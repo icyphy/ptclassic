@@ -118,7 +118,7 @@ namespace ::tycho {
             {::tycho::view EditSTD {-file {%s}}} \
             {State transition diagram editor} "graphics"
     ::tycho::File::registerExtensions {.idx} \
-            {::tycho::DialogWindow::new IndexBrowser [::tycho::autoName .idx] \
+            {::tycho::Dialog::new IndexBrowser [::tycho::autoName .idx] \
             -file {%s}} \
             {}
 }

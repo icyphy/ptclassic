@@ -39,12 +39,34 @@
 
 
 ##########################################################################
-#### filename
+#### queryfilename
 # Query the user for a filename and return it.  This procedure brings up
 # a file browser, and returns only when that file browser is dismissed.
+# The first argument is a text string used as a label in the file browser.
+# The optional second argument is an initial filename to display in the
+# entry box.  If it is not specified, then the most recently used file name
+# is displayed instead.
+# <p>
+# This procedure indirectly calls <code>update</code>, a Tk utility
+# that processes pending events, including mouse events. If this
+# procedure is called from within an Itcl object, directly or
+# indirectly, it may be necessary to take precautions to prevent the
+# calling object from being deleted during the call. Because of a
+# defect in at least some versions of Itcl, failure to do so can result
+# in catastrophic failure of the application (a core dump). In Tycho
+# objects, the <code>safeEval</code> method should be used to evaluate
+# this procedure or any method or procedure that in turn calls this
+# procedure. If the procedure is called from the top level or from a
+# Tcl procedure that is not itself called from within an Itcl object,
+# then there is no cause for worry.
 #
-proc ::tycho::filename {} {
-    return [::tycho::DialogWindow::newModal FileBrower [autoName .file]]
+proc ::tycho::queryfilename {string {default {}}} {
+    set nm [::tycho::autoName .fileBrowser]
+    uplevel #0 [list ::tycho::FileBrowser $nm -text $string]
+    if {$default != {}} {
+        $nm configure -default $default
+    }
+    return [::tycho::Dialog::wait $nm]
 }
 
 ##########################################################################
@@ -202,7 +224,7 @@ body ::tycho::FileBrowser::help {} {
 # Also, make this new directory the common working directory.
 #
 body ::tycho::FileBrowser::mkdir {} {
-    set dirname [::tycho::queryinfo "Directory name" "$localCWD/" 80]
+    set dirname [safeEval ::tycho::queryinfo "Directory name" "$localCWD/" 80]
     if {$dirname != {}} {
 	# FIXME: Unix command built in
 	exec mkdir $dirname
@@ -271,7 +293,7 @@ body ::tycho::FileBrowser::processItem {filename} {
 	    set fileLastOpened $filename
 	    return 1
 	} {
-	    ::tycho::warn "Directory does not exist: $dir"
+	    safeEval ::tycho::warn "Directory does not exist: $dir"
 	    return 0
 	}
     } 
@@ -287,7 +309,7 @@ body ::tycho::FileBrowser::processItem {filename} {
             updateListbox
             return 0
 	} else {
-	    ::tycho::warn \
+	    safeEval ::tycho::warn \
 		    "Directory \"[string trimright $file /]\" is unreadable"
 	    return 0
 	}
@@ -299,7 +321,7 @@ body ::tycho::FileBrowser::processItem {filename} {
 	    set fileLastOpened $filename
 	    return 1
 	} {
-	    ::tycho::warn "\"$file\" is unreadable"
+	    safeEval ::tycho::warn "\"$file\" is unreadable"
 	    return 0
 	}
     }

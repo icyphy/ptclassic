@@ -210,7 +210,7 @@ uplevel #0 {
     source [file join $tychokernel Color.tcl]
     source [file join $tychokernel CircularList.itcl]
     source [file join $tychokernel TopLevel.itcl]
-    source [file join $tychokernel DialogWindow.itcl]
+    source [file join $tychokernel Dialog.itcl]
     source [file join $tychokernel FontManager.itcl]
     source [file join $tychokernel Message.itcl]
     source [file join $tychokernel ErrorMessage.itcl]

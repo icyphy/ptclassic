@@ -34,7 +34,7 @@
 # top of a Displayer.
 #
 class ::tycho::ToolBar {
-    inherit itk::Widget
+    inherit ::tycho::TWidget
 
     constructor {args} {}
     destructor {}

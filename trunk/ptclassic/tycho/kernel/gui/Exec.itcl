@@ -32,10 +32,6 @@
 
 
 #######################################################################
-#### options
-#
-
-#######################################################################
 #### Exec
 # Exec a process, and if there is output, display the output.
 #
@@ -47,7 +43,7 @@
 # </pre></tcl>
 #
 class ::tycho::Exec {
-    inherit ::tycho::EntryQuery
+    inherit ::tycho::Query
     constructor {args} {}
     destructor {}
     
@@ -102,8 +98,8 @@ configbody ::tycho::Exec::dir {
 #
 body ::tycho::Exec::constructor {args} {
     configure -queries [list \
-            { commandToExec {Command to Exec:} make} \
-            { dirToExecFrom {Directory to Exec from:} {}} \
+            {line commandToExec {Command to Exec:} make} \
+            {line dirToExecFrom {Directory to Exec from:} {}} \
     ]
 
     eval itk_initialize $args

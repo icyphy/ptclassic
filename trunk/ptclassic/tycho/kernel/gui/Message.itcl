@@ -34,20 +34,48 @@
 ##########################################################################
 #### warn
 # Post a warning message, and return only after the user has acknowledged.
+# <p>
+# This procedure indirectly calls <code>update</code>, a Tk utility
+# that processes pending events, including mouse events. If this
+# procedure is called from within an Itcl object, directly or
+# indirectly, it may be necessary to take precautions to prevent the
+# calling object from being deleted during the call. Because of a
+# defect in at least some versions of Itcl, failure to do so can result
+# in catastrophic failure of the application (a core dump). In Tycho
+# objects, the <code>safeEval</code> method should be used to evaluate
+# this procedure or any method or procedure that in turn calls this
+# procedure. If the procedure is called from the top level or from a
+# Tcl procedure that is not itself called from within an Itcl object,
+# then there is no cause for worry.
 #
 proc ::tycho::warn {msg} {
-    ::tycho::DialogWindow::newModal Message [::tycho::autoName .message] \
-	    -text $msg -bitmap warning
+    set name [autoName .message]
+    uplevel #0 [list ::tycho::Message $name -text $msg -bitmap warning]
+    return [::tycho::Dialog::wait $name]
 }
 
 ##########################################################################
 #### inform
 # Issue an informational message to the user and return only after
 # the user has acknowledged.
+# <p>
+# This procedure indirectly calls <code>update</code>, a Tk utility
+# that processes pending events, including mouse events. If this
+# procedure is called from within an Itcl object, directly or
+# indirectly, it may be necessary to take precautions to prevent the
+# calling object from being deleted during the call. Because of a
+# defect in at least some versions of Itcl, failure to do so can result
+# in catastrophic failure of the application (a core dump). In Tycho
+# objects, the <code>safeEval</code> method should be used to evaluate
+# this procedure or any method or procedure that in turn calls this
+# procedure. If the procedure is called from the top level or from a
+# Tcl procedure that is not itself called from within an Itcl object,
+# then there is no cause for worry.
 #
 proc ::tycho::inform {msg} {
-    ::tycho::DialogWindow::newModal Message [::tycho::autoName .message] \
-	    -text $msg -bitmap info
+    set name [autoName .message]
+    uplevel #0 [list ::tycho::Message $name -text $msg -bitmap info]
+    return [::tycho::Dialog::wait $name]
 }
 
 ##########################################################################
@@ -56,22 +84,9 @@ proc ::tycho::inform {msg} {
 # immediately.  The name of the window is returned.
 #
 proc ::tycho::post {msg {title ""}} {
-    return [::tycho::DialogWindow::new Message \
+    return [::tycho::Dialog::new Message \
 	    [::tycho::autoName .message] -text $msg -title $title]
 }
-
-##########################################################################
-#### postLong
-# Post a long informational message to the user in a window and return.
-# The name of the window is returned.
-# NOTE: The -scrolltext option does not exist. Anyway, it is not clear
-# this is the right solution. Perhaps the scrollbar should appear
-# automatically on the message if the message is too long.
-#
-# proc ::tycho::postLong {msg {title ""}} {
-#     return [::tycho::DialogWindow::new Message \
-# 	    [::tycho::autoName .message] -scrolltext $msg -title $title]
-# }
 
 # COMPATIBILITY procedures.  The following procedures emulate the behavior
 # of similarly named procedures in pigi, the predecessor to Tycho.
@@ -95,7 +110,7 @@ proc ::ptkInform {win text} {::tycho::inform $text}
 # offer a slightly simpler interface to this class.
 #
 class ::tycho::Message {
-    inherit ::tycho::DialogWindow
+    inherit ::tycho::Dialog
 
     constructor {args} {}
     destructor {}

@@ -1,4 +1,4 @@
-# Definition of the abstract view class
+# Base class for widgets that view and/or edit data or text.
 # 
 # @Author: Farhana Sheikh and Edward A. Lee
 #
@@ -41,14 +41,15 @@ catch {delete class ::tycho::View}
 #######################################################################
 #### View
 # This class is the base class for most graphical and textual widgets
-# in Tycho.  It is designed to be inserted into a Displayer, although
-# it can be used alone as an ordinary widget.  A Displayer can contain
-# multiple views.  The Displayer provides a menu bar.
-#
-# FIXME: Fill in the documentation here
-#
-# A <code>View</code> object that has been attached to a
-# <code>Displayer</code> should only be destroyed by calling the
+# in Tycho. It is designed to be inserted into a
+# <code>Displayer</code>, although it can be used alone as an ordinary
+# widget. A displayer can contain multiple views, although the
+# functionality has not yet been fully developed. The displayer
+# provides a menu bar, a status bar, and a tool bar. Methods are
+# provided for defining the contents of these bars. If a view widget is
+# used without a displayer, then commands issued via these methods to
+# the bars are ignored. A view object that has been attached to a
+# displayer should only be destroyed by calling the
 # <code>destroyView</code> method of the displayer. Otherwise the
 # displayer will be unaware that the view is gone.
 # <p>
@@ -60,7 +61,7 @@ catch {delete class ::tycho::View}
 # </pre></tcl>
 #
 class ::tycho::View {
-    inherit itk::Widget
+    inherit ::tycho::TWidget
 
     constructor {args} {}
     destructor {}
@@ -81,10 +82,7 @@ class ::tycho::View {
     # Add a subview to the view.  NOTE: Not implemented yet.
     method addSubview {subviewName type side args}
 
-    # Change the cursor to the "watch" and execute the arguments.
-    method busy {args}
-
-    # In derived classes, return the current point in a form usable by seeFragment.
+    # In derived classes, return the current point for use by seeFragment.
     method currentPoint {} {return {}}
 
     # Invoke a command on the Displayer, if it exists.
@@ -96,47 +94,23 @@ class ::tycho::View {
     # Return 1 if the data is read-only, 0 otherwise.
     method getReadOnly {} 
 
-    # Open a file and go to its internal point identified by name.
-    method hyperJump {file {point {}}}
-
     # Insert this view into its Displayer.
     method insertInDisplay {}
 
     # Invoke a command on the menu bar, if it exists.
     method menubar {args}
 
-    # Invoke a command on the context-sensitive popup menu.
-    method contextmenu {args}
-
     # Print a status message, if possible.
     method putStatus {string}
 
-    # Raise the top-level (displayer) window.
-    method raiseWindow {}
-
     # Remove a subview from the view. NOTE: Not implemented yet.
     method removeSubview {subviewName}
-
-    # Find and make visible a point in the display.
-    method seeFragment {point}
 
     # Invoke a command on the status bar, if it exists.
     method statusbar {args}
 
     # Invoke a command on the tool bar, if it exists.
     method toolbar {args}
-
-    # Return the name of my view window.
-    method windowName {} {return $itk_component(hull)}
-
-    ###################################################################
-    ####                         public procs                      ####
-
-    # Get the current contents of the local clipboard.
-    proc getClipboard {} {return $clipboard}
-
-    # Set the current contents of the local and Tk clipboards.
-    proc setClipboard {text} {set clipboard $text}
 
     ###################################################################
     ####                         protected methods                 ####
@@ -146,12 +120,6 @@ class ::tycho::View {
 
     ###################################################################
     ####                         protected variables               ####
-
-    # A local Tycho clipboard that is mirrored in the Tk clipboard.
-    protected common clipboard {}
-
-    # Name of my context-sensitive popup menu
-    protected variable myContextmenu {}
 
     # Name of this view's Displayer
     protected variable myDisplayer {}
@@ -164,9 +132,6 @@ class ::tycho::View {
 
     # Name of my toolbar
     protected variable myToolbar {}
-
-    # The prefix is just a shorthand for $itk_component(hull).
-    protected variable prefix
 
     # Indicate whether modifying the text is allowed.
     protected variable readOnly 0
@@ -205,15 +170,6 @@ configbody ::tycho::View::readonly {
 #### constructor
 #
 body ::tycho::View::constructor {args} {
-    # Create a childsite for the contents of the widget
-    itk_component add childsite {
-	frame $itk_interior.childsite
-    } {
-	keep -background -cursor
-    }
-    pack $itk_component(childsite) -fill both -expand yes
-    
-    set prefix $itk_component(hull)
 
     # Figure out whether I'm in a displayer, and if so, set myDisplayer.
     set top [winfo toplevel $prefix]
@@ -240,8 +196,6 @@ body ::tycho::View::constructor {args} {
     set myStatusbar [lindex $bars 1]
     set myToolbar [lindex $bars 2]
     insertInDisplay
-
-    ::bind $itk_component(hull) <Enter> "$this focusin"
 }
 
 #######################################################################
@@ -288,51 +242,6 @@ body ::tycho::View::addSubview {subviewName type side args} {
     set subviewList($subviewName) $itk_component($subviewName)
 }
 
-#####################################################################
-#### busy
-# Change the cursor in the interior of this widget to the "watch"
-# cursor (to indicate that the object is busy), execute the arguments
-# and then change the cursor back to
-# whatever it was before. In order for the cursor to actually change,
-# the method calls "update", during which time the object may be deleted.
-# If the object is deleted, this method never returns (it unwinds the stack
-# by triggering a silent error).
-# A typical invocation is as follows:
-# <pre>
-#     busy $this methodname arg1 arg2
-# </pre>
-#
-body ::tycho::View::busy {args} {
-    set oldCursor [lindex [config -cursor] end]
-    config -cursor {watch}
-    ::tycho::safeUpdate $prefix
-    # If we get here, then the object $this still exists.
-    # Catch errors so that we can reset the cursor.
-    if {[catch {eval $args} msg] != 0} {
-        config -cursor $oldCursor
-        global ::errorInfo
-        set saveInfo $errorInfo
-	error $msg $saveInfo
-    }
-    config -cursor $oldCursor
-    return $msg
-}
-
-#########################################################################
-#### contextmenu
-# If there is a context-sensitive popup menu associated with this view,
-# use the arguments as a command to issue to the PopupMenu widget,
-# Menubar, and return whatever is returned by the command.  Otherwise,
-# return an empty string.
-#
-body ::tycho::View::contextmenu {args} {
-    if {$myContextmenu != {}} {
-        return [eval $myContextmenu $args]
-    } {
-        return {}
-    }
-}
-
 #########################################################################
 #### displayer
 # If there is a Displayer associated with this view, use the arguments
@@ -354,7 +263,7 @@ body ::tycho::View::displayer {args} {
 # appropriate subwindow.
 #
 body ::tycho::View::focusin {} {
-    focus $itk_component(hull)
+    ::tycho::TWidget::focusin
     displayer setCurrentView $viewName
 }
 
@@ -364,34 +273,6 @@ body ::tycho::View::focusin {} {
 #
 body ::tycho::View::getReadOnly {} {
     return $readOnly
-}
-
-#####################################################################
-#### hyperJump
-# Open a file and go to its internal point identified by name. If the
-# filename is the empty string, just call <code>seeFragment</code>,
-# passing it the second argument. Otherwise, the
-# file is opened  with <code>::tycho::File::openContext</code>,
-# which will choose an editor based on the filename extension.
-# Invoke <code>seeFragment</code> to view the specified point within the
-# file. The format for the <i>point</i> argument depends on the type of
-# file being opened. For HTML files, it will normally be the name of an
-# anchor in the file. For text files, it will normally be either "{line
-# <i>linenumber</i>}" or "{range <i>start</i> <i>end</i>}", where
-# <i>start</i> and <i>end</i> have the form
-# <i>linenumber.characternumber</i>.
-# 
-body ::tycho::View::hyperJump {file {point {}}} {
-    if {$file != {}} {
-        set obj [uplevel #0 [list ::tycho::File::openContext $file]]
-        if {$point != {}} {
-            # The seeFragment call is postponed to give time for the widget
-            # to be created. The catch is in case it is immediately deleted.
-            after 200 [list catch [list $obj seeFragment $point]]
-        }
-    } {
-        seeFragment $point
-    }
 }
 
 #######################################################################
@@ -425,18 +306,6 @@ body ::tycho::View::putStatus {string} {
     statusbar puts $string
 }
 
-#####################################################################
-#### raiseWindow
-# Bring the corresponding top-level window to the foreground, and
-# make sure it is deiconified.
-#
-body ::tycho::View::raiseWindow {} {
-    set tl [winfo toplevel $itk_component(hull)]
-    wm deiconify $tl
-    raise $tl
-    focusin
-}
-
 #######################################################################
 #### removeSubview
 # This method removes a subview from parent view.  It requires the 
@@ -444,26 +313,6 @@ body ::tycho::View::raiseWindow {} {
 # NOTE: Not implemented yet.
 # 
 body ::tycho::View::removeSubview {subviewName} {
-}
-
-#####################################################################
-#### seeFragment
-# In derived classes, this method will go to the point in the display
-# identified by the name argument.  What this means depends on what
-# type of data being displayed.  In this base class, do
-# nothing.
-#
-body ::tycho::View::seeFragment {point} {
-}
-
-#####################################################################
-#### setClipboard
-# Set the current contents of the local and Tk clipboards.
-#
-body ::tycho::View::setClipboard {text} {
-    set clipboard $text
-    clipboard clear
-    clipboard append -- $text
 }
 
 #########################################################################

@@ -53,7 +53,7 @@ catch {delete class Glimpse}
 # </pre></tcl>
 #
 class ::tycho::Glimpse {
-    inherit ::tycho::EntryQuery
+    inherit ::tycho::Query
 
     constructor {args} {}
     destructor {}
@@ -91,8 +91,8 @@ body ::tycho::Glimpse::constructor {args} {
     global PTOLEMY TYCHO tcl_library
 
     configure -queries [list \
-	{pattern {Search pattern:} {}} \
-	[list glimpse_index {Glimpse Index:} \
+	{line pattern {Search pattern:} {}} \
+	[list line glimpse_index {Glimpse Index:} \
                 [file join $TYCHO .glimpse_index]] \
     ]
 
@@ -140,15 +140,18 @@ body ::tycho::Glimpse::constructor {args} {
     addButton help -text "Help" -command "$this help"
 
     if {! [file exists [file join $TYCHO .glimpse_index]]} {
-       set response [::tycho::DialogWindow::newModal YesNoCancel \
-               [::tycho::autoName .glimpseYNC] \
-               -text "The glimpse file `[file join $TYCHO .glimpse_index]' does not exist.  Create it now?"]
-       if {$response == -1 } {
-           ::tycho::silentError
-       }
-       if {$response == 1 } {
-           updateTychoDatabase
-       }
+        set nm [::tycho::autoName .glimpseYNC]
+        ::tycho:::YesNoCancel $nm \
+                -text "The glimpse file \
+                `[file join $TYCHO .glimpse_index]' \
+                does not exist.  Create it now?"
+        set response [::tycho::Dialog::wait $nm]
+        if {$response == -1 } {
+            ::tycho::silentError
+        }
+        if {$response == 1 } {
+            updateTychoDatabase
+        }
     }
 }
 

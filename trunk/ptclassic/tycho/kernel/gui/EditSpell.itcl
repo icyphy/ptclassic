@@ -47,7 +47,7 @@
 # ".file0.search". Note that this is a UNIX-specific spell checker.
 #
 class ::tycho::EditSpell {
-    inherit ::tycho::EntryQuery
+    inherit ::tycho::Query
 
     constructor {args} {}
 
@@ -116,7 +116,7 @@ configbody ::tycho::EditSpell::edit {
 body ::tycho::EditSpell::constructor {args} {
 
     configure -queries {
-	{word {Mispelling:} {}}
+	{line word {Mispelling:} {}}
     }
 
     eval itk_initialize $args
@@ -144,23 +144,22 @@ body ::tycho::EditSpell::constructor {args} {
 
     #
     # Create a button box for dictionary buttons
+    # FIXME: Layout needs to be improved.
     #
     itk_component add dbox {
 	button $itk_component(childsite).dbox -text {Dictionary}\
-		-command "$this dictionary" -pady 0 -width 14
+		-command "$this dictionary" -pady 5 -padx 5 -width 14
     } {
 	keep -background -cursor
     }
-    # FIXME: This button and the lbox button below are in the wrong place
-    # Formerly, we could use $itk_component(word), but that does not work
-    pack $itk_component(dbox) -side right  -before $itk_component(separator)
+    pack $itk_component(dbox) -side right  -before $itk_component(querysite)
     itk_component add lbox {
 	button $itk_component(childsite).lbox -text {Learn} \
-		-command "$this learn" -pady 0 -width 14
+		-command "$this learn" -pady 5 -padx 5 -width 14
     } {
 	keep -background -cursor
     }
-    pack $itk_component(lbox) -side right -before $itk_component(separator)
+    pack $itk_component(lbox) -side right -before $itk_component(querysite)
 }
 
 ##################################################################
@@ -219,7 +218,7 @@ body ::tycho::EditSpell::next {} {
 	set tx [$tw textWinName]
 	set range [$tx tag nextrange spellmatch $upto]
 	if {$range == {}} {
-	    if [::tycho::askuser "End of file.  Start at the top?"] {
+	    if [safeEval ::tycho::askuser "End of file.  Start at the top?"] {
 		set range [$tx tag nextrange spellmatch 1.0]
 		if {$range == {}} {
 		    # No more errors tagged.  Recheck
@@ -259,7 +258,7 @@ body ::tycho::EditSpell::recheck {} {
 	}
     }
     if {$errs == {}} {
-	::tycho::inform "Spelling OK."
+	safeEval ::tycho::inform "Spelling OK."
 	return
     }
     ::tycho::rm $filename
@@ -324,7 +323,7 @@ body ::tycho::EditSpell::readDictionary {} {
 	    close $fd
 	    return $dict
 	} {
-	    ::tycho::warn "Personal dictionary file, $dictfile,\
+	    safeEval ::tycho::warn "Personal dictionary file, $dictfile,\
 		    is not readable"
 	}
     }

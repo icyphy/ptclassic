@@ -29,15 +29,43 @@
 # 						COPYRIGHTENDKEY
 ###########################################################################
 
+##########################################################################
+#### queryfont
+# Query the user for a font and return it. This procedure brings up the
+# Tycho font manager, and returns only when it is dismissed. The
+# returned string is the name of a font. If an argument is given, it is
+# the default font in the entry box.  The returned font is guaranteed
+# to be a valid font.
+# <p>
+# This procedure indirectly calls <code>update</code>, a Tk utility
+# that processes pending events, including mouse events. If this
+# procedure is called from within an Itcl object, directly or
+# indirectly, it may be necessary to take precautions to prevent the
+# calling object from being deleted during the call. Because of a
+# defect in at least some versions of Itcl, failure to do so can result
+# in catastrophic failure of the application (a core dump). In Tycho
+# objects, the <code>safeEval</code> method should be used to evaluate
+# this procedure or any method or procedure that in turn calls this
+# procedure. If the procedure is called from the top level or from a
+# Tcl procedure that is not itself called from within an Itcl object,
+# then there is no cause for worry.
+#
+proc ::tycho::queryfont {{default {}}} {
+    set name [autoName .font]
+    uplevel #0 ::tycho::FontManager $name
+    if {$default != {}} {
+        $name configure -initialfont $default
+    }
+    return [::tycho::Dialog::wait $name 0]
+}
 
 #########################################################################
 #### FontManager
 # Manage font selection. Instances of this class are dialog windows
 # that permit the user to select a font. If the creator makes the font
-# manager modal using the
-# <code>::tycho::DialogWindow::wait</code> procedure, then
-# that procedure will return either a valid font name selected by the
-# user or the null string (if the user cancels).
+# manager modal using the <code>::tycho::Dialog::wait</code> procedure,
+# then that procedure will return either a valid font name selected by
+# the user or the null string (if the user cancels).
 # <p>
 # One instance of this class called <code>.tychoFonts</code> is created
 # and left unmapped at all times. This instance can be used by any
@@ -53,7 +81,7 @@
 # <code>findFont</code> method, which always returns a valid font.
 #
 class ::tycho::FontManager {
-    inherit ::tycho::DialogWindow
+    inherit ::tycho::Dialog
 
     constructor {args} {}
     destructor {}
@@ -379,6 +407,11 @@ abcdefghijklmnopqrstuvwxyz
     catch {setCurrentFont}
 
     eval itk_initialize $args
+
+    # If no -okcommand option is specified, use a reasonable default.
+    if {$itk_option(-okcommand) == {}} {
+        configure -okcommand "$this getCurrentFont"
+    }
 }
 
 #########################################################################
@@ -442,7 +475,10 @@ body ::tycho::FontManager::findFont {specs} {
 # also displayed in the window.
 #
 body ::tycho::FontManager::fontValid {font} {
-    if [::info exists validFonts($font)] {return 1}
+    if [::info exists validFonts($font)] {
+	set commandResult($prefix) $font
+        return 1
+    }
     if {[catch {configure -displayfont $font}] == 0} {
 	set commandResult($prefix) $font
         set validFonts($font) 1
@@ -479,8 +515,10 @@ body ::tycho::FontManager::getCurrentFont {} {
 body ::tycho::FontManager::getFont \
 	{family {size 14} {weight medium} {style r}} {
     set nm "$family-$size-$weight-$style"
-    if [::info exists validFontSpecs($nm)] {return $validFontSpecs($nm)}
-
+    if [::info exists validFontSpecs($nm)] {
+        set commandResult($prefix) $validFontSpecs($nm)
+        return $validFontSpecs($nm)
+    }
     set foundries   [preference get fontmanager foundries]
     set resolutions [preference get fontmanager resolutions]
     set encodings   [preference get fontmanager encodings]
@@ -491,6 +529,7 @@ body ::tycho::FontManager::getFont \
 "-$foundry-$family-$weight-$style-normal-*-*-${size}0-$res-$res-*-*-$cod-*"
 	        if [fontValid $font] {
                     set validFontSpecs($nm) $font
+                    set commandResult($prefix) $font
 		    return $font
 		}
 	    }

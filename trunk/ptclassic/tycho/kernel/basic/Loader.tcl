@@ -79,11 +79,9 @@ proc ::tycho::loadIfNotPresent {command package} {
 
 	    while {1} {
 		# We did not load ok, so we prompt the user.
-		set loadLibPath [::tycho::DialogWindow::newModal FileBrowser \
-			[::tycho::autoName .fileBrowser] \
-			-bitmap questhead \
-			-text \
-			"Enter the name of the library that contains the\n command `$command' in the package `$package'" ]
+		set loadLibPath [::tycho::queryfilename \
+			"Enter the name of the library that contains the\n \
+                        command `$command' in the package `$package'"]
 
 		load $loadLibPath
 	
@@ -92,10 +90,8 @@ proc ::tycho::loadIfNotPresent {command package} {
 		    break
 		}
 		# That didn't work, try again
-		set tryAgain [::tycho::DialogWindow::newModal YesNoQuery .y \
-			-text \
-			"Command `$command' still does not exist\nTry again?"]
-		if !$tryAgain {
+		if ![::tycho::askuser \
+                        "Command `$command' still does not exist\nTry again?"] {
 		    error "`$command' not dynamically loaded"
 		}
 	    }

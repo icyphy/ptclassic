@@ -49,14 +49,14 @@ TCL_SRCS = \
 
 ITCL_SRCS = \
 	CircularList.itcl \
-	DialogWindow.itcl \
+	ColorBrowser.itcl \
+	Dialog.itcl \
 	Displayer.itcl \
 	DirectedAcyclicGraph.itcl \
 	Edit.itcl \
 	EditSearch.itcl \
 	EditSpell.itcl \
 	EditStack.itcl \
-	EntryQuery.itcl \
 	ErrorMessage.itcl \
 	Exec.itcl \
 	File.itcl \
@@ -73,12 +73,14 @@ ITCL_SRCS = \
 	MenuBar.itcl \
 	MenuSupport.itcl \
 	Message.itcl \
+	Object.itcl \
 	Parameters.itcl \
 	Preferences.itcl \
 	PreferenceDialog.itcl \
 	PreferenceEditor.itcl \
 	PrintDialog.itcl \
 	PopupMenu.itcl \
+	Query.itcl \
 	RevControl.itcl \
 	RevControlSCCS.itcl \
 	RevControlRCS.itcl \
@@ -88,6 +90,7 @@ ITCL_SRCS = \
 	TclShell.itcl \
 	ToolBar.itcl \
 	TopLevel.itcl \
+	TWidget.itcl \
 	Tycho.tcl \
 	View.itcl \
 	WelcomeMessage.itcl \

@@ -67,6 +67,7 @@
 # mentioned are present.
 #
 class ::tycho::Graph {
+    inherit ::tycho::Object
 
     constructor {args} {}
     destructor {}
@@ -523,7 +524,7 @@ body ::tycho::Graph::verifyAll {{repair {}}} {
 body ::tycho::Graph::listreplace {listname olditem newitem} {
     set idx [lsearch -exact [set $listname] $olditem]
     if {$idx < 0} {
-        ::tycho::warn "Missing item in list $listname: $olditem"
+        safeEval ::tycho::warn "Missing item in list $listname: $olditem"
     } {
         set $listname [lreplace [set $listname] $idx $idx]
     }

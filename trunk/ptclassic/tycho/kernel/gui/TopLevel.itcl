@@ -69,17 +69,13 @@ proc ::tkMbLeave {arg} {
 # all bets are off.  You could get a core dump if after returning from
 # the catch the object no longer exists.  The object name given in the
 # argument must be visible at the global scope.
-# <p>
-# Unfortunately, currently the "info" command in Itcl, used here to
-# check whether the object still exists, is broken.  It will claim that
-# the object does not exist even if it does.  As a temporary workaround,
-# pass as an argument the name of the <i>window</i> of widget associated with
-# the object.  If there is none, then you are on your own.  Argue with
-# the Itcl designers to get "info" fixed.
 #
 proc ::tycho::safeUpdate {obj} {
     update
-    if {[uplevel #0 info objects $obj] == {} && ![winfo exists $obj]} {
+    if {$obj == {}} {return}
+    # NOTE: Formerly used
+    #   if {[uplevel #0 info objects $obj] == {} && ![winfo exists $obj]}
+    if {[info which -command $obj] == {}} {
         puts "command aborted: $obj does not exist"
         ::tycho::silentError
     }
@@ -128,7 +124,7 @@ class ::tycho::TopLevel {
     # Center the window on the screen.
     method centerOnScreen {}
 
-    # In derived classes, return the current point in a form usable by seeFragment.
+    # In derived classes, return the current point for use by seeFragment.
     method currentPoint {} {return {}}
 
     # Give the window or a subwindow the focus.
@@ -143,11 +139,11 @@ class ::tycho::TopLevel {
     # Shift the focus to the next window in the topLevelWindows list.
     method nextWindow {{raise 0}}
 
-    # Return the name of my top-level window.
-    method windowName {} {return $itk_component(hull)}
-
     # Raise the window.
     method raiseWindow {}
+
+    # Return the name of my top-level window.
+    method windowName {} {return $itk_component(hull)}
 
     #################################################################
     ####                   public procedures                     ####
@@ -160,6 +156,12 @@ class ::tycho::TopLevel {
 
     # Specify whether to exit when the last window is closed.
     public proc exitWhenNoMoreWindows {bool} {}
+
+    #################################################################
+    ####                  protected methods                      ####
+
+    # Prevent destruction of this object while evaluating the arguments.
+    protected method safeEval {args}
 
     #################################################################
     ####                  protected variables                    ####
@@ -194,6 +196,9 @@ class ::tycho::TopLevel {
     # If this is non-zero, then when the last window is closed,
     # the program will be exited.
     private common exitflag 1
+
+    # If non-zero, disable destruction.
+    private variable disableDestruction 0
 }
 
 #####################################################################
@@ -302,11 +307,15 @@ body ::tycho::TopLevel::constructor {args} {
 # NOTE: It would be better if the user were queried for confirmation
 # about exiting the program, but this appears to be impossible with the
 # current Itcl version.  A call to askuser in this destructor leads to
-# very strange behavior, often a core dump. Also, the window is getting
-# unmapped before we get to this point, so in effect, there will be no
-# remaining open windows even if the user tries to cancel the close.
+# very strange behavior, often a core dump.
 #
 body ::tycho::TopLevel::destructor {} {
+
+    if $disableDestruction {
+        # Schedule a future attempt at destruction.
+        after 1000 "$this nextWindow; delete object $this"
+        ::tycho::silentError
+    }
 
     if {[info exists topLevelWindows] && \
 	    [info exists prefix] && \
@@ -359,6 +368,7 @@ body ::tycho::TopLevel::busy {args} {
     config -cursor $oldCursor
     return $msg
 }
+
 #####################################################################
 #### centerOnScreen
 # This procedure will request of the window manager that it center
@@ -444,13 +454,17 @@ body ::tycho::TopLevel::hyperJump {file {point {}}} {
 #### nextWindow
 # Switch the focus to the next window listed in the array topLevelWindows.
 # If an argument is given, and is non-zero, then raise the window as well.
+# If the focus is not currently in this window, ignore.
 #
 body ::tycho::TopLevel::nextWindow {{raise 0}} {
+    # NOTE: Is this update safe?  Needed for focus to settle.
+    update idletasks
+    if ![string match "$prefix*" [focus]] {return}
     foreach win [$topLevelWindows elements $prefix] {
 	if {$win == $prefix} {continue}
 	if {[winfo exists $win] && \
 		[winfo ismapped $win] && \
-		[uplevel #0 info objects $win] != {} && \
+		[uplevel #0 info which -command $win] != {} && \
 		[$win isa ::tycho::TopLevel]} {
 	    $win focusin
 	    if {$raise != 0} {$win raiseWindow}
@@ -529,6 +543,36 @@ body ::tycho::TopLevel::returnExitCon {} {
     return $exitconfirmed
 }
 
+    #################################################################
+    #################################################################
+    ####                  protected methods                      ####
+
+#####################################################################
+#### safeEval
+# Prevent destruction of this object while evaluating the arguments.
+# Destruction will be cancelled by invoking a silent error, and will
+# be scheduled for another attempt in the future.
+# <p>
+# This method is a workaround for a defect in Itcl. If "update",
+# "update idletasks", or "tkwait" is called directly or indirectly from
+# within an Itcl method, and during the update the Itcl object is
+# destroyed, then when update returns, you may get a catastrophic failure
+# of the application (a core dump).
+#
+body ::tycho::TopLevel::safeEval {args} {
+    set disableDestruction 1
+    set retval {}
+    if [catch {set retval [eval $args]} msg] {
+        global ::errorInfo
+        set saveInfo $errorInfo
+        set disableDestruction 0
+        error $saveInfo
+    }
+    set disableDestruction 0
+    return $retval
+}
+
+    #################################################################
     #################################################################
     ####                  private procedures                     ####
 

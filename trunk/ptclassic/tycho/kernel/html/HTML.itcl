@@ -361,8 +361,7 @@ body ::tycho::HTML::destructor {} {
 # currently displayed HTML.  Otherwise, view its contents in a new window.
 #
 body ::tycho::HTML::altFile {} {
-    set filename [::tycho::DialogWindow::newModal FileBrowser \
-	    [::tycho::autoName .fileBrowser] -text "Alternate file to load:"]
+    set filename [safeEval ::tycho::queryfilename {Alternate file to load:}]
     if {$filename != {}} {
 	hyperJump $filename
     }

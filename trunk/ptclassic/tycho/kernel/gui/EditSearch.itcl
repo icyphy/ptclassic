@@ -42,7 +42,7 @@
 # object could be ".file0.search".
 #
 class ::tycho::EditSearch {
-    inherit ::tycho::EntryQuery
+    inherit ::tycho::Query
 
     constructor {args} {}
 
@@ -176,12 +176,12 @@ body ::tycho::EditSearch::constructor {args} {
 
     if {$itk_option(-nochange) == 0} {
         configure -queries {
-            {pattern {Search pattern:} {}}
-            {change {Change to:} {}}
+            {line pattern {Search pattern:} {}}
+            {line change {Change to:} {}}
         }
     } {
         configure -queries {
-            {pattern {Search pattern:} {}}
+            {line pattern {Search pattern:} {}}
         }
     }
 
@@ -231,7 +231,7 @@ body ::tycho::EditSearch::constructor {args} {
 	}
 	pack $itk_component(changeall) -side left
     } {
-	removeQuery change
+	remove change
     }
 
     # Insert defaults into the entry boxes, if appropriate.
@@ -328,13 +328,13 @@ body ::tycho::EditSearch::find {{start {}}} {
 
     if {$result == {}} {
 	if {$backwardssw} {
-	    if [::tycho::askuser \
+	    if [safeEval ::tycho::askuser \
 		    "Not found.  Start search again at the bottom?"] {
 		after idle "$this focusin"
 		find end
 	    }
 	} {
-	    if [::tycho::askuser \
+	    if [safeEval ::tycho::askuser \
 		    "Not found.  Start search again at the top?"] {
 		after idle "$this focusin"
 		find 1.0

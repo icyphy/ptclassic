@@ -51,7 +51,6 @@
 # a simple "::" prefix.  The name of the view subwindow that is created
 # is returned.
 #
-
 proc ::tycho::view {view {viewoptions {}} \
         {displayer {Displayer}} {dispoptions {}}} {
     if ![string match {::*} $view] {

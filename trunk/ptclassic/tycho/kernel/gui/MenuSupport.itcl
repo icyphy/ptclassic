@@ -58,7 +58,7 @@
 # so be careful.
 #
 class ::tycho::MenuSupport {
-    inherit itk::Widget
+    inherit ::tycho::TWidget
 
     constructor {args} {}
     destructor {}
