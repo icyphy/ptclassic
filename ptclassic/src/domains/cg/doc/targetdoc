@@ -93,10 +93,16 @@ As with addCode, addProcedure returns a TRUE or FALSE indicating
 whether the code was inserted into the code stream.  Taking this into
 account, we could have added the code line by line:
 .(c
-    if (addProcedure("/* A silly function */\en","mult")) {
-	addProcedure("double $sharedSymbol(silly,mult)(double a, double b)\en");
-	addProcedure("{\en\etdouble m;\en\etm = a*b;\en\etreturn m;\en}\en");
-    }
+if (addProcedure("/* A silly function */\en","mult")) {
+    addProcedure(
+       "double $sharedSymbol(silly,mult)(double a, double b)\en"
+    );
+    addProcedure("{\en");
+    addProcedure("\etdouble m;\en");
+    addProcedure("\etm = a*b;\en");
+    addProcedure("\etreturn m;\en");
+    addProcedure("}\en");
+}
 .)c
 .H3 "Code Generation"
 .pp
