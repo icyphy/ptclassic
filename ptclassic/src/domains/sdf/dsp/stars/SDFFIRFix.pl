@@ -7,7 +7,7 @@ A finite impulse response (FIR) filter with fixed-point capabilities.
 The fixed-point coefficients are specified by the "taps" parameter.
 The default coefficients give an 8th-order, linear phase lowpass filter.
 To read coefficients from a file, replace the default coefficients
-with "<fileName", preferably specifying a complete path.
+with "&lt;fileName", preferably specifying a complete path.
 Polyphase multirate filtering is also supported.
         }
         version { $Id$ }
@@ -26,7 +26,7 @@ This star implements a finite-impulse response filter with multirate capability.
 <a name="FIR filter"></a>
 The default coefficients correspond to an eighth-order, equiripple,
 linear-phase, lowpass filter which has a 3 dB cutoff frequency at
-approximately <i></i>1<i>/</i>3<i></i> of the Nyquist frequency.
+approximately 1/3 of the Nyquist frequency.
 The default precision on these coefficients is a total of 24 bits.
 The number of decimal bits is chosen as the minimum number of bits
 needed to represent the number in fixed-point.
@@ -44,7 +44,7 @@ It is best to use tilde characters in the filename to reference them to
 the user's home directory.
 This way, future file system reorganizations will have minimal effect.
 <p>
-When the <i>decimation\fP (<i>interpolation\fP)
+When the <i>decimation</i> (<i>interpolation</i>)
 state is different from unity, the filter behaves exactly
 as it were followed (preceded) by a DownSample (UpSample) star.
 However, the implementation is much more efficient than
@@ -67,7 +67,7 @@ then the filter stopband should begin before <i>f/</i>2<i></i>.
 If the interpolation ratio is <i>i</i>, then <i>f/</i>2<i></i> is a fraction <i></i>1<i>/</i>(<i></i>2<i> i</i>)<i></i>
 of the sample rate at which you must design your filter.
 <p>
-The <i>decimationPhase\fP parameter is somewhat subtle.
+The <i>decimationPhase</i> parameter is somewhat subtle.
 It is exactly equivalent the phase parameter of the DownSample star.
 Its interpretation is as follows; when decimating,
 samples are conceptually discarded (although a polyphase structure
