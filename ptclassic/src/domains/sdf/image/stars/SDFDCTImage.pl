@@ -53,7 +53,7 @@ cosine transform (DCT) and outputs a DCTImage.
 		}
 	} // end cosSet()
 
-	method {
+	inline method {
 		name { fwdD }
 		type { float }
 		arglist { "(int a, int b)" }
@@ -64,8 +64,8 @@ cosine transform (DCT) and outputs a DCTImage.
 	method {
 		name { doDCT }
 		type { void }
-		arglist { "(float* out, unsigned const char* in, int outw,
-			    int outh, int inw, int inh)"
+		arglist { "(float* out, unsigned const char* in, int outw, \
+				int outh, int inw, int inh)"
 		}
 		code {
 	register int ndx, ndx2, cntr;
@@ -74,7 +74,7 @@ cosine transform (DCT) and outputs a DCTImage.
 // Do the HORIZONTAL transform. From input to out...
 	for(ii = 0; ii < inh; ii++) {
 		for(jj = 0; jj < outw-blocksize; jj += blocksize) {
-			ndx  = ii*outw + jj;
+			ndx = ii*outw + jj;
 			ndx2 = ii*inw + jj;
 			for(j = 0; j < blocksize; j++) {
 				out[ndx+j] = 0.0;
@@ -83,7 +83,7 @@ cosine transform (DCT) and outputs a DCTImage.
 		}	}	}
 
 // Handle last (maybe partial) block at end of each row (i.e. zero-pad).
-		ndx  = ii*outw + jj;
+		ndx = ii*outw + jj;
 		ndx2 = ii*inw + jj;
 		for(j = 0; j < blocksize; j++) {
 			out[ndx+j] = 0.0;
