@@ -295,47 +295,6 @@ int *inN, *outN;
     return (TRUE);
 }    
 
-/* 7/31/90
-   Insert a fork star and use it to connect things up.
-   This function requires a star class in the current domain named
-   Fork with terminals "input" and "output".
- */
-
-static boolean
-JoinWithFork(inTermPtr, outTermPtr, n)
-octObject *inTermPtr, *outTermPtr;
-int n;
-{
-    octObject inInst, outInst;
-    char* forkname = UniqNameGet("!af");
-    boolean outIsConn;
-    int i;
-
-    PrintDebug ("JoinWithFork: inserting a Fork star");
-    ERR_IF1(!KcInstance (forkname, "Fork", (ParamListType *)0));
-    ERR_IF2(GetById(&outInst, outTermPtr->contents.term.instanceId) != OCT_OK,
-	octErrorString());
-    outIsConn = IsIoPort(&outInst);
-    if (outIsConn) {
-	ErrAdd ("JoinWithFork: output as alias not supported");
-	return FALSE;
-    }
-    ERR_IF1(!KcConnect(outInst.contents.instance.name,
-		       outTermPtr->contents.term.name,forkname,"input", 0));
-    for (i = 0; i < n; i++) {
-	ERR_IF2(GetById(&inInst, inTermPtr->contents.term.instanceId) != OCT_OK,
-	    octErrorString());
-	if (IsIoPort(&inInst)) {
-	    ErrAdd ("JoinWithFork: input as alias not supported");
-	    return FALSE;
-	}
-	ERR_IF1(!KcConnect(forkname,"output",inInst.contents.instance.name,
-			   inTermPtr->contents.term.name, 0));
-	inTermPtr++;
-    }
-    return (TRUE);
-}
-
 /* 6/14/89
 */
 static boolean
@@ -385,9 +344,30 @@ int delay;
     return (TRUE);
 }
 
+/* This function connects terminals to nodes; it is used in n-way connections*/
+static boolean
+JoinToNode(termPtr, nodename)
+octObject *termPtr;
+char *nodename;
+{
+    octObject inst, fterm;
+
+    ERR_IF2(GetById(&inst, termPtr->contents.term.instanceId) != OCT_OK,
+	octErrorString());
+    if (IsIoPort(&inst)) {
+	ErrAdd("Galaxy portholes can be connected to only one port");
+	EssAddObj(&inst);
+	return (FALSE);
+    }
+    ERR_IF1(!KcNodeConnect(inst.contents.instance.name,
+			       termPtr->contents.term.name, nodename));
+    return (TRUE);
+}
+
+
+
 /* 6/14/89 7/31/90
-Emits connect, input, and output statements.  Also handles connects to
-multiportholes and auto-forks.
+Emits connect, input, and output statements.
 */
 static boolean
 ConnectPass(facetPtr)
@@ -400,58 +380,50 @@ octObject *facetPtr;
 
     (void) octInitGenContents(facetPtr, OCT_NET_MASK, &netGen);
     while (octGenerate(&netGen, &net) == OCT_OK) {
+/* For each net, we require only that there be at least one input
+   and at least one output.  Other errors are handled by the kernel.
+ */
 	ERR_IF1(!CollectTerms(&net, in, &inN, out, &outN));
 	totalN = inN + outN;
         delay = (GetByPropName(&net, &delayProp, "delay") == OCT_NOT_FOUND)
 		? 0 : (int) delayProp.contents.prop.value.integer;
-	if (totalN == 2) {
-	    /* possible ordinary connection */
-	    if (inN != 1 && outN != 1) {
-		ErrAdd("ConnectPass: cannot match an input to an output");
-		EssAddObj(&net);
-		return (FALSE);
-	    }
-	    ERR_IF1(!JoinOrdinary(&in[0], &out[0], delay));
-	}
-	else if (totalN < 2) {
+	if (totalN < 2) {
 	    /* bad net, delete it */
 	    ERR_IF2(octDelete(&net) != OCT_OK, octErrorString());
 	    PrintDebug("Warning: bad net deleted");
 	}
-    /* totalN > 2: possible auto-fork or multiport connection */
-	else if (inN == 1 && outN > 1) {
-	    if (TermIsMulti(&in[0])) {
-		for (i = 0; i < outN; i++) {
-		    ERR_IF1(!JoinOrdinary(&in[0], &out[i], delay));
-		}
-	    }
-	    else {
-	        ErrAdd("ConnectPass: single input porthole has more than 1 output");
-		EssAddObj(&net);
-		return (FALSE);
-	    }
-	}
-	else if (outN == 1 && inN > 1) {
-	    if (TermIsMulti(&out[0])) {
-		for (i = 0; i < inN; i++) {
-		    ERR_IF1(!JoinOrdinary(&in[i], &out[0], delay));
-		}
-		return (TRUE);
-	    }
-	    /* auto-fork connection... */
-	    if (delay > 0) {
-		ErrAdd("ConnectPass: illegal delay on auto-fork net");
-		EssAddObj(&net);
-		return (FALSE);
-	    }
-	    /* create a fork star and add it */
-	    ERR_IF1(!JoinWithFork(in,out,inN));
-	}
-	else {
-	    ErrAdd("ConnectPass: multiple inputs and outputs on one net");
+	else if (inN == 0 || outN == 0) {
+	    ErrAdd("ConnectPass: cannot match an input to an output");
 	    EssAddObj(&net);
 	    return (FALSE);
 	}
+/* We only allow delay on point-to-point connections */
+	else if (delay && totalN > 2) {
+	    ErrAdd("ConnectPass: delay not allowed on multi-connections");
+	    EssAddObj(&net);
+	    return (FALSE);
+        }
+	else if (totalN == 2) {
+	    ERR_IF1(!JoinOrdinary(&in[0], &out[0], delay));
+        }
+/* Handle input multiporthole case.  Eventually this will be handled
+ * in the kernel (we will eliminate this else clause. */
+	else if (inN == 1 && outN > 1 && TermIsMulti(&in[0])) {
+	    for (i = 0; i < outN; i++) {
+		ERR_IF1 (!JoinOrdinary(&in[0], &out[i], 0));
+	    }
+	}
+/* All other cases are handled by the kernel, including autofork */
+	else {
+	    char *nodename = UniqNameGet("node");
+	    if (!KcNode(nodename)) return (FALSE);
+	    for (i = 0; i < outN; i++) {
+		if (!JoinToNode(&out[i], nodename)) return (FALSE);
+	    }
+	    for (i = 0; i < inN; i++) {
+		if (!JoinToNode(&in[i], nodename)) return (FALSE);
+	    }
+        }
     }
     return (TRUE);
 }
@@ -595,7 +567,7 @@ octObject *facetPtr;
 	return (TRUE);
     }
     PrintDebug("CompileUniv");
-    KcClearUniverse();
+    KcClearUniverse(name);
     ERR_IF1(!ProcessFormalParams(facetPtr));
     ERR_IF1(!ProcessInsts(facetPtr));
     ERR_IF1(!ConnectPass(facetPtr));
