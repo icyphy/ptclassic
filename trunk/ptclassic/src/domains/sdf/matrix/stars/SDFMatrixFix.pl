@@ -6,10 +6,10 @@ Generate a matrix with fixed-point entries.
   }
 	htmldoc {
 The entries of the generated matrix are read from the array parameter
-<i>FixMatrixContents</i></b> in rasterized order: i.e. for an <i>M x N</i> matrix,
+<i>FixMatrixContents</i> in rasterized order: i.e. for an <i>M</i> &#215; <i>N</i> matrix,
 the first row is filled from left to right using the first <i>N</i> values
 from the array.  All entries have the same precision, as specified by
-the parameter <i>FixPrecision</i></b>.
+the parameter <i>FixPrecision</i>.
   }
   version   { $Id$ }
   author    { Mike J. Chen }
