@@ -2153,18 +2153,26 @@ LocalWin *wi;
     int markFlag, pixelMarks, bigPixel, colorMark;
     int noLines = PM_BOOL("NoLines");
     int lineWidth = PM_INT("LineWidth");
+    int barGraph = PM_BOOL("BarGraph");
+    double halfBarWidth = PM_DBL("BarWidth") * 0.5;
+    double barBase = PM_DBL("BarBase");
 
     set_mark_flags(&markFlag, &pixelMarks, &bigPixel, &colorMark);
     for (idx = 0;  idx < MAXSETS;  idx++) {
 	thisList = PlotData[idx].list;
 	while (thisList) {
 	    X_idx = 0;
-	    for (subindex = 0;  subindex < thisList->numPoints-1;  subindex++) {
-		/* Put segment in (sx1,sy1) (sx2,sy2) */
+	    for (subindex = 0;  subindex < thisList->numPoints;  subindex++) {
+		/* Put segment in (sx1,sy1) (sx2,sy2), with a degenerate dot for the last/only point */
 		sx1 = thisList->xvec[subindex];
 		sy1 = thisList->yvec[subindex];
-		sx2 = thisList->xvec[subindex+1];
-		sy2 = thisList->yvec[subindex+1];
+		if (subindex < thisList->numPoints-1) {
+		    sx2 = thisList->xvec[subindex+1];
+		    sy2 = thisList->yvec[subindex+1];
+		} else {
+		    sx2 = sx1;
+		    sy2 = sy1;
+		}
 		/* Now clip to current window boundary */
 		C_CODE(sx1, sy1, code1);
 		C_CODE(sx2, sy2, code2);
@@ -2193,89 +2201,78 @@ LocalWin *wi;
 			C_CODE(sx2, sy2, code2);
 		    }
 		}
-		if (!code1 && !code2) {
-		    /* Add segment to list */
+		if (!code1 && !code2 && ((subindex < thisList->numPoints-1) || (thisList->numPoints == 1))) {
+		    /* Add segment or solitary dot to list */
 		    Xsegs[X_idx].x1 = SCREENX(wi, sx1);
 		    Xsegs[X_idx].y1 = SCREENY(wi, sy1);
 		    Xsegs[X_idx].x2 = SCREENX(wi, sx2);
 		    Xsegs[X_idx].y2 = SCREENY(wi, sy2);
+		    if (thisList->numPoints == 1) {
+			/* Make solitary dot just visible */
+			Xsegs[X_idx].x2++;
+			Xsegs[X_idx].y2++;
+		    }
 		    X_idx++;
 		}
 
 		/* Draw markers if requested and they are in drawing region */
 		if (markFlag && mark_inside) {
+		    int mx1 = SCREENX(wi, sx1);
+		    int my1 = SCREENY(wi, sy1);
 		    if (pixelMarks) {
 			if (bigPixel) {
 			    wi->dev_info.xg_dot(wi->dev_info.user_state,
-						Xsegs[X_idx-1].x1, Xsegs[X_idx-1].y1,
+						mx1, my1,
 						P_DOT, 0, idx % MAXATTR);
 			} else {
 			    wi->dev_info.xg_dot(wi->dev_info.user_state,
-						Xsegs[X_idx-1].x1, Xsegs[X_idx-1].y1,
+						mx1, my1,
 						P_PIXEL, 0, PIXVALUE(idx));
 			}
 		    } else {
 			/* Distinctive markers */
 			wi->dev_info.xg_dot(wi->dev_info.user_state,
-					    Xsegs[X_idx-1].x1, Xsegs[X_idx-1].y1,
+					    mx1, my1,
 					    P_MARK, MARKSTYLE(idx),
 					    PIXVALUE(idx));
 		    }
 		}
 
 		/* Draw bar elements if requested */
-		if (PM_BOOL("BarGraph")) {
-		    int barPixels, baseSpot;
-		    XSegment line;
-
-		    barPixels = (int) ((PM_DBL("BarWidth")/wi->XUnitsPerPixel) + 0.5);
-		    if (barPixels <= 0) barPixels = 1;
-		    baseSpot = SCREENY(wi, PM_DBL("BarBase"));
-		    line.x1 = line.x2 = Xsegs[X_idx-1].x1;
-		    line.y1 = baseSpot;  line.y2 = Xsegs[X_idx-1].y1;
-		    wi->dev_info.xg_seg(wi->dev_info.user_state,
+		if (barGraph) {
+		    /* Put segment in (sx1,sy1) (sx2,sy2) */
+		    sx1 = thisList->xvec[subindex] - halfBarWidth;
+		    sy1 = thisList->yvec[subindex];
+		    sx2 = thisList->xvec[subindex] + halfBarWidth;
+		    sy2 = barBase;
+		    /* Now clip to current window boundary */
+		    C_CODE(sx1, sy1, code1);
+		    C_CODE(sx2, sy2, code2);
+		    if (!(code1 & code2)) {
+			int barPixels;
+			XSegment line;
+			if (code1) {
+			    if (code1 & LEFT_CODE) sx1 = wi->UsrOrgX; /* Crosses left edge */
+			    else if (code1 & RIGHT_CODE) sx1 = wi->UsrOppX; /* Crosses right edge */
+			    if (code1 & BOTTOM_CODE) sy1 = wi->UsrOrgY; /* Crosses bottom edge */
+			    else if (code1 & TOP_CODE) sy1 = wi->UsrOppY; /* Crosses top edge */
+			}
+			if (code2) {
+			    if (code2 & LEFT_CODE) sx2 = wi->UsrOrgX; /* Crosses left edge */
+			    else if (code2 & RIGHT_CODE) sx2 = wi->UsrOppX; /* Crosses right edge */
+			    if (code2 & BOTTOM_CODE) sy2 = wi->UsrOrgY; /* Crosses bottom edge */
+			    else if (code2 & TOP_CODE) sy2 = wi->UsrOppY; /* Crosses top edge */
+			}
+			barPixels = (int) (((sx2 - sx1)/wi->XUnitsPerPixel) + 0.5);
+			if (barPixels <= 0) barPixels = 1;
+			line.x1 = line.x2 = SCREENX(wi, 0.5 * (sx1 + sx2));
+			line.y1 = SCREENY(wi, sy1);
+			line.y2 = SCREENY(wi, sy2);
+			wi->dev_info.xg_seg(wi->dev_info.user_state,
 					1, &line, barPixels, L_VAR,
 					LINESTYLE(idx), PIXVALUE(idx));
-		}
-	    }
-	    /* Handle last marker */
-	    if (markFlag && (thisList->numPoints > 0)) {
-		C_CODE(thisList->xvec[thisList->numPoints-1],
-		       thisList->yvec[thisList->numPoints-1],
-		       mark_inside);
-		if (mark_inside == 0) {
-		    if (pixelMarks) {
-			if (bigPixel) {
-			    wi->dev_info.xg_dot(wi->dev_info.user_state,
-						Xsegs[X_idx-1].x2, Xsegs[X_idx-1].y2,
-						P_DOT, 0, idx % MAXATTR);
-			} else {
-			    wi->dev_info.xg_dot(wi->dev_info.user_state,
-						Xsegs[X_idx-1].x2, Xsegs[X_idx-1].y2,
-						P_PIXEL, 0, PIXVALUE(idx));
-			}
-		    } else {
-			/* Distinctive markers */
-			wi->dev_info.xg_dot(wi->dev_info.user_state,
-					    Xsegs[X_idx-1].x2, Xsegs[X_idx-1].y2,
-					    P_MARK, MARKSTYLE(idx),
-					    PIXVALUE(idx));
 		    }
 		}
-	    }
-	    /* Handle last bar */
-	    if ((thisList->numPoints > 0) && PM_BOOL("BarGraph")) {
-		int barPixels, baseSpot;
-		XSegment line;
-
-		barPixels = (int) ((PM_DBL("BarWidth")/wi->XUnitsPerPixel) + 0.5);
-		if (barPixels <= 0) barPixels = 1;
-		baseSpot = SCREENY(wi, PM_DBL("BarBase"));
-		line.x1 = line.x2 = Xsegs[X_idx-1].x2;
-		line.y1 = baseSpot;  line.y2 = Xsegs[X_idx-1].y2;
-		wi->dev_info.xg_seg(wi->dev_info.user_state,
-				    1, &line, barPixels, L_VAR,
-				    LINESTYLE(idx), PIXVALUE(idx));
 	    }
 
 	    /* Draw segments */
