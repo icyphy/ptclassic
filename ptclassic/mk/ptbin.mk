@@ -115,6 +115,14 @@ ifdef PTRIM
 	SDFFULL =	1
 endif
 
+ifdef PTCP
+	PIGI =		$(BASENAME).cp
+	VERSION_DESC =	'With DE, and CP domain only, on the sun4 only'
+	DE =		1
+	HOF =		1
+	CP =		1
+endif
+
 ifndef TK
 	# Don't need Higher Order Functions.  ptcl does not need HOF
 	HOF=
@@ -231,6 +239,9 @@ $(BASENAME).ptrim: $(PT_DEPEND)
 $(BASENAME).ptiny: $(PT_DEPEND)
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny
 
+$(BASENAME).ptcp: $(PT_DEPEND)
+	$(MAKE) PTCP=1 BASENAME=$(BASENAME) $(BASENAME).cp
+
 $(BASENAME).debug: $(PT_DEPEND)
 	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug
 
@@ -239,6 +250,9 @@ $(BASENAME).ptrim.debug: $(PT_DEPEND)
 
 $(BASENAME).ptiny.debug: $(PT_DEPEND)
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug
+
+$(BASENAME).ptcp.debug: $(PT_DEPEND)
+	$(MAKE) PTCP=1 BASENAME=$(BASENAME) $(BASENAME).ptcp.debug
 
 $(BASENAME).debug.purify: $(PT_DEPEND)
 	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.purify
