@@ -31,16 +31,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /*
  * transform.c
  *
- * Copyright (c) 1987 Wayne A. Christopher, U. C. Berkeley CAD Group 
- *	 faustus@cad.berkeley.edu, ucbvax!faustus
- * Permission is granted to modify and re-distribute this code in any manner
- * as long as this notice is preserved.  All standard disclaimers apply.
- *
  * Transform a fang geometry according to an oct transform type.
- *
- * 1987 Brian Lee
- * Modified to transform fang geometry by an oct transform instead of just
- * and oct transform type.  Filled out rotation transformation arrays.
  */
 
 #include "copyright.h"
