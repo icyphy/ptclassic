@@ -105,16 +105,11 @@ public:
 	// output a directive that switches to the code section
 	virtual void codeSection() = 0;
 
-	// generate file of stuff named base.suffix.  If mode is
-	// specified, the mode of the file generated is set to 'mode.'
-	int genFile(StringList& stuff, char* base,
-		    const char* suffix=NULL,const char* mode=NULL);
+	// generate file of stuff named base.suffix.
+	int genFile(StringList& stuff, char* base,const char* suffix=NULL);
 
 	// generate file of stuff named base.suffix and display it.
-	// If mode is specified, the mode of the file generated is 
-	// set to 'mode.'
-	int genDisFile(StringList& stuff,char* base,
-		       const char* suffix=NULL,const char* mode=NULL);
+	int genDisFile(StringList& stuff,char* base,const char* suffix=NULL);
   
 	// Return full file name including path.  
 	// NOTE: User must delete the char* returned after use.
