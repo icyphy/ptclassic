@@ -319,7 +319,7 @@ class ::tycho::Query {
     # Get the current value of the queries (or one query).
     method get {{tag {}}}
 
-    # Insert tags to the specified tag group.
+    # Append tags to the specified tag group.
     method groupTags { grouptag args}
 
     # Insert the specified string into the specified query.
@@ -589,12 +589,13 @@ body ::tycho::Query::choice {tag label entries default args} {
 
     # Create the option menu button
     itk_component add tag_$tag {
-        menubutton $itk_component(querysite).tag_$tag \
+        eval [list menubutton $itk_component(querysite).tag_$tag \
                 -width $itk_option(-entrywidth) \
 		-indicatoron 1 \
 		-menu $itk_component(querysite).tag_$tag.menu \
 		-textvariable [scope $itk_component(hull)_[set tag]sw] \
-		-relief raised -bd 2 -highlightthickness 2 -anchor c
+		-relief raised -bd 2 -highlightthickness 2 -anchor c] \
+		$args
     } {
         keep -background -cursor
         # Need to be able to control each one individually.
@@ -707,8 +708,12 @@ body ::tycho::Query::get {{tag {}}} {
             lappend response [eval $tagsget($tag)]
         }
     } elseif [info exists taggroups($tag)] {
-	foreach tag $taggroups($tag) {
-	    lappend response [get $tag]
+	foreach qtag $taggroups($tag) {
+	    # If the label of the query was given, append it to the result.
+	    if [info exists taggroups($tag,$qtag)] {
+		lappend response $taggroups($tag,$qtag)
+	    }
+	    lappend response [::tycho::Query::get $qtag]
 	}
     } else {
         set response [eval $tagsget($tag)]
@@ -718,22 +723,45 @@ body ::tycho::Query::get {{tag {}}} {
 
 #####################################################################
 #### groupTags
-# Create the specified tag group if it doesn't exist, and
-# insert tags into the specified tag group. 
+# Append tags to the specified tag group.  If the tag group does not
+# exist, create it.  If no tags are given to append, then return
+# a list of tags currently in the tag group. A tag group permits certain
+# operations on the set of queries whose tags are in the group to be done
+# together by referencing only the tag group name.
+# If the tag is given as
+# a pair, {tag label}, the "get" method will use the label when
+# retrieving values of the queries in the tag group.
 # 
 body ::tycho::Query::groupTags {grouptag args} {
-    if {[info exists taggroups($grouptag)] == 0} {
-	set taggroups($grouptag) {}
+    # if no tag is given, return the tags in the specified group tag.
+    if {$args == ""} { 
+	if {[info exists taggroups($grouptag)] == 0} {
+	    error "grouptag $grouptag does not exist in $this"
+	}
+	return $taggroups($grouptag) 
     }
 
-    # if no tag is given, return the tags in the specified group tag.
-    if {$args == ""} { return $taggroups($grouptag) }
-
     foreach tag $args {
+	# If a tag is given by a pair, {tag label}, the label will be
+	# used when the "get" method is invoked for this group tag.
+	if {[llength $tag] == 2} {
+	    set label [lindex $tag 1]
+	    set tag [lindex $tag 0]
+	}
 	if {[lsearch $tags $tag] == -1} {
 	    error "tag $tag does not exist in $this"
 	}
-	lappend taggroups($grouptag) $tag 
+	if {[info exists taggroups($grouptag)] == 0} {
+	    set taggroups($grouptag) {}
+	}
+	# Append "tag" to the tag group unless it's in the group already.
+	if {[lsearch $taggroups($grouptag) $tag] == -1} {
+	    lappend taggroups($grouptag) $tag 
+	}
+	if [info exists label] {
+	    set taggroups($grouptag,$tag) $label
+	    unset label
+	}
     }
 }
 
@@ -996,7 +1024,8 @@ body ::tycho::Query::ok {} {
 
 #####################################################################
 #### querycget
-# Return the value of the specified configuration option.
+# Return the value of the specified configuration option for the query
+# with the specified tag.
 #
 body ::tycho::Query::querycget {tag option} {
     array set gridopt [grid info $itk_component(tag_$tag)]
@@ -1012,7 +1041,7 @@ body ::tycho::Query::querycget {tag option} {
 
 #####################################################################
 #### queryconfigure
-# Configure the option of the query.
+# Configure the option of the query with the specified tag.
 # 
 body ::tycho::Query::queryconfigure {tag option value} {
     array set entryopt [grid info $itk_component(tag_$tag)]
