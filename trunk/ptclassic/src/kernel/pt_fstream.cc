@@ -118,7 +118,12 @@ pt_ifstream::pt_ifstream(const char *name,int mode, int prot) {
 
 void pt_ifstream::open(const char* name, int mode, int prot) {
 	int nobufB;
-	int fd = check_special(name, nobufB);
+	int fd;
+	if (name == (const char *) NULL) {
+	    Error::abortRun("called pt_ifstream open() with a NULL file name");
+	    return;
+	}
+	fd = check_special(name, nobufB);
 	if (fd == 0) {
 		rdbuf()->attach(fd);
 #ifdef NEED_DONT_CLOSE
@@ -142,7 +147,12 @@ pt_ofstream::pt_ofstream(const char *name,int mode, int prot) {
 
 void pt_ofstream::open(const char* name, int mode, int prot) {
 	int nobufB;
-	int fd = check_special(name, nobufB);
+	int fd;
+	if (name == (const char *) NULL) {
+	    Error::abortRun("called pt_ofstream open() with a NULL file name");
+	    return;
+	}
+	fd = check_special(name, nobufB);
 	if (fd == 0) {
 		Error::abortRun("Can't open ", name,
 				" for writing: can't write to standard input");
