@@ -24,11 +24,10 @@ SDFSRC=$(ROOT)/src/domains/sdf/stars
 SDFKERSRC=$(ROOT)/src/domains/sdf/kernel
 
 # libraries
-LIBS=-lsdfstars -lPG -lLS -lEG -lsdf -lImage -lcompileSDF -lptolemy \
+LIBS=-lsdfstars -lLS -lEG -lsdf -lImage -lcompileSDF -lptolemy \
 	$(SYSLIBS)
 
 LIBFILES=\
- $(LIBDIR)/libPG.a \
  $(LIBDIR)/libLS.a $(LIBDIR)/libEG.a $(LIBDIR)/libsdf.a \
  $(LIBDIR)/libImage.a \
  $(LIBDIR)/libcompileSDF.a \
