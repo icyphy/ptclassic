@@ -79,6 +79,9 @@ public:
 	// Generate code to end an iterative procedure.
 	/*virtual*/ void endIteration(int, int);
 
+	// Add the clock to the clock list and generate code to toggle it.
+	void addClock(const char*);
+
 	// Run the code.
 	/*virtual*/ int runCode();
 
