@@ -78,7 +78,7 @@ public:
 		while (dimension() <= index) {
 			put(new CodeBlockList);
 		}
-		return(Vector::elem(index));
+		return((CodeBlockList*)Vector::elem(index));
 	}
 };
 
