@@ -167,6 +167,7 @@ if {$tycho_bindings == {unix}} {
 # the character appears in the entry box (simply add a "break" to the
 # standard Tk binding).
 bind Entry <Key> "tkEntryInsert %W %A; break"
+bind Entry <Control-h> "tkEntryBackspace %W; break"
 bind Text <Key> "tkTextInsert %W %A; break"
 bind Text <Return> {tkTextInsert %W \n; break}
 # One exception to allow "all" to catch it (to post menus)
