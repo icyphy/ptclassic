@@ -1,10 +1,8 @@
-#ifndef _MutableCQEventQueue_h
-#define _MutableCQEventQueue_h 1
-/**************************************************************************
-Version identification:
+/* 
+Version Identification:
 $Id$
 
-Copyright (c) 1997 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,14 +24,12 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
-                                                PT_COPYRIGHT_VERSION_2
-                                                COPYRIGHTENDKEY
- Programmer: John Davis
- Date: 5/28/97
-	The MutableCQEventQueue class parallels the CQEventQueue
-	with the addition of mutable semantics.
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
+*/
 
-**************************************************************************/
+#ifndef _MutableCQEventQueue_h
+#define _MutableCQEventQueue_h 1
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -41,7 +37,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "MutableCalendarQueue.h"
 #include "CalendarQueue.h"
 #include "EventQueue.h"
-#include "Particle.h"
 
 class Particle;
 class PortHole;
@@ -53,8 +48,6 @@ class PortHole;
 class MutableCQEventQueue : public MutableCalendarQueue
 {
 public:
-	MutableCalendarQueue::removeEvent;
-
 	void pushHead(Particle* p, PortHole* ph, double v, double fv) {
             Event* temp = getEvent(p, ph);
 	    Star *dest = NULL;
@@ -76,7 +69,7 @@ public:
 
  // The following takes care of the case where levelput is called
  // directly without going thru pushHead. In that case it is called
- // with three arguments and dest must be internally calculated.
+ // with three arguments and dest must be internallu calculated.
 
 	LevelLink* levelput(Pointer a, double v, double fv) {
 	     Star *dest= NULL;
@@ -89,16 +82,12 @@ public:
 	     } else {
 		 dest = (Star*) a;
 	     }
-	     return createRefInDestinedEventList( 
-		MutableCalendarQueue::levelput(a, v, fv, dest) );
+	     return MutableCalendarQueue::levelput(a, v, fv, dest);
 	}
 
 	CqLevelLink* levelput(Pointer a, double v, double fv, Star* dest) {
-	     return createRefInDestinedEventList( 
-	    	MutableCalendarQueue::levelput(a, v, fv, dest) );
+	    return MutableCalendarQueue::levelput(a, v, fv, dest);
 	}
-
-	CqLevelLink * createRefInDestinedEventList( CqLevelLink * link );
 
 	void putFreeLink(CqLevelLink* p); // virtual
 
