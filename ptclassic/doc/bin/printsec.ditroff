@@ -11,6 +11,7 @@
 # The -index option generates an index only, printing nothing.
 # The -preview option causes the domain to previewed via xditview
 # (or nroff, if no DISPLAY is set) instead of being printed.
+# The -ps option generates a ps file in /tmp only, printing nothing.
 # The -H option means the following option is a file in the
 # $PTOLEMY/doc/headers directory.
 # Index information is appended to the file $HOME/Almagest.index,
@@ -33,10 +34,12 @@ set printoptions = "-me -tbl -eqn -P$PRINTER"
 set contentscmd = $PTOLEMY/doc/bin/contents
 set files = ""
 set previewcommand = "xditview -"
+set psprintcommand = ptroff
 
 # Variables
 set indexonly = 0
 set preview = 0
+set ps = 0
 
 if (!($?ALMAGEST_INDEX)) then
 	setenv ALMAGEST_INDEX $HOME/Almagest.index
@@ -53,6 +56,10 @@ while ($#argv)
 			breaksw
 		case -preview:
 			set preview = 1
+			shift
+			breaksw
+		case -ps
+			set ps = 1
 			shift
 			breaksw
 		case -H:
@@ -84,6 +91,11 @@ else if ($preview) then
 		(eqn /tmp/pt$$ | tbl | nroff -me > /tmp/ptnr$$) >& /dev/null
 		more /tmp/ptnr$$
 	endif
+else if ($ps) then
+	# generate a postscript file to /tmp only.  nothing is printed
+	($printcommand $printoptions -t /tmp/pt$$ | psdit > \
+		/tmp/pt.$$.ps) >& /tmp/index$$
+	echo "printsec: generated postscript in /tmp/pt.$$.ps"
 else
 	# otherwise just print it out
 	$printcommand $printoptions /tmp/pt$$ >& /tmp/index$$
