@@ -1,0 +1,14 @@
+#!/bin/csh -f
+# Simplified login as ptuser.
+# 
+# Author:	T. M. Parks
+# Created:	26 November 1993
+
+# Host where Ptolemy development files live.
+set ptHost=cooley.eecs.berkeley.edu
+
+if (`hostname` == $ptHost) then
+	exec rlogin -l ptuser $ptHost
+else
+	echo You must first login to $ptHost
+endif
