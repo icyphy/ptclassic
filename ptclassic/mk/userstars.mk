@@ -80,11 +80,11 @@ all:	makefile $(OBJS)
 
 # Rule for compiling C++ files
 .cc.o:
-	$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(GPPFLAGS) -I$(VPATH) $(INCL) -c $<
+	$(CPLUSPLUS) $(USER_CC_SHAREDFLAGS) $(GPPFLAGS) -I$(VPATH) $(INCL) -c $<
 
 # Rule for compiling with cc
 .c.o:
-	$(CC) $(C_SHAREDFLAGS) $(CFLAGS) $(C_INCL) -c $<
+	$(CC) $(USER_C_SHAREDFLAGS) $(CFLAGS) $(C_INCL) -c $<
 
 # Note that forcing the installation of ptlang might not be the best
 # thing to do, it would be best if 'make sources' did not touch the
