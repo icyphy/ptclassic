@@ -3,7 +3,7 @@ defstar {
 	domain { CG56 }
 	desc {Gaussian Noise Source}
 	version { $Id$ }
-	author { Kennard, Chih-Tsung Huang (ported from Gabriel) }
+	author { Chih-Tsung Huang, Kennard White (ported from Gabriel) }
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
@@ -21,7 +21,7 @@ distribution (mean = 0, standard deviation = 0.1).
 .Ir "central limit theorem"
 According to the central limit theorem, the sum of N random variables
 approaches a Gaussian distribution as N approaches infinity.
-This star generates an output number by summing \fIno_uniforms\fR uniform
+This star generates an output number by summing \fInoUniforms\fR uniform
 random variables.
 .PP
 The parameters \fIseed\fR and \fImultiplier\fR control the generation of the

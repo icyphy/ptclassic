@@ -13,10 +13,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { CG56 demo library }
         explanation {
 The star produces at its output an impulse with height given by the parameter
-\fIimpulse_size\fR.
+\fIimpulseSize\fR.
 .PP
 A state variable is maintained to keep around the next output value.
-At initialization, the state is set to \fIimpulse_size\fR.
+At initialization, the state is set to \fIimpulseSize\fR.
 During each subsequent invocation, the output value is taken from the state,
 which is then set to zero.
         }
