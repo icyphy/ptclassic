@@ -179,21 +179,22 @@ This clustering algorithm consists of alternating a
 In the merging step, blocks connected together 
 are merged into a cluster if there is no sample rate change between
 them and the merge will not introduce deadlock. In the looping step,
-a cluster is looped to make it possible to 
-be merged with the neighbor blocks or clusters.
+a cluster is looped until it is possible to 
+merge it with the neighbor blocks or clusters.
 Since this looping algorithm is conservative, some complicated looping
-possibilities are not disclosed.
+possibilities are not always discovered.
 .pp
-The more complicated looping algorithm was developed by combining
+A more complicated looping algorithm was developed by adding
 postprocessing steps to the above algorithm to handle cases that
 it cannot handle.  For lack of a better name, we call this technique
-"SJS scheduling", for the first initials of the designers.
+"SJS scheduling", for the first initials of the designers
+(Shuvra Bhattacharyya, Joe Buck, and Soonhoi Ha).
 .Id "SJS scheduling"
-We apply the previously described scheduling algorithm as the first pass. In the
-second pass, we decompose the graph (S. Bhattacharyya's contribution) so
-that the graph becomes acyclic. The decomposed graphs are
+We apply the previously described scheduling algorithm as the first pass.
+In the second pass, we decompose the graph (Bhattacharyya's contribution) so
+that the graph becomes acyclic [3]. The decomposed graphs are
 expanded to acyclic precedence graphs in which looping structures are
-extracted (S. Ha's contribution). This scheduling option is selected
+extracted (Ha's contribution). This scheduling option is selected
 when the
 .c loopTarget
 .Ir "loopTarget, class"
@@ -221,3 +222,6 @@ D. G. Messerschmitt,
 "Synchronous Data Flow"
 \fIIEEE Proceedings\fR,
 September, 1987.
+.ip [3]
+S. Bhattacharyya and E. A. Lee, "Scheduling Synchronous Dataflow Graphs
+for Efficient Looping," to appear in \fIJ. of VLSI Signal Processing\fR, 1993.
