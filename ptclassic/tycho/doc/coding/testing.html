@@ -8,7 +8,14 @@
 <HR>
 This page is primarily for Tycho Developers.  Some of the commands
 mentioned below are not included in Tycho.
-<H2>Test Suite</H2>
+ <P>Contents:
+<MENU>
+<LI> <A HREF="#test suite">Test Suite</A>
+<LI> <A HREF="#testing documentation">Testing Documentation</A>
+<LI> <A HREF="#testing the tycho script">Testing the tycho Script</A>
+</MENU>
+
+<H2><A NAME="test suite">Test Suite</A></H2>
 
 We have included recursion tests for some of the code.  Usually, 
 wherever there is a Itcl file, the tests are in the <CODE>test</CODE>
@@ -133,7 +140,7 @@ test Foo-1.1 {Test out Foo} {
 </OL>
 
 <HR>
-<H2>Testing Documentation</H2>
+<H2><A NAME="testing documentation">Testing Documentation</A></H2>
 
 The Tycho documentation is written in html.  There are several tools
 that can be used.
@@ -260,8 +267,26 @@ in the distribution.
 
 </DL> 
 
+<H2><A NAME="testing the tycho script">Testing the tycho script</A></H2>
+
+The <A HREF="../../bin/tycho"><CODE>$TYCHO/bin/tycho</CODE></A> script
+can be tested with the <A
+HREF="../../kernel/test/chktycho"><CODE>$TYCHO/kernel/test/chktycho</CODE></A>
+script.
+
+ <P>This script calls <CODE>tycho</CODE> with all the various
+combinations of command line arguments.  <CODE>chktycho</CODE> adds a
+line to <A
+HREF="~/.tycho/tychorc.tcl"><CODE>~/.tycho/tychorc.tcl</CODE></A> so
+that <CODE>tycho</CODE> is exitted after a few seconds.  This allows
+the script to test many invocations of <CODE>tycho</CODE> without user
+intervention.  However to test the <CODE>-debug</CODE> option, the
+user must type <CODE>cont</CODE> in the gdb window.
+
+<p>
+<a href="../../doc/index.html">Tycho Home Page</a><br>
 <HR>
-Copyright &#169 1996, The Regents of the University of California.
+Copyright &#169 1996-%Q%, The Regents of the University of California.
 All rights reserved. 
 <br> Last updated: $Date$, comments to:
 <author>tycho@eecs.berkeley.edu</author> </body> </html>
