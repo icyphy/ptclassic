@@ -1,0 +1,68 @@
+# Makefile for optfir (Classical FIR filter design using Parks-McClellan)
+# Version identification:
+# $Id$
+#
+# Copyright (c) 1994 The Regents of the University of California.
+#			All Rights Reserved.
+# Makefile by Christopher Hylands
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	make depend
+# This will add the dependencies to the makefile.
+#
+# root of source tree
+ROOT	      = ../../..
+# VPATH points to the "real" source directory
+VPATH         = $(ROOT)/src/filters/wfir
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+include $(CONFIG)
+
+# This directory contains three source files:
+# wfir.f: 	original Fortran source code
+# wfir-f2c.c:	wfir.f converted to C with f2c
+# wfir.c:	hand massaged C version that works
+
+SRCS	      = wfir.c
+EXTRA_SRCS = 	wfir.f
+EXTRA_DESTS= 	wfir-fortran
+
+OBJS = $(SRCS:.c=.o)
+
+LIB = 
+
+all:	makefile $(LIB) wfir
+
+install: makefile $(BINDIR)/wfir
+
+# Use the $(LINKER) so the binary is statically linked for distribution.
+# On suns, cc takes -Bstatic, gcc takes -static, so we can't just add a flag
+# here.
+wfir:	wfir.o 
+	rm -f wfir
+	$(LINKER) $(LINKFLAGS) wfir.o -lm -o $@ 
+
+$(BINDIR)/wfir:	wfir
+	rm -f $(BINDIR)/wfir
+	ln wfir $(BINDIR)/wfir
+
+lint:	$(SRCS)
+	lint -u $(SRCS) > lint
+
+# Rules to build from fortran source
+LDFLAGS	      = -Bstatic
+
+FC	      = f77
+
+wfir-fortran: wfir.f
+	$(FC) $^ -O  -o $@ $(LDFLAGS) -lm
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
