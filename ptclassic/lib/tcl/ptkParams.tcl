@@ -1027,7 +1027,7 @@ proc ptkEditStrings {instr cmd editList args} {
    foreach name_value $pairs {
     set name [lindex $name_value 0]
     ed_MkEntryButton $nmFrame.name_$name $name
-    $nmFrame.name_$name.entry config -width 32
+    $nmFrame.name_$name.entry config -width 40
     if {[llength $name_value] == 2} {
         $nmFrame.name_$name.entry insert 0 [lindex $name_value 1]
     }
@@ -1161,4 +1161,47 @@ proc ptkOkCancelButtons {frame okCmd cancelCmd} {
    pack [button $frame.f.ok -text OK -command $okCmd] \
 	-padx 1m -pady 1m -ipadx 1m -ipady 1m
 
+}
+
+# This procedure lets the user edit a long string in a text widget.
+# Authors: Wei-Jen Huang and Alan Kamas
+#
+# The title argument is the decoration string at the top of the window.
+# The cmd argument is a string to be processed by format.
+# The string argument is the long string to being edited.
+
+proc ptkEditText {title cmd string} {
+    global unique
+    set w .ptkEditText$unique
+    incr unique
+
+    toplevel $w
+    wm title $w ptolemyWindow
+    wm iconname $w ptolemyWindow
+
+    pack [label $w.label -text $title -relief raised \
+	-font [option get . mediumfont Pigi]] \
+	-side top -fill x -expand 1
+    pack [frame $w.tframe -bd 2] -side top -fill x -expand 1
+    scrollbar $w.tframe.vscroll -relief flat \
+	-command "$w.tframe.text yview"
+    pack $w.tframe.vscroll -side right -fill y
+
+    text $w.tframe.text -wrap word -width 60 -height 7 \
+	-setgrid true -yscrollcommand "$w.tframe.vscroll set" \
+	-relief raised -bd 2
+
+    pack $w.tframe.text -expand yes -fill both
+    pack [frame $w.f -bd 2 -relief sunken] -side top -fill x -expand true
+    $w.tframe.text insert 0.0 $string
+    ptkOkCancelButtons $w.f \
+	"ed_EditTextExec \"$cmd\" $w.tframe.text; destroy $w" \
+	"destroy $w"
+}    
+
+# The following procedure is used in conjunction with ed_EditText for
+#  editing long strings.
+
+proc ed_EditTextExecute {cmd textWidget} {
+    eval [format $cmd \"[$textWidget get @0,0 end]\"]
 }
