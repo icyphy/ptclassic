@@ -1,4 +1,3 @@
-static const char file_id[] = "CGBDFTarget.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -31,6 +30,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 BDF code generation!
 
 *******************************************************************/
+static const char file_id[] = "CGBDFTarget.cc";
+
+#ifdef __GNUG__
+#pragma implementation
+#endif
 
 #include "CGBDFTarget.h"
 #include "BDFCluster.h"
