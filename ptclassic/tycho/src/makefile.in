@@ -67,7 +67,7 @@ MISC_FILES =	java.mk tcl.mk config.cache config.log config.status \
 # defines its own all rule would have the rule defined twice.  With
 # GNU make, we could make the all rule a double-colon rule, but this might
 # not be portable.
-all install:
+all:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
@@ -77,6 +77,24 @@ all install:
 	    fi ; \
 	done
 
+install: $(LIBDIR) $(LIBDIR)/java.mk $(LIBDIR)/tcl.mk
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making $@ in $(ME)/$$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+		) \
+	    fi ; \
+	done
+
+$(LIBDIR):
+	mkdir $@
+$(LIBDIR)/java.mk:
+	rm -f $@
+	ln -s java.mk $@
+$(LIBDIR)/tcl.mk:
+	rm -f $@
+	ln -s tcl.mk $@
 depend:
 	@echo "no dependencies in this directory"
 
