@@ -70,8 +70,9 @@ ITCL_SRCS = \
 	Curriculum.itcl \
 	Dialog.itcl \
 	Digraph.itcl \
-	Displayer.itcl \
 	DirectedAcyclicGraph.itcl \
+	DirSearch.itcl \
+	Displayer.itcl \
 	Edit.itcl \
 	EditSearch.itcl \
 	EditSpell.itcl \
