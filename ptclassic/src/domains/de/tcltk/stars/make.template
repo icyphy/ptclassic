@@ -49,13 +49,13 @@ PL_SRCS= \
 # DELMSCxTkPlot.pl \
 
 TCL_SRCS= \
-  $(TCL_SCRIPT_DIR)/tkButtons.tcl \
+  tkButtons.tcl \
   $(TCL_SCRIPT_DIR)/tkMeter.tcl \
   $(TCL_SCRIPT_DIR)/tkScript.tcl \
-  $(TCL_SCRIPT_DIR)/tkShowEvents.tcl \
+  tkShowEvents.tcl \
   $(TCL_SCRIPT_DIR)/tkShowValues.tcl \
   $(TCL_SCRIPT_DIR)/tkSlider.tcl \
-  $(TCL_SCRIPT_DIR)/tkText.tcl \
+  tkText.tcl \
   tkLogicAnalyzer.tcl
 
 # The .cc files
