@@ -300,6 +300,7 @@ PrecisionState& PrecisionState :: operator = (const char* arg)
 PrecisionState& PrecisionState :: operator = (const PrecisionState& p)
 {
 	(Precision&)*this = p;
+	delete [] val;
 	val = p.val ? savestring(p.val) : (char*)NULL;
 	return *this;
 }
@@ -309,6 +310,7 @@ PrecisionState& PrecisionState :: operator = (const PrecisionState& p)
 PrecisionState& PrecisionState :: operator = (const Precision& p)
 {
   StringList sl(p);
+  delete [] val;
   val = savestring(sl);
   return *this;
 }
@@ -327,7 +329,7 @@ StringList PrecisionState :: currentValue() const {
 State* PrecisionState :: clone () const
 {
 	LOG_NEW; PrecisionState *s = new PrecisionState;
-	if (val)  s->val = savestring(val);
+	if (val) s->val = savestring(val);
 	(Precision&)*s = *this;
 	return s;
 }
