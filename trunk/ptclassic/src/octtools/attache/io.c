@@ -24,11 +24,12 @@ static char SccsId[]="$Id$";
  * ENHANCEMENTS, OR MODIFICATIONS.
  * 
  */
+#include <curses.h>		    /* Include this first, as port.h
+				       also defines TRUE and FALSE. */
 #include "copyright.h"
 #include "port.h"
 #include "utility.h"
 #include "options.h"                /* PBP - MCC 12/09/89 */
-#include <curses.h>
 #include "errtrap.h"                /* PBP - MCC 12/09/89 */
 #include "io.h"
 
