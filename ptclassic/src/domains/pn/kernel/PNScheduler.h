@@ -99,7 +99,7 @@ protected:
     int iteration;
 
     // List for keeping track of threads.
-    PNThreadList* threads;
+    ThreadList* threads;
 };
 
 #endif
