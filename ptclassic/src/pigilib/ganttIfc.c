@@ -1,9 +1,6 @@
 /*  ganttIfc.c  edg
 Version identification:
 $Id$
-All Gantt functions have been removed since there is yet no kernel
-support for displaying SDF schedules.  All that remains is the
-RpcFindStar() function which is useful in debugging schematics.
 */
 
 /* Includes */
@@ -14,6 +11,7 @@ RpcFindStar() function which is useful in debugging schematics.
 #include "ganttIfc.h"
 #include "oh.h"
 #include "vemInterface.h"
+#include <setjmp.h>
 
 /* MAX_DEPTH
 Maximum nesting depth for galaxies, eg. a star in a galaxy in a
@@ -90,13 +88,16 @@ Outputs:
     depth = updated to indicate total # of sets
 */
 static boolean
-FrameStar(rootFacetPtr, name, color, sets, depth)
+FrameStar(rootFacetPtr, name, color, sets, depth, usePattern)
 octObject *rootFacetPtr;
 char *name;
 RgbValue *color;
 vemSelSet sets[];
 int *depth;
+int usePattern;
 {
+    static char *pattern = "00010000 00010000 00010000 11111111 00010000 00010000 00010000 00010000";
+
     octObject facet, inst;
     char word[256];
     vemSelSet ss;
@@ -108,8 +109,13 @@ int *depth;
 	if (ohGetByInstName(&facet, &inst, word) == OCT_NOT_FOUND) {
 	    return FALSE;
 	}
-	ss = vemNewSelSet(facet.objectId, color->red,
-	    color->green, color->blue, 2, 3, 1, 1, "0");
+	if (usePattern)
+		ss = vemNewSelSet(facet.objectId, color->red,
+				  color->green, color->blue, 1, 1, 8, 8, 
+				  pattern);
+	else
+		ss = vemNewSelSet(facet.objectId, color->red,
+				  color->green, color->blue, 2, 3, 1, 1, "0");
 	sets[(*depth)++] = ss;
 	vemAddSelSet(ss, inst.objectId);
 	if ((name = incr(name)) == NULL) break;
@@ -167,7 +173,7 @@ long userOptionWord;
         ViDone();
     }
     FindClear();
-    if (!FrameStar(&facet, item.value, &color, findSets, &findDepth)) {
+    if (!FrameStar(&facet, item.value, &color, findSets, &findDepth, 1)) {
 	ErrAdd("Cannot find name in facet");
 	PrintErr(ErrGet());
         ViDone();
@@ -183,5 +189,135 @@ char *name;
 /* name contains the universe name as well, which must be stripped */
     name = incr(name);
     if (!name) return;
-    FrameStar(facetP, name, &color, findSets, &findDepth);
+    FrameStar(facetP, name, &color, findSets, &findDepth, 0);
+}
+
+/* Gantt chart support, from ~gabriel/src/ggirpc/ganttIfc.c */
+
+static vemSelSet (*sets)[MAX_DEPTH];  /* stores vemSelSets until freed */
+static int *procDepth;  /* number of vemSelSets used for each processor */
+extern octObject lastFacet;  /* root facet for name lookup */
+static RgbValue *procColors;  /* points to array of processor color values */
+static int procN;  /* number of processors in Gantt chart */
+
+/* CreateFrames  2/26/90 7/6/88
+Call this first, before any other Gantt routine.
+Inputs:
+    colors = each array entry describes the color of one frame
+    n = number of frames to create
+*/
+int
+CreateFrames(colors, n)
+RgbValue colors[];
+int n;
+{
+    int i;
+
+    procColors = colors;
+    procN = n;
+    if ((sets = (vemSelSet (*)[MAX_DEPTH]) malloc(n * sizeof(*sets))) == NULL) {
+	return 0;
+    }
+    if ((procDepth = (int *) malloc(n * sizeof(int))) == NULL) {
+	free(sets);
+	return 0;
+    }
+    for (i = 0; i < n; i++) {
+	procDepth[i] = 0;
+    }
+    return 1;
+}
+
+/* ClearFrames  7/6/88
+Hides all frames from view but does not free storage associated with
+frames.
+*/
+int
+ClearFrames()
+{
+    int i, j;
+
+    for (i = 0; i < procN; i++) {
+	for (j = 0; j < procDepth[i]; j++) {
+	    vemFreeSelSet(sets[i][j]);
+	}
+	procDepth[i] = 0;
+    }
+    return (1);
+}
+
+/* DestroyFrames  7/6/88
+Hides all frames and frees all storage associated with frames.  Must
+call CreateFrames() again before calling any other function.
+*/
+int
+DestroyFrames()
+{
+    ClearFrames();
+    free(sets);
+    free(procDepth);
+    return (1);
+}
+
+/* Frame  3/28/90 7/16/88 7/6/88
+Inputs: stars = array of strings.  Assumes number of strings equals
+    number of frames that were created.  If a pointer in stars[] is
+    NULL then the corresponding frame will not be used.
+
+Star names are assumed not to contain the universe name.
+*/
+int
+Frame(stars)
+char *stars[];
+{
+    int i;
+    octObject inst;
+
+    for (i = 0; i < procN; i++) {
+	if (!FrameStar(&lastFacet, stars[i], &procColors[i], sets[i],
+	    &procDepth[i], 1)) {
+	    return 0;
+	}
+    }
+    return 1;
+}
+
+/*
+The main guy
+*/
+
+static jmp_buf env;
+
+boolean
+displayGanttChart(fileName)
+char* fileName;
+{
+	extern char* xDisplay;
+	if (setjmp(env)) {
+		return (FALSE);
+	} else {
+		display_schedule(xDisplay, 1, fileName, "");
+		return (TRUE);
+	}
+}
+
+/* 8/12/89
+Save the error message for GGI and exit from display_schedule().
+*/
+void
+GanttErr(msg)
+char *msg;
+{
+    ErrAdd("Internal error in Gantt chart display\n");
+    ErrAdd(msg);
+    PrintErr(ErrGet());
+    longjmp(env, 1);
+}
+
+int
+GanttMan(name)
+char *name;
+{
+    win_msg("Gantt chart help not yet implemented\nFor more information, read ~gabriel/doc/man/man2/display_sched.2");
+    return 0;
 }
