@@ -159,7 +159,8 @@ void CGTarget::setup() {
 		}
 	}
 	if (!galaxy()) return;
-
+	if (!galaxySetup()) return;
+	if (haltRequested()) return;
 	if (filePrefix.null()) filePrefix = galaxy()->name();
 	
 	// This will be phased out.  Use either CGTarget::writeFile
@@ -178,9 +179,9 @@ void CGTarget::setup() {
 	if (!modifyGalaxy()) return;
 
 	if (!noSchedule) {
-		Target::setup();
-		if (haltRequested()) return;
+		if(!schedulerSetup()) return;
 	}
+	if (haltRequested()) return;
 	noSchedule = 0;		// reset for next setup.
 
 	// If in a WormHole, generate, compile, load, and run code.
@@ -188,6 +189,7 @@ void CGTarget::setup() {
 	if (inWormHole() && alone())
 	{
 	    adjustSampleRates();
+	    wormPrepare();
 	    generateCode();
 	    if (haltRequested()) return;
 	    if (compileCode())
@@ -201,6 +203,9 @@ void CGTarget::setup() {
 	    }
 	    else Error::abortRun(*this, "could not compile!");
 	}
+}
+
+void CGTarget::wormPrepare() {
 }
 
 int CGTarget :: run() {
