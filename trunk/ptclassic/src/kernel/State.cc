@@ -20,10 +20,8 @@ $Id$
 #include "State.h"
 #include "Block.h"
 #include "miscFuncs.h"
-#include "Output.h"
+#include "Error.h"
 #include "KnownState.h"
-
-extern Error errorHandler;
 
 const int TOKSIZE = 256;
 
@@ -199,12 +197,7 @@ State* StateList::stateWithName(const char* name) {
 
 // complain of parse error
 void State::parseError (const char* text, const char* text2) {
-	StringList msg = "Error initializing ";
-	msg += readFullName();
-	msg += ": ";
-	msg += text;
-	msg += " ";
-	msg += text2;
-	Error::abortRun (msg);
+	Error::abortRun (*this, "Parameter initialization error: ", text,
+			 text2);
 }
 
