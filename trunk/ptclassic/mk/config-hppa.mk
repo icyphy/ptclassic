@@ -199,3 +199,9 @@ CSYSLIBS = 	-lm -ldld
 
 # Matlab architecture
 MATARCH = hp700
+
+# HPUX has a hard time handling symbols that are defined both in a static
+# library and in a shared library, so, since we have different Error::
+# functions for pigiRpc, ptcl and tycho, we need to be sure that
+# libpigi, libptcl and libtycho are all static on the hppa.
+USE_CORE_STATIC_LIBS = 1
