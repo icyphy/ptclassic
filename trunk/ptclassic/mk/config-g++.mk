@@ -15,7 +15,7 @@ CPLUSPLUS = g++
 # If we have g++, then compile Octtools with gcc.  ARCHs that are cfront
 # based probably don't have gcc.
 # OCT_CC is used in src/octtools/vem-{lib,bin}.mk
-OCT_CC =	gcc -traditional -fwritable-strings
+OCT_CC =	gcc -fwritable-strings
 
 # Compiler flags
 GPPFLAGS = -g -Wall -Wcast-qual $(MEMLOG)
