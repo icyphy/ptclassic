@@ -112,7 +112,7 @@ provisions.
       addCode(fireonce);
       addCode("if ($starSymbol(numbytes) < 16) {");
       addCode("$starSymbol(numbytes) += 8180;");
-      addCode("if ($starSymbol(numread) == 4) {");
+      addCode("if ($starSymbol(numread) > 3) {");
       addCode(setbufptr);
       addCode("$starSymbol(numread) = 1;");
       addCode("}else {");
