@@ -120,7 +120,7 @@ void GenericPort :: connect(GenericPort& destination,int numberDelays)
 // small virtual functions for PortHole, InPortHole, OutPortHole
 
 int InPortHole :: isItInput() { return TRUE;}
-int OutPortHole :: isItOutput() { return FALSE;}
+int OutPortHole :: isItOutput() { return TRUE;}
 void PortHole :: beforeGo () { return;}
 void PortHole :: afterGo () { return;}
 	
