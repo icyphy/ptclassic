@@ -78,7 +78,7 @@ StringList UniProcessor :: display(int makespan)
 	out << "    { target " << target()->name() << " }\n";
     out << "    { totalIdleTime " << sumIdle << " }\n";
     out << schedule;
-    schedule << "  }\n";
+    out << "  }\n";
 
     return out;
 }
