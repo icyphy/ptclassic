@@ -265,7 +265,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 
 	go {
 		addProcedure(ipcHandler);
-                addProcedure(errorHandler, "ErrorHandler");
+                addProcedure(errorHandler, "CGCNOWam_ErrorHandler");
 		addCode(block);
 	}
 	codeblock (runtime) {
