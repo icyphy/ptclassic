@@ -283,6 +283,7 @@ PortHole :: setPlasma (Plasma* useType) {
 // return immediately if useType matches myPlasma and non-null.
 	if (far() == NULL) return myPlasma;
 // check for infinite recursion
+	
 	if (myPlasma == Mark) return 0;
 
 // I am allowed to change my type only if I am an output porthole.
@@ -306,31 +307,32 @@ PortHole :: setPlasma (Plasma* useType) {
 	else if (isItInput()) {
 // If my type isn't known try to set it.
 		if (!myPlasma) {
-			myPlasma = Mark;
-			if (typePort())
+			if (typePort()) {
+				myPlasma = Mark;
 				myPlasma = typePort()->setPlasma();
-			else
+			}
+			// If still not set, try the connected output
+			if (!myPlasma) {
+				myPlasma = Mark;
 				myPlasma = far()->setPlasma();
+			}
 		}
 	} 
 // If it is an output PortHole.
 	else {	
-		// first, far() has known type and not on wormhole boundary
-		if (far()->myPlasma && far()->isItInput() &&
-		    far()->myPlasma != Mark) {
+		// first, far() has known type: use it
+		if (far()->myPlasma && far()->myPlasma != Mark) {
 			myPlasma = far()->myPlasma;
 		}
-		// or, far() has typePort and not on wormhole boundary
-		else if (far()->typePort() && far()->isItInput()) {
+		// or, far() has typePort: set far() and use it
+		else if (far()->typePort()) {
 			Plasma* save = myPlasma;
 			myPlasma = Mark;
 			myPlasma = far()->setPlasma();
-			if (!myPlasma) {
-				myPlasma = save;
-				if (myPlasma) far()->setPlasma(myPlasma);
-			}
+			if (!myPlasma) myPlasma = save;
+			if (myPlasma) far()->setPlasma(myPlasma);
 		}
-		// second, look for typePort (ANYTYPE or on wormhole boundary)
+		// still not set: look for typePort
 		if (myPlasma == 0 && typePort()) {
 			myPlasma = Mark;
 			myPlasma = typePort()->setPlasma();
@@ -345,22 +347,7 @@ PortHole :: setPlasma (Plasma* useType) {
 // Function to get plasma type for a MultiPortHole.
 Plasma*
 MultiPortHole :: setPlasma (Plasma* useType) {
-	reset();
-	if (useType) {
-		for (int n = numberPorts(); n>0; n--)
-			(ports++).setPlasma(useType);
-		return useType;
-	}
-	// call setPlasma the first contained PortHole whose type we
-	// can resolve to get the value.
-	for (int n = numberPorts(); n>0; n--) {
-		Plasma* q = (ports++).setPlasma();
-		if (q) {
-			reset();
-			return q;
-		}
-	}
-	return 0;
+	return typePort() ? typePort()->setPlasma(useType) : 0;
 }
 
 void PortHole :: initialize()
