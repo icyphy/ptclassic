@@ -40,7 +40,6 @@ AsmTarget.h \
 MultiTarget.h \
 HLLTarget.h \
 CGPortHole.h \
-CGDisplay.h \
 CGGeodesic.h \
 CGStar.h \
 CGTarget.h \
