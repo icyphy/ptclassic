@@ -38,6 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include <unistd.h>             // getpid()
 #include "SimLFTarget.h"
 #include "KnownTarget.h"
 #include "CGUtilities.h"
