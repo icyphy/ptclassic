@@ -79,14 +79,7 @@ void MotorolaTarget :: initStates() {
 	inProgSection = 0;
  	mem = 0;
 	assemblerOptions = "-A -B -L";
-	resetMemoryUsage();
-}
-
-void MotorolaTarget :: resetMemoryUsage() {
-	// Memory usage data members
-	ProgramDataMemory = 0;
-	XDataMemory = 0;
-	YDataMemory = 0;
+	softwareCost = 0;
 }
 
 void MotorolaTarget :: setup() {
@@ -116,10 +109,10 @@ void MotorolaTarget :: setup() {
 	// set the A_SYMMETRIC attribute here
 
 	GalStarIter nextStar(*galaxy());
-	AsmStar * s;
+	AsmStar* s;
 	while((s = (AsmStar*)nextStar++) != 0){
 	    BlockPortIter next(*s);
-	    AsmPortHole  * p;
+	    AsmPortHole* p;
 	    while((p = (AsmPortHole*) next++) != 0) {
 	      if (p->resolvedType() == COMPLEX ){
 		  p->setAttributes(A_SYMMETRIC);
@@ -332,9 +325,12 @@ static int memoryRequirements(const char* filename, int* words) {
 	return(TRUE);
 }
 
-int MotorolaTarget::computeMemoryUsage() {
+int MotorolaTarget::computeImplementationCost() {
         int words[3] = {0, 0, 0};
-	resetMemoryUsage();
+
+	// Motorola 56000 architecture is one processor and two banks of memory
+	if (softwareCost) softwareCost->initialize();
+	else softwareCost = new ImplementationCost(1,2);
 
 	// Figure out where the .lod file is
 	// If it is on a remote machine, then copy it over
@@ -349,9 +345,9 @@ int MotorolaTarget::computeMemoryUsage() {
 	// Compute the memory requirements from the .lod file
 	int valid = memoryRequirements(loadpathname, words);
 	if (valid) {
-	    ProgramDataMemory = words[PMEMORY_INDEX];
-	    XDataMemory = words[XMEMORY_INDEX];
-	    YDataMemory = words[YMEMORY_INDEX];
+	    softwareCost->setProgMemoryCost(0, words[PMEMORY_INDEX]);
+	    softwareCost->setDataMemoryCost(0, words[XMEMORY_INDEX]);
+	    softwareCost->setDataMemoryCost(1, words[YMEMORY_INDEX]);
 	}
 	else {
 	    Error::warn("Could not open ", loadpathname, " for reading");
@@ -368,10 +364,15 @@ int MotorolaTarget::computeMemoryUsage() {
 	return valid;
 }
 
-const char* MotorolaTarget::memoryUsageString() {
-	MemoryUsageString = "Motorola 56000 memory usage in words";
-	MemoryUsageString << ": program = " << programMemoryUsage()
-			  << ", x data = " << xdataMemoryUsage()
-			  << ", y data = " << ydataMemoryUsage();
-	return MemoryUsageString;
+const char* MotorolaTarget::printImplementationCost() {
+	costString = "Motorola 56000 memory usage in words";
+	if (softwareCost) {
+		costString << ": program = " << softwareCost->progMemoryCost(0)
+			   << ", x data = " << softwareCost->dataMemoryCost(0)
+			   << ", y data = " << softwareCost->dataMemoryCost(1);
+	}
+	else {
+		costString << ": not computed";
+	}
+	return costString;
 }

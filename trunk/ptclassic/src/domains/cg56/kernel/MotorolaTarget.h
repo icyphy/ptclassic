@@ -44,6 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringState.h"
 #include "IntState.h"
 #include "StringList.h"
+#include "ImplementationCost.h"
 
 class MotorolaMemory : public DualMemory {
 public:
@@ -53,29 +54,38 @@ public:
 
 class MotorolaTarget : public AsmTarget {
 public:
+	// copy constructor
 	MotorolaTarget(const char* nam, const char* desc, const char* stype);
+
+	// destructor
+	~MotorolaTarget();
+
 	// copy constructor
 	MotorolaTarget(const MotorolaTarget&);
+
 	Block* makeNew() const;
 	void setup();
 	void beginIteration(int repetitions, int depth);
 	void endIteration(int repetitions, int depth);
 	virtual double limitFix(double val);
-	/*virtual*/ StringList comment(const char*,const char*,const char*,const char*);
-	/*virtual*/ void writeFiring(Star&,int);
+	/*virtual*/ StringList comment(const char*, const char*,
+				       const char*, const char*);
+	/*virtual*/ void writeFiring(Star&, int);
 
 #ifdef __GNUG__
 	// Workaround a bug in gcc-2.6.0.  Otherwise Sim56Target.cc 
 	// won't compile
-	void trailerCode() { CGTarget::trailerCode();}
+	void trailerCode() { CGTarget::trailerCode(); }
 #endif
 
-	int computeMemoryUsage();
-	inline int programMemoryUsage() { return ProgramDataMemory; }
-	inline int xdataMemoryUsage() { return XDataMemory; }
-	inline int ydataMemoryUsage() { return YDataMemory; }
-	const char* memoryUsageString();
-	void resetMemoryUsage();
+	ImplementationCost* implementationCost() {
+		return softwareCost;
+	}
+	int computeImplementationCost();
+	const char* printImplementationCost();
+	inline void resetImplementationCost() {
+		if (softwareCost) softwareCost->initialize();
+	}
 
 	inline const char* setAssemblerOptions(const char* options) {
 		assemblerOptions = options;
@@ -84,8 +94,6 @@ public:
 	inline const char* getAssemblerOptions() {
 		return assemblerOptions;
 	}
-
-	~MotorolaTarget();
 
 protected:
 	// Target parameters (states)
@@ -111,12 +119,12 @@ protected:
 	void saveProgramCounter();
 	void restoreProgramCounter();
 
+	// Implementation cost: 1 processor, 2 banks of memory
+	ImplementationCost* softwareCost;
+	StringList costString;
+
 	// Other data members
 	int inProgSection;
-	int ProgramDataMemory;
-	int XDataMemory;
-	int YDataMemory;
-	StringList MemoryUsageString;
 	StringList assemblerOptions;
 
 private:
