@@ -55,6 +55,7 @@ PL_SRCS= \
  SDFFIR.pl \
  SDFFIRCx.pl \
  SDFGAL.pl \
+ SDFGoertzelBase.pl \
  SDFLMS.pl \
  SDFLMSCx.pl \
  SDFAutocor.pl \
@@ -72,6 +73,8 @@ PL_SRCS= \
  SDFFIRFix.pl \
  SDFGGAL.pl \
  SDFGLA.pl \
+ SDFGoertzel.pl \
+ SDFGoertzelPower.pl \
  SDFHilbert.pl \
  SDFIIR.pl \
  SDFIIRFix.pl \
