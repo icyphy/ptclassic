@@ -115,9 +115,18 @@ PtGate* SimControl::gate = 0;
 
 int SimControl::internalDoActions(SimActionList* l, Star* which) {
 	SimActionListIter nextAction(*l);
-	SimAction* a = (SimAction *)NULL;
-	while (!haltRequested() && (a = nextAction++) != 0)
+	SimAction* a = nextAction++;
+	SimAction* temp = (SimAction *)NULL;
+	while (!haltRequested() && a != 0) {
+		// We pre-move the iteratpr to the next action
+		// and remember that action in 'temp'.  This is because
+		// an action (e.g. STEP in pigi's run control panel)
+		// may remove itself from the action list, which corrupts
+		// the iterator if the iterator is pointing at it.
+		temp = nextAction++;
 		if (a->match(which)) a->apply(which);
+		a = temp;
+	}
 	return !haltRequested();
 }
 
