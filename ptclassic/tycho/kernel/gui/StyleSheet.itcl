@@ -57,7 +57,7 @@
 # requested parameter is not present, look for the same parameter
 # in the "default" style. If that doesn't exist, raise an error.
 #
-# <dt><b>register</b> _stylesheet_ _masterfile_ _userfile_
+# <dt><b>register</b> _stylesheet_ ?_masterfile_? ?_userfile_?
 # <dd>
 # Register a stylesheet. _stylesheet_ is the name which will be used
 # to refer to the stylesheet in future calls. _masterfile_ is
@@ -71,7 +71,9 @@
 # dates of _masterfile_ and _userfile_ are compared, and
 # if _masterfile_ is more recent than _userfile_, the loaded
 # model is updated to add or remove any parameters present in
-# _masterfile_ but not in _userfile_, or vice versa.
+# _masterfile_ but not in _userfile_, or vice versa. If
+# _masterfile_ and _userfile_ are not supplied, the result is the
+# previously-registered value of _userfile_.
 #
 # <dt><b>set</b> _stylesheet_ ?_style_? _param_ _value_
 # <dd>
@@ -83,7 +85,7 @@
 # using the <b>publish</b> method of the stylesheet model, so any
 # subscribers to the style will be notified of the new value.
 #
-# <dt><b>style</b> _subscriber_ _stylesheet_ ?_style_?
+# <dt><b>style</b> _stylesheet_ ?_subscriber_? ?_style_?
 # <dd>
 # Select or get the style used to give value to a widget's options.
 # _subscriber_ is the widget, _stylesheet_ is the name of
@@ -91,13 +93,17 @@
 # _style_ is the name of the style that will be used to update
 # the options of _subscriber_. If no style is ever specified
 # for a particular widget, then the style named "default" will
-# be used. If _style_ is not specified, return the current style
-# of _subscriber_; if it is, change the style of _subscriber_ to
-# _style_.
+# be used. If _subscriber_ is not given, return a list of subscribers
+# and their chosen styles; if _style_ is not given, return the
+# current style of _subscriber_; if _style is given, change the
+# style of _subscriber_ to _style_. The special style <b>delete</b>
+# will delete the subscriber from the style list.
 #
-# <dt><b>stylesheets</b>
+# <dt><b>stylesheets</b> ?<b>all</b>?
 # <dd>
-# Return a list of registered stylesheet.
+# Return a list of registered and loaded stylesheets. If the
+# <b>all</b> argument is supplied, return all registered stylesheets,
+# regardless of whether they are loaded.
 #
 # <dt><b>subscribe</b> _subscriber_ _stylesheet_ ?_option_ _param_ ...?
 # <dd>
@@ -151,8 +157,15 @@ ensemble ::tycho::stylesheet {
     }
 
     # Register a stylesheet
-    option register {stylesheet masterfile userfile} {
-	if [@scope ::tycho::StyleSheet ::info exists _stylefile($stylesheet)] {
+    option register {stylesheet {masterfile {}} {userfile {}}} {
+        if { $masterfile == "" } {
+            if ![@scope ::tycho::StyleSheet ::info exists \
+                    _userfile($stylesheet)] {
+                error "Style sheet \"$stylesheet\" has not been registered"
+            }
+            return [@scope ::tycho::StyleSheet set _userfile($stylesheet)]
+	}
+	if [@scope ::tycho::StyleSheet ::info exists _masterfile($stylesheet)] {
 	    error "Style sheet \"$stylesheet\" is already registered"
 	}
 	@scope ::tycho::StyleSheet set _masterfile($stylesheet) $masterfile
@@ -176,22 +189,22 @@ ensemble ::tycho::stylesheet {
                 [$model namebystyle $style $param] -value $value
     }
 
-    # Select or get the style to which a widget is subscribed
-    option style {subscriber stylesheet {style {}}} {
+    # Get or set the preferred style
+    option style {stylesheet {subscriber {}} {style {}}} {
 	# Make sure it's loaded
 	set model [::tycho::StyleSheet::load $stylesheet]
 	
 	# Call it
-	if { $style == "" } {
-	    @scope ::tycho::StyleSheet set _widgetstyle($subscriber)
-	} else {
-	    $model subscribe style $subscriber $style
-	}
+	$model style $stylesheet $subscriber $style
     }
 
     # Return a list of registered stylesheets
-    option stylesheets {} {
-	@scope ::tycho::StyleSheet array names _userfile
+    option stylesheets {{mode {}}} {
+	if { $mode == "all" } {
+	    @scope ::tycho::StyleSheet array names _userfile
+	} else {
+	    @scope ::tycho::StyleSheet array names _stylemodel
+	}
     }
 
     # Subscribe options
@@ -335,6 +348,9 @@ class ::tycho::StyleSheet {
     # Convert a subscriber and parameter name into an item name
     method namebysubscriber {subscriber param}
 
+    # Get or set the preferred style
+    method style {stylesheet {subscriber {}} {style {}}}
+
     # Subscribe to this model
     method subscribe {type {subscriber {}} args}
 
@@ -374,6 +390,9 @@ class ::tycho::StyleSheet {
     # Array containing {widgetname option parameter}
     private variable _widgetoptions
     
+    # Mapping from widget name to subscribed style
+    private variable _widgetstyle
+
     #################################################################
     ####               private common variables                  ####
 
@@ -385,9 +404,6 @@ class ::tycho::StyleSheet {
 
     # Mapping from sheet name to user file name
     private common _userfile
-
-    # Mapping from widget name to subscribed style
-    private common _widgetstyle
 }
 
 
@@ -419,7 +435,7 @@ body ::tycho::StyleSheet::constructor {args} {
     
     # Now a little trick: the model is subscribed to itself, so
     # it can update option subscriptions.
-    subscribe data all "$this _notify"
+    subscribe data $this all "$this _notify"
 }
 
 
@@ -447,21 +463,22 @@ body ::tycho::StyleSheet::_notify {command name args} {
     regsub {[^ ]+:} [lreplace $name 0 0] {} param
     set param [join $param .]
 
-	# Get the item's value
-	set value [value $name 1]
+    # Get the item's value	
+    set value [value $name 1]
 
     # Find subscribers and update. Note that we go directly to the
     # ::itk::Archetype method in order to bypass the overridden
     # configure{} method.
     foreach {widget option _} [eval concat \
-	    [array names _subscribedoptions([list * * $param])]] {
-	if { [winfo command -which $widget] == "" } {
-	    catch {unset _widgetstyle($widget)}
-	    unset _widgetoptions([list $widget $option $param])
-	}
-    	if { $_widgetstyle($widget) == $style } {
-	    $widget ::itk::Archetype::configure $option [value $name 1]]
-    	}
+            [array names _widgetoptions [list * * $param]]] {
+        if { [info which -command $widget] == "" } {
+            catch {unset _widgetstyle($widget)}
+            unset _widgetoptions([list $widget $option $param])
+            continue
+        }
+        if { $_widgetstyle($widget) == $style } {
+            $widget ::itk::Archetype::configure $option [value $name 1]
+        }
     }
 }
 
@@ -536,9 +553,81 @@ body ::tycho::StyleSheet::namebysubscriber {subscriber param} {
 }
 
 ########################################################################
+#### namebysubscriber
+#
+# Select or get the style used to give value to a widget's options.
+# _subscriber_ is the widget, _stylesheet_ is the name of
+# a stylesheet (as given to the <b>register</b> option), and
+# _style_ is the name of the style that will be used to update
+# the options of _subscriber_. If no style is ever specified
+# for a particular widget, then the style named "default" will
+# be used. If _subscriber_ is not given, return a list of subscribers
+# and their chosen styles. If _subscriber is given and _style_ is not,
+# return the current style preferred by _subscriber_. If _subscriber
+# is unknown, return "default". If _subscriber_ and _style_ are both given,
+# change the style of _subscriber_ to _style_.  If the widget has
+# already subscribed options (with <b>subscribe option</b>), then
+# all of the widgets subscribed options are updated with the same
+# parameters, but in _stylename_ instead of the previous style.
+# If the widget has not yet subscribed to any styles, then
+# _stylename_ will be used as the style from which to set options
+# in later calls to <b>subscribe option</b>. The special style
+# <b>delete</b> will delete the subscriber style record from this
+# stylesheet.
+#
+body ::tycho::StyleSheet::style {stylesheet {subscriber {}} {style {}}} {
+    if { $subscriber == "" } {
+	# Get all subscribers and styles
+	array get _widgetstyle
+    } else {
+	set s [::info which -command $subscriber]
+	if { $s != "" } {
+	    set subscriber $s
+	}
+	if { $style == "" } {
+	    # Return the style for this widget
+	    if ![::info exists _widgetstyle($subscriber)] {
+		return "default"
+	    } else {
+                return $_widgetstyle($subscriber)
+	    }
+	} elseif { $style == "delete" } {
+	    # Delete the subscriber reference
+	    catch {unset _widgetstyle($subscriber)}
+
+	} else {
+	    # Change the style. First check that it's either here
+	    # or in the master.
+            if ![exists style:$style] {
+                if { $master == "" || ! [$master exists style:$style] } {
+                    error "Unknown style \"$style\" in style-sheet \"$modelname\""
+                }
+	    }
+	    # Change the style for this widget
+	    set _widgetstyle($subscriber) $style
+
+	    # Update the widget. It is possible that a widget
+            # is created that has the same name as a widget that
+            # was created before, in which case it will already have
+            # entries in _widgetoptions, which have not yet
+            # been create in the widget. Because of this, catch
+            # the configure{}.
+	    set updatelist {}
+            foreach {_ option param} [eval concat \
+                    [array names _widgetoptions [list $subscriber * *]]] {
+                catch {
+                    $subscriber ::itk::Archetype::configure $option [value \
+                            [namebysubscriber $subscriber $param] 1]
+                }
+            }
+        }
+    }
+}
+
+########################################################################
 #### subscribe
 #
-# Subscribe to this model. This command has four forms, depending
+# Subscribe to this model. This command has three forms, depending
 # on the value of the _mode_ argument. The _subscriber_ is
 # usually the name of the widget that is subscribing to this model,
 # but remaining arguments differ according to the mode. If
@@ -571,16 +660,6 @@ body ::tycho::StyleSheet::namebysubscriber {subscriber param} {
 # current value of item _name_. Furthermore, any change to _name_
 # will cause _subscriber_ to be updated again.
 #
-# <dt><b>style</b> _subscriber_ _stylename_
-# <dd>
-# Subscribe a widget to a style. If the widget has already
-# subscribed options (with <b>subscribe option</b>), then all
-# of the widgets subscribed options are updated with the same
-# parameters, but in _stylename_ instead of the previous style.
-# If the widget has not yet subscribed to any styles, then
-# _stylename_ will be used as the style from which to set options
-# in later calls to <b>subscribe option</b>.
-#
 # </dl>
 #
 body ::tycho::StyleSheet::subscribe {mode {subscriber {}} args} {
@@ -608,26 +687,6 @@ body ::tycho::StyleSheet::subscribe {mode {subscriber {}} args} {
 	    # Update the widget now
 	    eval $subscriber ::itk::Archetype::configure $updatelist
         }
-        "style" {
-            # Check style. We don't need one here, but we do in the 
-            # master.
-	    set style [lindex $args 0]
-            if ![exists style:$style] {
-                if { $master == "" || ! [$master exists style:$style] } {
-                    error "Unknown style \"$style\" in style-sheet \"$modelname\""
-                }
-	    }
-	    # Change the style for this widget
-	    set _widgetstyle($subscriber) $style
-	    
-	    # Update the widget
-	    set updatelist {}
-	    foreach {_ option param} [eval concat \
-		    [array names _subscribedOptions [list $subscriber * *]]] {
-		$subscriber ::itk::Archetype::configure $option [value \
-			[namebysubscriber $subscriber $param] 1]
-	    }
-    	}
     	default {
 	    eval chain $mode $subscriber $args
     	}
@@ -646,7 +705,7 @@ body ::tycho::StyleSheet::subscribe {mode {subscriber {}} args} {
 body ::tycho::StyleSheet::synchronize {master} {
     puts "Synchronizing stylesheet: $modelname"
     foreach s [match style] {
-		_sync $master $s {}
+	_sync $master $s {}
     }
 }
 
@@ -808,7 +867,7 @@ body ::tycho::StyleSheet::load {stylesheet} {
 ########################################################################
 #### _addparameter
 #
-# Add an parameter. If no default is provided, the _value_ argument is
+# Add a parameter. If no default is provided, the _value_ argument is
 # used as the default.
 #
 body ::tycho::StyleSheet::_addparameter {tail value args} {
@@ -824,7 +883,7 @@ body ::tycho::StyleSheet::_addparameter {tail value args} {
 ########################################################################
 #### _describeparameter
 #
-# Return a string describing an parameter.
+# Return a string describing a parameter.
 #
 body ::tycho::StyleSheet::_describeparameter {name {prefix {}}} {
     regexp {(.+):(.+)} [lindex $name end] _ type tail
