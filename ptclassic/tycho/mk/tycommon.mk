@@ -301,10 +301,11 @@ updatewebsite: $(JDISTS)
 	 chmod g+w $(JDISTS); chmod g+ws $(JPACKAGE))
 
 installjdist:
-	$(MAKE) clean
+	$(MAKE) realclean
 	@echo "We must use JDK1.0.2 to compile for use with Netscape"
 	$(MAKE) JAVAHOME=/usr/sww/lang/java-1.0.2
 	$(MAKE) install
+	$(MAKE) jhtml
 	$(MAKE) jdist
 	$(MAKE) updatewebsite
 
