@@ -114,6 +114,7 @@ int SDFScheduler :: setup (Block& block) {
 
 	Galaxy& galaxy = block.asGalaxy();
 	numItersSoFar = 0;
+	numIters = 1;			// reset the member "numIters"
 	invalid = FALSE;
 
 	// initialize galaxy and all contents.
@@ -394,6 +395,10 @@ int SDFScheduler :: simRunStar (SDFStar& atom,
 		// Look at the next port in the list
 		port = (SDFPortHole*)&atom.nextPort();
 
+		// On the wormhole boundary, skip.
+		if (port->isItInput() == port->far()->isItInput())
+			continue;
+
 		if( port->isItInput() )
 			// OK to update numInitialParticles for input PortHole
 			port->myGeodesic->numInitialParticles -=
@@ -434,6 +439,11 @@ int SDFScheduler :: deferIfWeCan (SDFStar& atom) {
 			invalid = TRUE;
 			return 0;
 		}
+
+		// can't be deferred if on the boundary of wormhole.
+		if ((port->isItOutput()) && (port->isItOutput() == port->far()->isItOutput()))
+			return FALSE;
+
 		SDFStar& dest = (SDFStar&) port->far()->parent()->asStar();
 
 		// If not an output, or destination is not
@@ -441,7 +451,7 @@ int SDFScheduler :: deferIfWeCan (SDFStar& atom) {
 
 		if(!port->isItOutput() || notRunnable(dest) != 0)
 			continue;
-
+		
 		// It is runnable.
 
 		// If possible, store a pointer to the block
