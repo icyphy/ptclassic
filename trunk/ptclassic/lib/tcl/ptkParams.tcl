@@ -590,6 +590,7 @@ proc ptkEditParams {facet number args} {
   # Raise the window if it exists.
   if {[info exists ed_ToplevelNumbers($facet,$number)] && \
       [winfo exists .o$args$ed_ToplevelNumbers($facet,$number)]} {
+    wm deiconify .o$args$ed_ToplevelNumbers($facet,$number)
     raise .o$args$ed_ToplevelNumbers($facet,$number)
     return
   }
