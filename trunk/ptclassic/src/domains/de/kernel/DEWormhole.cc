@@ -57,6 +57,8 @@ void DEWormhole :: begin()
         //Running default behaviour for begin
         Wormhole::begin();
  
+	//Checks if the wormhole requires selfFiring. If it does, then the
+        // wormhole is fired for the first time now.
         if (myTarget()->selfFiringRequested()) {
                 DEBaseSched* sched = (DEBaseSched*) outerSched();
                 DEStar* me = this;
@@ -75,7 +77,8 @@ void DEWormhole :: go()
 	// synchronize the two domains
 	myTarget()->setCurrentTime(arrivalTime);
 
-        //Checking if the inner domain requests self-firing
+	//Checking if the inner domain requests self-firing. If it does,
+        //then it is setup for the next firing.
         if (myTarget()->selfFiringRequested()) {
                 DEBaseSched* sched = (DEBaseSched*) outerSched();
                 DEStar* me = this;
