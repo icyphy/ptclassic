@@ -98,12 +98,11 @@ class ::tycho::WelcomeMessage {
 body ::tycho::WelcomeMessage::constructor {args} {
 
     global TYCHO
-
     # An option -palette 3/3/2 below restricts the palette,
     # but it is better to restrict it in the source.
     if {!$ptolemygifexists} {
 	image create photo ptolemygif \
-		-file $TYCHO/kernel/ptolemyWelcome.gif
+		-file $TYCHO/kernel/tychologo.gif
     }
     configure -image ptolemygif
 
@@ -120,7 +119,7 @@ body ::tycho::WelcomeMessage::constructor {args} {
 
     # Arrange for destruction, if appropriate.
     if {!$itk_option(-persistent)} {
-	after 20000 [list catch [list delete object $this]]
+	after 40000 [list catch [list delete object $this]]
     }
 
     # Construct the HTML message that forms the welcome message.
