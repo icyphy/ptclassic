@@ -102,6 +102,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    addCode(procDefs(input.numberPorts()),"procedure");
 	    addCode("$starSymbol(count) = 0;");
 	    addCode("$starSymbol(batchCount) = 0;");
+	    addInclude("\"ptkBarGraph.h\"");
 	}
 	go {
 	  for (int i = 0; i < input.numberPorts(); i++) {
