@@ -483,7 +483,7 @@ int AcyCluster::legalCutIntoBddSets(int K)
 	// Update best cut.  
 	
 	if (minCutVal > cutVal && numSucc <= K && totalNumberOfBlocks()-numSucc <= K) {
-	    updateBestCut(totalNumberOfBlocks()-numSucc);
+	    updateBestCut();
 	    minCutVal = cutVal;
 	}
     }
@@ -528,7 +528,7 @@ int AcyCluster::legalCutIntoBddSets(int K)
 	// Update best cut.	
 	if (minCutVal > cutVal && numPred <= K && totalNumberOfBlocks()-numPred <= K) {
 	    minCutVal = cutVal;
-	    updateBestCut(numPred);
+	    updateBestCut();
 	}
     }
     if (minCutVal == INT_MAX) {
@@ -623,27 +623,17 @@ int AcyCluster::costOfMovingAcross(Cluster* bndryNode, int direction)
 Update best cut.
 
 @Description
-Uses the following numbering scheme
-to indicate the partition.  Nodes on the left side of the
-cut get the value of their parent while the nodes on the
-right side of the cut get the value of parent (that is,
-<code>PARTITION(this)</code>) plus the number of
-nodes on the left hand side.  This is to make it easy to deduce the
-ordering if this function is called recursively many times.
-<code>numOnLeftSide</code> is the number of nodes on the left side of the cut.
+Just copies the 0/1 values from the TMP_PARTITION location.
 
 @SideEffects see description above
 
 ****/    
-void AcyCluster::updateBestCut(int numOnLeftSide)
+void AcyCluster::updateBestCut()
 {    
     Cluster* tmp;
     ClusterIter nextTmp(*this);
     while((tmp = nextTmp++) !=NULL) {
 	PARTITION(tmp) = TMP_PARTITION(tmp);
-
-//	PARTITION(tmp) = PARTITION(this) * ( !TMP_PARTITION(tmp) ) +
-//	(PARTITION(this) + numOnLeftSide) * (TMP_PARTITION(tmp));
     }
 }
 
