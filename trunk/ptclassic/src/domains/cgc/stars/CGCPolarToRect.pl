@@ -30,7 +30,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	constructor {
 		noInternalState();
 	}
-	setup {
+	initCode {
 		addInclude("<math.h>");
 	}
 	codeblock(body) {
