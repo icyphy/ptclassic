@@ -69,12 +69,21 @@ proc ptkImportantMessage {w text} {
 
     wm geometry $w +200+200
     tkwait visibility $w
-    focus $w
     bind $w <Key> "destroy $w"
-    bind $w <Button> "destroy $w"
+    bind $w <ButtonPress> "destroy $w"
     bind $w.msg <Button> "destroy $w"
+    focus $w
     grab $w
     tkwait window $w
+}
+
+
+###################################################################
+# Procedure to display whatever is in the global variable errorInfo
+#
+proc ptkDisplayErrorInfo {} {
+    global errorInfo
+    ptkImportantMessage .error $errorInfo
 }
 
 ###################################################################
