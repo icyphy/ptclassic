@@ -50,13 +50,14 @@ Circular buffer.
 	}
 	codeblock(mainDecl){
 	  int currentValue,i;
-	  double src[tapSize], fir[tapSize];;
+	  double src[$val(tapSize)], fir[$val(tapSize)];
 	}
 
 	codeblock(initialize){
 	  currentValue = 0;
-	  for(i=0;i<tapSize;i++){
-	    fir[tapSize]=$ref2(taps,i);
+	  for(i=0;i<$val(tapSize);i++){
+	    fir[i]=$ref2(taps,i);
+	    src[i] = 0.0;
 	  }
 	}
 	initCode{
@@ -70,7 +71,7 @@ Circular buffer.
 	codeblock(body) {
 
 	  if(currentValue > 7){
-	    currentValue -= tapSize;
+	    currentValue -= $val(tapSize);
 	  }
 	  
 	  accum = 0.0;
@@ -81,8 +82,8 @@ Circular buffer.
 	    nminusk--;
 	  }
 
-	  nminusk = tapSize-1;
-	  for (k = currentValue+1; k < tapSize; k++){
+	  nminusk = $val(tapSize)-1;
+	  for (k = currentValue+1; k < $val(tapSize); k++){
 	    accum += fir[k] * src[nminusk];
 	    nminusk--;
 	  }
