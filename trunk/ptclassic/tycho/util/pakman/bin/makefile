@@ -62,7 +62,7 @@ TYDOC_DESC =
 all:  sources $(MISC_SRCS) tclIndex
 	-chmod a+x pakman
 
-install: all tybin_makefile
+install: all tybin_install
 
 # We have an all rule, so include tycommon.mk.
 include $(ROOT)/mk/tycommon.mk
