@@ -74,8 +74,8 @@ namespace ::tycho {
 # The default is false.
 # 
 # <li><b>-style</b>.  The "style" of terminal: <i>plain</i>,
-# <i>arrowin</i>, <i>arrowout</i>, <i>doublearrowout</i>, 
-# <i>circle</i>, or <i>rectangle</i>. Default is <i>arrowin</i>.
+# <i>arrowin</i>, <i>arrowtail</i>, <i>arrowout</i>, <i>doublearrowout</i>, 
+# <i>circle</i>, or <i>rectangle</i>. Default is <i>plain</i>.
 # 
 # <li><b>-width</b>. The width of the line.
 # 
@@ -88,8 +88,7 @@ namespace ::tycho {
 # for test suites.
 # </ul>
 #
-# <p><b>Enhancements</b>: The "arrow" style should perhaps put a
-# "tail" on the wiring end of an input terminal (as in VEM).
+# <p><b>Enhancements</b>: (none)
 # 
 # <p><b>Example</b>: Create some terminals:
 # <tcl quiet><pre>
@@ -197,15 +196,15 @@ class ::tycho::Terminal {
     #### Set option defaults
     array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
 
-    set optiondefault(-arrowshape) {8 10 3}
+    set optiondefault(-arrowshape) {8 11 3}
     set optiondefault(-direction) e
     set optiondefault(-fill)      black
-    set optiondefault(-length)    25
+    set optiondefault(-length)    20
     set optiondefault(-scaled)    1
     set optiondefault(-shape)     point
     set optiondefault(-size)      3
     set optiondefault(-slash)     0
-    set optiondefault(-style)     arrowin
+    set optiondefault(-style)     plain
     set optiondefault(-type)      input
     set optiondefault(-width)     1
 }
@@ -337,6 +336,23 @@ body ::tycho::Terminal::_style {id canvas slate style} {
 	"arrowout" {
 	    $canvas itemconfigure $primary($id) -arrow last
 	}
+	"arrowtail" {
+	    set coords [$canvas coords $primary($id)]
+	    set xdir [lindex $variable(vector$id) 0]
+	    set ydir [lindex $variable(vector$id) 1]
+
+	    $canvas itemconfigure $primary($id) -arrow none
+	    set component(blob$id) [$canvas create line \
+		    [expr [lindex $coords 2] - $xdir * 7] \
+		    [expr [lindex $coords 3] - $ydir * 7] \
+		    [expr [lindex $coords 2] - $xdir * 8] \
+		    [expr [lindex $coords 3] - $ydir * 8] \
+		    -fill $option(fill$id) \
+		    -width $option(width$id) \
+		    -arrowshape $option(arrowshape$id) \
+		    -arrow last \
+		    -tags [$canvas gettags $id]]
+	}
 	"doublearrowin" {
 	    set coords [$canvas coords $primary($id)]
 	    set xdir [lindex $variable(vector$id) 0]
@@ -349,6 +365,8 @@ body ::tycho::Terminal::_style {id canvas slate style} {
 		    [expr [lindex $coords 0] + $xdir * 6] \
 		    [expr [lindex $coords 1] + $ydir * 6] \
 		    -fill $option(fill$id) \
+		    -width $option(width$id) \
+		    -arrowshape $option(arrowshape$id) \
 		    -arrow first \
 		    -tags [$canvas gettags $id]]
 	}
@@ -364,6 +382,8 @@ body ::tycho::Terminal::_style {id canvas slate style} {
 		    [expr [lindex $coords 2] - $xdir * 5] \
 		    [expr [lindex $coords 3] - $ydir * 5] \
 		    -fill $option(fill$id) \
+		    -width $option(width$id) \
+		    -arrowshape $option(arrowshape$id) \
 		    -arrow last \
 		    -tags [$canvas gettags $id]]
 	}
