@@ -52,7 +52,7 @@ class TclStarIfc {
 public:
 	// constructor and destructor
 	TclStarIfc ();
-	~TclStarIfc ();
+	virtual ~TclStarIfc ();
 
 	// Define the relevant Tcl variables and functions, and then source
 	// the specified Tcl file.  All the star's parameters are made available
@@ -97,13 +97,7 @@ public:
 	int *outputNewFlags;
 
 	// Method to set one value of the above array with boundary checking
-	void setOneOutput(int outNum, double outValue);
-
-	// Method to set or clear one of the outputNewFlags
-	void setOneNewOutputFlag(int outNum, int flag);
-
-	// Method to set all of the outputNewFlags to either TRUE or FALSE
-	void setAllNewOutputFlags(int flag);
+	virtual void setOneOutput(int outNum, double outValue);
 
 	Block* myStar;
 

@@ -68,7 +68,7 @@ static int grabInputsState(
 }
 
 // Define the callback procedure used by Tcl to set the value of
-// the outputs.
+// the outputs.  This method sets all outputs simultaneously.
 static int setOutputs(
     ClientData tcl,                     // Pointer to the Tcl interface
     Tcl_Interp*,                 	// Current interpreter
@@ -87,6 +87,28 @@ static int setOutputs(
         return TCL_OK;
 }
 
+// Define the callback procedure used by Tcl to set the value of
+// just one output.  The arguments are the output number (starting
+// with 1) and the new value.
+static int setOutput(
+    ClientData tcl,                     // Pointer to the Tcl interface
+    Tcl_Interp*,                 	// Current interpreter
+    int argc,                           // Number of arguments
+    char *argv[]      			// Argument strings
+) {
+	float temp;
+	int outnum;
+	if (argc != 3 ||
+	    sscanf(argv[1], "%d", &outnum) != 1 ||
+	    sscanf(argv[2], "%f", &temp) != 1 ) {
+	  Error::abortRun(*(((TclStarIfc*)tcl)->myStar),
+			  "usage: setOutput outputNumber value");
+	  return TCL_ERROR;
+	}
+	((TclStarIfc*)tcl)->setOneOutput(outnum-1,temp);
+        return TCL_OK;
+}
+
 
 /////////////////////////////////////////////////////////////////////////
 //			Methods for TclStarIfc class
@@ -97,7 +119,6 @@ TclStarIfc::TclStarIfc () {
 	starID += unique++;
 	inputNewFlags = NULL;
 	outputValues = NULL;
-	outputNewFlags = NULL;
 	outputArraySize = 0;
 	inputArraySize = 0;
 }
@@ -128,6 +149,9 @@ TclStarIfc::~TclStarIfc() {
 	buf = "setOutputs_";
 	buf += starID;
 	Tcl_DeleteCommand(ptkInterp, (char*)buf);
+	buf = "setOutput_";
+	buf += starID;
+	Tcl_DeleteCommand(ptkInterp, (char*)buf);
 	buf = "goTcl_";
 	buf += starID;
 	Tcl_DeleteCommand(ptkInterp, (char*)buf);
@@ -140,7 +164,6 @@ TclStarIfc::~TclStarIfc() {
 	Tcl_UnsetVar(ptkInterp,(char*)starID,TCL_GLOBAL_ONLY);
 	LOG_DEL; delete [] inputNewFlags;
 	LOG_DEL; delete [] outputValues;
-	LOG_DEL; delete [] outputNewFlags;
 }
 
 int TclStarIfc::setup (Block* star,
@@ -178,6 +201,13 @@ int TclStarIfc::setup (Block* star,
 		    setOutputs, (ClientData) this, NULL);
 	}
 
+	if (numOutputs > 0) {
+		buf = "setOutput_";
+		buf += starID;
+	        Tcl_CreateCommand(ptkInterp, (char*)buf,
+		    setOutput, (ClientData) this, NULL);
+	}
+
 	// Set entries in the $starID array
 	buf = numInputs;
 	Tcl_SetVar2(ptkInterp, (char*)starID, "numInputs",
@@ -201,20 +231,17 @@ int TclStarIfc::setup (Block* star,
 		LOG_DEL; delete [] inputNewFlags;
 		LOG_NEW; inputNewFlags = new int[numInputs];
 		// Initialize the outputs
-		for (int i = 0; i < numOutputs; i++)
+		for (int i = 0; i < numInputs; i++)
 		  inputNewFlags[i] = FALSE;
 	}
 	inputArraySize = numInputs;
 
 	if (numOutputs > 0) {
 		LOG_DEL; delete [] outputValues;
-		LOG_DEL; delete [] outputNewFlags;
 		LOG_NEW; outputValues = new double[numOutputs];
-		LOG_NEW; outputNewFlags = new int[numOutputs];
 		// Initialize the outputs
 		for (int i = 0; i < numOutputs; i++) {
 		  outputValues[i] = 0.0;
-		  outputNewFlags[i] = FALSE;
 		}
 	}
 	outputArraySize = numOutputs;
@@ -290,8 +317,10 @@ int TclStarIfc::go () {
     if (tkExists) Tcl_Eval( ptkInterp, "update");
 
     // If the there exists a "goTcl" procedure, call it
-    if(synchronous) return callTclProc("goTcl");
-    else return TRUE;
+    int result = TRUE;
+    if(synchronous) result = callTclProc("goTcl");
+
+    return(result);
 }
 
 int TclStarIfc::wrapup() {
@@ -354,23 +383,6 @@ void TclStarIfc::setOneOutput (int outNum, double outValue) {
 	}
 	else {
 	    outputValues[outNum] = outValue;
-	    outputNewFlags[outNum] = TRUE;
-	}
-}
-
-// Sets all elements of outputNewFlags array to flag (either TRUE or FALSE)
-void TclStarIfc::setAllNewOutputFlags (int flag) {
-	for ( int port = 0; port < outputArraySize; port++ )
-	  outputNewFlags[port] = flag;
-}
-
-// Sets one element of outputNewFlags array to flag (either TRUE or FALSE)
-void TclStarIfc::setOneNewOutputFlag(int outNum, int flag) {
-	if ( (outNum >= outputArraySize) || (outNum < 0) ) {
-	    Error::warn(*myStar, "Output port number is out of range");
-	}
-	else {
-	    outputNewFlags[outNum] = flag;
 	}
 }
 
