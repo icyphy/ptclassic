@@ -1,0 +1,214 @@
+<!$Id$	%Q%>
+<html>
+<head>
+<title>Programming Style for Tycho</title>
+</head>
+<body>
+<h1>Programming Style for Tycho</h1>
+<p>
+The following programming style will be followed in the Tycho project.
+Please submit comments or suggestions to eal@eecs.berkeley.edu.
+General comments about programming style can be found in
+<a href="../Programming.html">the Ptolemy programming style guide.</a>
+Please refer to that document.
+
+<h3>SUMMARY OF SUGGESTIONS BELOW</h3>
+
+<ol>
+<li><a href="#indentation"> Indentation </a>
+<li><a href="#comments"> Comments </a>
+<li><a href="#names"> Names </a>
+<li><a href="#global"> Global </a>
+<li><a href="#documentation"> Documentation </a>
+<li><a href="#copyright"> Copyright and acknowledgements </a>
+<li><a href="#proofread"> Proofread </a>
+</ol>
+
+<h3><a name="indentation"> INDENTATION </a></h3>
+
+Tabs are 8 characters.  Do not override this in your text editor.
+Nested statements should be indented 4 characters, as in:
+<pre>
+itcl_class .gEdit {
+    inherit .gMenu
+    constructor {config} {
+        # Constructor statements
+    }
+}
+</pre>
+Closing brackets should be on a line by themselves, aligned with
+the beginning of the line that contains the open bracket.
+<p>
+Long lines (which are common especially for Tk commands)
+should be broken up into many small lines.  Continuation lines
+are indented by 8 characters, as in
+<pre>
+        $prefix.m.edit.menu add command \
+                -label "Select All" \
+                -underline 0 \
+                -accelerator "C-/" \
+                -command "$this selectall"
+</pre>
+Notice that the line breaks are carefully chosen so
+that the options are easy to identify.  Avoid the following
+variant:
+
+<pre>
+        $prefix.m.edit.menu add command \
+                -label "Select All" \
+                -underline 0 -accelerator "C-/" \
+                -command "$this selectall"
+</pre>
+Glancing at this, it is easy to miss the "-accelerator" option.
+
+<h3><a name="comments"> COMMENTS </a></h3>
+
+Comments should be complete sentences and complete thoughts.
+We plan to automatically generate documentation from the source
+code file, so the comments should be carefully written.
+Delineate major breaks in the flow (e.g. a new class definition
+or a new method definition) with a full row of comment
+characters.  Following this row with a line containing the name
+of the object or method or procedure being defined.  Comments
+should include honest information about the limitations of
+the object definition.  For example,
+<pre>
+#######################################################################
+# GEdit
+# This is a window that contains arbitrary text and
+# allows editing of this text using emacs bindings plus mouse movements.
+# Note that this object should not really define a top-level window.
+# It should instead define a widget that can be used in place of the
+# Text widget in Tk, in much the same way.  But it's a bit of work
+# to change it now, so I'll leave it this way for the time being.
+#
+itcl_class GEdit {
+    inherit GFile
+
+    # For now, we implement just a one-level undo command.
+    # An infinite undo is possible, but is it wise?
+    protected undoCommand ""
+
+    #####################################################################
+    # readFile
+    # Insert the contents of the specified file into the text window.
+    #
+    method readFile {} {
+        # Method commands
+    }
+}
+</pre>
+
+<h3><a name="names"> NAMES </a></h3>
+
+All programming languages have a global namespace.  In itcl, it's class
+names, global variables, and procedure names.  Choose names carefully.
+In particular,
+<ul>
+<li> All class names should begin with "G".
+<li> All <a href="#global">global variables</a> in Tycho should begin
+     with "gal" and should be documented. The documentation is
+     temporarily being collected in the file "doc"
+     in the main Tycho directory.
+<li> All procedure names should begin with "gal" unless they already
+     existed in pigi, in which case they should begin with "ptk" and
+     should be backward compatible.
+</ul>
+In itcl, there is no limit to name sizes (as it should be).
+Do not hesitate to use long names.
+<p>
+When naming objects, use automatic naming as much as possible.
+For any itcl class that does not define a top-level window,
+the syntax is:
+
+<pre>
+Classname #auto ?options?
+</pre>
+
+If the class defines a top-level window (i.e. it eventually inherits
+GTopLevel), then you should use the syntax
+
+<pre>
+Classname [autoname .classname] ?options?
+</pre>
+
+The autoname procedure is defined in Tycho and returns a class
+name that is constructed by appending to the single argument
+an underscore and an integer that ensures that the name will be unique.
+
+<h3><a name="global"> GLOBAL VARIABLES </a></h3>
+
+Global variables are almost entirely unnecessary in itcl.
+If you need a global variable, use a "common" variable in a class.
+Note that at least one instance of the class must have been created
+for the common variable to exist. (Apparently, it can have been
+deleted as well).
+<p>
+There appears to be one circumstance in which global variables
+are needed.  A Tk checkbutton object generally has a global
+variable associated with it.  There appears to be no way to
+use a common variable for this (that I have found).
+The name of the global variable should begin with "gal",
+and its existence should be documented, as explained
+<a href="#names">above</a>.
+
+<h3><a name="documentation"> DOCUMENTATION </a></h3>
+
+Tycho documentation will be entirely in html and will be designed
+primarily for use on-line.  Documentation for the code
+(analogous to the Ptolemy Kernel Manual) will be generated
+automatically from the comments in the code.
+You may anticipate this by inserting HTML formatting in these
+comments.  However, do not do this at the expense of readability.
+We can automate a certain amount of formatting, such as blank
+lines turning into paragraph breaks.
+<p>
+User documentation for your objects should be written
+in HTML.  We should devise a strategy to keep that documentation
+together with the code it is documenting.
+
+<h3><a name="copyright"> COPYRIGHT AND ACKNOWLEDGEMENTS </a></h3>
+
+We would prefer to be able to release Tycho with the standard
+UCB copyright, which allows for subsequent commercialization.
+However, this is a large project, and we should use existing
+code as much as possible.  The following scenarios are possible:
+<ul>
+<li> An uncopyrighted program (public domain) is used either verbatim
+or as inspiration.  In this case, it is essential to acknowledge the
+author and institution originating the code, but this has no effect
+on our copyright policy.
+
+<li> A copylefted program (under the Gnu public license) is used
+as insipiration.  If there is no verbatim code used, then it
+is sufficient (and necessary) to acknowledge the author and
+institution.
+
+<li> A copylefted program or portion of a program is used verbatim.
+This will place the entire Tycho program under the Gnu public license,
+and therefore should be done only with good reason.  However, we are
+not averse to doing this.  If you include copylefted code,
+<em>be sure to identify every line of code that is borrowed in this
+way</em>.  This will allow us (or someone else) to later rewrite this
+code and liberate Tycho from the copyleft.
+
+</ul>
+In all cases, any foreign code that you use should be carefully
+read and tested.  Yes, it should be read!
+Preferably, it should be reformmated to fit our programming
+style, but if it is a large piece of code, it is probably not
+worth doing.  We will need to devise a scheme to avoid
+confusing the automatic documentation generator.
+If it is Tcl/Tk code, it <em>must</em> be ported to Tk 4.0
+(a nontrivial task).  If it is not itcl code, it should
+be carefully searched for namespace violations.
+
+<h3><a name="proofread"> PROOFREAD </a></h3>
+
+Software has become a publication medium.  People will read your code.
+Your name is on it, so you want to be proud of it.  It seems that most
+people stop working on the code when it "works."  This is like stopping
+work on a paper when what it says is correct, and not worrying at all
+about how it is said.  PROOFREAD YOUR CODE AFTER YOU'VE GOTTEN IT WORKING.
+
+</body>
