@@ -1,7 +1,7 @@
 defstar {
 	name { Xgraph }
 	domain { CGC }
-	desc { Generate a plot with the xgraph program. }
+	desc { Generate a plot with the pxgraph program. }
 	version {$Id$}
 	author { S. Ha }
 	copyright {
@@ -13,16 +13,16 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { CGC main library }
 	explanation {
 This star is actually equivalent to the XMgraph star with only one input.
-The input signal is plotted using the \fIxgraph\fR program.
+The input signal is plotted using the \fIpxgraph\fR program.
 This program must be in your path, or this star will not work!
 The \fItitle\fR parameter specifies a title for the plot.
 The \fIsaveFile\fR parameter optionally specifies a file for
-storing the data in a syntax acceptable to xgraph.
+storing the data in a syntax acceptable to pxgraph.
 A null string prevents any such storage.
-The \fIoptions\fR string is passed directly to the xgraph program
-as command-line options.  See the manual section describing xgraph
+The \fIoptions\fR string is passed directly to the pxgraph program
+as command-line options.  See the manual section describing pxgraph
 for a complete explanation of the options.
-.Ir "xgraph program"
+.Ir "pxgraph program"
 .Id "graph, X window"
 	}
 	input {
@@ -39,13 +39,13 @@ for a complete explanation of the options.
 		name {saveFile}
 		type {string}
 		default {""}
-		desc {File to save the input to the xgraph program.}
+		desc {File to save the input to the pxgraph program.}
 	}
 	defstate {
 		name {options}
 		type {string}
 		default {""}
-		desc { Command line options for xgraph.}
+		desc { Command line options for pxgraph.}
 	}
 	defstate {
 		name {ignore}
@@ -131,7 +131,7 @@ codeblock(closeFile) {
 			cmd << sf << "; /bin/echo \"\" >> " << sf << "; ";
 		}
 
-		cmd << "xgraph ";
+		cmd << "pxgraph ";
 
 		// put title on command line
 

@@ -1,7 +1,7 @@
 defstar {
 	name { XMgraph }
 	domain { CGC }
-	desc { Generate a multi-signal plot with the xgraph program. }
+	desc { Generate a multi-signal plot with the pxgraph program. }
 	version {$Id$}
 	author { Soonhoi Ha }
 	copyright {
@@ -12,14 +12,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
 	explanation {
-The input signal is plotted using the \fIxgraph\fR program.
+The input signal is plotted using the \fIpxgraph\fR program.
 This program must be in your path, or this star will not work!
 The \fItitle\fR parameter specifies a title for the plot.
 The \fIsaveFile\fR parameter optionally specifies a file for
-storing the data in a syntax acceptable to xgraph.
+storing the data in a syntax acceptable to pxgraph.
 A null string prevents any such storage.
-The \fIoptions\fR string is passed directly to the xgraph program
-as command-line options.  See the manual section describing xgraph
+The \fIoptions\fR string is passed directly to the pxgraph program
+as command-line options.  See the manual section describing pxgraph
 for a complete explanation of the options.
 	}
 	inmulti {
@@ -42,7 +42,7 @@ for a complete explanation of the options.
 		name {options}
 		type {string}
 		default {""}
-		desc {Command line options for the xgraph program.}
+		desc {Command line options for the pxgraph program.}
 	}
 	defstate {
 		name {ignore}
@@ -162,7 +162,7 @@ codeblock(closeFile) {
 			}
 		}
 
-		cmd << "xgraph ";
+		cmd << "pxgraph ";
 
 		// put title on command line
 
