@@ -56,7 +56,7 @@ The values of the input ports will be passed as arguments to this function.
 	}
 
 	// Matrix.h is from the Ptolemy kernel
-	hinclude { "dataType.h", "Matrix.h", "InfString.h" }
+	hinclude { "dataType.h", "Matrix.h", "StringList.h", "InfString.h" }
 
 	header { typedef Matrix *MatrixPtr; }
 
@@ -220,6 +220,7 @@ The values of the input ports will be passed as arguments to this function.
 	  }
 	}
 
+	// Returns 1 for Failure and 0 for Success
 	method {
 	  name { processInputMatrices }
 	  access { protected }
@@ -338,10 +339,10 @@ The values of the input ports will be passed as arguments to this function.
 		  }
 		  else {
 		    errorFlag = TRUE;
-		    InfString errstr;
+		    StringList errstr;
 		    errstr = "Unsupported data type ";
 		    errstr << portType << " on input port " << i+1 << ".";
-		    Error::warn(*this, (const char *) errstr);
+		    Error::warn(*this, errstr);
 		    matlabMatrix = mxCreateFull(1, 1, MXREAL);
 		    double *realp = mxGetPr(matlabMatrix);
 		    *realp = 0.0;
@@ -351,6 +352,7 @@ The values of the input ports will be passed as arguments to this function.
 		  mxSetName(matlabMatrix, matlabInputNames[i]);
 
 		  // let Matlab know about the new Matlab matrix we've defined
+		  // FIXME: Memory Leak
 		  putMatlabMatrix(matlabMatrix);
 
 		  // save the pointer to the new Matlab matrix for deallocation
@@ -361,6 +363,7 @@ The values of the input ports will be passed as arguments to this function.
 	  }
 	}
 
+	// Returns 1 for Failure and 0 for Success
 	method {
 	  name { processOutputMatrices }
 	  access { protected }
@@ -373,7 +376,7 @@ The values of the input ports will be passed as arguments to this function.
 		int incompatibleOutportPort = FALSE;
 		int matlabFatalError = FALSE;
 		int nullMatlabMatrix = FALSE;
-		InfString merrstr, mverbstr, nerrstr, nverbstr;
+		StringList merrstr, mverbstr, nerrstr, nverbstr;
 
 		// iterate through the output ports
 		MPHIter nextp(output);
@@ -383,6 +386,7 @@ The values of the input ports will be passed as arguments to this function.
 		  DataType portType = oportp->resolvedType();
 
 		  // create a new Matlab matrix for deallocation and save ref.
+		  // FIXME: Memory leak
 		  Matrix *matlabMatrix = getMatlabMatrix(matlabOutputNames[j]);
 
 		  // save the pointer to the new Matlab matrix for deallocation
@@ -431,11 +435,11 @@ The values of the input ports will be passed as arguments to this function.
 		    else if ( portType == FLOAT_MATRIX_ENV ) {
 		      FloatMatrix& Amatrix = *(new FloatMatrix(rows, cols));
 		      if ( mxIsComplex(matlabMatrix) ) {
-			InfString myerrstr;
+			StringList myerrstr;
 			myerrstr = "\nImaginary components ignored for the ";
 			myerrstr << "Matlab matrix " << matlabOutputNames[j];
 			myerrstr << " on output port " << j;
-			Error::warn(*this, (const char *) myerrstr);
+			Error::warn(*this, myerrstr);
 		      }
 		      for ( int jcol = 0; jcol < cols; jcol++ ) {
 			for ( int jrow = 0; jrow < rows; jrow++ ) {
@@ -475,14 +479,10 @@ The values of the input ports will be passed as arguments to this function.
 			"method should have flagged this error.");
 		}
 		if ( nullMatlabMatrix ) {
-		  Error::warn( *this,
-			       (const char *) nerrstr,
-			       (const char *) nverbstr );
+		  Error::warn(*this, nerrstr, nverbstr);
 		}
 		if ( matlabFatalError ) {
-		  Error::warn( *this,
-			       (const char *) merrstr,
-			       (const char *) mverbstr );
+		  Error::warn( *this, merrstr, mverbstr );
 		}
 
 		return( incompatibleOutportPort ||
