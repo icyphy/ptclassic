@@ -99,11 +99,13 @@ extern "C" {
 #endif
 
 /* Volatile produces warnings under some cfront versions */
+#if !defined(VOLATILE)
 #if defined(PTHPPA_CFRONT) || defined(PTSUN4_CFRONT)
 #define VOLATILE
 #else
 #define VOLATILE volatile
 #endif /* PTSUN4_CFRONT or PTHPPA_CFRONT */
+#endif /* ! VOLATILE */
 
 #ifndef PTLINUX
 #if defined(USG) && ! defined(PTHPPA)
