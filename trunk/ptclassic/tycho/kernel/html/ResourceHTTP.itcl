@@ -397,7 +397,7 @@ body ::tycho::ResourceHTTP::delete {path} {
 # list is sorted, with directory names ending in "/",
 # in a similar fashion to ls -F.
 #
-body ::tycho::ResourceHTTP::dirlist {path} {
+body ::tycho::ResourceHTTP::dirlist {url} {
     # If a non-existent directory, return nothing
     if { ! [exists $url] } {
 	return {}
@@ -476,7 +476,7 @@ body ::tycho::ResourceHTTP::new {path args} {
 # Query properties of the http class. See the comment in
 # ::tycho::Resource::query for details.
 #
-body ::tycho::ResourceHTTP::query {path option} {
+body ::tycho::ResourceHTTP::query {url option} {
     switch -exact -- $option {
 	"executable" {
 	    # FIXME: Do directories need to be executable to read them?
@@ -484,47 +484,47 @@ body ::tycho::ResourceHTTP::query {path option} {
 	}
 	"exists" {
 	    # FIXME: Do directories need to be executable to read them?
-	    exists $path
+	    exists $url
 	}
 	"isdirectory" {
 	    # If we already know, just return it
-	    stat $path opt
+	    stat $url opt
 	    if [::info exists opt(isdirectory)] {
-		return $opt(directory)
+		return $opt(isdirectory)
 	    }
 	    # Otherwise we have to work it out. As a first
 	    # guess, a URL represents a directory if it
 	    # exists and ends in "/"
 	    set isdir 0
-	    if [exists $path] {
-		while { [::info exists _forwarding($path)] } {
-		    set path $_forwarding($path)
+	    if [exists $url] {
+		while { [::info exists _forwarding($url)] } {
+		    set url $_forwarding($url)
 		}
-		if [regexp {/$} $path] {
+		if [regexp {/$} $url] {
 		    set isdir 1
 		}
 		# As a second guess, it's a directory if it contains the
 		# string "Index of foo", where "foo" is the path component
 		# of the URL.
-		set path [lindex [splitURL $path] 2]
-		set data [::tycho::resource read $path]
+		set path [lindex [splitURL $url] 2]
+		set data [::tycho::resource read $url]
 		set isdir [regexp "Index of $path" $data]
 
 		# Remember what it is
-		lappend _statinfo($path) isdirectory $isdir
+		lappend _statinfo($url) isdirectory $isdir
 		return $isdir
 	    }
 	    return 0
 	}
 	"isfile" {
 	    # A URL is a file if it exists and is not a directory
-	    if [exists $path] {
-		return [expr { ! [query isdirectory $path] }]
+	    if [exists $url] {
+		return [expr { ! [query isdirectory $url] }]
 	    }
 	    return 0
 	}
 	"readable" {
-	    exists $path
+	    exists $url
 	}
 	"remote" {
 	    return 1
@@ -533,7 +533,7 @@ body ::tycho::ResourceHTTP::query {path option} {
 	    return 0
 	}
 	default {
-	    error "Unknown option \"$option\" on $path"
+	    error "Unknown option \"$option\" on $url"
 	}
     }
 }
@@ -548,13 +548,13 @@ body ::tycho::ResourceHTTP::query {path option} {
 # use only. If the URL cannot be accessed then nothing
 # is done.
 #
-body ::tycho::ResourceHTTP::stat {path varName} {
-    if [exists $path] {
+body ::tycho::ResourceHTTP::stat {url varName} {
+    if [exists $url] {
     	upvar $varName v
-    	while { [::info exists _forwarding($path)] } {
-	    set path $_forwarding($path)
+    	while { [::info exists _forwarding($url)] } {
+	    set url $_forwarding($url)
     	}
-    	array set v $_statinfo($path)
+    	array set v $_statinfo($url)
     }
 }
 
