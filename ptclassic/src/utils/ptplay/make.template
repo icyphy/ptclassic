@@ -58,7 +58,7 @@ ptplay: ptplay.$(ARCH)
 	fi
 endif
 
-install:	$(BINDIR)/ptplay
+install:	ptplay $(BINDIR)/ptplay
 
 ptplay.cfront:  ptplay.sun4
 	ln -s $^ $@ 
