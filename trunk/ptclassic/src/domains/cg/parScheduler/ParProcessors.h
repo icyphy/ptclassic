@@ -108,6 +108,8 @@ public:
         // ParScheduler::setUpProcs virtual method to get the new behavior.
         int moveStars;
 
+	int replaceCommStar(DataFlowStar& /*newStar*/,
+				     DataFlowStar& /*oldStar*/);
 protected:
 	// processors
 	UniProcessor* schedules;

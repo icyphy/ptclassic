@@ -59,7 +59,7 @@ public:
 	virtual ~ParScheduler();
 
 	// return my expanded graph
-	ParGraph* myEG() {return exGraph;}
+	virtual ParGraph* myEG() {return exGraph;}
 
 	// redefine "compileRun"
         /*virutal*/ void compileRun();
@@ -77,7 +77,7 @@ public:
 	int getTotalWork() { return totalWork; }
 
         // prepare for Gantt chart display
-        void writeGantt(ostream& o);
+        virtual void writeGantt(ostream& o);
 
 	UniProcessor* getProc(int n) { return parProcs->getProc(n); }
 	ParProcessors* myProcs() { return parProcs; }

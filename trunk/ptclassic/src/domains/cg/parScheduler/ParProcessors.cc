@@ -346,6 +346,20 @@ ParNode* ParProcessors :: matchCommNodes(DataFlowStar* s, EGGate* g, PortHole* p
 	return saven;
 }
 
+int ParProcessors::replaceCommStar(DataFlowStar& newStar,
+				   DataFlowStar& oldStar) {
+    EGNodeListIter iter(SCommNodes);
+    ParNode* pn;
+    int replaceFlag = FALSE;
+    while ((pn = (ParNode*) iter++) != 0) {
+	if (pn->getCopyStar() == &oldStar) {
+	    pn->replaceCopyStar(newStar);
+	    replaceFlag = TRUE;
+	}
+    }
+    return replaceFlag;
+}
+
 /*****************************************************************
 		DISPLAY 
  ****************************************************************/

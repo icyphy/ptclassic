@@ -47,6 +47,8 @@ special routines to generate the sub universes.
 #include "Wormhole.h"
 #include <string.h>
 
+#include <iostream.h>
+
 PortHole* clonedPort(DataFlowStar* s, PortHole* p) {
 	ParNode* n = (ParNode*) s->myMaster();
  	DataFlowStar* copyS = n->getCopyStar();
@@ -171,7 +173,8 @@ void UniProcessor :: makeOSOPConnect(PortHole* p, DataFlowStar* org,
 	PortHole* cp = parent->moveStars?p:clonedPort(org, p);
 	if (p->isItInput()) {
 	    makeReceive(n->getProcId(),cp,p->numTokens(),0,p);
-	} else {
+	}
+	else {
 	    makeSend(n->getProcId(), cp, 0,p);
 	}
     }

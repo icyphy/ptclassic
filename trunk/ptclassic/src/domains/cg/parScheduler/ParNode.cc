@@ -184,7 +184,12 @@ void ParNode :: setCopyStar(DataFlowStar* s, ParNode* prevN) {
 	} else {
 		firstNode = this;
 		numCopied = 1;
+
+		
 	}
 	nextNode = 0;
 }
 
+void ParNode::replaceCopyStar(DataFlowStar& newStar) {
+    clonedStar = &newStar;
+}

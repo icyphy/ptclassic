@@ -112,6 +112,8 @@ public:
 	// restore hidden gates
 	void restoreHiddenGates();
 
+        inline void replaceCopyStar (DataFlowStar& /*newStar*/,
+				     DataFlowStar& /*oldStar*/);
 };
 
 class NodePair {
