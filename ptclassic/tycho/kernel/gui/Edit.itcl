@@ -2260,7 +2260,7 @@ body ::tycho::Edit::initializeMenubar {menubar} {
     
     # Add font size control
     $menubar command biggerfont special \
-	    -label "Bigger Font" -underline 0\
+	    -label "Larger Font" -underline 0\
             -accelerator "C-+" -command "$this upSize"
 
     $menubar command smallerfont special \
