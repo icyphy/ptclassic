@@ -283,3 +283,13 @@ THREAD_STAR_LIBFILES =	$(PN_LIBFILES)
 THREAD_LIBS =		$(PTHREAD_LIBS)
 THREAD_LIBFILES =	$(PTHREAD_LIBFILES)
 endif
+
+# sol2.cfront can't build ipus because of template problems
+ifneq (,$(filter sol2.cfront,$(PTARCH)))
+IPUSSTARS =
+IPUS_STAR_LIBFILES =
+IPUS_TCLSTARS =
+IPUS_TCL_STAR_LIBS =
+IPUS_TCL_STAR_LIBFILES =
+IPUS_STAR_LIBS =
+endif
