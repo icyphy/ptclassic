@@ -20,6 +20,7 @@ $Id$
 #include "Output.h"
 #include "Connect.h"
 #include "string.h"
+#include "Domain.h"
 
 extern Error errorHandler;
 
@@ -204,6 +205,20 @@ InterpGalaxy :: numPorts (const char* star, const char* port, int num) {
 	return TRUE;
 }
 
+int
+InterpGalaxy::setDomain (const char* name) {
+	// if we're already in the given domain, do nothing and return true
+	if (strcmp (name, KnownBlock::domain()) == 0) return TRUE;
+	if (numberBlocks() > 0) {
+		errorHandler.error ("Can't change domain, non-empty galaxy");
+		return FALSE;
+	}
+	if (!KnownBlock::setDomain (name)) return FALSE;
+	actionList += "D";
+	actionList += savestring (name);
+	return TRUE;
+}
+
 // DANGER WILL ROBINSON!!!  Casting actionList to char* will cause all
 // the action strings to be combined into one string.  This will break
 // clone()!!!  Do not do it!
@@ -217,6 +232,7 @@ InterpGalaxy::clone() {
 // list.
 	InterpGalaxy* gal = new InterpGalaxy;
 	gal->descriptor = descriptor;
+	const char* oldDom = NULL; // old domain
 
 // process the action list
 	int nacts = actionList.size();
@@ -279,16 +295,52 @@ InterpGalaxy::clone() {
 			nacts -= 4;
 			break;
 
+		case 'D':	// change the domain
+			oldDom = KnownBlock::domain();
+			a = actionList.next();
+			gal->setDomain (a);
+			nacts -= 2;
+			break;
+
 		default:
 			errorHandler.error ("Internal error in InterpGalaxy");
 		}
 	}
 
+// if we're producing a wormhole, change the domain back
+	if (oldDom) KnownBlock::setDomain (oldDom);
 	return gal;
 }
 
 void
-InterpGalaxy::addToKnownList() {
-	KnownBlock *p = new KnownBlock(*this,savestring(readName()));
-	delete p;
+InterpGalaxy::addToKnownList(const char* outerDomain) {
+	const char* myName = savestring(readName());
+
+// If there was a domain change, this is a Wormhole.  Make the appropriate
+// type of wormhole, add it to the list, and change back to outerDomain
+	if (strcmp (outerDomain, KnownBlock::domain()) != 0) {
+		Star& s = Domain::named(outerDomain)->newWorm(*this);
+		setBlock (myName, &s);
+		KnownBlock *p = new KnownBlock(s, myName);
+		delete p;
+		KnownBlock::setDomain (outerDomain);
+	}
+// If not, ordinary galaxy
+	else {
+		KnownBlock *p = new KnownBlock(*this,myName);
+		delete p;
+	}
+}
+
+// Function to allow us to use dotted names in interpreter show commands
+Block* InterpGalaxy::blockWithDottedName (const char* dotname) {
+	char buf[256];
+	const char* p = index (dotname, '.');
+	if (p == NULL) return blockWithName (dotname);
+	int n = p - dotname;
+	strncpy (buf, dotname, n);
+	buf[n] = 0;
+	Block* b = blockWithName (buf);
+	if (b->isItAtomic()) return NULL;
+	return ((InterpGalaxy&)b->asGalaxy()).blockWithDottedName (p + 1);
 }
