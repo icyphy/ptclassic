@@ -1,17 +1,14 @@
-ident {
-// Copyright (c) 1990 The Regents of the University of California.
-//			All Rights Reserved.
-
-// This star outputs the last input tokens from "N" tokens.
-// (N = condition value)
-// Soonhoi Ha
-// 
-// $Id$
-}
 defstar {
 	name { LastOfN }
 	domain { DDF }
-	desc { "A LastOfN Star outputs the last tokens from N inputs" }
+	desc {
+Outputs the last token of N input tokens,
+where N is the control input.
+	}
+	version { $Id$ }
+	author { Soonhoi Ha }
+	copyright { 1991 The Regents of the University of California }
+	location { DDF library }
 	input {
 		name { input }
 		type { ANYTYPE }

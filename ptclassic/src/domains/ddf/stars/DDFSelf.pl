@@ -1,25 +1,20 @@
-ident {
-/******************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  Soonhoi Ha
- Date of creation: 8/9/90
- Converted to use preprocessor, 10/5/90
-
- DDFSelf is a star for recursion. At runtime, it appears to contain
- a clone of the galaxy (recursion) and execute it. At compile time,
- it is just a atomic star.
-
-*******************************************************************/
-}
 defstar {
 	name { Self }
 	domain { DDF }
-	desc { "This star realizes recursion" }
+	desc { Realizes recursion. }
+	version { $Id$ }
+	author { Soonhoi Ha }
+	copyright { 1991 The Regents of the University of California }
+	location { DDF library }
+	explanation {
+This is a star for recursion.  At runtime, it appears to contain
+a clone of the galaxy whose name is given by "recurGal".
+That galaxy is supplied with the input particles and executed.
+That galaxy may be one within which this instance of Self resides,
+hence realizing recursion.
+At compile time, this star appears to just be an atomic star.
+	}
+	seealso { fibonnacci }
 	hinclude { "InterpGalaxy.h" }
 	ccinclude { "DDFScheduler.h" }
 	protected {
@@ -39,7 +34,7 @@ defstar {
 		name { recurGal }
 		type { string }
 		default { "" }
-		desc { "name of recursive galaxy" }
+		desc { Name of galaxy to be invoked. }
 	}
 // isItSelf method.
 	method {

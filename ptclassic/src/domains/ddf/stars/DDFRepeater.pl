@@ -1,19 +1,14 @@
-ident {
-// Copyright (c) 1990 The Regents of the University of California.
-//			All Rights Reserved.
-
-// This star repeats the input as many times as the condition value.
-// Soonhoi Ha
-// 
-// $Id$
-}
 defstar {
 	name { Repeater }
 	domain { DDF }
 	desc {
-		"This star uses the 'control' input value to decide how many\n"
-		"times to repeat the 'input' value on 'output."
+This star uses the "control" input value to specify how many
+times to repeat the "input" value on "output".
 	}
+	version { $Id$ }
+	author { Soonhoi Ha }
+	copyright { 1991 The Regents of the University of California }
+	location { DDF library }
 	input {
 		name { input }
 		type { ANYTYPE }
