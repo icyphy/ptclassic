@@ -50,6 +50,12 @@ struct XWMHints;
 struct XClassHint;
 
 #include "tcl.h"
+
+/* Note that if we are including ptk.h in a C++ file, we must include
+ * ptk.h last because ptk.h includes tk.h which eventually includes
+ * X11/X.h, which on Solaris2.4 there is a #define Complex 0, which
+ * causes no end of trouble.
+ */
 #include "tk.h"
 
 extern Tcl_Interp *ptkInterp;
