@@ -43,9 +43,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ptdspRGBYUVConversion.h"
  
 /**Function*******************************************************************
-  Synopsis    [ Map a double into an integer in the range [0,255] by rounding ]
-  SideEffects []
-  SeeAlso     [ Ptdsp_RGBToYUV ]
+  Synopsis    [ Map a double into an integer in the range [0,255\] by rounding ]
+  SideEffects [ ]
+  SeeAlso     [ ]
 ******************************************************************************/
 static unsigned char
 quant(double inval) {
@@ -68,7 +68,7 @@ quant(double inval) {
 		three double arrays that describe that image in YUV
 		format. No downsampling is performed on the U and V
 		signals.]
-  SideEffects []
+  SideEffects [ The double arrays YImg, UImg and VImg are modified. ]
   SeeAlso     [ Ptdsp_YUVToRGB ]
 ******************************************************************************/
 void 
@@ -115,7 +115,8 @@ Ptdsp_RGBToYUV ( const double* redImg, const double* greenImg,
   Description [ Read three double arrays that describe a color image
                 in YUV format and stores the result in  three double
 		arrays that describe an image in RGB format. ]
-  SideEffects []
+  SideEffects [ The double arrays redImg, greenImg and blueImg are
+                modified. ]
   SeeAlso     [ Ptdsp_RGBToYUV ]
 ******************************************************************************/
 void 
