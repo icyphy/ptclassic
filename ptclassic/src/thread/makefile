@@ -85,8 +85,7 @@ GT_SRC = $(ROOT)/src/thread/gthreads
 GT_OBJ = $(ROOT)/obj.$(PTARCH)/thread/gthreads
 
 # Redefined make variables.
-GT_CFLAGS =	-DASM_SETJMP -DNOERR_CHECK -DSTACK_CHECK -DSIGNAL_STACK \
-		-DC_INTERFACE
+GT_CFLAGS =	-DASM_SETJMP -DSTACK_CHECK -DC_INTERFACE
 GT_COMP_ASM =	$$(CC) $$(INC1) $$(INC2) $$(CFLAGS) -c $$*.S
 
 # Only the gthreads_install and gthreads_clean rules are externally visible.
