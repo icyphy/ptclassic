@@ -3,7 +3,7 @@ static const char file_id[] = "DEStar.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -86,28 +86,28 @@ void DEStar :: initialize() {
 	}
 }
 
+// declare inline so that it can be inlined into DEStar::run,
+// the primary call point
+inline void DEStar :: sendOutput() {
+	BlockPortIter next(*this);
+	PortHole* p;
+	while ((p = next++) != 0) {
+		p->sendData();
+	}
+}
+
 int DEStar :: run() {
 	int status = Star::run();
 	sendOutput();
 	return status;
 }
 
-void DEStar :: sendOutput() {
-        BlockPortIter next(*this);
-        for (int k = numberPorts(); k > 0; k--)
-                (next++)->sendData();
-}
-
 // new phase
 void DEStar :: startNewPhase() {
-
 	BlockPortIter next(*this);
-	PortHole* p;
-	while ((p = next++) != 0) {
-		if (p->isItInput()) {
-			InDEPort* inp = (InDEPort*) p;
-			inp->cleanIt();
-		}
+	DEPortHole* p;
+	while ((p = (DEPortHole*) next++) != 0) {
+		p->cleanIt();
 	}
 }
 
