@@ -23,7 +23,7 @@ sequence
 
         input  {
                 name { N }
-	        type { fix }
+	        type { int }
 	}
         output {
 		name { output }
