@@ -41,7 +41,7 @@ include $(CONFIG)
 MISC_FILES =	README README.files copyright
 
 makefiles all clean depend realclean checkjunk sccsinfo itcldocs \
-extraclean:
+extraclean echohtmls:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
@@ -56,7 +56,7 @@ subinstall:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
-		echo making installin $$x ; \
+		echo making install in $$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) install ;\
 		) \
 	    fi ; \
