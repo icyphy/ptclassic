@@ -53,6 +53,7 @@ TCL_SRCS = \
 ITCL_SRCS = \
 	AbstractGraph.itcl \
 	ButtonBox.itcl \
+	Build.itcl \
 	CircularList.itcl \
 	Class.itcl \
 	ColorBrowser.itcl \
@@ -84,7 +85,6 @@ ITCL_SRCS = \
 	HyperlinkIndex.itcl \
 	IconIndex.itcl \
 	IndexBrowser.itcl \
-	Install.itcl \
 	Interchange.itcl \
 	KeyedDigraph.itcl \
 	ListBrowser.itcl \
