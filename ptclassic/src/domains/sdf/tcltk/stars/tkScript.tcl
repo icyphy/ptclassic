@@ -69,7 +69,7 @@ if {![winfo exists $s] || ![info exists ballId_$starID]} {
     set y2 [expr 2.5+$ballRadius]
 
     set ballId_$starID [$c create oval ${x1}c ${y1}c ${x2}c ${y2}c \
-        -outline [ptkColor black] -fill [ptkColor tan3] ]
+        -outline [ptkColor black] -fill [ptkColor azure1] ]
 
     # Conditionally define procedures, only if they haven't been defined before
     proc setOut_$starID {value} "
