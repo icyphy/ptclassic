@@ -46,10 +46,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	    // Since it is so easy to get into an infinite loop
 	    // (just name as your block a galaxy that you are within),
 	    // process Tk events, and check for a halt request.
-	    // Note that this alone prevents the use of this star in ptcl,
-	    // which does not have Tk.
-	    // FIXME: This should be done some other way.
-	    Tk_DoOneEvent(TK_DONT_WAIT|TK_ALL_EVENTS);
+            // Formerly, we called Tk_DoOneEvent() here, but with
+            // Tcl7.5, we can call Tcl_DoOneEvent()
+	    Tcl_DoOneEvent(TCL_DONT_WAIT|TCL_ALL_EVENTS);
 	    if (SimControl::haltRequested()) {
 		Error::abortRun(*this, "Initialization aborted");
 		return;
