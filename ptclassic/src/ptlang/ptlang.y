@@ -1636,8 +1636,8 @@ void genDef ()
 		 inputFile, progName);
 	fprintf (fp, "<html>\n<head>\n<title>%s %s star</title>\n</head>\n",
                  domain, objName);
-/* Background color */
-        fprintf (fp, "<body bgcolor=#ffdead>\n");
+/* Background color (this color is called "ivory2") */
+        fprintf (fp, "<body bgcolor=#eeeee0>\n");
 
 /* Name */
 	fprintf (fp,
