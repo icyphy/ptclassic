@@ -4,6 +4,7 @@ defstar {
 	desc { 
 DSP56000 - Sin function.
 Calculation by table lookup.  Input range of (-1,1) scaled by pi.
+output is sin(pi*input)
 	}
 	version { $Id$ }
 	author { Chih-Tsung Huang }
