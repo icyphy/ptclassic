@@ -38,8 +38,8 @@ falseOutput.
 	}
 	go {
 		// get Particles from Geodesic
-		control.grabData();
-		input.grabData();
+		control.receiveData();
+		input.receiveData();
 
 		// read control value, and route input
 		// to output depending on it.

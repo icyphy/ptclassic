@@ -28,10 +28,7 @@ signals.
 		output.setBDFParams (1, input, BDF_COMPLEMENT);
 	}
 	go {
-		// note that explicit grabData and sendData are needed
-		input.grabData();
 		output%0 << !int(input%0);
-		output.sendData();
 	}
 }
 
