@@ -47,6 +47,8 @@ class SDFPortHole : public PortHole
 private:
 	int maxBackValue;	// maximum % argument allowed
 public:
+	SDFPortHole() : maxBackValue(0) {}
+
         // The setPort function is redefined to take one more optional
         // argument, the number of Particles consumed/generated
         PortHole& setPort(const char* portName,
