@@ -10,11 +10,20 @@ Tycho includes a few different ways of
 <A NAME="running a subprocess">running</A> <A NAME="subprocesses, running">subprocesses</A>.  
 <DL>
 <DT> <CODE>::tycho::tyexec</CODE> <I>args</I>
-<DD> The <A HREF="../codeDoc/Exec_rel.html#tyexec Proc associated with ::tycho:;Exec class"><CODE>tyexec</CODE> procedure</A>
+<DT> <CODE>::tycho::execModal</CODE> <I>args</I>
+<DD> The <A HREF="../codeDoc/Exec_rel.html#tyexec">
+	<CODE>tyexec</CODE></A> procedure and
+     The <A HREF="../codeDoc/Exec_rel.html#execModal">
+	<CODE>execModal</CODE></A> procedure
 will pass <I>args</I> to the Tcl <CODE>exec</CODE> command.
 
+<DT> <CODE>::tycho::Exec</CODE>
+<DD> The non-graphical <A HREF="../codeDoc/Exec.html">Exec class</a>
+is a programmer's interface to execute command.
+
 <DT> <CODE>::tycho::Monitor</CODE>
-<DD> The <A HREF="../usersGuides/MonitorHelp.html">Monitor Class</A>
+<DD> The graphical 
+<A HREF="../usersGuides/ExecHelp.html">Monitor Class</A>
  brings up a dialog widget that allows the user to type
 in a command and view the output.
 
