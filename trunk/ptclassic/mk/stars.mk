@@ -207,7 +207,7 @@ ifdef C50
 		LIBFILES += $(LIBDIR)/libc50targets.$(LIBSUFFIX)
 	else
 		TARGETS += $(C50T)/DSKC50Target.o \
-			$(C50T)/SimC50Target.o
+			$(C50T)/SimC50Target.o \
 			$(C50T)/SubC50Target.o
 	endif
 	# kernel and stars 
