@@ -36,16 +36,29 @@ example, "::tycho::EditTcl" will be identified as a link,
 but "EditTclText" will not.  Unfortunately, since itcl-2.0 is
 dynamically scoped, it appears that there is no way around this.
 <p>
-For the
-<a name="Evaluate command">"Evaluate" command</a> in the "File" menu
-to work, the editor keeps track of
-classes that are defined within so that it can delete the class
-definitions and instances before evaluating the file. Note that for
-this to work, all derived classes must be accessible by auto-loading.
-This implies some formatting restrictions on the source code file.
+The <a name="Evaluate command">"Evaluate" command</a> in the "File" menu
+evaluates the Itcl code in the selection (if there is a selection) or
+the entire file (if there is no selection).  The returned result
+is displayed.
+In the case where the entire file is evaluated,
+the editor first deletes any
+classes that are defined within the file so that it can safely redefine
+these classes.  As a side effect, all instances of the classes and
+all derived classes will also be deleted.
+If these derived classes are not accessible by auto-loading,
+then they must be manually reloaded.
+Note that the Itcl auto-loading mechanism
+implies some formatting restrictions on the syntax.
 Specifically, class definitions must appear with the keyword "class"
 starting in column zero and the class name following it on the same
 line.
+Moreover, the deletion of classes will only work properly if the class
+names are fully qualified with all namespaces (the class names should
+begin with "::").  If this is not the case, then there is no way to tell
+from the syntax of the file what classes are actually being defined
+(it depends on what namespace the file is evaluated in).
+If the class name is not fully specified, we assume it is defined
+in the global namespace only.
 <p>
 <HR>
 Copyright &#169 %Q%, The Regents of the University of California.
