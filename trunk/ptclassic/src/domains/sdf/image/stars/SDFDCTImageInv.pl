@@ -66,7 +66,7 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
     int ii, jj, i, j;
 
 // Do the VERTICAL transform.  DCTImage to tmpbuf and copy back...
-    float* tmpbuf = new float[max(outw, outh)];
+    float* tmpbuf = new float[(outw > outh ? outw : outh)];
     for(jj = 0; jj < outw; jj++) {
         for(ii = 0; ii < outh; ii += blocksize) {
             ndx = ii*outw + jj;
