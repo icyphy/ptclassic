@@ -88,9 +88,9 @@ depend:
 	done
 
 doc/stars/starHTML.idx: $(wildcard doc/stars/*.htm)
-	if [ -w $(dir $@) ]; then \
-		@echo "Updating $@"
-		rm -f $@
+	@if [ -w $(dir $@) ]; then \
+		@echo "Updating $@"; \
+		rm -f $@; \
 		(cd doc/stars; \
 		echo "set TYCHO $(PTOLEMY)/tycho; \
 			source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
@@ -102,26 +102,26 @@ doc/stars/starHTML.idx: $(wildcard doc/stars/*.htm)
 	fi
 
 starHTML.idx: subdomainstarHTML doc/stars/starHTML.idx
-	@echo "Updating $@:"
-	rm -f $@
-	@if [ "$(SUBDOMAINDIRS)" != "." ]; then \
-		subdirs="$(addsuffix /doc/stars/starHTML.idx, $(SUBDOMAINDIRS))"; \
-		echo "Merging doc/stars/starHTML.idx $$subdirs ";\
-		echo "set TYCHO $(PTOLEMY)/tycho; \
+	@if [ -f doc/stars/starHTML.idx ]; then \
+		@echo "Updating $@"; \
+		rm -f $@; \
+		if [ "$(SUBDOMAINDIRS)" != "." ]; then \
+			subdirs="$(addsuffix /doc/stars/starHTML.idx, $(SUBDOMAINDIRS))"; \
+			echo "Merging doc/stars/starHTML.idx $$subdirs ";\
+			echo "set TYCHO $(PTOLEMY)/tycho; \
 			source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
 			tychoMergeIndices \"All Ptolemy $(ME) stars\" $@ \
-				$$subdirs \
+			$$subdirs \
 				doc/stars/starHTML.idx" | itclsh; \
-	else \
-		if [ -f doc/stars/starHTML.idx ]; then \
+		else \
 			echo "Merging only doc/stars/starHTML.idx"; \
 			echo "set TYCHO $(PTOLEMY)/tycho; \
 			source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
 			tychoMergeIndices \"All Ptolemy $(ME) stars\" $@ \
 				doc/stars/starHTML.idx" | itclsh; \
-		else \
-			echo "doc/stars/starHTML.idx does not exist, skipping";\
 		fi; \
+	else \
+		echo "doc/stars/starHTML.idx does not exist, skipping";\
 	fi
 
 SUBDOMAINDIRS = .

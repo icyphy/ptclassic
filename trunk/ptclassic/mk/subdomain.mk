@@ -84,9 +84,9 @@ depend:
 	done
 
 doc/stars/starHTML.idx: $(wildcard doc/stars/*.htm)
-	if [ -w $(dir $@) ]; then \
-		@echo "Updating $@"
-		rm -f $@
+	@if [ -w $(dir $@) ]; then \
+		@echo "Updating $@"; \
+		rm -f $@; \
 		(cd doc/stars; \
 		domain=`echo $(dir $(ME)) | sed s=/$$==`; \
 		echo "set TYCHO $(PTOLEMY)/tycho; \
