@@ -95,6 +95,10 @@ int VHDLTarget :: runIt(VHDLStar* s) {
   code << s->fullName() << " (class " << s->className() << ") \n";
   myCode << code;
   int status = ((CGStar*) s)->CGStar::run();
+
+  VHDLVariableList* varList = s->firingVariableList.newCopy();
+  registerVariableList(variableList);
+  
   if (!status) return status;
 
   if (s->isItFork()) {
@@ -287,14 +291,18 @@ StringList VHDLTarget :: declState(const State* state, const char*
 	dec << i;
 	dec << ": ";
 
-	if (state->isA("IntState") || state->isA("IntArrayState"))
-	  dec << "INTEGER";
-	else if (state->isA("ComplexState") || state->isA("ComplexArrayState"))
-	  dec << "complex";
-	else if (state->isA("StringState") || state->isA("StringArrayState"))
-	  dec << "char*";
-	else dec << "REAL";
+	dec << stateType(state);
 
+/*
+  if (state->isA("IntState") || state->isA("IntArrayState"))
+  dec << "INTEGER";
+  else if (state->isA("ComplexState") || state->isA("ComplexArrayState"))
+  dec << "complex";
+  else if (state->isA("StringState") || state->isA("StringArrayState"))
+  dec << "char*";
+  else dec << "REAL";
+  */
+	
 	dec << ";\n";
       }
     }
@@ -345,6 +353,17 @@ void VHDLTarget :: setGeoNames(Galaxy& galaxy) {
     BlockPortIter nextPort(*s);
     VHDLPortHole* p;
     while ((p = (VHDLPortHole*) nextPort++) != NULL) {
+      if (p->isItInput()) {
+	StringList sl = sanitizedFullName(*p);
+	p->setGeoName(savestring(sl));
+      }
+    }
+  }
+  nextStar.reset();
+  while ((s = nextStar++) != NULL) {
+    BlockPortIter nextPort(*s);
+    VHDLPortHole* p;
+    while ((p = (VHDLPortHole*) nextPort++) != NULL) {
       if (p->isItOutput()) {
 	StringList sl = sanitizedFullName(*p);
 	p->setGeoName(savestring(sl));
@@ -368,6 +387,21 @@ StringList VHDLTarget :: sanitizedFullName (const NamedObj& obj) const {
                 out = sanitizedName(obj);
         }
         return out;
+}
+
+// Return the VHDL type corresponding to the State type.
+StringList VHDLTarget :: stateType(const State* st) {
+  StringList type;
+  
+  if (st->isA("IntState") || st->isA("IntArrayState"))
+    type = "INTEGER";
+  else if (st->isA("ComplexState") || st->isA("ComplexArrayState"))
+    type = "complex";
+  else if (st->isA("StringState") || st->isA("StringArrayState"))
+    type = "char*";
+  else type = "REAL";
+
+  return type;
 }
 
 ISA_FUNC(VHDLTarget,HLLTarget);

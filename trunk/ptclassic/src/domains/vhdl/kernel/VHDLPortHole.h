@@ -82,6 +82,12 @@ public:
         // Return the VHDL datatype corresponding to the port type.
 	StringList dataType() const;
 
+        // Update the offset pointer to the queue of connected geodesic.
+	void updateOffset();
+
+        // Get the offset pointer to the queue of connected geodesic.
+	int getOffset();
+
 private:
 	char* bufName;		// set if no geodesic is assigned.
 

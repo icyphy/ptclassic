@@ -40,6 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLTarget.h"
 #include "VHDLStar.h"
 #include "VHDLCompDecl.h"
+#include "VHDLSignal.h"
 #include "VHDLCompMap.h"
 
 class StructTarget : public VHDLTarget {
@@ -50,8 +51,9 @@ public:
 	// Class identification.
 	/*virtual*/ int isA(const char*) const;
 
-	// The following are for keeping track of components.
+	// The following are for keeping track of components and signals.
 	VHDLCompDeclList compDeclList;
+	VHDLSignalList signalList;
 	VHDLCompMapList compMapList;
 
 	// Main routine.
@@ -92,10 +94,16 @@ public:
 			      VHDLPortList* portList,
 			      VHDLGenericList* genList);
 
+	// Register each signal in the star signal list.
+	void registerSignalList(VHDLSignalList* starSignalList);
+
 	// Register component mapping.
 	void registerCompMap(StringList label, StringList name,
 			     VHDLPortMapList* portMapList,
 			     VHDLGenericMapList* genMapList);
+
+	// Return the VHDL type corresponding to the State type.
+	StringList stateType(const State* st);
 
 protected:
 	CodeStream component_declarations;

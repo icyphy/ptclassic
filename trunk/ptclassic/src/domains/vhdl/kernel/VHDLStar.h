@@ -42,6 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLPort.h"
 #include "VHDLGeneric.h"
 #include "VHDLVariable.h"
+#include "VHDLSignal.h"
 #include "VHDLPortMap.h"
 #include "VHDLGenericMap.h"
 
@@ -58,6 +59,7 @@ public:
 	VHDLPortList firingPortList;
 	VHDLGenericList firingGenericList;
 	VHDLVariableList firingVariableList;
+	VHDLSignalList firingSignalList;
 
 	// Lists of VHDL port and generic mappings.
 	// This is public so that VHDLTarget and other targets can access it.
@@ -108,6 +110,9 @@ protected:
 	// Assignment operator, depending on variable or signal
 	StringList expandAssign(const char*);
 
+	// Update the offset read and write pointers to the porthole queues.
+	void updateOffsets();
+
 private:
 	// Generate declarations for individual PortHoles and States.
 	StringList declareBuffer(const VHDLPortHole*);
@@ -128,6 +133,9 @@ private:
 	// Register variable reference for use by target.
 	void registerVariable(StringList ref, StringList type,
 			      StringList initVal);
+	// Register the signal mapped to for use by target.
+	void registerSignal(StringList name, StringList type, 
+			    StringList from, StringList to);
 	// Register port mapping for use by target.
 	void registerPortMap(StringList ref, StringList mapping);
 	// Register generic mapping for use by target.

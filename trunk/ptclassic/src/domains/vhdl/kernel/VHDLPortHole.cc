@@ -127,6 +127,29 @@ StringList VHDLPortHole :: dataType() const {
   return type;
 }
 
+// Update the offset pointer to the queue of connected geodesic.
+void VHDLPortHole :: updateOffset() {
+  if (isItInput()) {
+    geo().getTokens(numXfer());
+  }
+  else if (isItOutput()) {
+    geo().putTokens(numXfer());
+  }
+}
+
+// Get the offset pointer to the queue of connected geodesic.
+int VHDLPortHole :: getOffset() {
+  if (isItInput()) {
+    return geo().nextGet();
+  }
+  else if (isItOutput()) {
+    return geo().nextPut();
+  }
+  else {
+    return 1;
+  }
+}
+
 // Dummy
 int MultiVHDLPort :: someFunc() { return 1; }
 

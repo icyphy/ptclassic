@@ -114,7 +114,7 @@ StringList VHDLStar :: expandRef(const char* name) {
 
     registerState(state);
     ref << starSymbol.lookup(state->name());
-    type = state->type();
+    type = targ()->stateType(state);
     initVal = state->initValue();
 
     // Register this variable reference for use by target.
@@ -126,15 +126,17 @@ StringList VHDLStar :: expandRef(const char* name) {
     StringList mapping;
     StringList direction;
     StringList type;
+
+    if (multiPortWithName(portName)) {
+      codeblockError(portName, " is a multiport referenced as a single port");
+      ref.initialize();
+      return ref;
+    }
     
     ref << port->getGeoName();
-
-    // Use subscript notation for buffers of size larger than one
-    // which are referenced through a pointer.
-    if (port->bufSize() > 1) {
-      ref << "_";
-      ref << port->bufPos();
-    }
+    ref << "_";
+    ref << port->getOffset();
+    
     mapping = ref;
     direction = port->direction();
     type = port->dataType();
@@ -143,6 +145,8 @@ StringList VHDLStar :: expandRef(const char* name) {
     registerPort(ref, direction, type);
     // Register this port mapping for use by target.
     registerPortMap(ref, mapping);
+    // Register the signal mapped to for use by target.
+    registerSignal(ref, type, ref, ref);
   }
 
   // Error:  couldn't find a State or a PortHole with given name.
@@ -192,7 +196,7 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
       codeblockError(name, " is not an array state");
       ref.initialize();
     }
-    type = state->type();
+    type = targ()->stateType(state);
     initVal = state->initValue();
 
     // Register this variable reference for use by target.
@@ -200,11 +204,17 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
   }
 
   // Expand PortHole reference with offset.
-  else if (port = (VHDLPortHole*)genPortWithName(portName)) {
+  else if (port = (VHDLPortHole*) genPortWithName(portName)) {
     StringList mapping;
     StringList direction;
     StringList type;
 
+    if (multiPortWithName(portName)) {
+      codeblockError(portName, " is a multiport referenced as a single port");
+      ref.initialize();
+      return ref;
+    }
+    
     ref << port->getGeoName();
 
     // Use array notation for large buffers and for embedded buffers
@@ -215,8 +225,7 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
       // generate constant for index from state
       if (offsetState != NULL) {
 	int offset = *(IntState*)offsetState;
-	ref << ( (port->bufPos() - offset + port->bufSize())
-		 % port->bufSize() );
+	ref << (port->getOffset() + offset);
       }
 
       // generate constant for index
@@ -226,8 +235,7 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
 	for (int i=0; offset[i]>='0' && offset[i]<='9'; i++) {
 	  offsetInt = 10*offsetInt + (offset[i]-'0');
 	}
-	ref << ( (port->bufPos() - offsetInt + port->bufSize())
-		 % port->bufSize() );
+	ref << (port->getOffset() + offsetInt);
       }
     }
     mapping = ref;
@@ -238,6 +246,8 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
     registerPort(ref, direction, type);
     // Register this port mapping for use by target.
     registerPortMap(ref, mapping);
+    // Register the signal mapped to for use by target.
+    registerSignal(ref, type, ref, ref);
   }
 
   return ref;
@@ -351,6 +361,7 @@ int VHDLStar :: run() {
 	firingPortMapList.initialize();
 	firingGenericMapList.initialize();
 	status = targ()->runIt(this);
+	updateOffsets();
 	return status;
 }
 
@@ -455,14 +466,14 @@ StringList VHDLStar :: initCodeBuffer(VHDLPortHole* port) {
 
 	if (type == INT) code << " := 0;";
 	else if (type == COMPLEX) {
-	  code << ".real := 0.0;\n";
+	  code << ".real := X.X;\n";
 	  code << name;
 	  code << "_";
 	  code << i;
-	  code << ".imag := 0.0;";
+	  code << ".imag := X.X;";
 	}
 	else {	// default to double
-	  code << " := 0.0;";
+	  code << "double := X.X;";
 	}
 	code << "\n";
       }
@@ -471,12 +482,12 @@ StringList VHDLStar :: initCodeBuffer(VHDLPortHole* port) {
       code << name;
       if (type == INT) code << " := 0;";
       else if (type == COMPLEX) {
-	code << ".real := 0.0;\n";
+	code << ".real := X.X;\n";
 	code << name;
-	code << ".imag := 0.0;";
+	code << ".imag := X.X;";
       }
       else {	// default to double
-	code << " := 0.0;";
+	code << "double := X.X;";
       }
       code << "\n";
     }
@@ -490,7 +501,7 @@ StringList VHDLStar :: initCodeOffset(const VHDLPortHole* port) {
     StringList code;	// initialization code
 /* DISABLE UNTIL FURTHER NOTICE - USING SUBSCRIPTS INSTEAD OF INDICES
     code << sanitize(starSymbol.lookup(port->name()))
-	 << " := " << port->bufPos() << ";\n";
+	 << " := " << port->getOffset() << ";\n";
 */
     return code;
 }
@@ -620,6 +631,28 @@ void VHDLStar :: registerVariable(StringList ref, StringList type,
   firingVariableList.put(*newvar);
 }
 
+// Register the signal mapped to for use by target.
+void VHDLStar :: registerSignal(StringList name, StringList type,
+			    	StringList from, StringList to) {
+  VHDLSignalListIter signalNext(firingSignalList);
+  VHDLSignal* nSignal;
+  // Search for a match from the existing list.
+  while ((nSignal = signalNext++) != 0) {
+    // Create temporary StringLists so as to allow safe (const char*) casts.
+    StringList newTemp = name;
+    StringList listTemp = nSignal->name;
+    // If a match is found, no need to go any further.
+    if (!strcmp(newTemp,listTemp)) return;
+  }
+  // Allocate memory for a new VHDLGenericMap and put it in the list.
+  VHDLSignal* newSignal = new VHDLSignal;
+  newSignal->name = name;
+  newSignal->type = type;
+  newSignal->from = from;
+  newSignal->to = to;
+  firingSignalList.put(*newSignal);
+}
+
 // Register port mapping for use by target.
 void VHDLStar :: registerPortMap(StringList ref, StringList mapping) {
   VHDLPortMapListIter portMapNext(firingPortMapList);
@@ -656,6 +689,16 @@ void VHDLStar :: registerGenericMap(StringList ref, StringList mapping) {
   newGenericMap->name = ref;
   newGenericMap->mapping = mapping;
   firingGenericMapList.put(*newGenericMap);
+}
+
+// Update the offset read and write pointers to the porthole queues.
+void VHDLStar :: updateOffsets() {
+  // Iterate through all the ports and change pointers according to numXfer()
+  BlockPortIter nextPort(*this);
+  VHDLPortHole* port;
+  while ((port = (VHDLPortHole*) nextPort++) != 0) {
+    port->updateOffset();
+  }
 }
 
 ISA_FUNC(VHDLStar,CGStar);

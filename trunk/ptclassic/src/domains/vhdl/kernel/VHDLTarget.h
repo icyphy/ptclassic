@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "HLLTarget.h"
 #include "VHDLStar.h"
+#include "VHDLVariable.h"
 
 class VHDLTarget : public HLLTarget {
 public:
@@ -51,6 +52,9 @@ public:
 
 	// Class identification.
 	/*virtual*/ int isA(const char*) const;
+
+	// The following is for keeping track of variables.
+	VHDLVariableList variableList;
 
 	// Main routine.
 	virtual int runIt(VHDLStar*);
@@ -84,6 +88,9 @@ public:
 
 	// Declare State variable.
 	StringList declState(const State*, const char*);
+
+	// Return the VHDL type corresponding to the State type.
+	StringList stateType(const State* st);
 
 protected:
 	CodeStream entity_declaration;

@@ -94,6 +94,7 @@ void StructTarget :: setup() {
 
 // Main routine.
 int StructTarget :: runIt(VHDLStar* s) {
+  int level = 0;
   // Change the default stream temporarily.
   defaultStream = &firingAction;
   // process action; running star modifies myCode.
@@ -102,43 +103,74 @@ int StructTarget :: runIt(VHDLStar* s) {
   defaultStream = &myCode;
 
   myCode << "\n\t-- firing ";
-  myCode << targetNestedSymbol.push(s->fullName());
+  myCode << targetNestedSymbol.push(sanitize(s->fullName()));
   myCode << " (class " << s->className() << ") \n";
   myCode << "entity ";
   myCode << targetNestedSymbol.get();
   myCode << " is\n";
 
-  myCode << "port(\n";
-  // Add in port refs here from firingPortList.
-  VHDLPortListIter nextPort(s->firingPortList);
-  VHDLPort* nport;
-  while ((nport = nextPort++) != 0) {
-    myCode << nport->name;
-    myCode << ": ";
-    myCode << nport->direction;
-    myCode << " ";
-    myCode << nport->type;
-    myCode << ";\n";
+  if (s->firingPortList.head()) {
+    level++;
+    myCode << indent(level);
+    myCode << "port(\n";
+    // Add in port refs here from firingPortList.
+    VHDLPortListIter nextPort(s->firingPortList);
+    VHDLPort* nport;
+    int portCount = 0;
+    while ((nport = nextPort++) != 0) {
+      if (portCount) {
+	myCode << ";";
+      	myCode << "\n";
+      }
+      level++;
+      myCode << indent(level);
+      myCode << nport->name;
+      myCode << ": ";
+      myCode << nport->direction;
+      myCode << " ";
+      myCode << nport->type;
+      portCount++;
+      level--;
+    }
+    myCode << "\n";
+    myCode << indent(level);
+    myCode << ");\n";
+    level--;
   }
-  myCode << ");\n";
-
-  myCode << "generic(\n";
-  // Add in generic refs here from firingGenericList.
-  VHDLGenericListIter nextGeneric(s->firingGenericList);
-  VHDLGeneric* ngen;
-  while ((ngen = nextGeneric++) != 0) {
-    myCode << ngen->name;
-    myCode << ": ";
-    myCode << ngen->type;
-    myCode << " := ";
-    myCode << ngen->defaultVal;
-    myCode << ";\n";
+  
+  if (s->firingGenericList.head()) {
+    level++;
+    myCode << indent(level);
+    myCode << "generic(\n";
+    // Add in generic refs here from firingGenericList.
+    VHDLGenericListIter nextGeneric(s->firingGenericList);
+    VHDLGeneric* ngen;
+    int genCount = 0;
+    while ((ngen = nextGeneric++) != 0) {
+      if (genCount) {
+	myCode << ";";
+	myCode << "\n";
+      }
+      level++;
+      myCode << indent(level);
+      myCode << ngen->name;
+      myCode << ": ";
+      myCode << ngen->type;
+      myCode << " := ";
+      myCode << ngen->defaultVal;
+      genCount++;
+      level--;
+    }
+    myCode << "\n";
+    myCode << indent(level);
+    myCode << ");\n";
+    level--;
   }
-  myCode << ");\n";
-
+  
+  myCode << indent(level);
   myCode << "end ";
   myCode << targetNestedSymbol.get();
-  myCode << "\n";
+  myCode << ";\n";
   myCode << "\n";
 
   myCode << "architecture ";
@@ -153,86 +185,60 @@ int StructTarget :: runIt(VHDLStar* s) {
   VHDLVariableListIter nextVar(s->firingVariableList);
   VHDLVariable* nvar;
   while ((nvar = nextVar++) != 0) {
+    level++;
+    myCode << indent(level);
+    myCode << "variable ";
     myCode << nvar->name;
     myCode << ": ";
     myCode << nvar->type;
     myCode << " := ";
     myCode << nvar->initVal;
     myCode << ";\n";
+    level--;
   }
 
 //	declareStar(s);
 //	myCode << starDecls;
-	myCode << "begin\n";
+  myCode << "begin\n";
 
 // process action
-	myCode << firingAction;
-	firingAction.initialize();
+  myCode << firingAction;
+  firingAction.initialize();
 	
-	myCode << "end process;\n";
-	myCode << "end ";
-	myCode << "behavior";
-	myCode << ";\n";
+  myCode << "end process;\n";
+  myCode << "end ";
+  myCode << "behavior";
+  myCode << ";\n";
 
-// Major re-working is required.
-// 1. A new entity for each firing
-// 2. A new architecture for each entity
-// 3. Proper signals declared to stitch firings together
-// 4. Proper signals/variables declared in each architecture
-// Add to component declarations list
-// Add to signal declarations list
-// Add to component mappings list
-// Need to declare ports & generics here
 // Need to make ports for changing states to communicate them
 // between firings - a further complication.
-// declaring star should generate starDecls for port spec
-// it should also declare signals needed
-// and also the component spec for the component list
-// and also the port/generic mapping
 // include portholes of star, but have multiples for inhomogeneity
 // try to include states which get passed between firings
-// a: in integer;\n b: in integer;\n c: out integer\n
-// perhaps "firingDecls" is more appropriate here than "starDecls"
-// doing all star decls is redundant; it gets re-done for each firing.
 	
-  // Calls to register a new component, register component map
-  // register needed signals - use these built lists later to
-  // elaborate these things in main vhdl code.
-
 // At the end of running a star, build a component decl for it
 // and build a component mapping for it, and register them.
 
-//########################################################################
-//
-//		Problem! How to save lists from being destroyed?
-//
-//########################################################################
-  // The following are pointer assignments - not actual copying
-  // Will need to do actual copy if original reference destructs it.
   StringList label = targetNestedSymbol.get();
+  label << "_proc";
   StringList name = targetNestedSymbol.get();
-/*
-  VHDLPortList* portList = &(s->firingPortList);
-  VHDLGenericList* genList = &(s->firingGenericList);
-  VHDLPortMapList* portMapList = &(s->firingPortMapList);
-  VHDLGenericMapList* genMapList = &(s->firingGenericMapList);
-  */
 
   VHDLPortList* portList = s->firingPortList.newCopy();
   VHDLGenericList* genList = s->firingGenericList.newCopy();
   VHDLPortMapList* portMapList = s->firingPortMapList.newCopy();
   VHDLGenericMapList* genMapList = s->firingGenericMapList.newCopy();
+  VHDLSignalList* signalList = s->firingSignalList.newCopy();
 
   registerCompDecl(name, portList, genList);
+  registerSignalList(signalList);
   registerCompMap(label, name, portMapList, genMapList);
 
   if (!status) {
-	  return status;
-	}
-	if (s->isItFork()) {
-	  return status;
-	}
-	return status;
+    return status;
+  }
+  if (s->isItFork()) {
+    return status;
+  }
+  return status;
 }
 
 // Initial stage of code generation.
@@ -257,78 +263,161 @@ void StructTarget :: headerCode() {
 
 // Trailer code.
 void StructTarget :: trailerCode() {
+  int level = 0;
   // Add in component declarations here from compDeclList.
   VHDLCompDeclListIter nextCompDecl(compDeclList);
   VHDLCompDecl* compDecl;
   while ((compDecl = nextCompDecl++) != 0) {
+    level++;
+    component_declarations << indent(level);
     component_declarations << "component ";
     component_declarations << compDecl->name;
     component_declarations << "\n";
 
-    component_declarations << "port(\n";
-    // Add in port refs here from portList.
-    VHDLPortListIter nextPort(*(compDecl->portList));
-    VHDLPort* nport;
-    while ((nport = nextPort++) != 0) {
-      component_declarations << nport->name;
-      component_declarations << ": ";
-      component_declarations << nport->direction;
-      component_declarations << " ";
-      component_declarations << nport->type;
-      component_declarations << ";\n";
+    if (compDecl->portList->head()) {
+      level++;
+      component_declarations << indent(level);
+      component_declarations << "port(\n";
+      // Add in port refs here from portList.
+      VHDLPortListIter nextPort(*(compDecl->portList));
+      VHDLPort* nport;
+      int portCount = 0;
+      while ((nport = nextPort++) != 0) {
+	if (portCount) {
+	  component_declarations << ";";
+	  component_declarations << "\n";
+	}
+	level++;
+	component_declarations << indent(level);
+	component_declarations << nport->name;
+	component_declarations << ": ";
+	component_declarations << nport->direction;
+	component_declarations << " ";
+	component_declarations << nport->type;
+	portCount++;
+	level--;
+      }
+      component_declarations << "\n";
+      component_declarations << indent(level);
+      component_declarations << ");\n";
+      level--;
     }
-    component_declarations << ");\n";
-
-    component_declarations << "generic(\n";
-    // Add in generic refs here from genList.
-    VHDLGenericListIter nextGen(*(compDecl->genList));
-    VHDLGeneric* ngen;
-    while ((ngen = nextGen++) != 0) {
-      component_declarations << ngen->name;
-      component_declarations << ": ";
-      component_declarations << ngen->type;
-      component_declarations << " := ";
-      component_declarations << ngen->defaultVal;
-      component_declarations << ";\n";
+    
+    if (compDecl->genList->head()) {
+      level++;
+      component_declarations << indent(level);
+      component_declarations << "generic(\n";
+      // Add in generic refs here from genList.
+      VHDLGenericListIter nextGen(*(compDecl->genList));
+      VHDLGeneric* ngen;
+      int genCount = 0;
+      while ((ngen = nextGen++) != 0) {
+	if (genCount) {
+	  component_declarations << ";";
+	  component_declarations << "\n";
+	}
+	level++;
+	component_declarations << indent(level);
+	component_declarations << ngen->name;
+	component_declarations << ": ";
+	component_declarations << ngen->type;
+	component_declarations << " := ";
+	component_declarations << ngen->defaultVal;
+	genCount++;
+	level--;
+      }
+      component_declarations << "\n";
+      component_declarations << indent(level);
+      component_declarations << ");\n";
+      level--;
     }
-    component_declarations << ");\n";
-  
+    
+    component_declarations << indent(level);
     component_declarations << "end component;\n";
+    level--;
+  }
+
+  // Add in signal declarations here from signalList.
+  VHDLSignalListIter nextSignal(signalList);
+  VHDLSignal* signal;
+  while ((signal = nextSignal++) != 0) {
+    level++;
+    signal_declarations << indent(level);
+    signal_declarations << "signal ";
+    signal_declarations << signal->name;
+    signal_declarations << ": ";
+    signal_declarations << signal->type;
+    signal_declarations << ";\n";
+    level--;
   }
 
   // Add in component mappings here from compMapList.
   VHDLCompMapListIter nextCompMap(compMapList);
   VHDLCompMap* compMap;
   while ((compMap = nextCompMap++) != 0) {
+    level++;
+    component_mappings << indent(level);
     component_mappings << compMap->label;
     component_mappings << ": ";
     component_mappings << compMap->name;
     component_mappings << "\n";
 
-    component_mappings << "port map(\n";
-    // Add in port maps here from portMapList.
-    VHDLPortMapListIter nextPortMap(*(compMap->portMapList));
-    VHDLPortMap* nportmap;
-    while ((nportmap = nextPortMap++) != 0) {
-      component_mappings << nportmap->name;
-      component_mappings << " => ";
-      component_mappings << nportmap->mapping;
-      component_mappings << ",\n";
+    if (compMap->portMapList->head()) {
+      level++;
+      component_mappings << indent(level);
+      component_mappings << "port map(\n";
+      // Add in port maps here from portMapList.
+      VHDLPortMapListIter nextPortMap(*(compMap->portMapList));
+      VHDLPortMap* nportmap;
+      int portCount = 0;
+      while ((nportmap = nextPortMap++) != 0) {
+	if (portCount) {
+	  component_mappings << ",";
+	  component_mappings << "\n";
+	}
+	level++;
+	component_mappings << indent(level);
+	component_mappings << nportmap->name;
+	component_mappings << " => ";
+	component_mappings << nportmap->mapping;
+	portCount++;
+	level--;
+      }
+      component_mappings << "\n";
+      component_mappings << indent(level);
+      component_mappings << ")\n";
+      level--;
     }
-    component_mappings << ");\n";
+    
+    if (compMap->genMapList->head()) {
+      level++;
+      component_mappings << indent(level);
+      component_mappings << "generic map(\n";
+      // Add in generic maps here from genMapList.
+      VHDLGenericMapListIter nextGenMap(*(compMap->genMapList));
+      VHDLGenericMap* ngenmap;
+      int genCount = 0;
+      while ((ngenmap = nextGenMap++) != 0) {
+	if (genCount) {
+	  component_mappings << ",";
+	  component_mappings << "\n";
+	}
+	level++;
+	component_mappings << indent(level);
+	component_mappings << ngenmap->name;
+	component_mappings << " => ";
+	component_mappings << ngenmap->mapping;
+	level--;
+      }
+      component_mappings << "\n";
+      component_mappings << indent(level);
+      component_mappings << ")\n";
+      level--;
+    }
 
-    component_mappings << "generic map(\n";
-    // Add in generic maps here from genMapList.
-    VHDLGenericMapListIter nextGenMap(*(compMap->genMapList));
-    VHDLGenericMap* ngenmap;
-    while ((ngenmap = nextGenMap++) != 0) {
-      component_mappings << ngenmap->name;
-      component_mappings << " => ";
-      component_mappings << ngenmap->mapping;
-      component_mappings << ",\n";
-    }
-    component_mappings << ");\n";
-  
+    component_mappings << indent(level);
+    component_mappings << ";\n";
+    level--;
   }
 
 /*
@@ -468,6 +557,17 @@ void StructTarget :: setGeoNames(Galaxy& galaxy) {
     BlockPortIter nextPort(*s);
     VHDLPortHole* p;
     while ((p = (VHDLPortHole*) nextPort++) != NULL) {
+      if (p->isItInput()) {
+	StringList sl = sanitizedFullName(*p);
+	p->setGeoName(savestring(sl));
+      }
+    }
+  }
+  nextStar.reset();
+  while ((s = nextStar++) != NULL) {
+    BlockPortIter nextPort(*s);
+    VHDLPortHole* p;
+    while ((p = (VHDLPortHole*) nextPort++) != NULL) {
       if (p->isItOutput()) {
 	StringList sl = sanitizedFullName(*p);
 	p->setGeoName(savestring(sl));
@@ -515,6 +615,36 @@ void StructTarget :: registerCompDecl(StringList name,
   compDeclList.put(*newCompDecl);
 }
 
+// Register each signal in the star signal list.
+void StructTarget :: registerSignalList(VHDLSignalList* starSignalList) {
+  VHDLSignalListIter starSignalNext(*starSignalList);
+  VHDLSignalListIter signalNext(signalList);
+  VHDLSignal* nStarSignal;
+  VHDLSignal* nSignal;
+  // Scan through the list of signals from the star firing.
+  while ((nStarSignal = starSignalNext++) != 0) {
+    // Search for a match from the existing list.
+    int isNewSignal = 1;
+    signalNext.reset();
+    while ((nSignal = signalNext++) != 0) {
+      // Create temporary StringLists so as to allow safe (const char*) casts.
+      StringList newTemp = nStarSignal->name;
+      StringList nameTemp = nSignal->name;
+      // If a match is found, no need to go any further.
+      if (!strcmp(newTemp,nameTemp)) isNewSignal = 0;
+    }
+    if (isNewSignal) {
+      // Allocate memory for a new VHDLSignal and put it in the list.
+      VHDLSignal* newSignal = new VHDLSignal;
+      newSignal->name = nStarSignal->name;
+      newSignal->type = nStarSignal->type;
+      newSignal->from = nStarSignal->from;
+      newSignal->to = nStarSignal->to;
+      signalList.put(*newSignal);
+    }
+  }
+}
+
 // Register component mapping.
 void StructTarget :: registerCompMap(StringList label, StringList name,
 				     VHDLPortMapList* portMapList,
@@ -536,6 +666,21 @@ void StructTarget :: registerCompMap(StringList label, StringList name,
   newCompMap->portMapList = portMapList;
   newCompMap->genMapList = genMapList;
   compMapList.put(*newCompMap);
+}
+
+// Return the VHDL type corresponding to the State type.
+StringList StructTarget :: stateType(const State* st) {
+  StringList type;
+  
+  if (st->isA("IntState") || st->isA("IntArrayState"))
+    type = "INTEGER";
+  else if (st->isA("ComplexState") || st->isA("ComplexArrayState"))
+    type = "complex";
+  else if (st->isA("StringState") || st->isA("StringArrayState"))
+    type = "char*";
+  else type = "REAL";
+
+  return type;
 }
 
 ISA_FUNC(StructTarget,VHDLTarget);
