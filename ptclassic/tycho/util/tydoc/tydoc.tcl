@@ -114,10 +114,18 @@ proc tydoc {args} {
 	    set debug 1
 	    incr switchCount
 	}
+	if { [ lindex $args $n] == "-notestdir" } {
+	    if {"[file tail [pwd]]" == "test"} {
+		puts "tydoc called in a directory named test,\
+			so no documentation need be generated"
+		exit
+	    }
+	    incr switchCount
+	}
     }
 
     if {$argc == 0 || $argc == $switchCount} {
-	puts "tydoc called with no files, \
+	puts "tydoc called with no files,\
 		so no documentation need be generated"
 	exit
     }
