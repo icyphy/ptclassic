@@ -6,6 +6,10 @@
 # $Id$
 #
 
+# Load the package
+::tycho::loadIfNotPresent ::tycho::timer tytimer
+::tycho::loadIfNotPresent ::tycho::testtask tytest
+
 # Initialize two counters
 set ccounter 0
 set tclcounter 0
@@ -17,7 +21,6 @@ frame .t.b
 pack .t.a
 pack .t.b
 
-
 # Create a label which prints the counter value
 label .t.a.l -textvariable ccounter -width 8 \
         -font [::tycho::font Helvetica 24]
@@ -25,28 +28,22 @@ frame .t.a.buttons
 
 # This button adds a task to the scheduler.
 button .t.a.start -text Start -command {
-    ::tycho::Scheduler::start ctask {
-	::tycho::testtask setup ccounter
-    } {
-	::tycho::testtask execute
-    } {
-        ::tycho::testtask wrapup
-    } {}
+    ::tycho::Scheduler::startC ::tycho::testtask ccounter
 }
 
 # This button pauses the task
 button .t.a.pause  -text Pause  -command {
-    ::tycho::Scheduler::suspend ctask
+    ::tycho::Scheduler::suspend testtask
 }
 
 # This button resumes the task
 button .t.a.resume  -text Resume  -command {
-    ::tycho::Scheduler::resume ctask
+    ::tycho::Scheduler::resume testtask
 }
 
 # This button kills the task
 button .t.a.stop  -text Stop -command {
-    ::tycho::Scheduler::kill ctask
+    ::tycho::Scheduler::kill testtask
 }
 
 pack .t.a.l -fill x -expand on
@@ -64,15 +61,11 @@ frame .t.b.buttons
 
 # This button adds a task to the scheduler.
 button .t.b.start -text Start -command {
-    ::tycho::Scheduler::start tcltask {
-	set tclcounter 0
-    } {
-	::tycho::timer start
-	while { ! [::tycho::timer elapsed] } {
-	incr tclcounter
-	}
-	expr 1 ;# 1 means that we haven't terminated
-    } {} {}
+    set tclcounter 0
+    ::tycho::Scheduler::startTcl tcltask {
+        incr tclcounter
+        expr 1 ;# 1 means that we haven't terminated
+    }
 }
 
 # This button pauses the task
@@ -100,8 +93,8 @@ pack .t.b.stop -in .t.b.buttons -side left
 
 # It's handy to have a button to close the window
 button .t.close  -text Close -command {
-    catch {::tycho::Scheduler::kill ctask}
-    catch {::tycho::Scheduler::kill bar}
+    catch {::tycho::Scheduler::kill testtask}
+    catch {::tycho::Scheduler::kill tcltask}
     destroy .t
 }
 pack .t.close
