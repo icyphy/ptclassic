@@ -22,7 +22,7 @@ Date of last revision:
 #include "Error.h"
 
 // redefine the virtual methods
-EGNode *ParGraph :: newNode(SDFStar* s, int i)
+EGNode *ParGraph :: newNode(DataFlowStar* s, int i)
 	{ LOG_NEW; return new ParNode(s,i); }
 
 			//////////////////
