@@ -48,7 +48,7 @@ LIB=libfsm.$(LIBSUFFIX)
 
 # Header files
 HDRS= FSMPortHole.h FSMTarget.h FSMScheduler.h FSMStar.h FSMWormhole.h \
-      FSMStateStar.h
+      FSMStateStar.h MixedScheduler.h utilities.h
 
 # Library sources
 SRCS= $(HDRS:.h=.cc) FSMDomain.cc

@@ -29,7 +29,8 @@ PL_SRCS= \
 FSMDataIn.pl \
 FSMDataOut.pl \
 FSMMoore.pl \
-FSMMealy.pl
+FSMMealy.pl \
+FSMMixed.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)

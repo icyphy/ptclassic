@@ -38,72 +38,40 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "EventHorizon.h"
 #include "Error.h"
 #include "InfString.h"
+#include "utilities.h"
 
-extern const char FSMdomainName[];
+	//////////////////////////////////////////
+	// Methods for FSMScheduler
+	//////////////////////////////////////////
 
-// Constructor.
 FSMScheduler::FSMScheduler() {
+    currentTime = 0;
+
     inputNameMap = NULL;
     outputNameMap = NULL;
+    internalNameMap = NULL;
     machineType = NULL;
-    currentTime = 0;
 
     myInPorts = NULL;
     myOutPorts = NULL;
-
-    curState = NULL;
-    nextState = NULL;
 }
 
 // Destructor.
 FSMScheduler::~FSMScheduler() {
     delete [] inputNameMap;
     delete [] outputNameMap;
+    delete [] internalNameMap;
     delete [] machineType;
 }
 
-// Domain identification.
-const char* FSMScheduler::domain() const {
-    return FSMdomainName;
+// Set the stopping time.
+void FSMScheduler::setStopTime(double) {
+    // reactive system takes no time to output.
 }
 
-extern int warnIfNotConnected (Galaxy&);
-
-// Initialization.
-void FSMScheduler::setup() {
-    clearHalt();
-    currentTime = 0;
-
-    if (!galaxy()) {
-	Error::abortRun("FSMScheduler has no galaxy.");
-	return;
-    }
-
-    if (warnIfNotConnected(*galaxy())) return;
-
-    // Create the Tcl interpreter for evaluting the conditions in each state.
-    // "myInterp" will be passed to each state, so it should be created
-    // before galaxy()->initialize()
-    if (!(myInterp = Tcl_CreateInterp())) {
-      Error::abortRun("FSMScheduler:", " Couldn't create a Tcl interpreter!");
-      return; 
-    }
-
-    // Setup InPorts/OutPorts. These information will be used in each state
-    // setup method, so it should be before galaxy()->initialize().
-    if (!setupIOPorts()) return;
-
-    galaxy()->initialize();
-
-    if (!checkStars()) return;
-
-    // After checkStars(), myInPorts/myOutPorts are setup.
-    // Now get the outer parent.
-//    MPHIter nexti(*(myInPorts));
-//    PortHole *p = nexti++;
-//    EventHorizon * eh = p->far()->asEH();
-//    myOuterParent = eh->ghostAsPort()->parent()->parent();
-//    if (!myOuterParent) return;
+// Set the stopping time when inside a Wormhole. */
+void FSMScheduler::resetStopTime(double) {
+    // reactive system takes no time to output.
 }
 
 int FSMScheduler::setupIOPorts() {
@@ -132,78 +100,96 @@ int FSMScheduler::setupIOPorts() {
     }
 
     // Set the name of each PortHole in the input/output MultiPortHole.
-    if (!setNameMap(*myInPorts,inputNameMap))   return FALSE;
-    if (!setNameMap(*myOutPorts,outputNameMap)) return FALSE;
+    if (!setNameMap(*myInPorts,inputNameMap))    return FALSE;
+    if (!setNameMap(*myOutPorts,outputNameMap))  return FALSE;
 
     return TRUE;
 }
 
 int FSMScheduler::setNameMap(MultiPortHole& mph, const char* Name_Map) {
-    int numQuote = 0;
-    int start = 0;
-    int end = 0;
+    int nNames = 0;
+    char **parsedName = strParser(Name_Map,nNames,"double-quote"); 
+    if (!parsedName)  return FALSE;
 
-    while (Name_Map[start] != '\0') {
-      if (Name_Map[start] == '\"') numQuote++;
-      start++;
-    }
+    if (nNames != mph.numberPorts()) {
+      delete [] parsedName;
 
-    if (numQuote%2 != 0) {
-      InfString buf = "Cannot parse the ";
+      InfString buf = "FSMScheduler: The number of specified ";
       buf << mph.isItInput() ? "input" : "output";
-      buf << " NameMap. Unmatched double-quote.";
-      Error::abortRun("FSMScheduler: ", buf);
-      return FALSE;		      
-    }
-
-    if (numQuote/2 != mph.numberPorts()) {
-      InfString buf = mph.isItInput() ? "input" : "output";
-      buf << " names don't match the number of PortHoles in the MultiPortHole.";
-      Error::abortRun("FSMScheduler: ", "The number of specified ", buf);
+      buf << " names don't match the number of PortHoles in the ";
+      buf << "MultiPortHole.";
+      Error::abortRun(buf);
       return FALSE;
     }
 
-    char* name = 0;
     MPHIter nextp(mph);
     PortHole* p;
-    start = 0;
-    end = 0;
-    while (1) {
-      // Skip all the prefix spaces.
-      while (Name_Map[start] == ' ') start++;
-      
-      if (Name_Map[start] == '\0') break ; // Hit end of string.
-      
-      // Find the left-side quote.
-      if (Name_Map[start] != '\"') {
-	InfString buf = "Cannot parse the ";
-	buf << mph.isItInput() ? "input" : "output";
-	buf << "NameMap. Each name must be embraced in a pair ";
-	buf << "of double-quotes.";
-	Error::abortRun("FSMScheduler: ", buf);
-	return 0;
-      }
-      start++;
-      end = start;
-	
-      // Find the right-side quote.
-      while (Name_Map[end]!='\"') end++;
-	
-      name = (char *)new char[end-start+1];
-      for (int i = 0; i<end-start; i++) {
-	name[i] = Name_Map[start+i];
-      }
-      name[i] = '\0'; 
-
-      p = nextp++;
-      p->setName((const char*)name);
-
-      start = end+1;
+    int indx = 0;
+    while ( (p = nextp++) != NULL ) {
+      p->setName((const char*)parsedName[indx]);
+      indx++;
     }
+
+    delete [] parsedName;
+
     return TRUE;
 }
 
-int FSMScheduler::checkStars() {
+// isA
+ISA_FUNC(FSMScheduler,Scheduler);
+
+
+	//////////////////////////////////////////
+	// Methods for BasicScheduler
+	//////////////////////////////////////////
+
+// Constructor.
+BasicScheduler::BasicScheduler() {
+    curState = NULL;
+    nextState = NULL;
+}
+
+extern int warnIfNotConnected (Galaxy&);
+
+// Initialization.
+void BasicScheduler::setup() {
+    clearHalt();
+    currentTime = 0;
+
+    if (!galaxy()) {
+	Error::abortRun("BasicScheduler has no galaxy.");
+	return;
+    }
+
+    if (warnIfNotConnected(*galaxy())) return;
+
+    // Create the Tcl interpreter for evaluting the conditions in each state.
+    // "myInterp" will be passed to each state, so it should be created
+    // before galaxy()->initialize()
+    if (!(myInterp = Tcl_CreateInterp())) {
+      Error::abortRun("BasicScheduler: ", 
+		      "Couldn't create a Tcl interpreter!");
+      return; 
+    }
+
+    // Setup InPorts/OutPorts. These information will be used in each state
+    // setup method, so it should be before galaxy()->initialize().
+    if (!setupIOPorts()) return;
+
+    galaxy()->initialize();
+
+    if (!checkStars()) return;
+
+    // After checkStars(), myInPorts/myOutPorts are setup.
+    // Now get the outer parent.
+//    MPHIter nexti(*(myInPorts));
+//    PortHole *p = nexti++;
+//    EventHorizon * eh = p->far()->asEH();
+//    myOuterParent = eh->ghostAsPort()->parent()->parent();
+//    if (!myOuterParent) return;
+}
+
+int BasicScheduler::checkStars() {
     int check = 0; // To check if only one initial state exists.
     GalTopBlockIter next(*galaxy());
     Block *bl;
@@ -212,14 +198,14 @@ int FSMScheduler::checkStars() {
       if (bl->isA("FSMStateStar")) {
 	if (!strcmp(machineType,"Moore")) {
 	  if (!bl->isA("FSMMoore")) {
-	    Error::abortRun("FSMScheduler: ",
+	    Error::abortRun("BasicScheduler: ",
 			    "Non-supported state star found in your state ",
 			    "transition diagram. Should be FSMMoore.");
 	    return FALSE;  
 	  }
 	} else {
 	  if (!bl->isA("FSMMealy")) {
-	    Error::abortRun("FSMScheduler: ",
+	    Error::abortRun("BasicScheduler: ",
 			    "Non-supported state star found in your state ",
 			    "transition diagram. Should be FSMMealy.");
 	    return FALSE;  
@@ -234,12 +220,12 @@ int FSMScheduler::checkStars() {
     }   // end of while ((bl = next++) != 0) 
 
     if (check > 1) {
-      Error::abortRun("FSMScheduler: ",
+      Error::abortRun("BasicScheduler: ",
 		      "Can't have more than one initial state.");
       return FALSE;  
     }
     else if (check == 0) {
-      Error::abortRun("FSMScheduler: ",
+      Error::abortRun("BasicScheduler: ",
 		      "No initial state. At least one is necessary.");
       return FALSE;  
     }
@@ -249,9 +235,9 @@ int FSMScheduler::checkStars() {
 
 
 // Run (or continue) the simulation.
-int FSMScheduler::run() {
+int BasicScheduler::run() {
     if (SimControl::haltRequested() || !galaxy()) {
-	Error::abortRun("FSMScheduler has no galaxy to run");
+	Error::abortRun("BasicScheduler has no galaxy to run");
 	return FALSE;
     }
 
@@ -262,7 +248,6 @@ int FSMScheduler::run() {
     while ((p = nexti++) != 0) {
       // Get data from Geodesic to PortHole.
       p->receiveData(); 
-//printf("input name %s with value : %f\n",p->name(),double((*p)%0));
 
       //register the input data into Tcl interpreter.
       InfString buf = double((*p)%0);
@@ -286,7 +271,7 @@ int FSMScheduler::run() {
     else {
       // Mealy machine
       if (condNum == -1) {
-	Error::abortRun("FSMScheduler: ",
+	Error::abortRun("BasicScheduler: ",
 			"No IMPLICIT reflexive transition is allowed",
 			"in Mealy machine.");
 	return FALSE;
@@ -314,12 +299,5 @@ int FSMScheduler::run() {
     return !SimControl::haltRequested();
 }
 
-// Set the stopping time.
-void FSMScheduler::setStopTime(double) {
-    // reactive system takes no time to output.
-}
-
-// Set the stopping time when inside a Wormhole. */
-void FSMScheduler::resetStopTime(double) {
-    // reactive system takes no time to output.
-}
+// isA
+ISA_FUNC(BasicScheduler,FSMScheduler);

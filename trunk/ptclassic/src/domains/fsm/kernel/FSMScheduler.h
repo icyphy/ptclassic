@@ -40,6 +40,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "FSMStateStar.h"
 #include "FSMPortHole.h"
 
+extern const char FSMdomainName[];
+
 class FSMScheduler : public Scheduler
 {
 public:
@@ -49,14 +51,11 @@ public:
     // Destructor
     ~FSMScheduler();
 
+    // class identification
+    int isA(const char*) const;
+
     // Domain identification.
-    /*virtual*/ const char* domain() const;
-
-    // Initialization.
-    /*virtual*/ void setup();
-
-    // Run (or continue) the simulation.
-    /*virtual*/ int run();
+    /*virtual*/ const char* domain() const { return FSMdomainName; }
 
     // Get the stopping time.
     /*virtual*/ double getStopTime() { return double(0); }
@@ -67,18 +66,20 @@ public:
     // Set the stopping time when inside a Wormhole.
     /*virtual*/ void resetStopTime(double);
 
-    // Type of this machine.       //--|
-    char* machineType;             //  |
-                                   //  |
-    // Input/Output name maps.     //  |--These three will be set by Target.
+    // Input/Output name maps.     //--|
     char* inputNameMap;            //  |
-    char* outputNameMap;           //--|
+    char* outputNameMap;           //  |
+    // Internal event name maps.   //  |--These four will be set by Target.
+    char* internalNameMap;         //  |				  
+                                   //  |
+    // Type of this machine.       //  |
+    char* machineType;             //--|
 
     // Return the input/output multiport of this FSM.
     MultiPortHole* inPorts() { return myInPorts; }
     MultiPortHole* outPorts() { return myOutPorts; }
 
-    // Return the private Tcl interp.
+    // Return my own Tcl interp.
     Tcl_Interp* interp() { return myInterp; }
 
 protected:
@@ -86,24 +87,47 @@ protected:
     int setupIOPorts();
     int setNameMap(MultiPortHole& mph, const char* Name_Map);
 
-    // Check if the stars in galaxy match FSM doamin.
-    int checkStars();
-
-private:
     // The input multiport of this FSM.
     MultiPortHole* myInPorts;
 
     // The output multiport of this FSM.
     MultiPortHole* myOutPorts;
 
+    // my own Tcl interpreter
+    Tcl_Interp* myInterp;
+};
+
+	//////////////////////////////////////////
+	// class BasicScheduler
+	//////////////////////////////////////////
+
+// This is the scheduler for basic FSM model. (Moore or Mealy machine.)
+
+class BasicScheduler : public FSMScheduler
+{
+public:
+    // Constructor.
+    BasicScheduler();
+
+    // class identification
+    int isA(const char*) const;
+
+    // Initialization.
+    /*virtual*/ void setup();
+
+    // Run (or continue) the simulation.
+    /*virtual*/ int run();
+
+protected:
+    // Check if the stars in galaxy match the specific machine.
+    int checkStars();
+
+private:
     // Current state of this FSM.
     FSMStateStar* curState;
 
     // Next transition state.
     FSMStateStar* nextState;
-
-    // Private Tcl interpreter
-    Tcl_Interp* myInterp;
 };
 
 #endif

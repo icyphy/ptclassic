@@ -64,11 +64,17 @@ public:
     int isInit() { return int(isInitState); }
 
     // Return the next state according the conditions.
-    FSMStateStar *nextState(int& condNum);
+    virtual FSMStateStar *nextState(int& condNum, int=0);
 
     // Do the action.
-    virtual int doAction(int = 0);
+    virtual int doAction(int = 0) = 0;
 
+    // Execute the internal machine.
+    virtual int doInMach(int);
+
+    // Get the entry type of a possible transition out of this state.
+    virtual int getEntryType(int);
+    
 // Print out the information of this state
 void printOut();
 
@@ -87,8 +93,8 @@ protected:
 
     Star * createWormhole (const char *galname, const char* where_defined);
     const char* ptkCompile(const char *galname, const char* where_defined);
-    Geodesic** setupGeodesic (Star* worm, MultiPortHole& mph);
-    char** strParser (const char* strings,int& numStr);
-    double* str2values (const char* string,int& numValues);
+    int ioNmLists(StringList& inNmList, StringList& outNmList, Star* worm);
+    virtual Geodesic** setupGeodesic (PortList& pList, MultiPortHole* mph,
+				      Star* worm, StringList& pNmList);
 };
 #endif
