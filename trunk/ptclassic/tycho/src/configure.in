@@ -177,30 +177,42 @@ fi
 #
 AC_ARG_WITH(java, [  --with-java=DIR          use Java binaries from DIR],
         JAVAHOME=$withval, JAVAHOME=`cd /opt/SUNWjws/JDK; pwd`)
-if test ! -d $JAVAHOME; then
-    AC_MSG_ERROR(Java directory $JAVAHOME doesn't exist)
-fi
-if test ! -f $JAVAHOME/include/StubPreamble.h; then
-    AC_MSG_ERROR(There's no StubPreamble.h in $JAVAHOME/include;  use the --with-java= configure flag to specify the location of the Java Development Kit (JDK) )
-fi
 
-AC_MSG_CHECKING([for the java compiler])
-if test -f $JAVAHOME/bin/javac; then
-	AC_MSG_RESULT($JAVAHOME/bin/javac)
+#
+# If the user called configure with -without-java, then we don't
+# set TYJAVA, and we won't cd down into the tyjava directory to do the build
+#
+if test "$with_java" = "no"; then
+	AC_MSG_WARN([Configure called with -without-java, so no java checking])
+	TYJAVA=""
 else
-	AC_MSG_ERROR([Cannot find $JAVAHOME/bin/javac, try --with-java=DIR])
-fi
+	TYJAVA=tyjava
+	if test ! -d $JAVAHOME; then
+	    AC_MSG_ERROR(Java directory $JAVAHOME doesn't exist)
+	fi
 
-#
-# User specified Java architecture, used to find the jdk include files
-#
-AC_ARG_WITH(javaarchinclude, [  --with-javaarchinclude=DIR          use Java arch dependent includes from DIR],
-        JAVA_ARCH_INCLUDE=$withval, JAVA_ARCH_INCLUDE="$JAVAHOME/include/solaris")
-if test ! -d $JAVA_ARCH_INCLUDE; then
-    AC_MSG_ERROR(Java directory $JAVA_ARCH_INCLUDE doesn't exist)
-fi
-if test ! -f $JAVA_ARCH_INCLUDE/oobj_md.h; then
-    AC_MSG_ERROR(There's no oobj_md.h in $JAVA_ARCH_INCLUDE/include;  use the --with-javaarchinclude= configure flag to specify the location of the architecture dependent include files in the (JDK) )
+	if test ! -f $JAVAHOME/include/StubPreamble.h; then
+	    AC_MSG_ERROR(There's no StubPreamble.h in $JAVAHOME/include;  use the --with-java= configure flag to specify the location of the Java Development Kit (JDK), or use --without-java if you don't have Java. )
+	fi
+
+	AC_MSG_CHECKING([for the java compiler])
+	if test -f $JAVAHOME/bin/javac; then
+		AC_MSG_RESULT($JAVAHOME/bin/javac)
+	else
+		AC_MSG_ERROR([Cannot find $JAVAHOME/bin/javac, try --with-java=DIR])
+	fi
+
+	#
+	# User specified Java architecture, used to find the jdk include files
+	#
+	AC_ARG_WITH(javaarchinclude, [  --with-javaarchinclude=DIR          use Java arch dependent includes from DIR],
+	        JAVA_ARCH_INCLUDE=$withval, JAVA_ARCH_INCLUDE="$JAVAHOME/include/solaris")
+	if test ! -d $JAVA_ARCH_INCLUDE; then
+	    AC_MSG_ERROR(Java directory $JAVA_ARCH_INCLUDE doesn't exist)
+	fi
+	if test ! -f $JAVA_ARCH_INCLUDE/oobj_md.h; then
+	    AC_MSG_ERROR(There's no oobj_md.h in $JAVA_ARCH_INCLUDE/include;  use the --with-javaarchinclude= configure flag to specify the location of the architecture dependent include files in the (JDK) )
+	fi
 fi
 
 dnl Checks for libraries.
@@ -248,7 +260,7 @@ AC_SUBST(TK_LIB_SPEC)
 AC_SUBST(TK_LIB_SPEC)
 AC_SUBST(TK_SRC_DIR)
 AC_SUBST(TK_XINCLUDES)
-
+AC_SUBST(TYJAVA)
 
 AC_OUTPUT(makefile tcl.mk:../mk/tcl.mk.in java.mk:../mk/java.mk.in \
 	profile/makefile tksteal/makefile \
