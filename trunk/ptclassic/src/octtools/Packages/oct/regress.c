@@ -84,7 +84,32 @@ static st_table *xid_table;
     } \
 }
 
+/* Like TEST above, we return 0*/
+#define TEST_RET(func,value) \
+{ \
+    octStatus last; \
+    char *pkg, *msg; \
+    int code; \
+    char buffer[256]; \
+\
+    if (!setjmp(errJmpBuf)) { \
+        errIgnPush(); \
+        if ((last = func) != value) { \
+	    (void) sprintf(buffer, "func returned %d, expected %d", last, value); \
+            LOG(buffer); \
+	    return 0; \
+        } \
+    } \
+    errIgnPop(); \
+    if (errStatus(&pkg, &code, &msg) && (code != value)) { \
+	(void) sprintf(buffer, "func returned %d, expected %d (%s)", code, value, msg); \
+        LOG(buffer); \
+	return 0; \
+    } \
+}
+
 #define TEST_OK(func)			TEST(func, OCT_OK)
+#define TEST_RET_OK(func)		TEST_RET(func, OCT_OK)
 #define TEST_ERROR(func)		TEST(func, OCT_ERROR)
 #define TEST_NOT_ATTACHED(func)		TEST(func, OCT_NOT_ATTACHED)
 #define TEST_ALREADY_ATTACHED(func)	TEST(func, OCT_ALREADY_ATTACHED)
@@ -497,11 +522,11 @@ octObjectMask mask;
     octGenerator gen;
     octObject dummy;
 
-    TEST_OK(octInitGenContents(obj, mask, &gen));
+    TEST_RET_OK(octInitGenContents(obj, mask, &gen));
     while (octGenerate(&gen, &dummy) == OCT_OK) {
 	count++;
     }
-    TEST_OK(octFreeGenerator(&gen));
+    TEST_RET_OK(octFreeGenerator(&gen));
     return count;
 }
 
