@@ -19,10 +19,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	explanation {
 This star computes the sine of the input, which must be in the range
 (-1.0, 1.0).
-The output equals sin($~pi~cdot~$\fIin\fR$+\fIphase\fR),
+The output equals sin($~pi~cdot~$\fIin\fR$+\fIphase\fR$),
 so the input range is effectively (-$~pi$, $pi~$).
 The output is in the range (-1.0, 1.0).
-The parameter \fIphase\fR is in degrees (.e.g, cos() would use phase=90).
+The parameter \fIphase\fR is in degrees (e.g., cos() would use phase=90).
 	}
 	input {
 		name {input}
