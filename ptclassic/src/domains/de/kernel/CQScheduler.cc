@@ -38,6 +38,7 @@ static const char file_id[] = "$RCSfile$";
 #include "GalIter.h"
 #include "IntState.h"
 #include <assert.h>
+#include "checkConnect.h"
 
 extern const char DEdomainName[];
 
@@ -53,9 +54,6 @@ extern const char DEdomainName[];
 StringList CQScheduler :: displaySchedule () {
     return "{ { scheduler \"Calendar queue run-time scheduler\" } }";
 }
-
-
-extern int warnIfNotConnected (Galaxy&);
 
 	////////////////////////////
 	// setup
