@@ -9,7 +9,7 @@
 # link) -- that way a separate directory containing, say, Sun-3 and Sun-4
 # objects can be maintained.
 
-include ../../../../subdomain.mk
+include ../../../../mk/subdomain.mk
 
 DIRS = stars
 
