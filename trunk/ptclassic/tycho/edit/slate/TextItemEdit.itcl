@@ -175,6 +175,7 @@ class ::tycho::TextItemEdit {
 # Activate the interactor on an item.
 # 
 body ::tycho::TextItemEdit::activate {t x y args} {
+puts "::tycho::TextItemEdit::activate $t $x $y $args"
     # If already editing another item, deactivate from it first
     if { $target != "" } {
 	deactivate
@@ -200,21 +201,22 @@ body ::tycho::TextItemEdit::activate {t x y args} {
     ::bind $slate <Key> "$this key %A %K %s $args"
 
     # Execute the user-specified activation command
-    execute $activatecommand $x $y $args
+    if { $activatecommand != "" } {
+        uplevel #0 $activatecommand $target $x $y
+    }
 
     # Set up the mouse bindings for drag-selecting. This uses
-    # the default button (button  1, and any other button that
-    # has no more specific binding), NOT the button used to activate this
+    # the default button (button  1), NOT the button used to activate this
     # interactor. This could be parameterised with an option, but
     # I doubt it's necessary.
     $slate bind $target \
-	    [eval ::tycho::Interactor::event Click] \
-	    [list @scope [info class] "$this click %x %y $args"]
+	    [eval ::tycho::Interactor::event Click -button 1] \
+	    "$this click %x %y $args"
 
     # Also a binding to detect a double-click, for word-dragging
     $slate bind $target \
-	    [eval ::tycho::Interactor::event DoubleClick] \
-	    [list @scope [info class] "$this dbclick"]
+	    [eval ::tycho::Interactor::event DoubleClick -button 1] \
+	    "$this dbclick"
 
     # Start the interaction sequence
     eval click $x $y $args
@@ -237,14 +239,14 @@ body ::tycho::TextItemEdit::click {x y args} {
     # Create the motion events
     $slate bind $target \
 	    [eval ::tycho::Interactor::event Motion] \
-	    [list @scope [info class] "$this drag %x %y"]
+	    "$this drag %x %y"
     $slate bind $target \
 	    [eval ::tycho::Interactor::event Release] \
-	    [list @scope [info class] "$this release"]
+	    "$this release"
 
-    # Forward to a proxy if there is one
-    if { $proxy != "" } {
-	@scope [$proxy info class] "eval $proxy click $x $y $args"
+    # Forward to a cascaded interactor if there is one
+    if { $cascaded != "" } {
+	eval $cascaded click $x $y $args
     }
 }
 
@@ -265,10 +267,10 @@ body ::tycho::TextItemEdit::dbclick {} {
     # For some reason, it is necessary to make the motion bindings again...
     $slate bind $target \
 	    [eval ::tycho::Interactor::event Motion] \
-	    [list @scope [info class] "$this drag %x %y"]
+	    "$this drag %x %y"
     $slate bind $target \
 	    [eval ::tycho::Interactor::event Release] \
-	    [list @scope [info class] "$this release"]
+	    "$this release"
 }
 
 #######################################################################
@@ -295,7 +297,9 @@ body ::tycho::TextItemEdit::deactivate {args} {
     $this enable
 
     # Call the deactivation command. This must follow the above bindings!
-    execute $deactivatecommand
+    if { $deactivatecommand != "" } {
+        uplevel #0 $deactivatecommand $target $x $y
+    }
 
     # Clear the target
     target {}
@@ -309,11 +313,14 @@ body ::tycho::TextItemEdit::deactivate {args} {
 body ::tycho::TextItemEdit::drag {x y} {
     select adjust @$x,$y
 
-    # Forward to a proxy if there is one
-    if { $proxy != "" } {
-	@scope [$proxy info class] "eval $proxy drag $x $y"
+    # Forward to a cascaded interactor if there is one
+    if { $cascaded != "" } {
+	$cascaded drag $x $y
     }
-    # execute $dragcommand $x $y
+    # Call the drag command
+    if { $dragcommand != "" } {
+        uplevel #0 $dragcommand $target $x $y
+    }
 }
 
 #######################################################################
@@ -550,6 +557,7 @@ body ::tycho::TextItemEdit::stop {} {
 # Manipulate the selection in useful ways.
 #
 body ::tycho::TextItemEdit::select {mode args} {
+puts "::tycho::TextItemEdit::select $mode $args"
     switch -exact $mode {
 	"adjust" {
 	    # Move the end of the selection to the given index
@@ -594,13 +602,13 @@ body ::tycho::TextItemEdit::select {mode args} {
 	}
 	"clear" {
 	    if { ! ([$slate select item] == "") } {
-		$slate select clear
+		$slate _select clear
 	    }
 	}
 	"delete" {
 	    if { ! ([$slate select item] == "") } {
 		$slate dchars $target sel.first sel.last
-		$slate select clear
+		$slate _select clear
 	    }
 	}
 	"exists" {
