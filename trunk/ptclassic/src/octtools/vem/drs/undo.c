@@ -31,6 +31,7 @@ static char SccsId[]="$Id$";
 #include "oct.h"
 #include "oh.h"
 #include "message.h"
+#include "windows.h"
 /*
   -------------------------------
   $Header$
@@ -107,9 +108,11 @@ octId facetid;
 }
 
 
-printproblem(fp,str,arg1,arg2,arg3,arg4,arg5,arg6)
+
+void printproblem(fp,str,arg1,arg2,arg3,arg4,arg5,arg6)
 FILE *fp;
 char *str;
+int arg1,arg2,arg3,arg4,arg5,arg6;
 {
 #ifdef DEBUGCL
     char buf[300];
@@ -139,7 +142,7 @@ enum st_retval printCLSize( key, value, arg )
 
     count = ohCountContents( &clist, OCT_CHANGE_RECORD_MASK );
     
-    printf( "CL %d: %d records\n", clId, count );
+    printf( "CL %ld: %d records\n", (long)clId, count );
 
     return ST_CONTINUE;
 }
@@ -160,15 +163,15 @@ octId facetid;
     octObject facet, cl, cr, obj;
     octId clid;
     static octGenerator *crg = 0;
-    int start, retval;
+    int start, retval = 0;
     char *ptr;
     int eventCount = 0;		/* Count events that are undone. */
     int eventLength = 0;	/* Length of change list. */
 #ifdef DEBUGCL
-    FILE *dump;
+    FILE *dump = (FILE *)NULL;
     octGenerator pcrg;
 #else
-    int dump; /* so the printproblem stuff doesn't complain */
+    int dump = 0; /* so the printproblem stuff doesn't complain */
 #endif
 	
     /*
@@ -241,7 +244,6 @@ octId facetid;
 	octObject container, objn;
 	octPoint pt_array[10];
 	int retval1, retval2;
-	char errstr[200];
 	int32 xid, num_points;
 
 	octExternalId(&cr,&xid);
