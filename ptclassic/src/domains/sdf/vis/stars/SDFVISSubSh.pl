@@ -1,7 +1,7 @@
 defstar {
 	name { QuadSub16 }
 	domain { SDF }
-	version { $Date$ $Id$}
+	version { $Date$ $Id$ }
 	author { William Chen }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -43,4 +43,3 @@ limitation of liability, and disclaimer of warranty provisions.
           Out%0 << diff;
       	}
 }
-
