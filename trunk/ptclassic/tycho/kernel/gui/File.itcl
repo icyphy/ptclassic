@@ -242,8 +242,8 @@ class ::tycho::File {
     # Open a file browser, and then open an editor for the file.
     method openWinMethod {} {}
 
-    # Create an entry widget, and then open an editor for the file.
-    method openWinMethod2 {} {}
+    # Open a file from a "minibuffer."
+    method openWinMinibuffer {} {}
 
     # Print the contents of the file. The default behavior is an error.
     method print {}
@@ -472,9 +472,7 @@ body ::tycho::File::constructor {args} {
     bind $prefix <Control-x><Control-r> "$this evaluate; break"
     bind $prefix <Control-x><Control-q> "$this toggleReadOnly; break"
     bind $prefix <Control-x><v> "$this revisionControl; break"
-
-    # Experimental binding: open using status bar
-    bind $prefix <Control-x><Control-F> "$this openWinMethod2; break"
+    bind $prefix <Control-x><Control-F> "$this openWinMinibuffer; break"
 
     # The following initialize options and then invoke any
     # configuration options, assuming there are options specified.
@@ -785,23 +783,27 @@ body ::tycho::File::openWinMethod {} {
 }
 
 #####################################################################
-#### openWinMethod2
+#### openWinMinibuffer
 # Place an entry widget in the status bar, if there is one, and
 # set it up so that Return opens the file in it. If there is
-# no statusbar, call OpenWinMethod{}.
+# no statusbar, call openWinMethod{}.
 # The editor is chosen based on the file extension, if the extension
 # is recognized.  Otherwise, the <code>Edit</code> class is used to open an
 # ordinary text editor.
 #
-body ::tycho::File::openWinMethod2 {} {
+body ::tycho::File::openWinMinibuffer {} {
     if { [statusbar] == "" } {
         openWinMethod
     } else {
         if { $completeFilePath == "NoName" } {
             set default [pwd]
         } else {
-            set default [::tycho::url dirname $completeFilePath] 
+            set default [::tycho::url dirname $completeFilePath]
         }
+	append default [::tycho::directorySeparator]
+
+	# FIXME: Supply the -tabcommand option in order to
+	# make tab-completion work
         statusbar entry "Open File:" \
                 -default $default \
                 -command "::tycho::openContext %%; $this statusbar puts {}"
