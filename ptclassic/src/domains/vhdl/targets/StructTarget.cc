@@ -46,7 +46,7 @@ StructTarget :: StructTarget(const char* name,const char* starclass,
 			 const char* desc) :
 VHDLTarget(name,starclass,desc) {
   regsUsed = 0;
-  selsUsed = 0;
+  muxsUsed = 0;
   sorsUsed = 0;
   addCodeStreams();
   initCodeStreams();
@@ -223,7 +223,7 @@ void StructTarget :: trailerCode() {
   }
   
   // Iterate through the state list and connect registers and
-  // initial value selectors for each referenced state.
+  // initial value multiplexors for each referenced state.
   VHDLStateListIter nextState(stateList);
   VHDLState* state;
   while ((state = nextState++) != 0) {
@@ -244,7 +244,7 @@ void StructTarget :: trailerCode() {
 
       signalList.put(initName, state->type, "", "");
       connectRegister(state->lastRef, tempName, state->type);
-      connectSelector(tempName, state->firstRef, initName, state->type);
+      connectMultiplexor(tempName, state->firstRef, initName, state->type);
       connectSource(state->initVal, initName);
     }
   }
@@ -316,8 +316,8 @@ void StructTarget :: frameCode() {
   if (registers()) {
     myCode << regCode();
   }
-  if (selectors()) {
-    myCode << selCode();
+  if (multiplexors()) {
+    myCode << muxCode();
   }
   if (sources()) {
     myCode << sourceCode();
@@ -512,8 +512,12 @@ void StructTarget :: registerState(State* state, const char* varName,
     // If it's the first firing to refer to this state,
     if (isFirstStateRef) {
       if (constState) {
+	/*
 	firingSignalList.put(root, stType, "", root);
 	firingPortMapList.put(root, root);
+	*/
+	firingSignalList.put(root, stType, "", root);
+	firingPortMapList.put(refIn, root);
       }
       if (!(constState)) {
 	firingSignalList.put(refIn, stType, "", refIn);
@@ -528,8 +532,12 @@ void StructTarget :: registerState(State* state, const char* varName,
       StringList stateSignal = root;
       stateSignal << "_" << listState->lastFiring << "_Out";
       if (constState) {
+	/*
 	firingSignalList.put(root, stType, root, root);
 	firingPortMapList.put(root, root);
+	*/
+	firingSignalList.put(root, stType, root, root);
+	firingPortMapList.put(refIn, root);
       }
       if (!(constState)) {
 	firingSignalList.put(stateSignal, stType, stateSignal, refIn);
@@ -539,9 +547,14 @@ void StructTarget :: registerState(State* state, const char* varName,
     }
 
     if (constState) {
+      /*
       firingVariableList.put(ref, stType, "");
       firingPortVarList.put(root, ref);
       firingPortList.put(root, "IN", stType);
+      */
+      firingVariableList.put(ref, stType, "");
+      firingPortVarList.put(refIn, ref);
+      firingPortList.put(refIn, "IN", stType);
     }
     if (!(constState)) {
       firingSignalList.put(refOut, stType, refOut, "");
@@ -600,13 +613,13 @@ void StructTarget :: registerSource(StringList /*type*/) {
   registerCompDecl(name, portList, genList);
 }
 
-// Connect a selector between the given input and output signals.
-void StructTarget :: connectSelector(StringList inName, StringList outName,
+// Connect a multiplexor between the given input and output signals.
+void StructTarget :: connectMultiplexor(StringList inName, StringList outName,
 				     StringList initVal, StringList /*type*/) {
-      registerSelector("INTEGER");
+      registerMultiplexor("INTEGER");
       StringList label = outName;
-      label << "_SEL";
-      StringList name = "Sel";
+      label << "_MUX";
+      StringList name = "Mux";
 //      name << "_" << type;
       name << "_" << "INT";
 
@@ -623,12 +636,12 @@ void StructTarget :: connectSelector(StringList inName, StringList outName,
       registerCompMap(label, name, portMapList, genMapList);
 }
 
-// Add a selector component declaration.
-void StructTarget :: registerSelector(StringList /*type*/) {
-  // Set the flag indicating selectors and sources are needed.
-  setSelectors();
+// Add a multiplexor component declaration.
+void StructTarget :: registerMultiplexor(StringList /*type*/) {
+  // Set the flag indicating multiplexors and sources are needed.
+  setMultiplexors();
 
-  StringList name = "Sel";
+  StringList name = "Mux";
 //  name << "_" << type;
   name << "_" << "INT";
 
@@ -737,12 +750,14 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* varName,
 
 // Return the assignment operator for States.
 const char* StructTarget :: stateAssign() {
+  // FIXME: Make these perm. strings (hash or save)
   const char* assign = ":=";
   return assign;
 }
 
 // Return the assignment operator for PortHoles.
 const char* StructTarget :: portAssign() {
+  // FIXME: Make these perm. strings (hash or save)
   const char* assign = "<=";
   return assign;
 }
@@ -1231,21 +1246,21 @@ StringList StructTarget :: regCode() {
   return codeList;
 }
 
-// Generate the selector entity and architecture.
-StringList StructTarget :: selCode() {
+// Generate the multiplexor entity and architecture.
+StringList StructTarget :: muxCode() {
   StringList codeList;
   codeList << "\n";
-  codeList << "     -- Sel_INT : initial value selector of type INT\n";
-  codeList << "entity Sel_INT is\n";
+  codeList << "     -- Mux_INT : initial value multiplexor of type INT\n";
+  codeList << "entity Mux_INT is\n";
   codeList << "	port(\n";
   codeList << "		control: IN BOOLEAN;\n";
   codeList << "		init_val: IN INTEGER;\n";
   codeList << "		input: IN INTEGER;\n";
   codeList << "		output: OUT INTEGER\n";
   codeList << "	);\n";
-  codeList << "end Sel_INT;\n";
+  codeList << "end Mux_INT;\n";
   codeList << "\n";
-  codeList << "architecture behavior of Sel_INT is\n";
+  codeList << "architecture behavior of Mux_INT is\n";
   codeList << "	begin\n";
   codeList << "		process (control, init_val, input)\n";
   codeList << "		begin\n";

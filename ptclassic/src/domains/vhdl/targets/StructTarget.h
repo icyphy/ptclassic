@@ -167,11 +167,12 @@ private:
 	// Add a source component declaration.
 	void registerSource(StringList);
 
-	// Connect a selector between the given input and output signals.
-	void connectSelector(StringList, StringList, StringList, StringList);
+	// Connect a multiplexor between the given input and output signals.
+	void connectMultiplexor(StringList, StringList, StringList,
+				StringList);
 
-	// Add a selector component declaration.
-	void registerSelector(StringList type);
+	// Add a multiplexor component declaration.
+	void registerMultiplexor(StringList type);
 
 	// Connect a register between the given input and output signals.
 	void connectRegister(StringList, StringList, StringList);
@@ -188,14 +189,14 @@ private:
 	// Return the condition indicating if registers are needed.
         int registers() { return regsUsed; }
 
-	// Flag indicating if selectors are needed.
-        int selsUsed;
+	// Flag indicating if multiplexors are needed.
+        int muxsUsed;
 
-	// Set the condition indicating selectors are needed.
-	void setSelectors() { selsUsed = 1; }
+	// Set the condition indicating multiplexors are needed.
+	void setMultiplexors() { muxsUsed = 1; }
 
-	// Return the condition indicating if selectors are needed.
-        int selectors() { return selsUsed; }
+	// Return the condition indicating if multiplexors are needed.
+        int multiplexors() { return muxsUsed; }
 
 	// Flag indicating if sources are needed.
         int sorsUsed;
@@ -255,8 +256,8 @@ private:
 	// Generate the register entity and architecture.
 	StringList regCode();
 
-	// Generate the selector entity and architecture.
-	StringList selCode();
+	// Generate the multiplexor entity and architecture.
+	StringList muxCode();
 
 	// Generate the source entity and architecture.
 	StringList sourceCode();
