@@ -83,7 +83,7 @@ void NamedList::prepend(Pointer object, const char* name)
 }
 
 // Get a named object from the list.
-// Return NULL on error.
+// Return a null pointer on error.
 Pointer NamedList::get(const char* name) const
 {
     NamedNode* node = getNamedNode(name);
@@ -109,23 +109,22 @@ void NamedList::deleteNodes()
 {
     ListIter node(*this);
     NamedNode* n;
-    while ((n = (NamedNode*)node++) != NULL)
-    {
+    while ((n = (NamedNode*)node++) != 0) {
+	SequentialList::remove(n);
 	LOG_DEL; delete n;
+	node.reset();
     }
 }
 
 // Get the NamedNode for a named object in the list.
-// Return NULL on error.
+// Return a null pointer on error.
 NamedNode* NamedList::getNamedNode(const char* name) const
 {
     NamedNode* n = 0;
-    if (name == 0)
-    {
+    if (name == 0) {
 	n = (NamedNode*)SequentialList::head();
     }
-    else
-    {
+    else {
 	ListIter node(*this);
 	while ((n = (NamedNode*)node++) != 0)
 	{
