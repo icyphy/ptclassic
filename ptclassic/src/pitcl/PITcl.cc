@@ -327,8 +327,7 @@ int PTcl::schedule(int argc,char **) {
 	// be returned
 	universe->initTarget();
 	if (SimControl::haltRequested()) {
-		Tcl_SetResult(interp, "Error setting up the schedule.", 
-			      TCL_STATIC);
+		Error::error("Error setting up the schedule.");
 		return TCL_ERROR;
 	}
 	return result(universe->displaySchedule());
@@ -340,8 +339,7 @@ int PTcl::run(int argc,char ** argv) {
 
 	universe->initTarget();
 	if (SimControl::haltRequested()) {
-		Tcl_SetResult(interp, "Error setting up the schedule.", 
-			      TCL_STATIC);
+		Error::error("Error setting up the schedule.");
 		return TCL_ERROR;
 	}
 	stopTime = 0.0;
@@ -502,8 +500,7 @@ int PTcl::targetparam(int argc,char ** argv) {
 	if (definingGal && currentTarget) t = currentTarget;
 	State* s = t->stateWithName(argv[1]);
 	if (!s) {
-		sprintf (interp->result, "No such target parameter: %s",
-			 argv[1]);
+		Error::error("No such target parameter: ", argv[1]);
 		return TCL_ERROR;
 	}
 	if (argc == 1) {
