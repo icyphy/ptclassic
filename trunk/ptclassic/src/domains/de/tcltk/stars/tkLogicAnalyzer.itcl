@@ -1,0 +1,73 @@
+# Tcl front end for LogicAnalyzer class in the DE domain.
+# Author: Matthew T. Tavis
+# Version: $Id$
+
+itcl_class LogicAnalyzerStar {
+
+    inherit TyItclScript
+
+    constructor { starID config } {
+
+	global PTOLEMY
+	global ptkControlPanel
+	global $starID
+	set starIdent $starID
+	TyItclScript::constructor $starID
+
+	# create an instance of the LogicAnalyzer class
+	ptkLogicAnalyzer myChart_$starID -starID $starID \
+		-chartName $ptkControlPanel.logicAnalyzer_$starID -numInputs \
+		[$this numInputs] -signalLabels [subst \
+		$${starID}(signalLabels)] -stopTime [stoptime] -univ \
+		[curuniverse] -title [subst $${starID}(title)] -position \
+		[subst $${starID}(position)] \
+		-height_cm [subst $${starID}(height_cm)] -width_cm \
+		[subst $${starID}(width_cm)] -TimeWindow \
+		[subst $${starID}(TimeWindow)]
+
+	# set universe to be current universe
+	set univ [curuniverse]
+
+	# set number of inputs
+	set numInputs [$this numInputs]
+    }
+
+    destructor { 
+	ptkStop $univ
+	myChart_$starID delete
+    }
+
+    protected univ ""
+    protected starIdent ""
+    protected numInputs
+
+    method go {} {
+
+	#FIXME: still relying on the starID array
+	global $starIdent
+
+	# read values
+	set ParticleVals [grabInputs]
+	puts "Values: $ParticleVals"
+	set ParticleState [grabInputsState_$starIdent]
+	puts "State: $ParticleState"
+	set arrivalTime [set ${starIdent}(arrivalTime)]
+
+	# Iterate over the portholes
+	for {set i 0} {$i < $numInputs} {incr i} {
+	    
+	    # Plot a point only if an event has occured on this input
+	    # otherwise plot the same values as last time
+	    if {[lindex $ParticleState $i] == 1} {
+		myChart_$starIdent LAPlotPoint $arrivalTime \
+			[lindex $ParticleVals $i] $i
+	    }
+	}
+    }
+    
+    method wrapup {} {
+	myChart_$starIdent LARefresh
+    }
+}
+
+LogicAnalyzerStar #auto $starID
