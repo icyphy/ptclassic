@@ -1,0 +1,24 @@
+   In order to run Ptolemy, two things are necessary:
+      1.  Create a user called "ptolemy" (no quotes). 
+      2.  Set certain environment variables correctly.  The following 
+          script, appearing in the .cshrc file of ~ptolemy, will set
+	  the appropriate values.
+------------------------------------------------------------------------------
+#/bin/csh
+if ( ! $?PTOLEMY ) then
+    setenv PTOLEMY ~ptolemy
+endif
+
+if ( ! $?OCTTOOLS ) then
+    setenv OCTTOOLS ~ptolemy/octtools
+endif
+
+if ( ! $?ARCH ) then
+    setenv ARCH snake
+endif
+
+set path=(. $PTOLEMY/bin.$ARCH $PTOLEMY/bin $PTOLEMY/octtools/bin.$ARCH $path)
+
+# if ( ! $?USER ) then setenv USER bush endif
+
+# if ( ! $?DISPLAY ) then setenv DISPLAY tereza:0.0 endif
