@@ -35,13 +35,24 @@
 # A tool bar with any of a variety of widgets.  It is meant to be put at
 # the top of a Displayer.
 #
+# Examples:
+# <pre><tcl>
+#    catch {delete object .t}
+#    ::tycho::ToolBar .t
+#    .t button foo -text Foo -command {puts Foo!}
+#    .t button bar -text Bar -command {puts Bar!}
+#    .t entry location Location {The default text} {puts}
+#    pack .t
+#    wm deiconify .
+# </tcl></pre>
+#
 # NOTE: There is a certain amount of duplication here with the
 # Query object, but enough differences that it is hard to see how to
 # merge the two.  The objectives are somewhat different.  As facilities
 # get added to each, we should try to at least keep the same interface.
 #
 class ::tycho::ToolBar {
-    inherit ::tycho::TWidget
+    inherit ::tycho::ButtonBox
 
     constructor {args} {}
     destructor {}
@@ -49,28 +60,22 @@ class ::tycho::ToolBar {
     ###################################################################
     ####                            options                        ####
 
-    # The status bar to use for print help messages.
-    itk_option define -statusbar statusBar StatusBar {}
+    # The foreground color of entry widgets
+    itk_option define -entryforeground \
+            entryForeground EntryForeground black
 
-    # The font to use.
-    itk_option define -font font Font [::tycho::font screen]
+    # The background color of entry widgets
+    itk_option define -entrybackground \
+            entryBackground EntryBackground white
 
-    # The horizontal button padding
-    itk_option define -padx padX Pad 11
-
-    # The vertical button padding
-    itk_option define -pady padY Pad 4
-
-    # The options used by the entry widgets
-    itk_option define -entryforeground entryForeground EntryForeground black
-    itk_option define -entrybackground entryBackground EntryBackground white
+    # The font used in entry widgets
     itk_option define -entryfont entryFont EntryFont 8x13
 
     ###################################################################
     ####                         public methods                    ####
 
     # Add a button to the toolbar.
-    method button {tag description args}
+    method button {tag args}
 
     # Clear all widgets or one widget.
     method clear {{tag {}}}
@@ -95,9 +100,6 @@ class ::tycho::ToolBar {
 
     # Access the "dialogs" preference set.
     protected method preference {mode args}
-
-    # Print a message to the status bar.
-    protected method putStatus {string}
 
     ##################################################################
     ####             protected and private variables              ####
@@ -129,38 +131,27 @@ class ::tycho::ToolBar {
 #
 body ::tycho::ToolBar::constructor {args} {
 
-    # A tiny bit of padding to the left of everything
-    itk_component add leftpacking {
-	frame $itk_interior.leftpacking -width 2
-    } {
-	keep -background -cursor
-    }
-    pack $itk_component(leftpacking) -side left
-
-    # Button site
-    itk_component add buttonsite {
-	frame $itk_interior.buttonsite
-    } {
-	keep -background -cursor
-    }
-    pack $itk_component(buttonsite) -side top -expand yes -fill both
-
     # Entry site
     itk_component add entrysite {
-	frame $itk_interior.entrysite
+        frame $itk_interior.entrysite
     } {
-	keep -background -cursor
+        keep -background -cursor
     }
-    pack $itk_component(entrysite) -side top -expand yes -fill x
+    # Leave a little extra padding at the sides when packing
+    pack $itk_component(entrysite) -side top \
+            -expand yes -fill x \
+            -padx 2
 
-    # Initialize options
+    # Initialize options, first setting the -ringwidth option
+    # and the -buttonwidth option also to zero
+    configure -ringwidth 0 -buttonwidth 0
     eval itk_initialize $args
-
+    
     # Subscribe to the preference set
     preference subscribeoptions $this \
-	    -entryforeground entryForeground \
-	    -entrybackground entryBackground \
-	    -entryfont entryFont
+            -entryforeground entryForeground \
+            -entrybackground entryBackground \
+            -entryfont entryFont
 }
 
 #########################################################################
@@ -169,50 +160,11 @@ body ::tycho::ToolBar::constructor {args} {
 
 #####################################################################
 #### button
-# Add a button to the toolbar at the top. The required arguments are a
-# tag for the button and itk_component and a description. The
-# description will appear in the status bar, if there is one, whenever
-# the mouse is moved into the button. Any additional arguments are
-# passed to the Tk <code>button</code> command.
-# For example,
-# <pre>
-#    button foo "a button" -text "Push Me" -command "::tycho::post Thanks"
-# </pre>
-# will create a button with label "Push Me" and the specified command.
-# To use a bitmap instead, something like the following will work:
-# <pre>
-#    global ::TYCHO
-#    button foo "a button" -bitmap @$TYCHO/kernel/img/back.xbm -command ...
-# </pre>
-# Note that buttons appear in the order they are added, from left to
-# right.  Someday we should add a way to put more buttons on a second row.
+# Add a button to the toolbar. This is just an alias for the add{}
+# method defined in the superclass, <a href="ButtonBox.html">ButtonBox</a>.
 # 
-# Note that this method shadows the Tk <code>button</code> command, so
-# you must use <code>::button</code> if you want the Tk version.
-#
-body ::tycho::ToolBar::button {tag description args} {
-    itk_component add $tag {
-	eval ::button $itk_component(buttonsite).$tag $args
-    } {
-	keep -background -font -activebackground -cursor \
-		-highlightthickness -activeforeground \
-		-foreground -highlightcolor -highlightbackground \
-		-padx -pady
-    }
-    pack $itk_component($tag) -side left
-
-    # Bind description output.
-    bind $itk_component($tag) <Enter> [code [list %Q putStatus $description]]
-    bind $itk_component($tag) <Leave> [code "%Q putStatus {}"]
-
-    # Record the tag and its access methods.  Note that clear and get
-    # do nothing.
-    lappend tags $tag
-    set tagsclear($tag) {}
-    set tagsget($tag) {$itk_component($tag) cget -text}
-    set tagsinsert($tag) {$itk_component($tag) configure -text}
-    set tagsenable($tag) "$itk_component($tag) configure -state normal"
-    set tagsdisable($tag) "$itk_component($tag) configure -state disabled"
+body ::tycho::ToolBar::button {tag args} {
+    eval add $tag $args
 }
 
 #####################################################################
@@ -230,9 +182,11 @@ body ::tycho::ToolBar::clear {{tag {}}} {
             }
         }
     } {
-        set cmd $tagsclear($tag)
-        if {$cmd != {}} {
-            eval $cmd
+	if { [::info exists tagsclear($tag)] } {
+	    set cmd $tagsclear($tag)
+	    if {$cmd != {}} {
+		eval $cmd
+	    }
         }
     }
 }
@@ -240,22 +194,38 @@ body ::tycho::ToolBar::clear {{tag {}}} {
 #####################################################################
 #### disable
 # Disable user interaction with the widget with the given tag.
+# The tag can represent a button or an entry widget. The
+# method will cause an error if the tag is not recognized.
 #
 body ::tycho::ToolBar::disable {tag} {
-    set cmd $tagsdisable($tag)
-    if {$cmd != {}} {
-        eval $cmd
+    if { ! [::info exists tagsdisable($tag)] } {
+	# Assume it's a button
+	chain $tag
+    } else {
+	# Process some other widget
+	set cmd $tagsdisable($tag)
+	if {$cmd != {}} {
+	    eval $cmd
+	}
     }
 }
 
 #####################################################################
 #### enable
 # Enable user interaction with the widget with the given tag.
+# The tag can represent a button or an entry widget. The
+# method will cause an error if the tag is not recognized.
 #
 body ::tycho::ToolBar::enable {tag} {
-    set cmd $tagsenable($tag)
-    if {$cmd != {}} {
-        eval $cmd
+    if { ! [::info exists tagsenable($tag)] } {
+	# Assume it's a button
+	chain $tag
+    } else {
+	# Process some other widget
+	set cmd $tagsenable($tag)
+	if {$cmd != {}} {
+	    eval $cmd
+	}
     }
 }
 
@@ -303,7 +273,7 @@ body ::tycho::ToolBar::entry {tag label default command args} {
     if {[regexp {(.*)\-command {(.*)}(.*)} $args]} {
         # if -command exists, then we want a button
         itk_component add label_$tag {
-            # added eval and \" \"
+            # added eval and \" \" (highlighting: ")
             eval ::button $itk_component(entrysite).label_$tag \
                     -text {$label} -relief flat $buttonarg
         } {
@@ -314,7 +284,7 @@ body ::tycho::ToolBar::entry {tag label default command args} {
     } else {
         # if no -command, we just want a regular label
         itk_component add label_$tag {
-            # added eval and \" \"
+            # added eval and \" \" (highlighting: ")
             eval ::label $itk_component(entrysite).label_$tag \
                     -text {$label} $labelarg
         } {
@@ -375,9 +345,9 @@ body ::tycho::ToolBar::entry {tag label default command args} {
 # and return as a list in the form {tag value tag value ...}.  This list
 # can be directly assigned to an array using <code>array set</code>,
 # making it easy to use the results of the query. If a tag is given as an
-# argument, return the value of the corresponding entry only. If the tag
-# is not recognized, return an empty string.  For buttons, the label
-# of the button is returned.
+# argument, return the value of the corresponding entry widget only.
+# If the tag is not recognized or is a button tag, return an empty
+# string.
 # 
 body ::tycho::ToolBar::get {{tag {}}} {
     set response {}
@@ -393,12 +363,12 @@ body ::tycho::ToolBar::get {{tag {}}} {
             lappend response $rp
         }
     } {
-        set cmd $tagsget($tag)
-        if {$cmd != {}} {
-            set response [eval $cmd]
-        } {
-            set response $tag
-        }
+	if { [::info exists tagsget($tag)] } {
+	    set cmd $tagsget($tag)
+	    if {$cmd != {}} {
+		set response [eval $cmd]
+	    }
+	}
     }
     return $response
 }
@@ -406,8 +376,7 @@ body ::tycho::ToolBar::get {{tag {}}} {
 #####################################################################
 #### insert
 # Insert the specified string into the specified entry box.
-# If the tag is not recognized, flag an error.  For button widgets,
-# the label of the button is changed.
+# If the tag is not recognized, flag an error.
 # 
 body ::tycho::ToolBar::insert {tag str} {
     set cmd $tagsinsert($tag)
@@ -430,16 +399,4 @@ body ::tycho::ToolBar::insert {tag str} {
 #
 body ::tycho::ToolBar::preference {mode args} {
     eval ::tycho::preference $mode "dialogs" $args
-}
-
-#######################################################################
-#### putStatus
-# Put an arbitrary string to the status bar. To enforce
-# wrap-around, set the wrap-length of the label to its current width.
-#
-body ::tycho::ToolBar::putStatus {string} {
-    set sb $itk_option(-statusbar)
-    if {$sb != {}} {
-        $sb puts $string
-    }
 }
