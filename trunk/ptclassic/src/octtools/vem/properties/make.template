@@ -48,7 +48,7 @@ SRCS = $(LIBCSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o)
 
-LIB =		libproperties.a
+LIB =		libproperties.$(LIBSUFFIX)
 
 # common makefile file for vem binary
 VEMBINCONFIG=../../vem-bin.mk

@@ -50,7 +50,7 @@ SRCS = $(LIBCSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o)
 
-LIB =		libpatterns.a
+LIB =		libpatterns.$(LIBSUFFIX)
 
 # common makefile file for vem binary
 VEMBINCONFIG=../../vem-bin.mk
