@@ -116,11 +116,14 @@ const int linkingNotSupported =
 #endif // PTIRIX5
 
 #if defined(PTHPPA) &&  __GNUG__ > 1
-// Uncomment the # diretives below for Neal Becker's HPPA shl_load() style
-// dynamic linking.
+// Define USE_SHLLOAD for Neal Becker's HPPA shl_load() style
+// dynamic linking.  You can add -DUSE_SHLLOAD to MISCCFLAGS in 
+// $PTOLEMY/mk/config-hppa.mk
 // To get this to work, you'll need a linker patch
 // As of 4/95 the linker patch was PHSS_5083* for hpux9.x
-#define USE_SHLLOAD
+// gcc-2.7.2 under HPUX10.01 cannot create shared libraries, so this
+// might not work.
+#ifdef USE_SHLLOAD
 #define SHARED_OBJECT_COMMAND "g++ -shared -fPIC -nostdlib -o"
 #include <dl.h>
 #include <errno.h>
