@@ -232,76 +232,56 @@ body ::tycho::Frame::_relief {args} {
 ## constructor
 #
 body ::tycho::Frame::constructor {s c x0 y0 x1 y1 args} {
-    #
     # Set the slate and canvas variables.
-    #
     set slate  $s
     set canvas $c
 
-    #
     # Extract the -color option value if there is one.
     # This is a ``speed'' hack, so that objects are already
     # created with the right color.
-    #
     getopt color args
     set colorObject [::tycho::Shades::new $color]
 
-    #
     # Extract the -borderwidth option value if there is one.
     # This is another ``speed'' hack, so that components do not
     # have to be resized later.
-    #
     getopt borderwidth args
 
-    #
     # Override defaults: shape is rectangular
-    #
     set shape "rectangular"
 
-    #
     # Initialize the list used to create the components
-    #
     set itemspecs {}
 
-    #
     # Set the traces on configuration options. If borderwidth is
     # changed, update the fill as well to resize the surface item.
-    #
     trace variable borderwidth w [code $this _borderwidth]
     trace variable borderwidth w [code $this _fill]
     trace variable relief      w [code $this _relief]
     trace variable fill        w [code $this _fill]
 
-    #
     # Add some answers.
-    #
     lappend answers [info context]
 
-    #
     # Create the primary component for the outline coordinates.
     # Note that this has an outline, but it will be obscured
     # by other components. DO NOT give this rectangle a blank
     # outline, because then it will respond to mouse events on
     # its inside (even though invisible), which makes see-through
     # frames impossible.
-    #
     lappend itemspecs "primary" [list rectangle $x0 $y0 $x1 $y1]
 
-    #
     # The way that the polygon co-ordinates is set up in the Tk
     # canvas seems somewhat bogus, so we have to futz with the
     # coordinates here.
-    #
     set	y1 [expr $y1+1]
     set	x1 [expr $x1+1]
 
-    #
     # Create the borders and the fill. This is set for the default
     # relief (raised). This should really be done
     # in the option-update methods, which is how I originally
     # had it, but duplicating some of the code here gave a
     # speed improvement	of about 40%...
-    #
     set	a0 [expr $x0 + $borderwidth]
     set	b0 [expr $y0 + $borderwidth]
     set	a1 [expr $x1 - $borderwidth]
@@ -319,14 +299,10 @@ body ::tycho::Frame::constructor {s c x0 y0 x1 y1 args} {
 	    $a0 $b0 $a1 $b1 \
 	    -outline {} -fill [$colorObject matt]]
 
-    #
     # Create the items with the itemspecs list.
-    #
     eval $this create untagged $itemspecs
 
-    #
     # Configure option variables
-    #
     eval configure $args
 }
 

@@ -47,7 +47,7 @@ class ::tycho::Bounder {
 
     ## constructor
     #
-    constructor {s c args} {
+    constructor {{s {}} {c {}} args} {
 	set slate $s
 	set canvas $c
 
