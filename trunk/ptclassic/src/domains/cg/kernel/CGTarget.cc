@@ -73,7 +73,7 @@ StringList CGTarget::indent(int depth) {
 // constructor
 CGTarget::CGTarget(const char* name,const char* starclass,
 		   const char* desc, char sep)
-: Target(name,starclass,desc), defaultStream(&myCode), schedFileName(0), noSchedule(0)
+: Target(name,starclass,desc), defaultStream(&myCode), schedFileName(0), noSchedule(0),typeConversionTable(0),typeConversionTableRows(0)
   
 {
 	separator = sep;
@@ -132,14 +132,11 @@ CGTarget::~CGTarget() {
 // Methods used in setup(), run(), wrapup(), and generateCode().
 // The default versions do nothing.
 // Return FALSE on error.
-int CGTarget :: modifyGalaxy() { return TRUE; }
 int CGTarget :: codeGenInit() { return TRUE; }
 int CGTarget :: allocateMemory() { return TRUE; }
 int CGTarget :: compileCode() { return TRUE; }
 int CGTarget :: loadCode() { return TRUE; }
 int CGTarget :: runCode() { return TRUE; }
-
-// the main guy.
 
 CommPair CGTarget::fromCGC(PortHole&) {
     CommPair empty;
@@ -177,6 +174,8 @@ AsynchCommPair CGTarget::createPeekPoke(CGTarget& /*peekTarget*/,
     AsynchCommPair dummy;
     return dummy;
 }
+
+// the main guy.
 
 void CGTarget::setup() {
 	myCode.initialize();
@@ -647,6 +646,65 @@ const char* CGTarget::lookupSharedSymbol(const char* scope, const char* name)
     return sharedSymbol.lookup(scope, name);
 }
 
+int CGTarget :: modifyGalaxy() {
+    if(!typeConversionTable) return TRUE;
+
+    extern int warnIfNotConnected (Galaxy&);
+
+    Galaxy& gal = *galaxy();
+    GalStarIter starIter(gal);
+    Star* star;
+    const char* domain = gal.domain();
+
+    // type conversion table;
+    // procession takes place in chronological order
+
+    if (warnIfNotConnected(gal)) return FALSE;
+
+    while ((star = starIter++) != NULL) {
+	BlockPortIter portIter(*star);
+	PortHole* port;
+	while ((port = portIter++) != NULL) {
+	    // Splice in type conversion stars.
+	    if (needsTypeConversionStar(*port)) {
+		// Avoid re-initializing the Galaxy, which will break
+		// things if this is a child in a MultiTarget. (Why? See
+		// comments for CGTarget::setup() method.)  Initialize it
+		// only if there is no resolved type.
+		if (port->resolvedType() == NULL) {
+		    gal.initialize();
+		    if (SimControl::haltRequested()) return FALSE;
+		    // We must now re-run modifyGalaxy, blocks & ports may
+		    // have been added or deleted in the initialize method.
+		    return modifyGalaxy();
+		}
+
+		PortHole* input = port->far();	// destination input PortHole
+
+		int i;
+		for (i=0; i < typeConversionTableRows; i++) {
+		    if (((port->type() == typeConversionTable[i].src) ||
+			 (typeConversionTable[i].src == ANYTYPE)) &&
+			((port->resolvedType() ==
+			  typeConversionTable[i].dst) ||
+			 (typeConversionTable[i].dst == ANYTYPE)))
+		    {
+			Block* s = 0;
+			if (!(s = spliceStar(input,
+					     typeConversionTable[i].star,
+					     TRUE, domain)))
+			    return FALSE;
+			else {
+			    s->setTarget(this);
+			}
+		    }
+		}
+	    }
+	}
+    }
+    return TRUE;
+}
+
 // splice star "name" to the porthole p.
 Block* CGTarget::spliceStar(PortHole* p, const char* name,
 				int delayBefore, const char* dom)
@@ -722,5 +780,15 @@ Block* CGTarget::spliceStar(PortHole* p, const char* name,
 	if (Scheduler::haltRequested()) return 0;
 
 	return newb;
+}
+
+int CGTarget::needsTypeConversionStar(PortHole& port) {
+    if (port.isItOutput()) {
+	// splice conversion star if type of output port does not
+	// match the type of the data connection
+	if ((port.type() != port.resolvedType()) && (port.type() != ANYTYPE))
+	    return TRUE;
+    }
+    return FALSE;
 }
 
