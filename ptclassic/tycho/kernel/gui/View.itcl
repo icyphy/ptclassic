@@ -1,6 +1,7 @@
 # Definition of the abstract view class
 # 
 # @Author: Farhana Sheikh
+# @Contributors: Edward A. Lee
 #
 # @Version: $Id$
 # 
@@ -69,42 +70,102 @@ class ::tycho::View {
     # Visualization State Machine that view will require
     itk_option define -vsm vsm VSM ""
 
+    # Specify the name of the File object that contains this widget.
+    itk_option define -top top Top {}
+
 
     ###################################################################
     ####                         public methods                    ####
 
-    # Add the menus of the view to its Displayer
+    # Add my menus; derived classes should redefine this method
     method addMyMenus {}
 
     # Add a subview to the view
     method addSubview {subviewName}
 
+    # Change the cursor to the "watch" and execute the arguments.
+    method busy {args}
+
+    # In derived classes, return the current point in a form usable 
+    # by seePoint.
+    method currentPoint {} {return {}}
+    
     # Disable all of the view's menus
     method disableMyMenus {}
 
     # Enable all of the view's menus
     method enableMyMenus {}
 
+    # Give the window or a subwindow the focus.
+    method focusin {}
+
+    # Open a file and go to its internal point identified by name.
+    method hyperJump {file point}
+
     # Insert this view into its Displayer
     method insertInDisplay {}
+
+    # If the -top option was given, indicate that data has been modified.
+    method markModified {}
 
     # Remove a subview from the view
     method removeSubview {subviewName}
 
+    # Find and make visible a point in the display.
+    method seePoint {point}
+
     ###################################################################
-    ####                   public variables                       ####
+    ####                         public procs                      ####
+
+    # Get the current contents of the local clipboard.
+    proc getClipboard {} {return $clipboard}
+
+    # Set the current contents of the local and Tk clipboards.
+    proc setClipboard {text} {set clipboard $text}
+
+    ###################################################################
+    ####                   public variables                        ####
+
+
+    ###################################################################
+    ####                         protected variables               ####
+
+    # A local Tycho clipboard that is mirrored in the Tk clipboard.
+    protected common clipboard {}
 
     # Name of this view's Displayer
-    public variable myDisplayer
+    protected variable myDisplayer
+
+    # Name of my menubar
+    protected variable myMenubar
 
     # Name of vsm used by this view
-    public variable myVSM ""
+    protected variable myVSM ""
+
+    # Label of this view; unique for each instance of the view.
+    protected variable viewLabel ""
 
     ###################################################################
     ####                   private variables                       ####
 
+    # List of subviews
     private variable mySubviewList {} 
-    private variable myMenuList {}
+}
+
+#########################################################################
+#### -top option configuration
+# Specify the name of the File object that contains this widget.
+# The value should be the name of a File object visible in the current scope.
+# This is used to communicate information that is displayed by the top-level
+# window, like whether the text has been modified since the last save.
+# 
+configbody ::tycho::View::top {
+    set top $itk_option(-top)
+    if {$top != {}} {
+	if {![eval $top isa ::tycho::File]} {
+	    error "-top option is not a File object : $top"
+	}
+    }
 }
 
 #######################################################################
@@ -121,8 +182,30 @@ configbody ::tycho::View::vsm {
 #
 body ::tycho::View::constructor {args} {
 
+    # import the tycho namespace
+    import add ::tycho
+
     # Get displayer for view
     set myDisplayer [winfo parent $itk_component(hull)]
+
+    # set up a unique label identifier for this view to use in calls
+    # to displayer methods
+    set length [string length $itk_component(hull)]
+    set index 0
+    while {$index < $length} {
+	set char [string index $itk_component(hull) $index]
+	if {[string compare $char .] != 0} {
+	    append viewLabel $char
+	}
+	incr index
+    }
+
+    # Register myself with my displayer here
+    set myMenubar [$myDisplayer registerView $itk_component(hull) $viewLabel]
+
+    # Derived classes should build up their menus and menu items
+    # here.
+    
     eval itk_initialize $args
 }
 
@@ -139,13 +222,10 @@ body ::tycho::View::destructor {} {
 
 #######################################################################
 #### addMyMenus
-# Add menus to Displayer specific to this view.
-# This method should be redefined for views that inherit from this 
-# class
-# 
+# Build up menus for this view.  Derived classes should redefine this
+# method to set up their specific menus.
+#
 body ::tycho::View::addMyMenus {} {
-
-    # Derived classes should add appropriate menus and menu items here 
 }
 
 #######################################################################
@@ -156,12 +236,87 @@ body ::tycho::View::addMyMenus {} {
 body ::tycho::View::addSubview {subviewName} {
 }
 
-#######################################################################
-#### removeSubview
-# This method removes a subview from parent view.  It requires the 
-# name of the subview as an argument.
+#####################################################################
+#### busy
+# Change the cursor in the interior of this widget to the "watch"
+# cursor (to indicate that the object is busy), execute the arguments
+# as a method invocation this object, and change the cursor back to
+# whatever it was before. In order for the cursor to actually change,
+# the method calls "update", and therefore the object may no longer
+# exist when the procedure returns (it might be deleted during the call
+# to update). If the object does not exist, the procedure returns 0.
+# Otherwise, it returns 1 (or an error). You should test the return
+# value immediately and return from all methods immediately. A typical
+# invocation is therefore as follows:
+# <pre>
+#     if {![busy methodname arg1 arg2]} {return}
+# </pre>
+# Be sure you are not just returning to another method.
+# If the method is invoked at the top-level, for example in response to
+# a key binding, then there is no need to test its return value.
+#
+body ::tycho::View::busy {args} {
+    set oldCursor [lindex [$itk_interior config -cursor] end]
+    $itk_interior config -cursor {watch}
+    if {![::tycho::saferUpdate $this]} {return 0}
+
+    # Catch errors so that we can reset the cursor
+    if {[catch [code [concat $this $args]] msg] != 0} {
+	$itk_interior config -cursor $oldCursor
+        global ::errorInfo
+        set saveInfo $errorInfo
+	error $msg $saveInfo
+    }
+    $itk_interior config -cursor $oldCursor
+    return 1
+}
+
+#########################################################################
+#### focusin
+# Grab the focus.  This should be redefined in derived classes to give
+# the focus to the appropriate subwindow.
+#
+body ::tycho::View::focusin {} {
+    focus $itk_component(hull)
+}
+
+#####################################################################
+#### hyperJump
+# Open a file and go to its internal point identified by name. If the
+# widget is contained by a Tycho top-level window (of class
+# <code>::tycho::TopLevel</code>), then defer to that object to process
+# the hyperjump. That object may use context information to convert
+# relative filenames. If the widget is not inside a Tycho top-level
+# window, then if the file name is the empty string, just call
+# <code>seePoint</code>, passing it the second argument. Otherwise,
+# open the resulting file using
+# <code>::tycho::File::openContext</code>, which will choose an editor
+# based on the filename extension. Then invoke <code>seePoint</code> to
+# view the specified point within the file. The format for the
+# <i>point</i> argument depends on the type of file being opened. For
+# HTML files, it will normally be the name of an anchor in the file.
+# For text files, it will normally be either "{line <i>linenumber</i>}"
+# or "{range <i>start</i> <i>end</i>}", where <i>start</i> and
+# <i>end</i> have the form <i>linenumber.characternumber</i>.
 # 
-body ::tycho::View::removeSubview {subviewName} {
+body ::tycho::View::hyperJump {file point} {
+    set tl [winfo toplevel $itk_component(hull)]
+    set tlc [winfo command $tl]
+    if {[info objects $tlc] != {} && \
+            [$tlc isa ::tycho::TopLevel]} {
+        $tlc hyperJump $file $point
+    } {
+        if {$file != {}} {
+            set obj [uplevel #0 [list ::tycho::File::openContext $file]]
+            if {$point != {}} {
+                # The seePoint call is postponed to give time for the widget
+                # to be created. The catch is in case it is immediately deleted.
+                after 200 [list catch [list $obj seePoint $point]]
+            }
+        } {
+            seePoint $point
+        }
+    }
 }
 
 #######################################################################
@@ -170,6 +325,57 @@ body ::tycho::View::removeSubview {subviewName} {
 # 
 body ::tycho::View::insertInDisplay {} {
     
-   # insert the view into the displayer
-   $myDisplayer setView $itk_component(hull)
+    # Build up my menus
+    addMyMenus
+
+    # insert the view into the displayer
+    $myDisplayer setView $viewLabel
+
+    # This should be changed in derived classes to give
+    # focus to subwindows.
+    ::bind $itk_component(hull) <Enter> \
+	    "$myDisplayer configure \
+	    -menubar [$myDisplayer menubar $viewLabel]; \
+	    focus %W"
 }
+
+#####################################################################
+#### markModified
+# If the -top option was given, call the markModified method of the
+# specified File object.
+#
+body ::tycho::View::markModified {} {
+    set top $itk_option(-top)
+    if {$top != {}} {
+	$top markModified
+    }
+}
+
+#######################################################################
+#### removeSubview
+# This method removes a subview from parent view.  It requires the 
+# name of the subview as an argument.
+# 
+body ::tycho::View::removeSubview {subviewName} {
+}
+
+#####################################################################
+#### seePoint
+# In derived classes, this method will go to the point in the display
+# identified by the name argument.  What this means depends on what
+# type of data being displayed.  In this base class, do
+# nothing.
+#
+body ::tycho::View::seePoint {point} {
+}
+
+#####################################################################
+#### setClipboard
+# Set the current contents of the local and Tk clipboards.
+#
+body ::tycho::View::setClipboard {text} {
+    set clipboard $text
+    clipboard clear
+    clipboard append -- $text
+}
+
