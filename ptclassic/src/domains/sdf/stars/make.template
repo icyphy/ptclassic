@@ -58,6 +58,8 @@ PL_SRCS= \
  SDFDB.pl \
  SDFDTFT.pl \
  SDFDct.pl \
+ SDFDctCode.pl \
+ SDFDctCodeInv.pl \
  SDFDctInv.pl \
  SDFDeMux.pl \
  SDFDiffImage.pl \
@@ -98,8 +100,8 @@ PL_SRCS= \
  SDFLimit.pl \
  SDFLog.pl \
  SDFMedianImage.pl \
- SDFMotionCmp.pl \
- SDFMotionCmpInv.pl \
+ SDFmotionCmp.pl \
+ SDFmotionCmpInv.pl \
  SDFMux.pl \
  SDFNewQuant.pl \
  SDFNumToBus.pl \
