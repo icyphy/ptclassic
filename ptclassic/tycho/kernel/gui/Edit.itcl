@@ -309,7 +309,7 @@ body ::tycho::Edit::altFile {} {
 	$itk_component(text) setInsert 1.0
 	windowMenuRemoveAll $prevfile
 	windowMenuAddAll $this $filename
-	set $itk_option(-file) $filename
+	$this configure -file $filename
     } 
 }
 
