@@ -8,7 +8,7 @@
 # This is a modified version to support a PTOLEMY environment variable.
 #
 # Version: $Id$
-# Copyright (c) 1990-1995 The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # 	All Rights Reserved.
 #
 
@@ -39,22 +39,6 @@ if ( ! $?PTX11DIR ) then
 endif
 if ( ! $?LD_LIBRARY_PATH ) then
     setenv LD_LIBRARY_PATH /usr/lib:${PTX11DIR}/lib
-endif
-
-setenv PIGIBASE pigiRpc
-if ( ! $?PIGIRPC ) then
-     switch ($progname)
-	case ptiny:  
-		setenv PIGIBASE ptinyRpc
-		breaksw
-	case ptrim:
-		setenv PIGIBASE ptrimRpc
-		breaksw
-	case *:
-		setenv PIGIBASE pigiRpc
-		breaksw
-     endsw
-     setenv PIGIRPC $PTOLEMY/bin.$ARCH/$PIGIBASE
 endif
 
 set cell = init.pal
@@ -96,11 +80,15 @@ while ($#argv)
 			breaksw
 		case -ptiny:
 			setenv PIGIBASE ptinyRpc
-			setenv PIGIRPC $PTOLEMY/bin.$ARCH/ptinyRpc
+			if ( ! $?PIGIRPC ) then
+				setenv PIGIRPC $PTOLEMY/bin.$ARCH/ptinyRpc
+			endif
 			breaksw
 		case -ptrim:
 			setenv PIGIBASE ptrimRpc
-			setenv PIGIRPC $PTOLEMY/bin.$ARCH/ptrimRpc
+			if ( ! $?PIGIRPC ) then
+				setenv PIGIRPC $PTOLEMY/bin.$ARCH/ptrimRpc
+			endif
 			breaksw
 		case -*:
 			echo Bad option: $argv[1]
@@ -121,18 +109,55 @@ if ( ! $?DISPLAY ) then
     exit 1
 endif
 
-if ($?pigidebug && -x $PIGIRPC.debug ) then
+
+# Try and do some smart error recovery if the pigiRpc binary can't be found.
+# Rules if we can't find a binary:
+# If we can't find $PIGIRPC, try looking in obj.$ARCH/pigiRpc
+# If we are running this script as ptiny or ptrim, or as pigi -ptiny or
+# pigi -ptrim try looking for ptinyRpc or ptrimRpc.
+# If we are running with -debug, try looking for .debug images
+
+if ( ! $?PIGIBASE ) then
+     switch ($progname)
+	case ptiny:  
+		setenv PIGIBASE ptinyRpc
+		breaksw
+	case ptrim:
+		setenv PIGIBASE ptrimRpc
+		breaksw
+	case *:
+		setenv PIGIBASE pigiRpc
+		breaksw
+     endsw
+endif
+
+if ( ! $?PIGIRPC ) then
+     setenv PIGIRPC $PTOLEMY/bin.$ARCH/$PIGIBASE
+endif
+
+if ($?pigidebug && ! -x $PIGIRPC.debug ) then
+	echo "$PIGIRPC.debug does not exist or is not executable"	
+	if ( -x $PTOLEMY/obj.$ARCH/pigiRpc/${PIGIBASE}.debug ) then
+		setenv PIGIRPC $PTOLEMY/obj.$ARCH/pigiRpc/${PIGIBASE}.debug
+		echo "Using $PIGIRPC instead"
+	endif
+else
 	setenv PIGIRPC $PIGIRPC.debug
 endif
 
-if ( ! -e $PIGIRPC ) then
-	echo "$PIGIRPC does not exist."
-	if ( -e $PTOLEMY/obj.$ARCH/pigiRpc/$PIGIBASE ) then
-		setenv PIGIRPC $PTOLEMY/obj.$ARCH/pigiRpc/$PIGIBASE
+if ( ! -x $PIGIRPC ) then
+	echo "$PIGIRPC does not exist or is not executable."
+	if ( $?pigidebug && -x $PTOLEMY/obj.$ARCH/pigiRpc/${PIGIBASE}.debug ) then
+		setenv PIGIRPC $PTOLEMY/obj.$ARCH/pigiRpc/${PIGIBASE}.debug
 		echo "Using $PIGIRPC instead"
 	else
-		echo "${progname}: exiting"
-		exit 4
+		if ( -x $PTOLEMY/obj.$ARCH/pigiRpc/$PIGIBASE ) then
+			setenv PIGIRPC $PTOLEMY/obj.$ARCH/pigiRpc/$PIGIBASE
+			echo "Using $PIGIRPC instead"
+		else
+			echo "${progname}: exiting"
+			exit 4
+		endif
 	endif
 endif
 
