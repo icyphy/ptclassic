@@ -57,7 +57,7 @@ EXTRA_SRCS =	abbreviations.html \
 		releasenotes.html \
 		releasenotes0.1.html \
 		releasenotes0.1.1.html \
-		releasenotes0.1.2.html \
+		releasenotes0.2.html \
 		running.html \
 		sponsors.html \
 		tim.html \
