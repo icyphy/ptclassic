@@ -62,9 +62,12 @@ uplevel #0 {
 # Register the standard context-sensitive editors
 namespace ::tycho {
     tycho::File::registerEditor {} Edit {Plain text editor}
+    tycho::File::registerEditor {.c .y} EditC {C editor}
+    tycho::File::registerEditor {.C .cc .h .H} EditCpp {C++ editor}
     tycho::File::registerEditor {} EditHTML {HTML editor}
     tycho::File::registerEditor {.itcl .itk} EditItcl {Itcl editor}
     tycho::File::registerEditor .tcl EditTcl {Tcl editor}
+    tycho::File::registerEditor .pl EditPtlang {Ptlang editor}
     tycho::File::registerEditor {} Console {Tcl console}
     tycho::File::registerEditor {} Matlab {Matlab console}
     tycho::File::registerEditor .html HTML {}
