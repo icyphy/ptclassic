@@ -109,6 +109,7 @@ ITCL_SRCS = \
 	Registry.itcl \
 	Resource.itcl \
 	ResourceFile.itcl \
+	ResourceRemote.itcl \
 	ResourceFTP.itcl \
 	ResourceHTTP.itcl \
 	ResourceMail.itcl \
