@@ -19,11 +19,80 @@ David G. Messerschmitt
 simulation environments, where a key objective is the ability
 to combine these environments into multi-paradigm simulations
 as necessary.
-Further detail about the objectives and design of the \*(PT system
-are to be found in the paper "\*(PT: A Multi-Paradigm Simulation
-Environment" by Edward A. Lee and David G. Messerschmitt.
-\*(PT is programmed in C++, and uses modern object-oriented
-software technologies to achieve its basic objectives.
+To effectively use existing simulation and synthesis tools and methodologies,
+different models of computation must be used for different
+parts of the overall design.
+Large systems often mix
+hardware, software, and communication subsystems.
+They may also combine hardware targets,
+including custom logic, processors with varying degrees
+of programmability, systolic arrays, and other multiprocessor subsystems.
+Tools supporting each of these components are different,
+using for instance dataflow principles, regular iterative algorithms,
+communicating sequential processes, control/dataflow hybrids,
+functional languages, and discrete-event system theory and simulation.
+.pp
+\*(PT is a third-generation software environment that supports
+heterogeneous system specification, simulation, and design.
+It is an object-oriented framework within which diverse models
+of computation can co-exist and interact.
+In addition to the usual use of hierarchy to manage complexity,
+\*(PT uses hierarchy to mix heterogeneous models of computation.
+The result is a unified software environment that extends the
+philosophy of mixed-mode circuit simulation up to the design
+and simulation of complex systems.
+.pp
+\*(PT is an outgrowth of
+two previous generations of design environments,
+Blosim and Gabriel, that were aimed at digital signal processing applications.
+.IE Blosim
+.IE Gabriel
+Both environments used a block-diagram data-flow paradigm for the
+description of the algorithms.
+To broaden the applicability beyond DSP,
+we see the need for other computational models,
+such as discrete-event scheduling, mixed compile-time and run-time
+scheduling, or computational models based
+on shared data structures.
+These are not supported very gracefully by Blosim or Gabriel.
+Most importantly, we see the need for a flexible simulation
+environment which is extensible to new computational models
+without re-implementation of the system.
+.pp
+\*(PT uses an object-oriented programming methodology to support
+heterogeneity, and is programmed in C++.
+Data abstraction and polymorphism, two tenets
+of object-oriented programming,
+allow models of computation to be abstracted so that their differences
+are not visible from other domains.
+Our goal is to make the system non-dogmatic, in the sense that the
+environment itself does not impose any particular computational
+model, and it is extensible to new models by simply adding to the
+system and not modifying what is already there.
+Further goals are to incorporate features
+that have been successful in Blosim or Gabriel,
+such as achieving modularity and reusability of
+user-programmed software modules, friendly graphical window
+interfaces, and code generation for targeting
+concurrent architectures rather than just simulation.
+.pp
+Each model of computation in \*(PT is called a
+.c Domain.
+.IE domain
+The system currently has a synchronous
+data-flow (SDF) domain (like Gabriel), a dynamic dataflow (DDF) domain 
+(like Blosim), a discrete-event (DE) domain, and some others that
+are either more specialized or still under development.
+The system is thus already capable of simulating
+combinations of signal processing and communication networks
+(such as in packet speech and packet video) and combinations
+of behavioral and hardware simulation.
+.pp
+The same graphical interface used by Gabriel, based on
+Vem, can be used with at least some domains in \*(PT.
+Oct serves as the design database for the system,
+just as with Gabriel, enabling future assimilation
+of many Berkeley design tools.
 .pp
 A word about notation:
 In this and other \*(PT documentation, keywords from C++,
@@ -37,8 +106,10 @@ just used for "class".
 simulation.
 The overall simulation is decomposed into software modules called
 .i blocks .
+.IE block
 These blocks at runtime are invoked in an order determined by a
 .i scheduler ,
+.IE scheduler
 and exchange data among themselves as
 they execute.
 From the user perspective there are two types of blocks: the
@@ -53,23 +124,167 @@ There are also many pre-coded
 .c Star s
 in the \*(PT library, but these should be viewed as examples,
 rather than as a comprehensive set.
+Adding new blocks is easy, so the system should be viewed as a programming
+environment, and not just as a monolithic tool to be used unmodified.
 A
 .c Galaxy
+.IE galaxy
 is a block which internally contains
 .c Star s
+.IE star
 as well as possibly other
 .c Galaxy s.
 The
 .c Galaxy
 is thus a construct for producing a hierarchical description
 of the simulation.
+A
+.c Universe
+.IE universe
+is a complete program, or application.
+.pp
+One of the key innovations in \*(PT is the extension of the hierarchy
+of stars, galaxies, and universes to include objects called
+.c Wormhole s.
+.IE wormhole
+A wormhole is named as such because from the outside, it looks
+monolithic, like a star, but inside, it looks more like a universe.
+The scheduler on the outside treats it exactly like a star, but internally
+it contains its own scheduler.
+The inside and outside schedulers need not abide by the same model
+of computation.
+This is the basic mechanism for supporting heterogeneity.
+.pp
+Data passes between blocks in discrete units called
+.c Particle s.
+.IE particle
+For example,
+a particle in a signal processing system is a signal sample, usually
+a floating-point value.
+In a communication system, it may be a packet consisting of multiple
+fields.
+In domains using dataflow principles, a particle may be called a \fItoken\fR.
+.IE token
+Particles pass from one domain to another (into or out of a wormhole)
+through an
+.c EventHorizon.
+.IE "event horizon"
+The event horizon manages any format translations that may be required
+to stitch together two models of computation.
 .pp
 To get started, you can use the \*(PT interactive
 graphical interface (pigi), described below, or the \*(PT
 interpreter.
-Thus, both a graphical and textual specification langauge are available.
+Thus, both a graphical and textual specification language are available.
 It is unlikely that these two user interfaces will the only
 ones developed for \*(PT.
 They are, in fact, quite distinct from the \*(PT kernel,
 precisely so that other types of user interfaces can be readily
 accepted.
+.H1 "Installation"
+.pp
+\*(PT is a large software system that relies on a properly configured
+software environment.  There are many things that can go wrong
+in getting \*(PT running.  For instance, the windowing system may
+not be the same one we use, or it may be used in a different way.
+There is also some configuration required by each user in order to
+use the graphical interface.  The information for doing this
+is given in the Pigi document, section 2 of the Almagest.
+Here we give the basic information required to get from a distribution
+tape to being able to run the system.
+.H2 "Basic \*(PT installation"
+.pp
+First note that the
+approximate disk space requirements are:
+.(b
+	\*(PT: 28 Mbytes
+	\*(PT (after you optionally remake): 37 Mbytes
+	Gnu subset: 14 Mbytes
+.)b
+Steps to install \*(PT:
+(steps 2-4 may not be necessary in the future)
+Much of this has to be done as root.
+.ip 1.
+Create a user "ptolemy".
+.ip 2.
+Create directory /usr/users (if not already there).
+.ip 3.
+cd /usr/users
+.ip 4.
+ln -s ~ptolemy
+(This creates a directory /usr/users/ptolemy).
+.ip 5.
+Load the tape in your drive.
+.ip 6.
+mt -f /dev/nrst8 rewind
+(This rewinds the tape.)
+.ip 7.
+tar xf /dev/nrst8 
+(This reads the tape, and will take a while.)
+.ip 8.
+chown -R ptolemy ptolemy
+(This changes ownership of all files to user ptolemy.)
+.ip 9.
+Edit ~ptolemy/.rhosts, adding a line for your system
+(This gives pigi permission to create a ptolemy process.)
+The added line will be of the form "hostname ptolemy", you can
+find the correct hostname with the command "hostname".
+.H2 "GNU Installation"
+.pp
+For convenience, some software from the Free Software Foundation is
+included on the distribution tape.  This includes the compiler
+used to make \*(PT, which is also the compiler you will use to extend
+\*(PT.  Note that this is not a complete set of Gnu software.
+.ip 1.
+cd /usr
+.ip 2.
+mkdir gnu (Unless there is such a directory there, in which case, you
+probably don't want to load the version from this tape).
+.ip 3.
+mt -f /dev/nrst8 fsf 1
+.ip 4.
+tar xf /dev/rst8
+.H2 "Testing the Installation
+.pp
+To test \*(PT:
+.ip 1.
+login as ptolemy
+.ip 2.
+Wait for the X window system to start up.
+Note that the ptolemy user is configured to start the X window system
+when you log on.
+If your installation uses X some other way, please modify the dot files
+in ~ptolemy
+accordingly.
+.ip 3.
+cd demo
+.ip 4.
+pigi
+.ip 5.
+Follow instructions in the Pigi manual, section 2 of the Almagest.
+.pp
+Note that the ptolemy user provides a model of a user properly
+configured to run ptolemy.  All the .files in the home directory
+are set up according to the tastes of the \*(PT authors,
+and according the standard use of windowing software in the \*(PT
+development group.
+.H2 ""Troubleshooting"
+.ip "\fBPermission denied.\fR
+If when you start pigi you get the message "permission denied"
+and the \*(PT greeting window fails to pop up, then Vem was
+unable to start pigiRpc, the associated \*(PT process.
+This process is started using the Unix "rsh" command.
+This command can fail if your workstation does not have
+networking enabled, or the users .rhosts file does not include
+the name of the workstation on which you are running.
+The following simple test checks your networking and .rhosts configuration:
+.(c
+	rsh name echo "hello world"
+.)c
+where "name" is the name of your workstation.  If you get back
+"hello world", then your workstation networking is correct.
+If you get the "permission denied" message again,
+then either your .rhosts is incorrect or networking is turned off
+on your workstation.
+If the latter is the problem,
+please ask your system administrator to enable networking.
