@@ -147,6 +147,19 @@ endif
 
 set path = ( $PTOLEMY/bin.$ARCH $PTOLEMY/bin $path )
 
+if ( $?pigiconsole ) then
+        setenv TAILARGS -console
+endif
+if ( $?pigidebug ) then
+        if ( "$ARCH" == "hppa.cfront" ) then
+                setenv COMMAND $PTOLEMY/lib/pigiRpcDebug.xdb
+        else
+                setenv COMMAND $PTOLEMY/lib/pigiRpcDebug
+        endif
+else if ( $?pigiconsole ) then
+        setenv COMMAND $PTOLEMY/lib/pigiRpcConsole
+endif
+
 if ( ! $?VEMBINARY) setenv VEMBINARY $PTOLEMY/bin.$ARCH/vem 
 
 $VEMBINARY -G 600x150+0+0 -F ${cell}:schematic -G +0+200 -R $PTOLEMY/lib/pigiRpcShell
