@@ -320,8 +320,7 @@ void VHDLTarget :: frameCode() {
   code << "\n" << "begin";
   code << "\n" << loopOpener;
   
-  // Prepend the header, declarations, and initialization.
-//  prepend(code, myCode);
+  // myCode contains the main action of the main process
   code << myCode;
   
   code << "\n" << loopCloser;
@@ -340,6 +339,22 @@ void VHDLTarget :: writeCode() {
   // !Warning! Not currently working properly!
 //wrapAround(&myCode);
   writeFile(myCode,".vhdl",displayFlag);
+  singleUnderscore();
+}
+
+// Change all double underscores to single ones to ensure proper identifiers.
+void VHDLTarget :: singleUnderscore() {
+  StringList command = "";
+  command << "cd " << (const char*) destDirectory;
+  command << " ; ";
+  command << "rm -f " << "temp" << filePrefix << ".vhdl";
+  command << " ; ";
+  command << "sed s/\"__\"/\"_\"/g ";
+  command << filePrefix << ".vhdl" << " > " << "temp" << filePrefix << ".vhdl";
+  command << " ; ";
+  command << "mv -f " << "temp" << filePrefix << ".vhdl" << " "
+	  << filePrefix << ".vhdl";
+  system(command);
 }
 
 // Compile the code.
@@ -573,7 +588,8 @@ void VHDLTarget :: registerState(State* state, int thisFiring/*=-1*/,
     }
   }
   else {
-    initVal = state->initValue();
+    state->initialize();
+    initVal = state->currentValue();
   }
   
   ref << "_" << thisFiring;
