@@ -1,6 +1,7 @@
 #! /bin/csh -f
 # safe-get: arg is the name of the SCCS file
 # always does cd to proper place before doing the get.
+# Set execute permission if it is set for the SCCS file.
 # This is invoked by Gnu make because the makefiles
 # set the variable $GET to equal "safe-get".
 # Note that Gnu make adds a "-G filename" option
@@ -29,6 +30,9 @@ set sccsdir = $fullname:h
 # use the tail of the pathname only, I.e., the filename
 set root = $fullname:t
 
+# remove the leading "s." from the file name
+set file = `echo $root | sed s/s\.//`
+
 if ("$sccsdir" == "SCCS") then
 	echo "get SCCS/$root"
 else
@@ -39,3 +43,7 @@ endif
 
 get SCCS/$root
 
+if (-x SCCS/$root) then
+	echo "chmod +x $file"
+	chmod +x $file
+endif
