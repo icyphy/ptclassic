@@ -583,6 +583,10 @@ body ::tycho::SmartLine::coords {id canvas slate args} {
 # the two end points...
 #
 body ::tycho::SmartLine::highlight {id canvas slate args} {
+    # Delete existing highlight
+    if { [$canvas find withtag highlight.$id] != "" } {
+        $canvas delete highlight.$id
+    }
     array set opts $args
     set line $component(segments$id)
     eval $canvas create line [$canvas coords $line] [list \
