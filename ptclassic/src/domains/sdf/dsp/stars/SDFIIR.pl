@@ -8,7 +8,7 @@ with z^0 terms and decrease in powers of z.
 Default coefficients give an 8th order Butterworth lowpass
 filter (XXX: or they will, when I get around to it).
     }
-    version {@(#)SDFFIR.pl	1.4 7/25/91}
+    version {$Id$}
     author { Kennard White }
     copyright { 1991 The Regents of the University of California }
     location { SDF dsp library }
