@@ -210,8 +210,9 @@ char *data;			/* User data (not used)    */
 	inst->objectId = oct_null_id;
 	(void) sprintf(why, "No appropriate connector found: %d layers\n", ne);
 	for ( i = 0; i < ne; i++ ) {
-	    (void) sprintf( buf, "%s(%d) ", elems[i].layer.contents.layer.name,
-			   elems[i].width );
+	    (void) sprintf( buf, "%s(%ld) ",
+			   elems[i].layer.contents.layer.name,
+			   (long)elems[i].width );
 	    (void) strcat( why, buf );
 	}
 	return 0;
