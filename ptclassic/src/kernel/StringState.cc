@@ -2,6 +2,8 @@
 #include <std.h>
 #include "StringState.h"
 
+const int TOKSIZE = 80;
+
 /**************************************************************************
 Version identification:
 $Id$
@@ -24,19 +26,21 @@ $Id$
 
 **************************************************************************/
 
+
 void StringState  :: initialize() {
-	val = evalExpression(initValue, parent()->parent());
+	const char* specialChars = "*+-/()";
+	Tokenizer lexer(initValue,specialChars);
+
+	val = evalExpression(lexer, parent()->parent());
 }
 
-const char* StringState :: evalExpression(const char* string, Block*  blockIAmIn) {
+const char* StringState :: evalExpression(Tokenizer& lexer, Block*  blockIAmIn) {
 
-//	This part may  be used later for file read etc.
-//
-//	lexptr = string;
-//	ParseToken t = getParseToken(string, blockIAmIn);
-//	if(!strcmp(t.tok,"ID")) return ((StringState*)t.s)->val;
-//	else return 0;
-	return string;
+	ParseToken t = getParseToken(lexer, blockIAmIn);
+	if(!strcmp(t.tok,"ID")) return ((StringState*)t.s)->val;
+	else if (!strcmp(t.tok,"STRING")) return t.sval;
+	else return 0;
+
 }
 
 // make known state entry

@@ -19,6 +19,8 @@ $Id$
 #include "State.h"
 #include "Block.h"
 
+const int TOKSIZE = 80;
+
 /*************************************************************************
 
 	class State methods
@@ -30,91 +32,64 @@ inline unsigned int is_idchar(char c) {
         return isalnum(c) || c == '_';
 }
 
+char*
+savestring (const char* foo) {
+        char* bar = new char[strlen(foo)+1];
+        strcpy (bar, foo);
+        return bar;
+}
+
 // The state tokenizer: return next token
 ParseToken
-State :: getParseToken(const char* string, Block* blockIAmIn) {
-	int c;
-	int namelen;
-	const char *tokstart;
-	ParseToken   t;
- retry:
-	
-	tokstart = lexptr;
-	c  = *tokstart;
-	switch (c) {
-	case 0:			// End of string
+State :: getParseToken(Tokenizer& lexer, Block* blockIAmIn) {
+        char token[TOKSIZE];
+	ParseToken t;
+
+        lexer >> token;
+        if (*token == 0) {
+                t.tok = "EOF";
+                return t;
+        }
+
+        if (*token == '+' || *token == '-' || *token == '*' ||  *token == '/'
+	|| *token == '(' || *token == ')')
+                t.tok = "OP";
+                t.cval = (char)token;
+
+
+        if (isdigit(*token) || *token == '.' )  {
+                if (index (token, '.')) {
+                        t.tok = "FLOAT";
+                        t.dval = atof(token);
+			return t;
+                }
+                else {
+                        t.tok = "INT";
+                        t.ival = atoi(token);
+			return t;
+                }
+        }
+
+        if (is_idchar(*token)) {
+                State* s = lookup(token,blockIAmIn);
+                // better, maybe, to return type and value of the State
+		if(s){
+                t.tok =  "ID"; 
+		t.s =  s ;
+                return t;
+        	}
+		else if(!strcmp(this->type(),"STRING")){
+		t.tok = "STRING";
+		t.sval = savestring(token);
+		return t;
+		}
+		else{
 		t.tok = "NULL";
-		t.cval = 0;
+		t.s = 0;
 		return t;
-
-	case ' ':		// White-space, skip it
-	case '\t':
-	case '\n':
-		lexptr++;
-		goto retry;
-
-	case '/':		// one-character token
-	case '+':
-	case '-':
-	case '*':
-	case '(':
-	case ')':
-		lexptr++;
-		t.tok = "OP";
-		t.cval = c;
-		return t;
-
+		} 
 	}
-
-	if  (c >= '0'  && c<= '9') { // digit
-		int floatflag = 0;
-		namelen = 0;
-		c = tokstart[namelen];
-		while(is_idchar(c) || c == '.')
-		{ 
-			if(c == '.') floatflag =  1;
-			namelen++;
-			c = tokstart[namelen];
-		};	
-
-		if(floatflag)
-		{ 	t.dval = atof(tokstart);
-			t.tok = "FLOAT"; }
-		else
-		{ 	t.ival = atoi(tokstart);
-			t.tok = "INT"; }
-		lexptr +=  namelen;
-		return t;
-	}
-
-	namelen=0;		// otherwise: assume ID
-	c = tokstart[namelen];
-	while(is_idchar(c))
-	{
-		namelen++;
-		c = tokstart[namelen];
-	};
-
-
-	char yytext[namelen+1];
-	for(int i = 0 ; i < namelen + 1 ; i++) {
-		yytext[i] = tokstart[i];
-	};
-
-	State* s = lookup(yytext, blockIAmIn);
-	if(s == 0) 
-	{
-	t.tok = "NULL";
-	t.s = 0;	
-	return t;
-	};
-
-	t.tok  = "ID";
-	t.s  = s;
-
-	lexptr  += namelen;
-	return t;
-};
+}
 
 State* State :: lookup (char* name, Block* blockIAmIn) {
         while (blockIAmIn) {

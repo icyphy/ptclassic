@@ -40,7 +40,7 @@ public:
 	StringList currentValue() { return val;}
 
 	// Evaluate expression in string	
-	const char* evalExpression(const char* string, Block* blockIAmIn);	
+	const char* evalExpression(Tokenizer& lexer, Block* blockIAmIn);	
 	// Use as a string in stars
 	operator const char* () { return val;}
 
