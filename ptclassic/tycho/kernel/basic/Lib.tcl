@@ -82,10 +82,12 @@ namespace ::tycho {
     ::tycho::File::registerExtensions .pl \
             {::tycho::view EditPtlang -file {%s}} \
             {Ptlang editor} "text"
+    ::tycho::File::registerExtensions .sdl \
+            {::tycho::view EditSDL -file {%s}} \
+            {SDL editor} "text"
     ::tycho::File::registerExtensions .tcl \
             {::tycho::view EditTcl -file {%s}} \
             {Tcl editor} "text"
-
     # For now, TIM files open a Tcl editor
     ::tycho::File::registerExtensions .tim \
             {::tycho::view EditTcl -file {%s}} \
