@@ -104,6 +104,45 @@ itcldocs_again:
 TAGS:
 	echo "Making tags makes no sense in the tycho directory"
 
+############################################################################
+# Rules that compile Tcl extensions.
+#
+# You can use Tycho without these extensions, though certain features,
+# such as the Tcl/Java interface will be missing.
+
+tclexts: config_tclexts all_tclexts install_tclexts
+
+# Run configure
+# You can pass arguments to configure like so:
+# make tclexts CONFIGURE_ARGS=--with-tclsrc=/users/cxh/pt/src/tcltk/itcl2.2/tcl7.6
+config_tclexts: obj.$(PTARCH) src/configure
+	(cd obj.$(PTARCH); ../src/configure --srcdir ../src $(CONFIGURE_ARGS))
+	(cd obj.$(PTARCH)/tyjava/tcljava; rm -f tcl; \
+		ln -s ../../../src/tyjava/tcljava/tcl .)
+
+# The autoconf script is not shipped with Tycho, but src/configure
+# _is_ shipped, so this rule is not usually needed.
+src/configure: src/configure.in
+	(cd src; autoconf)
+
+all_tclexts: 
+	(cd obj.$(PTARCH); $(MAKE) all)
+
+install_tclexts: lib.$(PTARCH)
+	(cd obj.$(PTARCH); $(MAKE) install)
+
+obj.$(PTARCH):
+	if [ "$(PTARCH)" = "" ]; then \
+		echo "The PTARCH variable must be set."; \
+		echo "Under csh, try 'setenv PTARCH `\$TYCHO/bin/ptarch`'"; \
+	fi
+	mkdir $@
+
+lib.$(PTARCH):
+	mkdir $@
+
+############################################################################
+# Rules that create indices and class diagrams
 
 # This rule should contains things that might take a little while
 # to run, so it is run nightly
@@ -133,6 +172,9 @@ glimpse: .glimpse_exclude
 		$(GLIMPSEINDEX) -H "$(TYCHO)" "$(TYCHO)"; \
 		chmod a+r $(TYCHO)/.glimpse_*; \
 	fi
+
+############################################################################
+# Rules used to test a release 
 
 # Check html docs for problems
 # htmlchek is not shipped with tycho, see:
