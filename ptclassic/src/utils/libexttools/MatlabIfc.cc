@@ -457,11 +457,12 @@ int MatlabIfc :: SetMatlabVariable(const char* name,
     // Matlab stores values in column-major order like Fortran
     Real* realp = mxGetPr(newMatlabMatrixPtr);
     for ( int jcol = 0; jcol < numcols; jcol++ ) {
-	// index = jrows * numcols + jcol
-	int index = jcol;
+	// to convert row-major to column-major ordering use
+	// index = jcol * numrows + jrow
+	int index = jcol * numrows;
 	for ( int jrow = 0; jrow < numrows; jrow++ ) {
 	    realp[index] = atof(*realPartStrings++);
-	    index += numcols;
+	    index++;
 	}
     }
 
@@ -470,11 +471,12 @@ int MatlabIfc :: SetMatlabVariable(const char* name,
     if ( realOrComplex == MXCOMPLEX ) {
 	Real* imagp = mxGetPi(newMatlabMatrixPtr);
 	for ( int jcol = 0; jcol < numcols; jcol++ ) {
-	    // index = jrows * numcols + jcol
-	    int index = jcol;
+	    // to convert row-major to column-major ordering use
+	    // index = jcol * numrows + jrow
+	    int index = jcol * numrows;
 	    for ( int jrow = 0; jrow < numrows; jrow++ ) {
 		imagp[index] = atof(*imagPartStrings++);
-		index += numcols;
+		index++;
 	    }
 	}
     }
@@ -506,8 +508,9 @@ int MatlabIfc :: GetMatlabVariable(char* name,
 	if ( imagp ) *imagPartStrings = new char* [numelements];
 	else *imagPartStrings = 0;
 	for ( int jcol = 0; jcol < *numcols; jcol++ ) {
-	    // index = jrows * numcols + jcol
-	    int index = jcol;
+	    // to convert column-major order to row-major order use
+	    // index = jcol * numrows + jrow
+	    int index = jcol * (*numrows);
 	    for ( int jrow = 0; jrow < *numrows; jrow++ ) {
 		StringList realstring = *realp++;
 		(*realPartStrings)[index] = savestring(realstring);
@@ -515,7 +518,7 @@ int MatlabIfc :: GetMatlabVariable(char* name,
 		    StringList imagstring = *imagp++;
 		    (*imagPartStrings)[index] = savestring(imagstring);
 		}
-		index += *numcols;
+		index++;
 	    }
 	}
 	mxFreeMatrix(matlabMatrix);
