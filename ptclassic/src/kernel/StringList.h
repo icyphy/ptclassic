@@ -37,33 +37,28 @@ public:
 	// Constructors
 	// Note: StringList foo = bar; calls the constructor,
 	// if bar is char*, int, or double
-	StringList() {totalSize=0;}
+	StringList() : totalSize(0) {}
 
-	StringList(const char* s) {
-		totalSize=strlen(s);
-		put(savestring(s));
-	}
+	StringList(const char* s);
 
-	StringList(int i) {totalSize=0; *this += i;}
+	StringList(int i);
 
-	StringList(double d) {totalSize=0; *this += d;}
+	StringList(double d);
 
 	// Copy constructor
-	StringList(const StringList& s) {
-		totalSize = s.totalSize;
-		put(s.newCopy());
-	}
+	StringList(const StringList& s);
 
 	// Assignment operator
 	StringList& operator = (const StringList& sl);
+	StringList& operator = (const char* s);
 
 	// Destructor
-	~StringList() { deleteAllStrings(); }
+	~StringList();
 
-	// Put first string on list: same as +=
+	// Put number on list: same as +=
 	// Use of this operator to add something to a nonempty
 	// StringList is deprecated
-	StringList& operator = (const char* s) { return *this += s;}
+
 	StringList& operator = (int i) { return *this += i;}
 	StringList& operator = (double d) { return *this += d;}
 
@@ -73,18 +68,15 @@ public:
 	StringList& operator += (double);
 	StringList& operator += (const StringList&);
 
-        // Return size of list
-        int size() const {return SequentialList::size();}
-
 	// Return first string on list
 	char* head() const {return (char*)SequentialList::head();}
 
-	// Convert to char*
+	// Convert to const char*
 	// NOTE!!  This operation modifies the StringList -- it calls
 	// the private consolidate method to collect all strings into
 	// one string and clean up the garbage.  No modification happens
 	// if the StringList is already in one chunk.
-	operator char* () { return consolidate();}
+	operator const char* () { return consolidate();}
 
 	// Make a copy of the StringList as a char* in dynamic memory.
 	// the user is responsible for deletion.
@@ -94,7 +86,7 @@ private:
 	// underlying SequentialList nodes.
 	void deleteAllStrings();
 
-	char* consolidate();
+	const char* consolidate();
 	int totalSize;
 };
 
@@ -116,6 +108,6 @@ UserOutput& operator << (UserOutput& o, const StringList& sl);
 // don't have to include stream.h)
 
 class ostream;
-ostream& operator << (ostream& o,StringList& sl);
+ostream& operator << (ostream& o,const StringList& sl);
 
 #endif
