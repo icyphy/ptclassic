@@ -124,9 +124,9 @@ In order to get consistent documentation, a set of troff
 macros is used to control most important formatting options.
 These macros are explained here.
 The set of macros used to document basic capabilities
-is different from the set used to document demos and stars.
+is different from the set used to document demos, stars, and targets.
 For stars, the formatted documentation will be generated
-automatically by the preprocessor. For demos, you must generate
+automatically by the preprocessor. For demos and targets, you must generate
 it yourself.
 .H2 "Basic documents"
 .pp
@@ -357,19 +357,21 @@ All editing of the star documentation should be done in the .pl file,
 not in the troff file.
 .Id "stars, documenting"
 .Id "documentation, stars"
-.H2 "Documenting new galaxies and demos"
+.H2 "Documenting new galaxies and universes"
 .pp
 .Id "galaxies, documenting"
 .Id "demos, documenting"
 .Id "documenting galaxies"
 .Id "documenting demos"
-Unlike stars, galaxies and demos must be documented manually.
+.Id "documenting universes"
+.Id "universes, documenting"
+Unlike stars, galaxies and universes must be documented manually.
 The troff source files for galaxies should go in XXX/doc/stars,
 where XXX is the location of the domain source directory.
 Since galaxies can be used exactly as if they were stars,
 it is logical that their documentation should appear with
 the stars.
-Troff source files for demos should go in XXX/doc/demos,
+Troff source files for demo universes should go in XXX/doc/demos,
 where XXX is again the location of the domain source directory.
 .pp
 In both cases, the syntax of the document source files is as follows:
@@ -470,11 +472,19 @@ with each entry reading
 	\\\\fIname\\\\fR (type): descriptor
 	.DF "default value"
 .)c
+State entries should also be made for demos with top-level parameters.
 .pp
 A single star, galaxy, or demo document page can be printed
 using the command ``printpage filename''.
 This command is stored in ~ptolemy/doc/bin, but also has a link
 in ~ptolemy/bin, so it should be in your path.
+.H2 "Documenting targets"
+.pp
+Targets should be documented in the same way that universes and
+galaxies are documented, with careful attention paid to documenting
+each parameter or state.
+Troff source files for demos should go in XXX/doc/targets,
+where XXX is again the location of the domain source directory.
 .H2 "Documenting new domains"
 .pp
 .Id "domains, documenting"
