@@ -94,7 +94,7 @@ if ($#files > 0) then
 	set res = 1
 	# for very long lines, this barfs
 	#echo "$prefix$files"
-	echo -n $prefix
+	echo -n "$prefix "
 	echo $files
 endif
 
