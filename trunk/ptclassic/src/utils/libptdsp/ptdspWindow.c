@@ -59,6 +59,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 	        in ptdspWindow.h. The possible windows are Rectangle, 
 		Bartlett, Hanning, Hamming, Blackman, SteepBlackman,
 		and Kaiser ]
+  SeeAlso     [ Ptdsp_Window ]
   SideEffects []
 ******************************************************************************/
 int 
@@ -88,7 +89,7 @@ Ptdsp_WindowNumber(const char* wn) {
 		ptdsp_WindowNumber returns. realLen specifies the
 		length of the window. The parameters argument is
 		accessed only for the Kaiser window ]
-  SideEffects []
+  SideEffects [ The double array window is modified. ]
   SeeAlso     [ Ptdsp_WindowNumber ]
 ******************************************************************************/
 int 
