@@ -215,6 +215,9 @@ public:
 	// optionally do additional clustering on internal cluster
 	virtual int internalClustering() { return FALSE;}
 
+	// hook for doing simulated execution of the real stars.
+	virtual void simRunRealStars() = 0;
+
 	// print me
 	virtual ostream& printOn(ostream&) = 0;
 
@@ -253,10 +256,11 @@ public:
 	void go() { run();}
 	int myExecTime();
 
-	// simulate execution for schedule generation.  We also
-	// call simRunStar on the "real" star, so info like the
-	// maximum # of tokens on each arc will get set right.
-	int simRunStar(int deferFiring);
+	// simulate execution of underlying real stars.
+	// call simRunStar on the "real" star loop() times,
+	// so info like the maximum # of tokens on each arc
+	// will get set right.
+	void simRunRealStars();
 
 	// print me
 	ostream& printOn(ostream&);
@@ -274,9 +278,6 @@ private:
 // a SDFClusterBag.
 
 class SDFBagScheduler : public SDFScheduler {
-protected:
-	// we permit disconnected galaxies.
-	int checkConnectivity() { return TRUE;}
 public:
 	// return the schedule
 	virtual StringList displaySchedule(int depth);
@@ -286,6 +287,12 @@ public:
 
 	// code generation
 	virtual void genCode(Target&, int depth);
+protected:
+	// we permit disconnected galaxies.
+	int checkConnectivity() { return TRUE;}
+
+	// simulate execution of "real" stars to set geodesics right.
+	void simRunRealStars();
 };
 
 // An SDFClusterBag is a composite object.  In some senses it is like
@@ -307,7 +314,7 @@ public:
 	// The effect is to call simRunStar on the "real" stars,
 	// so info like the maximum # of tokens on each arc will
 	// get set right.
-	int simRunStar(int deferFiring);
+	void simRunRealStars();
 
 	// absorb adds the SDFCluster argument to the bag
 	void absorb(SDFCluster*,SDFClusterGal*);
@@ -395,14 +402,16 @@ private:
 	void unloopBy(int fac) { numberTokens /= fac;}
 };
 
-class SDFClustSched : public SDFScheduler {
+class SDFClustSched : public SDFBagScheduler {
 public:
 	// constructor and destructor
 	SDFClustSched(const char* log = 0) : cgal(0),logFile(log) {}
 	~SDFClustSched();
 
-	// return the schedule
-	StringList displaySchedule();
+	// SDFBagScheduler allows disconnections, we do not.
+	int checkConnectivity() {
+		return SDFScheduler::checkConnectivity();
+	}
 
 	// Generate code using the Target to produce the right language.
 	void compileRun();
