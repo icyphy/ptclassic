@@ -76,3 +76,9 @@ PortHole& MultiOutACSPort::newPort()
 	LOG_NEW; PortHole& p = *new OutACSPort;
 	return installPort(p);
 }
+
+void InACSPort :: receiveData () { getParticle();}
+
+void OutACSPort :: receiveData () { clearParticle();}
+
+void OutACSPort :: sendData () { putParticle();}
