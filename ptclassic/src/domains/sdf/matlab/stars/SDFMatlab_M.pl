@@ -16,21 +16,24 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
 	explanation {
-This star passes one or more complex matrix inputs to a Matlab function
-and produces a complex matrix output that is the result.
-The \fIoptions\fR string is passed directly to the Matlab kernel.
-The Matlab kernel is started during the setup phase and exitted during
-the wrapup phase.
-At each firing of the star, the matrices on the input ports are converted
-to Matlab format and passed to the Matlab function \fIMatlabFunction\fR
-in the order that the input ports are connected to the star.
-If there are no inputs, then the \fIMatlabFunction\fR is evaluated without
-any arguments; e.g., a \fIMatlabFunction\fR of "hilb(4)" would return
-a 4 x 4 Hilbert matrix.
-The names of the input and output variables in Matlab are derived from
-\fImatlabInputName\fR and \fImatlabOutputName\fR, respectively.
-If the \fImatlabInputName\fR is the same as the \fImatlabOutputName\fR,
-then some or all of the matrices are reused by Matlab.
+This star converts the matrices on the input ports to Matlab format,
+passes the Matlab matrices to the \fIMatlabFunction\fR, converts the
+resulting Matlab matrices to Ptolemy format, and outputs the matrices.
+If there are no inputs, then the \fIMatlabFunction\fR is evaluated as is
+without any arguments being passed to it; e.g., a value of
+"hilb(4)" for \fIMatlabFunction\fR would return a 4 x 4 Hilbert matrix.
+The names of the input arguments and output variables for the Matlab function
+are derived from \fImatlabInputName\fR and \fImatlabOutputName\fR,
+respectively.
+The values of \fImatlabInputName\fR and \fImatlabOutputName\fR may be the same.
+The user should specify these names so as to avoid name conflicts with
+built-in Matlab commands and custom Matlab scripts.
+
+As an example of how the Matlab command is built, suppose that this
+star has three inputs and two outputs.
+If \fImatlabInputName\fR is "Pout", \fImatlabOutputName\fR is "Pin",
+and \fIfIMatlabFunction\fR is "doit", then this star would evaluate
+the Matlab command "[Pout1, Pout2] = doit(Pin1, Pin2, Pin3);".
 .Ir "Matlab interface"
 	}
 	inmulti {
@@ -138,6 +141,32 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 	}
 
 	go {
+		// convert Ptolemy input matrices to Matlab matrices
+		processInputMatrices();
+
+		// evaluate the Matlab command (non-zero means error)
+		// second argument indicates whether or not to abort on error
+		evaluateMatlabCommand(matlabCommand, TRUE);
+
+		// convert the Matlab matrices to Ptolemy matrices
+		processOutputMatrices();
+	}
+
+	destructor {
+		LOG_DEL; delete [] matlabInputMatrices;
+		LOG_DEL; delete [] matlabOutputMatrices;
+
+		LOG_DEL; delete [] matlabInputNames;
+		LOG_DEL; delete [] matlabOutputNames;
+		LOG_DEL; delete [] matlabCommand;
+	}
+
+	method {
+	  name { processInputMatrices }
+	  access { protected }
+	  type { void }
+	  arglist { "()" }
+	  code {
 		// allocate memory for Matlab matrices
 		MPHIter nexti(input);
 		for ( int i = 0; i < numInputs; i++ ) {
@@ -171,15 +200,19 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		  // save the pointer to the new Matlab matrix for deallocation
 		  matlabInputMatrices[i] = matlabMatrix;
 		}
+	  }
+	}
 
-		// evaluate the Matlab command (non-zero means error)
-		// second argument indicates whether or not to abort on error
-		evaluateMatlabCommand(matlabCommand, TRUE);
-
+	method {
+	  name { processOutputMatrices }
+	  access { protected }
+	  type { void }
+	  arglist { "()" }
+	  code {
 		// copy each Matlab output matrix to a Ptolemy matrix
 		MPHIter nextp(output);
 		InfString errstr;
-		char *verbstr;
+		char *verbstr = "";
 		int fatalErrorFlag = FALSE;
 		for ( int j = 0; j < numOutputs; j++ ) {
 		  // create a new Matlab matrix for deallocation and save ref.
@@ -189,13 +222,13 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		  // allocate a Ptolemy matrix
 		  int rows = mxGetM( matlabMatrix );
 		  int cols = mxGetN( matlabMatrix );
+		  LOG_NEW;
 		  ComplexMatrix& Amatrix = *(new ComplexMatrix(rows, cols));
 
 		  if ( mxIsFull(matlabMatrix) ) {
 		    // for real matrices, imagp will be null
 		    double *realp = mxGetPr( matlabMatrix );
 		    double *imagp = mxGetPi( matlabMatrix );
-		    LOG_NEW;
 		    for ( int jrow = 0; jrow < rows; jrow++ ) {
 		      for ( int jcol = 0; jcol < cols; jcol++ ) {
 		        double realValue = ( realp ) ? ( *realp++ ) : 0.0;
@@ -240,14 +273,7 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		  killMatlab();
 		  Error::abortRun(*this, (char *) errstr, verbstr);
 		}
+	  }
 	}
 
-	destructor {
-		LOG_DEL; delete [] matlabInputMatrices;
-		LOG_DEL; delete [] matlabOutputMatrices;
-
-		LOG_DEL; delete [] matlabInputNames;
-		LOG_DEL; delete [] matlabOutputNames;
-		LOG_DEL; delete [] matlabCommand;
-	}
 }
