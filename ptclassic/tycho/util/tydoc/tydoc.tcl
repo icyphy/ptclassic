@@ -35,6 +35,7 @@
 # Programming" book
 
 package provide tycho.util.tydoc 2.0
+package require tycho.kernel.basic
 
 global env auto_path
 set env(TYDOC_LIBRARY) [file dirname [info script]]
