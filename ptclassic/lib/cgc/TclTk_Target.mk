@@ -40,7 +40,7 @@ OPTIMIZER =
 TKCFLAGS = $(X11_INCSPEC) -I$(TK_INCDIR) -I$(TCL_INCDIR) -I$(TK_INCDIR) \
 	-I$(PTOLEMY)/src/domains/cgc/tcltk/lib -I$(PTOLEMY)/src/ptklib \
 	-I$(ROOT)/src/domains/cgc/rtlib
-LOADLIBES = -L$(PTOLEMY)/lib.$(PTARCH) -lptk -lCGCrtlib $(TK_LIBSPEC) \
+TKLOADLIBES = -L$(PTOLEMY)/lib.$(PTARCH) -lptk -lCGCrtlib $(TK_LIBSPEC) \
 	$(TCL_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)
 
 # We are not assuming GNU make, so we can't include common.mk,
@@ -52,3 +52,8 @@ LOADLIBES = -L$(PTOLEMY)/lib.$(PTARCH) -lptk -lCGCrtlib $(TK_LIBSPEC) \
 #  "`N' is made automatically from `N.o' by running the linker 
 #  (usually called `ld') via the C compiler. The precise command
 #  used is `$(CC) $(LDFLAGS) N.o $(LOADLIBES)'."
+
+# Define a rule to build binaries from scratch.  Note that this
+# is a GNU make extension
+%: %.o
+	$(LINK.o) $^ $(LOADLIBES) $(TKLOADLIBES) $(LDLIBS) -o $@
