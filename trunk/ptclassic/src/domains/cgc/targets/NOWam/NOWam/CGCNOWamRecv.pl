@@ -62,6 +62,7 @@ Produce code for inter-process communication (receive-side).
 #include <sys/fcntl.h>
 #include <sys/resource.h>
 #include <sys/procfs.h>
+#include <unistd.h>
 #endif
 	}
 	codeblock (ipcHandler) {
