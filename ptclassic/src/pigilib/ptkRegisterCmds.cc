@@ -39,9 +39,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
     a new Tcl callable function is added to the GUI.
 */
 
-#include "ptcl.h"
-#include "poct.h"
-#include "pvem.h"
+
+#include "PTcl.h"
+extern PTcl *ptcl;  
+#include "POct.h"
+extern POct *poct;  
+#include "PVem.h"
+extern PVem *pvem;  
 
 // Even though ptkRegisterCmds.cc is a C++ file,
 // ptkRegisterCmds.h is a C include file.
