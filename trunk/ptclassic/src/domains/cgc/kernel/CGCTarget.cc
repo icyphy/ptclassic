@@ -394,20 +394,27 @@ int CGCTarget :: codeGenInit() {
 
     static int needsSpliceStar(CGCPortHole* port)
     {
-	if (port->isItOutput() && (port->type() != ANYTYPE)) {
+	if (port->isItOutput()) {
 
 	    // splice conversion star if type of output port does not
 	    // match the type of the data connection
-	    if (port->type() != port->resolvedType())
+	    if ((port->type() != port->resolvedType()) &&
+ 	        (port->type() != ANYTYPE))
 		return TRUE;
 
 	    // check for ports of type FIX;
 	    // splice a FixToFix star if the precisions do not match or
 	    // one or both side uses precision variables that can change at
 	    // runtime
-	    if (port->type() == FIX) {
+	    if (port->resolvedType() == FIX) {
 
 		Precision p1, p2;
+
+		// Determine the two connected ports;
+		// If this port is the output of a fork star we go back to
+		// the input of the fork
+		CGCPortHole* far_port  = (CGCPortHole*)port->far();
+		CGCPortHole* this_port = far_port->realFarPort();
 
 		// if this or the far side is a multiporthole, refer to the
 		// multiport rather than to the normal porthole itself;
@@ -415,33 +422,31 @@ int CGCTarget :: codeGenInit() {
 		// the precision of the multiport may not have been set yet
 		// (cf. MultiInCGCPort::newPort)
 
-		MultiCGCPort* myMultiPort  = (MultiCGCPort*)port->getMyMultiPortHole();
-		MultiCGCPort* farMultiPort = (MultiCGCPort*)port->far()->getMyMultiPortHole();
+		MultiCGCPort *this_mph,*far_mph;
+		this_mph = (MultiCGCPort*)this_port->getMyMultiPortHole();
+		far_mph  = (MultiCGCPort*)far_port ->getMyMultiPortHole();
 
-		GenericPort* thisSide = port;
-		GenericPort* farSide  = port->far();
+		// Get the precision assigned to the two connected ports.
+		// Since the precision() method eventually passes the
+		// precision of the connected port, we use validPrecision()
+		// to determine whether a precision has been assigned
+		// explicitly to the port.
 
-		// get the precision assigned to the two connected ports without
-		// using the precision() method directly, since it would eventually
-		// pass the precision of the peer port
+		if (this_mph && this_mph->validPrecision())
+			p1 = this_mph->precision();
+	   else if (this_port->validPrecision())
+			p1 = this_port->precision();
 
-		if (myMultiPort && myMultiPort->validPrecision())
-			p1 = myMultiPort->precision(),
-			thisSide = myMultiPort;
-	   else if (port->validPrecision())
-			p1 = port->precision();
-
-		if (farMultiPort && farMultiPort->validPrecision())
-			p2 = farMultiPort->precision(),
-			farSide = farMultiPort;
-	   else if (((CGCPortHole*)port->far())->validPrecision())
-			p2 = ((CGCPortHole*)port->far())->precision();
+		if (far_mph && far_mph->validPrecision())
+			p2 = far_mph->precision();
+	   else if (far_port->validPrecision())
+			p2 = far_port->precision();
 
 		// if at least one of the connected ports uses variable
 		// precisions and the other side defines its own precision,
 		// we need a FixToFix star
-		if (((thisSide->attributes() & AB_VARPREC) && p2.isValid()) ||
-		    ((farSide->attributes()  & AB_VARPREC) && p1.isValid()))
+		if (((this_port->attributes() & AB_VARPREC) && p2.isValid()) ||
+		    ((far_port->attributes()  & AB_VARPREC) && p1.isValid()))
 			return TRUE;
 
 		// otherwise check whether the precisions differ
