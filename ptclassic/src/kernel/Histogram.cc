@@ -18,15 +18,24 @@ $Id$
 #include <std.h>
 #include "miscFuncs.h"
 
+void intVec::resize(int newSize) {
+	if (newSize == xsize) return;
+	int* oldData = data;
+	data = new int[newSize];
+	int ncopy = min(newSize, xsize);
+	for (int i = 0; i < ncopy; i++)
+		data[i] = oldData[i];
+	for (i = ncopy; i < newSize; i++)
+		data[i] = 0;
+	delete oldData;
+	xsize = newSize;
+}
+
 const int growStep = 16;
 
 // increment a bin in the intVec, growing the vector as needed.
 inline static void incBin(intVec& v, int bin) {
-	int oldcap = v.capacity();
-	if (oldcap <= bin) {
-		v.resize(bin+growStep);
-		v.fill(0,oldcap);
-	}
+	if (v.capacity() <= bin) v.resize(bin+growStep);
 	v.elem(bin) += 1;
 }
 
