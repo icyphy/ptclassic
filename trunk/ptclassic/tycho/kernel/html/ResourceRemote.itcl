@@ -92,7 +92,7 @@ class ::tycho::ResourceRemote {
     method streamable {}
 
     # Return the progess indicator, as a decimal number. 1.0 is full.
-    method progress {}
+    method progress {} {error "This should be redefined!"}
 
     # Write to the remote file.
     method write {data} {error "Should be redefined"}
@@ -288,24 +288,6 @@ body ::tycho::ResourceRemote::gets {{varName {}}} {
 #### isopen
 body ::tycho::ResourceRemote::isopen {} {
     return $fileIsOpen
-}
-
-#########################################################################
-#### progress
-# Get the current progress of a non-blocking read. Won't make sense
-# if not called during a non-blocking read.
-#
-body ::tycho::ResourceRemote::progress {} {
-    if {$contentlength==0} {
-        return 0
-    }
-    expr $contentloaded / $contentlength.0
-}
-
-#####################################################################
-#### puts
-body ::tycho::ResourceRemote::puts {string} {
-    error "HTTP files are not writable"
 }
 
 #####################################################################
