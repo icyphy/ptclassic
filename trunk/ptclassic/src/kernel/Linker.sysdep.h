@@ -493,6 +493,7 @@ extern "C" int getpagesize(void);
  * it has calls to dlsym, dlopen and dlerror.  However, we cannot
  * link to -ldl, so we provide dummy functions here.  
  */
+extern "C" {
 static void ptsun4dlerror() {
      fprintf(stderr,
              "Linker: The sun4 port of Ptolemy does not support dl* calls\n");
@@ -513,4 +514,6 @@ int dlclose(void * /*handle*/) {
 	ptsun4dlerror();
 	return 0;
 }
+
+} /* extern "C" */
 #endif /* PTSUN4 */
