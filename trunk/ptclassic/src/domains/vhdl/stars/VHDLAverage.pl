@@ -54,7 +54,10 @@ defstar {
       out << "$ref(output, ";
       out << -i;
       out << ") $assign(output) $temp(avg,float) / ";
-      out << float(numInputsToAverage);
+      // Cast to float indirectly to satisfy VHDL compiler.
+      int numInt = int(numInputsToAverage);
+      float numFloat = numInt;
+      out << numFloat;
       out << ";\n";
     }
 
