@@ -41,6 +41,7 @@ extern int strcasecmp TOP_ARGS((const char *s1, const char *s2));
 
 #if defined(__sun__) && ! defined(__svr4__)
 
+#ifdef DONT_USE
 /* bad stdio.h, unbelievable...  */
 extern int fputs();
 extern int printf();
@@ -59,6 +60,8 @@ extern int toupper TOP_ARGS((int c));
 /* bad stdlib.h, unbelievable...  */
 extern long strtol TOP_ARGS((const char *__nptr, char **__eptr, int __base));
 extern int putenv TOP_ARGS((const char*));
+
+#endif
 
 /* for gcc 2.1 */
 #define abort screwed_abort
