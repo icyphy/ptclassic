@@ -40,6 +40,7 @@ PL_SRCS = \
  VHDLConstInt.pl \
  VHDLImpulse.pl \
  VHDLRect.pl \
+ VHDLWaveForm.pl \
  VHDLFork.pl \
  VHDLGain.pl \
  VHDLAdd.pl \
