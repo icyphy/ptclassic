@@ -37,6 +37,8 @@ Note: all print functions append \n to string before printing.
 #include "err.h"
 #include "octMacros.h"
 #include "list.h"
+#include "rpcApp.h"
+#define VemReady() (RPCSendStream != 0)
 
 /* Controls whether errors get printed out in windows */
 static boolean errorWindows = TRUE;
@@ -65,9 +67,12 @@ void
 PrintCon(s)
 char *s;
 {
-    vemMessage("\0062", MSG_DISP|MSG_NOLOG);
-    vemMessage(s, MSG_DISP|MSG_NOLOG);
-    vemMessage("\n\0060", MSG_DISP|MSG_NOLOG);
+    if (VemReady()) {
+	vemMessage("\0062", MSG_DISP|MSG_NOLOG);
+	vemMessage(s, MSG_DISP|MSG_NOLOG);
+	vemMessage("\n\0060", MSG_DISP|MSG_NOLOG);
+    }
+    else printf ("%s\n", s);
 }
 
 /* PrintConLog  5/10/88 4/7/88
@@ -77,9 +82,12 @@ void
 PrintConLog(s)
 char *s;
 {
-    vemMessage("\0062", MSG_DISP|MSG_NOLOG);
-    vemMessage(s, MSG_DISP);
-    vemMessage("\n\0060", MSG_DISP);
+    if (VemReady()) {
+	vemMessage("\0062", MSG_DISP|MSG_NOLOG);
+	vemMessage(s, MSG_DISP);
+	vemMessage("\n\0060", MSG_DISP);
+    }
+    else printf ("%s\n", s);
 }
 
 /* PrintErr  5/10/88 4/25/88 7/15/93
@@ -93,6 +101,10 @@ char *s;
     char buf[MSG_BUF_MAX];
     char *msg;
     if (*s == 0) return;        /* ignore blank message */
+    if (!VemReady()) {
+	fprintf (stderr, "Error: %s\n", s);
+	return;
+    }
     (void) sprintf(buf, "\0062Error: %s\n\0060", s);
     (void) vemMessage(buf, MSG_DISP);
     if (errorWindows) {
