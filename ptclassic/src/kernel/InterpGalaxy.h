@@ -38,34 +38,34 @@ public:
 	setDescriptor(const char* dtext) { descriptor = dtext;}
 
 // add a new star to the galaxy
-	void
+	int
 	addStar(const char* starname, const char* starclass);
 
 // add a connection
-	void
+	int
 	connect(const char* srcstar, const char* srcport, const char* dststar,
 		const char* dstport, int delay = 0);
 // add an alias
-	void
+	int
 	alias(const char* galport, const char* star, const char *starport);
 
 // add a state
-	void
+	int
         addState(const char* statename, const char* stateclass, const char* statevalue);
 
 // set a state
-	void
+	int
         setState(const char* blockname, const char* statename, const char* statevalue);
 
 /// make portholes with a multiporthole
-	void
+	int
 	numPorts(const char* starname, const char* portname, int numP);
 
 // Make a new, identical galaxy
 	virtual Block *clone();
 
 // "register" the galaxy (add it to the known list)
-	addToKnownList();
+	void addToKnownList();
 
 // return a contained star/galaxy (this is protected in Galaxy)
 	Block* blockWithName(const char* s) {return Galaxy::blockWithName(s);}

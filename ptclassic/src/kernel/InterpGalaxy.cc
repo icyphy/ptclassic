@@ -56,14 +56,14 @@ InterpGalaxy::findPortHole (const char* star,const char* port) {
 	return ph;
 }
 
-void
+int
 InterpGalaxy::connect(const char* srcStar,const char* srcPipe,
 		      const char* dstStar,const char* dstPipe,
 		      int numberDelays=0) {
 // Get the source and destination ports
 	PortHole *srcP = findPortHole (srcStar, srcPipe);
 	PortHole *dstP = findPortHole (dstStar, dstPipe);
-	if (srcP == NULL || dstP == NULL) return;
+	if (srcP == NULL || dstP == NULL) return FALSE;
 
 	srcPipe = savestring(srcPipe);
 	srcStar = savestring(srcStar);
@@ -78,29 +78,30 @@ InterpGalaxy::connect(const char* srcStar,const char* srcPipe,
 	actionList += numberDelays;
 // Now it's obvious:
 	connect (*srcP, *dstP, numberDelays);
+	return TRUE;
 }
 
-void
+int
 InterpGalaxy::addStar(const char* starname,const char* starclass) {
 	starname = savestring (starname);
 	starclass = savestring (starclass);
 	Block *src = KnownBlock::clone(starclass);
-	if (src == 0) return;
+	if (src == 0) return FALSE;
 	addBlock(src->setBlock(starname,this));
 //add action to list
 	actionList += "S";
 	actionList += starname;
 	actionList += starclass;
-	return;
+	return TRUE;
 }
 
-void
+int
 InterpGalaxy::alias(const char* galportname,const char* starname,
 		    const char* portname) {
 	galportname = savestring (galportname);
 // first get the portname for the contained star
 	PortHole *ph = findPortHole (starname, portname);
-	if (ph == NULL) return;
+	if (ph == NULL) return FALSE;
 	portname = ph->readName();// safe copy
 	starname = ph->parent()->readName();// safe copy
 // create new galaxy port, add to galaxy, do the alias
@@ -120,15 +121,16 @@ InterpGalaxy::alias(const char* galportname,const char* starname,
 	actionList += galportname;
 	actionList += starname;
 	actionList += portname;
+	return TRUE;
 }
 
-void
+int
 InterpGalaxy::addState (const char* statename, const char* stateclass, const char* statevalue) {
         statename = savestring (statename);
         stateclass = savestring (stateclass);
         statevalue = savestring (statevalue);
         State *src = KnownState::clone(stateclass);
-        if (src == 0) return;
+        if (src == 0) return FALSE;
         addState(src->setState(statename,this,statevalue));
         initState();
 //add action to list
@@ -136,17 +138,17 @@ InterpGalaxy::addState (const char* statename, const char* stateclass, const cha
         actionList += statename;
         actionList += stateclass;
         actionList += statevalue;
-        return;
+        return TRUE;
 }
 
-void
+int
 InterpGalaxy::setState (const char* blockname, const char* statename, const char* statevalue) {
         blockname = savestring (blockname);
         statename = savestring (statename);
         statevalue = savestring (statevalue);
 	if(!strcmp(blockname, "this")) {
 		State *src = stateWithName(statename);
-		if (src == 0) return;
+		if (src == 0) return FALSE;
 		setState(statename,statevalue);
 		initState();
 	}
@@ -163,15 +165,15 @@ InterpGalaxy::setState (const char* blockname, const char* statename, const char
 	actionList += blockname;
         actionList += statename;
         actionList += statevalue;
-        return;
+        return TRUE;
 }
 
-void
+int
 InterpGalaxy :: numPorts (const char* star, const char* port, int num) {
 	Block *st = blockWithName(star);
 	if (st == NULL) {
 		noInstance (star, readName());
-		return;
+		return FALSE;
 	}
 	MultiPortHole *mp = st->multiPortWithName(port);
 	if (mp == NULL) {
@@ -182,12 +184,12 @@ InterpGalaxy :: numPorts (const char* star, const char* port, int num) {
 		msg += star;
 		msg += "\"";
 		errorHandler.error (msg);
-		return;
+		return FALSE;
 	}
 
 	// Quit if we already have the right number
 	int np = mp->numberPorts ();
-	if (np == num) return;
+	if (np == num) return TRUE;
 
 	star = savestring (star);
 	port = savestring (port);
@@ -199,7 +201,7 @@ InterpGalaxy :: numPorts (const char* star, const char* port, int num) {
 	actionList += star;
 	actionList += port;
 	actionList += num;
-	return;
+	return TRUE;
 }
 
 // DANGER WILL ROBINSON!!!  Casting actionList to char* will cause all
@@ -285,6 +287,7 @@ InterpGalaxy::clone() {
 	return gal;
 }
 
+void
 InterpGalaxy::addToKnownList() {
 	KnownBlock *p = new KnownBlock(*this,savestring(readName()));
 	delete p;
