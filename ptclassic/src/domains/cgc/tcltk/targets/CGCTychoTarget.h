@@ -37,7 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "StringState.h"
+#include "StringList.h"
 #include "CGCTarget.h"
 
 class CGCTychoTarget : public CGCTarget {
