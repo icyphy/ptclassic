@@ -44,7 +44,7 @@ connected to a star that consumes more than one sample each time
 it fires), interrupt-based code will be generated.
 If the star is not repeated, it will generate code
 that polls the SSI and busy waits if samples are not available.
-Interrupt-based code can be forced by setting the buffer size positive.
+Interrupt-based code can be forced by setting the buffer size non-zero.
 The interrupt buffer holds at least \fIqueueSize\fP samples; the length
 of the queue will be adjusted upward according to the number of schedule
 repetitions of the star.  If \fIqueueSize\fP is negative, the negative
@@ -569,7 +569,7 @@ $label(tx_done)
 	doXmit1 = doXmit2 = TRUE;
 
 	doIntr = reps() > 1;
-	if ( int(queueSize) > 0 )
+	if ( int(queueSize) != 0 )
 	    doIntr = TRUE;
 
 	doErrAbort = int(abortOnRealTimeError);
