@@ -5,7 +5,12 @@ defstar {
     desc { Interface to the 56001 SSI's port with timing-skew capability. }
     version { $Id$ }
     author { Kennard White }
-    copyright { 1991 The Regents of the University of California }
+    copyright {
+Copyright (c) 1991-%Q% The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+    }
     location { CG56 library }
     explanation {
 This derived star adds an additional \fIerror\fR input used to control
