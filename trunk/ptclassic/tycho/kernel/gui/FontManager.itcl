@@ -206,6 +206,12 @@ class ::tycho::FontManager {
     set screenFont(18) 8x16
     set screenFont(24) 10x20
     set screenFont(32) 12x24  
+
+    # The regular expression used to parse X fonts.
+    # This expression may need to be changed to cope with
+    # un-anticipated foundries etc. For example, I just added
+    # the "&" to the foundry expression so it gets "b&h".
+    private common _xfontRegexp "^-(\[a-z&\]*|\\*)-(\[a-zA-Z\ \]*)-(medium|bold)-(r|i)-(\[a-z\]*|\\*)-(\[a-z\]*|\\*)-(\[a-z\]*|\\*)-(\[0-9\]+)0-"
 }
 
 
@@ -313,36 +319,40 @@ body ::tycho::FontManager::family {{type {}} {family {}} args} {
 # </ol>
 #
 body ::tycho::FontManager::getFont {family {size 12} {style roman} {shift 0}} {
-    # Figure out X weight/style specs
-    switch [string tolower $style] {
-	"roman" {
-	    set weight medium
-	    set style  r
-	}
-	"italic" {
-	    set weight medium
-	    set style  i
-	}
-	"bold" {
-	    set weight bold
-	    set style  r
-	}
-	"bold italic" -
-	"bolditalic" {
-	    set weight bold
-	    set style  i
-	}
-        default {
-            # Unrecognized font
-            set weight medium
-            set style r
+    # See if the family looks like an X font specification
+    if [regexp -- $_xfontRegexp $family] {
+        regexp -- $_xfontRegexp $family \
+                match foundry family weight style _ _ _ size
+    } else {
+        # Figure out X weight/style specs
+        switch [string tolower $style] {
+            "roman" {
+                set weight medium
+                set style  r
+            }
+            "italic" {
+                set weight medium
+                set style  i
+            }
+            "bold" {
+                set weight bold
+                set style  r
+            }
+            "bold italic" -
+            "bolditalic" {
+                set weight bold
+                set style  i
+            }
+            default {
+                # Unrecognized font
+                set weight medium
+                set style r
+            }
         }
     }
-
     # Call the lower-level routine
     return [getXFont $family $size $weight $style $shift]
 }
-
 
 ########################################################################
 #### getXFont
@@ -420,11 +430,7 @@ body ::tycho::FontManager::getXFont {family {size 12} {weight medium} \
 # the size without changing type, and so on.
 #
 body ::tycho::FontManager::parseFont {font} {
-    # This expression may need to be changed to cope with
-    # un-anticipated foundries etc. For example, I just added
-    # the "&" to the foundry expression so it gets "b&h".
-    set exp "^-(\[a-z&\]*|\\*)-(\[a-zA-Z\ \]*)-(medium|bold)-(r|i)-(\[a-z\]*|\\*)-(\[a-z\]*|\\*)-(\[a-z\]*|\\*)-(\[0-9\]+)0-"
-    if [regexp -- $exp $font \
+    if [regexp -- $_xfontRegexp $font \
 	    match foundry family weight style junk1 junk2 junk3 size] {
 	# Parse succeeded -- get non-X style
 	switch -exact $weight-$style {
