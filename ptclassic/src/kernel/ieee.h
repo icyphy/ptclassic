@@ -35,7 +35,7 @@ Version: $Id$
 #include <nan.h>
 #endif
 #if defined(sun) 
-#if defined(__svr4__)
+#if defined(__svr4__) || defined(SVR4) || defined(SYSV)
 #define IsNANorINF(X) (isnan(X))
 #else
 #define IsNANorINF(X) (isnan(X) || isinf(X))
