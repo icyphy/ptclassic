@@ -109,6 +109,12 @@ class ::tycho::MenuSupport {
     # Set options of a menu entry
     method entryconfigure {tag args}
 
+    # Test ia a menu or an entry exists
+    method exists {tag}
+
+    # Given an entry tag, get its Tk index
+    method index {tag}
+
     # Insert a menu entry before the specified entry
     method insert {type tag before args}
 
@@ -124,8 +130,14 @@ class ::tycho::MenuSupport {
     # Set options of a menu
     method menuconfigure {tag args}
 
+    # Ppost the given menu
+    method post {tag}
+
     # Add a separator to a menu
     method separator {tag inMenu}
+
+    # Unpost a menu
+    method unpost {tag}
 
     ##########################################################################
     ####                         protected variables                      ####
@@ -174,6 +186,7 @@ body ::tycho::MenuSupport::constructor {args} {
 #
 # If there is already
 # an entry with the specified tag, an error is generated.
+# The returned result is the tag.
 #
 body ::tycho::MenuSupport::add {type tag inMenu args} {
     # Check if the menu exists
@@ -218,16 +231,17 @@ body ::tycho::MenuSupport::clear {menu} {
 	return
     }
 
-    # Delete the menu entries
-    set i 0
-    foreach tag $menuentries($menupath($menu)) {
+    # Delete the menu entries. Note: Do in reverse
+    # order so indexes don't get mixed up
+    set i [expr [llength $menuentries($menupath($menu))] -1]
+    foreach tag [::tycho::lreverse $menuentries($menupath($menu))] {
 	if { [$menupath($menu) type $i] == "cascade" } {
-	    $this delete [$menupath($menu) entrycget $i -label]
+	    $this delete $tag
 	} else {
 	    $menupath($menu) delete $i
 	    unset parentmenu($tag)
 	}
-	incr i
+	incr i -1
     }
     set menuentries($menupath($menu)) {}
 }
@@ -277,14 +291,13 @@ body ::tycho::MenuSupport::delete {tag} {
     }
 
     # Remove the entry from the menu
-    $parentmenu($tag) delete \
-	    [lsearch -exact $menuentries($parentmenu($tag)) $tag]
+    $parentmenu($tag) delete [index $tag]
 
     # Remove it from the entry list of its parent
     set menuentries($parentmenu($tag)) \
-    	[::tycho::ldelete $menuentries($parentmenu($tag)) $tag]
+	    [::tycho::ldelete $menuentries($parentmenu($tag)) $tag]
 
-	# Finally, just forget it!
+    # Finally, just forget it!
     unset parentmenu($tag)
 }
 
@@ -299,9 +312,7 @@ body ::tycho::MenuSupport::disable {tag} {
 	return
     }
     # Disable the menu entry
-    $parentmenu($tag) entryconfigure \
-	    [lsearch -exact $menuentries($parentmenu($tag)) $tag] \
-	    -state disabled
+    $parentmenu($tag) entryconfigure [index $tag] -state disabled
 }
 
 #####################################################################
@@ -315,9 +326,7 @@ body ::tycho::MenuSupport::enable {tag} {
 	return
     }
     # Enable the menu entry
-    $parentmenu($tag) entryconfigure \
-	    [lsearch -exact $menuentries($parentmenu($tag)) $tag] \
-	    -state normal
+    $parentmenu($tag) entryconfigure [index $tag] -state normal
 }
 
 #####################################################################
@@ -329,7 +338,16 @@ body ::tycho::MenuSupport::empty {tag} {
     if { ! [::info exists menupath($tag)] } {
 	error "Menu $tag does not exist"
     }
-    expr { $menuentries($parentmenu($tag)) == "" }
+    expr { $menuentries($menupath($tag)) == "" }
+}
+
+#####################################################################
+#### exists
+# Test if a menu or an entry exists
+#
+body ::tycho::MenuSupport::exists {tag} {
+    expr {  [::info exists menupath($tag)] \
+	    || [::info exists parentmenu($tag)] }
 }
 
 #####################################################################
@@ -343,9 +361,7 @@ body ::tycho::MenuSupport::entrycget {tag option} {
 	error "$tag is not a menu entry"
     }
     # Get the option
-    $parentmenu($tag) entrycget  \
-	    [lsearch -exact $menuentries($parentmenu($tag)) $tag] \
-	    $option
+    $parentmenu($tag) entrycget [index $tag] $option
 }
 
 #####################################################################
@@ -359,9 +375,21 @@ body ::tycho::MenuSupport::entryconfigure {tag args} {
 	error "$tag is not a menu entry"
     }
     # Get or set the option(s)
-    eval $parentmenu($tag) entryconfigure \
-	    [lsearch -exact $menuentries($parentmenu($tag)) $tag] \
-	    $args
+    eval $parentmenu($tag) entryconfigure [index $tag] $args
+}
+
+#####################################################################
+#### index
+# Given an entry tag, get its Tk index. This is mainly used
+# internal but may also be useful for testing.
+#
+body ::tycho::MenuSupport::index {tag} {
+    # Check validity
+    if { ! [::info exists parentmenu($tag)] } {
+	error "$tag is not a menu entry"
+    }
+    # Get the index
+    lsearch -exact $menuentries($parentmenu($tag)) $tag
 }
 
 #####################################################################
@@ -369,6 +397,7 @@ body ::tycho::MenuSupport::entryconfigure {tag args} {
 # Insert an entry before the specified entry. An error is flagged
 # if the entry to insert before does not exist. If the new entry
 # already exists, flag an error.
+# The returned result is the tag.
 #
 body ::tycho::MenuSupport::insert {type tag before args} {
     # Check if the entry to insert before exists
@@ -380,12 +409,12 @@ body ::tycho::MenuSupport::insert {type tag before args} {
 	error "Menu $tag already exists"
     }
     # Get the index of the menu to insert before
-    set idx [lsearch $menuentries($parentmenu($before)) $before]
+    set idx [index $before]
 	
     # Create a sub-menu
     if { $type == "cascade" } {
 	set parentmenu($tag) $parentmenu($before)
-	set menupath($tag) $menupath($before).menu$tag
+	set menupath($tag) $parentmenu($before).menu$tag
 	itk_component add $menupath($tag) {
 	    menu $menupath($tag) -tearoff 0
 	} {
@@ -403,6 +432,8 @@ body ::tycho::MenuSupport::insert {type tag before args} {
     # Remember the entry in its menu
     set menuentries($parentmenu($before)) \
     	[linsert $menuentries($parentmenu($before)) $idx $tag]
+
+    return $tag
 }
 
 #####################################################################
@@ -416,7 +447,7 @@ body ::tycho::MenuSupport::inmenu {tag} {
 	error "Menu entry $tag does not exist"
     }
     set parent [lindex [split $parentmenu($tag) "."] end]
-    regsub {^menu} $parent parent
+    regsub {^menu} $parent {} parent
     return $parent
 }
 
@@ -463,6 +494,38 @@ body ::tycho::MenuSupport::menuconfigure {tag args} {
 }
 
 #####################################################################
+#### post
+# Post the given menu. This works with both top-level
+# menus and cascaded menus. If a cascaded menu is posted,
+# then its parent menus are also recursively posted/
+# Note that if performing this explicitly, an update
+# needs to be performed between posting a menu and
+# cascaded menu, or the cascade will be mapped in the
+# wrong position on the screen.
+#
+body ::tycho::MenuSupport::post {tag} {
+    # Check validity
+    if { ! [::info exists menupath($tag)] } {
+	error "$tag is not a menu"
+    }
+    # Post it
+    if { [::info exists parentmenu($tag)] } {
+	# Post a cascade menu
+	if ![::winfo ismapped $parentmenu($tag)] {
+	    # Recursively post parent and update screen
+	    post [inmenu $tag]
+	    ::tycho::safeUpdate $this
+	}
+	$parentmenu($tag) postcascade [index $tag]
+    } else {
+	# Post a top-level menu
+	$menupath($tag) post \
+		[winfo rootx [component hull]] \
+		[winfo rooty [component hull]]
+    }
+}
+
+#####################################################################
 #### separator
 #
 # Add a "separator" menu entry to the end of a menu. This is a version
@@ -482,4 +545,17 @@ body ::tycho::MenuSupport::separator {tag inMenu} {
     eval $menupath($inMenu) add separator
     lappend menuentries($menupath($inMenu)) $tag
     return $tag
+}
+
+#####################################################################
+#### unpost
+# Unpost the given menu.
+#
+body ::tycho::MenuSupport::unpost {tag} {
+    # Check validity
+    if { ! [::info exists menupath($tag)] } {
+	error "$tag is not a menu"
+    }
+    # Unpost it
+    $menupath($tag) unpost
 }
