@@ -74,10 +74,13 @@ void Target::setGalaxy(Galaxy& g) {
 
 void Target::setup() {
 	SimControl::clearHalt();
+	Target* t = child(0);
+	if (!t) t = this;
 	GalStarIter next(*gal);
 	Star* s;
 	while ((s = next++) != 0) {
-		if (!s->isA(supportedStarClass) && !s->isA(auxStarClass())) {
+		if (!s->isA(t->supportedStarClass) && 
+		    !s->isA(t->auxStarClass())) {
 			Error::abortRun (*s,
 					 "wrong star type for target ",
 					 name());
