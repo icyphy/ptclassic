@@ -136,36 +136,37 @@ Academic Press, New York, 1977.
 	}
 	code {
 
-// Swap rows in a matrix the slow but safe way
-void intSwapRows( IntMatrix mat, int row1, int row2 )
+// Swap two rows in a matrix the slow but safe way
+void intSwapRows( IntMatrix *mat, int row1, int row2 )
 {
 	int col, numcols, temp;
-	int *ptr1;
-	int *ptr2;
 
-	numcols = mat.numCols();
-	if ( row1 != row2 )
+	numcols = mat->numCols();
+	if ( row1 != row2 ) {
 	  for ( col = 0; col < numcols; col++ )
-	    INT_SWAP3(mat[row1][col], mat[row2][col], temp);
+	    INT_SWAP3((*mat)[row1][col], (*mat)[row2][col], temp)
+	}
 
 	return;
 }
 
-// Swap columns in a matrix the slow but safe way
-void intSwapCols( IntMatrix mat, int col1, int col2 )
+// Swap two columns in a matrix the slow but safe way
+void intSwapCols( IntMatrix *mat, int col1, int col2 )
 {
 	int numrows, row, temp;
 
-	numrows = mat.numRows();
-	if ( col1 != col2 )
+	numrows = mat->numRows();
+	if ( col1 != col2 ) {
 	  for ( row = 0; row < numrows; row++ )
-	    INT_SWAP3(mat[row][col1], mat[row][col2], temp);
+	    INT_SWAP3((*mat)[row][col1], (*mat)[row][col2], temp)
+	}
 
 	return;
 }
 
 	}
 	go {
+
           // get the input
           Envelope Apkt;
           (S%0).getMessage(Apkt);
@@ -203,7 +204,7 @@ void intSwapCols( IntMatrix mat, int col1, int col2 )
 	    endflag = FALSE;
 	    while ( ! endflag ) {
 
-	      // find the indices of the pivot: non-zero entry with min value
+	      // find indices of the pivot: non-zero entry with min value in d
 	      mincol = minrow = dim;
 	      minvalue = d[mincol][minrow];
 	      minabsvalue = intabs(minvalue);
@@ -219,13 +220,14 @@ void intSwapCols( IntMatrix mat, int col1, int col2 )
 	        }
 	      }
 
-	      // move the pivot to location (dim, dim) via elementary matrices
+	      // move the pivot to location (dim, dim) in d
+	      // in terms of elementary matrices E and F working on U D V,
 	      // U (E E^-1) D (F^-1 F) V = (U E) (E^-1 D F^-1) (F V)
-	      intSwapRows( d, dim, minrow );		/* E^-1 D */
-	      intSwapCols( d, dim, mincol );		/* E^-1 D F^-1 */
+	      intSwapRows( &d, dim, minrow );		/* E^-1 D */
+	      intSwapCols( &d, dim, mincol );		/* E^-1 D F^-1 */
 
-	      intSwapCols( u, dim, minrow );		/* U E */
-	      intSwapRows( v, dim, mincol );		/* F V */
+	      intSwapCols( &u, dim, minrow );		/* U E */
+	      intSwapRows( &v, dim, mincol );		/* F V */
 
 	      // eliminate elements in column dim except for element dim by
 	      // U (E E^-1) D (F^-1 F) V = (U E) (E^-1 D F^-1) (F V)
