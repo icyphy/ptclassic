@@ -1,2 +1,9 @@
-# Files that get ignored by CVS
+# Files to ignore
 *.class
+*.jar
+#
+# Keep these alphabetical
+alljtests.tcl
+codeDoc
+# Don't add doc, since we have doc directories that have CVS files
+# doc
