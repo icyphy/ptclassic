@@ -1,5 +1,5 @@
 defstar {
-	name		{ RunLenImage }
+	name		{ RunLenImg }
 	domain		{ SDF }
 	version		{ $Id$ }
 	author		{ Paul Haskell }
@@ -120,4 +120,4 @@ separate pieces.
 
 		Envelope outEnvp(*inImage); outData%0 << outEnvp;
 	}
-} // end defstar { RunLen }
+} // end defstar { RunLenImg }
