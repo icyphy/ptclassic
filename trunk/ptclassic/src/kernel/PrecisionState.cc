@@ -254,10 +254,22 @@ StringList& operator << (StringList& l, const Precision& p)
 	class PrecisionState methods
 **************************************************************************/
 
+PrecisionState:: PrecisionState(): State(),Precision()
+{
+    val=NULL;
+    //    this->operator=(initValue());
+}
+
 // setting and deleting the value string
 PrecisionState :: ~PrecisionState()
 {
 	if (val) { LOG_DEL; delete [] val; }
+}
+
+// default copy constructor
+PrecisionState::PrecisionState(const PrecisionState &)
+{
+    Error::abortRun (" Called PrecisionState copy constructor, which is not done yet. ");
 }
 
 // initialize the state from a character string
@@ -286,7 +298,11 @@ PrecisionState& PrecisionState :: operator = (const char* arg)
 	else {
 		// check for extra cruft (this also eats up any pushback token)
 	  	if (getParseToken(lexer).tok != T_EOF) {
-			parseError ("extra text after valid expression");
+			StringList msg;
+			msg << "extra text after valid expression: '" 
+			    << arg << "'. Token was '" 
+			    << foo << "'";
+			parseError (msg);
 			return *this;
 		}
 
@@ -339,6 +355,12 @@ void PrecisionState :: initialize()
 {
 	// use overloaded operator = (const char*)
 	this->operator = (initValue());
+}
+
+void PrecisionState :: setInitValue(const char* s)
+{
+    State::setInitValue(s);
+    initialize();
 }
 
 // static function that can be invoked from outside
@@ -416,7 +438,9 @@ Precision PrecisionState :: parsePrecisionString(Tokenizer& lexer)
 	
 	ParseToken t1 = getParseToken(lexer);
 	if ((t1.tok != '.') && (t1.tok != ':')) {
-		parseError ("expected . or /");
+	        StringList msg;
+	        msg << "expected . or /, got: " << (char )t1.tok;
+		parseError (msg);
 		return Precision();
 	}
 
@@ -435,6 +459,18 @@ Precision PrecisionState :: parsePrecisionString(Tokenizer& lexer)
 		intBits = t2.intval - t.intval;
 
 	return Precision(length,intBits);
+}
+
+PrecisionState& PrecisionState :: setState(const char* stateName, 
+			Block* parent ,
+			const char* ivalue,
+			const char* desc = NULL)
+{
+	setDescriptor(desc);
+	setNameParent(stateName, parent);
+	setInitValue(ivalue);
+	//myInitValue = ivalue;
+	return *this;
 }
 
 // redefine the state tokenizer
