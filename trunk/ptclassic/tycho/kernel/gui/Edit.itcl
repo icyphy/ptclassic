@@ -32,11 +32,7 @@
 #######################################################################
 
 # FIXME - to do
-#  - revert should go back to the original position in the file,
-#    and also mark the file unmodified.  This should be done by
-#    implementing a mechanism for tagging positions in EditText,
-#    giving them names.
-#  - Revert should also be undoable.
+#  - Reload should also be undoable.
 
 #######################################################################
 # options
@@ -92,13 +88,9 @@ class ::tycho::Edit {
     # Directly load the contents of the file.
     method loadFile {loadfile} 
 
-    #### revert
-    # Revert to previously saved file contents.
-    method revert {}
-
     #### reload
     # Reload the current file. 
-    method reload {{askuser 1} {filename ""}}
+    method reload {{askuser 1} {filename "defaultfileforreloadmethod"}}
 
     #### nextRevAction
     # Check in a file using the selected revision control program command
@@ -451,28 +443,16 @@ body ::tycho::Edit::nextRevAction {} {
 }
 
 ###################################################################
-#### revert
-# Revert to previously saved file contents after obtaining confirmation.
-# This command does nothing if either the text is not modified or
-# no file has been specified by the -file option.
-#
-body ::tycho::Edit::revert {} {
-    if {$modified && $file != "NoName" && $file != ""} {
-	if [askuser "OK to discard changes in [file tail $file]?"] {
-	    $itk_component(text) deleteRange 1.0 end
-	    $itk_component(text) readFile $file
-	    markUnmodified
-	}
-    }
-}
-
-###################################################################
 #### reload
 # Reload the current file. If the contents are modified, then we 
 # ask the user if they want to procede.
 #
-body ::tycho::Edit::reload {{askuser 1} {filename ""}} {
-    if {$filename == ""} {
+body ::tycho::Edit::reload {{askuser 1} {filename \
+	"defaultfileforreloadmethod"}} {
+    if {$filename == "NoName" || $filename == ""} {
+	return 
+    }
+    if {$filename == "defaultfileforreloadmethod"} {
 	set filename $file
     }
     # Save the position of the cursor.
@@ -486,7 +466,6 @@ body ::tycho::Edit::reload {{askuser 1} {filename ""}} {
     $itk_component(text) deleteRange 1.0 end
     $this loadFile $filename
     $itk_component(text) setInsert $ins
-    $itk_component(text) parseRegion 1.0 end
     $itk_component(text) center
     markUnmodified
     if {[file writable $filename]} {
