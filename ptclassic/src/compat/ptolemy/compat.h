@@ -100,7 +100,7 @@ extern "C" {
 #define PTSOL2_CFRONT
 #endif
 
-#if defined(sparc) && !defined(__svr4__)
+#if defined(sparc) && !(defined(__svr4__) || defined(PTSOL2_CFRONT))
 /* Really, we mean sun4 running SunOs4.1.x, Sun C++ or g++ */
 #define SUN4
 #define PTSUN4
