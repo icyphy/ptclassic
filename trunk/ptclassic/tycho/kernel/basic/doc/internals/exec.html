@@ -10,11 +10,17 @@ Tycho includes a few different ways of
 <A NAME="running a subprocess">running</A> <A NAME="subprocesses, running">subprocesses</A>.  
 <DL>
 <DT> <CODE>::tycho::tyexec</CODE> <I>args</I>
+<DD> The <A HREF="../codeDoc/Tyexec.html"><CODE>tyexec</CODE></A> procedure
+is a wrapper to the the Tcl <CODE>exec</CODE> command which checks
+to see if <CODE>exec</CODE> is supported on the current platform
+and gives a better error message if the <CODE>exec</CODE> returns non-zero.
+<CODE>tyexec</CODE> is non-graphical, and resides in the <CODE>tycho.kernel.basic</CODE> package.
 <DT> <CODE>::tycho::execModal</CODE> <I>args</I>
-<DD> The <A HREF="../codeDoc/Tyexec.html"><CODE>tyexec</CODE></A> procedure and
-     The <A HREF="../../../gui/doc/usersGuides/ExecHelp.html#execModal Proc associated with ::tycho::Exec class"><CODE>execModal</CODE></A> procedure
-will pass <I>args</I> to the Tcl <CODE>exec</CODE> command.
-
+<DD> The <A HREF="../../../gui/doc/usersGuides/ExecHelp.html#execModal Proc associated with ::tycho::Exec class"><CODE>execModal</CODE></A> procedure
+is a short cut to the <CODE>::tycho::Monitor</CODE> class.
+<CODE>execModal</CODE> is graphical, and resides in the 
+<CODE>tycho.kernel.gui</CODE> package along with the <CODE>Monitor</CODE>
+class.
 <DT> <CODE>::tycho::Monitor</CODE>
 <DD> The graphical 
 <A HREF="../../../gui/doc/usersGuides/ExecHelp.html">Monitor Class</A>
