@@ -48,6 +48,7 @@ static char SccsId[]="$Id$";
 #include <netinet/in.h>
 #include <netdb.h>
 #include <errno.h>
+#include <sys/types.h>
 
 extern int errno;
 
@@ -228,7 +229,12 @@ long size;			/* number of items in the array */
      * loop waiting for VEM to request user functions
      */
 loop:
-    while ((nfound = select(32, &rmask, &wmask, &emask,
+    /* Fixed up select() by casting to args to (fd_set *).  Note that the
+       args we are casting are longs, and fd_set is usually an int, so we are
+       probably shooting ourselves in the foot here.
+     */
+    while ((nfound = select(32, 
+			    (fd_set *)&rmask,(fd_set *)&wmask,(fd_set *)&emask,
 			    RPCNIL(struct timeval))) >= 0) {
 
 	/* timeout or error */
