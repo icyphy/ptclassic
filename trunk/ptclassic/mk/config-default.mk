@@ -114,3 +114,10 @@ SYSLIBS=-lg++ -lm
 LINKFLAGS=-L$(LIBDIR)
 # link flags if debugging symbols are to be left
 LINKFLAGS_D=-L$(LIBDIR)
+
+# Flag for cc to statically link binaries (hppa and sun4 currently use this)
+CC_STATIC=
+
+# Used to build xv.  xv is distributed in the other.src tar file
+XV_RAND=
+XV_INSTALL=install
