@@ -21,7 +21,7 @@ Contents:
 </ul>
 <h1><a name="bugs in the kernel">Bugs in the kernel</a></h1>
 
-<h3><a href="$TYCHO/kernel/MenuBar.itcl">MenuBar</a></h3>
+<h3><a href="../kernel/MenuBar.itcl">MenuBar</a></h3>
 <ul>
 <li>If you add a menu with a name that already exists, and the
 existing menu is before an entry that has no -label option
@@ -34,7 +34,7 @@ and using that.
 
 </ul>
 
-<h3><a href="$TYCHO/kernel/File.itcl">File</a></h3>
+<h3><a href="../kernel/File.itcl">File</a></h3>
 <ul>
 <li>File names are being added to the list of open files,
 but if the constructor subsequently fails, then Tycho
@@ -45,13 +45,13 @@ index but doesn't exist.
 the HTML editor, not the HTML viewer. But that's what you get.
 </ul>
 
-<h3><a href="$TYCHO/kernel/Displayer.itcl">Displayer</a></h3>
+<h3><a href="../kernel/Displayer.itcl">Displayer</a></h3>
 <ul>
 <li>The menu buttons created in MenuSupport and MenuBar may need to be
     made global (with an uplevel #0).
 </ul>
 
-<h3><a href="$TYCHO/kernel/Edit.itcl">Edit</a></h3>
+<h3><a href="../kernel/Edit.itcl">Edit</a></h3>
 <ul>
 <li>Fill region is much too slow.
 <li>The undo in the text widgets is only one level deep.
@@ -61,12 +61,12 @@ After it's deselected, then it cannot be "stuffed" elsewhere from the
 clipboard.
 </ul>
 
-<h3><a href="$TYCHO/kernel/File.itcl">File</a></h3>
+<h3><a href="../kernel/File.itcl">File</a></h3>
 <ul>
 <li>Crash recovery code only works with Ptolemy binaries.
 </ul>
 
-<h3><a href="$TYCHO/kernel/Glimpse.itcl">Glimpse</a></h3>
+<h3><a href="../kernel/Glimpse.itcl">Glimpse</a></h3>
 <ul>
 <li>Glimpse should not freeze Tycho while running. Searching
 through say the Ptolemy tree can take a very long time.
@@ -75,7 +75,7 @@ through say the Ptolemy tree can take a very long time.
 as the user if we want to create it.
 </ul>
 
-<h3><a href="$TYCHO/kernel/HTML.itcl">HTML</a></h3>
+<h3><a href="../kernel/HTML.itcl">HTML</a></h3>
 <H4>HTML Rendering bugs</H4>
 
 <ul>
@@ -138,7 +138,7 @@ menu in the file browser that selects the type of editor.
 
 </ul>
 
-<h3><a href="$TYCHO/kernel/Query.itcl">Query</a></h3>
+<h3><a href="../kernel/Query.itcl">Query</a></h3>
 <ul>
 
 <li> Control-v in the search window inserts garbage into the search
@@ -146,7 +146,7 @@ field.
 
 </ul>
 
-<h3><a href="$TYCHO/kernel/RevControlRCS.itcl">RevControlRCS</a></h3>
+<h3><a href="../kernel/RevControlRCS.itcl">RevControlRCS</a></h3>
 <ul>
 
 <li> Unfortunately, if RCS does not necessarily put the version
@@ -156,7 +156,7 @@ file is put in the current directory.
 
 </ul>
 
-<h3><a href="$TYCHO/kernel/RevControlSCCS.itcl">RevControlSCCS</a></h3>
+<h3><a href="../kernel/RevControlSCCS.itcl">RevControlSCCS</a></h3>
 <ul>
 
 <li> Revision control appears to use the file permissions to test
@@ -167,7 +167,7 @@ It should check for the lock file.
 </ul>
 
 
-<h3><a href="$TYCHO/kernel/TclShell.itcl">TclShell</a></h3>
+<h3><a href="../kernel/TclShell.itcl">TclShell</a></h3>
 <ul>
 <li> When a TclShell is displaying stdout on its last line, typed
 commands are not always interpreted correctly.
@@ -176,7 +176,7 @@ cursor at the top of the shell.  It should only put the view up there.
 It needs to run adjustInsertionCursor.
 </ul>
 
-<h3><a href="$TYCHO/kernel/WelcomeWindow.itcl">WelcomeWindow</a></h3>
+<h3><a href="../kernel/WelcomeWindow.itcl">WelcomeWindow</a></h3>
 <ul>
 <li> If your ptolemy binary has a long name,
 	then the welcome window is cropped at the bottom, and there
@@ -188,13 +188,13 @@ It needs to run adjustInsertionCursor.
 
 <h1><a name="bugs in text editors">Bugs in text editors</a></h1>
 
-<h3><a href="$TYCHO/editors/textedit/EditHTML.itcl">EditHTML</a></h3>
+<h3><a href="../editors/textedit/EditHTML.itcl">EditHTML</a></h3>
 <ul>
 <li>The Check Hyperlinks command flags every http reference as an error.
 Since it can't do HTTP yet, it should ignore these.
 </ul>
 
-<h3><a href="$TYCHO/editors/textedit/EditProgram.itcl">EditProgram</a></h3>
+<h3><a href="../editors/textedit/EditProgram.itcl">EditProgram</a></h3>
 <ul>
 <li>Indent region should be undoable.
 <li>Spelling checker should ignore HTML directives in comments.
@@ -203,13 +203,13 @@ directory is not writable, the user should be asked if they want to
 create their own doc directory.
 </ul>
 
-<h3><a href="$TYCHO/editors/textedit/EditTcl.itcl">EditTcl</a></h3>
+<h3><a href="../editors/textedit/EditTcl.itcl">EditTcl</a></h3>
 <ul>
 <li>Indenting fails to ignore backslash on the end of a comment line.
 <li>Indenting confused by a single line with "if {" and nothing more.
 </ul>
 
-<h3><a href="$TYCHO/editors/textedit/EditC.itcl">EditC</a></h3>
+<h3><a href="../editors/textedit/EditC.itcl">EditC</a></h3>
 <ul>
 <li>Indenting needs a lot of work.
 </ul>
@@ -217,7 +217,7 @@ create their own doc directory.
 <h1><a name="bugs in visual editors">Bugs in visual editors</a></h1>
 There are lots of bugs to be fixed in the visual editors, here are 
 some of the biggies.
-<h3><a href="$TYCHO/editors/visedit/Graphics.itcl">Graphics</a></h3>
+<h3><a href="../editors/visedit/Graphics.itcl">Graphics</a></h3>
 <ul>
 <li> Cut and past does not work in the Graphics widget.
 <li> Moved titles new position is not saved.
@@ -225,7 +225,7 @@ some of the biggies.
 <li> Most bindings in the File menu do not work.
 </ul>
 
-<h3><a href="$TYCHO/editors/visedit/TclProfile.itcl">TclProfile</a></h3>
+<h3><a href="../editors/visedit/TclProfile.itcl">TclProfile</a></h3>
 <ul>
 <li> The TclProfile probably won't work under Windows unless TclX is
 installed by hand.  The <CODE>lib/profile</CODE> directory probably
