@@ -1065,7 +1065,7 @@ body ::tycho::LabeledGrid::hskip {{group {}} args} {
     if { $args != "" } {
 	eval grid columnconfigure $itk_interior $_curcol($group) $args
     }
-    if { [incr $_curcol($group)] >= $_lastcol($group) } {
+    if { [incr _curcol($group)] >= $_lastcol($group) } {
         vskip $id
     }
 }

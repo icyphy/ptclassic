@@ -495,7 +495,7 @@ body ::tycho::ResourceFTP::ftpget {{url {}}} {
 
     # Connect to server
     if {[catch {socket -async $ftpserver $ftpport} ftpid]} {
-	catch {unset $ftpid}
+	catch {unset ftpid}
         ftpabort "Can't open $ftpserver, $ftpport"
         return
     }
