@@ -96,6 +96,9 @@ class ::tycho::Edit {
     ##########################################################################
     ####                         public methods                           ####
 
+    # Capitalize the selection or the current word.
+    method capitalize {}
+
     # Center the insertion point in the window.
     method center {}
 
@@ -168,7 +171,7 @@ class ::tycho::Edit {
     # Remove text from the insertion pointer to the end of the line.
     method killToEndOfLine {}
 
-    # Convert the selection to lower case.
+    # Convert the selection or the current word to lower case.
     method lowerCase {}
 
     # Insert text from the selection if the mouse has not moved.
@@ -185,6 +188,9 @@ class ::tycho::Edit {
 
     # Paste the selection from the clipboard.
     method paste {}
+
+    # Print the selection or the entire contents.
+    method print {}
 
     # Query the user for a new right column for text fill.
     method queryFillColumn {}
@@ -240,7 +246,7 @@ class ::tycho::Edit {
     # Unselect everything in the specified range.
     method unselectRange {start stop}
 
-    # Convert the selection to upper case.
+    # Convert the selection or the current word to upper case.
     method upperCase {}
 
     # Write to the specified file any text that should be spell checked.
@@ -295,6 +301,9 @@ class ::tycho::Edit {
 
     # Set up the undo buffer for an insertion at position index.
     private method prepareInsert {index} {}
+
+    # Delete and return the selection or the current word.
+    private method selOrWord {}
 
     # Keep track of the maximum line length for filling text.
     private variable maxLineLength 70
@@ -530,6 +539,8 @@ body ::tycho::Edit::constructor {args} {
     bind $itk_component(text) <Escape><l> "%Q lowerCase; break"
     bind $itk_component(text) <Meta-u> "%Q upperCase; break"
     bind $itk_component(text) <Escape><u> "%Q upperCase; break"
+    bind $itk_component(text) <Meta-C> "%Q capitalize; break"
+    bind $itk_component(text) <Escape><C> "%Q capitalize; break"
 
     # Cursor motion keys do not set the modified flag
     # Note that the definitions below have a blank space.
@@ -658,10 +669,13 @@ body ::tycho::Edit::constructor {args} {
 
         $myMenubar addSeparator Format
 
+        $myMenubar add "Capitalize" Format -underline 0 \
+                -accelerator "M-C" -command "$this capitalize"
+
         $myMenubar add "Lower Case" Format -underline 0 \
                 -accelerator "M-l" -command "$this lowerCase"
 
-        $myMenubar add "Upper Case" Format -underline 1 \
+        $myMenubar add "Upper Case" Format -underline 0 \
                 -accelerator "M-u" -command "$this upperCase"
     }
 
@@ -692,6 +706,35 @@ body ::tycho::Edit::constructor {args} {
 ##########################################################################
 ####                         public methods                           ####
 
+
+#####################################################################
+#### capitalize
+# Capitalize words in the selection, or the current word if there is
+# no selection
+#
+body ::tycho::Edit::capitalize {} {
+    if $readOnly {bell; return}
+    set sel [selOrWord]
+    set caps {}
+    while {[regexp -indices \
+            "((^|\[ \t\n\]+)\[a-zA-Z\])\[^ \t\n\]*($|\[ \t\n\])" \
+            $sel whole match] != 0} {
+        set first [lindex $match 0]
+        set second [lindex $match 1]
+        set end [lindex $whole 1]
+        if {$first > 0} {
+            append caps [string range $sel 0 $first]
+        }
+        append caps [string toupper [string range $sel $first $second]]
+        set second [expr $second+1]
+        if {$second <= $end} {
+            append caps [string range $sel $second $end]
+        }
+        set sel [string range $sel [expr $end+1] end]
+    }
+    append caps $sel
+    insertString insert $caps
+}
 
 #########################################################################
 #### center
@@ -1427,15 +1470,8 @@ body ::tycho::Edit::killToEndOfLine {} {
 # Convert the selection or the current word to lower case.
 #
 body ::tycho::Edit::lowerCase {} {
-    
     if $readOnly {bell; return}
-    
-    if {[set sel [getSelection]] != {}} {
-	deleteRange sel.first sel.last
-    } {
-        set sel [get "insert wordstart" "insert wordend"]
-        deleteRange "insert wordstart" "insert wordend"
-    }
+    set sel [selOrWord]
     insertString insert [string tolower $sel]
 }
 
@@ -1508,6 +1544,32 @@ body ::tycho::Edit::paste {} {
     resetUndo
     catch {
 	insertString insert [getClipboard]
+    }
+}
+
+#####################################################################
+#### print
+# Print the selection or, if there is no selection, the entire contents.
+# Query the user for the print command to use.  A temporary file is
+# created and then deleted to do the printing.  The name of that file
+# will be appended to the end of the command specified by the user before
+# it is invoked.
+#
+body ::tycho::Edit::print {} {
+    if {[set sel [getSelection]] == {}} {
+        set sel [get 1.0 end]
+        set msg "Command to print contents"
+    } {
+        set msg "Command to print selection"
+    }
+    if {[set printCmd [safeEval ::tycho::queryinfo $msg $printCmd]] != {}} {
+        set fn [::tycho::tmpFileName]
+        set fd [open $fn w]
+        puts $fd $sel
+        close $fd
+        # Unix-isms here
+        eval ::tycho::invoke $printCmd $fn
+        ::tycho::rm $fn
     }
 }
 
@@ -1881,15 +1943,8 @@ body ::tycho::Edit::unselectRange {start stop} {
 # Convert the selection or the current word to upper case.
 #
 body ::tycho::Edit::upperCase {} {
-    
     if $readOnly {bell; return}
-    
-    if {[set sel [getSelection]] != {}} {
-	deleteRange sel.first sel.last
-    } {
-        set sel [get "insert wordstart" "insert wordend"]
-        deleteRange "insert wordstart" "insert wordend"
-    }
+    set sel [selOrWord]
     insertString insert [string toupper $sel]
 }
 
@@ -2044,3 +2099,33 @@ body ::tycho::Edit::prepareInsert {index} {
     return $contflag
 }
 
+#####################################################################
+#### selOrWord
+# Identify the current selection or the current word, delete it, and
+# return the deleted text.  This is used by all commands that modify
+# the "selection or word".  The current word is the word within which
+# the insertion cursor is placed.  If the insertion cursor is at a space,
+# then the current word is the next word.
+#
+body ::tycho::Edit::selOrWord {} {
+    
+    if $readOnly {bell; return {}}
+    
+    if {[set sel [getSelection]] != {}} {
+	deleteRange sel.first sel.last
+    } {
+        # Check whether we are at white space
+        if [regexp "\[ \t\n\]" [get insert]] {
+            set text $itk_component(text)
+            set nextword [$text search -regexp "\[^ \t\]" insert]
+            if {$nextword == {}} {
+                bell
+                return {}
+            }
+            $text mark set insert $nextword
+        }
+        set sel [get "insert wordstart" "insert wordend"]
+        deleteRange "insert wordstart" "insert wordend"
+    }
+    return $sel
+}
