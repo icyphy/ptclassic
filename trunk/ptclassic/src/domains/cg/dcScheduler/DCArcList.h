@@ -44,6 +44,10 @@ public:
 	int operator==(DCArc &a) 
 	 	{return ((srcnode == a.srcnode) && (sinknode == a.sinknode));}
 
+	// check whether this arc is between invocs of the same star.
+	int betweenSameStarInvocs() {
+		return (srcnode->myMaster() == sinknode->myMaster()); }
+
 	void reverse();
 	StringList print();
 
