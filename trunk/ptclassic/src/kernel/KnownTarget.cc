@@ -31,7 +31,7 @@ static KnownTargetEntry* allTargets;
 
 // Find a target on the known list (internal form)
 // Find a known list entry
-static KnownTargetEntry*
+KnownTargetEntry*
 KnownTarget::findEntry (const char* name) {
 	KnownTargetEntry* l = allTargets;
 	while (l) {
