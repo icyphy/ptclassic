@@ -41,6 +41,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLTarget.h"
 #include <ostream.h>
 
+/*
+static TypeConversionTable vhdlCnvTable[7] = {
+  {  COMPLEX, 	FIX, 		"CxToFix"	},
+  {  COMPLEX, 	ANYTYPE,	"CxToFloat"	},
+  {  FIX,	COMPLEX,	"FixToCx"	},
+  {  FIX,	FIX,		"FixToFix"	},
+  {  FIX,	ANYTYPE,	"FixToFloat"	},
+  {  ANYTYPE, 	COMPLEX,	"FloatToCx"	},
+  {  ANYTYPE, 	FIX,		"FloatToFix"	}
+};
+*/
+
 // Constructor
 VHDLTarget :: VHDLTarget(const char* name, const char* starclass,
 			 const char* desc) :
@@ -54,6 +66,15 @@ HLLTarget(name, starclass, desc) {
   // Initialize lists.
   firingVariableList.initialize();
   variableList.initialize();
+
+  // Make states defined in CGTarget settable.
+  displayFlag.setAttributes(A_SETTABLE);
+
+/*
+  // Initialize type conversion table
+  typeConversionTable = vhdlCnvTable;
+  typeConversionTableRows = 7;
+  */
 }
 
 // Clone
@@ -559,14 +580,16 @@ void VHDLTarget :: registerState(State* state, const char* varName,
 	state->initialize();
 	ref << "_P" << pos;
 	if (state->isA("FloatArrayState")) {
-//          initVal = state[pos].initValue();
 	  initVal << (*((FloatArrayState *) state))[pos];
 	}
 	else if (state->isA("IntArrayState")) {
 	  initVal << (*((IntArrayState *) state))[pos];
 	}
+	else if (state->isA("ComplexArrayState")) {
+	  initVal << (*((IntArrayState *) state))[pos];
+	}
 	else {
-	  Error::error(*state, "is not a Float or Int ArrayState");
+	  Error::error(*state, "is not of a known ArrayState type");
 	}
       }
     }
@@ -589,7 +612,8 @@ void VHDLTarget :: registerState(State* state, const char* varName,
 }
 
 // Register PortHole reference.
-void VHDLTarget :: registerPortHole(VHDLPortHole* port, int tokenNum/*=-1*/) {
+void VHDLTarget :: registerPortHole(VHDLPortHole* port, int tokenNum/*=-1*/,
+				    const char* part/*=""*/) {
   // The registry keeps track of all refed arcs, and their min/max R/W offsets.
   registerArcRef(port, tokenNum);
 
@@ -607,7 +631,8 @@ void VHDLTarget :: registerPortHole(VHDLPortHole* port, int tokenNum/*=-1*/) {
   else { /* (tokenNum < 0) */
     ref << "_N" << (-tokenNum);
   }
-
+  ref << part;
+  
   //FIXME: May want to do something different if it's a wormhole port.
   //Such as, what was done in StructTarget: make extra port to VHDL module.
 

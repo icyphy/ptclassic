@@ -76,6 +76,8 @@ protected:
 	// Expand State or PortHole reference macros.
 	/* virtual */ StringList expandRef(const char*);
 	/* virtual */ StringList expandRef(const char*, const char*);
+	StringList expandRefCx(const char*, const char*, const char*);
+
 	// Form expression interspersing operators within arg list.
 	StringList VHDLStar :: expandInterOp(const char*, const char*);
 

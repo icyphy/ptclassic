@@ -87,6 +87,10 @@ StringList VHDLStar :: expandMacro(const char* func, const StringList&
 	  s = expandRef(arg1, arg2);
 	else if (matchMacro(func, argList, "ref", 1))
 	  s = expandRef(arg1);
+	else if (matchMacro(func, argList, "refCx", 2))
+	  s = expandRefCx(arg1, "", arg2);
+	else if (matchMacro(func, argList, "refCx", 3))
+	  s = expandRefCx(arg1, arg2, arg3);
 	else if (matchMacro(func, argList, "val", 1))
 	  s = expandVal(arg1);
 	else if (matchMacro(func, argList, "size", 1))
@@ -110,6 +114,62 @@ StringList VHDLStar :: expandMacro(const char* func, const StringList&
 	else macroError(func, argList);
 
 	return s;
+}
+
+// Reference to State or PortHole.
+StringList VHDLStar :: expandRefCx(const char* name, const char* offset,
+				   const char* part) {
+  StringList ref;
+  State* state;
+  VHDLPortHole* port;
+  StringList portName = expandPortName(name);
+  
+  ref.initialize();
+  
+  // Do this until figure out how to merge with other expandRef
+  StringList dummy = offset;
+
+  // Check if it's a State reference.
+  if ((state = stateWithName(name)) != 0) {
+/*
+  ref = starSymbol.lookup(state->name());
+//    ref << "_" << firing;
+    
+    targ()->registerState(state, ref, firing);
+    */
+  }
+  
+//FIXME: Make more efficient by combining into one genPortWithName call -
+// See CGCStar.cc.
+  // Check if it's a PortHole reference.
+  else if ((port = (VHDLPortHole*) genPortWithName(portName)) != 0) {
+    if (multiPortWithName(portName)) {
+      codeblockError(portName,
+		     " is a MultiPortHole referenced as a single PortHole");
+      ref.initialize();
+      return ref;
+    }
+    
+    int tokenNum = port->getOffset();
+    ref << port->getGeoName();
+    if (tokenNum >= 0) {
+      ref << "_" << tokenNum;
+    }
+    else { /* (tokenNum < 0) */
+      ref << "_N" << (-tokenNum);
+    }
+    
+    targ()->registerPortHole(port, tokenNum, part);
+  }
+
+  // Error:  couldn't find a State or a PortHole with given name.
+  else {
+    codeblockError(name, " is not defined as a State or PortHole");
+    ref.initialize();
+  }
+
+  ref << part;
+  return ref;
 }
 
 // Reference to State or PortHole.
@@ -163,10 +223,10 @@ StringList VHDLStar :: expandRef(const char* name) {
 StringList VHDLStar :: expandRef(const char* name, const char* offset) {
   StringList ref;
   State *state;
-  State *offsetState;
-  StringList offsetVal;
   VHDLPortHole* port;
   StringList portName = expandPortName(name);
+  State *offsetState;
+  StringList offsetVal;
 
   ref.initialize();
     
