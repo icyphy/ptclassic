@@ -13,14 +13,14 @@ All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -29,9 +29,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+							COPYRIGHTENDKEY
 
  Programmer : Jose Luis Pino
  Date of Creation : 6/10/90
@@ -55,10 +53,13 @@ public:
     /*virtual*/ ClusterPort* asClusterPort() { return this; }
 };
 
+
 class CGCluster : public CGStar, public DFClusterBase{
 public:
-    
     CGCluster(const char* domain);
+
+    // type identification
+    /*virtual*/ int isA(const char*) const;
 
     /*virtual*/ int run();
 
@@ -84,12 +85,30 @@ public:
 	return isClusterSDFinContext();
     }
 
+    /*virtual*/ int setTarget(Target* t);
     /*virtual*/ int myExecTime();
     
     // return my domain.  all clusters should redefine this method of block.
     /*virtual*/ const char* domain () const { return myDomain; }
+
+    // Add a spliced star to this cluster, and schedule it with
+    // SDFScheduler
+    /*virtual*/ int addSplicedStar(Star&);
+
+    void fixBufferSizes(int nReps);
 };
+
+class CGClusterIter : private ClusterIter {
+public:
+    CGClusterIter(Cluster& n):ClusterIter(n) {};
+    CGCluster* next() { return (CGCluster*)ClusterIter::next(); }
+    CGCluster* operator++(POSTFIX_OP) { return next();}
+    GalStarIter::reset;
+};
+
 #endif
+
+
 
 
 
