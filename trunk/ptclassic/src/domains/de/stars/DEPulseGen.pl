@@ -9,7 +9,7 @@ The events are specified in the "value" array, which consists of
 time-value pairs, given in the syntax of complex numbers.
   }
   explanation { none }
-  version { $Date$ $Id$ }
+  version { $Revision$ $Date$ }
   author { Stefan De Troch (of IMEC) }
   copyright {
 Copyright (c) 1994 The Regents of the University of California.
