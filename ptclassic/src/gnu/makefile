@@ -117,7 +117,7 @@ bin_make:
 bin_gcc:
 	(cd $(GNU_OBJ)/gcc; $(GNU_OBJ)/make/make bootstrap)
 
-install_gcc:
+install_gcc: $(BINDIR)
 	(cd $(GNU_OBJ)/make; $(MAKE) install)
 	(cd $(GNU_OBJ)/gcc; $(GNU_OBJ)/make/make install CC="stage2/xgcc -Bstage2/" CFLAGS="-g -O")
 	@echo "Install c++filt, the g++ name demangler"
