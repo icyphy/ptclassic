@@ -1420,7 +1420,7 @@ body ::tycho::Edit::help {} {
 
 #####################################################################
 #### indicateReadOnly
-# Indicate in the status bar and in the menus
+# Indicate in the status bar, in the menus, and by the mouse cursor,
 # whether modifications are allowed on the buffer.
 #
 body ::tycho::Edit::indicateReadOnly {bool} {
