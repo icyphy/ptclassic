@@ -61,6 +61,7 @@ ITCL_SRCS = \
 	CircularList.itcl \
 	Exec.itcl \
 	Object.itcl \
+	Registry.itcl \
 	Resource.itcl \
 	ResourceFile.itcl \
 	Stack.itcl \
