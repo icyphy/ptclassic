@@ -29,6 +29,7 @@
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
+# tkoct was originally authored by Kennard White
 # Ptolemy style makefile by Christopher Hylands (11/94)
 
 # Note that tkoct and oct2ptcl use libraries from top.  tkoct uses libraries
