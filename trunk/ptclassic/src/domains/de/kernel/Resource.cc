@@ -80,7 +80,7 @@ Resource::Resource(const char* n, int policy, DERCScheduler* sched)
 // of emission has arrived, and so must be emitted by the Star
 ///////////////////////////////////////////////////////////////////////
 
-void Resource::newEventFromInterruptQ(DERCEvent* e, double now) {
+int Resource::newEventFromInterruptQ(DERCEvent* e, double now) {
     // first get the priority of the received events source star
     double prio = e->src->priority;
 
@@ -90,7 +90,7 @@ void Resource::newEventFromInterruptQ(DERCEvent* e, double now) {
     
     if (p->priority != prio) {
         Error::abortRun("unequal priorities");
-        return;
+        return FALSE;
     }
     while (p->priority == prio) {        
         if (p->event == e) {
@@ -112,7 +112,7 @@ void Resource::newEventFromInterruptQ(DERCEvent* e, double now) {
 
     if (p->event != e) {
         Error::abortRun("Event from IntQ not on Resources Linked List");
-        return;
+        return FALSE;
     }
     if (e->isDummy) {
         // resource is finished with the current Star, so update 
@@ -127,7 +127,7 @@ void Resource::newEventFromInterruptQ(DERCEvent* e, double now) {
         // Call Star to emit Event!!
         e->src->emitEvent(e, now); 
     }   
-    return;
+    return TRUE;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -142,7 +142,7 @@ void Resource::newEventFromInterruptQ(DERCEvent* e, double now) {
 // star as destination (this method is only called by DERCScheduler)
 /////////////////////////////////////////////////////////////////////////
 
-void Resource :: newEventFromEventQ(DERCEvent* e, double now) {
+int Resource :: newEventFromEventQ(DERCEvent* e, double now) {
     double nextTry;    
     // first get all events from the eventQ with the current time, 
     // for this Resource
@@ -222,7 +222,7 @@ void Resource :: newEventFromEventQ(DERCEvent* e, double now) {
                             // resource MUST be operating in NonPreemptive mode, else have error
                             if (schedPolicy == Preemptive) {
                                 Error::abortRun("if resource is using a Preemptive policy, it should not reach here");
-                                return;
+                                return FALSE;
                             }
                             // Try again some time in future, earlist time 
                             // being when currently executing star is finished
@@ -237,7 +237,7 @@ void Resource :: newEventFromEventQ(DERCEvent* e, double now) {
                     }
                     if (nextTry == -1) {
                         Error::abortRun(" SW Event never got rescheduled in NewEventFromEventQ()");
-                        return;
+                        return FALSE;
                     }
                     // getAppECT->~ListIter();
                     DEPortHole* destPort = (DEPortHole*)sortArray[i]->dest;
@@ -258,7 +258,7 @@ void Resource :: newEventFromEventQ(DERCEvent* e, double now) {
                 if (starUsingResource == dest) {
                     if (port->isItOutput()) {
                         Error::abortRun("Terminal goes to wormhole!!!");
-                        return;
+                        return FALSE;
                     }
                     else {
                         int success = ((InDEPort*) port)->getFromQueue(sortArray[i]->p);
@@ -320,7 +320,7 @@ void Resource :: newEventFromEventQ(DERCEvent* e, double now) {
                     }
                     if (nextTry == -1) {
                         Error::abortRun("HW Event never got rescheduled in NewEventFromEventQ()");
-                        return;
+                        return FALSE;
                     }
                     //getAppECT->~ListIter();
                     DEPortHole* destPort = (DEPortHole*)e->dest;
@@ -354,7 +354,7 @@ void Resource :: newEventFromEventQ(DERCEvent* e, double now) {
                 assert(starUsingResource == dest);
                 if (port->isItOutput()) {
                     Error::abortRun("Terminal goes to wormhole!!!");
-                    return;
+                    return FALSE;
                 }
                 else {
                     int success=((InDEPort*)port)->getFromQueue(sortArray[i]->p);
@@ -370,10 +370,11 @@ void Resource :: newEventFromEventQ(DERCEvent* e, double now) {
             this->timeWhenFree = nextTry;
         }
     }
+    return TRUE;
 }
 
 ////////////////////////////////////////////////////////////////////////////
-// This metheod returns a SequentialList of all other current Events in the
+// This method returns a SequentialList of all other current Events in the
 // eventQ, and the passed event, who also want to access this resource. 
 ///////////////////////////////////////////////////////////////////////////
 
