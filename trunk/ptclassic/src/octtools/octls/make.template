@@ -46,7 +46,7 @@ SRCS = $(LIBCSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o)
 
-C_INCL= -I../include
+C_INCL= -I../include $(PTCOMPAT_INCSPEC)
 
 all::	 makefile octls
 
@@ -57,7 +57,7 @@ LIBS	= -L$(OCTLIBDIR) -loh$(DBGFLAG) -lvov$(DBGFLAG) \
 
 octls:	$(OBJS)
 	$(LINKER) $(LINKFLAGS) $(OBJS) \
-  		-o octls \
+		-o octls \
 		$(LIBS) -lm 
 
 DEST = $(OCTTOOLS)/bin.$(ARCH)/octls
@@ -68,7 +68,7 @@ $(DEST):	octls
 		ln octls $(DEST)
 
 install: makefile $(DEST) $(BINDIR)/octls
-	
+
 $(BINDIR)/octls:
 	(cd $(BINDIR); ln -s ../octtools/bin.$(ARCH)/octls .)
 
