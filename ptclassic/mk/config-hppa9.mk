@@ -39,6 +39,7 @@
 # version of Ptolemy under hpux9.x, you will need to edit config-hppa.mk
 include $(ROOT)/mk/config-hppa.mk
 
+
 # Note that hppa does support shl_load() style dynamic linking, see
 # $(PTOLEMY)/src/kernel/Linker.sysdep.h for more information.
 # You may need to get the latest HP linker patch for shl_load to work.
@@ -46,6 +47,11 @@ include $(ROOT)/mk/config-hppa.mk
 
 # Misc. flags for OS version, if you are under HPUX9.x:
 ARCHFLAGS =
+
+# src/kernel/makefile uses this to compile flush_cache.s.
+# Under HPUX9.x, use /bin/as
+HP_AS = 	/bin/as
+#HP_AS =		/usr/ccs/bin/as
 
 # PN domain is not supported under hpux9
 INCLUDE_PN_DOMAIN = no
