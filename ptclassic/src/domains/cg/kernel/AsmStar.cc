@@ -48,7 +48,7 @@ StringList
 AsmStar::lookupAddress(const char* name) {
 	unsigned a;
 	StringList s;
-	AsmPortHole* p = (AsmPortHole*)portWithName(name);
+	AsmPortHole* p = asmPortWithName(name);
 	if (p) s = p->location();
 	// see if it's a state
 	else if (lookupEntry(name,a)) {
@@ -66,7 +66,7 @@ AsmStar::lookupAddress(const char* name) {
 unsigned
 AsmStar::addrWithOffset (const char* name, const char* offset) {
 	int off;
-	AsmPortHole* p = (AsmPortHole*)portWithName(name);
+	AsmPortHole* p = asmPortWithName(name);
 	if (!p) {
 		codeblockError(name, " is not a porthole name");
 		return 0;
@@ -94,7 +94,7 @@ AsmStar::addrWithOffset (const char* name, const char* offset) {
 // lookup size (of buffer or state) for symbol in a codeblock
 int
 AsmStar::lookupSize(const char* name) {
-	AsmPortHole* p = (AsmPortHole*)portWithName(name);
+	AsmPortHole* p = asmPortWithName(name);
 	if (p) return p->bufSize();
 	State* s = stateWithName(name);
 	if (s) return s->size();
@@ -109,7 +109,7 @@ AsmStar::lookupMem(const char* name) {
 	unsigned a;
 	StringList s;
 	ProcMemory* m;
-	AsmPortHole* p = (AsmPortHole*)portWithName(name);
+	AsmPortHole* p = asmPortWithName(name);
 	if (p && p->memory()) s = p->memory()->readName();
 	// see if it's a state
 	else if (m = lookupEntry(name,a)) {
