@@ -88,7 +88,7 @@ RPCFunction CommandArray[] = {
     {ERFilterDesign, "Filter", " equirriple FIR", "<", 0},
     {WFilterDesign, "Filter", " window FIR", ">", 0},
     {Man, "Other", "man"},
-    {Profile, "Other", "profile"},
+    {Profile, "Other", "profile", ",", 0},
     {Options, "Other", "options"},
     {Version, "Other", "version"},
     {ExitApp, "Other", "exit-pigi"}
