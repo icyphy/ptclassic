@@ -204,6 +204,22 @@ test YesNoQuery-2.1 {Test the modal ::tycho::askuser proc} {
     ::tycho::askuser "Are you awake?"
 } 1
 </pre></tcl>
+	
+<H2>Writing Testable Code</H2>
+Below are some hints about writing code that can be tested.
+<MENU>
+	<LI> If a method creates a window, and the window is present
+	after the method ends, then the method should probably return
+	the name of the window.  This makes it easier for callers
+	and testing scripts to perform operations on the window.
+
+	<LI> Separating interface and implementation can help.
+	If a largish operation brings up lots of windows, it
+	can help if there is a method that performs the interface
+	operations which then calls a series of smaller methods.
+	It is easier to test a series of small scripts that to
+	test a large monolithic method.
+</MENU>
 
 <HR>
 <H2><A NAME="testing documentation">Testing Documentation</A></H2>
