@@ -2,17 +2,17 @@ defstar {
 	name { Play }
 	domain { SDF }
 	desc {
-Play an input stream on the SparcStation speaker.
-The "gain" state (default 1.0) multiplies the input stream
-before it is mu-law compressed and written.
-The inputs should be in the range of -32000.0 to 32000.0.
-The file is played at a fixed sampling rate of 8000 samples/second.
-When the wrapup method is called, a file of 8-bit mu-law
-samples is handed to a program named "ptplay" which plays the file.
-The "ptplay" program must be in your path.
+Play an input stream on the SparcStation speaker.  The "gain" state
+(default 1.0) multiplies the input stream before it is mu-law compressed.
+The "gain" should chosen to scale the input values in the range -32000.0
+to 32000.0.  The scaled input values are compressed from 16-bit linear
+amplitude format to sign magnitude mu-law 8-bit format and written to
+a file.  When the wrapup method is called, a file of 8-bit mu-law
+will be played at the fixed sampling rate of 8000 samples/second by 
+the "ptplay" program, which must be in your path.
 	}
 	version {$Id$}
-	author { J. T. Buck }
+	author { Joseph T. Buck }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -59,7 +59,7 @@ be a parameter.
 	hinclude { <stdio.h> }
 	ccinclude { "miscFuncs.h", "paths.h", "ptdspMuLaw.h", <std.h> }
 	constructor {
-		strm = NULL;
+		strm = 0;
 		delFile = FALSE;
 		fileName = 0;
 	}
@@ -72,7 +72,7 @@ be a parameter.
 		// if name is empty, use a temp file.
 		const char* sf = saveFile;
 		delete [] fileName;
-		if (sf == NULL || *sf == 0) {
+		if (sf == 0 || *sf == 0) {
 			fileName = tempFileName();
 			delFile = TRUE;
 		}
@@ -81,7 +81,7 @@ be a parameter.
 		}
 
 		// should check if file already exists here
-		if ((strm = fopen(fileName, "w")) == NULL) {
+		if ((strm = fopen(fileName, "w")) == 0) {
 			Error::abortRun (*this, "Can't open file ", fileName);
 		}
 	}
@@ -89,16 +89,16 @@ be a parameter.
 // go.  Does nothing if open failed.  Does mu-law compression.
 	go {
 		if (!strm) return;
-		// add gain, convert to integer
+		// Scale by gain and convert to an integer
 		int data = int(double(input%0) * double(gain));
-		putc(Ptdsp_MuLaw(data), strm);
+		putc(Ptdsp_Linear16ToMuLaw8(data), strm);
 	}
 // wrapup.  Does nothing if open failed, or 2nd wrapup call.
 // closes file and runs the command.
 	wrapup {
 		if (!strm) return;
 		fclose (strm);
-		strm = NULL;
+		strm = 0;
 		StringList cmd;
 
 		if (delFile) cmd += "( ";
