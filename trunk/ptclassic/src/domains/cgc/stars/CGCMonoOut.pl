@@ -41,6 +41,10 @@ provisions.
     channels.setInitValue(1);
     balance.setAttributes(A_NONCONSTANT|A_NONSETTABLE);
     balance.setInitValue(0.0);
+    encodingType.setInitValue("ulaw8");
+    portType.setInitValue("speaker");
+    sampleRate.setInitValue(8000);
+
   }
   	
   codeblock (setbufptr) {
