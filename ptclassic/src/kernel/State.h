@@ -74,10 +74,10 @@ public:
 			const char* ivalue,
 			const char* desc = NULL,
 			unsigned int attr = A_DEFAULT) {
-               		 	if (desc) descriptor = desc;
+               		 	descriptor = desc;
 				setNameParent(stateName, parent);
 				initValue = ivalue;
-				attributeBits = A_DEFAULT;
+				attributeBits = attr;
 				return *this;
         }
 
