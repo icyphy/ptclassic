@@ -53,7 +53,7 @@ class ::tycho::ItclClassList {
 
     constructor {args} {}
     destructor {}
-    
+
     ###################################################################
     ####                         public methods                    ####
 
@@ -127,14 +127,6 @@ body ::tycho::ItclClassList::constructor {args} {
     # Add myself to the list of open files. 
     windowMenuAddAll $file
 }
-
-
-#######################################################################
-#### destructor
-#
-body ::tycho::ItclClassList::destructor {} {
-}
-
 
     ###################################################################
     ###################################################################
@@ -236,7 +228,7 @@ body ::tycho::ItclClassList::updateClassDiagram {} {
     if {$retval != {} } {
 	::tycho::warn $retval
     }
-    ::tycho::File::openContext $classDiagramFile
+    return [::tycho::File::openContext $classDiagramFile]
 }
 
     ###################################################################
