@@ -41,10 +41,10 @@
 #
 # Remove an item from a list. Examples:
 # <pre><tcl>
-#     ldelete {1 2 3 4} 3
+#     ::tycho::ldelete {1 2 3 4} 3
 # </tcl></pre>
 # <pre><tcl>
-#     ldelete {1 2 3 4} 5
+#     ::tycho::ldelete {1 2 3 4} 5
 # </tcl></pre>
 #
 proc ::tycho::ldelete {list item} {
@@ -63,10 +63,10 @@ proc ::tycho::ldelete {list item} {
 # Return true if l1 and l2 are disjoint -- that is, their
 # intersection is null. Examples:
 # <pre><tcl>
-#     ldisjoint {1 2 3} {4 5 6}
+#     ::tycho::ldisjoint {1 2 3} {4 5 6}
 # </tcl></pre>
 # <pre><tcl>
-#     ldisjoint {1 2 3} {1 3 5}
+#     ::tycho::ldisjoint {1 2 3} {1 3 5}
 # </tcl></pre>
 #
 proc ::tycho::ldisjoint {l1 l2} {
@@ -86,10 +86,10 @@ proc ::tycho::ldisjoint {l1 l2} {
 #
 # Return the intersection of two lists. Examples:
 # <pre><tcl>
-#     lintersection {1 2 3} {4 5 6}
+#     ::tycho::lintersection {1 2 3} {4 5 6}
 # </tcl></pre>
 # <pre><tcl>
-#     lintersection {1 2 3} {1 3 5}
+#     ::tycho::lintersection {1 2 3} {1 3 5}
 # </tcl></pre>
 #
 proc ::tycho::lintersection {l1 l2} {
@@ -108,10 +108,9 @@ proc ::tycho::lintersection {l1 l2} {
 #### linterval
 #
 # Return list of integers in the range _x_ to _y_. For example,
-# <pre>
-#    linterval 2 5
-# </pre>
-# returns <code>{2 3 4 5}</code>.
+# <pre><tcl>
+#    ::tycho::linterval 2 5
+# </tcl></pre>
 #
 proc ::tycho::linterval {x y} {
     set result {}
@@ -135,14 +134,16 @@ proc ::tycho::linterval {x y} {
 # are evaluated correctly. Examples:
 # <pre><tcl>
 #     set fred 4
-#     lmap {1 2 3} {lambda x -> expr $x + 4}
+#     ::tycho::lmap {1 2 3} {lambda x -> expr $x + 4}
 # </tcl></pre>
 # <pre><tcl>
-#     lmap {1 2 3} {4 5 6} {lambda x y -> expr $x + $y}
+#     ::tycho::lmap {1 2 3} {4 5 6} {lambda x y -> expr $x + $y}
 # </tcl></pre>
 #
 # <b>Caveat</b>: The lists must all be the same length, or this function
 # Will fail with a cryptic error message. This should be fixed.
+#
+# FIXME: <b>When did this ever work?</b>
 #
 proc ::tycho::lmap {args} {
     set result {}
@@ -176,10 +177,10 @@ proc ::tycho::lmap {args} {
 #
 # Test whether an item is in a list. Examples:
 # <pre><tcl>
-#     lmember {1 2 3} 2
+#     ::tycho::lmember {1 2 3} 2
 # </tcl></pre>
 # <pre><tcl>
-#     lmember {1 2 3} 4
+#     ::tycho::lmember {1 2 3} 4
 # </tcl></pre>
 #
 proc ::tycho::lmember {list item} {
@@ -191,7 +192,7 @@ proc ::tycho::lmember {list item} {
 #
 # Remove duplicates from a list. Example:
 # <pre><tcl>
-#     lnub {1 2 3 2 1 2}
+#     ::tycho::lnub {1 2 3 2 1 2}
 # </tcl></pre>
 #
 # The implementation uses an array to remove duplicates, and
@@ -221,7 +222,7 @@ proc ::tycho::lnub {list} {
 #
 # Reverse a list. Example:
 # <pre><tcl>
-#     lreverse {1 2 3 4 5}
+#     ::tycho::lreverse {1 2 3 4 5}
 # </tcl></pre>
 #
 proc ::tycho::lreverse {list} {
@@ -237,10 +238,10 @@ proc ::tycho::lreverse {list} {
 #
 # Return true if l1 is a subset of l2. Examples:
 # <pre><tcl>
-#     lsubset {3 2} {1 2 3 4}
+#     ::tycho::lsubset {3 2} {1 2 3 4}
 # </tcl></pre>
 # <pre><tcl>
-#     lsubset {0 3 2} {1 2 3 4}
+#     ::tycho::lsubset {0 3 2} {1 2 3 4}
 # </tcl></pre>
 #
 proc ::tycho::lsubset {l1 l2} {
@@ -260,7 +261,11 @@ proc ::tycho::lsubset {l1 l2} {
 #
 # Return a string that is a substring of all elements of l from left to right.
 # Idea is that if it's sorted and the first and last elements match from
-# left to right, all will.
+# left to right, all will. Example:
+#
+# <pre><tcl>
+#   ::tycho::lsubstring {appliance apple apple-icious applejacks applaud}
+# </tcl></pre>
 #
 proc ::tycho::lsubstring {l} {
     set llength [llength $l]
@@ -299,7 +304,7 @@ proc ::tycho::lsubstring {l} {
 #
 # Return the difference of two lists: _l1_ - _l2_. Example:
 # <pre><tcl>
-#     lsubtract {1 2 3 4 5} {2 4 6}
+#     ::tycho::lsubtract {1 2 3 4 5} {2 4 6}
 # </tcl></pre>
 #
 # This procedure is implemented using arrays, and on 100-elements lists
@@ -352,7 +357,7 @@ proc ::tycho::ltake {list n} {
 # Return the union of two lists. If the two lists are not
 # proper sets, the union is anyway. Example:
 # <pre><tcl>
-#     lunion {1 2 3} {3 4 5 4}
+#     ::tycho::lunion {1 2 3} {3 4 5 4}
 # </tcl></pre>
 #
 proc ::tycho::lunion {l1 l2} {
