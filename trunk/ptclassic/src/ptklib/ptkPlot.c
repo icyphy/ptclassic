@@ -211,7 +211,7 @@ static int drawAxes(interp,plotPtr)
     /* "x10" translates to 3 characters */
     /* "x.xx" of the y-axis tick labels translates to 4 characters */
 
-    plotPtr->llx = (MAX(strlen(yExpStr)+3,4)+2)*nw;
+    plotPtr->llx = (MAX((int)strlen(yExpStr)+3,4)+2)*nw;
 
     /* some characters of padding */
     /* Title & X-axis tick labels ==> 2 char high */
