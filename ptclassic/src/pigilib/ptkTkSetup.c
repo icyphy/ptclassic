@@ -36,6 +36,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
   creates the RPC connection from Tcl to RPC
 */
    
+#include "pthreadsCompat.h"	/* Must be first for hpux10 */
 /* Standard includes */
 #include <stdio.h>
 

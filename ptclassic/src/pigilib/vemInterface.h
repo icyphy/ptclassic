@@ -32,9 +32,13 @@ Version identification:
 $Id$
 */
 
-/* Do the right thing for sol2 boolean defs.  oct.h must be included
- * first so sys/types.h is included correctly.  See octtools/include/port.h
- * Also, define the octObject data structure
+#include "pthreadsCompat.h"	/* Must be first for hpux10 */
+
+/* Do the right thing for sol2 boolean defs.  
+ * Under HPUX10, pthreads.h must be included first, so we do it in 
+ *   pthreadsCompat.h
+ * oct.h must be included second so sys/types.h is included correctly.
+ *   See octtools/include/port.h 
  */
 #include "oct.h"
 #include "rpc.h"

@@ -34,8 +34,8 @@ $Id$
 This is a local include file for useful macros and definitions.
 */
 
-#include "compat.h"		/* define architecture settings */
 #include "sol2compat.h"		/* define boolean */
+#include "compat.h"		/* define architecture settings */
 #include "ansi.h"		/* define ARGS, EXTERN, and HAS_STDARG */
 
 #ifdef HAS_STDARG
