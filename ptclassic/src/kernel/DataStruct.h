@@ -81,7 +81,7 @@ Each element of the vector is a Pointer....so arbitrary objects
  can be stored in the vector
 */
 
-class Vector : SingleLinkList
+class Vector : private SingleLinkList
 {
 public:
 	// Add element to the vector
@@ -120,7 +120,7 @@ inline Pointer Vector :: elem (int i)
 Class implements a queue or first-in first-out buffer
 */
 
-class Queue : SingleLinkList
+class Queue : private SingleLinkList
 {
 	int numberNodes;
 public:
@@ -157,7 +157,7 @@ It is recommended that operator ++ be used
 to access the next element of the list
 */
 
-class SequentialList : SingleLinkList
+class SequentialList : private SingleLinkList
 {
 	friend class ListIter;
 public:
@@ -198,14 +198,8 @@ private:
 class ListIter {
 public:
 	ListIter(const SequentialList& l) : list(&l), ref(l.lastNode) {}
-	reset() { ref = list->lastNode;}
-	Pointer next() {
-		if (!ref) return 0;
-		ref = ref->next;
-		Pointer p = ref->e;
-		if (ref == list->lastNode) ref = 0;
-		return p;
-	}
+	void reset() { ref = list->lastNode;}
+	Pointer next();
 	Pointer operator++ () { return next();}
 protected:
 // attach the ListIter to a different object
@@ -228,7 +222,7 @@ of the stack. In addition, we allow elements to be added
 to the bottom of the stack.
 */
 
-class Stack : SingleLinkList
+class Stack : private SingleLinkList
 {
 public:
 	// Add element at the top of the stack
