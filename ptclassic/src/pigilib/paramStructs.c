@@ -92,10 +92,10 @@ ParamListType *pListPtr;
  */
 
     sep = CTLA;
-    from = index(pStr, sep);
+    from = strchr(pStr, sep);
     if (!from) {
 	sep = '|';
-	if ((from = index(pStr, sep)) == NULL) {
+	if ((from = strchr(pStr, sep)) == NULL) {
 	    /* can't find separator between length and first param! */
 	    return(FALSE);
         }
@@ -113,7 +113,7 @@ ParamListType *pListPtr;
 		    
     for (i = 0; i < param_n; i++) {
 	/* set param name at current place */
-	if ((to = index(from, sep)) == NULL) {
+	if ((to = strchr(from, sep)) == NULL) {
 	    err++; break;
 	}
 	*to = '\0';
@@ -122,7 +122,7 @@ ParamListType *pListPtr;
 	if (sep == '|') place->type = 0;
 	else {
 	    /* set param type at current place */
-	    if ((to = index(from, sep)) == NULL) {
+	    if ((to = strchr(from, sep)) == NULL) {
 		err++; break;
 	    }
 	    *to = '\0';
@@ -130,7 +130,7 @@ ParamListType *pListPtr;
 	    from = ++to;
 	}
 	/* set param value at current place */
-	if ((to = index(from, sep)) == NULL) {
+	if ((to = strchr(from, sep)) == NULL) {
 	    err++; break;
 	}
 	*to = '\0';
