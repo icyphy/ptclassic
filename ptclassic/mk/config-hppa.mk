@@ -37,3 +37,5 @@ CC_STATIC = -Wl,-a,archive
 # Used by xv
 XV_RAND= RAND="-DNO_RANDOM -Drandom=rand"
 XV_INSTALL=bsdinst
+
+FLUSH_CACHE = $(LIBDIR)/flush_cache.o
