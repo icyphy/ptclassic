@@ -1,7 +1,7 @@
 # Makefile for Ptolemy Tycho system, kernel directory.
 #
 # $Id$
-# Author: E. A. Lee (based on ptcl)
+# Authors: E. A. Lee, Christopher Hylands
 #
 # Copyright (c) 1991-%Q% The Regents of the University of California.
 # All rights reserved.
@@ -48,11 +48,6 @@ include $(CONFIG)
 
 # Directory containing the [incr Tcl] extensions to Tcl
 
-# FIXME: This should be in the Ptolemy tree
-
-ITCL_INCDIR = $(ROOT)/tcltk/itcl/include
-ITCL_LIBSPEC = -L$(ROOT)/tcltk/itcl.$(PTARCH)/lib -litcl
-
 # Directory containing utilities for BarGraph and XYPlot
 PTKDIR = $(ROOT)/src/ptklib
 
@@ -66,98 +61,6 @@ include $(ROOT)/mk/stars.mk
 
 # For development period, disable optimization
 OPTIMIZER=
-
-# libraries
-# Note that we have two underscores in the name PTINY__LIBS to differentiate 
-# it from PTINY_LIBS below
-PTINY__LIBS =	$(PTINY_STAR_LIBS) \
-		$(PTINY_TCL_STAR_LIBS) $(HOF_LIBS) \
-		-lptk -lptolemy -lgantt $(LIB_FLUSH_CACHE)
-
-PTRIM__LIBS =	$(PTRIM_STAR_LIBS) \
-		$(PTRIM_TCL_STAR_LIBS) $(HOF_LIBS) \
-		-lptk -lptolemy \
-		$(LIB_FLUSH_CACHE)
-
-LIBS =		$(STAR_LIBS) \
-		$(TCL_STAR_LIBS) $(HOF_LIBS) \
-		-lptk -lptolemy $(THREAD_LIBS) $(LIB_FLUSH_CACHE)
-
-PTINY_LIBFILES =	$(PTINY_STAR_LIBFILES) \
-	$(LIBDIR)/libdetclstars.$(LIBSUFFIX) \
-	$(LIBDIR)/libsdftclstars.$(LIBSUFFIX) \
-	$(LIBDIR)/libptolemy.a \
-	$(LIBDIR)/libptk.a
-
-PTRIM_LIBFILES = $(PTRIM_STAR_LIBFILES) \
-	$(LIBDIR)/libdetclstars.$(LIBSUFFIX) \
-	$(LIBDIR)/libsdftclstars.$(LIBSUFFIX) \
-	$(LIBDIR)/libpigi.$(LIBSUFFIX) $(LIBDIR)/libptolemy.a \
-	$(LIBDIR)/libgantt.$(LIBSUFFIX) \
-
-LIBFILES = 		$(STAR_LIBFILES) \
-			$(LIBDIR)/libdetclstars.$(LIBSUFFIX) \
-			$(LIBDIR)/libsdftclstars.$(LIBSUFFIX) \
-			$(LIBDIR)/libptolemy.a \
-			$(LIBDIR)/libptk.a \
-			$(THREAD_LIBFILES)
-
-VERSION=0.6.tycho
-
-# first star determines default domain as a rule
-PTINY_STARS = $(PTINY_SDFSTARS) \
-	$(DESTARS) \
-	$(LIBDIR)/sdftclstars.o $(LIBDIR)/detclstars.o \
-	$(LIBDIR)/hofstars.o
-
-PTRIM_STARS = $(SDFSTARS) \
-	$(CGCSTARS) $(CGSTARS) \
-	$(DDFSTARS) $(DESTARS) $(BDFSTARS) \
-	$(LIBDIR)/sdftclstars.o $(LIBDIR)/detclstars.o \
-	$(LIBDIR)/hofstars.o
-
-ALLSTARS = $(THREAD_STARS) $(ATMSTARS) $(SDFSTARS) \
-	$(CGCSTARS) $(CG96STARS) $(CG56STARS) $(SilageSTARS) \
-	$(VHDLFSTARS) $(VHDLBSTARS) $(CGSTARS) \
-	$(DDFSTARS) $(THORSTARS) $(DESTARS) $(BDFSTARS) \
-	$(LIBDIR)/sdftclstars.o $(LIBDIR)/detclstars.o \
-	$(MDSDFSTARS)  $(LIBDIR)/mdsdftclstars.o \
-	$(IPUSSTARS) \
-	$(LIBDIR)/hofstars.o
-
-PTINY_TARGETS =		$(SDFTARGETS) 
-
-PTRIM_TARGETS = 	$(SDFTARGETS) $(CGCTCL)/CGCTclTkTarget.o $(BDFTARGETS) 
-ALLTARGETS =		$(SDFTARGETS) $(CGTARGETS) $(CGCTARGETS) \
-			$(CG56TARGETS) $(CG96TARGETS) $(BDFTARGETS) \
-			$(MDSDFTARGETS)
-
-PTINY_OBJS =		$(OBJS) $(PTCL_OBJS) $(PTINY_STARS) $(PTINY_TARGETS)
-
-PTRIM_OBJS =		$(OBJS)	$(PTCL_OBJS) $(PTRIM_STARS) $(PTRIM_TARGETS)
-
-# FIXME: we want ganttChart.o, but not the rest of pigilib, otherwise we
-# get undefined Oct symbols.
-TY_OBJS =		$(OBJS) $(PTCL_OBJS) \
-			$(OBJDIR)/pigilib/ganttChart.o \
-			$(ALLSTARS) $(ALLTARGETS)
-
-PTINY_LIBS =		$(PTINY__LIBS) \
-			$(ITCL_LIBSPEC) $(ITK_LIBSPEC) \
-			$(TK_LIBSPEC) $(TCL_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
-
-PTRIM_LIBS =		$(PTRIM__LIBS) \
-			$(ITCL_LIBSPEC) $(ITK_LIBSPEC) \
-			$(TK_LIBSPEC) $(TCL_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
-
-TY_LIBS = 		$(LIBS) \
-			$(ITCL_LIBSPEC) $(ITK_LIBSPEC) \
-			$(TK_LIBSPEC) $(TCL_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
-
-# Allow for user specified overriding definitions.  Do not declare
-# any variables after this command.  GNU make's earlier that 3.71 may
-# print a warning message.
--include override.mk
 
 # Sources
 SRCS = \
@@ -193,77 +96,37 @@ OTHERSRCS = \
 # Objects
 OBJS = $(SRCS:.cc=.o)
 
-all:	makefile tycho
+LIB=	libtycho.$(LIBSUFFIX)
 
-tycho:	$(OBJS) $(LIBFILES) $(ALLSTARS) $(ALLTARGETS)
-		rm -f $@ 
-		echo char '*gVersion = "Version:' $(VERSION) \
-			'%created' `date` '";' | sed 's/%/\\n/' > version.c
-		$(CC) -c version.c
-		$(PURELINK) $(LINKER) $(LINKFLAGS) $(TY_OBJS) $(TY_LIBS) \
-			version.o -o $@ 
+# Set up definitions for ptbin.mk
+BASENAME = 	tycho
+SPECIAL_LIBS =	-L./ -ltycho -lptcl -lptk -lptolemy -lgantt
+NEED_PALETTES = no
+NEED_HOF =	yes
+NEED_GRAPHICS =	yes
+MAIN =		
+MAIN_DEPEND =	$(LIB)
 
-tycho.debug:	$(OBJS) $(LIBFILES) $(ALLSTARS) $(ALLTARGETS)
-		rm -f $@ 
-		echo char '*gVersion = "Version:' $(VERSION) \
-			'(with debug symbols)' \
-			'%created' `date` '";' | sed 's/%/\\n/' > debugVersion.c
-		$(CC) -c debugVersion.c
-		$(PURELINK) $(LINKER) $(LINKFLAGS_D) $(TY_OBJS) $(TY_LIBS) \
-			debugVersion.o -o $@ 
+# all rule must be before ptbin.mk
+all:	makefile $(LIB) tycho
 
-# Small version of tycho, sdf domain (but with no image stars), and de domain
-tycho.ptiny:	$(OBJS) $(PTINY_LIBFILES) $(PTINY_STARS) $(PTINY_TARGETS)
-		rm -f $@ 
-		echo char '*gVersion = "Version:' $(VERSION) \
-			'(ptiny version)' \
-			'%created' `date` '";' | sed 's/%/\\n/' > version.c
-		$(CC) -c version.c
-		$(PURELINK) $(LINKER) $(LINKFLAGS) $(PTINY_OBJS) $(PTINY_LIBS) \
-			version.o -o $@
+# Include variables and rules common to all binaries
+include $(ROOT)/mk/ptbin.mk
 
-tycho.ptiny.debug:	$(OBJS) $(PTINY_LIBFILES) $(PTINY_STARS) $(PTINY_TARGETS)
-		rm -f $@ 
-		echo char '*gVersion = "Version:' $(VERSION) \
-			'(ptiny version with debug symbols)' \
-			'%created' `date` '";' | sed 's/%/\\n/' > debugVersion.c
-		$(CC) -c debugVersion.c
-		$(PURELINK) $(LINKER) $(LINKFLAGS_D) $(PTINY_OBJS) $(PTINY_LIBS) \
-			debugVersion.o -o $@
-
-# Small version of tycho, sdf, de, cgc, no parallel targets
-tycho.ptrim:	$(OBJS) $(PTRIM_LIBFILES) $(PTRIM_STARS) $(PTRIM_TARGETS)
-		rm -f $@ 
-		echo char '*gVersion = "Version:' $(VERSION) \
-			'(ptrim version)' \
-			'%created' `date` '";' | sed 's/%/\\n/' > version.c
-		$(CC) -c version.c
-		$(PURELINK) $(LINKER) $(LINKFLAGS) $(PTRIM_OBJS) $(PTRIM_LIBS) \
-			version.o -o $@
-
-tycho.ptrim.debug:	$(OBJS) $(PTRIM_LIBFILES) $(PTRIM_STARS) $(PTRIM_TARGETS)
-		rm -f $@ 
-		echo char '*gVersion = "Version:' $(VERSION) \
-			'(ptrim version with debug symbols)' \
-			'%created' `date` '";' | sed 's/%/\\n/' > debugVersion.c
-		$(CC) -c debugVersion.c
-		$(PURELINK) $(LINKER) $(LINKFLAGS_D) $(PTRIM_OBJS) $(PTRIM_LIBS) \
-			debugVersion.o -o $@
+# Allow for user specified overriding definitions.  Do not declare
+# any variables after this command.  GNU make's earlier that 3.71 may
+# print a warning message.
+-include override.mk
 
 # "make install" puts things in the official place
 # FIXME: For now, we just make ptiny
-install:	$(BINDIR)/tycho.ptiny
+install:	$(BINDIR)/tycho.ptiny $(LIBDIR)/$(LIB)
 
 # FIXME: For now, we just make ptiny
 $(BINDIR)/tycho.ptiny:	tycho.ptiny
 		rm -f $(BINDIR)/tycho.ptiny
 		ln tycho.ptiny $(BINDIR)
 
-# extra stuff to delete
-REALCLEAN_STUFF=tycho tycho.debug tycho.ptiny tycho.ptiny.debug \
-		tycho.ptrim tycho.ptrim.debug
-
-LIB=dummy		# required since no LIB
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
 
