@@ -39,33 +39,32 @@ VPATH = $(ROOT)/src/domains/cgc/tcltk/stars
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
+# CGDIR is the directory containing CG domain support
+CGDIR = $(ROOT)/src/domains/cg/kernel
 CGCDIR = $(ROOT)/src/domains/cgc/kernel
 CGCSTARDIR = $(ROOT)/src/domains/cgc/stars
 CGCDSPDIR = $(ROOT)/src/domains/cgc/dsp/stars
-
-# CGDIR is the directory containing CG domain support
-CGDIR = $(ROOT)/src/domains/cg/kernel
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
 
-INCL = -I$(CGCDSPDIR) -I$(CGCDIR) -I$(CGDIR) -I$(SDFDIR) \
- -I$(KERNDIR) -I$(CGCSTARDIR)
+INCL = -I$(CGCDSPDIR) -I$(CGCSTARDIR) -I$(CGCDIR) -I$(CGDIR) -I$(SDFDIR) \
+ -I$(KERNDIR)
 
 # source files for all stars, using preprocessor, listing base stars first
 PL_SRCS= \
- CGCTkPlot.pl \
- CGCTkSunSound.pl \
- CGCLMSTkPlot.pl \
  CGCTclScript.pl \
+ CGCTkXYPlot.pl \
+ CGCLMSTkPlot.pl \
  CGCTkBarGraph.pl \
+ CGCTkCheckButton.pl 
  CGCTkEntry.pl \
  CGCTkImpulse.pl \
  CGCTkParametricEq.pl \
+ CGCTkRadioButton.pl \
+ CGCTkPlot.pl \
  CGCTkSlider.pl \
  CGCTkStereoIn.pl \
  CGCTkStereoOut.pl \
- CGCTkXYPlot.pl \
- CGCTkRadioButton.pl \
- CGCTkCheckButton.pl 
+ CGCTkSunSound.pl
 
 TCL_SRCS= \
  tkBall.tcl \
