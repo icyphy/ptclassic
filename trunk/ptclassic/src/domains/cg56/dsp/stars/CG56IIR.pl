@@ -14,9 +14,9 @@ Note that the constant term of D is not omitted, as is common in
 other programs that assume that it has been normalized to unity.
     }
     version { $Id$ }
-    author { Kennard White & Luis Gutierrez}
+    author { Kennard White and Luis Gutierrez}
     copyright {
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -58,17 +58,13 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
     defstate {
 	name {numerator}
 	type {fixarray}
-	default {
-		".5 .25 .1"
-	}
+	default { ".5 .25 .1" }
 	desc { Numerator coefficients. }
     }
     defstate {
 	name {denominator}
 	type {fixarray}
-	default {
-		"1 .5 .3"
-	}
+	default { "1 .5 .3" }
 	desc { Denominator coefficients. }
     }
 //    defstate {
@@ -106,79 +102,73 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
     protected {
 	int numState, numLoops;
     }
-    ccinclude {
-	<minmax.h>	// for max()
-    }
+    // for max()
+    ccinclude { <minmax.h> }
     setup {
 	int numNumer = numerator.size();
 	int numDenom = denominator.size();
-	numState = max(numNumer,numDenom);
+	numState = max(numNumer, numDenom);
 	double b0, scaleDenom, scaleNumer;
 	numLoops = numState - 1;
 	// Set up scaling to distribute the gain through the numerator,
-	// and scale both numer and denom to make b0=1
+	// and scale both numer and denom to make b0 = 1
 	if ( numDenom < 1 ) {
 	    b0 = 1.0;
-	} else {
-	    if ( (b0 = double(denominator[0])) == 0.0 ) {
-		// XXX: should sanity-check b0 more thoroughly
-		// (e.g., shouldn't even be close to zero)
-		Error::abortRun(*this, 
-		  "Must have non-zero leading denominator");
-		return;
-	    }
+	}
+	else if ( (b0 = double(denominator[0])) == 0.0 ) {
+	    // XXX: should sanity-check b0 more thoroughly
+	    // (e.g., shouldn't even be close to zero)
+	    Error::abortRun(*this, "Must have non-zero leading denominator");
+	    return;
 	}
 	scaleDenom = 1.0 / b0;
 	scaleNumer = scaleDenom * double(gain);
 	coeffs.resize(2*numState);
 	delays.resize(numState+1);
-	for ( int i=0; i < numState; i++) {
-	    delays[i]    = 0;
-	    coeffs[i*2+1]       = i < numNumer ? scaleNumer * double(numerator[i]) : 0;
-	    coeffs[i*2]         = i < numDenom ? scaleDenom * -(double(denominator[i])) : 0;
+	for (int i = 0; i < numState; i++) {
+	    delays[i] = 0;
+	    coeffs[i*2+1] = i < numNumer ? scaleNumer * double(numerator[i]) : 0;
+	    coeffs[i*2] = i < numDenom ? scaleDenom * -(double(denominator[i])) : 0;
 	}
 
     }
     go{
 	if (numState == 1) {
 		addCode(one);
-	} else {
+	}
+	else {
 		addCode(init);
 		addCode(do_filter(numLoops));
 		addCode(end);
 	}
     }
     codeblock(one){
-		move $ref(signalIn),x1
-		move $ref(coeffs,1),x0
-		mpyr x1,x0,a
-		move a,$ref(signalOut)
+	move	$ref(signalIn),x1
+	move	$ref(coeffs,1),x0
+	mpyr	x1,x0,a
+	move	a,$ref(signalOut)
     }
     codeblock(init){
-		move #($addr(delays)+1),r0
-		move #($addr(coeffs)+2),r4
-		move $ref(signalIn),a
-		clr b   x:(r0),x0     y:(r4)+,y0
+	move	#($addr(delays)+1),r0
+	move	#($addr(coeffs)+2),r4
+	move	$ref(signalIn),a
+	clr	b	x:(r0),x0	y:(r4)+,y0
     }
     codeblock(do_filter, "int numLoops"){
-		do #@numLoops,$label(end_loops)
-		mac y0,x0,a  x1,x:(r0)+      y:(r4)+,y1
-		move x0,x1                   ; delay 
-		mac y1,x1,b  x:(r0),x0       y:(r4)+,y0
+	do #@numLoops,$label(end_loops)
+	mac	y0,x0,a		x1,x:(r0)+	y:(r4)+,y1
+	move	x0,x1						; delay 
+	mac	y1,x1,b		x:(r0),x0	y:(r4)+,y0
 $label(end_loops)
     }
     codeblock(end){
-		move $ref(coeffs,1),y1
-		move a,x0
-		macr x0,y1,b    a,$ref(delays,1)
-		move b,$ref(signalOut)
+	move $ref(coeffs,1),y1
+	move a,x0
+	macr x0,y1,b    a,$ref(delays,1)
+	move b,$ref(signalOut)
     }
     exectime{
-	if (numState == 1) {
-		return 4;
-	} else {
-		return (4+ 3 + 4*numLoops + 4 );
-        }
-   }		
-
+	if (numState == 1) return 4;
+	return (4 + 3 + 4*numLoops + 4);
+    }
 }
