@@ -1,0 +1,104 @@
+.\" $Id$
+.EQ
+delim off
+.EN
+.H1 "Trouble Shooting"
+.pp
+This section is a collection common difficulties encountered when
+ptolemy is installed.  This list is, of course, by no means complete.
+If you can't find your particular problem here, refer to "Additional
+Resources" at the end of this section.
+.H2 "Permission Denied"
+.pp
+If when you start pigi you get the message "permission denied"
+and the \*(PT greeting window fails to pop up, then Vem was
+unable to start pigiRpc, the associated \*(PT process.
+This process is started using the Unix "rsh" command.
+This command can fail if your workstation does not have
+networking enabled, or the user's .rhosts file does not include
+the name of the workstation on which you are running.
+The following simple test checks your networking and .rhosts configuration:
+.(c
+        rsh name echo "hello world"
+.)c
+where "name" is the name of your workstation.  If you get back
+"hello world", then your workstation networking is correct.
+If you get the "permission denied" message again,
+then either your .rhosts is incorrect or networking is turned off
+on your workstation.
+If the latter is the problem,
+please ask your system administrator to enable networking.
+.H2 "Graphs fail to appear"
+.pp
+If you succeed in invoking pigi, but graphs do not appear, but messages
+saying that the xgraph program could not be found appear instead,
+your path is set incorrectly.  Because pigi uses
+.i rsh 
+to start up \*(PT, your path
+must be defined in your .cshrc file, not just in your .login file.
+The path must be defined even when ``prompt'' is not set, since
+your .cshrc file will be read in non-interactive mode.
+.H2 "Ptolemy won't recompile"
+.pp
+You may be using a substantially different version of the Gnu compiler.
+The system is most likely to build if you use the same tools that we
+used originally.  The gnu tools we used are supplied with the Ptolemy
+distribution.
+.H2 "Old Flowgraphs won't work"
+.pp
+Several stars that were included in the 0.3.1 release of Ptolemy
+have been renamed. 
+The objective was to adopt a consistent naming policy across all domains. 
+One major benefit of this is the ability to migrate universes and galaxies
+from one domain to another. 
+A consequence, however, is that some of your
+universes and galaxies will have inconsistencies (they will point to icons
+that no longer exist in the current release).  Please see the file
+"$PTOLEMY/lib/rename/README."  This file explains how to upgrade your
+universes and galaxies to the current release. 
+.H2 "Error: ld.so:  libXext.so.4: not found"
+.pp
+You have not installed the shared library needed by Ptolemy when it
+is used under Open Windows.  See the "Open Windows" section in the 
+installation guide.
+.H2 "Additional Resources"
+.pp
+The best, most complete source for information on Ptolemy is to be found
+in the \*)PT manual, the Almagest.  Chances are, the information you
+are looking for is in there somewhere.
+.pp
+The entire manual is included in
+every distribution.  In addition, the printed documentation is also
+available from the ILP office at the following address:
+.(b
+	EECS/ERL Industrial Liaison Program Office
+        Software Distribution
+        479 Cory Hall
+        University of California, Berkeley
+        Berkeley, CA 94720
+	(510) 643-6687
+	email: software@hera.berkeley.edu
+.)b
+The current price is $25. US, but that is subject to change.
+Contact them for the exact fee.
+.pp
+A second source is the "ptolemy-hackers@ohm.berkeley.edu" mailing list.  
+This list provides a forum for ptolemy questions and issues.  
+Users of the current release 
+who have a Ptolemy question, comment, 
+or think they've found a bug should send mail to ptolemy-hackers.
+.pp
+To join ptolemy-hackers, send mail to
+.br
+"ptolemy-hackers-request@ohm.berkeley.edu
+.br
+with the Subject "ADD ME."
+.pp
+Another source is the Ptolemy ftp archive.  To access this, use
+anonymous FTP to ptolemy.berkeley.edu.
+.EQ
+delim $$
+.EN
+.\" Local variables:
+.\" mode: nroff
+.\" End:
