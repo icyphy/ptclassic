@@ -45,6 +45,7 @@ INCL = -I$(DEDIR) -I$(KERNDIR)
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list
 PL_SRCS= \
+DEAdd.pl \
 DEDelay.pl \
 DEEther.pl \
 DEEtherRec.pl \
