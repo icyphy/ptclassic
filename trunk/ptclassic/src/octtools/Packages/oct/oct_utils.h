@@ -28,9 +28,9 @@
 #define OCT_UTILS_H
 #include "ansi.h"
 void oct_error
-	ARGS((...));
+	ARGS((va_alist));
 void oct_prepend_error
-	ARGS((...));
+	ARGS((va_alist));
 void oct_subclass_responsibility();
 
 #endif
