@@ -45,7 +45,6 @@ physical	eqWinCmd	KEY =	MENU Display 4	ALIAS
 physical	optWinCmd	MENU Options 0  ALIAS
 physical	optLECmd	MENU Options 1	ALIAS	
 physical	optToggleGridCmd KEY g MENU Options 2 ALIAS
-physical	showProp	KEY ^P	MENU Props&Bags 0 ALIAS
 #physical	editProp	KEY ^E	MENU Props&Bags 1 ALIAS
 #physical	bagSelect	KEY B	MENU Props&Bags 2 ALIAS
 #physical	bagSelectCnts	KEY ^B	MENU Props&Bags 3 ALIAS
