@@ -9,6 +9,7 @@ static const char file_id[] = "CGRecurScheduler.cc";
 #include "DataStruct.h"
 #include "distributions.h"
 #include "KnownBlock.h"
+#include "CGDDFCode.h"
 #include <math.h>
 
 /**************************************************************************

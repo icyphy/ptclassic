@@ -12,6 +12,7 @@ static const char file_id[] = "CGForScheduler.cc";
 #include "Geodesic.h"
 #include "CGDDFCluster.h"
 #include "dataType.h"
+#include "CGDDFCode.h"
 #include <math.h>
 
 /**************************************************************************

@@ -10,6 +10,7 @@ static const char file_id[] = "CGCaseScheduler.cc";
 #include "CGMacroCluster.h"
 #include "distributions.h"
 #include "Domain.h"
+#include "CGDDFCode.h"
 #include <math.h>
 
 /**************************************************************************
