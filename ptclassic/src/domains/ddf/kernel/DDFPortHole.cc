@@ -61,34 +61,6 @@ void OutDDFPort :: sendData () { putParticle();}
 int MultiInDDFPort :: isItInput () const { return TRUE;}
 int MultiOutDDFPort :: isItOutput () const { return TRUE;}
 
-PortHole& DDFPortHole :: setPort (
-			     const char* s,
-			     Block* parent,
-			     DataType t,
-			     unsigned numTokens,
-			     unsigned delay)
-{
-	// Initialize PortHole
-	PortHole::setPort(s,parent,t);
-
-	// Based on the delay, we allocate a Buffer assuming no
-	// past Particles are allocated
-	if (numTokens > 0) {
-		varying = FALSE;
-		numberTokens = numTokens;
-	} else {
-		varying = TRUE;
-		numberTokens = 1;
-	}
-
-	// The number of Particles the buffer has to hold is:
-	//		numberTokens current and future Particles
-	//		delay past Particles
-	bufferSize = numberTokens + delay;
-
-	return *this;
-}
-
 void DDFPortHole :: imageConnect()
 {
 	// get real partner
@@ -166,30 +138,12 @@ int OutDDFPort :: moveData()
     return number;
 }
 
-// common code for making a new DDFPortHole in a DDFMultiPortHole.
-// called by MultiInDDFPort::newPort and MultiOutDDFPort::newPort.
-// This is a method of MultiDDFPort because MultiDDFPort is a friend
-// of DDFPortHole.  Hence it can set the protected members
-// numberTokens and varying.
-//
-PortHole& MultiDDFPort :: finishNewPort(DDFPortHole& p) {
-	if (numberTokens == 0) {
-		p.numberTokens = 1;
-		p.varying = TRUE;
-	}
-	else {
-		p.numberTokens = numberTokens;
-		p.varying = FALSE;
-	}
-	return installPort(p);
-}
-
 PortHole& MultiInDDFPort :: newPort () {
 	LOG_NEW; DDFPortHole& p = *new InDDFPort;
-	return finishNewPort(p);
+	return installPort(p);
 }
 
 PortHole& MultiOutDDFPort :: newPort () {
 	LOG_NEW; DDFPortHole& p = *new OutDDFPort;
-	return finishNewPort(p);
+	return installPort(p);
 }

@@ -53,17 +53,7 @@ class DDFPortHole : public DFPortHole
 	friend class MultiDDFPort;
 
 public:
-	DDFPortHole() : varying(0) {}
-
-	// The setPort function is redefined to take one more optional
-	// argument, the number of Particles consumed/generated
-	PortHole& setPort(const char* portName,
-			  Block* parent,
-			  DataType type = FLOAT,
-			  // Number Particles consumed/generated
-			  unsigned numTokens = 1,
-			  // Maximum delay the Particles are accessed
-			  unsigned delay = 0);
+	DDFPortHole() {}
 
 	int isDynamic() const { return varying ;}
 
@@ -87,8 +77,6 @@ public:
 	Geodesic* imageGeo;
 	PortHole* imagePort;
 
-protected:
-	int varying;	// flag to be set if dynamic
 };
 
 	///////////////////////////////////////////
@@ -140,11 +128,6 @@ public:
 // Dynamic dataflow MultiPortHole
  
 class MultiDDFPort : public MultiDFPort {
-protected:
-	// add the DDFPortHole to my portlist.
-	// Used by MultiInDDFPort and MultiOutDDFPort, but defined
-	// here because MultiDDFPort is a friend of DDFPortHole.
-	PortHole& finishNewPort(DDFPortHole&);
 public:
 	// Function to alter the numberTokens member, which indicates the
 	// number of tokens produced or consumed, or 0 if not known.
