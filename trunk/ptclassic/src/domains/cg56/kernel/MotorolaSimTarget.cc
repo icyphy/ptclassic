@@ -101,8 +101,6 @@ void MotorolaSimTarget::writeCode() {
     if (!parent()) {
 	StringList realcmds = "#!/bin/sh\n";
 	realcmds << headerComment("# ");
-	realcmds << "\n# Remove all of the CG56WriteFile output files\n";
-	realcmds << "/bin/rm -f /tmp/cgwritefile*\n";
 	realcmds << "\n# Run the simulator\n";
 	if (int(interactiveFlag))
 		realcmds << "xterm -e sim";
@@ -111,7 +109,7 @@ void MotorolaSimTarget::writeCode() {
 	realcmds << dspType << " " << filePrefix << ".cmd" << " >/dev/null\n";
 	if (int(reportExecutionTime)) {
 		// Search the simulation state file for the pattern 'cyc:' e.g.
-		// ^Break #1 pc>=$ff0 h ;dev:0 pc:0ff0 cyc:439131
+		// Break #1 pc>=$ff0h dev:0 pc:0ff0 cyc:439131
 		realcmds << "\n# Extract the number of cycles executed\n";
 		realcmds << "/bin/rm -f " << filePrefix << ".cyc\n";
 		realcmds << "grep 'cyc:' " << filePrefix << ".sim | "
