@@ -439,7 +439,7 @@ $(ITCL_SHARED_OBJ)/itcl/libitcl.$(LIBSUFFIX):
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		SHLIB_LD=ld \
 		shared)
-$(ITCL_SHARED_OBJ)/itcl/libitcl.$(LIBSUFFIX).$(ITCL_MAJOR_VERSION_INT):
+$(ITCL_SHARED_OBJ)/itcl/libitcl.$(LIBSUFFIX).$(ITCL_MAJOR_VERSION_INT): \
 		$(ITCL_SHARED_OBJ)/itcl/libitcl.$(LIBSUFFIX) 
 	(cd $(ITCL_DEST_LIB); \
 		rm -f $@; \
@@ -453,7 +453,7 @@ $(ITCL_SHARED_OBJ)/itk/libitk.$(LIBSUFFIX):
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		SHLIB_LD=ld \
 		shared)
-$(ITCL_SHARED_OBJ)/itcl/libitk.$(LIBSUFFIX).$(ITCL_MAJOR_VERSION_INT):
+$(ITCL_SHARED_OBJ)/itcl/libitk.$(LIBSUFFIX).$(ITCL_MAJOR_VERSION_INT): \
 		$(ITCL_SHARED_OBJ)/itcl/libitk.$(LIBSUFFIX) 
 	(cd $(ITCL_DEST_LIB); \
 		rm -f $@; \
