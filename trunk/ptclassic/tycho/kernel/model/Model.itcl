@@ -1012,7 +1012,7 @@ body ::tycho::Model::redo {{distance 1}} {
 
 	# Execute the command.
 	$this evalInSpecificContext \
-		eval $redoCommands($historyMark(current))]
+		eval $redoCommands($historyMark(current))
 
 	# Publish if publishable
 	if { $_publishable($historyMark(current)) } {
