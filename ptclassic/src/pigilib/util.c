@@ -93,19 +93,6 @@ char *string;
     return(strcpy((char *) calloc(strlen(string)+1, sizeof(char)), string));
 }
 
-/*
-Use the ptolemy kernel expansion call -- kennard
-*/
-void
-TildeExpand(input, buffer)
-char *input;
-char *buffer;
-{
-    strcpy( buffer, KcExpandPathName(input));
-    return;
-}
-
-
 /* SkipWhite  4/28/88
 */
 char *
