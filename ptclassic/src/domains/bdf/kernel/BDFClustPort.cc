@@ -47,7 +47,8 @@ const int UNKNOWN = 2;		// a value other than TRUE/FALSE.
 // if bp is set it's a "bag port" belonging to an BDFClusterBag.
 BDFClustPort::BDFClustPort(DFPortHole& port,BDFCluster* parent, int bp)
 : pPort(port), bagPortFlag(bp), pOutPtr(0), feedForwardFlag(0),
-  ctlFlag(0), lastBoolValue(2), dupedFlag(0), moveupNeeded(UNKNOWN)
+  ctlFlag(0), lastBoolValue(2), dupedFlag(0), moveupNeeded(UNKNOWN),
+  ignoreFlag(0)
 {
 	const char* name = bp ? port.name() : BDFCluster::mungeName(port);
 	setPort(name,parent,INT);
