@@ -1,7 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -82,6 +82,13 @@ static char SccsId[]="$Id$";
 #include <time.h>
 #endif
 
+#ifdef SYSV
+#include <sys/rusage.h>
+#include <sys/resource.h>
+#ifndef RUSAGE_SELF
+#include <sys/procfs.h>
+#endif
+#endif
 
 /*
  *   util_cpu_time -- return a long which represents the elapsed processor
@@ -91,6 +98,41 @@ long
 util_cpu_time()
 {
     long t = 0;
+
+
+#ifdef SYSV
+/* For Solaris2, taken from solaris2_porting.faq */
+        /*
+         *      getrusage --
+         */
+
+#ifdef PIOCUSAGE
+    int             fd;
+    char            proc[SOMETHING];
+    prusage_t       prusage;
+
+    sprintf(proc,"/proc/%d", getpid());
+    if ((fd = open(proc,O_RDONLY)) == -1) {
+      perror("util_cpu_time(): open");
+      return (long) 0;
+    }
+    if (ioctl(fd, PIOCUSAGE,, &prusage) == -1) {
+      perror("util_cpu_time(): ioctl");
+      return (long) 0;
+    }
+    t = prusage.pr_utime.tv_sec*1000 +     prusage.pr_utime.tv_nsec/1000000;
+#ifdef NEVER
+#else                   /* Again, assume BSD */
+                if (getrusage(RUSAGE_SELF, &rusage) == -1) {
+                        perror("getrusage");
+                        ....
+                }
+                ....
+#endif /* NEVER */
+#endif /* PIOCUSAGE */
+
+#else
+
 
 #ifndef hpux
 #ifdef BSD
@@ -138,6 +180,6 @@ util_cpu_time()
     times(&buffer);
     t = buffer.proc_user_time * 10;
 #endif
-
+#endif /* SYSV */
     return t;
 }
