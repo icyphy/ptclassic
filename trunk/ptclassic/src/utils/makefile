@@ -33,7 +33,7 @@
 # maintained.
 
 
-DIRS = libcephes libgslider ptplay rman-2.4 tkman-1.7.3
+DIRS = libcephes libexttools libgslider ptplay rman-2.4 tkman-1.7.3
 # Need to have $PTOLEMY as an absolute pathname for wish
 #PTOLEMY = ../..
 
