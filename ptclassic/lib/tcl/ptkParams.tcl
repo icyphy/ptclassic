@@ -963,10 +963,15 @@ proc ptkFormatCmd {cmd radioVarName} {
    upvar $radioVarName radioVar
    eval [format $cmd $radioVar]
 }
+                                                                            #
+                                                                            #
+#############################################################################
 
+#############################################################################
 # Given a list of name-value arguments, this procedure lets the
 # user modify values.
-
+# Author: Wei-Jen Huang
+#
 # The argument "instr" is a label (anchored west) used to decorate the
 #  top of the window and can be used as an instruction.
 # The argument "args" is a list of (a list of) name-value pairs.
@@ -1041,6 +1046,3 @@ proc ptkOkCancelButtons {frame okCmd cancelCmd} {
 	-padx 1m -pady 1m -ipadx 1m -ipady 1m
 
 }
-                                                                            #
-                                                                            #
-#############################################################################
