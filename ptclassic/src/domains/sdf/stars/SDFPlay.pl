@@ -80,9 +80,25 @@ be a parameter.
 			fileName = expandPathName(sf);
 		}
 
-		// should check if file already exists here
+		// Truncate the file, creating a 0 length file.
+		// We have to fopen with "r+" so that we can read and write
+		// but the file must exist for "r+" to work.
 		if ((strm = fopen(fileName, "w")) == 0) {
+			Error::abortRun (*this, "Can't truncate file ",
+					 fileName);
+		}
+		fclose(strm);
+
+		// Reopen the file for read/write so that we can adjust
+		// the header. 
+		if ((strm = fopen(fileName, "r+")) == 0) {
 			Error::abortRun (*this, "Can't open file ", fileName);
+		}
+
+		// Write a blank mulaw file header.
+		if (Ptdsp_WriteSunMuLawHeader(strm) == 0) {
+			Error::abortRun (*this, "Failed to write blank header",
+					fileName);
 		}
 	}
 
@@ -94,11 +110,21 @@ be a parameter.
 		putc(Ptdsp_LinearToPCMMuLaw(data), strm);
 	}
 // wrapup.  Does nothing if open failed, or 2nd wrapup call.
-// closes file and runs the command.
+// writes the header, closes file and runs the command.
 	wrapup {
+		
+		// If the open failed, do nothing.
 		if (!strm) return;
+
+
+		// Update the datasize field in the mulaw file header.
+		if (Ptdsp_WriteSunMuLawHeader(strm) == 0) {
+			Error::abortRun (*this, "Failed to update header",
+					fileName);
+		}
 		fclose (strm);
 		strm = 0;
+
 		StringList cmd;
 
 		if (delFile) cmd += "( ";
