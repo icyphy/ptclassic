@@ -38,13 +38,6 @@
 #	barGraphWidth	width in centimeters
 #	barGraphHeight	height in centimeters
 proc ptkMakeBarGraph {w desc geo numBars barGraphWidth barGraphHeight univ} {
-
-    # Make sure that Tycho has started, and use it to get a decent
-    # button font. This minimizes problems with buttons disappearing
-    # because of Tk using an unnecessarily large font.
-    ptkStartTycho
-    set buttonFont [.tychoFonts getFont Helvetica 12 bold]
-    
     catch {destroy $w}
     toplevel $w
     wm title $w "$desc"
@@ -55,10 +48,8 @@ proc ptkMakeBarGraph {w desc geo numBars barGraphWidth barGraphHeight univ} {
     label $w.cntr.label -text "Scale range:"
     set startScale [${w}rescale 1.0]
     label $w.cntr.value -width 20 -text "$startScale"
-    button $w.cntr.hv -text "Zoom In" -command "changeBarScale $w 0.5" \
-	    -font $buttonFont
-    button $w.cntr.dbl -text "Zoom Out" -command "changeBarScale $w 2.0" \
-	    -font $buttonFont
+    button $w.cntr.hv -text "Zoom In (z)" -command "changeBarScale $w 0.5"
+    button $w.cntr.dbl -text "Zoom Out (Z)" -command "changeBarScale $w 2.0"
     pack append $w.cntr \
 	$w.cntr.label left \
 	$w.cntr.value left \
@@ -91,6 +82,11 @@ proc ptkMakeBarGraph {w desc geo numBars barGraphWidth barGraphHeight univ} {
     tkwait visibility $w.pf.plot
     # Binding to redraw the plot when the window is resized.
     bind $w.pf.plot <Configure> "${w}redraw"
+
+    # ``Accelerators'' for zooming. This requires a focus on mouse entry.
+    bind $w.pf.plot <Enter> "focus $w.pf.plot"
+    bind $w.pf.plot <KeyPress-z> "changeBarScale $w 0.5"
+    bind $w.pf.plot <KeyPress-Z> "changeBarScale $w 2.0"
 }
 
 proc changeBarScale {w s} {
