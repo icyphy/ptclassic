@@ -36,7 +36,7 @@ void SDFStar :: fire() {
 	BlockPortIter next(*this);
 	for(int i = numberPorts(); i > 0; i--)
 		(next++)->grabData();
-	go();
+	Star::fire();
 	next.reset();
 	for(i = numberPorts(); i > 0; i--)
 		(next++)->sendData();
