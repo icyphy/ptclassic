@@ -55,9 +55,9 @@ public:
 	}  
  
         // Access a submatrix of the mothermatrix stored in the Geodesic
-        Matrix* getInput(int rowFiringIndex, int colFiringIndex,
+        PtMatrix* getInput(int rowFiringIndex, int colFiringIndex,
                          int rowDelay = 0, int colDelay = 0);
-        Matrix* getOutput(int rowFiringIndex, int colFiringIndex);
+        PtMatrix* getOutput(int rowFiringIndex, int colFiringIndex);
 
         MatrixParticle* mainParticle() { return motherParticle; }
 
