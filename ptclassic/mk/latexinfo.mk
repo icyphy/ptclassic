@@ -6,6 +6,7 @@
 GET=safe-get
 
 LATEXINFO= /usr/tools/gnu/src/latexinfo
+MORE_TEXINPUTS= $(LATEXINFO)/styles
 TEXINPUTS= .:$(ROOT)/doc/tex:$(LATEXINFO)/styles:$(MORE_TEXINPUTS)
 
 INFO=	-l $(ROOT)/doc/elisp/default.el -l $(LATEXINFO)/.emacs \
