@@ -75,71 +75,74 @@ State* <T>ArrayState :: clone() { return new <T>ArrayState;}
 
 // Parse initValue to set value
 void <T>ArrayState  :: initialize() {
+// free any old memory
+	delete val;
+	val = 0;
+	nElements = 0;
 
 	<C> buf[MAXLEN];
 	char* specialChars = "*+-/()<[]";
 	Tokenizer lexer(initValue,specialChars);
 
-	int i = 0;
+	int i = 0, err = 0;
 	int numRepeats;
 	<C> saveValue;
-	while(!lexer.eof() && i < MAXLEN) {
-	ParseToken t =evalExpression(lexer, parent()->parent());
-	if(strcmp(t.tok,"ERROR"))
-	if(strcmp(t.tok,"EOF"))
-        if(!strcmp(t.tok,"REPEATER")) {
-                if(t.cval != '[') return;
-                t = getParseToken(lexer, parent()->parent());
-                if(strcmp(t.tok,"INT"))return;
-                numRepeats = t.intval - 1;
-                while ( numRepeats != 0) {
-                        buf[i++] = saveValue;
-                        numRepeats--;   
-                }
-                t = getParseToken(lexer,parent()->parent());
-                if(strcmp(t.tok,"REPEATER")) return;
-                if(t.cval != ']') return;
-                continue;
-        }
-
-	{if(!strcmp(t.tok,"<T>")) buf[i++] = t.<C>val;
-        else if(!strcmp(t.tok,"ID")) buf[i++] = ((<T>State*)t.s)->val;
+	while(!lexer.eof() && i < MAXLEN && err == 0) {
+		ParseToken t = evalExpression(lexer);
+		if (t.tok == T_EOF) break;
+		switch (t.tok) {
+		case '[':
+			t = getParseToken(lexer, T_Int);
+			if (t.tok != T_Int) {
+				parseError ("expected intval after", "[");
+				err = 1;
+				break;
+			}
+			numRepeats = t.intval - 1;
+			while ( numRepeats != 0) {
+				buf[i++] = saveValue;
+				numRepeats--;   
+			}
+			t = getParseToken(lexer);
+			if (t.tok != ']') {
+				parseError ("expected ']'", "");
+				err = 1;
+				break;
+			}
+			break;
+		case T_<T>:
+			buf[i++] = t.<C>val;
+			break;
+		default:
+			parseError ("syntax error", "");
+			err = 1;
+		}
+		saveValue = buf[i-1];
 	}
-	saveValue = buf[i-1];
-			};
-	nElements  = i;
-
-	val  = new <C> [nElements];
-	for(i = 0; i < nElements; i++)
-	val[i] = buf[i];
+	if (!err) {
+		nElements  = i;
+		val  = new <C> [nElements];
+		for(i = 0; i < nElements; i++)
+			val[i] = buf[i];
+	}
+	return;
 }
 
-ParseToken <T>ArrayState :: evalExpression(Tokenizer& lexer, Block*  blockIAmIn) {
+ParseToken <T>ArrayState :: evalExpression(Tokenizer& lexer)
+{
         <C> signflag = 1;
-        ParseToken t = getParseToken(lexer, blockIAmIn,"<T>");
-
-        if(!strcmp(t.tok,"EOF")) return t;
-	if(!strcmp(t.tok,"REPEATER")) return t;
-        if(!strcmp(t.tok,"OP"))
-        {
-        if(t.cval == '-')
-                {signflag = -1;
-                t = getParseToken(lexer, blockIAmIn,"<T>");
-                if(!strcmp(t.tok,"NULL")) {t.tok = "ERROR"; return t;}
-                }
-        }
-        if(!strcmp(t.tok,"<T>")) {
-                                        t.<C>val = signflag * t.<C>val;
-                                        return  t;
-                                }
-        else if(!strcmp(t.tok,"ID")) {
-                ((<T>State*)t.s)->val = signflag * ((<T>State*)t.s)->val;
-                                        return t;
-                                }
-        else {t.tok = "ERROR"; return t;}
-	
+        ParseToken t = getParseToken(lexer, T_<T>);
+	if (t.tok != '-') return t;
+	t = getParseToken(lexer, T_<T>);
+	switch (t.tok) {
+	case T_<T>:
+		t.<C>val = -t.<C>val;
+		break;
+	default:
+		t.tok = T_ERROR;
+	}
+	return t;
 }
-
 
 // make knownstate entry
 static <T>ArrayState proto;

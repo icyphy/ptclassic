@@ -64,7 +64,7 @@ public:
 	void initialize();
 
 	// Parse element
-	ParseToken evalExpression(Tokenizer&, Block*);
+	ParseToken evalExpression(Tokenizer&);
 
 	// clone method
 	State* clone(); // {return new <T>ArrayState;}
