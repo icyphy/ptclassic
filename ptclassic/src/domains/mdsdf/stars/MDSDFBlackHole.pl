@@ -3,8 +3,8 @@ defstar {
 	domain { MDSDF }
 	version { $Id$ }
 	desc {
-Discard all inputs.  This star is useful for terminating
-signals that are not useful.
+Discard all inputs.  This star is useful for terminating signals that are
+not useful.
 	}
 	author { Mike J. Chen }
 	copyright {
@@ -15,8 +15,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { MDSDF library }
 	explanation {
-A BlackHole accepts input Matrices, but doesn't do anything with
-them.  It is typically used to discard unwanted outputs from other blocks.
+A BlackHole accepts input Matrices, but doesn't do anything with them.
+It is typically used to discard unwanted outputs from other blocks.
 	}
 	inmulti {
 		name{input}

@@ -7,7 +7,12 @@ This star uses the GNU library <Uniform.h>.
 }
   version   { $Id$ }
   author    { Mike J. Chen }
-  copyright { 1993 The Regents of the University of California }
+  copyright {
+Copyright (c) 1990-%Q% The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+  }
   location  { MDSDF library }
   output {
 	name { output }
