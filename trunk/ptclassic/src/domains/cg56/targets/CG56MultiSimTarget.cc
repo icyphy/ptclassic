@@ -72,13 +72,15 @@ Target* CG56MultiSimTarget :: createChild(int) {
 }
 
 // -----------------------------------------------------------------------------
-DataFlowStar* CG56MultiSimTarget :: createSend(int from, int to, int num) {
+DataFlowStar* CG56MultiSimTarget :: createSend(int /*from*/, int /*to*/,
+					       int num) {
 	LOG_NEW; CG56MultiSimSend* s = new CG56MultiSimSend;
 	s->setProperty(num);
 	return s;
 }
 
-DataFlowStar* CG56MultiSimTarget :: createReceive(int from, int to, int num) {
+DataFlowStar* CG56MultiSimTarget :: createReceive(int /*from*/, int /*to*/,
+						  int num) {
 	LOG_NEW; CG56MultiSimReceive* r =  new CG56MultiSimReceive;
 	r->setProperty(num);
 	return r;
