@@ -44,6 +44,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLVariable.h"
 #include "VHDLSignal.h"
 
+class VHDLPort;
+class VHDLPortList;
+class VHDLSignalList;
+
 class VHDLFiring : public VHDLObj
 {
  public:
