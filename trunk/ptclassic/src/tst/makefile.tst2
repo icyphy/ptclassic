@@ -89,7 +89,7 @@ ifdef RANDOM_RESULTS
 endif
 	@echo "Not all domains have all types of output, so expect errors"
 	-mv *.pt *.pt.* *.pout xv* *.au $(TST_DOMAIN)/results
-	mv $(TST_DOMAIN)/results/*.pt.pxgraph $(TST_DOMAIN)/chk
+	-mv $(TST_DOMAIN)/results/*.pt.pxgraph $(TST_DOMAIN)/chk
 
 $(TST_DOMAIN)/results $(TST_DOMAIN)/chk $(TST_DOMAIN)/random random.tmp \
 	results.tmp chk.tmp:
