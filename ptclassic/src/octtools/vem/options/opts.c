@@ -49,6 +49,8 @@ static char SccsId[]="$Id$";
 
 #include "internal.h"		/* Local definitions        */
 
+#include "opts.h"		/* Some Public functions    */
+
 static st_table *all_opt_editors = (st_table *) 0;
 
 /*
