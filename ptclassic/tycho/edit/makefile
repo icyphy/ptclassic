@@ -1,9 +1,9 @@
-# Makefile for Ptolemy Tycho system, lib directory.
+# Makefile for Tycho's editors package directory
 #
 # $Id$
 # Author: Christopher Hylands
 #
-# Copyright (c) 1996-%Q% The Regents of the University of California.
+# Copyright (c) %Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -29,7 +29,7 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-DIRS = textedit visedit slate graphedit
+DIRS = textedit visedit slate graph
 
 # Root of Tycho directory
 ROOT =		..
@@ -42,5 +42,7 @@ VPATH =		$(ROOT)/$(ME)
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-# Include rules for directories that contain only subdirectories.
-include $(ROOT)/mk/tydir.mk
+EXTRA_SRCS = pkgIndex.tcl
+
+# Include rules for directories that don't compile
+include $(ROOT)/mk/no-compile.mk

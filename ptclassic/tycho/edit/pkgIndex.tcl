@@ -48,7 +48,7 @@ catch {
     foreach file [glob -nocomplain [file join $dir * pkgIndex.tcl]] {
 	set dir [file dirname $file]
 	if [catch {source $file} msg] {
-	    tclLog "error reading package index file $file: $msg"
+	    catch {puts stderr "error reading package index file $file: $msg"}
 	}
     }
 }
