@@ -55,83 +55,20 @@ Geodesic* MTDFPortHole::allocateGeodesic()
 
     LOG_NEW; MTDFGeodesic* g = new MTDFGeodesic;
     g->setNameParent(hashstring(nm), parent());
+    g->makeLock(LwpMonitor::prototype);
 
     LOG_DEL; delete nm;
     return g;
 }
 
-void InMTDFPort::wait()
+int MTDFPortHole::allocatePlasma()
 {
-    receiveData();
-}
-
-/* Because MTDFGeodsic::get() may block, care must be taken to keep the buffer
-   and Plasma consistent.
-*/
-void MTDFPortHole::getParticle()
-{
-    Particle **pOld, *pNew;
-
-    // Avoid thrashing by waiting until the Geodesic is full.
-    myGeodesic->wait();
-
-    // Transfer numberTokens Particles from the Geodesic to the buffer.
-    for(int i = numberTokens; i>0; i--)
+    if (DFPortHole::allocatePlasma())
     {
-	// Get a pointer to the next Particle in the buffer.
-	pOld = myBuffer->next();
-
-	// Get a new Particle from the Geodesic. (This may block!)
-	pNew = myGeodesic->get();
-
-	// Recycle the old particle by putting it into the Plasma.
-	myPlasma->put(*pOld);
-
-	// Put the new Particle into the buffer.
-	*pOld = pNew;
+	myPlasma->makeLock(LwpMonitor::prototype);
+	return TRUE;
     }
-}
-
-/* Redefining DFPortHole::putParticle() is necessary only because
-   Geodesic::put() is not virtual.
-*/
-void MTDFPortHole::putParticle()
-{
-    Particle** p;
-
-    // Fast case for one Particle.
-    if (numberTokens == 1)
-    {
-	p = myBuffer->here();
-	myGeodesic->put(*p);
-	*p = myPlasma->get();
-	return;
-    }
-
-    // Slow case for multiple Particles.
-
-    // Back up to the first new Particle in the buffer.
-    myBuffer->backup(numberTokens);
-
-    // Transfer numberTokens Particles from the buffer to the Geodesic.
-    for(int i = numberTokens; i>0; i--)
-    {
-	// Get the next Particle from the buffer.
-	p = myBuffer->next();
-
-	// Transfer the Particle to the Geodesic.
-	myGeodesic->put(*p);
-
-	// Replace the used-up Particle with one recycled from the Plasma.
-	*p = myPlasma->get();
-    }
-}
-
-PortHole& MTDFPortHole::setPort(const char* name, Block* parent, DataType type,
-    int num, int delay)
-{
-    if (dynamic = (num < 0)) num = -num;
-    return DFPortHole::setPort(name, parent, type, num, delay);
+    return FALSE;
 }
 
 // Input/output identification.
