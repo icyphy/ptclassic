@@ -34,7 +34,7 @@
 catch {delete class ::ptolemy::Galaxy}
 
 # Create the namespace if it doesn't exist
-namespace ::ptolemy {}
+namespaceEval ::ptolemy {}
 
 #######################################################################
 #### Galaxy
@@ -205,7 +205,7 @@ body ::ptolemy::Galaxy::addBlock {newblockname blockclass} {
     set newname $fullname.$newblockname
     if {$cloneblocks} {
         catch [list uplevel #0 delete object $newname]
-        if {[namespace ::ptolemy "info classes $blockclass"] != {}} {
+        if {[namespaceEval ::ptolemy "info classes $blockclass"] != {}} {
             return [uplevel #0 $blockclass $newname $blockclass]
         }
         if {[info which -command $blockclass] != {} && \

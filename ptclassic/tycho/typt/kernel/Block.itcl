@@ -34,7 +34,7 @@
 catch {delete class ::ptolemy::Block}
 
 # Create the namespace if it doesn't exist
-namespace ::ptolemy {}
+namespaceEval ::ptolemy {}
 
 #######################################################################
 #### Block
@@ -114,7 +114,7 @@ body ::ptolemy::Block::constructor {master args} {
     # Block name is the instance name, minus the namespace information.
     # The name can be absolute (beginning with a period) or relative
     # to the current galaxy.
-    set fullname [info namespace tail $this]
+    set fullname [namespaceTail $this]
 
     # The part of this object name after the last period is called the
     # root name.

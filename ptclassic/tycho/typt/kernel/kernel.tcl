@@ -100,7 +100,10 @@ set ptolemyfeature(ptolemyinstalled) \
 # ptolemyfeature(pitcl) is set to 1 if the ::pitcl commands are present,
 # which indicates that we have access to the ptolemy kernel
 # via ::pitcl
-if {[uplevel #0 info namespace all pitcl] == "pitcl"} {
+# This test was:
+#   if {[uplevel #0 info namespace all pitcl] == "pitcl"}
+#
+if { [lsearch -exact [namespace children ::] ::pitcl] >= 0 } {
     set ptolemyfeature(pitcl) 1
     set ptolemyfeature(ptolemy) 1
 } {
