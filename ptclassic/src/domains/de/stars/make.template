@@ -122,6 +122,7 @@ DEVarServer.pl \
 DEVirtClock.pl \
 DEWaveForm.pl \
 DEXMgraph.pl \
+DEXYgraph.pl \
 DEXgraph.pl \
 DEXhistogram.pl
 
