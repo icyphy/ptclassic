@@ -48,10 +48,10 @@ class ACSCorona : public ACSStar {
 public:
 
 	// Default constructor initializes init core flag to zero ( no cores ).
-	ACSCorona::ACSCorona() : initCoreFlag(0) { }
+	ACSCorona() : initCoreFlag(0) { }
 
 	// This is a constructor with init core flag as argument.
-	ACSCorona::ACSCorona(int initCoreFlag_) : initCoreFlag(initCoreFlag_) { }
+	ACSCorona(int initCoreFlag_) : initCoreFlag(initCoreFlag_) { }
 	// constructor needs to know where to look for core sources.
 	virtual const char* getSrcDirectory() { return NULL; }
 
