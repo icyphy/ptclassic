@@ -32,11 +32,12 @@ INCL=-I$(KERNDIR) -I$(CGDIR) -I$(SDFDIR)
 LIB=libcgc.a
 
 # Header files
-HDRS= CGCConnect.h CGCStar.h CGCTarget.h CGCGeodesic.h CGCForkNode.h
+HDRS= CGCConnect.h CGCStar.h CGCTarget.h CGCGeodesic.h CGCForkNode.h \
+	CGCWormConnect.h
 
 # Library objects
 OBJS= CGCConnect.o CGCStar.o CGCDomain.o CGCTarget.o CGCGeodesic.o  \
-	CGCForkNode.o
+	CGCWormConnect.o CGCForkNode.o
 
 # Library sources
 SRCS= $(OBJS:.o=.cc)
