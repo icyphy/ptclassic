@@ -50,7 +50,8 @@ CGDIR = 	$(ROOT)/src/domains/cg/kernel
 CGCDIR = 	$(ROOT)/src/domains/cgc/kernel
 SDFDIR = 	$(ROOT)/src/domains/sdf/kernel
 
-INCL = -I$(VHDLDIR) -I$(CGDIR) -I$(CGCDIR) -I$(SDFDIR) -I$(KERNDIR)
+INCL = -I$(VHDLDIR) -I$(CGDIR) -I$(CGCDIR) -I$(SDFDIR) -I$(KERNDIR) \
+       -I$(ROOT)/src/utils/libcephes
 
 # stars library
 LIB=libvhdlstars.$(LIBSUFFIX)
@@ -97,6 +98,7 @@ PL_SRCS = \
  VHDLCxToFloat.pl \
  VHDLFloatToCx.pl \
  VHDLQuant.pl \
+ VHDLWindow.pl \
  VHDLXgraph.pl \
  VHDLXMgraph.pl \
  VHDLXYgraph.pl \
