@@ -353,22 +353,21 @@ const char* e, const char* cont) {
     if (e==NULL) end =' ';
     else end = *e;
     if (cont==NULL) {	/*multiline comments unsupported*/
-	LOG_NEW; char* c = new char[strlen(msg)];
-	strcpy(c,msg);
+	char* c = savestring(msg);
 	for (char* line=strtok(c,"\n"); line; line=strtok(NULL,"\n"))
 	    cmt << begin << line << end << "\n";
-	LOG_DEL; delete(c);
+	LOG_DEL; delete c;
     }
     else if (*cont=='\0') /*multiline comments supported, no cont char*/
 	cmt << begin << msg << end << "\n";
     else { /*multiline comments supported, continue char desired*/
-	LOG_NEW; char* c = new char[strlen(msg)];
+	char* c = savestring(msg);
 	char* line = strtok(c,"/n");
 	cmt << begin << line << "\n";
 	while(line = strtok(NULL,"\n"))
 	    cmt << cont << line << '\n';
 	cmt << end << '\n';
-	LOG_DEL; delete(c);
+	LOG_DEL; delete c;
     }
     return cmt;
 }
