@@ -35,7 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #ifdef __GNUG__
 #pragma interface
 #endif
-#include "SDFPortHole.h"
+
 #include "CGPortHole.h"
 
 // three different types of buffer.
