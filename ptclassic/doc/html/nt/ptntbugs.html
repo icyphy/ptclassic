@@ -89,7 +89,8 @@ is used to convert Oct facets to ptcl scripts.  If you don't need
 (Reported by
 Sascha Schwarz <CODE>&lt;saschas@natasha.auslabs.lucent.com&gt;</CODE>).
 
-<li> <CODE>octtools/Xpackages/iv</CODE> fails to compile
+<li> <a name="xpackages"><CODE>octtools/Xpackages/iv</CODE> fails to compile</a>
+
 <pre>
 ../../../../src/octtools/Xpackages/iv/ivGetLine.c: In function `ivTextInit':
 ../../../../src/octtools/Xpackages/iv/ivGetLine.c:98: storage size of `tty'
@@ -125,6 +126,13 @@ a Cygwin32 curses library and .h file.
 
 (Reported by
 Sascha Schwarz <CODE>&lt;saschas@natasha.auslabs.lucent.com&gt;</CODE>).
+
+
+
+<li> <a name="xv"><CODE>xv</CODE> fails to compile</a>
+There are various problems compiling xv under Cygwin.
+In the short term, you can ignore them.  The SDF image processing
+demos use xv.
 
 
 <li> Problems compiling <CODE>src/tysh/SigHandle.cc</CODE>:
