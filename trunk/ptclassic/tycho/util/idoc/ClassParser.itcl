@@ -36,15 +36,15 @@
 #### ClassParser
 # ClassParser is the superclass of all classes that parse source
 # cpde files to generate class models (of class <a href = 
-# "../../../../kernel/doc/codeDoc/ClassModel.itclclass">::tycho::ClassModel
+# "../../../../kernel/doc/codeDoc/ClassModel.idoc">::tycho::ClassModel
 # </a>).
 #
 # The procedure <code>::tycho::ClassParser::generateIDoc</code> accepts
 # a list of filenames. It examines their extensions, and uses
 # <code>ClassParser::generator</code> to create an instance of the
 # correct parsing class to process that file.
-# (Currently, <a href = "ItclParser.itclclass">[incr Tcl]</a> and 
-# <a href ="JavaParser.itclclass">Java</a> are supported). If a subsequent file
+# (Currently, <a href = "ItclParser.idoc">[incr Tcl]</a> and 
+# <a href ="JavaParser.idoc">Java</a> are supported). If a subsequent file
 # is of the same type, it uses the same generator.
 #
 # This procedure is also tied to the make idocs command as well as the 

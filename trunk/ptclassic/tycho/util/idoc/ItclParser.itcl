@@ -35,7 +35,7 @@
 #######################################################################
 #### ItclParser
 # Parses Itcl code, creates <a href = 
-#"../../../../kernel/doc/codeDoc/ClassModel.itclclass">::tycho::ClassModel</a>
+# "../../../../kernel/doc/codeDoc/ClassModel.idoc">::tycho::ClassModel</a>
 # models for each class found, and outputs those to the proper
 # files. The most convenient interface
 # is from <code>::tycho::ClassParser::generateIDoc</code>.
@@ -168,7 +168,7 @@ body ::tycho::ItclParser::generateSingleFileIDoc {filename} {
         # puts $class
         # puts [$_classmodels($class) describe]
         if {$class != "related"} {
-            set docFile [info namespace tail $class].itclclass
+            set docFile [info namespace tail $class].idoc
             ::tycho::rmIfNotWritable $docFile
             set fd [open $docFile "w"]
 	    puts $fd [$model describe]
@@ -181,10 +181,10 @@ body ::tycho::ItclParser::generateSingleFileIDoc {filename} {
                 # related documentation
                 if {[array size _classmodels] == 1} {
                     # Not related, ONLY docs
-                    set relFile [file root $filename].itclclass
+                    set relFile [file root $filename].idoc
                 } else {
                     # Related file
-                    set relFile [file root $filename]_rel.itclclass
+                    set relFile [file root $filename]_rel.idoc
                 }
                 ::tycho::rmIfNotWritable $relFile
                 set fd [open $relFile "w"]
@@ -395,7 +395,7 @@ body ::tycho::ItclParser::modCheck {filename} {
     set extension [file extension $filename]
 
     if {$extension == ".tcl" || $extension == ".tk" || $extension == ""} {
-        set docFile [file join doc codeDoc [file root $filename].itclclass]
+        set docFile [file join doc codeDoc [file root $filename].idoc]
         if ![file exists $docFile] {
             # No tcl-only documentation
             return 1
@@ -422,7 +422,7 @@ body ::tycho::ItclParser::modCheck {filename} {
     foreach class $classes {
         if {$class == "related"} {
             set relFile [file join doc codeDoc \
-                    [file root $filename]_rel.itclclass]
+                    [file root $filename]_rel.idoc]
             if ![file exists $relFile] {
                 # No class-related documentation
                 return 1
@@ -439,7 +439,7 @@ body ::tycho::ItclParser::modCheck {filename} {
             continue
         }
         set docFile [file join doc codeDoc \
-                [info namespace tail $class].itclclass]
+                [info namespace tail $class].idoc]
         if ![file exists $docFile] {
             # There is no documentation.
             return 1
@@ -692,6 +692,7 @@ body ::tycho::ItclParser::parseClass {class body} {
     set _classmodels($class) [::tycho::ClassModel [::tycho::autoName class]]
     $_classmodels($class) configure \
 	    -language $_language \
+            -modelmode itclclass \
 	    -classname $class \
 	    -sourcefile [file join .. .. $_sourceFile]
 
