@@ -70,6 +70,7 @@ class Galaxy;
 // from NamedObj.
 
 class PortHole;
+class MultiPortHole;
 
 // attribute bits for PortHoles.  Only one is defined here: PB_HIDDEN.
 // if it is true, the porthole is not visible to user interfaces, so
@@ -129,6 +130,7 @@ public:
 	int isA(const char*) const;
 
 	GenericPort* alias() const { return aliasedTo;}
+	GenericPort* aliasFrom() const { return aliasedFrom;}
 
 	// Constructor
 	GenericPort ();
@@ -146,13 +148,15 @@ public:
 	// return typePortPtr
 	GenericPort* typePort() const { return typePortPtr;}
 
-protected:
-	// set up alias pointers in pairs.  Protected so derived types may
-	// restrict who can be an alias.
+	// set up alias pointers in pairs.  Public so that InterpGalaxy
+	// can set aliases.  Use with care, since derived types may
+	// want to restrict who can alias
 	void setAlias (GenericPort& gp) {
 		aliasedTo = &gp;
 		gp.aliasedFrom = this;
 	}
+
+protected:
 
 	// Translate aliases, if any.
 	GenericPort* translateAliases();
@@ -262,6 +266,12 @@ public:
 
 	// index value
 	int index() const { return indexValue;}
+
+	// set or return the MultiPortHole that spawned this PortHole, or NULL
+	// if there is no such MultiPortHole.
+	MultiPortHole* getMyMultiPortHole() const { return myMultiPortHole; }
+	void setMyMultiPortHole(MultiPortHole* m) { myMultiPortHole = m; }
+
 protected:
         // Indicate the real port (aliases resolved) at the far end
         // of a connection.  Initialized to NULL.
@@ -294,6 +304,10 @@ private:
 
 	// index value, for making scheduler tables
 	int indexValue;
+
+	// Pointer to the MultiPortHole that spawned this PortHole,
+	// if there is one.  Otherwise, NULL
+	MultiPortHole* myMultiPortHole;
 };
 
 // The following generic type is good enough to use in galaxies.
@@ -307,6 +321,7 @@ private:
 class GalPort : public PortHole {
 public:
 	GalPort(GenericPort& a);
+	GalPort() {};
 	int isItInput() const;
 	int isItOutput() const;
 };
@@ -411,6 +426,9 @@ class GalMultiPort : public MultiPortHole {
 public:
 	// a GalMultiPort always has an alias
 	GalMultiPort(GenericPort& a);
+
+	// If you want to defer creating the alias to an alias() call
+	GalMultiPort() {};
 
 	// queries pass through to the inside
 	int isItInput() const;
