@@ -225,9 +225,6 @@ body ::tycho::RevControl::unedit {} {
     if {$file == {}} {
 	error "Revision control: no file specified"
     }
-    if [$object saveQuery 1] {
-        enableButton checkout
-    }
 }
 
 
