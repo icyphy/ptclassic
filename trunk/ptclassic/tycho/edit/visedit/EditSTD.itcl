@@ -84,10 +84,6 @@ class ::tycho::EditSTD {
     method makeIcon {}
     method makeIconOk {w}
 
-    # Modify th options.
-    method modifyOptions {}
-    method modifyOptionsDone {w}
-
     # Pop up a file
     method popUpFile {name}
 
@@ -97,15 +93,8 @@ class ::tycho::EditSTD {
     # Invoked by the "Set Initial State" command in the Edit menu.
     method setInitialState {tag} 
 
-    # Set all options of this machine.
-    method setMachineOptions {evaluation oneWriter}
-    # OLD
-    method setOptions {machine evaluation oneWriter}
-
     # Set the input, output and internal ports.
     method setPorts {input output internal}
-    # OLD
-    method setPortNames {input output internal}
  
     # Specify whether or not modifications are allowed in the displayed text.
     method setReadOnly {bool}
@@ -135,14 +124,6 @@ class ::tycho::EditSTD {
 
     ##########################################################################
     ####                     protected variables                          ####
-
-    # Evaluation type.
-    protected variable evaluationChoices {Strict}
-    protected variable evaluationType Strict
-
-    # One-writer rule checking type.
-    protected variable oneWriterChoices {Compile None}
-    protected variable oneWriterType Compile
 
     # Previous highlighted state
     protected variable preHighLtStateId ""
@@ -195,17 +176,6 @@ body ::tycho::EditSTD::constructor {args} {
 #
 body ::tycho::EditSTD::clear {} {
     if [getReadOnly] {bell; return}
-
-#    foreach node [$slate find withtag node] {
-#	# destroy the corresponding edit state window if it exists.
-#	set w $prefix.stdEditState$node
-#	if [winfo exists $w] { destroy $w }
-#    }
-#    foreach arc [$slate find withtag arc] {
-#	# destroy the corresponding edit arc window if it exists.
-#	set w $prefix.stdEditArc$arc
-#	if [winfo exists $w] { destroy $w }
-#    } 
 
     $slate delete all
     foreach index [array names nodeInfo] {
@@ -515,53 +485,6 @@ body ::tycho::EditSTD::makeIconOk {w} {
     ptkSetMkStar $name SDF $makeIconSrcDir $makeIconPaletteName
 }
 
-################################################################
-#### modifyOptions
-# Modify the options, like evaluationType.
-#
-body ::tycho::EditSTD::modifyOptions {} {
-
-    set w $prefix.stdmodifyOptions
-    if [winfo exists $w] {
-	wm deiconify $w
-	raise $w
-    } else {
-	set name [file tail [file rootname [filename]]]
-	set titleLabel "Modify options of $name"
-
-	set evaluationTypeQuery [list radio evaluationType {Evaluation Type:}\
-		$evaluationChoices $evaluationType]
-
-	set oneWriterTypeQuery [list radio oneWriterType\
-		{One-writer rule type:} $oneWriterChoices $oneWriterType]
-
-	::tycho::Query $w -title "STD modification of options"\
-		-text $titleLabel \
-		-queries [list $evaluationTypeQuery $oneWriterTypeQuery]\
-		-okcommand "$this modifyOptionsDone $w"
-
-	$w centerOnScreen
-    }
-}
-
-###################################################################
-#### modifyOptionsDone
-# Only used by modifyOptions.
-#
-body ::tycho::EditSTD::modifyOptionsDone {w} {
-    set newEvaluationType [$w get evaluationType]
-    if {$evaluationType != $newEvaluationType} {
-	set evaluationType $newEvaluationType
-	$this markModified
-    }
-
-    set newOneWriterType [$w get oneWriterType]
-    if {$oneWriterType != $newOneWriterType} {
-	set oneWriterType $newOneWriterType
-	$this markModified
-    }
-}
-
 ##############################################################
 #### popUpFile
 body ::tycho::EditSTD::popUpFile {name} {
@@ -602,8 +525,6 @@ body ::tycho::EditSTD::ptkCompile {} {
 	transPort internal; # Split the name and type for each internal port
 	targetparam intlEventNames $ports(internal,names)
 	targetparam intlEventTypes $ports(internal,types)
-	targetparam evaluationType $evaluationType
-        targetparam oneWriterType $oneWriterType
 
         # Setup input ports of FSM galaxy
 	transPort input; # Split the name and type for each input port
@@ -644,7 +565,7 @@ body ::tycho::EditSTD::ptkCompile {} {
 	# Creating a star for each node in the canvas. 
 	foreach node [$slate find withtag node] {
 	    set star$node [$slate itemcget $node -text]
-	    star [set star$node] $evaluationType
+	    star [set star$node] State
 	}
 
 	# Set initial state.
@@ -817,55 +738,6 @@ body ::tycho::EditSTD::setInitialState {tag} {
 	$slate itemconfigure $item -width 5.0
 	$this markModified
     }
-}
-
-#######################################################################
-#### setMachineOptions
-#
-body ::tycho::EditSTD::setMachineOptions {evaluation oneWriter} {
-    if {[lsearch -exact $evaluationChoices $evaluation] == -1} {
-	"$evaluation is an unknown evaluation type!\
-		Possible choices: $evaluationChoices"
-    } else {
-	set evaluationType $evaluation
-    }
-
-    if {[lsearch -exact $oneWriterChoices $oneWriter] == -1} {
-	"$oneWriter is an unknown one-writer checking type!\
-		Possible choices: $oneWriterChoices"
-    } else {
-	set oneWriterType $oneWriter
-    }
-}
-
-# OLD
-#######################################################################
-#### setOptions
-#
-body ::tycho::EditSTD::setOptions {machine evaluation oneWriter} {
-    if {[lsearch -exact $evaluationChoices $evaluation] == -1} {
-	"$evaluation is an unknown evaluation type!\
-		Possible choices: $evaluationChoices"
-    } else {
-	set evaluationType $evaluation
-    }
-
-    if {[lsearch -exact $oneWriterChoices $oneWriter] == -1} {
-	"$oneWriter is an unknown one-writer checking type!\
-		Possible choices: $oneWriterChoices"
-    } else {
-	set oneWriterType $oneWriter
-    }
-}
-
-# OLD
-#######################################################################
-#### setPortNames
-#
-body ::tycho::EditSTD::setPortNames {input output internal} {
-    set ports(input)       $input
-    set ports(output)      $output
-    set ports(internal) $internal
 }
 
 #######################################################################
@@ -1126,11 +998,7 @@ body ::tycho::EditSTD::saveText {} {
     }
     append text "\$this configure -canvaswidth $width\n"
 
-    # Options
-    append text "\$this setMachineOptions [list $evaluationType\
-            $oneWriterType]\n"
-
-    # Set member variables
+    # Set member variables: input/output/internal ports
     append text "\n### Member variables\n"
     # I/O ports and internal events
     append text "\$this setPorts \
@@ -1146,16 +1014,6 @@ body ::tycho::EditSTD::saveText {} {
 		-text [list [$slate itemcget $node -text]]\]\n"
 	append text "set nodeInfo(\$node$node,inEdges) \{\}\n"
 	append text "set nodeInfo(\$node$node,outEdges) \{\}\n"
-
-	# Generate code to draw the label.
-# 	append text "set nodeInfo(\$node$node,label)\
-# 		\[\$slate create text\
-# 		[$slate coords $nodeInfo($node,label)] -fill black"
-# 	set label [$slate itemcget $node -text]
-# 	if {$label != {}} {
-# 	    append text " -text \{$label\}"
-# 	}
-#	append text "\]\n"
 
         # Slave Process
         if "[info exists nodeInfo($node,slave)]" {
@@ -1284,8 +1142,4 @@ body ::tycho::EditSTD::_initializeMenubar {menubar} {
     $menubar insert command makeicon getinfo \
 	    -label "Make Icon..." -underline 0 \
             -command "$this makeIcon"
-
-    $menubar insert command options makeicon \
-	    -label "Options..." -underline 0 \
-            -command "$this modifyOptions"
 }
