@@ -150,13 +150,13 @@ body ::tycho::CompileJava::compileAndRun {filenames} {
 
     if [preference get useEnvClassPath] {
 	if [info exists env(CLASSPATH)] { 
-	    set classPath [preference get classPath]
+	    set classPath [::tycho::expandPathSplit [preference get classPath]]
 	    set classPathArg "-classpath $classPath"
 	} else {
 	    set classPathArg ""
 	}
     } else {
-	set classPath [preference get classPath]
+	set classPath [::tycho::expandPathSplit [preference get classPath]]
 	if {$classPath == {} } { 
 	    if [info exists env(CLASSPATH)] { 
 		unset env(CLASSPATH)
