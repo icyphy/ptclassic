@@ -81,8 +81,8 @@ If \fItrace\fP is YES, there may not be more than 64 taps in the filter.
 		LOG_DEL; delete prevPhase;
 		LOG_DEL; delete outPhase;
 	}		
-	start {
-		SDFCxLMS::start();
+	setup {
+		SDFCxLMS::setup();
 		LOG_DEL; delete prevPhase;
 		LOG_DEL; delete outPhase;
 		int nPlots = 1;

@@ -44,6 +44,6 @@ characteristics.  The "optfir" program supplied with Ptolemy can do this.
 			else
 				taps[i] = 0.0;
 		}
-		SDFFIR :: start();
+		SDFFIR :: setup();
 	}
 }

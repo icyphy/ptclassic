@@ -65,12 +65,12 @@ of raised cosine pulses in communications systems.
 		decimation.clearAttributes(A_SETTABLE);
 		decimationPhase.clearAttributes(A_SETTABLE);
 	}
-	start {
+	setup {
 		taps.resize(int(N));
 		int center = int(N)/2;
 		for (int i = 0; i < int(N); i++)
 			taps[i] = rcos (i - center, P, excessBW);
-		SDFComplexFIR :: start();
+		SDFComplexFIR :: setup();
 	}
 }
 

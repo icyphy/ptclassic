@@ -52,7 +52,7 @@ samples.
 	    for (int k = 0; k < int(truncationDepth); k++) {
 		int index = c-k;
 		if (index < 0) index += int(truncationDepth);
-		sum += float(inA%(index))*float(inB%(k));
+		sum += double(inA%(index))*double(inB%(k));
 	    }
 	    out%(0) << sum;
 	    if (c >= int(truncationDepth) - 1) iterationCount = 0;
