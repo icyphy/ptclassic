@@ -1,5 +1,5 @@
-#ifndef  _IntArray_h
-#define  _IntArray_h 1
+#ifndef  _WFIntArray_h
+#define  _WFIntArray_h 1
 /**************************************************************************
 Version identification:
 $Id$
@@ -38,30 +38,30 @@ This class is used by the SDFWF4 star.
 #ifndef INTARRAY_H
 #define INTARRAY_H
 
-class IntArray
+class WFIntArray
 {
  private:
   int total;
   int* ints;
 
  public:
- IntArray::IntArray(void);
- IntArray::IntArray(int);
- IntArray::IntArray(int,int);
- IntArray::~IntArray(void);
-  IntArray& operator=(IntArray&);
-  void IntArray::copy(IntArray*);
-  void IntArray::fill(int);
-  IntArray* IntArray::sort_lh(void);
-  IntArray* IntArray::sort_hl(void);
-  void IntArray::reorder(IntArray*);
-  void IntArray::add(void);
-  void IntArray::add(int);
-  void IntArray::remove(int);
-  int IntArray::population(void);
-  int IntArray::query(int);
-  int IntArray::set(int,int);
-  void IntArray::print(const char*);
+ WFIntArray::WFIntArray(void);
+ WFIntArray::WFIntArray(int);
+ WFIntArray::WFIntArray(int,int);
+ WFIntArray::~WFIntArray(void);
+  WFIntArray& operator=(WFIntArray&);
+  void WFIntArray::copy(WFIntArray*);
+  void WFIntArray::fill(int);
+  WFIntArray* WFIntArray::sort_lh(void);
+  WFIntArray* WFIntArray::sort_hl(void);
+  void WFIntArray::reorder(WFIntArray*);
+  void WFIntArray::add(void);
+  void WFIntArray::add(int);
+  void WFIntArray::remove(int);
+  int WFIntArray::population(void);
+  int WFIntArray::query(int);
+  int WFIntArray::set(int,int);
+  void WFIntArray::print(const char*);
 };
 
 #endif
