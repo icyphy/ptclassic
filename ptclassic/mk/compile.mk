@@ -167,7 +167,12 @@ realclean:
 
 # Remove the sources too, so that we can get them back from sccs
 extraclean: realclean
-	rm -f $(SRCS) $(HDRS)
+	@if [ -d SCCS ]; then \
+		echo "SCCS dir present, removing sources"; \
+		rm -f $(SRCS) $(HDRS); \
+	else \
+		echo "SCCS dir not present, _not_ removing sources"; \
+	fi
 
 # The depend, makefile and makefiles rules are duplicated in
 # src/pitcl/make.template, so if you make changes below, please
