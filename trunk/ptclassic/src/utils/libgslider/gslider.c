@@ -24,6 +24,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
+
 #if !defined(lint) && !defined(SABER)
 static	char	SccsId[] = "$Id$";
 #endif /* not lint and not saber */
@@ -35,9 +36,18 @@ static	char	SccsId[] = "$Id$";
 #include "compat.h"
 #include "gslider.h"
 
-static	char	*strdup();
+static	char	*gsl_strdup();
 static	Gslider	*gsl_parse();
 static  int	gsl_field();
+
+#define	GSL_STRING	0
+#define	GSL_DOUBLE	1
+
+#define GSL_ERROR(error) \
+	fprintf(stderr, "%s\n", error); \
+	free(sp); \
+	return (NULL);
+
 /*
  * Read in the async i/o configuration file.  Format:
  *
@@ -78,15 +88,6 @@ gsl_read(file)
 	return (head);
 }
 
-
-#define ERROR(error) \
-	fprintf(stderr, "%s\n", error); \
-	free(sp); \
-	return (NULL);
-
-#define	STRING	0
-#define	DOUBLE	1
-
 static Gslider *
 gsl_parse(line)
 	char	*line;
@@ -103,9 +104,9 @@ gsl_parse(line)
 		return (NULL);
 	}
 
-	ret = gsl_field(line, &next, &type, STRING);
+	ret = gsl_field(line, &next, &type, GSL_STRING);
 	if (ret < 0) {
-		ERROR("gsl_parse: missing type\n");
+		GSL_ERROR("gsl_parse: missing type\n");
 	}
 	/* ignore ones that aren't sliders */
 	if (strcmp(type, "slider") != 0) {
@@ -113,49 +114,49 @@ gsl_parse(line)
 		(void) free(sp);
 		return (NULL);
 	}
-	ret = gsl_field(next, &next, &sp->dsplabel, STRING);
+	ret = gsl_field(next, &next, &sp->dsplabel, GSL_STRING);
 	if (ret < 0) {
-		ERROR("gsl_parse: missing DSP label\n");
+		GSL_ERROR("gsl_parse: missing DSP label\n");
 	}
-	ret = gsl_field(next, &next, &sp->name, STRING);
+	ret = gsl_field(next, &next, &sp->name, GSL_STRING);
 	if (ret < 0) {
-		ERROR("gsl_parse: missing name\n");
+		GSL_ERROR("gsl_parse: missing name\n");
 	}
-	ret = gsl_field(next, &next, &sp->hostmin, DOUBLE);
+	ret = gsl_field(next, &next, &sp->hostmin, GSL_DOUBLE);
 	if (ret < 0) {
-		ERROR("gsl_parse: bad host minimum value\n");
+		GSL_ERROR("gsl_parse: bad host minimum value\n");
 	}
-	ret = gsl_field(next, &next, &sp->hostmax, DOUBLE);
+	ret = gsl_field(next, &next, &sp->hostmax, GSL_DOUBLE);
 	if (ret < 0) {
-		ERROR("gsl_parse: bad host maximum value\n");
+		GSL_ERROR("gsl_parse: bad host maximum value\n");
 	}
-	ret = gsl_field(next, &next, &sp->hostinit, DOUBLE);
+	ret = gsl_field(next, &next, &sp->hostinit, GSL_DOUBLE);
 	if (ret < 0) {
-		ERROR("gsl_parse: bad host initial value\n");
+		GSL_ERROR("gsl_parse: bad host initial value\n");
 	}
-	ret = gsl_field(next, &next, &sp->dspmin, DOUBLE);
+	ret = gsl_field(next, &next, &sp->dspmin, GSL_DOUBLE);
 	if (ret < 0) {
-		ERROR("gsl_parse: bad dsp minimum value\n");
+		GSL_ERROR("gsl_parse: bad dsp minimum value\n");
 	}
-	ret = gsl_field(next, &next, &sp->dspmax, DOUBLE);
+	ret = gsl_field(next, &next, &sp->dspmax, GSL_DOUBLE);
 	if (ret < 0) {
-		ERROR("gsl_parse: bad dsp maximum value\n");
+		GSL_ERROR("gsl_parse: bad dsp maximum value\n");
 	}
-	ret = gsl_field(next, &next, &rep, STRING);
+	ret = gsl_field(next, &next, &rep, GSL_STRING);
 	if (ret < 0) {
-		ERROR("gsl_parse: missing representation field\n");
+		GSL_ERROR("gsl_parse: missing representation field\n");
 	}
 	if (strcmp(rep, "linear") == 0)
 		sp->rep = GSL_REP_LINEAR;
 	else if (strcmp(rep, "db") == 0)
 		sp->rep = GSL_REP_DB;
 	else {
-		ERROR("gsl_parse: unknown representation field\n");
+		GSL_ERROR("gsl_parse: unknown representation field\n");
 	}
 	free(rep);
-	ret = gsl_field(next, &next, &sp->descr, STRING);
+	ret = gsl_field(next, &next, &sp->descr, GSL_STRING);
 	if (ret < 0) {
-		ERROR("gsl_parse: missing description field\n");
+		GSL_ERROR("gsl_parse: missing description field\n");
 	}
 	sp->user = NULL;
 
@@ -201,8 +202,8 @@ gsl_field(start, next, vp, type)
 	if (*e == '\0')
 		eol++;
 	*e++ = '\0';
-	if (type == STRING) {
-		*(char **)vp = strdup(s);
+	if (type == GSL_STRING) {
+		*(char **)vp = gsl_strdup(s);
 	} else {
 		*(double *)vp = atof(s);
 	}
@@ -211,7 +212,7 @@ gsl_field(start, next, vp, type)
 }
 
 static char *
-strdup(s)
+gsl_strdup(s)
 	char	*s;
 {
 	char	*cp;
