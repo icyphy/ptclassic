@@ -84,9 +84,13 @@ GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 # The cc man page says that defining _HPUX_SOURCE gives the same name space
 # compatibility as -Ac
 LOCALCFLAGS =	-DUSG $(CDEBUGFLAGS) -Aa -D_HPUX_SOURCE
+
 # If you are using gcc and HPUX CC, uncomment the two lines below
 # It turns out that when you order HPUX CC, you don't get a cc compiler
 CC = 		gcc
+# Note that the bundled hppa cc compiler is non-ansi so it won't 
+# compile certain files in octtools that use ansi CPP, such as oct/io.h
+OCT_CC =	$(CC)
 LOCALCFLAGS = 	-DUSG
 
 CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
