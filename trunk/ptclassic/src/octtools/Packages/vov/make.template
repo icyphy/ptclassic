@@ -41,7 +41,8 @@ VPATH         = $(ROOT)/src/octtools/Packages/vov
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-HDRS		= vov.h
+HDRS		= vov.h \
+		vov_lib.h
 
 LIBCSRCS	= lib.c \
 		vovoct.c
