@@ -17,3 +17,8 @@ enum Position_e {
 
 extern boolean MkTermInit();
 extern boolean MkTerm();
+
+#define FLOAT_COLOR "blue"
+#define INT_COLOR   "yellow"
+#define COMPLEX_COLOR "white"
+#define ANYTYPE_COLOR "red"
