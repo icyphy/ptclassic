@@ -83,6 +83,15 @@ int DEScheduler :: setup (Block& b) {
 	}
 
 	galaxy.initialize();
+	
+	// set the depth of the stars...
+	alanShepard.setupSpaceWalk(galaxy);
+	for (i = alanShepard.totalSize(galaxy); i>0; i--) {
+		Star& s = alanShepard.nextStar();
+		DEStar* ds = (DEStar*) &s;
+		setDepth(ds);
+	}
+
 	return !haltRequestFlag;
 }
 
@@ -108,7 +117,7 @@ DEScheduler :: run (Block& galaxy) {
 
 		// if level > stopTime, RETURN...
 		if (level > stopTime)	{
-			eventQ.levelput(terminal, level);	// push back
+			eventQ.pushBack(f);		// push back
 			currentTime = stopTime;
 			stopBeforeDeadlocked = TRUE;  // there is extra events.
 			return 0;
@@ -143,7 +152,6 @@ DEScheduler :: run (Block& galaxy) {
 			// if same destination star with same time stamp..
 			if (level == h->level && dest == s && tl != terminal) {
 				eventQ.extract(h);
-				delete h;
 				if (tl->numTokens() >= tl->numberTokens)
 					tl->grabData();
 			} else if (h->level > level)
@@ -171,7 +179,7 @@ DEScheduler :: run (Block& galaxy) {
 				currentTime = stamp;
 				sr->fire();
 			} else {
-				processQ.levelput(sr, stamp);	// push back
+				processQ.pushBack(pf);	// push back
 				temp = 0;
 			}
 		    } while ( temp && processQ.length() > 0);
@@ -198,3 +206,57 @@ float DEScheduler :: nextTime() {
         }
         return (val < stopTime)? val : stopTime ; // return min(val, stopTime)
 }
+
+// calculate the depth of a DEStar.
+int DEScheduler :: setDepth(DEStar* s) {
+	
+	// 1. Check if the depth is already set, then return immediately.
+	if (s->depth < 0) return s->depth;
+
+	// 2. If it is a delay-type star, set depth = -1;
+	if (s->delayType == TRUE)	{
+		s->depth = -1;
+	} else {
+
+		// 3. indicate that this star is under consideration.
+		//    By depth > 0, we can detect the delay-free loop (error)
+		s->depth = 1;
+
+		// 4. scan through all output connections. Get the minimum
+		//    depth to set its depth.
+		int min = 0;
+		for (int i = s->numberPorts(); i > 0; i--) {
+			PortHole& port = s->nextPort();
+
+			// 5. check whether it is on the wormhole boundary.
+			//    and check it is on the feedback arc.
+			if (port.isItOutput() && port.far()->parent() != 
+						 port.parent()) {
+			   int val;
+			   if (port.far()->isItOutput()) {
+				val = 0;
+			   } else {
+				DEStar* dp = (DEStar*) port.far()->parent();
+
+				// 6. detect the delay-free loop.
+				if (dp->depth > 0) {
+					StringList msg = dp->readFullName();
+					msg += " lies on a delay-free loop";
+					errorHandler.error(msg);
+					val = 0;
+				} else {
+					// 7. recursive call.
+					val = setDepth(dp);
+				}
+			   }
+			   if (min >= val) min = val - 1;
+			}
+		}
+		
+		// 5. check whether there is no output.
+		if (min >= 0)   s->depth = -1;
+		else		s->depth = min;
+	}
+	return s->depth;
+}
+			
