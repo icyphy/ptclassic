@@ -146,7 +146,11 @@ void CGTarget::setup() {
 }
 
 void CGTarget::generateCode() {
-	if (parent()) setup();
+	CGTarget* parT = (CGTarget*) parent();
+	if (parT) { 
+		setup();
+		symbolCounter = parT->symbolCounter;
+	}
 	if (SimControl::haltRequested()) return;
 	headerCode();
 	if(!allocateMemory() || !codeGenInit()) return;
@@ -155,6 +159,7 @@ void CGTarget::generateCode() {
 	trailerCode();
 	frameCode();
 	if (!parent()) writeCode();
+	if (parT) parT->symbolCounter = symbolCounter;
 }
 
 void CGTarget :: mainLoopCode() {
@@ -254,7 +259,7 @@ int CGTarget :: loadCode() {
 	return TRUE; // load and Run can be combined in runCode method
 }
 
-int CGTarget :: incrementalAdd(CGStar*) {
+int CGTarget :: incrementalAdd(CGStar*, int) {
 	Error:: abortRun("No Incremental-Add(so, no wormhole) supported yet");
 	return FALSE;
 }

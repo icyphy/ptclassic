@@ -85,7 +85,8 @@ public:
     virtual void writeCode(const char* name = NULL);
 
     // incrementally add a star
-    virtual int incrementalAdd(CGStar* s);
+    // If flag is FALSE, just call go() method of the star.
+    virtual int incrementalAdd(CGStar* s, int flag = 1);
 
     // methods to compile and run the target.
     // check access privilege later.
@@ -262,7 +263,6 @@ protected:
     // In this base class, do nothing.
     virtual void frameCode();
     
-private:
     // codeStringLists is a list of all the code streams that a star 
     // has access to.  These StringLists should be added from the 
     // derived target's constructor using the protected method add.
@@ -270,6 +270,7 @@ private:
     // public member getStream
     CodeStreamList codeStringLists;
     
+private:
     // return non-zero if this target is not a child target, or not
     // inherited from another target. Then, generate code in the setup
     // stage if it is inside a wormhole.
