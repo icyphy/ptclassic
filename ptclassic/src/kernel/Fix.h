@@ -9,7 +9,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1993 The Regents of the University of California.
+Copyright (c) 1993, 1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -32,17 +32,45 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
                                                         COPYRIGHTENDKEY
 
- Programmer:  A. Khazeni 
+ Programmer:  A. Khazeni, J. Buck
  Date of creation: 2/24/93 
  Revisions:
         1/17/94  added constant definitions for types of overflow
+	1/20/94  major revisions: each Fix now keeps track of errors,
+	         many bugs fixed
+	1/21/94  now twos-complement only
 
 This header file declares the class type Fix and its supporting 
 functions. 
 
 Fix type variables allow users to specify the number of bits and 
 position of the binary point for the fixed-point representation of the 
-variable. 
+variable.  There are two ways to specify the precision:
+
+Method 1: a pair of integer arguments, specifying the length in bits
+          and "intBits", the number of bits to the left of the binary point.
+	  The sign bit counts as one of the intBits, so this number must
+	  be at least one.
+
+Method 2: As a string like "3.2", or more generally "m.n", where m is
+          intBits and n is the number to the right of the binary point.
+	  Thus length is m+n.
+
+Arithmetic is done in such a way that operations like + do not overflow,
+as a rule, unless the result cannot be represented with all FIX_MAX_LENGTH
+bits left of the binary point.  Overflow occurs on assignment to a Fix
+that has its format set, if the new result cannot fit.
+
+The binary point must occur somewhere within the bits, or just to the
+right of it.
+
+By default, the effect of overflow is to saturate the result (use the
+largest or smallest representable number) and set the overflow flag.
+Overflow flags are passed along by the arithmetic operations + - * and /
+to results, so you can keep track of whether any overflows have occured
+anywhere by checking only the final result.  If either argument has overflow
+set, the result has it set as well.  The ovf_occurred() method gives
+access to the flag.
 
 **************************************************************************/
 
@@ -51,66 +79,119 @@ typedef unsigned short uint16;
 typedef unsigned long  uint32;
 typedef unsigned char  uchar;
 typedef long int32;
-typedef void (*mask_func_pointer)(int, uint16*);
 
-#define WORDS_PER_FIX   4         // maximum size of the array Bits
-extern const int   FIX_MAX_LENGTH;
-
-//  Types of overflow--- do not change (constants are indices into an array)
-#define FIX_OVERFLOW_SATURATE		0
-#define FIX_OVERFLOW_ZERO_SATURATE	1
-#define FIX_OVERFLOW_WRAPPED		2
-#define FIX_OVERFLOW_WARNING		3
-#define TYPES_OF_FIX_OVERFLOW		4
-
+const int WORDS_PER_FIX = 4;
+const int FIX_BITS_PER_WORD = 16;
+const int FIX_MAX_LENGTH = WORDS_PER_FIX * FIX_BITS_PER_WORD;
 
 //////////////////////////////
 // Class Fix
 //////////////////////////////
 
 class Fix { 
-private:
-
-    uint16 Bits[WORDS_PER_FIX];   // The bit pattern that stores the value 
-    uchar  length;                // # of significant bits 
-    uchar  intBits;               // # of bits to the left of the binary point 
-    uchar  format;                // 2's complement if 0, unsigned if 1.
-    uchar  ovflow;                // overflow characteristic
-    static mask_func_pointer MASK;// masking function.
-    // internal function.
-    static void make_bit_pattern(int,int,double,uint16*);
 public:
+    // codes for overflow types
+    enum { ovf_saturate = 0,
+	   ovf_zero_saturate = 1,
+	   ovf_wrapped = 2,
+	   ovf_warning = 3,
+	   ovf_n_types = 4
+   };
 
+    // error fields
+    enum errorcode { err_ovf = 1, err_dbz = 2, err_invalid = 4 };
+
+    // truncation-rounding codes, for backward compatibility
+    enum mask { mask_truncate = 0, mask_truncate_round = 1 };
+
+    // length in bits
     int len() const { return length; }
-    int intb() const { return intBits; }
-    int fixtype() const { return format; }
-    int overflow() const { return ovflow; }
 
-    int signBit() const;
-    int words() const;
+    // bits to right of binary point
+    int intb() const { return intBits; }
+
+    // bits to left of binary point
+    int precision() const { return length - intBits;}
+
+    // return overflow type (one of the codes above)
+    int overflow() const { return ovf_type;}
+
+    // set the overflow type
+    void set_overflow(int value) { ovf_type = value;}
+
+    // set the rounding type: true for rounding, false for truncation
+    void set_rounding(int value) { roundFlag = (value != 0);}
+
+    // set the rounding type: synonym for backward compatibility
+    void Set_MASK(int value) { set_rounding(value);}
+
+    // return rounding mode (1 for rounding, 0 for truncation)
+    int roundMode() const { return roundFlag;}
+
+    // return TRUE for negative, false for + or 0
+    int signBit() const { return (Bits[0] & 0x8000) != 0;}
+
+    // return TRUE iff zero value
+    int is_zero() const;
+
+    // set to zero (equivalent to assigning zero)
+    void setToZero();
+
+    // max and min values representable in this format
     double max() const;
     double min() const;
+
+    // value as a double
     double value() const;
+
+    // discard precision information and zero
     void initialize();
+
+    // set overflow using a name
     void set_ovflow (const char*);
 
 ///////////////////////////////////
 // Constructors
 
-    Fix();
-    Fix(int, int);
-    Fix(int, int, const char*);
-    Fix(const double&);
-    Fix(int, int, const double&);
-    Fix(int, int, const double&, const char*);
+    // create with unspecified precision
+    Fix() { initialize();}
+
+    // create a Fix with specified precision and zero value.
+    Fix(int length, int intbits);
+    Fix(const char * precisionString);
+
+    // create a Fix with default precision
+    Fix(double value);
+
+    // create a Fix from the double with specified precision
+    // We always round to the nearest Fix.
+    Fix(int length, int intbits, double value);
+    Fix(const char * precisionString, double value);
+
+    // create a Fix, specifying the bits precisely.
+    // the first word of bits is the most significant.
+    // from the "bits" argument: Fix("2.14", bits) will
+    // only reference bits[0], for example.
+
+    Fix(const char * precisionString, uint16* bits);
+
+    // copy constructor: make exact duplicate.
     Fix(const Fix&);
-    Fix(int, int, const Fix&);
+
+    // copy value from Fix arg with new precision
+    Fix(int length, int intbits, const Fix&);
 
 ///////////////////////////////////
 // Assignment operators
 
+    // assignment operator.  If *this does not have precision set, it is
+    // copied, otherwise value is converted from existing precision.
     Fix&          operator =  (const Fix&);
-    Fix           operator =  (const double&);
+
+    // assignment from double 
+    Fix&          operator =  (double arg) {
+	return *this = Fix(arg);
+    }
 
 ///////////////////////////////////
 // Arithmetic operators
@@ -121,58 +202,112 @@ public:
     friend Fix    operator *  (const Fix&, int);
     friend Fix    operator *  (int, const Fix&);
     friend Fix    operator /  (const Fix&, const Fix&);
-    Fix           operator += (const Fix&);
-    Fix           operator -= (const Fix&);
-    Fix           operator *= (const Fix&);
-    Fix           operator *= (int);
-    Fix           operator /= (const Fix&);
+    friend Fix    operator - (const Fix&); // unary minus
 
-///////////////////////////////////
-// bitwise operators
-
-    friend Fix     operator &  (const Fix&, const Fix&);
-    friend Fix     operator |  (const Fix&, const Fix&);
-    friend Fix     operator ~  (const Fix&);
-    friend Fix     operator << (const Fix&, int);
-    friend Fix     operator >> (const Fix&, int);
-    Fix            operator <<=(int);
-    Fix            operator >>=(int);
+    Fix&          operator += (const Fix&);
+    Fix&          operator -= (const Fix&);
+    Fix&          operator *= (const Fix&);
+    Fix&          operator *= (int);
+    Fix&          operator /= (const Fix&);
 
 ///////////////////////////////////
 // Comparison functions
+    // return -1 if a<b, 0 if a==b, 1 if a>b
+    friend int compare (const Fix& a, const Fix& b);
 
-    int     operator == (const Fix&);
-    int     operator != (const Fix&);
-    int     operator <  (const Fix&);
-    int     operator <= (const Fix&);
-    int     operator >  (const Fix&);
-    int     operator >= (const Fix&);
-
+///////////////////////////////////
+// access to errors
+    int     ovf_occurred() const { return (errors & err_ovf) != 0;}
+    int     invalid() const { return (errors & (err_dbz|err_invalid)) != 0;}
+    int     dbz() const { return (errors & err_dbz) != 0;}
 ///////////////////////////////////
 // other operators
 
-    Fix&           operator +  ();
-    Fix&           operator -  ();
-
+    // convert to integer, truncating towards zero.
     operator int () const;
-    operator float () const;
-    operator double () const;
 
-    friend void	    printFix(const Fix&);	     //print contents
-    friend void     overflow_handler(Fix&, const Fix&);
-    friend void     overflow_handler(Fix&, const double&);
-    friend void     complement(Fix&);
+    // convert to float or double -- exact result where possible
+    operator float () const { return float(value());}
+    operator double () const { return value();}
 
-// utility functions
+    // debug-style printer
+    friend void	    printFix(const Fix&);
+
+    // replace arg by its negative
+    void complement();
+
+    // print on ostream in form (value, precision)
+    friend ostream& operator<<(ostream&, const Fix&);
+
+// utility functions.  Obsolete.
     static int  get_intBits(const char *p);
     static int  get_length(const char *p);
 
-// possibilities for mask_truncate
-    static void mask_truncate(int, uint16*);
-    static void mask_truncate_round(int, uint16*);
+private:
+    // Internal representation
 
-    static mask_func_pointer Set_MASK(mask_func_pointer);
+    uint16 Bits[WORDS_PER_FIX];   // The bit pattern that stores the value 
+    uchar  length;                // # of significant bits 
+    uchar  intBits;               // # of bits to the left of the binary point 
+    uchar  ovf_type;		  // fields specifying overflow type
+    uchar  errors;		  // indicates whether overflow or errors have
+				  // occurred in computing this value.
+    uchar  roundFlag;		  // round on assignment if true
+
+    // create bit pattern from the double value, using existing
+    // length and intBits, rounding if round is nonzero.
+    void makeBits(double value, int round);
+
+    // apply truncation or rounding.
+    void applyMask(int round);
+
+    // treat types of overflow
+    void overflow_handler(int resultSign);
+
+    // parse a precision argument.  Return TRUE if valid else FALSE.
+    int setPrecision(const char* precision);
+
+    // # of words in internal representation
+    int words() const {
+	return (length <= FIX_BITS_PER_WORD ? 1 :
+		(length + FIX_BITS_PER_WORD - 1) / FIX_BITS_PER_WORD);
+    }
+
+    // # words in internal representation, possibly including an extra
+    // bit for use before rounding
+    int wordsIncludingRound(int round) const {
+	return (length+round<= FIX_BITS_PER_WORD ? 1 :
+		(length+round + FIX_BITS_PER_WORD - 1) / FIX_BITS_PER_WORD);
+    }
+
 };
 
-ostream& operator<<(ostream&, const Fix&);
+// comparision operators are in terms of compare.  compare checks all
+// bits if the formats are the same, otherwise it converts to double,
+// which only has 53 bits of precision on IEEE machines.
+
+inline int operator == (const Fix& a, const Fix& b) {
+    return compare(a, b) == 0;
+}
+
+inline int operator != (const Fix& a, const Fix& b) {
+    return compare(a, b) != 0;
+}
+
+inline int operator < (const Fix& a, const Fix& b) {
+    return compare(a, b) < 0;
+}
+
+inline int operator <= (const Fix& a, const Fix& b) {
+    return compare(a, b) <= 0;
+}
+
+inline int operator > (const Fix& a, const Fix& b) {
+    return compare(a, b) > 0;
+}
+
+inline int operator >= (const Fix& a, const Fix& b) {
+    return compare(a, b) >= 0;
+}
+
 #endif
