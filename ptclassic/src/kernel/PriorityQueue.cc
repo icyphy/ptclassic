@@ -38,6 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "PriorityQueue.h"
+#include "Error.h"
 
 // Set the properties of the LevelLink class.
 LevelLink* LevelLink :: setLink(Pointer a, double v, double fv, LevelLink* n,
@@ -48,6 +49,24 @@ LevelLink* LevelLink :: setLink(Pointer a, double v, double fv, LevelLink* n,
 	next = n;
 	before = b;
 	return this;
+}
+
+void BasePrioQueue::pushHead (Particle* p, PortHole* port,
+    double lvl, double flvl)
+{
+    Error::abortRun("pushHead() not implemented in base class!");
+}
+
+void BasePrioQueue::pushTail(Particle* p, PortHole* port,
+    double lvl, double flvl)
+{
+    Error::abortRun("pushTail() not implemented in base class!");
+}
+
+LevelLink* BasePrioQueue::levelput(Pointer a, double v, double fv)
+{
+    Error::abortRun("levelput() not implemented in base class!");
+    return 0;
 }
 
 // get a free LevelLink if any. If none, create a new LevelLink.

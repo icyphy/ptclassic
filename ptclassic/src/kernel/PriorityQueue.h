@@ -42,7 +42,9 @@ A priority queue structure.
 #pragma interface
 #endif
 
-#include "DataStruct.h"
+#include "type.h"
+class Particle;
+class PortHole;
 
 /**************************************************************************
 
@@ -71,7 +73,7 @@ public:
 				// finerLevel which is optional.
 	LevelLink() {}
 
-private:
+protected:
 	LevelLink* next;
 	LevelLink* before;
 
@@ -84,7 +86,16 @@ private:
 	// class PriorityQueue
 	//////////////////////////////////////
 
-class PriorityQueue
+
+class BasePrioQueue
+{
+public:
+    virtual void pushHead(Particle* p, PortHole* ph, double v, double fv);
+    virtual void pushTail(Particle* p, PortHole* ph, double v, double fv);
+    virtual LevelLink* levelput(Pointer a, double v, double fv);
+};
+
+class PriorityQueue : public BasePrioQueue
 {
 public:
 	// Add element to the tail of the queue and sort it by its level (v)
