@@ -65,15 +65,8 @@ class GalStarIter;
 	// SDFScheduler
 	////////////////////////////
 
-// Constant used by the SDF scheduler
-// The value may have a minor effect on the speed of the scheduler,
-// but will not affect the correctness.  Changing the value may result
-// in different (all correct) schedules.
-
-const int MAX_NUM_DEFERRED_BLOCKS = 10;
-
 class SDFScheduler : public Scheduler {
-
+protected:
 	SDFSchedule mySchedule;
 public:
 	// The setup function computes an SDF schedule
@@ -82,15 +75,6 @@ public:
 
 	// The run function resumes the run where it was left off.
 	int run(Galaxy&);
-
-	// Options for the scheduler are specified by setting
-	// various Booleans.  The repeatedFiring option will schedule
-	// a block several times in a row, if possible.  This consumes
-	// more memory, but may make the scheduler much faster.
-	// if used in combination with the deferredFiring option, the effect is
-	// exactly the opposite: memory usage may be decreased, making
-	// static buffering more effective.
-	int repeatedFiring;
 
 	// The scheduler makes repeated
 	// passes through the list of atomic blocks in the Universe or
@@ -217,7 +201,7 @@ private:
 	int deferIfWeCan(SDFStar& atom);
 
 	// Put a block on the deferred list.
-	void defer(Block* b);
+	void defer(SDFStar* b);
 
 	// Determine whether a star can be run (checking the
 	// number of tokens in the portholes
@@ -232,14 +216,10 @@ private:
 	// a pass.  A fixed length vector is used because the only effect
 	// the length of the vector has is a mild effect on the speed
 	// of the scheduler.
-	int numDeferredBlocks;
-	Block* deferredBlocks[MAX_NUM_DEFERRED_BLOCKS];
+	SDFStar* deferredStar;
 
 	// State of progress in computing the schedule
 	int passValue;
-
-	// Pointer to star that may be causing deadlock
-	Block* dead;
 
         // Function to report on deadlock
         void reportDeadlock(GalStarIter&);
