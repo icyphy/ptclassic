@@ -41,6 +41,7 @@ include $(CONFIG)
 
 SIMPLE_TESTS =
 GRAPHICAL_TESTS = \
+	testEditPalette.itcl \
 	testEditPtcl.itcl \
 	testEditPtlang.itcl
 
