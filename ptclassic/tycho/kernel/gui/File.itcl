@@ -42,8 +42,79 @@
 # expanded using <code>::tycho::expandPath</code>, making them absolute
 # and unique.
 #
-proc ::tycho::openContext {filename args} {
-    eval [list ::tycho::File::openContext $filename] $args
+# The _mode_ argument, if supplied, overrides the default mode
+# and the mode determined from
+# the file. If the file is already open in this mode, raise the
+# viewer window. If not, then open it. Note: It is the callers'
+# responsibility to ensure that multiple open windows on the same
+# file behave correctly.
+#
+proc ::tycho::openContext {filename {mode {}}} {
+    set filename [::tycho::expandPath $filename]
+
+    if { $mode == "" } {
+	# We only want one window to be open on this file
+	if [::tycho::registry isopen $filename] {
+	    set win [lindex [::tycho::registry windows $filename] 0]
+	    if [catch {$win raiseWindow} msg] {
+                # FIXME
+		puts "!!! windowMenuRemoveAll $filename !!!"
+		# windowMenuRemoveAll $filename
+		global ::errorInfo
+		set saveInfo $errorInfo
+		error "Registered command failed on $filename:\n$msg" $saveInfo
+	    }
+	    return $win
+	}
+    } else {
+	# We allow one window in each mode
+	foreach win [::tycho::registry windows $filename] {
+	    if { [::tycho::registry windowcget $filename $win -mode] \
+		    == $mode } {
+		if [catch {$win raiseWindow} msg] {
+		    windowMenuRemoveAll $filename
+		    global ::errorInfo
+		    set saveInfo $errorInfo
+		    error "Registered command failed on \
+			    $filename:\n$msg" $saveInfo
+		}
+		return $win
+	    }
+	}
+    }
+    # If we got to here, we can open the file in the appropriate mode
+    # Check for existing autosave files
+    set filename [::tycho::File::checkForAutoSaveFiles $filename]
+
+    # If a mode is not supplied, get the default mode and
+    # override with the mode from the file header
+    if { $mode == "" } {
+        # Read the header if the file exists and is not a directory
+        if { [resource exists $filename] && \
+                ![resource isdirectory $filename] } {
+            set mode [::tycho::readFileHeader $filename junk]
+        }
+        # If there was no header, get the default mode
+        if { $mode == "" } {
+            set mode [::tycho::registry filemode $filename]
+        }
+        # If there's still no mode, assume "text"
+        if { $mode == "" } {
+            set mode "text"
+        }
+    }
+
+    # Get the command for this mode and execute it
+    set command [::tycho::registry modecget $mode -command]
+    if [catch {
+	set command [format $command $filename]
+	set result [uplevel #0 $command]
+    } msg] {
+	global ::errorInfo
+	set saveInfo $errorInfo
+	error "Registered command failed on $filename:\n$msg" $saveInfo
+    }
+    return $result
 }
 
 #######################################################################
@@ -210,7 +281,10 @@ class ::tycho::File {
     # If the argument is a File object, call its autoSave method.
     proc callAutoSave {obj}
 
-    # Call the saveCrash method for all File objects.
+     # Check for auto-save or crash-recovery files, and return the file to open.
+    proc checkForAutoSaveFiles {filename} {}
+
+   # Call the saveCrash method for all File objects.
     proc emergencySave {}
 
     # Edit a file based on its extension, mode, etc
@@ -260,9 +334,6 @@ class ::tycho::File {
 
     ##########################################################################
     ####                  private procedures                              ####
-
-    # Check for auto-save or crash-recovery files, and return the file to open.
-    private proc checkForAutoSaveFiles {filename} {}
 
     ##########################################################################
     ####                         private variables                        ####
@@ -569,7 +640,7 @@ body ::tycho::File::evaluate {} {
 #
 body ::tycho::File::help {} {
     global ::TYCHO
-    ::tycho::File::openContext \
+    ::tycho::openContext \
 	    [file join $TYCHO kernel doc usersGuides FileHelp.html]
 }
 
@@ -581,7 +652,7 @@ body ::tycho::File::help {} {
 # begin with "/", "~", or "$"), then prepend the directory of the file
 # currently being edited or viewed. Then, expand the filename using
 # <code>::tycho::expandPath</code> and open the resulting file with
-# <code>::tycho::File::openContext</code>, which will choose an editor
+# <code>::tycho::openContext</code>, which will choose an editor
 # based on the filename extension. Finally, invoke
 # <code>seeFragment</code> to view the specified point within the file.
 # The format for the <i>point</i> argument depends on the type of file
@@ -684,7 +755,7 @@ body ::tycho::File::openItclHTMLPage {} {
     }
     
     if [::tycho::resource exists $itclhtmlpage] {
-        ::tycho::File::openContext "$itclhtmlpage"
+        ::tycho::openContext "$itclhtmlpage"
     } else {
 	error "Sorry, $itclhtmlpage does not exist. You can\nuse\
 	the itclHTMLPage Miscellaneous preference to set the\npath\
@@ -703,7 +774,7 @@ body ::tycho::File::openItclHTMLPage {} {
 #
 body ::tycho::File::openWinMethod {} {
     ::tycho::Dialog::new FileBrowser [::tycho::autoName .fileBrowser] \
-	    -command "::tycho::File::openContext " \
+	    -command "::tycho::openContext " \
 	    -text "Open File:" \
             -initial $completeFilePath
 }
@@ -1073,6 +1144,70 @@ body ::tycho::File::callAutoSave {obj} {
 }
 
 #####################################################################
+#### checkForAutoSaveFiles
+# Check to see whether there is an auto-save or crash recovery file for
+# the supplied filename that is newer than the file corresponding to
+# the supplied filename. If so, query the user to see whether first the
+# crash recovery file, then the autosave file should be opened. Return
+# the name of the file that should be opened.
+#
+body ::tycho::File::checkForAutoSaveFiles {filename} {
+
+    # If a remote file, there are no backups
+    if [::tycho::resource isremote $filename] {
+	return $filename
+    }
+
+    # Get the names of the backup and crash recovery files.
+    set filetail [::tycho::url tail $filename]
+    set dirname [::tycho::url dirname $filename]
+    set emerfile [::tycho::url join $dirname "#crash#$filetail"]
+    set backfile [::tycho::url join $dirname "#auto#$filetail"]
+
+    # See whether a backup or crash recovery files exists and is
+    # newer than the file being opened.
+    if [::tycho::resource exists $emerfile] {
+	if [::tycho::resource exists $filename] {
+	    if {[::tycho::resource mtime $emerfile] > \
+		    [::tycho::resource mtime $filename]} {
+		if [::tycho::askuser "A crash recovery file exists for\
+			$filename. \
+			\nDo you wish to open it instead?"] {
+		    return $emerfile
+		}
+	    }
+	} else {
+	    if [::tycho::askuser "A crash recovery file exists, but\
+		    $filename does not.\
+		    \nDo you wish to open the crash recovery file instead?"] {
+		return $emerfile
+	    }
+	}
+    }
+    if [::tycho::resource exists $backfile] {
+	if [::tycho::resource exists $filename] {
+	    if {[::tycho::resource mtime $backfile] > \
+		    [::tycho::resource mtime $filename]} {
+		if [::tycho::askuser "A newer auto-save file exists\
+			for $filename. \
+			\nDo you wish to open it instead?"] {
+		    return $backfile
+		}
+	    }
+	} else {
+	    if [::tycho::askuser "An auto-save file exists, but \
+		    $filename does not.\
+		    \nDo you wish to open the auto-save file instead?"] {
+		return $backfile
+	    }
+	}
+    }   
+
+    # The original file is the file to open.
+    return $filename
+}
+
+#####################################################################
 #### emergencySave
 # Call the saveCrash method for all existing objects that are of
 # class File, or are derived from class File.
@@ -1103,86 +1238,12 @@ body ::tycho::File::indicateReadOnly {bool} {
 
 #####################################################################
 #### openContext
-# If an editor has been registered for the file or directory, use it to
-# open the file or directory. Otherwise, if it is a file, open a plain
-# text editor and return the name of the editor object. If a window
-# already exists editing this file, simply raise it instead. New
-# windows are always opened at the global scope. File names are
-# expanded using <code>::tycho::expandPath</code>, making them absolute
-# and unique.
+# Open a file with the correct kind of widget. <b>Deprecated</b>
+# (use <a href="File_rel.html"><code>::tycho::openContext</code></a>
+# instead).
 #
-# The _mode_ argument, if supplied, overrides the default mode
-# and the mode determined from
-# the file. If the file is already open in this mode, raise the
-# viewer window. If not, then open it. Note: It is the callers'
-# responsibility to ensure that multiple open windows on the same
-# file behave correctly.
-#
-body ::tycho::File::openContext {filename {mode {}}} {
-    set filename [::tycho::expandPath $filename]
-
-    if { $mode == "" } {
-	# We only want one window to be open on this file
-	if [::tycho::registry isopen $filename] {
-	    set win [lindex [::tycho::registry windows $filename] 0]
-	    if [catch {$win raiseWindow} msg] {
-                # FIXME
-		puts "!!! windowMenuRemoveAll $filename !!!"
-		# windowMenuRemoveAll $filename
-		global ::errorInfo
-		set saveInfo $errorInfo
-		error "Registered command failed on $filename:\n$msg" $saveInfo
-	    }
-	    return $win
-	}
-    } else {
-	# We allow one window in each mode
-	foreach win [::tycho::registry windows $filename] {
-	    if { [::tycho::registry windowcget $filename $win -mode] \
-		    == $mode } {
-		if [catch {$win raiseWindow} msg] {
-		    windowMenuRemoveAll $filename
-		    global ::errorInfo
-		    set saveInfo $errorInfo
-		    error "Registered command failed on \
-			    $filename:\n$msg" $saveInfo
-		}
-		return $win
-	    }
-	}
-    }
-    # If we got to here, we can open the file in the appropriate mode
-    # Check for existing autosave files
-    set filename [checkForAutoSaveFiles $filename]
-
-    # If a mode is not supplied, get the default mode and
-    # override with the mode from the file header
-    if { $mode == "" } {
-        #  Read the header only if not a directory
-        if ![::tycho::resource isdirectory $filename] {
-            set mode [::tycho::readFileHeader $filename junk]
-        }
-        # If there was no header, get the default mode
-        if { $mode == "" } {
-            set mode [::tycho::registry filemode $filename]
-        }
-        # If there's still no mode, assume "text"
-        if { $mode == "" } {
-            set mode "text"
-        }
-    }
-
-    # Get the command for this mode and execute it
-    set command [::tycho::registry modecget $mode -command]
-    if [catch {
-	set command [format $command $filename]
-	set result [uplevel #0 $command]
-    } msg] {
-	global ::errorInfo
-	set saveInfo $errorInfo
-	error "Registered command failed on $filename:\n$msg" $saveInfo
-    }
-    return $result
+body ::tycho::openContext {filename {mode {}}} {
+     eval [list ::tycho::openContext $filename] $mode
 }
 
 #####################################################################
@@ -1210,11 +1271,11 @@ body ::tycho::File::openWin {{megawidget {}}} {
     }
     if { $megawidget == {} || [$megawidget isa ::tycho::File] != 1} {
         ::tycho::Dialog::new FileBrowser [::tycho::autoName .fileBrowser] \
-                -command "::tycho::File::openContext " \
+                -command "::tycho::openContext " \
                 -text "Open File:"
     } else {
         ::tycho::Dialog::new FileBrowser [::tycho::autoName .fileBrowser] \
-                -command "::tycho::File::openContext " \
+                -command "::tycho::openContext " \
                 -text "Open File:" \
                 -initial [$megawidget filename]
     }
@@ -1423,68 +1484,4 @@ body ::tycho::File::removeBackupFiles {} {
 #########################################################################
 #########################################################################
 ####                          private procedures                     ####
-
-#####################################################################
-#### checkForAutoSaveFiles
-# Check to see whether there is an auto-save or crash recovery file for
-# the supplied filename that is newer than the file corresponding to
-# the supplied filename. If so, query the user to see whether first the
-# crash recovery file, then the autosave file should be opened. Return
-# the name of the file that should be opened.
-#
-body ::tycho::File::checkForAutoSaveFiles {filename} {
-
-    # If a remote file, there are no backups
-    if [::tycho::resource isremote $filename] {
-	return $filename
-    }
-
-    # Get the names of the backup and crash recovery files.
-    set filetail [::tycho::url tail $filename]
-    set dirname [::tycho::url dirname $filename]
-    set emerfile [::tycho::url join $dirname "#crash#$filetail"]
-    set backfile [::tycho::url join $dirname "#auto#$filetail"]
-
-    # See whether a backup or crash recovery files exists and is
-    # newer than the file being opened.
-    if [::tycho::resource exists $emerfile] {
-	if [::tycho::resource exists $filename] {
-	    if {[::tycho::resource mtime $emerfile] > \
-		    [::tycho::resource mtime $filename]} {
-		if [::tycho::askuser "A crash recovery file exists for\
-			$filename. \
-			\nDo you wish to open it instead?"] {
-		    return $emerfile
-		}
-	    }
-	} else {
-	    if [::tycho::askuser "A crash recovery file exists, but\
-		    $filename does not.\
-		    \nDo you wish to open the crash recovery file instead?"] {
-		return $emerfile
-	    }
-	}
-    }
-    if [::tycho::resource exists $backfile] {
-	if [::tycho::resource exists $filename] {
-	    if {[::tycho::resource mtime $backfile] > \
-		    [::tycho::resource mtime $filename]} {
-		if [::tycho::askuser "A newer auto-save file exists\
-			for $filename. \
-			\nDo you wish to open it instead?"] {
-		    return $backfile
-		}
-	    }
-	} else {
-	    if [::tycho::askuser "An auto-save file exists, but \
-		    $filename does not.\
-		    \nDo you wish to open the auto-save file instead?"] {
-		return $backfile
-	    }
-	}
-    }   
-
-    # The original file is the file to open.
-    return $filename
-}
 
