@@ -47,6 +47,7 @@ EXTRA_SRCS =	\
 	EditSTDHelp.html \
 	GraphicsHelp.html \
 	ProfileTclHelp.html \
+	ProfileJavaHelp.html \
 	index.html \
 	tclXprofile.c.patch
 
