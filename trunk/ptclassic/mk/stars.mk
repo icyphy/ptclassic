@@ -55,7 +55,7 @@ endif
 # if MATLABDIR is defined, then compile with Matlab external interface library
 ifdef MATLABDIR
 MATLABEXT_LIB= -lmat
-MATLABEXT_LIBDIR= -Lextern/lib/$(ARCH)
+MATLABEXT_LIBDIR= -L$(MATLABDIR)/extern/lib/$(ARCH)
 endif
 
 # Library files reqd by stars.  Note that libptolemy.a is not included.
