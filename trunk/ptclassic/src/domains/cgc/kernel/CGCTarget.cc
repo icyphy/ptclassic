@@ -311,9 +311,10 @@ int CGCTarget :: allocateMemory() {
 
 			// (4) naming buffers.
 	    		if (p->isItOutput() && (!p->switched())) {
-				StringList name = sanitizedName(*p);
-				name << separator << symbolCounter++;
-				p->setGeoName(savestring(name));
+				StringList sym, sName;
+				sName << sanitizedName(*p);
+				sym << symbol(sName);
+				p->setGeoName(savestring(sym));
 	    		}
 
 			// (5) initialize offset pointer.
@@ -537,9 +538,10 @@ int CGCTarget :: incrementalAdd(CGStar* s, int flag) {
 
 		// Assign names only for each output port
 		if (p->isItOutput() && (p->switched() == 0)) {
-			StringList name = sanitizedName(*p);
-			name << separator << symbolCounter++;
-			p->setGeoName(savestring(name));
+			StringList sym, sName;
+			sName << sanitizedName(*p);
+			sym << symbol(sName);
+			p->setGeoName(savestring(sym));
 	    }
 	}
 
