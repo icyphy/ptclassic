@@ -44,7 +44,7 @@
 class ::tycho::YesNoCancel {
     inherit ::tycho::YesNoQuery
 
-    # The command to execute on a yes response.
+    # The command to execute on a cancel response.
     itk_option define -cancelcommand cancelcommand CancelCommand \
 	    "::tycho::DialogWindow::answer -1"
 

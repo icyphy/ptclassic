@@ -53,8 +53,8 @@ proc ::tycho::welcomeMessage {{binary ""} {version ""}} {
     }
 }
 
-# COMPATIBILITY procedures.  The following procedures emulate the behavior
-# of similarly named procedures in pigi, the predecessor to Tycho.
+# COMPATIBILITY procedures.  The following procedure emulates the behavior
+# of a similarly named procedure in pigi, the predecessor to Tycho.
 #
 proc ::ptkStartupMessage {version executable} {
     if [winfo exists .welcome] {
@@ -70,18 +70,18 @@ proc ::ptkStartupMessage {version executable} {
 
 ##########################################################################
 #### WelcomeMessage
-# Display the startup message.
+# A startup message window.
 #
 class ::tycho::WelcomeMessage {
     inherit ::tycho::Message
 
-    # Indicates the version of the executable that we are running.
+    # Specify the version of the executable that we are running.
     itk_option define -version version Version ""
 
-    # Indicates the actual executable file that we are running.
+    # Specify the actual executable file that we are running.
     itk_option define -executable executable Executable ""
 
-    # Indicates whether the window should destroy itself after a timeout.
+    # Specify whether the window should destroy itself after a timeout.
     itk_option define -persistent persistent Persistent 1
 
     constructor {args} {}
