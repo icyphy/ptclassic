@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1991-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,9 +25,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 */
 /* Version $Id$
-   Copyright 1991 The Regents of the University of California.
-   All Rights Reserved.
-
    Programmer:  T. M. Parks
    Date of creation:  8 Nov 91
 */
