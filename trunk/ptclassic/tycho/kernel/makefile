@@ -81,6 +81,7 @@ ITCL_SRCS = \
 	Forest.itcl \
 	Glimpse.itcl \
 	Graph.itcl \
+	HierModel.itcl \
 	HTML.itcl \
 	HTMLMessage.itcl \
 	HyperlinkIndex.itcl \
