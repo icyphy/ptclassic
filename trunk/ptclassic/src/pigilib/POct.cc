@@ -1807,10 +1807,10 @@ struct InterpTableEntry {
 // Here is the function table and dispatcher function.
 // These macros define entries for the table
 
-#define ENTRY(verb) { quote(verb), POct::verb }
+#define ENTRY(verb) { quote(verb), &POct::verb }
 
 // synonyms or overloads on argv[0]
-#define ENTRY2(verb,action) { quote(verb), POct::action }
+#define ENTRY2(verb,action) { quote(verb), &POct::action }
 
 // Here is the table.  Make sure it ends with "0,0"
 static InterpTableEntry funcTable[] = {

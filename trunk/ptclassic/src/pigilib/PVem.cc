@@ -222,10 +222,10 @@ struct InterpTableEntry {
 };
 
 // These macros define entries for the table
-#define ENTRY(verb) { quote(verb), PVem::verb }
+#define ENTRY(verb) { quote(verb), &PVem::verb }
 
 // synonyms or overloads on argv[0]
-#define ENTRY2(verb,action) { quote(verb), PVem::action }
+#define ENTRY2(verb,action) { quote(verb),& PVem::action }
 
 // Here is the table.  Make sure it ends with "0,0"
 static InterpTableEntry funcTable[] = {

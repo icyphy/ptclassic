@@ -1240,10 +1240,10 @@ struct InterpTableEntry {
 // Here is the function table and dispatcher function.
 // These macros define entries for the table
 
-#define ENTRY(verb) { quote(verb), PTcl::verb }
+#define ENTRY(verb) { quote(verb), &PTcl::verb }
 
 // synonyms or overloads on argv[0]
-#define ENTRY2(verb,action) { quote(verb), PTcl::action }
+#define ENTRY2(verb,action) { quote(verb), &PTcl::action }
 
 // Here is the table.  Make sure it ends with "0,0"
 // CAUTION: the dispatcher treats the first three entries specially
