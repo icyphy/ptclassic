@@ -11,8 +11,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	author { J. T. Buck }
 	location { BDF main library }
 	desc {
-If the value on the 'control' line is nonzero, trueInput
-is copied to the output; otherwise, falseInput is.
+If the value on the 'control' line is nonzero, N tokens (from the
+parameter N) from trueInput are copied to the output; otherwise, 
+N tokens from falseInput are copied to the output.
+	}
+	defstate {
+		name { N }
+		type { int }
+		default { 1 }
+		desc { Number of data tokens to move per execution }
 	}
 	input {
 		name { trueInput }
@@ -30,20 +37,18 @@ is copied to the output; otherwise, falseInput is.
 		name { output }
 		type { =trueInput }
 	}
-	constructor {
-		trueInput.setBDFParams(1,control,BDF_TRUE);
-		falseInput.setBDFParams(1,control,BDF_FALSE);
+	setup {
+		int n = N;
+		trueInput.setBDFParams(n,control,BDF_TRUE,n-1);
+		falseInput.setBDFParams(n,control,BDF_FALSE,n-1);
+		output.setBDFParams(n,0,BDF_NONE,n-1);
 	}
 	go {
 		// read control value, and route input to output
 		// depending on it.
-		if ((int) (control%0)) {
-			// route true-side to the output
-			output%0 = trueInput%0;
-		} else {
-			// route false-side to the output
-			output%0 = falseInput%0;
-		}
+		PortHole& input = *(int(control%0) ? &trueInput : &falseInput);
+		for (int i = int(N)-1; i >= 0; i--)
+			output%0 = input%0;
 	}
 }
 

@@ -11,10 +11,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	author { J. T. Buck }
 	location { BDF main library }
 	desc {
-Switches input events to one of two outputs, depending on
-the value of the control input.  If control is true, the
-value is written to trueOutput; otherwise it is written to
+Switches input tokens to one of two outputs, depending on
+the value of the control input.  The parameter N gives the
+number of tokens read.  If the token read from control is true, the
+values are written to trueOutput; otherwise they are written to
 falseOutput.
+	}
+	defstate {
+		name { N }
+		type { int }
+		default { 1 }
+		desc { Number of data tokens to move per execution }
 	}
 	input {
 		name { input }
@@ -32,18 +39,18 @@ falseOutput.
 		name { falseOutput }
 		type { =input }
 	}
-	constructor {
-		trueOutput.setBDFParams(1, control, BDF_TRUE, 0);
-		falseOutput.setBDFParams(1, control, BDF_FALSE, 0);
+	setup {
+		int n = N;
+		input.setBDFParams(n, 0, BDF_NONE, n-1);
+		trueOutput.setBDFParams(n, control, BDF_TRUE, n-1);
+		falseOutput.setBDFParams(n, control, BDF_FALSE, n-1);
 	}
 	go {
 		// read control value, and route input
 		// to output depending on it.
-		if ((int) (control%0)) {
-			trueOutput%0 = input%0;
-		} else {
-			falseOutput%0 = input%0;
-		}
+		PortHole& out = *(int(control%0) ? &trueOutput : &falseOutput);
+		for (int i = int(N)-1; i >= 0; i--)
+			out%0 = input%0;
 	}
 }
 
