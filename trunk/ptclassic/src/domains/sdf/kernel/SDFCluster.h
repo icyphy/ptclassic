@@ -381,7 +381,14 @@ public:
 		return far() ? 0 : pOutPtr;
 	}
 	int feedForward() const { return feedForwardFlag;}
-	void markFeedForward() { feedForwardFlag = 1;}
+
+	// indicate that this is a feedforward arc.  Mark both
+	// ends of the connection.
+	void markFeedForward() {
+		feedForwardFlag = 1;
+		SDFClustPort* pFar = far();
+		if (pFar) pFar->feedForwardFlag = 1;
+	}
 
 	// return TRUE if there is delay on the arc that may be a
 	// problem for merging, and FALSE otherwise.
