@@ -275,6 +275,7 @@ void VHDLTarget :: trailerCode() {
       // However, do not create a variable if it's a wormhole input.
       // Will have created a system port input instead.
 
+/*
       // If no system port by the given name, go ahead and make the variable.
       if (!(variableList.inList(sourceName))) {
 	// Allocate memory for a new VHDLVariable and put it in the list.
@@ -289,7 +290,37 @@ void VHDLTarget :: trailerCode() {
 	}
 	variableList.put(*newvar);
       }
+      */
+      {
+	// Allocate memory for a new VHDLVariable and put it in the list.
+	VHDLVariable* newvar = new VHDLVariable;
+	newvar->name = sourceName;
+	newvar->type = arc->type;
+	if (!strcmp(arc->type,"INTEGER")) {
+	  newvar->initVal = "0";
+	}
+	else {
+	  newvar->initVal = "0.0";
+	}
+	variableList.put(*newvar);
+      }
+
+/*
       if (!(variableList.inList(destName))) {
+	// Allocate memory for a new VHDLVariable and put it in the list.
+	VHDLVariable* newvar = new VHDLVariable;
+	newvar->name = destName;
+	newvar->type = arc->type;
+	if (!strcmp(arc->type,"INTEGER")) {
+	  newvar->initVal = "0";
+	}
+	else {
+	  newvar->initVal = "0.0";
+	}
+	variableList.put(*newvar);
+      }
+      */
+      {
 	// Allocate memory for a new VHDLVariable and put it in the list.
 	VHDLVariable* newvar = new VHDLVariable;
 	newvar->name = destName;
@@ -495,6 +526,7 @@ void VHDLTarget :: mergeVariableList(VHDLVariableList* starVariableList) {
   VHDLVariable* nStarVariable;
   // Scan through the list of variables from the star firing.
   while ((nStarVariable = starVariableNext++) != 0) {
+/*
     // Search for a match from the existing list.
     int isNewVariable = 1;
 
@@ -506,6 +538,11 @@ void VHDLTarget :: mergeVariableList(VHDLVariableList* starVariableList) {
       newVariable = nStarVariable->newCopy();
       variableList.put(*newVariable);
     }
+    */
+    // Allocate memory for a new VHDLVariable and put it in the list.
+    VHDLVariable* newVariable = new VHDLVariable;
+    newVariable = nStarVariable->newCopy();
+    variableList.put(*newVariable);
   }
 }
 
@@ -600,7 +637,7 @@ void VHDLTarget :: registerState(State* state, const char* varName,
     initVal = state->currentValue();
   }
 
-  if (firingVariableList.inList(ref)) return;
+//  if (firingVariableList.inList(ref)) return;
   
   // Allocate memory for a new VHDLVariable and put it in the list.
   VHDLVariable* newvar = new VHDLVariable;
@@ -630,7 +667,7 @@ void VHDLTarget :: registerPortHole(VHDLPortHole* port, const char* varName,
   //FIXME: May want to do something different if it's a wormhole port.
   //Such as, what was done in StructTarget: make extra port to VHDL module.
 
-  if (firingVariableList.inList(ref)) return;
+//  if (firingVariableList.inList(ref)) return;
   
   // Allocate memory for a new VHDLVariable and put it in the list.
   VHDLVariable* newvar = new VHDLVariable;
@@ -649,13 +686,12 @@ void VHDLTarget :: registerPortHole(VHDLPortHole* port, const char* varName,
 void VHDLTarget :: registerTemp(const char* temp, const char* type) {
   StringList ref = sanitize(temp);
 
-  if (firingVariableList.inList(ref)) return;
+//  if (firingVariableList.inList(ref)) return;
   
   // Allocate memory for a new VHDLVariable and put it in the list.
   VHDLVariable* newvar = new VHDLVariable;
   newvar->name = ref;
   newvar->type = sanitizeType(type);
-//  newvar->initVal = "0.0";
   if (!strcmp(newvar->type,"INTEGER")) {
     newvar->initVal = "0";
   }
@@ -670,7 +706,7 @@ void VHDLTarget :: registerDefine(const char* define, const char* type,
 				  const char* init) {
   StringList ref = sanitize(define);
 
-  if (firingVariableList.inList(ref)) return;
+//  if (firingVariableList.inList(ref)) return;
   
   // Allocate memory for a new VHDLVariable and put it in the list.
   VHDLVariable* newvar = new VHDLVariable;
