@@ -140,7 +140,7 @@ octObject *facetPtr;
     octGenerator genInst;
     octObject inst, galFacet;
 
-    (void) octInitGenContents(facetPtr, OCT_INSTANCE_MASK, &genInst);
+    (void) octInitGenContentsSpecial(facetPtr, OCT_INSTANCE_MASK, &genInst);
     while (octGenerate(&genInst, &inst) == OCT_OK) {
 	if (IsVemConnector(&inst) || IsIoPort(&inst) || IsMarker(&inst)) {
 	    /* skip */
@@ -172,7 +172,7 @@ octObject *facetPtr;
     octObject net, prop;
     octGenerator netGen;
 
-    (void) octInitGenContents(facetPtr, OCT_NET_MASK, &netGen);
+    (void) octInitGenContentsSpecial(facetPtr, OCT_NET_MASK, &netGen);
     while (octGenerate(&netGen, &net) == OCT_OK) {
 	prop.type = OCT_PROP;
 	prop.contents.prop.name = "delay";
@@ -254,7 +254,7 @@ octObject *facetPtr;
     char *akoName;
     
     DetachDelaysFromNets(facetPtr);
-    (void) octInitGenContents(facetPtr, OCT_INSTANCE_MASK, &genInst);
+    (void) octInitGenContentsSpecial(facetPtr, OCT_INSTANCE_MASK, &genInst);
     while (octGenerate(&genInst, &inst) == OCT_OK) {
 	if (IsVemConnector(&inst) || IsIoPort(&inst)) {
 	    /* skip */
@@ -331,7 +331,7 @@ int *inN, *outN;
 
     *inN = 0;
     *outN = 0;
-    (void) octInitGenContents(netPtr, OCT_TERM_MASK, &termGen);
+    (void) octInitGenContentsSpecial(netPtr, OCT_TERM_MASK, &termGen);
     for (i = 0; i < TERMS_MAX; ) {
 	if (octGenerate(&termGen, &term) != OCT_OK) {
 	    break;
@@ -453,7 +453,7 @@ octObject *facetPtr;
     char delay[BLEN], width[BLEN];
     char *errMsg = 0;
 
-    (void) octInitGenContents(facetPtr, OCT_NET_MASK, &netGen);
+    (void) octInitGenContentsSpecial(facetPtr, OCT_NET_MASK, &netGen);
     while (octGenerate(&netGen, &net) == OCT_OK && !errMsg) {
 /* For each net, we require only that there be at least one input
    and at least one output.  Other errors are handled by the kernel.
@@ -503,20 +503,22 @@ octObject *facetPtr;
 	    char *nodename = UniqNameGet("node");
 	    if (!KcNode(nodename)) {
 		errMsg = "";
-		break;
 	    }
-	    for (i = 0; i < outN; i++) {
-		if (!JoinToNode(&out[i], nodename)) {
-		    errMsg = "";
-		    break;
+	    else {
+		for (i = 0; i < outN; i++) {
+		    if (!JoinToNode(&out[i], nodename)) {
+			errMsg = "";
+			break;
+		    }
+		}
+		for (i = 0; i < inN; i++) {
+		    if (!JoinToNode(&in[i], nodename)) {
+			errMsg = "";
+			break;
+		    }
 		}
 	    }
-	    for (i = 0; i < inN; i++) {
-		if (!JoinToNode(&in[i], nodename)) {
-		    errMsg = "";
-		    break;
-		}
-	    }
+	    free(nodename);
 	}
     }
     if (errMsg) {
@@ -855,4 +857,72 @@ void
 CompileEnd()
 {
     /* clean up tmp file before exiting */
+}
+
+/* NEW FUNCTION */
+
+int
+RpcRunAllDemos(spot, cmdList, userOptionWord) /* ARGSUSED */
+RPCSpot *spot;
+lsList cmdList;
+long userOptionWord;
+{
+    octObject facet;
+    ViInit("run-all-demos");
+    ErrClear();
+    facet.objectId = spot->facet;
+    if (octGetById(&facet) != OCT_OK) {
+	PrintErr(octErrorString());
+	ViDone();
+    }
+    if (!IsPalFacet(&facet)) {
+	PrintErr("This command must be run in a palette");
+    }
+    else RunAll(&facet);
+    FreeOctMembers(&facet);
+    ViDone();
+}
+
+/* run everything in the facet, which is assumed to be a palette */
+static boolean
+RunAll(facetPtr)
+octObject *facetPtr;
+{
+    octGenerator genInst;
+    octObject inst;
+    octInitGenContentsSpecial(facetPtr, OCT_INSTANCE_MASK, &genInst);
+    while (octGenerate(&genInst, &inst) == OCT_OK) {
+	octObject univFacet;
+
+	if (!MyOpenMaster(&univFacet,&inst, "contents", "r")) {
+	    PrintErr(octErrorString());
+	    return FALSE;
+	}
+	/* skip any non-universes */
+	if (IsCursor(&inst)) {
+	    /* nothing */;
+	}
+	else if (IsUnivFacet(&univFacet)) {
+	    char * name = BaseName(univFacet.contents.facet.cell);
+	    char msg[128];
+	    int n;
+
+	    sprintf(msg, "RunAllDemos: executing universe '%s'", name);
+	    PrintDebug(msg);
+	    if (!CompileFacet(&univFacet) ||
+		GetIterateProp(&univFacet,&n) < 0 ||
+		!KcRun(n)) {
+		sprintf (msg, "Execution of '%s' failed", name);
+		PrintErr(msg);
+		return FALSE;
+	    }
+	}
+	else if (IsPalFacet(&univFacet)) {
+	    RunAll(&univFacet);
+	}
+	FreeOctMembers(&univFacet);
+	FreeOctMembers(&inst);
+    }
+    octFreeGenerator(&genInst);
+    return TRUE;
 }

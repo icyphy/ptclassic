@@ -40,6 +40,7 @@ Utility functions.
 #include "octIfc.h"
 #include "vemInterface.h"
 
+extern char * HashString();
 
 /* UMalloc  12/10/88
 Allocate using malloc.
@@ -248,11 +249,10 @@ char *s;
     int *ip;
 
     ENTRY item, *found, *hsearch();
-    item.key = s;
+    item.key = HashString(s);
     found = hsearch(item, FIND);
     if (found == NULL) {
 	item.data = 0;
-	item.key = DupString(s);
 	if (!(found = hsearch(item, ENTER))) {
 	    ErrAdd("UniqNameGet: hash table is full!");
 	    return NULL;
