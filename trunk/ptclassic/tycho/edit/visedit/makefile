@@ -49,7 +49,8 @@ ITCL_SRCS = \
 	EditPalette.itcl \
 	EditSTD.itcl \
 	Graphics.itcl \
-	ProfileTcl.itcl
+	ProfileTcl.itcl \
+	TCanvas.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
