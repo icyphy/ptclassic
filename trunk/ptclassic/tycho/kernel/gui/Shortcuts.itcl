@@ -94,6 +94,7 @@ class ::tycho::Shortcuts {
             DownLine     {{} {}                       <Control-n> {C-n}                         <Control-n> {C-n}} \
             DownPage     {<Next> {Page Down}          <Control-v> {C-v}                         <Next> {Page Down}} \
             Evaluate     {{} {}                       <Control-x><Control-r> {C-x C-r}          {} {}} \
+            EvaluateConstruct {{} {}                  <Control-x><Control-Shift-R> {C-x C-R}    {} {}} \
             Exit         {<Control-q> Ctrl+Q          <Control-x><Control-c> {C-x C-c}          <Control-q> Ctrl+Q} \
             Fill         {{} {}                       <Meta-q> M-q                              {} {}} \
             Fill2        {{} {}                       <Escape><Key-q> {Esc q}                   {} {}} \
