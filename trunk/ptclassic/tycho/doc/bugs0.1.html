@@ -20,12 +20,12 @@ only rudimentary syntax-directed features.
 <li>Editors are too closely allied with their top-level windows, so that
 if you place multiple editors in a single window, you will have to carefully
 design your menus to be able to interact with all subwindows.
-<li>File completion in the file browser window only works if files
+<li>File completion in the file browser window only works if file is
 in the current directory.
 </ul>
 <p>
 <H2>Detailed Bug Descriptions</H2>
-
+n
 <H3>RCS mode bug</H3>
 	Unfortunately, if RCS does not necessarily put the version
 	control files in the RCS subdirectory.  If the RCS
@@ -33,7 +33,7 @@ in the current directory.
 	and the version control file is put in the current directory.
 
 	 <P>If I do the following to create a version control file in
-	the current directory
+	the current directory,
 	<PRE>
 	cxh@brahe 23% rm -rf RCS
 	cxh@brahe 24% chmod u+w log.itcl
@@ -48,19 +48,19 @@ in the current directory.
 	cxh@brahe 26%
 	</PRE>
 
-	 <P>Then when I try to check out log.itcl from within tycho, I get
+	 <P>then when I try to check out log.itcl from within Tycho, I get
 	a message stating that the file is not checked in, and would I
-	like to do so.  My guess is that tycho is looking for a RCS or
+	like to do so.  My guess is that Tycho is looking for an RCS or
 	SCCS subdirectory, and not the log.itcl,v file.  This is a
 	minor bug.
 
 <H3>Tycho Console Class bug</H3>
 
-The X Class of the tycho console is <CODE>Console</CODE>.  This means
+The X Class of the Tycho console is <CODE>Console</CODE>.  This means
 if <CODE>fvwm</CODE> is set so that windows named
 <CODE>Console</CODE> are sticky (present on all virtual screens), then
 the Tycho console is sticky too.  The <CODE>xprop</CODE> command shows
-that the Tycho console's class is Console
+that the Tycho console's class is <CODE>Console<CODE>.
 
 <HR>
 Up to: <A HREF="introduction.html">Tycho Introduction</A> -
