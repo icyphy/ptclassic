@@ -29,6 +29,7 @@ if [catch {package require %package%}] {
 }
 
 # If that didn't work, try the TYCHO environment variable.
+set err ""
 if !$ok {
     if ![info exists env(TYCHO)] {
 	if [info exists env(PTOLEMY)] {
@@ -41,14 +42,18 @@ if !$ok {
     if [info exists env(TYCHO)] {
 	if { [lsearch -exact $auto_path $env(TYCHO)] == -1 }  {
 	    lappend auto_path $env(TYCHO)
-	    if ![catch {package require %package%}] {
+	    if ![catch {package require %package%} err] {
 		set ok 1
 	    }
 	}
     }
 }
 if !$ok {
-    puts "Cannot find \"%Package%\". You can\n\
+    puts "Cannot find \"%Package%\".\
+	    Error was:\n--start--\n$err\n--end--\n\
+	    The auto_path variable lists the directories that were searched.\n\
+	    auto_path = $auto_path\n\
+	    You can:\n\
 	    1. Install %Package% in a subdirectory of your Tcl library\n\
 	    2. Install %Package% in the directory given by the TCL_PACKAGES \
 	    variable.\n\
