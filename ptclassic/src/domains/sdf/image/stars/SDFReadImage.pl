@@ -1,5 +1,4 @@
 defstar {
-//////// INFO ON STAR.
 	name	{ ReadImage }
 	domain	{ SDF }
 	version	{ $Id$ }
@@ -70,14 +69,13 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 					*p++ = *q++;
 				}
 			}
-			*p = '\000';
+			*p = 0;			// null terminate string
 			delete [] qorig;
 		} // end genFileName()
 	}
 
-////// Read data into an GrayImage object...
 	go {
-// Open file containing the image.
+		// Open file containing the image.
 		char fullName[512];
 		genFileName(fullName, fileName, int(frameId));
 		FILE* fp = fopen(fullName, "r");
@@ -86,7 +84,7 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 			return;
 		}
 
-// Read header, skipping 1 whitespace character at end.
+		// Read header, skipping 1 whitespace character at end.
 		char word[80];
 		int width, height, maxval;
 		fscanf(fp, "%s", word);
@@ -113,17 +111,17 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 			Error::abortRun(*this, fullName,": not in 8-bit format.");
 			return;
 		}
-		fscanf(fp, "%*c"); // skip one whitespace char.
+		fscanf(fp, "%*c");		// skip one whitespace char.
 
-// Create image object and fill it with data.
+		// Create image object and fill it with data.
 		LOG_NEW;
 		GrayImage* imgData = new GrayImage(width, height, int(frameId));
 		fread( (char*)imgData->retData(), sizeof(unsigned char),
 		       unsigned(width*height), fp );
 		fclose(fp);
-		frameId = int(frameId) + 1; // increment frame id
+		frameId = int(frameId) + 1;		// increment frame id
 
-// Write the new frame to output...
+		// Write the new frame to output...
 		Envelope envp(*imgData); output%0 << envp;
 	} // end go{}
 } // end defstar{ ReadImage }
