@@ -140,6 +140,8 @@ public:
 	// Return reference to Block as a Galaxy.  Error if it's not.
 	virtual Galaxy& asGalaxy() const;
 
+	// Return my domain (e.g. SDF, DE, etc.)
+	virtual const char* domain() const;
 protected:
 	// Database for this block
 

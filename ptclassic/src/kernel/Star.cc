@@ -49,6 +49,3 @@ void Star :: fire() { go() ;}
 // return myself as a Star.
 Star& Star :: asStar () const { return *this;}
 
-// return my domain.  Should this be an error (if noone has redefined
-// this?)
-const char* Star :: domain () const { return "";}
