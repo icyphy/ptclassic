@@ -34,7 +34,9 @@ LIB=libvhdlstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 PL_SRCS=\
+ VHDLConst.pl \
  VHDLAdd.pl \
+ VHDLAddInt.pl \
  VHDLBlackHole.pl \
  VHDLCos.pl \
  VHDLExp.pl \
@@ -51,8 +53,11 @@ PL_SRCS=\
  VHDLRampInt.pl \
  VHDLSin.pl \
  VHDLSub.pl \
+ VHDLSubInt.pl \
  VHDLXgraph.pl \
  VHDLXYgraph.pl \
+ VHDLCReceive.pl \
+ VHDLCSend.pl \
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
