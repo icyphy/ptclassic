@@ -121,7 +121,8 @@ itcldocs: $(ITCL_SRCS)
 # get compiled and have dependencies.  Instead, modify the makefile
 # that includes this one and have it set $(EXTRA_SRCS)
 checkjunk:
-	@checkextra -v $(HDRS) $(EXTRA_SRCS) $(MISC_FILES) makefile SCCS
+	@checkextra -v $(HDRS) $(EXTRA_SRCS) $(MISC_FILES) $(OPTIONAL_FILES) \
+		makefile SCCS
 	@if [ "x$(DIRS)" != "x" ]; then \
 		set $(DIRS); \
 		for x do \
