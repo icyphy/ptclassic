@@ -2,10 +2,9 @@ defstar {
 	name { Xprism3 }
 	domain { MDSDF }
 	desc {
-Generate a plot of a 2D signal with the xprism3 program.
-Due to a bug in xprism3 reading raw files from the command line,
-we go throug the intermediary step of converting the raw file
-to a Viff file using raw2viff.
+Generate a plot of a two-dimensional signal with the xprism3 program.  Due
+to a bug in xprism3 reading raw files from the command line, we go through the
+intermediate step of converting the raw file to a Viff file using raw2viff.
 	}
 	version {$Id$}
 	author { Mike J. Chen }
@@ -17,15 +16,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { MDSDF library }
 	explanation {
-The input signal is plotted using the \fIxprism3\fR program which
-is provided with the Ptolemy distribution.
-The \fItitle\fR parameter specifies a title for the plot.
-The \fIsaveFile\fR parameter optionally specifies a file for
-storing the data in a syntax acceptable to xprism3.
-A null string prevents any such storage.
-The \fIoptions\fR string is passed directly to the xprism3 program
-as command-line options.  See the manual section describing xprism3
-for a complete explanation of the options.
+The input signal is plotted using the \fIxprism3\fR program which is
+provided with the Ptolemy distribution.  The \fItitle\fR parameter specifies
+a title for the plot.  The \fIsaveFile\fR parameter optionally specifies a
+file for storing the data in a syntax acceptable to xprism3.  A null string
+prevents any such storage.  The \fIoptions\fR string is passed directly to
+the xprism3 program as command-line options.  See the manual section
+describing xprism3 for a complete explanation of the options.
 .Ir "xprism program"
 .Id "graph, X window"
 	}
@@ -65,7 +62,7 @@ for a complete explanation of the options.
 	  FloatSubMatrix* inputMatrix = (FloatSubMatrix*)(input.getInput());
 	  int del = FALSE;
 
-	  const char* iname = saveFile;
+	  const char* iname = (const char*)saveFile;
 	  char* nm = 0;
 	  if (iname && *iname) {
 	    nm = expandPathName(iname);
@@ -96,10 +93,11 @@ for a complete explanation of the options.
 	  fclose(fp);
 	  delete [] buffer;
 
-	  StringList cmd;
-	  StringList tmpFileName;
-	  tmpFileName << fileName << ".viff";
+	  StringList tmpFileName = fileName;
+	  tmpFileName << ".viff";
+
 	  // first generate the command to run raw2viff
+	  StringList cmd;
           cmd << "( raw2viff -i " << fileName << " -o " << tmpFileName;
 	  cmd << " -t \"float\" -mt \"Local Machine\" -r ";
 	  cmd << int(numRows) << " -c " << int(numCols) << ";";
