@@ -34,8 +34,10 @@
 # more information
 
 ifeq ($(ARCH),irix5)
+ifeq ($(USE_OCTTOOLS_SHARED_LIBS),yes)
 IRIX5_SHL_MK=$(ROOT)/mk/octtools-irix5-shl.mk
 include $(IRIX5_SHL_MK)
+endif # USE_OCTTOOLS_SHARED_LIBS
 endif
 
 CC =	$(OCT_CC)
