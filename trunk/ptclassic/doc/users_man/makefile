@@ -89,7 +89,7 @@ fm2ps: update_book
 	echo "SaveAs t troubleshooting.doc /tmp/troubleshooting.txt" >> $@
 	echo "Quit" >> $@ 
 
-VERSION=0.5.1
+VERSION=0.5.2beta
 OBTAINING_PTOLEMY=OBTAINING_PTOLEMY_$(VERSION)
 OBTAINING_PTOLEMY: $(OBTAINING_PTOLEMY) 
 $(OBTAINING_PTOLEMY): /tmp/obtainPtolemy.txt
