@@ -167,10 +167,10 @@ class ::tycho::Connectible {
     #### Set option defaults
     array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
 
-    set optiondefault(-inputs)   1
-    set optiondefault(-intype)   {Terminal -type input}
-    set optiondefault(-outputs)  1
-    set optiondefault(-outtype)  {Terminal -type output}
+    # set optiondefault(-inputs)   1
+    # set optiondefault(-intype)   {Terminal -type input}
+    # set optiondefault(-outputs)  1
+    # set optiondefault(-outtype)  {Terminal -type output}
 }
 
 ##########################################################################
