@@ -47,6 +47,13 @@ proc ptlangTroffToHTML {args} {
         set delim 1
         set ineq 0
         while {[gets $infile lineIn] >= 0} {
+	    # We put these replacements outside the explanation regexp
+	    # because we did not find out about them until we ran this
+	    # on all the stars and converted 'explanation' to 'html'
+            regsub -all {\\fI} $lineIn {<i>} lineIn
+            regsub -all {\\fP} $lineIn {</i>} lineIn
+            regsub -all {\\fR} $lineIn {</i>} lineIn
+	    regsub -all {\\fB} $lineIn {</b>} lineIn
             if [regexp {^[ 	]*explanation[ 	]*\{[ 	]*$} $lineIn] {
                 # Replace with htmldoc
                 puts $tmpfile "\thtmldoc \{"
@@ -57,9 +64,6 @@ proc ptlangTroffToHTML {args} {
                     # Replace certain formatting controls
                     regsub -all ">" $lineIn {\&gt;} lineIn
                     regsub -all "<" $lineIn {\&lt;} lineIn
-                    regsub -all "\\\\fI" $lineIn <i> lineIn
-                    regsub -all "\\\\fB" $lineIn <b> lineIn
-                    regsub -all "\\\\fR|\\\\fP" $lineIn </i></b> lineIn
                     regsub -all {\\\\} $lineIn {\\} lineIn
                     regsub -all {REFERENCES} $lineIn {References} lineIn
 
