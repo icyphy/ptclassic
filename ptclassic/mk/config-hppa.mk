@@ -137,11 +137,11 @@ CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 # We ship statically linked binaries, but other sites might want
 # to remove the -static below
 # If you are trying out the shl_load feature, then remove -static
-# and add -Xlinker -E
+# and add -Wl,-E
 #LINKFLAGS = 	-L$(LIBDIR) -Xlinker -x -static 
 #LINKFLAGS_D = 	-L$(LIBDIR) -g -static
-LINKFLAGS = 	-L$(LIBDIR) -Xlinker -x -Xlinker -E $(SHARED_LIBRARY_R_LIST)
-LINKFLAGS_D = 	-L$(LIBDIR) -g -Xlinker -E $(SHARED_LIBRARY_R_LIST)
+LINKFLAGS = 	-L$(LIBDIR) -Wl,-x,-E $(SHARED_LIBRARY_R_LIST)
+LINKFLAGS_D = 	-L$(LIBDIR) -g -Wl,-E $(SHARED_LIBRARY_R_LIST)
 
 LIBSUFFIX =		sl
 
