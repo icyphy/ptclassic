@@ -385,6 +385,7 @@ limitation of liability, and disclaimer of warranty provisions.
       addProcedure(audio_controlDef, "CGCAudioBase_audio_control");
       addProcedure(audio_gainDef,    "CGCAudioBase_audio_gain");
       addProcedure(audio_balanceDef, "CGCAudioBase_audio_balance");
+      addCode("$starSymbol(counter) = 0;\n");
     }
 
     wrapup {
