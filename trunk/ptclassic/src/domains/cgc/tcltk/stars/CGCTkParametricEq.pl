@@ -18,6 +18,13 @@ limitation of liability, and disclaimer of warranty provisions.
     }
 
     defstate {
+      name { starName }
+      type { string }
+      default { "parametric" }
+      desc { The user-friendly name of this star.}
+    }
+
+    defstate {
       name { highFreq }
       type { float }
       default { 20000.0 }
@@ -31,14 +38,6 @@ limitation of liability, and disclaimer of warranty provisions.
       desc { The lowest possible center frequency. }
     }
     
-    defstate {
-      name { nameofStar }
-      type { string }
-      default { "left1" }
-      desc { A token to distinguish between multiple instances of same
-	       star in a universe.}
-    }
-
     codeblock (tkSetup) {
       /* Establish the Tk window for setting the values    */
       /* "tkgain" is  a local variable which scales the    */
@@ -69,6 +68,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	displaySliderValue(".middle", "$starSymbol(scale2)",
 			   "$val(centerFreq)");
       }
+      /* Test code for the new custom control panels */
+      connectControl("$val(starName)",
+		     "gain",
+		     $starSymbol(setGain));
+
+      connectControl("$val(starName)",
+		     "frequency",
+		     $starSymbol(setcenterFreq));
     }
     codeblock(tkSetupband) {
       /* "tkband" is  a local variable which scales the    */
@@ -84,6 +91,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	displaySliderValue(".high", "$starSymbol(scale3)",
 			     "$val(bandwidth)");
       }      
+      connectControl("$val(starName)",
+		     "bandwidth",
+		     $starSymbol(setBandwidth));
     }
     codeblock(tkSetuppass) {
       /* "tkpass" is a local variable which scale the pass  */
