@@ -200,6 +200,7 @@ ddsData data;			/* Should be (ddsNumber *)            */
 		 "Items of type DDS_NUMBER must have a parent");
 	/*NOTREACHED*/
     }
+    return (ddsHandle)NULL;
 }
 
 
@@ -291,6 +292,7 @@ ddsInternal *child;		/* New child     */
     errRaise(ddsPackageName, DDS_BAD_PARENT,
 	     "DDS_NUMBER components may not have child components");
     /*NOTREACHED*/
+    return (Widget)NULL;
 }
 
 /*ARGSUSED*/
@@ -323,8 +325,7 @@ ddsFullNumber *item;
 {
     Widget result;
     char num_buf[MAX_NUM_LEN], max_buf[MAX_NUM_LEN];
-    double last, value;
-    int width;
+    double last;
 
     max_buf[0] = '\0';
     CK_VAL(item->user_spec.minimum);
