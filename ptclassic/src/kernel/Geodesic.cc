@@ -136,7 +136,11 @@ void Geodesic :: initialize()
 }
 
 // Functions for determining maximum buffer size during a simulated run.
-void Geodesic :: incCount(int n) { sz += n; maxBufLength += n;}
+void Geodesic :: incCount(int n) {
+	sz += n;
+	if (sz > maxBufLength) maxBufLength = sz;
+}
+
 void Geodesic :: decCount(int n) { sz -= n;}
 
 void Geodesic :: setMaxArcCount(int n) {
