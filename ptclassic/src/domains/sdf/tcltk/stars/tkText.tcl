@@ -25,49 +25,72 @@ if {![winfo exists $s]} {
         frame $win.f
         message $win.msg -width 12c -text $label
 
-	# The following flag is used if the waitBetweenOutputs parameter is set
+	# shorthand for refering to the star's data structure
 	upvar #0 $starID param
-	set param(tkTextWaitTrig) 0
+	global $starID
+
         for {set i 0} {$i < $numInputs} {incr i} {
     	    frame $win.f.m$i
-    	    text $win.f.m$i.t -relief raised -bd 2 -width 40 -height 10 \
-		-bg AntiqueWhite \
-		-yscrollcommand "$win.f.m$i.s set" -setgrid true
 	    scrollbar $win.f.m$i.s -relief flat -command "$win.f.m$i.t yview"
+    	    text $win.f.m$i.t -relief raised -bd 2 -width 40 -height 10 \
+		-yscrollcommand "$win.f.m$i.s set" -setgrid true
 	    pack append $win.f $win.f.m$i {top fill expand}
 	    pack append $win.f.m$i $win.f.m$i.s {right filly} \
 		$win.f.m$i.t {expand fill}
         }
         pack append $win $win.msg {top fill} $win.f {top fill expand}
 
+	set ${starID}(tkTextWaitTrig) 0
 	if {$wait} {
 	    # The following flag is used if the wait_between_outputs
 	    # parameter is set
-	    set param(tkTextWaitTrig) 0
-	    button $win.cont -relief raised -width 40 -bg AntiqueWhite \
-                -command "incr ${starID}(tkTextWaitTrig)" -text CONTINUE
-            pack append $win $win.cont {top fillx}
+	    frame $win.att -class Attention
+	    button $win.att.cont -relief raised -width 40 \
+                -command "incr ${starID}(tkTextWaitTrig)" -text CONTINUE \
+		-state disabled
+            pack append $win.att $win.att.cont {top fillx}
+            pack append $win $win.att {top fillx}
 	}
         button $win.ok -text "DISMISS" -command \
-		"ptkStop $univ; destroy $win"
+		"catch {incr ${starID}(tkTextWaitTrig)}
+		 ptkStop $univ
+		 destroy $win"
         pack append $win $win.ok {top fillx}
+
+	if {[set ${starID}(wait_between_outputs)]} {
+	    # Modify the control panel stop button to release the wait
+	    # HACK ALERT: highly non-local code.  Will work only if the
+	    # the design of the control panel does not change.
+	    global ptkControlPanel
+	    $ptkControlPanel.panel.stop configure -command \
+		"incr ${starID}(tkTextWaitTrig); ptkStop $univ"
+	    bind $ptkControlPanel.iter.entry <Escape> \
+		"incr ${starID}(tkTextWaitTrig); ptkStop $univ"
+	    bind $ptkControlPanel <Escape> \
+		"incr ${starID}(tkTextWaitTrig); ptkStop $univ"
+	}
     }
+
+    global $starID
 
     ptkTextMakeWindow $s [set ${starID}(label)] [set ${starID}(numInputs)] \
 		[curuniverse] [set ${starID}(wait_between_outputs)] $starID
 
-    global $starID
+    # The following is needed to avoid a seg fault if an error occurs
+    # (Tk bug)
+    update
+
     set ${starID}(lineCount) 0
 
     # Store the window name in the star data structure
     set ${starID}(win) $s
 
-    # In the following definition, the value of starID and
-    # numInputs is evaluated when the file is sourced.
-    proc callTcl_$starID {starID} {
+    proc goTcl_$starID {starID} {
 
-	# define a shorthand for referring to parameters
+	# Define a shorthand for referring to parameters.
+	# Need both notations here.
 	upvar #0 $starID param
+	global $starID
 
         set c $param(win).f
         set inputVals [grabInputs_$starID]
@@ -77,21 +100,19 @@ if {![winfo exists $s]} {
             $param(win).f.m$i.t insert end $in
             $param(win).f.m$i.t insert end "\n"
 	}
-	incr param(lineCount)
+	incr ${starID}(lineCount)
 	if {$param(lineCount) >= $param(number_of_past_values)} {
-	    incr param(lineCount) -1
+	    incr ${starID}(lineCount) -1
 	    for {set i 0} {$i < $param(numInputs)} {incr i} {
 		$param(win).f.m$i.t delete 1.0 2.0
 	    }
 	}
 
 	if {$param(wait_between_outputs)} {
-	    $param(win).cont configure -bg {orange1}
-	    $param(win).cont configure -activebackground {tan3}
-	    set param(tkTextWaitTrig) 0
-	    tkwait variable param(tkTextWaitTrig)
-	    $param(win).cont configure -bg {AntiqueWhite}
-	    $param(win).cont configure -activebackground {burlywood}
+	    set ${starID}(tkTextWaitTrig) 0
+	    $param(win).att.cont configure -state normal
+	    tkwait variable ${starID}(tkTextWaitTrig)
+	    catch {$param(win).att.cont configure -state disabled}
 	}
     }
 }
