@@ -39,338 +39,163 @@ Date of last revision:
 #include "HuParProcs.h"
 #include "EGGate.h"
 #include "StringList.h"
-#include "CGWormhole.h"
 #include "Profile.h"
 #include "HuNode.h"
 
-// common reference of the idle node
-static HuNode idleNode(1);
-
 // constructor
-HuParProcs :: HuParProcs(int pNum, MultiTarget* t) : ParProcessors(pNum,t)
-{
-	LOG_NEW; schedules = new HuUniProc[pNum];
-}
-
-HuParProcs :: ~HuParProcs() {
-	LOG_DEL; delete [] schedules;
-}
-
-UniProcessor* HuParProcs :: getProc(int num) { return getSchedule(num); }
-
-void HuParProcs :: initialize(HuGraph* g) 
-{
-	ParProcessors :: initialize();
-
-	// member initialization
-	myGraph = g;
-	clock = 0;
-}
+HuParProcs :: HuParProcs(int pNum, MultiTarget* t) : DLParProcs(pNum,t) {}
 
 /*****************************************************************
 		SCHEDULE AIDS
  ****************************************************************/
 
-void HuParProcs :: assignNode(HuNode* pd, int leng, int pNum)
+void HuParProcs :: fireNode(DLNode* temp) 
 {
-	// assign the node to the processor
-	HuUniProc* proc = getSchedule(pNum);
+	int pix = temp->getProcId();
 
-	// check whether to insert idle time or not.
-	int idle = proc->getIdleTime();
-	if (idle > 0)
-		proc->appendNode(&idleNode, idle);
-	proc->appendNode(pd, leng);
-	pd->setScheduledTime(proc->getTimeFree());
-	pd->setProcId(pNum);
-
-	// update the clock of the processors.
-	int ck = proc->getTimeFree() + leng;
-        proc->setTimeFree(ck);
-        proc->setAvailTime(ck);
-	pd->setFinishTime(ck);
-}
-
-void HuParProcs :: setIndex(int v)
-{
-	HuUniProc* proc = getSchedule(pIndex[v]);
-	proc->setIndex(v);
-}
-
-// determine the pattern of processor availability and store it
-// sorted.  Processor index is also stored for random reference.
-void HuParProcs :: determinePPA(IntArray& avail)
-{
-	// fill out the array initially
-	int base = getSchedule(pIndex[0])->getTimeFree();
-	for (int i = 0; i < numProcs; i++) {
-		avail[i] = getSchedule(pIndex[i])->getTimeFree() - base;
-	}
-}
-
-// When a processor is assigned a task, the pattern of processor
-// availability is changed. Keep track of this change.
-void HuParProcs :: renewPatternIndex(int spot)
-{
-	int temp = pIndex[spot];
-	int v = getSchedule(temp)->getTimeFree();
-	int j = spot+1;
-	// Among those of same timeFree field, 
-	// the recented, the smallest index.
-	while (j < numProcs && getSchedule(pIndex[j])->getTimeFree() < v) {
-		pIndex[j-1] = pIndex[j];
-		j++;
-	}
-	pIndex[j-1] = temp;
-}
-		
-// re-sort the sorted array.
-void reSortArray(IntArray& avail, int ix)
-{
-	int temp = avail[ix];
-	int j = ix+1;
-	while (j < avail.size() && avail[j] < temp) {
-		avail[j-1] = avail[j];
-		j++;
-	}
-	avail[j-1] = temp;
-}
-
-// Advance the clock until the free time of processor of pIndex[ix].
-// The nodes to be finished during the clock-advancement may make
-// some descendents runnable; put them into the runnable list.
-void HuParProcs :: advanceClock(int ix)
-{
-	// If clock is not advanced, just return.
-	if (clock >= getSchedule(pIndex[ix])->getTimeFree()) return;
-
-	// Advance the clock
-	int k = ix;
-	HuUniProc* proc = getSchedule(pIndex[k]);
-	clock = proc->getTimeFree();
-
-	// Update the runnable node list to include all descendents
-	// of "temp" which have become fireable as a result of "temp"
-	// being finished its execution.
-	do {	
-		int t = proc->getNextFiringTime();
-		while ((clock >= t) && (t > 0)) {
-			NodeSchedule* ns = proc->nextNodeToBeFired();
-			HuNode* temp = (HuNode*) ns->getNode();
-			if (temp) {
-				if (ns->getDuration()) {
-					temp->setAssignedFlag();
-				}
-				if (temp->alreadyAssigned()) {
-					proc->setFiringInfo(ns,
-						temp->getFinishTime());
-					fireNode(temp,k);
-				}
-			}
-			t = proc->getNextFiringTime();
-		}
-		k++;
-		if (k < numProcs) proc = getSchedule(pIndex[k]);
-	} while (k < numProcs);
-}
-			
-// fire a node and add runnable descendants into the list.
-void HuParProcs :: fireNode(HuNode* n, int preferredProc) {
-	EGGateLinkIter nextKid(n->descendants);
+	EGGateLinkIter nextKid(temp->descendants);
 	EGGate* d;
 	while ((d = nextKid++) != 0) {
 		HuNode* pd = (HuNode*) d->farEndNode();
 		if (pd->fireable()) {
-			pd->setAssignedFlag();
+			pd->setAvailTime();
+			pd->setPreferredProc(pix);
 			myGraph->sortedInsert(myGraph->runnableNodes,pd,1);
-			pd->setPreferredProc(pIndex[preferredProc]);
 		}
 	}
 }
 
-void HuParProcs :: checkPreferredProc(int pNum) 
-{
-	HuUniProc* proc = getSchedule(pNum);
-	if (proc->getTimeFree() <= clock) {
-		// yes, available
-		int temp = 0;
-		while (pIndex[temp] != pNum) temp++;
-		pIndex[temp] = pIndex[0];
-		pIndex[0] = pNum;
-	} else {
-		// no, check whether we may exchange the nodes or not.
-		if (proc->getPrevTime() == clock) {
-			HuNode* qn = (HuNode*) proc->getCurrentNode();
-			HuNode* q = (HuNode*) getSchedule(pIndex[0])->getCurrentNode();
-			if ((qn->getPreferredProc() != pNum) && (qn != q)) {
-				// exchange the nodes.
-				int length = proc->getAvailTime() - clock;
-				proc->removeLastSchedule();
-				proc->setAvailTime(clock);
-				proc->setTimeFree(clock);
-				assignNode(qn, length, pIndex[0]);
-				setIndex(0);
-				// adjust processor availability pattern
-				int temp = 0;
-				while (pIndex[temp] != pNum) temp++;
-				pIndex[temp] = pIndex[0];
-				pIndex[0] = pNum;
-			}
-		}
-	}
-}		
-				
-		
-
 /*****************************************************************
-		MAIN SCHEDULE ROUTINES
+		Scheduling ATOMIC block
  ****************************************************************/
 
 // schedule a normal atomic block.
-void HuParProcs :: scheduleSmall(HuNode* pd)
+void HuParProcs :: scheduleSmall(DLNode* node)
 {
-	// advance the global clock if necessary
-	advanceClock(0);
+	HuNode* pd = (HuNode*) node;
 
-	// check OSOP option
-	if (pd->sticky() && pd->invocationNumber() > 1) {
-		ParNode* firstN = (ParNode*) pd->myMaster()->myMaster();
-		int whichP =  firstN->getProcId();
-		assignNode(pd, pd->myExecTime(), whichP);
+	// get the earliest available processor or the designated processor
+	// If the processor is not available at the designated time,
+	// put the node to the runnable node list with the next
+	// available time.
+	int canProc = -1;
+	int earliest;
+	int targetTime = pd->availTime();
+        if (pd->atBoundary()) {
+		earliest = costAssignedTo(pd, 0, targetTime);
+                if (earliest == targetTime) canProc = 0;
+
+        } else if (pd->sticky() && pd->invocationNumber() > 1) {
+                ParNode* firstN = (ParNode*) pd->myMaster()->myMaster();
+                int pix = firstN->getProcId();
+		earliest = costAssignedTo(pd, pix, targetTime);
+                if (earliest == targetTime) canProc = pix;
+        } else {
+                candidate = mtarget->candidateProcs(this);
+		// get the canProc or the earliest available time
+		int pix = pd->getPreferredProc();
+		earliest = costAssignedTo(pd, pix, targetTime);
+		if (earliest == targetTime) {
+			canProc = pix;
+		} else {
+			int bound = candidate->size();
+			for (int i = 0; i < bound; i++) {
+				pix = candidate->elem(i);
+				int cost = costAssignedTo(pd, pix, targetTime);
+				if (cost == targetTime) {
+					canProc = pix;
+					break;
+				} else if (cost < earliest) {
+					earliest = cost;
+				}
+			}
+		}
+        }
+
+	// check whether canProc is set or not.
+	// If set, schedule the node. If not, put this node back to the 
+	// runnable node list.
+	if (canProc >= 0) {
+		assignNode(pd, canProc, targetTime);
+		fireNode(pd);
+
+		// renew the states of the graph
+		myGraph->decreaseNodes();
+		myGraph->decreaseWork(pd->myExecTime());
 	} else {
-		// check whether preferredProc is available or not.
-		checkPreferredProc(pd->getPreferredProc());
-
-		// schedule the node on the first available processor
-		assignNode(pd, pd->myExecTime(), pIndex[0]);
-
-		if (pd->myExecTime() == 0) fireNode(pd,0);
+		pd->setAvailTime(earliest);
+		myGraph->sortedInsert(myGraph->runnableNodes, pd, 1);
 	}
-
-	// renew the states of the graph
-	myGraph->decreaseNodes();
-	myGraph->decreaseWork(pd->myExecTime());
-
-	// renew the pattern of processor availability.
-	renewPatternIndex(0);
 }
 
-// Schedule a big block (CGWormhole, or dynamic construct).
-// There will be idle time at the front of this block due to the
-// mismatched pattern of processor availability.
-// We try to minimise this slot by scheduling other runnable nodes
-// into this idle time slot if possible.
-void HuParProcs :: scheduleBig(HuNode* node, int opt, IntArray& avail)
-{
-	CGStar* wormStar = (CGStar*) node->myStar();
-	CGWormhole* worm = wormStar->myWormhole();
-	Profile& pf = worm->getProfile(opt);
-	// set-up the correct "minWork" member of the graph.
-	int small = myGraph->smallestExTime();
-	int optNum = pf.getEffP();
+void HuParProcs :: scheduleIPC(int) {}
+void HuParProcs :: prepareComm(DLNode*) {}
 
-	// check whether preferredProc is available or not.
-	advanceClock(0);
-	checkPreferredProc(node->getPreferredProc());
-	int shift = pf.frontIdleLength(avail);
+/*****************************************************************
+		Scheduling BIG block
+ ****************************************************************/
 
-	// schedule the runnable nodes into the idle slot
-	// at the front on all assigned processors.
-	for (int i = 0; i < optNum; i++) {
+int HuParProcs :: determinePPA(DLNode* node, IntArray& avail) {
+	HuNode* pd = (HuNode*) node;
 
-		// The amount of the idle time
-		int idle = shift - avail[i] + pf.getStartTime(i);
+	// examine candidate processors
+	candidate = mtarget->candidateProcs(this);
 
-		// advance the global clock
-		advanceClock(i);	
+	// decide the starting processor assigned to the construct.
+	int earliest;
+	int optId = decideStartingProc(pd, &earliest);
+	
+	if (optId < 0) {
+		pd->setAvailTime(earliest);
+		myGraph->sortedInsert(myGraph->runnableNodes, pd, 1);
+		return -1;
+	} 
 
-		// scan the runnable nodes for best-fit.
-		HuNode* tiny;
-		while ((tiny = myGraph->findTinyBlock(idle)) != 0) {
-			// schedule it.
-			assignNode(tiny, tiny->myExecTime(), pIndex[i]);
-			// renew the states of the graph
-			myGraph->decreaseNodes();
-			myGraph->decreaseWork(tiny->myExecTime());
-			// renew the "avail" array and patternAvail array.
-			renewPatternIndex(i);
-			avail[i] += tiny->myExecTime();
-			reSortArray(avail,i);
-			// get the idle time again.
-			idle = shift - avail[i] + pf.getStartTime(i);
-			advanceClock(i);
-			if (tiny->myExecTime() <= myGraph->getMinWork())
-				small = myGraph->smallestExTime();
+	// sort the processor indices with available time.
+	sortWithAvailTime(earliest);
+
+	// fill out the array.
+	for (int i = numProcs-1; i >= 0; i--) {
+		int temp = getProc(pIndex[i])->getAvailTime();
+		if (temp > earliest) {
+			avail[i] = temp - earliest;     // positive.
+		} else {
+			if (pIndex[i] == optId) {
+				int t = pIndex[0];
+				pIndex[0] = optId;
+				pIndex[i] = t;
+				temp = getProc(t)->getAvailTime();
+			}
+			avail[i] = temp - earliest;     // non-positive.
 		}
 	}
-
-	// schedule the idle node and the profile into the processors.
-	int nonzero = 1;
-	for (i = optNum - 1; i >= 0; i--) {
-		// amount of idle time
-		int idle = shift - avail[i] + pf.getStartTime(i);
-		// schedule idle time
-		getSchedule(pIndex[i])->incTimeFree(idle);
-		// schedule the profile
-		int leng = pf.getFinishTime(i) - pf.getStartTime(i);
-		if (leng > 0) nonzero--;
-		assignNode(node, leng, pIndex[i]);
-		setIndex(i);
-		// renew the pattern of processor availability.
-		renewPatternIndex(i);
-	}
-	
-	// renew the states of the graph
-	node->resetAssignedFlag(nonzero);
-	myGraph->decreaseNodes();
-	myGraph->decreaseWork(node->myExecTime());
+	return earliest;
 }
 
-// schedule idle time.
-int HuParProcs :: scheduleIdle() {
-	
-	// Determine the amount of idle time
-	int i = 0;
-	while (i < numProcs && getSchedule(pIndex[i])->getTimeFree() <= clock) 
-		i++;
-	if (i >= numProcs) {
-		return FALSE;
+int HuParProcs :: decideStartingProc(DLNode* node, int* earliest) {
+
+	HuNode* pd = (HuNode*) node;
+
+	int targetTime = pd->availTime();
+	int canProc = -1;
+
+	int pix = pd->getPreferredProc();
+	*earliest = getProc(pix)->getAvailTime();
+	if ((*earliest) <= targetTime) {
+		canProc = pix;
 	} else {
-		advanceClock(i);
-
-		// insert idle time to the processors.
-		// After we insert idle time to some processors, 
-		// we will have more than one processor with 
-		// same "timeFree".  Change the order of the
-		// processor availability so that the processor 
-		// with least amount of the idle time is the 
-		// first available processor among those processors.
-		// This scheme will reduce the communication cost.
-
-		int t = getSchedule(pIndex[i])->getTimeFree();
-		for (int k = i - 1; k >= 0; k--) {
-			getSchedule(pIndex[k])->setTimeFree(t);
+		int bound = candidate->size();
+		for (int i = 0; i < bound; i++) {
+			pix = candidate->elem(i);
+			int cost = getProc(pix)->getAvailTime();
+			if (cost <= targetTime) {
+				canProc = pix;
+				break;
+			} else if (cost < *earliest) {
+				*earliest = cost;
+			}
 		}
-
-		int pN = i + 1;
-		while (pN < numProcs && 
-			getSchedule(pIndex[pN])->getTimeFree() <= t) pN++;
-
-		// Sort the processor index with idle time.
-		// The smallest idle time, the smallest index.
-        	for (i = 1; i < pN; i++) {
-                	int j = i - 1;
-			HuUniProc* up = getSchedule(pIndex[i]);
-                	int x = up->getIdleTime();
-                	int temp = pIndex[i];
-                	while (j >= 0 && 
-				x < getSchedule(pIndex[j])->getIdleTime()) {
-                        	pIndex[j+1] = pIndex[j];
-                        	j--;
-                	}
-                	j++;
-			pIndex[j] = temp;
-        	}
-		return TRUE;
 	}
+	return canProc;
 }
+

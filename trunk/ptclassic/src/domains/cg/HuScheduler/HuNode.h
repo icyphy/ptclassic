@@ -4,7 +4,7 @@
 #pragma interface
 #endif
 
-#include "ParNode.h"
+#include "DLNode.h"
 
 /*****************************************************************
 Version identification:
@@ -46,7 +46,7 @@ Date of last revision:
 // it is derived from the expanded graph node, it contains additional
 // data members which are used for Hu-level scheduling.
 
-class HuNode : public ParNode {
+class HuNode : public DLNode {
 
 public: 
 	// Constructor declaration
@@ -55,20 +55,24 @@ public:
 	// Constructor used for idle nodes or communication nodes
 	HuNode(int type);
 
-	// Indicate that this node has been scheduled.
-	void resetAssignedFlag(int i) { assignedFlag = i; }
-	void setAssignedFlag() { assignedFlag++; }
-	int alreadyAssigned() { return (assignedFlag > 0)? TRUE : FALSE; }
+	// set and get the time-to-be-scheduled
+	int availTime() { return timeTBS; }
+	void setAvailTime(int t) { timeTBS = t; }
+	void setAvailTime();
 
 	// get and set the preferredProc
 	int getPreferredProc() { return preferredProc; }
 	void setPreferredProc(int i) { preferredProc = i; }
 
+	// redefine
+	int getLevel() { return StaticLevel; }
+
 private:
-	// Indicate whether or not this node has been assigned.
-	int assignedFlag;
 	// preferred proc id.
 	int preferredProc;
+
+	// time to be scheduled
+	int timeTBS;
 };
 
 #endif

@@ -38,9 +38,8 @@ Date of last revision:
 *****************************************************************/
 
 #include "NamedObj.h"
-#include "HuUniProc.h"
 #include "HuGraph.h"
-#include "ParProcessors.h"
+#include "DLParProcs.h"
 
 /////////////////////////
 // class HuParProcs //
@@ -48,73 +47,29 @@ Date of last revision:
 
 // A class for managing the parallel processor schedules.
 
-class HuParProcs : public ParProcessors {
+class HuParProcs : public DLParProcs {
 
 public:
-	// constructor
 	HuParProcs(int pNum, MultiTarget* t);
 
-	~HuParProcs();
-
-	// initialize
-	void initialize(HuGraph*);
-
-	// get the i-th processor. Processors are indexed from 0 to
-	// numProcs-1.
-	HuUniProc* getSchedule(int num) { return &(schedules[pId[num]]); }
-
-	UniProcessor* getProc(int num); 
+	/* virtual */ void scheduleSmall(DLNode*);
 
   	// determine the pattern of processor availability before scheduling
   	// a dynamic construct (or non-atomic node).
-  	void determinePPA(IntArray& avail);
+  	/* virtual */ int determinePPA(DLNode*, IntArray&);
 
-	// renew PPA since the processor of "spot" index got
-	// assigned a new node.
-	void renewPatternIndex(int spot);
-
-	// Before schedule an atomic block, check whether the preferred
-	// processor is available or not.  If available, assign the node
-	// to the processor.  If not available, but exchangeable, exchange
-	// the scheduled node.
-	void checkPreferredProc(int pNum);
-
-	// schedule blocks.  Depending on the blocks, there are four
-	// different methods. Return the current scheduler clock.
-	// scheduleSmall: schedule a normal atomic block on a first
-	//		  available processor.
-	// scheduleBig: schedule a non-atomic block (such as dynamic 
-	//		construct) using more than one processors.
-	// scheduleIdle: When there is no runnable block at current time,
-	//		 increase the scheduler clock to make the first
-	//		 available processor finish the current execution
-	//		 and provide some runnable nodes.
-	void scheduleSmall(HuNode* pd);
-	void scheduleBig(HuNode* node, int opt, IntArray& avail);
-	int scheduleIdle();
+protected:
+	// Fire a node. Check the runnability of descendants.
+	/* virtual */ void fireNode(DLNode*);
 
 private:
-	// global clock
-	int clock;
+	// redefine virtual methods
+	/* virtual */ void prepareComm(DLNode*);	//  do nothing
+	/* virtual */ void scheduleIPC(int);	//  do nothing
 
-	// schedule a node into a designated processor
-	void assignNode(HuNode* pd, int leng, int pNum);
-
-	// The program graph to be scheduled
-	HuGraph* myGraph;
-
-	// processors
-	HuUniProc* schedules;
-
-	// advance the global clock, and identify the nodes which become
-	// runnable at that time.
-	void advanceClock(int ix);
-
-	// set the processor index for big blocks.
-	void setIndex(int v);
-
-	// fire a node and add runnable descendants into the list.
-	void fireNode(HuNode*, int);
+	// Among candidate processors, choose a processor that can execute
+	// the node earliest.
+	/* virtual */ int decideStartingProc(DLNode*, int*);
 };
 
 #endif
