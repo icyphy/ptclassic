@@ -31,7 +31,7 @@ limitation of liability, and disclaimer of warranty provisions.
         defstate {
 		name {geometry}
 		type{string}
-                default { "600x400+0+0" }
+                default { "720x400+0+0" }
                 desc { Specified the location and/or size of the window }
 	}
 	defstate {
