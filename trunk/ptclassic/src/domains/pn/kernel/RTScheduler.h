@@ -23,8 +23,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 */
 /*  Version $Id$
-    Programmer:		T.M. Parks
-    Date of creation:	7 January 1993
+    Author:	T.M. Parks
+    Created:	7 January 1993
 */
 
 #ifndef _RTDFScheduler_h
@@ -40,25 +40,23 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class RTDFScheduler : public MTDFScheduler
 {
 public:
-    // Constructor.
-    RTDFScheduler();
-
-    // Initialization.
-    void setup();
-
     // Run (or continue) the simulation.
     int run();
 
     // Current time.
-    /* virtual */ void setCurrentTime(double);
-    /* should be virtual? */ double now() const;
+    /*virtual*/ void setCurrentTime(double);
+    double now();
+
+    // Delay used for sleeping Threads.
+    /*virtual*/ TimeVal delay(TimeVal);
 
 protected:
     // Select Thread function for a Star.
-    /* virtual */ void (*thread(MTDFStar*))(MTDFStar*);
+    /*virtual*/ void (*selectThread(MTDFStar*))(MTDFStar*);
 
     // Thread functions.
     static void periodicThread(MTDFStar*);
+    static void sourceThread(MTDFStar*);
 
 private:
     Clock clock;
