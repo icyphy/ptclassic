@@ -1,4 +1,4 @@
--*-Mode:text-*- -[Thu Feb 27 22:30:08 1997 by cxh]-
+-*-Mode:text-*- -[Fri Feb 28 08:22:25 1997 by cxh]-
 Version: $Id$
 
 src/gnu/README
@@ -87,7 +87,16 @@ HP
 	HPUX10.01 comes with a broken version of cc that is sufficient
 	to bootstrap gcc.
 
-	To install gcc under HPUX10.20, you need to have GNU sed,
+	* If you are using the unbundled ansi-C compiler you should
+	probably check http://us-support.external.hp.com/ for patches.
+        In a vanilla HPUX-10.20 installation, we installed
+	PHSS_9855 - s700_800 10.X HP C++ (A.10.24) with a correct eh/lib++.a
+	PHSS_9400 - s700_800 10.20 ld(1) cumulative patch
+	PHSS_9927 - s700_800 10.X ANSI C compiler cumulative patch
+	PHKL_8693 - s700 10.20 sys/time.h fix for select(2)/C++ defects
+
+
+	* To install gcc under HPUX10.20, you need to have GNU sed,
 	If you don't use GNU sed, then fixincludes will fail under
 	HPUX10.20 with some unterminated #if - #endif pairs.
 
@@ -118,9 +127,20 @@ HP
 	ptuser@hewlett 19% sed -V
 	GNU sed version 2.05
 
-	The gcc-2.7.2.2 sources were patched with
+	* The gcc-2.7.2.2 sources were patched with
 	libg++-2.7.2-hppa-gcc-fix which fixes a problem with 
 	building shared versions of libg++ and libstdc++ on the HP.
+	The patch came from
+	 ftp://ftp.cygnus.com/pub/g++/libg++-2.7.2-hppa-gcc-fix
+	
+	Without this error, you will see an error while linking
+	libstdc++.sl:
+
+	gcc -fPIC -shared -o libstdc++.sl `cat piclist` 
+	collect2: ld returned 1 exit status
+	/usr/bin/ld: Procedure labels require the P' selector - use
+		the P' selector on code symbol "L$0010" in file
+		pic/exceptioni.o
 
 Solaris
 -------
