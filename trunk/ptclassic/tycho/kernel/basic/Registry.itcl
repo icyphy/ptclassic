@@ -34,18 +34,20 @@
 #### deregister
 # Deregister a registered entity.
 #
-# <ul>
-# <li><b>menubar</b> _menubar_:
+# <dl>
+# <dt><b>menubar</b> _menubar_
+# <dd>
 # Deregister a menubar. See
 # See <a href="Registry.html#deregisterMenubar proc of ::tycho::Registry class">
 # ::tycho::Registry::deregisterMenubar</a>.
 #
-# <li><b>window</b> _tag_ ?_window_?:
+# <dt><b>window</b> _tag_ ?_window_?
+# <dd>
 # Deregister a window or windows. See
 # See <a href="Registry.html#deregisterWindow proc of ::tycho::Registry class">
 # ::tycho::Registry::deregisterWindow</a>.
 #
-# </ul>
+# </dl>
 #
 ensemble ::tycho::deregister {
     option menubar {menubar} {
@@ -62,8 +64,9 @@ ensemble ::tycho::deregister {
 # Registry class and should be used instead of direct access
 # to its procedures. Options are:
 #
-# <ul>
-# <li><b>category</b> _type_ _name__ ?_option value_ ...?:
+# <dl>
+# <dt><b>category</b> _type_ _name__ ?_option value_ ...?
+# <dd>
 # Create a new category of editor. The category of an editor
 # is as indicated by the *-category* option to the *mode*
 # option of this procedure. The second argument is the
@@ -73,7 +76,8 @@ ensemble ::tycho::deregister {
 # to create a new editor or to raise an existing editor,
 # according to the _type_.
 #
-# <li><b>contents</b> _mode_ ?_arg_ ...?:
+# <dt><b>contents</b> _mode_ ?_arg_ ...?
+# <dd>
 # Register directory contents with the given file mode.
 # By "directory contents" we mean a list of file or directory names
 # that may exist inside a directory. Th first argument is the
@@ -87,7 +91,8 @@ ensemble ::tycho::deregister {
 # the command corresponding to that mode. The directory must
 # contain <i>all</i> of the specified contents items to be recognized.
 #
-# <li><b>filenames</b> _mode_ ?_arg_ ...?:
+# <dt><b>filenames</b> _mode_ ?_arg_ ...?
+# <dd>
 # Register one or more file names with a given file mode.
 # Any future open-file command (via the <code>::tycho::openContext</code>
 # procedure) will recognize a file that has one of the
@@ -96,38 +101,44 @@ ensemble ::tycho::deregister {
 # arguments are files that are to be opened (by default) in that
 # mode.
 #
-# <li><b>extensions</b> _mode_ ?_arg_ ...?:
+# <dt><b>extensions</b> _mode_ ?_arg_ ...?
+# <dd>
 # Register one or more file extensions for a given mode. The
 # mode is the first argument; all following arguments are valid
 # file extensions.  Note that the leading
 # period is considered part of the extension, as in ".itcl".
 #
-# <li><b>help</b> _name_ ?_option value_ ...?:
+# <dt><b>help</b> _name_ ?_option value_ ...?
+# <dd>
 # Register an entry for the Help menus.
 # See <a href="Registry.html#registerHelp proc of ::tycho::Registry class">
 # ::tycho::Registry::registerHelp</a>.
 #
-# <li><b>menubar</b> _menubar_ ?_owner_?:
+# <dt><b>menubar</b> _menubar_ ?_owner_?
+# <dd>
 # Register a menubar containing Window and Help menus.
 # See <a href="Registry.html#registerMenubar proc of ::tycho::Registry class">
 # ::tycho::Registry::registerMenubar</a>.
 #
-# <li><b>mode</b> _mode_ ?_option value_ ...?:
+# <dt><b>mode</b> _mode_ ?_option value_ ...?
+# <dd>
 # Register a new file mode.
 # See <a href="Registry.html#registerMode proc of ::tycho::Registry class">
 # ::tycho::Registry::registerMode</a>.
 #
-# <li><b>protocol</b> _protocol_ ?_option value_ ...?:
+# <dt><b>protocol</b> _protocol_ ?_option value_ ...?
+# <dd>
 # Register a new protocol.
 # See <a href="Registry.html#registerProtocol proc of ::tycho::Registry class">
 # ::tycho::Registry::registerProtocol</a>.
 #
-# <li><b>window</b> _window_ _tag_ ?_option value_ ...?:
+# <dt><b>window</b> _window_ _tag_ ?_option value_ ...?
+# <dd>
 # Register a viewer widget.
 # See <a href="Registry.html#registerWindow proc of ::tycho::Registry class">
 # ::tycho::Registry::registerWindow</a>.
 #
-# </ul>
+# </dl>
 #
 ensemble ::tycho::register {
     option category {type name args} {
@@ -168,14 +179,16 @@ ensemble ::tycho::register {
 #### registered
 # Test if an entity of some type is registered. Options are:
 #
-# <ul>
-# <li><b>mode</b> _mode_:
+# <dl>
+# <dt><b>mode</b> _mode_
+# <dd>
 # Test if the given mode is registered.
 #
-# <li><b>protocol</b> _protocol_:
+# <dt><b>protocol</b> _protocol_
+# <dd>
 # Test if the given protocol is registered.
 #
-# </ul>
+# </dl>
 #
 ensemble ::tycho::registered {
     option mode {mode} {
@@ -190,50 +203,60 @@ ensemble ::tycho::registered {
 #### registry
 # Query for registered information. Options are:
 #
-# <ul>
-# <li><b>filemode</b> _filename_:
+# <dl>
+# <dt><b>filemode</b> _filename_
+# <dd>
 # Return the default file mode registered with a given path name.
 # See <a href="Registry.html#registeredFileMode proc of ::tycho::Registry class">
 # ::tycho::Registry::registeredFileMode</a>.
 #
-# <li><b>isopen</b> _tag_ ?_window_?:
+# <dt><b>isopen</b> _tag_ ?_window_?
+# <dd>
 # See if the tag was previously registered with
 # <code>::tycho::register window</code>. If the _window_ argument
 # is supplied, the tag and window together are tested, otherwise
 # any entry that matches the tag is returned. The name of this option
 # reflects the fact that tags are usually file names.
 #
-# <li><b>modecget</b> _mode_ _option_:
+# <dt><b>modecget</b> _mode_ _option_
+# <dd>
 # Get an option of a mode, as passed to
 # <code>::tycho::register mode</code>.
 #
-# <li><b>modeconfigure</b> _mode_ ?_option_ _value_...?:
+# <dt><b>modeconfigure</b> _mode_ ?_option_ _value_...?
+# <dd>
 # Configure options of a mode.
 #
-# <li><b>protocolcget</b> _protocol_ _option_:
+# <dt><b>protocolcget</b> _protocol_ _option_
+# <dd>
 # Get an option of a protocol, as passed to
 # <code>::tycho::register protocol</code>.
 #
-# <li><b>protocolconfigure</b> _protocol_ ?_option_ _value_...?:
+# <dt><b>protocolconfigure</b> _protocol_ ?_option_ _value_...?
+# <dd>
 # Configure options of a protocol.
 #
-# <li><b>viewmode</b> _class_:
+# <dt><b>viewmode</b> _class_
+# <dd>
 # Given a class, as passed as the *-class* option to
 # <code>::tycho::register mode</code>, return the mode
 # to which it was registered. Null if the class was not
 # registered.
 #
-# <li><b>windowcget</b> _tag_ _window_ _option_:
+# <dt><b>windowcget</b> _tag_ _window_ _option_
+# <dd>
 # Get an option of a window, as passed to
 # <code>::tycho::register window</code>.
 #
-# <li><b>windowconfigure</b> _tag_ _window_ ?_option_ _value_...?:
+# <dt><b>windowconfigure</b> _tag_ _window_ ?_option_ _value_...?
+# <dd>
 # Configure options of a window.
 #
-# <li><b>windows</b> _tag_:
+# <dt><b>windows</b> _tag_
+# <dd>
 # Return all windows registered with the given _tag_.
 #
-# </ul>
+# </dl>
 #
 ensemble ::tycho::registry {
     option filemode {filename} {
