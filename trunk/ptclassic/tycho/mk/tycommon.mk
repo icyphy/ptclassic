@@ -314,11 +314,12 @@ $(JZIP): $(JSRCS) $(JCLASS)
 
 jars: $(JARFILE) 
 $(JARFILE): $(JSRCS) $(JCLASS)
-	@if [ "$(JBEANCLASSES)" != "" ]; then \
+	if [ "$(JBEANCLASSES)" != "" ]; then \
 		echo "Creating manifest.tmp"; \
 		rm -f manifest.tmp; \
 		echo ";$(JPACKAGE) $(JVERSION)" > manifest.tmp; \
-		for x in $(JBEANCLASSES); do \
+		set $(JBEANCLASSES); \
+		for x do \
 			echo "Name: $$x" >> manifest.tmp; \
 			echo "Java-Bean: True" >> manifest.tmp; \
 		done; \
