@@ -68,6 +68,7 @@ source $ptolemy/lib/tcl/utilities.tcl
 source $ptolemy/lib/tcl/dialog.tcl
 source $ptolemy/lib/tcl/ptkBind.tcl
 source $ptolemy/lib/tcl/ptkControl.tcl
+source $ptolemy/lib/tcl/ptkRunAllDemos.tcl
 source $ptolemy/lib/tcl/ptkParams.tcl
 source $ptolemy/lib/tcl/ptkBarGraph.tcl
 source $ptolemy/lib/tcl/ptkPrfacet.tcl
