@@ -47,8 +47,9 @@ void DEStar :: prepareForScheduling() {
 
 void DEStar :: fire() {
 	go();
+	BlockPortIter next(*this);
 	for (int k = numberPorts(); k > 0; k--) 
-		nextPort().sendData();
+		(next++)->sendData();
 }
 
 // DERepeatStar constructor
