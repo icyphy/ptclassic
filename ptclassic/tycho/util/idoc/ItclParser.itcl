@@ -866,8 +866,6 @@ body ::tycho::ItclParser::parseClass {class body} {
 		set parents [$_classmodels($class) modelcget -inherits]
 		lappend parents $construct
 		$_classmodels($class) modelconfigure -inherits $parents
-                puts [list $_classmodels($class) parent $construct]
-                # $_classmodels($class) parent $construct
 		continue
             }
             # No more parents, parse this.
