@@ -117,28 +117,33 @@ void CGStar :: setTarget(Target* t)
 	Star::setTarget(t);
 	codeblockSymbol.setSeparator(myTarget()->separator);
 	starSymbol.setSeparator(myTarget()->separator);
-	myCode = getStream("myCode");
-	procedures = getStream("procedures");
+	myCode = getStream(CODE);
+	procedures = getStream(PROCEDURE);
 }
 
 // Add a string to the Target code.
-void CGStar::addCode (const char* string,const char* stream, const char* name)
+int CGStar::addCode (const char* string,const char* stream, const char* name)
 {
-	CodeStream* c;
-	if (stream == NULL) *myCode << processCode(string);
-	else if (c = getStream(stream)) {
-		StringList foo = processCode(string);
-		if (name == NULL) *c << foo;
-		else c->put(foo,name);
-	} else {
-		Error::abortRun(*this, " unknown stream: ", stream);
+	CodeStream* cs;
+	if (stream == NULL) cs = myCode;
+	else cs = getStream(stream);
+	if (cs != NULL)
+	{
+	    StringList code = processCode(string);
+	    return cs->put(code, name);
+	}
+	else
+	{
+	    Error::abortRun(*this, " unknown stream: ", stream);
+	    return FALSE;
 	}
 }
 
 // Add a procedure to the target procedure stream.
-void CGStar::addProcedure(const char* code, const char* name)
+int CGStar::addProcedure(const char* string, const char* name)
 {
-	procedures->put(code,name);
+    StringList code = processCode(string);
+    return procedures->put(code, name);
 }
 
 // Add a comment to a target stream.
@@ -314,7 +319,7 @@ StringList CGStar::expandMacro(const char* func, const StringList& argList)
 	else if (matchMacro(func, argList, "label", 1)) s = codeblockSymbol.lookup(arg++);
 	else if (matchMacro(func, argList, "codeblockSymbol", 1)) s = codeblockSymbol.lookup(arg++);
 	else if (matchMacro(func, argList, "starSymbol", 1)) s = starSymbol.lookup(arg++);
-	else if (matchMacro(func, argList, "sharedSymbol", 1)) s = lookupSharedSymbol(arg++,arg++);
+	else if (matchMacro(func, argList, "sharedSymbol", 2)) s = lookupSharedSymbol(arg++,arg++);
 	else macroError(func, argList);
 
 	return s;
