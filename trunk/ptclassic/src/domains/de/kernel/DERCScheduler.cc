@@ -262,7 +262,8 @@ int DERCScheduler :: run () {
 		ds->startNewPhase();
 	    }
 	    // put the LinkList into the free pool for memory management.
-	   // eventQ.putFreeLink(f);
+   	    // LL: uncommented 9/16/99
+	    eventQ.putFreeLink(f);
             
 	    // Check if there is another event launching onto the
 	    // same star with the same time stamp (not the same port)...
@@ -294,14 +295,16 @@ int DERCScheduler :: run () {
 		    if (tl) {
 		        int success = ((InDEPort*) tl)->getFromQueue(ee->p);
 		        if (success) {
-		           // eventQ.putFreeLink(h);
+			   // LL: uncommented 9/16/99
+		           eventQ.putFreeLink(h);
 			}
 		        else {
 			    h->next = store;
 			    store = h;
 		        }
 		    } else if (!tl) {
-		         // eventQ.putFreeLink(h);
+			 // LL: uncommented 9/16/99
+		         eventQ.putFreeLink(h);
 		    } 
 	        } else {
 		    // need to put back since we did a get
@@ -357,7 +360,8 @@ int DERCScheduler :: fetchEvent(InDEPort* p, double timeVal)
             // if same destination star with same time stamp..
             if (tl == p) {
                 if (tl->getFromQueue(ent->p)){
-                    // eventQ.putFreeLink(h);
+		      // LL: uncommented 9/16/99
+                    eventQ.putFreeLink(h);
                 }
                 else
                     eventQ.pushBack(h);
