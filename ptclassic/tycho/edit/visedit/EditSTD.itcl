@@ -242,7 +242,7 @@ body ::tycho::EditSTD::editArc {arc} {
 		if "![info exists edgeInfo($arc,output,$outName)]" {
 		    set edgeInfo($arc,output,$outName) 0
 		} 
-		$w addQuery outputFor$outName "Output for \"${outName}\":"\
+		$w line outputFor$outName "Output for \"${outName}\":"\
 			$edgeInfo($arc,output,$outName)
 	    }
 
@@ -250,7 +250,7 @@ body ::tycho::EditSTD::editArc {arc} {
 		if "![info exists edgeInfo($arc,action,$internalName)]" {
 		    set edgeInfo($arc,action,$internalName) 0
 		} 
-		$w addQuery actionFor$internalName "Action for\
+		$w line actionFor$internalName "Action for\
 			\"$internalName\":" \
 			$edgeInfo($arc,action,$internalName)
 	    }
@@ -258,13 +258,13 @@ body ::tycho::EditSTD::editArc {arc} {
 	    if "![info exists edgeInfo($arc,preemptive)]" {
 		set edgeInfo($arc,preemptive) NO
 	    } 
-	    $w addRadioQuery preemptive {Preemptive:} {NO YES}\
-		    $edgeInfo($arc,preemptive)
+	    $w radio preemptive {Preemptive:} {NO YES}\
+		$edgeInfo($arc,preemptive)
 
 	    if "![info exists edgeInfo($arc,entryType)]" {
 		set edgeInfo($arc,entryType) History
 	    } 
-	    $w addRadioQuery entryType {Entry Type:} {History Default}\
+	    $w radio entryType {Entry Type:} {History Default}\
 		    $edgeInfo($arc,entryType)
 	}
 
@@ -361,7 +361,7 @@ body ::tycho::EditSTD::editState {node} {
 	    if "![info exists nodeInfo($node,machine)]" {
 		set nodeInfo($node,machine) ""
 	    }
-	    $w addQuery machine {Internal Machine:} $nodeInfo($node,machine)
+	    $w line machine {Internal Machine:} $nodeInfo($node,machine)
 	}
 
 	$w centerOnScreen
