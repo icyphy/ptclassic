@@ -19,7 +19,8 @@ GNUINCLUDE = /usr/gnu/lib/g++-include
 
 LIBSRCS=Star.cc Connect.cc Block.cc Galaxy.cc Scheduler.cc SpaceWalk.cc \
 	Output.cc Fraction.cc Universe.cc StringList.cc Particle.cc Help.cc \
-	Command.cc KnownBlock.cc Tokenizer.cc InterpGalaxy.cc Interpreter.cc
+	Command.cc KnownBlock.cc Tokenizer.cc InterpGalaxy.cc Interpreter.cc \
+	NamedObj.cc
 
 DEMOSRCS=BlockDemo.cc DataStructDemo.cc FractionDemo.cc MultiPortDemo.cc \
 	SchedulerDemo.cc SpaceWalkDemo.cc StarDemo.cc StringListDemo.cc \
@@ -29,7 +30,7 @@ SRCS=$(LIBSRCS) interpmain.cc $(DEMOSRCS)
 
 LIBOBJS=Star.o Connect.o Block.o Galaxy.o Scheduler.o SpaceWalk.o  Output.o \
 	Fraction.o Universe.o StringList.o Particle.o Help.o Command.o \
-	KnownBlock.o Tokenizer.o InterpGalaxy.o Interpreter.o
+	KnownBlock.o Tokenizer.o InterpGalaxy.o Interpreter.o NamedObj.o
 
 # LIBS is really only needed for the sun4 version, but it doesn't hurt
 # the sun3 version.  We need it for stars that do math library functions.
