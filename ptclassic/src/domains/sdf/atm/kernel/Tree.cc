@@ -29,6 +29,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 */
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
 
 #include "Tree.h"
 #include <ACG.h>
