@@ -55,7 +55,7 @@ public:
 class InDEPort : public DEPortHole
 {
 public:
-	int isItInput () {return TRUE; }
+	int isItInput () const {return TRUE; }
 
 	// Get particles from input Geodesic and set the timeStamp
 	void grabData();
@@ -73,7 +73,7 @@ public:
 class OutDEPort : public DEPortHole
 {
 public:
-	int isItOutput() {return TRUE; }
+	int isItOutput() const {return TRUE; }
 
 	// Send a data into the output Geodesic and signal an event to
 	// the event queue.
@@ -101,7 +101,7 @@ typedef class MultiPortHole MultiDEPort;
  
 class MultiInDEPort : public MultiDEPort {
 public:
-        int isItInput () {return TRUE; }
+        int isItInput () const {return TRUE; }
  
         // Add a new physical port to the MultiPortHole list
         PortHole& newPort();
@@ -116,10 +116,28 @@ public:
 
 class MultiOutDEPort : public MultiDEPort {     
 public:
-        int isItOutput () {return TRUE; }
+        int isItOutput () const {return TRUE; }
 
         // Add a new physical port to the MultiPortHole list
         PortHole& newPort();
+};
+
+// Iterators for MultiDEPorts -- they aren't required but make coding
+// stars a bit cleaner.  They "know" that MultiInDEPorts have InDEPorts
+// and MultiOutDEPorts have OutDEPorts.
+
+class InDEMPHIter : public MPHIter {
+public:
+	InDEMPHIter(const MultiInDEPort& mph) : MPHIter(mph) {}
+	InDEPort* next() { return (InDEPort*) MPHIter::next();}
+	InDEPort* operator++() { return next();}
+};
+
+class OutDEMPHIter : public MPHIter {
+public:
+	OutDEMPHIter(const MultiOutDEPort& mph) : MPHIter(mph) {}
+	OutDEPort* next() { return (OutDEPort*) MPHIter::next();}
+	OutDEPort* operator++() { return next();}
 };
 
 #endif
