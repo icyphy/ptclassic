@@ -185,7 +185,7 @@ KcLoadInit (const char* argv0) {
 static int
 linkObject (const char* ofile) {
 	char buf[512];
-	sprintf (buf, "(link %s)\n", ofile);
+	sprintf (buf, "link %s\n", ofile);
 	KcLog (buf);
 	return Linker::linkObj (ofile);
 }
