@@ -54,19 +54,19 @@ LIB=libsdftclstars.$(LIBSUFFIX)
 # Where star doc files go
 STARDOCDIR = ../../doc/stars
 
-# source files for all stars, using preprocessor
+# source files for all stars, using preprocessor, putting base stars first
 # note that SDFTclScript must be made before stars that depend on it
 PL_SRCS= \
+ SDFTclScript.pl \
+ SDFTkShowValues.pl \
  SDFLMSTkPlot.pl \
  SDFLMSCxTkPlot.pl \
- SDFTclScript.pl \
  SDFTkBarGraph.pl \
  SDFTkBreakPt.pl \
  SDFTkButtons.pl \
  SDFTkMeter.pl \
  SDFTkPlot.pl \
  SDFTkShowBooleans.pl \
- SDFTkShowValues.pl \
  SDFTkSlider.pl \
  SDFTkText.pl \
  SDFTkXYPlot.pl
