@@ -173,6 +173,7 @@ long userOptionWord;
 
 /** Error-check the user input. **/
 	if ((items[1].value[0] == 'f') || (items[1].value[0] == 'F')) {
+		fileName[0] = '\000'; /* Clear previous value. */
 		sscanf(items[2].value, "%s", fileName); /* Get first word. */
 		if (!fileName[0]) {
 			PrintErr("print-facet needs a filename");
