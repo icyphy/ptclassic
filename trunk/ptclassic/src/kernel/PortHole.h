@@ -168,7 +168,8 @@ protected:
 
 };
 
-	
+class EventHorizon;
+
         //////////////////////////////////////////
         // class PortHole
         //////////////////////////////////////////
@@ -178,6 +179,7 @@ protected:
 class PortHole : public GenericPort
 {
 	friend class Geodesic;	// allow Geodesic to access myPlasma
+	friend void EventHorizon::insideConnect(GenericPort&, int);
 public:
 
         // Every PortHole must be initialized with the setPort function
@@ -342,7 +344,7 @@ public:
 	setAlias (MultiPortHole &blockPort) { alias = &blockPort;}
 
 	// Return a new port for connections
-	virtual PortHole& newConnection() { return realPort().newPort();}
+	virtual PortHole& newConnection();
 
 	// Also use this in casting to PortHole.  (Is this what we want?)
 	operator PortHole (){ return newConnection();}
