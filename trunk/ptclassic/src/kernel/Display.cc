@@ -52,13 +52,6 @@ const int MAX_NO_GRAPHS = 64;
 #include <math.h>
 #include "streamCompat.h"
 
-// g++ v1 needs old array-delete syntax.
-#if defined(__GNUG__) && __GNUG__ == 1
-#define IFNEEDED(n) n
-#else
-#define IFNEEDED(n) /* nothing */
-#endif
-
 // constructor initializes streams and filenames
 XGraph :: XGraph () : strm(0), tmpFileNames(0), count(0), blockIamIn(0), ng(0)
 {}
@@ -75,9 +68,9 @@ void XGraph :: zapFiles () {
 			LOG_DEL; delete name;
 		}
 	}
-	LOG_DEL; delete [IFNEEDED(ng)] strm;
-	LOG_DEL; delete [IFNEEDED(ng)] tmpFileNames;
-	LOG_DEL; delete [IFNEEDED(ng)] count;
+	LOG_DEL; delete [] strm;
+	LOG_DEL; delete [] tmpFileNames;
+	LOG_DEL; delete [] count;
 	ng = 0;
 }
 
