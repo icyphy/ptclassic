@@ -239,6 +239,9 @@ jclass:	$(JSRCS) $(JCLASS)
 		done ; \
 	fi
 
+# Compile the classes that require JDK1.1 and later.
+jclass1_1: $(JSRCS1_1) $(JCLASS1_1)
+
 # Build the Java documentation.
 javadocs: doc/codeDoc/tree.html
 jhtml: doc/codeDoc/tree.html
@@ -303,6 +306,8 @@ updatewebsite: $(JDISTS)
 installjdist:
 	$(MAKE) sources
 	$(MAKE) realclean
+	@echo "Compile any classes that require JDK1.1"
+	$(MAKE) JFLAGS=-O jclass1_1 
 	@echo "We must use JDK1.0.2 to compile for use with Netscape"
 	$(MAKE) JAVAHOME=/usr/sww/lang/java-1.0.2 JFLAGS=-O
 	$(MAKE) install
