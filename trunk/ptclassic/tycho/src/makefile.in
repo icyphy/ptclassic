@@ -36,7 +36,7 @@
 # "autoconf" program (constructs like "@foo@" will get replaced in the
 # actual makefile.
 
-DIRS = profile tksteal tyjava tyevent tytimer
+DIRS = profile tksteal tyjava tytimer tytest
 
 srcdir = 	@srcdir@
 
