@@ -115,16 +115,5 @@ QUANTIFY =
 #S56DIR =	$(ROOT)/vendors/s56dsp
 S56DIR =
 
-# Variables for local Matlab installation
-# -- If Matlab is installed, then MATLABDIR points to where MATLAB is installed
-#    and MATLABLIBDIR points to the directory containing the Matlab libraries
-# -- If Matlab is not installed, then MATLABDIR equals $ROOT/src/compat/matlab
-#    and MATLABLIBIDR is undefined
-#MATLABDIR =	/usr/sww/matlab
-#MATLABLIBDIR =	-L$(MATLABDIR)/extern/lib/$(ARCH)
-MATLABDIR =	$(ROOT)/src/compat/matlab
-MATLABLIBDIR =
-
-
 # Used to compile xv.  Use -traditional to avoid varargs problems
 XV_CC =		gcc -traditional
