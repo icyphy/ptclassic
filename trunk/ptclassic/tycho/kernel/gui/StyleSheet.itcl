@@ -522,7 +522,7 @@ body ::tycho::StyleSheet::dfltcget {name attribute} {
 body ::tycho::StyleSheet::namebystyle {style param} {
     set name "style:$style"
     set splat [split $param .]
-    foreach g [lreplace $param end end] {
+    foreach g [lreplace $splat end end] {
 	lappend name "group:$g"
     }
     lappend name "parameter:[lindex $splat end]"
