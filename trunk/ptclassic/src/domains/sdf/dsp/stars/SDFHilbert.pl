@@ -18,7 +18,7 @@ off the response symmetrically at -N/2 and N/2.  This is good enough
 for demos, but for high accuracy we suggest the use of the Parks-McClellan
 algorithm to design a Hilbert transformer filter with the desired
 characteristics.  The "optfir" program supplied with Ptolemy can do this.
-.Ir "optfir"
+.Ir "optfir program"
 	}
 	ccinclude { <math.h> }
 	defstate {

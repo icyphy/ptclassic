@@ -15,7 +15,7 @@ this range, an error is signaled.
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
 	explanation {
-.Id "multiplexing"
+.Id "multiplex"
 	}
 	inmulti {
 		name {input}
