@@ -70,7 +70,7 @@ Header for error handing routines.
     }
 
 extern void ErrClear();
-extern void ErrAdd ARGS((char* msg));
+extern void ErrAdd ARGS((const char* msg));
 extern char* ErrGet();
 
 #endif   /* _ERR_H */
