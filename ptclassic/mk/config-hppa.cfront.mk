@@ -35,8 +35,19 @@ include $(ROOT)/mk/config-default.mk
 # Programs to use
 #
 RANLIB =	ranlib
+# ptlang and islang use yacc, which is not necessarily part of hpux10.x
+YACC =		bison -y
+# islang uses lex, which is not necessarily part of hpux10.x
+LEX =		flex
+# src/kernel/makefile uses this to 
+HP_AS =		/usr/ccs/bin/as
+
 # C++ compiler to use.
 # pigilib/POct.cc needs +a1 to initialize automatic aggregates.
+# The following patch was released in early February, 1996:
+# PHSS_6470      s700_800 10.X HP C++ patch version A.10.11
+# If you don't have this patch, you may have problems compililng VHDLObjList.cc
+# You can get the patch from http://us.external.hp.com/
 CPLUSPLUS = 	CC -I$(ROOT)/src/compat/cfront +a1
 
 # If you turn on debugging (-g) with cfront, expect ptcl and pigiRpc to be
@@ -64,7 +75,8 @@ OCT_DEBUG_FLAGS =
 # is not needed for 3.0.  Apparently -DPOSTFIX_OP= is needed for HPPA CC 3.20,
 # but it is unneeded for HPPA CC 3.50.  You can use 'what /usr/bin/CC'
 # to find out what version of HPPA CC you are using.
-ARCHFLAGS =	-DUSG $(GPPDEBUGFLAGS)
+# If you are running under HPUX9, then remove -DPTHPUX10
+ARCHFLAGS =	-DUSG $(GPPDEBUGFLAGS) -DPTHPUX10
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
 
@@ -72,6 +84,11 @@ GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 # The cc man page says that defining _HPUX_SOURCE gives the same name space
 # compatibility as -Ac
 LOCALCFLAGS =	-DUSG $(CDEBUGFLAGS) -Aa -D_HPUX_SOURCE
+# If you are using gcc and HPUX CC, uncomment the two lines below
+# It turns out that when you order HPUX CC, you don't get a cc compiler
+CC = 		gcc
+LOCALCFLAGS = 	-DUSG
+
 CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
 
@@ -94,11 +111,13 @@ CC_STATIC = 	-Wl,-a,archive
 GNULIB =
 # linker to use for pigi and interpreter
 LINKER =	CC
+# linker to use for programs that are not built with C++ files
+CLINKER = $(CC)
 # startup module
 CRT0 =
 # system libraries (libraries from the environment)
-# /usr/lib/end.o is necessary for debugging with xdb
-SYSLIBS =	-lm /usr/lib/end.o
+# /usr/lib/end.o is necessary for debugging with xdb under hpux9.x
+SYSLIBS =	-lm #/usr/lib/end.o
 
 # system libraries for linking .o files from C files only
 CSYSLIBS = $(SYSLIBS)
