@@ -64,11 +64,8 @@ typedef union ints_or_double {
 } convert;
 	}
 	codeblock (timeincludes) {
-#ifdef TIME_INFO
-#include <sys/fcntl.h>
-#include <sys/resource.h>
-#include <sys/procfs.h>
-#include <unistd.h>
+#ifdef TIME_INFO1
+#include <sys/time.h>
 #endif
 	}
 	codeblock (ipcHandler) {
@@ -129,19 +126,17 @@ en_t global;
 eb_t bundle;
         }
 	codeblock (timedecls) {
-#ifdef TIME_INFO
-int fd;
-char proc[BUFSIZ];
-double timeRun;
-prusage_t beginRun;
-prusage_t endRun;
+#ifdef TIME_INFO1
+hrtime_t timeRun;
+hrtime_t beginRun;
+hrtime_t endRun;
 #endif
 	}
 	codeblock (stardecls) {
-#ifdef TIME_INFO
-double $starSymbol(timeRecv);
-prusage_t $starSymbol(beginRecv);
-prusage_t $starSymbol(endRecv);
+#ifdef TIME_INFO3
+hrtime_t $starSymbol(timeRecv);
+hrtime_t $starSymbol(beginRecv);
+hrtime_t $starSymbol(endRecv);
 #endif
 int $starSymbol(i);
 en_t *$starSymbol(endname);
@@ -160,12 +155,15 @@ if (AM_SetEventMask(bundle, AM_NOTEMPTY) != AM_OK) {
 
         }
 	codeblock (timeinit) {
-#ifdef TIME_INFO
-timeRun = 0.0;
+#ifdef TIME_INFO3
+$starSymbol(timeRecv) = 0.0;
+#endif
+#ifdef TIME_INFO1
+beginRun = gethrtime();
 #endif
 	}
 	codeblock (starinit) {
-#ifdef TIME_INFO
+#ifdef TIME_INFO3
 $starSymbol(timeRecv) = 0.0;
 #endif
 $starSymbol(RecvData) = -0.001;
@@ -198,17 +196,6 @@ for ($starSymbol(i) = 0; $starSymbol(i) < $val(numNodes); $starSymbol(i)++) {
         }
 }
 	}
-	codeblock (openfd) {
-#ifdef TIME_INFO
-sprintf(proc,"/proc/%d", (int)getpid());
-if ((fd = open(proc, O_RDONLY)) == -1)
-	printf("error opening proc\n");
-if (fd == -1)
-       	printf("couldn't open proc\n");
-else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
-       	printf("error getting time\n");
-#endif
-	}
 	initCode {
 		addCode(converttype, "globalDecls", "convert");
 		addGlobal("#define HARDPORT 61114\n", "hardPort");
@@ -225,6 +212,8 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 		"-L$PTOLEMY/lib.$PTARCH -ludpam -lnsl -lsocket -lthread");
 
 		addCode(timeincludes, "include", "timeIncludes");
+		addProcedure(ipcHandler);
+                addProcedure(errorHandler, "CGCNOWam_ErrorHandler");
                 addCode(amdecls, "mainDecls", "amDecls");
 		addCode(timedecls, "mainDecls", "timeDecls");
 		addCode(stardecls, "mainDecls");
@@ -238,13 +227,8 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 	int i, pos;
 
 
-#ifdef TIME_INFO
-        if (fd == -1) {
-                printf("couldn't open proc\n");
-        }
-        else if (ioctl(fd, PIOCUSAGE, &$starSymbol(beginRecv)) == -1) {
-                printf("error getting time\n");
-        }
+#ifdef TIME_INFO3
+        $starSymbol(beginRecv) = gethrtime();
 #endif
 
 	for (i = 0; i < $val(numData); i++) {
@@ -259,37 +243,21 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
                 $starSymbol(RecvData) = -0.001;
 	}
 
-#ifdef TIME_INFO
-        if (fd == -1) {
-                printf("couldn't open proc\n");
-        }
-        else if (ioctl(fd, PIOCUSAGE, &$starSymbol(endRecv)) == -1) {
-                printf("error getting time\n");
-        }
-        $starSymbol(timeRecv) += (double)($starSymbol(endRecv).pr_rtime.tv_sec -
-                             $starSymbol(beginRecv).pr_rtime.tv_sec) +
-                    ((double)($starSymbol(endRecv).pr_rtime.tv_nsec -
-                             $starSymbol(beginRecv).pr_rtime.tv_nsec)) /
-                             1000000000.0;
-        printf("Cumulative time to receive %lf seconds\n", $starSymbol(timeRecv));
+#ifdef TIME_INFO3
+        $starSymbol(endRecv) = gethrtime();
+        $starSymbol(timeRecv) += $starSymbol(endRecv) - $starSymbol(beginRecv);
+        printf("Cumulative time to receive %lld usec\n", $starSymbol(timeRecv) / 1000);
 #endif
 	}
 
 	go {
-		addProcedure(ipcHandler);
-                addProcedure(errorHandler, "CGCNOWam_ErrorHandler");
 		addCode(block);
 	}
 	codeblock (runtime) {
-#ifdef TIME_INFO
-	if (fd == -1)
-		printf("couldn't open proc\n");
-	else if (ioctl(fd, PIOCUSAGE, &endRun) == -1)
-		printf("error getting time\n");
-	timeRun = (double)(endRun.pr_rtime.tv_sec - beginRun.pr_rtime.tv_sec) +
-		  ((double)(endRun.pr_rtime.tv_nsec -
-			    beginRun.pr_rtime.tv_nsec)) / 1000000000.0;
-	printf("Time to run %lf seconds\n", timeRun);
+#ifdef TIME_INFO1
+endRun = gethrtime();
+timeRun = endRun - beginRun;
+printf("Time to run %lld usec\n", timeRun / 1000);
 #endif
 	}
 	wrapup {
