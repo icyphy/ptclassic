@@ -85,7 +85,7 @@ body ::tycho::PtWelcomeMessage::constructor {args} {
 
     # Pack the introduction button.
     addButton intro -text "Home Page" -command \
-	    "::tycho::File::openContext $PTOLEMY/doc/index.html"
+	    "::tycho::File::openContext $PTOLEMY/doc/html/index.html"
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
@@ -114,7 +114,7 @@ body ::tycho::PtWelcomeMessage::constructor {args} {
 	    {limitation of liability,<br>} \
 	    {and disclaimer of warranty provisions</a>}
 
-    append html "<h1><a href=$PTOLEMY/doc/index.html>" \
+    append html "<h1><a href=$PTOLEMY/doc/html/index.html>" \
 	    {Introduction to Ptolemy</a></h1>}
 
     configure -size 0
