@@ -63,6 +63,8 @@ class VHDLState : public VHDLTypedObj {
 
   // Last firing to access this state.
   int lastFiring;
+  // Name of first firing to access the state.
+  StringList firstFiringName;
 
   // Class Idenitification.
   /* virtual */ int isA(const char*) const;
