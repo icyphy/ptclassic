@@ -6,7 +6,7 @@ $Id$
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: J. Buck and E. A. Lee
+ Programmer: J. Buck, E. A. Lee and J. Pino
 
 // a ProcMemory object represents a processor's memory.  In the base
 // class, no assumption about the organization of the memory is made.
@@ -232,7 +232,7 @@ int LinProcMemory::performAllocation() {
 	return TRUE;
 }
 
-static unsigned share_len(unsigned xa,unsigned ya,unsigned xl,unsigned yl) {
+static unsigned symmetric_len(unsigned xa,unsigned ya,unsigned xl,unsigned yl) {
 	unsigned s = max(xa,ya);
 	unsigned end = min(xa+xl,ya+yl);
 	return max(end,s) - s;
@@ -260,7 +260,7 @@ StringList LinProcMemory::printMemMap(const char* startString, const char* endSt
 
 StringList DualMemory::printMemMap(const char* startString, const char* endString) {
 	StringList l = startString;
-	l += " --------------------- Shared memory map: ";
+	l += " --------------------- Symmetric memory map: ";
 	l += endString;
 	l += "\n";
 	l += LinProcMemory::printMemMap(startString, endString);
@@ -296,13 +296,13 @@ DualMemory:: DualMemory(const char* n_x,     // name of the first memory space
 			unsigned y_len	     // length of y memory
 	) : 
 	sAddr(max(x_addr,y_addr)),
-	sLen(share_len(x_addr,y_addr,x_len,y_len)),
-	// set up the shared memory part
-	LinProcMemory("shared",
+	sLen(symmetric_len(x_addr,y_addr,x_len,y_len)),
+	// set up the symmetric memory part
+	LinProcMemory("symmetric",
 		      (st_x&st_y)|A_SYMMETRIC,
 		      (p_x&p_y)|A_SYMMETRIC,
 		      max(x_addr,y_addr),
-		      share_len(x_addr,y_addr,x_len,y_len)),
+		      symmetric_len(x_addr,y_addr,x_len,y_len)),
 	x(n_x,st_x,p_x,0,0),
 	y(n_y,st_y,p_y,0,0), 
 	xAddr(x_addr),xLen(x_len),
@@ -324,7 +324,7 @@ int DualMemory::allocReq(const State& s) {
 }
 
 int DualMemory::performAllocation() {
-// first do all the shared memory.
+// first do all the symmetric memory.
 
 	if (!LinProcMemory::performAllocation()) return FALSE;
 // now make the remaining-memory-lists for the others.

@@ -7,7 +7,7 @@ $Id$
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: J. Buck and E. A. Lee
+ Programmer: J. Buck, E. A. Lee and J. Pino
 
 // a ProcMemory object represents a processor's memory.  In the base
 // class, no assumption about the organization of the memory is made.
