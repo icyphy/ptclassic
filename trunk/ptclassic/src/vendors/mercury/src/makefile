@@ -46,7 +46,7 @@ all install clean realclean sources depend checkjunk sccsinfo:
 	    if [ -w $$x ] ; then \
 		cd $$x ; \
 		echo making $@ in utils/$$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/utils/$$x $@ ;\
+		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../../../src/vendors/mercury/src/$$x $@ ;\
 	 	cd .. ; \
 	    fi ; \
 	done
