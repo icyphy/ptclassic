@@ -231,12 +231,8 @@ long userOptionWord;
 static char **palettes;
 static int palettes_n;
 
-/* We put the old defaultPalettes code back for now:
+/* function to determine default palettes */
 char *defaultPalettes();
-*/
-static char *defaultPalettes =
-  "~ptolemy/src/domains/sdf/icons/sdf.pal:~ptolemy/src/domains/ddf/icons/ddf.pal:~ptolemy/src/domains/de/icons/de.pal:./user.pal:./init.pal";
-
 
 static dmWhichItem *items;
 
@@ -273,7 +269,7 @@ OpenPaletteInit()
 
     sprintf(buf, "%s.palettes", UAppName);
     if ((b = RPCXGetDefault("vem", buf)) == NULL) {
-	b = defaultPalettes;	/* defaultPalettes() eventually */
+	b = defaultPalettes();
     }
     palettes_n = ListLength(b) + 1;
     palettes = (char **) malloc(palettes_n * sizeof(char *));
