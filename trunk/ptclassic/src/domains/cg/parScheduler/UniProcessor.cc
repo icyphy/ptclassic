@@ -150,10 +150,12 @@ int UniProcessor :: filledInIdleSlot(ParNode* node, int start, int limit) {
 		if (obj->isIdleTime() == 0) { // regular or visible comm node
 			if (curTime < start + load) {
 				return prevTime;
-			} 
+			}  else if ((curTime == start) && (load == 0)) {
+				return start;
+			}
 		} else { // idle node or comm node which is hidden.
 			if (obj->getDuration() >= load) {
-				if (curTime < start) 
+				if (curTime <= start) 
 					return start;
 				else if ((limit == 0) || (curTime <= limit))
 					prevTime = curTime;
@@ -175,8 +177,18 @@ int UniProcessor :: schedInMiddle(ParNode* pd, int when, int leng) {
 	while (obj) {
 		curTime -= obj->getDuration();
 		temp = obj->getNode();
+
+		// special case
+		if ((curTime == when) && (leng == 0)) {
+			NodeSchedule* n = getFree();
+			n->setMembers(pd,leng);
+			insertAhead(n,obj);	
+			pd->setScheduledTime(when);
+			pd->setFinishTime(when);
+			return when;
+	
 		// check the current node should be an idle node.
-		if (obj->isIdleTime() == 0) {  // if regular node or comm. node.
+		} else if (obj->isIdleTime() == 0) {  
 			if (curTime < when + leng) {
 				return FALSE;
 			}
