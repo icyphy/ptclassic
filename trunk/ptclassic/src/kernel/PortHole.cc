@@ -562,7 +562,8 @@ PortHole& MultiPortHole :: newConnection() {
 	MPHIter next(*this);
 	PortHole* p;
 	while ((p = next++) != 0) {
-		if (p->far() == NULL) return *p;
+		// work right even for GalMultiPortHole
+		if (p->newConnection().far() == NULL) return *p;
 	}
 
 	// no disconnected ports, make a new one.
