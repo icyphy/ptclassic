@@ -473,6 +473,7 @@ ifdef DEFULL
 	DE = 1
 	DECONTRIB = 1
 	DEJAVA = 1
+	DESIP = 1
 endif
 ifdef DE
 	# star icons
@@ -493,6 +494,13 @@ ifdef DE
 			LIBS += -ldecontribstars
 			LIBFILES += $(LIBDIR)/libdecontribstars.$(LIBSUFFIX)
 		endif
+	endif
+	# SiP (SPIN in Ptolemy) SPIN is a protocol simulator
+	ifdef DESIP
+		CUSTOM_DIRS += $(DEDIR)/sip/kernel $(DEDIR)/sip/ptsip
+		LIBS += -lsip -lptsip
+		LIBFILES + =$(LIBDIR)/libsip.$(LIBSUFFIX) \
+			$(LIBDIR)/libptsip.$(LIBSUFFIX)
 	endif
 	# Tcl/Tk stars
 	ifdef TK
