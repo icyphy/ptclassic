@@ -87,24 +87,25 @@ static SRDomain proto;
 
 /**********************************************************************
 
-  The default target for the SR domain
+  The dynamic target for the SR domain
 
-  @Description This uses the brute-force scheduler
+  @Description This uses the brute-force dynamic scheduler
 
   @SeeAlso SRScheduler
 
  **********************************************************************/
-class SRTarget : public Target {
+class SRDynamicTarget : public Target {
 public:
   // Constructor
-  SRTarget() : Target("default-SR", "SRStar", "default SR target",
+  SRDynamicTarget()
+    : Target("dynamic-SR", "SRStar", "SR target with dynamic scheduling",
 		      SRdomainName) {}
 
   // Destructor
-  ~SRTarget() { delSched(); }
+  ~SRDynamicTarget() { delSched(); }
 
   // Return a new SRTarget
-  Block * makeNew() const { LOG_NEW; return new SRTarget;}
+  Block * makeNew() const { LOG_NEW; return new SRDynamicTarget;}
 
 protected:
   void setup() {
@@ -114,42 +115,12 @@ protected:
 
 };
 
-static SRTarget defaultSRtarget;
-static KnownTarget entry(defaultSRtarget,"default-SR");
+static SRDynamicTarget dynamicSRtarget;
+static KnownTarget dynamicEntry(dynamicSRtarget,"dynamic-SR");
 
 /**********************************************************************
 
-  The static scheduler target for the SR domain
-
-  @Description This uses the static scheduler
-
- **********************************************************************/
-class SRStaticTarget : public Target {
-public:
-  // Constructor
-  SRStaticTarget() : Target("static-SR", "SRStar",
-			    "SR target with static scheduling",
-			    SRdomainName) {}
-
-  // Destructor
-  ~SRStaticTarget() { delSched(); }
-
-  // Return a new SRStaticTarget
-  Block * makeNew() const { LOG_NEW; return new SRStaticTarget;}
-
-protected:
-  void setup() {
-    if (!scheduler()) { LOG_NEW; setSched(new SRStaticScheduler); }
-    Target::setup();
-  }
-};
-
-static SRStaticTarget staticSRtarget;
-static KnownTarget secondEntry(staticSRtarget,"static-SR");
-
-/**********************************************************************
-
-  The recursive scheduler target for the SR domain
+  The default target for the SR domain
 
   @Description This uses the recursive scheduler.
 
@@ -160,7 +131,7 @@ static KnownTarget secondEntry(staticSRtarget,"static-SR");
 class SRRecursiveTarget : public Target {
 public:
   // Constructor
-  SRRecursiveTarget() : Target("recursive-SR", "SRStar",
+  SRRecursiveTarget() : Target("default-SR", "SRStar",
 			       "SR target with recursive scheduling",
 			       SRdomainName) {
     addState( partScheme.setState( "partScheme", this, "sweep",
@@ -194,6 +165,6 @@ protected:
 };
 
 static SRRecursiveTarget recursiveSRtarget;
-static KnownTarget thirdEntry(recursiveSRtarget,"recursive-SR");
+static KnownTarget recursiveEntry(recursiveSRtarget,"default-SR");
 
 
