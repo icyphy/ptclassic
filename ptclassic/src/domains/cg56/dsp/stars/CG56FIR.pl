@@ -161,7 +161,7 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
                 tp= int(tapsNum/interpolation);
                 dec = tp;
                 if (tp > decimation) dec=decimation;
-		adjust = decimation - tp;
+		adjust = (int)decimation - (int)tp;
 		if (adjust<0) adjust=0;
 		if((tp*interpolation) >1)  addCode(first);
                 if(tp>decimation) addCode(old);
