@@ -123,7 +123,7 @@ int Linker::linkObj (const char* objName) {
 
 // generate the header.  The first word is a pointer to the initialization
 // function, the second to the termination function.
-	const char* headerName = genHeader (objName);
+	char* headerName = genHeader (objName);
 	if (!headerName) return FALSE;
 
 // generate the loader command.  The switches mean:
@@ -205,7 +205,7 @@ int Linker::linkObj (const char* objName) {
 }
 
 // find the first occurrence of subString in line.
-static char* match(char* line, char* subString) {
+static char* match(char* line, const char* subString) {
 	if (*subString == 0) return line;
 	char* p = line;
 	int ltail = strlen(subString) - 1;
@@ -229,11 +229,11 @@ const int LINELEN = 128;
 
 // The nm command is used to search for a symbol of the right form.
 
-const char*
+char*
 Linker::genHeader (const char* objName) {
 // Open a pipe to "nm" to get symbol information
 	char command[256];
-	char* sym;
+	char* sym = 0;
 	sprintf (command, "nm -g %s", objName);
 	FILE* fd = popen (command, "r");
 	if (fd == 0) {
