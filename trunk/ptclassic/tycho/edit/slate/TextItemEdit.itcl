@@ -175,7 +175,6 @@ class ::tycho::TextItemEdit {
 # Activate the interactor on an item.
 # 
 body ::tycho::TextItemEdit::activate {t x y args} {
-puts "::tycho::TextItemEdit::activate $t $x $y $args"
     # If already editing another item, deactivate from it first
     if { $target != "" } {
 	deactivate
@@ -211,7 +210,7 @@ puts "::tycho::TextItemEdit::activate $t $x $y $args"
     # I doubt it's necessary.
     $slate bind $target \
 	    [eval ::tycho::Interactor::event Click -button 1] \
-	    "$this click %x %y $args"
+	    "$this click %x %y -button 1"
 
     # Also a binding to detect a double-click, for word-dragging
     $slate bind $target \
@@ -219,7 +218,7 @@ puts "::tycho::TextItemEdit::activate $t $x $y $args"
 	    "$this dbclick"
 
     # Start the interaction sequence
-    eval click $x $y $args
+    eval click $x $y -button 1
 }
 
 #######################################################################
@@ -238,10 +237,10 @@ body ::tycho::TextItemEdit::click {x y args} {
 
     # Create the motion events
     $slate bind $target \
-	    [eval ::tycho::Interactor::event Motion] \
+	    [eval ::tycho::Interactor::event Motion -button 1] \
 	    "$this drag %x %y"
     $slate bind $target \
-	    [eval ::tycho::Interactor::event Release] \
+	    [eval ::tycho::Interactor::event Release -button 1] \
 	    "$this release"
 
     # Forward to a cascaded interactor if there is one
@@ -289,9 +288,9 @@ body ::tycho::TextItemEdit::deactivate {args} {
 
     # Remove the text drag-selection bindings
     $slate bind $target \
-	    [eval ::tycho::Interactor::event Click] {}
+	    [eval ::tycho::Interactor::event Click -button 1] {}
     $slate bind $target \
-	    [eval ::tycho::Interactor::event DoubleClick] {}
+	    [eval ::tycho::Interactor::event DoubleClick -button 1] {}
 
     # Reset the original activation bindings in case they changed
     $this enable
@@ -535,11 +534,11 @@ body ::tycho::TextItemEdit::key {key keysym state args} {
 body ::tycho::TextItemEdit::release {} {
     set wordmode 0
 
-    # Clear the motion and double-click events
+    # Clear the motion and release events
     $slate bind $target \
-	    [eval ::tycho::Interactor::event Motion] {}
+	    [eval ::tycho::Interactor::event Motion -button 1] {}
     $slate bind $target \
-	    [eval ::tycho::Interactor::event Release] {}
+	    [eval ::tycho::Interactor::event Release -button 1] {}
 }
 
 #######################################################################
@@ -557,7 +556,6 @@ body ::tycho::TextItemEdit::stop {} {
 # Manipulate the selection in useful ways.
 #
 body ::tycho::TextItemEdit::select {mode args} {
-puts "::tycho::TextItemEdit::select $mode $args"
     switch -exact $mode {
 	"adjust" {
 	    # Move the end of the selection to the given index
