@@ -55,13 +55,13 @@ option add *FileBrowser.height 12 widgetDefault
 # an environment variable.  For example, if the value of
 # of the environment variable TYCHO is /usr/tools/tycho, then
 # <pre>
-#       expandPath \$TYCHO/tmp
+#       ::tycho::expandPath \$TYCHO/tmp
 # </pre>
 # returns /usr/tools/tycho/tmp.
 #
 proc ::tycho::expandPath { path } {
     if {[string first \$ $path] == 0} {
-        global env
+        global ::env
         set slash [string first / $path]
         set envvar [string range $path 1 [expr {$slash-1}]]
         set envval $env($envvar)
@@ -80,7 +80,7 @@ proc ::ptkExpandEnvVar { path } {::tycho::expandPath $path}
 # a file browser, and returns only when that file browser is dismissed.
 #
 proc ::tycho::filename {} {
-    return [DialogWindow::newModal FileBrower [autoName .file]]
+    return [::tycho::DialogWindow::newModal FileBrower [autoName .file]]
 }
 
 ##########################################################################
@@ -100,7 +100,7 @@ proc ::tycho::filename {} {
 # For example, the following command will query the user for a file name,
 # and then post that filename in top-level window:
 # <tcl><pre>
-# FileBrowser .w -command post
+# ::tycho::FileBrowser .w -command ::tycho::post
 # .w centerOnScreen
 # </pre></tcl>
 #
@@ -152,7 +152,7 @@ body ::tycho::FileBrowser::constructor {args} {
     # The text to insert at the top of the file browser
     configure -text "Select File:"
     
-    global env
+    global ::env
     
     if {! [info exists fileLastOpened]} {
 	# First FileBrowser window constructed.
@@ -170,11 +170,11 @@ body ::tycho::FileBrowser::constructor {args} {
 
     # Current directory display.
     itk_component add dir {
-	label $itk_interior.childsite.dir -text $localCWD -width 35 -anchor e
+	label $itk_component(childsite).dir -text $localCWD -width 35 -anchor e
     } {
 	keep -background -cursor -foreground -font
     }
-    pack $itk_component(dir) -side top -fill x
+    pack $itk_component(dir) -side top -fill x -after $itk_component(listscroll)
     
     # In case updateListbox inserts into the entry; to avoid repetition
     clear entry
@@ -198,7 +198,7 @@ body ::tycho::FileBrowser::constructor {args} {
 # Open a help window.
 #
 body ::tycho::FileBrowser::help {} {
-    global TYCHO
+    global ::TYCHO
     ::tycho::File::openContext \
 	    $TYCHO/kernel/doc/usersGuides/FileBrowserHelp.html
 }
@@ -237,7 +237,7 @@ body ::tycho::FileBrowser::mkdir {} {
 body ::tycho::FileBrowser::processItem {filename} {
 
     # In case the filename starts with an environment variable, expand
-    set file [expandPath $filename]
+    set file [::tycho::expandPath $filename]
     
     set file [string trim $file]
     if {$file == ""} {return 0}
