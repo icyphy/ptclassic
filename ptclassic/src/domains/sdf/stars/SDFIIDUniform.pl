@@ -41,14 +41,14 @@ defstar {
 		default { "1.0" }
 		desc { "upper limit" }
 	}
-	hinclude { <ACG.h>, <Uniform.h> }
+	hinclude { <Uniform.h> }
+	ccinclude { <ACG.h> }
 	protected {
-		static ACG gen;
 		Uniform *random;
 	}
 // declare the static random-number generator in the .cc file
 	code {
-		ACG SDFIIDUniform::gen(10,20);
+		extern ACG gen;
 	}
 	constructor {
 		random = new Uniform(lower,upper,&gen);
