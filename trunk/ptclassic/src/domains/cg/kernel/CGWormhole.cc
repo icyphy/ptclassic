@@ -39,25 +39,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "CGWormhole.h"
 #include "CGPortHole.h"
-#include "GalIter.h"
-#include "Error.h"
-#include "Scheduler.h"
-
-/*******************************************************************
-
-	class CGWormhole methods
-
-********************************************************************/
-// Constructor
-CGWormhole :: CGWormhole(Galaxy& g, Target* t) : CGWormBase(*this,g,t)
-	{ buildEventHorizons(); }
-
-CGWormhole :: ~CGWormhole() { freeContents(); }
-
-// cloner -- clone the inside and make a new wormhole from that.
-Block* CGWormhole :: clone() const {
-	LOG_NEW; return new CGWormhole(gal.clone()->asGalaxy(), myTarget()->cloneTarget());
-}
 
 /**************************************************************************
 
