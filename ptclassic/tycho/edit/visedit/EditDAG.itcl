@@ -83,6 +83,9 @@ class ::tycho::EditDAG {
     # Specify whether or not modifications are allowed in the displayed DAG.
     method setReadOnly {bool}
 
+    # Change layout from horizontal to vertical or vice versa.
+    method transpose {}
+
     ###################################################################
     ####                   protected methods                       ####
 
@@ -115,6 +118,9 @@ body ::tycho::EditDAG::constructor {args} {
 
     addMenuItem {New Child} Edit -underline 4 -accelerator "C" \
 	    -command "$this component graphics addChild"
+
+    addMenuItem {Transpose} Format -underline 0 \
+            -command "$this transpose"
 
     eval itk_initialize $args
 }
@@ -173,4 +179,17 @@ body ::tycho::EditDAG::setReadOnly {bool} {
             enableMenuItem {New Child} Edit
 	}
     }
+}
+
+#####################################################################
+#### transpose
+# Change layout from horizontal to vertical or vice versa.
+#
+body ::tycho::EditDAG::transpose {} {
+    if {[component graphics cget -orientation] != {horizontal}} {
+        component graphics configure -orientation horizontal
+    } {
+        component graphics configure -orientation vertical
+    }
+    component graphics redrawGraph
 }
