@@ -1,11 +1,11 @@
 <!-- $Id$ -->
 <html>
 <head>
-<title>The Tycho/JPtolemy Code Rating System</title>
+<title>The Tycho/Ptolemy II Code Rating System</title>
 </head>
 <body bgcolor="#faf0e6">
-<h1><a name="code rating system">The Tycho/JPtolemy Code Rating System</a></h1>
-All code in Tycho and JPtolemy is rated using a simple four-level
+<h1><a name="code rating system">The Tycho/Ptolemy II Code Rating System</a></h1>
+All code in Tycho and Ptolemy II is rated using a simple four-level
 system. The goal of the code rating system is to provide a platform
 with which we can assess and improve code quality and stability.
 <p>
@@ -47,7 +47,7 @@ re-submit the code.
 which both the author and tester/reviewer are expected to satisfy
 before proposing or accepting advancement to that level.  The level of
 a class or file is indicated in the file header comment with the tags
-<B>@ProposedRating</B> and <B>@AcceptedRating</B>.  A file that has
+<code>@ProposedRating</code> and <code>@AcceptedRating</code>.  A file that has
 neither of these tags is <I>unrated</I>.
 
  <P> There is room within the process for design reviews and code
@@ -61,7 +61,7 @@ The four ratings are as follows:
 
 <dl>
 
-<dt><B>Red</B>
+<dt><code>Red</code>
 
 <dd> This is the starting point for all code. Red code is in flux, and
 cn be expected to changed without warning. Code that calls red code
@@ -71,9 +71,9 @@ break the calling code.  Red code should never be released.
  <P><dl>
  <dt><I>Proposing advancement</I>
 
-<dd> Code is made red simply by adding the <B>@ProposedRating</B> tag
+<dd> Code is made red simply by adding the <code>@ProposedRating</code> tag
 followed by "red" to the file header comment. The author should do
-this, and should also add the <B>@AcceptedRating</B> tag (solely for
+this, and should also add the <code>@AcceptedRating</code> tag (solely for
 the purpose of making it easier to search with grep). At the same time,
 the author should check the file into the shared development
 tree, add it to the appropriate makefile, and <I>check that the build
@@ -83,7 +83,7 @@ does not fail</i>.
 
 <dd> 
 "Advancement" to red is automatic. If the author does not add the
-<B>@AcceptedRating</B> tag, the code rating tools will assume
+<code>@AcceptedRating</code> tag, the code rating tools will assume
 that it is red.
  
  <P><dt><I>Acceptable changes</I>
@@ -96,7 +96,7 @@ tree must not cause the build to fail.
 </dl>
 
 
- <P><dt><B>Yellow</B>
+ <P><dt><code>Yellow</code>
 
 <dd>The interface and overall design of yellow code is considered to
 be acceptable.  Clients can code to this interface with the
@@ -157,7 +157,7 @@ HREF="#retrospective">Retrospective application of code rating</A>.)
 
 </dl>
 
- <P><dt><B>Green</B>
+ <P><dt><code>Green</code>
 
 <dd>
 The interface to green code has been finalized, and the implementation
@@ -206,7 +206,7 @@ fixes, then the class should probably be taken back to yellow.
 
 </dl>
 
- <P><dt><B>Blue</B>
+ <P><dt><code>Blue</code>
 
 <dd>The implementation of the class has been fully and completely
 tested, and accepted as meeting all requirements.  All documentation,
@@ -276,15 +276,17 @@ Tycho's revision control mechanism and documentation generation
 system supports the code rating system. The following doctags
 can be added to the comment at the head of a file:
 
-<dl> <dt><B>@ProposedRating</B> <I>rating</I> { <B>(</B><I>author</I>
-<B>&lt;</B><I>emailaddress</I><B>&gt;</B> <B>)</B> }
+<dl> <dt><code>@ProposedRating <I>rating</I> { <I>author</I>
+&lt;<I>emailaddress</I>&gt;) }</code>
 
 <dd>The rating proposed by the author, where rating is Red,
 Yellow, Green, or Blue. The author field is optional: if not
-supplied, Tycho will attempt to get it from the <B>@Author</B> doctag.
+supplied, Tycho will attempt to get it from the <code>@Author</code> doctag.
 
- <P><dt><B>@AcceptedRating</B> <I>rating</I> { <B>(</B><I>tester</I>
-<B>&lt;</B><I>emailaddress</I><B>&gt;</B> <B>)</B> }
+ <P>
+<dt><code>@AcceptedRating <I>rating</I> { <I>tester</I>
+&lt;<I>emailaddress</I>&gt;) }</code>
+
 
 <dd>The rating accepted by the tester/reviewer, where rating is Red,
 Yellow, Green, or Blue. The tester field is optional, but the
