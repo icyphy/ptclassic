@@ -40,6 +40,13 @@ static char SccsId[]="$Id$";
 #include "ualloc.h" 
 #include "iv.h"
 #include "ivGetLine.h"
+/*
+ * Can't include prototype for ivGetLine in ivGetLine.h because
+ * hppa.cfront cc fails to compile ivGetLine.c otherwise.
+ */
+int ivGetLine
+	ARGS((IVWindow *IVwin, XKeyEvent *keyEventPtr, int x, int y,
+	      int bufferSize, bool keepGoing));
 #include "ivBuf.h"
 #include <X11/Xresource.h>
 #include <X11/Xutil.h>
