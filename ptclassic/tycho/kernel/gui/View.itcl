@@ -70,7 +70,7 @@ class ::tycho::View {
     # Visualization State Machine that view will require
     itk_option define -vsm vsm VSM ""
 
-    # Specify the name of the File object that contains this widget.
+    # Specify the name of the top level window that contains this widget.
     itk_option define -top top Top {}
 
 
@@ -90,12 +90,6 @@ class ::tycho::View {
     # by seePoint.
     method currentPoint {} {return {}}
     
-    # Disable all of the view's menus
-    method disableMyMenus {}
-
-    # Enable all of the view's menus
-    method enableMyMenus {}
-
     # Give the window or a subwindow the focus.
     method focusin {}
 
@@ -114,6 +108,12 @@ class ::tycho::View {
     # Find and make visible a point in the display.
     method seePoint {point}
 
+    # Set my displayer
+    method setDisplayer {displayer}
+
+    # Set my menubar
+    method setMenubar {menubar}
+
     ###################################################################
     ####                         public procs                      ####
 
@@ -124,8 +124,10 @@ class ::tycho::View {
     proc setClipboard {text} {set clipboard $text}
 
     ###################################################################
-    ####                   public variables                        ####
-
+    ####                   protected methods                       ####
+    
+    # Setup the displayer, menubar, and register view with displayer
+    protected method setup {}
 
     ###################################################################
     ####                         protected variables               ####
@@ -134,10 +136,10 @@ class ::tycho::View {
     protected common clipboard {}
 
     # Name of this view's Displayer
-    protected variable myDisplayer
+    protected variable myDisplayer ""
 
     # Name of my menubar
-    protected variable myMenubar
+    protected variable myMenubar ""
 
     # Name of vsm used by this view
     protected variable myVSM ""
@@ -145,11 +147,8 @@ class ::tycho::View {
     # Label of this view; unique for each instance of the view.
     protected variable viewLabel ""
 
-    ###################################################################
-    ####                   private variables                       ####
-
     # List of subviews
-    private variable mySubviewList {} 
+    protected variable subviewList {} 
 }
 
 #########################################################################
@@ -185,24 +184,6 @@ body ::tycho::View::constructor {args} {
     # import the tycho namespace
     import add ::tycho
 
-    # Get displayer for view
-    set myDisplayer [winfo parent $itk_component(hull)]
-
-    # set up a unique label identifier for this view to use in calls
-    # to displayer methods
-    set length [string length $itk_component(hull)]
-    set index 0
-    while {$index < $length} {
-	set char [string index $itk_component(hull) $index]
-	if {[string compare $char .] != 0} {
-	    append viewLabel $char
-	}
-	incr index
-    }
-
-    # Register myself with my displayer here
-    set myMenubar [$myDisplayer registerView $itk_component(hull) $viewLabel]
-
     # Derived classes should build up their menus and menu items
     # here.
     
@@ -231,9 +212,39 @@ body ::tycho::View::addMyMenus {} {
 #######################################################################
 #### addSubview
 # Add a subview to this view.  The name of the subview that is to be
-# added is the only argument. 
+# added is the first argument.  Also required are the type of view
+# that needs to be inserted: slateView, ganttView, textView,
+# position of insertion (top, bottom, left, right) in the case
+# of simple packing.  For derived views that require different
+# positioning elements such as coordinates or insertion points as
+# would be the case for slateView or textView then this method
+# should be redefined for those views.  The last argument are
+# args that are options to the view being inserted.
 #
-body ::tycho::View::addSubview {subviewName} {
+body ::tycho::View::addSubview {subviewName type side args} {
+
+    itk_component add $subviewName {
+	eval "::tycho::$type $itk_interior.$subviewName $args"
+    } {
+	keep -cursor -background
+    }
+
+    # Packing may not necessarily be the thing to use in derived
+    # classes; for instance, inserting views into a text widget
+    # is different - one needs to use "create window" in that case.
+    pack $itk_component($subviewName) -expand true -fill both -side $side
+
+    # Add to subview list
+    set subviewList($subviewName) $itk_component($subviewName)
+    
+    # Set my displayer and menubar to the ones that are set for 
+    # parent view.
+    $itk_component($subviewName) setDisplayer $myDisplayer
+    $itk_component($subviewName) setMenubar $myMenubar
+
+    # Subviews should not be allowed to mess with the parent's
+    # menubar
+    
 }
 
 #####################################################################
@@ -321,15 +332,18 @@ body ::tycho::View::hyperJump {file point} {
 
 #######################################################################
 #### insertInDisplay
-# Insert view in the display.
+# Insert view in the display.  This method should be redefined for
+# derived classes where itk_component(hull) is changed to a specific
+# subwindow when binding the <Enter> event to the focus.
 # 
 body ::tycho::View::insertInDisplay {} {
     
-    # Build up my menus
-    addMyMenus
+    # Initialize my displayer and menus, and register with the
+    # displayer.
+    $this setup
 
     # insert the view into the displayer
-    $myDisplayer setView $viewLabel
+    $myDisplayer setView $viewLabel bottom
 
     # This should be changed in derived classes to give
     # focus to subwindows.
@@ -377,5 +391,62 @@ body ::tycho::View::setClipboard {text} {
     set clipboard $text
     clipboard clear
     clipboard append -- $text
+}
+
+#####################################################################
+#### setDisplayer
+# Set my displayer
+#
+body ::tycho::View::setDisplayer {displayer} {
+
+    set myDisplayer $displayer
+}
+
+#####################################################################
+#### setMenubar
+# Set my menubar
+#
+body ::tycho::View::setMenubar {menubar} {
+
+    set myMenubar $menubar
+}
+    ###################################################################
+    ###################################################################
+    ####                      protected methods                    ####
+
+#####################################################################
+#### setup
+# Setup the displayer, the menubar, register with the displayer and
+# set up my menus
+#
+body ::tycho::View::setup {} {
+
+    # If not already set, get displayer for view
+    if {$myDisplayer == ""} {
+	set myDisplayer [winfo parent $itk_component(hull)]
+    }
+
+    # If not already set, set up a unique label identifier for 
+    # this view to use in calls
+    # to displayer methods
+    if {$viewLabel == ""} {
+	set length [string length $itk_component(hull)]
+	set index 0
+	while {$index < $length} {
+	    set char [string index $itk_component(hull) $index]
+	    if {[string compare $char .] != 0} {
+		append viewLabel $char
+	    }
+	    incr index
+	}
+    }
+
+    # Get the name of my menubar
+    set myMenubar [$myDisplayer registerView $itk_component(hull) \
+	    $viewLabel]
+
+    # Build up my menus
+    addMyMenus
+
 }
 
