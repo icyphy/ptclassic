@@ -31,7 +31,9 @@
 # need to do something like:
 # setenv SYNOPSYS /usr/tools/synopsys
 # setenv SIM_ARCH sparcOS5
+# setenv ARCH $PTARCH
 # set path = (	$SYNOPSYS/$SIM_ARCH/syn/bin $SYNOPSYS/$SIM_ARCH/sim/bin $path)
+# Note that vhdlan seems to require that $ARCH is set.
 
 ROOT = ../../..
 VPATH = $(ROOT)/src/utils/ptvhdlsim
