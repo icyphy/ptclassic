@@ -35,6 +35,9 @@ include $(ROOT)/mk/config-sol2.mk
 
 ARCHFLAGS =	-DPTSOL2_5 -DPT_EGCS
 
+# Don't include -fno-for-scope
+LOCALCCFLAGS =	-g -DPTSOL2_4 -D_REENTRANT -pipe
+
 CC =		$(PTOLEMY)/gnu/egcs/sol2.5/bin/gcc
 
 CPLUSPLUS =	$(PTOLEMY)/gnu/egcs/sol2.5/bin/g++ -I$(ROOT)/src/compat/cfront
