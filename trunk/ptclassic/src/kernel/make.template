@@ -212,7 +212,7 @@ IntArrayState.h IntArrayState.cc : ArrayState.hP ArrayState.ccP
 
 # For dynamic linking on the hppa
 $(FLUSH_CACHE):
-	$(AS) $(VPATH)/`basename $(FLUSH_CACHE) .o`.s
+	$(HP_AS) $(VPATH)/`basename $(FLUSH_CACHE) .o`.s
 
 include $(ROOT)/mk/common.mk
 
