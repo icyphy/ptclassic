@@ -30,10 +30,7 @@ the next B particles from the next input, etc.
 	}
 	start {
 		int n = input.numberPorts();
-		MPHIter nexti(input);
-		PortHole* p;
-		while((p = nexti++) != 0)
-		   ((SDFPortHole*)p)->setSDFParams(int(blockSize),int(blockSize)-1);
+		input.setSDFParams(int(blockSize),int(blockSize)-1);
 		output.setSDFParams(n*int(blockSize),n*int(blockSize)-1);
 	}
 	go {
