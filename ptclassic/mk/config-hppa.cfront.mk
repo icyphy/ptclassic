@@ -46,7 +46,9 @@ CDEBUGFLAGS =
 OCT_DEBUG_FLAGS =
 
 # flags for C++ compilation.  -DPOSTFIX_OP= is needed for cfront 2.1; it
-# is not needed for 3.0.
+# is not needed for 3.0.  Apparently -DPOSTFIX_OP= is needed for HPPA CC 3.20,
+# but it is unneeded for HPPA CC 3.50.  You can use 'what /usr/bin/CC'
+# to find out what version of HPPA CC you are using.
 GPPFLAGS =	-DUSG $(GPPDEBUGFLAGS) $(MEMLOG)
 # -Aa turns on ansi c, needed for tkoct
 # The cc man page says that defining _HPUX_SOURCE gives the same name space
