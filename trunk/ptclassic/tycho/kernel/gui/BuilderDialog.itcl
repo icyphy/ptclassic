@@ -97,7 +97,7 @@ body ::tycho::BuilderDialog::constructor {args} {
 #
 body ::tycho::BuilderDialog::destructor {args} {
 
-    # Deregister ths window and menubar if inside a displayer
+    # Deregister this window and menubar if inside a displayer
     if { [displayer] != "" } {
         ::tycho::deregister window BuilderDialog $this
         ::tycho::deregister menubar [menubar]

@@ -124,7 +124,7 @@
 # </pre>
 #
 # To start the C task running, give it the name of the interface
-# procedure and the arguments tro be passed to the <code>setup</code>
+# procedure and the arguments to be passed to the <code>setup</code>
 # phase:
 # <tcl quiet><pre>
 #   ::tycho::Scheduler::startC ::tycho::testtask ccounter

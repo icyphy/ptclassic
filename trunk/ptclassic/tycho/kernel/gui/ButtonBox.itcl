@@ -433,7 +433,7 @@ body ::tycho::ButtonBox::buttonconfigure {tag {option {}} args} {
 	}
 
 	# If a button is being moved, check that no-one already has
-	# ths posiion it's being moved to
+	# this posiion it's being moved to
 	if { $move } {
 	    foreach {t r} [array get _row] {q c} [array get _column] {
 		if { $r == $row && $c == $column } {
