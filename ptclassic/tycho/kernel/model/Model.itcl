@@ -29,100 +29,6 @@
 ##########################################################################
 
 
-#####################################################################
-#### model
-# Perform operations on models. This procedure provides a number of
-# of useful access funcitons to models, to support things like
-# relative model paths, reference counting, and so on.
-#
-# <dl>
-# <dt><b>link</b> _path_ _key_
-# <dd>
-# Link a client to the model. A model remains in memory for as
-# long as there are clients with links to it. The _key_ argument
-# is used only to unlink from the model later -- usually, you can
-# use the name of the calling object. This method raises an error
-# if the key has already been used to link to the model. Linking
-# and unlinking uses keys because it's likely to be more reliable
-# than a simple link count.
-#
-# <dt><b>open</b> _name_ ?_path_?
-# <dd>
-# Open a TIM model file and return the model. The first argument
-# is the file name, either absolute or relative to the TIM_PATH
-# preference. If the second argument is supplied and not null,
-# it is prepended to the search path. If the model already
-# exists, just return it. The link count of the model is
-# not altered. The argument is the path to the model,
-# <i>relative to the TIM_PATH preference</i>. Clients should be sure
-# to perform a linkModel if this is the first time they have
-# accessed this model. Returns null if the file was not found.
-#
-# <dt><b>unlink</b> _path_ _key_
-# <dd>
-# Unlink from a model. The key must be a key that was previously
-# used to link to the model, or an error is raised.
-# </dl>
-#
-ensemble ::tycho::model {
-    # Link a client to the model
-    option link {path key} {
-	if ![::info exists _openModels($path)] {
-	    error "Model $path is not open"
-	}
-	if [::info exists _linkedClients($path,$key)] {
-	    error "Model $path is already linked by $key"
-	}
-	set _linkedClients($path,$key) 1
-    }
-
-    # Open a TIM model file and return the model
-    option open {name {path {}}} {
-	if [::info exists _openModels($name)] {
-	    # Already open, so return
-	    return $_openModels($name)
-	} else {
-	    # Get the default suffix-based mode and sub-mode
-	    ::tycho::Registry::registeredMode $name hdr
-	    
-	    # Find the file
-	    set file [::tycho::urlPathSearch $name \
-		    [concat $path [::tycho::splitPath \
-		    [stylesheet get system timpath]]]]
-
-	    # Read the actual file header to override defaults
-	    ::tycho::readFileHeader $file hdr
-	    
-	    # If not a TIM file, abort
-	    if { [string tolower $hdr(mode)] != "tim" } {
-		error "$file is not a TIM file"
-	    }
-	    
-	    # The sub-mode determines what to do with the file
-	    if ![::info exists hdr(submode)] {
-		set hdr(submode) {}
-	    }
-	    if ![::info exists _timMapping($hdr(submode))] {
-		error "Unknown TIM type: $hdr(submode)"
-	    }
-	    
-	    FIXME: Unfinished
-	}
-    }
-
-    # Unlink from a model
-    option unlink {path key} {
-	if ![::info exists _linkedClients($path,$key)] {
-	    error "Model $path is not linked by $key"
-	}
-	unset _linkedClients($path,$key)
-	if { [array names _linkedClients($path,*)] == "" } {
-	    delete object $_openModels($path)
-	    unset openModels($path)
-	}
-    }
-}
-
 ##########################################################################
 #### Model
 #
@@ -173,10 +79,16 @@ class ::tycho::Model {
     # The name of this model, used in messages and the like
     public variable modelname ""
 
+    # The mode of this model, to put into the header
+    public variable modelmode "tcl"
+
+    # The path to the file containing this model
+    public variable modelpath ""
+
     # The author
     public variable author ""
 
-    # The author
+    # The short description
     public variable description ""
 
     # The title
@@ -188,14 +100,14 @@ class ::tycho::Model {
     #################################################################
     ####                     public methods                      ####
 
+    # Return a header string for this model
+    method header {{prefix "# "}}
+
     # Manipulate the undo/redo history
     method history {mode args}
     
     # Manipulate a history mark
     method mark {mode args}
-
-    # Execute a command and don't record it in ths history
-    method norecord {command args}
 
     # Notify subscribers of a data change or an event
     method notify {type command args}
@@ -224,11 +136,19 @@ class ::tycho::Model {
     # Execute a sequence of commands in a list
     protected method _compound {cmdlist}
 
+    # Execute a command and don't record it in ths history
+    protected method _norecord {command args}
+
     #################################################################
     ####               protected variables                       ####
 
     # A list of printable public variables
-    protected variable printable {-author -description -title -version}
+    protected variable printable {
+        -author 
+        -description
+        -title 
+        -version
+    }
 
     # A flag saying whether to record commands
     protected variable recording 0
@@ -265,18 +185,6 @@ class ::tycho::Model {
 
     # The array of undo commands
     private variable _undo
-
-    #################################################################
-    ####                private common variables                 ####
-
-    # The array of open models 
-    private common _openModels
-
-    # The mapping from TIM submode to Model class 
-    private common _timMapping
-    array set _timMapping {
-    	{} text
-    }
 }
 
 #########################################################################
@@ -305,6 +213,55 @@ body ::tycho::Model::constructor {args} {
 
     # Supply the default model name
     set modelname [::info namespace tail $this]
+}
+
+########################################################################
+#### header
+#
+# Return a header string for this model. The returned string is an
+# emacs-style header string, enclosed in "-*-" delimiters. Normally,
+# an emacs header spans one line, but for Tycho Models, we produce
+# a multi-line header. The first line contains the <b>mode</b> variable,
+# and following lines contain other variables. Each line is prefixed with
+# the string contained in the _prefix_ argument, which has a default
+# value of "# ". The variables produced are:
+# <dl>
+# <dt><b>mode</b>
+# <dd>
+# The primary file mode. The value written for the mode will be the
+# value of the <b>-modelmode</b> public variable. This is, by default,
+# set to "tcl" so that model files will be opened in a Tcl text
+# editor. Models that should be opened only with a particular editor
+# should have <b>-modelmode</b> set to a mode that has been registered
+# with <b>::tycho::register mode</b>.
+# 
+# <dt><b>class</b>
+# <dd>
+# The name of the Itcl model class. This variable is always set
+# to guarantee that a model will always be loadable.
+# 
+# <dt><b>mtime</b>
+# <dd>
+# The time at which this method is called. This is provided as a means
+# of tracking relative modification dates of files.
+# 
+# <dt><b>version</b>
+# <dd>
+# The version number. How this is used is entirely up to clients.
+# It is set to be the same as the <b>-version</b> public variable.
+# By default, <b>-version</b> is blank.
+#
+# </dl>
+# 
+body ::tycho::Model::header {{prefix "# "}} {
+    set header ""
+    append header "$prefix -*- mode: $modelmode -*-\n"
+    append header "$prefix -*- class: [info class] -*-\n"
+    append header "$prefix -*- mtime: [clock format [clock seconds]] -*-\n"
+    if { $version != "" } {
+        append header "$ -*- version: $version -*-\n"
+    }
+    return $header
 }
 
 ########################################################################
@@ -546,27 +503,6 @@ body ::tycho::Model::mark {mode args} {
 		    delete, names, or set"
 	}
     }
-}
-
-########################################################################
-#### norecord
-#
-# Execute a command, but make sure that nothing is recorded in
-# the history. Note that, by default, commands are only recorded
-# if called via the <b>record</b> command. This method is for
-# use by methods that have been called via <b>record</b> that
-# need to temporarily prevent recording.
-#
-body ::tycho::Model::norecord {command args} {
-    set saved $recording
-    set recording 0
-    if [catch {
-        @scope $scope eval $this $command $args
-    } msg] {
-        set recording $saved
-        error $msg $errorInfo
-    }
-    set recording $saved
 }
 
 ########################################################################
@@ -944,6 +880,27 @@ body ::tycho::Model::_compound {args} {
         lappend undo [eval @scope $scope $this $cmd]
     }
     return $undo
+}
+
+########################################################################
+#### _norecord
+#
+# Execute a command, but make sure that nothing is recorded in
+# the history. Note that, by default, commands are only recorded
+# if called via the <b>record</b> command. This method is for
+# use by methods that have been called via <b>record</b> that
+# need to temporarily prevent recording.
+#
+body ::tycho::Model::_norecord {command args} {
+    set saved $recording
+    set recording 0
+    if [catch {
+        @scope $scope eval $this $command $args
+    } msg] {
+        set recording $saved
+        error $msg $errorInfo
+    }
+    set recording $saved
 }
 
 ########################################################################
