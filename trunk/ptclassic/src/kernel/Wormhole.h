@@ -1,6 +1,11 @@
 #ifndef _Wormhole_h
 #define _Wormhole_h 1
 
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "type.h"
 #include "Universe.h"
 #include "Galaxy.h"

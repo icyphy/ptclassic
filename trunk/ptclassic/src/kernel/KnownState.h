@@ -27,6 +27,11 @@ instance of class name.
 #ifndef _KnownState
 #define  _KnownState 1
 
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "StringList.h"
 #include "State.h"
 #include "Block.h"

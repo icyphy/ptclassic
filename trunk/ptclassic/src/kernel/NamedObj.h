@@ -1,5 +1,10 @@
 #ifndef _NamedObj_h
 #define _NamedObj_h 1
+
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
 /**************************************************************************
 Version identification:
 $Id$

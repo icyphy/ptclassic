@@ -15,6 +15,11 @@ $Id$
 #ifndef _Star_h
 #define _Star_h 1
 
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "Block.h"
 class Galaxy;
 

@@ -12,6 +12,10 @@ $Id$
  when attempts are made to connect multiple outputs to it.  It forbids
  the specification of multiple inputs.
 *************************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include <std.h>
 #include "AutoForkNode.h"
 #include "KnownBlock.h"

@@ -1,6 +1,11 @@
 #ifndef _WormConnect_h
 #define _WormConnect_h 1
 
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "NamedObj.h"
 #include "DataStruct.h"
 #include "Connect.h"

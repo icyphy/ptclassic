@@ -1,3 +1,7 @@
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include <std.h>
 #include "<T>State.h"
 #include "<T>ArrayState.h"

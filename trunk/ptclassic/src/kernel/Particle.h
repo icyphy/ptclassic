@@ -1,6 +1,11 @@
 #ifndef _particle_h
 #define _particle_h 1
 
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "StringList.h"
 #include "DataStruct.h"
 #include "dataType.h"

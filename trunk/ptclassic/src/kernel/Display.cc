@@ -13,6 +13,10 @@ are too large to efficiently inline.
 
 **************************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "Display.h"
 #include "miscFuncs.h"
 #include "Error.h"

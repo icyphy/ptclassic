@@ -12,6 +12,10 @@ $Id$
 
 **************************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "PriorityQueue.h"
 
 // Set the properties of the LevelLink class.

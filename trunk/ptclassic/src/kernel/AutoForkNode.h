@@ -1,5 +1,10 @@
 #ifndef _AutoForkNode_h
 #define _AutoForkNode_h 1
+
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
 /**************************************************************************
 Version identification:
 $Id$

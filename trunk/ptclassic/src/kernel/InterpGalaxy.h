@@ -19,6 +19,11 @@ $Id$
 #ifndef _InterpGalaxy_h
 #define _InterpGalaxy_h 1
 
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "Galaxy.h"
 #include "KnownBlock.h"
 #include "KnownState.h"

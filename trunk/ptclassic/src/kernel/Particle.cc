@@ -13,6 +13,10 @@ $Id$
 
 **************************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "Particle.h"
 #include "Plasma.h"
 #include "Error.h"

@@ -13,6 +13,10 @@ $Id$
 
 **************************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include <std.h>
 #include <ctype.h>
 #include <string.h>

@@ -1,6 +1,11 @@
 #ifndef _ComplexState_h
 #define _ComplexState_h 1
 
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "State.h"
 #include "KnownState.h"
 

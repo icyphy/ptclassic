@@ -1,6 +1,11 @@
 #ifndef _Geodesic_h
 #define _Geodesic_h 1
 
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 /****************************************************************
 Version identification:
 $Id$

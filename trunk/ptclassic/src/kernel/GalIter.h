@@ -14,6 +14,11 @@ at every level.
 **************************************************************************/
 #ifndef _GalIter_h
 #define _GalIter_h 1
+
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
 #include "Galaxy.h"
 #include "Star.h"
 

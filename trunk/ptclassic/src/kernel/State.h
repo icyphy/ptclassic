@@ -1,6 +1,11 @@
 #ifndef _State_h
 #define _State_h 1
 
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "DataStruct.h"
 #include "StringList.h"
 #include "Error.h"

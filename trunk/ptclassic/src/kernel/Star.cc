@@ -11,6 +11,10 @@ $Id$
  SDF-specific stuff moved to SDFStar.cc, 5/29/90.
 
 *******************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "Star.h"
 #include "StringList.h"
 #include "GalIter.h"

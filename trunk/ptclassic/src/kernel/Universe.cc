@@ -11,6 +11,10 @@ $Id$
 //
 // Print out the universe
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "Universe.h"
 #include "StringList.h"
 #include "GalIter.h"

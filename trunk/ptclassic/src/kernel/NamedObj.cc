@@ -14,6 +14,10 @@ where the parent is a Block (a specific type of NamedObj).
 
 **************************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "NamedObj.h"
 #include "StringList.h"
 #include "Block.h"

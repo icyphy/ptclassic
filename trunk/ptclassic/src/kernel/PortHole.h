@@ -1,6 +1,11 @@
 #ifndef _connect_h
 #define _connect_h 1
 
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "NamedObj.h"
 #include "DataStruct.h"
 #include "dataType.h"

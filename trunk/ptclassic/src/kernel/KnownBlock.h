@@ -28,6 +28,11 @@ instance of the named class in the current domain.
 #ifndef _KnownBlock_h
 #define  _KnownBlock_h 1
 
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "Block.h"
 #include "StringList.h"
 

@@ -1,6 +1,11 @@
 #ifndef _Universe_h
 #define _Universe_h 1
 
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 
 /*******************************************************************
 SCCS version identification

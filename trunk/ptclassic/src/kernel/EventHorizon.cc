@@ -1,3 +1,7 @@
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "WormConnect.h"
 #include "Star.h"
 #include "StringList.h"

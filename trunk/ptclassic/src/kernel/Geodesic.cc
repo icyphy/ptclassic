@@ -20,6 +20,10 @@ Geodesics can be created named or unnamed.
 
 *****************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "Geodesic.h"
 #include "Block.h"
 #include "Connect.h"
