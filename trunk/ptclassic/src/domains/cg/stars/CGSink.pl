@@ -22,8 +22,17 @@ It outputs lines of comments, instead of code.
 		name {input}
 		type {FLOAT}
 	}
+	defstate {
+		name {n}
+		type {int}
+		desc {number of samples to write}
+		default {1}
+	}
+	setup {
+		input.setSDFParams(n,int(n)-1);
+	}
 	codeblock (blockname) {
-// Line 1 code from CGSink
+// CGSink star: read $val(n) samples.
 // Line 2 code from CGSink
 	}
 	go {
