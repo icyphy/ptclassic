@@ -36,22 +36,39 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
+#include "DataStruct.h"
+
 class PtThread;
 
-class ThreadScheduler
+// A list of threads.
+class ThreadList : private SequentialList
 {
+    friend class ThreadListIter;
+
 public:
     // Register a thread.
-    virtual void add(PtThread*) = 0;
+    void add(PtThread*);
 
     // Allow all threads to run.
     virtual void run() = 0;
 
     // Delete (and terminate) all threads.
-    virtual ~ThreadScheduler() {}
+    virtual ~ThreadList();
 };
 
 
+// An iterator for ThreadList.
+class ThreadListIter : private ListIter
+{
+public:
+    ThreadListIter(ThreadList&);
+    inline PtThread* next() { return (PtThread*)ListIter::next();}
+    inline PtThread* operator++(POSTFIX_OP) { return next();}
+    ListIter::reset;
+};
+
+
+// Abstract base class for threads.
 class PtThread
 {
 public:
