@@ -128,6 +128,9 @@ ifdef CG56
 	PALETTES += PTOLEMY/src/domains/cg56/icons/main.pal
 	STARS += $(LIBDIR)/cg56dspstars.o $(LIBDIR)/cg56stars.o
 	LIBS += -lcg56dspstars -lcg56stars -lcg56
+	LIBFILES += $(LIBDIR)/libcg56dspstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libcg56stars.$(LIBSUFFIX) \
+		$(LIBDIR)/libcg56.$(LIBSUFFIX)
 	ifeq ($(USE_SHARED_LIBS),yes) 
 		LIBS += -lcg56targets
 		LIBFILES += $(LIBDIR)/libcg56targets.$(LIBSUFFIX)
@@ -309,13 +312,13 @@ ifdef IPUS
 				 $(IPUSDIR)/tcltk/stars 
 		PALETTES += PTOLEMY/src/domains/ipus/icons/ipus.pal
 		STARS += $(LIBDIR)/ipustclstars.o $(LIBDIR)/ipusstars.o
+		LIBS += -lipustclstars -lipusstars -lipus \
+			-lipustcltk -licp
 		LIBFILES += $(LIBDIR)/libipustclstars.$(LIBSUFFIX) \
 			$(LIBDIR)/libipustcltk.$(LIBSUFFIX) \
 			$(LIBDIR)/libipusstars.$(LIBSUFFIX) \
 			$(LIBDIR)/libipus.$(LIBSUFFIX) \
 			$(LIBDIR)/libicp.$(LIBSUFFIX)
-		LIBS += -lipustclstars -lipusstars -lipus \
-			-lipustcltk -licp
 	endif
 endif
 
@@ -323,9 +326,9 @@ ifdef MQ
 	ATM = 1
 	CUSTOM_DIRS += $(MQDIR)/kernel $(MQDIR)/stars
 	ATMSTARS = $(LIBDIR)/mqstars.o
-	LIBFILES += $(LIBDIR)/libmq.$(LIBSUFFIX) \
-		$(LIBDIR)/libmqstars.$(LIBSUFFIX)
 	LIBS += -lmqstars -lmq 
+	LIBFILES += $(LIBDIR)/libmqstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libmq.$(LIBSUFFIX)
 endif
 
 ifdef DE
@@ -391,14 +394,14 @@ ifdef CGC
 	STARS += $(LIBDIR)/cgcstars.o
 	CUSTOM_DIRS += $(CGCDIR)/stars $(CGCDIR)/kernel
 	LIBS += -lcgcstars
-	LIBFILES += $(LIBDIR)/libcgcstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libcgc.$(LIBSUFFIX)
+	LIBFILES += $(LIBDIR)/libcgcstars.$(LIBSUFFIX)
 endif
 
 ifdef CGCLIB
 	SDFLIB = 1
 	CUSTOM_DIRS += $(CGCDIR)/kernel
 	LIBS += -lcgc
+	LIBFILES += $(LIBDIR)/libcgc.$(LIBSUFFIX)
 endif
 
 ifdef BDF
@@ -425,11 +428,11 @@ ifdef CG
 			$(CGDIR)/macroScheduler $(CGDIR)/dcScheduler  \
 			$(CGDIR)/dlScheduler $(CGDIR)/hierScheduler \
 			$(CGDIR)/parScheduler
-		LIBS += -lMacro -lDC -lHu -lDL -lHier -lcgddf -lPar -lcg
 		TARGETS += $(CGT)/CGMultiTarget.o $(CGT)/CGSharedBus.o 
-		LIBFILES += $(LIBDIR)/libDC.$(LIBSUFFIX) \
+		LIBS += -lMacro -lDC -lHu -lDL -lHier -lcgddf -lPar
+		LIBFILES += $(LIBDIR)/libMacro.$(LIBSUFFIX) \
+			$(LIBDIR)/libDC.$(LIBSUFFIX) \
 			$(LIBDIR)/libHu.$(LIBSUFFIX) \
-			$(LIBDIR)/libMacro.$(LIBSUFFIX) \
 			$(LIBDIR)/libDL.$(LIBSUFFIX) \
 			$(LIBDIR)/libHier.$(LIBSUFFIX) \
 			$(LIBDIR)/libcgddf.$(LIBSUFFIX) \
@@ -466,8 +469,8 @@ ifdef SDF
 		SDFDSP=1
 		SDFDMM = 1
 		STARS += $(LIBDIR)/sdftclstars.o
-		LIBFILES += $(LIBDIR)/libsdftclstars.$(LIBSUFFIX)
 		LIBS += -lsdftclstars
+		LIBFILES += $(LIBDIR)/libsdftclstars.$(LIBSUFFIX)
 	endif
 	ifdef ATM
 		CUSTOM_DIRS += $(SDFDIR)/atm/stars
@@ -511,9 +514,9 @@ ifdef SDF
 	ifdef SDFCONTRIB
 		CUSTOM_DIRS += $(SDFDIR)/contrib/kernel $(SDFDIR)/contrib/stars
 		STARS += $(LIBDIR)/sdfcontribstars.o
-		LIBFILES += $(LIBDIR)/libsdfcontrib.$(LIBSUFFIX)
-		LIBFILES += $(LIBDIR)/libsdfcontribstars.$(LIBSUFFIX)
 		LIBS += -lsdfcontribstars -lsdfcontrib 
+		LIBFILES += $(LIBDIR)/libsdfcontribstars.$(LIBSUFFIX) \
+			$(LIBDIR)/libsdfcontrib.$(LIBSUFFIX)
 	endif
 	CUSTOM_DIRS += $(SDFDIR)/stars
 	STARS += $(LIBDIR)/sdfstars.o 
@@ -530,8 +533,8 @@ endif
 
 ifdef ATM
 	CUSTOM_DIRS += $(SDFDIR)/atm/kernel
-	LIBFILES += $(LIBDIR)/libatm.$(LIBSUFFIX)
 	LIBS += -latm
+	LIBFILES += $(LIBDIR)/libatm.$(LIBSUFFIX)
 endif
 
 ifdef CEPHESLIB
