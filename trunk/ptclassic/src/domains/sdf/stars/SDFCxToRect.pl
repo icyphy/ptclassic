@@ -1,26 +1,11 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  E. A. Lee
- Date of creation: 9/19/90
- Converted to use preprocessor, 9/26/90 
-
- Converts complex values to real and imaginary parts.
-
-**************************************************************************/
-}
-
 defstar {
 	name {ComplexReal}
 	domain {SDF}
-	desc {
-		"Convert complex data to real and imaginary parts"
-	}
+	desc { Convert complex data to real and imaginary parts. }
+	version {$Revision$ $Date$}
+	author { E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
 	input {
 		name {input}
 		type {complex}

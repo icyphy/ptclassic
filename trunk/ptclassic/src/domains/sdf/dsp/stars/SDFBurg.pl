@@ -1,11 +1,17 @@
 ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Programmer:  E. A. Lee
- Date of creation: 10/31/90
-
+#define MAXORDER 256
+#define MAXNOINPUTS 1024
+}
+defstar {
+	name {Burg}
+	domain {SDF}
+	version {$Revision$ $Date$}
+	desc { Burg's algorithm. }
+	author { E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF dsp library }
+	explanation {
+.pp
 This star uses Burg's algorithm to estimate the reflection coefficients
 and AR parameters of an input random process.
 The number of inputs looked at is given by the \fInumInputs\fR parameter
@@ -38,51 +44,39 @@ Prentice-Hall, Englewood Cliffs, NJ, 1988.
 .ip [3]
 S. Haykin, \fIModern Filters\fR, MacMillan Publishing Company,
 New York, 1989.
-.SA
-LevDur,
-linearPrediction,
-powerSpectrum.
-
-**************************************************************************/
-
-#define MAXORDER 256
-#define MAXNOINPUTS 1024
-}
-defstar {
-	name {Burg}
-	domain {SDF}
-	desc { "Burg's algorithm" }
+	}
+	seealso { LevDur, linearPrediction, powerSpectrum }
 	input {
 		name {input}
 		type {float}
-		// desc { "Input random process" }
+		desc { Input random process. }
 	}
 	output {
 		name {lp}
 		type {float}
-		// desc { "AR coefficients output" }
+		desc { AR coefficients output. }
 	}
 	output {
 		name {refl}
 		type {float}
-		// desc { "Lattice predictor coefficients output" }
+		desc { Lattice predictor coefficients output. }
 	}
 	output {
 		name {errPower}
 		type {float}
-		// desc { "Prediction error power" }
+		desc { Prediction error power. }
 	}
 	defstate {
 		name {order}
 		type {int}
 		default {8}
-		desc {"The number of reflection coefficients to generate"}
+		desc {The number of reflection coefficients to generate.}
 	}
 	defstate {
 		name {numInputs}
 		type {int}
 		default {64}
-		desc {"The number of inputs used to estimate the model"}
+		desc { The number of inputs used to estimate the model.}
 	}
 	start {
 		if (int(order) > MAXORDER) {

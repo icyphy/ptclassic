@@ -1,39 +1,32 @@
 ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  E. A. Lee
- Date of creation: 10/31/90
-
- Implements an FIR filter whose coefficients are periodically updated
- from the outside.  The \fIblockSize\fR parameter tells how often
- the updates occur.  It is an integer specifying how may input samples
- should be processed using each set of coefficients.  The \fIorder\fR
- parameter tells how many coefficients there are.
- The same interpolation and decimation of the FIR star is supported.
-
- Unfortunately, it proves not too convenient to derive this star from FIR
- because of the changes in the way the inputs and outputs are handled.
- Hence, much of the code here is quite similar to that in the FIR star.
- The maximum filter order (currently 1024) is defined in the source code,
- and can be changed, at the expense of recompiling.
-
-SEE ALSO:
-FIR
-**************************************************************************/
-
 #define MAXORDER 1024
-
 }
 
 defstar {
 	name { BlockFIR }
 	domain { SDF }
-	desc { "an FIR filter whose coefficients are externally updated" }
+	version {$Revision$ $Date$}
+	desc { An FIR filter with coefficients externally supplied. }
+	author { E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
+	explanation {
+.pp
+This star implements an FIR filter with coefficients that
+are periodically updated
+from the outside.  The \fIblockSize\fR parameter tells how often
+the updates occur.  It is an integer specifying how may input samples
+should be processed using each set of coefficients.  The \fIorder\fR
+parameter tells how many coefficients there are.
+The same interpolation and decimation of the FIR star is supported.
+.pp
+Unfortunately, it proves not too convenient to derive this star from FIR
+because of the changes in the way the inputs and outputs are handled.
+Hence, much of the code here is quite similar to that in the FIR star.
+The maximum filter order (currently 1024) is defined in the source code,
+and can be changed, at the expense of recompiling.
+	}
+	seealso { FIR }
 	input {
 		name {signalIn}
 		type {float}
@@ -50,31 +43,31 @@ defstar {
 		name { blockSize }
 		type { int }
 		default { "128" }
-		desc { "Number of inputs that use each each coefficient set" }
+		desc { Number of inputs that use each each coefficient set. }
 	}
 	defstate {
 		name { order }
 		type { int }
 		default { "16" }
-		desc { "Number of new coefficients to read each time" }
+		desc { Number of new coefficients to read each time. }
 	}
 	defstate {
 		name {decimation}
 		type {int}
 		default {1}
-		desc {"decimation ratio"}
+		desc { Decimation ratio.}
 	}
 	defstate {
 		name {decimationPhase}
 		type {int}
 		default {0}
-		desc {"downsampler phase"}
+		desc {Downsampler phase.}
 	}
 	defstate {
 		name {interpolation}
 		type {int}
 		default {1}
-		desc {"interpolation ratio"}
+		desc {Interpolation ratio.}
 	}
 	protected {
 		int phaseLength;

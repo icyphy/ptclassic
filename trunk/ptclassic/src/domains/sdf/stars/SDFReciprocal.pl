@@ -1,28 +1,17 @@
-ident {
-/************************************************************************
-Version identification:
-$Id$
-
-Copyright (c) 1990 The Regents of the University of California.
-			All Rights Reserved.
-
-Programmer: E. A. Lee
-Date of creation: 10/28/89
-
-This star computes $1/x$, where $x$ is the input.
-If the $magLimit$ parameter is not 0.0, then the output is
-$+- max ( magLimit, ~ 1/x )$.  In this case, $x$ can be zero
-without causing an floating exception.
-The sign of the output is determined by the sign of the input.
-
-************************************************************************/
-}
-
 defstar {
 	name {Reciprocal}
 	domain {SDF}
-	desc {
-		"1/x, with an optional magnitude limit."
+	desc { 1/x, with an optional magnitude limit. }
+	version {$Revision$ $Date$}
+	author { E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
+	explanation {
+This star computes $1/x$, where $x$ is the input.
+If the \fImagLimit\fR parameter is not 0.0, then the output is
+$+- ~ max ( magLimit, ~ 1/x )$.  In this case, $x$ can be zero
+without causing an floating exception.
+The sign of the output is determined by the sign of the input.
 	}
 	input {
 		name{input}
@@ -36,7 +25,7 @@ defstar {
 		name{magLimit}
 		type{float}
 		default{"0.0"}
-		desc {"If non-zero, limits the magnitude of the output"}
+		desc {If non-zero, limits the magnitude of the output.}
 	}
 	go {
 	   if(double(magLimit) == 0.0)

@@ -1,26 +1,24 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  E. A. Lee
- Date of creation: 10/28/90
-
+defstar {
+	name {DTFT}
+	domain {SDF}
+	desc { Discrete-time Fourier transform. }
+	version {$Revision$ $Date$}
+	author { E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF dsp library }
+	explanation {
 This star computes arbitrary samples of the discrete-time Fourier
 transform of a finite length sequence.
-Let it be written $sigma sup 2$.
 The \fIsignal\fR input is the signal to be transformed.
-Let these be written $a(1), ~ ... ~ ,~ a(N)$, where
-$N$ is the \fIlength\fR.
+The number of input samples consumed is given by \fIlength\fR.
+Let these be written $a(1), ~ ... ~ ,~ a(L)$, where
+$L$ is the \fIlength\fR.
 Then the output is
 .EQ
 A ( j omega ) ~=~
-{ sum from k=0 to N a(k) e sup {- j omega k T} }
+{ sum from k=0 to L a(k) e sup {- j omega k T} }
 .EN
-where $T$ is the time between samples.
+where $T$ is the time between samples (\fItimeBetweenSamples\fR).
 The number of samples produced at the output is determined
 by the \fInumberOfSamples\fR parameter.
 The values of $omega$ at which samples are taken are provided
@@ -29,49 +27,40 @@ can be examined at any desired resolution, and samples need not
 be taken at uniform intervals.
 Note that $omega ~=~ 2 pi / T$ is
 the sampling frequency.
-
-SEE ALSO:
-ComplexFFT
-
-**************************************************************************/
-
-}
-defstar {
-	name {DTFT}
-	domain {SDF}
-	desc { "Discrete-time Fourier transform" }
+	}
+	seealso { ComplexFFT }
 	input {
 		name {signal}
 		type {complex}
-		// desc { "signal to be transformed" }
+		desc { Signal to be transformed. }
 	}
 	input {
 		name {omega}
 		type {float}
-		// desc { "Frequency values at which to sample the transform" }
+		desc { Frequency values at which to sample the transform. }
 	}
 	output {
 		name {dtft}
 		type {complex}
-		// desc { "the samples of the transform" }
+		desc { The samples of the transform. }
 	}
 	defstate {
 		name {length}
 		type {int}
 		default {8}
-		desc {"The length of the input signal"}
+		desc {The length of the input signal.}
 	}
 	defstate {
 		name {numberOfSamples}
 		type {int}
 		default {128}
-		desc {"The number of samples of the transform to output"}
+		desc {The number of samples of the transform to output.}
 	}
 	defstate {
 		name {timeBetweenSamples}
 		type {float}
 		default {1.0}
-		desc {"The time between input samples (T)"}
+		desc {The time between input samples (T).}
 	}
 	ccinclude { "ComplexSubset.h" }
 	start {

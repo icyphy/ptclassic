@@ -1,29 +1,23 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  J. T. Buck
- Date of creation: 3/19/90
- Revised (from Xgraph) by E. A. Lee to accept multiple inputs, 9/18/90.
- Revised 10/3/90 to work under the preprocessor.
- Revised 10/20/90 to use XGraph class
-
- Draws a graph with the xgraph function.  It is assumed that "xgraph"
- is on your path, or this will not work!!!
-
- This version is for the SDF domain.
-**************************************************************************/
-
-}
-
 defstar {
 	name { XMgraph }
 	domain { SDF }
-	desc { "Generate a multi-signal plot with the xgraph program." }
+	desc { Generate a multi-signal plot with the xgraph program. }
+	version {$Revision$ $Date$}
+	author { J. T. Buck and E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
+	explanation {
+The input signal is plotted using the \fIxgraph\fR program.
+This program must be in your path, or this star will not work!
+The \fItitle\fR parameter specifies a title for the plot.
+The \fIsaveFile\fR parameter optionally specifies a file for
+storing the data in a syntax acceptable to xgraph.
+A null string prevents any such storage.
+The \fIoptions\fR string is passed directly to the xgraph program
+as command-line options.  See the manual section describing xgraph
+for a complete explanation of the options.
+	}
+	seealso { Xgraph xgraph XYgraph Xhistogram }
 	inmulti {
 		name { input }
 		type { anytype }
@@ -32,19 +26,19 @@ defstar {
 		name {title}
 		type {string}
 		default {"X graph"}
-		desc {"graph title"}
+		desc { Title for the plot. }
 	}
 	defstate {
 		name {saveFile}
 		type {string}
 		default {""}
-		desc {"file to save xgraph input"}
+		desc { File name for saving plottable data. }
 	}
 	defstate {
 		name {options}
 		type {string}
 		default {""}
-		desc {"command line options for xgraph"}
+		desc {Command line options for the xgraph program.}
 	}
 	protected {
 		XGraph graph;

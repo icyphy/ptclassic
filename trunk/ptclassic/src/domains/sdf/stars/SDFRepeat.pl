@@ -1,23 +1,17 @@
-ident {
-/************************************************************************
-Version identification:
-$Id$
-
-Copyright (c) 1990 The Regents of the University of California.
-                        All Rights Reserved.
-
-Programmer:  E. A. Lee
-Date of creation: 10/28/90
-
-Repeat repeats each input Particle the specified number of times
-(\fInumTimes\fR) on the output.
-
-************************************************************************/
-}
 defstar {
 	name {Repeat}
 	domain {SDF}
-	desc { "repeats each input sample the specified number of times" }
+	desc {  Repeats each input sample the specified number of times. }
+	version {$Revision$ $Date$}
+	author { E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
+	explanation {
+Repeat repeats each input Particle the specified number of times
+(\fInumTimes\fR) on the output.  Note that this is a sample rate
+change, and hence affects the number of invocations of downstream
+stars.
+	}
 	input {
 		name{input}
 		type{ANYTYPE}
@@ -30,7 +24,7 @@ defstar {
 		name {numTimes}
 		type {int}
 		default {2}
-		desc { "Repetition factor" }
+		desc { Repetition factor. }
 	}
 	start {
 		output.setSDFParams(int(numTimes),int(numTimes)-1);

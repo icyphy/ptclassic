@@ -1,20 +1,16 @@
-ident {
-// This star produces a waveform on the output, as specified by
-// a FloatArrayState.
-// J. Buck
-// $Id$
-// Copyright (c) 1990 The Regents of the University of California.
-//			All Rights Reserved.
-}
 defstar {
 	name { WaveForm }
 	domain { SDF }
 	desc {
-		"Output a waveform as specified by the array state\n"
-		"'value' (default '1 -1').  Note that a file may be\n"
-		"specified for the state value.  If 'periodic' is 'yes' the\n"
-		"waveform is periodic; otherwise zeros come after the end.\n"
+Output a waveform as specified by the array state
+"value" (default "1 -1").  Note that a file may be
+specified for the state value.  If "periodic" is YES then
+the waveform is periodic; otherwise zeros come after the end.
 	}
+	version {$Revision$ $Date$}
+	author { J. T. Buck }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
 	output {
 		name { output }
 		type { float }
@@ -23,13 +19,13 @@ defstar {
 		name { value }
 		type { floatarray }
 		default { "1 -1" }
-		desc { "One period of the output waveform" }
+		desc { One period of the output waveform. }
 	}
 	defstate {
 		name { periodic }
 		type { int }
 		default { "YES" }
-		desc { "Output is periodic if 'YES' (nonzero)" }
+		desc { Output is periodic if "YES" (nonzero). }
 	}
 	protected {
 		int pos;

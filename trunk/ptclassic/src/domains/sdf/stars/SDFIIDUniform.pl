@@ -1,29 +1,17 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  D. G. Messerschmitt
- Date of creation: 1/1/90
- Converted to preprocessor, and common AGC object used, by JTB 10/3/90
-
- Uniform generates a sequence of IID pseudo-independent Uniform
- variables represented as type FLOAT
-
- This Star uses the GNU library <Uniform.h>
-
-**************************************************************************/
-}
 defstar {
 	name { IIDUniform }
 	domain { SDF }
 	desc {
-	    "Generates an i.i.d. uniformly distributed pseudo-random process.\n"
-	    "Output is uniformly distributed between 'lower' (default 0)\n"
-	    "and 'upper' (default 1)."
+Generates an i.i.d. uniformly distributed pseudo-random process.
+Output is uniformly distributed between "lower" (default 0)
+and "upper" (default 1).
+	}
+	version {$Revision$ $Date$}
+	author { D. G. Messerschmitt }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
+	explanation {
+This Star uses the GNU library <Uniform.h>.
 	}
 	output {
 		name { output }
@@ -33,13 +21,13 @@ defstar {
 		name { lower }
 		type { float }
 		default { "0.0" }
-		desc { "lower limit" }
+		desc { Lower limit. }
 	}
 	defstate {
 		name { upper }
 		type { float }
 		default { "1.0" }
-		desc { "upper limit" }
+		desc { Upper limit. }
 	}
 	hinclude { <Uniform.h> }
 	ccinclude { <ACG.h> }

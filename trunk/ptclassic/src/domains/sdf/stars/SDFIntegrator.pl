@@ -1,31 +1,19 @@
-ident {
-/************************************************************************
-Version identification:
-$Id$
-
-Copyright (c) 1990 The Regents of the University of California.
-                        All Rights Reserved.
-
-Programmer: E. A. Lee
-Date of creation: 9/19/90
-Modified to use preprocessor: 10/3/90, by JTB
-
-Integrator Star, with leakage, limiting, and reset.
-
-************************************************************************/
-}
 defstar {
 	name { Integrator }
 	domain { SDF }
 	desc {
-	  "Integrator with leakage, limits, and reset.\n"
-	  "Leakage is controlled by the feedbackGain state (default 1.0).\n"
-	  "Limits are controlled by top and bottom.\n"
-	  "If top <= bottom, no limiting is performed (default).\n"
-	  "If saturate = 1, saturation is performed.\n"
-	  "If saturate = 0, wrap-around is performed (default).\n"
-	  "When the reset input is non-zero, the Integrator is reset to 0.0."
+Integrator with leakage, limits, and reset.
+Leakage is controlled by the "feedbackGain" state (default 1.0).
+Limits are controlled by "top" and "bottom".
+If top <= bottom, no limiting is performed (default).
+If "saturate" = 1, saturation is performed.
+If "saturate" = 0, wrap-around is performed (default).
+When the "reset" input is non-zero, the Integrator is reset to 0.0.
 	}
+	version {$Revision$ $Date$}
+	author { E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
 	input {
 		name { data }
 		type { float }
@@ -42,31 +30,31 @@ defstar {
 		name {feedbackGain}
 		type {float}
 		default {"1.0"}
-		desc {"gain on the feedback path"}
+		desc { The gain on the feedback path.}
 	}
 	defstate {
 		name {top}
 		type {float}
 		default {"0.0"}
-		desc {"upper limit"}
+		desc { The upper limit.}
 	}
 	defstate {
 		name {bottom}
 		type {float}
 		default {"0.0"}
-		desc {"lower limit"}
+		desc { The lower limit.}
 	}
 	defstate {
 		name {saturate}
 		type {int}
 		default {"YES"}
-		desc {"saturate if true, wrap around otherwise"}
+		desc { Saturate if YES, wrap around otherwise.}
 	}
 	defstate {
 		name {state}
 		type {float}
 		default {"0.0"}
-		desc {"internal state"}
+		desc { An internal state.}
 		attributes { A_NONCONSTANT|A_SETTABLE }
 	}
 	protected {

@@ -1,33 +1,40 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  D. G. Messerschmitt and E. A. Lee
- Date of creation: 1/16/90
- Revisions: 9/19/90, by EAL, to conform with Gabriel's adaptive filter.
- Converted to use preprocessor, 10/2/90 by J. Buck
-
- Implements an adaptive filter using the LMS tap update algorithm.'
-
-**************************************************************************/
-}
-
 defstar {
 	name { LMS }
 	domain { SDF }
 	derivedFrom { FIR }
 	desc {
-	    "Adaptive filter using LMS adaptation algorithm.\n"
-	    "Initial coefficients are in the 'taps' state variable.\n"
-	    "Default initial coefficients give an 8th order, linear phase\n"
-	    "lowpass filter.  To read default coefficients from a file,\n"
-	    "replace the default coefficients with \"<fileName\".\n"
-	    "Supports the same sample-rate conversions as FIR."
+Adaptive filter using LMS adaptation algorithm.
+Initial coefficients are in the "taps" state variable.
+Default initial coefficients give an 8th order, linear phase
+lowpass filter.  To read default coefficients from a file,
+replace the default coefficients with "<fileName".
+Supports decimation, but not interpolation.
 	}
+	version {$Revision$ $Date$}
+	author { E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
+	explanation {
+When correctly used, this filter will adapt to try to minimize
+the mean-squared error of the signal at its \fIerror\fR input.
+In order for this to be possible, the output of the filter should
+be compared (subtracted from) some reference signal to produce
+an error signal.
+That error signal should be fed back to the \fIerror\fR input.
+The \fIdelay\fR parameter must equal the total number of delays
+in the path from the output of the filter back to the error input.
+This ensures correct alignment of the adaptation algorithm.
+The number of delays must be greater than zero or the dataflow
+graph will deadlock.
+The adaptation algorithm used is the well-known LMS, or stochastic-gradient
+algorithm.
+.IE "stochastic gradient algorithm"
+.lp
+If the \fIsaveTapsFile\fR string is non-null, a file will
+be created by the name given by that string, and the final tap values
+will be stored there after the run has completed.
+	}
+	seealso {FIR, adaptFilter}
 	input {
 		name { error }
 		type { float }
@@ -36,19 +43,19 @@ defstar {
 		name { stepSize }
 		type { float }
 		default { "0.01" }
-		desc { "step size" }
+		desc { Adaptation step size. }
 	}
 	defstate {
 		name { errorDelay }
 		type { int }
 		default { "1" }
-		desc { "delay in the update loop" }
+		desc {  Delay in the update loop. }
 	}
 	defstate {
 		name { saveTapsFile }
 		type { string }
 		default { "" }
-		desc { "file to save final tap values" }
+		desc { File to save final tap values. }
 	}
 	ccinclude { "miscFuncs.h" }
 	constructor {

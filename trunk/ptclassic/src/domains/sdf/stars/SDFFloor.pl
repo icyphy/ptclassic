@@ -1,21 +1,11 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  J. T. Buck
- Date of creation: 10/8/90
-
- Returns the greatest integer <= the floating input.
-**************************************************************************/
-}
 defstar {
 	name { Floor }
 	domain { SDF } 
-	desc { 	"Outputs the greatest integer <= input." }
+	desc { Outputs the greatest integer <= input. }
+	version {$Revision$ $Date$}
+	author { J. T. Buck }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
 	input {
 		name { input }
 		type { float }

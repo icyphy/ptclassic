@@ -1,24 +1,18 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  E. A. Lee
- Date of creation: 10/20/90
-
- Creates a histogram with the xgraph function.  It is assumed that "xgraph"
- is on your path, or this will not work!!!
-
-**************************************************************************/
-}
-
 defstar {
 	name { Xhistogram }
 	domain { SDF }
-	desc { "Generate a histogram with the xgraph program." }
+	desc { Generate a histogram with the xgraph program. }
+	version {$Revision$ $Date$}
+	author { E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
+	explanation {
+Creates a histogram with the xgraph program.  It is assumed that "xgraph"
+is on your path, or this will not work!
+The \fIbinWidth\fR parameter specifies how wide histogram
+bin will be.  The number of bins is determined automatically from
+the input data.
+	}
 	input {
 		name { input }
 		type { anytype }
@@ -27,25 +21,25 @@ defstar {
 		name {title}
 		type {string}
 		default {"Xhistogram"}
-		desc {"graph title"}
+		desc { Title for the plot. }
 	}
 	defstate {
 		name {saveFile}
 		type {string}
 		default {""}
-		desc {"file to save Xhistogram input"}
+		desc {File to save input.}
 	}
 	defstate {
 		name {binWidth}
 		type {float}
 		default {"1.0"}
-		desc {"Width of bins for histogram."}
+		desc {Width of bins for histogram.}
 	}
 	defstate {
 		name {options}
 		type {string}
 		default {"-bar -nl"}
-		desc {"command line options for xgraph"}
+		desc {Command line options for xgraph.}
 	}
 	protected {
 		SequentialList bins;

@@ -24,10 +24,10 @@ GNUINCLUDE = /usr/gnu/lib/g++-include
 
 # Make sure we always run the preprocessor in the source directory
 .pl.cc:
-	cd $(VPATH); ptlang $<
+	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
 
 .pl.h:
-	cd $(VPATH); ptlang $<
+	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
 
 # source files for all stars, using preprocessor
 SRCS= \
