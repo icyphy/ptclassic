@@ -1,4 +1,4 @@
-static const char file_id[] = "CGWormTarget.cc";
+static const char file_id[] = "CompileCGSubsystems.cc";
 
 /*****************************************************************
 Version identification:
@@ -37,7 +37,7 @@ Programmer: Jose Luis Pino
 #pragma implementation
 #endif
 
-#include "CGWormTarget.h"
+#include "CompileCGSubsystems.h"
 #include "GalIter.h"
 #include "CGCFork.h"
 #include "Wormhole.h"
@@ -45,7 +45,7 @@ Programmer: Jose Luis Pino
 #include "AnyCGStar.h"
 #include "ParScheduler.h"
 
-#include "CGCTargetWH.h"
+#include "CreateSDFStar.h"
 #include "CGCSDFReceive.h"
 #include "CGCSDFSend.h"
 #include "DynamicGalaxy.h"
@@ -74,28 +74,28 @@ public:
     }
 };
 
-CGWormTarget::
-CGWormTarget(const char* name,const char* starType,const char* desc):
+CompileCGSubsystems::
+CompileCGSubsystems(const char* name,const char* starType,const char* desc):
 CGSharedBus(name,starType,desc),cgcWorm(0) {
     childType.setInitValue("default-CGC");
 }
 
-void CGWormTarget::prepareChildren() {
+void CompileCGSubsystems::prepareChildren() {
     CGSharedBus::prepareChildren();
     if(!galaxy()->parent() || !galaxy()->parent()->isItWormhole()) return;
-    if(!child(0)->isA("CGCTargetWH")) {
-	Error::abortRun(*child(0)," is not a CGCTargetWH.");
+    if(!child(0)->isA("CreateSDFStar")) {
+	Error::abortRun(*child(0)," is not a CreateSDFStar.");
 	return;
     }
 }
 
-void CGWormTarget::wormPrepare() {
+void CompileCGSubsystems::wormPrepare() {
     if(!galaxy()->parent() || !galaxy()->parent()->isItWormhole()) return;
-    cgcWorm = (CGCTargetWH*)child(0);
+    cgcWorm = (CreateSDFStar*)child(0);
     cgcWorm->convertWormholePorts(*galaxy());
 }
 
-int CGWormTarget::modifyGalaxy() {
+int CompileCGSubsystems::modifyGalaxy() {
     // Let HOF type stars do there magic
     if (!CGSharedBus::modifyGalaxy()) return FALSE;
     
@@ -103,13 +103,13 @@ int CGWormTarget::modifyGalaxy() {
     CGStar* star;
     // FIXME - This code only processes top-level wormholes
     while ((star = (CGStar*)nextStar++) != NULL) {
-	Wormhole* worm = ((CGStar*)star)->asWormhole();
+	Wormhole* worm = star->asWormhole();
 	if (!worm) continue;
 	BlockPortIter nextPort(*star);
 	PortHole* port;
 	while ((port = nextPort++) != NULL) {
 	    if (port->atBoundary()) continue;
-	    Wormhole* farWorm = ((CGStar*)port->far()->parent())->asWormhole();
+	    Wormhole* farWorm = ((Star*)port->far()->parent())->asWormhole();
 	    const char* farDomain = farWorm?
 		farWorm->insideDomain():port->far()->parent()->domain();
 	    const char* wormDomain = worm->insideDomain();
@@ -137,11 +137,11 @@ int CGWormTarget::modifyGalaxy() {
     return TRUE;
 }
 
-DataFlowStar* CGWormTarget::createSend(int from, int to, int /*num*/) {
+DataFlowStar* CompileCGSubsystems::createSend(int from, int to, int /*num*/) {
     return new DummySend(to,from);
 }
     
-DataFlowStar* CGWormTarget::createReceive(int from, int to, int /*num*/) {
+DataFlowStar* CompileCGSubsystems::createReceive(int from, int to, int /*num*/) {
     return new DummyReceive(to,from);
 }
 
@@ -159,7 +159,7 @@ inline DFPortHole* singlePort(DataFlowStar& star) {
     return (DFPortHole*)ports++;
 }
 
-int CGWormTarget::replaceCommBlock
+int CompileCGSubsystems::replaceCommBlock
 (DataFlowStar& newStar, DataFlowStar& oldStar) {
     if (!oldStar.parent()) {
 	Error::abortRun(oldStar,"replaceCommBlock: The old "
@@ -193,7 +193,7 @@ int CGWormTarget::replaceCommBlock
     return TRUE;
 }
 	
-void CGWormTarget::pairSendReceive(DataFlowStar* oldSend,
+void CompileCGSubsystems::pairSendReceive(DataFlowStar* oldSend,
 				   DataFlowStar* oldReceive) {
     int from = ((DummyComm*)oldSend)->from;
     int to = ((DummyComm*)oldSend)->to;
@@ -233,12 +233,12 @@ void CGWormTarget::pairSendReceive(DataFlowStar* oldSend,
     newReceive->setName(savestring(receive));
 }
 
-int CGWormTarget::runCode() {	
+int CompileCGSubsystems::runCode() {	
     // FIXME - assumes cgc target is child 0
     return cgChild(0)->runCode();
 }
 
-ISA_FUNC(CGWormTarget,CGSharedBus);
+ISA_FUNC(CompileCGSubsystems,CGSharedBus);
  
-static CGWormTarget cgWormTarget("WormTarget","CGStar","A CG wormhole target");
-static KnownTarget entry(cgWormTarget,"WormTarget");
+static CompileCGSubsystems cgCompileCGSubsystems("CompileCGSubsystems","CGStar","A CG wormhole target");
+static KnownTarget entry(cgCompileCGSubsystems,"CompileCGSubsystems");

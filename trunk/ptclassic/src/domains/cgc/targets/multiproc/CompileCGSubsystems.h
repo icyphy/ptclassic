@@ -29,8 +29,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 *******************************************************************/
 
-#ifndef _CGWormTarget_h
-#define _CGWormTarget_h 1
+#ifndef _CompileCGSubsystems_h
+#define _CompileCGSubsystems_h 1
 
 #ifdef __GNUG__
 #pragma interface
@@ -39,18 +39,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGSharedBus.h"
 #include "StringState.h"
 
-class CGCTargetWH;
+class CreateSDFStar;
 
-class CGWormTarget: public CGSharedBus {
+class CompileCGSubsystems: public CGSharedBus {
 public:	
-    CGWormTarget(const char* name,const char* starType,const char* desc);
+    CompileCGSubsystems(const char* name,const char* starType,const char* desc);
     
     // Add dummy CGC stars - set StringArrayState childType based on
     // wormholes.
     /*virtual*/ int modifyGalaxy();
     /*virtual*/ int isA(const char*) const;
     /*virtual*/ Block* makeNew() const {
-	 return new CGWormTarget(name(),starType(),descriptor());
+	 return new CompileCGSubsystems(name(),starType(),descriptor());
      }
     /*virtual*/ DataFlowStar* createSend(int from, int to, int num);
     /*virtual*/ DataFlowStar* createReceive(int from, int to, int num);
@@ -63,7 +63,7 @@ protected:
 private:
     int replaceCommBlock(DataFlowStar& /*newStar*/,
 			 DataFlowStar& /*oldStar*/);
-    CGCTargetWH *cgcWorm;
+    CreateSDFStar *cgcWorm;
 };
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef _CGCTargetWH_h
-#define _CGCTargetWH_h 1
+#ifndef _CreateSDFStar_h
+#define _CreateSDFStar_h 1
 /******************************************************************
 Version identification:
 $Id$
@@ -41,8 +41,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // This target allows for the creation of target specific code generation
 // wormholes to simulation.  It can be used stand-alone, for CGC inside of
 // simulation wormholes, or as a helper target such as 
-// $PTOLEMY/src/domains/cg56/targets/S56XTargetWH.{h,cc} for target specific
-// simulation wormholes.
 
 /* The ideas behind the implementation of CG wormholes is document in:
       J.L. Pino, T.M. Parks and E.A. Lee, "Automatic Code Generation for 
@@ -72,9 +70,9 @@ http://ptolemy.eecs.berkeley.edu/papers/autoMultiCodeGen/www/proceedings_1.html
 //          |-------------|            I 'inner' stars, may be any CG
 //
 
-class CGCTargetWH : public CGCTarget {
+class CreateSDFStar : public CGCTarget {
 public:
-    CGCTargetWH(const char* name, const char* starclass, const char* desc);
+    CreateSDFStar(const char* name, const char* starclass, const char* desc);
 
     int isA(const char*) const;
 
@@ -91,12 +89,12 @@ public:
 
     int linkFiles();
     
-    // This method allows CGCTargetWH to be used as a helper target to
+    // This method allows CreateSDFStar to be used as a helper target to
     // the cg wormhole target.  
     int convertWormholePorts(Galaxy&);
 
 
-    // This method allows CGCTargetWH to be used as a stand-alone target
+    // This method allows CreateSDFStar to be used as a stand-alone target
     /*virtual*/ void wormPrepare();
     
     // This string list collects the include directory locations (in
