@@ -69,7 +69,7 @@ void LSNode :: updateOutsideConnections(LSNode* cnode) {
 			int samples = g->samples();
 
 			// remove this intercluster arc
-			g->removeMyArc();
+			LOG_DEL; delete g;
 
 			// insert a link to this outside node
 			outNode->makeArc(cnode,samples,0);
@@ -83,7 +83,7 @@ void LSNode :: updateOutsideConnections(LSNode* cnode) {
 		LSNode* outNode = (LSNode*) g->farEndNode();
 		if (!outNode->inActiveCluster()) {
 			int samples = g->samples();
-			g->removeMyArc();
+			LOG_DEL; delete g;
 			cnode->makeArc(outNode,samples,0);
 		}
 	}
