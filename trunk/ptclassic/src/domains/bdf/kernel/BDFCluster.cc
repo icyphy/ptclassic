@@ -1916,7 +1916,7 @@ int BDFClustSched::computeSchedule (Galaxy& gal) {
 		logstrm = new pt_ofstream(file);
 
 	// do the clustering.
-	cgal = new BDFClusterGal(gal,logstrm);
+	cgal = new BDFTopGal(gal,logstrm);
 	cgal->cluster();
 	if (logstrm) {
 		*logstrm << "Clustering complete.  ";
@@ -1972,7 +1972,7 @@ StringList BDFClustSched::displaySchedule() {
 	return sch;
 }
 
-int BDFClustSched::handleDynamic(Galaxy& gal) {
+int BDFClustSched::handleDynamic(BDFTopGal& gal) {
 	if (!dynamicAllowed) {
 		Error::abortRun(gal, "Top level of clustering is not SDF",
 				"\nDynamic execution required");
@@ -1982,6 +1982,7 @@ int BDFClustSched::handleDynamic(Galaxy& gal) {
 	LOG_DEL; delete dynSched;
 	LOG_NEW; dynSched = new DynDFScheduler;
 	dynSched->setGalaxy(*cgal);
+	gal.setSched(dynSched);
 
 	// set stop time for dynamic scheduler (copy my own)
 	dynSched->setStopTime(getStopTime());
