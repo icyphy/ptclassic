@@ -11,7 +11,8 @@ not be the same one we use, or it may be used in a different way.
 There is also some configuration required by each user in order to
 use the graphical interface.  The information for doing this
 is given in the Pigi document, section 2 of the Almagest.
-Here we give the basic information required to get from a distribution
+Here we give the basic information required to get from an FTP
+archive or distribution
 tape to being able to run the system.
 .H2 "Basic \*(PT installation"
 .pp
@@ -23,28 +24,77 @@ other distributions are roughly the same size):
 	\*(PT (after you optionally remake): 64 Mbytes
 	Gnu subset: 16 Mbytes
 .)b
-Steps to install \*(PT on a Sun-3 or Sun-4:
-.ip 1.
-\fBPreferred method:\fR
+.pp
 Create a user ``ptolemy'', together with a home directory for the ``ptolemy''
-user.  If you do not wish to create a user called ``ptolemy'', see below
-for an alternative.
-.ip 2.
-Log in or su to user ``ptolemy''.
-.ip 3.
-Change your current directory to the
-.i parent
-of the ``ptolemy'' home directory (e.g. "cd ~ptolemy/..").
-.ip 4.
-Load the tape in your drive.
-.ip 5.
+user.  
+Once the "ptolemy" user account has been created, log in or
+su to user ``ptolemy''.
+If you do not wish to create a user called ``ptolemy'', 
+see below for an alternative.  
+.lp
+If you are loading Ptolemy from a tape, do the following:
+.ip a.
+cd /tmp
+(or any directory where you have write permission
+and there is plenty, many Mbytes, of free disk space).
+.ip b.
+Load the tape into your drive
+.ip c.
 mt -f /dev/nrst8 rewind
+.br
 (This rewinds the tape -- change the device name if your tape drive
 has a different name.)
+.ip d.
+tar xf /dev/nrst8
+.lp
+If you have used FTP to down load the files, then
+cd to the directory that contains the "*tar.Z" files you downloaded
+via FTP.
+.lp
+Now, whether you've used tape or FTP,
+there should be a number of large "*tar.Z" files in your current directory.
+Proceed as follows:
+.ip 1.
+zcat pt-0.4.doc.tar.Z | ( chdir ~ptolemy/..; tar xf - )
+.br
+(this uncompresses the documentation, changes directory the parent of the
+"ptolemy" user, and then creates all of the documentation files.)
+.ip 2.
+zcat pt-0.4.src.tar.Z |  ( chdir ~ptolemy/..; tar xf - )
+.br
+(this uncompresses the src and creates the source files.)
+You must not skip this step.  \*(PT depends on these files being present.
+Note that you may get a few warning messages during this and the following
+step about
+the tar program not being able to create a certain directory.  This
+is expected, so you need not worry. 
+.ip 3.
+If you are running the DecStation (MIPS) version of \*(PT:
+.br
+zcat pt-0.4.mips.tar.Z |  ( chdir ~ptolemy/..; tar xf - )
+.br
+If you are running the Sun 4 (Sparc, IPC, IPX, etc) version:
+.br
+zcat pt-0.4.mips.tar.Z |  ( chdir ~ptolemy/..; tar xf - )
+.br
+(this uncompresses the binaries and creates the executable files.)
+Note that is possible to have more than one binary set installed
+on the same file system as different directories are used for each
+set of binaries.
+.ip 4
+cd "~ptolemy"
+.br
+(change directories to the ptolemy root directory)
+.ip 5.
+Check to make sure that the 
+new ptolemy files take up the approximate disk space listed above.  
+(This is
+important as zcat will not report an "out of disk space" error.)  
+If
+the files check out, you may now remove the 
+ptolemy "tar.Z" files to save
+disk space.
 .ip 6.
-tar xf /dev/nrst8 
-(This reads the tape, and will take about one hour.)
-.ip 7.
 Create a symbolic link so that ``/usr/users/ptolemy'' points to ~ptolemy.
 If this is not possible or desirable, an alternative is to edit
 the following files:
@@ -59,7 +109,7 @@ In the first of these, the
 ROOT variable should be changed to point to the actual location of Ptolemy.
 In the second two files, the PTOLEMY_FULL_PATH variable should
 point to the actual location.
-.ip 8.
+.ip 7.
 Edit ~ptolemy/.rhosts, adding a line for your system
 (This gives pigi permission to create an RPC server process with the
 .i rsh
@@ -85,33 +135,23 @@ If you do this, \fIevery\fR Ptolemy user must set a PTOLEMY
 environment variable to point to the root directory of Ptolemy.
 The installation is the same as above, except that ``~ptolemy''
 is replaced with ``$PTOLEMY''.
-.H2 "Installation on a VaxStation or a DecStation"
-.pp
-For a VaxStation or DecStation, the procedure is exactly as above,
-except that the device names to use are different.
 .H2 "Special considerations for installation under Open Windows"
 .pp
-\*(PT was developed using the X11R4 distribution from MIT.  It will
+\*(PT was developed using the X11R5 distribution from MIT.  It will
 run successfully under Open Windows version 2.  There are problems
-with running the graphic interface with Open Windows version 3,
-unfortunately; we have not yet determined whether the problem is
-a bug in the version 3
-.i olwm
-(Open Look window manager)
-or in the Vem editor.  One workaround is to use the
-.i twm
-window manager from the MIT distribution instead of
-.i olwm ;
-while not as pretty as
-.i olwm ,
-at least it works.
+with running the graphic interface with Open Windows version 3, however.
+Some users have had no problems at all, but others have 
+had intermittent
+problems such as "bad match" errors.  We believe this may be a
+problem with the X-server supplied with the Open Windows 3.0, but
+the error is elusive and we have not yet tracked it down.
 .pp
 In order for all utilities included with this distribution to work
 under Open Windows (either version), you must install the Athena
 widgets (the freely redistributable widget set from the X11R4 distribution),
-which are provided with this distribution under the ``~ptolemy/athena.sunX'' 
-directory, where the X may be a 3 or 4 depending
-on your machine type.  To install them, become root
+which are provided with this distribution under the ``~ptolemy/athena.sun4'' 
+directory.
+To install them, become root
 and copy all files in that directory into ``/usr/openwin/lib'' (or, if
 .EQ
 delim ##
@@ -122,7 +162,7 @@ delim $$
 .EN
 .pp
 After installation, the ptolemy account will contain several scripts for
-starting up X11R4 (Xrun), Open Windows with
+starting up X11R5 (Xrun), Open Windows with
 .i olwm
 (Xrun.ow),
 or Open Windows with
@@ -137,30 +177,81 @@ used to make \*(PT, which is also the compiler you will use to extend
 .(f
 It is also possible to build \*(PT with Sun's port of AT&T's
 .i cfront
-compiler, version 2.1.  To do so, you must completely rebuild Ptolemy;
-the libraries on the tape were produced by the Gnu C++ compiler and
+compiler, version 2.1.  To do so, you must completely rebuild Ptolemy.
+The libraries on the tape were produced by the Gnu C++ compiler and
 are not interoperable with
 .i cfront
 code.
 .)f
+.pp
+To install the ptolemy gnu subset, proceed as follows:
 .ip 1.
 cd /usr/tools
 .ip 2.
-mkdir gnu (Unless there is such a directory there, in which case, you
-probably don't want to load the version from this tape).
-.ip 3.
-If you just installed Ptolemy from tape and used the
-"tar xf /dev/nrst8" command as specified in Step 6 of
-the installation procedures above, your tape should already
-be positioned at the gnu software subset, so go on to the next
-step.
-Otherwise, type the following command to skip over the
-Ptolemy portion of the tape:
+Check to see if there is already a "gnu" directory.  If so, you
+probably don't want to load the ptoelmy gnu files here and should
+pick a different location for the ptolemy gnu subset (be especially
+careful in step 6 below).
+If there is not already a "gnu" directory, then do the following command:
 .br
+mkdir gnu
+.ip 3.
+If you have \*(PT on tape, then do the following:
+.ip a.
+cd /tmp
+(or any directory where you have write permission
+and there is plenty, many Mbytes, of free disk space).
+.ip b.
+If you just installed Ptolemy from tape, and the tape is still
+in the tape drive you may skip the next step (c) and go to step (d).
+.ip c.
+insert the tape into the tape drive.
+.ip
+mt -f /dev/nrst8 rewind
+.br
+(This rewinds the tape -- change the device name if your tape drive
+has a different name.)
+.ip 
 mt -f /dev/nrst8 fsf 1
-.ip 4.
+.ip d.
 tar xf /dev/rst8
+.ip 4.
+If you have used FTP to get the ptolemy gnu file, 
+then cd to the directory that contains the "tar.Z" file you
+downloaded via FTP.
+.ip 5.
+You should now have a gnu-xxx.tar.Z file (where xxx is an architecture
+supported by ptolemy such as "sun4" or "mips") in your
+current directory.
+.ip 6.
+Note, if they was already a "gnu" directory in "/usr/tools" (see
+step (2) above) you will
+need to change the commands below.  Replace "/usr/tools"
+with the name of the parent directory of the location you have picked
+for the ptolemy gnu subset.
+.ip
+If you are running on a Sun 4 (Sparc, IPC, IPX, etc) then:
+.br
+zcat gnu-sun4.tar.Z | ( chdir /usr/tools; tar xf - )
+.br
+If you are running on a DecStation (MIPS) then:
+.br
+zcat gnu-mips.tar.Z | ( chdir /usr/tools; tar xf - )
+.pp
+The gnu tar files also contain the gnu source code in
+the /usr/tools/gnu/src directory.  
+You will save disk space and \*(PT will still run fine if 
+you delete all of the gnu source
+files. However, if you plan to redistribute the tools 
+(give them to anyone else) you must
+include sources, according to the Gnu Public License.
+Therefore, it may be a good idea to keep these source files around.
 .H2 "Testing the Installation
+.pp
+Note that the following tests assume that you have created a 
+user "ptolemy" and installed the system there.  One advantage
+of such an installation, is that the user "ptolemy" already has
+a working .cshrc and .login file to make startup easier.
 .pp
 To test \*(PT:
 .ip 1.
@@ -190,14 +281,46 @@ development group.
 If you wish to rebuild \*(PT from source (this step is recommended
 if you plan to do major development work, such as adding a
 new domain), it is simply a matter of editing the appropriate
-configuration file and typing ``make''.  We recommend using Gnu
-make; Ultrix make is not powerful enough to work with our makefiles.
+configuration file and typing ``make''.  This is explained in
+a bit more detail below.
 .pp
-Configuration files live in the root directory and have names like
-``config-xxx.mk''.  They are included by other makefiles and define
+Configuration files live in the root directory of your
+ptolemy system.  If you have installed \*)PT as the 
+user "ptolemy" then these file are in the ~ptolemy home directory.
+The configuration file are all named ``config-xxx.mk''
+where the ``xxx'' is something like "sun4" for a Sun-4 system or
+"mips" for a DecStation.  They are included by other makefiles and define
 symbols specifying compiler flags, the directory where X include
 files are located, etc.  The file that is used is determined by
 replacing ``xxx'' above by the value of the ARCH environment variable.
+.pp
+If you wish to
+rebuild using cfront rather than g++, use config-cfront.mk as a starting
+point to produce your configuration file.  This has been tested with
+cfront 2.1 on a Sun-4; for other platforms, you may need to do some
+tweaking.
+.pp
+To rebuild the system, first adjust the configuration parameters
+in the appropriate configuration file.  For example, if you are 
+using the Gnu tools on a Sun-4, then you will need to adjust
+the "config-sun4.mk" file.
+.pp
+Next, run make.  We recommend using Gnu make, which is included in the
+gnu subset.  (Make sure that the Gnu tools are installed correctly.)
+Ultrix make will definitely not work.
+.pp
+You will get some warnings from the compiler, but the following
+warnings can safely be ignored:
+.br
+any warning about file_id' defined but not used.
+.br
+ ../../src/kernel/Tokenizer.cc:85: warning: cast discards `const' from pointer target type
+.br
+ ../../../../src/domains/thor/kernel/fprval.cc:56: warning: ordered comparison between signed and unsigned
+.br
+ ../../src/ptcl/PTcl.cc:<n>: warning: cast discards `const' from pointer target type (this warning may appear four times with different values of <n>)
+.br
+ ../../src/ptcl/ptclMain.cc:75: warning: unused variable `ptcl'
 .H2 "Troubleshooting"
 .pp
 If when you start pigi you get the message "permission denied"
