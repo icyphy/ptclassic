@@ -105,7 +105,6 @@ void CGCTarget :: starDataStruct(CGCStar* block, int) {
 void CGCTarget :: setup() {
     // member initialize
     galId = 0;
-    unique = 0;
 
     if (galaxy()) setStarIndices(*galaxy()); 
     CGTarget::setup();
@@ -280,19 +279,11 @@ void CGCTarget::beginIteration(int repetitions, int depth) {
         if (repetitions == -1)          // iterate infinitely
                 myCode += "while(1) {\n";
         else {
-                mainDecls += indent(1);
-                mainDecls += "int i";
-                mainDecls += unique;
-                mainDecls += ";\n";
-                myCode += "for (i";
-                myCode += unique;
-                myCode += "=0; i";
-                myCode += unique;
-                myCode += " < ";
-                myCode += repetitions;
-                myCode += "; i";
-                myCode += unique++;
-                myCode += "++) {\n";
+	    mainDecls << indent(1)
+		      << "int " << targetNestedSymbol.push("i") << ";\n";
+	    myCode << "for (" << targetNestedSymbol.get() << "=0; "
+		   << targetNestedSymbol.get() << " < " << repetitions << "; "
+		   << targetNestedSymbol.pop() << "++) {\n";
         }
 	myCode += wormIn;
         return;
