@@ -1,4 +1,4 @@
-# Makefile for cgc/targets/NOWam (Network Of Workstations)
+# Makefile for cgc/targets/NOWam (Network Of Workstations with active messages)
 # Copyright (c) %Q% The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
