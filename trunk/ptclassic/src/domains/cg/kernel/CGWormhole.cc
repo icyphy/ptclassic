@@ -48,27 +48,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 	class CGWormhole methods
 
 ********************************************************************/
-
-void CGWormhole :: setup() {
-	profile = myProfile;
-
-	// get the number of processors.
-	setOuterTarget(target());
-
-	// main setup routine.
-	CGWormBase :: setup();
-}
-
-void CGWormhole :: go() {
-	downLoadCode(0, 0);
-}
-
-CGWormBase* CGWormhole :: myWormhole() { return selfWorm; }
-
-Profile* CGWormhole :: getProfile(int pNum) {
-	return CGWormBase :: getProfile(pNum);
-}
-
 // Constructor
 CGWormhole :: CGWormhole(Galaxy& g, Target* t) : CGWormBase(*this,g,t)
 	{ buildEventHorizons(); }
