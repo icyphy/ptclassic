@@ -826,8 +826,9 @@ void ArchTarget :: trailerCode() {
       Error::error(mux->getName(), ":  Mux has zero inputs");
     }
   }
+}
 
-
+void ArchTarget :: frameCode() {
   // Call the method to interactively rework the arch, if
   // it is provided (by derived targets)
   interact();
@@ -1144,10 +1145,9 @@ void ArchTarget :: trailerCode() {
   component_mappings << addComponentMappings(&mainCompDeclList, level);
   buildArchitectureBodyCloser(level);
   buildConfigurationDeclaration(level);
-}
 
-// Combine all sections of code.
-void ArchTarget :: frameCode() {
+
+  // Combine all sections of code.
   StringList code = headerComment();
 
   if (systemClock()) {
