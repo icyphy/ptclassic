@@ -38,14 +38,14 @@ ISA_FUNC(CG56Star, CGStar);
 
 // fire: prefix the code with a comment
 
-void CG56Star::fire() {
+int CG56Star::fire() {
 	StringList code = "; code from star ";
 	code += readFullName();
 	code += " (class ";
 	code += readClassName();
 	code += ")\n";
 	addCode(code);
-	AsmStar::fire();
+	return AsmStar::fire();
 }
 
 // This is a static function.

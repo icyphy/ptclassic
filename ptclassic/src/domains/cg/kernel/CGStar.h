@@ -43,7 +43,7 @@ public:
 	virtual void initCode() {}
 
 	// Generate code.  No data is grabbed or put onto geodesics.
-	void fire();
+	int fire();
 
 	// class identification
 	int isA(const char*) const;

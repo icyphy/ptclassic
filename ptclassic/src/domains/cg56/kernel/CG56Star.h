@@ -39,7 +39,7 @@ public:
 	// my domain
 	const char* domain() const;
 
-	void fire();
+	int fire();
 
 	// class identification
 	int isA(const char*) const;
