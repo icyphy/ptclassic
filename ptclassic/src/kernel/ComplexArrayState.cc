@@ -29,16 +29,31 @@ $Id$
 void ComplexArrayState  :: initialize() {
 
 	Complex buf[MAXLEN];
-	char* specialChars = "*+-/()<,";
+	char* specialChars = "*+-/()<,[]";
 	Tokenizer lexer(initValue,specialChars);
 	double realval;
 	double imagval;
+	int numRepeats;
 	int i = 0;
 	while(!lexer.eof() && i < MAXLEN) {
 	
 	ParseToken t =getParseToken(lexer, parent()->parent());
 	if(!strcmp(t.tok,"ERROR")) break;
         if(!strcmp(t.tok,"EOF")) break;
+	if(!strcmp(t.tok,"REPEATER")) {
+		if(t.cval != '[') return;
+		t = getParseToken(lexer, parent()->parent());
+		if(strcmp(t.tok,"INT"))return;
+		numRepeats = t.intval - 1;
+		while ( numRepeats != 0) {
+			buf[i++] = Complex(realval,imagval);
+			numRepeats--;
+		}
+		t = getParseToken(lexer,parent()->parent());
+		if(strcmp(t.tok,"REPEATER")) return;
+		if(t.cval != ']') return;
+		continue;
+	}
         if(strcmp(t.tok,"OP")) return;
         if(t.cval != '(') return;
         t =  evalExpression(lexer, parent()->parent());
@@ -72,14 +87,14 @@ void ComplexArrayState  :: initialize() {
 
 ParseToken ComplexArrayState :: evalExpression(Tokenizer& lexer, Block*  blockIAmIn) {
          double signflag = 1;
-        ParseToken t = getParseToken(lexer, blockIAmIn);
+        ParseToken t = getParseToken(lexer, blockIAmIn, "FLOAT");
 
         if(!strcmp(t.tok,"EOF")) return t;
         if(!strcmp(t.tok,"OP"))
         {
         if(t.cval == '-')
                 {signflag = -1;
-                t = getParseToken(lexer, blockIAmIn);
+                t = getParseToken(lexer, blockIAmIn, "FLOAT");
                 if(!strcmp(t.tok,"NULL")) {t.tok = "ERROR"; return t;}
                 }
         }

@@ -28,17 +28,35 @@ $Id$
 void <T>ArrayState  :: initialize() {
 
 	<C> buf[MAXLEN];
-	char* specialChars = "*+-/()<";
+	char* specialChars = "*+-/()<[]";
 	Tokenizer lexer(initValue,specialChars);
 
 	int i = 0;
+	int numRepeats;
+	<C> saveValue;
 	while(!lexer.eof() && i < MAXLEN) {
 	ParseToken t =evalExpression(lexer, parent()->parent());
 	if(strcmp(t.tok,"ERROR"))
 	if(strcmp(t.tok,"EOF"))
+        if(!strcmp(t.tok,"REPEATER")) {
+                if(t.cval != '[') return;
+                t = getParseToken(lexer, parent()->parent());
+                if(strcmp(t.tok,"INT"))return;
+                numRepeats = t.intval - 1;
+                while ( numRepeats != 0) {
+                        buf[i++] = saveValue;
+                        numRepeats--;   
+                }
+                t = getParseToken(lexer,parent()->parent());
+                if(strcmp(t.tok,"REPEATER")) return;
+                if(t.cval != ']') return;
+                continue;
+        }
+
 	{if(!strcmp(t.tok,"<T>")) buf[i++] = t.<C>val;
         else if(!strcmp(t.tok,"ID")) buf[i++] = ((<T>State*)t.s)->val;
 	}
+	saveValue = buf[i-1];
 			};
 	nElements  = i;
 
@@ -49,14 +67,15 @@ void <T>ArrayState  :: initialize() {
 
 ParseToken <T>ArrayState :: evalExpression(Tokenizer& lexer, Block*  blockIAmIn) {
         <C> signflag = 1;
-        ParseToken t = getParseToken(lexer, blockIAmIn);
+        ParseToken t = getParseToken(lexer, blockIAmIn,"<T>");
 
         if(!strcmp(t.tok,"EOF")) return t;
+	if(!strcmp(t.tok,"REPEATER")) return t;
         if(!strcmp(t.tok,"OP"))
         {
         if(t.cval == '-')
                 {signflag = -1;
-                t = getParseToken(lexer, blockIAmIn);
+                t = getParseToken(lexer, blockIAmIn,"<T>");
                 if(!strcmp(t.tok,"NULL")) {t.tok = "ERROR"; return t;}
                 }
         }
