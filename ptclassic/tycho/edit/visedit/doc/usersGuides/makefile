@@ -40,7 +40,8 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 EXTRA_SRCS =	\
-	EditForestHelp.html
+	EditForestHelp.html \
+	ProfileTclHelp.html
 
 MISC_FILES =
 
