@@ -54,14 +54,14 @@ public:
 	// SDFfromUniversal: public FromUniversal, public OutSDFPort
 	// SDFToUniversal::SDFToUniversal() : ToEventHorizon(this) {...}
 
-	EventHorizon(PortHole* self): selfPort(*self) {}
+	EventHorizon(PortHole* self): selfPort(self) {}
 
 	// virtual destructor
 	virtual ~EventHorizon();
 
 	// return myself as a porthole
-	PortHole& asPort() { return selfPort; }
-	PortHole& ghostAsPort() { return ghostPort->asPort(); }
+	PortHole* asPort() { return selfPort; }
+	PortHole* ghostAsPort() { return ghostPort->asPort(); }
 
 	// Connect two EventHorizons.
 	void ghostConnect(EventHorizon& to );
@@ -70,8 +70,8 @@ public:
 	Wormhole* wormhole;
 
 	// is it Input or Output? -- depends on the location.
-	int isItInput() const;
-	int isItOutput() const;
+	virtual int isItInput() const;
+	virtual int isItOutput() const;
 
 	// set ports
 	void setEventHorizon(inOutType inOut, const char* portName, 
@@ -88,15 +88,15 @@ public:
 	double getTimeMark() { return timeMark; }
 	void setTimeMark(double d) { timeMark = d; }
 
-	// pure virtual
-	virtual void initializing() = 0;
+	// virtual initialize
+	virtual void initialize();
 
 protected:
-	// reference to myself as a Porthole
-	PortHole& selfPort;
+	// myself as a Porthole
+	PortHole* selfPort;
 
 	// Access the myBuffer of the porthole
-	CircularBuffer* buffer() { return asPort().myBuffer; }
+	CircularBuffer* buffer() { return asPort()->myBuffer; }
 
 	// We need another set of connection information
 	// between boundary and inside of the wormhole.
@@ -130,8 +130,7 @@ protected:
 public:
 	ToEventHorizon(PortHole* p) : EventHorizon(p) {}
 
-	// initialization routine
-	void initializing(); 
+	void initialize(); 
 
 };
 
@@ -146,7 +145,7 @@ friend class Wormhole;
 protected:
 
 	//transfer data from Universal EventHorizon to outside
-	void putData() { asPort().putParticle();
+	void putData() { asPort()->putParticle();
 			 tokenNew = FALSE; }
 
 	// fire ghostPort :: grabData to get Data
@@ -159,8 +158,7 @@ protected:
 public:
 	FromEventHorizon(PortHole* p) : EventHorizon(p) {}
 
-	// initialization routine
-	void initializing(); 
+	void initialize(); 
 };
 
         //////////////////////////////////////////
