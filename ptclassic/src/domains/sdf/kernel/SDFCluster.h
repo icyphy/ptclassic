@@ -329,17 +329,17 @@ public:
 class SDFClusterGalIter : public GalTopBlockIter {
 public:
 	SDFClusterGalIter(SDFClusterGal& g) : GalTopBlockIter(g) {}
-	SDFCluster* next() { return (SDFCluster*)ListIter::next();}
+	SDFCluster* next() { return (SDFCluster*)GalTopBlockIter::next();}
 	SDFCluster* operator++() { return next();}
-	ListIter::reset;
+	GalTopBlockIter::reset;
 };
 
 class SDFClusterBagIter : public GalTopBlockIter {
 public:
 	SDFClusterBagIter(SDFClusterBag& b) : GalTopBlockIter(b.gal) {}
-	SDFCluster* next() { return (SDFCluster*)ListIter::next();}
+	SDFCluster* next() { return (SDFCluster*)GalTopBlockIter::next();}
 	SDFCluster* operator++() { return next();}
-	ListIter::reset;
+	GalTopBlockIter::reset;
 };
 
 #endif
