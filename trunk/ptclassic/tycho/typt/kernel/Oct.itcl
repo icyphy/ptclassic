@@ -93,8 +93,8 @@ body ::tycho::Oct::openFacet {} {
 # does not exist we create a facet.
 #
 body ::tycho::Oct::openFacetOrContext {filename} {
-    global ptolemypresent
-    if { $ptolemypresent == 1 && ! [ file exists $filename]} {
+    global ptolemyfeature
+    if { $ptolemyfeature(octtools) == 1 && ! [ file exists $filename]} {
 	::pvOpenWindow [::ptkOpenFacet $filename schematic contents]
     } else {
 	::tycho::File::openContext $filename
