@@ -51,6 +51,7 @@ ITCL_SRCS = \
 	EditSTD.itcl \
 	Graphics.itcl \
 	GraphLayout.itcl \
+	HTMLExport.itcl \
 	ProfileTcl.itcl \
 	TCanvas.itcl
 
