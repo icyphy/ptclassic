@@ -70,10 +70,7 @@ namespace ::tycho {
 # </dl></dl>
 #
 #
-# <p><b>Bugs</b>
-#
-# With the -ridge option, some polygons are not tagged properly and get
-# "left behind" when the item is moved.
+# <p><b>Bugs</b> (none)
 #
 # <p><b>Enhancements</b>
 #
@@ -286,7 +283,7 @@ body ::tycho::Frame::_relief {id canvas slate relief} {
 	if { ! [info exists notlit($id)] } {
 
 	    set coords [$canvas coords $primary($id)]
-	    set tags [$slate gettags $id]
+	    set tags [$slate gethtags $id]
 
 	    set x0 [expr [lindex $coords 0] + $_borderwidth($id)]
 	    set y0 [expr [lindex $coords 1] + $_borderwidth($id)]
