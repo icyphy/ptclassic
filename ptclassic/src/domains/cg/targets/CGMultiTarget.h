@@ -130,6 +130,10 @@ public:
         /*virtual*/ int modifyGalaxy();
 
 protected:
+
+        // Modify the galaxy with the appropriate child target.
+        int recursiveModifyGalaxy(Galaxy& gal);
+    
         // This flag keeps track if we have modified the galaxy.  We
         // Should only modify the galaxy ONCE per time the graph is 
         // compiled.  In this target we flatten wormholes.  If we
