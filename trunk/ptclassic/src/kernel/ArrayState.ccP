@@ -101,7 +101,7 @@ void <T>ArrayState  :: initialize() {
 		case '[':
 			t = evalIntExpression(lexer);
 			if (t.tok != T_Int) {
-				parseError ("expected integer expression after", "[");
+				parseError ("expected integer expression after '['");
 				err = 1;
 				break;
 			}
@@ -117,7 +117,7 @@ void <T>ArrayState  :: initialize() {
 			}
 			t = getParseToken(lexer);
 			if (t.tok != ']') {
-				parseError ("expected ']'", "");
+				parseError ("expected ']'");
 				err = 1;
 				break;
 			}
@@ -129,12 +129,12 @@ void <T>ArrayState  :: initialize() {
 				buf[i++] = t.<C>val;
 				t = getParseToken(lexer);
 				if (t.tok != ')') {
-					parseError ("expected ')'", "");
+					parseError ("expected ')'");
 					err = 1;
 				}
 			}
 			else {
-				parseError ("syntax error after '('", "");
+				parseError ("syntax error after '('");
 				err = 1;
 			}
 			break;
@@ -144,7 +144,8 @@ void <T>ArrayState  :: initialize() {
 		case T_ID:
 			// got a state value.  Must have same type as me.
 			if (strcmp((t.s)->type(), type()) != 0) {
-				parseError ("bad state type in initValue","");
+				parseError ("bad state type in initValue: ",
+					    t.s->type());
 				err = 1;
 				break;
 			}
@@ -158,7 +159,7 @@ void <T>ArrayState  :: initialize() {
 				buf[i++] = *sPtr++;
 			break;
 		default:
-			parseError ("syntax error", "");
+			parseError ("syntax error");
 			err = 1;
 		}
 		saveValue = buf[i-1];
