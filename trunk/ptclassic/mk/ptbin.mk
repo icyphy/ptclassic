@@ -84,7 +84,7 @@ ifdef FULL
 	PN =		1
 	SDFFULL =	1
 	SR =		1
-	VHDL =		1
+	VHDLFULL =	1
 	VHDLB =		1
 endif
 
