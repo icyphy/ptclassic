@@ -42,12 +42,12 @@ The inputs are multiplied and the result is written on the output.
 	ltp	*-,ar1			; acc = p, treg0 = imm1, ar0->re1
 	mpy	*,ar0			; p = imm1*imm2, ar1->imm2
 	lts	*+,ar2			; acc -= p, treg0 = re1,ar0->imm1
-	sach	*+,16,ar1		; output real part of prod
+	sach	*+,1,ar1		; output real part of prod
 	mpy	*-,ar0			; p = re1*imm2, ar1->re2
 	ltp	*,ar1			; acc = p, treg0 = imm1
 	mpy	*,ar2			; p = re2*imm1
 	apac				; acc += p
-	sach	*-,0			; output imaginary part of prod.
+	sach	*-,1			; output imaginary part of prod.; ar2->re(prod)
     }
 
     codeblock(cbMoreThanTwo,"int j"){
@@ -58,12 +58,12 @@ The inputs are multiplied and the result is written on the output.
 	ltp	*-,ar0			; treg0 = imm(po), acc = p, r2->re(po)
 	mpy	*,ar2			; p =imm(po)*imm(inj),ar0->imm(inj)
 	lts	*			; acc -= p, treg0 = re(po)
-	sach	*+,0,ar0		; store real, ar2->imm(po)
+	sach	*+,1,ar0		; store real, ar2->imm(po)
 	mpy	*-,ar2			; p =re(po)*imm(inj),ar0->re(inj)	
 	ltp	*,ar0			; acc = p, treg0=imm(po)
 	mpy	*,ar2			; p = imm(po)*re(inj)
 	apac				; acc += p
-	sach	*-,0			; store imaginary
+	sach	*-,1			; store imaginary
 	}
  
    protected {
@@ -95,8 +95,8 @@ The inputs are multiplied and the result is written on the output.
 	int n = input.numberPorts();
 	if (n == 0) addCode(cbZero);
 	if (n >= 2) addCode(cbTwoInputs);
-	for (int i = 3; i < n; i++)
-		addCode(cbMoreThanTwo(n));
+	for (int i = 3; i <= n; i++)
+		addCode(cbMoreThanTwo(i));
     }
     
     exectime {

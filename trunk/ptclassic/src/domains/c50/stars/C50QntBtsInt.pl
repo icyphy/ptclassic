@@ -1,7 +1,7 @@
 defstar {
 	name { QntBtsInt }
 	domain { C50 }
-	desc { Integer quantizer with adjustable offset. }
+	desc { Integer quantizer }
 	version { $Id$ }
 	author { Luis Gutierrez}
 	copyright {
@@ -27,7 +27,9 @@ given by the top \fInoBits\fR of the \fIinput\fR (for integer output).
 	state {
 		name { noBits }
 		type { int }
-		desc {   }
+		desc { 
+the output is the input truncated to this many significant bits
+		}
 		default { 4 }
 	}
 
@@ -39,9 +41,9 @@ given by the top \fInoBits\fR of the \fIinput\fR (for integer output).
 	lar	ar0,#$addr(input)
 	lar	ar1,#$addr(output)
 	mar	*,ar0
-	lacc	*,@noBits,ar1
-	and	#ffffh,16
-	sach	*,@(16-noBits)
+	lacc	*,0,ar1
+	and	#65535,@(16 - int(noBits))
+	sach	*,0
 	}
 
         go { 

@@ -38,6 +38,18 @@ an optional offset can be added to shift the output levels up or down.
 		desc { amount of shift.  }
 		default { 0 }
 	}
+	
+	private {
+		int	off;
+		
+	}
+	setupt{
+		// convert fixed point offset to an integer because the
+		// assembler can only handle integer numbers in add immediate
+		// instructions.
+		Fix temp("1.15",double(offset));
+		off	= int(temp);
+	}
  
 	constructor {
 		noInternalState();
@@ -46,13 +58,13 @@ an optional offset can be added to shift the output levels up or down.
 	lar	ar0,#$addr(input)
 	lar	ar1,#$addr(output)
 	mar	*,ar0
-	lacc	*,@noBits,ar1
-	and	#ffffh,16
-	add	#@offset,@noBits
-	sach	*,@(16-noBits)
+	lacc	*,0,ar1
+	and	#65535,@(16-int(noBits))
+	add	#@off,0
+	sach	*,0
 	}
         go { 
- 		addCode(std);
+ 		addCode(std());
  	}
 
 	execTime { 
