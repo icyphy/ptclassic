@@ -445,7 +445,6 @@ body ::tycho::IDoc::describe {{class {}}} {
 body ::tycho::IDoc::downSize {} {
     $myHtmlTop downSize
     $myHtmlBottom downSize
-    resetHtml 2
 }
 
 #####################################################################
@@ -642,7 +641,6 @@ body ::tycho::IDoc::resizeFrame {horizontal pixels} {
 body ::tycho::IDoc::upSize {} {
     $myHtmlTop upSize
     $myHtmlBottom upSize
-    resetHtml 2
 }
 
     ###################################################################
@@ -1310,10 +1308,10 @@ body ::tycho::IDoc::newRelHeight {pixels} {
 
 #####################################################################
 #### resetHtml
-# When the HTML widget fonts are changed, the HTML widgets go blank,
-# possibly because they attempt to load from their "files". Because 
-# they aren't associated with valid files, they need to be reset
-# manually.
+# HTML widgets are loaded by changing their data variables and then
+# calling this procedure. It used to be necessary when sizes were
+# changed. It no longer is probably due to JohnR's removal of the 
+# -data option.
 #
 body ::tycho::IDoc::resetHtml {{top 1}} {
     switch $top {
