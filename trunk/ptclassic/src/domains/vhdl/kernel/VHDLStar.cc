@@ -120,8 +120,8 @@ StringList VHDLStar :: expandRef(const char* name) {
   if ((state = stateWithName(name)) != 0) {
     StringList tempName = targ()->sanitizedFullName(*state);
     ref = sanitize(tempName);
-    ref << "_";
-    ref << firing;
+//    ref << "_";
+//    ref << firing;
     
     targ()->registerState(state, firing);
   }
@@ -198,8 +198,8 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
 	targ()->registerState(state, firing, offsetInt);
 	ref << "_P";
 	ref << offsetInt;
-	ref << "_";
-	ref << firing;
+//	ref << "_";
+//	ref << firing;
       }
 
       // generate constant for index
@@ -211,8 +211,8 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
 	}
 	ref << "_P";
 	ref << offsetInt;
-	ref << "_";
-	ref << firing;
+//	ref << "_";
+//	ref << firing;
 	targ()->registerState(state, firing, offsetInt);
       }
     }

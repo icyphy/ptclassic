@@ -446,12 +446,12 @@ void StructTarget :: registerState(State* state, int thisFiring/*=-1*/,
   // Root is ref, without marking for any particular firing.
   root = ref;
 
-  ref << "_" << thisFiring;
+//  ref << "_" << thisFiring;
 
   StringList refIn = sanitize(ref);
-  refIn << "_In";
+  refIn << "_" << thisFiring << "_In";
   StringList refOut = sanitize(ref);
-  refOut << "_Out";
+  refOut << "_" << thisFiring << "_Out";
   StringList reg = sanitize(root);
   reg << "_Reg";
 
