@@ -285,11 +285,8 @@ DualMemory:: DualMemory(const char* n_x,     // name of the first memory space
 	) : 
 	sAddr(max(x_addr,y_addr)),
 	sLen(share_len(x_addr,y_addr,x_len,y_len)),
-	// should be something like the following:
-	// LinProcMemory("shared",(st_x&st_y)|A_SHARED,(p_x&p_y)|A_SHARED,
-	// 			sAddr,sLen),
-	// but it is temporarily:
-	LinProcMemory("shared",st_x|A_SHARED,p_x|A_SHARED,sAddr,sLen),
+	LinProcMemory("shared",(st_x&st_y)|A_SHARED,(p_x&p_y)|A_SHARED,
+			sAddr,sLen),
 	x(n_x,st_x,p_x,0,0),
 	y(n_y,st_y,p_y,0,0), 
 	xAddr(x_addr),xLen(x_len),
