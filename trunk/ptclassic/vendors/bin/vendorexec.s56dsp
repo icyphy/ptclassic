@@ -1,16 +1,18 @@
 #!/bin/sh
-#%w%	$Date$
-#usage vendorexec.s56dsp relpath args
+# usage: vendorexec.s56dsp relpath args
+# Checks to make sure the s56dsp is installed, and then executes the
+# command as though vendorexec had been called instead.  An error message
+# is issued no 56dsp is installed.
+#
+# $Id$
 
+S56DSP=${S56DSP-`dirname $0`/../s56dsp}
 export S56DSP
-if test ! "$S56DSP"
-then
-	S56DSP=`dirname $0`/s56dsp
-fi
-temp=`/usr/etc/modstat | grep s56dsp`
-if test "$temp"
-then
-	exec `dirname $0`/vendorexec $*
+if [ `/usr/etc/modstat | grep -s s56dsp` ] ; then
+    exec `dirname $0`/vendorexec $*
 else
-	echo "`basename $1` : s56dsp driver not loaded, try running on bennett, carson, or gammow"
+    SELF=`basename $1`
+    USEHOSTS="bennett carson gammow"
+    echo "$SELF: s56dsp driver not loaded on `hostname`"
+    echo "$SELF: Try using one of the following: $USEHOSTS"
 fi
