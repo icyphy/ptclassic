@@ -45,17 +45,6 @@ void MotorolaTarget :: setup() {
 	AsmTarget::setup();
 }
 
-void MotorolaTarget :: wrapup () {
-	if (procCode.numPieces() > 0) {
-		myCode << "\n\n;\n; Procedures Begin\n;\n" << procCode;
-		myCode << "\n\n;\n; Procedures End\n;\n";
-		procCode.initialize();
-	}
-	StringList map = mem->printMemMap(";","");
-	addCode (map);
-	AsmTarget::wrapup();
-}
-
 MotorolaTarget :: ~MotorolaTarget () {
 	LOG_DEL; delete mem; mem = 0;
 }
@@ -74,105 +63,74 @@ Block* MotorolaTarget :: makeNew () const {
 }
 
 void MotorolaTarget::beginIteration(int repetitions, int) {
-	StringList out;
-	if (repetitions == -1) {	// iterate infinitely
-		out = targetNestedSymbol.push("LOOP");
-		out += "\n";
-	}
-	else {				// iterate finitely
-		out = "\tdo\t#";
-		out += repetitions;
-		out += ",";
-		out += targetNestedSymbol.push("LOOP");
-		out += "\n";
-	}
-	addCode(out);
+    if (repetitions == -1)		// iterate infinitely
+	myCode << targetNestedSymbol.push("LOOP") << "\n";
+    else				// iterate finitely
+	myCode << "\tdo\t#" << repetitions << "," 
+	       << targetNestedSymbol.push("LOOP") << "\n";
 }
 
 void MotorolaTarget::endIteration(int repetitions, int) {
-	StringList out;
-	if (repetitions == -1)	{	// iterate infinitely
-		out = "\tjmp\t";
-		out += targetNestedSymbol.pop();
-		out += "\n";
-	}
-	else {				// iterate finitely
-		out = targetNestedSymbol.pop();
-		out += "\n\tnop\t\t; prevent two endloops in a row\n";
-	}
-	addCode(out);
+	if (repetitions == -1)		// iterate infinitely
+		myCode << "\tjmp\t"<< targetNestedSymbol.pop() << "\n";
+	else 				// iterate finitely
+		myCode << targetNestedSymbol.pop() 
+		       << "\n\tnop\t\t; prevent two endloops in a row\n";
 }
 
 void MotorolaTarget::codeSection() {
 	if (!inProgSection) {
-		addCode("\torg p:\n");
+		myCode << "\torg p:\n";
 		inProgSection = 1;
 	}
 }
 
 void MotorolaTarget::disableInterrupts() {
 	codeSection();
-	addCode("	ori	#03,mr	;disable interrupts\n");
+	myCode << "	ori	#03,mr	;disable interrupts\n";
 }
 
 void MotorolaTarget::enableInterrupts() {
 	codeSection();
-	addCode("	andi	#$fc,mr	;enable interrupts\n");
+	myCode << "	andi	#$fc,mr	;enable interrupts\n";
 }
 
 void MotorolaTarget::saveProgramCounter() {
 	codeSection();
-	StringList spc;
-	spc = targetNestedSymbol.push("SAVEPC");
-	spc += "\tequ	*\n";
-	addCode(spc);
+	myCode << targetNestedSymbol.push("SAVEPC") << "\tequ	*\n";
 }
 
 void MotorolaTarget::restoreProgramCounter() {
 	codeSection();
-	StringList spc;
-	spc = "\torg	p:";
-	spc += targetNestedSymbol.pop();
-	spc += "\n";
-	addCode(spc);
+	myCode << "\torg	p:" << targetNestedSymbol.pop() << "\n";
 }
 
 void MotorolaTarget::orgDirective(const char* memName, unsigned addr) {
-	StringList out = "\torg\t";
-	out += memName;
-	out += ":";
-	out += int(addr);
-	out += "\n";
-	addCode(out);
+	myCode << "\torg\t" << memName << ":" << int(addr) << "\n";
 	inProgSection = 0;
 }
 
 void MotorolaTarget::writeInt(int val) {
-	StringList out = "\tdc\t";
-	out += val;
-	out += "\n";
-	addCode(out);
+	myCode << "\tdc\t" << val << "\n";
 }
 
 void MotorolaTarget::writeFix(double val) {
-	StringList out = "\tdc\t";
-	out += limitFix(val);
-	out += "\n";
-	addCode(out);
+	myCode << "\tdc\t" << limitFix(val) << "\n";
 }
 
 void MotorolaTarget::writeFloat(double val) {
-	StringList out = "\tdc\t";
-	out += val;
-	out += "\n";
-	addCode(out);
+	myCode << "\tdc\t" << val << "\n";
 }
-
-const char* MotorolaTarget::className() const {return "MotorolaTarget";}
 
 double MotorolaTarget::limitFix(double val) { 
 	const double limit = 1.0 - 1.0/double(1<<23);
 	if (val >= limit) return limit;
 	else if (val <= -1.0) return -1.0;
 	else return val;
+}
+
+StringList MotorolaTarget::comment(const char* msg, const char* begin,
+const char* end, const char* cont) {
+	if (begin==NULL) return CGTarget::comment(msg,"; ");
+	else return CGTarget::comment(msg,begin,end,cont);
 }

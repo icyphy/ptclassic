@@ -31,17 +31,20 @@ protected:
 	StringList dspType;	//either 56000 or 96000
 	StringList startAddress;
 	StringList endAddress;
+	/*virtual*/ void headerCode();
+	/*virtual*/ void trailerCode();
 public:
 	MotorolaSimTarget(const char* nam,const char* desc,
 		  const char* sclass) : MotorolaTarget(nam,desc,sclass) {}
 	MotorolaSimTarget(const MotorolaSimTarget& arg) 
 	: MotorolaTarget(arg) {}
 	void initStates(const char* dsp,const char* start, const char* end);
-	void headerCode();
-	void wrapup();
 	int compileCode();
 	int loadCode();
 	int runCode();
+private:
+	// stream for writeFile stars
+	CodeStream simulatorCmds;
 };
 
 #endif
