@@ -48,6 +48,9 @@ class ::tycho::EditGraph {
     # The graph model
     itk_option define -graph graph Graph {}
     
+    # The icon index
+    itk_option define -icons icons Icons {}
+    
     #################################################################
     ####                     public methods                      ####
 
@@ -80,6 +83,12 @@ class ::tycho::EditGraph {
 
     # Handle change notification from the graph layout model
     method notify {method args}
+
+    # Move mouse over a port
+    method portenter {}
+
+    # Move mouse away from a port
+    method portleave {}
 
     # Update the layout model
     method updateLayout {}
@@ -114,6 +123,9 @@ class ::tycho::EditGraph {
     # Delete a tag from all items.
     protected method _dtag {tag}
 
+    # Add a new edge
+    protected method _edge {name spec args}
+
     # Move an item
     protected method _move {tag x y}
 
@@ -136,10 +148,10 @@ class ::tycho::EditGraph {
     protected method _reshapeclick {name x y args}
 
     # Continue reshaping an item
-    protected method _reshapedrag {name x y args}
+    protected method _reshapedrag {name x y}
 
     # Stop reshaping an item
-    protected method _reshaperelease {name x y args}
+    protected method _reshaperelease {name x y}
 
     # Add a vertex to the selection
     protected method _select {name}
@@ -152,6 +164,9 @@ class ::tycho::EditGraph {
 
     # Configure a vertex
     protected method _vertexconfigure {name args}
+    
+    # Add an icon to a menu
+    protected method addIconEntry {menu icons index}
 
     #################################################################
     ####                 protected variables                     ####
@@ -171,9 +186,11 @@ class ::tycho::EditGraph {
     # Storage for temporary variables
     protected variable _scratch
 
-  #################################################################
+    #################################################################
     ####                   private methods                       ####
 
+    # Initialize the menubar
+    private method initializeMenubar {}
 }
 
 #####################################################################
@@ -195,24 +212,6 @@ configbody ::tycho::EditGraph::layout {
 #### constructor
 #
 body ::tycho::EditGraph::constructor {args} {
-    # Add to menus
-    menubar addMenu Devel
-    menubar command {Foo} Devel -command "$this vertex foo 70 70"
-    menubar command {Bar} Devel -command "$this vertex bar 200 120"
-    menubar command {Baz} Devel -command "$this vertex baz 100 200"
-
-    menubar addSeparator Devel
-
-    menubar command {Clone} Devel \
-            -command "$this clone"
-
-    menubar addSeparator Devel
-
-    menubar command {Show layout} Devel \
-	    -command "::tycho::post \[\[$this cget -layout\] describe\]"
-    menubar command {Show graph} Devel \
-            -command "::tycho::post \[\[$this cget -graph\] describe\]"
-
     # Evaluate options
     eval itk_initialize $args
 
@@ -231,8 +230,24 @@ body ::tycho::EditGraph::constructor {args} {
                 -graph $itk_option(-graph)]
     }
 
+    # If there is not already an icon index, create one
+    if { $itk_option(-icons) == "" } {
+	set icons [uplevel #0 ::tycho::IconIndex \
+                [::tycho::autoName icons] \
+                -datafile {$TYCHO/editors/visedit/icons.tim}]
+	$icons load
+	configure -icons $icons
+    }
+
+    # Add menu development stuff
+    if {$myMenubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::EditGraph::initializeMenubar
+    }
+
     # Make a more pronounced highlight
-    $slate configure -highlightcolor cyan3 -highlightwidth 3
+    $slate configure -highlightcolor azure2 -highlightwidth 4
 
     # Enable selection with button 1; shift-click toggles
     $slate selector bind click vertex -button 1
@@ -337,6 +352,11 @@ body ::tycho::EditGraph::model {method args} {
 # it.
 #
 body ::tycho::EditGraph::newclick {item x y} {
+puts 1
+    # First we make sure that we clear the selection, since the
+    # DragDropper is too dumb to do this...
+    selectionclear
+puts 2
     # Create the connection line
     set coords [$slate aspect $item terminal]
     set _scratch(line) [eval $slate create SmartLine $coords $x $y]
@@ -381,7 +401,7 @@ body ::tycho::EditGraph::newdrag {item x y} {
 	}
     }
     # Remember the target item for newrelease{}
-    set _scratch(destination) $item
+    set _scratch(dest) $item
 }
 
 ########################################################################
@@ -392,10 +412,33 @@ body ::tycho::EditGraph::newdrag {item x y} {
 # since connection failed.
 #
 body ::tycho::EditGraph::newrelease {x y} {
-    if { $_scratch(destination) == "" } {
-	$slate delete $_scratch(line)
+    set line $_scratch(line)
+    if { $_scratch(dest) == "" } {
+	$slate delete $line
     } else {
-	puts "Creating edge from $_scratch(source) to $_scratch(destination)"
+	# Get the vertices and ports being connected
+	set srcpar [$slate itemcget [$slate parent $_scratch(source)] -name]
+	set source [$slate itemcget $_scratch(source) -name]
+	set dstpar [$slate itemcget [$slate parent $_scratch(dest)] -name]
+	set dest [$slate itemcget $_scratch(dest) -name]
+
+	# Add an edge to the graph
+	$itk_option(-graph) edge $srcpar $source $dstpar $dest
+
+	# Add an edge to the layout model
+	# FIXME: more options need to be propagated!!!
+	set attrs {}
+	foreach {opt x y z val} [eval concat [$slate itemconfigure $line]] {
+	    lappend attrs $opt $val
+	}
+	# Inform all views _except_ this one
+	eval [list $this model update $this edge \
+		[list $srcpar $source $dstpar $dest] \
+		[concat [$slate type $line] [$slate coords $line]]] \
+		$attrs
+
+	# Remember it
+	set _itemID([list $srcpar $source $dstpar $dest]) $line
     }
 }
 
@@ -426,7 +469,7 @@ body ::tycho::EditGraph::selectionclear {} {
 #  Update the layout with current coordinates.
 #
 body ::tycho::EditGraph::updateLayout {} {
-    foreach vertex [array names _itemID] {
+    foreach vertex [$itk_option(-graph) vertices] {
         set coords [$slate coords $_itemID($vertex)]
         eval [list $itk_option(-layout) vertexcoords $vertex] $coords
     }
@@ -435,44 +478,36 @@ body ::tycho::EditGraph::updateLayout {} {
 ########################################################################
 #### vertex
 #
-body ::tycho::EditGraph::vertex {name x y} {
+body ::tycho::EditGraph::vertex {icon x y} {
+    set name [::tycho::autoName vertex]
+    set graph $itk_option(-graph)
+    set icons $itk_option(-icons)
+
     # Add a vertex to the graph
-    $itk_option(-graph) publish vertex $name
+    $graph publish vertex $name -type $icon
 
     # Add a vertex to the layout model
-    if { $name == "foo" } {
-	$this model publish vertex foo [list IconFrame $x $y] \
-		-inputs {0 50 50 0} \
-		-outputs {100 50 50 100} \
-		-text Foo \
-                -anchor nw \
-                -graphics {Frame 10 10 50 50 -color red; Frame 50 50 90 90 -color green -relief sunken} \
-		-color green \
-		-tags vertex \
-		-intype {Terminal -type input -style blob -fill red -tags input} \
-		-outtype {Terminal -type output -style doublearrow -fill blue -tags output}
-    } elseif { $name == "bar" } {
-	$this model publish vertex bar [list IconFrame $x $y] {
-	    -inputs 2
-	    -outputs 1
-	    -text Bar
-	    -color lightsteelblue
+    set type  [$icons type $icon]
+    set attrs [$icons iconattrs $icon]
+    eval [list $this model publish vertex $name [list $type $x $y]] $attrs \
 	    -tags vertex
-	    port in0 {Terminal 0 25} -type input
-	    port in1 {Terminal 0 75} -type input
-	    port out {Terminal 100 50} -type output -fill green2
-	}
-#	$this model publish portin bar in0 {Terminal 0 25} -type input -fill green2
-    } else {
-        $this model publish vertex baz [list IconOval $x $y] \
-                -inputs {0 50 50 0} \
-                -outputs 1 \
-                -fill white \
-                -graphics {line 20 50 80 50 -width 4; \
-                    line 50 20 50 80 -width 4} \
-                -tags vertex \
-                -intype {Terminal -type input -style blob -fill red} \
-                -outtype {Terminal -type output -style doublearrow -fill blue}
+
+    # Add its ports to the graph
+    foreach port [$icons children port $icon] {
+	$graph publish keyin $name $port
+    }
+
+    # Add the ports to the layout model
+    foreach port [$icons children port $icon] {
+	set type  [$icons type $icon.$port]
+	set attrs [$icons portattrs $icon.$port]
+	
+	# When creating the port item, give it a tag which is the same
+	# as its type -- that is, "input" or "output". Give it a
+	# name which is the same as its name in the icon model
+	eval [list $this model publish portin $name $port $type] $attrs \
+		-tags [$icons portcget $icon.$port -type] \
+		-name $port
     }
 }
 
@@ -555,6 +590,18 @@ body ::tycho::EditGraph::_dtag {tag} {
 }
 
 ########################################################################
+#### _edge
+#
+# Add a new edge to the view. This method must be called only
+# by the model.
+#
+body ::tycho::EditGraph::_edge {name spec args} {
+    set id [eval $slate create $spec $args -name $name]
+    set _itemID($name) $id
+    set _itemname($id) $name
+}
+
+########################################################################
 #### _move
 #
 body ::tycho::EditGraph::_move {tag x y} {
@@ -588,15 +635,9 @@ body ::tycho::EditGraph::_moverelease {tag x y} {
 # Add a new port to the view. This method must be called only
 # by the model.
 #
-body ::tycho::EditGraph::_portin {context name spec args} {
-puts "EditGraph::portin: $context $name $spec $args"
-
-    set type [lindex $spec 0]
-    set x [lindex $spec 1]
-    set y [lindex $spec 2]
+body ::tycho::EditGraph::_portin {context name type args} {
     set parent $_itemID($context)
-
-    set id [eval $slate createrootchild $parent $type $x $y $args -name $name]
+    set id [eval $slate createrootchild $parent $type 0 0 $args -name $name]
     set _itemID($name) $id
     set _itemname($id) $name
 }
@@ -605,28 +646,28 @@ puts "EditGraph::portin: $context $name $spec $args"
 #### _reshape
 #
 body ::tycho::EditGraph::_reshape {name x y args} {
-    eval $slate reshape $name $x $y $args
+    eval $slate reshape $_itemID($name) $x $y $args
 }
 
 ########################################################################
 #### _reshapeclick
 #
 body ::tycho::EditGraph::_reshapeclick {name x y args} {
-    eval $slate reshapeclick $name $x $y $args
+    eval $slate reshapeclick $_itemID($name) $x $y $args
 }
 
 ########################################################################
 #### _reshapedrag
 #
-body ::tycho::EditGraph::_reshapedrag {name x y args} {
-    $slate reshapedrag $name $x $y
+body ::tycho::EditGraph::_reshapedrag {name x y} {
+    $slate reshapedrag $_itemID($name) $x $y
 }
 
 ########################################################################
 #### _reshaperelease
 #
-body ::tycho::EditGraph::_reshaperelease {name x y args} {
-    $slate reshaperelease $name $x $y
+body ::tycho::EditGraph::_reshaperelease {name x y} {
+    $slate reshaperelease $_itemID($name) $x $y
 }
 
 ########################################################################
@@ -654,8 +695,6 @@ body ::tycho::EditGraph::_selectionclear {foo} {
 # by the model.
 #
 body ::tycho::EditGraph::_vertex {name spec args} {
-    puts "EditGraph::_vertex $name $spec $args"
-
     set id [eval $slate create $spec $args -name $name]
     set _itemID($name) $id
     set _itemname($id) $name
@@ -669,5 +708,89 @@ body ::tycho::EditGraph::_vertex {name spec args} {
 #
 body ::tycho::EditGraph::_vertexconfigure {name args} {
     eval $slate itemconfigure $_itemID($name) $args
+}
+
+#####################################################################
+#### addIconEntry
+# Add an icon entry to the menus
+#
+body ::tycho::EditGraph::addIconEntry {menu icons index} {
+    if { $index != "" } {
+	menubar add [$icons groupcget $index -label] $menu -type cascade
+	foreach c [$icons children icon $index] {
+	    menubar command \
+		    [$icons iconcget $index.$c -label] \
+		    [$icons groupcget $index -label] \
+		    -command "$this vertex $index.$c 100 100"
+	}
+	foreach c [$icons children group $index] {
+	    addIconEntry $menu $icons $index.$c
+	}
+    } else {
+	foreach c [$icons roots icon] {
+	    menubar command [$icons iconcget $c -label] $menu \
+		    -command "$this vertex $c 100 100"
+	}
+	foreach c [$icons roots group] {
+	    addIconEntry $menu $icons $c
+	}
+    }
+}
+
+    #####################################################################
+    #####################################################################
+    ####                       private methods                       ####
+
+#####################################################################
+#### initializeMenubar
+# Adds entries to the menu bar specific to this class.
+#
+body ::tycho::EditGraph::initializeMenubar {} {
+    # Add an Edit menu before the Window menu
+    $myMenubar addMenu Edit -before Window -underline 0
+    
+    $myMenubar command {Undo} Edit -accelerator "C-x u" \
+	    -underline 0 -command "$this undo"
+    
+    $myMenubar command {Redo} Edit -accelerator "C-x r" \
+	    -underline 0 -command "$this redo"
+    
+    $myMenubar addSeparator Edit
+    
+    $myMenubar command Cut Edit -underline 0 -accelerator "C-w" \
+	    -command "$this cut"
+    
+    $myMenubar command Copy Edit -underline 1 -accelerator "M-w" \
+	    -command "$this copy"
+    
+    $myMenubar command Paste Edit -underline 0 -accelerator "C-y" \
+	    -command "$this paste"
+    
+    $myMenubar addSeparator Edit
+    
+    $myMenubar command "Select All" Edit -underline 0 \
+	    -accelerator "C-/" -command "$this selectRange 1.0 end"
+    
+    $myMenubar command "Unselect" Edit -underline 0 \
+	    -accelerator "C-\\" -command "$this unselectRange 1.0 end"
+
+    # Build a menu if icons from the icon index
+    if { $itk_option(-icons) != "" } {
+	menubar addMenu Icons -underline 0
+	addIconEntry Icons $itk_option(-icons) {}
+    }
+
+    # Add a Devel menu for development use
+    menubar addMenu Devel -underline 0
+    menubar command {Clone} Devel \
+            -command "$this clone"
+
+    menubar addSeparator Devel
+
+    menubar command {Show layout} Devel \
+	    -command "::tycho::post \[\[$this cget -layout\] describe\]"
+    menubar command {Show graph} Devel \
+            -command "::tycho::post \[\[$this cget -graph\] describe\]"
+
 }
 
