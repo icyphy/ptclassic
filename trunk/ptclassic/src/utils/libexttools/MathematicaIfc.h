@@ -45,7 +45,10 @@ class MathematicaIfc {
 
 public:
     // Constructor
-    MathematicaIfc(const char* name = 0, int privateContextFlag = 0);
+    MathematicaIfc(const char* name = 0,
+		   int privateContextFlag = 0,
+		   int echoInputFlag = 0,
+		   int echoOutputNumFlag = 0);
 
     // Destructor
     ~MathematicaIfc();
@@ -129,9 +132,18 @@ protected:
     MLINK mathlink;
     MLEnvironment environment;
 
+    // read the contents of a packet
+    StringList ReadPacketContents(MLINK linkp);
+
     // methods to manage the static connection
     int OpenStaticMathLink(int argc, char** argv);
     int CloseStaticMathLink();
+    const char* SetInputName(const char* name);
+    const char* GetInputName();
+
+    // whether to display the input prompt and expression
+    int displayInputFlag;
+    int displayOutputNumFlag;
 };
 
 #endif
