@@ -252,8 +252,7 @@ if [file isdirectory [file join $PTOLEMY tcltk itcl lib]] {
 }
 uplevel #0 {
     set ::auto_path [linsert $auto_path 0 [file join $tychoeditors textedit ] ]
-    set ::auto_path [linsert $auto_path 0 [file join $tychoeditors visedit ] ]
-    set ::auto_path [linsert $auto_path 0 [file join $tychoeditors graphedit ] ]
+    set ::auto_path [linsert $auto_path 0 [file join $tychoeditors graphedit ] ]    set ::auto_path [linsert $auto_path 0 [file join $tychoeditors visedit ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tychoeditors slate ] ]
 
     set ::auto_path [linsert $auto_path 0 [file join $tycholib tydoc ] ]
@@ -424,7 +423,7 @@ if [info exists tk_version] {
 
     # We could try sourcing Displayer.itcl here, but 'tycho' and 'tycho foo'
     # behave slightly differently, so it is not worthit.
-    ::tycho::Displayer::normalExit $tychoShouldWeDoRegularExit
+    ::tycho::TopLevel::normalExit $tychoShouldWeDoRegularExit
 }
 
 # FIXME: if the user starts with slowNetwork==1 and then sets it to 0
