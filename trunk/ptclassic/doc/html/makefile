@@ -42,5 +42,7 @@ include $(CONFIG)
 
 EXTRA_SRCS =	index.html
 
+all install: $(EXTRA_SRCS)
+
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
