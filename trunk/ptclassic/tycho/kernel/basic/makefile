@@ -44,9 +44,21 @@ include $(CONFIG)
 # Sub directories to run make in.
 DIRS =	
 
-TCL_SRCS = 
+TCL_SRCS = \
+	List.tcl \
+	Loader.tcl \
+	Lib.tcl \
+	Math.tcl \
+	Misc.tcl \
+	Path.tcl \
+	String.tcl \
+	URLPath.tcl
 
-ITCL_SRCS = 
+ITCL_SRCS = \
+	Builder.itcl \
+	Object.itcl \
+	Tycho.tcl \
+	Uninstantiable.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	basic.tcl \
