@@ -288,28 +288,39 @@ static int compile (const char* name, const char* idomain, const char* srcDir,
 
 // Replace the last occurrence of the "src" sub-directory with "obj.$ARCH"
 static char* genObjDir (const char* srcDirStr) {
-	char* srccopy = new char[ strlen(srcDirStr) + 1 ];
-	strcpy(srccopy, srcDirStr);
-	char* objDirStr = 0;
+	int len = strlen(srcDirStr);
+	char* srccopy = savestring(srcDirStr);
+	char* objDirStr = srccopy;
+	int found = FALSE;
 
-	// Search for src sub-directory
-	char* srcloc = strstr(srccopy, "/src/");
-	// If found, substitute last occurrence of "/src/" with "/obj.$ARCH/"
-	if ( srcloc ) {
-	  char* nextsrcloc;
-	  while ( (nextsrcloc = strstr(srcloc, "/src/")) ) {
-	    srcloc = nextsrcloc;
+	// Search for a sub-directory named "src"
+	if ( len >= 4 ) {
+
+	  // 1. Check for src sub-directory at end of path name
+	  int i = len - 4;
+	  char *srcloc = &srccopy[i];
+	  found = ( strcmp(srcloc, "/src") == 0 );
+
+	  // 2. If not found, then check for src sub-directory in path name
+	  if ( ! found ) {
+	    while ( i-- ) {
+	      if ( *srcloc == '/' && strncmp(srcloc, "/src/", 5) ) {
+		found = TRUE;
+		break;
+	      }
+	      srcloc--;
+	    }
 	  }
-	  *srcloc = 0;
-	  StringList temp = srccopy;
-	  temp << "/obj." << ARCH << "/"; // replace "/src/" with "/obj.$ARCH/"
-	  temp << &srcloc[5];		  // copy rest of source directory
-	  objDirStr = savestring(temp);
-	  delete [] srccopy;
-	}
-	// Otherwise, return the copy of the source directory
-	else {
-	  objDirStr = srccopy;
+
+	  // 2. If found, substitute "/src" subdirectory with "/obj.$ARCH"
+	  if ( found ) {
+	    *srcloc = 0;
+	    StringList temp = srccopy;
+	    temp << "/obj." << ARCH;	// replace "/src" with "/obj.$ARCH"
+	    temp << &srcloc[4];		// copy rest of source directory
+	    objDirStr = savestring(temp);
+	    delete [] srccopy;
+	  }
 	}
 
 	return objDirStr;
