@@ -462,7 +462,9 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 		    myCode += ".";
 		    myCode += expandedName(gp);
 		    myCode += ", ";
-		    myCode += ((PortHole&)p->realPort()).geo()->numInit();
+		    myCode += ((PortHole&)p->realPort())->numInitDelays();
+		    myCode += ", ";
+		    myCode += ((PortHole&)p->realPort())->initDelayValues();
 		    myCode += ");\n";
 		}
 	    }
