@@ -117,8 +117,6 @@ class MDSDFPortHole : public DFPortHole
   int rowFiringsPerIteration();
   int colFiringsPerIteration();
 
-  virtual Geodesic* allocateGeodesic();
-
   // get the location of single value inputs and outputs
   virtual double getFloatInput(int rowDelay = 0, int colDelay = 0);
   virtual double& getFloatOutput();
