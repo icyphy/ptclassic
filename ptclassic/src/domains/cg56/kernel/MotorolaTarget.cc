@@ -365,11 +365,14 @@ int MotorolaTarget::computeImplementationCost() {
 }
 
 const char* MotorolaTarget::printImplementationCost() {
-	costString = "\nMotorola 56000 memory usage in words:\n";
+	costString = "Motorola 56000 implementation costs: ";
 	if (softwareCost) {
-		costString << "program = " << softwareCost->progMemoryCost(0)
-			   << ", x data = " << softwareCost->dataMemoryCost(0)
-			   << ", y data = " << softwareCost->dataMemoryCost(1);
+		costString << "program memory = "
+			    << softwareCost->progMemoryCost(0)
+			   << ", x data memory = "
+			   << softwareCost->dataMemoryCost(0)
+			   << ", y data memory = "
+			   << softwareCost->dataMemoryCost(1);
 	}
 	else {
 		costString << "not computed";

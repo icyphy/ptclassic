@@ -164,12 +164,10 @@ int MotorolaSimTarget::computeImplementationCost() {
 const char* MotorolaSimTarget::printImplementationCost() {
 	StringList costInfoString = MotorolaTarget::printImplementationCost();
 	ImplementationCost* costInfoPtr = implementationCost();
-	costInfoString << "\n" << "execution time = ";
 	if ( costInfoPtr ) {
-	    costInfoString << costInfoPtr->executionTime() << " cycles";
-	}
-	else {
-	    costInfoString << "not computed";
+	    costInfoString << " execution time = "
+			   << costInfoPtr->executionTime()
+			   << " cycles";
 	}
 	return costInfoString;
 }
