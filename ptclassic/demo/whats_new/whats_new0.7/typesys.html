@@ -8,35 +8,38 @@
 
 Tom Lane (Structured Software Systems) has redesigned the type
 resolution system in Ptolemy, fixing a number of anomalies. The key
-changes are that types propagate forwards through arcs rather than
-backwards, that groups of multiple portholes are no longer constrained
+changes are that types propagate forwards through forks rather than
+backwards, that members of multiportholes are no longer constrained
 to have the same data type, and that higher-order functions in the HOF
 domain are evaluated in a new pre-initialization phase of execution.
 This solves a number of problems:
 
-
 <MENU>
 <LI> When a fork delivers particles to inputs of different types, the type
-  conversion will occur at the receiving end not the sending end, because
-  the plasma or buffer will be of the sender's type.  This prevents doing
-  coercion that may be appropriate for only some of the recipients.
-
+  conversion(s) will occur at the fork outputs rather than the output of
+  the source star.  This allows different conversions, or no conversion,
+  to be performed as appropriate for each recipient.  A minor disadvantage
+  is that duplicate conversions may be performed.  (This can be worked around
+  by inserting an explicit type conversion star before the fork, if
+  performance is critical.)
 
 <LI> Input ANYTYPE multiportholes can accept particles of different types
   from different sources.  This is an essential capability for polymorphic
-  stars like Printer.
-
+  stars like Printer.  Each member port of the multiporthole is assigned
+  the type of the source port it's connected to.
 
 <LI> In a star like Merge, the constraint that output type = input type
   will still constrain the input multiporthole members individually.
   Thus, the DE Merge will still require that all input types be the same,
   as it should.
 
-
-<LI> Rewiring the schematic before porthole type assignment fixes all the
-  type-assignment problems with HOF stars.  In particular, HOFNop will
-  not improperly constrain types, and we can get rid of the type-specific
-  variants of HOFSrc.
+<LI> HOF stars now rewire the schematic before porthole type assignment;
+  this fixes a lot of problems.  For example, HOFNop used to improperly
+  constrain all the connections passing through it to be of the same type.
+  Now, porthole type assignment is the same as it would be if the schematic
+  were written out in full, without any HOF stars.  Another benefit is that
+  the type-specific variants of HOFSrc are no longer necessary; there is
+  only one generic HOFSrc.
 
 </MENU>
 <hr>
