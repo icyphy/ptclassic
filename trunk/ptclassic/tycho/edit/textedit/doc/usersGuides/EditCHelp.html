@@ -24,8 +24,7 @@ will run <CODE>make</CODE> and compile the current file.
 
  <P>The <CODE>Compile and Load</CODE> menu choice
 will compile the current file and load it back
-into Tycho by using the Tcl <A
-HREF="../../../../doc/itclhtml/tcl/load.n.html"><CODE>load</CODE></A>
+into Tycho by using the Tcl <CODE>load</CODE>
 command.  The <CODE>Compile and Load</CODE> menu choice can be used
 to create new Tcl commands that are written in C.
 Note that it is risky to test C code within Tycho, since failure
@@ -94,9 +93,7 @@ directory.
 The Tcl <CODE>load</CODE> command invokes an initialization procedure
 after loading the shared object.  The name of the initialization
 procedure depends on the file name of the shared object, or on the Tcl
-package name.  See the
-<A
-HREF="../../../../doc/itclhtml/tcl/load.n.html"><CODE>load</CODE></A>
+package name.  See the Tcl <CODE>load</CODE>
 command for the details, but if the shared object is named <CODE>myTclCommand.so</CODE>, then the initialization procedure would be
 <PRE>
 int Mytclcommand_InitProc(Tcl_Interp *interp)
