@@ -33,8 +33,8 @@
 # maintained.
 
 
-DIRS = X11R4 X11R5 cfront freebsd matlab/extern/include \
-	mathematica/Source/Includes ptolemy
+DIRS = X11R4 X11R5 cfront freebsd ptolemy
+DEEPDIRS = matlab/extern/include mathematica/Source/Includes
 
 # Need to have $PTOLEMY as an absolute pathname for wish
 #PTOLEMY = ../..
@@ -49,5 +49,13 @@ all install clean realclean sources depend checkjunk sccsinfo:
 		echo making $@ in utils/$$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/utils/$$x $@ ;\
 	 	cd .. ; \
+	    fi ; \
+	done
+	@for x in $(DEEPDIRS); do \
+	    if [ -w $$x ] ; then \
+		cd $$x ; \
+		echo making $@ in utils/$$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../../../src/utils/$$x $@ ;\
+	 	cd ../../.. ; \
 	    fi ; \
 	done
