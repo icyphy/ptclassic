@@ -262,25 +262,37 @@ ifdef DDF
 endif
 
 ifdef VHDL
-	CUSTOM_DIRS += $(VHDLFDIR)/kernel $(VHDLFDIR)/stars \
-		$(VHDLBDIR)/kernel $(VHDLBDIR)/stars \
-		$(VHDLDIR)/kernel $(VHDLDIR)/stars  $(VHDLDIR)/targets
+	CUSTOM_DIRS += $(VHDLDIR)/kernel $(VHDLDIR)/stars  $(VHDLDIR)/targets
+	CG = 1
+	SDFLIB = 1
+	PALETTES += PTOLEMY/src/domains/vhdl/icons/vhdl.pal
+	STARS += $(LIBDIR)/vhdlstars.o
+	LIBS += -lvhdlstars -lvhdl -lvhdltargets
+	LIBFILES += $(LIBDIR)/libvhdlstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libvhdl.$(LIBSUFFIX) \
+		$(LIBDIR)/libvhdltargets.$(LIBSUFFIX)
+endif
+
+ifdef VHDLF
+	CUSTOM_DIRS += $(VHDLFDIR)/kernel $(VHDLFDIR)/stars
 	CG = 1
 	SDFLIB = 1
 	PALETTES += PTOLEMY/src/domains/vhdlf/icons/vhdlf.pal
-	PALETTES += PTOLEMY/src/domains/vhdlb/icons/vhdlb.pal
-	PALETTES += PTOLEMY/src/domains/vhdl/icons/vhdl.pal
-	STARS += $(LIBDIR)/vhdlfstars.o $(LIBDIR)/vhdlbstars.o \
-		$(LIBDIR)/vhdlstars.o
-	LIBS += -lvhdlfstars -lvhdlf -lvhdlbstars -lvhdlb \
-		-lvhdlstars -lvhdl -lvhdltargets
+	STARS += $(LIBDIR)/vhdlfstars.o
+	LIBS += -lvhdlfstars -lvhdlf
 	LIBFILES += $(LIBDIR)/libvhdlfstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libvhdlf.$(LIBSUFFIX) \
-		$(LIBDIR)/libvhdlbstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libvhdlb.$(LIBSUFFIX) \
-		$(LIBDIR)/libvhdlstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libvhdl.$(LIBSUFFIX) \
-		$(LIBDIR)/libvhdltargets.$(LIBSUFFIX)
+		$(LIBDIR)/libvhdlf.$(LIBSUFFIX)
+endif
+
+ifdef VHDLB
+	CUSTOM_DIRS += $(VHDLBDIR)/kernel $(VHDLBDIR)/stars
+	CG = 1
+	SDFLIB = 1
+	PALETTES += PTOLEMY/src/domains/vhdlb/icons/vhdlb.pal
+	STARS += $(LIBDIR)/vhdlbstars.o
+	LIBS += -lvhdlbstars -lvhdlb
+	LIBFILES += $(LIBDIR)/libvhdlbstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libvhdlb.$(LIBSUFFIX)
 endif
 
 ifdef MDSDF
