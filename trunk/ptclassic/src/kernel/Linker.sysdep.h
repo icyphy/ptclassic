@@ -84,9 +84,9 @@ const int linkingNotSupported =
 
 // hp-ux does not provide this function; may need to be changed
 #ifdef hpux
-inline int getpagesize() { return 4096;}
+inline size_t getpagesize() { return 4096;}
 #else
-extern "C" int getpagesize(void);
+extern "C" size_t getpagesize(void);
 #endif
 
 // Prefix for constructor-calling symbols
