@@ -34,7 +34,7 @@ Report problems and direct all questions to:
  */
 
 /* Solaris 2.5 pretends to have posix threads. */
-#if !defined(_POSIX_THREADS) || defined(PT_SOL2_5)
+#if !defined(_POSIX_THREADS) || defined(PTSOL2_5)
 
 #include <pthread/config.h>
 #include <pthread/unistd.h>
