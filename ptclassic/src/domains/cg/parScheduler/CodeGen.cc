@@ -138,7 +138,56 @@ void UniProcessor :: createSubGal() {
 		DataFlowStar* org = pn->myMaster();
 		BlockPortIter piter(*org);
 		PortHole* p;
+// CGDDF currently depends on being able to handle disconnected graphs,
+// which is a change from the other parallel schedulers.  The other
+// parallel schedulers assume that we have a fully connected graph
+// by the time we get here.
+// This functionality should probably be inside the cgddf scheduler
+// If you want to turn on this functionality, compile this file with:
+// -DCGDDF_CODEGEN_CC_WORKAROUND
+// 
+#ifdef CGDDF_CODEGEN_CC_WORKAROUND
+                Block* black = 0;
+                Block* cst = 0;
+#endif
 		while ((p = piter++) != 0) {
+#ifdef CGDDF_CODEGEN_CC_WORKAROUND
+				// Take care of unconnected portholes
+
+				// Boundary
+                        if (!p->far()) {
+                                // make a dummy connection to prevent
+                                // error message when code generation
+                                if (p->isItOutput()) {
+                                   if (!black) {
+                                      black = KnownBlock::clone("BlackHole",
+                                           domForClone);
+                                      if (!black) {
+                                        Error::abortRun("we need BlackHole",
+                                        " star for dummy connection.");
+                                        return;
+                                      }
+                                   }
+                                   PortHole* destP =
+                                        black->portWithName("input");
+                                   clonedPort(org,p)->connect(*destP, 0);
+                                } else {
+                                   cst = KnownBlock::clone("Const",
+                                        domForClone);
+                                   if (!cst) {
+                                        Error::abortRun("we need Const",
+                                        " star for dummy connection.");
+                                        return;
+                                   }
+                                   PortHole* srcP =
+                                        cst->portWithName("output");
+                                   srcP->connect(*(clonedPort(org,p)), 0);
+                                }
+
+                                // TRY IT
+                                continue;
+                        }
+#endif // CGDDF_CODEGEN_CC_WORKAROUND
 			DataFlowStar* farS =(DataFlowStar*) p->far()->parent();
 			ParNode* farN = (ParNode*) farS->myMaster();
 			ParNode* myN = (ParNode*) org->myMaster();
