@@ -379,6 +379,9 @@ class ::tycho::Resource {
     # Get the current full resource path
     method path {}
 
+    # Return the progess indicator, as a decimal number. 1.0 is full.
+    method progress {}
+
     # Source the resource as Tcl
     method source {}
 
@@ -512,6 +515,16 @@ body ::tycho::Resource::open {{mode "r"}} {
 #
 body ::tycho::Resource::path {} {
     return $currentFile
+}
+
+#########################################################################
+#### progress
+# Get the current progress of a non-blocking read. Won't make sense
+# if not called during a non-blocking read. By default, this method
+# always returns 1.
+#
+body ::tycho::Resource::progress {} {
+    return 1.0
 }
 
 #####################################################################
