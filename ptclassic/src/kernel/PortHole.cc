@@ -88,6 +88,12 @@ int GenericPort :: isItInput () const { return FALSE;}
 int GenericPort :: isItOutput () const { return FALSE;}
 int GenericPort :: isItMulti () const { return FALSE;}
 
+void GenericPort::setAlias (GenericPort& gp) {
+	aliasedTo = &gp;
+	gp.aliasedFrom = this;
+}
+
+
 PortHole& GenericPort :: newConnection () {
 	// my apologies for this horrible cast
 	return *(PortHole *)&realPort();
