@@ -62,7 +62,7 @@ HDRS =		$(SRCS:.cc=.h)
 STAR_MK =	sdfcontribstars
 DOMAIN =	SDF_CONTRIB
 DOMAIN_2 =	SDF
-EXTRA_SRCS =	$(STAR_MK).c $(PL_SRCS) fft.c
+EXTRA_SRCS =	$(STAR_MK).c $(PL_SRCS) fft.cc
 MISC_FILES =	README README.notes
 
 all:		$(SRCS) stars_all
