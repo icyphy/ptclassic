@@ -49,6 +49,7 @@ include $(CONFIG)
 EXTRA_SRCS =	abbreviations.html \
 		authors.html \
 		bindings.html \
+		bugs0.1.html \
 		documentation.html \
 		index.html \
 		introduction.html \
@@ -60,7 +61,7 @@ EXTRA_SRCS =	abbreviations.html \
 		running.html \
 		sponsors.html
 
-MISC_FILES =
+MISC_FILES =		coding
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
