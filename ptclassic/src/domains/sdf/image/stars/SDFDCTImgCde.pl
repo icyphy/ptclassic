@@ -6,9 +6,9 @@ defstar {
 	copyright	{ 1992 The Regents of the University of California }
 	location	{ SDF image palette }
 	desc {
-This star takes a DCTImage input, chops it into blocks, zig-zag scans
-it, inserts 'StartOfBlock' markers, run-length encodes it using
-'StartOfRun' markers, and outputs a modified DCTImage.
+This star takes a DCTImage input, inserts 'StartOfBlock' markers,
+run-length encodes it using 'StartOfRun' markers, and outputs the
+modified DCTImage.
 
 For the run-length encoding, all values with absolute value less than
 'Thresh' are set to 0.0, to help improve compression.
@@ -54,49 +54,6 @@ processes DCTImages, not GrayImages.
 
 	start { thresh = float(fabs(double(Thresh))); }
 
-	method { // zig-zag scan one block. "fData" holds output.
-		name { zigzag }
-		type { "void" }
-		access { private }
-		arglist { "(float* fData, const float* imData, const int i, \
-				const int j, const int width, const int blockSize)" }
-		code {
-			int k, l, indx;
-
-// Do zig-zag scan.
-			indx = 0;
-// K is length of current (semi)diagonal; L is iteration along diag.
-			for(k = 1; k < blockSize; k++) { // Top triangle
-				for(l = 0; l < k; l++) { // down
-					fData[indx++] = imData[j + (i+l)*width + (k-l-1)];
-				}
-				k++; // NOTE THIS!
-				for(l = 0; l < k; l++) { // back up
-					fData[indx++] = imData[j + (i+k-l-1)*width + l];
-			}	}
-
-// If blockSize an odd number, start with diagonal, else one down.
-			if (blockSize % 2) { k = blockSize; }
-			else { k = blockSize-1; }
-
-			for(; k > 1; k--) { // Bottom triangle
-				for(l = 0; l < k; l++) { // down
-					fData[indx++] = imData[j + (i+blockSize-k+l)*width +
-							(blockSize-l-1)];
-				}
-				k--; // NOTE THIS!
-				for(l = 0; l < k; l++) { // back up
-					fData[indx++] = imData[j + (i+blockSize-l-1)*width +
-							blockSize-k+l];
-			}	}
-
-// Have to do last element.
-			fData[indx] = imData[j + (i + blockSize - 1) * width +
-					blockSize - 1];
-		} // end code {}
-	} // end zigzag {}
-
-
 	method { // Do the run-length coding.
 		name { doRunLen }
 		type { "void" }
@@ -104,10 +61,11 @@ processes DCTImages, not GrayImages.
 		arglist { "(DCTImage* dcImage, DCTImage* acImage)" }
 		code {
 // Initialize.
-			int bSize = dcImage->retBS();
-			int width = dcImage->fullWidth();
-			int height = dcImage->fullHeight();
-			int size = width * height;
+			const int bSize = dcImage->retBS();
+			const int width = dcImage->fullWidth();
+			const int height = dcImage->fullHeight();
+			const int size = width * height;
+			const int blocks = size / (bSize*bSize);
 			if (size != dcImage->retSize()) {
 				Error::abortRun(*this,
 						"Can't encode a fragment or precoded image!");
@@ -115,7 +73,7 @@ processes DCTImages, not GrayImages.
 			}
 
 // Temporary storage for one block.
-			LOG_NEW; float* tmpBlk = new float[bSize*bSize];
+			float* tmpPtr = dcImage->retData();
 
 // The biggest runlen blowup we can have is the string "01010101...".
 // This gives a blowup of 50%, so with StartOfBlock and StartOfRun
@@ -123,60 +81,54 @@ processes DCTImages, not GrayImages.
 			LOG_NEW; float* outDc = new float[int(1.70*size + 1)];
 			LOG_NEW; float* outAc = new float[int(1.70*size + 1)];
 
-			int indxDc = 0, indxAc = 0, i, row, col, zeroRunLen;
-			for(row = 0; row < height; row += bSize) {
-				for(col = 0; col < width; col += bSize) {
-					zigzag(tmpBlk, dcImage->retData(), row, col, width,
-							bSize);
-
+			int indxDc = 0, indxAc = 0, i, blk, zeroRunLen;
+			for(blk = 0; blk < blocks; blk++) {
 // High priority coefficients.
-					for(i = 0; (i < bSize*bSize) && (i < HiPri); i++) {
-						outDc[indxDc++] = tmpBlk[i];
-					}
+				for(i = 0; i < HiPri; i++) {
+					outDc[indxDc++] = *tmpPtr++;
+				}
 
 // Low priority coefficients--start with block header.
-					outAc[indxAc++] = StartOfBlock;
-					outAc[indxAc++] = float(row);
-					outAc[indxAc++] = float(col);
+				outAc[indxAc++] = StartOfBlock;
+				outAc[indxAc++] = float(blk);
 
-					zeroRunLen = 0;
-					for(; i < bSize*bSize; i++) {
-// Do a non-zero run.
-						if(zeroRunLen) {
-							if (larger(tmpBlk[i], thresh)) {
-								outAc[indxAc++] = float(zeroRunLen);
-								zeroRunLen = 0;
-								outAc[indxAc++] = tmpBlk[i];
-							} else {
-								zeroRunLen++;
-							}
-						} else {
-							if (larger(tmpBlk[i], thresh)) {
-								outAc[indxAc++] = tmpBlk[i];
-							} else {
-								outAc[indxAc++] = StartOfRun;
-								zeroRunLen++;
-					}	}	}
-// Handle zero-runs that last till end of the block.
+				zeroRunLen = 0;
+				for(; i < bSize*bSize; i++) {
 					if(zeroRunLen) {
-						outAc[indxAc++] = float(zeroRunLen);
-					}
-			}	} // end for(each row and column)
+						if (larger(*tmpPtr, thresh)) {
+							outAc[indxAc++] = float(zeroRunLen);
+							zeroRunLen = 0;
+							outAc[indxAc++] = *tmpPtr;
+						} else {
+							zeroRunLen++;
+						}
+					} else {
+						if (larger(*tmpPtr, thresh)) {
+							outAc[indxAc++] = *tmpPtr;
+						} else {
+							outAc[indxAc++] = StartOfRun;
+							zeroRunLen++;
+					}	}
+					tmpPtr++;
+				}
+// Handle zero-runs that last till end of the block.
+				if(zeroRunLen) {
+					outAc[indxAc++] = float(zeroRunLen);
+				}
+			} // end for(each block)
 
 // Copy the data to the DCTImages.
-			LOG_DEL; delete tmpBlk;
-
 			dcImage->setSize(indxDc);
-			tmpBlk = dcImage->retData();
+			tmpPtr = dcImage->retData();
 			for(i = 0; i < indxDc; i++) {
-				tmpBlk[i] = outDc[i];
+				tmpPtr[i] = outDc[i];
 			}
 			LOG_DEL; delete outDc;
 
 			acImage->setSize(indxAc);
-			tmpBlk = acImage->retData();
+			tmpPtr = acImage->retData();
 			for(i = 0; i < indxAc; i++) {
-				tmpBlk[i] = outAc[i];
+				tmpPtr[i] = outAc[i];
 			}
 			LOG_DEL; delete outAc;
 		} // end { doRunLen }
