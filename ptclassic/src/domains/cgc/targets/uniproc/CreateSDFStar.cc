@@ -3,7 +3,7 @@ static const char file_id[] = "CreateSDFStar.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1991-1996  The Regents of the University of California.
+Copyright (c) 1991-%Q%  The Regents of the University of California.
 All Rights Reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -55,7 +55,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // This class duplicates some of the functionality of
 // SDFScheduler::setup  FIXME
 
-class Repetitions: public SDFScheduler {
+class Repetitions:public SDFScheduler {
 public:
     Repetitions(Galaxy& gal) {
 	invalid = FALSE;
@@ -76,29 +76,49 @@ CreateSDFStar::CreateSDFStar(const char* name,const char* starclass, const
 }
 
 void CreateSDFStar::setup () {
-    // Create the base name for the SDF star to be generated
-    StringList plPrefix;
-    plPrefix << "SDF" << filePrefix; 
-    filePrefix = hashstring(plPrefix);
-
-    CGCTarget::setup();
-
-    if (Scheduler::haltRequested()) return;
-}
-
-inline void commStarInit(CGCSDFBase& s,PortHole& p,int numXfer,int maxDelay) {
-    s.sdfPortName = hashstring(ptSanitize(p.name()));
-    s.numXfer = numXfer;
-    s.maxDelay = maxDelay;
-    DataType type = p.newConnection().resolvedType();
-    s.sdfPortType = type;
+    if (! galaxy()) return;
+    topLevelGalaxy = galaxy();
+    if (inWormHole()) {
+      // Construct name of target star, with and without "SDF" prefix
+      StringList plPrefix;
+      plPrefix << "SDF" << topLevelGalaxy->name() << "_compiled";
+      filePrefix = hashstring(plPrefix);    
+      const char* compiledStarName = filePrefix;
+      compiledStarName += 3;
+      // Is the star already present and newer than the galaxy?
+      long oldCompiledSN = KnownBlock::serialNumber(compiledStarName,"SDF");
+      // check the galaxy's contents
+      long galaxySN = topLevelGalaxy->maxContainedSerialNumber();
+      // check the galaxy itself, in the person of its containing wormhole
+      Block* topWorm = topLevelGalaxy->parent();
+      if (topWorm) {
+	long wormSN = KnownBlock::serialNumber(*topWorm);
+	if (wormSN > galaxySN)
+	  galaxySN = wormSN;
+      }
+      if (oldCompiledSN <= galaxySN) {
+	// Need to (re) compile and link the galaxy.
+	CGCTarget::setup();
+      }
+      // Now we can link the compiled star into the outer galaxy.
+      if (! SimControl::haltRequested()) {
+	fprintf(stderr,"replacing CGC wormhole by the compiled star\n");
+	if(!connectStar()) {
+	  Error::abortRun("Failed to connect new star, aborting");
+	  return;
+	}
+      }
+    } else {
+      // Not in a wormhole .. let outer target have control
+      StringList plPrefix;
+      plPrefix << "SDF" << filePrefix; 
+      filePrefix = hashstring(plPrefix);
+      CGCTarget::setup();
+    }
 }
 
 void CreateSDFStar::wormPrepare() {
     if (! galaxy()) return;
-    StringList plPrefix;
-    plPrefix << "SDF" << galaxy()->name(); 
-    filePrefix = hashstring(plPrefix);    
     convertWormholePorts(*galaxy());
 }
 
@@ -109,31 +129,28 @@ int CreateSDFStar::convertWormholePorts(Galaxy& gal) {
     Repetitions computeReps(gal);
     if (SimControl::haltRequested()) return FALSE;
 
-    topLevelGalaxy = &gal;
-
     // Iterate on all of the galaxy ports
     BlockPortIter nextPort(gal);
     DFPortHole *p;
     while ((p = (DFPortHole*)nextPort++) != 0) {
 	// Must save type *before* disconnecting port
 	CGPortHole &cgPort = (CGPortHole&)p->newConnection();
+	DataType type = cgPort.resolvedType();
 	int numXfer =
 	    ((DataFlowStar*)cgPort.parent())->reps()*cgPort.numXfer(); 
 	int maxDelay= numXfer + cgPort.maxDelay()-cgPort.numXfer();
 	cgPort.disconnect();
-	DFPortHole *source, *destination, *newPort;
+	DFPortHole *source,*destination,*newPort;
 	CGCSDFBase *newStar;
 	StringList nm;
 	if (p->isItInput()) {
 	    newStar = new CGCSDFReceive;
-	    commStarInit(*newStar,*p,numXfer,maxDelay);
 	    newPort = source = &((CGCSDFReceive*)newStar)->output;
 	    destination = &cgPort;
 	    nm << symbol("CGCSDFReceive");
 	}
 	else {
 	    newStar = new CGCSDFSend;
-	    commStarInit(*newStar,*p,numXfer,maxDelay);
 	    source = &cgPort;
 	    newPort = destination = &((CGCSDFSend*)newStar)->input;
 	    nm << symbol("CGCSDFSend");
@@ -142,9 +159,9 @@ int CreateSDFStar::convertWormholePorts(Galaxy& gal) {
 	// Add the star to the inner galaxy
 	gal.addBlock(*newStar,hashstring(nm));
 	newStar->setTarget(this);
-	
+	newStar->setSDFPortInfo(hashstring(ptSanitize(p->name())),
+				type, numXfer, maxDelay);
 	source->connect(*destination,0);
-	newPort->setSDFParams(numXfer,maxDelay);
     }
     return !SimControl::haltRequested();
 }
@@ -162,19 +179,14 @@ int CreateSDFStar::loadCode() {
 	Error::abortRun("Failed to link in new star, aborting");
 	return FALSE;
     }
-    fprintf(stderr,"replacing CGC wormhole by the new star\n");
-    if(!connectStar()) {
-	Error::abortRun("Failed to connect new star, aborting");
-	return FALSE;
-    }
     return TRUE;
 }
 
 void CreateSDFStar::frameCode() {
     StringList code;
-    const char* wormStarName = filePrefix;
-    wormStarName += 3;
-    code << "defstar{\n\tname{ "<< wormStarName
+    const char* compiledStarName = filePrefix;
+    compiledStarName += 3;
+    code << "defstar{\n\tname{ "<< compiledStarName
 	 <<"}\n\tdomain{SDF}\n\tdesc{\n"
 	 << headerComment() <<"\t}\n\tlocation{ "<<(const char*)destDirectory 
 	 << "}\nhinclude {\"Error.h\",\"SimControl.h\"}\n" 
@@ -258,43 +270,43 @@ int CreateSDFStar::linkFiles () {
 }
 
 int CreateSDFStar::connectStar() {
-    Galaxy* parentGal = (Galaxy*)topLevelGalaxy->parent()->parent();
-    StringList	starname;
-    starname << topLevelGalaxy->name() << "Worm";
-    const char* sname = hashstring((const char*)starname);
-
-    const char* wormStarName = filePrefix;
-    wormStarName += 3;
-
-    Block *newWormStar = KnownBlock::clone(wormStarName,"SDF");
-    if (newWormStar == 0) {
+    // Clone the previously compiled star.
+    const char* compiledStarName = filePrefix;
+    compiledStarName += 3;
+    Block *newCompiledStar = KnownBlock::clone(compiledStarName,"SDF");
+    if (newCompiledStar == 0) {
 	StringList message;
-	message << "Can not clone the newly linked SDF worm star: " 
+	message << "Can not clone the compiled CGC-in-SDF worm star: " 
 		<< topLevelGalaxy->name();
 	Error::abortRun((const char*)message);
 	return FALSE;
     }
-    parentGal->addBlock(*newWormStar,sname);
+    // Link the new star into the outer galaxy.
+    // Give it the same name the wormhole had.
+    Block* topWorm = topLevelGalaxy->parent();
+    Galaxy* parentGal = (Galaxy*) topWorm->parent();
+    parentGal->addBlock(*newCompiledStar, topWorm->name());
 
+    // Reconnect the connections of the old wormhole star.
     PortHole* wormPort;
-    BlockPortIter wpNext(*topLevelGalaxy->parent());
+    BlockPortIter wpNext(*topWorm);
     while ((wormPort = wpNext++) != 0 ) {
 	PortHole* farPort = wormPort->far();
 	int delays = wormPort->numInitDelays();
 	PortHole* newPort =
-	    newWormStar->portWithName(ptSanitize(wormPort->name()));
+	    newCompiledStar->portWithName(ptSanitize(wormPort->name()));
 	farPort->disconnect();
 	newPort->connect(*farPort,delays);
     }
     
     // We must initialize this new star, the star is created during
-    // the initialize method of the parent galaxy, thus the initilize
+    // the initialize method of the parent galaxy, thus the initialize
     // method is run on the original wormhole, and not this
     // dynamically linked in star.
-    newWormStar->initialize();
+    newCompiledStar->initialize();
 
     // Tell the parent galaxy to delete the original wormhole.
-    parentGal->deleteBlockAfterInit(*topLevelGalaxy->parent());
+    parentGal->deleteBlockAfterInit(*topWorm);
 
     return TRUE;
 }
