@@ -143,6 +143,13 @@ void SRPortHole::setGeodesic( Geodesic * g )
   } else {
     farSidePort = ((SRGeodesic *)g)->getReceiver();
   }
+  // The following avoids far() returning NULL when an output
+  // is connected to only one input: if the other side exists
+  // and does not know about us, let it know.
+  // MR, VL, FB - Supélec, March 1998
+  if (farSidePort != NULL && farSidePort->far() == NULL) {
+      ((SRPortHole *)farSidePort)->setGeodesic(g);
+  }
 }
 
 // Identify the port as an input
