@@ -115,7 +115,7 @@ IsIoPort(instPtr)
 octObject *instPtr;
 {
     return(strncmp(BaseName(instPtr->contents.instance.master), 
-	"%p", 2) == 0);
+	PT_PERCENT "p", strlen(PT_PERCENT "p")) == 0);
 }
 
 boolean 
@@ -123,35 +123,39 @@ IsInputPort(instPtr)
 octObject *instPtr;
 {
     return(strcmp(BaseName(instPtr->contents.instance.master), 
-	"%pInput") == 0);
+            PT_PERCENT "pInput") == 0);
 }
 
 boolean 
 IsDelay(instPtr)
 octObject *instPtr;
 {
-    return(strcmp(BaseName(instPtr->contents.instance.master), "%dDelay") == 0);
+    return(strcmp(BaseName(instPtr->contents.instance.master),
+            PT_PERCENT "dDelay") == 0);
 }
 
 boolean 
 IsDelay2(instPtr)
 octObject *instPtr;
 {
-    return(strcmp(BaseName(instPtr->contents.instance.master), "%dDelay2") == 0);
+    return(strcmp(BaseName(instPtr->contents.instance.master),
+            PT_PERCENT "dDelay2") == 0);
 }
 
 boolean
 IsBus(instPtr)
 octObject *instPtr;
 {
-    return(strcmp(BaseName(instPtr->contents.instance.master), "%dBus") == 0);
+    return(strcmp(BaseName(instPtr->contents.instance.master),
+            PT_PERCENT "dBus") == 0);
 }
 
 boolean
 IsMarker(instPtr)
 octObject *instPtr;
 {
-    return(strncmp(BaseName(instPtr->contents.instance.master), "%d", 2) == 0);
+    return(strncmp(BaseName(instPtr->contents.instance.master),
+            PT_PERCENT "d", strlen(PT_PERCENT "d")) == 0);
 }
 
 boolean 
@@ -218,7 +222,8 @@ boolean
 IsCursor(instPtr)
 octObject *instPtr;
 {
-    return(strcmp(BaseName(instPtr->contents.instance.master),"%cCursor") == 0);
+    return(strcmp(BaseName(instPtr->contents.instance.master),
+            PT_PERCENT "cCursor") == 0);
 }
 
 /***** end of Isxxx functions */
