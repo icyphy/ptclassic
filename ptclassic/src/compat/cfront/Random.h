@@ -68,6 +68,7 @@ public:
 #if defined(PTNT) && !defined(PT_NT4VC)
 extern "C" {
 #include <stdlib.h>
+}
 #else
 extern "C" long random();
 #endif
