@@ -40,15 +40,6 @@ protected {
     DataType txType;
 }
 
-codeblock(updateLink,"const char* code") {
-    if ($starSymbol(iterationCount)++ == $val(updateRate)) {
-	$starSymbol(iterationCount) = 1;
-    	{
-	@code;
-    	}
-    }
-}
-
 codeblock(declarations,"const char* cgcType") {
 QckItem $starSymbol(s56xBuffer);
 int $starSymbol(bufferAddr);
@@ -70,7 +61,6 @@ initCode {
 	cgcType = "fix";
     else if (txType == FLOAT)
 	cgcType = "double";
-    addDeclaration("int $starSymbol(iterationCount) = 0;");
     if (blockSize > 1) addDeclaration(declarations(cgcType));
     CGCXBase::initCode();
 }
