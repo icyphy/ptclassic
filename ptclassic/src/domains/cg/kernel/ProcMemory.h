@@ -90,7 +90,7 @@ public:
 	// Returns TRUE if the attributes of the state or port match the
 	// required attributes of the memory, and hence return TRUE if the
 	// request was successfully logged.
-	virtual int allocReq(const State& s) = 0;
+	virtual int allocReq(State& s) = 0;
 	virtual int allocReq(AsmPortHole& p) = 0;
 
 	// Perform all registered allocation requests
@@ -145,7 +145,7 @@ public:
 	// Returns TRUE if the attributes of the state or port match the
 	// required attributes of the memory, and hence return TRUE if the
 	// request was successfully logged.
-	int allocReq(const State& s);
+	int allocReq(State& s);
 	int allocReq(AsmPortHole& p);
 
 	// Perform all registered allocation requests
@@ -204,7 +204,7 @@ public:
 	// Returns TRUE if the attributes of the state or port match the
 	// required attributes of the memory, and hence return TRUE if the
 	// request was successfully logged.
-	int allocReq(const State&);
+	int allocReq(State&);
 	int allocReq(AsmPortHole&);
 
 	// Perform all registered allocation requests

@@ -119,7 +119,7 @@ int LinProcMemory::allocReq(AsmPortHole& p) {
 	return TRUE;
 }
 
-int LinProcMemory::allocReq(const State& s) {
+int LinProcMemory::allocReq( State& s) {
 	if (!match(s)) return FALSE;
 
 	// request for consecutive allocation: add this state to a
@@ -251,13 +251,19 @@ DualMemory:: DualMemory(const char* n_x,       // name of first memory space
 DualMemory::~DualMemory() { reset(); }
 
 int DualMemory::allocReq(AsmPortHole& p) {
+	if (p.resolvedType() == COMPLEX ) {
+		p.setAttributes(A_SYMMETRIC);
+	}
 	if (!LinProcMemory::allocReq(p))
 	    if (!x.allocReq(p))
 		return y.allocReq(p);
 	return TRUE;
 }
 
-int DualMemory::allocReq(const State& s) {
+int DualMemory::allocReq(State& s) {
+        if (strcmp(s.type(), "COMPLEX")== 0 ) {
+                s.setAttributes(A_SYMMETRIC);
+        }
 	if (!LinProcMemory::allocReq(s))
 	    if (!x.allocReq(s))
 		return y.allocReq(s);
