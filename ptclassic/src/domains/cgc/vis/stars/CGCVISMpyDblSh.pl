@@ -37,25 +37,24 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	initCode{
 	  addInclude("<vis_proto.h>");
+	  addInclude("<vis_types.h>");
 	}
 	codeblock(localDecl){
-	  double resulthihi, resulthilo, resulthi;
-	  double resultlohi, resultlolo, resultlo;
-	  double result;
-	  float  dataAlo, dataAhi, dataBlo, dataBhi;
-	  float  resultu, resultl;
+	  vis_d64  resulthihi,resulthilo,resulthi;
+	  vis_d64  resultlohi,resultlolo,resultlo,result;
+	  vis_f32  dataAlo,dataAhi,dataBlo,dataBhi,resultu,resultl;
 	}
 	codeblock(multfour){
 	  vis_write_gsr(8);
 	  
 	  /* setup the data */
-	       dataAhi=vis_read_hi((double) $ref(inA));
+	  dataAhi=vis_read_hi((double) $ref(inA));
 	  dataAlo=vis_read_lo((double) $ref(inA));
 	  dataBhi=vis_read_hi((double) $ref(inB));
 	  dataBlo=vis_read_lo((double) $ref(inB));
 	  
 	  /* calculate the partial products */
-	      resulthihi = vis_fmuld8sux16(dataAhi,dataBhi);
+	  resulthihi = vis_fmuld8sux16(dataAhi,dataBhi);
 	  resulthilo = vis_fmuld8ulx16(dataAhi,dataBhi);
 	  resulthi   = vis_fpadd32(resulthihi,resulthilo);
 	  
@@ -64,7 +63,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  resultlo   = vis_fpadd32(resultlohi,resultlolo);
 	  
 	  /*pack and concat the final product*/
-	      resultu = vis_fpackfix(resulthi);
+	  resultu = vis_fpackfix(resulthi);
 	  resultl = vis_fpackfix(resultlo);
 	  result = vis_freg_pair(resultu,resultl);
 	  
