@@ -90,7 +90,7 @@ LOCALCFLAGS =	-DUSG $(CDEBUGFLAGS) -Aa -D_HPUX_SOURCE
 CC = 		gcc
 # Note that the bundled hppa cc compiler is non-ansi so it won't 
 # compile certain files in octtools that use ansi CPP, such as oct/io.h
-OCT_CC =	$(CC)
+OCT_CC =	gcc
 LOCALCFLAGS = 	-DUSG
 
 CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
