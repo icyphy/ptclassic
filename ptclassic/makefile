@@ -69,7 +69,7 @@ install_gnu:
 	$(MAKE) -f mk/scratch-srcs.mk CC=$(GNU_BUILD_CC) $(MFLAGS) gnu_all
 # For hppa, run install_hpgnu, not install_gnu
 install_hpgnu:
-	$(MAKE) -f mk/scratch-srcs.mk CC=$(GNU_BUILD_CC) $(MFLAGS) hp_all
+	$(MAKE) -f mk/scratch-srcs.mk CC=$(GNU_BUILD_CC) $(MFLAGS) hpgnu_all
 install_tcltk:
 	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) tcltk_all
 
