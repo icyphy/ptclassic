@@ -11,6 +11,7 @@
 /* plate in the Tcl/Tk distribution. This code is used to support Spin's  */
 /* option M for generating a Postscript file from a simulation run.       */
 
+#include <stdlib.h>		/* define exit function */
 #include "spin.h"
 #include "version.h"
 extern	void tfree(void *);
