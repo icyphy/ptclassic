@@ -64,4 +64,5 @@ MATLABSTAR_LIBFILE=	$(LIBDIR)/libsdfmatlabstars.$(LIBSUFFIX)
 MATLABSTAR_LIB=		-lsdfmatlabstars
 MATLABSTARS_DOT_O=	$(LIBDIR)/sdfmatlabstars.o
 endif
+MATLAB_INCSPEC = -I$(MATLABDIR)/extern/include
 
