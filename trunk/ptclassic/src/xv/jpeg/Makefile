@@ -2,7 +2,7 @@
 
 ROOT = ../../..
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # This makefile is suitable for Unix-like systems with non-ANSI compilers.
