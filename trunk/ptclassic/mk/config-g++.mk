@@ -39,9 +39,9 @@ CRT0=/lib/crt0.o
 # system libraries (libraries from the environment)
 SYSLIBS=-lg++ -lm $(GNULIB)/gcc-gnulib -lc
 # link flags
-LINKFLAGS=-S $(CRT0) -L$(LIBDIR)
+LINKFLAGS=-S $(CRT0) -L$(LIBDIR) -L$(GNULIB)
 # link flags if debugging symbols are to be left
-LINKFLAGS_D=$(CRT0) -L$(LIBDIR)
+LINKFLAGS_D=$(CRT0) -L$(LIBDIR) -L$(GNULIB)
 
 # CONSTRUCTOR_HACK is a substitute "gnulib3" that makes g++ programs
 # call constructors in reverse order.  It is not used with the
