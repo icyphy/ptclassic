@@ -51,10 +51,6 @@ protected:
 	// code generation init routine; compute offsets, generate initCode
 	int codeGenInit();
 
-	// Generate declarations and initialization code for
-	// Star PortHoles and States.
-	/*virtual*/ void declareStar(CGCStar*);
-
         CodeStream mainLoopInit;
         CodeStream mainLoopTerm;
         CodeStream tkSetup;
