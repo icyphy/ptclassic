@@ -22,9 +22,12 @@ $Id$
 #include "CGCStar.h"
 #include "GalIter.h"
 #include "miscFuncs.h"
+#include "dataType.h"
 #include "WormConnect.h"
 
 const Attribute ANY = {0,0};
+
+const char* whichType(DataType);
 
 // constructor
 CGCTarget::CGCTarget(const char* name,const char* starclass,
@@ -33,21 +36,12 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
                         "function name to be created."));
 	addState(compileCommand.setState("compileCommand",this,"cc",
                         "function name to be created."));
-	addState(compileOption.setState("compileOption",this,"",
-                        "function name to be created."));
-}
-
-// default methods
-void CGCTarget :: getDataToSend(EventHorizon* p) {
-	Error::abortRun("Target should define getDataToSend() method.\n", 
-		"Wormhole interface is not supported in this target");
-	p->dataNew = FALSE;
-}
-
-void CGCTarget :: getDataToReceive(EventHorizon* p) {
-	Error::abortRun("Target should define getDataToReceive() method.\n"
-		"Wormhole interface is not supported in this target");
-	p->dataNew = FALSE;
+	addState(compileOptions.setState("compileOptions",this,"",
+                        "options to be specified for compiler."));
+	addState(linkOptions.setState("linkOptions",this,"",
+                        "options to be specified for linking."));
+	addState(saveFileName.setState("saveFileName",this,"",
+                        "file name to save the generated code."));
 }
 
 StringList CGCTarget :: sectionComment(const StringList s) {
@@ -104,7 +98,8 @@ int CGCTarget :: starDataStruct(Block& block, int level) {
 	if (p->isItOutput()) {
 	   	int dimen = ((CGCPortHole*)p)->maxBufReq();
 		out += indent(level+1);
-		out += "float ";
+		out += whichType(p->myType());
+		out += " ";
 		out += sanitizedName(*p);
 		if(dimen > 1) {
 		    out += "[";
@@ -130,7 +125,8 @@ int CGCTarget :: starDataStruct(Block& block, int level) {
     const State* s;
     while ((s = nextState++) != 0) {
 	out += indent(level+1);
-	out += "float ";
+	out += whichType(s->type());
+	out += " ";
 	out += sanitizedName(*s);
 	if (s->size() > 1) {
 		out += "[";
@@ -183,12 +179,7 @@ int CGCTarget :: setup (Galaxy& g) {
     return CGTarget::setup(g);
 }
 
-int CGCTarget :: run () {
-
-    // Main loop runs before data structure declarations so that
-    // the states that are referenced with $ref() macros can be
-    // marked as states that must be declared and initialized.
-    BaseCTarget::run();
+void CGCTarget :: frameCode () {
 
     // Data structure declaration
     StringList leader = "Code from Universe: ";
@@ -213,8 +204,14 @@ int CGCTarget :: run () {
     runCode += indent(1);
     
     myCode = runCode;
+}
 
-    return(TRUE);
+StringList CGCTarget :: generateCode(Galaxy& g) {
+	setup(g);
+	run();
+	myCode +=  indent(1);
+	myCode += "}\n";
+	return myCode;
 }
 
 void CGCTarget :: wrapup () {
@@ -230,32 +227,53 @@ void CGCTarget :: wrapup () {
 	char* codeFileName = writeFileName("code.c");
 	if(!display(myCode, codeFileName)) return;
 
+	if(compileCode()) runCode();
+}
+	
+// compile the code
+int CGCTarget :: compileCode() {
+
 	// Compile and run the code
 	StringList cmd = "cd ";
 	cmd += (const char*)destDirectory;
 	cmd += "; ";
 	cmd += (const char*)compileCommand;
+	cmd += " ";
+	cmd += (const char*)compileOptions;
 	cmd += " code.c ";
-	cmd += (const char*)compileOption;
+	cmd += (const char*)linkOptions;
 	if(system(cmd)) {
 		Error::abortRun("Compilation errors in generated code.");
-		return;
+		return FALSE;
 	}
-	cmd = "cd ";
+	return TRUE;
+}
+
+// down-load (do nothing here) and run the code
+int CGCTarget :: runCode() {
+	StringList cmd = "cd ";
 	cmd += (const char*)destDirectory;
 	cmd += "; a.out";
 	if(system(cmd)) {
 		Error::abortRun("Error(s) executing the generated program.");
-		return;
+		return FALSE;
 	}
 	// Move the code into files of more reasonable names
 	cmd = "cd ";
 	cmd += (const char*)destDirectory;
 	cmd += "; mv -f code.c ";
-	cmd += gal->readName();
-	cmd += ".c; mv a.out ";
-	cmd += gal->readName();
+	const char* ch = (const char*) saveFileName;
+	if (ch && strcmp(ch, "")) {
+		cmd += (const char*) saveFileName;
+		cmd += ".c; mv a.out ";
+		cmd += (const char*) saveFileName;
+	} else {
+		cmd += gal->readName();
+		cmd += ".c; mv a.out ";
+		cmd += gal->readName();
+	}
 	system(cmd);
+	return TRUE;
 }
 
 // Routines for writing code: schedulers may call these
@@ -419,3 +437,9 @@ int CGCTarget :: codeGenInit(Galaxy& g) {
         return TRUE;
 }
 
+const char* whichType(DataType s) {
+	if (strcmp(s, INT) == 0) return "int";
+	else if (strcmp(s, "STRING") == 0) return "char*";
+	return "double";
+}
+	
