@@ -32,7 +32,7 @@
 
 if {[string compare test [info procs test]] == 1} then { 
     source $TYCHO/kernel/test/testDefs.tcl
-} {step value}
+} {}
 
 # Uncomment this to get a full report, or set in your Tcl shell window.
 # set VERBOSE 1
@@ -46,6 +46,67 @@ set reallyExit 0
 test states.1 {check states of a master star} {
     ::pitcl::addUniverse .x SDF
     ::pitcl::states Ramp
-} {}
+} {Ramp.step Ramp.value}
+
+test states.2 {check states of a star instance} {
+    ::pitcl::addUniverse .x SDF
+    ::pitcl::addBlock .x.f Ramp
+    ::pitcl::states .x.f
+} {.x.f.step .x.f.value}
+
+test states.3 {check initial state value of a star instance} {
+    ::pitcl::stateValue -initial .x.f.value
+} {0.0}
+
+test states.4 {check current state value of an uninitialized star instance} {
+    ::pitcl::stateValue .x.f.value
+} {0.0}
+
+test states.5 {check initial state value of a star master} {
+    ::pitcl::stateValue -initial Ramp.value
+} {0.0}
+
+test states.6 {check current state value of an uninitialized star master} {
+    ::pitcl::stateValue Ramp.value
+} {0.0}
+
+test states.7 {change the initial value of a star instance} {
+    ::pitcl::setState .x.f.value 2.0
+    list [::pitcl::stateValue -initial .x.f.value]
+} {2.0}
+
+test states.8 {check that the current value is unchanged} {
+    ::pitcl::stateValue .x.f.value
+} {0.0}
+
+test states.9 {initialize and check the current value} {
+    ::pitcl::initState .x.f.value
+    ::pitcl::stateValue .x.f.value
+} {2.0}
+
+test states.10 {initialize the block to change the current value} {
+    ::pitcl::setState .x.f.value 4.0
+    ::pitcl::initBlock .x.f
+    ::pitcl::stateValue .x.f.value
+} {4.0}
+
+test states.11 {attempt to change the initial value of a star instance} {
+    catch {::pitcl::setState Ramp.value 2.0} msg
+    list $msg
+} [list {The parent block of state Ramp.value is not in an InterpGalaxy.}]
+
+test states.12 {create a new universe state} {
+    ::pitcl::addState .x.s FLOAT 1.5
+    ::pitcl::stateValue -initial .x.s
+} {1.5}
+
+test states.13 {list universe states} {
+    ::pitcl::states .x
+} {.x.s}
+
+test states.14 {initialize the universe to change the current value} {
+    ::pitcl::initBlock .x
+    ::pitcl::stateValue .x.s
+} {1.5}
 
 doneTests
