@@ -31,6 +31,12 @@ void AsmTarget::doInitialization(CGStar& cgStar) {
 	AsmStar &star = (AsmStar&)cgStar;
 	BlockStateIter nextState(star);
 	State* s;
+        StringList comment = "initialization code from star ";
+        comment += star.readFullName();
+        comment += " (class ";
+        comment += star.readClassName();
+        comment += ")\n";
+        outputComment(comment);
 	while ((s = nextState++) != 0) {
 		if ((s->attributes() & AB_MEMORY) == 0 ||
 		    (s->attributes() & AB_NOINIT) != 0) continue;
