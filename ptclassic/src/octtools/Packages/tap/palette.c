@@ -30,19 +30,34 @@ static char SccsId[]="$Id$";
 #include "errtrap.h"
 #include "oct.h"
 #include "oh.h"
+#include "ansi.h"
 #include "tap_int.h"
 
 /*LINTLIBRARY*/
 
-static void incorporateWidth();
-static int initConnectors();
-static int tryConnector();
-static int tabulateConnector();
-static void interpretConnector();
-static int addImplBoxToConn();
-static void cacheConnectorInfo();
-static int sortConnectors();
-static int connCompare();
+static void incorporateWidth
+	ARGS((struct connLayer *layerDescPtr, octCoord width, octCoord
+	      angle, int direction));
+static int initConnectors
+	ARGS((struct tapTech *techPtr));
+static int tryConnector
+	ARGS((struct tapConnector *connPtr, int layerCount, struct connLayer *neededLayers, octObject *instPtr));
+static int tabulateConnector
+	ARGS((struct tapTech *techPtr, struct tapConnector *connPtr, octObject *instancePtr, octObject *palettePtr));
+static void interpretConnector
+	ARGS((struct tapTech *techPtr, octObject *instancePtr, octObject *palettePtr));
+static int addImplBoxToConn
+	ARGS((struct connLayer *layerDescs, octObject *implBoxPtr,
+	      octObject *techFacetPtr));
+static void cacheConnectorInfo
+	ARGS((struct tapTech *techPtr, octObject *instancePtr,
+	      octObject *palettePtr, double area, struct connLayer *layerDescs));
+
+
+static void sortConnectors
+	ARGS((struct tapTech *techPtr));
+static int connCompare
+	ARGS((struct tapConnector *a, struct tapConnector *b));
 
 int tapOpenPalette(objPtr, name, masterPtr, mode)
 octObject *objPtr;
@@ -211,7 +226,8 @@ octObject *instPtr;
      */
     success = 0;
     for (connPtr = techPtr->connList; connPtr; connPtr = connPtr->next) {
-	if(largerConn=tryConnector(connPtr, techPtr->layerCount, neededLayers, instPtr)) {
+	if( (largerConn = tryConnector(connPtr, techPtr->layerCount,
+				       neededLayers, instPtr)) ) {
 	    if ((largerConn<0) && userConnectorGenerator) {
 		break;
 	    }
@@ -611,7 +627,7 @@ struct connLayer *layerDescs;
 #define SORT1	doSort
 #include "lsort.h"
 
-static sortConnectors(techPtr)
+static void sortConnectors(techPtr)
 struct tapTech *techPtr;
 {
     int connCompare();
