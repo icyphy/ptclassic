@@ -31,12 +31,11 @@
 ##########################################################################
 #### SlateView
 #
-# _SlateView_ is a view that references a Slate. It
-# provides a symbolic naming interface to a Slate to make it
-# easy for Slates to be notified by Layout models.
+# _SlateView_ is a view that contains a Slate. It provides an interface
+# between Slates and Layout models.
 #
 class ::tycho::SlateView {
-    inherit ::tycho::Object
+    inherit ::tycho::File
 
     constructor {args} {}
     destructor {}
@@ -44,89 +43,92 @@ class ::tycho::SlateView {
     #################################################################
     ####                        options                          ####
 
-    # The slate
-    public variable slate ""
+    # The layout model
+    public variable layout ""
     
     #################################################################
     ####                     public methods                      ####
 
-    # Add a tag to all indicated items.
-    method addtag {tag args}
-
     # Set or get the coordinates of an item
     method coords {name args}
 
-    # Clear data from this editor (Note: not the viewer)
-    method clear {}
+    # Load items from the model into the slate
+    method load {layout {item {}}}
 
-    # Delete an item
-    method delete {name}
-
-    # Delete a tag from all items.
-    method dtag {tag}
+    # Find items.
+    method find {mode args}
 
     # Get the id of an item given its name
     method id {name}
 
-    # Add a new item
-    method item {name spec args}
-
-    # Configure an item
-    method itemconfigure {name args}
-    
-    # Load items from the model into the slate
-    method load {layout {context {}}}
-
-    # Move an item
-    method move {tag x y}
-
-    # Start moving an item
-    method moveclick {tag x y args}
-
-    # Continue moving an item
-    method movedrag {tag x y}
-
-    # Stop moving an item
-    method moverelease {tag}
-
     # Get or set the name of an item given its id
-    method name {id {name {}}}
+    method name {id}
 
     # Handle change notification from the layout model
     method notify {method args}
 
-    # Reshape an item
-    method reshape {name x y args}
-
-    # Start reshaping an item
-    method reshapeclick {name x y args}
-
-    # Continue reshaping an item
-    method reshapedrag {name x y}
-
-    # Stop reshaping an item
-    method reshaperelease {name}
-
-    # Manipulate the the selection
-    method selection {mode {name {}}}
-
-    # Add a nested item
-    method subitem {context name spec args}
-
-    # Synchronize the model with current coordinates
-    method syncback {layout}
-
-    # Return the vertices and edges with a given tag.
-    method withtag {tag}
-
     #################################################################
     ####                  protected methods                      ####
+
+    # Add a new item
+    method _add {name args}
+
+    # Add a tag to all indicated items.
+    method _addtag {tag args}
+
+    # Set or get the coordinates of an item
+    method _coords {name args}
+
+    # Clear data from this editor
+    method _clear {}
+
+    # Delete an item
+    method _delete {name}
+
+    # Delete a tag from all items.
+    method _dtag {tag {delete {}}}
+
+    # Configure an item
+    method _itemconfigure {name args}
+    
+    # Move an item
+    method _move {tag x y}
+
+    # Start moving an item
+    method _moveclick {tag x y args}
+
+    # Continue moving an item
+    method _movedrag {tag x y}
+
+    # Stop moving an item
+    method _moverelease {tag}
+
+    # Reshape an item
+    method _reshape {name x y args}
+
+    # Start reshaping an item
+    method _reshapeclick {name x y args}
+
+    # Continue reshaping an item
+    method _reshapedrag {name x y}
+
+    # Stop reshaping an item
+    method _reshaperelease {name}
+
+    # Manipulate the the selection
+    method _selection {mode {name {}}}
+
+    #################################################################
+    ####                  protected variables                    ####
+    
+    # The slate
+    protected variable slate
 
     #################################################################
     ####                   private variables                     ####
     
     # The mapping from item names to item IDs
-    private variable _itemID
+    private variable _itemid
 
     # The mapping from item IDs to item names
     private variable _nameof
@@ -136,35 +138,20 @@ class ::tycho::SlateView {
 #### constructor
 #
 body ::tycho::SlateView::constructor {args} {
+    # Create a slate
+    itk_component add slate {
+        uplevel #0 ::tycho::slate $itk_interior.slate
+    } {
+        keep -cursor
+        rename -background -canvascolor canvasColor CanvasColor
+        rename -height -canvasheight canvasHeight CanvasHeight
+        rename -width -canvaswidth canvasWidth CanvasWidth
+    }
+    set slate $itk_component(slate)
+    pack $slate -expand yes -fill both -side left
+
     # Evaluate options
     eval configure $args
-    
-    # Check correct usage
-    if { $slate == "" } {
-        error "SlateView requires a -slate option"
-    }
-}
-
-########################################################################
-#### addtag
-#
-# Add a tag to all indicated vertices and names.
-#
-body ::tycho::SlateView::addtag {tag args} {
-    foreach name $args {
-	$slate addtag $tag withtag $_itemID($name)
-    }
-}
-
-########################################################################
-#### clear
-#
-# Clear all items from the slate.
-#
-body ::tycho::SlateView::clear {} {
-    catch {unset _itemID}
-    catch {unset _nameof}
-    $slate delete all
 }
 
 ########################################################################
@@ -173,229 +160,238 @@ body ::tycho::SlateView::clear {} {
 # Set or get coordinates of an item.
 #
 body ::tycho::SlateView::coords {name args} {
-    eval $slate coords [list $_itemID($name)] $args
-}
-
-########################################################################
-#### delete
-#
-# Delete an item.
-#
-body ::tycho::SlateView::delete {name} {
-    $slate delete $_itemID($name)
-    unset _nameof(_itemID($name))
-    unset _itemID($name)
-}
-
-########################################################################
-#### dtag
-#
-# Delete a tag from all items.
-#
-body ::tycho::SlateView::dtag {tag} {
-    $slate dtag $tag
+    eval $slate coords $_itemid($name) $args
 }
 
 ########################################################################
 #### id
 #
-# Return the id of an item given its name. If the id is unknown,
+# Return the slate id of an item given its name. If the id is unknown,
 # return the argument on the assumption that it's a valid canvas
 # tag.
 #
 body ::tycho::SlateView::id {name} {
-    if [::info exists _itemID($name)] {
-        return $_itemID($name)
+    if [::info exists _itemid($name)] {
+        return $_itemid($name)
     } else {
         return $name
-	# Hm... maybe we should do this:
-	# error "Unknown item \"$name\" ([array get names _itemID])"
     }
-}
-
-########################################################################
-#### item
-#
-# Add a new item to the view.
-#
-body ::tycho::SlateView::item {name spec args} {
-    # puts "::tycho::SlateView::item $name $spec $args"
-    set id [eval $slate create $spec $args]
-    set _itemID($name) $id
-    set _nameof($id) $name
-}
-
-########################################################################
-#### itemconfigure
-#
-# Configure an item.
-#
-body ::tycho::SlateView::itemconfigure {name args} {
-    eval $slate itemconfigure $_itemID($name) $args
 }
 
 ########################################################################
 #### load
 #
-# Load all items from a layout model into the slate. Be sure to
-# call clear{} before calling this method.
+# Load items from a layout model into the slate.
 #
-body ::tycho::SlateView::load {layout {context {}}} {
-    # Create items
-    if { $context == "" } {
-        # Top-level items
-        foreach item [$layout names] {
-            eval [list item $item \
-                    [$layout type $item]] \
-                    [$layout coords $item] \
-                    [$layout attributes $item]
-            
-            # Recursive call to do nested items
-            load $layout $item
-        }
+body ::tycho::SlateView::load {layout {item {}}} {
+	if { $item != "" } {
+		_add $item [$layout itemcget $item]
+	}
+	foreach i [$layout listing item $item] {
+		load $layout $i
+	}
+}
+
+########################################################################
+#### name
+#
+# Get the name of an item from its slate id.
+#
+body ::tycho::SlateView::name {id} {
+	return $_itemid($name)
+}
+
+########################################################################
+#### notify
+#
+# Notify on a change to the layout model. This method simply
+# prepends an underscore to the command name and evaluates the
+# protected method with that name.
+#
+body ::tycho::SlateView::notify {method args} {
+    eval _$method $args
+}
+
+#####################################################################
+#####################################################################
+####                     protected methods                       ####
+
+########################################################################
+#### _add
+#
+# Add a new item to the view.
+#
+body ::tycho::SlateView::_add {name args} {
+    array set opts $args
+    set type $opts(-type)
+    set coords $opts(-coords)
+    unset opts(-type)
+    unset opts(-coords)
+    set args [array get opts]
+
+    if { [llength $name] == 1 } {
+	# Root item
+	set id [eval $slate create $type $coords $args]
+    	set _itemid($name) $id
+    	set _nameof($id) $name
     } else {
-    	# Nested items
-    	foreach item [$layout names* $context] {
-	    eval [list subitem $context $item \
-		    [$layout type $item]] \
-		    [$layout coords $item] \
-		    [$layout attributes $item]
-        }
+	set parent $_itemid([lreplace $name end end])
+	set id [eval $slate createrootchild $parent $type $coords $args]
+	set _itemid($name) $id
+	set _nameof($id) $name
     }
 }
 
 ########################################################################
-#### move
+#### _addtag
 #
-body ::tycho::SlateView::move {tag x y} {
-    if { [::info exists _itemID($tag)] } {
-        $slate move $_itemID($tag) $x $y
+# Add a tag to all indicated vertices and names.
+#
+body ::tycho::SlateView::_addtag {tag args} {
+    foreach name $args {
+	$slate addtag $tag withtag $_itemid($name)
+    }
+}
+
+########################################################################
+#### _clear
+#
+# Clear all items from the slate.
+#
+body ::tycho::SlateView::_clear {} {
+    catch {unset _itemid}
+    catch {unset _nameof}
+    $slate delete all
+}
+
+########################################################################
+#### _coords
+#
+# Set coordinates of an item.
+#
+body ::tycho::SlateView::_coords {name args} {
+    eval $slate coords $_itemid($name) $args
+}
+
+########################################################################
+#### _delete
+#
+# Delete an item.
+#
+body ::tycho::SlateView::_delete {name} {
+    $slate delete $_itemid($name)
+    unset _nameof(_itemid($name))
+    unset _itemid($name)
+}
+
+########################################################################
+#### _dtag
+#
+# Delete a tag from all items.
+#
+body ::tycho::SlateView::_dtag {tag {delete {}}} {
+    eval $slate dtag $tag $delete
+}
+
+########################################################################
+#### _itemconfigure
+#
+# Configure an item.
+#
+body ::tycho::SlateView::_itemconfigure {name args} {
+	array set opts $args
+	if [::info exists opts(-coords)] {
+		eval $slate coords $_itemid($name) $opts(-coords)
+		unset opts(-coords)
+		set args [array get opts]
+	}
+    eval $slate itemconfigure $_itemid($name) $args
+}
+
+########################################################################
+#### _move
+#
+body ::tycho::SlateView::_move {tag x y} {
+    if { [::info exists _itemid($tag)] } {
+        $slate move $_itemid($tag) $x $y
     } else {
         $slate move $tag $x $y
     }
 }
 
 ########################################################################
-#### moveclick
+#### _moveclick
 #
-body ::tycho::SlateView::moveclick {tag x y} {
-    # puts "moveclick $tag"
-    if { [::info exists _itemID($tag)] } {
-        eval $slate moveclick $_itemID($tag) $x $y
+body ::tycho::SlateView::_moveclick {tag x y} {
+    if { [::info exists _itemid($tag)] } {
+        eval $slate moveclick $_itemid($tag) $x $y
     } else {
         eval $slate moveclick $tag $x $y
     }
 }
 
 ########################################################################
-#### movedrag
+#### _movedrag
 #
-body ::tycho::SlateView::movedrag {tag x y} {
-    if { [::info exists _itemID($tag)] } {
-        $slate movedrag $_itemID($tag) $x $y
+body ::tycho::SlateView::_movedrag {tag x y} {
+    if { [::info exists _itemid($tag)] } {
+        $slate movedrag $_itemid($tag) $x $y
     } else {
         $slate movedrag $tag $x $y
     }
 }
 
 ########################################################################
-#### moverelease
+#### _moverelease
 #
-body ::tycho::SlateView::moverelease {tag} {
-    if { [::info exists _itemID($tag)] } {
-        $slate moverelease $_itemID($tag)
+body ::tycho::SlateView::_moverelease {tag} {
+    if { [::info exists _itemid($tag)] } {
+        $slate moverelease $_itemid($tag)
     } else {
         $slate moverelease $tag
     }
 }
 
 ########################################################################
-#### name
+#### _reshape
 #
-# Get or set the name of an item. With no arguments, just return
-# the name of the given id if it's a valid id and it's been
-# previsouly registerd. If it's not a valid id, _assume_ that
-# it is intended as a tag and just return it. If it's an ID
-# that doesn't exists, throw an error.
-# With an argument and if the id is valid, register the name
-# with the id; throw an error if the id is invalid.
-#
-body ::tycho::SlateView::name {id {name {}}} {
-    if { $name != "" } {
-        # Bind a name to an id
-        if [regexp {^[_0-9][0-9]*$} $id] {
-            # It's a valid id
-            set _nameof($id) $name
-            set _itemID($name) $id
-            return $name
-        } else {
-            error "Invalid id $id"
-        }
-    } else {
-        # Get a name
-        if [regexp {^[_0-9][0-9]*$} $id] {
-            # It's a valid id
-            if [::info exists _nameof($id)] {
-                return $_nameof($id)
-            } else {
-                error "Unknown id $id"
-            }
-        } else {
-            # Assume it's a valid tag
-            return $id
-        }
-    }
+body ::tycho::SlateView::_reshape {name x y args} {
+    eval $slate reshape $_itemid($name) $x $y $args
 }
 
 ########################################################################
-#### notify
+#### _reshapeclick
 #
-# FIXME: Want to call methods directly!
-#
-body ::tycho::SlateView::notify {method args} {
-    eval $method $args
+body ::tycho::SlateView::_reshapeclick {name x y args} {
+    eval $slate reshapeclick $_itemid($name) $x $y $args
 }
 
 ########################################################################
-#### reshape
+#### _reshapedrag
 #
-body ::tycho::SlateView::reshape {name x y args} {
-    eval $slate reshape $_itemID($name) $x $y $args
+body ::tycho::SlateView::_reshapedrag {name x y} {
+    $slate reshapedrag $_itemid($name) $x $y
 }
 
 ########################################################################
-#### reshapeclick
+#### _reshaperelease
 #
-body ::tycho::SlateView::reshapeclick {name x y args} {
-    eval $slate reshapeclick $_itemID($name) $x $y $args
+body ::tycho::SlateView::_reshaperelease {name} {
+    $slate reshaperelease $_itemid($name)
 }
 
 ########################################################################
-#### reshapedrag
-#
-body ::tycho::SlateView::reshapedrag {name x y} {
-    $slate reshapedrag $_itemID($name) $x $y
-}
-
-########################################################################
-#### reshaperelease
-#
-body ::tycho::SlateView::reshaperelease {name} {
-    $slate reshaperelease $_itemID($name)
-}
-
-########################################################################
-#### selection
+#### _selection
 #
 # Manipulate the selection.
 #
-body ::tycho::SlateView::selection {mode {name {}}} {
+body ::tycho::SlateView::_selection {mode {name {}}} {
     switch -exact $mode {
     	"add" {
-	    $slate selection add $_itemID($name)
+	    $slate selection add $_itemid($name)
     	}
     	"remove" {
-	    $slate selection add $_itemID($name)
+	    $slate selection add $_itemid($name)
     	}
     	"clear" {
 	    $slate selection clear
@@ -404,28 +400,14 @@ body ::tycho::SlateView::selection {mode {name {}}} {
 }
 
 ########################################################################
-#### subitem
+#### find
 #
-# Add a nested item. The item is created as a "root" child so that
-# it responds to events.
+# Find items.
 #
-body ::tycho::SlateView::subitem {context name spec args} {
-    set parent $_itemID($context)
-    set id [eval $slate createrootchild $parent $spec $args]
-    set _itemID($name) $id
-    set _nameof($id) $name
-}
-
-########################################################################
-#### withtag
-#
-# Return the items with a given tag.
-#
-body ::tycho::SlateView::withtag {tag} {
+body ::tycho::SlateView::find {mode tag} {
     set result {}
-    foreach id [$slate find withtag $tag] {
+    foreach id [$slate find $mode $tag] {
 	lappend result $_nameof($id)
     }
     return $result
 }
-

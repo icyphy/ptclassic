@@ -32,11 +32,63 @@
 ##########################################################################
 #### Layout
 #
-# The _Layout_ model is a model for any graphical "picture"
-# drawn on the slate.
+# The _Layout_ model is a model for graphical items drawn onto a
+# slate. Its methods provide a model-like interface for slate
+# modifications, so that any view based on a slate can communicate
+# with other views.
+#
+# _Layout_ has the following types:
+# <dl>
+# <dt><b>item</b> _name_
+# <dd>
+# A graphical item on the slate. Items can be nested arbitrarily, and
+# views should interpret nested items as active child items on the slate.
+# Items have the following attributes:
+#   <dl>
+#   <dt><b>-coords</b> <b>{</b> _x_ _y_ ?_x_ _y_ ...? <b>}</b>
+#   <dd>
+#   The coordinates of the item. The coordinates are not always kept
+#   up to date, simply because most of the work of maintaining them
+#   is done by the Slate, and duplicating it in this mdoel would be
+#   pointless. Instead, this attribute is updated automatically when
+#   it is read. This item must be supplied when the item is created.
+#
+#   <dt><b>-slatetype</b> _type_
+#   <dd>
+#   The slate type of the item. This attribute must be supplied when
+#   an item is created, and cannot be changed afterwards.
+#
+#   <dt>_Item option_
+#   <dd>
+#   Any other attributes must be legal options to the slate type
+#   given by </b>-slatetype</b>. 
+#
+#   </dl>
+#
+# _Layout_ supports several events that have no method, but are used
+# by views to communicate information with each other. These events
+# deal with tagging and selection, which is information that is not
+# recorded in the model itself. The event names correspond directly
+# to the methods of the same names in _IncrCanvas_ or _Slate_. The
+# events are:
+# <dl>
+# <dt><b>addtag</b> _tag_ ?_item_ _item_...?
+# <dd>
+# Add the specified _tag_ to each _item_.
+#
+# <dt><b>dtag</b> _tag_ ?_delete_...?
+# <dd>
+# Delete _tag_. If _delete_ is given, delete from matching items,
+# oherwise delete from all items.
+# 
+# <dt><b>selection</b> _mode_ ?_arg_ _arg...?
+# <dd>
+# Manipulate the selection.
+# 
+# </dl>
 #
 class ::tycho::Layout {
-    inherit ::tycho::DataModel
+    inherit ::tycho::Layout
 
     constructor {args} {}
     destructor {}
@@ -44,41 +96,23 @@ class ::tycho::Layout {
     #################################################################
     ####                        options                          ####
 
-    # The "primary" view of this model
-    public variable primaryview {}
-
     #################################################################
     ####                     public methods                      ####
 
-    # Add a tag to specified items
-    method addtag {tag args}
-    
-    # Return all attributes of an item
-    method attributes {item}
+    # Assign the values an item 
+    method assign {item value}
 
-    # Reset model coordinates according to current actual coordinates
-    method clean {}
+    # Add an item 
+    method add {item args}
 
     # Get or set the coordinates of an item
     method coords {item args}
 
-    # Delete an item
-    method delete {item}
-
-    # Describe the layout
-    method describe {{prefix {}}}
-
-    # Delete a tag from all items
-    method dtag {tag}
-
-    # Add a top-level item to the layout
-    method item {item spec args}
+    # Get an attribute of an item
+    method itemcget {item args}
 
     # Configure an item
     method itemconfigure {item args}
-
-    # Get an attribute of an item
-    method itemcget {item args}
 
     # Move an item
     method move {tag x y}
@@ -92,41 +126,44 @@ class ::tycho::Layout {
     # Stop moving an item
     method moverelease {tag}
 
-    # Get the names of items
-    method names {{context {}}}
-
-    # Get the (full) names of items
-    method names* {context}
-
     # Reshape an item
-    method reshape {name x y args}
+    method reshape {item x y args}
 
     # Start reshaping an item
-    method reshapeclick {name x y args}
+    method reshapeclick {item x y args}
 
     # Continue reshaping an item
-    method reshapedrag {name x y}
+    method reshapedrag {item x y}
 
     # Stop reshaping an item
-    method reshaperelease {name}
+    method reshaperelease {item}
 
-    # Manipulate the selection
-    method selection {args}
+    # Subscribe to this model
+    method subscribe {type subscriber args}
 
-    # Add a nested item
-    method subitem {context item spec args}
+    # Unsubscribe from this model
+    method unsubscribe {type subscriber args}
 
-    # Get the type of an item
-    method type {item}
+    #################################################################
+    ####                   protected methods                     ####
+
+    # Add an item
+    protected method _additem {args} {eval add $args}
+
+    # Return a description of a single item
+    protected method _describeitem {item {prefix {}}}
+
+    # Find items using a subscribed view
+    protected method find {mode args}
 
     #################################################################
     ####                   private variables                     ####
     
+    # Flag to mark "dirty" coordinates
+    protected variable _dirty
+    
     # Storage used during interaction sequences
     protected variable _scratch
-    
-    # The dirty flag for each item -- to keep coordinates correct
-    protected variable _dirty
 }
 
 ########################################################################
@@ -141,195 +178,128 @@ body ::tycho::Layout::constructor {args} {
 }
 
 ########################################################################
-#### addtag
+#### assign
 #
-# Add a tag to all specified items. Does not return an inverse
-# command, since tagging and untagging are not undoable commands.
+# Assign an attribute list to an item. This method overrides
+# the inherited method to deal with the <b>-slatetype</b> and
+# <b>-coords</b> attributes.
 #
-body ::tycho::Layout::addtag {tag args} {
-    return ""
-}
-
-########################################################################
-#### attributes
-#
-# Return a list containing the attributes of the item as a flat
-# attribute-value list. Flag an error if the item does not exist.
-#
-body ::tycho::Layout::attributes {item} {
-    set splut [split $item "."]
-    set cntxt [lreplace $splut end end]
-    set local [lindex $splut end]
-
-    _verify item $cntxt $local
-    _attributes item $cntxt $local
-}
-
-########################################################################
-#### clean
-#
-# Reset the coordinates of each item marked "dirty" to the
-# current coordinates obtained from the primary view. This
-# must be called before calling any methods that access the
-# coordinates of this model, such as describe{}, save{}, and
-# so on. Note: this is all rather awkward, but is the price we
-# pay for being able to keep the Tcl code reasonable efficient.
-#
-body ::tycho::Layout::clean {} {
-    foreach item [array names _dirty] {
-        eval coords $item [$primaryview coords $item]
+body ::tycho::Layout::assign {item value} {
+    array set opts $value
+    if ![info exists opts(-slatetype)] {
+        error "attribute \"-slatetype\" must be supplied"
     }
+    if { $opts(-slatetype) != [itemcget $item -slatetype] } {
+        error "attribute \"-slatetype\" cannot be changed"
+    }
+    if ![info exists opts(-coords)] {
+        error "attribute \"-coords\" must be supplied"
+    }
+    chain $item $value
+}
+
+########################################################################
+#### add
+#
+# Add an item. This method overrides the inherited method to deal
+# with the <b>-slatetype</b> and <b>-coords</b> attributes.
+#
+body ::tycho::Layout::add {item args} {
+    array set opts $args
+    if ![info exists opts(-slatetype)] {
+        error "attribute \"-slatetype\" must be supplied"
+    }
+    if ![info exists opts(-coords)] {
+        error "attribute \"-coords\" must be supplied"
+    }
+    eval chain $item $args
 }
 
 ########################################################################
 #### coords
 #
 # With no arguments, get the coordinates of an item, with arguments,
-# set the coordinates and return the undo command. Note: this
-# must be called after a call to move{}, release{}, etc, in order
-# to update the model itself, since those calls do not actually
-# keep the coordinates up-to-date.
+# set the coordinates and add to the history if recording. 
 #
 body ::tycho::Layout::coords {item args} {
-    set splut [split $item "."]
-    set cntxt [lreplace $splut end end]
-    set local [lindex $splut end]
-
-    _verify item $cntxt $local
     if { $args == "" } {
-	lreplace $_value($item) 0 0
+        itemcget $item -coords 
     } else {
-	set inverse "coords $item [lreplace $_value($item) 0 0]"
-        _assign item $cntxt $local \
-                [linsert $args 0 [lindex $_value($item) 0]]
-        set _dirty($item) 1
-    	return $inverse
+        if $recording {
+            history append \
+                    "coords $item $args" \
+                    "coords $item [itemcget $item -coords]"
+        }
+        norecord itemconfigure $item -coords $args
     }
-}
-
-########################################################################
-#### delete
-#
-# Delete an item from the model.
-#
-body ::tycho::Layout::delete {item} {
-    set splut [split $item "."]
-    set cntxt [lreplace $splut end end]
-    set local [lindex $splut end]
-
-    _verify $type $cntxt $local
-    set info [_delete $type $cntxt $local]
-    catch {unset _dirty($item)}
-    # Return inverse command.
-    # FIXME: does not work with nested entities yet!
-    concat item $item $info
-}
-
-########################################################################
-#### dtag
-#
-# Delete a tag from all items. Does not return an inverse
-# command, since tagging and untagging are not undoable commands.
-#
-body ::tycho::Layout::dtag {tag} {
-    return ""
-}
-
-########################################################################
-#### describe
-#
-# Return a string that describes the layout.
-# See the <a href="Interchange.html"> Interchange</a> class.
-#
-body ::tycho::Layout::describe {{prefix {}}} {
-    # First update coordinates
-    clean
-
-    # Call the superclass
-    chain $prefix
-}
-
-########################################################################
-#### item
-#
-# Add a new item to the model and return the inverse command. The
-# value is the type and the _initial_ coordinates only.
-#
-body ::tycho::Layout::item {item spec args} {
-    set splut [split $item "."]
-    set cntxt [lreplace $splut end end]
-    set local [lindex $splut end]
-
-    _verifynot item $cntxt $local $item
-    _addentity item $cntxt $local $item $spec $args
 }
 
 ########################################################################
 #### itemcget
 #
-# Get an attribute of an item.
+# Get an attribute or attributes of an item. This method overrides
+# the inherited method to deal with the <b>-slatetype</b> and
+# <b>-coords</b> attributes.
 #
-body ::tycho::Layout::itemcget {item attribute} {
-    set splut [split $item "."]
-    set cntxt [lreplace $splut end end]
-    set local [lindex $splut end]
-
-    _verify item $cntxt $local
-    _cget item $cntxt $local $attribute
+body ::tycho::Layout::itemcget {item {attribute {}}} {
+    # Update coordinates
+    if { [::info exists _dirty($item)] && $_views != "" } {
+        itemconfigure $item -coords [[lindex $_views 0] coords $item]
+        unset _dirty($item)
+    }
+    chain $item $attribute
 }
 
 ########################################################################
 #### itemconfigure
 #
-# Configure an item and return the inverse command.
+# Configure an attribute or attributes of an item. This method overrides
+# the inherited method to deal with the <b>-slatetype</b> and
+# <b>-coords</b> attributes.
 #
 body ::tycho::Layout::itemconfigure {item args} {
-    set splut [split $item "."]
-    set cntxt [lreplace $splut end end]
-    set local [lindex $splut end]
-
-    _verify item $cntxt $local
-    concat [list itemconfigure $name] [_configure $type $cntxt $local $args]
+    if { [lsearch -exact -- $args -slatetype] != -1 } {
+        error "Attribute \"-slatetype\" is read-only"
+    }
+    if { [lsearch -exact -- $args -coords] != -1 } {
+        catch {unset _dirty($item)}
+    }
+    eval chain $item $args	
 }
 
 ########################################################################
 #### move
 #
-# Move an item by name, or a set of items by tag.
-# Note: coords{} must be called (but not via publish{})
-# after calling this to keep the model itself up-to-date.
+# Move an item by name, or a set of items by tag. Record a single move
+# command in the history if currently recording.
 #
 body ::tycho::Layout::move {tag x y} {
-    # puts "::tycho::Layout::move $tag $x $y"
-    # Only construct the inverse if the "recording" flag is set.
-    # This is not for efficiency, but because the command may
-    # need to generate its own redo command.
-    if { $recording } {
-        # Construct the inverse command
-	if { [::info exists _value($tag)] } {
-            # Set dirty flag because coords on model are no longer valid
+    # If not recording, set the dirty flag of each item.
+    if !$recording {
+        if [exists $tag] {
             set _dirty($tag) 1
-
- 	    # This is an item, so return simple inverse command
-	    return [list move $tag [expr -$x] [expr -$y]]
-	} else {
- 	    # It's a tag, so explicitly construct commands to move all
-	    # tagged items. Note that we don't use the tag since the
-	    # tags may change by the time the command is undone.
-	    set undo [list sequence]
-	    set redo [list sequence]
-	    foreach item [$primaryview withtag $tag] {
-                # Set dirty flag for this item
+        } else {
+            foreach item [find withtag $tag] {
                 set _dirty($item) 1
-
-                # Construct undo and redo commands
- 		lappend undo [list move $item [expr -$x] [expr -$y]]
-		lappend redo [list move $item $x $y]
-	    }
-	    # Add to history, and return null so nothing else is recorded.
-	    appendHistory $redo $undo 1
-	    return ""
-	}
+            }
+        }
+    } else {
+        # If recording, add to the history as well
+        if [exists $tag] {
+            set _dirty($tag) 1
+            history append \
+                    "move $tag $x $y" \
+                    "move $tag [expr -$x] [expr -$y]"
+        } else {
+            set redo _compound
+            set undo _compound
+            foreach item [find withtag $tag] {
+                set _dirty($item) 1
+                lappend redo "move $item $x $y"
+                lappend undo "move $item [expr -$x] [expr -$y]"
+            }
+            history append $redo $undo
+        }
     }
 }
 
@@ -337,38 +307,32 @@ body ::tycho::Layout::move {tag x y} {
 #### moveclick
 #
 # Start moving an item specified by name, or a set of items 
-# specified by tag.
+# specified by tag. Don't record anything in the history.
 #
 body ::tycho::Layout::moveclick {tag x y} {
-    # Just remember where we are, and don't record in the history
     set _scratch($tag.startx) $x
     set _scratch($tag.starty) $y
     set _scratch($tag.currentx) $x
     set _scratch($tag.currenty) $y
-    return ""
 }
 
 ########################################################################
 #### movedrag
 #
 # Continue moving an item specified by name, or a set of items 
-# specified by tag.
+# specified by tag. Don't record anything in the history.
 #
 body ::tycho::Layout::movedrag {tag x y} {
-    # puts "::tycho::Layout::movedrag $tag $x $y"
     set _scratch($tag.currentx) $x
     set _scratch($tag.currenty) $y
-    return ""
 }
 
 ########################################################################
 #### moverelease
 #
 # Terminate movement of an item specified by name, or a set of items 
-# specified by tag. Record a single move command (for the whole
-# sequence since the call to moveclick{}) in the history.
-# Note: coords{} must be called (but not via publish{})
-# after calling this to keep the model itself up-to-date.
+# specified by tag. Record a single move command in the history
+# if currently recording.
 #
 body ::tycho::Layout::moverelease {tag} {
     set deltax [expr $_scratch($tag.currentx) - $_scratch($tag.startx)]
@@ -378,190 +342,172 @@ body ::tycho::Layout::moverelease {tag} {
     unset _scratch($tag.currentx)
     unset _scratch($tag.currenty)
 
-    # Only construct the inverse if the "recording" flag is set.
-    # This should never happen, but we check just to make sure.
-    if { $recording } {
-	if { [::info exists _value($tag)] } {
-            # Set dirty flag of this item
-            set _dirty($tag) 1
-
- 	    # This is an item, so use simple command
-	    set undo [list move $tag [expr -$deltax] [expr -$deltay]]
-	    set redo [list move $tag $deltax $deltay]
-	} else {
- 	    # It's a tag, so construct commands to move all tagged items.
-	    # Note that we don't use the tag in the command since the
-	    # tags may change by the time the command is undone.
-	    set items [$primaryview withtag $tag]
-	    if { [llength $items] == 0 } {
-		set undo {}
-		set redo {}
-	    } elseif { [llength $items] == 1 } {
-                # Set dirty flag for this item
-                set _dirty([lindex $items 0]) 1
-
- 		set undo [list move [lindex $items 0] \
-			[expr -$deltax] [expr -$deltay]]
-		set redo [list move [lindex $items 0] $deltax $deltay]
-	    } else {
-		set undo [list sequence]
-		set redo [list sequence]
-		foreach item [$primaryview withtag $tag] {
-                    # Set dirty flag for this item
-                    set _dirty($item) 1
-
-                    # Construct undo and redo commands
- 		    lappend undo [list move $item \
-			    [expr -$deltax] [expr -$deltay]]
-		    lappend redo [list move $item $deltax $deltay]
-		}
-	    }
-	}
-    	# Add to history, and return null so nothing else is recorded.
-    	appendHistory $redo $undo 1
-    	return ""
-    }
+    # Call the move method to construct history
+    move $tag $deltax $deltay
 }
 
-########################################################################
-#### names
-#
-# Get the names of items. If the context argument is
-# given, get items within that context; if not, get root items.
-#
-body ::tycho::Layout::names {{context {}}} {
-    _children item $context
-}
-
-########################################################################
-#### names
-#
-# Get the full names of items.
-#
-body ::tycho::Layout::names* {context} {
-    set result {}
-    foreach c [_children item $context] {
-        lappend result $context.$c
-    }
-    return $result
-}
 ########################################################################
 #### reshape
 #
-# Reshape an item by name.
-# Note: coords{} must be called (but not via publish{})
-# after calling this to keep the model itself up-to-date.
+# Reshape an item by name. Record a single reshape
+# command in the history if currently recording.
 #
-body ::tycho::Layout::reshape {name x y args} {
-    # puts "::tycho::Layout::reshape $name $x $y $args"
-    if { ! [::info exists _value($name)] } {
-    	error "Item \"$name\" does not exists in [_dataname]"
+body ::tycho::Layout::reshape {item x y args} {
+    if ![exists $item] {
+    	error "Cannot reshape \"$item\""
     }
-    concat reshape [list $name] [expr -$x] [expr -$y] $args
+	set _dirty($tag) 1
+	if $recording {
+		history append \
+				"reshape $item $x $y $args" \
+				"reshape $item [expr -$x] [expr -$y] $args"
+		}
+	}
 }
 
 ########################################################################
 #### reshapeclick
 #
-# Start moving an item specified by name.
+# Start moving an item specified by name. Don't record anything in
+# the history.
 #
-body ::tycho::Layout::reshapeclick {name x y args} {
-    # puts "::tycho::Layout::reshapeclick $name $x $y $args"
-    if { ! [::info exists _value($name)] } {
-    	error "Item \"$name\" does not exist in [_dataname]"
+body ::tycho::Layout::reshapeclick {item x y args} {
+    if ![exists $item] {
+    	error "Cannot reshape \"$item\""
     }
-    # Just remember where we are, and don't record in the history
-    set _scratch($name.startx) $x
-    set _scratch($name.starty) $y
-    set _scratch($name.currentx) $x
-    set _scratch($name.currenty) $y
+    set _scratch($item.startx) $x
+    set _scratch($item.starty) $y
+    set _scratch($item.currentx) $x
+    set _scratch($item.currenty) $y
 
     array set opts $args
-    set _scratch($name.aspects) $opts(-aspects)
-    return ""
+    set _scratch($item.aspects) $opts(-aspects)
 }
 
 ########################################################################
 #### reshapedrag
 #
-# Continue reshaping an item specified by name.
+# Continue reshaping an item specified by name. Don't record anything in
+# the history.
 #
-body ::tycho::Layout::reshapedrag {name x y} {
-    set _scratch($name.currentx) $x
-    set _scratch($name.currenty) $y
-    return ""
+body ::tycho::Layout::reshapedrag {item x y} {
+    if ![exists $item] {
+    	error "Cannot reshape \"$item\""
+    }
+    set _scratch($item.currentx) $x
+    set _scratch($item.currenty) $y
 }
 
 ########################################################################
 #### reshaperelease
 #
-# Terminate reshaping of an item specified by name. Record a
-# single reshape command (for the whole sequence since the call
-# to reshapeclick{}) in the history.
-# Note: coords{} must be called (but not via publish{})
-# after calling this to keep the model itself up-to-date.
+# Terminate reshaping of an item specified by name. Record a reshape
+# command in the history if currently recording.
 #
-body ::tycho::Layout::reshaperelease {name} {
-    # puts "::tycho::Layout::reshaperelease $name $x $y"
-    set deltax [expr $_scratch($name.currentx) - $_scratch($name.startx)]
-    set deltay [expr $_scratch($name.currenty) - $_scratch($name.starty)]
-    unset _scratch($name.startx)
-    unset _scratch($name.starty)
-    unset _scratch($name.currentx)
-    unset _scratch($name.currenty)
-
-    set aspects $_scratch($name.aspects)
-    unset _scratch($name.aspects)
-
-    # Only construct the inverse if the "recording" flag is set.
-    # This should never happen, but we check just to make sure.
-    if { $recording } {
-        # Set dirty flag of this item
-        set _dirty($name) 1
-
-    	# This is an item, so use simple commands
-    	set undo [concat reshape [list $name] \
-		[expr -$deltax] [expr -$deltay] $aspects]
-    	set redo [concat reshape [list $name] $deltax $deltay $aspects]
-
-    	# Add to history, and return null so nothing else is recorded.
-    	appendHistory $redo $undo 1
-    	return ""
+body ::tycho::Layout::reshaperelease {item} {
+    if ![exists $item] {
+    	error "Cannot reshape \"$item\""
     }
+    set deltax [expr $_scratch($item.currentx) - $_scratch($item.startx)]
+    set deltay [expr $_scratch($item.currenty) - $_scratch($item.starty)]
+    set aspects $_scratch($item.aspects)
+
+    unset _scratch($item.startx)
+    unset _scratch($item.starty)
+    unset _scratch($item.currentx)
+    unset _scratch($item.currenty)
+    unset _scratch($item.aspects)
+
+    # Call the reshape method to construct history
+    eval reshape $item $deltax $deltay $args
 }
 
 ########################################################################
-#### selection
+#### subscribe
 #
-# Manipulate the selection. This command is here only because
-# it needs to be propagated to multiple subscribers. Does not
-# return an inverse command, since selection and deselection
-# are not undoable commands.
+# Subscribe to this model. This command has several forms, depending
+# on the value of the _mode_ argument.
 #
-body ::tycho::Layout::selection {mode {name {}}} {
-    return ""
+# <dl>
+# <dt><b>data</b> _subscriber_ ?_name_?
+# <dd>
+# As inherited from the _Model_ superclass.
+#
+# <dt><b>event</b> _subscriber_ ?_event_?
+# <dd>
+# As inherited from the _Model_ superclass.
+#
+# <dt><b>view</b> _subscriber_
+# <dd>
+# The _subscriber_ must be a view that understands the following
+# methods with model item names as arguments: <b>coords</b>,
+# and <b>find</b>.
+#
+# </dl>
+#
+body ::tycho::Model::subscribe {mode subscriber {name {}} {command {}}} {
+	if { $mode == "view" } {
+		lappend _views $subscriber
+	} else {
+		chain $mode $subscriber $name
+	}
 }
 
 ########################################################################
-#### subitem
+#### unsubscribe
 #
-# Add a nested item.
+# Unsubscribe from this model. This command has several forms, depending
+# on the value of the _mode_ argument.
 #
-body ::tycho::Layout::subitem {context item value args} {
-    _verifynot item $context $item $context.$item
-    _addentity item $context $item $context.$item $value $args
+# <dl>
+# <dt><b>data</b> _subscriber_ ?_name_?
+# <dd>
+# As inherited from the _Model_ superclass.
+#
+# <dt><b>event</b> _subscriber_ ?_event_?
+# <dd>
+# As inherited from the _Model_ superclass.
+#
+# <dt><b>view</b> _subscriber_
+# <dd>
+# The _subscriber_ must be a view previously subscribed with
+# <b>subscribe view</b>.
+#
+# </dl>
+#
+body ::tycho::Model::unsubscribe {mode subscriber {name {}}} {
+	if { $mode == "view" } {
+		set _views [::tycho::ldelete $_views $subscriber]
+	} else {
+		chain $mode $subscriber $name
+	}
+}
+
+#####################################################################
+#####################################################################
+####                     protected methods                       ####
+
+########################################################################
+#### _describeitem
+#
+# Return a string describing an item. This method overrides
+# the default method in order to make sure that the item's
+# <b>-coords</b> attribute is correctly updated.
+#
+body ::tycho::PortedDigraph::_describeitem {item {prefix {}}} {
+	itemcget $item -coords
+	_describe $item $prefix
 }
 
 ########################################################################
-#### type
+#### find
 #
-# Get the Slate type of an item
+# Perform a "find" command, using one of the subscribed slate views.
 #
-body ::tycho::Layout::type {item} {
-    set splut [split $item "."]
-    set cntxt [lreplace $splut end end]
-    set local [lindex $splut end]
-
-    _verify item $cntxt $local
-    lindex $_value($item) 0
+body ::tycho::Layout::find {mode args} {
+	if { $_views != "" } {
+		eval [lindex $_views 0] find $mode $args
+	} else {
+		return ""
+	}
 }
