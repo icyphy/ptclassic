@@ -155,6 +155,9 @@ public:
 	// DDFAutoWorm needs access.
 	void setDomain(const char* dom) { myDomain = dom;}
 
+	// Add a block to the list of blocks to be deleted after initialization
+	void deleteBlockAfterInit(Block& b);
+
 protected:
 
 	// Add blocks to the list
@@ -199,6 +202,9 @@ protected:
 private:
 	// Keep a list of component Blocks
 	BlockList	blocks;
+
+	// List of blocks to delete after initialization
+	BlockList blocksToDelete;
 
 	// my domain
 	const char* myDomain;
