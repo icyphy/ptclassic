@@ -52,7 +52,12 @@ test Loader-1.1 {load up the profile command} {
     if ![file exists $profileobj] {
 	puts "About to run make tclexts"
 	set makeWindow [::tycho::execModal {make tclexts} $TYCHO]
-        destroy [lindex $makeWindow 1]
+        # New Monitor cannot be just destroyed, since it also contains view.
+        #destroy [lindex $makeWindow 1]
+        set makeWindow [lindex $makeWindow 1]
+        $makeWindow getStatusWait
+        # Force to autodestroy no matter exit status is normal or not.
+        $makeWindow autoDestroy 2
     }
     ::tycho::loadIfNotPresent profile tclx [list \
 	    [list tclXprofile $profileobjdir]]
