@@ -68,8 +68,8 @@ CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
                                      "if true, display Gantt chart"));
         addState(logFile.setState("logFile",this,"",
                                      "log file to write to (none if empty)"));
-        addState(ammortizedComm.setState("ammortizedComm",this,"NO",
-                                     "try to ammortize communication?"));
+        addState(amortizedComm.setState("amortizedComm",this,"NO",
+                                     "try to amortize communication?"));
 	addState(ignoreIPC.setState("ignoreIPC",this,"NO",
 				   "ignore communication cost?"));
 	addState(overlapComm.setState("overlapComm",this,"NO",
@@ -101,7 +101,7 @@ void CGMultiTarget::setup() {
 
 	// check whether communication can be amortized or not.
 	// If YES, setup the  Reachability matrix.
-	if ((nChildrenAlloc > 1) && int(ammortizedComm)) {
+	if ((nChildrenAlloc > 1) && int(amortizedComm)) {
 		LOG_NEW; 
 		rm = new BooleanMatrix(nChildrenAlloc, nChildrenAlloc); 
 	}
@@ -607,8 +607,8 @@ void CGMultiTarget :: updateRM(int from, int to) {
 	rm->orRows(from, to);
 }
 
-// return TRUE if ammortization is possible, FALSE otherwise.
-int CGMultiTarget :: ammortize(int from, int to) {
+// return TRUE if amortization is possible, FALSE otherwise.
+int CGMultiTarget :: amortize(int from, int to) {
 	if (!rm) return FALSE;
 	int x = rm->getElem(from, to) + rm->getElem(to, from);
 	if (x < 2) return TRUE;
