@@ -48,8 +48,9 @@ ISA_FUNC(SRPortHole,PortHole);
 //
 // @Description This is used for point-to-point connections and
 // will either connect to the SRGeodesic of either port, or create a new one
-// if needed.  Calls SRGeodesic::setDestPort and SRGeodesic::setSourcePort
-// to make the connection.
+// if needed.  Calls SRGeodesic::setOldDestPort and
+// SRGeodesic::setOldSourcePort to make the connection because it
+// calls newConnection.
 
 void SRPortHole::connect(GenericPort& destination,
 				 int,
@@ -93,18 +94,18 @@ void SRPortHole::connect(GenericPort& destination,
   if ( c != connect_near ) {
     farPort.myGeodesic = g;
     if ( farPort.isItInput() ) {
-      g->setDestPort( farPort );
+      ((SRGeodesic *) g)->setOldDestPort( farPort );
     } else {
-      g->setSourcePort( farPort, 0, 0 );
+      ((SRGeodesic *) g)->setSourcePort( farPort, 0, 0 );
     }
   }
 
   if ( c != connect_far ) {
     nearPort.myGeodesic = g;
     if ( nearPort.isItInput() ) {
-      g->setDestPort( nearPort );
+      ((SRGeodesic *) g)->setOldDestPort( nearPort );
     } else {
-      g->setSourcePort( nearPort, 0, 0 );
+      ((SRGeodesic *) g)->setOldSourcePort( nearPort, 0, 0 );
     }
   }
 
