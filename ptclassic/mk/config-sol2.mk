@@ -49,9 +49,9 @@ SYSLIBS=-lsocket -lnsl -ldl -lg++ -lm
 
 # Can't use -static here, or we won't be able to find -ldl, and
 # dynamic linking will not work.
-LINKFLAGS=-L$(LIBDIR) -Wl,-R,$(PTOLEMY)/lib.$(ARCH):$(PTOLEMY)/octtools/lib.$(ARCH) 
+LINKFLAGS=-L$(LIBDIR) -Wl,-R,$(PTOLEMY)/lib.$(ARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR)
 # link flags if debugging symbols are to be left
-LINKFLAGS_D=-L$(LIBDIR) -Wl,-R,$(PTOLEMY)/lib.$(ARCH):$(PTOLEMY)/octtools/lib.$(ARCH) 
+LINKFLAGS_D=-L$(LIBDIR) -Wl,-R,$(PTOLEMY)/lib.$(ARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR)
 
 # Flag that gcc expects to create statically linked binaries.
 # Binaries that are shipped should be statically linked.
@@ -62,7 +62,8 @@ CC_STATIC =
 # Directories to use
 #
 X11_INCSPEC =	-I/usr/openwin/include
-X11_LIBSPEC =	-L/usr/openwin/lib -lX11
+X11_LIBDIR =	/usr/openwin/lib
+X11_LIBSPEC =	-L$(X11_LIBDIR)  -lX11
 
 # Variables for Pure Inc tools (purify, purelink, quantify)
 COLLECTOR = 	
@@ -92,8 +93,12 @@ MATLABLIBDIR =
 XV_INSTALL =
 
 # -DATT is needed so we don't try and include sys/dir.h
-XV_CC =		gcc -traditional -I/usr/openwin/include -L/usr/openwin/lib \
-		-DSVR4 -DSYSV -DDIRENT -DATT -DNO_BCOPY
+# -R$(X11LIB_DIR) is need so we can find the X libs at runtime,
+#	otherwise, we will need to set LD_LIBRARY_PATH
+XV_CC =		gcc -traditional $(X11_INCSPEC) \
+		-DSVR4 -DSYSV -DDIRENT -DATT -DNO_BCOPY \
+		$(X11_LIBSPEC) -R$(X11_LIBDIR)
+
 XV_RAND = 	-DNO_RANDOM
 
 # Under sol2, xmkmf is not compatible with gcc, so we don't use it

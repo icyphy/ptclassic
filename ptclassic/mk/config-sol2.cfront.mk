@@ -72,15 +72,16 @@ SYSLIBS =	-lsocket -lnsl -ldl -lm
 
 # Can't use -Bstatic here, or we won't be able to find -ldl, and
 # dynamic linking will not work.
-LINKFLAGS=-L$(LIBDIR) -R$(PTOLEMY)/lib.$(ARCH):$(PTOLEMY)/octtools/lib.$(ARCH) 
+LINKFLAGS=-L$(LIBDIR) -R$(PTOLEMY)/lib.$(ARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR)
 # link flags if debugging symbols are to be left
-LINKFLAGS_D=-L$(LIBDIR) -R$(PTOLEMY)/lib.$(ARCH):$(PTOLEMY)/octtools/lib.$(ARCH)	
+LINKFLAGS_D=-L$(LIBDIR) -R$(PTOLEMY)/lib.$(ARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR)	
 
 #
 # Directories to use
 #
 X11_INCSPEC =	-I/usr/openwin/include
-X11_LIBSPEC =	-L/usr/openwin/lib -lX11
+X11_LIBDIR =	/usr/openwin/lib
+X11_LIBSPEC =	-L$(X11_LIBDIR)  -lX11
 
 # Variables for Pure Inc tools (purify, purelink, quantify)
 COLLECTOR =
@@ -100,9 +101,9 @@ XPM_DEFINES =	-DZPIPE -DSYSV $(X11_INCSPEC)
 XMKMF =		/usr/openwin/bin/xmkmf
 # -Xs is needed for the varargs code in xv/tiff
 # -w turns of warnings.  xv/bitmaps.h causes _lots_ of warnings
-# -R/usr/openwin/lib is need so we can find the X libs at runtime,
-#	otherwise, we will need to set LD_LIBRARY_PATH
-XV_CC =		cc -Xs -w -I/usr/openwin/include \
+# -R$(X11LIB_DIR) is need so we can find the X libs at runtime,
+#   otherwise, we will need to set LD_LIBRARY_PATH to include $(X11_LIBDIR) 
+XV_CC =		cc -Xs -w $(X11_INCSPEC) \
 		-DSVR4 -DSYSV -DDIRENT -DATT -DNO_BCOPY \
-		-L/usr/openwin/lib -R/usr/openwin/lib
+		$(X11_LIBSPEC) -R$(X11_LIBDIR)
 XV_RAND = 	-DNO_RANDOM
