@@ -25,30 +25,20 @@ include $(CONFIG)
 
 INCL=-I$(KERNDIR) -I$(TCL_H_DIR)
 
-# libraries
-LIBS=-lcgddf -lddf -ldycon -lDC -lHu -lDL -lPar -lLS -lEG -lcg -lsdf \
-	-lde -lthor -lptolemy -lImage -ltcl $(SYSLIBS)
-
-LIBFILES=\
- $(LIBDIR)/libcgddf.a \
- $(LIBDIR)/libDL.a $(LIBDIR)/libHu.a \
- $(LIBDIR)/libcg.a $(LIBDIR)/libDC.a $(LIBDIR)/libPar.a \
- $(LIBDIR)/libLS.a $(LIBDIR)/libEG.a $(LIBDIR)/libsdf.a \
- $(LIBDIR)/libImage.a \
- $(LIBDIR)/libdycon.a $(LIBDIR)/libddf.a \
- $(LIBDIR)/libde.a \
- $(LIBDIR)/libthor.a \
- $(LIBDIR)/libptolemy.a
-
+# Include information on all stars and targets.
 
 include $(ROOT)/stars.mk
 
-ALLTARGETS = $(SDFTARGETS) $(CGTARGETS)
+# libraries
+LIBS= $(STAR_LIBS) -lptolemy -ltcl $(SYSLIBS)
 
-# the LAST star linked in determines the default domain
-ALLSTARS =	$(CGSTARS) $(CGDDFSTARS) \
-		$(ThorSTARS) $(DESTARS) $(DDFSTARS) \
-		$(SDFSTARS) $(SDF_DSPSTARS) $(SDF_IMAGESTARS)
+LIBFILES=$(STAR_LIBFILES) $(LIBDIR)/libptolemy.a
+
+# first star determines default domain as a rule
+ALLSTARS = $(SDFSTARS) $(CGCSTARS) $(CG96STARS) $(CG56STARS) $(CGSTARS) \
+	$(DDFSTARS) $(THORSTARS) $(DESTARS)
+ALLTARGETS =	$(SDFTARGETS) $(CGTARGETS) $(CGCTARGETS) \
+	$(CG56TARGETS) $(CG96TARGETS)
 
 # Sources
 SRCS= PTcl.cc ptclMain.cc ptclError.cc
