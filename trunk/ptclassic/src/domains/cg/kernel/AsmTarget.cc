@@ -18,9 +18,9 @@ $Id$
 #include "GalIter.h"
 #include "AsmStar.h"
 #include "ProcMemory.h"
+#include "UserOutput.h"
 
-int
-AsmTarget::setup(Galaxy& g) {
+int AsmTarget::setup(Galaxy& g) {
 // clear the memory
 	if (mem == 0) return FALSE;
 	mem->reset();
@@ -107,5 +107,25 @@ void AsmTarget :: outputLineOrientedComment(const char* prefix,
 	*p = 0;
 	addCode(line);
 	LOG_DEL; delete line;
+}
+
+int AsmTarget :: genFile (StringList& stuff, char* base, const char* suffix) {
+	int status;
+	StringList bname = base;
+	bname += suffix;
+	char* fullName = writeFileName(bname);
+	UserOutput o;
+	if (!o.fileName(fullName)) {
+		Error::abortRun(*this, "can't open file for writing: ",
+				fullName);
+		status = FALSE;
+	}
+	else {
+		o << stuff;
+		o.flush();
+		status = TRUE;
+	}
+	LOG_DEL; delete fullName;
+	return status;
 }
 

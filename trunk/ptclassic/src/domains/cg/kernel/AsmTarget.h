@@ -47,6 +47,9 @@ public:
 	// output a directive that switches to the code section
 	virtual void codeSection() = 0;
 
+	// generate file of stuff named base.suffix
+	int genFile(StringList& stuff, char* base,const char* suffix);
+
 	// output an "org" directive that switches to the specified
 	// memory and address
 	virtual void orgDirective(const char* mem, unsigned addr) = 0;
