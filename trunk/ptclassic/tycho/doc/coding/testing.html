@@ -1,0 +1,163 @@
+<!-- $Id$-->
+<html>
+<head>
+<title>Testing Tycho</title>
+</head>
+<h1><A NAME="Testing Tycho">Testing Tycho</A></h1>
+<HR>
+This page is primarly for Tycho Developers.  Some of the commands
+mentioned below are not included in Tycho.
+<H2>Test Suite</H2>
+
+We have included recursion tests for some of the code.  Usually, 
+wherever there is a Itcl file, the tests are in the <CODE>test</CODE>
+directory.
+
+ <P>The tycho test suite can be run from the Tycho Toplevel directory
+with the command: <CODE>make tests</CODE>
+<H3>Writing your own tests</H3>
+
+The test suite infrastruction is based on the Itcl test suite code,
+which is in turn based on the Tcl test suite code.
+
+ <P>The file <A HREF="../../kernel/test/testDefs.tcl"><CODE>$TYCHO/kernel/test/testDefs.tcl</CODE></A> defines the tcl proc <CODE>test</CODE>.
+
+ <P><CODE>test</CODE> takes four argument:
+<OL>
+<LI> The name of the test
+
+<LI> The test description, usually a single sentence.
+
+<LI> The contents of the test, usually tcl code that does the action to
+be tested.  The last line of the contents should return a value.
+
+<LI> The results to be compared against.
+</OL>
+
+Below is a sample piece of code that sources the <CODE>testDefs.tcl</CODE>
+file and then runs one test
+
+<tcl><pre>
+if {[string compare test [info procs test]] == 1} then { 
+    source $TYCHO/kernel/test/testDefs.tcl
+} {}
+test testExample-1.1 {This is the first test example, it does very little} {
+	catch {this is an error} errMsg1
+	set a "this is the value of a"
+	list $errMsg1 $a
+} {}
+</pre><tcl>
+
+<HR>
+<H2>Testing Documentation</H2>
+
+The Tycho documentation is written in html.  There are several tools
+that can be used.
+<H3>weblint</H3>
+
+Weblint tells the user about html errors.  Weblint can be obtained
+from <A
+HREF="ftp://ftp.cre.canon.co.uk/pub/weblint/weblint.tar.gz"><CODE>ftp://ftp.cre.canon.co.uk/pub/weblint/weblint.tar.gz</CODE></A>
+To run <CODE>weblint</CODE>:
+<PRE>
+cd $TYCHO
+make weblint
+</PRE>
+
+<H3>htmlchek</H3>
+
+Htmlchek is another tool that tells the user about html errors.
+<CODE>htmlchek</CODE> also checks for bad links.  The
+<CODE>htmlchek</CODE> output is a little hard to read, so we tend to
+use <CODE>weblint</CODE> for checking individual files.
+<CODE>htmlchek</CODE> cat be obtained from
+<A HREF="ftp://ftp.cs.buffalo.edu/pub/htmlchek/"><CODE>ftp://ftp.cs.buffalo.edu/pub/htmlchek/</CODE></A>
+
+<P> To run <CODE>htmlchek</CODE>:
+<PRE>
+cd $TYCHO
+make htmlchek
+</PRE>
+The output ends up in five files
+<MENU>
+<LI> <CODE>htmlchekout.ERR</CODE> - HTML usage errors
+<LI> <CODE>htmlchekout.NAME</CODE> - Locations in the specified files
+that ware not referenced by any of those files
+<LI> <CODE>htmlchekout.HREF</CODE> - References from the specified files
+that are not found in the files.  This file is by far the most important
+file to look at.
+<LI> <CODE>htmlchekout.SRC</CODE> - References to online images.
+<LI> <CODE>htmlchekout.MAP</CODE> - Cross dependency information.
+</MENU>
+sh	
+<P> All of the references in <CODE>htmlchekout.HREF</CODE> that point
+to <CODE>.html</CODE> files should be checked.  References to non-html
+files appear in <CODE>htmlchekout.HREF</CODE> because the non-html
+files were not included in the list of files that
+<CODE>htmlchek</CODE> ran on.  One quick way to search all the the <CODE>*.html</CODE> files is
+<PRE>
+cd $TYCHO
+grep mystring `find . -name "*.html" -print`
+</PRE>
+
+<H3>Spellchecking</H3>
+Checking the spelling in the html files can be done with:
+<PRE>
+cd $TYCHO
+spell `find . -name "*.html" -print`
+</PRE>
+
+<H3>Checking embedded tcl</H3>
+
+Tycho extends html with <CODE>&lt;TCL&gt; . . . &lt;TCL&gt;</CODE>
+tags.  In the Tycho HTML viewer, when the contents of these tags are
+moused on, the embedded tcl code is executed.
+
+ <P>To test all of the embedded tcl, the script
+<CODE>$TYCHO/adm/bin/chktclpre</CODE> will generated a
+<CODE>tclpre.html</CODE> file that contains all of the embedded tcl.
+This script is not shipped with Tycho.
+
+ <P>After running <CODE>chktclpre</CODE>, start up tycho, view
+<CODE>tclpre.html</CODE> and mouse on each block of embedded tcl code.
+Note that some blocks depend on the widgets created in earlier blocks.
+If you run into problems, you can follow the hyperlink in
+<CODE>tclpre.html</CODE> to the source html file.
+
+
+<H3>Checking for bogus copyright SCCS keywords</H3>
+
+Run <CODE>~ptdesign/adm/copyright/chkq $TYCHO</CODE> to print out
+the names of files that might have bogus percentQpercent values.
+ <P>
+Then run <CODE>~ptdesign/adm/bin/sccsadmin</CODE> on each file that
+has no value for percentQpercent substituted in.
+
+<H3>Check the distribution for bogus files</H3>
+Run the following makefile rules and commands
+<DL>
+<DT> <CODE>make realclean</CODE>
+
+<DD> This will remove the <CODE>tclIndex</CODE> files and the files in
+<CODE>doc/codeDoc</CODE>.  The reason to remove the
+<CODE>codeDoc</CODE> files is so that we don't ship html files for any
+classes that have been removed.
+
+<DT> <CODE>make install</CODE>
+<DD> This will recreate the <CODE>tclIndex</CODE> files and the
+<CODE>doc/codeDoc</CODE> files.
+
+<DT> <CODE>make checkjunk</CODE>
+<DD> Look for files in the distribution that should not be there.
+
+<DT> <CODE>adm/bin/chkgifs</CODE>
+<DD> This file looks for gif files that are not used by html files
+in the distribution.
+
+</DL> 
+
+<HR>
+Copyright &#169 1996, The Regents of the University of California.
+All rights reserved. 
+<br> Last updated: $Date$, comments to:
+<author>tycho@eecs.berkeley.edu</author> </body> </html>
