@@ -42,7 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "FixArrayState.h"
 #include "CGUtilities.h"
 #include <ctype.h>
-
+#include <stdio.h>              // sprintf(), sscanf()
 
 // isA
 ISA_FUNC(ACSCGCCore, ACSCGCore);
