@@ -61,7 +61,7 @@ XColor *clr;			/* Returned color structure */
         */
         
         XAllocNamedColor(xv_disp(), xv_cmap(), "white", &white, &exactwhite);
-	//white.pixel = WhitePixel(xv_disp(), xv_scrn());
+	/*white.pixel = WhitePixel(xv_disp(), xv_scrn());*/
 	XQueryColor(xv_disp(), xv_cmap(), &white);
     }
     if (clr) *clr = white;
