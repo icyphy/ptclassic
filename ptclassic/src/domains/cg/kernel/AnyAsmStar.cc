@@ -47,7 +47,8 @@ static const char file_id[] = "AnyAsmStar.cc";
 #include "AnyAsmStar.h"
 #include "Domain.h"
 #include "CGWormhole.h"
-#include "AutoForkNode.h"
+#include "AsmForkNode.h"
+#include "AsmPortHole.h"
 
 const char* AnyAsmStar::domain() const { return "AnyAsm";}
 
@@ -87,8 +88,11 @@ public:
                 LOG_NEW; return *new CGtoUniversal;
         }
 
-	// new node (geodesic)
-	Geodesic& newNode() { complain(); LOG_NEW; return *new AutoForkNode;}
+	// new geodesic
+	Geodesic& newGeo(int multi) { 
+	    if (multi) { LOG_NEW; return *new AsmForkNode;}
+	    else { LOG_NEW; return *new AsmGeodesic;}
+	}
 
 	// constructor
 	AnyAsmDomain() : Domain("AnyAsm") {}
