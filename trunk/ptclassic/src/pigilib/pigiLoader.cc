@@ -255,7 +255,7 @@ static int compile (const char* name, const char* idomain, const char* srcDir,
 	// 1. Initialize command, add "cd $objDir; $compile $options"
 	StringList cmd;
 	cmd.initialize();
-	cmd << "cd " << objDir << ";";
+	cmd << "cd " << objDir << "; ";
 	cmd << CPLUSPLUS << " " << EXTRAOPTS << " -c ";
 
 	// 2. build up the include path
