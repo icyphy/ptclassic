@@ -294,13 +294,13 @@ will be placed in current VEM directory.  Else, use dir and absolute
 pathname.
 */
 boolean
-MkStarIconInPal(starName, dir, palName)
-char *starName, *dir, *palName;
+MkStarIconInPal(starName, dir, domain, palName)
+char *starName, *dir, *domain, *palName;
 {
     octObject iconFacet = {OCT_UNDEFINED_OBJECT, 0},
 	      palFacet = {OCT_UNDEFINED_OBJECT, 0};
 
-    ERR_IF1(!MkStarIcon(starName, dir, &iconFacet));
+    ERR_IF1(!MkStarIcon(starName, dir, domain, &iconFacet));
     ERR_IF1(!GOCPaletteFacet(palName, &palFacet));
     ERR_IF1(!AddIconToPal(&iconFacet, &palFacet));
     CK_OCT(octCloseFacet(&palFacet));

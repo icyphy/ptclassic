@@ -48,6 +48,6 @@ extern boolean MkUnivIconInPal
 extern boolean MkGalIconInPal
        ARGS((octObject *galFacetPtr, char *dir, char *palName));
 extern boolean MkStarIconInPal
-       ARGS((char *starName, char *dir, char *palName));
+       ARGS((char *starName, char *dir, char *domain, char *palName));
 
 #endif /* PALETTE_H */
