@@ -147,9 +147,6 @@ class ::tycho::View {
     ###################################################################
     ####                         protected variables               ####
 
-    # A list of menu, tool, and status bars returned by the displayer.
-    protected variable bars {}
-
     # A local Tycho clipboard that is mirrored in the Tk clipboard.
     protected common clipboard {}
 
@@ -179,6 +176,9 @@ class ::tycho::View {
 
     # Name of this view; unique for each view in a displayer.
     protected variable viewName {}
+
+    # "Type" of this view, used for placing windows in the Window menu
+    protected variable viewType {}
 
     ###################################################################
     ####                         private variables                 ####

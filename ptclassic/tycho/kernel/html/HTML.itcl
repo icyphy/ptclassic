@@ -228,6 +228,9 @@ configbody ::tycho::HTML::size {
 #
 body ::tycho::HTML::constructor {args} {
 
+    # Set the view "type" for the Window menu
+    set viewType "html"
+
     # Add buttons to the toolbar, if it exists.
     # FIXME: need a forward command.
     # FIXME: should the user be allowed to change the home window?
@@ -315,12 +318,12 @@ body ::tycho::HTML::constructor {args} {
                 -underline 1 -accelerator {C-x s} \
                 -command "$this openSource"
         
-        $myMenubar disable "Insert..."
-        $myMenubar disable "Save"
-        $myMenubar disable "SaveAs..."
-        $myMenubar disable "Evaluate"
-        $myMenubar disable "Revision Control..."
-        $myMenubar disable "Toggle Read-Only"
+        $myMenubar delete "Insert..."
+        $myMenubar delete "Save"
+        $myMenubar delete "SaveAs..."
+        $myMenubar delete "Evaluate"
+        $myMenubar delete "Revision Control..."
+        $myMenubar delete "Toggle Read-Only"
     }
     bind $prefix <Control-x><Key-s> "$this openSource; break"
     # disable certain bindings
@@ -335,6 +338,9 @@ body ::tycho::HTML::constructor {args} {
 
     # Create a stack to store where we've been.
     set stack [::tycho::Stack #auto]
+
+    # Add myself to the list of open files. 
+    windowMenuAddAll $file
 }
 
 ###################################################################
