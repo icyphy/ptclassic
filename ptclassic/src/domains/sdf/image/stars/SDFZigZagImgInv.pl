@@ -1,5 +1,5 @@
 defstar {
-	name		{ ZigZagImageInv }
+	name		{ ZigZagImgInv }
 	domain		{ SDF }
 	version		{ $Id$ }
 	author		{ Paul Haskell }
@@ -13,7 +13,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	desc {
 This star inverse zig-zag scans a DCTImage.
 }
-	seealso { ZigZagImage }
+	seealso { ZigZagImg }
 
 	input	{ name	{ inport }	type { message } }
 	output	{ name	{ outport }	type { message } }
@@ -126,4 +126,4 @@ This star inverse zig-zag scans a DCTImage.
 		invZigZag(*image);
 		Envelope temp(*image); outport%0 << temp;
 	}
-} // end defstar{ ZigZagInv }
+} // end defstar{ ZigZagImgInv }
