@@ -115,6 +115,15 @@ class ::tycho::Slate {
     method roots    {picts}               {}
 
 
+    method {itemconfigure} {pict args} {
+	if { [string match {[0-9]*} $pict] } {
+	    eval $itk_component(canvas) itemconfigure $pict $args
+	} else {
+	    eval $pict configure $args
+	}
+    }
+
+
     ###################################################################
     ## Thin wrappers around canvas operations
 
@@ -142,21 +151,6 @@ class ::tycho::Slate {
     protected variable myself ""
 
 
-    ## slatePictures
-    #
-    # A list of all pictures created on the slate. This may need to be
-    # modified in future to record only top-level pictures (?).
-    #
-#    private variable slatePictures {}
-
-
-    ## itemdict
-    #
-    # The mapping from canvas items to pictures.
-    #
-#    private variable itemdict
-
-
     ## pictdict
     #
     # The mapping from the primary canvas tag to the corresponding
@@ -170,47 +164,6 @@ class ::tycho::Slate {
     # The mapping from tags to pictures.
     #
     private variable tagdict
-
-
-    ## registerItem  pict item
-    ## registerItems pict items
-    #
-    # Register a picture with one or more items. For use by the
-    # Primitive class only.
-    #
-    # -- pict: The picture object to set as the owner of the items.
-    # -- item: A single canvas item.
-    # -- items: A list of canvas items.
-    #
-#     method registerItem {pict item} {
-# 	set itemdict($item) $pict
-#     }
-
-#     method registerItems {pict items} {
-# 	foreach i $items {
-# 	    set itemdict($i) $pict
-# 	}
-#     }
-
-
-    ## deregisterItem  item
-    ## deregisterItems items
-    #
-    # Cancel the registration of a picture with an item.
-    # For use by the Primitive class only.
-    #
-    # -- item: A single canvas item.
-    # -- items: A list of canvas items.
-    #
-#     method deregisterItem {item} {
-# 	unset itemdict($item)
-#     }
-
-#     method deregisterItems {items} {
-# 	foreach i $items {
-# 	    unset itemdict($i)
-# 	}
-#     }
 
 
     ## registerTag tag pict
@@ -278,28 +231,23 @@ body ::tycho::Slate::addtag {tag searchSpec args} {
 # FIXME: Doesn't work with "current" tag
 #
 body ::tycho::Slate::bbox {args} {
-    set picts {}
+    set tags  {}
     foreach p $args {
 	if { $p == "all" } {
-	    set picts $slatePictures
-	    break
+	    return [$itk_component(canvas) bbox all]
 	} elseif { [isNumber $p] } {
-	    lappend picts $p
+	    lappend tags $p
 	} elseif { [isObject $p] } {
-	    lappend picts $p
+	    lappend tags [lindex [split $p ":"] end]
 	} else {
 	    # FIXME: Remove redundant pictures (children)
-	    lappend picts $tagdict($p)
+	    foreach q $tagdict($p) {
+		lappend tags [lindex [split $q ":"] end]
+	    }
 	}
     }
-    
-    # Flatten the picture list. If empty, return null string
-    set picts [eval concat $picts]
-    if { $picts == "" } {
-	return ""
-    } else {
-	return [eval $itk_component(canvas) bbox $picts]
-    }
+    puts $tags
+    return [eval $itk_component(canvas) bbox $tags]
 }
 
 
@@ -330,9 +278,7 @@ body ::tycho::Slate::bbox {args} {
 #
 # FIXME: Doesn't work with "current" tag
 #
-body ::tycho::Slate::bind {tagOrID {event void} {command void}} {
-puts "Slate::bind $tagOrID $event $command"
-
+body ::tycho::Slate::bind {tagOrID {event 0} {command 0}} {
     # Deal with canvas items first
     # FIXME: Can this be better integrated?
     if { [string match {[0-9]*} $tagOrID] } {
@@ -349,12 +295,12 @@ puts "Slate::bind $tagOrID $event $command"
     }
 
     # With just one arg, return the event and command
-    if { $event == void } {
+    if { $event == 0 } {
 	return [$itk_component(canvas) bind $tag]
     }
 
     # With two args, return the bound commands
-    if { $command == void } {
+    if { $command == 0 } {
 	return [$itk_component(canvas) bind $tag $event]
     }
 
@@ -362,13 +308,12 @@ puts "Slate::bind $tagOrID $event $command"
     # a) the binding is to a tag or an object, and b) whether the
     # command is blank (i.e. deleting a binding) or not.
     #
-    if { $obj != "" && $command != void } {
-puts "Bind to an object"
+    if { $obj != "" && $command != 0 } {
 	# Bind to an object. This means the picture is "self-bound."
 	# If the picture is not marked, then mark it and set the event
 	# tags to _$tag. If it is marked but doesn't have that
 	# event tag, then add it.
-	if { [$obj cget -mark] == void } {
+	if { [$obj cget -mark] == 0 } {
 	    $obj configure -mark 1
 	    $obj _etag set [list _$tag] -force
 	} elseif { ! [lmember [$obj _etag get] _$tag] } {
@@ -379,8 +324,7 @@ puts "Bind to an object"
 	$itk_component(canvas) bind _$tag $event $command
 
 
-    } elseif { $obj != "" && $command == void } {
-puts "Unbind from an object"
+    } elseif { $obj != "" && $command == 0 } {
 	# Remove a binding from an object. First remove the binding
 	# for the specified sequence. Then, check if the event tag
 	# has any other bindings; if not, remove it from the event
@@ -397,7 +341,7 @@ puts "Unbind from an object"
 	    }
 	}
 
-    } elseif { $obj == "" && $command != void } {
+    } elseif { $obj == "" && $command != 0 } {
 	# Bind to an tag. There are potentially a whole bunch
 	# of pictures, so get the list of them.
 	#
@@ -421,7 +365,7 @@ puts "Unbind from an object"
 	# Bind the command to the event and tag.
 	$itk_component(canvas) bind $tag $event $command
 
-    } elseif { $obj == "" && $command == void } {
+    } elseif { $obj == "" && $command == 0 } {
 	# Remove a binding from a tag. Firstly, find the pictures.
 	$itk_component(canvas) bind $tag $event {}
 
@@ -475,7 +419,7 @@ body ::tycho::Slate::constructor {args} {
     pack $itk_component(canvas) -fill both -expand yes
 
     # Set up the "myself" variable for later use in create{}.
-    set myself [string trimleft $this ":"]
+    set myself [lindex [split $this ":"] end]
 
     # Initialise options
     eval itk_initialize $args
@@ -543,6 +487,9 @@ body ::tycho::Slate::delete {args} {
 	if { $p == "all" } {
 	    set picts [$this find all]
 	    break
+	} elseif { [string match {[0-9]*} $pict] } {
+	    # Canvas item: just delete now
+	    $itk_component(canvas) delete $pict
 	} elseif { ! [isObject $p] } {
 	    set picts [concat $picts \
 		    [$this roots [$this find withtag $p]]]
