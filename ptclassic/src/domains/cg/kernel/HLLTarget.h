@@ -48,12 +48,11 @@ class HLLTarget : public CGTarget {
 public:
 	// constructor
 	HLLTarget(const char* nam, const char* startype, const char* desc);
-	void wrapup ();
-	Block* makeNew() const = 0;
+	/*virtual*/ Block* makeNew() const = 0;
 
 	// Routines for writing code: schedulers may call these
-	void beginIteration(int repetitions, int depth);
-	void endIteration(int repetitions, int depth);
+	/*virtual*/ void beginIteration(int repetitions, int depth);
+	/*virtual*/ void endIteration(int repetitions, int depth);
 
 protected:
 

@@ -45,10 +45,6 @@ HLLTarget::HLLTarget(const char* nam, const char* startype,
 {
 }
 
-void HLLTarget::wrapup() {
-    writeCode();
-}
-
 // Routines for writing code: schedulers may call these
 void HLLTarget::beginIteration(int repetitions, int depth) {
 	myCode << indent(depth);
