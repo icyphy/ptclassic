@@ -38,7 +38,7 @@ protected:
 	// get the reference from the geodesic.  Otherwise, invoke the
 	// same method in CGStar.
 	StringList getRef(const char* name);
-	StringList getRef2(const char* name, int offset);
+	StringList getRef2(const char* name, const char* offset);
 
 	// If "name" is a state, and is not already on the list
 	// referencedStates, add it.
