@@ -26,7 +26,7 @@ optmkdir obj.$ARCH
 
 cd obj.$ARCH
 optlink ../src makefile
-foreach x (domains interp kernel pigiRpc pigilib tests preproc)
+foreach x (domains interp kernel pigiRpc pigilib libgantt tests preproc)
 	optmkdir $x
 	cd $x
 	optlink ../../src/$x makefile
