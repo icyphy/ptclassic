@@ -34,23 +34,6 @@ Data movement is repeated inline so may not be efficient for large N.
 	name { output }
 	type { =input }
     }
-    protected {
-	int n;
-    }
-    defstate {
-	name { N }
-	type { int }
-	desc { number to transfer per execution }
-	default { 0 }
-    }
-    setup {
-	n = int(N);
-	if (n == 0) {
-	    n = output.far()->numXfer();
-	}
-	input.setSDFParams(n,n-1);
-	output.setSDFParams(n,n-1);
-    }
     defstate {
 	name { ptr }
 	type { int }
@@ -59,46 +42,97 @@ Data movement is repeated inline so may not be efficient for large N.
 	attributes { A_UMEM|A_NOINIT|A_NONSETTABLE }
     }
 
+    defstate {
+	name { N }
+	type { int }
+	desc { number to transfer per execution }
+	default { 0 }
+    }
+
+    protected {
+	int n,bufferSize,xferType,time;
+    }
+
+
+    method {
+	name { transferType }
+	type { "void" }
+	arglist { "()" }
+	access { protected }
+	code {
+		bufferSize = input.bufSize();
+		xferType = 3;
+		time = 11 + bufferSize;
+		if (input.resolvedType() == COMPLEX ){
+			if (bufferSize == 2){
+				xferType = 2;
+				time = 4;
+				return;
+			}
+		} else {
+			if (bufferSize == 1){
+				xferType = 1;
+				time = 2;
+				return;
+			}
+		};
+	}
+    }
+
+    setup {
+	n = int(N);
+	if (n == 0) {
+	    n = output.far()->numXfer();
+	}
+	input.setSDFParams(n,n-1);
+	output.setSDFParams(n,n-1);
+    }
+
     initCode{ addCode(init); }
 
     go {
-
-	if (input.bufSize()>1) {
-	    addCode(setupC(n-1));
-	    addCode(moveData(n-1));
-	    addCode(restore);
-	} else {
-	    if (input.resolvedType() == COMPLEX){
-	        addCode(copyCx);
-	    } else  addCode(copyReal);
+	
+	transferType();
+	switch (xferType){
+		case 1:
+			addCode(copyReal);
+			break;
+		case 2:
+			addCode(copyCx);
+			break;
+		case 3:
+			addCode(setupCircBuffer());
+			addCode(moveData());
+			addCode(restore);
+			break;
 	}
-    }
+     }	
+
     
     exectime {
-	if (input.bufSize() > 1) return (12 + n);
-	else if (input.resolvedType() == COMPLEX) return 4;
-	else return 2;
+	transferType();
+	return time;
     }
 
     codeblock(init){
-	.ds	#$addr(ptr)
-	.word	$addr(input)
+	.ds	$addr(ptr)
+	.word	$addr(output)
 	.text
 	}
 
-    codeblock(setupC,"int buffSize") {
+    codeblock(setupCircBuffer,"") {
 	lmmr	ar0,#$addr(ptr)		; ar0 = start address
 	lacc	#$addr(input),0
 	samm	cbsr1			; set circ buff start addr
-	add	#@buffSize,0
+	add	#@(bufferSize-1),0
 	samm	cber1			; set circ buff end addr
 	lacl	#08
 	samm	cbcr			; set ar0 = cir. buff reg.
 	mar	*,ar0			; arp -> ar0
     }
 
-    codeblock(moveData,"int iter"){
-	rpt	#@iter
+    codeblock(moveData,""){
+	rpt	#@(bufferSize - 1)
 	bldd	*+,#$addr(output)
     }
 

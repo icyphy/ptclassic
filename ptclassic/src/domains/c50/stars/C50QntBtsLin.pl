@@ -34,7 +34,7 @@ an optional offset can be added to shift the output levels up or down.
 	}
 	state {
 		name { offset }
-		type { fix }
+		type { Fix }
 		desc { amount of shift.  }
 		default { 0 }
 	}
@@ -43,12 +43,16 @@ an optional offset can be added to shift the output levels up or down.
 		int	off;
 		
 	}
-	setupt{
+	setup{
 		// convert fixed point offset to an integer because the
 		// assembler can only handle integer numbers in add immediate
 		// instructions.
-		Fix temp("1.15",double(offset));
-		off	= int(temp);
+		double temp = offset.asDouble();
+		if ( temp >= 0) {
+			off = int(32768*temp);
+		} else {
+			off = int(32768*(1-temp));
+		}
 	}
  
 	constructor {
@@ -71,3 +75,6 @@ an optional offset can be added to shift the output levels up or down.
 		return 7;
 	}
  }
+
+
+

@@ -3,7 +3,7 @@ defstar {
 	domain { C50 }
 	desc { A variable delay with linear interpolation. }
 	version { $Id$ }
-	author { Chih-Tsung Huang, ported from Gabriel }
+	author { Luis Gutierrez, based on the CG56 version }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -48,41 +48,64 @@ between -1.0 and 1.0.
 		default { 10 }
 		desc { maximum delay }
 	}
-	codeblock(block) {
-	.ds	$addr(buf)	; initialize internal buffer	
-   	.text 	
-	}			      
-	codeblock(std) {
-	movec   #$val(maxDelay),m0	 	; MAX may be short immediate
-	move    $ref(bufStart),r0
-	clr     a       $ref(input),y0
-	movec   m0,a1
-	move    a,x1    y0,y:(r0)+
-	move    $ref(control),y1
-	mac     x1,y1,a r0,$ref(bufStart)
-	asr     a       (r0)-
-	clr     b       (r0)-
-	move    a1,n0	   			; offset
-	move    a0,b1	   			; remainder
-	asr     b       #<0.5,a
-	rnd     b       (r0)-n0			; linear interpolation
-	subl    b,a     y:(r0)+,y1      b,x1	; a=1-b
-	mpy     x1,y1,a y:(r0),y1       a,x1
-	macr    x1,y1,a
-	move    a,$ref(output)
-	movec   m1,m0				; restore m0
+
+	private{
+		int size;
 	}
+
+	codeblock(block) {
+	.ds	$addr(bufStart)	; initialize internal buffer	
+	.word	$addr(buf)   
+	.text 	
+	}			      
+
+	codeblock(std,"") {
+	ldp	#0
+	lacl	#@(size - 1)
+	samm	dbmr			; used for modulo 2^k addressing
+	lmmr	ar1,#$addr(input)	; ar1 = most recent input
+	lar	ar0,#$addr(bufStart)	; ar0 = pointer to start of buff.
+	mar	*,ar0			; arp = 0
+	smmr	ar1,*+			; store input on buffer, inc ar0
+	apl	ar0			; get lowest k-1 bits
+	opl	#$addr(bufStart),ar0	; add address; so ar0->nxt position
+	smmr	ar0,#$addr(bufStart)	; store nxt postion
+	lmmr	treg0,#$addr(control)	; treg0 = control
+	lacc	#4000h,1		; 
+	add	treg0,0			; acc = 0.5(control+1)*2
+	sfr				; acc = 0.5(control+1)
+	samm	treg0			; treg0 = 0.5(control+1)
+	mpy	#$val(maxDelay)		; p = 0.5(maxDelay)*(0.5(control+1))
+	pac				; acc = p
+	add	#0003,14		; rnd up and add 1 more delay to ar0
+	sach	indx,1			; indx = maxDelay*(0.5(control+1))+1
+	mar	*0-			; ar0 = bufStart - indx
+	apl	ar0			; get lowest k-1 bits
+	opl	#$addr(buf),ar0		; ar0 = loc in buffer of element
+	bldd	*,#$addr(output)	; output element
+	}
+
 	setup {
-		buf.resize(int(maxDelay)+1);
+		size = 1;
+		if (int(maxDelay) < 0) Error::abortRun(*this,
+			"Delay can not be negative!!");
+//the C50 does not support modulo addressing so the easiest 
+//way of implementing this star is using a buffer of size 2^k
+//even though this wastes memory.
+		for (int i = 0; i<16; i++) {
+			if (size >= int(maxDelay)) break;
+			size = size<<1;
+		};
+		buf.resize(size);
 	}		
 	initCode {
 		addCode(block);
 	}
 	go {
-		addCode(std);
+		addCode(std());
 	}		
 
 	execTime { 
-		 return 19;
+		 return 23;
 	}
 }

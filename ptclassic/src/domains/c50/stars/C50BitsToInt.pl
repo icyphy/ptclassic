@@ -38,36 +38,36 @@ output integer will always be non-negative.
 	noInternalState();
     }
     setup {
-	if (int(nBits) > 23) {
-	    Error::abortRun(*this,"nBits needs to be less than 23");
+	if (int(nBits) > 15) {
+	    Error::abortRun(*this,"nBits needs to be less than 15");
 	    return;
 	}
 	input.setSDFParams(int(nBits),int(nBits)-1);
     }
-    codeblock(readNwrite) {
-	lar	ar0,#$addr(input)
+    codeblock(readNwrite,"") {
+	lar	ar3,#$addr(input)
 	lacl	#@(nBits-1)
 	samm	brcr		; seup block counter reg.
 	zap
 	samm	arcr		; setup compare reg
 	lar	ar1,#$addr(output)
-	mar	*,ar0
-	rpt	$label(compress)
+	mar	*,ar3
+	rptb	$label(compress)
 	lar	ar2,*+,ar2
 	cmpr	3		; check that input != 0
 	sfl			; shift acc left 1 bit
 	xc	1,TC		
 	add	#01h		; add 1 to acc if input!=0
 $label(compress)
-	mar	*,ar0
+	mar	*,ar3
 	mar	*,ar1
 	sacl	*
 	lacc	*,@(16-nBits)
-	sach	*,0
+	sacl	*,0
 	}
 
     go {
-	addCode(readNwrite);
+	addCode(readNwrite());
     }
     exectime {
 	return int(nBits)*6 + 12;

@@ -11,7 +11,7 @@ Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-	}
+	}	
 	location { C50 main library }
 	input {
 		name {upper}
@@ -31,16 +31,23 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 
 	codeblock(order) {
-	lar	ar0,#0012h		; lesser -> ar0 -> ar2
-	mar	*,ar0			; arp =0
-	bldd	#$addr(upper),*+	; ar2 = upper; ar0->ar2
-	bldd	#$addr(lower),*		; ar3 = lower; ar0 -> ar3
-	lamm	ar2			; acc = ar2 = upper
-	sub	*			; acc -= ar3 = lower
-	lar	ar1,#0012h		; greater -> ar1 -> ar2 
-	xc	2,LT			; if upper > lower 
-	mar	*-,ar1			; xchange ar0, ar1
-	mar	*+			; arp = 1
+	lar	ar0,#0012h		
+	setc	ovm			
+	mar	*,ar0			
+	bldd	#$addr(upper),*+	
+	bldd	#$addr(lower),*-
+	lacc	*+,16		
+	sub	*,16,ar1
+	lar	ar1,#0012h		
+* there's a bug in the dsk debugger because the following inst.
+* produces the wrong result.
+*	xc	2,LT			
+* to work around it, replace inst. with two consecutive
+* xc 1,LT instructions
+	xc	1,LT
+	mar	*+,ar0			
+	xc	1,LT
+	mar	*-,ar1	
 	bldd	*,#$addr(greater),ar0
 	bldd	*,#$addr(lesser)
 	}

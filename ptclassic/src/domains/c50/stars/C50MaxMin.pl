@@ -65,31 +65,28 @@ Also, the index of the output is provided (count starts at 0).
 
 
 	codeblock(compare,"" ){
-	lar	ar0,#$addr(input)
+	lar	ar0,#$addr(input,@(int(N)-1))
 	mar	*,ar0
 	ldp	#00h
-	splk	#@(int(N)-1),brcr
-	lacc	*+,16
+	lar	ar1,#@(int(N)-1)
+	splk	#@(int(N)-2),brcr
+	lacc	*-,16
 	sacb	
+	lacc	*-,16
 	rptb	$starSymbol(lp)
-	lacc	*+,16
 	.if	@(int(MAX))
 	crgt
 	.else
 	crlt
 	.endif
-	nop
-	xc	1,TC
+	lacc	*-,16
+	xc	1,C
 $starSymbol(lp)
-	lph	ar0
+	lar	ar1,brcr
 	}
 
 	codeblock(outIndex){
-	pac
-	sub	#0001,0
-	sub	#$addr(input),16
-	lar	ar0,#$addr(output)
-	sach	*,0
+	smmr	ar1,#$addr(index)
 	}
 	
 	codeblock(out){
@@ -99,31 +96,33 @@ $starSymbol(lp)
 	}
 
 	codeblock(compareMag,""){
-	lar	ar0,#$addr(input)
+	lar	ar0,#$addr(input,@(int(N)-1))
 	mar	*,ar0
 	ldp	#00h
-	splk	#@(int(N)-1),brcr
-	lacc	*+,16
+	lar	ar1,#@(int(N)-1)
+	splk	#@(int(N)-2),brcr
+	lacc	*-,16
 	abs
 	sacb	
-	rptb	$starSymbol(lp)
-	lacc	*+,16
+	lacc	*-,16
 	abs
+	rptb	$starSymbol(lp)
 	.if	@(int(MAX))
 	crgt
 	.else
 	crlt
 	.endif
-	nop
-	xc	1,TC
+	lacc	*-,16
+	abs
+	xc	1,C
 $starSymbol(lp)
-	lph	ar0
+	lar	ar1,brcr
 	}
 
 	codeblock(outMag){
 	exar
 	abs
-	lar	ar0,#$addr(output0
+	lar	ar0,#$addr(output)
 	sach	*,0
 	}
 
@@ -154,11 +153,12 @@ $starSymbol(lp)
 				addCode(compare());
 			}
 			addCode(outIndex);
-			if (int(outputMagnitude))
+			if (int(outputMagnitude)){
 				addCode(outMag);
-			addCode(out);				
-		}
-		else{
+			} else {
+				addCode(out);
+			}				
+		}else{
 			if (int(outputMagnitude)) 
 				addCode(oneMag);
 			else
@@ -174,11 +174,20 @@ $starSymbol(lp)
 			if (int(outputMagnitude)) time += 5;
 			return time;
 		}
-		if (int(compareMagnitude)) time += 8 + 6*int(N);
-		else time += 7 + 5*int(N);
+		if (int(compareMagnitude)) time += 11 + 5*(int(N)-1);
+		else time += 9 + 4*(int(N)-1);
 		if (int(outputMagnitude)) time += 4;
 		else  time += 3;
 		time += 5;
 		return time;
  	}
-}
+    }
+
+
+
+
+
+
+
+
+

@@ -52,17 +52,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	
 	protected{
 		int n;
-		int inSize;
-	}
-
-	setup {
-		n = output.numberPorts();
-		ptrarray.resize(n);
+		int iter;
 	}
 
 	initCode{
 	  StringList ptrInit;
-	  ptrInit << "\tds   $addr(ptrarray)\n";
+	  ptrInit << "\t.ds   $addr(ptrarray)\n";
 	  for (int i=1; i<= n; i++){
 	    ptrInit<<"\t.word  $addr(output#";
 	    ptrInit<<i;
@@ -82,58 +77,78 @@ limitation of liability, and disclaimer of warranty provisions.
 	splk	#$addr(ptrarray),cbsr1	; load circ buff addr.
 	splk	#$addr(ptrarray,@(n-1)),cber1
 	splk	#0009h,cbcr		; enable circ buff 1 with ar1
-	zap				; clear acc & p
 	}
 	
-	codeblock(moveInput,"int iter"){
+	codeblock(moveInput,""){
 	.if	@iter
-	lacl	*+,ar0
+	lacl	*+,0,ar0
 	samm	bmar
 	rpt	#@iter
 	bldd	*+,bmar
 	mar	*,ar1
 	.else
-	lacl	*+,ar0
+	lacl	*+,0,ar0
 	samm	ar2			
-	lacl	*,ar2
-	sacl	*,ar1
+	lacl	*,0,ar2
+	sacl	*,0,ar1
 	.endif		
 	}
 	
-	codeblock(moveZero,"int iter"){
+	codeblock(moveZero,""){
 	.if	@iter
-	lacl	*+,ar2
+	lacl	*+,0,ar2
 	samm	ar2
 	rpt	#@iter
-	sph	*+	
+	sach	*+,0	
 	mar	*,ar1
 	.else
-	lacl	*+,ar2
+	lacl	*+,0,ar2
 	samm	ar2
-	sph	*,ar1
+	sach	*,0,ar1
 	.endif
 	}
 
 	codeblock(restore){
-	splk	#0000h,cbcr		
+	splk	#0000h,cbcr	; deactivate circ. buffer addressing	
 	}
 
-	go {
-		int iter = (input.bufSize())*(int(blockSize));
-		if (input.resolvedType() == COMPLEX){
-			iter = 2*iter;
+	method {
+		name { computeIterations }
+		type { " void " }
+		arglist { "()" }
+		access { protected }
+		code {
+			iter = int(blockSize);
+			if (input.resolvedType() == COMPLEX ){
+				iter = 2*iter;
+			};
+			iter --;
 		}
-		iter--;
+	}
+
+	setup {
+		n = output.numberPorts();
+		ptrarray.resize(n);
+		int portsize = int(blockSize);
+		input.setSDFParams(portsize, portsize-1);
+		output.setSDFParams(portsize, portsize-1);
+		computeIterations();
+	}
+
+
+	go {
 		addCode(loadAddress());
-		addCode(moveInput(iter));
-		for (int i = 1; i<n; i++) addCode(moveZero(iter));
+		addCode(moveInput());
+		for (int i = 1; i<n; i++) addCode(moveZero());
 		addCode(restore);
 	}
+
 	exectime{
 		int time = 10;
-		if (int(blockSize) == 1) time+= (3*n + 1);
-		else{ 
-			time+= n*(int(blockSize)+4);
+		if ( iter ) {
+			time+= n*(8 + iter);
+		} else{ 
+			time+= n*3 + 1;
 		}
 		return time;
 	}

@@ -49,27 +49,27 @@ limitation of liability, and disclaimer of warranty provisions.
 	sach	*+,0,ar0			; store real result;ar1->im(out)
 	lacc	*,16,ar2			; acc = imm(pos)
 	sub	*,16,ar1			; acc =imm(pos)-imm(neg1)
-	sach	*,0,r0				; store imaginary result
+	sach	*,0,ar0				; store imaginary result
 	}
 
 
 //subOdd assumes that imaginary part of prev. result is stored in 
 //acc and that arp -> ar0; ar0->im(inj); ar1->im(po)
 	codeblock(subOdd,"int j"){
-	lar	ar0,#$addr(neg#@j,1)		; ar0 -> imm(inj)
-	sub	*-,16,ar1			;acc=imm(po)-imm(inj); ar0->re(inj)
-	sach	*-,0,ar1			;im(out) = acc; ar1->re(po)
-	lacc	*,16,ar0			;acc = re(po)
-	sub	*,16,ar0			;acc = re(po)-re(inj); ar0->re(inj), ar1->re(po)
+	lar	ar0,#$addr(neg#@j,1)	    ; ar0 -> imm(inj)
+	sub	*-,16,ar1		    ;acc=imm(po)-imm(inj); ar0->re(inj)
+	sach	*-,0,ar1		    ;im(out) = acc; ar1->re(po)
+	lacc	*,16,ar0		    ;acc = re(po)
+	sub	*,16,ar0       ;acc = re(po)-re(inj); ar0->re(inj), ar1->re(po)
 	}
 //subEven assumes that real part of prev result is stored in acc
 // and that arp-> ar0; 
 	codeblock(subEven,"int j"){
-	lar	ar0,#$addr(neg#@j,0)		;ar0->re(inj)		
-	sub	*+,16,ar1			;acc = re(po)-re(inj); ar0->im(inj)
-	sach	*+,0,ar1			;re(out) = acc; ar1->im(po)
-	lacc	*,16,ar0			;acc = im(po)
-	sub	*,16,ar0			;acc = im(po) - im(inj); ar0->im(inj); ar1->im(po)
+	lar	ar0,#$addr(neg#@j,0)	    ;ar0->re(inj)		
+	sub	*+,16,ar1		    ;acc = re(po)-re(inj); ar0->im(inj)
+	sach	*+,0,ar1		    ;re(out) = acc; ar1->im(po)
+	lacc	*,16,ar0		    ;acc = im(po)
+	sub	*,16,ar0     ;acc = im(po) - im(inj); ar0->im(inj); ar1->im(po)
 	}
 
 	codeblock(subEnd){

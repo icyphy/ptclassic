@@ -47,7 +47,7 @@ The inputs are multiplied and the result is written on the output.
 	ltp	*,ar1			; acc = p, treg0 = imm1
 	mpy	*,ar2			; p = re2*imm1
 	apac				; acc += p
-	sach	*-,1			; output imaginary part of prod.; ar2->re(prod)
+	sach	*-,1		; output imaginary part of prod.; ar2->re(prod)
     }
 
     codeblock(cbMoreThanTwo,"int j"){
@@ -59,7 +59,7 @@ The inputs are multiplied and the result is written on the output.
 	mpy	*,ar2			; p =imm(po)*imm(inj),ar0->imm(inj)
 	lts	*			; acc -= p, treg0 = re(po)
 	sach	*+,1,ar0		; store real, ar2->imm(po)
-	mpy	*-,ar2			; p =re(po)*imm(inj),ar0->re(inj)	
+	mpy	*-,ar2		        ; p =re(po)*imm(inj),ar0->re(inj) 
 	ltp	*,ar0			; acc = p, treg0=imm(po)
 	mpy	*,ar2			; p = imm(po)*re(inj)
 	apac				; acc += p
