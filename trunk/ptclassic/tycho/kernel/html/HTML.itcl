@@ -509,7 +509,7 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
 
 	# Use isRelative, not 'file pathtype' so that we handle paths
 	# that start with ~ and $.
-	if {[::tycho::isRelative $filename] != "absolute"} {
+	if [::tycho::isRelative $filename] {
             set filename [format "%s/%s" [file dirname $file] $filename]
         }
         set filename [::tycho::expandPath $filename]
