@@ -62,13 +62,12 @@ of \fIthresholds\fR.
 ; Register usage
 ; r0 = pointer into the array of thresholds
 ; r4 = pointer into the array of threshold levels
-; r5 = address of the array of threshold levels (used by QuantIdx star)
 ; a = current threshold
 ; b = current threshold level
 ; x0 = input value
-        move    #>$addr(levels),r4
         move    #<$addr(thresholds),r0
-        move    r4,r5		$ref(input),x0
+        move    #>$addr(levels),r4
+	move	$ref(input),x0		; read input (and let r4 settle)
         move    x:(r0)+,a	y:(r4)+,b
         do      #$val(X)-1,$label(lab)		; begin loop
         cmp	x0,a
@@ -120,6 +119,6 @@ $label(term)
 	}
 	exectime {
 		if ( thresholds.size() == 1 ) return 6;
-	        return 12 + 4*int(thresholds.size());
+	        return 13 + 4*int(thresholds.size());
 	}
 }
