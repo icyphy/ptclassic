@@ -81,18 +81,24 @@ class ::tycho::Frame {
     ###################################################################
     ####                         protected variables               ####
 
+    # Components of the picture
     common lit
     common notlit
     common shaded
     common notshaded
     common surface
 
-    common colorObject
+    # The object used to get shades of color
+    common colorShadesObject
+
+    # The "shape" of pictures of this class
+    common shape "rectangle"
 
     #### Set option defaults
     set optiondefault(-color)       background
     set optiondefault(-borderwidth) 2
     set optiondefault(-relief)      raised
+
 }
 
 
@@ -151,11 +157,11 @@ body ::tycho::Frame::borderwidth {id canvas bw} {
 #
 body ::tycho::Frame::color {id canvas co} {
     set color($id) $co
-    set colorObject($id) [::tycho::Shades::new $color($id)]
+    set colorShadesObject($id) [::tycho::Shades::new $color($id)]
 
     # FIXME: quick and dirty
     relief $id $canvas $relief($id)
-    $canvas itemconfigure $surface($id) -fill [$colorObject($id) matt]
+    $canvas itemconfigure $surface($id) -fill [$colorShadesObject($id) matt]
 }
 
 
@@ -169,7 +175,7 @@ body ::tycho::Frame::construct {id tags canvas x0 y0 x1 y1 args} {
     }
 
     # This object is used to get the shades of color
-    set colorObject($id) [::tycho::Shades::new $color($id)]
+    set colorShadesObject($id) [::tycho::Shades::new $color($id)]
  
 
     # Create the primary component for the outline coordinates.
@@ -196,15 +202,15 @@ body ::tycho::Frame::construct {id tags canvas x0 y0 x1 y1 args} {
 
     set lit($id) [$canvas create polygon \
  	    $x0 $y1 $x0 $y0 $x1 $y0 $a1 $b0 $a0 $b0 $a0 $b1 \
- 	    -fill [$colorObject($id) light] -tags $tags]
+ 	    -fill [$colorShadesObject($id) light] -tags $tags]
 
     set shaded($id) [$canvas create polygon \
  	    $x0 $y1 $x1 $y1 $x1 $y0 $a1 $b0 $a1 $b1 $a0 $b1 \
- 	    -fill [$colorObject($id) dark] -tags $tags]
+ 	    -fill [$colorShadesObject($id) dark] -tags $tags]
 
     set surface($id) [$canvas create rectangle \
  	    $a0 $b0 $a1 $b1 \
- 	    -fill [$colorObject($id) matt] \
+ 	    -fill [$colorShadesObject($id) matt] \
  	    -outline {} -tags $tags]
 
     if { $relief($id) != "raised" } {
@@ -287,12 +293,12 @@ body ::tycho::Frame::relief {id canvas re} {
 
     if { $relief($id) == "ridge" || $relief($id) == "groove" } {
 	
-	set light [$colorObject($id) light]
-	set dark  [$colorObject($id) dark]
+	set light [$colorShadesObject($id) light]
+	set dark  [$colorShadesObject($id) dark]
 
 	if { $relief($id) == "groove" } {
 	    set light $dark
-	    set dark [$colorObject($id) light]
+	    set dark [$colorShadesObject($id) light]
 	}
 
 	# Change the color of the lit and shaded components
@@ -333,14 +339,14 @@ body ::tycho::Frame::relief {id canvas re} {
 	    $canvas itemconfigure $notlit($id) -fill $dark
 	}
     } else {
-	set light [$colorObject($id) light]
-	set dark  [$colorObject($id) dark]
+	set light [$colorShadesObject($id) light]
+	set dark  [$colorShadesObject($id) dark]
 
 	if { $relief($id) == "sunken" } {
 	    set light $dark
-	    set dark [$colorObject($id) light]
+	    set dark [$colorShadesObject($id) light]
 	} elseif { $relief($id) == "flat" } {
-	    set light [$colorObject($id) matt]
+	    set light [$colorShadesObject($id) matt]
 	    set dark $light
 	}
 
