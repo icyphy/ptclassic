@@ -16,7 +16,7 @@ $Id$
 
 #include "type.h"
 #include "DEConnect.h"
-#include "Block.h"
+#include "Particle.h"
 #include "Output.h"
 #include "Star.h"
 
