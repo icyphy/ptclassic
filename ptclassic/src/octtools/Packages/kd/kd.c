@@ -45,8 +45,15 @@ static char SccsId[]="$Id$";
 #include "errtrap.h"
 #include "utility.h"
 
+#ifndef MAXINT
+/* Needed for linux */
 #define MAXINT	2147483647
+#endif
+
+#ifndef MININT
+/* Needed for linux */
 #define MININT	-2147483647
+#endif
 
 #ifndef MIN
 #define MIN(a, b)	((a) < (b) ? (a) : (b))
