@@ -13,11 +13,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { HOF main library }
 	desc {
 Create one or more instances of the named block connected in a chain.
-This is implemented by replacing the Chain star with instances of
-the named blocks at setup time.  The replacement block(s) are connected
-as specified by "input_map", "internal_map", and "output_map".
-Their parameters are determined by "parameter_map".
-If "pipeline" is YES then a unit delay is put on all internal connections.
+This is implemented by replacing the
+.c Chain
+star with instances of the named blocks at setup time.
+The replacement block(s) are connected as specified by
+\fIinput_map\fR, \fIinternal_map\fR, and \fIoutput_map\fR.
+Their parameters are determined by \fIparameter_map\fR.
+If \fIpipeline\fR is YES then a unit delay is put on all internal connections.
 	}
 	explanation {
 This star is a higher-order function mechanism.
@@ -27,13 +29,13 @@ See the
 documentation for background information.
 .UH "Number of replacement blocks"
 .pp
-The star is replaced by one or more instances of the block with
-name given by \fIblockname\fR at setup time, before the scheduler is invoked.
-The number of instances of the replacement block
-is given by the \fIchain_length\fR parameter.
-If the named block is not on the knownlist (e.g., it is not a built-in
-block), then the where_defined parameter is taken to be the full
-path and filename of facet that should be compiled to define the block.
+The star is replaced by one or more instances of the block with name
+given by \fIblockname\fR at setup time, before the scheduler is invoked.
+The number of instances of the replacement block is given by the
+\fIchain_length\fR parameter.
+If the named block is not on the knownlist (e.g., it is not a built-in block),
+then the \fIwhere_defined\fR parameter is taken to be the full path name and
+filename of facet that should be compiled to define the block.
 This path name may (and probably should) begin with the environment
 .EQ
 delim off
@@ -44,20 +46,20 @@ delim $$
 .EN
 .UH "Connections"
 .pp
-The input and output connections specified by \fIinput_map\fR
-and \fIoutput_map\fR are made to the first and last blocks in
-the chain.
-The internal connections are made as specified by the
-\fIinternal_map\fR parameter.
-This parameter should consist of an alternating list of
-output names and input names for the replacement block.
-As with
-.c Map ,
-if inputs or outputs are multiple, repeated names can be used.
+The input and output connections specified by \fIinput_map\fR and
+\fIoutput_map\fR are made to the first and last blocks in the chain.
+The internal connections are made as specified by the \fIinternal_map\fR
+parameter.
+This parameter should consist of an alternating list of output names and
+input names for the replacement block.
+As with the
+.c Map
+star, if inputs or outputs are multiple, repeated names can be used.
 .UH "Setting parameter values"
 .pp
 The \fIparameter_map\fR parameter can be used to set parameter values
-for the replacement blocks.  The syntax is the same as in the
+for the replacement blocks.
+The syntax is the same as in the
 .c Map
 star.
 .UH "A note about data types"

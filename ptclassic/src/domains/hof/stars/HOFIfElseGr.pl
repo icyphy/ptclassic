@@ -4,8 +4,9 @@ defstar {
 	derivedFrom { IfElse }
 	desc {
 A variant of the IfElse star where the two possible replacement
-blocks are specified by graphically rather than textually.  There must
-be exactly two blocks connected in the positions of the replacement blocks.
+blocks are specified by graphically rather than textually.
+There must be exactly two blocks connected in the positions of the
+replacement blocks.
 The HOFNop stars are the only exception: they may be used in addition to the
 two replacement blocks in order to control the order of connection.
 	}

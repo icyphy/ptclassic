@@ -4,9 +4,11 @@ defstar {
 	derivedFrom { MapGr }
 	desc {
 Create one or more instances of the named block to produce the
-required number of output stream(s).  This is implemented by replacing
-the SrcGr_M star with the named block at setup time.  The replacement
-block(s) are connected as illustrated by the example block that is connected.
+required number of output stream(s).
+This is implemented by replacing the SrcGr_M star with the named
+block at setup time.
+The replacement block(s) are connected as illustrated by the example
+block that is connected.
 Their parameters are determined by "parameter_map".
 	}
 	version { $Id$ }
@@ -19,10 +21,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { HOF main library }
 	explanation {
-See the explanation for MapGr star, from which this is derived.
+See the explanation for the
+.c MapGr
+star, from which this is derived.
 The only difference is that this star forces the number of inputs to zero
-and output datatype to float matrix.  It also hides the input ports and the
-\fIinput_map\fR parameter.
+and output datatype to float matrix.
+It also hides the input ports and the \fIinput_map\fR parameter.
 .Sr "MapGr"
 	}
 	ccinclude { "Matrix.h" } 

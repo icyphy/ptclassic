@@ -10,13 +10,13 @@ It is also used to break out multi-inputs
 and multi-outputs into individual ports.
 	}
 	explanation {
-Normally, the number of input connections must equal the
-number of output connections.  But, a special feature of
-this star supports a particularly convenient graphical
-programming device.  If either the input or the output
-is connected to a multi-porthole on the far side, but there
-too few connections that have been realized, then the star
-will increase the number of connections automatically
+Normally, the number of input connections must equal the number of
+output connections.
+But, a special feature of this star supports a particularly convenient
+graphical programming device.
+If either the input or the output is connected to a multi-porthole on
+the far side, but there too few connections that have been realized,
+then the star will increase the number of connections automatically
 to the correct number.
 	}
 	version {$Id$}

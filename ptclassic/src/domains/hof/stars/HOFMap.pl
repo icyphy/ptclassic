@@ -13,11 +13,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { HOF library }
 	desc {
 Map one or more instances of the named block to the input stream(s)
-to produce the output stream(s).  This is implemented by replacing
-the Map star with the named block at setup time.  The replacement
-block(s) are connected as specified by "input_map" and "output_map",
-using the existing connections to the Map star.  Their parameters
-are determined by "parameter_map".
+to produce the output stream(s).
+This is implemented by replacing the Map star with the named block at
+setup time.
+The replacement block(s) are connected as specified by "input_map"
+and "output_map", using the existing connections to the Map star.
+Their parameters are determined by "parameter_map".
 	}
 	explanation {
 See the documentation for the
@@ -29,23 +30,30 @@ name given by \fIblockname\fR at setup time, before the scheduler is invoked.
 .pp
 The number of instances of the replacement block
 is determined by the number of input or
-output connections that have been made to the Map star.  Suppose the
-Map star has $M sub I$ inputs and $M sub O$ outputs connected to it.
+output connections that have been made to the
+.c Map
+star.
+Suppose the
+.c Map
+star has $M sub I$ inputs and $M sub O$ outputs connected to it.
 Suppose further that the replacement block has $B sub I$ input
-ports and $B sub O$ output ports.  Then
+ports and $B sub O$ output ports.
+Then
 .EQ
 N ~=~ {M sub I} over {B sub I} ~=~ {M sub O} over {B sub O}
 .EN
-is the number of instances that will be created.  It is
-an error for this second equality not to be satisfied.
+is the number of instances that will be created.
+It is an error for this second equality not to be satisfied.
 .UH "How the inputs and outputs are connected"
 .pp
-The first $B sub I$ connections to the Map star will be
-connected to the inputs of the first instance of the replacement blocks.
+The first $B sub I$ connections to the
+.c Map
+star will be connected to the inputs of the first instance of the
+replacement blocks.
 The names of the inputs to the replacement block should be listed
 in the \fIinput_map\fR parameter in the order in which they should
-be connected.  There should be exactly $B sub I$ names in the
-\fIinput_map\fR list.
+be connected.
+There should be exactly $B sub I$ names in the \fIinput_map\fR list.
 The next $B sub I$ connections will be connected to the next
 replacement block, again using the ordering specified in \fIinput_map\fR.
 Similarly for the outputs.
@@ -68,15 +76,17 @@ If we want three inputs in each replacement block, then
 .pp
 In this star, the output data type is ANYTYPE, and the type
 will be derived from the type of the input(s).
-This creates a problem when there are no inputs.  Thus, the zero-input
-version of this star is implemented as a family of derived stars called
-.c ParSources,
-each with a particular type of output.
+This creates a problem when there are no inputs.
+Thus, the zero-input version of this star is implemented as a
+family of derived stars called
+.c ParSource
+stars, each with a particular type of output.
 There are other problems as well with this mechanism, in that
 when type resolution is done, before the block substitution occurs,
 there is no information about the substitution block.
-It is best, therefore, when using the Map star, to make all type
-conversions explicit.
+It is best, therefore, when using the
+.c Map
+star, to make all type conversions explicit.
 .UH "Bugs"
 .pp
 Repeated names in the \fIinput_map\fR or \fIoutput_map\fR
