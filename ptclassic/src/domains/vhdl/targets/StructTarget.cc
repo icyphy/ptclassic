@@ -40,12 +40,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLStar.h"
 #include "VHDLState.h"
 #include "KnownTarget.h"
-#include <ostream.h>
 
 // constructor
 StructTarget :: StructTarget(const char* name,const char* starclass,
 			 const char* desc) :
 VHDLTarget(name,starclass,desc) {
+  regsUsed = 0;
+
   // Add additional codeStreams.
   addCodeStreams();
 
@@ -72,10 +73,7 @@ void StructTarget :: addCodeStreams() {
   addStream("architecture_body_closer", &architecture_body_closer);
   addStream("starDecls", &starDecls);
   addStream("starInit", &starInit);
-//  addStream("firingVarDecls", &firingVarDecls);
-//  addStream("firingPreAction", &firingPreAction);
   addStream("firingAction", &firingAction);
-//  addStream("firingPostAction", &firingPostAction);
 }
 
 // Initialize codeStreams.
@@ -88,16 +86,19 @@ void StructTarget :: initCodeStreams() {
   architecture_body_closer.initialize();
   starDecls.initialize();
   starInit.initialize();
-//  firingVarDecls.initialize();
-//  firingPreAction.initialize();
   firingAction.initialize();
-//  firingPostAction.initialize();
 }
 
 // Setup the target.
 void StructTarget :: setup() {
-	if (galaxy()) setStarIndices(*galaxy()); 
-	HLLTarget::setup();
+  int worm = 0;
+  if (galaxy()->isItWormhole()) {
+    // Currently this is not doing anything:
+    Error::warn("This galaxy is a wormhole!");
+    worm = 1;
+  }
+  if (galaxy()) setStarIndices(*galaxy()); 
+  HLLTarget::setup();
 }
 
 // Main routine.
@@ -128,11 +129,11 @@ int StructTarget :: runIt(VHDLStar* s) {
   myCode << targetNestedSymbol.get();
   myCode << " is\n";
 
+  // Add in port refs here from firingPortList.
   if (firingPortList.head()) {
     level++;
     myCode << indent(level);
     myCode << "port(\n";
-    // Add in port refs here from firingPortList.
     VHDLPortListIter nextPort(firingPortList);
     VHDLPort* nport;
     int portCount = 0;
@@ -157,11 +158,11 @@ int StructTarget :: runIt(VHDLStar* s) {
     level--;
   }
   
+  // Add in generic refs here from firingGenericList.
   if (firingGenericList.head()) {
     level++;
     myCode << indent(level);
     myCode << "generic(\n";
-    // Add in generic refs here from firingGenericList.
     VHDLGenericListIter nextGeneric(firingGenericList);
     VHDLGeneric* ngen;
     int genCount = 0;
@@ -203,6 +204,34 @@ int StructTarget :: runIt(VHDLStar* s) {
   myCode << "begin\n";
   myCode << "process\n";
 
+  // Add in sensitivity list of input ports.
+  // Do this explicitly for sake of synthesis.
+  if (firingPortList.head()) {
+    level++;
+    myCode << indent(level);
+    myCode << "(\n";
+    VHDLPortListIter nextPort(firingPortList);
+    VHDLPort* nport;
+    int portCount = 0;
+    while ((nport = nextPort++) != 0) {
+      if (!strcmp(nport->direction,"IN")) {
+	if (portCount) {
+	  myCode << ",";
+	  myCode << "\n";
+	}
+	level++;
+	myCode << indent(level);
+	myCode << nport->name;
+	portCount++;
+	level--;
+      }
+    }
+    myCode << "\n";
+    myCode << indent(level);
+    myCode << ")\n";
+    level--;
+  }
+  
   // Add in variable refs here from firingVariableList.
   VHDLVariableListIter nextVar(firingVariableList);
   VHDLVariable* nvar;
@@ -223,9 +252,6 @@ int StructTarget :: runIt(VHDLStar* s) {
 
   myCode << "begin\n";
 
-  // process pre-action
-//  myCode << firingPreAction;
-//  firingPreAction.initialize();
   // Add in port to variable transfers here from firingPortVarList.
   VHDLPortVarListIter nextPortVar(firingPortVarList);
   VHDLPortVar* nPortVar;
@@ -240,9 +266,6 @@ int StructTarget :: runIt(VHDLStar* s) {
   myCode << firingAction;
   firingAction.initialize();
 
-  // process post-action
-//  myCode << firingPostAction;
-//  firingPostAction.initialize();
   // Add in variable to port transfers here from firingVarPortList.
   VHDLPortVarListIter nextVarPort(firingVarPortList);
   VHDLPortVar* nVarPort;
@@ -272,6 +295,7 @@ int StructTarget :: runIt(VHDLStar* s) {
   registerSignalList(signalList);
   registerCompMap(label, name, portMapList, genMapList);
 
+  // Vestigial code - see original for reasoning behind this, then change it.
   if (!status) {
     return status;
   }
@@ -281,12 +305,44 @@ int StructTarget :: runIt(VHDLStar* s) {
   return status;
 }
 
-// Initial stage of code generation.
+// Initial stage of code generation (done first).
 void StructTarget :: headerCode() {
+}
+
+// Trailer code (done last).
+void StructTarget :: trailerCode() {
+  int level = 0;
   // Generate the entity_declaration.
   entity_declaration << "entity ";
   entity_declaration << galaxy()->name();
   entity_declaration << " is\n";
+  if (systemPortList.head()) {
+    level++;
+    entity_declaration << indent(level);
+    entity_declaration << "port(\n";
+    VHDLPortListIter nextPort(systemPortList);
+    VHDLPort* nport;
+    int portCount = 0;
+    while ((nport = nextPort++) != 0) {
+      if (portCount) {
+	entity_declaration << ";";
+	entity_declaration << "\n";
+      }
+      level ++;
+      entity_declaration << indent(level);
+      entity_declaration << nport->name;
+      entity_declaration << ": ";
+      entity_declaration << nport->direction;
+      entity_declaration << " ";
+      entity_declaration << nport->type;
+      portCount++;
+      level--;
+    }
+    entity_declaration << "\n";
+    entity_declaration << indent(level);
+    entity_declaration << ");\n";
+    level--;
+  }
   entity_declaration << "end ";
   entity_declaration << galaxy()->name();
   entity_declaration << ";\n";
@@ -297,11 +353,7 @@ void StructTarget :: headerCode() {
   architecture_body_opener << " of ";
   architecture_body_opener << galaxy()->name();
   architecture_body_opener << " is\n";
-}
 
-// Trailer code.
-void StructTarget :: trailerCode() {
-  int level = 0;
   // Add in component declarations here from compDeclList.
   VHDLCompDeclListIter nextCompDecl(compDeclList);
   VHDLCompDecl* compDecl;
@@ -312,6 +364,7 @@ void StructTarget :: trailerCode() {
     component_declarations << compDecl->name;
     component_declarations << "\n";
 
+    // Add in port refs here from portList.
     if (!(compDecl->portList->head())) {
       Error::error("Empty compDecl port list!");
     }
@@ -319,16 +372,15 @@ void StructTarget :: trailerCode() {
       level++;
       component_declarations << indent(level);
       component_declarations << "port(\n";
-      // Add in port refs here from portList.
       VHDLPortListIter nextPort(*(compDecl->portList));
       VHDLPort* nport;
       int portCount = 0;
       while ((nport = nextPort++) != 0) {
+	level++;
 	if (portCount) {
 	  component_declarations << ";";
 	  component_declarations << "\n";
 	}
-	level++;
 	component_declarations << indent(level);
 	component_declarations << nport->name;
 	component_declarations << ": ";
@@ -344,20 +396,20 @@ void StructTarget :: trailerCode() {
       level--;
     }
     
+    // Add in generic refs here from genList.
     if (compDecl->genList->head()) {
       level++;
       component_declarations << indent(level);
       component_declarations << "generic(\n";
-      // Add in generic refs here from genList.
       VHDLGenericListIter nextGen(*(compDecl->genList));
       VHDLGeneric* ngen;
       int genCount = 0;
       while ((ngen = nextGen++) != 0) {
+	level++;
 	if (genCount) {
 	  component_declarations << ";";
 	  component_declarations << "\n";
 	}
-	level++;
 	component_declarations << indent(level);
 	component_declarations << ngen->name;
 	component_declarations << ": ";
@@ -405,20 +457,20 @@ void StructTarget :: trailerCode() {
     component_mappings << compMap->name;
     component_mappings << "\n";
 
+    // Add in port maps here from portMapList.
     if (compMap->portMapList->head()) {
       level++;
       component_mappings << indent(level);
       component_mappings << "port map(\n";
-      // Add in port maps here from portMapList.
       VHDLPortMapListIter nextPortMap(*(compMap->portMapList));
       VHDLPortMap* nportmap;
       int portCount = 0;
       while ((nportmap = nextPortMap++) != 0) {
+	level++;
 	if (portCount) {
 	  component_mappings << ",";
 	  component_mappings << "\n";
 	}
-	level++;
 	component_mappings << indent(level);
 	component_mappings << nportmap->name;
 	component_mappings << " => ";
@@ -432,20 +484,20 @@ void StructTarget :: trailerCode() {
       level--;
     }
     
+    // Add in generic maps here from genMapList.
     if (compMap->genMapList->head()) {
       level++;
       component_mappings << indent(level);
       component_mappings << "generic map(\n";
-      // Add in generic maps here from genMapList.
       VHDLGenericMapListIter nextGenMap(*(compMap->genMapList));
       VHDLGenericMap* ngenmap;
       int genCount = 0;
       while ((ngenmap = nextGenMap++) != 0) {
+	level++;
 	if (genCount) {
 	  component_mappings << ",";
 	  component_mappings << "\n";
 	}
-	level++;
 	component_mappings << indent(level);
 	component_mappings << ngenmap->name;
 	component_mappings << " => ";
@@ -473,18 +525,36 @@ void StructTarget :: trailerCode() {
 void StructTarget :: frameCode() {
   StringList code = headerComment();
 
-  myCode << "-- entity_declaration\n";
+  if (registers()) {
+    myCode << "
+     -- Reg_INTEGER : register of type INTEGER
+entity Reg_INTEGER is
+	port (C: in boolean; D: in integer; Q: out integer);
+end Reg_INTEGER;
+
+architecture Reg_INTEGER_behavior of Reg_INTEGER is
+begin
+	main: process
+	begin
+		wait until C'event and C = TRUE;
+		Q <= D;
+	end process main;
+end Reg_INTEGER_behavior;
+";
+  }
+  
+  myCode << "\n-- entity_declaration\n";
   myCode << "\n" << entity_declaration;
-  myCode << "-- architecture_body_opener\n";
+  myCode << "\n-- architecture_body_opener\n";
   myCode << "\n" << architecture_body_opener;
-  myCode << "-- component_declarations\n";
+  myCode << "\n-- component_declarations\n";
   myCode << "\n" << component_declarations;
-  myCode << "-- signal_declarations\n";
+  myCode << "\n-- signal_declarations\n";
   myCode << "\n" << signal_declarations;
   myCode << "\n" << "begin";
-  myCode << "-- component_mappings\n";
+  myCode << "\n-- component_mappings\n";
   myCode << "\n" << component_mappings;
-  myCode << "-- architecture_body_closer\n";
+  myCode << "\n-- architecture_body_closer\n";
   myCode << "\n" << architecture_body_closer;
 
   // Prepend the header, declarations, and initialization.
@@ -501,12 +571,12 @@ void StructTarget :: writeCode() {
 
 // Compile the code.
 int StructTarget :: compileCode() {
-  // Do nothing, return nothing.
+  // Do nothing, return nothing - will change this eventually.
 }
 
 // Run the code.
 int StructTarget :: runCode() {
-  // Do nothing, return nothing.
+  // Do nothing, return nothing - will change this eventually.
 }
 
 // Generate a comment.
@@ -523,24 +593,10 @@ StringList StructTarget :: comment(const char* text, const char* b,
 
 // Generate code to begin an iterative procedure
 void StructTarget :: beginIteration(int repetitions, int depth) {
-  myCode << "\n";
-  myCode << indent(depth);
-  if (repetitions == -1)          // iterate infinitely
-    myCode += "while TRUE loop\n";
-  else {
-    myCode << indent(depth)
-	   << "variable " << targetNestedSymbol.push("i") << ": INTEGER;\n";
-    myCode << indent(depth)
-	   << "for " << targetNestedSymbol.pop() << " in 1 to "
-	   << repetitions << " loop\n";
-  }
-  return;
 }
 
 // Generate code to end an iterative procedure
 void StructTarget :: endIteration(int /*reps*/, int depth) {
-    myCode << indent(depth)
-	   << "end loop;     -- end repeat, depth " << depth << "\n";
 }
 
 // Declare PortHole buffer.
@@ -656,7 +712,10 @@ void StructTarget :: registerSignalList(VHDLSignalList* starSignalList) {
 void StructTarget :: registerCompMap(StringList label, StringList name,
 				     VHDLPortMapList* portMapList,
 				     VHDLGenericMapList* genMapList) {
-  if (compMapList.inList(name)) return;
+//  Problem: inList uses name, not label, for generic VHDL objects.
+//  Will just comment this out for now.  If get repeated registrations
+//  of a comp map, will deal with that.
+//  if (compMapList.inList(label)) return;
   
   // Allocate memory for a new VHDLCompMap and put it in the list.
   VHDLCompMap* newCompMap = new VHDLCompMap;
@@ -702,21 +761,38 @@ void StructTarget :: registerTemp(const char* temp, const char* type) {
 }
 
 // Register the State reference.
-void StructTarget :: registerState(State* state, int thisFiring/*=-1*/) {
-
+void StructTarget :: registerState(State* state, int thisFiring/*=-1*/,
+				   int pos/*=-1*/) {
   StringList temp = sanitizedFullName(*state);
   StringList ref = sanitize(temp);
-  StringList root = ref;
+  StringList root;
+  StringList initVal;
+  
+  if (pos >= 0) {
+    ref << "_P" << pos;
+    // WARNING: The following is dangerous unless you know
+    // that state has a big enough array and that pos is valid!
+//    initVal << state[pos].initValue();
+  }
+  else {
+//    initVal << state->initValue();
+  }
+  
+  // Root is ref, without marking for any particular firing.
+  root = ref;
 
   if (thisFiring >= 0) ref << "_" << thisFiring;
 
-  StringList refIn = sanitize(temp);
-  if (thisFiring >= 0) refIn << "_" << thisFiring;
+  StringList refIn = sanitize(ref);
+//  if (thisFiring >= 0) refIn << "_" << thisFiring;
   refIn << "_In";
 
-  StringList refOut = sanitize(temp);
-  if (thisFiring >= 0) refOut << "_" << thisFiring;
+  StringList refOut = sanitize(ref);
+//  if (thisFiring >= 0) refOut << "_" << thisFiring;
   refOut << "_Out";
+
+  StringList reg = sanitize(root);
+  reg << "_Reg";
 
   // look for state in stateList
   // if don't find it, enter it with -1 as state->lastFiring
@@ -743,86 +819,89 @@ void StructTarget :: registerState(State* state, int thisFiring/*=-1*/) {
   
   int isFirstStateRef = (stateLastFiring == -1);
   
-  // If it's the first firing to refer to this state,
-  // make ports for it in & out, leave them open.
-  if (isFirstStateRef) {
-    if (!(firingVariableList.inList(ref))) {
-      // Allocate memory for a new VHDLVariable and put it in the list.
-      VHDLVariable* newVar = new VHDLVariable;
-      newVar->name = ref;
-      newVar->type = stateType(state);
-      newVar->initVal.initialize();
-      firingVariableList.put(*newVar);
+
+  // If this is the first reference to this state in this firing
+  // need to put it in the proper lists and make connections.
+  if (listState->lastFiring != thisFiring) {
+
+    // If it's the first firing to refer to this state,
+    if (isFirstStateRef) {
+      // make regi, map it to IN and OUT
+
+      registerRegister(state);
+      
+      StringList label = reg;
+      StringList name = "Reg";
+      name << "_" << stateType(state);
+      VHDLPortMapList* portMapList = new VHDLPortMapList;
+      VHDLGenericMapList* genMapList = new VHDLGenericMapList;
+      portMapList->initialize();
+      genMapList->initialize();
+      
+      VHDLPortMap* DPortMap = new VHDLPortMap;
+      DPortMap->name = "D";
+      DPortMap->mapping = refOut;
+      portMapList->put(*DPortMap);
+      
+      VHDLPortMap* QPortMap = new VHDLPortMap;
+      QPortMap->name = "Q";
+      QPortMap->mapping = refIn;
+      portMapList->put(*QPortMap);
+      
+      VHDLPortMap* CPortMap = new VHDLPortMap;
+      CPortMap->name = "C";
+      CPortMap->mapping = "clock";
+      portMapList->put(*CPortMap);
+
+      StringList clockRef = "clock";
+      if (!(systemPortList.inList(clockRef))) {
+	// Allocate memory for a new VHDLPort and put it in the list.
+	VHDLPort* newport = new VHDLPort;
+	newport->name = clockRef;
+	newport->direction = "IN";
+	newport->type = "boolean";
+	systemPortList.put(*newport);
+      }
+      
+      registerCompMap(label, name, portMapList, genMapList);
+
+      if (!(firingSignalList.inList(refIn))) {
+	// Allocate memory for a new VHDLSignal and put it in the list.
+	VHDLSignal* newSignal = new VHDLSignal;
+	newSignal->name = refIn;
+	newSignal->type = stateType(state);
+	newSignal->from.initialize();
+	newSignal->to = refIn;
+	firingSignalList.put(*newSignal);
+      }
+
+      if (!(firingPortMapList.inList(refIn))) {
+	// Allocate memory for a new VHDLPortMap and put it in the list.
+	VHDLPortMap* newportMapIn = new VHDLPortMap;
+	newportMapIn->name = refIn;
+	newportMapIn->mapping = refIn;
+	firingPortMapList.put(*newportMapIn);
+      }
+
+      if (!(firingPortMapList.inList(refOut))) {
+	// Allocate memory for a new VHDLPortMap and put it in the list.
+  	VHDLPortMap* newportMapOut = new VHDLPortMap;
+	newportMapOut->name = refOut;
+	newportMapOut->mapping = refOut;
+	firingPortMapList.put(*newportMapOut);
+      }
+
     }
 
-    if (!(firingPortVarList.inList(refIn))) {
-      // Allocate memory for a new VHDLPortVar and put it in the list.
-      VHDLPortVar* portVar = new VHDLPortVar;
-      portVar->name = refIn;
-      portVar->variable = ref;
-      firingPortVarList.put(*portVar);
-    }
+    // If this isn't the first firing to refer to this state,
+    if (!isFirstStateRef) {
+      // re-map input to register with output of this firing's state
 
-    if (!(firingVarPortList.inList(refOut))) {
-      // Allocate memory for a new VHDLPortVar and put it in the list.
-      VHDLPortVar* portVar = new VHDLPortVar;
-      portVar->name = refOut;
-      portVar->variable = ref;
-      firingVarPortList.put(*portVar);
-    }
-
-    if (!(firingPortList.inList(refIn))) {
-      // Allocate memory for a new VHDLPort and put it in the list.
-      VHDLPort* newportIn = new VHDLPort;
-      newportIn->name = refIn;
-      newportIn->direction = "IN";
-      newportIn->type = stateType(state);
-      firingPortList.put(*newportIn);
-    }
-    
-    if (!(firingPortList.inList(refOut))) {
-      // Allocate memory for a new VHDLPort and put it in the list.
-      VHDLPort* newportOut = new VHDLPort;
-      newportOut->name = refOut;
-      newportOut->direction = "OUT";
-      newportOut->type = stateType(state);
-      firingPortList.put(*newportOut);
-    }
-
-    if (!(firingPortMapList.inList(refIn))) {
-      // Allocate memory for a new VHDLPortMap and put it in the list.
-      VHDLPortMap* newportMapIn = new VHDLPortMap;
-      newportMapIn->name = refIn;
-      newportMapIn->mapping.initialize();
-      firingPortMapList.put(*newportMapIn);
-    }
-
-    if (!(firingPortMapList.inList(refOut))) {
-      // Allocate memory for a new VHDLPortMap and put it in the list.
-      VHDLPortMap* newportMapOut = new VHDLPortMap;
-      newportMapOut->name = refOut;
-      newportMapOut->mapping.initialize();
-      firingPortMapList.put(*newportMapOut);
-    }
-  }
-
-  // If this isn't the first firing to refer to this state,
-  // and it's the first time for this firing to refer to the state,
-  // make in & out ports, and connect state's in port to the state's
-  // out port of the last firing to ref the state; leave this firing's
-  // out port open.
-  cout << "pointA\n";
-  if (!isFirstStateRef) {
-  cout << "pointB\n";
-    // If lastFiring different from thisFiring, need to make connection.
-    if (listState->lastFiring != thisFiring) {
-  cout << "pointC\n";
       // Contstruct the name of the last ref to the state.
       StringList stateSignal = root;
       stateSignal << "_" << listState->lastFiring << "_Out";
 
       if (!(firingSignalList.inList(stateSignal))) {
-  cout << "pointD\n";
 	// Allocate memory for a new VHDLSignal and put it in the list.
 	VHDLSignal* newSignal = new VHDLSignal;
 	newSignal->name = stateSignal;
@@ -832,98 +911,138 @@ void StructTarget :: registerState(State* state, int thisFiring/*=-1*/) {
 	firingSignalList.put(*newSignal);
       }
 
-  cout << "pointE\n";
-      // Get the port map from the port map list and map it to this signal.
+      if (!(firingPortMapList.inList(refIn))) {
+	// Allocate memory for a new VHDLPortMap and put it in the list.
+	VHDLPortMap* newportMapIn = new VHDLPortMap;
+	newportMapIn->name = refIn;
+	newportMapIn->mapping = stateSignal;
+	firingPortMapList.put(*newportMapIn);
+      }
+      
+      if (!(firingPortMapList.inList(refOut))) {
+	// Allocate memory for a new VHDLPortMap and put it in the list.
+	VHDLPortMap* newportMapOut = new VHDLPortMap;
+	newportMapOut->name = refOut;
+	newportMapOut->mapping = refOut;
+	firingPortMapList.put(*newportMapOut);
+      }
+
+      // Get the register port map from the port map list and re-map it.
       VHDLCompMapListIter compMapNext(compMapList);
       VHDLCompMap* nCompMap;
       while ((nCompMap = compMapNext++) != 0) {
-  cout << "pointF\n";
-	VHDLPortMapListIter portMapNext(*(nCompMap->portMapList));
-	VHDLPortMap* nPortMap;
-	while ((nPortMap = portMapNext++) != 0) {
-  cout << "pointG\n";
-	  // Check for a match.
-	  StringList nameTemp = nPortMap->name;
-	  StringList stateTemp = stateSignal;
-	  cout << "nameTemp  = " << nameTemp << "\n";
-	  cout << "stateTemp = " << stateTemp << "\n";
-	  cout << "strcmp(,) = " << (!strcmp(nameTemp,stateTemp)) << "\n";
-	  if (!strcmp(nameTemp,stateTemp)) {
-  cout << "pointH\n";
-	    // Found a match.
-	    if ((nPortMap->mapping).numPieces() > 0) {
-	      Error::error("Port map ", nPortMap->name, " already mapped");
+	// Check for a match.
+	StringList nameTemp = nCompMap->label;
+	StringList stateTemp = reg;
+	if (!strcmp(nameTemp,stateTemp)) {
+	  // Found a match.
+	  VHDLPortMapListIter portMapNext(*(nCompMap->portMapList));
+	  VHDLPortMap* nPortMap;
+	  while ((nPortMap = portMapNext++) != 0) {
+	    // Check for a match.
+	    StringList portTemp = nPortMap->name;
+	    StringList DTemp = "D";
+	    if (!strcmp(portTemp,DTemp)) {
+	      // Found a match.
+	      nPortMap->mapping = refOut;
 	    }
-	    nPortMap->mapping = stateSignal;
 	  }
 	}
       }
+    }
 
-  cout << "pointI\n";
+    if (!(firingSignalList.inList(refOut))) {
+      // Allocate memory for a new VHDLSignal and put it in the list.
+      VHDLSignal* newSignal = new VHDLSignal;
+      newSignal->name = refOut;
+      newSignal->type = stateType(state);
+      newSignal->from = refOut;
+      newSignal->to.initialize();
+      firingSignalList.put(*newSignal);
+    }
+
     if (!(firingVariableList.inList(ref))) {
-      // Allocate memory for a new VHDLVariable and put it in the list.
-      VHDLVariable* newVar = new VHDLVariable;
-      newVar->name = ref;
-      newVar->type = stateType(state);
-      newVar->initVal.initialize();
-      firingVariableList.put(*newVar);
-    }
-
-    if (!(firingPortVarList.inList(refIn))) {
-      // Allocate memory for a new VHDLPortVar and put it in the list.
-      VHDLPortVar* portVar = new VHDLPortVar;
-      portVar->name = refIn;
-      portVar->variable = ref;
-      firingPortVarList.put(*portVar);
-    }
-
-    if (!(firingVarPortList.inList(refOut))) {
-      // Allocate memory for a new VHDLPortVar and put it in the list.
-      VHDLPortVar* portVar = new VHDLPortVar;
-      portVar->name = refOut;
-      portVar->variable = ref;
-      firingVarPortList.put(*portVar);
-    }
-
-    if (!(firingPortList.inList(refIn))) {
-      // Allocate memory for a new VHDLPort and put it in the list.
-      VHDLPort* newportIn = new VHDLPort;
-      newportIn->name = refIn;
-      newportIn->direction = "IN";
-      newportIn->type = stateType(state);
-      firingPortList.put(*newportIn);
-    }
-    
-    if (!(firingPortList.inList(refOut))) {
-      // Allocate memory for a new VHDLPort and put it in the list.
-      VHDLPort* newportOut = new VHDLPort;
-      newportOut->name = refOut;
-      newportOut->direction = "OUT";
-      newportOut->type = stateType(state);
-      firingPortList.put(*newportOut);
-    }
-
-    if (!(firingPortMapList.inList(refIn))) {
-      // Allocate memory for a new VHDLPortMap and put it in the list.
-      VHDLPortMap* newportMapIn = new VHDLPortMap;
-      newportMapIn->name = refIn;
-      newportMapIn->mapping = stateSignal;
-      firingPortMapList.put(*newportMapIn);
-    }
-
-    if (!(firingPortMapList.inList(refOut))) {
-      // Allocate memory for a new VHDLPortMap and put it in the list.
-      VHDLPortMap* newportMapOut = new VHDLPortMap;
-      newportMapOut->name = refOut;
-      newportMapOut->mapping.initialize();
-      firingPortMapList.put(*newportMapOut);
-    }
-      
-    }
+    // Allocate memory for a new VHDLVariable and put it in the list.
+    VHDLVariable* newVar = new VHDLVariable;
+    newVar->name = ref;
+    newVar->type = stateType(state);
+    newVar->initVal.initialize();
+    firingVariableList.put(*newVar);
   }
-      
-  // Reset state's lastFiring tag.
+
+  if (!(firingPortVarList.inList(refIn))) {
+    // Allocate memory for a new VHDLPortVar and put it in the list.
+    VHDLPortVar* portVar = new VHDLPortVar;
+    portVar->name = refIn;
+    portVar->variable = ref;
+    firingPortVarList.put(*portVar);
+  }
+
+  if (!(firingVarPortList.inList(refOut))) {
+    // Allocate memory for a new VHDLPortVar and put it in the list.
+    VHDLPortVar* portVar = new VHDLPortVar;
+    portVar->name = refOut;
+    portVar->variable = ref;
+    firingVarPortList.put(*portVar);
+  }
+
+  if (!(firingPortList.inList(refIn))) {
+    // Allocate memory for a new VHDLPort and put it in the list.
+    VHDLPort* newportIn = new VHDLPort;
+    newportIn->name = refIn;
+    newportIn->direction = "IN";
+    newportIn->type = stateType(state);
+    firingPortList.put(*newportIn);
+  }
+    
+  if (!(firingPortList.inList(refOut))) {
+    // Allocate memory for a new VHDLPort and put it in the list.
+    VHDLPort* newportOut = new VHDLPort;
+    newportOut->name = refOut;
+    newportOut->direction = "OUT";
+    newportOut->type = stateType(state);
+    firingPortList.put(*newportOut);
+  }
+
+  }
+
+  // Reset state's lastFiring tag just before exiting.
   listState->lastFiring = thisFiring;
+}
+
+// Add a register component declaration.
+void StructTarget :: registerRegister(State* state) {
+  // Set the flag indicating registers are needed.
+  setRegisters();
+
+  StringList name = "Reg";
+  name << "_" << stateType(state);
+
+  VHDLPortList* portList = new VHDLPortList;
+  VHDLGenericList* genList = new VHDLGenericList;
+  portList->initialize();
+  genList->initialize();
+  
+  VHDLPort* DPort = new VHDLPort;
+  VHDLPort* QPort = new VHDLPort;
+  VHDLPort* CPort = new VHDLPort;
+
+  DPort->name = "D";
+  DPort->direction = "IN";
+  DPort->type = stateType(state);
+  portList->put(*DPort);
+  
+  QPort->name = "Q";
+  QPort->direction = "OUT";
+  QPort->type = stateType(state);
+  portList->put(*QPort);
+  
+  CPort->name = "C";
+  CPort->direction = "IN";
+  CPort->type = "boolean";
+  portList->put(*CPort);
+  
+  registerCompDecl(name, portList, genList);
 }
 
 // Register PortHole reference.
@@ -947,8 +1066,21 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, int offset/*=-1*/) {
     newPortMap->mapping = ref;
     firingPortMapList.put(*newPortMap);
   }
-  
-  if (!(firingSignalList.inList(ref))) {
+
+  // For wormhole inputs, create a system port.
+  // For local inputs, create a signal.
+  if (port->atBoundary()) {
+    // Port at wormhole boundary, so create a system port instead of a signal.
+    if (!(systemPortList.inList(ref))) {
+      // Allocate memory for a new VHDLPort and put it in the list.
+      VHDLPort* newport = new VHDLPort;
+      newport->name = ref;
+      newport->direction = port->direction();
+      newport->type = port->dataType();
+      systemPortList.put(*newport);
+    }
+  }
+  else if (!(firingSignalList.inList(ref))) {
     // Allocate memory for a new VHDLSignal and put it in the list.
     VHDLSignal* newSignal = new VHDLSignal;
     newSignal->name = ref;

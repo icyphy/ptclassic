@@ -5,7 +5,7 @@
 #endif
 
 #include "StringList.h"
-#include "CGWormBase.h"
+#include "CGWormhole.h"
 #include "EventHorizon.h"
 #include "VHDLStar.h"
 
@@ -87,8 +87,8 @@ public:
 	// FIXME: what should this do?
 	double getStopTime() { return 0.0;}
 
-	// Redefine: return the profile when "pNum" processors are assigned.
-	Profile* getProfile(int pNum);
+//	// Redefine: return the profile when "pNum" processors are assigned.
+//	Profile* getProfile(int pNum);
 };
 
         //////////////////////////////////////////

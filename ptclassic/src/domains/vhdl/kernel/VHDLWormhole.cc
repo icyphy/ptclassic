@@ -46,10 +46,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 ********************************************************************/
 
 void VHDLWormhole :: setup() {
-	profile = myProfile;
+//	profile = myProfile;
 
-	// get the number of processors.
-	setOuterTarget(target());
+//	// get the number of processors.
+//	setOuterTarget(target());
 
 	// main setup routine.
 	CGWormBase :: setup();
@@ -60,9 +60,9 @@ void VHDLWormhole :: go() {
 
 CGWormBase* VHDLWormhole :: myWormhole() { return selfWorm; }
 
-Profile* VHDLWormhole :: getProfile(int pNum) {
-	return CGWormBase :: getProfile(pNum);
-}
+//Profile* VHDLWormhole :: getProfile(int pNum) {
+//	return CGWormBase :: getProfile(pNum);
+//}
 
 // Constructor
 VHDLWormhole :: VHDLWormhole(Galaxy& g, Target* t) : CGWormBase(*this,g,t)
