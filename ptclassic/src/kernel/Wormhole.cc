@@ -15,8 +15,7 @@ Version identification:
 #include "Wormhole.h"
 #include "StringList.h"
 #include "Output.h"
-// #include "SDFUniverse.h"
-// #include "SDFStar.h"
+#include "Domain.h"
 
 extern Error errorHandler;
 
@@ -26,12 +25,95 @@ extern Error errorHandler;
 
 ********************************************************************/
 
-StringList Wormhole :: printVerbose () {
+// Constructor
+// Here, Galaxy is the inner galaxy, Star points to the Star part
+// of the wormhole.  That is, we would say
+// SDFWormhole::SDFWormhole(Galaxy&g) : Wormhole(g,this)
+// { buildEventHorizons();}
+
+Wormhole::Wormhole(Star& s,Galaxy& g) : selfStar(s),
+	Runnable(&Domain::domainOf(g)->newSched(),
+		 Domain::domainOf(g)->domainName(),&g)
+{
+	messageProcessingTime = 10.0; // default delay
+	currentTime = 0.0;	      // default
+	dynamicHorizons = FALSE;
+}
+
+// function to build the event horizons connecting the inner galaxy
+// to the outside.
+
+void Wormhole :: buildEventHorizons () {
+	// check so this isn't done twice.
+	if (selfStar.numberPorts() > 0) return;
+	Domain* inSideDomain = Domain::domainOf(gal);
+	Domain* outSideDomain = Domain::domainOf(selfStar);
+// Take each of the galaxy ports and make a pair of EventHorizons; connect
+// them together.
+	for (int n = gal.numberPorts(); n>0; n--) {
+		PortHole& galp = gal.nextPort();
+		if (galp.isItInput()) {
+			EventHorizon& to = outSideDomain->newTo();
+			EventHorizon& from = inSideDomain->newFrom();
+			to.setPort(in, galp.readName(), this, &selfStar,
+				   galp.realPort().myType());
+			selfStar.addPort(to);
+			from.setPort(in, galp.readName(), this, &selfStar,
+				     galp.realPort().myType());
+			to.ghostConnect (from);
+			to.inheritTypeFrom (from);
+			from.inheritTypeFrom (galp);
+			from.connect(galp,0);
+		}
+		else {
+			EventHorizon& to = inSideDomain->newTo();
+			EventHorizon& from = outSideDomain->newFrom();
+			from.setPort(out, galp.readName(), this, &selfStar,
+				     galp.realPort().myType());
+			selfStar.addPort(from);
+			to.setPort(out, galp.readName(), this, &selfStar,
+				   galp.realPort().myType());
+			to.ghostConnect (from);
+			to.inheritTypeFrom (from);
+			from.inheritTypeFrom (galp);
+			galp.connect(to,0);
+		}
+	}
+	dynamicHorizons = TRUE;
+	return;
+}
+
+Wormhole::~Wormhole () {
+// do later
+}
+	
+// method for printing info on a wormhole
+StringList Wormhole :: print (int recursive) {
 	StringList out;
-	out += "CONTENTS:\n";
-
-	out += gal.printVerbose ();
-
+// title, eg SDF in DE Wormhole: myNameHere
+	out += Domain::domainOf(gal)->domainName();
+	out += " in ";
+	out += selfStar.domain();
+	out += " Wormhole: ";
+	out += selfStar.readFullName();
+	out += "\nDescriptor: ";
+	out += selfStar.readDescriptor();
+	out += "\n";
+	out += selfStar.printPorts ("wormhole");
+	out += selfStar.printStates ("wormhole");
+	out += "Blocks in the inner galaxy: ";
+	if (recursive) {
+		out += "------------------------\n";
+		for (int i = gal.numberBlocks(); i > 0; i--)
+			out += gal.nextBlock().printRecursive();
+	}
+	else {
+		for (int i = gal.numberBlocks(); i>0; i--) {
+			out += gal.nextBlock().readName();
+			if (i > 1) out += ", ";
+		}
+		out += "\n";
+	}
 	return out;
 }
 

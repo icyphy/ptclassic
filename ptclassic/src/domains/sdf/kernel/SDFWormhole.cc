@@ -44,3 +44,19 @@ void SDFWormhole :: go() {
 	// No time stamp setup is necessary for SDF system.
 }
 
+// Constructor
+SDFWormhole :: SDFWormhole(Galaxy& g) : Wormhole(*this,g)
+{
+	buildEventHorizons ();
+	addState(iterationPeriod.setState("iterationPeriod", this,
+		  "100.0", "simulated iteration Period of SDF system"));
+	gal.addState(samplingPeriod.setState("samplingPeriod",&gal,"10.0",
+		     "time increment for sampling stars"));
+}
+
+
+// cloner -- clone the inside and make a new wormhole from that.
+Block* SDFWormhole :: clone() {
+	return new SDFWormhole(gal.clone()->asGalaxy());
+}
+

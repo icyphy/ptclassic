@@ -30,3 +30,8 @@ void DEWormhole :: go()
 	completionTime = arrivalTime + double(messageProcessingTime);
 }
 
+// cloner -- clone the inside and make a new wormhole from that.
+Block* DEWormhole :: clone()
+{
+	return new DEWormhole(gal.clone()->asGalaxy());
+}

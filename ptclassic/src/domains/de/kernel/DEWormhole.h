@@ -30,12 +30,16 @@ public:
 	void go();
 
 	// constructor
-	DEWormhole(Scheduler* s, const char* typeDesc, Galaxy* g)
-		: Wormhole(s, typeDesc, g) {}
+	DEWormhole(Galaxy &g) : Wormhole(*this,g) {
+		buildEventHorizons ();
+	}
 
-	// printVerbose
-	StringList printVerbose() { Star :: printVerbose();
-				    Wormhole :: printVerbose(); }
+	// print methods
+	StringList printVerbose() { return Wormhole :: print(0);}
+	StringList printRecursive() { return Wormhole :: print(1);}
+
+	// clone -- allows interpreter to make copies
+	Block* clone();
 };
 	
 #endif

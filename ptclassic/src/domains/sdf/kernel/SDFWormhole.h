@@ -4,6 +4,7 @@
 #include "Wormhole.h"
 #include "SDFStar.h"
 #include "Fraction.h"
+#include "FloatState.h"
 
 /*******************************************************************
  SCCS Version identification :
@@ -20,22 +21,23 @@
 
 class SDFWormhole : public Wormhole, public SDFStar {
 
-public:
+protected:
 	// Wormhole specific.
 	FloatState iterationPeriod;
-
+	FloatState samplingPeriod;
+public:
 	void start() {Wormhole :: setup() ;}
 	void go();
 
 	// Constructor
-	SDFWormhole(Scheduler* s, const char* typeDesc, Galaxy* g)
-		: Wormhole(s, typeDesc, g) {
-		addState(iterationPeriod.setState("iterationPeriod", this,
-			"100.0", "simulated iteration Period of SDF system"));}
+	SDFWormhole(Galaxy& g);
 
-	// printVerbose
-	StringList printVerbose() { Star :: printVerbose();
-				    Wormhole :: printVerbose(); }
+	// print methods
+	StringList printVerbose() { return Wormhole :: print(0);}
+	StringList printRecursive() { return Wormhole :: print(1);}
+
+	// clone -- allows interpreter to make copies
+	Block* clone();
 };
 	
 #endif
