@@ -112,6 +112,7 @@ void DETarget::begin() {
 	Star *s;
 	while ((s = nextStar++) != 0) {
 		s->begin();
+		if (SimControl::haltRequested()) return;
 		// call sendOutput here to get events into the event queue
 		((DEStar*)s)->sendOutput();
 	}
