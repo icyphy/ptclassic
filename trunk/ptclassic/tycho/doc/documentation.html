@@ -65,6 +65,16 @@ appears as follows in a document:
 Double clicking on this script will execute it if you are
 viewing the document under Tycho.
 <p>
+
+When creating embedded tcl scripts, you may find it necessary to use
+the <A
+HREF="http://www.w3.org/pub/WWW/Markup/html-spec/html-spec_13.html">HTML
+Code Character Set</A> for things like greater-than '&gt;' and
+less-than '&lt;'.  Greater-than is coded <CODE>&gt;</CODE>, less-than
+is coded <CODE>&lt;</CODE>.  If you don't code characters that have
+meaning in HTML, then you might find that the output does not look the
+way you want it.  
+<p>
 In addition, Tycho expands hypertext references that begin with
 a dollar sign ($).  The characters up to the first slash (or up to then
 end if there are no slashes) are taken to be the name of an environment
