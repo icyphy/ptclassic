@@ -292,7 +292,7 @@ body ::tycho::EditJava::genidocBuffer {} {
         set debug 0
         set generateIndex 0
         file delete -force $docfile
-        ::tycho::IDocSys::generateIDoc \
+        ::tycho::ClassParser::generateIDoc \
                 $debug $generateIndex {A Java Class} $tail
     }]
 }
