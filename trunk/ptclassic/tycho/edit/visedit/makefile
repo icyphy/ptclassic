@@ -44,6 +44,8 @@ TCL_SRCS =
   
 ITCL_SRCS = \
 	EditBubbleAndArc.itcl \
+	EditDAG.itcl \
+	EditDAGWidget.itcl \
 	EditForest.itcl \
 	EditForestWidget.itcl \
 	EditSTD.itcl \
