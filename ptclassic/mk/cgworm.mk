@@ -15,12 +15,12 @@ include $(ROOT)/mk/common.mk
 
 .o.a:
 ifeq ($(USE_SHARED_LIBS),yes)
-	-rm -f $@
-	$(SHARED_LIBRARY_COMMAND) $@ $^
+	-rm -f lib$@
+	$(SHARED_LIBRARY_COMMAND) lib$@ $^
 else
-	-rm -f $@
-	$(AR) cq $@ $^ 
-	$(RANLIB) $@
+	-rm -f lib$@
+	$(AR) cq lib$@ $^ 
+	$(RANLIB) lib$@
 endif
 
 all: $(WORM_ALL) 
