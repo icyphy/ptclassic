@@ -61,6 +61,7 @@ fa_geometry *geo1, *geo2;
 
 static int fa_do_and(geo1, geo2, intersect_flag, outgeo)
 fa_geometry *geo1, *geo2;
+int intersect_flag;
 fa_geometry *outgeo;
 {
     vertex_sum vertex;
