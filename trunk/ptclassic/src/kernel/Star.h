@@ -82,14 +82,10 @@ public:
 	Block& setBlock(char* starName, Block* parent = NULL);
 
 	// The following method produces Particles on the geodesics
-	// connected to output ports for the star to write its data.
-	// This method is invoked automatically by the scheduler.
-	void produceParticles();
-
-	// The following method discards Particles that have been
-	// consumed by the star.  It is automatically invoked
-	// by the scheduler also.
-	void consumeParticles();
+	// connected to output ports for the star to write its data,
+	// and brings particles in from the geodesics to the input
+	// PortHoles.
+	void getParticles();
 };
 
 #endif

@@ -4,7 +4,7 @@
 
 
 // SCCS version identification
-// $Id$
+// @(#)Scheduler.h	1.7	1/15/90
 
 #ifndef _Scheduler_h
 #define _Scheduler_h 1
@@ -80,9 +80,16 @@ class SDFScheduler : public Scheduler {
 
 	SDFSchedule mySchedule;
 public:
+	// The setup function computes an SDF schedule
+	// and initializes all the blocks.
 	int setup(Block& galaxy);
 
+	// The run function resumes the run where it was left off.
 	int run(Block& galaxy, int numIterations = 1);
+
+	// The wrapup function runs the termination routines of all the
+	// atomic blocks
+	int wrapup(Block& galaxy);
 
 	// Options for the scheduler are specified by setting
 	// various Booleans.  The repeatedFiring option will schedule
@@ -146,13 +153,16 @@ private:
 	*******************************************************/
 
 	// Check to see whether or not an atomic block (star or
-	// wormhole) can be scheduled by checking the noParticles
+	// wormhole) can be scheduled by checking the numInitialParticles
 	// member of the input geodesics and comparing it to the
 	// numberTokens member of the input PortHoles.  If the
-	// block can be scheduled, then the noParticles member of
+	// block can be scheduled, then the numInitialParticles member of
 	// the inputs is updated by subtracting the numberTokens.
+	// Note that by the time the scheduler finishes,
+	// numInitialParticles will have been restored to its initial value.
 	// If the updateOutputs flag is TRUE (the default), then
-	// the noParticles member of the output geodesics is also updated.
+	// the numInitialParticles member of the output geodesics
+	// is also updated.
 	// (For parallel schedules, this update will be deferred).
 	// Returns 0 if the star is run, 1 if not, but it has not
 	// been run the number of times given by repetitions, and 2 if
@@ -162,7 +172,8 @@ private:
 		       int deferFiring = FALSE,
 		       int updateOutputs = TRUE);
 
-	// Determine whether a star can be run (checking the noParticles
+	// Determine whether a star can be run (checking the
+	// numInitialParticles
 	// member of the geodesic and the noTimes member of the block).
 	// Returns 0 if the star is runnable, 1 if not, but has not
 	// been run the number of times given by repetitions, and 2 if

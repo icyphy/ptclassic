@@ -211,3 +211,24 @@ Particle* Geodesic::get()
 		);
 	return (Particle*)popTop();
 }
+
+void Geodesic :: initialize()
+{
+	// Remove any Particles residing on the Geodesic,
+	// and put them in Plasma
+	for(int i=size(); i>0; i--) {
+		Particle* p = get();
+		destinationPort->myPlasma->put(p);
+		}
+
+	// Initialize the buffer to the number of Particles
+	// specified in the connection
+	for(i=numInitialParticles; i>0; i--) {
+		Particle* p = originatingPort->myPlasma->get();
+		put(p);
+		}
+}
+
+Geodesic* PortHole :: allocateGeodesic () {
+	return new Geodesic;
+}
