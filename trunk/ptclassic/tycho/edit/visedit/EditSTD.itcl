@@ -35,7 +35,6 @@
 # A graphical editor for editing the state transition diagrams (STD).
 # It recognizes the file extension ".std".
 #
-
 class ::tycho::EditSTD {
     inherit ::tycho::EditBubbleAndArc
 
@@ -222,7 +221,7 @@ body ::tycho::EditSTD::clearHighlightState {} {
 }
 
 ###################################################################
-#### editArc and editArcDone
+#### editArc
 # Edit an arc.
 #
 body ::tycho::EditSTD::editArc {arc} {
@@ -262,6 +261,10 @@ body ::tycho::EditSTD::editArc {arc} {
     $w centerOnScreen
 }
 
+###################################################################
+#### editArcDone
+# Done editing an arc.
+#
 body ::tycho::EditSTD::editArcDone {arc w} {
     set label [$slate itemcget $edgeInfo($arc,label) -text]
     set newLabel [string trim [$w get label]]
@@ -303,7 +306,7 @@ body ::tycho::EditSTD::editItem {item} {
 }
 
 #########################################################################
-#### editState and editStateDone
+#### editState
 # Edit a state.
 #
 body ::tycho::EditSTD::editState {node} {
@@ -335,6 +338,10 @@ body ::tycho::EditSTD::editState {node} {
 
 }
 
+#########################################################################
+#### editStateDone
+# Done editing a state.
+#
 body ::tycho::EditSTD::editStateDone {node w} {
     set label [$slate itemcget $node -text]
     set newLabel [string trim [$w get label]]
@@ -1051,9 +1058,11 @@ body ::tycho::EditSTD::transAction {action} {
 ################################################################
 #### transGuard
 # Translate the guard of an arc into desired format.
-# -- Each input symbol is substituted by $input(n), where n is the
+# <ul>
+# <li>Each input symbol is substituted by $input(n), where n is the
 #    index of the symbol in the (input port+internal event) name list.
-# -- Check if invalid operator exists. <--- Not implement.
+# <li>Check if invalid operator exists (not implemented).
+# </ul>
 #
 body ::tycho::EditSTD::transGuard {guard} {
     set validOp "! | & { }" ;# Valid operators or blank
