@@ -15,9 +15,9 @@ link only the DE and the SDF domains to the kernel,
 excluding other domains.
 .pp
 To define a new domain, it is necessary to define a base class
-for the stars in the domain, a universe class, a set of classes
+for the stars in the domain, a set of classes
 for interconnecting stars in the domain and passing data
-between them, a scheduler, a wormhole, a mechanism for
+between them, a scheduler, one or more targets, a wormhole, a mechanism for
 connecting to other domains through the wormhole boundary,
 and a domain object.
 This is no small task.
@@ -27,6 +27,10 @@ make only very minor additions or changes to these base classes.
 Major changes, however, are possible, and may be required to introduce
 domains that operate in very different ways compared to the existing
 domains.
+.pp
+To make the task of producing a new domain a bit easier, we include
+a sample ``dummy domain'' named ``XXX'' in the directory
+``~ptolemy/src/domains/xxx/kernel''.
 .pp
 There is a great deal of flexibility in the definition of new domains,
 and only the \*(PT source code can provide full documentation.
@@ -51,7 +55,7 @@ to a class defined in the kernel,
 .c AutoForkNode .
 .pp
 A domain has a specific operational semantics for a block diagram
-representation.  The operational semantics is realized by a
+representation.  The operational semantics are realized by a
 .c Scheduler
 for the domain, so in some sense this forms the heart
 of the domain.  The scheduler
@@ -75,6 +79,17 @@ we call the \fIsetStopTime()\fR method.  If the domain resides in a
 we call the \fIresetStopTime()\fR method.
 .IE "setStopTime() scheduler method"
 .IE "resetStopTime() scheduler method"
+.pp
+Control of execution of a universe is accomplished by a
+.c Target .
+In most simulation domains, the
+.c Target
+object simply passes commands through to the
+.c Scheduler
+object; it may also be used to pass parameters through to the
+scheduler.  In code generation domains, in particular, different
+.c Target
+objects model different targets for the generated code.
 .pp
 It may also be necessary to define domain specific star and
 .c PortHole
@@ -127,16 +142,13 @@ wormhole
 depending on the direction of dataflow.
 Further details of these classes are given below.
 .pp
-Two additional classes defined in a domain are the
-.c Universe
-and
+An additional class defined in a domain is the
 .c Domain
-classes.
-.IE "Universe class"
+class.
 .IE "Domain class"
-Their definitions are straightforward but essential for
+Its definition are straightforward but essential for
 domain abstraction in the kernel.  The source code
-for the bases classes in the kernel is self-explanatory,
+for the base class in the kernel is self-explanatory,
 so it serves as the best reference.
 Wormhole design, however, is much more subtle,
 and hence is explained in more detail below.
@@ -145,5 +157,9 @@ A complete domain definition also consists of a library of stars.
 However, the design of these stars is entirely up the domain
 designer, so there is little guidance we can provide.
 Note that for many new domains, it will be possible to use
-the ptlang preprocessor unchanged for the design of stars.
+the
+.i ptlang
+preprocessor unchanged for the design of stars.
 This is encouraged because it promotes uniformity.
+The preprocessor also produces documentation for stars.
+

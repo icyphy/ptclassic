@@ -22,7 +22,7 @@ The taxonomy of existing domains is:
 .sp
 .nf
 \fItimed\fR : DE, THOR, etc
-\fIuntimed\fR : SDF, DDF, CAPSIM, MQ, etc
+\fIuntimed\fR : SDF, DDF, CG, etc
 .fi
 .sp
 .pp
@@ -94,13 +94,14 @@ Maintaining consistency between these chronologies is the principal
 challenge.
 A DE domain containing a THOR domain will be
 an example.  First of all, since both domains have global clocks, 
-we have to synchronize them.  Therefore, the inner domain
-has a 
+we have to synchronize them.  Therefore, the inner domain's
+.c Target
+object has a 
 .c State 
 called \fItimeScale\fR which is the ratio between the time unit of
 .IE "timeScale"
-inner domain and that of the outer domain.  If the state is undefined,
-the \fItimeScale\fR is $1.0$ by default (no scaling).  
+inner domain and that of the outer domain.  The
+\fItimeScale\fR is $1.0$ by default (no scaling).  
 At the beginning of the execution of the 
 wormhole,
 the \fIcurrentTime\fR of the outer domain is scaled by the \fItimeScale\fR
@@ -111,17 +112,19 @@ is executed until the stopping condition is met.  After the execution
 finishes, the \fIcurrentTime\fR of the inner domain is scaled again
 by the inverse of the \fItimeScale\fR and informed to the outer domain.
 A user can change the value of the
-scale factor by defining a 
-.c FloatState
+scale factor by changing the value of the target parameter
 (\fItimeScale\fR) in the outermost galaxy of the inner timed domain.
 In the interpreter, the following line does it:
 .(c
-(state timeScale float "10.0")
+targetparam timeScale 10.0
 .)c
-In the graphical iterface, this state can be specified as a galaxy state
-for the wormhole galaxy.
-Use the edit-params command with the mouse in the background
-of the inner galaxy, and add or edit the \fItimeScale\fR parameter.
+In the graphical interface, this state can be modified by executing
+the
+.i edit-target
+command on the inner galaxy.  Doing so causes two menus to appear
+in succession; the first permits the user to change the target object
+used; simply click ``OK''.  The second menu permits galaxy parameters
+to be altered; now the \fItimeScale\fR parameter can be altered.
 .pp
 The decision about the stopping condition of the inner domain is the most
 complex part of the domain interface.  Suppose that the
@@ -280,15 +283,16 @@ keeps a property called its \fIschedulePeriod\fR.
 .IE "schedulePeriod"
 The \fIcurrentTime\fR of the untimed domain is increased by the
 \fIschedulePeriod\fR after each iteration.
-A user can control the value of the \fIschedulePeriod\fR by defining a 
-.c FloatState
-(\fIschedulePeriod\fR) in the outermost galaxy of the untimed domain.
-In the interpreter command, the following line is enough:
+A user can control the value of the \fIschedulePeriod\fR by altering
+the
+(\fIschedulePeriod\fR) target parameter
+in the outermost galaxy of the untimed domain.
+In the interpreter, the following line does the job:
 .(c
-(state schedulePeriod float "10.0")
+targetparam schedulePeriod "10.0"
 .)c
-If the state is not defined, the \fIschedulePeriod\fR of the untimed
-domain is set to a large number ($10000$) by default.
+The default value of \fIschedulePeriod\fR of the untimed
+domain is set to a large number ($10000$).
 Presumably, the \fIschedulePeriod\fR has no physical significance
 since in the untimed domain, time has no meaning.  The sole
 purpose of the state is to define the stopping condition of the
@@ -311,7 +315,7 @@ the time interval between data packets is fixed, and hidden safely
 in the system representation.  A synchronous digital
 signal processing system falls into this category.
 In this case, the SDF domain looks like a timed domain!.  The
-\fIschedulePeriod\fR has its physical significance.
+\fIschedulePeriod\fR then has physical significance.
 Hence, the user has to supply a meaningful value.
 The \fIschedulePeriod\fR of the SDF system represents the repetition
 period of the SDF schedule, and during one iteration, there may

@@ -13,9 +13,19 @@ portholes
 of the
 wormhole
 are called
-.c EventHorizon s,
-and are derived from the base class
-.c PortHole .
+.i "event horizons" ,
+named after the point at which an object that falls into a black hole
+disappears from our universe (and presumably reappears in another).
+These objects are defined using multiple inheritance: for each such
+object, one baseclass is some type of
+.c PortHole
+and the other baseclass is either
+.c ToEventHorizon
+or
+.c FromEventHorizon ,
+each of which are derived from the class
+.c EventHorizon .
+.pp
 Precisely speaking, one
 porthole of a wormhole consists of a pair of
 event horizons,
@@ -27,9 +37,11 @@ which contains a DE subsystem.
 Then, an input port of the
 wormhole
 comprises a
-.c SDFtoUniversal\ EventHorizon
+.c SDFtoUniversal
+event horizon
 and a
-.c DEfromUniversal\ EventHorizon .
+.c DEfromUniversal
+event horizon.
 The former
 is connected to the outer domain (to some
 .c SDFStar )
@@ -37,9 +49,11 @@ and the latter is connected to the inner domain (to some
 .c DEStar ).
 Similarly, an output port of the wormhole
 comprises a
-.c DEtoUniversal\ EventHorizon
+.c DEtoUniversal
+event horizon
 for the inner connection and a
-.c SDFfromUniversal\ EventHorizon
+.c SDFfromUniversal
+event horizon
 for the outer connection.
 .pp
 The
@@ -52,31 +66,45 @@ In general, a domain has a pair of derived
 event horizons,
 one derived from the
 .c FromEventHorizon
-class
+class and the
+.c XXXPortHole
+class, where
+.c XXX
+is the domain
 (e.g.
 .c SDFfromUniversal,
 .c DEfromUniversal ),
 and the other from the
 .c ToEventHorizon
+class and the
+.c XXXPortHole
 class
 (e.g.
 .c SDFtoUniversal,
 .c DEtoUniversal ).
-The \fIgrabData()\fR method of the
+The
+.c receiveData()
+method of the
 .c ToEventHorizon
 class receives data packets from its domain and transfers them to the
 counterpart
 .c FromEventHorizon
 class.
-Similarly, the \fIsendData()\fR method of the
+Similarly, the
+.c sendData()
+method of the
 .c FromEventHorizon
 class receives data packets from the counterpart 
 .c ToEventHorizon
 and transfers them to its domain.
 Therefore, the data transfer between domains is performed by
-calling the \fIgrabData()\fR of the
+calling the 
+.c receiveData()
+of the
 .c ToEventHorizon
-first, and calling the \fIsendData()\fR of the
+first, and calling the 
+.c sendData()
+of the
 .c FromEventHorizon 
 next, regardless of whether it happens at an input port or an output port
 of the wormhole.
@@ -134,20 +162,28 @@ class.
 This class not only receives particles
 but also puts events into the global event queue in the
 DE domain (refer to the \fBDE Domain\fR chapter in the \fBAlmagest\fR).
-Another example is the \fIready()\fR method in the
+Another example is the 
+.c ready()
+method in the
 .c FromEventHorizon
 class.
 This method is to check whether the port is ready for the inner domain
-to be fired.  For the SDF domain, it returns \fBTRUE\fR only when
-it has sufficient data.  Suppose that
+to be fired.  For the SDF domain, it returns true only when
+it has sufficient data.  Supposing that
 the inner domain is SDF and the outer
 domain is DE, the inner domain may not be executed until
 all input ports of the
 .c DEWormhole
-have enough data packets.  For that purpose, the \fIcheckReady()\fR method
+have enough data packets.  For that purpose, the 
+.c checkReady()
+method
 of the wormhole checks all
 .c FromEventHorizon s
-(using the \fIready()\fR method) of the input ports whether they are ready.
-For other domains, the \fIready()\fR method can be redefined for
+(using the 
+.c ready()
+method) of the input ports whether they are ready.
+For other domains, the 
+.c ready()
+method can be redefined for
 more elaborate synchronization, or ignored if no synchronization is
 necessary, as in the DE domain. 
