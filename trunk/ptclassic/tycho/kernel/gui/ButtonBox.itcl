@@ -189,7 +189,6 @@ configbody ::tycho::ButtonBox::spacingy {
 #
 body ::tycho::ButtonBox::constructor {args} {
     eval itk_initialize $args
-    eval preference exclude $this $args
 }
 
 #########################################################################

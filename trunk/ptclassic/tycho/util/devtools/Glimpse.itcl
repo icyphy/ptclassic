@@ -101,7 +101,6 @@ body ::tycho::Glimpse::constructor {args} {
     ]
 
     eval itk_initialize $args
-    eval preference exclude $this $args
 
     # If the findcommand option has not been set, set the default now.
     # This has to be done in the constructor rather than in the class

@@ -155,7 +155,6 @@ body ::tycho::PreferenceDialog::constructor {args} {
 
     # Initialise options
     eval itk_initialize $args
-    eval preference exclude $this $args
 }
 
 #######################################################################

@@ -140,10 +140,6 @@ class ::tycho::MenuSupport {
 #
 body ::tycho::MenuSupport::constructor {args} {
     eval itk_initialize $args
-
-    # We don't need to exclude from preferences, since this
-    # class is abstract and should never be instantiated.
-    # eval preference exclude $this $args
 }
 
 ###################################################################

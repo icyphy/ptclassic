@@ -161,7 +161,6 @@ configbody ::tycho::RevControl::object {
 #
 body ::tycho::RevControl::constructor {args} {
     eval itk_initialize $args
-    eval preference exclude $this $args
 
     addButton checkin -text "Checkin <i>" -command "$this checkInAndUpdate"
     addButton checkout -text "Checkout <o>" -command "$this checkOutAndUpdate"

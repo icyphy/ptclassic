@@ -173,7 +173,6 @@ body ::tycho::EditSearch::constructor {args} {
     pack $itk_component(regexp) -side left
 
     eval itk_initialize $args
-    eval preference excludeoptions $this $args
 
     if {$itk_option(-nochange) == 0} {
         configure -queries {

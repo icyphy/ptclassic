@@ -62,7 +62,6 @@ class ::tycho::EditStack {
 body ::tycho::EditStack::constructor {args} {
 
     eval itk_initialize $args
-    eval preference exclude $this $args
 
     displayer configure -title "Stack Trace"
 

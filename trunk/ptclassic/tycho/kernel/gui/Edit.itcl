@@ -622,7 +622,6 @@ body ::tycho::Edit::constructor {args} {
 
     # Initialize options and tell preferences manager to ignore them
     eval itk_initialize $args
-    eval preference excludeoptions $this $args
 
     # Subscribe to the preference set
     preference subscribeoptions $this \

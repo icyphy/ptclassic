@@ -298,7 +298,6 @@ body ::tycho::TopLevel::constructor {args} {
 	    wm iconify $itk_component(hull); break"
     # Explicitly handle configs that may have been ignored earlier.
     eval itk_initialize $args
-    eval preference exclude $this $args
 
     # Grab the focus when the window gets mapped.
     # NOTE: This causes focusin to be called a very large number of times!
@@ -624,7 +623,7 @@ body ::tycho::TopLevel::itk_initialize {args} {
 	lappend temp $option
     }
     if { $temp != "" } {
-	eval ::tycho::preference excludeoptions $this $temp
+	eval ::tycho::preference excludeoptions dummy $this $temp
     }
     uplevel ::itk::Archetype::itk_initialize $args
 }

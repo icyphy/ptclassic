@@ -277,7 +277,6 @@ body ::tycho::HTML::constructor {args} {
     set stateArrayName HM$text
 
     eval itk_initialize $args
-    eval preference excludeoptions $this $args
 
     # Subscribe to the preference set
     preference subscribeoptions $this \
