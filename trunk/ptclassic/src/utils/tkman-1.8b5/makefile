@@ -63,7 +63,7 @@ tkman:
 		all
 
 install:	$(ROOT)/man/man1 #tkman $(BINDIR)/tkman
-	rm -f $(BINDIR)/tkman
+	rm -f $(ROOT)/man/man1/tkman.1 $(BINDIR)/tkman
 	$(MAKE) -f $(VPATH)/Makefile.dist \
 		VPATH=$(VPATH) \
 		WISH=$(WISH) \
