@@ -140,8 +140,7 @@ BDFClusterGal::BDFClusterGal(Galaxy& gal, ostream* log)
 			// the isItOutput check.
 			BDFClustPort* in = ptable[realP.far()->index()];
 			int numDelays = realP.numInitDelays();
-			const char* initDelays = realP.initDelayValues();
-			curCP->connect(*in,numDelays,initDelays);
+			curCP->connect(*in,numDelays);
 			curCP->initGeo();
 		}
 	}
@@ -1188,9 +1187,8 @@ void BDFClusterBag::absorb(BDFCluster* c,BDFClusterGal* par) {
 			// zap it and connect directly.
 			BDFClustPort* p = pFar->inPtr();
 			int numDelays = cp->numInitDelays();
-			const char* initDelays = cp->initDelayValues();
 			LOG_DEL; delete pFar;
-			cp->connect(*p, numDelays, initDelays);
+			cp->connect(*p, numDelays);
 			cp->initGeo();
 		}
 		else {
@@ -1235,10 +1233,9 @@ BDFClusterBag::merge(BDFClusterBag* b,BDFClusterGal* par) {
 		BDFClustPort* near = p->inPtr();
 		BDFClustPort* far = pFar->inPtr();
 		int numDelays = p->numInitDelays();
-		const char* initDelays = p->initDelayValues();
 		LOG_DEL; delete pFar;
 		LOG_DEL; delete p;
-		near->connect(*far, numDelays, initDelays);
+		near->connect(*far, numDelays);
 		near->initGeo();
 	}
 	// now we simply combine the remaining bagports and clusters into this.
