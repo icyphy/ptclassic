@@ -54,7 +54,7 @@ proc ::tycho::htmlmessage {source} {
 # window.  Here is an example:
 # <tcl><pre>
 # catch {delete object .m}
-# ::tycho::HTMLMessage .m -data {<h1>Header</h1>}
+# ::tycho::HTMLMessage .m -data {&lt;h1&gt;Header&lt;/h1&gt;}
 # .m centerOnScreen
 # </pre></tcl>
 # <p>
