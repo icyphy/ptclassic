@@ -127,6 +127,7 @@ uplevel #0 {
     source $tychokernel/Lib.tcl
     source $tycholib/util/lib.tcl
     set ::auto_path [linsert $auto_path 0 $tychoeditors/textedit ]
+    set ::auto_path [linsert $auto_path 0 $tychoeditors/visedit ]
 }
 
 if {![info exists tychoWelcomeWindow]} {
