@@ -89,12 +89,12 @@ E. A. Lee and D. G. Messerchmitt,
 		decimation.clearAttributes(A_SETTABLE);
 		decimationPhase.clearAttributes(A_SETTABLE);
 	}
-	start {
+	setup {
 		taps.resize (N);
 		int center = int(N)/2;
 		for (int i = 0; i < int(N); i++)
 			taps[i] = rcos (i - center, P, excessBW);
-		SDFFIR :: start();
+		SDFFIR :: setup();
 	}
 }
 

@@ -39,8 +39,8 @@ transients die away.
 		int nTracesSoFar;
 	}
 
-	start {
-		SDFXgraph::start();
+	setup {
+		SDFXgraph::setup();
 		traceCount = 0;
 		nTracesSoFar = 0;
 	}

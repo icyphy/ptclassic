@@ -68,11 +68,11 @@ will be stored there after the run has completed.
 		// taps are no longer constant
 		taps.clearAttributes(A_CONSTANT);
 	}
-	start {
+	setup {
 		// force interpolation to 1
 		interpolation = 1;
 		// Next run the ComplexFIR start routine
-		SDFComplexFIR :: start();
+		SDFComplexFIR :: setup();
 
 		// Then reset the signalIn number of samples in the past
 		// to account for the error delay.

@@ -58,8 +58,8 @@ If \fItrace\fP is YES, there may not be more than 64 taps in the filter.
 		// remove saveTapsFile as a settable param
 		saveTapsFile.clearAttributes(A_SETTABLE);
 	}
-	start {
-		SDFLMS::start();
+	setup {
+		SDFLMS::setup();
 		int nPlots = 1;
 		if (int(trace)) {
 			nPlots = taps.size();
