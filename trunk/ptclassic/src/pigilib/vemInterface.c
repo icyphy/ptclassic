@@ -146,10 +146,12 @@ octObject *facetPtr;
 	PrintCon("ViKillBuf: Please answer YES to the next question!");
 	ERR_IF2(vemCommand("kill-buffer", &tmpSpot, lsCreate(), 0) != VEM_OK,
 	    "ViKillBuf: unable to kill buffer");
-    }
-    if ((status = octOpenFacet(facetPtr)) == OCT_ALREADY_OPEN) {
-        ErrAdd("ViKillBuf: Vem buffer not killed. Maybe open facets have icon?");
-        return (FALSE);
+
+	/* See if the kill was successful */
+        if ((status = octOpenFacet(facetPtr)) == OCT_ALREADY_OPEN) {
+            ErrAdd("ViKillBuf: Vem buffer not killed. Maybe open facets have icon?");
+            return (FALSE);
+        }
     }
     if (status == OCT_OLD_FACET || status == OCT_NEW_FACET) {
 	CK_OCT(octCloseFacet(facetPtr));
