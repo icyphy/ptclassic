@@ -55,6 +55,9 @@ pigi and feeds stdout to that same window.
 #endif /* PTSVR4 */
 
 extern "C" {
+// We must include ptk.h last because ptk.h includes tk.h which 
+// eventually includes X11/X.h, which on Solaris2.4 
+// there is a #define Complex 0, which causes no end of trouble.
 #include "ptk.h"
 }
 
