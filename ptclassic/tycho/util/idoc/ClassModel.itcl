@@ -38,7 +38,7 @@
 # more suitable to particular languages. It is designed to be
 # usable both for documenting classes and for use in 
 # object models. The names of methods (including constructors and
-# desctructors) should, in languages that support multiple
+# destructors) should, in languages that support multiple
 # methods per operation, contain the full signature. For example:
 # <code>add(int,int):int</code> and <code>add(int,float):float</code>.
 #
