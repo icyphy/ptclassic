@@ -175,11 +175,15 @@ The values of the input ports will be passed as arguments to this function.
 	}
 
 	destructor {
+		freeMatlabMatrices(matlabInputMatrices, numInputs);
 		delete [] matlabInputMatrices;
+		freeMatlabMatrices(matlabOutputMatrices, numOutputs);
 		delete [] matlabOutputMatrices;
 
 		freeStringArray(matlabInputNames, numInputs);
+		delete [] matlabInputNames;
 		freeStringArray(matlabOutputNames, numOutputs);
+		delete [] matlabOutputNames;
 		delete [] matlabCommand;
 	}
 
