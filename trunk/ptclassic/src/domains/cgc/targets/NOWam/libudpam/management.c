@@ -50,6 +50,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #ifdef SOLARIS 
 #include <thread.h>
 #include <sys/filio.h>  
+#include <sys/systeminfo.h>	/* sysinfo() */
 #endif /* SOLARIS */
 
 static
@@ -71,10 +72,17 @@ void BindAndSetSocket(int sd)
     perror("malloc error\n");
     exit(-1);
   }
+#ifdef SOLARIS
+  if (sysinfo(SI_HOSTNAME, hostname, sizeof(hostname)) < 0) {
+    perror("sysinfo(SI_HOSTNAME,...) error\n");
+    exit(-1);
+  }
+#else
   if (gethostname(hostname, 256*sizeof(char)) < 0) {
     perror("gethostbyname error\n");
     exit(-1);
   }
+#endif
   if ((host = gethostbyname_r(hostname, host, buffer, bufferlen, 
 			      &h_errno)) == NULL) {
     perror("gethostbyname_r error\n");
@@ -791,10 +799,17 @@ void BindAndSetKnownSocket(int sd, int port)
     perror("malloc error\n");
     exit(-1);
   }
+#ifdef SOLARIS
+  if (sysinfo(SI_HOSTNAME, hostname, sizeof(hostname)) < 0) {
+    perror("sysinfo(SI_HOSTNAME,...) error\n");
+    exit(-1);
+  }
+#else
   if (gethostname(hostname, 256*sizeof(char)) < 0) {
     perror("gethostbyname error\n");
     exit(-1);
   }
+#endif
   if ((host = gethostbyname_r(hostname, host, buffer, bufferlen,
                               &h_errno)) == NULL) {
     perror("gethostbyname_r error\n");
