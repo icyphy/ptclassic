@@ -129,6 +129,7 @@ gthreads_sol2: $(GT_OBJ)
 		INSTALL_INCLUDE='../../$(THREAD_INCLUDE)' \
 		INSTALL_LIBS='../../$(THREAD_LIB)' \
 		CC=gcc \
+		CPLUSPLUS=g++ \
 		CFLAGS='-DASM_SETJMP -DSTACK_CHECK -DC_INTERFACE -DSOLARIS -DSVR4' \
 		all install;
 
@@ -139,6 +140,7 @@ gthreads_sol2.cfront gthreads_sol2.5.cfront: $(GT_OBJ)
 		INSTALL_INCLUDE='../../$(THREAD_INCLUDE)' \
 		INSTALL_LIBS='../../$(THREAD_LIB)' \
 		CC=cc \
+		CPLUSPLUS=CC \
 		CFLAGS='-DASM_SETJMP -DSTACK_CHECK -DC_INTERFACE -DSOLARIS -DSVR4' \
 		CCFLAGS='-xO3 $$(CFLAGS)' \
 		CCFLAGS1='-xO1 $$(CFLAGS)' \
@@ -159,6 +161,7 @@ gthreads_sun4: $(GT_OBJ)
 		INSTALL_INCLUDE='../../$(THREAD_INCLUDE)' \
 		INSTALL_LIBS='../../$(THREAD_LIB)' \
 		CC=gcc \
+		CPLUSPLUS=g++ \
 		CFLAGS='-DASM_SETJMP -DSTACK_CHECK -DC_INTERFACE' \
 		COMP_ASM='$$(CC) $$(INC1) $$(INC2) $$(CFLAGS) -c $$*.S' \
 		all install;
@@ -170,6 +173,7 @@ gthreads_linux: $(GT_OBJ)
 		INSTALL_INCLUDE='../../$(THREAD_INCLUDE)' \
 		INSTALL_LIBS='../../$(THREAD_LIB)' \
 		CC=gcc \
+		CPLUSPLUS=g++ \
 		CFLAGS='-DC_INTERFACE -DC_CONTEXT_SWITCH -DCLEANUP_HEAP -D_POSIX -DAUTO_INIT' \
 		all install;
 
@@ -180,5 +184,6 @@ gthreads_freebsd: $(GT_OBJ)
 		INSTALL_INCLUDE='../../$(THREAD_INCLUDE)' \
 		INSTALL_LIBS='../../$(THREAD_LIB)' \
 		CC=gcc \
+		CPLUSPLUS=g++ \
 		CFLAGS='-DSTACK_CHECK -DC_INTERFACE -DC_CONTEXT_SWITCH -DCLEANUP_HEAP -D_POSIX -DAUTO_INIT' \
 		all install;
