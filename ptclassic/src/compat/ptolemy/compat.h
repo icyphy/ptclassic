@@ -68,6 +68,11 @@ extern "C" {
 #define PTIRIX5
 #endif
 
+#if defined(PTHPPA) && ! defined(__GNUC__)
+/* SGI running IRIX5.x with native SGI CC*/
+#define PTIRIX5_CFRONT
+#endif
+
 #if defined(linux)
 #define PTLINUX
 #endif
@@ -217,7 +222,7 @@ extern int vfprintf(FILE *, const char *, char *);
 
 /* IBM RS6000 running AIX */
 #ifdef PTAIX
- extern "C" int select(unsigned long, void*, void*, void*, timeval*);
+#include <sys/select.h>
 #endif
 
 
