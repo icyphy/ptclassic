@@ -43,6 +43,7 @@ include $(CONFIG)
 TCL_SRCS = 
   
 ITCL_SRCS =  \
+	EditDFG.itcl \
 	Layout.itcl \
 	IconLibrary.itcl \
 	SlateView.itcl \
