@@ -24,21 +24,23 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
-/* Version $Id$
+/* Version: $Id$
    Programmer:  T. M. Parks
    Date of creation:  8 Nov 91
 */
 
-static const char file_id[] = "$RCSfile$";
+static const char file_id[] = "Clock.cc";
 
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
 #include "Clock.h"
+#include "Error.h"
 #include "type.h"
 #define NEED_TIMEVAL //compat.h reads this
 #include "compat.h"
+
 
 #if !defined(PTSOL2_4) && !defined(PTSOL2_5) && !defined(PTHPUX10)
 extern "C" int gettimeofday(timeval *, struct timezone *);
@@ -68,7 +70,12 @@ void Clock::reset()
 TimeVal Clock::timeOfDay() const
 {
     TimeVal t;
+
+#ifdef PT_NO_GETTIMEOFDAY
+    Error::abortRun("Clock::timeOfDay: gettimeofday() not present at compile time");
+#else
     gettimeofday(&t,0);
+#endif
     return t;
 }
 
@@ -81,6 +88,9 @@ TimeVal Clock::elapsedTime() const
 // Sleep until specified elapsed time.
 int Clock::sleepUntil(const TimeVal& time) const
 {
+#ifdef PT_NO_SELECT
+    Error::abortRun("Clock::sleepUntil(): select() not present at compile time");
+#else
     TimeVal elapsed = elapsedTime();
     if (time < elapsed) return FALSE;	// Sleep only if not running late.
     while (time > elapsed)		// select() could return early.
@@ -89,5 +99,6 @@ int Clock::sleepUntil(const TimeVal& time) const
 	select(0, NULL, NULL, NULL, &delay);
 	elapsed = elapsedTime();
     }
+#endif
     return TRUE;
 }
