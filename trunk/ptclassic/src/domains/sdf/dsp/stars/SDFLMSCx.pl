@@ -67,7 +67,7 @@ will be stored there after the run has completed.
 		default { "" }
 		desc { File to save final tap values. }
 	}
-	ccinclude { "miscFuncs.h" }
+	ccinclude { "miscFuncs.h", <stdio.h> }
 	constructor {
 		// remove interpolation as a settable parameter
 		interpolation.clearAttributes(A_SETTABLE);
