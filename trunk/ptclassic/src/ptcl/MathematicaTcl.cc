@@ -42,6 +42,7 @@ static const char file_id[] = "MathematicaTcl.cc";
 
 #include <string.h>
 #include "tcl.h"
+#include "miscFuncs.h"
 #include "StringList.h"
 #include "Error.h"
 #include "MathematicaIfc.h"
@@ -86,14 +87,33 @@ int MathematicaTcl::error(const char* msg) {
     return TCL_ERROR;
 }
 
+// Create a new instance of an interface to Mathematica
+void MathematicaTcl::newMathematicaInterface() {
+    // 1. put the directory $PTOLEMY/lib/mathematica on Mathematica's path
+    StringList initCommand = "PrependTo[$Path, \"";
+    char* libMmaName = expandPathName("$PTOLEMY/lib/mathematica");
+    initCommand << libMmaName << "\"]; ";
+
+    // 2. declare packages that we need
+    initCommand << "Needs[\"FourierSeriesFormula`\"]; ";
+    initCommand << "Needs[\"Calculus`Master`\"]; ";
+    initCommand << "Needs[\"Algebra`Master`\"]; ";
+
+    // 3. create new instance
+    delete mathematicaInterface;
+    mathematicaInterface =
+    	new MathematicaIfc(initCommand, "MathematicaTcl", TRUE, FALSE, FALSE);
+
+    delete [] libMmaName;
+}
+
 // Start a Mathematica process if one is not running
 int MathematicaTcl::init() {
     // Start a connection to Mathematica called MathematicaTcl in which
     // Mathematica starts up in a private namespace (context) "MathematicaTcl`"
     // We also disable the display of the input and the output number
     if (mathematicaInterface == 0) {
-	mathematicaInterface =
-		new MathematicaIfc("MathematicaTcl", TRUE, FALSE, FALSE);
+	newMathematicaInterface();
     }
 
     if (! mathematicaInterface->MathematicaIsRunning()) {

@@ -78,6 +78,9 @@ protected:
     // Display an error message in the Tcl interpreter
     int error(const char* msg);
 
+    // Create a new interface to Mathematica
+    void newMathematicaInterface();
+
     // Start a Mathematica process if one is not running
     int init();
 
