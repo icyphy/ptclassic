@@ -48,7 +48,6 @@ ITCL_SRCS = \
 	ComplexItem.itcl \
 	Connectible.itcl \
 	DragDropper.itcl \
-	Editor.itcl \
 	Follower.itcl \
 	Frame.itcl \
 	IconFrame.itcl \
@@ -62,6 +61,7 @@ ITCL_SRCS = \
 	LabeledRect.itcl \
 	Layout.itcl \
 	Line.itcl \
+	TextItemEdit.itcl \
 	Oval.itcl \
 	Point.itcl \
 	Polygon.itcl \
