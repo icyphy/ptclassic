@@ -22,7 +22,7 @@ and Boolean-controlled dataflow
 \cindex{Boolean-controlled dataflow}
 \cindex{dataflow, Boolean-controlled}
 models of computation.  The model 
-assocaited with a particular program graph is determined by
+associated with a particular program graph is determined by
 which target is selected.  The \code{bdf-CGC} target supports the BDF
 model, while all other targets in the CGC domain support the more
 limited SDF model.  Code can be generated for both single-processor
@@ -36,7 +36,7 @@ single processors include \code{default-CGC}, \code{TclTk_Target}, and
 The targets of the CGC domain
 generate \code{C} code from dataflow program graphs.
 Code generation is controlled by the \var{host}, \var{directory}, and
-\var{file} parameters as described in \nxref{CG Domain}.
+\var{file} parameters as described in \nxref{CG Single-Processor Targets}.
 \vrindex{host parameter}
 \vrindex{directory parameter}
 \vrindex{file parameter}
@@ -45,15 +45,15 @@ The command used to compile the code is determined by the
 \vrindex{compileCommand parameter}
 \vrindex{compileOptions parameter}
 \vrindex{linkOptions parameter}
-parameters.
-Compilation and execution are controlled by the
+parameters.  Compilation and execution are controlled by the
 \var{display?}, \var{compile?}, and \var{run?}
 \vrindex{display? parameter}
 \vrindex{compile? parameter}
 \vrindex{run? parameter}
-parameters, also described in \nxref{CG Domain}.  The other parameters
-common to all CGC targets are listed below.  Not all of these
-parameters are made available to the user by every target.
+parameters, also described in \nxref{CG Single-Processor Targets}.
+The other parameters common to all CGC targets are listed below.  Not
+all of these parameters are made available to the user by every
+target, and some targets define additional parameters.
 
 \begin{statelist}
 \state{INT}{staticBuffering}{TRUE}
@@ -87,16 +87,6 @@ List of abstract resources that the host computer has.
 \node CGC Single-Processor Targets
 \subsection{Single-Processor Targets}
 
-\node default-CGC
-\subsubsection{\protect\code{default-CGC}}
-\tpindex{default-CGC target}
-\tpindex{target, default-CGC}
-
-The \code{default-CGC} target generates \code{C} code for a single computer
-from a SDF program graph.  The parameters available to the user are shown in
-table \ref{default-CGC-parameters}.
-See \nxref{CG Targets}, and \nxref{CGC Targets} for detailed descriptions of
-these parameters.
 
 \begin{table}
 \centering
@@ -112,13 +102,21 @@ these parameters.
 \label{default-CGC-parameters}
 \end{table}
 
-\node TclTk_Target
-\subsubsection{\protect\code{TclTk_Target}}
+The \code{default-CGC} target
+\tpindex{default-CGC target}
+\tpindex{target, default-CGC}
+generates \code{C} code for a single
+processor from a SDF program graph.  The parameters available to the
+user are shown in table \ref{default-CGC-parameters}.  See \nxref{CG
+Single-Processor Targets}, and \nxref{CGC Targets} for detailed
+descriptions of these parameters.
+
+
+The \code{TclTk_Target} target,
 \tpindex{TclTk_Target target}
 \tpindex{target, TclTk_Target}
-
-This target, which is derived from the \code{default-CGC} target
-(\pxref{default-CGC}), must be used when Tcl/Tk stars are present in
+which is derived from the \code{default-CGC} target,
+must be used when Tcl/Tk stars are present in
 the program graph.  The parameters differ from those of the
 \code{default-CGC} target only in their default values.
 
@@ -142,26 +140,22 @@ the program graph.  The parameters differ from those of the
 \vrindex{linkOptions parameter}
 \end{statelist}
 
-\node bdf-CGC
-\subsubsection{\protect\code{bdf-CGC}}
+
+The \code{bdf-CGC} target
 \tpindex{bdf-CGC target}
 \tpindex{target, bdf-CGC}
-
-This target supports the Boolean-controlled dataflow (BDF) model of
+supports the Boolean-controlled dataflow (BDF) model of
 computation.  It must be used when BDF stars are present in the program
 graph.  It can also be used with program graphs that contain only
 synchronous dataflow (SDF) stars.
-
 The \code{bdf-CGC} target has the same parameters as the
-\code{default-CGC} target (\pxref{default-CGC}) with the exception that
+\code{default-CGC} target with the exception that
 the \var{Looping Level} parameter is absent.  This is because a
 loop-generating algorithm is always used for scheduling.
+\xref{BDF Domain}, for details on the scheduling algorithm.
 
 \node CGC Multi-Processor Targets
 \subsection{Multi-Processor Targets}
-
-\node unixMulti_C
-\subsubsection{\protect\code{unixMulti_C}}
 
 \begin{table}
 \centering
@@ -177,8 +171,35 @@ loop-generating algorithm is always used for scheduling.
     \var{ganttChart}    &\var{oneStarOneProc}   &\\
 \end{tabular}
 \caption{Parameters for the \protect\code{unixMulti_C} target.}
-\label{unixMulti_C-parameters}
+\label{unixMultiC-parameters}
 \end{table}
+
+The supported multi-processor target in the CGC domain is \code{unixMulti_C}.
+It generates code for multiple networked workstations, using a shared bus
+configuration for scheduling purposes.  In addition to the target
+parameters described in
+\nxref{CGC Targets}, and \nxref{CG Multi-Processor Targets},
+this target defines the user parameters listed below.
+Table \ref{unixMultiC-parameters} gives the complete list of parameters for
+the \code{unixMulti_C} target.
+
+\begin{statelist}
+\state{INT}{portNumber}{7654}
+The starting port number used by send/receive stars.  The port number
+will be incremented for each send/receive pair.  It is the
+responsibility of the user to ensure that the port number does not
+conflict with any that may already be in use.
+
+\state{STRING}{machineNames}{herschel}
+The names of the networked workstations which form the
+multi-processor.  The names should be separated by a comma (\samp{,}).
+
+\state{STRING}{nameSuffix}{}
+The domain suffix for the workstations named in \var{machineNames}.  If left
+blank, which is the default, then the workstations are assumed to be part of
+the local domain.  Otherwise, specify the proper domain name, including
+a leading period, such as \samp{.berkeley.edu}.
+\end{statelist}
 
 \node CGC Star Overview
 \section{An Overview of CGC Stars}
