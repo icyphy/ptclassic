@@ -167,7 +167,7 @@ class ::tycho::Slider {
     #
     # The total width of the slider widget.
     #
-    itk_option define -totalwidth totalwidth TotalWidth 40 {
+    itk_option define -totalwidth totalwidth TotalWidth 34 {
 	if { $initialized } {
 	    puts "$this totalwidth!"
 	    redraw
