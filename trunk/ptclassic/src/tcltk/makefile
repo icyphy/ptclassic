@@ -100,7 +100,7 @@ ITCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/itcl
 all: 		configure tcl tk itcl
 configure:	$(TCL_OBJ)/config.status $(TK_OBJ)/config.status \
 			$(ITCL_OBJ)/config.status \
-			$(TCLTK_OBJ)/$(TCL_VERSION) $(TCLTK_OBJ)/makefile
+			$(TCLTK_OBJ)/$(TCL_MAJOR_VERSION) $(TCLTK_OBJ)/makefile
 bin:		tcl tk itcl
 install:	install_tcl install_tk install_itcl
 clean:		clean_tcl clean_tk clean_itcl
