@@ -35,14 +35,14 @@ public:
 	}
 
 	// return my scheduler
-	Scheduler* mySched() { return scheduler ;}
+	Scheduler* mySched() const { return scheduler ;}
 
 	// print methods
-	StringList printVerbose() { return Wormhole :: print(0);}
-	StringList printRecursive() { return Wormhole :: print(1);}
+	StringList printVerbose() const { return Wormhole :: print(0);}
+	StringList printRecursive() const { return Wormhole :: print(1);}
 
 	// clone -- allows interpreter to make copies
-	Block* clone();
+	Block* clone() const;
 
 protected:
 	// redefine getStopTime() : 
