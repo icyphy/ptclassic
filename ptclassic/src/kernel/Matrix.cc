@@ -2102,7 +2102,7 @@ int ComplexMatrixEnvParticle::initParticleStack(Block* parent,
 // error and calls Error::abortRun().
 
 void ComplexMatrixEnvParticle::operator << (const Envelope& p) { 
-  if(!p.typeCheck("ComplexMatrix"))
+  if(!p.typeCheck("ComplexMatrix") && !p.empty())
     errorAssign(p.dataType());
   else data = p;
 }
@@ -2215,7 +2215,7 @@ int FixMatrixEnvParticle::initParticleStack(Block* parent,
 // error and calls Error::abortRun().
 
 void FixMatrixEnvParticle::operator << (const Envelope& p) { 
-  if(!p.typeCheck("FixMatrix"))
+  if(!p.typeCheck("FixMatrix") && !p.empty())
     errorAssign(p.dataType());
   else data = p;
 }
@@ -2329,7 +2329,7 @@ int FloatMatrixEnvParticle::initParticleStack(Block* parent,
 // error and calls Error::abortRun().
 
 void FloatMatrixEnvParticle::operator << (const Envelope& p) { 
-  if(!p.typeCheck("FloatMatrix"))
+  if(!p.typeCheck("FloatMatrix") && !p.empty())
     errorAssign(p.dataType());
   else data = p;
 }
@@ -2442,7 +2442,7 @@ int IntMatrixEnvParticle::initParticleStack(Block* parent,
 // error and calls Error::abortRun().
 
 void IntMatrixEnvParticle::operator << (const Envelope& p) { 
-  if(!p.typeCheck("IntMatrix"))
+  if(!p.typeCheck("IntMatrix") && !p.empty())
     errorAssign(p.dataType());
   else data = p;
 }
