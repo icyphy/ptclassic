@@ -31,7 +31,7 @@
 #######################################################################
 
 if {[string compare test [info procs test]] == 1} then { 
-    source testDefs.tcl
+    source [file join $TYCHO kernel test testDefs.tcl]
 } {}
 
 # If necessary load up the class definitions
