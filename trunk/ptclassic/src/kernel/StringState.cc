@@ -61,9 +61,11 @@ void StringState  :: initialize() {
 			}
 			StringList sl = st->currentValue();
 			const char* sltext = sl;
-			int l = strlen (sltext);
-			strcpy (q, sltext);
-			q += l;
+			if (sltext) {	// check if non-null string
+				int l = strlen (sltext);
+				strcpy (q, sltext);
+				q += l;
+			}
 		}
 		else if (*p == '\\') {
 			*q++ = *p++;
