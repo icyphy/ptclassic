@@ -22,12 +22,33 @@ $Id$
 #include "CGCStar.h"
 #include "GalIter.h"
 #include "miscFuncs.h"
+#include "WormConnect.h"
 
 const Attribute ANY = {0,0};
 
 // constructor
 CGCTarget::CGCTarget(const char* name,const char* starclass,
-                   const char* desc) : BaseCTarget(name,starclass,desc) {}
+                   const char* desc) : BaseCTarget(name,starclass,desc) {
+	addState(funcName.setState("funcName",this,"main",
+                        "function name to be created."));
+	addState(compileCommand.setState("compileCommand",this,"cc",
+                        "function name to be created."));
+	addState(compileOption.setState("compileOption",this,"",
+                        "function name to be created."));
+}
+
+// default methods
+void CGCTarget :: getDataToSend(EventHorizon* p) {
+	Error::abortRun("Target should define getDataToSend() method.\n", 
+		"Wormhole interface is not supported in this target");
+	p->dataNew = FALSE;
+}
+
+void CGCTarget :: getDataToReceive(EventHorizon* p) {
+	Error::abortRun("Target should define getDataToReceive() method.\n"
+		"Wormhole interface is not supported in this target");
+	p->dataNew = FALSE;
+}
 
 StringList CGCTarget :: sectionComment(const StringList s) {
 	StringList out = "\n/****** ";
@@ -184,7 +205,8 @@ int CGCTarget :: run () {
     StringList runCode = include;
     runCode += staticDeclarations;
     runCode += sectionComment("Main function");
-    runCode += "main() {\n";
+    runCode += (const char*) funcName;
+    runCode += "() {\n";
     runCode += mainDeclarations;
     runCode += mainInitialization;
     runCode += myCode;
@@ -211,7 +233,10 @@ void CGCTarget :: wrapup () {
 	// Compile and run the code
 	StringList cmd = "cd ";
 	cmd += (const char*)destDirectory;
-	cmd += "; cc code.c";
+	cmd += "; ";
+	cmd += (const char*)compileCommand;
+	cmd += " code.c ";
+	cmd += (const char*)compileOption;
 	if(system(cmd)) {
 		Error::abortRun("Compilation errors in generated code.");
 		return;
@@ -299,14 +324,12 @@ void CGCTarget :: addMainInit(const char* decl) {
 	mainInitialization += decl;
 }
 
-// copy constructor
-CGCTarget :: CGCTarget (const CGCTarget& src) :
-BaseCTarget(src.readName(), "CGCStar", src.readDescriptor())
-{ }
-
 // clone
 Block* CGCTarget :: clone () const {
-	LOG_NEW; return new CGCTarget(*this);
+	LOG_NEW; 
+	CGCTarget* t = new CGCTarget(readName(),starType(),readDescriptor());
+	t->copyStates(*this);
+	return t;
 }
 
 void CGCTarget :: setGeoNames(Galaxy& galaxy) {
