@@ -199,7 +199,7 @@ body ::tycho::MultiPanel::append {element {children} args} {
     } else {
         # only one child, no frame necessary
         if {[llength $children] == 1} {
-            set child [elementinfo $children]
+            set child [elementinfo [lindex $children 0]]
         }
     }
         
