@@ -151,7 +151,7 @@ foreach file $argv {
 # which is in TyConsole.cc. Otherwise we are being called from itkwish,
 # or another script. 
 if {![info exists TychoBinaryInfo]} {
-    set TychoBinaryInfo $env(PTOLEMY)/tcltk/itcl.$env(PTARCH)/bin/itkwish
+    set TychoBinaryInfo itkwish
 }
 if {![info exists TychoVersionInfo]} {
     set TychoVersionInfo "Version 0.6"
