@@ -22,7 +22,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 */
-static const char SccsId[] = "$Id$ %G";
+static const char SccsId[] = "$Id$";
 
 #ifdef __GNUG__
 #pragma implementation
