@@ -15,14 +15,15 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	explanation {
-This MpNeuron is based on the McCulloch-Pitts model of artificial neurons [1].
-
-.UH REFERENCES
-.IP [1]
-W. S. McCulloch and W. Pitts, "A logical calculus of the ideas immanent 
-in nervous activity", Bulletin of Mathematical Biophysics, Vol. 5, 
+	htmldoc {
+This star is based on the McCulloch-Pitts model of artificial neurons [1].
+<p>
+References
+<ol>
+<li>W. S. McCulloch and W. Pitts, "A logical calculus of the ideas immanent 
+in nervous activity", <em>Bulletin of Mathematical Biophysics</em>, Vol. 5, 
 pp. 115-133, 1943
+</ol>
 	}
 	inmulti {
 		name { input }

@@ -16,22 +16,22 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	explanation {
+	htmldoc {
 A common model of an artificial neuron is a weighted sum of inputs
 followed by an activation function.  The activation function, which
 is often nonlinear, transforms the net input to a neuron into its
 activation (level of activity) [1].  The Sigmoid function is one of
 the most commonly used activation functions in artificial neural
 networks.
-.pp
+<p>
 The input to the Sigmoid function can be any number, positive or negative,
 and outputs a number from 0 and 1.  Hence, the Sigmoid function does not
 suffer from numerical overflow.
-
-.UH REFERENCES
-.IP [1]
-L. Fausett, \fIFundamentals of Neural Networks\fR, Prentice Hall,
+<p>
+<ol>
+<li>L. Fausett, <em>Fundamentals of Neural Networks</em>, Prentice Hall,
 Englewood Cliffs, NJ, ISBN 0-13-334186-0, 1994.
+</ol>
 	}
 	input {
 		name { input }
