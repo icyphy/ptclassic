@@ -91,6 +91,9 @@ class ::tycho::ToolBar {
     # Add an entry widget to the toolbar.
     method entry {tag label default command args}
 
+    # Focus in the tag. Currently works only for entry tag
+    method focusin {tag}
+
     # Get the current value of the widgets (or one widget). Ignored for buttons.
     method get {{tag {}}}
 
@@ -337,6 +340,17 @@ body ::tycho::ToolBar::entry {tag label default command args} {
     set tagsenable($tag) "$itk_component(tag_$tag) configure -state normal"
     set tagsdisable($tag) "$itk_component(tag_$tag) configure -state disabled"
 }
+
+#####################################################################
+#### focus
+# This needs to be redefined because focusing in on an entire toolbar
+# does not do anything. Currently this is reconfigured to focus on
+# entries.
+#
+body ::tycho::ToolBar::focusin {tag} {
+    focus $itk_component(entrysite).tag_$tag
+}
+
 
 #####################################################################
 #### get
