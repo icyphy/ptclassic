@@ -564,6 +564,12 @@ ifdef SDF
 		LIBFILES += $(LIBDIR)/libsdfcontribstars.$(LIBSUFFIX) \
 			$(LIBDIR)/libsdfcontrib.$(LIBSUFFIX)
 	endif
+	ifdef SDFVIS
+		# Ultrasparc Visual Instruction Set (VIS) stars
+		CUSTOM_DIRS += $(SDFDIR)/vis/stars
+		STARS += $(LIBDIR)/sdfvisstars.o
+		LIBS += $(VSDKHOME)/util/vis.il
+	endif
 	CUSTOM_DIRS += $(SDFDIR)/stars
 	STARS += $(LIBDIR)/sdfstars.o 
 	ifdef CG
