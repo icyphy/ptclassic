@@ -36,9 +36,13 @@
 # Ptolemy style makefile by Christopher Hylands (11/94)
 
 # Note that tkoct and oct2ptcl use libraries from top.  tkoct uses libraries
-# from tkgraph.
-DIRS = 		tkgraph top tkoct oct2ptcl
-PTOLEMY = 	../../..
+# from tkgraph.  We don't usually build tkoct and tkgraph.
+DIRS = 		top oct2ptcl #tkoct tkgraph
+
+# Don't define PTOLEMY as a relative pathname or oct2ptcl will
+# have an incorrect rpath and you won't be able to find the libraries
+# at runtime
+#PTOLEMY = 	../../..
 
 MAKEVARS =	\
 		"PTARCH=$(PTARCH)" 
@@ -47,7 +51,7 @@ makefiles all install clean sources depend realclean checkjunk sccsinfo:
 	 @for x in $(DIRS); do \
 	 	cd $$x ; \
 		echo making $@ in $$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) PTOLEMY=../../../.. VPATH=../../../../src/octtools/tkoct/$$x $@ ;\
+		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../../src/octtools/tkoct/$$x $@ ;\
 	  	cd .. ; \
 	 done
 
