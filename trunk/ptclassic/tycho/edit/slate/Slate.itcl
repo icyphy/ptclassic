@@ -749,12 +749,11 @@ body ::tycho::Slate::moverelease {id} {
 #######################################################################
 #### moveto
 #
-# Move the given _aspect_ of one or more items to the absolute
-# location given by
-# _x_ and _y_. If the arguments contain the *-shape* option,
-# the this shape is used instead of the default.
-# If a tag is specified and the tag denotes more than one item,
-# then the items are treated as a rectangle.
+# Move the given _aspect_ of one or more items to the absolute location
+# given by _x_ and _y_. If the arguments contain the *-shape* option,
+# the this shape is used instead of the default. If a tag is specified
+# and the tag denotes more than one item, then the items are treated
+# as a rectangle.
 #
 body ::tycho::Slate::moveto {tag x y aspect args} {
     set current [eval [list aspect $tag $aspect] $args]
