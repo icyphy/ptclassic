@@ -1,0 +1,280 @@
+\c Version $Id$
+\node CP Domain
+\chapter{CP Domain}
+
+\Author{Seungjun Lee}
+\cindex{Lee, S.}
+\Contrib{Sangjin Hong \\
+Thomas M. Parks}
+\cindex{Hong, S.}
+\cindex{Parks, T.}
+
+\date{$Date$}
+
+\node Execution Model
+\section{Execution Model}
+
+When the simulation starts, the \code{go} method of each block is
+converted into a separate process that runs independently.  A process
+will \dfn{block} when it tries to communicate with another process and
+the communication is not possible.  The process will resume as soon as
+the blocking condition is resolved, e.g. the communication channel
+becomes available or new data arrives at a porthole.  A process can
+explicitly \dfn{suspend} itself for a period of time.  A suspended
+process is resumed by the scheduler after the specified amount of time
+has passed.  A process \dfn{terminates} when the \code{go} method
+returns.
+
+It is assumed that a block executes in zero simulated time:  the global
+clock does not advance while a block is running.  A process should
+be suspended explicitly to model the execution delay, which allows the
+global clock to advance.  Consider a simple server that waits for input
+data, processes it, and sends the result back through the output porthole:
+
+\begin{example}
+go() \{
+    while (TRUE) \{
+        msgReceive(data, input);
+        result = processData(data);
+        waitFor(delay);
+        msgSend(result, output);
+    \}
+\}
+\end{example}
+
+The \code{go} method is specified with an infinite loop, which is
+typical for a CP block.  In \code{msgReceive}, the process receives
+\var{data} from the \var{input} porthole.  The process blocks if
+\var{data} is not available and \code{msgReceive} does not return until
+it is received.  Once \code{msgReceive} returns, and the server
+processes the \var{data} in \code{processData}.  The execution of
+\code{processData} is assumed to take zero time and the global clock
+does not advance.  To model the execution time, use \code{waitFor}.
+The statement \samp{waitFor(\var{delay})} suspends the process and
+places it in the scheduler's list of waiting processes to be resumed
+after \var{delay} time units.  When the global clock advances by
+\var{delay} time units, the server process resumes execution.  It sends
+out the \var{result} through the \var{output} porthole.  The execution
+blocks until it is sent successfully and \code{msgSend} returns.  This
+whole sequence is repeated indefinitely.
+
+\node Writing CP Stars
+\section{Writing CP Stars}
+
+A CP star can be viewed as a process that executes independently
+once the simulation starts.  Hence, the behavior of a block is usually
+described by an infinite loop.  Many methods are provided to make
+modeling at a high level of abstraction easier.
+
+Blocks communicate with each other by passing messages through
+portholes.  The communication protocol for a porthole is \emph{block on
+full/empty} by default.  The following methods of the \code{CPPortHole}
+class can be used to change the protocol or examine the state of the
+porthole.
+
+\begin{indexlist}{CPPortHole}
+
+\method{void}{setProtocol}{(Protocol \var{mode})}
+Set the porthole's protocol to \var{mode}.
+Output portholes can have the following protocols:
+\begin{description}
+\item[BLOCK]  block on full
+\item[OVERWRITE] overwrite on full
+\item[IGNORE] ignore on full
+\end{description}
+Input portholes can have the following protocols:
+\begin{description}
+\item[BLOCK] block on empty
+\item[PREVIOUS] previous on empty
+\item[IGNORE] ignore on empty
+\end{description}
+
+\method{Protocol}{getProtocol}{()}
+Return the porthole's protocol.
+
+\method{int}{transReady}{()}
+Return \samp{TRUE} if the porthole is ready for a communication transaction.
+
+\end{indexlist}
+
+The following methods of the \code{CPStar} class are used for inter-process
+communication and process synchronization.
+
+\begin{indexlist}{CPStar}
+
+\method{double}{currentTime}{()}
+Get the current value of the global clock, which is maintained by the
+scheduler.
+
+\method{double}{getRandom}{(double \var{max})}
+Return a random number between zero and \var{max}.  This is useful for
+modeling stochastic behavior.
+
+\method{void}{waitFor}{(double \var{delay})}
+Suspend the current process until \var{delay} units of simulated time
+have elapsed.
+
+\method{int}{msgReceive}{(int& \var{data}, InCPPort& \var{port}, double \var{timeout} = -1)}
+\code{(float& \var{data}, InCPPort& \var{port}, double \var{timeout} = -1)} \\
+\code{(Envelope& \var{data}, InCPPort& \var{port}, double \var{timeout} = -1)} \\
+Receive \var{data} through a \var{port}.  Multiple versions are
+available to support different types of \var{data}.  Return immediately
+if the protocol is either \samp{PREVIOUS} or \samp{IGNORE}.  If the
+protocol is \samp{BLOCK}, then return only after the transaction is
+complete or \var{timeout} units of simulated time have elapsed.  The
+default \var{timeout} of \samp{-1} corresponds to an infinite amount of
+time.
+
+\method{int}{msgReceive}{(MultiInCPPort& \var{ports})}
+Clear out received data from a set of input \var{ports}.
+
+\method{int}{msgSend}{(int \var{data}, OutCPPort& \var{port}, double \var{timeout} = -1)}
+\code{(float \var{data}, OutCPPort& \var{port}, double \var{timeout} = -1)} \\
+\code{(Envelope \var{data}, OutCPPort& \var{port}, double \var{timeout} = -1)} \\
+Send \var{data} through an output \var{port}.  Multiple versions are
+available to support different types of \var{data}.  Return immediately
+if the protocol is either \samp{OVERWRITE} or \samp{IGNORE}.  If the
+protocol is \samp{BLOCK}, then return only after the transaction is
+complete or \var{timeout} units of simulated time have elapsed.  The
+default \var{timeout} of \samp{-1} corresponds to an infinite amount of
+time.
+
+\method{int}{msgSend}{(int \var{data}, MultiOutCPPort& \var{ports})}
+\code{(float \var{data}, MultiOutCPPort& \var{ports})} \\
+\code{(Envelope \var{data}, MultiOutCPPort& \var{ports})} \\
+Broadcast \var{data} through a set of output \var{ports}.  Multiple
+versions are available to support different types of \var{data}.  Return
+immediately if the protocol is either \samp{OVERWRITE} or
+\samp{IGNORE}.  If the protocol is \samp{BLOCK}, then return only after
+the transaction is complete.
+
+\method{int}{waitAll}{(int \var{number}, ...)}
+Wait for all of the listed portholes to be ready for communication.
+The first argument specifies the \var{number} of remaining arguments,
+which must be of type \samp{PortHole*} or \samp{MultiPortHole*}.
+Return the number of ready portholes, or \samp{-1} on error.
+
+\method{int}{TWaitAll}{(double \var{timeout}, int \var{number}, ...)}
+This method is the same as \code{waitAll} except that it will return
+after \var{timeout} units of simulated time have elapsed even if the
+listed portholes are not ready.
+
+\method{int}{waitAny}{(int \var{number}, ...)}
+Wait for any of the listed portholes to be ready for communication.
+The first argument specifies the \var{number} of remaining arguments,
+which must be of type \samp{PortHole*} or \samp{MultiPortHole*}.
+Return the number of ready portholes, or \samp{-1} on error.
+
+\method{int}{TWaitAny}{(double \var{timeout}, int \var{number}, ...)}
+This method is the same as \code{waitAny} except that it will return
+after \var{timeout} units of simulated time have elapsed even if the
+listed portholes are not ready.
+
+\method{CPPortHole*}{waitOne}{(int \var{number}, ...)}
+Wait for one of the listed portholes to be ready for communication.
+The first argument specifies the \var{number} of remaining arguments,
+which must be of type \samp{PortHole*} or \samp{MultiPortHole*}.
+Return a pointer to a ready porthole.  If more than one porthole is
+ready, then choose a porthole randomly.
+
+\method{CPPortHole*}{TWaitOne}{(double \var{timeout}, int \var{number}, ...)}
+This method is the same as \code{waitAny} except that it will return
+after \var{timeout} units of simulated time have elapsed even if the
+listed portholes are not ready.  In this case the return value will be
+\samp{NULL}.
+
+\end{indexlist}
+
+The methods \code{waitAll}, \code{waitAny}, and \code{waitOne} only
+examine the availability of data; they do not actually
+transfer data.  These methods should be used with \code{msgReceive} or
+\code{msgSend} to complete the data transaction.  The \code{waitAll}
+method can be used to describe \emph{data-driven} behavior as in SDF.
+The following example shows the usage of \code{waitAll} in the description
+of two-input adder:
+
+\begin{example}
+go \{
+    while (TRUE) \{
+        waitAll(2, &in1, &in2);
+        msgReceive(x1, in1);
+        msgReceive(x2, in2);
+        waitFor(delay);
+        msgSend(x1+x2, out);
+    \}
+\}
+\end{example}
+
+The \code{waitAny} method is useful for \emph{event-driven} modeling as in the
+DE domain.  It is usually followed by \code{transReady} to
+determine which portholes are ready.
+
+\begin{example}
+go \{
+    while (TRUE)\{
+        waitAny(2, &in1, &in2);
+        if (transReady(in1)) msgReceive(data, in1);
+        if (transReady(in2)) msgReceive(data, in2);
+        msgSend(data, out);
+    \}
+\}
+\end{example}
+
+The \code{waitOne} method can describe non-deterministic behavior.  It
+is implemented as the combination of \code{waitAny} and random
+selection.  It waits for any of the portholes to become ready.  When
+there are multiple ready portholes at the same time, it chooses one
+randomly.
+
+The following code shows the usage of \emph{TWaitAny()} in clock generator with 
+asynchronous \var{reset}.  It generates pulses with a given period.  After
+generating a pulse, it waits for a certain interval unless there is a
+\var{reset} signal.  If the \var{reset} arrives during the waiting period,
+the clock restarts from the moment the \var{reset} signal is asserted.  
+
+\begin{example}
+go \{
+    while (TRUE)\{
+        msgSend(data, output);
+        if (TWaitAny(delay, 1, &reset)) msgReceive(data, reset);
+    \}
+\}
+\end{example}
+
+\subsection{Support for ANYTYPE}
+
+Ptolemy allows the data type of a porthole to be determined
+dynamically.  If a porthole's data type is specified as
+\samp{ANYTYPE}, then the data type is inherited from the porthole it is
+connected to.  This scheme is quite useful for implementing generic
+blocks such as \code{Fork} \code{Queue} and \code{Merge}.  Within these
+blocks, data is never evaluated but is just transmitted untouched.
+
+\samp{ANYTYPE} is also supported in the CP domain, but a little caution
+needs to be taken.  A CP block sends and receives data through
+\code{msgReceive} and \code{msgSend}, and the data type must be
+specified when they are called.  Therefore, these methods cannot be called for
+portholes with \samp{ANYTYPE}.  In this case, the \code{receiveData} and
+\code{sendData} methods of the \code{CPPortHole} class must be
+used directly.  For example:
+
+\begin{example}
+input \{
+    name \{ in \}
+    type \{ anytype \}
+\}
+output \{
+    name \{ out \}
+    type \{ =in \}
+\}
+protected \{
+    Queue buffer;
+\}
+go() \{
+    in.receiveData();
+    buffer.put((in%0).clone());
+    Particle *p = (Particle*) buffer.get();
+    out%0 = *p;
+    out.sendData();
+\}
+\end{example}
