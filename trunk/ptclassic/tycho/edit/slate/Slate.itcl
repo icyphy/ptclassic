@@ -849,7 +849,6 @@ body ::tycho::Slate::recreate {description args} {
 # primary (IconFrame, for example), will need to do this.
 #
 body ::tycho::Slate::region {tag args} {
-puts $tag
     set rectangular 0
     set single 1
     if { [string match {[0-9]*} $tag] } {
