@@ -90,6 +90,7 @@ void FSMStateStar::begin() {
 }
 
 int FSMStateStar::compOneWriterCk() {
+    int l;
     for (int i=0; i<numConds; i++)
         if (!preemptive[i])
         for (int j=0; j<parsedAct[i].size(); j++)
@@ -98,7 +99,7 @@ int FSMStateStar::compOneWriterCk() {
 		    InfString buf = "The output \"";
 		    StringListIter nextNm(slave->outNmList);
 		    const char* str = NULL;
-		    for (int l=0; l<=k; l++)   str = nextNm++;
+		    for (l=0; l<=k; l++)   str = nextNm++;
 		    buf << str;
 		    buf << "\" in the action of the non-preemptive ";
 		    buf << "transtion from state \"";
@@ -241,10 +242,11 @@ int FSMStateStar::ioNmLists(StringList& inNmList, StringList& outNmList, Star* w
 // If no condition is TRUE, return (1) condNum = -1 and (2) "this" state.
 FSMStateStar * FSMStateStar::nextState (int& condNum, int preemption) {
       InfString buf;
-
       int* result = new int[numConds];
       int checkResult = 0;
-      for (int i = 0; i < numConds; i++) {
+      int i; 
+
+      for (i = 0; i < numConds; i++) {
 	if (preemptive[i] == preemption) {
 	  // If the preemptiveness of the i'th arc is equal to "preemption",
 	  // then evaluate the corresponding condition. 

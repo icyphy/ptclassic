@@ -180,7 +180,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	go {
 	    StringList out;
-	    for (int i = 1; i <= input.numberPorts(); i++) {
+	    int i;
+	    for (i = 1; i <= input.numberPorts(); i++) {
 		temp = i;
 		out << "\t$starSymbol(ins)[" << i-1 << "] = $ref(input#temp);\n";
 	        addCode((const char*) out);

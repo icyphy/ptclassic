@@ -48,6 +48,7 @@ char** strParser(const char* string,int& numStr,const char* type) {
     char** parsedStr = 0;
     int start = 0;
     int end = 0;
+    int i;
 
     if (strcmp(type, "double-quote") == 0) {
       int numQuote = 0;
@@ -120,7 +121,7 @@ char** strParser(const char* string,int& numStr,const char* type) {
       }
 	
       parsedStr[numStr] = (char *) new char[end-start+1];
-      for (int i = 0; i < end-start; i++) {
+      for (i = 0; i < end-start; i++) {
 	parsedStr[numStr][i] = string[start+i];
       }
       parsedStr[numStr][i] = '\0'; 

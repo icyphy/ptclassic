@@ -186,12 +186,14 @@ void MacroParProcs :: copyBigSchedule(MacroNode* node, IntArray& avail) {
 	// processor index
 	int ix = pf->assignedTo(1,0);
 
+        int i;
+
 	// schedule comm.
 	prepareComm(node);
 	scheduleIPC(ix);
 
 	// fill out the array pIndex[], and avail[].
-	for (int i = 0; i < optNum; i++)
+	for (i = 0; i < optNum; i++)
 		pIndex[i] = pf->assignedTo(1,i);
 
 	int ref = getProc(ix)->getAvailTime();
@@ -216,8 +218,8 @@ int MacroParProcs :: scheduleParNode(ParNode* pnode) {
 
 	// Compare the processor availability and the startTime profile
 	int tempIx;
-	int tempMax, refMin = -1;
-	for (int i = 0; i < num; i++) {
+	int i, tempMax, refMin = -1;
+	for (i = 0; i < num; i++) {
 		if (pf->getStartTime(i) == 0) {
 			tempIx = pf->assignedTo(invocNum,i);
 			tempMax = getProc(tempIx)->getAvailTime();

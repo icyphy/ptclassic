@@ -185,6 +185,7 @@ for (i = 0; i < $val(numIn); i++) fclose($starSymbol(fp)[i]);
 }
 
 	wrapup {
+		int i;
 		addCode("{\n");
 		addCode("int i;\n");
 
@@ -228,7 +229,7 @@ for (i = 0; i < $val(numIn); i++) fclose($starSymbol(fp)[i]);
 		}
 
 		// put file names
-		for (int i = 0; i < int(numIn); i++) {
+		for (i = 0; i < int(numIn); i++) {
 			cmd << target()->name() << "_$starSymbol(temp)";
 			cmd << i << " ";
 		}

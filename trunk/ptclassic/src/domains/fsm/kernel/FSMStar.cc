@@ -40,8 +40,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Define firing
 int FSMStar :: run() {
+        int i;
 	BlockPortIter next(*this);
-	for(int i = numberPorts(); i > 0; i--)
+	for(i = numberPorts(); i > 0; i--)
 		(next++)->receiveData();
 	int status = Star::run();
 	// we send the data even on error

@@ -290,8 +290,9 @@ SPureSched::~SPureSched() {
 }
 
 void SPureSched::clearOutput(int value) {
+    int indx;
     // Clear output buffers corresponding to the internal events.
-    for (int indx=0; indx<internalEventNm.numPieces(); indx++)
+    for (indx=0; indx<internalEventNm.numPieces(); indx++)
       myAllOutBuf[indx] = value;
 
     // For output portholes.
@@ -309,8 +310,9 @@ void SPureSched::clearOutput(int value) {
 }
 
 void SPureSched::receiveData() {
+    int indx;
     // Internal events are fed back from previous iteration.
-    for (int indx=0; indx<internalEventNm.numPieces(); indx++)
+    for (indx=0; indx<internalEventNm.numPieces(); indx++)
       myAllInBuf[indx] = myAllOutBuf[indx];
 
     // Grab data for input portholes.
@@ -417,10 +419,11 @@ void SPureSched::sendData() {
 
 // Setup input/output/internal event buffers.
 int SPureSched::setupIOBuf() {
+    int i;
     int numAllInputs = internalEventNm.numPieces()+myInPorts->numberPorts();
     delete [] myAllInBuf;
     myAllInBuf = new int[numAllInputs];
-    for (int i=0; i<numAllInputs; i++) {
+    for (i=0; i<numAllInputs; i++) {
       myAllInBuf[i] = 0;
 
       InfString buf = "input(";
