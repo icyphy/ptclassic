@@ -130,6 +130,12 @@ public:
 // change the domain
 	int
 	setDomain(const char* newDomain);
+
+// set the definition source
+	void setDefinitionSource(const char* source);
+
+// read the definition source
+	inline const char* definitionSource() const { return defSource; }
 		
 // Make a new, identical galaxy
 	Block *makeNew() const;
@@ -169,6 +175,9 @@ public:
 // Destructor
 	~InterpGalaxy();
 
+	// reset the Galaxy back to its state preserved in the action list
+	void reset();
+
 protected:
 	// find a star porthole, with and without error reporting
 	PortHole* findPortHole(const char* star,const char* port);
@@ -192,13 +201,11 @@ protected:
 	// process action list, used by copy and reset methods
 	void processActionList(const StringList&);
 
-	// reset the Galaxy back to its state preserved in the action list
-	void reset();
-
 private:
 	StringList actionList;	// saves actions used in building galaxy
 	StringList initList;	// actions to be done by initialize()
 	const char* myClassName;
 	const char* innerDomain;
+	const char* defSource; // where definition came from
 };
 #endif
