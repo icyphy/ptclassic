@@ -63,7 +63,11 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	README.txt \
 	pkgIndex.tcl
 
-MISC_FILES =  $(DIRS) adm tclIndex
+MISC_FILES =  $(DIRS) tclIndex
+
+# make checkjunk will not report OPTIONAL_FILES as trash
+# make realclean removes OPTIONAL_FILES
+OPTIONAL_FILES = 	adm
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF = tclIndex
