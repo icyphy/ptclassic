@@ -457,13 +457,15 @@ body ::tycho::File::constructor {args} {
 	    -underline 0 \
 	    -accelerator "C-x k" \
 	    -command "$this nextWindow; delete object $this"
-    
-    $itk_component(fileMenu) add command \
-	    -label Quit \
-	    -underline 0 \
-	    -accelerator "C-x C-c" \
-	    -command "::tycho::TopLevel::exitProgram"
-    
+ 
+    if {$tychoNoRegExit == 0} {
+	$itk_component(fileMenu) add command \
+		-label Quit \
+		-underline 0 \
+		-accelerator "C-x C-c" \
+		-command "::tycho::TopLevel::exitProgram"
+    }
+
     # Undo the binding in the base class, where Return dismisses
     # the window.
     bind $prefix <Return> {}
