@@ -33,7 +33,7 @@ Short descriptor
 .DM domain_name derived_from
 .SV 0. % I % "date"  \" star version number (without the spaces in % I %)
 .AL "Author list, separated by commas, terminated with a period."
-.AC "Acknolgedements"
+.AC "Acknowledgements"
 .CO "copyright info"
 .LO "location of demo"
 .IH
