@@ -3,7 +3,7 @@
 .SD
 This demo shows the use of the Multiple Signal Classification (MUSIC)
 algorithm to identify three sinusoids in noise that have frequencies very
-close to each other.
+close to one another.
 .DE
 .LO "$PTOLEMY/src/domains/sdf/matrix/demo"
 .DM SDF Universe
@@ -43,6 +43,6 @@ star.
 S. Haykin, \fIModern Filters\fR, pp. 330-331, 335-336,
 Macmillan Publishing Company, New York, 1989.
 .SA
-SVD_M,
-MUSIC_M.
+MUSIC_M,
+SVD_M.
 .ES
