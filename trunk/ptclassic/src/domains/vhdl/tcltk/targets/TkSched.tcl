@@ -608,7 +608,7 @@ proc DrawToken { token x y topOrBottom } {
 	    -fill white \
 	    -outline green \
 	    -tag "token $token"]
-    set textID [.view.c create text [expr $x+10] [expr $y+10] \
+    set textID [.view.c create text [expr $x+5] [expr $y+5] \
 	    -anchor nw -text $token -tag "token $token"]
 
     # Associate the token ID and the node with each other
