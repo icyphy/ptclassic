@@ -101,8 +101,19 @@ class ::tycho::HTML {
     # Override the slowNetwork preference for this html browswer.
     itk_option define -image image Image 0
 
+    # If true (the default), underline hyperlinks.
+    itk_option define -underlinelinks underlineLinks UnderlineLinks 1
+
     # Offset from the nominal 14 points for the font sizes.
     itk_option define -size size Size 2
+
+    # The default display font -- currently an X font, but should
+    # be made symbolic in Tk 8.0
+    itk_option define -displayfont displayFont Font [::tycho::font Times 14]
+
+    # The default constant-width font -- currently an X font, but should
+    # be made symbolic in Tk 8.0
+    itk_option define -cwfont cwFont Font [::tycho::font Courier 14]
 
     constructor {args} {}
     destructor {}
@@ -237,6 +248,108 @@ configbody ::tycho::HTML::size {
     HMset_state [textWinName] -size $itk_option(-size)
 }
 
+#########################################################################
+#### -cwfont configuration
+# Parse the given X font to figure out what font family, size,
+# and style to use for constant-width fonts, and modify the
+# HMtag_map array accordingly.
+#
+configbody ::tycho::HTML::cwfont {
+    global HMtag_map
+
+    set f [::tycho::FontManager::parseFont $itk_option(-cwfont)]
+
+    # Get the initial font attributes used by the renderer
+    # and overwrite the family, size, and style
+    switch -exact [string tolower [lindex $f 2]] {
+	"roman" {
+	    set weight medium
+	    set style r
+	}
+	"bold" {
+	    set weight bold
+	    set style r
+	}
+	"italic" {
+	    set weight medium
+	    set style i
+	}
+	"bolditalic" {
+	    set weight bold
+	    set style i
+	}
+    }
+    # Process each tag -- "tcl" is treated specially in HMtag_tcl
+    foreach tag {code kbd pre tt} {
+	array set temp $HMtag_map($tag)
+	# Remove spaces from family name
+	set temp(family) [join [lindex $f 0] ""]
+	set temp(size) [lindex $f 1]
+	# "kbd" tag is always bold
+	if { $tag != "kbd" } {
+	    set temp(weight) $weight
+	}
+	set temp(style) $style
+	set HMtag_map($tag) [array get temp]
+    }
+
+    # Re-render the window. In theory, all that should be necessary
+    # is to change the font attributes for all tags, but...
+    ::tycho::HTML::render $this
+}
+
+#########################################################################
+#### -displayfont configuration
+# Parse the given X font to figure out what font family, size,
+# and style to use for the display font, then set it in the
+# HMinitialtag_map array.
+#
+configbody ::tycho::HTML::displayfont {
+    global HMinitialtag_map
+
+    set f [::tycho::FontManager::parseFont $itk_option(-displayfont)]
+    
+    # Get the initial font attributes used by the renderer
+    # and overwrite the family, size, and style
+    array set temp $HMinitialtag_map
+    # Remove spaces from family name
+    set temp(family) [join [lindex $f 0] ""]
+    set temp(size) [lindex $f 1]
+    switch -exact [string tolower [lindex $f 2]] {
+	"roman" {
+	    set temp(weight) medium
+	    set temp(style) r
+	}
+	"bold" {
+	    set temp(weight) bold
+	    set temp(style) r
+	}
+	"italic" {
+	    set temp(weight) medium
+	    set temp(style) i
+	}
+	"bolditalic" {
+	    set temp(weight) bold
+	    set temp(style) i
+	}
+    }
+    set HMinitialtag_map [array get temp]
+
+    # Re-render the window. In theory, all that should be necessary
+    # is to change the font attributes for all tags, but...
+    ::tycho::HTML::render $this
+}
+
+#########################################################################
+#### -underlinelinks configuration
+# Set the text format for the "link" tag to turn underlining on or off.
+#
+configbody ::tycho::HTML::underlinelinks {
+    # Modifications on configuration in the HTML library:
+    $itk_component(text) tag configure link \
+	    -underline $itk_option(-underlinelinks)
+}
+
 ###################################################################
 #
 body ::tycho::HTML::constructor {args} {
@@ -279,9 +392,6 @@ body ::tycho::HTML::constructor {args} {
     $text tag bind link <Enter> "$this linkEnter %x %y"
     $text tag bind link <Leave> "$this statusbar puts {}"
 
-    # Modifications on configuration in the HTML library:
-    $text tag configure link -underline 1
-
     # Additions:
     $text tag configure subscript -offset -6
     $text tag configure superscript -offset +6
@@ -293,11 +403,14 @@ body ::tycho::HTML::constructor {args} {
     # Subscribe to the preference set
     preference subscribeoptions $this \
 	    -textfont textFont \
+	    -displayfont displayFont \
+	    -cwfont cwFont \
 	    -textforeground textForeground \
 	    -textbackground textBackground \
 	    -relief textRelief \
 	    -textwidth textWidth \
-	    -textheight textHeight
+	    -textheight textHeight \
+	    -underlinelinks underlineLinks
 
     # Setup Special menu
     menubar addMenu Special -underline 0
@@ -331,7 +444,11 @@ body ::tycho::HTML::constructor {args} {
         }
     }
 
-    set sizeName($this) [preference get fontSize]
+    # Now that the preferences font setting control font sizes,
+    # initialize this variable to "small", since that has a zero
+    # offset.
+    # set sizeName($this) [preference get fontSize]
+    set sizeName($this) "small"
     configure -size $sizes($sizeName($this))
 
     # Modify the menu commands appropriately.
@@ -1590,9 +1707,11 @@ proc HMtag_tcl {win param text} {
         set var(Ttclq) tclq
     }
 
-    # Reduce the size because courier fonts on X window systems
-    # are absurdly large.  Also tag the text "tcl".
-    HMstack $win {} "Ttcl tcl size [expr [lindex $var(size) end] - 2]"
+    # We used to reduce the size here to compensate for the
+    # difference in size of Courier and Times fonts. Now that
+    # the size is set by user preferences we let the user
+    # set it. Also tag the text "tcl".
+    HMstack $win {} "Ttcl tcl size [lindex $var(size) end]"
 }
 
 proc HMtag_/tcl {win param text} {
