@@ -56,14 +56,14 @@ Error :: warn(cc* m1, cc* m2, cc* m3) {
 
 void
 Error :: error (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
-	StringList nam = o.readFullName();
+	StringList nam = o.fullName();
 	PigiErrorMark(nam);
 	outMsg(nam, 0, m1, m2, m3);
 }
 
 void
 Error :: warn (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
-	StringList nam = o.readFullName();
+	StringList nam = o.fullName();
 	PigiErrorMark(nam);
 	outMsg(nam, 1, m1, m2, m3);
 	FindClear();
@@ -105,7 +105,7 @@ static void info(cc* obj, cc* m1, cc* m2, cc* m3) {
 
 void
 Error :: message (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
-	StringList nam = o.readFullName();
+	StringList nam = o.fullName();
 	info(nam, m1, m2, m3);
 }
 
@@ -118,6 +118,6 @@ Error :: message (cc* m1, cc* m2, cc* m3) {
 int Error :: canMark() { return 1;}
 
 void Error :: mark(const NamedObj& o) {
-	StringList n = o.readFullName();
+	StringList n = o.fullName();
 	PigiErrorMark(n);
 }
