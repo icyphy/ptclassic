@@ -62,11 +62,10 @@ deallocating memory for the objects, etc.
 class Link {
 	friend class LinkedList;
 	friend class LinkedListIter;
-public:
-	Link(Pointer,Link*); 
 protected:
 	Link *next,*previous; 
 	Pointer e; 
+	Link(Pointer,Link*); 
 	void remove();
 };
 
