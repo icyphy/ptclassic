@@ -514,10 +514,8 @@ extern int errno;
 #endif
 
 /* Is char* environ defined? See octtools/Packages/vov/lib.c */
-#if defined(PTHPPA) || (defined(PTLINUX) && (!defined(__GLIBC__) || (__GLIBC__ < 2)))
-/* Under PTHPPA, and PTLINUX , don't need environ declaration.
- * Under PTLINUX with egcs1.0.2 and glibc-2.0.6, we do need it
- */
+#if defined(PTHPPA) || defined(PTLINUX)
+/* Under PTHPPA and PTLINUX, we already have environ declaration. */
 #else
 #define NEED_ENVIRON_DECL
 #endif
