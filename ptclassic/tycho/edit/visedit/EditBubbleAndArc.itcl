@@ -131,6 +131,9 @@ class ::tycho::EditBubbleAndArc {
     # Utility function
     method chooseCursor {x y} 
 
+    # Open a help window.
+    method help {}
+
     ##########################################################################
     ####                         protected methods                        ####
 
@@ -1161,6 +1164,17 @@ body ::tycho::EditBubbleAndArc::find_close_node {x y} {
 	}
     }
     return $close_node
+}
+
+#######################################################################
+#### help
+# Open a help window.
+#
+body ::tycho::EditForest::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+        [file join $TYCHO edit visedit doc usersGuides \
+	    EditBubbleAndArcHelp.html] html
 }
 
 ######################################################################

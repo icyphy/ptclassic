@@ -67,6 +67,9 @@ class ::tycho::EditSTD {
     # getInfo
     method getInfo {} 
  
+    # Open a help window.
+    method help {}
+
     # Highlight those states with the name.
     method highlightState {name}
  
@@ -352,6 +355,17 @@ body ::tycho::EditSTD::getInfo {} {
 	    \n# of arcs: [llength $arcs]\
 	    \nInitial state: $init_state "
     $w centerOnScreen
+}
+
+#######################################################################
+#### help
+# Open a help window.
+#
+body ::tycho::EditForest::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+        [file join $TYCHO edit visedit doc usersGuides \
+	    EditSTDHelp.html] html
 }
 
 ################################################################
