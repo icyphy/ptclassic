@@ -1083,9 +1083,9 @@ body ::tycho::File::toggleReadOnly {} {
     set revclass [::tycho::RevControl::whichRevClass $this]
     if {$revclass != {}} {
         if {![::tycho::resource writable [filename]]} {
-            $revclass::checkOut $this
+            ${revclass}::checkOut $this
         } {
-            $revclass::checkIn $this
+            ${revclass}::checkIn $this
         }
     } {
         # NOTE: Unix-only implementation here.
