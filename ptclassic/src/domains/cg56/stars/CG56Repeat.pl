@@ -24,6 +24,7 @@ For now, we just assume the worst case.
     input {
 	    name {input}
 	    type {anytype}
+	    attributes{P_CIRC}
     }
     output {
 	    name {output}
@@ -35,40 +36,73 @@ For now, we just assume the worst case.
 	    default {2}
 	    desc { Repetition factor. }
     }
+    state {
+	    name {blockSize}
+	    type {int}
+	    default {1}
+	    desc { Size of a block of input data. }
+    }
+
+    protected{
+	    int effectiveNumTimes;
+	   // = numTimes*blockSize
+    }
+
     setup {
-	    output.setSDFParams(int(numTimes),int(numTimes)-1);
-    
+	    effectiveNumTimes = int(numTimes)*int(blockSize);
+	    input.setSDFParams(int(blockSize),int(blockSize)-1);
+	    output.setSDFParams(effectiveNumTimes,effectiveNumTimes-1);    
     }
     codeblock(cbOnce) {
     	move	$ref(input),a
     	move	a,$ref(output)
     }
+    codeblock(cbLoadAddr,"int block"){
+    IF @(int(block))
+    move #$addr(input),r2
+    move #@(int(blockSize)-1),m2
+    move #$addr(output),r1
+    ELSE
+    move #$addr(output),r1
+    move $ref(input),a
+    ENDIF
+    }	   
     codeblock(cbRepLoop) {
-    	move	#$addr(output),r1
-    	move	$ref(input),a
-    	rep	#$val(numTimes)
-    	  move	a,$mem(output):(r1)+
+    rep	 #$val(numTimes)
+    move a,$mem(output):(r1)+
     }
-    codeblock(cbDoLoop) {
-    	move	#$addr(output),r1
-    	move	$ref(input),a
-    	.LOOP	#$val(numTimes)
-    	  move	a,$mem(output):(r1)+
-	.ENDL
-	nop
+    codeblock(cbDoLoop,"int block") {
+    .LOOP	#@(effectiveNumTimes)
+      IF @(int(block))
+      move    $mem(input):(r2)+,a
+      ENDIF
+      move    a,$mem(output):(r1)+
+    .ENDL
+    nop
     }
-
+    codeblock(cbRestoreModulo){
+     move #$$0FFFF,m2
+    }    
     go {
-	/*IF*/ if ( int(numTimes) == 1 ) {
-	    addCode(cbOnce);	// should fork buf instead
-	} else if ( int(numTimes) <= 100 ) {
-	    addCode(cbRepLoop);
-	} else {
-	    addCode(cbDoLoop);
-	}
-    }
+     int block;
+     block = (int(blockSize) > 1);
 
+	/*IF*/ if ( effectiveNumTimes == 1 ) {
+	    addCode(cbOnce);	// should fork buf instead
+	} else {
+	   addCode(cbLoadAddr(block));
+	   if ( effectiveNumTimes <= 100 && !(block)) {
+			 addCode(cbRepLoop);
+	   } else {
+			 addCode(cbDoLoop(block));
+	   }
+	}
+	if (block) addCode(cbRestoreModulo);
+   }
     exectime {
-	    return int(numTimes)+4;
+	if (int(blockSize) > 1) return 2*effectiveNumTimes + 7;
+	else if (int(numTimes)==1) return 2;
+	else if (int(numTimes) > 100) return 3 + int(numTimes);
+	else return 3 + 3 + int(numTimes);
     }
 }
