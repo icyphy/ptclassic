@@ -1,15 +1,18 @@
 $Id$
 
-To print out the entire manual, make sure your .cshrc file has a line like
+To print out the entire manual, make sure your PRINTER environment
+variable is set.  If it isn't (if echo $PRINTER says the variable is
+undefined) you can type (for csh)
+
 	setenv PRINTER lw
 where "lw" is replaced with the name of your printer.
 Then
 	% cd ~ptolemy/doc
 	% make print
 
-Sorry, but you must have write permission in the ptolemy
-directories to do this.  You can either log on as ptolemy (not advised)
-or be in the group "ptolemy" (preferred).
+You no longer need write permission in the ptolemy directories to print
+the manual.  You do need to be able to write to your OWN home directory --
+files named Almagest.main and Almagest.index are created there.
 
 The manual currently consists of the following
 sections:
