@@ -5,31 +5,34 @@
 # Copyright (c) 1996-%Q% The Regents of the University of California.
 # 	All Rights Reserved.
 
-# PTOLEMY and PTARCH are part of the Ptolemy project,  If you don't
-# have Ptolemy installed, you can comment out the two lines below and
-# then set $PTARCH by hand to either:
-# Solaris2.4
-# setenv PTARCH sol2
+# PTOLEMY and PTARCH are part of the Ptolemy project.
+# You can set $PTARCH by hand to either:
+# Solaris2.5
+# setenv PTARCH sol2.5
 # SunOS4.1.3
 # setenv PTARCH sun4
-# HPUX10.01
+# HPUX10.20
 # setenv PTARCH hppa
+
 if (! $?PTOLEMY && $?TYCHO) then
 	if( -f "$TYCHO/../bin/ptarch") setenv PTOLEMY "$TYCHO/.."
 else
-	if (! $?TYCHO) setenv TYCHO /usr/eesww/share/tycho0.1.1/tycho0.1.1
+	if (! $?TYCHO) setenv TYCHO /usr/eesww/share/tycho0.2/tycho0.2
 	if (! $?PTOLEMY) setenv PTOLEMY /usr/eesww/share/ptolemy
 endif
 
 # ITCLDIR should be the location of the untar'd itcl files
-if (! $?ITCLDIR) setenv ITCLDIR /usr/eesww/share/tycho0.1.foo
+if (! $?ITCLDIR) setenv ITCLDIR $TYCHO
 
-# TYCHO should be the location of the tycho distribution
-if ( ! -x "$TYCHO/bin/ptarch") then
-	echo "$TYCHO/bin/ptarch either is not executable or does not exist"
-	echo 'Perhaps you need to set $TYCHO or $PTOLEMY?'
+
+# The value of PTARCH is the architecture.
+if (! $?PTARCH) then
+	if ( ! -x "$ITCLDIR/bin/ptarch") then
+	  echo "$ITCLDIR/bin/ptarch either is not executable or does not exist"
+	  echo 'Perhaps you need to set $ITCLDIR'
+	endif
+	setenv PTARCH ` $ITCLDIR/bin/ptarch`
 endif
-if (! $?PTARCH) setenv PTARCH ` $TYCHO/bin/ptarch`
 
 if ( -f $ITCLDIR/itcl/lib/itcl/itcl/itcl.tcl ) then
 	if ($PTARCH =~ hppa?*) then
