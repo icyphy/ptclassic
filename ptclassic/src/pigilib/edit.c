@@ -126,16 +126,20 @@ static dmTextItem defaultItem = {NULL, 1, dmIncrement, NULL, NULL};
     maxwidth = 0;
 
     /* put formal params (if any) into item list */
-    itemsN = (pList.length + 1) * 2;
+    itemsN = (pList.length + 1) * 3;
     items = (dmTextItem *) calloc(itemsN, sizeof(dmTextItem));
     place = pList.array;
     j = 0;
     for (i = 0 ; i < pList.length; i++) {
+	    /* add in the name, type, value of each param */
 	items[j] = defaultItem;
 	items[j].itemPrompt = "Name";
 	items[j++].value = place->name;
 	width = strlen(place->name);
 	if(maxwidth<width) maxwidth = width;
+	items[j] = defaultItem;
+	items[j].itemPrompt = "Type";
+	items[j++].value = place->type ? place->type : "FLOAT";
 	items[j] = defaultItem;
 	items[j].itemPrompt = "Value";
 	items[j++].value = place->value;
@@ -145,6 +149,9 @@ static dmTextItem defaultItem = {NULL, 1, dmIncrement, NULL, NULL};
     }
     items[j] = defaultItem;
     items[j].itemPrompt = "New name";
+    items[j++].value = "";
+    items[j] = defaultItem;
+    items[j].itemPrompt = "New type";
     items[j++].value = "";
     items[j] = defaultItem;
     items[j].itemPrompt = "New value";
@@ -169,6 +176,7 @@ static dmTextItem defaultItem = {NULL, 1, dmIncrement, NULL, NULL};
 	if (strlen(SkipWhite(items[j].value)) != 0) {
 	    /* copy this name-value pair */
 	    place->name = items[j++].value;
+	    place->type = items[j++].value;
 	    place->value = items[j++].value;
 	    place++;
 	    paramsN++;
