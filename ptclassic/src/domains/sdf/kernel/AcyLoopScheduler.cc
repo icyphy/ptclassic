@@ -76,7 +76,7 @@ Kluwer Academic Publishers, Norwood, MA, 1996
 ****/
 
 // Constructor
-SimpleIntMatrix::SimpleIntMatrix (int nr=1, int nc=1) : nrows(nr), ncols(nc) {
+SimpleIntMatrix::SimpleIntMatrix (int nr, int nc) : nrows(nr), ncols(nc) {
     m = new int *[nr];
     for (int i=0; i<nr; i++) {
 	m[i] = new int[nc];
