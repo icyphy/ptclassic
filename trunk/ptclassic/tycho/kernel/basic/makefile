@@ -52,11 +52,14 @@ TCL_SRCS = \
 	Misc.tcl \
 	Path.tcl \
 	String.tcl \
-	URLPath.tcl
+	URLPath.tcl\
+	tychoMakeClassDAG.tcl
 
 ITCL_SRCS = \
 	Builder.itcl \
 	Object.itcl \
+	Resource.itcl \
+	ResourceFile.itcl \
 	Tycho.tcl \
 	Uninstantiable.itcl
 
@@ -66,7 +69,7 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	makefile \
 	pkgIndex.tcl
 
-MISC_FILES = adm bin demo doc test
+MISC_FILES = adm bin demo doc test tclIndex
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
