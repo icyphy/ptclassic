@@ -39,11 +39,10 @@ VPATH =		$(ROOT)/kernel/gui/test
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-TCL_SRCS = \
+TCL_SRCS =
 
 SIMPLE_TESTS = \
 	testCircularList.itcl \
-	testMail.itcl \
 	testStack.itcl
 
 # Removed testBuilderDialog.itcl until test levels are implemented
