@@ -83,7 +83,7 @@ class ::tycho::EditJava {
 ###################################################################
 #
 body ::tycho::EditJava::constructor {args} {
-
+    global tcl_platform
     eval itk_initialize $args
     
     # Set the fill prefix to be the comment character for Java.
@@ -92,10 +92,16 @@ body ::tycho::EditJava::constructor {args} {
 
     menubar add "Appletviewer" Special -underline 0 \
             -command "$this execProcess appletviewer"
+    if ![::tycho::Exec::execWidgetIsSupported] {
+	menubar disable Appletviewer
+    }
 
     menubar add "Generate doc" Special -underline 0 \
             -command "$this gendoc"
 
+    if {$tcl_platform(platform) == macintosh} {
+	menubar disable "Generate doc"
+    }
 }
 
 #####################################################################
