@@ -110,7 +110,7 @@ end
 
 if ( ! $?TYCHO ) then
 	if ( $?PTOLEMY ) then
-		setenv TYCHO $PTOLEMY/tycho
+		setenv TYCHO "$PTOLEMY/tycho"
 	else
 		setenv TYCHO ~ptolemy/tycho
 		if ( -d "$TYCHO" ) then
@@ -152,37 +152,28 @@ else
 
 	if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 
-	if ( ! -r $PTOLEMY/bin/ptsetup.csh ) then
+	if ( ! -r "$PTOLEMY/bin/ptsetup.csh" ) then
 		echo "Can't find $PTOLEMY/bin/ptsetup.csh"
 		echo "Are you sure Ptolemy is installed?"
 		exit 2
 	endif
 
 	# Set the commonly used environment variables
-	source $PTOLEMY/bin/ptsetup.csh
+	source "$PTOLEMY/bin/ptsetup.csh"
 
-	# We need to set these if we are running a prebuilt Ptolemy
-	# binary that could be located anywhere.
-	# However, itkwish need not have these set
-	# FIXME: Hardwired in tk4.0
-	#	   $PTOLEMY/tycho/kernel/Lib.tcl
-	if ( -r $PTOLEMY/tcltk/itcl/lib/itcl/tk/tk.tcl ) then
-		setenv TCL_LIBRARY $PTOLEMY/tcltk/itcl/lib/itcl/tcl
-		setenv TK_LIBRARY $PTOLEMY/tcltk/itcl/lib/itcl/tk
-	endif
 	# To get tcl/tk man pages before corresponding unix man pages,
 	# and to guess about a reasonable manpath if none is set.
 	if (! $?MANPATH ) then
-	    setenv MANPATH $PTOLEMY/tcltk/tk/man:$PTOLEMY/tcltk/tcl/man:$PTOLEMY/doc/man:/usr/local/man:/usr/man
+	    setenv MANPATH "$PTOLEMY/tcltk/tk/man:$PTOLEMY/tcltk/tcl/man:$PTOLEMY/doc/man:/usr/local/man:/usr/man"
 	else
-	    setenv MANPATH $PTOLEMY/tcltk/tk/man:$PTOLEMY/tcltk/tcl/man:$PTOLEMY/doc/man:$MANPATH
+	    setenv MANPATH "$PTOLEMY/tcltk/tk/man:$PTOLEMY/tcltk/tcl/man:$PTOLEMY/doc/man:$MANPATH"
 	endif
 
-	set bindir = $PTOLEMY/bin.$PTARCH
+	set bindir = (\"\$PTOLEMY/bin.$PTARCH\")
 
 	if ( ! $?prog ) then
 		if ( "$progname" == "tysh.ptiny" || $?tychoptiny ) then
-		    set prog = $bindir/tysh.ptiny
+		    set prog = "$bindir/tysh.ptiny"
 		else
 			if ( "$progname" == "tysh.ptrim" || $?tychoptrim ) then
 			    set prog = $bindir/tysh.ptrim
@@ -239,7 +230,7 @@ if ( $?noconsole ) set prog = ($prog -noconsole)
 if ( $tclscript != "") set prog = ($prog -e $tclscript)
 
 # If neither tyedit or selectPtolemy are set then we are just running itkwish
-if (! -x $prog[1] && ($?tyedit || $?selectPtolemy)) then
+if (! -x `eval $prog[1]` && ($?tyedit || $?selectPtolemy)) then
 	echo "Program does not exist: $prog"
 else
     if (! $?filename || $?tychodebug) then
