@@ -34,7 +34,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	outmulti {
 		name {output}
-		type {anytype}
+		type {= input}
 	}
 	defstate {
 		name {blockSize}
