@@ -81,10 +81,8 @@ ITCL_SRCS = \
 	Graph.itcl \
 	HTML.itcl \
 	HTMLMessage.itcl \
-	HyperGraph.itcl \
 	HyperlinkIndex.itcl \
 	IconIndex.itcl \
-	Index.itcl \
 	IndexBrowser.itcl \
 	Install.itcl \
 	Interchange.itcl \
@@ -94,10 +92,7 @@ ITCL_SRCS = \
 	MenuSupport.itcl \
 	Message.itcl \
 	Model.itcl \
-	ModelDebug.itcl \
-	ModelSchema.itcl \
 	Monitor.itcl \
-	MultiGraph.itcl \
 	MultiPanel.itcl \
 	Object.itcl \
 	PreferenceDialog.itcl \
@@ -107,7 +102,6 @@ ITCL_SRCS = \
 	RevControl.itcl \
 	RevControlSCCS.itcl \
 	RevControlRCS.itcl \
-	Schedule.itcl \
 	Scheduler.itcl \
 	Stack.itcl \
 	StatusBar.itcl \
@@ -117,7 +111,6 @@ ITCL_SRCS = \
 	TopLevel.itcl \
 	TWidget.itcl \
 	Tycho.tcl \
-	UndirectedGraph.itcl \
 	Uninstantiable.itcl \
 	View.itcl \
 	WelcomeMessage.itcl \
