@@ -36,10 +36,10 @@ instance of the named class in the current domain.
 #include "Block.h"
 #include "StringList.h"
 
-class Scheduler;
 class KnownListEntry;
 
 class KnownBlock {
+	friend class KnownBlockIter;
 private:
 	static int currentDomain;
 	static int numDomains;
@@ -68,13 +68,6 @@ public:
 // the current domain, and returns a clone of that block.
 	static Block* clone (const char* name);
 
-// The newSched method takes a string and returns a scheduler of the
-// given type.
-	static Scheduler* newSched (const char* name);
-
-// Argument-less version gives the one for the current domain.
-	static Scheduler* newSched ();
-
 // Return the names of known blocks in the current domain.
 	static StringList nameList();
 
@@ -90,6 +83,19 @@ public:
 // Return true if the named block is dynamically linked.
 	static int isDynamic (const char* type);
 	
+};
+
+// An iterator that steps through the knownlist for a particular domain
+
+class KnownBlockIter {
+private:
+	KnownListEntry* pos;
+	int idx;
+public:
+	KnownBlockIter(const char* dom = 0);
+	const Block* next();
+	const Block* operator++() { return next();}
+	void reset();
 };
 
 #endif
