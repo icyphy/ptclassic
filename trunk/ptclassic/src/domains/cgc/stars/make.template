@@ -79,12 +79,14 @@ PL_SRCS= \
  CGCFixToFloat.pl \
  CGCFloatToCx.pl \
  CGCFloatToFix.pl \
+ CGCFloatToInt.pl \
  CGCFork.pl \
  CGCGAL.pl CGCGGAL.pl \
  CGCGain.pl \
  CGCGainFix.pl \
  CGCImpulse.pl \
  CGCIntegrator.pl \
+ CGCIntToFloat.pl \
  CGCIIDGaussian.pl \
  CGCIIDUniform.pl \
  CGCIntToBits.pl \
