@@ -4,6 +4,7 @@
 #include "Output.h"
 #include "DEStar.h"
 #include "PriorityQueue.h"
+#include "WormConnect.h"
  
 /**************************************************************************
 Version identification:
@@ -75,12 +76,15 @@ void OutDEPort :: sendData ()
    if (dataNew) {
 	putParticle();
 
-	// If the port lies on the Wormhole boundary, skip. Otherwise,
-	// generate an event into the event queue.
+	// If the port lies on the Wormhole boundary, just inform timeStamp.
+	// Otherwise, generate an event into the event queue.
 	if (farSidePort->isItInput() == TRUE) {
 		Star& s = parent()->asStar();
 		DEStar* dp = (DEStar*) &s;
 		dp->eventQ->levelput(farSidePort, timeStamp);
+	} else {
+		EventHorizon* p = (EventHorizon *) farSidePort;
+		p->timeStamp = timeStamp;
 	}
 	
 	dataNew = FALSE;
