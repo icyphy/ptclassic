@@ -128,6 +128,10 @@ STRIP_DEBUG= true
 C_SHAREDFLAGS =
 CC_SHAREDFLAGS =
 
+# mk/userstars.mk uses these vars
+USER_C_SHAREDFLAGS =	$(C_SHAREDFLAGS)
+USER_CC_SHAREDFLAGS =	$(CC_SHAREDFLAGS)
+
 # Libraries are of the form libfoo.$(LIBSUFFIX) 
 LIBSUFFIX = 	a
 

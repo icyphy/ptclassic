@@ -33,6 +33,9 @@ USE_SHARED_LIBS = yes
 C_SHAREDFLAGS =		-K PIC
 # libcgstars.a requires PIC instead of pic
 CC_SHAREDFLAGS =	-PIC
+# mk/userstars.mk uses these vars
+USER_C_SHAREDFLAGS =	$(C_SHAREDFLAGS)
+USER_CC_SHAREDFLAGS =	$(CC_SHAREDFLAGS)
 LIBSUFFIX =		so
 SHARED_LIBRARY_COMMAND =	CC -G -o
 #endif

@@ -107,5 +107,7 @@ FLUSH_CACHE =	flush_cache.o
 # in pigiRpc/makefile, or the make will fail on other archs.
 LIB_FLUSH_CACHE = $(LIBDIR)/flush_cache.o
 
-# If you are trying out the shl_load feature uncomment the line below.
-#SHAREDFLAGS =		-fPIC
+# If you are trying out the shl_load feature uncomment the lines below.
+#USER_CC_SHAREDFLAGS =		-fPIC
+#USER_C_SHAREDFLAGS =		-fPIC
+
