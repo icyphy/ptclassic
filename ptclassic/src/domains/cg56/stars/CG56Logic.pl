@@ -111,15 +111,17 @@ non-zero integer (not necessarily 1).
 	// General cases
 
 	codeblock(prepareAndLoop) {
-	move	#<$addr(input#2),r0		; r0 points to the address of input#2
-	move	$ref(input#1),x1		; load input #1 into x1 and wait for r0
-	mpy	x:(r0)+,x1,a		; a = x0 * x1, save previous a in x1
-	asr	a			; a is integer mult
+	clr	b	#<$addr(input#1)+1,r0	; r0 = address of input block
+	move	$ref(input#1),a	b,y0
 	}
 
-	codeblock(logicAndOpAndLoad) {
-	mpy	x:(r0)+,x1,a	a,x1	; a = x0 * x1, save previous a in x1
-	asr	a			; a is integer mult
+	codeblock(logicAndOpAndLoad,"int numinputs") {
+	do	#@numinputs-1, $label(AndLoop)
+	tst	b	x:(r0)+,b	; test previous and load next input
+	teq	y0,a			; if previous = 0, then a = 0
+$label(AndLoop)
+	tst	b
+	teq	y0,a			; if previous = 0, then a = 0
 	}
 
 	codeblock(logicOrOp) {
@@ -131,13 +133,16 @@ non-zero integer (not necessarily 1).
 	}
 
 	codeblock(beginXor) {
+	move	#<$addr(input#1)+1,r0		; r0 = pointer into input block
 	clr	a	$ref(input#1),b		; a contains result
 	}
 
-	codeblock(XorAccumulator,"int i") {
+	codeblock(logicXorOpAndLoad,"int numinputs") {
+	do	#@numinputs-1, $label(Xor)
 	not	a	a,y0		; save a in y0 and invert a
-	tst	b	$ref(input#@i),b		; test input and read next input
+	tst	b	x:(r0)+,b	; test input and read next input
 	teq	y0,a			; restore a if input != 0
+$label(Xor)
 	}
 
 	codeblock(endXor) {
@@ -198,9 +203,7 @@ non-zero integer (not necessarily 1).
 			}
 			else {
 				addCode(prepareAndLoop);
-				for (i = 3; i <= numinputs; i++ ) {
-					addCode(logicAndOpAndLoad);
-				}
+				addCode(logicAndOpAndLoad(numinputs));
 			}
 			break;
 		    case ORID:
@@ -209,7 +212,7 @@ non-zero integer (not necessarily 1).
 			addCode(header);
 			addCode(loadAccumulator(1));
 			addCode(loadx0(2));
-			for (i = 3; i < input.numberPorts(); i++ ) {
+			for (i = 3; i < numinputs; i++ ) {
 				addCode(logicOrOpAndLoad(i));
 			}
 			addCode(logicOrOp);
@@ -219,9 +222,7 @@ non-zero integer (not necessarily 1).
 			header << "positive logic";
 			addCode(header);
 			addCode(beginXor);
-			for (i = 2; i <= input.numberPorts(); i++ ) {
-				addCode(XorAccumulator(i));
-			}
+			addCode(logicXorOpAndLoad(numinputs));
 			addCode(endXor);
 			break;
 		}
@@ -237,6 +238,8 @@ non-zero integer (not necessarily 1).
 		// oscillator cycles because that's the way it was done in
 		// Gabriel: they simply counted the number of instructions.
 
+		int numinputs = input.numberPorts();
+
 		// Time to read one input and write one output
 		int pairsOfCycles = 2;
 
@@ -249,21 +252,21 @@ non-zero integer (not necessarily 1).
 		    pairsOfCycles += 2;
 		    // fall through
 		  case ANDID:
-		    pairsOfCycles += 2*input.numberPorts();
+		    pairsOfCycles += 2*numinputs + 1;
 		    break;
 
 		  case NORID:
 		    pairsOfCycles += 2;
 		    // fall through
 		  case ORID:
-		    pairsOfCycles += input.numberPorts();
+		    pairsOfCycles += numinputs;
 		    break;
 
 		  case XORID:
 		    pairsOfCycles += 2;
 		    // fall through
 		  case XNORID:
-		    pairsOfCycles += 3*input.numberPorts();
+		    pairsOfCycles += 3*numinputs;
 		    break;
 		}
 
