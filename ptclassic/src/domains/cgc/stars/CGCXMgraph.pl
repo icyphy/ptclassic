@@ -197,7 +197,7 @@ for (i = 0; i < $val(numIn); i++) fclose($starSymbol(fp)[i]);
 		// save File
 		const char* sf = saveFile;
 		if (sf != NULL && *sf != 0) {
-			for (int i = 0; i<int(numIn); i++) {
+			for (i = 0; i<int(numIn); i++) {
 				cmd << "/bin/cat ";
 				cmd << target()->name(); 
 				cmd << "_$starSymbol(temp)" << i << " >> ";
