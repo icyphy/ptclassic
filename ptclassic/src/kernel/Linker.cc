@@ -485,7 +485,7 @@ int Linker::multiLink (int argc, char** argv) {
 	      (char *)NULL)
 	    return FALSE;
 	  
-	if ( (lib_handle = shl_load(objName, BIND_DEFERRED | DYNAMIC_PATH | BIND_VERBOSE  | BIND_FIRST, 0)) == NULL) {
+	if ( (lib_handle = shl_load(objName, BIND_IMMEDIATE | DYNAMIC_PATH | BIND_VERBOSE  | BIND_FIRST, 0)) == NULL) {
 	  StringList msg = "Error linking file ";
 	  msg << objName << " dlopen: " << strerror (errno);
 	  Error::abortRun(msg);
@@ -677,6 +677,13 @@ Linker::invokeConstructors (const char* objName, void * dlhandle) {
 #endif
 	shl_t handle = (shl_t)dlhandle;
 	void (*A_ptr)();
+ 	if (shl_findsym (&handle, ConsName, TYPE_PROCEDURE, &A_ptr)) {
+ 	  StringList msg = "shl_findsym failed :";
+ 	  msg << ConsName << " " << strerror (errno);
+ 	  Error::abortRun (msg);
+ 	  return -1;
+ 	}
+
 	if (shl_findsym (&handle, ConsName, TYPE_PROCEDURE, &A_ptr))
 	  Error::abortRun ("shl_findsym failed");
 
