@@ -446,10 +446,10 @@ body ::tycho::MenuSupport::insertSeparator {before} {
 # Invoke the action for the menu entry.
 #
 # See the Tk menu man page for a full description of the name argument,
-# but briefly index is either a number, 'active', 'end', 'last', 'none'
-# @number or a pattern.  Note that since we are doing an eval of $name
-# you may need to wrap multi-word menu patterns in two levels of curly
-# brackets.
+# but briefly index is either a number, 'active', 'end', 'last', 
+# 'none' @number or a pattern.  Note that since we are doing an eval of
+# $name you may need to wrap multi-word menu patterns in two levels of
+# curly brackets.
 #
 body ::tycho::MenuSupport::invoke {inMenu name} {
     # Check if the menu exists
