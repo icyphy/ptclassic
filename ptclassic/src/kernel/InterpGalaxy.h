@@ -53,6 +53,7 @@ class InterpGalaxy: public Galaxy {
 private:
 	StringList actionList;	// saves actions used in building galaxy
 	NodeList nodes;
+	const char* className;
 
 protected:
 	// find a star porthole
@@ -68,10 +69,20 @@ protected:
 	void copy(const InterpGalaxy&);
 public:
 // constructor: makes an empty galaxy
-	InterpGalaxy() { descriptor = "An interpreted galaxy";}
+	InterpGalaxy() : className("InterpGalaxy")
+		{ descriptor = "An interpreted galaxy";}
+
+// constructor: sets the class name
+	InterpGalaxy(const char* c) {
+		descriptor = "An interpreted galaxy";
+		className = c;
+	}
 
 // copy constructor: duplicates an existing galaxy
 	InterpGalaxy(const InterpGalaxy& g) { copy(g);}
+
+// read the class name
+	const char* readClassName() const {return className; }
 
 // assignment operator: change this galaxy to look like another one
 	InterpGalaxy& operator=(const InterpGalaxy& g) {
