@@ -254,13 +254,13 @@ configbody ::tycho::Subpanel::state {
     switch $itk_option(-state) {
 	closed {
 	    $itk_component(arrow) configure \
-		    -bitmap @img/arrowclose.xbm \
+		    -bitmap @$TYCHO/kernel/img/arrowclose.xbm \
 		    -justify center \
 		    -command "$this open"
 	}
 	open {
 	    $itk_component(arrow) configure \
-		    -bitmap @img/arrowopen.xbm \
+		    -bitmap @$TYCHO/kernel/img/arrowopen.xbm \
 		    -justify center \
 		    -command "$this close"
 
