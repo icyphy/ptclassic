@@ -36,6 +36,13 @@ static char SccsId[]="$Id$";
 #define sv_handler	sa_handler
 #endif
 
+#if defined(__sparc) && !defined(__svr4__)  && defined (__GNUC__)
+/* SunOS4.1.3 under gcc. */
+extern int sigvec(int, struct sigvec *, struct sigvec *);
+extern int setitimer(int, struct itimerval *, struct itimerval *);
+extern int sigpause(int);
+#endif
+
 #ifdef sequent
 
 int  ignoreAlarm( sig, code, scp)
