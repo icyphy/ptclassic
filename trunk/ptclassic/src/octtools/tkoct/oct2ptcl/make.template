@@ -86,7 +86,10 @@ $(DEST): $(BINARY)
 	@echo Installing $(BINARY)
 	rm -f $(DEST);  ln $^ $@
 
-install:	makefile $(OUT)
+install:	makefile $(DEST) $(BINDIR)/$(BINARY)
+
+$(BINDIR)/$(BINARY):
+	(cd $(BINDIR); rm -f $(BINARY); ln -s ../octtools/bin.$(PTARCH)/$(BINARY) .)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
