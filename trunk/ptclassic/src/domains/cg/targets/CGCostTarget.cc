@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
- Programmer:  Raza Ahmed
+ Programmer:  Raza Ahmed and Brian L. Evans
  Date of creation: 07/09/96
 
  Target for the generation of cost of individual stars in the galaxy.
@@ -129,7 +129,7 @@ int CGCostTarget::selectConnectStarBlock(Galaxy* localGalaxy,
     // The matched star will be then added to the passed in galaxy 
     // Then the two ports will be connected within the galaxy
     if (localHole->isItInput()) {
-	StringList starName = "CGDummySource";
+	StringList starName = "CGDummySrc";
 	const char* abbreviation = dataTypeAbbreviation(localHole->type());
 	if (abbreviation == 0) return FALSE;
 	starName << abbreviation;
@@ -141,11 +141,11 @@ int CGCostTarget::selectConnectStarBlock(Galaxy* localGalaxy,
 	localHole->connect(*starPointer->portWithName("input"), 0, 0);
     } 
     else {
-	const Block* sinkStarPtr = KnownBlock::find("CGDummySink", "CG");
+	const Block* sinkStarPtr = KnownBlock::find("CGBlackHole", "CG");
 	if (sinkStarPtr == 0) return FALSE;
 	Block* starPointer = sinkStarPtr->clone();
 	addTempBlock(starPointer);
-	localGalaxy->addBlock(*starPointer, "CGDummySink");
+	localGalaxy->addBlock(*starPointer, "CGBlackHole");
 	localHole->connect(*starPointer->portWithName("output"), 0); 
     }
     return TRUE;
