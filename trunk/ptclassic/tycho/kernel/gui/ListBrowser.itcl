@@ -272,6 +272,12 @@ body ::tycho::ListBrowser::breakCompleteSequence {} {
 body ::tycho::ListBrowser::chooseItem {lb ypos} {
     $lb selection clear @0,0 end
     $lb selection set [$lb nearest $ypos]
+    # If we don't clear the first element, then if we select an item,
+    # scroll down one page and select another item, the entry widget
+    # will contain both the old and new elements, separated with a "\n"
+    if {[llength [$lb curselection]] > 1} { 
+	$lb selection clear [lindex [$lb curselection] 0]
+    }
     setEntry [selection get]
 }
 
