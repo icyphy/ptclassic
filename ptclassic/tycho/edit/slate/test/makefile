@@ -37,7 +37,7 @@ ROOT =		../../..
 VPATH =		$(ROOT)/tycho/editors/slate
 
 # get configuration info
-CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 TCL_SRCS = 
@@ -68,9 +68,6 @@ OPTIONAL_FILES = OLD
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
-
-# Include information on all stars and targets.
-include $(ROOT)/mk/stars.mk
 
 all install: $(MISC_SRCS)
 
