@@ -132,11 +132,11 @@ class ::tycho::EditSTD {
     protected variable machineType Pure
 
     # Evaluation type.
-    protected variable evaluationChoices {Strict NonStrict}
+    protected variable evaluationChoices {Strict}
     protected variable evaluationType Strict
 
     # One-writer rule checking type.
-    protected variable oneWriterChoices {Compile Run None}
+    protected variable oneWriterChoices {Compile None}
     protected variable oneWriterType Compile
 
     # Previous highlighted state
@@ -621,9 +621,6 @@ body ::tycho::EditSTD::ptkCompile {} {
 
         targetparam machineType $machineType
 	targetparam evaluationType $evaluationType
-	if {$evaluationType == "Strict" && $oneWriterType == "Run"} {
-	    set oneWriterType Compile
-	}
         targetparam oneWriterType $oneWriterType
         
         # Setup In/Out Ports
