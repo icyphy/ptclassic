@@ -39,20 +39,7 @@ const char* StringState :: evalExpression(const char* string, Block*  blockIAmIn
 	return string;
 }
 
-StringState :: operator StringList() {
-                StringList  out;
-                out = "String State: ";
-                out += "initValue= ";
-                out += initValue;
-                out += "\t";
-                out += readName();
-                out += "\t";
-                out += "val= ";
-                out += val;
-                out += "\n";
-        return  out;
-};
-
+// make known state entry
 static StringState proto;
 static KnownState entry(proto,"string");
 	 
