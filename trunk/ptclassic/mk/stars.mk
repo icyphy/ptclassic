@@ -107,9 +107,11 @@ ifndef TK
 	# Set up definitions for stars.mk
 	IPUS=
 
-	SDFTK=
-	HOF=
+	CGCTK=
 	CODESIGN=
+	HOF=
+	SDFTK=
+	SDFDFM=
 endif 
 
 # Motorola DSP assembly code generation domains
