@@ -54,7 +54,7 @@ value (or minimum for negative magnitudes).
 	}
 
 	codeblock(setprec) {
-	        FIX_SetPrecisionFromDouble($precision(output),$ref(input));
+	        FIX_SetPrecisionFromDouble($precision(output),(double)((int)$ref(input)));
 	}
 	codeblock(assign) {
 	        FIX_DoubleAssign($ref(output),(double)((int)$ref(input)));
