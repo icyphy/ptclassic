@@ -38,7 +38,7 @@ VPATH =		$(ROOT)/typt/edit/doc
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-EXTRA_SRCS =
+EXTRA_SRCS =	index.html
 
 MISC_FILES =	usersGuides #internals
 
