@@ -363,41 +363,49 @@ int SDFClusterGal::loopPass() {
 	if (logstrm)
 		*logstrm << "Starting loop pass\n";
 	if (numberClusts() <= 1) return FALSE;
-	int changes = 0;
-	SDFClusterGalIter nextClust(*this);
 
-	// special handling for two clusters: do arbitrary rate
-	// changes if no delays between the clusters and rate
-	// mismatch exists.
+	if (numberClusts() == 2) 
+		return nonIntegralLoopPass();
+	int changes = integralLoopPass(0);
+	if (!changes) changes = integralLoopPass(1);
+	if (logstrm && !changes)
+		*logstrm << "Loop pass made no changes\n";
+	return changes;
+}
+
+int SDFClusterGal::nonIntegralLoopPass() {
+	// this assumes there are only two clusters.
 	// We can ignore feedforward delays.
-	if (numberClusts() == 2) {
-		SDFCluster* c1 = nextClust++;
-		SDFCluster* c2 = nextClust++;
-		// check to see that there are no delays on arcs,
-		// and that a sample rate change is needed.
-		SDFClustPortIter nextPort(*c1);
-		SDFClustPort* p;
-		while ((p = nextPort++) != 0) {
-			if (p->fbDelay() ||
-			    p->numIO() == p->far()->numIO()) return FALSE;
-		}
-		// ok, loop both clusters so that their
-		// repetitions values become 1.
-		int r1 = c1->reps();
-		int r2 = c2->reps();
-		c1->loopBy(r1);
-		c2->loopBy(r2);
-		if (logstrm)
-			*logstrm << "looping " << c1->name() << " by "
-				<< r1 << " and " << c2->name() << " by "
-					<< r2 << "\n";
-		return TRUE;
+	SDFClusterGalIter nextClust(*this);
+	SDFCluster* c1 = nextClust++;
+	SDFCluster* c2 = nextClust++;
+	// check to see that there are no delays on arcs,
+	// and that a sample rate change is needed.
+	SDFClustPortIter nextPort(*c1);
+	SDFClustPort* p;
+	while ((p = nextPort++) != 0) {
+		if (p->fbDelay() ||
+		    p->numIO() == p->far()->numIO()) return FALSE;
 	}
+	// ok, loop both clusters so that their
+	// repetitions values become 1.
+	int r1 = c1->reps();
+	int r2 = c2->reps();
+	c1->loopBy(r1);
+	c2->loopBy(r2);
+	if (logstrm)
+		*logstrm << "looping " << c1->name() << " by "
+			 << r1 << " and " << c2->name() << " by "
+			 << r2 << "\n";
+	return TRUE;
+}
 
-	// "normal" case: only loop to do integral rate conversions.
+int SDFClusterGal::integralLoopPass(int doAnyLoop) {
+	SDFClusterGalIter nextClust(*this);
 	SDFCluster *c;
+	int changes = 0;
 	while ((c = nextClust++) != 0) {
-		int fac = c->loopFactor();
+		int fac = c->loopFactor(doAnyLoop);
 		if (fac > 1) {
 			c->loopBy(fac);
 			if (logstrm)
@@ -406,15 +414,13 @@ int SDFClusterGal::loopPass() {
 			changes = TRUE;
 		}
 	}
-	if (logstrm && !changes)
-		*logstrm << "Loop pass made no changes\n";
 	return changes;
 }
 
 // This function determines the loop factor for a cluster.
 // We attempt to find a factor to repeat the loop by that will make
 // it better match the sample rate of its neighbors.
-int SDFCluster::loopFactor() {
+int SDFCluster::loopFactor(int doAnyLoop) {
 	int retval = 0;
 	SDFClustPortIter nextPort(*this);
 	SDFClustPort* p;
@@ -428,6 +434,7 @@ int SDFCluster::loopFactor() {
 		// don't loop if peer should loop first
 		if (myIO > peerIO) return 0;
 		// try looping if things go evenly.
+		if (doAnyLoop && peerIO == myIO) continue;
 		if (peerIO % myIO == 0) {
 			int possFactor = peerIO / myIO;
 			// choose the smallest possible valid loopfactor;
@@ -933,6 +940,9 @@ int SDFClustSched::computeSchedule (Galaxy& g) {
 	// do the clustering.
 	cgal = new SDFClusterGal(g,logstrm);
 	cgal->cluster();
+// recompute repetitions on top-level clusters
+	setGalaxy(*cgal);
+	repetitions();
 // generate schedule
 	if (SDFScheduler::computeSchedule(*cgal)) {
 		if (logstrm) {
