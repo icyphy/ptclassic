@@ -102,7 +102,14 @@ const int linkingNotSupported =
 inline size_t getpagesize() { return 4096;}
 #else
 #ifdef __GNUG__
+#if defined(__sgi) || defined(sgi)
+#if defined(__SYSTYPE_SVR4) || defined(SYSTYPE_SVR4)
+/* SGI irix5 */
+extern "C" int getpagesize(void);
+#endif /* SVR4 */
+#else
 extern "C" size_t getpagesize(void);
+#endif
 #endif
 #endif
 
