@@ -48,6 +48,7 @@ REALCLEAN_STUFF =
 DIRS =
 
 EXTRA_SRCS =	\
+	CommandShellHelp.html \
 	EditCHelp.html \
 	EditCppHelp.html \
 	EditHTMLHelp.html \
