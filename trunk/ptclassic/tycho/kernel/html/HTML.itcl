@@ -1458,13 +1458,17 @@ body ::tycho::HTML::_initializeToolbar {toolbar} {
             -underline 0 \
             -text Open -command "$this altFile"
     bind $text <Key-o> "$this altFile; break"
-    
+    bind $text <<Open>> "$this altFile; break"
+
     $toolbar button find \
 	    -description {Find text or a pattern on this page} \
             -underline 0 \
             -text Find -command "$this search"
     bind $text <Key-f> "$this search; break"
-    
+    #bind $text <Find> "$this search; break"
+    bind $text <<Find>> "$this search; break"
+    bind $text <<Search>> "$this search; break"
+
     $toolbar button stop \
 	    -description {Abort rendering} \
             -underline 0 \
