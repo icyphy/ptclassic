@@ -134,7 +134,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	go {
 	  InDEMPHIter nextx(X), nexty(Y);
-	  InDEPort *px, *py;
+	  InDEPort *px, *py = (InDEPort*)NULL;
 	  int set = 1;
 	  while ((px = nextx++) != 0 && (py = nexty++) != 0) {
 	    if (px->dataNew || py->dataNew) {
