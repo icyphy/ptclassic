@@ -198,7 +198,7 @@ body ::tycho::FileBrowser::constructor {args} {
     preference subscribeoptions $this \
 	    -width  fileBrowserWidth \
 	    -height fileBrowserHeight
-    if [::preference get dialogs fileBrowserUseLastDirectory] {
+    if [::tycho::preference get dialogs fileBrowserUseLastDirectory] {
 	# If the we prefer to always have the FileBrowser open
 	# the last directory we visted.
 
