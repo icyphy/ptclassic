@@ -170,21 +170,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	codeblock (procDefs) {
 	    static int
-	    $starSymbol(reset)(dummy, interp, argc, argv)
-		ClientData dummy;		   /* Not used. */
-		Tcl_Interp *interp;		 /* Current interpreter. */
-		int argc;			   /* Number of arguments. */
-		char **argv;			/* Argument strings. */
-	    {
-		int i;
-		for (i=0; i<$val(tapSize); i++) {
-		    $ref(taps)[i] = $starSymbol(backup)[i];
-		}
-		$starSymbol(invCount) = 0;
-		return $starSymbol(redraw) (dummy, interp, argc, argv);
-	    }
-
-	    static int
 	    $starSymbol(redraw)(dummy, interp, argc, argv)
 		ClientData dummy;		   /* Not used. */
 		Tcl_Interp *interp;		 /* Current interpreter. */
@@ -201,6 +186,21 @@ limitation of liability, and disclaimer of warranty provisions.
 			    &$starSymbol(ids_ptr)) == 0)
 		    errorReport("Cannot redraw bar graph");
 		return TCL_OK;
+	    }
+
+	    static int
+	    $starSymbol(reset)(dummy, interp, argc, argv)
+		ClientData dummy;		   /* Not used. */
+		Tcl_Interp *interp;		 /* Current interpreter. */
+		int argc;			   /* Number of arguments. */
+		char **argv;			/* Argument strings. */
+	    {
+		int i;
+		for (i=0; i<$val(tapSize); i++) {
+		    $ref(taps)[i] = $starSymbol(backup)[i];
+		}
+		$starSymbol(invCount) = 0;
+		return $starSymbol(redraw) (dummy, interp, argc, argv);
 	    }
 
 	    static int
