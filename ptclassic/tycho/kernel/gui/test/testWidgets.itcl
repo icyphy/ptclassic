@@ -67,7 +67,8 @@ test DialogWindow-1.1 {Test DialogWindow} {
 ############################################################################
 # Test Edit
 test Edit-1.1 {Test Edit} {
-    set win [::tycho::view Edit]
+    set view [::tycho::view Edit]
+    set win [$view displayer windowName]
     wm deiconify $win
 #    after $duration ::tycho::safeUpdate $win
     after $longDuration removeobj $win
@@ -115,15 +116,7 @@ test EntryQuery-1.2 {Test EntryQuery: addQuery method} {
 
 
 ############################################################################
-# Test File
-test File-1.1 {Test File} {
-    set win [::tycho::view File]
-    wm deiconify $win
-#    after $duration ::tycho::safeUpdate $win
-    after $longDuration removeobj $win
-    list {Done}
-} {Done}
-
+# File is tested in testFile.itcl
 
 ###########################################################################
 # Test FileBrowser
@@ -155,7 +148,8 @@ test ListBrowser-1.1 {Test ListBrowser} {
 ############################################################################
 # Test HTML
 test HTML-1.1 {Test HTML} {
-    set win [::tycho::view HTML]
+    set view [::tycho::view HTML]
+    set win [$view displayer windowName]
     wm deiconify $win
 #    after $duration ::tycho::safeUpdate $win
     after $longDuration removeobj $win
@@ -201,13 +195,13 @@ test TopLevel-1.1 {Test TopLevel} {
 ############################################################################
 # Test WelcomeMessage
 test WelcomeMessage-1.1 {Test WelcomeMessage} {
-    set win [::tycho::view WelcomeMessage { \
-	    -version "A test version" \
-	    -executable "A test executable" } ]
-    wm deiconify $win
-#    after $duration ::tycho::safeUpdate $win
-    after $longDuration removeobj $win
-    list {Done}
+#    set win [::tycho::view WelcomeMessage { \
+#	    -version "A test version" \
+#	    -executable "A test executable" } ]
+#    wm deiconify $win
+##    after $duration ::tycho::safeUpdate $win
+#    after $longDuration removeobj $win
+#    list {Done}
 } {Done}
 
 
