@@ -90,7 +90,7 @@ public:
 
 	// the dispatcher is called by Tcl to handle all extension
 	// commands.
-	static int dispatcher(ClientData,Tcl_Interp*,int,char**);
+	static int dispatcher(ClientData,Tcl_Interp*,int,char*[]);
 
 // the following are the Tcl-callable functions.  Each returns TCL_OK
 // or TCL_ERROR, and may set the Tcl result to return a string using

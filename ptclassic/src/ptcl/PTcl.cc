@@ -547,7 +547,7 @@ void PTcl::registerFuncs() {
 Tcl_Interp* PTcl::activeInterp = 0;
 
 // dispatch the functions.
-int PTcl::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char** argv)
+int PTcl::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char* argv[])
 			   {
 	PTcl* obj = findPTcl(interp);
 	if (obj == 0) {
