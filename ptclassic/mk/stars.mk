@@ -181,7 +181,6 @@ ifdef CG56
 		LIBFILES += $(LIBDIR)/libcg56targets.$(LIBSUFFIX)
 	else
 		TARGETS += $(CG56T)/Sim56Target.o $(CG56T)/S56XTarget.o \
-			$(CG56T)/S56XTargetWH.o \
 			$(CG56T)/Sub56Target.o \
 			$(CG56T)/CG56MultiSimTarget.o \
 			$(CG56T)/CG56MultiSimSend.o \
@@ -418,7 +417,8 @@ ifdef CGC
 				$(CGCT)/main/CGCSDFSend.o \
 				$(CGCT)/main/CGCSDFReceive.o \
 				$(CGCT)/main/CGCSDFBase.o \
-				$(CGCT)/main/CGCTargetWH.o
+				$(CGCT)/main/CGCTargetWH.o \
+				$(CGCT)/main/CGWormTarget.o
 		endif
 	endif
 	PALETTES += PTOLEMY/src/domains/cgc/icons/cgc.pal
