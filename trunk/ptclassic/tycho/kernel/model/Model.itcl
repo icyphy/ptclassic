@@ -307,14 +307,7 @@ class ::tycho::Model {
     ####                   private methods                       ####
     
     # Evaluate code in this object's context
-    private method evalInSpecificContext {args}  {
-	puts "[info class] $args"
-	eval $args
-    }
-
-    method debug {args} {
-        eval $args
-    }
+    private method evalInSpecificContext {args}  {eval $args}
 }
 
 
