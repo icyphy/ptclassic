@@ -53,6 +53,7 @@ public:
 
 	void insert(Pointer a);	// Add at head of list
 	void append(Pointer a);	// Add at tail of list
+	int remove(Pointer a);	// remove ptr: return TRUE if removed
 	Pointer getAndRemove();	// Return and remove head of list
 	Pointer getNotRemove()  // Return head, do not remove
 	{
@@ -64,7 +65,7 @@ public:
 		lastReference = lastReference->next;
 		return lastReference->e;
 	}
-	Pointer elem(int);	// Return arbitary node of list
+	Pointer elem(int) const;// Return arbitary node of list
 	void initialize();	// Remove all links
 
         // Reset the last reference pointer so that accesses start
@@ -100,7 +101,7 @@ public:
         void put(Pointer p) {append(p); ++dimen;}
 
 	// Return the dimension of the vector
-	int dimension() {return dimen;}
+	int dimension() const {return dimen;}
 
 	// Return and element of the vector, given index
 	Pointer elem (int index);
@@ -140,7 +141,7 @@ public:
         Pointer get() {--numberNodes; return getAndRemove();}
 
 	// Return number of elements currently in queue
-	int length() {return numberNodes;}
+	int length() const {return numberNodes;}
 
 	// Clear the queue
         void initialize() {SingleLinkList::initialize(); numberNodes=0;}
@@ -175,6 +176,15 @@ public:
 	// Return number of elements on the list
 	int size() const {return dimen;}
 
+	// Return head of list
+	Pointer head() const { return elem(0);}
+
+	// Remove an object from the list
+	int remove(Pointer p) {
+		int i = SingleLinkList::remove(p);
+		dimen -= i;
+		return i;
+	}
 	// Return next element on the list
 	SingleLinkList::next;
 
