@@ -547,8 +547,13 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN,
 void 
 UniProcessor :: makeReceive(int pindex, PortHole* rP, int delay, 
 			    EGGate* g, PortHole* orgP) {
-	int numSample = rP->numXfer();
-	
+	int numSample;
+	if (orgP != 0) {
+		numSample = orgP->far()->numXfer();
+	}
+	else {
+		numSample = rP->numXfer();
+	}	
 	// create target specific Receive star
 	DataFlowStar* newR = mtarget->createReceive(pindex,myId(),numSample);
 	newR->setTarget(targetPtr);
@@ -558,7 +563,8 @@ UniProcessor :: makeReceive(int pindex, PortHole* rP, int delay,
 	PortHole* sP = newR->portWithName("output");
 	sP->connect(*rP, delay);
 	((DFPortHole*)sP)->setSDFParams(numSample,numSample-1);
-
+	newR->repetitions = ((DFPortHole*)rP)->parentReps();
+	   
 	// set the cloned star pointer of the receive nodes
 	int comp = myId() - pindex;
 	ParNode* pn = parent->matchCommNodes(newR, g, orgP);
@@ -570,8 +576,13 @@ UniProcessor :: makeReceive(int pindex, PortHole* rP, int delay,
 // Note that the delay is attached in the receiver part if any.
 void UniProcessor :: makeSend(int pindex, PortHole* sP, 
 			EGGate* g, PortHole* orgP) {
-	int numSample = sP->numXfer();
-	
+	int numSample;
+	if (orgP != 0) {
+		numSample = orgP->numXfer();
+	}
+	else {
+		numSample = sP->numXfer();
+	}		
 	// create target specific Send star
 	DataFlowStar* newS = mtarget->createSend(myId(), pindex, numSample);
 	newS->setTarget(targetPtr);
@@ -581,6 +592,7 @@ void UniProcessor :: makeSend(int pindex, PortHole* sP,
 	PortHole* rP = newS->portWithName("input");
 	sP->connect(*rP, 0);
 	((DFPortHole*)rP)->setSDFParams(numSample,numSample-1);
+	newS->repetitions = ((DFPortHole*)sP)->parentReps();
 
 	// set the cloned star pointer of the Send node
 	int comp = myId() - pindex;

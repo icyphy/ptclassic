@@ -101,8 +101,6 @@ public:
 	// set and get the index of preferred processor
 	void setProcId(int i) { procId = i; }
 	int getProcId()	{ return procId; }
-	virtual int whichProc() { return procId; }
-	virtual void assignProc(int i) { procId = i; }
 
 	// get the type field
 	int getType()	{ return type; }
@@ -147,7 +145,6 @@ public:
 	EGGate* getOrigin() { return origin; }
 	void setPartner(ParNode* n) { partner = n; n->partner = this; }
 	ParNode* getPartner() { return partner; }
-
 protected:
 	// Length of the longest execution time path to an endnode 
 	int StaticLevel;

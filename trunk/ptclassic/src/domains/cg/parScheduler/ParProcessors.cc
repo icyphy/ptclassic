@@ -149,7 +149,7 @@ int ParProcessors :: listSchedule(ParGraph* graph) {
 
 	while (readyNodes.size() > 0) {
 		ParNode* node = (ParNode*) readyNodes.takeFromFront();
-		UniProcessor* p = getProc(node->whichProc());
+		UniProcessor* p = getProc(node->getProcId());
 
 		// compute the earliest schedule time
 		int start = ancestorsFinish(node);
@@ -231,62 +231,83 @@ void ParProcessors::findCommNodes(ParGraph* graph)
 {
 	// Make sure the list of communication nodes is clear
 	removeCommNodes();
-	int hidden = FALSE;
 
+	// Iterate over all nodes in the expanded graph.  Search for
+	// arcs that connect nodes that are allocated to different
+	// processors.  Insert send/receive nodes on these arcs, group the
+	// arcs if they are going to the same processor.
 	EGIter iter(*graph);
-	ParNode *pg;
+	ParNode* pg;
 	while ((pg = (ParNode*) iter++) != 0) {
-	   hidden = FALSE;
+
+           // Current send node
+	   ParNode* snode = NULL;
+
+	   // Current receive node
+	   ParNode* rnode = NULL;
+
+	   // Last node to receive data
+	   ParNode* lastDesc = NULL;
+
+	   // Number of tokens transfered from ParNode 'pg'
+	   int numXfer = 0;
+	   
+	   // We loop twice, first over the non-hidden EGGates, and the through the
+	   // hidden EGGates.  Gates that are hidden have delays that are associated
+	   // with the gate
+	   int hidden = FALSE;
 	   EGGateLinkIter giter(pg->descendants);
-	   EGGate* g;
-	   for (int i = 2; i > 0; i--) {	// loop twice
-		while ((g = giter++) != 0) {
-			int num = g->samples();
+	   for (int i = 2; i > 0; i--) {
+		EGGate* g;
+		while (( g = giter++) != 0) {
+			int num = g->samples();  // Number of tokens transfered over gate
 			if (num == 0) continue;
 			if (hidden && g->isItInput()) continue;
 			ParNode* desc = (ParNode*)(g->farEndNode());
-			int from = pg->whichProc();
-			int to = desc->whichProc();
+			int from = pg->getProcId();
+			int to = desc->getProcId();
 			if (from != to) {
+				// make send/receive nodes if necessary.
+				if ((snode==NULL) ||
+				    (rnode->getProcId() != to) ||
+				    (desc->myStar() != lastDesc->myStar())) {
+					snode = createCommNode(-1);
+					rnode = createCommNode(-2);
+					numXfer = 0;
+					snode->setProcId(from);
+					rnode->setProcId(to);
+					snode->setOrigin(g);
+					rnode->setOrigin(g->farGate()); 
+					if (hidden) {
+						snode->assignSL(1);	
+						rnode->assignSL(1);
+					}
+					else {
+						snode->assignSL(pg->getLevel() + 1);
+						rnode->assignSL(desc->getLevel());
+					}
+					
+				        // insert the send/receive nodes into the graph.
+					pg->connectedTo(snode);
+					snode->connectedTo(rnode);
+					snode->setPartner(rnode);
+					SCommNodes.insert(snode);
+					SCommNodes.insert(rnode);
 
-				// make comm nodes.
-				// 1. compute communication times.
-				int sTime = mtarget->commTime(from,to,num,0);
-				int rTime = mtarget->commTime(from,to,num,1);
-
-				// 2. make send and receive nodes
-				ParNode* snode = createCommNode(-1);
-				snode->assignProc(from);
-				snode->setProcId(from);
-				snode->setOrigin(g);
-				if (hidden) {
-					// can be done later.
-					snode->assignSL(1);	
-				} else {
-					snode->assignSL(pg->getLevel() + 1);
+					// save the destination node
+					lastDesc = desc;
 				}
-				snode->setExTime(sTime);
-				
-				ParNode* rnode = createCommNode(-2);
-				rnode->assignProc(to);
-				rnode->setProcId(to);
-				rnode->setOrigin(g->farGate()); 
-				if (hidden) {
-					// can be done later
-					rnode->assignSL(1);
-				} else {
-					rnode->assignSL(desc->getLevel());
-				}
-				rnode->setExTime(rTime);
-
-				// 3. insert them into the graph.
-				pg->connectedTo(snode);
 				if (!hidden) rnode->connectedTo(desc);
-				snode->connectedTo(rnode);
 
-				snode->setPartner(rnode);
-				SCommNodes.insert(snode);
-				SCommNodes.insert(rnode);
+				// compute tokens transfered by
+				// send/receive invocation
+			        numXfer += num;
+				
+				// compute communication times.
+				int sTime = mtarget->commTime(from,to,numXfer,0);
+				int rTime = mtarget->commTime(from,to,numXfer,1);
+				snode->setExTime(sTime);
+				rnode->setExTime(rTime);
 			}
 		}
 		giter.reconnect(pg->hiddenGates);
