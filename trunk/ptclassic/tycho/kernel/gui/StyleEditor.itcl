@@ -68,7 +68,7 @@ configbody ::tycho::PreferenceEditor::preferences {
 	return
     }
     configure -title [::preference cget $group -description]
-    configure -labelcolor [ptkColor blue black]
+    configure -labelcolor [::tycho::color blue black]
 
     foreach preference [::preference names $group] {
 	set description [::preference description $group $preference]
