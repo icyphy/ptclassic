@@ -86,6 +86,7 @@ public:
         void writeGantt(UserOutput& o);
 
 	UniProcessor* getProc(int n) { return parProcs->getProc(n); }
+	ParProcessors* myProcs() { return parProcs; }
 
 	// set up processors
 	virtual void setUpProcs(int num);
