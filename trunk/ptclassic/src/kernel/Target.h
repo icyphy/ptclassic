@@ -146,6 +146,11 @@ public:
 	// class identification
 	int isA(const char*) const;
 	const char* className() const;
+
+	// return true if the target has (or can have) a child for which
+	// isA(argument) would be true
+	virtual int childIsA(const char*) const;
+
 	Galaxy* galaxy() { return gal;}
 protected:
 

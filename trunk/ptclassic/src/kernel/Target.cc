@@ -337,3 +337,14 @@ void Target::endDoWhile(PortHole&,int,int) {}
 
 const char* Target::className() const {return "Target";}
 ISA_FUNC(Target,Block);
+
+// see if there is a child of the appropriate type
+
+int Target::childIsA(const char* type) const {
+	Target * c = children;
+	while (c) {
+		if (c->isA(type)) return TRUE;
+		c = c->link;
+	}
+	return FALSE;
+}
