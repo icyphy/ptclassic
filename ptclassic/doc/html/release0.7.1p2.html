@@ -33,6 +33,37 @@ Below are some common problems that you might run across with 0.7.1.
 <li> A major feature of Ptolemy 0.7.1p2 is that Itcl was upgraded from
 Itcl 2.2 to Itcl3.0.  Any stars that use Tcl or Tk will definitely need to
 be recompiled.  
+
+ <br>We are not that confident of the Tycho part of the port to Tcl8.0.  The
+main problem seems to be in menu traversals, though there are problems
+with search and replace as well.  It is usable with Ptolemy, but it is
+not very polished.  This could present a problem to you, depending on
+how much you are using Tycho in your product.  You might be better off
+sticking with Itcl2.2
+
+ <br>Between Itcl2.2 and Itcl3.0, the directory structure changed, so I've
+made changes to 0.7.1p2 to reflect that change.  The biggest changes
+are that
+ <br>$PTOLEMY/tcltk/itcl is now $PTOLEMY/tcltk/tcl
+$PTOLEMY/tcltk/tcl.$PTARCH is now $PTOLEMY/tcltk/tcl.$PTARCH
+
+ <br>The location of the libraries in the subdirectories has also changed. 
+
+ <br>As a result, many of the scripts in $PTOLEMY/bin and the makefiles in 
+$PTOLEMY/mk have changed.
+
+ <br>We could have probably forced Itcl3.0 to install in the same
+directories as Itcl2.2, but it would have required rewriting some
+of the makefiles that ship with Itcl/Tcl/Tk.
+
+ <br>There were a few changes in the code itself, but we left those #defined
+so that Itcl2.2 should be usable without too many changes.
+
+ <br>The version of Tycho that is shipped with the 0.7.1p2 patch is 
+not at all backward compatible with Itcl2.2.  To use Itcl2.2, it would
+be best to drop in the version of Tycho that shipped with 
+Ptolemy 0.7.1p1
+
 <li> Ptolemy 0.7.1p2 also includes
 an upgrade of the compiler from egcs-1.0.2 to egcs-1.1.
 In general, <CODE>.o</CODE> files built under Ptolemy 0.7
