@@ -20,7 +20,6 @@ Two DE-specific struct/classes are defined.
 #ifndef _DEconnect_h
 #define _DEconnect_h 1
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 

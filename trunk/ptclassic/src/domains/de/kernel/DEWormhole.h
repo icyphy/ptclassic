@@ -1,7 +1,6 @@
 #ifndef _DEWormhole_h
 #define _DEWormhole_h 1
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 

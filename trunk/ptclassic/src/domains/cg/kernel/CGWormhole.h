@@ -1,7 +1,6 @@
 #ifndef _CGWormhole_h
 #define _CGWormhole_h 1
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 
