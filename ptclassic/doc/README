@@ -14,6 +14,11 @@ You no longer need write permission in the ptolemy directories to print
 the manual.  You do need to be able to write to your OWN home directory --
 files named Almagest.main and Almagest.index are created there.
 
+You no longer need to have the "ditroff" program to print out the manual.
+It is now possible to print the manual using the "groff" program from the
+Free Software Foundation.  If you wish to use groff, follow the 
+instructions in the $PTOLEMY/doc/main/documents/overall file.
+
 The manual currently consists of the following
 sections:
 	sect 1: general Ptolemy documentation
