@@ -129,7 +129,7 @@ class DCNodeListIter : public EGNodeListIter
 public:
         DCNodeListIter(const EGNodeList& l) : EGNodeListIter(l) {}
         DCNode* next() { return (DCNode*) EGNodeListIter::next(); }
-        DCNode* operator++() { return next(); }
+        DCNode* operator++(POSTFIX_OP) { return next(); }
 };
 
 class DCAncestorIter : public ParAncestorIter
@@ -137,7 +137,7 @@ class DCAncestorIter : public ParAncestorIter
 public:
         DCAncestorIter(DCNode* n) : ParAncestorIter(n) {}
         DCNode* next() { return (DCNode*) ParAncestorIter::next(); }
-        DCNode* operator++() { return next(); }
+        DCNode* operator++(POSTFIX_OP) { return next(); }
 };
 
 class DCDescendantIter : public ParDescendantIter
@@ -145,7 +145,7 @@ class DCDescendantIter : public ParDescendantIter
 public:
         DCDescendantIter(DCNode* n) : ParDescendantIter(n) {}
         DCNode* next() { return (DCNode*) ParDescendantIter::next(); }
-        DCNode* operator++() { return next(); }
+        DCNode* operator++(POSTFIX_OP) { return next(); }
 };
 
 #endif

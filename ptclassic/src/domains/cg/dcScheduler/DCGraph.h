@@ -150,7 +150,7 @@ class DCIter : public EGIter {
 public:
 	DCIter(DCGraph& g) : EGIter(g) {}
 	DCNode* next() { return (DCNode*) EGIter :: next(); }
-	DCNode* operator++() { return next(); }
+	DCNode* operator++(POSTFIX_OP) { return next(); }
 };
 
 #endif
