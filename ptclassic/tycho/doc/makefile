@@ -63,5 +63,21 @@ REALCLEAN_STUFF =
 # Sub directories to run make in.
 DIRS =			coding
 
+all: tychoClasses.dag
+
+FORCE:
+
+tychoClasses.dag: FORCE
+	rm -f $@
+	@if [ "$(TYCHO)" = "" ]; then \
+		echo "TYCHO is not set so we assume we are part of PTOLEMY"; \
+		echo "Running $(ITCLSH), \$$PTOLEMY=$(PTOLEMY)"; \
+		echo "set TYCHO $(PTOLEMY)/tycho; source ../kernel/tychoMakeClassDAG.tcl; tychoStandardDAG" | $(ITCLSH); \
+	else \
+		echo "Running $(ITCLSH)"; \
+		echo "set TYCHO $(TYCHO);  source ../kernel/tychoMakeClassDAG.tcl; tychoStandardDAG" | $(ITCLSH); \
+	fi
+
+
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
