@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 *************************************************************************/
 
+#include <string.h>
 #include "Error.h"
 #include "type.h"
 
