@@ -124,7 +124,7 @@ config_tclexts: obj.$(PTARCH) src/configure mk/tcl.mk.in mk/java.mk.in \
 		src/tksteal/makefile.in \
 		src/tytimer/makefile.in \
 		src/tytest/makefile.in \
-		src/cgctest/makefile.in
+		src/tycgc/makefile.in
 	(cd obj.$(PTARCH); ../src/configure --srcdir ../src $(CONFIGURE_ARGS))
 	(cd obj.$(PTARCH)/tyjava/tcljava; rm -f tcl; \
 		ln -s ../../../src/tyjava/tcljava/tcl .)
