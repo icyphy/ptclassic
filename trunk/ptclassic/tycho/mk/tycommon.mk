@@ -429,7 +429,7 @@ buildjdist:
 	$(MAKE) JFLAGS=-O jclass1_1 
 	$(MAKE) jhtml
 	@echo "We must use JDK1.0.2 to compile for use with Netscape"
-	$(MAKE) JAVAHOME=/usr/sww/lang/java-1.0.2 JFLAGS=-O
+	$(MAKE) JAVAHOME=/usr/sww/lang/java-1.0.2 JFLAGS=-O jclass
 	$(MAKE) install
 	$(MAKE) dists
 
