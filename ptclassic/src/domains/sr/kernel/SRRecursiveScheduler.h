@@ -26,3 +26,60 @@ ENHANCEMENTS, OR MODIFICATIONS.
     Created:    23 October 1996
 
  */
+
+#ifdef __GNUG__
+#pragma interface
+#endif
+
+#include "Scheduler.h"
+
+class SRDependencyGraph;
+
+/**********************************************************************
+
+ The recursive scheduler
+
+ @Description
+
+ **********************************************************************/
+class SRRecursiveScheduler : public Scheduler
+{
+public:
+  SRRecursiveScheduler();
+  ~SRRecursiveScheduler();
+
+  const char* domain() const;
+
+  void setup();
+
+  void setStopTime(double);
+
+  void resetStopTime(double);
+
+  // Return the stopping time of the simulation
+  double getStopTime() { return double(numInstants); }
+
+  int run();
+
+  virtual void runOneInstant();
+
+  // The "time" of each instant, used when interfacing with a timed domain
+  double schedulePeriod;
+
+  StringList displaySchedule();  
+
+protected:
+  // Number of instants to execute
+  int numInstants;
+
+  // Number of instants already executed
+  int numInstantsSoFar;
+
+  virtual int computeSchedule( Galaxy & );
+
+private:
+
+  // The dependency graph of the galaxy
+  SRDependencyGraph * dgraph;
+
+};

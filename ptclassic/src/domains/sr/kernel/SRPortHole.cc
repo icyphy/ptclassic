@@ -38,9 +38,84 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SRStar.h"
 #include "Error.h"
 #include "Plasma.h"
+#include <stream.h>
 
 // Class identification.
 ISA_FUNC(SRPortHole,PortHole);
+
+// Return myself
+//
+// @Description Overrides the alias-resolving version in GenericPort,
+// since the SR domain doesn't want the hierarchy to be flattened.
+
+PortHole & SRPortHole::newConnection () {
+  cout << "newConnection called on " << this->parent()->name() << " "
+       << this->name() << "\n";
+  
+  PortHole * p = (PortHole *) this;
+  return *p;
+}
+
+// Connect this port to another
+//
+// @Description If this is an input, set the far port to the
+// destination.  If this is an output, set the far port of the
+// destination to point back here.  (Calls setFarPort.)
+
+void SRPortHole::connect(GenericPort& destination,
+				 int,
+				 const char* = 0)
+{
+  cout << "connect called on "
+       <<  this->parent()->name() << " " << this->name()
+       << " to " << destination.parent()->name() << " " << destination.name()
+       << "\n";
+
+  SRPortHole * t = undoAliases();
+  SRPortHole * d = ((SRPortHole *) (&destination))->undoAliases();  
+
+  cout << " (actually) "
+       <<  t->parent()->name() << " " << t->name()
+       << " to " << d->parent()->name() << " " << d->name()
+       << "\n";
+
+  t = this;
+  d = (SRPortHole *) &destination;
+
+  if ( t->isItInput() ) {
+    t->setFarPort( d );
+  } else {
+    d->setFarPort( t );
+  }
+
+}
+
+SRPortHole * SRPortHole::undoAliases()
+{
+  SRPortHole * p = this;
+  while ( p->aliasFrom() ) {
+    p = (SRPortHole *) p->aliasFrom();
+  }
+  return p;
+}
+
+SRPortHole * SRPortHole::doAliases()
+{
+  return (SRPortHole *) translateAliases();
+}
+
+// Set the far port
+void SRPortHole::setFarPort( SRPortHole * ) {
+  cout << "setFarPort called on non-input " << parent()->name() << " "
+       << name() << "\n";
+}
+
+// Set the far port for this input
+void InSRPort::setFarPort( SRPortHole * p ) {
+  cout << "setFarPort called on input " << parent()->name() << " "
+       << name() << "\n";
+  farSidePort = (PortHole *) p;
+}
 
 // Identify the port as an input
 int InSRPort::isItInput() const

@@ -35,6 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "GalIter.h"
 #include "GraphUtils.h"
 #include <assert.h>
+#include <stream.h>
 
 // Build a dependency graph for a galaxy
 //
@@ -50,10 +51,11 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
   InSRPort * ip;
   OutSRPort * op, * fop;
   SRStar * s;
+  SRStar * fs;
 
   mygalaxy = &g;
 
-  GalStarIter nextStar(g);
+  GalTopBlockIter nextStar(g);
 
   // Count the number of vertices by summing the number of outputs on each
   // star
@@ -78,6 +80,7 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
   while ( (s = (SRStar *)(nextStar++)) != NULL ) {
     BlockOutputIter nextOutput(*s);
     while ( (op = (OutSRPort *)(nextOutput++)) != NULL ) {
+      op = (OutSRPort *) op->doAliases();
       stars[vs] = s;
       ports[vs] = op;
       vs++;
@@ -100,14 +103,22 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
     while ( (op = (OutSRPort *)(nextOutput++)) != NULL ) {
       BlockInputIter nextInput(*s);
       while ( (ip = (InSRPort *)(nextInput++)) != NULL ) {
-	fop = (OutSRPort *) (ip->far());
-	vs = vertexOfStarPort( (SRStar *) fop->parent(), fop );
+	ip = (InSRPort *) ip->doAliases();
+	if ( (fop = (OutSRPort *) (ip->far())) != NULL ) {
+	  fs = (SRStar *) fop->undoAliases()->parent();
+	  vs = vertexOfStarPort( fs, fop );
 
-	// We should be able to find the vertex driving this
-	// input
-	assert( vs >= 0 );
-
-	fEdgeCount[vs]++;
+	  cout << "Found something connected to vertex " << vs << "\n";
+	  
+	  // We should be able to find the vertex driving this
+	  // input
+	  assert( vs >= 0 );
+	  
+	  fEdgeCount[vs]++;
+	} else {
+	  cout << "input " << ip->name() << " on " << s->name()
+	       << " has no far port\n";
+	}
       }
     }
   }
@@ -115,8 +126,13 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
   // Form the edge lists
 
   int * edgenumber = new int[numvertices];
+  fEdge = new int *[numvertices];
   for ( vs = numvertices ; --vs >= 0 ; ) {
-    fEdge[vs] = new int[ fEdgeCount[vs] ];
+    if ( fEdgeCount[vs] != 0 ) {
+      fEdge[vs] = new int[ fEdgeCount[vs] ];
+    } else {
+      fEdge[vs] = NULL;
+    }
     edgenumber[vs] = 0;
   }
 
@@ -124,6 +140,7 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
   while ( (s = (SRStar *)(nextStar++)) != NULL ) {
     BlockOutputIter nextOutput(*s);
     while ( (op = (OutSRPort *)(nextOutput++)) != NULL ) {
+      op = (OutSRPort *) op->doAliases();
       vd = vertexOfStarPort(s, op );
 
       // We should have been able to find the output vertex
@@ -131,13 +148,16 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
 
       BlockInputIter nextInput(*s);
       while ( (ip = (InSRPort *)(nextInput++)) != NULL ) {
-	fop = (OutSRPort *) (ip->far());
-	vs = vertexOfStarPort( (SRStar *) fop->parent(), fop );
+	ip = (InSRPort *) ip->doAliases();
+	if ( (fop = (OutSRPort *) (ip->far())) != NULL ) {
+	  fs = (SRStar *) fop->undoAliases()->parent();
+	  vs = vertexOfStarPort( fs, fop );
 
-	// We should have been able to find the vertex driving this input
-	assert( vs >= 0 );
+	  // We should have been able to find the vertex driving this input
+	  assert( vs >= 0 );
 	
-	fEdge[vs][ edgenumber[vs]++ ] = vd;
+	  fEdge[vs][ edgenumber[vs]++ ] = vd;
+	}
       }
     }
   }
@@ -183,3 +203,22 @@ int SRDependencyGraph::vertexOfStarPort( SRStar * s, OutSRPort * p ) const
 
 }
 
+// Return a printable form of the graph
+
+StringList SRDependencyGraph::displayGraph() const
+{
+  StringList out;
+
+  out << "Vertices: " << numvertices << "\n";
+
+  for ( int v = 0 ; v < numvertices ; v++ ) {
+    out << v << ": " << stars[v]->name() << " " << ports[v]->undoAliases()->name() << "\n  ";
+    for ( int e = 0 ; e < fEdgeCount[v] ; e++ ) {
+      out << fEdge[v][e] << " ";
+    }
+    out << "\n";
+  }
+  
+  return out;
+
+}
