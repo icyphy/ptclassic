@@ -141,6 +141,7 @@ void CGMultiTarget::setup() {
     ParScheduler* sched = (ParScheduler*) scheduler();
     sched->setGalaxy(*galaxy());
     sched->setUpProcs(nChildrenAlloc);
+    
 
     // CG stuff
     myCode.initialize();
@@ -304,7 +305,7 @@ void CGMultiTarget :: chooseScheduler() {
     }
 
     if (hierSchedulingFlag)
-	LOG_NEW; mainScheduler=new MultiScheduler(this,logFile,*mainScheduler);
+	mainScheduler=new MultiScheduler(this,logFile,*mainScheduler);
 
     setSched(mainScheduler);
 }
