@@ -44,6 +44,9 @@ static const char file_id[] = "MDSDFTarget.cc";
 #include "MDSDFScheduler.h"
 #include "pt_fstream.h"
 
+// Defined in MDSDFDomain.cc
+extern const char MDSDFdomainName[];
+
 MDSDFTarget::MDSDFTarget() :
 Target("simulate-MDSDF","MDSDFStar",
 "Runs MDSDF systems on the local workstation using the default scheduler.")
@@ -80,5 +83,5 @@ void MDSDFTarget::setup() {
 }
 
 const char* MDSDFTarget::domain() {
-	return galaxy() ? galaxy()->domain() : "MDSDF";
+	return galaxy() ? galaxy()->domain() : MDSDFdomainName;
 }
