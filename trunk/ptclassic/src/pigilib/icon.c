@@ -59,6 +59,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "kernelCalls.h"	/* define callParseClass and KcDomainOf */
 #include "pigiLoader.h"
 #include "handle.h"
+#include "displayFile.h"	/* displayFile(), startTycho() */
 
 #define DM_WIDTH 80		/* dialog entry width */
 #define EDIT_ICON_SNAP 5	/* snap size of vem window for edit-icon */
@@ -110,59 +111,15 @@ char *codeDir, **iconDir;
     return(TRUE);
 }
 
-/* generate a command line to edit a file */
-extern char* getenv();
-
-static void genDispCommand(buf, file, background)
-char* buf;
-const char* file;
-int background;
-{
-    char* dispCmd = getenv("PT_DISPLAY");
-    if (dispCmd == 0) {
-	*buf = '\0';
-    } else {
-	sprintf(buf, dispCmd, file);
-	if (background) strcat(buf, "&");
-    }
-}
-
-/* Start Tycho, if it has not already been started. */
-static void startTycho() {
-    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp, "ptkStartTycho", (char*)NULL));
-}
 
 /* 8/3/90
 Open a window and run tycho on a file.
-Runs in the background and returns immediately.
 */
 boolean
 LookAtFile(fileName)
 const char* fileName;
 {
-    char buf[512];
-    genDispCommand(buf, fileName, TRUE);
-    if (*buf == '\0') {
-	PrintDebug("Invoking Tycho editor");
-	startTycho();
-	if (( Tcl_VarEval(ptkInterp,
-		"::tycho::File::openContext ",
-		fileName,
-		(char *)NULL) ) != TCL_OK) {
-	    sprintf(buf, "Cannot invoke Tycho editor for '%s'", fileName);
-	    ErrAdd(buf);
-	    return (FALSE);
-	}
-	return (TRUE);
-    } else {
-	PrintDebug(buf);
-	if (util_csystem(buf)) {
-	    sprintf(buf, "Cannot edit Ptolemy code file '%s'", fileName);
-	    ErrAdd(buf);
-	    return (FALSE);
-	}
-	return (TRUE);
-    }
+  return displayFile(fileName, PrintDebug, ErrAdd);
 }
 
 /*
