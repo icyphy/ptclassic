@@ -36,7 +36,7 @@
 # model-view-controller architecture developed as part of Smalltalk and 
 # seemingly discussed in just about every book on object-oriented 
 # architectures and design techniques.  The model-view derivation combines 
-# MVC's view and controller into a single abstraction -- the key forcees 
+# MVC's view and controller into a single abstraction -- the key forces 
 # driving this change are the increased control functionality provided 
 # these days by widgets in UI frameworks (including Tk) and the increased 
 # amount of direct manipulation and feedback, which makes the 
@@ -63,7 +63,7 @@
 # in which subscribers query the model for changed information.  All data 
 # is accessed by means of an _index_.  Depending on the functionality 
 # implemented by specific subclasses, this index could a simple integer or 
-# string key, or somehting more complex: a region of a file between two 
+# string key, or something more complex: a region of a file between two 
 # positions, a regular expression indicating the text associated with a 
 # particular method, or some other symbolic representation of a portion of 
 # or position within the data contained by one of these objects.  
@@ -119,7 +119,7 @@
 # <li>Change commands: add{}, replace{}, dataconfigure{}, delete{}, 
 #     execute{}, and so on.
 #     These are the commands that are available for undo/redo
-#     and publishing. In this abstract superclass, only the exceute{} 
+#     and publishing. In this abstract superclass, only the execute{} 
 #     command (which executes a list of commands) is implemented: other 
 #     commands must be provided by subclasses. Suggested commands are :
 #    
@@ -555,7 +555,7 @@ body ::tycho::Model::get {index} {
 # explicitly by a) deleting the data and b) calling this method.
 # In all cases, a load _adds_ (or overwrites) data already in this
 # class, so if a load is intended to give an object all of its data
-# then must first be cleared (depending on the paricular subclass, this
+# then must first be cleared (depending on the particular subclass, this
 # may require one or many calls to delete{}). (It would probably just
 # be faster to delete the object and create a new one.)
 #
@@ -988,7 +988,7 @@ body ::tycho::Model::write {{file {}} {image {}}} {
 # setting the *-notifyscript* option, which must be a function-script
 # that can be applied to four arguments: the subscriber, the command name,
 # the index, and a list of remaining arguments. Individual subscribers
-# may themselves choose a different otification mechanism when they
+# may themselves choose a different notification mechanism when they
 # subscribe by providing the *whattodo* argument to subscribe{}.
 #
 # Although subscribers are supposed to
