@@ -45,14 +45,14 @@ part. The code should be modified for portability.
 		addCode(initSeed);
 	}
 	go {
-		addCode(random);
+		addCode(randomGen);
 	}
 	// "code" to initialize the seed
 	codeblock(initSeed) {
     srand48($val(seed));
 	}
 	// "common" part of random number generation
-	codeblock(random) {
+	codeblock(randomGen) {
 		float scale = $val(upper) - ($val(lower));
 		float center = ($val(upper) + ($val(lower)))/2.0;
 		$ref(output) = scale * (drand48() - 0.5) + center;
