@@ -1166,6 +1166,10 @@ body ::tycho::File::openContext {filename {mode {}}} {
         if { $mode == "" } {
             set mode [::tycho::registry filemode $filename]
         }
+        # If there's still no mode, assume "text"
+        if { $mode == "" } {
+            set mode "text"
+        }
     }
 
     # Get the command for this mode and execute it
@@ -1483,3 +1487,4 @@ body ::tycho::File::checkForAutoSaveFiles {filename} {
     # The original file is the file to open.
     return $filename
 }
+
