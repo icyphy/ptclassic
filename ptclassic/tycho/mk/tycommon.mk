@@ -398,7 +398,7 @@ $(TYDIST_EX): $(ROOT)/mk/tycommon.mk
 	@if [ "$(TYPACKAGE_DIR)x" = "x" ]; then \
 		echo "TYPACKAGE_DIR is not set in the makefile, so we won't create a tar exclude file"; \
 	else \
-		/bin/echo "adm\nSCCS\n*.tar.gz\n*[0-9].zip\n$(JARFILE)" > $@ ; \
+		/bin/echo "adm\nSCCS\n*.tar.gz\n*[0-9].zip\n" > $@ ; \
 	fi
 
 # Tar file distribution
