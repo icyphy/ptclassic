@@ -43,13 +43,14 @@ EXTRA_SRCS =	\
 	EditHelp.html \
 	FileBrowserHelp.html \
 	FileHelp.html \
-	FontManagerHelp.html \
+	FontDialogHelp.html \
 	GlimpseHelp.html \
 	HTMLHelp.html \
 	IndexBrowserHelp.html \
 	ListBrowserHelp.html \
 	LoaderHelp.html \
 	TclShellHelp.html \
+	PreferenceHelp.html \
 	index.html
 
 MISC_FILES =
