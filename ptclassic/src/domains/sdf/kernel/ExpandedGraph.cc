@@ -116,6 +116,8 @@ void ExpandedGraph::initialize_invocations()
 }
 
 // This function creates all invocations of a star.
+// The first invocation should be created first since the derived
+// class use this fact for efficiency reason (e.g. ParNode constructor).
 void ExpandedGraph::createInvocations(DataFlowStar* s)
 {
 	int num = s->repetitions;
