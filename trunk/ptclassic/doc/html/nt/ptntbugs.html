@@ -6,8 +6,13 @@
 <body bgcolor=#faf0e6>
 <H1>Ptolemy NT Bugs</H1>
 
-<h2><a name="tar">Tar Bugs</a></h2>
+<h2><a name="tar">Tar and Zip File Bugs</a></h2>
 <menu>
+<li> When you unzip the zip file, you may see messages about
+files being overwritten.  These messages are probably caused
+by symbolic links in the original source directory.  You can safely 
+overwrite these files.
+
 <li> Cygwin32 tar has problems creating <CODE>$PTOLEMY/colors/ptolemy/con</CODE>.  The problem is that <CODE>con</CODE> is a reserved name.
  <br>The Cygwin32 FAQ says
 <BLOCKQUOTE>
@@ -32,6 +37,8 @@ bash-2.01$
 The workaround is to use a non GNU tar tool such as Winzip. 
  <br>(Reported by
 Sascha Schwarz <CODE>&lt;saschas@natasha.auslabs.lucent.com&gt;</CODE>).
+
+
 
 </menu>
 
@@ -272,6 +279,23 @@ Exceed.  If you have font problems, you might try the following:
 	then do <CODE>xrdb -merge ~/.Xdefaults</CODE>
 	</ol>
 
+
+<li> Under NT4.0, with Exceed 6.1, the following messages may occur:
+
+<pre>
+A Serious X Error has occurred:
+   BadValue (integer parameter out of range for operation)
+   Request X_QueryColors (minor code 0)
+Type 'y' to continue, 'n' to exit, 'a' to abort:
+y
+A Serious X Error has occurred:
+   BadValue (integer parameter out of range for operation)
+   Request X_QueryColors (minor code 0)
+Type 'y' to continue, 'n' to exit, 'a' to abort:
+y
+</pre>
+The workaround is to be sure that your display is set to 256
+colors.
 
 </menu>
 
