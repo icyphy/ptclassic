@@ -157,7 +157,7 @@ class ::tycho::EditBubbleAndArc {
 ####               constructor & destructor                          ####
 
 body ::tycho::EditBubbleAndArc::constructor {args} {
-    component graphics undoEnable 0
+    component graphics interactiveEnable 0
 
     # Disable and remove items in Edit menu
     disableMenuItem "Cut" Edit
@@ -201,7 +201,7 @@ body ::tycho::EditBubbleAndArc::constructor {args} {
 
     eval itk_initialize $args
 
-    component graphics undoEnable 1
+    component graphics interactiveEnable 1
 }
 
 #######################################################################
