@@ -42,7 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Error.h"
 
 VHDLPortHole :: ~VHDLPortHole() {
-	LOG_DEL; delete bufName;
+	LOG_DEL; delete [] bufName;
 }
 
 void VHDLPortHole :: initialize() {
@@ -89,7 +89,7 @@ const VHDLPortHole* VHDLPortHole :: realFarPort() const {
 }
 
 void VHDLPortHole :: setGeoName(const char* n) {
-    delete [] bufName;
+    LOG_DEL; delete [] bufName;
     if (myGeodesic == 0) bufName = savestring(n);
     else geo().setBufName(n);
 }
