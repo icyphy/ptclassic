@@ -108,6 +108,7 @@
 #   <li><b>-default</b>: The default value of the parameter. This makes
 #       sense only if the parameter is optional. Default is a null string.
 #   </ul>
+# </ul>
 #
 # Here is an example of a class model:
 # For more general information on models, see <a href="Model.html">Model</a>.
@@ -291,9 +292,9 @@ body ::tycho::Class::constructor {args} {
 	    -scope instance
 
     # Define the "parameter" entity
-    defineEntity resource \
-	    -ordered 1 \  ;# FIXME!!!
-    -type "" \
+    defineEntity parameter \
+	    -ordered 1 \
+	    -type "" \
 	    -optional 0 \
 	    -default ""
 }
@@ -376,7 +377,7 @@ body ::tycho::Class::annotationin {context name value args} {
 #
 body ::tycho::Class::method {name value args} {
     _verifynot method $name
-    _link method $name [concat [list $value] $args]
+    _link method {} $name [concat [list $value] $args]
 }
 
 ########################################################################
@@ -431,7 +432,7 @@ body ::tycho::Class::methods {args} {
 		break
 	    }
     	}
-    	if { ! $matching } {
+    	if { $matching } {
 	    lappend result $method
     	}
     }
@@ -502,7 +503,7 @@ body ::tycho::Class::parameterin {context name args} {
 # Get the parameters of a method.
 #
 body ::tycho::Class::parameters {method} {
-    _children parameter $method
+    _children $method parameter
 }
 
 ########################################################################
@@ -569,7 +570,7 @@ body ::tycho::Class::variables {args} {
 		break
 	    }
     	}
-    	if { ! $matching } {
+    	if { $matching } {
 	    lappend result $variable
     	}
     }
