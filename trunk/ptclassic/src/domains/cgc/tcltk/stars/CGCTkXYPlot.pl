@@ -2,17 +2,15 @@ defstar {
 	name {TkXYPlot}
 	domain {CGC}
 	desc {
-Plot Y input(s) vs. X input(s) with dynamic updating.
-Two styles are currently supported: "dot" causes
-points to be plotted, whereas "connect" causes connected
-lines to be plotted. Drawing a box in the plot will
-reset the plot area to that outlined by the box.
-There are also buttons for zooming in and out, and for
-resizing the box to just fit the data in view.
-Generate an animated X-Y plot in a Tk window.
+Plot Y input(s) vs. X input(s) with dynamic updating.  Two styles are
+currently supported: "dot" causes points to be plotted, and "connect"
+causes connected lines to be plotted.  Drawing a box in the plot will
+reset the plot area to that outlined by the box.  There are also buttons
+for zooming in and out, and for resizing the box to just fit the data
+in view.  Generate an animated X-Y plot in a Tk window.
 	}
 	version { $Id$ }
-	author { W.-J. Huang, E. A. Lee, D. Niehaus }
+	author { W.-J. Huang, E. A. Lee, and D. Niehaus }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -93,15 +91,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	  addGlobal("double $starSymbol(xMin);");
 	  addGlobal("double $starSymbol(xMax);");
 
-	  
 	  if ((xRange.size() != 2) || (xRange[0] >= xRange[1])) {
 	    Error::abortRun(*this,"xRange parameter values are invalid");
 	  }
 	  if ((yRange.size() != 2) || (yRange[0] >= yRange[1])) {
 	    Error::abortRun(*this,"yRange parameter values are invalid");
 	  }
+
+	  // Add the ptkPlot module and ptkPlot_defs.h on which it depends
+	  addModuleFromLibrary("ptkPlot", "src/ptklib", "ptk");
 	  addInclude("\"ptkPlot_defs.h\"");
-	  addInclude("\"ptkPlot.h\"");
+
 	  addGlobal("ptkPlotWin $starSymbol(plotwin);");
 	  addGlobal("ptkPlotDataset $starSymbol(plotdataset);");
 
