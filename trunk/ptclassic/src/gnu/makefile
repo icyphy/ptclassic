@@ -106,10 +106,15 @@ configure_make: $(GNU_OBJ)
 	@echo "Now configure gcc"
 
 configure_gcc: $(GNU_OBJ)
+	# We need to use --with-gxx-include-dir to workaround a bug
+	# in gcc-2.95.1 where prefix is not a subdir of exec-prefix.
+	# See http://egcs.cygnus.com/ml/gcc-bugs/1999-08/msg00528.html
+	# http://egcs.cygnus.com/ml/gcc-bugs/1999-08/msg01102.html
 	-mkdir $(GNU_OBJ)/gcc
 	(cd $(GNU_OBJ)/gcc; \
 	$(GCC_SRC)/configure --srcdir=$(GCC_SRC) \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		--with-gxx-include-dir=${GNU_PREFIX}/include/g++-3 \
 		$(SHAREDLIB_CONFIGURE_FLAGS))
 
 configure_libstdc++: $(GNU_OBJ)
