@@ -1,0 +1,2 @@
+.\" $Id$
+.TI "VHDLB Stars"
