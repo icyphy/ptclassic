@@ -240,7 +240,7 @@ body ::tycho::EditC::commentSelection {} {
 body ::tycho::EditC::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    [file join $TYCHO editors textedit doc usersGuides \
+	    [file join $TYCHO edit textedit doc usersGuides \
 	    EditCHelp.html]
 }
 

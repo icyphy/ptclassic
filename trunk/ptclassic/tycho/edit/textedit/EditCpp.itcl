@@ -198,7 +198,7 @@ body ::tycho::EditCpp::fileTemplate {fileTemplate {newClassName {}}} {
 body ::tycho::EditCpp::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    [file join $TYCHO editors textedit doc usersGuides \
+	    [file join $TYCHO edit textedit doc usersGuides \
 	    EditCppHelp.html]
 }
 
