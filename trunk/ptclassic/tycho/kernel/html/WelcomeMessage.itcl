@@ -75,17 +75,17 @@ body ::tycho::WelcomeMessage::constructor {args} {
     # but it is better to restrict it in the source.
     if {!$tychogifexists} {
 	image create photo tychogif \
-		-file $TYCHO/kernel/img/tychologo.gif
+		-file [ file join $TYCHO kernel img tychologo.gif]
     }
     configure -image tychogif
 
     # Pack the copyright button.
     addButton copyright -text "Copyright" -command \
-	    "::tycho::File::openContext $TYCHO/copyright"
+	    "::tycho::File::openContext [file join $TYCHO copyright]"
 
     # Pack the introduction button.
     addButton intro -text "Home Page" -command \
-	    "::tycho::File::openContext $TYCHO/doc/index.html"
+	    "::tycho::File::openContext [file join $TYCHO doc index.html]"
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
