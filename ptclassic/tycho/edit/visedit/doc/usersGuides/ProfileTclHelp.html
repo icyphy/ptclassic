@@ -20,10 +20,29 @@ includes a section on <A HREF="../../../../doc/coding/performance.html">Performa
 The Profile Tcl tool uses the TclX <CODE>profile</CODE> command.  TclX
 is an extension to Tcl.  The TclX sources are available at <A
 HREF="ftp.neosoft.com:/pub/tcl/tclx-distrib"><CODE>ftp.neosoft.com:/pub/tcl/tclx-distrib</CODE></A>.
-To use the Profile Tcl tool, you must have TclX installed so that the
-TclX shared library can be loaded at runtime.
+To use the Profile Tcl tool, you must have the TclX <CODE>profile</CODE>
+command available at runtime.
 
- <P>TclX7.5.3-a1 does not understand Itcl namespaces.  The file <A
+ <P>When the Profiler is started, the Tycho<A
+HREF="../../../../kernel/doc/usersGuides/LoaderHelp.html">Loader</A>
+will look for the TclX shared library that contains the
+<CODE>profile</CODE> command and attempt to load it.
+
+ <P>There are several different scenarios:
+<MENU>
+<LI> <A HREF="#profile command, default TclX">Use the default TclX
+	profile command</A>
+<LI> <A HREF="#profile command, TclX patch">Patch the TclX profile
+	command and Reinstall TclX</A>
+<LI> <A HREF="#profile command, standalone version">Compile a
+	standalone profile command</A>
+</MENU>
+
+<H3><A NAME="profile command, default TclX">Use the default TclX
+profile command</A></H3>
+
+ <P>The <CODE>profile</CODE> command shipped with TclX7.5.3-a1 does
+not understand Itcl namespaces.  The file <A
 HREF="tclXprofile.c.patch"><CODE>tclXprofile.c.patch</CODE></A> is a
 patch to <CODE>tclX7.5.3-a1/tcl/generic/tclXprofile.c</CODE> that
 modifies the profile command so it understands Itcl namespaces.  The
@@ -31,15 +50,76 @@ Profile Tcl tool will work on Itcl scripts without this patch, but you
 won't have any namespace information, so the output will be a little
 hard to understand.
 	
+<H3><A NAME="profile command, TclX patch">Patch the TclX profile command and Reinstall TclX</A>
+</H3>
+
  <P>To install this patch, you will need Larry Wall's
 <CODE>patch</CODE> program.  (You can get <CODE>patch</CODE> from <A
 HREF="ftp://ptolemy.eecs.berkeley.edu/pub/gnu/src/patch-2.1.tar.gz"><CODE>ftp://ptolemy.eecs.berkeley.edu/pub/gnu/src/patch-2.1.tar.gz</CODE></A>).
-To install the patch, grab the TclX sources, cd to
-<CODE>tclX</CODE><I>version</I><CODE>/tcl/generic</CODE>, and then run
-<CODE>patch &lt;
-$TYCHO/editors/visedit/doc/usersGuides/tclXprofile.c.patch</CODE>.
-Then install TclX.
+To install the patch
+<OL>
+<LI> Grab the TclX sources from
+<A
+HREF="ftp.neosoft.com:/pub/tcl/tclx-distrib"><CODE>ftp.neosoft.com:/pub/tcl/tclx-distrib</CODE></A>.
 
+<LI> <CODE>cd </CODE>to 
+	<CODE>tclX</CODE><I>version</I><CODE>/tcl/generic</CODE>.
+
+<LI> Patch <CODE>tclXprofile.c</CODE> <CODE>patch &lt;
+$TYCHO/editors/visedit/doc/usersGuides/tclXprofile.c.patch</CODE>.
+
+<LI> Install TclX by following the TclX instructions.
+
+</OL>
+
+<H3><A NAME="profile command, standalone version">Compile a standalone profile command</A>
+</H3>
+
+The directory <CODE>$TYCHO/lib/profile</CODE> contains a standalone
+version of <CODE>tclXprofile.c</CODE> that can be configured and
+compiled to produced a shared object that can be loaded in to Tycho
+when profiling starts.  The Tycho Loader facility will bring up a file
+browser if TclX cannot be found, and you can enter the pathname of the
+<CODE>tclXprofile</CODE> object.
+ <P>
+
+Compiling <CODE>tclXprofile.c</CODE> requires the tcl sources, since
+the .c file uses <CODE>tclInt.h</CODE>, which is not usually
+installed.  If you are compiling <CODE>tclXprofile.c</CODE> from
+within Ptolemy, then you can use the default settings in
+<CODE>$TYCHO/lib/profile/makefile</CODE>.  If you are not compiling
+from within Ptolemy, you will have to set the
+<CODE>TCL_SRC_INCLUDE_DIR</CODE> makefile variable.
+ <P>
+
+Compiling <CODE>tclXprofile.c</CODE> also requires
+<CODE>tclConfig.sh</CODE>, which is usually in the architecture
+dependent tcl <CODE>lib</CODE> directory.  Again, if you are
+installing from within Ptolemy, then the makefile is probably fine.
+Otherwise you will have to adjust the <CODE>TCLCONFIGSH</CODE>
+makefile variable.
+ <P>
+There are two ways to adjust these variables:
+<OL>
+<LI> Edit <CODE>$TYCHO/lib/profile/makefile</CODE>
+<LI> Pass the new values as command line options:
+<PRE>
+cd $TYCHO/lib/profile
+make TCL_SRC_INCLUDE_DIR=$PTOLEMY/src/tcltk/itcl2.1/tcl7.5/generic/ \
+	$PTOLEMY/tcltk/itcl.$PTARCH/lib/itcl/tclConfig.sh
+</PRE>
+</OL>
+After you have adjusted the makefile accordingly, configure and build
+the shared object:
+<PRE>
+ <CODE>cd $TYCHO/lib/profile; make</CODE>
+</PRE>
+
+The <CODE>tclXprofile</CODE> shared object will be in
+<CODE>$TYCHO/lib/profile/$PTARCH</CODE>.  Under solaris, the file will
+be named <CODE>tclXprofile.so</CODE>.
+
+<HR>
 <H2>Profiler Description</H2>
 
 <p>
