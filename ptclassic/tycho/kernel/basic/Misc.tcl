@@ -466,7 +466,7 @@ proc foreach* {args} {
 	set   l_$var [lindex $args 1]    ;# second element
 	set args [lreplace $args 0 1]    ;# rest of list
 
-	set outer [min $outer [llength [set l_$var]]]
+	set outer [min2 $outer [llength [set l_$var]]]
 	lappend script "set v_$var \[lindex \$l_$var \$counter\]\;"
     }
     set script [eval concat $script]
@@ -604,7 +604,7 @@ proc apply* {args} {
 	set   l_$var [lindex $args 1]    ;# second element
 	set args [lreplace $args 0 1]    ;# rest of list
 
-	set outer [min $outer [llength [set l_$var]]]
+	set outer [min2 $outer [llength [set l_$var]]]
 	lappend script "set v_$var \[lindex \$l_$var \$counter\]\;"
     }
     set script [eval concat $script]
