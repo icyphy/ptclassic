@@ -236,10 +236,11 @@ The values of the input ports will be passed as arguments to this function.
 		    matlabMatrix = mxCreateFull(rows, cols, MXCOMPLEX);
 
 		    // copy values in the Ptolemy matrix to the Matlab matrix
+		    // Matlab stores values in column-major order like Fortran
 		    double *realp = mxGetPr(matlabMatrix);
 		    double *imagp = mxGetPi(matlabMatrix);
-		    for ( int irow = 0; irow < rows; irow++ ) {
-		      for ( int icol = 0; icol < cols; icol++ ) {
+		    for ( int icol = 0; icol < cols; icol++ ) {
+		      for ( int irow = 0; irow < rows; irow++ ) {
 			Complex temp = Amatrix[irow][icol];
 			*realp++ = real(temp);
 			*imagp++ = imag(temp);
@@ -258,9 +259,10 @@ The values of the input ports will be passed as arguments to this function.
 		    matlabMatrix = mxCreateFull(rows, cols, MXREAL);
 
 		    // copy values in the Ptolemy matrix to the Matlab matrix
+		    // Matlab stores values in column-major order like Fortran
 		    double *realp = mxGetPr(matlabMatrix);
-		    for ( int irow = 0; irow < rows; irow++ ) {
-		      for ( int icol = 0; icol < cols; icol++ ) {
+		    for ( int icol = 0; icol < cols; icol++ ) {
+		      for ( int irow = 0; irow < rows; irow++ ) {
 			*realp++ = double(Amatrix[irow][icol]);
 		      }
 		    }
@@ -277,9 +279,10 @@ The values of the input ports will be passed as arguments to this function.
 		    matlabMatrix = mxCreateFull(rows, cols, MXREAL);
 
 		    // copy values in the Ptolemy matrix to the Matlab matrix
+		    // Matlab stores values in column-major order like Fortran
 		    double *realp = mxGetPr(matlabMatrix);
-		    for ( int irow = 0; irow < rows; irow++ ) {
-		      for ( int icol = 0; icol < cols; icol++ ) {
+		    for ( int icol = 0; icol < cols; icol++ ) {
+		      for ( int irow = 0; irow < rows; irow++ ) {
 			*realp++ = Amatrix[irow][icol];
 		      }
 		    }
@@ -296,9 +299,10 @@ The values of the input ports will be passed as arguments to this function.
 		    matlabMatrix = mxCreateFull(rows, cols, MXREAL);
 
 		    // copy values in the Ptolemy matrix to the Matlab matrix
+		    // Matlab stores values in column-major order like Fortran
 		    double *realp = mxGetPr(matlabMatrix);
-		    for ( int irow = 0; irow < rows; irow++ ) {
-		      for ( int icol = 0; icol < cols; icol++ ) {
+		    for ( int icol = 0; icol < cols; icol++ ) {
+		      for ( int irow = 0; irow < rows; irow++ ) {
 			*realp++ = double(Amatrix[irow][icol]);
 		      }
 		    }
@@ -382,11 +386,12 @@ The values of the input ports will be passed as arguments to this function.
 		    double *realp = mxGetPr(matlabMatrix);
 		    double *imagp = mxGetPi(matlabMatrix);
 
+		    // copy Matlab matrices (in column-major order) to Ptolemy
 		    if ( portType == COMPLEX_MATRIX_ENV ) {
 		      LOG_NEW; ComplexMatrix& Amatrix =
 					*(new ComplexMatrix(rows, cols));
-		      for ( int jrow = 0; jrow < rows; jrow++ ) {
-			for ( int jcol = 0; jcol < cols; jcol++ ) {
+		      for ( int jcol = 0; jcol < cols; jcol++ ) {
+			for ( int jrow = 0; jrow < rows; jrow++ ) {
 			  double realValue = *realp++;
 			  double imagValue = ( imagp ) ? *imagp++ : 0.0;
 			  Amatrix[jrow][jcol] = Complex(realValue, imagValue);
@@ -406,8 +411,8 @@ The values of the input ports will be passed as arguments to this function.
 			myerrstr << " on output port " << j;
 			Error::warn(*this, (const char *) myerrstr);
 		      }
-		      for ( int jrow = 0; jrow < rows; jrow++ ) {
-			for ( int jcol = 0; jcol < cols; jcol++ ) {
+		      for ( int jcol = 0; jcol < cols; jcol++ ) {
+			for ( int jrow = 0; jrow < rows; jrow++ ) {
 			  Amatrix[jrow][jcol] = *realp++;
 			}
 		      }
