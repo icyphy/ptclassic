@@ -58,7 +58,7 @@ static Bool initialized = FALSE;  /* AM layer initialized? */
  * DESCRIPTION:  Send replying endpoint (receiver) an unreliable ACK (hint) to 
  * free up reply storage.
  */
-inline static 
+/*inline*/ static 
 void ReplyACK(int sender, struct sockaddr_in receiver, int buf_id, int seq_num)
 {
   UDPAM_ReplyACK_Pkt packet;
@@ -175,7 +175,7 @@ int EmptyReply(ea_t endpoint, struct sockaddr_in *err_requester, tag_t tag,
  * DESCRIPTION:  Dequeues a UDPAM buffer from request_endpoint's send queue and 
  * adjusts the number of credits for destination endpoint reply_endoint.
  */
-inline static 
+/*inline*/ static 
 void AM_GetRequestPacket(ea_t request_endpoint, int reply_endpoint, UDPAM_Buf **buf)
 {
   while (request_endpoint->translation_table[reply_endpoint].wsize == 0) {
