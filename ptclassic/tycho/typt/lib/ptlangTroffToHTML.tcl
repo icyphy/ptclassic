@@ -95,7 +95,7 @@ proc ptlangTroffToHTML {args} {
                     set lineIn $newline
 
                     # Search for various common troff macros
-                    switch -regexp $lineIn {
+                    switch -regexp -- $lineIn {
                         {^\.br} {
                             puts $tmpfile "<br>"
                         }
