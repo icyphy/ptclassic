@@ -204,8 +204,9 @@ int MatlabTcl::get(int argc, char** argv) {
 	return usage("matlab get <matrix_name> ?<matlab_command>?");
     MATLABTCL_CHECK_MATLAB();
 
+    // evaluate the script if given
     if (argc == 4) {
-	if ( MatlabTcl::evaluate(argv[3], FALSE) != TCL_OK ) return TCL_ERROR;
+	if ( evaluate(argv[3], FALSE) != TCL_OK ) return TCL_ERROR;
     }
 
     int numrows = 0, numcols = 0;
@@ -246,6 +247,12 @@ int MatlabTcl::getpairs(int argc, char** argv) {
     if ((argc < 3) || (argc > 4))
 	return usage("matlab getpairs <matrix_name> ?<matlab_command>?");
     MATLABTCL_CHECK_MATLAB();
+
+    // evaluate the script if given
+    if (argc == 4) {
+	if ( evaluate(argv[3], FALSE) != TCL_OK ) return TCL_ERROR;
+    }
+
     InfString command = "eval makeOrderedPairs [lrange [matlab get ";
     command << argv[2] << "] 2 end]";
     return Tcl_Eval(tclinterp, command);
