@@ -372,7 +372,7 @@ $label(fullLoop)
 	            if (decimation==1)
 		            b=8+tapsNum-decimation;
 	            else
-		            b=10+2*int(decimation);	            
+		            b=10+tapsNum+decimation;
                }
                return a+b;
       }
