@@ -40,25 +40,40 @@ Programmer: Jose Luis Pino
 #include "Galaxy.h"
 #include "GalIter.h"
 
-inline int defaultBlockTest(Block&) { return TRUE; }
 
 // Delete-safe iterators
-class DSGalAllBlockIter {
+inline int defaultBlockTest(Block&) { return TRUE; }
+
+class DSBlockIter {
 public:
-    DSGalAllBlockIter(Galaxy&, int (*)(Block&) = defaultBlockTest);
-    virtual ~DSGalAllBlockIter() { delete nextBlockThatMeetsTest; }
+    DSBlockIter(int (*test)(Block&) = defaultBlockTest):testBlock(test){};
+    virtual ~DSBlockIter() { delete nextBlockThatMeetsTest; }
     inline Block* next() { return nextBlockThatMeetsTest->next(); }
     inline Block* operator++(POSTFIX_OP) { return next();}
     inline void reset() { nextBlockThatMeetsTest->reset(); }
+    inline void put(Block& b) {
+	if (testBlock(b)) blocksThatMeetTest.put(b);
+    }
+protected:
+    // This method must be called at the end of all derived class constructors
+    inline void initInternalIterator() {
+	nextBlockThatMeetsTest = new BlockListIter(blocksThatMeetTest);
+    }
 private:
     int (*testBlock)(Block&);
     BlockList blocksThatMeetTest;
     BlockListIter *nextBlockThatMeetsTest;
+};   
+
+class DSGalAllBlockIter:public DSBlockIter {
+public:
+    DSGalAllBlockIter(Galaxy&, int (*)(Block&) = defaultBlockTest);
 };
 
-class DSGalTopBlockIter {
+class DSGalTopBlockIter :public DSBlockIter {
+public:
     DSGalTopBlockIter(Galaxy&, int (*)(Block&) = defaultBlockTest);
-    virtual ~DSGalTopBlockIter() {};
+};
 		      
 inline int defaultGalaxyTest (Block& b) {return ! b.isItAtomic();}
 class GalGalaxyIter : private DSGalAllBlockIter {
