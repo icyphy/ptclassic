@@ -1,5 +1,6 @@
 # Configuration makefile for an HP-PA machine (7xx or 8xx)
-# running HP-UX with cfront
+# running HP-UX 10.x with HP's C++ compler
+#
 # $Id$
 # Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
@@ -77,7 +78,7 @@ OCT_DEBUG_FLAGS =
 # to find out what version of HPPA CC you are using.
 # If you are running under HPUX9, then remove -DPTHPUX10
 # We need -D_CMA_NOWRAPPERS_ to build domains/pn/stars/PNSplice.cc
-ARCHFLAGS =	-DUSG $(GPPDEBUGFLAGS) -DPTHPUX10 -D_CMA_NOWRAPPERS_
+ARCHFLAGS =	$(GPPDEBUGFLAGS) -DPTHPUX10 -D_CMA_NOWRAPPERS_ -D_REENTRANT -D_HPUX_SOURCE
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
 
@@ -122,7 +123,8 @@ CLINKER = $(CC)
 CRT0 =
 # system libraries (libraries from the environment)
 # /usr/lib/end.o is necessary for debugging with xdb under hpux9.x
-SYSLIBS =	-lm #/usr/lib/end.o
+# /opt/langtools/lib/end.o is necessary for debugging with xdb under hpux10.x
+SYSLIBS =	-lm /opt/langtools/lib/end.o
 
 # system libraries for linking .o files from C files only
 CSYSLIBS = $(SYSLIBS)

@@ -41,6 +41,8 @@ include $(ROOT)/mk/config-g++.mk
 # Comment the next line out if you don't want shared libraries.
 include $(ROOT)/mk/config-g++.shared.mk
 
+# The HPUX9/HPUX10 dependencies are below here
+
 # ptbin.mk uses this to decide whether to include the PN stars
 # If you are under HPUX10, then the PN domain requires DCE threads.
 #  you will need to install the DCE development set of the OS cds.
@@ -49,6 +51,20 @@ include $(ROOT)/mk/config-g++.shared.mk
 #  this installed, set INCLUDE_PN_DOMAIN to no
 #INCLUDE_PN_DOMAIN = no
 INCLUDE_PN_DOMAIN = yes
+
+# Misc. flags for OS version, if you are under HPUX9.x:
+#ARCHFLAGS =	
+# If you are under HPUX10 and don't have DCE installed, add -DPTNO_THREADS
+#  to ARCHFLAGS.
+# If you are under HPUX10.x:
+ARCHFLAGS =	-DPTHPUX10 -D_CMA_NOWRAPPERS_ -D_REENTRANT -D_HPUX_SOURCE
+
+# src/kernel/makefile uses this to compile flush_cache.s.
+# Under HPUX9.x, use /bin/as
+#HP_AS = 	/bin/as
+HP_AS =		/usr/ccs/bin/as
+
+# end of HPUX9/HPUX10 dependencies
 
 
 # gcc-2.7.2 under hpux10 requires '-shared -fPIC' to produce shared
@@ -81,8 +97,6 @@ RANLIB =	ranlib
 YACC =		bison -y
 # islang uses lex, which is not necessarily part of hpux10.x
 LEX =		flex
-# src/kernel/makefile uses this to 
-HP_AS =		/usr/ccs/bin/as
 # Use gcc everywhere, including octtools
 CC =		gcc
 
@@ -105,12 +119,6 @@ OPTIMIZER =	-O2
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wsynth #-Wcast-qual 
 
-# Misc. flags for OS version, if you are under HPUX9.x:
-#ARCHFLAGS =	
-# If you are under HPUX10.x, define -DPTHPUX10
-# Under HPUX10.x, you will need to define _CMA_NOWRAPPERS_ to get
-#   the PN domain to work (see /usr/include/dce/cma_ux.h)
-ARCHFLAGS =	-DPTHPUX10 -D_CMA_NOWRAPPERS_
 # Under gcc-2.7.0, you will need to add -fno-for-scope to LOCALCCFLAGS
 LOCALCCFLAGS =	-g -DUSG -DUSE_SHLLOAD -fno-for-scope
 
@@ -165,6 +173,9 @@ LIBSUFFIX =		sl
 X11DIR = 	/usr/sww/X11R5
 X11_INCSPEC =	-I$(ROOT)/src/compat -I$(X11DIR)/include
 X11_LIBSPEC =	-L$(X11DIR)/lib -lX11
+# X11_LIBDIR is used in the SHARED_LIBRARY_PATH
+X11_LIBDIR =	$(X11DIR)/lib
+
 #X11_INCSPEC =	-I$(ROOT)/src/compat
 #X11_LIBSPEC =	-L/usr/lib/X11R5 -lX11
 
