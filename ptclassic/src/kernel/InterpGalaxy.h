@@ -29,6 +29,8 @@ $Id$
 #include "KnownState.h"
 #include "StringList.h"
 
+class Target;
+
 // class for a list of Geodesics (or nodes)
 class NodeList : public SequentialList {
 	friend class NodeListIter;
@@ -136,7 +138,7 @@ public:
 	Block *clone() const;
 
 // "register" the galaxy (add it to the known list)
-	void addToKnownList(const char* domain);
+	void addToKnownList(const char* domain,Target* t = 0);
 
 // return a contained star/galaxy (this is protected in Galaxy)
 	Block* blockWithName(const char* s) {return Galaxy::blockWithName(s);}
