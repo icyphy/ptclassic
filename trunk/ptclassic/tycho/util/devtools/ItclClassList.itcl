@@ -229,12 +229,14 @@ body ::tycho::ItclClassList::_initializeBars {menubar statusbar toolbar} {
     if {$toolbar != {}} {
         $toolbar button includeTychoClasses  \
                 -text {Include Tycho} \
+                -underline 8 \
                 -command "$this includeTychoClasses" \
                 -description {Insert all Tycho classes into the \
                 current file.}
         
         $toolbar button includeDirectoryClasses \
                 -text {Include Directory} \
+                -underline 8 \
                 -command "$this includeDirectoryClasses" \
                 -description {Choose a file in a directory, and then \
                 insert all the *.itcl and *.itk files \
@@ -242,17 +244,20 @@ body ::tycho::ItclClassList::_initializeBars {menubar statusbar toolbar} {
         
         $toolbar button clearClassList \
                 -text Clear \
+                -underline 0 \
                 -command "$this deleteRange 0.0 end" \
                 -description {Clear the contents of the current file}
         
         $toolbar button browseClassDiagram \
                 -text {Diagram File Name} \
+                -underline 8 \
                 -command "$this browseClassDiagram" \
                 -description {Choose a filename for the class \
                 diagram output to go into.}
         
         $toolbar button updateClassDiagram \
                 -text {Update Class Diagram}\
+                -underline 0 \
                 -command "$this updateClassDiagram" \
                 -description {Generate a class diagram from the files \
                 listed in the current file.}

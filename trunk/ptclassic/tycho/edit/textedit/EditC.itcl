@@ -358,16 +358,19 @@ body ::tycho::EditC::_initializeMenubar {menubar} {
     # Add menu entries for templates
     $menubar separator specialsep1 special
     $menubar command tclinit special \
-	    -label {Add Tcl Initialization} -underline 0 \
+	    -label {Add Tcl Initialization} \
+            -underline 0 \
             -command "$this addTclInitialization"
 
     # Set up menu entries for compiling
     $menubar delete evaluate
     $menubar insert command compile close \
-	    -label Compile -underline 0 \
-            -accelerator "C-x C-r" -command "$this evaluate"
+	    -label Compile \
+            -underline 6 \
+            -command "$this evaluate"
     $menubar insert command compileandload close \
-	    -label {Compile and Load} -underline 0 \
+	    -label {Compile and Load} \
+            -underline 12 \
             -command "$this compileAndLoad"
     $menubar insert separator filesep3 close
 }

@@ -267,6 +267,7 @@ body ::tycho::EditPtlang::_initializeMenubar {menubar} {
     $menubar delete bodytemplate
     $menubar delete cctemplate
     $menubar delete htemplate
+    $menubar delete specialsep3
 
     # Stuff for the special menu
     $menubar command generatedoc special \
@@ -282,12 +283,12 @@ body ::tycho::EditPtlang::_initializeMenubar {menubar} {
 	    [file join $PTOLEMY tycho typt lib PtolemyFacets.fst]"
 
     $menubar command starxref special \
-	    -label "Star/Demo Xref" -underline 11 \
+	    -label "Star/Demo Xref" -underline 10 \
             -command "::tycho::File::openContext \
             [file join $PTOLEMY doc star-demo-index index.html]"
 
     $menubar command ptstars special \
-	    -label "Ptolemy stars" -underline 0 \
+	    -label "Ptolemy stars" -underline 6 \
             -command "::tycho::File::openContext \
             [file join $PTOLEMY src domains starHTML.idx.fst]"
 }

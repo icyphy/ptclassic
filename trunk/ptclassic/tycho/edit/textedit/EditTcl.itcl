@@ -105,7 +105,7 @@ body ::tycho::EditTcl::constructor {args} {
     # Set the fill prefix to be the comment character for Tcl.
     set fillPrefix "#"
 
-    bind $itk_component(text) <Control-x><Control-Shift-R> \
+    bind $itk_component(text) <<EvaluateConstruct>> \
             "$this evaluateConstruct"
 }
 
@@ -375,11 +375,13 @@ body ::tycho::EditTcl::_initializeBars {menubar statusbar toolbar} {
     if {$menubar != {}} {
         $menubar insert command selectbody unselect \
 		-label "Select Body"  \
+                -underline 7 \
                 -command "$this selectConstruct"
         
         $menubar insert command evaluatebody reload \
 		-label "Evaluate Body" \
-                -accelerator "C-x C-R" \
+                -underline 9 \
+                -accelerator [::tycho::Shortcuts::getLabel EvaluateConstruct] \
                 -command "$this evaluateConstruct"
     }
 }

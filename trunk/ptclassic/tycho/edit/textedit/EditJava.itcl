@@ -581,7 +581,7 @@ body ::tycho::EditJava::_initializeMenubar {menubar} {
     $menubar separator specialsep2 special
 
     $menubar command generatedoc special \
-	    -label "Generate HTML Documentation" -underline 0 \
+	    -label "Generate HTML Documentation" -underline 9 \
             -command "$this gendocBuffer"
 
     $menubar command generateidoc special \

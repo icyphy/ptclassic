@@ -77,9 +77,6 @@ class ::tycho::EditDiff {
     # Open a help window.  This should be redefined in derived classes.
     method help {}
 
-    # openContext a file, then jump to the line
-    method hyperJump {filename line} {}
-
     # Put in the file name in the list entry
     method insertFileName {num nameAndPath} {}
 
@@ -90,7 +87,7 @@ class ::tycho::EditDiff {
     method insertString {index str status} {}
 
     # Jump to the next difference
-    method jumpDifference {incrdecr idx} {}
+    method jumpDifference {{direction {forward}}} {}
 
     ####################################################################
     ####           protected methods and variables                  ####
@@ -175,8 +172,12 @@ body ::tycho::EditDiff::constructor {args} {
 
     eval itk_initialize $args
 
-    # Center the screen.
-    bind $itk_component(text) <Control-L> "$this compareFile"
+    # Bindings to make the key accelerators work
+    bind $itk_component(text) <Key-p> "$this jumpDifference backward; break"
+    bind $itk_component(text) <Key-n> "$this jumpDifference forward; break"
+    bind $itk_component(text) <Key-c> "$this compareFile; break"
+    bind $itk_component(text) <Key-1> "$this insertSelectedFileName 1; break"
+    bind $itk_component(text) <Key-2> "$this insertSelectedFileName 2; break"
 }
 
 
@@ -217,7 +218,7 @@ body ::tycho::EditDiff::compareFile {} {
     $text config -cursor left_ptr
     set differenceList {}
     set differenceListCount -1
-
+    set tag 0
 
     # Create an exec instance
     if {[info object $execDiff ]==""} {
@@ -252,8 +253,6 @@ body ::tycho::EditDiff::compareFile {} {
         set n4 [lindex $diffInfo 4]
         
         set tag [llength $differenceList]
-        $text tag bind l0$tag <Button-1> \
-                "$this jumpDifference {} [expr [llength $differenceList] -1]"
 
         # Output common lines. Also increment
         # file1 and file2 pointer
@@ -282,9 +281,8 @@ body ::tycho::EditDiff::compareFile {} {
             diff #[expr [llength $differenceList]+1]\""
         $text tag bind l1$tag <Leave> "$this putStatus \"\""
         $text tag bind l1$tag <Double-Button-1> \
-                "$this hyperJump [toolbar get filename1] $fileLineCount1"
-        $text tag bind l1$tag <Button-1> \
-                "$this jumpDifference {} [llength $differenceList]"
+                [list $this hyperJump [toolbar get filename1] \
+                [list line $fileLineCount1]]
 
         $text tag configure l2$tag -foreground [lindex $linecolor2 0]
         $text tag bind l2$tag <Enter> \
@@ -293,9 +291,8 @@ body ::tycho::EditDiff::compareFile {} {
             diff #[expr [llength $differenceList]+1]\""
         $text tag bind l2$tag <Leave> "$this putStatus \"\""
         $text tag bind l2$tag <Double-Button-1> \
-                "$this hyperJump [toolbar get filename2] $fileLineCount2"
-        $text tag bind l2$tag <Button-1> \
-                "$this jumpDifference {} [llength $differenceList]"
+                [list $this hyperJump [toolbar get filename2] \
+                [list line $fileLineCount2]]
 
         # Setup coloring
         if {$info=="c"} {
@@ -451,75 +448,51 @@ body ::tycho::EditDiff::insertSelectedFileName {num} {
 
 ###################################################################
 #### jumpDifference
-# Jump to the next difference. This is called by buttons.
+# Jump to the next difference.  If the argument is not
+# given or has value "forward", then jump forward.  Otherwise,
+# jump backwards.
 #
-body ::tycho::EditDiff::jumpDifference {{incrdecr 1} {idx {}}} {
+body ::tycho::EditDiff::jumpDifference {{direction {forward}}} {
     # No difference, return
     if {[llength $differenceList]==0} {
         ::tycho::inform {There is no difference!}
         return
     }
     
-    if {$idx=={}} {
-        # Choose to incr or decr
-        incr differenceListCount $incrdecr
-        # Overflow! Warning:
-        if {$differenceListCount==[llength $differenceList]} {
-            incr differenceListCount -1
-            if {[tycho::askuser {Not found, search again at the top?}]} {
-                set differenceListCount -1
-                jumpDifference 1
-            }
-            return
-        }
-        if {$differenceListCount==-1} {
-            incr differenceListCount 1
-            if {[tycho::askuser {Not found, search again at the bottom?}]} {
-                set differenceListCount [llength $differenceList]
-                jumpDifference -1
-            }
-            return
-        }
-    } elseif {$idx!={}} {
-        set differenceListCount $idx
-        return
+    # Choose to incr or decr
+    if {$direction == {forward}} {
+        incr differenceListCount 1
     } else {
-        error "Passing empty params to jumpDifference"
+        incr differenceListCount -1
+    }
+    # Overflow! Warning:
+    if {$differenceListCount==[llength $differenceList]} {
+        incr differenceListCount -1
+        if {[tycho::askuser {Not found, search again at the top?}]} {
+            set differenceListCount -1
+            jumpDifference forward
+        }
+        return
+    }
+    if {$differenceListCount==-1} {
+        incr differenceListCount 1
+        if {[tycho::askuser {Not found, search again at the bottom?}]} {
+            set differenceListCount [llength $differenceList]
+            jumpDifference backward
+        }
+        return
     }
     
     # Extract begin and ending block numbers
     set diffBlock [lindex $differenceList $differenceListCount]
     set differenceBegin [lindex $diffBlock 0]
     
-    # Highlight just the beginning of the difference.
-    # Previously, highlighting the entire block is too annoying.
-    $this seeFragment "line [expr $differenceBegin]"
+    # Make the next difference visible.
+    # Previously, we were highlighting the first line of the difference.
+    # However, this obscures the color coding.  So we do no highlighting.
+    set point "[expr $differenceBegin].0"
+    $this seeFragment "range $point $point"
 }
-
-#######################################################################
-#### hyperJump
-# This will open file context, and jump to entry number.
-#
-body ::tycho::EditDiff::hyperJump {filename line} {
-    # FIXME: directory could potentially be anywhere, specified in Makefile.
-    # Name of our editor/viewer
-    set editorName [::tycho::File::openContext $filename]
-    set editorName [string trim $editorName :]
-
-    # Jump to the line in editor
-    $editorName seeFragment "line $line"
-    # THe following is added because if a file has not been opened,
-    # then seeFragment will be called too quickly, thus no line
-    # will be selected.
-    after 1000 "$editorName seeFragment \"line $line\""
-}
-
-
-####################################################################
-####################################################################
-####                    public procedures                       ####
-
-
 
 ####################################################################
 ####################################################################
@@ -586,25 +559,30 @@ body ::tycho::EditDiff::_initializeToolbar {toolbar} {
 
     $toolbar button prevdiff \
             -text {Prev Difference} \
+            -underline 0 \
             -description {Jump to the previous difference} \
-            -command "$this jumpDifference -1"
+            -command "$this jumpDifference backward"
 
     $toolbar button nextdiff \
             -text {Next Difference} \
+            -underline 0 \
             -description {Jump to the next difference} \
-            -command "$this jumpDifference 1"
+            -command "$this jumpDifference forward"
 
     $toolbar button compare \
             -text Compare \
+            -underline 0 \
             -description {Read in both files, and start parsing} \
             -command "$this compareFile"
 
     $toolbar entry filename1 "File 1 name: " {} "$this entryCommand 1 " \
             -foreground [lindex $linecolor1 0] \
+            -underline 5 \
             -command "$this insertSelectedFileName 1"
            
     $toolbar entry filename2 "File 2 name: " {} "$this entryCommand 2 " \
             -foreground [lindex $linecolor2 0] \
+            -underline 5 \
             -command "$this insertSelectedFileName 2"
 }
 	
