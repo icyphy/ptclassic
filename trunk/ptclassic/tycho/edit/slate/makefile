@@ -43,6 +43,7 @@ include $(CONFIG)
 TCL_SRCS = 
   
 ITCL_SRCS = \
+	Animator.itcl \
 	Axis.itcl \
 	Bounder.itcl \
 	ComplexItem.itcl \
