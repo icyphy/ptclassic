@@ -58,6 +58,12 @@ void EGGate::removeMe() {
 	LOG_DEL; delete this;
 }
 
+void EGGate::hideMe(int flag) {
+	if (!flag) far->hideMe(1);
+	myLink->removeMeFromList();
+	parent->hiddenGates.insertGate(this, 0);
+}
+	
 SDFStar* EGGate :: farEndMaster() {
 	if (far == 0) return 0;
 	return farEndNode()->myMaster(); }
