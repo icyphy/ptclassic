@@ -55,6 +55,7 @@ extern int errno;
 /* #include "message.h" */
 #include "rpcApp.h"
 #include "oh.h"
+#incluce "appNet.h"
 #include "ansi.h"
 
 EXTERN rpcInternalStatus RPCReceiveFunctionToken
