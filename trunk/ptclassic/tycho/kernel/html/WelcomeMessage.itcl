@@ -41,6 +41,7 @@ proc ::tycho::welcomeMessage {{binary ""} {version ""}} {
             -executable $binary \
             -persistent 0]
     $nm centerOnScreen
+    return $nm
 }
 
 ##########################################################################
