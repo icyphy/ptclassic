@@ -24,7 +24,7 @@ include $(CONFIG)
 SDFDIR=$(ROOT)/src/domains/sdf/kernel
 LOOPDIR=$(ROOT)/src/domains/sdf/loopScheduler
 
-INCL= -I$(KERNDIR) -I$(SDFDIR) -I$(LOOPDIR)
+INCL= $(PTCOMPAT_INCSPEC) -I$(KERNDIR) -I$(SDFDIR) -I$(LOOPDIR)
 
 # Library name
 LIB=libcg.$(LIBSUFFIX)
