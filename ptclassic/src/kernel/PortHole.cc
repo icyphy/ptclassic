@@ -14,6 +14,7 @@ static const char file_id[] = "Connect.cc";
 #include "Plasma.h"
 #include "miscFuncs.h"
 #include "GalIter.h"
+#include "WormConnect.h"
 #include <std.h>
  
 /**************************************************************************
@@ -190,9 +191,10 @@ void PortHole :: disconnect(int delGeo) {
 }
 
 // Porthole constructor.
-PortHole :: PortHole () : myGeodesic(0), farSidePort(0), myPlasma(0),
-		      myBuffer(0), myMultiPortHole(0) {}
+PortHole :: PortHole () : myGeodesic(0), farSidePort(0), 
+	myPlasma(0), myBuffer(0), myMultiPortHole(0) {}
 	
+EventHorizon* PortHole :: asEH() { return NULL; }
 
 // Porthole destructor.
 PortHole :: ~PortHole() {
