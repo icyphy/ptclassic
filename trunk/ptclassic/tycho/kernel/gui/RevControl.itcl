@@ -2,7 +2,7 @@
 #
 # @Authors: Joel King and Edward A. Lee
 #
-# @Version: $Id$ %G
+# @Version: $Id$
 #
 # @Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
@@ -69,8 +69,17 @@ class ::tycho::RevControl {
     # Unedit the file, reverting to the previously checked in version.
     method unedit {}
 
-    # View the version control history.
-    method viewHistory {} {error "Sorry, not implemented yet"}
+    # Get the specified version.
+    method retrieveVersion {version} {error "Not in base class!"}
+
+    # Shortcut to use retrieveVersion and openContext on it
+    method openVersion {version} {}
+
+    # Get the specified version and open the file.
+    method compareVersion {} {}
+
+    # Diff the most recent files
+    method diffRecent {text} {}
 
     ###################################################################
     ####                      public procs                         ####
@@ -114,6 +123,20 @@ class ::tycho::RevControl {
 
     # Update the history information, if it is on display.
     protected method updateHistory {}
+
+    # Parse the history information and insert a synopsis into the text window.
+    protected method parseHistory {history text}
+
+    # Update the files to diff stack
+    public method updateDiff {buttonName} {}
+
+    # Reset all the buttons
+    protected method resetDiff {} {}
+
+
+    ###################################################################
+    ####                   private methods                         ####
+
 
     ###################################################################
     ####                  protected procs                          ####
@@ -247,6 +270,99 @@ body ::tycho::RevControl::unedit {} {
     }
 }
 
+###################################################################
+#### openVersion
+# Uses children's retrieveVersion (SCCS or RCS) to get the
+# file, then do a openContext on the file. This is used as
+# a shortcut by the button bindings (see parseHistory).
+body ::tycho::RevControl::openVersion {version} {
+    set tmpFile [$this retrieveVersion $version]
+    set myView [::tycho::File::openContext $tmpFile]
+    $myView configure -tmpfile 1
+}
+
+###################################################################
+#### compareVersion
+# Compare versions set by the button boxes.
+#
+body ::tycho::RevControl::compareVersion {} {
+    if {[llength $difflist]!=2} {
+        error "You need to select exactly two files to compare."
+    }
+
+    set file [$object filename]
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+    cdDir $dir
+
+    # Generate a temporary file name that has the same extension as the file
+    # we are working on.
+    set tmpFile [::tycho::tmpFileName \
+            [file rootname $basefile] \
+            [file extension $basefile]]
+    # We originally have the formal UNIQUEID+12345_678
+    # Now parser into 12345.678
+    regexp {.*\+(.*)} [lindex $difflist 0] match version1
+    regexp {.*\+(.*)} [lindex $difflist 1] match version2
+    set version1 [join [split $version1 _] .]
+    set version2 [join [split $version2 _] .]
+
+    # Note: VERSION 0.0 indicates the latest original file.
+    # Now, sort the version number. The first file should be the higher
+    # version number so that EditDiff will place it on top. However, if it
+    # is verison 0.0, then it has precedence.
+    set versions [lsort -real [list $version1 $version2]]
+    if {$version1==0.0} {
+        # Do nothing, version 0.0 has precedence (top)
+    } elseif {$version2==0.0} {
+        set version1 [lindex $versions 0]  ;# version1 is the original, top
+        set version2 [lindex $versions 1]
+    } else {
+        # We're comparing two old versions
+        set version1 [lindex $versions 1]  ;# version1 is the highest number
+        set version2 [lindex $versions 0]
+    }
+
+    # Now make sure that version 0.0 is the original file
+    if {$version1==0.0} {
+        set tmpFile1 $file
+    } else {
+        set tmpFile1 [retrieveVersion $version1]
+    }
+
+    if {$version2==0.0} {
+        set tmpFile2 $file
+    } else {
+        set tmpFile2 [retrieveVersion $version2]
+    }
+
+    # We have the files! Now safely invoke diffWidget
+    set diffWidget [::tycho::view EditDiff -toolbar 1 -textheight 32 \
+            -filename1 $tmpFile1 -filename2 $tmpFile2]
+    $diffWidget configureUpdate
+    $diffWidget compareFile
+
+    cd $olddir
+}
+
+###################################################################
+#### diffRecent
+# diff the two most recent files
+body ::tycho::RevControl::diffRecent {text} {
+    # Clear up all the buttons
+    resetDiff
+    if {[isCheckedOut]} {
+        $text.[lindex $filelist 0] invoke
+        $text.[lindex $filelist 1] invoke
+    } else {
+        $text.[lindex $filelist 1] invoke
+        $text.[lindex $filelist 2] invoke
+    }
+    compareVersion
+}
+
+
 
 ###################################################################
 ###################################################################
@@ -318,7 +434,6 @@ body ::tycho::RevControl::makeRev {type editorWin editorObj} {
 # can access it for testing.
 #
 body ::tycho::RevControl::setup {editorWin editorObj} {
-
     # If a rev control window is already open, use it.
     if [winfo exists $editorWin.revcontrol] {
 	wm deiconify $editorWin.revcontrol
@@ -452,3 +567,173 @@ body ::tycho::RevControl::getComments {} {
     return [join [split $comments "\n"] "\\\n"]
 }
 
+    ###################################################################
+    ###################################################################
+    ####                   private methods                         ####
+
+#####################################################################
+#### parseHistory
+# Parse the history information and insert a synopsis into the text window.
+# History contains the entire "sccs prs" or "rlog" history list.
+# Info contains the status of the current file (empty means not checked out).
+body ::tycho::RevControl::parseHistory {history text} {
+    # Clear up all the checked files (with check button)
+    resetDiff
+
+    set file [$object filename]
+    set basefile [file tail $file]
+    set lines [split $history "\n"]
+
+    # FIXME: Error recovery scheme should be more complicated!
+    if {[llength $lines] < 2} {
+	$text insert insert $lines
+	return
+    }
+
+    set commentColor [preference get commentColor]
+    set versionColor [preference get versionColor]
+
+    $text insert insert "Double click the underlined text to view versions.\n" 
+
+    # Diff list is currently empty (nothing in revision control yet)
+    set filelist {}
+    set uniqueID [join [split [string tolower $basefile] .] ""]
+
+    # strip off leading ::
+    #regexp {(::)?(.*)} $uniqueID match leadingTrailingJunk uniqueID
+    set uniqueID [string trim $uniqueID :]+
+
+    set background [$text cget -background]
+
+    $text insert insert "To diff two files, check the buttons to the\
+            left of the file\nversion, then press: "
+    # Create the START DIFF button
+    set version STARTDIFF
+    set buttonName $uniqueID$version
+    button $text.$buttonName -text "Start Diff" -command "$this compareVersion"
+    $text window create end -window $text.$buttonName
+    $text insert insert " to compare the two files.\n\n"
+
+    # Create the START DIFF RECENT button
+    set version DIFFRECENT
+    set buttonName $uniqueID$version
+    button $text.$buttonName -text "Diff Recent" -command \
+            "$this diffRecent $text"
+    $text insert insert "To diff the most recent files, press: "
+    $text window create end -window $text.$buttonName
+    $text insert insert "\n\n"
+
+
+    # Create a line entry for the original file
+    # The original file could be compared with
+    set version 0_0
+    set start [$text index insert]
+    set buttonName $uniqueID$version
+    checkbutton $text.$buttonName -variable $buttonName \
+            -command "$this updateDiff $buttonName" \
+            -background $background -foreground $background \
+            -relief flat -padx 0 -pady 0
+    $text window create end -window $text.$buttonName -padx 0 -pady 0
+    $text insert insert "Current file"
+    if [isCheckedOut] {
+	$text insert insert ", [isCheckedOutBy]\n"
+    } else {
+        $text insert insert ".\n"
+    }
+    $text tag add v$version $start insert
+    $text tag configure v$version -foreground $versionColor -underline 1
+    $text tag bind v$version <Double-Button-1> \
+            "::tycho::File::openContext $file"
+
+
+    lappend filelist $buttonName
+    if {[uplevel #0 "set $buttonName"]==1} {lappend difflist $buttonName}
+    $text insert insert "\n"
+
+    # Skip first two lines
+    foreach line [lrange $lines 2 end] {
+	if [regexp -nocase {D ([0-9.]*) ([0-9/]*) ([0-9:]*) ([a-z]*)} \
+		$line junk version date time user] {
+	    set start [$text index insert]
+
+            # Check button name, must be unique for each editor.
+            set buttonName $uniqueID[join [split $version .] "_"]
+            checkbutton $text.$buttonName -variable $buttonName \
+                    -command "$this updateDiff $buttonName" \
+                    -background $background -foreground $background \
+                    -relief flat -padx 0 -pady 0
+            lappend filelist $buttonName
+            if {[uplevel #0 "set $buttonName"]==1} {
+                if {[llength $difflist]<2} {
+                    lappend difflist $buttonName
+                } else {
+                    # This is an attempt of error recovery, if list is >2
+                    uplevel #0 "set $buttonName 0"
+                }
+            }
+            $text window create end -window $text.$buttonName -padx 0 -pady 0
+            
+            # Insert Name, Version number, etc...
+	    $text insert insert "$version $date $time, checked in by $user\n"
+	    $text tag add v$version $start insert
+	    $text tag configure v$version -foreground $versionColor -underline 1
+            $text tag bind v$version <Double-Button-1> \
+                    "$this openVersion $version"
+	} elseif [regexp {MRs:|COMMENTS:} $line] {
+	    # ignore
+	} else {
+	    set start [$text index insert]
+	    $text insert insert "$line\n"
+	    $text tag add comment $start insert
+	    $text tag configure comment -foreground $commentColor
+	    $text tag configure comment -lmargin1 0.5c
+	    $text tag configure comment -lmargin2 0.5c
+	}
+    }
+    puts "Filelist: $filelist"
+}
+
+    ###################################################################
+    ###################################################################
+    ####                   private methods                         ####
+
+
+#####################################################################
+#### updateDiff
+# update the check buttons so that only two is activated at once.
+# updateDiff takes in the argument of the name of the button, and
+# decides whether it should set the other button off or not, and
+# adds the list of names (file names) to the diff list
+#
+body ::tycho::RevControl::updateDiff {buttonName} {
+    global $buttonName [lindex $difflist 0]
+    
+    # Clicking on or off
+    if {[uplevel #0 "set $buttonName"]==1} {
+        # click on
+        # push off the oldest file name
+        if {[llength $difflist]>=2} {
+            # Disable the check button
+            uplevel #0 "set [lindex $difflist 1] 0"
+        }
+        # put in a new one.
+        set difflist "[lindex $difflist 0] $buttonName"
+    } else {
+        # click off
+        if {$buttonName==[lindex $difflist 0]} {
+            set difflist [lindex $difflist 1]
+        } else {
+            set difflist [lindex $difflist 0]
+        }
+    }
+}
+
+# Reset all the buttons to click on nothing, and clear the list of
+# checked files.
+#
+body ::tycho::RevControl::resetDiff {} {
+    foreach i $filelist {
+        uplevel #0 "set $i 0"
+    }
+    set difflist {}
+}
