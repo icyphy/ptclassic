@@ -15,5 +15,5 @@
 PTOLEMY=${PTOLEMY:-~/ptolemy}
 PTARCH=`$PTOLEMY/bin/ptarch`
 indexscript=$PTOLEMY/bin/mkStarIndex.tcl
-ptolemytcl=$PTOLEMY/tcltk/itcl.$PTARCH/bin/tclsh
+ptolemytcl=$PTOLEMY/tcltk/tcl.$PTARCH/bin/tclsh
 exec $ptolemytcl $indexscript "$@"
