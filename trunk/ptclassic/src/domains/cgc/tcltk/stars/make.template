@@ -55,7 +55,7 @@ PL_SRCS= \
  CGCTkXYPlot.pl \
  CGCLMSTkPlot.pl \
  CGCTkBarGraph.pl \
- CGCTkCheckButton.pl 
+ CGCTkCheckButton.pl \
  CGCTkEntry.pl \
  CGCTkImpulse.pl \
  CGCTkParametricEq.pl \
