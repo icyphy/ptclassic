@@ -2,12 +2,12 @@ defstar {
 	name { TableInt }
 	domain { CGC }
 	desc {
-Implements a real-valued lookup table.  The "values" state contains the
+Implements an integer-valued lookup table.  The "values" state contains the
 values to output; its first element is element zero.  An error occurs if
 an out of bounds value is received.
 	}
 	version { $Id$ }
-	author { J. T. Buck }
+	author { Joseph T. Buck }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -40,7 +40,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	go {
 		addCode(readIdx);
-		if (runTimeCheck) addCode(check);
+		if (int(runTimeCheck)) addCode(check);
 		addCode(lookup);
 	}
 	constructor {
