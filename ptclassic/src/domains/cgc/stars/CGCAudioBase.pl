@@ -31,17 +31,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	int standardIO:1;
     }
 
-    setup {
-	standardIO = fileName.null();
-    }
-
-    initCode {
-	if (!standardIO) {
-            addInclude("<fcntl.h>");		// Define open and O_RDONLY
-	    addInclude("<unistd.h>");		// Define read and write
-	}
-    }
-
     codeblock(declarations, "const char* datatype, int size") {
 	@datatype $starSymbol(buf)[@size];
     }
@@ -95,8 +84,22 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
     }
 
+    setup {
+	standardIO = fileName.null();
+    }
+
+    initCode {
+	if (!standardIO) {
+            addInclude("<fcntl.h>");		// Define open and O_RDONLY
+	    addInclude("<unistd.h>");		// Define read and write
+	}
+	addGlobal(globals);
+    }
+
     wrapup {
 	if (!standardIO) addCode(closeFile);
     }
 }
+
+
 
