@@ -67,6 +67,9 @@ oct2ps:	$(OBJS)
 oct2ps.debug:	$(OBJS)
 	$(LINKER) $(LINKFLAGS_D) $(OBJS) -o $@ $(LIBS) -lm 
 
+oct2ps.debug.purify:	$(OBJS)
+	$(PURIFY) $(LINKER) $(LINKFLAGS_D) $(OBJS) -o $@ $(LIBS) -lm 
+
 TESTBINARY = ./oct2ps
 tests: $(TESTBINARY)
 	@echo "Trivial test that produces a postscript file of $(PTOLEMY)/init.pal"
