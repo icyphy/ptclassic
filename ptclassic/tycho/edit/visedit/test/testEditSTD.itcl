@@ -48,7 +48,7 @@ test EditSTD-1.1 {Open a std file and do a reload} {
     $view reload
 
     update
-    $view ioPortNames
+    $view ioPorts
 
     after $duration removeobj $win
     list {}
