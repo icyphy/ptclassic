@@ -20,7 +20,7 @@ places to go</A> </H2>
 <H2><A NAME="windows bugs">Tycho/Windows bugs</A></H2>
 <MENU>
 
-<LI> Tycho0.2 does not handle spaces in pathnames very well.  Tycho
+<LI> Tycho0.2.1 does not handle spaces in pathnames very well.  Tycho
 will work best if the distribution is installed in a directory that
 has a pathname that contains no spaces.
 
@@ -62,14 +62,36 @@ binaries for Windows.
 <LI> Install Itcl by running <CODE>itcl22.exe</CODE>.
 
 <LI> Because of a bug in Itcl2.2, the path leading up to the
-<CODE>tycho.0.2/lib/windows/tycho-windows.itk</CODE> script cannot
+<CODE>tycho.0.2.1/lib/windows/tycho-windows.itk</CODE> script cannot
 have any spaces in it.  If you installed Tycho in <CODE>c:\Program
 Files</CODE>, then you must move either
-<CODE>c:\Program Files\tycho0.2\ </CODE> or the
-<CODE>tycho0.2\lib\windows\tycho-window.itk</CODE> script to a
+<CODE>c:\Program Files\tycho0.2.1\ </CODE> or the
+<CODE>tycho0.2.1\lib\windows\tycho-window.itk</CODE> script to a
 directory that has no spaces in the pathname leading up to it.  It is
-best if you move the entire Tyycho distribution to
-<CODE>c:\tycho0.2</CODE>.
+best if you move the entire Tycho distribution to
+<CODE>c:\tycho0.2.1</CODE>.
+
+
+<LI> There are two ways to start up Tycho:
+<DL>
+<DT> <A HREF="DOS batch file: tycho.bat"><CODE>$TYCHO/bin/tycho.bat</CODE></A>
+<DD> A DOS batch file which can can be used as
+<MENU>
+<LI> <CODE>tycho</CODE>
+
+<LI> <CODE>tycho <I>filename</I></CODE>
+
+<LI> <CODE>tycho -java</CODE>
+</MENU>
+
+
+<DT> <CODE>$TYCHO/lib/windows/tycho-windows.itk</CODE>
+<DD> An <CODE>itk</CODE> file that can be started up by <CODE>itkwish</CODE>
+if your system is setup up properly.
+
+</DL>
+We discuss the details below.
+
 
 <LI> Tycho refers to the directory where the Tycho distribution is
 with the environment variable <CODE>$TYCHO</CODE>.  In Unix, under
@@ -77,34 +99,36 @@ with the environment variable <CODE>$TYCHO</CODE>.  In Unix, under
 /usr/local/tycho</CODE>.
 
  <P> You can either hardwire this variable by setting it in the
-<CODE>tycho-windows</CODE> start up script, or under NT, you can set
-the <CODE>TYCHO</CODE> environment variable by clicking on
-<CODE>Start</CODE>, then
-<CODE>Settings</CODE>, then <CODE>Control Panel</CODE> and finally the
-<CODE>System</CODE> icon.  In the <CODE>System Properties</CODE>
-window that comes up, select <CODE>Environment</CODE>.  There, you can
-add <CODE>TYCHO</CODE> as a User Variable.  Incidentally, this is
-where you set your path.
+<CODE>tycho-windows</CODE> or 
+<CODE>tycho.bat</CODE> start up scripts, or under
+NT, you can set the <CODE>TYCHO</CODE> environment variable by
+clicking on <CODE>Start</CODE>, then <CODE>Settings</CODE>, then
+<CODE>Control Panel</CODE> and finally the <CODE>System</CODE> icon.
+In the <CODE>System Properties</CODE> window that comes up, select
+<CODE>Environment</CODE>.  There, you can add <CODE>TYCHO</CODE> as a
+User Variable.  Incidentally, this is where you set your path.
 
- <P> If your Tycho distribution is at <CODE>c:\tycho0.2</CODE>, then
+ <P> If your Tycho distribution is at <CODE>c:\tycho0.2.1</CODE>, then
 you need not set the <CODE>TYCHO</CODE> environment variable, it will
 be set for you, by the <CODE>tycho-windows</CODE> script.  If your
 distribution is elsewhere, then you must either set the
 <CODE>TYCHO</CODE> variable, or edit
-<CODE>tycho0.2/lib/windows/tycho-windows</CODE>.
+<CODE>tycho0.2.1/lib/windows/tycho-windows</CODE>.
 
-<LI> The script <CODE>tycho0.2/lib/windows/tycho-windows</CODE>
-first checks the <CODE>TYCHO</CODE> variable, and if
+<LI> <CODE>tycho0.2.1/lib/windows/tycho-windows</CODE>
+and <CODE>tycho.bat</CODE>
+first check the <CODE>TYCHO</CODE> variable, and if
 <CODE>TYCHO</CODE> is not set, then the script expects that the Tycho
-distribution will be at <CODE>c:\tycho0.2</CODE>.
+distribution will be at <CODE>c:\tycho0.2.1</CODE>.
 
 <LI> Itcl2.2 associates files with the <CODE>itk</CODE> extension with
 the <CODE>itkwish</CODE> binary.  Apparently, the <CODE>itk</CODE>
 files must have Unix style end-of-line characters.
 
 <P> To start Tycho, click on the
-<CODE>tycho0.2/lib/windows/tycho-windows.itk</CODE> script.
-
+<CODE>tycho0.2.1/lib/windows/tycho-windows.itk</CODE> script
+or add <CODE>%tycho%\bin</CODE> to your path and run <CODE>tycho</CODE>
+from the DOS prompt.
 
 <LI> Tycho includes HTML documentation of the Itcl classes that make up
 Tycho.  To save space, these files are not shipped in the Tycho tar
