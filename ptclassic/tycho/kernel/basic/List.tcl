@@ -41,6 +41,11 @@
 #
 # Take the head and tail of a list.
 #
+# Note: ltail{} requires that the list contain at least one
+# element. Use lnull{} to check this before calling if you're
+# not sure that this is the case. _This is a deliberate choice,
+# not a bug_.
+#
 proc lhead {list} {
     return [lindex $list 0]
 }
@@ -50,17 +55,22 @@ proc ltail {list} {
 }
 
 
-## linit, llast list
+## llast, linit list
 #
 # Take the last element of a list, end everything but the last
 # element.
 #
-proc linit {list} {
-    return [ltake $list [expr [llength $list] - 1]]
-}
-
+# Note: linit{} requires that the list contain at least one
+# element. Use lnull{} to check this before calling if you're
+# not sure that this is the case. _This is a deliberate choice,
+# not a bug._
+#
 proc llast {list} {
     return [lindex $list end]
+}
+
+proc linit {list} {
+    return [lreplace $list end end]
 }
 
 
