@@ -31,5 +31,6 @@ $Id$
 
 extern "C" int ptkMakeBarGraph();
 extern "C" int ptkSetBarGraph();
+extern "C" void ptkFigureBarEdges();
 
 #endif /* PTKBARGRAPH_H */
