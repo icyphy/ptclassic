@@ -43,10 +43,8 @@ explicitly.
     MPHIter nextp(output);
     MDSDFPortHole* p;
     PtMatrix* inputData = (PtMatrix*)(input.getInput());
-    PtMatrix* outputData;
-
     while ((p = (MDSDFPortHole*)nextp++) != 0) {
-      outputData = p->getOutput();
+      PtMatrix* outputData = p->getOutput();
       *outputData = *inputData;
       delete outputData;
     }
