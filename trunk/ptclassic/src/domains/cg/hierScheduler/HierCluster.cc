@@ -132,7 +132,7 @@ int HierCluster::adjustRepetitions(int newRepetitionCount) {
     GalTopBlockIter nextBlock(*this);
     Block* block;
     while ((block = nextBlock++) != NULL) {
-	if (block->isItAtomic) {
+	if (block->isItAtomic()) {
 	    DataFlowStar& star = *(DataFlowStar*)block;
 	    star.repetitions = star.reps() * scaleFactor;
 	}
