@@ -32,34 +32,6 @@
 # 						COPYRIGHTENDKEY
 
 ########################################################################
-# auto-loading
-# Set up the directories to be searched in order of priority.
-#
-global ::tychokernel
-set ::auto_path [linsert $auto_path 0 $tychokernel ]
-
-# Create the tycho namespace
-namespace ::tycho
-
-# Make the tycho namespace visible at the current scope
-# Note that this greatly weakens namespace protection, but
-# itcl makes it rather awkward without it.  In the body of
-# a procedure for a class within namespace ::tycho, for example,
-# the namespace ::tycho is not visible.  Apparently, only the local
-# namespace of the class and the global namespace are visible.
-# import add ::tycho
-
-# Files that we are going to need right away, so there is no
-# point in deferring them to auto-loading.
-uplevel #0 {
-    source [file join $tychokernel Color.tcl]
-    source [file join $tychokernel CircularList.itcl]
-    source [file join $tychokernel TopLevel.itcl]
-    source [file join $tychokernel DialogWindow.itcl]
-    source [file join $tychokernel FontManager.itcl]
-    source [file join $tychokernel Message.itcl]
-    source [file join $tychokernel ErrorMessage.itcl]
-}
 
 # Register the standard context-sensitive editors
 namespace ::tycho {
