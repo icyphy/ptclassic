@@ -46,7 +46,9 @@ int CompiledUniverse::parseCommandLine(int argc, char** argv, int* numIters) {
 			}
 			st += " [iterations]";
 			Error::abortRun(st);
+			return FALSE;
 		} else { break; }
 	    }
 	}
+	return TRUE;
 }
