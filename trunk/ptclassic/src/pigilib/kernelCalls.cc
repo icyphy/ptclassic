@@ -70,6 +70,10 @@ KcInitLog(const char* file) {
 	return LOG ? TRUE : FALSE;
 }
 
+extern "C" void KcLog(const char* str) { LOG << str; }
+
+extern "C" void KcFlushLog() { LOG.flush(); }
+
 ///////////////////////////////////////////////////////////////////////
 // a SafeTcl is just a const char* with a different way of printing.
 class SafeTcl {
@@ -99,8 +103,6 @@ ostream& operator<<(ostream& o,const SafeTcl& stcl) {
 	if (special) return o << "\"" << str << "\"";
 	return o << str;
 }
-
-extern "C" void KcLog(const char* str) { LOG << str; }
 
 ///////////////////////////////////////////////////////////////////////
 // Parse a classname
@@ -452,29 +454,6 @@ KcSetDesc(const char* desc) {
 		ptcl->currentGalaxy->setDescriptor(hashstring(desc));
 	}
 	else ptcl->currentGalaxy->setDescriptor(dummyDesc);
-}
-
-///////////////////////////////////////////////////////////////////////
-// Run the universe
-// FIXME:
-// This should go away, but first the RunAll function in compile.c has
-// to be updated.
-extern "C" boolean
-KcRun(int n) {
- 	LOG << "run " << n << "\nwrapup\n";
-	LOG.flush();
-	SimControl::clearHalt();
-	ptcl->universe->initTarget();
-	if (SimControl::flagValues() & SimControl::error)
-		return FALSE;
-	ptcl->universe->setStopTime(n);
-	ptcl->universe->run();
-	if (SimControl::flagValues() & SimControl::error)
-		return FALSE;
-	ptcl->universe->wrapup();
-	if (SimControl::flagValues() & SimControl::error)
-		return FALSE;
-	return TRUE;
 }
 
 extern "C" boolean LookAtFile(const char*);
