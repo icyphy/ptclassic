@@ -47,7 +47,8 @@ interpreter.
 #include "NamedObj.h"
 #include "SimControl.h"
 
-#undef setstate			/* work around bug in Linux headers */
+#undef setstate                 /* work around bug in Linux headers */
+
 class InterpUniverse;
 class InterpGalaxy;
 class Target;
@@ -155,7 +156,6 @@ public:
 	// the current domain
 	const char* curDomain;
 
-// These are not used outside PTcl. -aok
 private:
 	// the Tcl interpreter
 	Tcl_Interp* interp;
@@ -176,9 +176,15 @@ private:
 	// function to register extensions with the Tcl interpreter
 	void registerFuncs();
 
-// This are public for testing.  should be returned to private. - aok
-// protected:
-public:
+	// This is added to support galileo - eal
+	// The following flag determines whether ptcl will call the tcl
+	// procedure monitorPtcl every time a ptcl command is invoked.
+	// This procedure can be redefined in Tcl to monitor all commands
+	// executed.
+	static int monitor;
+
+protected:
+
 	// these three functions are used to associate PTcl objects
 	// with interpreters.
 	static PTcl* findPTcl(Tcl_Interp*);
@@ -247,6 +253,12 @@ public:
 	int knownlist(int argc,char** argv);
 	int link(int argc,char** argv);
 	int listobjs(int argc,char** argv);
+
+	// added to support galileo - eal
+	int monitorOff(int argc,char** argv);
+	int monitorOn(int argc,char** argv);
+	int monitorPtcl(int argc,char** argv);
+
 	int multilink(int argc,char** argv);
 	int newstate(int argc,char** argv);
 	int newuniverse(int argc,char** argv);
@@ -258,7 +270,7 @@ public:
 	int registerAction(int argc,char** argv);
 	int reset(int argc,char** argv);
 	int run(int argc,char** argv);
-	int stoptime(int argc,char** argv);
+        int stoptime(int argc,char** argv);
 	int schedtime(int argc,char** argv);
 	int schedule(int argc,char** argv);
 	int seed(int argc,char** argv);
