@@ -97,6 +97,12 @@ class ::tycho::CompileJava {
     method compileAndRun {filename}
 
     ###################################################################
+    ####                   public procs                          ####
+
+    # Get the classpath from the preferences.
+    proc classpath {}
+
+    ###################################################################
     ####                   protected methods                       ####
 
 
@@ -108,6 +114,9 @@ class ::tycho::CompileJava {
 
     # Name of the Exec widget used to run appletviewer.
     protected variable appletviewerWidget {}
+
+    # Name of the Exec widget used to run java once we've compiled.
+    protected variable javaRunWidget {}
 }
 
 #######################################################################
@@ -136,6 +145,40 @@ body ::tycho::CompileJava::destructor {} {
     ###################################################################
     ###################################################################
     ####                      public methods                       ####
+#######################################################################
+#### classpath
+# Determine what the classpath should be.
+#
+body ::tycho::CompileJava::classpath {} {
+    global env tcl_platform
+    if [::tycho::preference get java useEnvClassPath] {
+        if [info exists env(CLASSPATH)] { 
+	    set classPath [::tycho::expandPathSplit $env(CLASSPATH)]
+	    set classPathArg "-classpath $classPath"
+	} else {
+	    set classPathArg ""
+	}
+    } else {
+	set classPath [::tycho::expandPath \
+                [::tycho::preference get java classPath]]
+	if {$classPath == {} } { 
+	    # Why??? if [info exists env(CLASSPATH)] { 
+		# unset env(CLASSPATH)
+	    # }
+	    set classPathArg ""
+	} else {
+	    set classPathArg "$classPath"
+	}
+    }
+    
+    switch $tcl_platform(platform) {
+        {unix} { set classpath [join $classPathArg ":"]}
+        {windows} { set classpath [join $classPathArg "\\\\;"]}
+        {macintosh} { error "Internal error: CompileJava::classPath, macintosh \
+                not supported"}
+    }
+    return [subst $classpath]
+}
 
 #######################################################################
 #### compileAndRun
@@ -146,42 +189,33 @@ body ::tycho::CompileJava::destructor {} {
 # preference.
 #
 body ::tycho::CompileJava::compileAndRun {filenames} {
-    global env
+    global env tcl_platform
 
-    if [::tycho::preference get java useEnvClassPath] {
-	if [info exists env(CLASSPATH)] { 
-	    set classPath [::tycho::expandPathSplit $env(CLASSPATH)]
-	    set classPathArg "-classpath $classPath"
-	} else {
-	    set classPathArg ""
-	}
-    } else {
-	set classPath [::tycho::expandPathSplit \
-                [::tycho::preference get java classPath]]
-	if {$classPath == {} } { 
-	    # Why??? if [info exists env(CLASSPATH)] { 
-		# unset env(CLASSPATH)
-	    # }
-	    set classPathArg ""
-	} else {
-	    # Why??? set env(CLASSPATH) $classPath
-	    set classPathArg "-classpath $classPath"
-	}
-    } 
-
+    # Initialize protected vars in the parent class such as dirname
     ::tycho::Compile::compileAndRun $filenames
-    foreach javaFile $filenameList {
-        lappend classNameList [file tail [file rootname $javaFile]]
+
+    foreach filename $filenames {
+        lappend shortFilenameList [file tail $filename]
     }
+
+    # Under NT, if you add -verbose, then execModal will think that there
+    # are errors.
+ #     switch $tcl_platform(platform) {
+ #         unix { set compileString \
+ #                 "javac -classpath [classpath] $shortFilenameList"}
+ #         windows { 
+ #             # Windows has a length limit on the size of the command we
+ #             # can execute.
+ #             set env(CLASSPATH) [classpath]
+ #             set compileString "javac $shortFilenameList"
+ #         }
+ #    }
+    set compileString \
+                 "[::tycho::preference get java javaCompileCommand] -classpath [classpath] $shortFilenameList"
     if [checkSourceFiles] {
         # We have a main(), so we don't run appletviewer
-        set compileString "java -cs $classPathArg -v $classNameList"
         set runAppletViewer 0
     } else {
-        # There was no main, so run the appletviewer.
-        # FIXME: we should be checking that we are extending Applet here.
-	set compileString \
-		"javac -verbose $classPathArg $filenameList"
         set runAppletViewer 1
     }
 
@@ -211,6 +245,21 @@ body ::tycho::CompileJava::compileAndRun {filenames} {
             }
             set appletviewerWidget [lindex $retList 1]
         }
+    } else {
+        if {$execStatus == "normal"} {
+            # The .java file contains a main statement, so run it
+            if {![winfo exists $javaRunWidget] && \
+                    [info object $javaRunWidget] == {}} {
+                set javaRunWidget [::tycho::view Monitor -toolbar 1]
+                set retList [::tycho::execModal \
+                        "java [file root [file tail $filenames]]" $dirname \
+                        $javaRunWidget]
+            } else {
+                set retList [::tycho::execModal {} {} $javaRunWidget]
+            }
+            set javaRunWidget [lindex $retList 1]
+        }
+
     }
 }
     ###################################################################
