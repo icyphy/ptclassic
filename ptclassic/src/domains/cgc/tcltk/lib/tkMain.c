@@ -323,7 +323,7 @@ main() {
         fprintf(stderr, "%s\n", interp->result);
         exit(1);
     }
-    Tk_SetClass(w, "Tk");
+    Tk_SetClass(w, "CGC");
     Tk_CreateEventHandler(w, StructureNotifyMask, StructureProc,
             (ClientData) NULL);
     Tk_DoWhenIdle(DelayedMap, (ClientData) NULL);
