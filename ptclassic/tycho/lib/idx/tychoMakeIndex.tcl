@@ -48,6 +48,7 @@ proc tychoCompareFirst {first second} {
 # from which the index should be created.
 #
 proc tychoMkIndex {name filename prependTYCHO args } {
+    #puts "name=$name, filename=$filename files=$args"
     set entries {}
     foreach file $args {
 	set fd [open $file r]
@@ -73,6 +74,7 @@ proc tychoMkIndex {name filename prependTYCHO args } {
     foreach entry [lsort -command tychoCompareFirst $entries] {
 	puts $fd [list $entry]
     }
+
     puts $fd \}
     close $fd
 }
@@ -154,28 +156,28 @@ proc tychoFindCodeDocHTML { {dirname .} {depth 0}} {
 # because if we do, and the directory is a link, we end up somewhere
 # else.
 #
-proc ptolemyFindStarHTML { {dirname .} {depth 0}} {
-    cd $dirname
-    set files [glob -nocomplain [file join codeDoc *.html]]
-    foreach name [exec ls] {
-	if [file isdirectory $name] {
-	    # Skip SCCS, RCS, adm, test directories and anything called "junk"
-	    if {$name != {SCCS} && \
-		    $name != {RCS} && \
-		    $name != {adm} && \
-		    $name != {test} && \
-		    $name != {junk} } {
-		set subfiles [ptolemyFindStarHTML [file join $dirname $name] \
-g			[expr $depth + 1]]
-		cd $dirname
-		foreach file $subfiles {
-		    lappend files [file join $name $file]
-		}
-	    }
-	}
-    }
-    return $files
-}
+#proc ptolemyFindStarHTML { {dirname .} {depth 0}} {
+#    cd $dirname
+#    set files [glob -nocomplain [file join codeDoc *.html]]
+#    foreach name [exec ls] {
+#	if [file isdirectory $name] {
+#	    # Skip SCCS, RCS, adm, test directories and anything called "junk"
+#	    if {$name != {SCCS} && \
+#		    $name != {RCS} && \
+#		    $name != {adm} && \
+#		    $name != {test} && \
+#		    $name != {junk} } {
+#		set subfiles [ptolemyFindStarHTML [file join $dirname $name] \
+#			[expr $depth + 1]]
+#		cd $dirname
+#		foreach file $subfiles {
+#		    lappend files [file join $name $file]
+#		}
+#	    }
+#	}
+#    }
+#    return $files
+#}
 
 #### tychoStandardIndex
 # Update the Tycho master index.
@@ -219,17 +221,36 @@ proc tychoCodeDocIndex {} {
 # Update the Tycho code index.
 # All files in the codeDoc directories with the extension .html in the
 # tree rooted at the environment.
-# variable TYCHO are included.
-#
-proc ptolemyStarHTMLIndex { {title {Ptolemy Star HTML Index}}} {
-    global TYCHO
-    set olddir [pwd]
+# Note that we assume that outputfilename and args are all in one
+# directory, and we strip off any leading paths information
+proc ptolemyStarHTMLIndex { domain outputfilename args} {
+    if {$domain == "thor" || [llength $args] == 0} {
+	puts "$domain does not contain stars that have .htm documentation,"
+	puts "  creating $outputfilename"
+	cd [file dirname $outputfilename]
+	set fd [open [file tail $outputfilename] w]
+	puts $fd "{thor stars}"
+	puts $fd "{\n{{} {} {}}}"
+	close $fd
+	return
+    }
+    # Create a title from the outputfilename 
+    # FIXME: this is a big time hack.
+    set subdomain {}
+    regexp {.*/domains/.*/(.*)/doc/stars} $outputfilename dummy subdomain
+    if {$subdomain != {}} {
+	set title "$domain $subdomain stars"
+    } else {
+	set title "$domain stars"
+    }
+    set newargs {}
+    foreach arg $args {
+	lappend newargs [file tail $arg]
+    }
 
-    set files [tychoFindAllHTML .]
-    # cd back in case we have followed links in ptolemyFindStarHTML
-    cd $olddir
-    eval tychoMkIndex $title \
-	    starHTML.idx 0 $files 
+    set olddir [pwd]
+    cd [file dirname [lindex $args 0]]
+    eval tychoMkIndex [list $title] [file tail $outputfilename] 0 $newargs
     cd $olddir
 }
 
@@ -279,10 +300,28 @@ proc tychoMergeIndices {title outputfilename args} {
 	    }
 
 	    # Fix the filename by prepending the CWD
-	    set name "[lindex $item 0] ($subtitle)"
+
+	    # Currently, we discard the subtitle, but we could add it in
+	    # and extend the IndexBrowser to be able to narrow the search
+	    #set name "[lindex $item 0] ($subtitle)"
+	    set name [lindex $item 0]
 	    set filename [lindex $item 1]
-	    set point [lindex $item 1]
-	    lappend entries [list $name "$CWD/$filename" "$CWD/$point"]
+	    set point [lindex $item 2]
+
+	    # Process the filename, and adjust accordingly
+	    if { [string range $filename 0 2] == "../" } {
+		# If the filename starts with a leading '../' strip it off
+		set newfilename [string range $filename 3 end]
+	    } elseif { [string index $filename 0] == "$"}  {
+		# If the filename begins with $, then the user is using
+		# a variable so just copy
+		set newfilename $filename
+	    } else {
+		# Append the current working directory on
+		set newfilename $CWD/$filename
+	    }
+
+	    lappend entries [list $name $newfilename "$point"]
 	}
 
 	# If there is a Forest file, then merge that too
@@ -328,4 +367,18 @@ proc tychoMergeIndices {title outputfilename args} {
     }
     puts $fd \}
     close $fd
+}
+
+#### tychoVpathMergeIndices
+# Like tychoMergeIndices, but takes a vpath argument
+# contains a pathname that is deleted from all of the input args
+# The outputfilename arg is not modified, only the pathnames to
+# the index files contained in args
+proc tychoVpathMergeIndices {title outputfilename vpath args} {
+    set newargs {}
+    foreach arg $args {
+	regsub $vpath $arg {} newarg
+	lappend newargs $newarg
+    }
+    eval tychoMergeIndices [list $title] $outputfilename $newargs
 }
