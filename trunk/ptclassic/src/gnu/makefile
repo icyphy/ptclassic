@@ -160,7 +160,7 @@ install: install_make install_egcs install_gcc_links
 FSF_SRC=$(PTOLEMY)/src/gnu/old
 FSF_OBJ=$(GNU_OBJ).fsf
 FSF_PREFIX=$(GNU_PREFIX).fsf
-FSF_EXEC_PREFIX=$(GNU_EXEC_PREFIX).fsf
+FSF_EXEC_PREFIX=$(GNU_EXEC_PREFIX)
 
 # This rule configures, builds and installs make, gcc and libg++
 all_fsf: configure_fsf bin_fsf install_fsf
