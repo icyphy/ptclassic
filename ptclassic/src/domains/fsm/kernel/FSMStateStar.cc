@@ -123,7 +123,7 @@ void FSMStateStar::setup() {
     }
 
     delete [] parsedAct;
-    parsedAct = new (char**)[numStrs];
+    parsedAct = new char**[numStrs];
     for (int indx=0; indx<stateOut.numberPorts(); indx++) {
       parsedAct[indx] = strParser(tmpParsedAct[indx],numStrs,"double-quote");
       if (!parsedAct[indx]) return;
@@ -371,7 +371,7 @@ Geodesic** FSMStateStar::setupGeodesic (PortList& pList, MultiPortHole* mph, Sta
       // in the pNmList. In addition, it collects all the corresponding 
       // portholes in mph and puts them into pList.
       
-      Geodesic** myGeoArray = new (Geodesic*) [pNmList.numPieces()];
+      Geodesic** myGeoArray = new Geodesic*[pNmList.numPieces()];
 
       int index = 0;
       StringListIter nextpNm(pNmList);
