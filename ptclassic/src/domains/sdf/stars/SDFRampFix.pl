@@ -17,11 +17,12 @@ fixed-point number with the default precision which has a total length
 of 24 bits with the number of range bits as required by the value.  
 For example, the default value 1.0 creates a fixed-point object with 
 precision 2.22, and a value like 0.5 would create one with precision 
-1.23 and etc.  The alternative way of specifying the value and the
-precision of this parameter is to use the paranthesis notation which will be 
+1.23.  An alternate way of specifying the value and the
+precision of this parameter is to use the parenthesis notation which will be 
 interpreted as (value, precision).  For example, filling the dialog
-box of this parameter by let's say (2.546, 3.5) would create a fixed-point
-object by casting the double 2.546 to the precision 3.5. } 
+box of this parameter by (2.546, 3.5) would create a fixed-point
+object by casting the double-precision floating-point number 2.546
+to a fixed-point precision of 3.5. } 
 	output {
 		name { output }
 		type { fix }
@@ -44,8 +45,8 @@ object by casting the double 2.546 to the precision 3.5. }
                 type { string }
                 default { "saturate" }
                 desc {
-Set the overflow characteristic for the output.  If the result
-of the sum can not be fit into the precision of the output, overflow
+The overflow characteristic for the output.  If the result
+of the sum cannot be fit into the precision of the output, overflow
 occurs and the overflow is taken care of by the method specified by this
 parameter.  The keywords for overflow handling methods are :
 "saturate"(default), "zero_saturate", "wrapped", "warning". }
