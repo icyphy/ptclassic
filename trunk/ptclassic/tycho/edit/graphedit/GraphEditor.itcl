@@ -35,7 +35,7 @@
 # Procedure to create a test graph editor
 #
 proc ::tycho::foo {} {
-    set nm [::tycho::view DFGEditor]
+    set nm [::tycho::view GraphEditor]
 
     # FIXME FIXME
     # Load stars and icons
@@ -53,12 +53,12 @@ proc ::tycho::foo {} {
 }
 
 ##########################################################################
-#### DFGEditor
+#### GraphEditor
 #
-# _DFGEditor_ is an editor for the _GraphLayout_ model. It edits
+# _GraphEditor_ is an editor for the _GraphLayout_ model. It edits
 # directed graphs.
 #
-class ::tycho::DFGEditor {
+class ::tycho::GraphEditor {
     inherit ::tycho::SlateView
 
     constructor {args} {}
@@ -171,7 +171,7 @@ class ::tycho::DFGEditor {
 ########################################################################
 #### constructor
 #
-body ::tycho::DFGEditor::constructor {args} {
+body ::tycho::GraphEditor::constructor {args} {
 
     # Create the models. The graph model has a special notify{} method
     set _graph [uplevel #0 ::tycho::PortedGraph [::tycho::autoName graph]]
@@ -182,6 +182,7 @@ body ::tycho::DFGEditor::constructor {args} {
     set _layout [uplevel #0 ::tycho::Layout [::tycho::autoName layout]]
     model add layout $_layout
     $_layout subscribe data $this "$this notify"
+    $_layout subscribe event $this "$this notify"
 
     # In addition, subscribe to the layout model as a "view". This
     # is necessary because the Layout model sometimes needs to get
@@ -213,7 +214,7 @@ body ::tycho::DFGEditor::constructor {args} {
     $_slate configure -highlightcolor azure2 -highlightwidth 4
 
     # Create the edge controller object
-    set edgecontroller [uplevel #0 ::tycho::DFGEdgeController \
+    set edgecontroller [uplevel #0 ::tycho::EdgeController \
     		[::tycho::autoName controller] \
             -slate $_slate \
             -slateview $this \
@@ -221,7 +222,7 @@ body ::tycho::DFGEditor::constructor {args} {
             -layout $_layout]
 
     # Create the vertex controller object
-    set vertexcontroller [uplevel #0 ::tycho::DFGVertexController \
+    set vertexcontroller [uplevel #0 ::tycho::VertexController \
             [::tycho::autoName controller] \
             -slate $_slate \
             -slateview $this \
@@ -311,7 +312,7 @@ body ::tycho::DFGEditor::constructor {args} {
 #
 # Initialize a new menu.
 #
-body ::tycho::DFGEditor::_initmenu {libname menuname context} {
+body ::tycho::GraphEditor::_initmenu {libname menuname context} {
     set mb [menubar]
     set lib [library access $libname]
     
@@ -329,7 +330,7 @@ body ::tycho::DFGEditor::_initmenu {libname menuname context} {
 #
 # Create a palette of icons.
 #
-body ::tycho::DFGEditor::_iconpalette {libname context} {
+body ::tycho::GraphEditor::_iconpalette {libname context} {
     set lib [library access $libname]
     set palettename [concat $libname $context]
 
@@ -363,7 +364,7 @@ body ::tycho::DFGEditor::_iconpalette {libname context} {
 #
 # Process a delete event.
 #
-body ::tycho::DFGEditor::delete {} {
+body ::tycho::GraphEditor::delete {} {
     # Mark the history
     $_graph mark set temp
     $_layout mark set temp
@@ -388,7 +389,7 @@ body ::tycho::DFGEditor::delete {} {
 ########################################################################
 #### editparameters
 #
-body ::tycho::DFGEditor::editparameters {args} {
+body ::tycho::GraphEditor::editparameters {args} {
     # FIXME: The parameter editing window must include the whole
     # path name of the model
     foreach v $args {
@@ -411,14 +412,14 @@ body ::tycho::DFGEditor::editparameters {args} {
 ########################################################################
 #### newstar
 #
-body ::tycho::DFGEditor::newstar {libname starname} {
+body ::tycho::GraphEditor::newstar {libname starname} {
     $vertexcontroller add $libname $starname
 }
 
 ########################################################################
 #### notifygraph
 #
-body ::tycho::DFGEditor::notifygraph {method args} {
+body ::tycho::GraphEditor::notifygraph {method args} {
     # puts "$this notifygraph $method"
     # eval _$method $args
 
@@ -436,7 +437,7 @@ body ::tycho::DFGEditor::notifygraph {method args} {
 # at a good location to put the icon. Later on, it will do some
 # kind of grab and place or drag-and-drop.
 #
-body ::tycho::DFGEditor::place {} {
+body ::tycho::GraphEditor::place {} {
     # Figure out where to put the icon. First check if topleft is free
     if { [$_slate find overlapping 10 10 10 10] == "" } {
         set iconx 10
@@ -456,7 +457,7 @@ body ::tycho::DFGEditor::place {} {
 #
 # Redo the most recent command
 #
-body ::tycho::DFGEditor::redo {} {
+body ::tycho::GraphEditor::redo {} {
     eval $_layout redo
     eval $_graph redo
 }
@@ -466,8 +467,8 @@ body ::tycho::DFGEditor::redo {} {
 #
 # Handle changes to the selection.
 #
-body ::tycho::DFGEditor::select {mode args} {
-    # puts "DFGEditor::select $mode $args ([$_slate find withtag sel])"
+body ::tycho::GraphEditor::select {mode args} {
+    # puts "GraphEditor::select $mode $args ([$_slate find withtag sel])"
     switch -exact $mode {
         "clear" {
             $_slate select clear
@@ -500,7 +501,7 @@ body ::tycho::DFGEditor::select {mode args} {
 #
 # Undo the most recent command
 #
-body ::tycho::DFGEditor::undo {} {
+body ::tycho::GraphEditor::undo {} {
     eval $_layout undo
     eval $_graph undo
 }
@@ -519,13 +520,13 @@ body ::tycho::DFGEditor::undo {} {
 # This method is called by its displayer when attachView is called (usually
 # in ::tycho::view
 #
-body ::tycho::DFGEditor::_initializeBars {menubar statusbar toolbar} {
+body ::tycho::GraphEditor::_initializeBars {menubar statusbar toolbar} {
     chain $menubar $statusbar $toolbar
 
     if {$menubar != {}} {
         # We have to qualify the call to this supposed-ly private
         # method because Itcl (2.2) has virtual private methods!
-        ::tycho::DFGEditor::_initializeMenubar $menubar
+        ::tycho::GraphEditor::_initializeMenubar $menubar
     }
 }
 
@@ -533,21 +534,19 @@ body ::tycho::DFGEditor::_initializeBars {menubar statusbar toolbar} {
 #### clear
 # Clear the data.
 #
-body ::tycho::DFGEditor::clear {} {
+body ::tycho::GraphEditor::clear {} {
     if { $_graph != "" } {
         $_graph clear
+        $_graph notify event clear
     }
-    if { $_layout != "" } {
-        $_layout clear
-    }
-    $_slate delete all
+    layout clear
 }
 
 #####################################################################
 #### configureContextMenu
 # Configure the popup menu according to context.
 #
-body ::tycho::DFGEditor::configureContextMenu {} {
+body ::tycho::GraphEditor::configureContextMenu {} {
     chain
 
     contextmenu separator sep1
@@ -580,34 +579,37 @@ body ::tycho::DFGEditor::configureContextMenu {} {
 
 #####################################################################
 #### insertData
-# Insert the specified data. For now, this is a two-list containing
-# a description of the graph and the layout respectively.
-# Note that data cannot be just inserted: it will always
-# be cleared too.
+# Insert the specified data. This is a PortedGraph model that
+# must contain a "layout" annotation.
 #
-body ::tycho::DFGEditor::insertData {data} {
+body ::tycho::GraphEditor::insertData {data} {
     # Delete all data
     clear
 
     # Load the data into the models
-    $_graph parse [lindex $data 0]
-    $_layout parse [lindex $data 1]
+    $_graph parse $data
+    $_layout parse [$_graph attrget layout -data]
+    $_graph attrset layout -data {}
 
     # Load the new data into this view
-    loadLayout
+    layout load
 }
 
 #####################################################################
 #### saveText
-# Return the text to save. For now, this is a two-list containing
-# a description of the graph and the layout respectively.
+# Return the text to save. This is a description of the graph model,
+# with the layout embedded in an annotation element.
 #
-body ::tycho::DFGEditor::saveText {} {
-    set result "\{\n"
-    append result [$_graph describe]
-    append result "\}\n\{\n"
-    append result [$_layout describe]
-    append result "\}\n"
+body ::tycho::GraphEditor::saveText {} {
+    if ![$_graph exists layout] {
+        $_graph add annotation layout -data {}
+    }
+    $_graph attrset layout -data [$_layout describe]
+puts ?[$_layout describe]
+puts ![$_graph attrget layout -data]
+    set result [$_graph describe]
+    # $_graph attrset layout -data {}
+    
     return $result
 }
 
@@ -619,7 +621,7 @@ body ::tycho::DFGEditor::saveText {} {
 #### _initializeMenubar
 # Adds entries to the menu bar specific to this class.
 #
-body ::tycho::DFGEditor::_initializeMenubar {menubar} {
+body ::tycho::GraphEditor::_initializeMenubar {menubar} {
     # Add an Edit menu before the Window menu
     $menubar addMenu edit -label Edit -before window -underline 0
     
@@ -686,11 +688,13 @@ body ::tycho::DFGEditor::_initializeMenubar {menubar} {
     $menubar command showlayouthistory devel \
 	    -label "Show layout history" \
             -command "set _nm_ \[::tycho::view EditTcl\]; \
-        \$_nm_ insertData \[$this model access layout history get\]"
+        \$_nm_ insertData \[$this model access layout history get\]; \
+        \$_nm markUnmodified"
 
     $menubar command showgraphhistory devel \
 	    -label "Show graph history" \
             -command "set _nm_ \[::tycho::view EditTcl\]; \
-        \$_nm_ insertData \[$this model access graph history get\]"
+        \$_nm_ insertData \[$this model access graph history get\]; \
+        \$_nm markUnmodified"
 
 }

@@ -2,7 +2,7 @@
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)graphedit.tcl	1.3 02/25/98
 #
 # @Copyright (c) 1995-1998 The Regents of the University of California.
 # All rights reserved.
@@ -45,4 +45,24 @@ set env(GRAPHEDIT_LIBRARY) [file dirname [info script]]
 if { [lsearch -exact $auto_path $env(GRAPHEDIT_LIBRARY)] == -1 } {
     lappend auto_path $env(GRAPHEDIT_LIBRARY)
 }
+
+
+### Stylesheets
+::tycho::register stylesheet "graphedit" \
+	[file join $env(GRAPHEDIT_LIBRARY) graphedit.style] \
+	[file join ~ .Tycho styles graphedit.style]
+
+### MODE MAPPINGS
+::tycho::register extensions "dfg" .dfg
+
+### MODES
+########### graphical editors (alphabetical)
+
+# Basic graph viewer
+::tycho::register mode "dfg" \
+	-command {::tycho::view GraphEditor -file {%s}} \
+	-viewclass ::tycho::GraphEditor \
+	-label {Graph Editor}  \
+	-category "graphics" \
+	-underline 0
 
