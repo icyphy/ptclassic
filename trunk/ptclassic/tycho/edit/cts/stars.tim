@@ -58,6 +58,14 @@ group sink -label {Sink Actors} {
         attribute YMax -default "1.0" -label "Y maximum" -type number
         port input -datatype float -composite 1
     }
+    star plot_3 \
+            -class {Plot} \
+            -label {Plotter_3} \
+            -icon {edit/cts/icons.tim#sink.plot_3} {
+        attribute YMin -default "-1.0" -label "Y minimum" -type number
+        attribute YMax -default "1.0" -label "Y maximum" -type number
+        port input -datatype float -composite 1
+    }
     star xyplot \
             -class {XYPlot} \
             -label {2D-Plotter} \
@@ -87,7 +95,8 @@ group function -label {Functional Actors} {
             -class {LookupTable} \
             -label {LookupTable} \
             -icon {edit/cts/icons.tim#function.lookup} {
-        attribute fromFile -default "table.txt" -label "Load From File" -type string
+        attribute domain -default "{-5 -4 -3 -2 -1 0 1 2 3 4 5}" -label "domain" -type string
+        attribute range -default "{-0.999 -0.9993 -0.9951 -0.9640 -0.7616 0 0.7616 0.9640 0.9951 0.9993 0.9999}" -label "range" -type string
         port input -datatype float
         port output -datatype float
     }
