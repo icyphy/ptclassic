@@ -44,7 +44,14 @@ TCL_SRCS =
 ITCL_SRCS =
 
 EXTRA_SRCS = \
-	fonts.style
+	colors.style \
+	fonts.style \
+	interaction.style \
+	java.style \
+	layout.style \
+	stacktrace.style \
+	system.style \
+	textcolors.style
 
 # Files or directories that are present, but that 'make checkjunk' 
 # should not complain about
