@@ -35,7 +35,6 @@ if {[string compare test [info procs test]] == 1} then {
 } {}
 
 # The following tests need to be sequential...
-
 test cache-1 {Get a cache file name, and write into it.} {
     ::tycho::cache initialize
     set url "newformat://a.b.c/index.tyc"
@@ -95,7 +94,7 @@ test cache-5 {Check whether initialize/exists will keep concurrency} {
 
     set url "newformat://a.b.c/index.tyc"
     set cachefile [::tycho::cache getcachefile $url]
-    ::file delete $cachefile
+    ::tycho::cache remove $url
 
     # Resynchronize
     ::tycho::cache initialize
