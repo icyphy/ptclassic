@@ -70,7 +70,7 @@ class ::tycho::JRPC {
     public variable portnum 19876
 
     # Debug flag
-    public variable debug 1
+    public variable debug 0
 
     ###################################################################
     ####                         public methods                    ####
