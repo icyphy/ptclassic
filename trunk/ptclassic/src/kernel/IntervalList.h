@@ -75,6 +75,9 @@ public:
 	// intersection.
 	int intersects(const Interval& i1) const;
 
+	// subsetOf returns true if the argument is a subset of me.
+	int subsetOf(const Interval& i1) const;
+
 	// merge alters the interval to the result of merging it with i1.
 	void merge(const Interval& i1);
 
@@ -117,6 +120,9 @@ public:
 	// copy constructor
 	IntervalList(const IntervalList& src) { copy(src);}
 
+	// constructor that takes a string value and parses it
+	IntervalList(const char* definition);
+
 	// assignment operator
 	IntervalList& operator=(const IntervalList& src) {
 		zero();
@@ -141,7 +147,26 @@ public:
 	// intersection (nondestructive)
 	IntervalList operator&(const IntervalList&) const;
 
+	// subtract an interval from the list
+	IntervalList& subtract(const Interval& i1);
+
+	// alternate name
+	IntervalList& operator-=(const Interval& i1) {
+		return subtract(i1);
+	}
+
+	// subtract an IntervalList from the list
+	IntervalList& operator-=(const IntervalList &toSub);
+
+	// predicate for empty list
+	int empty() const { return (head == 0);}
 };
+
+// difference of two interval lists.
+inline IntervalList operator-(const IntervalList& a,const IntervalList& b) {
+	IntervalList tmp(a);
+	return tmp -= b;
+}
 
 // Take the union of two interval lists.
 inline IntervalList operator|(const IntervalList& a,const IntervalList& b) {
