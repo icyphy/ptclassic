@@ -101,18 +101,14 @@ TCL_ROOT=$(ROOT)/tcltk
 ITCL_VERSION=itcl
 
 
-# Directory containing Tcl include files
-TCL_INCDIR=$(TCL_ROOT)/itcl/include
-
+# Uncomment these for Itcl2.2
 TCL_VERSION_NUM=7.6i
 TK_VERSION_NUM=4.2i
 ITCL_VERSION_NUM=2.2
+ITCL_SRC_INCDIR=
 
 # Combined -L and -l options to link with tcl library.
 TCL_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl -ltcl$(TCL_VERSION_NUM)
-
-# Directory containing Tk include files
-TK_INCDIR=$(TCL_ROOT)/itk/include
 
 # Combined -L and -l options to link with tk library.  Can add
 # addtional -L and/or -l options to support tk extensions.
@@ -126,6 +122,37 @@ ITCL_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
 ITK_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
 ITK_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
 	-litk$(ITCL_VERSION_NUM)
+
+
+# Uncomment these for Itcl3.0
+#TCL_VERSION_NUM=8.0
+#TK_VERSION_NUM=8.0
+#ITCL_VERSION_NUM=3.0
+#ITCL_MINOR_VERSION_NUM=a1
+#ITCL_SRC_INCDIR =-I$(ROOT)/src/tcltk/itcl$(ITCL_VERSION_NUM)$(ITCL_MINOR_VERSION_NUM)/tcl8.0/generic
+
+# Combined -L and -l options to link with tcl library.
+#TCL_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib -ltcl$(TCL_VERSION_NUM)
+
+# Combined -L and -l options to link with tk library.  Can add
+# addtional -L and/or -l options to support tk extensions.
+#TK_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/ -ltk$(TK_VERSION_NUM) #-lXpm
+
+# Directory containing Tcl include files
+#TCL_INCDIR=$(TCL_ROOT)/itcl/include $(ITCL_SRC_INCDIR)
+
+# Directory containing Tk include files
+#TK_INCDIR=$(TCL_ROOT)/itk/include
+
+
+# Directory containing itcl include files
+#ITCL_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
+#ITCL_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib \
+#	-litcl$(ITCL_VERSION_NUM)
+
+#ITK_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
+#ITK_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib \
+#	-litk$(ITCL_VERSION_NUM)
 
 # Location of the ish binary (tcl + namespaces)
 ISH=$(ROOT)/tcltk/$(ITCL_VERSION).$(PTARCH)/bin/ish
