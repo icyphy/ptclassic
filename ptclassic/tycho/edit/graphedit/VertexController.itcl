@@ -30,13 +30,13 @@
 
 
 ##########################################################################
-#### DFGVertexController
+#### VertexController
 #
-# _DFGVertexController_ is a controller object used by the
+# _VertexController_ is a controller object used by the
 # _DFGEditor_ view. It is responsible for managing vertices
 # of the graph.
 #
-class ::tycho::DFGVertexController {
+class ::tycho::VertexController {
     inherit ::tycho::ViewController
 	
     constructor {args} {}
@@ -104,7 +104,7 @@ class ::tycho::DFGVertexController {
 ########################################################################
 #### constructor
 #
-body ::tycho::DFGVertexController::constructor {args} {
+body ::tycho::VertexController::constructor {args} {
     # Evaluate options
     eval configure $args
 
@@ -122,7 +122,7 @@ body ::tycho::DFGVertexController::constructor {args} {
 #
 # Add a vertex given the library name and star name
 #
-body ::tycho::DFGVertexController::add {libname starname} {
+body ::tycho::VertexController::add {libname starname} {
     set lib [$slateview library access $libname]
 
     # Instantiate the star as a vertex of the graph
@@ -167,7 +167,7 @@ body ::tycho::DFGVertexController::add {libname starname} {
 # that have one end connected to one of these vertices and
 # remember who they are.
 #
-body ::tycho::DFGVertexController::click {tag x y args} {
+body ::tycho::VertexController::click {tag x y args} {
     # Get the vertices, and start a move sequence on them
     set vertices [$slateview find withtag $tag]
 
@@ -201,7 +201,7 @@ body ::tycho::DFGVertexController::click {tag x y args} {
 #
 # Initialize the context-sensitive pop-up menu. 
 #
-body ::tycho::DFGVertexController::contextmenu {slateid type} {
+body ::tycho::VertexController::contextmenu {slateid type} {
     set name [itemname $slateid]
 
     if { $type == "vertex" } {
@@ -217,7 +217,7 @@ body ::tycho::DFGVertexController::contextmenu {slateid type} {
 #
 # Delete a vertex and icon by name
 #
-body ::tycho::DFGVertexController::delete {vertex} {
+body ::tycho::VertexController::delete {vertex} {
     # Mark the histories
     $layout mark set vertex
     $graph mark set vertex
@@ -249,7 +249,7 @@ body ::tycho::DFGVertexController::delete {vertex} {
 # Continue a move interaction on vertices. The
 # vertices and edges are moved and reshaped as appropriate.
 #
-body ::tycho::DFGVertexController::drag {tag x y} {
+body ::tycho::VertexController::drag {tag x y} {
     # Move the vertices and fully-connected edges
     $layout publish movedrag $_movetag $x $y
     if { $_moveedges != "" } {
@@ -269,7 +269,7 @@ body ::tycho::DFGVertexController::drag {tag x y} {
 #
 # Place an icon at the specified location.
 #
-body ::tycho::DFGVertexController::place {iconlib iconname starname x y} {
+body ::tycho::VertexController::place {iconlib iconname starname x y} {
     # Place the icon into the layout model, giving it the
     # same name as the vertex in the graph.
     $iconlib instantiate $iconname $layout \
@@ -292,7 +292,7 @@ body ::tycho::DFGVertexController::place {iconlib iconname starname x y} {
 # Terminate a move interaction on vertices and add an undo and
 # redo command to the history of the layout model.
 #
-body ::tycho::DFGVertexController::release {tag} {
+body ::tycho::VertexController::release {tag} {
     # Mark the history
     $layout mark set vertex
 
@@ -329,6 +329,6 @@ body ::tycho::DFGVertexController::release {tag} {
 ########################################################################
 #### _cleanup
 #
-body ::tycho::DFGVertexController::_cleanup {} {
+body ::tycho::VertexController::_cleanup {} {
     ;
 }

@@ -2,7 +2,7 @@
 # Version: $Id$
 # Author: John Reekie
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -86,8 +86,14 @@ class ::tycho::Layout {
     # Set attributes of an item
     method attrset {name args}
 
+    # Clear data from the model
+    method clear {}
+
     # Get or set the coordinates of an item
     method coords {item args}
+
+    # Get a description of the layout or an item
+    method describe {{item {}} {prefix {}}}
 
     # Forward a query to a subscriber view
     method forward {method name args}
@@ -183,9 +189,8 @@ body ::tycho::Layout::add {type item args} {
 #
 body ::tycho::Layout::attrget {item {attribute {}}} {
     # Update coordinates
-    if { [::info exists _dirty($item)] && $_views != "" } {
-        attrset $item -coords [[lindex $_views 0] coords $item]
-        # unset _dirty($item)
+    if [::info exists _dirty($item)] {
+        attrset $item -coords [forward coords $item]
     }
     chain $item $attribute
 }
@@ -208,6 +213,16 @@ body ::tycho::Layout::attrset {item args} {
 }
 
 ########################################################################
+#### clear
+#
+# Clear all data from the model and invalidate the cache.
+#
+body ::tycho::Layout::clear {} {
+    catch {unset _dirty}
+    chain
+}
+
+########################################################################
 #### coords
 #
 # With no arguments, get the coordinates of an item, with arguments,
@@ -215,7 +230,7 @@ body ::tycho::Layout::attrset {item args} {
 #
 body ::tycho::Layout::coords {item args} {
     if { $args == "" } {
-        attrget $item -coords
+        forward coords $item -coords
     } else {
         if $recording {
             history append \
@@ -227,6 +242,24 @@ body ::tycho::Layout::coords {item args} {
     }
 }
 
+########################################################################
+#### describe
+#
+# Generate a TIM description of an item or the layout model.
+# See the docs in the DataModel superclass.
+#
+body ::tycho::Layout::describe {{item {}} {prefix {}}} {
+    if { $item == "" } {
+	# Update all coords
+	foreach i [array names _dirty] {
+	    attrset $i -coords [forward coords $i]
+	}
+    } elseif [info exists _dirty($item)] {
+	attrset $item -coords [forward coords $item]
+    }
+    chain $item $prefix
+}
+	
 #######################################################################
 #### forward
 #

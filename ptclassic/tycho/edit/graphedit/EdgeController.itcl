@@ -30,13 +30,13 @@
 
 
 ##########################################################################
-#### DFGEdgeController
+#### EdgeController
 #
-# _DFGEdgeController_ is a controller object used by the
+# _EdgeController_ is a controller object used by the
 # _DFGEditor_ view. It is responsible for managing edges of
 # the graph.
 #
-class ::tycho::DFGEdgeController {
+class ::tycho::EdgeController {
     inherit ::tycho::ViewController
     
     constructor {args} {}
@@ -151,7 +151,7 @@ class ::tycho::DFGEdgeController {
 ########################################################################
 #### constructor
 #
-body ::tycho::DFGEdgeController::constructor {args} {
+body ::tycho::EdgeController::constructor {args} {
     # Evaluate options
     eval configure $args
 
@@ -188,7 +188,7 @@ body ::tycho::DFGEdgeController::constructor {args} {
 #
 # Process the click event from either drag-_dropper.
 #
-body ::tycho::DFGEdgeController::click {id x y} {
+body ::tycho::EdgeController::click {id x y} {
     # puts "click [$slate type $id] ([$slate gettags $id]) $id $x $y"
 
     set _initx $x
@@ -233,7 +233,7 @@ body ::tycho::DFGEdgeController::click {id x y} {
 #
 # Delete an edge and net by name
 #
-body ::tycho::DFGEdgeController::delete {edge} {
+body ::tycho::EdgeController::delete {edge} {
     # Delete grapples
     set id [slateid $edge]
     $slate delete grapple.$id
@@ -252,7 +252,7 @@ body ::tycho::DFGEdgeController::delete {edge} {
 # previous connection point, and a sticky grapple is added
 # to the disconnected end.
 #
-body ::tycho::DFGEdgeController::disconnect {edge end} {
+body ::tycho::EdgeController::disconnect {edge end} {
     set edgeitem [slateid $edge]
     set term [$graph attrget $edge $end]
     set termitem [slateid $term]
@@ -299,7 +299,7 @@ body ::tycho::DFGEdgeController::disconnect {edge end} {
 # null, then we are over an input terminal, so move the end of the
 # line to the right connection point.
 #
-body ::tycho::DFGEdgeController::drag {id x y} {
+body ::tycho::EdgeController::drag {id x y} {
     # puts [list drag $id $x $y]
 
     # If this is the first time, call for initial processing
@@ -351,7 +351,7 @@ body ::tycho::DFGEdgeController::drag {id x y} {
 #
 # Test if a junction will accept a connection.
 #
-body ::tycho::DFGEdgeController::junctionaccepts {name id tag} {
+body ::tycho::EdgeController::junctionaccepts {name id tag} {
     # puts "junctionaccepts $name $id $tag"
 
     set inputs [$graph edges * $name]
@@ -373,7 +373,7 @@ body ::tycho::DFGEdgeController::junctionaccepts {name id tag} {
 # Find the nearest available connection point on a junction.
 # Assumes there is at least one.
 #
-body ::tycho::DFGEdgeController::junctionnearest {name id x y} {
+body ::tycho::EdgeController::junctionnearest {name id x y} {
     # puts "junctionnearest $id $x $y"
 
     # Find connected aspects
@@ -407,7 +407,7 @@ body ::tycho::DFGEdgeController::junctionnearest {name id x y} {
 # appropriate. If the edge is not connected, a sticky grapple
 # is left on the disconnected end.
 #
-body ::tycho::DFGEdgeController::release {args} {
+body ::tycho::EdgeController::release {args} {
     # puts "release $args ($_moving)"
     if !$_moving {
         # The mouse hasn't moved
@@ -457,7 +457,7 @@ body ::tycho::DFGEdgeController::release {args} {
 # Test if an item is a valid candidate for starting a new connection.
 # This method looks at the connectedness of the item.
 #
-body ::tycho::DFGEdgeController::trysource {id} {
+body ::tycho::EdgeController::trysource {id} {
     # puts "trysource $id"
     set name [itemname $id]
 
@@ -486,7 +486,7 @@ body ::tycho::DFGEdgeController::trysource {id} {
 # Test if an item is a valid candidate for terminating a new connection.
 # This method looks at the tags and the connectivity of the item.
 #
-body ::tycho::DFGEdgeController::trytarget {id} {
+body ::tycho::EdgeController::trytarget {id} {
     # Make sure we're currently trying to connect
     if { $_totags == "" } {
         return 0
@@ -519,7 +519,7 @@ body ::tycho::DFGEdgeController::trytarget {id} {
 ########################################################################
 #### _cleanup
 #
-body ::tycho::DFGEdgeController::_cleanup {} {
+body ::tycho::EdgeController::_cleanup {} {
     set _aspect ""
     set _edgename ""
     set _edgeitem ""
@@ -533,7 +533,7 @@ body ::tycho::DFGEdgeController::_cleanup {} {
 ########################################################################
 #### _initdrag:edge
 #
-body ::tycho::DFGEdgeController::_initdrag:edge {x y} {
+body ::tycho::EdgeController::_initdrag:edge {x y} {
     set edgeitem1 [$slate find withtag current]
     set edgename1 [itemname $edgeitem1]
     
@@ -622,7 +622,7 @@ body ::tycho::DFGEdgeController::_initdrag:edge {x y} {
 ########################################################################
 #### _initdrag:grapple
 #
-body ::tycho::DFGEdgeController::_initdrag:grapple {x y} {
+body ::tycho::EdgeController::_initdrag:grapple {x y} {
     set _edgeitem [$slate itemcget $_grapple -item]
     set _edgename [itemname $_edgeitem]
 
@@ -643,7 +643,7 @@ body ::tycho::DFGEdgeController::_initdrag:grapple {x y} {
 ########################################################################
 #### _initdrag:junction
 #
-body ::tycho::DFGEdgeController::_initdrag:junction {x y} {
+body ::tycho::EdgeController::_initdrag:junction {x y} {
     set id [$slate find withtag "current"]
     set name [itemname $id]
 
@@ -675,7 +675,7 @@ body ::tycho::DFGEdgeController::_initdrag:junction {x y} {
 ########################################################################
 #### _initdrag:terminal
 #
-body ::tycho::DFGEdgeController::_initdrag:terminal {x y} {
+body ::tycho::EdgeController::_initdrag:terminal {x y} {
     set source [$slate find withtag "current"]
 
     # The "direction" of the terminal

@@ -43,6 +43,15 @@ class ::tycho::SlateView {
     #################################################################
     ####                        options                          ####
 
+     # The height of the slate
+    itk_option define -height height Height 300
+
+     # The width of the slate
+    itk_option define -width width Width 400
+
+    # The background color of the slate
+
+
     #################################################################
     ####                     public methods                      ####
 
@@ -176,6 +185,13 @@ body ::tycho::SlateView::constructor {args} {
 
     # Evaluate options
     eval itk_initialize $args
+
+
+    # Subscribe to the style parameters
+    stylesheet subscribe \
+	    -canvasheight graphedit canvasHeight \
+	    -canvaswidth  graphedit canvasWidth \
+	    -canvascolor  graphedit canvasColor
 }
 
 ########################################################################
@@ -267,7 +283,8 @@ body ::tycho::SlateView::layout {mode args} {
             _loadlayout
         }
         "clear" {
-            ;#
+            $_layout clear
+            $_layout notify event clear
         }
         "set" {
             set _layout [lindex $args 0]
@@ -320,6 +337,7 @@ body ::tycho::SlateView::layout {mode args} {
 # The <b>group</b> type is used to construct hierarchical menus.
 # The following options are recognized:
 #
+# <dl>
 # <dt><b>-customizecommand</b> _script_
 # <dd>
 # Specify a command prefix to evaluate before any items are
@@ -337,9 +355,9 @@ body ::tycho::SlateView::layout {mode args} {
 # <dt><b>-types</b> _typelist_
 # <dd>
 # Specify the types of entity that are added into the menu.
-# If not supplied, the types will be given by the <b>-visibletypes<b>
+# If not supplied, the types will be given by the <b>-visibletypes</b>
 # configuration option of the library, if there is one. If not
-# supplied and the library has no <b>-visibletypes<b> option, then
+# supplied and the library has no <b>-visibletypes</b> option, then
 # all types except <b>attribute</b>, <b>group</b>, and <b>xref</b>
 # will be added. 
 #
@@ -746,10 +764,10 @@ body ::tycho::SlateView::_select {mode {name {}}} {
 #
 body ::tycho::SlateView::_loadlayout {{item {}}} {
     if { $item != "" } {
-        _add $item [$_layout itemcget $item]
+        eval _add item [list $item] [$_layout attrget $item]
     }
     foreach i [$_layout match item $item] {
-        load [concat $item $i]
+        _loadlayout [concat $item $i]
     }
 }
 

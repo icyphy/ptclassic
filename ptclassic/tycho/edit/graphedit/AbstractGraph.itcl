@@ -1,6 +1,6 @@
 # A graph data structure.
 #
-# @Author: Edward A. Lee, John Reekie
+# @Author: $Id$ John Reekie, Edward A. Lee
 #
 # @Version: $Id$
 #
@@ -42,6 +42,17 @@
 #
 # _AbstractGraph_ model has the following types:
 # <dl>
+# <dt><b>annotation</b> _name_
+# <dd>
+# An annotation to the graph. Annotations contain things like
+# layout information and anything else specific to particular
+# graph viewers and editors. The _name_ of the annotation is used
+# to indicate what its purpose is. The contents of an annotation
+# are completely arbitrary, and it is up to the particular editor
+# responsible for creating an annotation to figure out useful ways
+# of handling annotations. Annotations are used to work around
+# the inability of the File class to handle more than one file.
+#
 # <dt><b>vertex</b> _name_
 # <dd>
 # A vertex of the graph. Vertices have no default attributes.
@@ -222,6 +233,10 @@ class ::tycho::AbstractGraph {
 body ::tycho::AbstractGraph::constructor {args} {
     # Evaluate options
     eval configure $args
+
+    # Define the "annotation" entity
+    type define annotation \
+	    :leafonly 1
 
     # Define the "vertex" entity
     type define vertex \
