@@ -1,7 +1,7 @@
-/* utility.h  edg
+/* util.h
 Version identification:
 $Id$
-Header file for utility.c
+Header file for util.c
 */
 
 #define UToolName "ptolemy"
@@ -10,6 +10,8 @@ Header file for utility.c
 #define UAppName "pigi"  /* name of this application */
 
 #define UFree(buf) (void) free((buf))
+
+#define DEFAULT_DOMAIN "SDF"
 
 extern boolean UMalloc();
 extern boolean StrDup();
@@ -35,3 +37,5 @@ extern boolean DupSheetInit();
 extern boolean DupSheetClear();
 extern boolean DupSheetAdd();
 extern boolean DupSheetIsDup();
+extern char* setCurDomainS();
+extern char* setCurDomainF();
