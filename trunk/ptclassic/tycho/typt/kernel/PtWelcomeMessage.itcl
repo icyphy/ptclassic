@@ -35,12 +35,12 @@
 # For convenience, a procedure to create a Tycho welcome message.
 #
 proc ptkStartupMessage {{version ""} {binary ""}} {
-    set nm [::tycho::autoName .ptwelcome]
-    uplevel #0 [list ::tycho::PtWelcomeMessage $nm \
-	    -version $version \
-	    -executable $binary \
-	    -persistent 0]
-    $nm centerOnScreen
+#    set nm [::tycho::autoName .ptwelcome]
+#    uplevel #0 [list ::tycho::PtWelcomeMessage $nm \
+#	    -version $version \
+#	    -executable $binary \
+#	    -persistent 0]
+#    $nm centerOnScreen
 }
 
 ##########################################################################
