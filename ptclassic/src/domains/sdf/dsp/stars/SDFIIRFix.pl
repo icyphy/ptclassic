@@ -255,7 +255,7 @@ The input particles are only cast to this precision if the parameter
 		if ( int(ArrivingPrecision) )
 		    fdbckAccum += (const Fix&)(signalIn%0);
 		else {
-		    fixIn = Fix(signalIn%0);
+		    fixIn = (const Fix&)(signalIn%0);
 		    fdbckAccum += (const Fix&)fixIn;
 		}
 		checkOverflow(fdbckAccum);
