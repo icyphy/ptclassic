@@ -53,9 +53,12 @@ class DataFlowStar;
 class CGStar;
 
 class MultiTarget : public CGTarget {
-
 public:
-        MultiTarget(const char* name, const char* starclass, const char* desc);
+	// Constructor
+        MultiTarget(const char* name, const char* starclass, const char* desc,
+		    const char* assocDomain = CGdomainName);
+
+	// Destructor
 	~MultiTarget();
 
 	// type identification

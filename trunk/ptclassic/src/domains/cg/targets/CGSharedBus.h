@@ -42,9 +42,11 @@ Programmer: Soonhoi Ha
 #include "UniProcessor.h"
 
 class ParNode;
+
 class CGSharedBus : public CGMultiTarget {
 public:
-	CGSharedBus(const char* name,const char* starType,const char* desc);
+	CGSharedBus(const char* name, const char* starType, const char* desc,
+		    const char* assocDomain = CGdomainName);
 
 	void clearCommPattern();
 	void saveCommPattern();
