@@ -1,4 +1,6 @@
-# Ptolemy-style makefile for xgraph
+# Ptolemy-style makefile for pxgraph
+# This is a Ptolemy version of xgraph, where the only difference is that
+# it accepts binary input if you use the -binary command line switch.
 # Version identification:
 # $Id$
 # Copyright (c) 1991 The Regents of the University of California.
@@ -19,17 +21,17 @@ SRCS = $(OBJS:.o=.c)
 HDRS = copyright.h general.h hard_devices.h params.h plotter.h st.h \
  xgout.h xgraph.h xtb.h
 
-all:	makefile xgraph
+all:	makefile pxgraph
 
-xgraph:	$(OBJS)
-	rm -f xgraph
-	$(CC) $(X11LIBDIR) -o xgraph $(OBJS) $(LXEXT) $(LX11) -lm
+pxgraph:	$(OBJS)
+	rm -f pxgraph
+	$(CC) $(X11LIBDIR) -o pxgraph $(OBJS) $(LXEXT) $(LX11) -lm
 
-OUT = $(BINDIR)/xgraph
+OUT = $(BINDIR)/pxgraph
 
-$(OUT):	xgraph
+$(OUT):	pxgraph
 	rm -f $(OUT)
-	ln xgraph $(OUT)
+	ln pxgraph $(OUT)
 
 install:	makefile $(OUT)
 
