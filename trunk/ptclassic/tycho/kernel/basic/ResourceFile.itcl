@@ -69,8 +69,11 @@ class ::tycho::ResourceFile {
     # Read a string from a streamable resource 
     method gets {{varName {}}}
 
+    # Test if the file is currently open
+    method isopen {}
+
     # Open the resource
-    method open {path {mode "r"}}
+    method open {{mode "r"}}
 
     # Write a string to a streamable resource 
     method puts {string}
@@ -126,11 +129,11 @@ class ::tycho::ResourceFile {
     ###################################################################
     ####                          private variables                ####
     
-    # The current access mode
-    private variable accessMode ""
-    
     # The current channel (file) ID
     private variable fileid ""
+    
+    # True if the file is open
+    private variable fileIsOpen 0
 }
 
 
@@ -208,16 +211,21 @@ body ::tycho::ResourceFile::gets {{varName {}}} {
 
 #####################################################################
 #### open
-body ::tycho::ResourceFile::open {path {mode "r"}} {
+body ::tycho::ResourceFile::open {{mode "r"}} {
     if $fileIsOpen {
 	$this close
     }
+    set path [path]
     regsub {^file:} $path {} path
-    set currentFile $path
-    set accessMode $mode
     set fileid [::open $path $mode]
     set fileIsOpen 1
     return 1
+}
+
+#####################################################################
+#### isopen
+body ::tycho::ResourceFile::isopen {} {
+    return $fileIsOpen
 }
 
 #####################################################################
