@@ -60,7 +60,7 @@ The parameter \fIphase\fR is in degrees (e.g., cos() would use phase=90).
  	codeblock (cbTempTables) {
 ; set DE=1 in OMR, to access sine tables
 ; we use to play pipeline tricks with turning the sine tables on and off.
-; However, this isnt safe in the presense of interupts, so we just eat
+; However, this isnt safe in the presence of interrupts, so we just eat
 ; the nop.
         ori     #$$04,omr	; turn on table  -- NOTE THE 1 CYCLE TIME LAG
 	nop

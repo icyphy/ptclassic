@@ -16,7 +16,7 @@ limitation of liability, and disclaimer of warranty provisions.
 Output data from DSP to host via host port synchronously.
 .UH IMPLEMENTATION:
 .pp
-We distiguish between single word transfers and multiword transfers.
+We distinguish between single word transfers and multiword transfers.
 The single word case is simpler in that we can use the \fIref\fP macro to
 access the value.  The multiword case requires a loop.  Currently
 we distinguish the two cases by \fIsamplesConsumed\fP, but I think it should
@@ -42,7 +42,7 @@ flow control.
 	state {
 		name { samplesOutput }
 		type { int }
-		desc { Number of samples transfered to host.  }
+		desc { Number of samples transferred to host.  }
 		default { 1 }
 	}
  	state  {

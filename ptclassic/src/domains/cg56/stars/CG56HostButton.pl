@@ -15,22 +15,22 @@ limitation of liability, and disclaimer of warranty provisions.
     explanation {
 .Ir "button"
 This is an asynchronous source star (like the Const star) with a particular
-graphical user interface.  The star always outputs one of two values;
-which value is output is controled by a button.  There are two types
-of buttons: \fBpushbutton\fPs and \fBcheckbutton\fPs.
-Both presents a single button to the user that
-may be "pressed" with the mouse.  The buttons differ
-in the semantics of the push.
+graphical user interface.
+The star always outputs one of two values; which value is output is
+controlled by a button.
+There are two types of buttons: \fBpushbutton\fPs and \fBcheckbutton\fPs.
+Both presents a single button to the user that may be "pressed" with the mouse.
+The buttons differ in the semantics of the push.
 When the \fBpushbutton\fP is pressed, the \fIonVal\fP state
 is output, otherwise \fIoffVal\fP.
 The \fBcheckbutton\fP widget is either on or off; pressing it toggles
-between on and off.  When on, the \fIonVal\fP state is output,
-otherwise \fIoffVal\fP is output.
+between on and off.
+When on, the \fIonVal\fP state is output, otherwise \fIoffVal\fP is output.
 .LP
-The \fIoffVal\fP and \fIonVal\fP should be either FIX or INT type.  They
-are not examined at compile-time: they are passed literally to qdm (via
-the aio file) and to the asembler (via the initial value).  Note
-that there is a big difference between "1" and "1.0".
+The \fIoffVal\fP and \fIonVal\fP should be either FIX or INT type.
+They are not examined at compile-time: they are passed literally to qdm
+(via the aio file) and to the assembler (via the initial value).
+Note that there is a big difference between "1" and "1.0".
     }
     state {
 	name { buttonType }

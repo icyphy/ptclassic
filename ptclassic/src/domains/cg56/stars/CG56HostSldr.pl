@@ -2,7 +2,7 @@ defstar {
     name { HostSldr }
     derivedFrom { HostASrc }
     domain { CG56 }
-    desc { Graphical host slider for asyncronous input source. }
+    desc { Graphical host slider for asynchronous input source. }
     version { $Id$ }
     author { Kennard White }
     acknowledge { Based on CG56HostSldrGX }
@@ -23,7 +23,7 @@ It is indended that this star be used with a graphical target monitor
 (.e.g., qdm_s56x).
 .LP
 The \fBslider\fP widget presents the user with a "ruler" along which
-the user may slide a marker.  The value output cooresponds to the
+the user may slide a marker.  The value output corresponds to the
 current location of the slider.
 The \fIdspMin\fP and \fIdspMax\fP states control the range of values
 that will be output on the DSP.

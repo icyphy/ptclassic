@@ -5,12 +5,12 @@ defstar {
     version { $Id$ }
     author { Kennard White }
     acknowledge { SDF version by E. A. Lee }
-	copyright {
+    copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-	}
+    }
     location { CG56 control library }
     explanation {
 .Id "multiplex"
@@ -18,27 +18,30 @@ limitation of liability, and disclaimer of warranty provisions.
 But only one of these blocks of particles is copied to the output.
 The one copied is determined by the \fIcontrol\fP input.
 Integers from 0 through N-1 are accepted at the \fIcontrol\fP input,
-where N is the number of inputs.  If the control input is outside
-this range, random data (possibly memory mapped devices) will be copied.
+where N is the number of inputs.
+If the control input is outside this range, random data (possibly
+memory mapped devices) will be copied.
 .UH IMPLEMENTATION:
 .pp
 There are potentially very many special cases that could be handled
-for increased efficiency: looped vs non-looped, circular vs linear,
-and scalars vs vectors (blockSize > 1), 
-uniform inputs vs non-uniform inputs (port.bufSize()).
-The current implementation handles only some of these cases.  Use this
-star at your own risk.
+for increased efficiency: looped vs. non-looped, circular vs. linear,
+and scalars vs vectors (blockSize > 1), uniform inputs vs. non-uniform
+inputs (port.bufSize()).
+The current implementation handles only some of these cases.
+Use this star at your own risk.
 .pp
 At compile time the star constructs a table of pointers to each of the
-input blocks.  The \fIcontrol\fP input is used to index this table,
-yielding a pointer to the appropriate input block for the firing.  This
-implementation assumes that all of its input ports reside in X memory.
+input blocks.
+The \fIcontrol\fP input is used to index this table, yielding a pointer
+to the appropriate input block for the firing.
+This implementation assumes that all of its input ports reside in X memory.
 .pp
 Currently we advance each of the pointers in the table on every firing.
 With some schedule the advancement is a nop; this case is handled.
-In other schedules the adancement is periodic over all inputs; in this
+In other schedules the advancement is periodic over all inputs; in this
 case, we could pre-calculate a set of tables at compile time instead
-of performing run-time advancement.  This is not currently handled.
+of performing run-time advancement.
+This is not currently handled.
     }
     inmulti {
         name {input}
@@ -83,7 +86,7 @@ of performing run-time advancement.  This is not currently handled.
 	name {useModuloB}
 	type {INT}
 	default {0}
-	desc { "True if any input is not scalor." }
+	desc { "True if any input is not scalar." }
 	attributes {A_NONSETTABLE|A_NONCONSTANT}
     }
     setup {
@@ -118,7 +121,7 @@ of performing run-time advancement.  This is not currently handled.
 	}
 	addCode("	org	y:$addr(ptrvec)");
 	for ( i=0; i < np; i++) {
-	    // There is a weirdness with scalor inputs: see cbCopy below
+	    // There is a weirdness with scalar inputs: see cbCopy below
 	    sprintf( buf, "\tdc\t$size(input#%d)-1", i+1);
 	    addCode(buf);
 	}
@@ -139,7 +142,7 @@ of performing run-time advancement.  This is not currently handled.
 	move	#$addr(output),r3
 	move	x:(r0+n0),r2
 	IF	$val(useModuloB)
-	  move	y:(r0+n0),m2	; for scalors m2=0=fft, but doesnt matter
+	  move	y:(r0+n0),m2	; for scalars m2=0=fft, but doesnt matter
 	ENDIF
 	.LOOP	#$val(blockSize)
 	  move	x:(r2)+,x0

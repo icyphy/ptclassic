@@ -2,9 +2,10 @@ defstar {
 	name { WaveForm }
 	domain { CG56 }
 	desc {
-A value of values is repeated at the ouput with period period, zero-padding
-or tuncating to period if necessary.  Setting period to 0 (default) ouputs the value
-once.  The default value is 0.1 0.2 0.3 0.4.
+A value of values is repeated at the output with period period, zero-padding
+or truncating to period if necessary.
+Setting period to 0 (default) outputs the value once.
+The default value is 0.1 0.2 0.3 0.4.
         }
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
@@ -17,8 +18,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { CG56 signal sources library }
         explanation {
 You can get periodic signals with any period, and can halt a simulation
-at the end of the given waveform.  The following table summarizes the
-capabilities:
+at the end of the given waveform.
+The following table summarizes the capabilities:
 .TS
 center, box;
 l l l l.
@@ -31,9 +32,9 @@ NO	NO	anything	Output the waveform once, then zeros.
 The first line of the table gives the default settings.
 .PP
 This star may be used to read a file by simply setting "value" to
-something of the form "< filename".  The file will be read completely
-and its contents stored in an array.  The size of the array is currently
-limited to 20,000 samples.
+something of the form "< filename".
+The file will be read completely and its contents stored in an array.
+The size of the array is currently limited to 20,000 samples.
 .IE "waveform from file"
 .IE "reading from a file"
 .IE "halting a simulation"

@@ -30,7 +30,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	name { expr }
 	type { string }
 	default { "\tmove\t$ref(in#1),a\n\tmove\ta,$ref(out)" }
-	desc { Expression to evaulate. }
+	desc { Expression to evaluate. }
     }
 
     state

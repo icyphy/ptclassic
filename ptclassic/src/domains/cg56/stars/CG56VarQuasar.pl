@@ -2,9 +2,9 @@ defstar {
 	name { VarQuasar }
 	domain { CG56 }
 	desc {
-A sequence of values is repeated at the ouput with period N, zero-padding
-or tuncating to N if necessary.  A value of 0 for N outputs an aperiodic
-sequence
+A sequence of values is repeated at the output with period N, zero-padding
+or truncating to N if necessary.
+A value of 0 for N outputs an aperiodic sequence.
         }
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
@@ -15,11 +15,6 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 nonlinear functions library }
-        explanation {
-A sequence of values is repeated at the ouput with period N, zero-padding
-or tuncating to N if necessary.  A value of 0 for N outputs an aperiodic
-sequence
-	}
 
         input  {
                 name { N }

@@ -1,7 +1,7 @@
 defstar {
 	name { Mpy }
 	domain { CG56 }
-	desc { Multipy any number of inputs, producing an output. }
+	desc { Multiply any number of inputs, producing an output. }
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright {
