@@ -70,7 +70,7 @@ STR yesButton, noButton;	/* Labels on buttons      */
     static ddsControl con_data;
     ddsPosition pos;
     char full[MAX_BUF];
-    int i;
+
 #ifdef BUG
     static char *buf = (char *) 0;
 
