@@ -54,8 +54,6 @@
 #
 #---------------------------------------------------------------------------
 #
-# Search for the word COMPATIBILITY to see how the scripts work simultaneously
-# under Tk 3.6 and 4.0
 
 # Width of entry in average-sized chars of font
 set ed_MaxEntryLength 60
@@ -65,35 +63,6 @@ set ed_EntryDestroyFlag 0
 
 # Global variable containing the number for a toplevel window
 set ed_ToplevelNumbers(WindowNumber) 0
-
-# COMPATIBILITY Tk 3.6 and 4.0
-#
-# Tk 3.6: tk_butDown is a tk internal procedure.  It is defined in the
-# Tk installation.  We use it because of the tk3.6 binding mechanism.
-# basically, tk_butDown defines the binding, i.e., handling, when you
-# push the mouse button down in any buttons.  It is a "class binding"
-# that applies to class Button.  In Tk 3.6, bindings for window, class,
-# and "all" are mutually exclusive.  Only the most specific binding is
-# executed.  So if you add a binding for button-down event in a specific
-# button, and you still want to execute the general Button class binding,
-# you need to invoke tk_butDown also in the specific button's binding.
-# Similar holds for tk_butUp.  -wtc
-#
-# Tk 4.0: The bindings for window, class, and "all" are processed
-# in order, so the equivalent of tk_butDown (tkButtonDown) is not needed.
-#
-if { $tk_version >= 4.0 } {
-  set ed_Compatibility(ButDown)     tkButtonDown
-  set ed_Compatibility(ButUp)       tkButtonUp
-  set ed_Compatibility(EntryScroll) -xscrollcommand
-  set ed_Compatibility(EntryView)   xview
-
-} else {
-  set ed_Compatibility(ButDown)     tk_butDown
-  set ed_Compatibility(ButUp)       tk_butUp
-  set ed_Compatibility(EntryScroll) -scrollcommand
-  set ed_Compatibility(EntryView)   view
-}
 
 # This procedure is called when the Cancel button is invoked and discards
 # changes previously applied.
@@ -200,15 +169,11 @@ proc ptkProcessPragmas {facet parentname instance starname} {
 
 proc ed_SetEntryButtons \
      {frame {numStor 1} {numPossVis ""} {leftIdx 0} {rightIdx 0}} {
-# COMPATIBILITY Tk 3.6 and 4.0
-global ed_Compatibility
-set viewopt $ed_Compatibility(EntryView)
-set butdown $ed_Compatibility(ButDown)
   $frame.left config -fg black
   if {$leftIdx > 0} {
     $frame.left config -state normal -fg black
-    bind $frame.left <Button-1> "$butdown %W
-        $frame.entry $viewopt \[expr \[$frame.entry index @0\]-1\]
+    bind $frame.left <Button-1> "tkButtonDown %W
+        $frame.entry xview \[expr \[$frame.entry index @0\]-1\]
         after 200 ed_ShiftButtonViewLeft %W $frame.entry"
   } else {
     set bgColor [lindex [$frame.left config -bg] 4]
@@ -218,8 +183,8 @@ set butdown $ed_Compatibility(ButDown)
   }
   if {$rightIdx < [expr $numStor-1]} {
     $frame.right config -state normal -fg black
-    bind $frame.right <Button-1> "$butdown %W
-        $frame.entry $viewopt \[expr \[$frame.entry index @0\]+1\]
+    bind $frame.right <Button-1> "tkButtonDown %W
+        $frame.entry xview \[expr \[$frame.entry index @0\]+1\]
         after 200 ed_ShiftButtonViewRight %W $frame.entry"
   } else {
     set bgColor [lindex [$frame.right config -bg] 4]
@@ -233,11 +198,8 @@ set butdown $ed_Compatibility(ButDown)
 #  to shift the view in the entry
 
 proc ed_ShiftButtonViewLeft {button entry} {
-# COMPATIBILITY Tk 3.6 and 4.0
-global ed_Compatibility
-set viewopt $ed_Compatibility(EntryView)
   if {[lindex [$button config -relief] 4] == "sunken"} {
-    $entry $viewopt [expr [$entry index @0]-1]
+    $entry xview [expr [$entry index @0]-1]
     after 50 "ed_ShiftButtonViewLeft $button $entry"
   }
 }
@@ -246,11 +208,8 @@ set viewopt $ed_Compatibility(EntryView)
 #  to shift the view in the entry
 
 proc ed_ShiftButtonViewRight {button entry} {
-# COMPATIBILITY Tk 3.6 and 4.0
-global ed_Compatibility
-set viewopt $ed_Compatibility(EntryView)
   if { [lindex [$button config -relief] 4] == "sunken" } {
-    $entry $viewopt [expr [$entry index @0]+1]
+    $entry xview [expr [$entry index @0]+1]
     after 50 "ed_ShiftButtonViewRight $button $entry"
   }
 }
@@ -260,12 +219,7 @@ set viewopt $ed_Compatibility(EntryView)
 
 proc ed_MkEntryButton {frame label} {
   global ptolemy ed_MaxEntryLength
-# COMPATIBILITY Tk 3.6 and 4.0
-global ed_Compatibility
-set butdown $ed_Compatibility(ButDown)
-set butup $ed_Compatibility(ButUp)
-set scrollcmd $ed_Compatibility(EntryScroll)
-set viewopt $ed_Compatibility(EntryView)
+
   pack append [frame $frame -bd 2] \
     [label $frame.label -text "$label:  " -anchor w] left \
     [button $frame.right -bitmap @$ptolemy/lib/tcl/right.xbm \
@@ -274,21 +228,21 @@ set viewopt $ed_Compatibility(EntryView)
             -command ed_Dummy -relief flat] right
   $frame.right config -fg [lindex [$frame.right config -bg] 4]
   $frame.left config -fg [lindex [$frame.left config -bg] 4]
-  bind $frame.left <Button-1> "$butdown %W
-    $frame.entry $viewopt \[expr \[$frame.entry index @0\]-1\]
+  bind $frame.left <Button-1> "tkButtonDown %W
+    $frame.entry xview \[expr \[$frame.entry index @0\]-1\]
     after 200 ed_ShiftButtonViewLeft %W $frame.entry"
-  bind $frame.right <Button-1> "$butdown %W
-    $frame.entry $viewopt \[expr \[$frame.entry index @0\]+1\]
+  bind $frame.right <Button-1> "tkButtonDown %W
+    $frame.entry xview \[expr \[$frame.entry index @0\]+1\]
     after 200 ed_ShiftButtonViewRight %W $frame.entry"
-  bind $frame.left <ButtonRelease-1> "catch {$butup %W}"
-  bind $frame.right <ButtonRelease-1> "catch {$butup %W}"
+  bind $frame.left <ButtonRelease-1> "catch {tkButtonUp %W}"
+  bind $frame.right <ButtonRelease-1> "catch {tkButtonUp %W}"
 # FIXME: The last command (pack) exhibits different behavior in Tk 4.0
 # due to the change in the scroll command for entry widgets; in Tk 3.6,
 # ed_SetEntryButtons gets called with five arguments which give the
 # status of the cursor in the entry widget; no such arguments are passed
 # for Tk 4.0
   pack before $frame.left \
-    [entry $frame.entry $scrollcmd "ed_SetEntryButtons \"$frame\"" \
+    [entry $frame.entry -xscrollcommand "ed_SetEntryButtons \"$frame\"" \
            -relief sunken -width $ed_MaxEntryLength] {right}
 }
                                                                             #
