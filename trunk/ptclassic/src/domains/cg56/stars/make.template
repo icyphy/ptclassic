@@ -32,6 +32,7 @@ PL_SRCS= \
  CG56ASin.pl \
  CG56Abs.pl \
  CG56Add.pl \
+ CG56BitsToInt.pl \
  CG56CircToLin.pl \
  CG56Commutator.pl \
  CG56Const.pl \
@@ -41,6 +42,7 @@ PL_SRCS= \
  CG56Delay.pl \
  CG56Distributor.pl \
  CG56DownSample.pl \
+ CG56Expr.pl \
  CG56Gain.pl \
  CG56HostAOut.pl \
  CG56HostASrc.pl \
@@ -53,6 +55,7 @@ PL_SRCS= \
  CG56IIDUniform.pl \
  CG56Impulse.pl \
  CG56Intgrtr.pl \
+ CG56IntToBits.pl \
  CG56Limit.pl \
  CG56LinToCirc.pl \
  CG56Log.pl \
@@ -90,6 +93,7 @@ PL_SRCS= \
  CG56SSISink1.pl \
  CG56SSISkew.pl \
  CG56Sgn.pl \
+ CG56SgnInt.pl \
  CG56Shifter.pl \
  CG56Sin.pl \
  CG56Skew.pl \
