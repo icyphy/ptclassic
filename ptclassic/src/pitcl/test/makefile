@@ -65,11 +65,13 @@ ITCL_SRCS =	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) alltests.itcl all.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
+# Files or directories that are present, but that 'make checkjunk' 
+# should not complain about
 MISC_FILES =
 
-# Sources that may or may not be present, but if they are present, we don't
-# want make checkjunk to barf on them.
-OPTIONAL_FILES =
+# make checkjunk will not report OPTIONAL_FILES as trash
+# make realclean removes OPTIONAL_FILES
+OPTIONAL_FILES = 	alltests.itcl all.itcl	
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
