@@ -407,21 +407,6 @@ void ArchTarget :: trailerCode() {
 	return;
       }
 
-      StringList firstRefPortName = state->firstRef;
-      firstRefPortName << "_IN";
-      StringList muxName = state->firstFiringName;
-      muxName << "_" << firstRefPortName;
-      VHDLMux* firstRefMux =
-	muxList.vhdlMuxWithName(muxName);
-
-      if (!firstRefMux) {
-	Error::abortRun(muxName, ": no such mux in muxList");
-	return;
-      }
-      else {
-	firstRefMux->addInput(initSignal);
-      }
-
       // FIXME:  dummy signal for control just to please mux maker.
       // if only one input signal, mux should get replaced anyway
       VHDLSignal* firstIterDone =
@@ -433,7 +418,29 @@ void ArchTarget :: trailerCode() {
 	signalList.put(*firstIterDone);
       }
 
-      firstRefMux->setControl(firstIterDone);
+      // Need to connect the signal from the constant state's source
+      // to all firings that input the constant state, and not just
+      // the first one.
+      StringListIter nextName(state->constRefFiringList);
+      const char* refFiringName;
+      while ((refFiringName = nextName++) != 0) {
+	StringList stateRefPortName = state->firstRef;
+	stateRefPortName << "_IN";
+	StringList muxName = refFiringName;
+	muxName << "_" << stateRefPortName;
+	VHDLMux* stateRefMux =
+	  muxList.vhdlMuxWithName(muxName);
+	if (!stateRefMux) {
+	  Error::abortRun(muxName, ": no such mux in muxList");
+	  return;
+	}
+	else {
+	  stateRefMux->addInput(initSignal);
+	}
+
+	stateRefMux->setControl(firstIterDone);
+      }
+
       initSignal->setControlValue(0);
       signalList.put(*initSignal);
 
@@ -510,6 +517,7 @@ void ArchTarget :: trailerCode() {
 	connectSource(state->initVal, initSignal);
       }
 
+      /*
       // NEW: Add a dependency over iterations between
       // the last ref signal and the first ref reg.
       VHDLDependency* dep = new VHDLDependency;
@@ -517,9 +525,31 @@ void ArchTarget :: trailerCode() {
       dep->sink = firstRefReg;
       // Need dep to have unique name before putting into list.
       StringList depName = "";
-      depName << lastRefSignal->getName() << "," << firstRefReg->getName();
+      depName << dep->source->getName() << "," << dep->sink->getName();
       dep->setName(depName);
       iterDependencyList.put(*dep);
+      // END NEW
+      */
+
+      // NEW: Add a dependency over iterations between
+      // the last ref firing and the first ref reg.
+      VHDLDependency* dep = new VHDLDependency;
+      StringList lastFiringName = state->lastFiringName;
+      VHDLFiring* lastFiring =
+	masterFiringList.vhdlFiringWithName(lastFiringName);
+      if (lastFiring) {
+	dep->source = lastFiring;
+      }
+      else {
+	Error::error(lastFiringName,
+		     ":  Couldn't find a firing with this name");
+      }
+      dep->sink = firstRefReg;
+      // Need dep to have unique name before putting into list.
+      StringList depName = "";
+      depName << dep->source->getName() << "," << dep->sink->getName();
+      dep->setName(depName);
+      dependencyList.put(*dep);
       // END NEW
 
       VHDLSignal* iterClockSignal =
@@ -659,27 +689,53 @@ void ArchTarget :: trailerCode() {
 	regList.put(*destReg);
       }
 
-      // NEW: Add a dependency over iterations between
+      VHDLToken* sourceToken =
+	tokenList.vhdlTokenWithName(sourceName);
+      VHDLToken* destToken =
+	tokenList.vhdlTokenWithName(destName);
+
+      // Add a dependency over iterations between
       // the source reg and the dest reg.
       VHDLDependency* dep = new VHDLDependency;
       dep->source = sourceReg;
+      // If the token has a source firing, it's not
+      // an iteration token, so we want to use the source
+      // firing as the source of the dependency.
+      VHDLFiring* sourceFiring = 0;
+      if (sourceToken) {
+	sourceFiring = sourceToken->getSourceFiring();
+	if (sourceFiring) {
+	  sourceFiring =
+	    masterFiringList.vhdlFiringWithName(sourceFiring->getName());
+	  dep->source = sourceFiring;
+	}
+      }
+      // If the token has no dest firings, 
       dep->sink = destReg;
       // Need dep to have unique name before putting into list.
       StringList depName = "";
-      depName << sourceReg->getName() << "," << destReg->getName();
+      depName << dep->source->getName() << "," << dep->sink->getName();
       dep->setName(depName);
-      iterDependencyList.put(*dep);
+      if (sourceFiring) {
+	dependencyList.put(*dep);
+      }
+      else {
+	iterDependencyList.put(*dep);
+      }
 
       // Add a token to the token list so that it will get processed
       // by the interactive app.
-      VHDLToken* sourceToken = new VHDLToken;
-      sourceToken->setName(sourceReg->getName());
-      VHDLToken* destToken = new VHDLToken;
-      destToken->setName(destReg->getName());
+      if (!sourceToken) {
+	sourceToken = new VHDLToken;
+	sourceToken->setName(sourceReg->getName());
+      }
+      if (!destToken) {
+	destToken = new VHDLToken;
+	destToken->setName(destReg->getName());
+      }
 
       tokenList.put(*sourceToken);
       tokenList.put(*destToken);
-      // END NEW
       
       toggleClock("feedback_clock");
 
@@ -746,10 +802,11 @@ void ArchTarget :: trailerCode() {
       VHDLFiringListIter nextFiring(masterFiringList);
       VHDLFiring* firing;
       while ((firing = nextFiring++) != 0) {
-	// Find the port with the given name
+	// Find all ports with the given name
 	port = firing->portList->vhdlPortWithName(outName);
 	if (port) {
 	  thePort = port;
+	  thePort->connect(mux->getInputs()->head());
 	}
       }
       if (thePort) {
@@ -758,7 +815,7 @@ void ArchTarget :: trailerCode() {
 	cout << "Reconnecting port " << outName;
 	cout << " to signal " << mux->getInputs()->head()->getName() << "\n";
 	*/
-	thePort->connect(mux->getInputs()->head());
+	//	thePort->connect(mux->getInputs()->head());
       }
       else {
 	Error::error(outName,
@@ -1236,7 +1293,7 @@ void ArchTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
 
 	    // Need dep to have unique name before putting into list.
 	    StringList depName = "";
-	    depName << sourceFiring->name << "," << currentFiring->name;
+	    depName << dep->source->getName() << "," << dep->sink->getName();
 	    dep->setName(depName);
 	    dependencyList.put(*dep);
 	  }
@@ -1432,6 +1489,8 @@ void ArchTarget :: registerState(State* state, const char* varName,
     firingVariableList.put(*inVar);
 
     if (constState) {
+      listState->constRefFiringList << currentFiring->getName();
+
       // NEW: NO LONGER CREATE A TOKEN FOR CONST STATES
       /*
       listState->constant = 1;
@@ -1541,7 +1600,7 @@ void ArchTarget :: registerState(State* state, const char* varName,
 
 	  // Need dep to have unique name before putting into list.
 	  StringList depName = "";
-	  depName << sourceFiring->name << "," << currentFiring->name;
+	  depName << dep->source->getName() << "," << dep->sink->getName();
 	  dep->setName(depName);
 	  dependencyList.put(*dep);
 	}
@@ -1560,6 +1619,7 @@ void ArchTarget :: registerState(State* state, const char* varName,
 
   // Reset state's lastFiring tag just before exiting.
   listState->lastFiring = thisFiring;
+  listState->lastFiringName = currentFiring->getName();
 }
 
 // Connect a source of the given value to the given signal.
