@@ -161,6 +161,9 @@ void IntParticle :: operator << (int i) {data=i;}
 void IntParticle :: operator << (double f) {data=int(f);}
 void IntParticle :: operator << (const Complex& c) {data=int(abs(c));}
 void IntParticle :: operator << (const Fix& x) {data = int(x);}
+void IntParticle :: operator << (const Envelope&) {
+	Error::abortRun ("Attempt to load a Message into Fix Particle");
+}
 
 
 	////////////////////////////////////////
@@ -238,6 +241,10 @@ void FloatParticle :: operator << (int i) {data=i;}
 void FloatParticle :: operator << (double f) {data=f;}
 void FloatParticle :: operator << (const Complex& c) {data=abs(c);}
 void FloatParticle :: operator << (const Fix& x) {data = double(x);}
+void FloatParticle :: operator << (const Envelope&) {
+	Error::abortRun ("Attempt to load a Message into Fix Particle");
+}
+
 
         ////////////////////////////////////////
         // class ComplexParticle
@@ -324,6 +331,9 @@ void ComplexParticle :: operator << (double f) {data=Complex(f);}
 void ComplexParticle :: operator << (const Complex& c) {data=c;}
 void ComplexParticle :: operator << (const Fix& x) 
                                               {data = Complex(double(x));}
+void ComplexParticle :: operator << (const Envelope&) {
+	Error::abortRun ("Attempt to load a Message into Fix Particle");
+}
 
 
         ///////////////////////////////////////
@@ -407,6 +417,10 @@ void FixParticle :: operator << (int i) {data = double(i);}
 void FixParticle :: operator << (double f) {data = f;}
 void FixParticle :: operator << (const Complex& c) {data = double(abs(c));}
 void FixParticle :: operator << (const Fix& x) {data = x;}
+void FixParticle :: operator << (const Envelope&) {
+	Error::abortRun ("Attempt to load a Message into Fix Particle");
+}
+
 
 // Error catcher for attempts to retrieve a Message from a different
 // type of particle
@@ -421,7 +435,7 @@ void Particle::getMessage(Envelope & p) {
 	Particle::accessMessage(p);
 }
 
-void Particle::operator<<(const Envelope&) {
+void Particle :: operator << (const Envelope&) {
 	Error::abortRun ("Attempt to load a Message into non-Message Particle");
 }
 

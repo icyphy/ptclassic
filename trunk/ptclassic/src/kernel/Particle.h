@@ -187,6 +187,7 @@ public:
 	void operator << (double f);
 	void operator << (const Complex& c);
         void operator << (const Fix& x);
+	void operator << (const Envelope&);
 
 	// Copy the Particle
 	Particle& operator = (const Particle&);
@@ -241,6 +242,7 @@ public:
         void operator << (double f);
         void operator << (const Complex& c);
         void operator << (const Fix& x);
+	void operator << (const Envelope&);
 
         // Copy the Particle
         Particle& operator = (const Particle&);
@@ -297,6 +299,7 @@ public:
         void operator << (double f);
 	void operator << (const Complex& c);
         void operator << (const Fix& x);
+	void operator << (const Envelope&);
 
         // Copy the Particle
         Particle& operator = (const Particle&);
@@ -355,6 +358,7 @@ public:
         void operator << (double f);
         void operator << (const Complex& c);
         void operator << (const Fix& x);
+	void operator << (const Envelope&);
 
         // Copy the Particle
         Particle& operator = (const Particle&);
