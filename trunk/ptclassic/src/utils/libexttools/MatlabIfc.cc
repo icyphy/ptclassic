@@ -557,3 +557,18 @@ int MatlabIfc :: MatlabToPtolemy(
 
     return incompatibleOutportPort;
 }
+
+void MatlabIfc :: FreeMatlabMatrices(Matrix *matlabMatrices[], int numMatrices) {
+    if ( matlabMatrices != 0 ) {
+	for ( int k = 0; k < numMatrices; k++ ) {
+	    if ( matlabMatrices[k] != 0 ) {
+		mxFreeMatrix(matlabMatrices[k]);
+		matlabMatrices[k] = 0;
+	    }
+	}
+    }
+}
+
+void MatlabIfc :: NameMatlabMatrix(Matrix* matrixPtr, const char *name) {
+    mxSetName(matrixPtr, name);
+}
