@@ -56,6 +56,9 @@ S56DIR =
 XV_RAND =	RAND="-DNO_RANDOM -Drandom=rand"
 XV_INSTALL =	bsdinst
 
+# Used by tcltk to build the X pixmap extension
+XPM_DEFINES =	-DZPIPE
+
 # Used to flush the cache on the hppa.  (source is in the kernel/ directory)
 FLUSH_CACHE =	flush_cache.o
 # Destination of flush_cache.  Can't just subsitute $(LIBDIR)/flush_cache.o
