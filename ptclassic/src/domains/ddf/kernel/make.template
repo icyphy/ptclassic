@@ -15,17 +15,15 @@
 ROOT=../../../..
 # True source directory
 VPATH = $(ROOT)/src/domains/ddf/kernel
-# Kernel directory
-KERNDIR=$(ROOT)/src/kernel
+
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
+
 # SDF support directory
 SDFDIR=$(ROOT)/src/domains/sdf/kernel
 # Dynamic constructs support directory
 DYCONDIR=$(ROOT)/src/domains/ddf/constructs
-# Where to install the libraries
-DESTDIR=$(ROOT)/lib.$(ARCH)
-
-GPPFLAGS = -g
-GNU = g++
 
 # Rule for compiling with g++
 .SUFFIXES: .cc
@@ -55,12 +53,12 @@ $(LIB):	$(OBJS)
 	ranlib $(LIB)
 
 # "make install" puts things in the official place
-install:	makefile $(DESTDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(LIB)
 
-$(DESTDIR)/$(LIB):	$(LIB)
-		rm -f $(DESTDIR)/$(LIB)
-		cp $(LIB) $(DESTDIR)
-		ranlib $(DESTDIR)/$(LIB)
+$(LIBDIR)/$(LIB):	$(LIB)
+		rm -f $(LIBDIR)/$(LIB)
+		cp $(LIB) $(LIBDIR)
+		ranlib $(LIBDIR)/$(LIB)
 
 # "make clean" removes .o files and other cruft
 clean:
@@ -71,8 +69,8 @@ sources:	$(SRCS) $(HDRS) make.template
 
 depend:
 		cd $(VPATH); \
-		g++ -MM -I$(DYCONDIR) -I$(SDFDIR) -I$(KERNDIR) $(SRCS) |\
-			 cat make.template - > makefile.n
+		$(DEPEND) -I$(DYCONDIR) -I$(SDFDIR) -I$(KERNDIR) $(SRCS) |\
+			 cat make.template - > makefile.n;\
 		mv -f makefile.n makefile
 
 makefile:	make.template

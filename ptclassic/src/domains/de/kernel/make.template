@@ -15,15 +15,13 @@
 ROOT=../../../..
 # True source directory
 VPATH = $(ROOT)/src/domains/sdf/image
-# Kernel directory
-KERNDIR=$(ROOT)/src/kernel
+
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
+
 # SDF kernel
 SDFKERNDIR=$(ROOT)/src/domains/sdf/kernel
-# Where to install the libraries
-DESTDIR=$(ROOT)/lib.$(ARCH)
-
-GPPFLAGS = -g
-GNU = g++
 
 # Rule for compiling with g++
 .SUFFIXES: .cc
@@ -48,12 +46,12 @@ $(LIB):	$(OBJS)
 	ranlib $(LIB)
 
 # "make install" puts things in the official place
-install:	makefile $(DESTDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(LIB)
 
-$(DESTDIR)/$(LIB):	$(LIB)
-		rm -f $(DESTDIR)/$(LIB)
-		cp $(LIB) $(DESTDIR)
-		ranlib $(DESTDIR)/$(LIB)
+$(LIBDIR)/$(LIB):	$(LIB)
+		rm -f $(LIBDIR)/$(LIB)
+		cp $(LIB) $(LIBDIR)
+		ranlib $(LIBDIR)/$(LIB)
 
 # "make clean" removes .o files and other cruft
 clean:
@@ -75,4 +73,3 @@ makefile:	make.template
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-

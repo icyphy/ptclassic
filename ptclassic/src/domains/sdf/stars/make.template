@@ -10,17 +10,20 @@
 
 ROOT = ../../../..
 VPATH = $(ROOT)/src/domains/sdf/stars
-# KERNDIR is the directory containing the Ptolemy kernel source.
-KERNDIR = $(ROOT)/src/kernel
+
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
+
 # SDFDIR is the directory containing SDF domain support
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
 IMAGE = $(ROOT)/src/domains/sdf/image
-GPPFLAGS = -g
-GNU = g++
+INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(IMAGE) -I$(VPATH)
 
+# rule for compiling C++ programs
 .SUFFIXES: .o .cc .h .pl
 .cc.o:
-	$(GNU) $(GPPFLAGS) -I$(SDFDIR) -I$(KERNDIR) -I$(IMAGE) -I$(VPATH) -c  $<
+	$(GNU) $(GPPFLAGS) $(INCL) -c $<
 
 # Make sure we always run the preprocessor in the source directory
 .pl.cc:
@@ -152,7 +155,7 @@ clean:
 		rm -f *.o core *~ *#
 depend:
 		cd $(VPATH); \
-		g++ -MM -I$(SDFDIR) -I$(KERNDIR) -I$(IMAGE) $(CCSRCS) |\
+		$(DEPEND) $(INCL) $(CCSRCS) |\
 			 cat make.template - > makefile.n; \
 		mv -f makefile.n makefile
 
