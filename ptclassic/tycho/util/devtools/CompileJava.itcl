@@ -33,21 +33,25 @@
 
 #######################################################################
 #### CompileJava
-# This class compiles and runs a Java file.
+# This class compiles a Java class and optionally runs it.
 #
-# There are several different possiblities to this:
-#
-# Call *java -cs* _ClassName_, which will check the modification times
+# <H2>Compilation Methods</H2>
+# If the *.java* file contains a *main()*, then we call
+# <CODE>java -cs</CODE> _ClassName_, which will check the modification times
 # of the *.java* and *.class* file and compile if necessary.  Then
-# the class file is run.  This method requires that the _ClassName.java_
-# file has a *main()*.
+# the class file is run and we are done.
 #
-# Call *javac* _ClassName_, which will compile the file.  This is useful
-# if your class does not have a *main()*.
+# If the *.java* file does not contain a *main()*, then we call 
+# *javac* _ClassName_, which will compile the file.
 #
-# Call *javac* _ClassName_, and then run *appletViewer* _ClassName.html_.
-# This is useful if you are writting an applet.  This method relies on
-# their being a *.html* file with the same name as the class.
+# After the compilation successfully completes, we check 
+# if there is a _ClassName_*.html* file present, then we run
+# *appletViewer* _ClassName.html_.  It would be nice if we checked to
+# see if the *.java* file extends *Applet*, but that is more work.
+#
+# <H2>Other possible compilation methods</H2>
+# Below we discuss other possible compilation methods that are 
+# <B>not</B> implemented.
 #
 # If a *makefile* is present in the same directory as the _ClassName.java_
 # file, then we should run 'make'.  There are several problems here:
@@ -58,6 +62,13 @@
 # We could generate a *ClassName.mk* file and then run
 # *make -f ClassName.mk*.  This is what the *CompileCTcl* class does.
 #
+# <H2>CLASSPATH</H2>
+# The *CLASSPATH* environment variable controls where the Java tools
+# such as *javac*, *java*, and *appletviewer*.   *javac* and *java* tak
+# a *-classpath* option, *appletviewer* does not.
+# Tycho reads the *classpath* preference and sets the *CLASSPATH* environment
+# variable before calling the java tools.  The *classpath* preference is
+# set in the miscellaneous preferences.
 #
 # <p>
 # Here is an example of how to use the CompileJava class:
