@@ -1,4 +1,4 @@
-# Makefile for Ptolemy Tycho system, kernel/doc/codeDoc directory.
+# Makefile for Ptolemy Tycho system, kernel/gui/doc/codeDoc directory.
 #
 # $Id$
 # Author: Christopher Hylands
@@ -30,10 +30,10 @@
 ##########################################################################
 
 # Root of Tycho directory
-ROOT =		../../..
+ROOT =		../../../..
 
 # True source directory
-VPATH =		$(ROOT)/kernel/doc/usersGuides
+VPATH =		$(ROOT)/kernel/gui/doc/usersGuides
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
