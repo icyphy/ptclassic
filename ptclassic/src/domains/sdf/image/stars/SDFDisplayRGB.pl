@@ -70,12 +70,11 @@ to produce the full filename of the displayed image.
 		const char* saveMe = saveColor;
 		int del = !((saveMe[0] == 'y') || (saveMe[0] == 'Y'));
 
-		char fileName[256];
-		if (!(const char*) imageName) {
-			strcpy(fileName, tempFileName());
-		} else {
+		char fileName[256];		fileName[0] = '\000';
+		if ((const char*) imageName) {
 			strcpy(fileName, (const char*) imageName);
 		}
+		if (fileName[0] == '\000') { strcpy(fileName, tempFileName()); }
 		char numtmp[16];
 		sprintf(numtmp, ".%d", tempyD->retId());
 		strcat(fileName, numtmp);
