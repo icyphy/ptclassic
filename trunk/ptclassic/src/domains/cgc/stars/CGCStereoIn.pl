@@ -46,14 +46,9 @@ provisions.
     codeblock (convert) {
       /* Convert data in buffer to Output format */
 
-      for ($starSymbol(counter)=0; $starSymbol(counter) <($val(blockSize)/4);
-	   $starSymbol(counter)++) {
-
-	$ref(left,$starSymbol(counter)) = 
-	  $starSymbol(buf)[2*$starSymbol(counter)] /32768.0;
-	$ref(right,$starSymbol(counter)) = 
-	  $starSymbol(buf)[2*$starSymbol(counter)+1] /32768.0;
-	
+      for (i=0; i <($val(blockSize)/4); i++) {
+	$ref(left,i) = $starSymbol(buf)[2*i] /32768.0;
+	$ref(right,i) = $starSymbol(buf)[2*i+1] /32768.0;
       }
     }
 
@@ -76,7 +71,6 @@ provisions.
       /* Update parameters */
       StringList updateParameters = "$sharedSymbol(CGCStereoBase,set_parameters)";
       updateParameters << "($starSymbol(file), "
-		       << "\"" << encodingType << "\", "
 		       << "\"" << inputPort << "\", "
 		       <<  volume << ", " 
 		       <<  balance << ", " 
@@ -85,6 +79,7 @@ provisions.
     }
 
     go {
+      addDeclaration("int i;");
       addCode(read);
       addCode(convert);
     }
