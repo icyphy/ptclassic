@@ -58,8 +58,11 @@ class ::tycho::EditJava {
     # Insert a body template
     method bodyTemplate {}
 
-    # Execute the Java code in the selection (or the entire text widget).
-    method evaluate {}
+    # Compile and Run the Java code in the current file
+    method compileAndRun {}
+
+    # Compile the Java code in the current file
+    method compile {}
 
     # Get the blank Java template for a file and insert it into the window
     method fileTemplate {{newClassName {}}}
@@ -150,22 +153,35 @@ body ::tycho::EditJava::bodyTemplate {} {
     insertData $template
     markModified
 }
+
 #####################################################################
 #### evaluate
-# Save the buffer if necessary, compile it and load it back into
-# Tcl.  If necessary, add a initialization procedure so that the 
-# Tcl load command will work.  If there is no makefile present in the
-# current directory, then create a makefile with a name based on the
-# current file.
+# Save the buffer if necessary, and compile it.
+# If there is no makefile present in the current directory, then create a
+# makefile with a name based on the current file.
 #
-body ::tycho::EditJava::evaluate {} {
+body ::tycho::EditJava::compile {} {
     global env tycho
     saveQuery
     if {$compileWidget == {} } {
         set compileWidget [::tycho::CompileJava [::tycho::autoName .editJava]]
         $compileWidget configure -view $this
     }
-    $compileWidget compileAndRun [list [filename]]
+    $compileWidget compile [list [filename]]
+}
+
+
+####################################################################
+#### compileAndRun
+# Save the buffer if necessary, compile it and then run it.
+# If there is no makefile present in the current directory, then create a
+# makefile with a name based on the current file.
+#
+body ::tycho::EditJava::compileAndRun {} {
+    compile
+    if {$compileWidget != {}} {
+	$compileWidget compileAndRun [list [filename]]
+    }
 }
 
 #####################################################################
@@ -574,6 +590,19 @@ body ::tycho::EditJava::_initializeMenubar {menubar} {
     $menubar delete htemplate
     $menubar delete tclinit
     $menubar delete specialsep2
+
+    $menubar delete compileandload
+    $menubar delete compile
+    $menubar delete filesep3
+    $menubar insert command compile close \
+	    -label Compile \
+            -underline 6 \
+            -command "$this compile"
+
+    $menubar insert command compileandrun close \
+	    -label {Compile and Run} \
+            -command "$this compileAndRun"
+    $menubar insert separator filesep3 close
 
     $menubar command filetemplate special \
 	    -label "File Template" -underline 0 \
