@@ -116,12 +116,13 @@ facet.  Thus, Oct manages all data accesses to facets.
 Facets may define a universe, a galaxy, or a wormhole.
 They also define the physical appearance and formal
 terminals of icons that represent stars, galaxies, universes,
-and wormholes.
+and wormholes.  
 A facet may also contain a \fIpalette\fR,
 which is simply a collection of disconnected icons.
 .IE palette
 Palettes are directories of stars, galaxies, universes,
 and wormholes in a library.
+Note that facet names, just like file names, may not contain spaces.
 .pp
 Here is a quick summary of terms:
 .ip \*(PT 1i
