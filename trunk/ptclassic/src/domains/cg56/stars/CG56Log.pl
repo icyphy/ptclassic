@@ -4,7 +4,7 @@ defstar {
 	desc { Logorithm }
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright { 1992s The Regents of the University of California }
+	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
         explanation {
 This star computes the base two logarithm of its input divided by 32,
@@ -28,7 +28,7 @@ using polynomial approximation with eight bits of accuracy.
 	codeblock(std) {
         move            m7,r7
         move            $ref(input),a
-        move            #$addr(d),r1
+        move            #>$addr(d),r1
         rep   #23
         norm  r7,a
         move            a,x0
