@@ -14,6 +14,7 @@ with which we can assess and improve code quality and stability.
 <li><a href="#code rating levels">Code rating levels</a>
 <li><a href="#code rating rules">Code rating rules</a>
 <li><a href="#code rating tools">Tool support</a>
+<li><a href="#retrospective">Retrospective application of code rating</a>
 <li><a href="#code rating FAQ">Infrequently-asked questions</a>
 </ul>
 <p>
@@ -44,7 +45,10 @@ re-submit the code.
 <P>The four levels of confidence are <I>red</I>, <I>yellow</I>,
 <I>green</I>, and <I>blue</I>. Each level has a well-defined meaning,
 which both the author and tester/reviewer are expected to satisfy
-before proposing or accepting advancement to that level.
+before proposing or accepting advancement to that level.  The level of
+a class or file is indicated in the file header comment with the tags
+<B>@ProposedRating</B> and <B>@AcceptedRating</B>.  A file that has
+neither of these tags is <I>unrated</I>.
 
  <P> There is room within the process for design reviews and code
 reviews, although the degree to which these are applied is up to the
@@ -59,124 +63,146 @@ The four ratings are as follows:
 
 <dt><B>Red</B>
 
-<dd>All code starts here.  
-<MENU>
-<LI> Red code is in flux, and anyone that calls red code should expect
-it to change without warning.
-<LI> If Red code is checked in to the shared development tree, it should
-not cause compiles to fail.
-<LI> Code that calls red code does not need to be modified by the author if
-changes in the red code break the calling code.
-<LI>  Red code should never be released.
-</MENU>
+<dd> This is the starting point for all code. Red code is in flux, and
+cn be expected to changed without warning. Code that calls red code
+does not need to be modified by the author if changes in the red code
+break the calling code.  Red code should never be released.
 
+ <P><dl>
+ <dt><I>Proposing advancement</I>
+
+<dd> Code is made red simply by adding the <B>@ProposedRating</B> tag
+followed by "red" to the file header comment. The author should do
+this, and should also add the <B>@AcceptedRating</B> tag (solely for
+the purpose of making it easier to search with grep). At the same time,
+the author should check the file into the shared development
+tree, add it to the appropriate makefile, and <I>check that the build
+does not fail</i>.
+
+ <P><dt><I>Accepting advancement</I>
+
+<dd> 
+"Advancement" to red is automatic. If the author does not add the
+<B>@AcceptedRating</B> tag, the code rating tools will assume
+that it is red.
+ 
+ <P><dt><I>Acceptable changes</I>
+
+<dd> 
+Any changes at all can be made to red code, with one significant
+condition: red code that is checked into the shared development
+tree must not cause the build to fail.
+
+</dl>
 
 
  <P><dt><B>Yellow</B>
 
-<dd>The interface and overall design of the class is acceptable for
-development purposes.
-<MENU>
-<LI> Clients can code to this interface with the
+<dd>The interface and overall design of yellow code is considered to
+be acceptable.  Clients can code to this interface with the
 expectation that further changes will be limited to revisions, not
-major changes. 
-<LI> Clients cannot expect that code that calls yellow code
-will work at all.
-<LI> Code that calls yellow code should be modified by the author of 
-the yellow code if changes in the yellow code break the calling code.
-<LI> Yellow code should generally not be released.
-</MENU>
+major changes.  Clients cannot expect that yellow code has any
+functionality behind the interface.  Yellow code should generally not
+be released.
 
  <P><dl>
  <dt><I>Proposing advancement</I>
 
 <dd> The author proposes advancement to yellow when he/she is
 satisfied with the design of the class, and how it collaborates with
-other classes. The author is responsible for making sure that the
-class is adequately documented and that the javadoc output is correct.
-UML diagrams at the design level are appropriate here.
+other classes. Before proposing advancement to yellow, the author is
+responsible for making sure that the class is adequately documented
+and that automatically generated documentation produced by tydoc or
+javadoc is correct and reasonably complete. The author is also
+responsible for ensuring that appropriate design documentation -- UML
+diagram, for example -- is complete and readable.
 
  <P><dt><I>Accepting advancement</I>
 
 <dd> The tester/reviewer accepts advancement to yellow when he/she is
-satisfied that the design of the class is satisfactory in the context
-given by the author. The tester/reviewer should evaluate the class
-solely on the basis of the documented interface -- note that, in the
-case of classes which are designed to be subclassed, this includes the
-(protected) interface provided to subclasses. The tester/reviewer is
-entitled to request UML diagrams as an aid to understanding the
-purpose and function of the class, and is entitled to organize a
-design review at this time. The tester/reviewer is also entitled to
-require changes to the interface in anticipation of testing needs.
+satisfied that the design of the class is satisfactory. What
+"satisfactory" means is a matter of judgment, based on the project the
+work is taking place in and the stated purpose of the class.  The
+tester/reviewer should evaluate the design and interface of the class
+solely on the basis of the design documentation and the documentation
+generated by tydoc or javadoc -- in other words, without reading the
+source code. Note that, in the case of classes which are designed to
+be subclassed, this includes the (protected) interface provided to
+subclasses.
+
+ <P> If appropriate, the tester/reviewer is entitled to request UML
+diagrams as an aid to understanding the purpose and function of the
+class, and is entitled to organize a design review at this time. The
+tester/reviewer is also entitled to require changes to the interface
+in anticipation of testing needs.
 
  <P><dt><I>Acceptable changes</I>
 
-<dd> Yellow code can have interface changes before advancing to green,
-but the author should avoid making wholesale changes.  If wholesale
-changes are required, the author should request that the class be
-taken back to red. If the author changes the interface to yellow code,
-then he is responsible for:
-
+<dd> Yellow code can have minor interface changes before advancing to
+green.  If wholesale changes are required, the author should request
+that the class be taken back to red. If the author changes the
+interface to yellow code, then he is responsible for:
+ <P>
 <OL>
-<LI> Making sure that the calling code
-compiles.
-<LI> Notifying the author of calling code about the
-change.
-<LI> Fixing the tests in the test suite.
-<LI> Updating the design documents and javadoc output
+<LI> Making sure that the calling code compiles.
+<LI> Notifying the author of calling code about the change.
+<LI> Updating the design documents and tydoc or javadoc output.
 </OL>
 
-The author is not responsible for making sure that the calling
-code works or passes its test suites, as yellow code does not provide
-any assurance of functionality.
+ <P>
+The author is not responsible for making sure that the calling code
+works or passes its test suites, as yellow code does not provide any
+assurance of functionality. (But see <A
+HREF="#retrospective">Retrospective application of code rating</A>.)
 
 </dl>
 
  <P><dt><B>Green</B>
 
 <dd>
-<MENU>
-<LI> The interface of the class has been finalized, and the
-implementation is acceptable for development purposes.
-<LI> The documentation of the interface is acceptable for development
-purposes.
-<LI> Clients can code to green code in the expection that the
-interface will not change in such a way as to break compilation, nor
-will the implementation change enough to break the caller's test
-suite.
-<LI> Green code is releaseable.
-</MENU>
-
+The interface to green code has been finalized, and the implementation
+is considered acceptable for development purposes.  Clients can code
+to green code in the expection that the interface will not change in
+such a way as to break compilation, nor will the implementation change
+enough to break the caller's test suite.  Green code is releasable.
 
 
  <P><dl>
 <dt><I>Proposing advancement</I>
 
 <dd>The author proposes advancement to green when he/she is satisfied
-that the interface to the class will not need further changes, except
-for relatively minor enhancements and additions, and with the
-implementation of the class. This could be considered "beta" level
-code. The author is responsible for providing the tester/reviewer with
-a test suite that he/she can use as a starting point. This test suite
-should exercise and illustrate the main uses of the class.
+that the interface to the class is final, except for relatively minor
+enhancements and additions, and that the implementation of the class
+is satisfactory. This could be considered "beta" level code. Before
+proposing advancement to green, the author is responsible for
+providing a test suite that exercises and demonstrates the main
+functionality of the class.
 
  <P><dt><I>Accepting advancement</I>
 
 <dd>The tester/reviewer accepts advancement to green if he/she is
 satisfied with the implementation of the class. The tester/reviewer
 shall determine this by a) writing a test suite, and b) reviewing the
-code. The test suite must have at least 50% code coverage.  The
-tester/reviewer is entitled to organize a code review at this
-time. The author is required to write example test code if requested
-by the tester/reviewer.
+code. The test suite should have at least 50% code coverage.  If
+appropriate, the tester/reviewer is entitled to organize a code review
+at this time. The author is required to write example test code if
+requested by the tester/reviewer.
 
  <P><dt><I>Acceptable changes</I>
 
-<dd>The interface to green code can have interface changes, but these
-should be minor or purely incremental (new methods). If the changes
-break any test suites, the author is required to fix the calling
-code. If a change will require substantial fixes, then the class
-should probably be taken back to yellow.
+<dd>The interface to green code can only have incremental interface
+changes (that is, new methods). Small changes, such as an additional
+argument or a change in an argument type, are acceptable but should
+first be cleared with authors of client classes. In any case, the
+author is required to fix any test suites or clients that break as a
+result.
+
+ <P>Implementation changes to green code are allowed, provided that
+they do not require clients to change the order of calls (which is, in
+effect, changing the interface.) The author must verify that changes
+do not break any test suites, and is required to fix the clients
+and/or test suites if they do. If a change will require substantial
+fixes, then the class should probably be taken back to yellow.
 
 </dl>
 
@@ -185,7 +211,7 @@ should probably be taken back to yellow.
 <dd>The implementation of the class has been fully and completely
 tested, and accepted as meeting all requirements.  All documentation,
 including external documentation if appropriate, is complete. Blue
-code is releaseable.
+code is releasable.
 
  <P><dl>
 
@@ -316,6 +342,72 @@ check-in comment (like emacs).
 </ul>
 
 
+<h2><a name="retrospective">Retrospective application of code rating</a></h2>
+
+The rating guidelines need to be modified somewhat if the
+ratings are added after the code is already being developed.
+Typical problems may include the following:
+
+<ul>
+
+<li>The code is only at red or yellow, yet there are already test
+suites. which have a tendency to break whenever the code is modified.
+
+ <P>
+<li>The code starts at red, but nobody wants to take the trouble to go
+through yellow before getting to green, because the implementation
+is already considered sound -- so why go to the trouble of messing about
+with yellow?
+
+</ul>
+
+Basically, the right approach in situations like this is to use
+judgment. The author and tester/review should, when entering the
+rating system, recognize that the code is an exception to the usual
+application of the code rating system, and modify the guidelines
+appropriately. Here are some particular guidelines for
+code that has been recognized as exceptional:
+
+<ul>
+<li> If test suites exist already, then the author should
+either:
+
+ <P>
+<ol>
+<li>Make sure that all tests still pass after each modification, or
+
+ <P>
+<li>Remove the tests from the test suite (with the tester/reviewer's
+approval) and fix them when proposing advancement to green.
+
+</ol>
+
+ <P><li> If code is already considered robust and generally 
+"done," then it is up to the author and reviewer to decide
+if they want to skip yellow. Before doing this, they should first
+consider:
+
+ <P><ol>
+
+<li>Whether it would be better to just leave the code unrated.
+Unrated code that is fully developed is better left unrated if it is
+not going to be used in conjunction with new code that is being
+developed under the rating system. If, however, it is being subclassed
+or heavily used by new, rated, code, then it should also be brought
+into the rating system.
+
+ <P><li>Whether the code really is as good as expected for green level --
+having been in use for some time does not automatically make this
+so. It is important to remember that the purpose of code rating is to
+improve quality. If no-one has time or energy to advance this kind of
+code through each level, then it may be better to just leave it
+unrated, red, or yellow.
+
+</ol>
+
+</ul>
+
+
 <h2><a name="code rating FAQ">Infrequently-asked questions</a></h2>
 
 <dl>
@@ -328,7 +420,8 @@ be in the tree, although it may not be considered eligible for
 release. The degree to which the review and testing process is carried
 out is determined by the perceived needs of users of your code. In any
 case, you should really view the process as an opportunity to improve
-the quality of your code.
+the quality of both your own code and that of our research group as a
+whole
 
  <P><dt><I>Nobody really writes an interface without writing
 code at the same time. Doesn't this make yellow redundant?</I>
@@ -337,12 +430,11 @@ code at the same time. Doesn't this make yellow redundant?</I>
 maturity of modeling languages such as OMT and UML. Secondly, it
 doesn't matter: if an author chooses to completely write the
 implementation of a class before proposing that it be made yellow,
-that's fine. If, for a given author, this approach makes him or her
-more confident that the class will make it to green without any
-substantial changes, even better -- and the author will have less work
-to do to get the code to green. However, acceptance at level yellow
-only implies acceptance of the interface, and all the same guidelines
-about usage still apply.
+that's fine. If this approach makes him or her more confident that the
+class will make it to green without any substantial changes, even
+better -- and the author will have less work to do to get the code to
+green. However, acceptance at level yellow only implies acceptance of
+the interface, and all the same guidelines about usage still apply.
 
  <P><dt><I>Haven't you neglected the incremental improvements that all
 code goes through?</I>
@@ -357,33 +449,6 @@ considered appropriate. If needed improvements cannot be done without
 gross violation of the guidelines for that level, then the author or
 modifier can propose that the code be taken back one, two, or even
 three levels.
-
- <P><dt><I>We've been using this code for months now. Why not just
-make it green or blue?</i>
-
-<dd>Because it hasn't been reviewed or tested, which is the whole
-point!  Short-circuiting the process will just mean that code that is
-stamped as OK even though it hasn't gone through the process.  It's
-better to consider releasing red or yellow code than pretend that it's
-really green or blue.
-
- <P><dt><I>OK, so why don't we just advance this class to green and
-skip yellow?</i>
-
-<dd>Again, you could do that, but it makes the rating system rather
-pointless. There's no particular reason a class couldn't go from red
-to green in one step, provided that the tester/reviewer is careful to
-perform the steps for both advancements -- in which case you might as
-well do both steps. This also makes the tools easier to write.
-
- <P>Part of the reason, incidentally, for going through each step is
-to guard against the rating system being used as a mechanism to
-prevent other people from "messing" with your code.  If someone needs
-to mess with it, then this indicates a weakness that should have been
-identified at the advancement to yellow or green levels. Without
-performing those steps, you are more likely to end up with green code
-that doesn't fill the needs of clients -- and hence the need to mess
-with it.
 
  <P><dt><I>The requirements to get to blue are pretty severe. Why?</i>
 
