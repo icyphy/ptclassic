@@ -54,6 +54,9 @@ proc ptkStartTycho { } {
 # Procedure to load an FSM within Tycho.
 #
 proc ptkTychoLoadFSM { file } {
+    # Get absolute file name
+    set file [::tycho::expandPath $file]
+
     # Get the class name which is the rootname.
     set classname [file tail [file rootname $file]]
 
