@@ -485,7 +485,7 @@ body ::tycho::StyleSheet::_notify {command name args} {
 ########################################################################
 #### dfltcget
 #
-# Get an attribute of an item. This is like <b>attrset</b>, except
+# Get an attribute of an item. This is like <b>attrget</b>, except
 # that it searches in the master style-sheet to find missing
 # values: If the attribute is not present here, look in
 # the same stylesheet in the master. If it is not present
@@ -493,7 +493,7 @@ body ::tycho::StyleSheet::_notify {command name args} {
 #
 body ::tycho::StyleSheet::dfltcget {name attribute} {
     if [exists $name] {
-	array set attrs [assign $name]
+	array set attrs [attrset $name]
 	if [::info exists attrs($attribute)] {
 	    return $attrs($attribute)
 	}
@@ -506,7 +506,7 @@ body ::tycho::StyleSheet::dfltcget {name attribute} {
 	regexp {[^:]+$} [lindex $name 0] style
 	if { $style == "default" } {
 	    # Can't go any further
-	    attrset $name $attribute
+	    attrget $name $attribute
 	} else {
 	    # Try default style
 	    dfltcget [lreplace $name 0 0 style:default] $attribute
@@ -889,7 +889,7 @@ body ::tycho::StyleSheet::_describeparameter {name {prefix {}}} {
     set string "${prefix}parameter $tail"
 
     # Print value
-    array set attrs [assign $name]
+    array set attrs [attrset $name]
     lappend string $attrs(-value)
     unset attrs(-value)
 

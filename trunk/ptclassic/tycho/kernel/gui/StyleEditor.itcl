@@ -302,7 +302,7 @@ configbody ::tycho::StyleEditor::stylesheet {
         # Get styles from master
         foreach s [$_master match style] {
             if [$_master exists style:$s -label] {
-                set label [$_master attrset style:$s -label]
+                set label [$_master attrget style:$s -label]
                 if { $label != "" } {
                     set _index($label) $s
                     set _unindex($s) $label
@@ -312,7 +312,7 @@ configbody ::tycho::StyleEditor::stylesheet {
         # Get additional styles from the user model
         foreach s [$_model match style] {
             if [$_model exists style:$s -label] {
-                set label [$_model attrset style:$s -label]
+                set label [$_model attrget style:$s -label]
                 if { $label != "" } {
                     set _index($label) $s
                     set _unindex($s) $label
@@ -352,7 +352,7 @@ configbody ::tycho::StyleEditor::style {
         if ![$itk_component(items) exists $parameter] {
             continue
         }
-        set type [$_master attrset "style:default parameter:$parameter" -type]
+        set type [$_master attrget "style:default parameter:$parameter" -type]
         set value [$_model dfltcget "style:$style parameter:$parameter" -value]
         switch -exact $type {
             "font" {
@@ -522,8 +522,8 @@ body ::tycho::StyleEditor::_loaddata \
     # Build list of parameters by type
     foreach parameter [$_master match parameter style:default] {
 	set name "style:default parameter:$parameter"
-	set label [$_master attrset $name -label]
-	set type [$_master attrset $name -type]
+	set label [$_master attrget $name -label]
+	set type [$_master attrget $name -type]
 	if { $label != "" } {
 	    set _[set type]($label) $parameter
 	}

@@ -248,7 +248,7 @@ body ::tycho::UserProfile::getstyle {stylesheet {widget {}} {title {}}} {
             set id [_map title $title]
             if { $id != "" } {
                 if [exists preference:title.$id -$stylesheet] {
-                    return [attrset preference:title.$id -$stylesheet]
+                    return [attrget preference:title.$id -$stylesheet]
                 }
             }
         }
@@ -258,14 +258,14 @@ body ::tycho::UserProfile::getstyle {stylesheet {widget {}} {title {}}} {
             set id [_map class $class]
             if { $id != "" } {
                 if [exists preference:class.$id -$stylesheet] {
-                    return [attrset preference:class.$id -$stylesheet]
+                    return [attrget preference:class.$id -$stylesheet]
                 }
             }
         }
     }
     # See if there's a global preference    
     if [exists preference:global -$stylesheet] {
-	return [attrset preference:global -$stylesheet]
+	return [attrget preference:global -$stylesheet]
     }
     # Nothing found
     return "default"
@@ -315,10 +315,10 @@ body ::tycho::UserProfile::registerstyle \
 # Update the name maps.
 #
 body ::tycho::UserProfile::_updatecache {} {
-    array set _mapclass [assign map:class]
-    array set _unmapclass [assign unmap:class]
-    array set _maptitle [assign map:title]
-    array set _unmaptitle [assign unmap:title]
+    array set _mapclass [attrset map:class]
+    array set _unmapclass [attrset unmap:class]
+    array set _maptitle [attrset map:title]
+    array set _unmaptitle [attrset unmap:title]
     cache validate
 }
 
@@ -341,9 +341,9 @@ body ::tycho::UserProfile::_newmap {type name} {
     }
     set _map[set type]($name) $_id
     set _unmap[set type]($_id) $name
-	
-    assign map:$type [array get _map$type]
-    assign unmap:$type [array get _unmap$type]
+
+    eval attrset map:$type [array get _map$type]
+    eval attrset unmap:$type [array get _unmap$type]
 
     return $_id
 }
