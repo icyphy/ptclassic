@@ -43,7 +43,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class SynthArchTarget : public ArchTarget {
 public:
-	SynthArchTarget(const char* name, const char* starclass, const char* desc);
+	SynthArchTarget(const char* name, const char* starclass,
+			const char* desc);
+
+	/*virtual*/ void setup();
+
 	/*virtual*/ Block* makeNew() const;
 
 	// Class identification.
@@ -62,7 +66,9 @@ protected:
 	// States.
 	IntState elaborate;
 	IntState compile;
-	
+	StringState precision;
+	const char* precSpec;
+
 	// Return the condition indicating if system clock generator is needed.
 	// For synthesis, we don't want a system clock.
 	/*virtual*/ int systemClock() { return FALSE; }
