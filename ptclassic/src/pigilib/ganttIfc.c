@@ -226,10 +226,10 @@ long userOptionWord;
 
     ptkOctObj2Handle(&facet,facetHandle);
 
-    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditValues ",
+    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditStrings ",
                    " \"Find Name\" ",
                    " \"ptkSetFindName ", facetHandle, " %s \" ",
-                   " \"Name\" ",
+                   " \"{{Name} {}}\" ",
                    (char *)NULL) )
 
     ViDone();

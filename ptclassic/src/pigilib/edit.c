@@ -440,10 +440,10 @@ long userOptionWord;
     /* At this point, obj is either an instance or the facet */
     ptkOctObj2Handle(&obj,facetHandle);
 
-    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditValues ",
+    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditStrings ",
 		   " \"Edit Comment\" ",
                    " \"ptkSetComment ", facetHandle, " %s \" ",
-                   " \"Comment [ptkGetComment ", facetHandle, "]\" ",
+                   " \"{{Comment} [ptkGetComment ", facetHandle, "]}\" ",
                    (char *)NULL) )
 
     ViDone();
@@ -487,10 +487,10 @@ long userOptionWord;
     ErrClear();
     FindClear();
 
-    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditValues ",
+    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditStrings ",
                    " \"Set Seed\" ",
                    " \"ptkSetSeed %s \" ",
-                   " \"{Seed for Random Number} [ptkGetSeed]\" ",
+                   " \"{{Seed for Random Number} [ptkGetSeed]}\" ",
                    (char *)NULL) )
     ViDone();
 }
