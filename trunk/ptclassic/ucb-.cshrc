@@ -12,6 +12,7 @@ umask 02
 #  gcc uses gnm from sww/bin, so when building a ptolemy to distribute
 #  don't include gcc in the path
 set path = ( /usr/kerb.local/bin \
+	     /opt/jdk1.1/bin \
 		$path \
 		/usr/sww/bin )
 
