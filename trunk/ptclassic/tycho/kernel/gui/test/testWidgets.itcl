@@ -1,0 +1,126 @@
+# Test suite for widgets in tycho.
+#
+# Author: Edward A. Lee
+#
+# A number of windows will be created, and then some time after, destroyed.
+# You should just watch.  Do not push any buttons, or you could trigger
+# spurious errors.  If no errors occur during the test, there will be no
+# windows left at the end.  Currently, windows are left open for 4 seconds.
+#
+# Limitations:
+#  - Modal dialogs are not tested so that the test can proceed automatically.
+#  - This is assumed to be run in $PTOLEMY/tycho/kernel_itk.
+#  - The tests are by no means complete.
+#
+# The modal dialogs are adequately tested by the demo script.
+
+namespace tycho
+import add tycho
+
+# FIXME: These should be auto-loaded.
+source Color.tcl
+source TopLevel.itcl
+source Dismiss.itcl
+source Font.itcl
+source Options.tcl
+source DialogWindow.itcl
+source Message.itcl
+source ErrorMessage.itcl
+source YesNoQuery.itcl
+source YesNoCancel.itcl
+source FileBrowser.itcl
+source File.itcl
+source EditText.itcl
+source Edit.itcl
+
+############################################################################
+#### removeobj
+# This procedure removes an object if it exists.
+proc removeobj {name} {
+    if {[info object $name] != ""} {
+	delete object $name
+    }
+}
+
+# How long windows are kept around, in milliseconds
+set duration 4000
+
+############################################################################
+# Test TopLevel
+set win [TopLevel [autoName .toplevel] -geometry 100x100+0+0]
+wm deiconify $win
+after $duration removeobj $win
+
+############################################################################
+# Test DialogWindow
+DialogWindow .dialog -text "I am a very senstitive widget"
+.dialog addButton pushme -text "Push Me" -command "puts ouch"
+.dialog default pushme
+.dialog centerOnScreen
+.dialog freezeWindowSize
+.dialog invoke pushme
+after $duration removeobj .dialog
+
+############################################################################
+# Test Message
+Message .msg1 -text \
+	"This is a plain message"
+.msg1 centerOnScreen
+after $duration removeobj .msg1
+update
+
+############################################################################
+# Test ErrorMessage
+ErrorMessage .msg2 -text \
+	"This is not really an error, but just a test of the messenger"
+after $duration removeobj .msg2
+update
+
+############################################################################
+# Test YesNoQuery
+after $duration .yesno invoke yes
+after [expr 2*$duration] .another invoke yes
+YesNoQuery .yesno \
+	-text "Either button should bring up another dialog" \
+	-yescommand "YesNoQuery .another -text {Another dialog}; \
+	         .another centerOnScreen" \
+	-nocommand "askuser {Are you sure not?}"
+.yesno centerOnScreen
+update
+
+############################################################################
+# Test YesNoCancel
+after $duration .yesnocancel invoke cancel
+YesNoCancel .yesnocancel \
+	-text "Yes, No, or Cancel" \
+	-yescommand "puts yes" \
+	-nocommand "puts no" \
+	-cancelcommand "puts cancel"
+.yesnocancel centerOnScreen
+update
+
+############################################################################
+# Test FileBrowser
+after $duration .file invoke cancel
+FileBrowser .file
+.file centerOnScreen
+update
+
+############################################################################
+# Test Dismiss
+set win [Dismiss [autoName .dismiss] -geometry +0+0]
+wm deiconify $win
+after $duration removeobj $win
+
+############################################################################
+# Test File
+set win [File [autoName .file] -geometry +0+0]
+wm deiconify $win
+after $duration removeobj $win
+
+############################################################################
+# Test Edit
+set win [Edit [autoName .file] -geometry +0+0]
+wm deiconify $win
+after $duration removeobj $win
+

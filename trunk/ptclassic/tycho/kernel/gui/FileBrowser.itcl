@@ -1,0 +1,451 @@
+# Definition of a file browser.
+# This is based on the version in pigi.
+#
+# Authors: Edward A. Lee, Wei-Jen Huang, Mario Jorge Silva
+#
+# Version: $Id$
+#
+# Copyright (c) 1990-%Q% The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+########################################################################
+#### expandPath
+# Procedure to expand a filename that might begin with
+# an environment variable.  For example, if the value of
+# of the environment variable PTOLEMY is /usr/tools/ptolemy, then
+# <pre>
+#       expandPath \$PTOLEMY/tmp
+# </pre>
+# returns /usr/tools/ptolemy/tmp.
+#
+proc tycho::expandPath { path } {
+    if {[string first \$ $path] == 0} {
+        global env
+        set slash [string first / $path]
+        set envvar [string range $path 1 [expr {$slash-1}]]
+        set envval $env($envvar)
+        return "$envval[string range $path $slash end]"
+    } else {
+        return $path
+    }
+}
+
+# COMPATIBILITY with pigi
+proc ptkExpandEnvVar { path } {tycho::expandPath $path}
+
+##########################################################################
+#### filename
+# Query the user for a filename and return it.  This procedure brings up
+# a file browser, and returns only when that file browser is dismissed.
+#
+proc tycho::filename {} {
+    return [DialogWindow::newModal FileBrower [autoName .file]]
+}
+
+#######################################################################
+# options
+#
+option add *FileBrowser.textBackground \
+	[ptkColor antiqueWhite white] startupFile
+
+##########################################################################
+#### FileBrowser
+# If the -command option is specified, then the value of the option is
+# taken as a command to execute when the user has selected a filename.
+# Before executing the command, the filename selected by the user (which
+# may represent a file that does not exist) is appended to the command
+# as an argument.
+#
+class tycho::FileBrowser {
+    inherit DialogWindow
+
+    # The command to execute on a file when one is identified
+    itk_option define -command command Command "DialogWindow::answer"
+
+    constructor {args} {}
+
+    # Open the file or directory specified in the entry box.
+    method ok {} {}
+
+    # Open the file or directory specified in the argument.
+    method open {name} {}
+
+    # Raise the window to the foreground.
+    method raise {} {}
+
+    # Copy filename from listbox to entry.
+    protected method selectFile {lb ypos} {}
+
+    # Fill the listbox with file and directory names.
+    protected method updateListbox {} {}
+
+    # Process a file or directory selection.
+    protected method checkFile {filename} {}
+
+    # Common variables store the name of the last file opened
+    # and the directory last visited.
+    protected common fileLastOpened
+    protected common CWD
+}
+
+######################################################################
+#
+body tycho::FileBrowser::constructor {args} {
+    
+    # The text to insert at the top of the file browser
+    configure -text "Select File:"
+    
+    # To make things more compact
+    component hull configure -borderwidth 0
+    
+    global env
+    
+    if {! [info exists fileLastOpened]} {
+	# First call to this routine.
+	# If the environment variable PTPWD exists, it gives the directory.
+	# Otherwise, we issue the Unix command pwd.
+	set fileLastOpened ""
+	if [info exists env(PTPWD)] {
+	    set CWD $env(PTPWD)
+	} {
+	    set CWD [pwd]
+	}
+    }
+
+    # Entry box for entering file names directly
+    itk_component add entry {
+	entry $itk_interior.childsite.entry -relief sunken -bd 3
+    } {
+	keep -background -cursor -foreground -font
+	rename -background -textbackground textBackground Background
+    }
+    pack $itk_component(entry) \
+	    -side top -fill x -padx 3m -pady 2m -anchor w 
+    
+    # frane for listbox for listing files and directories.
+    itk_component add listscroll {
+	frame $itk_interior.childsite.listscroll
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(listscroll) -side top \
+	    -expand yes -fill both -padx 10
+
+    # Current directory display.
+    itk_component add dir {
+	label $itk_interior.childsite.dir -text $CWD -width 35 -anchor e
+    } {
+	keep -background -cursor -foreground -font
+    }
+    pack $itk_component(dir) -side top -fill x
+    
+    # Listbox for files and directories.
+    global topLevelClass
+    itk_component add listbox {
+	listbox $itk_component(listscroll).listbox -relief sunken \
+		-yscroll "$itk_component(listscroll).scroll set" \
+		-setgrid 1 \
+		-selectmode single
+    } {
+	keep -background -cursor -foreground -font
+	rename -background -textbackground textBackground Background
+    }
+    pack $itk_component(listbox) -side left -expand yes -fill both
+    
+    updateListbox
+    
+    # In case updateListbox inserts into the entry; to avoid repetition
+    $itk_component(entry) delete 0 end
+    $itk_component(entry) insert 0 $fileLastOpened
+
+    # Scrollbar for files.
+    itk_component add scroll {
+	scrollbar $itk_component(listscroll).scroll \
+		-command "$itk_component(listscroll).listbox yview" \
+		-relief sunken
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(scroll) -side right -fill y
+
+    # Buttons.
+    addButton ok -text "OK <Ret>" -command "$this ok"
+    addButton cancel -text "Cancel <Esc>" -command "delete object $this"
+    default ok
+    
+    ###################################################################
+    # bindings
+    #
+    bind $itk_component(listbox) <Double-1> \
+	    "$this open \[selection get\]; break"
+    bind $itk_component(listbox) <1> \
+	    "$this selectFile %W %y"
+    bind $itk_component(hull) <Return> \
+	    "$this ok; break"
+    bind $itk_component(hull) <Escape> \
+	    "delete object $this"
+    
+    bind $itk_component(hull) <Any-Enter> "focus $itk_component(entry)"
+    
+    # Process any unevaluated arguments.
+    eval itk_initialize $args
+
+    # Grab the focus.
+    focus $itk_component(entry)
+}
+
+######################################################################
+#### ok
+# Open the file specified in the entry box.
+#
+body tycho::FileBrowser::ok {} {
+    open [$itk_component(entry) get]
+}
+
+######################################################################
+#### raise
+# Raise the window so it is visible.  This should be called if a
+# dialog box already exists, rather than creating a new one.
+#
+body tycho::FileBrowser::raise {} {
+    if {[winfo exists $prefix] && [winfo ismapped $prefix]} {
+	wm deiconify $prefix
+	raise $prefix
+    }
+}
+
+######################################################################
+#### open
+# Open a file or directory.
+#
+body tycho::FileBrowser::open {name} {
+    update idletasks
+    if [checkFile $name] {
+	delete object $this
+    }
+}
+
+######################################################################
+#### selectFile
+# Determine the file name in the listbox lb that is closest to the
+# mouse position ypos and insert its name in the entry box.
+#
+body tycho::FileBrowser::selectFile {lb ypos} {
+    $lb selection clear @0,0 end
+    $lb selection set [$lb nearest $ypos]
+    $itk_component(entry) delete 0 end
+    $itk_component(entry) insert 0 [selection get]
+}
+
+######################################################################
+#### updateListbox
+# This procedure fills the listbox with filenames. It classifies on
+# basis of directories and files. Directories are inserted at the top
+# and are arranged alphabetically.
+#
+body tycho::FileBrowser::updateListbox {} {
+    
+    # clear the list box
+    $itk_component(listbox) delete 0 end
+    
+    # Get a list of filenames in the current working directory
+    set files [glob -nocomplain $CWD/*]
+    
+    # Split the filename list into directories and plain files
+    set dirList ""
+    set fileList ""
+    foreach file $files {
+	set tail [file tail $file]
+	if [file isdirectory $file] {
+	    lappend dirList $tail
+	} {
+	    lappend fileList $tail
+	}
+    }
+    
+    set dirList [lsort $dirList]
+    set fileList [lsort $fileList]
+    
+    # Insert directories, then files into the listbox
+    foreach dir $dirList {
+	$itk_component(listbox) insert end "$dir/"
+    }
+    foreach fname $fileList {
+	$itk_component(listbox) insert end "$fname"
+    }
+    
+    $itk_component(entry) delete 0 end
+    
+    set dirLength [llength $dirList]
+    set fileLength [llength $fileList]
+    
+    if {$CWD != "/"} {
+	$itk_component(listbox) insert 0 "../"
+    }
+    
+    # Choose intelligently which default file or directory
+    # to put in the entry box.
+    if {($dirLength == 1) && ($fileLength == 0)} {
+	$itk_component(entry) insert 0 [lindex $dirList 0]
+    } elseif {($dirLength == 0) && ($fileLength == 1)} {
+	$itk_component(entry) insert 0 [lindex $fileList 0]
+    } elseif {($dirLength == 0) && ($fileLength == 0)} {
+	if {$CWD != "/"} {
+	    $itk_component(entry) insert 0 "../"
+	}
+    }
+}
+
+
+######################################################################
+#### checkFile
+# This procedure checks and processes the user selection. If the user
+# has selected a file, then the specified command is invoked with that
+# filename as an argument, and a 1 is returned. If the user specified a
+# directory, then the listbox is updated with the contents of the
+# directory and a 0 is returned. If the specified filename is an empty
+# string, then nothing is done and a zero is returned. If the specified
+# filename exists but is not readable, an error is triggered.
+#
+body tycho::FileBrowser::checkFile {filename} {
+
+    # In case the filename starts with an environment variable, expand
+    set file [expandPath $filename]
+    
+    set file [string trim $file]
+    if {$file == ""} {return 0}
+    
+    # For use later _if_ necessary
+    set relPath $file
+    
+    # Check for non-relative pathnames
+    set char [string index $file 0]
+    if {$char == "/" || $char == "~"} {
+	set relative 0
+    } else { set relative 1 }
+    
+    # Flag to indicate whether a new file was created
+    set newFile 0
+    
+    # If the file does not exist, execute command
+    if $relative {
+	if {! [file exist $CWD/$file]} {
+	    execCommand -command $CWD/$file
+	    set newFile 1
+	} else {
+	    set file $CWD/$file
+	}
+    } else {
+	if {! [file exist $file]} {
+	    execCommand -command $file
+	    set newFile 1
+	}
+    }
+    if $newFile {
+	set fileLastOpened $relPath
+	return 1
+    } 
+    
+    # If the file does exist, and is a directory
+    if {[file isdir $file]} {
+	if {[file readable $file] && [file executable $file]} {
+	    
+	    # Non-relative path
+	    if {$char == "~"} {
+		set dir [glob -nocomplain $relPath]
+		if {! [file exist $dir]} {
+		    error "\"$dir\" does not exist!"
+		} else {
+		    set CWD $dir
+		    $itk_component(dir) config -text $CWD
+		    set fileLastOpened ""
+		    updateListbox
+		    return 0
+		}
+	    } elseif {$char == "/"} {
+		set CWD $relPath
+		$itk_component(dir) config -text $CWD
+		set fileLastOpened ""
+		updateListbox
+		return 0
+	    }
+	    # Else relative path
+	    set newPath $CWD
+	    while {[regsub {^([^/]+)(/.*$|$)} $relPath {\1 \2} temp]} {
+		set partOfPath [lindex $temp 0]
+		set relPath [string trimleft [lindex $temp 1] "/"]
+		if {$partOfPath == "."} {
+		    continue
+		} elseif {$partOfPath == ".."} {
+		    if [regsub {(.*)/[^/]+$} $newPath {\1} temp] {
+			set newPath $temp
+		    } else {
+			error "Invalid component: \"$partOfPath\""
+		    }
+		} else {
+		    if {$newPath == "/"} {
+			if [file exists /$partOfPath] {
+			    set newPath /$partOfPath
+			} else {
+			    error "Invalid component: \"$partOfPath\""
+			}
+		    } else {
+			if [file exists $newPath/$partOfPath] {
+			    set newPath $newPath/$partOfPath
+			} else {
+			    error "Invalid component: \"$partOfPath\""
+			}
+		    }
+		}
+	    }
+	    if {$newPath == ""} {
+		set CWD "/"
+	    } else {
+		set CWD $newPath
+	    }
+	    $itk_component(dir) config -text $CWD
+	    set fileLastOpened ""
+	    updateListbox
+	    return 0
+	} else {
+	    error "Directory \"[string trimright $file /]\" is unreadable"
+	}
+    } else {
+	# It's a plain file
+	if {[file readable $file]} {
+	    execCommand -command $file
+	    # Store last facet opened
+	    if $relative {
+		set fileLastOpened $relPath
+	    } else {
+		set fileLastOpened $file
+	    }
+	    return 1
+	} {
+	    error "\"$file\" is unreadable"
+	}
+    }
+}
