@@ -81,7 +81,7 @@ It is often desirable to expand the filter into a parallel or cascade form.
 	type {floatarray}
 	default { "0" }
 	desc {State.}
-	attributes { A_NONCONSTANT|A_SETTABLE }
+	attributes { A_NONCONSTANT|A_NONSETTABLE }
     }
     protected {
 	int numState;
