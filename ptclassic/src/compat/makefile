@@ -34,7 +34,8 @@
 
 
 DIRS = X11R4 X11R5 cfront ptolemy nt.vc
-DEEPDIRS = matlab/extern/include mathematica/Source/Includes
+DEEPDIRS = matlab/extern/include mathematica/Source/Includes \
+	nt.vc/sys
 
 # Need to have $PTOLEMY as an absolute pathname for wish
 #PTOLEMY = ../..
