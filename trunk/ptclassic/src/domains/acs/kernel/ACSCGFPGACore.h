@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: @(#)ACSCGFPGACore.h	1.4 10/30/99
+ Version: @(#)ACSCGFPGACore.h	1.2 09/08/99
 ***********************************************************************/
 #ifndef _ACSCGFPGACore_h
 #define _ACSCGFPGACore_h
@@ -35,21 +35,22 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 // JMS
-#include "HWSchedule.h"
+#include <sys/types.h>
+#include <unistd.h>
 #include "StringArray.h"
 #include "Pipealign.h"
-#include "acs_starconsts.h"
+#include "ACSIntArray.h"
+#include "Pin.h"
+#include "Capability.h"
+#include "Constants.h"
+#include "Resource.h"
 #include "acs_vhdl_lang.h"
+#include "acs_starconsts.h"
+
+class VHDL_LANG;
 
 #include "ACSCGCore.h"
 #include "ACSWormhole.h"
-class Pin;
-class Capability;
-class Constants;
-class Connectivity;
-class Resource;
-class Pipealign;
-class VHDL_LANG;
 
 
 // Global category string
@@ -57,35 +58,41 @@ extern const char ACSCGFPGACategory[];
 
 class ACSCGFPGACore : public ACSCGCore {
 public:
+  // Debug switches
+  static const int DEBUG_STARIO=0;
 
-  
-  // JMS
   /*virtual*/ int isA(const char*) const;
   
   // This is the default constructor for the FPGA core category.
-  ACSCGFPGACore(void);
-  ACSCGFPGACore(const char* category);
+  ACSCGFPGACore::ACSCGFPGACore(void);
+  ACSCGFPGACore::ACSCGFPGACore(const char* category);
 
   // This is the flavor of constructor used by ACSCore* makeNew( ACSCorona & ).
-  ACSCGFPGACore(ACSCorona& corona_);
+  ACSCGFPGACore::ACSCGFPGACore(ACSCorona& corona_);
 
-  ~ACSCGFPGACore();
+  ACSCGFPGACore::~ACSCGFPGACore();
 
-  // JMS
   // A unique identifier to this core smart generator
   int acs_id;
-  char* comment;
+  int comment_flag;
+  ostrstream comment;
+  int acs_origin;
+
+
+  // Determines if the component definition should be unique
+  int unique_component;
+  int declaration_flag;
+  ostrstream unique_name;
 
   // Most of these attributes are intermediary between the Ptolemy
   // IO windows and the smart generators.  Refer to the Pins.
   int acs_type;     // SOURCE/SINK/BOTH, BOTHs are used for algorithms!!
   int acs_domain;
-  int acs_fpga;     // A numeric identifier specifying where the sg will reside
+  int acs_device;   // A numeric identifier specifying where the sg will reside
+  int acs_outdevice; // If a IOPORT, then store the driving device number here
   int acs_existence;
   int acs_speed;
   int sg_language;
-  int acs_hwport;   // Indicates which I/O port this star is associated
-		    // Only valid for SOURCE/SINK stars
 
   // Hierarchy related
   SequentialList* child_sgs;					      
@@ -98,11 +105,13 @@ public:
 
   // JMS
   // Scheduler-related
-  int acs_addract;  // Address activation time as dictated by the scheduler
-  int acs_dataact;  // Data activation time as dicated by the scheduler
+  int act_input;    // Input activation time as dictated by the scheduler
+  int act_output;   // Output activation time as dicated by the scheduler
   int acs_delay;    // Delay amount as determined by the smart generator
   int alg_delay;    // Delay amount that is dictated by the algorithm
   int pipe_delay;   // Delay amount that is dictated by the scheduler
+  int phase_dependent; // Determines which phase in a given sequence it should activate
+  int delay_offset; // If phase dependent, the output may be produced at input time
   Pipealign* pipe_alignment;
 
   // JMS
@@ -117,9 +126,8 @@ public:
  
   // JMS
   // Data class - handles I/O information concerning values
-  int acsdata_address;
-  int acsdata_rsize;
-  int acsdata_csize;
+  int address_start;
+  int address_step;
  
   // JMS
   // Setup related
@@ -160,53 +168,63 @@ public:
   char* numsim_filename;
   char* rangecalc_filename;
   char* natcon_filename;
+  char* schedule_filename;
 
   // Core-based methods
-  char* comment_name(void);
-  char* name(void);
-  char* lc_name(void);
-  int vector_length(double);
-  int intparam_query(const char*);
-  void intparam_set(const char*,int);
+  char* ACSCGFPGACore::comment_name(void);
+  char* ACSCGFPGACore::name(void);
+  char* ACSCGFPGACore::lc_name(void);
+  int ACSCGFPGACore::vector_length(double);
+  int ACSCGFPGACore::intparam_query(const char*);
+  void ACSCGFPGACore::intparam_set(const char*,int);
 
   // Smart generator-based methods:
-  int sg_initialize(void);
-  int sg_initialize(char*,
+  int ACSCGFPGACore::sg_param_query(void);
+  int ACSCGFPGACore::add_comment(const char*);
+  int ACSCGFPGACore::add_comment(const char*,const int);
+  int ACSCGFPGACore::add_comment(const char*,const char*,const int);
+  int ACSCGFPGACore::sg_delay_query(void);
+  int ACSCGFPGACore::sg_io_query(void);
+  int ACSCGFPGACore::sg_initialize(void);
+  int ACSCGFPGACore::sg_initialize(char*,
 		    int,
 		    int*);
-  int sg_costfunc(int);
-  int bits_overlap(const int, const int,
+  int ACSCGFPGACore::sg_costfunc(int);
+  int ACSCGFPGACore::bits_overlap(const int, const int,
 		   const int, const int);
-  char* tolowercase(char*);
+  char* ACSCGFPGACore::tolowercase(char*);
+  Pin* ACSCGFPGACore::dup_pins(void);
+  void ACSCGFPGACore::update_resources(int);
 
-  virtual int sg_cost(ofstream&,
-		      ofstream&,
-		      ofstream&,
-		      ofstream&) { 
+  virtual int ACSCGFPGACore::sg_cost(ofstream&,
+				     ofstream&,
+				     ofstream&,
+				     ofstream&,
+				     ofstream&) { 
     printf("WARNING:sg_cost not implemented for star %s\n",name());
     return(0);
   };
-  virtual int sg_resources(int) { 
+  virtual int ACSCGFPGACore::sg_resources(int) { 
     printf("WARNING:sg_resources not implemented for star %s\n",name());
     return(0);
   };
-  virtual int sg_setup(void) {
+  virtual int ACSCGFPGACore::sg_setup(void) {
     printf("WARNING:sg_setup not implemented for star %s\n",name());
     return(0);
   };
-  virtual int sg_param_query(SequentialList*,SequentialList*) {
+  virtual int ACSCGFPGACore::sg_param_query(SequentialList*,SequentialList*) {
     printf("WARNING:sg_param_query not implemented for star %s\n",name());
     return(0);
   };
-  virtual int macro_query(void) {
+  virtual int ACSCGFPGACore::macro_query(void) {
     printf("WARNING:macro_query not implemented for this star %s\n",name());
     return(0);
   };
-  virtual int macro_build(int*) {
+  virtual int ACSCGFPGACore::macro_build(int*) {
     printf("WARNING:macro_build not implemented for this star %s\n",name());
     return(0);
   };
-  virtual int acs_build(void) {
+  virtual int ACSCGFPGACore::acs_build(void) {
     printf("WARNING:acs_build not implemented for this star %s\n",name());
     return(0);
   };
