@@ -54,6 +54,10 @@ protected:
 	// delete all the "children" (for when they are created dynamically)
 	void deleteChildren();
 
+	// auxililary star class: permits a second type of star in addition
+	// to supportedStarClass.
+	virtual const char* auxStarClass() const;
+
 	// Method returns a directory name for writing.
 	// If the directory does not exist, it attempts create it.
 	// Always returns a pointer to a string in new memory, or 0

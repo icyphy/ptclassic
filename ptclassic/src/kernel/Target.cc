@@ -51,6 +51,9 @@ StringList Target::displaySchedule() {
 	return "no scheduler member, so no schedule\n";
 }
 
+// default auxiliary star class: none.
+const char* Target::auxStarClass() const { return "";}
+
 // default setup: set all stars to have me as their Target, then
 // do Scheduler::setup.
 
@@ -59,10 +62,10 @@ int Target::setup(Galaxy& g) {
 	GalStarIter next(g);
 	Star* s;
 	while ((s = next++) != 0) {
-		if (!s->isA(supportedStarClass)) {
+		if (!s->isA(supportedStarClass) && !s->isA(auxStarClass())) {
 			Error::abortRun (*s,
-					 "wrong star type for target, not a ",
-					 supportedStarClass);
+					 "wrong star type for target ",
+					 readName());
 			return FALSE;
 		}
 		s->setTarget(this);
