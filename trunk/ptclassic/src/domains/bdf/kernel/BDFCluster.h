@@ -286,6 +286,9 @@ public:
 	// the number of times indicated by loop().
 	void runInner();
 
+	// wrapup: only used for dynamic execution
+	void wrapup();
+
 	// time reqd
 	int myExecTime();
 
@@ -372,6 +375,9 @@ public:
 	// execute the cluster's "inside" (called by BDFCluster::go)
 	// the number of times indicated by loop().
 	void runInner();
+
+	// wrapup: only used for dynamic execution
+	void wrapup();
 
 	// do additional clustering on internal cluster (merge parallel
 	// loops, for example)

@@ -1362,6 +1362,13 @@ void BDFClusterBag::runInner() {
 	exCount += loop();
 }
 
+// invoke wrapup functions: used only in dynamic execution
+void BDFClusterBag::wrapup() {
+	BDFClusterBagIter nextClust(*this);
+	BDFCluster* c;
+	while ((c = nextClust++) != 0) c->wrapup();
+}
+
 // destroy the bag.
 BDFClusterBag::~BDFClusterBag() {
 	if (!owner) {
@@ -1643,6 +1650,11 @@ void BDFAtomCluster::runInner() {
 	}
 }
 
+// wrapup: pass through to inner star
+void BDFAtomCluster::wrapup() {
+	pStar.wrapup();
+}
+
 // set the buffer sizes of the actual buffers -- we can pass down all
 // but the self-loops.
 // A self-loop buffer size is just numInitDelays * numXfer.
@@ -1689,26 +1701,20 @@ BDFClustSched::BDFClustSched(const char* log , int canDoDyn)
 
 BDFClustSched::~BDFClustSched() {
 	LOG_DEL; delete cgal;
-#if 0
 	LOG_DEL; delete dynSched;
-#endif
 }
 
 // timing control
 void BDFClustSched::setStopTime (double limit) {
 	BDFScheduler::setStopTime(limit);
-#if 0
 	if (dynSched)
 		dynSched->setStopTime(limit);
-#endif
 }
 
 void BDFClustSched::resetStopTime (double limit) {
 	BDFScheduler::resetStopTime(limit);
-#if 0
 	if (dynSched)
 		dynSched->resetStopTime(limit);
-#endif
 }
 
 // for now, we assume we are SDF at top level.
@@ -1797,16 +1803,23 @@ StringList BDFClustSched::displaySchedule() {
 int BDFClustSched::handleDynamic(Galaxy& gal) {
 	if (!dynamicAllowed) {
 		Error::abortRun(gal, "Top level of clustering is not SDF",
-				"\nDynamic execution would b");
+				"\nDynamic execution required");
 		return FALSE;
 	}
+	// create dynamic scheduler
 	LOG_DEL; delete dynSched;
 	LOG_NEW; dynSched = new DynDFScheduler;
 	dynSched->setGalaxy(*cgal);
+
+	// set stop time for dynamic scheduler (copy my own)
+	dynSched->setStopTime(getStopTime());
+
 	// create schedules for each cluster
 	BDFClusterGalIter nextClust(*cgal);
 	BDFCluster* c;
 	while ((c = nextClust++) != 0) c->genSched();
+
+	// finish the setup.
 	dynSched->setup();
 	return !haltRequested();
 }
