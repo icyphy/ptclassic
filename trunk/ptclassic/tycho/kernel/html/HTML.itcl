@@ -554,12 +554,7 @@ body ::tycho::HTML::altFile {} {
 # Start up appletviewer on the current file
 #
 body ::tycho::HTML::appletViewer {} {
-     set w [::tycho::autoName .appletViewer]
-     ::tycho::Exec $w \
-	     -command "appletviewer $file" \
-	     -dir [file dirname $file] \
-	     -entrywidth 80
-     $w centerOnScreen
+     ::tycho::execModal "appletviewer $file" [file dirname $file]
 }
 
 #####################################################################
