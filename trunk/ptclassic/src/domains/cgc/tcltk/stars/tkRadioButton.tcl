@@ -1,5 +1,5 @@
-# Tcl/Tk source for a telephone keypad, to be used with the TkSource star
-# For use with a two-output, zero-input TclScript star.
+# Tcl/Tk source for a radio button widget.
+# For use with the CGCTkRadioButton Star.
 #
 # Authors: Jose Luis Pino
 # Version: $Id$
