@@ -512,8 +512,10 @@ extern int gethostname( char * name, int namelen);
 /*extern char * memset ARGS(( char *, char *, int));*/
 #include <memory.h>
 
-extern void qsort
-	ARGS((void *, size_t, size_t, int (*)(const void *, const void *)));
+/* Don't include a declaration for qsort, include stdlib.h instead */
+#include <stdlib.h>
+/*extern void qsort
+	ARGS((void *, size_t, size_t, int (*)(const void *, const void *)));*/
 #endif
 
 #endif /* PORT_H */
