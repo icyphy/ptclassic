@@ -16,7 +16,6 @@ $Id$
 #include "Particle.h"
 #include "Output.h"
 #include <builtin.h>		// for gnu form(...) function
-extern Error errorHandler;
 
 // Here are the plasmas!
 // Create instances of each particle and plasma
@@ -40,7 +39,7 @@ void Particle :: badCopy (const Particle& src) const {
 	msg += " Particle to ";
 	msg += readType();
 	msg += " Particle";
-	errorHandler.error (msg);
+	Error::abortRun (msg);
 }
 
 extern const dataType ANYTYPE = "ANYTYPE";
@@ -177,9 +176,12 @@ Plasma* Plasma :: getPlasma(dataType t)
 		p = p->nextPlasma;
 	}
 	if(t == ANYTYPE)
-		errorHandler.error("can't create Plasma with type ANYTYPE");
-	else
-		errorHandler.error("unknown Particle type ", t);
+		Error::abortRun("can't create Plasma with type ANYTYPE");
+	else {
+		StringList msg = "unknown Particle type: ";
+		msg += t;
+		Error::abortRun(msg);
+	}
 	return 0;
 }
 

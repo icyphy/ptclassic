@@ -19,8 +19,6 @@ Code for functions declared in Connect.h
 
 **************************************************************************/
 
-extern Error errorHandler;
-
 // Methods for CircularBuffer
 
 CircularBuffer :: CircularBuffer(int i)
@@ -61,11 +59,11 @@ Pointer* CircularBuffer :: last()
 Pointer* CircularBuffer :: previous(int i)
 {
         if(i > dimen-1)
-		errorHandler.error(
+		Error::abortRun(
                 "CircularBuffer: Access with too large a delay\n"
 		);
 	else if(i < 0)
-		 errorHandler.error(
+		Error::abortRun(
                 "CircularBuffer: Access with negative delay\n"
                 );
 	else if(i > current)
@@ -274,8 +272,9 @@ PortHole :: setPlasma () {
 		}
 	}
 	if (myPlasma) return myPlasma;
-
-	errorHandler.error ("Can't determine type of ",readFullName());
+	StringList msg = "Can't determine dataType of ";
+	msg += readFullName();
+	Error::abortRun (msg);
 	return 0;
 }
 
@@ -324,10 +323,13 @@ void PortHole :: setMaxDelay(int delay)
 Particle& PortHole ::  operator % (int delay)
 {
 	Pointer* p = myBuffer->previous(delay);
-        if(*p == NULL)
-		 errorHandler.error(
-                "Attempt to access nonexistent input Particle"
-			);
+        if(*p == NULL) {
+		StringList msg = readFullName();
+		msg += "Attempt to access nonexistent input Particle";
+		Error::abortRun(msg);
+// kludge -- gotta get a particle somehow
+		return *myPlasma->get();
+	}
         return *(Particle*)*p;
 }
 
@@ -386,9 +388,10 @@ PortHole& MultiPortHole :: newConnection() {
 
 Particle* Geodesic::get()
 {
-	if(size() == 0) errorHandler.error(
-		"Geodesic: Attempt to access empty Geodesic"
-		);
+	if(size() == 0) {
+		Error::abortRun("Geodesic: Attempt to access empty Geodesic");
+		return 0;
+	}
 	return (Particle*)popTop();
 }
 
