@@ -3,17 +3,9 @@ defstar {
 	domain { C50 }
 
 // 	derivedFrom { FIR }
-// this star is derived from FIR in the cg56 domain but in the 50
-// domain the coefficients for FIR are stored in program memory.
-// the dsk assembler does not accept an statement like
-// lmmr bmar,#<label pointing to 1st tap> so the only other way 
-// to modify the second tap is to do
-// rptb <label pointing to 1st tap> which loads the address of
-// first tap into paer reg. and then do lmmr bmar,#paer to 
-// get bmar to point to second tap.  One could then use bldp/blpd
-// instructions to modify the second tap.  Because of all these
-// instructions are expensive it's not convenient to derive this
-// star from FIR.
+// since 2 of the 3 taps of the filter are 1/2 it's much more convenient
+// not to derive this star from C50FIR and use the lacc *,15 instruction
+// to implement the multiplication by 1/2
 
 	desc {
 This filter tries to lock onto the strongest sinusoidal component in
