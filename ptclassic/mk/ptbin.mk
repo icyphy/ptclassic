@@ -188,6 +188,11 @@ $(PIGI).debug.quantify: $(PT_DEPEND) $(ADD_SRCS)
 $(PIGI).debug.purecov: $(PT_DEPEND) $(ADD_SRCS)
 	$(PURECOV) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
 
+version.$(PIGI).c: $(PT_DEPEND)
+	echo char '*gVersion = "Version:' $(VERSION) \
+		'%created' `date` '";' | sed 's/%/\\n/g' > version.$(PIGI).c
+	$(CC) -c version.$(PIGI).c
+
 $(BINDIR)/$(PIGI): $(PIGI)
 		@echo Installing $<
 		rm -f $(BINDIR)/$(PIGI)
