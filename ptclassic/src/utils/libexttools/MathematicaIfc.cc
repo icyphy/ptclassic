@@ -36,9 +36,6 @@ not know what tools it will interface with.
 #endif
 
 #include "MathematicaIfc.h"
-#include "StringList.h"
-#include "InfString.h"
-#include "mathlink.h"
 
 // count how many instances of this class have been created
 static int mathematicaStarsCount = 0;
