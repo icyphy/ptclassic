@@ -25,6 +25,7 @@ $Id$
 #include "FloatState.h"
 #include "GalIter.h"
 #include "Target.h"
+#include "Geodesic.h"
 #include <std.h>
 
 extern const char SDFdomainName[];
@@ -114,8 +115,8 @@ int SDFScheduler :: setup (Galaxy& galaxy) {
 
         checkConnectivity(galaxy);
         if (invalid) return FALSE;
-       
-        prepareGalaxy(galaxy); 
+
+        prepareGalaxy(galaxy);
 
 	// set schedulePeriod if user gives it.
 	FloatState* st = (FloatState*) galaxy.stateWithName("schedulePeriod");
@@ -130,13 +131,13 @@ int SDFScheduler :: setup (Galaxy& galaxy) {
 
 	// force recomputation of repetitions and noTimes.  Also make
 	// sure all stars are SDF.
-        
-        checkStars(galaxy);	
+
+        checkStars(galaxy);
 	if (invalid) return FALSE;
-  
+
         prepareStars(galaxy);
 	if (invalid) return FALSE;
-       
+
 	repetitions(galaxy);
 	if (invalid) return FALSE;
 
@@ -161,7 +162,7 @@ int SDFScheduler::checkConnectivity(Galaxy& galaxy)
                 invalid = TRUE;
                 return FALSE;
 	}
-	return TRUE; 
+	return TRUE;
 }
 
 // Check that all stars in "galaxy" are SDF stars or are derived from SDF.
@@ -185,11 +186,16 @@ int SDFScheduler::prepareStars(Galaxy& galaxy)
 {
 	GalStarIter nextStar(galaxy);
 	Star* s;
-	while ((s = nextStar++) != 0) 
+	while ((s = nextStar++) != 0)
 		s->prepareForScheduling();
 	return TRUE;
 }
 
+inline int wormEdge(PortHole& p) {
+	PortHole* f = p.far();
+	if (!f) return TRUE;
+	else return (p.isItInput() == f->isItInput());
+}
 
 int SDFScheduler::computeSchedule(Galaxy& galaxy)
 {
@@ -242,6 +248,21 @@ int SDFScheduler::computeSchedule(Galaxy& galaxy)
 	// END OF MAIN LOOP
 
 	if (passValue == 1) reportDeadlock(nextStar);
+
+	// debug: make sure all geos are the right size.
+	nextStar.reset();
+	while ((s = nextStar++) != 0) {
+		BlockPortIter nextPort(*s);
+		PortHole* p;
+		while ((p = nextPort++) != 0) {
+			if (p->isItInput() || wormEdge(*p)) continue;
+			Geodesic* g = p->myGeodesic;
+			if (g->size() != g->numInit()) {
+				Error::abortRun(*p,"geodesic error!");
+				invalid = TRUE;
+			}
+		}
+	}
 	return !invalid;
 }
 
@@ -251,13 +272,13 @@ void SDFScheduler::reportDeadlock (GalStarIter& next) {
 	SDFStar *s;
         if (Error::canMark()) {
                 while ((s = (SDFStar*)next++) != 0)
-                        if (notRunnable(*s) == 1) Error::mark(*s);
+                        if (s->notRunnable() == 1) Error::mark(*s);
                 Error::abortRun ("DEADLOCK: the indicated stars cannot be run");
         }
         else {
 		Error::abortRun ("DEADLOCK: the following stars cannot be run");
 		while ((s = (SDFStar*)next++) != 0)
-			if (notRunnable(*s) == 1)
+			if (s->notRunnable() == 1)
 				Error::message(*s, "is deadlocked");
 	}
         invalid = TRUE;
@@ -340,11 +361,6 @@ int SDFScheduler :: repetitions (Galaxy& galaxy) {
 	return TRUE;
 }
 
-int wormEdge(PortHole& p) {
-	PortHole* f = p.far();
-	if (!f) return TRUE;
-	else return (p.isItInput() == f->isItInput());
-}
 
 	////////////////////////////
 	// reptConnectedSubgraph
@@ -400,7 +416,7 @@ int SDFScheduler :: reptArc (PortHole& nearPort, PortHole& farPort){
 
 	// Simplify the fraction
 	farStarShouldBe.simplify();
-	
+
 	if (farStarRepetitions == Fraction(0)) {
 		// farStarRepetitions has not been set, so set it
 		farStarRepetitions = farStarShouldBe;
@@ -436,164 +452,17 @@ int SDFScheduler :: reptArc (PortHole& nearPort, PortHole& farPort){
 	// simRunStar
 	////////////////////////////
 
-int SDFScheduler :: simRunStar (SDFStar& atom,
-				int deferFiring,
-				int updateOutputs){
+int SDFScheduler :: simRunStar (SDFStar& atom, int deferFiring) {
+	int status = atom.simRunStar(deferFiring);
+	if (status == 3 && !deferredStar) {
+		// if no star has been deferred yet, defer this one.
+		// if there already is a deferred star, this star effectively
+		// is deferred until a future pass.  This is harmless.
 
-	int test = notRunnable(atom);
-	if(test) return test;	// return if the star cannot be run
-
-	// If we get to this point without returning, then the star can be run.
-
-	int i;
-	SDFPortHole* port;
-
-	// An important optimization for code generation:
-	// Postpone any execution of a star feeding data to another
-	// star that is runnable.  Also postpone if each output port
-	// has enough data on it to satisfy destination stars.
-	// This is optional because it slows down the scheduling.
-
-	if(deferFiring && deferIfWeCan(atom))
-		return 1;
-
-	// Iterate over the ports again to adjust
-	// the number of tokens on each arc.
-	// Note that this should work equally well if there are no inputs.
-
-	SDFStarPortIter nextp(atom);
-	for(i = atom.numberPorts(); i>0; i--) {
-
-		// Look at the next port in the list
-		port = nextp++;
-
-		// On the wormhole boundary, skip.
-		if (wormEdge(*port)) continue;
-
-		if( port->isItInput() )
-			// OK to update size for input PortHole
-			port->decCount(port->numberTokens);
-
-		else if (updateOutputs)
-			// OK to update size for output PortHole
-			port->incCount(port->numberTokens);
+		deferredStar = &atom;
+		status = 1;
 	}
-
-	// Increment noTimes
-	atom.noTimes += 1;
-
-	// Indicate that the block was successfully run
-	return 0;
-}
-
-void SDFScheduler :: defer (SDFStar* b) {
-	// if no star has been deferred yet, defer this one.
-	// if there already is a deferred star, this star effectively
-	// is deferred until a future pass.  This is harmless.
-
-	if(!deferredStar)
-		deferredStar = b;
-}
-
-	///////////////////////////
-	// deferIfWeCan
-	///////////////////////////
-
-// return TRUE if we defer atom, FALSE if we don't.
-// Postpone any execution of a star feeding data to another
-// star that is runnable.  Also postpone if each output port
-// has enough data on it to satisfy destination stars.
-
-int SDFScheduler :: deferIfWeCan (SDFStar& atom) {
-
-	int i;
-	SDFPortHole* port;
-	SDFStarPortIter nextp(atom);
-	// Check to see whether any destination blocks are runnable
-	for(i = atom.numberPorts(); i>0; i--) {
-		// Look at the next port in the list
-		port = nextp++;
-		// cannot be deferred if on the boundary of wormhole.
-		if (wormEdge(*port)) return FALSE;
-
-		SDFStar& dest = (SDFStar&) port->far()->parent()->asStar();
-
-		// If not an output, or destination is not
-		// runnable, skip to the next porthole
-
-		if(!port->isItOutput() || notRunnable(dest) != 0)
-			continue;
-		
-		// It is runnable, but can be postponed.
-		defer((SDFStar*)port->parent());
-
-		// Give up on this star -- it has been deferred
-		return TRUE;
-	}
-
-	// Alternatively, the block might be deferred if its output
-	// ports all have enough data to satisfy destination
-	// stars, even if the destination stars are not runnable.
-
-	// We must detect the case that there are no output ports
-	int outputPorts = FALSE;
-	nextp.reset();	// restart iterator
-	for(i = atom.numberPorts(); i>0; i--) {
-
-		// Look at the farSidePort of the next port in the list
-		port = nextp++;
-		// Skip if it is not output or not connected
-		if (!port->isItOutput() || port->far() == NULL)
-			continue;
-		
-		port = (SDFPortHole*)(port->far());
-
-
-		// The farside port is an input.  Check Particle supply
-		// if not enough, atom cannot be deferred.
-		if(port->numTokens() < port->numberTokens)
-			return FALSE;
-			
-		// Since the farside port is an input, the nearside is
-		// an output
-		outputPorts = TRUE;
-	}
-
-	// If we get here, all destinations have enough data,
-	// and the block can be deferred, assuming there are output ports.
-	if(outputPorts) defer(&atom);
-	return outputPorts;
-}
-
-	////////////////////////////
-	// notRunnable
-	////////////////////////////
-
-// Return 0 if the star is can be run now,
-// 1 if it can't be run now, but should be runnable later (it has not
-// reached its designated number of iterations), and 2 if it
-// has been run as often as it needs to be.
-// It is assumed that the denominator of the
-// repetitions member is unity (as it should be).
-
-int SDFScheduler :: notRunnable (SDFStar& atom) {
-
-	SDFStarPortIter nextp(atom);
-	SDFPortHole *p;
-	// Check to see whether the requisite repetitions have been met.
-	if (atom.repetitions.numerator <= atom.noTimes)
-		return 2;
-
-	// Step through all the input ports, checking to see whether
-	// there is enough data on the inputs
-	while ((p = nextp++) != 0) {
-		// worm edges always have enough data
-		if (wormEdge(*p)) continue;
-		if (p->isItInput() && p->numTokens() < p->numberTokens)
-			// not enough data
-			return 1;
-	}
-	return 0;
+	return status;
 }
 
 const char* SDFScheduler::domain() const { return SDFdomainName;}

@@ -173,43 +173,18 @@ private:
 	*******************************************************/
 
 	// Check to see whether or not an atomic block (star or
-	// wormhole) can be scheduled by checking the numInitialParticles
-	// member of the input geodesics and comparing it to the
-	// numberTokens member of the input PortHoles.  If the
-	// block can be scheduled, then the numInitialParticles member of
-	// the inputs is updated by subtracting the numberTokens.
-	// Note that by the time the scheduler finishes,
-	// numInitialParticles will have been restored to its initial value.
-	// If the updateOutputs flag is TRUE (the default), then
-	// the numInitialParticles member of the output geodesics
-	// is also updated.
-	// (For parallel schedules, this update will be deferred).
+	// wormhole) can be scheduled.
+
 	// Returns 0 if the star is run, 1 if not, but it has not
 	// been run the number of times given by repetitions, and 2 if
 	// it has been run the number of times given by repetitions.
 
 	int simRunStar(SDFStar& atom,
-		       int deferFiring = FALSE,
-		       int updateOutputs = TRUE);
-
+		       int deferFiring = FALSE);
 
 	// The next function runs simRunStar and adds the star to
 	// the schedule if appropriate
 	int addIfWeCan(SDFStar& atom, int deferFiring = FALSE);
-
-	// The next function contains the code for deferred firing
-	int deferIfWeCan(SDFStar& atom);
-
-	// Put a block on the deferred list.
-	void defer(SDFStar* b);
-
-	// Determine whether a star can be run (checking the
-	// number of tokens in the portholes
-	// and the noTimes member of the block).
-	// Returns 0 if the star is runnable, 1 if not, but has not
-	// been run the number of times given by repetitions, and 2 if
-	// it has been run the number of times given by repetitions.
-	int notRunnable(SDFStar& atom);
 
 	// If deferredFiring is TRUE, then we will need a list to store
 	// pointers to blocks whose firing is deferred until the end of
