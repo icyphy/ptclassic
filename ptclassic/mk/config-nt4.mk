@@ -52,6 +52,7 @@ include $(ROOT)/mk/config-g++.mk
 #
 # Programs to use
 #
+#SHELL=/Cygnus/B19/H-i386-cygwin32/bin/bash.exe
 RANLIB = touch
 YACC= byacc
 # Use gcc everywhere including in octtools
