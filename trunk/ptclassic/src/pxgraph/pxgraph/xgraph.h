@@ -33,6 +33,10 @@ extern void do_hardcopy();	/* Carries out hardcopy    */
 extern void ho_dialog();	/* Hardcopy dialog         */
 extern void set_X();		/* Initializes X device    */
 
+#if defined(__sparc) && defined(__svr4__)
+#define SOL2
+#endif
+
 /* To make lint happy */
 extern char *malloc();
 extern char *realloc();
@@ -40,7 +44,9 @@ extern char *realloc();
 extern int sprintf();
 #else
 #ifndef sgi
+#ifndef SOL2
 extern char *sprintf();
+#endif
 #endif
 #endif
 extern char *strcpy();
