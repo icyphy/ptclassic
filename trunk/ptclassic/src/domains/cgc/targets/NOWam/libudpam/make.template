@@ -44,7 +44,7 @@ include $(CONFIG)
 
 SRCS = 	management.c misc.c transport.c
 
-HDRS =	am.h misc.h udpam.h
+HDRS =	am.h misc.h udpam.h transport.h
 
 OBJS = 	$(SRCS:.c=.o)
 
