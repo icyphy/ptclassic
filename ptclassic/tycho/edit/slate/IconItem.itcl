@@ -91,7 +91,6 @@ namespace ::tycho {
 # <p><b>Caveats</b>: (none)
 # 
 # <p><b>Example</b>: See <a href="IconFrame.html">IconFrame.html</a>
-# and <a href="IconRect.html">IconRect.html</a>
 #
 # <a href="../internals/howtoread.html">Reading <i>ComplexItem</i> documentation</a>.
 #
