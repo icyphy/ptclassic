@@ -10,7 +10,7 @@ value decomposition for floating-point matrices.
 	version { $Id$ }
 	author { Brian Evans }
 	copyright { 1993 The Regents of the University of California }
-        location  { SDF matrix library }
+	location  { SDF matrix library }
 	explanation {
 .pp
 Smith forms are useful in making non-separable multidimensional 
@@ -31,15 +31,18 @@ $V$ is $n$ x $n$.
 Hence, $U$ and $V$ are always square.
 .pp
 Smith form decompositions are not unique [5-6].
-However, the Smith normal form imposes a canonical structure on $D$
-that makes $D$ unique [6].
+However, the canonical structure imposes structure on the form of $D$
+to make $D$ unique [6].
 The canonical form of $D$ is that each diagonal element is a factor of
 the next diagonal element.
 Even in the canonical form, however, the $U$ and $V$ matrices are not unique.
-Note that this routine \fIwas not\fR coded to return the Smith normal form
-(although sometimes this will happen).
-Converting a Smith form into a Smith normal form requires an extra
-min($m$, $n$) steps for an $m$ x $n$ matrix [6].
+This block will return the canonical form if the field
+\fISmithCanonicalForm\fR is \fITRUE\fR.
+.pp
+The Smith form decomposition algorithm requires on the order of
+$[n + m]^4$ operations.
+Converting the Smith form into canonical form requires on the order of
+min($m$, $n$) extra operations [6].
 .pp
 The intermediate integer computations of the decomposition for integer
 matrices of large dimension and for matrices with large integer entries
@@ -87,7 +90,7 @@ B. Evans, T. Gardos, and J. McClellan,
 ``Imposing Structure on Smith Form Decompositions of
 Rational Resampling Matrices,''
 \fITransactions on Signal Processing\fR,
-vol. 42, April, 1994.
+vol. 42, no. 4, pp. 970-973, April, 1994.
 .ip [6]
 A. Kaufmann and A. Henry-Labordiere,
 \fIInteger and Mixed Programming: Theory and Applications\fR,
@@ -114,36 +117,31 @@ Academic Press, New York, 1977.
 		desc { Right regular unimodular integer matrix. }
 	}
 	defstate {
-		name { numRows }
+		name { SmithCanonicalForm }
 		type { int }
-		default { 3 }
-		desc { The number of rows in the input matrix. }
+		default { FALSE }
+		desc {
+Whether or not to put the matrix into Smith canonical form. }
 	}
-	defstate {
-		name { numCols }
-		type { int }
-		default { 3 }
-		desc { The number of columns in the input matrix. }
-	}
-        ccinclude { "Matrix.h" }
+	ccinclude { "Matrix.h", "Fraction.h" }
 	header {
 #define intmin(m,n)             ( ( (m) < (n) ) ? (m) : (n) )
 #define intabs(m)               ( ( (m) > 0 ) ? (m) : (-(m)) )
 
 #define INT_IS_ZERO(x)          ( ! (x) )
 #define INT_IS_NOT_ZERO(x)      (x)
-#define INT_SWAP3(a,b,t)	{ t = a; a = b; b = t; }
+#define INT_SWAP3(a,b,t)        { t = a; a = b; b = t; }
 	}
 	code {
 
 // Swap two rows in a matrix the slow but safe way
 void intSwapRows( IntMatrix *mat, int row1, int row2 )
 {
-	int col, numcols, temp;
+	int numcols, temp;
 
 	numcols = mat->numCols();
 	if ( row1 != row2 ) {
-	  for ( col = 0; col < numcols; col++ )
+	  for ( int col = 0; col < numcols; col++ )
 	    INT_SWAP3((*mat)[row1][col], (*mat)[row2][col], temp)
 	}
 
@@ -153,60 +151,93 @@ void intSwapRows( IntMatrix *mat, int row1, int row2 )
 // Swap two columns in a matrix the slow but safe way
 void intSwapCols( IntMatrix *mat, int col1, int col2 )
 {
-	int numrows, row, temp;
+	int numrows, temp;
 
 	numrows = mat->numRows();
 	if ( col1 != col2 ) {
-	  for ( row = 0; row < numrows; row++ )
+	  for ( int row = 0; row < numrows; row++ )
 	    INT_SWAP3((*mat)[row][col1], (*mat)[row][col2], temp)
 	}
 
 	return;
 }
 
+// Define extendedGCD
+int extendedGCD( int a, int b, int *alpha, int *beta)
+{
+	int lambdavalue = 0, muvalue = 0;
+	int gcdvalue = gcd(a, b);
+	int anorm = a / gcdvalue;
+	int bnorm = b / gcdvalue;
+
+	if ( intabs(a) <= intabs(b) ) {
+	  int mumax = intabs(anorm);
+	  for ( int mu = 0; mu < mumax; mu++ ) {
+	    int lambdap = ( 1 - mu * bnorm );
+	    int lambda = lambdap / anorm;
+	    if ( lambdap == (lambda * anorm) ) {
+	      lambdavalue = lambda;
+	      muvalue = mu;
+	      break;
+	    }
+	  }
 	}
+	else {
+	  int lambdamax = intabs(bnorm);
+	  for ( int lambda = 0; lambda < lambdamax; lambda++ ) {
+	    int mup = ( 1 - lambda * anorm );
+	    int mu = mup / bnorm;
+	    if ( mup == ( mu * bnorm ) ) {
+	      muvalue = mu;
+	      lambdavalue = lambda;
+	      break;
+	    }
+	  }
+	}
+
+	*alpha = lambdavalue;
+	*beta = muvalue;
+
+	return(gcdvalue);
+}
+
+	}
+
 	go {
 
-          // get the input
-          Envelope Apkt;
-          (S%0).getMessage(Apkt);
-          const IntMatrix *mat = (const IntMatrix *)Apkt.myData();
+	  // get the input
+	  Envelope Apkt;
+	  (S%0).getMessage(Apkt);
+	  const IntMatrix *mat = (const IntMatrix *)Apkt.myData();
 
-	  // initialize the local variables
-	  int col, dim, entry, m, mincol, minrow, minabsvalue, minvalue,
-	      n, quotient, r, row, sum;
-	  int *mVector;
-	  int *nVector;
-	  int endflag;
-
-	  m = (int) numRows;	// cast extracts the value of the state numRows
-	  n = (int) numCols;	// cast extracts the value of the state numCols
-
-          mVector = (int *) malloc( m * sizeof(int) );
-	  nVector = (int *) malloc( n * sizeof(int) );
-	  if ( ( mVector == (int *) NULL ) || ( nVector == (int *) NULL ) ) {
+	  // check for empty inputs
+	  if ( Apkt.empty() ) {
 	    Error::abortRun( *this,
-			     "The SDFSmithForm star cannot allocate ",
-			     "dynamic memory." );
-	    return;
+			     "Empty packet received in Smith form ",
+			     "decomposition star." );
 	  }
 
-          // initialize the matrices u, d, and v
-          
-          if(Apkt.empty()) { // check for empty inputs, possibly caused by delays
-            IntMatrix& d = *(new IntMatrix(m,n));
-            d = 0;
-            mat = &d;
-          }
-          IntMatrix& d = *(new IntMatrix(*mat));
+	  // initialize the local variables
+	  int entry, mincol, minrow, minabsvalue, minvalue, quotient, r, sum;
+	  int endflag;
+
+	  int m = mat->numRows();	// number of rows in input matrix
+	  int n = mat->numCols();	// number of columns in input matrix
+
+	  int *mVector = new int[m];
+	  int *nVector = new int[n];
+
+	  // initialize the matrices u, d, and v
+
+	  IntMatrix& d = *(new IntMatrix(*mat));
 	  IntMatrix& u = *(new IntMatrix(m, m));
 	  u.identity();
 	  IntMatrix& v = *(new IntMatrix(n, n));
 	  v.identity();
 
-	  // perform the decomposition
+	  // perform the basic Smith form decomposition
 	  r = intmin(m, n);
-	  for ( dim = 0; dim < r - 1; dim++ ) {
+	  for ( int dim = 0; dim < r - 1; dim++ ) {
 	    endflag = FALSE;
 	    while ( ! endflag ) {
 
@@ -214,8 +245,9 @@ void intSwapCols( IntMatrix *mat, int col1, int col2 )
 	      mincol = minrow = dim;
 	      minvalue = d[mincol][minrow];
 	      minabsvalue = intabs(minvalue);
+	      int row, col;
 	      for ( row = dim; row < m; row++ ) {
-	        for ( col = dim; col < n; col++ ) {
+		for ( col = dim; col < n; col++ ) {
 		  entry = d[row][col];
 		  if ( entry < 0 ) entry = -entry;
 		  if ( INT_IS_NOT_ZERO(entry) && ( entry < minabsvalue ) ) {
@@ -223,7 +255,7 @@ void intSwapCols( IntMatrix *mat, int col1, int col2 )
 		    minrow = row;
 		    mincol = col;
 		  }
-	        }
+		}
 	      }
 
 	      // move the pivot to location (dim, dim) in d
@@ -243,52 +275,131 @@ void intSwapCols( IntMatrix *mat, int col1, int col2 )
 	      // We must be careful because we are performing updates in place
 	      minvalue = d[dim][dim];
 	      for ( row = dim + 1; row < m; row++ )
-	        mVector[row] = -d[row][dim] / minvalue;
+		mVector[row] = -d[row][dim] / minvalue;
 	      for ( col = dim + 1; col < n; col++ )
-	        nVector[col] = -d[dim][col] / minvalue;
+		nVector[col] = -d[dim][col] / minvalue;
 
 	      for ( row = dim + 1; row < m; row++ ) {
-	        quotient = mVector[row];
-	        for ( col = dim + 1; col < n; col++ ) {
+		quotient = mVector[row];
+		for ( col = dim + 1; col < n; col++ ) {
 		  d[row][col] += quotient * d[dim][col];
-	        }
-	        d[row][dim] += quotient * minvalue;
+		}
+		d[row][dim] += quotient * minvalue;
 	      }						/* E^-1 D */
 	      for ( col = dim + 1; col < n; col++ ) {
-	        quotient = nVector[col];
-	        for ( row = dim + 1; row < m; row++ ) {
+		quotient = nVector[col];
+		for ( row = dim + 1; row < m; row++ ) {
 		  d[row][col] += d[row][dim] * quotient;
-	        }
-	        d[dim][col] += quotient * minvalue;
+		}
+		d[dim][col] += quotient * minvalue;
 	      }						/* (E^-1 D) F^-1 */
 
 	      for ( row = 0; row < m; row++ ) {
-	        sum = u[row][dim];
-	        for ( col = dim + 1; col < m; col++ )
+		sum = u[row][dim];
+		for ( col = dim + 1; col < m; col++ )
 		  sum -= u[row][col] * mVector[col];
-	        u[row][dim] = sum;
+		u[row][dim] = sum;
 	      }						/* U E */
 	      for ( col = 0; col < n; col++ ) {
-	        sum = v[dim][col];
-	        for ( row = dim + 1; row < n; row++ )
+		sum = v[dim][col];
+		for ( row = dim + 1; row < n; row++ )
 		  sum -= nVector[row] * v[row][col];
-	        v[dim][col] = sum;
+		v[dim][col] = sum;
 	      }						/* F V */
 
 	      // check for the ending condition for this iteration
 	      endflag = TRUE;
 	      for ( col = dim + 1; col < n; col++ )
-	        if ( INT_IS_NOT_ZERO(d[dim][col]) ) {
+		if ( INT_IS_NOT_ZERO(d[dim][col]) ) {
 		  endflag = FALSE;
 		  break;
-	        }
+		}
 	      if ( endflag ) {
-	        for ( row = dim + 1; row < m; row++ )
+		for ( row = dim + 1; row < m; row++ )
 		  if ( INT_IS_NOT_ZERO(d[row][dim]) ) {
 		    endflag = FALSE;
 		    break;
-	        }
+		}
 	      }
+	    }
+	  }
+
+	  // put the Smith form into canonical form
+	  // (1) pull out negative signs
+	  // (2) sort diagonal entries
+	  // (3) shuffle factors along diagonal by iteratively finding
+	  //     regular unimodular G and H such that
+	  //     U D V = U (G^-1 G) D (H H^-1) V = (U G^-1) (G D H) (H^-1 V)
+	  //     so that G and H move D closer to canonical form
+
+	  if ( int(SmithCanonicalForm) ) {
+	    IntMatrix ginv = IntMatrix(m, m);
+	    IntMatrix hinv = IntMatrix(n, n);
+	    int i, j;
+
+	    // (1) pull out negative signs
+	    ginv.identity();
+	    for ( i = 0; i < r; i++ ) {
+	      int di = d[i][i];
+	      if ( di < 0 ) {
+		d[i][i] = -di;
+		ginv[i][i] = -1;
+	      }
+	    }
+	    u = u * ginv;
+
+	    // (2) sort diagonal elements
+	    for ( i = 0; i < r; i++ ) {
+	      int jend = r - i;
+	      for ( j = 0; j < jend; j++ ) {
+		if ( d[j][j] > d[j+1][j+1] ) {
+		  int temp;
+		  INT_SWAP3(d[j][j], d[j+1][j+1], temp);
+		  intSwapCols( &u, j, j+1 );
+		  intSwapRows( &v, j, j+1 );
+		}
+	      }
+	    }
+
+	    // (3) shuffle factors along the diagonal
+	    int lastd = d[1][1];
+	    int lasti = 1; 
+	    //  begin processing with the second diagonal element
+	    for ( i = 1; i < r; i++ ) {
+	      int lcmvalue, lambda, mu;
+	      int di = d[i][i];
+	      int gcdvalue = extendedGCD(lastd, di, &lambda, &mu);
+	      if ( gcdvalue == lastd ) {
+		lastd = di;
+		lasti = i;
+		continue;
+	      }
+
+	      ginv.identity();
+	      hinv.identity();
+	      lcmvalue = lcm(lastd, di);
+
+	      // define the G^-1 matrix
+	      ginv[lasti][lasti] = lambda * lastd / gcdvalue;
+	      ginv[lasti][i] = -1;
+	      ginv[i][lasti] = mu * di / gcdvalue;
+	      ginv[i][i] = 1;
+
+	      // define the H^-1 matrix 
+	      hinv[lasti][lasti] = lastd / gcdvalue;
+	      hinv[lasti][i] = di / gcdvalue;
+	      hinv[i][lasti] = -mu;
+	      hinv[i][i] = lambda;
+
+	      // shuffle factors on the diagonal matrix D
+	      d[lasti][lasti] = gcdvalue;
+	      d[i][i] = lastd = lcmvalue;
+
+	      // update U and V matrices
+	      u = u * ginv;
+	      v = hinv * v;
+
+	      lasti = i;
 	    }
 	  }
 
@@ -302,13 +413,14 @@ void intSwapCols( IntMatrix *mat, int col1, int col2 )
 	    return;
 	  }
 
-	  // free memory --  must put the (char *) cast for cfront
-	  free( (char *) mVector );
-	  free( (char *) nVector );
+	  // free memory 
+	  delete [] mVector;
+	  delete [] nVector;
 
 	  // output the Smith form matrices
-          U%0 << u;
-          D%0 << d;
-          V%0 << v;
+	  U%0 << u;
+	  D%0 << d;
+	  V%0 << v;
+
 	}
 }
