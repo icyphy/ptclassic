@@ -9,43 +9,21 @@
 # See the file $TYCHO/copyright for copyright notice,
 # limitation of liability, and disclaimer of warranty provisions.
 
+# This script starts up tycho.  Most of the confusion occurs because 
+# tycho can be shipped as part of Ptolemy, or standalone
+
+# If you add to this script, make sure that you don't make it dependent
+# on Ptolemy.
+
+
 set usagestring = "Usage: $0 [-debug] [-ptiny|-ptrim|-pigi|-bin tychobin] [-bak] [file...]"
 
-if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
-if ( ! $?TYCHO ) setenv TYCHO $PTOLEMY/tycho
-
-# Set the commonly used environment variables
-source $PTOLEMY/bin/ptsetup.csh
-
-switch ($progname) 
-	case tycho.ptiny:
-		# If 'tycho.ptiny' is a link to this script,
-		# then we just use tysh.ptiny
-		set progname = tysh.ptiny
-		breaksw
-endsw	
+set argError = "Usage: $0 -ptiny, -ptrim, -pigi and -bin xxx are mutually exclusive"
 
 if ( ! $?DISPLAY ) then
-    echo "${0}: Your DISPLAY environment variable must be set"
-    exit 1
+	echo "${0}: Your DISPLAY environment variable must be set"
+	exit 1
 endif
-
-# FIXME: Hardwired in tk4.0
-# See also $PTOLEMY/src/tycho/kernel/make.template
-#	   $PTOLEMY/tycho/kernel/Lib.tcl
-setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl/lib/tcl
-setenv TK_LIBRARY $PTOLEMY/tcltk/tk/lib/tk
-
-
-# To get tcl/tk man pages before corresponding unix man pages,
-# and to guess about a reasonable manpath if none is set.
-if (! $?MANPATH ) then
-    setenv MANPATH $PTOLEMY/tcltk/tk/man:$PTOLEMY/tcltk/tcl/man:$PTOLEMY/doc/man:/usr/local/man:/usr/man
-else
-    setenv MANPATH $PTOLEMY/tcltk/tk/man:$PTOLEMY/tcltk/tcl/man:$PTOLEMY/doc/man:$MANPATH
-endif
-
-set argError = "Usage: $0 -ptiny, -ptrim, -pigi and -bin xxx are mutually exclusive"
 
 while ($#argv)
 	switch ($argv[1])
@@ -114,61 +92,113 @@ while ($#argv)
 	shift
 end
 
-# For now, look for the executable in obj.$PTARCH, rather than bin.$ARCH.
-set bindir = $PTOLEMY/obj.$PTARCH
+if ( ! $?TYCHO ) setenv TYCHO ~ptolemy/tycho
 
-if ( ! $?prog ) then
-	if ( "$progname" == "tysh.ptiny" || $?tychoptiny ) then
-	    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh.ptiny
-	else
-		if ( "$progname" == "tysh.ptrim" || $?tychoptrim ) then
-		    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh.ptrim
-		else 
-			if ( "$progname" == "tysh.pigi" || $?tychopigi ) then
-			    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh
-			else
-			    set tychoedit
-			    set prog = ($PTOLEMY/tcltk/itcl.$PTARCH/bin/itkwish -f $TYCHO/kernel/Tycho.tcl)
-			endif
-		endif
-
-	endif
-	if ( ! $?tychoedit && $?tychodebug ) then
-	    # There is no debug version of itkwish yet.
-	    set prog = $prog.debug
-	endif
-	if ( $?tychobak ) then
-		if ( -d ${PTOLEMY}/lib.${PTARCH}.bak ) then
-			if ( $?S_LD_LIB_PATH ) then
-				# S_LD_LIB_PATH is set by ptsetup.csh
-				# if this script was called and LD_LIBRARY_PATH
-				# was not set.  If this was the case, then we
-				# setup user to use the backup libraries, if
-				# they exist.
-				setenv LD_LIBRARY_PATH ${PTOLEMY}/lib.${PTARCH}.bak:/usr/lib:${PTX11DIR}/lib
-			else
-				# The user set LD_LIBRARY_PATH, so we stick
-				# lib.$PTARCH.bak in front anyway, just
-				# to be sure that we get good libraries.
-				# This might be a mistake, since if
-				# LD_LIBRARY_PATH is set, we should assume
-				# the user knows what they want to do
-				setenv LD_LIBRARY_PATH ${PTOLEMY}/lib.${PTARCH}.bak:${LD_LIBRARY_PATH}
-			endif
-		else
-			echo "Warning: Can't find ${PTOLEMY}/lib.${PTARCH}.bak"
-		endif
-	    set prog = $prog.bak
-	endif
+if ( ! -d $TYCHO) then
+	echo "The directory $TYCHO does not exist!  exiting."
+	exit 2
 endif
+
+if ( ! $?selectPtolemy) then
+	# We did not select Ptolemy, so we just assume that itkwish
+	# is in the users path.  Bad idea?  One alternative would be
+	# to see if $PTOLEMY is set and then check for 
+	# $PTOLEMY/bin.$PTARCH/itkwish
+	if ( $?tychodebug ) then
+		set prog = (itkwish.purify -f $TYCHO/kernel/Tycho.tcl)
+	else
+		set prog = (itkwish -f $TYCHO/kernel/Tycho.tcl)
+	endif
+else
+	# We selected Ptolemy
+
+	if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+
+	if ( ! -r $PTOLEMY/bin/ptsetup.csh ) then
+		echo "Can't find $PTOLEMY/bin/ptsetup.csh"
+		echo "Are you sure Ptolemy is installed?"
+		exit 2
+	endif
+
+	# Set the commonly used environment variables
+	source $PTOLEMY/bin/ptsetup.csh
+
+	# We need to set these if we are running a prebuilt Ptolemy
+	# binary that could be located anywhere.
+	# However, itkwish need not have these set
+	# FIXME: Hardwired in tk4.0
+	# See also $PTOLEMY/src/tycho/kernel/make.template
+	#	   $PTOLEMY/tycho/kernel/Lib.tcl
+	setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl/lib/tcl
+	setenv TK_LIBRARY $PTOLEMY/tcltk/tk/lib/tk
+
+	# To get tcl/tk man pages before corresponding unix man pages,
+	# and to guess about a reasonable manpath if none is set.
+	if (! $?MANPATH ) then
+	    setenv MANPATH $PTOLEMY/tcltk/tk/man:$PTOLEMY/tcltk/tcl/man:$PTOLEMY/doc/man:/usr/local/man:/usr/man
+	else
+	    setenv MANPATH $PTOLEMY/tcltk/tk/man:$PTOLEMY/tcltk/tcl/man:$PTOLEMY/doc/man:$MANPATH
+	endif
+
+	# For now, look for the executable in obj.$PTARCH, rather thn bin.$ARCH
+	set bindir = $PTOLEMY/obj.$PTARCH
+
+	if ( ! $?prog ) then
+		if ( "$progname" == "tysh.ptiny" || $?tychoptiny ) then
+		    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh.ptiny
+		else
+			if ( "$progname" == "tysh.ptrim" || $?tychoptrim ) then
+			    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh.ptrim
+			else 
+				if ( "$progname" == "tysh.pigi" || $?tychopigi ) then
+				    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh
+				else
+				    set tychoedit
+				    set prog = ($PTOLEMY/tcltk/itcl.$PTARCH/bin/itkwish -f $TYCHO/kernel/Tycho.tcl)
+				endif
+			endif
+		endif
+		if ( ! $?tychoedit && $?tychodebug ) then
+		    # There is no debug version of itkwish yet.
+		    set prog = $prog.debug
+		endif
+		if ( $?tychobak ) then
+			if ( -d ${PTOLEMY}/lib.${PTARCH}.bak ) then
+				if ( $?S_LD_LIB_PATH ) then
+					# S_LD_LIB_PATH is set by ptsetup.csh
+					# if this script was called and
+					# and LD_LIBRARY_PATH was not set.
+					# If this was the case, then we
+					# setup user to use the backup
+					# libraries, if they exist.
+					setenv LD_LIBRARY_PATH ${PTOLEMY}/lib.${PTARCH}.bak:/usr/lib:${PTX11DIR}/lib
+				else
+					# The user set LD_LIBRARY_PATH, so we
+					# stick lib.$PTARCH.bak in front
+					# anyway, just to be sure that we get
+					# good libraries.
+					# This might be a mistake, since if
+					# LD_LIBRARY_PATH is set, we should
+					# assume the user knows what they
+					# want to do
+					setenv LD_LIBRARY_PATH ${PTOLEMY}/lib.${PTARCH}.bak:${LD_LIBRARY_PATH}
+				endif
+			else
+				echo "Warning: Can't find ${PTOLEMY}/lib.${PTARCH}.bak"
+			endif
+		    set prog = $prog.bak
+		endif
+	endif
+endif # !?selectPtolemy
 
 if ( "$1" =~ "-*" ) then
     echo "${0}: Bad option: $1"
     exit 1
 endif
 
-if (! -x $prog[1] ) then
-    echo "Program does not exist: $prog"
+# If neither tyedit or selectPtolemy are set then we are just running itkwish
+if (! -x $prog[1] && ($?tyedit || $?selectPtolemy)) then
+	echo "Program does not exist: $prog"
 else
     if (! $?filename) then
 	$prog
