@@ -160,7 +160,7 @@ public:
 
 	// class identification
 	int isA(const char*) const;
-	const char* readClassName() const {return "Block";}
+	const char* readClassName() const;
 
 protected:
 	// Database for this block
