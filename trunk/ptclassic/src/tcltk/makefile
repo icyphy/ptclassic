@@ -166,6 +166,7 @@ $(TK_OBJ)/xpm/libxpm.a: $(TK_OBJ)/xpm
 		DESTBINDIR=$(TK_DEST)/bin \
 		DESTLIBDIR=$(TK_DEST)/lib \
 		DESTINCLUDEDIR=$(TK_INDEPENDENT_DEST)/include \
+		RANLIB=$(RANLIB) \
 		DEFINES="$(XPM_DEFINES)" \
 	all)
 
@@ -181,6 +182,7 @@ $(TK_DEST)/lib/libxpm.a: $(TK_OBJ)/xpm/libxpm.a
 		DESTLIBDIR=$(TK_DEST)/lib \
 		DESTINCLUDEDIR=$(TK_INDEPENDENT_DEST)/include \
 		RANLIB=$(RANLIB) \
+		DEFINES="$(XPM_DEFINES)" \
 	install)
 
 $(TK_DEST):
