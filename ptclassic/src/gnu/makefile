@@ -26,6 +26,9 @@
 # 						COPYRIGHTENDKEY
 #
 
+# This makefile has only been tested with Solaris2.4, SunOS4.1.3 and
+# HPUX10.01.  It may work on other platforms, but we have not tried.
+
 # This makefile will install the GNU tools for non-hp and hp platforms.
 # hp's need GNU gas for -g to work, and they don't come with lex or yacc,
 # so we need some additional rules to build the GNU tools for hp.
@@ -58,6 +61,9 @@ GNU_PREFIX=$(GNU_DEST)/common
 # $PTOLEMY/src/gnu/README and $PTOLEMY/src/gnu/INSTALL.
 # Also, check out the COLLECTOR variables in $PTOLEMY/mk/config-*.mk
 GCC_VERSION=2.7.2
+# If you are trying to build GNU for Linux, you may want to uncomment
+# the next line and comment out the following line
+#LIBGPLUSPLUS_VERSION=27.1.0
 LIBGPLUSPLUS_VERSION=2.7.1
 
 # Machine dependent files
