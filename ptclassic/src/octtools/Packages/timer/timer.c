@@ -44,6 +44,11 @@ static char SccsId[]="$Id$";
 #include <sys/procfs.h>
 #endif
 
+#if defined(__sparc) && !defined(__svr4__) && defined(__GNUC__)
+/* SunOS4.1.3 under gcc */
+extern int getrusage(int who, struct rusage *rusage);
+#endif
+
 struct timestruct {
 #ifdef HAS_TIMEB
    struct timeb startElapsedTime;
