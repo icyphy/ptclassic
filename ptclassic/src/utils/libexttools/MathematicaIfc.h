@@ -45,7 +45,7 @@ class MathematicaIfc {
 
 public:
     // Constructor
-    MathematicaIfc(const char* name = 0, int restrictContextFlag = 0);
+    MathematicaIfc(const char* name = 0, int privateContextFlag = 0);
 
     // Destructor
     ~MathematicaIfc();
@@ -117,10 +117,13 @@ protected:
     int instanceNumber;
 
     // package name attached to Mathematica interface instance
-    StringList context;
-    int contextFlag;
+    InfString context;
     InfString prolog;
     InfString epilog;
+    InfString initCode;
+
+    // method to set the string states context, prolog, epilog, and initCode
+    void setContext(const char* name, int flag);
 
     // current link to Mathematica
     MLINK mathlink;
