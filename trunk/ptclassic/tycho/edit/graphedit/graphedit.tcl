@@ -34,7 +34,12 @@
 # Based on pp 344-346 of Harrison and McClellan's "Effective Tcl/Tk
 # Programming" book
 
+package require tycho.kernel.basic
+package require tycho.kernel.gui
+package require tycho.edit.slate
+
 package provide tycho.edit.graphedit 1.0
+
 global env auto_path
 set env(GRAPHEDIT_LIBRARY) [file dirname [info script]]
 if { [lsearch -exact $auto_path $env(GRAPHEDIT_LIBRARY)] == -1 } {
