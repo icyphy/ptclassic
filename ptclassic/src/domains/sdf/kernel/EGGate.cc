@@ -188,7 +188,7 @@ StringList EGGateList::printMe() {
 // the same delay, "pnode" will be deallocated, and the number of samples 
 // it had, will be added to the existing node.
 
-void EGGateList :: insertGate(EGGate *pgate, int update) 
+void EGGateList :: insertGate(EGGate* pgate, int update) 
 {
 	int pos = 0;
 	EGGateLink* p = findInsertPosition(pgate->farEndNode(),
@@ -214,6 +214,7 @@ void EGGateList :: insertGate(EGGate *pgate, int update)
 		// endpoint (this is our convention).
 		else if (update) {
 			p->gate()->addSamples(pgate->samples());
+			LOG_DEL; delete pgate;
 			LOG_DEL; delete temp;
 		}
 		else {
