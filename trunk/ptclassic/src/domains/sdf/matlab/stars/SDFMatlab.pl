@@ -136,7 +136,7 @@ extern "C" {
 		  }
 		  commandString << "] = ";
 		}
-		commandString << ((char *) matlabFunction);
+		commandString << matlabFunction;
 		if ( numInputs > 0 ) {
 		  commandString << "(" << matlabInputNames[0];
 		  for ( int i = 1; i < numInputs; i++ ) {
@@ -241,10 +241,10 @@ extern "C" {
 	  code {
 		killMatlab();
 
-		matlabEnginePtr = engOpen( ((char *) OSStartCommand) );
+		matlabEnginePtr = engOpen( ((const char *) OSStartCommand) );
 		if ( matlabEnginePtr == 0 ) {
 		  Error::abortRun( *this, "Could not start Matlab using ",
-				   (char *) OSStartCommand );
+				   (const char *) OSStartCommand );
 		}
 		engOutputBuffer(matlabEnginePtr,
 				matlabOutputBuffer,
