@@ -547,11 +547,6 @@ body ::tycho::File::constructor {args} {
                 {::tycho::File::openContext \
 		[file join \$TYCHO doc tychoClasses.dag]}
 
-        $myMenubar add "Glimpse" Help -underline 0 -command { \
-                set w [::tycho::autoName .glimpse]; \
-                ::tycho::Glimpse $w -geometry +0+0;\
-                wm deiconify $w}
-
 	# Add the Preferences menu. This is probably the wrong place
 	# for it, but it will do until we figure out a good menu to
 	# put it in that doesn't keep disappearing...
