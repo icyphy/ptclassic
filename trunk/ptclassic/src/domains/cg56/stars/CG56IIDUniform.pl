@@ -63,7 +63,7 @@ done with g++ (type "long long"), but it isn't portable.
 	}
 	// "common" part of random number generation
 	codeblock(random) {
-	move	$addr(accum),r1
+	move	#$addr(accum),r1
         move	#>10916575,y1
         move    l:(r1),x
         mpy   	x0,y1,a		#>12648789,y0
