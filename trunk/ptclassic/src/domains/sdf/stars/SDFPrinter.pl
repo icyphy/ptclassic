@@ -38,7 +38,7 @@ the same line, separated by tabs.
 	wrapup {
 		output.close();
 	}
-	start {
+	setup {
 		// abortRun is called on open failure
 		output.open(fileName);
 	}

@@ -85,7 +85,7 @@ star.
 			return sample;
 		}
 	}
-	start
+	setup
 	{
 		LOG_DEL; delete input; input = 0;
 		// open input file

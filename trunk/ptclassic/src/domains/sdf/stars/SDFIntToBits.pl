@@ -28,7 +28,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		default { 4 }
 		desc { number of bits read per execution }
 	}
-	start {
+	setup {
 		output.setSDFParams(int(nBits),int(nBits)-1);
 	}
 	go {

@@ -59,7 +59,7 @@ where \fIhalfw\fR is half the bin width.
 		XHistogram his;
 	}
 	hinclude { "Histogram.h" }
-	start {
+	setup {
 		his.initialize(this,binWidth,options,title,saveFile);
 	}
 	go {

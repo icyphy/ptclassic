@@ -23,7 +23,7 @@ it.  The first received bit becomes the most significant bit of the output.
 		default { 4 }
 		desc { number of bits read per execution }
 	}
-	start {
+	setup {
 		if (int(nBits) < 0) {
 			Error::abortRun(*this, "nBits must be positive");
 			return;

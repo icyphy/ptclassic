@@ -70,7 +70,7 @@ for a complete explanation of the options.
 		double index;
 	}
 
-	start {
+	setup {
 		graph.initialize(this, 1, options, title, saveFile, ignore);
 		index = xInit;
 	}

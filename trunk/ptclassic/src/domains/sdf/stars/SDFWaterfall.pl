@@ -78,7 +78,7 @@ Turns on or off display of the plane where y=0.
 	}
 	constructor { highestValue = 0;}
 	destructor { LOG_DEL; delete highestValue;}
-	start {
+	setup {
 		graph.initialize(this, 2, options, title, saveFile, ignore);
 		// allow access to one past sample
 		input.setSDFParams(1,1);

@@ -35,7 +35,7 @@ limitation of liability, and disclaimer of warranty provisions.
 Input blocks of this size will be averaged to produce an output block.
 		}
 	}
-	start {
+	setup {
 		input.setSDFParams(int(blockSize)*int(numInputsToAverage),
 			int(blockSize)*int(numInputsToAverage)-1);
 		output.setSDFParams(int(blockSize), int(blockSize)-1);

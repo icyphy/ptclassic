@@ -78,7 +78,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	protected {
 		double spread;
 	}
-	start {
+	setup {
 		spread = double(top) - double(bottom);
 	}
 	go {

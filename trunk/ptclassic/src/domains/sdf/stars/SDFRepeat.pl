@@ -31,7 +31,7 @@ stars.
 		default {2}
 		desc { Repetition factor. }
 	}
-	start {
+	setup {
 		output.setSDFParams(int(numTimes),int(numTimes)-1);
 	}
 	go {

@@ -55,7 +55,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	protected {
 		int pos;
 	}
-	start {
+	setup {
 		pos = 0;
 	}
 	go {
