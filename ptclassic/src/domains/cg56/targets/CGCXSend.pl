@@ -2,6 +2,7 @@ defstar {
     name { S56XSend }
     domain { CGC }
     desc { Send data from CGC to S56X }
+    derivedFrom { S56XBase }
     version { $Id$ }
     author { Jose L. Pino }
     copyright { 
@@ -42,12 +43,6 @@ limitation of liability, and disclaimer of warranty provisions.
     }
     }
 
-    initCode {
-	addInclude("<sys/types.h>");
-	addInclude("<sys/uio.h>");
-	addInclude("\"s56dspUser.h\"");
-    }
-    
     go {
 	const char* intSend = "value = $ref(input,i)";
 	const char* fixSend = "value = $ref(input,i)*(1<<23)";

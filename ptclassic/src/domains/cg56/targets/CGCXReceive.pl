@@ -2,6 +2,7 @@ defstar {
     name { S56XReceive }
     domain { CGC }
     desc { Receive data from S56X to CGC }
+    derivedFrom { S56XBase }
     version { $Id$ }
     author { Jose L. Pino }
     copyright { 
@@ -38,11 +39,6 @@ limitation of liability, and disclaimer of warranty provisions.
     }
     }
     
-    initCode {
-	addInclude("<sys/types.h>");
-	addInclude("<sys/uio.h>");
-	addInclude("\"s56dspUser.h\"");
-    }
     
     go {
 	const char* intReceive = "$ref(output,i) = value";
