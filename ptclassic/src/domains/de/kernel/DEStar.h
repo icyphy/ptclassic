@@ -42,12 +42,8 @@ public:
 	const char* domain() const;
 
 	// constructor
-	DEStar() : delayType(FALSE) {}
-
-	// Redefine method setting internal data in the Block
-	// so that various DE-specific initilizations can be performed.
-	// If the parent pointer is not provied, it defaults to NULL
-	Block& setBlock(char* starName, Block* parent = NULL);
+	DEStar() : delayType(FALSE) { arrivalTime = 0.0;
+				      completionTime = 0.0; }
 
 	// Store the completion time of the current execution, which in turn
 	// the next free time. But, it may not be the start time of the next

@@ -27,20 +27,6 @@ $Id$
 
 ********************************************************************/
 
-// Redefine method setting internal data in the Block
-// so that various DE-specific initilizations can be performed.
-// If the parent pointer is not provied, it defaults to NULL
-Block& DEStar :: setBlock(char* s, Block* parent = NULL) {
-	// First invoke the generic setBlock
-	Block::setBlock(s,parent);
-
-	// Then, perform the DE specific initialization.
-	completionTime = 0.0;
-	arrivalTime = 0.0;
-
-	return *this;
-}
-
 // initialize DE-specific members.
 void DEStar :: prepareForScheduling() {
 	arrivalTime = 0.0;
