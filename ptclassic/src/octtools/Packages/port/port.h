@@ -154,7 +154,9 @@ typedef int int16;
 #endif /* vax */
 #endif /* MACHDEP_INCLUDED */
 
+#include "ansi.h"
 
+#include "compat.h"
 /*
  *   Do not do anything if already somebody else is doing it.
  *  _std_h     is defined by the g++ std.h file
@@ -255,7 +257,7 @@ extern double trunc();
 
 
 /* Some systems have 'fixed' certain functions which used to be int */
-#if defined(ultrix) || defined(SABER) || defined(hpux) || defined(__hpux) || defined(aiws) || defined(apollo) || defined(AIX) || defined(linux) ||     defined(__STDC__) 
+#if defined(ultrix) || defined(SABER) || defined(hpux) || defined(__hpux) || defined(aiws) || defined(apollo) || defined(AIX) || defined(linux) || defined(__STDC__) || defined(SOL2)
 #define VOID_HACK void
 #else
 #define VOID_HACK int
@@ -321,7 +323,7 @@ extern VOID_HACK rewind();
 
 
 /* most machines don't give us a header file for these */
-#if defined(__STDC__) || defined(sprite) || defined(__cplusplus)
+#if defined(__STDC__) || defined(sprite) || defined(__cplusplus) || defined(SOL2)
 #include <stdlib.h>
 #else
 
@@ -484,5 +486,26 @@ extern VOID_HACK sleep();
 #define SIG_FLAGS(s)    (s).sv_flags
 #endif
 
+#ifdef SOL2
+/* gcc-2.5.8 under Solaris2.3 with Openwindows3.3 prints warning
+   messages while compiling Maxport.c. 
+   message was: warning: cast discards `const' from pointer target type
+ */
+#define XTSTRINGDEFINES
+extern int putenv(char *);	/* masters/masters.c uses system() */
+extern void qsort
+	ARGS((void *, size_t, size_t, int (*)(CONST void *, CONST void *)));
+extern int system(CONST char *);
+/* vem/rpc/serverNet.c and vem/rpc/vemRpc use gethostname() */
+extern int gethostname( char * name, int namelen); 
+#endif
+
+#if defined(sun) && !defined(SOL2)
+#include <unistd.h>
+extern char * memset
+	ARGS(( char *, char *, int));
+extern void qsort
+	ARGS((void *, size_t, size_t, int (*)(const void *, const void *)));
+#endif
 
 #endif /* PORT_H */
