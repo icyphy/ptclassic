@@ -202,41 +202,39 @@ Engine* MatlabIfc :: MatlabEngineOpen(char* unixCommand) {
 }
 
 // send a command to the Matlab Engine for evaluation
-int MatlabIfc :: MatlabEngineSend(Engine* enginePtr, char* command) {
-    return engEvalString(enginePtr, command);
+int MatlabIfc :: MatlabEngineSend(char* command) {
+    return engEvalString(matlabEnginePtr, command);
 }
 
 // tell Matlab where to put the output of computations
-int MatlabIfc :: MatlabEngineOutputBuffer(Engine* enginePtr,
-					  char* buffer,
-					  int buferLength) {
-    return engOutputBuffer(enginePtr, buffer, buferLength);
+int MatlabIfc :: MatlabEngineOutputBuffer(char* buffer, int buferLength) {
+    return engOutputBuffer(matlabEnginePtr, buffer, buferLength);
 }
 
 // get pointer to a copy of a Matlab matrix
-Matrix* MatlabIfc :: MatlabEngineGetMatrix(Engine* enginePtr, char* name) {
-    return engGetMatrix(enginePtr, name);
+Matrix* MatlabIfc :: MatlabEngineGetMatrix(char* name) {
+    return engGetMatrix(matlabEnginePtr, name);
 }
 
 // put a matrix in the Matlab environment (Matlab will copy the matrix)
-int MatlabIfc :: MatlabEnginePutMatrix(Engine* enginePtr, Matrix* matrixPtr) {
-    return engPutMatrix(enginePtr, matrixPtr);
+int MatlabIfc :: MatlabEnginePutMatrix(Matrix* matrixPtr) {
+    return engPutMatrix(matlabEnginePtr, matrixPtr);
 }
 
 // kill the Matlab connection
-int MatlabIfc :: MatlabEngineClose(Engine* enginePtr) {
-    return engClose(enginePtr);
+int MatlabIfc :: MatlabEngineClose() {
+    return engClose(matlabEnginePtr);
 }
 
 // higher-level interface to the Matlab process
 int MatlabIfc :: EvaluateOneCommand(char* command) {
     if ( MatlabIsRunning() ) {
 	// assert location of buffer to hold output of Matlab commands
-	AssertOutputBuffer();
+	MatlabEngineOutputBuffer(matlabOutputBuffer, MATLAB_BUFFER_LEN);
 
 	// MatlabEngineSend returns 0 on success and non-zero on failure
 	matlabOutputBuffer[0] = 0;
-	int merror = MatlabEngineSend(matlabEnginePtr, command);
+	int merror = MatlabEngineSend(command);
 	matlabOutputBuffer[MATLAB_BUFFER_LEN] = 0;
 
 	// kludge: MatlabEngineSend always returns 0 (success) even if
@@ -349,7 +347,7 @@ int MatlabIfc :: CloseMatlabFigures() {
 int MatlabIfc :: KillMatlab() {
      int retval = TRUE;
      if ( MatlabIsRunning() ) {
-	  if ( MatlabEngineClose( matlabEnginePtr ) ) {
+	  if ( MatlabEngineClose() ) {
 		Error::warn("Error when terminating connection ",
 			    "to the Matlab kernel.");
 		retval = FALSE;
