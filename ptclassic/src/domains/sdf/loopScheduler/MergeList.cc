@@ -116,6 +116,13 @@ void MergeLink :: setUp() {
 	sonRep = son_node->myMaster()->repetitions;
 	par_inv = parRep / gcd;
 	son_inv = sonRep / gcd;
+
+	delete preClust;
+	delete mainClust;
+	delete postClust;
+	preClust = 0;
+	mainClust = 0;
+	postClust = 0;
 }
 
 //////////////////////////
