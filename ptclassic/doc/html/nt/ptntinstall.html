@@ -1,0 +1,59 @@
+<!-- $Id$ -->
+<html>
+<head>
+<title>Ptolemy NT Installation</title>
+</head>
+<body bgcolor=#faf0e6>
+<H1>Ptolemy NT Installation</H1>
+The Ptolemy NT Installation is more tricky than it should be,
+we hope to fix this soon.  
+<H2><CODE>nt4</CODE> installation instructions</H2>
+
+<OL>
+<LI> Download Cygnus GNU-win32 from
+<A HREF="ftp://ftp.cygnus.com/pub/gnu-win32/latest"><CODE>ftp://ftp.cygnus.com/pub/gnu-win32/latest</CODE></A>.
+In that directory, download
+<A HREF="ftp://ftp.cygnus.com/pub/gnu-win32/latest/README.txt"><CODE>README.txt</CODE></A>
+and 
+<A HREF="ftp://ftp.cygnus.com/pub/gnu-win32/latest/cdk.exe/"><CODE>cdk.exe</CODE></A>(13.7Mb)
+
+<LI> Install Cygnus GNU-win32 by mousing on the <CODE>cdk.exe</CODE>
+icon.  Be sure to update your path and the other variables mentioned
+in the Cygnus <CODE>README.txt</CODE>.
+
+<LI> Obtain and Install Tcl8.0.  You have two choices, compile it
+	yourself, or download precompiled binaries.
+	<OL>
+	<LI> FIXME: get Tcl URL
+
+	<LI> FIXME: location of prebuilt binaries
+	</OL>
+
+<LI> Download the Ptolemy NT sources
+
+<LI> Set your <CODE>PTOLEMY</CODE> variable to the location
+where you installed the Ptolemy NT sources.  Set <CODE>PTARCH</CODE>
+to <CODE>nt4</CODE>.  
+
+<LI> Run the <CODE>buildnt</CODE> script from a <CODE>bash</CODE>
+window by starting up <CODE>bash</CODE>, and then typing
+<PRE>
+$PTOLEMY/doc/html/nt/buildnt
+</PRE>
+
+</OL>
+
+
+<HR>
+<A HREF="index.html">Up to the Ptolemy under NT page</A> -
+<A HREF="ptntbugs.html">Back to Ptolemy NT Installation</A>
+
+<HR>
+<A HREF="index.html">Back to the Ptolemy under NT page</A>
+<HR>
+Copyright &#169 1997, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: $Date$,
+comments to: <author>cxh@eecs.berkeley.edu</author>
+
