@@ -170,7 +170,7 @@ int KnownTarget::getList (const char* dom, const char** names, int nMax) {
 }
 
 const char* KnownTarget :: defaultName (const char* dom) {
-	if (dom == 0) dom = KnownBlock::domain();
+	if (dom == 0) dom = KnownBlock::defaultDomain();
 	static char buf[72];
 	strcpy (buf, "default-");
 	strcat (buf, dom);
