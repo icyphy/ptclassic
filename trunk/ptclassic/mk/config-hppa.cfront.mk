@@ -184,13 +184,18 @@ LINKFLAGS_D =	-L$(LIBDIR)
 #
 # Directories to use
 #
-X11_INCSPEC =	-I$(ROOT)/src/compat -I/usr/sww/X11R6/include
-X11_LIBSPEC =	-L/usr/sww/X11R6/lib -lX11
+# The hpux faq says that you can download X11R6 libraries and binaries
+# from http://hpux.cs.utah.edu/hppd/hpux/X11/Core/XR6built-6.11/
+#
+
+X11DIR = 	/usr/local/X11R6
+X11_INCSPEC =	-I$(ROOT)/src/compat -I$(X11DIR)/include
+X11_LIBSPEC =	-L$(X11DIR)/lib -lX11
 #X11_INCSPEC =	-I$(ROOT)/src/compat
 #X11_LIBSPEC =	-L/usr/lib/X11R5 -lX11
 
 # Use -lSM -lICE for X11R6, don't use then for X11R5
-X11EXT_LIBSPEC=	-L/usr/sww/X11R6/lib -lXext -lSM -lICE
+X11EXT_LIBSPEC=	-lXext -lSM -lICE
 #X11EXT_LIBSPEC=-lXext
 
 
@@ -208,7 +213,8 @@ FLUSH_CACHE =	flush_cache.o
 LIB_FLUSH_CACHE = $(LIBDIR)/flush_cache.o
 
 # Defines to build xv
-XMKMF =		/usr/sww/X11/bin/xmkmf
+XMKMF =		$(X11DIR)/bin/xmkmf
+
 # -Ac turns on compatibility mode
 # -DXLIB_ILLEGAL_ACCESS is needed to compile xv.c
 XV_CC =		cc -Ac -DXLIB_ILLEGAL_ACCESS $(X11_INCSPEC) $(X11_LIBSPEC)
