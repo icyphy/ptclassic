@@ -83,8 +83,9 @@ proc ptkRunAllDemos {name octHandle} {
 	-fill both -expand yes
 
     # Animation is off by default
-    # wtc: maybe this should go to ptkCompileRun?
     ptkGrAnimation 0
+
+    ptkClearHighlights
 
     frame $ptkControlPanel.disfr
     # DISMISS button does nothing for now, no command binding.
@@ -167,7 +168,6 @@ proc ptkCompileRun {name octHandle} {
 
     # So that error highlighting, etc. works
     if {$univ != $name} {ptkSetHighlightFacet $octHandle}
-    ptkClearHighlights
 
     # catch errors and reset the run flag.
     if {[catch {
