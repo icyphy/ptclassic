@@ -1481,9 +1481,6 @@ STREAM receiveStream, sendStream;
     return RPC_OK;
 }
 
-
-extern long lseek();
-
 rpcStatus
 RPCfileOpen(receiveStream, sendStream)
 STREAM receiveStream, sendStream;
