@@ -15,29 +15,35 @@ A NamedObj is an object that has a name, a descriptor, and a parent,
 where the parent is a Block (a specific type of NamedObj).
 
 **************************************************************************/
+#include "StringList.h"
+
 class Block;
 
 class NamedObj {
 private:
-	char* name;		// my name
+	const char* name;	// my name
 	Block* blockIamIn;	// pointer to parent
 protected:
-	char* descriptor;	// a descriptor
+	const char* descriptor;	// a descriptor
 public:
-	NamedObj () {
-		name = "noName";
-		descriptor = "noDescriptor";      
-		blockIamIn = 0;
-	}
-	char* readName() { return name;}
-	char* readDescriptor() {return descriptor;}
-	Block* parent() { return blockIamIn;}
-	char* readFullName();
-	void setNameParent (char* my_name,Block* my_parent) {
+	// constructors
+	NamedObj () : name(""), blockIamIn(0), descriptor("") {}
+	NamedObj (const char* n,Block* p,const char* d) :
+		name(n), blockIamIn(p), descriptor(d){}
+
+	const char* readName() const { return name;}
+	const char* readDescriptor() const {return descriptor;}
+
+	Block* parent() const { return blockIamIn;}
+
+	StringList readFullName() const;
+
+	void setNameParent (const char* my_name,Block* my_parent) {
 		name = my_name;
 		blockIamIn = my_parent;
 	}
-	virtual operator char* () { return "<NamedObj>";}
+
+	virtual operator StringList () = 0;
 };
 
 #endif
