@@ -38,8 +38,8 @@ PL_SRCS= \
  HOFBusSplit.pl \
  HOFChain.pl \
  HOFDelayedMap.pl \
- HOFIfThenElse.pl \
- HOFIfThenElseGr.pl \
+ HOFIfElse.pl \
+ HOFIfElseGr.pl \
  HOFMap.pl \
  HOFMapGr.pl \
  HOFNop.pl \
