@@ -214,7 +214,7 @@ extern double trunc();
 
 
 /* Some systems have 'fixed' certain functions which used to be int */
-#if defined(ultrix) || defined(SABER) || defined(hpux) || defined(aiws) || defined(apollo) || defined(AIX) || defined(__STDC__)
+#if defined(ultrix) || defined(SABER) || defined(hpux) || defined(__hpux) || defined(aiws) || defined(apollo) || defined(AIX) || defined(__STDC__)
 #define VOID_HACK void
 #else
 #define VOID_HACK int
@@ -275,7 +275,7 @@ extern VOID_HACK rewind();
 #include <stdlib.h>
 #else
 
-#ifdef hpux
+#if defined(hpux) || defined(__hpux)
 extern int abort();
 extern void free(), exit(), perror();
 #else
@@ -307,7 +307,7 @@ extern char *malloc(), *realloc(), *calloc();
 #endif
 #endif
 
-#if defined(hppa) || defined(aiws)
+#if defined(hpux) || defined (__hpux) || defined(aiws)
 extern int sprintf();
 #else
 #ifndef _IBMR2
