@@ -1,0 +1,3 @@
+#!/bin/sh
+#$Id$
+exec `dirname $0`/vendorexec motorola/dsp/bin/asm56000 $*
