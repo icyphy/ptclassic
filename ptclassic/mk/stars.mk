@@ -365,10 +365,12 @@ ifdef CM5
 		$(CGCT)/cm5/CGCcm5Target.o $(CGCT)/cm5/CGCcm5peTarget.o
 endif
 
-ifdef NOWAM # Networks Of Workstations Active Messages
+# Networks Of Workstations Active Messages
+ifdef NOWAM
      # NOWam only supported under sol2 and sol2.cfront
      ifneq (,$(filter sol%,$(PTARCH)))
-	CUSTOM_DIRS += $(ROOT)/src/domains/cgc/targets/NOWam/NOWam
+	CUSTOM_DIRS += $(ROOT)/src/domains/cgc/targets/NOWam/NOWam \
+		$(ROOT)/src/domains/cgc/targets/NOWam/libudpam
 	CGC = 1
 	ifeq ($(USE_SHARED_LIBS),yes) 
 		LIBS += -lNOWam
