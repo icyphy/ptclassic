@@ -1,6 +1,6 @@
 /**********************************************************************
 Version identification:
-@(#)XDomain.ccP	1.3	11/8/90  (CGDomain.cc)
+$Id$
 
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
@@ -14,27 +14,25 @@ Version identification:
 ***********************************************************************/
 
 #include "Domain.h"
-#include "CGScheduler.h"
-// #include "CGWormhole.h"
+#include "CGTarget.h"
+#include "KnownTarget.h"
+#include "SDFScheduler.h"
 #include "CGConnect.h"
-// #include "CGWormConnect.h"
-#include "CGGeodesic.h"
+#include "AutoForkNode.h"
+
 // for error messages (temporary, until wormholes exist):
-#include "Output.h"
+#include "Error.h"
 
 // For the hacks below to avoid doing wormholes:
-#include "SDFStar.h"
+
 #include "WormConnect.h"
 
 extern const char CGdomainName[] = "CG";
 
 class CGDomain : public Domain {
 public:
-	// new scheduler
-	Scheduler& newSched() { return *new CGScheduler;}
-
 	// new wormhole
-	Star& newWorm(Galaxy& innerGal)  {
+	Star& newWorm(Galaxy&, Target*)  {
 		// return *new CGWormhole(innerGal);
 		Error::abortRun("No CG wormhole implemented yet");
 		// Following is a hack
@@ -64,7 +62,7 @@ public:
 	}
 
 	// new node (geodesic)
-	Geodesic& newNode() { return *new CGGeodesic;}
+	Geodesic& newNode() { return *new AutoForkNode;}
 
 	// constructor
 	CGDomain() : Domain("CG") {}
@@ -72,3 +70,9 @@ public:
 
 // declare a prototype
 static CGDomain proto;
+
+// declare the default Target object
+
+static CGTarget defaultCGtarget("default-CG","CGStar","default CG target");
+static KnownTarget entry(defaultCGtarget,"default-CG");
+
