@@ -122,7 +122,6 @@ ITCL_SRCS = \
 	Stack.itcl \
 	StarLibrary.itcl \
 	StatusBar.itcl \
-	StylePreferences.itcl \
 	StyleSheet.itcl \
 	Subpanel.itcl \
 	TclShell.itcl \
@@ -131,6 +130,7 @@ ITCL_SRCS = \
 	TWidget.itcl \
 	Tycho.tcl \
 	Uninstantiable.itcl \
+	UserProfile.itcl \
 	View.itcl \
 	WelcomeMessage.itcl \
 	WidgetPreferences.itcl \
