@@ -27,7 +27,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	defstate {
 		name { value }
 		type { int }
-		default { 0.0 }
+		default { 0 }
 		desc { Initial (or latest) value output by Ramp. }
 		attributes { A_SETTABLE|A_NONCONSTANT }
 	}
