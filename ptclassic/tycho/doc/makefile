@@ -42,6 +42,7 @@ include $(CONFIG)
 EXTRA_SRCS =	abbreviations.html \
 		authors.html \
 		bindings.html \
+		bugs.html \
 		bugs0.1.html \
 		bugs0.1.1.html \
 		documentation.html \
