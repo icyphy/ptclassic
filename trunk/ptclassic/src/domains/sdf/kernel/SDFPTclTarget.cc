@@ -75,16 +75,12 @@ void SDFPTclTarget::setStopTime (double limit) {
 
 int SDFPTclTarget::run() {
 
-    // Process pending events and check for halt
+    // CallltRequested to process pending events and check for halt
     // If the user hit the DISMISS button in the run control panel,
     // then the universe referenced by galaxy() will return a null pointer
     int haltFlag = SimControl::haltRequested();
-    if (! galaxy()) {
+    if (! galaxy() || haltFlag) {
         Error::abortRun("SDF PTcl target has no galaxy to run");
-        return FALSE;
-    }
-    if (haltFlag) {
-        Error::abortRun(*galaxy(), "Cannot continue after run-time error");
         return FALSE;
     }
 
