@@ -61,8 +61,8 @@ OBJS = $(LIBCSRCS:.c=.o)
 
 LIB =		librpcserver.a
 
-# This is a GNU make hack that appends more text to CFLAGS
-CFLAGS += -DSERVER
+OTHERCFLAGS=-DSERVER
+
 all::	$(LIB)
 
 # common makefile file for vem binary

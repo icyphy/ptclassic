@@ -1,6 +1,6 @@
 # Version Identification:
 # $Id$
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -69,7 +69,11 @@ OBJS = $(LIBCSRCS:.c=.o)
 LIB =		libmain.a
 
 VERSION=8-2
-CFLAGS="-DCUR_DATE=\"`date`\"" -DCUR_VER=\"$(VERSION)\" -g
+OTHERCFLAGS="-DCUR_DATE=\"`date`\"" -DCUR_VER=\"$(VERSION)\"
+
+# common makefile file for vem binary
+VEMBINCONFIG=../../vem-bin.mk
+include $(VEMBINCONFIG)
 
 # pigilib/local.h includes ansi.h
 header:: $(OCTTOOLS)/include/ansi.h ../include/ansi.h
@@ -77,10 +81,6 @@ header:: $(OCTTOOLS)/include/ansi.h ../include/ansi.h
 $(OCTTOOLS)/include/ansi.h ../include/ansi.h: ansi.h
 	rm -f $@
 	cp $? $@
-
-# common makefile file for vem binary
-VEMBINCONFIG=../../vem-bin.mk
-include $(VEMBINCONFIG)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
