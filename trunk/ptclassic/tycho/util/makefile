@@ -3,7 +3,7 @@
 # $Id$
 # Author: Christopher Hylands
 #
-# Copyright (c) 1996-1997 The Regents of the University of California.
+# Copyright (c) 1997-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -41,7 +41,7 @@ VPATH =		$(ROOT)/$(ME)
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-DIRS =		notmake pakman obstcl devtools tydoc
+DIRS =		notmake pakman devtools tydoc #obstcl
 
 EXTRA_SRCS = 	pkgIndex.tcl
 
