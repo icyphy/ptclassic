@@ -75,7 +75,7 @@ option add *Subpanel.labelMargin 2 widgetDefault
 # pack .w.options.left.debug -side top -anchor nw
 # pack .w.options.right.script -side top -anchor nw
 # proc closePanel {} {
-# puts "close"
+#     puts "close"
 # }
 # tycho::Subpanel .w.s -text "Options" -childwidget .w.options
 # pack .w.s -side top -anchor nw
@@ -87,13 +87,13 @@ option add *Subpanel.labelMargin 2 widgetDefault
 # button .w.new.bframe.button -text "push me"
 # pack .w.new.bframe.button
 # proc openPanel {} {
-# set widget .w.new
-# puts "open"
-# return $widget
+#     set widget .w.new
+#     puts "open"
+#     return $widget
 # }
 # .w.s configure -opencallback "openPanel"
 # </pre></tcl>
-
+#
 class ::tycho::Subpanel { 
     inherit ::tycho::TychoWidget
 
@@ -138,7 +138,7 @@ class ::tycho::Subpanel {
 
 #######################################################################
 #### -childwidget configuration
-# Name of the custom childwidget that user wants to embed in a 
+# Specify the name of the custom childwidget that user wants to embed in a 
 # subpanel
 # 
 configbody ::tycho::Subpanel::childwidget {
