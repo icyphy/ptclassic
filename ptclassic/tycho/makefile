@@ -44,7 +44,7 @@ TCL_SRCS =
 
 MISC_FILES =	\
 	README.txt \
-	copyright \
+	copyright.txt \
 	.glimpse_exclude \
 	pkgIndex.tcl
 
