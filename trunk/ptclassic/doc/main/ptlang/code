@@ -9,11 +9,12 @@ language.
 .pp
 C++ code segments are an important part of any star definition.
 They can appear in the
-.c start ,
+.c setup ,
 .c go ,
 .c wrapup ,
 .c constructor ,
 .c destructor ,
+.c exectime ,
 .c code ,
 and
 .c method
@@ -40,7 +41,7 @@ In general, the task of a Ptolemy star is to receive input Particles
 and/or produce output Particles; in addition, there may be side effects
 (reading or writing files; displaying graphs).  As for all C++ objects,
 the constructor is called when the object is created, and the destructor
-is called when the object is destroyed.  In addition, the start() method,
+is called when the object is destroyed.  In addition, the setup() method,
 if any, is called every time a new simulation run is started, the go()
 method (which always exists except for stars like BlackHole and Null
 that do nothing) is called each time a star is to be executed, and
@@ -96,7 +97,7 @@ subdirective of the
 or
 .c output
 directive.
-Currently this can be float, int, complex, or packets.
+Currently this can be float, int, complex, or ``message''.
 .pp
 The operator ``%'' operating on an SDF porthole returns a reference
 to a particle.
@@ -143,20 +144,27 @@ its data can be accessed as follows:
 .(c
 go {
 	Particle& currentSample = in%0;
-	float value = float(currentSample);
+	double value = double(currentSample);
 	...
 }
 .)c
 or more concisely,
 .(c
 go {
-	float value = float(in%0);
+	double value = double(in%0);
 	...
 }
 .)c
 The expression
-.c float(in%0)
-can be used anywhere that a float can be used.
+.c double(in%0)
+can be used anywhere that a double can be used.  In many contexts,
+where there is no ambiguity, the conversion operator can be omitted:
+.(c
+	double value = in%0;
+.)c
+However, since conversion operators are defined to convert Particles
+to several types, it is often necessary to indicate precisely which
+type conversion is desired.
 .pp
 To write data to an output porthole, note that the right-hand
 side of the assignment operator should be of type
@@ -178,13 +186,16 @@ loads data into particles.  The type of the right-side operand
 of ``<<'' may be
 .c int ,
 .c float ,
+.c double ,
 .c Complex
 or
-.c Packet;
+.c Envelope;
 the appropriate type conversion will be performed.
 For more information on the
-.c Packet
-type, please see the appendix at the end of this section.
+.c Envelope
+and
+.c Message
+types, please see the appendix at the end of this section.
 .H3 "SDF PortHole parameters"
 .pp
 In the above example, where
@@ -198,7 +209,7 @@ at each output when a star fires.  This information can be
 provided through a call to
 .c setSDFParams
 in the
-.c start
+.c setup
 method.
 .IE setSDFParams
 .IE "SDF parameters"
@@ -207,7 +218,7 @@ method.
 .IE "producing multiple particles"
 This has the syntax
 .(c
-start {
+setup {
 	\fIname\fP.setSDFParams(\fImultiplicity, past\fP)
 }
 .)c
@@ -314,7 +325,7 @@ particle data to each one.
 Consider another example, which sums any number of inputs:
 .(c
 defstar {
-	name {FloatSum}
+	name {Add}
 	domain {SDF}
 	desc { Output the sum of the inputs, as a floating value.  }
 	inmulti {
@@ -330,7 +341,7 @@ defstar {
 		PortHole *p;
 		double sum = 0.0;
 		while ((p = nexti++) != 0)
-			sum += float((*p)%0);
+			sum += double((*p)%0);
 		output%0 << sum;
 	}
 }
@@ -356,49 +367,52 @@ as virtual methods in the base class
 There are never really objects of class
 .c Particle
 in the system; instead, there are objects of class
-.c IntSample ,
-.c FloatSample ,
-and
-.c ComplexSample ,
+.c IntParticle ,
+.c FloatParticle ,
+.c ComplexParticle ,
 which hold data of type
 .c int ,
-.c float ,
+.c double
+(not float!),
 and
 .c Complex ,
-respectively.  The conversion and loading operators are designed
+respectively (there is also
+.c MessageParticle ,
+which is described later).  The conversion and loading operators are designed
 to ``do the right thing'' when an attempt is made to convert
 between mismatched types.
 .pp
 Clearly we can convert an
 .c int
 to a
-.c float
+.c double
 or
 .c Complex ,
 or a
-.c float
+.c double
 to a
 .c Complex ,
 with no loss of information.  Attempts to convert in the opposite
 direction work as follows: conversion of a
 .c Complex
 to a
-.c float
+.c double
 produces the magnitude of the complex number.
 Conversion of a
-.c float
+.c double
 to an
 .c int
 produces the greatest integer that is less than or equal to
 the
-.c float
-value.
+.c double
+value.  There are also operators to convert to or from
+.c float .
 .pp
 This gives considerable flexibility in defining code that
 operates on ANYTYPE.
-For instance, since ANYTYPE of particle can be cast to float,
+For instance, since ANYTYPE of particle can be cast to double,
 a plotting star can accept ANYTYPE of input, and internally
-the star only has to cast the input to float.
+the star only has to cast the input to double.
 Of course, if the input is complex, some information is lost;
 thus when complex values are fed directly to the Xgraph star,
 the magnitudes of the values are plotted.
@@ -515,8 +529,8 @@ to schedule itself for later execution.  In many cases it is convenient
 to schedule the first execution at time zero; think of this as actually
 occurring at time epsilon for a very small epsilon.  If a
 .c DERepeatStar
-defines a start function, that function must call
-.c DERepeatStar::start() .
+defines a setup function, that function must call
+.c DERepeatStar::setup() .
 .pp
 Here is a (simplified) version of DEClock, which outputs a zero-valued
 token every 5 time units (the real star is parametized):
@@ -626,8 +640,9 @@ The derived state classes currently defined in the kernel are
 .c StringState ,
 .c FloatArrayState ,
 .c IntArrayState ,
+.c ComplexArrayState ,
 and
-.c ComplexArrayState .
+.c StringArrayState .
 .pp
 A state can be used in a star method
 just like the corresponding predefined data types.
@@ -654,7 +669,7 @@ For example, the value of this state can be accessed in the
 method as follows:
 .(c
 go {
-	output%0 << myState * float(input%0);
+	output%0 << myState * double(input%0);
 }
 .)c
 The references to input and output are explained above.
@@ -685,10 +700,10 @@ Note that the type
 .c Complex
 .IE "Complex type"
 is not a fundamental part of C++.
-We have used a subset of the
+We have implemented a subset of the
 .c Complex
-class defined by the Free Software Foundation,
-and included on the standard distribution tape with the Gnu software.
+class as defined by several library vendors; we use our own version
+for maximum portability.
 Using the
 .c ComplexState
 class will automatically ensure the inclusion of the appropriate header
@@ -716,11 +731,9 @@ can be set from an
 and a
 .c StringState
 can be set from a
-.c char* .
-Be careful, in the latter case, to be sure that the memory pointed
-to by the
 .c char*
-is persistent.
+or
+.c "const char*" .
 .H2 "Array States"
 .pp
 The
@@ -815,7 +828,7 @@ defstar {
 	desc {
 A Finite Impulse Response (FIR) filter.
 	}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { E. A. Lee }
 	input {
 		name {signalIn}
@@ -833,21 +846,21 @@ A Finite Impulse Response (FIR) filter.
 		}
 		desc { Filter tap values. }
 	}
-	start {
+	setup {
 		// tell the PortHole the maximum delay we will use
 		signalIn.setSDFParams(1, taps.size() - 1);
 	}
 	go {
 		double out = 0.0;
 		for (int i = 0; i < taps.size(); i++)
-			out += taps[i] * float(signalIn%i);
+			out += taps[i] * double(signalIn%i);
 		signalOut%0 << out;
 	}
 }
 .)c
 .pp
 Notice the
-.c start
+.c setup
 method; this is necessary to allocate a buffer in the input
 .c PortHole
 large enough to hold the particles that are accessed in the
@@ -869,12 +882,12 @@ you can use it with the
 .c star,
 as in:
 .(c
-PTOLEMY: (galaxy foop SinGen)
-PTOLEMY: (star fir FIR)
-PTOLEMY: (star printer Printer)
-PTOLEMY: (connect (foop output)(fir signalIn))
-PTOLEMY: (connect (fir signalOut)(printer input))
-PTOLEMY: (show fir)
+galaxy foop SinGen
+star fir FIR
+star printer Printer
+connect foop output fir signalIn
+connect fir signalOut printer input
+print fir
 Star: mainGalaxy.fir
 	...
 States in the star fir:
@@ -900,8 +913,8 @@ contains the data:
 .)c
 The resulting interpreter commands are:
 .(c
-PTOLEMY: (setstate fir taps "<foo 5.5")
-PTOLEMY: (show fir)
+setstate fir taps "<foo 5.5"
+print fir
 Star: mainGalaxy.fir
 	...
 States in the star fir:
@@ -935,7 +948,7 @@ of the baseclass star.  Sometimes we want to modify some aspect
 of the behavior of a baseclass state in the derived class.  This
 is done by placing calls to member functions of the state in the
 constructor of the derived star.  Useful functions include
-.c setValue
+.c setInitValue
 to change the default value, and
 .c setAttibututes
 and
@@ -968,10 +981,10 @@ The first example is the part of the DE Poisson star preprocessor file.
         destructor {
                 if(random) delete random;
         }
-        start {
+        setup {
                 if(random) delete random;
                 random = new NegativeExpntl(double(meanTime),gen);
-                DERepeatStar :: start();
+                DERepeatStar :: setup();
         }
         go {
 	   ......
@@ -988,7 +1001,7 @@ random numbers; the global variable
 .i gen
 (a poor choice of name, perhaps, but it's there now) is a pointer to it.
 We define a member of \fBNegativeExpntl\fR class and create
-an instance in the \fBstart()\fR
+an instance in the \fBsetup()\fR
 method, not in the constructor since Ptolemy allows you to change the
 seed of the random number.  When the user changes the seed of the
 random number generator, the object pointed to by
@@ -1018,7 +1031,7 @@ This example uses a uniformly distributed random number.
         destructor {
                 if(random) delete random;
         }
-        start {
+        setup {
                 if(random) delete random;
                 random = new Uniform(0,double(output.numberPorts()),gen);
         }
@@ -1032,7 +1045,7 @@ This example uses a uniformly distributed random number.
 You may notice that the two examples above are very similar in nature.
 You can get another kind of distribution for the random numbers, by including
 the appropriate library file in .h file and by creating the instance
-with the right parameters in the \fBstart()\fR method.
+with the right parameters in the \fBsetup()\fR method.
 .H2 "Programming examples"
 .pp
 The following star has no inputs, just an output.
@@ -1101,7 +1114,7 @@ defstar {
 		desc { Gain of the star. }
 	}
 	go {
-		output%0 << double(gain) * (float)(input%0);
+		output%0 << double(gain) * double(input%0);
 	}
 }
 .)c
@@ -1140,7 +1153,7 @@ the same line, separated by tabs.
 	protected {
 		UserOutput output;
 	}
-	start {
+	setup {
 		output.fileName(fileName);
 	}
 

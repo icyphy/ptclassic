@@ -45,7 +45,7 @@ directive, so arbitrary troff formatting commands can be inserted.
 .pp
 To make things clearer, let's
 start with an example, a rectangular pulse star in the file
-.c SDFFloatRect.pl :
+.c SDFRect.pl :
 .(d
 ident {
 /*  Anything put here will appear verbatim in the .cc and .h files
@@ -55,7 +55,7 @@ ident {
 */
 }
 defstar {
-	name { FloatRect }
+	name { Rect }
 	domain { SDF }
 	desc {
 Generates a rectangular pulse of height "height" (default 1.0).
@@ -102,10 +102,10 @@ If needed, a longer explanation would go here.
 .)d
 .pp
 Running the preprocessor on the above file produces the three files
-.c SDFFloatRect.h,
-.c SDFFloatRect.cc
+.c SDFRect.h,
+.c SDFRect.cc
 and
-.c SDFFloatRect.t ;
+.c SDFRect.t ;
 the names are determined
 .i not
 by the input filename but by concatenating the domain and name

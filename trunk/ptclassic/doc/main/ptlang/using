@@ -24,7 +24,7 @@ With this policy, the makefiles can contain the default rules
         .pt.h:
                 ptlang $<
 .)c     
-See the makefile in ~ptolemy/src/example or ~ptolemy/src/domains/sdf/stars
+See the ``common Makefile rules'' file ~ptolemy/common.mk
 for how this can be made to work ``in context''.
 .pp
 The documentation

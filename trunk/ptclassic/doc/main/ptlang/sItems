@@ -138,19 +138,29 @@ author { \fIfirst name, second name and third name\fP }
 .)c
 Any set of characters between the brackets will be interpreted
 as a list of author names.
+.UH acknowledge
+.pp
+.IE "acknowledge { }"
+This optional entry attaches an acknowledgement section to the
+documentation.  The syntax is
+.(c
+acknowledge { \fIarbitrary single line of text\fP }
+.)c
 .UH copyright
 .pp
 .IE "copyright { }"
 This optional entry attaches a copyright notice to the
-.c .h
+.c .h ,
+.c .cc ,
 and
-.c .cc
+.c .t
 files.
 The syntax is
 .(c
 copyright { \fIcopyright information\fP }
 .)c
-For example, we use the following:
+For example, we used to use the following (our lawyers have recently
+caused us to increase the verbosity):
 .(c
 copyright { 1991 The Regents of the University of California }
 .)c
@@ -233,8 +243,9 @@ field is its type, which may be one of
 .c complex ,
 .c intarray ,
 .c floatarray ,
+.c complexarray ,
 or
-.c complexarray .
+.c stringarray .
 Case is ignored for the type argument.
 .pp
 The
@@ -268,12 +279,13 @@ Finally, the
 .c attributes
 keyword specifies state attributes.  At present, two attributes
 .IE "attributes"
-are defined: A_CONSTANT and A_SETTABLE (along with their complements
-A_NONCONSTANT and A_NONSETTABLE).  If a state has the A_CONSTANT attribute,
-then its value is not modified by the run-time code in the star (it is
-up to you as the star writer to ensure that this condition is satisfied).
-States with the A_NONCONSTANT attribute may change when the star is run.
-If a state has the A_SETTABLE attribute, then user interfaces (such as
+are defined for all stars: A_CONSTANT and A_SETTABLE (along with their
+complements A_NONCONSTANT and A_NONSETTABLE).  If a state has the
+A_CONSTANT attribute, then its value is not modified by the run-time code
+in the star (it is up to you as the star writer to ensure that this
+condition is satisfied).  States with the A_NONCONSTANT attribute may
+change when the star is run.  If a state has the A_SETTABLE attribute,
+then user interfaces (such as
 .i pigi )
 will prompt the user for values when directives such as
 .i edit-parameters
@@ -281,12 +293,12 @@ will prompt the user for values when directives such as
 are given.  States without this attribute are not presented to the user;
 such states always start with their default values as the initial value.
 If no attributes are specified, the default is A_CONSTANT|A_SETTABLE.
-If you specify attributes, you
-.i must
-specify the state of both bits: for example, A_NONCONSTANT|A_SETTABLE.
-In the above example, the attributes were equal to the default,
-so the item could have been omitted.
-Attributes are ignored for galaxy states.
+.pp
+Code generation stars use a great number of attributes, many specific
+to the model for which code is being generated.  Read the documentation
+for the appropriate code generation domain to learn more about these.
+.pp
+Attributes are currently ignored for galaxy states.
 .pp
 Mechanisms for accessing and updating states in C++ methods
 associated with a star are explained below, in the section entitled
@@ -318,7 +330,7 @@ specifies the particle type.  The type may be one of
 .c int ,
 .c float ,
 .c complex ,
-.c packet ,
+.c message ,
 or
 .c anytype .
 Again, case does not matter for the type value.  The
@@ -326,7 +338,7 @@ Again, case does not matter for the type value.  The
 item may be omitted; the default type is
 .c anytype .
 For more information on 
-.c packet ,
+.c message ,
 please see the appendix at the end of this section.
 .pp
 The
@@ -344,12 +356,14 @@ of a state, it is preferable to leave out the
 .c numtokens
 specification and to have the
 .c start
-method set the number of tokens (in the SDF domain, this is
+method set the number of tokens (in the SDF domain and most code
+generation domains, this is
 accomplished with the
 .c setSDFParams
 method).
-This item is used primarily in the SDF domain, and is discussed
-further in the documentation of that domain.
+This item is used primarily in the SDF and code generation domains,
+and is discussed
+further in the documentation of those domains.
 .pp
 There is an alternative syntax for the type field of a porthole; this
 syntax is used in connection with ANYTYPE to specify a connection
@@ -453,21 +467,27 @@ file.  Since the destructor for all stars is virtual, this is only a
 win when the star is used as a base for derivation.
 .UH start
 .pp
-.IE "start { }"
+.IE "setup { }"
 This item defines the
-.c start()
+.c setup()
 method, which is called every time the simulation is restarted.  Syntax:
 .(c
-start { \fIbody\fP }
+setup { \fIbody\fP }
 .)c
 The optional keyword
 .c inline
 may appear before the
-.c start
+.c setup
 keyword.
 It is common for this method to set parameters of input and output
 portholes, and to initialize states.
 The code syntax for doing this is explained below.
+.pp
+The alternative keyword
+.c start
+is accepted instead of
+.c setup
+for backward compatibility with previous releases.
 .UH go
 .pp
 .IE "go { }"
@@ -516,6 +536,18 @@ The optional keyword
 may appear before the
 .c exectime
 keyword.
+.UH "codeblock"
+.pp
+.IE "codeblock { }"
+Codeblocks are parametized blocks of code for use in code generation
+stars.  Their use and format is discussed in detail in the documentation
+for code generation domains.  Syntax:
+.(c
+codeblock {
+	code
+	...
+}
+.)c
 .UH "public, protected, private"
 .pp
 .IE "public { }"
