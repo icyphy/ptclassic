@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1995-1998 The Regents of the University of California.
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -35,7 +35,7 @@
 ROOT =		../../..
 
 # True source directory
-VPATH =		$(ROOT)/edit/graphedit/demos
+VPATH =		$(ROOT)/edit/graphedit/demo
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
