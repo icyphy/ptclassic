@@ -62,6 +62,12 @@ class ::tycho::WelcomeMessage {
 
     constructor {args} {}
 
+    ##########################################################################
+    ####                       protected methods                          ####
+
+    # Access the "stacktrace" preferences
+    #protected method preference {mode args}
+
     # Indicator of whether the gif image has been created.
     private variable tychogifexists 0
 }
@@ -72,13 +78,17 @@ class ::tycho::WelcomeMessage {
 body ::tycho::WelcomeMessage::constructor {args} {
 
     global ::TYCHO
-    # An option -palette 3/3/2 below restricts the palette,
-    # but it is better to restrict it in the source.
-    if {!$tychogifexists} {
-	image create photo tychogif \
-		-file [ file join $TYCHO kernel img tychologo.gif]
+    set slowNetwork [preference get slowNetwork]
+
+    if {$slowNetwork == 0} {  
+	# An option -palette 3/3/2 below restricts the palette,
+	# but it is better to restrict it in the source.
+	if {!$tychogifexists} {
+	    image create photo tychogif \
+		    -file [ file join $TYCHO kernel img tychologo.gif]
+	}
+	configure -image tychogif
     }
-    configure -image tychogif
 
     # Pack the copyright button.
     addButton copyright -text "Copyright" -command \
@@ -124,3 +134,19 @@ body ::tycho::WelcomeMessage::constructor {args} {
     configure -data $html
     configure -scrollbar 0
 }
+
+#####################################################################
+#####################################################################
+####                     protected methods                       ####
+
+
+#####################################################################
+#### preference
+# Access the preferences associated with this widget. This method
+# overrides the default method in ::tycho::TWidget to access the
+# "misc" preferences.
+#
+#body ::tycho::WelcomeMessage::preference {mode args} {
+#    eval ::tycho::preference $mode "misc" $args
+#}
+
