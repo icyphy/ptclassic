@@ -16,9 +16,8 @@ $Id$
 ***********************************************************************/
 
 #include "Domain.h"
-#include "Target.h"
+#include "BDFTarget.h"
 #include "KnownTarget.h"
-#include "BDFScheduler.h"
 #include "BDFWormhole.h"
 #include "BDFConnect.h"
 #include "BDFWormConnect.h"
@@ -55,21 +54,7 @@ public:
 // declare a prototype
 static BDFDomain proto;
 
-// declare the default Target object
-
-class BDFTarget : public Target {
-public:
-	BDFTarget() : Target("default-BDF", "DataFlowStar",
-			     "default BDF target") {
-		LOG_NEW; setSched(new BDFScheduler);
-	}
-	~BDFTarget() { LOG_DEL; delSched();}
-	Block* clone() const;
-};
-
-Block* BDFTarget::clone() const {
-	LOG_NEW; return new BDFTarget;
-}
+// declare a prototype default target object.
 
 static BDFTarget defaultBDFtarget;
 static KnownTarget entry(defaultBDFtarget,"default-BDF");

@@ -207,12 +207,12 @@ StringList& operator+=(StringList& msg, const BoolFraction& f) {
 ostream& operator<<(ostream& o, const BoolTerm& t) {
 	StringList q;
 	q += t;
-	o << (const char *)q;
+	return o << q;
 }
 
 ostream& operator<<(ostream& o, const BoolFraction& f) {
 	StringList q;
 	q += f;
-	o << (const char *)q;
+	return o << q;
 }
 

@@ -2,16 +2,10 @@ static const char file_id[] = "BDFScheduler.cc";
 #include "type.h"
 #include "BDFScheduler.h"
 #include "BDFStar.h"
-#include "BDFConnect.h"
-#include "SDFStar.h"
 #include "BDFSchList.h"
-#include "Fraction.h"
-#include "Output.h"
-#include "StringList.h"
 #include "FloatState.h"
 #include "Geodesic.h"
 #include "GalIter.h"
-#include "ParticleStack.h"
 #include "ConstIters.h"
 
 /**************************************************************************
@@ -150,6 +144,7 @@ int BDFScheduler::prepareGalaxy(Galaxy& galaxy) {
 	nPorts = setPortIndices(galaxy);
 	// turn on debugging if there is a state named debug
 	if (galaxy.stateWithName("debug")) debug = TRUE;
+	return TRUE;
 }
 
 int BDFScheduler::checkStars(Galaxy& galaxy) {
@@ -166,16 +161,15 @@ int BDFScheduler::checkStars(Galaxy& galaxy) {
 	// make sure they are of the right domain.
 
 	while ((s = nextStar++) != 0) {
-		if (s->isA("BDFStar")) 
-			initInfoBDF (*s);
-		else if (s->isA("SDFStar"))
-			initInfoSDF (*s);
+		if (s->isA("BDFStar") || s->isA("SDFStar"))
+			initInfo (*s);
 		else {
 			Error::abortRun(*s, " is not an SDF or BDF star");
 			invalid = TRUE;
 			return FALSE;
 		}
 	}
+	return TRUE;
 }
 
 int BDFScheduler::computeSchedule(Galaxy& galaxy) {
@@ -246,7 +240,7 @@ int BDFScheduler::computeSchedule(Galaxy& galaxy) {
 				runResult = addIfWeCan(*s,deferredFiring);
 				if (runResult == 0)
 					starFiredOnThisPass = TRUE;
-			} while (repeatedFiring && (runResult == 0));
+			} while (runResult == 0);
 		}
 		
 		// If the deferred firing option is set, we must now schedule
@@ -766,71 +760,65 @@ BDFPortSchedInfo::BDFPortSchedInfo() : num(0), assoc(0), relDelay(0), geo(0),
 // In this function and the next, it is assumed that the info structure
 // has the values set in the constructor.
 
-void BDFScheduler::initInfoBDF(const Star& star) {
-	BDFStarSchedInfo& sinfo = info(star);
-	CBlockPortIter nextPort(star);
-	BDFPortHole* p;
-	while ((p = (BDFPortHole*)nextPort++) != 0) {
-		BDFPortSchedInfo& pinfo = info(*p);
-		pinfo.num = p->numberTokens;
-		pinfo.assoc = p->assocBoolean;
-		pinfo.relation = p->relation;
-		if (pinfo.assoc &&
-		    (pinfo.relation == TRUE || pinfo.relation == FALSE))
-			sinfo.numToksConst = FALSE;
-		pinfo.traceBack (*p);
-		BDFPortSchedInfo& farInfo = info(*p->far());
-		if (farInfo.geo) pinfo.geo = farInfo.geo;
-		else pinfo.geo =
-			new SimGeo (FALSE,p->myGeodesic->numInitialParticles);
+void BDFScheduler::initInfo(Star& star) {
+	BlockPortIter nextPort(star);
+	if (star.isItWormhole()) {
+		// for now, assume wh has SDF behavior
+		// design problem????
+		PortHole* p;
+		while ((p = nextPort++) != 0)
+			commonPortInfo(*p);
+		return;
+	}
+	else {
+		BDFStarSchedInfo& sinfo = info(star);
+		DFPortHole* p;
+		while ((p = (DFPortHole*)nextPort++) != 0) {
+			commonPortInfo(*p);
+			BDFPortSchedInfo& pinfo = info(*p);
+			pinfo.assoc = p->assocPort();
+			pinfo.relation = p->assocRelation();
+			if (conditional(*p))
+				sinfo.numToksConst = FALSE;
+			else
+				pinfo.traceBack (*p);
+		}
 	}
 }
 
-// function to initialize information for a SDF star (arg is assumed to
-// really be a SDFStar -- important!)
-
-void BDFScheduler::initInfoSDF(const Star& star) {
-	BDFStarSchedInfo& sinfo = info(star);
-	CBlockPortIter nextPort(star);
-	SDFPortHole* p;
-	while ((p = (SDFPortHole*)nextPort++) != 0) {
-		BDFPortSchedInfo& pinfo = info(*p);
-		pinfo.num = p->numberTokens;
-		BDFPortSchedInfo& farInfo = info(*p->far());
-		if (farInfo.geo) pinfo.geo = farInfo.geo;
-		else pinfo.geo =
-			new SimGeo (FALSE,p->myGeodesic->numInitialParticles);
-	}
+// initialize the parts that work for any type of porthole.
+void BDFScheduler::commonPortInfo(PortHole& port) {
+	BDFPortSchedInfo& pinfo = info(port);
+	pinfo.num = port.numXfer();
+	BDFPortSchedInfo& farInfo = info(*(port.far()));
+	// create the simulated geodesic, or attach to the existing one.
+	if (farInfo.geo) pinfo.geo = farInfo.geo;
+	else pinfo.geo = new SimGeo (FALSE,port.numTokens());
 }
 
-// this function traces all the assocBooleans and relations back
+// this function traces all the assocPort()s and relations back
 // to find the origin of a signal.
-void BDFPortSchedInfo::traceBack (const BDFPortHole& port) {
+void BDFPortSchedInfo::traceBack (DFPortHole& port) {
 	relDelay = 0;
-	if (port.assocBoolean == 0 ||
-	    (port.relation != TRUE && port.relation != FALSE)) {
+	if (!conditional(port)) {
 		finalAssoc = 0;
 		neg = 0;
 		return;
 	}
 // trace back the signal
-	int negated = !port.relation;
-	PortHole* where = port.assocBoolean;
+	int negated = !port.assocRelation();
+	PortHole* where = port.assocPort();
 	while (1) {
-		relDelay += where->myGeodesic->numInitialParticles;
-		PortHole* fp = where->far();
+		relDelay += where->numTokens();
+		DFPortHole* fp = (DFPortHole*)where->far();
 // see if BDF: if so, look for BDF_SAME, BDF_COMPLEMENT
-		if (strcmp (fp->parent()->domain(), "BDF") == 0) {
-			BDFPortHole* bfp = (BDFPortHole*)fp;
-			if (!bfp->assocBoolean) break;
-			if (bfp->relation == BDF_SAME) {
-				where = bfp->assocBoolean;
-			}
-			else if (bfp->relation == BDF_COMPLEMENT) {
-				where = bfp->assocBoolean;
-				negated = !negated;
-			}
-			else break;
+		if (!fp->assocPort()) break;
+		if (fp->assocRelation() == BDF_SAME) {
+			where = fp->assocPort();
+		}
+		else if (fp->assocRelation() == BDF_COMPLEMENT) {
+			where = fp->assocPort();
+			negated = !negated;
 		}
 		else break;
 	}

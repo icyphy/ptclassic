@@ -15,7 +15,7 @@ Mostly copied from SDFWormhole.cc
 #include "BDFWormhole.h"
 #include "BDFScheduler.h"
 #include "StringList.h"
-#include "Output.h"
+#include "Error.h"
 #include <stream.h>
 
 extern Error errorHandler;

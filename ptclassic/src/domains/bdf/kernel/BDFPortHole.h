@@ -5,7 +5,7 @@ $Id$
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer:  E. A. Lee and D. G. Messerschmitt
+ Programmer:  J. Buck
  Date of creation: 5/29/90, J. Buck
 
 This file contains definitions of BDF-specific PortHole classes.
@@ -13,7 +13,12 @@ This file contains definitions of BDF-specific PortHole classes.
 ******************************************************************/
 #ifndef _BDFConnect_h
 #define _BDFConnect_h 1
-#include "Connect.h"
+
+#ifdef __GNUG__
+#pragma interface
+#endif
+
+#include "SDFConnect.h"
 
 /*****************************************************************
 BDF: Synchronous Data Flow generalized to handle booleans
@@ -36,29 +41,38 @@ constructs such as Switch and Select are also permitted.
 // Contains all the special features required for
 //   synchronous dataflow (BDF)
 
-// note: FALSE = 0, TRUE = 1 are declared elsewhere.
-const int BDF_SAME = 2;
-const int BDF_COMPLEMENT = 3;
+// see below for meanings of relation codes.
+enum BDFRelation {
+	BDF_NONE = -1,
+	BDF_FALSE = 0,
+	BDF_TRUE = 1,
+	BDF_SAME = 2,
+	BDF_COMPLEMENT = 3 };
 
-class BDFPortHole : public PortHole
+
+class BDFPortHole : public DFPortHole
 {
-public:
-	// number of tokens produced by the porthole
-	unsigned numberTokens;
-
+private:
 	// if given, points to an associated boolean signal;
 	// tokens are only produced/consumed when that signal is true
-	PortHole* assocBoolean;
+	PortHole* pAssocPort;
 
 	// "relation" specifies the relation of this porthole with the
-	// assocBoolean porthole (if it is non-null).  There are four
-	// possibilities:
-	// TRUE	- produces/consumes data only when assocBoolean is true
-	// FALSE - produces/consumes data only when assocBoolean is false
+	// assocPort porthole (if it is non-null).  There are five
+	// possibilities for BDF ports:
+	// BDF_NONE - no relationship
+	// BDF_TRUE - produces/consumes data only when assocBoolean is true
+	// BDF_FALSE - produces/consumes data only when assocBoolean is false
 	// BDF_SAME - signal is logically the same as assocBoolean
 	// BDF_COMPLEMENT - signal is the logical complemnt of assocBoolean
+
 	// for the latter two cases data are always moved.
-	int relation;
+
+	BDFRelation relation;
+public:
+	PortHole* assocPort() { return pAssocPort;}
+
+	int assocRelation() const { return relation;}
 
         // The setPort function is redefined to take one more optional
         // argument, a reference to a BDFSigInfo object giving information
@@ -68,22 +82,19 @@ public:
                           DataType type = FLOAT,
 			  unsigned numTokens = 1,
 			  PortHole* assocBool = 0,
-			  int relation = TRUE,
-			  int delay = 0) {
-		PortHole::setPort(portName,parent,type);
-		return setBDFParams(numTokens,assocBool,relation,delay);
-	}
+			  BDFRelation relation = BDF_NONE,
+			  int delay = 0);
 
 	// Function to alter BDF values.
 	PortHole& setBDFParams(unsigned numTokens = 1,
 			  PortHole* assocBool = 0,
-			  int relation = TRUE,
+			  BDFRelation relation = BDF_NONE,
 			  int delay = 0);
 
 	// Function to alter BDF values (alternate form)
 	PortHole& setBDFParams(unsigned numTokens,
 			  PortHole& assocBool,
-			  int relation = TRUE,
+			  BDFRelation relation = BDF_NONE,
 			  int delay = 0) {
 		return setBDFParams(numTokens,&assocBool,relation,delay);
 	}
@@ -139,7 +150,7 @@ public:
         // class MultiBDFPort
         //////////////////////////////////////////
  
-// Synchronous dataflow MultiPortHole
+// Boolean dataflow MultiPortHole
  
 class MultiBDFPort : public MultiPortHole {
 public:
@@ -150,7 +161,7 @@ public:
 			       DataType type = FLOAT,
 			  unsigned numTokens = 1,
 			  PortHole* assocBool = 0,
-			  int rel = FALSE,
+			  BDFRelation rel = BDF_NONE,
 			  int del = 0) {
 		MultiPortHole::setPort(portName,parent,type);
 		numberTokens = numTokens;
@@ -160,7 +171,7 @@ public:
 		return *this;
 	}
 	void setBDFParams(unsigned n = 1, PortHole* assoc = 0,
-			  int rel = TRUE, int del = 0) {
+			  BDFRelation rel = BDF_NONE, int del = 0) {
 		numberTokens = n;
 		assocBoolean = assoc;
 		relation = rel;
@@ -168,7 +179,7 @@ public:
 	}
 	// alternate version with reference arg.
 	void setBDFParams(unsigned n, PortHole& assoc,
-			  int rel = TRUE, int del = 0) {
+			  BDFRelation rel = BDF_NONE, int del = 0) {
 		numberTokens = n;
 		assocBoolean = &assoc;
 		relation = rel;
@@ -184,13 +195,20 @@ protected:
 	PortHole* assocBoolean;
 
 	// specifies relation to the assocBoolean signal (see BDFPortHole)
-	int relation;
+	BDFRelation relation;
 
 	// delay args for portholes
 	int delay;
  
 
 };
+
+// test to see if a BDF/SDF port is conditional
+inline int conditional(const DFPortHole& p) {
+	int r = p.assocRelation();
+	return (r == BDF_TRUE || r == BDF_FALSE);
+}
+
 
         //////////////////////////////////////////
         // class MultiInBDFPort

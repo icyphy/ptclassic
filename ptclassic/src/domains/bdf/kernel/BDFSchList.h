@@ -15,6 +15,10 @@ $Id$
 
 *******************************************************************/
 
+#ifdef __GNUG__
+#pragma interface
+#endif
+
 #include "BDFBool.h"
 #include "Star.h"
 #include "Connect.h"
