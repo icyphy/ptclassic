@@ -50,7 +50,7 @@
 # This class defines a combination of an HTML widget and a text widget
 # which will eventually be used for more efficient class browsing.
 #  
-# Data is stored in a <a href="$TYCHO/kernel/doc/codeDoc/Class.html">
+# Data is stored in a <a href="$TYCHO/kernel/doc/codeDoc/Class.idoc">
 # ::tycho::Class</a> model. The model is in turn generated from the code.
 # 
 # IDoc supports any language that can be encoded into a ::tycho::Class
@@ -128,8 +128,11 @@ class ::tycho::IDoc {
     ###################################################################
     ####                      public methods                       ####
     
-    # Return a description of the current class.
-    public method describe {}
+    # Return a description of the main or given class.
+    public method describe {{class {}}}
+
+    # Make the fonts in all FIMXE: widgets smaller.
+    public method downSize {}
 
     # Place a ghost handle a certain number of pixels from the actual one.
     public method ghostHandle {horizontal pixels}
@@ -138,15 +141,27 @@ class ::tycho::IDoc {
     public method insertData {data}
     
     # Insert HTML into myHtml(Top or Bottom) widget
-    public method putHtml {data {top 1}}
+    public method putHtml {class data {top 1}}
 
     # Resize the appropriate frame.
     public method resizeFrame {horizontal pixels}
+    
+    # Make the fonts in all FIMXE: widgets bigger.
+    public method upSize {}
+
+    ###################################################################
+    ####                      public procs                         ####
+
+    # Return the filename of the documentation of the given class.
+    public method docFile {classname}
 
     ###################################################################
     ####                      protected variables                  ####
-  
-    # Current ::tycho::Class
+
+    # The name of the currently displayed class (others are related to this)
+    protected variable mainClass
+
+    # Array of ::tycho::Class objects indexed by class -> myClass(::foo::bar)
     protected variable myClass
    
     # Internal contents widget
@@ -161,7 +176,13 @@ class ::tycho::IDoc {
     # Internal HTML widget for user-chosen documentation
     protected variable myHtmlBottom
 
-    # Language of current myClass
+    # Data currently shown in bottom HTML widget.
+    protected variable myBottomData ""
+
+    # Data currently shown in top HTML widget.
+    protected variable myTopData ""
+
+    # Language of current class (should be same for all classes loaded)
     protected variable language
 
     # Location where mouse button was pressed.
@@ -171,12 +192,15 @@ class ::tycho::IDoc {
     ####                      private methods                      ####
 
     # Bind a description to <enter>ing a label.
-    private method bindDesc {item label}
+    private method bindDesc {class item label}
   
     # Bind an explanation to button 1 clicking a label.
-    private method bindExpl {item label}
+    private method bindExpl {class item label}
 
-    # Display the contents of myClass in contents widget.
+    # Delete the classes in the myClass array and unset the array.
+    private method deleteClasses {}
+
+    # Display the contents of $myClass($mainClass) in contents widget.
     private method display {}
 
     # Display the proper methods/procedures in the contents widget.
@@ -186,7 +210,7 @@ class ::tycho::IDoc {
     private method displayVar {protection}
 
     # Format the explanation of the given item in HTML.
-    private method formatExpl {item type}
+    private method formatExpl {class item type}
 
     # Calculate a new -relwidth parameter (doesn't reset it)
     private method newRelWidth {pizels}
@@ -194,12 +218,14 @@ class ::tycho::IDoc {
     # Calculate a new -relheight parameter (doesn't reset it)
     private method newRelHeight {pixels}
 
+    # Reload the data in HTML widgets after an event has cleared them.
+    private method resetHtml {{top 1}}
+
     # Setup the resizing handles to behave properly.
     private method setupHandles {}
      
     # Preference function for this class
     private method preference {mode args}
-
 }
 
 #########################################################################
@@ -374,6 +400,19 @@ body ::tycho::IDoc::constructor {args} {
         $myMenubar delete "SaveAs..."
         $myMenubar delete "Evaluate"
         $myMenubar delete "Revision Control..."
+        
+        $myMenubar addMenu Special -after Window -underline 0
+        # Add a way to get the text description.
+        $myMenubar command Describe Special \
+                -underline 0 -command "::tycho::inform \[$this describe\]"
+       
+        $myMenubar addMenu Format -after Special -underline 0
+        # Add font size control
+        $myMenubar command "Bigger Font" Format -underline 0\
+                -accelerator "C-+" -command "$this upSize"
+        
+        $myMenubar command "Smaller Font" Format -underline 0\
+                -accelerator "C--" -command "$this downSize"
     }
 
     set myDisplayer [[$this displayer] windowName]
@@ -392,7 +431,11 @@ body ::tycho::IDoc::constructor {args} {
             -privatecolor privateColor \
             -optioncolor optionColor 
 
-            
+    # Bindings
+    # font size control
+    bind $myDisplayer <Control-equal> "$this upSize; break"
+    bind $myDisplayer <Control-plus> "$this upSize; break"
+    bind $myDisplayer <Control-minus> "$this downSize; break"
     
     # Configure the handles
     setupHandles
@@ -409,10 +452,23 @@ body ::tycho::IDoc::constructor {args} {
 
 #####################################################################
 #### describe 
-# Return a description of the current class by calling myClass describe.
+# Return a description of the current class by calling describe. The 
+# class must be loaded. Calling with no arguments describes the mainClass.
 #
-body ::tycho::IDoc::describe {} {
-    return [$myClass describe]
+body ::tycho::IDoc::describe {{class {}}} {
+    if {$class == {}} {
+        set class $mainClass
+    }
+    return [$myClass($class) describe]
+}
+
+#####################################################################
+#### downSize
+# 
+body ::tycho::IDoc::downSize {} {
+    $myHtmlTop downSize
+    $myHtmlBottom downSize
+    resetHtml 2
 }
 
 #####################################################################
@@ -458,12 +514,14 @@ body ::tycho::IDoc::ghostHandle {horizontal pixels} {
 #
 body ::tycho::IDoc::insertData {data} {
     if [getReadOnly] {bell; return}
-    catch {delete object myClass}
-    set myClass [::tycho::Class [::tycho::autoName class]]
-    $myClass read string "$data"
-    set language [$myClass modelcget -language]
+    deleteClasses
+    set tempClass [::tycho::Class [::tycho::autoName class]]
+    $tempClass read string "$data"
+    set language [$tempClass modelcget -language]
+    set mainClass [$tempClass modelcget -name]
+    set myClass($mainClass) $tempClass
     display
-    putHtml [$myClass get annotation explanation]
+    putHtml $mainClass [$tempClass get annotation explanation]
 }
 
 #########################################################################
@@ -471,27 +529,29 @@ body ::tycho::IDoc::insertData {data} {
 # Load a portion of HTML into the proper HTML widget. Add tags to format
 # properly.
 #
-body ::tycho::IDoc::putHtml {data {top 1}} {
+body ::tycho::IDoc::putHtml {class data {top 1}} {
     switch $top {
         1 {
-            $myHtmlTop clear
-            $myHtmlTop insertData "
+            set myTopData " 
                <head>
-               <title>Class [$myClass modelcget -name]</title>
+               <title>Class [$myClass($class) modelcget -name]</title>
                </head>
                <body bgcolor=\"$itk_option(-bgcolor)\">
                $data
                </body>
                </html>"
+            resetHtml 1
+            $myHtmlTop config -file [docFile $class].base
         }
         0 {
-            $myHtmlBottom clear
-            $myHtmlBottom insertData "
+            set myBottomData "
                <html>
                <body bgcolor=\"$itk_option(-bgcolor)\">
                $data
                </body>
                </html>"
+            resetHtml 0
+            $myHtmlBottom config -file [docFile $class].base
         }
     }
 }
@@ -508,6 +568,27 @@ body ::tycho::IDoc::resizeFrame {horizontal pixels} {
     }
 }
 
+#####################################################################
+#### upSize
+# 
+body ::tycho::IDoc::upSize {} {
+    $myHtmlTop upSize
+    $myHtmlBottom upSize
+    resetHtml 2
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public procs                         ####
+
+#####################################################################
+#### docFile
+# 
+#
+body ::tycho::IDoc::docFile {classname} {
+    return [$this cget -file]
+}
+
     ###################################################################
     ###################################################################
     ####                      private methods                      ####
@@ -518,7 +599,9 @@ body ::tycho::IDoc::resizeFrame {horizontal pixels} {
 # the display of the description of the given item in the statusbar
 # if such a description exists
 #
-body ::tycho::IDoc::bindDesc {item label} {
+body ::tycho::IDoc::bindDesc {class item label} {
+    set classModel $myClass($class)
+
     # get the type of the label
     switch [string range $label end end] {
         "\p" {set type method}
@@ -527,7 +610,7 @@ body ::tycho::IDoc::bindDesc {item label} {
         default {set type {}}
     }
 
-    if ![catch {set desc [$myClass get annotation $item.description $type]}] {
+   if ![catch {set desc [$classModel get annotation $item.description $type]}] {
         $myContents bind $label <Enter> \
                 [code "$this putStatus \{$desc\}"]
         $myContents bind $label <KeyRelease-Shift_L> \
@@ -546,7 +629,7 @@ body ::tycho::IDoc::bindDesc {item label} {
 # the explanation includes extra information besides the
 # actual explanation field of the item
 #
-body ::tycho::IDoc::bindExpl {item label} {
+body ::tycho::IDoc::bindExpl {class item label} {
     # get the type of the label
     switch [string range $label end end] {
         "\p" {set type method}
@@ -556,34 +639,51 @@ body ::tycho::IDoc::bindExpl {item label} {
     }
 
     # format explanation
-    set expl [formatExpl $item $type]
+    set expl [formatExpl $class $item $type]
 
     # bind explanation to button 1 click
     $myContents bind $label <Button-1> \
-            [code "$this putHtml {$expl} {0}"]
+            [code "$this putHtml $class {$expl} {0}"]
+}
+
+###########################################################################
+#### deleteClasses
+# Unset the array of classes and delete each class object.
+#
+body ::tycho::IDoc::deleteClasses {} {
+    if ![info exists myClass] {
+        return
+    }
+
+    foreach class [array names myClass] {
+        catch {delete object $myClass($class)}
+    }
+    unset myClass
 }
 
 ###########################################################################
 #### display
-# display the contents of myClass in the myContents widget
+# display the contents of myClass($mainClass) in the myContents widget
 #
 body ::tycho::IDoc::display {} {
-    
+    set classModel $myClass($mainClass)
+
     # clear the contents widget
     $myContents clear
 
     # insert the class name
     $myContents appendlabel class \
-            -text [$myClass modelcget -name] \
+            -text $mainClass \
             -font [$this cget -headfont]
 
     $myContents bind class <Button-1> \
-            [code "$this putHtml \{[$myClass get annotation explanation]\}"]
+            [code "$this putHtml \
+            $mainClass \{[$classModel get annotation explanation]\}"]
 
     # Class description is optional
-    if ![catch {$myClass get annotation description}] {
+    if ![catch {$classModel get annotation description}] {
         $myContents bind class <Enter> [code \
-                "$this putStatus \{[$myClass get annotation description]\}"]
+                "$this putStatus \{[$classModel get annotation description]\}"]
         $myContents bind class <Leave> [code \
                 "$this putStatus {}"]
     }
@@ -605,6 +705,7 @@ body ::tycho::IDoc::display {} {
 # widget in according to the $language variable.
 #
 body ::tycho::IDoc::displayMeth {protection} {
+    set classModel $myClass($mainClass)
 
     switch $language {
         Itcl {
@@ -613,7 +714,7 @@ body ::tycho::IDoc::displayMeth {protection} {
             
             # Methods
             set subnames {}
-            foreach method [$myClass methods \
+            foreach method [$classModel methods \
                     -protection $protection -scope instance] {
                 # put label into contents widget
                 $myContents appendlabel $method\m \
@@ -621,8 +722,8 @@ body ::tycho::IDoc::displayMeth {protection} {
                         -font [$this cget -bodyfont] \
                         -fg [$this cget -$protection\color]
                 # setup bindings on <Enter> and <B1-Click>
-                bindDesc $method $method\m
-                bindExpl $method $method\m
+                bindDesc $mainClass $method $method\m
+                bindExpl $mainClass $method $method\m
                 lappend subnames $method\m
             }
             # insert panel if any methods found
@@ -635,7 +736,7 @@ body ::tycho::IDoc::displayMeth {protection} {
 
             # Procs
             set subnames {}
-            foreach method [$myClass methods \
+            foreach method [$classModel methods \
                     -protection $protection -scope class] {
                 # put label into contents widget
                 $myContents appendlabel $method\p \
@@ -643,8 +744,8 @@ body ::tycho::IDoc::displayMeth {protection} {
                         -font [$this cget -bodyfont] \
                         -fg [$this cget -$protection\color]
                 # setup bindings on <Enter> and <B1-Click>
-                bindDesc $method $method\p
-                bindExpl $method $method\p
+                bindDesc $mainClass $method $method\p
+                bindExpl $mainClass $method $method\p
                 lappend subnames $method\p
             }
             # insert panel if any procs found
@@ -657,7 +758,7 @@ body ::tycho::IDoc::displayMeth {protection} {
         }
         default {
             set subnames {}
-            foreach method [$myClass methods \
+            foreach method [$classModel methods \
                     -protection $protection] {
                 # put label into contents widget
                 $myContents appendlabel $method\m \
@@ -665,8 +766,8 @@ body ::tycho::IDoc::displayMeth {protection} {
                         -font [$this cget -bodyfont] \
                         -fg [$this cget -$protection\color]
                 # setup bindings on <Enter> and <B1-Click>
-                bindDesc $method $method\p
-                bindExpl $method $method\p
+                bindDesc $mainClass $method $method\p
+                bindExpl $mainClass $method $method\p
                 lappend subnames $method\p
             }
             # insert panel if any methods found
@@ -686,13 +787,14 @@ body ::tycho::IDoc::displayMeth {protection} {
 # widget in according to the $language variable.
 #
 body ::tycho::IDoc::displayVar {protection} {
+    set classModel $myClass($mainClass)
 
     switch $language {
         Itcl {
             # itcl uses -modifiers itk_option to signify an itk_option.
             # check for itk_options
             set subnames {}
-            foreach variable [$myClass variables \
+            foreach variable [$classModel variables \
                     -protection $protection -modifiers itk_option] {
                 # put label into contents widget
                 $myContents appendlabel $variable\v \
@@ -700,8 +802,8 @@ body ::tycho::IDoc::displayVar {protection} {
                         -font [$this cget -bodyfont] \
                         -fg [$this cget -optioncolor]
                 # setup bindings on <Enter> and <B1-Click>
-                bindDesc $variable $variable\v
-                bindExpl $variable $variable\v
+                bindDesc $mainClass $variable $variable\v
+                bindExpl $mainClass $variable $variable\v
                 lappend subnames $variable\v
             }
             # insert panel if any itk_options found
@@ -713,7 +815,7 @@ body ::tycho::IDoc::displayVar {protection} {
             
             # do other variables
             set subnames {}
-            foreach variable [$myClass variables \
+            foreach variable [$classModel variables \
                     -protection $protection -modifiers {}] {
                 # put label into contents widget   
                 $myContents appendlabel $variable\v \
@@ -721,8 +823,8 @@ body ::tycho::IDoc::displayVar {protection} {
                         -font [$this cget -bodyfont] \
                         -fg [$this cget -$protection\color]
                 # setup bindings on <Enter> and <B1-Click>
-                bindDesc $variable $variable\v
-                bindExpl $variable $variable\v
+                bindDesc $mainClass $variable $variable\v
+                bindExpl $mainClass $variable $variable\v
                 lappend subnames $variable\v
             }
             # insert panel if any variables found
@@ -735,7 +837,7 @@ body ::tycho::IDoc::displayVar {protection} {
         }
         default { 
             set subnames {}
-            foreach variable [$myClass variables \
+            foreach variable [$classModel variables \
                     -protection $protection] {
                 # put label into contents widget   
                 $myContents appendlabel $variable\v \
@@ -743,8 +845,8 @@ body ::tycho::IDoc::displayVar {protection} {
                         -font [$this cget -bodyfont] \
                         -fg [$this cget -$protection\color]
                 # setup bindings on <Enter> and <B1-Click>
-                bindDesc $variable $variable\v
-                bindExpl $variable $variable\v
+                bindDesc $mainClass $variable $variable\v
+                bindExpl $mainClass variable $variable\v
                 lappend subnames $variable\v
             }
             # insert panel if any variables found
@@ -764,15 +866,17 @@ body ::tycho::IDoc::displayVar {protection} {
 # bound to a button 1 click on an item in the contents widget.
 # An item may not have an explanation, but _must_ have a description.
 #
-body ::tycho::IDoc::formatExpl {item type} {
-    if [catch {set expl [$myClass get annotation $item.explanation $type]}] {
-        set expl [$myClass get annotation $item.description $type]
+body ::tycho::IDoc::formatExpl {class item type} {
+    set classModel $myClass($class)
+
+    if [catch {set expl [$classModel get annotation $item.explanation $type]}] {
+        set expl [$classModel get annotation $item.description $type]
     }
     
     set paramlist {}
     if {$type == "method"} {
-        foreach parameter [$myClass parameters $item] {
-            set default [$myClass itemcget parameter \
+        foreach parameter [$classModel parameters $item] {
+            set default [$classModel itemcget parameter \
                     $item.$parameter -default $type]
             if {$default == {}} {
                 lappend paramlist $parameter
@@ -824,6 +928,24 @@ body ::tycho::IDoc::newRelHeight {pixels} {
     }
     
     return $newRelY
+}
+
+#####################################################################
+#### resetHtml
+# When the HTML widget fonts are changed, the HTML widgets go blank,
+# possibly because they attempt to load from their "files". Because 
+# they aren't associated with valid files, they need to be reset
+# manually.
+#
+body ::tycho::IDoc::resetHtml {{top 1}} {
+    switch $top {
+        "0" {$myHtmlBottom insertData $myBottomData}
+        "1" {$myHtmlTop insertData $myTopData}
+        default {
+            $myHtmlTop insertData $myTopData
+            $myHtmlBottom insertData $myBottomData
+        }
+    }
 }
 
 #####################################################################
