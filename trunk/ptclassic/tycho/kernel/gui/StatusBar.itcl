@@ -46,15 +46,18 @@ class ::tycho::StatusBar {
     # The command to call when the Close button is pressed
     itk_option define -closecommand closeCommand CloseCommand {}
 
+    # The text to display in the Close button ("Close" by default)
+    itk_option define -closetext closeText CloseText "Close"
+
+    # The current file status: none, readonly, readwrite, modified
+    itk_option define -filestatus fileStatus FileStatus "none"
+
 
     ###################################################################
     ####                         public methods                    ####
 
     # Set the class type
-    method class {class} {}
-    
-    # Set the file status display
-    method fileStatus {status} {}
+    # method class {class} {}
     
     # Put a string to the status bar
     method puts {string} {}
@@ -62,6 +65,16 @@ class ::tycho::StatusBar {
     # Set the line and column display, and clear the status string
     method lineColumn {line column} {}
 
+    ###################################################################
+    ####                       private variables                   ####
+
+    private variable filestatus readwrite
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Displaythe file status help
+    method helpFileStatus {} {}
 }
 
 
@@ -70,6 +83,45 @@ class ::tycho::StatusBar {
 #
 configbody ::tycho::StatusBar::closecommand {
     $itk_component(closeButton) configure -command $itk_option(-closecommand)
+}
+
+
+#######################################################################
+#### -closetext configuration
+#
+configbody ::tycho::StatusBar::closetext {
+    $itk_component(closeButton) configure -text $itk_option(-closetext)
+}
+
+
+#######################################################################
+#### filestatus configuration
+#
+# The file status display. Valid values
+# are ``readonly,'' ``readwrite,'' and ``modified.''
+#
+# <b>Note</b>: Currently the display consists simply of the letters
+# ``R'' (readonly) or ``M'' (modified). This needs to be replaced
+# with some meaningful icons.
+#
+configbody ::tycho::StatusBar::filestatus {
+    switch -exact $itk_option(-filestatus) {
+	"none" {
+	    $itk_component(fileStatus) configure -text ""
+	}
+	"readonly" {
+	    $itk_component(fileStatus) configure -text "R"
+	}
+	"readwrite" {
+	    $itk_component(fileStatus) configure -text ""
+	}
+	"modified" {
+	    $itk_component(fileStatus) configure -text "M"
+	}
+	default {
+	    error "StatusBar::fileStatus: Invalid option $status"
+	}
+    }
 }
 
 
@@ -99,6 +151,11 @@ body ::tycho::StatusBar::constructor {args} {
 	    -padx 0 -pady 2 \
 	    -side left
 
+    # Bind help to the file status display
+    bind $itk_component(fileStatus) <Enter> [code "%Q helpFileStatus"]
+    bind $itk_component(fileStatus) <Leave> [code "%Q puts {}"]
+
+
     # Create the empty space under the scroll bar
     # FIXME: Need a better way of getting the scroll bar width
     itk_component add packing {
@@ -118,25 +175,25 @@ body ::tycho::StatusBar::constructor {args} {
     }
     pack $itk_component(closeButton) -side right
 
-    # Create the class display
-    itk_component add class {
-	label $itk_interior.class -anchor w \
-		-font [.tychoFonts getFont Helvetica 10] \
-		-borderwidth 1 \
-		-relief raised
-    } {
-	keep -background -cursor
-    }
-    pack $itk_component(class) \
-	    -fill y \
-	    -padx 0 -pady 2 \
-	    -side left
+#     # Create the class display
+#     itk_component add class {
+# 	label $itk_interior.class -anchor w \
+# 		-font [.tychoFonts getFont Helvetica 10] \
+# 		-borderwidth 1 \
+# 		-relief raised
+#     } {
+# 	keep -background -cursor
+#     }
+#     pack $itk_component(class) \
+# 	    -fill y \
+# 	    -padx 0 -pady 2 \
+# 	    -side left
 
     # Create the status output display
     itk_component add mainStatus {
 	label $itk_interior.mainStatus \
 		-anchor w -justify left \
-		-font [.tychoFonts getFont Helvetica 10] \
+		-font [.tychoFonts getFont Helvetica 12] \
 		-borderwidth 1 \
 		-relief raised
     } {
@@ -159,37 +216,28 @@ body ::tycho::StatusBar::constructor {args} {
 #######################################################################
 #### class
 #
-body ::tycho::StatusBar::class {class} {
-    $itk_component(class) configure -text "  $class  "
-}
+#body ::tycho::StatusBar::class {class} {
+#    $itk_component(class) configure -text "  $class  "
+#}
 
 
 #######################################################################
-#### fileStatus
+#### helpFileStatus
 #
-# Set the file status display. Valid values of the _status_ argument
-# are ``readonly,'' ``readwrite,'' and ``modified.''
-#
-# <b>Note</b>: Currently the display consists simply of the letters
-# ``R'' (readonly) or ``M'' (modified). This needs to be replaced
-# with some meaningful icons.
-#
-body ::tycho::StatusBar::fileStatus {status} {
-    switch -exact $status {
+body ::tycho::StatusBar::helpFileStatus {} {
+    switch -exact $itk_option(-filestatus) {
 	"readonly" {
-	    $itk_component(fileStatus) configure -text "R"
+	    puts "Read-only"
 	}
 	"readwrite" {
-	    $itk_component(fileStatus) configure -text ""
+	    puts "Read-write"
 	}
 	"modified" {
-	    $itk_component(fileStatus) configure -text "M"
-	}
-	default {
-	    error "StatusBar::fileStatus: Invalid option $status"
+	    puts "Modified"
 	}
     }
 }
+
 
 
 #######################################################################
@@ -205,7 +253,7 @@ body ::tycho::StatusBar::lineColumn {line column} {
 #### puts
 #
 # Put an arbitrary string to the status bar. To enforce
-# wrap-around, set the wrap-length of the label to its current width
+# wrap-around, set the wrap-length of the label to its current width.
 #
 body ::tycho::StatusBar::puts {string} {
     $itk_component(mainStatus) configure -wraplength \
