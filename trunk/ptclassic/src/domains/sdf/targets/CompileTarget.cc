@@ -25,6 +25,7 @@ a universe.
 
 class CompileTarget : public BaseCTarget {
 public:
+	int setup(Galaxy& g);
 	int run();
 	void wrapup ();
 	Block* clone() const
@@ -48,6 +49,13 @@ private:
 	int writeGalDef(Galaxy& galaxy, const StringList className);
 
 };
+
+int CompileTarget::setup(Galaxy& g) {
+	// This kludge bypasses setup() in CGTarget, which casts
+	// the portholes to CGPortHole.  These casts are no good for
+	// this target, which has SDFPortHole types.
+	return Target::setup(g);
+}
 
 int CompileTarget::writeGalDef(Galaxy& galaxy, const StringList className) {
     // First generate the files that define the galaxies
