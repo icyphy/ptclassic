@@ -45,12 +45,17 @@ and "y" and "z" are defined in the code.
 .pp
 The reflection (or PARCOR) coefficients should be specified
 left to right, K1 to Kn as above.
-.pp
+Using exactly the same coefficients in the
+.c Lattice
+star will result in precisely the inverse transfer function.
 The default reflection coefficients give the following transfer function:
 .EQ
 H(z) ~=~ 1 over { 1 ~-~ 2 z sup -1 ~+~ 1.91z sup -2 ~-~ 0.91z sup -3 ~+~
 0.205z sup -4 } ~.
 .EN
+Hence, the same coefficients in the
+.c Lattice
+star will give transfer function $H sup -1 (z)$.
 .pp
 Note that the definition of reflection coefficients is not quite universal
 in the literature.  The reflection coefficients in references [2] and [3]
