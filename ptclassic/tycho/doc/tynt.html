@@ -37,14 +37,6 @@ Itcl2.2 binaries.
 and Windows, it appears that Tcl scripts edited with the NT
 <CODE>Notebook</CODE> program cannot be sourced with Itcl2.2.
 
-<LI> Tycho cannot access web pages over the net.  Under Unix, the workaround
-is to start up Netscape.  Under NT, this does not work, Netscape starts 
-up, and the following message appears:
- <br>
-
-<CODE>Error: Unable to locate REG.INI in directory C:\Program
-Files\Netscape\Navigator\Program</CODE>
-
 <LI> If you run <CODE>nmake</CODE> from within the Tycho Monitor, then
 any submakes will bring up new windows, and the <CODE>nmake</CODE> output
 will be lost.
@@ -130,21 +122,9 @@ or add <CODE>%tycho%\bin</CODE> to your path and run <CODE>tycho</CODE>
 from the DOS prompt.
 
 <LI> Tycho includes HTML documentation of the Itcl classes that make up
-Tycho.  To save space, these files are not shipped in the Tycho tar
-file, you must build them after untarring the distribution.
+Tycho.  In Tycho0.2.1, these files are shipped with the Tycho distribution.
 
- <P>The
-<A HREF="../kernel/gui/doc/usersGuides/BuilderDialogHelp.html">BuilderDialog</A>
-is an experimental graphical interface to the build process.  The
-BuilderDialog interface will change over time, but you may find it useful
-for building the HTML documentation.  To run the BuilderDialog, choose the
-<CODE>Build Tycho</CODE> submenu choice under the <CODE>Tools</CODE> menu
-choice in the main <CODE>Window</CODE> menu.
 
- <P>Under Unix, the best way to build these files is to run
-<CODE>make install</CODE>.  However, under Windows, a <CODE>make</CODE>
-binary may or may not be present, so running the BuilderDialog
-is usually the best option.
 </OL>
 
 <p>
