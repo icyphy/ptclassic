@@ -19,14 +19,14 @@ include $(ROOT)/mk/config-g++.mk
 # Programs to use
 #
 RANLIB =	ranlib
-# Use gcc
-# Note that you cannot compile vem with gcc, you must use cc.
-# Hopefully, this will go away sometime soon
+# Use gcc everywhere, including octtools
 CC =		gcc
 OPTIMIZER =	-O2
 WARNINGS =	-Wall -Wcast-qual
 GPPFLAGS =	-DUSG -g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
-CFLAGS =	-DUSG -g $(OPTIMIZER)
+# If you are not using gcc, then you might have problems with the WARNINGS flag
+CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
+
 
 #
 # Variables for the linker
