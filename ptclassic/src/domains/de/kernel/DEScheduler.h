@@ -49,7 +49,7 @@ public:
 	int run(Block& galaxy);
 
 	// Display the static schedule for SDF wormholes...
-	StringList displaySchedule(Block& galaxy); 
+	StringList displaySchedule(); 
 
 	// Constructor sets default options
 	DEScheduler () { stopTime = 100.0;}
