@@ -1,6 +1,6 @@
 # Makefile for cgc/vis/devel
 #
-# Copyright (c) 1990- The Regents of the University of California.
+# Copyright (c) 1996-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #
-# @(#)make.template	1.1 8/22/96
+# $Id$
 
 ROOT = ../../../../..
 VPATH = $(ROOT)/src/domains/cgc/vis/devel
