@@ -392,6 +392,7 @@ body ::tycho::EditSearch::find {{start {}}} {
         # priority of the tag so current match is still visible as normal.
 
         $text tag raise currmatch findmatch
+        $text tag raise sel currmatch
         $text tag configure findmatch \
                 -background [stylesheet get text search.background] \
                 -foreground [stylesheet get text search.foreground]    }
