@@ -44,12 +44,12 @@ proc tychoCompareFirst {first second} {
 # Make an index file of the type read by the Tycho IndexBrowser class.
 # The first argument is the name of the index.
 # The second argument is the name of the index file to create.
+# The fourth argument generates a one-level hierarchy if true.
 # The rest of the arguments are any number of file names
 # from which the index should be created.
 #
-proc tychoMkIndex {name filename prependTYCHO args } {
+proc tychoMkIndex {name filename prependTYCHO nested args } {
     #puts "name=$name, filename=$filename files=$args"
-    set entries {}
     foreach file $args {
 	set fd [open $file r]
 	set contents [read $fd]
@@ -59,12 +59,12 @@ proc tychoMkIndex {name filename prependTYCHO args } {
 		!= 0} {
 	    set nm [string range $contents [lindex $matchname 0] \
 		    [lindex $matchname 1]]
+	    set ix [lindex $nm 0]
 	    if { $prependTYCHO != 0} {
-		set entry [list $nm [file join \$TYCHO $file] $nm]
+		lappend entries($ix) [list $nm [file join \$TYCHO $file] $nm]
 	    } else {
-		set entry [list $nm $file $nm]
+		lappend entries($ix) [list $nm $file $nm]
 	    }
-	    lappend entries $entry
 	    set contents [string range $contents [lindex $matchname 1] end]
 	}
     }
@@ -74,8 +74,24 @@ proc tychoMkIndex {name filename prependTYCHO args } {
             Use tycho to view it.</h1> <nothtml"
     puts $fd [list $name]
     puts $fd \{
-    foreach entry [lsort -command tychoCompareFirst $entries] {
-	puts $fd [list $entry]
+    if { $nested } {
+	foreach entry [lsort -command tychoCompareFirst [array names entries]] {
+	    puts $fd \{
+	    puts $fd "$entry"
+	    puts $fd \{
+	    puts $fd [list "$name: $entry"]
+	    puts $fd \{
+	    foreach item $entries($entry) {
+		puts $fd [list $item]
+	    }
+	    puts $fd \}\}\}
+	}
+    } else {
+	foreach entry [lsort -command tychoCompareFirst [array names entries]] {
+	    foreach item $entries($entry) {
+		puts $fd [list $item]
+	    }
+	}
     }
 
     puts $fd \}
@@ -197,7 +213,7 @@ proc tychoStandardIndex {} {
     # cd back in case we have followed links in tychoFindAllHTML
     cd $TYCHO
     eval tychoMkIndex {{Tycho index}} \
-    	    [file join $TYCHO lib idx tycho.idx] 1 $files 
+    	    [file join $TYCHO lib idx tycho.idx] 1 0 $files 
     cd $olddir
 }
 
@@ -216,7 +232,7 @@ proc tychoCodeDocIndex {} {
     # cd back in case we have followed links in tychoFindAllHTML
     cd $TYCHO
     eval tychoMkIndex {{Tycho Itcl Code Index}} \
-	    [file join $TYCHO lib idx codeDoc.idx] 1 $files
+	    [file join $TYCHO lib idx codeDoc.idx] 1 0 $files
     cd $olddir
 }
 
@@ -254,7 +270,7 @@ proc ptolemyStarHTMLIndex { domain outputfilename args} {
 
     set olddir [pwd]
     cd [file dirname [lindex $args 0]]
-    eval tychoMkIndex [list $title] [file tail $outputfilename] 0 $newargs
+    eval tychoMkIndex [list $title] [file tail $outputfilename] 0 0 $newargs
     cd $olddir
 }
 
