@@ -1,7 +1,10 @@
 defstar {
 	name { Ramp }
 	domain { C50 }
-	desc {Ramp generator}
+	desc {
+Generate a ramp signal, starting at "value" (default 0) and
+incrementing by step size "step" (default 1) on each firing.
+	}
 	version { $Id$ }
 	author { A. Baensch }
 	copyright {
@@ -51,7 +54,7 @@ with step size "step" (default 0.001).
 	add	*,15,AR5			;Accu = sum + step
         sach    *,1				;Accu => sum
 	}
-	
+
 	setup {
 		sum=value;
 	}
@@ -62,6 +65,3 @@ with step size "step" (default 0.001).
 		return 8;
 	}
 }
-
-
-
