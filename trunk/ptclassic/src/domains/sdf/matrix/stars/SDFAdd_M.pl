@@ -41,19 +41,38 @@ defstar {
           (Binput%0).getMessage(Bpkt);
           const FloatMatrix& Bmatrix = *(const FloatMatrix *)Bpkt.myData();
 
-          // just check that A's dimensions match the state info.
-          // the operator + on matricies will check that A matches B
-          if((Amatrix.numRows() != int(numRows)) ||
-             (Amatrix.numCols() != int(numCols))) {
-            Error::abortRun(*this,"Dimension size of FloatMatrix inputs do ",
-                                  "not match the given state parameters.");
-            return;
+          // check for "null" matrix inputs, caused by delays
+          if(Apkt.empty() && Bpkt.empty()) {
+            // both empty, return a zero matrix with the given dimensions
+            FloatMatrix& result = *(new FloatMatrix(int(numRows),int(numCols)));
+            result = 0.0;
+            output%0 << result;
           }
+          else if(Apkt.empty()) {
+            // Amatrix is empty but B is not, return just B
+            output%0 << Bmatrix;
+          }
+          else if(Bpkt.empty()) {
+            // Bmatrix is empty but A is not, return just A
+            output%0 << Amatrix;
+          }
+          else {
+            // Amatrix and Bmatrix both valid
 
-          // do matrix addition
-          FloatMatrix *result = new FloatMatrix(int(numRows),int(numCols));
-          *result = Amatrix + Bmatrix;
-          output%0 << *result;
+            // just check that A's dimensions match the state info.
+            // the operator + on matricies will check that A matches B
+          
+            if((Amatrix.numRows() != int(numRows)) ||
+               (Amatrix.numCols() != int(numCols))) {
+              Error::abortRun(*this,"Dimension size of FloatMatrix inputs do ",
+                                    "not match the given state parameters.");
+              return;
+            }
+
+            // do matrix addition
+            FloatMatrix& result = *(new FloatMatrix(int(numRows),int(numCols)));
+            result = Amatrix + Bmatrix;
+            output%0 << result;
+          }
 	}
 }
-
