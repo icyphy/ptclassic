@@ -63,6 +63,7 @@ GT_SRC = ../$(ROOT)/src/thread/gthreads
 GT_LIBS = libgthreads.a
 GT_CC = gcc
 GT_CFLAGS =	-DASM_SETJMP -DNOERR_CHECK -DSTACK_CHECK -DSIGNAL_STACK \
+		-DCLEANUP_HEAP -DC_CONTEXT_SWITCH \
 		-DSRP -DC_INTERFACE
 GT_COMP_ASM = $$(CC) $$(INC1) $$(INC2) $$(CFLAGS) -c $$*.S
 
