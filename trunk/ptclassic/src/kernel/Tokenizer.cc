@@ -159,9 +159,9 @@ static int slash_interp(char c) {
 }
 
 void
-Tokenizer::push(istream* s,const char* f) {
+Tokenizer::push(istream* s, const char* f) {
 // save existing context on stack
-	LOG_NEW; stack = new TokenContext(curfile,strm,line_num,stack);
+	LOG_NEW; stack = new TokenContext(curfile, strm, line_num, stack);
 // save filename in dynamic memory, and set curfile to it.
 	curfile = savestring(f);
 	strm = s;
@@ -175,7 +175,7 @@ Tokenizer::pop() {
 	if (depth == 0) return;
 	TokenContext* t = stack;
 	LOG_DEL; delete strm;
-	LOG_DEL; delete []curfile;
+	LOG_DEL; delete [] curfile;
 	strm = t->savestrm;
 	curfile = t->filename;
 	line_num = t->line_num;
@@ -184,19 +184,23 @@ Tokenizer::pop() {
 	depth--;
 }
 
-// Open a new file.  Return 1 for success, 0 for failure.
+// Open a new file.  Return TRUE for success, FALSE for failure.
 
 int
 Tokenizer::fromFile(const char *filename) {
     const char* expandedFileName = expandPathName(filename);
     LOG_NEW; ifstream* s = new ifstream(expandedFileName);
     LOG_DEL; delete [] expandedFileName;
-    if (!*s) {
-	LOG_DEL; delete s;
-	return 0;
+    if (s == 0) {
+	return FALSE;
     }
-    push (s, filename);
-    return 1;
+    if (*s == 0) {
+	LOG_DEL; delete s;
+	return FALSE;
+    }
+    // Push stream pointer and copy of original filename on stack
+    push(s, filename);
+    return TRUE;
 }
 
 // Get the next character from the tokenizer.  Return 0 on eof, else 1.
