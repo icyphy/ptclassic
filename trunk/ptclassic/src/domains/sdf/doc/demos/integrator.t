@@ -12,7 +12,7 @@ This system shows the various features of the
 star.
 The leftmost integrator has limits so that it's output is a sawtooth.
 The
-.c FloatThresh
+.c Quantizer
 star resets the rightmost integrator when
 the sawtooth is at its peaks.  The rightmost integrator also has
 leakage, so its output signal is bowed.
