@@ -46,8 +46,7 @@ include $(CONFIG)
 
 HDRS		= options.h
 
-LIBCSRCS	= dfltoptions.c \
-		dflttap.c \
+LIBCSRCS	= dflttap.c \
 		dfltvov.c \
 		options.c
 
