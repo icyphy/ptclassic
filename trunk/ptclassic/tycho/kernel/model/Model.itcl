@@ -62,18 +62,13 @@
 # decide when to notify the view. Views can subscribe to all changes,
 # changes to a single item of data, or changes that match a pattern.
 #
-# Persistent data is an important aspect of information models: the user 
-# opens and closes windows, but the information model, representing the 
-# user's conceptual understanding of the semantics of the operations he or 
-# she performs via the user interface, is persistent across window 
-# openings and closings, and even across invocations of the application 
-# program.  It is supported by the three options *-sourcefile*, 
+# A model has three file-related options *-sourcefile*, 
 # *-datafile*, and *-statefile*.  These are all file names, and any may be 
 # used, depending on the subclass and the particular application.  The 
-# "source" is a file containing information needed to build the data and 
-# is never modified by the data object; the "file" is a file containing 
+# "sourcefile" is a file containing information needed to build the data and 
+# is never modified by the data object; the "datafile" is a file containing 
 # the same information, but can be written by the data object: it is thus 
-# the same as the usual *-file* option to the Tycho editors; the "state" 
+# the same as the usual *-file* option to the Tycho editors; the "statefile" 
 # is a file containing the data in a form that can be rapidly 
 # reconstructed by the data object.  The state is a simple Tcl 
 # implementation of the ``Memento'' design pattern (Gamma _et al_).
@@ -107,12 +102,12 @@
 #     and publishing. Suggested commands are :
 #    
 #     <ul>
-#     <li>*add* _index_ _data_ _args_: Add new data at the given index.
+#     <li>*add* _name_ _data_ _args_: Add new data with the given name.
 #          Some subclasses may not allow this operation if data already
 #          exists at the given index, while others will just insert
 #          additional data at that index. If the data subclass accepts
 #          data options, then following arguments are option values.
-#  		   The methid is often named for the type of data: _entry_,
+#  		   The method is often named for the type of data: _entry_,
 #		   _vertex_, _edge_, and so on.
 #     <li>*assign* _index_ _data_: Assign a new value to the data at the
 # 	 	   given index. Some subclasses may not allow this operation
