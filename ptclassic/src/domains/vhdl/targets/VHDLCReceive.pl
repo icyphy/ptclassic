@@ -29,12 +29,6 @@ limitation of liability, and disclaimer of warranty provisions.
     VHDLCSynchComm::setup();      
   }
 
-  //  codeblock (C2VintegerComp) {
-  //  }
-
-  //  codeblock (C2VrealComp) {
-  //  }
-
   codeblock (C2VintegerConfig) {
 for all:C2Vinteger use entity PTVHDLSIM.C2Vinteger(CLI); end for;
   }
@@ -49,11 +43,9 @@ for all:C2Vreal use entity PTVHDLSIM.C2Vreal(CLI); end for;
     if(!(targ()->isA("SynthTarget"))) {
 
     if (strcmp(output.resolvedType(), "INT") == 0) {
-      //      addCode(C2VintegerComp, "cli_comps", "c2vintcomp");
       addCode(C2VintegerConfig, "cli_configs", "c2vintconfig");
     }
     else if (strcmp(output.resolvedType(), "FLOAT") == 0) {
-      //      addCode(C2VrealComp, "cli_comps", "c2vrealcomp");
       addCode(C2VrealConfig, "cli_configs", "c2vrealconfig");
     }
     else
