@@ -105,7 +105,11 @@ const int linkingNotSupported =
 
 #endif // PTSOL2
 #else // __GNUG__
+#if defined(PTIRIX5_CFRONT)
+#define SHARED_OBJECT_COMMAND "CC -shared -o"    //-G  doesn't work at al
+#else
 #define SHARED_OBJECT_COMMAND "CC -G -o"
+#endif // PTIRIX5_CFRONT
 #endif // __GNUG__
 #endif
 
@@ -255,7 +259,7 @@ extern "C" size_t getpagesize(void);
 #endif //PTSOL2 || PTAIX
 #endif
 #else /* not __GNUG__ (i.e. cfront) */
-#if defined(PTHPPA) || defined(PTSOL2)
+#if defined(PTHPPA) || defined(PTSOL2) || defined(PTIRIX5_CFRONT)
 
 // These definitions also work with Sun Solaris2.3 CC3.0, but not
 // with CC4.0.  Sol2 CC4.0 uses ctv as a constructor suffix
