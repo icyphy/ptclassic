@@ -46,13 +46,18 @@ DIRS =	bin demo doc test
 
 TCL_SRCS = 
 
-ITCL_SRCS = 
+ITCL_SRCS = \
+	PNEdit.itcl \
+	PNRunWindow.itcl \
+	PNSimulation.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	pn.tcl \
 	README.txt \
 	makefile \
-	pkgIndex.tcl
+	pkgIndex.tcl \
+	icons.tim \
+	stars.tim
 
 MISC_FILES = $(DIRS) tclIndex
 
