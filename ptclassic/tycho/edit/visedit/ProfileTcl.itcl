@@ -120,6 +120,9 @@ body ::tycho::ProfileTcl::constructor {args} {
     }
     ::tycho::loadIfNotPresent profile tclx $packagePathList
 
+    # Give the window a title
+    displayer configure -title {[Incr Tcl] Profiler}
+    
     # Set up bindings to update the times.
     $slate bind node <Enter> "$this updateTimes"
 }
