@@ -189,7 +189,7 @@ DEScheduler :: run () {
 		if (level > stopTime)	{
 			eventQ.pushBack(f);		// push back
 			// set currentTime = next event time.
-			currentTime = level/relTimeScale;
+			currentTime = stopTime/relTimeScale;
 			stopBeforeDeadFlag = TRUE;  // there is extra events.
 			return TRUE;
 		// If the event time is less than the global clock,
