@@ -145,7 +145,7 @@ static char *defStyle[MAXATTR] = {
 
 /* Default color names */
 static char *defColors[MAXATTR] = {
-    "red", "ForestGreen", "blue", "yellow",
+    "red", "SpringGreen", "blue", "yellow",
     "cyan", "sienna", "orange", "coral"
 };
 
