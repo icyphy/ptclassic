@@ -19,26 +19,18 @@ the last received control input.
 	}
 	output {
 		name {true}
-		type {anytype}
+		type {=input}
 	}
 	output {
 		name {false}
-		type {anytype}
+		type {=input}
 	}
-	constructor {
-		true.inheritTypeFrom(false);
-		input.inheritTypeFrom(true);
-	}
-
 	go {
-	   if (input.dataNew) {
 	   	completionTime = arrivalTime;
 		Particle& pp = input.get();
-		int c = int(control%0);
-		if(c)
+		if(int(control%0))
            	   true.put(completionTime) = pp;
 		else
            	   false.put(completionTime) = pp;
-	   }
 	}
 }

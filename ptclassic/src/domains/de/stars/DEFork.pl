@@ -12,19 +12,14 @@ defstar {
 	}
 	outmulti {
 		name{output}
-		type{ANYTYPE}
-	}
-	constructor {
-		input.inheritTypeFrom(output);
+		type{=input}
 	}
 	go {
-           completionTime = arrivalTime;
-           if (input.dataNew) {
+		completionTime = arrivalTime;
                 Particle& pp = input.get();
 		OutDEMPHIter nextp(output);
 		OutDEPort *oport;
 		while ((oport = nextp++) != 0)
 			oport->put(completionTime) = pp;
-           }
 	}
 }
