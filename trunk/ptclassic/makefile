@@ -45,3 +45,8 @@ sources depend:
 
 obj.$(ARCH):		MAKEARCH
 	csh -f MAKEARCH
+
+oct_and_vem:
+	cd obj.$(ARCH)/vem; $(MAKE) $(MFLAGS) all
+install_oct_and_vem:
+	cd obj.$(ARCH)/vem; $(MAKE) $(MFLAGS) install
