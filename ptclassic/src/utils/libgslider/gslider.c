@@ -29,7 +29,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <stdio.h>
 #include <malloc.h>
 #include <stdlib.h>		/* Define atof */
-#include <strings.h>		/* Define index */
 #include "compat.h"
 #include "gslider.h"
 
@@ -69,7 +68,7 @@ gsl_read(file)
 	}
 
 	while (fgets(buf, sizeof (buf), fp) != NULL) {
-		cp = index(buf, '\n');
+		cp = strchr(buf, '\n');
 		if (cp)
 			*cp = '\0';
 		if (buf[0] == '\0')
