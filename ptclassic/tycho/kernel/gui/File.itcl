@@ -1303,7 +1303,20 @@ body ::tycho::File::openContext {filename} {
         # }
 	set ext [file extension $filename]
 	set base [file tail $filename]
-	if {[info exists editors] && [info exists editors($ext)]} {
+
+	# FIXME: we should not have this here, it should be some
+	# easy extension where we register procedures that check
+	# if an editor should be called, and if it is true, then
+	# the editor is called.
+	#
+	# Check to see if $filename/schematic/contents; exists, if it
+	# does, then open the ptlang editor
+	if [file exists [file join $filename schematic "contents;"]] {
+	    set name [uplevel #0 [list \
+		    ::tycho::EditPtcl [::tycho::autoName .file] \
+		    -facet $filename]]
+
+	} elseif {[info exists editors] && [info exists editors($ext)]} {
 	    set name [uplevel #0 [list \
 		    $editors($ext) [::tycho::autoName .file] -file $filename]]
 	} elseif {[info exists editorsBase] && [info exists \
