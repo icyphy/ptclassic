@@ -1,12 +1,12 @@
 <!-- $Id$ -->
 <html>
 <head>
-<Title>User's Guide to the Ptolemy Retargetting Editor</title>
+<Title>User's Guide to the Ptolemy Retargeting Editor</title>
 </head>
 <body bgcolor="#faf0e6">
 
-<h1><a name="Ptolemy Retargetting editor">User's Guide to the Ptolemy
-Retargetting Editor</a></h1>
+<h1><a name="Ptolemy Retargeting editor">User's Guide to the Ptolemy
+Retargeting Editor</a></h1>
 
 <p>
 
@@ -27,18 +27,18 @@ This editor is used to retarget Universes between different domains.
 For example, there is the CG56 domain that generates code for the
 Motorola 56k processor and there is a domain for the Texas Instruments
 C50 domain.  This editor can be used to retarget a universe that was
-written in the CG56 domain to the C50 domain.  The retargetting editor
+written in the CG56 domain to the C50 domain.  The retargeting editor
 can also be used to compare the stars in two different domains.
 
-<h2><a name="Ptolemy Retargetting editor tutorial">Ptolemy Retargetting
+<h2><a name="Ptolemy Retargeting editor tutorial">Ptolemy Retargeting
 editor tutorial</a></h2>
 
-The Retargetting editor can be started up from a <A HREF="EditPtclHelp.html">ptcl editor</A>.
+The Retargeting editor can be started up from a <A HREF="EditPtclHelp.html">ptcl editor</A>.
 
 The <CODE>Special</CODE> menu button in the ptcl editor contains the
-<CODE>Retarget</CODE> menu choice which brings up the retargetting editor.
+<CODE>Retarget</CODE> menu choice which brings up the retargeting editor.
 
-<H3>Retargetting Buttons</H3>
+<H3>Retargeting Buttons</H3>
 <MENU>
 
 <LI> <CODE>Compare Domains</CODE> - This button compares the stars in
@@ -47,14 +47,14 @@ conflict.
 
 <LI> <CODE>Change Domain A <I>Domain</I></CODE> - This button brings
 up a ListBrowser that allow the user to change the domain.  Usually
-Domain A is the domain we are retargetting from.  If the retargetting
+Domain A is the domain we are retargeting from.  If the retargeting
 editor was started from a Ptcl editor, then Domain A defaults to the
 domain of the Universe.  Only the domains that are present in the
 currently running binary are listed.
 
 <LI> <CODE>Change Domain B <I>Domain</I></CODE> - This button brings
 up a ListBrowser that allows the user to change the domain.
-Usually Domain B is the domain we are retargetting to.
+Usually Domain B is the domain we are retargeting to.
 
 <LI> <CODE>Check Universe</CODE> - This button asks the ptcl editor
 for a list of all the stars in it and then checks the stars against
@@ -62,7 +62,7 @@ the different types of conflicts.
 
 </MENU>
 
-The bottom of the retargetting window contains a serious of counters
+The bottom of the retargeting window contains a serious of counters
 that display the number of stars in the different categories.  If you
 move the mouse over these counters, then the status window should
 provide a brief description of the counter.
@@ -92,12 +92,12 @@ window should come up that contains a textual description of the
 <LI>  Under the <CODE>Special</CODE> menu button in the ptcl editor, select
 the <CODE>Retarget</CODE> choice and the retarget editor should come up.
 
-<LI> In the Retargetting editor, hit the <CODE>Change Domain B</CODE>
+<LI> In the Retargeting editor, hit the <CODE>Change Domain B</CODE>
 button and change the domain to C50.  We are going to attempt to
 retarget the domain from CGC to the Texas Instruments C50 domain.
 
-<LI> In the Retargetting editor, mouse on the <CODE>Check Universe</CODE>
-button.  After a brief wait, the Retargetting editor will display the
+<LI> In the Retargeting editor, mouse on the <CODE>Check Universe</CODE>
+button.  After a brief wait, the Retargeting editor will display the
 names of the stars in sound demo, and the conflicts between the CGC and the
 C50 domain.  You can double click on a star name which will bring up a window
 that compares the two stars in the different domains.
@@ -108,7 +108,7 @@ that compares the two stars in the different domains.
 
 
 
-<h2><a name="Ptolemy Retargetting editor bugs">Ptolemy Retargetting
+<h2><a name="Ptolemy Retargeting editor bugs">Ptolemy Retargeting
 editor bugs</a></h2>
 
 <menu>
@@ -122,7 +122,7 @@ then things could get a little confusing. Currently, the tool throws
 away the domain information of the stars in the ptcl file and just
 compares star names.
 
-<li> There is no easy way to call the Retargetting editor from within
+<li> There is no easy way to call the Retargeting editor from within
 Ptolemy.  The problem is that if Ptolemy is present, and you open a
 facet from within Tycho, then the facet is passed to vem.  What we
 need is some easy way to convert a facet to ptcl.

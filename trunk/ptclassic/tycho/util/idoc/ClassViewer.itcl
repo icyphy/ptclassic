@@ -79,7 +79,7 @@
 # and path.
 # <li><b>relFile</b> Given a class name, returns the relative documentation
 # file name and path.
-# <li><b>generateHtml</b> Tranforms the current main Class into a standalone
+# <li><b>generateHtml</b> Transforms the current main Class into a standalone
 # HTML document.
 # <li><b>_generateHtmlContents</b> Generates the table of contents for the 
 # standalone HTML.
