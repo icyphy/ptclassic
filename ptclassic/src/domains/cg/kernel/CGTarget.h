@@ -221,9 +221,6 @@ public:
 	return sym;
     }
 
-    // Directory to store code files in.
-    StringState destDirectory;
-
     // Stream to collect makefile commands
     CodeStream makefile;
 
@@ -243,6 +240,17 @@ public:
     // if needed to do the start functions.
     virtual int modifyGalaxy();
 
+    /********************************************************************/
+    /*  Below, are the states that may need modification if this target */
+    /*  is being used as a child target.                                */
+    /********************************************************************/
+    
+    // Directory to store code files in.
+    StringState destDirectory;
+
+    // If we set this state 0, no looping. 1, Joe's looping.
+    // If set to 2, Shuvra and Ha's extensive looping.
+    IntState loopingLevel;
 
 protected:
 
@@ -274,10 +282,6 @@ protected:
     // Prefix for file names.  This is automatically set in the setup
     // method to the galaxy name if = "".
     StringState filePrefix;
-
-    // If we set this state 0, no looping. 1, Joe's looping.
-    // If set to 2, Shuvra and Ha's extensive looping.
-    IntState loopingLevel;
 
     // Enable or disable Target functions.
     IntState displayFlag;
