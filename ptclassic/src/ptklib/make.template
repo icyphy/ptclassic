@@ -28,27 +28,28 @@ LIBCSRCS      = ptkBarGraph.c ptkPlot.c
 
 LIBCPPSRCS    =
 
-SRCS = $(LIBCSRCS) $(LIBCPPSRCS)
+SRCS = 		$(LIBCSRCS) $(LIBCPPSRCS)
 
-OBJS = $(LIBCSRCS:.c=.o) $(LIBCPPSRCS:.cc=.o)
+OBJS = 		$(LIBCSRCS:.c=.o) $(LIBCPPSRCS:.cc=.o)
 
-LIB=libptk.$(LIBSUFFIX)
+LIB =		libptk.$(LIBSUFFIX)
 
 # extra source files: tcl/tk script files
 SCRIPTS = ptkPlot.tcl
 
-EXTRA_SRCS = $(SCRIPTS) README
+EXTRA_SRCS = 	$(SCRIPTS) README
 
 all:	makefile $(LIB)
 
 install: makefile $(LIBDIR)/$(LIB)
 
 # include the X11, oct and tcl headers for C++ as well as C
-INCL=-I$(KERNDIR) -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
+INCL =		-I$(KERNDIR) -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
 # include the headers from the kernel, even though C++ objects should be
 # avoided.  As of this writing, ieee.h is the only file referenced.
-C_INCL=-I$(KERNDIR) -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
+C_INCL =	$(PTCOMPAT_INCSPEC) -I$(KERNDIR) -I$(TCL_INCDIR) \
+		-I$(TK_INCDIR) $(X11_INCSPEC)
 
 lint:	$(LIBCSRCS)
 	lint -u $(LIBCSRCS) > lint
