@@ -46,6 +46,7 @@ static const char file_id[] = "SDFTarget.cc";
 #include "SDFScheduler.h"
 #include "SDFCluster.h"
 #include "pt_fstream.h"
+#include "AcyLoopScheduler.h"
 
 SDFTarget::SDFTarget(const char* nam, const char* desc) :
 Target(nam,"SDFStar",desc)
@@ -75,6 +76,8 @@ void SDFTarget::setup() {
 		break;
 	case 1:
 		LOG_NEW; s = new SDFClustSched(logFile);
+		break;
+	case 2: LOG_NEW; s = new AcyLoopScheduler;
 		break;
 	default:
 		Error::abortRun(*this,"Unknown scheduler");
