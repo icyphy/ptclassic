@@ -77,12 +77,11 @@ tests:: test_simple test_graphics
 
 # These tests do not require a graphics terminal
 test_simple: $(TCL_SRCS) $(ITCL_SRCS)
-	echo "foreach i [list $(SIMPLE_TESTS)] {puts \$$i; source \$$i}" | \
-		$(ITCLSH)
+	tytestsh $(SIMPLE_TESTS)
 
 # These tests require a graphics terminal
 test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
-	tycho -noconsole -e alltests.itcl
+	tytest alltests.itcl
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
