@@ -61,7 +61,10 @@ BINDIR=$(PTOLEMY)/bin.$(PTARCH)
 # No changes should be necessary below this line
 #---------------------------------------------------------
 ENABLE_GCC =		--enable-gcc
-ENABLE_SHARED =		--enable-shared
+# If you build Itcl with shared libraries on sun4, then	
+# incremental linking of stars will fail with a message from ld
+# about how it cannot find -litk22
+ENABLE_SHARED =		`$(PTOLEMY)/src/tcltk/tcl_shared`
 
 # Used to find the itcl source directory
 ITCL_VERSION =		itcl2.2
@@ -113,7 +116,8 @@ ITCL_DEST_LIB = $(ITCL_DEST)/lib
 
 # itcl2.1 contains its own custom tcltk
 all: 		configure itcl
-configure:	$(ITCL_OBJ)/config.status $(TCLTK_OBJ)/makefile
+configure:	$(PTOLEMY)/src/tcltk/tcl_shared \
+			$(ITCL_OBJ)/config.status $(TCLTK_OBJ)/makefile
 bin:		itcl
 install:	install_itcl
 clean:		clean_itcl
@@ -125,6 +129,10 @@ realclean:	clean_itcl
 # The itcl2.1 distribution contains tcl and tk
 
 # Configure itcl
+FORCE:
+$(PTOLEMY)/src/tcltk/tcl_shared: FORCE
+	chmod a+x $@
+
 $(ITCL_OBJ)/config.status: config_itcl
 
 config_itcl: $(TCLTK_OBJ) $(ITCL_OBJ)  $(TCL_OBJ) $(TK_OBJ) $(ITCL_OBJ)/itcl $(ITCL_OBJ)/itk $(IWIDGETS_OBJ)
