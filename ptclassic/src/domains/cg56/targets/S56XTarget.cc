@@ -194,7 +194,7 @@ AsynchCommPair S56XTarget::createPeekPoke(CGTarget& peekTarget,
     }
 
     cgcSide->S56XFilePrefix.
-	setInitValue(savestring(filePrefix.currentValue()));
+	setInitValue(hashstring(filePrefix.currentValue()));
     cgcSide->S56XFilePrefix.initialize();
 
     StringList aioVariable;
