@@ -322,7 +322,7 @@ fixlinks:
 ######################################################
 # TclBlend
 
-TCLBLEND_MAJOR_VERSION = 1.0
+TCLBLEND_MAJOR_VERSION = 1.1
 TCLBLEND_MINOR_VERSION =
 TCLBLEND_VERSION = $(TCLBLEND_MAJOR_VERSION)$(TCLBLEND_MINOR_VERSION)
 
