@@ -595,7 +595,7 @@ body ::tycho::EditJava::initializeMenubar {menubar} {
             -command "$this gendocBuffer"
 
     $menubar command generateidoc special \
-	    -label "Generate Idoc Documentation" -underline 9 \
+	    -label "Generate IDoc Documentation" -underline 9 \
             -command "$this genidocBuffer"
 
     $menubar command appletviewer special \
