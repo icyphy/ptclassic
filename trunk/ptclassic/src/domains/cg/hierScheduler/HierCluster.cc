@@ -47,11 +47,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 int HierCluster::absorb(Cluster& c, int removeFlag) {
     adjustRepetitions((HierCluster&)c);
+    execTime += ((HierCluster&)c).execTime;
     return Cluster::absorb(c, removeFlag);
 }
 
 int HierCluster::merge(Cluster& c, int removeFlag) {
     adjustRepetitions((HierCluster&)c);
+    execTime += ((HierCluster&)c).execTime;
     return Cluster::merge(c, removeFlag);
 }
 
@@ -76,14 +78,16 @@ Cluster* HierCluster::convertGalaxy(Galaxy& g) {
 	scheduler = new SDFScheduler;
     cluster->setScheduler(scheduler);
     
-    GalStarIter nextStar(*cluster);
-    DataFlowStar *star;
-    while ((star = (DataFlowStar*)nextStar++) != NULL)
-	cluster->repetitions = gcd(star->repetitions,cluster->repetitions);
+    ClusterIter next(*cluster);
+    HierCluster *c;
+    while ((c = (HierCluster*)next++) != NULL)
+	cluster->repetitions = gcd(c->repetitions,cluster->repetitions);
 
-    nextStar.reset();
-    while ((star = (DataFlowStar*)nextStar++) != NULL)
-	star->repetitions /= cluster->repetitions;
+    next.reset();
+    while ((c = (HierCluster*)next++) != NULL) {
+	c->repetitions /= cluster->repetitions;
+	cluster->execTime += c->repetitions * c->execTime;
+    }
     
     return cluster;
 }
@@ -92,6 +96,7 @@ Cluster* HierCluster::convertStar(Star& s) {
     HierCluster* cluster = (HierCluster*)Cluster::convertStar(s);
     DataFlowStar &star = (DataFlowStar&)s;
     cluster->repetitions = star.repetitions;
+    cluster->execTime = star.myExecTime();
     star.repetitions = 1;
     return cluster;
 }
@@ -123,6 +128,7 @@ int HierCluster::adjustRepetitions(int newRepetitionCount) {
     }
 
     int scaleFactor = repetitions / newRepetitionCount;
+    execTime *= scaleFactor;
     GalTopBlockIter nextBlock(*this);
     Block* block;
     while ((block = nextBlock++) != NULL) {
