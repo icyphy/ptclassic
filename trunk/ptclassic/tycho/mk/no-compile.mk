@@ -31,16 +31,30 @@
 # This makefile is to be included if we don't need the compiler
 # and we don't need to generate any dependencies
 
-all install TAGS:
+all install TAGS: $(EXTRA_SRCS) $(HDRS) $(MISC_FILES)
 	@echo "Nothing to be done in this directory"
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
-sources:	$(EXTRA_SRCS) $(SRCS) $(HDRS) makefile
-
+# You probably don't want to add $(SRCS) to this, rather, change
+# the makefile that includes this one to use $(EXTRA_SRCS)
+sources:	$(EXTRA_SRCS) $(HDRS) $(MISC_FILES) makefile
+ifdef DIRS
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making $@ in $$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+		) \
+	    fi ; \
+	done
+endif
 CRUD=*.o *.so core *~ *.bak ,* LOG* $(KRUFT) 
 
 clean:
 	rm -f $(CRUD)
+
+realclean:
+	rm -f $(CRUD) $(REALCLEAN_STUFF)
 
 depend:
 	@echo "no dependencies in this directory"
