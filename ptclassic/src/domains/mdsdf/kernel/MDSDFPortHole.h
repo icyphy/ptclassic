@@ -147,8 +147,8 @@ class InMDSDFPort : public MDSDFPortHole {
   int isItInput() const;     // returns TRUE
 
   // get submatrix inputs and outputs
-  /*virtual*/ inline PtMatrix* getInput(int rowDelay = 0, int colDelay = 0);
-  /*virtual*/ inline double getFloatInput(int rowDelay = 0, int colDelay = 0);
+  /*virtual*/ PtMatrix* getInput(int rowDelay = 0, int colDelay = 0);
+  /*virtual*/ double getFloatInput(int rowDelay = 0, int colDelay = 0);
 
 };
 
