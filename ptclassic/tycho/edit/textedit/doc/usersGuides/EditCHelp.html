@@ -28,7 +28,8 @@ into Tycho by using the Tcl <A
 HREF="../../../../doc/itclhtml/tcl/load.n.html"><CODE>load</CODE></A>
 command.  The <CODE>Compile and Load</CODE> menu choice can be used
 to create new Tcl commands that are written in C.
-
+Note that it is risky to test C code within Tycho, since failure
+of the C code could cause Tycho to crash.
 
  <P>When a C file is compiled and loaded, the following steps occur.
 <OL>
