@@ -41,7 +41,7 @@ ROOT	      = ../../../..
 VPATH         = $(ROOT)/src/octtools/Packages/octmm
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 HDRS		= hackterm.h \
