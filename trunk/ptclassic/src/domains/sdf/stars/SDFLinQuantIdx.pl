@@ -65,6 +65,7 @@ the Thor stars that need an integer input.
 	
 	go {
 	    int i;
+	    number= int( (-1)*(int(levels))* (0.5));
 
 	    float in = input%0;
 
