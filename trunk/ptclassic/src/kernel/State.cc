@@ -20,8 +20,11 @@ $Id$
 #include "State.h"
 #include "Block.h"
 #include "miscFuncs.h"
+#include "Output.h"
 
-const int TOKSIZE = 80;
+extern Error errorHandler;
+
+const int TOKSIZE = 256;
 
 /*************************************************************************
 
@@ -55,9 +58,21 @@ State :: getParseToken(Tokenizer& lexer, Block* blockIAmIn, char* stateType) {
 	lexer >> token;
         if (*token == '<') {
                 char filename[TOKSIZE];
+// temporarily disable special characters, so '/' (for instance)
+// doesn't screw us up.
+		const char* tc = lexer.setSpecial ("");
                 lexer >> filename;
-                if (!lexer.fromFile(filename))
-                        { t.tok = "ERROR";  return t;}
+// put special characters back.
+		lexer.setSpecial (tc);
+                if (!lexer.fromFile(filename)) {
+			StringList msg = readFullName();
+			msg += ": can't open file '";
+			msg += filename;
+			msg += "' in initValue string";
+			errorHandler.error (msg);
+			t.tok = "ERROR";
+			return t;
+		}
                 else lexer >> token;
         }
 
@@ -86,6 +101,14 @@ State :: getParseToken(Tokenizer& lexer, Block* blockIAmIn, char* stateType) {
 	}
 
         if (isdigit(*token) || *token == '.' )  {
+// possible scientific notation if ending in e or E.  Elim + and - as
+// special if so, and append to token.  Ugly hack.
+		int l = strlen(token);
+		if (token[l-1] == 'e' || token[l-1] == 'E') {
+			const char* tc = lexer.setSpecial("*()/");
+			lexer >> token + l;
+			lexer.setSpecial(tc);
+		}
 		if (!strcmp(stateType,"FLOAT")) {
                         t.tok = "FLOAT";
                         t.doubleval = atof(token);
@@ -102,19 +125,25 @@ State :: getParseToken(Tokenizer& lexer, Block* blockIAmIn, char* stateType) {
                 State* s = lookup(token,blockIAmIn);
                 // better, maybe, to return type and value of the State
 		if(s){
-                t.tok =  "ID"; 
-		t.s =  s ;
-                return t;
+			t.tok =  "ID"; 
+			t.s =  s ;
+			return t;
         	}
 		else if(!strcmp(this->type(),"STRING")){
-		t.tok = "STRING";
-		t.sval = savestring(token);
-		return t;
+			t.tok = "STRING";
+			t.sval = savestring(token);
+			return t;
 		}
-		else{
-		t.tok = "NULL";
-		t.s = 0;
-		return t;
+		else {
+			StringList msg = "initState string for ";
+			msg += readFullName();
+			msg += " contains undefined symbol '";
+			msg += token;
+			msg += "'";
+			errorHandler.error (msg);
+			t.tok = "NULL";
+			t.s = 0;
+			return t;
 		} 
 	}
 }
