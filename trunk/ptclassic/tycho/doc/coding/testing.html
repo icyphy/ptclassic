@@ -8,12 +8,11 @@
 <HR>
 This page is primarily for Tycho Developers.  Some of the commands
 mentioned below are not included in the Tycho distribution.
- <P>For information about testing Java, see the
-<A HREF="../../java/doc/internals/javatcltest.html">Testing Java with Tcl</A>
-page. 
+
  <P>Contents:
 <MENU>
 <LI> <A HREF="#test suite">Test Suite</A>
+<LI> <A HREF="#testing java">Testing Java</A>
 <LI> <A HREF="#testing documentation">Testing Documentation</A>
 <LI> <A HREF="#testing the tycho script">Testing the tycho Script</A>
 </MENU>
@@ -362,6 +361,71 @@ Below are some hints about writing code that can be tested.
 	It is easier to test a series of small scripts than to
 	test a large monolithic method.
 </MENU>
+
+<HR>
+<H2><A NAME="testing java">Testing Java</A></H2>
+
+TclBlend is Sun's Tcl/Java interface.  We use TclBlend to test Java
+by writing Tcl code that exercises the Java classes.
+
+<H3>Running the tests</H3>
+If you run <CODE>make</CODE> in a test directory that contains 
+tests written in Tcl for testing Java classes, then the 'right thing'
+should just happen.  The Java testbed does have a few differences:
+<DL>
+<DT> The <CODE>make test_jsimple</CODE> rule
+<DD> This rule will run only the Java tests in a <CODE>tclsh</CODE> binary
+that can load the TclBlend extension
+
+<DT> The <CODE>alljtests.tcl</CODE> file
+<DD> This file will run all the Java tests that require TclBlend.
+The reason we have yet another file is that TclBlend will not necessarily
+work on all platforms, and we want to be able to run the non-TclBlend
+tests on those platforms.
+
+</DL>
+
+
+<H3>Writing Tests for Java </H3>
+Below we discuss some of the details of writing tests in Tcl that test
+Java classes.
+<H4>Simple Example</H4>
+<p>TclBlend allows us to instantiate objects in a class and call public
+methods.  We use TclBlend and the standard Tcl test bed to create tests.
+In the example below, we call <CODE>java::new</CODE> to create an
+instance of the Java <CODE>NamedObj</CODE> class.  We can then
+call public methods of <CODE>NamedObj</CODE> by referring to the 
+Java object handle <CODE>$n</CODE>:
+<PRE>
+test NamedObj-2.1 {Create a NamedObj, set the name, change it} {
+    set n [java::new pt.kernel.NamedObj]
+    set result1 [$n getName]
+    $n setName "A Named Obj"
+    set result2 [$n getName]
+    list $result1 $result2
+} {{} {A Named Obj}}
+</PRE>
+
+<H4>Java Tcl Test Files</H4>
+It is best if each Java class has a separate Tcl file that contains tests.
+The base of the name of the Tcl test file should be the same of the Java
+class being tested.  The Tcl test file should be located in the
+<CODE>test</CODE> subdirectory of the directory where the Java class
+is defined.
+ <P>For example, if we are testing <CODE>NamedObj.java</CODE>, then
+the Tcl test file should be at <CODE>test/NamedObj.tcl</CODE>.
+
+<H4><A NAME="getJavaInfo testing proc">getJavaInfo Testing Proc</A></H4>
+ <P>TclBlend provides a Tcl procedure called <CODE>java::info</CODE>
+which returns information about an instance of a Java class.  
+<A HREF="../../kernel/test/testDefs.tcl"><CODE>$TYCHO/kernel/test/testDefs.tcl</CODE></A>
+defines the <CODE>getJavaInfo</CODE> Tcl proc, which takes a Java object
+handle and returns a string that describes the object's fields, methods
+constructors, and superclass.
+ <P>Each Java class should have a Tcl test that calls <CODE>getJavaInfo</CODE>
+so that if the Java class definition changes, then the test will fail.
+This will hopefully prompt the developer to write a test for the
+changed feature.
 
 <HR>
 <H2><A NAME="testing documentation">Testing Documentation</A></H2>
