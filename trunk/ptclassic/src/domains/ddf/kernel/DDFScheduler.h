@@ -12,6 +12,7 @@
 #include "RecurScheduler.h"
 #include "defConstructs.h"
 
+class DDFTarget;
 
 /**************************************************************************
 Version identification:
@@ -36,6 +37,8 @@ $Id$
 
 class DDFScheduler : public Scheduler {
 
+friend class DDFTarget;
+
 	// explicit stopping condition
 	int stopTime;
 
@@ -54,6 +57,9 @@ class DDFScheduler : public Scheduler {
 
 	// number of overlapped execution allowed.
 	int numOverlapped;
+
+	// capacity of arc
+	int maxToken;
 
 	// number of stars in the galaxy
 	int galSize;
