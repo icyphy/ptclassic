@@ -20,10 +20,10 @@ many of the basic stars and the basic domain interface, and
 also made extensive contributions to the CG domain, the kernel,
 and parallel schedulers of all types.
 Philip Bitar had a major impact on the design of the DE domain.
-Jose Pino has been pimarily responsible for the code generation
+Jos\o"e\'" Pino has been pimarily responsible for the code generation
 domains, although extensive contributions have been made by Soonhoi Ha,
 Praveen Murthy, Thomas M. Parks, and Kennard White.
-Chih-Tsung Huang, with some help from Jose Pino, singlehandedly ported
+Chih-Tsung Huang, with some help from Jos\o"e\'" Pino, singlehandedly ported
 all the assembly code generation stars from Gabriel.
 Shuvra Bhattacharyya and Joe Buck wrote the loop scheduling mechanism,
 and Shuvra Bhattacharyya contributed the Gantt chart display tool.
