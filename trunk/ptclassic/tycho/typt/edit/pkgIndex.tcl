@@ -31,7 +31,7 @@
 ##########################################################################
 
 
-package ifneeded tycho.typt.editors 0.2.1 \
-	[list source [file join $dir editors.tcl]]
+package ifneeded tycho.typt.edit 0.2.1 \
+	[list source [file join $dir edit.tcl]]
 
 

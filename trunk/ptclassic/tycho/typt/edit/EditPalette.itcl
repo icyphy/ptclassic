@@ -104,8 +104,9 @@ body ::tycho::EditPalette::constructor {args} {
 # Open a help window.
 #
 body ::tycho::EditPalette::help {} {
-    hyperJump [file join \$TYCHO editors visedit doc \
-	    usersGuides EditPaletteHelp.html] {}
+    global ::TYCHO
+    ::tycho::File::openContext \
+        [file join $TYCHO typt edit doc usersGuides EditPaletteHelp.html]
 }
 
 ####################################################################

@@ -2,10 +2,11 @@ README.txt
 $Id$
 
 This is the README.txt file for the Tycho
-package tycho.typt.editors.
+package tycho.typt.edit
 
-[Insert brief description of tycho.typt.editors here]
-
+This package contains classes that implement various editors
+for the Ptolemy system.  Some of the editors require that
+Ptolemy be present, others don't.
 
 This package contains the following directories:
 
