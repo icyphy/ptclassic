@@ -271,8 +271,6 @@ void TITarget::writeFiring(Star& s, int level) {
 
 	// Invoke procedure.
 	mainLoop << "\tcall\t " << label << "\n";
-
-	delete [] starname;
     }
     else {
 	AsmTarget::writeFiring(s,level);
