@@ -32,7 +32,7 @@ If this parameter is a number, it will be used for the length
 .PP
 In the event of a real-time violation, execution will abort
 and the following error code will be left in register y0:
-.IP "\fB123061\fP"
+.ip "\fB123061\fP"
 An interrupt occurred and the output buffer was empty.
 	}
         seealso { ProPortAD, ProPortADDA }

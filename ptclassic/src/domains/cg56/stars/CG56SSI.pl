@@ -61,9 +61,9 @@ the queue length will be doubled.
 If a real-time violation occurs and the parameter
 \fIabortOnRealtimeError\fP is TRUE, execution will abort
 and one of the following error codes will be left in register y0:
-.IP "\fB123062\fP"
+.ip "\fB123062\fP"
 An interrupt occurred and the receive buffer was full.
-.IP "\fB123063\fP"
+.ip "\fB123063\fP"
 An interrupt occurred and the transmit buffer was empty.
 .UH "INTERUPTS: QUEUES:"
 .pp
