@@ -4,8 +4,8 @@ defstar {
 	desc {
 On each execution, this star reads a block of "nread" samples (default 128)
 and writes "nwrite" of these samples (default 64), skipping the first
-"offset" samples (default 0).  It is an error if nwrite + offset &gt; nread.
-If nwrite &gt; nread, then the output consists of overlapping windows,
+"offset" samples (default 0).  It is an error if nwrite + offset > nread.
+If nwrite > nread, then the output consists of overlapping windows,
 and hence "offset" must be negative.
 	}
 	version {$Id$}
