@@ -76,7 +76,7 @@ all:	makefile $(LIB)
 install: makefile $(LIBDIR)/$(LIB)
 
 INCL=-I$(KERNDIR)
-C_INCL=-I$(OCTTOOLS)/include
+C_INCL=-I$(OCTTOOLS)/include $(X11INCL)
 
 lint:	$(LIBCSRCS)
 	lint -u -I$(OCTTOOLS)/include $(LIBCSRCS) > lint
