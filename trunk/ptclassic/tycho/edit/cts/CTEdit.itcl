@@ -153,7 +153,7 @@ body ::tycho::CTEdit::_initializeMenubar {menubar} {
             -types {star}
 
 
-    $menubar add separator develsep3 devel
+    $menubar add separator develsepctedit devel
 
     $menubar command run devel \
 	    -label "Run..." \
