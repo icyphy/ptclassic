@@ -86,7 +86,10 @@ public:
 	/* virtual */ void initialize();
 
 	// Number of times this star is executed in the schedule
-	int reps() const { return repetitions.num()/repetitions.den();}
+	int reps() const {
+	  return repetitions.den() == 1 ? repetitions.num() : \
+	    repetitions.num()/repetitions.den();
+	}
 
 	int isA(const char*) const;
 
