@@ -62,6 +62,7 @@ CGCTclTkTarget::CGCTclTkTarget(const char* name,const char* starclass,
 	loopingLevel.setInitValue("1");
 	addStream("mainLoopInit", &mainLoopInit);
 	addStream("mainLoopTerm", &mainLoopTerm);
+        addStream("tychoSetup",&tychoSetup);
 	addStream("tkSetup", &tkSetup);
 
 	// Add the string state for the Tcl start command
@@ -74,6 +75,7 @@ void CGCTclTkTarget :: initCodeStrings() {
 	CGCTarget::initCodeStrings();
 	mainLoopInit.initialize();
 	mainLoopTerm.initialize();
+        tychoSetup.initialize();
 	tkSetup.initialize();
 }
 
