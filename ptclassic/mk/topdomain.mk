@@ -88,7 +88,8 @@ depend:
 	done
 
 doc/stars/starHTML.idx: $(wildcard doc/stars/*.htm)
-	@echo "Updating starHTML.idx:
+	@echo "Updating starHTML.idx:"
+	rm -f $@
 	(cd doc/stars; \
 	echo "set TYCHO $(PTOLEMY)/tycho; source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; ptolemyStarHTMLIndex" | itclsh)
 
