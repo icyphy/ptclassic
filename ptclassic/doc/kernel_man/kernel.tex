@@ -3251,10 +3251,10 @@ execution (where @code{numInit} stays the same and @code{size}
 changes).
 
 @example
-StringList printVerbose() const;
+StringList print(int verbose) const;
 @end example
 
-FIXME: should be @code{print(int @var{verbose} = 0) const}.
+Print information on the Geodesic, overrides NamedObj function.
 
 @example
 virtual void incCount(int);
@@ -3529,20 +3529,18 @@ they have the same type, and, in a sense that is separately determined
 for each type, the same value.
 
 @example
-virtual Particle* clone() = 0;
+virtual Particle* clone() const = 0;
 @end example
 
 Produce a second, identical particle (as a rule, one is obtained from
-the Plasma for the particle if possible).  FIXME: should be const
-method.
+the Plasma for the particle if possible).
 
 @example
-virtual Particle* useNew() = 0;
+virtual Particle* useNew() const = 0;
 @end example
 
 This is similar to @code{clone}, except that the particle is allocated
-from the heap rather than from the Plasma.  FIXME: should be const.
-FIXME: should access be restricted to this method?
+from the heap rather than from the Plasma.  
 
 @example
 virtual void die() = 0;
@@ -3701,18 +3699,233 @@ Message object.
 @node class Message, class MessageParticle, class Envelope, Messages
 @subsection class Message
 
+Message objects can be used to carry data between blocks.  Unlike
+Particles, which must all be of the same type on a given connection,
+connections that pass Message objects may mix message objects of
+many types on a given connection.  The tradeoff is that blocks that
+receive Message objects must, as a rule, type-check the received
+objects.
+
+The baseclass for all messages, named Message, contains no data, only
+a reference count (accordingly, all derived classes have a reference
+count and a standard interface).  The reference count counts how many
+Envelope objects refer to the same Message object.
+
+The constructor for Message creates a reference count that lives on
+the heap.  This means that the reference count is non-const even when
+the Message object itself is const. 
+
+The copy constructor for Message ignores its argument and creates a
+new Message with a new reference count.  This is necessary so that no
+two messages will share the same reference count.
+
+The destructor, which is virtual, deletes the reference count.
+
+The following Message functions must be overriden appropriately in any
+derived class:
+
+@example
+virtual const char* dataType() const;
+@end example
+
+This function returns the type of the Message.  The default
+implementation returns "DUMMY".
+
+@example
+virtual Message* clone() const;
+@end example
+
+This function produces a duplicate of the object it is called on.
+The duplicate must be "good enough" so that applications work the
+same way whether the original Message or one produced by @code{clone()}
+is received.  A typical strategy is to define the copy constructor
+for each derived Message class and write something like
+
+@example
+Message* MyMessage::clone() const @{ return new MyMessage(*this);@}
+@end example
+
+@example
+virtual int isA(const char*) const;
+@end example
+
+The @code{isA} function returns true if given the name of the class
+or the name of any baseclass.  Exception: the baseclass function returns
+FALSE to everything (as it has no data at all).  A macro @code{ISA_FUNC}
+is defined to automate the generation of implementations of derived
+class @code{isA} functions; it is the same one as that used for the
+NamedObj class.
+
+The following methods may optionally be redefined.
+
+@example
+virtual StringList print() const;
+@end example
+
+This method returns a printable representation of the Message.
+The default implementation returns a message like
+
+@example
+Message class <@var{type}>: no print method
+@end example
+
+where @var{type} is the message type as returned by the @code{dataType}
+function.
+
+@example
+virtual int asInt() const;
+virtual double asFloat() const;
+virtual Complex asComplex() const;
+@end example
+
+These functions represent conversions of the Message data to an integer,
+a floating point value, and a complex number, respectively.  Usually
+such conversions do not make sense; accordingly, the default
+implementations generate an error message (using the protected member
+function @code{errorConvert}) and return a zero of the appropriate type.
+If a conversion does make sense, they may be overriden by a method that
+does the appropriate conversion.  These methods will be used by the
+MessageParticle class when an attempt is made to read a MessageParticle
+in a numeric context.
+
+One protected member function is provided:
+
+@example
+int errorConvert(const char* @var{cvttype}) const;
+@end example
+
+This function invokes @code{Error::abortRun} with a message of the
+form
+
+@example
+Message class <@var{msgtype}>: invalid conversion to @var{cvttype}
+@end example
+
+where @var{msgtype} is the type of the Message, and @var{cvttype} is
+the argument.
+
 @node class MessageParticle,  , class Message, Messages
 @subsection class MessageParticle
+
+MessageParticle is a derived type of Particle whose data field is an
+Envelope; accordingly, it can transport Message objects.
+
+MessageParticle defines no new methods of its own; it only provides
+behaviors for the virtual functions defined in class Particle.
+The most important such behaviors are as follows:
+
+@example
+void operator << (const Envelope& @var{env});
+@end example
+
+This method loads the Message contained in @var{env} into the Envelope
+contained in the MessageParticle.  Since the Envelope assignment
+operator is used, after execution of this method both @var{env} and
+the MessageParticle refer to the message, so its reference count is at
+least 2.
+
+@example
+void getMessage(const Envelope& @var{env});
+@end example
+
+This method loads the message contained in the MessageParticle into the
+Envelope @var{env}, and removes the message from the MessageParticle
+(so that it now contains the dummy message).  If @var{env} previously
+contained the only reference to some other Message, that previously
+contained Message will be deleted.
+
+@example
+void accessMessage(const Envelope& @var{env});
+@end example
+
+@code{accessMessage} is the same as @code{getMessage} except that the
+message is not removed from the MessageParticle.  It can be used in
+situations where the same Particle will be read again.  We recommend
+that @code{getMessage} be used where possible, especially for very
+large message objects, so that they are deleted as soon as possible.
 
 @node Example Message types,  , Messages, Particles and Messages
 @section Example Message types
 
+The kernel provides two simple sample message types for transferring
+arrays of data.  They are almost identical except that one holds an
+array of integers and the other holds an array of single precision
+floating point data.  The array contents live on the heap.  Each is
+derived from class Message.
+
+Each provides a public data member that points to the data.  As a rule,
+we recommend against public data members for classes, but an exception
+was made in this case, perhaps unwisely.
+
+This section will describe the interface of the FloatVecData class.
+The interface for IntVecData is almost identical.
+
+Three constructors are provided:
+
 @example
-FloatVecData : public Message /FloatVecData.h:22:
-IntVecData : public Message /IntVecData.h:22:
+FloatVecData(int @var{len});
 @end example
 
-These classes are types of Message.
+This form creates an uninitialized array of length @var{len} in the
+FloatVecData object.  Since the pointer to the data is public the
+array may easily be filled in.
+
+@example
+FloatVecData(int @var{len},const float *@var{srcData});
+@end example
+
+This form creates an array of length @var{len} and initializes it with
+@var{len} elements from @var{srcData}.
+
+@example
+FloatVecData(int @var{len},const double *@var{srcData});
+@end example
+
+This form is the same, except that the source data is double precision
+(it is converted to single precision).  This is the only function for
+which an analogous function does not exist in IntVecData (an IntVecData
+can only be initialized from an integer array).
+
+An appropriate copy constructor, assignment operator, and destructor
+are defined.
+
+@example
+int length() const;
+@end example
+
+Return the length of the array.
+
+@example
+float *data;
+@end example
+
+Public data member; points to the array.  It is permissible to read or
+assign the @var{len} elements starting at @code{data}; the effect of
+altering the @code{data} pointer itself is undefined.
+
+@example
+const char* dataType() const;
+@end example
+
+Returns the string @code{"FloatVecData"}.
+
+@example
+int isA(const char* @var{type}) const;
+@end example
+
+TRUE for @var{type} equal to @code{"FloatVecData"}, otherwise false.
+
+@example
+StringList print() const;
+@end example
+
+Returns a comma-separated list of elements enclosed in curly braces.
+
+@example
+Message* clone() const;
+@end example
+
+Creates an identical copy with @code{new}.
 
 @node The incremental linker, Parameters and States, Particles and Messages, Top
 @chapter The incremental linker
@@ -3997,18 +4210,82 @@ T_Float, T_EOF, or T_ERROR.
 @node types of states,  , class State, Parameters and States
 @section types of states
 
+@menu
+* scalar states::               class IntState and class FloatState
+* class ComplexState::          class ComplexState
+* class StringState::           class StringState
+* numeric array states::        numeric array states
+* class StringArrayState::      class StringArrayState
+@end menu
+
+@node scalar states, class ComplexState, types of states, types of states
+@subsection class IntState and class FloatState
+
+Class IntState, derived from State, has an integer current value.
+Its @code{initialize()} function uses the @code{evalIntExpression}
+function to read an integer expression from the initial value
+string.  If successful, it attempts to read another token from
+the string; if there is another token, it reports the error
+"extra text after valid expression".
+
+An assignment operator is provided that accepts an integer value
+and loads it into the current value.  A cast to integer is also
+defined for accessing the current value.  The virtual function
+@code{currentValue} is overloaded to return a printed version of
+the current value.
+
+In addition to the @code{setInitValue} from class State, a second
+form is provided that takes an integer argument.
+
+Standard overrides for @code{isA}, @code{className}, and @code{clone}
+are provided.
+
+Class FloatState is almost identical to class IntState except that
+its data field is a double precision value; where IntState functions
+have an argument or return value of @code{int}, FloatState has a
+corresponding argument or return value of @code{double}.  Both are
+generated from the same pseudo-template files.
+
+The @code{type()} function for IntState returns @code{"INT"}.
+For FloatState, @code{"FLOAT"} is returned.  For both implementations, a
+prototype object is added to the KnownState list.
+
+@node class ComplexState, class StringState, scalar states, types of states
+@subsection class ComplexState
+
+ComplexState is much like FloatState and IntState, except in the
+expressions it accepts for initial values.  Its data member is
+Complex and it accordingly defines an assignment operator that takes a
+complex value and a conversion operator that returns one.
+
+The initial value string for a ComplexState takes one of three forms:
+it may be the name of a galaxy ComplexState, a floating expression
+(of the form accepted by @code{State::evalFloatExpression}), or a
+string of the form
+
+@example
+( @var{floatexp1} , @var{floatexp2} )
+@end example
+
+where both @var{floatexp1} and @var{floatexp2} are floating expressions.
+For the second form, the imaginary part will always be zero.  For the
+third form, the first expression gives the real part and the second
+gives the imaginary part.
+
+@node class StringState, numeric array states, class ComplexState, types of states
+@subsection class StringState
+
+@node numeric array states, class StringArrayState, class StringState, types of states
+@subsection numeric array states
+
 @example
 ComplexArrayState : public State/ComplexArrayState.h:29:
-ComplexState : public State/ComplexState.h:29:
-FixArrayState : public FloatArrayState /FixArrayState.h:38:
-FixState : public FloatState /FixState.h:31:
 FloatArrayState : public State/FloatArrayState.h:29:
-FloatState : public State/FloatState.h:34:
 IntArrayState : public State/IntArrayState.h:29:
-IntState : public State/IntState.h:34:
-StringArrayState : public State/StringArrayState.h:30:
-StringState : public State/StringState.h:31:
 @end example
+
+@node class StringArrayState,  , numeric array states, types of states
+@subsection class StringArrayState
 
 @node known lists, I/O classes, Parameters and States, Top
 @chapter Support for known lists and such
@@ -4302,6 +4579,142 @@ etc), and one to represent certain predeclared global states.
 
 @node class StringList, class Tokenizer, I/O classes, I/O classes
 @section StringList, a kind of String class
+
+Class StringList provides a subset of the functions provided by the
+typical C++ String class; enough for our purposes.  It is privately
+derived from SequentialList.  Its internal implementation is as a
+list of @code{char *} strings, each on the heap.  A StringList
+object can be treated either as a single string or as a list of
+strings; the individual substrings retain their separate identity
+until the conversion operator to type @code{const char *} is invoked.
+There are also operators that add numeric values to the StringList;
+there is only one format available for such additions.
+
+@menu
+* StringList constructors::     StringList constructors and assignment operators
+* adding to StringLists::       adding to StringLists
+* StringList info functions::   StringList information functions
+* StringList conversion::       StringList conversion to const char *
+* StringList destruction::      StringList destruction and zeroing
+* class StringListIter::        class StringListIter
+@end menu
+
+@node StringList constructors, adding to StringLists, class StringList, class StringList
+@subsection StringList constructors and assignment operators
+
+The default constructor makes an empty StringList.  There is also
+a copy constructor and five single-argument constructors that can
+function as conversions from other types to type StringList; they
+take arguments of the types
+@code{char}, @code{const char *}, @code{int}, @code{double}, and
+@code{unsigned int}.
+
+There are also six assignment operators corresponding to these
+constructors: one that takes a @{const StringList&} argument and
+also one for each of the five standard types:
+@code{char}, @code{const char *}, @code{int}, @code{double}, and
+@code{unsigned int}.
+
+The resulting object has one piece, unless initialized from another
+StringList in which case it has the same number of pieces.
+
+@node adding to StringLists, StringList info functions, StringList constructors, class StringList
+@subsection adding to StringLists
+
+There are six functions that can add a printed representation of an
+argument to a StringList: one each for arguments of type @{const
+StringList&}, @code{char}, @code{const char *}, @code{int},
+@code{double}, and @code{unsigned int}.  In each case, the function
+can be accessed in either of two equivalent ways:
+
+@example
+StringList& operator += (@var{type} @var{arg});
+StringList& operator << (@var{type} @var{arg});
+@end example
+
+The second "stream form" is considered preferable; the "+=" form is
+there for backward compatibility.  If a StringList object is added,
+each piece of the added StringList is added separately (boundaries
+between pieces are preserved); for the other five forms, a single
+piece is added.
+
+@node StringList info functions, StringList conversion, adding to StringLists, class StringList
+@subsection StringList information functions
+
+@example
+const char* head() const;
+@end example
+
+Return the first substring on the list (the first "piece").  A null
+pointer is returned if there are none.
+
+@example
+int length() const;
+@end example
+
+Return the length in characters.
+
+@example
+int numPieces() const;
+@end example
+
+Return the number of substrings in the StringList.
+
+@node StringList conversion, StringList destruction, StringList info functions, class StringList
+@subsection StringList conversion to const char *
+
+@example
+operator const char* ();
+@end example
+
+This function joins all the substrings in the StringList into a
+single piece, so that afterwards @code{numPieces} will return 1.
+A null pointer is always returned if there are no characters.
+
+Warning: if this function is called on a temporary StringList, it
+is possible that the compiler will delete the StringList object
+before the last use of the returned @code{const char *} pointer.
+The result is that the pointer may wind up pointing to garbage.
+The best workaround for such problems is to make sure that any
+StringList object "has a name" before this conversion is applied
+to it; e.g. assign the results of functions returning StringList
+objects to local StringList variables or references before trying
+to convert them.
+
+@example
+char* newCopy() const;
+@end example
+
+This function makes a copy of the StringList's text in a single piece
+as a @code{char *} in dynamic memory.  The object itself is not modified.
+The caller is responsible for deletion of the returned text.
+
+@node StringList destruction, class StringListIter, StringList conversion, class StringList
+@subsection StringList destruction and zeroing
+
+@example
+void initialize();
+@end example
+
+This function deallocates all pieces of the StringList and changes
+it to an empty StringList.
+
+@example
+~StringList();
+@end example
+
+The destructor calls the @code{initialize} function.
+
+@node class StringListIter,  , StringList destruction, class StringList
+@subsection class StringListIter
+
+Class StringListIter is a standard iterator that operates on
+StringLists.  Its @code{next()} function returns a pointer of type
+@code{const char *} to the next substring of the StringList.
+It is important to know that the operation of converting a
+StringList to a @code{const char *} string joins all the substrings into
+a single string, so that operation should be avoided if extensive
+use of StringListIter is planned.
 
 @node class Tokenizer, augmented fstreams, class StringList, I/O classes
 @section Tokenizer, a simple lexical analyzer class
