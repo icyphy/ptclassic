@@ -3,6 +3,7 @@ defstar {
 	domain {CGC}
 	derivedFrom { LMS }
 	desc { 
+THIS STAR IS OBSOLETE: Use LMSTkPlot.
 Just like the LMS filter, but with an animated Tk display of
 the taps, plus associated controls.
 	}
