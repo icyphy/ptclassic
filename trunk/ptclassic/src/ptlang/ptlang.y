@@ -113,6 +113,7 @@ char consCalls[BIGBUFSIZE];
 #define M_PURE 1
 #define M_VIRTUAL 2
 #define M_INLINE 4
+#define M_STATIC 8
 
 /* note: names must match order of symbols above */
 char* stateClasses[] = {
@@ -225,7 +226,7 @@ typedef char * STRINGVAL;
 %token CCINCLUDE HINCLUDE PROTECTED PUBLIC PRIVATE METHOD ARGLIST CODE
 %token BODY IDENTIFIER STRING CONSCALLS ATTRIB LINE
 %token VERSION AUTHOR ACKNOWLEDGE COPYRIGHT EXPLANATION SEEALSO LOCATION
-%token CODEBLOCK EXECTIME PURE INLINE HEADER INITCODE
+%token CODEBLOCK EXECTIME PURE INLINE STATIC HEADER INITCODE START
 %%
 /* production to report better about garbage at end */
 full_file:
@@ -332,6 +333,8 @@ sgitem:
 method:	METHOD				{ clearMethodDefs(0);}
 |	PURE vopt METHOD		{ clearMethodDefs(M_PURE);}
 |	VIRTUAL METHOD			{ clearMethodDefs(M_VIRTUAL);}
+|	STATIC METHOD			{ clearMethodDefs(M_STATIC);}
+|	INLINE STATIC METHOD		{ clearMethodDefs(M_STATIC|M_INLINE);}
 |	INLINE vopt METHOD		{ int mode = M_INLINE;
 					  if ($2) mode |= M_VIRTUAL;
 					  clearMethodDefs(mode);
@@ -361,6 +364,10 @@ stdkey2:
 |	WRAPUP				{ methKey = C_WRAPUP;}
 |	INITCODE			{ methKey = C_INITCODE;}
 |	EXECTIME			{ methKey = C_EXECTIME;}
+|	START
+		{ yywarn("start is obsolete, use setup");
+		  methKey = C_SETUP;
+		}
 ;
 
 /* version identifier */
@@ -623,8 +630,8 @@ keyword:	DEFSTAR|GALAXY|NAME|DESC|DEFSTATE|DOMAIN|NUMPORTS|DERIVED
 |CONSTRUCTOR|DESTRUCTOR|STAR|ALIAS|OUTPUT|INPUT|OUTMULTI|INMULTI|TYPE
 |DEFAULT|SETUP|GO|WRAPUP|CONNECT|CCINCLUDE|HINCLUDE|PROTECTED|PUBLIC
 |PRIVATE|METHOD|ARGLIST|CODE|ACCESS|AUTHOR|ACKNOWLEDGE|VERSION|COPYRIGHT
-|EXPLANATION
-|SEEALSO|LOCATION|CODEBLOCK|EXECTIME|PURE|INLINE|HEADER|INITCODE
+|EXPLANATION|START
+|SEEALSO|LOCATION|CODEBLOCK|EXECTIME|PURE|INLINE|HEADER|INITCODE|STATIC
 ;
 %%
 /* Reset for a new star or galaxy class definition.  If arg is TRUE
@@ -857,6 +864,7 @@ int mode;
 genMethod ()
 {
 	char * p = whichMembers (methodAccess);
+	char * mkey = "";
 /* add decl to class body */
 	if (methodMode == M_PURE) {
 		if (methodCode) yyerror ("Code supplied for pure method");
@@ -872,8 +880,10 @@ genMethod ()
 		methodCode = "";
 	}
 	/* form declaration in class body */
-	sprintf (str1, "\t%s%s %s %s", (methodMode & M_VIRTUAL) ? "virtual " : "",
-		 methodType, methodName, methodArgs);
+	if (methodMode & M_STATIC) mkey = "static ";
+	else if (methodMode & M_VIRTUAL) mkey = "virtual ";
+	sprintf (str1, "\t%s%s %s %s", mkey, methodType,
+		 methodName, methodArgs);
 	strcat (p, str1);
 	/* handle inline functions */
 	if (methodMode & M_INLINE) {
@@ -1299,8 +1309,9 @@ struct tentry keyTable[] = {
 	"seealso", SEEALSO,
 	"setup", SETUP,
 	"star", STAR,
-	"start", SETUP,		/* backward compatibility */
+	"start", START,
 	"state", DEFSTATE,
+	"static", STATIC,
 	"type", TYPE,
 	"version", VERSION,
 	"virtual", VIRTUAL,
