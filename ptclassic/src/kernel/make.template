@@ -80,6 +80,7 @@ CCS_WITH_H_FILES=\
  Particle.cc \
  ParticleQueue.cc \
  Plasma.cc \
+ PrecisionState.cc \
  PriorityQueue.cc \
  PtGate.cc \
  Scheduler.cc \
