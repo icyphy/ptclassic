@@ -41,6 +41,7 @@ limitation of liability, and disclaimer of warranty provisions.
                 In.setSDFParams(NumIn,NumIn);
         }
 	go {
+	  int i;
 
 	  union vis_dreg {
 	    double dreg64;
@@ -51,12 +52,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	  double intmp[NumIn];
 
 	  /*scale input to reduce possibility of overflow*/
-	  for (int i=NumIn;i>0;i--){
+	  for (i=NumIn;i>0;i--){
 	  intmp[i-1] = double(scale)*double(In%(i-1));
 	  }
 	  
 	  /*check bounds of the input and cast each float to short*/
-	  for (int i=NumIn;i>0;i--){
+	  for (i=NumIn;i>0;i--){
 	  if (intmp[i-1] <= double(LowerBound))
 	    packedout.sreg16[i-1] = LowerBound;
 	  else if (intmp[i-1] >= double(UpperBound))
