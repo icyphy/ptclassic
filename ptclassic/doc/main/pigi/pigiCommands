@@ -53,7 +53,7 @@ a wormhole will be automatically created.
 All domains currently linked to pigi will be offered as options.
 T}
 .sp 0.5
-edit-architecture	a	T{
+edit-target	T	T{
 To specify a target architecture for a code generation domain.
 If no target architectures are defined for the current domain, an
 error message will be issued.
@@ -70,7 +70,7 @@ T}
 .sp 0.5
 clear-marks		T{
 Pigi tries to highlight objects when an error
-occurs during a compile, or when the find-name
+occurs during compilation or execution, or when the find-name
 command is invoked.  This clears the highlighting.
 T}
 =
