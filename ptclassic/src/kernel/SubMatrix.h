@@ -74,7 +74,7 @@ class ComplexSubMatrix: public ComplexMatrix {
   // specified by the starting row and col, and the number of rows and
   // cols of the submatrix.  Result is undefined if the dimensions of the
   // submatrix go beyond the dimensions of the original matrix.
-  ComplexSubMatrix(const ComplexSubMatrix& src,int sRow,int sCol,int nRow,int nCol);
+  ComplexSubMatrix(ComplexSubMatrix& src,int sRow,int sCol,int nRow,int nCol);
 
   // Copy constructor
   ComplexSubMatrix(const ComplexSubMatrix& src);
@@ -133,7 +133,7 @@ class FixSubMatrix: public FixMatrix {
   // specified by the starting row and col, and the number of rows and
   // cols of the submatrix.  Result is undefined if the dimensions of the
   // submatrix go beyond the dimensions of the original matrix.
-  FixSubMatrix(const FixSubMatrix& src,int sRow,int sCol,int nRow,int nCol);
+  FixSubMatrix(FixSubMatrix& src,int sRow,int sCol,int nRow,int nCol);
 
   // Copy constructor
   FixSubMatrix(const FixSubMatrix& src);
@@ -193,7 +193,7 @@ class FloatSubMatrix: public FloatMatrix {
   // specified by the starting row and col, and the number of rows and
   // cols of the submatrix.  Result is undefined if the dimensions of the
   // submatrix go beyond the dimensions of the original matrix.
-  FloatSubMatrix(const FloatSubMatrix& src,int sRow,int sCol,int nRow,int nCol);
+  FloatSubMatrix(FloatSubMatrix& src,int sRow,int sCol,int nRow,int nCol);
 
   // Copy constructor
   FloatSubMatrix(const FloatSubMatrix& src);
@@ -252,7 +252,7 @@ class IntSubMatrix: public IntMatrix {
   // specified by the starting row and col, and the number of rows and
   // cols of the submatrix.  Result is undefined if the dimensions of the
   // submatrix go beyond the dimensions of the original matrix.
-  IntSubMatrix(const IntSubMatrix& src,int sRow,int sCol,int nRow,int nCol);
+  IntSubMatrix(IntSubMatrix& src,int sRow,int sCol,int nRow,int nCol);
 
   // Copy constructor
   IntSubMatrix(const IntSubMatrix& src);
