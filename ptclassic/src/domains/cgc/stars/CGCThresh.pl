@@ -3,7 +3,7 @@ defstar {
 	domain { CGC }
 	desc {
 Compares input values to "threshold" (default 0.5).
-Output is 0 if input <= threshold, otherwise it is 1.
+Output is 0 if input is greater than or equal to threshold, otherwise it is 1.
 	}
 	version {$Id$}
 	author { J. Buck }
