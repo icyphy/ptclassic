@@ -84,7 +84,7 @@ class ::tycho::Displayer {
     method removeView {viewLabel}
 
     # Display the given view inside the displayer
-    method setView {viewLabel}
+    method setView {viewLabel side}
     
     ###################################################################
     ####                       private variables                   ####
@@ -266,12 +266,14 @@ body ::tycho::Displayer::registerView {viewName viewLabel} {
     set viewList($viewLabel) $viewName
 
     # Create the menubar for the menu and return the name
-    itk_component add menubar$viewLabel {
-	::tycho::Menubar $itk_component(menuFrame).menubar$viewLabel
-    } {
-	keep -background -cursor
+    # Create it only if it does not already exist
+    if {![winfo exists $itk_component(menuFrame).menubar$viewLabel]} {
+	itk_component add menubar$viewLabel {
+	    ::tycho::Menubar $itk_component(menuFrame).menubar$viewLabel
+	} {
+	    keep -background -cursor
+	}
     }
-    
     return $itk_component(menubar$viewLabel) 
 }
 
@@ -309,19 +311,19 @@ body ::tycho::Displayer::removeView {viewLabel} {
 	configure -menubar $itk_component(menubar)
     } else {
 	set newViewLabel [lindex $insertedViews 0]
-	$this setView $newViewLabel
+	$this setView $newViewLabel bottom
     }
 }
 
 #######################################################################
 #### setView
 # Display the given view inside the displayer.  The required argument
-# is the label associated with the view.  The view must have registered itself with the
-# Displayer before it can be inserted into the Displayer
-# FIXME: might want to add another argument to determine whether view gets packed
-#             vertically or horizontally, ie like the -side option on the packer.
+# is the label associated with the view.  The view must have registered 
+# itself with the Displayer before it can be inserted into the Displayer
+# The side argument can be top, bottom, left, or right depending on
+# where the user wants to put the view in the displayer.
 #
-body ::tycho::Displayer::setView {viewLabel} {
+body ::tycho::Displayer::setView {viewLabel side} {
 
     # Check if view is registered
     if [catch {set view $viewList($viewLabel)}] {
@@ -335,7 +337,11 @@ body ::tycho::Displayer::setView {viewLabel} {
     }
 
     # pack into the view frame in the window childsite
-    pack $view -in $itk_component(viewFrame) -expand true -fill both
+    pack $view \
+	    -in $itk_component(viewFrame) \
+	    -expand true \
+	    -fill both \
+	    -side $side
 
     # Install the appropriate menubar
     configure -menubar $itk_component(menubar$viewLabel)
