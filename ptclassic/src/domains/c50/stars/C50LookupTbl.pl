@@ -11,7 +11,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 nonlinear functions library }
-        explanation {
+	explanation {
 .PP
 The input accesses a lookup table.  More generally, this star defines
 a function which maps input values between -1 and +1-2^-15 into
@@ -58,7 +58,7 @@ table type, 5 for limited, 6 for linear, and 2.5 for any other type.
 The \fItableType\fR feature is in fact implemented by tacking an extra
 value onto the end of the table.  Thus, the coefficient table will require
 one more memory location if \fIinterpolation\fR is "linear".
-	}                  
+	}
        	input {
 		name { input }
 		type { fix }
@@ -83,84 +83,89 @@ one more memory location if \fIinterpolation\fR is "linear".
 		name { coef }
 		type { FIXARRAY }
 		desc { values stored in file. }
-                default { "-0.5 0.5" }
-                attributes { A_UMEM|A_CONSEC }
+		default { "-0.5 0.5" }
+		attributes { A_UMEM|A_CONSEC }
 	}
-        state {
-                name { addedVal }
-                type { fix }
-	        desc { internal }
-	        default { 0 }
-                attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT }
+	state {
+		name { addedVal }
+		type { fix }
+		desc { internal }
+		default { 0 }
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT }
 	}
 	state { 
 		name { coefNum }
 		type { int }
 		desc { Number of coefficients. }
 		default { 2 }
-                attributes { A_NONCONSTANT|A_NONSETTABLE }
+		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
-        setup {
-                coefNum=coef.size();
-        }		
-        initCode {
-        const char* p=tableType;
-        const char* r = interpolation;
-                if(r[0]=='l' || r[0]=='L') {
-                          switch (p[4]) {
-	                  case 'o': case 'O':      // periodic
-                               addedVal=coef[0];
-  		               break;
-	     	          case 't': case 'T':      // limited
-			       addedVal=coef[coefNum-1];
-		               break;
-                          case 'a': case 'A':      // linear
-                               addedVal=2*coef[coefNum-1]-coef[coefNum-2];
-                               break;
-            	          }
-                          addCode(addblockinit);
-		}               
-        }		
+	setup {
+		coefNum = coef.size();
+	}
+	ccinclude { <string.h> }
+	initCode {
+		const char* tabletype = tableType;
+		const char* interptype = interpolation;
+		if (strcasecmp(interptype, "linear") == 0) {
+		    if (strcasecmp(tabletype, "periodic") == 0)
+			addedVal = coef[0];
+		    else if (strcasecmp(tabletype, "limited") == 0)
+			addedVal=coef[coefNum-1];
+		    else if (strcasecmp(tabletype, "linear") == 0)
+			addedVal = 2*coef[coefNum-1] - coef[coefNum-2];
+		    addCode(addblockinit);
+		}
+		else if ( strcasecmp(interptype, "none") != 0 ) {
+		    Error::abortRun(*this,
+				    "Unrecognized interpolation type '",
+				    interptype,
+				    "': should be either linear or none");
+		}
+	}
 	go {
-        const char* q = interpolation;
+		const char* q = interpolation;
 		switch (q[0]) {
-		case 'n': case 'N':    	// none
+		  case 'n':
+		  case 'N':    	// none
 			addCode(none);
 			break;
-		default:
+		  default:	// linear
 			addCode(other);
 			return;
-	        }
+		}
 	}
 
-        codeblock(addblockinit) {
-        .ds     #$addr(addedVal)		;initialize for added value
-        .q15    #$val(addedVal)
-        .text
-        }
+	codeblock(addblockinit) {
+	.ds     #$addr(addedVal)		;initialize for added value
+	.q15    #$val(addedVal)
+	.text
+	}
+
 	codeblock (none) {
 	mar 	*,AR6				;
 	lar	AR6,#$addr(input)		;Address input		=> AR6
 	lar	AR7,#$addr(output)		;Address output		=> AR7
  	lacl   	#$val(coefNum)			;Accu = number of coef
 	lt	*,AR7			 	;TREG0 = input
-        mpy     #$val(coefNum)			;P-Reg = input*coefNum
-        apac					;Accu = coefNum*(1+input)
+	mpy     #$val(coefNum)			;P-Reg = input*coefNum
+	apac					;Accu = coefNum*(1+input)
 	sfr			     		;1 shift right
-        add   	#$addr(coef),0			;Accu = Accu + Address coef
+	add   	#$addr(coef),0			;Accu = Accu + Address coef
 	samm	BMAR				;store Accu in BMAR
 	bldd	BMAR,*				;ouput = value at address BMAR
   	}
-        codeblock(other) {
+
+	codeblock(other) {
 	mar 	*,AR6				;
 	lar	AR6,#$addr(input)		;Address input		=> AR6
 	lar	AR7,#$addr(output)		;Address output		=> AR7
  	lacl   	#$val(coefNum)			;Accu = number of coef
 	lt	*,AR0			 	;TREG0 = input
-        mpy     #$val(coefNum)			;P-Reg = input*coefNum
-        apac					;Accu = coefNum*(1+input)
+	mpy     #$val(coefNum)			;P-Reg = input*coefNum
+	apac					;Accu = coefNum*(1+input)
 	sfr			     		;1 shift right
-        add   	#$addr(coef),0			;Accu = Accu + Address coef
+	add   	#$addr(coef),0			;Accu = Accu + Address coef
 	samm	AR0				;store Accu in AR0
 	rpt 	#15				; 
 	 sfl					;16 shifts left(value in acch)
@@ -174,18 +179,11 @@ one more memory location if \fIinterpolation\fR is "linear".
 	mpy	*,AR7
 	apac
 	sach	*,1
-        }
-        exectime {
-		const char* i = interpolation;  
-                if (i[0]=='n' || i[0]=='N')
-	            return 9;
-                else
-	            return 21;
 	}
 
+	exectime {
+		const char* i = interpolation;  
+		if (i[0]=='n' || i[0]=='N') return 9;
+		else return 21;
+	}
 }
-
-
-
-
-
