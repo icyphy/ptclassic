@@ -119,9 +119,9 @@ $(OBJ_DIR):
 	mkdir $(OBJ_DIR)
 
 # DEC make can't seem to handle VPATH very well
-GMAKE= `if [ -f $(GNU_OBJ)/make/make ]; \
-	 then echo $(GNU_OBJ)/make/make ; \
-	 else echo make; fi`
+#GMAKE= `if [ -f $(GNU_OBJ)/make/make ]; \
+#	 then echo $(GNU_OBJ)/make/make ; \
+#	 else echo make; fi`
 
 
 # libg++-2.7.1 is supposed to be able to build shared libraries for
@@ -133,16 +133,18 @@ GMAKE= `if [ -f $(GNU_OBJ)/make/make ]; \
 # So we build gcc first, then clean out libiberty and then rebuild
 bin:
 	@echo $$PATH
-	#	(cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC="$(CC)" MAKE=$(GMAKE) )
+	#	(cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC="$(CC)" )
 	@echo "Build gcc first, so we can build shared libiberty.so"
-	(cd $(GNU_OBJ)/gcc; $(MAKE) $(MFLAGS) CC="$(CC)" MAKE=$(GMAKE) \
-		LANGUAGES=c )
-	@echo "Building libiberty and g++"
+	(cd $(GNU_OBJ)/gcc; $(MAKE) $(MFLAGS) CC="$(CC)" LANGUAGES=c )
+	@echo "Build gnumake next"
 	# LDFLAGS is needed to build gmake
-	(cd $(GNU_OBJ); $(MAKE) $(MFLAGS) \
+	(cd $(GNU_OBJ)/make; $(MAKE) $(MFLAGS) \
 		CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ \
-		LDFLAGS=-B$(GNU_OBJ)/gcc/ \
-		MAKE=$(GMAKE))
+		LDFLAGS=-B$(GNU_OBJ)/gcc/ )
+	@echo "Building libiberty and g++"
+	(cd $(GNU_OBJ); $(GNU_OBJ)/make/make $(MFLAGS) \
+		CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ \
+		LDFLAGS=-B$(GNU_OBJ)/gcc/ )
 
 $(BINDIR):
 	mkdir $(BINDIR)
@@ -156,7 +158,7 @@ install: $(BINDIR)
 # gcc.  See src/gnu/src/gcc/INSTALL for more info.
 # Use the gcc '-v ' flag to see whether your gcc was compiled with cc or gcc
 bootstrap_gcc: configure
-	(cd $(GNU_OBJ)/gcc; $(MAKE) MAKE=$(GMAKE) bootstrap)
+	(cd $(GNU_OBJ)/gcc; $(MAKE) bootstrap)
 
 install_bootstrap_gcc:
 	(cd $(GNU_OBJ)/gcc; $(MAKE) install CC="stage2/xgcc -Bstage2/" CFLAGS="-g -O")
@@ -253,15 +255,20 @@ $(GNU_DEST)/$(PTARCH):
 hp_bin:
 	#(PATH=$(GNU_OBJ)/gas:$(PATH) ;echo $$PATH; cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC="$(CC)" )
 	@echo "Build gcc first, so we can build shared libiberty.so"
+	# We build C, C++ and objc here so that we don't have alloc problems
 	(PATH=$(GNU_OBJ)/gas:$(PATH) ;echo $$PATH; \
-		cd $(GNU_OBJ)/gcc; $(MAKE) $(MFLAGS) CC="$(CC)" MAKE=$(GMAKE) \
-		LANGUAGES=c )
+		cd $(GNU_OBJ)/gcc; $(MAKE) $(MFLAGS) CC="$(CC)" )
+	@echo "Build gnumake next"
+	# LDFLAGS is needed to build gmake
+	(PATH=$(GNU_OBJ)/gas:$(PATH) ;echo $$PATH; \
+		cd $(GNU_OBJ)/make; $(MAKE) $(MFLAGS) \
+		CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ \
+		LDFLAGS=-B$(GNU_OBJ)/gcc/ )
 	@echo "Building libiberty and g++"
 	(PATH=$(GNU_OBJ)/gas:$(PATH) ;echo $$PATH; \
-		cd $(GNU_OBJ); $(MAKE) $(MFLAGS) \
+		cd $(GNU_OBJ); $(GNU_OBJ)/make/make $(MFLAGS) \
 		CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ \
-		LDFLAGS=-B$(GNU_OBJ)/gcc/ \
-		MAKE=$(GMAKE))
+		LDFLAGS=-B$(GNU_OBJ)/gcc/ )
 
 # In gcc-2.5.8, collect2 is not automagically installed.  The symptom
 # of this is that ptcl says that there is no SDF domain, and that perhaps
