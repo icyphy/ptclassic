@@ -27,5 +27,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	go {
 		addCode("\t$ref(output) = $val(level);\n");
 	}
+	exectime {
+		return 0;	
+	}
 }
 

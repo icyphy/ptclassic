@@ -60,4 +60,7 @@ transients die away.
 		traceCount++;
 		CGCXgraph::go();
 	}
+	exectime {
+		return 8;
+	}
 }

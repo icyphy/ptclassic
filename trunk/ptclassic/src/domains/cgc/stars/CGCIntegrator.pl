@@ -126,4 +126,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		    addCode(limitWithoutSat);
 	    addCode(write);
 	}
+	exectime {
+		int x = 0;
+		if (spread > 0.0) {
+			if (int(saturate)) x = 3;
+			else x = 5;
+		}
+		return 3 + x + 2;
+	}
 }

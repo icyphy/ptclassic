@@ -42,4 +42,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	codeblock (init) {
 	$ref(output) = $ref(pos);
 	}
+	exectime {
+		return 1 + neg.numberPorts();
+	}
 }

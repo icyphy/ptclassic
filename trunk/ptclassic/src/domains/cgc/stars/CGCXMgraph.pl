@@ -196,4 +196,7 @@ codeblock(closeFile) {
 		out << cmd << "\");\n    }\n";
 		addCode(out);
 	}
+	exectime {
+		return 6 * int(numIn) + 1;
+	}
 }

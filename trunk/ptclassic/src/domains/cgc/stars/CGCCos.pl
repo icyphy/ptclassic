@@ -31,6 +31,9 @@ limitation of liability, and disclaimer of warranty provisions.
    codeblock(cosgen) {
 	$ref(output) = cos($ref(input));
    }
+	exectime {
+		return 23;	/* value taken from CG96Cos */
+	}
 }
 
 		

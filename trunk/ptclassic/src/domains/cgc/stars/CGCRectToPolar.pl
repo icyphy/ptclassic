@@ -49,4 +49,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	go {
 		  addCode(body); 
 	}
+	exectime {
+		return 200;	/* based on CG96 stars */
+	}
 }

@@ -52,4 +52,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	go {
 		addCode(sendsample);
 	}
+	exectime {
+		return 1;
+	}
 }

@@ -27,4 +27,7 @@ them.  It is typically used to discard unwanted outputs from other blocks.
 	go {
 		addCode("/* This star generates no code */");
 	}
+	exectime {
+		return 0;
+	}
 }

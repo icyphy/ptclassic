@@ -43,4 +43,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	go {
 		addCode(body);
 	}
+	exectime {
+		return 50;
+	}
 }

@@ -35,4 +35,7 @@ limitation of liability, and disclaimer of warranty provisions.
    codeblock(exp) {
 	$ref(output) = exp($ref(input));
    }
+	exectime {
+		return 33;  /* use the same value as log */
+	}
 }

@@ -30,8 +30,11 @@ PL_SRCS= \
  CGCCommutator.pl \
  CGCConst.pl \
  CGCCos.pl \
+ CGCCut.pl \
+ CGCCutVarOffset.pl \
  CGCCxToRect.pl \
  CGCDB.pl \
+ CGCDeMux.pl \
  CGCDistributor.pl \
  CGCDownSample.pl \
  CGCExp.pl \
@@ -44,6 +47,8 @@ PL_SRCS= \
  CGCLMS.pl \
  CGCLog.pl \
  CGCMpy.pl \
+ CGCMux.pl \
+ CGCPad.pl \
  CGCPCM.pl \
  CGCPCMread.pl \
  CGCPCMwrite.pl \
@@ -54,6 +59,9 @@ PL_SRCS= \
  CGCReciprocal.pl \
  CGCRectToCx.pl \
  CGCRectToPolar.pl \
+ CGCRepeat.pl \
+ CGCReverse.pl \
+ CGCTrainer.pl \
  CGCSin.pl \
  CGCSqrt.pl \
  CGCSub.pl \

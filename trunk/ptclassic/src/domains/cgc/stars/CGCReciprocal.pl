@@ -60,4 +60,9 @@ The sign of the output is determined by the sign of the input.
 		$ref(output) = t;
 	}
    }
+	exectime {
+		/* based on CG96Reciprocal */
+		if (double(magLimit) == 0.0) return 8;
+		else return 12;
+	}
 }

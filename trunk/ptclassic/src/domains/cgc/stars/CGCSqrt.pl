@@ -34,4 +34,7 @@ limitation of liability, and disclaimer of warranty provisions.
    codeblock(ln) {
 	$ref(output) = sqrt($ref(input));
    }
+	exectime {
+		return 165;	/* value taken from CG96Sqrt */
+	}
 }

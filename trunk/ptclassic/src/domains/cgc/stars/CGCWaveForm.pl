@@ -101,4 +101,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	go {
 		addCode(body);
 	}
+	exectime {
+		return 11;  /* worst case number */
+	}
 }
