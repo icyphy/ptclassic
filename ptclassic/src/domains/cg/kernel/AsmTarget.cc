@@ -33,7 +33,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Basic assembly language code Target for a single processor.
  Either an SDFScheduler or a LoopScheduler object can be used as
  the scheduler.  More specialized Targets (for a specific
- processor, etc) can be derived from this.
+ processor, etc.) can be derived from this one.
 
 *******************************************************************/
 #ifdef __GNUG__
@@ -60,7 +60,7 @@ AsmTarget :: AsmTarget(const char* nam, const char* desc,
 	initStates();
 	addStream("mainLoop",&mainLoop);
 	addStream("trailer",&trailer);
-	starTypes +=  "AnyAsmStar";
+	starTypes += "AnyAsmStar";
 	// if mem has not been defined by this point, define
 	// it to be a vanilla LinProcMemory of very large size.
 	// This is so that AsmTarget can be used with CG stars
@@ -69,7 +69,7 @@ AsmTarget :: AsmTarget(const char* nam, const char* desc,
 	// that any target derived from AsmTarget can delete
 	// mem and create a new one appropriate for itself
 	// in its setup method.
-	if (mem==0) mem = new LinProcMemory("AsmMem",ANY,ANY,"0-64000");
+	if (mem == 0) mem = new LinProcMemory("AsmMem",ANY,ANY,"0-64000");
 }
 
 AsmTarget::~AsmTarget() {
@@ -142,13 +142,17 @@ AsmTarget::allocReq(AsmStar& star) {
 // (We do, however, allocate memory for output event horizon ports).
 	AsmStarPortIter nextPort(star);
 	AsmPortHole* p;
+	if (mem == 0) {
+		Error::abortRun("AsmTarget memory allocator never allocated");
+		return FALSE;
+	}
 	while ((p = nextPort++) != 0) {
 		if (p->isItOutput() && p->far()->isItInput()) continue;
 
-		// If schedule has not been computed, the bufSize == 0
-		// bufSize, calls Error::abortRun
+		// If schedule has not been computed, then bufSize == 0
+		// and bufSize calls Error::abortRun
 		if (!p->bufSize()) return FALSE;
-		
+
 		if ((p->bufSize() > star.reps()*p->numXfer()) && 
 		    !(p->attributes() & PB_CIRC)) {
 			Error::abortRun(*p, "Dynamic addressing required for the buffer size returned by scheduler.  This is not supported yet."); 
@@ -179,8 +183,8 @@ AsmTarget::allocReq(AsmStar& star) {
 				continue;
 			}
 		} 
-                // skip states that are not in memory
-                if ((s->attributes() & AB_MEMORY) == 0) continue;
+		// skip states that are not in memory
+		if ((s->attributes() & AB_MEMORY) == 0) continue;
 		if (!mem->allocReq(*s)) {
 			Error::abortRun(*s,
 			      "memory allocation failed for state buffer:",
@@ -195,9 +199,9 @@ AsmTarget::allocReq(AsmStar& star) {
 
 void AsmTarget :: mainLoopCode() {
 	defaultStream = &mainLoop;
-        if (inWormHole()) allWormInputCode();
-        compileRun((SDFScheduler*) scheduler());
-        if (inWormHole()) allWormOutputCode();
+	if (inWormHole()) allWormInputCode();
+	compileRun((SDFScheduler*) scheduler());
+	if (inWormHole()) allWormOutputCode();
 	defaultStream = &trailer;
 }
 
@@ -349,14 +353,14 @@ void AsmTarget :: wormOutputCode(PortHole& p) {
 	myCode << comment(msg);
 }
 
-/*virtual*/ void AsmTarget::frameCode() {
-        // Generate Code.  Iterate an infinite number of times if
-        // target is inside a wormhole
-        int iterations = inWormHole()? -1 : (int)scheduler()->getStopTime();
+void AsmTarget::frameCode() {
+	// Generate Code.  Iterate an infinite number of times if
+	// target is inside a wormhole
+	int iterations = inWormHole() ? -1 : int(scheduler()->getStopTime());
 	defaultStream = &myCode;
-        beginIteration(iterations,0);
+	beginIteration(iterations,0);
 	myCode << mainLoop;
-        endIteration(iterations,0);
+	endIteration(iterations,0);
 	myCode << trailer;
 	if (procedures.numPieces() > 0) {
 	    StringList heading = "\n\n\nProcedures Begin\n\n";
@@ -367,8 +371,8 @@ void AsmTarget :: wormOutputCode(PortHole& p) {
 	myCode << comment(memMap);
 }
 
-/*virtual*/ void AsmTarget :: writeCode() {
-    writeFile(myCode,".asm",displayFlag);
+void AsmTarget :: writeCode() {
+    writeFile(myCode, ".asm", displayFlag);
 }
 
 ISA_FUNC(AsmTarget,CGTarget);
