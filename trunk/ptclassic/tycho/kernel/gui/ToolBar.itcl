@@ -72,13 +72,23 @@ class ::tycho::ToolBar {
 #
 body ::tycho::ToolBar::constructor {args} {
 
-    # A tiny bit of padding to the left of the status bar.
+    # A tiny bit of padding to the left of the toolbar.
     itk_component add leftpacking {
 	frame $itk_interior.leftpacking -width 2
     } {
 	keep -background -cursor
     }
     pack $itk_component(leftpacking) -side left
+
+    # Create and delete a bogus button. This appears to be necessary
+    # to keep the itk options manager happy.
+    itk_component add bogus {
+ 	eval button $itk_interior.junk
+    } {
+ 	keep -padx -pady -font
+    }
+    destroy $itk_component(bogus)
+    unset itk_component(bogus)
 
     # Initialize options
     eval itk_initialize $args
@@ -115,7 +125,8 @@ body ::tycho::ToolBar::addButton {name description args} {
     } {
 	keep -background -font -activebackground -cursor \
 		-highlightthickness -activeforeground \
-		-foreground -highlightcolor -highlightbackground
+		-foreground -highlightcolor -highlightbackground \
+		-padx -pady
     }
     pack $itk_component($name) -side left
 
