@@ -15,6 +15,7 @@ CG56STARS = \
  $(CG56)/CG56Commutator.o \
  $(CG56)/CG56Cos.o \
  $(CG56)/CG56DC.o \
+ $(CG56)/CG56Delay.o \
  $(CG56)/CG56Distributor.o \
  $(CG56)/CG56DownSample.o \
  $(CG56)/CG56Fork.o \
@@ -39,6 +40,8 @@ CG56STARS = \
  $(CG56)/CG56PickminVal.o \
  $(CG56)/CG56Quantizer.o \
  $(CG56)/CG56QuantizerInt.o \
+ $(CG56)/CG56Quasar.o \
+ $(CG56)/CG56QuasarChgPd.o \
  $(CG56)/CG56Reciprocal.o \
  $(CG56)/CG56Sgn.o \
  $(CG56)/CG56Shifter.o \
@@ -49,6 +52,8 @@ CG56STARS = \
  $(CG56)/CG56Sub.o \
  $(CG56)/CG56Tone.o \
  $(CG56)/CG56UpSample.o \
+ $(CG56)/CG56VarDelay.o \
+ $(CG56)/CG56VarQuasar.o \
  $(CG56)/CG56WriteFile.o \
  $(CG56)/CG56WriteFileInt.o \
  $(CG56)/CG56ZeroHld.o

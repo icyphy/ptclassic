@@ -33,6 +33,7 @@ PL_SRCS= \
  CG56Commutator.pl \
  CG56Cos.pl \
  CG56DC.pl \
+ CG56Delay.pl \
  CG56Distributor.pl \
  CG56Fork.pl \
  CG56Gain.pl \
@@ -55,9 +56,11 @@ PL_SRCS= \
  CG56Peak.pl \
  CG56Pickmin.pl \
  CG56PickminVal.pl \
- CG56Reciprocal.pl \
  CG56Quantizer.pl \
  CG56QuantizerInt.pl \
+ CG56Quasar.pl \
+ CG56QuasarChgPd.pl \
+ CG56Reciprocal.pl \
  CG56Sgn.pl \
  CG56Shifter.pl \
  CG56Sin.pl \
@@ -67,6 +70,8 @@ PL_SRCS= \
  CG56Sub.pl \
  CG56Tone.pl \
  CG56UpSample.pl \
+ CG56VarDelay.pl \
+ CG56VarQuasar.pl \
  CG56WriteFile.pl \
  CG56WriteFileInt.pl \
  CG56ZeroHld.pl
