@@ -284,7 +284,7 @@ char *item;
 {
     DupSheetNode *new;
     
-    ERR_IF1(!UMalloc(&new, sizeof(DupSheetNode)));
+    ERR_IF1(!UMalloc((char **)&new, sizeof(DupSheetNode)));
     new->info = item;
     new->moreinfo = NULL;
     new->next = *ds;
@@ -304,7 +304,7 @@ char *item2;
 {
     DupSheetNode *new;
     
-    ERR_IF1(!UMalloc(&new, sizeof(DupSheetNode)));
+    ERR_IF1(!UMalloc((char **)&new, sizeof(DupSheetNode)));
     new->info = item;
     new->moreinfo = item2;
     new->next = *ds;
