@@ -51,14 +51,7 @@ input data is affected by loss.
   }
 
   //// CODE
-  hinclude { "Matrix.h", "Error.h" }
-
-  code {
-// Numbers unlikely to come from a DCT...
-	  const float StartOfBlock = 524288.0;
-	  const float StartOfRun = 1048576.0;
-  }
-
+  hinclude { "Matrix.h", "Error.h", "ptdspRunLength.h" }
 
   method { // Do the run-length decoding.
     name { invRunLen }
@@ -67,62 +60,20 @@ input data is affected by loss.
     arglist { "(const FloatMatrix& hiImage, const FloatMatrix& loImage, int width, int height)" }
     code {
       // Initialize.
-      const int bSize = int(BlockSize);
       const int fullFrame = width * height;
+      const double* hiImagePtr = hiImage[0];
+      const double* loImagePtr = loImage[0];
 
-      // Do DC image first.
-      int i, j, k, blk;
+      double* outPtr = new double[fullFrame];
+      for(int k = 0; k < fullFrame; k++) { outPtr[k] = 0.0; }
+      
+      Ptdsp_RunLengthInverse (hiImagePtr, loImagePtr, outPtr, fullFrame, 
+			      int(BlockSize), loImage.numRows() * loImage.numCols(),
+			      HiPri);
 
-      float* outPtr = new float[fullFrame];
-      for(k = 0; k < fullFrame; k++) { outPtr[k] = 0.0; }
-      
-      i = 0;
-      for(j = 0; j < fullFrame; j += bSize * bSize) {
-	for(k = 0; k < HiPri; k++) {
-	  outPtr[j + k] = hiImage.entry(i++);
-	}
-      }
-      
-      // While still low priority input data left...
-      const int size = loImage.numRows() * loImage.numCols();
-      
-      i = 0;
-      while (i < size) {
-
-	// Process each block, which starts with "StartOfBlock".
-	while ((i < size) && (loImage.entry(i) != StartOfBlock)) {
-	  i++;
-	}
-	if (i < size-2) {
-	  i++;
-	  blk = int(loImage.entry(i++));
-	  blk *= bSize*bSize;
-	  if ((blk >= 0) && (blk < fullFrame)) {
-	    blk += HiPri;
-	    k = 0;
-	    while ((i < size) && (k < bSize*bSize - HiPri)
-		   && (loImage.entry(i) != StartOfBlock)) {
-	      if (loImage.entry(i) == StartOfRun) {
-		i++;
-		if (i < size) {
-		  int runLen = int(loImage.entry(i++));
-		  for(int l = 0; l < runLen; l++ ) {
-		    outPtr[blk+k] = 0.0;
-		    k++;
-		  }
-		}
-	      } else {
-		outPtr[blk+k] = loImage.entry(i++);
-		k++;
-	      }
-	    }
-	  } // if (blk OK)
-	}
-      } // end while (indx < size)
-      
       // Copy the data to return.
       FloatMatrix& outImage = *(new FloatMatrix(height,width));
-      for(i = 0; i < fullFrame; i++) {
+      for(int i = 0; i < fullFrame; i++) {
 	outImage.entry(i) = outPtr[i];
       }
       delete [] outPtr;
