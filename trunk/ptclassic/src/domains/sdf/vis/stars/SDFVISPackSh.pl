@@ -12,9 +12,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { SDF vis library }
 	desc { 
 	  Pack four floating point numbers into a single floating
-	  point number.  Each input floating point number is first
-	  down cast into a 16 bit short and then packed into a series of
-	  four shorts.}
+	    point number.  Each input floating point number is first
+	    down cast into a 16 bit short and then packed into a series of
+	    four shorts.  Three things to notice:  
+	    First assume that the input ranges from -1 to 1.
+	    Second the code is inlined for faster performance.
+	    Third data memory is prealigned for faster performance.
+	    }
 	input {
 		name { in }
 		type { float }
@@ -35,8 +39,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	code {
                 #define NumIn (4)
-                #define UpperBound (32767) 
-                #define LowerBound (-32768)
 	}
 	protected{
 	  short *packedout;
@@ -55,24 +57,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	  packedout = (short *) memalign(sizeof(double),sizeof(short)*NumIn);
         }
 	go {
-	  
-	  int index;
-	  double invalue;
 	  double *outvalue;
-	  
-	  //scale input, check bounds of the input, 
-	      //  and cast each float to short
-	      for (index=0;index<NumIn;index++){
-		invalue = (double) scale * double(in%(index));
-		if (invalue <= (double) LowerBound)
-		  packedout[index] = (short) LowerBound;
-		else if (invalue >= (double) UpperBound)
-		  packedout[index] = (short) UpperBound;
-		else 
-		  packedout[index] = (short) invalue;
-	      }	
+	  //scale, cast, and pack input
+	  packedout[0] = (short) (scale * double(in%0));
+	  packedout[1] = (short) (scale * double(in%1));
+	  packedout[2] = (short) (scale * double(in%2));
+	  packedout[3] = (short) (scale * double(in%3));
 
-	  /*output packed double*/	  
+	  //output packed double	  
 	  outvalue = (double *) packedout;
 	  out%0 << *outvalue;
 	}
