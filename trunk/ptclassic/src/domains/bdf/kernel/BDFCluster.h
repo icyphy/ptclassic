@@ -507,7 +507,7 @@ protected:
 	}
 private:
 	// The clustered galaxy.
-	BDFClusterGal* cgal;
+	BDFTopGal* cgal;
 	// The dynamic scheduler
 	DynDFScheduler* dynSched;
 	// The log file name
