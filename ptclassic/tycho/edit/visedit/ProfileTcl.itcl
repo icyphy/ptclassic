@@ -133,7 +133,7 @@ body ::tycho::ProfileTcl::profileDisplay {} {
                 if {$parent == {}} {
                     set color white
                 } {
-                    set fst [component graphics forest]
+                    set fst [component graphics graph]
                     set parcontents [$fst contents $parent]
                     set partime [keylget parcontents cpu]
                     if {$partime > 0} {
@@ -166,7 +166,7 @@ body ::tycho::ProfileTcl::profileDisplay {} {
     disableTool off
     disableTool cancel
     enableTool on
-    component graphics redrawForest
+    component graphics redrawGraph
 }
 
 #######################################################################
@@ -187,7 +187,8 @@ body ::tycho::ProfileTcl::profileStart {} {
 #
 body ::tycho::ProfileTcl::updateTimes {} {
     set node [component graphics current]
-    set fst [component graphics forest]
+    if {$node == {}} {return}
+    set fst [component graphics graph]
     set contents [$fst contents $node]
     # Use TclX commands, since TclX is required to be present anyway.
     set count [keylget contents count]
