@@ -1140,7 +1140,9 @@ body ::tycho::File::autoSave {} {
 	set filename [file tail $file]
 	set filename [format "#auto#%s" $filename]
 	set filename [format "%s/%s" [file dirname $file] $filename]
-	save $filename
+	if {[catch "save $filename" message] != 0} {
+	    ::tycho::warn "Auto-save failed: $message"
+	}
 	markModified
     }
     set interval [expr int(60000*$itk_option(-autosaveinterval))]
