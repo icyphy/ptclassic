@@ -216,3 +216,85 @@ void ListIter::remove() {
     else if (list->lastNode)
 	((SequentialList*)list)->removeLink(*list->lastNode);
 }
+
+
+Queue::Queue() {
+  buffer = 0;
+  bufferSize = 0;
+  numEntries = 0;
+  firstEntry = 0;
+}
+
+Queue::~Queue() {
+  LOG_DEL; delete [] buffer;
+}
+
+// make room for at least one more entry
+void Queue::enlarge() {
+  // somewhat arbitrary policy for initial size & growth rate of buffer array
+  int newSize = (bufferSize > 0) ? bufferSize*2 : 32;
+  LOG_NEW; Pointer *newBuffer = new Pointer[newSize];
+  // copy old data to head of new area
+  int p = firstEntry;
+  for (int i = 0; i < numEntries; i++) {
+    newBuffer[i] = buffer[p];
+    if (++p >= bufferSize)
+      p = 0;
+  }
+  // and clean up
+  LOG_DEL; delete [] buffer;
+  buffer = newBuffer;
+  bufferSize = newSize;
+  firstEntry = 0;
+}
+
+void Queue::initialize() {
+  numEntries = 0;
+  firstEntry = 0;
+}
+
+void Queue::putHead(Pointer p) {
+  if (numEntries >= bufferSize)
+    enlarge();
+  if (--firstEntry < 0)
+    firstEntry = bufferSize-1;
+  buffer[firstEntry] = p;
+  numEntries++;
+}
+
+void Queue::putTail(Pointer p) {
+  if (numEntries >= bufferSize)
+    enlarge();
+  int i = firstEntry + numEntries;
+  if (i >= bufferSize)
+    i -= bufferSize;
+  buffer[i] = p;
+  numEntries++;
+}
+
+Pointer Queue::getHead() {
+  if (numEntries == 0)
+    return 0;
+  Pointer p = buffer[firstEntry];
+  if (++firstEntry >= bufferSize)
+    firstEntry = 0;
+  numEntries--;
+  return p;
+}
+
+Pointer Queue::getTail() {
+  if (numEntries == 0)
+    return 0;
+  int i = firstEntry + numEntries - 1;
+  if (i >= bufferSize)
+    i -= bufferSize;
+  Pointer p = buffer[i];
+  numEntries--;
+  return p;
+}
+
+Pointer Queue::head() const {
+  if (numEntries == 0)
+    return 0;
+  return buffer[firstEntry];
+}

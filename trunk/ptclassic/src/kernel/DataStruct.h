@@ -2,7 +2,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -128,27 +128,37 @@ Class implements a queue, which may be used to implement FIFO or LIFO or a
 mixture -- using putTail (or put), putHead, getTail, and getHead (or get).
 */
 
-class Queue : private SequentialList
+class Queue
 {
+private:
+	Pointer *buffer;	// expansible circular buffer for entries
+	int bufferSize;		// allocated size of buffer array
+	int numEntries;		// number of entries currently stored
+	int firstEntry;		// array index of head entry
+
+	void enlarge();		// make the buffer bigger
+
 public:
-	Queue() {}
+	Queue();
+	~Queue();
 
-	// Add element to the queue
-        void put(Pointer p) {append(p);}
-	void putTail(Pointer p) {append(p);}
-	void putHead(Pointer p) {prepend(p);}
+	void initialize();	// Remove all entries
 
-	// Remove and return element from end of the queue
-        Pointer get() {return getAndRemove();}
-	Pointer getHead() {return get();}
-	Pointer getTail() {return getTailAndRemove();}
+	// Add element to the front or back of the queue
+	void putHead(Pointer p);
+	void putTail(Pointer p);
+        void put(Pointer p) { putTail(p); }
 
-	SequentialList::size;
-	SequentialList::initialize;
+	// Remove and return element from front or back of the queue;
+	// these return 0 if the queue is empty
+	Pointer getHead();
+	Pointer getTail();
+        Pointer get() { return getHead(); }
 
-	inline int length() const { return size();} // TEMPORARY
-	// need public destructor
-	~Queue() {}
+	Pointer head() const;	// get head element without removing it
+
+	inline int size() const { return numEntries; }
+	inline int length() const { return numEntries; } // alternate spelling
 };
 
 	///////////////////////////////////
@@ -237,25 +247,25 @@ of the stack. In addition, we allow elements to be added
 to the bottom of the stack.
 */
 
-class Stack : private SequentialList
+class Stack : private Queue
 {
 public:
 	Stack() {}
 
 	// Add element at the top of the stack
-	void pushTop(Pointer p) {prepend(p);}
+	void pushTop(Pointer p) { putHead(p); }
 
 	// Add element to the bottom of the stack
-	void pushBottom(Pointer p) {append(p);}
+	void pushBottom(Pointer p) { putTail(p); }
 
 	// Access and remove element from the top of the stack
-	Pointer popTop() {return getAndRemove();}
+	Pointer popTop() { return getHead(); }
 
 	// Access but do not remove element from top of stack
 	Pointer accessTop() const {return head();}
 
-	SequentialList::initialize;
-	SequentialList::size;
+	Queue::initialize;
+	Queue::size;
 
 	// need destructor since baseclass is private, so others can destroy
 	~Stack() {}
