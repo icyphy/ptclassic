@@ -1,8 +1,11 @@
 #include "Connect.h"
+#include "CircularBuffer.h"
 #include "Block.h"
 #include "StringList.h"
 #include "Output.h"
 #include "Particle.h"
+#include "Geodesic.h"
+#include "Plasma.h"
 #include "miscFuncs.h"
  
 /**************************************************************************
@@ -42,25 +45,6 @@ CircularBuffer :: ~CircularBuffer()
 		if (q) q->die();
 	}
         delete buffer;
-}
-
-Particle** CircularBuffer :: here() const
-{
-        return buffer+current;
-}
-
-Particle** CircularBuffer :: next()
-{
-	++current;
-	if (current >= dimen) current = 0;
-        return buffer+current;
-}
-
-Particle** CircularBuffer :: last()
-{
-	--current;
-	if (current < 0) current = dimen - 1;
-        return buffer+current;
 }
 
 // Find the position in the buffer i in the past relative to current
@@ -174,7 +158,10 @@ int InPortHole :: isItInput() { return TRUE;}
 int OutPortHole :: isItOutput() { return TRUE;}
 void PortHole :: beforeGo () { return;}
 void PortHole :: afterGo () { return;}
-	
+
+// return number of tokens waiting on Geodesic
+int PortHole :: numTokens() const { return myGeodesic->size();}
+
 void PortHole :: allocateBuffer()
 {
 	// If there is a buffer, release its memory
@@ -454,33 +441,31 @@ PortHole& MultiPortHole :: newConnection() {
 
 Particle* Geodesic::get()
 {
-	if(size() == 0) {
-		Error::abortRun("Geodesic: Attempt to access empty Geodesic");
-		return 0;
+	if (sz > 0) {
+		sz--;
+		return ParticleStack::get();
 	}
-	return (Particle*)popTop();
+	else return 0;
 }
 
 void Geodesic :: initialize()
 {
 	// Remove any Particles residing on the Geodesic,
 	// and put them in Plasma
-	for(int i=size(); i>0; i--) {
-		Particle* p = get();
-		p->die();
-	}
+	freeup();
 
 	// Initialize the buffer to the number of Particles
 	// specified in the connection; note that these Particles
 	// are initialized by Plasma
-	for(i=numInitialParticles; i>0; i--) {
+	for(int i=numInitialParticles; i>0; i--) {
 		Particle* p = originatingPort->myPlasma->get();
-		put(p);
-
+		putTail(p);
+	}
+	sz = numInitialParticles;
 	// TO DO: Allow Particles in the Geodesic to be
 	// initialized to specific values
-		}
 }
+
 
 Geodesic* PortHole :: allocateGeodesic () {
 	return new Geodesic;
