@@ -23,6 +23,7 @@ At compile time, this star appears to just be an atomic star.
 	inmulti {
 		name { input }
 		type { float }
+		num { 0 }
 	}
 	outmulti {
 		name { output }
