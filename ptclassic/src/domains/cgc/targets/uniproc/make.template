@@ -30,7 +30,7 @@
 # Root of Ptolemy directory
 ROOT =		../../../../..
 # True source directory
-VPATH = 	$(ROOT)/src/domains/cgc/targets/uniprocessor
+VPATH = 	$(ROOT)/src/domains/cgc/targets/uniproc
 
 # get configuration info
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
