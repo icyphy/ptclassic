@@ -270,18 +270,6 @@ body ::tycho::Monitor::constructor {args} {
 	set itk_option(-autodestroy) 1
 	configure -autodestroy 1
     }
-
-    $this raiseWindow
-    $this toolbar focusin commandtoexec
-    if {$itk_option(-autostart) == 1} {
-        # If autostart, no need to invoke focus on the user's command
-        after idle $this execProcess
-    } else {
-        # If not autostart, default is to focus in on the user command
-        after 750 $this toolbar focusin commandtoexec
-        putStatus "Press ENTER to start execute"
-    }
-    return $this
 }
 
 #######################################################################
@@ -548,6 +536,17 @@ body ::tycho::Monitor::initialize \
         ::tycho::Monitor::initializeToolbar $toolbar
     }
 
+    $this raiseWindow
+    
+    toolbar focusin commandtoexec
+    if {$itk_option(-autostart) == 1} {
+        # If autostart, no need to invoke focus on the user's command
+        after idle $this execProcess
+    } else {
+        # If not autostart, default is to focus in on the user command
+        after 750 $this toolbar focusin commandtoexec
+        putStatus "Press ENTER to start execute"
+    }
 }
 
 #########################################################################
