@@ -106,6 +106,6 @@ typt/lib/PtolemyFacets.fst: FORCE
 # Glimpse is a tool that prepares an index of a directory tree.
 # glimpse is not included with Tycho, see http://glimpse.cs.arizona.edu
 GLIMPSEINDEX =	/usr/sww/bin/glimpseindex
-glimpse:
+glimpse: .glimpse_exclude
 	$(GLIMPSEINDEX) -H $(PTOLEMY)/tycho $(PTOLEMY)/tycho
 	chmod a+r $(PTOLEMY)/tycho/.glimpse_*
