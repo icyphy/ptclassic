@@ -35,7 +35,7 @@ is on your path, or this will not work!!!
 	defstate {
 		name {options}
 		type {string}
-		default {""}
+		default {"-bb -tk -P =800x400"}
 		desc { Command line options for xgraph.}
 	}
 	hinclude { "Display.h" }
