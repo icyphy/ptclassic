@@ -44,7 +44,7 @@ CPLUSPLUS_COMPAT =  -I$(ROOT)/src/compat/cfront
 # we get messages like:
 # ../../src/compat/cfront/std.h:65: warning: No include path in which
 #	 to find sysent.h 
-CPLUSPLUS = g++ $(GPLUSPLUS_COMPAT) -DPT_EGCS
+CPLUSPLUS = g++ $(CPLUSPLUS_COMPAT) -DPT_EGCS
 
 # system libraries (libraries from the environment)
 # No need to include -lg++ under egcs
