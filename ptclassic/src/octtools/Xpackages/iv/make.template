@@ -42,7 +42,9 @@ include $(CONFIG)
 
 HDRS		= iv.h \
 		ivBuf.h \
-		ualloc.h
+		ivGetLine.h \
+		ualloc.h \
+		xformatevent.h
 
 LIBCSRCS	= iv.c \
 		ivBuf.c \
