@@ -46,19 +46,20 @@
 #
 # Assign elements of a list to multiple variables. If the number
 # of variable names is less then the length of the list, then
-# later elements pf the list are just ignored. Of the number of
-# variable names is more than the length of the list, then only
-# as many variables as there list elements are set. (Actually, I
-# wonder if this shouldn't flag an error: is there any reason why
-# one would ever want to do this?)
+# later elements pf the list are just ignored. if the number of
+# variable names is more than the length of the list, then an error
+# will be generated.
 #
 # -- varnames: One or more names of variables.
 # -- list: The list containing values to assign to the variables.
 #
 proc assign {args} {
-    foreach* var [linit $args] val [llast $args] {
+    set values [lindex $args end]            ;# llast
+    foreach var [lreplace $args end end] {   ;# linit
 	upvar $var v
-	set v $val
+
+	set v      [lindex   $values 0]      ;# lhead
+	set values [lreplace $values 0 0]    ;# ltail
     }
 }
 
@@ -93,10 +94,9 @@ proc behead {varname listname} {
     upvar $varname  v
     upvar $listname l
 
-    set v [lhead $l]
-    set l [ltail $l]
+    set v [lindex   $l 0]      ;# lhead
+    set l [lreplace $l 0 0]    ;# ltail
 }
-
 
 #
 # assert
@@ -215,7 +215,7 @@ proc getoption {option listname} {
 
     set t [lsearch -exact $l -$option]
     if { $t != -1 } {
-	set ldash [ldrop $l [expr $t+1]]
+	set ldash [lreplace $l 0 $t]
 	set tdash [lsearch -regexp $ldash {-[^0-9]}]
 
 	if { $tdash == -1 } {
@@ -247,7 +247,7 @@ proc readoption {option listname} {
 
     set t [lsearch -exact $l -$option]
     if { $t != -1 } {
-	set ldash [ldrop $l [expr $t+1]]
+	set ldash [lreplace $l 0 $t]
 	set tdash [lsearch -glob $ldash "-*"]
 
 	if { $tdash == -1 } {
@@ -273,6 +273,9 @@ proc readoption {option listname} {
 # This is very handy for processing non-option arguments in
 # a uniform way: co-ordinates are the example for which this
 # procedure was originally written.
+#
+# FIXME: This will incorrectly assume that a negative number starts
+# the options list!!!
 #
 proc getalloptions {varname listname} {
 
@@ -367,37 +370,6 @@ proc makeopt {option} {
 
 
 #
-# setquery
-#
-# A useful procedure for set-query methods. If the argument 'list'
-# is not empty, return the variable 'name'; if it is, set the
-# variable (return its value), and optionally execute a script.
-#
-# Use like this:
-#
-#   method rate {args} {
-#       setquery rate args {
-#           do_something
-#       }
-#   }
-#
-# WARNING: This function is probably bogus. DO NOT USE.
-#
-#proc setquery {name arg args} {
-#    upvar $name v
-#
-#    if { $arg == "" } {
-#	return $v
-#    } else {
-#	set v $arg
-#	if { $args != "" } {
-#	    uplevel [lindex $args 0]
-#	}
-#    }
-#}
-
-
-#
 # loop
 #
 # Loop $n times. Called as "loop n body." The -counter option
@@ -434,68 +406,52 @@ proc loop {args} {
 # of a variable that counts from 0 to n-1, where n is the length
 # of the shortest argument list.
 #
-# How does it work? I wish you hadn't asked.... For each variable
-# name, it creates a local variable called i0, i1 etc, and binds
-# the local variable to the passed variable with upvar{}. For each
-# argument list, it creates local variable called l0, l1 etc.
+# It works as follows: for each variable name x and corresponding list,
+# it creates a new variable and list v_x and l_x, where v_x is upvar'ed
+# to the caller's variable x. It then builds a script that sets v_x
+# to the head of l_x. Thus, the call
 #
-# Then, in a frenzy of list heading and tailing, it sets each i(n)
-# to the head element of the corresponding l(n), and evaluates the
-# body in the caller's context (so that variable names passed to
-# this procedure reference the appropriate i(n)). It takes the tail
-# of the lists and, provided none are empty, does the same thing again.
+#     foreach* x {1 2 3} y {4 5 6} {puts "$x $y"}
 #
-# This is very inefficient, of course, and should be one of the
-# first things recoded in C when things need speeding up.
+# will build the script
 #
-# FIXME: This procedure ignores the last element if it is an empty
-# list. Depending on how you look at it, the problem is either in the
-# way that Tcl handles lists, which is totally brain-dead, or in the
-# definition of lnull{}. A work-around
-# is to ensure that, if the last
-# element is an empty list, that it is followed by a space before
-# the terminating brace. Really, this should be fixed properly.
+#     set v_x [lindex $l_x $counter]; set v_y [lindex $l_y $counter];
+#
+# In the process, the length of the shortest list is counted. Then
+# the generated script is executed to bind each argument variable
+# in the caller's context to the correct element of the corresponding
+# argument list, and the body executed in the caller's context.
+#
+# This is quite inefficient, of course, although it's not too bad
+# compared with other things you need to do in Tk. For example, I timed
+# the constant overhead (for one input list) at about the same as
+# creating a 50 x 50 rectangle on the Tk canvas.
 #
 proc foreach* {args} {
-    set c 0
-
     set v [readopt counter args]
     if {$v != ""} {
 	upvar $v counter
     }
 
-    while {[llength $args] > 2} {
-	upvar   [lindex $args 0] i$c
-	set l$c [lindex $args 1]
+    set script {}
+    set body  [lindex $args end]
+    set outer [llength [lindex $args 1]]
+    set inner 0
 
-	set args [ldrop $args 2]
-	incr c
+    while { [llength $args] > 1 } {
+	set var [lindex $args 0]         ;# first  element
+	upvar $var v_$var
+	set   l_$var [lindex $args 1]    ;# second element
+	set args [lreplace $args 0 1]    ;# rest of list
+
+	set outer [min $outer [llength [set l_$var]]]
+	lappend script "set v_$var \[lindex \$l_$var \$counter\]\;"
     }
+    set script [eval concat $script]
 
-    if {[llength $args] != 1} {
-	puts "Wrong number of args to foreach*"
-	return
-    }
-
-    set body [lindex $args 0]
-
-    set done    0
-    set counter 0
-    while { ! $done } {
-	for {set i 0} {$i < $c} {incr i} {
-	    set i$i [lindex [set l$i] 0]
-	}
-
+    for { set counter 0 } { $counter < $outer } { incr counter } {
+	eval $script
 	uplevel $body
-
-	for {set i 0} {$i < $c} {incr i} {
-	    set l$i [ltail [set l$i]]
-	    if {[lnull [set l$i]]} {
-		set done 1
-	    }
-	}
-
-	incr counter
     }
 }
 
@@ -520,8 +476,9 @@ proc foreachpair {x y l body} {
     upvar $y snd
 
     while { [llength $l] >= 2 } {
-	assign fst snd $l
-	set l [ldrop $l 2]
+	set fst [lindex $l 0]
+	set snd [lindex $l 1]
+	set l   [lreplace $l 0 1]
 
 	uplevel $body
     }
@@ -605,53 +562,33 @@ proc filter {v l body} {
 #        list $i [expr $x * $y]
 #    }
 #
-# FIXME: apply*{} has the same bug with an empty list element at the end
-# of the list as foreach*{}.
-#
 proc apply* {args} {
-
-    set c      0
-    set result ""
-
     set v [readopt counter args]
     if {$v != ""} {
 	upvar $v counter
     }
 
-    while {[llength $args] > 2} {
-	upvar   [lindex $args 0] i$c
-	set l$c [lindex $args 1]
+    set script {}
+    set body  [lindex $args end]
+    set outer [llength [lindex $args 1]]
+    set inner 0
 
-	set args [ldrop $args 2]
-	incr c
+    while { [llength $args] > 1 } {
+	set var [lindex $args 0]         ;# first  element
+	upvar $var v_$var
+	set   l_$var [lindex $args 1]    ;# second element
+	set args [lreplace $args 0 1]    ;# rest of list
+
+	set outer [min $outer [llength [set l_$var]]]
+	lappend script "set v_$var \[lindex \$l_$var \$counter\]\;"
     }
+    set script [eval concat $script]
 
-    if {[llength $args] != 1} {
-	puts "Wrong number of args to apply*"
-	return
-    }
-
-    set body [lindex $args 0]
-
-    set done    0
-    set counter 0
-    while { ! $done } {
-	for {set i 0} {$i < $c} {incr i} {
-	    set i$i [lindex [set l$i] 0]
-	}
-
+    set result {}
+    for { set counter 0 } { $counter < $outer } { incr counter } {
+	eval $script
 	lappend result [uplevel $body]
-
-	for {set i 0} {$i < $c} {incr i} {
-	    set l$i [ltail [set l$i]]
-	    if {[lnull [set l$i]]} {
-		set done 1
-	    }
-	}
-	
-	incr counter
     }
 
     return $result
 }
-
