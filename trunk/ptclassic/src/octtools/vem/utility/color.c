@@ -82,7 +82,7 @@ XColor *clr;			/* Returned color structure */
 
     if (!init) {
         XAllocNamedColor(xv_disp(), xv_cmap(), "black", &black, &exactblack);
-	//black.pixel = BlackPixel(xv_disp(), xv_scrn());
+	/* black.pixel = BlackPixel(xv_disp(), xv_scrn()); */
 	XQueryColor(xv_disp(), xv_cmap(), &black);
     }
     if (clr) *clr = black;
