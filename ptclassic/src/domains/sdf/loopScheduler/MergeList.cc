@@ -63,20 +63,19 @@ int euclid(int a, int b) {
 MergeLink::MergeLink(LSNode* base, LSNode* relative, int d) : DoubleLink(0) {
 	base_node = base;
 	adjacent_node = relative;
-	parRep = base->myMaster()->repetitions;
-	sonRep = relative->myMaster()->repetitions;
-	gcd = euclid(parRep,sonRep);
-	par_inv = parRep / gcd;
-	adj_ix = relative->invocationNumber();
 	direction = d;
 
-	par_node = 0;
-	son_node = 0;
+	int basereps = base->myMaster()->repetitions;
+	int relreps = relative->myMaster()->repetitions;
+	gcd = euclid(basereps, relreps);
 
-	// ClusterNodeLists 
+	adj_ix = relative->invocationNumber();
+
 	preClust = 0;
 	mainClust = 0;
 	postClust = 0;
+
+	setUp();
 }
 
 MergeLink::~MergeLink() {
@@ -112,10 +111,9 @@ void MergeLink :: setUp() {
 	else {
 		par_node = adjacent_node;
 		son_node = base_node;
-		int temp = sonRep;
-		sonRep = parRep;
-		parRep = temp;
 	}
+	parRep = par_node->myMaster()->repetitions;
+	sonRep = son_node->myMaster()->repetitions;
 	par_inv = parRep / gcd;
 	son_inv = sonRep / gcd;
 }
@@ -138,20 +136,8 @@ int MergeLink::formRepeatedCluster(LSGraph &g)
 
 	//  attempt clustering to check whether deadlock occurs.
 	if (!preClustering(g, ix, iy)) return FALSE;
-	if (!mainClustering(g, ix, iy)) {
-		LOG_DEL; delete preClust;
-		preClust = 0;
-		return FALSE;
-	}
-	if (son_node) {
-		if(!postClustering(g)) {
-			LOG_DEL; delete preClust;
-			preClust = 0;
-			LOG_DEL; delete mainClust;
-			mainClust = 0;
-			return FALSE;
-		}
-	}
+	if (!mainClustering(g, ix, iy)) return FALSE;
+	if (son_node && ! postClustering(g)) return FALSE;
 
 	// no deadlock occurs. THEN,
 	// 1. initial phase
@@ -198,8 +184,8 @@ int MergeLink :: preClustering(LSGraph& g, int& ix, int& iy) {
 		nextP = nextS->nextConnection(nextP,0);
 		if (!nextP) return FALSE;
 		parIx = nextP->invocationNumber();
-	} while ((parIx != prevPar) && (sonIx <= sonLimit) && 
-		(parIx <= parLimit));
+	} while ((parIx != prevPar) && (sonIx <= sonLimit) &&
+		 (parIx <= parLimit));
 	
 	// Check whether the initial cluster needs to be made.
 	if ((parIx >= parLimit) && (sonIx >= sonLimit))
@@ -344,11 +330,11 @@ int MergeLink :: postClustering(LSGraph& g) {
 	// append isolated par_nodes if any.
 	appendIsolatedPar(postClust);
 
-	while (son_node != 0) {
+	while (son_node) {
 		postClust->append(son_node);
 		son_node = son_node->getNextInvoc();
 	}
-	
+
 	// Check that the formation of this invocation will not
 	// introduce a cycle in the graph.
 	if (g.introducesCycle(*postClust)) {
