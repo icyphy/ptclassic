@@ -53,7 +53,7 @@ HDRS = \
 SRCS = $(HDRS:.h=.cc) DESiPrun.cc
 
 #Library name
-LIB=libsip.$(LIBSUFFIX)
+PTLIB=libsip.$(LIBSUFFIX)
 
 # Used to create .dlls under nt4.vc
 DLLDEPS =	..\..\..\..\kernel\libptolemy.lib
@@ -61,10 +61,10 @@ DLLDEPS =	..\..\..\..\kernel\libptolemy.lib
 # Objects:
 OBJS = $(SRCS:.cc=.o)
 
-all: 	makefile $(LIB)
+all: 	makefile $(PTLIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(PTLIB)
 
 
 # include common definitions, rules

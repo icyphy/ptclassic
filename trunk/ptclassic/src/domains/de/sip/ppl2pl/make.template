@@ -49,8 +49,8 @@ SRCS =		ppl2pl.c
 
 OBJS = 		$(SRCS:.c=.o)
 
-# common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
-LIB = 		foo
+# common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(PTLIB)
+PTLIB = 		foo
 
 C_INCL =	$(PTCOMPAT_INCSPEC)
  

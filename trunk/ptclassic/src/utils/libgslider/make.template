@@ -55,16 +55,16 @@ SRCS =		$(LIBCSRCS)
 
 OBJS =		$(LIBCSRCS:.c=.o)
 
-LIB = 		libgslider.$(LIBSUFFIX)
+PTLIB = 		libgslider.$(LIBSUFFIX)
 
 EXPHDR =	gslider.h
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
 
-all: makefile $(LIB)
+all: makefile $(PTLIB)
 
-install: makefile $(LIBDIR)/$(LIB)
+install: makefile $(LIBDIR)/$(PTLIB)
 
 lint:	$(LIBCSRCS)
 	lint -u $(INCL) $(LIBCSRCS) > lint
