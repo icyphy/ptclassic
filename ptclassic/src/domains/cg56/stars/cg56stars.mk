@@ -35,7 +35,6 @@ CG56STARS = \
  $(CG56)/CG56FixTable.o \
  $(CG56)/CG56FixThresh.o \
  $(CG56)/CG56Fork.o \
- $(CG56)/CG56GetFile.o \
  $(CG56)/CG56HostAIN.o \
  $(CG56)/CG56HostIn.o \
  $(CG56)/CG56HostOut.o \
@@ -44,10 +43,10 @@ CG56STARS = \
  $(CG56)/CG56IIDUniform.o \
  $(CG56)/CG56Integrator.o \
  $(CG56)/CG56Interpolator.o \
- $(CG56)/CG56IntGetFile.o \
  $(CG56)/CG56IntMult.o \
  $(CG56)/CG56IntProduct.o \
  $(CG56)/CG56IntQuantizer.o \
+ $(CG56)/CG56IntReadFile.o \
  $(CG56)/CG56IntWriteFile.o \
  $(CG56)/CG56Limit.o \
  $(CG56)/CG56LinToCirc.o \
@@ -66,6 +65,7 @@ CG56STARS = \
  $(CG56)/CG56ProPortADDA.o \
  $(CG56)/CG56ProPortDA.o \
  $(CG56)/CG56Pulse.o \
+ $(CG56)/CG56ReadFile.o \
  $(CG56)/CG56Reverse.o \
  $(CG56)/CG56Quantizer.o \
  $(CG56)/CG56QuasarChgPd.o \

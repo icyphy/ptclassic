@@ -53,7 +53,6 @@ PL_SRCS= \
  CG56FixTable.pl \
  CG56FixThresh.pl \
  CG56Fork.pl \
- CG56GetFile.pl \
  CG56HostAIN.pl \
  CG56HostIn.pl \
  CG56HostOut.pl \
@@ -62,10 +61,10 @@ PL_SRCS= \
  CG56IIDUniform.pl \
  CG56Integrator.pl \
  CG56Interpolator.pl \
- CG56IntGetFile.pl \
  CG56IntMult.pl \
  CG56IntProduct.pl \
  CG56IntQuantizer.pl \
+ CG56IntReadFile.pl \
  CG56IntWriteFile.pl \
  CG56Limit.pl \
  CG56LinToCirc.pl \
@@ -86,6 +85,7 @@ PL_SRCS= \
  CG56Pulse.pl \
  CG56Quantizer.pl \
  CG56QuasarChgPd.pl \
+ CG56ReadFile.pl \
  CG56Reciprocal.pl \
  CG56Repeat.pl \
  CG56Reverse.pl \
