@@ -147,16 +147,16 @@ protected:
 // new parameter value for PrecisionState::getParseToken
 const int T_Precision = 500;
 
-class PrecisionState :  public Precision, public State
+class PrecisionState :   public State, public Precision
 {
 
 public:
         // con/destructors
-        PrecisionState() { val = NULL; }
+        PrecisionState();
 	~PrecisionState();
 
 	// default copy constructor
-	PrecisionState(const &);
+	PrecisionState(const PrecisionState &);
 
         // parses initValue to set value
         void initialize();
@@ -188,12 +188,17 @@ public:
 	State* clone () const;//  {return new PrecisionState;}
 
 	// this redeclaration is required by the "hiding rule".  Yuk!
-	void setInitValue(const char* s) { State::setInitValue(s);}
+	void setInitValue(const char* s);
 
 	// parse precision string of the form "intBits.fracBits" or "fracBits/length" 
 	// where each expression may contain operators and references to other states.
 	static Precision parsePrecisionString(
 		Tokenizer&, const char* name, Block* parent);
+	// Method setting internal data  in the State
+        PrecisionState& setState(const char* stateName, 
+			Block* parent ,
+			const char* ivalue,
+			const char* desc = NULL);
 
 protected:
 	// redefine token parser from class State
