@@ -1,5 +1,5 @@
 defstar {
-	name { Quad256FFTCx }
+	name { QuadFFTCx }
 	domain { SDF }
 	version { $Date$ $Id$ }
 	author { William Chen }
@@ -11,8 +11,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF vis library }
 	desc { 
-	  256 point fft of a single complex sequence using split
-	    radix 2.
+	  A single complex sequence FFT using radix 2.
+	    Input length must be power of two.
 	}
 	input {
 	  name { realIn }
@@ -45,7 +45,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  name { orderfft }
 	  type { int }
 	  default { 5 }
-	  desc { Order of FFT }
+	  desc { Log2 of fft size }
 	  attributes { A_CONSTANT|A_SETTABLE }
 	}
       	defstate {
