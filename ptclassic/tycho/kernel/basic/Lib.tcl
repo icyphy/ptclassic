@@ -61,7 +61,7 @@ set auto_path [linsert $auto_path 0 \
 	$ptolemy/tcltk/itcl-2.0b2/lib/iwidgets2.0
 ]
 
-namespace tycho
+namespace ::tycho
 
 # Files that we are going to need right away, so there is no
 # point in deferring them to auto-loading.

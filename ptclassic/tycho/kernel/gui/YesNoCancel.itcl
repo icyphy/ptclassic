@@ -40,7 +40,7 @@
 # directly creating an instance.  The value returned by the cancel button
 # is -1, while yes is 1 and no is 0.
 #
-class tycho::YesNoCancel {
+class ::tycho::YesNoCancel {
     inherit YesNoQuery
 
     # The command to execute on a yes response.
@@ -53,7 +53,7 @@ class tycho::YesNoCancel {
 ##########################################################################
 #### constructor
 #
-body tycho::YesNoCancel::constructor {args} {
+body ::tycho::YesNoCancel::constructor {args} {
 
     # Pack the cancel button
     addButton cancel -text "Cancel <Esc>" \

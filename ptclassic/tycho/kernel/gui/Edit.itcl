@@ -45,7 +45,7 @@
 # the Text widget in Tk, in much the same way. This will happen
 # eventually.
 #
-class tycho::Edit {
+class ::tycho::Edit {
     inherit File
 
     #### insertFile
@@ -85,7 +85,7 @@ class tycho::Edit {
 
 ###################################################################
 #
-body tycho::Edit::constructor {args} {
+body ::tycho::Edit::constructor {args} {
 
     # The text widget.
     itk_component add text {
@@ -229,7 +229,7 @@ body tycho::Edit::constructor {args} {
 # specified file is not writable, trigger an error. Return 1 if the
 # write succeeds, 0 otherwise.
 #
-body tycho::Edit::save {{name ""}} {
+body ::tycho::Edit::save {{name ""}} {
     if {$name == ""} {
 	set filename $file
     } {
@@ -258,7 +258,7 @@ body tycho::Edit::save {{name ""}} {
 # In other implementations, it may find hypertext points or procedure
 # definitions or things of that sort.
 #
-body tycho::Edit::seename {name} {
+body ::tycho::Edit::seename {name} {
     $itk_component(text) seename $name
 }
 
@@ -267,7 +267,7 @@ body tycho::Edit::seename {name} {
 # Open a file browser to query the user for a filename, and then
 # insert the contents of that file at the insertion cursor.
 #
-body tycho::Edit::insertFile {} {
+body ::tycho::Edit::insertFile {} {
     set filename [DialogWindow::newModal FileBrowser [autoName .filebr] \
 	    -text {File to Insert}]
     $itk_component(text) readFile $filename
@@ -280,7 +280,7 @@ body tycho::Edit::insertFile {} {
 # This command does nothing if either the text is not modified or
 # no file has been specified by the -file option.
 #
-body tycho::Edit::revert {} {
+body ::tycho::Edit::revert {} {
     if {[isModified] && $file != "NoName" && $file != ""} {
 	if [askuser "OK to discard changes in [file tail $file]?"] {
 	    $itk_component(text) deleteRange 1.0 end
@@ -295,7 +295,7 @@ body tycho::Edit::revert {} {
 # Append more information to the keybindings returned by the base class.
 # FIXME: This should be an HTML document, separate from this file.
 #
-body tycho::Edit::keybindings {} {
+body ::tycho::Edit::keybindings {} {
     append helpstring \
 	    [TyFile::keybindings] \
 	    {
@@ -446,7 +446,7 @@ settings in your window manager.
 #########################################################################
 #### mousebindings
 #
-body tycho::Edit::mousebindings {} {
+body ::tycho::Edit::mousebindings {} {
     return {
 Pressing mouse button 1 in an text positions the inser-
 tion  cursor  just  before the character underneath the

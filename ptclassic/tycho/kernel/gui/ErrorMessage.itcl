@@ -42,7 +42,7 @@ proc tkerror {msg} {
     # Handle the blank message case
     if {$msg == ""} {set msg "Tcl reports an error"}
 
-    tycho::DialogWindow::newModal ErrorMessage [tycho::autoName .error] \
+    ::tycho::DialogWindow::newModal ErrorMessage [::tycho::autoName .error] \
 	    -text $msg -bitmap error
 }
 
@@ -54,7 +54,7 @@ proc tkerror {msg} {
 proc ptkImportantMessage {win msg} {::tkerror $msg}
 proc ptkDisplayErrorInfo {} {
     global errorInfo
-    tycho::post $errorInfo
+    ::tycho::post $errorInfo
 }
 
 ##########################################################################
@@ -66,7 +66,7 @@ proc ptkDisplayErrorInfo {} {
 # inform the user. "Modal" means that nothing further will happen until
 # the window is destroyed.
 #
-class tycho::ErrorMessage {
+class ::tycho::ErrorMessage {
     inherit Message
 
     constructor {args} {}
@@ -78,7 +78,7 @@ class tycho::ErrorMessage {
 ##########################################################################
 #### constructor
 #
-body tycho::ErrorMessage::constructor {args} {
+body ::tycho::ErrorMessage::constructor {args} {
     # Pack the stack trace button, if there is error info.
     global errorInfo
     if {$errorInfo != ""} {
@@ -89,7 +89,7 @@ body tycho::ErrorMessage::constructor {args} {
     # This is put in catch so that this code can be used outside of Ptolemy.
     # To avoid losing information in the stack trace, we have to save it.
     set savestack $errorInfo
-    catch {tycho::halt}
+    catch {::tycho::halt}
     set errorInfo $savestack
 
     # Process any unevaluated arguments.
@@ -100,7 +100,7 @@ body tycho::ErrorMessage::constructor {args} {
 #### stackTrace
 # Show the stack trace, if there is one.
 #
-body tycho::ErrorMessage::stackTrace {} {
+body ::tycho::ErrorMessage::stackTrace {} {
     global errorInfo
     if {$errorInfo != ""} {
 	post "The most recent stack trace found is:\n$errorInfo"
