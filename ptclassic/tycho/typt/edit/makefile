@@ -46,7 +46,9 @@ ITCL_SRCS = \
 	EditPtcl.itcl \
 	EditPtlang.itcl
 
-EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
+EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) \
+	editors.tcl \
+	pkgIndex.tcl
 
 MISC_FILES =	tclIndex doc test
 
