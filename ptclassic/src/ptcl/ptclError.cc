@@ -62,7 +62,7 @@ Error :: error (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 	}
 	if (!m2) m2 = "";
 	if (!m3) m3 = "";
-	StringList s = o.readFullName();
+	StringList s = o.fullName();
 	const char* name = s;
 	int l = strlen(name) + strlen(m1) + strlen(m2) + strlen(m3) + 10;
 	LOG_NEW; char* msg = new char[l];
@@ -73,7 +73,7 @@ Error :: error (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 
 void
 Error :: warn (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
-	StringList n = o.readFullName();
+	StringList n = o.fullName();
 	cerr << "Warning: " << n << ": ";
 	p3(m1,m2,m3);
 }
@@ -85,7 +85,7 @@ Error :: message(cc* m1, cc* m2, cc* m3) {
 
 void
 Error :: message (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
-	StringList n = o.readFullName();
+	StringList n = o.fullName();
 	cerr << n << ": ";
 	p3(m1,m2,m3);
 }

@@ -81,6 +81,8 @@ protected:
 	// return a "static result".  Don't give this one a stringlist!
 	int staticResult(const char*);
 
+	// append a value to the result, using Tcl_AppendElement.
+	void addResult(const char*);
 public:
 // the active Tcl interpreter, for error reporting.
 	static Tcl_Interp* activeInterp;
@@ -115,7 +117,7 @@ public:
 	int node(int argc,char** argv);
 	int nodeconnect(int argc,char** argv);
 	int numports(int argc,char** argv);
-	int printVerbose(int argc,char** argv);
+	int print(int argc,char** argv);
 	int reset(int argc,char** argv);
 	int run(int argc,char** argv);
 	int schedule(int argc,char** argv);
