@@ -1,8 +1,4 @@
-static const char file_id[] = "XXXDomain.cc";
 /**********************************************************************
-Version identification:
-$Id$
-
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
@@ -29,6 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer:  J. T. Buck
  Date of creation: 7/2/90
+ Version: $Id$
 
  WARNING -- XDomain.ccP is a template file that is used to generate
  domain description modules.  If the name of this file is not XDomain.ccP,
@@ -38,6 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  etc, for the XXX domain so the interpreter can generate them dynamically.
 
 ***********************************************************************/
+static const char file_id[] = "XXXDomain.cc";
 
 #include "Domain.h"
 #include "Target.h"
@@ -49,6 +47,9 @@ extern const char XXXdomainName[] = "XXX";
 
 class XXXDomain : public Domain {
 public:
+	// constructor
+	XXXDomain() : Domain(XXXdomainName) {}
+
 	// new wormhole
 	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
 		LOG_NEW; return *new XXXWormhole(innerGal,innerTarget);
@@ -59,9 +60,6 @@ public:
 
 	// new toUniversal EventHorizon
 	EventHorizon& newTo() { LOG_NEW; return *new XXXtoUniversal;}
-
-	// constructor
-	XXXDomain() : Domain("XXX") {}
 };
 
 // declare a prototype
@@ -71,13 +69,22 @@ static XXXDomain proto;
 
 class XXXTarget : public Target {
 public:
-	XXXTarget() : Target("default-XXX","XXXStar","default XXX target"){}
-	Block* makeNew() const { LOG_NEW; return new XXXTarget;}
-	~XXXTarget() { delSched();}
+	// Constructor
+	XXXTarget() : Target("default-XXX", "XXXStar", "default XXX target"){}
+
+	// Destructor
+	~XXXTarget() { delSched(); }
+
+	// Return a copy of itself
+	/*virtual*/ Block* makeNew() const { LOG_NEW; return new XXXTarget;}
+
+	// Return the domain of the galaxy if it exists and "XXX" otherwise
+	/*virtual*/ const char* domain() {
+		return galaxy() ? galaxy()->domain() : XXXdomainName;
+	}
 
 protected:
-	void setup()
-	{
+	void setup() {
 		if (!scheduler()) { LOG_NEW; setSched(new XXXScheduler); }
 		Target::setup();
 	}
