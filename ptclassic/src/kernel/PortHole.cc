@@ -228,6 +228,8 @@ void InSDFPort :: beforeGo()
 
 void OutSDFPort :: beforeGo()
 {
+	Pointer* p;
+
 // It is assumed this routine is called before a Star executes....
 // It moves current by numberTokens in the buffer, initializing
 //  each Particle; after the Star executes these Particles will
@@ -246,13 +248,15 @@ void OutSDFPort :: beforeGo()
 	for(int i = numberTokens; i>0; i--) {
 	
 		// Get and initialize next Particle
-        	Pointer* p = myBuffer->next();
+        	p = myBuffer->next();
 		((Particle*)*p)->initialize();
 		}
 }
 
 void OutSDFPort :: afterGo()
 {
+	Pointer* p;
+
 // This method is called after go(); the buffer now contains numberTokens
 // Particles that are to be send to the output Geodesic
 // We send copies to prevent the Star from modifying Particles in the
@@ -260,7 +264,7 @@ void OutSDFPort :: afterGo()
 
 	// Back up in the buffer by numberTokens
 	for(int i = numberTokens; i>0; i--)
-        	Pointer* p = myBuffer->last();
+        	p = myBuffer->last();
 
 	// Now move forward numberTokens times, sending copy of
 	// Particle to Geodesic
