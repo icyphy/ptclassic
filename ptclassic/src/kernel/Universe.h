@@ -77,6 +77,9 @@ public:
 	Universe(Scheduler* s,const char* typeDesc) :
 		Runnable(s,typeDesc,this) {}
 
+	// return my scheduler
+	Scheduler* mySched() { return scheduler ;}
+
 protected:
 	// print, possibly recursively
 	StringList print(int recursive);
