@@ -69,12 +69,12 @@ public:
 	// return my scheduler
 	Scheduler* scheduler() const { return target->scheduler();}
 
-	// print methods
-	StringList printVerbose() const { return Wormhole :: print(0);}
-	StringList printRecursive() const { return Wormhole :: print(1);}
+	// print method
+	StringList print(int verbose) const { return Wormhole::print(verbose);}
 
 	// clone -- allows interpreter to make copies
 	Block* clone() const;
+	Block* makeNew() const;
 
 	// identify myself as a wormhole
 	int isItWormhole() const { return TRUE;}
