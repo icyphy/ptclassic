@@ -54,12 +54,14 @@ extern const double __infinity;
 #include "DataStruct.h"
 #include "DEStar.h"
 #include "PriorityQueue.h"
+#include "CalendarQueue.h"
 
 
 #define MAX_BUCKET     1024*4
 #define QUEUE_SIZE     (MAX_BUCKET*3)/2
 #define HALF_MAX_DAYS  1024*2  
 #define MINI_CQ_INTERVAL  0.2
+
 
 
 ///////////////////////////////////////////////////////
@@ -73,7 +75,6 @@ extern const double __infinity;
 
 class MutableCalendarQueue : public BasePrioQueue
 {
-	friend PendingEventList;
 public:
 	// Add element to the tail of the queue and sort it by its level (v)
 	// first and its fineLevel (fv) second.

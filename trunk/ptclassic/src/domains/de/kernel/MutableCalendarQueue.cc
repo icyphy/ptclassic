@@ -144,6 +144,18 @@ CqLevelLink* MutableCalendarQueue :: levelput(Pointer a, double v, double fv, St
     if ((cq_resizeEnabled) &&
 	(cq_eventNum > cq_topThreshold && cq_bucketNum < HALF_MAX_DAYS))
 	    Resize(2 * cq_bucketNum);
+
+    if( dest->isA("DEStar") ) { 
+        DEStar* deStarDestination = (DEStar *)dest; 
+	if( deStarDestination->isMutable() ) { 
+	    newLink->destinationRef = 
+		    deStarDestination->addToPendingEventList(newLink);
+        }
+    }
+    /* FIXME
+    */
+
+
     return newLink;
 }
 
