@@ -17,7 +17,6 @@
 % if the layer is all 1's, don't tile it, fill it
 bm 256 eq
 {
-  0 setgray
   newpath
   llx lly moveto
   urx lly lineto
@@ -66,7 +65,6 @@ grestore
 % if the layer is all 1's, don't tile it, fill it
 bm 256 eq
 {
-  0 setgray
   newpath
   llx lly moveto
   urx lly lineto
