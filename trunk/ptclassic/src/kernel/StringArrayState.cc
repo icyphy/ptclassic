@@ -59,6 +59,8 @@ StringArrayState :: ~StringArrayState() {
 void StringArrayState :: resize(int newSize) {
     zap();
     LOG_NEW; val = new char* [nElements = newSize];
+    for (int i = 0; i < newSize ; i++)
+	val[i] = 0;
 }
 
 // copy constructor body
