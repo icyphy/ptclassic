@@ -37,7 +37,7 @@ after processing the input is sent to the ``size'' output.
 	}
 	output {
 		name {outData}
-		type {anytype}
+		type {=inData}
 	}
 	output {
 		name {size}
@@ -48,19 +48,18 @@ after processing the input is sent to the ``size'' output.
 	}
 	protected {
 		Queue queue;
-	}
-	constructor {
-		inData.inheritTypeFrom(outData);
+		int infinite;
 	}
 	defstate {
 		name {capacity}
 		type {int}
 		default {"10"}
-		desc { Maximum size of the queue. }
+		desc { Maximum size of the queue (if -1, infinite). }
 	}
 
 	start {
 		demand.dataNew = TRUE;
+		infinite = (int(capacity) < 0);
 		queue.initialize();
 	}
 
@@ -68,14 +67,10 @@ after processing the input is sent to the ``size'' output.
 	   // If the data input is new, and the queue is not full, store it
 	   completionTime = arrivalTime;
 	   if (inData.dataNew) {
-		if (queue.length() < int(capacity)) {
-		   Particle& pp = inData.get();
-		   Particle* newp = pp.clone();
-		   *newp = pp;
-		   queue.put(newp);
+		if (infinite || queue.length() < int(capacity)) {
+		   queue.put(inData.get().clone());
 		}
-
-		inData.dataNew = FALSE;
+		else inData.dataNew = FALSE;
 	   }
 	   // Produce outData only if the demand input is new.
 	   if (demand.dataNew) {
