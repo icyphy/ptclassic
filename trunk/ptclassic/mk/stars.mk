@@ -130,7 +130,7 @@ endif
 
 ifdef CG56
 	CUSTOM_DIRS += $(CG56DIR)/kernel $(CG56DIR)/stars \
-		$(CG56DIR)/targets $(CG56DIR)/dsp/stars
+		$(CG56T) $(CG56DIR)/dsp/stars
 	# must bring in the parallel schedulers for multi-cg56 targets
 	CGFULL = 1
 	PALETTES += PTOLEMY/src/domains/cg56/icons/main.pal
@@ -168,7 +168,7 @@ endif
 
 ifdef C50
 	CUSTOM_DIRS += $(C50DIR)/kernel $(C50DIR)/stars \
-		$(C50DIR)/targets $(C50DIR)/dsp/stars
+		$(C50T) $(C50DIR)/dsp/stars
 	# must bring in the parallel schedulers for multi-c50 targets
 	# CGFULL = 1
 	CG = 1
@@ -231,7 +231,7 @@ ifdef DDF
 endif
 
 ifdef VHDL
-	CUSTOM_DIRS += $(VHDLDIR)/kernel $(VHDLDIR)/stars  $(VHDLDIR)/targets
+	CUSTOM_DIRS += $(VHDLDIR)/kernel $(VHDLDIR)/stars  $(VHDLT)
 	CG = 1
 	SDFLIB = 1
 	CGCLIB = 1
@@ -356,8 +356,8 @@ ifdef NOWAM
 	# NOWam only supported under the Solaris operating system,
 	# matched by pattern sol%
 	ifneq ("$(filter sol%,$(PTARCH))","")
-		CUSTOM_DIRS += $(CGCDIR)/targets/NOWam/NOWam \
-			$(CGCDIR)/targets/NOWam/libudpam
+		CUSTOM_DIRS += $(CGCT)/NOWam/NOWam \
+			$(CGCT)/NOWam/libudpam
 		CGC = 1
 		CGPAR = 1
 		ifeq ($(USE_SHARED_LIBS),yes) 
@@ -371,9 +371,8 @@ ifdef NOWAM
 	endif
 endif
 
-
 ifdef CGC
-	CUSTOM_DIRS += $(CGCDIR)/stars
+	CUSTOM_DIRS += $(CGCDIR)/stars $(CGCDIR)/dsp/stars
 	ifdef CGCTK
 		CUSTOM_DIRS += $(CGCDIR)/tcltk/stars $(CGCDIR)/tcltk/targets \
 			$(CGCDIR)/tcltk/lib
@@ -386,23 +385,31 @@ ifdef CGC
 	CG = 1
 	SDFLIB = 1
 	BDFLIB = 1
+	# Uniprocessor targets are included by default
+	CUSTOM_DIRS += $(CGCT)/uniprocessor
+	ifeq ($(USE_SHARED_LIBS),yes) 
+		LIBS += -lcgctargets
+		LIBFILES += $(LIBDIR)/libcgctargets.$(LIBSUFFIX)
+	else
+		TARGETS += $(CGCT)/uniprocessor/CGCMakefileTarget.o \
+			   $(CGCT)/uniprocessor/CGCSDFBase.o \
+			   $(CGCT)/uniprocessor/CGCSDFSend.o \
+			   $(CGCT)/uniprocessor/CGCSDFReceive.o \
+			   $(CGCT)/uniprocessor/CreateSDFStar.o
+	endif
+	# Multiprocessor targets are included if CGPAR is defined
 	ifdef CGPAR
-		CUSTOM_DIRS += $(CGCDIR)/targets/main
+		CUSTOM_DIRS += $(CGCT)/multiprocessor
 		ifeq ($(USE_SHARED_LIBS),yes) 
-			LIBS += -lcgctargets
-			LIBFILES += $(LIBDIR)/libcgctargets.$(LIBSUFFIX)
+			LIBS += -lcgcmultitargets
+			LIBFILES += $(LIBDIR)/libcgcmultitargets.$(LIBSUFFIX)
 		else
-			TARGETS += $(CGCT)/main/CGCUnixSend.o \
-				$(CGCT)/main/CGCUnixReceive.o \
-				$(CGCT)/main/CGCMultiTarget.o \
-				$(CGCT)/main/CGCMakefileTarget.o \
-				$(CGCT)/main/CGCMacroStar.o \
-				$(CGCT)/main/CGCDDFCode.o \
-				$(CGCT)/main/CGCSDFSend.o \
-				$(CGCT)/main/CGCSDFReceive.o \
-				$(CGCT)/main/CGCSDFBase.o \
-				$(CGCT)/main/CreateSDFStar.o \
-				$(CGCT)/main/CompileCGSubsystems.o
+			TARGETS += $(CGCT)/multiprocessor/CGCUnixSend.o \
+				$(CGCT)/multiprocessor/CGCUnixReceive.o \
+				$(CGCT)/multiprocessor/CGCMultiTarget.o \
+				$(CGCT)/multiprocessor/CGCMacroStar.o \
+				$(CGCT)/multiprocessor/CGCDDFCode.o \
+				$(CGCT)/multiprocessor/CompileCGSubsystems.o
 		endif
 	endif
 	PALETTES += PTOLEMY/src/domains/cgc/icons/cgc.pal
@@ -431,14 +438,14 @@ ifdef BDF
 		TARGETS += $(CGT)/CGBDFTarget.o 
 	endif
 	ifdef CGC
-		TARGETS += $(CGCT)/main/CGCBDFTarget.o
+		TARGETS += $(CGCT)/uniprocessor/CGCBDFTarget.o
 	endif
 	LIBS += -lbdfstars
 	LIBFILES += $(LIBDIR)/libbdfstars.$(LIBSUFFIX)
 endif
 
 ifdef CG
-	CUSTOM_DIRS += $(CGDIR)/kernel $(CGDIR)/targets $(CGDIR)/stars
+	CUSTOM_DIRS += $(CGDIR)/kernel $(CGT) $(CGDIR)/stars
 	PALETTES += PTOLEMY/src/domains/cg/icons/cg.pal
 	ifdef CGPAR
 		CUSTOM_DIRS += $(CGDIR)/HuScheduler $(CGDIR)/ddfScheduler \
@@ -546,7 +553,7 @@ ifdef SDF
 	ifdef CG
 		# The only thing in sdf/targets also depends on 
 		# cg... should this be in the cg directory
-		CUSTOM_DIRS += $(SDFDIR)/targets 
+		CUSTOM_DIRS += $(SDFT)
 		TARGETS += $(SDFT)/CompileTarget.o
 	endif
 	LIBS += -lsdfstars
