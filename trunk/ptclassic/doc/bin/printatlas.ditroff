@@ -52,7 +52,7 @@ set tempTroffFile = $tempdir/pt$$.t
 set tempIndexFile = $tempdir/index$$
 set tempNroffFile = $tempdir/pt$$.n
 set tempPSFile = $tempdir/pt$$.ps
-set tempFiles = $tempTroffFile $tempIndexFile $tempNroffFile $tempPSFile
+set tempFiles = ($tempTroffFile $tempIndexFile $tempNroffFile $tempPSFile)
 
 # Variables
 set indexonly = 0
