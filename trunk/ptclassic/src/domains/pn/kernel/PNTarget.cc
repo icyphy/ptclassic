@@ -74,7 +74,7 @@ void PNTarget::wrapup()
     Target::wrapup();
 
     // Uninitialize the thread library.
-    PNThread::wrapup();
+    PNThread::finalize();
 
     // Disable all registered PtGates after threads have been deleted.
     GateKeeper::disableAll();
