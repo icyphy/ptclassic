@@ -109,7 +109,8 @@ public:
 	// return TRUE if no halting condition arises, FALSE
 	// if we are to halt.
         // Must have call to haltRequested(), even though it's expensive,
-        // in order to prevent crashes due to unprocessed Error::abortRun calls.
+        // in order to prevent crashes due to unprocessed Error::abortRun
+        // calls.
 	inline static int doPreActions(Star * which) {
 		return (nPre > 0) ? internalDoActions(preList,which)
 			: !haltRequested();
@@ -117,7 +118,8 @@ public:
 
 	// same, but do postactions.
         // Must have call to haltRequested(), even though it's expensive,
-        // in order to prevent crashes due to unprocessed Error::abortRun calls.
+        // in order to prevent crashes due to unprocessed Error::abortRun
+        // calls.
 	inline static int doPostActions(Star * which) {
 		return (nPost > 0) ? internalDoActions(postList,which)
 			: !haltRequested();
