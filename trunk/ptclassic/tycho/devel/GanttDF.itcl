@@ -49,7 +49,7 @@
 # </pre></tcl>
 #
 class ::tycho::GanttVSM {
-    inherit ::tycho::TychoWidget
+    inherit itk::Widget
 
     constructor {args} {}
     destructor {}
@@ -94,6 +94,7 @@ class ::tycho::GanttVSM {
 
     # Return schedule in list form
     method getSchedule {} {return $schedule}
+
     # Return the target
     method getTarget {} {return $target}
     
@@ -140,27 +141,29 @@ configbody ::tycho::GanttVSM::file {
    
     set filename $itk_option(-file)
 
-    # Check if file is a schedule file
-    if {[string compare [string trimleft $filename .] "sched"] == 0} {
-	error "File \"$filename\" is not a valid schedule file."
+    if {$filename != ""} {
+	# Check if file is a schedule file
+	if {[string compare [string trimleft $filename .] "sched"] == 0} {
+	    error "File \"$filename\" is not a valid schedule file."
+	}
+	
+	# Check if file exists
+	if {![file exists $filename]} {
+	    error "File \"$filename\" does not exist."
+	} 
+	
+	# Open file for reading
+	set fileID [open $filename r]
+	set schedInfo [read $fileID nonewline]
+	
+	# Close the file
+	close $fileID
+	
+	# strip off any extraneous information before schedule 
+	# information starts
+	set schedInfo [lindex $schedInfo [expr [llength $schedInfo] - 1]]
+	set schedHier {}
     }
-
-    # Check if file exists
-    if {![file exists $filename]} {
-	error "File \"$filename\" does not exist."
-    } 
-    
-    # Open file for reading
-    set fileID [open $filename r]
-    set schedInfo [read $fileID nonewline]
-    
-    # Close the file
-    close $fileID
-
-    # strip off any extraneous information before schedule 
-    # information starts
-    set schedInfo [lindex $schedInfo [expr [llength $schedInfo] - 1]]
-    
 }
 #######################################################################
 #### -id configuration
@@ -209,6 +212,7 @@ body ::tycho::GanttVSM::destructor {} {
 #
 body ::tycho::GanttVSM::create {} {
 
+    puts "in create"
     # Create may have already been called once, if so no need to parse
     # again.
     if {$schedHier != {}} {
@@ -227,6 +231,9 @@ body ::tycho::GanttVSM::create {} {
 	    cluster {		
 		set nestedSched [lindex $item [expr [llength $item] - 1]]
 		set name cluster$curindex
+		if {[llength $item] > 2} {
+		    set id [lindex $item 1]
+		}
 		itk_component add $name {
 		    ::tycho::GanttVSM $itk_component(hull).$name \
 			    -schedule $nestedSched \
@@ -234,18 +241,7 @@ body ::tycho::GanttVSM::create {} {
 		} {
 		}
 		lappend hierarchy "$itk_component($name)"
-
-		if {[llength $item] > 2} {
-		    set id [lindex $item 1]
-		} else {
-		    lappend ddata "cluster"
-		    set nprocs [$itk_component($name) getNumProcs]
-		    lappend ddata 1
-		    lappend ddata {name 0 1}
-		    puts "$nprocs $ddata"
-		}
 	    }
-
 	    processor { 
 		set nestedSched [lindex $item [expr [llength $item] - 1]]
 		set procNum [lindex $item 1]
@@ -291,7 +287,32 @@ body ::tycho::GanttVSM::create {} {
 # Get the display data
 #
 body ::tycho::GanttVSM::getDisplayData {} {
+    
+    puts "in getDisplayData"
+    set parent [winfo parent $itk_component(hull)]
+    set time 0
 
+    set me [getID]
+    set sched [getSchedule]
+    if {[regexp "proc" $me]} {
+	lappend ddata proc
+	lappend ddata [string trimleft $me "proc"] 
+	foreach item $sched {
+	    switch [lindex $item 0] {
+		totalIdleTime { 
+		    set end [expr $time + [lindex $item 1]]
+		    lappend ddata [list idle $time $end]
+		    set time $end
+		}
+		fire {
+		    set name [lindex $item 1]
+		    set end [expr $time + [lindex [lindex $item 2] 1]]
+		    lappend ddata [list $name $time $end]
+		    set time $end
+		}
+	    }
+	}
+    }
     return $ddata
 }
 
