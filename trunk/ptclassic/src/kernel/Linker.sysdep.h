@@ -354,7 +354,7 @@ extern "C" {int nlist(char *, struct nlist *);};
 #endif //PTHPPA
 
 #include <std.h>
-#ifndef mips
+#if !defined(mips) && !defined(PT_NT4VC)
 #include <sys/file.h>
 #endif
 
