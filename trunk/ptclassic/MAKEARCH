@@ -102,6 +102,7 @@ if ($ARCH =~ sun?* || $ARCH =~ mips) then
 	end
 	popd
 	mkarch thread/awe
+	mkarch domains/pn{,/kernel,/stars}
 endif
 
 # Make thread and CP directories (currently specific to sun)
