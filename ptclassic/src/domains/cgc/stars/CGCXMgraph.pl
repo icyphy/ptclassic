@@ -86,6 +86,11 @@ for a complete explanation of the options.
 		default { 0 }
 		attributes {A_NONCONSTANT|A_NONSETTABLE}
 	}
+	defstate {
+		name {resources}
+		type {stringarray}
+		default { "STDIO" }
+	}
 	private {
 		int count;
 	}
