@@ -35,6 +35,10 @@ static char SccsId[]="$Id$";
 #include "io.h"
 #include "internal.h"
 #include "obj.h"
+#include "command.h"
+#include "update.h"
+
+#include "template.h"
 
 #define TEMP_STOPS	"\r\n\t\016\020\04\033"
 
@@ -48,12 +52,12 @@ static octObject *tCurObjPtr;
 static struct fieldTemplate *recursionTemplate;
 static int matchString();
 
-printTemplate(templatePtr, objPtr)
+void printTemplate(templatePtr, objPtr)
 struct fieldTemplate *templatePtr;
 octObject *objPtr;
 {
     char *datumPtr;
-    char *currentString;
+    char *currentString = (char *)NULL;
 
     while (templatePtr->text != NIL(char)) {
 	IOputs(templatePtr->text);
@@ -79,7 +83,7 @@ octObject *objPtr;
     }
 }
 
-initGetTemplate(reset)
+void initGetTemplate(reset)
 int reset;
 {
     if (reset == RESET_FIELD) tField = 1;
@@ -87,6 +91,7 @@ int reset;
     tCurGetFn = NILGF;
 }
 
+int
 getTemplate()
 {
     int stopCh;
@@ -359,7 +364,7 @@ octObject *objPtr;
      * better not be)
      */
     OCT_PROTECT(octGetPoints(geoPtr, &npoints, NIL(struct octPoint)));
-    (void) sprintf(string, "%d", npoints);
+    (void) sprintf(string, "%ld", (long)npoints);
     return(string);
 }
 
@@ -412,7 +417,7 @@ octObject *objPtr;
 }
 
 /*ARGSUSED*/
-tGetString(cptr, tmpPtr)
+int tGetString(cptr, tmpPtr)
 char *cptr;
 struct enumTemplate *tmpPtr;
 {
@@ -428,7 +433,7 @@ struct enumTemplate *tmpPtr;
 }
 
 /*ARGSUSED*/
-tGetInteger(cptr, tmpPtr)
+int tGetInteger(cptr, tmpPtr)
 char *cptr;
 struct enumTemplate *tmpPtr;
 {
@@ -442,7 +447,7 @@ struct enumTemplate *tmpPtr;
 }
 
 /*ARGSUSED*/
-tGetCoord(cptr, tmpPtr)
+int tGetCoord(cptr, tmpPtr)
 char *cptr;
 struct enumTemplate *tmpPtr;
 {
@@ -456,7 +461,7 @@ struct enumTemplate *tmpPtr;
 }
 
 /*ARGSUSED*/
-tGetReal(cptr, tmpPtr)
+int tGetReal(cptr, tmpPtr)
 char *cptr;
 struct enumTemplate *tmpPtr;
 {
@@ -470,7 +475,7 @@ struct enumTemplate *tmpPtr;
 }
 
 /*ARGSUSED*/
-tGetID(cptr, tmpPtr)
+int tGetID(cptr, tmpPtr)
 char *cptr;
 struct enumTemplate *tmpPtr;
 {
@@ -525,7 +530,7 @@ JUST_GET(tGetLJust, lineJust)
 #define PART_MATCH	1
 #define EXACT_MATCH	2
 
-tGetEnum(cptr, tmpPtr)
+int tGetEnum(cptr, tmpPtr)
 char *cptr;
 struct enumTemplate *tmpPtr;
 {
@@ -534,7 +539,7 @@ struct enumTemplate *tmpPtr;
     char oldString[100];
     char *newString;
     int nMatch = 0;
-    struct enumTemplate *matchTmpPtr;
+    struct enumTemplate *matchTmpPtr = (struct enumTemplate *)NULL;
 
     *oldString = '\0';
     (void) strncat(oldString, tCurString, 99);

@@ -39,7 +39,7 @@ char lineKillChar = CNTRL('U');
 static char *wrapString = 0;
 static int wrapMargin = 0;
 
-IOinit()
+void IOinit()
 {
     if ((int) initscr() == ERR) {
 	/* PBP - MCC 12/09/89 : Don't call exit() in case attache
@@ -65,7 +65,7 @@ IOinit()
 #endif
 }
 
-IOend()
+void IOend()
 {
     IObotHome();
     IOrefresh();
@@ -73,7 +73,7 @@ IOend()
     putchar('\n');
 }
 
-IOgetchar()
+int IOgetchar()
 {
     int ch;
 
@@ -85,7 +85,7 @@ IOgetchar()
     }
 }
 
-IOputchar(ch)
+void IOputchar(ch)
 int ch;
 {
     int x, y;
@@ -110,7 +110,7 @@ int ch;
     }
 }
 
-IOputs(str)
+void IOputs(str)
 char *str;
 {
     while (*str != '\0') {
@@ -118,7 +118,7 @@ char *str;
     }
 }
 
-IOwrap(str)
+void IOwrap(str)
 char *str;
 {
     char *cp;
@@ -134,7 +134,7 @@ char *str;
     }
 }
 
-IOputcharSee(ch)
+void IOputcharSee(ch)
 int ch;
 {
     int x, y;
@@ -171,7 +171,7 @@ int ch;
     }
 }
 
-IOputsSee(str)
+void IOputsSee(str)
 char *str;
 {
     while (*str != '\0') {
@@ -179,39 +179,39 @@ char *str;
     }
 }
 
-IOhome()
+void IOhome()
 {
     move(0, 0);
 }
 
-IObotHome()
+void IObotHome()
 {
     move(LINES-1, 0);
 }
 
-IOmove(y, x)
+void IOmove(y, x)
 int y, x;
 {
     move(y, x);
 }
 
-IOgetyx(yPtr, xPtr)
+void IOgetyx(yPtr, xPtr)
 int *yPtr, *xPtr;
 {
     getyx(stdscr, *yPtr, *xPtr);
 }
 
-IOstandout()
+void IOstandout()
 {
     standout();
 }
 
-IOstandend()
+void IOstandend()
 {
     standend();
 }
 
-IOclearScreen()
+void IOclearScreen()
 {
     int i;
 
@@ -219,17 +219,17 @@ IOclearScreen()
     for (i = 1; i < LINES; i++) IOputchar('\n');
 }
 
-IOforceClear()
+void IOforceClear()
 {
     clear();
 }
 
-IOclearLine()
+void IOclearLine()
 {
     clrtoeol();
 }
 
-IOrefresh()
+void IOrefresh()
 {
     refresh();
 }

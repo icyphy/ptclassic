@@ -36,6 +36,15 @@ static char SccsId[]="$Id$";
 #include "internal.h"
 #include "edit.h"
 #include "obj.h"
+#include "attache.h"
+#include "template.h"
+#include "update.h"
+
+#include "command.h"
+
+/* Forward references */
+static void doFedit	ARGS((octObject *objPtr));
+static int queryContinueEditing		ARGS((char *msg));
 
 /*
  * NOTE: PBP 12/09/89 - to make attache callable as a subroutine in VEMCC,
@@ -206,7 +215,7 @@ reEdit:
     return(OCT_OK);
 }
 
-doFedit(objPtr)
+static void doFedit(objPtr)
 octObject *objPtr;
 {
     static int interrupted = 0;
@@ -434,9 +443,12 @@ getObj()
     char *text, *dummy;
     octObject obj;
     char *getComString();
+    long tmplong;		/* Read into a long, because int32
+				   could be into or long */
 
     text = getComString();
-    if (sscanf(text, "%d", &xid) == 1) {
+    if (sscanf(text, "%ld", &tmplong) == 1) {
+	xid=tmplong;
 	OCT_ASSERT(octGetByExternalId(&currentState->currentFacet, xid, &obj),
 									"%s");
 	return(obj.objectId);
@@ -541,6 +553,7 @@ char *stopList;
     return(ch);
 }
 
+void
 strUpcase(strPtr)
 char *strPtr;
 {
@@ -551,7 +564,7 @@ char *strPtr;
     }
 }
 
-queryContinueEditing(msg)
+static int queryContinueEditing(msg)
 char *msg;
 {
     int answer;

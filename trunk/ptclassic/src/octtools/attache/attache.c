@@ -36,6 +36,8 @@ static char SccsId[]="$Id$";
 #include "io.h"
 #include "internal.h"
 #include "edit.h"
+#include "update.h"
+
 #include "attache.h"
 
 int attacheCalledFromMainP = 0;
@@ -66,6 +68,7 @@ octObject *facet;
     return;
 }
 
+void
 editFacet(instPtr, facetPtr)
 octObject *instPtr;	/* instance (if any) whose master we're opening */
 octObject *facetPtr;	/* the facet to be edited */
@@ -125,12 +128,13 @@ octObject *facetPtr;	/* the facet to be edited */
     FREE(newState.historyList);
 }
 
+void
 edit(drawFlag)
 int drawFlag;
 {
     struct cTable *cmdPtr;
     int cmd;
-    octStatus status;
+    octStatus status = OCT_OK;
 
     if (drawFlag &&
 	    strcmp(currentState->currentFacet.contents.facet.mode, "r") == 0) {
@@ -165,6 +169,7 @@ int drawFlag;
     } while (status != OCT_GEN_DONE && ! quitAll);
 }
 
+int
 querySaveChanges()
 {
     int answer;
