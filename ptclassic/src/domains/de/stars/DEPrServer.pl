@@ -1,29 +1,26 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  S. Ha
- Date of creation: 8/31/90
-
- This star is a simple model of DEStar with ranked input.
- If input event comes in during the execution, it is queued.
- When the server is available, it serves an event with highest priority
- first ignoring the event arrival time. Among events of highest priority,
- earlier event gets first.
- If a queue is overflowed, it generates warning and continues.
-
-**************************************************************************/
-}
 defstar {
 	name { PrServer }
 	domain { DE }
 	derivedFrom { PriorityStar }
 	desc {
-		 "This Star is a server with ranked input ports"
+This Star is a server with ranked input ports.
+	}
+	version { $Id$ }
+	author { Soonhoi Ha }
+	copyright {
+Copyright (c) 1990-1994 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
+	location { DE main library }
+	explanation {
+This star is a simple model of DEStar with ranked input.
+If input event comes in during the execution, it is queued.
+When the server is available, it serves an event with highest priority
+first ignoring the event arrival time.
+Among events of highest priority, earlier event gets first.
+If a queue is overflowed, it generates warning and continues.
 	}
 	input {
 		name {input1}
@@ -71,4 +68,3 @@ defstar {
 		goToNext();
 	}
 }
-
