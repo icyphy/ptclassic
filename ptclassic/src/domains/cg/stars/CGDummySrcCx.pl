@@ -32,4 +32,7 @@ stars.
 	}
 	go {
 	}
+	exectime {
+		return 0;
+	}
 }
