@@ -62,10 +62,13 @@ NetworkCell::NetworkCell(const NetworkCell& vc):
 
 StringList NetworkCell::print() const
 {
-	char* printBuf = new char[80]; // StringList d'tor frees this.
-	sprintf(printBuf, "<%s> pri=%d dest=%d size=%d",
-			dataType(), priority, destAddr, mySize);
-	return (StringList(printBuf));
+	StringList printBuf = "<";
+	printBuf << dataType();
+	printBuf << ">";
+	printBuf << " pri=" << priority;
+	printBuf << " dest=" << destAddr;
+	printBuf << " size=" << mySize;
+	return printBuf;
 }
 
 ISA_FUNC(NetworkCell, Message);
