@@ -46,7 +46,12 @@ DIRS =
 
 TCL_SRCS = 
 
-ITCL_SRCS = 
+SIMPLE_TESTS = \
+	testLoader.itcl \
+	testPath.itcl \
+
+ITCL_SRCS = \
+	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS)
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS)
 
@@ -58,8 +63,16 @@ REALCLEAN_STUFF =
 # Title for the tydoc index page
 TYDOC_DESC =
 
-# Do make sources so that we ensure that the subdirectories are checked out
-all install: sources $(MISC_SRCS)
+tests:: test_simple
+
+# These tests do not require a graphics terminal
+test_simple: $(TCL_SRCS) $(ITCL_SRCS)
+	echo "foreach i [list $(SIMPLE_TESTS)] {puts \$$i; source \$$i}" | \
+		$(ITCLSH)
+
+# These tests require a graphics terminal
+test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
+	tycho -noconsole -e alltests.itcl
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
