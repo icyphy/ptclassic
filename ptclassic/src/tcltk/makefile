@@ -48,13 +48,13 @@ BINDIR=$(PTOLEMY)/bin.$(ARCH)
 #---------------------------------------------------------
 
 # Version numbers
-TCL_VERSION =	tcl7.3
-TK_MAJOR_VERSION = 	tk3.6
-TK_VERSION =	tk3.6p1
+#TCL_VERSION =	tcl7.3
+#TK_MAJOR_VERSION = 	tk3.6
+#TK_VERSION =	tk3.6p1
 
-#TCL_VERSION =	tcl7.4b2
-#TK_MAJOR_VERSION = 	tk4.0
-#TK_VERSION =	tk4.0b2
+TCL_VERSION =	tcl7.4b3
+TK_MAJOR_VERSION = 	tk4.0
+TK_VERSION =	tk4.0b3
 
 ITCL_VERSION =	itcl-1.5
 
@@ -69,21 +69,27 @@ ITCL_SRC =	$(TCLTK_SRC)/$(ITCL_VERSION)
 
 # Location of the tcl only object files
 TCL_OBJ =	$(TCLTK_OBJ)/tcl
+#TCL_OBJ =	$(TCLTK_OBJ)/$(TCL_VERSION)
 # Location of the tk only object files
 TK_OBJ =	$(TCLTK_OBJ)/tk
+#TK_OBJ =	$(TCLTK_OBJ)/$(TK_VERSION)
 # Location of the tk only object files
 ITCL_OBJ =	$(TCLTK_OBJ)/itcl
 
 
 # Destination of tcl only machine dependent files
-TCL_DEST =	$(TCLTK_DEST)/tcl.$(ARCH)
+#TCL_DEST =	$(TCLTK_DEST)/tcl.$(ARCH)
+TCL_DEST =	$(TCLTK_DEST)/$(TCL_VERSION).$(ARCH)
 # Destination of the machine independent tcl files
-TCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/tcl
+#TCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/tcl
+TCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/$(TCL_VERSION)
 
 # Destination of tk only machine dependent files
-TK_DEST =	$(TCLTK_DEST)/tk.$(ARCH)
+#TK_DEST =	$(TCLTK_DEST)/tk.$(ARCH)
+TK_DEST =	$(TCLTK_DEST)/$(TK_VERSION).$(ARCH)
 # Destination of the machine independent tk files
-TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/tk
+#TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/tk
+TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/$(TK_VERSION)
 
 # Destination of itcl only machine dependent files
 ITCL_DEST =	$(TCLTK_DEST)/itcl.$(ARCH)
