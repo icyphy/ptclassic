@@ -840,8 +840,9 @@ body ::tycho::EditDAG::verify {{repair {}}} {
 # menu entries accordingly.
 #
 body ::tycho::EditDAG::configureContextMenu {} {
+    ::tycho::TWidget::configureContextMenu
+
     set item [$slate find withtag current]
-    contextmenu clear
     if { $item != "" } {
 	if { [lmember [$slate gettags $item] node] } {
 	    set node $nametable($item)
@@ -857,12 +858,6 @@ body ::tycho::EditDAG::configureContextMenu {} {
 	    # FIXME: Add entries for other node attributes
 	}
     }
-    # Add the default entry back into the menu.
-    # FIXME: This is bogus: we need a way to clear the menu
-    # _except for this entry.
-    contextmenu add {Name of this widget...} -command \
-	    "::tycho::post $this"
-
 }
 
 #######################################################################
