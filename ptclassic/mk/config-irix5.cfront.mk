@@ -1,5 +1,5 @@
 # Configuration makefile to build on SGI Indigo running Irix5.3 with
-# SGI's C++ compiler (This compiler probably is not cfront, but we call 
+# SGI's `Delta-C++' compiler (This compiler is not cfront, but we call 
 # all non-g++ compilers 'cfront' for historical reasons)
 #
 # $Id$
@@ -33,21 +33,18 @@
 # --------------------------------------------------------------------
 include $(ROOT)/mk/config-default.mk
 
-# Get the g++ definitions; we override some below.
-##include $(ROOT)/mk/config-g++.mk
-include $(ROOT)/mk/config-cfront.mk
-
 #
 # Programs to use
 #
-# C++ compiler to use
-GPPFLAGS =	$(GPPDEBUGFLAGS) $(MEMLOG)
+
+# Define the C++ compiler - always have compat/cfront includes as 1st choice
+CPLUSPLUS = 	CC -I$(ROOT)/src/compat/cfront
+
+# Plain C compiler
+CC = cc
 # C compiler flags.  Defined by the arch-config mk.
 CFLAGS =
 
-# IRIX5.x does not have a ranlib
-RANLIB = 	true
-CC = cc
 # OCT_CC is used in src/octtools/vem-{lib,bin}.mk
 OCT_CC = cc -D_BSD_SIGNALS
 # BSD_SIGNALS needed *only* for src/octtools/Xpackages/iv/timer.c, 
@@ -56,6 +53,9 @@ OCT_CC = cc -D_BSD_SIGNALS
 # command to generate dependencies (cfront users can try CC -M)
 ##DEPEND=g++ -MM
 DEPEND=CC -M
+
+# IRIX5.x does not have a ranlib
+RANLIB = 	true
 
 # linker to use for pigi and interpreter.
 LINKER=CC
@@ -76,20 +76,18 @@ MISC_DEFINES =	-D_BSD_SIGNALS -D_BSD_TIME
 
 # dpwe: -G 0 is to disable accessing data off 'the global pointer' 
 # (according to man CC); this is known to result in global space 
-# overflow in large programs;  However, man CC also suggests that 
-# unless -nonshared is also specified, it is ignored anyway.
+# overflow in large programs;  (man CC also suggests that 
+# unless -nonshared is also specified, it is ignored anyway.)
 #GOTFLAG = -G 0
 # -xgot is the SGI hack to avoid overflows in the GOT by allowing 
 # 32 bit offsets, or something.
 GOTFLAG = -G 0 -xgot
 
-#  Under gcc-2.5.8 on Irix5.2, -g is not supported
 GPPFLAGS =	$(GOTFLAG) $(MEMLOG) $(WARNINGS) $(MISC_DEFINES) $(OPTIMIZER)
 
 #     -cckr   The traditional K&R/Version7 C with SGI extensions
-# Note that -cckr will not work with gcc
 CFLAGS =	$(GOTFLAG) -cckr $(OPTIMIZER)
-##CFLAGS =	$(GOTFLAG) $(MEMLOG) $(WARNINGS) $(MISC_DEFINES) $(OPTIMIZER)
+
 #
 # Variables for the linker
 #
