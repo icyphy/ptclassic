@@ -140,7 +140,7 @@ body ::ptolemy::Universe::run {stoptime}  {
 # Invoke the wrapup method of the target associated with this universe.
 #
 body ::ptolemy::Universe::wrapup {}  {
-    localEval ::pitcl::wrapup
+    localEval ::pitcl::wrapup $fullname
 }
 
     ###################################################################
