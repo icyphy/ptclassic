@@ -58,7 +58,8 @@ install:	makefile $(DESTDIR)/$(LIB)
 
 $(DESTDIR)/$(LIB):	$(LIB)
 		rm -f $(DESTDIR)/$(LIB)
-		cp -p $(LIB) $(DESTDIR)
+		cp $(LIB) $(DESTDIR)
+		ranlib $(DESTDIR)/$(LIB)
 
 # "make clean" removes .o files and other cruft
 clean:
