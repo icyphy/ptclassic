@@ -94,12 +94,11 @@ void S56XTarget :: headerCode () {
 		"	nop\n"
 		"	org	p:$90\n"
 		"START\n"
-		"; Allow host command interrupts\n"
-		"	andi	#$fc,mr\n"
 		"; Set device driver DMA ready flag\n"
 		"	bset	#m_hf2,x:m_hcr\n"
 		"	bclr	#0,x:m_pbddr		; clear read DMA flow control bit\n"
 		"	bclr	#1,x:m_pbddr		; clear write DMA flow control bit\n\n");
+		interruptFlag = TRUE;
 };
 
 Block* S56XTarget::clone() const {
