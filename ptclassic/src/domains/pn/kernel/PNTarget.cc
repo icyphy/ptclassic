@@ -35,9 +35,6 @@ static const char file_id[] = "$RCSfile$";
 
 #include "PNTarget.h"
 #include "PNScheduler.h"
-#include "PNThread.h"
-
-static PNMonitor prototype;
 
 // Constructor.
 PNTarget::PNTarget() : Target("default-PN", "DataFlowStar",
@@ -61,20 +58,11 @@ Block* PNTarget::makeNew() const
 void PNTarget::setup()
 {
     LOG_NEW; setSched(new PNScheduler);
-
-    // Enable all registered PtGates before additional threads are created.
-    GateKeeper::enableAll(prototype);
-
     Target::setup();
 }
 
 void PNTarget::wrapup()
 {
     Target::wrapup();
-
-    // Delete scheduler (and any threads it created).
     delSched();
-
-    // Disable all registered PtGates after threads have been deleted.
-    GateKeeper::disableAll();
 }
