@@ -17,11 +17,16 @@
 
 #include "Thread.h"
 
+class MTDFStar;
+
 class MTDFThread : public Thread
 {
 public:
+    // Constructor.
+    MTDFThread(unsigned int priority, MTDFStar*);
+
     // Change the Thread's priority.
-    int setPriority(unsigned int p);
+    int setPriority(unsigned int);
 };
 
 #endif
