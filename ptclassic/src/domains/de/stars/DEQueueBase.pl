@@ -7,7 +7,8 @@ This star is not intended to be used except to derive useful stars from.
 All inputs are simply routed to the "overflow" output.  None are stored.
 	}
 	version { $Id$}
-	author { Soonhoi Ha, E. A. Lee, and Philip Bitar }
+	author { Soonhoi Ha and E. A. Lee }
+	acknowledge { Incorporates design ideas from Philip Bitar }
 	copyright { 1991 The Regents of the University of California }
 	input {
 		name {demand}

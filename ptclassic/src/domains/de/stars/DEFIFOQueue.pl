@@ -16,7 +16,7 @@ or "demand" event is processed.
 Input data that doesn't fit in the queue is sent to the "overflow" output.
 	}
 	version { $Id$}
-	author { Soonhoi Ha, E. A. Lee, and Philip Bitar }
+	author { Soonhoi Ha and E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
 	location { DE main library }
 	seealso {QueueBase, Stack, PriorityQueue}
