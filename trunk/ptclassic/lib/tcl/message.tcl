@@ -176,7 +176,7 @@ Ptolemy Interactive Graphical Interface }
 Ptolemy executable you are running:
 } $pigiFilename "
 
-Copyright \251 1990-1995 Regents of the University of California
+Copyright \251 1990-%Q% Regents of the University of California
 - All rights reserved -
 For copyright notice, limitation of liability,
 and disclaimer of warranty provisions, push the button below. "
