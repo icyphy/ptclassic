@@ -123,20 +123,20 @@ tap equal to 0.5 and all other taps zero.
     }
     initCode {
 	addCode(cbInit);
-	int k;
-	addCode("	org	x:$addr(coef_table)");
+	int k = 0;
+	addCode("	org	x:$addr(coef_table)\n");
 	for ( k=0; k < numTaps; k++) {
-	    char	buf[100];
-	    sprintf(buf, "	dc	%.15f", double(init_taps_r[k]));
+	    char buf[100];
+	    sprintf(buf, "	dc	%.15f\n", double(init_taps_r[k]));
 	    addCode(buf);
 	}
-	addCode("	org	y:$addr(coef_table)");
+	addCode("	org	y:$addr(coef_table)\n");
 	for ( k=0; k < numTaps; k++) {
-	    char	buf[100];
-	    sprintf(buf, "	dc	%.15f", double(init_taps_i[k]));
+	    char buf[100];
+	    sprintf(buf, "	dc	%.15f\n", double(init_taps_i[k]));
 	    addCode(buf);
 	}
-	addCode("	org	p:");
+	addCode("	org	p:\n");
     }
     go {
 	addCode(cbHeader);
@@ -155,25 +155,30 @@ tap equal to 0.5 and all other taps zero.
 
     execTime {
 	int coretime = 8 * int(numTaps) + 3 * int(decimation) + 28;
-	if ( last_tap_min.asDouble() > 0.0 )
+
+	if ( last_tap_min.asDouble() > 0.0 ) {
 	    coretime += 14;
+	}
+
 	if ( int(numTaps) <= 2 ) {
 	    coretime += int(decimation) <= 1 ? 0 : 3;
-	} else {
+	}
+	else {
 	    coretime += int(decimation) <= 1 ? 6 : 9;
 	}
+
 	return coretime;
     }
 
     codeblock(cbExample) {
-	;	decimation (e.g. =3)
-	;	time ->
-	;	x0	x1	x2	|  x0	 x1	x2
-	;	e	no_info	no_info	|  e	 n/i	n/i
-	;			lms_out	|		lms_out
-	;	note: total delay between e_in and the last x(decimation-1) =
-	;	      (* error_delay  decimation)
-	;	      where error_delay is delay in feedback loop
+;	decimation (e.g. =3)
+;	time ->
+;	x0	x1	x2	|  x0	 x1	x2
+;	e	no_info	no_info	|  e	 n/i	n/i
+;			lms_out	|		lms_out
+;	note: total delay between e_in and the last x(decimation-1) =
+;	      (* error_delay  decimation)
+;	      where error_delay is delay in feedback loop
     }
 
     codeblock(cbInit) {
