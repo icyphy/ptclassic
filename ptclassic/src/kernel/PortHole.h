@@ -391,7 +391,7 @@ public:
 
 	// Operator to return Particles previously input or output
 	// Argument is the delay in the past
-        Particle& operator % (int);
+        virtual Particle& operator % (int); // changed to virtual for MDSDF
 
 	// return the "resolved type", the type that the pair of connected
 	// portholes have agreed to use.  This will never by ANYTYPE.
