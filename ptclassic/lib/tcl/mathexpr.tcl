@@ -65,6 +65,54 @@ proc listApplyExpression {tclexpr thelist} {
   return $newlist
 }
 
+
+
+# Function: makePtolemyState
+
+add_to_help makePtolemyState {?<rows> <cols>? <realvalues> ?<imagvalues>?} {
+Converts a list of values into a Ptolemy state representation; e.g.,
+makePtolemyState "1 2 3" "3 2 1" returns "(1, 3) (2, 2) (3, 1)".  The
+values of <rows> and <cols> are ignored, and are supported for the
+Tcl/Matlab interface (see the help information on the "matlab" command).
+}
+
+proc makePtolemyState {args} {
+  set numargs [llength $args]
+  if { $numargs == 4 } {
+    set realvector [lindex $args 2]
+    set imagvector [lindex $args 3]
+  } elseif { $numargs == 3 } {
+    return [join [lindex $args 2]]
+  } elseif { $numargs == 2 } {
+    set realvector [lindex $args 0]
+    set imagvector [lindex $args 1]
+  } elseif { $numargs == 1 } {
+    return [join $args]
+  } else {
+    set usagestr "makePtolemyState ?rows cols? <realvalues> ?imagvalues?"
+    error "wrong # arguments: should be \"$usagestr\""
+    return -code error
+  }
+
+  # Both real and imaginary values were specified
+  # Convert into Ptolemy syntax (real1, imag1) (real2, imag2) ...
+  set numreals [llength $realvector]
+  set numimags [llength $imagvector]
+  if { $numreals == $numimags } {
+    set pvector ""
+    for {set i 0} {$i < $numreals} {incr i} {
+      set realvalue [lindex $realvector $i]
+      set imagvalue [lindex $imagvector $i]
+      lappend pvector "($realvalue, $imagvalue)"
+    }
+    return [join $pvector]
+  } else {
+    error "error: # of real values ($numreals) is different from\
+	   # of imaginary values ($numimags)"
+    return -code error
+  }
+}
+
 # Function: max
 
 add_to_help max {<x1> <x2> ...} {
