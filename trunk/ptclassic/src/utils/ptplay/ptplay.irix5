@@ -1,0 +1,10 @@
+#! /bin/sh
+#
+# $Id$
+
+OUT=/tmp/ptlay.out.$$
+# Is this the right format?
+/usr/sbin/sfconvert $1 $OUT -i mulaw format next end format aiff integer 16 2
+/usr/sbin/sfplay $OUT
+
+rm -f $OUT
