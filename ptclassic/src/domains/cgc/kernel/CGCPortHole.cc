@@ -38,6 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGCPortHole.h"
 #include "CGCGeodesic.h"
 #include "SDFStar.h"
+#include "CGCStar.h"
 #include "Error.h"
 #include "SimControl.h"
 
@@ -280,6 +281,105 @@ int CGCPortHole :: isConverted(){
 	return converted;
 }
 
+// return the precision for a port of type FIX that was assigned
+// with the setPrecision() method
+Precision CGCPortHole::getAssignedPrecision() const
+{
+	MultiCGCPort* myMultiPort  = (MultiCGCPort*)getMyMultiPortHole();
+	MultiCGCPort* farMultiPort = (MultiCGCPort*)realFarPort()->getMyMultiPortHole();
+
+	// return the precision of this port or of the associated multiport
+	if (prec.isValid())
+		return prec;
+
+   else if (myMultiPort && myMultiPort->validPrecision())
+		return myMultiPort->precision();
+
+	else {
+		// if the precision is not set explicitly, return the precision
+		// of the connected port
+
+		if (realFarPort()->validPrecision())
+			return realFarPort()->precision();
+
+	   else if (farMultiPort && farMultiPort->validPrecision())
+			return farMultiPort->precision();
+	}
+
+	// return empty precision structure
+	return Precision();
+}
+
+// overloaded % operators used to obtain the fixed-point precision
+// of an element of the porthole buffer
+CGCPrecisionHolder CGCPortHole::operator % (int offset) const
+{
+	char buffer[16];
+	sprintf(buffer, "%d", offset);
+	return *this % buffer;
+}
+
+CGCPrecisionHolder CGCPortHole::operator % (const char* symbolic_offset) const
+{
+	// function declared in CGCStar.cc
+	extern const char* sanitize(const char*);
+
+	CGCStar* star = (CGCStar*)this->parent();
+
+	// if this is a port that uses precision variables,
+	// produce a symbolic precision representation that contains
+	// references to the entry in the array of fix_prec variables
+	// that belongs to the specified offset
+
+	if ((attributes() & AB_VARPREC) ||
+	    (realFarPort()->attributes() & AB_VARPREC)) {
+
+	    const CGCPortHole* this_side =
+		(const CGCPortHole*)((attributes() & AB_VARPREC) ? this : realFarPort());
+
+	    StringList ref;
+	    ref << this_side->getGeoName() << 'p';
+
+	    // Use array notation for large buffers and for embedded buffers
+	    // which are referenced through a pointer.
+
+	    if (bufSize() > 1 || bufType() == EMBEDDED)
+	    {
+		ref << "[(";
+
+		if (staticBuf()) ref << bufPos();
+		else ref << sanitize(star->starSymbol.lookup(name()));
+		if (strcmp(symbolic_offset,"0"))
+			ref << "-(" << symbolic_offset << ')';
+		if (!linearBuf())	// use circular addressing
+		{
+		    ref << '+' << bufSize() << ")%" << bufSize();
+		}
+		else ref << ')';
+
+		ref << ']';
+	    }
+
+	    StringList sym_len, sym_intb;
+	    sym_len  << (const char*)ref << ".len";
+	    sym_intb << (const char*)ref << ".intb";
+
+	    // determine the non-symbolic initial value of the precision
+	    // variable that was assigned by the user
+	    Precision initial_prec = getAssignedPrecision();
+
+	    CGCPrecisionHolder ph(
+		initial_prec.len(),initial_prec.intb(), sym_len,sym_intb);
+
+	    return ph;
+	}
+	else
+	{
+	    // otherwise pass the assigned precision
+	    return CGCPrecisionHolder(getAssignedPrecision());
+	}
+}
+
 // Dummy
 int MultiCGCPort :: someFunc() { return 1; }
 
@@ -287,6 +387,12 @@ int InCGCPort :: isItInput() const { return TRUE; }
 int OutCGCPort :: isItOutput() const { return TRUE; }
 int MultiInCGCPort :: isItInput() const { return TRUE; }
 int MultiOutCGCPort :: isItOutput() const { return TRUE; }
+
+// create new portholes from a multiport;
+// note that the precision of the multiport is not passed to the new port
+// since it is usually not defined at this time;
+// therefore the CGCPortHole::precision() method must eventually check the
+// precision of the associated multiport.
 
 PortHole& MultiInCGCPort :: newPort () {
         LOG_NEW; InCGCPort* p = new InCGCPort;
@@ -301,3 +407,30 @@ PortHole& MultiOutCGCPort :: newPort () {
 	forkProcessing(*p);
         return installPort(*p);
 }
+
+// return the precision for a multi port of type FIX;
+// if the precision has not been explicitly set via the setPrecision()
+// method, a combination of the precisions of the connected portholes
+// is returned
+Precision MultiCGCPort::precision() const
+{
+	if (prec.isValid())
+		return prec;
+	else {
+		MPHIter nextPort(*(MultiCGCPort*)this);
+		CGCPortHole* port;
+
+		// use the += operator of class Precision to combine the
+		// precisions of the connected ports;
+		// it returns a precision whose integer and fraction parts
+		// are large enough to hold the fix values of both ports,
+		// which is exactly what we want
+		
+		Precision p;
+		while ((port = (CGCPortHole*)nextPort++) != NULL) {
+			p += port->precision();
+		}
+		return prec;
+	}
+}
+

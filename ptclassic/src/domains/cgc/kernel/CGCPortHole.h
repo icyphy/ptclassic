@@ -37,6 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "CGPortHole.h"
+#include "PrecisionState.h"
 
 const bitWord PB_GLOBAL = 0x20;
 extern const Attribute P_GLOBAL;
@@ -48,6 +49,20 @@ extern const Attribute P_LOCAL;
 enum BufType { NA, OWNER, EMBEDDED };
 
 class CGCGeodesic;
+
+// a holder for precisions of fixed-point variables;
+// this class is used in conjunction with the % operators of class CGCPortHole
+// in order to achieve a consistent method to refer to port precisions (s.below)
+class CGCPrecisionHolder : private Precision {
+public:
+	CGCPrecisionHolder(int len, int intb,
+            const char* symbolic_length=NULL, const char* symbolic_intBits=NULL) :
+		Precision(len,intb, symbolic_length,symbolic_intBits) { }
+	CGCPrecisionHolder(const Precision& p) : Precision(p) { }
+
+	Precision precision() { return *this; }
+};
+
 
 class CGCPortHole : public CGPortHole {
 friend class ForkDestIter;
@@ -98,8 +113,8 @@ public:
 	const char* getGeoName() const;
 
 	// Return the geodesic connected to this PortHole.
-	// This is typesafe ONLY when CGC stars are used in the CGC domain.
-	// Will this be a problem?
+	// This is typesafe because allocateGeodesic
+	// makes myGeodesic of this type.
 	CGCGeodesic& geo() { return *(CGCGeodesic*)myGeodesic;}
 
 	// const version
@@ -134,6 +149,36 @@ public:
 	// set output offset manually
 	void setOffset(int v) { manualOffset = v; }
 
+ 	// set the precision for a port of type FIX;
+ 	// the symbolic precision representation is ignored for ports with
+ 	// attribute A_VARPREC since their symbolic representation comprises
+ 	// references to precision variables declared in the generated code;
+ 	// this scheme is fixed and cannot be changed at compile time.
+ 	void setPrecision(const Precision& p) { prec = p; }
+ 
+ 	// return the precision for a port of type FIX;
+ 	// for ports with attribute A_VARPREC the symbolic representation
+ 	// of the precision may depend on the offset into the porthole
+ 	// buffer;  therefore we adapt the scheme used in the SDF domain
+ 	// to specify a buffer offset directly with the % operator.
+ 	// The precision of a specific buffer entry can be obtained by
+ 	// using expressions like "(output%1).precision()".
+ 
+ 	// overloaded % operator for constant and symbolic integer offsets
+ 	CGCPrecisionHolder operator % (int offset) const;
+ 	CGCPrecisionHolder operator % (const char* symbolic_offset) const;
+ 
+ 	// abbreviation for 0 offsets
+ 	Precision precision() const { return (*this%"0").precision(); }
+ 
+ //protected:
+ 	// return the precision of this or the connected port that was
+ 	// assigned with the setPrecision() method
+ 	Precision getAssignedPrecision() const;
+ 
+ 	// return TRUE if the precision assigned to this port is valid
+	int validPrecision() const { return prec.isValid(); }
+	
 private:
 	int maxBuf;		// Final buffer size.
 	short manualFlag;	// set if buffer size is manually chosen.
@@ -149,6 +194,8 @@ private:
 	SequentialList& myDest() { return forkDests; }
 	
 	int manualOffset;	// set the offset of the output manually.
+
+	Precision prec;		// fixed point precision for ports of type FIX
 };
 
 class InCGCPort : public CGCPortHole {
@@ -161,10 +208,30 @@ public:
 	int isItOutput() const;
 };
 
+
 // is anything here?
 class MultiCGCPort : public MultiCGPort {
 public:
 	int someFunc();
+
+	// return the precision for a multiport of type FIX;
+	// if the precision has not been set explicitly via the setPrecision()
+  	// method, a combination of the precisions of the connected portholes
+	// is returned;
+	// note that the attribute A_VARPREC is left unregarded since precision
+	// variables are not defined for multiports.  In order to refer to the
+	// fix_prec variable of a multiport one must refer to the derived normal
+	// portholes.
+  	Precision precision() const;
+  
+	// set the fixed-point precision
+	void setPrecision(const Precision& p) { prec = p; }
+
+	// return TRUE if the precision is set for this port
+	int validPrecision() const { return prec.isValid(); }
+
+private:
+	Precision prec;		// fixed point precision for ports of type FIX
 };
 
 class MultiInCGCPort : public MultiCGCPort {
