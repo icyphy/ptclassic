@@ -52,18 +52,6 @@ class ::tycho::Editor {
     }
     destructor {}
 
-    ###################################################################
-    ####                         public methods                    ####
-
-    # Bind the interactor to a picture or tag
-    method bind {t args}
-
-    # Remove the binding of an interactor to a picture or tag
-    method unbind {t}
-
-    # Process a key press
-    method key {key keysym state}
-
 
     ###################################################################
     ####                        protected methods                  ####
@@ -151,22 +139,6 @@ body ::tycho::Editor::activate {t x y} {
 
     # Start the interaction sequence
     eval click $x $y $options
-}
-
-
-#######################################################################
-#### bind target
-#
-# Bind button-press events to the specified object or tag, so that
-# clicking on one of those pictures calls activate{}. The configuration
-# options *-button* and *-modifiers* determine the actual events.
-#
-body ::tycho::Editor::bind {t args} {
-    foreach b $button {
-	$slate bind $t \
-		[::tycho::Interactor::event Press -button $b ] \
-		[list @scope [info class] "$this activate $t %x %y"]
-    }
 }
 
 
@@ -426,18 +398,5 @@ body ::tycho::Editor::select {mode args} {
 	"exists" {
 	    return [expr {! ([$slate select item] == "")}]
 	}
-    }
-}
-
-#######################################################################
-#### unbind target
-#
-# Remove the bindings to the specified object or tag. The specified 
-# pictures will no longer respond to the mouse.
-#
-body ::tycho::Editor::unbind {t} {
-    foreach b $button {
-	$slate bind $t \
-		[::tycho::Interactor::event Press -button $b] {}
     }
 }

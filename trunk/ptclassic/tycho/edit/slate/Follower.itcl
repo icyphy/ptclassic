@@ -31,7 +31,7 @@
 #### Follower
 #
 # The simplest interactor: follow the mouse. This interactor implements
-# the activate{}, deactivate{}, bind{}, and unbind{} methods so that
+# the activate{} and deactivate{} methods so that
 # clicking and dragging on a target picture causes corresponding actions
 # on the target -- in other words, with the default moving behavior,
 # the picture is moved by clicking and dragging.
@@ -56,37 +56,26 @@ class ::tycho::Follower {
     destructor {}
 
     ###################################################################
-    ####                         public methods                    ####
-
-    # Bind the interactor to a picture or tag
-    method bind {t args} {}
-
-    ## Remove the binding of an interactor to a picture or tag
-    method unbind {t} {}
-
-
-    ###################################################################
     ####                        protected methods                  ####
 
     # Attach the interactor to the current picture
-    protected method activate {t x y} {}
+    protected method activate {t x y args}
 
     # Remove the interactor from the current picture
-    protected method deactivate {} {}
+    protected method deactivate {args}
 }
 
-
 #######################################################################
-#### activate target x y
+#### activate
 #
 # Activate the interactor on a picture object. Motion and release events
 # are bound to the current picture so that the picture can be dragged
 # and so on. After setting up bindings and calling the *activatecommand*
-# option, this method calls the click{} metjod -- subclasses therefore
+# option, this method calls the click{} method -- subclasses therefore
 # need only to override click{} (and drag{} and release{}) to alter the
 # interaction behavior.
 # 
-body ::tycho::Follower::activate {t x y} {
+body ::tycho::Follower::activate {t x y args} {
     # Remember the tag/object, for use in deactivate
     set tag $t
 
@@ -101,14 +90,12 @@ body ::tycho::Follower::activate {t x y} {
 
     # Set up the bindings. Note: the bindings are set to the tag,
     # not to the current object. -- WHY???
-    foreach b $button {
-	$slate bind $tag \
-		[::tycho::Interactor::event Motion -button $b] \
-		[list @scope [info class] "$this drag %x %y; update idletasks"]
-	$slate bind $tag \
-		[::tycho::Interactor::event Release -button $b] \
-		[list @scope [info class] "$this release; $this deactivate"]
-    }
+    $slate bind $tag \
+	    [eval ::tycho::Interactor::event Motion $args] \
+	    [list @scope [info class] "$this drag %x %y; update idletasks"]
+    $slate bind $tag \
+	    [eval ::tycho::Interactor::event Release $args] \
+	    [list @scope [info class] "$this release; $this deactivate $args"]
 
     # If there's a proxy, tell it about the current target
     if { $proxy != "" } {
@@ -116,26 +103,10 @@ body ::tycho::Follower::activate {t x y} {
     }
 
     # Execute the user-specified activation command
-    execute $activatecommand $x $y
+    execute $activatecommand $x $y $args
 
     # Start the interaction sequence
-    eval click $x $y $options
-}
-
-
-#######################################################################
-#### bind target
-#
-# Bind button-press events to the specified object or tag, so that
-# clicking on one of those pictures calls activate{}. The configuration
-# options *-button* and *-modifiers* determine the actual events.
-#
-body ::tycho::Follower::bind {t args} {
-    foreach b $button {
-	$slate bind $t \
-		[::tycho::Interactor::event Press -button $b ] \
-		[list @scope [info class] "$this activate $t %x %y"]
-    }
+    eval click $x $y $options $args
 }
 
 
@@ -145,31 +116,15 @@ body ::tycho::Follower::bind {t args} {
 # Deactivate the interactor from the target. This method must be called
 # by the script bound to the release event.
 # 
-body ::tycho::Follower::deactivate {} {
+body ::tycho::Follower::deactivate {args} {
     # Remove bindings from the current tag
-    foreach b $button {
-	$slate bind $tag \
-		[::tycho::Interactor::event Motion -button $b] {}
-	$slate bind $tag \
-		[::tycho::Interactor::event Release -button $b] {}
-    }
+    $slate bind $tag \
+	    [eval ::tycho::Interactor::event Motion $args] {}
+    $slate bind $tag \
+	    [eval ::tycho::Interactor::event Release $args] {}
 
     # Execute the user-specified de-activation command
     if { $deactivatecommand != "" } {
 	uplevel #0 apply [list $deactivatecommand] $target
-    }
-}
-
-
-#######################################################################
-#### unbind target
-#
-# Remove the bindings to the specified object or tag. The specified 
-# pictures will no longer respond to the mouse.
-#
-body ::tycho::Follower::unbind {t} {
-    foreach b $button {
-	$slate bind $t \
-		[::tycho::Interactor::event Press -button $b] {}
     }
 }

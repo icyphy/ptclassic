@@ -69,12 +69,6 @@ class ::tycho::Repeater {
     ###################################################################
     ####                         public methods                    ####
 
-    # Bind the interactor to a picture or tag
-    method bind {t args} {}
-
-    ## Remove the binding of an interactor to a picture or tag
-    method unbind {t} {}
-
 
     ###################################################################
     ####                   protected methods                       ####
@@ -149,18 +143,6 @@ body ::tycho::Repeater::activate {t x y} {
 
 
 #######################################################################
-#### bind
-#
-body ::tycho::Repeater::bind {t args} {
-    foreach b $button {
-	$slate bind $t \
-		[::tycho::Interactor::event Click -button $b] \
-		[list @scope [info class] "$this activate $t %x %y"]
-    }
-}
-
-
-#######################################################################
 #### deactivate
 #
 # Remove this interactor from the current picture. This removes
@@ -212,14 +194,3 @@ body ::tycho::Repeater::reactivate {x y} {
 	    [list @scope [info class] $this reactivate $currentX $currentY]]]
 }
 
-
-#######################################################################
-#### unbind
-#
-body ::tycho::Repeater::unbind {t} {
-    foreach b $button {
-	$slate bind $t \
-		[::tycho::Interactor::event Click -button $b] \
-		{}
-    }
-}
