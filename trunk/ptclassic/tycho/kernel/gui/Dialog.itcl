@@ -372,6 +372,19 @@ body ::tycho::Dialog::invoke {args} {
 # if the window has menus.  If a second argument is given and has value 0,
 # then this auto-raise feature is disabled.
 #
+# This procedure has a special behavior of the global variable
+# TY_TESTING exists and is set. If the TY_TEST_MODAL global
+# variable exists and is not null, then it is taken to be
+# a list of scripts. This procedure evaluates the first
+# script in this list in the global context, with the name of
+# the dialog instance substituted for every ocurrence of the string
+# "%0". It removes the script from the list so that the next modal
+# dialog will have the next dialog executed. This allows a series
+# of modal dialog invocation to be tested without user intervention.
+# The return result is the result of the dialog box.
+# In the case that TY_TEST_MODAL is not set, this procedure
+# returns the name of the dialog box.
+#
 body ::tycho::Dialog::wait {instance {autoraise 1}} {
     if ![$instance isa ::tycho::Dialog] {
         error "wait expects a Dialog but got: $instance"
@@ -397,23 +410,21 @@ body ::tycho::Dialog::wait {instance {autoraise 1}} {
             # If the user moves the mouse in another window, raise
             bind $instance <Motion> "+raise $instance"
         }
-        # This is very evil, but if we are running the test suite
-        # then we need to return a value here, so that we can
-	# make the tests press buttons and stuff
-        global TY_TESTING TY_TEST_SCRIPT TY_TEST_SERIES
-	if { [info exists TY_TESTING] && $TY_TESTING == 1 } {
-            if [::info exists TY_TEST_SCRIPT] {
-                regsub -all %0 $TY_TEST_SCRIPT $instance temp_script
-		after 1000
-                uplevel #0 $temp_script
-            } elseif [::info exists TY_TEST_SERIES] {
-                set temp_script [lindex $TY_TEST_SERIES 0]
-                set TY_TEST_SERIES [lreplace $TY_TEST_SERIES 0 0]
-                if { $TY_TEST_SERIES == "" } {
-                    unset TY_TEST_SERIES
+        # If we are running the test suite
+        # then we don't use tkwait to wait for the dialog to
+        # close. If the TY_TEST_MODAL global variable is set,
+        # then execute the first script in that list with the
+        # dialog substitued for any occurrence of %0.
+        global TY_TESTING TY_TEST_MODAL
+	if { [::info exists TY_TESTING] && $TY_TESTING == 1 } {
+            if { [::info exists TY_TEST_MODAL] && $TY_TEST_MODAL != "" } {
+                set temp_script [lindex $TY_TEST_MODAL 0]
+                set TY_TEST_MODAL [lreplace $TY_TEST_MODAL 0 0]
+                if { $TY_TEST_MODAL == "" } {
+                    unset TY_TEST_MODAL
                 }
                 regsub -all %0 $temp_script $instance temp_script
-		after 1000
+                after 1000
                 uplevel #0 $temp_script
             } else {
                 return $instance
