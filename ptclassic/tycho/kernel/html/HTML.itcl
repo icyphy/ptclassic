@@ -214,7 +214,7 @@ body ::tycho::HTML::constructor {args} {
     bind $prefix <Control-x><Key-i> { }
     bind $prefix <Control-x><Control-q> { }
 
-    $itk_component(text) configure -readonly 1
+    configure -readonly 1
     focusin
 
     # Create a stack to store where we've been.
