@@ -99,9 +99,13 @@ protected:
 	// support blockWithName message to access internal block list
 	Block* blockWithName (const char* name) {return blocks.blockWithName(name);}
 
+public:
+
+	// Constructor
+	Galaxy () : myDomain(0) {}
+
 	// destructor
 	~Galaxy ();
-public:
 
 	// system initialize method.  Derived Galaxies should not
 	// redefine initialize; they should write a start() method
@@ -136,7 +140,7 @@ public:
 	Galaxy& asGalaxy() const; // { return *this;}
 
 	// my domain
-	char* myDomain;
+	const char* myDomain;
 };
 
 
