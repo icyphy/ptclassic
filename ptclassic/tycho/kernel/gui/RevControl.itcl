@@ -427,9 +427,9 @@ body ::tycho::RevControl::cdDir {dir} {
 # Open a dialog box to query the user for comments.
 # 
 body ::tycho::RevControl::getComments {} {
-    # If TestSuite is defined, then we are running in the test suite
-    global TestSuite
-    if { ![info exists TestSuite ]} {
+    # If testsuite is defined, then we are running in the test suite
+    global testsuite
+    if { ![info exists testsuite ]} {
         set comments [lindex [::tycho::query {Summarize changes} \
                 {{lines body {} {} 5}} 60] 1]
     } else {
