@@ -60,6 +60,9 @@ class ::tycho::HTML {
     # Open a help window.
     method help {}
 
+    # Insert the specified data.
+    method insertData {data}
+
     # Open the source file using an HTML editor.
     method openSource {}
 
@@ -264,6 +267,14 @@ body ::tycho::HTML::focusin {} {
 body ::tycho::HTML::help {} {
     global ::TYCHO
     ::tycho::File::openContext $TYCHO/kernel/doc/usersGuides/HTMLHelp.html
+}
+
+#####################################################################
+#### insertData
+# Insert the specified data.
+#
+body ::tycho::HTML::insertData {data} {
+    component text configure -html $data
 }
 
 #####################################################################
