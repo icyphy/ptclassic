@@ -143,35 +143,35 @@ int setHandlers(SIG_PF sigHandler)
 void setReleaseStrings(void) 
 {
 
-    InfString tempPath, tempScript, tempMsg, ptolemy, itcl_path;
-
     // Sub-directory of $PTOLEMY that contains the itcl binary plus binary
     // file name, e.g., "/bin.sol2/itkwish"
-    itcl_path << "/bin.";
-    if (getenv("PTARCH") == 0)
+    InfString itcl_path = "/bin.";
+    const char* ptarch = getenv("PTARCH");
+    if (ptarch == 0)
     {
         itcl_path << PTARCH;
     }
     else
     {
-        itcl_path << getenv("PTARCH");
+        itcl_path << ptarch;
     }  
     itcl_path << "/";
     itcl_path << SH_ITCLTK_PROG;
 
     // 1. Find the value of the PTOLEMY environment variable
-    ptolemy << getenv("PTOLEMY");
-    if ((char *) ptolemy == 0 ) {
-        ptolemy.initialize();
-        ptolemy << "~ptolemy";
+    const char* ptolemy = getenv("PTOLEMY");
+    if (ptolemy == 0) {
+        ptolemy = "~ptolemy";
     }
 
     // 2. Define the path of [incr tk] and tcltk script to source
-    tempPath << ptolemy;
+    InfString tempPath = ptolemy;
     tempPath << itcl_path;
-    tempScript << ptolemy;
+
+    InfString tempScript = ptolemy;
     tempScript << SH_ITCLTK_RELEASE_SCRIPT;
-    tempMsg << "\n\nFatal error occured. Tycho was not able to intercept the error signal and deal with it appropriately.\n";
+
+    InfString tempMsg = "\n\nFatal error occured. Tycho was not able to intercept the error signal and deal with it appropriately.\n";
 
     // These values don't change for the life of the program. So if the 
     // environment changes during execution those changes will not be 
@@ -231,11 +231,9 @@ void signalHandlerRelease(void)
 void setDebugStrings(void) 
 {
 
-    InfString tempPath, tempScript, tempMsg, ptolemy, itcl_path;
-
     // Sub-directory of $PTOLEMY that contains the itcl binary plus binary
     // file name, e.g., "/bin.sol2/itkwish"
-    itcl_path << "/bin.";
+    InfString itcl_path = "/bin.";
     if (getenv("PTARCH") == 0)
     {
         itcl_path << PTARCH;
@@ -248,18 +246,20 @@ void setDebugStrings(void)
     itcl_path << SH_ITCLTK_PROG;
 
     // 1. Find the value of the PTOLEMY environment variable
-    ptolemy << getenv("PTOLEMY");
-    if ((char *) ptolemy == 0 ) {
-        ptolemy.initialize();
-        ptolemy << "~ptolemy";
+    const char* ptolemy = getenv("PTOLEMY");
+    if (ptolemy == 0)
+    {
+        ptolemy = "~ptolemy";
     }
 
     // 2. Define the path of itcl_wish and itcl file name to source
-    tempPath << ptolemy;
+    InfString tempPath = ptolemy;
     tempPath << itcl_path;
-    tempScript << ptolemy;
+
+    InfString tempScript = ptolemy;
     tempScript << SH_ITCLTK_DEBUG_SCRIPT;
-    tempMsg << "\n\nFatal error occured. Tycho was not able to intercept the error signal and deal with it appropriately.\n";
+
+    InfString tempMsg = "\n\nFatal error occured. Tycho was not able to intercept the error signal and deal with it appropriately.\n";
 
     // These values don't change for the life of the program. So if the 
     // environment changes during execution those changes will not be 
