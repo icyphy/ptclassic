@@ -226,6 +226,9 @@ class ::tycho::Edit {
     # Return a list of tags to restrict the spelling check.
     method spellCheckTags {} {return {}}
 
+    # Substitute all instances of 'target' with 'newString'
+    method substituteText {target newstring}
+
     # Return the full path name of the text window.
     method textWinName {}
 
@@ -1765,6 +1768,34 @@ body ::tycho::Edit::stuff {} {
 	insertString insert $sel
 	$itk_component(text) see insert
     }
+}
+
+#####################################################################
+#### substituteText
+# Substitute all instances of 'target' with 'newString'
+# This method just substitutes all instances of target without user
+# intervention.  If you want user intervention, use the EditSearch window.
+# This is a shortcut method because there are many findAll arguments.
+# 
+body ::tycho::Edit::substituteText {target newString} {
+    # Find all the target strings
+
+    # The arguments for findAll are:
+    # tag them 'toBeSubstituted', 1 - don't ignore case,
+    # 0 - return only exact matches, 0 -ignore word boundaries,
+    # search for 'target', search from the start to the end,
+    # {} - don't restrict the search.
+    findAll toBeSubstituted 1 0 0 $target 0.0 end {}
+    
+    # Substitute $target for $newString
+    set ind 1.0
+    while {[set res \
+	    [$itk_component(text) tag nextrange \
+	    toBeSubstituted $ind end]] != {}} {
+	eval deleteRange $res
+	insertString [lindex $res 0] $newString
+    }
+
 }
 
 #####################################################################
