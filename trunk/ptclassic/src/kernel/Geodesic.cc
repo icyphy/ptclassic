@@ -26,7 +26,28 @@ Geodesics can be created named or unnamed.
 #include "Plasma.h"
 #include "StringList.h"
 
-int Geodesic :: isItPersistent () {
+StringList Geodesic :: printVerbose () const {
+	StringList out;
+	if (isItPersistent()) out += "Persistent ";
+	out += "Geodesic: ";
+	out += readFullName();
+	out += "\n";
+	if (originatingPort) {
+		out += "originatingPort: ";
+		out += originatingPort->readFullName();
+		out += "\n";
+	}
+	if (destinationPort) {
+		out += "destinationPort: ";
+		out += destinationPort->readFullName();
+		out += "\n";
+	}
+	if (!originatingPort && !destinationPort)
+		out += "Not connected.\n";
+	return out;
+}
+
+int Geodesic :: isItPersistent () const {
 	return FALSE;
 }
 
@@ -62,27 +83,18 @@ int Geodesic :: disconnect (PortHole& p) {
 	return TRUE;
 }
 
-Particle* Geodesic::get()
-{
-	if (sz > 0) {
-		sz--;
-		return ParticleStack::get();
-	}
-	else return 0;
-}
-
 void Geodesic :: initialize()
 {
 	// Remove any Particles residing on the Geodesic,
 	// and put them in Plasma
-	freeup();
+	pstack.freeup();
 
 	// Initialize the buffer to the number of Particles
 	// specified in the connection; note that these Particles
 	// are initialized by Plasma
 	for(int i=numInitialParticles; i>0; i--) {
 		Particle* p = originatingPort->myPlasma->get();
-		putTail(p);
+		pstack.putTail(p);
 	}
 	sz = numInitialParticles;
 	// TO DO: Allow Particles in the Geodesic to be
@@ -92,21 +104,9 @@ void Geodesic :: initialize()
 // destructor
 Geodesic :: ~Geodesic () {
 	// free all particles (return them to Plasma)
-	freeup();
+	pstack.freeup();
 	// disconnect any connected portholes.  0 argument says
 	// not to have PortHole::disconnect try to do things to geodesic
 	if (originatingPort) originatingPort->disconnect(0);
 	if (destinationPort) destinationPort->disconnect(0);
-}
-
-
-// readFullName
-StringList Geodesic :: readFullName () const {
-	StringList out;
-	if (blockIamIn) {
-		out = blockIamIn->readFullName();
-		out += ".";
-	}
-	out += name;
-	return out;
 }
