@@ -12,7 +12,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 
-	ccinclude { "iostream.h" }
+	ccinclude { <iostream.h> }
 
 	input
 	{
