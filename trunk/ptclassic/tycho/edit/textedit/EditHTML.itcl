@@ -45,6 +45,27 @@ class ::tycho::EditHTML {
     destructor {}
 
     ##########################################################################
+    ####                            options                               ####
+
+    # The color of commands.
+    itk_option define -commandcolor commandColor CommandColor black {
+	$itk_component(text) tag configure command \
+		-foreground $itk_option(-commandcolor)
+    }
+
+    # The color of pointer.
+    itk_option define -pointercolor pointerColor PointerColor black {
+	$itk_component(text) tag configure pointer \
+		-foreground $itk_option(-pointercolor)
+    }
+
+    # The color of dests.
+    itk_option define -destcolor destColor DestColor black {
+	$itk_component(text) tag configure dest \
+		-foreground $itk_option(-destcolor)
+    }
+
+    ##########################################################################
     ####                         public methods                           ####
 
     # Check hyperlinks for validity.
@@ -82,6 +103,12 @@ class ::tycho::EditHTML {
 #
 body ::tycho::EditHTML::constructor {args} {
     eval itk_initialize $args
+
+    # Subscribe to the preference set
+    preference subscribe htmledit $this \
+	    -commandcolor commandColor \
+	    -pointercolor pointerColor \
+	    -destcolor destColor
 
     # Add to the format menu commands to comment and uncomment
     # the regions defined by the selection.
@@ -241,7 +268,7 @@ body ::tycho::EditHTML::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged commands
     $text tag configure command -foreground \
-	    [preference get htmledit html.commandColor]
+	    [preference get htmledit commandColor]
 
     # Scan the text for hypertext pointers.
     set upto $start
@@ -257,7 +284,7 @@ body ::tycho::EditHTML::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged commands
     $text tag configure pointer -foreground \
-	    [preference get htmledit html.pointerColor]
+	    [preference get htmledit pointerColor]
 
     # for testing
     # $text tag configure text -foreground red
@@ -278,7 +305,7 @@ body ::tycho::EditHTML::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged commands
     $text tag configure dest -foreground \
-	    [preference get htmledit html.destColor]
+	    [preference get htmledit destColor]
 }
 
 #####################################################################
@@ -329,7 +356,7 @@ body ::tycho::EditHTML::fixLink {link start end err} {
     # as normal.
     $itk_component(text) tag raise sel badlink
     $itk_component(text) tag configure badlink \
-	    -background [preference get htmledit html.targetColor]
+	    -background [preference get htmledit targetColor]
 
     set replacement [::tycho::DialogWindow::newModal EntryQuery \
 	    [::tycho::autoName .entry] \
