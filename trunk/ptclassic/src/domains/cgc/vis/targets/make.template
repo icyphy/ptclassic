@@ -55,8 +55,6 @@ all:		makefile $(OBJS)
 install:	all
 		@echo Installation complete.
 
-endif
-
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
 
