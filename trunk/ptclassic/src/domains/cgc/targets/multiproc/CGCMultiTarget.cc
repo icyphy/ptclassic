@@ -81,7 +81,6 @@ CGCMultiTarget::CGCMultiTarget(const char* name,const char* starclass,
 		"common suffix of machine names(e.g. .berkeley.edu)"));
 
 	// make some states invisible
-	childType.setAttributes(A_NONSETTABLE);
 	childType.setInitValue("default-CGC");
 
 	machineInfo = 0;
