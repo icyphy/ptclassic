@@ -160,6 +160,19 @@ enum BDFLoopType {
 	DO_ITER, DO_IFTRUE, DO_IFFALSE, DO_UNTILTRUE, DO_UNTILFALSE
 };
 
+// This is the top-level cluster.  Just like BDFClusterGal but it has
+// a pointer to a scheduler (for dynamic execution).
+
+class BDFTopGal : public BDFClusterGal {
+public:
+	BDFTopGal(Galaxy& g, ostream* log = 0)
+	: BDFClusterGal(g,log), sched(0) {}
+	Scheduler* scheduler() const { return sched;}
+	void setSched(Scheduler* s) { sched = s;}
+private:
+	Scheduler* sched;
+};
+
 // This is the baseclass for BDF cluster objects.  A cluster may have
 // an internal galaxy (if it is an BDFClusterBag); it always has a loop
 // count, indicating how many times it is to be looped.
@@ -266,7 +279,7 @@ public:
 	static const char* mungeName(NamedObj&);
 };
 
-// define << operator to use virt fn.
+// define << operator to use virtual printing function.
 inline ostream& operator<<(ostream& o, BDFCluster& cl) {
 	return cl.printOn(o);
 }
@@ -323,7 +336,7 @@ public:
 	// return the schedule
 	virtual StringList displaySchedule(int depth);
 
-	// default version (since BDFScheduler has a no-argument version)
+	// default version (since SDFScheduler has a no-argument version)
 	StringList displaySchedule() { return displaySchedule(0);}
 
 	// code generation
@@ -386,6 +399,8 @@ public:
 	// loops, for example)
 	int internalClustering();
 
+	// return my scheduler
+	Scheduler* scheduler() const { return sched;}
 protected:
 	// createInnerGal
 	virtual void createInnerGal();
@@ -433,6 +448,8 @@ private:
 
 class DynDFScheduler;
 
+// This is the clustering BDF scheduler class.
+
 class BDFClustSched : public BDFScheduler {
 public:
 	// constructor and destructor
@@ -459,7 +476,7 @@ protected:
 	// run schedule
 	void runOnce();
 	// handle creation of dynamic scheduler if needed and allowed
-	int handleDynamic (Galaxy&);
+	int handleDynamic (BDFTopGal&);
 private:
 	// The clustered galaxy.
 	BDFClusterGal* cgal;
