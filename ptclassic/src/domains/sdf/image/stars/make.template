@@ -29,6 +29,7 @@ STARDOCDIR = ../../doc/stars
 # source files for all stars, using preprocessor
 PL_SRCS= \
  SDFAddMotionVecs.pl \
+ SDFContrast.pl \
  SDFDCTImage.pl \
  SDFDCTImgCde.pl \
  SDFDCTImgCdeInv.pl \
@@ -37,8 +38,10 @@ PL_SRCS= \
  SDFDisplayImage.pl \
  SDFDisplayRGB.pl \
  SDFDisplayVideo.pl \
+ SDFDither.pl \
  SDFDPCMImage.pl \
  SDFDPCMImageInv.pl \
+ SDFEdgeDetect.pl \
  SDFImageToMx.pl \
  SDFImageToPix.pl \
  SDFMakeSeqATMCell.pl \
