@@ -396,8 +396,8 @@ StringList SimVSSTarget :: addComponentMaps(VHDLCompMapList* compMapList) {
   VHDLCompMap* compMap;
   while ((compMap = nextCompMap++) != 0) {
     level++;
-    all << indent(level) << compMap->label << ": "
-		       << compMap->name << "\n";
+    all << indent(level) << compMap->name << ": "
+		       << compMap->type << "\n";
 
     // Add in generic maps here from genMapList.
     if (compMap->genMapList->head()) {
@@ -450,18 +450,13 @@ StringList SimVSSTarget :: addComponentMaps(VHDLCompMapList* compMapList) {
 }
 
 // Register component mapping.
-void SimVSSTarget :: registerCompMap(StringList label, StringList name,
+void SimVSSTarget :: registerCompMap(StringList name, StringList type,
 				     VHDLPortMapList* portMapList,
 				     VHDLGenericMapList* genMapList) {
-//  Problem: inList uses name, not label, for generic VHDL objects.
-//  Will just comment this out for now.  If get repeated registrations
-//  of a comp map, will deal with that.
-//  if (compMapList.inList(label)) return;
-  
   // Allocate memory for a new VHDLCompMap and put it in the list.
   VHDLCompMap* newCompMap = new VHDLCompMap;
-  newCompMap->label = label;
   newCompMap->name = name;
+  newCompMap->type = type;
   newCompMap->genMapList = genMapList;
   newCompMap->portMapList = portMapList;
   topCompMapList.put(*newCompMap);

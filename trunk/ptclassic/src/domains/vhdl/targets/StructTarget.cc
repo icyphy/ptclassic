@@ -391,18 +391,13 @@ void StructTarget :: mergeSignalList(VHDLSignalList* starSignalList) {
 }
 
 // Register component mapping.
-void StructTarget :: registerCompMap(StringList label, StringList name,
+void StructTarget :: registerCompMap(StringList name, StringList type,
 				     VHDLPortMapList* portMapList,
 				     VHDLGenericMapList* genMapList) {
-//  Problem: inList uses name, not label, for generic VHDL objects.
-//  Will just comment this out for now.  If get repeated registrations
-//  of a comp map, will deal with that.
-//  if (compMapList.inList(label)) return;
-  
   // Allocate memory for a new VHDLCompMap and put it in the list.
   VHDLCompMap* newCompMap = new VHDLCompMap;
-  newCompMap->label = label;
   newCompMap->name = name;
+  newCompMap->type = type;
   newCompMap->genMapList = genMapList;
   newCompMap->portMapList = portMapList;
   compMapList.put(*newCompMap);
@@ -1173,8 +1168,8 @@ void StructTarget :: buildComponentMappings(int level) {
   VHDLCompMap* compMap;
   while ((compMap = nextCompMap++) != 0) {
     level++;
-    component_mappings << indent(level) << compMap->label << ": "
-		       << compMap->name << "\n";
+    component_mappings << indent(level) << compMap->name << ": "
+		       << compMap->type << "\n";
 
     // Add in generic maps here from genMapList.
     if (compMap->genMapList->head()) {

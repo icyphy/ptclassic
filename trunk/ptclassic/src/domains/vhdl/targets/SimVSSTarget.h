@@ -119,7 +119,7 @@ private:
 	StringList addComponentMaps(VHDLCompMapList* compMapList);
 
 	// Register component mapping.
-	void registerCompMap(StringList label, StringList name,
+	void registerCompMap(StringList name, StringList type,
 				     VHDLPortMapList* portMapList,
 				     VHDLGenericMapList* genMapList);
 
