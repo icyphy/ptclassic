@@ -7,6 +7,7 @@ Useful higher level OCT interface functions.
 /* Includes */
 #include <stdio.h>
 #include <strings.h>
+#include <ctype.h>
 #include "local.h"
 #include "rpc.h"
 #include "paramStructs.h"
@@ -303,10 +304,10 @@ octObject *instPtr;
     if (KcIsKnown(akoName)) {
 	return (TRUE);
     }
-    PrintCon(
-	sprintf(buf,
-	  "Unknown star '%s' in current domain, trying to load it...",
-	  akoName));
+    (void)sprintf(buf,
+		  "Unknown star '%s' in current domain, trying to load it...",
+		  akoName);
+    PrintCon(buf);
     return LoadTheStar(instPtr);
 }
 
@@ -477,6 +478,75 @@ octObject *instPtr, *propPtr;
     propPtr->contents.prop.type = OCT_INTEGER;
     propPtr->contents.prop.value.integer = 1;
     (void) octGetOrCreate(instPtr, propPtr);
+}
+
+/* given a property, make a string out of it and return it. */
+boolean
+StringizeProp(propPtr, buf, len)
+octObject *propPtr;
+char* buf;
+int len;
+{
+	struct octProp* p = &(propPtr->contents.prop);
+	switch (p->type) {
+	case OCT_INTEGER:
+		(void)sprintf (buf, "%ld", (long)p->value.integer);
+		return TRUE;
+	case OCT_REAL:
+		(void)sprintf (buf, "%g", p->value.real);
+		return TRUE;
+	case OCT_STRING:
+		if (strlen (p->value.string) >= len) return FALSE;
+		(void)strcpy (buf, p->value.string);
+		return TRUE;
+	default:
+		return FALSE;
+	}
+}
+
+/* get delay, buswidth, or some other property as a string using
+ * Stringize -- empty string and return of false if not set.
+ */
+GetStringizedProp(objPtr, name, dest, dlen)
+octObject *objPtr;
+char *name, *dest;
+int dlen;
+{
+    octObject prop;
+    if (GetByPropName(objPtr, &prop, name) == OCT_NOT_FOUND) {
+	*dest = 0;
+	return FALSE;
+    }
+    return StringizeProp(&prop, dest, dlen);
+}
+
+/* given a property, if it is OCT_STRING but its value corresponds to
+   an integer, convert it to an integer property (OCT_INTEGER)
+ */
+void
+IntizeProp(propPtr)
+octObject *propPtr;
+{
+	char* s;
+	int n;
+	struct octProp* p = &(propPtr->contents.prop);
+	if (p->type != OCT_STRING) return;
+	s = p->value.string;
+	/* skip initial whitespace */
+	while (*s && isspace(*s)) s++;
+	/* return if this is not a number */
+	if (*s == 0 || !isdigit(*s)) return;
+	/* skip digits */
+	while (*s && isdigit(*s)) s++;
+	/* skip trailing whitespace */
+	while (*s && isspace(*s)) s++;
+	/* if not at end-of-string, not a number */
+	if (*s != 0) return;
+	/* OK, convert to a number */
+	n = atoi (p->value.string);
+	p->type = OCT_INTEGER;
+	p->value.integer = n;
+	return;
 }
 
 /* GetCommentProp  5/31/89
