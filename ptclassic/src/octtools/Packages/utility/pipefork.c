@@ -105,7 +105,11 @@ int *pid;
 #endif
 
     /* parent here, use slimey vfork() semantics to get return status */
+#ifdef PTNT
+    if (waitPid == forkpid && WIFEXITED(status.w_status)) {
+#else
     if (waitPid == forkpid && WIFEXITED(status)) {
+#endif
 	return 0;
     }
     if ((*toCommand = fdopen(topipe[1], "w")) == NULL) {
