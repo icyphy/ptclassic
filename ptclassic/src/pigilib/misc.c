@@ -346,7 +346,7 @@ long userOptionWord;
     ViInit("open-facet");
     ErrClear();
     TCL_CATCH_ERR( 
-	Tcl_VarEval( ptkInterp, "::tycho::File::openFacet", (char *) NULL) );
+	Tcl_VarEval( ptkInterp, "::tycho::Oct::openFacet", (char *) NULL) );
     ViDone();
 }
 
