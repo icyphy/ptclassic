@@ -754,6 +754,7 @@ bool tmp_thor;
    char name[100];
    char inputName[100];
    char prec[10];
+   char typ[10];
    strcpy(name,Root->Name);
    strcat(name,"Prec.inputs");
    fp = fopen(name,"r");
@@ -764,7 +765,9 @@ bool tmp_thor;
    }
    while (fscanf(fp,"%s",inputName) == 1)
    {
-   fscanf(fp,"%s",prec);
+   fscanf(fp,"%s",typ);
+if(strcmp(typ,"bool") == 0);
+else fscanf(fp,"%s",prec);
    fprintf (CFD, "\tinput { \n");
    fprintf (CFD, "\t\tname { ");
    fprintf (CFD, "%s",inputName);
@@ -813,6 +816,7 @@ bool tmp_thor;
    char name[100];
    char outputName[100];
    char prec[10];
+   char typ[10];
    strcat(outputName,"");
    strcpy(name,Root->Name);
    strcat(name,"Prec.outputs");
@@ -825,7 +829,9 @@ bool tmp_thor;
    }
    while( (fscanf(fq,"%s",outputName) == 1 ) )
    {
-   fscanf(fq,"%s",prec);
+   fscanf(fq,"%s",typ);
+if( strcmp(typ,"bool") == 0);
+else fscanf(fq,"%s",prec);
    fprintf (CFD, "\toutput { \n");
    fprintf (CFD, "\t\tname { ");
    fprintf (CFD, "%s",outputName);
@@ -1241,7 +1247,7 @@ bool pl_flag;
     }
     else 
     {
-    	if(pl_flag) fprintf(CFD, "int* pIn, \n");
+    	if(pl_flag) fprintf(CFD, "int* pIn,");
     	else fprintf(CFD, "int *pIn;\n");
     }
     if(pl_flag) 
@@ -1332,6 +1338,7 @@ bool bittrue;
 /* in case of the bittrue simulation, need to use th SDF Fixed functions */
    if(bittrue)
    { 
+	fprintf(CFD, "\n\t\t/* FixedPoint Precision Initialization */\n");
 	while( (fscanf(fq,"%s",portName) == 1 ) )
 	{
 	fprintf(CFD,"\t\t%s_P = %sPrecision;\n",portName,portName);
@@ -1361,8 +1368,12 @@ bool tmp_thor;
    FILE *fp;
    FILE *fq;
    char fInName[100], fOutName[100], inputName[100], outputName[100];
+   char inputTyp[10], inputPrec[10];
+   char outputTyp[10], outputPrec[10];
    struct listOfIO {
        	char name[100];
+       	char typ[10];
+       	char prec[10];
    };
    struct listOfIO inputList[10];	/* max num of inputs */ 
    struct listOfIO outputList[10];	/* max num of outputs */ 
@@ -1373,18 +1384,23 @@ bool tmp_thor;
    numIn = 0;
    numOut = 0;
 
-   strcpy(fInName,Root->Name); 		strcat(fInName,".inputs");
-   strcpy(fOutName,Root->Name); 	strcat(fOutName,".outputs");
+   strcpy(fInName,Root->Name); 		strcat(fInName,"Prec.inputs");
+   strcpy(fOutName,Root->Name); 	strcat(fOutName,"Prec.outputs");
    fp = fopen(fInName,"r");		fq = fopen(fOutName,"r");
    if (fp == NULL) {fprintf(stderr,"error opening input file\n"); exit(-1); }
    if (fq == NULL) {fprintf(stderr,"error opening output file\n"); exit(-1); }
 
    while( fscanf(fp,"%s",inputName) == 1)
    {
+   fscanf(fp,"%s",inputTyp);
+   if(strcmp(inputTyp,"bool") == 0) strcpy(inputPrec,"2.0");
+   else fscanf(fp,"%s",inputPrec);
+
    if(tmp_thor)
    {
 fprintf(CFD,"\t\tfloat %s_%s = float(%s%%0);\n",Root->Name,inputName,inputName);
    } /* tmp_thor */
+
    if(!bittrue && !tmp_thor)
    /*if(!bittrue)*/
    {
@@ -1394,9 +1410,19 @@ fprintf(CFD,"\t\tfloat %s_%s = float(%s%%0);\n",Root->Name,inputName,inputName);
    fprintf(CFD,"\t\t Error::abortRun(*this,env_%s.typeError(\"FloatingPt\"));\n",inputName);
    fprintf(CFD,"\t\t return;\n\t\t} // type check \n"); 
    fprintf(CFD,"\t\tconst FloatingPt* f_%s = (const FloatingPt*)env_%s.myData();\n",inputName,inputName);
+  if(strcmp(inputTyp,"bool")==0)
+  {
+/* NOTE THIS CHANGE SIM_ LATER *******************/
+fprintf(CFD,"\t\tint %s_%s = int(f_%s->data);\n",Root->Name,inputName,inputName);
+/*fprintf(CFD,"\t\tfloat %s_%s = f_%s->data;\n",Root->Name,inputName,inputName);*/
+  }
+  else
+   {
   fprintf(CFD,"\t\tfloat %s_%s = f_%s->data;\n",Root->Name,inputName,inputName);
 /*fprintf(CFD, "\t\tfloat %s_%s = %s%%0; \n", Root->Name,inputName,inputName);*/
    }
+   }  /* not bittrue */
+
    else if(bittrue)
    {
    fprintf(CFD,"\t\tEnvelope env_%s;\n",inputName);
@@ -1407,25 +1433,50 @@ fprintf(CFD,"\t\tfloat %s_%s = float(%s%%0);\n",Root->Name,inputName,inputName);
    fprintf(CFD,"\t\tconst FixedPoint* f_%s = (const FixedPoint*)env_%s.myData();\n",inputName,inputName);
   /* fprintf(CFD,"//\tFixedPoint* ff_%s = new FixedPoint(%s_Len,%s_IntBits,*f_%s);\n",inputName,inputName,inputName,inputName); */
    fprintf(CFD,"\t\tfloat %s_%s = FixToDouble(*f_%s);\n",Root->Name,inputName,inputName); /* this is from SDF */
+  if(strcmp(inputTyp,"bool")==0)
+  {
+/* NOTE THIS CHANGE SIM_ LATER *******************/
+fprintf(CFD,"\t\tint F_%s_%s = int(%s_%s);\n",Root->Name,inputName,Root->Name,inputName);
+/* fprintf(CFD,"\t\tSig_Type F_%s_%s = %s_%s;\n",Root->Name,inputName,Root->Name,inputName); */
+  }
+  else
+   {
    fprintf(CFD,"\t\tSig_Type F_%s_%s;\n",Root->Name,inputName);
    fprintf(CFD,"\t\tFloat2Fix(%s_%s,F_%s_%s,%s_Len,%s_FracBits);\n",Root->Name,inputName,Root->Name,inputName,inputName,inputName); /* from Silage */
    }
+} /*bittrue */
    strcpy(inputList[numIn].name,inputName);
+   strcpy(inputList[numIn].typ,inputTyp);
+   strcpy(inputList[numIn].prec,inputPrec);
    numIn++;
-   }
+   } /* while */
    numberIn = numIn; 
 
    while( fscanf(fq,"%s",outputName) == 1)
    {
+   fscanf(fq,"%s",outputTyp);
+   if(strcmp(outputTyp,"bool") == 0) strcpy(outputPrec,"2.0");
+   else fscanf(fq,"%s",outputPrec);
+   
    if(!bittrue || tmp_thor)
+   {
+   if(strcmp(outputTyp,"bool")==0) 
+   	fprintf(CFD, "\t\tint %s_%s; \n", Root->Name,outputName);
+   else
    	fprintf(CFD, "\t\tfloat %s_%s; \n", Root->Name,outputName);
+   }
    else if(bittrue)
    {
+   if(strcmp(outputTyp,"bool")==0) 
+   	fprintf(CFD, "\t\tint F_%s_%s; \n", Root->Name,outputName);
+   else
   	fprintf(CFD,"\t\tSig_Type F_%s_%s;\n",Root->Name,outputName);
    }
    strcpy(outputList[numOut].name,outputName);
+   strcpy(outputList[numOut].typ,outputTyp);
+   strcpy(outputList[numOut].prec,outputPrec);
    numOut++;
-   }
+   } /* while */
    numberOut = numOut; 
 
    fprintf(CFD, "\t\tSim_%s (", Root->Name);
@@ -1469,19 +1520,33 @@ fprintf(CFD,"\t\t%s%%0 << int(%s_%s); \n",outputList[k].name,Root->Name,outputLi
 	} /* tmp_thor*/
    	if(!bittrue && !tmp_thor)
 	{
+if(strcmp(outputList[k].typ,"bool")==0)
+{
+fprintf(CFD,"\t\tFloatingPt* t_%s = new FloatingPt(float(%s_%s));\n",outputList[k].name,Root->Name,outputList[k].name);
+}
+else
+{
 fprintf(CFD,"\t\tFloatingPt* t_%s = new FloatingPt(%s_%s);\n",outputList[k].name,Root->Name,outputList[k].name);
+}
 fprintf(CFD,"\t\tEnvelope env_%s(*t_%s);\n",outputList[k].name,outputList[k].name);
 fprintf(CFD,"\t\t%s%%0 << env_%s;\n",outputList[k].name,outputList[k].name);
 /*fprintf(CFD,"\t\t%s%%0 << %s_%s; \n",outputList[k].name,Root->Name,outputList[k].name); */
-	}
+	} /* !bittrue */
    	else if(bittrue)
    	{
+if(strcmp(outputList[k].typ,"bool")==0)
+{
+   fprintf(CFD,"\t\tfloat %s_%s = float(F_%s_%s);\n",Root->Name,outputList[k].name,Root->Name,outputList[k].name);
+}
+else
+{
    fprintf(CFD,"\t\tfloat %s_%s;\n",Root->Name,outputList[k].name);
    fprintf(CFD,"\t\tfix_2_float (F_%s_%s,%s_Len,%s_FracBits,&%s_%s);\n",Root->Name,outputList[k].name,outputList[k].name,outputList[k].name,Root->Name,outputList[k].name);
+}
    fprintf(CFD,"\t\tFixedPoint* t_%s = new FixedPoint(%s_Len,%s_IntBits,(double)%s_%s);\n",outputList[k].name,outputList[k].name,outputList[k].name,Root->Name,outputList[k].name);
 		fprintf(CFD,"\t\tEnvelope env_%s(*t_%s);\n",outputList[k].name,outputList[k].name);
           	fprintf(CFD,"\t\t%s%%0 << env_%s;\n",outputList[k].name,outputList[k].name);
-   	}
+   	} /* bittrue */
    } /* for */
 
     fprintf(CFD, "\t } // go \n");
