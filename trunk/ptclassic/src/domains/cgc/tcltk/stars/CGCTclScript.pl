@@ -6,14 +6,17 @@ Sends input values to a Tcl script.  Gets output values from a Tcl script.
 The star can communicate with Tcl either synchronously or asynchronously.
 	}
 	explanation {
-The star reads a file containing Tcl commands.  This file can bind Tk events
-to Tcl commands that affect the star.  In addition, it may define a procedure
-that will be called by Ptolemy that can execute Tcl code.
+This star reads a file containing Tcl commands and communicates with Tcl
+via procedures defined in that file.  Those procedures can read the inputs
+to the star and set its outputs.
 It can be used in a huge
-variety of ways, all of which use three Tcl procedures to communicate
+variety of ways, including using Tk to animate or control a simulation.
+The Tcl file must define three Tcl procedures to communicate
 between the star and the Tcl code.  One of these reads the values of the
 inputs to the star (if any), another writes new values to the outputs (if
-any), and the third tells Tcl when to perform its functions.
+any), and the third is called by Ptolemy either on every firing of
+the star (if \fIsynchronous\fR is TRUE) or on starting the simulation
+(if \fIsynchronous\fR is FALSE).
 .pp
 The names of the three procedures are different for each instance of this star.
 This allows sharing of Tcl code without name conflicts.
