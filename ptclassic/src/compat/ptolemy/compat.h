@@ -36,6 +36,11 @@ extern "C" {
 /***************************************************************************/
 /* Define #defines for each Ptolemy architecture. (Alphabetical, please) */
 
+#if defined(__alpha)
+/* DEC Alpha */
+#define PTALPHA
+#endif
+  
 #if defined(hpux) || defined(__hpux)
 /* HP PA, cfront or g++ */
 #define PTHPPA
@@ -84,6 +89,7 @@ extern "C" {
 #if defined(ultrix)
 /* DEC MIPS running Ultrix4.x */
 #define PTULTRIX
+#define PTMIPS
 #endif
 
 /***************************************************************************/
@@ -189,6 +195,7 @@ extern int vfprintf(FILE *, const char *, char *);
 
 #endif /* SUN4 */
 
+/* Here we define common missing function prototypes */
 /* Alphabetical, please */
 
 #if !defined(PTIRIX5) && !defined(PTHPPA)
@@ -212,9 +219,11 @@ extern int listen(int, int);
 extern int pclose(FILE *);
 extern void perror (const char *);
 extern int printf (const char *, ...);
-#if !defined(hppa) && !defined(__hppa__) && !defined(linux)
+
+#if !defined(PTHPPA) && !defined(PTLINUX) && !defined(PTALPHA)
 extern int putenv (char *);
-#endif
+#endif /* ! PTHPPA && ! PTLINUX && ! PTALPHA */
+
 extern int puts (const char *);
 
 #if defined(PTSUN4) || defined(PTULTRIX)
@@ -231,7 +240,71 @@ extern int sscanf (const char *, const char *, ...);
 extern int socket(int, int, int); /* thor/kernel/rpc.c uses socket() */
 extern int symlink(const char *, const char *);	/* CGCTarget.cc */
 extern int unlink(const char *);
+
+/* End of common missing function prototypes */
 #endif /* __GNUC__ */
+
+/* Here we define common types that differ by platform */
+
+/* thor/analyzerX11/event.c uses FDS_TYPE */
+#ifdef PTHPPA
+#ifndef FDS_TYPE
+#define FDS_TYPE (int *)
+#endif
+#endif /* PTHPPA */
+
+/* Fix up casts for kernel/TimeVal.cc */
+
+#ifdef PTHPPA
+#define TV_SEC_TYPE	unsigned long
+#endif /* PTHPPA */
+
+#ifndef TV_USEC_TYPE
+#define TV_USEC_TYPE	long int
+#endif
+
+#ifndef TV_SEC_TYPE
+#define TV_SEC_TYPE	long int
+#endif
+
+/* End of common types that differ by platform */
+
+/* Start of octtools specific defines */
+/* Decide whether to include dirent.h or sys/dir.h.
+ * octtools/Packages/fc.h uses this
+ */
+#if defined(aiws) || defined(_IBMR2) || defined(SYSV) || defined(PTALPHA)
+#define USE_DIRENT_H
+#endif
+
+/* Does wait() take an int* arg or a union wait * arg
+ * DEC Ultrix wait() takes union wait *
+ * See octtools/Packages/utility/csystem.c
+ */
+#if defined(_IBMR2) || defined(SYSV) || defined(PTALPHA) || defined(PTHPPA) ||defined(PTSUN4) || defined(PTSOL2) || defined(PTIRIX5)
+#define WAIT_TAKES_INT_STAR
+#endif
+
+/* Use wait3 or waitPid()?
+ * Used in octtools/Packages/utils/pipefork.c, vov/lib.c
+ */
+#if defined(SYSV) || defined(PTALPHA)
+#define USE_WAITPID
+#endif
+
+/* Use SystemV curses?  See octtools/attache/io.c
+ */
+#if defined(PTHPPA) || defined(SYSV) || defined(PTLINUX) || defined(PTALPHA)
+#define USE_SYSV_CURSES
+#endif
+
+/* Do we need to defined stricmp()?  See octtools/installColors/installColors.c
+ */
+#if defined(PT_ULTRIX) || defined(PTHPPA) || defined(PTIRIX5) || defined(PTSOL2) || defined(PTLINUX) || defined(PTALPHA)
+#define NEED_STRICMP
+#endif
+
+/* End of octtools specific defines */
 
 #ifdef __cplusplus
 }
