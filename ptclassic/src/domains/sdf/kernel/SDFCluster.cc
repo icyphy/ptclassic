@@ -118,6 +118,20 @@ SDFClusterGal::SDFClusterGal(Galaxy& gal, ostream* log)
 	delete [] ptable;
 }
 
+// Partial destructor: deallocate sequental list and data members
+// Use this method with extreme care.  It assumes that the galaxy
+// cluster does not own its blocks, so only the SequentialList
+// holding the block pointers needs to be deallocated. -BLE
+void SDFClusterGal::PartialDestructor() {
+	// remove each block from galaxy list without deallocating it
+	SDFClusterGalIter nextC(*this);
+	SDFCluster* c;
+	while ((c = nextC++) != 0) {
+		removeBlock(*c);
+		nextC.reset();
+	}
+}
+
 // Core clustering routine.  Alternate merge passes and loop passes
 // until no more can be done.
 int SDFClusterGal::clusterCore(int& urate) {
@@ -185,10 +199,10 @@ int SDFClusterGal::uniformRate() {
 // Merge adjacent actors that can be treated as a single cluster.
 int SDFClusterGal::mergePass() {
 	if (numberClusts() <= 1) return FALSE;
-	int changes = 0;
+	int changes = FALSE, contflag = TRUE;
 	SDFClusterGalIter nextClust(*this);
-	SDFCluster *c1, *c2 = 0;
-	do {
+	while ( contflag ) {
+		SDFCluster *c1 = 0, *c2 = 0;
 		while ((c1 = nextClust++) != 0) {
 			c2 = c1->mergeCandidate();
 			if (c2 && canMerge(c1,c2)) break;
@@ -208,11 +222,12 @@ int SDFClusterGal::mergePass() {
 		// cluster).
 		else if ((c2 = fullSearchMerge()) != 0)
 			nextClust.reset();
-	} while (c2);
+
+		contflag = (c2 != 0);
+	}
 
 	if (logstrm) {
-		if (changes)
-			*logstrm << "After merge pass:\n" << *this;
+		if (changes) *logstrm << "After merge pass:\n" << *this;
 		else *logstrm << "Merge pass made no changes\n";
 	}
 	return changes;
@@ -470,7 +485,7 @@ int SDFClusterGal::tryTreeLoop() {
 int SDFClusterGal::integralLoopPass(int doAnyLoop) {
 	SDFClusterGalIter nextClust(*this);
 	SDFCluster *c;
-	int changes = 0;
+	int changes = FALSE;
 	while ((c = nextClust++) != 0) {
 		int fac = c->loopFactor(doAnyLoop);
 		if (fac > 1) {
@@ -580,11 +595,11 @@ const char* SDFClusterGal::genBagName() {
 SDFCluster* SDFClusterGal::merge(SDFCluster* c1, SDFCluster* c2) {
 	int fac = 1;
 
-// if a bag has a loop factor we treat it as an atom for merging
-// purposes (put it inside another bag instead of combining bags).
-// That's why we test for the loop count.
-// Exception: if both loop factors are the same, we "unloop" and
-// "reloop".
+	// if a bag has a loop factor we treat it as an atom for merging
+	// purposes (put it inside another bag instead of combining bags).
+	// That's why we test for the loop count.
+	// Exception: if both loop factors are the same, we "unloop" and
+	// "reloop".
 
 	// unloop check
 	if (c1->loop() == c2->loop() && c1->loop() > 1) {
@@ -598,13 +613,13 @@ SDFCluster* SDFClusterGal::merge(SDFCluster* c1, SDFCluster* c2) {
 
 	SDFClusterBag* c1Bag = (c1->loop() == 1) ? c1->asBag() : 0;
 	SDFClusterBag* c2Bag = (c2->loop() == 1) ? c2->asBag() : 0;
-	if (c1Bag) {
-		if (c2Bag) c1Bag->merge(c2Bag,this); // merge two bags
-		else c1Bag->absorb(c2,this);   // put c2 into the c1 bag
+	if (c1Bag) {					// c1 is a bag
+		if (c2Bag) c1Bag->merge(c2Bag,this);	// merge two bags
+		else c1Bag->absorb(c2,this);		// put c2 in c1 bag
 	}
-	else if (c2Bag) {		// c2 is a bag, c1 is not
-		c2Bag->absorb(c1,this); // put c1 into the c2 bag
-		c1Bag = c2Bag;	     // leave result in the same place
+	else if (c2Bag) {			// c2 is a bag, c1 is not
+		c2Bag->absorb(c1,this);		// put c1 into the c2 bag
+		c1Bag = c2Bag;			// leave result in same place
 	}
 	else {
 		// make a new bag and put both atoms into it.
@@ -613,11 +628,10 @@ SDFCluster* SDFClusterGal::merge(SDFCluster* c1, SDFCluster* c2) {
 		bag->absorb(c2,this);
 		c1Bag = bag;
 	}
-	if (logstrm)
-		*logstrm << "result is " << *c1Bag << "\n\n";
 
-	if (fac > 1) {
-		// reloop after merge
+	if (logstrm) *logstrm << "result is " << *c1Bag << "\n\n";
+
+	if (fac > 1) {				// reloop after merge
 		c1Bag->loopBy(fac);
 	}
 	return c1Bag;
@@ -630,15 +644,12 @@ SDFClusterBag* SDFClusterGal :: createBag() {
 }
 
 // constructor: make empty bag.
-SDFClusterBag :: SDFClusterBag()
-: sched(0), gal(0), exCount(0), owner(TRUE)
-{}
+SDFClusterBag :: SDFClusterBag() : sched(0), gal(0), exCount(0), owner(TRUE) {}
 
 void SDFClusterBag :: createInnerGal() {
-	LOG_DEL; delete gal;
-	LOG_NEW; gal = new SDFClusterGal;
-	if (parent())
-		gal->dupStream((SDFClusterGal*)parent());
+	delete gal;
+	gal = new SDFClusterGal;
+	if (parent()) gal->dupStream((SDFClusterGal*)parent());
 }
 
 // This function absorbs an atomic cluster into a bag.
@@ -669,8 +680,8 @@ void SDFClusterBag::absorb(SDFCluster* c,SDFClusterGal* par) {
 		}
 		else {
 			// add a new connection to the outside for this guy
-			LOG_NEW; SDFClustPort *np =
-				new SDFClustPort(*cp,this,1);
+			// FIXME: Memory leak
+			SDFClustPort *np = new SDFClustPort(*cp,this,1);
 			cp->makeExternLink(np);
 			addPort(*np);
 		}
@@ -690,8 +701,7 @@ int SDFClusterGal::isTree() {
 		c->setVisit(0);
 	}
 
-	if (logstrm)
-		*logstrm << "isTree: " << num << " clusters\n";
+	if (logstrm) *logstrm << "isTree: " << num << " clusters\n";
 
 	// for each pass, we "lop off"
 	// clusters with their visit flags set.  So, for example, a
@@ -772,10 +782,10 @@ SDFClusterBag::merge(SDFClusterBag* b,SDFClusterGal* par) {
 		p->setNameParent(p->name(),this);
 		addPort(*p);
 	}
-// get rid of b.
-	par->removeBlock(*b); // remove from parent galaxy
-	b->owner = FALSE;     // prevent from zapping contents, I took them
-	LOG_DEL; delete b;    // zap the shell
+	// get rid of b
+	par->removeBlock(*b);	// remove b from parent galaxy
+	b->owner = FALSE;	// blocks in b's galaxy are not owned by b
+	delete b;		// zap the shell
 }
 
 // internal clustering for a bag
@@ -844,7 +854,7 @@ void SDFClusterBag::fixBufferSizes(int nReps) {
 
 int SDFClusterBag::genSched() {
 	if (sched) return TRUE;
-	LOG_NEW; sched = new SDFBagScheduler;
+	sched = new SDFBagScheduler;
 	sched->setGalaxy(*gal);
 	sched->setup();
 	if (Scheduler::haltRequested()) return FALSE;
@@ -898,9 +908,11 @@ int SDFClusterBag::run() {
 
 // destroy the bag.
 SDFClusterBag::~SDFClusterBag() {
-	if (!owner) return;
-	LOG_DEL; delete gal;
-	LOG_DEL; delete sched;
+	// empty b's galaxy's list of blocks if b doesn't own them
+	// to prevent them from being prematurely deleted -BLE
+	if (gal && !owner) gal->PartialDestructor();
+	delete gal;
+	delete sched;
 }
 
 // find an attractive and compatible neighbor.
