@@ -17,7 +17,10 @@ include $(CONFIG)
 
 # SRDIR is the directory containing SR domain support
 SRDIR = $(ROOT)/src/domains/sr/kernel
-INCL = -I$(SRDIR) -I$(KERNDIR)
+#INCL = -I$(SRDIR) -I$(KERNDIR)
+
+## Added for Itcl support
+INCL = -I$(SRDIR) -I$(KERNDIR) -I$(TCL_INCDIR)
 
 # Library name
 LIB=libsrstars.$(LIBSUFFIX)
@@ -25,8 +28,22 @@ LIB=libsrstars.$(LIBSUFFIX)
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list
 PL_SRCS= \
-  SRAdd.pl SRAnd.pl SRConst.pl SRMux.pl SRNop.pl SRPre.pl SRPrinter.pl \
-  SRSub.pl SRWhen.pl
+	SRAdd.pl \
+	SRAnd.pl \
+	SRConst.pl \
+	SRItcl.pl \
+	SRItclCounter.pl \
+	SRItclDatabase.pl \
+	SRItclIn.pl \
+	SRItclInOut.pl \
+	SRItclModeSelect.pl \
+	SRItclOut.pl \
+	SRMux.pl \
+	SRNop.pl \
+	SRPre.pl \
+	SRPrinter.pl \
+	SRSub.pl \
+	SRWhen.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
