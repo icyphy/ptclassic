@@ -27,31 +27,6 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 ##########################################################################
-
-
-##########################################################################
-#### foo
-#
-# Procedure to create a test graph editor
-#
-proc ::tycho::foo {} {
-    set nm [::tycho::view GraphEditor]
-
-    # FIXME FIXME
-    # Load stars and icons
-    # $nm loadStars [::tycho::expandPath {$TYCHO/editors/graphedit/stars.tim}]
-    # $nm loadIcons [::tycho::expandPath {$TYCHO/editors/graphedit/icons.tim}]
-
-    # FIXME: Where should this go??     
-    $nm library load edit/graphedit/stars.tim
-    $nm library addtomenu stars stars \
-            -command "$nm newstar stars" \
-            -customizecommand "$nm _initmenu stars" \
-            -types {star}
-
-    return $nm
-}
-
 ##########################################################################
 #### GraphEditor
 #
@@ -88,8 +63,11 @@ class ::tycho::GraphEditor {
     # Add a star
     method newstar {libname starname}
 
-    # Handle change notification from the graph model
+    # Handle data change notification from the graph model
     method notifygraph {method args}
+
+    # Handle event notification from the graph model
+    method notifygraphevent {event args}
 
     # Place an icon
     method place {}
@@ -177,17 +155,7 @@ body ::tycho::GraphEditor::constructor {args} {
     set _graph [uplevel #0 ::tycho::PortedGraph [::tycho::autoName graph]]
     model add graph $_graph
     $_graph subscribe data $this "$this notifygraph"
-
-    # The layout model uses notify{} inherited from SlateView
-    set _layout [uplevel #0 ::tycho::Layout [::tycho::autoName layout]]
-    model add layout $_layout
-    $_layout subscribe data $this "$this notify"
-    $_layout subscribe event $this "$this notify"
-
-    # In addition, subscribe to the layout model as a "view". This
-    # is necessary because the Layout model sometimes needs to get
-    # data from a real Tk canvas...
-    $_layout subscribe view $this
+    $_graph subscribe event $this "$this notifygraphevent"
 
     # Evaluate options
     eval itk_initialize $args
@@ -305,6 +273,11 @@ body ::tycho::GraphEditor::constructor {args} {
     $selector delegate $follower disconnected -button 1
     $selector delegate $follower disconnected -button 1 \
             -modifiers shift
+
+    # Set the "mode" of the graph model so it will
+    # be loaded correctly later
+    # FIXME: Is this the right place for this?
+    $_graph configure -modelmode "graph"
 }
 
 ########################################################################
@@ -419,14 +392,41 @@ body ::tycho::GraphEditor::newstar {libname starname} {
 ########################################################################
 #### notifygraph
 #
+# Handle data change notification from the graph model.
+#
 body ::tycho::GraphEditor::notifygraph {method args} {
+    # FIXME FIXME FIXME
     # puts "$this notifygraph $method"
     # eval _$method $args
+}
 
-    # Assume any notification means a modification...
-    # (This is too agrresive -- even selecting an item
-    # causes the view to be marked modified...)
-    # markModified
+########################################################################
+#### notifygraphevent
+#
+# Handle event notification from the layout model. This processes
+# the event in a switch. Subclasses may choose to override and
+# chain any unrecognized events.
+#
+body ::tycho::GraphEditor::notifygraphevent {event args} {
+    switch -exact $event {
+	"clear" {
+	    # Clear data from the graph
+	    $_graph clear
+	}
+	"modified" {
+	    # Mark the data unmodified
+	    # puts !Modified
+	    markModified
+	}
+	"saved" {
+	    # We only want to mark unmodified if the layout is saved,
+	    # so ignore this event
+	}
+	default {
+	    puts "Unrecognized event \"$event\" from \
+		    [$_graph cget -modelname]"
+	}
+    }
 }
 
 ########################################################################
@@ -536,7 +536,6 @@ body ::tycho::GraphEditor::_initializeBars {menubar statusbar toolbar} {
 #
 body ::tycho::GraphEditor::clear {} {
     if { $_graph != "" } {
-        $_graph clear
         $_graph notify event clear
     }
     layout clear
@@ -593,6 +592,8 @@ body ::tycho::GraphEditor::insertData {data} {
 
     # Load the new data into this view
     layout load
+
+    # FIXME FIXME FIXME: the above has to motify other views.
 }
 
 #####################################################################
@@ -605,11 +606,16 @@ body ::tycho::GraphEditor::saveText {} {
         $_graph add annotation layout -data {}
     }
     $_graph attrset layout -data [$_layout describe]
-puts ?[$_layout describe]
-puts ![$_graph attrget layout -data]
     set result [$_graph describe]
     # $_graph attrset layout -data {}
     
+    # Now, presumably, if this method has been called, then this
+    # widget's data has been saved to disk. So, notify all other
+    # views that the data has been saved.
+    $_layout notify event "saved"
+    $_graph notify event "saved"
+
+    # Return the text
     return $result
 }
 
@@ -697,4 +703,14 @@ body ::tycho::GraphEditor::_initializeMenubar {menubar} {
         \$_nm_ insertData \[$this model access graph history get\]; \
         \$_nm markUnmodified"
 
+    #### FIXME FIXME
+    # For now, load a sample library if this class is being
+    # instantiated
+    if { [info class] == [info context] } {
+	library load [file join edit graphedit stars.tim]
+	library addtomenu stars stars \
+		-command "$this newstar stars" \
+		-customizecommand "$this _initmenu stars" \
+		-types {star}
+    }
 }
