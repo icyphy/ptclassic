@@ -31,7 +31,6 @@ AsmTarget::setup(Galaxy& g) {
 		allocMem(*s);
 	}
 	if (!mem.performAllocation()) return FALSE;
-	headerCode();
 // do all initCode methods.
 	nextStar.reset();
 	while ((s = (AsmStar*)nextStar++) != 0)
@@ -54,5 +53,3 @@ AsmTarget::allocMem(AsmStar& star) {
 	return mem.performAllocation();
 }
 
-
-	

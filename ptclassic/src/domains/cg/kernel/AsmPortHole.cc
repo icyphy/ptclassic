@@ -28,9 +28,8 @@ int AsmPortHole::circAccess() const {
 
 // return a string indicating the address.  This is virtual so it
 // could be handled differently by derived classes.
-StringList AsmPortHole::location(int update) {
+StringList AsmPortHole::location() {
 	int n = baseAddr() + offset;
-	if (update) advance();
 	return n;
 }
 
@@ -52,7 +51,11 @@ void AsmPortHole::assignAddr(ProcMemory& m, unsigned a) {
 }
 
 unsigned AsmPortHole::baseAddr() const {
-	return geo().addr();
+	return geo().address();
+}
+
+ProcMemory* AsmPortHole::memory() const {
+	return geo().memory();
 }
 
 int InAsmPort :: isItInput() const {return TRUE; }

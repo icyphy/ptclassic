@@ -34,6 +34,7 @@ public:
 	CGTarget(const char* name, const char* starclass, const char* desc);
 	void initialize();
 	void start();
+	int run();
 	void wrapup();
 	Block* clone() const;
 	void addCode(const char*);

@@ -21,6 +21,7 @@ $Id$
 #include "ProcMemory.h"
 #include "AsmStar.h"
 #include "miscFuncs.h"
+#include "isa.h"
 #include <builtin.h>
 
 int MemoryList::firstFitAlloc(unsigned reqSize, unsigned &reqAddr) {
@@ -176,7 +177,9 @@ static unsigned share_len(unsigned xa,unsigned ya,unsigned xl,unsigned yl) {
 	return max(end,s) - s;
 }
 
-DualMemory:: DualMemory(const Attribute& st, // attribute for states
+DualMemory:: DualMemory(const char* n_x,     // name of the first memory space
+			const char* n_y,     // name of the second memory space
+			const Attribute& st, // attribute for states
 			const Attribute& p,  // attribute for portholes
 			const Attribute& a_x,// attribute for X, as opposed to
 					     // Y memory.
@@ -187,7 +190,8 @@ DualMemory:: DualMemory(const Attribute& st, // attribute for states
 			) : 
 			sAddr(max(x_addr,y_addr)),
 			sLen(share_len(x_addr,y_addr,x_len,y_len)),
-	LinProcMemory(st,p,sAddr,sLen), x(st,p,0,0), y(st,p,0,0), 
+	LinProcMemory(n_x,st,p,sAddr,sLen), name_y(n_y),
+	x(n_x,st,p,0,0), y(n_y,st,p,0,0), 
 	xAddr(x_addr),xLen(x_len), yAddr(y_addr),yLen(y_len), xmemAttr(a_x)
 {}
 
@@ -231,4 +235,3 @@ void DualMemory::reset() {
 	y.reset();
 	LinProcMemory::reset();
 }
-		   

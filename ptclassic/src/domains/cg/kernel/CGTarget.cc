@@ -20,7 +20,7 @@ $Id$
 #include "UserOutput.h"
 #include "SDFScheduler.h"
 
-// Return a formatted for loop with a unique index counter
+// Return a string for indenting to the given depth
 StringList CGTarget::indent(int depth) {
 	StringList out;
 	out = "";
@@ -43,6 +43,19 @@ void CGTarget :: initialize() {
 void CGTarget :: start() {
 	if (!mySched() && !parent()) setSched (new SDFScheduler);
 	headerCode();
+}
+
+int CGTarget :: run() {
+	// Sorry about the following horrible cast.
+	// Design of kernel Scheduler makes it very difficult to avoid
+	int iters = ((SDFScheduler*)mySched())->getStopTime();
+	StringList startIter = beginIteration(iters,1);
+	addCode(startIter);
+	mySched()->setStopTime(1);
+	int i = Target::run();
+	StringList endIter = endIteration(iters,1);
+	addCode(endIter);
+	return i;
 }
 
 Block* CGTarget :: clone() const {

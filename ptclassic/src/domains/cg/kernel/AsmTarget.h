@@ -28,6 +28,7 @@ private:
 protected:
 	ProcMemory& mem;
 
+	// Allocate memory for all structures in a Star
 	int allocMem(AsmStar&);
 public:
 	AsmTarget(const char* nam, const char* desc,
@@ -36,6 +37,8 @@ public:
 
 	Block* clone() const = 0;
 
+	// Initialize proc. pointers and create the schedule.
+	// Then allocate memory for all stars.
 	int setup(Galaxy&);
 
 };
