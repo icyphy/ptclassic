@@ -292,7 +292,7 @@ void xgiMenuHandler(xg)
 int XGM_showAll(xg)
 	XG		*xg;
 {
-	double	loX, loY, hiX, hiY;
+	double	loX=0.0, loY=0.0, hiX=0.0, hiY=0.0;
 	int		set;
 	int		subindex;
 	int		first = TRUE;
