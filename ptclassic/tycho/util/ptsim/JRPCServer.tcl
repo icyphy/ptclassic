@@ -93,8 +93,7 @@ proc _JRPCServer_ReadOrClose {fd} {
 	return;
     }
     if [catch {uplevel #0 $line} result] {
-	global errorInfo
-	puts $fd [list 1 $result $errorInfo]
+	puts $fd [list 1 $result]
 	flush $fd
     } else {
 	puts $fd [list 0 $result]
