@@ -106,7 +106,7 @@ defstar {
 	default { 0 }
 	attributes { A_YMEM|A_NONCONSTANT|A_NONSETTABLE|A_NOINIT }
     }
-    start {
+    setup {
 	int d = int(decimation);
 	input_r.setSDFParams( d, d-1);
 	input_i.setSDFParams( d, d-1);

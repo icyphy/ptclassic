@@ -54,7 +54,7 @@ The inputs are multiplied and the result is written on the output.
     protected {
 	int	runtime;
     }
-    start {
+    setup {
 	int n = input_r.numberPorts();
 	if ( n != input_i.numberPorts() ) {
 	    Error::abortRun(*this,"must have same number of real & imag input ports");
