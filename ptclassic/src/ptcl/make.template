@@ -87,6 +87,12 @@ ptcl.ptiny:	$(OBJS) $(PTINY_LIBFILES) $(PTINY_STARS) $(PTINY_TARGETS)
 		$(PURELINK) $(LINKER) $(LINKFLAGS_D) $(PTINY_PTCL_MODS) -o $@
 		$(STRIP_DEBUG) $@
 
+# Small version of ptcl, sdf domain (but with no image stars), and de domain
+# made with purify and debugging
+ptcl.ptiny.debug.purify:	$(OBJS) $(PTINY_LIBFILES) $(PTINY_STARS) $(PTINY_TARGETS)
+		rm -f $@ 
+		$(PURIFY) $(LINKER) $(LINKFLAGS_D) $(PTINY_PTCL_MODS) -o $@
+
 # "make install" puts things in the official place
 install:	$(BINDIR)/ptcl
 
