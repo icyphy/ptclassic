@@ -45,7 +45,7 @@ static int grabInputs(
     int argc,                           // Number of arguments
     char **argv                         // Argument strings
 ) {
-	StringList inputs = ((TclStarIfc*)tcl)->getInputs();
+	InfString inputs = ((TclStarIfc*)tcl)->getInputs();
 	Tcl_SetResult(ptkInterp,(char*)inputs, TCL_VOLATILE);
 	return TCL_OK;
 }
@@ -79,11 +79,12 @@ TclStarIfc::TclStarIfc () {
 	starID = "tclStar";
 	starID += unique++;
 	outputValues = NULL;
+	arraySize = 0;
 }
 
 // destructor
 TclStarIfc::~TclStarIfc() {
-	StringList buf;
+	InfString buf;
 	// Delete Tcl commands created for this star
 	buf = "grabInputs_";
 	buf += starID;
@@ -102,7 +103,7 @@ int TclStarIfc::setup (Block* star,
 		       int numInputs,
 		       int numOutputs,
 		       const char* tcl_file) {
-	StringList buf;
+	InfString buf;
 
 	myStar = star;
 
@@ -142,8 +143,8 @@ int TclStarIfc::setup (Block* star,
 	State* s;
 	BlockStateIter next(*star);
 	while ((s = next++) != 0) {
-		StringList val = s->currentValue();
-		StringList name = s->name();
+		InfString val = s->currentValue();
+		InfString name = s->name();
 		Tcl_SetVar2(ptkInterp, (char*)starID, (char*)name,
 			(char*)val, TCL_GLOBAL_ONLY);
 	}
@@ -191,7 +192,7 @@ int TclStarIfc::setup (Block* star,
 }
 
 int TclStarIfc::go () {
-	StringList buf;
+	InfString buf;
 
 	// If synchronous == TRUE, callTcl
 	if(synchronous) {
@@ -215,10 +216,10 @@ int TclStarIfc::go () {
 	return TRUE;
 }
 
-StringList TclStarIfc::getInputs () {
+InfString TclStarIfc::getInputs () {
 	BlockPortIter nexti(*myStar);
 	PortHole *p;
-	StringList result;
+	InfString result;
 	while ((p = nexti++) != 0) {
 	    // return a quoted string for tcl consumption
 	    result += "{";
