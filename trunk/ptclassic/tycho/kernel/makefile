@@ -46,7 +46,7 @@ ITCL_SRCS =
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) pkgIndex.tcl Tycho.tcl
 
-MISC_FILES =  test styles tclIndex html basic gui model
+MISC_FILES =  test styles tclIndex html basic gui model img
 
 # Sub directories to run make in.
 DIRS = test styles html basic gui model
