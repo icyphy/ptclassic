@@ -146,6 +146,10 @@ void ToEventHorizon :: initialize()
 	// call initialization routine for itselt
 	PortHole :: initialize();
 
+	// Initialize members
+	timeStamp = 0.0;
+	dataNew = FALSE;
+
 	// if on the boundary, call ghostPort :: initialize()
 	if (isItInput())
 		ghostPort->initialize();
@@ -168,6 +172,10 @@ void FromEventHorizon :: initialize()
 {
 	// call initialization routine for itselt
 	PortHole :: initialize();
+
+	// Initialize members
+	timeStamp = 0.0;
+	dataNew = FALSE;
 
 	// if on the boundary, call ghostPort :: initialize()
 	if (isItOutput())
