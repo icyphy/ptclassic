@@ -103,7 +103,13 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 
 		// code generation.
 		addInclude("<stdio.h>");
-		addInclude("<am.h>");
+		addInclude("<thread.h>");
+		addInclude("\"udpam.h\"");
+		addInclude("\"am.h\"");
+		addCompileOption(
+                      "-I$(PTOLEMY)/src/domains/cgc/targets/NOWam/libudpam");
+		addLinkOption("-L$(PTOLEMY)/lib.$(PTARCH) -ludpam");
+
                 addCode(timeincludes, "include", "timeIncludes");
                 addCode(timedecls, "mainDecls", "timeDecls");
                 addCode(stardecls, "mainDecls");
