@@ -70,12 +70,12 @@ body ::tycho::EditProgram::constructor {args} {
     $itk_component(formatMenu) add command \
 	    -label "Comment Out Region" \
 	    -underline 0 \
-	    -command [code "$itk_component(text) commentSelection"]
+	    -command "$this component text commentSelection"
     
     $itk_component(formatMenu) add command \
 	    -label "Uncomment Region" \
 	    -underline 0 \
-	    -command [code "$itk_component(text) uncommentSelection"]
+	    -command "$this component text uncommentSelection"
     
     # Add to the format menu a command to recolorize.
     $itk_component(formatMenu) add separator
@@ -84,25 +84,25 @@ body ::tycho::EditProgram::constructor {args} {
 	    -label "Recolorize" \
 	    -accelerator "S-C-l" \
 	    -underline 0 \
-	    -command [code "$itk_component(text) parseRegion 1.0 end"]
+"$this component text	    -command "$this component text parseRegion 1.0 end"
     
     $itk_component(formatMenu) add command \
 	    -label "Indent Line" \
 	    -accelerator "Tab" \
 	    -underline 0 \
-	    -command [code "$itk_component(text) indentLine"]
+	    -command "$this component text indentLine"
 
     $itk_component(formatMenu) add command \
 	    -label "Indent Region" \
 	    -accelerator "Esc C-\\" \
 	    -underline 1 \
-	    -command [code "$itk_component(text) indentSelection"]
+	    -command "$this component text indentSelection"
     
     $itk_component(formatMenu) add command \
 	    -label "Tab" \
 	    -accelerator "C-q Tab" \
 	    -underline 0 \
-	    -command [code "$itk_component(text) insertString insert {\t}"]
+	    -command "$this component text insertString insert {\t}"
 
     # Read contents from the specified file, unless the name is "NoName".
     # This needs to be repeated from the baseclass because the -file

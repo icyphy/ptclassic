@@ -76,7 +76,7 @@ body ::tycho::EditTcl::constructor {args} {
     $itk_component(formatMenu) add command \
 	    -label "Show Links" \
 	    -underline 1 \
-	    -command [code "$itk_component(text) busy tagLinks"]
+	    -command "$this component text busy tagLinks"
     
     # Read contents from the specified file, unless the name is "NoName".
     # This needs to be repeated from the baseclass because the -file
