@@ -51,7 +51,6 @@ public:
 	/*virtual*/ void frameCode();
  
 protected:
-	StringState skeletonMakefile;
         StringState scriptFile;
 
 	// generate the code for the main loop.
