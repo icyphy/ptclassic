@@ -57,7 +57,7 @@ TyConsole::TyConsole(int argc, char **argv) {
   ptkw = Tk_CreateMainWindow(interp, NULL, appName, appClass);
   if (!ptkw) {
     fprintf(stderr,"Failed to create Tk main window: %s\n", interp->result);
-    exit);
+    exit(1);
   }
 
   // Define Tcl and Tk extensions
