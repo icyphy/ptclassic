@@ -47,6 +47,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 //
 // <P> Stars with no outputs are given a vertex with an empty
 // port pointer.
+//
+// <P> No edges are added for independent input ports.
 
 SRDependencyGraph::SRDependencyGraph( Galaxy & g )
 {
@@ -126,25 +128,27 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
 
       BlockInputIter nextInput(*s);
       while ( (ip = (InSRPort *)(nextInput++)) != NULL ) {
-	if ( (fop = (OutSRPort *) (ip->far())) != NULL ) {
-	  fs = (SRStar *) fop->parent();
-	  vs = vertexOfStarPort( fs, fop );
+	if ( !(ip->isItIndependent()) ) {
+	  if ( (fop = (OutSRPort *) (ip->far())) != NULL ) {
+	    fs = (SRStar *) fop->parent();
+	    vs = vertexOfStarPort( fs, fop );
 
-	  // cout << "Found something connected to vertex " << vs << "\n";
+	    // cout << "Found something connected to vertex " << vs << "\n";
 	  
-	  // We should be able to find the vertex driving this input
-	  assert( vs >= 0 );
+	    // We should be able to find the vertex driving this input
+	    assert( vs >= 0 );
 
-	  // Record this edge
+	    // Record this edge
 
-	  if ( vs != vd ) {
-	    fEdgeCount[vs]++;
-	    bEdgeCount[vd]++;
-          }
+	    if ( vs != vd ) {
+	      fEdgeCount[vs]++;
+	      bEdgeCount[vd]++;
+	    }
 
-	} else {
-	  //	  cout << "input " << ip->name() << " on " << s->name()
-	  //	       << " has no far port\n";
+	  } else {
+	    //	  cout << "input " << ip->name() << " on " << s->name()
+	    //	       << " has no far port\n";
+	  }
 	}
       }
       op = (OutSRPort *)(nextOutput++);
@@ -185,20 +189,22 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
 
       BlockInputIter nextInput(*s);
       while ( (ip = (InSRPort *)(nextInput++)) != NULL ) {
-	if ( (fop = (OutSRPort *) (ip->far())) != NULL ) {
-	  fs = (SRStar * ) fop->parent();
-	  vs = vertexOfStarPort( fs, fop );
+	if ( !(ip->isItIndependent()) ) {
+	  if ( (fop = (OutSRPort *) (ip->far())) != NULL ) {
+	    fs = (SRStar * ) fop->parent();
+	    vs = vertexOfStarPort( fs, fop );
 
-	  // We should have been able to find the vertex driving this input
-	  assert( vs >= 0 );
+	    // We should have been able to find the vertex driving this input
+	    assert( vs >= 0 );
 	
-	  // Add the forward and backward edge to the lists
+	    // Add the forward and backward edge to the lists
 
-	  if ( vs != vd ) {
-	    fEdge[vs][ fedgenumber[vs]++ ] = vd;
-	    bEdge[vd][ bedgenumber[vd]++ ] = vs;
-   	  }
+	    if ( vs != vd ) {
+	      fEdge[vs][ fedgenumber[vs]++ ] = vd;
+	      bEdge[vd][ bedgenumber[vd]++ ] = vs;
+	    }
 
+	  }
 	}
       }
       op = (OutSRPort *)(nextOutput++);
