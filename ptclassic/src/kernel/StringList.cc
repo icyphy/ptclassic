@@ -59,6 +59,8 @@ StringList::StringList(const char* s) {
 	put(savestring(s));
 }
 
+StringList::StringList(char c) {totalSize=0; *this += c;}
+
 StringList::StringList(int i) {totalSize=0; *this += i;}
 
 StringList::StringList(double d) {totalSize=0; *this += d;}
@@ -88,6 +90,16 @@ StringList :: operator += (const char* s) {
 	put(savestring(s));
 	totalSize+=strlen(s);
 	return *this;
+}
+
+// Add in a char: uses the above method
+StringList&  
+StringList :: operator += (char c)
+{
+        char buf[2];
+        buf[0] = c;
+        buf[1] = '\0';
+        return *this += buf;
 }
 
 // Add in an int: uses the above method
@@ -149,7 +161,7 @@ void StringList::deleteAllStrings() {
 	// the result
 	ListIter next(*this);
 	for (int i=size(); i > 0; i--) {
-		char* p = next++;
+		char* p = (char*)next++;
 		LOG_DEL; delete p;
 	}
 	SequentialList::initialize();
