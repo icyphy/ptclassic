@@ -14,7 +14,12 @@ $Id$
 
 // The loader should do incremental linking; use a 4.3/Sun-style loader
 // or use the Gnu loader.
-#define LOADER "ld"
+#define LOADER "/bin/ld"
+
+// Full pathname of the "nm" program; it reads symbol names from a .o
+// file.  Do NOT use a "demangling" version such as gnu nm.
+
+#define NM_PROGRAM "/bin/nm"
 
 // Options to give the loader.  We also give it "-T hex-addr" to specify
 // the starting address and "-A ptolemy-name" to get the symbols for the
