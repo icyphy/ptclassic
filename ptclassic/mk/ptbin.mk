@@ -71,10 +71,8 @@ ifdef FULL
 	CGFULL =	1
 	DDF =		1
 	DE =		1
-	ifeq ($(INCLUDE_IPUS_DOMAIN),no)
+	ifeq ($(INCLUDE_IPUS_DOMAIN),yes)
 		# Non G++ compilers fail to compile IPUS' templates
-		IPUS =		0
-	else
 		IPUS =		1
 	endif
 	MDSDF =		1
