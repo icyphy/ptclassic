@@ -2,6 +2,7 @@ defstar {
 	name {PrQueue}
 	domain {DE}
 	desc {
+THIS STAR IS OBSOLETE -- USE PriorityQueue.
 A priority queue.
 Inputs have priorities according to the number of the input, with
 "inData#1" having highest priority, "inData#2" being next, etc.
