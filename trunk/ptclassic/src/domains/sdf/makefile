@@ -43,7 +43,7 @@ include $(CONFIG)
 include $(ROOT)/mk/topdomain.mk
 
 # Subdirectories with star directories in them
-SUBDOMAINDIRS = dfm dsp image tcltk matrix matlab atm contrib
+SUBDOMAINDIRS = dfm dsp image tcltk matrix matlab atm contrib wildforce
 
 DIRS = kernel stars loopScheduler targets $(SUBDOMAINDIRS)
 
