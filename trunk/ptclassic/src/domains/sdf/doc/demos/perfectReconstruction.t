@@ -1,8 +1,8 @@
 .\" $Date$ $Id$
 .NA perfectReconstruction 
 .SD
-This universe implements an eight-channel perfect reconstruction one-dimensional
-filterbank.
+This universe implements an eight-channel perfect reconstruction
+one-dimensional filterbank.
 .EQ
 delim off
 .EN
@@ -20,29 +20,30 @@ delim $$
 .Ie "perfect reconstruction"
 The following represents an eight-channel perfect reconstruction filterbank,
 consisting of an analysis section and a synthesis section.
-
-The analysis section here divides a signal according to its frequency content.
+The analysis section divides a signal according to its frequency content.
 The analysis section consists of three stages, and each stage is composed of 
-two multirate FIR filter stars.  The pair of FIR filters perfectly split an 
-incoming signal into highpass and lowpass components and then downsamples each
-component.  By chaining three stages together, the analysis section divides 
-the frequency axis into 8 equal bins.
+two multirate FIR filter stars.
+The pair of FIR filters perfectly split an incoming signal into highpass
+and lowpass components and then downsamples each component.
+By chaining three stages together, the analysis section divides the
+frequency axis into 8 equal bins.
 .Ir "Smith, M. J. T."
 .Ir "Barnwell, T. P."
 .pp
-The synthesis filterbank performs the inverse function of the analysis filterbank,
-taking the frequency components and reconstructing the original signal.
+The synthesis filterbank performs the inverse function of the analysis
+filterbank, taking the frequency components and reconstructing the
+original signal.
 In a similar way, the synthesis section consists of three stages.
 In each stage, the incoming components from the analysis section are
-upsampled by 2, passed through reconstructing FIR filters, and added 
-together.  By chaining three stages together, the synthesis section mirrors
+upsampled by 2, passed through reconstructing FIR filters, and added together.
+By chaining three stages together, the synthesis section mirrors
 that of the analysis to reconstruct the original signal.
 .pp
 For specially designed FIR filters, the reconstructed signal will be an exact
 replica of the input (to within coefficient round-off error and delay).
 There are, in all, only four unique FIR filters used, known as the
-conjugate quadrature mirror filters.  These filters preserve  
-the property of 'perfect reconstruction', which 
+conjugate quadrature mirror filters.
+These filters preserve  the property of 'perfect reconstruction', which 
 has been studied in great detail in the literature [4].
 .Ir "Vaidyanathan, P. P."
 .pp
