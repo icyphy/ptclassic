@@ -159,9 +159,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 
 // root of Ptolemy source/lib directory
-static const char* ptolemyRoot;
+static const char* ptolemyRoot = 0;
 // a temporary file name for compiler errors
-static const char* tmpFileName;
+static const char* tmpFileName = 0;
 
 // pigi funcs to call
 extern "C" {
@@ -214,8 +214,8 @@ static void reportErrors (const char* text) {
 	const int BUFLEN = 2048;
 	char buf[BUFLEN];
 	sprintf (buf, "Loader: %s\n", text);
-	int l = strlen (buf);
-	char* p = buf + l;
+	int len = strlen (buf);
+	char* p = buf + len;			// pointer arithmetic
 	FILE* fd = fopen (tmpFileName, "r");
 	if (fd == 0) {
 		strcpy (p, "Can't open error file!");
@@ -238,58 +238,54 @@ static void reportErrors (const char* text) {
 static int compile (const char* name, const char* idomain, const char* srcDir,
 		    const char* objDir)
 {
- 	char domain[32], cmd[1024];
-  	strcpyLC (domain, idomain);
+ 	char domain[32];
+  	strcpyLC(domain, idomain);
 
+	StringList ptSrcDir = ptolemyRoot;
+	ptSrcDir << "/src";
+
+	StringList ptDomainDir = ptSrcDir;
+	ptDomainDir << "/domains/" << domain;
+
+	// Unix command to compile the file "name" 
+	// it has the form
+	//   cd $objDir; $compile $options $includepath $ccfile >& $tmpFileName
+	// where ccfile = $srcDir/$idomain$name.cc
+
+	// 1. Initialize command, add "cd $objDir; $compile $options"
+	StringList cmd;
+	cmd.initialize();
+	cmd << "cd " << objDir << ";";
+	cmd << CPLUSPLUS << " " << EXTRAOPTS << " -c ";
+
+	// 2. build up the include path
+	//    -- don't forget to add a space after each -I directive
+        //    -- if running under cfront, include -I$PTOLEMY/src/compat/cfront 
 #ifndef __GNUG__
-        //if we are running under cfront, then include
-        // -I$PTOLEMY/src/compat/cfront 
- 	sprintf (cmd, "cd %s; "
- 		 "%s %s -c "
- 		 "-I%s/src/compat/cfront "
- 		 "-I%s/src/domains/%s/kernel "
-  		 "-I%s/src/domains/%s/stars "
-  		 "-I%s/src/domains/%s/dsp/stars "
-  		 "-I%s/src/domains/%s/image/stars "
-  		 "-I%s/src/domains/%s/tcltk/stars "
-  		 "-I%s/src/kernel "
- 		 "-I%s %s/%s%s.cc >& %s",
- 		 objDir,
- 		 CPLUSPLUS, EXTRAOPTS,
- 		 ptolemyRoot,
- 		 ptolemyRoot, domain,
- 		 ptolemyRoot, domain,
- 		 ptolemyRoot, domain,
- 		 ptolemyRoot, domain,
- 		 ptolemyRoot, domain,
- 		 ptolemyRoot,
-  		 srcDir, srcDir, idomain, name, tmpFileName);
-#else
-	// We are compiling under g++, so we do not include compat/cfront
-	 	sprintf (cmd, "cd %s; "
- 		 "%s %s -c "
- 		 "-I%s/src/domains/%s/kernel "
-  		 "-I%s/src/domains/%s/stars "
-  		 "-I%s/src/domains/%s/dsp/stars "
-  		 "-I%s/src/domains/%s/image/stars "
-  		 "-I%s/src/domains/%s/tcltk/stars "
-  		 "-I%s/src/kernel "
- 		 "-I%s %s/%s%s.cc >& %s",
- 		 objDir,
- 		 CPLUSPLUS, EXTRAOPTS,
- 		 ptolemyRoot, domain,
- 		 ptolemyRoot, domain,
- 		 ptolemyRoot, domain,
- 		 ptolemyRoot, domain,
- 		 ptolemyRoot, domain,
- 		 ptolemyRoot,
-  		 srcDir, srcDir, idomain, name, tmpFileName);
-#endif //__GNUG__
-	PrintDebug (cmd);
-	if (util_csystem (cmd)) {
+	cmd << "-I" << ptSrcDir << "/compat/cfront ";
+#endif
+	cmd << "-I" << ptDomainDir << "/kernel ";
+	cmd << "-I" << ptDomainDir << "/stars ";
+	cmd << "-I" << ptDomainDir << "/dsp/stars ";
+	cmd << "-I" << ptDomainDir << "/image/stars ";
+	cmd << "-I" << ptDomainDir << "/tcltk/stars ";
+	cmd << "-I" << ptSrcDir << "/kernel ";
+	cmd << "-I" << srcDir << " ";
+
+	// 3. Add the C++ file name to be compiled
+	cmd << srcDir << "/" << idomain << name << ".cc";
+
+	// 4. Send the output of the compilation to the temporary file
+	cmd << " >& " << tmpFileName;
+
+	// Evaluate the Unix command and report results
+	PrintDebug(cmd);
+	if ( util_csystem(cmd) ) {
 		reportErrors ("errors in compilation");
 		return FALSE;
 	}
+
+	// Delete temporary file on successful compilation
 	unlink(tmpFileName);
 	return TRUE;
 }
@@ -315,12 +311,13 @@ static char* genObjDir (const char* src) {
 // Function to initialize the loader
 extern "C" void
 KcLoadInit (const char* argv0) {
-	ptolemyRoot = getenv ("PTOLEMY");
-	// FIXME: Memory Leak
+	ptolemyRoot = hashstring(getenv("PTOLEMY"));
 	if (ptolemyRoot == 0) {
-		ptolemyRoot = hashstring(expandPathName("~ptolemy"));
+		const char* expandedName = expandPathName("~ptolemy");
+		ptolemyRoot = hashstring(expandedName);
+		delete [] expandedName;
 	}
-	// FIXME: Memory Leak
+	delete [] tmpFileName;
 	tmpFileName = tempFileName();
 	Linker::init (argv0);
 	// look for a file specifying modules to be permanently linked in
@@ -352,14 +349,18 @@ KcDoStartupLinking() {
 // Load an object file (local only)
 static int
 linkObject (const char* ofile, int permB, const char *linkArgs) {
-	char buf[2048];	/* XXX: this is gross */
-	sprintf (buf, "%s %s %s\n", permB ? "permlink" : "link",
-	  ofile ? ofile : "", linkArgs ? linkArgs : "");
-	KcLog (buf);
+	// Record ptcl command: $link $ofile $linkArgs
+	StringList ptclbuf = permB ? "permlink " : "link ";
+	if (ofile) ptclbuf << ofile << " ";
+	if (linkArgs) ptclbuf << linkArgs;
+	KcLog (ptclbuf);
 
-	sprintf( buf, "%s%s%s", ofile ? ofile : "", ofile ? " " : "",
-	  linkArgs ? linkArgs : "");
-	return Linker::multiLink(buf, permB);
+	// Dynamically link the file: $ofile $linkArgs
+	StringList linkbuf;
+	if (ofile) linkbuf << ofile << " ";
+	if (linkArgs) linkbuf << linkArgs;
+
+	return Linker::multiLink(linkbuf, permB);
 }
 
 // tables for suffixes and preprocessors
@@ -373,32 +374,49 @@ static const char *preprocProg[] = { "", "ptlang", "pepp", "islang" };
 // idomain = domain of the star
 // srcDir = star source directory
 static int
-compileAndLink (const char* name, const char* idomain, const char* srcDir,
-		  int preproc, int permB, const char* linkArgs) {
-	// FIXME: Memory Leak
-	srcDir = expandPathName (srcDir);
-	char* objDir = genObjDir (srcDir);
-	char plName[512], oName[512], ccName[512], cmd[512];
+compileAndLink (const char* name, const char* idomain, const char* srcDirStr,
+		int preproc, int permB, const char* linkArgs) {
 
-// form the source file name
-	sprintf (plName, "%s/%s%s.%s", srcDir, idomain, name,
-		 preprocSuffix[preproc]);
-	sprintf (ccName, "%s/%s%s.cc", srcDir, idomain, name);
+	// Determine and save the source and object directory names
+	const char* expandedSrcDir = expandPathName(srcDirStr);
+	const char* expandedObjDir = genObjDir(expandedSrcDir);
+	StringList srcDir = expandedSrcDir;
+	StringList objDir = expandedObjDir;
+	delete [] expandedSrcDir;
+	delete [] expandedObjDir;
+
+	// Form path name of the source files
+	// -- the template file $srcDir/$idomain$name.$suffix
+	// -- the C++ file $srcDir/$idomain$name.cc
+	StringList plName = srcDir;
+	plName << "/" << idomain << name << "." << preprocSuffix[preproc];
+	StringList ccName = srcDir;
+	ccName << "/" << idomain << name << ".cc";
 	const char *sourceFile = (preproc ? plName : ccName);
-// check existence of file.
+
+	// Check existence of source file.
 	int fd = open (sourceFile, 0);
-	if (fd < 0) return noPermission ("Loader: can't open ", plName);
+	if (fd < 0) {
+		return noPermission ("Loader: can't open ", sourceFile);
+	}
 	close (fd);
-	sprintf (oName, "%s/%s%s.o", objDir, idomain, name);
-// if there is a makefile, use make.
-	char makeFile[512];
-	sprintf (makeFile, "%s/%s", objDir, "Makefile");
+
+	// Form path name of the object file, $objDir/$idomain$name.o
+	StringList oName = objDir;
+	oName << "/" << idomain << name << ".o";
+
+	// If a makefile exists in the object directory, use make.
+	StringList makeFile = objDir;
+	makeFile << "/Makefile";
 	if (!exists (makeFile)) {
-		sprintf (makeFile, "%s/%s", objDir, "makefile");
+		makeFile = objDir;
+		makeFile << "/makefile";
 	}
 	if (exists (makeFile)) {
-		sprintf (cmd, "cd %s; make %s%s.o >& %s",
-			 objDir, idomain, name, tmpFileName);
+		// cd $objDir; make $idomain$name.o >& $tmpFileName
+		StringList cmd = "cd ";
+		cmd << objDir << "; make " << idomain << name << ".o >& ";
+		cmd << tmpFileName;
 		PrintDebug (cmd);
 		if (util_csystem (cmd)) {
 			reportErrors ("errors from make");
@@ -407,16 +425,21 @@ compileAndLink (const char* name, const char* idomain, const char* srcDir,
 		unlink(tmpFileName);
 		return linkObject (oName, permB, linkArgs);
 	}
-// No makefile.  If object is younger than source, assume it's good.
-// It also must be younger than the Ptolemy image.
+
+	// No makefile.  If object is younger than source, assume it's good.
+	// It also must be younger than the Ptolemy image.
 	if (exists (oName) && isYounger (oName, sourceFile) &&
-	    isYounger (oName, Linker::imageFileName()))
+	    isYounger (oName, Linker::imageFileName())) {
 		return linkObject (oName, permB, linkArgs);
-// Preprocess if need be.
+	}
+
+	// Preprocess if need be.
 	if (preproc && (!exists (ccName) || isYounger (plName, ccName))) {
-		sprintf (cmd, "cd %s; %s %s%s.%s >& %s",
-			 srcDir, preprocProg[preproc], idomain, name,
-			 preprocSuffix[preproc], tmpFileName);
+		// cd $srcDir; $preproc $idomain$name.$suffix >& $tmpFileName
+		StringList cmd = "cd ";
+		cmd << srcDir << "; " << preprocProg[preproc] << " ";
+		cmd << idomain << name << "." << preprocSuffix[preproc];
+		cmd << " >& " << tmpFileName;
 		PrintDebug (cmd);
 		if (util_csystem (cmd)) {
 			reportErrors (cmd);
@@ -433,9 +456,11 @@ compileAndLink (const char* name, const char* idomain, const char* srcDir,
 			return FALSE;
 		}
 	}
-// now compile.
+
+	// now compile
 	if (!compile (name, idomain, srcDir, objDir)) return FALSE;
-// finally incremental link.
+
+	// finally incremental link.
 	return linkObject (oName, permB, linkArgs);
 }
 
@@ -469,10 +494,10 @@ KcCompileAndLink (const char* name, const char* idomain, const char* srcDir,
 		return FALSE;
 	}
 // form the source file name
-	// FIXME: Memory Leak
 	const char* eDir = expandPathName (srcDir);
 	char fName[512];
 	int preproc = FindStarSourceFile(eDir, idomain, name, fName);
+	delete [] eDir;
 	if (preproc < 0) {
 		StringList msg = "Loader: can't find ";
 		msg += fName;
@@ -488,26 +513,29 @@ KcCompileAndLink (const char* name, const char* idomain, const char* srcDir,
 // Here is the pigi interface to the loader.  fullName is the name
 // of the icon for the star.
 
-
 extern "C" int
-KcLoad (const char* iconName, int permB, const char* linkArgs) {
+KcLoad (const char* iconNameStr, int permB, const char* linkArgs) {
 	if (!Linker::enabled()) {
 		ErrAdd ("Loader disabled");
 		return FALSE;
 	}
 	char codeName[512], base[128], domain[64], dir[512];
 
-	// FIXME: Memory Leak
-	iconName = expandPathName (iconName);
-	if (!IconFileToSourceFile (iconName, codeName, domain))
+	const char* iconName = expandPathName(iconNameStr);
+	int retval = IconFileToSourceFile(iconName, codeName, domain);
+	delete [] iconName;
+	if ( ! retval ) {
 		return FALSE;
+	}
+
 	strcpy (dir, codeName);
 	DirName(dir);		// strip off the tail
 	char* b = BaseName(codeName);
-// now basename is the domain concatenated with the star name.
-// check that domain is prefix of basename.
-	int l = strlen(domain);
-	if (strncmp(b, domain, l) != 0) {
+
+	// now basename is the domain concatenated with the star name.
+	// check that domain is prefix of basename.
+	int domainlen = strlen(domain);
+	if (strncmp(b, domain, domainlen) != 0) {
 		StringList msg = "Loader: ";
 		msg += domain;
 		msg += " is not a prefix of ";
@@ -515,9 +543,10 @@ KcLoad (const char* iconName, int permB, const char* linkArgs) {
 		ErrAdd(msg);
 		return FALSE;
 	}
-// b has a suffix ".pl", ".chdl", or ".cc"; zap it; tell KcCompileAndLink
-// which one.
-	strcpy (base, b + l);
+
+	// b has a suffix ".pl", ".chdl", or ".cc"; zap it;
+	// tell KcCompileAndLink which one.
+	strcpy (base, b + domainlen);
 	char* p = strrchr (base, '.');
 	int preproc = 0;
 	if (p) {
@@ -536,9 +565,10 @@ KcLoad (const char* iconName, int permB, const char* linkArgs) {
 	}
 	*p = 0;
 	const char* curdom = curDomainName();
-// If the star's domain is different from the current domain, set the
-// current domain to the star's domain in order for the KcIsCompiledInStar
-// and KcIsKnown calls below to work.
+
+	// If the star's domain is different from the current domain, then
+	// set the current domain to the star's domain in order for the
+	// KcIsCompiledInStar and KcIsKnown calls below to work.
 	if (strcmp(curdom, domain) != 0) {
 		KcSetKBDomain(domain);
 	}
@@ -559,9 +589,11 @@ KcLoad (const char* iconName, int permB, const char* linkArgs) {
 		return FALSE;
 	}
 	int status = KcIsKnown(base);
-	if (!status)
+	if (!status) {
 		ErrAdd("loader ran successfully, but star is not defined!");
-// restore the original current domain
+	}
+
+	// restore the original current domain
 	KcSetKBDomain(curdom);
 	return status;
 }
