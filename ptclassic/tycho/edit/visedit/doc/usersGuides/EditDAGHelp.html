@@ -16,8 +16,15 @@ class.
 <A NAME="EditDAG class">EditDAG class</A> is derived from the 
 <A HREF="GraphicsHelp.html">Graphics class</A>, and therefore
 inherits all of its features.
+ <p>
+Editing DAG nodes is not supported.
+ <p>
+The <CODE>viseditViewOnly</CODE> preference controls whether the
+<CODE>Edit</CODE> menu appears.  This preference is a member 
+of the <CODE>interaction</CODE> style sheet.
+By default <CODE>viseditViewOnly</CODE> is true, which means that
+the EditDAG class is only a viewer, nodes cannot be edited.
 <P>
-
 Nodes in the canvas widget can be mouse sensitive.  For an example of 
 DAG, see
 <A HREF="../../../../doc/tychoClasses.dag"><CODE>$TYCHO/doc/tychoClasses.dag</CODE></A>

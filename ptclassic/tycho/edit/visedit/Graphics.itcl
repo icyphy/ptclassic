@@ -1758,6 +1758,10 @@ body ::tycho::Graphics::_initializeMenubar {menubar} {
 	    -command "$this scrollQuery"
 
     # Add an Edit menu before the Window menu
+    # EditDAG and EditForest check the viseditViewOnly preference
+    # and delete the edit menu because editing in these graphs
+    # is not supported very well.
+
     $menubar addMenu edit -label Edit -underline 0 -before window
     
     $menubar command undo edit \
