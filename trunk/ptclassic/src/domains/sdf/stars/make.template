@@ -58,11 +58,16 @@ SRCS= \
  SDFCxWaveForm.pl \
  SDFDB.pl \
  SDFDTFT.pl \
+ SDFDct.pl \
+ SDFDctInv.pl \
  SDFDeMux.pl \
  SDFDiffImage.pl \
  SDFDisplayImage.pl \
+ SDFDisplayRgb.pl \
  SDFDistributor.pl \
  SDFDownSample.pl \
+ SDFDpcm.pl \
+ SDFDpcmInv.pl \
  SDFExp.pl \
  SDFFIR.pl \
  SDFFloatDC.pl \
@@ -91,6 +96,8 @@ SRCS= \
  SDFLimit.pl \
  SDFLog.pl \
  SDFMedianImage.pl \
+ SDFMotionCmp.pl \
+ SDFMotionCmpInv.pl \
  SDFMux.pl \
  SDFPlay.pl \
  SDFPolarRect.pl \
@@ -98,11 +105,15 @@ SRCS= \
  SDFQuantizer.pl \
  SDFRaisedCos.pl \
  SDFReadImage.pl \
+ SDFReadRgb.pl \
  SDFRealComplex.pl \
  SDFReciprocal.pl \
  SDFRectPolar.pl \
  SDFRepeat.pl \
  SDFReverse.pl \
+ SDFRgb2Yuv.pl \
+ SDFRunLen.pl \
+ SDFRunLenInv.pl \
  SDFSgn.pl \
  SDFSin.pl \
  SDFSqrt.pl \
@@ -114,7 +125,8 @@ SRCS= \
  SDFXYgraph.pl \
  SDFXgraph.pl \
  SDFXhistogram.pl \
- SDFXscope.pl
+ SDFXscope.pl \
+ SDFYuv2Rgb.pl
 
 # The .cc files
 CCSRCS=$(SRCS:.pl=.cc)
