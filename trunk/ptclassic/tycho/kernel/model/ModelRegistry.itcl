@@ -156,7 +156,7 @@ class ::tycho::ModelRegistry {
 #
 body ::tycho::ModelRegistry::constructor {args} {
     # Define the "model" type
-    type define model \
+    define model \
             :leafonly 1 \
             -class "" \
             -extension "" \

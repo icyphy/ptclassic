@@ -169,14 +169,14 @@ class ::tycho::ModelLocator {
 #
 body ::tycho::ModelLocator::constructor {args} {
     # Define the "reference" type
-    type define reference \
+    define reference \
             :leafonly 1 \
 	    -path "" \
 	    -proxy "" \
 	    -workdir ""
 
     # Define the "proxy" type
-    type define proxy \
+    define proxy \
             :leafonly 1 \
             -class "" \
             -extension "" \

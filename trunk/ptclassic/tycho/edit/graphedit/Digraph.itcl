@@ -172,7 +172,7 @@ body ::tycho::Digraph::constructor {args} {
     eval configure $args
 
     # Define the "edge" type
-    type define edge \
+    define edge \
             :override 1 \
             :leafonly 1
 }

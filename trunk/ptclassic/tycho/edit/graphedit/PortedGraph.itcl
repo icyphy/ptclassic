@@ -204,19 +204,19 @@ class ::tycho::PortedGraph {
 #
 body ::tycho::PortedGraph::constructor {args} {
     # Define the "edge" type
-    type define edge \
+    define edge \
             :override 0 \
             :leafonly 1 \
             -from {} \
             -to {} 
 
     # Define the "port" entity
-    type define port \
+    define port \
 	    :leafonly 1
 
     # Turn off the :leafonly option of vertices, so that
     # they can contain ports
-    type configure vertex :leafonly 0
+    configure vertex :leafonly 0
 
     # Evaluate options
     eval configure $args

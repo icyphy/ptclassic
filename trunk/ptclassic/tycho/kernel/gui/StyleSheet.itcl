@@ -416,17 +416,17 @@ class ::tycho::StyleSheet {
 #
 body ::tycho::StyleSheet::constructor {args} {
     # Define the style entity
-    type define style \
+    define style \
 	    -label {} \
 	    -description {}
 
     # Define the group entity
-    type define group \
+    define group \
 	    -label {} \
 	    -description {}
 
     # Define the parameter entity
-    type define parameter \
+    define parameter \
             :override 1 \
 	    :leafonly 1 \
 	    -label {} \

@@ -167,12 +167,12 @@ class ::tycho::UserProfile {
 #
 body ::tycho::UserProfile::constructor {args} {
     # Define the "preference" type
-    type define preference :leafonly 1
+    define preference :leafonly 1
 
     # FIXME: Delete these some time later. They are needed
     # so that loading existing profiles doesn't barf
-    type define map :override 1
-    type define unmap :override 1
+    define map :override 1
+    define unmap :override 1
 
     # Evaluate options
     eval configure $args
