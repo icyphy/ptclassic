@@ -2,7 +2,7 @@
 # Version: $Id$
 # Author: H. John Reekie
 #
-# Copyright (c) %Q% The Regents of the University of California.
+# Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -27,35 +27,49 @@
 ##########################################################################
 
 
-## Stepper
+#######################################################################
+#### Stepper
 #
-# A class that implements quantized moving behaviour.
+# A class that implements quantized moving behavior. Unlike the
+# <a href="Gridder.html"><i>Gridder</i></a> class, _Stepper_
+# just quantizes the cursor movement, rather than snapping it to
+# the grid.
 #
 class ::tycho::Stepper {
     inherit ::tycho::Gridder
 
-    ## constructor
-    #
     constructor {{s {}} {c {}} args} {
 	set slate $s
 	set canvas $c
 
 	eval configure $args
     }
+    destructor {}
 
+    ###################################################################
+    ####                         public methods                    ####
 
-    ## click
-    #
-    # The behavior is identical to that of the superclass, Gridder,
-    # except for the initialization of state variables.
-    #
-    protected method click {x y} {
-	::tycho::Interactor::click $x $y
+    # Start interaction sequence
+    method click {x y} {}
 
-	set actualX $x
-	set actualY $y
+}
 
-	set slopX 0
-	set slopY 0
-    }
+#######################################################################
+#### click
+#
+# Start the interaction. The behavior of this method is the same as that
+# of the superclass, Gridder, except that the ``actual'' and ``slip''
+# variables are set to the current coordinates and zero rather than
+# to the nearest grid point and the distance from it -- the effect is
+# to quantize the cursor to the gridsize rather than to the actual
+# grid coordinates.
+#
+body ::tycho::Stepper::click {x y} {
+    ::tycho::Interactor::click $x $y
+
+    set actualX $x
+    set actualY $y
+
+    set slopX 0
+    set slopY 0
 }

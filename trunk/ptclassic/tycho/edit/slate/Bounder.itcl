@@ -2,7 +2,7 @@
 # Version: $Id$
 # Author: H. John Reekie
 #
-# Copyright (c) %Q% The Regents of the University of California.
+# Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -27,21 +27,23 @@
 ##########################################################################
 
 
-## Bounder
+#######################################################################
+#### Bounder
 #
 # An interactor that keeps the target object within a given region.
+# The region can either be specified by an option, by the target
+# picture, or defaults to the size of the slate.
 #
 class ::tycho::Bounder {
     inherit ::tycho::Follower
 
-    ## constructor
-    #
     constructor {{s {}} {c {}} args} {
 	set slate $s
 	set canvas $c
 
 	eval configure $args
     }
+    destructor {}
 
 
     ###################################################################
@@ -73,12 +75,14 @@ class ::tycho::Bounder {
     private variable x1
     private variable y1
     
+    # The position to which the cursor has been moved
     private variable actualX
     private variable actualY
 }
 
 
-## click
+#######################################################################
+#### click
 #
 # Start the interaction. To find the bounds within which to move
 # the picture, the interactor first examines its -bounds option.
@@ -109,15 +113,17 @@ body ::tycho::Bounder::click {x y} {
     set x1 [expr $x1 + ($x - $a1)]
     set y1 [expr $y1 + ($y - $b1)]
 
-    # Initialise other variables, and click on target
-    $proxy click $x $y
+    # Click on target
+    ::tycho::Interactor::click $x $y
 
+    # Remember where we are
     set actualX $x
     set actualY $y
 }
 
 
-## drag
+#######################################################################
+#### drag
 #
 # Test if the new point is outside the bounds. If it is,
 # then move to the boundary. Otherwise, move to the
@@ -140,9 +146,5 @@ body ::tycho::Bounder::drag {x y} {
 	set actualY $y
     }
 
-    $proxy drag $actualX $actualY
-    
-    if { $dragcommand != "" } {
-	uplevel #0 apply [list $dragcommand] $target $x $y
-    }
+    ::tycho::Interactor::drag $actualX $actualY
 }

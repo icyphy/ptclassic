@@ -2,7 +2,7 @@
 # Version: $Id$
 # Author: H. John Reekie
 #
-# Copyright (c) %Q% The Regents of the University of California.
+# Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -27,22 +27,33 @@
 ##########################################################################
 
 
-## Follower
+#######################################################################
+#### Follower
 #
-# The simplest interactor: follow the mouse.
+# The simplest interactor: follow the mouse. This interactor implements
+# the activate{}, deactivate{}, bind{}, and unbind{} methods so that
+# clicking and dragging on a target picture causes corresponding actions
+# on the target -- in other words, with the default moving behavior,
+# the picture is moved by clicking and dragging.
+#
+# It seems like this class goes to a lot of trouble to perform a simple
+# function. However, its real power comes from inheritance, where
+# click-and-drag behavior can be customized for more sophistictaed
+# interaction -- see
+# <a href="Gridder.html"><i>Gridder</i></a>,
+# <a href="Bounder.html"><i>Bounder</i></a>, and
+# <a href="Alonger.html"><i>Alonger</i></a> for examples.
 #
 class ::tycho::Follower {
     inherit ::tycho::Interactor
 
-    ## constructor
-    #
     constructor {{s {}} {c {}} args} {
 	set slate $s
 	set canvas $c
 
 	eval configure $args
     }
-
+    destructor {}
 
     ###################################################################
     ####                         public methods                    ####
@@ -65,10 +76,17 @@ class ::tycho::Follower {
 }
 
 
-## activate target x y
+#######################################################################
+#### activate target x y
 #
+# Activate the interactor on a picture object. Motion and release events
+# are bound to the current picture so that the picture can be dragged
+# and so on. After setting up bindings and calling the *activatecommand*
+# option, this method calls the click{} metjod -- subclasses therefore
+# need only to override click{} (and drag{} and release{}) to alter the
+# interaction behavior.
+# 
 body ::tycho::Follower::activate {t x y} {
-
     # Remember the tag/object, for use in deactivate
     set tag $t
 
@@ -116,7 +134,12 @@ body ::tycho::Follower::activate {t x y} {
 }
 
 
-## bind target
+#######################################################################
+#### bind target
+#
+# Bind button-press events to the specified object or tag, so that
+# clicking on one of those pictures calls activate{}. The configuration
+# options *-button* and *-modifiers* determine the actual events.
 #
 body ::tycho::Follower::bind {t args} {
     foreach b $button {
@@ -127,8 +150,12 @@ body ::tycho::Follower::bind {t args} {
 }
 
 
-## deactivate
+#######################################################################
+#### deactivate
 #
+# Deactivate the interactor from the target. This method must be called
+# by the script bound to the release event.
+# 
 body ::tycho::Follower::deactivate {} {
     # Remove bindings from the current tag
     foreach b $button {
@@ -144,7 +171,12 @@ body ::tycho::Follower::deactivate {} {
     }
 }
 
-## unbind target
+
+#######################################################################
+#### unbind target
+#
+# Remove the bindings to the specified object or tag. The specified 
+# pictures will no longer respond to the mouse.
 #
 body ::tycho::Follower::unbind {t} {
     foreach b $button {

@@ -2,7 +2,7 @@
 # Version: $Id$
 # Author: H. John Reekie
 #
-# Copyright (c) %Q% The Regents of the University of California.
+# Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -31,7 +31,15 @@
 ## Repeater
 #
 # An interactor that repeatedly invokes a command while the mouse
-# button is held down.
+# button is held down. As with all interactor callbacks, the called
+# command has the current coordinates passed to it, so that the
+# command can modify its action according to the current position
+# within the picture.
+#
+# <b>Caveat</b>: the command is still called repeatedly even if the mouse
+# is moved outside the picture while the mouse is held down. This
+# interactor should perhaps have another option that controls whether
+# this happens or not.
 #
 class ::tycho::Repeater {
     inherit ::tycho::Interactor
@@ -42,8 +50,8 @@ class ::tycho::Repeater {
 
 	eval configure $args
     }
-
     destructor {}
+    
     
     ###################################################################
     ####                            options                        ####
@@ -51,10 +59,10 @@ class ::tycho::Repeater {
     # The command to execute repeatedly.
     public variable command ""
 
-    # The time delay before next execution. 400 ms by default.
+    # The time delay before next execution.
     public variable delay 400
 
-    # The time interval between executions. 100 ms by default.
+    # The time interval between executions.
     public variable interval 100
 
 
@@ -66,6 +74,7 @@ class ::tycho::Repeater {
 
     ## Remove the binding of an interactor to a picture or tag
     method unbind {t} {}
+
 
     ###################################################################
     ####                   protected methods                       ####
@@ -82,6 +91,7 @@ class ::tycho::Repeater {
     # Reinvoke the activation command
     protected method reactivate {x y} {}
 
+
     ###################################################################
     ####                       private variables                   ####
 
@@ -97,7 +107,10 @@ class ::tycho::Repeater {
 #######################################################################
 #### activate target x y
 #
-# Activate the interactor.
+# Attach the interactor to the current picture. After setting up bindings 
+# for the motion and release events, the *-command* script is executed,
+# and a delayed call to reactivate{} set up for *-delay* milliseconds 
+# later.
 #
 body ::tycho::Repeater::activate {t x y} {
     # Remember the tag/object, for use in deactivate
@@ -153,10 +166,6 @@ body ::tycho::Repeater::bind {t args} {
 # Remove this interactor from the current picture. This removes
 # the mouse bindings, cancels the delayed command, and clears the target.
 #
-# FIXME: If the activate gets called again before the next
-# call to reactivate, then there'll be two sets of delayed
-# calls operating.
-#
 body ::tycho::Repeater::deactivate {} {
     # Cancel the delayed event
     after cancel $afterid
@@ -175,10 +184,21 @@ body ::tycho::Repeater::deactivate {} {
 
 
 #######################################################################
+#### motion
+#
+# Record a change in mouse position.
+#
+body ::tycho::Repeater::motion {x y} {
+    set currentX $x
+    set currentY $y
+}
+
+
+#######################################################################
 #### reactivate
 #
 # Reinvoke the interactor's activation command, and set up to
-# call this again after the time specified by the -interval option.
+# call this again after the time specified by the *-interval* option.
 #
 body ::tycho::Repeater::reactivate {x y} {
     # Execute the user-specified activation command
@@ -190,17 +210,6 @@ body ::tycho::Repeater::reactivate {x y} {
     set afterid [after $interval \
 	    [list catch \
 	    [list @scope [info class] $this reactivate $currentX $currentY]]]
-}
-
-
-#######################################################################
-#### motion
-#
-# Record a change in mouse position.
-#
-body ::tycho::Repeater::motion {x y} {
-    set currentX $x
-    set currentY $y
 }
 
 
