@@ -37,6 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include "DETarget.h"
 #include "DEWormhole.h"
 #include "DEScheduler.h"
 #include "PriorityQueue.h"
@@ -50,6 +51,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
 	class DEWormhole methods
 
 ********************************************************************/
+ 
+void DEWormhole :: begin()
+{
+        //Running default behaviour for begin
+        Wormhole::begin();
+ 
+        if (myTarget()->selfFiringRequested()) {
+                DEBaseSched* sched = (DEBaseSched*) outerSched();
+                DEStar* me = this;
+                sched->queue()->levelput(me, sched->now(), 0);
+        }
+}
 
 void DEWormhole :: setup()
 {
@@ -62,6 +75,13 @@ void DEWormhole :: go()
 	// synchronize the two domains
 	myTarget()->setCurrentTime(arrivalTime);
 
+        //Checking if the inner domain requests self-firing
+        if (myTarget()->selfFiringRequested()) {
+                DEBaseSched* sched = (DEBaseSched*) outerSched();
+                DEStar* me = this;
+                sched->queue()->levelput(me, myTarget()->nextFiringTime(), 0);
+        }
+ 
 	// run the inner scheduler.
 	Wormhole::run();
 }
