@@ -493,7 +493,9 @@ body ::tycho::JavaDocSys::parseClass {class body} {
     set others {}
     set inComment 0
     set inVariable 0
+    set willVariable 0
     set inMethod 0
+    set willMethod 0
     set inStatic 0
     set inSynchronized 0
 
@@ -588,12 +590,14 @@ body ::tycho::JavaDocSys::parseClass {class body} {
             }
             "abstract" {
                 lappend modifiers "abstract"
+                set willMethod 2
             }
             "final" {
                 lappend modifiers "final"
             }
             "native" {
                 lappend modifiers "native"
+                set willMethod 2
             }
             "transient" {
                 lappend modifiers "transient"
@@ -602,28 +606,50 @@ body ::tycho::JavaDocSys::parseClass {class body} {
                 lappend modifiers "volatile"
             }
             default {
-                # Check if it is an end of command (;) or block {}
+                # Check if it is an end of command (;) or equals = or arglist )
                 set construct [string trimright $construct " \t\n"]
                 set lastchar [string range $construct end end]
-
-                if {$lastchar == "\}" || $construct == {}} {
-                    # It's a method body for sure, ignore it.
+                if {$lastchar == "="} {
+                    set willVariable 1
+                    lappend others $construct
+                } elseif {$lastchar == "\}"} {
                     set inMethod 1
-                } elseif {$lastchar == ";"} {
-                    # Could be either a method or variable, use heuristic
-                    if {[lsearch $modifiers "native"] != -1 \
-                            || [lsearch $modifiers "abstract"] != -1} {
-                        # It's a method with no body.
-                        lappend others $construct
-                        set inMethod 1
-                    } elseif ![regexp {^(.*)[ 	]+(.*)$} $construct] {
-                        # Heuristic says: it's a variable
-                        lappend others $construct
-                        set inVariable 1
-                    } {
-                        # Heuristic says: it's a method body, ignore it
-                        set inMethod 1
+                } elseif {$lastchar == ")"} {
+                    if !{$willVariable} {
+                        # Could be an initializing function call.
+                        set willMethod 1
                     }
+                    lappend others $construct
+                } elseif {$lastchar == ";"} {
+                    if {$willMethod} {
+                        if {$willMethod == 2} {
+                            # The current method has an empty body. Save this.
+                            lappend others $construct
+                        }
+                        # Otherwise, it's a regular body, ignore it.
+                        set willMethod 0
+                        set willVariable 0
+                        set inMethod 1
+                    } else {
+                        # It must be a variable
+                        set willVariable 0
+                        set willMethod 0
+                        set inVariable 1
+                        # Save the current construct, it may be initialization
+                        lappend others $construct
+                    } 
+                } elseif {$construct == {}} {
+                    # Could be empty method or variable intialized to ""
+                    if {$willMethod} {
+                        set willMethod 0
+                        set willVariable 0
+                        set inMethod 1
+                        # Ignore the current construct, it's a method body
+                    } else {
+                        set willVariable 1
+                        lappend others {\"\"}
+                        # The current construct is a null string initializer
+                    } 
                 } else {
                     # Just a word, figure out what it is at the end.
                     lappend others $construct
@@ -826,9 +852,12 @@ body ::tycho::JavaDocSys::addVariable {class protection modifiers\
             # The last item is a ;
             set enddef [expr [llength $others] -2]
             set default [lrange $others 1 $enddef]
+            if {$default == "\{\"\"\}"} {
+                # There's a null string default
+                set default {""}
+            }
         }
     }
-    
     set classModel $myClass($class)
     
     # Create the variable entry
@@ -852,7 +881,6 @@ body ::tycho::JavaDocSys::addVariable {class protection modifiers\
 body ::tycho::JavaDocSys::addMethod {class protection modifiers others comment} {    
     set isConstructor 0
     set exceptions {}
-
     # Check if is static
     set static [lsearch -exact $modifiers "static"]
     if {$static != -1} {
@@ -889,8 +917,8 @@ body ::tycho::JavaDocSys::addMethod {class protection modifiers others comment} 
         # There should always be an endparen
         set arguments [lrange $others 0 $endparen]
         set others [lreplace $others 0 $endparen]
-    } elseif {$debug} {
-        puts "Error in JavaDocSys::addMethod: no end parenthesis found."
+    } else {
+        error "::tycho::JavaDocSys::addMethod: no end parenthesis found."
     }
     
     if {$others != {}} {
