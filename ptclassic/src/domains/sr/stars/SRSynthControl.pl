@@ -1,0 +1,269 @@
+defstar {
+  name { SynthControl }
+  domain { SR }
+  desc {
+A polyphonic synthesizer control
+  }
+  version { $Id$ }
+  author { S. A. Edwards }
+  copyright {
+Copyright (c) 1990-1997 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+  }
+
+  htmldoc {
+  }
+
+  input {
+    name { onPitch }
+    type { int }
+    desc { Pitch of a Note On command (0-127, 60 is middle C) }
+  }
+  input {
+    name { onVelocity }
+    type { int }
+    desc { Velocity of a Note On command (0-127) }
+  }
+
+  input {
+    name { offPitch }
+    type { int }
+    desc { Pitch of a Note Off command (0-127, 60 is middle C) }
+  }
+
+  input {
+    name { reset }
+    type { int }
+    desc { Present to reset the system }
+  }
+
+  outmulti {
+    name { frequency }
+    type { float }
+    desc { Frequency values for each voice }
+  }
+
+  outmulti {
+    name { velocity }
+    type { float }
+    desc { Velocity values for each voice }
+  }
+
+  inmulti {
+    name { done }
+    type { int }
+    desc { Done flag for each voice }
+  }
+  defstate {
+    name { AFreq }
+    type { float }
+    default { "440.0" }
+    desc { Frequency output for the A below Middle C }    
+  }
+
+  ccinclude { <math.h>, <stream.h> }
+
+  protected {
+    // Number of ports on frequency, velocity, and done multiports
+    int numVoices;
+
+    // Array of pointers to the done input ports
+    InSRPort ** donePort;
+
+    // Array of pointers to the frequency output ports
+    OutSRPort ** frequencyPort;
+
+    // Array of pointers to the velocity output ports
+    OutSRPort ** velocityPort;
+
+    // Array of pitches, one per active voice.
+    //
+    // @Description These are MIDI pitch values (1-127) for voices
+    // that are currently sounding, and zero for idle channels
+    int * voicePitch;    
+
+    // Array of velocities, one per active voice
+    //
+    // @Description These are MIDI velocities, zero after a note off.
+    int * voiceVelocity;
+
+    // Array translating pitches to frequencies
+    double frequencyOfPitch[128];
+  }
+
+  constructor {
+    donePort = NULL;
+    frequencyPort = NULL;
+    velocityPort = NULL;
+    voicePitch = NULL;
+    voiceVelocity = NULL;
+    numVoices = 0;
+
+  }
+
+  begin {
+    resetVoices();
+  }
+
+  setup {
+    delete [] donePort;
+    delete [] frequencyPort;
+    delete [] velocityPort;
+
+    delete [] voicePitch;
+    delete [] voiceVelocity;
+
+    // Fill the pitch array with equal-tempered pitch values
+
+    for ( int pi = 128 ; --pi >= 0 ; ) {
+      frequencyOfPitch[pi] = double(AFreq) * pow( double(pi-56) / 12.0, 2.0 );
+      cout << "Pitch " << pi << " frequency " << frequencyOfPitch[pi] << '\n';
+    }
+
+    // Verify the number of ports
+
+    if ( done.numberPorts() != frequency.numberPorts() ||
+	 frequency.numberPorts() != velocity.numberPorts() ||
+	 done.numberPorts() == 0 ) {
+      Error::abortRun( *this, "Number of multi ports inconsistent or zero");
+      return;
+    }
+
+    // Create arrays of pointers to the ports
+    
+    numVoices = done.numberPorts();
+
+    // cout << "Found " << numVoices << " voices on an SRSynthControl star\n";
+
+    donePort = new InSRPort* [numVoices];
+    frequencyPort = new OutSRPort* [numVoices];
+    velocityPort = new OutSRPort* [numVoices];      
+
+    int i;
+    PortHole * p;
+
+    MPHIter nextdone(done);
+    i = 0;
+    while ( (p = nextdone++) != 0 ) {
+      donePort[i++] = (InSRPort *)p;
+      // Set this input port to be independent
+      ((InSRPort *)p)->independent();
+    }
+
+    MPHIter nextfrequency(frequency);
+    i = 0;
+    while ( (p = nextfrequency++) != 0 ) {
+      frequencyPort[i++] = (OutSRPort *)p;
+    }
+
+    MPHIter nextvelocity(velocity);
+    i = 0;
+    while ( (p = nextvelocity++) != 0 ) {
+      velocityPort[i++] = (OutSRPort *)p;
+    }
+
+    voicePitch = new int[numVoices];
+    voiceVelocity = new int[numVoices];     
+
+  }
+
+  public {
+    void resetVoices();
+  }
+
+  code {
+
+    void SRSynthControl::resetVoices() {
+      if ( voicePitch != NULL ) {
+	for ( int i = numVoices ; --i >= 0 ; ) {
+	  voicePitch[i] = voiceVelocity[i] = 0;
+	}
+      }
+    }
+
+  }
+
+  destructor {
+    delete [] donePort;
+    delete [] frequencyPort;
+    delete [] velocityPort;
+
+    delete [] voicePitch;
+    delete [] voiceVelocity;
+  }
+
+  go {
+    int i;
+
+    // cout << "Go called on SynthControl\n";
+
+    if ( onPitch.known() && onVelocity.known() &&
+	 offPitch.known() && reset.known() ) {
+	// !(frequencyPort[0]->known()) ) {
+
+      // cout << "Entered if in SynthControl\n";
+
+      if ( reset.present() ) {
+	resetVoices();
+      }
+     
+      if ( onPitch.present() && onVelocity.present() ) {
+
+	// Have a note on command -- find an empty voice and play it
+
+	for ( i = numVoices ; --i >= 0 ; ) {
+	  if ( voicePitch[i] == 0 ) {
+	    voicePitch[i] = int(onPitch.get());
+	    voiceVelocity[i] = int(onVelocity.get());
+	    break;
+	  }
+	}
+
+      }
+
+      if ( offPitch.present() ) {
+
+	// Have a note off command -- find the pitch and set its velocity
+	// to zero
+
+	int p = int(offPitch.get());
+	for ( i = numVoices ; --i >= 0 ; ) {
+
+	  if ( voicePitch[i] == p ) {
+	    voiceVelocity[i] = 0;
+	  }
+	}
+      }
+
+      // Emit the frequencies and velocities for the voices
+
+      for ( i = numVoices ; --i >= 0 ; ) {
+	frequencyPort[i]->emit() << frequencyOfPitch[voicePitch[i]];
+	velocityPort[i]->emit() << double(voiceVelocity[i]);
+      }
+
+    }
+
+  }
+
+  tick {
+    // cout << "Calling tick with " << numVoices << " voices\n";
+
+    // Check the "done" status of each voice, clearing the pitch of
+    // any that are non-zero
+
+    for ( int i = numVoices ; --i >= 0 ; ) {
+      if ( donePort[i]->present() && int(donePort[i]->get()) != 0 ) {
+	voicePitch[i] = voiceVelocity[i] = 0;
+      }
+    }
+
+    for ( i = 0 ; i < numVoices ; i++ ) {
+      cout << voicePitch[i] << ' ' << voiceVelocity[i] << ' ';
+    }
+    cout << '\n';
+  }
+
+}
