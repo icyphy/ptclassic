@@ -192,25 +192,7 @@ body ::tycho::HTML::constructor {args} {
     addTool find Find "$itk_component(text) search"
     addTool stop Stop "$itk_component(text) stopRendering"
 
-    itk_component add formatMenuButton {
-	menubutton $itk_component(menuFrame).format \
-		-text Format \
-		-underline 1 \
-		-menu $itk_component(menuFrame).format.menu
-    } {
-	keep -font -activebackground -cursor -activeforeground \
-		-background -foreground -highlightbackground \
-		-highlightcolor
-    }
-
-    pack $itk_component(formatMenuButton) -side left
-
-    itk_component add formatMenu {
-	menu $itk_component(formatMenuButton).menu -tearoff 0
-    } {
-	keep -font -activebackground -cursor -activeforeground \
-		-background -foreground
-    }
+    addMenu Format left {} -underline 1
 
     eval itk_initialize $args
 
@@ -218,7 +200,9 @@ body ::tycho::HTML::constructor {args} {
     component text configure -directory [file dirname $file]
 
     foreach size {{tiny -2} {small 0} {medium 2} {large 4} {huge 8}} {
-	$itk_component(formatMenu) add radio \
+        # Note that the File base class has no method for adding radio
+        # buttons to menus.
+	$itk_component(menuFormat) add radio \
 		-label [lindex $size 0] \
 		-variable [scope sizeName($this)] \
 		-command \
@@ -228,17 +212,16 @@ body ::tycho::HTML::constructor {args} {
     set sizeName($this) medium
 
     # Modify the menu commands appropriately.
-    $itk_component(fileMenu) entryconfigure 2 \
-	    -label "Open Source" \
-	    -underline 1 \
-	    -accelerator {C-x s} \
+    insertMenuItem "Open Source" "Switch File..." File \
+            -underline 1 -accelerator {C-x s} \
 	    -command "$this openSource"
 
-    $itk_component(fileMenu) delete "Save"
-    $itk_component(fileMenu) delete "SaveAs..."
-    $itk_component(fileMenu) delete "Evaluate"
-    $itk_component(fileMenu) delete "Revision Control..."
-    $itk_component(fileMenu) delete "Toggle Read-Only"
+    disableMenuItem "Insert..." File
+    disableMenuItem "Save" File
+    disableMenuItem "SaveAs..." File
+    disableMenuItem "Evaluate" File
+    disableMenuItem "Revision Control..." File
+    disableMenuItem "Toggle Read-Only" File
 
     bind $prefix <Control-x><Key-s> "$this openSource; break"
     # disable certain bindings

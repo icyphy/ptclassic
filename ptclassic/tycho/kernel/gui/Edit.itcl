@@ -111,129 +111,54 @@ body ::tycho::Edit::constructor {args} {
     pack $itk_component(text) -expand yes -fill both
 
     # Add an Edit menu
-    itk_component add editMenuButton {
-	menubutton $itk_component(menuFrame).edit \
-		-text Edit \
-		-underline 0 \
-		-menu $itk_component(menuFrame).edit.menu
-    } {
-	keep -font -activebackground -cursor -activeforeground \
-		-background -foreground -highlightbackground \
-		-highlightcolor
-    }
-    pack $itk_component(editMenuButton) -side left \
-	    -before $itk_component(windowMenuButton)
-    
-    # Edit menu contents
-    itk_component add editMenu {
-	menu $itk_component(editMenuButton).menu -tearoff 0
-    } {
-	keep -font -activebackground -cursor -activeforeground \
-		-background -foreground
-    }
-    
-    $itk_component(editMenu) add command \
-	    -label {Undo/Redo} \
-	    -accelerator "C-x u" \
-	    -underline 0 \
+    addMenu Edit left Window -underline 0
+
+    addMenuItem {Undo/Redo} Edit -accelerator "C-x u" -underline 0 \
 	    -command "$this component text undo"
     
-    $itk_component(editMenu) add separator
+    addMenuSeparator Edit
     
-    $itk_component(editMenu) add command \
-	    -label Cut \
-	    -underline 0 \
-	    -accelerator "C-w" \
+    addMenuItem Cut Edit -underline 0 -accelerator "C-w" \
 	    -command "$this component text cut"
     
-    $itk_component(editMenu) add command \
-	    -label Copy \
-	    -underline 1 \
-	    -accelerator "M-w" \
+    addMenuItem Copy Edit -underline 1 -accelerator "M-w" \
 	    -command "$this component text copy"
     
-    $itk_component(editMenu) add command \
-	    -label Paste \
-	    -underline 0 \
-	    -accelerator "C-y" \
+    addMenuItem Paste Edit -underline 0 -accelerator "C-y" \
 	    -command "$this component text paste"
     
-    $itk_component(editMenu) add separator
+    addMenuSeparator Edit
     
-    $itk_component(editMenu) add command \
-	    -label "Select All" \
-	    -underline 0 \
-	    -accelerator "C-/" \
+    addMenuItem "Select All" Edit -underline 0 -accelerator "C-/" \
 	    -command "$this component text selectRange 1.0 end"
     
-    $itk_component(editMenu) add command \
-	    -label "Unselect" \
-	    -underline 0 \
-	    -accelerator "C-\\" \
+    addMenuItem "Unselect" Edit -underline 0 -accelerator "C-\\" \
 	    -command "$this component text unselectRange 1.0 end"
     
-    $itk_component(editMenu) add command \
-	    -label "Find/Change..." \
-	    -underline 0 \
-	    -accelerator "C-s" \
+    addMenuItem "Find/Change..." Edit -underline 0 -accelerator "C-s" \
 	    -command "$this component text search"
     
-    $itk_component(editMenu) add command \
-	    -label "Spelling..." \
-	    -underline 2 \
-	    -accelerator "M-$" \
+    addMenuItem "Spelling..." Edit -underline 2 -accelerator "M-$" \
 	    -command "$this component text spellCheck"
     
-    $itk_component(editMenu) add command \
-	    -label {Goto Line...}\
-	    -underline 0 \
-	    -accelerator "C-c C-g" \
+    addMenuItem {Goto Line...} Edit -underline 0 -accelerator "C-c C-g" \
 	    -command "$this component text gotoLine"
 
     # Add a Format menu
-    itk_component add formatMenuButton {
-	menubutton $itk_component(menuFrame).format \
-		-text Format \
-		-underline 1 \
-		-menu $itk_component(menuFrame).format.menu
-    } {
-	keep -font -activebackground -cursor -activeforeground \
-		-background -foreground -highlightbackground \
-		-highlightcolor
-    }
-    pack $itk_component(formatMenuButton) -side left
+    addMenu Format left {} -underline 1
     
-    # Format menu contents
-    itk_component add formatMenu {
-	menu $itk_component(formatMenuButton).menu -tearoff 0
-    } {
-	keep -font -activebackground -cursor -activeforeground \
-		-background -foreground
-    }
-    
-    $itk_component(formatMenu) add command \
-	    -label "Font..." \
-	    -underline 0 \
+    addMenuItem "Font..." Format -underline 0 \
 	    -command "$this setFont"
  
-    $itk_component(formatMenu) add separator
+    addMenuSeparator Format
 
-    $itk_component(formatMenu) add command \
-	    -label "Fill Region" \
-	    -accelerator "M-q" \
-	    -underline 2 \
+    addMenuItem "Fill Region" Format -underline 2 -accelerator "M-q"  \
 	    -command "$this component text busy fillSelection"
     
-    $itk_component(formatMenu) add command \
-	    -label "Right Fill Column" \
-	    -accelerator "C-x f" \
-	    -underline 2 \
+    addMenuItem "Right Fill Column" Format -underline 2 -accelerator "C-x f" \
 	    -command "$this component text queryFillColumn"
     
-    $itk_component(formatMenu) add command \
-	    -label "Set Fill Prefix" \
-	    -accelerator "C-x ." \
-	    -underline 1 \
+    addMenuItem "Set Fill Prefix" Format -underline 1 -accelerator "C-x ."  \
 	    -command "$this component text queryFillPrefix"
     
     # The following initialize options and then invoke any
