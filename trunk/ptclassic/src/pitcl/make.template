@@ -65,9 +65,13 @@ OBJS =			$(SRCS:.cc=.o)
 all:	makefile ptcl
 
 
+# On some architectures we strip out the debugging so the binaries are smaller
+# Note that doing a full strip can sometimes disable incremental linking.
+
 ptcl:		$(OBJS) $(LIBFILES) $(ALLSTARS) $(ALLTARGETS)
 		rm -f $@ 
 		$(PURELINK) $(LINKER) $(LINKFLAGS) $(PTCL_MODS) -o $@ 
+		$(STRIP_DEBUG) $@
 
 ptcl.debug:	$(OBJS) $(LIBFILES) $(ALLSTARS) $(ALLTARGETS)
 		rm -f $@ 
@@ -77,6 +81,7 @@ ptcl.debug:	$(OBJS) $(LIBFILES) $(ALLSTARS) $(ALLTARGETS)
 ptcl.ptiny:	$(OBJS) $(PTINY_LIBFILES) $(PTINY_STARS) $(PTINY_TARGETS)
 		rm -f $@ 
 		$(PURELINK) $(LINKER) $(LINKFLAGS_D) $(PTINY_PTCL_MODS) -o $@
+		$(STRIP_DEBUG) $@
 
 # "make install" puts things in the official place
 install:	$(BINDIR)/ptcl
