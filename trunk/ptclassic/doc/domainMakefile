@@ -1,7 +1,7 @@
 # $Id$
 #
-# Makefile for domain sections
-#
+# Makefile for domain sections.  Each domain should make a symbolic
+# link from this file to $(PTOLEMY)/src/domains/doc/Makefile.
 
 PTOLEMY       = ../../../..
 PRINTSEC      = $(PTOLEMY)/doc/bin/printsec
@@ -20,3 +20,6 @@ MAKEVARS =	\
 
 print:
 	$(PTOLEMY)/doc/bin/printdom $(OPTIONS)
+
+preview:
+	$(PTOLEMY)/doc/bin/printdom -preview $(OPTIONS)
