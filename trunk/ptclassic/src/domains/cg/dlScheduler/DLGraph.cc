@@ -17,7 +17,7 @@ Date of last revision:
 #endif
 
 #include "DLGraph.h"
-#include "EGConnect.h"
+#include "EGGate.h"
 
 // redefine the virtual methods
 EGNode *DLGraph :: newNode(DataFlowStar* s, int i)
