@@ -111,7 +111,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  addCode(srcTclFile,"tkSetup");
 
 	  int plotstyle = 0;
-	  if (strcmp(style,"connect")) plotstyle = 1;
+	  if (strcmp(style,"connect") == 0) plotstyle = 1;
 	  addCode(createPlot(xMin,xMax,yMin,yMax,Y.numberPorts(),plotstyle),
 		  "tkSetup");
 	}
