@@ -594,6 +594,16 @@ proc ::tycho::uniqueFileName { {stem {tyuniq}} {extension {}}} {
 # excluding the last component. Tilde substitution is performed
 # only on local names. If the name is a network name and the
 # path is empty, return the name unchanged.
+# <li><code>::tycho::url expand</code> _name_: Return a
+# "normalized" pathname. If a local name, the result is
+# obtained from <code>::tycho::expandPath</code>. If a
+# network name, the result has components like <code>..</code>
+# removed.
+# <li><code>::tycho::url join</code> _name_ ?_name_ ...?: Return the
+# platform-dependent path name from the arguments. If the first
+# element of the list if a protocol name, then construct a network
+# name using slashes; if not, then construct a platform-dependent
+# local name.
 # <li><code>::tycho::url extension</code> _name_: Return the character
 # after the last period in the last component of the name.
 # <li><code>::tycho::url join</code> _name_ ?_name_ ...?: Return the
@@ -663,6 +673,28 @@ ensemble ::tycho::url {
 	} else {
 	    # Local name
 	    file dirname $name
+	}
+    }
+    # Expand the name into a normalized version.
+    option expand {name} {
+        if [regexp {^[a-z]+:/} $name] {
+	    # Network name
+	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
+	    if { $path != "" } {
+                set res {}
+                foreach c [split $path /] {
+                    if { $c == ".." && [llength $c] > 0 } {
+                        set res [lreplace $res end end]
+                    } else {
+                        lappend res $c
+                    }
+                }
+                set path [join $res /]
+            }
+            return $protocol$server$path
+	} else {
+	    # Local name
+	    ::tycho::expandPath $name
 	}
     }
     # Return the name extension.
@@ -820,4 +852,5 @@ ensemble ::tycho::url {
 	}
     }
 }
+
 
