@@ -1,4 +1,4 @@
--*-Mode:text-*- -[Mon Mar 21 11:35:04 1994 by cxh]-
+-*-Mode:text-*- -[Fri Jul  1 13:20:43 1994 by cxh]-
 Version: $Id$
 
 src/gnu/README
@@ -11,8 +11,8 @@ produced by the sources in this directory.  You need not reinstall the
 GNU binaries from this directory if you already have the Ptolemy
 binary distribution.
 
-If you plan on doing dynamic linking you will need to have gcc
-available.
+If you plan on doing dynamic linking with the prebuilt binary
+distribution, you will need to have gcc available.
 
 Note that the tcl/tk source is elsewhere.
 
@@ -70,7 +70,10 @@ GNU make
 	src/vem/vem/makefile depends on the $(@D) and $(@F) GNU make
 	directives. 
 
-
+	mk/common.mk, mk/config-sol2.mk and mk/config-sol2.cfront.mk
+	all have a makefile conditional that checks the value of
+	$(USE_SHARED_LIBS).
+	
 HP
 --
 	The version of gcc-2.5.8 from the FSF does not have support
@@ -136,12 +139,25 @@ using the HP assembler then configure GCC with "hpNNN-hpux8.02".
 
 -----End------	
 
+SGI Irix5.x
+-----------
+	Note that the gcc 'make-compare' step may fail under Irix5.x
+	
+	The gcc info file says:
+	"In order to compile GCC on an SGI the "c.hdr.lib" option must
+	be installed from the CD-ROM supplied from Silicon Graphics."
+	
+	gcc-2.5.8 under Irix5.x does not support the -g option, so
+	debugging is painful.
+
 gcc and Purify
 --------------
 	To use Purelink and Purify from Pure Inc, be sure to build gcc
 	with out the GNU assembler, gas.  Also, be sure to use
 	ld-collect rather than GNU ld.  In this directory, we
 	configure gcc to not use gas and not to use GNU ld.  
+
+
 
 See Also
 --------
