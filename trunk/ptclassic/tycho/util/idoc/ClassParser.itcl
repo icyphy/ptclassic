@@ -53,6 +53,9 @@ class ::tycho::IDocSys {
     # Generate an index of the IDocumentation (in HTML)
     method generateIDocIndex { {title {"Index of classes"}}}
 
+    # Check if the current file is newer than its related documentation.
+    method modCheck {filename}
+
     ###################################################################
     ####                      public procs                         ####
 
@@ -145,6 +148,9 @@ class ::tycho::IDocSys {
     # Format an explanation properly (in HTML)
     private method formatExpl {comment}
 
+    # Get the names of classes in a source file
+    private method getClassesInSource {filename}
+
     # FIXME: not implemented. May move to viewer.
     private method getSourceFile {classname}
 
@@ -205,6 +211,59 @@ body ::tycho::IDocSys::generateIDocIndex { {title {"Index of classes"}}} {
 # FIXME: FIXME: FIXME!
 }
 
+#####################################################################
+#### modCheck
+# Checks if the current file is newer than it's associated documentation.
+# And returns 1 if so.
+#
+# This requires searching for all classes defined within the file and
+# checking if those class's documents are older. Takes about 5% of 
+# the time to create the docs.
+#
+# A more ideal system would check which classes need to be redocumented.
+# However, there are few sources with more than one class so this is a
+# decent compromise.
+#
+# One bug, it doesn't know how to check if a classfile_rel.idoc should be
+# created. If one exists it checks to see if it is newer. This is not 
+# critical because idocs are generated at the same time, so if one is okay,
+# the other must be as well. 
+#
+# For non-itcl files, it silently returns 1 because it can't tell.
+#
+body ::tycho::IDocSys::modCheck {filename} {
+    if {[file extension $filename] != ".itcl"} {
+        return 1
+    }
+    
+    set sourceTime [file mtime $filename]
+
+    # If there's already a related documentation file, check it.
+    # For the pathological case where an itcl file contains no class
+    # so shouldn't be called itcl.
+    set relFile [file root $filename]_rel.idoc
+    if [file exists $relFile] {
+        if {$sourceTime > [file mtime $relFile]} {
+            return 1
+        }
+    }
+    
+    set classes [getClassesInSource $filename]
+    foreach class $classes {
+        set docFile [file join doc codeDoc [info namespace tail $class].idoc]
+        if ![file exists $docFile] {
+            # There is no documentation.
+            return 1
+        }
+        if {$sourceTime > [file mtime $docFile]} {
+            # The source is newer.
+            return 1
+        }
+    }
+    # not modified
+    return 0
+}
+
     ###################################################################
     ###################################################################
     ####                      public procedures                    ####
@@ -222,6 +281,12 @@ body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
     }
     set retval ""
     foreach filename $filelist {
+
+        if ![$IDocSys modCheck $filename] {
+            # file does not need to be redocumented
+            continue
+        }
+
         if $debug {
             puts "$filename"
         }
@@ -1068,6 +1133,23 @@ body ::tycho::IDocSys::formatExpl {comment} {
     return "$comment"
 }
 
+#####################################################################
+#### getClassesInSource
+# Quickly scan the source file for the classes which are defined within.
+# Requires around 5% of the time it takes to make the docs.
+#
+body ::tycho::IDocSys::getClassesInSource {filename} {
+    set fd [open $filename]
+    while {![eof $fd]} {
+        gets $fd lineIn
+        if [regexp {^[	 ]*(class)[ 	]+(::[a-zA-Z_:]*)[ 	]+\{} \
+                $lineIn dummy dummy2 classname] {
+            lappend retval $classname
+        }
+    }
+    close $fd
+    return $retval
+}
 
 # Get the source file for a given class
 body ::tycho::IDocSys::getSourceFile {classname} {
