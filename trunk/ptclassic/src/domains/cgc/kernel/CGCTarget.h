@@ -46,6 +46,10 @@ public:
 		{return  sanitizedFullName(p); }
 	StringList appendedName(const NamedObj& p, const char* s);
 
+	// set the hostMachine name
+	void setHostName(const char* s) { hostMachine = s; }
+	const char* hostName() { return (const char*) hostMachine; }
+
 	// compile and run the code
 	int compileCode();
 	int runCode();
@@ -95,6 +99,7 @@ protected:
 	// states
 	IntState staticBuffering;
 	IntState doCompile;
+	StringState hostMachine;
 	StringState funcName;
 	StringState compileCommand;
 	StringState compileOptions;
@@ -117,6 +122,12 @@ private:
 	// setup forkDests list for all Fork input portholes
 	// This complete list is needed to decide the buffer size computation.
 	void setupForkDests(Galaxy&);
+
+	// check the hostMachine and set the localHost flag if the hostMachine
+	// is the same as the /bin/hostname.
+	void checkHostMachine();
+
+	int localHost;
 };
 
 #endif
