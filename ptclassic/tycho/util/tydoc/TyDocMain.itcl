@@ -164,7 +164,7 @@ body ::tycho::DocClass::destructor {} {
 # Append a construct to the appropriate variable
 #
 body ::tycho::DocClass::appendConstruct { construct comment access argList } {
-    set myDocComment [DocComment .docClass#auto $comment]
+    set myDocComment [::tycho::DocComment .docClass#auto $comment]
     # Save the name of the docComment so we can delete it later
     lappend docCommentList $myDocComment
     lappend $construct \
@@ -678,7 +678,10 @@ body ::tycho::DocSys::parseFileAsList {fileAsList} {
 				    $constructArgList} errMsg ] {
 				puts "Failed to call\
 					${construct}Clause:\n---\n$errMsg"
+				#global errorInfo
+				#puts $errorInfo
 				puts "---\nCommentBody was: '$commentBody'"
+
 			    }
 		        #puts "..>$construct:\t <$commentBody> <$constructAccess> <$constructArgList>"
 
@@ -923,7 +926,7 @@ body ::tycho::ListDocSys::appendConstruct {construct comment access argList } {
     if { $currentClass == {} } {
 	# If we don't have a currentClass, then create one
 	#puts "appendConstruct#1: $construct $comment $access $argList"
-	set currentClass [::tycho::DocClass  .ListClass#auto]
+	set currentClass [::tycho::DocClass  ::tycho::.ListClass#auto]
 	lappend classList  $currentClass
 	# All constructs outside a class are associated with topClass
 	set topClass $currentClass
@@ -1050,7 +1053,7 @@ body ::tycho::ListDocSys::classClause { comment access argList} {
     set inClass 0
 
     # Create a newClass for any unknown constructs that follow
-    set currentClass [::tycho::DocClass  .ListClass#auto]
+    set currentClass [::tycho::DocClass  ::tycho::.ListClass#auto]
     lappend classList  $currentClass
 }
 
@@ -1066,7 +1069,7 @@ body ::tycho::ListDocSys::commentClause { comment access argList } {
 	if !$inClass {
 	    if {$outsideClassComment == {} } {
 		set outsideClassComment \
-			[::tycho::DocComment .outsideComment#auto $comment]
+			[::tycho::DocComment ::tycho::.outsideComment#auto $comment]
 	    } else {
 		# This is fairly evil, but if we already have a description
 		# in the outside comment, We don't want to append more stuff
