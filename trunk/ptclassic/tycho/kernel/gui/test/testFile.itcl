@@ -310,6 +310,7 @@ after 500
 # save{}
 #
 test File-save-1 {Insert data and save} {
+    _mkfile $foo {Empty}
     _file -file $foo
     # Insert data and call save
     .f insertData {Oh, for goodness' sake, not the elephant again!}
@@ -471,6 +472,7 @@ test File-saveQuery-2 {If modified, answer yes} {
     update
     after 1000
     # Modify it
+    .f clear
     .f insertData {Voluble vilification}
     update
     after 500
@@ -540,18 +542,125 @@ test File-saveQuery-4 {If modified, cancel} {
 ############################################################################
 # altFile{}
 #
-test File-altFile-1 {Switch to another file} {
-    _mkfile $foo {Verbal veracity}
+test File-altFile-1 {Switch to another file, data not modified} {
+    _mkfile $foo {Elastically scholastically}
+    _mkfile $bar {Croissants.. with tea?}
     _file -file $foo
     # Wait around for a while...
     update
     after 1000
-    # Save it, checking that the file is not touched
-    set fd [open $foo "w+"]
-    close $fd
-    set result [.f saveQuery]
-    list $result [_rdfile $foo]
-} {2 {}}
+    # Script to answer dialog
+    set TY_TEST_MODAL {
+        {
+            %0 clear
+            %0 insert entry $bar
+            update
+            after 1000
+            %0 ok
+        }
+    }
+    # Switch to another file
+    .f altFile
+    list [.f cget -file] [.f saveText]
+} [list [::tycho::expandPath $bar] {Croissants.. with tea?}]
+
+test File-altFile-2 {Switch to another file, save modified data} {
+    _mkfile $foo {Henry? Henry! HENRY!!!}
+    _mkfile $bar {One lump, but never stir}
+    _file -file $foo
+    # Wait around for a while...
+    update
+    after 1000
+    # Modify the data
+    .f clear
+    .f insertData {On, no, Henry... <sob>}
+    update
+    after 1000
+    # Script to answer dialog
+    set TY_TEST_MODAL {
+        {
+	    # Yes, save it
+            %0 invoke yes
+        }
+        {
+	    # Insert file bar
+            %0 clear
+            %0 insert entry $bar
+            update
+            after 1000
+            %0 ok
+        }
+    }
+    # Switch to another file
+    .f altFile
+    list [_rdfile $foo] [.f saveText]
+} {{On, no, Henry... <sob>} {One lump, but never stir}}
+
+############################################################################
+# autoSave{}
+#
+# These are a little doubtful -- each one will start another series
+# of after{} events...
+#
+test File-autoSave-1 {Call autosave -- file not modified} {
+    _mkfile $foo {He's on the edge, right on the edge}
+    _rmfile $autofoo
+    _file -file $foo
+    # Wait around for a while...
+    update
+    after 1000
+    # Call autoSave -- nothing should happen
+    .f autoSave
+    file exists $autofoo
+} 0
+
+test File-autoSave-2 {Call autosave -- file is modified} {
+    _mkfile $foo {}
+    _rmfile $autofoo
+    _file -file $foo
+    # Wait around for a while...
+    update
+    after 1000
+    # Modify
+    .f insertData {Larson? Larson who?}
+    # Call autoSave -- should create file
+    .f autoSave
+    list [file exists $autofoo] [_rdfile $autofoo]
+} {1 {Larson? Larson who?}}
+update
+after 1000
+.f save
+
+############################################################################
+# insertFile{}
+#
+test File-insertFile-1 {Insert a file} {
+    _mkfile $foo {Motorcycles transport the body}
+    _mkfile $bar {
+Ducati's transport the soul}
+    _file -file $foo
+    # Wait around for a while...
+    update
+    after 1000
+    # Script to answer dialog
+    set TY_TEST_MODAL {
+        {
+            %0 clear
+            %0 insert entry $bar
+            update
+            after 1000
+            %0 ok
+        }
+    }
+    # Insert a file
+    .f insertFile
+    list [.f cget -file] [.f saveText]
+} [list $foo {Motorcycles transport the body
+Ducati's transport the soul}]
+update
+after 1000
+# So we can delete
+.f save
 
 ########################################################################
 ## CLEAN UP
