@@ -35,8 +35,12 @@ LIBOBJS=Star.o Connect.o Block.o Galaxy.o Scheduler.o SpaceWalk.o  Output.o \
 # the sun3 version.  We need it for stars that do math library functions.
 LIBS=-lg++ -lm
 interpreter:	interpmain.o ptolemy.a
-		$(GNU) $(GFLAGS) interpmain.o STARS/*.o ptolemy.a $(LIBS) \
-			-o interpreter
+		$(GNU) $(GFLAGS) interpmain.o /usr/tools/ptolemy/lib/sdf/*.o \
+		    ptolemy.a $(LIBS) -o interpreter
+
+pigiPt.o:	pigiIfc.o ptolemy.a
+		$(GNU) $(GFLAGS) -r -o pigiPt.o pigiIfc.o \
+		    /usr/tools/ptolemy/lib/sdf/*.o ptolemy.a
 
 demos:		BlockDemo DataStructDemo FractionDemo MultiPortDemo \
 		SchedulerDemo SpaceWalkDemo StarDemo StringListDemo \
