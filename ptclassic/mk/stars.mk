@@ -48,10 +48,7 @@ PARLIBFILES = $(LIBDIR)/libDC.a $(LIBDIR)/libHu.a  $(LIBDIR)/libDL.a \
 ifdef S56DIR
 S56WH_LIB= -lqckMon
 S56WH_LIBDIR= -L$(S56DIR)/lib
-S56WH_O= $(CG56T)/S56XTargetWH.o $(CG56T)/CG56S56XCGCReceive.o \
-         $(CG56T)/CG56S56XCGCSend.o $(CG56T)/CGCS56XReceive.o \
-         $(CG56T)/CGCS56XSend.o $(CG56T)/CGCS56XTarget.o \
-	 $(CG56T)/CGCS56XBase.o $(CG56T)/CG56S56XCGCBase.o
+S56WH_O= $(CG56T)/S56XTargetWH.o 
 endif
 
 # Library files reqd by stars.  Note that libptolemy.a is not included.
@@ -123,8 +120,10 @@ CGCDDFTARGETS =	$(CGCT)/main/CGCDDFTarget.o
 BDFTARGETS =	$(CGT)/CGBDFTarget.o $(CGCT)/main/CGCBDFTarget.o
 CG56TARGETS =	$(CG56T)/Sim56Target.o $(CG56T)/S56XTarget.o $(S56WH_O)\
 		$(CG56T)/Sub56Target.o $(CG56T)/CG56MultiSimTarget.o \
-		$(CG56T)/CG56MultiSimSend.o $(CG56T)/CG56MultiSimReceive.o
-CG96TARGETS =	$(CG96T)/Sim96Target.o
-
+		$(CG56T)/CG56MultiSimSend.o $(CG56T)/CG56MultiSimReceive.o \
+		$(CG56T)/CG56S56XCGCReceive.o \
+	        $(CG56T)/CG56S56XCGCSend.o $(CG56T)/CGCS56XReceive.o \
+        	$(CG56T)/CGCS56XSend.o $(CG56T)/CGCS56XTarget.o \
+	 	$(CG56T)/CGCS56XBase.o $(CG56T)/CG56S56XCGCBase.o
 CGCcm5TARGETS =	$(CGCT)/cm5/CGCcm5Send.o $(CGCT)/cm5/CGCcm5Recv.o \
 		$(CGCT)/cm5/CGCcm5Target.o $(CGCT)/cm5/CGCcm5peTarget.o
