@@ -69,7 +69,8 @@ PL_SRCS= \
  DETkSlider.pl \
  DETkStripChart.pl \
  DETkText.pl \
- DETkXYPlot.pl
+ DETkXYPlot.pl \
+ DETkLogicAnalyzer.pl
 
 # DELMSTkPlot.pl \
 # DELMSCxTkPlot.pl \
