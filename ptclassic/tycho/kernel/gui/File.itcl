@@ -65,8 +65,7 @@ catch {delete class ::tycho::File}
 # <p>
 # Here is an example:
 # <tcl><pre>
-# ::tycho::File .file
-# .file centerOnScreen
+# ::tycho::view File
 # </pre></tcl>
 # <p>
 # Derived classes should normally redefine the methods
