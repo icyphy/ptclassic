@@ -61,23 +61,11 @@ MultiPortHole& MultiSDFPort :: setPort (const char* s,
 }
 
 PortHole& MultiInSDFPort :: newPort () {
-        InSDFPort* newport = new InSDFPort;
-        ports.put(*newport);
-        parent()->
-            addPort(newport->
-                        setPort(newName(), parent(), type, numberTokens));
-	newport->typePort = typePort;
-        return *newport;
+	return installPort(*new InSDFPort);
 }
  
  
 PortHole& MultiOutSDFPort :: newPort () {
-        OutSDFPort* newport = new OutSDFPort;
-        ports.put(*newport);
-        parent()->
-            addPort(newport->
-                        setPort(newName(), parent(), type, numberTokens));
-	newport->typePort = typePort;
-        return *newport;
+	return installPort(*new OutSDFPort);
 }
 
