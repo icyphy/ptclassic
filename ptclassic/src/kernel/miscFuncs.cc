@@ -41,6 +41,10 @@ static const char file_id[] = "miscImpl.cc";
 
 #include <stdio.h>		// Pick up sprintf under sol2 Sun CC
 #include "miscFuncs.h"
+#ifdef PT_NT4VC
+#include <process.h>		// Need getpid()
+#endif
+
 
 // This function returns a new, unique temporary file name.
 // It lives on the heap and may be deleted when no longer needed.
