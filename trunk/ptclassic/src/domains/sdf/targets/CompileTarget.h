@@ -46,6 +46,7 @@ a universe.
 class CompileTarget : public HLLTarget {
 public:
 	void setup();
+	void begin();
 	int run();
 	void wrapup ();
 	CompileTarget(const char* nam, const char* stype, const char* desc);
