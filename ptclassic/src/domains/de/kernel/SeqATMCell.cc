@@ -1,53 +1,62 @@
-// filename: BitArray.cc
+// filename: SeqATMCell.cc
 // SCCS info: $Id$
 //
 // This file contains the member functions of the
-// BitArray class.
+// SeqATMCell class.
 
-static const char file_id[] = "BitArray.cc";
+static const char file_id[] = "SeqATMCell.cc";
 
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
-#include "BitArray.h"
+#include "SeqATMCell.h"
+
+// 424 = 8 * 53, and there are 53 bytes in the proposed broadband
+// integrated serviced digital network (BISDN) cell.
+// Asynchronous transfer mode (ATM) is the switching method used
+// by the BISDN.
+static const int BISDNCellSize = 424;
+
 
 // default constructor
-BitArray::BitArray( const int sequenceNo ) : seqNo( sequenceNo ),
-		wordSize( 16 ), size( 424 ) {
-	// wordWidth is minimum number of unsigned short needed
-	// to hold size
-	typedef unsigned short bitArrayType;
-	int wordWidth = ( size + wordSize - 1 ) / wordSize;
+SeqATMCell::SeqATMCell( const int sequenceNo ) : seqNo( sequenceNo ),
+		size( BISDNCellSize )
+{
+// 'wordWidth' is minimum number of unsigned short needed
+// to hold 'size' bits.
+	const int wordWidth = ( size + 8*sizeof(short) - 1 ) /
+			8*sizeof(short);
 	LOG_NEW;
-	cell = new bitArrayType[ wordWidth ];
+	cell = new unsigned short[ wordWidth ];
 	for ( int i = 0; i < wordWidth; ++i ) // initialize all bits to 0
 		cell[ i ] = 0;
 }
 
 // copy constructor
-BitArray::BitArray( const BitArray& ba ) : wordSize( 16 ), size( 424 ) {
-	typedef unsigned short bitArrayType;
-	int wordWidth = ( size + wordSize - 1 ) / wordSize;
+SeqATMCell::SeqATMCell( const SeqATMCell& ba ) : size( BISDNCellSize )
+{
+	const int wordWidth = ( size + 8*sizeof(short) - 1 ) /
+			8*sizeof(short);
 	LOG_NEW;
-	cell = new bitArrayType[ wordWidth ];
+	cell = new unsigned short[ wordWidth ];
 	for ( int i = 0; i < wordWidth; ++i )
 		cell[ i ] = ba.cell[ i ];
 	this->seqNo = ba.seqNo;
 }
 
 // returns word which contains the ith bit
-inline int BitArray::getIndex( const int ith ) const {
-	return( ith / wordSize );
+inline int SeqATMCell::getIndex( const int ith ) const {
+	return( ith / 8*sizeof(short) );
 }
 
 // returns position of ith bit in a word
-inline int BitArray::getOffSet( const int ith ) const {
-	return( ith % wordSize );
+inline int SeqATMCell::getOffSet( const int ith ) const {
+	return( ith % 8*sizeof(short) );
 }
 
 // turns on the ith bit
-BitArray& BitArray::set( const int ith ) {
+SeqATMCell& SeqATMCell::set( const int ith ) {
 	int index = getIndex( ith );
 	int offset = getOffSet( ith );
 	cell[ index ] = cell[ index ] | ( 1 << offset );
@@ -55,7 +64,7 @@ BitArray& BitArray::set( const int ith ) {
 }
 
 // turns off the ith bit
-BitArray& BitArray::unset( const int ith ) {
+SeqATMCell& SeqATMCell::unset( const int ith ) {
 	int index = getIndex( ith );
 	int offset = getOffSet( ith );
 	cell[ index ] = cell[ index ] & ( ~( 1 << offset ) );
@@ -63,20 +72,20 @@ BitArray& BitArray::unset( const int ith ) {
 }
 
 // returns TRUE if ith bit is ON
-int BitArray::isON( const int ith ) const {
+int SeqATMCell::isON( const int ith ) const {
 	int index = getIndex( ith );
 	int offset = getOffSet( ith );
 	return( cell[ index ] & ( 1 << offset ) );
 }
 
 // returns TRUE if ith bit is OFF
-int BitArray::isOFF( const int ith ) const {
+int SeqATMCell::isOFF( const int ith ) const {
 	return( !( this->isON( ith ) ) );
 }
 
-StringList BitArray::print() const {
+StringList SeqATMCell::print() const {
 	StringList out;
-	out << "\nBitArray: seqNo = ";
+	out << "\nSeqATMCell: seqNo = ";
 	out << readSeq() << "\n";
 	for ( int i = 0; i < size; ++i ) {
 		if ( isON( i ) )
