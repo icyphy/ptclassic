@@ -190,11 +190,18 @@ class ::tycho::Model {
     # A script saying how to parse data from a "source" file
     public variable parsescript {}
 
+    # The separator character for hierarchical models. If 
+    # null, do not execute code that assumes hierarchy.
+    public variable separator "."
+
     # The immutable file that this data is based on
     public variable sourcefile {}
 
     # The file used for storing this data
     public variable statefile {}
+
+    # If true, options are checked, otherwise any are allowed
+    public variable strictoptions 1
 
     #################################################################
     ####                     public methods                      ####
@@ -301,6 +308,27 @@ class ::tycho::Model {
 }
 
 
+#########################################################################
+#### -strictoptions configuration
+# This option provides external access to the _strictoptions variable
+# in the _Interchange_ superclass, which controls whether
+# options are checked for validity.
+#
+configbody ::tycho::Model::strictoptions {
+	set _strictoptions $strictoptions
+}
+
+#########################################################################
+#### -separator configuration
+# This option provides external access to the _separator variable
+# in the _Interchange_ superclass, which specifies the separator
+# character used to separator hierarchy levels. It is null if the
+# model does not support hierarchy.
+#
+configbody ::tycho::Model::separator {
+	set _separator $separator
+}
+
 ########################################################################
 #### constructor
 #
@@ -347,7 +375,7 @@ body ::tycho::Model::destructor {} {
 # Following arguments are option names and their default values.
 #
 body ::tycho::Model::association {type vcount acount args} {
-    eval _declareassociation $type $vcount $acount $args
+    _declareassociation $type $vcount $acount $args
 }
 
 ########################################################################
@@ -527,7 +555,7 @@ body ::tycho::Model::describe {{prefix {}}} {
 # Following arguments are option names and their default values.
 #
 body ::tycho::Model::entity {type count args} {
-    eval _declareentity $type $count $args
+    _declareentity $type $count $args
 }
 
 ########################################################################
@@ -1029,7 +1057,7 @@ body ::tycho::Model::update {subscriber command index args} {
 ########################################################################
 #### write
 #
-# Write data to a data file. See the <a href="Interchange.html>
+# Write data to a data file. See the <a href="Interchange.html">
 # Interchange</a> class.
 #
 body ::tycho::Model::write {fd {prefix {}}} {
