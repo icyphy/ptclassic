@@ -124,6 +124,9 @@ public:
 	// Skip whitespace (closing include file if no more space)
 	void skipwhite();
 
+	// Clears through whitespace and comments, stops at eof 
+	void clearwhite();
+
 	// discard current line, or close file (error cleanup)
 	void flush();
 
