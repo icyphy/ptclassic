@@ -67,7 +67,7 @@ USE_GPLUSPLUS = yes
 # USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
 
 
-# -Wsynth is new in g++-2.6.x
+# -Wsynth was new in g++-2.6.x, but is not in egcs-1.1.1
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wsynth #-Wcast-qual 
 LOCALCCFLAGS =	-g

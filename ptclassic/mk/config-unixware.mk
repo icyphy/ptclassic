@@ -136,7 +136,7 @@ OPTIMIZER =	-O2
 # 'production' version with optimization
 #OPTIMIZER =	-O2 #-fomit-frame-pointer #-m486 -pipe
 
-# -Wsynth is new in g++-2.6.x
+# -Wsynth was new in g++-2.6.x, but is not in egcs-1.1.1
 WARNINGS =	-Wall -Wcast-align -Wsynth
 ARCHFLAGS =	-DPTSVR4
 
