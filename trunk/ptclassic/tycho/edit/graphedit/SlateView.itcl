@@ -369,7 +369,7 @@ body ::tycho::SlateView::itemname {slateid {newname {}}} {
             set oldname $_nameof($slateid)
             set _nameof($slateid) $newname
             unset _itemid($oldname)
-            set _itemid ($newname) $slateid
+            set _itemid($newname) $slateid
         }
     }
 }
