@@ -62,7 +62,7 @@ endif
 
 # $PTOLEMY/mk/ptbin.mk checks $(PTCL) 
 # If PTCL is set, we don't include Tk.  To use libpitcl instead of libptcl
-# set 'PITCL', see tysh/make.template.
+# set 'PITCL' see tysh/make.template.
 PTCL = 1
 
 INCL = 		-I$(KERNDIR) -I$(ITCL_INCDIR) -I$(TCL_INCDIR) \
@@ -73,17 +73,17 @@ C_INCL =	$(PTCOMPAT_INCSPEC) -I$(TCL_INCDIR) -I$(TK_INCDIR)
 
 # Sources: LIB_SRCS contains the files that make up libpitcl.so.
 # NON_LIB_SRCS contains the files that do not go into libpitcl.so.
-LIB_SRCS =	MatlabTcl.cc MathematicaTcl.cc PITcl.cc pitclInit.cc \
-		pitclError.cc pitclGantt.cc pitclInvokeInterp.cc \
-		pitclDescription.cc
+LIB_SRCS =	MatlabTcl.cc MathematicaTcl.cc PITcl.cc ptclInit.cc \
+		ptclError.cc ptclGantt.cc ptclInvokeInterp.cc \
+		ptclDescription.cc
 LIB_CSRCS = 	displayFile.c
-NON_LIB_SRCS =	pitclAppInit.cc
+NON_LIB_SRCS =	ptclAppInit.cc
 SRCS =		$(LIB_SRCS) $(LIB_CSRCS) $(NON_LIB_SRCS)
 
 # Header files
 HDRS =		displayFile.h \
 		MatlabTcl.h MathematicaTcl.h PITcl.h ganttChart.h \
-		pitclDescription.h
+		ptclDescription.h
 
 # Objects that make up the library
 OBJS =		$(LIB_SRCS:.cc=.o) $(LIB_CSRCS:.c=.o)
