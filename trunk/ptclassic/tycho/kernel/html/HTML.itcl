@@ -432,7 +432,6 @@ body ::tycho::HTML::appletViewer {} {
 # Go back to the previous view, popping it off the stack.
 #
 body ::tycho::HTML::back {} {
-    puts [$stack contents]
     set ref [$stack pop]
     if {$ref == {}} {return}
     set filename [lindex $ref 0]
