@@ -240,6 +240,8 @@ void CGCMakefileTarget :: writeCode() {
       // printing these, we need to optionally print the appropriate
       // makefile lhs.
 
+      int onhostflag = onHostMachine(targetHost);
+
       // FIXME: is there a better way to read in a file and copy it to
       // a stream?
 
@@ -277,25 +279,20 @@ void CGCMakefileTarget :: writeCode() {
       // called `ld') via the C compiler. The precise command used is
       // `$(CC) $(LDFLAGS) N.o $(LOADLIBES)'."
 
-      // FIXME: Code duplication from CreateSDFStar
-      if (linkOptionsStream.numPieces()) {
+      // FIXME: Code duplication from CreateSDFStar and CGCTarget::compileLine
+      if (linkOptionsStream.numPieces() ||
+		localLinkOptionsStream.numPieces() ||
+		! linkOptions.null()) {
+	  StringList allLinkOptions;
+	  allLinkOptions << (const char*) linkOptions << " "
+			 << linkOptionsStream << " ";
+	  if (onhostflag) allLinkOptions << localLinkOptionsStream << " ";
 	  char* expandedLinkOptionsStream =
-	      expandMakefileVariables(linkOptionsStream);
+	      expandMakefileVariables(allLinkOptions);
 	  generatedMakefile << "LOADLIBES= ";
 	  generatedMakefile << expandedLinkOptionsStream << ' ';
 	  delete [] expandedLinkOptionsStream;
       }     
-
-      // Now process the parent target linkOptions
-      if (! linkOptions.null() ) {
-	  char* expandedLinkOptions =
-	      expandMakefileVariables(linkOptions);
-	  // If we have not printed LOADLIBES= yet, then do it now.
-	  if (!linkOptionsStream.numPieces())
-	     generatedMakefile << "LOADLIBES= ";
-	  generatedMakefile << expandedLinkOptions;
-	  delete [] expandedLinkOptions;
-      }
       generatedMakefile << "\n";
       
       // Append rules to the end of the makefile
