@@ -3,23 +3,50 @@ defstar {
 	domain { SDF }
 	derivedFrom { FIR }
 	desc {
-		Output a raised-cosine Nyquist pulse.
+An FIR filter with a magnitude frequency response shaped
+like the standard raised cosine used in digital communications.
+By default, the star upsamples by a factor of 16, so 16 outputs
+will be produced for each input unless the "interpolation"
+parameter is changed.
 	}
 	version { $Id$ }
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { Joe's private lib }
 	explanation {
-This star outputs a raised cosine pulse with excess bandwidth given
-by \fIexcessbw\fR and pulse width (distance from center to first
-zero crossing) given by \fIP\fP.  The length of the filter (number
-of taps) is \fIN\fP, and the output sample rate is \fIupsample\fP
-times the input.  This star is implemented by deriving from the FIR
-star.
+This star implements an FIR filter with
+a raised cosine frequency response, with the excess bandwidth given
+by \fIexcessbw\fR and the distance from center to first
+zero crossing given by \fIP\fP.
+The length of the filter (the number of taps) is \fIN\fP.
+Ideally, the impulse response of the filter would be
+.EQ
+h(n) ~=~ left ( { sin ( pi n / P ) } over { pi n / P } right )
+left ( { cos ( alpha pi n / P ) } over { 1 minus 2 alpha n / P } right )
+.EN
+where $alpha$ is \fIexcessbw\fR.
+However, this pulse is centered at zero, and we can only implement causal
+filters in the SDF domain in Ptolemy.  Hence, the inpulse response is
+actually
+.EQ
+g(n) ~=~ h(n - M)
+.EN
+where $M ~=~ N/2$ if $N$ is even, and $M ~=~ (N+1)/2$ if $N$ is odd.
+Since the impulse response is simply truncated outside this range,
+note that if $N$ is even the impulse response will not be symmetric.
+It will have one more sample to the left than to the right of center.
+Unless this extra sample is zero, the filter will not have linear phase
+if $N$ is even.
+.sp
+The output sample rate is \fIupsample\fP times the input.
+This is set by default to 16 becuase in digital communication systems
+this pulse is used for line coding of symbols, and upsampling is necessary.
+The star is implemented by deriving from the FIR star.
 .IE "raised cosine pulses"
-.pp
-See "Digital Communication" by Lee and Messerschmitt for a discussion
-of raised cosine pulses in communications systems.
+.UH REFERENCES
+.ip [1]
+E. A. Lee and D. G. Messerchmitt,
+"Digital Communication," Kluwer Academic Publishers, 1988.
 	}
 	seealso {FIR}
 	code {
