@@ -70,8 +70,13 @@ ITCL_TK_MAJOR_VERSION_NUMBER =	4.1
 ITCL_MAJOR_VERSION_NUMBER =	2.1
 IWIDGETS_MAJOR_VERSION_NUMBER =	2.1.0
 
+
+TCLX_VERSION =		tclX7.5.2
+TCLX_SRC =		$(TCLTK_SRC)/$(ITCL_VERSION).$(TCLX_VERSION)/$(TCLX_VERSION)
+TCLX_OBJ =		$(TCLTK_OBJ)/$(ITCL_VERSION)/$(TCLX_VERSION)/unix
+
 # Location of the itcl source
-ITCL_SRC =	$(TCLTK_SRC)/$(ITCL_VERSION)
+ITCL_SRC =	$(TCLTK_SRC)/$(ITCL_VERSION).$(TCLX_VERSION)
 
 # Location of the itcl only object files
 ITCL_OBJ =	$(TCLTK_OBJ)/$(ITCL_VERSION)
@@ -162,6 +167,40 @@ fixlinks:
 		cd tcl; ln -s ../itcl/include/itcl include; \
 		cd ../tk; ln -s ../itcl/include/itcl include; \
 		cd ../itcl/include; ln -s itcl/*.h .)
+
+###
+# TclX rules
+# we use TclX for the profile command
+# FIXME: configure fails with GNU make!  try set path=(`pwd` $path)
+config_tclx: $(TCLX_OBJ)	
+	( cd $(TCLX_OBJ); \
+		$(TCLX_SRC)/unix/configure \
+		--srcdir=$(TCLX_SRC)/unix \
+		--prefix=$(ITCL_INDEPENDENT_DEST) \
+		--exec-prefix=$(ITCL_DEST) \
+		$(ENABLE_SHARED) $(ENABLE_GCC))
+
+#FIXME: LD_LIBRARY_PATH will not work on hppa
+tclx: 
+	@echo "Making all in tclx"
+	(cd  $(TCLX_OBJ); \
+		$(MAKE) \
+		LD_LIBRARY_PATH=$(ITCL_OBJ)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)/unix \
+		SHLIB_PATH=$(ITCL_OBJ)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)/unix \
+		CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS)" \
+		X11_INCLUDES="$(X11_INCSPEC)" \
+		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
+		all)
+install_tclx:
+	@echo "Making install in itcl"
+	(cd  $(TCLX_OBJ); $(MAKE) \
+		CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS)" \
+		X11_INCLUDES="$(X11_INCSPEC)" \
+		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
+		install)
+
+$(TCLX_OBJ):
+	mkdir -p $@
 
 # Links so that older programs can find libs and includes.
 # Note that itcl contains its own tcl/tk so we have to make links
