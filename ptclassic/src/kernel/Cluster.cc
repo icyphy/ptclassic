@@ -87,7 +87,14 @@ void ClusterPort::update() {
     }
 }
 
-ClusterPort::ClusterPort(PortHole& p) : GalPort(p) {
+ClusterPort::ClusterPort(PortHole& p) {
+    // If the porthole has aliases, we want them to end up pointing to the
+    // cluster port instead.  Essentially, we need the cluster port to
+    // get in at the bottom of the alias chain, rather than the top
+    // as setAlias would do by default.
+    p.moveMyAliasesTo(*this);
+    // Now it's safe to link myself to the target porthole.
+    setAlias(p);
     setName(p.name());
 }
 
@@ -374,6 +381,9 @@ Cluster* Cluster::convertGalaxy(Galaxy& g) {
     BlockPortIter nextPort(g);
     PortHole* galPort;
     while ((galPort = nextPort++) != NULL) {
+	// tricky bit here: we effectively substitute the new cluster port
+	// for the original galaxy's port in whatever chain of aliases
+	// may exist.  See ClusterPort::ClusterPort.
 	GenericPort* portToAlias = galPort->alias();
 	galPort->clearAliases();
 	cluster->addNewPort((PortHole&)*portToAlias);
