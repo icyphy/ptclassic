@@ -105,7 +105,7 @@ proc applylkernel {script actuals} {
 	# formals and evaluate it (ignore extra args, if any)
 	if { [llength $actuals] >= [llength $formals] } {
 	    foreach formal $formals actual $actuals {
-		regsub -all \\\$$formal $script $actual script
+		regsub -all \\\$$formal $script [list $actual] script
 	    }
 	    return [uplevel 2 $script]
 	}
@@ -115,16 +115,15 @@ proc applylkernel {script actuals} {
 	# a new script with remaining arguments.
 	foreach formal [ltake $formals [llength $actuals]] \
 		actual $actuals {
-	    regsub -all \\\$$formal $script $actual script
+	    regsub -all \\\$$formal $script [list $actual] script
 	}
 	return "lambda [ldrop $formals [llength $actuals]] -> $script"
     } else {
 	# This is the simpler case. Just substitute each argument
 	# for the corresponding %n symbol.
 	foreach actual $actuals n [interval 0 [expr [llength $actuals] - 1]] {
-	    regsub -all %$n $script $actual script
+	    regsub -all %$n $script [list $actual] script
 	}
-
 	# .. and evaluate
 	return [uplevel 2 $script]
     }
@@ -393,9 +392,8 @@ proc makeflag {option} {
 #     makeopt fred
 #
 # returns "-fred 123" if $fred is equal to 123 in the calling
-# environment, and
-#
-# returns "" if $fred is "" in the calling environment.
+# environment, and returns "" if $fred is "" in the calling
+# environment.
 #
 proc makeopt {option} {
     set value [uplevel [list set $option]]
