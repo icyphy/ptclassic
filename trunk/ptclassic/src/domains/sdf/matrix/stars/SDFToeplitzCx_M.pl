@@ -11,7 +11,7 @@ limitation of liability, and disclaimer of warranty provisions.
     }
     location    { SDF matrix library }
     descriptor	{
-Generate a complex data matrix X, with dimensions (numRows,numCols),
+Generate a complex data matrix X, with dimensions numRows x numCols,
 from a stream of numRows + numCols - 1 input particles.
 The data matrix is a Toeplitz matrix such that the first row is
 [ x(M-1) x(M-2) ... x(0) ], the second row is [ x(M) x(M-1) x(M-2) ... x(1) ],
@@ -34,7 +34,7 @@ among others.
     }
     input {
 	name	{ input }
-	type	{ complex	}
+	type	{ complex }
 	desc	{ Input stream.}
     }
     output {
@@ -43,17 +43,19 @@ among others.
 	desc	{ The data matrix X. }
     }
     setup {
-	input.setSDFParams(int(numRows)+int(numCols)-1);
+	input.setSDFParams(int(numRows) + int(numCols) - 1);
     }
-    hinclude 	{ "Matrix.h" }
+    hinclude { "Matrix.h" }
     go {
-        int i,j,k;
-        // collect inputs and put into the matrix
-        ComplexMatrix& X = *(new ComplexMatrix(int(numRows),int(numCols)));
+	int numrows = int(numRows);
+	int numcols = int(numCols);
 
-	for(i = 0; i < int(numRows); i++) {
-            k = int(numCols) - i - 1;
-	    for(j = 0; j < int(numCols); j++,k++)
+        // collect inputs and put into the matrix
+        ComplexMatrix& X = *(new ComplexMatrix(numrows, numcols));
+
+	for (int i = 0; i < numrows; i++) {
+            int k = numrows - i - 1;
+	    for (int j = 0; j < numcols; j++, k++)
 		X[i][j] = Complex(input%k);
         }
 
@@ -61,5 +63,3 @@ among others.
         output%0 << X;
     }		
 }
-
-
