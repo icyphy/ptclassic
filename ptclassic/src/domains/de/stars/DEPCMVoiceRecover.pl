@@ -87,11 +87,11 @@ port.  If more than one packet was missing, this star
 will repeat the derived packet enough times to fill the
 void.
 .UH REFERENCES
-Goodman, J., LockHart, G., Wasem, O., and Wong, W.,
+J. Goodman, G. LockHart, O. Wasem, and W. Wong,
 "Waveform Substitution Techniques for Recovering
 Missing Speech Segments in Packet Voice Communications,"
-\fIIEEE Trans. on ASSP\fR, vol ASSP-34, no. 6, pp. 1440-
-1448, December 1986.
+\fIIEEE Trans. on Acoustics, Speech, and Signal Processing\fR,
+vol ASSP-34, no. 6, pp. 1440-1448, December 1986.
 	}
 
 	defstate {
@@ -132,6 +132,10 @@ Missing Speech Segments in Packet Voice Communications,"
 				*created;
 	}
 
+	constructor {
+		pkt1 = pkt2 = pkt3 = pkt4 = pkt5 = currentPkt = created = 0;
+	}
+
 	setup {
 		if ( numInfoBits > 384 )
 			Error::abortRun( *this, "illegal SeqATMCell size" );
@@ -170,7 +174,9 @@ Missing Speech Segments in Packet Voice Communications,"
 				}
 				count++;
 				count %= 8;
-				if ( pkt5 != pkt4 ) { LOG_DEL; delete pkt5; }
+				if ( pkt5 != pkt4 ) {
+					LOG_DEL; delete pkt5;
+				}
 				pkt5 = pkt4;
 				pkt4 = pkt3;
 				pkt3 = pkt2;
@@ -186,6 +192,9 @@ Missing Speech Segments in Packet Voice Communications,"
 						output.put( arrivalTime ) << 0;
 					count++;
 					count %= 8;
+					if ( pkt5 != pkt4 ) {
+						delete pkt5;
+					}
 					pkt5 = pkt4;
 					pkt4 = pkt3;
 					pkt3 = pkt2;
@@ -215,7 +224,9 @@ Missing Speech Segments in Packet Voice Communications,"
 					}
 					count++;
 					count %= 8;
-					if ( pkt5 != pkt4 ) { LOG_DEL; delete pkt5; }
+					if ( pkt5 != pkt4 ) {
+						LOG_DEL; delete pkt5;
+					}
 					pkt5 = pkt4;
 					pkt4 = pkt3;
 					pkt3 = pkt2;
@@ -281,7 +292,9 @@ Missing Speech Segments in Packet Voice Communications,"
 					else
 						output.put( arrivalTime ) << 0;
 				}
-				if ( pkt5 != pkt4 ) { LOG_DEL; delete pkt5; }
+				if ( pkt5 != pkt4 ) {
+					LOG_DEL; delete pkt5;
+				}
 				pkt5 = pkt4;
 				pkt4 = pkt3;
 				pkt3 = pkt2;
@@ -300,7 +313,9 @@ Missing Speech Segments in Packet Voice Communications,"
 			count++;
 			count %= 8;
 			missingPkt = 0;
-			if ( pkt5 != pkt4 ) { LOG_DEL; delete pkt5; }
+			if ( pkt5 != pkt4 ) {
+				LOG_DEL; delete pkt5;
+			}
 			pkt5 = pkt4;
 			pkt4 = pkt3;
 			pkt3 = pkt2;
