@@ -79,6 +79,7 @@ class ::tycho::EditForest {
 #### constructor
 #
 body ::tycho::EditForest::constructor {args} {
+    disableMenuItem Transpose Format
     eval itk_initialize $args
 }
 
