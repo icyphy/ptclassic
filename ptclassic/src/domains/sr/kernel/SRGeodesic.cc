@@ -47,22 +47,43 @@ SRGeodesic::SRGeodesic()
 // Destroy a Geodesic, disconnecting all connected PortHoles
 SRGeodesic::~SRGeodesic()
 {
+  SequentialList rec;
 
   if ( originatingPort ) {
     originatingPort->disconnect(0);
-    originatingPort = NULL;
-  }
+  }  
+
+  // Copy the list of receivers onto a new list
 
   ListIter nextReceiver( receivers );
   for ( int size = receivers.size() ; --size >= 0 ; ) {
-    SRPortHole * receiver = (SRPortHole *) nextReceiver++;
-    if ( receiver ) {
-      receiver->disconnect(0);
-    }
+    rec.append((Pointer) nextReceiver++);
   }
 
-  // Clear these references even though the SR domain doesn't use them
-  destinationPort = NULL;
+  // Disconnect each one (this empties the receivers list)
+
+  ListIter nextRec( rec );
+  for ( size = rec.size() ; --size >= 0 ; ) {
+    SRPortHole * receiver = (SRPortHole *) nextRec++;
+    if ( receiver ) {
+      receiver->disconnect(0);
+    }    
+  }
+
+}
+
+// Disconnect a PortHole from this Geodesic
+//
+// @Description Does not affect the PortHole itself.
+int SRGeodesic::disconnect( PortHole & p )
+{
+  if ( &p == originatingPort ) {
+    originatingPort = NULL;
+    return TRUE;
+  }
+
+  return receivers.remove( &p );
+
 }
 
 // Return the first receiver in the list, if any
@@ -132,4 +153,13 @@ PortHole * SRGeodesic::setOldDestPort( GenericPort & p )
 
   return (PortHole *) &p;
 
+}
+
+// Say that this Geodesic is persistent
+//
+// @Description This is to ensure PortHole::disconnect() doesn't destroy
+// this geodesic just because one PortHole disconnects from it.
+int SRGeodesic::isItPersistent() const
+{
+  return TRUE;
 }
