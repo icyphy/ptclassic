@@ -32,17 +32,6 @@ class LSCluster;
 //
 
 class LSNode : public EGNode {
-private:
-	// flag for cluster formation -- this marks whether or not this
-	// node is in the current cluster being considered
-	unsigned active_flag : 1;
-
-	// Indicates whether or not this node has been fired.
-	unsigned fired_flag : 1;
-
-	// index into connection matrix
-	int rm_index;
-
 public:
 
 	// constructor with master and invocation number arguments
@@ -73,7 +62,7 @@ public:
 	int connected() { return ancestors.size() + descendants.size(); }
 
 	// get this node's connection-matrix index
-	int myRMIndex() {return rm_index;}
+	int RMIndex() {return rm_index;}
 
 	// fire it.
 	void fireMe() {fired_flag = 1; }
@@ -86,14 +75,24 @@ public:
 
 	// redefine
 	LSNode* getNextInvoc() { return (LSNode*) EGNode :: getNextInvoc(); }
+
+private:
+	// flag for cluster formation -- this marks whether or not this
+	// node is in the current cluster being considered
+	unsigned active_flag : 1;
+
+	// Indicates whether or not this node has been fired.
+	unsigned fired_flag : 1;
+
+	// index into connection matrix
+	int rm_index;
 };
 
 class LSNodeLink : public EGNodeLink
 {
 public:
-	LSNode* myNode()	{ return (LSNode*) e; }
+	LSNode* node()	{ return (LSNode*) e; }
 
-	// constructor
 	LSNodeLink(LSNode* e) : EGNodeLink(e) {}
 };
 

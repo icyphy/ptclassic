@@ -43,7 +43,6 @@ class LSGraph : public ExpandedGraph
 friend class DecomScheduler;
 
 public:
-	// constructor, destructor
 	LSGraph() : RM(0) {}
 	~LSGraph();
 
