@@ -88,7 +88,7 @@ Example of a connection to the replacement block
 	      return;
 	    }
 	    if (!(destgp = breakConnection(peo))) return;
-	    if (inputMap.size() > 0) inputMap += " ";
+	    if (inputMap.numPieces() > 0) inputMap += " ";
 	    inputMap += destgp->name();
 	    if (!connectInput(pi,destgp)) return;
 	  }
@@ -102,7 +102,7 @@ Example of a connection to the replacement block
 	      return;
 	    }
 	    if (!(sourcegp = breakConnection(pei))) return;
-	    if (outputMap.size() > 0) outputMap += " ";
+	    if (outputMap.numPieces() > 0) outputMap += " ";
 	    outputMap += sourcegp->name();
 	    if (!connectOutput(po, sourcegp)) return;
 	  }
