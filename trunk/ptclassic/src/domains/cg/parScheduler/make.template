@@ -25,7 +25,6 @@
 # 						COPYRIGHTENDKEY
 # base parallel schedulers
 
-
 # Root of Ptolemy directory
 ROOT=../../../..
 # True source directory
@@ -37,15 +36,14 @@ include $(CONFIG)
 
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
 CGKERNEL = $(ROOT)/src/domains/cg/kernel
-PTCLHDRS = $(ROOT)/src/ptcl
 
-INCL=-I$(SDFKERNEL) -I$(CGKERNEL) -I$(KERNDIR) -I$(PTCLHDRS)
+INCL=-I$(SDFKERNEL) -I$(CGKERNEL) -I$(KERNDIR) -I$(PTCL_INCDIR)
 
 SRCS =	ParNode.cc ParGraph.cc ParScheduler.cc \
-		UniProcessor.cc CodeGen.cc ParProcessors.cc 
+ UniProcessor.cc CodeGen.cc ParProcessors.cc 
 
 HDRS =  ParNode.h ParGraph.h ParScheduler.h \
-		UniProcessor.h ParProcessors.h 
+ UniProcessor.h ParProcessors.h 
 
 OBJS = $(SRCS:.cc=.o)
 
