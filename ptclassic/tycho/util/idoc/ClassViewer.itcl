@@ -102,6 +102,9 @@ class ::tycho::IDoc {
     ###################################################################
     ####                      public methods                       ####
     
+    # Return a description of the current class.
+    public method describe {}
+
     # Insert the specified data.
     public method insertData {data}
     
@@ -142,6 +145,7 @@ class ::tycho::IDoc {
     private method displayvar {protection}
     
 }
+
 #########################################################################
 #### -headfont configuration
 # Parse the given X font to figure out what font family, size,
@@ -156,6 +160,7 @@ configbody ::tycho::IDoc::headfont {
     # must be caught because class may not exist
     catch {$myContents subconfig class -font $f}
 }
+
 #########################################################################
 #### -bodyfont configuration
 # Parse the given X font to figure out what font family, size,
@@ -237,7 +242,50 @@ body ::tycho::IDoc::constructor {args} {
 
     # Something annoying inherited insists on creating this thing
     pack forget $itk_interior.childsite
-    }
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#####################################################################
+#### describe 
+# Return a description of the current class by calling myClass describe.
+#
+body ::tycho::IDoc::describe {} {
+return [$myClass describe]
+}
+
+#######################################################################
+#### insertData
+# Append the specified data to the existing display.
+# The data should be a list of items of the form <i>methodname args</i>,
+# where <i>methodname</i> is a method of this class (i.e. any class
+# derived from <code>IDoc</code>), and <i>args</i> is the
+# set of arguments appropriate for that method.
+#
+body ::tycho::IDoc::insertData {data} {
+    if [getReadOnly] {bell; return}
+    catch {delete object myClass}
+    set myClass [::tycho::Class [::tycho::autoName class]]
+    $myClass read string "$data"
+    set language [$myClass cget -language]
+    display
+    putHtml [$myClass annotationget explanation]
+}
+
+#########################################################################
+#### putHtml
+# Load a portion of HTML into the $myHtml widget
+#
+body ::tycho::IDoc::putHtml {data} {
+    $myHtml clear
+    $myHtml insertData $data
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      private methods                      ####
 
 ###########################################################################
 #### binddesc
@@ -469,31 +517,4 @@ body ::tycho::IDoc::displayvar {protection} {
             }
         }
     }
-}
-
-#######################################################################
-#### insertData
-# Append the specified data to the existing display.
-# The data should be a list of items of the form <i>methodname args</i>,
-# where <i>methodname</i> is a method of this class (i.e. any class
-# derived from <code>IDoc</code>), and <i>args</i> is the
-# set of arguments appropriate for that method.
-#
-body ::tycho::IDoc::insertData {data} {
-    if [getReadOnly] {bell; return}
-    catch {delete object myClass}
-    set myClass [::tycho::Class [::tycho::autoName class]]
-    $myClass read string "$data"
-    set language [$myClass cget -language]
-    display
-    putHtml [$myClass annotationget explanation]
-}
-
-#########################################################################
-#### putHtml
-# Load a portion of HTML into the $myHtml widget
-#
-body ::tycho::IDoc::putHtml {data} {
-    $myHtml clear
-    $myHtml insertData $data
 }
