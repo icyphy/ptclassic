@@ -41,7 +41,7 @@ makefiles:
 		cd .. ; \
 	done
 
-all install clean sources depend:
+all install clean realclean sources depend:
 	@for x in $(DIRS); do \
 		cd $$x ; \
 		echo making $@ in $$x ; \
