@@ -100,7 +100,10 @@ DECLARE(param_reset, void, (char *name, char *val));
 DECLARE(param_get, params *, (char *name, params *val));
 DECLARE(param_dump, void, ());
 
+/* Cygwin b19 #defines stricmp to strcasecmp */
+#ifndef stricmp
 DECLARE(stricmp, int, (char *a, char *b));
+#endif
 
 /* Some convenience macros */
 
