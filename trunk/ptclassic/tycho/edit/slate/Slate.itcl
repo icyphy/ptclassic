@@ -106,30 +106,18 @@ proc ::tycho::slate {pathName args} {
 # other classes that work with the slate to implement its full
 # functionality. These classes are grouped into several categories,
 # according to their function in the slate:
-# <dl>
 #
-# <dt><a href="index.html"><b>kernel</b></a> <dd>The kernel classes,
-# including this one (Slate) and the core classes that implement
-# hierarchical pictures (Picture, Primitive, and Composite).
-#
-# <dt><a
-# href="../../../pictures/doc/codeDoc/index.html"><b>pictures</b></a>
-# <dd>A set of classes that implement picture in addition to the Tk
-# canvas items, including things like , ``3D'' rectangles and
+# <ul>
+# <li><i>Picture</i> and subclasses.
+# These classes implement the functionailty needed by the slate to 
+# actually create complex items. Subclasses of Picture includes things
+# like ``3D'' rectangles and
 # polygons, and ``smart'' objects like self-routing lines.
 #
-# <dt><a href="../../../shapes/doc/codeDoc/index.html"><b>shapes</b></a> 
-# <dd>A class hierarchy that manages picture ``shapes.'' Shape
-# object are what gives pictures knowledge of key coordinates
-# such as where their corners or the location of a point on
-# a circumference), and the ability to reshape themselves.
-#
-# <dt><a href="../../../interactors/doc/codeDoc/index.html">
-#       <b>interactors</b></a> 
-# <dd>A class hierarchy that manages user interaction with pictures
-# on the slate. Interactors provide a pwoerful mechanism
-# for capturing and reusing standard patterns of interaction.
-# </dl>
+# <li><i>Interactor</i> and subclasses. Interactors are objects that
+# manage user interaction with the slate. Interactors provide a powerful
+# mechanism for capturing and reusing standard patterns of interaction.
+# </ul>
 #
 # To create a slate, do not call the constructor directly, but call
 # the procedure <code>::tycho::slate</code>:
@@ -140,8 +128,14 @@ proc ::tycho::slate {pathName args} {
 #     wm deiconify .
 # </pre></tcl>
 #
+# The Slate class is designed to be fully compatible with the canvas,
+# so some of the methods are less efficient than they could be.
+# We are considering writing a second class, <i>Scratchpad</i>, which
+# will provide a faster interface for code that doesn't need
+# backwards compatibility.
+#
 class ::tycho::Slate {
-    inherit ::tycho::TWidget
+    inherit itk::Widget
 
     constructor {args} {}
     destructor {}
@@ -338,7 +332,7 @@ class ::tycho::Slate {
     private variable tagged
 
     # Storage for temporary variables
-    private variable temp
+    private variable scratch
 }
 
 
@@ -651,7 +645,7 @@ body ::tycho::Slate::component {id {component {}} {method {}} args} {
 #
 # Get or set the coordinates of an item or pict. If the argument
 # is a tag, perform this operation on the first item on the
-# slatereturned by `find withtag'.
+# slate returned by `find withtag'.
 #
 body ::tycho::Slate::coords {id args} {
     # If this is a canvas item, call the canvas
@@ -1126,13 +1120,13 @@ body ::tycho::Slate::interact {mode id args} {
 	    set x [lindex $args 0]
 	    set y [lindex $args 1]
 
-	    set temp($id.prevX) $x
-	    set temp($id.prevY) $y
+	    set scratch($id.prevX) $x
+	    set scratch($id.prevY) $y
 
 	    # If the -ghost option is specified, create the ghost
 	    if { [lsearch -exact $args -ghost] != -1 } {
-		set temp($id.ghost) [$this call $id ghost]
-		set temp($id.start) [$this coords $temp($id.ghost)]
+		set scratch($id.ghost) [$this call $id ghost]
+		set scratch($id.start) [$this coords $scratch($id.ghost)]
 	    }
 	}
 	"drag" {
@@ -1140,38 +1134,38 @@ body ::tycho::Slate::interact {mode id args} {
 	    set y [lindex $args 1]
 
 	    # If there's a ghost, move it. else move the picture.
-	    if { [::info exists temp($id.ghost)] } {
-		set movethis $temp($id.ghost)
+	    if { [::info exists scratch($id.ghost)] } {
+		set movethis $scratch($id.ghost)
 	    } else {
 		set movethis $id
 	    }
 
 	    # Move is a delta operation.
 	    $this move $movethis \
-		    [expr $x - $temp($id.prevX)] \
-		    [expr $y - $temp($id.prevY)]
+		    [expr $x - $scratch($id.prevX)] \
+		    [expr $y - $scratch($id.prevY)]
 
 	    # Remember the new position
-	    set temp($id.prevX) $x
-	    set temp($id.prevY) $y
+	    set scratch($id.prevX) $x
+	    set scratch($id.prevY) $y
 	}
 	"release" {
 	    # If there's a ghost, move the picture to its position and then
 	    # delete it
-	    if { [::info exists temp($id.ghost)] } {
-		assign x y $temp($id.start)
-		assign a b [$this coords $temp($id.ghost)]
+	    if { [::info exists scratch($id.ghost)] } {
+		assign x y $scratch($id.start)
+		assign a b [$this coords $scratch($id.ghost)]
 
 		$this move $id [expr $a - $x] [expr $b - $y]
-		$this delete $temp($id.ghost)
+		$this delete $scratch($id.ghost)
 
-		unset temp($id.ghost)
-		unset temp($id.start)
+		unset scratch($id.ghost)
+		unset scratch($id.start)
 	    }
 
 	    # Clean up
-	    unset temp($id.prevX)
-	    unset temp($id.prevY)
+	    unset scratch($id.prevX)
+	    unset scratch($id.prevY)
 	}
     }
 }
