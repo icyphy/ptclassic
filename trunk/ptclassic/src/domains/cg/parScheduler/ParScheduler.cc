@@ -42,10 +42,8 @@ ParScheduler :: ParScheduler(BaseMultiTarget* t, const char* logName) {
 ParScheduler :: ~ParScheduler() {
 }
 
-int ParScheduler :: computeSchedule(Galaxy& galaxy)
+int ParScheduler :: computeSchedule(Galaxy& g)
 {
-	myGal = &galaxy;
-
 	if (overrideSchedule()) {
 		if (!exGraph) {
 			Error::abortRun("We can not override an empty",
@@ -65,7 +63,7 @@ int ParScheduler :: computeSchedule(Galaxy& galaxy)
 	exGraph->setLog(logstrm);
 
 	// form the expanded graph
-	if (!exGraph->createMe(galaxy, OSOPreq())) {
+	if (!exGraph->createMe(g, OSOPreq())) {
 		Error::abortRun("Could not create expanded graph");
 		invalid = TRUE;
 		return FALSE;
@@ -80,14 +78,14 @@ int ParScheduler :: computeSchedule(Galaxy& galaxy)
 	}
 
 	// schedule it.
-	if(!mainSchedule(galaxy)) {
+	if(!mainSchedule()) {
 		invalid = TRUE;
 		return FALSE;
 	}
 
 	// finalize the schedule of wormholes.
 	if (inUniv) {
-		finalSchedule(galaxy);
+		finalSchedule();
 	}
  
 	// targetPtr setup for each processor
@@ -125,13 +123,13 @@ int ParScheduler :: createSubGals() {
 // mainSchedule 
 /////////////////////////////
 
-int ParScheduler :: mainSchedule(Galaxy& g) {
+int ParScheduler :: mainSchedule() {
 	// If manual assignment is requested
-	if (assignManually()) return scheduleManually(g);
+	if (assignManually()) return scheduleManually();
 	// Else, call automatic scheduling routine.
 	else {
 		if(!scheduleIt()) return FALSE;
-		if (OSOPreq()) saveProcIds(g);
+		if (OSOPreq()) saveProcIds();
 	}
 	return TRUE;
 }
@@ -140,8 +138,8 @@ int ParScheduler :: mainSchedule(Galaxy& g) {
 // saveProcIds
 /////////////////////////////
 
-void ParScheduler :: saveProcIds(Galaxy& g) {
-	GalStarIter iter(g);
+void ParScheduler :: saveProcIds() {
+	GalStarIter iter(*galaxy());
 	CGStar* s;
 	while ((s = (CGStar*) iter++) != 0) {
 		ParNode* n = (ParNode*) s->myMaster();
@@ -167,9 +165,9 @@ int procIdOfFork(CGStar* s) {
 // scheduleManually
 /////////////////////////////
 
-int ParScheduler :: scheduleManually(Galaxy& g) {
+int ParScheduler :: scheduleManually() {
 	// Make sure all stars are assigned to processors.
-	GalStarIter iter(g);
+	GalStarIter iter(*galaxy());
 	CGStar* s;
 	while ((s = (CGStar*) iter++) != 0) {
 		// If it is a Fork star, assign the procId with the parent's.
@@ -265,10 +263,10 @@ void ParScheduler :: setProfile(Profile* profile) {
 // finalSchedule
 /////////////////////////////
 
-void ParScheduler :: finalSchedule(Galaxy& galaxy) {
+void ParScheduler :: finalSchedule() {
 
 	// detect the wormholes, and finalize their schedule.
-	GalStarIter next(galaxy);
+	GalStarIter next(*galaxy());
 	CGStar* s;
 	while ((s = (CGStar*) next++) != 0) {
 		if (s->isItWormhole()) {
@@ -289,7 +287,7 @@ StringList ParScheduler :: displaySchedule() {
 	// Display Wormhole schedules.
 
 	out += "*********** Wormhole Schedules ************\n";
-	GalStarIter next(*myGal);
+	GalStarIter next(*galaxy());
 	CGStar* s;
 	while ((s = (CGStar*) next++) != 0) {
 		if (s->isItWormhole()) {

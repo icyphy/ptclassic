@@ -11,10 +11,18 @@ be in [-1,1].
 	location { CG56 demo library }
 	explanation {
 We make no attempt to be heroic and handle all cases as was done with Gabriel.
-The only special case is for gain 1.
+The only special case is for gain 1.  We eliminate ourselves from the circuit
+in that case.
+	}
+	protected {
+		short identity;
+	}
+	start {
+		identity = (double(gain) >= CG56_ONE);
+		if (identity) forkInit(input,output);
 	}
 	execTime {
-		return double(gain) == double(ONE) ? 2 : 5;
+		return identity ? 0 : 5;
 	}
 	input {
 		name {input}
@@ -37,12 +45,7 @@ The only special case is for gain 1.
 	rnd	a
 	move	a,$ref(output)
 	}
-	codeblock (unity) {
-	move	$ref(input),a
-	move	a,$ref(output)
-	}
 	go {
-		if (double(gain) == double(ONE)) gencode(unity);
-		else gencode(std);
+		if (!identity) gencode(std);
 	}
 }

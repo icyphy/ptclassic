@@ -21,7 +21,7 @@ Date of last revision: 5/92
 // function to display the schedule
 StringList DeclustScheduler::displaySchedule() {
 	StringList out;
-	out += bestSchedule->display(myGal);
+	out += bestSchedule->display(galaxy());
 	return out;
 }
 
@@ -119,7 +119,7 @@ int DeclustScheduler::scheduleIt() {
 
 	if (logstrm) {
 		*logstrm << "The best schedule after cluster shifting is \n";
-		*logstrm << bestSchedule->display(myGal);
+		*logstrm << bestSchedule->display(galaxy());
 	}
 
 	// If necessary, break down granularity of elementary clusters 
@@ -131,7 +131,7 @@ int DeclustScheduler::scheduleIt() {
 
 	if (logstrm) {
 		*logstrm << "The best schedule after cluster breakdown is \n";
-		*logstrm << bestSchedule->display(myGal);
+		*logstrm << bestSchedule->display(galaxy());
 	}
 
 	// Important: set parProcs to the bestSchedule
@@ -262,7 +262,7 @@ int DeclustScheduler::clusterBreakdown() {
 
 	DCNodeList SLPsection, bestBreak; // nodelist to hold SLP on curProc
 
-	while (SLP.mySize() > 0) {
+	while (SLP.size() > 0) {
 		// Start finding the next SLPsection
 		SLPsection.initialize();
 
@@ -273,7 +273,7 @@ int DeclustScheduler::clusterBreakdown() {
 		while (node && (node->getProcId() == curProc)) {
 			if (node->getType() == 0) SLPsection.insert(node);
 			node = (DCNode*) SLP.takeFromFront();
-			if (SLP.mySize()) node = (DCNode*) SLP.headNode();
+			if (SLP.size()) node = (DCNode*) SLP.headNode();
 			else node = 0;
 		}
 			
@@ -501,7 +501,7 @@ void DeclustScheduler::scheduleAnalysis(ClusterList &remClusts) {
 			///////////////////
 // Tries shifting slp clusters on heavily loaded to lightly loaded processors.
 
-int DeclustScheduler::loadShift(ClusterList &remC, ClusterList *slpC) {
+int DeclustScheduler::loadShift(ClusterList &, ClusterList *slpC) {
 
 	if (logstrm) {
 		*logstrm << "\nStarting loadShift\n";
@@ -755,7 +755,7 @@ int DeclustScheduler::pulldown(ClusterList *combClusts, ClusterList *Cleft) {
 	if (logstrm) {
 		*logstrm << "\n-- schedule traces --------------------\n";
 		*logstrm << "Initial schedule: \n";
-		*logstrm << bestSchedule->display(myGal);
+		*logstrm << bestSchedule->display(galaxy());
 	}
 
 	bestSchedule->saveBestResult(myGraph);
@@ -819,7 +819,7 @@ int DeclustScheduler::pulldown(ClusterList *combClusts, ClusterList *Cleft) {
 
 			if (logstrm) {
 				*logstrm << "New best schedule is: \n";
-				*logstrm << bestSchedule->display(myGal);
+				*logstrm << bestSchedule->display(galaxy());
 			}
 		}
 		else {	// Unbroken, assign to former processor

@@ -73,11 +73,11 @@ public:
 	void findClusts(DCNodeList&);
 
 	ClusterLink *firstLink()
-		{return (ClusterLink*)DoubleLinkList::myHead();}
+		{return (ClusterLink*)DoubleLinkList::head();}
 
 	Cluster *firstClust() {return (Cluster*)(firstLink()->getClustp());}
 
-	int listSize() {return DoubleLinkList::mySize();}
+	int listSize() {return DoubleLinkList::size();}
 
 	// Inserts the cluster smallest ExecTime first
 	void insertSorted(Cluster *c);

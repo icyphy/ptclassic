@@ -53,16 +53,15 @@ CGFullConnect::~CGFullConnect() {
 	delSched();
 }
 
-Block* CGFullConnect::clone() const {
-	LOG_NEW; CGFullConnect *t = new CGFullConnect(readName(),starType(),readDescriptor());
-	return &t->copyStates(*this);
+Block* CGFullConnect::makeNew() const {
+	LOG_NEW; return new CGFullConnect(name(),starType(),descriptor());
 }
 
 	/////////////////////////
-	// start, setup, wrapup
+	// setup, wrapup
 	/////////////////////////
 
-void CGFullConnect::start() {
+void CGFullConnect::setup() {
 	if (!inherited()) {
 	   if (nChildrenAlloc != int(nprocs) || strcmp(childType,oldChildType) != 0) {
 		deleteChildren();
@@ -80,23 +79,28 @@ void CGFullConnect::start() {
 	}
 	//choose the right scheduler
 	chooseScheduler();
-
-	ParScheduler* tempSched = (ParScheduler*) mySched();
-	tempSched->setUpProcs(nChildrenAlloc);
-	parProcs = tempSched->myProcs();
+	
+	ParScheduler* sched = (ParScheduler*) scheduler();
+	sched->setGalaxy(*galaxy());
+	sched->setUpProcs(nChildrenAlloc);
+	parProcs = sched->myProcs();
 
 	canProcs.create(nChildrenAlloc);
 
 	// CG stuff
-	LOG_DEL; delete dirFullName;
-	dirFullName = writeDirectoryName(destDirectory);
+	writeDirectoryName(destDirectory);
 	myCode.initialize();
+
+	if (galaxy()->parent()) {
+		sched->ofWorm();
+	}
+	Target :: setup();
 }
 
 Target* CGFullConnect :: createChild() {
 	return KnownTarget::clone(childType);
 }
-	
+
 void CGFullConnect :: chooseScheduler() {
 
 	delSched();
@@ -111,7 +115,7 @@ void CGFullConnect :: chooseScheduler() {
 	}
 }
 
-void CGFullConnect :: setStopTime(float f) {
+void CGFullConnect :: setStopTime(double f) {
 	Target::setStopTime(f);
 
 	// For child targets
@@ -125,23 +129,17 @@ void CGFullConnect :: setStopTime(float f) {
 // redefine beginIteration method to set the stop time of the child target
 // do nothing for endIteration
 void CGFullConnect :: beginIteration(int num, int) {
-	setStopTime(float(num));
+	setStopTime(num);
 }
 
 void CGFullConnect :: endIteration(int, int) {}
-
-int CGFullConnect::setup(Galaxy& gal) {
-	if (gal.parent()) {
-		((ParScheduler*) mySched())->ofWorm();
-	}
-	return Target :: setup(gal);
-}
 
 
 extern "C" int displayGanttChart(const char*);
 
 // Display Gantt chart if requested.
-void CGFullConnect::displaySchedule(ParScheduler* s) {
+void CGFullConnect::writeSchedule() {
+	ParScheduler* s = (ParScheduler*) scheduler();
         if (int(ganttChart)) {
 		char* gname = tempFileName();
 		pt_ofstream o(gname);
@@ -156,7 +154,7 @@ void CGFullConnect::displaySchedule(ParScheduler* s) {
 
 void CGFullConnect::wrapup() {
 
-	displaySchedule((ParScheduler*) mySched());
+	writeSchedule();
 	StringList logMsg;
 	for (int i = 0; i < nProcs(); i++) {
 		// write out generated code.
@@ -167,7 +165,7 @@ void CGFullConnect::wrapup() {
 		CGTarget* nextChild = (CGTarget*)child(i);
 		nextChild->writeCode(out);
 		logMsg += "code for ";
-		logMsg += nextChild->readFullName();
+		logMsg += nextChild->fullName();
 		logMsg += " written to ";
 		logMsg += (const char*)filePrefix;
 		logMsg += i;
@@ -181,21 +179,21 @@ void CGFullConnect::wrapup() {
 	/////////////////////
 
 int CGFullConnect :: run() {
-	if(gal->parent() == 0) return CGTarget :: run();
+	if(galaxy()->parent() == 0) return CGTarget :: run();
 
 	// if a wormhole, setup already generated code.
 	// We must do the transfer of data to and from the target.
-	BlockPortIter nextPort(*gal);
+	BlockPortIter nextPort(*galaxy());
 	PortHole* p;
 	while ((p = nextPort++) != 0) {
 		if (p->isItInput()) {
 			PortHole& realP = p->newConnection();
-			Geodesic* realG = realP.far()->myGeodesic;
+			Geodesic* realG = realP.far()->geo();
 			ParNode* pn = (ParNode*)
 				((SDFStar*) realP.parent())->myMaster();
 			while (pn) {
 			    CGStar* s = (CGStar*) pn->getCopyStar();
-			    PortHole* tp = s->portWithName(realP.readName());
+			    PortHole* tp = s->portWithName(realP.name());
 			    realG->setDestPort(*tp);
 			    if(!sendWormData(*tp)) return FALSE;
 			    pn = (ParNode*) pn->getNextInvoc();
@@ -206,12 +204,12 @@ int CGFullConnect :: run() {
 	while ((p = nextPort++) != 0) {
 		if (p->isItOutput()) {
 			PortHole& realP = p->newConnection();
-			Geodesic* realG = realP.far()->myGeodesic;
+			Geodesic* realG = realP.far()->geo();
 			ParNode* pn = (ParNode*)
 				((SDFStar*) realP.parent())->myMaster();
 			while (pn) {
 			    CGStar* s = (CGStar*) pn->getCopyStar();
-			    PortHole* tp = s->portWithName(realP.readName());
+			    PortHole* tp = s->portWithName(realP.name());
 			    realG->setSourcePort(*tp);
 			    if(!receiveWormData(*tp)) return FALSE;
 			    pn = (ParNode*) pn->getNextInvoc();
@@ -224,8 +222,9 @@ int CGFullConnect :: run() {
 // default code generation for a wormhole.  This produces an infinite
 // loop that reads from the inputs, processes the schedule, and generates
 // the outputs.
-int CGFullConnect :: wormCodeGenerate(Galaxy&g) {
-	int iprocs[nChildrenAlloc];
+int CGFullConnect :: wormCodeGenerate() {
+	Galaxy& g = *galaxy();
+	LOG_NEW; int* iprocs = new int[nChildrenAlloc];
 	for (int i = 0; i < nChildrenAlloc; i++)
 		iprocs[i] = 0;
 
@@ -245,7 +244,7 @@ int CGFullConnect :: wormCodeGenerate(Galaxy&g) {
 					iprocs[ip] = 1;
 					CGStar* s = (CGStar*)pn->getCopyStar();
 					s->myTarget()->wormInputCode(
-					 *(s->portWithName(realP.readName())));
+					 *(s->portWithName(realP.name())));
 				}
 				pn = (ParNode*) pn->getNextInvoc();
 			}
@@ -268,15 +267,16 @@ int CGFullConnect :: wormCodeGenerate(Galaxy&g) {
 					iprocs[ip] = 1;
 					CGStar* s = (CGStar*)pn->getCopyStar();
 					s->myTarget()->wormOutputCode(
-					 *(s->portWithName(realP.readName())));
+					 *(s->portWithName(realP.name())));
 				}
 				pn = (ParNode*) pn->getNextInvoc();
 			}
 		}
         }
 
-        mySched()->compileRun();
+        scheduler()->compileRun();
         endIteration(-1,0);
+	LOG_DEL; delete [] iprocs;
         return wormLoadCode();
 }
 
@@ -324,13 +324,13 @@ ParNode* CGFullConnect :: backComm(ParNode* n) {
 void CGFullConnect :: resetResources() {}			
 
 // create communication stars
-SDFStar* CGFullConnect :: createSend(int from, int to, int num) {
+SDFStar* CGFullConnect :: createSend(int from, int to, int /*num*/) {
 	LOG_NEW; CGSend* newS = new CGSend;
 	newS->registerProcs(from, to);
 	return newS;
 }
 
-SDFStar* CGFullConnect :: createReceive(int from, int to, int num) {
+SDFStar* CGFullConnect :: createReceive(int from, int to, int /*num*/) {
 	LOG_NEW; CGReceive* newS = new CGReceive;
 	newS->registerProcs(from, to);
 	return newS;
@@ -341,28 +341,28 @@ SDFStar* CGFullConnect :: createReceive(int from, int to, int num) {
 	/////////////////////////
 
 void CGFullConnect :: setProfile(Profile* p) {
-	((ParScheduler*) mySched())->setProfile(p);
+	((ParScheduler*) scheduler())->setProfile(p);
 }
 
 int CGFullConnect :: computeProfile(int nP, int flag, IntArray*) {
 	resetResources();
-	ParScheduler* qs = (ParScheduler*) mySched();
+	ParScheduler* qs = (ParScheduler*) scheduler();
 	qs->setUpProcs(nP);
-	int temp = qs->mainSchedule(*gal);
-	if (flag < 0) qs->finalSchedule(*gal);
+	int temp = qs->mainSchedule();
+	if (flag < 0) qs->finalSchedule();
 	return temp;
 }
 
 int CGFullConnect :: totalWorkLoad() {
-        return ((ParScheduler*) mySched())->getTotalWork();
+        return ((ParScheduler*) scheduler())->getTotalWork();
 }
 
 void CGFullConnect :: insideSchedule() {
- 	((ParScheduler*) mySched())->sortProcessors();
+ 	((ParScheduler*) scheduler())->sortProcessors();
 }
 
 void CGFullConnect::downLoadCode(int pId, Profile*) {
-	((ParScheduler*)mySched())->getProc(pId)->run();
+	((ParScheduler*)scheduler())->getProc(pId)->run();
 }
 
 void CGFullConnect :: addCode(const char* code) {

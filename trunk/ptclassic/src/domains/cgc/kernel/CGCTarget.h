@@ -28,10 +28,9 @@ class CGCStar;
 class CGCTarget : public BaseCTarget {
 public:
 	CGCTarget(const char* name, const char* starclass, const char* desc);
-	Block* clone() const;
+	Block* makeNew() const;
 	void headerCode();
-	void start();	// reset uniqueId.
-	int setup(Galaxy&);
+	void setup();
 	void wrapup();
 	void beginIteration(int repetitions, int depth);
 	void endIteration(int repetitions, int depth);
@@ -65,7 +64,7 @@ public:
 	int runCode();
 
 	// generate code for a single processor in a multiprocessor target
-	StringList generateCode(Galaxy& g);
+	StringList generateCode();
 
 	// static buffering option can be set by parent target
 	void wantStaticBuffering() { staticBuffering = TRUE; }
@@ -82,10 +81,10 @@ protected:
 	StringList wormOut;
 
 	// buffer size determination
-	int allocateMemory(Galaxy&);
+	int allocateMemory();
 
 	// code generation init routine; compute offsets, generate initCode
-	int codeGenInit(Galaxy&);
+	int codeGenInit();
 
 	// redefine frameCode() method
 	void frameCode();

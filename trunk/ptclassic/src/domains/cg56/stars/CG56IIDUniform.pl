@@ -45,11 +45,11 @@ done with g++ (type "long long"), but it isn't portable.
 	}
 	go {
 		gencode(random);
-		if (double(range) < double(ONE)) gencode(rangeScale);
+		if (double(range) < CG56_ONE) gencode(rangeScale);
 		else gencode (range1);
 	}
 	execTime {
-		return (double(range) < double(ONE)) ? 17 : 15;
+		return (double(range) < CG56_ONE) ? 17 : 15;
 	}
 	// "code" to initialize the seed
 	codeblock(initSeed) {

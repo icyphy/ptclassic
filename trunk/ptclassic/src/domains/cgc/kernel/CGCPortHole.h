@@ -1,5 +1,5 @@
-#ifndef _CGCConnect_h
-#define _CGCConnect_h 1
+#ifndef _CGCPortHole_h
+#define _CGCPortHole_h 1
 /******************************************************************
 Version identification:
 $Id$
@@ -15,9 +15,10 @@ $Id$
 #ifdef __GNUG__
 #pragma interface
 #endif
-#include "SDFConnect.h"
-#include "CGConnect.h"
-#include "CGCGeodesic.h"
+#include "SDFPortHole.h"
+#include "CGPortHole.h"
+
+class CGCGeodesic;
 
 class CGCPortHole : public CGPortHole {
 friend class ForkDestIter;
@@ -44,9 +45,7 @@ public:
 	// return the buffer requirements. Indicates whether static buffering
 	// is achieved or not.
 	// return 1 if on the wormhole boundary
-	int maxBufReq() const
-		{ if (atBoundary()) return 1;
-		return isItOutput()? maxBuf: realFarPort()->maxBufReq(); }
+	int maxBufReq() const;
 
 	// return TRUE if a star can see this port as a linear buffer.
 	int linearBuf() const { return asLinearBuf; }

@@ -32,9 +32,9 @@ public:
 	int compileCode();
 	int loadCode();
 	int runCode();
-	Block* clone() const;
+	Block* makeNew() const;
 	int isA(const char*) const;
-	const char* readClassName() const {return "Sim56Target";}
+	const char* className() const {return "Sim56Target";}
 };
 
 #endif

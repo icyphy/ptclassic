@@ -37,7 +37,7 @@ public:
 		{ return (DCNode*) EGNodeList :: takeFromFront(); }
 
 	DCNode* headNode() { 
-		return head? ((DCNode*) ((EGNodeLink*) head)->myNode()) : 0; }
+		return head() ? ((DCNode*) ((EGNodeLink*) head())->myNode()) : 0; }
 	int member(DCNode* n);
 
 	void removeNodes();
@@ -76,8 +76,8 @@ public:
 	int getSamples(DCNode *destnode);
 
 	// return TRUE if it is a merge node.
-	int amIMerge() { return tempAncs.mySize() - 1; }
-	int amIBranch() { return tempDescs.mySize() - 1; }
+	int amIMerge() { return tempAncs.size() - 1; }
+	int amIBranch() { return tempDescs.size() - 1; }
 
 	// print information
 	StringList print();	// Prints star name and invocation

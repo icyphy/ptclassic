@@ -40,7 +40,7 @@ StringList CGCStar::expandRef(const char* name)
     if ((st = stateWithName(name)) != NULL)
     {
 	registerState(name);
-	ref << ((CGCTarget*)myTarget())->correctName(*st);
+	ref << target()->correctName(*st);
     }
     else if ((port = (CGCPortHole*)genPortWithName(portName)) != NULL)
     {
@@ -48,9 +48,9 @@ StringList CGCStar::expandRef(const char* name)
 	if (port->maxBufReq() > 1) {
 		ref << '[';
 		if (port->staticBuf() == FALSE) {
-	    		ref << ((CGCTarget*)myTarget())->offsetName(port);
+	    		ref += target()->offsetName(port);
 		} else {
-			ref << port->bufPos();
+			ref += port->bufPos();
 		}
 		ref << ']';
 	}
@@ -91,7 +91,7 @@ StringList CGCStar::expandRef(const char* name, const char* offset)
     if ((state = stateWithName(name)) != NULL)
     {
 	ref = expandRef(name);
-	if (ref.size() == 0) return ref;	// error in getRef()
+	if (ref.length() == 0) return ref;	// error in getRef()
 	if (state->size() > 1) ref << '[' << offset << ']';
     }
     else if (port = (CGCPortHole*)genPortWithName(portName))
@@ -100,9 +100,9 @@ StringList CGCStar::expandRef(const char* name, const char* offset)
 	if (port->maxBufReq() > 1) {
 		ref << "[(";
 		if (port->staticBuf() == FALSE) {
-	    		ref << ((CGCTarget*)myTarget())->offsetName(port);
+	    		ref += target()->offsetName(port);
 		} else {
-			ref << port->bufPos();
+			ref += port->bufPos();
 		}
 	    	ref << " - (" << offset << ")";
 	    	if (port->linearBuf() == 0) {
@@ -124,7 +124,7 @@ void CGCStar :: initBufPointer() {
 		StringList out;
 		out += initializeOffset(p);
 		out += initializeBuffer(p);
-		if (out.size()) addMainInit(out);
+		if (out.length() > 0) addMainInit(out);
 	}
 }
 	
@@ -136,7 +136,7 @@ void CGCStar::registerState(const char* name) {
 		StateListIter nextState(referencedStates);
 		const State* sp;
 		while ((sp = nextState++) != 0)
-			if(strcmp(name,sp->readName()) == 0) return;
+			if(strcmp(name,sp->name()) == 0) return;
 		referencedStates.put(*state);
 	}
 }
@@ -148,14 +148,14 @@ void CGCStar::initialize() {
 
 // fire: prefix the code with a comment
 
-int CGCStar::fire() {
+int CGCStar::run() {
 	StringList code = "\t{  /* star ";
-	code += readFullName();
+	code += fullName();
 	code += " (class ";
-	code += readClassName();
+	code += className();
 	code += ") */\n";
 	gencode(code);
-	int status = CGStar::fire();
+	int status = CGStar::run();
 	
 	if (isItFork()) {
 		gencode("\t}\n");
@@ -170,7 +170,7 @@ int CGCStar::fire() {
 
 void CGCStar :: updateOffsets() {
 
-	CGCTarget* t = (CGCTarget*) myTarget();
+	CGCTarget* t = target();
 	StringList code2;
 
 	BlockPortIter next(*this);
@@ -208,9 +208,9 @@ StringList CGCStar :: declarePortHole(CGCPortHole* p) {
 		emptyFlag = FALSE;
 		int dimen = p->maxBufReq();
 		out += "    ";
-		out += whichType(p->plasmaType());
+		out += whichType(p->resolvedType());
 		out += " ";
-		out += ((CGCTarget*) myTarget())->correctName(*p);
+		out += target()->correctName(*p);
 		if(dimen > 1) {
 			out += "[";
 			out += dimen;
@@ -231,7 +231,7 @@ StringList CGCStar :: declareOffset(const CGCPortHole* p) {
 		emptyFlag = FALSE;
 		out += "    ";
 		out += "int ";
-		out += ((CGCTarget*) myTarget())->correctName(*p);
+		out += target()->correctName(*p);
 		out += "_ix";           // suffix to indicate the offset.
 		out += ";\n";
 	}
@@ -244,7 +244,7 @@ StringList CGCStar :: declareState(const State* s) {
 	out += "    ";
 	out += whichType(s->type());
 	out += " ";
-	out += ((CGCTarget*) myTarget())->correctName(*s);
+	out += target()->correctName(*s);
 	if (s->size() > 1) {
 		out += "[";
 		out += s->size();
@@ -275,7 +275,7 @@ StringList CGCStar :: initializeBuffer(const CGCPortHole* p) {
 StringList CGCStar :: initializeOffset(const CGCPortHole* p) {
 	StringList out;
 	if ((p->maxBufReq() > 1) && (p->staticBuf() == FALSE)) {
-		out = ((CGCTarget*)myTarget())->offsetName(p);
+		out = target()->offsetName(p);
 		out += " = ";
 		out += p->bufPos();
 		out += ";\n";
@@ -287,7 +287,7 @@ StringList CGCStar :: initializeOffset(const CGCPortHole* p) {
 
 // Initialize the state
 StringList CGCStar :: initializeState(const State* s) {
-	CGCTarget* t = (CGCTarget*) myTarget();
+	CGCTarget* t = target();
 	StringList out;
 	if (s->size() > 1) {
 		StringList temp = s->currentValue();
@@ -319,4 +319,30 @@ StringList CGCStar :: initializeState(const State* s) {
 	return out;
 }
 
+
+	// Add lines to be put at the beginning of the code file
+void CGCStar :: addInclude(const char* decl) {
+	target()->addInclude(decl);
+}
+
+	// Add declarations, to be put at the beginning of the main section
+void CGCStar :: addDeclaration(const char* decl) {
+	target()->addDeclaration(decl);
+}
+
+	// Add global declarations, to be put ahead of the main section
+void CGCStar :: addGlobal(const char* decl) {
+	target()->addGlobal(decl);
+}
+
+	// Add procedures, to be put ahead of the main section
+void CGCStar :: addProcedure(const char* decl) {
+	target()->addProcedure(decl);
+}
+
+	// Add main initializations, to be put at the beginning of the main 
+	// section
+void CGCStar :: addMainInit(const char* decl) {
+	target()->addMainInit(decl);
+}
 

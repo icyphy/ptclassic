@@ -42,7 +42,7 @@ void Sub56Target :: initStates() {
 int Sub56Target :: run() {
 	addCode("	rts\n");
 	addCode("ptolemyMain\n");
-	mySched()->setStopTime(1);
+	scheduler()->setStopTime(1);
 	int i = Target::run();
 	addCode("	rts\n");
 	return i;
@@ -54,7 +54,7 @@ void Sub56Target :: headerCode () {
 	CG56Target :: headerCode();
 };
 
-Block* Sub56Target::clone() const {
+Block* Sub56Target::makeNew() const {
 	LOG_NEW; return new Sub56Target(*this);
 }
 

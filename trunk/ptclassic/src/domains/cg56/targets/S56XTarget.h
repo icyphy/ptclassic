@@ -33,9 +33,9 @@ public:
 	int compileCode();
 	int loadCode();
 	int runCode();
-	Block* clone() const;
+	Block* makeNew() const;
 	int isA(const char*) const;
-	const char* readClassName() const{return "S56XTarget";}
+	const char* className() const{return "S56XTarget";}
 };
 
 #endif

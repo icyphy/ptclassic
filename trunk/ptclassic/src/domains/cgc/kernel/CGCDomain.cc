@@ -17,9 +17,9 @@ $Id$
 #include "Domain.h"
 #include "CGCTarget.h"
 #include "KnownTarget.h"
-#include "CGCConnect.h"
+#include "CGCPortHole.h"
 #include "CGCForkNode.h"
-#include "CGCWormConnect.h"
+#include "CGWormhole.h"
 
 // for error messages (temporary, until wormholes exist):
 #include "Error.h"
@@ -28,28 +28,16 @@ extern const char CGCdomainName[] = "CGC";
 
 class CGCDomain : public Domain {
 public:
-	// new wormhole
-	Star& newWorm(Galaxy& ,Target* )  {
-		// return *new CGCWormhole(innerGal,innerTarget);
-		Error::abortRun("No CGC wormhole implemented yet");
-		// Following is a hack
-		LOG_NEW; return *(new SDFStar);
-	}
-
-	// new input porthole
-	PortHole& newInPort() { LOG_NEW; return *new InCGCPort;}
-
-	// new output porthole
-	PortHole& newOutPort() { LOG_NEW; return *new OutCGCPort;}
+	// no XXXinCGC wormholes yet, so no newWorm
 
 	// new fromUniversal EventHorizon
 	EventHorizon& newFrom() {
-		LOG_NEW; return *(new CGCfromUniversal);
+		LOG_NEW; return *(new CGfromUniversal);
 	}
 
 	// new toUniversal EventHorizon
 	EventHorizon& newTo() {
-		LOG_NEW; return *(new CGCtoUniversal);
+		LOG_NEW; return *(new CGtoUniversal);
 	}
 
 	// new node (geodesic)

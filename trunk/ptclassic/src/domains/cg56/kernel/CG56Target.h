@@ -21,24 +21,22 @@ $Id$
 #include "ProcMemory.h"
 #include "StringState.h"
 #include "IntState.h"
-#include "FixState.h"
 
 extern StringList CG56ONE;
 
 class CG56Target : public virtual MotorolaTarget {
 protected:
 	void writeFloat(double);
-	FixState ONE;
 public:
 	CG56Target (const char* nam, const char* desc) :
 		MotorolaTarget(nam,desc,"CG56Star") {}
 	// copy constructor
 	CG56Target(const CG56Target& src) : 
-	  MotorolaTarget(src.readName(),src.readDescriptor(),"CG56Star") {}
-	int setup(Galaxy &g);
-	Block* clone() const;
+	  MotorolaTarget(src.name(),src.descriptor(),"CG56Star") {}
+	Block* makeNew() const;
 	void headerCode();
-	const char* readClassName() const{return "CG56Target";}
+	const char* className() const;
+	void setup();
 };
 
 #endif

@@ -56,7 +56,7 @@ void Sim56Target :: headerCode () {
 	addCode("	movep	#$0000,x:m_bcr\n\n");
 };
 
-Block* Sim56Target::clone() const {
+Block* Sim56Target::makeNew() const {
 	LOG_NEW; return new Sim56Target(*this);
 }
 

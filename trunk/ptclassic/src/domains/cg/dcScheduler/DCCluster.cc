@@ -78,7 +78,7 @@ void Cluster :: addArc(Cluster* adj, int numSample) {
 		carc->addSamples(numSample);
 	} else {
 		LOG_NEW; carc = new ClustArc(adj, numSample);
-		InOutArcs.tup(carc);
+		InOutArcs.prepend(carc);
 	}
 }
 

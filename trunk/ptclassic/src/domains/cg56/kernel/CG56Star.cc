@@ -20,18 +20,14 @@ $Id$
 #include "CG56Target.h"
 #include "StringList.h"
 
-CG56Star :: CG56Star() {
-	//CG56ONE is defined in CG56Target
-	addState(ONE.setState("ONE",this,CG56ONE,
-		"Max Fix point value",A_NONSETTABLE|A_CONSTANT));
-}
-
 // The following is defined in CG56Domain.cc -- this forces that module
 // to be included if any CG56 stars are linked in.
 
 extern const char CG56domainName[];
 
 const char* CG56Star :: domain () const { return CG56domainName;}
+
+StringList CG56Star :: ONE(CG56_ONE);
 
 // isa
 

@@ -57,16 +57,16 @@ public:
 	virtual void setUpProcs(int num);
 
         // main body of the schedule. 
-	int mainSchedule(Galaxy& g);
+	int mainSchedule();
 
-	virtual int scheduleManually(Galaxy& g);  // manual assignment.
+	virtual int scheduleManually();  // manual assignment.
         virtual int scheduleIt();		  // automatic assignment.
 				// Should be redefined in the derived class.
 
 ////////// Methods for wormholes ////////////////
 
 	// finialize the schedule of wormholes.
-	void finalSchedule(Galaxy&);
+	void finalSchedule();
 
 	// set the scheduled result into a designated profile
 	void setProfile(Profile* profile);
@@ -86,7 +86,6 @@ protected:
 	ostream *logstrm;
 
 	BaseMultiTarget* mtarget;
-	Galaxy* myGal;
 
 	int numProcs;
 
@@ -125,7 +124,7 @@ protected:
 
 	// use a modified critical path algorithm to schedule the graphs
 	// with given number of processors.
-	int computeSchedule(Galaxy&);
+	int computeSchedule(Galaxy& g);
 
 	// virtual methods: prepare scheduling. By default, do nothing
 	virtual int preSchedule();
@@ -133,7 +132,7 @@ protected:
 private:
 	// set the procId of stars after scheduling with OSOP option
 	// is executed. Prepare for adjustment.
-	void saveProcIds(Galaxy& g);
+	void saveProcIds();
 	
 	// temporary hack to get around the CG-DDF limitation.
 	int oldRoutine;

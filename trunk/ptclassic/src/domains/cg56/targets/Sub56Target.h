@@ -30,9 +30,9 @@ public:
 	Sub56Target(const Sub56Target&);
 	void headerCode();
 	int run();
-	Block* clone() const;
+	Block* makeNew() const;
 	int isA(const char*) const;
-	const char* readClassName() const {return "Sub56Target";}
+	const char* className() const {return "Sub56Target";}
 };
 
 #endif

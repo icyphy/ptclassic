@@ -52,7 +52,7 @@ void S56XTarget :: headerCode () {
 	interruptFlag = TRUE;
 };
 
-Block* S56XTarget::clone() const {
+Block* S56XTarget::makeNew() const {
 	LOG_NEW; return new S56XTarget(*this);
 }
 

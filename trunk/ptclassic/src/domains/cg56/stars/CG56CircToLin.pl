@@ -55,7 +55,7 @@ is repeated inline so may not be efficient for large N.
 	}
 	initCode { gencode(init);}
 	go {
-		gencode(setup);
+		gencode(setupC);
 		for (int j = 0; j < n; j++) {
 			i = j;
 			gencode(one);
@@ -73,7 +73,7 @@ is repeated inline so may not be efficient for large N.
 	move	x0,$ref(ptr)
 	}
 
-	codeblock(setup) {
+	codeblock(setupC) {
 	move	$ref(ptr),r0
 	move	#$size(input)-1,m0
 	nop			; can't read from circbuf right away

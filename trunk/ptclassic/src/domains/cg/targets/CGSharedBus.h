@@ -35,7 +35,7 @@ public:
 	// just before the argument node on the same communication resource.
 	ParNode* backComm(ParNode* n);
 
-	Block* clone() const;
+	Block* makeNew() const;
 
 protected:
 	UniProcessor bus;		// working bus used for scheduling

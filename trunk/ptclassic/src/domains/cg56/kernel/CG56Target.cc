@@ -17,8 +17,8 @@ $Id$
 #endif
 
 #include "CG56Target.h"
-
-StringList CG56ONE = double(1.0 - 1.0/double(1<<23));
+#include "CG56Star.h"
+#include "FixState.h"
 
 void CG56Target :: headerCode () {
         MotorolaTarget::headerCode();
@@ -31,14 +31,20 @@ void CG56Target :: headerCode () {
 	addCode(inc);
 }
 
-int CG56Target :: setup(Galaxy& g) {
-	g.addState(ONE.setState("ONE",this,CG56ONE,
-		"Max Fix point value",A_NONSETTABLE|A_CONSTANT));
-	return MotorolaTarget :: setup(g);
+void CG56Target :: setup() {
+	Galaxy& g = *galaxy();
+	if (g.stateWithName("ONE") == 0) {
+		LOG_NEW; FixState& ONE = *new FixState;
+		g.addState(ONE.setState("ONE",this,"",
+					"Max Fix point value",
+					A_NONSETTABLE|A_CONSTANT));
+		ONE.setInitValue(CG56_ONE);
+	}
+	MotorolaTarget :: setup();
 }
 
-// clone
-Block* CG56Target :: clone () const {
+// makeNew
+Block* CG56Target :: makeNew () const {
 	LOG_NEW; return new CG56Target(*this);
 }
 
@@ -49,4 +55,4 @@ void CG56Target::writeFloat(double val) {
 	MotorolaTarget::writeFloat(val);
 }
 
-
+const char* CG56Target::className() const { return "CG56Target";}

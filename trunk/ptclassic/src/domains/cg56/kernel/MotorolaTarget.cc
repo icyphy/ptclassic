@@ -39,16 +39,18 @@ void MotorolaTarget :: initStates() {
 	addState(yMemMap.setState("yMemMap",this,"0-4095","Y memory map"));
 }
 
-int MotorolaTarget :: setup(Galaxy& g) {
-	LOG_DEL; delete mem; mem = 0;
+void MotorolaTarget :: setup() {
+	LOG_DEL; delete mem;
 	LOG_NEW; mem = new MotorolaMemory(xMemMap,yMemMap);
-	return AsmTarget::setup(g);
+	AsmTarget::setup();
 }
 
 void MotorolaTarget :: wrapup () {
-	myCode << "\n\n;\n; Procedures Begin\n;\n" << procCode;
-	myCode << "\n\n;\n; Procedures End\n;\n";
-	procCode.initialize();
+	if (procCode.numPieces() > 0) {
+		myCode << "\n\n;\n; Procedures Begin\n;\n" << procCode;
+		myCode << "\n\n;\n; Procedures End\n;\n";
+		procCode.initialize();
+	}
 	StringList map = mem->printMemMap(";","");
 	addCode (map);
 	AsmTarget::wrapup();
@@ -60,14 +62,14 @@ MotorolaTarget :: ~MotorolaTarget () {
 
 // copy constructor
 MotorolaTarget :: MotorolaTarget (const MotorolaTarget& src) :
-AsmTarget(src.readName(),src.readDescriptor(),src.starType())
+AsmTarget(src.name(),src.descriptor(),src.starType())
 {
 	initStates();
 	copyStates(src);
 }
 
-// clone
-Block* MotorolaTarget :: clone () const {
+// makeNew
+Block* MotorolaTarget :: makeNew () const {
 	LOG_NEW; return new MotorolaTarget(*this);
 }
 
@@ -166,4 +168,11 @@ void MotorolaTarget::writeFloat(double val) {
 	addCode(out);
 }
 
+const char* MotorolaTarget::className() const {return "MotorolaTarget";}
 
+double MotorolaTarget::limitFix(double val) { 
+	const double limit = 1.0 - 1.0/double(1<<23);
+	if (val >= limit) return limit;
+	else if (val <= -1.0) return -1.0;
+	else return val;
+}

@@ -18,34 +18,15 @@ $Id$
 #include "CG56Target.h"
 #include "KnownTarget.h"
 #include "SDFScheduler.h"
-#include "CG56Connect.h"
-#include "SDFWormConnect.h"
+#include "CG56PortHole.h"
+#include "SDFWormhole.h"
 #include "AsmForkNode.h"
-
-// for error messages (temporary, until wormholes exist):
-#include "Error.h"
-
-// For the hacks below to avoid doing wormholes:
-
-#include "WormConnect.h"
 
 extern const char CG56domainName[] = "CG56";
 
 class CG56Domain : public Domain {
 public:
-	// new wormhole
-	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
-		// return *new CG56Wormhole(innerGal,innerTarget);
-		Error::abortRun("No CG56 wormhole implemented yet");
-		// Following is a hack
-		LOG_NEW; return *(new SDFStar);
-	}
-
-	// new input porthole
-	PortHole& newInPort() { LOG_NEW; return *new InCG56Port;}
-
-	// new output porthole
-	PortHole& newOutPort() { LOG_NEW; return *new OutCG56Port;}
+	// no fn to build a CG56-on-outside wormhole yet.
 
 	// new fromUniversal EventHorizon
 	EventHorizon& newFrom() {
