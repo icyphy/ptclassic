@@ -2,7 +2,7 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: @(#)testSDFDSP.tcl	1.3 10/01/97
+# @Version: $Id$
 #
 # @Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
