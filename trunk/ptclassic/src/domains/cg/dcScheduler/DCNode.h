@@ -47,21 +47,10 @@ public:
 // it is derived from the expanded graph node, it contains additional
 // data members which are used by SDFParScheduler.
 
-class DCAncestorIter;
-class DCDescendantIter;
-
 class DCNode : public ParNode {
 friend class DCGraph;
-friend class DCAncestorIter;
-friend class DCDescendantIter;
 
 private:
-	// A temporary copy of the list of ancestors 
-	DCNodeList tempAncs;
-
-	// A temporary copy of the list of descendants
-	DCNodeList tempDescs;
-
 	// set of merge nodes reachable through directed path is, which
 	// keeps compact information on the transitive closure.
 	DCNodeList TClosure;
@@ -82,10 +71,6 @@ public:
 
 	// Constructor used for communication nodes
 	DCNode(int type);
-
-	// Replenishes temporary lists tempAncs and tempDescs from the 
-	//	permanent ancestors and descendants lists 
-	void copyAncDesc(DCGraph*, int flag);
 
 	// Get the number of samples passed between this and destnode.
 	int getSamples(DCNode *destnode);
@@ -115,16 +100,6 @@ public:
 	int getBestStart() { return bestStart; }
 	int getBestFinish() { return bestFinish; }
 
-	// make connection.
-	void connectedTo(DCNode* to) {
-		tempDescs.insert(to);
-		to->tempAncs.insert(this);
-		to->incWaitNum();
-	}
-
-	// remove a node from tempDescs.
-	void removeDescs(DCNode* n) { tempDescs.remove(n); }
-
 	// return an adjacent node in the given node list.
 	// if direction = 1, look at the ancestors, if -1, descendants.
 	DCNode* adjacentNode(DCNodeList&, int direction);
@@ -138,19 +113,19 @@ public:
         DCNode* operator++() { return next(); }
 };
 
-class DCAncestorIter : public EGNodeListIter
+class DCAncestorIter : public ParAncestorIter
 {
 public:
-        DCAncestorIter(DCNode* n) : EGNodeListIter(n->tempAncs) {}
-        DCNode* next() { return (DCNode*) EGNodeListIter::next(); }
+        DCAncestorIter(DCNode* n) : ParAncestorIter(n) {}
+        DCNode* next() { return (DCNode*) ParAncestorIter::next(); }
         DCNode* operator++() { return next(); }
 };
 
-class DCDescendantIter : public EGNodeListIter
+class DCDescendantIter : public ParDescendantIter
 {
 public:
-        DCDescendantIter(DCNode* n) : EGNodeListIter(n->tempDescs) {}
-        DCNode* next() { return (DCNode*) EGNodeListIter::next(); }
+        DCDescendantIter(DCNode* n) : ParDescendantIter(n) {}
+        DCNode* next() { return (DCNode*) ParDescendantIter::next(); }
         DCNode* operator++() { return next(); }
 };
 
