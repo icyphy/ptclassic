@@ -55,31 +55,37 @@ Input length must be power of two.
 	  desc { Filter tap scale }
 	  attributes { A_CONSTANT|A_SETTABLE }
 	}
+	hinclude {<vis_types.h>}
         ccinclude {<vis_proto.h>, <math.h>, <stdio.h>}
 	code {
 #define NUMPACK (4)
+#define M_TWO_PI (2*M_PI)
 #define SWAP(a, b) tempr=(a); (a)=(b); (b)=tempr
-	  static void calcTwSinCos(double *Twsine,double
-				   *Twcosine,double ExpofW,int N2)
+	  static void calcTwSinCos(vis_s16 *sinsarray,vis_s16
+				   *cossarray,int order, int size)
 	    {
-	      double scale = 32767.0;
-	      int i;
-	      short *indexcount0,*indexcount1;
+	      vis_d64 twopioverN2;
+	      vis_s16 *indexcounts0,*indexcounts1;
+	      int N2,i,j;
 
-	      indexcount0 = (short *) Twcosine;
-	      indexcount1 = (short *) Twsine;
-	      for(i=0;i<N2;i++){
-		*indexcount0++ = (short) scale*cos(ExpofW*(N2-1-i));
-		*indexcount1++ = (short) -scale*sin(ExpofW*(N2-1-i));       
+	      N2=size;
+	      indexcounts0=cossarray;
+	      indexcounts1=sinsarray;
+	      for(i=0;i<order-2;i++){
+		twopioverN2 = M_TWO_PI/N2;
+		N2 = N2/2;
+		for(j=0;j<N2;j++){
+		  *indexcounts0++=(vis_s16) 32767* cos(twopioverN2*j);
+		  *indexcounts1++=(vis_s16) -32767*sin(twopioverN2*j);
+		}
 	      }
 	    }
-	  static double mult4x4(double mult1,double mult2)
+	  static vis_d64 mult4x4(vis_d64 mult1,vis_d64 mult2)
 	    { 
-
-	      double prodhihi,prodhilo,prodlohi,prodlolo;
-	      double prodhi,prodlo,product;
-	      float mult1hi,mult1lo,mult2hi,mult2lo;
-	      float packhi,packlo;
+	      vis_d64 prodhihi,prodhilo,prodlohi,prodlolo;
+	      vis_d64 prodhi,prodlo,product;
+	      vis_f32  mult1hi,mult1lo,mult2hi,mult2lo;
+	      vis_f32  packhi,packlo;
 
 	      mult1hi = vis_read_hi(mult1);
 	      mult1lo = vis_read_lo(mult1);
@@ -97,27 +103,27 @@ Input length must be power of two.
 	      packlo = vis_fpackfix(prodlo);
 	      return product = vis_freg_pair(packhi,packlo);
 	    }
-	  static float mult2x2(float mult1,float mult2)
+	  static vis_f32 mult2x2(vis_f32 mult1,vis_f32 mult2)
 	    {
-	      double resultu,resultl,result;
-	      float product;
+	      vis_d64 resultu,resultl,result;
+	      vis_f32 product;
 
 	      resultu = vis_fmuld8sux16(mult1,mult2);
 	      resultl = vis_fmuld8ulx16(mult1,mult2);
 	      result = vis_fpadd32(resultu,resultl);
 	      return product = vis_fpackfix(result);
 	    }
-	  static void reorderfft(short *s1,short *s2, int nn)
+	  static void reorderfft(vis_s16 *s1,vis_s16 *s2, int nn)
 	    {
 	      unsigned long n,j,i,m;
-	      short tempr;
+	      vis_s16 tempr;
 
 	      n=nn<<1;
 	      j=1;
 	      for(i=1;i<n;i+=2){
 		if(j>i){
-		  SWAP(s1[nn-1-(j-1)/2],s1[nn-1-(i-1)/2]);
-		  SWAP(s2[nn-(j-1)/2-1],s2[nn-(i-1)/2-1]);
+		  SWAP(s1[(j-1)/2],s1[(i-1)/2]);
+		  SWAP(s2[(j-1)/2],s2[(i-1)/2]);
 		}
 		m=n>>1;
 		while(m>=2 && j>m){
@@ -129,36 +135,33 @@ Input length must be power of two.
 	    }
 	}
 	protected {
-	  double *rein,*imin,*Twcosine,*Twsine;
-	  double twopi;
+	  vis_d64 *rein,*imin;
+	  vis_s16 *cossarray,*sinsarray;
 	}
 	constructor {
-	  rein = imin = Twcosine = Twsine =  0;
-	  twopi = 6.28318530717959;
+	  rein = imin = 0;
+	  cossarray = sinsarray =  0;
 	}
 	destructor {
 	  free(rein);
 	  free(imin);
-	  free(Twcosine);
-	  free(Twsine);
+	  free(cossarray);
+	  free(sinsarray);
 	}
 	begin {
-	  int i;
-	  short *indexcount;
-
 	  //allocate memory
-	  free(rein);
-	  free(imin);
-	  free(Twcosine);
-	  free(Twsine);
+	  if (rein) free(rein);
+	  if (imin) free(imin);
+	  if (cossarray) free(cossarray);
+	  if (sinsarray) free(sinsarray);
 	  rein = (double *)
 		memalign(sizeof(double),sizeof(double)*sizeoffft/4);
 	  imin = (double *)
 	  	memalign(sizeof(double),sizeof(double)*sizeoffft/4);
-	  Twcosine = (double *)
-	  	memalign(sizeof(double),sizeof(double)*sizeoffft/8);
-	  Twsine = (double *)
-	  	memalign(sizeof(double),sizeof(double)*sizeoffft/8);
+	  cossarray = (short *) memalign(sizeof(vis_d64),sizeof(vis_s16)*(sizeoffft-4));
+	  sinsarray = (short *) memalign(sizeof(vis_d64),sizeof(vis_s16)*(sizeoffft-4));
+
+	  calcTwSinCos(sinsarray,cossarray,orderfft,sizeoffft);	  
 	}
 	setup {
           realIn.setSDFParams(sizeoffft/4,sizeoffft/4-1);
@@ -167,91 +170,84 @@ Input length must be power of two.
 	  imagOut.setSDFParams(sizeoffft/4,sizeoffft/4-1);
 	}
 	go {	
-	  double ExpofW,reindtmp,imagindtmp;
-	  double xtcd,ytsd,xtsd,ytcd;
-	  float xtcf,ytsf,xtsf,ytcf;
-	  float *splitf_rein,*splitf_imin;
-	  float reinftmp,imaginftmp;
-	  float *Cf,*Sf;
-	  int i,j,k,l;
-	  int N,N1,N2;
-	  short *splits_rein,*splits_imin;
-	  short reinstmp,imaginstmp;
+	  vis_d64 reindtmp,imagindtmp,xtcd,xtsd,ytsd,ytcd,t0,t1,*twC,*twS;
+	  vis_f32 reinftmp,imaginftmp,xtcf,ytsf,xtsf,ytcf;
+	  vis_f32 *Cf,*Sf,*splitf_rein,*splitf_imin,C0,S0;
+	  int     N,N1,N2,i,j,k,l,genindex;
+	  vis_s16 reinstmp,imaginstmp,*splits_rein,*splits_imin;
 
 	  vis_write_gsr(8);
-
-	  splitf_rein = (float*)rein;
-	  splitf_imin = (float*)imin;
-	  splits_rein = (short*)rein;
-	  splits_imin = (short*)imin;
-
-	  // read in the input
-	  for(i=0;i<sizeoffft/4;i++){
-		rein[i] = double(realIn%i);
-		imin[i] = double(imagIn%i);
+	  splitf_rein = (vis_f32*)rein;
+	  splitf_imin = (vis_f32*)imin;
+	  splits_rein = (vis_s16*)rein;
+	  splits_imin = (vis_s16*)imin;
+	  twC = (vis_d64*) cossarray;
+	  twS = (vis_d64*) sinsarray;
+	  /*read in the input*/
+	  for(genindex=0;genindex<sizeoffft/4;genindex++){
+	    rein[genindex] = double(realIn%genindex);
+	    imin[genindex] = double(imagIn%genindex);
 	  }
-
-	  //first stages of fft (order of fft minus last two)
-	  N=sizeoffft;
-	  N2=N;
-	  for(k=0;k<orderfft-2;k++){
-	    N1=N2;
-	    N2=N2/2;
-	    ExpofW=twopi/N1;
-	    for(j=0;j<N2/4;j++){
-	      calcTwSinCos(Twsine,Twcosine,ExpofW,N2);
-	      for(i=j;i<N/4;i+=N1/4){
-		l=i+N2/4;
-		reindtmp=vis_fpsub16(rein[l],rein[i]);
-		rein[l]=vis_fpadd16(rein[i],rein[l]);
-		imagindtmp=vis_fpsub16(imin[l],imin[i]);
-		imin[l]=vis_fpadd16(imin[i],imin[l]);
-		xtcd=mult4x4(reindtmp,Twcosine[j]);
-		xtsd=mult4x4(reindtmp,Twsine[j]);
-		ytsd=mult4x4(imagindtmp,Twsine[j]);
-		ytcd=mult4x4(imagindtmp,Twcosine[j]);
-		rein[i]=vis_fpsub16(xtcd,ytsd);
-		imin[i]=vis_fpadd16(xtsd,ytcd);
+	  /*
+	   * first stages of fft (order of fft minus
+	   * last two)
+	   */   
+	  N = sizeoffft;
+	  N2 = N;
+	  for(k = 0;k < orderfft-2;k++){
+	    N1 = N2;
+	    N2 = N2/2;
+	    for(j = 0;j < N2/4;j++){
+	      t0 = *twC++;
+	      t1 = *twS++;
+	      for(i = j;i < N/4;i += N1/4){
+		l = i + N2/4;
+		reindtmp = vis_fpsub16(rein[i], rein[l]);
+		rein[i] = vis_fpadd16(rein[i], rein[l]);
+		imagindtmp = vis_fpsub16(imin[i], imin[l]);
+		imin[i] = vis_fpadd16(imin[i], imin[l]);
+		xtcd = mult4x4(reindtmp,t0);
+		xtsd = mult4x4(reindtmp,t1);
+		ytsd = mult4x4(imagindtmp,t1);
+		ytcd = mult4x4(imagindtmp,t0);
+		rein[l] = vis_fpsub16(xtcd, ytsd);
+		imin[l] = vis_fpadd16(xtsd, ytcd);
 	      }
 	    }
 	  }
-	  //second to last stage of the fft
-	      N1=N2;
-	  N2=N2/2;
-	  ExpofW=twopi/N1;
-	  calcTwSinCos(Twsine,Twcosine,ExpofW,N2);
-	  Cf=(float *) Twcosine;
-	  Sf=(float *) Twsine;
-	  j=0;
-	  for(i=0;i<N/4;i++){
-	    reinftmp=vis_fpsub16s(splitf_rein[j+1],splitf_rein[j]);
-	    imaginftmp=vis_fpsub16s(splitf_imin[j+1],splitf_imin[j]);
-	    splitf_rein[j+1]=vis_fpadd16s(splitf_rein[j+1],splitf_rein[j]);
-	    splitf_imin[j+1]=vis_fpadd16s(splitf_imin[j+1],splitf_imin[j]);
-	    xtcf=mult2x2(reinftmp,*Cf);
-	    xtsf=mult2x2(reinftmp,*Sf);
-	    ytsf=mult2x2(imaginftmp,*Sf);
-	    ytcf=mult2x2(imaginftmp,*Cf);
-	    splitf_rein[j]=vis_fpsub16s(xtcf,ytsf);
-	    splitf_imin[j]=vis_fpadd16s(xtsf,ytcf);
-	    j+=2;
-	  }
-	  //last stage of the fft
-	  i=0;
-	  for(j=0;j<N/2;j++){
-	    reinstmp=splits_rein[i+1]-splits_rein[i];
-	    imaginstmp=splits_imin[i+1]-splits_imin[i];
-	    splits_rein[i+1]=splits_rein[i]+splits_rein[i+1];
-	    splits_imin[i+1]=splits_imin[i]+splits_imin[i+1];
-	    splits_rein[i]=reinstmp;
-	    splits_imin[i]=imaginstmp;
-	    i+=2;
+	  /*second to last stage of the fft*/
+	  C0 = vis_to_float(0x7fff<<16|0x0000);
+	  S0 = vis_to_float(0x0000<<16|0x8000);
+	  j = 0;
+	  for(i = 0;i < N/4;i++){
+	    reinftmp = vis_fpsub16s(splitf_rein[j], splitf_rein[j+1]);
+	    imaginftmp = vis_fpsub16s(splitf_imin[j], splitf_imin[j+1]);
+	    splitf_rein[j] = vis_fpadd16s(splitf_rein[j + 1], splitf_rein[j]);
+	    splitf_imin[j] = vis_fpadd16s(splitf_imin[j + 1], splitf_imin[j]);
+	    xtcf = mult2x2(reinftmp, C0);
+	    xtsf = mult2x2(reinftmp, S0);
+	    ytsf = mult2x2(imaginftmp, S0);
+	    ytcf = mult2x2(imaginftmp, C0);
+	    splitf_rein[j+1] = vis_fpsub16s(xtcf, ytsf);
+	    splitf_imin[j+1] = vis_fpadd16s(xtsf, ytcf);
+	    j += 2;
+	  }	
+	  /*last stage of the fft*/
+	  i = 0;
+	  for(j = 0;j < N/2;j++){
+	    reinstmp = splits_rein[i] - splits_rein[i+1];
+	    imaginstmp = splits_imin[i] - splits_imin[i+1];
+	    splits_rein[i] = splits_rein[i] + splits_rein[i + 1];
+	    splits_imin[i] = splits_imin[i] + splits_imin[i + 1];
+	    splits_rein[i+1] = reinstmp;
+	    splits_imin[i+1] = imaginstmp;
+	    i += 2;
 	  }	
 	  reorderfft(splits_rein,splits_imin,sizeoffft);
-	  //output the results
+	  /*output the results*/
 	  for(i=0;i<sizeoffft/4;i++){
 	    realOut%i << rein[i];
 	    imagOut%i << imin[i];
 	  }
-	}	
+	}
 }
