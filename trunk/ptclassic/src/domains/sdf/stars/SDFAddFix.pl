@@ -1,11 +1,12 @@
 defstar {
 	name { AddFix }	
 	domain {SDF}
-	desc { Output the sum of the fixed-piont inputs as a fixed-point value. }
+	desc {
+Output the sum of the fixed-piont inputs as a fixed-point value.
+	}
 	version { $Id$ }
         author { A. Khazeni }
         location { SDF main library }
-	hinclude { "Fix.h" }
 	inmulti {
 		name { input }
 		type { fix }
@@ -26,55 +27,56 @@ precision specified by the parameter "InputPrecision". }
         defstate {
                 name { InputPrecision }
                 type { string }
-                default { "2.14" }
+                default { "4.14" }
                 desc { 
-Precision of the input in bits.  The input particles are only cast
-to this precision if the parameter "ArrivingPrecision" is set to NO.}
+Precision of the input in bits.
+The input particles are only cast to this precision if the
+parameter "ArrivingPrecision" is set to NO.
+		}
         }
         defstate {
                 name { OutputPrecision }
                 type { string }
-                default { "2.14" }
-                desc { 
-Precision of the output in bits.  This is the precision that will hold
-the result of the sum of the inputs.}
+                default { "4.14" }
+                desc {
+Precision of the output in bits and precision of the accumulation.
+When the value of the accumulation extends outside of the precision,
+the OverflowHandler will be called.
+                }
         }
         defstate {
                 name { OverflowHandler }
                 type { string }
                 default { "saturate" }
-                desc { 
-Overflow characteristic for the output.  If the result
-of the sum cannot be fit into the precision of the output, overflow 
-occurs and the overflow is taken care of by the method specified by this 
-parameter.  The keywords for overflow handling methods are : 
-"saturate"(default), "zero_saturate", "wrapped", "warning". }     
+                desc {
+Overflow characteristic for the output.
+If the result of the sum cannot be fit into the precision of the output,
+then overflow occurs and the overflow is taken care of by the method
+specified by this parameter.
+The keywords for overflow handling methods are:
+"saturate" (the default), "zero_saturate", "wrapped", and "warning".
+		}
         }
         protected {
-                const char* IP;
-                const char* OP;
-                const char* OV;
-                int in_IntBits;
-                int in_len;
-                int out_IntBits;
-                int out_len;
-		Fix sum;
+		Fix fixIn, sum;
+		int in_IntBits, in_len;
         }
         setup {
-                IP = InputPrecision;
-                OP = OutputPrecision;
-                OV = OverflowHandler;
-                in_IntBits = Fix::get_intBits (IP);
-                in_len = Fix::get_length (IP);
-                out_IntBits = Fix::get_intBits (OP);
-                out_len = Fix::get_length (OP);
+                const char* IP = InputPrecision;
+                in_IntBits = Fix::get_intBits(IP);
+                in_len = Fix::get_length(IP);
+
+                const char* OP = OutputPrecision;
+                int out_IntBits = Fix::get_intBits(OP);
+                int out_len = Fix::get_length(OP);
                 sum = Fix(out_len, out_IntBits);
+
+                const char* OV = OverflowHandler;
                 sum.set_ovflow(OV);  // Set the overflow characteristic of sum
         }
         go {
                 MPHIter nexti(input);
                 PortHole *p;
-                Fix fixIn;
 
 		sum = 0.0;
                 while ((p = nexti++) != 0) {
