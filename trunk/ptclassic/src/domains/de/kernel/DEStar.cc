@@ -65,6 +65,7 @@ DEStar::DEStar() {
     mode = SIMPLE;
     _pendingEventList = 0;
     _mutabilitySet = 0;
+    isRCStar = FALSE;
 }
 
 DEStar::~DEStar() {
