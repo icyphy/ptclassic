@@ -2,7 +2,7 @@
 #
 # @Author: %author%
 #
-# @Version: $Id$
+# @Version: %percentW%percent %percentG%percent
 #
 %copyright%
 
@@ -11,7 +11,7 @@
 
 package provide %Package% %version%
 global env auto_path
-set env(%PACKAGE%_LIBRARY) [file dirname [info script]]
-if { [lsearch -exact $auto_path $env(%PACKAGE%_LIBRARY)] == -1 } {
-    lappend auto_path $env(%PACKAGE%_LIBRARY)
+set env(%PKG%_LIBRARY) [file dirname [info script]]
+if { [lsearch -exact $auto_path $env(%PKG%_LIBRARY)] == -1 } {
+    lappend auto_path $env(%PKG%_LIBRARY)
 }
