@@ -5,6 +5,7 @@ Demonstrates the EndCase star.
 .DE
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
+.LO "~ptolemy/src/domains/ddf/demo"
 .LD
 .Se EndCase
 This rather trivial demo shows what the
