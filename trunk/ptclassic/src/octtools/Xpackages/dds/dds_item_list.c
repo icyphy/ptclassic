@@ -126,6 +126,7 @@ ddsData data;			/* Should be (ddsEditText *)          */
 		 "Items of type DDS_ITEM_LIST must have a parent");
 	/*NOTREACHED*/
     }
+    return (ddsHandle)NULL;
 }
 
 
@@ -440,6 +441,7 @@ ddsInternal *child;		/* New child     */
     errRaise(ddsPackageName, DDS_BAD_PARENT,
 	     "DDS_ITEM_LIST components may not have child components");
     /*NOTREACHED*/
+    return (Widget)NULL;
 }
 
 /*ARGSUSED*/
