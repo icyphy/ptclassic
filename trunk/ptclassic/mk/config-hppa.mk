@@ -15,6 +15,8 @@
 include $(ROOT)/mk/config-default.mk
 
 
+RANLIB =	ranlib
+
 # Get the g++ definitions; we override some below.
 include $(ROOT)/mk/config-g++.mk
 

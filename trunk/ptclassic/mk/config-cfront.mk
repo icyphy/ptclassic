@@ -10,6 +10,8 @@
 # platforms.
 include $(ROOT)/mk/config-default.mk
 
+RANLIB =	ranlib
+
 # C++ compiler to use.
 CPLUSPLUS = CC -I$(ROOT)/src/compat/cfront
 
