@@ -1443,10 +1443,9 @@ proc HMgoto {win where {callback HMwent_to}} {
     upvar #0 HM$win var
 
     # Note that javadoc produces tags like NamedObj(java.lang.String)
-    # so we can't use regexp below, use string match instead.
-    # FIXME: this will break if the tag has any special characters
-    # such as * ? [] or \
-    if {[string match "* N:$where *" [$win mark names]]} {
+    # which contains the magic symbols: ( and ),
+    # so we can't use regexp or string match, we must use lsearch -exact
+    if {[lsearch -exact [$win mark names] "N:$where" ] != -1} {
 	catch {$win see "N:$where"}
 	update
 	eval $callback $win [list $where]
