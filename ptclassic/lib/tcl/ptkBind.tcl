@@ -30,7 +30,7 @@
 # Bindings for widget classes in the tcl/tk Ptolemy interface
 #
 # Authors: Wei-Jen Huang
-#          Text Bindings by Alan Kamas
+#	   Text Bindings by Alan Kamas
 #	   Clean up and port to tk4.0 by Christopher Hylands
 #---------------------------------------------------------------------------
 #
@@ -67,11 +67,11 @@
 
 # Focus
     bind Entry <Any-Enter> {
-        #selection own %W
-        focus %W
+	#selection own %W
+	focus %W
     }
     bind Text <Any-Enter> {
-        selection own %W
+	selection own %W
 	focus %W
     }
 
@@ -166,7 +166,7 @@
     } 
 
 #  M-F          |       Forward one word
-     bind Entry <Key-Escape><Key-f> {
+    bind Entry <Key-Escape><Key-f> {
        # The next line is from the tk4.0 entry.tcl.
        tkEntrySetCursor %W [string wordend [%W get] [%W index insert]]
     }
@@ -185,14 +185,14 @@
 	   } else {set exists 0}
 	   catch {selection get}
 	   if {! [info exists errorInfo]} {
-              if {[selection own -displayof %W] == "%W"} {
+	      if {[selection own -displayof %W] == "%W"} {
 		clipboard clear -displayof %W
 		catch {
 		  clipboard append -displayof %W 0 end
 		  %W delete sel.first sel.last
 		}
 	      }
-             selection clear %W
+	     selection clear %W
 	   } else {
 		%W insert insert %A
 		tkEntrySeeInsert %W
@@ -203,11 +203,3 @@
 		tkEntrySeeInsert %W
 	}
     }
-
-proc ptkRecursiveBind {widget keySeq action} {
-    bind $widget $keySeq \
-	"uplevel #0 bind [winfo class $widget] $keySeq; uplevel #0 $action"
-    foreach child [winfo children $widget] {
-	ptkRecursiveBind $child $keySeq $action
-    }
-}
