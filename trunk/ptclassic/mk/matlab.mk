@@ -55,9 +55,5 @@ MATLABEXT_LIB = 	-lptmatlab
 else
 MATLABEXT_LIB = 	-L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
 endif
-
 MATLAB_INCSPEC =	-I$(MATLABDIR)/extern/include
-MATLABSTAR_LIBFILE =	$(LIBDIR)/libsdfmatlabstars.$(LIBSUFFIX) 
-MATLABSTAR_LIB =	-lsdfmatlabstars
-MATLABSTARS_DOT_O =	$(LIBDIR)/sdfmatlabstars.o
 
