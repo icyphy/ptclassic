@@ -146,8 +146,8 @@ static void ptSafeSig( int SigNum ) {
         pt_alarm_action.sa_flags |= SA_RESTART;
         sigaction( SigNum, &pt_alarm_action, NULL);
 }
-static void ptBlockSig ARGS((int SigNum)) {};
-static void ptReleaseSig ARGS((int SigNum)) {};
+static void ptBlockSig ARGS((int SigNum)) {}
+static void ptReleaseSig ARGS((int SigNum)) {}
 
 #else 
 #if defined(PTHPPA)
