@@ -35,7 +35,7 @@ $Id$
 #include "ganttIfc.h"
 #include "oh.h"
 #include "vemInterface.h"
-
+#include "octIfc.h"		/* Pick up MyOpenMaster */
 #include "ptk.h"  /* Interpreter name, window name, etc.  aok */
 #include "handle.h"
 
@@ -69,11 +69,9 @@ char *s;
 /*
 Copy the first component of s into buf.
 Components are separated by '.' characters.
-If the component contains the character "=", return FALSE.
-Otherwise, return TRUE.
 If the buffer is not large enough, copy only what fits.
 */
-static boolean
+static void
 head(s, buf, buflen)
 char *s;
 char *buf;
