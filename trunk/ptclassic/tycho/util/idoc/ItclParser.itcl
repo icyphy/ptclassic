@@ -35,11 +35,10 @@
 #######################################################################
 #### ItclParser
 # Parses Itcl code, creates <a href = 
-#"../../../../kernel/doc/codeDoc/Class.idoc">::tycho::Class</a>
+#"../../../../kernel/doc/codeDoc/ClassModel.itclclass">::tycho::ClassModel</a>
 # models for each class found, and outputs those to the proper
 # files. The most convenient interface
-# is from <code>::tycho::ClassParser::generateIDoc</code>
-# which will also generate Java documentation.
+# is from <code>::tycho::ClassParser::generateIDoc</code>.
 #
 # The parsing is done in three main procedures. <code>readFile</code>
 # reads in a file line by line and formats the comments in such a way
@@ -98,17 +97,20 @@ class ::tycho::ItclParser {
     ###################################################################
     ####                   private methods                         ####
 
-    # Parse the data for a single file, creating and modifying classes as needed
-    private method parseData {data}
+    # Format and add the arguments in a form the class model understands
+    private method addArgs {class name arguments}
 
-    # Parse the data within a class definition
-    private method parseClass {class body}
+    # Attach body information to the appropriate entity in the class model
+    private method addBody {name arguments expl}
 
     # Add the class comment by formatting it into HTML.
     private method addClassComment {class expl}
 
-    # Format and add the arguments in a form the class model understands
-    private method addArgs {class entityName arguments}
+    # Add a common proc to the class model
+    private method addCommon {class name protection desc {default {}}}
+    
+    # Attach configbody information to the appropriate entity in the class model
+    private method addConfigBody {name expl}
 
     # Add the constructor to the class model
     private method addConstructor {class arguments desc}
@@ -116,30 +118,27 @@ class ::tycho::ItclParser {
     # Add the destructor to the class model
     private method addDestructor {class desc}
 
-    # Add an itk_option to the class model
-    private method addItk_Option {class switchName desc {default {}}}
-    
-    # Add a common proc to the class model
-    private method addCommon {class commonName protection desc {default {}}}
-    
-    # Add a variable to the class model
-    private method addVariable {class varName protection desc {default {}}}
-
     # Add a proc to the class model
-    private method addInsideProc {class procName arguments protection desc}
+    private method addInsideProc {class name arguments protection desc}
+    
+    # Add an itk_option to the class model
+    private method addItk_Option {class name desc {default {}}}
     
     # Add a method to the class model
-    private method addMethod {class methodName protection arguments desc} 
-
-
-    # Attach body information to the appropriate entity in the class model
-    private method addBody {bodyName arguments expl}
-
-    # Attach configbody information to the appropriate entity in the class model
-    private method addConfigBody {configName expl}
+    private method addMethod {class name protection arguments desc} 
 
     # Add a non-class procedure to the related class model
-    private method addOutsideProc {procName arguments expl}
+    private method addOutsideProc {name arguments expl}
+
+    # Add a variable to the class model
+    private method addVariable {class name protection desc {default {}}}
+
+    # Parse the data for a single file, creating and
+    # modifying classes as needed
+    private method parseData {data}
+
+    # Parse the data within a class definition
+    private method parseClass {class body}
 
     ###################################################################
     ####                   private variables                       ####
@@ -202,7 +201,7 @@ body ::tycho::ItclParser::readFile {filename} {
     }
 
     # setup related model for outside class information
-    set _classmodels(related) [::tycho::Class [::tycho::autoName class]]
+    set _classmodels(related) [::tycho::ClassModel [::tycho::autoName class]]
     set _relatedModified 0
 
     set _sourceFile $filename
@@ -272,20 +271,21 @@ body ::tycho::ItclParser::readFile {filename} {
 
 #####################################################################
 #### generateSingleFileIDoc
-# Output an IDoc (::tycho::Class) representation of the loaded classes.
+# Write the models for all loaded classes into a file.
 #
 body ::tycho::ItclParser::generateSingleFileIDoc {filename} {
     # output class model data
-    foreach class [array names _classmodels] {
+    foreach {class model} [array get _classmodels] {
         # puts $class
         # puts [$_classmodels($class) describe]
         if {$class != "related"} {
             set docFile [info namespace tail $class].itclclass
             ::tycho::rmIfNotWritable $docFile
             set fd [open $docFile "w"]
-            $_classmodels($class) write $fd
+	    puts $fd [$model describe]
             close $fd
-            delete object $_classmodels($class)
+            # FIXME - ?
+	    delete object $model
         } else {
             if {$_relatedModified} {
                 # NOTE: goes by the filename, not the class name, for
@@ -299,10 +299,11 @@ body ::tycho::ItclParser::generateSingleFileIDoc {filename} {
                 }
                 ::tycho::rmIfNotWritable $relFile
                 set fd [open $relFile "w"]
-                $_classmodels(related) write $fd
+		puts $fd [$model describe]
                 close $fd
             }
-            delete object $_classmodels(related)
+	    # FIXME - ?
+            delete object $model
         }
     }
 }
@@ -420,7 +421,8 @@ body ::tycho::ItclParser::modCheck {filename} {
     set classes [getClassesInSource $filename]
     foreach class $classes {
         if {$class == "related"} {
-            set relFile [file join doc codeDoc [file root $filename]_rel.itclclass]
+            set relFile [file join doc codeDoc \
+                    [file root $filename]_rel.itclclass]
             if ![file exists $relFile] {
                 # No class-related documentation
                 return 1
@@ -436,7 +438,8 @@ body ::tycho::ItclParser::modCheck {filename} {
             }
             continue
         }
-        set docFile [file join doc codeDoc [info namespace tail $class].itclclass]
+        set docFile [file join doc codeDoc \
+                [info namespace tail $class].itclclass]
         if ![file exists $docFile] {
             # There is no documentation.
             return 1
@@ -459,6 +462,218 @@ body ::tycho::ItclParser::modCheck {filename} {
     ###################################################################
     ###################################################################
     ####                      private methods                      ####
+
+#####################################################################
+#### addArgs
+# Add the arguments to a proc or method to its associated entity in
+# the class model. This involves reformatting from Itcl:
+# <code>add {num1 {num2 0}}</code> to the class model's preferred
+# format: <code>parameter num1; parameter num2 -optional 1 -default 0</code>
+#
+body ::tycho::ItclParser::addArgs {class name arguments} {
+    set classModel $_classmodels($class)
+    foreach arg $arguments {
+        puts [list arg $arg [llength $arg]]
+	if { [llength $arg] == 2 } {
+	    set argname [lindex $arg 0]
+	    set default [lindex $arg 1]
+            $classModel add [concat $name argument:$argname] \
+                    -optional 1 \
+		    -default $default
+        } else {
+            $classModel add [concat $name argument:$arg]
+        }
+    }
+}
+
+#####################################################################
+#### addBody 
+# Add the information from a body structure to the class model. The body
+# name contains the information necessary to decide which class it 
+# belongs to and which entity its information is applicable to. At 
+# present, it just ignores the $arguments argument because those are
+# added when the entity is first parsed. It adds the explanation to
+# the given entity in the proper class.
+#
+body ::tycho::ItclParser::addBody {name arguments expl} {
+puts "addBody $name $arguments"
+    # assumes the method or proc already exists
+    set class [info namespace qualifiers $name]
+    set name [info namespace tail $name]
+    if { $name == "constructor" } {
+        set fullname constructor:constructor
+    } elseif { $name == "destructor" } {
+        set fullname destructor:destructor
+    } else {
+        set fullname method:$name
+    }
+
+    # Tcl allows either tycho::crap or ::tycho::crap
+    if ![::info exists _classmodels($class)] {
+        set class "::$class"
+    }
+
+    if [::info exists _classmodels($class)] {
+        set classModel $_classmodels($class)
+        # Insert the explanation
+        set expl [formatExpl "$expl"]
+        if {$expl != {}} {
+            $classModel itemconfigure $fullname -explanation $expl
+        }
+    }
+}
+
+#####################################################################
+#### addClassComment
+# Add a class comment to the class model.
+#
+body ::tycho::ItclParser::addClassComment {class expl} {
+    set classModel $_classmodels($class)
+    set expl [formatClassComment $expl]
+    $classModel modelconfigure -explanation "$expl"
+}
+
+#####################################################################
+#### addCommon 
+# Add a common proc at the given protection, its associated description,
+# and its default (if any) to the class model for $class.
+#
+body ::tycho::ItclParser::addCommon {class name protection desc {default {}}} {
+    # Commons are variables of classwide scope in Itcl
+    set classModel $_classmodels($class)
+    $classModel add variable:$name \
+            -protection $protection \
+	    -scope class \
+	    -default $default \
+	    -description [formatDesc $desc]
+}
+
+#####################################################################
+#### addConfigBody 
+# Add the information from a configbody structure to the class model.
+# the config name contains the information necessary to decide which
+# class it belongs to and which entity its information is applicable
+# to. It adds the explanation to the proper entity in the proper
+# class model.
+#
+body ::tycho::ItclParser::addConfigBody {name expl} {
+    # assumes the itk_option already exists
+    set class [info namespace qualifiers $name]
+    set name [info namespace tail $name]
+ 
+    # Tcl allows either tycho::crap or ::tycho::crap
+    if ![info exists _classmodels($class)] {
+        set class "::$class"
+    }
+
+    if [info exists _classmodels($class)] {
+        set classModel $_classmodels($class) 
+        set expl [formatExpl "$expl"]
+        if {$expl != {}} {
+            $classModel itemconfigure variable:-$name -explanation $expl
+        } 
+    }
+}
+
+#####################################################################
+#### addConstructor
+# Add the constructor, its arguments, and associated description to
+# the class model for $class.
+#
+body ::tycho::ItclParser::addConstructor {class arguments desc} {
+    set classModel $_classmodels($class)
+    $classModel add constructor:constructor -description [formatDesc $desc]
+    addArgs $class constructor:constructor $arguments    
+}
+
+#####################################################################
+#### addDestructor
+# Add the destructor, its arguments, and associated description to
+# the class model for $class.
+#
+body ::tycho::ItclParser::addDestructor {class desc} {
+    set classModel $_classmodels($class)
+    $classModel add destructor:destructor -description [formatDesc $desc]
+}
+
+#####################################################################
+#### addInsideProc
+# Add a proc which is part of a class at the given protection, its
+# associated description, and arguments to the class model for $class.
+#
+body ::tycho::ItclParser::addInsideProc {class name protection \
+        arguments desc} {
+    # Procs are methods of classwide scope in Itcl
+    set classModel $_classmodels($class)
+    $classModel add method:$name \
+	    -protection $protection \
+	    -scope class \
+	    -description [formatDesc $desc]
+    addArgs $class method:$name $arguments
+}    
+
+#####################################################################
+#### addMethod 
+# Add a method at the given protection, its arguments, and associated
+# description to the class model for $class.
+#
+body ::tycho::ItclParser::addMethod {class name protection arguments desc} {
+    # Methods are methods of instance scope in Itcl
+    set classModel $_classmodels($class)
+    $classModel add method:$name \
+	    -protection $protection \
+	    -scope instance \
+	    -description [formatDesc $desc]
+    addArgs $class method:$name $arguments
+}
+
+#####################################################################
+#### addItk_Option
+# Add the itk_option, its associated description, and its default (if 
+# any) to the class model for $class.
+#
+body ::tycho::ItclParser::addItk_Option {class name desc {default {}}} {
+    # Itk_options have the modifier flag set to itk_option in Itcl
+    set classModel $_classmodels($class)
+    $classModel add variable:$name \
+            -protection public \
+	    -modifiers itk_option \
+	    -default $default \
+	    -description [formatDesc $desc]
+}
+
+#####################################################################
+#### addOutsideProc
+# Add the proc given to the related class model. This model contains
+# all procs which are not defined within a specific class namespace
+# yet are found in the current file.
+#
+body ::tycho::ItclParser::addOutsideProc {name arguments expl} {
+    # add to $_classmodels(related)
+    set classModel $_classmodels(related)
+    $classModel add method:$name \
+	    -protection public \
+	    -scope class \
+	    -explanation [formatExpl $expl] \
+	    -description [shortDesc $expl]
+
+    set _relatedModified 1
+}
+
+#####################################################################
+#### addVariable 
+# Add a variable at the given protection, its associated description,
+# and its default (if any) to the class model for $class.
+body ::tycho::ItclParser::addVariable \
+	{class name protection desc {default {}}} {
+    # Variables are variables of instance scope in Itcl
+    set classModel $_classmodels($class)
+    $classModel add variable:$name \
+            -protection $protection \
+	    -scope instance \
+	    -default $default \
+	    -description [formatDesc $desc]
+}
 
 #####################################################################
 #### parseData
@@ -631,10 +846,11 @@ body ::tycho::ItclParser::parseData {data} {
 # definition.
 #
 body ::tycho::ItclParser::parseClass {class body} {
-    set _classmodels($class) [::tycho::Class [::tycho::autoName class]]
-    $_classmodels($class) modelconfigure -language $_language
-    $_classmodels($class) modelconfigure -name $class
-    $_classmodels($class) modelconfigure -source [file join .. .. $_sourceFile]
+    set _classmodels($class) [::tycho::ClassModel [::tycho::autoName class]]
+    $_classmodels($class) modelconfigure \
+	    -language $_language \
+	    -name $class \
+	    -source [file join .. .. $_sourceFile]
 
     set lastComment {}
     set lastProtection {}
@@ -804,8 +1020,12 @@ body ::tycho::ItclParser::parseClass {class body} {
         }
         if {$inInherit} {
             if {[string range $construct 0 1] == "::"} {
-                $_classmodels($class) parent $construct
-                continue
+		set parents [$_classmodels($class) modelcget -inherits]
+		lappend parents $construct
+		$_classmodels($class) modelconfigure -inherits $parents
+                puts [list $_classmodels($class) parent $construct]
+                # $_classmodels($class) parent $construct
+		continue
             }
             # No more parents, parse this.
             set inInherit 0
@@ -855,208 +1075,4 @@ body ::tycho::ItclParser::parseClass {class body} {
             }
         }
     }
-}
-
-#####################################################################
-#### addClassComment
-# Add a class comment to the class model. 
-#
-body ::tycho::ItclParser::addClassComment {class expl} {
-    set classModel $_classmodels($class)
-    set expl [formatClassComment $expl]
-    $classModel annotation explanation "$expl"
-}
-
-#####################################################################
-#### addArgs
-# Add the arguments to a proc or method to its associated entity in
-# the class model. This involves reformatting from Itcl:
-# <code>add {num1 {num2 0}}</code> to the class model's preferred
-# format: <code>parameter num1; parameter num2 -optional 1 -default 0</code>
-#
-body ::tycho::ItclParser::addArgs {class entityName arguments} {
-    set classModel $_classmodels($class)
-    foreach arg $arguments {
-        set default [lindex $arg 1]
-        # check the length in case the default is {}
-        if {[llength $arg] == 2} {
-            $classModel parameter $entityName [lindex $arg 0] \
-                    -optional 1 -default $default
-        } else {
-            $classModel parameter $entityName $arg
-        }
-    }
-}
-
-#####################################################################
-#### addConstructor
-# Add the constructor, its arguments, and associated description to
-# the class model for $class.
-#
-body ::tycho::ItclParser::addConstructor {class arguments desc} {
-    set classModel $_classmodels($class)
-    $classModel Constructor constructor
-    set desc [formatDesc $desc]
-    $classModel annotation constructor.description $desc Constructor
-    addArgs $class constructor $arguments    
-}
-
-#####################################################################
-#### addDestructor
-# Add the destructor, its arguments, and associated description to
-# the class model for $class.
-#
-body ::tycho::ItclParser::addDestructor {class desc} {
-    set classModel $_classmodels($class)
-    $classModel Destructor destructor
-    set desc [formatDesc $desc]
-    $classModel annotation destructor.description $desc Destructor
-}
-
-#####################################################################
-#### addItk_Option
-# Add the itk_option, its associated description, and its default (if 
-# any) to the class model for $class.
-#
-body ::tycho::ItclParser::addItk_Option {class switchName desc {default {}}} {
-    # Itk_options have the modifier flag set to itk_option in Itcl
-    set classModel $_classmodels($class)
-    $classModel variable $switchName \
-            -protection public -modifiers itk_option -default $default
-    set desc [formatDesc $desc]
-    $classModel annotation $switchName.description $desc variable
-}
-
-#####################################################################
-#### addCommon 
-# Add a common proc at the given protection, its associated description,
-# and its default (if any) to the class model for $class.
-#
-body ::tycho::ItclParser::addCommon {class commonName protection \
-        desc {default {}}} {
-    # Commons are variables of classwide scope in Itcl
-    set classModel $_classmodels($class)
-    $classModel variable $commonName \
-            -protection $protection -scope class -default $default
-    set desc [formatDesc $desc]
-    $classModel annotation $commonName.description $desc variable
-}
-
-#####################################################################
-#### addVariable 
-# Add a variable at the given protection, its associated description,
-# and its default (if any) to the class model for $class.
-body ::tycho::ItclParser::addVariable {class varName protection \
-        desc {default {}}} {
-    # Variables are variables of instance scope in Itcl
-    set classModel $_classmodels($class)
-    $classModel variable $varName \
-            -protection $protection -scope instance -default $default
-    set desc [formatDesc $desc]
-    $classModel annotation $varName.description $desc variable
-}
-
-#####################################################################
-#### addInsideProc
-# Add a proc which is part of a class at the given protection, its
-# associated description, and arguments to the class model for $class.
-#
-body ::tycho::ItclParser::addInsideProc {class procName protection \
-        arguments desc} {
-    # Procs are methods of classwide scope in Itcl
-    set classModel $_classmodels($class)
-    $classModel method $procName -protection $protection -scope class
-    set desc [formatDesc $desc]
-    $classModel annotation $procName.description $desc method
-    addArgs $class $procName $arguments
-}    
-
-#####################################################################
-#### addMethod 
-# Add a method at the given protection, its arguments, and associated
-# description to the class model for $class.
-#
-body ::tycho::ItclParser::addMethod {class methodName protection arguments desc} {
-    # Methods are methods of instance scope in Itcl
-    set classModel $_classmodels($class)
-    $classModel method $methodName -protection $protection -scope instance
-    set desc [formatDesc $desc]
-    $classModel annotation $methodName.description $desc method
-    addArgs $class $methodName $arguments
-}
-
-#####################################################################
-#### addBody 
-# Add the information from a body structure to the class model. The body
-# name contains the information necessary to decide which class it 
-# belongs to and which entity its information is applicable to. At 
-# present, it just ignores the $arguments argument because those are
-# added when the entity is first parsed. It adds the explanation to
-# the given entity in the proper class.
-#
-body ::tycho::ItclParser::addBody {bodyName arguments expl} {
-    # assumes the method or proc already exists
-    set class [info namespace qualifiers $bodyName]
-    set bodyName [info namespace tail $bodyName]
-
-    # Tcl allows either tycho::crap or ::tycho::crap
-    if ![info exists _classmodels($class)] {
-        set class "::$class"
-    }
-
-    if [info exists _classmodels($class)] {
-        set classModel $_classmodels($class)
-        # Insert the explanation
-        set expl [formatExpl "$expl"]
-        if {$expl != {}} {
-            $classModel annotation $bodyName.explanation $expl method
-        }
-    }
-}
-
-#####################################################################
-#### addConfigBody 
-# Add the information from a configbody structure to the class model.
-# the config name contains the information necessary to decide which
-# class it belongs to and which entity its information is applicable
-# to. It adds the explanation to the proper entity in the proper
-# class model.
-#
-body ::tycho::ItclParser::addConfigBody {configName expl} {
-    # assumes the itk_option already exists
-    set class [info namespace qualifiers $configName]
-    set configName [info namespace tail $configName]
- 
-    # Tcl allows either tycho::crap or ::tycho::crap
-    if ![info exists _classmodels($class)] {
-        set class "::$class"
-    }
-
-    if [info exists _classmodels($class)] {
-        set classModel $_classmodels($class) 
-        set expl [formatExpl "$expl"]
-        if {$expl != {}} {
-            $classModel annotation $configName.explanation $expl variable
-        } 
-    }
-}
-
-#####################################################################
-#### addOutsideProc
-# Add the proc given to the related class model. This model contains
-# all procs which are not defined within a specific class namespace
-# yet are found in the current file.
-#
-body ::tycho::ItclParser::addOutsideProc {procName arguments expl} {
-    # add to $_classmodels(related)
-    set classModel $_classmodels(related)
-    $classModel method $procName -protection public -scope class
-    set expl [formatExpl "$expl"]
-    if {$expl != {}} {
-        $classModel annotation $procName.explanation $expl method
-    }
-    set desc [shortDesc "$expl"]
-    $classModel annotation $procName.description $desc method
-   
-    set _relatedModified 1
 }
