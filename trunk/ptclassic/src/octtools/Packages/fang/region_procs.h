@@ -25,7 +25,7 @@
  * 
  */
 /*ARGSUSED*/
-static region_init_line(line, geo)
+static void region_init_line(line, geo)
 region_line *line;
 fa_geometry *geo;
 {
@@ -43,7 +43,7 @@ fa_geometry *geo;
     line->head->last = NIL(region_point);
 }
 
-static region_insert_point(pointer, x, y, delta)
+static void region_insert_point(pointer, x, y, delta)
 region_point *pointer;
 fa_coord x;
 fa_coord y;
@@ -66,14 +66,14 @@ int delta;
 }
 
 
-static region_free_line(line)
+static void region_free_line(line)
 region_line line;
 {
     FREE(line.head);
     FREE(line.tail);
 }
 
-static region_remove_point(pointer)
+static void region_remove_point(pointer)
 region_point *pointer;
 {
     pointer->last->next = pointer->next;
@@ -93,7 +93,7 @@ register fa_coord x;
     return(pointer);
 }
 
-static new_region(head_pointer, tail_pointer, tail_y)
+static void new_region(head_pointer, tail_pointer, tail_y)
 region_point *head_pointer;
 region_point *tail_pointer;
 fa_coord tail_y;
@@ -120,7 +120,7 @@ fa_coord tail_y;
     ptr->region.count = 2;
 }
 
-static push_head(region, pointer, y)
+static void push_head(region, pointer, y)
 region_region *region;
 region_point *pointer;
 fa_coord y;
@@ -137,7 +137,7 @@ fa_coord y;
     region->region.count++;
 }
 
-static push_tail(region, pointer, y)
+static void push_tail(region, pointer, y)
 region_region *region;
 region_point *pointer;
 fa_coord y;
@@ -155,7 +155,7 @@ fa_coord y;
     region->region.count++;
 }
 
-static merge_region(head_region, tail_region)
+static void merge_region(head_region, tail_region)
 region_region *head_region, *tail_region;
 {
     struct fa_region *ptr;
@@ -202,7 +202,7 @@ region_region *head_region, *tail_region;
 
 #define PHASE(region) (region->head->x < region->tail->x)
 
-static emit_region(outregion, region, pointer)
+static void emit_region(outregion, region, pointer)
 fa_region **outregion;
 region_region *region;
 region_point *pointer;
@@ -265,7 +265,7 @@ region_point *pointer;
     FREE(region);
 }
 
-static region_check_emit(outregion, pointer, vertex)
+static void region_check_emit(outregion, pointer, vertex)
 fa_region **outregion;
 region_point *pointer;
 fa_vertex *vertex;
@@ -348,6 +348,12 @@ fa_vertex *vertex;
 	    
 	    push_tail(pointer->region, pointer, vertex->y);
 	}
+	break;
+      case NO_VERTEX:
+      case LOWER_LEFT_NEG:
+      case LOWER_LEFT_POS:
+	break;
+      default:
 	break;
     }
 }
