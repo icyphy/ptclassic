@@ -59,6 +59,7 @@ PL_SRCS= \
  AnyAsmFork.pl \
  AnyAsmGround.pl \
  AnyCGPeekPoke.pl \
+ CGBlackHole.pl \
  CGCircToLin.pl \
  CGCollect.pl \
  CGDummySrc.pl \
