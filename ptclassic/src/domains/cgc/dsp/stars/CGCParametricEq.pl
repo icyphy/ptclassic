@@ -1,5 +1,5 @@
 defstar {
-	name {ParamBiquad}
+	name {ParametricEq}
 	derivedFrom {Biquad}
 	domain {CGC}
 	version { $Id$ }
