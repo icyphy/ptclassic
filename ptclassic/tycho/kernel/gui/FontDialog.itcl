@@ -187,7 +187,6 @@ abcdefghijklmnopqrstuvwxyz
     } {
 	keep -highlightthickness -background \
 		-foreground -highlightbackground
-	rename -font -displayfont displayFont DisplayFont
     }
     pack $itk_component(sampler) -fill both -expand yes \
 	    -after $itk_component(top) \
