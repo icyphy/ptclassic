@@ -106,14 +106,6 @@ CGWormhole :: ~CGWormhole() {
 	freeContents();
 }
 
-StringList CGWormhole :: printVerbose() const {
-	return Wormhole :: print(0);
-}
-
-StringList CGWormhole :: printRecursive() const {
-	return Wormhole :: print(1);
-}
-
 // Display schedules
 StringList CGWormhole :: displaySchedule() {
 	return target->displaySchedule();
@@ -184,7 +176,7 @@ void CGWormhole :: computeProfile(int num, int resWork, IntArray* avail)
 **************************************************************************/
 
 void CGtoUniversal :: initialize() {
-	InCGPort :: initialize();
+	PortHole :: initialize();
 	ToEventHorizon :: initialize();
 }
 
@@ -202,7 +194,7 @@ EventHorizon* CGtoUniversal :: asEH() { return this; }
 **************************************************************************/
 
 void CGfromUniversal :: initialize() {
-	OutCGPort :: initialize();
+	PortHole :: initialize();
 	FromEventHorizon :: initialize();
 }
 
