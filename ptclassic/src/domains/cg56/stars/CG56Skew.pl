@@ -7,7 +7,8 @@ defstar {
     copyright { 1991 The Regents of the University of California }
     location { CG56 library }
     explanation {
-The \fIerror\fP input is accumulated.  Normally the constant 0.0 is output.
+The \fIerror\fR input is accumulated.
+Normally the constant 0.0 is output.
 However, when overflow occurs, \fIoverVal\fP is output, 
 and when underflow occurs, \fIunderVal\fP is output.
     }

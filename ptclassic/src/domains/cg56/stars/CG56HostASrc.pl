@@ -4,7 +4,7 @@ defstar {
     desc { Asynchronous source. }
     version { $Id$ }
     author { Kennard White }
-	copyright {
+    copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
@@ -20,20 +20,20 @@ the host via the host port.
 This is intended as a base star for derivation; a derived star would provide
 some host-specific interface to this star.
 .LP
-The \fIlabel\fP parameter is not directly used by the star; it is for the
+The \fIlabel\fR parameter is not directly used by the star; it is for the
 convenience of derived stars.
-.UH IMPLEMENTATION:
+.UH IMPLEMENTATION
 .pp
 Since we may be followed by an up sampling operation, there may be
 an arbitrary number of memory locations corresponding to our output.
 Since we can't expect the host to update all of these values, we
-can't apply the trick used by the
+cannot apply the trick used by the
 .c Const
 star to eliminate runtime code in all cases.
 More work must be done to identify the safe cases.
 .LP
-On each firing of the star, the \fIvalue\fP state is output.
-The host may modify the \fIvalue\fP state asynchronously.
+On each firing of the star, the \fIvalue\fR state is output.
+The host may modify the \fIvalue\fR state asynchronously.
 Currently the value state is referenced by explicit memory location; however,
 we might want to generate a symbolic name.
 .LP

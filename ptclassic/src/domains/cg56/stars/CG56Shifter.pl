@@ -4,17 +4,17 @@ defstar {
     desc { Hard shifter. }
     version { $Id$ }
     author { Chih-Tsung Huang, ported from Gabriel }
-	copyright {
+    copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-	}
+    }
     location { CG56 arithmetic library }
     explanation {
 .Id "bit shifter"
-Scale by shifting left \fIleftShifts\fP bits.
-Negative values of N implies right shifting.
+Scale by shifting left \fIleftShifts\fR bits.
+Negative values of $N$ implies right shifting.
 Arithmetic shifts are used.
     }
     input {

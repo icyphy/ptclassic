@@ -26,17 +26,17 @@ it fires), interrupt-based code will be generated.
 If the star is not repeated, it will generate code
 that polls the Proport and busy waits if samples are not available.
 Interrupt-based code can be forced by setting the string
-parameter \fIforceInterrupts\fP to "yes".
+parameter \fIforceInterrupts\fR to "yes".
 The interrupt buffer will be the minimum required size if the
-parameter \fIinterruptBufferSize\fP is "default=4".
+parameter \fIinterruptBufferSize\fR is "default=4".
 If this parameter is a number, it will be used for the length
 (in words) of the interrupt buffer.
 .PP
 In the event of a real-time violation, execution will abort
 and one of the following error codes will be left in register y0:
-.ip "\fB123062\fP"
+.ip "\fB123062\fR"
 An interrupt occurred and the input buffer was full.
-.ip "\fB123063\fP"
+.ip "\fB123063\fR"
 An interrupt occurred and the output buffer was empty.
 	}
         seealso { PrPrtAD, PrPrtDA }

@@ -8,8 +8,8 @@ defstar {
     copyright { 1991 The Regents of the University of California }
     location { CG56 library }
     explanation {
-This derived star adds an additional \fIerror\fP input used to control the
-skew.
+This derived star adds an additional \fIerror\fR input used to control
+the skew.
 The error value is added to an internal accumulator.
 
 When the accumulator underfows 0.0, we conceptually slow down the timing clock.
@@ -28,8 +28,8 @@ More sophisticated applications will probably want to control skewing
 of input and output independently; this would require the SSI star to
 be operating in dual-buffer mode.
 
-When the parameter \fIinternalAccum\fP is false, it is assumed that
-the \fIerror input\fP is the output from an
+When the parameter \fIinternalAccum\fR is false, it is assumed that
+the \fIerror input\fR is the output from an
 .c SSISkew
 star.
 A positive value is treated as an overflow, and a negative value is treated

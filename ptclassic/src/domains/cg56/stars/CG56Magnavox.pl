@@ -13,7 +13,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 io library }
 	explanation {
-.PP
 This star is a combined input/output interface to a modified
 Magnavox CD player.
 The two inputs to the star are sent to the Magnavox CD player for output
@@ -27,23 +26,22 @@ it fires), interrupt-based code will be generated.
 If the star is not repeated, it will generate code
 that polls the Magnavox and busy waits if samples are not available.
 Interrupt-based code can be forced by setting the string
-parameter \fIforceInterrupts\fP to "yes".
+parameter \fIforceInterrupts\fR to "yes".
 The interrupt buffer will be the minimum required size if the
-parameter \fIinterruptBufferSize\fP is "default=4".
+parameter \fIinterruptBufferSize\fR is "default=4".
 If this parameter is a number, it will be used for the length
 (in words) of the interrupt buffer.
 .PP
 If a real-time violation occurs and the parameter
-\fIabortOnRealtimeError\fP is set to "yes", the star
-will abort execution
+\fIabortOnRealtimeError\fR is set to "yes", the star will abort execution
 with one of the following hexadecimal error codes in register y0:
-.ip "\fB123052\fP"
+.ip "\fB123052\fR"
 An interrupt occurred and the receive buffer was full.
-.ip "\fB123053\fP"
+.ip "\fB123053\fR"
 An interrupt occurred and the transmit buffer was empty.
-.UH BUGS:
+.UH BUGS
 .pp
-The \fIabortOnRealtimeError\fP parameter is ignored when
+The \fIabortOnRealtimeError\fR parameter is ignored when
 interrupt-based code is generated.
 	}
         seealso { MagnavoxIn, MagnavoxOut }

@@ -17,10 +17,11 @@ Output data from DSP to host via host port synchronously.
 .UH IMPLEMENTATION:
 .pp
 We distinguish between single word transfers and multiword transfers.
-The single word case is simpler in that we can use the \fIref\fP macro to
-access the value.  The multiword case requires a loop.  Currently
-we distinguish the two cases by \fIsamplesConsumed\fP, but I think it should
-be \fIsamplesOuput\fP.
+The single word case is simpler in that we can use the \fIref\fR macro to
+access the value.
+The multiple word case requires a loop.
+Currently, we distinguish the two cases by \fIsamplesConsumed\fR, but
+I think it should be \fIsamplesOuput\fR.
 .LP
 In blocking mode we wait until the host is ready to read our samples.
 In non-blocking mode, we completely skip the transfer if the host
