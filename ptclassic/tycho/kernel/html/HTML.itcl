@@ -73,6 +73,9 @@ class ::tycho::HTML {
     # Prompt the user for a file name and load in place of the current file.
     method altFile {}
 
+    # Return the current insertion point in a form usable by seePoint.
+    method currentPoint {}
+
     # Give the text subwindow the focus.
     method focusin {}
 
@@ -91,8 +94,8 @@ class ::tycho::HTML {
     # Clear the current text and reload from the source file.
     method reload {}
 
-    # Go to a named point within the file.
-    method seeName {name}
+    # Go to a specified point within the file.
+    method seePoint {point}
 
     # Switch to a different HTML file.
     method switchFile {filename}
@@ -273,6 +276,15 @@ body ::tycho::HTML::altFile {} {
 }
 
 ###################################################################
+#### currentPoint
+# Return the current insertion point in a form usable by seePoint.
+#
+body ::tycho::HTML::currentPoint {} {
+    set idx [[component text textWinName] index insert]
+    return [list range $idx $idx]
+}
+
+###################################################################
 #### focusin
 # Hand the focus to the text window.
 #
@@ -335,11 +347,11 @@ body ::tycho::HTML::reload {} {
 }
 
 #####################################################################
-#### seeName
-# Go to a named point within the file.
+#### seePoint
+# Go to a specified point within the file.
 #
-body ::tycho::HTML::seeName {name} {
-    $itk_component(text) seeName $name
+body ::tycho::HTML::seePoint {point} {
+    $itk_component(text) seePoint $point
 }
 
 #####################################################################
