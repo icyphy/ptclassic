@@ -85,7 +85,7 @@ for a complete explanation of the options.
 		int count;
 	}
 	ccinclude { "Target.h" }
-	start {
+	setup {
 		index = xInit;
 		numIn = input.numberPorts();
 		count = 0;
@@ -138,7 +138,21 @@ codeblock(closeFile) {
 		addCode(closeFile);
 
 		StringList cmd;
-		cmd << "(xgraph ";
+		cmd << "( ";
+
+		// save File
+		const char* sf = saveFile;
+		if (sf != NULL && *sf != 0) {
+			for (int i = 0; i<int(numIn); i++) {
+				cmd << "; /bin/cat ";
+				cmd << targetPtr->name(); 
+				cmd << "_$starSymbol(temp)" << i << " >> ";
+				cmd << sf << "; /bin/echo \"\" >> " << sf;
+				cmd << "; ";
+			}
+		}
+
+		cmd << "xgraph ";
 
 		// put title on command line
 
@@ -164,17 +178,6 @@ codeblock(closeFile) {
 		for (int i = 0; i < int(numIn); i++) {
 			cmd << targetPtr->name() << "_$starSymbol(temp)";
 			cmd << i << " ";
-		}
-
-		// save File
-		const char* sf = saveFile;
-		if (sf != NULL && *sf != 0) {
-			for (i = 0; i<int(numIn); i++) {
-				cmd << "; /bin/cat ";
-				cmd << targetPtr->name(); 
-				cmd << "_$starSymbol(temp)" << i << " >> ";
-				cmd << sf << "; /bin/echo \"\" >> " << sf;
-			}
 		}
 
 		// remove temporary files
