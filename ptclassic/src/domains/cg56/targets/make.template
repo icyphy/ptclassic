@@ -30,6 +30,7 @@ CGSTARDIR=$(ROOT)/src/domains/cg/stars
 
 # CGC directory
 CGCDIR=$(ROOT)/src/domains/cgc/kernel
+CGCTAR=$(ROOT)/src/domains/cgc/targets/main
 
 # CG56 kernel support
 CG56DIR=$(ROOT)/src/domains/cg56/kernel
@@ -55,7 +56,7 @@ S56PL_SRCS = 	CG56XCAsynchComm.pl CG56XCSynchComm.pl \
 
 INCL=-I$(CG56DIR) -I$(CGDIR) -I$(CGSTARDIR) -I$(SDFDIR) -I$(KERNDIR) \
      -I$(PARDIR) -I$(CGTARDIR) -I$(CG56STARDIR) -I$(CGCDIR) $(S56WHI) \
-     -I$(COMPAT)
+     -I$(COMPAT) -I$(CGCTAR)
 
 # stars to make
 PL_SRCS = CG56MultiSimReceive.pl CG56MultiSimSend.pl $(S56PL_SRCS)

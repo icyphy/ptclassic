@@ -22,35 +22,77 @@ input {
 	type {ANYTYPE}
 }
 
+codeblock(intSend,"int numXfer") {
+{
+    fix fixValue;
+    memcpy(fixValue,&$ref(input@(numXfer>1?",i":"")),sizeof(int));
+    FIX_Assign(24,24,dspWord,sizeof(int)*8,sizeof(int)*8,fixValue);
+}
+}
+
+codeblock(floatSend,"int numXfer") {
+    FIX_DoubleAssign(24,1,dspWord,$ref(input@(numXfer>1?",i":"")));
+}
+
+codeblock(fixSend,"int numXfer") {
+    FIX_Assign(24,1,dspWord,$ref(input@(numXfer>1?",i":"")));
+}
+
 codeblock(sendData,"const char* command,int numXfer") {
-	int i,semaphoreMask = 1<<@(pairNumber%24);
-	/* wait for dsp buffer to be empty */
-	while (s56xSemaphores[@(pairNumber/24)]&semaphoreMask);
-	for(i = 0 ; i<@numXfer ; i ++) {
-		int value;
-		@command;
-		if (value < 0xff800000) value = 0xff800000;
-		if (value > 0x007FFFFF) value = 0x007FFFFF;
-		if (qckPutY(dsp,@bufferPtr+i,value) == -1) { 
-			fprintf(stderr, "Send Data Failed, Pair @pairNumber:	%s\n", qckErrString);
-			exit(1);
-		}
-	}
-	s56xSemaphores[@(pairNumber/24)] |= semaphoreMask;
-	if (qckPutY(dsp,@(semaphorePtr+pairNumber/24),s56xSemaphores[@(pairNumber/24)]) == -1) { 
-		fprintf(stderr, "Semaphore update failed, Pair @pairNumber:	%s\n", qckErrString);
-		exit(1);
-	}
+    int value[@numXfer];
+    int i,semaphoreMask = 1<<@(pairNumber%24);
+    int count = S56X_MAX_POLL;
+    /* wait for dsp buffer to be empty */
+    while (--count && (s56xSemaphores[@(pairNumber/24)]&semaphoreMask));
+    if (count == 0) EXIT_CGC("The S-56X board is failing to receive data.  Is there another process still attached to the DSP?");
+    for(i = 0 ; i<@numXfer ; i ++) {
+	char* pValue;
+	fix dspWord;
+        pValue = (char*) &value[@numXfer-1-i];
+@command    
+        memcpy(++pValue,dspWord,3);
+    }
+
+    if (qckPutBlkItem(dsp,value,$starSymbol(s56xBuffer),@numXfer) == -1) { 
+	char buffer[128];
+	sprintf(buffer,
+		"Send Data Failed, Pair @pairNumber: %s", qckErrString);
+	EXIT_CGC(buffer);
+    }
+    s56xSemaphores[@(pairNumber/24)] |= semaphoreMask;
+    if (qckPutY(dsp,@(semaphorePtr+pairNumber/24),s56xSemaphores[@(pairNumber/24)]) == -1) { 
+	char buffer[128];
+	sprintf(buffer, "Semaphore update failed, Pair @pairNumber: %s", qckErrString);
+	EXIT_CGC(buffer);
+    }
+}
+
+setup {
+    if (input.setResolvedType() == FIX) {
+	Precision cg56Fix(24,1);
+	input.setPrecision(cg56Fix);
+    }
+    numXfer = input.numXfer();
+    CGCXSynchComm::setup();
 }
 
 go {
-	const char* intSend = "value = $ref(input,i)";
-	const char* fixSend = "value = $ref(input,i)*(1<<23)";
-	if (strcmp(input.resolvedType(),INT)==0)
-	    addCode(sendData(intSend,input.numXfer()));
-	else
-	    addCode(sendData(fixSend,input.numXfer()));
+    StringList command;   
+    if (input.resolvedType() == INT)
+	command << intSend(input.numXfer());
+    else if (input.resolvedType() == FIX)
+	command << fixSend(input.numXfer());
+    else if (input.resolvedType() == FLOAT)
+	command << floatSend(input.numXfer());
+    else
+	Error::abortRun(*this,input.resolvedType()," not supported");
+    addCode(sendData(command,input.numXfer()));
 }
 
 }
+
+
+
+
+
 

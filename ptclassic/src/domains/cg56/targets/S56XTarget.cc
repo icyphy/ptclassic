@@ -87,14 +87,6 @@ void S56XTarget :: trailerCode () {
 	trailer << "\tjmp\tERROR\n";
 }
 
-int S56XTarget :: compileCode() {
-	StringList assembleCmds = "asm56000 -b -l -A -oso ";
-	assembleCmds += filePrefix;
-	if (systemCall(assembleCmds,"Errors in assembly")!=0)
-		return FALSE;
-	return TRUE;
-}
-
 void S56XTarget :: writeCode() {
     /*
      * generate .aio data file

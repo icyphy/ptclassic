@@ -47,7 +47,6 @@ class S56XTarget : public CG56Target {
 public:
     S56XTarget(const char*,const char*);
     S56XTarget(const S56XTarget&);
-    /*virtual*/ int compileCode();
     /*virtual*/ void writeCode();
     /*virtual*/ int runCode();
     /*virtual*/ Block* makeNew() const;

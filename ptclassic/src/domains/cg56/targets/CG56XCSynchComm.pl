@@ -10,7 +10,6 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	hinclude  { "CGCS56XTarget.h"}
 	location { CG56 Target Directory }
 	explanation {
 	}
@@ -18,7 +17,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	state {
 		name {buffer}
 		type {intarray}
-		attributes {A_NONCONSTANT|A_NONSETTABLE|A_YMEM}
+		attributes {A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_NOINIT}
 		default {0}
 	}
 
@@ -69,8 +68,23 @@ $label(pending)
 	move    P:$$8000,a0              ; trigger host SIGUSR1 interrupt
 }
 
+method {
+    name{bufferName}
+    type{"const char*"}
+    access{public}
+    arglist{"()"}
+    code {
+	return starSymbol.lookup("buffer");
+    }
+}
+
 initCode {
 	addCode("	bset	#m_hf3,x:m_hcr",NULL,"hostInterruptEnable");
+	@	org	$ref(buffer)
+	@$starSymbol(buffer)
+        for(int i=0;i<numXfer;i++)
+	    @	dc	0
+	@	org	p:
 }
 
 }
