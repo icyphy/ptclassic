@@ -108,19 +108,17 @@ void S56XTarget :: writeCode() {
     /*
      * generate shell-cmd file (/bin/sh)
      */
-    if (!parent()) {
-	const char *monprog = monitorProg;
-	StringList realcmds = "#!/bin/sh\n";
-	realcmds << headerComment("# ");
-	if ( monprog==NULL || *monprog=='\0' ) {
-	    realcmds << "load_s56x" << " '" << filePrefix << ".lod'\n" << shellCmds;
-	} else {
-	    realcmds << monprog << " '" << filePrefix << ".lod'\n" << shellCmds;
-	}
-	if (!writeFile(realcmds,"",FALSE,0755)) {
-	    Error::abortRun(*this,"Shell command file write failed");
-	    return;
-	}
+    const char *monprog = monitorProg;
+    StringList realcmds = "#!/bin/sh\n";
+    realcmds << headerComment("# ");
+    if ( monprog==NULL || *monprog=='\0' ) {
+	realcmds << "load_s56x" << " '" << filePrefix << ".lod'\n" << shellCmds;
+    } else {
+	realcmds << monprog << " '" << filePrefix << ".lod'\n" << shellCmds;
+    }
+    if (!writeFile(realcmds,"",FALSE,0755)) {
+	Error::abortRun(*this,"Shell command file write failed");
+	return;
     }
     /*
      * generate the .asm file (and optionally display it)
