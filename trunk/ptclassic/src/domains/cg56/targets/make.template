@@ -42,7 +42,7 @@ CGTARDIR = $(ROOT)/src/domains/cg/targets
 # is defined in config-sun4.mk.
 ifdef S56DIR
 S56WHO= S56XTargetWH.o
-S56WHI= $(S56DIR)/include
+S56WHI= -I$(S56DIR)/include
 endif
 
 S56PL_SRCS = 	CG56S56XCGCBase.pl CGCS56XBase.pl \
@@ -50,7 +50,7 @@ S56PL_SRCS = 	CG56S56XCGCBase.pl CGCS56XBase.pl \
 		CGCS56XSend.pl CGCS56XReceive.pl
 
 INCL=-I$(CG56DIR) -I$(CGDIR) -I$(CGSTARDIR) -I$(SDFDIR) -I$(KERNDIR) \
-     -I$(PARDIR) -I$(CGTARDIR) -I$(CG56STARDIR) -I$(CGCDIR) -I$(S56WHI)
+     -I$(PARDIR) -I$(CGTARDIR) -I$(CG56STARDIR) -I$(CGCDIR) $(S56WHI)
 
 # stars to make
 PL_SRCS = CG56MultiSimReceive.pl CG56MultiSimSend.pl $(S56PL_SRCS)
