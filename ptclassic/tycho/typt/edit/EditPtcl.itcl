@@ -455,7 +455,7 @@ body ::tycho::EditPtcl::saveImplementation {} {
 
 #####################################################################
 #### selectImplementation
-# Make a list broswer which lists up implementations. When the OK button
+# Make a list browser which lists up implementations. When the OK button
 # is hit, record the star-implementation pair.
 #
 body ::tycho::EditPtcl::selectImplementation {{default {}}} {
@@ -477,7 +477,7 @@ body ::tycho::EditPtcl::selectImplementation {{default {}}} {
 
 #####################################################################
 #### selectStar
-# Make a list broswer which lists up stars.
+# Make a list browser which lists up stars.
 #
 body ::tycho::EditPtcl::selectStar {stars {default {}}} {
     set nm [::tycho::autoName .lb]

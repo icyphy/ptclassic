@@ -55,7 +55,7 @@
 # -- this ordering can be changed with the <b>reorder</b> method.
 #
 # The data of an item is a list of named attributes. By convention,
-# attribute names begine with a leading dash, although there is
+# attribute names begin with a leading dash, although there is
 # no requirement that this be so. Attributes can be set individually
 # with the <b>attrset</b> method. The names and number of attributes
 # is arbitrary, so attributes can be added and deleted dynamically.

@@ -99,7 +99,7 @@ class ::tycho::HTML {
     # The directory for relative references to images and the like,
     itk_option define -directory directory Directory {}
 
-    # Override the slowNetwork preference for this html browswer.
+    # Override the slowNetwork preference for this html browser.
     itk_option define -image image Image 0
 
     # If true (the default), underline hyperlinks.

@@ -729,7 +729,7 @@ body ::tycho::StatusBar::mode {} {
 # of progress bar updates at regular intervals.
 #
 # If _label__ argument is not supplied (which is how this method
-# is called in the after{} callbaks), then the command supplied
+# is called in the after{} callbacks), then the command supplied
 # by a previous call to this method is evaluated at the global
 # scope and the return value used to set proportion of the
 # progress bar display. The returned value is expected to be
