@@ -36,7 +36,7 @@ complete filename of the displayed image.
 }
 
 	ccinclude {
-		"GrayImage.h" , <std.h> , <stdio.h>, "Error.h"
+		"GrayImage.h" , <std.h> , <stdio.h>, "Error.h", "StringList.h"
 	}
 	input { name { inData } type { message } }
 	defstate {
@@ -74,19 +74,16 @@ complete filename of the displayed image.
 		const char* saveMe = saveImage;
 		int del = !((saveMe[0] == 'y') || (saveMe[0] == 'Y'));
 
-		char fileName[256];
-		fileName[0] = '\000';
+		StringList fileName;
 		if ((const char*) imageName) {
-		  strcpy(fileName, (const char*) imageName);
+		  fileName = (const char*) imageName;
 		}
-		if (fileName[0] == '\000') {
+		else {
 		  char* nm = tempFileName();
-		  strcpy(fileName, nm);
+		  fileName = nm;
 		  LOG_DEL; delete [] nm;
 		}
-		char numstr[16];
-		sprintf(numstr, ".%d", image->retId());
-		strcat(fileName, numstr);
+		fileName << "." << image->retId();
 
 		FILE* fptr = fopen(fileName, "w");
 		if (fptr == (FILE*) NULL) {
@@ -101,13 +98,12 @@ complete filename of the displayed image.
 			(unsigned) image->retWidth() * image->retHeight(), fptr);
 		fclose(fptr);
 
-		char cmdbuf[256];
-		sprintf (cmdbuf, "(%s %s", (const char*) command, fileName);
+		StringList cmdbuf = "(";
+		cmdbuf << (const char *) command << fileName;
 		if (del) {
-		  strcat(cmdbuf, "; rm -f ");
-		  strcat(cmdbuf, fileName);
+		  cmdbuf << "; rm -f " << fileName;
 		}
-		strcat(cmdbuf, ")&");		// Run command in the background
+		cmdbuf << ")&";		// Run command in the background
 		system(cmdbuf);
 	} // end go{}
 } // end defstar { DisplayImage }
