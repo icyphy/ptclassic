@@ -145,7 +145,7 @@ int CompileTarget::run() {
     myCode += "\n";
     myCode += "// set default value for number of iterations\n";
     myCode += "iterations = ";
-    myCode += scheduler()->getStopTime();
+    myCode += (int)(scheduler()->getStopTime());
     myCode += ";\n";
 
     myCode += universeName;
