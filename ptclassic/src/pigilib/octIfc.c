@@ -488,25 +488,27 @@ GetOrInitSogParams(instPtr, pListPtr)
 octObject *instPtr;
 ParamListType *pListPtr;
 {
-    octObject prop = {OCT_UNDEFINED_OBJECT};
+    octObject prop = {OCT_PROP};
     ParamListType tempList = {0, 0};
 
     ERR_IF1(!GetDefaultParams(instPtr, pListPtr));
-    prop.type = OCT_PROP;
+
+    /* Don't free prop with FreeOctMembers: it contains static strings */
     prop.contents.prop.name = "params";
+
+    /* If no parameters: use default list */
     if (octGetByName(instPtr, &prop) == OCT_NOT_FOUND) {
-	/* no parameters: use default list */
 	ERR_IF1(!SetSogParams(instPtr, pListPtr));
 	return(TRUE);
     }
-    if (!PStrToPList(prop.contents.prop.value.string, &tempList))
+
+    if (!PStrToPList(prop.contents.prop.value.string, &tempList)) {
 	return(FALSE);
-    FreeOctMembers(&prop);
-    MergeParams(pListPtr, &tempList);
-    if ( tempList.array ) {
-        free(tempList.array->name);
-        free(tempList.array);
     }
+
+    /* Do not free tempList: its pointers will be copied to pListPtr */
+    MergeParams(pListPtr, &tempList);
+
     return(TRUE);
 }
 
@@ -525,24 +527,26 @@ char* targName;
 octObject *facetPtr;
 ParamListType *pListPtr;
 {
-    octObject prop = {OCT_UNDEFINED_OBJECT};
+    octObject prop = {OCT_PROP};
     ParamListType tempList = {0, 0};
 
     ERR_IF1(!KcGetTargetParams(targName, pListPtr));
-    prop.type = OCT_PROP;
+
+    /* Don't free prop with FreeOctMembers: it contains static strings */
     prop.contents.prop.name = "targetparams";
+
+    /* If no parameters, return default list */
     if (octGetByName(facetPtr, &prop) == OCT_NOT_FOUND) {
-	/* no parameters: return default list */
 	return(TRUE);
     }
-    if (!PStrToPList(prop.contents.prop.value.string, &tempList))
+
+    if (!PStrToPList(prop.contents.prop.value.string, &tempList)) {
 	return(FALSE);
-    FreeOctMembers(&prop);
-    MergeParams(pListPtr, &tempList);
-    if ( tempList.array ) {
-        free(tempList.array->name);
-        free(tempList.array);
     }
+
+    /* Do not free tempList: its pointers will be copied to pListPtr */
+    MergeParams(pListPtr, &tempList);
+
     return(TRUE);
 }
 
@@ -976,15 +980,15 @@ octObject *o;
 		p = &(o->contents.prop);
 		free (p->name);
 		switch (p->type) {
-		case OCT_STRING:
+		  case OCT_STRING:
 			free(p->value.string);
 			break;
-		case OCT_NULL:
-		case OCT_INTEGER:
-		case OCT_REAL:
-		case OCT_ID:
+		  case OCT_NULL:
+		  case OCT_INTEGER:
+		  case OCT_REAL:
+		  case OCT_ID:
 			break;			/* nothing to free */
-		default:
+		  default:
 			fprintf(stderr,
 			        "FreeOctMembers: OCT_PROP type %d not handled\n",
 				p->type);
