@@ -1,4 +1,4 @@
-# Master initialization file for the Tycho tcl/tk Ptolemy interface.
+# Master initialization file for Tycho.
 # Sourcing this file will open one or more tycho editors, depending
 # on the command-line arguments.  If no command-line arguments are given,
 # then a console window is opened.
@@ -132,6 +132,13 @@ global ::ptolemyfeature
 
 # ptolemyfeature(ptolemy) is set to 1 if ptolemy is present
 set ptolemyfeature(ptolemy) 0
+
+# ptolemyfeature(ptolemyinsalled) is set if the file
+# $ptolemy/copyright exists.  This is not the same as having
+# ptolemy present, which means the executing binary can execute
+# ptolemy commands.
+set ptolemyfeature(ptolemyinstalled) \
+        [file exists [file join $ptolemy copyright]]
 
 # ptolemyfeature(pitcl) is set to 1 if the ::pitcl commands are present,
 # which indicates that we have access to the ptolemy kernel
