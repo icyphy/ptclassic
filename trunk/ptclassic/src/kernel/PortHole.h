@@ -50,59 +50,7 @@ Plasma: The place where Particles reside in transit back.
 
 Particles: Defined in Particle.h
 ******************************************************************/
-
-	/////////////////////////////////////////
-	// class CircularBuffer
-	/////////////////////////////////////////
-
-/*
-class CircularBuffer manages a circular buffer
-(array with modulo addressing) containing pointers to Particles.
-It is used to store Particle*s corresponding to past
-input or output Particles
-*/
-
-class CircularBuffer
-{
-public:
-        // Argument is the dimension of the array to allocate
-        CircularBuffer(int);
-        ~CircularBuffer();
-
-        // Reset to the beginning of the buffer
-        void reset() {current=0;}
-
-	// ZERO out the contents of the buffer
-	void initialize();
-
-        // Return current Pointer on the buffer
-        Particle** here() const;
-
-        // Return next Pointer on the buffer
-        Particle** next();
-
-        // Back up one Pointer on the buffer
-        Particle** last();
- 
-        // Access buffer relative to current
-        Particle** previous(int) const;
- 
-        // Size of the buffer
-        int size() const {return dimen;}
-
-	// last error msg
-	static const char* errMsg() { return errMsgString;}
-private:
-        // Number of Pointers on the buffer
-        int dimen;
-        // Index of the current Pointer
-        int current;
-        // Pointer array
-        Particle** buffer;
-	// An error string for the class
-	static const char* errMsgString;
-};
-
+class CircularBuffer;
 class Geodesic;
 class Plasma;
 class Block;
@@ -233,6 +181,9 @@ public:
 	// one except for SDF, where it is the number of
 	// Particles consumed or generated
 	int numberTokens;
+
+	// return the number of particles on my Geodesic
+	int numTokens() const;
 
 	// Maintain pointer to Geodesic connected to this PortHole
 	Geodesic* myGeodesic;
@@ -404,70 +355,6 @@ public:
 
         // Add MultiPortHole to list
         void put(MultiPortHole& p) {SequentialList::put(&p);}
-};
-/****************************************************************
-Geodesic
-
-Geodesic is where Particles reside in transit between
-Blocks. It is a container class, which stores and retreives
-Particles. Actually it stores only Particle*'s, so that its
-operator is independent of the type of Particle.
-*****************************************************************/
- 
-	///////////////////////////////////////////
-	// class Geodesic
-	///////////////////////////////////////////
-
-// Currently a type of Stack
-class Geodesic : public Stack
-{
-public:
-	// A lot of things are kept public, unfortunately, because
-	//  these routines are called by a lot of different
-	//  types of PortHoles -- impossible to make them
-	//  all friends
-
-        // We keep a pointer to the PortHoles corresponding to
-        // this Geodesic
-        PortHole *originatingPort;
-        PortHole *destinationPort;
-
-        // Constructor
-        Geodesic() { originatingPort = NULL;
-                     destinationPort = NULL;
-		     numInitialParticles = 0;}
-
-	// Destructor -- frees up all particles first
-	virtual ~Geodesic() {
-		numInitialParticles = 0;
-		initialize();
-	}
-
-	// initialize() for Geodesic initializes the number of Particles
-	// to that given by the numInitialParticles field, and
-	// also calls initialize() for each of those Particles
-	// TO BE DONE:  There should be a way to specify the value
-	// of these initial particles.
-	void initialize();
-
-	// Put a Particle into the Geodesic
-	void put(Particle* p) {pushBottom(p);}
-
-	// Get a Particle from the Geodesic
-	Particle* get();
-
-	//  Push a Particle back into the Geodesic
-	void pushBack(Particle* p) {pushTop(p);}
-
-	// Return the number of Particles on the Geodesic
-	int size() {return Stack::size();}
-
-        // A connection may require some initial particles.
-        // Note that the SDFScheduler manipulates this number directly, but
-        // guarantees that when it is done, the value will
-        // be the same as when it started, or the run will have been aborted
-        // due to a sample-rate inconsistency.
-	int numInitialParticles;
 };
 
 /***********************************************************
