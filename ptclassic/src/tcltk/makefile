@@ -191,7 +191,7 @@ $(TCLTK_OBJ)/$(TK_MAJOR_VERSION): $(TK_OBJ)
 
 # Build tk
 tk: $(TK_OBJ)/libtk.a 
-$(TK_OBJ)/libtk.a: $(TK_OBJ) #$(TK_OBJ)/xpm/libxpm.a
+$(TK_OBJ)/libtk.a: $(TK_OBJ) $(TCLTK_OBJ)/$(TCL_MAJOR_VERSION) #$(TK_OBJ)/xpm/libxpm.a
 	@echo "Making all in tk"
 	(cd  $(TK_OBJ); $(MAKE) \
 		X11_INCLUDES="$(X11_INCSPEC)" \
