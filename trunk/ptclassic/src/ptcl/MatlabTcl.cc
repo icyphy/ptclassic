@@ -133,6 +133,9 @@ int MatlabTcl::matlab(int argc, char** argv) {
 	if ( strcmp(argv[1], "get") == 0 ) {
 	    return MatlabTcl::get(argc, argv);
 	}
+	else if ( strcmp(argv[1], "getpairs") == 0 ) {
+	    return MatlabTcl::getpairs(argc, argv);
+	}
 	break;
 
       case 's':
@@ -160,7 +163,7 @@ int MatlabTcl::matlab(int argc, char** argv) {
     StringList msg = "unrecognized matlab command \"";
     msg << argv[1]
 	<< "\": should be "
-	<< "end, eval, get, send, set, start, status, or unset";
+	<< "end, eval, get, getpairs, send, set, start, status, or unset";
     return error(msg);
 }
 
@@ -224,6 +227,13 @@ int MatlabTcl::get(int argc, char** argv) {
     StringList msg = "Matlab matrix '";
     msg << argv[2] << "' is not defined";
     return error(msg);
+}
+
+// get a Matlab matrix
+int MatlabTcl::getpairs(int argc, char** /*argv*/) {
+    if ((argc < 3) || (argc > 4))
+	return usage("matlab getpairs <matrix_name> ?<matlab_command>?");
+    return error("'matlab getpairs' is not yet implemented.");
 }
 
 // evaluate a Matlab command
