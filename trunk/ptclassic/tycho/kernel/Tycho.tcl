@@ -98,7 +98,9 @@ uplevel #0 {
     source $TYCHO/tcltk/itcl-2.0b2/lib/itk2.0/init.itk
 }
 
-source $tychokernel/Lib.tcl
+uplevel #0 {
+    source $tychokernel/Lib.tcl
+}
 
 # FIXME: The following should be handled by auto-loading.
 uplevel #0 {
