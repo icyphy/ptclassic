@@ -30,6 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 
 #include "tk.h"
+#include "compat.h"		/* Pick up decl for sscanf() under sunos4.1.3*/
 #include <math.h>		/* Pick up isnan() and isinf(). */
 
 /* Number of colors defined in the ptkOptions database */

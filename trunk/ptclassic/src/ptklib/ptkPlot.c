@@ -34,6 +34,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <malloc.h>
 #include <math.h>
 #include <stdio.h>
+#include "compat.h"		/* Pick up decl for sscanf() under sunos4.1.3*/
 #include "ieee.h"
 
 /* Number of colors defined in the ptkOptions database */
