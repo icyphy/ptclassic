@@ -271,7 +271,7 @@ char* hInclude[NINC];		/* include files in .h file */
 int   nHInclude;		/* number of such files */
 char* ccInclude[NINC];		/* include files in .cc file */
 int   nCcInclude;		/* number of such files */
-char* derivedFrom;		/* stars obj is derived from */
+char* derivedFrom;		/* class obj is derived from */
 char* alsoDerivedFrom[NALSODERIVED]; /* Other non star classes derived from */
 int   nAlsoDerivedFrom;		/* number of such files */
 char* seeAlsoList[NSEE];	/* list of pointers to other manual sections */
@@ -790,7 +790,7 @@ int g;
 	int i;
 	for (i = 0; i < NSTATECLASSES; i++) stateMarks[i] = 0;
 	galDef = g;
-	objName = objVer = objDesc = domain = 
+	objName = objVer = objDesc = domain = derivedFrom =
 		objAuthor = objCopyright = objExpl = objHTMLdoc =
                 objLocation = NULL;
 	consStuff[0] = ccCode[0] = hCode[0] = consCalls[0] = 0;
@@ -2231,7 +2231,7 @@ yylexNormal(pCurChar)
 /* #define input() ((c = getc(yyin))==10?(yyline++,c):c) */
 
 /* The lexical analyzer */
-int yylex() {
+int yylex () {
     static int	c = 0;
     if (c == EOF) return 0;
 
