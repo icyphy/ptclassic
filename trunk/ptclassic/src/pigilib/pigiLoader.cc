@@ -51,6 +51,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringList.h"
 #include <ctype.h>
 #include "pt_fstream.h"
+
 #if defined(PTHPPA_CFRONT) || defined(PTSOL2) || defined(SVR4) || defined(SYSV) || !defined(PTIRIX5_CFRONT)
 #include <fcntl.h>		// For open().
 #endif /*hppa GNUG SOL2*/
@@ -62,78 +63,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define CPLUSPLUS "CC"
 #endif
 
-// Architecture-specific stuff.  The PTFOO defs come from compat.h
+// define the software architecture PTARCH
+#include "ptarch.h"
 
-#ifdef PTAIX
-#define ARCH "aix"
-#endif
-
-#ifdef PTAIX_XLC
-// IBM AIX running IBM's c and c++ compilers
-#define ARCH "aix.xlc"
-#endif
-
-#ifdef PTALPHA
-#define ARCH "alpha"
-#endif
-
-#ifdef PTHPPA
-#define ARCH "hppa"
-#endif
-
-#ifdef PTHPPA_CFRONT
-#undef ARCH
-#define ARCH "hppa.cfront"
-#endif
-
-#ifdef PTIRIX5
-#define ARCH "irix5"
-#endif
-
-#ifdef PTIRIX5_CFRONT
-#undef ARCH
-#define ARCH "irix5.cfront"
-#endif
-
-#ifdef PTLINUX
-#define ARCH "linux"
-#endif
-
-#ifdef PTULTRIX
-#define ARCH "mips"
-#endif
-
-#ifdef __mc68000__
-#define ARCH "sun3"
-#endif
-
-#ifdef PTSOL2
-#define ARCH "sol2"
-#endif
-
-#ifdef PTSOL2_CFRONT
-#undef ARCH
-#define ARCH "sol2.cfront"
-#endif
-
-
-#ifdef PTSUN4
-#define ARCH "sun4"
-#endif
-
+// define extra compiler options EXTRAOPTS
 #ifdef PTSVR4
-#undef ARCH
-#define ARCH "unixware"
 #ifdef __GNUG__
 #define EXTRAOPTS "-fPIC"
 #else
 #define EXTRAOPTS "-KPIC"
 #endif /* __GNUG__ */
 #endif /* PTSVR4 */
-
-#ifdef vax
-#define ARCH "vax"
-#endif
 
 #ifdef mips
 #define EXTRAOPTS "-G 0"
@@ -287,7 +227,7 @@ static int compile (const char* name, const char* idomain, const char* srcDir,
 	return TRUE;
 }
 
-// Replace the last occurrence of the "src" sub-directory with "obj.$ARCH"
+// Replace the last occurrence of the "src" sub-directory with "obj.$PTARCH"
 // in the directory srcDirStr (note that srcDirStr is not a path name)
 static char* genObjDir (const char* srcDirStr) {
 	int len = strlen(srcDirStr);
@@ -314,11 +254,11 @@ static char* genObjDir (const char* srcDirStr) {
 	    }
 	  }
 
-	  // 3. If found, substitute "/src" subdirectory with "/obj.$ARCH"
+	  // 3. If found, substitute "/src" subdirectory with "/obj.$PTARCH"
 	  if ( found ) {
 	    *srcloc = 0;
 	    StringList temp = srccopy;
-	    temp << "/obj." << ARCH;	// replace "/src" with "/obj.$ARCH"
+	    temp << "/obj." << PTARCH;	// replace "/src" with "/obj.$PTARCH"
 	    temp << &srcloc[4];		// copy rest of source directory
 	    objDirStr = savestring(temp);
 	    delete [] srccopy;
