@@ -15,25 +15,80 @@ higher level functions are called
 and an entire
 application is called a 
 .c Universe .
-A \fBPtolemaic\fR domain is implemented as a C++ object called a
+The domain of a
+.c Star
+is decided automatically  by 
+.c class
+hierarchy in its creation.  For example, all stars
+derived from
+.c SDFStar\ class
+are in the SDF domain.
+On the other hand, we may explicitly specify the domain of a
+.c Galaxy
+by setting the domain property of the
+.c Galaxy.
+If not specified explicitly, the domain of the 
+.c Galaxy
+is determined by the domain of the first-searched block in the
+.c Galaxy .
+A
+.c Galaxy
+in the DDF domain may contain any 
+.c SDF\ Star s.
+Then, we need to specify the domain of the
+.c Galaxy
+as "DDF", not to be confused with the SDF domain.
+Presumably, the blocks in a
+.c Universe
+are in the same domain. 
+.pp
+In \*(PT, however, we can link another domain
+in the current domain with a C++ object called a
 .c Wormhole .
-A 
-.c Wormhole 
-is derived from the 
-.c class\ Star , 
-and behaves externally like any other
-.c Star .  
+A
+.c Wormhole
+is represented as a 
+.c Galaxy
+of a different domain in \*(PT interactive graphical interface or
+\*(PT interpreter.
+It is during compilation when a
+.c Wormhole
+instance is created.  The compiler compares the domain property of a 
+.c Galaxy
+with that of the current domain (domain of the outer
+.c Galaxy ).
+If they are different, the compiler creates a 
+.c Wormhole
+and substitutes it for the
+.c Galaxy ,
+which now becomes a component of the
+.c Wormhole .
+Once a
+.c Wormhole
+is created, it behaves externally like any other
+.c Star .
 Internally, however, it encapsulates an entire foreign
 domain invisible from the outside domain.
 The internal computational model can be totally different
 from the external model, in that the specification language,
 semantics, and scheduling paradigm can be totally different.
 .pp
-The interface
-between different domains is accomplished by first converting data packets
-to a format compatible with the
-universal 
-.c EventHorizon ,
-and then converting to a format compatible
-with the second domain.
+When the 
+.c Scheduler
+of the outer domain fires the 
+.c Wormhole ,
+the inner
+.c Scheduler
+is invoked for the inner
+.c Galaxy
+until some specified stopping condition is met, and returns back to the
+.c Scheduler
+of the outer domain.
+Thus, the interaction of two domains takes place through
+.c Wormhole s.
+A
+.c Wormhole 
+may contain other
+.c Wormhole s.
 This document illustrates the detailed mechanism of the domain interface.
+In the last section, we will discuss how to create a new domain in \*(PT.
