@@ -49,4 +49,4 @@ ENHANCEMENTS, OR MODIFICATIONS.
 ********************************************************************/
 // Constructor
 CGWormBase :: CGWormBase(Star& s, Galaxy& g, Target* t) : 
-	Wormhole(s,g,t) { }
+	Wormhole(s,g,t), execTime(1) { }
