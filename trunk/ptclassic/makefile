@@ -46,7 +46,15 @@ sources depend:
 obj.$(ARCH):		MAKEARCH
 	csh -f MAKEARCH
 
-oct_and_vem:
+# Usually rebuilding vem and the octtools library is not done everytime
+oct_and_vem: obj.$(ARCH)
 	cd obj.$(ARCH)/vem; $(MAKE) $(MFLAGS) all
-install_oct_and_vem:
+install_oct_and_vem: obj.$(ARCH)
 	cd obj.$(ARCH)/vem; $(MAKE) $(MFLAGS) install
+
+# This rule builds and installs gcc and tcl/tk from scratch, then octtools,
+# then everything else.  gcc and tcl/tk source are usually distributed as a
+# separate tar file 
+bootstrap:
+	$(MAKE) -f ~ptdesign/mk/scratch-srcs.mk
+	$(MAKE) $(MFLAGS) install_oct_and_vem install
