@@ -48,14 +48,23 @@ Programmer: J. Buck, E. Goei
 #include <signal.h>
 #include <ctype.h>
 
+// Include the global ptcl object (contains the universe) - aok
+#include "ptcl.h"
+
 extern ACG* gen;
 extern char DEFAULT_DOMAIN[];
 
-static InterpUniverse *universe = NULL;  // Universe to execute
-static InterpGalaxy *currentGalaxy = NULL;  // current galaxy to make things in
+// The following static variables should be taken from the
+// PTcl object, instead of being static to KernelCalls -aok
+// static InterpUniverse *universe = NULL;  // Universe to execute
+// static InterpGalaxy *currentGalaxy = NULL;  // galaxy to make things in
+// static Target *galTarget = NULL;         // target for a galaxy
+// static const char *curDomain = DEFAULT_DOMAIN; // current domain
+
+// This variable is only used by the KcDefGalaxy and KcEndDefgalaxay
+// functions.  These two functions are called in order from compile.c
+// Thus, this is not a state worth worrying about. - aok
 static InterpGalaxy *saveGalaxy = NULL;  // used to build galaxies
-static Target *galTarget = NULL;	 // target for a galaxy
-static const char *curDomain = DEFAULT_DOMAIN; // current domain
 
 // Define a stream for logging -- log output to pigiLog.pt
 
@@ -250,7 +259,7 @@ static const Block* findClass (const char* name) {
 	int nf;
 	const char* c = parseClass (name, nf, names);
 	if (!c) return 0;
-	const Block* b = KnownBlock::find (c, curDomain);
+	const Block* b = KnownBlock::find (c, ptcl->curDomain);
 	if (!b) return b;
 	return checkFields(b,names,nf,isMPH) ? b : 0;
 }
@@ -260,9 +269,9 @@ static const Block* findClass (const char* name) {
 
 static void logDomain() {
 	static const char* oldDom = "";
-	if (strcmp(curDomain, oldDom) == 0) return;
-	LOG << "domain " << curDomain << "\n";
-	oldDom = curDomain;
+	if (strcmp(ptcl->curDomain, oldDom) == 0) return;
+	LOG << "domain " << ptcl->curDomain << "\n";
+	oldDom = ptcl->curDomain;
 }
 
 // Return the domain of an object: note, it may not be the current
@@ -280,9 +289,8 @@ KcDomainOf(char* name) {
 // Delete the universe and make another
 extern "C" void
 KcClearUniverse(const char* name) {
-	LOG_DEL; delete universe;
-	LOG_NEW; universe = new InterpUniverse(name,curDomain);
-	currentGalaxy = universe;
+	// ptcl function replaces old Kernel Calls code:
+	ptcl -> resetUniverse();
 	LOG << "reset\n";
 	LOG << "# Creating universe '" << name << "'\n";
 	logDomain();
@@ -297,9 +305,9 @@ KcInstance(char *name, char *ako, ParamListType* pListPtr) {
 	int nf;
 	const char* cname = parseClass (ako, nf, names, values);
 	if (!cname) return FALSE;
-	const Block* b = KnownBlock::find(cname, curDomain);
+	const Block* b = KnownBlock::find(cname, ptcl->curDomain);
 	if (!b || !checkFields(b,names,nf,isMPH)) return FALSE;
-	if (!cname || !currentGalaxy->addStar(name, cname))
+	if (!cname || !ptcl->currentGalaxy->addStar(name, cname))
 		return FALSE;
  	LOG << "\tstar " << SafeTcl(name) << " " << SafeTcl(cname) << "\n";
 	for(int j = 0; j < nf; j++ ) {
@@ -307,14 +315,14 @@ KcInstance(char *name, char *ako, ParamListType* pListPtr) {
 			int nP = atoi(values[j]);
 			LOG << "\tnumports " << SafeTcl(name) << " " 
 			    << names[j] << " " << nP << "\n";
-			if (!currentGalaxy->numPorts (name, names[j], nP))
+			if (!ptcl->currentGalaxy->numPorts (name, names[j], nP))
 				return FALSE;
 		}
 		else {
 			LOG << "\tsetstate " << SafeTcl(name) << " "
 			    << SafeTcl(names[j]) << " "
 			    << SafeTcl(values[j]) << "\n";
-			if (!currentGalaxy->setState(name,names[j],
+			if (!ptcl->currentGalaxy->setState(name,names[j],
 						     hashstring(values[j])))
 				return FALSE;
 		}
@@ -324,7 +332,7 @@ KcInstance(char *name, char *ako, ParamListType* pListPtr) {
 		LOG << "\tsetstate " << SafeTcl(name) << " " <<
 			SafeTcl(pListPtr->array[i].name) << " " <<
 			SafeTcl(pListPtr->array[i].value) << "\n";
-		if(!currentGalaxy->setState(name, pListPtr->array[i].name,
+		if(!ptcl->currentGalaxy->setState(name, pListPtr->array[i].name,
 			pListPtr->array[i].value)) return FALSE;
 	}
 	return TRUE;
@@ -341,12 +349,12 @@ KcMakeState(char *name, char *type, char *initVal) {
 		msg += type;
 		msg += "'\nThe following parameter types are known:\n";
 		msg += KnownState::nameList();
-		Error::abortRun(*currentGalaxy, msg);
+		Error::abortRun(*ptcl->currentGalaxy, msg);
 		return FALSE;
 	}
 	LOG << "\tnewstate " << SafeTcl(name) << " " << type << " " << 
 		SafeTcl(initVal) << "\n";
-	return currentGalaxy->addState(name, type, initVal);
+	return ptcl->currentGalaxy->addState(name, type, initVal);
 }
 
 // connect or busconnect
@@ -368,10 +376,10 @@ KcConnect(char *inst1, char *t1, char *inst2, char *t2, char* delay, char* width
  		LOG << " " << SafeTcl(delay);
  	LOG << "\n";
 	if (*width)
-		return currentGalaxy->busConnect(inst1, t1, inst2, t2,
+		return ptcl->currentGalaxy->busConnect(inst1, t1, inst2, t2,
 						 width, delay);
 	else
-		return currentGalaxy->connect(inst1, t1, inst2, t2, delay);
+		return ptcl->currentGalaxy->connect(inst1, t1, inst2, t2, delay);
 }
 
 // create a galaxy formal terminal
@@ -379,10 +387,10 @@ extern "C" boolean
 KcAlias(char *fterm, char *inst, char *aterm) {
 	LOG << "\talias " << SafeTcl(fterm) << " " << SafeTcl(inst)
 	    << " " << SafeTcl(aterm) << "\n";
-	return currentGalaxy->alias(fterm, inst, aterm);
+	return ptcl->currentGalaxy->alias(fterm, inst, aterm);
 }
 
-/* Given the name of a domain, set curDomain, and the domain of the
+/* Given the name of a domain, set ptcl->curDomain, and the domain of the
    galaxy if it exists, to correspond to the this domain.
    Returns false if this fails (invalid domain).
         EAL, 9/23/90
@@ -400,11 +408,11 @@ KcSetKBDomain(const char* domain) {
 	// changing the galaxy domain if it is non-empty.
 
 	// equality can be used here because of hashstring call.
-	if (currentGalaxy && currentGalaxy->numberBlocks() == 0 &&
-	    currentGalaxy->domain() != domain &&
-	    !currentGalaxy->setDomain(domain))
+	if (ptcl->currentGalaxy && ptcl->currentGalaxy->numberBlocks() == 0 &&
+	    ptcl->currentGalaxy->domain() != domain &&
+	    !ptcl->currentGalaxy->setDomain(domain))
 		return FALSE;
-	curDomain = domain;
+	ptcl->curDomain = domain;
 	return TRUE;
 }
 
@@ -413,7 +421,7 @@ Return the name of the current domain in KnownBlock
 */
 extern "C" const char*
 curDomainName() {
-	return curDomain;
+	return ptcl->curDomain;
 }
 
 // start a galaxy definition
@@ -424,12 +432,12 @@ KcDefgalaxy(const char *galname, const char *domain, const char* innerTarget) {
 	    << domain << "\n";
 	if (innerTarget && strcmp(innerTarget, "<parent>") != 0) {
 		LOG << "target " << innerTarget << "\n";
-		galTarget = KnownTarget::clone(innerTarget);
+		ptcl->currentTarget = KnownTarget::clone(innerTarget);
 	}
-	else galTarget = 0;
-	saveGalaxy = currentGalaxy;
-	LOG_NEW; currentGalaxy = new InterpGalaxy(galname,curDomain);
-	currentGalaxy->setBlock(galname, saveGalaxy);
+	else ptcl->currentTarget = 0;
+	saveGalaxy = ptcl->currentGalaxy;
+	LOG_NEW; ptcl->currentGalaxy = new InterpGalaxy(galname,ptcl->curDomain);
+	ptcl->currentGalaxy->setBlock(galname, saveGalaxy);
 	// Set the domain of the galaxy
 	return KcSetKBDomain(domain);
 }
@@ -442,8 +450,8 @@ KcEndDefgalaxy(const char* outerDomain) {
 	// note that this call also restores the KnownBlock::currentDomain
 	// to equal the outerDomain.
 	LOG << "}\n";
-	currentGalaxy->addToKnownList(outerDomain,galTarget);
-	currentGalaxy = saveGalaxy;
+	ptcl->currentGalaxy->addToKnownList(outerDomain,ptcl->currentTarget);
+	ptcl->currentGalaxy = saveGalaxy;
 	return KcSetKBDomain(outerDomain);
 }
 
@@ -454,9 +462,9 @@ static char dummyDesc[] =
 extern "C" void
 KcSetDesc(const char* desc) {
 	if (desc && *desc) {
-		currentGalaxy->setDescriptor(hashstring(desc));
+		ptcl->currentGalaxy->setDescriptor(hashstring(desc));
 	}
-	else currentGalaxy->setDescriptor(dummyDesc);
+	else ptcl->currentGalaxy->setDescriptor(dummyDesc);
 }
 
 // Run the universe
@@ -465,12 +473,12 @@ KcRun(int n) {
  	LOG << "run " << n << "\nwrapup\n";
 	LOG.flush();
 	SimControl::clearHalt();
-	universe->initTarget();
+	ptcl->universe->initTarget();
 	if (SimControl::haltRequested())
 		return FALSE;
-	universe->setStopTime(n);
-	universe->run();
-	universe->wrapup();
+	ptcl->universe->setStopTime(n);
+	ptcl->universe->run();
+	ptcl->universe->wrapup();
 	return TRUE;
 }
 
@@ -481,15 +489,15 @@ extern "C" boolean
 KcDisplaySchedule() {
  	// LOG << "run " << n << "\nwrapup\n";
 	// LOG.flush();
-	if ( galTarget == NULL ) {
+	if ( ptcl->currentTarget == NULL ) {
 	    cerr << "No current target";
 	    return FALSE;
 	}
 	StringList name;
-	name << "~/schedule." << universe->name();
+	name << "~/schedule." << ptcl->universe->name();
 	pt_ofstream str(name);
 	if (str) {
-		str << galTarget->displaySchedule();
+		str << ptcl->currentTarget->displaySchedule();
 		str.close();
 		return LookAtFile(name);
 	}
@@ -521,7 +529,7 @@ extern "C" boolean
 KcIsCompiledInStar(char *className) {
 	const Block* b = findClass(className);
 	if (b == 0 || b->isA("InterpGalaxy")) return FALSE;
-	return !KnownBlock::isDynamic(b->name(), curDomain);
+	return !KnownBlock::isDynamic(b->name(), ptcl->curDomain);
 }
 
 /* 12/22/91 - by Edward A. Lee
@@ -655,7 +663,7 @@ Ask if a porthole within a named block is a multiporthole.
 extern "C" boolean
 KcIsMulti(char* blockname, char* portname)
 {
-	Block *block = currentGalaxy->blockWithName(blockname);
+	Block *block = ptcl->currentGalaxy->blockWithName(blockname);
 	if (block == 0) return FALSE;
 	return block->multiPortWithName(portname) ? TRUE : FALSE;
 }
@@ -735,7 +743,7 @@ KcGetParams(char* name, ParamListType* pListPtr) {
 	char *stateNames[MAX_NUM_FIELDS];
 	int nf;
 	const char* cname = parseClass(name, nf, stateNames);
-	return realGetParams(KnownBlock::find(cname, curDomain),
+	return realGetParams(KnownBlock::find(cname, ptcl->curDomain),
 			     pListPtr, stateNames, nf);
 }
 
@@ -748,14 +756,14 @@ KcGetTargetParams(char* name, ParamListType* pListPtr) {
 /* modify parameters of a target */
 extern "C" boolean
 KcModTargetParams(ParamListType* pListPtr) {
-	if (!galTarget) return TRUE;
+	if (!ptcl->currentTarget) return TRUE;
 	for (int i = 0; i < pListPtr->length; i++) {
 		const char* n = pListPtr->array[i].name;
 		const char* v = pListPtr->array[i].value;
 		LOG << "\ttargetparam " << SafeTcl(n) << " " << SafeTcl(v) << "\n";
-		State* s = galTarget->stateWithName(n);
+		State* s = ptcl->currentTarget->stateWithName(n);
 		if (s == 0) {
-			Error::abortRun (*galTarget, "no target-state named ", n);
+			Error::abortRun (*ptcl->currentTarget, "no target-state named ", n);
 			return FALSE;
 		}
 		s->setInitValue(hashstring(v));
@@ -809,7 +817,7 @@ KcProfile (char* name) {
 	clr_accum_string ();
 	// if dynamically linked, say so
 	if (tFlag && KnownTarget::isDynamic(b->name())
-	    || !tFlag && KnownBlock::isDynamic (b->name(), curDomain))
+	    || !tFlag && KnownBlock::isDynamic (b->name(), ptcl->curDomain))
 		accum_string ("Dynamically linked ");
 	if (tFlag) {
 		accum_string ("Target: ");
@@ -906,7 +914,7 @@ extern "C" boolean
 KcNumPorts (char* starname, char* portname, int numP) {
 	LOG << "\tnumports " << starname << " " << portname << " "
 		<< numP << "\n";
-	return currentGalaxy->numPorts(starname, portname, numP);
+	return ptcl->currentGalaxy->numPorts(starname, portname, numP);
 }
 
 /* 9/22/90, by eal
@@ -929,7 +937,7 @@ nthDomainName(int n) {
 extern "C" int
 KcNode (const char* name) {
 	LOG << "\tnode " << name << "\n";
-	return currentGalaxy->addNode(name);
+	return ptcl->currentGalaxy->addNode(name);
 }
 
 // connect a porthole to a node
@@ -937,7 +945,7 @@ extern "C" int
 KcNodeConnect (const char* inst, const char* term, const char* node) {
  	LOG << "\tnodeconnect " << inst << " " << term << " " <<
 		node << "\n";
-	return currentGalaxy->nodeConnect(inst, term, node);
+	return ptcl->currentGalaxy->nodeConnect(inst, term, node);
 }
 
 /*
@@ -945,7 +953,7 @@ Return a list of targets supported by the current domain.
 */
 extern "C" int
 KcDomainTargets(const char** names, int nMax) {
-	return KnownTarget::getList(curDomain,names,nMax);
+	return KnownTarget::getList(ptcl->curDomain,names,nMax);
 }
 
 /*
@@ -954,8 +962,8 @@ Set the target for the universe
 extern "C" int
 KcSetTarget(const char* targetName) {
 	LOG << "target " << targetName << "\n";
-	int temp = universe->newTarget (hashstring(targetName));
-	galTarget = universe->myTarget();
+	int temp = ptcl->universe->newTarget (hashstring(targetName));
+	ptcl->currentTarget = ptcl->universe->myTarget();
 	return temp;
 }
 
@@ -964,7 +972,7 @@ Return the default target name for the current domain.
 */
 extern "C" const char*
 KcDefTarget() {
-	return KnownTarget::defaultName(curDomain);
+	return KnownTarget::defaultName(ptcl->curDomain);
 }
 
 /*
@@ -1023,8 +1031,8 @@ class KernelCallsOwner {
 public:
 	KernelCallsOwner() {}
 	~KernelCallsOwner() {
-		if (currentGalaxy != universe) {
-			LOG_DEL; delete currentGalaxy;
+		if (ptcl->currentGalaxy != ptcl->universe) {
+			LOG_DEL; delete ptcl->currentGalaxy;
 		}
 		LOG_DEL; delete universe;
 	}
