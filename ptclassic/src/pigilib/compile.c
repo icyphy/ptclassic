@@ -294,6 +294,7 @@ char *propname;
 
 	/* fill in default values, and get or create the property. */
 	else {
+	    int newpropmemory;
 	    if ( IsBus(instPtr) ) {
 		prop.contents.prop.type = OCT_INTEGER;
 		prop.contents.prop.value.integer = 1;
@@ -306,10 +307,13 @@ char *propname;
 		prop.contents.prop.type = OCT_STRING;
 		prop.contents.prop.value.string = "0";
 	    }
-            octGetOrCreate(instPtr, &prop);
+            newpropmemory = octGetOrCreate(instPtr, &prop);
 	    if ( octAttach(&net, &prop) != OCT_OK ) {
 		ErrAdd(octErrorString());
 		retval = FALSE;
+	    }
+	    if ( newpropmemory ) {
+		FreeOctMembers(&prop);		/* created by octGetOrCreate */
 	    }
 	}
     }
