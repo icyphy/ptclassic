@@ -38,6 +38,7 @@ PL_SRCS= \
  DETclScript.pl \
  DETkBarGraph.pl \
  DETkMeter.pl \
+ DELogicAnalyzer.pl \
  DETkShowValues.pl \
  DETkSlider.pl \
  DETkText.pl
