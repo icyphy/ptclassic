@@ -189,6 +189,10 @@ class ::tycho::File {
     # If the argument is a File object, call its autoSave method.
     proc callAutoSave {obj} {}
 
+    #### displayData
+    # Display the data as if it were stored in the file by the given name.
+    proc displayData {data filename}
+
     #### emergencySave
     # Call the saveCrash method for all File objects.
     proc emergencySave {} {}
@@ -913,6 +917,32 @@ body ::tycho::File::callAutoSave {obj} {
     if {[info objects $obj] != "" && [$obj isa File]} {
 	$obj autoSave
     }
+}
+
+#####################################################################
+#### displayData
+# Open an editor to display the supplied data using the editor that
+# would be used if the data were stored in a file with the specified
+# name. No file is referenced. If there is no editor for the specified
+# extension, open a plain text editor.  Return the name of the window
+# that is opened.  This procedure gives a simple way to open a registered
+# editor on data that is not stored in a file.
+#
+body ::tycho::File::displayData {data filename} {
+    set ext [file extension $filename]
+    set base [file tail $filename]
+    if {[info exists editors] && [info exists editors($ext)]} {
+	set name [uplevel #0 [list \
+		$editors($ext) [autoName .file] -text $data]]
+    } elseif {[info exists editorsBase] && [info exists editorsBase($base)]} {
+	set name [uplevel #0 [list \
+		$editorsBase($base) [autoName .file] -text $data]]
+    } else {
+	set name [uplevel #0 [list \
+		Edit [autoName .edit] -text $data]]
+    }
+    $name centerOnScreen
+    return $name
 }
 
 #####################################################################
