@@ -275,17 +275,23 @@ body ::tycho::Exec::constructor {args} {
     global $statusVariableName
     set $statusVariableName "constructed"
 
+    # Make the entry boxes wide so we can see the entire command
+    configure -entrywidth 80
 
-    # If autostart is not equal to zero, then start the subprocess
-    if {$itk_option(-autostart) != 0} {
-        $this execProcess
-    }
     wm resizable $prefix 1 1
     # NOTE: There seems to be no way to find out the actual window size at this
     # point.  The commands "wm reqwidth" and "wm width" return 1, even after
     # a "tkwait visibility" and an "update".  So we just set some reasonable
     # minimum size.
     wm minsize $prefix 10 10
+
+
+    # If autostart is not equal to zero, then start the subprocess
+    # This should be at the end of the constructor
+    if {$itk_option(-autostart) != 0} {
+        $this execProcess
+    }
+
 }
 
 #######################################################################
