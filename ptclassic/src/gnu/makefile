@@ -62,7 +62,7 @@ GNU_PREFIX=$(GNU_DEST)/common
 # references to the current version, along with
 # $PTOLEMY/src/gnu/README.
 # Also, check out the COLLECTOR variables in $PTOLEMY/mk/config-*.mk
-GCC_VERSION=2.95.1
+GCC_VERSION=2.95.2
 
 GCC_SRC=$(GNU_SRC)/gcc
 
