@@ -74,7 +74,7 @@ style default \
     }
 }
 
-style default \
+style console \
 	-label "Console" \
 	-description {
     Layout parameters for console windows.
