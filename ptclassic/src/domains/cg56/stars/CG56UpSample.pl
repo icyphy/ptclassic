@@ -15,11 +15,11 @@ is to output it first (phase = 0). The maximum phase is "factor" - 1.
 	}
 	input {
 		name {input}
-		type {FIX}
+		type {anytype}
 	}
 	output {
 		name {output}
-		type {FIX}
+		type {=input}
 	}
 	state {
 		name {factor}

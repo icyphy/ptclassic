@@ -22,7 +22,7 @@ the next B particles from the next input, etc.
 	}
 	output {
 		name {output}
-		type {anytype}
+		type {=input}
 	}
         state {
                 name {blockSize}
