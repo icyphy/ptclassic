@@ -43,7 +43,7 @@ EXTRA_SRCS =	index.html
 MISC_FILES =	usersGuides #internals
 
 # make checkjunk will not report OPTIONAL_FILES as trash
-OPTIONAL_FILES =	codeDoc
+OPTIONAL_FILES =	codeDoc img
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
