@@ -77,6 +77,11 @@ extern "C" {
 #define PTLINUX
 #endif
 
+#if defined(PTLINUX) && defined(__ELF__)
+// Shorthand for Linux and ELF
+#define PTLINUX_ELF
+#endif
+
 #if defined(netbsd_i386)
 #define PTNBSD_386
 #endif
@@ -107,11 +112,17 @@ extern "C" {
 #define PTSUN4_CFRONT
 #endif
 
+/* Unixware1.1
+*#define PTSVR4
+*/
+
 #if defined(ultrix)
 /* DEC MIPS running Ultrix4.x */
 #define PTULTRIX
 #define PTMIPS
 #endif
+
+
 
 /***************************************************************************/
 /* Used to keep function paramters straight.  Note that SunOS4.1.3 cc
@@ -137,7 +148,7 @@ extern "C" {
 #endif /* ! VOLATILE */
 
 #if !defined(PTLINUX) && !defined(PTNBSD_386)
-#if defined(USG) && ! defined(PTHPPA) && ! defined(PTAIX)
+#if defined(USG) && ! defined(PTHPPA) && ! defined(PTAIX) && !defined(PTSVR4)
 extern int sprintf();
 #else
 #ifndef PTIRIX5
@@ -146,6 +157,7 @@ extern int sprintf();
 #ifndef PTHPPA
 #ifndef PTAIX
 #ifndef PTALPHA
+#ifndef PTSVR4
 #if !(defined(sun) && defined (__GNUC__)) && !defined(hppa) && !defined(__hppa__)
 #if defined(sun) && !defined(__GNUC__) && defined(__cplusplus) && !defined(SOL2)
 /* SunOS4.1.3 Sun Cfront */	
@@ -153,6 +165,7 @@ extern int sprintf();
 extern char *sprintf();
 #endif
 #endif /*sun && __GNUC__*/
+#endif /* PTSVR4 */
 #endif /* PTALPHA */
 #endif /* PTAIX */
 #endif /* PTHPPA */
@@ -326,6 +339,11 @@ extern int errno;
 
 #endif /* PTHPPA */
 
+
+#ifdef PTSVR4
+#define FDS_TYPE (fd_set *)
+#define SYSV
+#endif /* PTSVR4 */
 
 /* Fix up casts for kernel/TimeVal.cc */
 
