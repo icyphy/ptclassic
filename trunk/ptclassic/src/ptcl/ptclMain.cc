@@ -40,6 +40,7 @@ class.
 **************************************************************************/
 static const char file_id[] = "ptclMain.cc";
 
+#include "compat.h"
 #include "PTcl.h"
 #include "Linker.h"
 #include "SimControl.h"
@@ -54,11 +55,11 @@ static void loadStartup(Tcl_Interp* interp);
 #include <tcl.h>
 #include <errno.h>
 
-#ifdef linux
+#ifdef PTLINUX
 #include <fpu_control.h>
 #endif
 
-#ifndef linux
+#ifndef PTLINUX
 /*
  * Declarations for various library procedures and variables (don't want
  * to include tclUnix.h here, because people might copy this file out of
@@ -70,7 +71,11 @@ extern int		access _ANSI_ARGS_((CONST char *path, int mode));
 extern int		errno;
 extern void		exit _ANSI_ARGS_((int status));
 extern int		isatty _ANSI_ARGS_((int fd));
+
+#ifndef PTAIX_XLC
 extern char *		strcpy _ANSI_ARGS_((char *dst, CONST char *src));
+#endif
+
 };
 #endif
 
@@ -110,7 +115,7 @@ main(int argc, char **argv) {
     int code, gotPartial, tty;
     int exitCode = 0;
 
-#ifdef linux
+#ifdef PTLINUX
     // Fix for DECalendarQueue SIGFPE under linux.
     __setfpucw(_FPU_DEFAULT | _FPU_MASK_IM);
 #endif
