@@ -43,7 +43,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 #define PTKCODE
 
-#include "compat.h"
+#include "local.h"		/* include "ansi.h" and "compat.h" */
 
 #ifdef PTKCODE
 #include "ptkTkSetup.h"
@@ -51,6 +51,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #ifndef VAXLISP
 
+/* Octtools include files */
 #include "copyright.h"
 #include "port.h"
 
@@ -81,9 +82,10 @@ extern octStatus vemSendMenu ARGS((RPCFunction* array, long count));
 
 /* This is defined in octtools/Xpackages/rpc/appNet.c */
 extern rpcStatus RPCApplicationFunctionComplete();
-#endif
+#endif	/* PTKCODE */
 
-extern long UserMain();
+#include "main.h"			/* define UserMain */
+
 
 #ifndef PTKCODE
 RPCMain(argc, argv)
