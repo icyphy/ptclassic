@@ -37,19 +37,10 @@ static const char file_id[] = "$RCSfile$";
 #pragma implementation
 #endif
 
-#include "PNThread.h"
 #include "PNPortHole.h"
-#include "PNGeodesic.h"
-#include "CircularBuffer.h"
-#include "Plasma.h"
-#include "Error.h"
-#include <strstream.h>
 
 extern const Attribute P_DYNAMIC = {PB_DYNAMIC,0};
 extern const Attribute P_STATIC = {0,PB_DYNAMIC};
-
-// Prototype PtGate.
-static PNMonitor prototype;
 
 // Class identification.
 ISA_FUNC(PNPortHole,DFPortHole);
@@ -99,7 +90,7 @@ int MultiInPNPort::isItInput() const
 PortHole& MultiInPNPort::newPort()
 {
     LOG_NEW; InPNPort& p = *new InPNPort;
-    Attribute a = {attributes(), 0};
+    Attribute a = {0, 0}; a.bitsOn = attributes();
     p.setAttributes(a);
     return installPort(p);
 }
@@ -114,7 +105,7 @@ int MultiOutPNPort::isItOutput() const
 PortHole& MultiOutPNPort::newPort()
 {
     LOG_NEW; OutPNPort& p = *new OutPNPort;
-    Attribute a = {attributes(), 0};
+    Attribute a = {0, 0}; a.bitsOn = attributes();
     p.setAttributes(a);
     return installPort(p);
 }
