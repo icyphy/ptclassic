@@ -36,7 +36,7 @@ For inputs that are zero or negative, the output is \fImin\fR.
 		type{int}
 		default{"FALSE"}
 		desc{
-TRUE if input is a power measurment, FALSE if it's an amplitude measurement.
+TRUE if input is a power measurement, FALSE if it's an amplitude measurement.
 		}
 	}
 	private {
