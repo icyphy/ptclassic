@@ -710,10 +710,10 @@ int DeclustScheduler::commReduction(DCClusterList &remC, DCClusterList *slpC) {
 		// Find cluster candidates for switching proc with cls
 		// Go through the list of processor candidates for cls
 		for (i = 0; i < numProcs; i++) {
+			DCClusterList Pclusts;
 			if (canProcs[i] == 0 || i == myP) continue;
 
 			// Fill Pclusts with clusters on processor i
-			DCClusterList Pclusts;
 			prcDCClusts(Pclusts, remC, i);
 			highestScores(&Pclusts, candDCClusts);
 		}
