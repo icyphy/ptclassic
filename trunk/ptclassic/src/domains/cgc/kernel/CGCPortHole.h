@@ -22,7 +22,8 @@ $Id$
 class CGCPortHole : public CGPortHole {
 friend class ForkDestIter;
 public:
-	CGCPortHole() : maxBuf(1), manualFlag(0), hasStaticBuf(1) {}
+	CGCPortHole() : maxBuf(1), manualFlag(0), asLinearBuf(1), 
+			hasStaticBuf(1), ownership(0) {}
 
 	CGCPortHole* getForkSrc() { return (CGCPortHole*) forkSrc; }
 
@@ -47,8 +48,15 @@ public:
 		{ if (atBoundary()) return 1;
 		return isItOutput()? maxBuf: realFarPort()->maxBufReq(); }
 
-	// return TRUE is static buffering is achieved.
+	// return TRUE if a star can see this port as a linear buffer.
+	int linearBuf() const { return asLinearBuf; }
+
+	// return TRUE if the actual static buffering achieved.
 	int staticBuf() const { return hasStaticBuf; }
+
+	// declare and claim the ownership of the buffer
+	void becomeOwner() { ownership = TRUE; }
+	int  isOwner() { return ownership; }
 
 	void setGeoName(char* n);
 	const char* getGeoName() const;
@@ -66,7 +74,7 @@ public:
 	int bufSize() const { return maxBufReq(); }
 
 	// return bufferSize
-	int inBufSize() { return bufferSize; }
+	int inBufSize() const { return bufferSize; }
 
 	// initialize offset
 	int initOffset();
@@ -80,9 +88,11 @@ public:
 	void requestBufSize(int i) { maxBuf = i; manualFlag = TRUE; }
 
 private:
-	int maxBuf;
-	int manualFlag;
-	int hasStaticBuf;
+	int maxBuf;		// Final buffer size.
+	int manualFlag;		// set if buffer size is manually chosen.
+	int hasStaticBuf;	// set if static buffer is achieved.
+	int asLinearBuf;	// set if acts as a linear buf inside a star
+	int ownership;		// set if this porthole owns the buffer.
 
 	SequentialList& myDest() { return forkDests; }
 };
