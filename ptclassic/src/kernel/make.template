@@ -120,7 +120,7 @@ all:	makefile $(LIB)
 # "make install" puts things in the official place
 install:	makefile $(LIBDIR)/$(LIB)
 
-EXTRA_SRCS=XDomain.ccP
+EXTRA_SRCS=XDomain.ccP ArrayState.ccP ArrayState.hP ScalarState.ccP ScalarState.hP
 
 # Need to define LIBDIR for the interpreter
 Interpreter.o:	Interpreter.cc
