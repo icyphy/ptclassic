@@ -46,6 +46,24 @@ class ::tycho::EditTeX {
     ###################################################################
     ####                            options                        ####
 
+    # The color of comments.
+    itk_option define -commentcolor commentColor CommentColor black {
+	$itk_component(text) tag configure comment \
+		-foreground $itk_option(-commentcolor)
+    }
+
+    # The color of "FIXME".
+    itk_option define -fixmecolor fixmeColor FixmeColor black {
+	$itk_component(text) tag configure fixme \
+		-foreground $itk_option(-fixmecolor)
+    }
+
+    # The color of keywords.
+    itk_option define -keywordcolor keywordColor KeywordColor black {
+	$itk_component(text) tag configure keyword \
+		-foreground $itk_option(-keywordcolor)
+    }
+
     ###################################################################
     ####                         public methods                    ####
 
@@ -61,11 +79,17 @@ class ::tycho::EditTeX {
     # Bracket the final arguments and edit for equation syntax.
     method bracketEqn {left right original}
 
+    # Insert a comment character at the beginning of each line in the selection.
+    method commentSelection {}
+
     # Specialized function.
     method fixSetReferences {original}
 
     # Replace characters that appear to be in the symbol set with TeX.
     method fixSymbolChars {original}
+
+    # Return a string with keywords separated by "|".
+    method keywords {}
 
     # Modify the selection to convert lines into paragraphs.
     method linesToParagraphs {}
@@ -73,11 +97,23 @@ class ::tycho::EditTeX {
     # Given a key, do pairwise substitution of text.
     method pairwiseSubstitute {original key}
 
+    # Color the text in a region.
+    method parseNow {start stop}
+
     # Returns a list of tags to use when checking the spelling.
     method spellCheckTags {} {return {text}}
 
+    # Remove the comment character in a range of lines.
+    method uncommentSelection {}
+
     ####################################################################
     ####                  protected methods and variables           ####
+
+    # Change this to 0 in derived classes if keywords are not case sensitive.
+    protected variable caseSensitiveKeywords 1
+
+    # Return the regular expression used to find line-oriented comments.
+    protected method commentRegexp {}
 
     # Initialize the menu/status/tool bars
     protected method _initializeBars {menubar statusbar toolbar}
@@ -87,6 +123,12 @@ class ::tycho::EditTeX {
 #
 body ::tycho::EditTeX::constructor {args} {
     eval itk_initialize $args
+
+    # Subscribe to the style parameters
+    stylesheet subscribe \
+	    -commentcolor  editcolors commentColor \
+	    -fixmecolor    editcolors fixmeColor \
+	    -keywordcolor  editcolors keywordColor \
 }
 
 #####################################################################
@@ -136,6 +178,32 @@ body ::tycho::EditTeX::bracketEqn {left right original} {
     return $left$i3$right
 }
 
+#####################################################################
+#### commentSelection
+# Insert the comment character at the beginning of every line contained
+# in the selection. Note that this command is undone (more or less)
+# by "uncommentSelection", and not by the usual undo mechanism.  If the
+# first line is partially contained in the selection, then it is
+# treated as if it were fully contained in the selection.
+#
+body ::tycho::EditTeX::commentSelection {} {
+    if {[getSelection] != {}} {
+	
+	# Get the line numbers touched by the selection
+	set firstind [$itk_component(text) index sel.first]
+	regexp {([0-9]+)\.([0-9]+)} $firstind match startline startch
+	set lastind [$itk_component(text) index sel.last]
+	regexp {([0-9]+)\.([0-9]+)} $lastind match endline endch
+	
+	for {set lineno $startline} {$lineno < $endline} {incr lineno} {
+	    $itk_component(text) insert $lineno.0 "% "
+	}
+	
+	markModified
+	parseRegion sel.first sel.last
+    }
+}
+
 ###################################################################
 #### fixSetReferences
 # NOTE: Specialized function inserted to help the author write a book.
@@ -170,6 +238,8 @@ body ::tycho::EditTeX::fixSymbolChars {original} {
             {{cos} {\cos}} \
             {{sin} {\sin}} \
             {{È} {\cup}} \
+            {{Ç} {\cap}} \
+            {{Æ} {\emptyset}} \
             {{¥} {\infty}} \
             {{:} {\colon }} \
             {{´} {\times}} \
@@ -180,19 +250,12 @@ body ::tycho::EditTeX::fixSymbolChars {original} {
         }]
 }
 
-###################################################################
-#### pairwiseSubstitute
-# Modify the first argument by replacing each instance of the first item
-# in each pair in the argument with an instance of the second.
+#####################################################################
+#### keywords
+# Return a list of keywords separated by "|".
 #
-body ::tycho::EditTeX::pairwiseSubstitute {original key} {
-    # Perform simple pairwise substitutions.
-    foreach pair $key {
-        set target [lindex $pair 0]
-        set newString [lindex $pair 1]
-        regsub -all -- $target $original $newString original
-    }
-    return $original
+body ::tycho::EditTeX::keywords {} {
+    return {\\item}
 }
 
 ###################################################################
@@ -230,10 +293,153 @@ body ::tycho::EditTeX::linesToParagraphs {} {
     fillSelection
 }
 
+###################################################################
+#### pairwiseSubstitute
+# Modify the first argument by replacing each instance of the first item
+# in each pair in the argument with an instance of the second.
+#
+body ::tycho::EditTeX::pairwiseSubstitute {original key} {
+    # Perform simple pairwise substitutions.
+    foreach pair $key {
+        set target [lindex $pair 0]
+        set newString [lindex $pair 1]
+        regsub -all -- $target $original $newString original
+    }
+    return $original
+}
+
+#####################################################################
+#### parseNow
+# Tag and color comments and tags. What constitutes a comment is determined by
+# the protected method "commentRegexp", which returns a regular
+# expression that identifies a comment. Keywords are specified by the
+# method "keywords". If that method returns a null string, no keywords
+# are highlighted. Note that highlighting keywords is a fairly
+# expensive operation, so it may not be desirable to always highlight
+# keywords.
+#
+body ::tycho::EditTeX::parseNow {start stop} {
+
+    # Remove tags first, if necessary
+    set text $itk_component(text)
+    $text tag remove comment $start $stop
+    $text tag remove notcomment $start $stop
+    $text tag remove fixme $start $stop
+    
+    # Color the comments.
+    set comregexp [commentRegexp]
+    set ind $start
+    set endc $stop
+    while {[set res [$text search -count len -regexp $comregexp \
+	    $ind $stop]] != {}} {
+	$text tag add notcomment $ind $res
+	set endc [$text index "$res + $len chars +1 char"]
+	$text tag add comment $res $endc
+	set ind $endc
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $ind >= end] {break}
+    }
+    $text tag add notcomment $ind $stop
+    
+    # Now tag all occurrences of "FIXME" and "NOTE" within the range.
+    set ind $start
+    while {[set ind [$text search -count cnt -regexp \
+	    {FIXME|NOTE} $ind $stop]] != {}} {
+
+	set endf [$text index "$ind + $cnt chars"]
+	$text tag add fixme $ind $endf
+	set ind $endf
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $ind >= end] {break}
+    }
+
+    # Tag section headings, etc.
+    set sectionPattern {\\section\{.*\}|\\section\*\{.*\}}
+    findAll section 1 1 1 $sectionPattern $start $stop {notcomment}
+    set subsectionPattern {\\subsection\{.*\}|\\subsection\*\{.*\}|\\subsubsection\{.*\}|\\subsubsection\*\{.*\}}
+    findAll subsection 1 1 1 $subsectionPattern $start $stop {notcomment}
+
+    # Tag environments
+    set environmentPattern {\\begin\{.*\}|\\end\{.*\}}
+    findAll environment 1 1 1 $environmentPattern $start $stop {notcomment}
+
+    # Tag labels
+    set labelPattern {\\label\{.*\}}
+    findAll label 1 1 1 $labelPattern $start $stop {notcomment}
+
+    # Tag math
+    # NOTE: Doesn't work...  need to tag smallest not largest match.
+    # set mathPattern {\\\[.*\\\]|\$.*\$|\$\$.*\$\$}
+    # findAll math 1 1 1 $mathPattern $start $stop {notcomment}
+
+    # Finally, tag keywords.
+    set kw [keywords]
+    if {$kw != {}} {
+        # Search case sensitive (by default), regexp, and wholeword.
+        findAll keyword $caseSensitiveKeywords 1 1 $kw $start $stop {notcomment}
+    }
+
+    # Set the visual characteristics of the tagged text
+    $text tag lower comment fixme
+
+    $text tag configure label -foreground \
+	    [stylesheet get tex labelColor]
+    $text tag configure section -foreground \
+	    [stylesheet get tex sectionColor]
+    $text tag configure subsection -foreground \
+	    [stylesheet get tex subsectionColor]
+    $text tag configure environment -foreground \
+	    [stylesheet get tex environmentColor]
+    $text tag configure math -foreground \
+	    [stylesheet get tex mathColor]
+}
+
+#####################################################################
+#### uncommentSelection
+# Remove the comment character at the beginning of every line contained
+# in the selection. Note that this command is (more or less) undone
+# by "commentSelection", and not by the usual undo mechanism. If the
+# first line is partially contained in the selection, then it is
+# treated as if it were fully contained in the selection.  
+#
+body ::tycho::EditProgram::uncommentSelection {} {
+    if {[getSelection] != {}} {
+	
+	# Get the line numbers touched by the selection
+	set firstind [$itk_component(text) index sel.first]
+	regexp {([0-9]+)\.([0-9]+)} $firstind match startline startch
+	set lastind [$itk_component(text) index sel.last]
+	regexp {([0-9]+)\.([0-9]+)} $lastind match endline endch
+		
+	append matchpat "\^\[ \t\]*" {%}
+	
+	for {set lineno $startline} {$lineno < $endline} {incr lineno} {
+	    if [regexp -indices $matchpat \
+		    [$itk_component(text) get $lineno.0 "$lineno.0 lineend"] \
+		    junkmatch toremove] {
+		$itk_component(text) delete $lineno.[lindex $toremove 0] \
+			"$lineno.[lindex $toremove 1] +1 char"
+	    }
+	}
+	
+	markModified
+	parseRegion sel.first sel.last
+    }
+}
+
 #####################################################################
 #####################################################################
 #####################################################################
 ####                    protected methods                        ####
+
+#####################################################################
+#### commentRegexp
+# Return the regular expression used to identify line-oriented 
+# comments.  Here, comments are lines that contain the fillPrefix.
+#
+body ::tycho::EditTeX::commentRegexp {} {
+    return "^\[ \t\]*%.*\$"
+}
 
 #####################################################################
 #### _initializeBars
@@ -248,6 +454,16 @@ body ::tycho::EditTeX::_initializeBars {menubar statusbar toolbar} {
     if {$menubar != {}} {
 	# Set up menus.
         
+        menubar command commentregion format \
+                -label "Comment Out Region" \
+                -underline 8 \
+                -command "$this commentSelection"
+
+        menubar command uncommentregion format \
+                -label "Uncomment Region" \
+                -underline 1 \
+                -command "$this uncommentSelection"
+
         menubar command inlineeq special \
                 -label "In-Line Equation" \
                 -underline 8 \
@@ -300,12 +516,28 @@ body ::tycho::EditTeX::_initializeBars {menubar statusbar toolbar} {
         menubar add cascade environments special -label "Environments" \
                 -underline 1
 
+        menubar command array environments -label "Array" \
+                -underline 0 \
+                -command "$this apply bracket \"\\\\begin\{array\}\{ll\}\n & \\\\\\\\\n & \" \"\n\\\\end\{array\}\""
+
+        menubar command center environments -label "Center" \
+                -underline 0 \
+                -command "$this apply bracket \"\\\\begin\{center\}\n\" \"\n\\\\end\{center\}\""
+
         menubar command enumerate environments -label "Enumerate" \
                 -underline 1 \
-                -command "$this apply bracket \"\\\\begin\{enumerate\}\n\" \"\n\\\\end\{enumerate\}\""
+                -command "$this apply bracket \"\\\\begin\{enumerate\}\n\\\\item\" \"\n\\\\end\{enumerate\}\""
+
+        menubar command eqnarray environments -label "Eqnarray*" \
+                -underline 8 \
+                -command "$this apply bracket \"\\\\begin\{eqnarray*\}\n&=& \\\\\\\\\n&=&\" \"\n\\\\end\{eqnarray*\}\""
 
         menubar command figure environments -label "Figure" \
                 -underline 0 \
                 -command "$this apply bracket \"\\\\begin\{figure\}\\\[btp\\\]\n\\\\centering\n\\\\includegraphics\{FIXME\}\n\\\\caption\{\" \"\}\n\\\\label\{FIXME\}\n\\\\end\{figure\}\""
+
+        menubar command verbatim environments -label "Verbatim" \
+                -underline 0 \
+                -command "$this apply bracket \"\\\\begin\{verbatim\}\n\" \"\n\\\\end\{verbatim\}\""
     }
 }
