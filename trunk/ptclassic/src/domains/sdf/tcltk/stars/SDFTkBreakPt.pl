@@ -15,7 +15,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF tcltk library }
+	location { SDF Tcl/Tk library }
 	explanation {
 .EQ
 delim off

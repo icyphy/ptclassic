@@ -19,7 +19,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF tcltk library }
+	location { SDF Tcl/Tk library }
 	explanation {
 The \fIpersistence\fR parameter specifies the number
 of points that are buffered, and hence the number that will
