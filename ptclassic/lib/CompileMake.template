@@ -6,6 +6,9 @@
 #	cp make.template makefile
 #	make depend
 # This will add the dependencies to the makefile.
+#
+# This file is used by sdf/targets/CompileTarget.cc to create a makefile to
+# manage generated C++ code for standalone programs.  It requires GNU make.
 
 # Root of source tree
 ROOT = $(PTOLEMY)
@@ -32,13 +35,17 @@ SDFKERSRC=$(ROOT)/src/domains/sdf/kernel
 SDFLOOP=$(ROOT)/src/domains/sdf/loopScheduler
 
 # libraries
-ifdef MATLABLIBDIR
-MATLABEXT_LIB= -lmat
+MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
+ifeq ($MATLABDIR,)
+MATLABDIR= $(ROOT)/src/compat/matlab
+else
+MATARCH := $(shell $(ROOT)/bin/matlabArch $(ARCH))
+MATLABEXT_LIB = -L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
 endif
 
 LIBS=-lsdfstars -lsdfdspstars -lsdfimagestars -lsdfatmstars -lsdfmatrixstars \
 	-lLS -lsdf -lImage -latm -lcompileSDF -lptolemy \
-	$(MATLABLIBDIR) $(MATLABEXT_LIB) $(SYSLIBS)
+	$(MATLABEXT_LIB) $(SYSLIBS)
 
 LIBFILES=\
  $(LIBDIR)/libLS.a $(LIBDIR)/libsdf.a \
