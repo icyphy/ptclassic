@@ -35,6 +35,9 @@ class DEScheduler : public Scheduler {
 
 	// stoping condition of the scheduler
 	float stopTime;
+
+	// set the depth of the DEStars.
+	int setDepth(DEStar*);
 public:
 	// The global event queue is implemented as a priority queue
 	// in DE scheduler.
