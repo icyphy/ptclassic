@@ -40,9 +40,16 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 EXTRA_SRCS =	\
+	EditBubbleAndArcHelp.html \
+	EditDAGHelp.html \
 	EditForestHelp.html \
+	EditPaletteHelp.html \
+	EditSTDHelp.html \
+	GanttView.html \
+	GanttViewHelp.html \
 	GraphicsHelp.html \
 	ProfileTclHelp.html \
+	SlateViewHelp.html \
 	index.html \
 	tclXprofile.c.patch
 
