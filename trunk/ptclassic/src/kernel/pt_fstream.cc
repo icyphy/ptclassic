@@ -74,7 +74,7 @@ void pt_ifstream::open(const char* name, int mode, int prot) {
 	if ( fd >= 0 )		rdbuf()->attach(fd);
 	else			ifstream::open(expand(name),mode,prot);
 	if (!*this)	reportError("reading");
-	if (nobufB)	rdbuf()->unbuffered(TRUE);
+	if (nobufB)	setf(unitbuf);
 }
 
 pt_ofstream::pt_ofstream(const char *name,int mode, int prot) {
@@ -87,5 +87,5 @@ void pt_ofstream::open(const char* name, int mode, int prot) {
 	if ( fd >= 0 )		rdbuf()->attach(fd);
 	else			ofstream::open(expand(name),mode,prot);
 	if (!*this) reportError("writing");
-	if (nobufB)	rdbuf()->unbuffered(TRUE);
+	if (nobufB)	setf(unitbuf);
 }
