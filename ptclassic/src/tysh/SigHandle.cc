@@ -85,7 +85,7 @@ int signalMsgSize;
 
 static void DoTychoSave(void)
 {
-    Tcl_VarEval(ptkInterp, ".mainConsole emergencySave", NULL);
+    Tcl_VarEval(ptkInterp, "::tycho::File::emergencySave", NULL);
 }    
 
 
