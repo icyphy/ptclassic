@@ -1,8 +1,9 @@
-#! /bin/csh -f 
+#! /bin/sh
 # This script is used to run itkwish from prebuilt binaries
 # Author: Christopher Hylands
+#         changed to bourne shell script by Wolfgang Reimer
 # Version: $Id$
-# Copyright (c) 1996-%Q% The Regents of the University of California.
+# Copyright (c) 1996-1997 The Regents of the University of California.
 # 	All Rights Reserved.
 
 # PTOLEMY and PTARCH are part of the Ptolemy project.
@@ -14,94 +15,104 @@
 # HPUX10.20
 # setenv PTARCH hppa
 
-if (! $?PTOLEMY && $?TYCHO) then
-	if( -f "$TYCHO/../bin/ptarch") setenv PTOLEMY "$TYCHO/.."
-else
-	if (! $?TYCHO) setenv TYCHO /usr/eesww/share/tycho0.2/tycho0.2
-	if (! $?PTOLEMY) setenv PTOLEMY /usr/eesww/share/ptolemy
-endif
+if [ -z "$PTOLEMY" ]; then 
+    if [ "$TYCHO" -a -f "$TYCHO/../bin/ptarch" ]; then
+	PTOLEMY="$TYCHO/.."
+    elif [ -d "/usr/eesww/share/ptolemy" ]; then
+	PTOLEMY=/usr/eesww/share/ptolemy
+    fi
+    export PTOLEMY
+fi
+
+if [ -z "$TYCHO" ]; then
+    if [ "$PTOLEMY" -a -f "$PTOLEMY/tycho/bin/ptarch" ]; then
+	TYCHO="$PTOLEMY/tycho"
+    elif [ -d "/usr/eesww/share/tycho0.2/tycho0.2" ]; then
+	TYCHO=/usr/eesww/share/tycho0.2/tycho0.2
+    fi
+    export TYCHO
+fi
 
 # ITCLDIR should be the location of the untar'd itcl files
-if (! $?ITCLDIR) setenv ITCLDIR $PTOLEMY/tcltk
+if [ -z "$ITCLDIR" ]; then
+    ITCLDIR="$PTOLEMY/tcltk"
+    export ITCLDIR
+fi
 
+if [ -z "$PTARCH" ]; then
+    if [ -x "$TYCHO/bin/ptarch" ]; then
+	PTARCH=`$TYCHO/bin/ptarch`
+	export PTARCH
+    elif [ -x "$ITCLDIR/itcl/bin/ptarch" ]; then
+	PTARCH=`$ITCLDIR/itcl/bin/ptarch`
+	export PTARCH
+    elif [ -x "$PTOLEMY/bin/ptarch" ]; then
+	PTARCH=`$PTOLEMY/bin/ptarch`
+	export PTARCH
+    else
+	echo '$PTARCH is not set.'
+	echo "$TYCHO/bin/ptarch, $PTOLEMY/bin/ptarch, and"
+	echo "$ITCLDIR/itcl/bin/ptarch either are not"
+	echo " executable or do not exist, so we cannot"
+	echo " run ptarch."
+	echo 'Perhaps you need to set $ITCLDIR?'
+   fi
+fi
 
-# The value of PTARCH is the architecture (sol2.5, hppa, sun4)
-if (! $?PTARCH) then
-	if ( -x "$TYCHO/bin/ptarch") then
-		setenv PTARCH `$TYCHO/bin/ptarch`
+progname=`basename $0`
+
+if [ -f $ITCLDIR/itcl/lib/itcl/itcl/itcl.tcl ]; then
+    case "$PTARCH" in
+    hppa?*) if [ "$SHLIB_PATH" ]; then
+	    SHLIB_PATH=$ITCLDIR/itcl.$PTARCH/lib/itcl:${SHLIB_PATH}
 	else
-		if ( -x "$ITCLDIR/itcl/bin/ptarch") then
-		setenv PTARCH `$ITCLDIR/itcl/bin/ptarch`
-		else
-			echo '$PTARCH is not set."
-			echo "$TYCHO/bin/ptarch and 
-			echo "$ITCLDIR/itcl/bin/ptarch either are not"
-			echo " executable or do not exist, so we cannot"
-			echo " run ptarch."
-			echo 'Perhaps you need to set $ITCLDIR?'
-		endif
-	endif
-endif
-
-set progname =  `basename $0`
-
-if ( -f $ITCLDIR/itcl/lib/itcl/itcl/itcl.tcl ) then
-	if ($PTARCH =~ hppa?*) then
-		if ($?SHLIB_PATH) then
-			setenv SHLIB_PATH $ITCLDIR/itcl.$PTARCH/lib/itcl:${SHLIB_PATH}
-		else
-			setenv SHLIB_PATH $ITCLDIR/itcl.$PTARCH/lib/itcl
-		endif
+	    SHLIB_PATH=$ITCLDIR/itcl.$PTARCH/lib/itcl
+	fi
+	export SHLIB_PATH;;
+    *) if [ "$LD_LIBRARY_PATH" ]; then
+	    LD_LIBRARY_PATH=$ITCLDIR/itcl.$PTARCH/lib/itcl:${LD_LIBRARY_PATH}
 	else
-		if ($?LD_LIBRARY_PATH) then
-			setenv LD_LIBRARY_PATH $ITCLDIR/itcl.$PTARCH/lib/itcl:${LD_LIBRARY_PATH}
-		else
-			setenv LD_LIBRARY_PATH $ITCLDIR/itcl.$PTARCH/lib/itcl
-		endif
-	endif
+	    LD_LIBRARY_PATH=$ITCLDIR/itcl.$PTARCH/lib/itcl
+	fi
+	export LD_LIBRARY_PATH;;
+    esac
 
-	# Itcl2.1
-	setenv TCL_LIBRARY $ITCLDIR/itcl/lib/itcl/tcl
-	setenv TK_LIBRARY $ITCLDIR/itcl/lib/itcl/tk
-	setenv ITCL_LIBRARY $ITCLDIR/itcl/lib/itcl/itcl
-	setenv ITK_LIBRARY $ITCLDIR/itcl/lib/itcl/itk
-	setenv IWIDGETS_LIBRARY $ITCLDIR/itcl/lib/itcl/iwidgets
+    # Itcl2.1
+    TCL_LIBRARY=$ITCLDIR/itcl/lib/itcl/tcl
+    TK_LIBRARY=$ITCLDIR/itcl/lib/itcl/tk
+    ITCL_LIBRARY=$ITCLDIR/itcl/lib/itcl/itcl
+    ITK_LIBRARY=$ITCLDIR/itcl/lib/itcl/itk
+    IWIDGETS_LIBRARY=$ITCLDIR/itcl/lib/itcl/iwidgets
+    export TCL_LIBRARY TK_LIBRARY ITCL_LIBRARY ITK_LIBRARY IWIDGETS_LIBRARY
 
-	exec $ITCLDIR/itcl.$PTARCH/bin/$progname $*
+    exec $ITCLDIR/itcl.$PTARCH/bin/$progname ${1+"$@"}
+
+elif [ -f $PTOLEMY/tcltk/tcl/lib/tcl/init.tcl ]; then
+    # Itcl2.0 with statically linked libs, which was shipped with Ptolemy0.6 
+    TCL_LIBRARY=$PTOLEMY/tcltk/tcl/lib/tcl
+    TK_LIBRARY=$PTOLEMY/tcltk/tk/lib/tk
+    ITCL_LIBRARY=$PTOLEMY/tcltk/itcl/lib/itcl
+    ITK_LIBRARY=$PTOLEMY/tcltk/itcl/lib/itk
+    IWIDGETS_LIBRARY=$PTOLEMY/tcltk/itcl/lib/iwidgets
+    export TCL_LIBRARY TK_LIBRARY ITCL_LIBRARY ITK_LIBRARY IWIDGETS_LIBRARY
+
+    exec $PTOLEMY/bin.$PTARCH/$progname ${1+"$@"}
+
 else
-	if ( -f $PTOLEMY/tcltk/tcl/lib/tcl/init.tcl) then
-		# Itcl2.0, which was shipped with Ptolemy0.6
-		setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl/lib/tcl
-		setenv TK_LIBRARY $PTOLEMY/tcltk/tk/lib/tk
-		setenv ITCL_LIBRARY $PTOLEMY/tcltk/itcl/lib/itcl
-		setenv ITK_LIBRARY $PTOLEMY/tcltk/itcl/lib/itk
-		setenv IWIDGETS_LIBRARY $PTOLEMY/tcltk/itcl/lib/iwidgets
-		exec $PTOLEMY/bin.$PTARCH/$progname $*
-	else
-		# If we just call itkwish here, we will end up in 
-		# a recursive loop
-		#exec itkwish $*
+    # If we just call itkwish here, we will end up in 
+    # a recursive loop
+    #exec itkwish $*
 
-		# Find the next itkwish by traversing the path, looking
-		# for an itkwish that is not a script
-		# Is this a big mistake?
-		set binary=$0
-		set bindir=`dirname $binary`
-		set newpath=''
-		foreach dir ($path)
-			if ( $dir != $bindir ) then
-				if ( -e $dir/progname ) then
-					file $dir/progname | \
-					 egrep -s 'csh|c-shell|script'
-					if ($status != 0) then
-						echo $dir/progname
-						exec $dir/progname $*
-					endif	
-				endif
-			endif	
-		end
-	endif
-	
-endif
+    # Find the next itkwish by traversing the path, looking
+    # for an itkwish that is not a script
+    # Is this a big mistake?
+    #     No, I tested this and it seems to work :-) (Wolfgang Reimer)
 
-
+    bindir=`dirname $0`
+    for dir in `echo $PATH|sed 's/:/ /g'`; do
+	if [ "$dir" != "$bindir" -a -x $dir/$progname ] ; then
+	    file $dir/$progname | egrep -s 'csh|shell|script' || \
+ 	    exec $dir/$progname ${1+"$@"}
+	fi	
+    done
+fi
