@@ -14,7 +14,7 @@ $Id$
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer:  E. A. Lee and D. G. Messerschmitt
+ Programmer:  E. A. Lee, D. G. Messerschmitt, J. Buck
  Date of creation: 1/17/90
 
 Definition of the Galaxy class, together with the BlockList class.
@@ -34,18 +34,23 @@ class BlockList : private NamedObjList
 public:
 	// Add Block to list
 	void put(Block& b) {NamedObjList::put(b);}
-	// Return first Block on list (a const method)
-	Block* head () const {return (Block*) NamedObjList::head();}
+
+	// Return first Block on list (const, non-const forms)
+	Block* head () {return (Block*) NamedObjList::head();}
+	const Block* head () const {
+		return (const Block*) NamedObjList::head();
+	}
 
 	// Remove a Block from the list.  Note: block is not deleted
 	int remove (Block* b) { return NamedObjList::remove(b);}
 
-	// find Block with given name
-	const Block* blockWithName(const char* name) const {
-		return (const Block*)objWithName(name);
-	}
+	// find Block with given name (const and non-const forms)
 	Block* blockWithName(const char* name) {
 		return (Block*)objWithName(name);
+	}
+
+	const Block* blockWithName(const char* name) const {
+		return (const Block*)objWithName(name);
 	}
 
 	// pass along baseclass methods.
