@@ -67,6 +67,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include <X11/Xlib.h>
+#ifdef PTSVR4
+#include "utility.h"
+#endif
 
 extern long UserMain();
 

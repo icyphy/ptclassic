@@ -31,6 +31,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define IV_H
 
 #include <X11/Xlib.h>
+#ifdef PTSVR4
+#include "utility.h"
+#endif
+
 
 #define IV_PKG_NAME "iv"
 
