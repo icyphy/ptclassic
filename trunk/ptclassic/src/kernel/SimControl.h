@@ -30,7 +30,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: J. Buck
+ Programmer: J. Buck  
  Date of creation: 6/23/92
 
 SimControl provides for control of a simulation.  Here are the features
@@ -50,7 +50,7 @@ be registered to provide for an arbitrary action when this bit is set.
 
 The poll function, if enabled, is called between each action function
 and when the flag bits are checked.  It can be used as an X event loop,
-for example.
+for example.  Polling functionality completed by Alan Kamas.  1/95
 
 **************************************************************************/
 
@@ -114,9 +114,16 @@ public:
 	// Returns old handler if any.
 	static SimHandlerFunction setInterrupt(SimHandlerFunction f);
 
+        // Set the Poll Flag true
+	static void SimControl::setPollFlag();
+
 	// register a function to be called if the poll flag is set.
 	// Returns old handler if any.
-	static SimHandlerFunction setPoll(SimHandlerFunction f);
+	static SimHandlerFunction setPollAction(SimHandlerFunction f);
+
+	// use the system timer to set the poll flag at the future time
+        // specified by the passed parameters.
+	static void setPollTimer( int seconds, int micro_seconds );
 
 	// cancel an action.  Warning: argument is deleted.
 	static int cancel(SimAction*);
