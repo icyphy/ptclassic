@@ -41,6 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation "InfString.h"
 #endif
 
+#include <stdio.h>
 #include <ctype.h>
 #include <stream.h>
 #include "StringList.h"
