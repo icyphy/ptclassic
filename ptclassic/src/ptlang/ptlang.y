@@ -1347,6 +1347,7 @@ yylex () {
 				yyerror (yytext);;
 				exit (1);
 			case '/':
+				if (inQuote) break;
 				c = getc(yyin);
 				if (c == '/') {
 					inComment = 1;
