@@ -92,7 +92,7 @@ class ::tycho::EditSearch {
 
     #### find
     # Find the specified pattern. Return 1 if it is found, 0 otherwise.
-    method find {}
+    method find {{start {}}}
 
     ###################################################################
     ####                      protected variables                  ####
@@ -286,9 +286,11 @@ body ::tycho::EditSearch::clearFindMatch {} {
 #####################################################################
 #### find
 # Find the specified pattern in the associated EditText object.
-# Return 1 if it is found, 0 otherwise.
+# Return 1 if it is found, 0 otherwise.  The search starts at the insertion
+# cursor, unless the optional argument is given, in which case it starts
+# at the specified point.
 # 
-body ::tycho::EditSearch::find {} {
+body ::tycho::EditSearch::find {{start {}}} {
 
     set tw $itk_option(-edittext)
     set pattern [get pattern]
@@ -299,10 +301,12 @@ body ::tycho::EditSearch::find {} {
     set lastSearchPattern $pattern
     
     # To avoid finding the same string over and over again ...
-    if {$myLastSearchPattern == $pattern && !$backwardssw} {
-	set start {insert +1 char}
-    } else {
-	set start insert
+    if {$start == {}} {
+	if {$myLastSearchPattern == $pattern && !$backwardssw} {
+	    set start {insert +1 char}
+	} else {
+	    set start insert
+	}
     }
     set myLastSearchPattern $pattern
     
@@ -320,13 +324,23 @@ body ::tycho::EditSearch::find {} {
     # to keep the command from getting confused if the pattern
     # starts with --.
     if {$case == "--"} {
-	set result [$tw find $start $direction $regexp $case $pattern]
+	set result [$tw find $direction $regexp $case $pattern $start]
     } {
-	set result [$tw find $start $direction $regexp $case -- $pattern]
+	set result [$tw find $direction $regexp $case -- $pattern $start]
     }
 
     if {$result == {}} {
-	warn "Not found."
+	if {$backwardssw} {
+	    if [::tycho::askuser \
+		    "Not found.  Start search again at the bottom?"] {
+		return [find end]
+	    }
+	} {
+	    if [::tycho::askuser \
+		    "Not found.  Start search again at the top?"] {
+		return [find 1.0]
+	    }
+	}
 	return 0
     } {
 	return 1
