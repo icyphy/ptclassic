@@ -35,8 +35,9 @@ are too large to efficiently inline.
 The XGraph class wants to talk to a modified version of the xgraph
 program that accepts input in binary form (indicated by the -binary
 flag).  This is much faster than the ASCII form used by standard xgraph.
+The program used is called pxgraph (the "p" is silent).
 
-The following commands may appear in binxgraph input
+The following commands may appear in pxgraph input
 
 d x y
 
@@ -102,10 +103,6 @@ void XGraph :: initialize(Block* parent,
 			  const char* saveFile,
 			  int ignore)
 {
-	// test for existence of program.
-	// if (progNotFound("xgraph", "Plots cannot be generated without it.\n"))
-	// 	return;
-
 	StringList msg;
 
 	// just in case initialize is called twice.
@@ -265,10 +262,10 @@ void XGraph :: terminate () {
                     }
         }
 
-	cmd += getenv("PTOLEMY");
-	cmd += "/bin.";
-	cmd += getenv("ARCH");
-        cmd += "/xgraph ";
+	// The following relies on the pxgraph being in the user's path.
+	// The path is set by the pigi script, so at least with pigi,
+	// this is safe.
+        cmd += "pxgraph ";
 	if (!ascii)
 		cmd += "-binary ";
 
