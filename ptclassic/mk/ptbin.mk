@@ -92,7 +92,7 @@ endif
 
 ifdef PTINY
 	PIGI=		$(BASENAME).ptiny
-	VERSION_DESC =	'With SDF (no image stars) and DE only'
+	VERSION_DESC =	'With SDF (no image stars) and DE domains only'
 	DE =		1
 	HOF =		1
 	SDF =		1
@@ -105,7 +105,7 @@ endif
 
 ifdef PTRIM
 	PIGI =		$(BASENAME).ptrim
-	VERSION_DESC =	'With SDF, DE, BDF, DDF and CGC'
+	VERSION_DESC =	'With SDF, DE, BDF, DDF and CGC domains only'
 	BDF =		1
 	CGCFULL =	1
 	CGFULL =	1
