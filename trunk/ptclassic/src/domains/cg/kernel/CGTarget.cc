@@ -39,25 +39,33 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "CGTarget.h"
-#include "CGStar.h"
-#include "CGPortHole.h"
+
+// Ptolemy kernel includes
 #include "Domain.h"
+#include "Block.h"
+#include "KnownBlock.h"
 #include "GalIter.h"
 #include "Error.h"
-#include "SDFScheduler.h"
 #include "EventHorizon.h"
-#include "LoopScheduler.h"
-#include "SDFCluster.h"
-#include "AcyLoopScheduler.h"
 #include "miscFuncs.h"
-#include "CGUtilities.h"
 #include "pt_fstream.h"
 #include "SimControl.h"
-#include "KnownBlock.h"
 #include "Tokenizer.h"
 #include "ProfileTimer.h"
 #include "checkConnect.h"
+
+// Ptolemy domain includes
+#include "LoopScheduler.h"
+#include "AcyLoopScheduler.h"
+#include "SDFScheduler.h"
+#include "SDFCluster.h"
+#include "CGUtilities.h"
+#include "CGStar.h"
+#include "CGPortHole.h"
+
 #include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>			// define stat structure
 
 // Defined in CGDomain.cc
 extern const char CGdomainName[];
@@ -78,7 +86,6 @@ StringList CGTarget::indent(int depth) {
 CGTarget::CGTarget(const char* name,const char* starclass,
 		   const char* desc, char sep)
 : Target(name,starclass,desc), defaultStream(&myCode), schedFileName(0), noSchedule(0),typeConversionTable(0),typeConversionTableRows(0)
-  
 {
 	counter = 0;
 	spliceList.initialize();
@@ -196,7 +203,6 @@ AsynchCommPair CGTarget::createPeekPoke(CGTarget& /*peekTarget*/,
 }
 
 // the main guy.
-
 void CGTarget::setup() {
 	myCode.initialize();
 	makefile.initialize();
@@ -205,29 +211,30 @@ void CGTarget::setup() {
 	// This only initializes the streams owned by 'codeStringLists'
 	codeStringLists.initialize();
 
+	// Full path name of the log file
 	StringList logPath = logFilePathName(destDirectory, "schedule.log");
 
 	if (!scheduler()) {
 	    switch (int(loopingLevel)) {
-	    case 0:
+	      case 0:
 		LOG_NEW; setSched(new SDFScheduler);
 		break;
-	    case 1:
+	      case 1:
 		delete [] schedFileName;
 		schedFileName = logPath.newCopy();
 		LOG_NEW; setSched(new SDFClustSched(schedFileName));
 		break;
-	    case 2:
+	      case 2:
 		delete [] schedFileName;
 		schedFileName = logPath.newCopy();
 		LOG_NEW; setSched(new LoopScheduler(schedFileName));
 		break;
-	    case 3:
+	      case 3:
 		delete [] schedFileName;
 		schedFileName = logPath.newCopy();
 		LOG_NEW; setSched(new AcyLoopScheduler(schedFileName));
 		break;
-	    default:
+	      default:
 		Error::abortRun(*this, "Unknown scheduler");
 		break;
 	    }
@@ -372,6 +379,8 @@ void CGTarget::generateCode() {
 	procedures.initialize();
 }
 
+// If there is a CGTarget parent, return its counter.
+// Otherwise, return the counter for this target.
 int* CGTarget::symbolCounter() {
 	if (parent()) {
 		if(((CGTarget*)parent())->isA("CGTarget")) {
@@ -590,19 +599,19 @@ void CGTarget :: writeCode() {
     writeFile(myCode,"",displayFlag);
 }
 
-int CGTarget::writeFile(const char* text,const char* suffix,
-			int display,int mode){
+int CGTarget::writeFile(const char* text, const char* suffix,
+			int display, int mode){
     StringList fileName;
     fileName << filePrefix << suffix;
-    int status = rcpWriteFile( targetHost, destDirectory, fileName, text, 
-		 display, mode);
+    int status = rcpWriteFile(targetHost, destDirectory, fileName, text, 
+			      display, mode);
     if (status) {
 	return TRUE;
     }
     else {
-	StringList errMsg;
-	errMsg << "Write of file " << fileName << " unsuccessful.";
-	Error::abortRun(*this,errMsg);
+	StringList errMsg = "Writing to the file ";
+	errMsg << fileName << " was unsuccessful.";
+	Error::abortRun(*this, errMsg);
 	return FALSE;
     }
 }
@@ -668,11 +677,10 @@ StringList CGTarget::headerComment(const char* begin, const char* end,
 	return header;
 }
 	
-int CGTarget::systemCall(const char*command,const char*error,const char*host){
-	int i;
-	if( (i=rshSystem(host,command,workingDirectory())) != 0 && 
-          error != NULL)
-		Error::abortRun(error);
+int CGTarget::systemCall(const char* command, const char* error,
+			 const char* host) {
+	int i = rshSystem(host, command, destDirectory);
+	if( i != 0 && error != NULL) Error::abortRun(error);
 	return i;
 }
 
@@ -832,21 +840,18 @@ StringList destDirectoryName(const char* subdir) {
 // Write a log file to the local machine in the destination directory.
 // Create the directory dir if it does not exist.
 StringList CGTarget::logFilePathName(const char* dir, const char* logfile) {
-	// FIXME: Assumes that the log file should always be written
-	// on the local machine?
 	StringList pathname = "";
 
-	// FIXME: writeDirectoryName will be phased out.  Use either
-	// CGTarget::writeFile or rpcWriteFile (defined in CGUtilities).
-	// Expand environment variables in the directory name.
-	// Create the directory if it does not exist.
-	writeDirectoryName(dir);
+	// Create a directory on the local machine
+	makeWriteableDirectory(0, dir);
+
+	// Build up the complete path name of the log file
 	if (logfile) {
-	    // writeDirectoryName must be called before writeFileName
-	    // otherwise, writeFileName returns /dev/null
-	    char* expandedPath = writeFileName(logfile);
+	    pathname << dir << "/" << logfile;
+	    char* expandedPath = expandPathName(pathname);
 	    pathname = expandedPath;
 	    delete [] expandedPath;
 	}
+
 	return pathname;
 }
