@@ -77,7 +77,9 @@ The facet that is already open,
 called ``init.pal:schematic'', is special because pigi always
 .IE "init.pal facet"
 opens a facet by this name in the directory in which it starts.
-Instead of using this facet, we will create a new one.
+Convention in Ptolemy dictates that ``init.pal'' should be used to store
+icons representing complete applications, so
+instead of using this facet, we will create a new one.
 .in +0.5i
 .LE
 Place cursor in window labeled ``init.pal:schematic''.
