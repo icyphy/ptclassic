@@ -22,7 +22,7 @@ class Block;
 class AutoForkNode : public Geodesic {
 public:
 	int isItPersistent ();
-	PortHole* setSourcePort (GenericPort &);
+	PortHole* setSourcePort (GenericPort &, int delay = 0);
 	PortHole* setDestPort (GenericPort &);
 	AutoForkNode () : forkStar(0), forkOutput(0) {}
 	~AutoForkNode();

@@ -42,9 +42,10 @@ void Geodesic :: portHoleConnect () {
 }
 
 // this function changes the sourceport.
-PortHole* Geodesic :: setSourcePort (GenericPort& sp) {
+PortHole* Geodesic :: setSourcePort (GenericPort& sp, int delay) {
 	originatingPort = &sp.newConnection();
 	portHoleConnect();
+	numInitialParticles = delay;
 	return originatingPort;
 }
 

@@ -44,7 +44,7 @@ public:
 	// set the source and destination portholes -- virtual
 	// these functions return a pointer to the "real porthole"
 	// on success, NULL on failure.
-	virtual PortHole* setSourcePort (GenericPort &);
+	virtual PortHole* setSourcePort (GenericPort &, int delay = 0);
 	virtual PortHole* setDestPort (GenericPort &);
 
 	// disconnect from porthole
