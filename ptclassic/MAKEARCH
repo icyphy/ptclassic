@@ -6,7 +6,7 @@ cd ~ptolemy
 mkdir bin.$ARCH lib.$ARCH obj.$ARCH
 cd obj.$ARCH
 ln -s ../src/makefile .
-foreach x (domains interp kernel pigiRpc stars tests xgraph)
+foreach x (domains interp kernel pigiRpc tests xgraph)
 	mkdir $x
 	cd $x
 	ln -s ../../src/$x/makefile .
@@ -14,12 +14,17 @@ foreach x (domains interp kernel pigiRpc stars tests xgraph)
 	cd ..
 end
 
-foreach y (domains stars)
-	cd $y
-	foreach x (sdf ddf de)
-		mkdir $x
-		cd $x
-		ln -s ../../../src/$y/$x/{make.template,makefile} .
+cd domains
+foreach x (sdf ddf de)
+	mkdir $x
+	cd $x
+	ln -s ../../../src/domains/$x/makefile .
+	foreach y (kernel stars)
+		mkdir $y
+		cd $y
+		ln -s ../../../../src/domains/$x/$y/{make.template,makefile} .
 		cd ..
+	end
+	cd ..
 end
 
