@@ -314,12 +314,9 @@ const char* ptSanitize(const char* string)
     // this function.
     static char *sanitizedString = 0;
 
-    // Delete the buffer allocated in the previous invocation.
-    if (sanitizedString) { LOG_DEL; delete sanitizedString; }
-
     // Allocate a new buffer for this invocation.
+    delete [] sanitizedString;
     LOG_NEW; sanitizedString = new char [strlen(string) + 2];
-
     char *cPtr = sanitizedString;
 
     // Check for leading digit.
