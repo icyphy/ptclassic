@@ -34,7 +34,7 @@
 #
 # An interactor that keeps the target object within a given region.
 # The region can either be specified by an option, by the target
-# picture, or defaults to the size of the slate. The *-constrain*
+# item, or defaults to the size of the slate. The *-constrain*
 # option that restricts movement along certain axes.  Bounder inherits from
 # <a href="Follower.html">Follower</a>, which provides non-constrained
 # movement, and is related to <a href="Stepper.html">Stepper</a>,
@@ -144,8 +144,8 @@ class ::tycho::Bounder {
 #### click
 #
 # Start the interaction. To find the bounds within which to move
-# the picture, the interactor first examines its -bounds option.
-# If that it is null, then it tries to see if the picture responds
+# the item, the interactor first examines its -bounds option.
+# If that it is null, then it tries to see if the item responds
 # to " query bounds"; if that doesn't work, then use the size of the
 # slate.
 #
@@ -156,8 +156,8 @@ body ::tycho::Bounder::click {x y args} {
 	set b $bounds
     } else {
 	# Didn't get bounds: try for a query
-	# FIXME: Need a mechanism for having a picture be asked what its
-	# bounds are, in case the picture itself "knows"
+	# FIXME: Need a mechanism for having an item be asked what its
+	# bounds are, in case the item itself "knows"
 	# set b [$target query bounds]
 	set b {}
 	if { [llength $b] != 4 } {
@@ -170,10 +170,10 @@ body ::tycho::Bounder::click {x y args} {
     # Remember the bounds
     ::tycho::assign x0 y0 x1 y1 $b
 
-    # Get the coordinates of the picture
+    # Get the coordinates of the item
     ::tycho::assign a0 b0 a1 b1 [$slate region $target]
 
-    # Adjust the bounds for the size of the picture
+    # Adjust the bounds for the size of the item
     set x0 [expr $x0 + ($x - $a0)]
     set y0 [expr $y0 + ($y - $b0)]
     set x1 [expr $x1 + ($x - $a1)]

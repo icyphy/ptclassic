@@ -113,7 +113,7 @@ class ::tycho::DragDropper {
     ###################################################################
     ####                         public methods                    ####
 
-    # Bind to a tag picture
+    # Bind to a tag or item
     method bind {tagOrID args}
 
     # Start interaction sequence

@@ -142,9 +142,6 @@ class ::tycho::ComplexItem {
     proc itemconfigure {id canvas slate scope args}
 
     ###################################################################
-    ####                         picture components                ####
-
-    ###################################################################
     ####                         protected variables               ####
 
     # The components of each item. Each subclass should place 
@@ -300,7 +297,7 @@ body ::tycho::ComplexItem::coords {id canvas slate args} {
 	set newbox $args
     }
 
-    # Scale the picture
+    # Scale the item
     ::tycho::assign x0 y0 x1 y1 $oldbox
     ::tycho::assign a0 b0 a1 b1 $newbox
 
@@ -310,12 +307,12 @@ body ::tycho::ComplexItem::coords {id canvas slate args} {
     set yscale [expr double($b1-$b0)/($y1-$y0)]
 
     # Move and scale each of the components
-    foreach pict [$slate picture children $id] {
+    foreach pict [$slate children $id] {
 	$slate move  $pict $xdelta $ydelta
 	$slate scale $pict $a0 $b0 $xscale $yscale
     }
 
-    # Move and scale the items belonging to this picture
+    # Move and scale the items belonging to this item
     $canvas move  !$id $xdelta $ydelta
     $canvas scale !$id $a0 $b0 $xscale $yscale
 

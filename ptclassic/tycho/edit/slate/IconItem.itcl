@@ -177,7 +177,7 @@ class ::tycho::Connectible {
 #
 # The option representing the positions of the input connections.
 # Each of these is a list of connection positions, in % and relative
-# to the top-left corner of the picture's outline. Each position
+# to the top-left corner of the item's outline. Each position
 # is a pair, with each number the percentage distance along
 # the horizontal and vertical axis respectively. For example,
 # a single point in the center of the left edge is *{0 50}*;

@@ -166,7 +166,7 @@ body ::tycho::Rectangle::_aspect {id canvas slate args} {
 #######################################################################
 #### _grapple interactor [-ghost]
 #
-# Attach a set of grapples to a target picture. The grapple is attached
+# Attach a set of grapples to a target item. The grapple is attached
 # to the target as a constraint. If the specified interactor is null,
 # then the grapple is removed from the object.
 #
@@ -334,7 +334,7 @@ body ::tycho::Rectangle::_reshapedrag {id canvas slate x y} {
     # Evaluate the drag script to update coordinates
     eval $scratch($id.script)
 
-    # If there's a ghost, reshape it. Otherwise reshape the picture.
+    # If there's a ghost, reshape it. Otherwise reshape the item.
     if $scratch($id.ghost) {
 	$slate region ghost \
 		$scratch($id.w) $scratch($id.n) $scratch($id.e) $scratch($id.s)
@@ -348,10 +348,10 @@ body ::tycho::Rectangle::_reshapedrag {id canvas slate x y} {
 #### _reshaperelease
 #
 body ::tycho::Rectangle::_reshaperelease {id canvas slate x y} {
-    # If there's a ghost, reshape the picture to its shape
+    # If there's a ghost, reshape the item to its shape
     # and then delete the ghost.
     if { $scratch($id.ghost) } {
-	# Reshape the picture
+	# Reshape the item
 	eval $slate coords $id [$slate coords ghost]
 	$canvas delete ghost
     }

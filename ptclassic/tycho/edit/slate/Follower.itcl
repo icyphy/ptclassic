@@ -34,9 +34,9 @@
 #
 # The simplest interactor: follow the mouse. This interactor implements
 # the activate{} and deactivate{} methods so that
-# clicking and dragging on a target picture causes corresponding actions
+# clicking and dragging on a target item causes corresponding actions
 # on the target -- in other words, with the default moving behavior,
-# the picture is moved by clicking and dragging.
+# the item is moved by clicking and dragging.
 #
 # It seems like this class goes to a lot of trouble to perform a simple
 # function. However, its real power comes from inheritance, where
@@ -85,18 +85,18 @@ class ::tycho::Follower {
     ###################################################################
     ####                        public methods                  ####
 
-    # Attach the interactor to the current picture
+    # Attach the interactor to the current item
     method activate {t x y args}
 
-    # Remove the interactor from the current picture
+    # Remove the interactor from the current item
     method deactivate {x y args}
 }
 
 #######################################################################
 #### activate
 #
-# Activate the interactor on a picture object. Motion and release events
-# are bound to the current picture so that the picture can be dragged
+# Activate the interactor on an item object. Motion and release events
+# are bound to the current item so that the item can be dragged
 # and so on. After setting up bindings and calling the *activatecommand*
 # option, this method calls the click{} method -- subclasses therefore
 # need only to override click{} (and drag{} and release{}) to alter the

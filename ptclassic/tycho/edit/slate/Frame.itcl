@@ -42,7 +42,7 @@ namespace ::tycho {
 #
 # <i>Frame</i> is a pseudo-3D rectangle, with a border and a relief.
 # <i>Frame</i> implements its scaling code so that the borderwidth remains 
-# constant when the picture is resized. In all other respects, it can be 
+# constant when the item is resized. In all other respects, it can be 
 # treated like any other rectangular item.
 #
 # <p><b>Options</b>

@@ -725,10 +725,8 @@ body ::tycho::Slate::region {tag args} {
 #### reshape
 #
 # Reshape an item by moving one or more of its aspects the specified
-# distance. If the *-region* flag is specified, treat the picture as
+# distance. If the *-region* flag is specified, treat the item as
 # a rectangular region.
-#
-# FIXME: Allow first arg to be a tag.
 #
 body ::tycho::Slate::reshape {id x y args} {
     ::tycho::getflag region args

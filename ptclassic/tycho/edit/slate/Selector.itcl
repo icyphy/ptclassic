@@ -214,7 +214,7 @@ class ::tycho::Selector {
     # The delegate interactors
     private variable delegates
 
-    # The pictures currently selected by dragging
+    # The items currently selected by dragging
     private variable covered ""
 
     # The current drag-select mode: "select" or "toggle"
@@ -449,10 +449,6 @@ body ::tycho::Selector::drag {x y} {
 	    }
 	}
     }
-
-    # Update the covered pictures for next time
-    # set covered $candidates
-
     # Execute the client-specified update command
     if { $dragcommand != "" } {
         uplevel #0 $dragcommand $target $x $y
