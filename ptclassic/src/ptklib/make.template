@@ -2,7 +2,7 @@
 # Version identification:
 # $Id$
 #
-# Copyright (c) 1993 The Regents of the University of California.
+# Copyright (c) 1993-1994 The Regents of the University of California.
 #			All Rights Reserved.
 # Date of creation: 10/2/93
 # Current version by E. A. Lee
@@ -39,11 +39,11 @@ all:	makefile $(LIB)
 install: makefile $(LIBDIR)/$(LIB)
 
 # include the X11, oct and tcl headers for C++ as well as C
-INCL=-I$(KERNDIR) -I$(TCL_INCDIR) -I$(TK_INCDIR)
+INCL=-I$(KERNDIR) -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
 # include the headers from the kernel, even though C++ objects should be
 # avoided.  As of this writing, ieee.h is the only file referenced.
-C_INCL=-I$(KERNDIR) -I$(TCL_INCDIR) -I$(TK_INCDIR)
+C_INCL=-I$(KERNDIR) -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
 lint:	$(LIBCSRCS)
 	lint -u $(LIBCSRCS) > lint
