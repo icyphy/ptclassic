@@ -204,10 +204,15 @@ install: $(DESTBIN) $(DESTBIN_D)  $(BINDIR)/vem $(BINDIR)/vem.debug
 		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../../src/vem/vem/$$x install ;\
 		cd .. ; \
 	done
+
+# These should rely on OCTBINDIR etc, but the relative paths make life
+# difficult.
 $(BINDIR)/vem:
-	ln -s $(DESTBIN) $@ 
+	(cd $(BINDIR); ln -s ../octtools/bin.$(ARCH)/vem .)
 $(BINDIR)/vem.debug:
-	ln -s $(DESTBIN_D) $@ 
+	(cd $(BINDIR); ln -s ../octtools/bin.$(ARCH)/vem.debug .)
+
+
 clean::
 	rm -f vem vem.debug
 
