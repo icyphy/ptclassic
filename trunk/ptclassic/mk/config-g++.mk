@@ -103,6 +103,7 @@ INC_LINK_FLAGS =	-fPIC
 #  de/stars/make.template
 #  cg56/stars/make.template
 #  cp/stars/make.template (cp domain is present only on sun4)
+#  cp/infopad/stars/make.template (cp domain is present only on sun4)
 #  sdf/matlab/stars/make.template
 UNOPTIMIZED_WARNING_MESSAGE = @echo "DANGER: gcc-2.7.2 optimizer workaround here, see $$PTOLEMY/mk/config-g++.mk"
 
