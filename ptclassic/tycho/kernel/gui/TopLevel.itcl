@@ -118,6 +118,12 @@ class ::tycho::TopLevel {
     constructor {args} {}
     destructor {}
 
+    ###################################################################
+    ####                            options                        ####
+
+    # If non-zero, treat this window as the application master.
+    itk_option define -master master Master "0"
+
     #################################################################
     ####                     public methods                      ####
 
@@ -157,14 +163,17 @@ class ::tycho::TopLevel {
     # Exit the program
     public proc exitProgram { {exitWithNoConfirmation 0}} {}
 
-    # Return 1 if we are in the process of exiting, 0 otherwise.
-    public proc returnExitCon {} {}
-
     # Specify whether to exit when the last window is closed.
     public proc exitWhenNoMoreWindows {bool} {}
 
     #################################################################
     ####                  protected methods                      ####
+
+    # Confirm that it's OK to proceed with destruction
+    protected method confirmDestruct {}
+
+    # Update the -master configuration option
+    protected method configureMaster {master}
 
     # Remember explicitly-set options and then call the built-in
     # itk_initialize
@@ -192,6 +201,9 @@ class ::tycho::TopLevel {
 
     #################################################################
     ####                  private variables                      ####
+
+    # Avoid self-destructing recursively -- FIXME: is this needed???
+    private variable alreadyexiting 0
 
     # A circular list of top-level windows is kept here and supported by
     # the <Control-x><o> binding, which switches the focus to the
@@ -231,6 +243,17 @@ class ::tycho::TopLevel {
 #configbody ::tycho::TopLevel::geometry {
 #    wm geometry $itk_component(hull) $itk_option(-geometry)
 #}
+
+###################################################################
+#### -master configuration
+# If the value of this option is non-zero, then this window is treated
+# as a master window in the sense that when it is closed, it queries
+# the user to see whether to exit the program. By default, a TopLevel
+# is not a master.
+#
+configbody ::tycho::TopLevel::master {
+    configureMaster $itk_option(-master)
+}
 
 #####################################################################
 #
@@ -313,8 +336,11 @@ body ::tycho::TopLevel::constructor {args} {
 
 #####################################################################
 #### Destructor
-# Destroy the window containing the widget. If there are no remaining
-# top-level windows, then exit the program. The latter functionality
+# Destroy the window containing the widget. If this is a master window,
+# then abort the destruction with a "silent error" and schedule a
+# call to <code>::tycho::exitProgram</code>. Otherwise, destroy
+# the window; if there are no remaining top-level windows, then
+# exit the program anyway. The latter functionality
 # can be disabled by calling
 # <code>::tycho::TopLevel::exitWhenNoMoreWindows</code> with the
 # argument "0". Normally, you should call <code>nextWindow</code>
@@ -330,14 +356,14 @@ body ::tycho::TopLevel::constructor {args} {
 # very strange behavior, often a core dump.
 #
 body ::tycho::TopLevel::destructor {} {
+    # Make sure that it's OK to destroy this object.
+    confirmDestruct
 
-    if $disableDestruction {
-        # Schedule a future attempt at destruction.
-        after 1000 "::tycho::TWidget::evalIfExists $this nextWindow; \
-                delete object $this"
-        ::tycho::silentError
-    }
-
+    # If we get to here, then all we are doing is trying to delete
+    # this window. Since the destructor of the subclasses have
+    # already run, assume that all data has been successfully
+    # saved if necessary, and remove the window from the list
+    # of top-level windows.
     if {[info exists topLevelWindows] && \
 	    [info exists prefix] && \
 	    [info exists exitflag]} {
@@ -560,24 +586,30 @@ body ::tycho::TopLevel::exitProgram { {exitWithNoConfirmation 0}} {
     if {$exitconfirmed} {return 1}
     if {$response} {
 	set exitconfirmed 1
-	# Need to delete all Toplevel objects first to make sure destructors
+	# Need to delete all TopLevel objects first to make sure destructors
 	# are invoked before the exit process begins.  Catch errors here
 	# because an error means that the exit was aborted.
 	if {[catch {
-	    foreach obj [::info objects] {
-		# A second check for object instance is necessary, because the
-		# object may have been deleted earlier in the loop.
-                # Also, defer destruction of mainConsole.
-		if {[::info objects $obj] != {} && \
-			[$obj isa ::tycho::File] && \
-                        ![string match *.mainConsole* $obj]} {
-                    # In theory, the delete below will fail with a silent
-                    # error if the user cancels, and the destruction will get
-                    # cancelled.  For some reason, this doesn't work.  So we
-                    # explicitly ask about saving first.  If the user says no,
-                    # they will be asked a second time during the delete.
-                    $obj saveQuery
-		    delete object $obj
+	    foreach win [$topLevelWindows elements] {
+		# Make sure the window exists...
+		if { [::info which -command $win] != "" } {
+		    # Also, defer destruction of any master windows
+		    # until later.
+		    if { ! [$win cget -master] } {
+			# Delete the window. If the user cancels
+			# then this will abort and get caught by the
+			# catch{} we are in, and this routine will
+			# exit without exiting the program. Note that
+			# the window will remove itself from the
+			# topLevelWindows list.
+			delete object $win
+		    }
+		}
+	    }
+	    # Now repeat for master windows
+	    foreach win [$topLevelWindows elements] {
+		if { [::info which -command $win] != "" } {
+		    delete object $win
 		}
 	    }
         }] == 0} {
@@ -599,17 +631,59 @@ body ::tycho::TopLevel::exitWhenNoMoreWindows {bool} {
     set exitflag $bool
 }
 
-#####################################################################
-#### returnExitCon
-# Return 1 if a confirmed exit is in progress, and 0 otherwise.
-#
-body ::tycho::TopLevel::returnExitCon {} {
-    return $exitconfirmed
-}
-
     #################################################################
     #################################################################
     ####                  protected methods                      ####
+
+#####################################################################
+#### configureMaster
+# Set this window as a "master" window: when the window is destroyed,
+# Tycho will exit. Subclasses can override if they need to change
+# state according to whether they are a master or not. By default,
+# this method does nothing.
+#
+body ::tycho::TopLevel::configureMaster {master} {
+    ;# Nothing needs to be done here
+}
+
+#####################################################################
+#### confirmDestruct
+# Confirm that it's OK to proceed with destruction if this widget.
+# This protected method must be called by any subclass of TopLevel
+# that actually destroys parts of itself _before_ it starts doing so.
+# It is needed because subclass destructors are executed _before_
+# superclass destructors, and the TopLevel class may decide to
+# defer destruction of this object until some later time. (If it
+# does, the method will never return, and execution will jump back
+# up to the main loop.)
+#
+body ::tycho::TopLevel::confirmDestruct {} {
+    # If we are in the middle of a safe update, then don't destroy this
+    # window but schedule another attempt later on.
+    if $disableDestruction {
+        # Schedule a future attempt at destruction.
+        after 1000 "::tycho::TWidget::evalIfExists $this nextWindow; \
+                delete object $this"
+        ::tycho::silentError
+    }
+
+    # To prevent hanging on incomplete construction, we check for
+    # existence of everything.
+    if {[info exists exitconfirmed] && [info exists itk_option(-master)]} {
+	# If exitconfirmed is not true and this is a master window, then
+	# We want to exit the entire program, not just this object.
+	# In order to get the proper safety checks and confirmation,
+	# we cancel the current destruction with silentError and
+	# then at the top-level, invoke exitProgram.
+	# Calling exitProgram from here directly is not good because
+	# it tries to delete the current object, and we are already
+	# in the middle of deleting it.
+	if { ! $exitconfirmed && $itk_option(-master) } {
+            after idle ::tycho::TopLevel::exitProgram
+            ::tycho::silentError
+	}
+    }
+}
 
 #####################################################################
 #### itk_initialize
@@ -678,11 +752,8 @@ body ::tycho::TopLevel::exitIfNoMoreWindows {} {
     set noMore 1
     foreach win [$topLevelWindows elements] {
         if [winfo exists $win] {
-            # Tycho fonts window handled specially
-            if {$win != {.tychoFonts}} {
-                set noMore 0
-                break
-            }
+	    set noMore 0
+	    break
         }
     }
     if $noMore {
