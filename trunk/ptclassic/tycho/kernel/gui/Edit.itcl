@@ -73,9 +73,6 @@ class ::tycho::Edit {
     # Return 1 if the text has been modified since the last save, 0 otherwise.
     method isModified {}
 
-    # Reload from the last saved version of the file.
-    method reload {}
-
     # Go to the specified point in the text.
     method seePoint {point}
 
@@ -213,25 +210,6 @@ body ::tycho::Edit::insertData {data} {
 #
 body ::tycho::Edit::isModified {} {
     return $modified
-}
-
-#####################################################################
-#### reload
-# Reload from the last saved version of the current file. This method
-# first disables read-only status (if it is set), then replaces the
-# current data with data from the current file, and then sets read-only
-# status based on the permissions of the file. The data is marked
-# unmodified after loading the file, and the clipboard is restored
-# to its state before the method was called. If the file does not exist, then
-# the current data is cleared, leaving a blank slate. If the current
-# file exists but is not readable, an error occurs. The actual
-# replacement of the data occurs via the method
-# <code>insertData</code>.
-#
-body ::tycho::Edit::reload {} {
-    set saveclipboard [component text getClipboard]
-    File::reload
-    component text setClipboard $saveclipboard
 }
 
 ###################################################################
