@@ -71,6 +71,12 @@ for a complete explanation of the options.
 		default { 0.0 }
 		attributes {A_NONSETTABLE|A_NONCONSTANT}
 	}
+	defstate {
+		name {resources}
+		type {stringarray}
+		default {"STDIO"}
+		desc {Resources required by star.}
+	}
 	ccinclude { "Target.h" }
 
 	setup {
