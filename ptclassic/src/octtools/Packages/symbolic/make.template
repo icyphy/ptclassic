@@ -84,6 +84,8 @@ LIB = 		libsymbolic.$(LIBSUFFIX)
 
 EXPHDR =	symbolic.h
 
+MISC_FILES =	symbolic.doc
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

@@ -56,6 +56,8 @@ LIB = 		liboh.$(LIBSUFFIX)
 
 EXPHDR =	oh.h
 
+MISC_FILES =	TODO oh.doc
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

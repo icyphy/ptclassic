@@ -66,6 +66,8 @@ DRVROBJ =	options-test.c
 
 DRVRLIBS =	-lport -lerrtrap -luprintf
 
+MISC_FILES =	 options-test.usage options.3 options.doc.src sample.test
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

@@ -74,6 +74,9 @@ DRVRLIBS =	-lharpoon -lfang -loh -ltap -lvov -loptions -loct -ltr -lst -lport -l
 
 DRVRDIR = 	cycle
 
+MISC_FILES =	TODO cycle from-mosis-pwell lex.l octmm.1 octmm.3 \
+		to-boxes to-mosis-pwell yacc.tab.c yacc.y
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

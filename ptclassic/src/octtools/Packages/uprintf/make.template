@@ -63,6 +63,8 @@ DRVROBJ =	utest.o
 
 DRVRLIBS =	-lport
 
+MISC_FILES =	uprintf.doc utest.test
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

@@ -70,6 +70,8 @@ DRVRLIBS =	-lfang -loh -lvov -loct -ltr -lutility -lport -lerrtrap -luprintf -ls
 
 DRVRDIR =	sample
 
+MISC_FILES =	harpoon.doc sample
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

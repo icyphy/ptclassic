@@ -69,6 +69,8 @@ DRVROBJ =	test.o
 
 DRVRLIBS = 	-lvulcan -lharpoon -lfang -loh -lvov -ltap -loptions -loct -ltr -lst -llist -lport -lutility -lerrtrap -luprintf -lm
 
+MISC_FILES =	TODO nle.3
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

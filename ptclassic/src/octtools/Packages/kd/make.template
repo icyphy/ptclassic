@@ -63,6 +63,8 @@ DRVROBJ = 	kd_test.o
 
 DRVRLIBS =	-lkd -lport -lerrtrap -luprintf
 
+MISC_FILES =	kd.doc
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

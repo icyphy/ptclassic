@@ -53,6 +53,8 @@ LIB = 		libth.$(LIBSUFFIX)
 
 EXPHDR =	th.h
 
+MISC_FILES =	th.doc
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

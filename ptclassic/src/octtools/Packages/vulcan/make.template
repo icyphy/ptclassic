@@ -65,6 +65,8 @@ DRVRLIBS =	-lharpoon -lfang -loh -ltap -lvov -loptions -loct -ltr -llist -lutili
 
 DRVRDIR =	sample
 
+MISC_FILES =	sample vulcan.1 vulcan.doc
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
