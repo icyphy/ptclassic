@@ -504,4 +504,8 @@ EXTERN int octIdCmp
 EXTERN int octIdHash
 	ARGS((char *id1, int mod));
 
+/* From change_record.c */
+EXTERN octStatus oct_make_change_record_marker
+	ARGS((octId clid));
+
 #endif /* OCT_H */
