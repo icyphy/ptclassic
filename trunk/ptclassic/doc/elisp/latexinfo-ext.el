@@ -37,3 +37,9 @@
 (put 'vrindexbold 'latexinfo-format 'latexinfo-format-vindex)
 (put 'tpindexbold 'latexinfo-format 'latexinfo-format-tindex)
 (put 'kyindexbold 'latexinfo-format 'latexinfo-format-kindex)
+
+; Commands that should be ignored.
+(put 'newcommand 'latexinfo-format 'latexinfo-discard-line-with-args)
+(put 'renewcommand 'latexinfo-format 'latexinfo-discard-line-with-args)
+(put 'sloppypar 'latexinfo-format 'latexinfo-discard-line)
+(put 'sloppypar 'latexinfo-end 'latexinfo-discard-line)
