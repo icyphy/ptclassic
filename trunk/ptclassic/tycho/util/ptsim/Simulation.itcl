@@ -175,8 +175,8 @@ body ::tycho::Simulation::constructor {args} {
 
     # Create the remote process and the object that talks to it
     #if !$disconnect {
-#	set _socketTalker [::tycho::JRPC #auto -debug 1 -portnum $portnum]
-#    }
+    # set _socketTalker [::tycho::JRPC #auto -debug 1 -portnum $portnum]
+    #}
 }
 
 
