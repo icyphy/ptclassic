@@ -54,8 +54,6 @@ ptkHighlight(dummy, interp, argc, argv)
 {
     char *name;
     static RgbValue color;
-    extern char *incr();
-    extern boolean FrameStarCall();
 
     if(argc < 2) {
         strcpy(interp->result,
@@ -75,7 +73,7 @@ ptkHighlight(dummy, interp, argc, argv)
 	strcpy(interp->result,"no such star: argv[1]");
 	return TCL_ERROR;    
     }
-    FrameStarCall(name, &color, 1);
+    FrameStarCall(name, color, 1);
     return TCL_OK;
 }
 

@@ -1,5 +1,6 @@
-#ifndef ICON_H
-#define ICON_H 1
+#ifndef _ICON_H
+#define _ICON_H 1
+
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -31,29 +32,31 @@ Version identification:
 $Id$
 */
 
-#ifdef __cplusplus
-#include "rpc.h"     /* needed to define "RPCSpot" */
+/* Do the right thing for sol2 boolean defs.  compat.h must be included
+ * first so sys/types.h is included correctly.
+ */
+#include "sol2compat.h"
 
-extern int RpcMkStar(RPCSpot *spot, lsList cmdList, long userOptionWord);
-extern int MkStar(char *name, char *domain, char *dir, char *palette);
-extern int RpcMkSchemIcon(RPCSpot *spot, lsList cmdList, long userOptionWord);
-extern int RpcLookInside(RPCSpot *spot, lsList cmdList, long userOptionWord);
-extern int RpcEditIcon(RPCSpot *spot, lsList cmdList, long userOptionWord);
-extern int IconFileToSourceFile(char *iconFile, char *sourceFile, char *domain);
-extern int AbsPath(char *path, char *abs_path);
-extern int ptMkStar(char* name, char* domain, char* dir, char* palette);
-                     /* used by POct - SetMkSchemIcon */
-extern int GetTildePath(octObject *facetPtr, char *tPath);
-#else
-extern int RpcMkStar();
-extern int MkStar();
-extern int RpcMkSchemIcon();
-extern int RpcLookInside();
-extern int RpcShowName();
-extern int RpcEditIcon();
-extern int IconFileToSourceFile();
-extern int AbsPath(/* char *path, char *abs_path */);
-extern int GetTildePath();  /* used by POct - SetMkSchemIcon */
-#endif /* __cplusplus */
+/* Define data structures lsList, octObject, and RPCSpot, respectively */
+#include "list.h"
+#include "oct.h"
+#include "rpc.h"
 
-#endif /* ICON_H */
+extern boolean LookAtFile ARGS((char *fileName));
+extern boolean MkStar ARGS((char *name, char *domain,
+			    char *dir, char *palette));
+extern int RpcMkStar ARGS((RPCSpot *spot, lsList cmdList, long userOptionWord));
+extern int GetTildePath ARGS((octObject *facetPtr, char *tPath));
+extern int AbsPath ARGS((char *path, char *abs_path));
+extern int RpcMkSchemIcon ARGS((RPCSpot *spot, lsList cmdList,
+				long userOptionWord));
+extern int RpcShowName ARGS((RPCSpot *spot, lsList cmdList,
+			     long userOptionWord));
+extern int RpcLookInside ARGS((RPCSpot *spot, lsList cmdList,
+			       long userOptionWord));
+extern int IconFileToSourceFile ARGS((char *iconFile, char *sourceFile,
+				      char *domain));
+extern int RpcEditIcon ARGS((RPCSpot *spot, lsList cmdList,
+			     long userOptionWord));
+
+#endif /* _ICON_H */

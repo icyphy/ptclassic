@@ -52,11 +52,6 @@ Useful higher level OCT interface functions.
 
 #include "octIfc.h"
 
-static boolean SetParamProp();
-extern char* HashString();
-extern char* curDomainName();
-
-
 /* 
 returns a pointer to the name of the passed Oct Object in "namePtr"
 written by Xavier Warzee 12/94 - installed into Ptolemy by Alan Kamas 3/95
@@ -372,22 +367,6 @@ Outputs:
 Updates:
 1/31/89 = name change
 */
-boolean
-SetSogParams(instPtr, pListPtr)
-octObject *instPtr;
-ParamListType *pListPtr;
-{
-	return SetParamProp(instPtr,pListPtr,"params");
-}
-
-boolean
-SetTargetParams(instPtr, pListPtr)
-octObject *instPtr;
-ParamListType *pListPtr;
-{
-	return SetParamProp(instPtr,pListPtr,"targetparams");
-}
-
 static boolean
 SetParamProp(instPtr, pListPtr, propname)
 octObject *instPtr;
@@ -407,6 +386,23 @@ char* propname;
 	return(TRUE);
     }
 }
+
+boolean
+SetSogParams(instPtr, pListPtr)
+octObject *instPtr;
+ParamListType *pListPtr;
+{
+	return SetParamProp(instPtr,pListPtr,"params");
+}
+
+boolean
+SetTargetParams(instPtr, pListPtr)
+octObject *instPtr;
+ParamListType *pListPtr;
+{
+	return SetParamProp(instPtr,pListPtr,"targetparams");
+}
+
 
 /* 
 Check if star corresponding to instPtr, is known to the kernel and if not,
@@ -470,6 +466,7 @@ ParamListType *pList;
  * parameters).  function return value indicates whether or not any
  * of the pListInst parameters were used. 
  */
+static
 boolean
 MergeParams(pListDef, pListInst)
 ParamListType *pListDef, *pListInst;

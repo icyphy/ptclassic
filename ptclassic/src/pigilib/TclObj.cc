@@ -1,3 +1,5 @@
+static const char file_id[] = "TclObj.cc";
+
 /*******************************************************************
 SCCS version identification
 $Id$
@@ -42,7 +44,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // and dispatcther functions were all written with only
 // one such object in mind.
 
-static const char file_id[] = "TclObj.cc";
 #ifdef __GNUG__
 #pragma implementation
 #endif

@@ -1,5 +1,6 @@
-#ifndef COMPILE_H
-#define COMPILE_H 1
+#ifndef _COMPILE_H
+#define _COMPILE_H 1
+
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -31,28 +32,28 @@ Version identification:
 $Id$
 */
 
-#ifdef __cplusplus
+/* Do the right thing for sol2 boolean defs.  compat.h must be included
+ * first so sys/types.h is included correctly.
+ */
+#include "sol2compat.h"
 
-#include "rpc.h"     /* needed to define "RPCSpot" */
+/* Define data structures lsList, octObject, and RPCSpot, respectively */
+#include "list.h"
+#include "oct.h"
+#include "rpc.h"
 
-extern boolean CompileFacet(octObject *facetPtr);
 extern boolean EssClear();
-extern int RpcCompileFacet(RPCSpot *spot, lsList cmdList, long userOptionWord);
+extern boolean EssAddObj ARGS((octObject *obj));
+extern boolean CompileGalInst ARGS((octObject *galInstPtr,
+				    octObject *parentFacetPtr));
+extern boolean CompileGalStandalone ARGS((octObject *galFacetPtr));
+extern boolean CompileGal ARGS((octObject *galFacetPtr));
+extern boolean CompileFacet ARGS((octObject *facetPtr));
+extern int RpcCompileFacet ARGS((RPCSpot *spot, lsList cmdList,
+				long userOptionWord));
 extern void CompileInit();
 extern void CompileEnd();
-extern boolean CompileGal(octObject *galFacetPtr);
-extern boolean CompileGalStandalone(octObject *galFacetPtr);
-extern boolean CompileGalInst(octObject *galInstPtr, octObject *parentFacetPtr);
-#else
-extern boolean CompileFacet();
-extern boolean EssClear();
-extern int RpcCompileFacet();
-extern void CompileInit();
-extern void CompileEnd();
-extern boolean CompileGal();
-extern boolean CompileGalStandalone(/* octObject *galFacetPtr */);
-extern boolean CompileGalInst(/* octObject *galInstPtr,
-			        octObject *parentFacetPtr */); 
-extern int RpcRunAllDemos();
-#endif /* __cplusplus */
-#endif /* COMPILE_H */
+extern int RpcRunAllDemos ARGS((RPCSpot *spot, lsList cmdList,
+				long userOptionWord));
+
+#endif /* _COMPILE_H */

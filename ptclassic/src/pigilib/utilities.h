@@ -1,3 +1,6 @@
+#ifndef _UTILITIES_H
+#define _UTILITIES_H 1
+
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -32,7 +35,11 @@ This file is the header file for commands in the "utilities" menu,
 each of which invokes a predefined universe.
 */
 
-extern int RpcPlotSignal();
-extern int RpcPlotCxSignal();
-extern int RpcDFT();
-extern int RpcDFTCx();
+extern int RpcPlotSignal ARGS((RPCSpot *spot, lsList cmdList,
+			       long userOptionWord));
+extern int RpcPlotCxSignal ARGS((RPCSpot *spot, lsList cmdList,
+				 long userOptionWord));
+extern int RpcDFT ARGS((RPCSpot *spot, lsList cmdList, long userOptionWord));
+extern int RpcDFTCx ARGS((RPCSpot *spot, lsList cmdList, long userOptionWord));
+
+#endif  /* _UTILITIES_H */

@@ -1,3 +1,6 @@
+#ifndef _ERR_H
+#define _ERR_H 1
+
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -67,5 +70,7 @@ Header for error handing routines.
     }
 
 extern void ErrClear();
-extern void ErrAdd();
-extern char *ErrGet();
+extern void ErrAdd ARGS((char* msg));
+extern char* ErrGet();
+
+#endif   /* _ERR_H */

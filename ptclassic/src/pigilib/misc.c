@@ -51,6 +51,7 @@ $Id$
 #include "kernelCalls.h"
 #include "icon.h"
 #include "utility.h"
+#include "xfunctions.h"
 
 /* for ShowFacetNum */
 #include "ptk.h"

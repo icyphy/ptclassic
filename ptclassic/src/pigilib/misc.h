@@ -1,5 +1,5 @@
-#ifndef MISC_H
-#define MISC_H 1
+#ifndef _MISC_H
+#define _MISC_H 1
 
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -27,46 +27,32 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
+
 /* misc.h  edg
 Version identification:
 $Id$
 */
 
-#ifdef __cplusplus
-#include "rpc.h"     /* needed to define "RPCSpot" */
+/* Define lsList and RPCSpot data types, respectively */
+#include "list.h"
+#include "rpc.h"
 
+extern int ManPage ARGS((char *starName));
+extern int Man ARGS((RPCSpot *spot, lsList cmdList, long userOptionWord));
+extern int ShowFacetNum ARGS((RPCSpot *spot, lsList cmdList,
+			      long userOptionWord));
+extern int PrintFacet ARGS((RPCSpot *spot, lsList cmdList,
+			    long userOptionWord));
+extern int ERFilterDesign ARGS((RPCSpot *spot, lsList cmdList,
+				long userOptionWord));
+extern int WFilterDesign ARGS((RPCSpot *spot, lsList cmdList,
+			       long userOptionWord));
+extern int Profile ARGS((RPCSpot *spot, lsList cmdList, long userOptionWord));
+extern int RpcOpenFacet ARGS((RPCSpot *spot, lsList cmdList,
+			      long userOptionWord));
+extern int RpcLoadStar ARGS((RPCSpot *spot, lsList cmdList,
+			     long userOptionWord));
+extern int RpcLoadStarPerm ARGS((RPCSpot *spot, lsList cmdList,
+				 long userOptionWord));
 
-extern int ShowFacetNum(RPCSpot *spot, lsList cmdList, long userOptionWord);
-extern int Man(RPCSpot *spot, lsList cmdList, long userOptionWord);
-extern int Profile(RPCSpot *spot, lsList cmdList, long userOptionWord);
-extern int PrintFacet(RPCSpot *spot, lsList cmdList, long userOptionWord);
-extern int RpcOpenFacet(RPCSpot *spot, lsList cmdList, long userOptionWord);
-extern int RpcLoadStar(RPCSpot *spot, lsList cmdList, long userOptionWord);
-extern int RpcLoadStarPerm(RPCSpot *spot, lsList cmdList, long userOptionWord);
-extern int ERFilterDesign(RPCSpot *spot, lsList cmdList, long userOptionWord);
-extern int WFilterDesign(RPCSpot *spot, lsList cmdList, long userOptionWord);
-extern int ptOpenFacet( char* Name, char* View, char* Facet);
-
-/* FIXME: The following functions are not in misc.c */
-extern int RpcPlot();
-extern int RpcCompileStar();
-extern int RpcParamCheck();
-#else
-extern int ShowFacetNum();
-extern int Man();
-extern int Profile();
-extern int PrintFacet();
-extern int RpcOpenFacet();
-extern int RpcLoadStar();
-extern int RpcLoadStarPerm();
-extern int ERFilterDesign();
-extern int WFilterDesign();
-extern int ptOpenFacet();
-
-/* FIXME: The following functions are not in misc.c */
-extern int RpcPlot();
-extern int RpcCompileStar();
-extern int RpcParamCheck();
-#endif /* __cplusplus */
-#endif /* MISC_H */
-
+#endif /* _MISC_H */

@@ -1,4 +1,5 @@
 static const char file_id[] = "pigiLoader.cc";
+
 /**************************************************************************
 Version identification:
 $Id$
@@ -40,16 +41,20 @@ ENHANCEMENTS, OR MODIFICATIONS.
 **************************************************************************/
 
 #define NEED_SYS_ERRLIST	// compat.h uses this.
+
+// Include standard include files to prevent conflict with
+// the type definition Pointer used by "rpc.h". BLE
 #include <std.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <ctype.h>
+
 #include "compat.h"
 #include "Linker.h"
 #include "Error.h"
 #include "Domain.h"
 #include "miscFuncs.h"
 #include "StringList.h"
-#include <ctype.h>
 #include "pt_fstream.h"
 
 #if defined(PTHPPA_CFRONT) || defined(PTSOL2) || defined(SVR4) || defined(SYSV) || !defined(PTIRIX5_CFRONT)
@@ -98,24 +103,28 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // root of Ptolemy source/lib directory
 static const char* ptolemyRoot = 0;
+
 // a temporary file name for compiler errors
 static const char* tmpFileName = 0;
 
-// pigi funcs to call
 extern "C" {
-	void PrintDebug(const char*);
-	void DirName(char*);
-	char* BaseName(const char*);
-	int IconFileToSourceFile (const char*, char*, char*);
-	int util_csystem (const char*);
-	void win_msg(const char*);
-	void ErrAdd(const char*);
-	void KcLog(const char*);
-	int KcIsCompiledInStar(const char*);
-	int KcIsKnown(const char*);
-	const char* curDomainName();
-	int KcSetKBDomain(const char*);
+#define Pointer screwed_Pointer		/* rpc.h and type.h define Pointer */
+#include "utility.h"			/* define util_csystem */
+
+#include "vemInterface.h"		/* define PrintDebug */
+#include "util.h"			/* define DirName and BaseName */
+#include "icon.h"			/* define IconFileToSourceFile */
+#include "xfunctions.h"			/* define win_msg */
+#include "err.h"			/* define ErrAdd */
+
+#include "kernelCalls.h"		/* define functions prefixed by Kc */
+#undef Pointer
 };
+
+/* Even though pigiLoader.cc is a C++ file, pigiLoader.h is a C include file */
+extern "C" {
+#include "pigiLoader.h"
+}
 
 static void strcpyLC (char* out, const char* in) {
 	char c;

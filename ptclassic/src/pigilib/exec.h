@@ -1,5 +1,6 @@
-#ifndef EXEC_H
-#define EXEC_H 1
+#ifndef _EXEC_H
+#define _EXEC_H 1
+
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -30,24 +31,23 @@ ENHANCEMENTS, OR MODIFICATIONS.
 Version identification:
 $Id$
 */
-#ifdef __cplusplus
-#include "rpc.h"     /* needed to define "RPCSpot" */
 
-extern int RunUniverse(char* name, int iterations);
-extern int ptkRun(octObject *facetPtr, boolean now);
+/* Do the right thing for sol2 boolean defs.  compat.h must be included
+ * first so sys/types.h is included correctly.
+ */
+#include "sol2compat.h"
 
-extern int RpcRun(RPCSpot *spot, lsList cmdList, long userOptionWord);
-extern int RpcDisplaySchedule(RPCSpot *spot, lsList cmdList, long userOptionWord);
+/* Define data structures lsList, octObject, and RPCSpot, respectively */
+#include "list.h"
+#include "oct.h"
+#include "rpc.h"
 
-/* FIXME:  The following function is not in exec.c */
-extern int ParallelSched();
-#else /* __cplusplus */
-extern int RunUniverse();
-extern int ptkRun();
-extern int RpcRun();
-extern int RpcDisplaySchedule();
-extern int ParallelSched();
-extern void PigiMark(/* char *objname */);
-#endif /* __cplusplus */
+extern int RunUniverse ARGS((char* name));
+extern int ptkRun ARGS((octObject *facetPtr, boolean now));
+extern int RpcRun ARGS((RPCSpot *spot, lsList cmdList, long userOptionWord));
+extern int RpcDisplaySchedule ARGS((RPCSpot *spot, lsList cmdList,
+				    long userOptionWord));
+extern void PigiErrorMark ARGS((char *objname));
+extern void PigiMark ARGS((char *objname));
 
-#endif /* EXEC_H */
+#endif /* _EXEC_H */

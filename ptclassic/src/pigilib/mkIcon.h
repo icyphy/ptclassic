@@ -1,5 +1,6 @@
-#ifndef MKICON_H
-#define MKICON_H 1
+#ifndef _MKICON_H
+#define _MKICON_H 1
+
 /* mkIcon.h  edg
 Version identification:
 $Id$
@@ -32,6 +33,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 */
 
+/* Do the right thing for sol2 boolean defs.  compat.h must be included
+ * first so sys/types.h is included correctly.
+ */
+#include "sol2compat.h"
+
 #define MAX_NUM_TERMS 85  /* max total # input and output terms */
 
 #ifndef __cplusplus
@@ -55,22 +61,15 @@ struct TermList_s {
 };
 typedef struct TermList_s TermList;
 
-#ifdef __cplusplus
 #include "oct.h"
-extern boolean MkPalIcon(octObject *facetPtr, octObject *iconFacetPtr);
-extern boolean MkUnivIcon(octObject *facetPtr, octObject *iconFacetPtr);
-extern boolean MkGalIcon(octObject *galFacetPtr, octObject *iconFacetPtr);
-extern boolean MkStarIcon(char *name, char *dir, octObject *iconFacetPtr);
-extern boolean PutShape( /* octObject *containPtr, octObject *objPtr, Shape *shapePtr, struct octPoint *translatePtr */);
 
-#else /* __cplusplus */
+extern boolean MkPalIcon ARGS((octObject *facetPtr,
+			       octObject *iconFacetPtr));
+extern boolean MkUnivIcon ARGS((octObject *facetPtr,
+				octObject *iconFacetPtr));
+extern boolean MkGalIcon ARGS((octObject *galFacetPtr,
+			       octObject *iconFacetPtr));
+extern boolean MkStarIcon ARGS((char *name, char *dir,
+				octObject *iconFacetPtr));
 
-extern boolean MkPalIcon();
-extern boolean MkUnivIcon();
-extern boolean MkGalIcon();
-extern boolean MkStarIcon();
-extern boolean PutShape( /* octObject *containPtr, octObject *objPtr,
-			    Shape *shapePtr, 
-			    struct octPoint *translatePtr */); 
-#endif /* cplusplus */
-#endif /* MKICON_H */
+#endif  /* _MKICON_H */

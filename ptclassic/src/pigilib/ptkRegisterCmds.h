@@ -1,3 +1,6 @@
+#ifndef _PTKREGISTERCMS_H
+#define _PTKREGISTERCMS_H 1
+
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -34,8 +37,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 	This must be a C-compatable .h file (included from ptkTkSetup.c)
 */
 
-#ifdef __cplusplus
-extern void ptkRegisterCmds( Tcl_Interp *ip, Tk_Window appWin);
-#else
-extern void ptkRegisterCmds();
-#endif /* __cplusplus */
+#include "tcl.h"
+#include "tk.h"
+
+extern void ptkRegisterCmds ARGS((Tcl_Interp *ip, Tk_Window appWin));
+
+#endif  /* _PTKREGISTERCMS_H */

@@ -66,9 +66,6 @@ CompileFacet is called.  xfered never gets re-initialized.
 #include "handle.h"
 #include "compile.h"
 
-extern void KcLog();
-extern void KcFlushLog();
-extern void KcSetDesc();
 static boolean RunAll();
 
 /* maximum number of actual terms allowed on a net */

@@ -1,4 +1,5 @@
 static const char file_id[] = "ptkRegisterCommands.cc";
+
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -38,15 +39,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
     a new Tcl callable function is added to the GUI.
 */
 
+extern "C" {
 #include "ptk.h"
+}
+
 #include "ptcl.h"
 #include "poct.h"
 #include "pvem.h"
 
+// Even though ptkRegisterCmds.cc is a C++ file,
+// ptkRegisterCmds.h is a C include file.
 extern "C" {
 #include "ptkRegisterCmds.h"
 #include "ptkTclIfc.h"
 }
+
 
 /* global */ 
 PTcl *ptcl;

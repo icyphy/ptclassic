@@ -1,3 +1,6 @@
+#ifndef _UTIL_H
+#define _UTIL_H 1
+
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -24,6 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
+
 /* util.h
 Version identification:
 $Id$
@@ -35,47 +39,26 @@ Header file for util.c
  */
 #include "sol2compat.h"
 
+/* name of the tool that this RPC application is for */
 #define UToolName "ptolemy"
-    /* name of the tool that this RPC application is for */
-#define UTechProp "ptolemy"  /* name of technology in technology directory */
-#define UAppName "pigi"  /* name of this application */
-#define UToolEnvName "PTOLEMY"	/* environment var name for tool */
 
-#define UFree(buf) (void) free((buf))
+/* name of technology in technology directory */
+#define UTechProp "ptolemy"
+
+/* name of this application */
+#define UAppName "pigi"
+
+/* environment var name for tool */
+#define UToolEnvName "PTOLEMY"
+
+#define UFree(buf) ((void) free((buf)))
 
 extern char DEFAULT_DOMAIN[];
 
-#ifdef __cplusplus
-extern boolean UMalloc(char **outPtr, int bytes);
-extern boolean StrDup(char **outPtr, char *in);
-extern char *DupString(char *string);
-extern void TildeExpand(char *input, char *buffer);
-extern char *SkipWhite(char *s);
-extern char *BaseName(char *name);
-extern boolean ConcatDirName(char *dir,char *baseName, char **outPtr);
-extern boolean UGetFullTechDir(char **strPtr);
-extern boolean YesNoToBoolean(char *str);
-extern char *BooleanToYesNo(boolean bit);
-extern boolean UniqNameInit();
-extern char *UniqNameGet(char *s);
-extern boolean IsBalancedParen(); /* FIXME: this funct not in util.c */
-extern char *DirName(char *buf);
-#else
-extern boolean UMalloc();
-extern boolean StrDup();
-extern char *DupString();
-extern void TildeExpand();
-extern char *SkipWhite();
-extern char *BaseName();
-extern boolean ConcatDirName();
-extern boolean UGetFullTechDir();
-extern boolean YesNoToBoolean();
-extern char *BooleanToYesNo();
-extern boolean UniqNameInit();
-extern char *UniqNameGet();
-extern boolean IsBalancedParen();
-extern char *DirName();
-#endif /* __cplusplus*/
+/* Define data structures lsList, octObject, and RPCSpot, respectively */
+#include "list.h"
+#include "oct.h"
+#include "rpc.h"
 
 typedef struct DupSheetNode_s {
     char *info;
@@ -84,30 +67,31 @@ typedef struct DupSheetNode_s {
 } DupSheetNode;
 typedef DupSheetNode *DupSheet;
 
-#ifdef __cplusplus
-#include "rpc.h"     /* needed to define "RPCSpot" */
+extern boolean UMalloc ARGS((char **outPtr, int bytes));
+extern boolean StrDup ARGS((char **outPtr, char *in));
+extern char *DupString ARGS((char *string));
+extern void TildeExpand ARGS((char *input, char *buffer));
+extern char *SkipWhite ARGS((char *s));
+extern char *BaseName ARGS((char *name));
+extern char *DirName ARGS((char *buf));
+extern boolean ConcatDirName ARGS((char *dir,char *baseName, char **outPtr));
+extern boolean UGetFullTechDir ARGS((char **strPtr));
+extern boolean YesNoToBoolean ARGS((char *str));
+extern char *BooleanToYesNo ARGS((boolean bit));
+extern boolean UniqNameInit();
+extern char *UniqNameGet ARGS((char *s));
 
-extern void DupSheetInit(DupSheet *ds);
-extern void DupSheetClear(DupSheet *ds);
-extern boolean DupSheetAdd(DupSheet *ds, char *item);
-extern boolean DupSheetAdd2(DupSheet *ds, char *item, char *item2);
-extern boolean DupSheetIsDup(DupSheet *ds, char *item);
-extern boolean DupSheetIsDup2(DupSheet *ds, char *item, char* item2);
-extern char* setCurDomainS(RPCSpot *spot);
-extern char* setCurDomainF(octObject *facetPtr);
-extern char* setCurDomainInst(octObject *instPtr);
-#else
-extern void DupSheetInit();
-extern void DupSheetClear();
-extern boolean DupSheetAdd();
-extern boolean DupSheetAdd2(/* DupSheet *ds, char *item, char *item2 */);
-extern boolean DupSheetIsDup();
-extern boolean DupSheetIsDup(/* DupSheet *ds, char *item */);
-extern boolean DupSheetIsDup2(/* DupSheet *ds, char *item, char* item2 */);
-extern char* getDomainF();
-extern char* getDomainS();
-extern char* getDomainInst();
-extern char* setCurDomainS();
-extern char* setCurDomainF();
-extern char* setCurDomainInst();
-#endif /* __cplusplus */
+extern void DupSheetInit ARGS((DupSheet *ds));
+extern void DupSheetClear ARGS((DupSheet *ds));
+extern boolean DupSheetAdd ARGS((DupSheet *ds, char *item));
+extern boolean DupSheetAdd2 ARGS((DupSheet *ds, char *item, char *item2));
+extern boolean DupSheetIsDup ARGS((DupSheet *ds, char *item));
+extern boolean DupSheetIsDup2 ARGS((DupSheet *ds, char *item, char* item2));
+extern char* getDomainS ARGS((RPCSpot *spot));
+extern char* setCurDomainS ARGS((RPCSpot *spot));
+extern char* getDomainF ARGS((octObject *facetPtr));
+extern char* setCurDomainF ARGS((octObject *facetPtr));
+extern char* getDomainInst ARGS((octObject *instPtr));
+extern char* setCurDomainInst ARGS((octObject *instPtr));
+
+#endif  /* _UTIL_H */

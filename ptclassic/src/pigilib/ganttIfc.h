@@ -1,5 +1,6 @@
-#ifndef GANTTIFC_H
-#define GANTTIFC_H 1
+#ifndef _GANTTIFC_H
+#define _GANTTIFC_H 1
+
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -31,44 +32,13 @@ Version identification:
 $Id$
 */
 
-#ifdef __cplusplus
-#include "rpc.h"
-extern int CreateFrames();
-extern int Frame(char *stars[]);
-extern int ClearFrames();
-extern int DestroyFrames();
-/* following is not used */
-/* extern void FindAndMarkError( octObject *facetP, char *name ); */
-extern boolean FindNameSet ARGS((octObject *facetPtr, char *name));
+/* Do the right thing for sol2 boolean defs.  compat.h must be included
+ * first so sys/types.h is included correctly.
+ */
+#include "sol2compat.h"
 
-/* FIXME:  These functions are not in ganttIfc.h */
-extern void FrameSetFacet();
-
-extern int GanttMan();
-extern void GanttErr();
-
-/* Functions below should only be called by GGI */
-extern boolean GanttRun();  /* FIXME: Not in ganttIfc.h */
-extern boolean GanttInit(); /* FIXME: Not in ganttIfc.h */
-extern void FindClear();
-#else
-extern void FrameSetFacet();
-extern int CreateFrames();
-extern int Frame();
-extern int ClearFrames();
-extern int DestroyFrames();
-extern int GanttMan();
-extern void GanttErr();
-/* extern void FindAndMarkError(); */
-/* Called by POct */
-extern boolean FindNameSet ARGS((octObject *facetPtr, char *name));
-
-/* Functions below should only be called by GGI */
-extern boolean GanttRun();
-extern boolean GanttInit();
-extern void FindClear();
-void FindAndMark(/* octObject facetP, char *name, int pattern */);
-#endif /* __cplusplus */
+/* Define the octObject data structure */
+#include "oct.h"
 
 typedef struct RgbValue_s {
     unsigned short red;
@@ -76,4 +46,14 @@ typedef struct RgbValue_s {
     unsigned short blue;
 } RgbValue;
 
-#endif /* GANTTIFC_H */
+extern char *incr ARGS((char *s));
+extern boolean FrameStarCall ARGS((char *name, RgbValue color, int usePattern));
+extern void FindClear();
+extern boolean FindNameSet ARGS((octObject *facetPtr, char *name));
+extern void FindAndMark ARGS((octObject *facetP, char *name, int pattern));
+extern int CreateFrames ARGS((RgbValue colors[], int n));
+extern int ClearFrames();
+extern int DestroyFrames();
+extern int Frame ARGS((char *stars[]));
+
+#endif /* _GANTTIFC_H */

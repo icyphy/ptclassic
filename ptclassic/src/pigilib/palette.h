@@ -1,5 +1,6 @@
-#ifndef PALETTE_H
-#define PALETTE_H
+#ifndef _PALETTE_H
+#define _PALETTE_H 1
+
 /* palette.h  edg
 Version identification:
 $Id$
@@ -32,17 +33,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 */
 
-#ifdef __cplusplus
-#include "oct.h" /* for octObject */
+/* Do the right thing for sol2 boolean defs.  compat.h must be included
+ * first so sys/types.h is included correctly.
+ */
+#include "sol2compat.h"
 
-extern boolean MkPalIconInPal(octObject *facetPtr, char *dir, char *palName);
-extern boolean MkUnivIconInPal(octObject *facetPtr, char *dir, char *palName);
-extern boolean MkGalIconInPal(octObject *galFacetPtr, char *dir, char *palName);
-extern boolean MkStarIconInPal(char *starName, char *dir, char *palName);
-#else
-extern boolean MkPalIconInPal();
-extern boolean MkUnivIconInPal();
-extern boolean MkGalIconInPal();
-extern boolean MkStarIconInPal();
-#endif /*__cplusplus*/
+/* Define octObject data structure */
+#include "oct.h"
+
+extern boolean MkPalIconInPal
+       ARGS((octObject *facetPtr, char *dir, char *palName));
+extern boolean MkUnivIconInPal
+       ARGS((octObject *facetPtr, char *dir, char *palName));
+extern boolean MkGalIconInPal
+       ARGS((octObject *galFacetPtr, char *dir, char *palName));
+extern boolean MkStarIconInPal
+       ARGS((char *starName, char *dir, char *palName));
+
 #endif /* PALETTE_H */

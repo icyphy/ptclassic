@@ -109,7 +109,6 @@ int buflen;
 Advance s to point after the next '.' character in the string or
 else return NULL if there are no more such characters.
 */
-extern
 char *
 incr(s)
 char *s;
@@ -178,7 +177,7 @@ int usePattern;
 }
 
 /* extern created to call FrameStar w/o losing static declaration */
-extern boolean
+boolean
 FrameStarCall(char *name, RgbValue color, int usePattern) {
 
   return FrameStar(&lastFacet, name, &color, findSets, &findDepth, usePattern);

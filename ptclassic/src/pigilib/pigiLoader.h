@@ -1,3 +1,6 @@
+#ifndef _PIGILOADER_H
+#define _PIGILOADER_H 1
+
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -27,24 +30,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /*
    $Id$
+
+   This is a C include file, and NOT a C++ include file.
 */
 
-#ifdef __cplusplus
-extern "C" {
-extern void KcLoadInit (const char* argv0);
+extern void KcLoadInit ARGS((const char* argv0));
 extern void KcDoStartupLinking();
-extern int FindStarSourceFile(const char* dir,const char* dom,const char* base, char* buf);
-extern int KcCompileAndLink (const char* name, const char* idomain, const char* srcDir, int permB, const char* linkArgs);
-extern int KcLoad (const char* iconName, int permB, const char* linkArgs);
-}
-#else /* __cplusplus */
-extern void KcLoadInit (/* const char* argv0 */);
-void KcDoStartupLinking();
-extern int FindStarSourceFile(/* const char* dir,const char* dom,const
-				 char* base, char* buf */); 
-extern int KcCompileAndLink (/* const char* name, const char* idomain,
-				const char* srcDir, int permB,
-				const char* linkArgs */);
-extern int KcLoad ( /*const char* iconName, int permB, const char*
-		      linkArgs */);
-#endif /* __cplusplus */
+extern int FindStarSourceFile ARGS((const char* dir, const char* dom,
+				    const char* base, char* buf));
+extern int KcCompileAndLink ARGS((const char* name, const char* idomain,
+				  const char* srcDir, int permB,
+				  const char* linkArgs));
+extern int KcLoad ARGS((const char* iconName, int permB,
+			const char* linkArgs));
+
+#endif  /* _PIGILOADER_H */
