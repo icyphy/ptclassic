@@ -18,6 +18,7 @@ $Id$  (<T>Domain.cc)
 #include "<T>Wormhole.h"
 #include "<T>Connect.h"
 #include "<T>WormConnect.h"
+#include "<T>Geodesic.h"
 
 extern const char <T>domainName[] = "<T>";
 
@@ -42,6 +43,9 @@ public:
 
 	// new toUniversal EventHorizon
 	EventHorizon& newTo() { return *new <T>toUniversal;}
+
+	// new node (geodesic)
+	Geodesic& newNode() { return *new <T>Geodesic;}
 
 	// constructor
 	<T>Domain() : Domain("<T>") {}
