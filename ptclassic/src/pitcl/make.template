@@ -57,11 +57,11 @@ ifndef PTCL
 endif
 
 INCL = 		-I$(KERNDIR) -I$(ITCL_INCDIR) -I$(TCL_INCDIR) \
-			$(PTCOMPAT_INCSPEC)
+		$(PTCOMPAT_INCSPEC) $(MATLAB_INCSPEC) $(MATLABIFC_INCSPEC)
 
 # Sources: LIB_SRCS contains the files that make up libptcl.so.
 # NON_LIB_SRCS contains the files that do not go into libptcl.so.
-LIB_SRCS =	PTcl.cc ptclInit.cc ptclError.cc ptclGantt.cc \
+LIB_SRCS =	MatlabTcl.cc PTcl.cc ptclInit.cc ptclError.cc ptclGantt.cc \
 		ptclInvokeInterp.cc
 NON_LIB_SRCS =	ptclAppInit.cc
 SRCS =		$(LIB_SRCS) $(NON_LIB_SRCS)
