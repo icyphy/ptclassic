@@ -46,7 +46,7 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 		}
 	} // end cosSet()
 
-	method { // Inverse DCT basis values (note transpose).
+	inline method { // Inverse DCT basis values (note transpose).
 		name { invD }
 		type { float }
 		arglist { "(int a, int b)" }
@@ -59,9 +59,9 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 		type { void }
 		access { protected }
 		arglist {
-"(unsigned char* outdata, float* indata, int outw, int outh, int inw,
-int inh)"
-	}
+			"(unsigned char* outdata, float* indata, int outw, \
+				int outh, int inw, int inh)"
+		}
 		code {
 	register int ndx, ndx2, cntr;
 	int ii, jj, i, j;
