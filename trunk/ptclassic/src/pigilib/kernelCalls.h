@@ -34,6 +34,8 @@ $Id$
  */
 #include "compat.h"
 
+#ifdef __cplusplus
+
 #include "InterpGalaxy.h"
 #include "Universe.h"
 
@@ -43,8 +45,6 @@ $Id$
 #ifndef MKICON_H
 #include "mkIcon.h"
 #endif
-
-#ifdef __cplusplus
 
 extern "C" {
 extern boolean KcInitLog(const char* file);
@@ -101,6 +101,40 @@ extern	void accum_string (const char*);
 extern	void pr_accum_string();
 extern	void FindClear();
 }
+#else /* __cplusplus */
+/* Functions defined in kernelCalls.h */
+extern boolean KcInstance(/*char *name, char *ako, ParamListType* pListPtr*/);
+extern boolean KcMakeState(/*char *name, char *type, char *initVal*/);
+extern boolean KcConnect(/*char *inst1, char *t1, char *inst2, char *t2, char* delay, char* width*/);
+extern boolean KcAlias(/*char *fterm, char *inst, char *aterm*/);
+extern boolean KcSetKBDomain(/*const char* domain*/);
+extern boolean KcDefgalaxy(/*const char *galname, const char *domain, const char* innerTarget*/);
+extern boolean KcEndDefgalaxy(/*const char* outerDomain*/);
+extern boolean KcDisplaySchedule();
+extern boolean KcIsKnown(/* char *className */);
+extern boolean KcIsCompiledInStar(/* char *className */);
+extern boolean KcGetTerms(/* char* name, TermList* terms */);
+extern boolean KcModTargetParams(/* ParamListType* pListPtr */);
+extern boolean KcIsMulti(/* char* blockname, char* portname */);
+extern boolean KcGetParams(/* char* name, ParamListType* pListPtr */);
+extern boolean KcGetTargetParams(/* char* name,
+				    ParamListType* pListPtr */);
+extern int KcProfile(/* char* name */);
+extern int numberOfDomains();
+extern int KcNodeConnect(/* const char* inst, const char* term, const
+			    char* node */); 
+extern int KcNode (/* const char* name */);
+
+extern int KcEventLoopActive();
+extern void KcSetEventLoop(/* int on */);
+
+/* error handling function for pigi */
+extern void ErrAdd(/* const char* */);
+extern	void clr_accum_string();
+extern	void accum_string (/* const char* */);
+extern	void pr_accum_string();
+extern	void FindClear();
+
 #endif /* __cplusplus */
 
 #endif /* KERNELCALLS_H */
