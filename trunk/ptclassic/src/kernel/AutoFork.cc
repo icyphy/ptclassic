@@ -126,3 +126,15 @@ const char* AutoFork::autoForkName() {
 	sprintf (buf, "auto-fork-%d", ++nF);
 	return hashstring (buf);
 }
+
+// destructor: remove fork star if present.  Otherwise the normal
+// Geodesic destructor will clean up properly.
+AutoFork::~AutoFork() {
+	if (forkStar) {
+		forkStar->parent()->asGalaxy().removeBlock(*forkStar);
+		LOG_DEL; delete forkStar;
+		if (geo.originatingPort)
+			geo.originatingPort->disconnect(0);
+		geo.originatingPort = geo.destinationPort = 0;
+	}
+}

@@ -50,7 +50,7 @@ class PortHole;
 class AutoFork {
 public:
 	AutoFork(Geodesic& g) : geo(g), forkStar(0), forkOutput(0) {}
-	~AutoFork() {}
+	~AutoFork();
 	// attach source or destination to the autofork
 	PortHole* setSource(GenericPort&, int delay = 0);
 	PortHole* setDest(GenericPort&, int alwaysFork = 0);
