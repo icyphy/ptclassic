@@ -129,6 +129,7 @@ public:
 	int ptkCompile (int argc,char** argv);
 	int ptkGetParams (int argc,char** argv);
 	int ptkSetParams (int argc,char** argv);
+	int ptkGetTargetNames (int argc,char** argv);
 	int ptkFacetContents (int argc,char** argv);
 	int ptkGetMaster (int argc,char** argv);
 	int ptkOpenFacet (int argc,char** argv);
