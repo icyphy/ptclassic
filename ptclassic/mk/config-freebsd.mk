@@ -119,7 +119,7 @@ OPTIMIZER =	-O2 -m486 -pipe
 #OPTIMIZER =	-O2 -m486 -fomit-frame-pointer -pipe
 
 # Under gcc-2.7.0, you will need to add -fno-for-scope to $WARNINGS
-WARNINGS =	-Wall -Wcast-align #-Wcast-qual 
+WARNINGS =	-Wall -Wcast-align $(GCC_270_OPTIONS) #-Wcast-qual 
 ARCHFLAGS =	-Dfreebsd
 LOCALCFLAGS =	-fwritable-strings
 

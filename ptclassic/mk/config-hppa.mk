@@ -124,7 +124,7 @@ OPTIMIZER =	-O2
 WARNINGS =	-Wall -Wsynth #-Wcast-qual 
 
 # Under gcc-2.7.0, you will need to add -fno-for-scope to LOCALCCFLAGS
-LOCALCCFLAGS =	-g -DUSG -DUSE_SHLLOAD -fno-for-scope
+LOCALCCFLAGS =	-g -DUSG -DUSE_SHLLOAD $(GCC_270_OPTIONS)
 
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)

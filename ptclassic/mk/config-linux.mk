@@ -149,7 +149,7 @@ WARNINGS =	-Wall -Wcast-align -Wsynth # -Wcast-qual
 # you will need -DI_UNISTD for rman to find the declaration of getopt()
 ARCHFLAGS =	-Dlinux -DI_UNISTD#-D_GNU_SOURCE -D_BSD_SOURCE -DNO_RAND_OPTIMIZE
 # Under gcc-2.7.0, you will need -fno-for-scope for LOCALCCFLAGS
-LOCALCCFLAGS =	-fno-for-scope
+LOCALCCFLAGS =	$(GCC_270_OPTIONS)
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
 LOCALCFLAGS =

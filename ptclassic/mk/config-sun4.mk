@@ -61,7 +61,7 @@ OPTIMIZER =	-O2
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wsynth #-Wcast-qual 
 # Under gcc-2.7.0, you will need -fno-for-scope for LOCALCCFLAGS
-LOCALCCFLAGS =	-g -fno-for-scope
+LOCALCCFLAGS =	-g $(GCC_270_OPTIONS)
 LOCALCFLAGS = $(LOCALCCFLAGS)
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
