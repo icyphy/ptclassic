@@ -34,6 +34,8 @@ provisions.
     channels.setInitValue(1);
     balance.setAttributes(A_NONCONSTANT|A_NONSETTABLE);
     balance.setInitValue(0.0);
+    encodingType.setInitValue("ulaw8");
+    sampleRate.setInitValue(8000);
   }
 
   codeblock (convert_linear16) {
