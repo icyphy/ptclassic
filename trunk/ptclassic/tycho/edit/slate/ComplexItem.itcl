@@ -28,12 +28,14 @@
 
 
 
+##########################################################################
 ## Picture
 #
 # An "empty" picture class into which items and other pictures can be
 # added.
 #
 class ::tycho::Picture {
+    inherit ::tycho::Singleton
 
     proc construct {id tags canvas x0 y0 x1 y1 args}
     proc destruct  {id canvas}
