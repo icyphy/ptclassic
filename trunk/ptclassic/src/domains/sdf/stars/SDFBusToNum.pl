@@ -2,7 +2,7 @@ defstar {
 	name { BusToNum }
 	domain { SDF }
 	desc {
-Takes in a bus (with 'bits' no of lines) 
+Takes in a bus (with 'bits' number of lines) 
 and outputs a signed integer corresponding to the value of this 
 binary number.
 	}
@@ -46,7 +46,7 @@ limitation of liability, and disclaimer of warranty provisions.
 			binary[i]= (*nexti++)%0;
 		}
 
-	// The following is a thor-specific condition check where we dont
+	// The following is a Thor-specific condition check where we do not
 	// want the number to be latched in if the bus is tristate (value 3)
 		for(i=0; i< bits; i++)
 		{
