@@ -22,6 +22,7 @@ David G. Messerschmitt
 .so demos
 .so universes
 .so galaxies
+.so hardcopy
 .so other
 .so codegen
 .so newstars
