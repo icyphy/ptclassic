@@ -188,8 +188,16 @@ test Message-1.1 {Test Message} {
 ############################################################################
 # Test TopLevel
 test TopLevel-1.1 {Test TopLevel} { 
-    set win [::tycho::view TopLevel]
+    set win [::tycho::autoName .t]
+    ::tycho::TopLevel $win -geometry 300x300+0+0
     wm deiconify $win
+    $win centerOnScreen
+    $win freezeWindowSize
+    $win configure -geometry 100x100-0+0
+    $win focusin
+    $win nextWindow
+    $win raiseWindow
+    $win windowName
 #    after $duration ::tycho::safeUpdate $win
     after $longDuration removeobj $win
     list {Done}
