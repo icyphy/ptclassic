@@ -1,4 +1,4 @@
--*-Mode:text-*- -[Sun Feb 23 15:40:37 1997 by cxh]-
+-*-Mode:text-*- -[Mon Feb 24 15:16:51 1997 by cxh]-
 Version: $Id$
 
 src/gnu/README
@@ -86,6 +86,37 @@ HP
 
 	HPUX10.01 comes with a broken version of cc that is sufficient
 	to bootstrap gcc.
+
+	To install gcc under HPUX10.20, you need to have GNU sed,
+	If you don't use GNU sed, then fixincludes will fail under
+	HPUX10.20 with some unterminated #if - #endif pairs.
+
+	GNU sed is available from:
+	http://hpux.csc.liv.ac.uk/hppd/hpux/Gnu/alpha.html
+	You can also find the sed binary on the Ptolemy ftp site
+	at
+	ftp://ptolemy.eecs.berkeley.edu/pub/gnu/hppa/sed-2.05-sa-10.10.depot
+
+	Install the package by downloading the file, copying it to
+	/tmp and doing the following as root:
+	swinstall -s /tmp/sed-2.05-sa-10.10.depot
+	
+	If you have problems with swinstall, try ungzipping the file
+	first:
+	mv /tmp/sed-2.05-sa-10.10.depot /tmp/sed-2.05-sa-10.10.depot.gz
+	gunzip /tmp/sed-2.05-sa-10.10.depot.gz
+	Then try swinstall as above.
+
+	The install procedure will install the sed binary into
+	/opt/sed/bin.  You might want to make a link from
+	/usr/local/bin/sed to /opt/sed/bin
+
+	cd /usr/local/bin
+	ln -s /opt/sed/bin/sed .
+
+	To verify that the proper sed is in your path, do:
+	ptuser@hewlett 19% sed -V
+	GNU sed version 2.05
 
 Solaris
 -------
