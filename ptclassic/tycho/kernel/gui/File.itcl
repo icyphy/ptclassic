@@ -741,7 +741,7 @@ body ::tycho::File::reload {} {
         }
     } {
         # File does not exist.  Simply clear current data.
-	setRead0nly 0
+	setReadOnly 0
         clear
     }
     setClipboard $saveclipboard
