@@ -484,17 +484,14 @@ void SDFScheduler::resetStopTime (float) {
 	numIters = 1; numItersSoFar = 0;
 }
 
-StringList SDFScheduler::compileRun () {
+void SDFScheduler::compileRun () {
     // assume the schedule has been set by the setup member
     Target& tar = getTarget();
 
     SDFSchedIter nextStar(mySchedule);
     SDFStar* star;
-    StringList out = "";
-    while ((star = nextStar++) != 0) {
+    while ((star = nextStar++) != 0 && !haltRequested()) {
 	// Fire the next star in the list
-	out += tar.writeFiring(*star, 1);
-	if (haltRequested()) { invalid = TRUE; return out; }
+	tar.writeFiring(*star, 1);
     }
-    return out;
 }
