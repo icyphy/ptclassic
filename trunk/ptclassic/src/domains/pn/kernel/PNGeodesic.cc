@@ -42,13 +42,13 @@ static const char file_id[] = "$RCSfile$";
 ISA_FUNC(PNGeodesic, Geodesic);
 
 // Constructor.
-PNGeodesic::PNGeodesic() : notEmpty(0)
+PNGeodesic::PNGeodesic() : notEmpty(0), notFull(0), cap(1)
 { }
 
 void PNGeodesic::makeLock(const PtGate& master)
 {
-    LOG_DEL; delete notEmpty;
-    notEmpty = 0;
+    LOG_DEL; delete notEmpty; delete notFull;
+    notEmpty = notFull = 0;
     Geodesic::makeLock(master);
     if (!isLockEnabled())
     {
@@ -57,43 +57,52 @@ void PNGeodesic::makeLock(const PtGate& master)
     else
     {
 	LOG_NEW; notEmpty = new PNCondition(*(PNMonitor*)gate);
+	LOG_NEW; notFull = new PNCondition(*(PNMonitor*)gate);
     }
 }
 
 void PNGeodesic::delLock()
 {
-    LOG_DEL; delete notEmpty;
-    notEmpty = 0;
+    LOG_DEL; delete notEmpty; delete notFull;
+    notEmpty = notFull = 0;
     Geodesic::delLock();
 }
 
+// Block when full.
 // Notify when not empty.
 void PNGeodesic::slowPut(Particle* p)
 {
     // Avoid entering the gate more than once.
     CriticalSection region(gate);
+    while (sz >= cap && notFull) notFull->wait();
     pstack.putTail(p); sz++;
     if (notEmpty) notEmpty->notifyAll();
 }
 
-// Block util not empty.
+// Block when empty.
+// Notify when not full.
 Particle* PNGeodesic::slowGet()
 {
     // Avoid entering the gate more than once.
     CriticalSection region(gate);
-    if (sz < 1 && notEmpty) notEmpty->wait();
-    if (sz > 0)
-    {
-	sz--; return pstack.get();
-    }
-    else return 0;
+    while (sz < 1 && notEmpty) notEmpty->wait();
+    sz--; Particle* p = pstack.get();
+    if (sz < cap && notFull) notFull->notifyAll();
+    return p;
 }
 
 // Notify when not empty.
+// Don't block when full.
 void PNGeodesic::pushBack(Particle* p)
 {
     // Avoid entering the gate more than once.
     CriticalSection region(gate);
     pstack.put(p); sz++;
     if (isLockEnabled() && notEmpty) notEmpty->notifyAll();
+}
+
+void PNGeodesic::setCapacity(int c)
+{
+    cap = c;
+    if (sz < cap && notFull) notFull->notifyAll();
 }

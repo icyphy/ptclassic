@@ -63,8 +63,16 @@ public:
     /*virtual*/ void makeLock(const PtGate& master);
     /*virtual*/ void delLock();
 
+    // Limit the number of Particles on the Geodesic.
+    int capacity() const { return cap; }
+    void setCapacity(int c);
+
 protected:
     PtCondition* notEmpty;
+    PtCondition* notFull;
+
+    // capacity limit
+    int cap;
 };
 
 #endif
