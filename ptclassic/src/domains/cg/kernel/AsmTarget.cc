@@ -32,7 +32,7 @@ AsmTarget::setup(Galaxy& g) {
 // all the requests.  Note we've already checked that all stars are AsmStar.
 	AsmStar* s;
 	while ((s = (AsmStar*)nextStar++) != 0) {
-		allocReq(*s);
+		if (!allocReq(*s)) return FALSE;
 	}
 	if (!mem->performAllocation()) return FALSE;
 // do all initCode methods.
@@ -53,7 +53,8 @@ AsmTarget::allocReq(AsmStar& star) {
 		if (p->isItOutput()) continue;
 		if (!mem->allocReq(*p)) {
 			Error::abortRun(*p,
-			  "memory allocation failed for porthole buffer");
+			  "memory allocation failed for porthole buffer:",
+					"attribute mismatch");
 			return FALSE;
 		}
 	}
@@ -64,7 +65,8 @@ AsmTarget::allocReq(AsmStar& star) {
 		if ((s->attributes() & AB_MEMORY) == 0) continue;
 		if (!mem->allocReq(*s)) {
 			Error::abortRun(*s,
-			      "memory allocation failed for state buffer");
+			      "memory allocation failed for state buffer:",
+					"attribute mismatch");
 			return FALSE;
 		}
 	}
