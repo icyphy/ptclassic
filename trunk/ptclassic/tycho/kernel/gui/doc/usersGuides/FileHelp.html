@@ -129,22 +129,50 @@ Since Tycho is meant to be an extensible system, it is expected
 that users will create new editors.  Integrating these editors into
 Tycho is easy.  Just issue the following command:
 <pre>
-::tycho::File::registerEditor {.foo} ::tycho::EditFoo {Foo editor}
+::tycho::File::registerExtensions {.foo} &#92
+	{::tycho::view ::tycho::EditFoo -file {%s}} &#92
+	{Foo editor} "text"
 </pre>
+<MENU>
+<LI> 
 The first argument, <CODE>{.foo}</CODE> gives zero or more filename
 extensions that will cause your editor to be used in place of the
-default editor.  The second argument is the name of the editor class
-to use.  The third argument is the text that will be inserted into the
-<CODE>Window</CODE> menu.  With the above example, a Tycho <CODE>Open
+default editor.  
+
+<LI> The second argument is a string with a <CODE>%s</CODE> embedded.
+The <CODE>%s</CODE> is replaced with the file name before invoking the
+command, using the Tcl <code>format</code>command to use.
+
+<LI>If the third argument is a non-empty string, then the
+command will be added to the <CODE>Window</CODE> menu of all File
+objects opened in the future using the value of this description as
+the menu label. This permits the user to open a new blank editor of
+the given class.
+
+<LI> If the fourth argument is supplied and non-empty, then is selects
+the sub-menu of the <CODE>Window</CODE> menu into which the entry to
+open a blank editor will be placed. Legal values are <CODE>text</CODE>,
+<CODE>graphics</CODE>, and <CODE>tools</CODE>.
+</MENU>
+ With the above example, a Tycho <CODE>Open
 File</CODE> command on a file called <CODE>file.foo</CODE>
-will cause an instance of <CODE>::tycho::EditFoo</CODE> to be created.
+will cause an view of <CODE>::tycho::EditFoo</CODE> to be created.
 The syntax of the command that creates the instance will be:
 <pre>
-::tycho::EditFoo .some_name -file file.foo
+::tycho::view EditFoo .some_name -file file.foo
 </pre>
 The name is generated automatically.  The 
 <a name="-file option"><CODE>-file</CODE> option</a> must (obviously)
 be understood by the editor.  But that is the only constraint on the editor.
+<p>
+If a editor has a ToolBar, then the <CODE>registerExtensions</CODE>
+command would look like:
+<PRE>
+    ::tycho::File::registerExtensions {.html .htm .htl} \
+            {::tycho::view HTML -file {%s} -toolbar 1} \
+            {}
+</PRE>
+
 <p>
 <h2><a name="Help menu">Help Menu</a></h2>
 <p>
@@ -166,23 +194,11 @@ in the menu title.  Once the menu is posted, typing
 the underlined character in a menu item will invoke it.
 The F10 key will post the <CODE>File</CODE> menu.
 <p>
-<h2><a name="autosave">Autosave</a> and
-<a name="crash recovery">Crash Recovery</a></h2>
+<h2><a name="autosave">Autosave</a>
 <p>
-
-
-the data to a file with the same name as the current file but with the
-prefix <CODE>#auto#</CODE>.  This file is automatically removed when
-you save the modified data.
-<p>
-If you are running <a href="../../../doc/tyunix.html#Ptolemy with Tycho">
-Ptolemy with Tycho</a>, then Tycho will also attempt to save modified
-data when the program crashes.  This is important because Ptolemy
-is fundamentally an extensible system, into which users routinely
-add their own code, so it is not uncommon in the process of doing
-code development to get crashes.  The crash recovery files have
-the prefix <CODE>#crash</CODE>.  There is no guarantee that their contents
-will be correct, since often the crash occurs due to corrupted data.
+Tycho will save the data to a file with the same name as the current
+file but with the prefix <CODE>#auto#</CODE>.  This file is
+automatically removed when you save the modified data.
 <p>
 <a href="../../../doc/index.html">Tycho Home Page</a><br>
 <p>
