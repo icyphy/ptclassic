@@ -42,7 +42,6 @@ include $(CONFIG)
 TCL_SRCS =
 
 SIMPLE_TESTS = \
-	all.itcl \
 	addBlock.itcl \
 	blocks.itcl \
 	connect.itcl \
@@ -57,7 +56,7 @@ SIMPLE_TESTS = \
 
 GRAPHICAL_TESTS =
 
-ITCL_SRCS =
+ITCL_SRCS =	$(SIMPLE_TESTS) alltests.itcl all.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
