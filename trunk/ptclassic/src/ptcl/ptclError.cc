@@ -110,13 +110,13 @@ Error :: message (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 void
 Error :: abortRun (cc *m1, cc* m2, cc* m3) {
 	error (m1, m2, m3);
-	SimControl::requestHalt();
+	SimControl::declareErrorHalt();
 }
 
 void
 Error :: abortRun (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 	error (o, m1, m2, m3);
-	SimControl::requestHalt();
+	SimControl::declareErrorHalt();
 }
 
 // marking is not supported in this implementation
