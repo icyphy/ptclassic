@@ -108,6 +108,9 @@ class ::tycho::Net {
 
     set optiondefault(-fromaspect) "terminal"
     set optiondefault(-toaspect)   "terminal"
+
+    # FIXME: For testing wide lines. Remoave after 4 April 1998.
+    set optiondefault(-capstyle) projecting
 }
 
 ##########################################################################
@@ -135,7 +138,7 @@ body ::tycho::Net::construct {id canvas slate tags x y args} {
         set option([string trimleft $opt -]$id) $val
     }
 
-    # Call superclass sonctructor
+    # Call superclass conctructor
     eval [list ::tycho::SmartLine::_construct \
 	    $id $canvas $slate $tags $x $y] \
 	    $args
