@@ -14,7 +14,7 @@ $Id$
 #include "err.h"
 #include "main.h"
 
-#define dmWidth 80
+#define dmWidth 40
 
 int 
 Man(spot, cmdList, userOptionWord)
