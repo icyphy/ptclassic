@@ -247,6 +247,45 @@ void CGTarget::setup() {
 	// reset for next setup
 	noSchedule = 0;
 
+	// Type resolution double-checking:
+	// PortHole types should be resolved by the time of
+	// the finish of the call to galaxy->initialize().
+
+	// Iterate over the galaxy, checking all port types.
+	// If a port's type doesn't match its resolvedType, we generate
+	// an error, because implicit type conversion is not supported,
+	// in general, in CG domains, unlike in simulation domains.
+	// Failing to perform explicit type conversion can lead to
+	// run-time and compile-time bugs.
+	GalAllBlockIter nextBlock(*galaxy());
+	Block* b;
+	while ((b = nextBlock++) != 0) {
+	  BlockPortIter phIter(*b);
+	  PortHole* ph;
+	  while ((ph = phIter++) != 0) {
+	    // If ph is an alias, get the true port.
+	    while (ph->alias()) {
+	      ph = (PortHole*) ph->alias();
+	    }
+	    // Issue an error if the resolved type doesn't match the type,
+	    // and it wasn't an ANYTYPE to begin with.
+	    // Domains that automatically splice in conversion stars
+	    // prior to this point will not generate errors.
+	    if (strcmp(ph->type(),"ANYTYPE") &&
+		strcmp(ph->resolvedType(),ph->type())) {
+	      StringList phInfo = "";
+	      phInfo << "type: " << ph->type()
+		<< "; resolvedType: " << ph->resolvedType();
+	      Error::warn(*ph, "\nConflict between PortHole type() and resolvedType():\n",
+			  (const char*) phInfo);
+	      Error::abortRun("Implicit type conversion not allowed in code generation domains.\n",
+			      "Please use an explicit type-conversion star, or redesign the graph\n",
+			      "so as to eliminate the conflict.");
+	      return;
+	    }
+	  }
+	}
+
 	// If in a WormHole, generate, compile, load, and run code.
 	// Ignore flags which may otherwise disable these functions.
 	if (inWormHole() && alone()) {
