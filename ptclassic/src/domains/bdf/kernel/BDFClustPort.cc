@@ -228,18 +228,25 @@ void BDFClustPort::receiveData() {
 		// if we are duped or are a control port.
 		if (duped() || isControl()) {
 			copy(pOutPtr,this);
-			// rely on dup ports being processed after real ones.
-			if (duped()) broadcastDupData(this);
 		}
 	}
 	else {
 		getParticle();
 		alreadyReadFlag = TRUE;
 	}
+	// rely on dup ports being processed after real ones.
+	if (duped()) broadcastDupData(this);
 }
 
-// see if signal is needed as ctl signal.
-static int seeIfMoveupNeeded(BDFClustPort* me) {
+// see if signal is needed as ctl signal.  Assumption: this is called on
+// outputs only.
+
+int BDFClustPort::seeIfMoveupNeeded() {
+	// if I am a control output with no far(), we must move
+	// up to communicate the token.
+	if (isControl() && far() == 0) return TRUE;
+	// otherwise see if the far end needs it.
+	BDFClustPort* me = this;
 	while (1) {
 		BDFClustPort* o = me->outPtr();
 		if (!o) break;
@@ -256,7 +263,7 @@ void BDFClustPort::sendData() {
 		return;
 	}
 	if (moveupNeeded == UNKNOWN)
-		moveupNeeded = seeIfMoveupNeeded(this);
+		moveupNeeded = seeIfMoveupNeeded();
 	// for non-bags, need to get data previously sent by geodesics.
 	if (moveupNeeded && bagPortFlag == BCP_ATOM) {
 		Geodesic* g = real().geo();
