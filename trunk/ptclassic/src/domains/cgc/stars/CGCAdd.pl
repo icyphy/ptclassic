@@ -30,15 +30,17 @@ limitation of liability, and disclaimer of warranty provisions.
 		noInternalState();
 	}
 	go {
-		StringList out;
-		out << "\t$ref(output) = ";
+		StringList out = "\t$ref(output) = ";
 		for (int i = 1; i <= input.numberPorts(); i++) {
+			// This code relies on side effects, i.e.,
+			// the current value of the state ix
 			ix = i;
 			out << "$ref(input#ix)";
 			if (i < input.numberPorts()) out << " + ";
 			else out << ";\n";
-			addCode((const char*)out);
-			out.initialize();
+			addCode(out);
+			// Reinitialize out (indent the code)
+			out = "\t\t";
 		}
 	}
 	exectime {
