@@ -18,11 +18,11 @@ vem*button*highlightThickness: 5
 vem*edit*borderWidth: 3
 #ifdef COLOR
 vem*cursor*color: red
-Vem*Background: bisque
+Vem*Background: grey93
 vem*menu*background: white
 vem*foreground: black
-vem.background.color: #cdcdc1
-vem.grid.zero.color: #cdcdc1
+vem.background.color: azure3
+vem.grid.zero.color: azure3
 vem*menu*item*background: LightGray
 vem*button*foreground: IndianRed
 vem*title*foreground: black
@@ -44,32 +44,3 @@ pxgraph.Background: white
 pxgraph.ZeroColor: navy
 pxgraph.Markers: off
 pxgraph.Foreground: black
-
-! Ptolemy resources for Xedit
-Xedit*input:			TRUE
-Xedit*filename*preferredPaneSize:	525
-Xedit*editWindow*preferredPaneSize:	500
-Xedit*labelWindow*justify:		center
-Xedit*labelWindow*label:		no file yet
-Xedit*quit.label:			Quit
-Xedit*save.label:			Save
-Xedit*load.label:			Load
-Xedit*buttons*orientation:		horizontal
-Xedit*buttons*showGrip:			False
-Xedit*messageWindow*preferredPaneSize:	50
-Xedit*Paned*Text*allowResize:		True
-Xedit*messageWindow.autoFill:		True
-Xedit*messageWindow.scrollVertical:	WhenNeeded
-Xedit*editWindow.autoFill:		True
-Xedit*editWindow.scrollVertical:	WhenNeeded
-Xedit*bc_label*label:			Use Control-S and Control-R to Search.
-!
-! Keep CR in filename window from confusing the user.
-!
-Xedit*filename.translations: #override \
-				<Key>Return: end-of-line()
-Xedit*filename.baseTranslations: #override \
-				<Key>Return: end-of-line()
-! basic resources for xterm
-XTerm*ScrollBar:                on
-XTerm*saveLines:                256
