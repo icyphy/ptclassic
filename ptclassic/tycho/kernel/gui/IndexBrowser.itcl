@@ -75,6 +75,13 @@
 # It can contain comment lines, which begin with a pound sign (#).
 # These are ignored.
 #
+# The example below opens up the tycho index
+# <tcl><pre> 
+# set win [::tycho::IndexBrowser [::tycho::autoName .ib] &#92
+#	    -file [file join \$TYCHO lib idx tycho.idx]]
+# $win centerOnScreen
+# </pre></tcl>
+#
 class ::tycho::IndexBrowser {
     inherit ::tycho::ListBrowser
 
