@@ -107,12 +107,14 @@ public:
 	// The buffer assigned to this porthole is embedded in a buffer:
 	// ex) input.embed(output) means that the buffer of the input
 	// porthole contains the buffer of the output porthole.
-	void embed(CGPortHole& p, int i = -1) { p.embeddedPort = this; 
-			embeddingFlag = TRUE; p.embeddedLoc = i; }
+	void embed(CGPortHole& p, int i = DF_NONE) {
+		p.embeddedPort = this; 
+		embeddingFlag = TRUE;
+		p.embeddedLoc = i; }
 	CGPortHole* embedded() { return embeddedPort; }
 	int embedding() { return embeddingFlag; }
 
-	// return where embedded. return -1 if not decided yet.
+	// return where embedded. return DF_NONE if not decided yet.
 	int whereEmbedded() { return embeddedLoc; }
 	void embedHere(int i) { embeddedLoc = i; }
 
@@ -120,12 +122,17 @@ public:
 	int fork() const { return forkDests.size();}
 
 	// Manage fork destinations
-	inline int removeForkDest(CGPortHole* p) { return forkDests.remove(p); }
-	inline void putForkDest(CGPortHole* p) { forkDests.put(p); }
+	inline int removeForkDest(CGPortHole* p, int cgPortHoleFlag = TRUE) {
+		if (cgPortHoleFlag) portHoleForkDests.remove(p);
+		return forkDests.remove(p);
+	}
+	inline void putForkDest(CGPortHole* p, int cgPortHoleFlag = TRUE) {
+		if (cgPortHoleFlag) portHoleForkDests.put(p);
+		forkDests.put(p);
+	}
 
 	// set a fork source
-	void setForkSource(CGPortHole* p);
-	inline void zeroForkSource() { forkSrc = 0; }
+	void setForkSource(CGPortHole* p, int cgPortHoleFlag = TRUE);
 
 	// functions for moving data across wormhole boundaries
 	void forceSendData() { putParticle(); }
@@ -133,8 +140,10 @@ public:
 
 protected:
 	int offset;
+
 	// Stuff to support fork buffers
-	SequentialList forkDests;
+	SequentialList forkDests;		// CGPortHoles + MultiCGPorts
+	SequentialList portHoleForkDests;	// CGPortHoles only
 	CGPortHole* forkSrc;
 
 	// Where I am embedded.
@@ -155,7 +164,7 @@ private:
 class InCGPort : public CGPortHole
 {
 public:
-	int isItInput () const ; // {return TRUE; }
+	int isItInput () const ;		// { return TRUE; }
 };
 
 	////////////////////////////////////////////
@@ -165,7 +174,7 @@ public:
 class OutCGPort : public CGPortHole
 {
 public:
-	int isItOutput () const; // {return TRUE; }
+	int isItOutput () const;		// { return TRUE; }
 };
 
 	//////////////////////////////////////////
@@ -177,13 +186,11 @@ public:
 // setSDFParams, not full set.
 
 class MultiCGPort : public MultiDFPort {
-protected:
-	CGPortHole* forkSrc;
 public:
 	MultiCGPort() : forkSrc(0) {}
 	~MultiCGPort();
 
-	void setForkBuf(CGPortHole& p) { forkSrc = &p;}
+	void setForkBuf(CGPortHole& p) { forkSrc = &p; }
 
 	// this function should be called by installPort for
 	// all derived output multiporthole classes.
@@ -192,6 +199,9 @@ public:
 	// Services of MultiSDFPort that are used often:
 	// setPort(const char* portName, Block* parent, dataType type,
 	//	unsigned numTokens)
+
+protected:
+	CGPortHole* forkSrc;
 };
 
 	//////////////////////////////////////////
@@ -202,7 +212,7 @@ public:
  
 class MultiInCGPort : public MultiCGPort {
 public:
-	int isItInput () const; // {return TRUE; }
+	int isItInput () const;			// { return TRUE; }
 
 	// Add a new physical port to the MultiPortHole list
 	PortHole& newPort();
@@ -217,7 +227,7 @@ public:
 
 class MultiOutCGPort : public MultiCGPort {     
 public:
-	int isItOutput () const; // {return TRUE; }
+	int isItOutput () const;		// { return TRUE; }
 
 	// Add a new physical port to the MultiPortHole list
 	PortHole& newPort();
