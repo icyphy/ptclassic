@@ -12,11 +12,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC Visual Instruction Set library }
 	desc { 
-Multiplies the 16-bit short integers concatenated in a 64-bit float particle
-to the corresponding 16-bit short integers in another 64-bit float particles.
-The result is four 16-bit signed shorts that are returned as a single
-floating point number.  Each multiplication results in a 32-bit result,
-which is then rounded to 16 bits.
+Multiply the corresponding 16-bit fixed point numbers of two
+partitioned float particles.  Four signed 16-bit fixed point
+numbers of a partitioned 64-bit float particle are multiplied to
+those of another 64-bit float particle.  Each multiplication produces 
+a 32-bit result.  Each 32-bit result is then left-shifted to fit
+within a certain dynamic range and truncated to 16 bits.  The final 
+result is four 16-bit fixed point numbers that are returned 
+as a single float particle.
 	}
 	input {
 	  name { inA }
@@ -33,6 +36,13 @@ which is then rounded to 16 bits.
 	  type { float }
 	  desc { Output float type }
 	}
+	defstate {
+	  name {leftshift}
+	  type {int}
+	  default {"1"}
+	  desc { Left shift each product so that it falls within the
+		 dynamic of the output. }
+	}
 	constructor {
 	  noInternalState();
 	}
@@ -47,7 +57,7 @@ which is then rounded to 16 bits.
 	  vis_f32  dataAlo,dataAhi,dataBlo,dataBhi,resultu,resultl;
 	}
 	codeblock(multfour){
-	  vis_write_gsr(8);
+	  vis_write_gsr($val(leftshift)<<3);
 	  
 	  /* setup the data */
 	  dataAhi=vis_read_hi((double) $ref(inA));
