@@ -43,7 +43,7 @@ include $(CONFIG)
 ITCL_SRCS = 
 
 DEMO_SRCS = \
-	query \
+	labeledgrid \
 	widgettree
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) $(DEMO_SRCS)
