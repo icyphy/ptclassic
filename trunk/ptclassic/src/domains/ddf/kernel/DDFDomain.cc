@@ -15,7 +15,7 @@ $Id$
 ***********************************************************************/
 
 #include "Domain.h"
-#include "Target.h"
+#include "DDFTarget.h"
 #include "KnownTarget.h"
 #include "DDFScheduler.h"
 #include "DDFWormhole.h"
@@ -57,21 +57,7 @@ public:
 // declare a prototype
 static DDFDomain proto;
 
-// declare the default Target object
-
-class DDFTarget : public Target {
-public:
-	DDFTarget() : Target("default-DDF", "DataFlowStar",
-			     "default DDF target") {
-		LOG_NEW; setSched(new DDFScheduler);
-	}
-	~DDFTarget() { LOG_DEL; delSched();}
-	Block* clone() const;
-};
-
-Block* DDFTarget::clone() const {
-	LOG_NEW; return new DDFTarget;
-}
+// declare a prototype default target object.
 
 static DDFTarget defaultDDFtarget;
 static KnownTarget entry(defaultDDFtarget,"default-DDF");
