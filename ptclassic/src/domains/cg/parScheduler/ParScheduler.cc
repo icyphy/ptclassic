@@ -31,7 +31,7 @@ Date of last revision:
 // main body of the parallel schedule
 
 
-ParScheduler :: ParScheduler(BaseMultiTarget* t, const char* logName) {
+ParScheduler :: ParScheduler(MultiTarget* t, const char* logName) {
 	mtarget = t;
 	logFile = logName;
 	logstrm = 0;
@@ -42,8 +42,47 @@ ParScheduler :: ParScheduler(BaseMultiTarget* t, const char* logName) {
 ParScheduler :: ~ParScheduler() {
 }
 
+int isaOSOPschedule(Galaxy& g) {
+	GalStarIter iter(g);
+	CGStar* s;
+	int globalTest = TRUE;
+	while ((s = (CGStar*) iter++) != 0) {
+		ParNode* n = (ParNode*) s->myMaster();
+		ParNode* firstN = n;
+		int pid = n->getProcId();
+		int temp = TRUE;
+		while ((n = (ParNode*) n->getNextInvoc()) != 0) {
+			if (pid != n->getProcId()) {
+				firstN->setOSOPflag(0);
+				temp = FALSE;
+				globalTest = FALSE;
+				break;
+			}
+		}
+		if (temp) firstN->setOSOPflag(1);
+	}
+	return globalTest;
+}
+
 int ParScheduler :: computeSchedule(Galaxy& g)
 {
+	// if numProcs == 1, use simple SDF scheduling
+	if (numProcs == 1) {
+		int flag =  SDFScheduler :: computeSchedule(g);
+
+		// total work computation. set targets.
+		oldRoutine = TRUE;
+		int sum = 0;
+		DFGalStarIter nextStar(*galaxy());
+		DataFlowStar* s;
+		while ((s = nextStar++) != 0) {
+			sum += s->myExecTime() * s->reps();
+			if (s->isItWormhole()) oldRoutine = FALSE;
+		}
+		totalWork = sum;
+		return flag;
+	}
+
 	if (overrideSchedule()) {
 		if (!exGraph) {
 			Error::abortRun("We can not override an empty",
@@ -88,6 +127,11 @@ int ParScheduler :: computeSchedule(Galaxy& g)
 		finalSchedule();
 	}
  
+	// explicit set the OSOP request flag by looking at the schedule
+	// result if possible to avoid Spread/Collect stars as much as
+	// possible
+	if (OSOPreq() != TRUE) mtarget->setOSOPreq(isaOSOPschedule(g));
+
 	// targetPtr setup for each processor
 	parProcs->mapTargets();
 
@@ -214,6 +258,21 @@ int ParScheduler :: scheduleIt() { return FALSE; }
 /////////////////////////////
 
 void ParScheduler::oldRun() {
+// If numProc == 1, be special.
+	if (numProcs == 1) {
+		SDFSchedIter next(mySchedule);
+		CGStar* s;
+		while ((s = (CGStar*) next++) != 0) {
+			if (s->isItWormhole()) {
+				CGWormhole* worm = s->myWormhole();
+				worm->downLoadCode(0);
+			} else {
+				mtarget->writeFiring(*s,1);
+			}
+		}
+		return;
+	}
+
 // run the schedule for each target
 	for (int i = 0; i < mtarget->nProcs(); i++) {
 		mtarget->setCurChild(i);
@@ -230,6 +289,14 @@ void ParScheduler :: compileRun() {
 		return;
 	}
 
+	// If numProc == 1, be special.
+	if (numProcs == 1) {
+		CGTarget* t = (CGTarget*) mtarget->child(0);
+		t->setGalaxy(*galaxy());
+		mtarget->addProcessorCode(0,t->generateCode());
+		return;
+	}
+
 	// make parallel target intervene here to do something necessary
 	// by default, do nothing
 	mtarget->prepareCodeGen();
@@ -243,6 +310,15 @@ void ParScheduler :: compileRun() {
 /////////////////////////////
 
 void ParScheduler :: setProfile(Profile* profile) {
+
+	// special for numProcs == 1
+	if (numProcs == 1) {
+		profile->setEffP(1);
+		profile->setStartTime(0,0);
+		profile->setFinishTime(0,getTotalWork());
+		profile->summary();
+		return;
+	}
 
 	int effNum = numProcs;
 
