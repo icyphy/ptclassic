@@ -40,6 +40,15 @@ Implementation of the InvokeInterp class that calls the Tcl interpreter.
 #include "InvokeInterp.h"
 #include "StringList.h"
 
+// METHODS
+
+// constructor
+InvokeInterp :: InvokeInterp() {}
+
+// destructor
+InvokeInterp :: ~InvokeInterp() {}
+
+// interpreter
 const char*
 InvokeInterp :: interpreter (const char* expression) {
   const char* result = 0;
