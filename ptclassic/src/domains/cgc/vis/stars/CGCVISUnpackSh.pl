@@ -26,7 +26,7 @@ limitation of liability, and disclaimer of warranty provisions.
        		desc { Output float type }
 	}
 	defstate {
-	        name { scale }
+	        name { scaledown }
 		type { float }
 		default { "1.0/32767.0" }
 		desc { Output scale }
@@ -39,27 +39,26 @@ limitation of liability, and disclaimer of warranty provisions.
 	  out.setSDFParams(PACKOUT,PACKOUT-1);
 	}
 	codeblock(mainDecl){
-	  const int $starSymbol(NUMOUT) = 4;
-          double *$starSymbol(packedin) = (double *)memalign(sizeof(double),sizeof(double));
+          double *$starSymbol(packedin) =
+	    (double*)memalign(sizeof(double),sizeof(double));
 	}
 	initCode{
 	  addDeclaration(mainDecl);
 	}
 	codeblock(localDecl){
-	  int index;
 	  double outvalue;
 	  short *invalue;
 	}
 	codeblock(unpackit){
+
 	  *$starSymbol(packedin) = (double) $ref(in);
 	  invalue = (short *) $starSymbol(packedin);
-	  
-	  /*scale input and unpack output*/
-	      for (index=0;index<$starSymbol(NUMOUT);index++){
-		outvalue = (double) $val(scale)* (double) invalue[index];
-		$ref2(out,index) = outvalue;
-	      }	
-      	}
+	  /*scale down and unpack input*/
+          $ref2(out,0)=(double) ($val(scaledown) * (double) invalue[0]);
+          $ref2(out,1)=(double) ($val(scaledown) * (double) invalue[1]);
+          $ref2(out,2)=(double) ($val(scaledown) * (double) invalue[2]);
+          $ref2(out,3)=(double) ($val(scaledown) * (double) invalue[3]);
+	}
 	go {
 	  addCode(localDecl);
 	  addCode(unpackit);
