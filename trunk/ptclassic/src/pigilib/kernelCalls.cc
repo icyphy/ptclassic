@@ -15,7 +15,6 @@ Some code borrowed from Interpreter.cc, see this file for more info.
 #include "miscFuncs.h"
 
 
-PlasmaList plasmaList;  // This global is needed for the kernel
 static InterpUniverse *universe = NULL;  // Universe to execute
 static InterpGalaxy *currentGalaxy = NULL;  // current galaxy to make things in
 static InterpGalaxy *saveGalaxy = NULL;  // used to build galaxies
