@@ -971,7 +971,12 @@ body ::tycho::HTML::openNewBrowser {win x y} {
                 [::tycho::url dirname [filename]] $filename]
     }
     set newbrowser [::tycho::File::openContext $filename]
-    after idle "$newbrowser hyperJump $filename [list $point] 1"
+    # If we need to jump to the point, jump.
+    if {$point!={}} {
+        # Need to catch in case the new browser is not HTML browser (ie.
+        # text editor) and we are forced to hyperJump with wrong # of args.
+        after idle "catch \"$newbrowser hyperJump $filename [list $point] 1\""
+    }
 }
 
 #####################################################################
