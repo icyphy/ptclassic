@@ -282,11 +282,24 @@ limitation of liability, and disclaimer of warranty provisions.
       }
     }
 
+    codeblock (syncCounter) {
+      /* Hack for Sun only */
+      unsigned $starSymbol(count) = 0;
+    }
+
     codeblock (sync) {
       {
+	/* Hack for Sun only */
+	/* Used only in MonoOut star */
 	/* Wait for samples to drain */
 	audio_info_t info;
-	ioctl($starSymbol(file), AUDIO_DRAIN, &info);
+	/* Wait for some samples to drain */
+	do {
+	  /* the cast below is to prevent warnings */
+	  ioctl($starSymbol(file), AUDIO_GETINFO, (caddr_t)(&info));
+        } while ((int) ($starSymbol(count) - info.play.samples) > 
+		 $val(aheadLimit));
+        $starSymbol(count) += $val(blockSize);
       }
     }
 
