@@ -121,6 +121,8 @@ class ::tycho::File {
     # In derived classes, clear the data being displayed or edited.
     method clear {} {}
 
+    method compareTo {} {}
+
     # Query the user for a filename, then evaluate its contents as Tcl commands.
     method evaluate {}
 
@@ -306,8 +308,12 @@ class ::tycho::File {
     # Keep track of registered editors to put them into the Window menu.
     private common windowMenuEntries {}
 
+    # Keep track of the compare widget
+    private variable diffWidget {}
+
     # Class identifier
     private variable myclass {}
+
 }
 
 #########################################################################
@@ -487,6 +493,34 @@ body ::tycho::File::destructor {} {
     # removeBackupFiles
 }
 
+#####################################################################
+#### compareTo
+#
+# Compare the current file with another one, using EditDiff
+#
+body ::tycho::File::compareTo {} {
+    global filename1 filename2
+    # FIXME: When global, filenames are constant. Maybe we should
+    # change this to be private instead?
+    
+    if {![winfo exists $diffWidget]} {
+        set diffWidget [::tycho::view EditDiff -toolbar 1 -textheight 32]
+        puts "Created $diffWidget"
+    }
+    $diffWidget configure -filename1 $file
+    $diffWidget configureUpdate
+    
+    $diffWidget configure -filename2 \
+            [safeEval ::tycho::queryfilename {File to compare with:}]
+    $diffWidget configureUpdate
+    
+    # Update the second file
+    if {[$diffWidget cget -filename2]!={}} {
+        $diffWidget compareFile
+    }
+}
+
+
 #########################################################################
 #########################################################################
 ####                          public methods                         ####
@@ -541,6 +575,11 @@ body ::tycho::File::autoSave {} {
 	after $interval "::tycho::File::callAutoSave $this"
     }
 }
+
+#####################################################################
+#### compareTo
+# Query the second file name, then compare it with the current file
+#
 
 #####################################################################
 #### evaluate
@@ -1402,6 +1441,9 @@ body ::tycho::File::initializeMenubar {} {
     $myMenubar command Evaluate File -underline 0 \
 	    -accelerator "C-x C-r" -command "$this evaluate"
     
+    $myMenubar command {Compare To...} File -underline 2 \
+            -command "$this compareTo "
+
     $myMenubar command Reload File -underline 0 \
 	    -command "$this reload"
     
