@@ -23,11 +23,14 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #
-# This file defines several math and list functions useful in specifying
-# state and parameter values for ptcl, pigi, and tycho.  The functions
-# help avoid the use of global variables.  For example, the Tcl code
-# to compute the filter taps for an FIR filter whose impulse response of
-# a sinusoidal function is
+# This file defines a set of generic math and list functions in Tcl.
+# This file can be used by itself.
+#
+# As a part of ptcl, pigi, and tycho, these routines are useful in
+# specifying state and parameter values.  The functions avoid using
+# global variables.  For example, the Tcl code to compute the filter
+# taps for an FIR filter whose impulse response is a sampled sinusoidal
+# function specified as
 #
 # set taps {}
 # for {set i 1} {$i <= 100} {incr i} {
@@ -65,50 +68,43 @@ proc listApplyExpression {tclexpr thelist} {
   return $newlist
 }
 
+# Function: makeOrderedPairs
 
-
-# Function: makePtolemyState
-
-add_to_help makePtolemyState {?<rows> <cols>? <realvalues> ?<imagvalues>?} {
-Converts a list of values into a Ptolemy state representation; e.g.,
-makePtolemyState "1 2 3" "3 2 1" returns "(1, 3) (2, 2) (3, 1)".  The
-values of <rows> and <cols> are ignored, and are supported for the
-Tcl/Matlab interface (see the help information on the "matlab" command).
+add_to_help makeOrderedPairs {<x-values> ?<y-values>?} {
+Converts two lists, <x-values> and <y-values>, into ordered pairs; e.g.,
+makeOrderedPairs "1 2 3" "3 2 1" returns "(1, 3) (2, 2) (3, 1)".
+If <y-values> is omitted, then <x-values> is returned.  This procedure
+returns a string.
 }
 
-proc makePtolemyState {args} {
+proc makeOrderedPairs {args} {
   set numargs [llength $args]
-  if { $numargs == 4 } {
-    set realvector [lindex $args 2]
-    set imagvector [lindex $args 3]
-  } elseif { $numargs == 3 } {
-    return [join [lindex $args 2]]
-  } elseif { $numargs == 2 } {
-    set realvector [lindex $args 0]
-    set imagvector [lindex $args 1]
+  if { $numargs == 2 } {
+    set xvector [lindex $args 0]
+    set yvector [lindex $args 1]
   } elseif { $numargs == 1 } {
     return [join $args]
   } else {
-    set usagestr "makePtolemyState ?rows cols? <realvalues> ?imagvalues?"
+    set usagestr "makeOrderedPairs <x-values> ?y-values?"
     error "wrong # arguments: should be \"$usagestr\""
     return -code error
   }
 
-  # Both real and imaginary values were specified
-  # Convert into Ptolemy syntax (real1, imag1) (real2, imag2) ...
-  set numreals [llength $realvector]
-  set numimags [llength $imagvector]
-  if { $numreals == $numimags } {
-    set pvector ""
-    for {set i 0} {$i < $numreals} {incr i} {
-      set realvalue [lindex $realvector $i]
-      set imagvalue [lindex $imagvector $i]
-      lappend pvector "($realvalue, $imagvalue)"
+  # Both x and y values were specified
+  # Convert into ordered pairs: (x1, y1) (x2, y2) ...
+  set numx [llength $xvector]
+  set numy [llength $yvector]
+  if { $numx == $numy } {
+    set orderedpairs ""
+    for {set i 0} {$i < $numx} {incr i} {
+      set xvalue [lindex $xvector $i]
+      set yvalue [lindex $yvector $i]
+      lappend orderedpairs "($xvalue, $yvalue)"
     }
-    return [join $pvector]
+    return [join $orderedpairs]
   } else {
-    error "error: # of real values ($numreals) is different from\
-	   # of imaginary values ($numimags)"
+    set errmsg "# of x-values ($numx) different from # of y-values ($numy)"
+    error "makeOrderedPairs: $errmsg"
     return -code error
   }
 }
