@@ -188,13 +188,15 @@ Tokenizer::pop() {
 
 int
 Tokenizer::fromFile(const char *filename) {
-	LOG_NEW; ifstream* s = new ifstream(expandPathName(filename));
-	if (!*s) {
-		LOG_DEL; delete s;
-		return 0;
-	}
-	push (s, filename);
-	return 1;
+    const char* expandedFileName = expandPathName(filename);
+    LOG_NEW; ifstream* s = new ifstream(expandedFileName);
+    LOG_DEL; delete [] expandedFileName;
+    if (!*s) {
+	LOG_DEL; delete s;
+	return 0;
+    }
+    push (s, filename);
+    return 1;
 }
 
 // Get the next character from the tokenizer.  Return 0 on eof, else 1.
