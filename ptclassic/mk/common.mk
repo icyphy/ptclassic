@@ -43,6 +43,11 @@
 # GENSTARVARS	A variable passed to genStarTable to allow stars other
 #		than those defined by PL_SRCS to be generated.
 
+# This file is used when there are files to be compiled.  Usually a 
+# make.template file is present if there are files to be compiled.
+# See no-compile.mk for a similar file that is to be used when there
+# are no files to be compiled.
+
 whatToBuild:	all
 
 .SUFFIXES:	.o .cc .h .pl .chdl .is
