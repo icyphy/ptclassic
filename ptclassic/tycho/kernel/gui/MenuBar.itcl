@@ -75,16 +75,6 @@ class ::tycho::MenuBar {
 #### constructor
 #
 body ::tycho::MenuBar::constructor {args} {
-    # Create a delete a bogus menubutton. This appears to be necessary
-    # to keep the itk options database happy
-    itk_component add bogus {
- 	eval menubutton $itk_interior.junk
-    } {
- 	keep -padx -pady -font
-    }
-    destroy $itk_component(bogus)
-    unset itk_component(bogus)
-
     eval itk_initialize $args
     eval preference exclude $this $args
 }
@@ -153,12 +143,14 @@ body ::tycho::MenuBar::addMenu {name args} {
     } {
 	keep -font -activebackground -cursor -activeforeground \
 		-background -foreground -highlightbackground \
-		-highlightcolor -padx -pady
+ 		-highlightcolor -padx -pady
     }
 
-    # Create the new menu
+    # Create the new menu. This is done at the global scope so
+    # that adding menu entries in the superclass (MenuSupport)
+    # do not invoke unknown{}.
     itk_component add menu$name {
-	menu $itk_component(menuButton$name).menu -tearoff 0
+	uplevel #0 menu $itk_component(menuButton$name).menu -tearoff 0
     } {
 	keep -font -activebackground -cursor -activeforeground \
 		-background -foreground
@@ -179,7 +171,6 @@ body ::tycho::MenuBar::addMenu {name args} {
     set itemtype($name) "menu"
     set menupath($name) $itk_component(menuButton$name).menu
 }
-
 
 #####################################################################
 #### delete

@@ -69,6 +69,12 @@ class ::tycho::MenuSupport {
     # The font to use for displaying menus
     itk_option define -font font Font [::tycho::font helvetica]
 
+    # The horizontal menu button padding
+    itk_option define -padx padX Pad 5
+
+    # The vertical menu button padding
+    itk_option define -pady padY Pad 4
+
     ###################################################################
     ####                         public methods                    ####
 
@@ -133,18 +139,11 @@ class ::tycho::MenuSupport {
 #### constructor
 #
 body ::tycho::MenuSupport::constructor {args} {
-    # Create a delete a bogus menubutton. This appears to be necessary
-    # to keep the itk options database happy
-    itk_component add bogus {
- 	eval menubutton $itk_interior.junk
-    } {
- 	keep -padx -pady -font
-    }
-    destroy $itk_component(bogus)
-    unset itk_component(bogus)
-
     eval itk_initialize $args
-    eval preference exclude $this $args
+
+    # We don't need to exclude from preferences, since this
+    # class is abstract and should never be instantiated.
+    # eval preference exclude $this $args
 }
 
 ###################################################################
