@@ -42,8 +42,8 @@
 # non-streamable resource act like data repositories. In all cases,
 # file and directory paths use a URL-like naming scheme.
 #
-class ::tycho::LocalFile {
-    inherit ::tycho::ResourceFile
+class ::tycho::ResourceFile {
+    inherit ::tycho::Resource
 
     constructor {args} {}
     destructor {}
@@ -53,6 +53,9 @@ class ::tycho::LocalFile {
 
     ###################################################################
     ####                         public methods                    ####
+
+    # Change the permissions
+    method chmod {permissions {path {}}}
 
     # Close the resource
     method close {}
@@ -65,6 +68,9 @@ class ::tycho::LocalFile {
 
     # Delete a resource
     method delete {path}
+
+    # Test if a file is executable
+    method executable {path}
 
     # Test if a given resource exists
     method exists {path}
@@ -91,13 +97,13 @@ class ::tycho::LocalFile {
     method new {{path {}}}
 
     # Open the resource
-    method open {path {mode "r"}}
+    method open {{path {}} {mode "r"}}
 
     # Get the current full resource path
     method path {}
 
     # Write a string to a streamable resource 
-    method puts {}
+    method puts {string}
 
     # Return a string containing the data in a streamable resource 
     method read {}
@@ -115,16 +121,10 @@ class ::tycho::LocalFile {
     method streamable {}
 
     # Return true if a resource is writable
-    method writeable {{path {}}}
+    method writable {{path {}}}
 
     # Write a string to a streamable resource
-    method write {}
-
-    ###################################################################
-    ####                           public procs                    ####
-
-    # Create and open a new resource
-    proc openResourceFile {path}
+    method write {data}
 
     ###################################################################
     ####                         protected methods                 ####
@@ -132,17 +132,11 @@ class ::tycho::LocalFile {
     ###################################################################
     ####                        protected variables                ####
 
-    # The access mode
-    protected variable accessMode
-
-    # The full name of the current file (or directory)
-    protected variable currentFile
-
-    # True if a file is open
-    protected variable fileIsOpen
-
     ###################################################################
     ####                          private variables                ####
+    
+    # The current access mode
+    private variable accessMode ""
     
     # The current channel (file) ID
     private variable fileid ""
@@ -168,13 +162,28 @@ body ::tycho::ResourceFile::destructor {} {
 ####                      public methods                             ####
 
 #####################################################################
+#### chmod
+body ::tycho::ResourceFile::chmod {permissions {path {}}} {
+    # NOTE: Unix-dependent implementation
+    if { $path == "" } {
+        if { $currentFile != "" } {
+            exec chmod $permissions $currentFile
+        } else {
+            error "No path name specified"
+        }
+    } else {
+        exec chmod $permission $path
+    }
+}
+
+#####################################################################
 #### close
 body ::tycho::ResourceFile::close {} {
-    if { $fileid == "" } {
-	error "File \"$this\" is not open"
+    if { $fileid != "" } {
+	::close $fileid
     }
-    ::close $fileid
     set fileid ""
+    set fileIsOpen 0
 }
 
 #####################################################################
@@ -206,6 +215,12 @@ body ::tycho::ResourceFile::delete {path} {
 	close
     }
     ::file delete $path
+}
+
+#####################################################################
+#### executable
+body ::tycho::ResourceFile::executable {path} {
+    ::file executable $path
 }
 
 #####################################################################
@@ -258,17 +273,29 @@ body ::tycho::ResourceFile::mkdir {path} {
 
 #####################################################################
 #### open
-body ::tycho::ResourceFile::open {path {mode "r"}} {
+body ::tycho::ResourceFile::open {{path {}} {mode "r"}} {
     if $fileIsOpen {
 	$this close
     }
-    ::file open $path $mode
+    if { $path == "" } {
+	if { $currentFile == "" } {
+	    error "No path specified"
+	}
+	set path $currentFile
+	set mode $accessMode
+    } else {
+	set currentFile $path
+	set accessMode $mode
+    }
+    set fileid [::open $path $mode]
+    set fileIsOpen 1
+    return 1
 }
 
 #####################################################################
 #### path
 body ::tycho::ResourceFile::path {} {
-    return $currentPath
+    return $currentFile
 }
 
 #####################################################################
@@ -284,9 +311,13 @@ body ::tycho::ResourceFile::puts {string} {
 #### read
 body ::tycho::ResourceFile::read {} {
     if !$fileIsOpen {
-	error "File \"$this\" is not open"
+	$this open
+	set data [::read $fileid]
+	$this close
+	return $data
+    } else {
+	::read $fileid
     }
-    ::read $fileid
 }
 
 #####################################################################
