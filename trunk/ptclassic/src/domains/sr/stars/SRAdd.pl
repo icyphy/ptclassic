@@ -26,6 +26,7 @@ limitation of liability, and disclaimer of warranty provisions.
     }
     setup {
 	reactive();
+	noInternalState();
     }
     go {
 	if ( input1.present() && input2.present() ) {
