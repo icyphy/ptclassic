@@ -17,11 +17,12 @@ $Id$
 #include "KnownTarget.h"
 #include "LoopScheduler.h"
 #include "StringState.h"
-#include "IntState.h"
+#include "FloatState.h"
 
 class LoopTarget : public Target {
 protected:
 	StringState logFile;
+	FloatState schedulePeriod;
 public:
 	LoopTarget();
 	void start();
@@ -36,6 +37,8 @@ Target("loop-SDF","SDFStar",
 {
 	addState(logFile.setState("logFile",this,"",
 			"Log file to write to (none if empty)"));
+	addState(schedulePeriod.setState("schedulePeriod",this,"10000.0",
+		"schedulePeriod for interface with a timed domain."));
 }
 
 LoopTarget::~LoopTarget() {
@@ -44,6 +47,8 @@ LoopTarget::~LoopTarget() {
 
 void LoopTarget::start() {
 	LOG_NEW; setSched(new LoopScheduler(logFile));
+	SDFScheduler* s = (SDFScheduler*) mySched();
+	s->schedulePeriod = float(double(schedulePeriod));
 }
 
 static LoopTarget loopTargetProto;
