@@ -96,7 +96,7 @@ ITCL_SRCS = \
 	Message.itcl \
 	MetaData.itcl \
 	Model.itcl \
-	ModelView.itcl \
+	ModelViewer.itcl \
 	Monitor.itcl \
 	MultiPanel.itcl \
 	Object.itcl \
