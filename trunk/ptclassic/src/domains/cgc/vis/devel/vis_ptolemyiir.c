@@ -9,14 +9,14 @@ void vdk_vis_ptolemyiir(vis_s16* src, vis_s16* dst, int dlen, vis_s16
   int 		i;
   double 	upper,lower,splitresult;
   double        allstates;
-  float         resulthi,resultlo,result[1];
+  float         resulthi,resultlo,result;
   vis_f32	ff1,ff2;
   vis_u32	fu;
-  short		state1,*statetapprod;
+  vis_s32	resultl;
+  short		state1,r0,r1;
 
   allstates = vis_fzero();
   ff1=ff2 = vis_fzeros();
-  statetapprod = (short *) result;
   for (i = 0; i < dlen; i++) {
     /* 0 */
     /* find product of states-taps */
@@ -25,15 +25,15 @@ void vdk_vis_ptolemyiir(vis_s16* src, vis_s16* dst, int dlen, vis_s16
     splitresult = vis_fpadd16(upper,lower);
     resulthi = vis_read_hi(splitresult);
     resultlo = vis_read_lo(splitresult);
-    result[0] = vis_fpadd16s(resulthi,resultlo);
+    result = vis_fpadd16s(resulthi,resultlo);
+    resultl = *((vis_s32*) &result);
     /* find next_state */
     ff2=ff1;
-    state1 = (src[i] - (statetapprod[0] << 1)) << scalefactor;
+    state1 = (src[i] - (resultl>>15)) << scalefactor;
     fu = (state1<<16 | state1 & 0xffff);
     ff1 = vis_to_float(fu);
     allstates=vis_freg_pair(ff1,ff2);
     /* find output */
-    dst[i] = (n0 * state1 >> 15) + (statetapprod[1] << 1);
+    dst[i] = (n0 * state1 >> 15) + (resultl<<1);
   }  
-}	
-
+}
