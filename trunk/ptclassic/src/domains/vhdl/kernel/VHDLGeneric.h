@@ -46,6 +46,9 @@ class VHDLGeneric : public VHDLObj
  public:
   // Constructors.
   VHDLGeneric();
+  VHDLGeneric(const char* n, const char* t, const char* d,
+	      const char* m)
+    : type(t), defaultVal(d), mapping(m) { setName(n); }
 
   // Destructor.
   ~VHDLGeneric();
@@ -63,6 +66,10 @@ class VHDLGeneric : public VHDLObj
 
   // Return a pointer to a new copy of the VHDLGeneric.
   VHDLGeneric* newCopy();
+
+  void setType(const char* newType) { type = newType; }
+  void setDefaultVal(const char* newDefaultVal) { defaultVal = newDefaultVal; }
+  void setMapping(const char* newMapping) { mapping = newMapping; }
 
  protected:
  private:
@@ -99,7 +106,7 @@ class VHDLGenericList : public VHDLObjList
   VHDLGenericList* newCopy();
 
   // Allocate memory for a new VHDLGeneric and put it in the list.
-  void put(StringList, StringList, StringList="");
+  void put(StringList, StringList, StringList="", StringList="");
 };
 
 class VHDLGenericListIter : public VHDLObjListIter {
