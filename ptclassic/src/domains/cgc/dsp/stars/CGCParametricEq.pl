@@ -267,13 +267,13 @@ based on the procedure defined by Shpak.
 	}
 	initCode {
 	  CGCBiquad::initCode();
-	  addGlobal(globalDecl,"global");
-	  addProcedure(setparams,"param");
-          addProcedure(constbw,"newtonapprox");
-	  addProcedure(lowpass,"lp");
-	  addProcedure(hipass,"hp");
-	  addProcedure(bandpass,"bp");
-	  addProcedure(setfiltertaps,"taps");
+	  addGlobal(globalDecl, "global");
+	  addProcedure(setparams, "CGCParamBiquad_param");
+          addProcedure(constbw, "CGCParamBiquad_newtonapprox");
+	  addProcedure(lowpass, "CGCParamBiquad_lp");
+	  addProcedure(hipass, "CGCParamBiquad_hp");
+	  addProcedure(bandpass, "CGCParamBiquad_bp");
+	  addProcedure(setfiltertaps, "CGCParamBiquad_taps");
           addDeclaration(mainDecl);
           addCode(findparams);
         }
