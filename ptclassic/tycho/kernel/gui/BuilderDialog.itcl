@@ -106,6 +106,15 @@ body ::tycho::BuilderDialog::constructor {args} {
     $myMenubar add {Tcl Extensions} Build -underline 0 \
 	    -command "$this busy ::tycho::Builder::tclexts"
 
+    global PTOLEMY
+    if [ file writable [file join $PTOLEMY src domains] ] { 
+        $myMenubar addSeparator Build
+	$myMenubar add {Domain Index} Build -underline 0 \
+	    -command "$this busy ::tycho::Builder::ptDomainIndex"
+	$myMenubar add {Ptolemy Facets Forest} Build -underline 0 \
+	    -command "$this busy ::tycho::Builder::ptolemyFacetsForest"
+    }
+
     $myMenubar addMenu Test -underline 0
 
     $myMenubar add {Run All Tests} Test -underline 0 \
