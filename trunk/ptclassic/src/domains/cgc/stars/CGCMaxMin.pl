@@ -11,7 +11,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF main library }
+	location { CGC main library }
 	explanation {
 If \fIcmpareMagnitude\fR is "no", the star finds from among
 the \fIinput\fR inputs the one with the maximum or minimum value;

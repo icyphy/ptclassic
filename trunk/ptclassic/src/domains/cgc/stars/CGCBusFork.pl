@@ -15,7 +15,7 @@ To keep the implementation simple, this star does not attempt the
 fancy tricks performed by the regular fork star to avoid runtime overhead.
 The data values are simply copied at runtime.
         }
-	location { SDF main library }
+	location { CGC main library }
 	inmulti {
 	  name{input}
 	  type{ANYTYPE}
