@@ -93,7 +93,12 @@ int ParScheduler :: computeSchedule(Galaxy& galaxy)
 	// targetPtr setup for each processor
 	parProcs->mapTargets();
 
-	if (logstrm) {
+	// sub-universe creation.
+	// In case of CGDDFWormhole, we resort to the old routine.
+	oldRoutine = createSubGals();
+
+	if (logstrm && (oldRoutine == TRUE)) {
+		*logstrm << parProcs->displaySubUnivs();
 		logstrm->flush();
 	}
 
@@ -219,17 +224,12 @@ void ParScheduler::oldRun() {
 }
 
 void ParScheduler :: compileRun() {
-	// step 1. sub-universe creation.
-	if (!createSubGals()) {
+	// sub-universe creation.
+	if (!oldRoutine) {
 		// in case of wormhole, we resort to the old routine.
 		// we will remove this later.
 		oldRun();
 		return;
-	}
-
-	if (logstrm) {
-		*logstrm << parProcs->displaySubUnivs();
-		logstrm->flush();
 	}
 
 	// make parallel target intervene here to do something necessary

@@ -32,11 +32,54 @@ class ostream;
 ///////////////////////////
 
 class ParScheduler : public SDFScheduler {
-private:
-	// set the procId of stars after scheduling with OSOP option
-	// is executed. Prepare for adjustment.
-	void saveProcIds(Galaxy& g);
-	
+public:
+  	// Constructor
+  	ParScheduler(BaseMultiTarget* t, const char* log = 0);
+
+	virtual ~ParScheduler();
+
+	// reset the flag; to be called inside a wormhole.
+	void ofWorm() { inUniv = FALSE; }
+  
+	// return the total work
+	int getTotalWork() { return totalWork; }
+
+        // prepare for Gantt chart display
+        void writeGantt(ostream& o);
+
+	UniProcessor* getProc(int n) { return parProcs->getProc(n); }
+	ParProcessors* myProcs() { return parProcs; }
+
+	// create subGals for each processor
+	virtual int createSubGals();
+
+	// set up processors
+	virtual void setUpProcs(int num);
+
+        // main body of the schedule. 
+	int mainSchedule(Galaxy& g);
+
+	virtual int scheduleManually(Galaxy& g);  // manual assignment.
+        virtual int scheduleIt();		  // automatic assignment.
+				// Should be redefined in the derived class.
+
+////////// Methods for wormholes ////////////////
+
+	// finialize the schedule of wormholes.
+	void finalSchedule(Galaxy&);
+
+	// set the scheduled result into a designated profile
+	void setProfile(Profile* profile);
+
+	// display schedule with "numProcs" processors.
+	// It displays wormhole schedules.
+	// Global schedule should be added in the derived class.
+	// Look at the DLSchedule for example.
+	StringList displaySchedule();
+
+	// sort Processors with finish time.
+	void sortProcessors() { parProcs->sortWithFinishTime(); }
+
 protected:
 	const char* logFile;
 	pt_ofstream logstrm_real;	// for logging.
@@ -87,53 +130,13 @@ protected:
 	// virtual methods: prepare scheduling. By default, do nothing
 	virtual int preSchedule();
 
-public:
-  	// Constructor
-  	ParScheduler(BaseMultiTarget* t, const char* log = 0);
-
-	virtual ~ParScheduler();
-
-	// reset the flag; to be called inside a wormhole.
-	void ofWorm() { inUniv = FALSE; }
-  
-	// return the total work
-	int getTotalWork() { return totalWork; }
-
-        // prepare for Gantt chart display
-        void writeGantt(ostream& o);
-
-	UniProcessor* getProc(int n) { return parProcs->getProc(n); }
-	ParProcessors* myProcs() { return parProcs; }
-
-	// create subGals for each processor
-	virtual int createSubGals();
-
-	// set up processors
-	virtual void setUpProcs(int num);
-
-        // main body of the schedule. 
-	int mainSchedule(Galaxy& g);
-
-	virtual int scheduleManually(Galaxy& g);  // manual assignment.
-        virtual int scheduleIt();		  // automatic assignment.
-				// Should be redefined in the derived class.
-
-////////// Methods for wormholes ////////////////
-
-	// finialize the schedule of wormholes.
-	void finalSchedule(Galaxy&);
-
-	// set the scheduled result into a designated profile
-	void setProfile(Profile* profile);
-
-	// display schedule with "numProcs" processors.
-	// It displays wormhole schedules.
-	// Global schedule should be added in the derived class.
-	// Look at the DLSchedule for example.
-	StringList displaySchedule();
-
-	// sort Processors with finish time.
-	void sortProcessors() { parProcs->sortWithFinishTime(); }
+private:
+	// set the procId of stars after scheduling with OSOP option
+	// is executed. Prepare for adjustment.
+	void saveProcIds(Galaxy& g);
+	
+	// temporary hack to get around the CG-DDF limitation.
+	int oldRoutine;
 };
 
 #endif
