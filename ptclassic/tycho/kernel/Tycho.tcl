@@ -87,6 +87,9 @@ if {![info exists ptolemy]} {
 
 global tychokernel
 set tychokernel $tycho/kernel
+if {![info exists tychoRegExit]} {
+    set tychoRegExit 1
+}
 
 # Note that it is NOT normally acceptable to rely on the TCL_LIBRARY
 # and TK_LIBRARY environment variables, because most other tcl
@@ -120,11 +123,6 @@ if {![info exists tychoWelcomeWindow]} {
 if {![info exists tychoConsoleWindow]} {
     # If tychoWelcomeWindow is 0, then no console window is opened.
     set tychoConsoleWindow 1
-}
-if {![info exists tychoNoRegExit]} {
-    # If tychoNoRegExit is 1, then regular methods of exiting are
-    # disabled.
-    set tychoNoRegExit 0
 }
 set tychoOpenFiles 0
 
@@ -179,6 +177,5 @@ if {$tychoOpenFiles == 0} {
 
 unset tychoWelcomeWindow
 unset tychoConsoleWindow
-unset tychoNoRegExit
 unset tychoOpenFiles
 
