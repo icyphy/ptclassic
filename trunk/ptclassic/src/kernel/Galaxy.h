@@ -14,19 +14,7 @@ $Id$
                        All Rights Reserved.
 
  Programmer:  E. A. Lee and D. G. Messerschmitt
- Date of creation: 1/17/89
- Revisions:
-    3/19/90 - J. Buck
-	Combine the four connect methods into one (since MultiPortHole
-	is now a derived type of PortHole we can do this).
-	Add Galaxy::blockWithName and BlockList::blockWithName.
- 	Make KnownBlock (see KnownBlock.h) a friend of BlockList.
-
-    4/20/90 - J. Buck
-	Revised; now PortHole and MultiPortHole come from GenericPort.
-
-    5/17/90 - I. Kuroda
-        Added methods for State.
+ Date of creation: 1/17/90
 
 Definition of the Galaxy class, together with the BlockList class.
 
@@ -38,7 +26,7 @@ Definition of the Galaxy class, together with the BlockList class.
 
 // This class is used to store a list of component blocks in a Galaxy
 
-class BlockList : SequentialList
+class BlockList : public SequentialList
 {
 	friend class Galaxy;
 	friend class KnownBlock;
@@ -52,12 +40,6 @@ class BlockList : SequentialList
 	// Return first Block on list (a const method)
 	Block& head () const {return *(Block*) SequentialList::head();}
 
-	// Return next Block on list
-	Block& operator ++ () {return *(Block*) next();}
-
-	// Find a block with the given name and return pointer; NULL if not found
-protected:
-	Block* blockWithName (const char* name);
 };
 
 	////////////////////////////////////
@@ -65,7 +47,7 @@ protected:
 	////////////////////////////////////
 
 class Galaxy : public Block  {
-
+	friend class GalTopBlockIter;
 private:
 	// Keep a list of component Blocks
 	BlockList	blocks;
@@ -97,7 +79,7 @@ protected:
 	}
 
 	// support blockWithName message to access internal block list
-	Block* blockWithName (const char* name) {return blocks.blockWithName(name);}
+	Block* blockWithName (const char* name) const;
 
 public:
 
@@ -128,14 +110,11 @@ public:
 	// Return the number of blocks in the galaxy.
 	int numberBlocks() const {return blocks.size();}
 
-	// Return the next block in the list
-	Block& nextBlock() {return blocks++;}
-
 	// Print a description of the galaxy
-	StringList printVerbose();
+	StringList printVerbose() const;
 
 	// Print a description of the galaxy and all contained galaxies
-	StringList printRecursive();
+	StringList printRecursive() const;
 
 	// Method replies FALSE to indicate that component blocks
 	// can be seen from outside.
@@ -151,5 +130,12 @@ public:
 	const char* myDomain;
 };
 
-
+// Iterator classes associated with Galaxy
+class GalTopBlockIter : private ListIter {
+public:
+	GalTopBlockIter(const Galaxy& g) : ListIter(g.blocks) {}
+	Block* next() { return (Block*)ListIter::next();}
+	Block* operator++() { return next();}
+	ListIter::reset();
+};
 #endif
