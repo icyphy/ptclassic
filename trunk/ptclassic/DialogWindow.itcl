@@ -343,7 +343,7 @@ body ::tycho::DialogWindow::addButton {args} {
 #
 body ::tycho::DialogWindow::default {id} {
     eval [list $itk_component(bbox) default $id]
-    bind $itk_component(hull) <Return> [code "$prefix invoke $id; break"]
+    bind $itk_component(hull) <Return> "%Q invoke $id; break"
 }
 
 ######################################################################
@@ -365,12 +365,12 @@ body ::tycho::DialogWindow::default {id} {
 # DialogWindow, the following sequence in the constructor will work,
 # for example:
 # <pre>
-#     $obj configure -okcommand [code "$this mymethod"]
+#     $obj configure -okcommand "[info which $this] mymethod"
 #     addButton b -text "Push Me" \
-#             -command [code "$this execCommand -okcommand"]
+#             -command "[info which $this] execCommand -okcommand"
 # </pre>
-# The "code" commands set the scope to that of the object that is
-# defining the button.
+# The "info which" commands return a fully qualified name for "$this"
+# that includes the namespace context.
 #
 body ::tycho::DialogWindow::execCommand {option args} {
     set retval ""
