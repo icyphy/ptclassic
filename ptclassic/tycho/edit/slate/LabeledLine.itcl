@@ -90,15 +90,22 @@ namespace ::tycho {
 #
 #  <P><b>Example</b>
 #
-#  <P>Create a labelled line and an object for moving it around:
+#  <P>Create a couple of labelled lines and some objects that can be
+# dragged around to change their shapes:
 # <tcl quiet><pre>
 #   source $tycho/editors/slate/doc/internals/newslate.itcl
-#   set l [$slate create LabeledLine 100 50 160 100 160 200 &#92
-#               -arrow last -text FooBar]
-#   set d [$slate create Solid 150 210 160 200 170 210 160 220 150 210 &#92
+#   set l [$slate create LabeledLine 50 50 110 100 110 200 &#92
+#               -arrow last -text Foo]
+#   set d [$slate create Solid 100 210 110 200 120 210 110 220 100 210 &#92
 #   		-color green -tags moveable]
 #   $slate constraint $d "move" {lambda id x y -> &#92
 # 		$slate reshape $l $x $y "end"}
+#   set m [$slate create LabeledLine 210 50 260 150 &#92
+#               -arrow last -text Bar]
+#   set e [$slate create Solid 250 160 260 150 270 160 260 170 250 160 &#92
+#   		-color green -tags moveable]
+#   $slate constraint $e "move" {lambda id x y -> &#92
+# 		$slate reshape $m $x $y "end"}
 # </pre></tcl>
 #
 # Move the diamond around to see how the label moves.
@@ -202,7 +209,7 @@ body ::tycho::LabeledLine::_anchor {id canvas slate anchor} {
 	return
     }
     $canvas itemconfigure $textitem($id) -anchor $anchor
-
+    
     # Check if the text anchor needs to be changed
     if { [lmember [eval $canvas find overlapping \
 	    [eval ::tycho::Rectangle::shrink \
@@ -262,7 +269,7 @@ body ::tycho::LabeledLine::_text {id canvas slate text} {
         if { ! [::info exists textitem($id)] } {
 	    # Create the item near the center of the line
             set textitem($id) [eval $canvas create text \
-                    [lineCenter [$canvas coords $primary($id)]] \
+                    [::tycho::Line::center [$canvas coords $primary($id)]] \
                     [list -text $text \
 		    -tags [$canvas gettags $primary($id)]]]
         } else {
@@ -312,12 +319,9 @@ body ::tycho::LabeledLine::coords {id canvas slate args} {
     # Move the line
     eval $canvas coords $primary($id) $args
 
-    # Configure the anchor to move the label
+    # Make sure the text is in the center of the line
+    eval $canvas coords $textitem($id) [::tycho::Line::center $args] 
+
+    # Configure the anchor so the label dodges the line
     _anchor $id $canvas $slate $_anchor($id)
-}
-
-
-### TEMPORARY
-proc lineCenter {line} {
-    lineAspect $line vertex-1
 }
