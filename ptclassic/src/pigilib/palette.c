@@ -67,8 +67,11 @@ octObject *facetPtr;
 	return(FALSE);
     } else if (status == OCT_NEW_FACET) {
 	CK_OCT(GetOrCreatePropStr(facetPtr, &prop, "VIEWTYPE", "SCHEMATIC"));
+	FreeOctMembers(&prop);
 	CK_OCT(GetOrCreatePropStr(facetPtr, &prop, "EDITSTYLE", "SCHEMATIC"));
+	FreeOctMembers(&prop);
 	CK_OCT(GetOrCreatePropStr(facetPtr, &prop, "TECHNOLOGY", UTechProp));
+	FreeOctMembers(&prop);
     }
     return (TRUE);
 }
