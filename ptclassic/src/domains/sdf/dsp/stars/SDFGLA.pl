@@ -138,26 +138,26 @@ represent a training vector.
 
 //  Get the input training vectors and store them in the 2-dimension array
     Envelope inpkt;
-    // FIXME: Memory Leak: vector never deallocated
-    FloatMatrix& vector = *(new FloatMatrix(1,int(dimension)));
+    FloatMatrix zerovector(1, int(dimension));
+    zerovector = 0;
     for (int i=0; i<int(sizeTrnSet); i++) {
+      const FloatMatrix* vectorp;
       (input%(int(sizeTrnSet)-1-i)).getMessage(inpkt);
-      vector = *(const FloatMatrix *)inpkt.myData();
-      // check for "null" matrix inputs, caused by delays
+      vectorp = (const FloatMatrix *)inpkt.myData();
+      // check for "null" matrix inputs, caused by delays: treat as zero matrix
       if (inpkt.empty()) {
-        // input empty, just think it as a zero matrix
-        vector = *(new FloatMatrix(1,int(dimension)));
-        vector = 0;
+        vectorp = &zerovector;
       }
-      if ( vector.numRows()*vector.numCols() != int(dimension) ) {
-	Error::message(*this,"The number of elements in input vector(matrix) ",
-			     "must equal to the parameter 'dimension'.");
+      if ( vectorp->numRows()*vectorp->numCols() != int(dimension) ) {
+	Error::message(*this,
+		       "The number of elements in input vector(matrix) ",
+		       "must equal to the parameter 'dimension'.");
 	return;
       }
       for (int j=0; j<int(dimension); j++) 
-	trnSet[i*int(dimension)+j]=vector.entry(j);
+	trnSet[i*int(dimension)+j] = vectorp->entry(j);
     }
-    
+ 
 //  Allocate a array for storing the generated codebook
     delete [] codebook;
     LOG_NEW; codebook = new double[int(sizeCodebook)*int(dimension)];
