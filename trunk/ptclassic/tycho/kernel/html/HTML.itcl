@@ -1381,7 +1381,7 @@ proc HMcurrent_tags {win} {
 }
 
 #######################################################################
-#### HMgoto
+#### HMextract_param
 # Modify Uhler's implementation
 # to not get confused by the presense of the keyword in a value.
 #
@@ -1441,7 +1441,12 @@ proc HMextract_param {param key {val ""}} {
 #
 proc HMgoto {win where {callback HMwent_to}} {
     upvar #0 HM$win var
-    if {[regexp "N:$where" [$win mark names]]} {
+
+    # Note that javadoc produces tags like NamedObj(java.lang.String)
+    # so we can't use regexp below, use string match instead.
+    # FIXME: this will break if the tag has any special characters
+    # such as * ? [] or \
+    if {[string match "* N:$where *" [$win mark names]]} {
 	catch {$win see "N:$where"}
 	update
 	eval $callback $win [list $where]
@@ -1769,12 +1774,41 @@ proc HMtag_/color {win param text} {
 }
 
 #######################################################################
+#### HMtag_dl
+# Sadly, javadoc produces dls that have only dd, no dt, this breaks things
+# So, here we set a variable which we clear when we see HMtag_dt
+# and we check in HMtag_/dl.
+# 
+# FIXME:  This will not work for nested dl dd dl dd /dl /dl
+# If you mess with this code, make sure that the javadoc output looks ok.
+#
+proc HMtag_dl {win param text} {
+    global gHMtag_dlflag
+    set gHMtag_dlflag 1
+}
+
+#######################################################################
+#### HMtag_/dl
+# If we have not yet seen a dt, then call HMtag_dt now.
+# 
+#
+proc HMtag_/dl {win param text} {
+    global gHMtag_dlflag
+    if {$gHMtag_dlflag == 1} {
+        HMtag_dt {win param text}
+    }
+}
+
+#######################################################################
 #### HMtag_dt
 # Modify the original to permanently remove the indent introduced by
 # tag_dl.  NOTE: This assumes well-structured definition lists.
 # I'm not sure what will happen with badly constructed HTML.
 #
 proc HMtag_dt {win param text} {
+        # Deal with dls that have no dt: dl dd /dl.  See HMtag_dl
+        global gHMtag_dlflag
+        set gHMtag_dlflag 0
 	upvar #0 HM$win var
 	upvar $text data
         # The depth of the indent is determined by depth of the "indent" stack.
