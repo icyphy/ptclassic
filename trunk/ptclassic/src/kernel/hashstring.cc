@@ -37,6 +37,7 @@ const int HASH_TABLE_SIZE = 601;
 
 #include "logNew.h"
 #include <string.h>
+#include "miscFuncs.h"
 
 struct hent {
 	char *txt;
