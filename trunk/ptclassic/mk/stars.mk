@@ -36,6 +36,7 @@ CGDDFSTARS = $(LIBDIR)/cgddfstars.o
 BDFSTARS = $(LIBDIR)/bdfstars.o
 VHDLFSTARS = $(LIBDIR)/vhdlfstars.o
 VHDLBSTARS = $(LIBDIR)/vhdlbstars.o
+CPSTARS = $(LIBDIR)/cpstars.o
 
 # parallel scheduler libraries.
 PARLIBFILES = $(LIBDIR)/libDC.a $(LIBDIR)/libHu.a  $(LIBDIR)/libDL.a \
@@ -71,6 +72,10 @@ $(LIBDIR)/libsdfstars.a $(LIBDIR)/libLS.a $(LIBDIR)/libsdf.a \
 $(LIBDIR)/libvhdlfstars.a $(LIBDIR)/libvhdlf.a \
 $(LIBDIR)/libvhdlbstars.a $(LIBDIR)/libvhdlb.a
 
+CP_LIBFILES= $(LIBFILES)/libcpstars.a $(LIBDIR)/libcp.a
+LWP_LIBFILES= $(LIBFILES)/liblwpthread.a
+
+
 # CG-DDF no longer supported
 #$(LIBDIR)/libcgddfstars.a $(LIBDIR)/libcgddf.a \
 
@@ -89,8 +94,8 @@ STAR_LIBS=\
 -lvhdlfstars -lvhdlf \
 -lvhdlbstars -lvhdlb
 
-# CG-DDF no longer supported
-#-lcgddfstars -lcgddf \
+CP_LIBS= -lcpstars -lcp
+LWP_LIBS= -llwpthread -llwp
 
 # Extra targets
 SDFT = $(OBJDIR)/domains/sdf/targets
