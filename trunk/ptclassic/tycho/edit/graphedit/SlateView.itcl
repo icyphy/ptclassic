@@ -175,7 +175,7 @@ body ::tycho::SlateView::constructor {args} {
     pack $_slate -expand yes -fill both -side left
 
     # Evaluate options
-    eval configure $args
+    eval itk_initialize $args
 }
 
 ########################################################################
@@ -320,20 +320,28 @@ body ::tycho::SlateView::layout {mode args} {
 # The <b>group</b> type is used to construct hierarchical menus.
 # The following options are recognized:
 #
-# <dt><b>-entities</b> _typelist_
+# <dt><b>-customizecommand</b> _script_
 # <dd>
-# Specify the types of entity that are added into the menu.
-# If not supplied, the types will be given by the <b>-entities<b>
-# configuration option of the library, if there is one. If not
-# supplied and the library has no <b>-entities<b> option, then
-# all types except <b>attribute</b>, <b>group</b>, and <b>xref</b>
-# will be added. 
+# Specify a command prefix to evaluate before any items are
+# added to a new menu. This can be used for placing menu
+# entries at the head of each menu. The menu name and the
+# group containing the items that will be added to that menu
+# are appended to the script. 
 #
 # <dt><b>-command</b> _command_
 # <dd>
 # Specify a command prefix to evaluate when a library item is
 # added. When a menu entry is selected, the menu name will be
 # appended to this command and evaluated at the global scope.
+#
+# <dt><b>-types</b> _typelist_
+# <dd>
+# Specify the types of entity that are added into the menu.
+# If not supplied, the types will be given by the <b>-visibletypes<b>
+# configuration option of the library, if there is one. If not
+# supplied and the library has no <b>-visibletypes<b> option, then
+# all types except <b>attribute</b>, <b>group</b>, and <b>xref</b>
+# will be added. 
 #
 # </dl>
 #
@@ -369,25 +377,20 @@ body ::tycho::SlateView::library {mode args} {
             # Extract args
             set libname [lindex $args 0]
             set menuname [lindex $args 1]
-            array set opts {-entities "" -command ""}
+            array set opts {-types "" -command "" -customizecommand ""}
             array set opts [lreplace $args 0 1]
             if ![::info exists _library($libname)] {
                 error "Unknown library \"$libname\""
             }
             set lib $_library($libname)
 
-            # Get types to add
-            if { $opts(-entities) == "" } {
-                set opts(-entities) [$lib cget -entities]
-            }
-            if { $opts(-entities) == "" } {
-                set opts(-entities) [::tycho::lsubtract \
-                        [$lib type names] {attribute group xref}]
-            }
             # Add to menubar
             set mb [menubar]
             if { $mb != "" } {
-                $lib makemenu $opts(-entities) $mb $menuname $opts(-command)
+                $lib makemenu $mb $menuname \
+                        -types $opts(-types) \
+                        -command $opts(-command) \
+                        -customizecommand $opts(-customizecommand)
             }
         }
         "load" {
