@@ -48,11 +48,12 @@ $(LIBDIR):
 # Tcl script that converts Unix makefiles to MSVC++ nmake files
 MAKEVCGEN=$(PTOLEMY)\bin\makevcgen
 
+# Pass in PTLIB because usually we build a static libptolemy.a
 KERNEL_LIB=$(PTOLEMY)\src\kernel\libptolemy.lib
 $(LIBDIR)\libptolemy.lib: $(KERNEL_LIB)
 $(KERNEL_LIB): $(PTOLEMY)\src\kernel\makefile.vc
 	cd $(PTOLEMY)\src\kernel
-	nmake -f makefile.vc install
+	nmake -f makefile.vc PTLIB=libptolemy.lib install
 
 $(PTOLEMY)\src\kernel\makefile.vc: $(PTOLEMY)\src\kernel\makefile
 	\bin\sh -c PTOLEMY=/users/ptolemy; export PTOLEMY $(MAKEVCGEN) $@ $<
