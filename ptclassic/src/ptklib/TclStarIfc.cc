@@ -116,6 +116,11 @@ static int setOutput(
         return TCL_OK;
 }
 
+static void reportTclError() {
+	char tkErrorCmd[ sizeof(PTK_DISPLAY_ERROR_INFO) ];
+	strcpy(tkErrorCmd, PTK_DISPLAY_ERROR_INFO);
+	Tcl_GlobalEval(ptkInterp, tkErrorCmd);
+}
 
 /////////////////////////////////////////////////////////////////////////
 //			Methods for TclStarIfc class
@@ -277,11 +282,9 @@ int TclStarIfc::setup (Block* star,
 	        buf = "source ";
 		buf += tcl_file;
 	}
-	if(Tcl_GlobalEval(ptkInterp, (char*)buf) != TCL_OK) {
-		char tkErrorCmd[ sizeof(PTK_DISPLAY_ERROR_INFO) ];
-		strcpy(tkErrorCmd, PTK_DISPLAY_ERROR_INFO);
-		Tcl_GlobalEval(ptkInterp, tkErrorCmd);
-		Error::abortRun(*star, "Cannot source tcl script ", tcl_file);
+	if (Tcl_GlobalEval(ptkInterp, (char*)buf) != TCL_OK) {
+		reportTclError();
+		Error::abortRun(*star, "Cannot source Tcl script ", tcl_file);
 		return FALSE;
         }
 
@@ -316,10 +319,8 @@ int TclStarIfc::callTclProc(const char* name) {
 	buf += starID;
 	buf += " ";
 	buf += starID;
-        if(Tcl_GlobalEval(ptkInterp, (char*)buf) != TCL_OK) {
-		char tkErrorCmd[ sizeof("ptkDisplayErrorInfo") ];
-		strcpy(tkErrorCmd, "ptkDisplayErrorInfo");
-		Tcl_GlobalEval(ptkInterp, tkErrorCmd);
+        if (Tcl_GlobalEval(ptkInterp, (char*)buf) != TCL_OK) {
+		reportTclError();
 		Error::abortRun(*myStar, "Failed to run Tcl procedure");
 		return FALSE;
 	}
