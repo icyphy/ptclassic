@@ -17,6 +17,7 @@ $Id$
 
 #include "DDFStar.h"
 #include "Scheduler.h"
+#include "DDFWormhole.h"
 
 /*******************************************************************
 
@@ -66,6 +67,9 @@ extern const char DDFdomainName[];
 const char* DDFStar :: domain () const { return DDFdomainName;}
 
 int DDFStar :: isItSelf() { return FALSE ;}
+
+// return NULL
+DDFWormhole* DDFStar :: myWorm() { return NULL; }
 
 const char* DDFStar :: readClassName () const { return "unspecified method";}
 
