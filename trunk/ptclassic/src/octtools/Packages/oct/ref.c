@@ -27,6 +27,7 @@ static char SccsId[]="$Id$";
 #include "copyright.h"
 #include "port.h"
 #include "internal.h"
+#include "ref.h"
 
 static int gen_fix();
 
@@ -92,6 +93,7 @@ generic *obj;
  * just detached)
  */
 
+int
 oct_fix_generators(link, obj)
 struct chain *link;
 generic *obj;
