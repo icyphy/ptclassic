@@ -347,22 +347,27 @@ $(JARFILE): $(JSRCS) $(JCLASS)
 			$(JPACKAGE_DIR)/*.class); \
 	fi
 
-# Rules to build Java package distributions
+##############
+# Rules to build Java and Itcl package distributions
 # This rule builds both a tar file and zip file of the sources
-JDISTS =	$(JDIST).tar.gz $(JDIST).zip 
-jdist: $(JDISTS)
+TYDISTS =	$(TYDIST).tar.gz $(TYDIST).zip 
+
+# Two names for the same thing
+tydist: $(TYDISTS)
+dist: $(TYDISTS)
 
 # List of files to exclude
-JDIST_EX =	/tmp/$(JDIST).ex
-$(JDIST_EX): $(ROOT)/mk/tycommon.mk
-	/bin/echo "adm\nSCCS\nmakefile\n$(JDIST).tar.gz\n$(JDIST).zip\n$(JARFILE)" > $@ 
+TYDIST_EX =	/tmp/$(TYDIST).ex
+$(TYDIST_EX): $(ROOT)/mk/tycommon.mk
+	/bin/echo "adm\nSCCS\nmakefile\n$(TYDIST).tar.gz\n$(TYDIST).zip\n$(JARFILE)" > $@ 
 
-$(JDIST).tar.gz:  $(JDIST_EX)
-	(cd ..; gtar -zchf $(JPACKAGE)/$@ -X $(JDIST_EX) $(JPACKAGE))
-	rm -f $(JDIST_EX)
+$(TYDIST).tar.gz:  $(TYDIST_EX)
+	(cd $(ROOT)/..; \
+		 gtar -zchf $(TYPACKAGE_DIR)/$@ -X $(TYDIST_EX) $(TYPACKAGE_DIR))
+	rm -f $(TYDIST_EX)
 
-$(JDIST).zip:
-	(cd ..; zip -r $(JPACKAGE)/$@ $(JPACKAGE) -x \*/adm/\* -x \*/SCCS/\* -x \*/makefile -x \*/$(JDIST).tar.gz -x \*/$(JDIST).zip)
+$(TYDIST).zip:
+	(cd $(ROOT)/..; zip -r $(TYPACKAGE_DIR)/$@ $(TYPACKAGE_DIR) -x \*/adm/\* -x \*/SCCS/\* -x \*/makefile -x \*/$(TYDIST).tar.gz -x \*/$(TYDIST).zip)
 
 
 # Build sources in a form suitable for releasing
@@ -384,13 +389,13 @@ installjdist:
 	$(MAKE) buildjdist
 	$(MAKE) updatewebsite
 
-updatewebsite: $(JDISTS)
+updatewebsite: $(TYDISTS)
 	@echo "Updating website"
-	(cd $(JDESTDIR); rm -rf $(JPACKAGE); mkdir $(JPACKAGE))
-	cp $(JDISTS) $(JDESTDIR)/$(JPACKAGE)
-	(cd $(JDESTDIR); gtar -zxf $(JPACKAGE)/$(JDIST).tar.gz;\
-	 chmod g+ws $(JPACKAGE))
-	(cd $(JDESTDIR)/$(JPACKAGE); chmod g+w $(JDISTS))
+	(cd $(JDESTDIR); rm -rf $(TYPACKAGE); mkdir $(TYPACKAGE))
+	cp $(TYDISTS) $(JDESTDIR)/$(TYPACKAGE)
+	(cd $(JDESTDIR); gtar -zxf $(TYPACKAGE)/$(TYDIST).tar.gz;\
+	 chmod g+ws $(TYPACKAGE))
+	(cd $(JDESTDIR)/$(TYPACKAGE); chmod g+w $(TYDISTS))
 
 ##############
 # Rules for testing 
@@ -578,8 +583,8 @@ checkjunk:
 
 CRUD=*.o *.so core *~ *.bak ,* LOG* *.class \
 	config.cache config.log config.status manifest.tmp \
-	$(JCLASS) $(JPACKAGE).zip $(JPACKAGE).jar \
-	$(JDISTS) $(KRUFT)  
+	$(JCLASS) $(TYPACKAGE).zip $(TYPACKAGE).jar \
+	$(TYDISTS) $(KRUFT)  
 
 clean:
 	rm -f $(CRUD)
