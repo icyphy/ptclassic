@@ -1,4 +1,4 @@
-# Generate an IDoc file (a representation of a ::tycho::Class) from java source.
+# Parse Java files to generate class models.
 #
 # @Author: Cliff Cordeiro
 #
@@ -33,9 +33,9 @@
 #######################################################################
 
 #######################################################################
-#### JavaDocSys
+#### JavaParser
 # Parses Java code, creates <a href = 
-#"../../../../kernel/doc/codeDoc/Class.idoc">::tycho::Class</a>
+#"../../../../kernel/doc/codeDoc/Class.javaclass">::tycho::Class</a>
 # models for each class found, and outputs those to the proper
 # files. The most convenient interface
 # is from ::tycho::IDocSys::generateIDoc which will also generate Java
@@ -66,7 +66,7 @@
 #
 # Finally, the classes are output as files by calling their write methods.
 #
-class ::tycho::JavaDocSys {
+class ::tycho::JavaParser {
     inherit ::tycho::IDocSys
 
     constructor {args} {}
@@ -141,7 +141,7 @@ class ::tycho::JavaDocSys {
 #######################################################################
 #### constructor
 #
-body ::tycho::JavaDocSys::constructor {args} {
+body ::tycho::JavaParser::constructor {args} {
 }
 
     ###################################################################
@@ -154,7 +154,7 @@ body ::tycho::JavaDocSys::constructor {args} {
 # into one line, bracket protect the comment contents, and append to a 
 # variable. Then parse that variable to distill class information.
 #
-body ::tycho::JavaDocSys::readFile {filename} {
+body ::tycho::JavaParser::readFile {filename} {
     # Initialize single file data
     set author ""
     set contributor ""
@@ -170,7 +170,7 @@ body ::tycho::JavaDocSys::readFile {filename} {
             set language Java
         }
         default {
-            error "::tycho::JavaDocSys does not support $ext files"
+            error "::tycho::JavaParser does not support $ext files"
         }
     }
 
@@ -253,7 +253,7 @@ body ::tycho::JavaDocSys::readFile {filename} {
         }
 
         # Remove brace/quote followed by semi-colon errors (only one pass)
-        if [ regexp {^(.*[\"\}]);(.*)$} $lineIn dmy first last] {
+        if [ regexp {^(.*[\"\}]);(.*)$} $lineIn dmy first last] { ;# "
             set lineIn "$first ;$last"
         }
         # Remove open brace following anything errors (only one pass)
@@ -273,13 +273,13 @@ body ::tycho::JavaDocSys::readFile {filename} {
 #### generateSingleFileIDoc
 # Output an IDoc (::tycho::Class) representation of the loaded classes.
 #
-body ::tycho::JavaDocSys::generateSingleFileIDoc {filename} {
+body ::tycho::JavaParser::generateSingleFileIDoc {filename} {
     # output class model data
     foreach class [array names myClass] {
         # puts $class
         # puts [$myClass($class) describe]
         if {$class != "related"} {
-            set docFile [info namespace tail $class].idoc
+            set docFile [info namespace tail $class].javaclass
             ::tycho::rmIfNotWritable $docFile
             set fd [open $docFile "w"]
             $myClass($class) write $fd
@@ -291,10 +291,10 @@ body ::tycho::JavaDocSys::generateSingleFileIDoc {filename} {
                 # related documentation
                 if {[array size myClass] == 1} {
                     # Not related, ONLY docs
-                    set relFile [file root $filename].idoc
+                    set relFile [file root $filename].javaclass
                 } else {
                     # Related file
-                    set relFile [file root $filename]_rel.idoc
+                    set relFile [file root $filename]_rel.javaclass
                 }
                 ::tycho::rmIfNotWritable $relFile
                 set fd [open $relFile "w"]
@@ -315,7 +315,7 @@ body ::tycho::JavaDocSys::generateSingleFileIDoc {filename} {
 # Quickly scan the source file for the classes which are defined within.
 # Not implemented for Java.
 #
-body ::tycho::JavaDocSys::getClassesInSource {filename} {
+body ::tycho::JavaParser::getClassesInSource {filename} {
     error "Not implemented in Java."
 }
 
@@ -326,7 +326,7 @@ body ::tycho::JavaDocSys::getClassesInSource {filename} {
 # documentation.
 #
 # This requires searching for all classes defined within the file and
-# checking if those class's documents are older. JavaDocSys does not
+# checking if those class's documents are older. JavaParser does not
 # support inner classes (yet), so only checks if the file is newer than it's 
 # top-level class' documentation.
 #
@@ -334,11 +334,11 @@ body ::tycho::JavaDocSys::getClassesInSource {filename} {
 # NOTE: should normally be called through its parent, which will call the
 # appropriate sibling for the file extension.
 #
-body ::tycho::JavaDocSys::modCheck {filename} {
+body ::tycho::JavaParser::modCheck {filename} {
     global TYCHO
 
     # Check to see if the generator itself has been changed.
-    set javaGenTime [file mtime [file join $TYCHO lib tydoc JavaDocSys.itcl]]
+    set javaGenTime [file mtime [file join $TYCHO lib tydoc JavaParser.itcl]]
     set idocGenTime [file mtime [file join $TYCHO lib tydoc IDocSys.itcl]]
     if {$javaGenTime > $idocGenTime} {
         set genTime $javaGenTime
@@ -355,7 +355,7 @@ body ::tycho::JavaDocSys::modCheck {filename} {
     }
     # Takes advantage of Java's requirement that the classname and filename
     # be identical
-    set docFile [file join doc codeDoc [file root $filename].idoc]
+    set docFile [file join doc codeDoc [file root $filename].javaclass]
         
     if ![file exists $docFile] {
         # There is no documentation.
@@ -395,12 +395,12 @@ body ::tycho::JavaDocSys::modCheck {filename} {
 # Comments are saved until the next keyword and are assumed to belong to
 # that entity. The class comment, then, must be the comment directly
 # preceding the class definition, ignoring initialization code that 
-# JavaDocSys does not recognize.
+# JavaParser does not recognize.
 #
 # NOTE: @ tags are only recognized in the class comment, the comment 
 # that appears before the class definition.
 #
-body ::tycho::JavaDocSys::parseData {data} {
+body ::tycho::JavaParser::parseData {data} {
     set inClass 0
     set inComment 0
     set inPackage 0
@@ -509,7 +509,7 @@ body ::tycho::JavaDocSys::parseData {data} {
 #
 # NOTE: Actually, this does not yet support Java 1.1 Inner classes.
 #
-body ::tycho::JavaDocSys::parseClass {class body} {
+body ::tycho::JavaParser::parseClass {class body} {
     set myClass($class) [::tycho::Class [::tycho::autoName class]]
     $myClass($class) modelconfigure -language $language
     $myClass($class) modelconfigure -name $class
@@ -642,7 +642,7 @@ body ::tycho::JavaDocSys::parseClass {class body} {
 # Parse what may be a variable or method passed from parseClass. Decide
 # which it is, then call addVariable or addMethod
 #
-body ::tycho::JavaDocSys::parseVarMeth {class protection modifiers\
+body ::tycho::JavaParser::parseVarMeth {class protection modifiers\
         others comment} {
     set isMethod 0
 
@@ -707,7 +707,7 @@ body ::tycho::JavaDocSys::parseVarMeth {class protection modifiers\
 # Extends denotes a parent which supplies an implementation, implements
 # denotes parents which supply an interface.
 #
-body ::tycho::JavaDocSys::parseExtends {class extends} {
+body ::tycho::JavaParser::parseExtends {class extends} {
     set classModel $myClass($class)
 
     if [regexp {^[ ]*extends[ ]+([A-Za-z_]+[A-Za-z0-9_.]*)[ ]+(.*)$} \
@@ -774,7 +774,7 @@ body ::tycho::JavaDocSys::parseExtends {class extends} {
 # model. Examples of class modifiers are final and (?). FIXME: Does 
 # not support other types of classes (inner classes in Java 1.1). 
 #
-body ::tycho::JavaDocSys::parseModifiers {class modifiers} {
+body ::tycho::JavaParser::parseModifiers {class modifiers} {
     set classModel $myClass($class)
     if [regexp {^(.*)[	 ]*public[ 	]*(.*)$} $modifiers dmy other other2] {
         $classModel modelconfigure -protection public
@@ -791,7 +791,7 @@ body ::tycho::JavaDocSys::parseModifiers {class modifiers} {
 #
 # NOTE: What to do about see tags here?
 #
-body ::tycho::JavaDocSys::addClassComment {class expl} {
+body ::tycho::JavaParser::addClassComment {class expl} {
     set classModel $myClass($class)
     set expl [formatClassComment $expl]
     $classModel annotation explanation "$expl"
@@ -804,7 +804,7 @@ body ::tycho::JavaDocSys::addClassComment {class expl} {
 # <code>(int num1, String ding)</code> to the class model's preferred
 # format: <code>parameter num1 -type int; parameter ding -type String</code>
 #
-body ::tycho::JavaDocSys::addArgs {class entityName arguments} {
+body ::tycho::JavaParser::addArgs {class entityName arguments} {
     set classModel $myClass($class)
     set istype 1
     set type ""
@@ -847,7 +847,7 @@ body ::tycho::JavaDocSys::addArgs {class entityName arguments} {
 # Add a variable at the given protection, its associated description,
 # and its default (if any) to the class model for $class.
 #
-body ::tycho::JavaDocSys::addVariable {class protection modifiers\
+body ::tycho::JavaParser::addVariable {class protection modifiers\
         others comment} {
 
     set default {}
@@ -919,7 +919,7 @@ body ::tycho::JavaDocSys::addVariable {class protection modifiers\
 # Add a method at the given protection, its arguments, and associated
 # description to the class model for $class.
 #
-body ::tycho::JavaDocSys::addMethod {class protection modifiers others comment} {    
+body ::tycho::JavaParser::addMethod {class protection modifiers others comment} {    
     set isConstructor 0
     set exceptions {}
     # Check if is static
@@ -959,7 +959,7 @@ body ::tycho::JavaDocSys::addMethod {class protection modifiers others comment} 
         set arguments [lrange $others 0 $endparen]
         set others [lreplace $others 0 $endparen]
     } else {
-        error "::tycho::JavaDocSys::addMethod: no end parenthesis\
+        error "::tycho::JavaParser::addMethod: no end parenthesis\
                 found in $methodName."
     }
     
@@ -1020,7 +1020,7 @@ body ::tycho::JavaDocSys::addMethod {class protection modifiers others comment} 
 # followed by something else. tokenize breaks up each element, then 
 # moves on to the next until all elements are broken into tokens.
 #
-body ::tycho::JavaDocSys::tokenize {list} {
+body ::tycho::JavaParser::tokenize {list} {
     set retval ""
 
     # Remove extra braces so regexp works
@@ -1072,7 +1072,7 @@ body ::tycho::JavaDocSys::tokenize {list} {
 # Try:
 # <pre><tcl>string match {* b[] *} {a b[] c}</tcl></pre>
 #
-body ::tycho::JavaDocSys::uniqueName {methodName arguments} {
+body ::tycho::JavaParser::uniqueName {methodName arguments} {
     set type 1
     
     append retval $methodName "("
