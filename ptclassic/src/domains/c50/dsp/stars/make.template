@@ -21,7 +21,8 @@ C50DSP = $(ROOT)/src/domains/c50/dsp/stars
 # CGDIR is the directory containing CG domain support
 CGDIR = $(ROOT)/src/domains/cg/kernel
 
-INCL = -I$(C50DIR) -I$(CGDIR) -I$(KERNDIR) -I$(C50SDIR)
+INCL = -I$(C50DIR) -I$(CGDIR) -I$(KERNDIR) -I$(C50SDIR) \
+ -I$(ROOT)/src/utils/libcephes
 
 # Where star doc files go
 STARDOCDIR = ../../doc/stars
