@@ -38,7 +38,9 @@ SRCS = 	ptplay.sol2.c
 
 EXTRA_DESTS =	ptplay.sun4 ptplay.irix5 ptplay.hppa ptplay.linux \
 	ptplay.cfront ptplay.sol2 ptplay.sol2.cfront ptplay.irix4 \
-	ptplay.hppa.cfront ptplay.freebsd
+	ptplay.hppa.cfront ptplay.freebsd \
+	ptplay.sol2.5 ptplay.sol2.5.cfront
+
 KRUFT = ptplay.sol2 ptplay	
 
 # common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
@@ -77,7 +79,8 @@ ptplay.unixware:
 	@echo "unixware architecture does not have a ptplay (yet)."
 
 C_INCL =	$(PTCOMPAT_INCSPEC)
-ptplay.sol2 ptplay.sol2.cfront: ptplay.sol2.o
+ptplay.sol2 ptplay.sol2.cfront \
+ptplay.sol2.5 ptplay.sol2.5.cfront: ptplay.sol2.o
 
 $(BINDIR)/ptplay:	ptplay
 	@if [ $(PTARCH) = "mips" -o $(PTARCH) = "unixware" ]; then \
