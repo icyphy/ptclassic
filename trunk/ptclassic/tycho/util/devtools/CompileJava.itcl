@@ -67,13 +67,13 @@
 # such as *javac*, *java*, and *appletviewer*.   *javac* and *java* take
 # a *-classpath* option, *appletviewer* does not.
 #
-# If *useEnvClassPath* preference is true, then the *CLASSPATH* is read
+# If *useEnvClassPath* style parameter is true, then the *CLASSPATH* is read
 # from the environment *$env(CLASSPATH)* and passed to *java* or *javac*
 #
-# If the *useEnvClassPath* preference is false, then Tycho reads the
-# *classPath* preference and sets the *CLASSPATH* environment
+# If the *useEnvClassPath* style parameter is false, then Tycho reads the
+# *classPath* parameter and sets the *CLASSPATH* environment
 # variable before calling the java tools.  The *useEnvClassPath* and 
-# *classpath* preferences are set in the "java" preferences.
+# *classpath* parameters are set in the "java" stylesheet.
 #
 # <p>
 # Here is an example of how to use the CompileJava class:
@@ -153,14 +153,14 @@ body ::tycho::CompileJava::classpath {} {
     global env tcl_platform
     set classPathArg ""
     set classPath ""
-    if [::tycho::preference get java useEnvClassPath] {
+    if [::tycho::stylesheet get java useEnvClassPath] {
         if [info exists env(CLASSPATH)] { 
 	    set classPath [::tycho::expandPathSplit $env(CLASSPATH)]
 	    set classPathArg "-classpath $classPath"
 	}
     } else {
 	set classPath [::tycho::expandPath \
-                [::tycho::preference get java classPath]]
+                [::tycho::stylesheet get java classPath]]
 	if {$classPath != {} } { 
 	    set classPathArg "$classPath"
 	}
@@ -172,34 +172,35 @@ body ::tycho::CompileJava::classpath {} {
                 [uplevel #0 subst $dirorfile]} errMsg ] {
             # This is an error because if the substitution above failed,
             # then the substitution at the end of this file will fail too.
-            error "The classPath  preference contains `$dirorfile' \
+            error "The classPath style parameter contains `$dirorfile' \
 		    which failed to expand properly.  The error message \
 		    was: \n$errMsg\n\n\
-                    To change the classPath preference, select Preferences \
+                    To change the classPath parameter, select Preferences \
                     menu choice under the Help menu, and then select the \
-		    Java preferences"
+		    Java style-sheet"
         }
         if { ![ file isdirectory $expandeddirorfile] && \
 		![file readable $expandeddirorfile] } {
-            ::tycho::warn "The classPath  preference contains `$dirorfile' \
+            ::tycho::warn \
+		    "The classPath style parameter contains `$dirorfile' \
 		    as an element, which expands to `$expandeddirorfile' \
 		    which does not exists  (Either it is not a directory \
                     or it is not a readablefile).\n\
-		    To change the classPath preference, select Preferences \
+		    To change the classPath parameter, select Preferences \
                     menu choice under the Help menu, and then select the \
-		    Java preferences"
+		    Java style-sheet"
         }
         if {$tcl_platform(platform) == "windows"} {
             if [regexp {[^\]\\[^\]} $expandeddirorfile] {
-                ::tycho::warn "The classPath  preference contains \
+                ::tycho::warn "The classPath style parameter contains \
 			`$dirorfile' as an element, which \
                         expands to `$expandeddirorfile' which contains a \
 			backslash.  In the Sun JDK1.1.2 \
                         under Windows, a backslash might prevent javac from \
 			properly finding a class.\n\
-			To change the classPath preference, select \
+			To change the classPath parameter, select \
 			Preferences menu choice under the Help menu, and then \
-			select the Java preferences""
+			select the Java style-sheet""
             }
         }
     }
@@ -220,7 +221,7 @@ body ::tycho::CompileJava::classpath {} {
 #
 # If useEnvClassPath is true, then get the CLASSPATH from $env(CLASSPATH).
 # If useEnvClassPath is false, then get the CLASSPATH from the classPath
-# preference.
+# style parameter.
 #
 body ::tycho::CompileJava::compileAndRun {filenames} {
     global env tcl_platform
@@ -245,7 +246,7 @@ body ::tycho::CompileJava::compileAndRun {filenames} {
  #         }
  #    }
     set compileString \
-                 "[::tycho::preference get java javaCompileCommand] -classpath [classpath] $shortFilenameList"
+                 "[::tycho::stylesheet get java javaCompileCommand] -classpath [classpath] $shortFilenameList"
     if [checkSourceFiles] {
         # We have a main(), so we don't run appletviewer
         set runAppletViewer 0

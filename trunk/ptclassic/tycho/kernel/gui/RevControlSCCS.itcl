@@ -222,7 +222,7 @@ body ::tycho::RevControlSCCS::initializeRevControl {} {
     }
 
     # Run sccs admin
-    set opts [preference get sccsAdminOptions]
+    set opts [stylesheet get system sccsAdminOptions]
     if [catch {eval exec sccs admin $opts $basefile} output] {
 	error "Failed to run 'sccs admin $opts $basefile:\
 		$output."

@@ -213,9 +213,6 @@ class ::tycho::HTML {
     # Initialize the menu/status/tool bars associated with this widget.
     protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
 
-    # Access the "viewhtml" preferences
-    protected method preference {mode args}
-
     # Configure the popup menu depending on the current context
     protected method configureContextMenu {}
    
@@ -406,17 +403,11 @@ body ::tycho::HTML::constructor {args} {
 
     eval itk_initialize $args
 
-    # Subscribe to the preference set
-    preference subscribeoptions $this \
-	    -textfont textFont \
-	    -displayfont displayFont \
-	    -cwfont cwFont \
-	    -textforeground textForeground \
-	    -textbackground textBackground \
-	    -relief textRelief \
-	    -textwidth textWidth \
-	    -textheight textHeight \
-	    -underlinelinks underlineLinks
+    # Subscribe to the style-sheets
+    stylesheet subscribe \
+	    -displayfont    fonts displayFont \
+	    -cwfont         fonts cwFont \
+	    -underlinelinks text underlineLinks
 
     if {$itk_option(-directory) == {}} {
         configure -directory [::tycho::url dirname [filename]]
@@ -655,7 +646,7 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
             set mailinfo [::tycho::ResourceMail::splitURL $filename]
             ::tycho::view EditMail -toolbar 1 \
                     -mailto "[lindex $mailinfo 0]@[lindex $mailinfo 1]" \
-                    -textheight [expr [preference get textHeight] - 8]
+                    -textheight [expr [stylesheet get layout textHeight] - 8]
             return
         }
 
@@ -1137,7 +1128,7 @@ body ::tycho::HTML::seeFragment {point} {
         set seecount 0
 	$text tag add hypertarget $sidx $eidx
 	$text tag configure hypertarget \
-		-background [preference get targetColor]
+		-background [stylesheet get text targetColor]
 	$text tag configure hypertarget \
 		-foreground black
 	component text mark set insert $sidx; 	\
@@ -1157,7 +1148,7 @@ body ::tycho::HTML::isSlowNetwork {} {
     if {$itk_option(-image) != 0 } { 
 	return 0
     } else {
-	return [preference get slowNetwork]
+	return [stylesheet get system slowNetwork]
     }
 }
 
@@ -1324,16 +1315,6 @@ body ::tycho::HTML::initialize {{menubar {}} \
 
     # Disable auto-save.
     configure -save 0
-}
-
-#####################################################################
-#### preference
-# Access the preferences associated with this widget. This method
-# overrides the default method in ::tycho::TWidget to access the
-# "viewhtml" preferences.
-#
-body ::tycho::HTML::preference {mode args} {
-    eval ::tycho::preference $mode "viewhtml" $args
 }
 
 #####################################################################
@@ -2410,7 +2391,7 @@ proc HMtag_tcl {win param text} {
     set HTML [winfo megawidget $win]
     set HTMLcommand [winfo command $HTML]
 
-    set color [::tycho::preference get viewhtml tclColor]
+    set color [::tycho::stylesheet get text activeColor]
     $win tag configure tcl -foreground $color
     $win tag bind tcl <Double-Button-1> \
 		"uplevel #0 $HTMLcommand execTcl %x %y; break"
@@ -2544,7 +2525,7 @@ proc HMwent_to {win where {count 0} {color {}}} {
     }
 
     if {$color == {}} {
-        set color [::tycho::preference get viewhtml targetColor]
+        set color [stylesheet get text targetColor]
     }
 
     # Temporarily change the background color

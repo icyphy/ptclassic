@@ -484,9 +484,9 @@ body ::tycho::File::constructor {args} {
     # configuration options, assuming there are options specified.
     eval itk_initialize $args
 
-    # Subscribe to the preference set
-    preference subscribeoptions $this \
-	    -autosaveinterval autoSaveInterval
+    # Subscribe to the style sheets
+    stylesheet subscribe \
+	    -autosaveinterval system autoSaveInterval
 
     # Identify the object for crash recovery
     set fileObjects($this) $this
@@ -759,7 +759,7 @@ body ::tycho::File::markUnmodified {} {
 # In Tycho, the itclHTMLPage preference controls what file is opened.
 #
 body ::tycho::File::openItclHTMLPage {} {
-    set itclhtmlpage [::tycho::preference get misc itclHTMLPage]
+    set itclhtmlpage [::tycho::stylesheet get system itclHTMLPage]
     if { $itclhtmlpage != "" } {
 	set itclhtmlpage [::tycho::expandPath $itclhtmlpage]
     }

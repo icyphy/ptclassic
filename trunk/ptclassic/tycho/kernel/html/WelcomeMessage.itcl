@@ -75,7 +75,7 @@ class ::tycho::WelcomeMessage {
 body ::tycho::WelcomeMessage::constructor {args} {
 
     global ::TYCHO
-    set slowNetwork [preference get slowNetwork]
+    set slowNetwork [stylesheet get system slowNetwork]
 
     if {$slowNetwork == 0} {  
 	# An option -palette 3/3/2 below restricts the palette,

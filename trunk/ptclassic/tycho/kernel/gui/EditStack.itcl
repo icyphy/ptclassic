@@ -64,9 +64,6 @@ class ::tycho::EditStack {
    
     # Initialize the menu/status/tool bars
     protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
-
-    # Access the "stacktrace" preferences
-    protected method preference {mode args}
 }
 
 ###################################################################
@@ -126,7 +123,7 @@ body ::tycho::EditStack::parseNow {start stop} {
     # The first line is always a title
     $text tag add title 1.0 "0.0 lineend"
     $text tag configure title -foreground \
-	    [preference get titleColor]
+	    [stylesheet get stacktrace titleColor]
 
     set comments {while executing|invoked from within|\(while constructing [^)]*\)|\(command bound to event\)}
     set point $start
@@ -166,7 +163,7 @@ body ::tycho::EditStack::parseNow {start stop} {
         #    then open previous file, then go to <line>
         set fname ""
         $text tag configure link$linkcount -foreground \
-                [preference get linkColor] -underline 1
+                [stylesheet get text hyperlinkColor] -underline 1
         if {[regexp {(method|class|procedure) "([^"]+)".* line ([0-9]+)} \
                 $line match _ meth lnum]} { ;#"
             # WARNING: This is TclIndex dependent.
@@ -192,9 +189,9 @@ body ::tycho::EditStack::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged text
     $text tag configure error -foreground \
-	    [preference get errorColor]
+	    [stylesheet get stacktrace errorColor]
     $text tag configure comment -foreground \
-	    [preference get commentColor]
+	    [stylesheet get stacktrace commentColor]
 }
 
 
@@ -269,14 +266,3 @@ body ::tycho::EditStack::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
 	$menubar delete format
     }
 }
-
-#####################################################################
-#### preference
-# Access the preferences associated with this widget. This method
-# overrides the default method in ::tycho::TWidget to access the
-# "stacktrace" preferences.
-#
-body ::tycho::EditStack::preference {mode args} {
-    eval ::tycho::preference $mode "stacktrace" $args
-}
-
