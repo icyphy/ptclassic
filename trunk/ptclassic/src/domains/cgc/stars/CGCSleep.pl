@@ -31,7 +31,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	constructor {
 		noInternalState();
 	}
-	init {
+	initCode {
 		addInclude("<sys/types.h>");
 		addInclude("<sys/time.h>");
 	}
