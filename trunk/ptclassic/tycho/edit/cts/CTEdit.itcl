@@ -30,12 +30,12 @@
 
 
 ##########################################################################
-#### EditCTS
+#### CTEdit
 #
-# _EditCTS_ is an editor for the _GraphLayout_ model. It edits
+# _CTEdit_ is an editor for the _GraphLayout_ model. It edits
 # directed graphs.
 #
-class ::tycho::EditCTS {
+class ::tycho::CTEdit {
     inherit ::tycho::GraphEditor
 
     constructor {args} {}
@@ -72,7 +72,7 @@ class ::tycho::EditCTS {
 ########################################################################
 #### constructor
 #
-body ::tycho::EditCTS::constructor {args} {
+body ::tycho::CTEdit::constructor {args} {
     # Initialize options
     eval itk_initialize $args
 
@@ -87,7 +87,7 @@ body ::tycho::EditCTS::constructor {args} {
 #
 # Open the control panel for running the simulation.
 #
-body ::tycho::EditCTS::openControlPanel {graph} {
+body ::tycho::CTEdit::openControlPanel {graph} {
     if { [info which -command $this.runwindow] != "" } {
 	raise [component hull].runwindow
     } else {
@@ -109,13 +109,13 @@ body ::tycho::EditCTS::openControlPanel {graph} {
 # This method is called by its displayer when attachView is called (usually
 # in ::tycho::view
 #
-body ::tycho::EditCTS::_initializeBars {menubar statusbar toolbar} {
+body ::tycho::CTEdit::_initializeBars {menubar statusbar toolbar} {
     chain $menubar $statusbar $toolbar
 
     if {$menubar != {}} {
         # We have to qualify the call to this supposed-ly private
         # method because Itcl (2.2) has virtual private methods!
-        ::tycho::EditCTS::_initializeMenubar $menubar
+        ::tycho::CTEdit::_initializeMenubar $menubar
     }
 }
 
@@ -127,7 +127,7 @@ body ::tycho::EditCTS::_initializeBars {menubar statusbar toolbar} {
 #### _initializeMenubar
 # Adds entries to the menu bar specific to this class.
 #
-body ::tycho::EditCTS::_initializeMenubar {menubar} {
+body ::tycho::CTEdit::_initializeMenubar {menubar} {
     # FIXME FIXME
     # Load the library. Should the library info be in the model?
     library load [file join edit cts stars.tim]
