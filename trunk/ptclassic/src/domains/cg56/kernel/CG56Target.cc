@@ -87,10 +87,11 @@ void CG56Target::initDataMembers() {
 int CG56Target :: compileCode() {
     StringList assembleCmds = "asm56000 ";
     assembleCmds << assemblerOptions << " " << filePrefix;
-    resetMemoryUsage();
+    resetImplementationCost();
     int valid = !systemCall(assembleCmds, "Errors in assembly", targetHost);
-    if (valid && computeMemoryUsage()) {
-	if (int(reportMemoryUsage)) Error::message(memoryUsageString());
+    if (valid && int(reportMemoryUsage)) {
+	computeImplementationCost();
+	Error::message(*this, printImplementationCost());
     }
     return valid;
 }
