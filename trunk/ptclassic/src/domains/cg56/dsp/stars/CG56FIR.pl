@@ -21,7 +21,7 @@ Decimation parameters > 1 reduces sample rate.
 		type {FIX}
 	}
 	state {
-		name {coef}
+		name {taps}
 		type {FIXARRAY}
 		default {
 	"-.040609 -.001628 .17853 .37665 .37665 .17853 -.001628 -.040609"
@@ -66,14 +66,14 @@ Decimation parameters > 1 reduces sample rate.
                 attributes {A_NONCONSTANT|A_NONSETTABLE}
         }	    
         state {
-                name {coefNum}
+                name {tapsNum}
 	        type {int}
 	        default {8}
                 desc { internal }
                 attributes {A_NONCONSTANT|A_NONSETTABLE}
         }	    
         state {
-                name {taps}
+                name {tp}
 	        type {int}
 	        default {0}
                 desc { internal }
@@ -95,14 +95,14 @@ Decimation parameters > 1 reduces sample rate.
         }	    
 
 	start {
-              coefNum=coef.size();
-              if (int(-(int(decimation)-int(coefNum))/int(interpolation))>0)
-                   oldsample.resize(int(-(int(decimation)-int(coefNum))/int(interpolation)));
+              tapsNum=taps.size();
+              if (int(-(int(decimation)-int(tapsNum))/int(interpolation))>0)
+                   oldsample.resize(int(-(int(decimation)-int(tapsNum))/int(interpolation)));
               else
                    oldsample.resize(0);
 
 
-              int modtemp=coefNum%interpolation;
+              int modtemp=tapsNum%interpolation;
               input.setSDFParams(decimation, decimation-1);
 	      output.setSDFParams(interpolation, interpolation-1);
 
@@ -110,19 +110,19 @@ Decimation parameters > 1 reduces sample rate.
 	              Error::abortRun (*this, ": Cannot both interpolate and decimate.");
                 
               if (modtemp !=0) {
-	             coef.resize(coefNum+interpolation-modtemp);
-		     coefNum=coef.size();
+	             taps.resize(tapsNum+interpolation-modtemp);
+		     tapsNum=taps.size();
 	      }
               StringList permuted ="";
               for (int i=interpolation-1; i> -1; i--) {
                     int j=i;
-                    while(j<coefNum) {
-		            permuted +=coef[j];
+                    while(j<tapsNum) {
+		            permuted +=taps[j];
 			    permuted +=" ";
                             j +=interpolation;
 		    }
               }
-	      coef.setCurrentValue(permuted);
+	      taps.setCurrentValue(permuted);
                
         }
 
@@ -134,54 +134,54 @@ Decimation parameters > 1 reduces sample rate.
         }
         
 	go {
-                taps= int(coefNum/interpolation);
-                dec = taps;
-                if (taps > decimation) dec=decimation;
-		adjust = decimation - taps;
+                tp= int(tapsNum/interpolation);
+                dec = tp;
+                if (tp > decimation) dec=decimation;
+		adjust = decimation - tp;
 		if (adjust<0) adjust=0;
-		if((taps*interpolation) >1)  gencode(first);
-                if(taps>decimation) gencode(old);
-	        if(taps>(decimation+1)) gencode(second); 
+		if((tp*interpolation) >1)  gencode(first);
+                if(tp>decimation) gencode(old);
+	        if(tp>(decimation+1)) gencode(second); 
 
 // Normal case
                 if(dec==1 && interpolation==1) {
                      gencode(must);
-	             if(taps>2) gencode(greaterTwo);
-		     if(taps==2) gencode(equalTwo);
-		     if(taps<2) gencode(lessTwo);
+	             if(tp>2) gencode(greaterTwo);
+		     if(tp==2) gencode(equalTwo);
+		     if(tp<2) gencode(lessTwo);
 		}
 // decimation
                 else if(dec>1) {
                      gencode(decmust);
-	             if(taps > (1+dec)) gencode(decgreater);
-		     if(taps == (1+dec)) gencode(decequal);
-		     if(taps < (1+dec)) gencode(decless);
+	             if(tp > (1+dec)) gencode(decgreater);
+		     if(tp == (1+dec)) gencode(decequal);
+		     if(tp < (1+dec)) gencode(decless);
 	        }   
 // interpolation
                 else {
                      gencode(interpmust);
-	             if(taps>2) {
+	             if(tp>2) {
                           gencode(greater);
 		          if(interpolation-1 > 1) gencode(greaterloop);
 		          if(interpolation-1 ==1) gencode(gone);
-			  if(taps-2==2) {
+			  if(tp-2==2) {
 		              gencode(grep);
 			      gencode(grep);
 			  }
-                          else if(taps-2==1) 
+                          else if(tp-2==1) 
 			      gencode(grep);
 		          else if(interpolation-2>0) 
 		              gencode(repGreater);
 
                           gencode(gcont);
 	             }
-		     if(taps==2) {
+		     if(tp==2) {
                           gencode(equal);
 		          if(interpolation-2 > 1) gencode(fullloop);
 		          if(interpolation-2 ==1) gencode(equalone);
                           gencode(equalcont);
 		     }
-		     if(taps<2) {
+		     if(tp<2) {
 		          gencode(less);
 			  if(interpolation-2==2) {
 		              gencode(lessrep);
@@ -213,23 +213,23 @@ Decimation parameters > 1 reduces sample rate.
         }
 
         codeblock(first) {
-; taps: $val(taps)
+; tp: $val(tp)
 ; interpolation : $val(interpolation)
 ; dec: $val(dec)
-        move    #<$val(taps)*$val(interpolation)+$addr(coef)-1,r0
+        move    #<$val(tp)*$val(interpolation)+$addr(taps)-1,r0
         }
         codeblock(old) {
         move    $ref(oldsampleStart),r5
         }
         codeblock(second) {
-        move    #<$val(taps)-$val(decimation)-1,m5
+        move    #<$val(tp)-$val(decimation)-1,m5
         }
         codeblock(must) {
         move    $ref2(input,adjust),x0
         }    
         codeblock(greaterTwo) {
         clr     a         x:(r5)+,x1      y:(r0)-,y1
-        rep     #$val(taps)-2
+        rep     #$val(tp)-2
         mac     x1,y1,a   x:(r5)+,x1      y:(r0)-,y1
         mac     x1,y1,a   x0,x:(r5)+      y:(r0)-,y1
         macr    x0,y1,a   r5,$ref(oldsampleStart)
@@ -243,7 +243,7 @@ Decimation parameters > 1 reduces sample rate.
         move    a,$ref(output)
         }
         codeblock(lessTwo) {    
-        clr     a         $ref(coef),y1
+        clr     a         $ref(taps),y1
         mpyr    x0,y1,a
         move    a,$ref(output)
         }
@@ -252,7 +252,7 @@ Decimation parameters > 1 reduces sample rate.
         }
         codeblock(decgreater) {
         clr     a         x:(r5)+,x1      y:(r0)-,y1
-        rep     #$val(taps)-$val(dec)-1
+        rep     #$val(tp)-$val(dec)-1
         mac     x1,y1,a   x:(r5)+,x1      y:(r0)-,y1
         do      #$val(dec),$label(loop)
         mac     x1,y1,a   x:(r6)+,x1      y:(r0)-,y1
@@ -272,7 +272,7 @@ $label(loop)
         codeblock(decless) {        
         nop
         clr     a         x:(r6)+,x1      y:(r0)-,y1
-        rep     #$val(taps)-1
+        rep     #$val(tp)-1
         mac     x1,y1,a   x:(r6)+,x1      y:(r0)-,y1
         macr    x1,y1,a
         move    a,$ref(output)
@@ -286,14 +286,14 @@ $label(loop)
         }
         codeblock(greaterloop) {
         do    #$val(interpolation)-1,$label(looparound)
-        rep   #$val(taps)-1
+        rep   #$val(tp)-1
         mac   x1,y1,a   x:(r5)+,x1      y:(r0)-,y1
         macr  x0,y1,a                   y:(r0)-,y1
         clr   a         a,x:(r6)+
 $label(looparound)   
         }
         codeblock(gone) {
-        rep   #$val(taps)-1
+        rep   #$val(tp)-1
         mac   x1,y1,a   x:(r5)+,x1      y:(r0)-,y1
         macr  x0,y1,a                   y:(r0)-,y1
         clr   a         a,x:(r6)+
@@ -302,7 +302,7 @@ $label(looparound)
         mac   x1,y1,a   x:(r5)+,x1      y:(r0)-,y1
         }
         codeblock(repGreater) {
-        rep   #$val(taps)-2
+        rep   #$val(tp)-2
         mac   x1,y1,a   x:(r5)+,x1      y:(r0)-,y1    
         }
         codeblock(gcont) {
@@ -354,15 +354,15 @@ $label(fullLoop)
                 int a=2;
                 int b=0;
 
-                if (coefNum>1)  a=4;
+                if (tapsNum>1)  a=4;
 		    
-                if (coefNum<=decimation) {
-              	    if (coefNum=1) 
+                if (tapsNum<=decimation) {
+              	    if (tapsNum=1) 
 		            b=3;
 	            else
-		            b=5+taps;
+		            b=5+tp;
                 }
-	        else if (taps==dec+1) {
+	        else if (tp==dec+1) {
 	            if (dec==1)
 		            b=4;
 	            else
@@ -370,9 +370,10 @@ $label(fullLoop)
 	        }
                 else {
 	            if (dec==1)
-		            b=8+taps-dec;
+		            b=8+tp-dec;
 	            else
 		            b=10+2*int(dec);	            
                }
-       }
+               return a+b;
+      }
 }
