@@ -50,9 +50,10 @@
 # <p>
 # Here is an example:
 # <tcl><pre>
-# ::tycho::View .v
-# pack .v
-# wm deiconify .
+# ::tycho::Displayer .d
+# ::tycho::View .d.v
+# .d.v insertInDisplay
+# wm deiconify .d
 # </pre></tcl>
 #
 class ::tycho::View {
