@@ -34,6 +34,7 @@ PL_SRCS=\
  VHDLBDC.pl \
  VHDLBRamp.pl \
  VHDLBBlackHole.pl \
+ VHDLBThrough.pl \
  VHDLBFork.pl \
  VHDLBClock.pl \
  VHDLBRegister.pl \
