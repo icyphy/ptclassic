@@ -18,7 +18,6 @@ struct gslider {
 	double	hostinit;	/* host initial value */
 	double	dspmin;		/* dsp minimum value */
 	double	dspmax;		/* dsp maximum value */
-	double	dspinit;	/* dsp initial value */
 	int	rep;		/* representation (db or linear) */
 	char	*user;		/* user data */
 	struct gslider *next;

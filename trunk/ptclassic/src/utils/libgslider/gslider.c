@@ -102,10 +102,6 @@ gsl_parse(line)
 	if (ret < 0) {
 		ERROR("gsl_parse: bad dsp maximum value\n");
 	}
-	ret = gsl_field(next, &next, &sp->dspinit, DOUBLE);
-	if (ret < 0) {
-		ERROR("gsl_parse: bad dsp initial value\n");
-	}
 	ret = gsl_field(next, &next, &rep, STRING);
 	if (ret < 0) {
 		ERROR("gsl_parse: missing representation field\n");
