@@ -1510,7 +1510,7 @@ body ::tycho::Edit::print {} {
         puts $fd $sel
         close $fd
         # Unix-isms here
-        eval ::tycho::invoke $printCmd $fn
+        eval ::tycho::tyexec $printCmd $fn
         ::tycho::rm $fn
     }
 }

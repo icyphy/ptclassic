@@ -9,9 +9,9 @@
 Tycho includes a few different ways of
 <A NAME="running a subprocess">running</A> <A NAME="subprocesses, running">subprocesses</A>.  
 <DL>
-<DT> <CODE>::tycho::invoke</CODE> <I>args</I>
-<DD> The <A HREF="../codeDoc/Path.html#invoke Proc associated with Path(s)">invoke procedure</A>
- will pass <I>args</I> to the Tcl <CODE>exec</CODE> command.
+<DT> <CODE>::tycho::tyexec</CODE> <I>args</I>
+<DD> The <A HREF="../codeDoc/Exec.html#tyexec Proc associated with Exec(s)">tyexec procedure</A>
+will pass <I>args</I> to the Tcl <CODE>exec</CODE> command.
 
 <DT> <CODE>::tycho::Exec</CODE>
 <DD> The <A HREF="../usersGuides/ExecHelp.html">Exec Class</A>
@@ -26,7 +26,7 @@ for descriptions of platform dependencies.
 
 <H3>Code that calls <CODE>exec</CODE> on the Macintosh</H3>
 
- <P>Neither <CODE>::tycho::invoke</CODE> or the <CODE>Exec</CODE> class
+ <P>Neither <CODE>::tycho::tyexec</CODE> or the <CODE>Exec</CODE> class
 will work on the Macintosh, so all methods that call these two methods
 should check the <CODE>$tcl_platform</CODE> variable at the top of the
 method and call <CODE>error</CODE> with an informative error message.
@@ -90,9 +90,9 @@ murky, but wrapping <CODE>catch</CODE> around the <CODE>chmod</CODE>
 call will probably make your code more robust.
 
 
-<LI> Call <CODE>::tycho::invoke</CODE> rather than just calling
+<LI> Call <CODE>::tycho::tyexec</CODE> rather than just calling
 <CODE>exec</CODE>.  If there is a problem, 
-<CODE>::tycho::invoke</CODE> will bring up an error window that includes
+<CODE>::tycho::tyexec</CODE> will bring up an error window that includes
 the command that failed to exec.
 
 </OL>
