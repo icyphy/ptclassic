@@ -269,9 +269,11 @@ body ::tycho::Solid::_relief {id canvas slate relief} {
 	    set coords [$canvas coords $primary($id)]
 
 	    assign inside junk1 junk2 \
-		    [polyBorders 45 -135 $coords $_borderwidth($id)]
+		    [::tycho::Polygon::borders 45 -135 \
+		    $coords $_borderwidth($id)]
 	    assign inside notlitC notshadedC \
-		    [polyBorders 45 -135 $inside $_borderwidth($id)]
+		    [::tycho::Polygon::borders 45 -135 \
+		    $inside $_borderwidth($id)]
 
 	    set notlit($id)    {}
 	    set notshaded($id) {}
@@ -321,7 +323,8 @@ body ::tycho::Solid::_relief {id canvas slate relief} {
 	    if { [::info exists surface($id)] } {
 		set coords [$canvas coords $primary($id)]
 		assign inside junk1 junk2 \
-			[polyBorders 45 -135 $coords $_borderwidth($id)]
+			[::tycho::Polygon::borders 45 -135 \
+			$coords $_borderwidth($id)]
 		eval $canvas coords $surface($id) $inside
 	    }
 	}
@@ -347,7 +350,7 @@ body ::tycho::Solid::adjust {id canvas name shade coords} {
     # If there weren't enough polygons, create some more. Lower the
     # new components to the same level as the primary component.
     if { [llength $coords] > $count } {
-	set tags [$canvas gettags $id]
+	set tags [$canvas gettags $primary($id)]
 	set moreneeded [ldrop $coords $count]
 	foreach c $moreneeded {
 	    set p [eval $canvas create polygon $c \
@@ -429,7 +432,7 @@ body ::tycho::Solid::coords {id canvas slate args} {
 
     # Get the coordinates of the borders and the surface component
     assign inside litC shadedC \
-	    [polyBorders 45 -135 $coords $_borderwidth($id)]
+	    [::tycho::Polygon::borders 45 -135 $coords $_borderwidth($id)]
 
     # Adjust the positions of the border polygons, creating and
     # deleting them as necessary.
@@ -440,10 +443,13 @@ body ::tycho::Solid::coords {id canvas slate args} {
     # as well. Note that _inside_ is over-written with new values.
     if { $_relief($id) == "ridge" || $_relief($id) == "groove" } {
 	assign inside notlitC notshadedC \
-		[polyBorders 45 -135 $inside $_borderwidth($id)]
+		[::tycho::Polygon::borders 45 -135 \
+		$inside $_borderwidth($id)]
 
-	adjust $id $canvas "notshaded" [$colorShadesObject($id) light] $notshadedC
-	adjust $id $canvas "notlit"    [$colorShadesObject($id) dark]  $notlitC
+	adjust $id $canvas "notshaded" \
+		[$colorShadesObject($id) light] $notshadedC
+	adjust $id $canvas "notlit" \
+		[$colorShadesObject($id) dark]  $notlitC
     }
 
     # Change the co-ordinates of the surface component, if it exists.

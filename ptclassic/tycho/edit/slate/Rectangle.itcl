@@ -76,22 +76,43 @@ class ::tycho::Rectangle {
     ####                         public procs                      ####
 
     # Get one or more aspects of an item
-    proc aspect {id canvas slate args}
+    proc _aspect {id canvas slate args}
 
     # Attach a set of grapples to an item
-    proc grapple {id canvas slate interactor args}
+    proc _grapple {id canvas slate interactor args}
 
     # Reshape one or more aspects of an item
-    proc reshape {id canvas slate x y args}
+    proc _reshape {id canvas slate x y args}
 
     # Start a reshape interaction sequence
-    proc reshapeclick {id canvas slate x y args}
+    proc _reshapeclick {id canvas slate x y args}
 
     # Continue a reshape interaction sequence
-    proc reshapedrag {id canvas slate x y}
+    proc _reshapedrag {id canvas slate x y}
 
     # Terminate a reshape interaction sequence
-    proc reshaperelease {id canvas slate x y}
+    proc _reshaperelease {id canvas slate x y}
+
+    # Get one or more aspects of a rectangle
+    proc aspect {x0 y0 x1 y1 args}
+
+    # Test if the first rectangle is inside the second.
+    proc inside {x0 y0 x1 y1 a0 b0 a1 b1}
+
+    # Test if two rectangles overlap
+    proc overlap {x0 y0 x1 y1 a0 b0 a1 b1}
+
+    # Reshape one or more aspects of a rectangle
+    proc reshape {x0 y0 x1 y1 x y args}
+
+    # Stretch a rectangle
+    proc stretch {x0 y0 x1 y1 hdelta {vdelta {}}}
+
+    # Shrink a rectangle
+    proc shrink {x0 y0 x1 y1 hdelta {vdelta {}}}
+
+    # Return the "union" of two rectangles
+    proc union {x0 y0 x1 y1 a0 b0 a1 b1}
 
     ###################################################################
     ####                     private variables                     ####
@@ -125,21 +146,18 @@ class ::tycho::Rectangle {
 
 
 #######################################################################
-#### aspect aspect
+#### _aspect aspect
 #
-# Return the value of an aspect. Valid aspects are any
-# of the eight compass points and "c" or "center."
-#
-body ::tycho::Rectangle::aspect {id canvas slate args} {
+body ::tycho::Rectangle::_aspect {id canvas slate args} {
     if { $args == "" } {
 	return {c n s e w ne nw se sw}
     } else {
-	return [eval rectAspect [list [$slate region $id]] $args]
+	return [eval aspect [$slate region $id] $args]
     }
 }
 
 #######################################################################
-#### grapple interactor [-ghost]
+#### _grapple interactor [-ghost]
 #
 # Attach a set of grapples to a target picture. The grapple is attached
 # to the target as a constraint. If the specified interactor is null,
@@ -148,7 +166,7 @@ body ::tycho::Rectangle::aspect {id canvas slate args} {
 # FIXME: This is _very_ slow. Try caching grapples and composites
 # somewhere and using cached objects.
 #
-body ::tycho::Rectangle::grapple {id canvas slate interactor args} {
+body ::tycho::Rectangle::_grapple {id canvas slate interactor args} {
     getflag ghost args
 
     # If the interactor argument is null, remove an existing
@@ -240,40 +258,14 @@ body ::tycho::Rectangle::grapple {id canvas slate interactor args} {
 }
 
 #######################################################################
-#### reshape
+#### _reshape
 #
-# Reshape one or more aspects of the picture by the specified amount.
-# Reshape each aspect by the specified _x_ and _y_ relative
-# values. Aspects are only affected by the appropriate _x_ or _y_
-# value -- for example, if the "e" (east) aspect is specified, it
-# is moved only by the _x_ amount.
-#
-body ::tycho::Rectangle::reshape {id canvas slate x y args} {
-
-    # Get the current values of the four main aspects
-    assign w n e s [$slate region $id]
-    
-    # For each direction, see if it is present in the aspects list,
-    # and if it is, add to the appropriate direction
-    if { [lsearch $args "*w"] >= 0 } {
-	set w [expr $w + $x]
-    }
-    if { [lsearch $args "*e"] >= 0 } {
-	set e [expr $e + $x]
-    }
-    if { [lsearch $args "n*"] >= 0 } {
-	set n [expr $n + $y]
-    }
-    if { [lsearch $args "s*"] >= 0 } {
-	set s [expr $s + $y]
-    }
-    
-    # Reshape with region{}
-    $slate region $id $w $n $e $s
+body ::tycho::Rectangle::_reshape {id canvas slate x y args} {
+    eval $slate region $id [eval reshape [$slate region $id] $x $y $args]
 }
 
 #######################################################################
-#### reshapeclick
+#### _reshapeclick
 #
 # Start a reshape interaction sequence. This works by building a script
 # that will be evaluated in the drag phase of the interaction. This
@@ -281,7 +273,7 @@ body ::tycho::Rectangle::reshape {id canvas slate x y args} {
 # make the drag as fast as possible. If and when the Tcl compiler
 # runs, this strategy may no longer be necessary.
 #
-body ::tycho::Rectangle::reshapeclick {id canvas slate x y args} {
+body ::tycho::Rectangle::_reshapeclick {id canvas slate x y args} {
     getflag ghost args
 
     # Remember how I am now.
@@ -317,9 +309,9 @@ body ::tycho::Rectangle::reshapeclick {id canvas slate x y args} {
 }
 
 #######################################################################
-#### reshapedrag
+#### _reshapedrag
 #
-body ::tycho::Rectangle::reshapedrag {id canvas slate x y} {
+body ::tycho::Rectangle::_reshapedrag {id canvas slate x y} {
     # Get delta coordinates
     set deltaX [expr $x - $scratch($id.prevX)]
     set deltaY [expr $y - $scratch($id.prevY)]
@@ -342,9 +334,9 @@ body ::tycho::Rectangle::reshapedrag {id canvas slate x y} {
 }
 
 #######################################################################
-#### reshaperelease
+#### _reshaperelease
 #
-body ::tycho::Rectangle::reshaperelease {id canvas slate x y} {
+body ::tycho::Rectangle::_reshaperelease {id canvas slate x y} {
     # If there's a ghost, reshape the picture to its shape
     # and then delete the ghost.
     if { [::info exists scratch($id.ghost)] } {
@@ -364,4 +356,144 @@ body ::tycho::Rectangle::reshaperelease {id canvas slate x y} {
     unset scratch($id.e)
     unset scratch($id.s)
     unset scratch($id.script)
+}
+
+##########################################################################
+#### aspect
+#
+# Return one or more aspects of a rectangle. Valid aspects are any
+# of the eight compass points and "c" or "center."
+#
+body ::tycho::Rectangle::aspect {x0 y0 x1 y1 args} {
+    set result {}
+    foreach aspect $args {
+	switch -exact $aspect {
+	    "n" {
+		lappend result [expr ($x0+$x1) / 2] $y0
+	    }
+	    "s" {
+		lappend result [expr ($x0+$x1) / 2] $y1
+	    }
+	    "e" {
+		lappend result $x1 [expr ($y0+$y1) / 2]
+	    }
+	    "w" {
+		lappend result $x0 [expr ($y0+$y1) / 2]
+	    }
+	    "nw" {
+		lappend result $x0 $y0
+	    }
+	    "ne" {
+		lappend result $x1 $y0
+	    }
+	    "sw" {
+		lappend result $x0 $y1
+	    }
+	    "se" {
+		lappend result $x1 $y1
+	    }
+	    "c" -
+	    "center" {
+		lappend result [expr ($x0+$x1) / 2] [expr ($y0+$y1) / 2]
+	    }
+	}
+    }
+    return $result
+}
+
+##########################################################################
+#### inside
+#
+# Test if the first rectangle is inside the second.
+#
+body ::tycho::Rectangle::inside {x0 y0 x1 y1 a0 b0 a1 b1} {
+    return [expr $x0 >= $a0 && $y0 >= $b0 && $x1 <= $a1 && $y1 <= $b1]
+}
+
+##########################################################################
+#### overlap
+#
+# Test if two rectangle overlap.
+#
+body ::tycho::Rectangle::overlap {x0 y0 x1 y1 a0 b0 a1 b1} {
+    return [expr $a0 <= $x1 && $b0 <= $y1 && $a1 >= $x0 && $b1 >= $y0]
+}
+
+#######################################################################
+#### reshape
+#
+# Given a rectangle, reshape it by moving the given aspects
+# by the specified _x_ and _y_ relative
+# values. Aspects are only affected by the appropriate _x_ or _y_
+# value -- for example, if the "e" (east) aspect is specified, it
+# is moved only by the _x_ amount.
+#
+body ::tycho::Rectangle::reshape {x0 y0 x1 y1 x y args} {
+    # For each direction, see if it is present in the aspects list,
+    # and if it is, add to the appropriate direction
+    if { [lsearch $args "*w"] >= 0 } {
+	set x0 [expr $x0 + $x]
+    }
+    if { [lsearch $args "*e"] >= 0 } {
+	set x1 [expr $x1 + $x]
+    }
+    if { [lsearch $args "n*"] >= 0 } {
+	set y0 [expr $y0 + $y]
+    }
+    if { [lsearch $args "s*"] >= 0 } {
+	set y1 [expr $y1 + $y]
+    }
+
+    # Return new rectangle
+    return [list $x0 $y0 $x1 $y1]
+}
+
+#######################################################################
+#### shrink
+#
+# Shrink a rectangle on all sides. The rectangle will be smaller
+# in the horizontal direction by 2 * _hdelta_ pixels, and by
+# 2 * _vdelta_ pixels in the vertical direction. If _vdelta_
+# is omitted, then _hdelta_ is used in both directions.
+#
+body ::tycho::Rectangle::shrink {x0 y0 x1 y1 hdelta {vdelta {}}} {
+    if { $vdelta == "" } {
+	set vdelta $hdelta
+    }
+
+    return [list \
+	    [expr $x0 + $hdelta] \
+	    [expr $y0 + $vdelta] \
+	    [expr $x1 - $hdelta] \
+	    [expr $y1 - $vdelta] ]
+}
+
+#######################################################################
+#### stretch
+#
+# Stretch a rectangle on all sides. The rectangle will be larger
+# in the horizontal direction by 2 * _hdelta_ pixels, and by
+# 2 * _vdelta_ pixels in the vertical direction. If _vdelta_
+# is omitted, then _hdelta_ is used in both directions.
+#
+body ::tycho::Rectangle::stretch {x0 y0 x1 y1 hdelta {vdelta {}}} {
+    if { $vdelta == "" } {
+	set vdelta $hdelta
+    }
+
+    return [list \
+	    [expr $x0 - $hdelta] \
+	    [expr $y0 - $vdelta] \
+	    [expr $x1 + $hdelta] \
+	    [expr $y1 + $vdelta] ]
+}
+
+##########################################################################
+#### union
+#
+# Return the ``union'' of two rectangles: that is, the rectangle that
+# contains both rectangles.
+#
+body ::tycho::Rectangle::union {x0 y0 x1 y1 a0 b0 a1 b1} {
+    return [list [min $x0 $a0] [min $y0 $b0] [max $x1 $a1] [max $y1 $b1]]
 }

@@ -35,6 +35,25 @@
 # coordinates. Items with this shape include <I>oval</I>
 # and <I>LabelledOval</I>.
 #
+# The TK canvas supports ellipses, or ``ovals,'' as it calls them,
+# but provides no facilities for finding points on the oval. This
+# shape includes routine to help out with some of this stuff.
+#
+# The equation of an ellipse with horizontal radius _a_ and
+# vertical radius _b_ is
+# <pre>
+#        2        2
+#       x        y
+#      ----  +  ----  =  1
+#        2        2
+#       a        b
+# </pre>
+#
+# Let m = y/x (the tangent of the angle to (x,y).
+#
+# Acknowledgement: these functions were derived from Wan-teh Chang's
+# finite-state-machine editor code.
+#
 #  <P><b>Primitive aspects</b>
 #
 # <ul>
@@ -69,33 +88,45 @@ class ::tycho::Oval {
     ####                         public procs                      ####
 
     # Get one or more aspects of an item
-    proc aspect {id canvas slate args}
+    proc _aspect {id canvas slate args}
 
     # Attach a set of grapples to an item
-    proc grapple {id canvas slate interactor args}
+    proc _grapple {id canvas slate interactor args}
 
     # Reshape one or more aspects of an item
-    proc reshape {id canvas slate x y args}
+    proc _reshape {id canvas slate x y args}
 
     # Start a reshape interaction sequence
-    proc reshapeclick {id canvas slate x y args}
+    proc _reshapeclick {id canvas slate x y args}
 
     # Continue a reshape interaction sequence
-    proc reshapedrag {id canvas slate x y}
+    proc _reshapedrag {id canvas slate x y}
 
     # Terminate a reshape interaction sequence
-    proc reshaperelease {id canvas slate x y}
+    proc _reshaperelease {id canvas slate x y}
+
+    # Convert a rectangle into an (x,y,a,b) representation
+    proc fromRect {x0 y0 x1 y1}
+
+    # Return a point on the circumference given an angle
+    proc circumference {x y a b angle}
+
+    # Return a point on the circumference given a point
+    proc circumferenceP {x y a b p q}
+
+    # Return a point on the circumference given "m"
+    proc circumferenceM {x y a b m positive}
 }
 
 
 #######################################################################
-#### aspect
+#### _aspect
 #
 # Return the value of an aspect. Valid aspects are "hradius,"
 # "vradius," "center," or <code>circumference-</code><i>x-y</i>, where
 # (_x_, _y_) is a vector from the center.
 #
-body ::tycho::Oval::aspect {id canvas slate args} {
+body ::tycho::Oval::_aspect {id canvas slate args} {
     assign x0 y0 x1 y1 [$slate coords $id]
     set result {}
 
@@ -126,7 +157,7 @@ body ::tycho::Oval::aspect {id canvas slate args} {
 }
 
 #######################################################################
-#### reshape
+#### _reshape
 #
 # Reshape one or more aspects of the item by the specified amount.
 # Reshape each aspect by the specified _x_ and _y_ relative
@@ -134,7 +165,7 @@ body ::tycho::Oval::aspect {id canvas slate args} {
 # value -- for example, if the "e" (east) aspect is specified, it
 # is moved only by the _x_ amount.
 #
-body ::tycho::Oval::reshape {id canvas slate x y args} {
+body ::tycho::Oval::_reshape {id canvas slate x y args} {
     # Get the current coordinates
     assign x0 y0 x1 y1 [$slate coords $id]
     
@@ -154,9 +185,9 @@ body ::tycho::Oval::reshape {id canvas slate x y args} {
 }
 
 #######################################################################
-#### reshapeclick
+#### _reshapeclick
 #
-body ::tycho::Oval::reshapeclick {id canvas slate x y args} {
+body ::tycho::Oval::_reshapeclick {id canvas slate x y args} {
     getflag ghost args
 
     # Remember how I am now.
@@ -173,9 +204,9 @@ body ::tycho::Oval::reshapeclick {id canvas slate x y args} {
 }
 
 #######################################################################
-#### reshapedrag
+#### _reshapedrag
 #
-body ::tycho::Oval::reshapedrag {id canvas slate x y} {
+body ::tycho::Oval::_reshapedrag {id canvas slate x y} {
     # Get the current coordinates
     assign x0 y0 x1 y1 [$slate coords $id]
     
@@ -208,9 +239,9 @@ body ::tycho::Oval::reshapedrag {id canvas slate x y} {
 }
 
 #######################################################################
-#### reshaperelease
+#### _reshaperelease
 #
-body ::tycho::Oval::reshaperelease {id canvas slate x y} {
+body ::tycho::Oval::_reshaperelease {id canvas slate x y} {
     # If there's a ghost, reshape the item to its shape
     # and then delete the ghost.
     if { [::info exists scratch($id.ghost)] } {
@@ -225,4 +256,86 @@ body ::tycho::Oval::reshaperelease {id canvas slate x y} {
     # General cleaning up
     unset scratch($id.prevX)
     unset scratch($id.prevY)
+}
+
+
+
+##########################################################################
+#### fromRect
+#
+# Given a rectangle specifying the boundary of the ellipse,
+# return a description in the form {x y a b}.
+#
+body ::tycho::Oval::fromRect {x0 y0 x1 y1} {
+    set a [expr ($x1 - $x0) / 2.0]
+    set x [expr $x1 - $a]
+    set b [expr ($y1 - $y0) / 2.0]
+    set y [expr $y1 - $b]
+
+    return [list $x $y $a $b]
+}
+
+##########################################################################
+#### circumference
+#
+# Given an oval and an angle, return the point on the circumference
+# of the oval. The angle _must_ be between -pi and 2*pi.
+#
+body ::tycho::Oval::circumference {x y a b angle} {
+    # First calculate m, checking for vertical angles
+    if { $angle > $pi } {
+	set angle [expr $angle - $twoPi]
+    }
+
+    if {       $angle > [expr $piOverTwo - 0.01] \
+	    && $angle < [expr $piOverTwo + 0.01] } {
+	return [list $x [expr $y - $b]]
+    } elseif { $angle > [expr $threePiOverTwo - 0.01] \
+	    && $angle < [expr $threePiOverTwo + 0.01] } {
+	return [list $x [expr $y + $b]]
+    }
+    set m [expr tan($angle)]
+
+    # Calculate point based on m
+    return [circumferenceM $oval $m [expr $angle >= 0.0]]
+}
+
+##########################################################################
+#### circumferenceP
+#
+# Given an oval (x, y, a, b) and a point (p,q), return the point on
+# its circumference which intersects the line from its center to the
+# point.
+#
+body ::tycho::Oval::circumferenceP {x y a b p q} {
+    # First calculate m, checking for vertical angles
+    if { $p == $x } {
+	if { $q < $y } {
+	    return [list $x [expr $y - $b]]
+	} else {
+	    return [list $x [expr $y + $b]]
+	}
+    }
+    set m [expr ($y - $q) / ($p - $x)]
+
+    # Calculate point based on m
+    return [circumferenceM $oval $m [expr $q < $y]]
+}
+
+##########################################################################
+#### circumferenceM
+#
+# Given an oval and the tangent from its center,
+# return the point on the circumference of the oval.
+# The positive argument specifies whether the angle
+# is positive or negative.
+#
+body ::tycho::Oval::circumferenceM {x y a b m positive} {
+    set offset [expr $a*$b / sqrt($b*$b + $m*$m*$a*$a)]
+    set offset [expr ($m < 0) ^ ! $positive ? -$offset : $offset]
+
+    set pointx [expr $x + $offset]
+    set pointy [expr $y - $m * $offset]
+
+    return [list $pointx $pointy]
 }

@@ -59,72 +59,218 @@
 # </ul>
 #
 class ::tycho::Line {
-    inherit ::tycho::Polygon
+    inherit ::tycho::Shape
 
     ###################################################################
     ####                         public procs                      ####
 
     # Get one or more aspects of an item
-    proc aspect {id canvas slate args}
+    proc _aspect {id canvas slate args}
 
     # Attach a set of grapples to an item
-    proc grapple {id canvas slate interactor args}
+    proc _grapple {id canvas slate interactor args}
 
     # Reshape one or more aspects of an item
-    proc reshape {id canvas slate x y args}
+    proc _reshape {id canvas slate x y args}
 
     # Start a reshape interaction sequence
-    proc reshapeclick {id canvas slate x y args}
+    proc _reshapeclick {id canvas slate x y args}
 
     # Continue a reshape interaction sequence
-    proc reshapedrag {id canvas slate x y}
+    proc _reshapedrag {id canvas slate x y}
 
     # Terminate a reshape interaction sequence
-    proc reshaperelease {id canvas slate x y}
+    proc _reshaperelease {id canvas slate x y}
+
+    # Get one or more aspects of a line
+    proc aspect {coords args}
+
+    # Reflect a line about the specified x coordinate
+    proc flip {coords x0}
+
+    # Reflect a line about the specified y coordinate
+    proc flop {coords y0}
+
+    # Reshape one or more aspects of a line
+    proc reshape {coords x y args}
+
+    # Reverse the direction of a line
+    proc reverse {coords}
+
+    # Rotate a line about the specified x and y coordinates
+    proc rotate {coords x y angle}
 }
 
-
 #######################################################################
-#### aspect
+#### _aspect
 #
-# Return the value of an aspect. Valid aspects are "start,"
-# "end," "length," or <code>vertex-</code><i>n</i>, where _n_ is
-# between 0 and _length_.
-#
-body ::tycho::Line::aspect {id canvas slate args} {
+body ::tycho::Line::_aspect {id canvas slate args} {
     set coords [$slate coords $id]
-    set result {}
 
     if { $args == "" } {
-	lappend result length start end
+	set result {length start end}
 	foreach n [interval 0 \
 		[expr [llength $coords] / 2 - 1]] {
 	    lappend result "vertex-$n"
 	}
+	return $result
     } else {
-	foreach aspect $args {
-	    set a [lindex [split $aspect "-"] 0]
-	    switch -exact $a {
-		"length" {
-		    lappend result [expr [llength $coords] / 2 - 1]
-		}
-		"start" {
-		    lappend result [lindex $coords 0] [lindex $coords 1]
-		}
-		"end" {
-		    lappend result \
-			    [lindex $coords [expr [llength $coords] - 2]] \
-			    [lindex $coords end]
-		}
-		"vertex" {
-		    set n [lindex [split $aspect "-"] 1]
-		    lappend result \
-			    [lindex $coords [expr 2*$n]] \
-			    [lindex $coords [expr 2*$n + 1]]
-		}
-		default {
-		    error "Invalid aspect \"$aspect\" of line shape"
-		}
+	return [eval aspect [list $coords] $args]
+    }
+}
+
+#######################################################################
+#### _reshape
+#
+body ::tycho::Line::_reshape {id canvas slate x y args} {
+    eval $slate coords $id \
+	    [eval reshape [list [$slate coords $id]] $x $y $args]
+}
+
+#######################################################################
+#### _reshapeclick
+#
+body ::tycho::Line::_reshapeclick {id canvas slate x y args} {
+    getflag ghost args
+
+    # Remember how I am now.
+    set scratch($id.prevX) $x
+    set scratch($id.prevY) $y
+
+    # Get the coordinates of the line into an efficient-to-process form
+    set i 0
+    foreach {a b} [$slate coords $id] {
+	set scratch($id.$i.x) $a
+	set scratch($id.$i.y) $b
+	lappend scratch($id.indexes) $i
+	incr i
+    }
+
+    # Figure out the vertices that will be changed
+    foreach aspect $args {
+	assign a n [split $aspect "-"]
+	switch -exact $a {
+	    "start" {
+		lappend scratch($id.vertices) 0
+	    }
+	    "end" {
+		lappend scratch($id.vertices) \
+			[lindex $scratch($id.indexes) end]
+	    }
+	    "vertex" {
+		lappend scratch($id.vertices) $n
+	    }
+	    "length" {
+		error "Cannot set the \"length\" aspect of a line"
+	    }
+	    default {
+		error "Invalid aspect \"$aspect\" of line shape"
+	    }
+	}
+    }
+    
+    # Make sure there are no duplicates
+    set scratch($id.vertices) [lnub scratch($id.vertices)]
+
+    # If the -ghost flag is set, draw the ghost line.
+    if { $ghost } {
+	set scratch($id.ghost) [eval $canvas create line \
+		$scratch($id.coords) \
+		-fill grey]
+    }
+}
+
+#######################################################################
+#### _reshapedrag
+#
+body ::tycho::Line::_reshapedrag {id canvas slate x y} {
+    # Get delta coordinates
+    set deltaX [expr $x - $scratch($id.prevX)]
+    set deltaY [expr $y - $scratch($id.prevY)]
+
+    # Remember the current coordinates
+    set scratch($id.prevX) $x
+    set scratch($id.prevY) $y
+
+    # Add the delta coordinates to the vertices
+    foreach v $scratch($id.vertices) {
+    	set scratch($id.$v.x) [expr $scratch($id.$v.x) + $deltaX]
+    	set scratch($id.$v.y) [expr $scratch($id.$v.y) + $deltaY]
+    }
+
+    # Rebuild the coordinates list and change coordinates
+    set coords {}
+    foreach i $scratch($id.indexes) {
+	lappend coords $scratch($id.$v.x) $scratch($id.$v.y)
+    }
+
+    # If there's a ghost, reshape it. Otherwise reshape the item.
+    if { [::info exists scratch($id.ghost)] } {
+	eval $canvas coords $scratch($id.ghost) $coords
+    } else {
+	eval $slate coords $id $coords
+    }
+}
+
+#######################################################################
+#### _reshaperelease
+#
+body ::tycho::Line::_reshaperelease {id canvas slate x y} {
+    # If there's a ghost, reshape the item to its shape
+    # and then delete the ghost.
+    if { [::info exists scratch($id.ghost)] } {
+	# Reshape the item
+	eval $slate coords $id [$slate coords $scratch($id.ghost)]
+	$canvas delete $scratch($id.ghost)
+
+	# Clean up
+	unset scratch($id.ghost)
+    }
+
+    # General cleaning up
+    unset scratch($id.prevX)
+    unset scratch($id.prevY)
+
+    foreach v $scratch($id.indexes) {
+    	unset scratch($id.$v.x)
+    	unset scratch($id.$v.y)
+    }
+    unset scratch($id.vertices)
+    unset scratch($id.indexes)
+}
+
+#######################################################################
+#### aspect
+#
+# Return aspects of a line. Valid aspects are "start,"
+# "end," "length," or <code>vertex-</code><i>n</i>, where _n_ is
+# between 0 and _length_.
+#
+body ::tycho::Line::aspect {coords args} {
+    set result {}
+
+    foreach aspect $args {
+	set a [lindex [split $aspect "-"] 0]
+	switch -exact $a {
+	    "length" {
+		lappend result [expr [llength $coords] / 2 - 1]
+	    }
+	    "start" {
+		lappend result [lindex $coords 0] [lindex $coords 1]
+	    }
+	    "end" {
+		lappend result \
+			[lindex $coords [expr [llength $coords] - 2]] \
+			[lindex $coords end]
+	    }
+	    "vertex" {
+		set n [lindex [split $aspect "-"] 1]
+		lappend result \
+			[lindex $coords [expr 2*$n]] \
+			[lindex $coords [expr 2*$n + 1]]
+	    }
+	    default {
+		error "Invalid aspect \"$aspect\" of line shape"
 	    }
 	}
     }
@@ -134,21 +280,19 @@ body ::tycho::Line::aspect {id canvas slate args} {
 #######################################################################
 #### reshape
 #
-# Reshape one or more aspects of the item by the specified amount.
+# Reshape one or more aspects of a line by the specified amount.
 # Reshape each aspect by the specified _x_ and _y_ relative
-# values. Aspects are only affected by the appropriate _x_ or _y_
-# value -- for example, if the "e" (east) aspect is specified, it
-# is moved only by the _x_ amount.
+# values.
 #
-body ::tycho::Line::reshape {id canvas slate x y args} {
+body ::tycho::Line::reshape {coords x y args} {
     # Get the coordinates of the line into an efficient-to-process form
     set i 0
     set indexes {}
-    foreach {a b} [$slate coords $id] {
-		set _x($i) $a
-		set _y($i) $b
-		lappend indexes $i
-		incr i
+    foreach {a b} $coords {
+	set _x($i) $a
+	set _y($i) $b
+	lappend indexes $i
+	incr i
     }
 
     # Process all aspects to change coordinates
@@ -177,82 +321,85 @@ body ::tycho::Line::reshape {id canvas slate x y args} {
 	}
     }
 
-    # Rebuild the coordinates list and change coordinates
+    # Rebuild the coordinates list and return
     set coords {}
     foreach i $indexes {
 	lappend coords $_x($i) $_y($i)
     }
-    eval $slate coords $id $coords
+    return $coords
 }
 
-#######################################################################
-#### reshapeclick
+##########################################################################
+#### reverse
 #
-body ::tycho::Line::reshapeclick {id canvas slate x y args} {
-    getflag ghost args
-
-    # Remember how I am now.
-    set scratch($id.prevX) $x
-    set scratch($id.prevY) $y
-
-    # Get the coordinates of the line into an efficient-to-process form
-    set i 0
-    foreach {a b} [$slate coords $id] {
-		set scratch($id.$i.x) $a
-		set scratch($id.$i.y) $b
-		lappend scratch($id.indexes) $i
-		incr i
+# Reverse the direction of a line. Basically just reverse
+# a list of coordinates.
+#
+body ::tycho::Line::reverse {coords} {
+    set result {}
+    foreach {x y} $coords {
+	set result [concat $x $y $result]
     }
-
-    # Figure out the vertices that will be changed
-    foreach aspect $args {
-		assign a n [split $aspect "-"]
-		switch -exact $a {
-	    	"start" {
-				lappend scratch($id.vertices) 0
-			}
-		    "end" {
-				lappend scratch($id.vertices) [lindex $scratch($id.indexes) end]
-		    }
-	    	"vertex" {
-	    		lappend scratch($id.vertices) $n
-	    	}
-		    "length" {
-				error "Cannot set the \"length\" aspect of a line"
-	    	}
-		    default {
-				error "Invalid aspect \"$aspect\" of line shape"
-			}
-		}
-    }
-    
-    # Make sure there are no duplicates
-    set scratch($id.vertices) [lnub scratch($id.vertices)]
-
-    # If the -ghost flag is set, draw the ghost line.
-    if { $ghost } {
-		set scratch($id.ghost) [eval $canvas create line \
-			$scratch($id.coords) \
-			-fill grey]
-    }
+    return $result
 }
 
-#######################################################################
-#### reshapedrag
+##########################################################################
+#### flip
 #
-# This just calls the "parent" class -- we should probably
-# implement "inheritance."
+# Reflect a line about the specified x coordinate.
 #
-body ::tycho::Line::reshapedrag {id canvas slate x y} {
-	::tycho::AsPolygon::reshapedrag $id $canvas $slate $x $y
+body ::tycho::Line::flip {coords x0} {
+    set result {}
+    foreach {x y} $coords {
+	set x [expr 2 * $x0 - $x]
+	lappend result $x $y
+    }
+    return $result
 }
 
-#######################################################################
-#### reshaperelease
+##########################################################################
+#### flop
 #
-# This just calls the "parent" class -- we should probably
-# implement "inheritance."
+# Reflect a line about the specified y coordinate.
 #
-body ::tycho::Line::reshaperelease {id canvas slate x y} {
-	::tycho::AsPolygon::reshaperelease $id $canvas $slate $x $y
+body ::tycho::Line::flop {coords y0} {
+    set result {}
+    foreach {x y} $coords {
+	set y [expr 2 * $y0 - $y]
+	lappend result $x $y
+    }
+    return $result
+}
+
+##########################################################################
+#### rotate
+#
+# Rotate a line about the specified x and y coordinates, by the
+# specified angle (in degrees).
+#
+body ::tycho::Line::rotate {coords x y angle} {
+    set angle [radians $angle]
+    set result {}
+
+    while { [llength $coords] > 0 } {
+	set a [lindex $coords 0]
+	set b [lindex $coords 1]
+	set coords [lreplace $coords 0 1]
+
+	if { $a == $x && $y == $b } { ;# same point
+	    lappend result $a $b
+	} else {
+	    set dx [expr $a - $x]
+	    set dy [expr $b - $y]
+
+	    set radius [expr sqrt($dx*$dx+$dy*$dy)]
+	    set theta  [expr atan2($dy, $dx) + $angle]
+
+	    set a [expr $x + $radius * cos($theta)]
+	    set b [expr $y + $radius * sin($theta)]
+
+	    lappend result $a $b
+	}
+    }
+    return $result
 }
