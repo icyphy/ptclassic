@@ -1056,8 +1056,6 @@ body ::tycho::Model::undo {{distance 1}} {
     if { $distance > $historyMark(current) - $historyMark(first) } {
 	set distance [expr $historyMark(current) - $historyMark(first)]
     }
-    # Mark model as modified
-    set modified 1
 
     # Undo the commands
     set count 0
