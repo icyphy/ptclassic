@@ -76,8 +76,8 @@ const int MAX_NO_GRAPHS = 64;
 #include "ieee.h"
 
 // constructor initializes streams and filenames
-XGraph :: XGraph () : strm(0), tmpFileNames(0), count(0), blockIamIn(0), ng(0),
-dataToPlot(0)
+XGraph :: XGraph () : blockIamIn(0), ng(0), strm(0), tmpFileNames(0), count(0),
+ dataToPlot(0)
 {}
 
 // close all files, and remove any files that might be open
