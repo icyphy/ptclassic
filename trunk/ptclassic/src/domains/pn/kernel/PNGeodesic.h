@@ -23,8 +23,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 */
 /*  Version $Id$
-    Programmer:		T.M. Parks
-    Date of creation:	6 February 1992
+    Author:	T.M. Parks
+    Created:	6 February 1992
 
     Geodesic with mutual exclusion for all methods which access data members
     at run-time.  The capacity of the Geodesic may be limited to throttle the
@@ -39,39 +39,32 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "Geodesic.h"
-#include "Monitor.h"
-#include "Condition.h"
+#include "LwpMonitor.h"
 
 class MTDFGeodesic : public Geodesic
 {
 public:
     // Class identification.
-    /* virtual */ int isA(const char*) const;
+    /*virtual*/ int isA(const char*) const;
 
     // Constructor.
     MTDFGeodesic();
 
-    // put with mutual exclusion.
-    void put(Particle*);
+    // Notify when not empty.
+    /*virtual*/ void slowPut(Particle*);
 
-    // get with mutual exclusion.
-    Particle* get();
+    // Block until not empty.
+    /*virtual*/ Particle* slowGet();
 
-    // pushBack with mutual exclusion.
+    // Notify when not empty.
     void pushBack(Particle*);
 
-    // size with mutual exclusion.
-    int size();
+    /*virtual*/ void makeLock(const PtGate& master);
+    /*virtual*/ void delLock();
 
-    void setCapacity(int);
-    void wait(int);
 
 protected:
-    Monitor geoMon;
-    Condition notEmpty;
-    Condition notFull;
-    int capacity;
-    int threshold;
+    LwpCondition* notEmpty;
 };
 
 #endif
