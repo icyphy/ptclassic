@@ -124,7 +124,7 @@ void PNScheduler::createThreads()
     // Create Threads for all the Stars.
     while((star = (DataFlowStar*)nextStar++) != NULL)
     {
-	LOG_NEW; threads->add(new SyncDataFlowProcess(*star, *start));
+	LOG_NEW; new SyncDataFlowProcess(*threads, *star, *start);
     }
 }
 
@@ -144,7 +144,7 @@ void PNScheduler::enableLocking()
     LOG_NEW; start = new PNCondition(*monitor);
 
     // Enable all registered PtGates.
-    // GateKeeper::enableAll(*monitor);
+    GateKeeper::enableAll(*monitor);
 
     // Enable locking on all portholes.
     GalStarIter nextStar(*galaxy());
@@ -178,7 +178,7 @@ void PNScheduler::disableLocking()
     }
 
     // Disable all registered PtGates.
-    // GateKeeper::disableAll();
+    GateKeeper::disableAll();
 
     // Delete the lock for this scheduler.
     LOG_DEL; delete start; start = NULL;
