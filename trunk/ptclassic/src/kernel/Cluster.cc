@@ -48,7 +48,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 extern int setPortIndices(Galaxy&);
 
 Cluster::Cluster(Star&self, const char* domain):
-selfStar(self),master(NULL),myDomain(domain),sched(0),scheduled(0) {};
+myDomain(domain),selfStar(self),master(NULL),sched(0),scheduled(0) {};
 
 /*virtual*/ Cluster::~Cluster() {
     if (isClusterAtomic()) {
@@ -349,7 +349,7 @@ int Cluster::generateSchedule() {
 }
 
 ClusterPort::ClusterPort(PortHole& self, const PortHole& myMaster, Star* parent)
-:selfPort(self),master(myMaster),clusterAliasedTo(0) {
+:selfPort(self),clusterAliasedTo(0),master(myMaster) {
     selfPort.setPort(real().name(),parent,INT);
     selfPort.myPlasma = Plasma::getPlasma(INT);
     selfPort.numberTokens = real().numXfer();
