@@ -217,7 +217,7 @@ The values of the input ports will be passed as arguments to this function.
 		       portType == FIX ) {
 		    matlabMatrix = mxCreateFull(1, 1, MXREAL);
 		    double *realp = mxGetPr(matlabMatrix);
-		    *realp = double((*iportp)%0);
+		    *realp = (double)((*iportp)%0);
 		  }
 		  else if ( portType == COMPLEX ) {
 		    matlabMatrix = mxCreateFull(1, 1, MXCOMPLEX);
