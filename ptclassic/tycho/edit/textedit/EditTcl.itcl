@@ -329,22 +329,34 @@ body ::tycho::EditTcl::commentRegexp {} {
 # if there is a selection, it offer to evaluate it.
 #
 body ::tycho::EditTcl::configureContextMenu {} {
-    ::tycho::TWidget::configureContextMenu
+    chain
 
     if { [$itk_component(text) tag ranges sel] != "" } {
-	contextmenu add {Evaluate selection} -command "$this evaluate"
+	contextmenu command evaluate \
+                -label "Evaluate selection" \
+                -command "$this evaluate"
     }
 
+    # Add links to HTML and Idoc files
     # FIXME: There must be a better way of doing this
     if { $itk_option(-file) != "" && $itk_option(-file) != "NoName" } {
-	set link [file split $itk_option(-file)]
-	set path [lrange $link 0 [expr [llength $link] - 2]]
-	set fname [join [concat \
-		[lreplace [split [lindex $link end] .] end end] "html"] .]
-	set link [eval file join $path doc codeDoc $fname]
+	set base [file join [file dirname $itk_option(-file)] doc codeDoc]
+        set base [file join \
+                $base \
+                [file rootname [file tail $itk_option(-file)]]]
 
+        # HTML docs
+        set link $base.html
 	if { [file exists $link] } {
-	    contextmenu add "Open documentation" \
+	    contextmenu command html \
+                    -label "Open HTML Documentation" \
+		    -command "::tycho::File::openContext $link"
+	}
+        # Idocs
+        set link $base.idoc
+	if { [file exists $link] } {
+	    contextmenu command idocs \
+                    -label "Open Itcl Documentation" \
 		    -command "::tycho::File::openContext $link"
 	}
     }
