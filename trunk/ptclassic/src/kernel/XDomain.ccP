@@ -1,6 +1,6 @@
 static const char file_id[] = "<T>Domain.cc";
 /**********************************************************************
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -57,10 +57,10 @@ public:
 	}
 
 	// new fromUniversal EventHorizon
-	EventHorizon& newFrom() { LOG_NEW; return *new <T>fromUniversal;}
+	EventHorizon& newFrom() { LOG_NEW; return *new <T>fromUniversal; }
 
 	// new toUniversal EventHorizon
-	EventHorizon& newTo() { LOG_NEW; return *new <T>toUniversal;}
+	EventHorizon& newTo() { LOG_NEW; return *new <T>toUniversal; }
 };
 
 // declare a prototype
@@ -71,17 +71,15 @@ static <T>Domain proto;
 class <T>Target : public Target {
 public:
 	// Constructor
-	<T>Target() : Target("default-<T>", "<T>Star", "default <T> target"){}
+	<T>Target() : Target("default-<T>", "<T>Star",
+			     "default <T> target", <T>domainName) {}
 
 	// Destructor
-	~<T>Target() { delSched();}
+	~<T>Target() { delSched(); }
 
 	// Return a copy of itself
-	/*virtual*/ Block* makeNew() const { LOG_NEW; return new <T>Target;}
-
-	// Return the domain of the galaxy if it exists and "<T>" otherwise
-	/*virtual*/ const char* domain() {
-		return galaxy() ? galaxy()->domain() : <T>domainName;
+	/*virtual*/ Block* makeNew() const {
+		LOG_NEW; return new <T>Target;
 	}
 
 protected:
@@ -92,4 +90,4 @@ protected:
 };
 
 static <T>Target default<T>target;
-static KnownTarget entry(default<T>target,"default-<T>");
+static KnownTarget entry(default<T>target, "default-<T>");
