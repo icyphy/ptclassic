@@ -94,6 +94,11 @@ namespace ::tycho {
 # four major compass points: <i>n</i>, <i>s</i>, <i>e</i>, or <i>w</i>. It is
 # <i>e</i> by default.
 #
+# <li><b>-state</b>:
+# The current "state" of the line. This is provided to make it possible to
+# duplicate lines, since a line between two given points may be drawn
+# in different ways.
+#
 # </ul>
 #
 # <p><b>Components</b>
@@ -173,6 +178,9 @@ class ::tycho::SmartLine {
 
     # Update the *-start* option
     proc _start {id canvas slate start}
+
+    # Update the *-state* option
+    proc _state {id canvas slate start}
 
     # Create a new item
     proc construct {id canvas slate tags x0 y0 x1 y1 args}
@@ -428,6 +436,7 @@ class ::tycho::SmartLine {
     set optiondefault(-fill)	  black
     set optiondefault(-smooth)    off
     set optiondefault(-start) 	  "e"
+    set optiondefault(-state) 	  0
 }
 
 
@@ -460,7 +469,6 @@ body ::tycho::SmartLine::_beta {id canvas slate beta} {
 #
 body ::tycho::SmartLine::_end {id canvas slate end} {
     set option(end$id) $end
-    set variable(state$id) 0
     redraw $id $canvas $slate
 }
 
@@ -485,7 +493,14 @@ body ::tycho::SmartLine::_smooth {id canvas slate smooth} {
 #
 body ::tycho::SmartLine::_start {id canvas slate start} {
     set option(start$id) $start
-    set variable(state$id) 0
+    redraw $id $canvas $slate
+}
+
+##########################################################################
+## -state option configuration
+#
+body ::tycho::SmartLine::_state {id canvas slate state} {
+    set option(state$id) $state
     redraw $id $canvas $slate
 }
 
@@ -507,10 +522,6 @@ body ::tycho::SmartLine::construct {id canvas slate tags x0 y0 x1 y1 args} {
     set component(segments$id) [$canvas create line $x0 $y0 $x1 $y1 \
 	    -fill $option(fill$id) -arrow $option(arrow$id) -tags $tags]
 
-    # Each line has a current state that controls its shape.
-    # Start in state 0.
-    set variable(state$id) 0
-    
     # Call redraw to do the work
     redraw $id $canvas $slate
 }
@@ -565,8 +576,8 @@ body ::tycho::SmartLine::redraw {id canvas slate} {
     }
 
     # Get the relative coordinates
-    set variable(state$id) [nextstate $id $type $variable(state$id) $x $y]
-    set coords [route_$type $id $variable(state$id) $x $y]
+    set option(state$id) [nextstate $id $type $option(state$id) $x $y]
+    set coords [route_$type $id $option(state$id) $x $y]
 
     # Swap north-south again if needed
     if { $flipped } {
@@ -761,6 +772,12 @@ body ::tycho::SmartLine::nextstate {id type state x y} {
     # Line parameters used by transition expressions
     set a $option(alpha$id)
     set b $option(beta$id)
+
+    # Check that the state option has not been set incorrectly
+    if { ! [::info exists transitions($type,$state)] } {
+	set option(state$id) 0
+	set state 0
+    }
 
     # We jump out of the while loop when no transitions are satisfied
     while { 1 } {
