@@ -23,7 +23,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 
 	codeblock(outputStepNumber){
-	smmr	ar1,#$addr(outputStepNumber)
+	smmr	ar1,#$addr(stepNumber)
 	}
 
 	// Inherit the setup method
