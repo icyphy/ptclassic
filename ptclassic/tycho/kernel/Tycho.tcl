@@ -88,6 +88,9 @@ set tychokernel $tycho/kernel
 global tycholib
 set tycholib $tycho/lib
 
+global tychoslate
+set tycholib $tycho/slate
+
 global tychoeditors
 set tychoeditors $tycho/editors
 
@@ -126,7 +129,11 @@ if [file isdirectory $PTOLEMY/tcltk/itcl/lib] {
 uplevel #0 {
     set ::auto_path [linsert $auto_path 0 $tychoeditors/textedit ]
     set ::auto_path [linsert $auto_path 0 $tychoeditors/visedit ]
-    set ::auto_path [linsert $auto_path 0 $tychoeditors/slate ]
+    set ::auto_path [linsert $auto_path 0 $tychoslate/kernel ]
+    set ::auto_path [linsert $auto_path 0 $tychoslate/pictures ]
+    set ::auto_path [linsert $auto_path 0 $tychoslate/shapes ]
+    set ::auto_path [linsert $auto_path 0 $tychoslate/interactors ]
+    set ::auto_path [linsert $auto_path 0 $tychoslate/combinators ]
     set ::auto_path [linsert $auto_path 0 $tycholib/widgets ]
     source $tychokernel/Lib.tcl
     source $tycholib/util/lib.tcl
