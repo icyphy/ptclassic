@@ -197,6 +197,10 @@ void Wormhole :: setStopTime(double) {
 	target->resetStopTime(getStopTime());
 }
 
+void Wormhole :: setup() {
+	initTarget();
+}
+
 int Wormhole :: run() {
 	if (!checkReady()) return TRUE;
 	setStopTime(1.0);		// 1.0 is dummy value.
@@ -208,8 +212,5 @@ int Wormhole :: run() {
 // arrange things after run
 void Wormhole :: sumUp() {}
 
-// should be redefined in the derived classes.  But, we can not
-// use abstract virtual method by some strange reason (compiler bug!) 
-// for now.
-double Wormhole :: getStopTime() { return 0 ;}
+
 
