@@ -35,7 +35,7 @@ class BlockList : public SequentialList
 {
 public:
 	// Add Block to list
-	void put(const Block* b) {SequentialList::put(b);}
+	void put(Block* b) {SequentialList::put(b);}
 
 	// Return size of list
 	int size() const {return SequentialList::size();}
@@ -44,7 +44,7 @@ public:
 	Block& head () const {return *(Block*) SequentialList::head();}
 
 	// Remove a Block from the list.  Note: block is not deleted
-	int remove (const Block* b) { return SequentialList::remove(b);}
+	int remove (Block* b) { return SequentialList::remove(b);}
 };
 
 	////////////////////////////////////
@@ -53,6 +53,7 @@ public:
 
 class Galaxy : public Block  {
 	friend class GalTopBlockIter;
+	friend class CGalTopBlockIter;
 private:
 	// Keep a list of component Blocks
 	BlockList	blocks;
@@ -60,7 +61,7 @@ private:
 protected:
 
 	// Add blocks to the list
-	void addBlock(const Block& b) {blocks.put(&b);}
+	void addBlock(Block& b) {blocks.put(&b);}
 
 	// Connect sub-blocks with a delay (default to zero delay)
 	void connect(GenericPort& source, GenericPort& destination,
@@ -112,7 +113,7 @@ public:
 	}
 
 	// Remove a block from the list
-	int removeBlock(const Block& b) { return blocks.remove(&b);}
+	int removeBlock(Block& b) { return blocks.remove(&b);}
 
         // States initialize
         void initState();
@@ -144,7 +145,7 @@ public:
 // Iterator classes associated with Galaxy
 class GalTopBlockIter : private ListIter {
 public:
-	GalTopBlockIter(const Galaxy& g) : ListIter(g.blocks) {}
+	GalTopBlockIter(Galaxy& g) : ListIter(g.blocks) {}
 	Block* next() { return (Block*)ListIter::next();}
 	Block* operator++() { return next();}
 	ListIter::reset;
