@@ -118,6 +118,7 @@ to become a permanent part of the system.
 #include "pt_fstream.h"
 #include <ctype.h>
 #include <stdio.h>
+#include <unistd.h>             // getpid()
 #include "paths.h"
 
 // Define DEBUG for dynamic linking debugging
