@@ -73,6 +73,9 @@ cleanup () {
 	$xrdb "$dbfile"
 	rm -f "$dbfile"
     fi
+    if [ -n "${xclockpid:-}" ]; then
+	kill $xclockpid
+    fi	
 }
 
 # On interrupt, clean up after ourselves
@@ -226,6 +229,25 @@ if [ $? != 0 ]; then
 fi
 
 $xrdb -merge "$PTOLEMY/lib/$resfile"
+
+if [ -z "`$xrdb -query`" ]; then
+    echo "$prg: 'xrdb -query' returned no X resources."
+    echo "      If you are running under the Hummingbird Exceed X Server"
+    echo "      then you may need to start up another client, such as"
+    echo "      'xclock &', before starting up Ptolemy."
+    echo "      Ptolemy will now attempt to startup xclock and try again."
+    xclock &
+    xclockpid=$!
+    echo "Sleeping 6 seconds"
+    sleep 6
+    $xrdb -merge "$PTOLEMY/lib/$resfile"
+    if [ -z "`$xrdb -query`" ]; then
+    	echo "$prg: 'xrdb -query' is still returning no resources. Exiting"
+	exit 1
+    else 
+	echo "$prg: starting up xclock fixed the xrdb problem."
+    fi	
+fi
 
 # Allow user-specified X resources
 if [ "${PIGIXRES:+x}" ]; then
