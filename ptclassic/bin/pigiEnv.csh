@@ -102,10 +102,10 @@ end
 if ( ! $?PIGIBASE ) then
      switch ($progname)
 	case ptiny:  
-		setenv PIGIBASE ptinyRpc
+		setenv PIGIBASE pigiRpc.ptiny
 		breaksw
 	case ptrim:
-		setenv PIGIBASE ptrimRpc
+		setenv PIGIBASE pigiRpc.ptrim
 		breaksw
 	case *:
 		setenv PIGIBASE pigiRpc
