@@ -55,6 +55,9 @@ proc pigilib_init_env {} {
 
 pigilib_init_env
 
+# Change color scheme to bisque
+tk_bisque
+
 # Load the help system for ptcl
 source $ptolemy/lib/tcl/ptcl_help.tcl
 
