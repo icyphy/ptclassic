@@ -68,10 +68,10 @@ when the run panel in the graphical interface is closed.
 }
 	}
 
-	hinclude { "MatlabIfc.h" }
+	hinclude { "MatlabPtIfc.h" }
 
 	protected {
-		MatlabIfc* matlabInterface;
+		MatlabPtIfc* matlabInterface;
 	}
 
 	constructor {
@@ -84,7 +84,7 @@ when the run panel in the graphical interface is closed.
 
 	begin {
 		if ( matlabInterface == 0 ) {
-		    matlabInterface = new MatlabIfc;
+		    matlabInterface = new MatlabPtIfc;
 		}
 		if ( ! matlabInterface->MatlabIsRunning() ) {
 		    if ( ! matlabInterface->StartMatlab() ) {
