@@ -11,7 +11,11 @@
 
 class Star : public Block  {
 
-protected:
+// Have to make the following public or make every individual
+// scheduler a friend.  It is not sufficient to make the base class
+// Scheduler a friend (is this yet another language defect?).
+
+public:
 	// The writer of a Star code has the option to
 	// provide the following methods
 
@@ -32,7 +36,6 @@ protected:
 	// Perform functions at wrapup, such as collecting stats
         virtual int wrapup() {};
 
-public:
 	// Method to print out description
 	virtual void profile ();
 };
