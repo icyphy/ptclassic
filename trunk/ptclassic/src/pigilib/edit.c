@@ -485,22 +485,14 @@ long userOptionWord;
     ViDone();
 }
 
-/* Declare the functions in kernelCalls that the next two funcs use */
-int numberOfDomains();
-char* nthDomainName();
-
 int
 RpcEditDomain(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    dmWhichItem *items;
     octObject facet;
-    char *domain, buf[MSG_BUF_MAX];
-    int i, which, nDomains;
-    char *temp;    /* for swapping two pointers to char */
-    int current = 0;    /* actual index of current domain */
+    char facetHandle[16];
 
     ViInit("edit-domain");
     ErrClear();
@@ -510,60 +502,12 @@ long userOptionWord;
         PrintErr(octErrorString());
         ViDone();
     }
-    if (!GOCDomainProp(&facet, &domain, DEFAULT_DOMAIN)) {
-        PrintErr(ErrGet());
-        ViDone();
-    }
+    ptkOctObj2Handle(&facet,facetHandle);
 
-    nDomains = numberOfDomains();
-
-    /* init data structure for dialog box... */
-    items = (dmWhichItem *) malloc(nDomains * sizeof(dmWhichItem));
-    for (i = 0; i < nDomains; i++) {
-        items[i].itemName = nthDomainName(i);
-        items[i].userData = NULL;
-        items[i].flag = 0;
-	/* Because dmWhichOne always makes items[0] as the default
-	   selected item, I put the current domain in items[0] so
-	   that the current domain is the default new domain.  So
-	   0 becomes the temperary index of the current domain.  The
-	   actual index of the current domain is saved in "current". */
-	if (i > 0 && !strcmp(items[i].itemName, domain)) {
-	    current = i;  /* actual index of current domain is "i" */
-	    /* swap items[0] and items[current] */
-	    temp = items[0].itemName;
-	    items[0].itemName = items[current].itemName;
-	    items[current].itemName = temp;
-        }
-    }
-
-    sprintf(buf, "domain = '%s'", domain);
-    /* dmWhichOne has a bug.  It doesn't always set 'which' to -1 when
-       no item is selected.  If the dialog box pops out with no default
-       selected item and the user doesn't touch any selection button and
-       directly clicks the "OK" or "Cancel" button, 'which' will be set
-       to a large integer.  So I add the test 'which >= nDomains'. */
-    if (dmWhichOne(buf, nDomains, items, &which, NULL, NULL) != VEM_OK
-        || which < 0 || which >= nDomains) {
-        PrintCon("Aborted entry");
-        ViDone();
-    }
-    /* Since we swapped items[0] and items[current], we must 
-       do the following adjustment on "which". */
-    if (which == 0) {
-	which = current;
-    } else if (which == current) {
-	which = 0;
-    }
-    domain = nthDomainName(which);
-    if (!SetDomainProp(&facet, domain)) {
-        PrintErr(ErrGet());
-        ViDone();
-    }
-    sprintf(buf, "domain = '%s'", domain);
-    PrintCon(buf);
-    free(items);
-    
+    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkChooseOne ",
+                   "[ptkGetDomainNames ", facetHandle, "]  ",
+                   " \"ptkSetDomain ", facetHandle, " %s \" ",
+                   (char *)NULL) )
     ViDone();
 }
 
