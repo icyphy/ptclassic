@@ -1,6 +1,12 @@
 defstar {
 	name {Not}
 	domain {BDF}
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	desc { A logical inverter: output is NOT of input }
 	version { $Id$ }
 	location { BDF main library }
