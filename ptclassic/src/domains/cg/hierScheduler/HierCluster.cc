@@ -41,61 +41,67 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "HierCluster.h"
 #include "Fraction.h"
 #include "DataFlowStar.h"
+#include "SDFScheduler.h"
+#include "LoopScheduler.h"
+#include "SDFCluster.h"
 
-// For the constructors, the HierCluster merge/absorb virtual methods
-// are not user - so we must set the repetitions count
-HierCluster::HierCluster(Star& s):Cluster(s) {
-    DataFlowStar& star = (DataFlowStar&)s;
-    repetitions = star.reps();
-    star.repetitions = 1;
+int HierCluster::absorb(Cluster& c, int removeFlag) {
+    adjustRepetitions((HierCluster&)c);
+    return Cluster::absorb(c, removeFlag);
 }
 
-HierCluster::HierCluster(Cluster& cluster):Cluster(cluster) {
-    repetitions = ((HierCluster&)cluster).repetitions;
+int HierCluster::merge(Cluster& c, int removeFlag) {
+    adjustRepetitions((HierCluster&)c);
+    return Cluster::merge(c, removeFlag);
 }
 
-HierCluster::HierCluster(Galaxy& galaxy):Cluster(galaxy) {
-    repetitions = 0;
-    GalStarIter nextStar(galaxy);
+int HierCluster::flatten(Galaxy* into, int removeFlag) {
+    adjustRepetitions(1);
+    return Cluster::flatten(into,removeFlag);
+}
+
+int HierCluster::flattenTest(Galaxy& g) {
+    return g.stateWithName("Scheduler")?FALSE:TRUE;
+}   
+
+Cluster* HierCluster::convertGalaxy(Galaxy& g) {
+    const char* schedType = g.stateWithName("Scheduler")->initValue();
+    HierCluster* cluster = (HierCluster*)Cluster::convertGalaxy(g);
+    Scheduler* scheduler;
+    if (strcmp(schedType,"Cluster") == 0)
+	scheduler = new SDFClustSched("");
+    else if (strcmp(schedType,"Loop") == 0)
+	scheduler = new LoopScheduler("");
+    else
+	scheduler = new SDFScheduler;
+    cluster->setScheduler(scheduler);
+    
+    GalStarIter nextStar(*cluster);
     DataFlowStar *star;
     while ((star = (DataFlowStar*)nextStar++) != NULL)
-	repetitions = gcd(repetitions,star->reps());
+	cluster->repetitions = gcd(star->repetitions,cluster->repetitions);
+
     nextStar.reset();
     while ((star = (DataFlowStar*)nextStar++) != NULL)
-	star->repetitions /= repetitions;
+	star->repetitions /= cluster->repetitions;
+    
+    return cluster;
 }
 
-int HierCluster::absorb(Block& block) {
-    adjustRepetitions(block);
-    return Cluster::absorb(block);
+Cluster* HierCluster::convertStar(Star& s) {
+    HierCluster* cluster = (HierCluster*)Cluster::convertStar(s);
+    DataFlowStar &star = (DataFlowStar&)s;
+    cluster->repetitions = star.repetitions;
+    star.repetitions = 1;
+    return cluster;
 }
 
-int HierCluster::merge(Cluster& c) {
-    adjustRepetitions(c);
-    return Cluster::merge(c);
-}
-
-int HierCluster::flatten() {
-    adjustRepetitions(1);
-    return Cluster::flatten();
-}
-
-void HierCluster::adjustRepetitions(Block& blockToMergeOrAbsorb) {
+void HierCluster::adjustRepetitions(HierCluster& clusterToMergeOrAbsorb) {
     // Compute the repetitions for the cluster
     int newRepetitions=0;
-    if (blockToMergeOrAbsorb.isItAtomic()) {
-	DataFlowStar& star = (DataFlowStar&) blockToMergeOrAbsorb;
-	newRepetitions = gcd(repetitions,star.reps());
-	if (newRepetitions > 1)
-	    star.repetitions /= newRepetitions;
-    }
-    else {
-	HierCluster& clusterToMergeOrAbsorb =
-	    (HierCluster&)blockToMergeOrAbsorb;
-	newRepetitions = gcd(repetitions,clusterToMergeOrAbsorb.repetitions);
-	clusterToMergeOrAbsorb.adjustRepetitions
-	    (clusterToMergeOrAbsorb.repetitions/newRepetitions);
-    }
+    newRepetitions = gcd(repetitions,clusterToMergeOrAbsorb.repetitions);
+    clusterToMergeOrAbsorb.adjustRepetitions
+	(clusterToMergeOrAbsorb.repetitions/newRepetitions);
     adjustRepetitions(newRepetitions);
 }
 	
@@ -134,65 +140,6 @@ int HierCluster::adjustRepetitions(int newRepetitionCount) {
     return TRUE;
 }
 
-// inline int reps(Block&b) {
-//     if (b.isItAtomic())
-// 	return ((DataFlowStar&)b).reps();
-//     else
-// 	return ((HierCluster&)b).repetitions;
-// }
 
-// enum { VISITED=0, DECENDENTS = 1};
 
-// HierCluster* findWellOrderCluster(Galaxy& g) {
-//     GalTopBlockIter nextBlock(g);
-//     Block* block;
-//     while ((block = nextBlock++) != NULL) {
-// 	// check if the 'block' is in the well-ordered chain:
-// 	// first -> block -> farBlock -> last and if so
-// 	// we return cluster the 'block' and 'anotherFarBlock
 
-// 	// If we have already tested this block, continue
-// 	if (block->flags[VISITED]) continue;
-// 	block->flags[VISITED] = TRUE;
-
-// 	BlockPortIter* myNextPort(*block);
-// 	PortHole* port;
-// 	Block *first(NULL), *farBlock(NULL), *last(NULL);
-// 	int continueFlag(FALSE);
-
-// 	// FIXME - We should take into account delays and ignore
-// 	// ports which are connected to geodesics with enough delay
-// 	while ((port = myNextPort++) != NULL) {
-// 	    Block* anotherFarBlock = port->far()->parent();
-// 	    if (port->isItInput()) {
-// 		if (anotherFarBlock == block) continue;
-// 		if (first && anotherFarBlock!=first) break;
-// 		first = anotherFarBlock;
-// 	    }
-// 	    else {
-// 		if (anotherFarBlock == block) continue;
-// 		if (farBlock && anotherFarBlockfarBlock!=farBlock) break;
-// 		if (reps(farBlock) != reps(anotherFarBlockfarBlock)) break;
-// 		farBlock = anotherFarBlock;
-// 	    }
-// 	}
-
-// 	// If port is not null we have broken out of the while loop
-// 	// prematurely which means this block is not on a well-ordered
-// 	// chain
-// 	if (port) continue;
-
-// 	if (farBlock) {
-// 	    // Now check the far block decendents
-// 	    BlockPortIter nextFarBlockPort(*farBlock);
-// 	    while ((port = nextFarBlockPort++) != NULL) {
-// 	    }
-// 	}
-//     }
-//     return (HierCluster*)NULL;
-// }
-
-// int wellOrderCluster(Galaxy& g) {
-//     // We do this so that we only visit each node once
-//     resetFlags(g);
-// }

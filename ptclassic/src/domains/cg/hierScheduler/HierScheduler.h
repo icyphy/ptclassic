@@ -1,5 +1,5 @@
-#ifndef _MultiScheduler_h
-#define _MultiScheduler_h
+#ifndef _HierScheduler_h
+#define _HierScheduler_h
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -9,7 +9,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -30,7 +30,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-				ov			COPYRIGHTENDKEY
+							COPYRIGHTENDKEY
 
 Programmer: Jose Luis Pino
 
@@ -38,14 +38,12 @@ Programmer: Jose Luis Pino
 
 #include "ParScheduler.h"
 
-class CGCluster;
-
-class MultiScheduler : public ParScheduler {
+class HierScheduler : public ParScheduler {
 public:
-    MultiScheduler(MultiTarget* t, const char* log, ParScheduler& top):
-    ParScheduler(t, log), topScheduler(top), topCluster(0){};
+    HierScheduler(MultiTarget* t, const char* log, ParScheduler& top):
+    ParScheduler(t, log), topScheduler(top){};
 
-    ~MultiScheduler();
+    ~HierScheduler();
 
     /*virtual*/ void setup();
 
@@ -71,7 +69,6 @@ public:
 
 private:
     ParScheduler& topScheduler;
-    CGCluster* topCluster;
     int sdfStars;
 };
 
