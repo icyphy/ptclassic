@@ -145,14 +145,9 @@ int CompileTarget::run() {
     myCode += "#include \"GalIter.h\"\n";
     myCode += galDef(galaxy(), universeClassName, 0);
 
-    myCode += "\n// Constant setting whether or not to include Tcl/Tk\n";
-    myCode += "#define SDF_COMPILE_TCL_TK ";
-    myCode += includeTclTkFlag;
-    myCode += "\n";
-
-    myCode += "\n#if SDF_COMPILE_TCL_TK\n";
-    myCode += tcltkSetup();
-    myCode += "#endif\n";
+    if ( int(includeTclTkFlag) ) {
+      myCode += tcltkSetup();
+    }
 
     myCode += "\n// MAIN FUNCTION\n";
     myCode += "main(int argc, char** argv) {\n";
@@ -174,9 +169,9 @@ int CompileTarget::run() {
     myCode += universeName;
     myCode += ".parseCommandLine(argc, argv, &iterations);\n";
 
-    myCode += "\n#if SDF_COMPILE_TCL_TK\n";
-    myCode += tcltkInitialize(universeName);
-    myCode += "#endif\n";
+    if ( int(includeTclTkFlag) ) {
+      myCode += tcltkInitialize(universeName);
+    }
 
     myCode += "\n// INITIALIZE CODE\n";
     myCode += universeName;
