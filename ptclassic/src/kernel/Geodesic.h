@@ -18,27 +18,39 @@ Geodesic is where Particles reside in transit between
 Blocks. It is a container class, which stores and retreives
 Particles. Actually it stores only Particle*'s, so that its
 operation is independent of the type of Particle.
+
+Geodesics can be created named or unnamed.
 *****************************************************************/
 
+#include "NamedObj.h"
 #include "ParticleStack.h"
+
+class GenericPort;
 class PortHole;
 
 	///////////////////////////////////////////
 	// class Geodesic
 	///////////////////////////////////////////
 
-class Geodesic : private ParticleStack
+class Geodesic : private ParticleStack, public NamedObj
 {
 public:
-	// A lot of things are kept public, unfortunately, because
-	//  these routines are called by a lot of different
-	//  types of PortHoles -- impossible to make them
-	//  all friends
+	// set the source and destination portholes -- virtual
+	// these functions return a pointer to the "real porthole"
+	// on success, NULL on failure.
+	virtual PortHole* setSourcePort (GenericPort &);
+	virtual PortHole* setDestPort (GenericPort &);
 
-        // We keep a pointer to the PortHoles corresponding to
-        // this Geodesic
-        PortHole *originatingPort;
-        PortHole *destinationPort;
+	// disconnect from porthole
+	virtual int disconnect (PortHole &);
+
+	// return true if the Geodesic is persistent
+	// (may exist in a disconnected state)
+	virtual int isItPersistent();
+
+	// return who is connected to source, destination
+	PortHole* sourcePort () const { return originatingPort;}
+	PortHole* destPort () const   { return destinationPort;}
 
         // Constructor
         Geodesic() : ParticleStack(0)
@@ -48,10 +60,8 @@ public:
 		numInitialParticles = sz = 0;
 	}
 
-	// Destructor -- frees up all particles first
-	virtual ~Geodesic() {
-		freeup();
-	}
+	// Destructor -- virtual since we have subclasses
+	virtual ~Geodesic();
 
 	// initialize() for Geodesic initializes the number of Particles
 	// to that given by the numInitialParticles field, and
@@ -72,12 +82,19 @@ public:
 	// Return the number of Particles on the Geodesic
 	int size() const {return sz;}
 
+	// Information printing
+	StringList printVerbose();
+
         // A connection may require some initial particles.
         // Note that the SDFScheduler manipulates this number directly, but
         // guarantees that when it is done, the value will
         // be the same as when it started, or the run will have been aborted
         // due to a sample-rate inconsistency.
 	int numInitialParticles;
+protected:
+	void portHoleConnect();
+        PortHole *originatingPort;
+        PortHole *destinationPort;
 private:
 	int sz;
 };
