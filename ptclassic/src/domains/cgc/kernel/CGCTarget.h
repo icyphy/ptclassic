@@ -97,6 +97,9 @@ public:
 	// return TRUE if a function is being defined.
 	int makingFunc() { return (getStream("mainInit") != &mainInit); }
 
+	// Splice in stars.
+	/*virtual*/ int modifyGalaxy();
+
 protected:
 
 	/*virtual*/ void setup();
@@ -124,9 +127,6 @@ protected:
 
 	// virtual function to initialize strings
 	virtual void initCodeStrings();
-
-	// Splice in stars.
-	/*virtual*/ int modifyGalaxy();
 
 	// buffer size determination
 	int allocateMemory();
