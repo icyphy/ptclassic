@@ -38,27 +38,32 @@
 # -- If Matlab is installed, then set MATLABDIR accordingly
 #
 # The Matlab include files are located in $(MATLABDIR)/extern/include
-# At compile time, sdfmatlabstars.o and libsdfmatlabstars.a are created
+# At compile time, sdfmatlabstars.o and libsdfmatlabstars.so are created
 # At link time, Ptolemy is linked against libexttools.so (MatlabIfc class)
 # and either
 # (a) libptmatlab.so if Matlab is not installed, or
-# (b) libmat.a if Matlab is installed.
+# (b) libmat.so if Matlab is installed.
 #
 # If Matlab is installed, the old way to determine the Matlab architecture is
 # MATARCH := $(shell $(ROOT)/bin/matlabArch $(PTARCH))
 # Now, MATARCH is set by the config makefiles.
-#
 
 # matlabRootDir traverses the user's path, so we only run it when
 # we really need it.
 ifdef NEED_MATLABDIR
-	MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
-
-	ifeq ("$(MATLABDIR)","")
-	MATLABDIR= 		$(ROOT)/src/compat/matlab
-	MATLABEXT_LIB = 	-lptmatlab
+	# config-default.mk sets INCLUDE_MATLAB to no
+	ifeq ($(INCLUDE_MATLAB),no) 
+		MATLABDIR= 		$(ROOT)/src/compat/matlab
+		MATLABEXT_LIB = 	-lptmatlab
 	else
-	MATLABEXT_LIB = 	-L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
+		MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
+
+		ifeq ("$(MATLABDIR)","")
+		MATLABDIR= 		$(ROOT)/src/compat/matlab
+		MATLABEXT_LIB = 	-lptmatlab
+		else
+		MATLABEXT_LIB = -L$(MATLABDIR)/extern/lib/$(MATARCH) -leng -lmat
+		endif
 	endif
 	MATLAB_INCSPEC =	-I$(MATLABDIR)/extern/include
 endif
