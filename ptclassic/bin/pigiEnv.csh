@@ -241,11 +241,17 @@ if ( $?pigiconsole ) then
         setenv TAILARGS -console
 endif
 if ( $?pigidebug ) then
-        if ( "$ARCH" == "hppa.cfront" ) then
-                setenv COMMAND $PTOLEMY/lib/pigiRpcDebug.xdb
-        else
-                setenv COMMAND $PTOLEMY/lib/pigiRpcDebug
-        endif
+	switch ($ARCH)
+		case hppa.cfront:
+	                setenv COMMAND $PTOLEMY/lib/pigiRpcDebug.xdb
+			breaksw
+		case sol2.cfront:
+	                setenv COMMAND $PTOLEMY/lib/pigiRpcDebug.dbx
+			breaksw
+		case *:
+	                setenv COMMAND $PTOLEMY/lib/pigiRpcDebug
+			breaksw
+	endsw
 else if ( $?pigiconsole ) then
         setenv COMMAND $PTOLEMY/lib/pigiRpcConsole
 endif
