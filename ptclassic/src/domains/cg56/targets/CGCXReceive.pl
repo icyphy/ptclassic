@@ -27,7 +27,12 @@ codeblock(receiveData,"const char* command, int numXfer") {
     /* wait for dsp buffer to be full */
     while ( --count && (~s56xSemaphores[@(pairNumber/24)] & semaphoreMask ));
     if (count == 0) EXIT_CGC("The S-56X board is failing to send data.  Is there another process still attached to the DSP?");
-    if (qckGetBlkItem(dsp,$starSymbol(s56xBuffer),value,@numXfer) == -1){
+#if @(numXfer-1)
+    if (qckGetBlkItem(dsp,$starSymbol(s56xBuffer),value,@numXfer) == -1)
+#else
+    if ((value[0] = qckPeekItem(dsp,$starSymbol(s56xBuffer))) == -1)
+#endif
+     {
 	char buffer[128];
 	sprintf(buffer, "Receive Data Failed, Pair @pairNumber: %s",
 		qckErrString);
