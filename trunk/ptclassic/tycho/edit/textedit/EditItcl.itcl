@@ -316,7 +316,6 @@ body ::tycho::EditItcl::gendocBuffer {} {
         ::tycho::rm -f $docfile
         ::tycho::HTMLDocSys::generateHTML \
                 $verbose $debug $generateIndex {An Itcl Class} $tail
-        ::tycho::File::openContext $docfile
     }]
 }
 
@@ -447,6 +446,5 @@ body ::tycho::EditItcl::gendoc {filename} {
         ::tycho::rm -f $docfile
         ::tycho::HTMLDocSys::generateHTML \
                 $verbose $debug $generateIndex {An Itcl Class} $tail
-        ::tycho::File::openContext $docfile
     }]
 }
