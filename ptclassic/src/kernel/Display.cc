@@ -195,7 +195,8 @@ void XGraph :: addPoint (int dataSet, float x, float y) {
 void XGraph :: newTrace(int dataSet) {
 	index = 0;
 	FILE* fd = strm[dataSet-1];
-	if (!fd) return;
+	// do nothing if file not open or we are ignoring input
+	if (!fd || count[dataSet-1] < nIgnore) return;
 	if (ascii)
 		fprintf(fd, "move ");
 	else
