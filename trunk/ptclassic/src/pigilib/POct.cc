@@ -1598,6 +1598,37 @@ int POct::ptkSetEventLoop (int aC,char** aV) {
     return TCL_OK;
 }
 
+// returns the name associated with the passed facet handle
+// written by Xavier Warzee 12/94
+// installed into Ptolemy by Alan Kamas 3/95
+int POct::ptkGetStarName(int aC,char** aV) {
+     octObject facet;
+     char *starName;
+
+     if (aC != 2) return
+          usage("ptkGetStarName <octObjectHandle>");
+
+     if(strcmp(aV[1],"NIL")==0) return result("NIL");
+
+     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
+          Tcl_AppendResult(interp, "Bad or Stale facet Handle passed to ", 
+                           aV[0], (char *) NULL);
+          return TCL_ERROR;
+     }
+
+     // get the name from the oct object:
+     GetStarName( &facet, &starName);
+
+     // Make sure that the starName is defined
+     if (starName == NULL) {
+	  return result("NIL");
+     } else {
+          Tcl_AppendResult(interp, starName, (char *) NULL);
+     }
+     return TCL_OK;
+}
+
+
 // An InterpFuncP is a pointer to an PTcl function that takes an argc-argv
 // argument list and returns TCL_OK or TCL_ERROR.
 
@@ -1647,6 +1678,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(ptkGetRunLength),
 	ENTRY(ptkSetRunLength),
 	ENTRY(ptkSetEventLoop),
+        ENTRY(ptkGetStarName),
 	{ 0, 0 }
 };
 

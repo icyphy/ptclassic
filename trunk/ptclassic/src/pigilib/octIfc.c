@@ -56,6 +56,23 @@ static boolean SetParamProp();
 extern char* HashString();
 extern char* curDomainName();
 
+
+/* 
+returns a pointer to the name of the passed Oct Object in "namePtr"
+written by Xavier Warzee 12/94 - installed into Ptolemy by Alan Kamas 3/95
+*/
+boolean GetStarName(instPtr, namePtr)
+octObject *instPtr;
+char** namePtr;
+{
+    char *starName;
+    starName = AkoName(instPtr->contents.instance.master);
+    *namePtr = strdup(starName);
+
+    return TRUE;
+}
+
+
 /* 8/14/89
 Opens the master of an instance, but allows you to choose which facet.
 i is the instance pointer, f is the facet, and m is the mode.  t points
