@@ -47,10 +47,8 @@ for a complete explanation of the options.
 	hinclude { "Display.h" }
 
 	start {
-		graph.initialize(input.numberPorts(),
-			(const char*) options,
-			(const char*) title,
-			(const char*) saveFile);
+		graph.initialize(this, input.numberPorts(),
+			options, title, saveFile);
 		index = 0;
 	}
 
