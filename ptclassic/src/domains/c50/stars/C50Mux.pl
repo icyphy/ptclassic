@@ -25,7 +25,7 @@ memory mapped devices) will be copied.
 <p>
 There are potentially very many special cases that could be handled
 for increased efficiency: looped vs. non-looped, circular vs. linear,
-and scalars vs vectors <i>blockSize(/i) &gt; 1, uniform inputs vs. non-uniform
+and scalars vs vectors (<i>blockSize</i> &gt 1), uniform inputs vs. non-uniform
 inputs (port.bufSize()).
 The current implementation handles only some of these cases.
 Use this star at your own risk.
@@ -36,7 +36,7 @@ The <i>control</i> input is used to index this table, yielding a pointer
 to the appropriate input block for the firing.
 <p>
 Currently we advance each of the pointers in the table on every firing.
-With some schedule the advancement is a nop; this case is handled.
+With some schedules the advancement is a nop; this case is handled.
 In other schedules the advancement is periodic over all inputs; in this
 case, we could pre-calculate a set of tables at compile time instead
 of performing runtime advancement.
