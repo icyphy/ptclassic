@@ -24,10 +24,7 @@
 class DEWormhole : public Wormhole, public DEStar {
 
 public:
-	// redefine "go()". After running the inside scheduler,
-	// it stamps the time for the OutDEEventHorizons.
-
-	// Restriction 2 : all outputs are synchronized.
+	// Restriction : all outputs are synchronized.
 
 	void start() {Wormhole :: setup() ;}
 	void go();
@@ -36,6 +33,9 @@ public:
 	DEWormhole(Galaxy &g) : Wormhole(*this,g) {
 		buildEventHorizons ();
 	}
+
+	// return my scheduler
+	Scheduler* mySched() { return scheduler ;}
 
 	// print methods
 	StringList printVerbose() { return Wormhole :: print(0);}
