@@ -16,13 +16,7 @@ void vdk_cint_ptolemyiir(vis_s16 *src, vis_s16 *dst, int dlen, vis_s16
       dst[i] = (taps0[2]*nextstate + taps0[3]*state1 + taps0[4]*state2)>>15;
       state2=state1;
       state1=nextstate;
-      /*printf("src0=%i",src[i]);*/
-      printf("nextstate=%i;",nextstate);
-      /*printf("state\n");
-      printf("state1=%i\tstate2=%i\n",state1,state2);*/
-    }
-      printf("\n");
-
+     }
  }
 
 /***************************************************************/
@@ -37,9 +31,7 @@ void vdk_cfloat_ptolemyiir(vis_d64 *src, vis_d64 *dst, int dlen, vis_d64 *taps1)
       dst[i] = taps1[2]*nextstate + taps1[3]*state1 + taps1[4]*state2;
       state2=state1;
       state1=nextstate;
-      printf("nextstate=%f",nextstate);
     }
-      printf("\n");
  }
 
 /***************************************************************/

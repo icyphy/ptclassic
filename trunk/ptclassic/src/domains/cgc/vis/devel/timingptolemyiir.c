@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 #include "vis_types.h"
+#include "vis_proto.h"
 
 #define NTIME 1000
 #define LENGTH 8192
@@ -86,6 +87,7 @@ taps1 = (vis_d64 *) memalign(sizeof(double),sizeof(double)*5);
   taps0[2] = (short) SCALETAPS/scaledown*numtaps[0];
   taps0[3] = (short) SCALETAPS/scaledown*numtaps[1];
   taps0[4] = (short) SCALETAPS/scaledown*numtaps[2];
+  printf("%i %i %i %i\n",taps0[0],taps0[3],taps0[1],taps0[4]);
 
   taps1[0] = dentaps[0];
   taps1[1] = dentaps[1];
@@ -93,13 +95,14 @@ taps1 = (vis_d64 *) memalign(sizeof(double),sizeof(double)*5);
   taps1[3] = numtaps[1];
   taps1[4] = numtaps[2];
  
-  vis_write_gsr(6);
+  vis_alignaddr(0,6);
+  tmp = (short *) taps0;
   taps2 = vis_fzero();
   n0 = taps0[2];
-  t0 = taps0[0];
-  t1 = taps0[3];
-  t2 = taps0[1];
-  t3 = taps0[4];
+  t0 = vis_ld_u16(tmp);
+  t1 = vis_ld_u16(tmp+3);
+  t2 = vis_ld_u16(tmp+1);
+  t3 = vis_ld_u16(tmp+4);
   taps2 = vis_faligndata(t3,taps2);
   taps2 = vis_faligndata(t2,taps2);
   taps2 = vis_faligndata(t1,taps2);
