@@ -28,10 +28,7 @@ the next B particles to the next output, etc.
 	start {
 		int n = output.numberPorts();
 		input.setSDFParams(n*int(blockSize),n*int(blockSize)-1);
-		MPHIter nexto(output);
-		PortHole* p;
-		while((p = nexto++) != 0)
-		   ((SDFPortHole*)p)->setSDFParams(int(blockSize),int(blockSize)-1);
+		output.setSDFParams(int(blockSize),int(blockSize)-1);
 	}
 // note: delay 0 is the newest sample, so we must read backwards
 	go {

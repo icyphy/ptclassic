@@ -33,11 +33,8 @@ this range, an error is signaled.
 		desc {Number of particles in a block.}
 	}
 	start {
-		MPHIter nexti(input);
-		PortHole* p;
-		while((p = nexti++) != 0)
-		   ((SDFPortHole*)p)->setSDFParams(int(blockSize),int(blockSize)-1);
 		output.setSDFParams(int(blockSize),int(blockSize)-1);
+		input.setSDFParams(int(blockSize),int(blockSize)-1);
 	}
 	go {
 	    int n = int(control%0);
