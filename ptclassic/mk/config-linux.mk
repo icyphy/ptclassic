@@ -83,7 +83,6 @@ DLLIB	=	-ldl
 CPP	=	gcc -E -D__ELF__
 OBJDUMP	=	objdump
 OBJDUMP_FLAGS =	-k -q 
-LDFLAGS	=	#-e startup_32 
 else
 AS	=	/usr/i486-linuxaout/bin/as
 LD	=	/usr/i486-linuxaout/bin/ld -m i386linux
