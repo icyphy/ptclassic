@@ -137,9 +137,10 @@ SYSLIBS =	-lg++ -lstdc++ $(CSYSLIBS)
 #
 # Directories to use
 #
-X11_INCSPEC =	-I/usr/X11/include
+X11DIR = /usr/openwin
+X11_INCSPEC =	-I$(X11_DIR)/include
 # Statically link X11 so we can ship something that works
-X11_LIBSPEC =	-Wl,-Bstatic -L/usr/X11/lib -lX11 $(LD_DYNAMIC)
+X11_LIBSPEC =	-Wl,-Bstatic -L$(X11_DIR)/lib -lX11 $(LD_DYNAMIC)
 
 # Use -lSM -lICE for X11R6, don't use then for X11R5
 X11EXT_LIBSPEC=-lXext -lSM -lICE
