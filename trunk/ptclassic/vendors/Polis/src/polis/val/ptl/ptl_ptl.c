@@ -357,7 +357,6 @@ static void pl_print_state( fp, node, compat, unittime )
     fprintf( fp, "    type { string }\n" );
     fprintf( fp, "    default { \"{SCHEDULER}\" }\n" );
     fprintf( fp, "    desc {Scheduling Policy to be used for simulation }\n" );
-    fprintf( fp, "    attributes { A_NONSETTABLE }\n" );
     fprintf( fp, "  }\n" );
     fprintf( fp, "  state {\n" );
     fprintf( fp, "    name { firename }\n" );
