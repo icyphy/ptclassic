@@ -41,7 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "oh.h"
 #include <sys/file.h>
 
-#if defined(linux)
+#if defined(linux) || defined(PTSVR4)
 #include <unistd.h>
 #endif
 
