@@ -184,6 +184,9 @@ public:
 	// class identification
 	int isA(const char*) const;
 
+	// send a string to an external interpreter for evaluation
+	const char* externalInterpreter(const char* expression);
+
 protected:
 	// get Token  from  string 
 	virtual ParseToken getParseToken(Tokenizer&, int = T_Float);
