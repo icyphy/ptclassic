@@ -272,7 +272,10 @@ void BDFClustPort::receiveData() {
 			if (duped()) broadcastDupData(this);
 		}
 	}
-	else getParticle();
+	else {
+		getParticle();
+		alreadyReadFlag = TRUE;
+	}
 }
 
 // see if signal is needed as ctl signal.
