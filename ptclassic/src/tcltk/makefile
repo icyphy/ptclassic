@@ -91,7 +91,7 @@ ENABLE_GCC =		--enable-gcc --disable-load
 ITCL_MAJOR_VERSION =	itcl2.0
 ITCL_MAJOR_VERSION_NUMBER = 2.0
 ITCL_MAJOR_VERSION_INT = 2
-ITCL_VERSION =		itcl2.0
+ITCL_VERSION =		itcl2.0plus
 
 IWIDGETS_VERSION =	iwidgets2.0.1
 
