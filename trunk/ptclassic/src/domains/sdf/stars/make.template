@@ -107,8 +107,6 @@ PL_SRCS= \
  SDFLog.pl \
  SDFLogic.pl \
  SDFMaxMin.pl \
- SDFMax.pl \
- SDFMin.pl \
  SDFModulo.pl \
  SDFModuloInt.pl \
  SDFMpy.pl \
