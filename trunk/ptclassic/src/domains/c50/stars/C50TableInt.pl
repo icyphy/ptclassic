@@ -49,11 +49,10 @@ This is currently not supported in the C50 domain.
 ; There is no check to make sure that the index is in bounds
 	}
 	codeblock(lookup) {
-	lacc	#$addr(values),0
-	lar	ar0,#$addr(input)
-	mar	*,ar0
-	add	*
-	samm	ar0
+	lmmr	indx,#$addr(input)
+	lar	ar1,#$addr(values)
+	mar	*,ar1
+	mar	*0+
 	bldd	*,#$addr(output)
 	}
 	go {
@@ -61,7 +60,7 @@ This is currently not supported in the C50 domain.
 		addCode(lookup);
 	}
 	exectime {
-		return 6;
+		return 5;
 	}
 }
 
