@@ -28,12 +28,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	output {
 		name { output }
-		type { anytype }
+		type { ANYTYPE }
 	}
 	protected {
 		int readyToGo;
 	}
-
 	constructor {
 		input.inheritTypeFrom(output);
 	}
@@ -57,18 +56,18 @@ limitation of liability, and disclaimer of warranty provisions.
 		}
 
 		InDDFMPHIter nexti(input);
-		InDDFPort* iportp = nexti++;
 		for (int i = 0; i < inputNum; i++) {
-			iportp = nexti++;
+			nexti++;
 		}
-		if (iportp->numTokens() >= iportp->numXfer()) {
-			iportp->receiveData();
-			output%0 = (*iportp)%0;
+		InDDFPort& iport = *(InDDFPort *)nexti++;
+		if (iport.numTokens() >= iport.numXfer()) {
+			iport.receiveData();
+			output%0 = iport%0;
 			output.sendData();
 			waitFor(control);
 			readyToGo = FALSE;
 		} else {
-			waitFor(*iportp);
+			waitFor(iport);
 			readyToGo = TRUE;
 			return;
 		}
