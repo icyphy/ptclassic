@@ -365,8 +365,14 @@ proc ::tycho::rmIfNotWritable { file } {
 # should get back <CODE>$TYCHO/README</CODE>.
 #
 # If we cannot simplify the pathname, then we return the original pathname.
-# The first environment variable that matches a non-zero number of characters
-# is the environment variable that is used
+#
+# If we specify a list of environment variables, then the first environment
+# variable that matches a non-zero number of characters is the environment
+# variable that is used
+#
+# If we don't specify a list of environment variables (the default), then
+# we return the shortest string that results from subsituting environment
+# variables.
 #
 # The following example expands and then simplifies $TYCHO/README.files:
 # <tcl><pre>
@@ -375,20 +381,35 @@ proc ::tycho::rmIfNotWritable { file } {
 #    [list TYCHO]]
 # </pre></tcl>
 # 
-proc ::tycho::simplifyPath {pathName envVarList} {
+proc ::tycho::simplifyPath {pathName {envVarList {}}} {
     global env
+    set returnOnFirstMatch 1
     set expandedPathName [::tycho::expandPath $pathName]
+    if {$envVarList == {}} {
+	# Return the shortest string, since we have no idea what order
+	# we are getting the environment variables
+	set returnOnFirstMatch 0
+	set envVarList [array names env]
+    }
+    set lastMatch $expandedPathName
     foreach envVar $envVarList {
 	if [info exists env($envVar)] {
 	    set expandedEnvVar [::tycho::expandPath $env($envVar)]
 	    if { [string first $expandedEnvVar $expandedPathName] != -1} {
-		return [file join \$$envVar [string range $expandedPathName \
+		set goodMatch [file join \$$envVar \
+			[string range $expandedPathName \
 			[expr {[string length $expandedEnvVar] +1 }] \
 			end]]
+		if {$returnOnFirstMatch == 1} {
+		    return $goodMatch
+		}
+		if {[string length $goodMatch] < [string length $lastMatch]} {
+		    set lastMatch $goodMatch
+		}
 	    }
 	}
     }
-    return $pathName
+    return $lastMatch
 }
 
 #####################################################################
