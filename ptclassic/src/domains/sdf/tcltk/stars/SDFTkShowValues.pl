@@ -34,6 +34,12 @@ create problems.
         default { "YES" }
         desc {Specify to put bars in the control panel (vs. their own window)}
     }
+    defstate {
+        name {wait_between_outputs}
+        type {int}
+        default { "NO" }
+        desc {Specify whether to wait for user input between output values}
+    }
     setup {
         if (output.numberPorts() > 0) {
             Error::abortRun(*this, "Outputs not supported");
@@ -53,6 +59,11 @@ create problems.
            Tcl_SetVar(ptkInterp,"putInCntrPan","1",TCL_GLOBAL_ONLY);
         } else {
            Tcl_SetVar(ptkInterp,"putInCntrPan","0",TCL_GLOBAL_ONLY);
+        }
+        if(int(wait_between_outputs)) {
+           Tcl_SetVar(ptkInterp,"waitBetweenOutputs","1",TCL_GLOBAL_ONLY);
+        } else {
+           Tcl_SetVar(ptkInterp,"waitBetweenOutputs","0",TCL_GLOBAL_ONLY);
         }
         SDFTclScript::setup();
     }

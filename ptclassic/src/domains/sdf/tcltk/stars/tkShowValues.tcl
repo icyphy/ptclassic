@@ -44,8 +44,12 @@ if {![winfo exists $s]} {
         message $win.msg -font -Adobe-times-medium-r-normal--*-180* -width 12c \
 	    -text $label
 
+	# The following flag is used if the waitBetweenOutputs parameter is set
+	global tkShowValueWaitTrig
+	set tkShowValueWaitTrig 0
         for {set i 0} {$i < $numInputs} {incr i} {
-    	    label $win.f.m$i -relief raised -width 40 -bg AntiqueWhite
+    	    button $win.f.m$i -relief raised -width 40 -bg AntiqueWhite \
+		-command "incr tkShowValueWaitTrig" 
 	    pack append $win.f $win.f.m$i {top frame w pady 4 expand filly}
         }
         pack append $win $win.msg {top expand} $win.f top
@@ -69,9 +73,26 @@ if {![winfo exists $s]} {
         update
     }
 
+    proc tkShowValueWait {flag uniqueSymbol numInputs win} {
+	if {$flag} {
+	    for {set i 0} {$i < $numInputs} {incr i} {
+	        $win.f.m$i configure -bg {orange}
+	        $win.f.m$i configure -activebackground {tan3}
+	    }
+	    global tkShowValueWaitTrig
+	    set tkShowValueWaitTrig 0
+	    tkwait variable tkShowValueWaitTrig
+	    for {set i 0} {$i < $numInputs} {incr i} {
+	        $win.f.m$i configure -bg {AntiqueWhite}
+	        $win.f.m$i configure -activebackground {tan}
+	    }
+	}
+    }
+
     # In the following definition, the value of uniqueSymbol and
     # numInputs is evaluated when the file is sourced.
     proc ${uniqueSymbol}callTcl {} "
         tkShowValueSetValues $uniqueSymbol $numInputs $s
+	tkShowValueWait $waitBetweenOutputs $uniqueSymbol $numInputs $s
     "
 }
