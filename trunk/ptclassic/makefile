@@ -47,10 +47,12 @@ obj.$(ARCH):		MAKEARCH
 	csh -f MAKEARCH
 
 # Usually rebuilding vem and the octtools library is not done everytime.
+# Currently, vem will not run properly if it is built with gcc.
+OCT_CC=cc
 octtools: obj.$(ARCH)
-	cd obj.$(ARCH)/octtools; $(MAKE) $(MFLAGS) all
+	cd obj.$(ARCH)/octtools; $(MAKE) CC=$(OCT_CC) $(MFLAGS) all
 install_octtools: obj.$(ARCH)
-	cd obj.$(ARCH)/octtools; $(MAKE) $(MFLAGS) install
+	cd obj.$(ARCH)/octtools; $(MAKE) CC=$((OCT_CC) $(MFLAGS) install
 
 # This rule builds and installs gcc and tcl/tk from scratch, then octtools,
 # then everything else.  gcc and tcl/tk source are usually distributed as a
