@@ -29,11 +29,15 @@ public:
 	Block* myTopology;
 
 	int initialize() {scheduler.setup(*myTopology);}
-	int go() {scheduler.run(*myTopology);}
+	int go(int numIterations = 1)
+		{scheduler.run(*myTopology, numIterations);}
 	int wrapup () {scheduler.wrapup(*myTopology);}
 
 	// Redefine profile method
 	virtual void profile ();
+
+	// Display the schedule
+	void displaySchedule() {scheduler.displaySchedule();}
 
 protected:
 	// The addBlock method should get invoked only once, with a
