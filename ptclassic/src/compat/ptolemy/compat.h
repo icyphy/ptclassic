@@ -223,9 +223,14 @@ extern void bzero(char *, int); 	/* vem/rpc/server.c */
 extern int fgetc(FILE *);
 extern int fputs(const char *, FILE *);
 
-/* pxgraph/xgraph.c, octtools/Xpackages/rpc/{appOct.c,rpc.c} all call fread()*/
+/* pxgraph/xgraph.c, octtools/Xpackages/rpc/{appOct.c,rpc.c},
+   utils/libptdsp/ptdspMuLaw.c all call fread()*/
 extern long unsigned int 
 fread(void *, long unsigned int, long unsigned int, FILE *);
+
+/* utils/libptdsp/ptdspMuLaw.c uses fseek */
+int fseek(FILE *, long, int);
+
 extern long unsigned int 
 fwrite(const void *, long unsigned int, long unsigned int, FILE *);
 
