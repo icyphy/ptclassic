@@ -40,6 +40,9 @@ public:
 
 	Block* clone() const = 0;
 
+	// Total Number of Labels generated.
+	int numLabels;
+
 	// Initialize proc. pointers and create the schedule.
 	// Then allocate memory for all stars.
 	int setup(Galaxy&);

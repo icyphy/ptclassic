@@ -29,8 +29,6 @@ extern const Attribute A_REVERSE(AB_REVERSE,0);
 extern const Attribute A_CONSEC(AB_CONSEC,0);
 extern const Attribute A_SYMMETRIC(AB_SYMMETRIC,0);
 
-int AsmStar::numLabels = 0 ;
-
 // Generate code
 void AsmStar::fire() {
 	// No need to grab data, so just go.
@@ -73,13 +71,17 @@ AsmStar::label(const char* name) {
 	unsigned a;
 	StringList s = name;
 	int i = lastLocalLabel;
-	while (i > -1 && strcmp(name,labels[i]) != 0 ) i--;
+	while (i > -1 ? strcmp(name,&labels[i][0]) != 0 : FALSE ) i--;
 	if (i == -1) {
 		lastLocalLabel++;
-		numLabels++;
-		strcpy(labels[lastLocalLabel],name);
-		s += numLabels;
-	} else 	s += numLabels - (lastLocalLabel - i);
+		if (lastLocalLabel == MAX_NUM_LABELS) 
+		    Error::abortRun("Number of labels exceeds limit");
+		myTarget()->numLabels++;
+		strcpy(&labels[lastLocalLabel][0],name);
+		s += myTarget()->numLabels;
+	} else 	{
+		s += myTarget()->numLabels - (lastLocalLabel - i);
+	}
 	return s;
 }
 
