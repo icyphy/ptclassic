@@ -215,6 +215,6 @@ AC_SUBST(TK_XINCLUDES)
 AC_SUBST(TK_LIBS)
 AC_SUBST(TK_LIB_SPEC)
 
-AC_OUTPUT(makefile tcl.mk:../mk/actcl.mk.in java.mk:../mk/acjava.mk.in \
+AC_OUTPUT(makefile tcl.mk java.mk \
 	profile/makefile tyjava/makefile tyjava/tcljava/makefile \
 	tyjava/eprintf/makefile)
