@@ -99,7 +99,7 @@ clr_accum_string()
 void
 pr_accum_string()
 {
-    Tcl_Eval(ptkInterp, "ptkDisplayProfile", 0, (char **) NULL);
+    Tcl_Eval(ptkInterp, "ptkDisplayProfile");
     clr_accum_string();
 }
 
