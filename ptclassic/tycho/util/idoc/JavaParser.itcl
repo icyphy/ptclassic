@@ -161,15 +161,15 @@ body ::tycho::JavaDocSys::readFile {filename} {
 
         if {!$inComment} {
             # Remove // comments
-            if [ regexp {^(.*)\/\/(.*)$} $lineIn dmy code comment] {
-                if {[string trim $code " \t"] == ""} {
-                    # Comment begins the line
-                    continue
-                } {
-                    # Comment follows code
-                    set lineIn $code
-                }
+            # which begin the line
+            if [ regexp {^[	 ]*\/\/.*$} $lineIn] {
+                continue
             }
+            # which follow code
+            if [ regexp {^(.*)\/\/(.*)$} $lineIn dmy code comment] {
+                set lineIn $code
+            }
+    
 
             # Remove line ending and single line /* */ comments
             if [ regexp {^(.*)\/\*[^*](.*)\*\/(.*)$} \
@@ -237,6 +237,7 @@ body ::tycho::JavaDocSys::readFile {filename} {
         append inEscapedComments "$lineIn \n"
     }    
     close $fd
+
     parseData $inEscapedComments
 }
 
