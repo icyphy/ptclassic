@@ -53,7 +53,7 @@
 # style obtained from <b>::tycho::userprofile</b>. If the stylesheet
 # has a master and the given 
 # parameter is not present, ask the master. If the stylesheet
-# is a master (that is, doews not itself have a master), and the 
+# is a master (that is, does not itself have a master), and the 
 # requested parameter is not present, look for the same parameter
 # in the "default" style. If that doesn't exist, raise an error.
 #
