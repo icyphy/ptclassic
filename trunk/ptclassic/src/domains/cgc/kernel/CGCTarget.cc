@@ -51,12 +51,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "InfString.h"		// Pick up InfString for use in pragma()
 #include "ConversionTable.h"
 
-/* this modification is necessary to make a galaxy code as a function */
+/* this modification is necessary to make galaxy code a function */
 #define MAINDECLS (*getStream("mainDecls"))
 #define MAININIT (*getStream("mainInit"))
 #define MAINLOOP (*getStream("mainLoop"))
 #define MAINCLOSE (*getStream("mainClose"))
-
 
 // HPPA CC under HPUX10.01 cannot deal with arrays, the message is:
 //  'sorry, not implemented: general initializer in initializer lists'
@@ -135,7 +134,7 @@ StringList CGCTarget::comment(const char* text, const char* b,
     const char* begin = "/* ";
     const char* end = " */";
     const char* cont = "   ";
-    if (b != NULL) {
+    if (b) {
 	begin = b; 
 	end = e;
     	cont = c;
@@ -148,8 +147,7 @@ void CGCTarget::declareGalaxy(Galaxy& galaxy)
 {
     GalStarIter starIter(galaxy);
     CGCStar* star;
-    while ((star = (CGCStar*)starIter++) != NULL)
-    {
+    while ((star = (CGCStar*)starIter++) != 0) {
 	if (!star->isItFork()) declareStar(star);
     }
 }
@@ -184,7 +182,8 @@ void CGCTarget :: setup() {
 	// after contructing the whole code.
 
 	// member initialize
-	galId = 0; curId = 0;
+	galId = 0;
+	curId = 0;
 
 	if (galaxy()) setStarIndices(*galaxy()); 
 	HLLTarget::setup();
@@ -224,14 +223,14 @@ StringList CGCTarget::pragma(const char* parentname,
 StringList CGCTarget::pragma (const char* parentname,		
 			      const char* blockname,
 			      const char* pragmaname) const {
+  const char* value = "";
   InfString compoundname;
   compoundname << parentname << "." << blockname;
-  const char* c = "";
-  if (strcmp(pragmaname,"state_name_mapping") != 0 ||
-      !(c = mappings.lookup(compoundname))) {
-    c = "";
+  if (strcmp(pragmaname, "state_name_mapping") == 0) {
+    const char* lookupValue = mappings.lookup(compoundname);
+    if (lookupValue) value = lookupValue;
   }
-  return c;
+  return value;
 }
 
 StringList CGCTarget::pragma (const char* parentname,		
@@ -240,7 +239,7 @@ StringList CGCTarget::pragma (const char* parentname,
 			      const char* value) {
   InfString compoundname;
   compoundname << parentname << "." << blockname;
-  if (strcmp(pragmaname,"state_name_mapping") == 0) {
+  if (strcmp(pragmaname, "state_name_mapping") == 0) {
     mappings.insert(compoundname, value);
   }
   return "";
@@ -346,7 +345,7 @@ void CGCTarget :: frameCode () {
 
 void CGCTarget :: writeCode()
 {
-    writeFile(myCode,".c",displayFlag);
+    writeFile(myCode, ".c", displayFlag);
     if (!onHostMachine(targetHost)) {
 	const char* header = "$PTOLEMY/src/domains/cgc/rtlib/CGCrtlib.h";
 	const char* source = "$PTOLEMY/src/domains/cgc/rtlib/CGCrtlib.c";
@@ -360,8 +359,7 @@ int CGCTarget::compileCode()
     // invoke the compiler
     StringList file, cmd, error, rtlib;
     if (onHostMachine(targetHost)) {
-	StringList ptolemy;
-	ptolemy << getenv("PTOLEMY");
+	StringList ptolemy = getenv("PTOLEMY");
 	rtlib << "-I" << ptolemy << "/src/domains/cgc/rtlib -L" 
 	      << ptolemy << "/lib." << getenv("PTARCH") << " -lCGCrtlib" ;
     }
