@@ -549,9 +549,19 @@ endif
 ifdef OCT
     CUSTOM_DIRS += $(CROOT)/src/pigilib
     MISC_OBJS += $(ROOT)/obj.$(PTARCH)/pigilib/ptkRegisterCmds.o
+    ifeq ($(USE_SHARED_LIBS),yes) 
+	# We need to include -lvov if we are using shared libraries, as
+	# the oh library has references to vov symbols in it.
+	LIBVOV = -lvov
+    endif
+	# We need -loh because pigilib/compile.c calls ohFormatName()
+	# We need -llist because of a few calls in pigilib and librpc
+	# We need -lutility because a few file in pigilib call util_csystem()
+	# We need -lst because of calls in pigilib and liboh, librpc,libutility
+	# We need -lerrtrap and -luprintf because of the other oct libs
     LIBS += 	-L$(OCTLIBDIR) -lpigi \
-		-lrpc -loh -lvov -lrpc -llist \
-		-ltr -lutility -lst -lerrtrap -luprintf -lport
+		-lrpc -loh $(LIBVOV) -llist \
+		-lutility -lst -lerrtrap -luprintf #-lport
 
     ifdef USE_CORE_STATIC_LIBS
 	LIBPIGI = $(LIBDIR)/libpigi.a
@@ -563,9 +573,9 @@ ifdef OCT
 	$(OCTLIBDIR)/librpc.$(LIBSUFFIX)  \
 	$(OCTLIBDIR)/liboh.$(LIBSUFFIX) $(OCTLIBDIR)/libvov.$(LIBSUFFIX) \
 	$(OCTLIBDIR)/liblist.$(LIBSUFFIX) \
-	$(OCTLIBDIR)/libtr.$(LIBSUFFIX) $(OCTLIBDIR)/libutility.$(LIBSUFFIX) \
+	$(OCTLIBDIR)/libutility.$(LIBSUFFIX) \
 	$(OCTLIBDIR)/libst.$(LIBSUFFIX) $(OCTLIBDIR)/liberrtrap.$(LIBSUFFIX) \
-	$(OCTLIBDIR)/libuprintf.$(LIBSUFFIX) $(OCTLIBDIR)/libport.$(LIBSUFFIX)
+	$(OCTLIBDIR)/libuprintf.$(LIBSUFFIX)
 endif
 
 ifdef TK
