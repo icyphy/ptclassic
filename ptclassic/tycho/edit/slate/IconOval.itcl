@@ -51,7 +51,9 @@ namespace ::tycho {
 # 
 # _IconOval_ has all options of <a href="IconItem.html">IconItem</a>
 # and <a href="LabeledOval.html">LabeledOval</a>. In addition, each
-# terminal is a component.
+# terminal is a component.  The <b>-fill</b> option, however, defaults
+# to white instead of null, and the <b>-hsize</b> and <b>-vsize</b>
+# options both default to 50.
 #
 # </ul>
 # 
@@ -124,9 +126,10 @@ class ::tycho::IconOval {
             array get optiondefault]
     array set optiondefault [array get ::tycho::IconItem::optiondefault]
  
-    # Make it round
+    # Make it round and white
     set optiondefault(-hsize) 50
     set optiondefault(-vsize) 50
+    set optiondefault(-fill)  white
 }
 
 #########################################################################
