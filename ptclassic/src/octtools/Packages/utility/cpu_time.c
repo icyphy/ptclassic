@@ -90,7 +90,7 @@ extern int getrusage(int who, struct rusage *rusage);
 #include <time.h>
 #endif
 
-#ifdef PTSOL2
+#if defined(PTSOL2) || defined(PTSVR4)
 #include <fcntl.h>
 /* sys/rusage.h is in Solaris2.3, but not Solaris2.4 */
 /*#include <sys/rusage.h>*/
@@ -110,25 +110,37 @@ util_cpu_time()
     long t = 0;
 
 
-#ifdef PTSOL2
+#if defined(PTSOL2) || defined(PTSVR4)
 /* For Solaris2, taken from solaris2_porting.faq */
         /*
          *      getrusage --
          */
     int             fd;
     char            proc[BUFSIZ];
+#ifdef PTSOL2
     prusage_t       prusage;
+#else
+    prstatus_t      prusage;
+#endif
 
     sprintf(proc,"/proc/%d", (int)getpid());
     if ((fd = open(proc,O_RDONLY)) == -1) {
       perror("util_cpu_time(): open");
       return (long) 0;
     }
+#ifdef PTSOL2
     if (ioctl(fd, PIOCUSAGE, &prusage) == -1) {
       perror("util_cpu_time(): ioctl");
       return (long) 0;
     }
-    t = prusage.pr_utime.tv_sec*1000 +     prusage.pr_utime.tv_nsec/1000000;
+#else
+    if (ioctl(fd, PIOCSTATUS, &prusage) == -1) {
+      perror("util_cpu_time(): ioctl");
+      return (long) 0;
+    }
+#endif
+
+    t = prusage.pr_utime.tv_sec*1000 + prusage.pr_utime.tv_nsec/1000000;
 
 #else
 
