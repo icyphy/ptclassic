@@ -170,7 +170,7 @@ int DEtoUniversal :: isItInput() const
 	{ return EventHorizon :: isItInput(); }
 int DEtoUniversal :: isItOutput() const 
 	{ return EventHorizon :: isItOutput(); }
-
+int DEtoUniversal :: onlyOne() const { return TRUE; }
 EventHorizon* DEtoUniversal :: asEH() { return this; }
 
 /**************************************************************************
@@ -238,6 +238,6 @@ int DEfromUniversal :: isItInput() const
 	{ return EventHorizon :: isItInput(); }
 int DEfromUniversal :: isItOutput() const 
 	{ return EventHorizon :: isItOutput(); }
-
+int DEfromUniversal :: onlyOne() const { return TRUE; }
 EventHorizon* DEfromUniversal :: asEH() { return this; }
 
