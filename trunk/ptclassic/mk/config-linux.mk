@@ -27,8 +27,9 @@
 #
 # $Id$
 
-# Author: Alberto Vignani, FIAT Research Center, TORINO
-# Modified by: Neal Becker (neal@ctd.comsat.com)
+# Author:  Alberto Vignani, FIAT Research Center, TORINO
+# Modified by: 	Neal Becker (neal@ctd.comsat.com)
+# 		Dirk Forchel (df2@inf.tu-dresden.de)
 #
 # --------------------------------------------------------------------
 # |  Please note that Linux is moving to the ELF object file format, |
@@ -43,10 +44,10 @@ HAVE_ELF=yes
 #
 # We use ELF.
 #
-#USE_ELF=yes
+USE_ELF=yes
 #
 # We use a.out.
-USE_ELF=no
+#USE_ELF=no
 
 # --------------------------------------------------------------------
 # |  Please see the file ``config-default.mk'' in this directory!    |
@@ -117,7 +118,7 @@ OPTIMIZER =	-O2 #-fomit-frame-pointer #-m486 -pipe
 
 # -Wsynth is new in g++-2.6.x, however 2.5.x does not support it
 # Slackware is using 2.5.x, so we leave -Wsynth out for the time being.
-WARNINGS =	-Wall -Wcast-qual -Wcast-align # -Wsynth
+WARNINGS =	-Wall -Wcast-align -Wsynth # -Wcast-qual 
 # Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
 GPPFLAGS =	$(LINUXDEF) -fno-for-scope $(WARNINGS) $(OPTIMIZER) $(MEMLOG)
 CFLAGS =	$(LINUXDEF) $(OPTIMIZER) -fwritable-strings
@@ -134,11 +135,18 @@ SYSLIBS=-lg++ $(CSYSLIBS)
 
 #LINKFLAGS=-L$(LIBDIR) Xlinker -S -Xlinker -x # -static
 #LINKFLAGS_D=-L$(LIBDIR) -g -static
-LINKFLAGS=-L$(LIBDIR) -Xlinker -x -rdynamic # -static
+LINKFLAGS=-L$(LIBDIR) -Xlinker -S -Xlinker -x -rdynamic # -static
 LINKFLAGS_D=-L$(LIBDIR) -g -rdynamic #-static
 
 # octtools/attache uses this
 TERMLIB_LIBSPEC = -ltermcap
+
+#
+# Variables for miscellaneous programs
+#
+# Used by xv
+# -DXLIB_ILLEGAL_ACCESS is need for X11R6 to compile xv.c:rd_str_cl()
+XV_CC =		gcc -DXLIB_ILLEGAL_ACCESS $(X11_INCSPEC) $(X11_LIBSPEC)
 
 #
 # Directories to use
