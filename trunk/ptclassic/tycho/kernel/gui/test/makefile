@@ -41,11 +41,11 @@ include $(CONFIG)
 
 TCL_SRCS =
 
-ITCL_SRCS =	test.tcl
+ITCL_SRCS =	RCS.itcl test.tcl
 
 EXTRA_SRCS =	$(ITCL_SRCS)
 
-MISC_FILES =	
+MISC_FILES =	rcsdir sccsdir
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
