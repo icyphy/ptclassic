@@ -41,14 +41,6 @@ Produce code for inter-process communication (receive-side)
 		desc { Host port number }
 		attributes { A_NONSETTABLE }
 	}
-	state {
-		name { hostAddr }
-		type { STRING }
-		default { " " }
-		desc { Host address for server }
-		attributes { A_NONSETTABLE }
-	}
-
 	setup {
 		numData = output.numXfer();
 	}
@@ -91,7 +83,7 @@ Produce code for inter-process communication (receive-side)
 	}
 	initCode {
 		StringList IPCproc = processCode(ipcHandler);	
-		addProcedure(IPCproc);
+		addProcedure(IPCproc, IPCHandlerName);
 		addGlobal("int $starSymbol(sId);\n");
 		addGlobal("int $starSymbol(newSId);\n");
 		addInclude("<stdio.h>");
