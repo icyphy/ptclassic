@@ -70,6 +70,8 @@ class ::tycho::RevControlSCCS {
     # Update the files to diff stack
     method updateDiff {buttonName} {}
 
+    # Reset all the buttons
+    method resetDiff {} {}
 
     ###################################################################
     ####                      public procs                         ####
@@ -137,6 +139,8 @@ body ::tycho::RevControlSCCS::checkIn {object} {
     }
     cd $olddir
     $object reload
+
+    resetDiff
 }
 
 #####################################################################
@@ -163,6 +167,8 @@ body ::tycho::RevControlSCCS::checkOut {object} {
     }
     cd $olddir
     $object reload
+    
+    resetDiff
 }
 
 #####################################################################
@@ -304,6 +310,7 @@ body ::tycho::RevControlSCCS::compareVersion {} {
     $diffWidget compareFile
 
     cd $olddir
+
 }
 
 
@@ -333,6 +340,8 @@ body ::tycho::RevControlSCCS::unedit {} {
 
     enableButton checkout
     updateHistory
+
+    resetDiff
 }
 
 #####################################################################
@@ -563,4 +572,13 @@ body ::tycho::RevControlSCCS::updateDiff {buttonName} {
             set difflist [lindex $difflist 0]
         }
     }
+}
+
+# Reset all the buttons to click on nothing
+#
+body ::tycho::RevControlSCCS::resetDiff {} {
+    foreach i $difflist {
+        uplevel #0 "set $i 0"
+    }
+    set difflist {}
 }
