@@ -400,7 +400,7 @@ body ::tycho::Displayer::attachView {window viewName} {
                 -statusbar $itk_component(status$viewName)
     } {
         # NOTE: Should we keep more options here?
-        keep -background -cursor
+        keep -background -cursor -font
     }
 
     return [list $itk_component(menubar$viewName) \
