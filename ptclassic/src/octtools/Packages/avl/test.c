@@ -1,5 +1,5 @@
 #ifndef lint
-static char SccsId[]="@(#)test.c	1.1 12/15/93";
+static char SccsId[]="$Id$";
 #endif /*lint*/
 /* Copyright (c) 1990-1993 The Regents of the University of California.
  * All rights reserved.
@@ -56,6 +56,7 @@ char *key, *value;
 }
 
 
+int
 main()
 {
     avl_tree *tree;
@@ -109,5 +110,5 @@ main()
 	exit(-6);
     }
 
-    exit(0);
+    return 0;
 }
