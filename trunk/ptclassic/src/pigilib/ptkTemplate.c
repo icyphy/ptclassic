@@ -109,9 +109,9 @@ char **argv;
     RPCFunction *CommandArray;          /* menu/function array */
     RPCSpot spot;
     lsList cmdList;
-    long userOptionWord;
-    char *display;
-    long size;
+    long userOptionWord = 0L;
+    char *display = 0;
+    long size = 0L;
     static int been_here_before = 0;            /* for 'wbaker' */
 
 #ifndef aiws
