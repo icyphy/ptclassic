@@ -44,7 +44,11 @@ Programmer: Jose Luis Pino
 #include "KnownTarget.h"
 #include "AnyCGStar.h"
 #include "ParScheduler.h"
-#include <iostream.h>
+
+#include "CGCTargetWH.h"
+#include "CGCSDFReceive.h"
+#include "CGCSDFSend.h"
+#include "DynamicGalaxy.h"
 
 class DummyComm : public AnyCGStar {
 public:
@@ -72,11 +76,23 @@ public:
 
 CGWormTarget::
 CGWormTarget(const char* name,const char* starType,const char* desc):
-CGSharedBus(name,starType,desc) {
+CGSharedBus(name,starType,desc),cgcWorm(0) {
     childType.setInitValue("default-CGC");
 }
 
+void CGWormTarget::prepareChildren() {
+    CGSharedBus::prepareChildren();
+    if(!galaxy()->parent() || !galaxy()->parent()->isItWormhole()) return;
+    if(!child(0)->isA("CGCTargetWH")) {
+	Error::abortRun(*child(0)," is not a CGCTargetWH.");
+	return;
+    }
+    cgcWorm = (CGCTargetWH*)child(0);
+    cgcWorm->convertWormholePorts(*galaxy());
+}
+    
 void CGWormTarget::setup() {
+    
     GalStarIter nextStar(*galaxy());
     CGStar* star;
     // FIXME - This code only processes top-level wormholes
@@ -102,16 +118,10 @@ void CGWormTarget::setup() {
 		if (farPort->isItOutput()) {
 		    farPort->connect(cgcFork->input,numDelays, delayValues);
 		    cgcForkOutput.connect(*port,0,"");
-//		    cgcFork->input.inheritTypeFrom(*farPort);
-//		    if (port->type() == ANYTYPE)
-//			port->inheritTypeFrom(cgcForkOutput);
 		}
 		else {
 		    port->connect(cgcFork->input,numDelays, delayValues);
 		    cgcForkOutput.connect(*farPort,0,"");
-//		    cgcFork->input.inheritTypeFrom(*port);
-//		    if (farPort->type() == ANYTYPE)
-//			farPort->inheritTypeFrom(cgcForkOutput);
 		}
 	    }
 	}
