@@ -49,6 +49,12 @@ where <i>halfw</i> is half the bin width.
 		desc {Width of bins for histogram.}
 	}
 	defstate {
+		name {showPercent}
+		type {int}
+		default {FALSE}
+		desc {Show Y-axis as percentages rather than counts.}
+	}
+	defstate {
 		name {options}
 		type {string}
 		default {"-bb =800x400"}
@@ -61,9 +67,10 @@ where <i>halfw</i> is half the bin width.
 	hinclude { "Histogram.h" }
 	setup {
 		his.initialize(this,binWidth,options,title,saveFile);
+		his.setPercentageDisplay(int(showPercent));
 	}
 	go {
-		his.addPoint(float(input%0));
+		his.addPoint(double(input%0));
 	}
 	wrapup {
 		his.terminate();

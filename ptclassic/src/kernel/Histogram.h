@@ -122,7 +122,9 @@ public:
 			const char* saveFile,
 			int maxBins = HISTO_MAX_BINS);
 
-	void addPoint(float y);
+	void setPercentageDisplay(int yes = 1) { showPercentages = yes; }
+
+	void addPoint(double y) { hist->add(y); }
 
 	void terminate();
 
@@ -135,6 +137,7 @@ private:
 	XGraph *display;
 	Histogram *hist;
 	char *optstring;
+	int showPercentages;
 };
 
 #endif
