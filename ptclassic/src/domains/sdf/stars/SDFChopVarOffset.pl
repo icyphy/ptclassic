@@ -13,8 +13,8 @@ limitation of liability, and disclaimer of warranty provisions.
         }
 	desc {
 This star has the same functionality as the
-Chop star except now the offset parameter is
-determined at run time through a control input.
+Chop star except that the offset parameter is
+determined at run time by a control input.
 	}
 
 	input { name { offsetCntrl } type { int } }
