@@ -78,6 +78,10 @@ void DETarget::begin() {
   Star *s;
   while ((s = nextStar++) != 0) {
     s->begin();
+
+    // Some DE stars, such those derived from DERepeatStar, generate
+    // output events in their begin methods.  So we need to call
+    // sendOutput here to get these events into the event queue.
     ((DEStar*)s)->sendOutput();
   }
 }
