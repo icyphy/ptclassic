@@ -106,6 +106,7 @@ ddsData data;			/* Should be (ddsControl *) */
 		 "The parent of DDS_CONTROL components must be of type DDS_TOP or DDS_COMPOSITE"); 
 	/*NOTREACHED*/
     }
+    return (ddsHandle)NULL;
 }
 
 
@@ -194,6 +195,7 @@ ddsInternal *child;		/* New child   */
     errRaise(ddsPackageName, DDS_BAD_PARENT,
 	     "DDS_CONTROL components may not have child components");
     /*NOTREACHED*/
+    return (Widget)NULL;
 }
 
 /*ARGSUSED*/
@@ -240,7 +242,7 @@ ddsFullControl *item;		/* Control button structure */
     (void) strcpy(trans_table, "#override");
     (void) strcpy(copy, item->user_spec.accelerator);
     spec = copy;
-    while (ptr = strchr(spec, '|')) {
+    while ( (ptr = strchr(spec, '|')) ) {
 	*ptr = '\0';
 	(void) sprintf(line, "\n%s:\tset()notify()unset()", spec);
 	(void) strcat(trans_table, line);
