@@ -91,15 +91,18 @@ class ::tycho::TWidget {
     ###################################################################
     ####                         protected methods                 ####
 
-    # Prevent destruction of this object while evaluating the arguments.
-    protected method safeEval {args}
-
     # Configure the popup menu depending on the current context
     protected method configureContextMenu {}
 
     # Remember explicitly-set options and then call the built-in
     # itk_initialize
     protected method itk_initialize {args}
+
+    # Prevent destruction of this object while evaluating the arguments.
+    protected method safeEval {args}
+
+    # Register code to be evaluated when the widget has been constructed.
+    protected method whenConstructed {args}
 
     ###################################################################
     ####                         protected variables               ####
@@ -114,10 +117,19 @@ class ::tycho::TWidget {
     protected variable prefix
 
     ###################################################################
+    ####                         private methods                   ####
+
+    # Notify that construction is complete
+    private method _notifyconstruction {}
+
+    ###################################################################
     ####                         private variables                 ####
 
     # If non-zero, disable destruction.
     private variable disableDestruction 0
+
+    # A flag saying whether this widget is already constructed
+    private variable _isConstructed 0
 
     # An array of options subscribed by "stylesheet subscribe"
     private variable _subscribedOptions
@@ -127,6 +139,9 @@ class ::tycho::TWidget {
 
     # An array of options overridden by itk_initialize or configure
     private variable _overriddenOptions
+
+    # Commands to execute when the widget has been constructed
+    private variable _whenConstructed {}
 }
 
 #######################################################################
@@ -514,6 +529,16 @@ body ::tycho::TWidget::itk_initialize {args} {
 
     # Configure the options
     uplevel ::itk::Archetype::itk_initialize $args
+
+    # If called from the most specific class, execute the
+    # post-construction commands.
+    if { [uplevel info context] == [info class] } {
+        foreach {scope cmd} $_whenConstructed {
+            @scope $scope $cmd
+        }
+	set _whenConstructed {}
+	set _isConstructed 1
+    }
 }
 
 #####################################################################
@@ -540,4 +565,29 @@ body ::tycho::TWidget::safeEval {args} {
     }
     set disableDestruction 0
     return $retval
+}
+
+########################################################################
+#### whenConstructed
+#
+# Register code to be executed when the last constructor in the
+# chain of constructor executes. The list of arguments is
+# considered to be the code to execute. The command will be
+# executed in the scope of the class from which this method
+# was called, at the completion of the call to itk_initialize.
+# The purpose of this method is to delay evaluation of code
+# until construction is complete.
+#
+# If the widget is already constructed, the command will be
+# executed immediately in the caller's context -- this method
+# can therefore be called from methods that will only sometimes
+# be executed within an object's constructor.
+#
+body ::tycho::TWidget::whenConstructed {args} {
+    set w [string trimleft $this :]
+    if $_isConstructed {
+        uplevel $args
+    } else {
+        lappend _whenConstructed [uplevel info context] $args
+    }
 }
