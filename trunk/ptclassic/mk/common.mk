@@ -80,3 +80,6 @@ TAGS:		$(SRCS)
 
 checkjunk:
 	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) makefile make.template SCCS
+
+sccsinfo:
+	sccs info
