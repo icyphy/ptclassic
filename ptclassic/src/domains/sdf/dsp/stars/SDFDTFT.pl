@@ -25,8 +25,12 @@ The number of input samples consumed is given by <i>length</i>.
 Letting the input samples be written as <i>a</i>(0)<i>,   ...   ,  a</i>(<i>L-</i>1), where
 <i>L</i> is the <i>length</i>, the output is
 <pre>
-A ( j omega ) ~=~
-{ sum from k=0 to L-1 a(k) e sup {- j omega k T} }
+             L-1
+             ---
+A(j omega) = \   a(k) e<sup>-j omega kT</sup>
+             /
+             ---
+             k=0  
 </pre>
 where <i>T</i> is the time between samples (<i>timeBetweenSamples</i>).
 The number of samples produced at the output is determined
