@@ -652,6 +652,7 @@ char *op;
     EdgePointer in1, in2, out;
     char str[STRSIZE];
     char* value;
+    char* umm;
     bool in1_changed, in2_changed;
 
     in1_changed = 0; in2_changed = 0;
@@ -664,6 +665,10 @@ char *op;
 /* for now make the simple(wrong?) assumption that if both are 
 in this class, they are iterators, and then types are fix<5,0> */
 
+/* this is for the case that it is an iterator that has not
+been cast to a precision yet, because it doesnt belong to
+the const fixedDeclarations at init */
+
    if( IsConstantEdge(in1) && HasAttribute(in1->Attributes,"value")) 
    {
 	value = (char*)GetAttribute(in1->Attributes,"value");
@@ -674,6 +679,17 @@ in this class, they are iterators, and then types are fix<5,0> */
 	value = (char*)GetAttribute(in2->Attributes,"value");
 	if(!isnumber(value)) in2_changed = 1;
    }
+
+/* this is for the case:
+i:0..N
+j:0..i
+then the i in the second loop needs a cast */
+
+   if( IsInputEdge(in1) && HasAttribute(in1->Arguments,"manifest"))
+	in1_changed = 1;
+   if( IsInputEdge(in2) && HasAttribute(in2->Arguments,"manifest"))
+	in2_changed = 1;
+
 
 	if(in1_changed)
 	{
@@ -687,6 +703,7 @@ in this class, they are iterators, and then types are fix<5,0> */
 	}
 	if(in2_changed)
 	{
+		if(in1_changed) Indent();
 		fprintf(CFD,"int_to_fix(");
 		GenOperand(in2);
 		fprintf(CFD,",&");
@@ -1240,10 +1257,10 @@ NodePointer node;
         for (ptr = IndexEdges; ptr != NULL; ptr = ptr->Next) {
 	    edge = EP(ptr);
 	    fprintf(CFD, "[");
-	    if (IsFixedType(edge))
+	    if (IsFixedType(edge) && !IsConstantEdge(edge) )
 	        fprintf(CFD, "f2i(");
 	    GenOperand(edge);
-	    if (IsFixedType(edge)) {
+	    if (IsFixedType(edge) && !IsConstantEdge(edge) ) {
 		GenFixedType(edge);
 	        fprintf(CFD, ")");
             }
