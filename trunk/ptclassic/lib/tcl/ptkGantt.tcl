@@ -868,7 +868,15 @@ proc ptkGanttDisplay { universe {inputFile ""} {standalone 0} } {
 			[lindex $LINEARR 1]l
 			continue}
 	    	\$end { incr proc_num ; continue}
-		default { ptkGantt_DrawProc $universe \
+		default { 
+		    if ![info exists ptkGantt_Layout($chart.numprocs)] {
+			error "NumberOfProcessors directive not found in $inputFile"
+		    }
+		    if ![info exists ptkGantt_Layout($chart.period)] {
+			error "period directive not found in $inputFile"
+		    }
+
+		    ptkGantt_DrawProc $universe \
 			$ptkGantt_Layout($chart.numprocs) \
 			$ptkGantt_Layout($chart.period) \
 			$proc_num [lindex $LINEARR 0] [string trimleft \
