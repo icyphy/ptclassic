@@ -52,8 +52,12 @@ codeblock(sendData,"const char* command,int numXfer") {
 @command    
         memcpy(++pValue,dspWord,3);
     }
-
-    if (qckPutBlkItem(dsp,value,$starSymbol(s56xBuffer),@numXfer) == -1) { 
+#if @(numXfer-1)
+    if (qckPutBlkItem(dsp,value,$starSymbol(s56xBuffer),@numXfer) == -1)
+#else
+    if (qckPokeItem(dsp,$starSymbol(s56xBuffer),value[0]) == -1)
+#endif
+    {
 	char buffer[128];
 	sprintf(buffer,
 		"Send Data Failed, Pair @pairNumber: %s", qckErrString);

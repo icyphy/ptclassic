@@ -51,13 +51,13 @@ int sig;
 			qckErrString);
 		EXIT_CGC(buffer);
 	}
+	s56xSemaphores[buffer/24] = qckGetY(dsp,@semaphorePtr+buffer/24);
 	if (qckPutY(dsp,@currentBuffer,0) == -1) { 
 	        char buffer[128];
 		sprintf(buffer, "S56X Interrupt Reset Failed: %s", 
 			qckErrString);
 		EXIT_CGC(buffer);
 	}
-	s56xSemaphores[buffer/24] = qckGetY(dsp,@semaphorePtr+buffer/24);
 } /* end s56xSignal interrupt */
 }
 

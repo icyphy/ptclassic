@@ -39,7 +39,6 @@ $label(bufferFull)
 		move	$mem(input):(r0)+,x0
 		move	x0,$mem(buffer):(r1)+
 $label(XFR)
-	bset	#@(pairNumber%24),$ref(bufferSemaphore,@(pairNumber/24))
 }
 
 setup {
@@ -58,6 +57,8 @@ go {
 	} */
 	addCode(sendData(pairNumber,numXfer));
 	addCode(interruptHost(pairNumber));
+@	bset	#@(pairNumber%24),$ref(bufferSemaphore,@(pairNumber/24))
+@
 }
 
 execTime {

@@ -33,7 +33,6 @@ $label(bufferEmpty)
 			move	$mem(buffer):(r1)+,x0
 			move	x0,$mem(output):(r0)+
 $label(XFR)
-	bclr	#@(pairNumber%24),$ref(bufferSemaphore,@(pairNumber/24))
 }
 
 setup {
@@ -49,6 +48,8 @@ go {
 	} */
 	addCode(receiveData(pairNumber,numXfer));
 	addCode(interruptHost(pairNumber));
+@	bclr	#@(pairNumber%24),$ref(bufferSemaphore,@(pairNumber/24))
+@
 }
 
 	execTime {
