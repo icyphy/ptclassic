@@ -72,6 +72,11 @@ public:
 	ProcMemory* lookupEntry(const char*,unsigned&);
 
 protected:
+	// Get one of my ports, which is always an AsmPortHole
+	AsmPortHole* asmPortWithName(const char* name) {
+		return (AsmPortHole*)portWithName(name);
+	}
+
 	// Given a CodeBlock, generate output code and add it to the
 	// code of the star's target.  Macros referencing states and
 	// inputs and outputs are processed here.
