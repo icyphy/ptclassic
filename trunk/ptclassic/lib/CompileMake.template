@@ -9,12 +9,12 @@
 
 
 # Root of source tree
-ROOT = /usr/users/ptolemy
+ROOT = $(PTOLEMY)
 # Path (absolute or relative) to the object directory root
 OBJDIR=$(ROOT)/obj.$(ARCH)
 
 # get configuration info
-CONFIG=$(ROOT)/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 SDF=$(OBJDIR)/domains/sdf/stars
@@ -30,11 +30,11 @@ SDFLOOP=$(ROOT)/src/domains/sdf/loopScheduler
 
 # libraries
 LIBS=-lsdfstars -lsdfdspstars -lsdfimagestars \
-	-lLS -lEG -lsdf -lImage -lcompileSDF -lptolemy \
+	-lLS -lsdf -lImage -lcompileSDF -lptolemy \
 	$(SYSLIBS)
 
 LIBFILES=\
- $(LIBDIR)/libLS.a $(LIBDIR)/libEG.a $(LIBDIR)/libsdf.a \
+ $(LIBDIR)/libLS.a $(LIBDIR)/libsdf.a \
  $(LIBDIR)/libImage.a \
  $(LIBDIR)/libcompileSDF.a \
  $(LIBDIR)/libptolemy.a
@@ -45,7 +45,7 @@ SRCS=code.cc
 # Rule for compiling with C++ programs
 .SUFFIXES: .cc
 .cc.o:
-	$(GNU) $(GPPFLAGS) -I$(KERNDIR) -I$(SDFSRC) -I$(SDF_DSP_SRC) -I$(SDF_IMAGE_SRC) -I$(SDFKERSRC) -I$(SDFLOOP) -c  $<
+	$(CPLUSPLUS) $(GPPFLAGS) -I$(KERNDIR) -I$(SDFSRC) -I$(SDF_DSP_SRC) -I$(SDF_IMAGE_SRC) -I$(SDFKERSRC) -I$(SDFLOOP) -c  $<
 
 all:		makefile code
 
