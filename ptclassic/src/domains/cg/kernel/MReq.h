@@ -98,6 +98,9 @@ public:
 	void zero();
 	~MConsecStateReq() { zero();}
 	void assign(ProcMemory&,unsigned);
+	// Here, state returns a pointer to the FIRST state in
+	// the list
+	const State* state();
 };
 
 class MReqListIter {
