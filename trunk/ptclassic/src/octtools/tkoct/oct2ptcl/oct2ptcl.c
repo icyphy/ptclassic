@@ -313,12 +313,12 @@ _otpGetPortFlags( octObject *pTerm, OTPNetInfo *pNetInfo, long *flags) {
 #endif
 	*flags |= OTP_PifFormal;
     } else {
-	OCTPTCL_OH_WARN(ohFindFormal( &fterm, pTerm),
-	  "Warning, the following instance was probably completely
-	regenerated so the formalExternalIds of the instances's terminals
-	are bogus. oct2ptcl is unnecessarily picky up this, the solution is
-	to edit the facet, destroy the instance in question and place a new
-	instance of the same galaxy there. The original error message was:
+	OCTPTCL_OH_WARN(ohFindFormal( &fterm, pTerm), \
+	  "Warning, the following instance was probably completely\n \
+	regenerated so the formalExternalIds of the instances's terminals\n \
+	are bogus. oct2ptcl is unnecessarily picky up this, the solution is\n \
+	to edit the facet, destroy the instance in question and place a new\n \
+	instance of the same galaxy there. The original error message was:\n \
           'interface formal term from contents actual(2)'", pTerm);
 
     }
