@@ -51,7 +51,11 @@ extern const dataType ANYTYPE = "ANYTYPE";
 
 extern const dataType INT = "INT";
 
-Particle* IntSample :: clone () { return intPlasma.get();}
+Particle* IntSample :: clone () {
+	Particle* p = intPlasma.get();
+	((IntSample*)p)->data = data;
+	return p;
+}
 
 void IntSample :: die () { intPlasma.put(this);}
 
@@ -71,7 +75,7 @@ IntSample :: operator int () const {return data;}
 IntSample :: operator float () const {return float(data);}
 IntSample :: operator Complex () const {return Complex(data);}
 
-char* IntSample :: print () const { return form("%d",data);}
+StringList IntSample :: print () const { return StringList(data);}
 
 	// Wash the Particle
 void IntSample :: initialize() {data=0;}
@@ -90,7 +94,12 @@ extern const dataType FLOAT = "FLOAT";
 
 Particle* FloatSample :: useNew () { return new FloatSample;}
 
-Particle* FloatSample :: clone () { return floatPlasma.get();}
+Particle* FloatSample :: clone () { 
+	Particle* p = floatPlasma.get();
+	((FloatSample*)p)->data = data;
+	return p;
+}
+
 
 void FloatSample :: die () { floatPlasma.put(this);}
 
@@ -111,7 +120,7 @@ FloatSample :: operator int () const {return int(data);}
 FloatSample :: operator float () const {return data;}
 FloatSample :: operator Complex () const {return Complex(data);}
 
-char* FloatSample :: print () const { return form("%f",data);}
+StringList FloatSample :: print () const { return StringList(data);}
 
  
         // Initialize the Particle
@@ -130,7 +139,11 @@ extern const dataType COMPLEX = "COMPLEX";
 
 Particle* ComplexSample :: useNew () { return new ComplexSample;}
 
-Particle* ComplexSample :: clone () { return complexPlasma.get();}
+Particle* ComplexSample :: clone () {
+	Particle* p = complexPlasma.get();
+	((ComplexSample*)p)->data = data;
+	return p;
+}
 
 void ComplexSample :: die () { complexPlasma.put(this);}
 
@@ -152,9 +165,14 @@ ComplexSample :: operator int () const {return int(abs(data));}
 ComplexSample :: operator float () const {return abs(data);}
 ComplexSample :: operator Complex () const {return data;}
 
-char* ComplexSample :: print () const
-        { return form("(%f,%f)",data.real(),data.imag());}
-
+StringList ComplexSample :: print () const {
+	StringList out = "(";
+	out += data.real();
+	out += ",";
+	out += data.imag();
+	out += ")";
+	return out;
+}
  
         // Initialize the Particle
 void ComplexSample :: initialize() {data=0.0;}
