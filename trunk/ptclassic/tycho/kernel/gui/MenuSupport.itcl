@@ -172,7 +172,12 @@ body ::tycho::MenuSupport::add {name inMenu args} {
 
     # If the entry already exists, delete it so the new one "replaces" it
     if { [::info exists entrypath($name)] } {
+	set before [$entrypath($name) entrycget \
+		[expr [$entrypath($name) index $name] + 1] \
+		-label]
 	$this delete $name
+	eval $this insert $name [list $before] $args
+	return
     }
 
     # Read the "type" option
