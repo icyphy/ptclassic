@@ -888,7 +888,9 @@ body ::tycho::Query::lines {tag label default lines args} {
     set tagsdisable($tag) "$itk_component(tag_$tag) configure -readonly 1"
 
     # Correct for the fact that the text widget grabs the focus.
-    after 1000 [list catch "$this focusin"]
+    # In theory, we don't need the "after idle", but the text
+    # widget is very insistent about taking the focus...
+    whenMapped tag_$tag [list after idle "$this focusin"]
     return {}
 }
 

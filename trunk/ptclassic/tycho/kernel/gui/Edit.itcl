@@ -1886,6 +1886,11 @@ body ::tycho::Edit::searchQuery {backwards nochange} {
 # is used and the two indices are equal.  As a side effect, the selection
 # (if there is one) is cleared.
 #
+# This method uses the whenMapped{} method to ensure that the
+# jump to the indicated point takes place after the text widget
+# has been mapped to the screen, thus ensuring that
+# the jump works properly.
+#
 body ::tycho::Edit::seeFragment {point} {
     set text $itk_component(text)
     if {[llength $point] == 2 && [lindex $point 0] == {line}} {
@@ -1912,12 +1917,13 @@ body ::tycho::Edit::seeFragment {point} {
 
         # The moving of the insertion index is also delayed in case the
         # binding that triggered this also involves the insertion cursor.
-        # This used to have a time delay of 200 instead of "idle", but
-        # that should no longer be needed because of the safeUpdate call.
-        after idle [list catch " \
-                ::tycho::safeUpdate $prefix; \
+        # This used to have a time delay of 200, which was then changed
+	# to "idle." Now, we use whenMapped{}, which defers this code
+	# until the text widget is mapped to the screen.
+        whenMapped text [list catch " \
                 $text mark set insert $sidx; 	\
-                selection clear -displayof $text; $this center"]
+                selection clear -displayof $text; \
+		$this center"]
 
         # Clear the hypertarget mark after some time.
         # The catch is in case the window doesn't exist anymore.
