@@ -477,8 +477,8 @@ proc ptkGo {name octHandle} {
     # For now, we allow only one run at a time.
     set univ [curuniverse]
     if {[info exists ptkRunFlag($univ)] && \
-	[regexp {^ACTIVE$|^STOP_PENDING$|^ABORT$} $ptkRunFlag($univ)] || \
-	($univ != $name && $ptkRunFlag($univ) == {PAUSED}) } {
+	([regexp {^ACTIVE$|^STOP_PENDING$|^ABORT$} $ptkRunFlag($univ)] || \
+	($univ != $name && $ptkRunFlag($univ) == {PAUSED})) } {
             ptkImportantMessage .error "Sorry.  Only one run at time. "
 	    return
     }
@@ -506,8 +506,9 @@ proc ptkGo {name octHandle} {
         set numIter [$w.iter.entry get]
         run $numIter
 	if {$ptkRunFlag($name) != {ABORT}} {wrapup}
+	ptkClearRunFlag $name $octHandle
     } msg] == 1} {
+	ptkClearRunFlag $name $octHandle
 	error $msg
     }
-    ptkClearRunFlag $name $octHandle
 }
