@@ -17,8 +17,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF Tcl/Tk library }
 	htmldoc {
-<pre>
-</pre>
 This star evaluates a tcl expression each time it is fired.  If the expression
 returns a value of "true" then the run is paused.
 The expression can be any valid tcl expression.  For details of valid tcl
