@@ -50,24 +50,25 @@ ITCL_SRCS = \
 	Universe.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) \
+	README.txt \
 	kernel.tcl \
 	pkgIndex.tcl
 
-# make checkjunk will not report OPTIONAL_FILES as trash
-# make realclean removes OPTIONAL_FILES
-MISC_FILES =	img test tclIndex doc
+DIRS =		bin demo doc test
 
 # make checkjunk will not report OPTIONAL_FILES as trash
 # make realclean removes OPTIONAL_FILES
-OPTIONAL_FILES =
+MISC_FILES =	$(DIRS) tclIndex
+
+# make checkjunk will not report OPTIONAL_FILES as trash
+# make realclean removes OPTIONAL_FILES
+OPTIONAL_FILES =	adm img
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex *.html
 
 # Title for the tydoc index page
 TYDOC_DESC =	Index of classes in tycho/typt/kernel
-
-DIRS =		test #doc
 
 all install: tclIndex $(MISC_SRCS)
 
