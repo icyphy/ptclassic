@@ -2,15 +2,6 @@
 <html>
 <head>
 <title>Tycho's default layout</title>
-<STYLE type="text/css">
-	P.expl {
-	font-size: small
-	}
-	P.file {
-	font-weight: bold;
-	font-size: small
-	}
-</STYLE>
 </head>
 <body bgcolor="#faf0e6">
 <h1>Tycho's default layout</a></h1>
@@ -25,251 +16,161 @@ as the package searcher can find them.
 
 <p>In the standard installation, packages are not installed in the
 top-level directory, but underneath sub-directories called
-<b>kernel/</b>, <b>editors/</b>, <b>util/</b>. This provides for
-manageable growth in the number of packages.  The structure of each
-package is given in <a href="structure.html">Package structure</a>.
+<code>kernel/</code>, <code>editors/</code>, <code>util/</code>. This
+provides for manageable growth in the number of packages.  The
+structure of each package is given in <a href="structure.html">Package
+structure</a>.
 
 <p>By convention, each package that is a proper part of Tycho has a
-name such as <B>tycho.kernel.gui</B>, to mimic the Java convention of
+name such as <code>tycho.kernel.gui</code>, to mimic the Java convention of
 placing packages by directory. The Tcl package system, of course, does
 not understand this convention, so in a non-standard installation you
 can place the packages anywhere you please. Some packages in the
-<B>util</B> directory are completely stand-alone, and so have simple
-names such as <B>notmake</B>.
+<code>util</code> directory are completely stand-alone, and so have simple
+names such as <code>notmake</code>.
 
 <P>Note that you do not need to install the Tycho framework to use
 Tycho packages. As long as you have all the packages you require, you
 can install them in your own directories in any way you choose.
 
  <P>
-<table valign=top cellpadding=4>
-<tr valign=top>
-<td><P class="file">
-tycho
+<dl>
+<dt><a href="../.."><CODE>tycho</CODE></a>
+<dd> <dl>
+	<dt><a href="../../makefile"><CODE>makefile</CODE></a>
+	<br><a href="../../pkgIndex.tcl"><CODE>pkgIndex.tcl</CODE></a>
+	<dd> Makefile and package index and load files
 
-<td><P class="file">
-makefile
-<br>
-tycho.tcl
-<br>
-pkgIndex.tcl
+	<dt><CODE>adm/</CODE> 
+	<dd> The admin directory, containing release
+	notes, announcements, and so on. This directory is not
+	shipped with the rest of the distribution
+		<dl>
+		<dt> <CODE>dist/</CODE>
+		<dd> The distribution directory. The contents of this
+		directory are automatically generated.
+		</dl>
 
-<td>
-<td>
- <P class="expl">Makefile and package index and load files
+	<dt><a href="../../bin"><CODE>bin/</CODE></a>
+	<dd> Shell scripts that start the <code>tclsh</code>,
+	<code>itclsh</code>, <code>wish</code>,
+	or <code>itkwish</code>, load one or more
+	packages, and do something useful. Many of the scripts in this package
+	will be copied into this directory from the <code>bin/</code>
+	directories of individual packages.
 
-<tr valign=top>
-<td>
-<td><P class="file">
-adm/
+	<dt> <a href="../../doc"><CODE>doc/</CODE></a>
+	<dd> 
+		<dl>
+		<dt> <a href="../../doc/makefile"><CODE>makefile</CODE></a>
+		<br>
+		<a href="../../doc/index.html"><CODE>index.html</CODE></a>
+		<br>
+		<CODE>*.html</CODE>
+		<dd>The generic Tycho documentation directory.  This includes
+		documentation on the package system, and the goals of the
+		Tycho project.   
 
-<td><P class="file">
-....
+		<dt><a href="../../doc/img"><CODE>img/</CODE></a>
+		<dd> Image files used in the documentation
 
-<td>
+		</dl>
 
- <P class="expl">The admin directory, containing release
-notes, announcements, and so on. This directory is not
-put into the distribution.
+	<dt><a href="../../edit"><CODE>edit/</CODE></a>
+	<dd> A meta-package containing packages of
+	textual and graphical editors and viewers.
+		<dl>
+		<dt><a href="../../edit/makefile"><CODE>makefile</CODE></a>
+		<br><a href="../../edit/pkgIndex.tcl"><CODE>pkgIndex.tcl</CODE></a>
 
-<tr valign=top>
-<td>
-<td><P class="file">
+		<dd> 
+		<dt><a href="../../edit/textedit"><CODE>textedit/</CODE></a>
+		<dd> a collection of syntax-sensitive text editors.
+		<dt><a href="../../edit/visedit"><CODE>visedit/</CODE></a>
+		<dd> a collection of graphical editors.
+		<dt><a href="../../edit/slate"><CODE>slate/</CODE></a>
+		<dd> an [incr Tcl] megawidget layered over the Tcl/Tk canvas.
+		</dl>
 
-<td><P class="file">
-dist/
 
-<td>
+	<dt> <a href="../../java"><CODE>java/</CODE></a>
+	<dd> Directories containing Java sources
+		<dl>
+		<dt> <a href="../../java/ptplot"><CODE>ptplot</CODE></a>
+		<dd> The Java plotter
+		</dl>
 
- <P class="expl">The distribution directory. The contents of this
-directory are automatically generated.
 
-<tr valign=top>
-<td>
-<td><P class="file">
-bin/
-<td><P class="file">
-...
+	<dt> <a href="../../kernel"><CODE>kernel/</CODE></a>
+	<dd> A meta-package containing the complete Tycho kernel. 
+		<dl>
+		<dt> <a href="../../kernel/basic"><CODE>basic/</CODE></a>
+		<dd> the minimal set of classes that is used
+		 by any non-graphical Tycho program, and includes Tcl
+		 procedures that could be used anywhere, such as list and
+		 string manipulation. Its <code>bin/</code> directory contains
+		 scripts that know how to start Tycho up in various graphical
+		 and non-graphical configurations.
+		<dt> <a href="../../kernel/gui"><CODE>gui/</CODE></a>
+		<dd> the Tycho graphical kernel, which is used by all graphical
+		applications.
+		<dt> <a href="../../kernel/html"><CODE>html/</CODE></a>
+		<dd> contains the HTML viewer and support
+		classes such as HTTP access and network support.
 
-<td>
- <P class="expl">Shell scripts that start the <B>tclsh</B>,
-<B>itclsh</B>, <B>wish</B>, or <B>itkwish</B>, load one or more
-packages, and do something useful. Many of the scripts in this package
-will be copied into this directory from the <B>bin/</B> directories of
-individual packages.
+		<dt> <a href="../../kernel/model"><CODE>model/</CODE></a>
+		<dd> is a package that forms the model part
+		of the model-view architecture used in parts of Tycho.
+		</dl>
 
-<tr valign=top>
-<td>
-<td><P class="file">
-doc/
-<td><P class="file">
-makefile
-<br>
-index.html
-<br>
-...html
 
-<td>
- <P class="expl">The generic Tycho documentation directory. This
-includes documentation on the package system, and the goals of the
-Tycho project. The package installer automatically adds links to
-individual packages to some of these files.
 
-<tr>
-<td>
-<td>
-<td><P class="file">
-img/
-<td>
- <P class="expl">Image files used in the documentation
+	<dt>  <a href="../../mk"><CODE>mk/</CODE></a>
+	<dd> Makefiles used by makefiles in all packages
+		<dl>
+		<dt> <a href="../../mk/tycho.mk"><CODE>tycho.mk</CODE></a>
+		<dd> Contains installation dependent makefile variables,
+		such as the location of the Java Development Kit
 
-<tr valign=top>
-<td>
-<td><P class="file">
-editors/
+		<dt> <a href="../../mk/tycommon.mk"><CODE>tycommon.mk</CODE></a>
+		<dd> Contains rules to build files from source files.
+		</dl>
 
-<td><P class="file">
-makefile
-<br>
-pkgIndex.tcl
 
-<td>
- <P class="expl">A meta-package containing packages of
-textual and graphical editors and viewers.
+	<dt> <CODE>lib.<I>$PTARCH</I>/</CODE>
+	 <br><CODE>obj.<I>$PTARCH</I>/</CODE>
+	<dd> Directories containing platform dependent libraries and
+	object files. <CODE>make tclexts</CODE> builds these.
+	For more information, see
+	<a href="../coding/buildtclexts.html">Building Tcl Extensions</a>
 
-<tr valign=top>
-<td>
-<td>
-<td><P class="file">
-tydoc/
-<br>
-textedit/
-<br>
-visedit/
-<br>
-graphedit/
-<br>
-...
 
-<td>
+	<dt> <a href="../../src"><CODE>src/</CODE></a>
+	<dd> Directories containing C source code
 
-<b>tydoc/</b> is a documentation generator and viewer for [incr Tcl]
-and Java. It can generate plain HTML as well as its own
-format. <b>textedit/</b> is a collection of syntax-sensitive text
-editors. <b>visedit/</b> is a collection of graphical
-editors. <b>graphedit/</b> contains editors for directed graphs.
 
-<tr valign=top>
-<td>
-<td><P class="file">
-ext/
+	<dt> <a href="../../util"><CODE>util/</CODE></a>
+	<dd>  A meta-package containing packages of general
+	utility. Most of these are not part of Tycho proper, but are
+	useful stand-alone tools.
+		<dl>
+		<dt> <a href="../../util/makefile"><CODE>makefile</CODE></a>
+		 <br><a href="../../util/pkgIndex.html"><CODE>pkgIndex.tcl</CODE></a>
+		<dd> Makefile and package index files
 
-<td><P class="file">
-makefile
-<br>
-lib.sol2.5/
-<br>
-obj.sol2.5/
-<br>
-...
+		<dt> <a href="../../util/devtools"><CODE>devtools/</CODE></a>
+		<dd> Developer tools used to compile C and Java
 
-<td>
- <P class="expl">A directory for binary extensions.  The source files
-from individual packages are compiled into the
-<b>obj.<I>architecture</I></b> directory. and generated libraries
-placed into the <B>lib.<I>architecture</I></B> directory.  Binary
-extensions that are supplied with a package (and not generated by
-recompilation) are also placed here.
+		<dt><a href="../../util/tydoc"><CODE>tydoc/</CODE></a>
+		<dd> <code>tydoc/</code> is a documentation generator
+		and viewer for [incr Tcl] and Java.
+		It can generate plain HTML as well as its own format.
 
-<tr valign=top>
-<td>
-<td><P class="file">
-kernel/
-
-<td><P class="file">
-makefile
-<br>
-pkgIndex.tcl
-
-<td>
- <P class="expl">
-
-A meta-package containing the complete Tycho kernel. 
-
-<tr valign=top>
-<td>
-<td>
-<td><P class="file">
-basic/
-<br>
-gui/
-<br>
-html/
-<br>
-model/
-
-<td>
-
-<b>basic/</b> is the minimal set of classes that is used by any
-non-graphical Tycho program, and includes Tcl procedures that could be
-used anywhere, such as list and string manipulation. Its <b>bin/</b>
-directory contains scripts that know how to start Tycho up in various
-graphical and non-graphical configurations. <b>gui/</b> is the Tycho
-graphical kernel, which is used by all graphical
-applications. <b>html/</b> contains the HTML viewer and support
-classes such as HTTP access and network support. <b>model/</b> is a
-package that forms the model part of the model-view architecture used
-in parts of Tycho.
-
-<tr valign=top>
-<td>
-<td><P class="file">
-mk/
-
-<td><P class="file">
-makefile
-<br>
-tycho.mk
-<br>
-...
-
-<td>
- <P class="expl">Makefiles used by makefiles in all packages.
-
-<tr valign=top>
-<td>
-<td><P class="file">
-util/
-
-<td><P class="file">
-makefile
-<br>
-pkgIndex.tcl
-
-<td>
- <P class="expl">A meta-package containing packages of general
-utility. Most of these are not part of Tycho proper, but are
-useful stand-alone tools.
-
-<tr valign=top>
-<td>
-<td>
-<td><P class="file">
-jester/
-<br>
-htmlscript/
-<br>
-notmake/
-<br>
-pakman/
-<br>
-...
-
-<td>
-</table>
-
-</table>
-
+		<dt><a href="../../util/tytest/"><CODE>tytest/</CODE></a>
+		<dd> Framework for testing C programs.
+		</dl>
+	</dl>
+</dl>
  <P>
 <HR>
 Copyright &#169 1998, The Regents of the University of California.
