@@ -118,10 +118,10 @@ ComplexSubMatrix::ComplexSubMatrix(const ComplexSubMatrix& src) {
 }
 
 // General operators
-int ComplexSubMatrix::operator == (const PtMatrix& m) {
+int ComplexSubMatrix::operator == (const PtMatrix& m) const {
   if(typesEqual(m)) {
     const ComplexSubMatrix& src = *((const ComplexSubMatrix*)&m);
-    if((parent == src.parent) && (data = src.data) &&
+    if((parent == src.parent) && (data == src.data) &&
        (nRows == src.nRows) && (nCols == src.nCols))
       return 1;
   }
@@ -233,10 +233,10 @@ FixSubMatrix::FixSubMatrix(const FixSubMatrix& src) {
 }
 
 // General operators
-int FixSubMatrix::operator == (const PtMatrix& m) {
+int FixSubMatrix::operator == (const PtMatrix& m) const {
   if(typesEqual(m)) {
     const FixSubMatrix& src = *((const FixSubMatrix*)&m);
-    if((parent == src.parent) && (data = src.data) &&
+    if((parent == src.parent) && (data == src.data) &&
        (nRows == src.nRows) && (nCols == src.nCols))
       return 1;
   }
@@ -348,10 +348,10 @@ FloatSubMatrix::FloatSubMatrix(const FloatSubMatrix& src) {
 }
 
 // General operators
-int FloatSubMatrix::operator == (const PtMatrix& m) {
+int FloatSubMatrix::operator == (const PtMatrix& m) const {
   if(typesEqual(m)) {
     const FloatSubMatrix& src = *((const FloatSubMatrix*)&m);
-    if((parent == src.parent) && (data = src.data) &&
+    if((parent == src.parent) && (data == src.data) &&
        (nRows == src.nRows) && (nCols == src.nCols))
       return 1;
   }
@@ -463,10 +463,10 @@ IntSubMatrix::IntSubMatrix(const IntSubMatrix& src) {
 }
 
 // General operators
-int IntSubMatrix::operator == (const PtMatrix& m) {
+int IntSubMatrix::operator == (const PtMatrix& m) const {
   if(typesEqual(m)) {
     const IntSubMatrix& src = *((const IntSubMatrix*)&m);
-    if((parent == src.parent) && (data = src.data) &&
+    if((parent == src.parent) && (data == src.data) &&
        (nRows == src.nRows) && (nCols == src.nCols))
       return 1;
   }
