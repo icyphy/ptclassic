@@ -73,7 +73,7 @@ lsList cmdList;			/* Argument list            */
     octObject facet, bag;
     lsGen lg;
     int len;
-    int expert = vemExpert( spot );
+    (void)vemExpert( spot );
 
     seInit();
 
