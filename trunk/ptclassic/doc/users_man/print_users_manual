@@ -11,16 +11,13 @@ lpr -P$PRINTER installation.ps
 lpr -P$PRINTER xgraph.ps
 lpr -P$PRINTER vem.ps
 lpr -P$PRINTER documents.ps
-lpr -P$PRINTER silage.ps
-lpr -P$PRINTER sproc.ps
-lpr -P$PRINTER cg96.ps
+lpr -P$PRINTER vhdl.ps
 lpr -P$PRINTER cg56.ps
 lpr -P$PRINTER cgc.ps
 lpr -P$PRINTER cg.ps
 lpr -P$PRINTER cp.ps
-lpr -P$PRINTER mq.ps
-lpr -P$PRINTER thor.ps
 lpr -P$PRINTER de.ps
+lpr -P$PRINTER pn.ps
 lpr -P$PRINTER bdf.ps
 lpr -P$PRINTER ddf.ps
 lpr -P$PRINTER hof.ps
@@ -29,6 +26,5 @@ lpr -P$PRINTER domains.ps
 lpr -P$PRINTER ptcl.ps
 lpr -P$PRINTER pigi.ps
 lpr -P$PRINTER overview.ps
-lpr -P$PRINTER foreword0.5.2.ps
 lpr -P$PRINTER users_manTOC.ps
 lpr -P$PRINTER title.ps
