@@ -2,21 +2,5 @@
 // Soonhoi Ha
 // $Id$
 
-#include "DEUniverse.h"
-#include "StringList.h"
+// There are no longer any methods here -- all moved to Universe.cc
 
-StringList
-DEUniverse :: printVerbose () {
-	StringList out;
-	out = "DISCRETE EVENT UNIVERSE: ";
-	out += readFullName ();
-	out += "\n";
-	out += "Descriptor: ";
-	out += readDescriptor();
-	out += "\n";
-	out += "CONTENTS:\n";
-
-	out += myTopology->printVerbose();
-
-	return out;
-}
