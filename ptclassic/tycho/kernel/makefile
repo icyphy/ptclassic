@@ -119,6 +119,7 @@ ITCL_SRCS = \
 	StatusBar.itcl \
 	StyleSheet.itcl \
 	Subpanel.itcl \
+	TArchetype.itcl \
 	TclShell.itcl \
 	TextModel.itcl \
 	ToolBar.itcl \
