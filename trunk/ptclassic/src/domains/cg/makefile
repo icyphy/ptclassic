@@ -11,7 +11,7 @@
 # objects can be maintained.
 
 
-DIRS = kernel stars architectures loopScheduler gilsScheduler topologies
+DIRS = kernel stars architectures gilsScheduler topologies
 
 ME = cg
 
