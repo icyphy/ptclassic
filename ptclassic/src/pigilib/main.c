@@ -31,6 +31,7 @@ Initialization code for pigiRpc.
 /* Includes */
 #include "local.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include "rpc.h"
 #include "vemInterface.h"
 #include "compile.h"
@@ -43,6 +44,8 @@ Initialization code for pigiRpc.
 #include "options.h"
 #include "utilities.h"
 #include "err.h"
+#include "xfunctions.h"
+#include "pigiLoader.h"
 
 /* Global Vars */
 
