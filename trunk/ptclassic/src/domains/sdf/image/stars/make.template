@@ -45,7 +45,7 @@ INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(ROOT)/src/domains/sdf/stars \
        -I$(ROOT)/src/utils/libptdsp
 
 # Library name
-LIB=libsdfimagestars.$(LIBSUFFIX)
+PTLIB=libsdfimagestars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor, put derived stars first
 PL_SRCS= \
