@@ -87,7 +87,7 @@ This star does not support frame numbers.  See ShowImg2.
     int del = !((saveMe[0] == 'y') || (saveMe[0] == 'Y'));
 
     const char* iname = imageName;
-    const char* nm = 0;
+    char* nm = 0;
     if (iname && *iname) {
       nm = expandPathName(iname);
     }

@@ -66,7 +66,7 @@ for a complete explanation of the options.
 	  int del = FALSE;
 
 	  const char* iname = saveFile;
-	  const char* nm = 0;
+	  char* nm = 0;
 	  if (iname && *iname) {
 	    nm = expandPathName(iname);
 	    del = FALSE;
