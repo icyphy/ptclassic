@@ -1,0 +1,154 @@
+
+<!-- $Id$ -->
+<html>
+<head>
+<meta name="generator"  content="Tycho, ::outline::htmlOutline, Fri Jul 24 21:23:49 PDT 1998">
+  <title>Pseudo-3D items</title>
+ <!--header-->
+  
+  <!-- <LINK href="style.css" rel="stylesheet" type="text/css"> -->
+
+  <!--/header-->
+</head>
+<div class="body">
+<blockquote>
+<body bgcolor=#faf0e6>
+
+<h1>Pseudo-3D items</h1>
+
+
+The Slate has two item pseudo-3D item types: rectangles and polygons.  
+We did at one time implement a psuedo-3D oval but it's rather hard to 
+make it look reasonable using just the Tk canvas.
+
+<h2><a name="Frame item type"></a><a href="../codeDoc/Frame.html">Frame</a></h2>
+
+<i>Frame</i> is a pseudo-3D rectangle.
+
+<p><b>Options</b>:
+
+<dl>
+<dt><dd>
+<dl>
+<dt><b>-borderwidth</b>
+<dd>The width of the border of the item. By default, it is two. For
+various reasons, the borderwidth is actually twice this value if the
+<b>-relief</b> option is <i>groove</i> or <i>ridge</i>.
+
+<dt><b>-color</b>
+<dd>The color of the item. This is a "generic" color as implemented by
+the <a href="../codeDoc/Shades.html">Shades</a> class -- this will
+soon be replaced by an enhanced version of <a
+href="../../../../kernel/doc/codeDoc/ColorManager.html">ColorManager</a>. By
+default, the color is the same as the standard Tk background color
+("grey85").
+
+<dt><b>-relief</b>
+<dd>The "relief" of the pseudo-3D item. This can be one of:
+<i>raised</i>, <i>sunken</i>, <i>groove</i>, <i>ridge</i>, or
+<i>flat</i>. The meanings of these are the same as for the Tk
+<b>frame</b> widget. The default is <i>raised</i>.
+
+</dl></dl>
+
+
+<i>Frame</i> implements its scaling code so that the borderwidth remains 
+constant when the picture is resized. In all other respects, it can be 
+treated like any other rectangular item.
+
+<p><b>Enhancements</b>: In an earlier version of the Slate, the Frame
+had an additional option,<b>-fill</b>, which could take
+values <i>none</i>,  <i>gloss</i>,  and <i>matt</i>. In the first 
+case, the Frame had no "surface" -- that is, it was transparent, which 
+was particularly useful if <b>-relief</b> was <i>ridge</i>. This 
+should be reimplemented.
+
+<p><b>Example</b>: Create some Frames with various options:
+<tcl quiet><pre>
+  source $tycho/editors/slate/doc/internals/newslate.itcl
+  $slate create Frame 30 30 70 50 -color green -tags moveable
+  $slate create Frame 100 20 120 40 -color lightblue &#92
+	-relief ridge -tags moveable
+  $slate create Frame 30 130 70 150 -relief sunken  &#92
+	-borderwidth 4 -tags moveable
+</pre></tcl>
+
+<h2><a name="Solid item type"></a><a href="../codeDoc/Solid.html">Solid</a></h2>
+
+<i>Solid</i> is a pseudo-3D polygon.
+
+<p><b>Options</b>:
+
+<BLOCKQUOTE>
+<dl>
+<dt><b>-borderwidth</b>
+<dd>The width of the border of the item. By 
+default, it is two. For various reasons, the borderwidth is actually
+twice this value if the <b>-relief</b> option is <i>groove</i> 
+or <i>ridge</i>.
+
+<dt><b>-color</b>
+<dd>The color of the item. This is a "generic" color as
+implemented by the <a href="../codeDoc/Shades.html">Shades</a> class
+-- this will soon be replaced by an enhanced version of <a
+href="../../../../kernel/doc/codeDoc/ColorManager.html">ColorManager</a>. By
+default, the color is the same as the standard Tk background color
+("grey85").
+
+<dt><b>-relief</b>
+<dd>The "relief" of the pseudo-3D item. This can be 
+one of: <i>raised</i>, <i>sunken</i>, <i>groove</i>, <i>ridge</i>, or 
+<i>flat</i>. The meanings of these are the same as for the Tk 
+<b>frame</b> widget. The default is <i>raised</i>.
+
+</dl>
+</BLOCKQUOTE>
+
+<i>Solid</i> implements its scaling code so that the borderwidth remains 
+constant when the picture is resized. Its coordinates, (like the 
+standard Tk canvas <i>polygon</i> item) are a list of vertex 
+coordinates. They must, however, be in a "clockwise" direction for the 
+borders to be drawn properly.
+
+<p><b>Enhancements</b>: (i) See the remark about <b>-fill</b> 
+option in the Frame section. (ii) In an earlier version of the Slate, 
+<i>Solid</i> had methods to rotate and "flip" itself -- this should
+be reimplemented.
+
+<p><b>Example</b>: Create some Solids with various options:
+<tcl quiet><pre>
+  source $tycho/editors/slate/doc/internals/newslate.itcl
+  $slate create Solid 100 20 120 20 120 10 140 30 120 50 120 40 100 40 &#92
+		  -color green -tags moveable
+  $slate create Solid 60 20 60 40 40 40 &#92
+		  -color grey -borderwidth 3 -tags moveable
+</pre></tcl>
+
+ <P>
+<center>
+<div class="navigation">
+<br>
+<a href="index.html">  <img  border=0  src="../img/BTN_Top.gif"  alt="Top: The Slate Programmer's Guide"></a>
+<a href="items.html">  <img  border=0  src="../img/BTN_Section.gif"  alt="Up: Item classes"></a>
+<a href="c-boxarrow.html">  <img  border=0  src="../img/BTN_Next.gif"  alt="Next: Box-and-arrow items"></a>
+
+<br>
+</div class="navigation">
+</center>
+
+<div class="footer">
+  
+<p>
+<HR>
+Copyright 1996-%Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: $Date$,
+comments to: <author>johnr@eecs.berkeley.edu</author>
+
+  </div class="footer">
+</body>
+</blockquote>
+</div>
+</html>
+
