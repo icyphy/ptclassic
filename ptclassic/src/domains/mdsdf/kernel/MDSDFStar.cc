@@ -46,9 +46,9 @@ ISA_FUNC(MDSDFStar,DataFlowStar);
 const char* MDSDFStar::domain() const { return MDSDFdomainName; }
 
 // Constructor
-MDSDFStar::MDSDFStar() : rowRepetitions(0,1), colRepetitions(0,1),
-                         rowIndex(0), colIndex(0), startRowIndex(0),
-                         startColIndex(0) {}
+MDSDFStar::MDSDFStar() : rowIndex(0), colIndex(0),
+			 rowRepetitions(0,1), colRepetitions(0,1),
+			 startRowIndex(0), startColIndex(0) {}
 
 // Domain-specific initialization.  This sets up only the states of
 // each star in the galaxy and calls the user setup() routine.
