@@ -9,9 +9,6 @@ $Id$
  Programmer:  Soonhoi Ha
  Date of creation: 5/30/90
 
- Class DERepeatStar's member functions, formerly here, now have
- their own file DERepeatStar.cc
-
 *******************************************************************/
 #ifdef __GNUG__
 #pragma implementation
@@ -47,9 +44,10 @@ void DEStar :: prepareForScheduling() {
 	}
 }
 
-void DEStar :: fire() {
-	Star::fire();
+int DEStar :: fire() {
+	int status = Star::fire();
 	sendOutput();
+	return status;
 }
 
 void DEStar :: sendOutput() {
