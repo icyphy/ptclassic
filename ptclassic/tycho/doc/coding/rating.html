@@ -59,18 +59,33 @@ The four ratings are as follows:
 
 <dt><B>Red</B>
 
-<dd>All code starts here.  Red code is in flux, and anyone that calls
-red code should expect it to change without warning.  Code that calls
-red code does not need to be modified by the author if changes in the
-red code break the calling code. Red code should never be released.
+<dd>All code starts here.  
+<MENU>
+<LI> Red code is in flux, and anyone that calls red code should expect
+it to change without warning.
+<LI> If Red code is checked in to the shared development tree, it should
+not cause compiles to fail.
+<LI> Code that calls red code does not need to be modified by the author if
+changes in the red code break the calling code.
+<LI>  Red code should never be released.
+</MENU>
+
+
 
  <P><dt><B>Yellow</B>
 
 <dd>The interface and overall design of the class is acceptable for
-development purposes.  Clients can code to this interface with the
+development purposes.
+<MENU>
+<LI> Clients can code to this interface with the
 expectation that further changes will be limited to revisions, not
-major changes. Clients cannot expect that code that calls yellow code
-will work at all. Yellow code should generally not be released.
+major changes. 
+<LI> Clients cannot expect that code that calls yellow code
+will work at all.
+<LI> Code that calls yellow code should be modified by the author of 
+the yellow code if changes in the yellow code break the calling code.
+<LI> Yellow code should generally not be released.
+</MENU>
 
  <P><dl>
  <dt><I>Proposing advancement</I>
@@ -78,8 +93,8 @@ will work at all. Yellow code should generally not be released.
 <dd> The author proposes advancement to yellow when he/she is
 satisfied with the design of the class, and how it collaborates with
 other classes. The author is responsible for making sure that the
-class is adequately documented. UML diagrams at the design level are
-appropriate here.
+class is adequately documented and that the javadoc output is correct.
+UML diagrams at the design level are appropriate here.
 
  <P><dt><I>Accepting advancement</I>
 
@@ -100,9 +115,18 @@ require changes to the interface in anticipation of testing needs.
 but the author should avoid making wholesale changes.  If wholesale
 changes are required, the author should request that the class be
 taken back to red. If the author changes the interface to yellow code,
-then he is responsible for a) making sure that the calling code
-compiles, and b) notifying the author of calling code about the
-change. The author is not responsible for making sure that the calling
+then he is responsible for:
+
+<OL>
+<LI> Making sure that the calling code
+compiles.
+<LI> Notifying the author of calling code about the
+change.
+<LI> Fixing the tests in the test suite.
+<LI> Updating the design documents and javadoc output
+</OL>
+
+The author is not responsible for making sure that the calling
 code works or passes its test suites, as yellow code does not provide
 any assurance of functionality.
 
@@ -110,13 +134,20 @@ any assurance of functionality.
 
  <P><dt><B>Green</B>
 
-<dd>The interface of the class has been finalized, and the
-implementation is acceptable for development purposes. The
-documentation of the interface is acceptable for development
-purposes. Clients can code to green code in the expection that the
+<dd>
+<MENU>
+<LI> The interface of the class has been finalized, and the
+implementation is acceptable for development purposes.
+<LI> The documentation of the interface is acceptable for development
+purposes.
+<LI> Clients can code to green code in the expection that the
 interface will not change in such a way as to break compilation, nor
 will the implementation change enough to break the caller's test
-suite. Green code is releaseable.
+suite.
+<LI> Green code is releaseable.
+</MENU>
+
+
 
  <P><dl>
 <dt><I>Proposing advancement</I>
