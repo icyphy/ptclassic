@@ -1,9 +1,10 @@
 # Microsoft VC++ nmake file for VC 5.0
 # Based on config-nt4.mk, but modified by hand
+# **** It is _VERY_ unlikely that this makefile works ****
 
 # Version: $Id$
 
-# Copyright (c) 1997 The Regents of the University of California.
+# Copyright (c) 1997-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -42,6 +43,7 @@
 # src/kernel/expandPath: We don't have a pwd.h, so file name expansion
 #       will not work.
 
+# See $PTOLEMY/doc/html/nt/index.html for more information.
 
 # Programmer:  Christopher Hylands
 
