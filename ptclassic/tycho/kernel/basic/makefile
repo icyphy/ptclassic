@@ -42,7 +42,7 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 # Sub directories to run make in.
-DIRS =	
+DIRS =	adm bin demo doc test
 
 TCL_SRCS = \
 	List.tcl \
@@ -51,7 +51,9 @@ TCL_SRCS = \
 	Math.tcl \
 	Misc.tcl \
 	Path.tcl \
+	Startup.tcl \
 	String.tcl \
+	Tycho.tcl \
 	URLPath.tcl\
 	tychoMakeClassDAG.tcl
 
