@@ -30,7 +30,6 @@
 #                                        COPYRIGHTENDKEY
 #######################################################################
 
-catch {delete class Glimpse}
 #######################################################################
 #### options
 #
@@ -162,7 +161,7 @@ body ::tycho::Glimpse::constructor {args} {
 #### destructor
 #
 body ::tycho::Glimpse::destructor {} {
-    ::tycho::rm -f $glimpseOutputFile
+    file delete -force $glimpseOutputFile
 }
 
 
