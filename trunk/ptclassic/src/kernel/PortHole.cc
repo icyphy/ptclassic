@@ -44,13 +44,15 @@ Pointer* CircularBuffer :: here()
 
 Pointer* CircularBuffer :: next()
 {
-        current = ++current % dimen;
+	++current;
+	if (current >= dimen) current = 0;
         return buffer+current;
 }
 
 Pointer* CircularBuffer :: last()
 {
-        current = --current % dimen;
+	--current;
+	if (current < 0) current = dimen - 1;
         return buffer+current;
 }
 
