@@ -55,15 +55,6 @@ DeclustScheduler::~DeclustScheduler() {
 
 int DeclustScheduler::preSchedule() {
 
-	// check the flag of the target. If onsStarOneProc option is set,
-	// generate error message since this scheduling algorithm does
-	// not support that feature yet.
-	/* if (OSOPreq()) {
-		Error::abortRun("OSOP request is not supported in ",
-		"Declustering Algorithm yet");
-		return FALSE;
-	} */
-
 	if (logstrm)
 		*logstrm << "Created DCGraph, moving to elementary clusters\n";
 
@@ -1000,7 +991,8 @@ void DeclustScheduler::NBranch(DCNode *BNode, DCNode *N1, DCNode *N2, int dir)
 	DCArc *cut, *other;
 	other = path2->head(); 	// The first arc in path2
 	while ((cut = arciter++) != 0) {
-		if (OSOPreq() && cut->betweenSameStarInvocs()) continue;
+		if (cut->betweenSameStarInvocs() && cut->getSrc()->sticky()) 
+			continue;
 		int finish = NoMerge(cut, other);
 		if (finish < bestFinish) {
 			bestFinish = finish;
@@ -1012,7 +1004,8 @@ void DeclustScheduler::NBranch(DCNode *BNode, DCNode *N1, DCNode *N2, int dir)
 	arciter.reconnect(*path2);
 	other = path1->head(); 	// The first arc in path1
 	while ((cut = arciter++) != 0) {
-		if (OSOPreq() && cut->betweenSameStarInvocs()) continue;
+		if (cut->betweenSameStarInvocs() && cut->getSrc()->sticky()) 
+			continue;
 		int finish = NoMerge(cut, other);
 		if (finish < bestFinish) {
 			bestFinish = finish;
@@ -1167,7 +1160,8 @@ void DeclustScheduler::FindBestCuts(DCArcList *list1, DCArcList *list2,
 
 	while ((cut1 = iter1++) != 0) {
 
-		if (OSOPreq() && cut1->betweenSameStarInvocs()) continue;
+		if (cut1->betweenSameStarInvocs() && cut1->getSrc()->sticky()) 
+			continue;
 		iter2.reset();
 		// If both cuts are on the same arclist, the second arc
 		// should be behind the first.
@@ -1177,7 +1171,7 @@ void DeclustScheduler::FindBestCuts(DCArcList *list1, DCArcList *list2,
 		}
 
 		while ((cut2 = iter2++) != 0) {
-			if (OSOPreq() && cut2->betweenSameStarInvocs()) 
+			if (cut2->betweenSameStarInvocs() && cut1->getSrc()->sticky()) 
 				continue;
 			int finish = Merge(cut1, cut2, other);
 

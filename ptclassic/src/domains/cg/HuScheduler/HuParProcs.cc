@@ -213,7 +213,7 @@ void QSParProcs :: scheduleSmall(QSNode* pd)
 	advanceClock(0);
 
 	// check OSOP option
-	if (OSOPreq() && pd->invocationNumber() > 1) {
+	if (pd->sticky() && pd->invocationNumber() > 1) {
 		ParNode* firstN = (ParNode*) pd->myMaster()->myMaster();
 		int whichP =  firstN->getProcId();
 		assignNode(pd, pd->myExecTime(), whichP);
