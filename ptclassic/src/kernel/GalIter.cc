@@ -30,12 +30,12 @@ class IterContext {
 };
 
 // Constructor.  Clear stack, create an iterator for this level.
-GalAllBlockIter::GalAllBlockIter(const Galaxy& g) {
+GalAllBlockIter::GalAllBlockIter(Galaxy& g) {
 	stack = 0;
 	thisLevelIter = new GalTopBlockIter(g);
 }
 
-GalStarIter::GalStarIter(const Galaxy& g) : GalAllBlockIter(g) {}
+GalStarIter::GalStarIter(Galaxy& g) : GalAllBlockIter(g) {}
 
 // The reset method pops up to the top level, then resets the top iterator
 void GalAllBlockIter::reset() {
@@ -50,7 +50,7 @@ GalAllBlockIter::~GalAllBlockIter() {
 }
 
 // push current iterator onto stack, enter a new galaxy g.
-inline void GalAllBlockIter::push(const Galaxy& g) {
+inline void GalAllBlockIter::push(Galaxy& g) {
 	stack = new IterContext(thisLevelIter, stack);
 	thisLevelIter = new GalTopBlockIter(g);
 }
