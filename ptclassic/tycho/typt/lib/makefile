@@ -44,7 +44,8 @@ ITCL_SRCS =
 
 TCL_SRCS = \
 	makeFacetForest.tcl \
-	ptlangTroffToHTML.tcl
+	ptlangTroffToHTML.tcl \
+	starindex.tcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
