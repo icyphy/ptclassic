@@ -1144,9 +1144,7 @@ BDFCluster* BDFClusterGal::merge(BDFCluster* c1, BDFCluster* c2) {
 }
 
 // constructor: make empty bag.
-BDFClusterBag :: BDFClusterBag()
-: sched(0), gal(0), exCount(0), owner(TRUE)
-{}
+BDFClusterBag :: BDFClusterBag() : sched(0), gal(0), exCount(0) {}
 
 
 void BDFClusterBag :: createScheduler() {
@@ -1225,12 +1223,11 @@ BDFClusterBag::merge(BDFClusterBag* b,BDFClusterGal* par) {
 	// problems with iterators.
 	BDFClustPortIter nextbp(*this);
 	BDFClustPort* p;
-	SequentialList zap;
 
 	// zap is the list of connections between the two clusters.  These
 	// become internal connections so we zap them from both bags' lists
 	// of external pointers.  Exceptions: as for absorb
-
+	SequentialList zap;
 	while ((p = nextbp++) != 0) {
 		BDFClustPort *pFar = p->far();
 		assert(pFar);
@@ -1239,7 +1236,6 @@ BDFClusterBag::merge(BDFClusterBag* b,BDFClusterGal* par) {
 	}
 
 	// now zap those that become internal
-
 	ListIter nextZap(zap);
 	while ((p = (BDFClustPort*)nextZap++) != 0) {
 		BDFClustPort* pFar = p->far();
@@ -1262,10 +1258,10 @@ BDFClusterBag::merge(BDFClusterBag* b,BDFClusterGal* par) {
 		p->setNameParent(p->name(),this);
 		addPort(*p);
 	}
-// get rid of b.
-	par->removeBlock(*b); // remove from parent galaxy
-	b->owner = FALSE;     // prevent from zapping contents, I took them
-	LOG_DEL; delete b;    // zap the shell
+	// get rid of b.
+	par->removeBlock(*b);	// remove from parent galaxy
+	b->gal->orphanBlocks();	// b's galaxy's blocks no longer owned by b
+	delete b;		// zap the shell
 	adjustAssociations();
 }
 
@@ -1544,12 +1540,8 @@ void BDFClusterBag::wrapup() {
 
 // destroy the bag.
 BDFClusterBag::~BDFClusterBag() {
-        // empty b's galaxy's list of blocks if b doesn't own them
-	// to prevent them from being prematurely deleted -BLE
-	if (gal && !owner) gal->orphanBlocks();
 	delete gal;
 	delete sched;
-	deleteAllGenPorts();
 }
 
 // This function, given a BDFClustPort, tries to find another port that
