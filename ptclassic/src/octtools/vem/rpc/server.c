@@ -34,7 +34,7 @@ static char SccsId[]="$Id$";
  *
  */
 
-#ifdef SYSV
+#ifdef USE_GETRLIMIT
 #include <sys/time.h>
 #include <sys/resource.h>
 #endif
@@ -66,7 +66,7 @@ lsList RPCDemonList;
 void
 rpcInit()
 {
-#ifdef SYSV
+#ifdef USE_GETRLIMIT
     struct rlimit	rlp;
 #endif
     /*
@@ -81,7 +81,7 @@ rpcInit()
     RPC_FD_ZERO(RPCSelectRequest);
     RPC_FD_ZERO(RPCSelectAccept);
     RPC_FD_ZERO(RPCFileRequest);
-#ifdef SYSV
+#ifdef USE_GETRLIMIT
     getrlimit(RLIMIT_NOFILE, &rlp);
     RPCFileDescriptors = RPCARRAYALLOC(int, rlp.rlim_cur - 1);
 #else
