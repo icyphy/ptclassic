@@ -1,5 +1,3 @@
-#ifndef _CGCostTarget_h
-#define _CGCostTarget_h 1
 /**********************************************************************
 Version identification:
  $Id$
@@ -32,9 +30,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer:  Raza Ahmed
  Date of creation: 07/09/96
 
- Target for the generation of cost of individual stars in the galaxy.
+ Target for the generation of cost of individual stars in a galaxy.
 
 ***********************************************************************/
+#ifndef _CGCostTarget_h
+#define _CGCostTarget_h 1
+
 #ifdef __GNUG__
 #pragma implementation
 #endif
@@ -42,8 +43,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringList.h"
 #include "StringState.h"
 #include "IntState.h"
-#include "GalIter.h"
-#include "SDFScheduler.h"
+
+#include "Block.h"
+#include "Galaxy.h"
+
 #include "CGTarget.h"
 
 class CGCostTarget : public CGTarget {
@@ -53,36 +56,33 @@ public:
 		     const char* assocDomain = CGdomainName);
 
 	// Return a copy of itself
-        /*virtual*/ Block* makeNew() const ;
+        /*virtual*/ Block* makeNew() const;
 
 	/*virtual*/ int run();
 	/*virtual*/ void wrapup();
 
-	// The following switch statement will find the right match in 
-	// the data type for the block in the galaxy
-	// The matched star will be then added to the passed in galaxy 
-	// Then the two ports will be connected within the galaxy
-        void selectConnectStarBlock(Galaxy* , MultiPortHole* , char*);
+        /*virtual*/ int isA(const char* cname) const;
 
-        // The following function will print the information about the
-	// stars found in the galaxy
-        void printGalaxy(Galaxy*);
+protected:
+	// Find the right source or sink star to match the block port
+        int selectConnectStarBlock(Galaxy* localGalaxy,
+		MultiPortHole* localHole);
 
-        /*virtual*/ int isA(const char*) const;
+        // Print the information about the stars found in the galaxy
+        void printGalaxy(Galaxy* localGalaxy);
+
+	// Add a newly created block
+	inline void addTempBlock(Block* block) { tempBlockList.put(block); };
+
+	// Delete newly allocated blocks
+	void deleteTempBlocks();
+
 private:
-	// some private members to mask the pointer to the constant 
-	// object to a pointer to a non-constant object
-        Block* starPointer;     
+	// Map a data type into a standard abbreviation used in star names
+	const char* dataTypeAbbreviation(const char* datatype);
 
+	// List of dynamically allocated blocks
+	SequentialList tempBlockList;
 };
 
 #endif
-
-
-
-
-
-
-
-
-
