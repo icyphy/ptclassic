@@ -194,8 +194,6 @@ clean_tcl:
 #	Need to make a link for tk.h so that we are sure it is installed
 #	Theoretically, GNU make should do the right thing, but . . .
 $(TK_OBJ)/config.status: $(TCLTK_OBJ) $(TK_OBJ) \
-			 $(TK_OBJ)/Makefile.in \
-			 $(TK_OBJ)/tkUnix.c \
 			#$(TCLTK_OBJ)/$(TCL_MAJOR_VERSION) $(TCLTK_OBJ)/$(TK_MAJOR_VERSION)
 	@echo "Configuring tk"
 	(cd $(TK_OBJ); $(TK_SRC)/configure -v --srcdir=$(TK_SRC) --prefix=$(TK_INDEPENDENT_DEST) --exec-prefix=$(TK_DEST) $(ENABLE_GCC))
@@ -203,10 +201,6 @@ $(TK_OBJ)/config.status: $(TCLTK_OBJ) $(TK_OBJ) \
 	-(cd $(TK_OBJ); ln -s $(TK_SRC)/install-sh .)
 $(TK_OBJ):
 	mkdir -p $(TK_OBJ)
-$(TK_OBJ)/Makefile.in:
-	(cd $(TK_OBJ); ln -s  $(TK_SRC)/Makefile.in .)
-$(TK_OBJ)/tkUnix.c:
-	-(cd $(TK_OBJ); ln -s  $(TK_SRC)/*.h .; ln -s $(TK_SRC)/*.c .)
 
 # This link is necessary for the tk build to find libtcl.a
 #$(TCLTK_OBJ)/$(TCL_MAJOR_VERSION): $(TCL_OBJ)
