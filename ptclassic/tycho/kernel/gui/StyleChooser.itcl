@@ -163,7 +163,7 @@ body ::tycho::StyleChooser::_changestyle {stylesheet} {
     set style $_stylemap([list $stylesheet $label])
 
     # Change it
-    ::tycho::profile registerstyle $stylesheet $style
+    ::tycho::userprofile registerstyle $stylesheet $style
 
     # Update all subscribers
     # FIXME: I can't help feeling that this should really be
@@ -176,7 +176,7 @@ body ::tycho::StyleChooser::_changestyle {stylesheet} {
         }
         # Get the style -- note that it won't necesserily change,
         # because the subscriber may have an override.
-        set style [::tycho::profile getstyle $stylesheet $subscriber]
+        set style [::tycho::userprofile getstyle $stylesheet $subscriber]
 
         # If it's different, update it
         if { $style != $oldstyle } {
@@ -233,7 +233,7 @@ body ::tycho::StyleChooser::_displaystyles {{mode {}}} {
         }
     
 	# Get current preference
-	set current [::tycho::profile getstyle $stylesheet]
+	set current [::tycho::userprofile getstyle $stylesheet]
 
 	# Create the entry
 	$itk_component(items) add optionmenu $stylesheet \

@@ -633,7 +633,7 @@ body ::tycho::TopLevel::stylesheet {mode args} {
 	    set param [lindex $args 1]
 		    
             # Get my style
-            set style [::tycho::profile getstyle $sheet $this]
+            set style [::tycho::userprofile getstyle $sheet $this]
 
             # Get the value
             ::tycho::stylesheet get $sheet $style $param
@@ -668,7 +668,7 @@ body ::tycho::TopLevel::stylesheet {mode args} {
 	    foreach {sheet opts} [array get lists] {
 		# Tell the style manager what style I prefer
 		if ![::info exists _styleSheets($sheet)] {
-		    set style [::tycho::profile getstyle $sheet $this]
+		    set style [::tycho::userprofile getstyle $sheet $this]
 		    ::tycho::stylesheet style $sheet $this $style
 		    set _styleSheets($sheet) $sheet
 		}		

@@ -50,7 +50,7 @@
 # style-sheet, _style_ the style_, and _param_ is the parameter
 # to be returned, in the same format as for the <b>subscribe</b>
 # option. If _style_ is not suppled, use the preferred global
-# style obtained from <b>::tycho::profile</b>. If the stylesheet
+# style obtained from <b>::tycho::userprofile</b>. If the stylesheet
 # has a master and the given 
 # parameter is not present, ask the master. If the stylesheet
 # is a master (that is, doews not itself have a master), and the 
@@ -81,7 +81,7 @@
 # style-sheet, _style_ the style_, and _param_ is the parameter
 # to be returned, in the same format as for the <b>subscribe</b>
 # option.  If _style_ is not suppled, use the preferred global
-# style obtained from <b>::tycho::profile</b>. The parameter is set
+# style obtained from <b>::tycho::userprofile</b>. The parameter is set
 # using the <b>publish</b> method of the stylesheet model, so any
 # subscribers to the style will be notified of the new value.
 #
@@ -149,7 +149,7 @@ ensemble ::tycho::stylesheet {
 	# Get default style parameter
 	if { $param == "" } {
 	    set param $style
-	    set style [::tycho::profile getstyle $stylesheet]
+	    set style [::tycho::userprofile getstyle $stylesheet]
 	}
 
 	# Get it
@@ -181,7 +181,7 @@ ensemble ::tycho::stylesheet {
 	if { $value == "" } {
 	    set value $param
 	    set param $style
-	    set style [::tycho::profile getstyle $stylesheet]
+	    set style [::tycho::userprofile getstyle $stylesheet]
 	}
 
 	# Set it and publish

@@ -179,7 +179,7 @@ ensemble ::tycho::register {
 	eval ::tycho::Registry::registerMode $modename $args
     }
     option profile {filename} {
-	::tycho::profile register $filename
+	::tycho::userprofile register $filename
     }
     option protocol {protocol args} {
 	eval ::tycho::Registry::registerProtocol $protocol $args
