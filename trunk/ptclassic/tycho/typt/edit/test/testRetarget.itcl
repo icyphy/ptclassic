@@ -45,25 +45,12 @@
 # Currently, the defaults are set to compare CG56 and C50.  I chose these
 # domains because they are fairly small and should be fairly similar.
 
-if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
-} {}
+# Make sure that the required packages are loaded
+package require tycho.util.tytest
+package require tycho.typt.editors
 
 # Uncomment this to get a full report, or set in your Tcl shell window.
 # set VERBOSE 1
-
-# If necessary load up the class definitions
-if {[namespace ptolemy {info classes DomainInfo}] == {} } {
-    uplevel #0 {
-	set ::auto_path [linsert $auto_path 0 [file join $TYCHO typt kernel]] 
-	set ::auto_path [linsert $auto_path 0 [file join $TYCHO typt editors]] 
-    }
-    if {[namespace ptolemy {info classes Object}] == {} } {
-	uplevel #0 {
-	    set ::auto_path [linsert $auto_path 0 [file join $TYCHO kernel]] 
-	}
-    }
-}
 
 ######################################################################
 #### Create a Retarget object
