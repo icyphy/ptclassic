@@ -97,7 +97,7 @@ void ComplexState  :: initialize() {
 	// if it does not begin with '(', assume a purely real value.
 	// this may be any valid floating expression.
 	else if (t.tok != '(') {
-		pushback = t;
+		setPushback(t);
 		t = evalFloatExpression(lexer);
 		if (t.tok == T_Float) val = t.doubleval;
 		// if wrong type, evalFloatExpression has already complained

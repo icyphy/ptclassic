@@ -21,6 +21,8 @@ $Id$
  Date of creation: 6/15/90
  Revisions:
 
+ While this code looks vaguely template-like, it is NOT a template.
+
  This file includes member functions for class <T>State, and also
  those functions of the baseclass, State, that parse <T> expressions.
 
@@ -88,7 +90,7 @@ ParseToken State :: eval<T>Expression(Tokenizer& lexer) {
 				t1.<C>val -= t3.<C>val;
 		}
 		else {
-			pushback = t2;
+			setPushback(t2);
 			return t1;
 		}
 	}
@@ -117,7 +119,7 @@ ParseToken State :: eval<T>Term(Tokenizer& lexer) {
 				t1.<C>val /= t3.<C>val;
 		}
 		else {
-			pushback = t2;
+			setPushback(t2);
 			return t1;
 		}
 	}
@@ -140,7 +142,7 @@ ParseToken State :: eval<T>Factor(Tokenizer& lexer) {
 			else if (t3.tok == T_ERROR) return t3;
 			else t1.<C>val = power(t1.<C>val,t3.<C>val);
 		} else {
-			pushback = t2;
+			setPushback(t2);
 			return t1;
 		}
 	}
