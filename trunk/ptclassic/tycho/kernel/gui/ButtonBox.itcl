@@ -122,6 +122,9 @@ class ::tycho::ButtonBox {
     # Enable a button.
     method enable {tag}
 
+    # Test if a button exists
+    method exists {tag}
+
     # Execute the command of a specified button
     method invoke {tag}
 
@@ -504,6 +507,14 @@ body ::tycho::ButtonBox::enable {tag} {
 	error "Button $tag does not exist"
     }
     buttonconfigure $tag -state normal
+}
+
+#####################################################################
+#### exists
+# Test if a button with the given tag exists.
+#
+body ::tycho::ButtonBox::exists {tag} {
+    ::info exists _row($tag)
 }
 
 ####################################################################
