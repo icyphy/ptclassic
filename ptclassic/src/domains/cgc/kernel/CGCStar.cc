@@ -638,7 +638,7 @@ StringList CGCStar :: declareOffset(const CGCPortHole* p) {
 StringList CGCStar :: initializeOffset(const CGCPortHole* p) {
 	StringList out;
 	if ((p->bufSize() > 1) && (p->staticBuf() == FALSE)) {
-		out = target()->offsetName(p);
+		out << "    " << target()->offsetName(p);
 		out << " = " << p->bufPos() << ";\n";
 	}
 	return out;
@@ -723,6 +723,6 @@ StringList CGCStar :: declareState(const State* s) {
 void CGCStar :: addInclude(const char* decl) {
 	StringList temp = "#include ";
 	temp << decl << "\n";
-	addCode(temp, "includes", decl);
+	addCode(temp, "include", decl);
 }
 
