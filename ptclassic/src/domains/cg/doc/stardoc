@@ -306,7 +306,18 @@ these macros. Refer to each domain document to see how these
 macros are actually expanded.
 .pp
 .Id "macro, $$"
-To have "$" appear in the output code, put "$$" in the codeblock.
+To have ``$'' appear in the output code, put ``$$'' in the codeblock.
+For a domain where ``$'' is a frequently used character in target 
+language, it is possible to use a different character instead by
+redefining the virtual function ``substChar'' (defined in CGStar) to
+return a different character.
+.Id "substChar, method"
+.pp
+.Id "processMacro, method"
+It is also possible to introduce processor-specific macros, by overriding
+the virtual function processMacro (rooted in CGStar) to process any
+macros it recognizes and defer substitution on the rest by calling 
+its parent's processMacro method.
 .H2 "Possibilities for Effective Buffering"
 .pp
 .Sr Fork, code generation
