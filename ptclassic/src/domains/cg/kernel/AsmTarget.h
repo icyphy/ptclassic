@@ -50,14 +50,19 @@ public:
 	virtual void codeSection() = 0;
 
 	// generate file of stuff named base.suffix
-	int genFile(StringList& stuff, char* base,const char* suffix);
+	int genFile(StringList& stuff, char* base,const char* suffix=NULL);
 
 	// generate file of stuff named base.suffix and display it.
-	int genDisFile(StringList& stuff, char* base,const char* suffix);
+	int genDisFile(StringList& stuff,char* base,const char* suffix=NULL);
 
-	// Return file name.  User must delete the char* returned after 
-	// use.
-	char* fullFileName(char* base, const char* suffix);
+	// Return full file name including path.  
+	// NOTE: User must delete the char* returned after use.
+	char* fullFileName(char* base, const char* suffix=NULL);
+
+	// Return file name w/o path.  If the char* returned is not
+	// for immediate use, the calling function must copy the string
+	// into another location.
+	char* fileName(char* base, const char* suffix=NULL);
 
 	// output an "org" directive that switches to the specified
 	// memory and address

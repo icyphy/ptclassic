@@ -117,15 +117,21 @@ void AsmTarget :: outputLineOrientedComment(const char* prefix,
 	LOG_DEL; delete line;
 }
 
-char* AsmTarget :: fullFileName(char* base, const char* suffix)
+char* AsmTarget :: fullFileName(char* base, const char* suffix=NULL)
 {
-	StringList bname = base;
-	bname += suffix;
+	StringList bname = fileName(base,suffix);
 	char* fullName = writeFileName(bname);
 	return fullName;
 }
 
-int AsmTarget ::genDisFile(StringList& stuff, char* base, const char* suffix)
+char* AsmTarget :: fileName(char* base, const char* suffix=NULL)
+{
+	StringList bname = base;
+	if (suffix != NULL) bname += suffix;
+	return bname;
+}
+
+int AsmTarget::genDisFile(StringList& stuff,char* base,const char* suffix=NULL)
 {
 	char* name = fullFileName(base,suffix);
 	int status = display(stuff,name);
@@ -133,7 +139,8 @@ int AsmTarget ::genDisFile(StringList& stuff, char* base, const char* suffix)
 	return status;
 }
 
-int AsmTarget :: genFile (StringList& stuff, char* base, const char* suffix) {
+int AsmTarget :: genFile(StringList& stuff,char* base,const char* suffix=NULL)
+{
 	int status;
 	char* fullName = fullFileName(base, suffix);
 	UserOutput o;
