@@ -44,6 +44,14 @@ public:
 
 	// class identification
 	int isA(const char*) const;
+
+	// print fixed point values
+	StringList printFixValue(double arg) const {
+		return printFixedPointValue(arg);
+	}
+
+	// body of above function
+	static StringList printFixedPointValue(double);
 };
 
 #endif
