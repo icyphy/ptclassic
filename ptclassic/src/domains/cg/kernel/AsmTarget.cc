@@ -35,10 +35,15 @@ AsmTarget::setup(Galaxy& g) {
 		if (!allocReq(*s)) return FALSE;
 	}
 	if (!mem->performAllocation()) return FALSE;
-// do all initCode methods.
+// initialize the porthole offsets, and do all initCode methods.
 	nextStar.reset();
-	while ((s = (AsmStar*)nextStar++) != 0)
+	while ((s = (AsmStar*)nextStar++) != 0) {
+		AsmStarPortIter next(*s);
+		AsmPortHole* p;
+		while ((p = next++) != 0)
+			p->initOffset();
 		doInitialization(*s);
+	}
 	return TRUE;
 }
 
