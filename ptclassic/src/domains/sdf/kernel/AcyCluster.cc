@@ -141,12 +141,13 @@ for nodes that are successors.
 ****/
 int AcyCluster::markSuccessors(AcyCluster* c)
 {
-    
+    // Depth first search.  2 means not done exploring that
+    // subgraph yet, 1 means done, and 0 means not started yet.
     int numSucc=c->totalNumberOfBlocks();
     SynDFClusterPort* out;
     AcyCluster* nc=0;
     SynDFClusterOutputIter nextO(*c);
-    c->TMP_PARTITION = 1;
+    c->TMP_PARTITION = 2;
     // Below, we find those successors whose delay_tag_flag is 0
     // meaning that the arc to the successor does not have enough delays
     // to ignore as a precedence arc.
@@ -156,10 +157,18 @@ int AcyCluster::markSuccessors(AcyCluster* c)
 	// If out->far() is 0, then we are going across the cluster
 	// boundary and hence we do nothing.
 	if ( out->far() && (nc = (AcyCluster*)out->far()->parent()) != NULL) {
-	    nc->TMP_PARTITION = 1;
-	    numSucc += markSuccessors(nc);
+	    if (nc->TMP_PARTITION == 2) {
+		StringList message;
+		message << "Cluster presented to AcyCluster::markSuccessors"
+			<< "appears to be cyclic.  This could be due to an"
+			<< "earlier clustering step.  Aborting...";
+		Error::abortRun(message);
+		return 0;
+	    }
+	    if (nc->TMP_PARTITION == 0) numSucc += markSuccessors(nc);
 	}
     }
+    c->TMP_PARTITION = 1;
     return numSucc;
 }
 
@@ -168,22 +177,31 @@ int AcyCluster::markPredecessors(AcyCluster* c)
 {
     // Note:  The following code is pretty much symmetric
     // to the one for markSuccessors.  Looking at comments above will help.
+    // Here, 2 means not done yet, 0 means done, 1 means not started yet.
     
     int numPred = c->totalNumberOfBlocks();
     SynDFClusterPort* inp;
     AcyCluster* pc=0;
     SynDFClusterInputIter nextI(*c);
-    c->TMP_PARTITION = 0;
+    c->TMP_PARTITION = 2;
     while ((inp = nextI.next(DELAY_TAG_FLAG,0)) != NULL) {
 	// It should be the case that if out->far() is defined, then
 	// so is out->far->parent(); the test below is conservative.
 	// If out->far() is 0, then we are going across the cluster
 	// boundary and hence we do nothing.
 	if (inp->far() && (pc = (AcyCluster*)inp->far()->parent()) != NULL) {
-	    pc->TMP_PARTITION = 0;
-	    numPred += markPredecessors(pc);
+	    if (pc->TMP_PARTITION == 2) {
+		StringList message;
+		message << "Cluster presented to AcyCluster::markPredecessors"
+			<< "appears to be cyclic.  This could be due to an"
+			<< "earlier clustering step.  Aborting...";
+		Error::abortRun(message);
+		return 0;
+	    }
+	    if (pc->TMP_PARTITION == 1) numPred += markPredecessors(pc);
 	}
     }
+    c->TMP_PARTITION = 0;
     return numPred;
 }
 
@@ -395,13 +413,14 @@ int AcyCluster::legalCutIntoBddSets(int K)
 	
 	resetFlags(*this,1,0);
 	numSucc = markSuccessors(c);
+	if (!numSucc) return -1;
 
 	// If set has too many nodes; consider the next cut
 	// Caveat: this could be the case with all cuts of this type (and
 	// of the {c + predecessors} type also).  Hence, the routine
-	// might return FALSE saying on cut that respects the bound was
+	// might return FALSE saying no cut that respects the bound was
 	// found.  This does not mean that no such cut exists.  An alternative
-	// would be see if the optimization step below moves some nodes
+	// would be to see if the optimization step below moves some nodes
 	// across thereby meeting the bound perhaps.   However, even this
 	// might not work since no node may be moved across.  In general,
 	// we would have to modify the optimization step to move nodes
@@ -413,6 +432,7 @@ int AcyCluster::legalCutIntoBddSets(int K)
 
 	if (numSucc > K) continue;
 	cutVal = computeCutCost(TMP_PARTITION_FLAG,0);
+
 	// Apply optimization step here.
 	// Nodes that are moved across will have their TMP_PARTITION flag
 	// marked as 1 also.
@@ -471,6 +491,8 @@ int AcyCluster::legalCutIntoBddSets(int K)
 
 	resetFlags(*this,1,1);
 	numPred = markPredecessors(c);
+	if (!numPred) return -1;
+
 	if (numPred > K) continue;
 	cutVal = computeCutCost(TMP_PARTITION_FLAG,0);
 	
@@ -663,7 +685,7 @@ int AcyCluster::checkLegalCut(int cutValue, int bdd)
 		    // This means that legalCutIntoBddSets has not
 		    // produced a legal cut.
 		    Error::abortRun("Cut of the graph is not legal; aborting");
-		    check = FALSE;
+		    return FALSE;
 		}
 	    }
 	}
