@@ -2,10 +2,11 @@ defstar {
 	name { TableCx }
 	domain { SDF }
 	desc {
-This star implements a real-valued lookup table indexed by an integer-valued input.
-The input must lie between 0 and N-1, inclusive, where N is the size of the table
-The "values" parameter specifies the table.  Its first element is indexed by a
-zero-valued input. An error occurs if the input value is out of bounds.
+This star implements a complex-valued lookup table indexed by an
+integer-valued input.  The input must lie between 0 and N-1,
+inclusive, where N is the size of the table. The "values" parameter
+specifies the table.  Its first element is indexed by a zero-valued
+input. An error occurs if the input value is out of bounds.
 	}
 	version {$Id$}
 	author { J. T. Buck }
@@ -35,8 +36,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	go {
 		int i = int(input%0);
-		if (i < 0 || i > values.size())
-			Error::abortRun(*this, ": out of bounds input value");
-		else output%0 << values[i];
+		if (i < 0 || i >= values.size())
+			Error::abortRun(*this, ": input index is out of bounds for the table");
+		else
+			output%0 << values[i];
 	}
 }
