@@ -124,6 +124,7 @@ int directive;
 
 
 
+#ifdef NEED_STRICMP
 int stricmp(a, b)
 register char *a, *b;
 /*
@@ -145,3 +146,4 @@ register char *a, *b;
 
     return value;
 }
+#endif /*NEED_STRICMP*/
