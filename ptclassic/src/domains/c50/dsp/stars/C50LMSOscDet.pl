@@ -39,7 +39,7 @@ is adapted while the others are held fixed.  The second tap is equal
 to $-2 a sub 1$, and its adaptation has the form
 .EQ
 y[n] = x[n] - 2 a sub 1[k] x[n-1] + x[n - 2]
-a sub 1[k] = a sub 1 [k-1] + 2 mu e[n] x[n-1]
+a sub 1[k] = a sub 1 [k-1] + 2 mu e[n-1] x[n-1]
 .EN
 where $y[n]$ is the output of this filter which can be used as the
 error signal.  The step size term $mu$ is fixed by the value of
@@ -245,9 +245,6 @@ Pointer to next element to be stored in delayBuf. Needed only in delay > 1
 //delays of 1 are currently supported with this symbol so a value
 //of 1 for the delay means do nothing as far as this star is
 //concerned.  For larger values of delays additional code is requird.
-//Also note that the adaptation has the term e[n]*x[n-1] but due to
-//the fact that the signal out is simply connected to the output this
-//represents an inherent delay of 1 so one has to use e[n-1]*x[n-2]
 
 	codeblock(delayOne){
 	lmmr	treg0,#$addr(error)	; treg0 = error
