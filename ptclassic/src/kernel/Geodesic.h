@@ -21,12 +21,6 @@ operation is independent of the type of Particle.
 
 Geodesics can be created named or unnamed.
 
-It would be most natural to multiply inherit Geodesic from
-ParticleStack and NamedObj.  However, gdb 3.5 chokes, gags, and
-dies on such code, and I'm willing to sacrifice some elegance
-to be able to use gdb.  Hence the very NamedObj-like name, parent,
-readFullName, readName members.
-
 *****************************************************************/
 
 #include "NamedObj.h"
@@ -39,7 +33,7 @@ class PortHole;
 	// class Geodesic
 	///////////////////////////////////////////
 
-class Geodesic : private ParticleStack {
+class Geodesic : public NamedObj {
 public:
 	// set the source and destination portholes -- virtual
 	// these functions return a pointer to the "real porthole"
@@ -52,14 +46,14 @@ public:
 
 	// return true if the Geodesic is persistent
 	// (may exist in a disconnected state)
-	virtual int isItPersistent();
+	virtual int isItPersistent() const;
 
 	// return who is connected to source, destination
 	PortHole* sourcePort () const { return originatingPort;}
 	PortHole* destPort () const   { return destinationPort;}
 
         // Constructor
-        Geodesic() : ParticleStack(0)
+        Geodesic() : pstack(0)
 	{ 
 		originatingPort = NULL;
 		destinationPort = NULL;
@@ -77,13 +71,16 @@ public:
 	virtual void initialize();
 
 	// Put a Particle into the Geodesic
-	void put(Particle* p) {putTail(p); sz++;}
+	void put(Particle* p) {pstack.putTail(p); sz++;}
 
 	// Get a Particle from the Geodesic
-	Particle* get();
+	Particle* get() {
+		if (sz > 0) { sz--; return pstack.get();}
+		else return 0;
+	}
 
 	//  Push a Particle back into the Geodesic
-	void pushBack(Particle* p) {ParticleStack::put(p); sz++;}
+	void pushBack(Particle* p) {pstack.put(p); sz++;}
 
 	// Return the number of Particles on the Geodesic
 	int size() const {return sz;}
@@ -98,25 +95,12 @@ public:
         // due to a sample-rate inconsistency.
 	int numInitialParticles;
 
-	// NamedObj-like methods.  Was done by MH
-	void setNameParent(const char* nm, Block* bp) {
-		name = nm; blockIamIn = bp;
-	}
-	const char* readName() const { return name;}
-
-	Block* parent() const { return blockIamIn;}
-
-	StringList readFullName() const;
-
 protected:
 	void portHoleConnect();
         PortHole *originatingPort;
         PortHole *destinationPort;
 private:
+	ParticleStack pstack;
 	int sz;
-// This could also be done by multiple inheritance from NamedObj, but gdb
-// chokes on that.  Once we get a new gdb I may change this back.
-	const char* name;
-	Block* blockIamIn;
 };
 #endif
