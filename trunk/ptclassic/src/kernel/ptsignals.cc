@@ -96,14 +96,14 @@ as a blank function and define ptBlockSig and ptReleaseSig as below.
 //  sigaction() must be used instead of signal() to register handlers.
 #if defined(PTSOL2) || defined(PTSUN4)
 
-extern "C" SIG_PF ptSignal(int sig, SIG_PF handler)
+extern "C" SIG_PT ptSignal(int sig, SIG_PT handler)
 {
     struct sigaction action;
 
     sigaction(sig, NULL, &action);
 
     // These two casts are UGLY, but what else are you going to do?!
-    SIG_PF old = (SIG_PF)action.sa_handler;
+    SIG_PT old = (SIG_PT)action.sa_handler;
     action.sa_handler = (void (*)())handler;
 
     sigaction(sig, &action, NULL);

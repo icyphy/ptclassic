@@ -35,17 +35,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 **************************************************************************/
 
-// Define SIG_PF
+// Define SIG_PT
 #include "ptsignals.h"
 
-// SIG_PF is defined in /usr/include/sys/signal.h on irix5 platforms
-// and is defined in ptsignals.h for sol2 and sun4 platforms.
 #if !defined(PTSOL2) && !defined(PTSUN4) && !defined(PTIRIX5)
-typedef void (*SIG_PF)(int);
+typedef void (*SIG_PT)(int);
 #endif
 
 // Function prototypes
-int setHandlers(SIG_PF sigHandler);
+int setHandlers(SIG_PT sigHandler);
 void signalHandlerRelease(void);
 void signalHandlerDebug(int signo);
 void abortHandling();

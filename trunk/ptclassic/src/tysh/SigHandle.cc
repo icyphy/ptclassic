@@ -94,7 +94,7 @@ static void DoTychoSave(void)
 // This function sets the signal handler function for each of the
 // signals that we want to intercept.
 
-int setHandlers(SIG_PF sigHandler)
+int setHandlers(SIG_PT sigHandler)
 {
     if (ptSignal(SIGBUS, sigHandler) != 0) {
         return 1;
@@ -308,7 +308,7 @@ void signalHandlerDebug(int signo)
     // We are now in the parent process
     // Set the handler for the current signal to the default, so that  
     // the kernel will generate a core file.
-    ptSignal(signo, (SIG_PF) SIG_DFL);
+    ptSignal(signo, (SIG_PT) SIG_DFL);
 
     // Commit suicide in manner that generates core file for child,
     // if suicide fails abort.               
