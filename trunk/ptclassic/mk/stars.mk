@@ -34,6 +34,8 @@ THORSTARS = $(LIBDIR)/thorstars.o
 DESTARS = $(LIBDIR)/destars.o
 CGDDFSTARS = $(LIBDIR)/cgddfstars.o 
 BDFSTARS = $(LIBDIR)/bdfstars.o
+VHDLFSTARS = $(LIBDIR)/vhdlfstars.o
+VHDLBSTARS = $(LIBDIR)/vhdlbstars.o
 
 # parallel scheduler libraries.
 PARLIBFILES = $(LIBDIR)/libDC.a $(LIBDIR)/libHu.a  $(LIBDIR)/libDL.a \
@@ -65,7 +67,9 @@ $(LIBDIR)/libdestars.a $(LIBDIR)/libde.a \
 $(LIBDIR)/libsdfimagestars.a $(LIBDIR)/libImage.a \
 $(LIBDIR)/libsdfdspstars.a $(LIBDIR)/libsdfmatrixstars.a \
 $(LIBDIR)/libbdfstars.a $(LIBDIR)/libbdf.a \
-$(LIBDIR)/libsdfstars.a $(LIBDIR)/libLS.a $(LIBDIR)/libsdf.a
+$(LIBDIR)/libsdfstars.a $(LIBDIR)/libLS.a $(LIBDIR)/libsdf.a \
+$(LIBDIR)/libvhdlfstars.a $(LIBDIR)/libvhdlf.a \
+$(LIBDIR)/libvhdlbstars.a $(LIBDIR)/libvhdlb.a
 
 # CG-DDF no longer supported
 #$(LIBDIR)/libcgddfstars.a $(LIBDIR)/libcgddf.a \
@@ -81,7 +85,9 @@ STAR_LIBS=\
 -lthorstars -lthor \
 -ldestars -lde \
 -lbdfstars -lbdf \
--lsdfimagestars -lImage -lsdfdspstars -lsdfstars -lLS -lsdf -lsdfmatrixstars
+-lsdfimagestars -lImage -lsdfdspstars -lsdfstars -lLS -lsdf -lsdfmatrixstars \
+-lvhdlfstars -lvhdlf \
+-lvhdlbstars -lvhdlb
 
 # CG-DDF no longer supported
 #-lcgddfstars -lcgddf \
