@@ -61,6 +61,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <std.h>
 #endif
 
+#ifdef PT_NT4VC
+#include <io.h>
+#include <sys/stat.h> /* For creat in Display.cc */
+#include <stdlib.h> /* For system in Display.cc */
+#endif
+
 #include "logNew.h"
 #include "Error.h"
 #include <string.h>
