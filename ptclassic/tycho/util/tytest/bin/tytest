@@ -62,8 +62,16 @@ if !$ok {
 # Print startup sig
 puts "tycho.util.tytest, version 1.0"
 
-# Run the main procedure
-eval tytest $argv
+# Source each of the files passed on the command line
+# FIXME: Need options?
+if { $argv == "" } {
+    puts "Usage: tytest <file> <file>..."
+    exit
+}
+
+foreach file $argv {
+    uplevel #0 "source $file"
+}
 
 # Done
 
