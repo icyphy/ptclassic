@@ -141,7 +141,12 @@ class ::tycho::EditItcl {
 #
 body ::tycho::EditItcl::constructor {args} {
     eval itk_initialize $args
+
+   # Subscribe to the preference set
+   preference subscribeoptions $this \
+           -optioncolor optionColor
 }
+
 
 ###################################################################
 ###################################################################
