@@ -44,6 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define PTKCODE
 
 #include "local.h"		/* include "ansi.h" and "compat.h" */
+#include <stdio.h>
 
 #ifdef PTKCODE
 #include "ptkTkSetup.h"
@@ -54,6 +55,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /* Octtools include files */
 #include "copyright.h"
 #include "port.h"
+#include "errtrap.h"		/* define errProgramName */
 
 /*
  * the VAXLISP version defines it own main
@@ -64,25 +66,33 @@ ENHANCEMENTS, OR MODIFICATIONS.
  *
  */
 
-/* Define data structures lsList, octObject, and RPCSpot, respectively */
-#include "list.h"
 #include "oct.h"
-#include "rpc.h"
+#include "list.h"		/* define lsList */
+#include "rpc.h"		/* define remote procedure calls */
 
-#include "rpcApp.h"
+#include "rpcApp.h"		/* define STREAM */
+
 
 #ifdef PTKCODE
-/* This is defined in octtools/Xpackages/rpc/appInit.c */
+
+/* These are defined in octtools/Xpackages/rpc/appInit.c */
 extern octStatus vemInitializeApplication
 	  ARGS((char **display, RPCSpot *spot,
 		lsList *cmdList, long *userOptionWord));
+extern octStatus vemSendMenu ARGS((RPCFunction *array, long count));
 
-/* This is defined in octtools/Xpackages/rpc/appInit.c */
-extern octStatus vemSendMenu ARGS((RPCFunction* array, long count));
-
-/* This is defined in octtools/Xpackages/rpc/appNet.c */
+/* These are defined in octtools/Xpackages/rpc/appNet.c */
 extern rpcStatus RPCApplicationFunctionComplete();
+extern void RPCByteSwappedApplication
+	ARGS((int a, int b, int c, int d, int32 int32val));
+extern rpcStatus RPCConnectToServer
+	ARGS((char *host, int port, char *protocol,
+	      STREAM *sendStream, STREAM *receiveStream));
+extern rpcStatus RPCApplicationProcessEvents
+	ARGS((RPCFunction funcArray[], long size));
+
 #endif	/* PTKCODE */
+
 
 #include "main.h"			/* define UserMain */
 
@@ -128,17 +138,13 @@ char **argv;
 
         /* determine the application is byte swapped relative to the server */
 
-        RPCByteSwappedApplication(atoi(argv[5]),
-                                         atoi(argv[6]),
-                                         atoi(argv[7]),
-                                         atoi(argv[8]),
-                                         atoi(argv[9]));
-            
+        RPCByteSwappedApplication(atoi(argv[5]), atoi(argv[6]), atoi(argv[7]),
+				  atoi(argv[8]), atoi(argv[9]));
+
         /* host port protocol */
-        if (RPCConnectToServer(argv[2], atoi(argv[3]), argv[4],
-                                        &RPCSendStream,
-                                        &RPCReceiveStream) == RPC_ERROR) {
-            (void) fprintf(stderr, "RPC Error: can not connect to the server\n");
+        if (RPCConnectToServer(argv[2], atoi(argv[3]), argv[4], &RPCSendStream,
+			       &RPCReceiveStream) == RPC_ERROR) {
+            (void) fprintf(stderr, "RPC Error: cannot connect to the server\n");
             exit(RPC_BAD_EXIT);
         }
 
@@ -149,15 +155,18 @@ char **argv;
 
     if (vemInitializeApplication(&display, &spot, &cmdList, &userOptionWord)
         != OCT_OK) {
-        (void) fprintf(stderr, "RPC Error: application: error in initialization\n");
+        (void) fprintf(stderr,
+		       "RPC Error: application: error in initialization\n");
         exit(RPC_BAD_EXIT);
     }
 
-    if ((size = UserMain(display, &spot, cmdList, userOptionWord, &CommandArray)) < 0) {
-        (void) fprintf(stderr, "RPC Error: UserMain returned a value less than zero\n");
+    size = UserMain(display, &spot, cmdList, userOptionWord, &CommandArray);
+    if (size < 0) {
+        (void) fprintf(stderr,
+		       "RPC Error: UserMain returned value less than zero\n");
         exit(RPC_BAD_EXIT);
     }
-    
+
     if (RPCApplicationFunctionComplete() != RPC_OK) {
         exit(RPC_BAD_EXIT);
     }
