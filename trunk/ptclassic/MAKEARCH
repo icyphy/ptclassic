@@ -292,7 +292,7 @@ do
 	cd $PTOLEMY/obj.$PTARCH/octtools
 done
 
-dirs=" installColors masters octfix octls oct2ps oct2tim octredomain"
+dirs=" installColors masters octfix octgc octls oct2ps oct2tim octredomain"
 for x in $dirs 
 do
 	optmkdir $x
