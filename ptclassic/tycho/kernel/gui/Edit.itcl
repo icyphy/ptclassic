@@ -1427,6 +1427,7 @@ body ::tycho::Edit::indicateReadOnly {bool} {
     ::tycho::File::indicateReadOnly $bool
     if [winfo exists $prefix] {
 	if {$bool} {
+            $itk_component(text) config -cursor {}
             menubar disable {Undo/Redo}
             menubar disable Cut
             menubar disable Paste
@@ -1437,6 +1438,7 @@ body ::tycho::Edit::indicateReadOnly {bool} {
             menubar disable {Lower Case}
             menubar disable {Upper Case}
 	} {
+            $itk_component(text) config -cursor xterm
             menubar enable {Undo/Redo}
             menubar enable Cut
             menubar enable Paste
