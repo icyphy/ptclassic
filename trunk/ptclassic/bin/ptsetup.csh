@@ -17,7 +17,12 @@
 set progname = `basename $0`
 
 if ( ! $?PTARCH ) then
-    setenv PTARCH `$PTOLEMY/bin/ptarch`
+    setenv PTARCH 
+else 
+	if ( $PTARCH != `$PTOLEMY/bin/ptarch` && $PTARCH !~ *?cfront ) then
+		echo "$progname : Warning: PTARCH == $PTARCH,"
+		echo " but PTOLEMY/bin/ptarch returns `$PTOLEMY/bin/ptarch`"
+	endif
 endif
 if ( ! $?USER ) then
     setenv USER $LOGNAME
