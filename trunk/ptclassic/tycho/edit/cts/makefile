@@ -46,13 +46,16 @@ DIRS =	bin demo doc test
 
 TCL_SRCS = 
 
-ITCL_SRCS = 
+ITCL_SRCS = \
+	EditCTS.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	cts.tcl \
 	README.txt \
 	makefile \
-	pkgIndex.tcl
+	pkgIndex.tcl \
+	icons.tim \
+	stars.tim
 
 MISC_FILES = $(DIRS) tclIndex
 
