@@ -30,18 +30,22 @@
 # a sinusoidal function is
 #
 # set taps {}
-# for {set i 1} {$i <= {NumFilterTaps}} {incr i} {
-#   lappend taps [expr cos(2*{PI}*($i-1)/{NumFilterTaps})]
+# for {set i 1} {$i <= 100} {incr i} {
+#   lappend taps [expr cos(2*{PI}*($i-1)/100)]
 # }
 # join $taps
 #
 # becomes
 #
-# sampleExpr {cos(2*{PI}*($i-1)/{NumFilterTaps})} 1 {NumFilterTaps}
+# sampleExpr {cos(2*{PI}*($i-1)/100)} 1 100
+#
+# Here, PI is a parameter of the Ptolemy system which is substituted
+# before the Tcl command is passed to the Tcl interpreter.
 #
 # Author: Brian L. Evans
 # $Id$
 
+# If add_to_help has not been defined as a procedure, then define a dummy one
 if { [info commands add_to_help] == "" } {
   proc add_to_help {cmd argl desc} {}
 }
@@ -50,7 +54,8 @@ if { [info commands add_to_help] == "" } {
 
 add_to_help listSampleExpr {<tclexpr> <list>} {
 Produces a new list by applying each item in list to the tclexpr
-by substituting for the variable i in tclexpr.
+by substituting for the variable i in tclexpr.  The tclexpr should
+be in an unevaluated form, e.g. { cos($i) }.
 }
 
 proc listSampleExpr {tclexpr thelist} {
@@ -117,7 +122,8 @@ proc range {minindex maxindex {inc 1}} {
 add_to_help sampleExpr {<tclexpr> <min> <max> ?<increment>?} {
 Evaluate tclexpr at values of i running from min to max at increments
 of increment to produce a list.  If the sequence of numbers will never
-reach max, then the routine will return an empty list.
+reach max, then the routine will return an empty list.  The tclexpr should
+be in an unevaluated form, e.g. { cos($i) }. 
 }
 
 proc sampleExpr {tclexpr minindex maxindex {inc 1}} {
