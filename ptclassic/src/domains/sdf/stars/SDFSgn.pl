@@ -2,8 +2,8 @@ defstar {
 	name {Sgn}
 	domain {SDF}
 	desc {
-This star computes the signum of its input.
-The output is +- 1.
+This star computes the signum of its input.  The output is +- 1.
+Note that 0.0 maps into 1.
 	}
 	version {$Id$}
 	author { E. A. Lee }
@@ -15,9 +15,11 @@ The output is +- 1.
 	}
 	output {
 		name{output}
-		type{float}
+		type{int}
 	}
 	go {
-		output%0 << copysign(1.0,(input%0));
+		double x = input%0;
+		int sgn = (x >= 0.0) ? 1 : -1;
+		output%0 << sgn;
 	}
 }
