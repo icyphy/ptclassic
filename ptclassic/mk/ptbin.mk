@@ -67,6 +67,7 @@ ifdef FULL
 		# Non G++ compilers fail to compile IPUS' templates
 		IPUS =		1
 	endif
+	HOF =		1
 	MDSDF =		1
 	PN =		1
 	SDFFULL =	1
@@ -79,6 +80,7 @@ ifdef PTINY
 	PIGI=		$(BASENAME).ptiny
 	VERSION_DESC =	'With SDF (no image stars) and DE only'
 	DE =		1
+	HOF =		1
 	SDF =		1
 	SDFTK =		1
 	SDFDSP =	1
@@ -94,6 +96,7 @@ ifdef PTRIM
 	CGFULL =	1
 	DDF =		1
 	DE =		1
+	HOF =		1
 	SDFFULL =	1
 endif
 
