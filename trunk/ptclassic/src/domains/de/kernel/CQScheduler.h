@@ -80,10 +80,10 @@ public:
 	// my domain
 	const char* domain() const;
 
-	// The global event queue is implemented as a priority queue
-	// in DE scheduler.
+	// The global event queue is implemented as a calendar queue
+	// in this DE scheduler.
 
-	// EWK we have redefined eventQ to inherit from CalendarQueue
+	// Here, EventQueue inherits from CalendarQueue
 	// rather than PriorityQueue
 	EventQueue eventQ;
 
