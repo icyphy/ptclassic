@@ -66,6 +66,9 @@ class ::tycho::GraphLayout {
     # Add a vertex to the graph
     method vertex {vertex coords args}
 
+    # Return all attributes of a vertex
+    method vertexattrs {vertex}
+
     # Start a move interaction on vertices
     method vertexclick {tag x y args}
 
@@ -77,6 +80,9 @@ class ::tycho::GraphLayout {
 
     # Continue a move interaction on vertices
     method vertexdrag {tag x y}
+
+    # Get the type and coordinates of a vertex
+    method vertexget {vertex}
 
     # Move vertices
     method vertexmove {tag x y}
@@ -110,10 +116,10 @@ body ::tycho::GraphLayout::constructor {args} {
     # Evaluate options
     eval configure $args
 
-    # The vertex entity has a value (its coords)
+    # The vertex entity has a value (its type and coords)
     defineEntityType vertex -valued 1
 
-    # The edge entity also a value (its coords)
+    # The edge entity also a value (its type and coords)
     defineEntityType edge -valued 1
 }
 
@@ -138,7 +144,6 @@ body ::tycho::GraphLayout::describe {{prefix {}}} {
 # command, since selection and deselection are not undoable commands.
 #
 body ::tycho::GraphLayout::deselect {name} {
-puts "deselect $name"
     return ""
 }
 
@@ -149,7 +154,6 @@ puts "deselect $name"
 # command, since selection and deselection are not undoable commands.
 #
 body ::tycho::GraphLayout::select {name} {
-puts "select $name"
     return ""
 }
 
@@ -167,16 +171,24 @@ body ::tycho::GraphLayout::selectionclear {foo} {
 #### vertex
 #
 # Add a new vertex to the model and return the inverse command. The
-# value is the _initial_ coordinates only.
+# value is the type and the _initial_ coordinates only.
 #
 body ::tycho::GraphLayout::vertex {vertex coords args} {
     _verifynot vertex $vertex
 
-    # Add a vertex to the graph -- ??
-    # $graph vertex $vertex
-
     # Add the layout here
     _entity vertex {} $vertex [concat [list $coords] $args]
+}
+
+########################################################################
+#### vertexattrs
+#
+# Return a list containing the attributes of the vertex as a flat
+# attribute-value list. Flag an error if the vertex does not exist.
+#
+body ::tycho::GraphLayout::vertexattrs {vertex} {
+    _verify vertex $vertex
+    _attributes vertex $vertex
 }
 
 ########################################################################
@@ -237,7 +249,7 @@ body ::tycho::GraphLayout::vertexconfigure {vertex args} {
 #
 body ::tycho::GraphLayout::vertexcoords {vertex x y} {
     _verify vertex $vertex
-    _assign vertex $vertex [list $x $y]
+    _assign vertex $vertex [list [lindex [_get vertex $vertex] 0] $x $y]
 }
 
 ########################################################################
@@ -260,6 +272,16 @@ body ::tycho::GraphLayout::vertexdrag {tag x y} {
 #     foreach edge $_scratch(outputedges) {
 #         notify reshapedrag $edge $x $y start
 #     }	
+}
+
+########################################################################
+#### vertexget
+#
+# Get the type and coordinates of a vertex
+#
+body ::tycho::GraphLayout::vertexget {vertex} {
+    _verify vertex $vertex
+    _get vertex $vertex
 }
 
 ########################################################################
