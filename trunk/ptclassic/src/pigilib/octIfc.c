@@ -308,22 +308,24 @@ octObject *instPtr;
 		  "Unknown star '%s' in current domain, trying to load it...",
 		  akoName);
     PrintCon(buf);
-    return LoadTheStar(instPtr);
+    return LoadTheStar(instPtr, FALSE, NULL);
 }
 
 /* used to be part of AutoLoadCk; this always loads the star,
    whether known or not.
  */
 boolean
-LoadTheStar(instPtr)
-octObject *instPtr;
+LoadTheStar(instPtr, permB, linkArgs)
+    octObject*	instPtr;
+    int		permB;
+    char*	linkArgs;
 {
     octObject mFacet;
     char *fullName;
 
     ERR_IF1(!MyOpenMaster(&mFacet, instPtr, "interface", "r"));
     octFullName(&mFacet, &fullName);
-    ERR_IF1(!KcLoad(fullName));
+    ERR_IF1(!KcLoad(fullName, permB, linkArgs));
     PrintCon("Load completed");
     return (TRUE);
 }
