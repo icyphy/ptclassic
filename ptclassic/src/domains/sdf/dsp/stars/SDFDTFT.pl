@@ -16,15 +16,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { SDF dsp library }
 	explanation {
 This star computes arbitrary samples of the discrete-time Fourier
-transform of a finite length sequence.
+transform (DTFT) of a finite length sequence [1].
 .Id "discrete time Fourier transform"
 .Id "Fourier transform, discrete time"
 .Ir "spectral estimation"
 The \fIsignal\fR input is the signal to be transformed.
 The number of input samples consumed is given by \fIlength\fR.
-Let these be written $a(0), ~ ... ~ ,~ a(L-1)$, where
-$L$ is the \fIlength\fR.
-Then the output is
+Letting the input samples be written as $a(0), ~ ... ~ ,~ a(L-1)$, where
+$L$ is the \fIlength\fR, the output is
 .EQ
 A ( j omega ) ~=~
 { sum from k=0 to L-1 a(k) e sup {- j omega k T} }
@@ -33,11 +32,16 @@ where $T$ is the time between samples (\fItimeBetweenSamples\fR).
 The number of samples produced at the output is determined
 by the \fInumberOfSamples\fR parameter.
 The values of $omega$ at which samples are taken are provided
-by the \fIomega\fR input.  Hence, any frequency range or ranges
-can be examined at any desired resolution, and samples need not
-be taken at uniform intervals.
-Note that $omega ~=~ 2 pi / T$ is
-the sampling frequency.
+by the \fIomega\fR input.
+Hence, any frequency range or ranges can be examined at any desired
+resolution, and samples need not be taken at uniform intervals.
+Note that $omega ~=~ 2 pi / T$ is the sampling frequency.
+.ID "Oppenheim, A. V."
+.ID "Schafer, R. W."
+.UH REFERENCES
+.ip [1]
+A. V. Oppenheim and R. W. Schafer, \fIDiscrete-Time Signal Processing\fR,
+Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	}
 	seealso { FFTCx }
 	input {
