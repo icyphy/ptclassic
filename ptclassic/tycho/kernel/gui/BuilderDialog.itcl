@@ -32,14 +32,16 @@
 
 
 #######################################################################
-#### Build
-# The Build class builds derived files such as Itcl HTML documentation
-# concept and code indexes and the class diagram.
+#### BuildDialog
+# The BuildDialog brings up a Dialog box that allows the user to
+# build Tycho documentation files and indexes.
 #
-# The Build class is primarily for use on platforms such as the Mac
-# that do not have 'make'
-#
-# See the BuildDialog class for a graphical interface
+# <tcl><pre>
+# set bd [::tycho::autoName .buildDialog]
+# ::tycho::BuildDialog $bd
+# $bd centerOnScreen
+# </pre></tcl>
+# BuildDialog is a graphical front end for the Build class.
 #
 class ::tycho::BuildDialog {
     inherit ::tycho::Query
@@ -49,9 +51,17 @@ class ::tycho::BuildDialog {
     ###################################################################
     ####                         public methods                    ####
 
-    # Run what ever Build proc the user asked for
-    method _runBuild { choice }
-}
+    # Run what ever Build proc the user asked for.
+    method _runBuild {}
+
+    # Bring up a dialog that allows the user to display Tycho documents
+    method _showDocs  {}
+
+    ###################################################################
+    ####                         public procs                      ####
+
+    # Check to see what files need to be built and bring up a dialog
+    proc checkFiles {}}
 
 #######################################################################
 #### constructor
@@ -61,30 +71,113 @@ body ::tycho::BuildDialog::constructor {args} {
             -title "Tycho Build Manager"
     radio buildchoice {Build Operation} \
             { {Full (10 Minutes)}\
+	    {Itcl HTML Only(9 Min)} \
             {Indices Only} \
             {Class Diagram Only} \
         } {Full (10 Minutes)}
-    addButton showTychoIdx -text "Show Tycho Index" \
-            -command "::tycho::File::openContext \
-            [file join \$TYCHO lib idx codeDoc.idx]"
-    addButton showCodeIdx -text "Show Code Index" \
-            -command "::tycho::File::openContext \
-            [file join \$TYCHO lib idx codeDoc.idx]"
-    addButton showClassDAG -text "Show Class Diagram" \
-            -command "::tycho::File::openContext \
-            [file join \$TYCHO doc tychoClasses.dag]"
 
-    configure -okcommand " $this $busy $this _runBuild \"[get buildchoice]\"" 
+    addButton Build -text "Build" \
+            -command "$this execCommand -okcommand"
+
+    #addButton Stop -text "Stop" \
+    #        -command "::tycho::silentError"
+
+    addButton Stop -text "View Docs" \
+            -command "$this _showDocs"
+
+
+    addButton help -text "Help" \
+            -command "::tycho::File::openContext \
+            [file join \$TYCHO kernel doc usersGuides BuildDialogHelp.html]"
+
+    configure -okcommand "$this _runBuild"
 }
 
 #######################################################################
-#### runBuild
+#### _runBuild
 # Run what ever Build proc the user asked for
 #
-body ::tycho::BuildDialog::_runBuild { choice } {
-    switch $choice {
+body ::tycho::BuildDialog::_runBuild {} {
+    switch [get buildchoice] {
 	{Full (10 Minutes)} { ::tycho::Build::build }
+	{Itcl HTML Only (9 min)} { ::tycho::Build::itcldocs }
 	{Indices Only} { ::tycho::Build::indices }
 	{Class Diagram Only} { ::tycho::Build::classDiagram }
     }
 }
+
+
+#######################################################################
+#### _showDocs
+# Bring up a dialog that allows the user to display a document.
+#
+body ::tycho::BuildDialog::_showDocs {} {
+    set choice [::tycho::query {Open a document} {
+        {radio docChoice {Document to open} { \
+                {Tycho Concept Index} \
+                {Tycho Code Index} \
+                {Tycho Class Diagram}} \
+            {Tycho Class Diagram}}}]
+
+    switch [lindex $choice 1] {
+	{Tycho Concept Index} {
+	    ::tycho::File::openContext [file join \$TYCHO lib idx tycho.idx]
+        }
+        {Tycho Code Index} {
+	    ::tycho::File::openContext [file join \$TYCHO lib idx codeDoc.idx]
+	}
+	{Tycho Class Diagram} {
+	    ::tycho::File::openContext \
+		    [file join \$TYCHO doc tychoClasses.dag]
+
+        }
+    }
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public procs                       ####
+
+#######################################################################
+#### checkFiles
+# Check to see what files need to be built and bring up a dialog asking
+# the user if they want to build.
+# 
+body ::tycho::BuildDialog::checkFiles {} {
+    global TYCHO
+    set origmsg "The following Tycho files do not exist:" 
+    set msg $origmsg
+    if ![file exists [file join $TYCHO kernel doc codeDoc File.html]] {
+	set msg "$msg\n The Tycho Itcl HTML documentation might not be \
+		built, for example the file:\n\
+		[file join $TYCHO kernel doc codeDoc File.html] \
+		does not exist."
+    } 
+    if ![file exists [file join $TYCHO doc tychoClasses.dag]] {
+	set msg "$msg\n The Tycho Class Diagram at \
+		[file join $TYCHO doc tychoClasses.dag]"
+    } 
+    if ![file exists [file join $TYCHO lib idx tycho.idx]] {
+	set msg "$msg\n The Tycho Concept Index at \
+		[file join $TYCHO lib idx tycho.idx]"
+    }
+    if ![file exists [file join $TYCHO lib idx codeDoc.idx]] {
+	set msg "$msg\n The Tycho Code Index at \
+		[file join $TYCHO lib idx codeDoc.idx]"
+    } 
+
+    if {$msg != $origmsg} {
+	# Something is missing, so bring up the dialog
+	set msg "$msg\n\nBring up Build Dialog to build these files?"
+
+	if [::tycho::askuser $msg] {
+	    set bd [::tycho::autoName .buildDialog]
+	    ::tycho::BuildDialog $bd
+	    $bd centerOnScreen
+	    # Return the name of the window so the test suite can get at it.
+	    return $bd
+	}
+    }
+}
+
