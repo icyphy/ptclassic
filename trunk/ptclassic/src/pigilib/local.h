@@ -46,8 +46,12 @@ typedef int boolean;
 
 #define EOS '\0' /* end of string */
 
+/* Sun CC (SC1.0) defines __cplusplus */
+#if !defined(__cplusplus)
 extern RAW_PTR calloc ARGS((size_t,size_t));
 extern RAW_PTR malloc ARGS((size_t));
+#endif /* __cplusplus */
+
 
 #include <sys/param.h>
 
