@@ -50,7 +50,7 @@ outside this range, all outputs get zero.
 		        (*p)%j = input%j;
 		else
 		    for (j = int(blockSize)-1; j >= 0; j--)
-			(*p)%j.initialize();
+			((*p)%j).initialize();
 	    }
 	}
 }
