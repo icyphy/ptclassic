@@ -1,4 +1,55 @@
-// @(#)SRGeodesic.h	1.1 3/19/96
-#define SRGeodesic Geodesic
-#define SRForkNode AutoForkNode
-#include "AutoForkNode.h"
+/* -*- c++ -*- */
+ 
+#ifndef _SRGeodesic_h
+#define _SRGeodesic_h
+ 
+/*  Version $Id$
+ 
+Copyright (c) 1990-%Q% The Regents of the University of California.
+All rights reserved.
+ 
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
+ 
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+SUCH DAMAGE.
+ 
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+ 
+    Author:     S. A. Edwards
+    Created:    25 October 1996
+
+*/
+
+#include "Geodesic.h"
+
+/**********************************************************************
+
+  The geodesic for the SR domain
+
+  @Description a hack
+
+**********************************************************************/
+class SRGeodesic : public Geodesic {
+
+public:
+
+  SRGeodesic();
+
+  PortHole * setSourcePort( GenericPort &, int, const char * = 0 );
+  PortHole * setDestPort( GenericPort & );
+
+};
+
+#endif
