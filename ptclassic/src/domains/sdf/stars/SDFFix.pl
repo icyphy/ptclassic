@@ -79,7 +79,7 @@ Otherwise, truncation will be used.
 		  if ( totalChecks > 0 )
 		    percentage = (100.0*overflows)/totalChecks;
 		  // truncate percentage to one decimal place
-		  sprintf(percentageStr, "%.1lf", percentage);
+		  sprintf(percentageStr, "%.1f", percentage);
 		  msg << " experienced overflow in " << overflows 
 		      << " out of " << totalChecks
 		      << " fixed-point calculations checked ("
