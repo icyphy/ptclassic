@@ -86,7 +86,7 @@ public:
 	virtual void setUpProcs(int num);
 
 	// map targets of processors
-	void mapTargets(IntArray* a = 0) { parProcs->mapTargets(a); }
+	void mapTargets() { parProcs->mapTargets(); }
 
         // main body of the schedule. 
 	int mainSchedule();
@@ -98,19 +98,12 @@ public:
         // Return the total number of nodes in the precedence directed acyclic
         // graph (DAG)
         virtual int dagNodes() const;
-////////// Methods for wormholes ////////////////
 
-	// finialize the schedule of wormholes.
-	int finalSchedule();
+	// finalize the schedule: do nothing in this base class.
+	virtual int finalSchedule();
 
 	// set the scheduled result into a designated profile
 	void setProfile(Profile* profile);
-
-	// display schedule with "numProcs" processors.
-	// It displays wormhole schedules.
-	// Global schedule should be added in the derived class.
-	// Look at the DLSchedule for example.
-	StringList displaySchedule();
 
 protected:
 	const char* logFile;
@@ -151,9 +144,6 @@ protected:
 	// use a modified critical path algorithm to schedule the graphs
 	// with given number of processors.
 	int computeSchedule(Galaxy& g);
-
-	// virtual methods: prepare scheduling. 
-	virtual int preSchedule();
 
 	// check whether the galaxy contains a data-parallel star or not.
 	int withParallelStar();
