@@ -44,14 +44,34 @@
 class ::tycho::EditCpp {
     inherit ::tycho::EditC
 
+    ##########################################################################
+    ####                            options                               ####
+
+    # Location of the .cc template file
+    itk_option define -filetemplate fileTemplate FileTemplate \
+	    $TYCHO/editors/textedit/templates/CppTemplate.cc {}
+
+    # Location of the .h template file
+    itk_option define -hfiletemplate fileTemplate FileTemplate \
+	    $TYCHO/editors/textedit/templates/CppTemplate.h {}
+
     constructor {args} {}
     destructor {}
 
     ##########################################################################
     ####                         public methods                           ####
 
+    # Insert a body template
+    method bodyTemplate {}
+
     # Comment out the selection using C++ style line-oriented comments.
     method commentSelection {}
+
+    # Get the blank template for a file and insert it into the window
+    method fileTemplate { fileTemplate {newClassName {}}}
+
+    # Guess about the class name from the filename
+    method getClassName {}
 
     # Open a help window.
     method help {}
@@ -64,6 +84,12 @@ class ::tycho::EditCpp {
 
     # Remove the leading "//" on lines touched by the selection.
     method uncommentSelection {}
+
+    ##########################################################################
+    ####                         protected variables                      ####
+
+    # The name of the class in this file.
+    protected variable className {}
 }
 
 ###################################################################
@@ -74,6 +100,38 @@ body ::tycho::EditCpp::constructor {args} {
     
     # Set the fill prefix to be the comment character for C++.
     set fillPrefix "//"
+    menubar addMenu Special -underline 0
+
+    menubar add "Body Template" Special -underline 0 \
+	    -command "$this bodyTemplate"
+
+    menubar add ".cc File Template" Special -underline 4 \
+	    -command "$this fileTemplate \
+            $itk_option(-filetemplate) \
+            \[$this getClassName\]"
+
+    menubar add ".h File Template" Special -underline 1 \
+	    -command "$this fileTemplate \
+            $itk_option(-hfiletemplate) \
+            \[$this getClassName\]"
+}
+
+#####################################################################
+#### bodyTemplate
+# Insert a body template
+#
+body ::tycho::EditCpp::bodyTemplate {} {
+
+    set template "
+/** 
+ */	
+public [getClassName]::AMethod()
+\{
+\}
+"
+
+    insertData $template
+    markModified
 }
 
 #####################################################################
@@ -83,6 +141,33 @@ body ::tycho::EditCpp::constructor {args} {
 #
 body ::tycho::EditCpp::commentSelection {} {
     EditProgram::commentSelection
+}
+
+#####################################################################
+#### getClassName
+# Guess about the class name from the filename
+# If the file has not been parsed then the className variable might
+# not be set.  If it is not set, guess on the className from
+# the name of the file
+#
+body ::tycho::EditCpp::getClassName {} {
+    if {$className == {}} {
+	return [file tail [file rootname [filename]]]
+    }
+    return $className
+}
+
+#####################################################################
+#### fileTemplate
+# Insert the blank template into the file.
+# The fileTemplate argument names the template file that should by used.  
+# $TYCHO/editors/textedit/templates contains some sample templates.
+# If the optional className argument is set, then its value will 
+# be substituted wherever the template file contains the string 'ClassName'
+#
+body ::tycho::EditCpp::fileTemplate {fileTemplate {newClassName {}}} {
+    ::tycho::EditProgram::fileTemplate $fileTemplate $newClassName
+    set className $newClassName
 }
 
 ###################################################################
