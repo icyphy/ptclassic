@@ -30,7 +30,7 @@ INCL=-I$(KERNDIR) -I$(TCL_INCDIR)
 include $(ROOT)/mk/stars.mk
 
 # libraries
-LIBS= $(STAR_LIBS) -lptolemy $(TCL_LIBSPEC) $(SYSLIBS) $(FLUSH_CACHE)
+LIBS= $(STAR_LIBS) -lptolemy $(TCL_LIBSPEC) $(SYSLIBS) $(LIB_FLUSH_CACHE)
 
 LIBFILES=$(STAR_LIBFILES) $(LIBDIR)/libptolemy.a
 
