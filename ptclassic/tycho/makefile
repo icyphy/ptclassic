@@ -130,3 +130,7 @@ htmlchek:
 			netscape=1 nowswarn=1 arena=1 strictpair=TCL,AUTHOR; \
 	fi
 	-chmod g+w $(HTMLCHEKOUT)*
+
+
+spellcheck:
+	cat `find . -name "*.html" -print` | spell
