@@ -83,7 +83,7 @@ extern "C" {
 #endif
 
 #if defined(PTLINUX) && defined(__ELF__)
-// Shorthand for Linux and ELF
+/* Shorthand for Linux and ELF */
 #define PTLINUX_ELF
 #endif
 
