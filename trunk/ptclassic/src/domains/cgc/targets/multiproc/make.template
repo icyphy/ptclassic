@@ -47,13 +47,21 @@ HDRS=$(SRCS:.cc=.h)
 
 OBJS = $(SRCS:.cc=.o)
 
-all:	makefile $(OBJS)
+ifeq ($(USE_SHARED_LIBS),yes) 
 
+# If we are building shared libraries, then we can put all the targets in
+# a shared library.
+LIB = 		libcgctargets.$(LIBSUFFIX)
+all:		$(SRCS) makefile $(OBJS) $(LIB)
+install:	all $(LIBDIR)/$(LIB)
+
+else
+LIB=none	# required by common.mk
+all:		makefile $(OBJS)
 # "make install" puts things in the official place
 install:	all
 		@echo Installation complete.
-
-LIB=none	# required by common.mk
+endif
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
