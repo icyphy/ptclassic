@@ -66,10 +66,10 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 MISC_FILES = 
 
 # make checkjunk will not report OPTIONAL_FILES as trash
-OPTIONAL_FILES = all.itcl alltests.itcl
+OPTIONAL_FILES =
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF = $(OPTIONAL_FILES)
+REALCLEAN_STUFF =
 
 tests:: test_simple test_graphics
 
