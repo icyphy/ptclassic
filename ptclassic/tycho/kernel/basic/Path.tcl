@@ -93,11 +93,14 @@ proc ::tycho::egrep {regexp args} {
         default {set filelist $args}
     }
 
-    
     if {[ ::tycho::pathEnvSearch egrep] != {}} {
         # We have an egrep binary, use it.
-        set files [glob -nocomplain $filelist]
-        return [split [eval exec egrep -n $greparg $regexp $files] "\n"]
+        set files [eval glob -nocomplain $filelist]
+        if { "$files" == ""} {
+            error "::tycho::egrep called with empty file arg.\
+                    args were `$regexp' `$files'"
+        }
+        return [split [eval exec egrep -n $greparg \"$regexp\" $files] "\n"]
     } else {
 
     # Only show the first 100 matches
