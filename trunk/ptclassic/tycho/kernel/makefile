@@ -68,6 +68,7 @@ ITCL_SRCS = \
 	ControlPanel.itcl \
 	ControlSubpanel.itcl \
 	Curriculum.itcl \
+	DataModel.itcl \
 	Dialog.itcl \
 	Digraph.itcl \
 	DirectedAcyclicGraph.itcl \
