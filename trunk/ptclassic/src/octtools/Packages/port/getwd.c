@@ -24,7 +24,8 @@ static char SccsId[]="$Id$";
  * ENHANCEMENTS, OR MODIFICATIONS.
  * 
  */
-#if defined(hpux)
+#include "compat.h"
+#if defined(PTHPPA)
 #include <sys/types.h>
 #include <sys/param.h>
 
