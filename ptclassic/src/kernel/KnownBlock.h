@@ -22,28 +22,20 @@ static MyType proto;
 static KnownBlock entry(proto,"MyType");
 
 Then the static method KnownBlock::clone(name) can produce a new
-instance of class name.
-thing:
+instance of the named class in the current domain.
 
 *******************************************************************/
 #ifndef _KnownBlock_h
 #define  _KnownBlock_h 1
 
 #include "Block.h"
-#include "Galaxy.h"
 #include "StringList.h"
-#include "Domain.h"
 
 class Scheduler;
 class KnownListEntry;
 
 class KnownBlock {
 private:
-// The known block lists, one per domain
-	static KnownListEntry* allBlocks[NUMDOMAINS];
-// The set of domain names
-	static const char* domainNames[NUMDOMAINS];
-
 	static int currentDomain;
 	static int numDomains;
 
@@ -85,11 +77,14 @@ public:
 	static StringList nameList (const char* domain);
 
 // Return the current domain name.
-	static const char* domain() { return domainNames[currentDomain];}
+	static const char* domain();
 
 // Change the current domain.  Return TRUE if it worked, FALSE for bad name.
 	static int setDomain (const char* newDom);
 
+// Return true if the named block is dynamically linked.
+	static int isDynamic (const char* type);
+	
 };
 
 #endif
