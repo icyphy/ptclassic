@@ -45,14 +45,31 @@ include $(CONFIG)
 INCL = -I$(KERNDIR)
 
 # DCTImage.h and MVImage.h should be removed once we get ParticleVec working
-HDRS= DEPortHole.h DEScheduler.h DEStar.h \
- DEWormhole.h DERepeatStar.h EventQueue.h DETarget.h \
- CalendarQueue.h CQEventQueue.h CQScheduler.h \
- LinkedList.h PendingEventList.h \
- MutableCalendarQueue.h MutableCQEventQueue.h MutableCQScheduler.h \
- NetworkCell.h SeqATMCell.h BaseImage.h GrayImage.h \
- DCTImage.h MVImage.h \
- DERCScheduler.h Resource.h DERCStar.h 
+HDRS = \
+	BaseImage.h \
+	CQEventQueue.h \
+	CQScheduler.h \
+	CalendarQueue.h \
+	DCTImage.h \
+	DEPortHole.h \
+	DERCScheduler.h \
+	DERCStar.h \
+	DERepeatStar.h \
+	DEScheduler.h \
+	DEStar.h \
+	DETarget.h \
+	DEWormhole.h \
+	EventQueue.h \
+	GrayImage.h \
+	LinkedList.h \
+	MVImage.h \
+	MutableCQEventQueue.h \
+	MutableCQScheduler.h \
+	MutableCalendarQueue.h \
+	NetworkCell.h \
+	PendingEventList.h \
+	Resource.h \
+	SeqATMCell.h
 
 SRCS = $(HDRS:.h=.cc) DEDomain.cc
 
