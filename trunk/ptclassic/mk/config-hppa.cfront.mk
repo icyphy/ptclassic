@@ -19,8 +19,8 @@ CDEBUGFLAGS =
 
 # flags for C++ compilation.  -DPOSTFIX_OP= is needed for cfront 2.1; it
 # is not needed for 3.0.
-GPPFLAGS =	-DUSG $(GPPDEBUGFLAGS) $(MEMLOG) -DPOSTFIX_OP=
-CFLAGS =	-DUSG $(CDEBUGFLAGS) 
+GPPFLAGS =	-g -DUSG $(GPPDEBUGFLAGS) $(MEMLOG) -DPOSTFIX_OP=
+CFLAGS =	-g -DUSG $(CDEBUGFLAGS) 
 DEPEND =	CC -M
 
 # where libraries are
