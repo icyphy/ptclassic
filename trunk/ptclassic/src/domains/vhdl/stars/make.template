@@ -35,6 +35,12 @@ PL_SRCS=\
  VHDLBlackHole.pl \
  VHDLRamp.pl \
  VHDLInhomogeneous.pl \
+ VHDLFIR4.pl \
+ VHDLFIR.pl \
+ VHDLLMS.pl \
+ VHDLQuant.pl \
+ VHDLSub.pl \
+ VHDLFork.pl \
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
