@@ -36,12 +36,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SRStar.h"
 #include "SRRecursiveScheduler.h"
 #include "SRDependencyGraph.h"
+#include "Set.h"
 #include "StringList.h"
 #include "Error.h"
 #include "Galaxy.h"
 #include "GalIter.h"
 #include "GraphUtils.h"
 #include <stream.h>
+#include <assert.h>
 
 extern const char SRdomainName[];
 
@@ -178,6 +180,128 @@ int SRRecursiveScheduler::computeSchedule( Galaxy & g )
 
   cout << dgraph->displayGraph();
 
+  Set wholeGraph(dgraph->vertices(), 1);
+
+  SequentialList SCCs = SCCsOf( wholeGraph );
+
   return 0;
 }
+
+// Compute the SCCs of the given subgraph
+//
+// @Description This returns a SequentialList of pointers to vertex
+// sets---the SCCs in a topological order.
+//
+// <P> This uses the SCC algorithm from Cormen, Leiserson, and Rivest,
+// which computes two DFSs, one on the forward graph, the other on the back.
+SequentialList &
+SRRecursiveScheduler::SCCsOf(Set & subgraph /* Vertices in the subgraph of the
+					       dependency graph */ )
+{
+  SequentialList * SCCs = new SequentialList;
+
+  cout << "SCCsOf called on " << subgraph.print() << "\n";
+  int * finishingTimes = new int[ subgraph.cardinality() ];
+  int finishIndex = 0;
+  Set unvisitedSet(1);
+
+  unvisitedSet.setequal(subgraph);
+
+  // Perform a DFS on the forward graph, recording finishing times
+
+  SetIter next(subgraph);
+  int v;
+  while ( (v = next++) >= 0 ) {
+    //    cout << "Trying to visit " << v << " in " << unvisitedSet.print() << "\n";
+    fDFSVisit( v, unvisitedSet, finishIndex, finishingTimes );
+  }
+
+  // We should have visited everything
+  assert( unvisitedSet.cardinality() == 0 );
+
+  // We should have recorded the finishing times of every vertex
+  // in the subgraph
+
+  //  cout << "finishIndex " << finishIndex << " subgraph.cardinality() "
+  //       << subgraph.cardinality() << "\n";
+
+  assert( finishIndex == subgraph.cardinality() );
+
+  //  cout << "Completed DFS of the forward graph\n";
+
+  // Perform a DFS on the backward graph, spitting out SCCs for each group
+
+  unvisitedSet.setequal(subgraph);
+
+  while ( --finishIndex >= 0 ) {
+    v = finishingTimes[finishIndex];
+    if ( unvisitedSet[v] ) {
+
+      // Create a new SCC and add it to the list
+
+      Set * newSCC = new Set( dgraph->vertices() );
+      bDFSVisit( v, unvisitedSet, *newSCC );
+      SCCs->append((Pointer) newSCC);
+
+      cout << "SCC: " << newSCC->print() << "\n";
+    }
+  }
+      
+  // We should have visited everything
+  assert( unvisitedSet.cardinality() == 0 );
+
+  delete [] finishingTimes;
+
+  return *SCCs;
+
+}
+
+// Try to visit a node in the subgraph of forward edges
+void SRRecursiveScheduler::fDFSVisit( int vertex,
+				      Set & unvisitedSet,
+				      int & finishIndex,
+				      int * finishingTimes )
+{
+  if ( unvisitedSet[vertex] ) {
+
+    //    cout << "fDFSVisit " << vertex << "\n";
+
+    // Visit the vertex by removing it from the unvisited set
+    unvisitedSet -= vertex;
+
+    // Visit each of its destinations
+    for (int e = dgraph->forwardEdges(vertex) ; --e >= 0 ; ) {
+      fDFSVisit( dgraph->destination(vertex,e),
+		 unvisitedSet, finishIndex, finishingTimes );
+    }
+
+    // Record the finishing time of this vertex
+    finishingTimes[finishIndex++] = vertex;
+
+  }
+}
+
+// Try to visit a node in the subgraph of backward edges
+void SRRecursiveScheduler::bDFSVisit( int vertex,
+				      Set & unvisitedSet,
+				      Set & SCC )
+{
+  if ( unvisitedSet[vertex] ) {
+
+    //    cout << "bDFSVisit " << vertex << "\n";
+
+    // Visit the vertex by removing it from the unvisited set
+    unvisitedSet -= vertex;
+
+    // Add it to the SCC
+    SCC |= vertex;
+
+    // Visit each of its sources
+    for (int e = dgraph->backwardEdges(vertex) ; --e >= 0 ; ) {
+      bDFSVisit( dgraph->source(vertex,e), unvisitedSet, SCC );
+    }
+
+  }
+}
+
 

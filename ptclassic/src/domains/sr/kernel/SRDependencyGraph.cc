@@ -35,7 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "GalIter.h"
 #include "GraphUtils.h"
 #include <assert.h>
-#include <stream.h>
+// #include <stream.h>
 
 // Build a dependency graph for a galaxy
 //
@@ -93,31 +93,41 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
   // Calculate the edge counts for each vertex
   
   fEdgeCount = new int[numvertices];
+  bEdgeCount = new int[numvertices];
   for ( vs = numvertices ; --vs >= 0 ; ) {
-    fEdgeCount[vs] = 0;
+    fEdgeCount[vs] = bEdgeCount[vs] = 0;
   }
 
   nextStar.reset();
   while ( (s = (SRStar *)(nextStar++)) != NULL ) {
     BlockOutputIter nextOutput(*s);
     while ( (op = (OutSRPort *)(nextOutput++)) != NULL ) {
+      op = (OutSRPort *) op->doAliases();
+      vd = vertexOfStarPort( s, op );
+
+      // We should be able to find this (destination) vertex
+      assert( vd >= 0 );
+
       BlockInputIter nextInput(*s);
       while ( (ip = (InSRPort *)(nextInput++)) != NULL ) {
+
 	ip = (InSRPort *) ip->doAliases();
 	if ( (fop = (OutSRPort *) (ip->far())) != NULL ) {
 	  fs = (SRStar *) fop->undoAliases()->parent();
 	  vs = vertexOfStarPort( fs, fop );
 
-	  cout << "Found something connected to vertex " << vs << "\n";
+	  // cout << "Found something connected to vertex " << vs << "\n";
 	  
-	  // We should be able to find the vertex driving this
-	  // input
+	  // We should be able to find the vertex driving this input
 	  assert( vs >= 0 );
-	  
+
+	  // Record this edge
+
 	  fEdgeCount[vs]++;
+	  bEdgeCount[vd]++;
 	} else {
-	  cout << "input " << ip->name() << " on " << s->name()
-	       << " has no far port\n";
+	  //	  cout << "input " << ip->name() << " on " << s->name()
+	  //	       << " has no far port\n";
 	}
       }
     }
@@ -125,15 +135,23 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
 
   // Form the edge lists
 
-  int * edgenumber = new int[numvertices];
+  int * fedgenumber = new int[numvertices];
+  int * bedgenumber = new int[numvertices];
   fEdge = new int *[numvertices];
+  bEdge = new int *[numvertices];
   for ( vs = numvertices ; --vs >= 0 ; ) {
     if ( fEdgeCount[vs] != 0 ) {
       fEdge[vs] = new int[ fEdgeCount[vs] ];
     } else {
       fEdge[vs] = NULL;
     }
-    edgenumber[vs] = 0;
+    if ( bEdgeCount[vs] != 0 ) {
+      bEdge[vs] = new int[ bEdgeCount[vs] ];
+    } else {
+      bEdge[vs] = NULL;
+    }
+    fedgenumber[vs] = 0;
+    bedgenumber[vs] = 0;
   }
 
   nextStar.reset();
@@ -156,19 +174,23 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
 	  // We should have been able to find the vertex driving this input
 	  assert( vs >= 0 );
 	
-	  fEdge[vs][ edgenumber[vs]++ ] = vd;
+	  // Add the forward and backward edge to the lists
+	  fEdge[vs][ fedgenumber[vs]++ ] = vd;
+	  bEdge[vd][ bedgenumber[vd]++ ] = vs;
 	}
       }
     }
   }
 
-  // We should have entered all the vertices we think
+  // We should have entered all the vertices we found previously
 
   for ( vs = numvertices ; --vs >= 0 ; ) {
-    assert( edgenumber[vs] == fEdgeCount[vs] );
+    assert( fedgenumber[vs] == fEdgeCount[vs] );
+    assert( bedgenumber[vs] == bEdgeCount[vs] );
   }
 
-  delete [] edgenumber;
+  delete [] fedgenumber;
+  delete [] bedgenumber;
  
 }
 
@@ -180,10 +202,13 @@ SRDependencyGraph::~SRDependencyGraph()
   delete [] stars;
   delete [] ports;
   delete [] fEdgeCount;
+  delete [] bEdgeCount;
   for ( int i = numvertices ; --i >= 0 ; ) {
     delete [] fEdge[i];
+    delete [] bEdge[i];
   }
   delete [] fEdge;
+  delete [] bEdge;
 
 }
 
@@ -212,9 +237,14 @@ StringList SRDependencyGraph::displayGraph() const
   out << "Vertices: " << numvertices << "\n";
 
   for ( int v = 0 ; v < numvertices ; v++ ) {
-    out << v << ": " << stars[v]->name() << " " << ports[v]->undoAliases()->name() << "\n  ";
+    out << v << ": " << stars[v]->name()
+	<< " " << ports[v]->undoAliases()->name() << "\n  -> ";
     for ( int e = 0 ; e < fEdgeCount[v] ; e++ ) {
       out << fEdge[v][e] << " ";
+    }
+    out << "\n  <- ";
+    for ( e = 0 ; e < bEdgeCount[v] ; e++ ) {
+      out << bEdge[v][e] << " ";
     }
     out << "\n";
   }
