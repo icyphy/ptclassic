@@ -1,0 +1,198 @@
+\c Version $Id$
+\node CGC Domain
+\chapter{CGC Domain}
+
+\Author{J. Buck \\
+S. Ha \\
+E. A. Lee \\
+T. M. Parks}
+\date{1/19/94}
+
+The \dfn{CGC domain} of Ptolemy generates code
+for the \code{C} programming language.
+\cindex{code generation in C}
+\cindex{C code generation}
+\cindex{CGC domain}
+This domain supports both synchronous dataflow
+(\pxref{SDF Domain})
+\cindex{synchronous dataflow}
+\cindex{dataflow, synchronous}
+and boolean-controlled dataflow
+(\pxref{BDF Domain})
+\cindex{boolean-controlled dataflow}
+\cindex{dataflow, boolean-controlled}
+models of computation.  The model of
+computation assocaited with a particular program graph is determined by
+which target is selected.  The \code{bdf-CGC} target supports the BDF
+model, while all other targets in the CGC domain support the more
+limited SDF model.  Code can be generated for single-processor machines
+and multi-processor machines.  The targets that support
+single-processors include \code{default-CGC}, \code{TclTk_Target}, and
+\code{bdf-CGC}.  The multi-processor target is \code{unixMulti_C}.
+
+For an overview of CGC stars and demos, please refer to the star atlas.
+
+\node CGC Single-Processor Targets
+\section{Single-Processor Targets}
+
+The single-processor targets of the CGC domain
+generate \code{C} code from dataflow program graphs.
+Code generation is controlled by the \var{host}, \var{directory}, and
+\var{file} paramteres as described in \nxref{CG Domain}.
+\vrindex{host, parameter}
+\vrindex{directory, parameter}
+\vrindex{file, parameter}
+The command used to compile the code is determined by the
+\var{compileCommand}, \var{compileOptions}, and \var{linkOptions}
+parameters.
+Compilation and execution are controlled by the
+\var{display?}, \var{compile?}, and \var{run?}
+parameters, also described in \nxref{CG Domain}.
+The parameters common to the CGC targets are listed below.
+
+\begin{statelist}
+\state{INT}{staticBuffering}{TRUE}
+If \samp{TRUE}, then attempt to static, compile-time addressing of data
+buffers between stars.  Otherwise, use dynamic, run-time addressing.
+
+\state{STRING}{funcName}{main}
+The name of the main function.  The default value of \samp{main} is suitable
+for generating stand-alone programs.  Choose another name if you wish to use
+the generated code as a procedure that is called from your own main program.
+
+\state{STRING}{compileCommand}{cc}
+Command name of the compiler.
+
+\state{STRING}{compileOptions}{}
+Options passed to the compiler.
+
+\state{STRING}{linkOptions}{-lm}
+Options passed to the linker.
+
+\state{STRINGARRAY}{resources}{STDIO}
+List of abstract resources that the host computer has.
+\end{statelist}
+
+\node default-CGC
+\subsection{\protect\code{default-CGC}}
+
+The \code{default-CGC} target generates \code{C} code for a single computer
+from a SDF program graph.
+
+\node TclTk_Target
+\subsection{\protect\code{TclTk_Target}}
+
+This target, which is derived from the \code{default-CGC} target
+(\pxref{default-CGC}), must be used when Tcl/Tk stars are present in
+the program graph.  The parameters differ from those of the
+\code{default-CGC} target only in their default values.
+
+\begin{statelist}
+\state{INT}{loopingLevel}{1}
+
+\state{STRING}{funcName}{go}
+
+\state{STRING}{compileOptions}{-I$PTOLEMY/tcl/tk/src \\
+    -I$PTOLEMY/tcl/tcl/src \\
+    -I$PTOLEMY/src/domains/cgc/tcltk/lib}
+
+\state{STRING}{linkOptions}{-L$PTOLEMY/tcl/tk/lib/$ARCH.opt \\
+    -L$PTOLEMY/tcl/tcl/lib/$ARCH.opt \\
+    -L$PTOLEMY/lib.$ARCH \\
+    -L$PTOLEMY/tcl/tk/lib/$ARCH.opt \\
+    -L/usr/X11/lib -ltk -ltcl -lptk -lXpm -lX11 -lm}
+
+\end{statelist}
+
+\node bdf-CGC
+\subsection{\protect\code{bdf-CGC}}
+
+This target supports the boolean-controlled dataflow (BDF) model of
+computation.  It must be used when BDF stars are present in the program
+graph.  It can also be used with program graphs that contain only
+synchronous dataflow (SDF) stars.
+
+The \code{bdf-CGC} target has the same parameters as the \code{default-CGC}
+target (\pxref{default-CGC})
+with the exception that the \var{Looping Level} parameter is absent.
+
+\node CGC Multi-Processor Targets
+\section{Multi-Processor Targets}
+
+\node unixMulit_C
+\subsection{\protect\code{unixMulti_C}}
+
+\node CGCcm5
+\subsection{\protect\code{CGCcm5}}
+
+\node CGC Star Overview
+\section{An Overview of CGC Stars}
+
+\begin{figure}
+\begin{center}
+\ \psfig{figure=cgc-stars.ps}
+\end{center}
+\end{figure}
+
+\node CGC Source Stars
+\subsection{Source Stars}
+
+\begin{description}
+\item[Const]
+\item[Ramp]
+\item[IIDUniform]
+\item[WaveForm]
+\item[PCMread]
+\item[singen]
+\item[TkSlider]
+\item[TkEntry]
+\item[TkImpulse]
+\end{description}
+
+\node CGC Sink Stars
+\subsection{Sink Stars}
+
+\begin{description}
+\item[BlackHole]
+\item[Xgraph]
+\item[XMgraph]
+\item[Xscope]
+\item[XYgraph]
+\item[Printer]
+\item[PCMwrite]
+\item[SunSound]
+\end{description}
+
+\node CGC Arithmetic Stars
+\subsection{Arithmetic Stars}
+
+\node CGC Nonlinear Stars
+\subsection{Nonlinear Stars}
+
+\node CGC Control Stars
+\subsection{Control Stars}
+
+\node CGC Conversion Stars
+\subsection{Conversion Stars}
+
+\node CGC Signal Processing Stars
+\subsection{Signal Processing Stars}
+
+\node CGC Dynamic Dataflow Stars
+\subsection{Dynamic Dataflow Stars}
+
+\node CGC Boolean-Controlled Dataflow Stars
+\subsection{Boolean-Controlled Dataflow Stars}
+
+\node CGC Tcl/Tk Stars
+\subsection{Tcl/Tk Stars}
+
+\node CGC Demo Overview
+\section{An Overview of CGC Demos}
+
+\begin{figure}
+\begin{center}
+\ \psfig{figure=cgc-demo.ps}
+\end{center}
+\caption{The top-level palette for CGC demos.}
+\end{figure}
