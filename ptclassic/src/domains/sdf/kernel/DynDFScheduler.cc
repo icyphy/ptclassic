@@ -110,8 +110,6 @@ void DynDFScheduler :: setup () {
 		return;
 	}
 
-	if (!checkBlocks()) return;
-
 	// If an error occured while initializing the galaxy,
 	// then it is not safe to continue.
 	galaxy()->initialize();
@@ -140,7 +138,7 @@ int DynDFScheduler::checkBlocks() {
 	// (for example, SDF, DDF).  Also compute the size.
 	DataFlowStar* s;
 	while ((s = nextStar++) != 0) {
-		if (!s->isA("DataFlowStar") && !s->isA("HOFStar")) {
+	        if (!s->isA("DataFlowStar")) {
 			Error::abortRun (*s, " is not a dataflow star");
 			return FALSE;
 		}
