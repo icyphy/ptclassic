@@ -83,6 +83,7 @@ after processing the input is sent to the ``size'' output.
 		if (queue.length() > 0) {
 		   Particle* pp = (Particle*) queue.get();
 		   outData.put(completionTime) = *pp;
+		   pp->die();
 		   demand.dataNew = FALSE;
 		}
 	   }
