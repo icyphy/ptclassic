@@ -86,10 +86,8 @@ public:
 
 	// set and get the buffer type
 	void setBufType(BufType b) { myType = b; }
-	BufType  bufType() const { 
-		if (atBoundary()) return myType;
-		return isItOutput()? myType: realFarPort()->bufType(); 
-	}
+
+	BufType  bufType() const;
 
 	void setGeoName(char* n);
 	const char* getGeoName() const;
