@@ -206,6 +206,16 @@ ifdef CGCFULL
 	ifdef TK
 		CGCTK = 1
 	endif
+	CGCVIS = 1
+endif
+
+# CGC VIS demonstrations will only run under Solaris 2.5 under cfront,
+# but the CGC VIS subdomain will build under any architecture.
+ifdef CGCVIS
+	# Don't build the CGC VIS subdomain on a non-Solaris machine
+	ifeq ("$(filter sol% ,$(PTARCH))","")
+		CGCVIS =
+	endif
 endif
 
 ifdef CGFULL
@@ -291,8 +301,8 @@ ifdef PN
 	CUSTOM_DIRS += $(PNDIR)/kernel $(PNDIR)/stars 
 	SDFLIB = 1
 	PALETTES += PTOLEMY/src/domains/pn/icons/pn.pal
-	# PN is only supported under Sun, Solaris and HP operating systems,
-	# matched by patterns sun% and sol%
+	# PN is only supported under Sun, Solaris and HP-UX operating systems,
+	# matched by patterns sun% and sol% and hppa% respectively
 	ifneq ("$(filter sun% sol% hppa% ,$(PTARCH))","")
 		STARS += $(LIBDIR)/pnstars.o
 		LIBS += -lpnstars -lpn
@@ -373,12 +383,29 @@ endif
 
 ifdef CGC
 	ifdef CGCTK
-		CUSTOM_DIRS += $(CGCDIR)/tcltk/stars $(CGCDIR)/tcltk/targets \
-			$(CGCDIR)/tcltk/lib
+		# CGC Tcl/Tk stars
+		CUSTOM_DIRS += $(CGCDIR)/tcltk/stars 
 		STARS += $(LIBDIR)/cgctcltkstars.o
 		LIBS += -lcgctcltk
 		LIBFILES += $(LIBDIR)/libcgctcltk.$(LIBSUFFIX)
+		# CGC Tcl/Tk targets
+		CUSTOM_DIRS += $(CGCDIR)/tcltk/targets
 		TARGETS += $(CGCTCL)/CGCTclTkTarget.o
+	endif
+	ifdef CGCVIS
+		# CGC VIS stars
+		CUSTOM_DIRS += $(CGCDIR)/vis/stars
+		STARS += $(LIBDIR)/cgcvisstars.o
+		LIBS += -lcgcvisstars
+		LIBFILES += $(LIBDIR)/libcgcvisstars.$(LIBSUFFIX)
+		# CGC VIS targets
+		CUSTOM_DIRS += $(CGCDIR)/vis/targets
+		ifeq ($(USE_SHARED_LIBS),yes) 
+			LIBS += -lcgcvistargets
+			LIBFILES += $(LIBDIR)/libcgcvistargets.(LIBSUFFIX)
+		else
+			TARGETS += $(CGCDIR)/vis/CGCVISTarget.o
+		endif
 	endif
 	CGCLIB = 1
 	CG = 1
