@@ -27,7 +27,7 @@ Particle& IntSample :: operator = (const Particle& p)
 {
 	if(compareType(p)) {
 		// Types are compatible, so we can copy
-		data = ((IntSample&)p).data;
+		data = int(p);
 		}
 	else
 		errorHandler.error(
@@ -36,7 +36,7 @@ Particle& IntSample :: operator = (const Particle& p)
 	return *this;
 }
 
-char* IntSample :: print () { return form("%d",data);}
+char* IntSample :: print () const { return form("%d",data);}
 
 
 	////////////////////////////////////////
@@ -47,7 +47,7 @@ Particle& FloatSample :: operator = (const Particle& p)
 {
         if(compareType(p)) {
                 // Types are compatible, so we can copy
-                data = ((FloatSample&)p).data;
+                data = float(p);
                 }
         else
                 errorHandler.error(
@@ -56,7 +56,7 @@ Particle& FloatSample :: operator = (const Particle& p)
 	return *this;
 }
 
-char* FloatSample :: print () { return form("%f",data);}
+char* FloatSample :: print () const { return form("%f",data);}
 
         ////////////////////////////////////////
         // class ComplexSample
@@ -66,7 +66,7 @@ Particle& ComplexSample :: operator = (const Particle& p)
 {
         if(compareType(p)) {
                 // Types are compatible, so we can copy
-                data = ((ComplexSample&)p).data;
+                data = Complex(p);
                 }
         else
                 errorHandler.error(
@@ -75,7 +75,7 @@ Particle& ComplexSample :: operator = (const Particle& p)
         return *this;
 }
 
-char* ComplexSample :: print ()
+char* ComplexSample :: print () const
         { return form("(%f,%f)",data.real(),data.imag());}
 
 
