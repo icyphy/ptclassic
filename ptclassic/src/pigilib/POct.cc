@@ -66,7 +66,7 @@ extern "C" {
 #include "icon.h"
 #include "compile.h"
 #include "octMacros.h"			/* For GetOrCreatePropStr */
-#include "xfunctions.h"
+#include "xfunctions.h"			/* define win_msg */
 #include "handle.h"
 #include "kernelCalls.h"		/* define functions prefixed by Kc */
 #undef Pointer
