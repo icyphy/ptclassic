@@ -11,13 +11,6 @@
 #
 set REPORT_TCL_ERRORS 1
 
-source [info library]/init.tcl
-source $tk_library/tk.tcl
-
-###################################################################
-# Destroy a window if it exists
-proc ptkSafeDestroy {win} {if {[winfo exists $win]} {destroy $win}}
-
 # Procedure to expand a filename that might begin with
 # an environment variable.  For example, if the value of
 # of the environment variable PTOLEMY is /usr/tools/ptolemy, then 
@@ -35,6 +28,45 @@ proc expandEnvVars { path } {
 	return $path
     }
 }
+
+set env(TCL_LIBRARY) [expandEnvVars \$PTOLEMY/tcltk/tcl/lib/tcl]
+source [info library]/init.tcl
+set tk_library [expandEnvVars \$PTOLEMY/tcltk/tk/lib/tk]
+source $tk_library/tk.tcl
+
+###################################################################
+# procedure to issue an error message
+proc popupMessage {w text} {
+    ptkSafeDestroy $w
+    toplevel $w
+    wm title $w "Message box"
+    wm iconname $w "Message"
+
+    button $w.ok -text "OK <Return>" -command "destroy $w"
+    message $w.msg -width 5i -text $text -justify left
+    pack append $w $w.msg {top fill expand} $w.ok {top fill expand}
+
+    wm geometry $w +300+300
+    tkwait visibility $w
+    bind $w <Key> "ptkSafeDestroy $w"
+    bind $w <ButtonPress> "ptkSafeDestroy $w"
+    bind $w.msg <Button> "ptkSafeDestroy $w"
+    set prevFocus [focus]
+    focus $w
+    grab $w
+    tkwait window $w
+    focus $prevFocus
+}
+
+# procedure to issue an error message from any internal tk error
+proc tkerror message {
+     popupMessage .error "Background error in Tk"
+     global REPORT_TCL_ERRORS
+     if {$REPORT_TCL_ERRORS == 1} {popupMessage .error $message}
+}
+
+# Destroy a window if it exists
+proc ptkSafeDestroy {win} {if {[winfo exists $win]} {destroy $win}}
 
 # Read Ptolemy color settings from the Ptolemy Library
 source [expandEnvVars \$PTOLEMY/lib/tcl/ptkColor.tcl]
@@ -136,37 +168,6 @@ proc updateIterations {} {
 	global numIterations
 	set numIterations [.numberIters.entry get]
 	return $numIterations
-}
-
-# procedure to issue an error message
-proc popupMessage {w text} {
-    ptkSafeDestroy $w
-    toplevel $w
-    wm title $w "Message box"
-    wm iconname $w "Message"
-
-    button $w.ok -text "OK <Return>" -command "destroy $w"
-    message $w.msg -width 5i -text $text -justify left
-    pack append $w $w.msg {top fill expand} $w.ok {top fill expand}
-
-    wm geometry $w +300+300
-    tkwait visibility $w
-    bind $w <Key> "ptkSafeDestroy $w"
-    bind $w <ButtonPress> "ptkSafeDestroy $w"
-    bind $w.msg <Button> "ptkSafeDestroy $w"
-    set prevFocus [focus]
-    focus $w
-    grab $w
-    tkwait window $w
-    focus $prevFocus
-}
-
-# procedure to issue an error message from any internal tk error
-proc tkerror message {
-     popupMessage .error "Background error in Tk"
-     global REPORT_TCL_ERRORS
-     if {$REPORT_TCL_ERRORS == 1} {popupMessage .error $message}
-     ptkStop cgc_prog
 }
 
 # procedure to make an entry for a star parameter in the master control panel
