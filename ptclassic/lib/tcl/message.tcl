@@ -2,7 +2,7 @@
 # $Id$
 # Author: Edward A. Lee
 #
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -128,7 +128,7 @@ Ptolemy Interactive Graphical Interface }
 Ptolemy executable you are running:
 } $pigiFilename "
 
-Copyright \251 1990-1993 Regents of the University of California
+Copyright \251 1990-1994 Regents of the University of California
 - All rights reserved -
 For copyright notice, limitation of liability,
 and disclaimer of warranty provisions, push the button below. "
