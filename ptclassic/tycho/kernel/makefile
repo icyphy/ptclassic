@@ -85,6 +85,7 @@ ITCL_SRCS = \
 	RevControl.itcl \
 	RevControlSCCS.itcl \
 	RevControlRCS.itcl \
+	Singleton.itcl \
 	Stack.itcl \
 	StatusBar.itcl \
 	Subpanel.itcl \
