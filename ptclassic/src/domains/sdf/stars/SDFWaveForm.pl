@@ -27,16 +27,14 @@ defstar {
 	}
 	defstate {
 		name { periodic }
-		type { string }
-		default { "yes" }
-		desc { "Output is periodic if 'yes'" }
+		type { int }
+		default { "YES" }
+		desc { "Output is periodic if 'YES' (nonzero)" }
 	}
 	protected {
-		int pos, pflag;
+		int pos;
 	}
 	start {
-		char first = *(const char*)periodic;
-		pflag = (first == 'y' || first == 'Y');
 		pos = 0;
 	}
 	go {
@@ -44,6 +42,6 @@ defstar {
 			output%0 << 0.0;
 		else
 			output%0 << value[pos++];
-		if (pflag && pos >= value.size()) pos = 0;
+		if (int(periodic) && pos >= value.size()) pos = 0;
 	}
 }
