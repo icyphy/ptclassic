@@ -31,7 +31,7 @@ static char SccsId[]="$Id$";
 
 /*LINTLIBRARY*/
 
-extern char *print_etype();
+static char *print_etype();
 static int vertex_type();
 
 #define print_vtype(type) \
@@ -124,7 +124,7 @@ fa_edge **horiz_edges, **vert_edges;
 {
     fa_geometry rev_geo;
     register fa_vertex *ptr, *next;
-    fa_edge *new, *head;
+    fa_edge *new=NULL, *head;
     
     fa_merge1(geo);
 
@@ -140,7 +140,7 @@ fa_edge **horiz_edges, **vert_edges;
     fa_free_geo(&rev_geo);
 }
     
-static vertex_type(type)
+static int vertex_type(type)
 fa_vertex_type type;
 {
     switch(type) {
@@ -154,6 +154,9 @@ fa_vertex_type type;
 	case UPPER_RIGHT_NEG :
 	case UPPER_LEFT_NEG :
 	case LOWER_RIGHT_NEG :
+        case NO_VERTEX:
+	case LEFT_DIAGONAL: 
+	case RIGHT_DIAGONAL: 
 	    return(FA_CONCAVE);
 	}
     
