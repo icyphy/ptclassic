@@ -99,20 +99,13 @@ body ::tycho::WelcomeMessage::constructor {args} {
 
     global TYCHO
 
-    # FIXME: is a global really what we want here?  Is there anyway
-    # to tell that we are on a slow link?  Should we pass this
-    # as an command line switch to the tycho script?
-    global gSlowX11Link
-    if { $gSlowX11Link != 1 } {
-	# If we are no on a slow X11 link, then bring up Mr. Ptolemy
-	# An option -palette 3/3/2 below restricts the palette,
-	# but it is better to restrict it in the source.
-	if {!$ptolemygifexists} {
-	    image create photo ptolemygif \
-		    -file $TYCHO/kernel/ptolemyWelcome.gif
-	}
-	configure -image ptolemygif
+    # An option -palette 3/3/2 below restricts the palette,
+    # but it is better to restrict it in the source.
+    if {!$ptolemygifexists} {
+	image create photo ptolemygif \
+		-file $TYCHO/kernel/ptolemyWelcome.gif
     }
+    configure -image ptolemygif
 
     # Pack the copyright button.
     addButton copyright -text "Copyright" -command \
