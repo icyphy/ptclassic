@@ -53,6 +53,9 @@ class ::tycho::SlateView {
     # Add a tag to all indicated items.
     method addtag {tag args}
 
+    # Set or get the coordinates of an item
+    method coords {name args}
+
     # Clear data from this editor (Note: not the viewer)
     method clear {}
 
@@ -165,6 +168,15 @@ body ::tycho::SlateView::clear {} {
 }
 
 ########################################################################
+#### coords
+#
+# Set or get coordinates of an item.
+#
+body ::tycho::SlateView::coords {name args} {
+    eval $slate coords [list $_itemID($name)] $args
+}
+
+########################################################################
 #### delete
 #
 # Delete an item.
@@ -237,11 +249,11 @@ body ::tycho::SlateView::load {layout {context {}}} {
                     [$layout attributes $item]
             
             # Recursive call to do nested items
-            load $item
+            load $layout $item
         }
     } else {
     	# Nested items
-    	foreach item [$layout names $context] {
+    	foreach item [$layout names* $context] {
 	    eval [list subitem $context $item \
 		    [$layout type $item]] \
 		    [$layout coords $item] \
