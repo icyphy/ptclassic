@@ -486,9 +486,9 @@ version:
         '$' URL IDENTIFIER '$'
 	'$' URL URL URL '$'
                 { char b[SMALLBUFSIZE];
-                  objDate = save(b);
                   objVer = $3;
                   sprintf(b, "\"%s %s\"", $7, $8);
+                  objDate = save(b);
                 }
 |
         '$' IDENTIFIER '$' '$' IDENTIFIER '$'
@@ -569,6 +569,7 @@ version:
 		  objVer = "?.?";
 		  t = time((time_t *)0);
 		  b[0] = QUOTE;
+		  b[1] = 0;
 		  strncat(b,ctime(&t),24);
 		  strcat(b,"\"");
 		  objDate = save(b);
