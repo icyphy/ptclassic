@@ -31,8 +31,15 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# FIXME -
-# This should be derived from EntryQuery and should use its facilities.
+# Options from the derived class
+option add *FileBrowser*entryWidth 30 widgetDefault
+option add *FileBrowser*entryBackground \
+	[ptkColor antiqueWhite white] widgetDefault
+option add *FileBrowser*textBackground \
+	[ptkColor antiqueWhite white] widgetDefault
+ option add *FileBrowser.textForeground \
+	[ptkColor black black] widgetDefault
+option add *FileBrowser.entryfont [.tychoFonts defaultFont fixed]
 
 ########################################################################
 #### expandPath
@@ -71,8 +78,6 @@ proc ::tycho::filename {} {
 #######################################################################
 # options
 #
-option add *FileBrowser.textForeground \
-	[ptkColor black black] widgetDefault
 option add *FileBrowser.textBackground \
 	[ptkColor antiqueWhite white] startupFile
 
@@ -98,42 +103,38 @@ option add *FileBrowser.textBackground \
 # </pre></tcl>
 #
 class ::tycho::FileBrowser {
-    inherit ::tycho::DialogWindow
+    inherit ::tycho::EntryQuery
 
     # The command to execute on a file when one is identified
-    itk_option define -command command Command "DialogWindow::answer"
+    itk_option define -command command Command "::tycho::DialogWindow::answer"
 
     constructor {args} {}
 
     ##################################################################
     ####                     public methods                       ####
 
-    #### focusin
-    # Grab the focus for the entry box.
-    method focusin {}
-
     #### ok
     # Open the file or directory specified in the entry box.
-    method ok {} {}
+    method ok {}
 
     #### open
     # Open the file or directory specified in the argument.
-    method open {name} {}
+    method open {name}
 
     #### selectFile
     # Copy filename from listbox to entry.
-    method selectFile {lb ypos} {}
+    method selectFile {lb ypos}
 
     ##################################################################
     ####                   protected methods                      ####
 
     #### checkFile
     # Process a file or directory selection.
-    protected method checkFile {filename} {}
+    protected method checkFile {filename}
 
     #### updateListbox
     # Fill the listbox with file and directory names.
-    protected method updateListbox {} {}
+    protected method updateListbox {}
 
     ##################################################################
     ####                   protected variables                    ####
@@ -142,6 +143,10 @@ class ::tycho::FileBrowser {
     # and the directory last visited.
     protected common fileLastOpened
     protected common CWD
+
+    ##################################################################
+    ####                   private variables                      ####
+    private variable closing 0
 }
 
 ######################################################################
@@ -169,15 +174,7 @@ body ::tycho::FileBrowser::constructor {args} {
     }
 
     # Entry box for entering file names directly
-    itk_component add entry {
-	entry $itk_interior.childsite.entry -relief sunken -bd 3
-    } {
-	keep -background -cursor -foreground -font
-	rename -foreground -textforeground textForeground Foreground
-	rename -background -textbackground textBackground Background
-    }
-    pack $itk_component(entry) \
-	    -side top -fill x -padx 3m -pady 2m -anchor w 
+    addQuery entry {} $fileLastOpened
     
     # frane for listbox for listing files and directories.
     itk_component add listscroll {
@@ -186,7 +183,7 @@ body ::tycho::FileBrowser::constructor {args} {
 	keep -background -cursor
     }
     pack $itk_component(listscroll) -side top \
-	    -expand yes -fill both -padx 10
+	    -expand yes -fill both -padx 5
 
     # Current directory display.
     itk_component add dir {
@@ -204,16 +201,16 @@ body ::tycho::FileBrowser::constructor {args} {
 		-selectmode single
     } {
 	keep -background -cursor -foreground -font
-	rename -foreground -textforeground textForeground Foreground
 	rename -background -textbackground textBackground Background
+	rename -foreground -textforeground textForeground Foreground
     }
     pack $itk_component(listbox) -side left -expand yes -fill both
     
     updateListbox
     
     # In case updateListbox inserts into the entry; to avoid repetition
-    $itk_component(entry) delete 0 end
-    $itk_component(entry) insert 0 $fileLastOpened
+    clear entry
+    insert entry $fileLastOpened
 
     # Scrollbar for files.
     itk_component add scroll {
@@ -225,28 +222,23 @@ body ::tycho::FileBrowser::constructor {args} {
     }
     pack $itk_component(scroll) -side right -fill y
 
-    # Buttons.
-    addButton ok -text "OK <Ret>" -command "$this ok"
-    addButton cancel -text "Cancel <Esc>" -command \
-	    "$this nextWindow; delete object $this"
-    default ok
-    
     ###################################################################
     # bindings
     #
     bind $itk_component(listbox) <Double-1> \
-	    "$this open \[selection get\]; break"
+	    [code {%Q open [%Q get entry]; break}]
     bind $itk_component(listbox) <1> \
-	    "$this selectFile %W %y"
-    bind $itk_component(hull) <Return> \
-	    "$this ok; break"
-    bind $itk_component(hull) <Escape> \
-	    "$this nextWindow; delete object $this"
-    
-    bind $itk_component(hull) <Any-Enter> "$this focusin"
-    
+	    [code %Q selectFile %W %y]
+
     # Process any unevaluated arguments.
     eval itk_initialize $args
+
+    wm resizable $prefix 1 1
+    # NOTE: There seems to be no way to find out the actual window size at this
+    # point.  The commands "wm reqwidth" and "wm width" return 1, even after
+    # a "tkwait visibility" and an "update".  So we just set some reasonable
+    # minimum size.
+    wm minsize $prefix 10 10
 }
 
 
@@ -254,21 +246,12 @@ body ::tycho::FileBrowser::constructor {args} {
     ##################################################################
     ####                     public methods                       ####
 
-
-#########################################################################
-#### focusin
-# Hand the focus to the entry window.
-#
-body ::tycho::FileBrowser::focusin {} {
-    focus $itk_component(entry)
-}
-
 ######################################################################
 #### ok
 # Open the file specified in the entry box.
 #
 body ::tycho::FileBrowser::ok {} {
-    open [$itk_component(entry) get]
+    open [get entry]
 }
 
 ######################################################################
@@ -276,11 +259,17 @@ body ::tycho::FileBrowser::ok {} {
 # Open a file or directory.
 #
 body ::tycho::FileBrowser::open {name} {
+    # This method might be in the middle of being processed already.
+    # If so, return.
+    if {$closing} {return}
+    set closing 1
     update idletasks
     if [checkFile $name] {
-	#nextWindow
+	#nextWindow not used because focus goes to the new window
 	delete object $this
+	return
     }
+    set closing 0
 }
 
 ######################################################################
@@ -291,8 +280,8 @@ body ::tycho::FileBrowser::open {name} {
 body ::tycho::FileBrowser::selectFile {lb ypos} {
     $lb selection clear @0,0 end
     $lb selection set [$lb nearest $ypos]
-    $itk_component(entry) delete 0 end
-    $itk_component(entry) insert 0 [selection get]
+    clear entry
+    insert entry [selection get]
 }
 
     ##################################################################
@@ -309,7 +298,7 @@ body ::tycho::FileBrowser::selectFile {lb ypos} {
 # string, then nothing is done and a zero is returned. If the specified
 # filename exists but is not readable, an error is triggered.  If the
 # filename does not exist as either a file or a directory, then the
-# specified command is invoked on that file.
+# command given by the -command option is invoked on that file.
 #
 body ::tycho::FileBrowser::checkFile {filename} {
 
@@ -319,35 +308,27 @@ body ::tycho::FileBrowser::checkFile {filename} {
     set file [string trim $file]
     if {$file == ""} {return 0}
     
-    # For use later _if_ necessary
+    # Name of the file before calculating the absolute path.
     set relPath $file
     
-    # Check for non-relative pathnames
+    # If the name is relative, calculate the absolute path.
     set char [string index $file 0]
-    if {$char == "/" || $char == "~"} {
-	set relative 0
-    } else { set relative 1 }
-    
-    # Flag to indicate whether a new file was created
-    set newFile 0
-    
-    # If the file does not exist, execute command
-    if $relative {
-	if {! [file exist $CWD/$file]} {
-	    execCommand -command $CWD/$file
-	    set newFile 1
-	} else {
-	    set file $CWD/$file
-	}
-    } else {
-	if {! [file exist $file]} {
-	    execCommand -command $file
-	    set newFile 1
-	}
+    if {$char != "/" && $char != "~"} {
+	set file $CWD/$file
     }
-    if $newFile {
-	set fileLastOpened $relPath
-	return 1
+
+    # If the file does not exist, check to see whether the
+    # directory exists.  If it does, execute the command given by -command
+    # (which will probably create the file).  Otherwise, trigger an error.
+    if {! [file exist $file]} {
+	set dir [file dirname $file]
+	if {[file exist $dir] && [file isdir $dir]} {
+	    execCommand -command $file
+	    set fileLastOpened $relPath
+	    return 1
+	} {
+	    error "Directory does not exist: $dir"
+	}
     } 
     
     # If the file does exist, and is a directory
@@ -418,12 +399,8 @@ body ::tycho::FileBrowser::checkFile {filename} {
 	# It's a plain file
 	if {[file readable $file]} {
 	    execCommand -command $file
-	    # Store last facet opened
-	    if $relative {
-		set fileLastOpened $relPath
-	    } else {
-		set fileLastOpened $file
-	    }
+	    # Store last file opened
+	    set fileLastOpened $relPath
 	    return 1
 	} {
 	    error "\"$file\" is unreadable"
@@ -469,7 +446,7 @@ body ::tycho::FileBrowser::updateListbox {} {
 	$itk_component(listbox) insert end "$fname"
     }
     
-    $itk_component(entry) delete 0 end
+    clear entry
     
     set dirLength [llength $dirList]
     set fileLength [llength $fileList]
@@ -481,12 +458,12 @@ body ::tycho::FileBrowser::updateListbox {} {
     # Choose intelligently which default file or directory
     # to put in the entry box.
     if {($dirLength == 1) && ($fileLength == 0)} {
-	$itk_component(entry) insert 0 [lindex $dirList 0]
+	insert entry [lindex $dirList 0]
     } elseif {($dirLength == 0) && ($fileLength == 1)} {
-	$itk_component(entry) insert 0 [lindex $fileList 0]
+	insert entry [lindex $fileList 0]
     } elseif {($dirLength == 0) && ($fileLength == 0)} {
 	if {$CWD != "/"} {
-	    $itk_component(entry) insert 0 "../"
+	    insert entry "../"
 	}
     }
 }
