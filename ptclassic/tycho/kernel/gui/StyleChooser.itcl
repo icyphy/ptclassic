@@ -76,6 +76,9 @@ class ::tycho::PreferenceDialog {
     # Notify (from preference editor) that preferences have been edited
     method notify {args}
 
+    # Revert to system defaults
+    method revert {}
+
     # Update changed preferences
     method update {args}
 
@@ -153,6 +156,10 @@ body ::tycho::PreferenceDialog::constructor {args} {
 	component bbox buttonconfigure redo -state disabled
     }
 
+    # Add a button to revert to defaults
+    addButton defaults -text "Defaults" -row 3 -column 0 \
+	    -command "$this revert"
+
     # Initialise options
     eval itk_initialize $args
 }
@@ -226,6 +233,27 @@ body ::tycho::PreferenceDialog::redo {} {
 
     # Enable the undo button
     component bbox buttonconfigure undo -state normal
+}
+
+#######################################################################
+#### revert
+#
+body ::tycho::PreferenceDialog::revert {} {
+    foreach group [::tycho::preference groups] {
+	foreach preference [::tycho::preference preferences $group] {
+	    set current [::tycho::preference get $group $preference]
+	    set default [::tycho::preference cget $group $preference -default]
+	    if { $current != $default } {
+		::tycho::preference model publish assign $group $preference $default
+	    }
+	}
+    }
+    # Clear the undo history
+    ::tycho::preference model clearHistory
+
+    # Disable the undo and redo buttons
+    component bbox buttonconfigure undo -state disabled
+    component bbox buttonconfigure redo -state disabled
 }
 
 #######################################################################
