@@ -40,7 +40,7 @@ static const char file_id[] = "AnyAsmStar.cc";
 
 #include "AnyAsmStar.h"
 #include "Domain.h"
-#include "SDFWormhole.h"
+#include "CGWormhole.h"
 #include "AutoForkNode.h"
 
 const char* AnyAsmStar::domain() const { return "AnyAsm";}
@@ -72,13 +72,13 @@ public:
 	// new fromUniversal EventHorizon
         EventHorizon& newFrom() {
 		complain();
-                LOG_NEW; return *new SDFfromUniversal;
+                LOG_NEW; return *new CGfromUniversal;
         }
 
 	// new toUniversal EventHorizon
         EventHorizon& newTo() {
 		complain();
-                LOG_NEW; return *new SDFtoUniversal;
+                LOG_NEW; return *new CGtoUniversal;
         }
 
 	// new node (geodesic)
