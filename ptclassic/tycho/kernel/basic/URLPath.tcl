@@ -53,7 +53,7 @@ proc ::tycho::readFileHeader {filename {var {}}} {
     }
     $fo close
     delete object $fo
-    if [regexp -- {-\*-.*-\*-} $string header] {
+    if [regexp -- {-\*-.*-\*-} $string string] {
 	return [::tycho::parseHeaderString $string v]
     } else {
 	return ""
