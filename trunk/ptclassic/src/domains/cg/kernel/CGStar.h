@@ -67,6 +67,7 @@ class StringList;
 // don't know how generally it is available.
 extern "C" int strcasecmp(const char* s1, const char* s2);
 
+class CGWormBase;
 class CodeStream;
 class Profile;
 
@@ -98,7 +99,11 @@ public:
 	// class identification
 	int isA(const char*) const;
 
-	// querry if it is a data-parallel star?
+        // If I am a wormhole, return a pointer to me as a wormhole.
+        // Return NULL if not.
+        virtual Wormhole* asWormhole();
+
+	// query if it is a data-parallel star?
 	virtual int isParallel() const { return dataParallel; }
 
 	// For a data parallel star, or a macro actor get the profile.
