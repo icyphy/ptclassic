@@ -98,16 +98,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #ifdef PTSOL2
 #define EXTRAOPTS "-fpic"
 #else
-#define EXTRAOPTS ""
-#endif /* PTSOL2 */
-
 #ifdef freebsd
 #define EXTRAOPTS "-Dfreebsd"
 #else
 #define EXTRAOPTS ""
 #endif /* freebsd */
+#endif /* PTSOL2 */
 
-#else
+#else  /* __GNUC_MINOR__ >= 7 */
 #define EXTRAOPTS ""
 #endif
 #endif /* ! __GNUG__ */
