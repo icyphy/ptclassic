@@ -86,7 +86,8 @@ char consCalls[BIGBUFSIZE];
 #define T_COMPLEXARRAY 6
 #define T_FIX 7
 #define T_FIXARRAY 8
-#define NSTATECLASSES 9
+#define T_STRINGARRAY 9
+#define NSTATECLASSES 10
 
 #define M_PURE 1
 #define M_VIRTUAL 2
@@ -96,7 +97,7 @@ char consCalls[BIGBUFSIZE];
 char* stateClasses[] = {
 "IntState", "FloatState", "ComplexState", "StringState",
 "IntArrayState", "FloatArrayState", "ComplexArrayState",
-"FixState", "FixArrayState"
+"FixState", "FixArrayState", "StringArrayState"
 };
 
 /* bookkeeping for state include files */
@@ -687,6 +688,8 @@ char* nameArg;
 		return T_FIX;
 	if (strcmp (name, "fixarray") == 0)
 		return T_FIXARRAY;
+	if (strcmp (name, "stringarray") == 0)
+		return T_STRINGARRAY;
 	fprintf (stderr, "state class %s\n", name);
 	yyerror ("bad state class: assuming int");
 		return T_INT;
