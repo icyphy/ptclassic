@@ -57,7 +57,13 @@ public:
 	virtual double operator()() = 0;
 };
 #else /* PT_USE_RAND */
+
+#if defined(PTNT)
+extern "C" {
+#include <stdlib.h>
+#else
 extern "C" long random();
+#endif
 
 // returns a random value between 0 and 1.
 

@@ -57,8 +57,12 @@ public:
 
 #else /* PT_USE_RAND */
 extern "C" {
+#if defined(PTNT)
+#include <stdlib.h>
+#else
   void srandom(unsigned);
   long random();
+#endif
 }
 class ACG {
 public:
