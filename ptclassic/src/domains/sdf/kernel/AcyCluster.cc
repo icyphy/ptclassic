@@ -135,6 +135,9 @@ void AcyCluster::tagDelayArcs()
 	    if (outArc->numInitDelays() >= loopFactor()* WEIGHT(outArc)) {
 		DELAY_TAG(outArc) = 1;
 		DELAY_TAG(outArc->far()) = 1;
+	    } else {
+		DELAY_TAG(outArc) = 0;
+		DELAY_TAG(outArc->far()) = 0;
 	    }
 	}
     }
