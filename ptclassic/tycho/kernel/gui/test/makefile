@@ -58,6 +58,7 @@ GRAPHICAL_TESTS = \
 
 ITCL_SRCS =	\
 	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) \
+	alltychotests.tcl \
 	DirectedAcyclicGraph.itcl \
 	alltests.itcl all.itcl
 
