@@ -49,10 +49,10 @@ TCL_SRCS = \
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =	#tclIndex doc
+MISC_FILES =	PtolemyFacets.fst #tclIndex doc
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =	tclIndex PtolemyFacets.pt *.html
+REALCLEAN_STUFF =	tclIndex PtolemyFacets.fst *.html
 
 # Title for the tydoc index page
 TYDOC_DESC =	Index of classes in tycho/typt/lib
