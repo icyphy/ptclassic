@@ -108,6 +108,9 @@ protected:
 	// it merges it and returns the result; otherwise it returns 0.
 	BDFCluster* fullSearchMerge();
 
+	// check needed by fullSearchMerge
+	int buriedCtlArcs(BDFCluster*, BDFCluster*);
+
 	// merge two clusters, returning the result.
 	BDFCluster* merge(BDFCluster* c1,BDFCluster* c2);
 
@@ -305,6 +308,9 @@ protected:
 	// createInnerGal
 	virtual void createInnerGal();
 
+	// adjust associated booleans after merging
+	void adjustAssociations();
+
 	BDFBagScheduler* sched;
 	BDFClusterGal* gal;
 	int exCount;
@@ -314,20 +320,39 @@ private:
 
 class BDFClustPort : public BDFPortHole {
 private:
+	// the real port
 	DFPortHole& pPort;
-	PortHole* pAssoc;
+
+	// the external link
 	BDFClustPort* pOutPtr;
+
+	// true if I am a bag port
 	unsigned char bagPortFlag;
+
+	// true if I am a feedforward-only port (after marking)
 	unsigned char feedForwardFlag;
+
+	// true if I control some other port
+	unsigned char ctlFlag;
 public:
 	BDFClustPort(DFPortHole& p,BDFCluster* parent = 0,int bagp = 0);
 	~BDFClustPort() {}
+
+	// return what is inside me
 	DFPortHole& real() { return pPort;}
+
+	// these are passthrough functions
 	int isItInput() const { return pPort.isItInput();}
 	int isItOutput() const { return pPort.isItOutput();}
-	PortHole* assocPort() { return pAssoc;}
-	int assocRelation() const { return pPort.assocRelation();}
-	void setAssoc(PortHole* p) { pAssoc = p;}
+
+	// set/return the control bit
+	int isControl() const { return ctlFlag;}
+	void setControl(int val) { ctlFlag = val ? 1 : 0;}
+
+	// my assocPort is guaranteed to be a BDFClustPort so this
+	// cast is safe.
+	BDFClustPort* assoc() { return (BDFClustPort*)assocPort();}
+
 	void initGeo();
 	BDFCluster* parentClust() { return (BDFCluster*)parent();}
 	BDFClustPort* far() { return (BDFClustPort*)PortHole::far();}
@@ -346,7 +371,7 @@ public:
 	// problem for merging, and FALSE otherwise.
 	int fbDelay() const { return (numTokens() > 0 && !feedForward());}
 
-	// return the real far port alised to bagPorts.
+	// return the real far port aliased to bagPorts.
 	// If the bagPort is a port of the outsideCluster, return zero.
 	BDFClustPort* realFarPort(BDFCluster* outsideCluster);
 
@@ -354,6 +379,12 @@ public:
 
 	BDFClustPort* inPtr() {
 		return bagPortFlag ? (BDFClustPort*)&pPort : 0;
+	}
+
+	void setRelation(int r, BDFClustPort* assoc = 0);
+
+	BDFRelation relType() const {
+		return (BDFRelation) assocRelation();
 	}
 };
 

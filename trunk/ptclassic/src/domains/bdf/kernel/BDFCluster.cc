@@ -65,6 +65,9 @@ ostream& operator<< (ostream& o, BDFClusterGal& g) {
 // constructor: builds a flat galaxy of BDFAtomCluster objects.
 // assumption: the initial galaxy has only SDF and BDF stars.
 
+// We use a table, based on the indices, to map portholes back to
+// their corresponding BDFClustPorts and connect it all up.
+
 BDFClusterGal::BDFClusterGal(Galaxy& gal, ostream* log)
 : bagNumber(1), logstrm(log)
 {
@@ -84,20 +87,37 @@ BDFClusterGal::BDFClusterGal(Galaxy& gal, ostream* log)
 	}
 	// now connect up the cluster ports to match the real ports
 	for (int i = 0; i < nports; i++) {
-		BDFClustPort* out = ptable[i];
-		// attach corresponding assocPort
-		PortHole* a = out->real().assocPort();
+		BDFClustPort* curCP = ptable[i];
+
+		// create corresponding assocPort relations, if they exist.
+		DFPortHole& realP = curCP->real();
+		PortHole* a = realP.assocPort();
 		if (a) {
+			// find the ClustPort that corresponds to a, and
+			// set me to be associated with that.
 			BDFClustPort* assoc = ptable[a->index()];
-			out->setAssoc(assoc);
+			int r = realP.assocRelation();
+			curCP->setRelation(r, assoc);
+
+			// flag the associated port if it controls
+			// the dataflow of another port
+
+			if (r == BDF_TRUE || r == BDF_FALSE)
+				assoc->setControl(TRUE);
 		}
-		if (out->isItInput()) continue;
-		BDFClustPort* in = ptable[out->real().far()->index()];
-		int delay = out->real().numTokens();
-		out->connect(*in,delay);
-		out->initGeo();
+		if (curCP->isItOutput()) {
+			// only one connection for each pair, hence
+			// the isItOutput check.
+			BDFClustPort* in = ptable[realP.far()->index()];
+			int delay = realP.numTokens();
+			curCP->connect(*in,delay);
+			curCP->initGeo();
+		}
 	}
 	LOG_DEL; delete ptable;
+	if (logstrm) {
+		*logstrm <<"Initial universe:\n" << *this;
+	}
 }
 
 // Core clustering routine.  Alternate merge passes and loop passes
@@ -232,9 +252,11 @@ BDFCluster* BDFClusterGal::fullSearchMerge() {
 					dest = c;
 				}
 				// requirement 2: no indirect path.
+				// requirement 3: no buried control arcs.
 				// if met, do the merge and return the
 				// result.
-				if (!indirectPath(src,dest))
+				if (!indirectPath(src,dest) &&
+				    !buriedCtlArcs(src,dest))
 					return merge(src,dest);
 			}
 		}
@@ -432,13 +454,14 @@ int BDFClusterGal::loopPass() {
 }
 
 // get the control port.  We don\'t care here about "same data" relations.
-static PortHole* controlPort(DFPortHole* p,int& relation) {
+static PortHole* controlPort(DFPortHole* p,BDFRelation& relation) {
 	PortHole* a = p->assocPort();
-	relation = p->assocRelation();
-	if (relation != BDF_TRUE && relation != BDF_FALSE) {
-		relation = -1;
+	int r = p->assocRelation();
+	if (r != BDF_TRUE && r != BDF_FALSE) {
+		relation = BDF_NONE;
 		a = 0;
 	}
+	else relation = (BDFRelation)r;
 	return a;
 }
 
@@ -451,7 +474,7 @@ static int sameSignal(PortHole* a1,PortHole* a2) {
 
 // determine whether two ports have matching conditions
 static int condMatch(DFPortHole* p1,DFPortHole* p2) {
-	int r1, r2;
+	BDFRelation r1, r2;
 	PortHole* a1 = controlPort(p1,r1);
 	PortHole* a2 = controlPort(p2,r2);
 	if (r1 != r2) return FALSE;
@@ -501,9 +524,19 @@ int BDFCluster::loopFactor() {
 	return retval;
 }
 
+static const char* labels[] = { "<ifFalse:", "<ifTrue:", "<Same:", "<Compl:" };
+
 // fn to print a single port of a cluster
 static ostream& operator<<(ostream& o, BDFClustPort& p) {
 	o << p.parent()->readName() << "." << p.readName();
+
+	// print BDF control information
+	if (p.isControl()) o << "[C]";
+	BDFRelation r = p.relType();
+	BDFClustPort* a = p.assoc();
+	if (a && r != BDF_NONE) o << labels[r] << a->readName() << ">";
+
+	// print connectivity
 	BDFClustPort* pFar = p.far();
 	if (p.isItOutput())
 		o << "=>";
@@ -659,6 +692,7 @@ void BDFClusterBag::absorb(BDFCluster* c,BDFClusterGal* par) {
 			addPort(*np);
 		}
 	}
+	adjustAssociations();
 }
 
 // this function merges two bags.
@@ -702,6 +736,41 @@ BDFClusterBag::merge(BDFClusterBag* b,BDFClusterGal* par) {
 	par->removeBlock(*b); // remove from parent galaxy
 	b->owner = FALSE;     // prevent from zapping contents, I took them
 	LOG_DEL; delete b;    // zap the shell
+	adjustAssociations();
+}
+
+// this function recalculates BDF_SAME and BDF_COMPLEMENT relations
+// after merging of clusters.  For each bag port, the underlying real
+// port may be marked the SAME or COMPLEMENT of other real ports, but
+// these relationships are only visible at the bag port level if the
+// relationship holds with another bag port.
+
+void BDFClusterBag::adjustAssociations() {
+	BDFClustPortIter nextPort(*this);
+	BDFClustPort* bagp;
+	while ((bagp = nextPort++) != 0) {
+		BDFRelation r = bagp->inPtr()->relType();
+		if (r != BDF_SAME && r != BDF_COMPLEMENT)
+			continue;
+		int reversed = (r == BDF_COMPLEMENT);
+		BDFClustPort* lower = bagp->inPtr()->assoc();
+		BDFClustPort* upper = lower->outPtr();
+		while (!upper && ((r = lower->relType()) == BDF_SAME
+				  || r == BDF_COMPLEMENT)) {
+			// first one is not a bag port, but there is more
+			// to the chain
+			// this cast is safe because all cluster
+			lower = lower->assoc();
+			upper = lower->outPtr();
+			if (r == BDF_COMPLEMENT) reversed = !reversed;
+		}
+		// we have either found a bag port that we are related to
+		// (same or complement) or we have gone around to ourselves.
+		if (upper == 0 || upper == bagp)
+			bagp->setRelation(BDF_NONE);
+		else bagp->setRelation(reversed ? BDF_COMPLEMENT : BDF_SAME,
+				       upper);
+	}
 }
 
 // internal clustering for a bag
@@ -784,6 +853,86 @@ BDFClusterBag::~BDFClusterBag() {
 	LOG_DEL; delete sched;
 }
 
+// This function is called to check whether a merge operation that
+// makes the argument, which is a controlling port, an internal port
+// will result in a cluster that is not a legal BDF actor.  It returns
+// true if the control arc will be lost and the star I/O will depend
+// on a hidden signal.  However, if only internal arcs are controlled
+// by the control signal, or if the control signal is available
+// externally, then all is well and the merge can proceed.
+
+static int controlIsBuried (BDFClustPort *ctlP) {
+	BDFClustPort *pFar = ctlP->far();
+	BDFClustPort *a;
+	BDFRelation r;
+	BDFCluster *me = ctlP->parentClust();
+	BDFCluster *you = pFar->parentClust();
+	BDFCluster *cl;
+
+	// we can return FALSE if none of the ports of "me" that are
+	// controlled by ctlP will end up external.
+
+	BDFClustPortIter nextPort(*me);
+	BDFClustPort *p;
+	int sorry = FALSE;
+	while ((p = nextPort++) != 0) {
+		if ((a = p->assoc()) != ctlP ||
+		    ((r = p->relType()) != BDF_TRUE && r != BDF_FALSE))
+			continue;
+		// OK, ctlP controls p.  But this is OK if p connects
+		// to a port belonging to "me" or "you".
+		cl = p->far()->parentClust();
+		if (cl != me && cl != you) {
+			sorry = TRUE;
+			break;
+		}
+	}
+	// if sorry is false, all controlled ports are internal so we
+	// can merge.
+	if (!sorry) return 0;
+
+	// OK, see if the control signal is exported -- for example,
+	// it may come from a fork.
+
+	if (ctlP->numTokens() != 0 || (a = ctlP->assoc()) == 0 ||
+	    ((r = ctlP->relType()) != BDF_SAME && r != BDF_COMPLEMENT))
+		return 1;
+	int reversed = (r == BDF_COMPLEMENT);
+	while (a && ((cl = a->parentClust()) == me || cl == you)) {
+		r = a->relType();
+		a = a->assoc();
+		if (r == BDF_COMPLEMENT) reversed = !reversed;
+		else if (r != BDF_SAME) a = 0;
+	}
+	// if we found an a that will point out of the current cluster,
+	// a is non-null and we return false (control is not buried),
+	// otherwise true.
+	return !a;
+}
+
+// check for any buried control arcs resulting from merging
+// the two stars.
+int BDFClusterGal::buriedCtlArcs(BDFCluster* src,
+					 BDFCluster* dest) {
+	BDFClustPortIter nextp(*src);
+	BDFClustPort *p;
+	while ((p = nextp++) != 0) {
+		BDFClustPort *pFar = p->far();
+		if (pFar->parentClust() != dest) continue;
+		if ((p->isControl() && controlIsBuried(p)) ||
+		    (pFar->isControl() && controlIsBuried(pFar))) {
+			if (logstrm) {
+				*logstrm << "Can't merge " << src->readName()
+					<< " and " << dest->readName() <<
+					": would bury a control arc:\n"
+					<< *p << "\n";
+			}
+			return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 // find an attractive and compatible neighbor.
 // This is the "quick version" -- it assumes that if the source has
 // multiple outputs or the destination has multiple inputs, an alternate
@@ -805,6 +954,28 @@ BDFCluster* BDFCluster::mergeCandidate() {
 
 		int ok = (!p->fbDelay() && myIO==peerIO && condMatch(p,pFar));
 
+		// if it or pFar is a control port, there is an additional
+		// requirement: we must make sure that the resulting cluster
+		// will be a valid BDF actor, which means either that nothing
+		// it controls ends up external, or there is a BDF_SAME or
+		// BDF_COMPLEMENT connection to another port that ends up
+		// external.
+
+		// under some circumstances a violation of this condition
+		// can be corrected by producing a do-while loop;
+		// this will be implemented later.
+
+		if ((p->isControl() && controlIsBuried(p)) ||
+		    (pFar->isControl() && controlIsBuried(pFar))) {
+			ok = FALSE;
+
+			// there may be multiple ports connecting two
+			// clusters -- if ANY disappearing control port
+			// is a problem we must veto the merge.
+			
+			if (peer == srcOK) srcOK = 0;
+			if (peer == dstOK) dstOK = 0;
+		}
 		if (p->isItInput()) {
 			if (src == 0) src = peer;
 			if (src != peer) multiSrc++;
@@ -822,6 +993,7 @@ BDFCluster* BDFCluster::mergeCandidate() {
 	else if (dstOK && multiDst == 0) return dstOK;
 	else return 0;
 }
+
 
 // function to create names for atomic clusters and portholes.
 static const char* mungeName(NamedObj& o) {
@@ -908,12 +1080,13 @@ int BDFAtomCluster::myExecTime() {
 // constructor for BDFClustPort, port for use in cluster.
 // if bp is set it's a "bag port" belonging to an BDFClusterBag.
 BDFClustPort::BDFClustPort(DFPortHole& port,BDFCluster* parent, int bp)
-: pPort(port), bagPortFlag(bp), pOutPtr(0), feedForwardFlag(0)
+: pPort(port), bagPortFlag(bp), pOutPtr(0), feedForwardFlag(0),
+  ctlFlag(0)
 {
 	const char* name = bp ? port.readName() : mungeName(port);
 	setPort(name,parent,INT);
 	myPlasma = Plasma::getPlasma(INT);
-	numberTokens = port.numberTokens;
+	numberTokens = port.numXfer();
 }
 
 void BDFClustPort::initGeo() { myGeodesic->initialize();}
@@ -945,6 +1118,13 @@ BDFClustPort* BDFClustPort :: realFarPort(BDFCluster* outsideCluster) {
 	if (parentClust() == outsideCluster) return 0;
 	if (far()) return far();
 	return pOutPtr->realFarPort(outsideCluster);
+}
+
+// set relationship
+void BDFClustPort :: setRelation(int r, BDFClustPort* assoc) {
+	// do not reference myGeodesic before it is set.
+	int nT = myGeodesic ? numTokens() : 0;
+	setBDFParams(numIO(),assoc,(BDFRelation)r,nT);
 }
 
 // methods for BDFClustSched, the clustering scheduler.
