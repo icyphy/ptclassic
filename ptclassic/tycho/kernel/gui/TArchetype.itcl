@@ -74,7 +74,7 @@
 # the cursor during time-consuming operations.
 #
 # <li>Widget construction. [incr Tk] has no means of saying
-# "do this when the constructor has completed." Themeth
+# "do this when the constructor has completed." The method
 # <b>whenConstructed</b> executes code when the widget has
 # completed construction, and the <b>whenMapped</b> method
 # executes code when a given component is mapped to the screen.

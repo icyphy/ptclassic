@@ -1,4 +1,4 @@
-# Ptolemy Retargetting mechanism: Display information about domains
+# Ptolemy Retargeting mechanism: Display information about domains
 #
 # @Author: Christopher Hylands
 #
@@ -32,7 +32,7 @@
 
 #######################################################################
 #### Retarget
-# Display Ptolemy Retargetting information.
+# Display Ptolemy Retargeting information.
 # The user can compare stars in two Ptolemy domains, and check
 # to see if the current universe would have conflicts while
 # being retargeted between domains.
@@ -108,7 +108,7 @@ class ::tycho::Retarget {
     # If we need to run compareDomains, then set this variable to 1
     private variable dirtyCompareDomains 1
 
-    # Editor object that contains the universe we are retargetting.
+    # Editor object that contains the universe we are retargeting.
     private variable editor
 
     # List of stars that clash, arranged by categories into sublists
