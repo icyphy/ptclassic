@@ -68,7 +68,6 @@ AsmStar::lookupAddress(const char* name) {
 // lookup unique label, if one doesn't exist, create new label
 StringList
 AsmStar::label(const char* name) {
-	unsigned a;
 	StringList s = name;
 	int i = lastLocalLabel;
 	while (i > -1 ? strcmp(name,&labels[i][0]) != 0 : FALSE ) i--;
@@ -188,7 +187,7 @@ AsmStar::processMacro(const char* func, const char* id, const char* arg2) {
 	else if (strcasecmp(func,"addr2") == 0) {
 		if (*arg2 == 0)
 			codeblockError("two arguments needed for addr2");
-		else s = addrWithOffset(id, arg2);
+		else s = (int)addrWithOffset(id, arg2);
 	}
 	// if more two-arg funcs are added, put them before here!
 	else if (*arg2 != 0) {
