@@ -67,7 +67,7 @@ MISC_FILES =
 
 # Sources that may or may not be present, but if they are present, we don't
 # want make checkjunk to barf on them.
-OPTIONAL_FILES =	rcstst sccstst
+OPTIONAL_FILES =	rcstst sccstst Path-5.1a Path-5.1b all.itcl
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
