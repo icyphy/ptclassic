@@ -15,13 +15,13 @@ scheduling is performed but before run-time scheduling begins. It
 generates the code outside the main loop, such as initialization code,
 global declaration code, and procedure declaration code. The go function
 generates the code for the main loop corresponding for the star, while
-the wraup function generates the code after the main loop.
+the wrapup function generates the code after the main loop.
 .pp
 The
 .c CGStar
 .Id "CGStar, class"
 class is the base class of all code generation stars of practical use, such
-as C-code generation stars and assemler generation stars. In this section,
+as C-code generation stars and assembler generation stars. In this section,
 we explain the common features  that the CGStar class provides for
 all derivative code generation stars. We use some practical code generation
 stars as examples. 
@@ -259,7 +259,7 @@ and belongs to the
 class. The conversion function is named 
 .c mulaw ,
 and belongs to the same PCM class. Other stars or derived stars can access
-that table or fuction by saying
+that table or function by saying
 .c $sharedSymbol(PCM,offset)
 or
 .c $sharedSymbol(PCM,mulaw) !
@@ -364,5 +364,60 @@ In the current release,
 all code generation domains do not allocate buffers to the outputs of
 the Fork-type stars, and reuse the input buffer.
 .pp
-
-[embedding stuff to be included: spread/collect stars]
+Another example is a 
+.c Spread
+.Id "Spread, star"
+star. It receives \fIN\fR tokens and spread them to more than one
+destinations. Thus, each output buffer may share a subset of its
+input buffer. We call this relationship as \fIembedding\fR: the outputs
+are embedded in the input. Let's look at the following example,
+.c CGCSpread
+star.
+.(c
+        setup {
+                MPHIter iter(output);
+                CGCPortHole* p;
+                int loc = 0;
+                while ((p = (CGCPortHole*) iter++) != 0) {
+                        input.embed(*p, loc);
+                        loc += p->numXfer();
+                }
+        }
+.)c
+The output is a multi-porthole. At the setup stage, we express that
+each output is embedded in the input starting at \fIloc\fR location. 
+At buffer allocation stage, we do not allocate 
+buffers for the outputs, but reuse the
+input buffer for all outputs. This feature, however, is not implemented in
+assembler language generation domains, but only in c-code generation
+domain in this release. 
+.pp
+A
+.c Collect
+.Id "Collect, star"
+star embeds its inputs in the output:
+.(c
+        setup {
+                MPHIter iter(input);
+                CGCPortHole* p;
+                int loc = 0;
+                while ((p = (CGCPortHole*) iter++) != 0) {
+                        output.embed(*p, loc);
+                        loc += p->numXfer();
+                }
+        }
+.)c
+Other examples of embedding relationship might be 
+.c UpSample
+and
+.c DownSample
+stars. One restriction of embedding, however, is that the embedded buffer
+must be static. Automatic insertion of Spread and Collect stars in
+.Id "static buffering"
+multi-processor targets(refer to the target section) guarantees 
+static buffering. If there is no delay (or no initial token) in the
+embedded buffer, the static buffering is enforced by default.
+A buffer is called \fIstatic\fR when a star instance consumes or produces
+data in the same buffer location in any schedule period. If the buffer
+size divides the \fIlcm\fR value of the number of tokens consumed and
+produced, the buffer is static. 
