@@ -166,6 +166,7 @@ proc tkerror message {
      popupMessage .error "Background error in Tk"
      global REPORT_TCL_ERRORS
      if {$REPORT_TCL_ERRORS == 1} {popupMessage .error $message}
+     ptkStop cgc_prog
 }
 
 # procedure to make an entry for a star parameter in the master control panel
@@ -184,7 +185,7 @@ proc makeEntry {win name desc default callback} {
     $s.entry insert 0 $default
     bind $s.entry <Return> \
 	"$callback \[$win.$name.entry get\]; focus ."
-    bind $s.entry <Escape> "ptkStop"
+    bind $s.entry <Escape> "ptkStop cgc_prog"
 }
 
 # procedure to make a button for a star parameter in the master control panel
