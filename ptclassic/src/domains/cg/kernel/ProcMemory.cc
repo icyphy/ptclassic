@@ -1,3 +1,4 @@
+static const char file_id[] = "ProcMemory.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -37,7 +38,7 @@ int MemoryList::firstFitAlloc(unsigned reqSize, unsigned &reqAddr) {
 		// delete this chunk
 		MemInterval* q = p->link;
 		*p = *q;
-		delete q;
+		LOG_DEL; delete q;
 	}
 	else p->len = 0;
 	return TRUE;
@@ -67,8 +68,8 @@ int MemoryList::circBufAlloc(unsigned reqSize, unsigned& reqAddr) {
 	// OK, block has split.  Make new piece for 2nd half
 		int loSize = reqAddr - p->addr;
 		int hiSize = p->len - reqSize - loSize;
-		MemInterval* newInt = new MemInterval(reqAddr + reqSize,
-						      hiSize, p->link);
+		LOG_NEW; MemInterval* newInt =
+			new MemInterval(reqAddr + reqSize, hiSize, p->link);
 		p->len = loSize;
 		p->link = newInt;
 	}
@@ -80,11 +81,11 @@ void MemoryList::copy(const MemoryList& src) {
 	min = src.min;
 	max = src.max;
 	MemInterval* q = src.l;
-	l = new MemInterval(q->addr,q->len);
+	LOG_NEW; l = new MemInterval(q->addr,q->len);
 	MemInterval* p = l;
 	while (q->link) {
 		q = q->link;
-		p->link = new MemInterval(q->addr,q->len);
+		LOG_NEW; p->link = new MemInterval(q->addr,q->len);
 		p = p->link;
 	}
 	p->link = 0;
@@ -93,7 +94,7 @@ void MemoryList::copy(const MemoryList& src) {
 void MemoryList::zero() {
 	MemInterval* p;
 	while (l->link) {
-		p = l; l = l->link; delete p;
+		p = l; l = l->link; LOG_DEL; delete p;
 	}
 }
 
@@ -101,13 +102,13 @@ int MemoryList::addChunk(unsigned addr,unsigned len) {
 	if (len == 0) return TRUE;
 	if (addr + len <= min) {
 		min = addr;
-		l = new MemInterval(addr, len, l);
+		LOG_NEW; l = new MemInterval(addr, len, l);
 	}
 	else if (addr > max) {
 		max = addr + len - 1;
 		MemInterval* p = l;
 		while (p->link) p = p->link;
-		p->link = new MemInterval(addr, len);
+		LOG_NEW; p->link = new MemInterval(addr, len);
 	}
 	else return FALSE;
 	return TRUE;
@@ -115,8 +116,10 @@ int MemoryList::addChunk(unsigned addr,unsigned len) {
 
 void MemoryList::reset() {
 	zero();
-	if(l) delete l;
-	l = new MemInterval(min, max-min+1);
+	if(l) {
+		LOG_DEL; delete l;
+	}
+	LOG_NEW; l = new MemInterval(min, max-min+1);
 }
 
 
@@ -125,12 +128,12 @@ void LinProcMemory::reset() {
 	lin.zero();
 	circ.zero();
 	mem.reset();
-	delete consec;
+	LOG_DEL; delete consec;
 }
 
 int LinProcMemory::allocReq(AsmPortHole& p) {
 	if (!match(p)) return FALSE;
-	MPortReq* r = new MPortReq(p);
+	LOG_NEW; MPortReq* r = new MPortReq(p);
 	if (p.circAccess())
 		circ.appendSorted(*r);
 	else lin.appendSorted(*r);
@@ -141,7 +144,9 @@ int LinProcMemory::allocReq(const State& s) {
 	if (!match(s)) return FALSE;
 
 	if (s.attributes() & AB_CONSEC) {
-		if (!consec) consec = new MConsecStateReq;
+		if (!consec) {
+			LOG_NEW; consec = new MConsecStateReq;
+		}
 		consec->append(s);
 		return TRUE;
 	}
@@ -149,7 +154,7 @@ int LinProcMemory::allocReq(const State& s) {
 		lin.appendSorted(*consec);
 		consec = 0;
 	}
-	MStateReq* r = new MStateReq(s);
+	LOG_NEW; MStateReq* r = new MStateReq(s);
 	if (s.attributes() | AB_CIRC)
 		circ.appendSorted(*r);
 	else lin.appendSorted(*r);
