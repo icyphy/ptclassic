@@ -9,7 +9,7 @@ defstar {
 	desc { An FIR filter with coefficients externally supplied. }
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
-	location { SDF main library }
+	location { SDF dsp library }
 	explanation {
 .pp
 This star implements an FIR filter with coefficients that
