@@ -31,13 +31,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer: Brent Chun 
  Creation Date: Sat Nov  4 17:25:01 PST 1995
 */
-
+ * 
 #ifndef _AM_H
 #define _AM_H   
 
-#define AM_ALL  0xffffffff     /* Deliver all messages to endpoint */  
-#define AM_NONE 0x00000000     /* Deliver no messages to endpoint */
-
+#define AM_ALL   1             /* Deliver all messages to endpoint */  
+#define AM_NONE  0             /* Deliver no messages to endpoint */
 #define AM_PAR   1             /* Concurrent bundle/endpoint access */
 #define AM_SEQ   0             /* Sequential bundle/endpoint access */
 
@@ -57,15 +56,16 @@ ENHANCEMENTS, OR MODIFICATIONS.
  */
 typedef int op_t;
 
-#define EBADARGS     0x1   
-#define EBADENTRY    0x2   
-#define EBADTAG      0x4
-#define EBADHANDLER  0x8
-#define EBADSEGOFF   0x10
-#define EBADLENGTH   0x20
-#define EBADENDPOINT 0x40   
-#define ECONGESTION  0x80
-#define EUNREACHABLE 0x100  
+#define EBADARGS        0x1   
+#define EBADENTRY       0x2   
+#define EBADTAG         0x4
+#define EBADHANDLER     0x8
+#define EBADSEGOFF      0x10
+#define EBADLENGTH      0x20
+#define EBADENDPOINT    0x40   
+#define ECONGESTION     0x80
+#define EUNREACHABLE    0x100
+#define EREPLYREJECTED  0x200  
 
 /*
  * Message types 
@@ -102,10 +102,6 @@ typedef int op_t;
 #define AM_NOEVENTS     0x0 
 #define AM_NOTEMPTY     0x1
 
-/* Old stuff */
-#define AM_EMPTYTONOT   0x1
-#define AM_MSGRECEIVED  0x2 
-
 /* 
  * Types of handlers 
  */
@@ -119,9 +115,9 @@ typedef void (*HandlerMedium4)(void *token, void *buf, int nbytes,
 typedef void (*HandlerMedium8)(void *token, void *buf, int nbytes, 
 			       int arg0, int arg1, int arg2, int arg3,
 			       int arg4, int arg5, int arg6, int arg7); 
-typedef void (*HandlerLong4)(void *token, int dest_offset, int nbytes, 
+typedef void (*HandlerLong4)(void *token, void *buf, int nbytes, 
 			     int arg0, int arg1, int arg2, int arg3);  
-typedef void (*HandlerLong8)(void *token, int dest_offset, int nbytes, 
+typedef void (*HandlerLong8)(void *token, void *buf, int nbytes, 
 			     int arg0, int arg1, int arg2, int arg3, 
 			     int arg4, int arg5, int arg6, int arg7); 
 typedef void (*HandlerGet4)(void *token, void *buf, int nbytes, int arg0,
@@ -234,7 +230,7 @@ extern int AM_MaxLong();
  * Endpoint and Bundle API  
  */
 extern int AM_AllocateBundle(int type, eb_t *endb);
-extern int AM_AllocateEndpoint(eb_t bundle, ea_t *endp);
+extern int AM_AllocateEndpoint(eb_t bundle, ea_t *endp, en_t **name);
 extern int AM_Map(ea_t ea, int index, en_t remote_endpoint, tag_t tag); 
 extern int AM_MapAny(ea_t ea, int *index, en_t remote_endpoint, tag_t tag); 
 extern int AM_Unmap(ea_t ea, int index);
@@ -266,40 +262,6 @@ extern int AM_GetEventMask(eb_t eb);
 extern int AM_SetEventMask(eb_t eb, int mask);
 extern int AM_Wait(eb_t eb);
 
-/*
- * Old names for those using older versions of the spec.  This will go away
- * later..
- */
-#define AM_RequestMedium4(request_endpoint,reply_endpoint,handler,source_addr,nbytes,arg0,arg1,arg2,arg3) \
-  AM_RequestI4(request_endpoint,reply_endpoint,handler,source_addr,nbytes,arg0,arg1,arg2,arg3)
-
-#define AM_RequestMedium8(request_endpoint,reply_endpoint,handler,source_addr,nbytes,arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7) \
-  AM_RequestI8(request_endpoint,reply_endpoint,handler,source_addr,nbytes,arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7)
-
-#define AM_RequestLong4(request_endpoint,reply_endpoint,dest_offset,handler,source_addr,nbytes,arg0,arg1,arg2,arg3) \
-  AM_RequestXfer4(request_endpoint,reply_endpoint,dest_offset,handler,source_addr,nbytes,arg0,arg1,arg2,arg3)
-
-#define AM_RequestLong8(request_endpoint,reply_endpoint,dest_offset,handler,source_addr,nbytes,arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7) \
-  AM_RequestXfer8(request_endpoint,reply_endpoint,dest_offset,handler,source_addr,nbytes,arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7)
-
-#define AM_RequestLongAsync4(request_endpoint,reply_endpoint,dest_offset,handler,source_addr,nbytes,arg0,arg1,arg2,arg3) \
-  AM_RequestXferAsync4(request_endpoint,reply_endpoint,dest_offset,handler,source_addr,nbytes,arg0,arg1,arg2,arg3) 
-
-#define AM_RequestLongAsync8(request_endpoint,reply_endpoint,dest_offset,handler,source_addr,nbytes,arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7) \
-  AM_RequestXferAsync8(request_endpoint,reply_endpoint,dest_offset,handler,source_addr,nbytes,arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7) 
-
-#define AM_ReplyMedium4(token,handler,nbytes,source_addr,arg0,arg1,arg2,arg3) \
-  AM_ReplyI4(token,handler,nbytes,source_addr,arg0,arg1,arg2,arg3)
-#define AM_ReplyMedium8(token,handler,nbytes,source_addr,arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7) \
-  AM_ReplyI8(token,handler,nbytes,source_addr,arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7)
-
-#define AM_ReplyLong4(token,dest_offset,handler,source_addr,nbytes,arg0,arg1,arg2,arg3) \
-  AM_ReplyXfer4(token,dest_offset,handler,source_addr,nbytes,arg0,arg1,arg2,arg3)
-#define AM_ReplyLong8(token,dest_offset,handler,source_addr,nbytes,arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7) \
-  AM_ReplyXfer8(token,dest_offset,handler,source_addr,nbytes,arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7)
-
-#define AM_WaitSema(eb)     AM_Wait(eb)  
-
-extern int AM_AllocateKnownEndpoint(eb_t bundle, ea_t *endp, int port);
+extern int AM_AllocateKnownEndpoint(eb_t bundle, ea_t *endp, en_t **name, int port);
 
 #endif /* _AM_H */
