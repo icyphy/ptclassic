@@ -42,18 +42,18 @@
 #
 proc ::tycho::resourceClass {path {procname {}} args} {
 	# Get the (syntactic) protocol
-    set protocol [::tycho::url protocol $path]
+    ::set protocol [::tycho::url protocol $path]
     if { $protocol == "" } {
-    	set protocol "file"
+    	::set protocol "file"
     }
     # Get the class registered for it
-    set rclass [::tycho::registry protocolcget $protocol -class]
+    ::set rclass [::tycho::registry protocolcget $protocol -class]
  	# Return the class if no additional arguments are given,
  	# otherwise call a procedure on it.
      if { $procname == "" } {
 	return $rclass
     } else {
-	eval [list $rclass::$procname $path] $args
+	eval [list ${rclass}::$procname $path] $args
     }
 }
 
@@ -203,7 +203,7 @@ ensemble ::tycho::resource {
 	$resource open "r"
 	set result [$resource read]
 	$resource close
-	delete object $resource
+	::delete object $resource
 	return $result
     }
     # Test if a resource is readable
@@ -228,7 +228,7 @@ ensemble ::tycho::resource {
 	$resource open "r"
 	set result [$resource source]
 	$resource close
-	delete object $resource
+	::delete object $resource
 	return $result
     }
     # Get resource status
@@ -237,7 +237,7 @@ ensemble ::tycho::resource {
 	# Can't pass the proc name (stat) to resource class
 	# because of the need to do an upvar. Do it the long way.
 	set rclass [::tycho::resourceClass $path]
-	$rclass::stat $path v
+	${rclass}::stat $path v
     }
     # Test if a resource is writable
     option writable {path} {
@@ -252,7 +252,7 @@ ensemble ::tycho::resource {
 	$resource open "w+"
 	set result [$resource write $data]
 	$resource close
-	delete object $resource
+	::delete object $resource
 	return $result
     }
 }
