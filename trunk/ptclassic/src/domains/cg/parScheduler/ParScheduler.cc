@@ -362,7 +362,7 @@ void ParScheduler :: compileRun() {
 	if (haltRequested()) { invalid = TRUE; return; }
 	
 	// run sub-universe in each processor to generate the code
-	parProcs->generateCode();
+//	parProcs->generateCode();
 	if (haltRequested()) { invalid = TRUE; return; }
 }
 
