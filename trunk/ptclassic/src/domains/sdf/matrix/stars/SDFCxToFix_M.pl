@@ -64,7 +64,8 @@ number is masked for casting to the fixed-point notation.  The keywords are:
       FixMatrix& result = *(new FixMatrix(matrix,intBits,length,Fix::mask_truncate_round));
       output%0 << result;
     }
-    Error::abortRun(*this, ": not a valid function for masking");
+    else
+      Error::abortRun(*this, ": not a valid function for masking");
   }
 }
 
