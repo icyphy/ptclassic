@@ -3,7 +3,7 @@
 	name	{ RGBToYUV }
 	domain	{ SDF }
 	version	{ $Id$ }
-	author	{ Sun-Inn Shih }
+	author	{ Sun-Inn Shih, Brian L. Evans, and T. J. Klausutis }
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
@@ -28,10 +28,25 @@ whereas the V axis has turquoise at its minimum point and red at its
 maximum point.
 In this implementation, each of the RGB values and each of the YUV values
 are integer values in the range from 0 to 255 (inclusive).
+.pp
+This star supports two YUV formats--- the usual one [1] and
+the CCIR 601 standard.
+The usual YUV definition shifts the YUV values so that they fall in
+the range from 0 to 255 (inclusive).
+The CCIR 601 standard scales and then shifts the YUV values so that fall in
+the range from 0 to 255 (inclusive).
+The CCIR 601 standard was developed so that more of the YUV space maps into
+the RGB space.
+All RGB values, however, map into both YUV standards, so RGB to YUV conversion
+followed by YUV to RGB conversion is nearly lossless.
+The CCIR 601 standard is used in the MPEG and H.261 compression standards.
 .Id "format conversion, RGB to YUV"
 .Id "image format conversion, RGB to YUV"
 .Ir "image format, red-green-blue (RGB)"
 .Ir "image format, luminance-chrominance (YUV)"
+.Id "CCIR 601 standard"
+.Id "MPEG"
+.Id "H.261"
 .Id "Pratt, W."
 .UH REFERENCES
 .ip [1]
@@ -49,6 +64,17 @@ Wiley & Sons: New York.  1991.  2nd ed.
 	output { name { output2 } type { message } }
 	output { name { output3 } type { message } }
 
+	defstate {
+		name	{ CCIR_601 }
+		type	{ int }
+		default { TRUE }
+		desc	{
+TRUE means that the RGB space will be converted to shifted-and-scaled YUV
+color space defined by the CCIR 601 standard, which is used in the MPEG
+and H.261 standards; otherwise, the RGB space will be converted according
+to the usual YUV definition. }
+	}
+
 	inline method {		// perform rounding in range [0, 255]
 		name { quant }
 		type { "unsigned char" }
@@ -62,7 +88,7 @@ Wiley & Sons: New York.  1991.  2nd ed.
 	} // end quant()
 
 	go {
-// Read inputs.
+		// Read inputs.
 		Envelope envp1, envp2, envp3;
 		(input1%0).getMessage(envp1);
 		(input2%0).getMessage(envp2);
@@ -71,7 +97,7 @@ Wiley & Sons: New York.  1991.  2nd ed.
 		TYPE_CHECK(envp2, "GrayImage");
 		TYPE_CHECK(envp3, "GrayImage");
 
-// Change into YUV format
+		// Change into YUV format
 		GrayImage* redI = (GrayImage*) envp1.writableCopy();
 		GrayImage* greenI = (GrayImage*) envp2.writableCopy();
 		GrayImage* blueI = (GrayImage*) envp3.writableCopy();
@@ -103,26 +129,40 @@ Wiley & Sons: New York.  1991.  2nd ed.
 		unsigned char* bptr = blueI->retData();
 
 		int i, j, temp1, temp2;
-		unsigned char yyy, uuu, vvv;
-		for (i = 0; i < height; i++) {
+		double rvalue, gvalue, bvalue;
+		double yvalue, uvalue, vvalue;
+		for ( i = 0; i < height; i++ ) {
 			temp1 = i*width;
-			for (j = 0; j < width; j++){
+			for ( j = 0; j < width; j++ ) {
 				temp2 = j + temp1;
-				yyy = quant(0.298981 * rptr[temp2]
-						+ 0.586997 * gptr[temp2]
-						+ 0.114022 * bptr[temp2]);
-				uuu = quant(-0.16863 * rptr[temp2]
-						- 0.331075 * gptr[temp2]
-						+ 0.499705 * bptr[temp2] + 128);
-				vvv = quant(0.4998 * rptr[temp2]
-						- 0.418506 * gptr[temp2]
-						- 0.0812936 * bptr[temp2] + 128);
-				rptr[temp2] = yyy;
-				gptr[temp2] = uuu;
-				bptr[temp2] = vvv;
-		}	}
+				rvalue = rptr[temp2];
+				gvalue = gptr[temp2];
+				bvalue = bptr[temp2];
+				yvalue =  0.299  * rvalue +
+					  0.587  * gvalue +
+					  0.114  * bvalue;
+				uvalue = -0.1687 * rvalue +
+					 -0.3313 * gvalue +
+					  0.5    * bvalue;
+				vvalue =  0.5    * rvalue +
+					 -0.4187 * gvalue +
+					 -0.0813 * bvalue;
+				if ( CCIR_601 ) {
+				  yvalue = (219*yvalue)/255 +  16;
+				  uvalue = (224*yvalue)/255 + 128;
+				  vvalue = (224*yvalue)/255 + 128;
+				}
+				else {
+				  uvalue += 128;
+				  vvalue += 128;
+				}
+				rptr[temp2] = quant(yvalue);
+				gptr[temp2] = quant(uvalue);
+				bptr[temp2] = quant(vvalue);
+			}
+		}
 
-// Write whole frame to output here...
+		// Write whole frame to output here...
 		Envelope envpy(*redI);
 		Envelope envpu(*greenI);
 		Envelope envpv(*blueI);
