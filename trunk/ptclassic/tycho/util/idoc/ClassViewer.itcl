@@ -115,6 +115,12 @@ class ::tycho::IDoc {
     # The default body font -- an X font which should be made symbolic in Tk 8.0
     itk_option define -bodyfont bodyFont Font [::tycho::font Hevetica 12 Bold]
 
+    # The relative width of the contents widget compared to the entire window.
+    itk_option define -relwidth relWidth RelWidth 0.4
+
+    # The relative height of the top HTML widget. (The bottom is 1-relheight). 
+    itk_option define -relheight relHeight RelHeight 0.5
+
     constructor {args} {}
     destructor {}
 
@@ -178,6 +184,12 @@ class ::tycho::IDoc {
     # Format the explanation of the given item in HTML.
     private method formatExpl {item}
 
+    # Calculate a new -relwidth parameter (doesn't reset it)
+    private method newRelWidth {pizels}
+
+    # Calculate a new -relheight parameter (doesn't reset it)
+    private method newRelHeight {pixels}
+
     # Setup the resizing handles to behave properly.
     private method setupHandles {}
     
@@ -213,16 +225,62 @@ configbody ::tycho::IDoc::bodyfont {
     }
 }
 
+#########################################################################
+#### -relheight configuration
+# Reset the placement of widgets to reflect the new relative height
+# priorities.
+#
+configbody ::tycho::IDoc::relheight {
+
+    set h $itk_option(-relheight)
+    set cw $itk_option(-relwidth)
+    set hw [expr 1 - $cw]
+
+    place $itk_component(html1) -anchor ne -relx 1.0 -rely 0.0 \
+            -relheight $h -relwidth $hw -in $itk_interior
+
+    place $itk_component(html2) -anchor se -relx 1.0 -rely 1.0 \
+            -relheight [expr 1 - $h] -relwidth $hw -in $itk_interior
+
+    place $itk_component(leftright) -anchor n -relx $cw -rely 0.0 \
+            -relheight 1.0 -in $itk_interior
+
+    place $itk_component(updown) -anchor e -relx 1.0 -rely $h \
+            -relwidth $hw -in $itk_interior
+}
+
+#########################################################################
+#### -relwidth configuration
+# Reset the placement of widgets to reflect the new relative width
+# priorities.
+#
+configbody ::tycho::IDoc::relwidth {
+
+    set h $itk_option(-relheight)
+    set cw $itk_option(-relwidth)
+    set hw [expr 1 - $cw]
+
+    place $itk_component(contents) -relx 0.0 -rely 0.0 \
+            -relheight 1.0 -relwidth $cw -in $itk_interior
+
+    place $itk_component(html1) -anchor ne -relx 1.0 -rely 0.0 \
+            -relheight $h -relwidth $hw -in $itk_interior
+
+    place $itk_component(html2) -anchor se -relx 1.0 -rely 1.0 \
+            -relheight [expr 1 - $h] -relwidth $hw -in $itk_interior
+    
+    place $itk_component(leftright) -anchor n -relx $cw -rely 0.0 \
+            -relheight 1.0 -in $itk_interior
+
+    place $itk_component(updown) -anchor e -relx 1.0 -rely $h \
+            -relwidth $hw -in $itk_interior
+}
+
 ###################################################################
 #### constructor
 #
 body ::tycho::IDoc::constructor {args} {
 
-    # Setup a frame for the HTML widgets
-    itk_component add htmlFrame {
-        frame $itk_interior.htmlFrame
-    } 
- 
     itk_component add html1 {
         ::tycho::HTML $itk_interior.html1
     } {
@@ -277,22 +335,7 @@ body ::tycho::IDoc::constructor {args} {
         usual
     }
 
-    pack $itk_component(contents) -side left -anchor w -fill y \
-            -in $itk_interior
-
-    pack $itk_component(leftright) -side left -fill y \
-            -in $itk_interior
-
-    pack $itk_component(html1) -side top -expand 1 -fill both \
-            -anchor n -in $itk_interior.htmlFrame
-
-    pack $itk_component(updown) -side top -fill x \
-            -in $itk_interior.htmlFrame
-
-    pack $itk_component(html2) -side top -expand 1 -fill both \
-            -anchor n -in $itk_interior.htmlFrame
-    
-    pack $itk_component(htmlFrame) -side left -expand 1 -fill both
+    # NOTE: placing of widgets occurs in the configbody of -relheight/-relwidth
 
     # Insert items in the menubar, if there is one.
     if {$myMenubar != {}} {
@@ -346,9 +389,7 @@ body ::tycho::IDoc::describe {} {
 # Control the ghost handle (for lack of a standard name), which is the
 # handle (Iwidgets' panedwindow calls it a "sash") that moves when you
 # are resizing a frame. This is done by _placing_ a frame of the correct
-# size on top of the proper location. This is not always exactly what 
-# the resizing does because the actual widgets are packed and resized
-# by their options, not by the packer.
+# size on top of the proper location.
 #
 body ::tycho::IDoc::ghostHandle {horizontal pixels} {
     if {$horizontal} {
@@ -356,35 +397,22 @@ body ::tycho::IDoc::ghostHandle {horizontal pixels} {
             # when the mouse is released, sent ghostHandle 1 0
             place forget $itk_component(hGhost)
         } {
-            set cWidth [expr [winfo width $itk_component(contents)]]
-            set width [winfo width [$this windowName]]
-            set wRatio [lindex [wm grid [[displayer] windowName]] 2]
-            set location [expr ($cWidth-$pixels)/$wRatio*$wRatio]
-            if {$location < 0} {
-                set location 0
-            } elseif {$location > $width} {
-                set location $width
-            }
-            place $itk_component(hGhost) -x $location -y 0 -width 4 \
-                    -relheight 1.0 
+            set newRelX [newRelWidth $pixels]
+
+            place $itk_component(hGhost) -anchor n -relx $newRelX \
+                    -rely 0.0 -width 4 -relheight 1.0 -in $itk_interior
         }
     } {
         if {$pixels == 0} {
             # when the mouse is released, sent ghostHandle 0 0
             place forget $itk_component(vGhost)
-        } {     
-            set tHeight [expr [winfo height $itk_component(html1)]]
-            set height [winfo height [$this windowName]]
-            set hRatio [lindex [wm grid [[displayer] windowName]] 3]
-            set location [expr ($tHeight-$pixels)/$hRatio*$hRatio]
-            if {$location < 0} {
-                set location 0
-            } elseif {$location > $height} {
-                set location $height
-            }
-            place $itk_component(vGhost) -y $location -x 0 -height 4 \
-                    -relwidth 1.0 -in $itk_component(htmlFrame) 
+        } { 
+            set hw [expr 1 - $itk_option(-relwidth)]
 
+            set newRelY [newRelHeight $pixels]
+
+            place $itk_component(vGhost) -anchor e -relx 1.0 -rely $newRelY \
+                    -relwidth $hw -height 4 -in $itk_interior
         }
         
     }
@@ -440,34 +468,12 @@ body ::tycho::IDoc::putHtml {data {top 1}} {
 #####################################################################
 #### resizeFrame
 # Resize the frame after a mouse event involving either handle.
-# The calculations are straightforward. Because of the gridding effect
-# caused by the HTML widgets, resizing is limited to certain units
-# of pixels. Because of the strangeness of the packer, small 
-# changes in requested height of frames sometimes have odd effects.
-# A fix would be to use the placer instead. This will be required
-# in the general case.
 #
 body ::tycho::IDoc::resizeFrame {horizontal pixels} {
     if {$horizontal} {
-        set cWidth [winfo pixels . [$this cget -contentswidth]]
-        set hWidth [winfo width $itk_component(html1)]
-        # get ratio of HTML width/pixels
-        set wRatio [lindex [wm grid [[displayer] windowName]] 2]
-        # round pixels to grid
-        set cNew [expr ($cWidth-$pixels)/$wRatio*$wRatio]
-        set hNew [expr $hWidth + ($cWidth - $cNew)]
-        $this config -contentswidth $cNew
-        $this config -htmlwidth [expr round(($hNew)/$wRatio.0)]
+        $this config -relwidth [newRelWidth $pixels]
     } {
-        set tHeight [winfo height $itk_component(html1)]
-        set bHeight [winfo height $itk_component(html2)]
-        # get ratio of HTML height/pixels
-        set hRatio [lindex [wm grid [[displayer] windowName]] 3]
-        # round pixels to grid
-        set tNew [expr ($tHeight - $pixels)/$hRatio*$hRatio]
-        set bNew [expr $bHeight + ($tHeight - $tNew)]
-        $this config -topheight [expr round(($tNew)/$hRatio)]
-        $this config -bottomheight [expr round(($bNew)/$hRatio)]
+        $this config -relheight [newRelHeight $pixels]
     }
 }
 
@@ -729,6 +735,48 @@ body ::tycho::IDoc::formatExpl {item} {
 }
 
 #####################################################################
+#### newRelWidth
+# Calculate the new -relwidth option to the placer which will put the
+# division of widgets over the cursor. _pixels_ is the distance from the 
+# old location to the desired location
+#
+body ::tycho::IDoc::newRelWidth {pixels} {
+    set contentsRelW $itk_option(-relwidth)
+    set totalW [winfo width [$this windowName]]
+    set newX [expr ($totalW * $contentsRelW) + $pixels] 
+    set newRelX [expr $newX/$totalW]
+            
+    if {$newRelX < 0.0} {
+        set newRelX 0.0
+    } elseif {$newRelX > 1.0} {
+        set newRelX 1.0
+    }
+
+    return $newRelX
+}
+
+#####################################################################
+#### newRelHeight
+# Calculate the new -relheight option to the placer which will put the
+# division of widgets over the cursor. _pixels_ is the distance from the
+# old location to the desired location
+#
+body ::tycho::IDoc::newRelHeight {pixels} {
+    set topRelH $itk_option(-relheight)
+    set totalH [winfo height [$this windowName]]
+    set newY [expr ($totalH * $topRelH) + $pixels]
+    set newRelY [expr $newY/$totalH]
+
+    if {$newRelY < 0.0} {
+        set newRelY 0.0
+    } elseif {$newRelY > 1.0} {
+        set newRelY 1.0
+    }
+    
+    return $newRelY
+}
+
+#####################################################################
 #### setupHandles
 # Setup the resizing handles to behave properly: configure the cursor,
 # bind the behaviours. Called by the constructor.
@@ -737,21 +785,20 @@ body ::tycho::IDoc::setupHandles {} {
     set updown $itk_component(updown)
     set leftright $itk_component(leftright)
 
-    $updown config -cursor sb_v_double_arrow -height 4
-    $leftright config -cursor sb_h_double_arrow -width 4
+    $updown config -cursor sb_v_double_arrow -height 4 -bg black
+    $leftright config -cursor sb_h_double_arrow -width 4 -bg black
     $itk_component(vGhost) config -cursor sb_h_double_arrow -bg white
     $itk_component(hGhost) config -cursor sb_v_double_arrow -bg white
     
-    bind $updown <1> {set lastPress "%y"}
-    bind $updown <B1-Motion> {%Q ghostHandle 0 [expr $lastPress - %y]}
+    bind $updown <B1-Motion> {%Q ghostHandle 0 "%y"}
     bind $updown <ButtonRelease-1> {
-        %Q resizeFrame 0 [expr $lastPress - %y]
+        %Q resizeFrame 0 "%y"
         %Q ghostHandle 0 0
     }
-    bind $leftright <1> {set lastPress "%x"}
-    bind $leftright <B1-Motion> {%Q ghostHandle 1 [expr $lastPress - %x]}
+
+    bind $leftright <B1-Motion> {%Q ghostHandle 1 "%x"}
     bind $leftright <ButtonRelease-1> {
-        %Q resizeFrame 1 [expr $lastPress - %x]
+        %Q resizeFrame 1 "%x"
         %Q ghostHandle 1 0
     }
 }
