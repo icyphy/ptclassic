@@ -31,6 +31,7 @@ GNUINCLUDE = /usr/gnu/lib/g++-include
 	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
 
 SRCS= \
+DEAnd.pl \
 DEArbitrate.pl \
 DEBlackHole.pl \
 DEClock.pl \
@@ -43,9 +44,11 @@ DEFork.pl \
 DEGate.pl \
 DEHandShake.pl \
 DEImpulse.pl \
+DEInvert.pl \
 DEMeasureDelay.pl \
 DEMerge.pl \
 DENull.pl \
+DEOr.pl \
 DEPSServer.pl \
 DEPoisson.pl \
 DEPrQueue.pl \
