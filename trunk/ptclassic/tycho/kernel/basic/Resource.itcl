@@ -30,18 +30,6 @@
 #                                        COPYRIGHTENDKEY
 #######################################################################
 
-#######################################################################
-#### source
-#
-# Source a file as Tcl, from anywhere on the network.
-#
-proc ::tycho::source {path} {
-    set resource [::tycho::openResource $path]
-    $resource source
-    $resource close
-    delete object $resource
-}
-
 #####################################################################
 #### openResource
 # Open a new resource. Returns the new resource object if successful,
@@ -63,15 +51,63 @@ proc ::tycho::openResource {path {mode "r"}} {
 }
 
 #######################################################################
-#### write
+#### ::tycho::resource
 #
-# Write data to a resource file.
-#
-proc ::tycho::write {path data} {
-    set resource [::tycho::openResource $path "w+"]
-    $resource write $data
-    $resource close
-    delete object $resource
+ensemble ::tycho::resource {
+    # Test if a resource path is relative
+    option isrelative {path} {
+	if [regexp {^http://} $path] {
+	    return 0
+	}
+	return [::tycho::isRelative $path]
+    }
+    # Test if a resource exists.
+    option exists {path} {
+	set resource [::tycho::openResource $path]
+	set result [$resource exists $path]
+	$resource close
+	delete object $resource
+	return $result
+    }
+    # Read from a resource.
+    option read {path} {
+	set resource [::tycho::openResource $path]
+	set result [$resource read]
+	$resource close
+	delete object $resource
+	return $result
+    }
+    # Test if a resource is readable
+    option readable {path} {
+	set resource [::tycho::openResource $path]
+	set result [$resource readable $path]
+	$resource close
+	delete object $resource
+	return $result
+    }
+    # Source a file as Tcl, from anywhere on the network.
+    option source {path} {
+	set resource [::tycho::openResource $path]
+	set result [$resource source $path]
+	$resource close
+	delete object $resource
+	return $result
+    }
+    # Test if a resource is writable
+    option writable {path} {
+	set resource [::tycho::openResource $path]
+	set result [$resource writable $path]
+	$resource close
+	delete object $resource
+	return $result
+    }
+    # Write data to a resource file.
+    option write {path data} {
+	set resource [::tycho::openResource $path "w+"]
+	$resource write $data
+	$resource close
+	delete object $resource
+    }
 }
 
 #######################################################################
