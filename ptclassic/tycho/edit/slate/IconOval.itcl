@@ -222,4 +222,5 @@ body ::tycho::IconOval::coords {id canvas slate args} {
 #
 body ::tycho::IconOval::highlight {id canvas slate args} {
     eval $canvas create oval [$canvas bbox $primary($id)] $args
+    $canvas lower highlight.$id $id
 }
