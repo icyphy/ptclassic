@@ -97,8 +97,8 @@ PL_SRCS= \
  CG56WasteCycles.pl \
  CG56WaveForm.pl \
  CG56WriteFile.pl \
- CG56WriteFileInt.pl
-
+ CG56WriteFileInt.pl \
+ CG56Xor.pl
 
 
 # The .cc files
