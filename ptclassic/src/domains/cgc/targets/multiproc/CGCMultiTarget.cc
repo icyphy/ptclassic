@@ -67,6 +67,9 @@ CGCMultiTarget::CGCMultiTarget(const char* name,const char* starclass,
 	addState(doCompile.setState("doCompile",this,"NO",
 		"disallow compiling during development stage"));
 
+	addState(doRun.setState("doRun",this,"YES",
+		"disallow running before compiling is succeeded."));
+
 	// port_number
 	addState(portNumber.setState("portNumber",this,"7654",
 		"hopefully will not collide any port_numbers taken"));
@@ -81,6 +84,9 @@ CGCMultiTarget::CGCMultiTarget(const char* name,const char* starclass,
 	childType.setAttributes(A_NONSETTABLE);
 	machineInfo = 0;
 	currentPort = 0;
+	baseNum = 0;
+	mapArray = 0;
+	replicateFlag = 0;
 }
 
 CGCMultiTarget :: ~CGCMultiTarget() {
@@ -132,27 +138,60 @@ void CGCMultiTarget :: pairSendReceive(DataFlowStar* s, DataFlowStar* r) {
 	cs->IPCHandlerName.setInitValue(hashstring(handlerName));
 	StringList callHandler;
 	callHandler << handlerName << "();\n";
-	ts->getStream("mainInit")->put((const char*) callHandler);
+	ts->getStream("commInit")->put((const char*) callHandler);
 	// for receiver
 	handlerName = "ipcHandler";
 	handlerName << '_' << cr->name();
 	cr->IPCHandlerName.setInitValue(hashstring(handlerName));
 	callHandler.initialize();
 	callHandler << handlerName << "();\n";
-	tr->getStream("mainInit")->put((const char*) callHandler);
+	tr->getStream("commInit")->put((const char*) callHandler);
 
 	// Set the port_number and machine address.
 	// port_number
 	cs->hostPort.setInitValue(*currentPort);
 	cr->hostPort.setInitValue((*currentPort)++);
+
+	cs->partner = cr;
+}
+
+void CGCMultiTarget :: setMachineAddr(CGStar* s, CGStar* r) {
+	CGCUnixSend* cs = (CGCUnixSend*) s;
+	CGCUnixReceive* cr = (CGCUnixReceive*) r;
+
+	CGTarget* tg = cr->myTarget();
+	if (replicateFlag && mapArray) {
+		int six = -1;
+		int rix = -1;
+		CGTarget* sg = cs->myTarget();
+		int numMatch = 0;
+		for (int i = 0; i < mapArray->size(); i++) {
+			CGTarget* temp = (CGTarget*) child(mapArray->elem(i));
+			if (temp == sg) {
+				six = i; numMatch++;
+			} else if (temp == tg) {
+				rix = i; numMatch++;
+			}
+			if (numMatch >= 2) break;
+		}
+		if ((six < 0) || (rix < 0) || (numMatch != 2)) {
+			Error :: abortRun("setMachineAddr failed.");
+			return;
+		}
+		int zz = six /baseNum;
+		if ((rix / baseNum) != zz) {
+			int newIx = zz * baseNum + (rix % baseNum);
+			tg = (CGTarget*) child(mapArray->elem(newIx));
+		}
+	}
+				
 	// machine address
-	int dix = machineId(cr->myTarget());
+	int dix = machineId(tg);
 	if (dix < 0) {
 		Error :: abortRun(*cr, "no child target for this star.");
 		return;
 	}
 	cs->hostAddr.setInitValue(machineInfo[dix].inetAddr);
-	cr->hostAddr.setInitValue(machineInfo[dix].inetAddr);
 }
 
 int CGCMultiTarget :: machineId(Target* t) {
@@ -265,6 +304,7 @@ void CGCMultiTarget :: addProcessorCode(int i, const char* s) {
 	}
 	char* codeFileName = writeFileName((const char*) fileName);
 	display(code,codeFileName);
+	LOG_DEL; delete codeFileName;
 }
 
 // -----------------------------------------------------------------------------
@@ -274,8 +314,12 @@ void CGCMultiTarget :: addProcessorCode(int i, const char* s) {
 
 int CGCMultiTarget::wormLoadCode() {
 
+	if(Scheduler::haltRequested()) return FALSE;
+
 	if (int(doCompile) == 0) return TRUE;
-	if (compileCode()) runCode();
+	if (compileCode()) {
+		if (int(doRun)) runCode();
+	}
 
 	// done
 	if(Scheduler::haltRequested()) return FALSE;
@@ -330,6 +374,29 @@ int CGCMultiTarget :: sendWormData(PortHole& p) {
 	cp.forceGrabData();
 	return TRUE;
 }
+
+			///////////////////
+			// CGDDF support
+			///////////////////
+
+void CGCMultiTarget :: prepCode(Profile* pf, int numP, int numChunk) {
+	// call prepCode routine
+	for (int i = 0; i < numP; i++) {
+		int pId = pf->assignedTo(1, i);
+		CGTarget* from = (CGTarget*) child(pId);
+		CodeStream* foo = from->getStream("commInit");
+		if (foo->length() == 0) continue;
+		for (int j = 1; j < numChunk; j++) {
+			int k = i + j * numP;
+			int tId = pf->assignedTo(1, k);
+			CGTarget* to = (CGTarget*) child(tId);
+			to->getStream("commInit")->put(*foo);
+		}
+	}
+	baseNum = numP;
+	mapArray = pf->assignArray(1);
+}
+
 // -----------------------------------------------------------------------------
 ISA_FUNC(CGCMultiTarget,CGMultiTarget);
 
