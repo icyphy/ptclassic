@@ -26,8 +26,8 @@ above are "setOutputs", "grabInputs", and "callTcl".
 The first thing the star does is to define the Tcl variable "uniqueSymbol"
 to equal the unique string.  This string specifies the prefix that makes
 the name unique.  Thus the full name for the three procedures
-is "${uniqueName}setOutputs", "${uniqueName}grabInputs", and
-"${uniqueName}callTcl".  The first two of these are defined internally
+is "${uniqueSymbol}setOutputs", "${uniqueSymbol}grabInputs", and
+"${uniqueSymbol}callTcl".  The first two of these are defined internally
 by the star.  The third should be defined by the user in the Tcl file
 that the star reads.
 .pp
