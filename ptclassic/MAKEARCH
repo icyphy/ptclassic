@@ -111,7 +111,7 @@ cd ..
 
 # EXPDOMAINS = experimental domains
 # EXPDOMAINS = capsim bdf
-set EXPDOMAINS=(sproc silage cg-ddf cg56 cgc cg96 mq vhdlf vhdlb mdsdf)
+set EXPDOMAINS=(sproc silage cg-ddf cg56 cgc cg96 mq vhdlf vhdlb mdsdf hof)
 set EXPEXTRAS=(cg56/targets cg96/targets)
 
 cd domains
