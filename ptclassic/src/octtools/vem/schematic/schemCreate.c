@@ -43,6 +43,7 @@ static char SccsId[]="$Id$";
 #include "vemUtil.h"
 #include "symbolic.h"
 #include "se.h"
+#include "opts.h"		/* For vemExpert() */
 
 /*
  * Forward declarations
@@ -68,7 +69,8 @@ lsList cmdList;			/* Argument list            */
     octObject facet;
     lsGen lg;
     int len;
-    int expert=vemExpert( spot );
+
+    (void)vemExpert( spot );
 
     seInit();
 
