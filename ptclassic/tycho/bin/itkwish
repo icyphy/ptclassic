@@ -1,4 +1,4 @@
-#! /bin/csh -f
+#! /bin/csh -f 
 # This script is used to run itkwish from prebuilt binaries
 # Author: Christopher Hylands
 # Version: $Id$
@@ -14,14 +14,22 @@
 # setenv PTARCH sun4
 # HPUX10.01
 # setenv PTARCH hppa
-if (! $?PTOLEMY) setenv PTOLEMY /usr/eesww/share/ptolemy
-if (! $?PTARCH) setenv PTARCH ` $PTOLEMY/bin/ptarch`
+if (! $?PTOLEMY && $?TYCHO) then
+	if( -f "$TYCHO/../bin/ptarch") setenv PTOLEMY "$TYCHO/.."
+else
+	if (! $?TYCHO) setenv TYCHO /usr/eesww/share/tycho0.1.1/tycho0.1.1
+	if (! $?PTOLEMY) setenv PTOLEMY /usr/eesww/share/ptolemy
+endif
 
 # ITCLDIR should be the location of the untar'd itcl files
 if (! $?ITCLDIR) setenv ITCLDIR /usr/eesww/share/tycho0.1.foo
 
 # TYCHO should be the location of the tycho distribution
-if (! $?TYCHO) setenv TYCHO /usr/eesww/share/tycho0.1/tycho0.1
+if ( ! -x "$TYCHO/bin/ptarch") then
+	echo "$TYCHO/bin/ptarch either is not executable or does not exist"
+	echo 'Perhaps you need to set $TYCHO or $PTOLEMY?'
+endif
+if (! $?PTARCH) setenv PTARCH ` $TYCHO/bin/ptarch`
 
 if ( -f $ITCLDIR/itcl/lib/itcl/itcl/itcl.tcl ) then
 	if ($PTARCH =~ hppa?*) then
