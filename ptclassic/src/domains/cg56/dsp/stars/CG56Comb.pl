@@ -20,7 +20,7 @@ The reverberation time is given by the time input [1, fig. 5].
 <h3>References</h3>
 <p>[1]  
 J.A. Moore, "About this reverberation business",
-<i>Computer Music Journal</i></b>,
+<i>Computer Music Journal</i>,
 vol. 3, no. 2, pp. 13-28, June, 1979.
 	}
 

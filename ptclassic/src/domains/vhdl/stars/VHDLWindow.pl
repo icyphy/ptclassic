@@ -11,20 +11,20 @@ samples is produced at each firing.
 <p>
 This star produces on its output values that are samples of a standard
 windowing function.
-The windowing function is determined by the <i>name</i></b> string parameter.
-Possible values are: <b>Rectangle</i></b>, <b>Bartlett</i></b>, <b>Hanning</i></b>,
-<b>Hamming</i></b>, <b>Blackman</i></b>, <b>Kaiser</i></b> and <b>SteepBlackman</i></b>.
+The windowing function is determined by the <i>name</i> string parameter.
+Possible values are: <b>Rectangle</i>, <b>Bartlett</i>, <b>Hanning</i>,
+<b>Hamming</i>, <b>Blackman</i>, <b>Kaiser</i> and <b>SteepBlackman</i>.
 Upper- and lower-case characters in the names are equivalent.
 <p>
-The parameter <i>length</i></b> is the length of the window to produce.
+The parameter <i>length</i> is the length of the window to produce.
 Note that most window functions have a zero value at the first and last sample.
-The parameter <i>period</i></b> specifies the period of the output signal:
+The parameter <i>period</i> specifies the period of the output signal:
 the window will be zero-padded if required.
-A <i>period</i></b> of 0 means a period equal to <i>length</i></b>.
+A <i>period</i> of 0 means a period equal to <i>length</i>.
 A negative period will produce only one window, and then output zero
 for all later samples.
 A period of less than the window length will be equivalent to a period of
-the window length (i.e., <i>period</i></b> = 0).
+the window length (i.e., <i>period</i> = 0).
 <h3>References</h3>
 <p>[1]  
 Leland Jackson, Digital Filters and Signal Processing, 2nd ed.,

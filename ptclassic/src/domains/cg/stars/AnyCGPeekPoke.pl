@@ -18,24 +18,24 @@ this is only supported in multitargets.
 <p>
 J.L. Pino, T.M. Parks and E.A. Lee, "Mapping Multiple Independent Synchronous
 Dataflow Graphs onto Heterogeneous Multiprocessors," <i>Proc. of IEEE Asilomar
-Conf. on Signals, Systems, and Computers</i></b>, Pacific Grove, CA,
+Conf. on Signals, Systems, and Computers</i>, Pacific Grove, CA,
 Oct. 31 - Nov. 2, 1994.
 &lt;http://ptolemy.eecs.berkeley.edu/papers/hierStaticSched-asilomar-95&gt;
 <p>
 The peek/poke facilities implement only a limited part of the
 functionality described in the Asilomar paper.
 <p>
-The first two user settable states are the <i>Poke_procId</i></b> and
-<i>Peek_procId</i></b>.  These must be set to the processor id where the poke
+The first two user settable states are the <i>Poke_procId</i> and
+<i>Peek_procId</i>.  These must be set to the processor id where the poke
 actor and peek actor are to be mapped to.
 <p>
-The next user settable state is <i>blockSize</i></b>.  With this state a
-peek/poke link can transfer <i>blockSize</i></b> number of consequtive
+The next user settable state is <i>blockSize</i>.  With this state a
+peek/poke link can transfer <i>blockSize</i> number of consequtive
 samples.
 <p>
-The final user settable state is <i>updateRate</i></b>.  This state can be
+The final user settable state is <i>updateRate</i>.  This state can be
 considered as a nondeterminate downsample factor for the link.
-The link will be updated at most once every <i>updateRate</i></b> number of
+The link will be updated at most once every <i>updateRate</i> number of
 iterations of one of the two disconnected SDF graphs.  The side which
 this effects is determined by the specific peek/poke implementation.
 }

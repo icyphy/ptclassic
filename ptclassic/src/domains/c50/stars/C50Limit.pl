@@ -14,7 +14,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	htmldoc {
 <a name="hard limiter"></a>
 The star hard limits the values of input samples to be in the range
-(<i>bottom</i></b>, <i>top</i></b>).
+(<i>bottom</i>, <i>top</i>).
 	}
 	input {
 		name {input}

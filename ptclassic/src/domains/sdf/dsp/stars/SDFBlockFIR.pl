@@ -19,9 +19,9 @@ limitation of liability, and disclaimer of warranty provisions.
 <p>
 <a name="filter, FIR, block"></a>
 <a name="FIR filter, block"></a>
-The <i>blockSize</i></b> parameter tells how often
+The <i>blockSize</i> parameter tells how often
 the updates occur.  It is an integer specifying how may input samples
-should be processed using each set of coefficients.  The <i>order</i></b>
+should be processed using each set of coefficients.  The <i>order</i>
 parameter tells how many coefficients there are.
 The same interpolation and decimation of the FIR star is supported.
 <p>

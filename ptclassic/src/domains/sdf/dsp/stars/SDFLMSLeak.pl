@@ -28,7 +28,7 @@ See pg 54 of [1].
 <h3>References</h3>
 <p>[1]  
 W. Honig and D. G. Messerschmitt,
-<i>Adaptive_Filters</i></b>, Kluwer Academic Publishers, Norwood MA, 1985.
+<i>Adaptive_Filters</i>, Kluwer Academic Publishers, Norwood MA, 1985.
 	}
 
 	seealso { LMS }

@@ -17,11 +17,11 @@ limitation of liability, and disclaimer of warranty provisions.
 <a name="slider bar"></a>
 <a name="gxslider program"></a>
 Host port slider.
-The parameters <i>hostMin</i></b>, <i>hostMax</i></b>, and <i>hostInitialValue</i></b>
+The parameters <i>hostMin</i>, <i>hostMax</i>, and <i>hostInitialValue</i>
 control the values that the slider is labeled with under X windows.
 They are mapped in a linear or decibel fashion into the range
-of the parameters <i>dspMin</i></b> and <i>dspMax</i></b> on the DSP,
-depending on whether <i>scale</i></b> is linear or log.
+of the parameters <i>dspMin</i> and <i>dspMax</i> on the DSP,
+depending on whether <i>scale</i> is linear or log.
 	}
 	output {
 		name {output}

@@ -51,7 +51,7 @@ The CCIR 601 standard is used in the MPEG and H.261 compression standards.
 <a name="Pratt, W."></a>
 <h3>References</h3>
 <p>[1]  
-W. Pratt, <i>Digital Image Processing</i></b>,
+W. Pratt, <i>Digital Image Processing</i>,
 Wiley & Sons: New York.  1991.  2nd ed.
 	}
 

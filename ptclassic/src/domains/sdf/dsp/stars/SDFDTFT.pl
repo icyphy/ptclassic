@@ -20,25 +20,25 @@ transform (DTFT) of a finite length sequence [1].
 <a name="discrete time Fourier transform"></a>
 <a name="Fourier transform, discrete time"></a>
 <a name="spectral estimation"></a>
-The <i>signal</i></b> input is the signal to be transformed.
-The number of input samples consumed is given by <i>length</i></b>.
+The <i>signal</i> input is the signal to be transformed.
+The number of input samples consumed is given by <i>length</i>.
 Letting the input samples be written as <i>a</i>(<i></i>0<i></i>)<i>,   ...   ,  a</i>(<i>L-</i>1<i></i>)<i></i>, where
-<i>L</i> is the <i>length</i></b>, the output is
+<i>L</i> is the <i>length</i>, the output is
 <pre>
 A ( j omega ) ~=~
 { sum from k=0 to L-1 a(k) e sup {- j omega k T} }
 </pre>
-where <i>T</i> is the time between samples (<i>timeBetweenSamples</i></b>).
+where <i>T</i> is the time between samples (<i>timeBetweenSamples</i>).
 The number of samples produced at the output is determined
-by the <i>numberOfSamples</i></b> parameter.
+by the <i>numberOfSamples</i> parameter.
 The values of <i>omega</i> at which samples are taken are provided
-by the <i>omega</i></b> input.
+by the <i>omega</i> input.
 Hence, any frequency range or ranges can be examined at any desired
 resolution, and samples need not be taken at uniform intervals.
 Note that <i>omega  </i>=<i>  </i>2<i> pi / T</i> is the sampling frequency.
 <h3>References</h3>
 <p>[1]  
-A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i></b>,
+A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i>,
 Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	}
 	seealso { FFTCx }

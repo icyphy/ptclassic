@@ -15,7 +15,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	htmldoc {
 This is an asynchronous source star
 with a tk graphical user interface.  The star outputs one of two
-values as specified by the <i>onValue</i></b> and <i>offValue</i></b> parameters.
+values as specified by the <i>onValue</i> and <i>offValue</i> parameters.
     }
     state {
 	name {identifier}

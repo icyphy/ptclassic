@@ -22,19 +22,19 @@ by averaging a certain number of input samples.  The number of outputs
 is twice the number of lags requested.  This makes the output almost
 symmetric (discard the last sample to get a perfectly symmetric output).
 <p>
-If the parameter <i>unbiased</i></b> is NO, then
+If the parameter <i>unbiased</i> is NO, then
 the autocorrelation estimate is
 <a name="unbiased autocorrelation"></a>
 <pre>
 r hat (k) ~=~ 1 over N sum from n=0 to N-1-k x(n)x(n+k)
 </pre>
 for <i>k  </i>=<i>  </i>0<i>, ... ,   p</i>, where <i>N</i> is the number of inputs to average
-(<i>noInputsToAvg</i></b>) and <i>p</i> is the number of lags to estimate (<i>noLags</i></b>).
+(<i>noInputsToAvg</i>) and <i>p</i> is the number of lags to estimate (<i>noLags</i>).
 This estimate is biased because the outermost lags have fewer than <i>N</i>
 <a name="biased autocorrelation"></a>
 terms in the summation, and yet the summation is still normalized by <i>N</i>.
 <p>
-If the parameter <i>unbiased</i></b> is YES (the default), then the estimate is
+If the parameter <i>unbiased</i> is YES (the default), then the estimate is
 <pre>
 r hat (k) ~=~ 1 over N-k sum from n=0 to N-1-k x(n)x(n+k) ~.
 </pre>

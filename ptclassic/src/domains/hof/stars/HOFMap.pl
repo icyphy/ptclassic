@@ -25,7 +25,7 @@ See the documentation for the
 <tt>BaseHiOrdFn</tt>
 star, from which this is derived, for background information.
 The star is replaced by one or more instances of the block with
-name given by <i>blockname</i></b> at setup time, before the scheduler is invoked.
+name given by <i>blockname</i> at setup time, before the scheduler is invoked.
 <h3>Number of replacement blocks</h3>
 <p>
 The number of instances of the replacement block
@@ -51,11 +51,11 @@ The first <i>B <sub>I</sub></i> connections to the
 star will be connected to the inputs of the first instance of the
 replacement blocks.
 The names of the inputs to the replacement block should be listed
-in the <i>input_map</i></b> parameter in the order in which they should
+in the <i>input_map</i> parameter in the order in which they should
 be connected.
-There should be exactly <i>B <sub>I</sub></i> names in the <i>input_map</i></b> list.
+There should be exactly <i>B <sub>I</sub></i> names in the <i>input_map</i> list.
 The next <i>B <sub>I</sub></i> connections will be connected to the next
-replacement block, again using the ordering specified in <i>input_map</i></b>.
+replacement block, again using the ordering specified in <i>input_map</i>.
 Similarly for the outputs.
 If there are no inputs at all, then the number of instances
 is determined by the outputs, and vice versa.
@@ -69,9 +69,9 @@ For example, the
 <tt>Add</tt>
 block has a multiple input port named "input".
 If we want the replacement block(s) to have two inputs,
-then <i>input_map</i></b> should be "input input".
+then <i>input_map</i> should be "input input".
 If we want three inputs in each replacement block, then
-<i>input_map</i></b> should be "input input input".
+<i>input_map</i> should be "input input input".
 <h3>A note about data types</h3>
 <p>
 In this star, the output data type is ANYTYPE, and the type
@@ -89,7 +89,7 @@ It is best, therefore, when using the
 star, to make all type conversions explicit.
 <h3>Bugs</h3>
 <p>
-Repeated names in the <i>input_map</i></b> or <i>output_map</i></b>
+Repeated names in the <i>input_map</i> or <i>output_map</i>
 for non-multiple inputs are an error.
 However, this is not detected.
 Results could be unexpected.

@@ -26,7 +26,7 @@ limitation of liability, and disclaimer of warranty provisions.
 An SDF-in-DE wormhole, in order to fire, requires at least one message
 on each of its input ports.  When connecting a DE networking star to
 an SDF-in-DE wormhole describing a packet switch and triggered on its
-<i>demand</i></b> input, this star will accept the first message on each of its
+<i>demand</i> input, this star will accept the first message on each of its
 inputs and pass them through to their respective outputs.  For inputs
 without messages, this star produces a null
 <tt>VoiceData</tt>

@@ -28,7 +28,7 @@ output ~=~ log (1 + mu | input | ) / log( 1 ~+~ mu ) ~.
 so this star always produces non-negative output.
 <h3>References</h3>
 <p>1  
-Simon Haykin, <i>Communication Systems</i></b>, John Wiley Sons,
+Simon Haykin, <i>Communication Systems</i>, John Wiley Sons,
 3rd ed., 1994, ISBN 0-471-57176-8, page 380.
 	}
 	input {

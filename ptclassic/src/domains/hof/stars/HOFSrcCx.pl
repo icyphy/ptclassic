@@ -26,7 +26,7 @@ See the explanation for the
 star, from which this is derived.
 The only difference is that this star forces the number of inputs to zero
 and output datatype to complex.
-It also hides the input ports and the <i>input_map</i></b> parameter.
+It also hides the input ports and the <i>input_map</i> parameter.
 	}
 	constructor {
 	  output.setPort("output", this, COMPLEX);

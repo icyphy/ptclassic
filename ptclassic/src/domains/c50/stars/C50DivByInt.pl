@@ -16,9 +16,9 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	htmldoc {
-This star computes the inverse of the <i>divisor</i></b> state as a fixed-point
+This star computes the inverse of the <i>divisor</i> state as a fixed-point
 number and then generates code that uses integer-fix multiplication
-to compute the dividend.  For values of <i>divisor</i></b> greater than 10,
+to compute the dividend.  For values of <i>divisor</i> greater than 10,
 additional code is generated to ensure that the integer division is correct.
 <p>
 There is no easy way to implement integer division on the Motorola 56000.

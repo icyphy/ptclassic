@@ -24,11 +24,11 @@ loaded trunk lines.
 	htmldoc {
 Produces several statistics: on a per-packet basis, it passes through
 <tt>VoiceData</tt>
-type packets received on <i>input</i></b> to <i>output</i></b> and also
-each packet's individual traversal time on the <i>latency</i></b> port.
-When a <i>demand</i></b> is detected, it produces average latency statistics
-for each individual trunk line on <i>avgLatencyIndiv</i></b> port and over all
-trunk lines on <i>avgLatencyAll</i></b> port.
+type packets received on <i>input</i> to <i>output</i> and also
+each packet's individual traversal time on the <i>latency</i> port.
+When a <i>demand</i> is detected, it produces average latency statistics
+for each individual trunk line on <i>avgLatencyIndiv</i> port and over all
+trunk lines on <i>avgLatencyAll</i> port.
        }
 
        hinclude {"VoiceData.h"}

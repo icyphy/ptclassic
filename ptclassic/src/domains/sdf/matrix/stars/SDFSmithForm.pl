@@ -29,7 +29,7 @@ This function returns one of the Smith forms of an integer matrix <i>S</i>
 by factoring <i>S</i> into three simpler integer matrices such that
 <i>S   </i>=<i>   U   D   V</i> [6].
 Here, <i>D</i> is diagonal, and <i>U</i> and <i>V</i> have determinant of <i>+</i>1<i></i> or <i>-</i>1<i></i>
-(and are called <i>regular unimodular</i></b>).
+(and are called <i>regular unimodular</i>).
 Therefore, <i>|det   S| </i>=<i> |det   D|</i>.
 Note that <i>S</i> is <i>m</i> &#215; <i>n</i>, so <i>U</i> is <i>m</i> &#215; <i>m</i>, <i>D</i> is <i>m</i> &#215; <i>n</i>, and
 <i>V</i> is <i>n</i> &#215; <i>n</i>.
@@ -42,7 +42,7 @@ The canonical form of <i>D</i> is that each diagonal element is a factor of
 the next diagonal element.
 Even in the canonical form, however, the <i>U</i> and <i>V</i> matrices are not unique.
 This block will return the canonical form if the state
-<i>SmithCanonicalForm</i></b> is <i>TRUE</i></b>.
+<i>SmithCanonicalForm</i> is <i>TRUE</i>.
 <p>
 The Smith form decomposition algorithm requires on the order of
 (<i>n + m</i>)<sup>4</sup> operations.
@@ -73,34 +73,34 @@ video processing applications will not exceed integer precision.
 <h3>References</h3>
 <p>[1]  
 A. Guessoum,
-<i>Fast Algorithms for the Multidimensional Discrete Fourier Transform</i></b>,
+<i>Fast Algorithms for the Multidimensional Discrete Fourier Transform</i>,
 Ph. D. Thesis, Georgia Institute of Technology, Atlanta, GA, June, 1984.
 <p>[2]  
 P. P. Vaidyanathan,
 ``The Role of Smith-Form Decomposition of Integer Matrices
 in Multidimensional Multirate Systems,''
-<i>Int. Conf. on Acoustics, Speech, and Signal Processing</i></b>,
+<i>Int. Conf. on Acoustics, Speech, and Signal Processing</i>,
 Toronto, Canada, May, 1991, pp. 1777--1780.
 <p>[3]  
 E. Viscito and J. Allebach,
 ``The Analysis and Design of Multidimensional {FIR} Perfect
 Reconstruction Filter Banks For Arbitrary Sampling Lattices,''
-<i>Transactions on Circuits and Systems</i></b>,
+<i>Transactions on Circuits and Systems</i>,
 vol. 38, no. 1, pp. 29-41, Jan., 1991.
 <p>[4]  
 T. Gardos, K. Nayebi, and R. Mersereau,
 ``Analysis and Design of Multi-Dimensional Non-Uniform Band Filter Banks,''
-<i>Proc. SPIE Visual Communications and Image Processing</i></b>, vol. 1818,
+<i>Proc. SPIE Visual Communications and Image Processing</i>, vol. 1818,
 pp. 49-60, Nov., 1992, Boston, MA.
 <p>[5]  
 B. Evans, T. Gardos, and J. McClellan,
 ``Imposing Structure on Smith Form Decompositions of
 Rational Resampling Matrices,''
-<i>Transactions on Signal Processing</i></b>,
+<i>Transactions on Signal Processing</i>,
 vol. 42, no. 4, pp. 970-973, April, 1994.
 <p>[6]  
 A. Kaufmann and A. Henry-Labordiere,
-<i>Integer and Mixed Programming: Theory and Applications</i></b>,
+<i>Integer and Mixed Programming: Theory and Applications</i>,
 Academic Press, New York, 1977.
 	}
 	input {

@@ -19,17 +19,17 @@ The discrete-time Fourier transform (DTFT) of a sampled sinc function is
 an ideal lowpass filter [1-2].
 Modulating a sampled sinc function by a cosine function gives an
 ideal bandpass signal.
-This star defines the sinc function <i>without</i></b> using <i>pi</i>,
+This star defines the sinc function <i>without</i> using <i>pi</i>,
 as is the convention in [2-3].
 <h3>References</h3>
 <p>[1]  
-A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i></b>,
+A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i>,
 Prentice-Hall: Englewood Cliffs, NJ, 1989.
 <p>[2]  
-A. V. Oppenheim and A. Willsky, <i>Signals and Systems</i></b>,
+A. V. Oppenheim and A. Willsky, <i>Signals and Systems</i>,
 Prentice-Hall: Englewood Cliffs, NJ, 1983.
 <p>[3]  
-R. N. Bracewell, <i>The Fourier Transform and Its Applications</i></b>,
+R. N. Bracewell, <i>The Fourier Transform and Its Applications</i>,
 McGraw-Hill: New York, 1986.
 	}
 	seealso { Dirichlet RaisedCos }

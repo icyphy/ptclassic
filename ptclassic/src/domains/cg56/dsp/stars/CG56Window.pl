@@ -19,16 +19,16 @@ limitation of liability, and disclaimer of warranty provisions.
 <p>
 This star produces on its output values that are samples of a standard
 windowing function.  The window function to be sampled is determined by
-the <i>name</i></b> string parameter.  Possible values are: <b>Rectangle</i></b>,
-<b>Bartlett</i></b>, <b>Hanning</i></b>, <b>Hamming</i></b>, <b>Blackman</i></b>, and
-<b>SteepBlackman</i></b>.  Upper and lower case characters in the names are
+the <i>name</i> string parameter.  Possible values are: <b>Rectangle</i>,
+<b>Bartlett</i>, <b>Hanning</i>, <b>Hamming</i>, <b>Blackman</i>, and
+<b>SteepBlackman</i>.  Upper and lower case characters in the names are
 equivalent.
 <p>
-The parameter <i>length</i></b> is the length of the window to produce.  Note
+The parameter <i>length</i> is the length of the window to produce.  Note
 that most windows functions have zero value at the first and last sample.
-The parameter <i>period</i></b> specifies the period of the output signal:
-the window will be zero-padded if required.  A <i>period</i></b> of 0
-means a period equal to <i>length</i></b>.  A negative period will
+The parameter <i>period</i> specifies the period of the output signal:
+the window will be zero-padded if required.  A <i>period</i> of 0
+means a period equal to <i>length</i>.  A negative period will
 produce only one window, and then outputs zero for all later samples.
 A period of less than window length will be equivalent to a period of
 window length (i.e, period=0).

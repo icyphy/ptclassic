@@ -22,8 +22,8 @@ but larger than all previous thresholds,
 the output will be the <i>N</i>th level.
 If the input is greater than all thresholds,
 the output is the <i></i>(<i>N+</i>1<i></i>)<i></i>th level.
-The <i>levels</i></b> parameter must be one greater than the number
-of <i>thresholds</i></b>.
+The <i>levels</i> parameter must be one greater than the number
+of <i>thresholds</i>.
 	}
 	input {
 		name {input}

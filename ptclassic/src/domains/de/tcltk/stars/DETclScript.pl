@@ -28,7 +28,7 @@ Much of the complexity in using this star is due to the need to use unique
 names for each instance of the star.
 These unique names are constructed using a unique string defined by the star.
 That string is made available to the Tcl script in the form of a global
-Tcl variable <i>starID</i></b>.
+Tcl variable <i>starID</i>.
 To set all output values at once from Tcl, use
 "setOutputs_$starID" with one argument for each output port (giving the new value).
 To set one output only, use "setOutput_$starID" with two arguments,
@@ -46,8 +46,8 @@ If this procedure is defined in the script, then it will be invoked every
 time the star fires.
 It takes one argument, the starID, and returns no values.
 If the goTcl procedure is defined, then the communication with Tcl is said
-to be <i>synchronous</i></b> (it is synchronized to the firing of the star).
-Otherwise, it is <i>asynchronous</i></b> (the Tcl script is responsible for setting
+to be <i>synchronous</i> (it is synchronized to the firing of the star).
+Otherwise, it is <i>asynchronous</i> (the Tcl script is responsible for setting
 up procedures that will interact with the star only when Tcl invokes them).
 <p>
 For asynchronous operation, typically X events are bound to Tcl/Tk commands

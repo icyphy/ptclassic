@@ -20,21 +20,21 @@ then this star outputs TRUE if the input exceeds the "threshold"
 and FALSE otherwise.  Output values are 1 for TRUE and 0 for FALSE.
 	}
 	htmldoc {
-This star detects threshold crossings if <i>crossingsOnly</i></b> is TRUE.
+This star detects threshold crossings if <i>crossingsOnly</i> is TRUE.
 Otherwise, it simply compares the input against the "threshold".
 <p>
 If "crossingsOnly" is TRUE, then: 
 <p>1)  
 A TRUE is output when the input particle exceeds or
-equals the <i>threshold</i></b> value, having been previously smaller.
+equals the <i>threshold</i> value, having been previously smaller.
 <p>2)  
 A FALSE is output when the input particle is smaller than
-<i>threshold</i></b> having been previously larger.
+<i>threshold</i> having been previously larger.
 <p>
 Otherwise, no output is produced.
 <p>
-If <i>crossingsOnly</i></b> is FALSE, then a TRUE is output whenever any
-input particle greater than or equal to <i>threshold</i></b> is received,
+If <i>crossingsOnly</i> is FALSE, then a TRUE is output whenever any
+input particle greater than or equal to <i>threshold</i> is received,
 and a FALSE is sent otherwise.
 Output values are always 1 for TRUE and 0 for FALSE.
 	}

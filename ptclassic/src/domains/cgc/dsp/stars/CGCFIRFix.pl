@@ -86,12 +86,12 @@ For more information about polyphase filters, see [1-2].
 <p>[1]  
 F. J. Harris,
 ``Multirate FIR Filters for Interpolating and Desampling'', in
-<i>Handbook of Digital Signal Processing</i></b>, Academic Press, 1987.
+<i>Handbook of Digital Signal Processing</i>, Academic Press, 1987.
 <p>[2]  
 P. P. Vaidyanathan,
 ``Multirate Digital Filters, Filter Banks, Polyphase
 Networks, and Applications: A Tutorial'',
-<i>Proc. of the IEEE</i></b>, vol. 78, no. 1, pp. 56-93, Jan. 1990.
+<i>Proc. of the IEEE</i>, vol. 78, no. 1, pp. 56-93, Jan. 1990.
         }
         seealso { FIRCx, Biquad, UpSample, DownSample, firDemo, interp, multirate }
         input {

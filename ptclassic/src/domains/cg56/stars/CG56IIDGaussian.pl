@@ -21,10 +21,10 @@ distribution (mean = 0, standard deviation = 0.1).
 <a name="central limit theorem"></a>
 According to the central limit theorem, the sum of N random variables
 approaches a Gaussian distribution as N approaches infinity.
-This star generates an output number by summing <i>noUniforms</i></b> uniform
+This star generates an output number by summing <i>noUniforms</i> uniform
 random variables.
 <p>
-The parameters <i>seed</i></b> and <i>multiplier</i></b> control the generation of the
+The parameters <i>seed</i> and <i>multiplier</i> control the generation of the
 random number. 
 <h3>BUGS:</h3>
 <p>

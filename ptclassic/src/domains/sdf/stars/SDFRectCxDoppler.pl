@@ -17,7 +17,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	htmldoc {
-This pulse generator is similiar to the <i>Rect</i></b> star, except
+This pulse generator is similiar to the <i>Rect</i> star, except
 that it is complex-valued and supports several additional options
 for Doppler effects.  This star was initially intended for radar
 simulations.

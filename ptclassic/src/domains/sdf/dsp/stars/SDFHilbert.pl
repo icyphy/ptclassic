@@ -27,16 +27,16 @@ The "optfir" program supplied with Ptolemy can do this.
 <a name="optfir program"></a>
 <h3>References</h3>
 <p>[1]  
-A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i></b>,
+A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i>,
 Prentice-Hall: Englewood Cliffs, NJ, 1989.
 <p>[2]  
 T. W. Parks and J. H. McClellan,
 ``Chebyshev Approximation for Nonrecursive Digital Filters With Linear Phase,''
-<i>IEEE Trans. on Circuit Theory</i></b>, vol. 19, no. 2, pp. 189-194, March 1972.
+<i>IEEE Trans. on Circuit Theory</i>, vol. 19, no. 2, pp. 189-194, March 1972.
 <p>[3]  
 L. R. Rabiner, J. H. McClellan, and T. W. Parks,
 ``FIR Digital Filter Design Techniques Using Weighted Chebyshev Approximation,''
-<i>Proc. of the IEEE</i></b>, vol. 63, no. 4, pp. 595-610, April 1975.
+<i>Proc. of the IEEE</i>, vol. 63, no. 4, pp. 595-610, April 1975.
 	}
 	ccinclude { <math.h> }
 	defstate {

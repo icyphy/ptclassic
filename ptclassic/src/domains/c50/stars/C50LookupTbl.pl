@@ -21,7 +21,7 @@ user-specified output values.
 <p>
 The basic function is given by a table of constants which specify
 values of the function at certain fixed points; the constants are
-taken from a file or given by the list <i>coef</i></b>.
+taken from a file or given by the list <i>coef</i>.
 For a table with n constants, the
 first constant specifies the output for an input of -1.  The second
 constant specifies the output for an input of -1 + 2/n, and so on,
@@ -29,10 +29,10 @@ the last constant handling an input of 1 - 2/n.  In essence, the
 table is scaled to fit in the interval from -1 to 1, and the input
 acts as an index into the table.
 <p>
-The <i>interpolation</i></b> parameter determines the output for input
-values between table-entry points.  If <i>interpolation</i></b> is
+The <i>interpolation</i> parameter determines the output for input
+values between table-entry points.  If <i>interpolation</i> is
 "linear", the star will interpolate between table entries; if
-<i>interpolation</i></b> is "none", it will use the next lowest entry.
+<i>interpolation</i> is "none", it will use the next lowest entry.
 With a two-element table, for instance, the first constant
 specifies the output for an input of -1, while the second handles
 an input of 0.  With no interpolation, all inputs less than 0 will
@@ -40,10 +40,10 @@ result in an output of the first constant.
 <p>
 Since the table specifies outputs only for inputs up to +1 - 2/n,
 special provisions must be made for inputs between that point and +1.
-With <i>interpolation</i></b> set to "none", inputs in that range result
-in an output of the last table constant.  If  <i>interpolation</i></b>
+With <i>interpolation</i> set to "none", inputs in that range result
+in an output of the last table constant.  If  <i>interpolation</i>
 is "linear", the behavior of the function is specified by
-<i>tableType</i></b>, which determines the effective table entry for an
+<i>tableType</i>, which determines the effective table entry for an
 input of 1.0.  "periodic" sets the entry equal to the entry for -1,
 allowing smoothly wrapping periodic functions.  For "limited", it
 is equal to the last constant.  "linear" sets it to twice
@@ -55,9 +55,9 @@ the following input-output pairs: -1=&gt;1; -.75=&gt;1.5; -.5=&gt; 2; -.25=&gt;2
 0=&gt;3; .25=&gt;4; .5=&gt;5.  An input of .75 gives an output of 3 for periodic
 table type, 5 for limited, 6 for linear, and 2.5 for any other type.
 <p>
-The <i>tableType</i></b> feature is in fact implemented by tacking an extra
+The <i>tableType</i> feature is in fact implemented by tacking an extra
 value onto the end of the table.  Thus, the coefficient table will require
-one more memory location if <i>interpolation</i></b> is "linear".
+one more memory location if <i>interpolation</i> is "linear".
 	}
        	input {
 		name { input }

@@ -46,10 +46,10 @@ c[n+1] = c[n] + step_size * x * e'
 <p>
 where <i>x</i> = input, <i>c</i> = coefficients, <i>y</i> = output, <i>e</i> = error
 (desired output - actual output), and ' represents the complex conjugate.
-Default <i>step_size</i></b> is 0.01
-The parameter <i>error_delay</i></b> must specify the total delay between
+Default <i>step_size</i> is 0.01
+The parameter <i>error_delay</i> must specify the total delay between
 the filter output and the error input, and
-<i>last_tap_min</i></b> constrains the minimum magnitude of both
+<i>last_tap_min</i> constrains the minimum magnitude of both
 the real and imaginary parts of the last tap.
 Default coefficients give a 7th-order filter, with the middle real
 tap equal to 0.5 and all other taps zero.

@@ -18,11 +18,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { SDF main library }
 	htmldoc {
 For inputs that are greater than zero, the output is either
-<i>N </i>log<i> <sub></i>10<i></sub> </i>(<i>input</i>)<i></i> or <i>min</i></b>, whichever is larger, where
-<i>N  </i>=<i>  </i>10<i></i> if <i>inputIsPower</i></b> is TRUE, and <i>N  </i>=<i>  </i>20<i></i> otherwise.
+<i>N </i>log<i> <sub></i>10<i></sub> </i>(<i>input</i>)<i></i> or <i>min</i>, whichever is larger, where
+<i>N  </i>=<i>  </i>10<i></i> if <i>inputIsPower</i> is TRUE, and <i>N  </i>=<i>  </i>20<i></i> otherwise.
 <a name="decibel"></a>
 The default is <i>N  </i>=<i>  </i>20<i></i>.
-For inputs that are zero or negative, the output is <i>min</i></b>.
+For inputs that are zero or negative, the output is <i>min</i>.
 	}
 	input {
 		name{input}

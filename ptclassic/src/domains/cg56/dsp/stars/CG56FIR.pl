@@ -29,7 +29,7 @@ where N is the order of the filter given by the number of coefficients in
 c[i], i = 0..N-1 are the tap coefficients; and x[T-i] is the input i samples
 before the current input.
 <p>
-The parameters <i>decimation</i></b> and <i>interpolation</i></b> enable this star
+The parameters <i>decimation</i> and <i>interpolation</i> enable this star
 to perform downsampling or upsampling.
 <p>
 The default filter is a linear-phase equiripple lowpass filter with its 3dB

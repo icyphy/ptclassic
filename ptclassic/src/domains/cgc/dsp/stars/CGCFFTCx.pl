@@ -17,22 +17,22 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC dsp library }
 	htmldoc {
-A number of input samples given by the parameter <i>size</i></b> will
+A number of input samples given by the parameter <i>size</i> will
 be consumed at the input, zero-padded if necessary to make <i></i>2<i> <sup>order</sup></i>
 samples, and transformed using a fast Fourier transform algorithm.
 <a name="FFT, complex"></a>
 <a name="fast Fourier transform, complex"></a>
 <a name="Fourier transform, fast, complex"></a>
-If <i>direction</i></b> is 1, then the forward Fourier transform is computed.
-If <i>direction</i></b> is -1, then the inverse Fourier transform is computed.
+If <i>direction</i> is 1, then the forward Fourier transform is computed.
+If <i>direction</i> is -1, then the inverse Fourier transform is computed.
 <p>
-Note a single firing of this star consumes <i>size</i></b> inputs
+Note a single firing of this star consumes <i>size</i> inputs
 and produces <i></i>2<i> <sup>order</sup></i> outputs.
 This must be taken into account when determining for how many iterations
 to run a universe.
 For example, to compute just one FFT, only one iteration should be run.
 <p>
-<b>Bugs</i></b>: the routine currently used (from Gabriel) recomputes trig
+<b>Bugs</i>: the routine currently used (from Gabriel) recomputes trig
 <a name="Gabriel"></a>
 functions for each term, instead of using a table.  Instead,
 ComplexFFT::start() should compute a table of appropriate size to save

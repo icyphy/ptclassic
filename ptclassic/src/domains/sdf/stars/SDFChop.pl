@@ -25,19 +25,19 @@ limitation of liability, and disclaimer of warranty provisions.
 	htmldoc {
 This star reads a sequence of input particles of any type, and writes a
 sequence of particles constructed from the input sequence (and possibly
-zeros).  The number of input particles consumed is given by <i>nread</i></b>,
-and the number of output particles produced is given by <i>nwrite</i></b>.
-The <i>offset</i></b> parameter (default 0) specifies where in the output
+zeros).  The number of input particles consumed is given by <i>nread</i>,
+and the number of output particles produced is given by <i>nwrite</i>.
+The <i>offset</i> parameter (default 0) specifies where in the output
 block the first (oldest) input should go.
 <p>
 A simple use of this star is to pad a block of inputs with zeros.
-Set <i>offset</i></b> to zero and use <i>nwrite &gt; nread</i></b>.
+Set <i>offset</i> to zero and use <i>nwrite &gt; nread</i>.
 <a name="zero-padding"></a>
 <a name="padding"></a>
 Another simple use is to obtain overlapping windows from
 an input stream.
-Set <i>use_past_inputs</i></b> to YES, use <i>nwrite &gt; nread</i></b>,
-and set <i>offset</i></b> equal to <i>nwrite - nread</i></b>.
+Set <i>use_past_inputs</i> to YES, use <i>nwrite &gt; nread</i>,
+and set <i>offset</i> equal to <i>nwrite - nread</i>.
 <a name="overlapping windows"></a>
 <a name="windowing"></a>
 <p>
@@ -61,15 +61,15 @@ The symbol "i" refers to any input particle.
 The leftmost symbol refers to the oldest input particle of the ones
 consumed in a given firing.
 The symbol "p" refers to a particle that is either zero
-(if <i>use_past_inputs</i></b> is NO) or is equal to a previously
-consumed input particle (if <i>use_past_inputs</i></b> is YES).
+(if <i>use_past_inputs</i> is NO) or is equal to a previously
+consumed input particle (if <i>use_past_inputs</i> is YES).
 The symbol "0" refers to a zero-valued particle.
 In the first of the above examples, the entire input block is
 copied to the output, and then filled out with zeros.
 In the second example, only a portion of the input block fits.
 The remaining input particles are discarded.
 <p>
-When the <i>offset</i></b> is negative, the corresponding scenarios are
+When the <i>offset</i> is negative, the corresponding scenarios are
 shown below:
 <p>
 <pre>

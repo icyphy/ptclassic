@@ -17,8 +17,8 @@ The Tcl file must define three Tcl procedures to communicate
 between the star and the Tcl code.  One of these reads the values of the
 inputs to the star (if any), another writes new values to the outputs (if
 any), and the third is called by Ptolemy either on every firing of
-the star (if <i>synchronous</i></b> is TRUE) or on starting the simulation
-(if <i>synchronous</i></b> is FALSE).
+the star (if <i>synchronous</i> is TRUE) or on starting the simulation
+(if <i>synchronous</i> is FALSE).
 <p>
 The names of the three procedures are different for each instance of this star.
 This allows sharing of Tcl code without name conflicts.

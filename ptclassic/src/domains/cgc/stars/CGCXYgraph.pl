@@ -16,7 +16,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
 	htmldoc {
-The input signal is plotted using the <i>pxgraph</i></b> program, with one
+The input signal is plotted using the <i>pxgraph</i> program, with one
 input interpreted as the x-axis data, and the other input as y-axis data.
 <a name="graph, X-Y"></a>
 <a name="pxgraph program"></a>

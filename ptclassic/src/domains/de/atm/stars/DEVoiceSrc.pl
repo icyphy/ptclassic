@@ -21,11 +21,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	htmldoc {
 This star produces dummy voice packet outputs modeling a voice process
 where silence periods are exponentially distributed in length
-with mean <i>silenceExpMean</i></b>.  The talkspurts are geometrically
+with mean <i>silenceExpMean</i>.  The talkspurts are geometrically
 distributed with the mean number of packets per talkspurt set by the
-state <i>meanPacketsSpurt</i></b>.  Then there is a state for the packetization
-period called <i>packPeriod</i></b>. Naturally, one can figure the mean duration
-of a talkspurt from the <i>meanPacketsSpurt</i></b> and <i>packPeriod</i></b> states.
+state <i>meanPacketsSpurt</i>.  Then there is a state for the packetization
+period called <i>packPeriod</i>. Naturally, one can figure the mean duration
+of a talkspurt from the <i>meanPacketsSpurt</i> and <i>packPeriod</i> states.
 Also, the packet is time-stamped and identified by connection.
 
 It recognizes

@@ -16,7 +16,7 @@ See the documentation for the
 star, from which this is derived, for background information.
 The parameter values of the graphically connected replacement block
 serve as default parameter values for all replacement blocks.
-These values will be overridden with the <i>parameter_map</i></b> parameter,
+These values will be overridden with the <i>parameter_map</i> parameter,
 where the format is the same as in other higher-order stars.
         }
 	version { $Id$ }

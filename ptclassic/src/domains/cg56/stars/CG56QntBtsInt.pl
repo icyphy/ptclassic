@@ -13,8 +13,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { CG56 main library }
 	htmldoc {
 <a name="quantizer"></a>
-Normally, the <i>output</i></b> is just the two's complement number
-given by the top <i>noBits</i></b> of the <i>input</i></b> (for integer output).
+Normally, the <i>output</i> is just the two's complement number
+given by the top <i>noBits</i> of the <i>input</i> (for integer output).
         }
 	input	{
 		name { input }

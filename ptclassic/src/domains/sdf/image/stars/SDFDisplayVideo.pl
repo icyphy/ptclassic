@@ -53,7 +53,7 @@ sequence alternately forwards and backwards.
 To end a loop playback, press any mouse button in the video window.
 To close the window type "q" inside.
 <p>
-This star uses programs from the <i>Utah Raster Toolkit</i></b>
+This star uses programs from the <i>Utah Raster Toolkit</i>
 to display moving video in an X window.
 The Utah Raster Toolkit is a collection of software tools from the
 University of Utah.
@@ -81,7 +81,7 @@ unix&gt; tar xvf urt-3.0.tar
 Then, change directories to the new urt_3.0 directory and build the
 software.
 To use the software, put the name of the directory with the URT
-executable files into the definition of the <i>path</i></b> variable
+executable files into the definition of the <i>path</i> variable
 inside the .cshrc file in your home directory.
 <p>
 These instructions are appropriate as of December 1992 but 

@@ -17,11 +17,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { CG56 nonlinear functions library }
 	htmldoc {
 <a name="filter, integrator"></a>
-Leakage is controlled by the <i>feedbackGain</i></b> state (default 1.0).
+Leakage is controlled by the <i>feedbackGain</i> state (default 1.0).
 The output is the data input plus feedbackGain*state, where state is the
 previous output.
 <p>
-Overflow is controlled by the <i>onOverflow</i></b> state (default wrap around).
+Overflow is controlled by the <i>onOverflow</i> state (default wrap around).
 The integrator can either be set to wrap around (default), saturate or reset.
 	}
 	input {

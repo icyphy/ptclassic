@@ -26,22 +26,22 @@ it fires), interrupt-based code will be generated.
 If the star is not repeated, it will generate code
 that polls the Magnavox and busy waits if samples are not available.
 Interrupt-based code can be forced by setting the string
-parameter <i>forceInterrupts</i></b> to "yes".
+parameter <i>forceInterrupts</i> to "yes".
 The interrupt buffer will be the minimum required size if the
-parameter <i>interruptBufferSize</i></b> is "default=4".
+parameter <i>interruptBufferSize</i> is "default=4".
 If this parameter is a number, it will be used for the length
 (in words) of the interrupt buffer.
 <p>
 If a real-time violation occurs and the parameter
-<i>abortOnRealtimeError</i></b> is set to "yes", the star will abort execution
+<i>abortOnRealtimeError</i> is set to "yes", the star will abort execution
 with one of the following hexadecimal error codes in register y0:
-<p><b>123052</i></b>  
+<p><b>123052</i>  
 An interrupt occurred and the receive buffer was full.
-<p><b>123053</i></b>  
+<p><b>123053</i>  
 An interrupt occurred and the transmit buffer was empty.
 <h3>BUGS</h3>
 <p>
-The <i>abortOnRealtimeError</i></b> parameter is ignored when
+The <i>abortOnRealtimeError</i> parameter is ignored when
 interrupt-based code is generated.
 	}
         seealso { MagnavoxIn, MagnavoxOut }

@@ -21,12 +21,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { cgc main library }
 	htmldoc {
 When correctly used, this filter will adapt to try to minimize
-the mean-squared error of the signal at its <i>error</i></b> input.
+the mean-squared error of the signal at its <i>error</i> input.
 In order for this to be possible, the output of the filter should
 be compared (subtracted from) some reference signal to produce
 an error signal.
-That error signal should be fed back to the <i>error</i></b> input.
-The <i>delay</i></b> parameter must equal the total number of delays
+That error signal should be fed back to the <i>error</i> input.
+The <i>delay</i> parameter must equal the total number of delays
 in the path from the output of the filter back to the error input.
 This ensures correct alignment of the adaptation algorithm.
 The number of delays must be greater than zero or the dataflow
@@ -35,7 +35,7 @@ The adaptation algorithm used is the well-known LMS, or stochastic-gradient
 algorithm.
 <a name="stochastic gradient algorithm"></a>
 <p>
-If the <i>saveTapsFile</i></b> string is non-null, a file will
+If the <i>saveTapsFile</i> string is non-null, a file will
 be created by the name given by that string, and the final tap values
 will be stored there after the run has completed.
 	}

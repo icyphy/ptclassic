@@ -81,7 +81,7 @@ this way is a no-op, passing input particles directly to the output.
 Even if two "inData" particles arrive with the
 same time stamp, they will both be passed to the output with the same
 time stamp, even though it takes two successive firings to accomplish this.
-<i>However, they will pass to the output in reverse order.</i></b>
+<i>However, they will pass to the output in reverse order.</i>
 <p>
 As a third example, a Stack with capacity zero will pass
 "inData" particles to the output only if there is a pending demand.

@@ -14,9 +14,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 main library }
 	htmldoc {
-We handle the special cases for values of <i>gain</i></b> equal to
+We handle the special cases for values of <i>gain</i> equal to
 -1, 0, 1, 2, 3, 4, and 5.
-In the case that the <i>gain</i></b> is one, we eliminate ourselves from
+In the case that the <i>gain</i> is one, we eliminate ourselves from
 the circuit.
 	}
 	protected {

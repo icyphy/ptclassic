@@ -12,7 +12,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 control library }
 	htmldoc {
-A delay star of <i>totalDelay</i></b> unit time delays.
+A delay star of <i>totalDelay</i> unit time delays.
 }
 
         input  {

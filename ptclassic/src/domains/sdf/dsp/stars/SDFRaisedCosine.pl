@@ -22,7 +22,7 @@ limitation of liability, and disclaimer of warranty provisions.
 This star implements an FIR filter with
 a raised cosine or square-root raised cosine frequency response,
 with the excess bandwidth given
-by <i>excessBW</i></b> and the symbol interval (in number of samples)
+by <i>excessBW</i> and the symbol interval (in number of samples)
 of the application given by <i>symbol_interval</i>.
 The length of the filter (the number of taps) is given by <i>length</i>.
 <p>
@@ -32,7 +32,7 @@ the impulse response of the filter would ideally be
 h(n) ~=~ left ( { sin ( pi n / T ) } over { pi n / T } right )
 left ( { cos ( alpha pi n / T ) } over { 1 ~-~ (2 alpha n / T) sup 2 } right )
 </pre>
-where <i>alpha</i> is <i>excessBW</i></b> and <i>T</i> is the <i>symbol_interval</i></b>.
+where <i>alpha</i> is <i>excessBW</i> and <i>T</i> is the <i>symbol_interval</i>.
 However, this pulse is centered at zero, and we can only implement causal
 filters in the SDF domain in Ptolemy.  Hence, the impulse response is
 actually
@@ -49,9 +49,9 @@ if <i>length</i> is even.
 <p>
 For some applications, you may wish to apply a window function to
 this impulse response.  To do this, feed an impulse into this star,
-multiply the output by the output of the <b>Window</i></b> star, and
+multiply the output by the output of the <b>Window</i> star, and
 store the resulting windowed impulse response in a file. Then, use
-the <b>FIR</i></b> star to implement the filter.
+the <b>FIR</i> star to implement the filter.
 <p>
 For the ordinary raised cosine response, the
 distance (in number of samples) from the center
@@ -76,7 +76,7 @@ The output sample rate is <i>upsample</i> times the input.
 This is set by default to 16 because in digital communication systems
 this pulse is used for the line coding of symbols, and upsampling is necessary.
 Typically, the value of <i>upsample</i> is the same as that of
-<i>symbol_interval</i></b>.
+<i>symbol_interval</i>.
 The star is derived from the FIR star.
 <a name="raised cosine pulse"></a>
 <a name="square-root raised cosine pulse"></a>
@@ -84,9 +84,9 @@ The star is derived from the FIR star.
 <h3>References</h3>
 <p>[1]  
 E. A. Lee and D. G. Messerchmitt,
-<i>Digital Communication,</i></b> Kluwer Academic Publishers, Boston, 1988.
+<i>Digital Communication,</i> Kluwer Academic Publishers, Boston, 1988.
 <p>[2]  
-I. Korn, <i>Digital Communications</i></b>, Van Nostrand Reinhold, New York, 1985.
+I. Korn, <i>Digital Communications</i>, Van Nostrand Reinhold, New York, 1985.
 	}
 	seealso {FIR, Window, pulses}
 	ccinclude { "ptdspRaisedCosine.h" }

@@ -13,7 +13,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { C50 main library }
 	htmldoc {
 <p>
-Output the <i>pos</i></b> minus all <i>neg</i></b> inputs.
+Output the <i>pos</i> minus all <i>neg</i> inputs.
         }    
 	input {
 		name { pos }

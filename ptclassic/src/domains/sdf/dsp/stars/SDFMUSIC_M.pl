@@ -34,28 +34,28 @@ Several derivatives of MUSIC exist such as root-MUSIC [6].
 <a name="Weiss, A. J."></a>
 <h3>References</h3>
 <p>[1]  
-S. Haykin, ed., <i>Advances in Spectrum Analysis and Array Processing</i></b>,
+S. Haykin, ed., <i>Advances in Spectrum Analysis and Array Processing</i>,
 vol. 2, Prentice-Hall: Englewood Cliffs, NJ, 1991.
 <p>[2]  
-S. Haykin, <i>Adaptive Filter Theory</i></b>,
+S. Haykin, <i>Adaptive Filter Theory</i>,
 Prentice-Hall: Englewood Cliffs, NJ.  1991.  2nd ed.
 <p>[3]  
 P. Stoica and A. Nehorai, ``MUSIC, Maximum Likelihood, and Cramer-Rao Bound:
 Further Results and Comparisons,''
-<i>IEEE Trans. on Acoustics, Speech, and Signal Processing</i></b>,
+<i>IEEE Trans. on Acoustics, Speech, and Signal Processing</i>,
 vol. 38, pp. 2140-2150, Dec. 1990.
 <p>[4]  
-D. H. Johnson and D. E. Dudgeon, <i>Array Signal Processing</i></b>,
+D. H. Johnson and D. E. Dudgeon, <i>Array Signal Processing</i>,
 Prentice-Hall: Englewood Cliffs, NJ.  1993.
 <p>[5]  
 P. Stoica and B. Soderstrom, ``Statistical Analysis of MUSIC and
 Subspace Rotation Estimates of Sinusoidal Frequencies,''
-<i>IEEE Trans. on Acoustics, Speech, and Signal Processing</i></b>,
+<i>IEEE Trans. on Acoustics, Speech, and Signal Processing</i>,
 vol. 39, pp. 1122-1135, Aug. 1991.
 <p>[6]  
 B. Friedlander and A. J. Weiss,
 ``Direction Finding Using Spatial Smoothing With Interpolated Arrays,''
-<i>IEEE Trans. on Aerospace and Electronic Systems</i></b>,
+<i>IEEE Trans. on Aerospace and Electronic Systems</i>,
 vol. 28, no. 2, pp. 574-587, April 1992.
   }
   input { 
