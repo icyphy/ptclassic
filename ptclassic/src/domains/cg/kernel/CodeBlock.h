@@ -11,6 +11,10 @@ $Id$
 
 *******************************************************************/
 
+#ifdef __GNUG__
+#pragma interface
+#endif
+
 #include "DataStruct.h"
 #include "type.h"
 
@@ -32,54 +36,6 @@ public:
 	void printCode ();
 private:
 	const char* text;
-};
-
-
-	////////////////////////////////////
-	// class CodeBlockList
-	////////////////////////////////////
-
-class CodeBlockList : public SequentialList {
-public:
-	// For many code generators, this method will parse the code lines
-	void put(CodeBlock* line) {
-		SequentialList::put(line);
-	}
-
-	void printCode ();
-};
-
-	////////////////////////////////////
-	// class CodeBlockIter
-	////////////////////////////////////
-
-// For now, this is identical with ListIter, except for a cast
-class CodeBlockIter : private ListIter {
-public:
-	CodeBlockIter(CodeBlockList& c) : ListIter (c) {}
-	CodeBlock* next() { return (CodeBlock*)ListIter::next();}
-	CodeBlock* operator++() { return next();}
-	ListIter::reset;
-};
-
-	////////////////////////////////////
-	// class CodeVector
-	////////////////////////////////////
-
-// The following class stores a vector of CodeBlockList*'s.
-// It is different from vector primarily in that the "elem" method
-// creates new vector entries if the index is larger than the number
-// of entries already allocated.
-
-class CodeVector : public Vector {
-public:
-	// Add an indexed element
-	const CodeBlockList* elem (int index) {
-		while (dimension() <= index) {
-			INC_LOG_NEW; put(new CodeBlockList);
-		}
-		return((CodeBlockList*)Vector::elem(index));
-	}
 };
 
 #endif

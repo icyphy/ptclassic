@@ -17,10 +17,4 @@ void CodeBlock:: printCode () {
 	cout << text << "\n";
 }
 
-void CodeBlockList :: printCode () {
-	CodeBlockIter line(*this);
-	for(int i = size(); i>0; i--) {
-		CodeBlock* p = line++;
-		p->printCode();
-	}
-}
+
