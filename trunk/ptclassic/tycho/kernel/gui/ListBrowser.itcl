@@ -195,13 +195,13 @@ body ::tycho::ListBrowser::constructor {args} {
 
     # Extra buttonbox above the usual DialogWindow button box.
     itk_component add buttons {
-	buttonbox $itk_interior.childsite.buttons
+	buttonbox $itk_interior.buttons
     } {
 	keep -background -cursor
     }
-    pack $itk_component(buttons) -expand no
+    pack $itk_component(buttons) -expand no -before $itk_interior.bbox
 
-    $itk_component(buttons) add help -text "Help" \
+    $itk_component(buttons) add help -text "    Help    " \
 	    -command [code $this help]
 
     ###################################################################
