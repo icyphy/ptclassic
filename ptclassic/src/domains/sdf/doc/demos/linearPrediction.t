@@ -77,7 +77,7 @@ the run can be varied to improve the performance.
 .Ir "Makhoul, J."
 .Ir "Kay, S. M."
 .Ir "Haykin, S."
-.UH "REFERENCES"
+.UH "References"
 .ip [1]
 J. Makhoul, "Linear Prediction: A Tutorial Review",
 \fIProc. IEEE\fR, Vol. 63, pp. 561-580, Apr. 1975.

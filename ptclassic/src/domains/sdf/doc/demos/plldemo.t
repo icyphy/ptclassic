@@ -62,7 +62,7 @@ which (at high signal-to-noise ratios) should approach Gaussian for a
 sufficiently large number of iterations.  The performance of the entire
 QPSK system can be estimated visually by inspecting the in-phase and
 quadrature eye diagrams.
-.UH "REFERENCES"
+.UH "References"
 .ip [1]
 J. Barry and J. Kahn,
 .i "Carrier Synchronization for Heterodyne Detection of Optical Quadriphase-Shift Keying,"

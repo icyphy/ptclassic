@@ -71,7 +71,7 @@ The last plot is the autocorrelation estimate used in the Levinson-Durbin
 algorithm.  Note that the center lag is the estimate of the power
 of the input process, and hence is equal to the zero sample
 of the prediction error power.
-.UH "REFERENCES"
+.UH "References"
 .ip [1]
 J. Makhoul, "Linear Prediction: A Tutorial Review",
 \fIProc. IEEE\fR, Vol. 63, pp. 561-580, Apr. 1975.
