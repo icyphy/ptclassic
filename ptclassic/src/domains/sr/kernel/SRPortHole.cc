@@ -126,6 +126,22 @@ PortHole * SRPortHole::far() const
   return NULL;
 }
 
+// Set the geodesic of this port
+//
+// @Description This also sets the farSidePort field, which is equal to
+// the driver for inputs, and equal to one of the receivers (the first in the
+// list) for an output.  This nonsense is for the type resolution system.
+
+void SRPortHole::setGeodesic( Geodesic * g )
+{
+  myGeodesic = g;
+  if ( (SRPortHole *)(far()) != this ) {
+    farSidePort = far();
+  } else {
+    farSidePort = ((SRGeodesic *)g)->getReceiver();
+  }
+}
+
 // Identify the port as an input
 int InSRPort::isItInput() const
 {
@@ -327,6 +343,8 @@ Particle & InSRPort::get() const
 // Clear the isIndependent flag
 void InSRPort::initialize()
 {
+  PortHole::initialize();
+
   isIndependent = FALSE;
 }
 
