@@ -51,6 +51,10 @@ EXTRA_SRCS =	$(ITCL_SRCS)
 
 MISC_FILES =	sample.fst
 
+# Sources that may or may not be present, but if they are present, we don't
+# want make checkjunk to barf on them.
+OPTIONAL_FILES =	alltests.itcl
+
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
