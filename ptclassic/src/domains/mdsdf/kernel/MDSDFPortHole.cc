@@ -37,7 +37,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "MDSDFPortHole.h"
 #include "MDSDFGeodesic.h"
-#include "CircularBuffer2D.h"
 #include "Plasma.h"
 #include "MDSDFStar.h"
 #include "miscFuncs.h"
