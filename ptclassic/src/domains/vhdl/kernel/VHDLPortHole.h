@@ -94,7 +94,7 @@ public:
 	// Get the precision of the port (FIX type only).
 	Precision getPrecision() { return precision; }
 	// Set the precision of the port (FIX type only).
-	setPrecision(Precision newPrecision) { precision = newPrecision; }
+	void setPrecision(Precision newPrecision) { precision = newPrecision; }
 
 private:
 	char* bufName;		// set if no geodesic is assigned.
