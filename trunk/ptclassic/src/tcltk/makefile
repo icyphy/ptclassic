@@ -452,9 +452,9 @@ $(ITCL_SHARED_DEST_LIB):
 
 # Links so that we don't have to change version numbers in lots of makefiles.
 $(ITCL_SHARED_DEST_LIB)/libtcl.so: $(ITCL_SHARED_OBJ)/tcl/libtcl.so
-	mv $(ITCL_SHARED_OBJ)/tcl/libtcl.so $@
+	mv $(ITCL_SHARED_OBJ)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)/libtcl.so $@
 $(ITCL_SHARED_DEST_LIB)/libtk.so: $(ITCL_SHARED_OBJ)/tk/libtk.so 
-	mv $(ITCL_SHARED_OBJ)/tk/libtk.so $@
+	mv $(ITCL_SHARED_OBJ)/tk$(ITCL_TK_MAJOR_VERSION_NUMBER)/libtk.so $@
 $(ITCL_SHARED_DEST_LIB)/libitk.so: $(ITCL_SHARED_OBJ)/itk/libitk.so 
 	mv $(ITCL_DEST_LIB)/libitk.so.2 $(ITCL_SHARED_DEST_LIB)/libitk.so
 
