@@ -70,6 +70,22 @@ int PTcl::matlab(int argc,char** argv) {
 }
 
 
+// "mathematica" ptcl command -BLE
+// we make mathematicatcl a static instance of the MathematicaTcl class
+// instead of a data member of the PTcl class because other libraries,
+// e.g. pigilib, rely on the PTcl class but do not use the "mathematica"
+// ptcl command, so false dependencies would otherwise be automatically
+// created by make depend
+#include "MathematicaTcl.h"
+
+static MathematicaTcl mathematicatcl;
+
+int PTcl::mathematica(int argc,char** argv) {
+	mathematicatcl.SetTclInterpreter(interp);
+	return mathematicatcl.mathematica(argc, argv);
+}
+
+
 // we want to be able to map Tcl_interp pointers to PTcl objects.
 // this is done with a table storing all the PTcl objects.
 
@@ -1129,6 +1145,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(link),
 	ENTRY(listobjs),
 	ENTRY(matlab),
+	ENTRY(mathematica),
 	ENTRY(multilink),
 	ENTRY(newstate),
 	ENTRY(newuniverse),
