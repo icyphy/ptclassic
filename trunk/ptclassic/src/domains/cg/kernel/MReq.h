@@ -72,7 +72,7 @@ class MConsecStateReq : public MReq {
 public:
 	MConsecStateReq() : sz(0) {}
 	void append(const State& s) {
-		lis.append(*new MStateReq(s));
+		INC_LOG_NEW; lis.append(*new MStateReq(s));
 		sz += s.size();
 	}
 	int size() { return sz;}
