@@ -1,12 +1,9 @@
 #! /bin/csh -f
 # $Id$
 
-# Create a Star Atlas entry.  Assumed to be started in
-# the "doc" subdirectory of a domain.
-
-# Command uses printer defined by environmental variable $PRINTER
-# User .cshrc file must contain "setenv PRINTER whatever"
-
+# Create a Star Atlas entry.
+# Assumed to be started in the "doc" subdirectory of a domain.
+#
 # Command line options:
 #
 #	-index		Generate an index only, print nothing.
@@ -15,15 +12,21 @@
 #			environment variable isn't set.
 #
 # Remaining arguments are taken to be files to print options.
+# Command uses printer defined by environmental variable $PRINTER
+# User .cshrc file must contain "setenv PRINTER whatever"
 #
-# An implicit header file, $PTOLEMY/doc/headers/shared, is prepended.
-
-# The following files are assumed to present in the documentation directory:
-#	startitle - The title page for the stars section.
-#	stars	  - A directory with star documentation
-#	demotitle - The title page for the demo section
-#	demos	  - A directory with demo documentation.
-
+# The documentation consists of a concatenation of the following files:
+#
+#   $PTOLEMY/doc/headers/shared - macro definitions
+#   targettitle.t - title page for the target section
+#   targets/*.t - target troff documentation
+#   startitle.t - title page for the stars section
+#   stars/*.t - star troff documentation files
+#   demotitle.t - title page for the demo section
+#   demos/*.t- demo troff documentation.
+#
+# Any troff file may include other troff files with the .so command
+#
 # Index information is appended to the file $HOME/Almagest.index,
 # or to whatever ALAMAGEST_INDEX is set to.
 
@@ -41,6 +44,15 @@ set printoptions = "-me -tbl -eqn -P$PRINTER"
 set contentscmd = $PTOLEMY/doc/bin/contents
 set previewcommand = "xditview -"
 set psincludecommand = $PTOLEMY/doc/bin/ditpsinc
+set troffFileNames = "*.t"
+
+# Temporary files
+set tempdir = /tmp
+set tempTroffFile = $tempdir/pt$$.t
+set tempIndexFile = $tempdir/index$$
+set tempNroffFile = $tempdir/pt$$.n
+set tempPSFile = $tempdir/pt$$.ps
+set tempFiles = $tempTroffFile $tempIndexFile $tempNroffFile $tempPSFile
 
 # Variables
 set indexonly = 0
@@ -78,76 +90,76 @@ end
 
 
 soelim $dirheader/shared $dirheader/domain \
-	init title > /tmp/pt$$
+	init title.t > $tempTroffFile
 
 if ( -d targets ) then
-        if (-e targettitle) then
+        if (-e targettitle.t) then
                 # set type for this section
-                echo '.ds TY "target' >> /tmp/pt$$
-                cat targettitle >> /tmp/pt$$
+                echo '.ds TY "target"' >> $tempTroffFile
+                cat targettitle.t >> $tempTroffFile
         endif
         cd targets
         # print all targets
-        cat -s * >> /tmp/pt$$
+        cat -s $troffFileNames >> $tempTroffFile
         cd ..
 endif
 
 if ( -d stars ) then
-	if (-e starstitle) then
+	if (-e starstitle.t) then
 		# set type for this section
-		echo '.ds TY "star' >> /tmp/pt$$
-		cat starstitle >> /tmp/pt$$
+		echo '.ds TY "star"' >> $tempTroffFile
+		cat starstitle.t >> $tempTroffFile
 	endif
 	cd stars
 	# print all stars, sorted in dictionary order
-	foreach file (`ls -1 -d * | sort -f -d`)
-		cat -s $file >> /tmp/pt$$
+	foreach file (`ls -1 -d $troffFileNames | sort -f -d`)
+		cat -s $file >> $tempTroffFile
 	end
 	cd ..
 endif
 
 if ( -d demos ) then
-	if (-e demotitle) then
+	if (-e demotitle.t) then
 		# set type for this section
-		echo '.ds TY "demo' >> /tmp/pt$$
-		cat demotitle >> /tmp/pt$$
+		echo '.ds TY "demo"' >> $tempTroffFile
+		cat demotitle.t >> $tempTroffFile
 	endif
 	cd demos
 	# print all demos
-	cat -s * >> /tmp/pt$$
+	cat -s $troffFileNames >> $tempTroffFile
 	cd ..
 endif
 
 if ($indexonly) then
 	# if only generating index, add -t option and throw away the output
-	($printcommand $printoptions -t /tmp/pt$$ > /dev/null) >& /tmp/index$$
+	($printcommand $printoptions -t $tempTroffFile > /dev/null) >& $tempIndexFile
 else if ($preview) then
 	# if previewing, use either X windows or nroff
 	if ($?DISPLAY) then
-		$printcommand $printoptions -t /tmp/pt$$ | $previewcommand
+		$printcommand $printoptions -t $tempTroffFile | $previewcommand
 	else
-		(eqn /tmp/pt$$ | tbl | nroff -me > /tmp/ptnr$$) >& /dev/null
-		more /tmp/ptnr$$
+		(eqn $tempTroffFile | tbl | nroff -me > $tempNroffFile) >& /dev/null
+		more $tempNroffFile
 	endif
 else if ($ps) then
 	# generate a postscript file to /tmp only.  nothing is printed
-        ($printcommand $printoptions -t /tmp/pt$$ | psdit > \
-                 /tmp/pt.$$.ps) >& /tmp/index$$
-        # $contentscmd /tmp/index$$
-        # $printcommand $printoptions -t $dirheader/shared title | psdit > \
+        ($printcommand $printoptions -t $tempTroffFile | psdit > \
+                 $tempPSFile) >& $tempIndexFile
+        # $contentscmd $tempIndexFile
+        # $printcommand $printoptions -t $dirheader/shared title.t | psdit > \
         #         /tmp/pt.$$.B.ps
 else
 	# otherwise just print it out
-	$printcommand $printoptions /tmp/pt$$ >& /tmp/index$$
-	$contentscmd /tmp/index$$
-	$printcommand $printoptions $dirheader/shared title
+	$printcommand $printoptions $tempTroffFile >& $tempIndexFile
+	$contentscmd $tempIndexFile
+	$printcommand $printoptions $dirheader/shared title.t
 endif
-if (-r /tmp/index$$) cat /tmp/index$$ >>! $ALMAGEST_INDEX
-# /bin/rm -f /tmp/pt$$ /tmp/index$$ /tmp/prnr$$
+if (-r $tempIndexFile) cat $tempIndexFile >>! $ALMAGEST_INDEX
+/bin/rm -f $tempFiles
 exit 0
 
 catch:
         # prevent the "no match" error message if there are no temporary files
         set nonomatch
-	/bin/rm -f /tmp/pt$$ /tmp/index$$ /tmp/prnr$$
+	/bin/rm -f $tempFiles
         exit 1
