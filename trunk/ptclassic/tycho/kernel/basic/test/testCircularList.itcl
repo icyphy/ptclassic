@@ -32,7 +32,7 @@
 
 # Make sure that the require packages are loaded
 package require tycho.util.tytest
-package require tycho.kernel.gui
+package require tycho.kernel.basic
 
 test CircularList-1.1 {Build a CircularList} {
     catch {delete object foo}
