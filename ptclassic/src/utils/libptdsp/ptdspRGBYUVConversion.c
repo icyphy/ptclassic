@@ -52,8 +52,8 @@ quant(double inval) {
    arrays that describe that image in YUV format. No downsampling is
    performed on the U and V signals.
    
-   The contentds of the double arrays YImg, UImg and VImg are modified
-   to store the return Y, U and V images respectively.
+   The contents of the double arrays YImg, UImg and VImg are modified
+   to store the return Y, U and V images, respectively.
 */
 void 
 Ptdsp_RGBToYUV ( const double* redImg, const double* greenImg, 

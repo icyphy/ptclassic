@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer: Joseph Buck and Brian Evans
 
-       Functions for raised cosine and square-root rasised cosine
+       Functions for raised cosine and square-root raised cosine
        frequency response.
 
 ********************************************************************/
