@@ -19,7 +19,6 @@
 
 typedef int			XPXfaDstType;
 typedef double			XPXfaSrcType;
-typedef enum _XPXfaMode		XPXfaMode;
 typedef struct _XPXfaCalls	XPXfaCalls;
 typedef struct _XPXfa		XPXfa;
 
@@ -34,6 +33,8 @@ typedef XPXfaSrcType	(XPXfaToWinFunc) ARGS((XPXfa *xfa, XPXfaDstType val));
 enum _XPXfaMode { 
   XPXfaMode_Null, XPXfaMode_Lin, XPXfaMode_Log, XPXfaMode_DSLog
 };
+typedef enum _XPXfaMode		XPXfaMode;
+
 
 struct _XPXfaCalls {
     XPXfaMode		Mode;
