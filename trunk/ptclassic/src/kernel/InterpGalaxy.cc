@@ -593,6 +593,7 @@ InterpGalaxy::processActionList(const StringList& actionListToProcess) {
 	while (nacts > 0) {
 		const char *a, *b, *c, *d, *action;
 		const char *initDelayValues, *width;
+		const char *tempString;
 
 		action = next++;
 		switch (action[0]) {
@@ -615,7 +616,8 @@ InterpGalaxy::processActionList(const StringList& actionListToProcess) {
 			b = next++;
 			c = next++;
 			d = next++;
-			initDelayValues = next++;
+			tempString = next++;
+			initDelayValues = tempString?hashstring(tempString):0;
 
 			connect (a, b, c, d, initDelayValues);
 			nacts -= 6;
@@ -627,7 +629,8 @@ InterpGalaxy::processActionList(const StringList& actionListToProcess) {
 			c = next++;
 			d = next++;
 			width = next++;
-			initDelayValues = next++;
+			tempString = next++;
+			initDelayValues = tempString?hashstring(tempString):0;
 			busConnect (a, b, c, d, width, initDelayValues);
 			nacts -= 7;
 			break;
@@ -657,7 +660,8 @@ InterpGalaxy::processActionList(const StringList& actionListToProcess) {
 			a = next++;
 			b = next++;
 			c = next++;
-			initDelayValues = next++;
+			tempString = next++;
+			initDelayValues = tempString?hashstring(tempString):0;
 			nodeConnect (a, b, c, initDelayValues);
 			nacts -= 5;
 			break;
@@ -827,6 +831,7 @@ InterpGalaxy::preinitialize () {
 	// The err counter is kept in case it is needed for debugging.
 	while (nacts > 0) {
 		const char *a, *b, *c, *d, *initDelayValues, *action;
+		const char *tempString;
 		int width;
 		action = next++;
 		switch (action[0]) {
@@ -836,7 +841,8 @@ InterpGalaxy::preinitialize () {
 			c = next++;
 			d = next++;
 			width = evalExp(this,next++,"busWidth");
-			initDelayValues = next++;
+			tempString = next++;
+			initDelayValues = tempString?hashstring(tempString):0;
 			{
 			  MultiPortHole* s = findMPHNE (a, b);
 			  MultiPortHole* dp = findMPHNE (c, d);
@@ -850,7 +856,8 @@ InterpGalaxy::preinitialize () {
 			b = next++;
 			c = next++;
 			d = next++;
-			initDelayValues = next++;
+			tempString = next++;
+			initDelayValues = tempString?hashstring(tempString):0;
 			{
 				PortHole* s = findPortHoleNE(a, b);
 				if (s == 0) err++;
@@ -864,7 +871,8 @@ InterpGalaxy::preinitialize () {
 			a = next++;
 			b = next++;
 			c = next++;
-			initDelayValues = next++;
+			tempString = next++;
+			initDelayValues = tempString?hashstring(tempString):0;
 			{
 				Geodesic *g = nodes.nodeWithName(c);
 				if (g == 0) err++;
