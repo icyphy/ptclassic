@@ -127,8 +127,8 @@ typedef char* TOPPtr;
 
 #define TOP_NELTS(x)	( sizeof(x)/sizeof((x)[0]) )
 
-typedef enum _TOPBool TOPBool;
 enum _TOPBool { TOPB_False, TOPB_True };
+typedef enum _TOPBool TOPBool;
 
 typedef char* TOPMallocPtr;
 typedef int TOPCompareFunc ARGS((const void *a, const void *b));
