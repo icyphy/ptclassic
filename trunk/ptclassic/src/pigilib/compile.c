@@ -77,9 +77,6 @@ octObject *obj;
 /***** End Ess routines (Error Select Set) */
 
 
-/* currently, all galaxy parameters are type "float".  We need to fix
-   this.
- */
 static boolean
 ProcessFormalParams(galFacetPtr)
 octObject *galFacetPtr;
@@ -90,7 +87,9 @@ octObject *galFacetPtr;
 
     ERR_IF1(!GetFormalParams(galFacetPtr, &pList));
     for (i = 0, p = pList.array; i < pList.length; i++, p++) {
-	ERR_IF1(!KcMakeState(p->name, "float", p->value));
+	if (!p->type || p->type[0] == 0)
+	    p->type = "FLOAT"; /* backward compatibility */
+	ERR_IF1(!KcMakeState(p->name, p->type, p->value));
     }
     return(TRUE);
 }
