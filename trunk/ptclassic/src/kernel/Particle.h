@@ -84,15 +84,9 @@ protected:
 	// Before copying Particles, always compare their types
 	// Otherwise the user could always copy Particles of
 	//  incompatible types between an input and output PortHole
-	// we compare function pointers to be fast.
-	int compareType(const Particle& p) const {
-		if (!typesEqual(p)) {
-			badCopy(p);
-			return 0;
-		}
-		return 1;
-	}
-	void badCopy(const Particle& p) const;
+
+	int compareType(const Particle& p) const;
+
 	Particle* link;
 
 	friend class ParticleStack;
@@ -221,10 +215,10 @@ public:
 	StringList print() const;
  
         // Initialize
-        ComplexSample(const Complex& c) {data=c;}
-	ComplexSample(double f) {data= f;}
-	ComplexSample(int i) {data = double(i);}
-        ComplexSample() {data=0.0;}
+        ComplexSample(const Complex& c) : data(c) {}
+	ComplexSample(double f);
+	ComplexSample(int i);
+        ComplexSample();
 
         // Initialize the Particle
         void initialize();
