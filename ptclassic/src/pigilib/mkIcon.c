@@ -304,7 +304,7 @@ octObject *facetPtr, *iconFacetPtr;
     ERR_IF1(!AskAboutIcon(facetPtr->contents.facet.cell));
     ERR_IF1(!MkBaseIcon(iconFacetPtr, facetPtr->contents.facet.cell, pal));
     ERR_IF1(!MkLabel(iconFacetPtr, BaseName(facetPtr->contents.facet.cell)));
-    CK_OCT(ohCreateOrModifyPropStr(iconFacetPtr, &prop, "palette", ""));
+    CK_OCT(CreateOrModifyPropStr(iconFacetPtr, &prop, "palette", ""));
     CK_OCT(octFlushFacet(iconFacetPtr));
     return (TRUE);
 }
@@ -323,7 +323,7 @@ octObject *facetPtr, *iconFacetPtr;
     ERR_IF1(!AskAboutIcon(facetPtr->contents.facet.cell));
     ERR_IF1(!MkBaseIcon(iconFacetPtr, facetPtr->contents.facet.cell, univ));
     ERR_IF1(!MkLabel(iconFacetPtr, BaseName(facetPtr->contents.facet.cell)));
-    CK_OCT(ohCreateOrModifyPropStr(iconFacetPtr, &prop, "universe", ""));
+    CK_OCT(CreateOrModifyPropStr(iconFacetPtr, &prop, "universe", ""));
     CK_OCT(octFlushFacet(iconFacetPtr));
     return (TRUE);
 }
@@ -358,7 +358,7 @@ octObject *galFacetPtr, *iconFacetPtr;
 	== OCT_OK) {
 	ERR_IF1(!MkBox(&iconBackgrLayer, size));
     }
-    CK_OCT(ohCreateOrModifyPropStr(iconFacetPtr, &prop, "galaxy", ""));
+    CK_OCT(CreateOrModifyPropStr(iconFacetPtr, &prop, "galaxy", ""));
     CK_OCT(octFlushFacet(iconFacetPtr));
     return (TRUE);
 }
@@ -407,7 +407,7 @@ octObject *iconFacetPtr;
 	}
 */
     }
-    CK_OCT(ohCreateOrModifyPropStr(iconFacetPtr, &prop, "star", ""));
+    CK_OCT(CreateOrModifyPropStr(iconFacetPtr, &prop, "star", ""));
     CK_OCT(octFlushFacet(iconFacetPtr));
     return (TRUE);
 }

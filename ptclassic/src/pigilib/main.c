@@ -149,14 +149,17 @@ RPCFunction **array;
     char buf[MSG_BUF_MAX], *envVar, *getenv();
 
     xDisplay = display;
-    /* Set the DISPLAY environment variable for ptolemy stars that use it */
-    sprintf(buf, "DISPLAY=%s", display);
-    if(!StrDup(&envVar, buf)) {
-	PrintErr(ErrGet());
-	RPCExit(-1);
+    /* Set the DISPLAY environment variable for ptolemy stars that use it,
+       if it does not already exist
+     */
+    if (getenv("DISPLAY") == 0) {
+	sprintf(buf, "DISPLAY=%s", display);
+	if(!StrDup(&envVar, buf)) {
+	    PrintErr(ErrGet());
+	    RPCExit(-1);
+	}
+	putenv(envVar);
     }
-    putenv(envVar);
-
     if (!OptInit()) {
 	ErrAdd("UserMain: OptInit() failed");
 	PrintErr(ErrGet());
