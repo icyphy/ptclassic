@@ -477,7 +477,8 @@ ifdef CGC
 
 		# special target (no shared library version)
 		CUSTOM_DIRS += $(CGCDIR)/tcltk/targets
-		TARGETS += $(CGCTCLT)/CGCTclTkTarget.o
+		TARGETS += $(CGCTCLT)/CGCTclTkTarget.o \
+			$(CGCTCLT)/CGCTychoTarget.o
 	endif
 	# Multiprocessor targets are included if CGPAR is defined
 	ifdef CGPAR
