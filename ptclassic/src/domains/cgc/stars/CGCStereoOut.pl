@@ -22,15 +22,7 @@ limitation of liability, and disclaimer of warranty
 provisions.
     }
     location { CGC main library }
-
-    defstate {
-      name { outputPort }
-      type { string }
-      default { line_out }
-      desc { Audio input port: line_out or speaker. }
-      attributes { A_GLOBAL }
-    }
-
+    
     input {
       name { left }
       type { float }
@@ -41,6 +33,15 @@ provisions.
       name { right }
       type { float }
       desc { Right channel input }
+    }
+	
+
+    defstate {
+      name { outputPort }
+      type { string }
+      default { line_out }
+      desc { Audio input port: line_out or speaker. }
+      attributes { A_GLOBAL }
     }
 
     constructor {
@@ -81,12 +82,15 @@ provisions.
       addCode(openCrtlfile);
 
       /* Update parameters */
-      StringList updateParameters = "$starSymbol(set_parameters)";
+      StringList updateParameters = "$sharedSymbol(CGCStereoBase,set_parameters)";
       updateParameters << "($starSymbol(ctlfile), "
 		       << "\"" << encodingType << "\", "
 		       << "\"" << outputPort << "\", "
+		       <<  volume << ", " 
+		       <<  balance << ", " 
 		       << "0);\n";
       addCode(updateParameters);
+
     }
 
     go {
