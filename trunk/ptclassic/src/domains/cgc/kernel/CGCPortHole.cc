@@ -58,6 +58,11 @@ void CGCPortHole::setFlags() {
 		hasStaticBuf = FALSE; 
 }
 
+BufType CGCPortHole::bufType() const { 
+	if (atBoundary()) return myType;
+	return isItOutput()? myType: realFarPort()->bufType(); 
+}
+
 		////////////////////////////////////////
 		// Buffer size determination routines
 		////////////////////////////////////////
