@@ -59,6 +59,8 @@ class VHDLObj : public NamedObj
 
   // Set the name.
   void setName(const char*);
+  // Get the name.
+  const char* getName() { return name; }
 
   // Class Idenitification.
   /* virtual */ int isA(const char*) const;
