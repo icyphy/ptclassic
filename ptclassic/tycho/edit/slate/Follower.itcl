@@ -106,14 +106,8 @@ class ::tycho::Follower {
 # 
 body ::tycho::Follower::activate {t x y args} {
     # Set the target. The client can modify its options later
-    # with -activatecommand if desired. If the target argument is
-    # in fact a tag, get the current picture from the slate.
-#    if { [string match {_*} $t] || [string match {[0-9]*} $t] } {
-#	target $t
-#    } else {
-#	target [$slate find withtag current]
-#    }
-target $t
+    # with -activatecommand if desired.
+    target $t
 
     # Set up the bindings.
     $slate bind $target \
@@ -121,7 +115,7 @@ target $t
 	    "$this drag %x %y; update idletasks"
     $slate bind $target \
 	    [eval ::tycho::Interactor::event Release $args] \
-	    "$this release %x %y; $this deactivate $args"
+	    "$this release %x %y; $this deactivate %x %y $args"
 
     # Execute the user-specified activation command
     execute $activatecommand $x $y $args
