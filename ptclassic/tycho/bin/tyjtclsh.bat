@@ -5,7 +5,7 @@ rem @author: Christopher Hylands
 rem @version: $Id$
 rem @copyright: Copyright (c) 1997 The Regents of the University of California.
 rem All rights reserved.
-rem See the file $TYCHO/copyright for copyright notice,
+rem See the file $TYCHO/copyright.txt for copyright notice,
 rem limitation of liability, and disclaimer of warranty provisions.
 
 rem Check the TYCHO variable.
