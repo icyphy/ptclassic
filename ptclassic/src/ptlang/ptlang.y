@@ -1533,7 +1533,7 @@ void genDef ()
 					yyerror("All cores must have"
 						" a coreCategory directive");
 	} else
-		sprintf (baseClass, "%sStar", domain);
+		sprintf (baseClass, coronaDef ? "%sCorona" : "%sStar", domain);
 
 /* Include files */
 	fprintf (fp, "#include \"%s.h\"\n", baseClass);
