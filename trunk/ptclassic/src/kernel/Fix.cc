@@ -33,7 +33,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer:  A. Khazeni 
  Date of creation: 2/24/93 
  Revisions:
-
+	1/17/94  BLE	cleaned up multiplication by zero
+		 BLE	added constant definitions for types of overflow
+		 BLE	added print out of overflow method in print method 
 
 This file contains the definitions of the functions declared in  
 header file Fix.h. 
@@ -46,6 +48,7 @@ variable.
 
 #include "Fix.h"
 #include "Error.h"
+#include "type.h"
 #include <stream.h>
 #include <std.h>
 #include <string.h>
@@ -106,7 +109,7 @@ static int find_intBits(int num)
    int qt = num, count = 1; 
    if (num == 0) count = 0;
    while ((qt = int(qt/2)) != 0) count++;
-   count += 1;             // For the sign bit
+   count++;					// Add 1 for the sign bit
    return count;
 }
 
@@ -124,15 +127,15 @@ void Fix::make_bit_pattern(int ln, int ib, double d, uint16* bits)
   int NO_OF_WORDS = find_words(ln);
 
   if ( x > max_value || x < min_value)
-    Error::abortRun("Error : overflow in declaration (construction)");
+    Error::abortRun( "Error : overflow in declaration (construction)" );
   else {
      if (x < 0) x += pow(2.0, ib);    //equivalent of taking 2's complement
      x *= pow(2.0,(BITS_PER_WORD - ib));
      for (int i=0; i < NO_OF_WORDS; i++)
      {
-        bits[i] = (uint16)x;
-        x -= bits[i];
-        x *= 65536;
+	bits[i] = (uint16)x;
+	x -= bits[i];
+	x *= 65536;
      }
      if (x >= 32768)  bits[NO_OF_WORDS-1]++; }
   (*MASK)(ln, bits);
@@ -220,14 +223,15 @@ double Fix::min() const
 double Fix::value() const
 {
   double d = 0.0;
-  if (len() == 0) return d;
-  for ( int i = words()-1; i >= 0; i-- )
+  if ( len() == 0 ) return d;
+  for ( int i = words() - 1; i >= 0; i-- )
   {
      d += Bits[i];
      d *= 1./65536.;
   }
-  d *= pow(2.0,intb());
-  return d <= max() ? d : d - (pow(2.0,intb()));
+  double final = pow(2.0, intb());
+  d *= final;
+  return ( d <= max() ) ? d : ( d - final );
 }
 
 void Fix::initialize()
@@ -236,17 +240,24 @@ void Fix::initialize()
   length  = 0;
   intBits = 0;
   format  = 0;
-  ovflow = 0;
+  ovflow = FIX_OVERFLOW_SATURATE;
 }
+
+static char *OverflowDescriptions[] =
+	{ "saturate", "zero_saturate", "wrapped", "warning" };
 
 void Fix::set_ovflow(const char *p)
 {
-  if (strcmp(p,"saturate") == 0) ovflow = 0;
-  else if (strcmp(p,"zero_saturate") == 0) ovflow = 1;
-  else if (strcmp(p,"wrapped") == 0) ovflow = 2;
-  else if (strcmp(p,"warning") == 0) ovflow = 3;
-  else
-   Error::abortRun(": not a valid overflow handling method for the class Fix");
+  int found = FALSE;
+  for ( int i = 0; i < TYPES_OF_FIX_OVERFLOW; i++ ) {
+    if ( strcasecmp(p, OverflowDescriptions[i]) == 0 ) {
+      found = TRUE;
+      ovflow = i;
+      break;
+    }
+  }
+  if ( ! found )
+    Error::abortRun(": not a valid overflow handling method for the class Fix");
 }
 
 ////////////////
@@ -261,7 +272,7 @@ Fix::Fix()
   length  = 0; 
   intBits = 0;  
   format  = 0;
-  ovflow = 0;
+  ovflow  = FIX_OVERFLOW_SATURATE;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -278,7 +289,7 @@ Fix::Fix(int ln, int ib)
   length  = ln;
   intBits = ib;  
   format  = 0;
-  ovflow = 0;
+  ovflow  = FIX_OVERFLOW_SATURATE;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -297,7 +308,7 @@ Fix::Fix(int ln, int ib, const char* p)
   length  = ln + 1;
   intBits = ib + 1;  
   format  = 1;
-  ovflow = 0;
+  ovflow  = FIX_OVERFLOW_SATURATE;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -316,7 +327,7 @@ Fix::Fix(const double& d)
     make_bit_pattern(length, intBits, d, Bits); }
 
   format = 0;
-  ovflow = 0;
+  ovflow = FIX_OVERFLOW_SATURATE;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -333,7 +344,7 @@ Fix::Fix(int ln, int ib, const double& d)
   length  = ln;
   intBits = ib;  
   format = 0;
-  ovflow = 0;
+  ovflow = FIX_OVERFLOW_SATURATE;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -354,7 +365,7 @@ Fix::Fix(int ln, int ib, const double& d, const char* p)
   length  = ln + 1;
   intBits = ib + 1;  
   format = 1;
-  ovflow = 0;
+  ovflow = FIX_OVERFLOW_SATURATE;
 }
 
 ////////////////////////////////////////////////////////////////
@@ -516,20 +527,26 @@ Fix operator - (const Fix& x, const Fix& y)
 }
 
 Fix operator * (const Fix& x, const Fix& y)
-{  
-  Fix X(x), Y(y), z;
-  if (x.length == 0 || y.length == 0) return z; 
+{
+  // Rewrote  if (x.length == 0 || y.length == 0) return z;
+  Fix z;
   int new_length  = x.length  + y.length;
   int new_intBits = x.intBits + y.intBits - 1;
+  z = Fix(new_length, new_intBits);
+  if ( (x.length == 0) || (x.value() == 0.0) ||
+       (y.length == 0) || (y.value() == 0.0) ) {
+    z = 0.0;
+    return z;
+  }
+
+  Fix X(x), Y(y);
   if (x.signBit()) complement(X);
   if (y.signBit()) complement(Y);
 
-  z = Fix(new_length, new_intBits);
-
-  for (int i=x.words() - 1; i >= 0; i-- )
+  for (int i = x.words() - 1; i >= 0; i-- )
   {
      uint32 carry = 0;
-     for (int j=y.words() - 1; j >= 0; j-- )
+     for (int j = y.words() - 1; j >= 0; j-- )
      {
          int k = i + j + 1;
          uint32 a = (uint32)X.Bits[i] * (uint32)Y.Bits[j];
@@ -550,12 +567,13 @@ Fix operator * (const Fix& x, const Fix& y)
 Fix operator * (const Fix& x, int n)
 {  
   int32 a, carry = 0;
-  Fix z;
-  if (x.length == 0) return z;
+  Fix z(x);
+  if ( (x.length == 0) || (x.value() == 0.0) || (n == 0) ) {
+    z = 0.0;
+    return z;
+  }
 
-  z = x;
-  for (int i= x.words() - 1; i >= 0; i-- )
-  {
+  for (int i = x.words() - 1; i >= 0; i-- ) {
      a = (int32)(uint32)x.Bits[i] * n + carry;
      z.Bits[i] = (uint16)a;
      carry = a >> BITS_PER_WORD;
@@ -719,15 +737,24 @@ Fix& Fix::operator -  () { complement(*this); return *this;}
 
 void printFix(const Fix& x)        // print contents
 {   
-  printf("Bits(hex) = ");
-  for (int i=0; i<WORDS_PER_FIX; i++)
-    printf("%04X ",x.Bits[i]);
-  printf("\n");
-  cout <<"length    = "<< x.len() << endl;
-  cout <<"intBits   = "<< x.intb() << endl;
-  cout <<"format    = "<< x.fixtype() << endl;
-  cout <<"ovflow    = "<< x.overflow() << endl;
-  cout <<"value     = "<< x.value() <<endl;
+  printf( "Bits(hex) = " );
+  for ( int i = 0; i < WORDS_PER_FIX; i++ )
+    printf("%04X ", x.Bits[i]);
+  printf( "\n" );
+
+  cout << "length    = " << x.len() << endl;
+  cout << "intBits   = " << x.intb() << endl;
+  cout << "format    = " << x.fixtype() << endl;
+
+  char *overflowStr;
+  int overflowType = x.overflow();
+  if ( overflowType < 0 || overflowType >= TYPES_OF_FIX_OVERFLOW )
+    overflowStr = "not valid";
+  else
+    overflowStr = OverflowDescriptions[overflowType];
+  cout << "overflow  = " << overflowStr << endl;
+
+  cout << "value     = " << x.value() << endl;
 }
 
 ostream& operator << (ostream& s, const Fix& x)
@@ -773,50 +800,57 @@ void Fix::mask_truncate_round (int ln, uint16* bits)
 
 void overflow_handler (Fix& l, const Fix& r)
 {
-  if (l.overflow() == 0) {                   // saturate
-     if (!l.fixtype()) {                     // signed
+  switch ( l.overflow() ) {
+    case FIX_OVERFLOW_SATURATE:			// saturate
+      if ( ! l.fixtype() ) {			// signed
         if (r.signBit()) {
           l.Bits[0] = 0x8000;
           for (int i=1; i < l.words(); i++)  l.Bits[i] = 0; }
         else {
           l.Bits[0] = 0x7fff;
           for (int i=1; i < l.words(); i++)  l.Bits[i] = 0xffff; }
-     }
-     else {                                  //unsigned
+      }
+      else {					//unsigned
         if (r.signBit()) 
           for (int i=0; i < l.words(); i++)  l.Bits[i] = 0; 
         else {
           l.Bits[0] = 0x7fff;
           for (int i=1; i < l.words(); i++)  l.Bits[i] = 0xffff; }
-     }
-     Fix::mask_truncate(l.length, l.Bits); }
+      }
+       Fix::mask_truncate(l.length, l.Bits);
+       break;
 
-  else if (l.overflow() == 1)                // zero_saturate
-     for (int i=0; i < WORDS_PER_FIX; i++)  l.Bits[i] = 0; 
+    case FIX_OVERFLOW_ZERO_SATURATE:		// zero saturate
+      for (int i=0; i < WORDS_PER_FIX; i++)
+        l.Bits[i] = 0;
+      break;
 
-  else if (l.overflow() == 2) {              // wrapped
-     if (!l.fixtype()) {                     // signed
+    case FIX_OVERFLOW_WRAPPED:			// wrapped
+      if ( ! l.fixtype() ) {			// signed
         if (!r.signBit()) {
           l.Bits[0] = 0x8000;
           for (int i=1; i < l.words(); i++)  l.Bits[i] = 0; }
         else {
           l.Bits[0] = 0x7fff;
           for (int i=1; i < l.words(); i++)  l.Bits[i] = 0xffff; }
-     }
-     else {                                  // unsigned
-        if (!r.signBit()) 
+      }
+      else {					// unsigned
+        if ( ! r.signBit() ) 
           for (int i=0; i < l.words(); i++)  l.Bits[i] = 0; 
         else {
           l.Bits[0] = 0x7fff;
           for (int i=1; i < l.words(); i++)  l.Bits[i] = 0xffff; }
-     }
-     Fix::mask_truncate(l.length, l.Bits); }
+      }
+      Fix::mask_truncate(l.length, l.Bits);
+      break;
 
-  else if (l.overflow() == 3) {             // warning
-     Error::abortRun(" Fix : overflow error"); }
+    case FIX_OVERFLOW_WARNING:			// warning
+      Error::abortRun(" Fix : overflow error");
+      break;
 
-  else
-     Error::abortRun(": overflow handling method not defined");
+    default:
+      Error::abortRun(": overflow handling method not defined");
+  }
 }
 
 void overflow_handler (Fix& l, const double& d)
