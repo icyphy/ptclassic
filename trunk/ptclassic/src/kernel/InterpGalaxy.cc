@@ -164,7 +164,7 @@ InterpGalaxy::addNode (const char* nodename) {
 // Connect a porthole to a node.
 int
 InterpGalaxy::nodeConnect (const char* star, const char* port,
-			   const char* node) {
+			   const char* node, int delay) {
 	GenericPort *ph = findGenericPort (star, port);
 	if (ph == NULL) return FALSE;
 	Geodesic *g = nodes.nodeWithName (node);
@@ -175,13 +175,21 @@ InterpGalaxy::nodeConnect (const char* star, const char* port,
 	star = savestring (star);
 	port = savestring (port);
 	node = savestring (node);
-	if ((ph->isItOutput() ? g->setSourcePort (*ph) : g->setDestPort (*ph))
-	    == 0) return FALSE;
+	if (ph->isItOutput()) {
+		if (!g->setSourcePort (*ph, delay)) return FALSE;
+	}
+	else if (delay) {
+		Error::abortRun ("delay not allowed when nodeConnecting an input");
+		return FALSE;
+	}
+	else if (!g->setDestPort (*ph)) return FALSE;
+
 	// add to action list
 	actionList += "c";
 	actionList += star;
 	actionList += port;
 	actionList += node;
+	actionList += delay;
 }
 
 // disconnect a porthole from whatever it is connected to.
@@ -368,8 +376,9 @@ InterpGalaxy::clone() {
 			a = actionList.next();
 			b = actionList.next();
 			c = actionList.next();
-			gal->nodeConnect (a, b, c);
-			nacts -= 4;
+			ndelay = atoi(actionList.next());
+			gal->nodeConnect (a, b, c, ndelay);
+			nacts -= 5;
 			break;
 
 		case 'd':	// disconnect a porthole
