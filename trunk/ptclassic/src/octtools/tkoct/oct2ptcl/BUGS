@@ -1,0 +1,16 @@
+$Id$
+List of known bugs in oct2ptcl:
+
+1) oct2ptcl is too picky about some facets.  It thinks facets are
+corrupt, but the facet will work fine in Ptolemy.  oct2ptcl is
+technically correct here, but by not processing semi-corrupt facets,
+oct2ptcl is not very useful
+
+2) oct2ptcl has not been extended to handle initializable delays.
+The mdsdf:test:IIRusingFIR demo uses initializable delays.
+If we run oct2ptcl on this facet, we get:
+    connect Fork.output=21 output#2 FIR1 input
+
+However, if we compile this facet with ptolemy, we get:
+    connect Fork.output=21 output#2 FIR1 input "0 1"
+
