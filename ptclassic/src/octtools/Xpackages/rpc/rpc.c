@@ -1,7 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -671,8 +671,13 @@ double *real;
 STREAM stream;
 {
     char *charArray;
-    double db, *ptr;
-    long lngs[2];
+
+    union u_tag {
+      long lngs[2];
+      double db;
+    } u;
+
+    double db;
 
     if (!RPCFloatingPointSame) {
 	charArray = RPCARRAYALLOC(char, 20);
@@ -685,11 +690,9 @@ STREAM stream;
 	(void) RPCFREE(charArray);
 	
     } else {
-	RPCASSERT(RPCReceiveLong(&lngs[0], stream));
-	RPCASSERT(RPCReceiveLong(&lngs[1], stream));
-	ptr = (double *) lngs;
-	db = *ptr;
-	*real = db;
+  	RPCASSERT(RPCReceiveLong(&u.lngs[0], stream));
+  	RPCASSERT(RPCReceiveLong(&u.lngs[1], stream));
+ 	*real = u.db;
     }
 	
     return RPC_TRUE;
