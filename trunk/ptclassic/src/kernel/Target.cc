@@ -179,7 +179,10 @@ void Target::begin() {
 
 	GalStarIter nextStar(*gal);
 	Star *s;
-	while ((s = nextStar++) != 0) s->begin();
+	while ((s = nextStar++) != 0) {
+	    s->begin();
+	    if (SimControl::haltRequested()) return;
+	}
 
 	// resetPortBuffers() in each Block, serving as a reinitialize (but
 	// still keep the data structure).
@@ -191,6 +194,7 @@ void Target::begin() {
 	int i;
 	for (i = 0; i < nProcs() ; i++) {
 	    child(i)->begin();
+	    if (SimControl::haltRequested()) return;
 	}
 }
 
