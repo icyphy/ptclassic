@@ -107,7 +107,6 @@ void ParGraph::sortedInsert(EGNodeList& nlist, ParNode *node, int flag) {
 
 	// Attach a link iterator to the runnableNodes
 	EGNodeListIter NodeIter(nlist);
-	ParNode *pd;
 	EGNodeLink* nl;
 	EGNodeLink* tmp = nlist.createLink(node);
 
