@@ -141,7 +141,7 @@ int Wormhole :: checkReady() const {
 	// check each porthole whether it is ready.
 	BlockPortIter next(selfStar);
 	for (int i = selfStar.numberPorts(); i > 0; i--) {
-		EventHorizon& p = (EventHorizon&) *next++;
+		EventHorizon& p = *(EventHorizon*) next++;
 		if (p.isItInput()) {
 			FromEventHorizon* fp = (FromEventHorizon*) p.ghostPort;
 			if (!(fp->ready())) { flag = FALSE;
