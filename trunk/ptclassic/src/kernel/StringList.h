@@ -22,20 +22,52 @@ String class
 
 Programmer: D.G. Messerschmitt, U.C. Berkeley
 Date: Jan 11, 1990
+
+Revised by: J.T. Buck
+The revised version eliminates memory leaks and adds constructors
+with arguments.
 *******************************************************************/
 
 class StringList : SequentialList
 {
 public:
-	// Put first string on list; operators = and += act identically
-	operator = (char*);
-	operator = (int);
-	operator = (float);
+	// Constructors
+	// Note: StringList foo = bar; calls the constructor,
+	// if bar is char*, int, or double
+	StringList() {totalSize=0;}
+
+	StringList(const char* s) {
+		totalSize=strlen(s);
+		char* n = new char[totalSize+1];
+		strcpy(n,s);
+		put(n);
+	}
+
+	StringList(int i) {totalSize=0; *this += i;}
+
+	StringList(double d) {totalSize=0; *this += d;}
+
+	StringList(StringList& s) {totalSize=0; *this += s;}
+
+	// Destructor: delete all substrings
+	~StringList() {
+		for (int i=size(); i > 0; i--)
+			delete next();
+	}
+
+	// Put first string on list: same as +=
+	// Use of this operator to add something to a nonempty
+	// StringList is deprecated
+	StringList& operator = (const char* s) { return *this += s;}
+	StringList& operator = (int i) { return *this += i;}
+	StringList& operator = (double d) { return *this += d;}
+	StringList& operator = (StringList& s) { return *this += s;}
 
         // Add string to list
-        operator += (char*);
-	operator += (int);
-	operator += (float);
+        StringList& operator += (const char*);
+	StringList& operator += (int);
+	StringList& operator += (double);
+	StringList& operator += (StringList&);
 
         // Return size of list
         int size() {return SequentialList::size();}
@@ -46,16 +78,16 @@ public:
         // Reset to start of the list
         void reset() {SequentialList::reset();}
 
-	// Cast list of character strings into a single character string
-	// This operator copies string into static memory (to save memory
-	//   and avoid having to delete dynamically allocated memory)
-	// Caution: if two instances of StringList are both cast into
-	//   char*, the second will overwrite the first! 
-	operator char* ();
+	// Convert to char*
+	// NOTE!!  This operation modifies the StringList -- it calls
+	// the private consolidate method to collect all strings into
+	// one string and clean up the garbage.
+	operator char* () { return consolidate();}
 
-	StringList() {totalSize=0;}
-
+	// The following isn't all that efficient but...
+	StringList operator+(char* s) { StringList r(*this); r += s; return r;}
 private:
+	char* consolidate();
 	int totalSize;
 };
 
