@@ -1,3 +1,4 @@
+static const char file_id[] = "BDFWormhole.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -28,7 +29,7 @@ extern Error errorHandler;
 
 void BDFWormhole :: go() {
 	// set the currentTime of the inner domain.
-	scheduler->setCurrentTime(arrivalTime);
+	target->setCurrentTime(arrivalTime);
 
 	// run
 	run();
@@ -60,7 +61,7 @@ float BDFWormhole :: getArrivalTime() {
 }
 
 // Constructor
-BDFWormhole :: BDFWormhole(Galaxy& g) : Wormhole(*this,g)
+BDFWormhole :: BDFWormhole(Galaxy& g, Target* t) : Wormhole(*this,g,t)
 {
 	buildEventHorizons ();
 }
@@ -76,6 +77,6 @@ StringList BDFWormhole :: printRecursive() const {
 
 // cloner -- clone the inside and make a new wormhole from that.
 Block* BDFWormhole :: clone() const {
-	return new BDFWormhole(gal.clone()->asGalaxy());
+LOG_NEW; return new BDFWormhole(gal.clone()->asGalaxy(),target->cloneTarget());
 }
 

@@ -1,3 +1,4 @@
+static const char file_id[] = "BDFSchList.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -154,8 +155,8 @@ void BDFTreeNode::add(Star& star, const BoolTerm &t, int sdf, int writesBools) {
 	}
 
 // we must add a decision block if we get here.
-	BDFTestNode* tes = new BDFTestNode(q->p);
 	decis = &q->p;
+	BDFTestNode* tes = new BDFTestNode(*(PortHole*)decis);
 	ifTrue = new BDFTreeNode(tes->ifTrue);
 	ifFalse = new BDFTreeNode(tes->ifFalse);
 	BoolTerm nt(t);

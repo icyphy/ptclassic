@@ -65,7 +65,7 @@ public:
 	// about the signal.
         PortHole& setPort(const char* portName,
                           Block* parent,
-                          dataType type = FLOAT,
+                          DataType type = FLOAT,
 			  unsigned numTokens = 1,
 			  PortHole* assocBool = 0,
 			  int relation = TRUE,
@@ -85,11 +85,11 @@ public:
 			  PortHole& assocBool,
 			  int relation = TRUE,
 			  int delay = 0) {
-		setBDFParams(numTokens,&assocBool,relation,delay);
+		return setBDFParams(numTokens,&assocBool,relation,delay);
 	}
 
 	// Services of PortHole that are often used:
-	// setPort(dataType d);
+	// setPort(DataType d);
 	// Particle& operator % (int);
 };
 
@@ -106,7 +106,7 @@ public:
 	void grabData();
 
         // Services of PortHole that are often used: 
-        // setPort(dataType d); 
+        // setPort(DataType d); 
         // Particle& operator % (int);
 };
 
@@ -131,7 +131,7 @@ public:
 	void sendData();
 
         // Services of PortHole that are often used: 
-        // setPort(dataType d); 
+        // setPort(DataType d); 
         // Particle& operator % (int);
 };
 
@@ -147,7 +147,7 @@ public:
         // argument, the number of Particles produced
         MultiPortHole& setPort(const char* portName,
                           Block* parent,
-			       dataType type = FLOAT,
+			       DataType type = FLOAT,
 			  unsigned numTokens = 1,
 			  PortHole* assocBool = 0,
 			  int rel = FALSE,

@@ -1,3 +1,4 @@
+static const char file_id[] = "BDFDomain.cc";
 /**********************************************************************
 Version identification:
 $Id$
@@ -5,7 +6,7 @@ $Id$
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer:  Soonhoi Ha
+ Programmer:  J. Buck and S. Ha
  Date of creation: 8/31/90
 
  A device to produce the correct portholes, wormholes, event horizons,
@@ -15,6 +16,8 @@ $Id$
 ***********************************************************************/
 
 #include "Domain.h"
+#include "Target.h"
+#include "KnownTarget.h"
 #include "BDFScheduler.h"
 #include "BDFWormhole.h"
 #include "BDFConnect.h"
@@ -25,12 +28,9 @@ extern const char BDFdomainName[] = "BDF";
 
 class BDFDomain : public Domain {
 public:
-	// new scheduler
-	Scheduler& newSched() { return *new BDFScheduler;}
-
 	// new wormhole
-	Star& newWorm(Galaxy& innerGal)  {
-		return *new BDFWormhole(innerGal);
+	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
+		return *new BDFWormhole(innerGal,innerTarget);
 	}
 
 	// new input porthole
@@ -54,3 +54,22 @@ public:
 
 // declare a prototype
 static BDFDomain proto;
+
+// declare the default Target object
+
+class BDFTarget : public Target {
+public:
+	BDFTarget() : Target("default-BDF", "DataFlowStar",
+			     "default BDF target") {
+		LOG_NEW; setSched(new BDFScheduler);
+	}
+	~BDFTarget() { LOG_DEL; delSched();}
+	Block* clone() const;
+};
+
+Block* BDFTarget::clone() const {
+	LOG_NEW; return new BDFTarget;
+}
+
+static BDFTarget defaultBDFtarget;
+static KnownTarget entry(defaultBDFtarget,"default-BDF");

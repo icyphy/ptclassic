@@ -47,10 +47,13 @@ public:
 	void wrapup() { endSimulation();}
 
 	// Constructor
-	BDFWormhole(Galaxy& g);
+	BDFWormhole(Galaxy& g, Target* t = 0);
+
+	// Destructor
+	~BDFWormhole() { freeContents();}
 
 	// return my scheduler
-	Scheduler* mySched() const { return scheduler ;}
+	Scheduler* mySched() const { return target->mySched() ;}
 
 	// print methods
 	StringList printVerbose() const;
@@ -66,7 +69,7 @@ public:
 	int isItWormhole() const { return TRUE;}
 
 	// use statelist for inner galaxy for stateWithName
-	State* stateWithName (const char* name) const {
+	State* stateWithName (const char* name) {
 		return gal.stateWithName(name);
 	}
 };

@@ -20,7 +20,7 @@ class StringList;
 
 // a BoolSignal represents a single boolean signal, which may be negated.
 struct BoolSignal {
-	friend int operator==(BoolSignal& a, BoolSignal& b);
+	friend int operator==(const BoolSignal& a, const BoolSignal& b);
 	friend StringList& operator+=(StringList&, const BoolSignal&);
 	friend class BoolTerm;
 private:
@@ -38,7 +38,7 @@ public:
 	const BoolSignal* next() const { return link;}
 };
 
-inline int operator==(BoolSignal& a, BoolSignal& b) {
+inline int operator==(const BoolSignal& a, const BoolSignal& b) {
 	return &(a.p) == &(b.p) && a.negated == b.negated;
 }
 
@@ -49,12 +49,12 @@ class BoolTerm {
 private:
 	BoolSignal* bList;
 	BoolTerm& fastAdd(const BoolSignal& term) {
-		bList = new BoolSignal(term,bList);
+		INC_LOG_NEW; bList = new BoolSignal(term,bList);
 		return *this;
 	}
 	void copy(const BoolTerm&);
 public:
-	unsigned constTerm;	// allow this to be written directly.
+	int constTerm;	// allow this to be written directly.
 	int pureNumber() const { return !bList;}
 	const BoolSignal* list() const { return bList;}
 	BoolTerm& add(const BoolSignal&);
@@ -64,9 +64,9 @@ public:
 	void zerofy();
 	int contradiction() const;
 	BoolTerm& lcm(const BoolTerm&);
-	BoolTerm(unsigned i=1) : constTerm(i), bList(0) {}
-	BoolTerm(unsigned i,const BoolSignal& term) : constTerm(i) {
-		bList = new BoolSignal(term);
+	BoolTerm(int i=1) : constTerm(i), bList(0) {}
+	BoolTerm(int i,const BoolSignal& term) : constTerm(i) {
+		INC_LOG_NEW; bList = new BoolSignal(term);
 	}
 	BoolTerm(const BoolTerm& arg) { copy(arg);}
 	BoolTerm& operator=(const BoolTerm& arg) {
@@ -100,9 +100,15 @@ public:
 	BoolFraction& operator = (const BoolFraction& f) {
 		numerator = f.numerator;
 		denominator = f.denominator;
+		return *this;
 	}
-	BoolTerm& num() const { return numerator;}
-	BoolTerm& den() const { return denominator;}
+	// const forms
+	const BoolTerm& num() const { return numerator;}
+	const BoolTerm& den() const { return denominator;}
+	// non-const forms
+	BoolTerm& num() { return numerator;}
+	BoolTerm& den() { return denominator;}
+
 	BoolFraction& simplify();
 	BoolFraction& add(const BoolSignal& s) {
 		numerator.add(s); return *this;
@@ -119,6 +125,7 @@ public:
 	BoolFraction& operator/= (const BoolFraction& arg) {
 		numerator *= arg.denominator;
 		denominator *= arg.numerator;
+		return *this;
 	}
 };
 
