@@ -37,9 +37,7 @@
 # <p>
 # Here is an example of how to use the EditPalette:
 # <tcl><pre>
-#     catch {delete object .f}
-#     ::tycho::EditPalette .f -file $PTOLEMY/init.pal
-#     .f centerOnScreen
+#     ::tycho::view EditPalette [list -file $PTOLEMY/init.pal]
 # </pre></tcl>
 #
 class ::tycho::EditPalette {
