@@ -95,19 +95,39 @@ class ::tycho::Solid {
     # The object used to get shades of color
     common colorShadesObject
 
+    # All methods are looked up through a table
+    common methodtable
+
+    # All options have a default value
+    common optiondefault
+
     # The "shape" of pictures of this class
     common shape "polygon"
-
-    #### Set option defaults
-    set optiondefault(-color)       background
-    set optiondefault(-borderwidth) 2
-    set optiondefault(-relief)      raised
 
     ###################################################################
     ####                        private procs                      ####
 
     private proc adjust {id canvas name shade coords} {}
 
+    ###################################################################
+    ####                       class initialization                ####
+
+    #### Set method table
+    array set methodtable [array get ::tycho::Picture::methodtable]
+
+    set methodtable(borderwidth) ::tycho::Solid::borderwidth
+    set methodtable(color)       ::tycho::Solid::color
+    set methodtable(construct)   ::tycho::Solid::construct
+    set methodtable(coords)      ::tycho::Solid::coords
+    set methodtable(ghost)       ::tycho::Solid::ghost
+    set methodtable(relief)      ::tycho::Solid::relief
+
+    #### Set option defaults
+    array set optionedefault [array get ::tycho::Picture::optiondefault]
+
+    set optiondefault(-color)       background
+    set optiondefault(-borderwidth) 2
+    set optiondefault(-relief)      raised
 }
 
 ##########################################################################
