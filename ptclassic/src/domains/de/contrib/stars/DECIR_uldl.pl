@@ -47,7 +47,6 @@ defstar{
 	default { "$PTOLEMY/src/domains/de/contrib/stars/topo.dxf" }
 	descriptor { File describing topology }
     }
-
     header { 
         //declare list_h for that file
         extern Handy *list_h;
@@ -231,7 +230,8 @@ defstar{
                                 interf_flag=1;
                             }    
                             if (interf_flag) {
-                                I = prop_class.MS_Stoerer(b, interferer->MS_pos); 
+                                I = prop_class.MS_Stoerer(b,
+					 interferer->MS_pos, fileName); 
                                 I_Sum+=t_value * pow(10.0, I/10);         // worst case, I[mW] 
                                 if (t_value>mobile->I_Tab[s].t_value)
                                 mobile->I_Tab[s].t_value=t_value;
@@ -300,7 +300,7 @@ defstar{
                                 intf_flag=1;
                             }
                             if (intf_flag) {
-                                I = prop_class.BS_Stoerer(n, b); 
+                                I = prop_class.BS_Stoerer(n, b, fileName); 
                                 I_Sum+=t_value * pow(10.0, I/10);          // worst case, I[mW] 
                                 if (t_value>mobile->I_Tab[s].t_value)
                                 mobile->I_Tab[s].t_value=t_value;

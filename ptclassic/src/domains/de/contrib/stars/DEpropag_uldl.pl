@@ -98,7 +98,7 @@ begin {
 method {
     name { BS_Stoerer }		
     access { public }  
-    arglist { "(int I_number, int C_number)" } 
+    arglist { "(int I_number, int C_number, const char* topoFileName)" } 
     type { float }
     code {
 
@@ -106,7 +106,7 @@ method {
 	 LI_number=I_number;			// interf. BS-cellnumber
 	 LC_number=C_number;		        // desired BS-Pos
 
-	 Abzweig();
+	 Abzweig(topoFileName);
 	 return (Berechnung());
          }
 }
@@ -114,7 +114,7 @@ method {
 method {
     name { MS_Stoerer }			
     access { public }  
-    arglist { "(int number, Complex Tposition)" } 
+    arglist { "(int number, Complex Tposition, const char* topoFileName)" } 
     type { float }
     code {
 
@@ -122,7 +122,7 @@ method {
 	 LC_number=number;			// interf. BS-cellnumber
 	 position=Tposition;		        // desired BS-Pos
 
-	 Abzweig();
+	 Abzweig(topoFileName);
 	 return (Berechnung());
          }
 }
@@ -131,6 +131,7 @@ method {
 method {
     name { Abzweig }
     access { private } 
+    arglist { "(const char* topoFileName)" } 
     type { void }
     code {
 
@@ -163,7 +164,7 @@ method {
 	if (Gelesen==1)  Objekte_abtast();    
 	else
 	{
-		File_lesen();
+		File_lesen(topoFileName);
 		Sortierung();
 		Objekte_abtast();
 	}
@@ -237,6 +238,7 @@ method {
 method {
     name { File_lesen }
     access { private }
+    arglist { "(const char *name)" }
     type { void }
     code {
 
@@ -250,7 +252,7 @@ method {
   
    pt_ifstream in;
    in.close();
-   in.open(fileName);
+   in.open(name);
    if (!in) {
 	Error::abortRun(*this, "can't open dxf-file  ", fileName);
 	}
@@ -1690,7 +1692,7 @@ method {
         		LC_number = cellnumb.get();
 			position = MS_Position.get();		// MS: Transceiver-pos
 
-			Abzweig();
+			Abzweig(fileName);
 			C_dBm.put(arrivalTime) << Berechnung();			
        		}
           
