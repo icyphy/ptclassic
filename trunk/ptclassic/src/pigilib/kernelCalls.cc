@@ -94,7 +94,7 @@ extern "C" void KcLog(const char* str) { LOG << str; }
 #define MAX_NUM_MULTS 4
 
 static const char* parseClass (const char* name, const char* mph[], int nP[]) {
-	static char buf[128], buf2[MAX_NUM_MULTS][128], buf3[32];
+	static char buf[128], buf2[MAX_NUM_MULTS][128];
 	char *p;
 	p = buf;
 
@@ -859,6 +859,11 @@ Get the state of animation.
 extern "C" int
 KcGetAnimationState() {
 	return (animatePre != 0);
+}
+
+extern "C" const char*
+KcExpandPathName(const char* name) {
+    return expandPathName(name);
 }
 
 // catch signals -- Vem passes the SIGUSR1 signal by default

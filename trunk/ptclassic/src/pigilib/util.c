@@ -71,49 +71,15 @@ char *string;
 }
 
 
-/* TildeExpand  4/28/88
-Copied from OCT.  Modified a little.
-Inputs: input = string "~xxx..."
-    buffer = buffer of chars
-Outputs: buffer = expanded string
-Caveats: does not skip white space at beginning of string.
+/*
+Use the ptolemy kernel expansion call -- kennard
 */
 void
 TildeExpand(input, buffer)
 char *input;
 char *buffer;
 {
-    char *end;
-    int name_length;
-    struct passwd *entry;
-
-    if (input[0] != '~') {
-	strcpy(buffer, input);
-	return;
-    }
-    
-    end = index(input,'/');
-    if (end == (char *) 0) {
-	end = input + strlen(input);
-    }
-
-    name_length = end - input - 1;
-
-    strncpy(buffer, input+1, name_length);
-    buffer[name_length] = '\0';
-
-    if (name_length == 0) {
-	entry = getpwuid(getuid());
-    } else {
-	entry = getpwnam(buffer);
-    }
-    
-    if (entry == (struct passwd *) 0) {
-	return;
-    }
-
-    strcpy(buffer, entry->pw_dir);
-    strcat(buffer, end);
+    strcpy( buffer, KcExpandPathName(input));
     return;
 }
 
