@@ -1,0 +1,197 @@
+# Version Identification:
+# $Id$
+# Copyright (c) 1994 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# src/tcltk/makefile
+# Makefile to build and install tcl/tk
+
+# You should not need to edit this file, merely set the
+# ARCH and PTOLEMY environment variables, for example:
+#	setenv ARCH sun4
+#	setenv PTOLEMY /users/ptolemy
+
+# Destination of the tcl/tk binaries, libraries and include files. 
+TCLTK_DEST=$(PTOLEMY)/tcltk
+
+# Location of the TCL sources.
+TCLTK_SRC=$(PTOLEMY)/src/tcltk
+
+# Location of the architecture specific build directory.
+TCLTK_OBJ=$(PTOLEMY)/obj.$(ARCH)/tcltk
+
+# No changes should be necessary below this line
+#---------------------------------------------------------
+
+# Version numbers
+TCL_VERSION =	tcl7.3
+TK_VERSION =	tk3.6p1-TkPixmap3.6a
+
+# Location of the tcl source
+TCL_SRC =	$(TCLTK_SRC)/$(TCL_VERSION)
+
+# Location of the tk source
+TK_SRC =	$(TCLTK_SRC)/$(TK_VERSION)
+
+# Location of the tcl only object files
+TCL_OBJ =	$(TCLTK_OBJ)/tcl
+
+# Location of the tk only object files
+TK_OBJ =	$(TCLTK_OBJ)/tk
+
+# Destination of tcl only machine dependent files
+TCL_DEST =	$(TCLTK_DEST)/tcl.$(ARCH)
+# Destination of the machine INDEPENDENTendent tcl files
+TCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/tcl
+
+# Destination of tk only machine dependent files
+TK_DEST =	$(TCLTK_DEST)/tk.$(ARCH)
+# Destination of the machine independent tk files
+TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/tk
+
+all: 		configure tcl tk
+configure:	$(TCL_OBJ)/config.status $(TK_OBJ)/config.status \
+			$(TCLTK_OBJ)/$(TCL_VERSION) $(TCLTK_OBJ)/makefile
+bin:		tcl tk
+install:	install_tcl install_tk
+clean:		clean_tcl clean_tk
+realclean:	clean_tcl clean_tk
+
+.PHONY:	tcl tk configure install_tcl install_tk	clean_tcl clean_tk realclean
+
+#
+# Rules for tcl
+#
+
+# Configure tcl
+$(TCL_OBJ)/config.status: $(TCLTK_OBJ) $(TCL_OBJ)
+	@echo "Configuring tcl"
+	(cd $(TCL_OBJ); $(TCL_SRC)/configure -v --srcdir=$(TCL_SRC) --prefix=$(TCL_INDEPENDENT_DEST) --exec-prefix=$(TCL_DEST) )
+
+$(TCL_OBJ): 
+	mkdir $(TCL_OBJ)
+
+$(TCLTK_OBJ):
+	mkdir $(TCLTK_OBJ)
+
+# Build tcl
+tcl: $(TCL_OBJ)/libtcl.a
+$(TCL_OBJ)/libtcl.a: $(TCL_OBJ)
+	@echo "Making all in tcl"
+	(cd  $(TCL_OBJ); $(MAKE) all)
+
+# Install tcl
+install_tcl: $(TCL_DEST)/lib/libtcl.a
+$(TCL_DEST)/lib/libtcl.a: $(TCL_OBJ)/libtcl.a $(TCLTK_DEST) $(TCL_DEST) $(TCL_DEST)/lib $(TCL_INDEPENDENT_DEST)
+	(cd  $(TCL_OBJ); $(MAKE) install)
+
+$(TCLTK_DEST):
+	mkdir $(TCLTK_DEST)
+
+$(TCL_INDEPENDENT_DEST):
+	mkdir $(TCL_INDEPENDENT_DEST)
+
+$(TCL_DEST):
+	mkdir $(TCL_DEST)
+
+$(TCL_DEST)/lib:
+	mkdir $(TCL_DEST)/lib
+
+clean_tcl:
+	(cd $(TCL_OBJ); $(MAKE) clean)
+
+##############
+# Rules for tk
+#
+
+# Configure tk
+#	Need to make a link for tk.h so that we are sure it is installed
+#	Theoretically, GNU make should do the right thing, but . . .
+$(TK_OBJ)/config.status: $(TCLTK_OBJ) $(TK_OBJ) $(TCLTK_OBJ)/$(TCL_VERSION) \
+			$(TK_OBJ)/xpm
+	@echo "Configuring tk"
+	(cd $(TK_OBJ); $(TK_SRC)/configure -v --srcdir=$(TK_SRC) --prefix=$(TK_INDEPENDENT_DEST) --exec-prefix=$(TK_DEST) )
+	-(cd $(TK_OBJ); ln -s $(TK_SRC)/tk.h tk.h)
+
+$(TK_OBJ):
+	mkdir $(TK_OBJ)
+
+# Need the xpm directory for TkPixmap
+$(TK_OBJ)/xpm:
+	mkdir $(TK_OBJ)/xpm
+	(cd $(TK_OBJ)/xpm; ln -s $(TK_SRC)/xpm/* .)
+
+# This link is necessary for the tk build to find libtcl.a
+$(TCLTK_OBJ)/$(TCL_VERSION): $(TCL_OBJ)
+	(cd $(TCLTK_OBJ); ln -s $(TCL_OBJ) $(TCLTK_OBJ)/$(TCL_VERSION))
+
+# Build tk
+tk: $(TK_OBJ)/libtk.a 
+$(TK_OBJ)/libtk.a: $(TK_OBJ) $(TK_OBJ)/xpm/libxpm.a
+	@echo "Making all in tk"
+	(cd  $(TK_OBJ); $(MAKE) all)
+
+# Build libxpm for TkPixMap
+# If your system does not have strdup(), use the following (Ultrix4.3a)
+XPM_DEFINES=-DZPIPE -DNEED_STRDUP
+# Otherwise:
+#XPM_DEFINES="-DZPIPE"
+
+ROOT	      = ../..
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+include $(CONFIG)
+
+all_xpm: $(TK_OBJ)/xpm/libxpm.a
+$(TK_OBJ)/xpm/libxpm.a: $(TK_OBJ)/xpm
+	(cd $(TK_OBJ)/xpm; $(MAKE) -f Makefile.noXtree \
+		DESTBINDIR=$(TK_DEST)/bin \
+		DESTLIBDIR=$(TK_DEST)/lib \
+		DESTINCLUDEDIR=$(TK_INDEPENDENT_DEST)/include \
+		DEFINES="$(XPM_DEFINES)" \
+	all)
+
+# Install tk
+install_tk: $(TK_DEST)/lib/libtk.a $(TK_DEST)/lib/libxpm.a
+$(TK_DEST)/lib/libtk.a: $(TK_OBJ)/libtk.a $(TCLTK_DEST) $(TK_DEST) $(TK_DEST)/lib $(TK_INDEPENDENT_DEST)
+	(cd  $(TK_OBJ); $(MAKE) install)
+
+install_xpm:$(TK_DEST)/lib/libxpm.a
+$(TK_DEST)/lib/libxpm.a: $(TK_OBJ)/xpm/libxpm.a
+	(cd $(TK_OBJ)/xpm; $(MAKE) -f Makefile.noXtree \
+		DESTBINDIR=$(TK_DEST)/bin \
+		DESTLIBDIR=$(TK_DEST)/lib \
+		DESTINCLUDEDIR=$(TK_INDEPENDENT_DEST)/include \
+		RANLIB=$(RANLIB) \
+	install)
+
+$(TK_DEST):
+	mkdir $(TK_DEST)
+$(TK_DEST)/lib:
+	mkdir $(TK_DEST)/lib
+$(TK_INDEPENDENT_DEST):
+	mkdir $(TK_INDEPENDENT_DEST)
+
+clean_tk:
+	(cd $(TK_OBJ); $(MAKE) clean)
+
+$(TCLTK_OBJ)/makefile:
+	ln -s $(TCLTK_SRC)/makefile $@
