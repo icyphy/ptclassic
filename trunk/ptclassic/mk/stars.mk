@@ -414,6 +414,7 @@ ifdef ACS
 		$(LIBDIR)/libacs.$(LIBSUFFIX)
 	# dependencies
 	CG = 1
+	CGC = 1
 endif
 
 ifdef DDF
