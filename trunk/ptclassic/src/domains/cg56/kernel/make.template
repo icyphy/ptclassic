@@ -37,7 +37,8 @@ HDRS= CG56Connect.h CG56Star.h CG56Target.h CG56WormConnect.h \
 
 # Library objects
 OBJS= CG56Connect.o CG56Star.o CG56Domain.o CG56Target.o CG56WormConnect.o \
- MotorolaAttributes.o MotorolaConnect.o MotorolaTarget.o MotorolaSimTarget.o
+MotorolaAttributes.o MotorolaConnect.o MotorolaTarget.o MotorolaSimTarget.o \
+
 
 # Library sources
 SRCS= $(OBJS:.o=.cc)
