@@ -725,6 +725,7 @@ octObject *facetPtr;
 			break;
 		    }
 		}
+		if (errMsg) break;         /* Tom Lane's fix, 1/9/96 */
 	    } else {
 		/* error: multiple outputs connected to one ordinary input */
 		strcpy(msg, "can't connect more than one output port:\n");
@@ -752,12 +753,14 @@ octObject *facetPtr;
 			break;
 		    }
 		}
+		if (errMsg) break;         /* Tom Lane's fix, 1/9/96 */
 		for (i = 0; i < inN; i++) {
 		    if (!JoinToNode(&in[i], nodename)) {
 			errMsg = "";
 			break;
 		    }
 		}
+		if (errMsg) break;         /* Tom Lane's fix, 1/9/96 */
 	    }
 	    free(nodename);
 	}
