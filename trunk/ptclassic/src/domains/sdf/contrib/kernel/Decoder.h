@@ -5,10 +5,6 @@
 #ifndef Decoder_h
 #define Decoder_h
 
-inline double sqr( double x ) {
-  return x * x;
-}
-
 inline int Bit( int x, int b ) {
   return ( x >> b ) & 1 ;
 }
@@ -43,7 +39,7 @@ private:
 
   // That's right folks.  *Squared* distance.  RTFM.
   double sqdist( double xmit, double rcv ) {
-    return sqr( xmit - rcv );
+    return ( (xmit - rcv) * (xmit - rcv) );
   }
 
   double XmitMap( int val ) {
