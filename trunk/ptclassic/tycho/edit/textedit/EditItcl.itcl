@@ -122,6 +122,7 @@ class ::tycho::EditItcl {
     ###################################################################
     ####                   protected variables                     ####
 
+    # The name of the class in this file
     protected variable className {}
 
     ####################################################################
