@@ -22,9 +22,10 @@ Below is a list of common problems that people have with Tycho.
 <H2><A NAME="Problems Starting Tycho">Problems Starting Tycho</A></H2>
 
 <H3><A NAME="itcl versions">Itcl Versions</A></H3>
-Note that Tycho0.2 will <B>not</B> work with Itcl2.0 or Itcl2.1, you must have
-Itcl2.2.  (Itcl2.0 was shipped with Ptolemy0.6, Itcl2.2 was shipped with
-with Ptolemy0.7)
+
+Note that Tycho0.2 and later will <B>not</B> work with Itcl2.0 or
+Itcl2.1, you must have Itcl2.2.  (Itcl2.0 was shipped with Ptolemy0.6,
+Itcl2.2 was shipped with with Ptolemy0.7 and 0.7.1)
 
 <H3><A NAME="libitk error messages"></A></H3>
 If Tycho fails to start with a message like:
@@ -141,11 +142,15 @@ HREF="coding/directories.html#tylndir and private trees"><CODE>$TYCHO/doc/coding
 Under Itcl2.2 on Windows, some colors in bitmaps might be rendered
 incorrectly.  An example of this is the parts of 
 bitmap in the Tycho Welcome Window will be yellow instead grey.
+
  <P>One workaround is to use the Color Palette settings and change the
 number of colors.  To get to this control panel, right click on the
 background, select <CODE>Properties</CODE>, which will bring up the
-<CODE>Display Properties</CODE> window.  In that window, select the 
+<CODE>Display Properties</CODE> window.  In that window, select the
 <CODE>Settings</CODE> tab and then change the Color Palette setting.
+You may need to to try several different settings before finding one
+that works best for you.
+
 
 <H2><A NAME="debugging hints">Debugging hints</A></H2>
 
@@ -163,21 +168,19 @@ an error during startup.
 <CODE>itkwish</CODE>
 
 <PRE>
-cxh@watson 357% setenv TYCHO ~/pt/tycho
-cxh@watson 358% cd $TYCHO/kernel
-cxh@watson 359% itkwish
+cxh@carson 37% setenv TYCHO ~/pt/tycho
+cxh@carson 38% cd $TYCHO/kernel
+cxh@carson 39% itkwish
 % set tyDebug 1
 1
 % source Tycho.tcl
 TYCHO=/users/cxh/pt/tycho
-Set auto_path
-About to source FontManager.itcl
-Sourced ErrorMessage.itcl
-Handled preferences
+Loaded packages
 Processed argv
-About to create a TclConsole
+About to create a TclShell
+About to unset
 % exit
-cxh@watson 360% 
+cxh@carson 40% 
 </PRE>
 
 <p>
