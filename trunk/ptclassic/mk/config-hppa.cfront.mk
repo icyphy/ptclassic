@@ -157,7 +157,7 @@ CRT0 =
 # List of libraries to search, obviating the need to set SHLIB_PATH
 # See the ld man page for more information.  These path names must
 # be absolute pathnames, not relative pathnames.
-#SHARED_LIBRARY_PATH = $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(PTOLEMY)/tcltk/itcl.$(PTARCH)/lib/itcl
+#SHARED_LIBRARY_PATH = $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(PTOLEMY)/tcltk/tcl.$(PTARCH)/lib
 #SHARED_LIBRARY_R_LIST = -Wl,+s,+b,$(SHARED_LIBRARY_PATH)
 
 # system libraries (libraries from the environment)
