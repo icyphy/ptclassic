@@ -90,9 +90,9 @@ test SDFCxToInt { SDFCxToInt } {
 }}
 
 ######################################################################
-#### test SDFCxToRect
+#### test SDFCxToRect-1
 # 
-test SDFCxToRect { SDFCxToRect} {
+test SDFCxToRect-1 { SDFCxToRect} {
     set star CxToRect
     reset __empty__
     domain SDF
@@ -131,6 +131,40 @@ test SDFCxToRect { SDFCxToRect} {
 0.0	
 0.0	
 0.0	
+}}}
+
+######################################################################
+#### test SDFCxToRect-2
+# 
+test SDFCxToRect-2 { SDFCxToRect -> SDFRectToCx} {
+    reset __empty__
+    domain SDF
+    newuniverse SDFCxToRect SDF
+    target loop-SDF
+
+    star Rampa Ramp
+    star CxToRect.a CxToRect
+    star RectToCx.a RectToCx
+    set tmpfile [sdfSetupPrinter]
+    connect RectToCx.a output Printa input
+    connect CxToRect.a imag RectToCx.a imag
+    connect CxToRect.a real RectToCx.a real
+    connect Rampa output CxToRect.a input
+
+    run 10 
+    wrapup
+    
+    list [readTmpFile $tmpfile]
+} {{{(0.0,0.0)	
+(1.0,0.0)	
+(2.0,0.0)	
+(3.0,0.0)	
+(4.0,0.0)	
+(5.0,0.0)	
+(6.0,0.0)	
+(7.0,0.0)	
+(8.0,0.0)	
+(9.0,0.0)	
 }}}
 
 ######################################################################
