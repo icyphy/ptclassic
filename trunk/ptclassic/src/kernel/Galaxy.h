@@ -25,6 +25,9 @@ $Id$
     4/20/90 - J. Buck
 	Revised; now PortHole and MultiPortHole come from GenericPort.
 
+    5/17/90 - I. Kuroda
+        Added methods for State.
+
 Definition of the Galaxy class, together with the BlockList class.
 
 **************************************************************************/
@@ -94,7 +97,17 @@ protected:
 
 	// support blockWithName message to access internal block list
 	Block* blockWithName (const char* name) {return blocks.blockWithName(name);}
+
 public:
+
+        // Define States of component Blocks by States of this Block
+        stateAlias(Block& b, char* stateName, char* expression)  {
+                b.stateWithName(stateName)->setValue(expression);
+        }
+
+        // States initialize
+        void initState();
+
 	// Return the number of blocks in the galaxy.
 	int numberBlocks() {return blocks.size();}
 

@@ -1,7 +1,7 @@
 #include "Block.h"
 #include "StringList.h"
 #include "Output.h"
-
+#include <stream.h>
 /**************************************************************************
 Version identification:
 $Id$
@@ -15,6 +15,9 @@ $Id$
 	3/19/90 - J. Buck
 		  add method Block::portWithName
 		  returns a pointer to the PortHole with the given name
+	5/26/90 - I. Kuroda
+		  add method Block::printStates
+		  add method Block::stateWithName
 
 Routines implementing class Block methods
  
@@ -43,6 +46,22 @@ Block :: printPorts (const char* type) {
 	return out;
 }
 
+StringList
+Block :: printStates (const char* type) {
+        StringList out;
+        out += "States in the ";
+        out += type;
+        out += " ";
+        out += readName();
+        out += ":\n";
+        out += "Number of status: ";
+        out += numberStates();
+        out += "\n";
+        for(int i = numberStates(); i>0; i--)
+                out += (StringList) nextState();
+        return out;
+}
+
 Block :: operator StringList ()
 {
 	StringList out;
@@ -53,6 +72,7 @@ Block :: operator StringList ()
 	out += readDescriptor();
 	out += "\n";
 	out += printPorts("block");
+        out += printPorts("block");
 	return out;
 }
 
@@ -61,6 +81,8 @@ void Block :: initialize()
 	// Call initialize() for each PortHole
 	for(int i = numberPorts(); i>0; i--)
 		nextPort().initialize();
+        // initialize States
+        initState();
 }
 
 // This method returns a PortHole corresponding to the given name.
@@ -122,4 +144,17 @@ Block::multiPortNames (const char** names, int* io, int nMax) {
 	}
 	return multiports.size();
 }
+
+
+State *
+Block::stateWithName(const char* name)
+        {       State* sp;
+                for(int i  = states.size(); i>0; i--) {
+                        sp = &nextState();
+                        if(strcmp(name,sp->readName()) == 0)
+                                return  sp;
+                        }
+                return NULL;
+        }
+
 

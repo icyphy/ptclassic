@@ -7,6 +7,10 @@ $Id$
 
  Programmer:  J. T. Buck
  Date of creation: 3/18/90
+ Revisions:
+	5/26/90 - I. Kuroda
+		add InterpGalaxy::addState
+		add InterpGalaxy::setState
 
  InterpGalaxy is a galaxy that may dynamically be added to, as well
  as cloned.
@@ -17,6 +21,7 @@ $Id$
 
 #include "Galaxy.h"
 #include "KnownBlock.h"
+#include "KnownState.h"
 #include "StringList.h"
 
 class InterpGalaxy: public Galaxy {
@@ -40,6 +45,12 @@ public:
 		const char* dstport, int delay = 0);
 // add an alias
 	alias(const char* galport, const char* star, const char *starport);
+
+// add a state
+        addState(const char* statename, const char* stateclass, const char* statevalue);
+
+// set a state
+        setState(const char* blockname, const char* statename, const char* statevalue);
 
 // Make a new, identical galaxy
 	virtual Block *clone();
