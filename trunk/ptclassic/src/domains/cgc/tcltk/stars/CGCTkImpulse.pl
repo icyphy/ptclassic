@@ -20,7 +20,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { float }
 		default { 1.0 }
 		desc { The height of the impulse. }
-		attributes { A_GLOBAL }
 	}
 	defstate {
 		name {identifier}
@@ -44,7 +43,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	// Note that window names cannot start with upper case letters
 	codeblock (tkSetup) {
 	    /* Establish the Tk button */
-	    makeButton("cp_middle",	/* location in the control panel */
+	    makeButton(".middle",	/* location in the control panel */
 		       "$starSymbol(button)",	/* name of the button */
 		       "$val(identifier)",	/* label on the button */
 		       $starSymbol(pulse));	/* callback procedure */

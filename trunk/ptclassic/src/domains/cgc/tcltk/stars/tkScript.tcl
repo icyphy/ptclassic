@@ -34,9 +34,9 @@
 # less of a drain on the computation time if the star is set to
 # operate asynchronously.
 
-set s .cp_middle.button$uniqueSymbol
+set s .middle.button$uniqueSymbol
 button $s -text "PUSH ME" -fg tan4
-pack append .cp_middle $s {top fillx}
+pack append .middle $s {top fillx}
 bind $s <ButtonPress-1> \
 	"${uniqueSymbol}setOutputs 1.0; $s configure -relief sunken"
 bind $s <ButtonRelease-1> \

@@ -20,7 +20,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		type{float}
 		default {"0.0"}
 		desc {The value to send to the output.}
-		attributes { A_GLOBAL }
 	}
 	defstate {
 		name {identifier}
@@ -39,7 +38,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	// Note that window names cannot start with upper case letters
 	codeblock (setup) {
 	    /* Establish the Tk window for setting the value */
-	    makeEntry("cp_high",		/* position in control panel */
+	    makeEntry(".high",		/* position in control panel */
 		      "$starSymbol(entry)",	/* name of entry pane */
 		      "$val(identifier)",	/* text identifying the pane */
 		      "$val(value)",		/* initial value of the entry */
