@@ -87,6 +87,9 @@ class ::tycho::FontManager {
     # Specify the initial font displayed in the window.
     itk_option define -initialfont initialFont InitialFont {9x15}
 
+    # The command to execute on an OK response.
+    itk_option define -okcommand okcommand OkCommand ""
+
     ##########################################################################
     ####                         public methods                           ####
 
@@ -105,6 +108,10 @@ class ::tycho::FontManager {
     #### fontValid
     # Return 1 if the specified font is valid, otherwise return 0.
     method fontValid {font}
+
+    #### getCurrentFont
+    # Return the current font displayed by the font manager.
+    method getCurrentFont {}
 
     #### getFont
     # Given a font specification, return a font name or an empty string.
@@ -165,7 +172,9 @@ body ::tycho::FontManager::constructor {args} {
 
     # Pack the OK button.
     addButton ok -text "OK <Ret>" -command \
-	    "$this nextWindow; delete object $this"
+	    [code "$this execCommand -okcommand; \
+	    $this nextWindow; \
+	    delete object $this"]
     default ok
 
     # Pack the Cancel button.
@@ -456,6 +465,14 @@ body ::tycho::FontManager::fontValid {font} {
 	return 1
     }
     return 0
+}
+
+########################################################################
+#### getCurrentFont
+# Return the current font displayed by the font manager.
+#
+body ::tycho::FontManager::getCurrentFont {} {
+    return [$itk_component(fontname) cget -text]
 }
 
 ########################################################################
