@@ -223,7 +223,7 @@ HasUPC(facetPtr)
     octGenerator gen;
     int status = FALSE;
 
-    octInitGenContents(facetPtr, OCT_INSTANCE_MASK, &gen);
+    octInitGenContentsSpecial(facetPtr, OCT_INSTANCE_MASK, &gen);
     while (octGenerate(&gen, &inst) == OCT_OK && !status) {
 	status = IsCursor(&inst) || IsUniv(&inst) || IsPal(&inst);
 	FreeOctMembers(&inst);
