@@ -303,7 +303,7 @@ int CreateSDFStar::connectStar() {
     newWormStar->initialize();
 
     // Tell the parent galaxy to delete the original wormhole.
-    parentGal->removeBlock(*topLevelGalaxy->parent());
+    parentGal->deleteBlockAfterInit(*topLevelGalaxy->parent());
 
     return TRUE;
 }
