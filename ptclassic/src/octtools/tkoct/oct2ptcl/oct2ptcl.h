@@ -124,6 +124,7 @@ struct OTPFacetInfo {
 extern octStatus otpXlateFacet( OTPFacetInfo *facetInfo, Tcl_DString *pStr);
 
 extern char* otpCvtPropToStr( octObject *pProp);
+extern char* otpCvtPropToStrDelay( octObject *pProp);
 extern octStatus otpXlateParams( octObject *pInst, char *instName,
 			  OTPFacetType which, Tcl_DString *pStr);
 extern OTPFacetInfo*otpGetMasterInfo( OTPFacetInfo *pFInfo, octObject *pInst);
