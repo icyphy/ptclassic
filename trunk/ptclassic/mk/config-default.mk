@@ -47,6 +47,8 @@ PTCL_INCDIR = $(ROOT)/src/ptcl
 OCTTOOLS = $(ROOT)/octtools
 # Oct libraries
 OCTLIBDIR = $(OCTTOOLS)/lib.$(ARCH)
+# cc to compile octtools with.
+OCT_CC =	cc
 
 # If the X11 include directories are in /usr/include/X11, leave
 # the following symbol blank.  Otherwise define it as "-Idir" where
