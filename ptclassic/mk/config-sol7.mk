@@ -56,3 +56,15 @@ INCLUDE_GTHREADS =	no
 
 # Include the PN domain.
 INCLUDE_PN_DOMAIN =	no
+
+# Dirk Forchel provided the following changes to compile xv:
+# -DATT is needed so we don't try and include sys/dir.h
+# -R$(X11LIB_DIR) is need so we can find the X libs at runtime,
+# otherwise, we will need to set LD_LIBRARY_PATH
+# -DXLIB_ILLEGAL_ACCESS is need for X11R6 to compile xv.c:rd_str_cl()
+XV_CC =  gcc -traditional $(X11_INCSPEC) \
+  -DXLIB_ILLEGAL_ACCESS \
+  -DSVR4 -DSYSV -DDIRENT -DATT -DNO_BCOPY \
+  $(X11_LIBSPEC) -R$(X11_LIBDIR)
+XV_RAND =  -DNO_RANDOM
+
