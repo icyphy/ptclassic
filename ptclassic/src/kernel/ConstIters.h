@@ -40,7 +40,7 @@ Block.h, PortHole.h, State.h, or Galaxy.h.
 #ifndef _ConstIters_h
 #define  _ConstIters_h 1
 #ifdef __GNUG__
-#pragma interface
+#pragma interface "ConstIters.h"
 #endif
 
 #include "Block.h"
