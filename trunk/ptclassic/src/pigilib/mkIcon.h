@@ -40,17 +40,24 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #define MAX_NUM_TERMS 85  /* max total # input and output terms */
 
-#ifndef __cplusplus
-#ifndef const
-#define const /* nothing */
-#endif
-#endif
+#ifdef __cplusplus
 
 struct Term_s {
     const char *name;		/* terminal name */
     const char *type;		/* terminal datatype */
     boolean multiple;		/* true if multiporthole */
 };
+
+#else
+
+struct Term_s {
+    char *name;			/* terminal name */
+    char *type;			/* terminal datatype */
+    boolean multiple;		/* true if multiporthole */
+};
+
+#endif
+
 typedef struct Term_s Term;
 
 struct TermList_s {
