@@ -4,10 +4,10 @@ defstar {
 	desc { Take a Particle vector as input and output the user
 		 specified field of this vector (casted to an 'int'). This star
                  has one input and one output. }
-	version { @(#)SDFUnpackFloat.pl	1.1   03/21/97 }
+	version { $Id$}
 	author { R. P. Gunturi }
 	copyright {
-Copyright (c) 1990- The Regents of the University of California.
+Copyright (c) 1996-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

@@ -3,10 +3,10 @@ defstar {
 	domain {SDF}
 	desc { This star takes two inputs and creates a Particle
 		 vector from its input particles.}
-	version { @(#)SDFPack.pl	1.1   03/21/97 }
+	version { $Id$}
 	author { R. P. Gunturi }
 	copyright {
-Copyright (c) 1990- The Regents of the University of California.
+Copyright (c) 1999-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
