@@ -142,7 +142,6 @@ else
 	# binary that could be located anywhere.
 	# However, itkwish need not have these set
 	# FIXME: Hardwired in tk4.0
-	# See also $PTOLEMY/src/tycho/kernel/make.template
 	#	   $PTOLEMY/tycho/kernel/Lib.tcl
 	setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl/lib/tcl
 	setenv TK_LIBRARY $PTOLEMY/tcltk/tk/lib/tk
@@ -160,13 +159,13 @@ else
 
 	if ( ! $?prog ) then
 		if ( "$progname" == "tysh.ptiny" || $?tychoptiny ) then
-		    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh.ptiny
+		    set prog = $PTOLEMY/obj.$PTARCH/tycho/tysh/tysh.ptiny
 		else
 			if ( "$progname" == "tysh.ptrim" || $?tychoptrim ) then
-			    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh.ptrim
+			    set prog = $PTOLEMY/obj.$PTARCH/tycho/tysh/tysh.ptrim
 			else 
 				if ( "$progname" == "tysh.pigi" || $?tychopigi ) then
-				    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh
+				    set prog = $PTOLEMY/obj.$PTARCH/tycho/tysh/tysh
 				else
 				    set tychoedit
 				    set prog = ($PTOLEMY/tcltk/itcl.$PTARCH/bin/itkwish -f $TYCHO/kernel/Tycho.tcl)
