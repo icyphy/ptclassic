@@ -108,7 +108,7 @@ class ::tycho::EditSTD {
     method setReadOnly {bool}
 
     # Split the action event and the action expression in action.
-    method transAction {arc action}
+    method transAction {action}
 
     # Substitute each event name, if it is valid in input/output/internal
     # ports, in argument "expression" by $name(s) or $name(v) depending on
@@ -117,6 +117,10 @@ class ::tycho::EditSTD {
 
     # Split the name and the type for each input/output/internal (option) port
     method transPort {option}
+
+    # Split event, condition, action events and action expressions
+    # from a transition
+    method transTransit {transition}
 
     ##########################################################################
     ####                     protected methods                            ####
@@ -143,6 +147,11 @@ class ::tycho::EditSTD {
     # Store the value used in makeIcon last time.
     protected common makeIconSrcDir [file join \$PTOLEMY src domains fsm demo]
     protected common makeIconPaletteName "user.pal"
+
+    # Array stores the result of split transition and is used by
+    # method transTransit. It has four elements: "event", "condition",
+    # "actEvents", "actExprs"
+    protected variable splitTransit
 
     ##########################################################################
     ####                         private methods                          ####
@@ -320,6 +329,15 @@ body ::tycho::EditSTD::editState {node} {
 	    -queries [list $labelQuery $slaveQuery $slaveSharedQuery]\
 	    -okcommand [list catch $cmd]
 
+        set init_state_id [$slate find withtag init_state]
+        if {[lsearch -exact $init_state_id $node] >= 0} {
+            if "![info exists nodeInfo($node,initTransit)]" {
+                set nodeInfo($node,initTransit) ""
+            }
+            $w line initTransit {Initial transition:} \
+                $nodeInfo($node,initTransit)
+        }
+
 	$w centerOnScreen
     }
 
@@ -346,6 +364,15 @@ body ::tycho::EditSTD::editStateDone {node w} {
 	set nodeInfo($node,slaveShared) $newSlaveShared
 	$this markModified	
     }
+
+    set init_state_id [$slate find withtag init_state]
+    if {[lsearch -exact $init_state_id $node] >= 0} {
+        set newInitTransit [string trim [$w get initTransit]]
+        if {$nodeInfo($node,initTransit) != $newInitTransit} {
+            set nodeInfo($node,initTransit) $newInitTransit
+            $this markModified
+        }
+    }
 }
 
 ##############################################################
@@ -362,9 +389,7 @@ body ::tycho::EditSTD::getInfo {} {
 
     set w $prefix.getInfo
     catch {destroy $w}
-    ::tycho::Message $w -text "Evaluation type: $evaluationType\
-            \nOne-writer rule type: $oneWriterType\
-	    \n# of nodes: [llength $nodes]\
+    ::tycho::Message $w -text "# of nodes: [llength $nodes]\
 	    \n# of arcs: [llength $arcs]\
 	    \nInitial state: $init_state "
     $w centerOnScreen
@@ -609,6 +634,22 @@ body ::tycho::EditSTD::ptkCompile {} {
 	} else {
 	    # Setup one initial state :
 	    setstate [set star$init_state_id] isInitState YES
+
+	    # Parse and set initial guard and action if exist
+	    if { [info exists nodeInfo($init_state_id,initTransit)] } {
+		set initTransit $nodeInfo($init_state_id,initTransit)
+		if {$initTransit != ""} {
+		    transTransit $initTransit
+		    setstate [set star$init_state_id] \
+			initEvent     $splitTransit(event)
+		    setstate [set star$init_state_id] \
+			initCondition $splitTransit(condition)
+		    setstate [set star$init_state_id] \
+			initActEvents $splitTransit(actEvents)
+		    setstate [set star$init_state_id] \
+			initActExprs  $splitTransit(actExprs)
+		}
+	    }
 	}
 
 	# Set the parameters for each star.
@@ -643,73 +684,12 @@ body ::tycho::EditSTD::ptkCompile {} {
 	    set entryType ""
 	    # Go through each outgoing arc
 	    foreach arc $nodeInfo($node,outEdges) {
-                set label [$slate itemcget $edgeInfo($arc,label) -text]
-		if {$label==""} {
-		    append events "{}"
-		    append conditions "{}"
-		    append actEvents "{}"
-		    append actExprs "{}"
-		} else {
-		    # Split guard and action
-		    set slashIndx [string first "/" $label]
-                    if {$slashIndx == -1} {
-			set guard $label
-			set action ""
-                    } elseif {$slashIndx == 0} {
-			set guard ""
-			set action [string range $label 1 end]
-                    } else {
-			set rightIndx [string first {]} $label]
-			if {$rightIndx == -1} {
-			    set guard \
-				[string range $label 0 [expr $slashIndx-1]]
-			    set action \
-				[string range $label [expr $slashIndx+1] end]
-			} else {
-			    # If right-side bracket exists, i.e. condition
-			    # exists, the slash separator must be on the
-			    # right of the right-side bracket. (The slash
-			    # on the left is just the divide operator.)
-			    set tmpLabel \
-				[string range $label $rightIndx end] 
-			    set slashIndx [string first "/" $tmpLabel]
-			    if {$slashIndx == -1} {
-				set guard $label
-				set action ""
-			    } else {
-				set slashIndx [expr $rightIndx+$slashIndx]
-				set guard \
-				  [string range $label 0 [expr $slashIndx-1]]
-				set action \
-				  [string range $label [expr $slashIndx+1] end]
-			    }
-			}
-                    } ;# end of spliting guard and action
-
-		    # Split event and condition in guard
-                    set leftIndx [string first {[} $guard]
-                    set rightIndx [string first {]} $guard]
-                    if {$leftIndx == -1} {
-			set event $guard
-			set condition ""
-                    } elseif {$leftIndx == 0} {
-			set event ""
-			set condition \
-				[string range $guard 1 [expr $rightIndx-1]]
-                    } else {
-			set event [string range $guard 0 [expr $leftIndx-1]]
-			set condition [string range \
-				$guard [expr $leftIndx+1] [expr $rightIndx-1]]
-		    }
-		    append events \{[transExpr event $event]\}
-		    append conditions \{[transExpr condition $condition]\}
-
-		    # Split actEvent and actExpr in action
-		    transAction $arc $action
-		    append actEvents \{$edgeInfo($arc,actEvent)\}
-		    append actExprs \{$edgeInfo($arc,actExpr)\}
-
-		} ;# end of else of if {$label==""}
+                set transition [$slate itemcget $edgeInfo($arc,label) -text]
+		transTransit $transition
+		append events     \{$splitTransit(event)\}
+		append conditions \{$splitTransit(condition)\}
+		append actEvents  \{$splitTransit(actEvents)\}
+		append actExprs   \{$splitTransit(actExprs)\}
 
 		if "![info exists edgeInfo($arc,preemptive)]" {
 		    set edgeInfo($arc,preemptive) NO
@@ -772,15 +752,43 @@ body ::tycho::EditSTD::setInitialState {tag} {
     if {$item == {}} return
     
     if {[lsearch -exact [$slate gettags $item] node] >= 0} {
-	# Item is a node.  See if there is already an initial state.
-	set init_state_id [$slate find withtag init_state]
-	if {$init_state_id != ""} {
-	    $slate itemconfigure $init_state_id -width 1.0
-	    $slate dtag init_state
-	}
-	$slate addtag init_state withtag $item
-	$slate itemconfigure $item -width 5.0
-	$this markModified
+	# Item is a node.
+        if {[lsearch -exact [$slate gettags $item] init_state] < 0} {
+            # If it's not already a initial state,
+            # see if there is already an initial state, and unset it if exists
+            set init_state_id [$slate find withtag init_state]
+            if {$init_state_id != ""} {
+                $slate itemconfigure $init_state_id -width 1.0
+                $slate dtag init_state
+
+                if "[info exists nodeInfo($init_state_id,initTransit)]" {
+                    unset nodeInfo($init_state_id,initTransit)
+                }
+
+                set w $prefix.stdEditState$init_state_id
+                if [winfo exists $w] {
+                    # If there is aready a edit window for this state,
+                    # modify the window.
+                    $w remove initTransit
+                }
+            }
+
+            $slate addtag init_state withtag $item
+            $slate itemconfigure $item -width 5.0
+
+            set w $prefix.stdEditState$item
+            if [winfo exists $w] {
+                # If there is aready a edit window for this state,
+                # modify the window.
+                if "![info exists nodeInfo($item,initTransit)]" {
+                    set nodeInfo($item,initTransit) ""
+                }
+                $w line initTransit {Initial transition:} \
+                        $nodeInfo($item,initTransit)
+            }
+
+            $this markModified
+        }
     }
 }
 
@@ -830,12 +838,12 @@ body ::tycho::EditSTD::setReadOnly {bool} {
 # Split the action event and the action expression for each action:
 # Each element in argument "action" is supposed to be in the form of
 # "event(expression)" and is delimited by either "," or space.
-# Then, the event and the expression are parsed and stored into
-# edgeInfo($arc,actEvent) and edgeInfo($arc,actExpr) respectively.
+# Then, the events and the expressions are parsed and stored into
+# splitTransit(actEvents) and splitTransit(actExprs) respectively.
 #
-body  ::tycho::EditSTD::transAction {arc action} {
-    set edgeInfo($arc,actEvent)  ""
-    set edgeInfo($arc,actExpr)  ""
+body  ::tycho::EditSTD::transAction {action} {
+    set splitTransit(actEvents) ""
+    set splitTransit(actExprs)  ""
 
     set length [string length $action]
     set start 0
@@ -886,8 +894,8 @@ body  ::tycho::EditSTD::transAction {arc action} {
 	# Check if event is valid in output or internal events.
 	if {[lsearch -exact $ports(output,names) $event]!=-1 || \
 	    [lsearch -exact $ports(internal,names) $event]!=-1} {
-	    append edgeInfo($arc,actEvent) \"$event\"
-	    append edgeInfo($arc,actExpr) \"[transExpr actExpr $expression]\"
+	    append splitTransit(actEvents) \"$event\"
+	    append splitTransit(actExprs)  \"[transExpr actExpr $expression]\"
 	} else {
 	    error "EditSTD: $event is not an output/internal event! " 
 	}
@@ -908,11 +916,11 @@ body  ::tycho::EditSTD::transExpr {option expression} {
 	set invalidOp "< > = + - * /"
 	set arrayIndx s
     } elseif {$option == "condition"} {
-	set validOp "{ } ! | & < > = + - * /"
+	set validOp "{ } ! | & < > = + - * / ( )"
 	set invalidOp ""
 	set arrayIndx v
     } elseif {$option == "actExpr"} {
-	set validOp "{ } + - * /"
+	set validOp "{ } + - * / ( )"
 	set invalidOp "! | & < > ="
 	set arrayIndx v
     } else {
@@ -980,12 +988,14 @@ body  ::tycho::EditSTD::transExpr {option expression} {
 body  ::tycho::EditSTD::transPort {option} {
     set ports($option,names)  ""
     set ports($option,types)  ""
+
     foreach port $ports($option) {
 	set parenIndx [string first "(" $port]
 	if {$parenIndx == -1} {
 	    set portName $port
 	    set portType INT
 	} else {
+            set port [string trimright $port ","]
 	    set port [string trimright $port ")"]
 	    set portName [string range $port 0 [expr $parenIndx-1]]
 	    set portType [string range $port [expr $parenIndx+1] end]
@@ -996,6 +1006,81 @@ body  ::tycho::EditSTD::transPort {option} {
 	}
 	lappend ports($option,names) $portName
 	lappend ports($option,types) $portType
+    }
+}
+
+#####################################################################
+#### transTransit
+# Split event, condition, action events and action expressions from
+# a transition which should be in the form of "event[condition]/action".
+# Each element in "action" should be in the form of "event(expression)"
+# and is delimited by either "," or space. Then, the event, condition,
+# action events and action expressions are parsed and stored into
+# splitTransit(event), splitTransit(condition), splitTransit(actEvents),
+# and splitTransit(actExprs) respectively.
+#
+body  ::tycho::EditSTD::transTransit {transition} {
+    if {$transition==""} {
+	set splitTransit(event)     ""
+	set splitTransit(condition) ""
+	set splitTransit(actEvents) ""
+	set splitTransit(actExprs)  ""
+    } else {
+	# Split guard and action
+	set slashIndx [string first "/" $transition]
+	if {$slashIndx == -1} {
+	    set guard $transition
+	    set action ""
+	} elseif {$slashIndx == 0} {
+	    set guard ""
+	    set action [string range $transition 1 end]
+	} else {
+	    set rightIndx [string first {]} $transition]
+	    if {$rightIndx == -1} {
+		set guard [string range $transition 0 [expr $slashIndx-1]]
+		set action [string range $transition [expr $slashIndx+1] end]
+	    } else {
+		# If right-side bracket exists, i.e. condition
+		# exists, the slash separator must be on the
+		# right of the right-side bracket. (The slash
+		# on the left is just the divide operator.)
+		set tmpLabel [string range $transition $rightIndx end] 
+		set slashIndx [string first "/" $tmpLabel]
+		if {$slashIndx == -1} {
+		    set guard $transition
+		    set action ""
+		} else {
+		    set slashIndx [expr $rightIndx+$slashIndx]
+		    set guard [string range $transition 0 [expr $slashIndx-1]]
+		    set action \
+			[string range $transition [expr $slashIndx+1] end]
+		}
+	    }
+        } ;# end of spliting guard and action
+
+	# Split event and condition in guard
+	set leftIndx [string first {[} $guard]
+	set rightIndx [string first {]} $guard]
+	if {$leftIndx == -1} {
+	    set event $guard
+	    set condition ""
+	} elseif {$leftIndx == 0} {
+	    set event ""
+	    set condition \
+		[string range $guard 1 [expr $rightIndx-1]]
+	} else {
+	    set event [string range $guard 0 [expr $leftIndx-1]]
+	    set condition [string range \
+		$guard [expr $leftIndx+1] [expr $rightIndx-1]]
+	}
+	set splitTransit(event)     [transExpr event $event]
+	set splitTransit(condition) [transExpr condition $condition]
+
+	# Split action events and action expressions in action. 
+	# After invoke transAction, the action events and the action
+	# expressions are parsed and stored into splitTransit(actEvents)
+	# and splitTransit(actExprs) respectively.
+	transAction $action
     }
 }
 
@@ -1095,6 +1180,12 @@ body ::tycho::EditSTD::saveText {} {
 	append text "### Initial state\n"
 	append text "\$slate addtag init_state withtag \$node$init_state_id\n"
 	append text "\$slate itemconfigure \$node$init_state_id -width 5.0\n"
+
+        if "[info exists nodeInfo($init_state_id,initTransit)]" {
+	    append text "# Initial transition:\n"
+	    append text "set nodeInfo(\$node$init_state_id,initTransit)\
+		    [list $nodeInfo($init_state_id,initTransit)]\n"
+        }
     }
 
     # Step through all the arcs in the canvas.
