@@ -228,8 +228,8 @@ MATARCH = hp700
 #  If you don't have a /usr/include/pthread.h, then you probably
 #  don't have the DCE developement set installed.  If you don't have
 #  this installed, set INCLUDE_PN_DOMAIN to no
-#INCLUDE_PN_DOMAIN = no
-INCLUDE_PN_DOMAIN = yes
+#INCLUDE_PN_DOMAIN = yes
+INCLUDE_PN_DOMAIN = no
 
 # Ipus uses templates in a way that is compatible with g++, but not hppa.cfront
 INCLUDE_IPUS_DOMAIN = no
