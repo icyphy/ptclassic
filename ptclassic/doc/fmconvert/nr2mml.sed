@@ -35,16 +35,17 @@
 # CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 # ENHANCEMENTS, OR MODIFICATIONS.
 #                                                        COPYRIGHTENDKEY
+s/\\\\/PAIRofBaCkSlAsHes/g
 s/\\/\\\\/g
 s/</\\</g
 s/>/\\>/g
 s/\\\\fI/<Italic>/g
 s/\\\\fP/<Plain>/g
-s/\\\\fR/<Plain>/g
+s/\\\\fR/<Norm>/g
 s/\\\\fB/<Bold>/g
 s/\\\\f6/<Bold>/g
 s/\\\\f5/<Plain>/g
-s/\\\\f\\\\\*F/<Class>/g
+s/\\\\f(\\\\\*F/<Class>/g
 #s/	/ /g
 s/	/\\t/g
 s/\\\\\&//g
@@ -62,6 +63,9 @@ s/^\.sh/.H /
 /^\.Sr /s/"//g
 /^\.Sd /s/"//g
 /^\.ip /s/"//g
+/^\.c /s/"//g
+/^\.i /s/"//g
+/^\.b /s/"//g
 # Ptolemy information
 /\\\\\*(PT/s//Ptolemy/g
 /\\\\\*(PV/s//0.5/g
@@ -76,6 +80,8 @@ s/^\.LE/<Bullet> /
 s/^\.IP/<Definition>/
 s/^\.lp/<LBody>/
 s/^\.pp/<Body>/
+s/^\.sp/<LBody>/
+s/^\.SP/<LBody>/
 s/^\.LP/<LBody>/
 s/^\.(f/<Footnote>/
 s/^\.)f/<LBody>/
@@ -85,3 +91,4 @@ s/''/<Character \\xd3 >/g
 s/\\\\(dg/<Character \\xa0 >/g
 s/\\\\(dd/<Character \\xa4 >/g
 s/\\\\(mu/x/g
+s/PAIRofBaCkSlAsHes/\\\\/g
