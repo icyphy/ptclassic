@@ -75,8 +75,7 @@ ITCL_SRCS =	\
 	alltests.itcl all.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) \
-	chktycho \
-	dltest.html
+	chktycho
 
 # Files or directories that are present, but that 'make checkjunk' 
 # should not complain about
