@@ -376,12 +376,8 @@ StringList CGCTarget :: compileLine(const char* fName) {
 	// variables expanded
 	StringList compileArgs = getCompileOptions(TRUE);
 	StringList linkArgs = getLinkOptions(TRUE);
-	int onhostflag = onHostMachine(targetHost);
-	StringList cmd;
-	cmd << (const char*) compileCommand << " " << compileArgs;
-	cmd << fName << " ";
-	if (! onhostflag) cmd << remoteLinkOptionsStream << " ";
-	cmd << linkArgs;
+	StringList cmd = (const char*) compileCommand;
+	cmd << " " << compileArgs << " " << fName << " " << linkArgs;
 	return cmd;
 }
 
@@ -394,6 +390,9 @@ StringList CGCTarget :: getLinkOptions(int expandEnvironmentVars) {
 	// such as the ptdsp or CGCrtlib libraries
 	if (onHostMachine(targetHost)) {
 		retLinkOptions << localLinkOptionsStream << " ";
+	}
+	else {
+		retLinkOptions << remoteLinkOptionsStream << " ";
 	}
 
 	// Link options requested by the user as a target parameter
