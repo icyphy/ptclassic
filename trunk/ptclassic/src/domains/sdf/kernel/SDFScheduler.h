@@ -79,11 +79,13 @@ public:
 	// buffering.  On each pass, a block is
 	// deferred until after the pass has been completed if any
 	// block that it feeds data to can be fired.
-	// It is deferred until some future pass if all of its output
-	// Geodesics already have enough data to satisfy all the destination
-	// blocks.  This is a rather complicated optimization, arrived at
+
+	// It is deferred until some future pass if one of its output
+	// Geodesics already have enough data to satisfy the destination
+	// block.  This is a rather complicated optimization, arrived at
 	// after much trial and error.  It significantly increases the
 	// execution time of the scheduler.
+
 	int deferredFiring;
 
 	StringList displaySchedule();
