@@ -117,6 +117,7 @@ void SRPortHole::connect(GenericPort& destination,
 
 PortHole * SRPortHole::far() const
 {
+  // cout << "far() called on " << parent()->name() << ' ' << name() << '\n';
   if ( myGeodesic ) {
     return myGeodesic->sourcePort();
   }
@@ -145,7 +146,8 @@ int MultiInSRPort::isItInput() const
 // Add a new physical port to the MultiPortHole list.
 PortHole& MultiInSRPort::newPort()
 {
-	LOG_NEW; PortHole& p = *new InSRPort;
+	LOG_NEW; SRPortHole& p = *new InSRPort;
+	// cout << "Added a new port hole to " << name() << '\n';
 	return installPort(p);
 }
 
@@ -158,7 +160,7 @@ int MultiOutSRPort::isItOutput() const
 // Add a new physical port to the MultiPortHole list.
 PortHole& MultiOutSRPort::newPort()
 {
-	LOG_NEW; PortHole& p = *new OutSRPort;
+	LOG_NEW; SRPortHole& p = *new OutSRPort;
 	return installPort(p);
 }
 
@@ -372,4 +374,40 @@ void OutSRPort::initialize()
   PortHole::initialize();
 
   emittedParticle = (Particle *) 0;
+}
+
+// Return a PortHole for a new connection.
+//
+// @Description This almost exactly replicates the behavior of
+// MultiPortHole::newConnection() in the Kernel.  However, since
+// the far() method is not virtual in the kernel, it incorrectly determines
+// whether the port has a connection.  This casts the port to InSRPort, which
+// uses the virtual far() method and gets it right.
+
+PortHole & MultiInSRPort::newConnection() {
+  // cout << "Called newConnection on " << parent()->name()
+  //     << ' ' << name() << '\n';
+  // first resolve aliases.
+  GenericPort & real = realPort();
+  // check for being aliased to a single porthole (is this possible?)
+  if (!real.isItMulti()) return (PortHole&)real;
+  MultiInSRPort & realmph = (MultiInSRPort &) real;
+  // find an unconnected porthole in the real port
+  MPHIter next(realmph);
+  InSRPort * p;
+  while ((p = (InSRPort *)(next++)) != 0) {
+    // do the right thing if a member of realmph is an alias.
+    // I think this is not really possible, but play it safe.
+    InSRPort & realp = (InSRPort &) (p->newConnection());
+    // realp is disconnected iff it has no far()
+    if (realp.far() == NULL) return realp;
+    // We cannot just check far() on p since, if
+    // it is an alias, its far will be null.
+    // And we don't want to return an alias anyway.
+  }
+  
+  // no disconnected ports, make a new one.
+  // NOTE: newPort() on a GalMultiPort returns the new alias porthole,
+  // so we have to resolve it to its real porthole.
+  return newPort().newConnection();
 }
