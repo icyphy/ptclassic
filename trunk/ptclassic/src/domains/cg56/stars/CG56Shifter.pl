@@ -7,6 +7,7 @@ defstar {
     copyright { 1992 The Regents of the University of California }
     location { CG56 demo library }
     explanation {
+.Id "bit shifter"
 Scale by shifting left \fIleftShifts\fP bits.
 Negative values of N implies right shifting.
 Arithmetic shifts are used.
