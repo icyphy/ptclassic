@@ -25,7 +25,7 @@ StateList *KnownState::allStates;       // the list of state types
 StateList *KnownState::allGlobals;	// the list of global state values
 
 int KnownState::numStates = 0;          // define the number of state types
-int KnownState::allGlobals = 0;		// and the number of global values
+int KnownState::numGlobals = 0;		// and the number of global values
 
 // Constructor.  Adds a state to the known list
 
@@ -37,7 +37,7 @@ KnownState::KnownState (State &state, const char* name) {
         numStates++;
 // set my name and add to the list
         state.setState (name,NULL,"");
-        allStates->put (&state);
+        allStates->put (state);
 }
 
 KnownState::KnownState (State& state, const char* name, const char* value) {
@@ -46,7 +46,7 @@ KnownState::KnownState (State& state, const char* name, const char* value) {
 	numGlobals++;
 	state.setState (name,NULL,value);
 	state.initialize();
-	allGlobals->put (&state);
+	allGlobals->put (state);
 }
 
 const State*
