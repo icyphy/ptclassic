@@ -34,19 +34,19 @@ static const char file_id[] = "$RCSfile$";
 #pragma implementation
 #endif
 
-#include "MTDFMonitor.h"
-#include "MTDFCondition.h"
-#include "MTDFGeodesic.h"
+#include "PNMonitor.h"
+#include "PNCondition.h"
+#include "PNGeodesic.h"
 #include "Error.h"
 
 // Class identification.
-ISA_FUNC(MTDFGeodesic, Geodesic);
+ISA_FUNC(PNGeodesic, Geodesic);
 
 // Constructor.
-MTDFGeodesic::MTDFGeodesic() : notEmpty(0)
+PNGeodesic::PNGeodesic() : notEmpty(0)
 { }
 
-void MTDFGeodesic::makeLock(const PtGate& master)
+void PNGeodesic::makeLock(const PtGate& master)
 {
     LOG_DEL; delete notEmpty;
     notEmpty = 0;
@@ -57,11 +57,11 @@ void MTDFGeodesic::makeLock(const PtGate& master)
     }
     else
     {
-	LOG_NEW; notEmpty = new MTDFCondition(*(MTDFMonitor*)gate);
+	LOG_NEW; notEmpty = new PNCondition(*(PNMonitor*)gate);
     }
 }
 
-void MTDFGeodesic::delLock()
+void PNGeodesic::delLock()
 {
     LOG_DEL; delete notEmpty;
     notEmpty = 0;
@@ -69,7 +69,7 @@ void MTDFGeodesic::delLock()
 }
 
 // Notify when not empty.
-void MTDFGeodesic::slowPut(Particle* p)
+void PNGeodesic::slowPut(Particle* p)
 {
     // Avoid entering the gate more than once.
     CriticalSection region(gate);
@@ -78,7 +78,7 @@ void MTDFGeodesic::slowPut(Particle* p)
 }
 
 // Block util not empty.
-Particle* MTDFGeodesic::slowGet()
+Particle* PNGeodesic::slowGet()
 {
     // Avoid entering the gate more than once.
     CriticalSection region(gate);
@@ -91,7 +91,7 @@ Particle* MTDFGeodesic::slowGet()
 }
 
 // Notify when not empty.
-void MTDFGeodesic::pushBack(Particle* p)
+void PNGeodesic::pushBack(Particle* p)
 {
     // Avoid entering the gate more than once.
     CriticalSection region(gate);

@@ -1,5 +1,5 @@
-#ifndef _MTDFStar_h
-#define _MTDFStar_h
+#ifndef _PNStar_h
+#define _PNStar_h
 
 /* 
 Copyright (c) 1990-1993 The Regents of the University of California.
@@ -36,9 +36,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "SDFStar.h"
-#include "MTDFPortHole.h"
+#include "PNPortHole.h"
 
-class MTDFStar : public DataFlowStar
+class PNStar : public DataFlowStar
 {
 public:
     // Class identification.

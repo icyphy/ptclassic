@@ -27,8 +27,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
     Date of creation:	2 April 1992
 */
 
-#ifndef _MTDFTarget_h
-#define _MTDFTarget_h
+#ifndef _PNTarget_h
+#define _PNTarget_h
 
 #ifdef __GNUG__
 #pragma interface
@@ -37,16 +37,16 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Target.h"
 #include "IntState.h"
 
-class MTDFTarget : public Target
+class PNTarget : public Target
 {
 public:
     // Constructor.
-    MTDFTarget();
+    PNTarget();
 
     // Destructor.
-    ~MTDFTarget();
+    ~PNTarget();
 
-    // Make a new MTDFTarget object.
+    // Make a new PNTarget object.
     /* virtual */ Block* makeNew() const;
 
     // Initialization.

@@ -32,21 +32,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 */
 
-#ifndef _MTDFThreadIter_h
-#define _MTDFThreadIter_h
+#ifndef _PNThreadIter_h
+#define _PNThreadIter_h
 
-#include "MTDFThreadList.h"
+#include "PNThreadList.h"
 #include "DataStruct.h"
 
-class MTDFThreadIter : private ListIter
+class PNThreadIter : private ListIter
 {
 public:
     // Constructor.
-    MTDFThreadIter(MTDFThreadList& tList) : ListIter(tList) {}
+    PNThreadIter(PNThreadList& tList) : ListIter(tList) {}
 
     // Next Thread on list.
-    MTDFThread* next() { return (MTDFThread*)ListIter::next(); }
-    MTDFThread* operator ++() { return next(); }
+    PNThread* next() { return (PNThread*)ListIter::next(); }
+    PNThread* operator ++() { return next(); }
 
     // Reset to head of list.
     ListIter::reset;
