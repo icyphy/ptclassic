@@ -53,6 +53,7 @@ static void loadStartup(Tcl_Interp* interp);
 #include <stdio.h>
 #include <sys/file.h>
 #include <tcl.h>
+#include <itcl.h>
 #include <errno.h>
 
 #ifdef PTLINUX
@@ -164,6 +165,11 @@ main(int argc, char **argv) {
 
     if (Tcl_AppInit(interp) != TCL_OK) {
 	fprintf(stderr, "Tcl_AppInit failed: %s\n", interp->result);
+    }
+
+    // Add [incr Tcl] (itcl) facilities
+    if (Itcl_Init(interp) == TCL_ERROR) {
+      return TCL_ERROR;
     }
 
     /*
