@@ -1,4 +1,4 @@
--*-Mode:text-*- -[Tue Apr  2 09:55:16 1996 by cxh]-
+-*-Mode:text-*- -[Wed May  1 14:58:19 1996 by cxh]-
 Version: $Id$
 
 src/gnu/README
@@ -137,6 +137,17 @@ Linux
 -----
 	If you are trying to build GNU with this makefile, you may need
 	to modify LIBGPLUSPLUS_VERSION.
+
+DEC Alpha
+---------
+	If you are trying to build gcc-2.7.2 under OSF3.2, you may
+	need to modify $PTOLEMY/src/gnu/src/gcc/config/alpha/x-alpha
+	and add -lots to CLIB:
+		CLIB=-lots -lmld 
+	If you, then while you are compiling collect2, you may see
+	messages like:
+		Unresolved:
+		_OtsRemainder32Unsigned
 
 gcc and Purify
 --------------
