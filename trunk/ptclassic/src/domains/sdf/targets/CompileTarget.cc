@@ -63,7 +63,7 @@ CompileTarget::CompileTarget(const char* nam,
 			     const char* desc)
 : HLLTarget(nam,stype,desc)
 {
-	destDirectory.setInitValue("~/PTOLEMY_SYSTEMS/SDF");
+	destDirectory.setInitValue("$HOME/PTOLEMY_SYSTEMS/SDF");
 }
 
 Block* CompileTarget::makeNew() const {

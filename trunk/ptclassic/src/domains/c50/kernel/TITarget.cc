@@ -62,7 +62,7 @@ void TITarget :: initStates() {
 	addState(uMemMap.setState("uMemMap",this,"2432-9999","UD memory map"));
 	addState(subFire.setState("subroutines?",this,"-1",
 	    "Write star firings as subroutine calls."));
-	destDirectory.setInitValue("~/PTOLEMY_SYSTEMS/C50");
+	destDirectory.setInitValue("$HOME/PTOLEMY_SYSTEMS/C50");
 }
 
 void TITarget :: setup() {
