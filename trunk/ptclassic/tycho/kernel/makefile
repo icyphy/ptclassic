@@ -82,6 +82,7 @@ ITCL_SRCS = \
 	HTML.itcl \
 	HTMLMessage.itcl \
 	HyperGraph.itcl \
+	HyperlinkIndex.itcl \
 	IconIndex.itcl \
 	Index.itcl \
 	IndexBrowser.itcl \
