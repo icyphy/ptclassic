@@ -709,7 +709,7 @@ realGetParams(const Block* block, ParamListType* pListPtr,char** names,
 		for (i = 0; i < j; i++)
 		    pListPtr->array[i] = tempArray[i];
 	    }
-	    LOG_DEL; delete tempArray;
+	    LOG_DEL; delete [] tempArray;
 	}
 	pListPtr->length = j;
 	return TRUE;
@@ -814,7 +814,7 @@ KcProfile (char* name) {
 			accum_string (" ");
 		}
 		else accum_string ("Wormhole: ");
-		LOG_DEL; delete msg;
+		LOG_DEL; delete [] msg;
 		accum_string (name);
 		accum_string ("\n");
 	}
