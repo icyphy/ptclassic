@@ -1,8 +1,8 @@
 defstar {
-	name {ParametricEq}
-	derivedFrom {Biquad}
+	name {VISParametricEq}
+	derivedFrom {VISBiquad}
 	domain {CGC}
-	version { @(#)CGCParametricEq.pl	1.13	7/20/96 }
+	version { $Id$ }
 	desc {
 A two-pole, two-zero parametric digital IIR filter (a biquad).
 	}
@@ -98,7 +98,7 @@ and Hipass types.
 	}
         codeblock(constbw) {
 	  /* Newton approximation */
-          static double $sharedSymbol(CGCParametricEq,constbw)(int niter,
+          static double $sharedSymbol(CGCVISParametricEq,constbw)(int niter,
 	     double tol, double bw, double wc, double initial_guess) {
 	      double x0,x1;
 	      double fval,fprimeval;
@@ -123,7 +123,7 @@ and Hipass types.
             }        
 	}
 	codeblock(lowpass) {
-          static void $sharedSymbol(CGCParametricEq,lowpass)(parametric_t *parametric, double *filtercoeff)
+          static void $sharedSymbol(CGCVISParametricEq,lowpass)(parametric_t *parametric, double *filtercoeff)
 	    {
 	      double omegapwarp,omegacwarp;
 	      double n0,d0,d1,d2,Qzsquared,Qpsquared,Qz,Qp;
@@ -160,7 +160,7 @@ and Hipass types.
 	    }
 	}
 	codeblock(bandpass) {
-          static void $sharedSymbol(CGCParametricEq,bandpass)(parametric_t *parametric, double *filtercoeff) {
+          static void $sharedSymbol(CGCVISParametricEq,bandpass)(parametric_t *parametric, double *filtercoeff) {
 	      double omegacwarp,omegacornerwarp,omegacorner_guess,gamma;
 	      double Qz,Qp,initial;
 	      double a2,b2;
@@ -168,7 +168,7 @@ and Hipass types.
 	      omegacwarp = 2*tan(parametric->omegac/2);
 	      omegacorner_guess = parametric->omegac - (parametric->omegabw/2);
 	      initial = parametric->omegac/omegacorner_guess;
-	      gamma = $sharedSymbol(CGCParametricEq,constbw)(5,0.001, parametric->omegabw, omegacwarp, initial);
+	      gamma = $sharedSymbol(CGCVISParametricEq,constbw)(5,0.001, parametric->omegabw, omegacwarp, initial);
 	      omegacornerwarp = omegacwarp/gamma;
 	      Qp = (sqrt(parametric->lineargain)*omegacwarp*omegacornerwarp) /
 		(omegacwarp*omegacwarp-omegacornerwarp*omegacornerwarp);
@@ -187,7 +187,7 @@ and Hipass types.
 	    }
 	}
 	codeblock(hipass) {
-          static void $sharedSymbol(CGCParametricEq,hipass)(parametric_t *parametric, double *filtercoeff)
+          static void $sharedSymbol(CGCVISParametricEq,hipass)(parametric_t *parametric, double *filtercoeff)
 	    {
 	      double omegapwarp,omegacwarp;
 	      double n0,d0,d1,d2,Qzsquared,Qpsquared,Qz,Qp;
@@ -226,7 +226,7 @@ and Hipass types.
 	}
 
 	codeblock(setfiltertaps){
-	  static void $sharedSymbol(CGCParametricEq,setfiltertaps)
+	  static void $sharedSymbol(CGCVISParametricEq,setfiltertaps)
 	    (parametric_t *parametric, double *filtercoeff, double
 	     *filtertaps)
 	    {
@@ -252,23 +252,23 @@ and Hipass types.
 	  /* procedure called to update changes in gain, center */
 	  /* freq., bandwidth, and passband freq, in the Tk star*/
 
-	  static void $sharedSymbol(CGCParametricEq,selectFilter)
+	  static void $sharedSymbol(CGCVISParametricEq,selectFilter)
 	    (parametric_t *parametric, double *filtercoeff, 
 	     double *filtertaps, char *filtername)
 	    {
 	      if (strcasecmp(filtername, "LOW") == 0){
-		$sharedSymbol(CGCParametricEq,lowpass)
+		$sharedSymbol(CGCVISParametricEq,lowpass)
 		  (parametric, filtercoeff);
 	      }
 	      else if (strcasecmp(filtername, "HI") == 0){
-		$sharedSymbol(CGCParametricEq,hipass)
+		$sharedSymbol(CGCVISParametricEq,hipass)
 		  (parametric, filtercoeff);
 	      }
 	      else if (strcasecmp(filtername, "BAND") == 0){
-		$sharedSymbol(CGCParametricEq,bandpass)
+		$sharedSymbol(CGCVISParametricEq,bandpass)
 		  (parametric, filtercoeff);
 	      }
-	      $sharedSymbol(CGCParametricEq,setfiltertaps)
+	      $sharedSymbol(CGCVISParametricEq,setfiltertaps)
 		(parametric, filtercoeff, filtertaps);
 	    }
 	}
@@ -283,8 +283,6 @@ and Hipass types.
 	    int gainflag;
 	  } parametric_t;
 
-
-
 #define PI (M_PI)
 	}
 	codeblock(declarations){
@@ -296,27 +294,28 @@ and Hipass types.
 	  addInclude("<string.h>");
 	  addGlobal(globalDecl, "global");
 	  addGlobal(declarations);
-	  CGCBiquad::initCode();
+	  CGCVISBiquad::initCode();
 	  addProcedure(setparams);
-          addProcedure(constbw, "CGCParametricEq_setparams");
-	  addProcedure(lowpass, "CGCParametricEq_lowpass");
-	  addProcedure(hipass, "CGCParametricEq_hipass");
-	  addProcedure(bandpass, "CGCParametricEq_bandpass");
-	  addProcedure(setfiltertaps, "CGCParametricEq_setfiltertaps");
-	  addProcedure(selectFilter, "CGCParametricEq_selectFilter");
+          addProcedure(constbw, "CGCVISParametricEq_setparams");
+	  addProcedure(lowpass, "CGCVISParametricEq_lowpass");
+	  addProcedure(hipass, "CGCVISParametricEq_hipass");
+	  addProcedure(bandpass, "CGCVISParametricEq_bandpass");
+	  addProcedure(setfiltertaps, "CGCVISParametricEq_setfiltertaps");
+	  addProcedure(selectFilter, "CGCVISParametricEq_selectFilter");
 	  addCode("$starSymbol(setparams)(&$starSymbol(parametric));");
 	  if (strcasecmp(filtertype, "LOW") == 0){
-	    addCode("$sharedSymbol(CGCParametricEq,lowpass)(&$starSymbol(parametric),$starSymbol(filtercoeff));");
+	    addCode("$sharedSymbol(CGCVISParametricEq,lowpass)(&$starSymbol(parametric),$starSymbol(filtercoeff));");
 	  }
 	  else if (strcasecmp(filtertype, "HI") == 0){
-	    addCode("$sharedSymbol(CGCParametricEq,hipass)(&$starSymbol(parametric),$starSymbol(filtercoeff));");
+	    addCode("$sharedSymbol(CGCVISParametricEq,hipass)(&$starSymbol(parametric),$starSymbol(filtercoeff));");
 	  }
 	  else if (strcasecmp(filtertype, "BAND") == 0){
-	    addCode("$sharedSymbol(CGCParametricEq,bandpass)(&$starSymbol(parametric),$starSymbol(filtercoeff));");
+	    addCode("$sharedSymbol(CGCVISParametricEq,bandpass)(&$starSymbol(parametric),$starSymbol(filtercoeff));");
           }
-	  addCode("$sharedSymbol(CGCParametricEq,setfiltertaps)(&$starSymbol(parametric),$starSymbol(filtercoeff),$starSymbol(filtertaps));");
+	  addCode("$sharedSymbol(CGCVISParametricEq,setfiltertaps)(&$starSymbol(parametric),$starSymbol(filtercoeff),$starSymbol(filtertaps));");
+	  addCode("$sharedSymbol(CGCVISBiquad,settaps)($starSymbol(filtertaps),$starSymbol(tapmatrix),&$starSymbol(betatop),&$starSymbol(betabott),$starSymbol(scaledown));");
         }
 	go {
-	  CGCBiquad::go();
+	  CGCVISBiquad::go();
 	}
 }
