@@ -63,6 +63,7 @@ EXTRA_SRCS =	\
 		releasenotes0.1.1.html \
 		releasenotes0.2.html \
 		releasenotes0.2.1.html \
+		releasenotes0.3.html \
 		running.html \
 		sponsors.html \
 		troubleshooting.html \
