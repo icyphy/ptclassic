@@ -58,7 +58,7 @@ This invokes a shell script that starts VEM and the
 associated pigiRpc process.
 VEM is started in general with the following command line options:
 .(c
-vem [-F cell[:view[:facet]]] [-G WxH+X+Y] [-R [host,]path] \
+vem [-F cell[:view[:facet]]] [-G WxH+X+Y] [-R [host,]path] \\
 	[-display host:display] [name=value ...]
 .)c
 .IE "VEM command line"
@@ -68,7 +68,7 @@ if (!($?PIGIRPC)) then
 	setenv PIGIRPC ~ptolemy/bin.$ARCH/pigiRpc
 endif
 xrdb -m ~ptolemy/lib/pigiXRes8
-vem -G 600x150+0+0 -F init.pal:schematic \
+vem -G 600x150+0+0 -F init.pal:schematic \\
 	-G 600x300+0+170 -R $PIGIRPC
 .)c
 The first three lines set the PIGIRPC environment variable to point
@@ -977,6 +977,7 @@ farther than larger ones.  If the box is omitted,  the window
 containing the mouse is zoomed out by a factor of two.
 .in -0.5i
 .H2 "Options"
+.pp
 The options commands below all post form windows which allow a user
 to change display parameters interactively.  The default values
 for these parameters can be changed in your ~/.Xdefaults file.
@@ -1821,7 +1822,7 @@ command allows the user to add new objects to a schematic cell.
 Different arguments given to 
 .I create
 will produce different objects.
-.pp
+.sp 0.5
 .BO "Formal Terminals -"
 \fB"terminal-name [type] [direction]"\fP
 .BO " : create"
@@ -1980,6 +1981,7 @@ Finally, the
 button displays some help about how to use the dialog.
 .in -0.5i
 .H2 "Remote application commands"
+.pp
 The following commands apply only if a remote application, like
 pigiRpc, is running.
 .pp
@@ -2010,7 +2012,7 @@ specifies the network location for the application and
 "path" specifies the path to the executable on "host".
 If the host specification is omitted,  the local machine
 is assumed.
-.in 0.5i
+.in -0.5i
 .TS
 lw(20)b lw(10)b lb.
 rpc-reset	^R	No Arguments
