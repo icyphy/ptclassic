@@ -35,6 +35,8 @@ ENHANCEMENTS, OR MODIFICATIONS.  COPYRIGHTENDKEY
 #pragma implementation
 #endif
 
+#include <stdio.h>              // printf()
+
 #include "ACSTarget.h"
 #include "KnownTarget.h"
 #include "pt_fstream.h"
