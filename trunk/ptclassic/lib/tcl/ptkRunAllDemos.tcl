@@ -29,15 +29,16 @@
 #######################################################################
 # Procedure to bring up the control panel for run-all-demos
 #
-proc ptkRunAllDemos { name octHandle } {
+proc ptkRunAllDemos {name octHandle} {
     global ptkControlPanel ptkOctHandles
     set ptkOctHandles($name) $octHandle
     set ptkControlPanel .run_all_demos_$octHandle
     
     if {[winfo exists $ptkControlPanel]} {
-            ptkImportantMessage .error \
-		"You already have a run control window open for $name"
-	    return
+        ptkImportantMessage .error \
+	    "You already have a run-all-demos control window open for $name"
+	raise $ptkControlPanel
+	return
     }
 
     catch {destroy $ptkControlPanel}
@@ -48,9 +49,9 @@ proc ptkRunAllDemos { name octHandle } {
     wm iconname $ptkControlPanel "Run-all-demos $name"
 
     message $ptkControlPanel.msg \
-	    -width 25c \
-	    -text "Run-all-demos control panel\nfor palette $name" \
-	    -justify center
+	-width 25c \
+	-text "Run-all-demos control panel\nfor palette $name" \
+	-justify center
 
     # Display info on the current universe
     label $ptkControlPanel.univName -width 40
@@ -62,7 +63,7 @@ proc ptkRunAllDemos { name octHandle } {
     # to stars to insert custom controls into the control panel.
     # By convention, we tend to use "high" for entries, "middle"
     # for buttons, and "low" for sliders.  The full name for the
-    # frame is .run_${octHandle}.$position, where $name is the name of the
+    # frame is $ptkControlPanel.$position, where $name is the name of the
     # universe, and $position is "high", "middle", or "low".
     frame $ptkControlPanel.high
     frame $ptkControlPanel.middle
@@ -70,20 +71,21 @@ proc ptkRunAllDemos { name octHandle } {
 
     # Define the panel of control buttons
     frame $ptkControlPanel.panel -bd 10
-	button $ptkControlPanel.panel.abortAll -text "Abort all" \
-		-command {ptkImportantMessage .error "Abort all: not implemented"} \
-		-width 14
-	button $ptkControlPanel.panel.abortCurrent -text "Abort current" \
-		-command {ptkAbort [curuniverse]} -width 14
-	pack $ptkControlPanel.panel.abortAll -side left -fill both -expand yes
-	pack $ptkControlPanel.panel.abortCurrent -side right \
-		-fill both -expand yes
+    button $ptkControlPanel.panel.abortAll -text "Abort all" \
+	-command {ptkImportantMessage .error "Abort all: not implemented"} \
+	-width 14
+    button $ptkControlPanel.panel.abortCurrent -text "Abort current" \
+	-width 14
+    pack $ptkControlPanel.panel.abortAll -side left -fill both -expand yes
+    pack $ptkControlPanel.panel.abortCurrent -side right \
+	-fill both -expand yes
 
     # Animation is off by default
+    # wtc: maybe this should go to ptkCompileRun?
     ptkGrAnimation 0
 
     frame $ptkControlPanel.disfr
-    # DISMISS button does nothing for now, no command.
+    # DISMISS button does nothing for now, no command binding.
     button $ptkControlPanel.disfr.dismiss -text "DISMISS (not implemented)"
     pack $ptkControlPanel.disfr.dismiss -side top -fill both -expand yes
 
@@ -107,6 +109,7 @@ proc ptkRunAllDemos { name octHandle } {
 # Procedure to delete a run-all-demos control window
 #
 proc ptkRunAllDemosDel { name window octHandle } {
+    global ptkOctHandles
     catch {unset ptkOctHandles($name)}
 
     # most important thing: destroy the window
@@ -118,10 +121,10 @@ proc ptkRunAllDemosDel { name window octHandle } {
 # Procedure to delete a universe and its baggage
 #
 proc ptkDelLite { name octHandle } {
-    global ptkRunFlag
+    global ptkControlPanel ptkOctHandles ptkRunFlag
 
     if {![info exists ptkRunFlag($name)]} {
-	# Assume the window has been deleted already and ignore command
+	# Assume the universe has been deleted already and ignore command
 	return
     }
     if [regexp {^ACTIVE$|^PAUSED$} $ptkRunFlag($name)] {
@@ -135,13 +138,14 @@ proc ptkDelLite { name octHandle } {
     }
     catch {unset ptkRunFlag($name)}
     catch {unset ptkOctHandles($name)}
+    $ptkControlPanel.panel.abortCurrent configure -command ""
     deluniverse $name
 }
 
 #######################################################################
-#procedure to compile and run a universe by run-all-demos
-#a blend of ptkRunControl (everything without the control panel part)
-#and ptkGo.  No debugging, animation.
+# Procedure to compile and run a universe by run-all-demos.
+# A blend of ptkRunControl (everything without the control panel part)
+# and ptkGo.  No debugging, animation.
 proc ptkCompileRun {name octHandle} {
     global ptkRunFlag ptkOctHandles
     set ptkOctHandles($name) $octHandle
@@ -156,31 +160,54 @@ proc ptkCompileRun {name octHandle} {
             ptkImportantMessage .error "Sorry.  Only one run at time. "
 	    return
     }
+
     global ptkControlPanel
-    after 200 ptkUpdateCount $name $octHandle
+
     # So that error highlighting, etc. works
     if {$univ != $name} {ptkSetHighlightFacet $octHandle}
-    # Make sure the button relief gets displayed
-    update
+    ptkClearHighlights
+
     # catch errors and reset the run flag.
     if {[catch {
 	$ptkControlPanel.univName configure -text "Compiling universe $name"
 	$ptkControlPanel.iter configure -text ""
 	update
         ptkCompile $octHandle
+
 	set ptkRunFlag($name) ACTIVE
 	$ptkControlPanel.univName configure -text "Running universe $name"
-	set numIter [ptkGetRunLength $octHandle]
-	$ptkControlPanel.iter configure -text "$numIter iterations"
-        run $numIter
-	if {$ptkRunFlag($name) != {ABORT}} { wrapup } {
-	    # Mark an error if the system was aborted
-	    set ptkRunFlag($name) ERROR
+	$ptkControlPanel.panel.abortCurrent configure \
+	    -command "ptkAbort $name"
+	if {[ptkGetStringProp $octHandle usescript] == "1"} {
+	    # we want to run the script.  This means we have to
+	    # retrieve the script from the oct facet, and then get
+	    # the Tcl interpreter to evaluate it.
+	    $ptkControlPanel.iter configure -text "A scripted run"
+	    set scriptValue [ptkGetStringProp $octHandle script]
+	    if {$scriptValue == ""} {
+		set numIter [ptkGetRunLength $octHandle]
+		set scriptValue "run $defNumIter\nwrapup\n"
+	    }
+	    eval $scriptValue
+	} {
+	    # default run: just run through the specified number
+	    # of iterations, finishing by invoking
+	    # wrapup if no error occurred.
+	    set numIter [ptkGetRunLength $octHandle]
+	    $ptkControlPanel.iter configure -text "$numIter iterations"
+            run $numIter
+
+	    if {[info exists ptkRunFlag($name)] &&
+		$ptkRunFlag($name) != {ABORT}} { wrapup } {
+	        # Mark an error if the system was aborted
+	        set ptkRunFlag($name) ERROR
+	    }
 	}
-	ptkClearRunFlag $name $octHandle
+
+	# we have finished running
+	set ptkRunFlag($name) FINISHED
     } msg] == 1} {
 	# An error has occurred.
-	ptkClearRunFlag $name $octHandle
 	# Mark an error
 	set ptkRunFlag($name) ERROR
 	error $msg
