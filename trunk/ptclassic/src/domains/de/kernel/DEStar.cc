@@ -11,7 +11,6 @@ $Id$
 *******************************************************************/
 #include "DEStar.h"
 #include "DERepeatStar.h"
-#include "DEPriorityStar.h"
 #include "StringList.h"
 #include "Output.h"
 #include "PriorityQueue.h"
@@ -87,83 +86,6 @@ const char* DEStar :: domain() const {
 void DERepeatStar :: start() {
 	feedbackOut.put(completionTime) << 0.0;
 	feedbackOut.sendData();
-}
-
-
-// constructor
-DEPriorityStar :: DEPriorityStar()
-{
-	// initialize the members
-	numEvent = 0;
-	addState(queueSize.setState("queueSize", this, "1", "queue size"));
-	inQueue = 0;		// no queue is initialized.
-}
-
-// redefine the start method to initialize the queues.
-
-void DEPriorityStar :: start()
-{
-	DERepeatStar :: start();
-	
-	// initialize queues and states
-	numEvent = 0;
-	if (inQueue)
-		for (int i = priorityList.length() - 1; i >= 0; i --)
-			inQueue[i].initialize();
-	else {
-		int l = priorityList.length();
-		inQueue = new Queue[l];
-	}
-}
-
-// set up priorityList
-int DEPriorityStar :: isItRunnable()
-{
-	priorityList.reset();
-	int preNum = numEvent;
-
-	// if event arrives, queue it 
-	if (!canGetFired()) {
-	   for (int i = priorityList.length() - 1; i >= 0; i--) {
-		InDEPort* p = (InDEPort*) priorityList.next()->e;
-		if (p->dataNew) {
-			numEvent++;
-			// queue if queue size is not greater than limit
-			if (inQueue[i].length() < int (queueSize)) {
-				Particle& pp = p->get();
-				Particle* newp = pp.clone();
-				*newp = pp;
-				inQueue[i].put(newp);
-			} else {
-				errorHandler.error("warning : queue overflow",
-				"class DEPriorityQueue");
-			}
-		}
-	   }
-	   if (arrivalTime < completionTime) {
-		// launch the feedback event.
-	   	if (preNum <= 0) refireAtTime(completionTime);	
-	   	return FALSE;
-	   }
-	} else if (numEvent == 0) return FALSE;
-	return TRUE;
-}
-
-Particle* DEPriorityStar :: fetchData(InDEPort& p) 
-{
-	priorityList.reset();
-	for (int i = priorityList.length() - 1; i >= 0; i--) {
-		if (((InDEPort*) priorityList.next()->e) == &p) {
-			if (inQueue[i].length() > 0) {
-				numEvent--;
-				Particle* pp = (Particle*) inQueue[i].get();
-				pp->die();
-				return pp;
-			}
-		}
-	}
-	// if no particle associated with the input port
-	return 0;
 }
 
 
