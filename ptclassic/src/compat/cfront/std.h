@@ -26,7 +26,7 @@
  */
 #ifndef _std_h
 #define _std_h
- *  _std_h     is defined by the g++ std.h file
+/*  _std_h     is defined by the g++ std.h file */
 
 #if defined(hppa)
 #include <stdlib.h>
