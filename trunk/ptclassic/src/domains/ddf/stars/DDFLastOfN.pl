@@ -42,12 +42,10 @@ where N is the control input.
 		// get control Particles from "control" porthole
 		if (!readyToGo) {
 			control.grabData();	
-			int i = int (control%0);
-			waitFor(input, i);
-			readyToGo = TRUE;
-		} else {
-			// skip the N-1 inputs
-			int num = int (control%0);
+		}
+		int num = int (control%0);
+		if (input.numTokens() >= num) {
+			// skip the num-1 inputs
 			for (int i = num; i > 0; i--)
 				input.grabData();
 
@@ -61,7 +59,10 @@ where N is the control input.
 
 			// generate output, and get ready for next firing
 			output.sendData();
-		}
+		} else {
+			waitFor(input, num);
+			readyToGo = TRUE;
+		} 
 	}
 }
 
