@@ -99,9 +99,9 @@ libvhdlstars.exp\
 libpigi.exp\
 libX11.exp
 
-$(EXP): $(LIB)
+$(EXP): $(PTLIB)
 
-$(LIBDIR)/$(LIB): $(LIB) $(EXP)
-	rm -f $(LIBDIR)/$(LIB)
-	ln $(LIB) $(LIBDIR)
+$(LIBDIR)/$(PTLIB): $(PTLIB) $(EXP)
+	rm -f $(LIBDIR)/$(PTLIB)
+	ln $(PTLIB) $(LIBDIR)
 	ln $(EXP) $(LIBDIR)

@@ -158,7 +158,7 @@ TAGS:		$(SRCS)
 # Rule for detecting junk files
 
 checkjunk:
-	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) $(OBJS) $(LIB) \
+	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) $(OBJS) $(PTLIB) \
 		$(STAR_MK).o $(EXTRA_DESTS) makefile make.template SCCS
 
 # "check" does not print anything if nothing is being edited.
