@@ -156,39 +156,39 @@ class ::tycho::File {
 
     #### callAutoSave
     # If the argument is a File object, call its autoSave method.
-    proc callAutoSave {obj}
+    proc callAutoSave {obj} {}
 
     #### emergencySave
     # Call the saveCrash method for all File objects.
-    proc emergencySave {}
+    proc emergencySave {} {}
 
     #### hyperjump
     # Open a file and go to its internal point identified by name.
-    proc hyperjump {filename point}
+    proc hyperjump {filename point} {}
 
     #### newEditor
     # Open a new editor of the specified class.
-    proc newEditor {editor}
+    proc newEditor {editor} {}
 
     #### openwin
     # Open a file browser, and then open an editor for the file.
-    proc openwin {}
+    proc openwin {} {}
 
     #### openContext
     # Open an editor to edit the file.
     # Which editor is determined by the file extension.
-    proc openContext {file}
+    proc openContext {file} {}
 
     # Register file extensions and an associated editor class.
-    proc registerEditor {extensions editorClass {description {}}}
+    proc registerEditor {extensions editorClass {description {}}} {}
 	
     #### windowMenuAddAll
     # Add a file editor object to the window menus of all open File objects.
-    proc windowMenuAddAll {obj label}
+    proc windowMenuAddAll {obj label} {}
 
     #### windowMenuRemoveAll
     # Remove a filename from the window menus of all open File objects.
-    proc windowMenuRemoveAll {filename}
+    proc windowMenuRemoveAll {filename} {}
 
     ##########################################################################
     ####                         protected variables                      ####
@@ -224,7 +224,7 @@ class ::tycho::File {
 
     #### checkForAutoSaveFiles
     # Check for auto-save or crash-recovery files, and return the file to open.
-    protected proc checkForAutoSaveFiles {filename}
+    protected proc checkForAutoSaveFiles {filename} {}
 
     #### removeBackupFiles
     # Remove auto-save and crash-recovery files, if they exist.
