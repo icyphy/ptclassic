@@ -244,7 +244,7 @@ At the end of the execution of the
 we find out the next event time of the inner domain and copies it to
 \fIcurrentTime\fR of the inner
 .c Scheduler .
-We also set the flag, \fIstopBeforeDeadlocked\FR, if the inner domain
+We also set the flag, \fIstopBeforeDeadlocked\fR, if the inner domain
 is not deadlocked.
 Then, the outer 
 .c Scheduler
