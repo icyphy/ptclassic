@@ -289,7 +289,7 @@ extern void free(), perror();
  *   performance advantages as vfork.
  */
 #define vfork() fork()
-extern void free(char *);
+extern VOID_HACK free();
 #else
 extern VOID_HACK abort(), free(), exit(), perror();
 #endif /*sgi*/
