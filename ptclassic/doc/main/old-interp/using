@@ -68,7 +68,8 @@ and connections among them.
 \*(PT supports multiple simulation domains, and so does the \*(PT
 interpreter.  Before creating a simulation environment and running
 it, it is necessary to establish the domain.  Currently, three domains
-are supported: synchronous data flow (SDF), discrete event (DE), and
+are linked into the standard interpreter:
+synchronous data flow (SDF), discrete event (DE), and
 dynamic data flow (DDF).
 The interpreter has a
 .i "current domain" ;
@@ -169,6 +170,25 @@ within the
 .c MultiPortHole
 and connect to that
 (see Section 5.3.1).
+.H3 "Netlist-style connections
+.pp
+As an alternative to issuing connect commands (which specify
+point-to-point connections) you may specify connections netlist-style.
+This syntax is used to connect an input to more than one output, for
+example (this is called
+.i auto-forking ).
+Two commands are provided for this purpose.  The
+.c node
+command creates a node:
+.(c
+(node \fInodename\fP)
+.)c
+The
+.c nodeconnect
+command connects a porthole to a node:
+.(c
+(nodeconnect (\fIstarname portname\fP) \fInodename\fP)
+.)c
 .H3 "Connecting Internal Galaxy Stars and Galaxys to the Outside
 .pp
 When you define a new
@@ -481,6 +501,8 @@ the commands described above \-
 .c star ,
 .c galaxy ,
 .c connect ,
+.c node ,
+.c nodeconnect ,
 .c input ,
 .c output ,
 .c numports ,
@@ -681,9 +703,10 @@ The syntax is
 .(c
 (wrapup)
 .)c
-.H2 "Miscellaneous Commands
+.H2 "Undoing what you've done"
 .pp
-This section describes the remaining interpreter commands.
+The commands in this section remove part or all of the structure you
+have built with previous commands.
 .H3 "Resetting the Interpreter
 .pp
 The
@@ -695,11 +718,52 @@ by an empty
 Any
 .c defgalaxy
 definitions you have made are still remembered.
-This is currently the only way to recover if you've made a mistake.
 The syntax is
 .(c
 (reset)
 .)c
+.H3 "Removing a Star
+.pp
+The
+.c delstar
+command removes the named Star from the current galaxy.
+The syntax is
+.(c
+(delstar \fIname\fP)
+.)c
+where
+.i name
+is the name of the star.
+.H3 "Removing a connection
+.pp
+The
+.c disconnect
+command reverses the effect of a previous
+.c connect
+or
+.c nodeconnect
+command.  The syntax is
+.(c
+(disconnect \fIstarname portname\fP)
+.)c
+where
+.i starname
+and
+.i portname ,
+taken together, specify one of the two connected portholes.  Note that
+you can disconnect by specifying either end of a porthole for a point-to-point
+connection.
+.H3 "Removing a node
+.pp
+The
+.c delnode
+command removes a node from the current galaxy.  Syntax:
+.(c
+(delnode \fInode\fP)
+.)c
+.H2 "Miscellaneous Commands
+.pp
+This section describes the remaining interpreter commands.
 .H3 "Loading Commands from a File
 .pp
 For complicated simulations it is best to store your
@@ -747,6 +811,17 @@ will load the same file as the example in the previous section.
 To see what the interpreter's current directory is, you can type
 .(c
 (exec pwd)
+.)c
+.H3 "Dynamically linking in new stars"
+.pp
+The interpreter has the ability to extend itself by linking in outside
+object files; the object files in question must define single stars
+(they will have the right format if they are produced from preprocessor
+input).  Unlike Pigi, the graphical interface, the interpreter will not
+automatically run the preprocessor and linker; it expects to be given
+object files that have already been compiled.  The syntax is
+.(c
+(link "\fIobject-file-name\fP")
 .)c
 .H3 "Messages to the User
 .pp
