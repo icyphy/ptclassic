@@ -16,13 +16,12 @@ $Id$
 #endif
 
 #include "SDFStar.h"
-#include "Fraction.h"
 #include "CGConnect.h"
-#include "Particle.h"
-#include "DataStruct.h"
 #include "Code.h"
-#include "CGSymbol.h"
+#include "SymbolList.h"
 #include "IntState.h"
+
+class StringList;
 
 // the following function is provided by the SunOS and Ultrix libs.
 // don't know how generally it is available.
@@ -92,7 +91,7 @@ protected:
 	// Process the string and add it to the Target code.
 	void addCode(const char*);
 
-	// Call addCode - temporarily here for backgroud compatibility.
+	// For temporary backward compatibility.
 	void gencode(const char* code) { addCode(code); };
 
 	// Return the special character that introduces a macro
