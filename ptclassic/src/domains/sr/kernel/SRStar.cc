@@ -67,7 +67,7 @@ void SRStar::initializeInstant()
 
 // Inter-instant time advancement
 // By default, do nothing
-int SRStar::tick()
+void SRStar::tick()
 {
   return 0;
 }
@@ -99,8 +99,27 @@ int SRStar::run()
       }
     }
 
-    if ( ableToFire && (!isReactive || presentInputs) ) {
-      go();
+    if ( ableToFire ) {
+      if (!isReactive || presentInputs ) {
+
+	// All of the inputs are known, and if the star is reactive,
+	// there is at least one present input--call go()
+
+	go();
+
+      } else {
+
+	// All of the inputs are known, but none are present and the
+	// star is reactive--mark all outputs as absent and don't call go()
+      
+	nextPort.reset();
+	while ( ( p = nextPort++ ) != 0 ) {
+	  if ( p->isItOutput() ) {
+	    ((OutSRPort *)p)->makeAbsent();
+	  }
+	}	
+      }
+
       hasFired = 1;
     }
 
