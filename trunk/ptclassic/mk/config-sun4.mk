@@ -12,10 +12,11 @@ X11INCL = -I/usr/X11/include
 # containing them.  Otherwise leave it blank.
 X11LIBDIR = -L/usr/X11/lib
 
+TCL_ROOT=$(ROOT)/tcl
 # Directory containing Tcl/Tk include files
-TCL_H_DIR=$(ROOT)/tcl/include
+TCL_H_DIR=$(TCL_ROOT)/include
 
 # Directory containing Tcl/Tk libraries
-TCL_LIBDIR=$(ROOT)/tcl/lib.$(ARCH)
+TCL_LIBDIR=$(TCL_ROOT)/lib.$(ARCH)
 
 
