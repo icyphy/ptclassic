@@ -20,12 +20,12 @@ MEMLOG = -DMEMORYLOG
 # C++ compiler to use
 GNU = g++
 # flags for C++ compilation
-GPPFLAGS = -g $(MEMLOG)
+GPPFLAGS = -g -Wall -Wcast-qual $(MEMLOG)
 # flags for C compilation
 CFLAGS = -g
 
 # command to use when getting files from SCCS (Gnu make)
-GET=cd $(VPATH); /usr/sccs/get
+GET=safe-get
 
 # command to generate dependencies (cfront users can try CC -M)
 DEPEND=g++ -MM
