@@ -95,6 +95,14 @@ as the user if we want to create it.
 <ul>
 <li>The HTML parser is quite slow.
 <li>In "img" directives, align="right" causes an error.
+<li>In "img" directives dollar signs are not properly handled.
+The HTML code:
+<PRE>
+&lt;img src="$PTOLEMY/tycho/typt/kernel/img/ptolemyWelcome.gif" &gt;
+</PRE>
+fails:
+<img src="$PTOLEMY/tycho/typt/kernel/img/ptolemyWelcome.gif" >
+
 <li>A &lt;p&gt; after an image is ignored.
 <li>If you have the source code for an HTML file open, and you try to open
     with HTML file with the "Back" command, you get an error message that
@@ -153,13 +161,6 @@ HREF="tynt.html"><CODE>tynt.html</CODE></A>.
 <li> The viewer beeps at you if you press the Alt key. It shouldn't
 do this, as the Alt key might be used in some window managers
 (I use it in FVWM, for instance -- hjr).
-
-<li> If you open a directory from within the HTML viewer, you should
-get a listing of the contents of the directory.  If you use the
-location entry widget to open a directory, or you have a link to a
-directory, you get a blank Edit widget.  If the HTML viewer is passed
-a directory, it should open the index.html file if it is present, otherwise
-it should print the contents of the directory in the window, a la Netscape.
 
 </ul>
 
