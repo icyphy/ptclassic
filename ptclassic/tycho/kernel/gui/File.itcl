@@ -57,8 +57,6 @@ proc ::tycho::openContext {filename {mode {}}} {
 	if [::tycho::registry isopen $filename] {
 	    set win [lindex [::tycho::registry windows $filename] 0]
 	    if [catch {$win raiseWindow} msg] {
-                # FIXME
-		puts "!!! windowMenuRemoveAll $filename !!!"
 		# windowMenuRemoveAll $filename
 		global ::errorInfo
 		set saveInfo $errorInfo
@@ -451,30 +449,17 @@ configbody ::tycho::File::tmpfile {
 body ::tycho::File::constructor {args} {
     global tcl_platform
 
-    # Remove Control-X from the <<Cut>> event 
-    # In Itcl2.2, we have virtual events, so Control-Key-x is bound to
-    #<<Cut>> in tk.tcl.  This means that we cannot have things like C-x C-r
-    # bound to reload.
-    if {[namespace ::itcl {set version}] > 2.1 } {
-	::event delete <<Cut>> <Control-Key-x>
-    }
-
     # Bindings.
-    # <Control-x><Control-f> is bound in TopLevel to open the file
-    # browser. Here. however, we want <Control-x><Control-f> to open
-    # the file open mini-buffer, and <Control-x><Control-F> to open
-    # the file browser.
-    bind [winfo toplevel $prefix] <Control-x><Control-f> {}
-    bind $prefix <Control-x><Control-f> "$this openWinMinibuffer; break"
-    bind $prefix <Control-x><Control-F> "::tycho::File::openWin %W; break"
-    bind $prefix <Control-x><Control-s> "$this save; break"
-    bind $prefix <Control-x><Control-v> "$this altFile; break"
-    bind $prefix <Control-x><Control-w> "$this saveAs; break"
-    bind $prefix <Control-x><Key-i> "$this insertFile; break"
-    bind $prefix <Control-x><Key-p> "$this print; break"
-    bind $prefix <Control-x><Control-r> "$this evaluate; break"
-    bind $prefix <Control-x><Control-q> "$this toggleReadOnly; break"
-    bind $prefix <Control-x><v> "$this revisionControl; break"
+    bind [winfo toplevel $prefix] <<Open>> {}
+    bind $prefix <<Open>> "$this openWinMinibuffer; break"
+    bind $prefix <<Save>> "$this save; break"
+    bind $prefix <<AltFile>> "$this altFile; break"
+    bind $prefix <<SaveAs>> "$this saveAs; break"
+    bind $prefix <<InsertFile>> "$this insertFile; break"
+    bind $prefix <<Print>> "$this print; break"
+    bind $prefix <<Evaluate>> "$this evaluate; break"
+    bind $prefix <<ToggleReadOnly>> "$this toggleReadOnly; break"
+    bind $prefix <<RevisionControl>> "$this revisionControl; break"
  
     # The following initialize options and then invoke any
     # configuration options, assuming there are options specified.
@@ -1349,7 +1334,7 @@ body ::tycho::File::_initializeBars {menubar statusbar toolbar} {
     # Insert items in the menu bar. This is faster in a seperate
     # method.
     if {$menubar != {}} {
-        # We have to qualify the call to this supposed-ly private
+        # We have to qualify the call to this supposedly private
         # method because Itcl (2.2) has virtual private methods!
         ::tycho::File::_initializeMenubar $menubar
     }
@@ -1402,55 +1387,73 @@ body ::tycho::File::_initializeMenubar {menubar} {
     $menubar addMenu help   -label Help -side right -underline 0
 
     # File menu contents
-    # Note that we have removed the binding to <Control-x><Control-f>
-    # made in TopLevel.
     $menubar command open file \
-	    -label "Open..." -underline 0 \
-	    -accelerator "C-x C-F" -command "$this openWinMethod"
+	    -label "Open..." \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel Open] \
+            -command "$this openWinMethod"
     
     $menubar command switchfile file \
-	    -label "Switch File..." -underline 4 \
-	    -accelerator "C-x C-v" -command "$this altFile"
+	    -label "Switch File..." \
+            -underline 5 \
+	    -accelerator [::tycho::Shortcuts::getLabel AltFile] \
+            -command "$this altFile"
     
     $menubar command insert file \
-	    -label "Insert..." -underline 0 \
-	    -accelerator "C-x i" -command "$this insertFile"
+	    -label "Insert..." \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel InsertFile] \
+            -command "$this insertFile"
     
     $menubar command reload file \
-	    -label "Reload" -underline 0 \
+	    -label "Reload" \
+            -underline 0 \
 	    -command "$this reload"
     
     $menubar separator filesep1 file
     
     $menubar command save file \
-	    -label "Save" -underline 0 \
-	    -accelerator "C-x C-s" -command "$this save"
+	    -label "Save" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel Save] \
+            -command "$this save"
     
     $menubar command saveas file \
-	    -label "SaveAs..." -underline 4 \
-	    -accelerator "C-x C-w" -command "$this saveAs"
+	    -label "SaveAs..." \
+            -underline 4 \
+	    -accelerator [::tycho::Shortcuts::getLabel SaveAs] \
+            -command "$this saveAs"
     
     $menubar command print file \
-	    -label "Print..." -underline 0 \
-	    -accelerator "C-x p" -command "$this print"
+	    -label "Print..." \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel Print] \
+            -command "$this print"
     
     $menubar separator filesep2 file
     
     $menubar command evaluate file \
-	    -label "Evaluate" -underline 0 \
-	    -accelerator "C-x C-r" -command "$this evaluate"
+	    -label "Evaluate" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel Evaluate] \
+            -command "$this evaluate"
     
     $menubar command compareto file \
-	    -label "Compare To..." -underline 2 \
+	    -label "Compare To..." \
+            -underline 2 \
             -command "$this compareTo "
 
     $menubar command revisioncontrol file \
-	    -label "Revision Control..." -underline 2 \
-	    -accelerator "C-x v" -command "$this revisionControl"
+	    -label "Revision Control..." \
+            -underline 2 \
+	    -accelerator [::tycho::Shortcuts::getLabel RevisionControl] \
+            -command "$this revisionControl"
 
     $menubar command togglereadonly file \
-	    -label "Toggle Read-Only" -underline 0 \
-	    -accelerator "C-x C-q" -command "$this toggleReadOnly"
+	    -label "Toggle Read-Only" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel ToggleReadOnly] \
+            -command "$this toggleReadOnly"
 
     # Windows might have a chmod and RCS.
     if {$tcl_platform(platform) == "macintosh"} {
@@ -1461,19 +1464,66 @@ body ::tycho::File::_initializeMenubar {menubar} {
     $menubar separator filesepbot file
     
     $menubar command close file \
-	    -label "Close" -underline 0 -accelerator "C-x k" \
-	    -command "[displayer] nextWindow; delete object [displayer]"
+	    -label "Close" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel Close] \
+	    -command "[displayer] prevWindow 1; delete object [displayer]"
 
-    if {[::tycho::Displayer::normalExit] == 1} {
+    if {[::tycho::TopLevel::normalExit] == 1} {
 	$menubar command quit file \
-		-label "Quit" -underline 0 \
-		-accelerator "C-x C-c" \
+		-label "Exit" \
+                -underline 1 \
+                -accelerator [::tycho::Shortcuts::getLabel Exit] \
 		-command "::tycho::TopLevel::exitProgram"
     }
     
+    $menubar command nextwindow window \
+	    -label "Next Window" \
+            -underline 5 \
+	    -accelerator [::tycho::Shortcuts::getLabel NextWindow] \
+            -command "$this displayer nextWindow 1"
+
+    $menubar command prevwindow window \
+	    -label "Prev Window" \
+            -underline 6 \
+	    -accelerator [::tycho::Shortcuts::getLabel PrevWindow] \
+            -command "$this displayer prevWindow 1"
+
+    $menubar command nextpane window \
+	    -label "Next Pane" \
+            -underline 5 \
+	    -accelerator [::tycho::Shortcuts::getLabel NextPane] \
+            -command "$this displayer nextView"
+
+    $menubar command iconify window \
+	    -label "Minimize" \
+            -underline 2 \
+	    -accelerator [::tycho::Shortcuts::getLabel Iconify] \
+            -command "$this displayer prevWindow 1; \
+            wm iconify \[winfo toplevel $itk_component(hull)\]"
+
+    $menubar command maximize window \
+	    -label "Maximize" \
+            -underline 2 \
+	    -accelerator [::tycho::Shortcuts::getLabel Maximize] \
+            -command "$this displayer fullScreen"
+
+    $menubar command minimize window \
+	    -label "Restore" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel Restore] \
+            -command "$this displayer originalSize"
+
+    $menubar command halfheight window \
+	    -label "Half Height" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel HalfHeight] \
+            -command "$this displayer halfHeight"
+
+    $menubar separator winsep window
+
     # Register the menubar so its Window and Help menus get set up
     ::tycho::register menubar $menubar $this
-
 }
 
 #####################################################################
