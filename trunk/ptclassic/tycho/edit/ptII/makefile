@@ -43,6 +43,7 @@ include $(CONFIG)
 TCL_SRCS =
   
 ITCL_SRCS = \
+	ButtonPanel.itcl \
 	PtEdit.itcl \
 	RunPanel.itcl \
 	RunWindow.itcl \
