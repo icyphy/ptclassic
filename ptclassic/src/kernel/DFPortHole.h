@@ -58,7 +58,7 @@ public:
 
         // redefine setPort
 	PortHole& setPort(const char* portName, Block* parent,
-		DataType type = FLOAT, unsigned numTokens = 1);
+		DataType type = FLOAT, int numTokens = 1);
 
 	// farSidePort is always DFPortHole or derived.  This
 	// overrides PortHole::far.
