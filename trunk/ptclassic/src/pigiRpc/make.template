@@ -94,7 +94,7 @@ ifdef PTRIM
 	TK=1
 endif
 
-ifndef VERSION
+ifndef PIGI
 ifndef PTRIM
 ifndef PTINY
 ifndef FULL
