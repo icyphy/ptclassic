@@ -54,9 +54,11 @@ class ::tycho::EditDiff {
     # The type of diff we want to perform
     itk_option define -difftype difftype Difftype 0
 
-    itk_option define -filename1 filename1 Filename1 ""
     # When a new instance is created, -filename1 and -filename2 are
     # passed onto the entry lines.
+    itk_option define -filename1 filename1 Filename1 ""
+
+    # Same as above
     itk_option define -filename2 filename2 Filename2 ""
 
     ##########################################################################
@@ -65,8 +67,8 @@ class ::tycho::EditDiff {
     # Compare files
     method compareFile {} {}
 
-    # Keep the concurrency between filename and listentry file
-    method configureUpdate {} {}
+    # Keep the concurrency between filename and list entry file
+    method configureUpdate {entrynum filename} {}
 
     # This will return the info line entry from the UNIX diff program
     # (ie. 12,32c53,3    3d5,6    etc)
@@ -119,12 +121,6 @@ class ::tycho::EditDiff {
     # to speed up loading time.
     private variable okaytoupdate 0
 
-    # File name 1, in sync with -filename1
-    public variable filename1
-
-    # File name 2, in sync with -filename2
-    public variable filename2
-
     # Color for old and new text. FIXME: This should be in preference!
     public variable linecolor1 {{} {}}
 
@@ -136,12 +132,9 @@ class ::tycho::EditDiff {
     public variable textLineCount 1
 }
 
-
-
 ###################################################################
 #
 body ::tycho::EditDiff::constructor {args} {
-    #global filename1 filename2 
     # FIXME: Currently, we'd like to change the default colors
     set linecolor1 [list blue {}]
     set linecolor2 [list red {}]
@@ -164,11 +157,11 @@ body ::tycho::EditDiff::constructor {args} {
             -description {Read in both files, and start parsing} \
             -command "$this compareFile"
 
-    toolbar entry filename1 "File 1 name: " {} "puts " \
+    toolbar entry filename1 "File 1 name: " {} "$this configureUpdate 1 " \
             -foreground [lindex $linecolor1 0] \
             -command "$this insertSelectedFileName 1"
            
-    toolbar entry filename2 "File 2 name: " {} "$this compareFile" \
+    toolbar entry filename2 "File 2 name: " {} "$this configureUpdate 2 " \
             -foreground [lindex $linecolor2 0] \
             -command "$this insertSelectedFileName 2"
 
@@ -220,8 +213,9 @@ body ::tycho::EditDiff::constructor {args} {
     # Center the screen.
     bind $itk_component(text) <Control-L> "$this compareFile"
 
-    # Configure text color
+    # Configure text alias
     set text $itk_component(text)
+
     # Tag the text to have different colors
     foreach i {1 2} {
         $text tag configure linecolor$i \
@@ -229,8 +223,12 @@ body ::tycho::EditDiff::constructor {args} {
                 -background [lindex [eval set linecolor$i] 1]
     }
     
-    if {$filename1 != {}} {insertFileName 1 $filename1}
-    if {$filename2 != {}} {insertFileName 2 $filename2}
+    if {$itk_option(-filename1) != {}} {
+        insertFileName 1 $itk_option(-filename1)
+    }
+    if {$itk_option(-filename2) != {}} {
+        insertFileName 2 $itk_option(-filename2)
+    }
 }
 
 
@@ -240,32 +238,38 @@ body ::tycho::EditDiff::constructor {args} {
 # text buffer, read in UNIX's diff, and then compare.
 #
 body ::tycho::EditDiff::compareFile {} {
-    set text $itk_component(text)
-    $text config -cursor left_ptr
-    $text delete 0.0 end    ;# This replaces clear
-    set differenceList {}
-    set differenceListCount -1
-    set textLineCount 1
-    markUnmodified
-
     # Make sure that all the files are legal to begin with. Otherwise, exit.
-    set flag 1
+    set errorflag 0
     foreach i {1 2} {
-        if {[eval set filename$i]=="" || [eval set filename$i]=="NoName"} {
+        # eval set filename$i
+        if {$itk_option(-filename$i)=="" || \
+                $itk_option(-filename$i)=="NoName"} {
             safeEval ::tycho::warn \
-                    "File name $i invalid: [eval set filename$i]"
-            return
+                    "File name $i invalid: $itk_option(-filename$i)"
+            set errorflag 1
         }
-        if {![file exists [eval set filename$i]]} {
+        if {![file exists $itk_option(-filename$i)]} {
             safeEval ::tycho::warn \
-                    "File name $i does not exist: [eval set filename$i]"
-            return
-        }
-        if {![file readable $filename1]} {
-            safeEval ::tycho::warn "File $i is not readable: $filename"
-            return
+                    "File name $i does not exist: $itk_option(-filename$i)"
+            set errorflag 1
+        } elseif {![file readable $itk_option(-filename$i)]} {
+            safeEval ::tycho::warn "File not readable: $itk_option(-filename$i)"
+            set errorflag 1
         }
     }
+    if {$errorflag==1} {return}
+
+    # Initialize variables
+    set text $itk_component(text)
+
+    configure -readonly 0
+    clear
+
+    set textLineCount 1
+    $text config -cursor left_ptr
+    set differenceList {}
+    set differenceListCount -1
+
 
     # Create an exec instance
     if {[info object $execDiff ]==""} {
@@ -273,7 +277,8 @@ body ::tycho::EditDiff::compareFile {} {
         set execDiff [::tycho::Exec [::tycho::autoName execDiff]]
     }
     $execDiff execProcess \
-            "diff $filename1 $filename2 |& grep -v \"^<\" |& grep -v \"^<\""
+            "diff $itk_option(-filename1) $itk_option(-filename2)\
+            |& grep -v \"^<\" |& grep -v \"^<\""
     # Wait until execution is done
     $execDiff getStatusWait
     set diffResult [$execDiff getHistory]
@@ -284,8 +289,8 @@ body ::tycho::EditDiff::compareFile {} {
     
 
     # Open up files 
-    set fd1 [open $filename1 r]
-    set fd2 [open $filename2 r]
+    set fd1 [open $itk_option(-filename1) r]
+    set fd2 [open $itk_option(-filename2) r]
     set fileLineCount1 1
     set fileLineCount2 1
     
@@ -322,15 +327,13 @@ body ::tycho::EditDiff::compareFile {} {
             lappend differenceBlock $textLineCount
         }
         # Setup tag bindings for either file
-        #set tag l1[llength $differenceList]
-        #set tag l2[llength $differenceList]
         $text tag configure l1$tag -foreground [lindex $linecolor1 0]
         $text tag bind l1$tag <Enter> "$text config -cursor dot;\
                 $this putStatus \"Diff #[expr [llength $differenceList]+1]\""
         $text tag bind l1$tag <Leave> "$text config -cursor left_ptr;\
                 $this putStatus \"\""
         $text tag bind l1$tag <Double-Button-1> \
-                "$this jumpToLine $filename1 $fileLineCount1"
+                "$this jumpToLine $itk_option(-filename1) $fileLineCount1"
         $text tag bind l1$tag <Button-1> \
                 "$this jumpDifference {} [llength $differenceList]"
 
@@ -340,7 +343,7 @@ body ::tycho::EditDiff::compareFile {} {
         $text tag bind l2$tag <Leave> "$text config -cursor left_ptr;\
                 $this putStatus \"\""
         $text tag bind l2$tag <Double-Button-1> \
-                "$this jumpToLine $filename2 $fileLineCount2"
+                "$this jumpToLine $itk_option(-filename2) $fileLineCount2"
         $text tag bind l2$tag <Button-1> \
                 "$this jumpDifference {} [llength $differenceList]"
 
@@ -383,6 +386,8 @@ body ::tycho::EditDiff::compareFile {} {
     close $fd1
     close $fd2
 
+    markUnmodified
+    configure -readonly 1
     return
 }
 
@@ -391,11 +396,22 @@ body ::tycho::EditDiff::compareFile {} {
 # when the file names are changed (from outer interface), change the
 # internal listentry.
 #
-body ::tycho::EditDiff::configureUpdate {} {
-    # most recent file should always in filename1.
-    insertFileName 1 $filename1
-    insertFileName 2 $filename2
-    configure -file "$filename1"
+body ::tycho::EditDiff::configureUpdate {{entrynum {}} {filename {}}} {
+    if {$entrynum == {}} {
+        # Setting from $itk_option(-filename) -> entry list name
+        # most recent file should always in filename1.
+        insertFileName 1 $itk_option(-filename1)
+        insertFileName 2 $itk_option(-filename2)
+        configure -file "$itk_option(-filename1)"
+    } else {
+        # Setting from entry list name -> $itk_option(-filename)
+        configure -filename$entrynum $filename
+        if {$entrynum==1} {
+            configure -file "$itk_option(-filename1)"
+        } else {
+            compareFile
+        }
+    }
 }
 
 
@@ -459,8 +475,11 @@ body ::tycho::EditDiff::help {} {
 # modified to handle cases
 #
 body ::tycho::EditDiff::insertString {bogusIndex str {status {common}}} {
-    $itk_component(text) insert $textLineCount.0 $str $status
+    # The following line is added because of stupid File class that is
+    # persistently adding junk to text whenever it is created.
+    if {$bogusIndex == "insert"} {return}
 
+    $itk_component(text) insert $textLineCount.0 $str $status
     incr textLineCount
     if {[expr [incr okaytoupdate] % 50]==0} {
         # This is here as an attempt to speed up responce time.
@@ -477,7 +496,7 @@ body ::tycho::EditDiff::insertString {bogusIndex str {status {common}}} {
 body ::tycho::EditDiff::insertFileName {num nameAndPath} {
     $this toolbar clear filename$num
     $this toolbar insert filename$num $nameAndPath
-    set filename$num $nameAndPath
+    configure -filename$num $nameAndPath
 }
 
 ###################################################################
@@ -555,7 +574,7 @@ body ::tycho::EditDiff::jumpToLine {filename line} {
     # THe following is added because if a file has not been opened,
     # then seeFragment will be called too quickly, thus no line
     # will be selected.
-    after 1000 "$editorName seeFragment \"line $line\""
+    after 1500 "$editorName seeFragment \"line $line\""
 }
 
 
