@@ -32,6 +32,9 @@ class DDFStar : public Star  {
 	int waitNum;
 
 public:
+	// initialize DDF-specific members
+	void prepareForScheduling();
+
 	// my domain
 	const char* domain() const;
 
