@@ -78,7 +78,8 @@ void (*function)();		/* function to call			*/
 }
 
 
-#ifdef FIOASYNC
+#defined(FIOASYNC) && defined(SIOCSPGRP)
+/* Cygnus cygwin32 does not defined SIOCSPGRP */
 void
 RPCsigio(fd, func)
 int fd;				/* file descriptor to be interrupted on */
