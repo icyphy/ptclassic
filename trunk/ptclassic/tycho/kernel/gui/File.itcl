@@ -340,7 +340,8 @@ configbody ::tycho::File::file {
             set file [::tycho::expandPath $file]
         }
         if {[info exists filesOpen($file)] \
-                && ![$filesOpen($file) getReadOnly]} {
+                && ![$filesOpen($file) getReadOnly] \
+                && !$readOnly} {
             $filesOpen($file) raiseWindow
             if {![safeEval ::tycho::askuser \
                     "File $file is already open for writing. \
