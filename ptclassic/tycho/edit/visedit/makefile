@@ -51,6 +51,8 @@ TCL_SRCS =
   
 ITCL_SRCS = \
 	EditBubbleAndArc.itcl \
+	EditForest.itcl \
+	EditForestWidget.itcl \
 	EditFSM.itcl \
 	EditMoore.itcl
 
