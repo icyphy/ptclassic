@@ -20,6 +20,7 @@ $Id$
 #include "UserOutput.h"
 #include "CG56Star.h"
 #include "KnownTarget.h"
+#include <sys/param.h>
 
 S56XTarget :: S56XTarget(const char* nam, const char* desc) :
 	CG56Target(nam,desc)
@@ -35,14 +36,22 @@ S56XTarget::S56XTarget(const S56XTarget& arg) :
 }
 
 void S56XTarget :: initStates() {
-/*	xMemMap.setValue("0-255 8192-16383");
+	xMemMap.setValue("0-255 8192-16383");
 	yMemMap.setValue("0-16383");
 	xMemMap.setAttributes(A_NONSETTABLE|A_NONCONSTANT);
-	yMemMap.setAttributes(A_NONSETTABLE|A_NONCONSTANT); */
-	xMemMap.setState("xMemMap",this,"0-255 8192-16383","X memory map");
-	yMemMap.setState("yMemMap",this,"0-16383","Y memory map");
-	addState(runCode.setState("Download/Run code?",this,"YES",
-	                          "display code if YES."));
+	yMemMap.setAttributes(A_NONSETTABLE|A_NONCONSTANT);
+	runCode.setValue("YES");
+	runCode.setAttributes(A_SETTABLE|A_NONCONSTANT);
+	targetHost.setAttributes(A_SETTABLE|A_NONCONSTANT);
+}
+
+void S56XTarget :: initializeCmds() {
+	CG56Target::initializeCmds();
+	assembleCmds += "asm56000 -b -l -A -oso ";
+	assembleCmds += uname;
+	assembleCmds += "\n";
+	downloadCmds += "load_s56x ";
+	downloadCmds += fileName(uname,".lod\n");
 }
 
 void S56XTarget :: headerCode () {
@@ -105,11 +114,6 @@ Block* S56XTarget::clone() const {
 	LOG_NEW; return new S56XTarget(*this);
 }
 
-void S56XTarget :: addCode(const char* code) {
-	if (code[0] == '@')
-		aio += (code + 1);
-	else CG56Target::addCode(code);
-}
 void S56XTarget :: wrapup () {
 	addCode (
 		 "; Error handler for s56x architecture: ignore interrupts, loop\n"
@@ -119,37 +123,8 @@ void S56XTarget :: wrapup () {
 		 "	nop\n"
 		 "	stop\n");
 	inProgSection = TRUE;
+	if (!genFile(miscCmds , uname,".aio")) return;
 	CG56Target::wrapup();
-// put the stuff into the files.
-	if (!genFile(aio, uname,".aio")) return;
-// directive to change to the working directory
-	StringList cd = "cd "; cd += dirFullName; cd += ";";
-// execute the assembler
-	if (int(runCode)) {
-		StringList assem = cd;
-		assem += "asm56000 -b -l -A -oso ";
-		assem += uname;
-		if (system(assem) != 0) {
-			StringList listing = (const char*)dirName;
-			listing += "/";
-			listing += uname;
-			listing += ".list";
-			Error::abortRun(
-			"Errors in assembly: see assembler listing in file ",
-					listing, " for errors");
-			return;
-		}
-// load & run on 56x
-		StringList ex = cd;
-		ex += "load_s56x ";
-		ex += uname;
-		ex += ".lod";
-		if(system (ex) != 0) {
-			Error::abortRun("Errors in loading to s56x");
-			return;
-		}
-		system(cmds);
-	}
 }
 
 ISA_FUNC(S56XTarget,CG56Target);

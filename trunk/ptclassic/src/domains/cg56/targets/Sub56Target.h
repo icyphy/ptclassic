@@ -32,6 +32,7 @@ public:
 	int run();
 	Block* clone() const;
 	int isA(const char*) const;
+	const char* readClassName() const {return "Sub56Target";}
 };
 
 #endif
