@@ -81,7 +81,7 @@ void SDFTarget::setup() {
 		return;
 	}
 	s->schedulePeriod = schedulePeriod;
-	s->setGalaxy(*galaxy());
+	if (galaxy()) s->setGalaxy(*galaxy());
 	setSched(s);
 	Target::setup();
 	if (Scheduler::haltRequested() || logFile.null()) return;
