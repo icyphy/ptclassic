@@ -48,7 +48,7 @@ TCL_SRCS =
 
 ITCL_SRCS = 
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) basic
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) pttycho tywish tyshell
 
 MISC_FILES = 
 
@@ -59,13 +59,18 @@ REALCLEAN_STUFF =
 TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all install: sources $(MISC_SRCS) tclIndex
+all install: sources $(MISC_SRCS)
 
 # Make the shell script/s executable
-sources::
-	chmod a+x basic
+sources:: pttycho
+	chmod a+x pttycho
+
+sources:: tyshell
+	chmod a+x tyshell
+
+sources:: tywish
+	chmod a+x tywish
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
-
 
