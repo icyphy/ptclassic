@@ -1744,10 +1744,10 @@ body ::tycho::Edit::searchQuery {backwards nochange} {
 		    -backwards $backwards \
 		    -nochange $nochange \
 		    -geometry +0+0 \
-		    -title $tlname
+		    -title [list $tlname]
 	    wm deiconify $tl.search
             $tl.search select pattern range 0 end
-	"
+        "
     }
 }
 
