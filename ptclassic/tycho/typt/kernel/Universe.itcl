@@ -1,0 +1,191 @@
+# Itcl interface to the Ptolemy InterpUniverse class.
+#
+# @Author: Edward A. Lee
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1997 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+# For easier debugging
+catch {delete class ::ptolemy::Universe}
+
+# Create the namespace if it doesn't exist
+namespace ::ptolemy {}
+
+#######################################################################
+#### Universe
+# This class defines an Itcl interface to the Ptolemy InterpUniverse class.
+# An instance of this class is the master definition of a Ptolemy Universe
+# class.  Instances of the Universe are not Itcl objects, only the master
+# Universe definition is.  When an instance of the Universe is created using
+# the "addStar" method of another Universe or Universe object, then the
+# current configuration of the Universe is cloned to create the instance.
+# Further changes to the master will have no effect on the cloned instance.
+# <p>
+# Here is an example of how to use the Universe:
+# <tcl><pre>
+#     ::ptolemy::Universe Xgal
+#     Xgal addStar a Ramp
+#     Xgal alias out a output
+# </pre></tcl>
+# This creates a Ptolemy Universe class called "Xgal".  This Universe cannot
+# be used directly in a Ptolemy application.  It must be instantiated,
+# for example by including it in another Universe as follows:
+# <tcl><pre>
+#     ::ptolemy::Universe Ygal
+#     Ygal addStar a Xgal
+#     Ygal addStar b Gain
+#     Ygal connect a out b input
+#     Ygal alias out b output
+# </pre></tcl>
+# Of course, this Universe must be instantiated also to be used.
+#
+#
+class ::ptolemy::Universe {
+    inherit ::ptolemy::Galaxy
+
+    constructor {master args} \
+            {::ptolemy::Galaxy::constructor $master} {}
+    destructor {}
+    
+    ###################################################################
+    ####                   public variables                        ####
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Run the current system until the designated stop time or interations.
+    method run {stoptime} 
+
+    # Invoke the wrapup method of the target associated with this universe.
+    method wrapup
+
+    ###################################################################
+    ####                   protected methods                       ####
+
+    # Create an empty universe with the current galaxy name.
+    protected method createBlock {ptblockname master}
+
+    # Remove the galaxy with the current galaxy name.
+    protected method deleteBlock {}
+
+    ###################################################################
+    ####                   protected variables                     ####
+
+    ###################################################################
+    ####                   private methods                         ####
+
+    ###################################################################
+    ####                   private variables                       ####
+}
+
+#######################################################################
+#### constructor
+# The constructor argument is a list of commands to execute in the
+# context of this universe, such as *addBlock* and *connect* to
+# populate and configure the universe.
+#
+body ::ptolemy::Universe::constructor {master args} {
+    eval configure $args
+}
+
+
+#######################################################################
+#### destructor
+#
+body ::ptolemy::Universe::destructor {} {
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#####################################################################
+#### run
+# Run the current system until the designated stop time or interations.
+# NOTE: The Ptolemy kernel "run" takes no arguments, and there is a
+# separate setStopTime method.
+#
+body ::ptolemy::Universe::run {stoptime}  {
+    localEval ::pitcl::run $stoptime
+}
+
+#####################################################################
+#### wrapup
+# Invoke the wrapup method of the target associated with this universe.
+#
+body ::ptolemy::Universe::wrapup {}  {
+    localEval ::pitcl::wrapup
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public procedures                    ####
+
+    ###################################################################
+    ###################################################################
+    ####                      protected methods                    ####
+
+#####################################################################
+#### createBlock
+# Create a universe with the current galaxy name.
+#
+body ::ptolemy::Universe::createBlock {ptblockname master} {
+    # FIXME: test this error condition
+    if ![string match .* $fullname] {
+        ::pitcl::remove $fullname
+        error "Universe name must begin with a period: Failed to create \
+                universe: $fullname"
+    }
+    # Can't use localeval here because the universe doesn't exist yet.
+    set savegal [::pitcl::curgalaxy]
+
+    # Create an empty universe
+    ::pitcl::addUniverse $ptblockname
+
+    # Fill it in.
+    if {$master != {}} {
+        eval $master
+    }
+
+    # Restore the current galaxy
+    ::pitcl::curgalaxy $savegal
+}
+
+#####################################################################
+#### deleteBlock
+# Remove a universe with the current galaxy name.
+#
+body ::ptolemy::Universe::deleteBlock {} {
+    # The catch is in case the block does not exist.
+    catch {::pitcl::remove $rootname}
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      private methods                      ####
