@@ -60,7 +60,7 @@ class ::tycho::Bounder {
     ####                         public methods                    ####
 
     # Start interaction sequence
-    method click {x y} {}
+    method click {x y args} {}
 
     # Continue interaction sequence
     method drag {x y} {}
@@ -90,14 +90,20 @@ class ::tycho::Bounder {
 # to " query bounds"; if that doesn't work, then use the size of the
 # slate.
 #
-body ::tycho::Bounder::click {x y} {
+body ::tycho::Bounder::click {x y args} {
     # Get the bounds to move between.
     if { [llength $bounds] == 4 } {
+	# Use the configuration option (rectangle)
 	set b $bounds
     } else {
-	set b [$target query bounds]
+	# Didn't get bounds: try for a query
+	# FIXME: Need a machanism for having a picture be asked what its
+	# bounds are
+	# set b [$target query bounds]
+	set b {}
 	if { [llength $b] != 4 } {
-	    set b [list 1 1 \
+	    # That didn't work either: use the size of the slate
+	    set b [list 2 2 \
 		    [expr [winfo width $slate] - 2] \
 		    [expr [winfo height $slate] - 2]]
 	}
@@ -105,7 +111,7 @@ body ::tycho::Bounder::click {x y} {
     assign x0 y0 x1 y1 $b
 
     # Here's the size of the picture
-    assign a0 b0 a1 b1 [$target region]
+    assign a0 b0 a1 b1 [$slate region $target]
 
     # Adjust the bounds accrodingly
     set x0 [expr $x0 + ($x - $a0)]
@@ -114,7 +120,7 @@ body ::tycho::Bounder::click {x y} {
     set y1 [expr $y1 + ($y - $b1)]
 
     # Click on target
-    ::tycho::Interactor::click $x $y
+    eval ::tycho::Interactor::click $x $y $args
 
     # Remember where we are
     set actualX $x
