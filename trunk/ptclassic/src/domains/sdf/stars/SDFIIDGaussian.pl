@@ -40,14 +40,14 @@ defstar {
 		default { "1.0" }
 		desc { "variance of distribution" }
 	}
-	hinclude { <ACG.h>, <Normal.h> }
+	hinclude { <Normal.h> }
+	ccinclude { <ACG.h> }
 	protected {
-		static ACG gen;
 		Normal *random;
 	}
 // declare the static random-number generator in the .cc file
 	code {
-		ACG SDFIIDGaussian::gen(10,20);
+		extern ACG gen;
 	}
 	constructor {
 		random = new Normal(mean,variance,&gen);
