@@ -57,10 +57,13 @@ class ::tycho::EditC {
     ##########################################################################
     ####                         public methods                           ####
 
+    # Compile the C file and load it into Tcl
+    method compileAndLoad {}
+
     # If the selection has no embedded comments, then comment it out.
     method commentSelection {}
 
-    # Compile the C file and load it into Tcl.
+    # Compile the C file
     method evaluate {}
 
     # Open a window with help on the C editor.
@@ -82,8 +85,33 @@ body ::tycho::EditC::constructor {args} {
 
     eval itk_initialize $args
     
+    # Set up menu entries for compiling.
+    menubar delete Evaluate
+    menubar insert Compile Close  -underline 0 \
+            -accelerator "C-x C-r" -command "$this evaluate"
+    menubar insert {Compile and Load} Close -underline 0 \
+            -command "$this compileAndLoad"
+    menubar insertSeparator Close
+
     # C does not have line-oriented comments, so there is no fill prefix.
     set fillPrefix ""
+}
+
+####################################################################
+#### compileAndLoad
+# Save the buffer if necessary, compile it and load it back into
+# Tcl.  If necessary, add a initialization procedure so that the 
+# Tcl load command will work.  If there is no makefile present in the
+# current directory, then create a makefile with a name based on the
+# current file.
+#
+body ::tycho::EditC::compileAndLoad {} {
+    global env tycho
+    saveQuery
+    set compiler [::tycho::CompileCTcl [::tycho::autoName .editC]]
+    $compiler configure -view $this
+    $compiler compileAndLoad [list $file]
+    delete object $compiler
 }
 
 #####################################################################
@@ -113,18 +141,16 @@ body ::tycho::EditC::commentSelection {} {
 
 #####################################################################
 #### evaluate
-# Save the buffer if necessary, compile it and load it back into
-# Tcl.  If necessary, add a initialization procedure so that the 
-# Tcl load command will work.  If there is no makefile present in the
-# current directory, then create a makefile with a name based on the
-# current file.
+# Save the buffer if necessary, compile it. If there is no makefile
+# present in the current directory, then create a makefile with a
+# name based on the current file.
 #
 body ::tycho::EditC::evaluate {} {
     global env tycho
     saveQuery
     set compiler [::tycho::CompileCTcl [::tycho::autoName .editC]]
     $compiler configure -view $this
-    $compiler compileAndLoad [list $file]
+    $compiler compile [list $file]
     delete object $compiler
 }
 
