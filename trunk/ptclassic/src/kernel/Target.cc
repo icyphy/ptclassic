@@ -118,24 +118,6 @@ StringList Target::printVerbose() const {
 	return out;
 }
 
-// method for copying states during cloning.  It is designed for use
-// by clone methods, and it assumes that the src argument has the same
-// state list as me.  The idea is to write clone methods as
-
-// MyTarget::clone() const { return (new MyTarget)->copyStates(*this);}
-
-// It is protected to guard against abuse.
-
-Target& Target::copyStates(const Target& src) {
-	CBlockStateIter nexts(src);
-	BlockStateIter nextd(*this);
-	const State* srcStatePtr;
-	State *destStatePtr;
-	while ((srcStatePtr = nexts++) != 0 && (destStatePtr = nextd++) != 0)
-		destStatePtr->setValue(srcStatePtr->getInitValue());
-	return *this;
-}
-
 // return the nth child.
 Target* Target::child(int n) {
 	Target*p = children;
