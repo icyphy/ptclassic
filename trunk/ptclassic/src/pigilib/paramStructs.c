@@ -38,6 +38,8 @@ Updates: 4/14/89 to PStrToPList()
 #include "local.h"
 #include <stdio.h>
 #include <string.h>
+#include <malloc.h>
+#include <stdlib.h>
 #include "util.h"
 #include "err.h"
 #include "paramStructs.h"
