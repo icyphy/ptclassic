@@ -2,7 +2,7 @@
 #
 # @Author: John Reekie
 #
-# @Version: @(#)sccs.tcl	1.2 02/10/98
+# @Version: $Id$
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
