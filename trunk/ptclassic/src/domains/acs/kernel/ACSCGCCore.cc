@@ -548,7 +548,7 @@ StringList index;
 	    else
 	    {
 		if (!port->linearBuf()) // use circular addressing
-			index << "CGC_MOD(";
+			index << "ACS_MOD(";
 		else
 			index << '(';
 		if (port->staticBuf()) index << port->bufPos();
