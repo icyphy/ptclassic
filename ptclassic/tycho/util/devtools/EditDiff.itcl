@@ -240,33 +240,29 @@ body ::tycho::EditDiff::constructor {args} {
 # text buffer, read in UNIX's diff, and then compare.
 #
 body ::tycho::EditDiff::compareFile {} {
-    markUnmodified
-
     set text $itk_component(text)
     $text config -cursor left_ptr
     $text delete 0.0 end    ;# This replaces clear
     set differenceList {}
     set differenceListCount -1
     set textLineCount 1
+    markUnmodified
 
-    #global filename1 filename2
-    #global linecolor1 linecolor2
-    
     # Make sure that all the files are legal to begin with. Otherwise, exit.
     set flag 1
     foreach i {1 2} {
         if {[eval set filename$i]=="" || [eval set filename$i]=="NoName"} {
-            safeEval ::tycho::warn "File name invalid: [eval set filename$i]"
+            safeEval ::tycho::warn \
+                    "File name $i invalid: [eval set filename$i]"
             return
         }
-
         if {![file exists [eval set filename$i]]} {
-            safeEval ::tycho::warn "File does not exist: [eval set filename$i]"
+            safeEval ::tycho::warn \
+                    "File name $i does not exist: [eval set filename$i]"
             return
         }
-        
         if {![file readable $filename1]} {
-            safeEval ::tycho::warn "File is not readable: $filename"
+            safeEval ::tycho::warn "File $i is not readable: $filename"
             return
         }
     }
@@ -302,11 +298,15 @@ body ::tycho::EditDiff::compareFile {} {
         set n3 [lindex $diffInfo 3]
         set n4 [lindex $diffInfo 4]
         
+        set tag [llength $differenceList]
+        $text tag bind l0$tag <Button-1> \
+                "$this jumpDifference {} [expr [llength $differenceList] -1]"
+
         # Output common lines. Also increment
         # file1 and file2 pointer
         while {$fileLineCount1 < $n1} {
             # Increment file1 until difference seen.
-            insertString insert [gets $fd1]\n common
+            insertString BOGUS [gets $fd1]\n l0$tag
             incr fileLineCount1
         }
         while {$fileLineCount2 < $n3} {
@@ -322,47 +322,50 @@ body ::tycho::EditDiff::compareFile {} {
             lappend differenceBlock $textLineCount
         }
         # Setup tag bindings for either file
-        set tag l1[llength $differenceList]
-        set tag l2[llength $differenceList]
+        #set tag l1[llength $differenceList]
+        #set tag l2[llength $differenceList]
         $text tag configure l1$tag -foreground [lindex $linecolor1 0]
         $text tag bind l1$tag <Enter> "$text config -cursor dot;\
-                $this putStatus \"Diff #[expr [llength $differenceList]+1]\";\
-                $this jumpDifference {} [llength $differenceList]"
+                $this putStatus \"Diff #[expr [llength $differenceList]+1]\""
         $text tag bind l1$tag <Leave> "$text config -cursor left_ptr;\
                 $this putStatus \"\""
         $text tag bind l1$tag <Double-Button-1> \
                 "$this jumpToLine $filename1 $fileLineCount1"
+        $text tag bind l1$tag <Button-1> \
+                "$this jumpDifference {} [llength $differenceList]"
 
         $text tag configure l2$tag -foreground [lindex $linecolor2 0]
         $text tag bind l2$tag <Enter> "$text config -cursor circle;\
-                $this putStatus \"Diff #[expr [llength $differenceList]+1]\";\
-                $this jumpDifference {} [llength $differenceList]"
+                $this putStatus \"Diff #[expr [llength $differenceList]+1]\""
         $text tag bind l2$tag <Leave> "$text config -cursor left_ptr;\
                 $this putStatus \"\""
         $text tag bind l2$tag <Double-Button-1> \
                 "$this jumpToLine $filename2 $fileLineCount2"
+        $text tag bind l2$tag <Button-1> \
+                "$this jumpDifference {} [llength $differenceList]"
+
         # Setup coloring
         if {$info=="c"} {
             # Output differences
             while {$fileLineCount1 <= $n2} {
-                insertString insert [gets $fd1]\n l1$tag
+                insertString BOGUS [gets $fd1]\n l1$tag
                 incr fileLineCount1
             }
 
             while {$fileLineCount2 <= $n4} {
-                insertString insert [gets $fd2]\n l2$tag
+                insertString BOGUS [gets $fd2]\n l2$tag
                 incr fileLineCount2
             }
             # Continue...
         } elseif {$info=="d"} {
             # Output the added lines
             while {$fileLineCount1 <= $n2} {
-                insertString insert [gets $fd1]\n l1$tag
+                insertString BOGUS [gets $fd1]\n l1$tag
                 incr fileLineCount1
             }
         } elseif {$info=="a"} {
             while {$fileLineCount2 <= $n4} {
-                insertString insert [gets $fd2]\n l2$tag
+                insertString BOGUS [gets $fd2]\n l2$tag
                 incr fileLineCount2
             }
         }
@@ -375,7 +378,7 @@ body ::tycho::EditDiff::compareFile {} {
 
     # Read and output the rest of the common lines until EOF
     while {![eof $fd1]} {
-        insertString insert [gets $fd1]\n common
+        insertString BOGUS [gets $fd1]\n l0$tag
     }
     close $fd1
     close $fd2
@@ -455,7 +458,7 @@ body ::tycho::EditDiff::help {} {
 #### insertString
 # modified to handle cases
 #
-body ::tycho::EditDiff::insertString {index str {status {common}}} {
+body ::tycho::EditDiff::insertString {bogusIndex str {status {common}}} {
     $itk_component(text) insert $textLineCount.0 $str $status
 
     incr textLineCount
@@ -496,20 +499,30 @@ body ::tycho::EditDiff::insertSelectedFileName {num} {
 #
 body ::tycho::EditDiff::jumpDifference {{incrdecr 1} {idx {}}} {
     # No difference, return
-    if {[llength $differenceList]==0} {return}
+    if {[llength $differenceList]==0} {
+        ::tycho::inform {There is no difference!}
+        return
+    }
     
-
     if {$idx=={}} {
         # Choose to incr or decr
         incr differenceListCount $incrdecr
         # Overflow! Warning:
         if {$differenceListCount==[llength $differenceList]} {
             incr differenceListCount -1
-            tycho::warn {No more differences!}
+            if {[tycho::askuser {Not found, search again at the top?}]} {
+                set differenceListCount -1
+                jumpDifference 1
+            }
+            return
         }
         if {$differenceListCount==-1} {
             incr differenceListCount 1
-            tycho::warn {No more differences!}
+            if {[tycho::askuser {Not found, search again at the bottom?}]} {
+                set differenceListCount [llength $differenceList]
+                jumpDifference -1
+            }
+            return
         }
     } elseif {$idx!={}} {
         set differenceListCount $idx
