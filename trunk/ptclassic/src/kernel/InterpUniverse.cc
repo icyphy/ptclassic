@@ -28,7 +28,10 @@ const char* InterpUniverse :: targetName() const {
 }
 
 int InterpUniverse :: newTarget(const char* newTargName) {
-	delete target;
+	if (target) {
+		delete target;
+		target = 0;
+	}
 	type = KnownBlock::domain();
 	targName = newTargName;
 	target = KnownTarget::clone (targetName());
