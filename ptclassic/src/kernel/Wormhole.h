@@ -53,7 +53,7 @@ public:
 		     sumUp();}
 
 	// redefine setStopTime()
-	void setStopTime() { scheduler->resetStopTime(getStopTime()) ;}
+	void setStopTime();
 
 	// constructor.  We never use plain Wormholes, we always have
 	// class SDFWormhole : public Wormhole, public SDFStar
