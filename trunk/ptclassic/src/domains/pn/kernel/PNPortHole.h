@@ -23,12 +23,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 */
 /*  Version $Id$
-
-    Copyright 1992 The Regents of the University of California.
-			All Rights Reserved.
-
-    Programmer:		T.M. Parks
-    Date of creation:	6 February 1992
+    Author:	T.M. Parks
+    Created:	6 February 1992
 
     Definitions of domain-specific PortHole classes.
 */
@@ -40,18 +36,20 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "PortHole.h"
+#include "SDFPortHole.h"
+
 class MTDFGeodesic;
 
-class MTDFPortHole : public PortHole
+class MTDFPortHole : public DFPortHole
 {
 public:
     // Class identification.
     virtual int isA(const char* className) const;
 
     // Constructor.
-    MTDFPortHole::MTDFPortHole()
-	: myGeodesic((MTDFGeodesic*&)PortHole::myGeodesic) {}
+    MTDFPortHole()
+	: myGeodesic((MTDFGeodesic*&)DFPortHole::myGeodesic), dynamic(0)
+    {}
 
     // Allocate and return a MTDFGeodesic.
     /* virtual */ Geodesic* allocateGeodesic();
@@ -59,12 +57,24 @@ public:
     /* Redefine PortHole methods because Geodesic lacks certain virtual
        functions.
     */
-    void MTDFPortHole::getParticle();
-    void MTDFPortHole::putParticle();
+    void getParticle();
+    void putParticle();
+
+    // Meaningful only for input PortHoles.
+    virtual void wait() {}
+
+    // Indicate whether port is dynamic or synchronous.
+    int isDynamic() { return dynamic; }
+
+    PortHole& setPort(const char* name, Block* parent, DataType type=FLOAT,
+    	int num=1, int delay=0);
 
 protected:
     // An alias for the inherited myGeodesic member.
     MTDFGeodesic*& myGeodesic;
+
+    // Flag to indicate whether port is dynamic or synchronous.
+    unsigned int dynamic:1;
 };
 
 class InMTDFPort : public MTDFPortHole
@@ -75,6 +85,9 @@ public:
 
     // Get data from the Geodesic.
     /* virtual */ void receiveData();
+
+    // Synonym for receiveData().
+    /* virtual */ void wait();
 };
 
 
