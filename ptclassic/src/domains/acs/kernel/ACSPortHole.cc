@@ -35,6 +35,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "ACSPortHole.h"
+#include "ACSTarget.h"
+#include "Plasma.h"
 
 // Class identification.
 ISA_FUNC(ACSPortHole,PortHole);
@@ -82,3 +84,13 @@ void InACSPort :: receiveData () { getParticle();}
 void OutACSPort :: receiveData () { clearParticle();}
 
 void OutACSPort :: sendData () { putParticle();}
+
+int ACSPortHole :: allocatePlasma() {
+	ACSTarget* myTarget = (ACSTarget*)(parent()->target());
+	myPlasma = Plasma::getPlasma(myTarget->mapType(resolvedType()));
+	if (!myPlasma) {
+		Error::abortRun(*this, "ACSPortHole::allocatePlasma failed");
+	}
+	return (myPlasma != 0);
+}
+

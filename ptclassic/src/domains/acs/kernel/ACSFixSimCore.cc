@@ -41,7 +41,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 extern const char ACSFixSimCategory[] = "FixSim";
 
 // add string to KnownCategory list
-static ACSKnownCategory	entry(ACSFixSimCategory);
+static ACSFixSimCore proto;
+static ACSKnownCategory	entry(proto);
 
 ACSFixSimCore::ACSFixSimCore(ACSCorona& corona) : ACSCore(ACSFixSimCategory) {
 

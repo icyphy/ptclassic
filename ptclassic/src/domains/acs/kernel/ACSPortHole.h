@@ -42,6 +42,8 @@ class ACSPortHole : public DFPortHole
 public:
     // Class identification.
     virtual int isA(const char* className) const;
+protected:
+    /* virtual */ int allocatePlasma();
 };
 
 class InACSPort : public ACSPortHole

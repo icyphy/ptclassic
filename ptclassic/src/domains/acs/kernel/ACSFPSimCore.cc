@@ -41,6 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 extern const char ACSFPSimCategory[] = "FPSim";
 
 // add string to KnownCategory list
-static ACSKnownCategory	entry(ACSFPSimCategory);
+static ACSFPSimCore proto;
+static ACSKnownCategory	entry(proto);
 
 

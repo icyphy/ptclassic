@@ -123,3 +123,11 @@ Block* ACSTarget::makeNew() const {
 }
 
 ISA_FUNC(ACSTarget,HLLTarget);
+
+DataType ACSTarget::mapType(DataType type) {
+	if ( isFixedPoint() && (strcmp(type,FLOAT) == 0) ) {
+		return FIX;
+	}
+	return type;
+}
+
