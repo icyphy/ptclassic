@@ -34,174 +34,389 @@
 ########################################################################
 
 # Register the standard context-sensitive editors
-namespace ::tycho {
-    global ptolemyfeature tcl_platform
-    ############# text editors (alphabetical except the first one)
 
-    ::tycho::File::registerExtensions {} \
-            {::tycho::view Edit -file {%s}} \
-            {Plain Text Editor} "text"
+### CATEGORIES
+::tycho::register category new "text" -label "Text Editors"
+::tycho::register category new "html" -label "HTML Viewers"
+::tycho::register category new "graphics" -label "Graphics Editors"
+::tycho::register category new "tool" -label "Tools"
+::tycho::register category new "ptolemy" -label "Ptolemy Tools"
 
-    ::tycho::File::registerExtensions {.sched .c .y} \
-            {::tycho::view EditC -file {%s}} \
-            {C Editor} "text"
-    ::tycho::File::registerExtensions {.C .cc .h .H} \
-            {::tycho::view EditCpp -file {%s}} \
-            {C++ Editor} "text"
-    ::tycho::File::registerExtensions {.strl} \
-            {::tycho::view EditEsterel -file {%s}} \
-            {Esterel Editor} "text"
-    ::tycho::File::registerExtensions {.fst} \
-            {::tycho::view EditForest -file {%s}} \
-            {Forest Editor} "graphics"
-    ::tycho::File::registerExtensions {} \
-            {::tycho::view EditHTML -file {%s}} \
-            {HTML Editor} "text"
-    ::tycho::File::registerExtensions {.gif .ppm .pgm .xbm} \
-            {::tycho::view HTML -file {%s} -image 1 -toolbar 1} \
-            {}
-    ::tycho::File::registerExtensions {.html .htm .htl} \
-            {::tycho::view HTML -file {%s} -toolbar 1} \
-            {}
-    ::tycho::File::registerExtensions {.itcl .itk} \
-            {::tycho::view EditItcl -file {%s}} \
-            {Itcl Editor} "text"
-    ::tycho::File::registerExtensions {.java} \
-            {::tycho::view EditJava -file {%s}} \
-            {Java Editor} "text"
-    # .vc is for Microsoft Visual c++
-    ::tycho::File::registerExtensions {.mk .template .vc} \
-            {::tycho::view EditMake -file {%s}} \
-	    {Makefile Editor} "text"
-    ::tycho::File::registerFilenames {Makefile makefile GNUmakefile} \
-            {::tycho::view EditMake -file {%s}} \
-	    {} 
-    ::tycho::File::registerExtensions {.pt .ptcl} \
-            {::tycho::view EditPtcl -file {%s}} \
-            {Ptcl Editor} "text"
-    ::tycho::File::registerExtensions .pl \
-            {::tycho::view EditPtlang -file {%s}} \
-            {Ptlang Editor} "text"
-    ::tycho::File::registerExtensions .sdl \
-            {::tycho::view EditSDL -file {%s}} \
-            {SDL Editor} "text"
-    ::tycho::File::registerExtensions .tcl \
-            {::tycho::view EditTcl -file {%s}} \
-            {Tcl Editor} "text"
-    # For now, TIM files open a Tcl Editor
-    ::tycho::File::registerExtensions .tim \
-            {::tycho::view EditTcl -file {%s}} \
-            {TIM Editor} "text"
+::tycho::register category open "text" -label "Open Text Editors"
+::tycho::register category open "html" -label "Open HTML Viewers"
+::tycho::register category open "graphics" -label "Open Graphics Editors"
+::tycho::register category open "tool" -label "Open Tools"
+::tycho::register category open "ptolemy" -label "Open Ptolemy Tools"
 
-    ########### graphical editors (alphabetical)
-    ::tycho::File::registerExtensions {.dag} \
-            {::tycho::view EditDAG -file {%s}} \
-            {DAG Editor} "graphics"
-    # NOTE: Not useful on its own.
-    # ::tycho::File::registerExtensions {.fsm} \
-    #       {::tycho::view EditFSM -file {%s}} \
-    #       {Finite state machine editor}
 
-    ::tycho::File::registerExtensions {.dfg} \
-            {::tycho::editgraph {%s}} \
-            {Graph Editor} "graphics"
+### MODE MAPPINGS
 
-    if !$ptolemyfeature(octtools) {
-        # Vem is not present.
-        ::tycho::File::registerContents [file join schematic {contents;}] \
-                {::tycho::view EditPalette -facet {%s}} \
-                {Palette Editor} "graphics"
-    }
-    # NOTE: Not ready for release
-    # NOTE: Put back in after release 1.1.2 -- hjr
-    ::tycho::File::registerExtensions {.std} \
-	    {::tycho::view EditSTD -file {%s}} \
-	    {State Transition Diagram Editor} "graphics"
+############# text editing modes
+::tycho::register extensions "c" .sched .c .y
+::tycho::register extensions "c++" .C .cc .h .H
+::tycho::register extensions "esterel" .strl
+::tycho::register extensions "forest" .fst
+::tycho::register extensions "html" .html .htm .htl
+::tycho::register extensions "idoc" .idoc
+::tycho::register extensions "image" .gif .ppm .pgm .xbm
+::tycho::register extensions "itcl" .itcl .itk
+::tycho::register extensions "java" .java
 
-    ::tycho::File::registerExtensions {.idx} \
-            {::tycho::Dialog::new IndexBrowser [::tycho::autoName .idx] \
-            -file {%s}} \
-            {}
-    if $ptolemyfeature(octtools) {
-        # Ptolemy and vem are present.  Use them.
-        ::tycho::File::registerContents [file join schematic {contents;}] \
-                {::pvOpenWindow [::ptkOpenFacet {%s} schematic contents]} \
-                {Vem Facet} "graphics"
-    }
+# .vc is for Microsoft Visual c++
+::tycho::register extensions "makefile" .mk .template .vc
+::tycho::register extensions "ptcl" .pt .ptcl
+::tycho::register extensions "ptlang" .pl
+::tycho::register extensions "sdl" .sdl
+::tycho::register extensions "tcl" .tcl .tim .layout
 
-    ########### tools (alphabetical)
+########### graphical editing modes
+::tycho::register extensions "dag" .dag
+::tycho::register extensions "dfg" .dfg
+::tycho::register extensions "std" .std
+::tycho::register extensions "indexbrowser" .idx
 
-    #::tycho::File::registerExtensions {} \
-    #        {::tycho::view CommandShell -file {%s}} \
-    #        {Command shell} "tools"
+########### tool modes
+::tycho::register extensions "itclclasslist" .icl
 
-    ::tycho::File::registerExtensions {} \
-            {::tycho::view BuilderDialog} \
-            {Tycho Builder} "tools"
+########### filename modes	
+::tycho::register filenames "makefile" Makefile makefile GNUmakefile
 
-    if {$tcl_platform(platform) != "macintosh"} {
-	::tycho::File::registerExtensions {} \
-		{::tycho::view EditDiff -toolbar 1} \
-		{Diff Viewer} "tools"
-    }
+########### contents modes	
+::tycho::register contents "vemfacet" [file join schematic {contents;}]
 
-    if {$tcl_platform(platform) != "macintosh"} {
-	::tycho::File::registerExtensions {} \
-		{::tycho::view Monitor -toolbar 1} \
-		{Exec Window} "tools"
-    }
 
-    if {$tcl_platform(platform) != "macintosh"} {
-	::tycho::File::registerExtensions {} \
-		{set w [::tycho::autoName .glimpse]; \
-                ::tycho::Glimpse $w -geometry +0+0;\
-                wm deiconify $w} \
-		{Glimpse} "tools"
-    }
+### MODES
+############# text editors
 
-    ::tycho::File::registerExtensions {.icl} \
-            {::tycho::view ItclClassList -file {%s} -toolbar 1} \
-            {Itcl Class List} "tools"
+# Plain text
+# The plain text editor always appears first in the menu.
+::tycho::register mode "text" \
+	-command {::tycho::view Edit -file {%s}} \
+	-viewclass ::tycho::Edit \
+	-label {Plain Text Editor} \
+	-category "text"
 
-    if {[uplevel #0 info commands matlab] != {}} {
-	::tycho::File::registerExtensions {} \
-                {::tycho::view Matlab -file {%s}} \
-                {Matlab Console} "tools"
-    }
-    if {[uplevel #0 info commands mathematica] != {}} {
-	::tycho::File::registerExtensions {} \
-                {::tycho::view Mathematica -file {%s}} \
-                {Mathematica Console} "tools"
-    }
-    ::tycho::File::registerExtensions {} \
-            {::tycho::view ProfileTcl -file {%s} -toolbar 1} \
-            {Tcl Profiler} "tools"
+# C
+::tycho::register mode "c" \
+	-command {::tycho::view EditC -file {%s}} \
+	-viewclass ::tycho::EditC \
+	-label {C Editor}  \
+	-category "text"
 
-    if { $ptolemyfeature(ptolemy)} {
-	::tycho::File::registerExtensions {} \
-                {::tycho::view Retarget -file {%s} -toolbar 1} \
-                {Ptolemy Retargeter} "tools"
-    }
+# C++
+::tycho::register mode "c++" \
+	-command {::tycho::view EditCpp -file {%s}} \
+	-viewclass ::tycho::EditCpp \
+	-label {C++ Editor}  \
+	-category "text"
 
-    ::tycho::File::registerExtensions {} \
-            {::tycho::view TclShell -file {%s}} \
-            {Tcl Shell} "tools"
+# Esterel
+::tycho::register mode "esterel" \
+	-command {::tycho::view EditEsterel -file {%s}} \
+	-viewclass ::tycho::EditEsterel \
+	-label {Esterel Editor}  \
+	-category "text"
 
-    # If we open a shared object, try to load it as a Tycho task
-    ::tycho::File::registerExtensions [info sharedlibext] \
-            {::tycho::controlpanel {%s}} \
-            {}
+# HTML editor
+::tycho::register mode "edithtml" \
+	-command {::tycho::view EditHTML -file {%s}} \
+	-viewclass ::tycho::EditHTML \
+	-label {HTML Editor}  \
+	-category "text"
 
-    ########### Compound viewers (alphabetical)
+# Images
+::tycho::register mode "image" \
+	-command {::tycho::view HTML -file {%s} -image 1 -toolbar 1} \
+	-category "html"
 
-    # Cliff's IDoc viewer (still under construction)
-    ::tycho::File::registerExtensions {.idoc} \
-            {::tycho::view IDoc -file {%s}} \
-            {IDoc Viewer} "text"
+# HTML viewer
+::tycho::register mode "html" \
+	-command {::tycho::view HTML -file {%s} -toolbar 1} \
+	-viewclass ::tycho::HTML \
+	-label {HTML Viewer}  \
+	-category "html"
 
+# Itcl
+::tycho::register mode "itcl" \
+	-command {::tycho::view EditItcl -file {%s}} \
+	-viewclass ::tycho::EditItcl \
+	-label {Itcl Editor}  \
+	-category "text"
+
+# Java
+::tycho::register mode "java" \
+	-command {::tycho::view EditJava -file {%s}} \
+	-viewclass ::tycho::EditJava \
+	-label {Java Editor}  \
+	-category "text"
+
+# Makefiles and Microsoft Visual C++
+::tycho::register mode "makefile" \
+	-command {::tycho::view EditMake -file {%s}} \
+	-viewclass ::tycho::EditMake \
+	-label {Makefile Editor}  \
+	-category "text"
+
+# Ptcl -- Ptolemy's Tcl interface language
+::tycho::register mode "ptcl" \
+	-command {::tycho::view EditPtcl -file {%s}} \
+	-viewclass ::tycho::EditPtcl \
+	-label {Ptcl Editor}  \
+	-category "ptolemy"
+
+# Ptlang -- Ptolemy's star definition language
+::tycho::register mode "ptlang" \
+	-command {::tycho::view EditPtlang -file {%s}} \
+	-viewclass ::tycho::EditPtlang \
+	-label {Ptlang Editor}  \
+	-category "ptolemy"
+
+# SDL -- System description language
+::tycho::register mode "sdl" \
+	-command {::tycho::view EditSDL -file {%s}} \
+	-viewclass ::tycho::EditSDL \
+	-label {SDL Editor} \
+	-category "text"
+
+# Tcl
+::tycho::register mode "tcl"  \
+	-command {::tycho::view EditTcl -file {%s}} \
+	-viewclass ::tycho::EditTcl \
+	-label {Tcl Editor}  \
+	-category "text"
+
+########### graphical editors (alphabetical)
+
+# Directed-acyclic graph viewer
+::tycho::register mode "dag" \
+	-command {::tycho::view EditDAG -file {%s}} \
+	-viewclass ::tycho::EditDAG \
+	-label {DAG Editor}  \
+	-category "graphics"
+
+# NOTE: Not useful on its own.
+# ::tycho::register mode {.fsm} \
+	#       {::tycho::view EditFSM -file {%s}} \
+	#       {Finite state machine editor}
+
+# Prototype dataflow graph editor
+::tycho::register mode "dfg" \
+	-command {::tycho::editgraph {%s}} \
+	-viewclass ::tycho::EditGraph \
+	-label {Graph Editor}  \
+	-category "graphics"
+
+# Tree viewer
+::tycho::register mode "forest" \
+	-command {::tycho::view EditForest -file {%s}} \
+	-viewclass ::tycho::EditForest \
+	-label {Forest Editor}  \
+	-category "graphics"
+
+# State-transition diagram editor
+::tycho::register mode "std" \
+	-command {::tycho::view EditSTD -file {%s}} \
+	-viewclass ::tycho::EditSTD \
+	-label {State Transition Diagram Editor}  \
+	-category "graphics"
+
+# Tycho index browser
+::tycho::register mode "indexbrowser" \
+	-command {::tycho::Dialog::new IndexBrowser \
+	[::tycho::autoName .idx] -file {%s}}
+
+########### tools (alphabetical)
+
+# Tycho Builder Tool
+::tycho::register mode "builder" \
+	-command {::tycho::view BuilderDialog} \
+	-label {Tycho Builder}  \
+	-category "tool"
+
+# Itcl class list and class diagram generator
+::tycho::register mode "itclclasslist" \
+	-command {::tycho::view ItclClassList -file {%s} -toolbar 1} \
+	-viewclass ::tycho::ItclClassList \
+	-label {Itcl Class List}  \
+	-category "tool"
+
+# Tcl profiling tool
+::tycho::register mode "profile" \
+	-command {::tycho::view ProfileTcl -file {%s} -toolbar 1} \
+	-label {Tcl Profiler}  \
+	-category "tool"
+
+# Tcl shell
+::tycho::register mode "tclshell" \
+	-command {::tycho::view TclShell -file {%s}} \
+	-viewclass ::tycho::TclShell \
+	-label {Tcl Shell}  \
+	-category "tool"
+
+# Tools that will not run on the Macintosh
+if {$tcl_platform(platform) != "macintosh"} {
+    
+    # "Diff" viewer
+    ::tycho::register mode "diffviewer" \
+	    -command {::tycho::view EditDiff -toolbar 1} \
+	    -viewclass ::tycho::EditDiff \
+	    -label {Diff Viewer}  \
+	    -category "tool"
+
+    # Monitor window for exec'ed processes
+    ::tycho::register mode "monitor" \
+	    -command {::tycho::view Monitor -toolbar 1} \
+	    -viewclass ::tycho::Monitor \
+	    -label {Exec Window}  \
+	    -category "tool"
+
+    # Glimpse interface
+    ::tycho::register mode "glimpse" \
+	    -command {set w [::tycho::autoName .glimpse]; \
+	    ::tycho::Glimpse $w -geometry +0+0;\
+	    wm deiconify $w} \
+	    -label {Glimpse}  \
+	    -category "tool"
 }
 
+########### Compound viewers (alphabetical)
+
+# Cliff's IDoc viewer (still under construction)
+::tycho::register mode "idoc" \
+	-command {::tycho::view IDoc -file {%s}} \
+	-viewclass ::tycho::IDoc \
+	-label {IDoc Viewer}  \
+	-category "html"
+
+########### Miscellaneous and conditional modes
+
+# If we open a shared object, try to load it as a Tycho task
+::tycho::register mode "sharedlibrary" \
+	-command {::tycho::controlpanel {%s}}
+::tycho::register extensions "sharedlibrary" [info sharedlibext]
+
+# Matlab console
+if {[uplevel #0 info commands matlab] != {}} {
+    ::tycho::register mode "matlab" \
+	    -command {::tycho::view Matlab -file {%s}} \
+	    -viewclass ::tycho::Matlab \
+	    -label {Matlab Console}  \
+	    -category "tool"
+}
+
+# Mathematica console
+if {[uplevel #0 info commands mathematica] != {}} {
+    ::tycho::register mode "mathematica" \
+	    -command {::tycho::view Mathematica -file {%s}} \
+	    -viewclass ::tycho::Mathematica \
+	    -label {Mathematica Console}  \
+	    -category "tool"
+}
+
+########### Ptolemy bits
+
+# The VEM facet mode behaves differently if we are inside Ptolemy
+if $ptolemyfeature(octtools) {
+    # Ptolemy and vem are present.  Use them.
+    ::tycho::register mode "vemfacet" \
+	    -command {::pvOpenWindow \
+	    [::ptkOpenFacet {%s} schematic contents]} \
+	    -label {Vem Facet} \
+	    -category "ptolemy"
+} else {
+    # Vem is not present.
+    ::tycho::register mode "vemfacet" \
+	    -command {::tycho::view EditPalette -facet {%s}} \
+	    -viewclass ::tycho::EditPalette \
+	    -label {Palette Editor} \
+	    -category "ptolemy"
+}
+# Retargetting editor
+if { $ptolemyfeature(ptolemy)} {
+    ::tycho::register mode "retarget" \
+	    -command {::tycho::view Retarget -file {%s} -toolbar 1} \
+	    -viewclass ::tycho::Retarget \
+	    -label {Ptolemy Retargeter}  \
+	    -category "ptolemy"
+}
+
+
+# HELP MENU ENTRIES
+
+# About...
+::tycho::register help about \
+	-label "About Tycho" \
+	-underline 0 \
+	-command {::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo}
+
+# Tycho home page
+::tycho::register help homepage \
+	-label "Tycho Home Page" \
+	-underline 0 \
+	-command {::tycho::openContext \
+	[file join $TYCHO doc index.html] "html"}
+
+# Help on this widget
+::tycho::register help usersguide \
+	-label "Guide to \[%Q info class\] Widget" \
+	-underline 0 \
+	-command "%Q help"
+
+# Concept index
+::tycho::register help conceptindex \
+	-label "Concept Index..." \
+	-underline 8 \
+	-command {::tycho::openContext [file join \$TYCHO lib idx tycho.idx]}
+
+# Code index
+::tycho::register help codeindex \
+	-label "Code Index..." -underline 0 \
+	-command {set _nmBogosity [::tycho::autoName .index]; \
+        ::tycho::IndexBrowser $_nmBogosity \
+	-file [file join \$TYCHO lib idx codeDoc.idx] \
+	-width 80; $_nmBogosity centerOnScreen}
+
+# Tycho class diagram
+::tycho::register help classdiagram \
+	-label "Class Diagram" \
+	-underline 6 \
+	-command {::tycho::openContext \
+	[file join \$TYCHO doc tychoClasses.dag]}
+
+# Open Itcl documentation
+# FIXME: Make openItclHTMLPage a proc!!!
+::tycho::register help itclmanpages \
+	-label "Itcl Man Pages" \
+	-underline 0 \
+	-command "%Q ::tycho::File::openItclHTMLPage"
+
+# The Preferences menu
+::tycho::register help preferences \
+	-label "Preferences..." \
+	-underline 0 \
+	-command { ::tycho::preferencedialog }
+
+# Ptolemy-only help entries
+if $ptolemyfeature(ptolemy) {
+    # About Ptolemy
+    ::tycho::register help ptabout \
+	    -label "About Ptolemy" \
+	    -underline 0 \
+	    -command ptkStartupMessage \
+	    -before usersguide
+
+    # Ptolemy home page
+    ::tycho::register help pthomepage \
+	    -label "Ptolemy Home Page" \
+	    -underline 0 \
+	    -command {::tycho::openContext \
+	    [file join $PTOLEMY doc html index.html] "html"}
+    -before usersguide
+}
+
+
 # FIXME: This entry binding patch may not be needed in the future.
+# FIXME: Is this still needed? -- hjr July 97
 # The following patch is contributed by Eric H. Herrin II.
 #
 # override some default Entry bindings for speed; 
