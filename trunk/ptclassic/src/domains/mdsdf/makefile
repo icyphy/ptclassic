@@ -27,14 +27,15 @@
 # Programmer:  Mike J. Chen
 # $Id$
 #
-# Important!  Do not run this makefile while in ~ptolemy/src/domains/silage.
-# Instead run in from ~ptolemy/obj.$PTARCH/domains/cgc (through the symbolic
+# Important!  Do not run this makefile while in ~ptolemy/src/domains/mdsdf
+# Instead run in from ~ptolemy/obj.$PTARCH/domains/mdsdf (through the symbolic
 # link) -- that way a separate directory containing, say, Sun-3 and Sun-4
 # objects can be maintained.
 
 include ../../../mk/topdomain.mk
 
-DIRS = kernel stars tcltk
+SUBDOMAINDIRS = tcltk
+DIRS = kernel stars $(SUBDOMAINDIRS)
 
 ME = mdsdf
 
