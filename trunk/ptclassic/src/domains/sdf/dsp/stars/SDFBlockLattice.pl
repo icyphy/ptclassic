@@ -3,7 +3,8 @@ defstar {
 	domain {SDF}
 	desc {
 A Block Forward Lattice filter.
-The reflection coefficients are updated each time the star fires
+It is identical to the Lattice star except that
+the reflection coefficients are updated each time the star fires
 by reading the "coefs" input.
 The "order" parameter indicates how many coefficient
 should be read.  The "blockSize" parameter specifies how many
