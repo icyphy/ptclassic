@@ -94,6 +94,7 @@ ITCL_SRCS = \
 	Model.itcl \
 	ModelDebug.itcl \
 	ModelSchema.itcl \
+	Monitor.itcl \
 	MultiGraph.itcl \
 	Object.itcl \
 	PreferenceDialog.itcl \
