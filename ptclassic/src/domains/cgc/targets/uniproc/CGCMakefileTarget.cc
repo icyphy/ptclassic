@@ -185,14 +185,14 @@ void CGCMakefileTarget :: writeCode()
       }
 				// Now process the parent target compileOptions
       if(strlen((const char*) compileOptions) > 0) {
-	  char* expandedCompileOptionsStream =
-	      expandPathName(compileOptionsStream);
+	  char* expandedCompileOptions =
+	      expandPathName(compileOptions);
 				// If we have not printed OTHERCFLAGS yet,
 				// then do it now
 	  if (!compileOptionsStream.numPieces())
 	     generatedMakefile << "OTHERCFLAGS= ";
-	  generatedMakefile << expandedCompileOptionsStream;
-	  delete [] expandedCompileOptionsStream;
+	  generatedMakefile << expandedCompileOptions;
+	  delete [] expandedCompileOptions;
       }
       generatedMakefile << "\n";
 
@@ -213,14 +213,14 @@ void CGCMakefileTarget :: writeCode()
       }     
 				// Now process the parent target linkOptions
       if(strlen((const char*) linkOptions) > 0) {
-	  char* expandedLinkOptionsStream =
-	      expandPathName(linkOptionsStream);
+	  char* expandedLinkOptions =
+	      expandPathName(linkOptions);
 				// If we have not printed LOADLIBES= yet,
 				// then do it now.
 	  if (!linkOptionsStream.numPieces())
 	     generatedMakefile << "LOADLIBES= ";
-	  generatedMakefile << expandedLinkOptionsStream;
-	  delete [] expandedLinkOptionsStream;
+	  generatedMakefile << expandedLinkOptions;
+	  delete [] expandedLinkOptions;
       }
       generatedMakefile << "\n";
       
