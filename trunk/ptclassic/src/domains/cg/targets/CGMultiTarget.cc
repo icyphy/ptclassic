@@ -45,7 +45,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DLScheduler.h"
 #include "HuScheduler.h"
 #include "DeclustScheduler.h"
-#include "MacroScheduler.h"
 #include "CGDDFScheduler.h"
 #include "KnownTarget.h"
 #include "CGSpread.h"
@@ -71,15 +70,14 @@ CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
 		"define the relative time scales of child targets"));
 	filePrefix.setAttributes(A_SETTABLE);
         addState(schedName.setState
-		 ("schedName(DL,HU,DC,HIER,MACRO,CGDDF)",this,"DL",
-		  "schedulers: \n"
-		  "\tDL - dynamic level \n"
-		  "\tHU - ignore IPC \n"
-		  "\tDC - clustering \n"
-		  "\tHIER(DL,HU,DC) - hierarchical scheduler, "
+		 ("schedName(DL,HU,DC,HIER,CGDDF)",this,"DL",
+		  "Multiprocessor Schedulers:\n"
+		  "\tHU - T.C. Hu's level scheduler (ignores IPC)\n"
+		  "\tDL - G.C. Sih's dynamic level scheduler\n"
+		  "\tDC - G.C. Sih's clustering/declustering scheduler\n"
+		  "\tHIER(DL,HU,DC) - J.L. Pino's hierarchical scheduler, "
 		  "defaults to DL top-level parallel scheduler\n"
-		  "\tMACRO - parallel task\n"
-		  "\tCGDDF - dynamic constructs\n\t"));
+		  "\tCGDDF - S. Ha's dynamic constructs scheduler"));
         addState(ganttChart.setState("ganttChart",this,"YES",
                                      "if true, display Gantt chart"));
         addState(logFile.setState("logFile",this,"",
@@ -275,9 +273,7 @@ void CGMultiTarget :: chooseScheduler() {
 	if (paren && ! ++paren == '\0') sname = paren;
 	// else, default to DL
     }
-    if (*sname == 'M' || *sname == 'm' && ! hierSchedulingFlag ) {
-    	LOG_NEW; mainScheduler = new MacroScheduler(this, logFile);
-    } else if (snamelen > 1 && (*(sname+1) == 'U' || *(sname+1) == 'u')) {
+    if (snamelen > 1 && (*(sname+1) == 'U' || *(sname+1) == 'u')) {
     	LOG_NEW; mainScheduler = new HuScheduler(this, logFile);
     } else if (snamelen > 1 && (*(sname+1) == 'C' || *(sname+1) == 'c')) {
     	if (childType.size() > 1) {
