@@ -41,8 +41,14 @@ $Id$
 #include "octIfc.h"
 #include "exec.h"
 
+#include "pigidefine.h"    /* defs of Constants */
 #include "ptk.h"  /* Interpreter name, window name, etc.  aok */
 #include "handle.h"
+
+/* Declare the functions in kernelCalls for editTarget */
+int KcDomainTargets();
+char* KcDefTarget();
+
 
 void FindClear();
 
@@ -596,26 +602,15 @@ long userOptionWord;
     ViDone();
 }
 
-/* Maximum number of targets that can be supported by one domain */
-#define MAX_NUM_TARGETS 50
-
-/* Declare the functions in kernelCalls that the next func uses */
-int KcDomainTargets();
-char* KcDefTarget();
-
+/* Rewritten 12/17/93 for Tk/Tcl by Alan Kamas */
 int
 RpcEditTarget(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    char *domain;
-    dmWhichItem *items;
     octObject facet;
-    char buf[MSG_BUF_MAX];
-    char *target, *defaultTarget;
-    int i, which, nTargets, galFlag = 0, nChoices;
-    char *targetNames[MAX_NUM_TARGETS];
+    char facetHandle[16];
 
     ViInit("edit-target");
     ErrClear();
@@ -625,76 +620,12 @@ long userOptionWord;
         PrintErr(octErrorString());
         ViDone();
     }
-    if (!GOCDomainProp(&facet, &domain, DEFAULT_DOMAIN)) {
-	PrintErr(ErrGet());
-	ViDone();
-    }
-    nTargets = KcDomainTargets(domain, targetNames, MAX_NUM_TARGETS);
+    ptkOctObj2Handle(&facet,facetHandle);
 
-    if(nTargets == 0) {
-	PrintErr("No targets supported by current domain.");
-	ViDone();
-    }
-
-    /* for a galaxy, add "<parent>" as an option */
-
-    if (IsGalFacet(&facet)) {
-	    galFlag = 1;
-	    targetNames[nTargets] = defaultTarget = "<parent>";
-    }
-    else defaultTarget = KcDefTarget(domain);
-
-    nChoices = nTargets + galFlag;
-
-    /* init data structure for dialog box... */
-    items = (dmWhichItem *) malloc(nChoices * sizeof(dmWhichItem));
-
-    for (i = 0; i < nChoices; i++) {
-        items[i].itemName = targetNames[i];
-        items[i].userData = NULL;
-        items[i].flag = 0;
-    }
-    
-    if (!GOCTargetProp(&facet, &target, defaultTarget)) {
-        PrintErr(ErrGet());
-        ViDone();
-    }
-
-    sprintf(buf, "target = '%s'", target);
-/* put current target in "0" position, because of the way dmWhichOne works */
-    for (i = 1; i < nChoices; i++) {
-	if (strcmp(items[i].itemName, target) == 0) {
-	    items[i].itemName = items[0].itemName;
-	    items[0].itemName = target;
-	}
-    }
-    if (dmWhichOne(buf, nChoices, items, &which, NULL, NULL) != VEM_OK
-        || which == -1) {
-        PrintCon("Aborted entry");
-        ViDone();
-    }
-
-    target = items[which].itemName;
-
-    if (!SetTargetProp(&facet, target)) {
-        PrintErr(ErrGet());
-        ViDone();
-    }
-    sprintf(buf, "target = '%s'", target);
-    PrintCon(buf);
-    free(items);
-/* now edit target parameters */
-    if (strcmp(target, "<parent>") != 0) {
-	ParamListType pList;
-	if (!GetTargetParams(target, &facet, &pList)) {
-	    PrintErr(ErrGet());
-	    ViDone();
-	}
-	if (pList.length > 0 &&
-	    EditParamList(&pList,"Edit Target Params") == TRUE) {
-	    SetTargetParams(&facet, &pList);
-        }
-    }
+    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkChooseOne ", 
+                   "[ptkGetTargetNames ", facetHandle, "]  ", 
+                   " \"ptkEditParams ", facetHandle, " %s Target \" ",
+                   (char *)NULL) )
     ViDone();
 }
 
