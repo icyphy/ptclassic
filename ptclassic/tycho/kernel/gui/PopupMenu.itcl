@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 # 
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1997 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -101,8 +101,10 @@ body ::tycho::PopupMenu::constructor {args} {
 #####################################################################
 #### add
 #
-body ::tycho::PopupMenu::add {type tag inMenu args} {
-    if [string match {-*} $inMenu] {
+body ::tycho::PopupMenu::add {type tag {inMenu {}} args} {
+    if { $inMenu == "" } {
+        set inMenu "top"
+    } elseif [string match {-*} $inMenu] {
 	set args [linsert $args 0 $inMenu]
 	set inMenu "top"
     }
