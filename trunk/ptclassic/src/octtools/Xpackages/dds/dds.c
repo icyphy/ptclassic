@@ -301,10 +301,22 @@ ddsPosition *spec;		/* Where to put shell     */
 	x -= width;
     }
     /* Make sure it is on screen */
+    /* Bug alert!  Under Openwindows, the edit-label fails to bring up
+     * a dialog box because the call to XtVaGetValues on line 280
+     * returns astronomical values for height and width. 
+     * This is only a workaround, a real bug fix would help.
+     */
+#ifdef NEVER
     if (x < 0) x = 0;
     else if (x + width > WidthOfScreen(scrn)) x = WidthOfScreen(scrn) - width;
     if (y < 0) y = 0;
     else if (y + height > HeightOfScreen(scrn)) y = HeightOfScreen(scrn) - height;
+#endif
+    if (x + width > WidthOfScreen(scrn)) x = WidthOfScreen(scrn) - width;
+    if (x < 0) x = 0;
+    if (y + height > HeightOfScreen(scrn)) y = HeightOfScreen(scrn) - height;
+    if (y < 0) y = 0;
+
     XtVaSetValues(shell, XtNx, x, XtNy, y, NULL);
 }
 
