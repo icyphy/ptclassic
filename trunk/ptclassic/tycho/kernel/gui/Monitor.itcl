@@ -148,6 +148,9 @@ class ::tycho::Monitor {
 
     # Variable to keep track so that the same error line isn't highlighted.
     private variable previousErrorLine -1
+
+    # Keep track of the line number in monitor
+    private variable monitorLine 0
 }
 
 
@@ -257,6 +260,7 @@ body ::tycho::Monitor::constructor {args} {
         pack $itk_component(history) -expand yes -fill both \
                 -after $itk_component(querysite)
         $itk_component(history) configure -readonly 1 -save 0
+        # FIXME: add key binding for C-x C-r
     }
 
     # Make the entry boxes wide so we can see the entire command
@@ -384,18 +388,20 @@ body ::tycho::Monitor::jumpToLine {monitorLine editorLine fname} {
 #
 body ::tycho::Monitor::insertLine {line} {
     set text $itk_component(history).text
-    set monitorLine [lindex [split [$text index insert] .] 0]
+    #set monitorLine [lindex [split [$text index insert] .] 0]
+    incr monitorLine
 
     # Need to lock up the output of the executable
     $itk_component(history) configure -readonly 0
-    # Just insert a regular line
-    $itk_component(history) insertData "$line"
-    #$text insert insert $line
+    # The following line causes trouble when the user changes the
+    # cursor position!
+    #$itk_component(history) insertData "$line"
+    $text insert $monitorLine.0 $line
     $itk_component(history) center
     $itk_component(history) configure -readonly 1
 
     # Now, if we have to, modify the line (ie. change color, etc)
-    if {[regexp {([^:]+):([0-9]+): (.+)} $line tmp fname editorLine msg] \
+    if {[regexp {^([^:]+):([0-9]+): (.+)$} $line tmp fname editorLine msg] \
             && $previousErrorLine!=$editorLine} {
         set previousErrorLine $editorLine
 
@@ -409,7 +415,8 @@ body ::tycho::Monitor::insertLine {line} {
             set color {red}
             lappend errorList [list $monitorLine $editorLine $fname]
         }
-        $text tag add error$errorCount $monitorLine.0 $monitorLine.end
+        $text tag add error$errorCount \
+                $monitorLine.0 $monitorLine.[expr [string length $line]-1]
         $text tag configure error$errorCount -foreground $color -underline 0
         # Two actions to the error binding:
         # 1) jump to the lines (and highlight)
@@ -438,6 +445,7 @@ body ::tycho::Monitor::setErrorCount {count} {
 # automatically exit upon successful execution.
 #
 body ::tycho::Monitor::execProcessInMonitor {} {
+    set monitorLine 0
     set oldCursor [lindex [config -cursor] end]
     config -cursor {watch}
     ::tycho::safeUpdate $this
