@@ -125,84 +125,177 @@ int DEScheduler :: computeDepth() {
 // and fire the destination star. Check all simultaneous events to the star.
 // Run until StopTime.
 // EWK this is where the biggest changes are made
+
 int DEScheduler :: run () {
 
+// FIXME we should be able to insert the destination stuff
+// during put so that we don't have to search for it here.
 
-	if (haltRequested()) {
-		Error::abortRun(*galaxy(),
-				"Can't continue after run-time error");
+fprintf(stderr,"DESC: started DEScheduler::run\n");
+    if (haltRequested()) {
+	    Error::abortRun(*galaxy(),
+			    "Can't continue after run-time error");
+	    return FALSE;
+    }
+
+    while (TRUE) {
+
+	int bFlag = FALSE;  // flag = TRUE when the terminal is on the
+			    // boundary of a wormhole of DE domain.
+
+	// fetch the earliest event.
+	CqLevelLink* f   = eventQ.get();
+fprintf(stderr,"DESC: got event at top of outer loop\n");
+	if (f == NULL) {
+fprintf(stderr,"DESC: event is null\n");
+	    break;
+	}
+	double level    = f->level;
+
+	// if level > stopTime, RETURN...
+	if (level > stopTime)	{
+fprintf(stderr,"DESC: have to push it back\n");
+		eventQ.pushBack(f);		// push back
+fprintf(stderr,"DESC: pushed it back\n");
+		// set currentTime = next event time.
+		currentTime = level/relTimeScale;
+		stopBeforeDeadFlag = TRUE;  // there is extra events.
+		return TRUE;
+	// If the event time is less than the global clock,
+	// it is an error...
+	} else if (level < currentTime) {
+	    // The event is in the past!  Argh!
+	    // Try to give a good error message.
+		Event* ent = (Event*) f->e;
+		PortHole* src = ent->dest->far();
+		Error::abortRun(*src, ": event from this porthole",
+				" is in the past!");
 		return FALSE;
 	}
 
-        // FIXME fix bFlag
 
-// HERE
+	// set currentTime
+	currentTime = level;
 
+	// check if the normal event is fetched
+	//
+	// For normal events, the fineLevel of the CqLevelLink
+	// class is negative (which is the minus of the depth of
+	// the destination star)
+	// But, we also put the process-star in the event queue
+	// with zeroed fineLevel --> which will put the process-stars
+	// at the end among simultaneous events as a side-effect.
+	DEStar* ds;
+	Star* s;
+	PortHole* terminal = 0;
+	if (f->fineLevel != 0) {
+fprintf(stderr,"DESC: Doing stuff for fineLevel != 0\n");
+		Event* ent = (Event*) f->e;
+		terminal = ent->dest;
+		s = &terminal->parent()->asStar();
+		if (terminal->isItOutput()) {
+			bFlag = TRUE;
+		} else {
+			ds = (DEStar*) s;
+			ds->arrivalTime = level;
+
+			// start a new phase.
+			ds->startNewPhase();
+		}
+
+		// Grab the Particle from the queue to the terminal.
+		// Record the arrival time, and flag existence of data.
+		InDEPort* inp = (InDEPort*) terminal;
+		inp->getFromQueue(ent->p);
+	} else {
+fprintf(stderr,"DESC: Doing stuff for fineLevel == 0\n");
+	// process star is fetched
+		ds = (DEStar*) f->e;
+		ds->arrivalTime = level;
+		s = ds;
+
+		// start a new phase.
+		ds->startNewPhase();
+	}
+	// put the LinkList into the free pool for memory management.
+
+fprintf(stderr,"DESC: called putFreeLink\n");
+	eventQ.putFreeLink(f);
+			
+	// Check if there is another event launching onto the
+	// same star with the same time stamp (not the same port)...
+
+	Star* dest;
 	while (TRUE) {
-	    LevelLink *eventObj = eventQ.get();
-	    if (eventObj == NULL) return FALSE;
-
-	    double eventTime = eventObj->level;
-	    double eventDestDepth = eventObj->fineLevel;
-	    double eventThirdLevel = FIXME;
-
-	    // If everythings ok with all 3 levels, call getFromQueue
-	    if (eventTime > stopTime) {
-		// put event back and return
-		eventQ.put(eventObj);
-		// set currentTime = next event time.
-                currentTime = level/relTimeScale;
-                stopBeforeDeadFlag = TRUE;  // there is extra events.
-                return TRUE;
+fprintf(stderr,"DESC: Attempting another get\n");
+            CqLevelLink *h = eventQ.get();
+fprintf(stderr,"DESC: got event at top of inner loop\n");
+	    if (h == NULL) {
+fprintf(stderr,"DESC: null event, break\n");
+		break;
 	    }
-	    if (eventTime < currentTime) {
-		// The event is in the past!  Argh!
-	        Error::abortRun(*src, ": event from this porthole is in the past!");
-                return FALSE;
-            }
+	    if (h->level > level) {
+fprintf(stderr,"DESC: event in future, break\n");
+		break;
+	    }
+	    PortHole* tl = 0;
+	    Event* ee = 0; 
+// FIXME we shouldn't have to do this if we already sorted on dest
+	    if (h->fineLevel != 0) {
+		    ee = (Event*) h->e;
+		    tl = ee->dest;
+		    dest = &tl->parent()->asStar();
+	    } else {
+		    dest = (Star*) h->e;
+	    }
 
-	    currentTime = eventTime;
-	    // As a first cut, forget the inter-domain stuff
-/*
-            if (h->level > level)   {
-                if (!bFlag) 
-                    if (!s->run()) return FALSE;
-            }
-*/
-            PortHole* tl = 0;
-            Event* ee = 0;
-            if (eventObj->fineLevel != 0) {
-                ee = (Event*) eventObj->e;
-                tl = ee->dest;
-                dest = &tl->parent()->asStar();
-            } else {
-                dest = (Star*) eventObj->e;
-            }
+	    // if same destination star with same time stamp..
+// We don't need to extract since our get does an extract
+fprintf(stderr,"DESC: check dest in inner loop\n");
+	    if (dest == s) {
+		if (tl) {
+		     int success =
+			((InDEPort*) tl)->getFromQueue(ee->p);
+		     if (success) eventQ.putFreeLink(h);
+		     else eventQ.pushBack(h);
+		} else if (!tl) {
+ 		     eventQ.putFreeLink(h);
+		} 
+	    } else {
+		// Added this, need to put back since we did a get
+		eventQ.pushBack(h);
+		// In the calendar queue, once you get a "bad"
+		// event, you're done, don't need to go through
+		// them all
+		break;
+	    }
 
-            // if same destination star with same time stamp..
-            if (dest == s) {
-                if (tl) {
-                     int success = ((InDEPort*) tl)->getFromQueue(ee->p);
-                }
-            } 
-	} // end of while
+        }   // while TRUE
 
-	if (haltRequested()) return FALSE;
+// fire the star.
+	if (!bFlag) {
+fprintf(stderr,"DESC: call run\n");
+	    if (!s->run()) return FALSE;
+fprintf(stderr,"DESC: called run\n");
+        }
 
-	stopBeforeDeadFlag = FALSE;	// yes, no more events...
-	return TRUE;
+    } // end of while
+
+if (haltRequested()) return FALSE;
+
+stopBeforeDeadFlag = FALSE;	// yes, no more events...
+fprintf(stderr,"end of run()\n");
+return TRUE;
 }
 
 
-	////////////////////////////
-	// Miscellanies
-	////////////////////////////
+////////////////////////////
+// Miscellanies
+////////////////////////////
 
 // fetch an event on request.
-// EWK FIXME this needs to be changed as well
 int DEScheduler :: fetchEvent(InDEPort* p, double timeVal) {
-	Error :: abortRun (*p, " has no more data.");
-	return FALSE;
+return eventQ.fetchEvent(p, timeVal);
 }
 
 // detect any delay-free loop which may potentially generate an
@@ -215,66 +308,66 @@ int DEScheduler :: fetchEvent(InDEPort* p, double timeVal) {
 
 int DEScheduler :: checkLoop(PortHole* p, DEStar* s) {
 
-	DEPortHole* dp = (DEPortHole*) p;
+DEPortHole* dp = (DEPortHole*) p;
 
-	if (!dp->depth || dp->depth == MINDEPTH) 	return TRUE;
-	else if (dp->depth < 0) {
+if (!dp->depth || dp->depth == MINDEPTH) 	return TRUE;
+else if (dp->depth < 0) {
 
-	   if (dp->isItInput()) {
-		InDEPort* inp = (InDEPort*) dp;
+if (dp->isItInput()) {
+    InDEPort* inp = (InDEPort*) dp;
 
-		// If it is delay-type, initialize depth.
-		if (s->delayType == TRUE) {
-			inp->depth = 0;
-		} else {
+    // If it is delay-type, initialize depth.
+    if (s->delayType == TRUE) {
+	    inp->depth = 0;
+    } else {
 
-			// Indicate that this port is under consideration.
-			// By depth > 0, can detect the delay-free loop
-			inp->depth = 1;
+	    // Indicate that this port is under consideration.
+	    // By depth > 0, can detect the delay-free loop
+	    inp->depth = 1;
 
-			// Scan through all output connections. 
-			if (inp->complete) {
-				BlockPortIter nextp(*s);
-				for (int i = s->numberPorts(); i > 0; i--) {
-					PortHole* port = nextp++;
-			   		if (port->isItOutput()) 
-						if(!checkLoop(port, s))
-							return FALSE;
-				}
-			} else if (inp->triggerList) {
-				ListIter nextp(*(inp->triggerList));
-				GenericPort* port;
-				while ((port = (GenericPort*)nextp++)) {
-				    if (port->isItMulti()) {
-					MultiPortHole* pp = 
-						(MultiPortHole*) port;
-					MPHIter mp(*pp);
-					PortHole* tp;
-					while((tp = mp++)) {
-					  if(!checkLoop(tp, s)) return FALSE;
-					}
-				    } else {
-					PortHole* pp = (PortHole*) port;
-					if(!checkLoop(pp, s)) return FALSE;
-				    }
-				}
+	    // Scan through all output connections. 
+	    if (inp->complete) {
+		    BlockPortIter nextp(*s);
+		    for (int i = s->numberPorts(); i > 0; i--) {
+			    PortHole* port = nextp++;
+			    if (port->isItOutput()) 
+				    if(!checkLoop(port, s))
+					    return FALSE;
+		    }
+	    } else if (inp->triggerList) {
+		    ListIter nextp(*(inp->triggerList));
+		    GenericPort* port;
+		    while ((port = (GenericPort*)nextp++)) {
+			if (port->isItMulti()) {
+			    MultiPortHole* pp = 
+				    (MultiPortHole*) port;
+			    MPHIter mp(*pp);
+			    PortHole* tp;
+			    while((tp = mp++)) {
+			      if(!checkLoop(tp, s)) return FALSE;
+			    }
+			} else {
+			    PortHole* pp = (PortHole*) port;
+			    if(!checkLoop(pp, s)) return FALSE;
 			}
-			dp->depth = 0;
-		}
-	   // 2. If it is an output, look at the connected input.
-	   } else if (!s->delayType) {
-		if (dp->numTokens()) dp->depth = 0;
-		else if (dp->far()->isItInput()) {
-			dp->depth = 1;
-			if(!checkLoop(dp->far(),(DEStar*) dp->far()->parent()))
-				return FALSE;
-			dp->depth = 0;
-		}
-	   } else dp->depth = 0;
-	}
-	// If depth >0, detect the delay-free loop.
-	else return errorDelayFree(p);
-   return TRUE;
+		    }
+	    }
+	    dp->depth = 0;
+    }
+// 2. If it is an output, look at the connected input.
+} else if (!s->delayType) {
+    if (dp->numTokens()) dp->depth = 0;
+    else if (dp->far()->isItInput()) {
+	    dp->depth = 1;
+	    if(!checkLoop(dp->far(),(DEStar*) dp->far()->parent()))
+		    return FALSE;
+	    dp->depth = 0;
+    }
+} else dp->depth = 0;
+}
+// If depth >0, detect the delay-free loop.
+else return errorDelayFree(p);
+return TRUE;
 }
 
 // calculate the depth of portholes of DEStars.
@@ -284,102 +377,102 @@ int DEScheduler :: checkLoop(PortHole* p, DEStar* s) {
 
 int DEScheduler :: setDepth(PortHole* p, DEStar* s) {
 
-	InDEPort* inp = (InDEPort*) p;
+InDEPort* inp = (InDEPort*) p;
 
-	if (inp->depth < 0) return inp->depth;
-	else if (inp->depth == 2) { errorUndefined(inp); return -1; }
-	else {
-		// If it is delay-type, set depth = -1;
-		if (s->delayType == TRUE) {
-			inp->depth = -1;
-		} else {
-			// Scan through all output connections. 
-			// Get the minimum depth to set its depth.
-			int min = -1;
+if (inp->depth < 0) return inp->depth;
+else if (inp->depth == 2) { errorUndefined(inp); return -1; }
+else {
+    // If it is delay-type, set depth = -1;
+    if (s->delayType == TRUE) {
+	    inp->depth = -1;
+    } else {
+	    // Scan through all output connections. 
+	    // Get the minimum depth to set its depth.
+	    int min = -1;
 
-			// If "beforeP" member is set, the minimum depth
-			// is determined by the depth of "beforeP".
-			if (inp->beforeP) {
-				inp->depth = 2;	// temporal setting.
-				PortHole* bp;
-				if (inp->beforeP->isItMulti()) {
- 				   MultiPortHole* pp = 
-					(MultiPortHole*) inp->beforeP;
-				   MPHIter mp(*pp);
-				   bp = mp++;
-				} else { bp = (PortHole*) inp->beforeP; }
-			 	min = setDepth(bp, s);
-			}
-				   
-			// if it is complete-type, meaning that this input
-			// triggers all outputs.
-			if (inp->complete) {
-				BlockPortIter nextp(*s);
-				for (int i = s->numberPorts(); i > 0; i--) {
-					PortHole* port = nextp++;
-			   		int val;
-			   		if (port->isItOutput() &&
-					    !port->numTokens() &&
-					    port->far()->isItInput()) {
-					    val = setDepth(port->far(),
+	    // If "beforeP" member is set, the minimum depth
+	    // is determined by the depth of "beforeP".
+	    if (inp->beforeP) {
+		    inp->depth = 2;	// temporal setting.
+		    PortHole* bp;
+		    if (inp->beforeP->isItMulti()) {
+		       MultiPortHole* pp = 
+			    (MultiPortHole*) inp->beforeP;
+		       MPHIter mp(*pp);
+		       bp = mp++;
+		    } else { bp = (PortHole*) inp->beforeP; }
+		    min = setDepth(bp, s);
+	    }
+		       
+	    // if it is complete-type, meaning that this input
+	    // triggers all outputs.
+	    if (inp->complete) {
+		    BlockPortIter nextp(*s);
+		    for (int i = s->numberPorts(); i > 0; i--) {
+			    PortHole* port = nextp++;
+			    int val;
+			    if (port->isItOutput() &&
+				!port->numTokens() &&
+				port->far()->isItInput()) {
+				val = setDepth(port->far(),
 (DEStar*) port->far()->parent()) - 1;
-			   		    if (min >= val) min = val;
-					}
-				}
-			// else, it scans through the "triggerList".
-			} else if (inp->triggerList) {
-				ListIter nextp(*(inp->triggerList));
-				GenericPort* port;
-				while ((port = (GenericPort*)nextp++)) {
-				    if (port->isItMulti()) {
-					MultiPortHole* pp = 
-						(MultiPortHole*) port;
-					MPHIter mp(*pp);
-					PortHole* tp;
-					while((tp = mp++)) {
-					    if (!tp->numTokens() &&
-						tp->far()->isItInput()) {
-						int val = setDepth(tp->far(),
+				if (min >= val) min = val;
+			    }
+		    }
+	    // else, it scans through the "triggerList".
+	    } else if (inp->triggerList) {
+		    ListIter nextp(*(inp->triggerList));
+		    GenericPort* port;
+		    while ((port = (GenericPort*)nextp++)) {
+			if (port->isItMulti()) {
+			    MultiPortHole* pp = 
+				    (MultiPortHole*) port;
+			    MPHIter mp(*pp);
+			    PortHole* tp;
+			    while((tp = mp++)) {
+				if (!tp->numTokens() &&
+				    tp->far()->isItInput()) {
+				    int val = setDepth(tp->far(),
 (DEStar*) tp->far()->parent()) - 1;
-						if (min >= val) min = val;
-					    }
-					}
-				    } else {
-					PortHole* pp = (PortHole*) port;
-					if (!pp->numTokens() &&
-						pp->far()->isItInput()) {
-					   int val = setDepth(pp->far(),
-(DEStar*) pp->far()->parent()) - 1;
-					   if (min >= val) min = val;
-					}
-				    }
+				    if (min >= val) min = val;
 				}
+			    }
+			} else {
+			    PortHole* pp = (PortHole*) port;
+			    if (!pp->numTokens() &&
+				    pp->far()->isItInput()) {
+			       int val = setDepth(pp->far(),
+(DEStar*) pp->far()->parent()) - 1;
+			       if (min >= val) min = val;
+			    }
 			}
-			inp->depth = min;
-		}
-	}
-        return inp->depth;
+		    }
+	    }
+	    inp->depth = min;
+    }
+}
+return inp->depth;
 }
 
 int DEScheduler :: errorDelayFree(PortHole* p) {
-	StringList msg;
-	msg += p->fullName();
-	msg += " lies on a delay-free loop";
-	Error::mark(*p);
-	Error::abortRun(msg);
-	return FALSE;
+StringList msg;
+msg += p->fullName();
+msg += " lies on a delay-free loop";
+Error::mark(*p);
+Error::abortRun(msg);
+return FALSE;
 }
 
 void DEScheduler :: errorUndefined(PortHole* p) {
-	StringList msg;
-	msg += p->fullName();
-	msg += " lies on a non-deterministic loop\n";
-	msg += "(execution order of simultaneous events is \
- non-deterministic)\n";
-	msg += "Please put an infinitesimal delay on a feedback arc.\n";
-	msg += "Without the delay, sorry, the \
+StringList msg;
+msg += p->fullName();
+msg += " lies on a non-deterministic loop\n";
+msg += "(execution order of simultaneous events is \
+non-deterministic)\n";
+msg += "Please put an infinitesimal delay on a feedback arc.\n";
+msg += "Without the delay, sorry, the \
 correct simulation may not be guaranteed.";
-	Error::warn(msg);
+Error::warn(msg);
 }
 
 // my domain
