@@ -110,19 +110,26 @@ DEScheduler :: run (Block& galaxy) {
 		// if level > stopTime, RETURN...
 		if (level > stopTime)	{
 			eventQ.levelput(terminal, level);	// push back
+			currentTime = stopTime;
 			return 0;
 		}
+
+		// set currentTime
+		currentTime = level;
 
 		DEStar* s = (DEStar*) &terminal->parent()->asStar();
 
 		// Grab the Particle from the geodesic to the terminal.
 		// Record the arrival time, and flag existence of data.
-
+		// We may require more than one events on an arc such as
+		// SDFinDEWormholes. Then, wait...
+		if (terminal->myGeodesic->size() < terminal->numberTokens)
+			continue;
 		s->arrivalTime = level;
 		terminal->grabData();
 	
 		// Check if there is another event launching onto the
-		// same star with the same time stamp...
+		// same star with the same time stamp (not the same port)...
 		int l;
 		eventQ.reset();
 		l = eventQ.length();
@@ -130,14 +137,15 @@ DEScheduler :: run (Block& galaxy) {
 		while (l > 0) {
 			l--;
 			LevelLink* h = eventQ.next();
-			terminal = (DEPortHole*) h->e;
-			dest = (DEStar *) &terminal->parent()->asStar();
+			DEPortHole* tl = (DEPortHole*) h->e;
+			dest = (DEStar *) &tl->parent()->asStar();
 
 			// if same destination star with same time stamp..
-			if (level == h->level && dest == s) {
-				terminal->grabData();
+			if (level == h->level && dest == s && tl != terminal) {
 				eventQ.extract(h);
 				delete h;
+				if (tl->myGeodesic->size() >= tl->numberTokens)
+					tl->grabData();
 			} else if (h->level > level)
 				goto L1;
 
