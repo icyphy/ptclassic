@@ -206,9 +206,6 @@ class ::tycho::EditBubbleAndArc {
     ##########################################################################
     ####                         protected variables                      ####
 
-    # Name of this graph
-    protected variable name
-
     ###################################################################
     # Most the methods of this class get the information on the graph
     # from the canvas widget and the class members below.
