@@ -159,7 +159,7 @@ octId *lyr_id;			/* Returned layer id     */
     intern_buffer *buf;
     buf_lyr *lyr;
 
-    if (buf = _bufFindBuffer(fct_id)) {
+    if ( (buf = _bufFindBuffer(fct_id)) ) {
 	if (buf->bufBits & LYR_UPDATE) _bufMakeLayers(fct_id, buf);
 	if (st_lookup(buf->lyr_tbl, (char *) tkl, (char **) &lyr)) {
 	    *lyr_id = lyr->lyr_id;
@@ -182,7 +182,7 @@ octId fct_id;			/* What facet to examine */
     intern_buffer *buf;
     octObject lyr;
 
-    if (buf = _bufFindBuffer(fct_id)) {
+    if ( (buf = _bufFindBuffer(fct_id)) ) {
 	if (buf->bufBits & LYR_UPDATE) _bufMakeLayers(fct_id, buf);
 	lyr.objectId = buf->hi_lyr;
 	if (octGetById(&lyr) == OCT_OK) {
@@ -234,7 +234,7 @@ octObject *lyr;			/* Layer object              */
     intern_buffer *realBuf;
     buf_lyr *item;
 
-    if (realBuf = _bufFindBuffer(fctId)) {
+    if ( (realBuf = _bufFindBuffer(fctId)) ) {
 	item = findLayer(fctId, realBuf, lyr);
 	if (item) {
 	    return item->path_width;
@@ -272,7 +272,7 @@ octCoord width;			/* New path width            */
     buf_lyr *item;
     octCoord min_width;
 
-    if (realBuf = _bufFindBuffer(fctId)) {
+    if ( (realBuf = _bufFindBuffer(fctId)) ) {
 	item = findLayer(fctId, realBuf, lyr);
 	if (item) {
 	    min_width = 0;
