@@ -911,19 +911,15 @@ body  ::tycho::EditSTD::transAction {action} {
 # argument "option".
 #
 body  ::tycho::EditSTD::transExpr {option expression} {
-    if {$option == "event"} {
+    if {$option=="event"} {
 	set validOp "{ } ! | &" ;# { } means space
 	set invalidOp "< > = + - * /"
 	set arrayIndx s
-    } elseif {$option == "condition"} {
+    } elseif {$option=="condition" || $option=="actExpr"} {
 	set validOp "{ } ! | & < > = + - * / ( )"
 	set invalidOp ""
 	set arrayIndx v
-    } elseif {$option == "actExpr"} {
-	set validOp "{ } + - * / ( )"
-	set invalidOp "! | & < > ="
-	set arrayIndx v
-    } else {
+     } else {
 	error "EditSTD: Unrecognized option $option for method transExpr! "
     }
 
