@@ -1,45 +1,52 @@
 .\" $Id$
 .NA queue
 .SD
-Demonstrates the use of the Queue block.
+Demonstrates the use of the FIFOQueue and Stack blocks.
 .DE
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD
 .IE Queue
-This demonstration feeds a queue with a Poisson counting process
+.IE FIFOQueue
+.IE Stack
+This demonstration feeds a
+.c FIFOQueue
+and a
+.c Stack
+with a Poisson counting process
 with average interarrival time of 1.0.
-An output is demanded from the
-.c Queue
+An output is demanded from the queue
 block at regular intervals of 1.0 using a
 .c Clock.
-Hence, the arrivals are departures are precariously balanced.
+Hence, the arrivals and departures are precariously balanced.
 .pp
-When an output is demanded and the queue is empty, then no output
+When an output is demanded and the queue or stack is empty, then no output
 is produced until the next arrival at the queue input.
-This shows up in the plot as intervals of greater than 1.0 between
-outputs of the queue.
+This shows up in the plots as intervals of greater than 1.0 between
+outputs of the queue and stack.
 If more demand inputs arrive while the queue is still empty,
 they are ignored.
-This shows up as successive zero-valued outputs in the Queue-size plot.
+This shows up as successive zero-valued outputs in the size plots.
+(Notice that the sizes of the stack and the queue should always be the same.)
 .pp
 It is possible for the demand inputs to be accumulated until they can
 be satisfied.  Just set the \fIconsolidateDemands\fR parameter of the
-Queue block to FALSE.  This will have the effect of keeping
-the queue size much smaller, because during large interarrival times
-the Queue accumulates many demands that can later be used up
+FIFOQueue or Stack block to FALSE.  This will have the effect of keeping
+the sizes much smaller, because during large interarrival times
+the FIFOQueue or Stack accumulates many demands that can later be used up
 when the interarrival times are small.
 .pp
 To keep the queue size from growing indefinitely it is constrained
 to a maximum size of 4.
-When the queue reaches this size, it accepts no further inputs,
-and the input events are lost.
+When the queue or stack reaches this size, it accepts no further inputs,
+and the input events are sent to the overflow output.
 This shows up in the Queue-size plot as multiple successive
 outputs with value 4.
-It shows up on the "Output of queue" plot as gaps in the counting
-processing.  For instance, if value 29 is followed by value 32,
+It shows up on the "Data queued" and "Data stacked" plots
+as a second trace.  Notice also the gaps in the queue and stack outputs.
+For instance, if value 29 is followed by value 32,
 then two input events, with values 30 and 31, were lost due
-to queue overflow.
+to queue overflow, and will not appear at the queue or stack output.
 .pp
 .IE Geodesic
 In \*(PT, the arc connecting two blocks is implemented with a
@@ -62,5 +69,6 @@ data in a queue.
 Clock,
 Poisson counting process,
 qAndServer,
-Queue.
+Stack,
+FIFOQueue.
 .ES
