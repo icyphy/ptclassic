@@ -53,7 +53,7 @@ HDRS = \
 SRCS = $(HDRS:.h=.cc) DESiPrun.cc
 
 #Library name
-LIB=libptsip.$(LIBSUFFIX)
+LIB=libsip.$(LIBSUFFIX)
 
 # Used to create .dlls under nt4.vc
 DLLDEPS =	..\..\..\..\kernel\libptolemy.lib
