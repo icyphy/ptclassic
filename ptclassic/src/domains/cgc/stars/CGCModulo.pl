@@ -1,9 +1,10 @@
 defstar {
 	name {Modulo}
 	domain { CGC }
-	desc { The output of this star is the input modulo the 
-		"modulo" parameter. The input, output are both
-		 float }
+	desc {
+The output of this star is the input modulo the "modulo" parameter.
+The input and output are both float
+	}
 	version { $Id$  }
 	author { Siamak Modjtahedi }
 	copyright {
