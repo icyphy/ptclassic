@@ -22,7 +22,7 @@ $Id$
 #include "GalIter.h"
 #include "miscFuncs.h"
 
-const Attribute ANY(0,0);
+const Attribute ANY = {0,0};
 
 // constructor
 CGCTarget::CGCTarget(const char* name,const char* starclass,
