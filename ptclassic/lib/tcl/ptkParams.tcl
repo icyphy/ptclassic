@@ -788,9 +788,9 @@ proc ed_Apply {facet number args} {
 
 proc ed_CheckForChanges \
      {parambyref paramdata twoargs countbyref name typebyref value} {
-  upvar #1 $parambyref param
-  upvar #1 $typebyref type
-  upvar #1 $countbyref count
+  upvar 1 $parambyref param
+  upvar 1 $countbyref count
+  upvar 1 $typebyref type
   set count 0
   foreach param $paramdata {
     if { [ed_listEq [lindex $param 0] $name] } {
@@ -987,7 +987,7 @@ proc ptkChooseOne { optionList command {instruction "Choose one:"} } {
 # The following procedure executes format on its arguments
 
 proc ptkFormatCmd {cmd radioVarName} {
-  upvar $radioVarName radioVar
+  upvar 1 $radioVarName radioVar
   eval [format $cmd $radioVar]
 }
                                                                             #
