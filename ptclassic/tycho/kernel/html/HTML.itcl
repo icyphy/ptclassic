@@ -1094,7 +1094,7 @@ proc HMgoto {win where {callback HMwent_to}} {
 #  tags:		number of tags processed so far
 #  symbols:		Symbols to use on un-ordered lists
 #  bgcolor:             The background color.
-#  fgcolor:             The forground color.
+#  fgcolor:             The foreground color.
 #
 proc HMinit_state {win} {
     upvar #0 HM$win var

@@ -52,7 +52,7 @@
 #
 # Split a list into a list of sub-lists, each sub-list containing
 # _n_ consecutive elements of the input list. If the length of
-# the list is not evenly divded by _n_, then the final incomplete
+# the list is not evenly divided by _n_, then the final incomplete
 # sublist is discarded. For example,
 #
 #     lchop {1 2 3 4 5 6 7} 3
