@@ -53,13 +53,13 @@ if { [lsearch -exact $auto_path $env(GRAPHEDIT_LIBRARY)] == -1 } {
 	[file join ~ .Tycho styles graphedit.style]
 
 ### MODE MAPPINGS
-::tycho::register extensions "dfg" .dfg
+::tycho::register extensions "graph" .graph
 
 ### MODES
 ########### graphical editors (alphabetical)
 
 # Basic graph viewer
-::tycho::register mode "dfg" \
+::tycho::register mode "graph" \
 	-command {::tycho::view GraphEditor -file {%s}} \
 	-viewclass ::tycho::GraphEditor \
 	-label {Graph Editor}  \
