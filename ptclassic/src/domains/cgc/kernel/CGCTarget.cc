@@ -104,6 +104,8 @@ int CGCTarget :: starDataStruct(CGCStar* block, int) {
 
 void CGCTarget :: start() {
 	galId = 0;
+	wormIn.initialize();	// should be initialize here.
+	wormOut.initialize();
 	CGTarget :: start();
 }
 
@@ -143,7 +145,6 @@ void CGCTarget :: frameCode () {
     runCode += mainDeclarations;
     runCode += mainInitialization;
     runCode += myCode;
-    runCode += indent(1);
     
     myCode = runCode;
 }
@@ -237,7 +238,23 @@ void CGCTarget::beginIteration(int repetitions, int depth) {
                 myCode += unique++;
                 myCode += "++) {\n";
         }
+	myCode += wormIn;
         return;
+}
+
+void CGCTarget :: wormInputCode(PortHole& p) {
+	wormIn << "\t/* READ from wormhole port " 
+		<< p.readFullName() << " */\n";
+}
+
+void CGCTarget :: wormOutputCode(PortHole& p) {
+	wormOut << "\t/* WRITE to wormhole port " 
+		<< p.readFullName() << " */\n";
+}
+
+void CGCTarget :: endIteration(int reps, int depth) {
+	myCode << wormOut;
+	myCode << "} /* end repeat, depth " << depth << "*/\n";
 }
 
 void CGCTarget :: addInclude(const char* inc) {
@@ -286,6 +303,7 @@ void CGCTarget :: addMainInit(const char* decl) {
 	mainInitialization += indent(1);
 	mainInitialization += decl;
 }
+
 
 // clone
 Block* CGCTarget :: clone () const {

@@ -34,6 +34,7 @@ public:
 	int setup(Galaxy&);
 	void wrapup();
 	void beginIteration(int repetitions, int depth);
+	void endIteration(int repetitions, int depth);
 
 	// Method available to stars to add to lines that are
 	// put at the beginning of the code file.
@@ -77,7 +78,8 @@ protected:
 	StringList include;
 	StringList mainDeclarations;
 	StringList mainInitialization;
-	StringList mainCode;
+	StringList wormIn;
+	StringList wormOut;
 
 	// buffer size determination
 	int allocateMemory(Galaxy&);
@@ -87,6 +89,13 @@ protected:
 
 	// redefine frameCode() method
 	void frameCode();
+
+	// Redefine:
+	// Add wormInputCode after iteration declaration and before the
+	// iteration body, and wormOutputCode just before the closure of
+	// the iteration.
+	virtual void wormInputCode(PortHole&);
+	virtual void wormOutputCode(PortHole&);
 
 	// return a name that can be used as C identifier, derived from
 	// the actual name
