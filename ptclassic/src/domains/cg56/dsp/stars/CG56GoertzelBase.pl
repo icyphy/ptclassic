@@ -72,7 +72,12 @@ first-order feedback coefficient which is a function of k and N }
 		theta = 0.0;
 	}
 	ccinclude { <math.h> }
-	setup {
+
+	method {
+	    name {CheckParameterValues}
+	    arglist { "()" }
+	    type { void }
+	    code {
 		if ( int(k) < 0 ) {
 		  Error::abortRun(*this,
 			"The value for state k must be nonnegative.");
@@ -100,11 +105,17 @@ first-order feedback coefficient which is a function of k and N }
 			"number of data samples read, given by state size.");
 		   return;
 		}
-		double kd = int(k);
-		double Nd = int(N);
+	    }
+	}
+
+	setup {
+		// Guard against division by N = 0
+		double Nd = double(int(N) ? int(N) : 1);
+		double kd = double(int(k));
 		theta = -2.0 * M_PI * kd / Nd;
-		halfd1 = cos(theta);
-		d1 = 2.0 * cos(theta);		// can't reuse halfd1
+		double cosTheta = cos(theta);
+		halfd1 = cosTheta;
+		d1 = 2.0 * cosTheta;		// can't reuse halfd1, a fix
 		input.setSDFParams(int(size), int(size)-1);
 	}
 
@@ -133,6 +144,8 @@ $label(_GoertzelBase)
 	}
 
 	go {
+		CheckParameterValues();
+
 		int dftLength = int(N);
 
 		// Run all-pole section of Goertzel's algorithm N iterations.
