@@ -40,7 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class Particle;
 class PortHole;
-class DEStar;
+class PendingEventList;
 
         //////////////////////////////////////////
         // class Event and EventQueue
@@ -48,6 +48,7 @@ class DEStar;
 
 class MutableCQEventQueue : public MutableCalendarQueue
 {
+	friend PendingEventList;
 public:
 	void pushHead(Particle* p, PortHole* ph, double v, double fv) {
             Event* temp = getEvent(p, ph);
@@ -94,7 +95,7 @@ public:
 	    return link;
 	}
 
-	void decrementEventNum() {
+	void decrementEventCount() {
 	    cq_eventNum--;
 	}
 
