@@ -12,42 +12,42 @@ With the default parameters, there is a pole at z=0.5 +/- j0.5, and no zero.
 	location { CG56 demo library }
 	input {
 		name { input }
-		type { float }
+		type { fix }
 	}
 	output {
 		name { output }
-		type { float }
+		type { fix }
 	}
 // Note: order of state declarations is important!  d1, d2, n1, n2
 // must be allocated in the order indicated.  The A_CONSEC attribute
 // tells the memory allocator to do this right.
 	state {
 		name { d1 }
-		type { float }
+		type { fix }
 		default { "-1.0" }
 		attributes { A_ROM|A_XMEM|A_CONSEC }
 	}
 	state {
 		name { d2 }
-		type { float }
+		type { fix }
 		default { "-0.5" }
 		attributes { A_ROM|A_XMEM|A_CONSEC }
 	}
 	state {
 		name { n1 }
-		type { float }
+		type { fix }
 		default { 0.0 }
 		attributes { A_ROM|A_XMEM|A_CONSEC }
 	}
 	state {
 		name { n2 }
-		type { float }
+		type { fix }
 		default { 0.0 }
 		attributes { A_ROM|A_XMEM }
 	}
 	state {
 		name { state }
-		type { floatarray }
+		type { fixarray }
 		default { "0.0[2]" }
 		desc { Filter states }
 		attributes { A_RAM|A_YMEM }
