@@ -70,7 +70,6 @@ void CQScheduler :: setup () {
 		Error::abortRun("CQScheduler: no galaxy!");
 		return;
 	}
-	GalStarIter next(*galaxy());
 
 	// initialize the global event queue and process queue.
 	eventQ.initialize();
@@ -78,39 +77,15 @@ void CQScheduler :: setup () {
 	// check connectivity
 	if (warnIfNotConnected (*galaxy())) return;
 
-	// Notify each star of the global event queue, 
-	Star* s;
-	while ((s = next++) != 0) {
-	  // The Target has already checked that all stars are allowable.
-	  // We need to initialize only those that are DE stars.
-	  if (s->isA("DEStar")) {
-	    // set up the block event queue.
-	    DEStar* p = (DEStar*) s;
-	    p->eventQ = &eventQ;
-	  }
-	}
-
 	galaxy()->initialize();
 	if(SimControl::haltRequested()) return;
 	
-	// Fire source stars to initialize the global event queue.
-	initialFire();
-
 	if (!checkDelayFreeLoop() || !computeDepth()) return;
 
 	if (!relTimeScale) {
 		Error::abortRun(*galaxy(),
 				": zero timeScale is not allowed in DE.");
 	}
-}
-
-//  If output events are generated during the "start" phase, send them
-//  to the global event queue.
-void CQScheduler :: initialFire() {
-	GalStarIter nextStar(*galaxy());
-	DEStar* s;
-	while ((s = (DEStar*) nextStar++) != 0 )
-		s->sendOutput();
 }
 
 // detect the delay free loop.
@@ -530,3 +505,6 @@ Error::warn(msg);
 
 // my domain
 const char* CQScheduler :: domain() const { return DEdomainName ;}
+
+// isA
+ISA_FUNC(CQScheduler,DEBaseSched);
