@@ -1,4 +1,7 @@
 .\" $Id$
+.EQ
+delim off
+.EN
 .H1 "Installation"
 .pp
 \*(PT is a large software system that relies on a properly configured
@@ -16,14 +19,16 @@ First note that the
 approximate disk space requirements are (for the Sun-4 distribution;
 other distributions are roughly the same size):
 .(b
-	\*(PT: 40 Mbytes
-	\*(PT (after you optionally remake): 57 Mbytes
-	Gnu subset: 7 Mbytes
+	\*(PT: 60 Mbytes
+	\*(PT (after you optionally remake): 75 Mbytes
+	Gnu subset: ?? Mbytes
 .)b
 Steps to install \*(PT on a Sun-3 or Sun-4:
 .ip 1.
+\fBPreferred method:\fR
 Create a user ``ptolemy'', together with a home directory for the ``ptolemy''
-user.
+user.  If you do not wish to create a user called ``ptolemy'', see below
+for an alternative.
 .ip 2.
 Log in or su to user ``ptolemy''.
 .ip 3.
@@ -38,19 +43,48 @@ mt -f /dev/nrst8 rewind
 has a different name.)
 .ip 6.
 tar xf /dev/nrst8 
-(This reads the tape, and will take a while.)
+(This reads the tape, and will take about one hour.)
 .ip 7.
-Create a symbolic link so that ``/usr/users/ptolemy'' points to ~ptolemy
-(optional \- as an alternative, you can change the definition of the
-PTOLEMY variable in the makefiles in ~ptolemy/src/example and
-in ~ptolemy/src/pigiExample).
+Create a symbolic link so that ``/usr/users/ptolemy'' points to ~ptolemy.
+If this is not possible or desirable, an alternative is to edit
+the following files:
+.sp
+	~ptolemy/src/pigiExample/make.template
+.br
+	~ptolemy/config-g++.mk
+.br
+	~ptolemy/config-cfront.mk
+.sp
+In the first of these, the
+ROOT variable should be changed to point to the actual location of Ptolemy.
+In the second two files, the PTOLEMY_FULL_PATH variable should
+point to the actual location.
 .ip 8.
 Edit ~ptolemy/.rhosts, adding a line for your system
 (This gives pigi permission to create an RPC server process with the
 .i rsh
 command ).
 The added line will be of the form "hostname ptolemy", you can
-find the correct hostname with the command "hostname".
+find the correct hostname with the Unix command "hostname".
+Users will also need entries in their .rhosts files to allow
+the server process to start up.
+.H2 "Installation without creating a ``ptolemy'' user"
+.pp
+The preferred installation technique, as indicated above, is to create
+a user called ``ptolemy''.  The reason for this is that running Ptolemy
+requires an appropriate user configuration.
+At minimum, the user's path must be set up properly.
+The ``ptolemy'' user is also configured to run an X window manager
+(twm) with suitable X resources that are known to work.
+In troubleshooting an installation, having the ``ptolemy'' user
+properly configured can be very valuable.
+.pp
+However, we recognize the some sites resist the creation of fictitious
+users. Consequently, Ptolemy can be installed anywhere.
+If you do this, \fIevery\fR Ptolemy user must set a PTOLEMY
+environment variable to point to the root directory of Ptolemy.
+The installation is the same as above, except that ``~ptolemy''
+is replaced with ``$PTOLEMY''.
 .H2 "Installation on a VaxStation or a DecStation"
 .pp
 For a VaxStation or DecStation, the procedure is exactly as above,
@@ -171,4 +205,9 @@ to start up \*(PT, your path
 must be defined in your .cshrc file, not just in your .login file.
 The path must be defined even when ``prompt'' is not set, since
 your .cshrc file will be read in non-interactive mode.
-
+.EQ
+delim $$
+.EN
+.\" Local variables:
+.\" mode: nroff
+.\" End:
