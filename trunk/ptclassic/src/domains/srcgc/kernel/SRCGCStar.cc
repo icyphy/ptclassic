@@ -246,27 +246,34 @@ int SRCGCStar::run() {
 }
 
 // Used for the names of procedures that test the states of their inputs.
-// Replace '.pal.' by '_'.
+// Work out a legal C name from fullName().
+static const char * toks = ".+-*/ #"; // chars to replace by '_' in C names
 StringList SRCGCStar::shortName() {
   char * name;
-  char * result;
-  StringList temp;
+  StringList result;
 
-  temp << fullName();
-  name = (char *) temp.head();
-  result = (char *)malloc(sizeof(char)*(strlen(name)));
-  memset(result,'\0',strlen(name));
+  name = fullName().newCopy(); // Get a fresh, modifiable copy for strtok
+
   if (!isA("SRCGCCSynchComm")) {
-    strcpy(result,strtok(name,"."));
-    strcat(result,"_");
-    (void)strtok(NULL,".");
-    strcat(result,strtok(NULL,"\0"));
+    char * p = name;
+    p = strtok(name,toks);
+    while (p != 0) {
+      if (strcmp(p,"pal") == 0) { // skip ".pal" in full name
+        p = strtok(0,toks);
+      } else {
+        result << p;
+        p = strtok(0,toks);
+        if (p != 0) {
+          result << '_';
+        }
+      }
+    }
   } else {
-    return (StringList) name;
+    result << name;
   }
-  return (StringList) result;
+  delete[] name;  // Get rid of strtok's scratchpad
+  return result;
 }
-
 
 // Already defined in CGCStar, declared here as extern
 #if 1
