@@ -209,7 +209,7 @@ int Linker::multiLink (int argc, char** argv) {
 		const char* objName = expandPathName(argv[i]);
 #ifdef DEBUG
 		DebugMessage("multiLink():",command);
-		DebugMessage((char *)objName, myDefaultOpts);
+		DebugMessage((char *)objName, (char *)myDefaultOpts);
 #endif //DEBUG
 		cmd << " " << objName;
 	}
