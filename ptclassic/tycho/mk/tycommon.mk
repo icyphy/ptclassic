@@ -226,12 +226,12 @@ TYDOC=$(ROOT)/util/tydoc/bin/tydoc
 itcldocs: $(ITCL_SRCS) $(TCL_SRCS)
 	@if [ "$(TYDOC_DESC)" = "" ] ; then \
 		chmod a+x $(TYDOC); \
-		echo "$(TYDOC) -d $(ITCL_SRCS) $(TCL_SRCS)"; \
-	 	$(TYDOC) -d $(ITCL_SRCS) $(TCL_SRCS); \
+		echo "$(TYDOC) -notestdir -d $(ITCL_SRCS) $(TCL_SRCS)"; \
+	 	$(TYDOC) -notestdir -d $(ITCL_SRCS) $(TCL_SRCS); \
 	else \
 		chmod a+x $(TYDOC); \
-		echo "$(TYDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS)"; \
-		$(TYDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS); \
+		echo "$(TYDOC) -notestdir -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS)"; \
+		$(TYDOC) -notestdir -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS); \
 	fi
 	@if [ "x$(DIRS)" != "x" ]; then \
 		set $(DIRS); \
@@ -619,7 +619,7 @@ htmlchek:
 checkjunk:
 	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) $(MISC_FILES) \
 		$(OPTIONAL_FILES) $(JSRCS) makefile SCCS \
-		$(JCLASS) $(OBJS) $(LIBR) 
+		$(JCLASS) $(OBJS) $(LIBR) $(TYDISTS)
 	@if [ "x$(DIRS)" != "x" ]; then \
 		set $(DIRS); \
 		for x do \
