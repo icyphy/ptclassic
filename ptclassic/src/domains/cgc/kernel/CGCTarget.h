@@ -72,8 +72,8 @@ public:
 		{return  sanitizedFullName(p); }
 
 	// set the hostMachine name
-	void setHostName(const char* s) { hostMachine = s; }
-	const char* hostName() { return (const char*) hostMachine; }
+	void setHostName(const char* s) { targetHost = s; }
+	const char* hostName() { return (const char*) targetHost; }
 
 	// redefine writeCode: default file is "code.c"
 	void writeCode(const char* name = NULL);
@@ -168,12 +168,10 @@ protected:
 
 	// states
 	IntState staticBuffering;
-	StringState hostMachine;
 	StringState funcName;
 	StringState compileCommand;
 	StringState compileOptions;
 	StringState linkOptions;
-	StringState saveFileName;
 	StringArrayState resources;
 
 	// give a unique name for a galaxy. 
