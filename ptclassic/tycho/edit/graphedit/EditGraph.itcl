@@ -42,14 +42,32 @@ class ::tycho::EditGraph {
     #################################################################
     ####                        options                          ####
 
-    # The GraphLayout model
-    itk_option define -model model Model {}
+    # The layout model
+    itk_option define -layout layout Layout {}
+    
+    # The graph model
+    itk_option define -graph graph Graph {}
     
     #################################################################
     ####                     public methods                      ####
 
+    # Remove an item from the selection
+    method _deselect {id}
+
+    # Add a vertex to the selection
+    method _select {id}
+
+    # Clear the selection
+    method _selectionclear {}
+
     # Add a tag to all indicated vertices and edges.
     method addtag {tag args}
+
+    # Create another editor.
+    method clone {}
+
+    # Remove an item from the selection
+    method deselect {name}
 
     # Delete a tag from all items.
     method dtag {tag}
@@ -61,13 +79,16 @@ class ::tycho::EditGraph {
     method move {tag x y}
 
     # Start moving an item
-    method moveclick {tag x y}
+    method moveclick {tag x y args}
 
     # Continue moving an item
     method movedrag {tag x y}
 
     # Stop moving an item
     method moverelease {tag x y}
+
+    # Handle change notification from the graph layout model
+    method notify {method args}
 
     # Reshape an item
     method reshape {name x y args}
@@ -80,6 +101,15 @@ class ::tycho::EditGraph {
 
     # Stop reshaping an item
     method reshaperelease {name x y args}
+
+    # Add a vertex to the selection
+    method select {name}
+
+    # Clear the selection
+    method selectionclear {foo}
+
+    # Update the layout model
+    method updateLayout {}
 
     # Add a new vertex to the view
     method vertex {name coords args}
@@ -107,30 +137,107 @@ class ::tycho::EditGraph {
 
 }
 
+#####################################################################
+#### -layout configuration
+# Subscribe to the layout model. Note: there will be a problem here
+# if the model is changed, since the old one is not unsubscribed...
+#
+configbody ::tycho::EditGraph::layout {
+    if { $itk_option(-layout) != "" } {
+        $itk_option(-layout) subscribe $this all
+    }
+}
+
 ########################################################################
 #### constructor
 #
 body ::tycho::EditGraph::constructor {args} {
     # Add to menus
     menubar addMenu Devel
-    menubar command {New vertex} Devel \
-	    -command "$this model vertex 100 100 -color green"
+    menubar command {Foo} Devel \
+	    -command "$this model publish vertex foo {100 100} -color green -tags vertex"
+    menubar command {Bar} Devel \
+	    -command "$this model publish vertex bar {150 150} -color red -tags vertex"
+
+    menubar command {Show layout} Devel \
+	    -command "::tycho::post \[\[$this cget -layout\] describe\]"
+    menubar command {Show graph} Devel \
+            -command "::tycho::post \[\[$this cget -graph\] describe\]"
 
     # Evaluate options
     eval itk_initialize $args
+
+    # If there is not already a graph model, create one
+    if { $itk_option(-graph) == "" } {
+	configure -graph \
+                [uplevel #0 ::tycho::KeyedDigraph [::tycho::autoName graph]]
+    }
+
+    # If there is not already a layout model, create one
+    if { $itk_option(-layout) == "" } {
+	configure -layout \
+                [uplevel #0 ::tycho::GraphLayout \
+                [::tycho::autoName layout] \
+                -primaryview $this \
+                -graph $itk_option(-graph)]
+    }
+
+    # Enable selection with button 1; shift-click toggles
+    $slate selector bind click vertex -button 1
+    $slate selector bind click vertex -button 1 -modifiers shift -toggle
+
+    # Enable drag-selection with button 1; shift-click toggles
+    $slate selector bind drag "#background" -button 1
+    $slate selector bind drag "#background" -button 1 -modifiers shift -toggle
+
+    # Create the interactor to move selected items
+    set follower [$slate interactor Follower]
+    $slate selector delegate immediate selected $follower vertex \
+	    -button 1 
+    $slate selector delegate immediate selected $follower vertex \
+	    -button 1 -modifiers shift
+
+    # Now for some tricky stuff: we want the follower to send
+    # the interaction to the model, rather than to the slate.
+    # Give it the right "prefixes":
+    $follower configure \
+            -clickprefix \
+            "$itk_option(-layout) vertexclick \[$follower target\]" \
+            -dragprefix \
+            "$itk_option(-layout) vertexdrag \[$follower target\]" \
+            -releaseprefix \
+            "$itk_option(-layout) vertexrelease \[$follower target\]"
+
+    # More tricky stuff: the selector sends selection events
+    # to the model:
+    $slate selector configure \
+	    -clearprefix "$this _selectionclear" \
+	    -deselectprefix "$this _deselect" \
+	    -selectprefix "$this _select"
+	    
+    # Try this:
+    $slate configure -exportselection 0
 }
 
 ########################################################################
-#### model
+#### _deselect
 #
-# Call the model. Note that this always publishes the command to
-# the model via Model::publish{}, so that all views _including
-# this one_ are notified of the change.
+body ::tycho::EditGraph::_deselect {id} {
+    $itk_option(-layout) publish deselect $_itemname($id)
+}
+
+########################################################################
+#### _select
 #
-body ::tycho::EditGraph::model {method args} {
-    if { $itk_option(-model) !=  "" } {
-	eval $itk_option(-model) publish $method $args
-    }
+body ::tycho::EditGraph::_select {id} {
+    $itk_option(-layout) publish select $_itemname($id)
+}
+
+########################################################################
+#### _selectionclear
+#
+body ::tycho::EditGraph::_selectionclear {} {
+    $itk_option(-layout) publish selectionclear foo
 }
 
 ########################################################################
@@ -139,10 +246,31 @@ body ::tycho::EditGraph::model {method args} {
 # Add a tag to all indicated vertices and names.
 #
 body ::tycho::EditGraph::addtag {tag args} {
+puts "$this addtag $tag $args"
     foreach name $args {
-	$slate addtag withtag $_itemID($name)
+	$slate addtag $tag withtag $_itemID($name)
     }
-    return $result
+}
+
+########################################################################
+#### clone
+#
+# Create another editor -- for demos only.
+#
+body ::tycho::EditGraph::clone {} {
+    ::tycho::view EditGraph \
+            -layout $itk_option(-layout) \
+            -graph $itk_option(-graph)
+}
+
+########################################################################
+#### deselect
+#
+# Remove an item from the selection.
+#
+body ::tycho::EditGraph::deselect {name} {
+puts "EditGraph $this: deselect $name ($_itemID($name))"
+    $slate select remove $_itemID($name)
 }
 
 ########################################################################
@@ -151,7 +279,22 @@ body ::tycho::EditGraph::addtag {tag args} {
 # Delete a tag from all items.
 #
 body ::tycho::EditGraph::dtag {tag} {
+puts "$this dtag $tag"
     $slate dtag $tag
+}
+
+
+########################################################################
+#### model
+#
+# Call the model. Note that this does not call the command to
+# the model via Model::publish{}, so commands that are to be published
+# should explitly be called via publish{}.
+#
+body ::tycho::EditGraph::model {method args} {
+    if { $itk_option(-layout) !=  "" } {
+	eval $itk_option(-layout) $method $args
+    }
 }
 
 ########################################################################
@@ -165,7 +308,7 @@ body ::tycho::EditGraph::move {tag x y} {
 #### moveclick
 #
 body ::tycho::EditGraph::moveclick {tag x y} {
-    $slate moveclick $tag $x $y
+    eval $slate moveclick $tag $x $y args
 }
 
 ########################################################################
@@ -180,6 +323,13 @@ body ::tycho::EditGraph::movedrag {tag x y} {
 #
 body ::tycho::EditGraph::moverelease {tag x y} {
     $slate moverelease $tag $x $y
+}
+
+########################################################################
+#### notify
+#
+body ::tycho::EditGraph::notify {method args} {
+    eval $method $args
 }
 
 ########################################################################
@@ -200,14 +350,46 @@ body ::tycho::EditGraph::reshapeclick {name x y args} {
 #### reshapedrag
 #
 body ::tycho::EditGraph::reshapedrag {name x y args} {
-    eval $slate reshapedrag $name $x $y $args
+    $slate reshapedrag $name $x $y
 }
 
 ########################################################################
 #### reshaperelease
 #
 body ::tycho::EditGraph::reshaperelease {name x y args} {
-    eval $slate reshaperelease $name $x $y $args
+    $slate reshaperelease $name $x $y
+}
+
+########################################################################
+#### select
+#
+# Add an item to the selection.
+#
+body ::tycho::EditGraph::select {name} {
+puts "EditGraph $this: select $name ($_itemID($name))"
+    $slate select add $_itemID($name)
+}
+
+########################################################################
+#### selectionclear
+#
+# Clear the selection.
+#
+body ::tycho::EditGraph::selectionclear {foo} {
+    $slate select clear
+}
+
+########################################################################
+#### updateLayout
+#
+# Add a new vertex to the view. This method must be called only
+# by the model.
+#
+body ::tycho::EditGraph::updateLayout {} {
+    foreach vertex [array names _itemID] {
+        set coords [$slate coords $_itemID($vertex)]
+        eval [list $itk_option(-layout) vertexcoords $vertex] $coords
+    }
 }
 
 ########################################################################
@@ -217,7 +399,9 @@ body ::tycho::EditGraph::reshaperelease {name x y args} {
 # by the model.
 #
 body ::tycho::EditGraph::vertex {name coords args} {
-    set id [eval $slate create KeyedVertex $coords $args]
+    # set id [eval $slate create text $coords $args]
+    set id [eval $slate create Frame [eval ::tycho::Rectangle::stretch \
+	    $coords $coords 20] $args]
     set _itemID($name) $id
     set _itemname($id) $name
 }
