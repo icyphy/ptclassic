@@ -2,7 +2,7 @@
 # @Version: $Id$
 # @Author: H. John Reekie
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -41,13 +41,6 @@
 # <li><B>vertex-</B><I>n</I>: The <I>n</I>'th vertex of the line.
 # <li><B>start</B>: The start of the line.
 # <li><B>end</B>: The end of the line.
-# </ul>
-#
-# <p><b>Derived aspects</b>
-#
-# <ul>
-# <li><B>length</B>: The number of edges in the line (number of
-# vertices less one).
 # </ul>
 #
 # <p><b>Bugs</b>: (none).
@@ -92,11 +85,17 @@ class ::tycho::Line {
     # Find the "center" point of a line
     proc center {coords}
 
+    # Find the direction at a given point
+    proc direction {coords x y}
+
     # Reflect a line about the specified x coordinate
     proc flip {coords x0}
 
     # Reflect a line about the specified y coordinate
     proc flop {coords y0}
+
+    # Find the nearest point on the line
+    proc nearest {coords x y}
 
     # Reshape one or more aspects of a line
     proc reshape {coords x y args}
@@ -106,6 +105,9 @@ class ::tycho::Line {
 
     # Rotate a line about the specified x and y coordinates
     proc rotate {coords x y angle}
+
+    # Find on which segment of the line a point lies 
+    proc segment {coords x y}
 }
 
 #######################################################################
@@ -117,11 +119,12 @@ body ::tycho::Line::_aspect {id canvas slate args} {
     set coords [$slate coords $id]
 
     if { $opts(-aspects) == "" } {
-	set result {}
-	foreach n [::tycho::linterval 0 \
-		[expr [llength $coords] / 2 - 1]] {
+	set result "start"
+	set length [expr [llength $coords] / 2 - 1]
+	for {set i 1} {$i < $length} {incr i} {
 	    lappend result "vertex-$n"
 	}
+	lappend result "end"
 	return $result
     } else {
 	return [eval aspect [list $coords] $opts(-aspects)]
@@ -180,9 +183,6 @@ body ::tycho::Line::_reshapeclick {id canvas slate x y args} {
 	    }
 	    "vertex" {
 		lappend scratch(vertices.$unique) $n
-	    }
-	    "length" {
-		error "Cannot set the \"length\" aspect of a line"
 	    }
 	    default {
 		error "Invalid aspect \"$aspect\" of line shape"
@@ -266,8 +266,8 @@ body ::tycho::Line::_reshaperelease {id canvas slate} {
 #### aspect
 #
 # Return aspects of a line. Valid aspects are "start,"
-# "end," "length," or <code>vertex-</code><i>n</i>, where _n_ is
-# between 0 and _length_.
+# "end," or <code>vertex-</code><i>n</i>, where _n_ is
+# between 0 and the number of vertices less one.
 #
 body ::tycho::Line::aspect {coords args} {
     set result {}
@@ -275,9 +275,6 @@ body ::tycho::Line::aspect {coords args} {
     foreach aspect $args {
 	set a [lindex [split $aspect "-"] 0]
 	switch -exact $a {
-	    "length" {
-		lappend result [expr [llength $coords] / 2 - 1]
-	    }
 	    "start" {
 		lappend result [lindex $coords 0] [lindex $coords 1]
 	    }
@@ -325,6 +322,95 @@ body ::tycho::Line::center {coords} {
 }
 
 #######################################################################
+#### direction
+#
+# Find the "direction" of a line at the given point. This works only
+# with perpendicular lines, and only if the point is exactly
+# on the line.
+#
+body ::tycho::Line::direction {coords x y} {
+    set segment [segment $coords $x $y]
+    ::tycho::assign a b c d [lrange $coords [expr $segment*2] end]
+    if { $x == $a && $x == $c } {
+        if { $b < $d } {
+            return s
+        } else {
+            return n
+        }
+    } else {
+        if { $a < $c } {
+            return e
+        } else {
+            return w
+        }
+    }	
+}
+
+##########################################################################
+#### flip
+#
+# Reflect a line about the specified x coordinate.
+#
+body ::tycho::Line::flip {coords x0} {
+    set result {}
+    foreach {x y} $coords {
+	set x [expr 2 * $x0 - $x]
+	lappend result $x $y
+    }
+    return $result
+}
+
+##########################################################################
+#### flop
+#
+# Reflect a line about the specified y coordinate.
+#
+body ::tycho::Line::flop {coords y0} {
+    set result {}
+    foreach {x y} $coords {
+	set y [expr 2 * $y0 - $y]
+	lappend result $x $y
+    }
+    return $result
+}
+
+#######################################################################
+#### nearest
+#
+# Find the point on a line nearest the given coordinates.
+# This works only for perpendicular lines, and only if the
+# given point is quite close on the line.
+#
+# FIXME: Implement properly.
+#
+body ::tycho::Line::nearest {coords x y} {
+    set i 0
+    set point [list $x $y]
+    set distance 1000000
+    while { [llength $coords] >= 4 } {
+        ::tycho::assign a b c d $coords
+        if { $a == $c } {
+            # Vertical segment
+            set d [expr abs($x - $a)]
+            if { $d < $distance } {
+                set distance $d
+                set point [list $a $y]
+            }
+        } else {
+            # Horizontal segment
+            set d [expr abs($y - $b)]
+            if { $d < $distance } {
+                set distance $d
+                set point [list $x $b]
+            }
+        }
+        set coords [lreplace $coords 0 1]
+    }
+    # This is a failure...
+    return $point
+}
+
+#######################################################################
 #### reshape
 #
 # Reshape one or more aspects of a line by the specified amount.
@@ -355,9 +441,6 @@ body ::tycho::Line::reshape {coords x y args} {
 		set _x($n) [expr $_x($n) + $x]
 		set _y($n) [expr $_y($n) + $y]
 	    }
-	    "length" {
-		error "Cannot set the \"length\" aspect of a line"
-	    }
 	    "vertex" {
 		set _x($n) [expr $_x($n) + $x]
 		set _y($n) [expr $_y($n) + $y]
@@ -386,34 +469,6 @@ body ::tycho::Line::reverse {coords} {
     set result {}
     foreach {x y} $coords {
 	set result [concat $x $y $result]
-    }
-    return $result
-}
-
-##########################################################################
-#### flip
-#
-# Reflect a line about the specified x coordinate.
-#
-body ::tycho::Line::flip {coords x0} {
-    set result {}
-    foreach {x y} $coords {
-	set x [expr 2 * $x0 - $x]
-	lappend result $x $y
-    }
-    return $result
-}
-
-##########################################################################
-#### flop
-#
-# Reflect a line about the specified y coordinate.
-#
-body ::tycho::Line::flop {coords y0} {
-    set result {}
-    foreach {x y} $coords {
-	set y [expr 2 * $y0 - $y]
-	lappend result $x $y
     }
     return $result
 }
@@ -449,4 +504,30 @@ body ::tycho::Line::rotate {coords x y angle} {
 	}
     }
     return $result
+}
+
+#######################################################################
+#### segment
+#
+# Find the segment of a line on which a particular point is.
+# This works only for perpendicular lines, and only if the
+# given point is exactly on the line.
+#
+body ::tycho::Line::segment {coords x y} {
+    set i 0
+    while { [llength $coords] >= 4 } {
+        ::tycho::assign a b c d $coords
+        if { $x == $a && $x == $c \
+                && ($b <= $y && $d >= $y || $b >= $y && $d <= $y) } {
+            return $i
+        }
+        if { $y == $b && $y == $d \
+                && ($a <= $x && $c >= $x || $a >= $x && $c <= $x) } {
+            return $i
+        }
+        incr i
+        set coords [lreplace $coords 0 1]
+    }
+    # This is a failure...
+    return 0
 }
