@@ -1,0 +1,61 @@
+<!-- $Id$ -->
+<html>
+<head>
+<Title>User's Guide to the IDoc Viewer</title>
+</head>
+<body bgcolor="#faf0e6">
+<h1><a name="IDoc Viewer">User's Guide to the IDoc Viewer</a></h1>
+This class allows browsing of 
+<a href = "../../../../kernel/doc/codeDoc/Class.idoc">::tycho::Class models</a>.
+One day it may replace HTML as the documentation viewer of choice for Tycho.
+<p>
+
+The Viewer consists of three widgets, one 
+<a href = "../../../../kernel/doc/codeDoc/MultiPanel.idoc">MultiPanel</a> 
+widget, and two 
+<a href = "../../../../kernel/doc/codeDoc/HTML.idoc">HTML</a> widgets. The 
+MultiPanel allows the user to select only those items she is interested in, and 
+then bring more detailed information into the HTML widgets. The upper HTML
+widget contains toplevel information about the particular class at all times, 
+while the lower HTML widget contains the specific information requested by the
+user. The MultiPanel also allows a quick scan of the items in it by passing the
+mouse pointer over relevant text.
+<p>
+
+The relative sizes of the constituent widgets of the IDoc are flexible. When
+passing the mouse pointer over the interior borders of the widgets, it changes
+into an arrow indicating which way the border may be dragged. Users may also
+specify a preference for a particular size by using the Tycho
+<a href = "../../../../kernel/gui/doc/usersGuides/PreferencesHelp.html>Preferences
+Manager</a>.
+<p>
+
+The IDoc Viewer is part of the IDoc system, which is described in more detail in
+a paper available in
+<a href = "http://ptolemy.eecs.berkeley.edu/~cliffc/project/report.pdf">PDF</a>
+as well as 
+<a href = "http://ptolemy.eecs.berkeley.edu/~cliffc/project/report.ps">PostScript&#174;</a>
+formats.
+<p>
+
+In brief, the IDoc system consists of the
+<a href = "../../../../kernel/doc/codeDoc/Class.idoc">Class model</a>, which 
+encapsulates relevant class information across programming language boundaries; 
+the <a href = "../codeDoc/IDocSys.idoc">documentation generator</a>, currently
+available in 
+<a href = "../codeDoc/ItclDocSys.idoc">Itcl</a> and
+<a href = "../codeDoc/JavaDocSys.idoc">Java</a> flavors, which generates the 
+Class models; and the IDoc Viewer, which understands how to display models 
+according to their languages. 
+<p>
+
+<a href="../../../../doc/index.html">Tycho Home Page</a><br>
+<p>
+<HR>
+Copyright &#169 1998-%Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: $Date$
+comments to: <author>tycho@eecs.berkeley.edu</author>
+</body>
+</html>
