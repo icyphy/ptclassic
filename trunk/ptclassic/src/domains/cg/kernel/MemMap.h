@@ -85,7 +85,7 @@ public:
 		if (ptr) ptr = ptr->next;
 		return res;
 	}
-	MemAssignment* operator++() { return next();}
+	MemAssignment* operator++(POSTFIX_OP) { return next();}
 };
 
 #endif
