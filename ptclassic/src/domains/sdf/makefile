@@ -34,8 +34,11 @@
 
 include ../../../mk/topdomain.mk
 
-DIRS = kernel stars loopScheduler dfm dsp image targets tcltk \
-	matrix matlab atm contrib
+# Subdirectories with star directories in them
+SUBDOMAINDIRS = dfm dsp image tcltk matrix matlab atm contrib
+
+DIRS = kernel stars loopScheduler targets $(SUBDOMAINDIRS)
+
 
 # We only build the VIS subdomain under the cfront compiler on Solaris
 # 2.5 and higher.  We test for sol2 and cfront in the architecture name
@@ -49,4 +52,3 @@ endif
 endif
 
 ME = sdf
-

@@ -34,7 +34,10 @@
 
 include ../../../mk/topdomain.mk
 
-DIRS = kernel stars tcltk atm
+# Subdirectories with star directories in them
+SUBDOMAINDIRS = tcltk atm
+
+DIRS = kernel stars $(SUBDOMAINDIRS)
 
 ME = de
 
