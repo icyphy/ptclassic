@@ -393,7 +393,7 @@ proc pftMain { } {
 	set env(ARCH) $arch
     }
 
-    uplevel #0 source $env(PTOLEMY)/tcl/lib/topgetopt.tcl
+    uplevel #0 source $env(PTOLEMY)/lib/tcl/topgetopt.tcl
 
     pftProcessArgs
     pftMainLoop
