@@ -124,13 +124,6 @@ ifdef PTCP
 	CP =		1
 endif
 
-ifndef TK
-	# Don't need Higher Order Functions.  ptcl does not need HOF
-	HOF=
-	# SDFDFM uses TclScript
-	SDFDFM =
-endif
-
 include $(ROOT)/mk/stars.mk
 
 # matlab.mk and mathematica.mk check these vars before traversing the path
