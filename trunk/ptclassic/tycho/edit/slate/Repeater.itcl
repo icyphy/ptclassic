@@ -74,10 +74,10 @@ class ::tycho::Repeater {
     ####                   protected methods                       ####
 
     # Attach the interactor to the current picture
-    protected method activate {t x y} {}
+    protected method activate {t x y args} {}
 
     # Remove the interactor from the current picture
-    protected method deactivate {} {}
+    protected method deactivate {args} {}
 
     # Record a mouse movement
     protected method motion {x y} {}
@@ -106,10 +106,7 @@ class ::tycho::Repeater {
 # and a delayed call to reactivate{} set up for *-delay* milliseconds 
 # later.
 #
-body ::tycho::Repeater::activate {t x y} {
-    # Remember the tag/object, for use in deactivate
-    set tag $t
-
+body ::tycho::Repeater::activate {t x y args} {
     # Set the target. If the target argument is
     # in fact a tag, get the current picture from the slate.
     if { [isObject $t] } {
@@ -118,17 +115,14 @@ body ::tycho::Repeater::activate {t x y} {
 	target [$slate find withtag current]
     }
 
-    # Set up the bindings. Note: the bindings are set to the tag,
-    # not to the current object.
-    foreach b $button {
-	$slate bind $tag \
-		[::tycho::Interactor::event Release -button $b ] \
-		[list @scope [info class] "$this deactivate"]
-	$slate bind $tag \
-		[::tycho::Interactor::event Motion -button $b ] \
-		[list @scope [info class] "$this motion %x %y"]
-    }
-
+    # Set up the bindings.
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Release $args] \
+	    [list @scope [info class] "$this deactivate"]
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Motion $args] \
+	    [list @scope [info class] "$this motion %x %y"]
+    
     # Execute the user-specified command
     execute $command $x $y
 
@@ -148,7 +142,7 @@ body ::tycho::Repeater::activate {t x y} {
 # Remove this interactor from the current picture. This removes
 # the mouse bindings, cancels the delayed command, and clears the target.
 #
-body ::tycho::Repeater::deactivate {} {
+body ::tycho::Repeater::deactivate {args} {
     # Cancel the delayed event
     after cancel $afterid
     set afterid ""
@@ -156,12 +150,9 @@ body ::tycho::Repeater::deactivate {} {
     # Clear the target 
     set target ""
 
-   # Remove the bindings
-    foreach b $button {
-	$slate bind $tag \
-		[::tycho::Interactor::event Release -button $b ] \
-		{}
-    }
+    # Remove the binding
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Release $args] {}
 }
 
 
@@ -184,9 +175,7 @@ body ::tycho::Repeater::motion {x y} {
 #
 body ::tycho::Repeater::reactivate {x y} {
     # Execute the user-specified activation command
-    if { $command != "" } {
-	uplevel #0 apply [list $command] $this $target $x $y
-    }
+    execute $command $x $y
 
     # Set up another delayed call
     set afterid [after $interval \
