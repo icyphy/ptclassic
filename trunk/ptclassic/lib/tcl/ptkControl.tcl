@@ -482,7 +482,7 @@ proc ptkRunControlDel { name window octHandle defNumIter} {
     }
 
     if [regexp {^ACTIVE$|^PAUSED$} $ptkRunFlag($name)] {
-	ptkStop $name 
+	ptkAbort $name 
 	update
     }
     if [regexp {^STOP_PENDING$|^ABORT$} $ptkRunFlag($name)] {
