@@ -39,6 +39,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer : Soonhoi Ha
  Date of Creation : 2/21/93
 	
+It is the base wormhole class for code generation domains.
+For now, it supports CGDDF domain only. To support other code generation
+domain inside, further modification is required.
+
 ********************************************************************/
 
 // CGWormBase can not contain a timed-domain. It may contain another
