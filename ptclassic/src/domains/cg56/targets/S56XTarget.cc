@@ -34,7 +34,7 @@ S56XTarget::S56XTarget(const S56XTarget& arg) :
 }
 
 void S56XTarget :: initStates() {
-	xMemMap.setValue("0-255 8192-16383");
+	xMemMap.setValue("0-255,8192-16383");
 	yMemMap.setValue("0-16383");
 	xMemMap.setAttributes(A_NONSETTABLE|A_NONCONSTANT);
 	yMemMap.setAttributes(A_NONSETTABLE|A_NONCONSTANT);
