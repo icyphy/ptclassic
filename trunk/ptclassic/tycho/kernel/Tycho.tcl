@@ -420,7 +420,7 @@ if [info exists tk_version] {
 # FIXME: if the user starts with slowNetwork==1 and then sets it to 0
 # then we don't adjust the insertOffTime.  A fix might be to have
 # some sort of callback in the preference manager.
-if [::tycho::preference get misc slowNetwork] {
+if {[info exists tk_version] && [::tycho::preference get misc slowNetwork]} {
     option add *insertOffTime 0
 }
 
