@@ -65,8 +65,8 @@ public:
 	virtual int operator == (const Particle&) = 0;
 
 	// clone the Particle, and remove clone
-	virtual Particle* clone() = 0;
-	virtual Particle* useNew() = 0;
+	virtual Particle* clone() const = 0;
+	virtual Particle* useNew() const = 0;
 	virtual void die() = 0;
 
 	// Message interface: these funcs return errors unless
@@ -142,8 +142,8 @@ public:
 	int operator == (const Particle&);
 
 	// clone the Particle, and remove clone
-	Particle* clone();
-	Particle* useNew();
+	Particle* clone() const;
+	Particle* useNew() const;
 	void die();
 
 private:
@@ -187,8 +187,8 @@ public:
 	int operator == (const Particle&);
 
 	// clone the Particle, and remove clone
-	Particle* clone();
-	Particle* useNew();
+	Particle* clone() const;
+	Particle* useNew() const;
 	void die();
 
 private:
@@ -234,8 +234,8 @@ public:
 	int operator == (const Particle&);
 
 	// clone the Particle, and remove clone
-	Particle* clone();
-	Particle* useNew();
+	Particle* clone() const;
+	Particle* useNew() const;
 	void die();
 
  private:
