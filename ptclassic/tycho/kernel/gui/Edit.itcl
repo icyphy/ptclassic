@@ -1924,12 +1924,22 @@ body ::tycho::Edit::seeFragment {point} {
         # The moving of the insertion index is also delayed in case the
         # binding that triggered this also involves the insertion cursor.
         # This used to have a time delay of 200, which was then changed
-	# to "idle." Now, we use whenMapped{}, which defers this code
+	# to "idle."
+
+        # Now, we use whenMapped{}, which defers this code
 	# until the text widget is mapped to the screen.
-        whenMapped text [list catch " \
+        #whenMapped text [list catch " \
+        #        $text mark set insert $sidx; 	\
+        #        selection clear -displayof $text; \
+	#	$this center"]
+
+	# The above command caused problems with evaluateConstruct
+	# in EditTcl.  Basically, the entire file was getting
+	# evaluated, instead of just a body.
+        after idle [list catch " \
+                ::tycho::safeUpdate $prefix; \
                 $text mark set insert $sidx; 	\
-                selection clear -displayof $text; \
-		$this center"]
+                selection clear -displayof $text; $this center"]
 
         # Clear the hypertarget mark after some time.
         # The catch is in case the window doesn't exist anymore.
