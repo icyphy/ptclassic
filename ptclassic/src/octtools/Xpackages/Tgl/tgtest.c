@@ -28,6 +28,7 @@ static char SccsId[]="$Id$";
  * Toggle tester (very short and simple)
  */
 
+#include "port.h"
 #include <stdio.h>
 #include <X11/StringDefs.h>
 #include <X11/Intrinsic.h>
@@ -113,13 +114,13 @@ Widget table;
     }
 }
 
-main(argc, argv)
+int main(argc, argv)
 int argc;
 char *argv[];
 {
     Widget top_level_widget;
     Widget table_widget;
-    Widget toggle_widget;
+    /*Widget toggle_widget;*/
     XtAppContext context;
     Arg arg_list[MAX_ARGS];
     int arg_len;
@@ -141,4 +142,5 @@ char *argv[];
     MakeDialog(table_widget);
     XtRealizeWidget(top_level_widget);
     XtAppMainLoop(context);
+    return 0;
 }
