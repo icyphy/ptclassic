@@ -34,6 +34,9 @@
 # This file currently contains routines for edit-params, target-params
 # and possibly, edit-domain dialog boxes.
 #
+# Note: This code needs a major overhaul.  The comments are all out of date,
+# and the code is full of "temporary" hacks.  EAL
+#
 #---------------------------------------------------------------------------
 #
 # For storage, there exist two global arrays
@@ -101,20 +104,74 @@ proc ed_RestoreParam {facet number {args ""}} {
 
 # Write and read parameters
 proc ed_WriteParam {paramdata facet number {args ""}} {
-  if {$args != "Target"} {
-    ptkSetParams $facet $number $paramdata
-  } else {
+  if {$args == "Target"} {
     ptkSetTargetParams $facet $number $paramdata
+  } elseif {$args == "Attributes"} {
+    ptkSetAttributes $facet $paramdata
+  } else {
+    ptkSetParams $facet $number $paramdata
   }
 }
 
 proc ed_GetParam {facet number {args ""}} {
-  if {$args != "Target"} {
-    set result [ptkGetParams $facet $number]
-  } else {
+  if {$args == "Target"} {
     set result [ptkGetTargetParams $facet $number]
+  } elseif {$args == "Attributes"} {
+    set result [ptkGetAttributes $facet]
+  } else {
+    set result [ptkGetParams $facet $number]
   }
   return $result
+}
+
+proc ptkSetAttributes {facet attrdata} {
+    # Need to add to the attrdata that data that is not supported
+    # by the current target, but is stored in the facet.
+    set facetdata [ptkGetStringProp $facet "Attributes"]
+    foreach attr $facetdata {
+	# If the attribute is not in attrdata, append it
+	set flag 0
+	foreach datum $attrdata {
+	    if {[lindex $datum 0] == [lindex $attr 0]} {
+		set flag 1
+	    }
+	}
+	if {$flag == 0} {
+	    lappend attrdata $attr
+	}
+    }
+    ptkSetStringProp $facet "Attributes" $attrdata
+}
+
+proc ptkGetAttributes {facet} {
+    # There are two sources for attributes and values:
+    # the Target and the Star.
+    # Merge the two lists, and return only
+    # those relevant to the current target.
+    set stored [ptkGetStringProp $facet "Attributes"]
+    foreach attr [targetAttributes] {
+	set attrname [lindex $attr 0]
+	set attrtype [lindex $attr 1]
+	set attrvalue [lindex $attr 2]
+	foreach st $stored {
+	    if {[lindex $st 0] == $attrname} {
+		set attrvalue [lindex $st 2]
+	    }
+	}
+	lappend targetAttributes [list $attrname $attrtype $attrvalue]
+    }
+    if {![info exists targetAttributes]} {
+	ptkImportantMessage .error "The target has no supported attributes"
+	return ""
+    }
+    return $targetAttributes
+}
+
+proc ptkProcessAttributes {instance} {
+    foreach attr [ptkGetAttributes $instance] {
+# FIXME: Replace with a ptcl call to set the attributes.
+	puts $attr
+    }
 }
 
 #############################################################################
@@ -520,6 +577,17 @@ proc ed_ClearOctEntryGlobals {facet number} {
 }
 
 # This procedure is called to open up an edit-parameters dialog box.
+# It is a kludge, and should be rewritten in an object-oriented way.
+# Three calling sequences are supported:
+#    ptkEditParams facetHandle instanceHandle
+#    ptkEditParams facetHandle targetName Target
+#    ptkEditParams facetHandle instanceHandle Attributes
+# The first of these edits a stars parameters.  The second
+# specifies the Target and then edits its parameters.
+# The third edits attributes of a star or galaxy.
+# The "number" argument (misnamed) is the instanceHandle or Target name.
+# FIXME: for editing Attributes, it should be allowed to edit more
+# than one star or galaxy at a time.
 
 proc ptkEditParams {facet number args} {
 
@@ -546,6 +614,8 @@ proc ptkEditParams {facet number args} {
   }
   if {$args == "Target"} {
     set params "{Edit Target} [list $params]"
+  } elseif {$args == "Attributes"} {
+    set params "{Edit Attributes} [list $params]"
   }
 
   set editType [lindex $params 0]
@@ -557,6 +627,8 @@ proc ptkEditParams {facet number args} {
 
   if { $args == "Target" } {
     set editType "Target \"$number\""
+  } elseif { $args == "Attributes" } {
+    set editType "Attributes \"$number\""
   } elseif { [ptkIsBus $number] } {
     set editType "Bus Width"
   } elseif { [ptkIsDelay $number] } {
@@ -613,7 +685,7 @@ proc ptkEditParams {facet number args} {
 
 # Joe Buck's fix <jbuck@Synopsys.com> 11/93
 
-  if {$number == "NIL" && $args != "Target"} {
+  if {$number == "NIL" && $args == ""} {
     pack append $u \
       [button $u.add -text " Add parameter " -command \
         "ed_AddParamDialog $facet $number"] \
@@ -681,7 +753,7 @@ proc ptkEditParams {facet number args} {
   ptkRecursiveBind $top <Return> \
     "ed_Apply $facet $number $args; $u.close invoke"
 
-  if {$args != "Target"} {
+  if {$args == ""} {
     if {!([ptkIsBus $number] || [ptkIsDelay $number] || [ptkIsStar $number])} {
       ptkRecursiveBind $top <M-a> "ed_AddParamDialog $facet $number"
       ptkRecursiveBind $top <M-r> \
