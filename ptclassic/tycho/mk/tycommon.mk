@@ -262,7 +262,8 @@ $(JZIP): $(JSRCS) $(JCLASS)
 
 # Rules to build Java package distributions
 # This rule builds both a tar file and zip file of the sources
-jdist: $(JDIST).tar.gz $(JDIST).zip 
+JDISTS =	$(JDIST).tar.gz $(JDIST).zip 
+jdist: $(JDISTS)
 
 # List of files to exclude
 JDIST_EX =	/tmp/$(JDIST).ex
@@ -390,7 +391,8 @@ checkjunk:
 # Rules for cleaning
 
 CRUD=*.o *.so core *~ *.bak ,* LOG* *.class \
-	config.cache config.log config.status $(JCLASS) $(JZIP) $(KRUFT)  
+	config.cache config.log config.status \
+	$(JCLASS) $(JZIP) $(JDISTS) $(KRUFT)  
 
 clean:
 	rm -f $(CRUD)
