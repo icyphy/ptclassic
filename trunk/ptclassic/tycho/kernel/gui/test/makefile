@@ -44,6 +44,7 @@ TCL_SRCS = \
 
 SIMPLE_TESTS = \
 	testCircularList.itcl \
+	testExec.itcl \
 	testForest.itcl \
 	testLoader.itcl \
 	testGraph.itcl \
