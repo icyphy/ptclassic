@@ -162,22 +162,20 @@ body ::tycho::EditSTD::constructor {args} {
     # configuration options, assuming there are options specified.
     eval itk_initialize $args 
 
-    # If no machine type is specified yet, initialize it.
-#    if {![info exists machineType]} {
-#	set w $prefix.editMachineType
-#	::tycho::Dialog $w -title "Edit the Machine Type"\
-#		-text "Press button to choose the machine type:"
-#	$w addButton mixed -text "Mixed"\
-#		-command "$this setMachineType Mixed; destroy $w"
-#	$w centerOnScreen
-#	tkwait window $w
-#    }
+    # Need the data in the file right away to decide if there is a machine 
+    # type or not, so couldn't wait for the delay reload in File::constructor.
+    code evalIfExists $this reload
 
-    # FIXME: Need to find a way to let users specify the machine type
-    # when this is a new file. Currently, the data of the file is read
-    # after this constructor, so we can't initialize the machine type
-    # like it used to be. (See the few lines above FIXME.)
-    set machineType "Mixed"
+    # If no machine type is specified yet, initialize it.
+    if {![info exists machineType]} {
+	set w $prefix.editMachineType
+	::tycho::Dialog $w -title "Edit the Machine Type"\
+		-text "Press button to choose the machine type:"
+	$w addButton mixed -text "Mixed"\
+		-command "$this setMachineType Mixed; destroy $w"
+	$w centerOnScreen
+	tkwait window $w
+    }
 
     interactiveEnable 1
 }
