@@ -42,11 +42,6 @@ from an initial integer value.
 When this parameter reaches zero, an alternative block is used instead
 of <i>X</i>, terminating the recursion.
 	}
-	constructor {
-	    // Change the datatype of the output to be derived from the input
-	    output.setPort("output",this,ANYTYPE);
-	    output.inheritTypeFrom(input);
-	}
 	defstate {
 		name {condition}
 		type {int}
@@ -77,7 +72,7 @@ The full path and facet name for the definition of true_block.
 		name {true_output_map}
 		type {stringarray}
 		default {""}
-		desc {The  output mapping for the false block}
+		desc {The output mapping for the false block}
 	}
 	defstate {
 		name {true_parameter_map}
@@ -109,7 +104,7 @@ The full path and facet name for the definition of false_block.
 		name {false_output_map}
 		type {stringarray}
 		default {""}
-		desc {The  output mapping for the false block}
+		desc {The output mapping for the false block}
 	}
 	defstate {
 		name {false_parameter_map}
@@ -125,28 +120,39 @@ The full path and facet name for the definition of false_block.
 	  output_map.clearAttributes(A_SETTABLE);
 	  parameter_map.clearAttributes(A_SETTABLE);
 	}
-	setup {
-	    if ((int)condition) {
-		blockname.setCurrentValue((const char*) true_block);
-		where_defined.setCurrentValue((const char*) where_true_defined);
+	method {
+	  name { preinitialize }
+	  access { public }
+	  code {
+	    // Call low-level preinit to make state values valid
+	    HOFBaseHiOrdFn::preinitialize();
+	    // Copy appropriate set of parameters
+	    // Note we must set the init values, not the current values,
+	    // because HOFMap::preinitialize will reinit the states.
+	    // Use of hashstring here is a small memory leak.
+	    if ((int) condition) {
+		blockname.setInitValue(hashstring((const char*) true_block));
+		where_defined.setInitValue(hashstring((const char*) where_true_defined));
 		StringList temp;
 		temp = true_input_map.currentValue();
-		input_map.setCurrentValue((const char*) temp);
+		input_map.setInitValue(hashstring((const char*) temp));
 		temp = true_output_map.currentValue();
-		output_map.setCurrentValue((const char*) temp);
+		output_map.setInitValue(hashstring((const char*) temp));
 		temp = true_parameter_map.currentValue();
-		parameter_map.setCurrentValue((const char*) temp);
+		parameter_map.setInitValue(hashstring((const char*) temp));
 	    } else {
-		blockname.setCurrentValue((const char*) false_block);
-		where_defined.setCurrentValue((const char*) where_false_defined);
+		blockname.setInitValue(hashstring((const char*) false_block));
+		where_defined.setInitValue(hashstring((const char*) where_false_defined));
 		StringList temp;
 		temp = false_input_map.currentValue();
-		input_map.setCurrentValue((const char*) temp);
+		input_map.setInitValue(hashstring((const char*) temp));
 		temp = false_output_map.currentValue();
-		output_map.setCurrentValue((const char*) temp);
+		output_map.setInitValue(hashstring((const char*) temp));
 		temp = false_parameter_map.currentValue();
-		parameter_map.setCurrentValue((const char*) temp);
+		parameter_map.setInitValue(hashstring((const char*) temp));
 	    }
-	    HOFMap::setup();
+	    // Now let HOFMap do its thing
+	    HOFMap::preinitialize();
+	  }
 	}
 }
