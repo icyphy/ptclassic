@@ -1236,6 +1236,8 @@ body ::tycho::Edit::findAll \
             set ind [lindex $ret 0]
             set len [lindex $ret 1]
 	    $text tag add $tag $ind "$ind + $len chars"
+            # Make sure the search starts at least one character ahead.
+            if {$len <= 0} {set len 1}
 	}
     }
 }
