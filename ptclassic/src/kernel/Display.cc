@@ -76,7 +76,8 @@ const int MAX_NO_GRAPHS = 64;
 #include "ieee.h"
 
 // constructor initializes streams and filenames
-XGraph :: XGraph () : strm(0), tmpFileNames(0), count(0), blockIamIn(0), ng(0)
+XGraph :: XGraph () : strm(0), tmpFileNames(0), count(0), blockIamIn(0), ng(0),
+dataToPlot(0)
 {}
 
 // close all files, and remove any files that might be open
@@ -95,6 +96,7 @@ void XGraph :: zapFiles () {
 	LOG_DEL; delete [] tmpFileNames;
 	LOG_DEL; delete [] count;
 	ng = 0;
+	dataToPlot = FALSE;
 }
 
 void XGraph :: initialize(Block* parent,
@@ -115,6 +117,7 @@ void XGraph :: initialize(Block* parent,
 	nIgnore = ignore;
 	sf = saveFile;
 	ng = noGraphs;
+	dataToPlot = FALSE;
 
 	index = 0;
 
@@ -180,6 +183,7 @@ void XGraph :: fcheck(double y, int set) {
 void XGraph :: addPoint(float y) {
 	addPoint (0, float(index), y);
 	index++;
+	dataToPlot = TRUE;
 }
 
 void XGraph :: addPoint (int dataSet, float x, float y) {
@@ -200,6 +204,7 @@ void XGraph :: addPoint (int dataSet, float x, float y) {
 		fwrite((char*)v, sizeof v[0], 2, strm[didx]);
 	    }
 	}
+	dataToPlot = TRUE;
 }
 
 // start a new trace on the graph.
@@ -247,39 +252,45 @@ void XGraph :: terminate () {
                     cmd += saveFileName;
                     cmd += "; ";
                 }
-                    }
+            }
         }
 
-	// The following relies on the pxgraph being in the user's path.
-	// The path is set by the pigi script, so at least with pigi,
-	// this is safe.
-        cmd += "pxgraph ";
-	if (!ascii)
+	if(dataToPlot) {
+
+	    // The following relies on the pxgraph being in the user's path.
+	    // The path is set by the pigi script, so at least with pigi,
+	    // this is safe.
+            cmd += "pxgraph ";
+	    if (!ascii)
 		cmd += "-binary ";
 
-	// put title on command line
+	    // put title on command line
 
-        if (ttl && *ttl) {
+            if (ttl && *ttl) {
 		if (strchr(ttl,'\'')) {
 			cmd += "-t \""; cmd += ttl; cmd += "\" ";
 		}
 		else {
 			cmd += "-t '"; cmd += ttl; cmd += "' ";
 		}
-        }
+            }
 
-	// put options on the command line
+	    // put options on the command line
 
-        if (opt && *opt) {
-            cmd += opt;
-            cmd += " ";
-        }
+            if (opt && *opt) {
+                cmd += opt;
+                cmd += " ";
+            }
 
-	// put filenames on the command line
-        for (i = 0; i<ng; i++) {
-            cmd += tmpFileNames[i];
-            cmd += " ";
-        }
+	    // put filenames on the command line
+            for (i = 0; i<ng; i++) {
+                cmd += tmpFileNames[i];
+                cmd += " ";
+            }
+	} else {
+	    cmd += "echo \"no data to plot\" ";
+	    Error::warn(*blockIamIn,"No data to plot");
+	}
 
         // issue commands to remove temporary files
         for (i = 0; i<ng; i++) {

@@ -106,6 +106,7 @@ private:
 	char** tmpFileNames;	// file names for graph traces
 	int* count;		// counts of # values on each stream
 	int nIgnore;		// # of initial points to ignore
+	int dataToPlot;		// flag indicating whether there is data to plot
 };
 
 #endif
