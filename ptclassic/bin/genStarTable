@@ -39,14 +39,14 @@ for makevar in $makevarlist ; do
 		-e "s/$pp/STR star_nm_${pp}/g" \
 		-e "s?${makevar}.*?/\* declare ${makevar} symbols \*/?" \
 		-e "s/\.[a-z]*/;/g" \
-		-e "s/[\\]//" \
+		-e 's/\\$//' \
 		-e "/^.. declare/,/^\$/p" make.template >> /tmp/$$.p1
 
 	sed -n	-e "s/$1/\&star_nm_${1}/g" \
 		-e "s/$pp/\&star_nm_${pp}/g" \
 		-e "s?^${makevar}.*=?/\* reference ${makevar} symbols \*/?" \
 		-e "s/\.[a-z]*/,/g" \
-		-e "s/[\\]//" \
+		-e 's/\\$//' \
 		-e "/^.. reference/,/^\$/p" make.template >> /tmp/$$.p2
 done
 
