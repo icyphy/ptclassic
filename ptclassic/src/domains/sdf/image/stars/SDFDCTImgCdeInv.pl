@@ -42,30 +42,16 @@ This one works on DCTImages, not GrayImages.
 		name { invRunLen }
 		type { "void" }
 		access { protected }
-		arglist { "(DCTImage* hiImage, const DCTImage* loImage)" }
+		arglist { "(DCTImage& hiImage, const DCTImage& loImage)" }
 		code {
 // Initialize.
-			const int bSize = hiImage->retBS();
-			const int width = hiImage->fullWidth();
-			const int height = hiImage->fullHeight();
-			const int fullFrame = width * height;
-
-			if ((bSize != loImage->retBS()) ||
-					(width != loImage->fullWidth()) ||
-					(height != loImage->fullHeight())) {
-				Error::abortRun(*this, "Two input images don't match");
-				return;
-			}
+			const int bSize = hiImage.retBS();
+			const int fullFrame = hiImage.fullWidth() *
+					hiImage.fullHeight();
 
 // Do DC image first.
-			int size = hiImage->retFullSize();
-			if ((size != hiImage->retSize()) || (size !=
-					HiPri*fullFrame/(bSize*bSize))) { // i.e. fragmented
-				Error::abortRun(*this, "DC image fragmented!");
-				return;
-			}
-			int i, j, k, blk, tmp;
-			const float* inPtr = hiImage->constData();
+			int i, j, k, blk;
+			const float* inPtr = hiImage.constData();
 			LOG_NEW; float* outPtr = new float[fullFrame];
 			for(k = 0; k < fullFrame; k++) { outPtr[k] = 0.0; }
 
@@ -76,12 +62,8 @@ This one works on DCTImages, not GrayImages.
 			}	}
 
 // While still low priority input data left...
-			size = loImage->retFullSize();
-			if (size != loImage->retSize()) { // i.e. fragmented
-				Error::abortRun(*this, "Low-pri image fragmented!");
-				return;
-			}
-			inPtr = loImage->constData();
+			const int size = loImage.retFullSize();
+			inPtr = loImage.constData();
 
 			i = 0;
 			while (i < size) {
@@ -116,19 +98,34 @@ This one works on DCTImages, not GrayImages.
 			} // end while (indx < size)
 
 // Copy the data back.
-			hiImage->setSize(fullFrame);
-			float* tmpPtr = hiImage->retData();
-			for(i = 0; i < fullFrame; i++) {
-				tmpPtr[i] = outPtr[i];
-			}
-
+			hiImage.setSize(fullFrame);
+			copy(fullFrame, hiImage.retData(), outPtr);
 			LOG_DEL; delete outPtr;
-		} // end { invRunLen }
-	}
+		}
+	} // end { invRunLen }
+
+
+	method {
+		name { copy }
+		type { "void" }
+		access { private }
+		arglist { "(const int c, float* to, const float* from)" }
+		code {
+			for(int i = 0; i < c % 5; i++) {
+				*to++ = *from++;
+			}
+			for(; i < c; i += 5) {
+				*to++ = *from++;
+				*to++ = *from++;
+				*to++ = *from++;
+				*to++ = *from++;
+				*to++ = *from++;
+			}
+	}	}
 
 
 	go {
-// Read input image.
+// Read input images.
 		Packet hiPacket;
 		(hiport%0).getPacket(hiPacket);
 		TYPE_CHECK(hiPacket, "DCTImage");
@@ -139,8 +136,29 @@ This one works on DCTImages, not GrayImages.
 		TYPE_CHECK(loPacket, "DCTImage");
 		const DCTImage* loImage = (const DCTImage*) loPacket.myData();
 
+// Check some things.
+		if ((hiImage->retBS() != loImage->retBS()) ||
+				(hiImage->fullWidth() != loImage->fullWidth()) ||
+				(hiImage->fullHeight() != loImage->fullHeight())) {
+			delete hiImage;
+			Error::abortRun(*this, "Two input images don't match");
+			return;
+		}
+		if (hiImage->fragmented() || (hiImage->retFullSize() !=
+				HiPri * (hiImage->fullWidth() * hiImage->fullHeight()) /
+				(hiImage->retBS() * hiImage->retBS()))) {
+			delete hiImage;
+			Error::abortRun(*this, "Hi-pri image wrong size.");
+			return;
+		}
+		if (loImage->fragmented()) {
+			delete hiImage;
+			Error::abortRun(*this, "Low-pri image fragmented.");
+			return;
+		}
+
 // Do the conversion.
-		invRunLen(hiImage, loImage);
+		invRunLen(*hiImage, *loImage);
 
 // Send output.
 		Packet temp(*hiImage);
