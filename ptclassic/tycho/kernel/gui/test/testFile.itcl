@@ -1,0 +1,559 @@
+# Test suite for the File class
+#
+# @Authors: John Reekie
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1995-1997 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+if {[string compare test [info procs test]] == 1} then { 
+    source [file join $TYCHO kernel test testDefs.tcl]
+} {}
+
+source [file join $TYCHO kernel test FileTester.itcl]
+
+#set VERBOSE 1
+
+############################################################################
+# constructor{}
+test File-constructor-1 {Create FileTester widget} {
+    catch {delete object .f}
+    ::tycho::FileTester .f
+} {.f}
+
+test File-constructor-2 {Create File with -file option} {
+    set foo [file join $TYCHO kernel test testFile.junk]
+    _mkfile $foo {Yes, Stanley, a fine specimen indeed.}
+    _file -file $foo
+    # Have to put in this call to after{} because of
+    # constructor weirdnesses using after{}
+    update
+    after 1000
+    .f saveText
+} {Yes, Stanley, a fine specimen indeed.}
+
+test File-constructor-3 {Create File with non-existent -file option} {
+    set foo [file join $TYCHO kernel test testFile.junk]
+    _rmfile $foo
+    _file -file $foo
+    # Have to put in this call to after{} because of
+    # constructor weirdnesses using after{}
+    update
+    after 1000
+    .f saveText
+} {}
+
+############################################################################
+# reload{}
+#
+test File-reload-1 {Reload while blank} {
+    set foo [file join $TYCHO kernel test testFile.junk]
+    _mkfile $foo {That hat. Yes, the yellow one.}
+    _file
+    # Configure -file and then call reload
+    .f reload
+    .f saveText
+} {}
+update
+after 500
+
+test File-reload-2 {Reload new file starting with blank} {
+    set foo [file join $TYCHO kernel test testFile.junk]
+    _mkfile $foo {That hat. Yes, the yellow one.}
+    _file
+    # Configure -file and then call reload
+    .f configure -file $foo
+    .f reload
+    .f saveText
+} {That hat. Yes, the yellow one.}
+update
+after 500
+
+test File-reload-3 {Reload after -file already set} {
+    set foo [file join $TYCHO kernel test testFile.junk]
+    set bar [file join $TYCHO kernel test testFile.knuj]
+    _mkfile $foo {The rain in Spain}
+    _mkfile $bar {falls mainly on the plain.}
+    _file -file $foo
+    # Have to put in this call to after{} because of
+    # constructor weirdnesses using after{}
+    update
+    after 1000
+    # Configure -file and then call reload
+    .f configure -file $bar
+    .f reload
+    .f saveText
+} {falls mainly on the plain.}
+update
+after 500
+
+test File-reload-4 {Reload with non-existent file} {
+    set foo [file join $TYCHO kernel test testFile.junk]
+    _rmfile $foo
+    _file
+    # Have to put in this call to after{} because of
+    # constructor weirdnesses using after{}
+    update
+    after 1000
+    # Configure -file and then call reload
+    .f configure -file $foo
+    .f reload
+    .f saveText
+} {}
+
+#####################################################################
+# saveAsFile{}
+#
+# saveAsFile{} performs no checking or user-level dialog.
+#
+test File-saveAsFile-1 {Save with the same file name} {
+    set foo [file join $TYCHO kernel test testFile.junk]
+    _mkfile $foo {Fresh outta mud, dang it}
+    _file -file $foo
+    # Have to put in this call to after{} because of
+    # constructor weirdnesses using after{}
+    update
+    after 1000
+    # To test that the save is happening, delete the file first
+    _rmfile $foo
+    .f saveAsFile $foo
+    _rdfile $foo
+} {Fresh outta mud, dang it}
+
+test File-saveAsFile-2 {Save with a different file name} {
+    set foo [file join $TYCHO kernel test testFile.junk]
+    set bar [file join $TYCHO kernel test testFile.knuj]
+    _mkfile $foo {Earl Grey, hot}
+    _rmfile $bar
+     _file -file $foo
+    # Have to put in this call to after{} because of
+    # constructor weirdnesses using after{}
+    update
+    after 1000
+    # To test that the save is happening, delete the file first
+    .f saveAsFile $bar
+    list [.f cget -file] [_rdfile $bar]
+} [list [file join $TYCHO kernel test testFile.knuj] {Earl Grey, hot}]
+
+#####################################################################
+# saveAs{}
+#
+# saveAs{} performs a number of checks on the file name and
+# initiates user-level dialogs.
+#
+set foo [file join $TYCHO kernel test testFile.junk]
+set bar [file join $TYCHO kernel test testFile.knuj]
+test File-saveAs-1 {Query and save with a new file} {
+    _mkfile $foo {A highly developed capacity for reason}
+    _rmfile $bar
+    _file -file $foo
+    # Have to put in this call to after{} because of
+    # constructor weirdnesses using after{}
+    update
+    after 1000
+    # To simulate the user selection of the new filename,
+    # perform the modal-dialog-workaround-dance
+    set TY_TEST_SCRIPT {
+        %0 clear
+        %0 insert entry [file join $TYCHO kernel test testFile.knuj]
+	update
+	after 1000
+        %0 ok
+        unset TY_TEST_SCRIPT
+    }
+    set result [.f saveAs]
+    list $result [_rdfile $bar]
+} {1 {A highly developed capacity for reason}}
+
+test File-saveAs-2 {Query and save with a new file in given directory} {
+    _mkfile $foo {No, not just a machine -- a thinking machine!}
+    _rmfile $bar
+    _file -file $foo
+    # Have to put in this call to after{} because of
+    # constructor weirdnesses using after{}
+    update
+    after 1000
+    # To simulate the user selection of the new filename,
+    # perform the modal-dialog-workaround-dance
+    set TY_TEST_SERIES {
+        {
+            %0 clear
+            %0 insert entry testFile.knuj
+            update
+            after 1000
+            %0 ok
+        }
+    }
+    set result [.f saveAs -initial $foo -file NoName]
+    list $result [_rdfile $bar]
+} {1 {No, not just a machine -- a thinking machine!}}
+
+test File-saveAs-3 {Query and try and save as "NoName"} {
+    _mkfile $foo {Captain Halibut, I presume?}
+    _rmfile $bar
+    _file -file $foo
+    # Have to put in this call to after{} because of
+    # constructor weirdnesses using after{}
+    update
+    after 1000
+    # To simulate the user selection of the new filename,
+    # perform the modal-dialog-workaround-dance
+    set TY_TEST_SERIES {
+        {
+            %0 clear
+            %0 insert entry NoName
+            update
+            after 1000
+            %0 invoke ok
+        }
+        {
+            %0 invoke ok
+        }
+    }
+    set result [.f saveAs -initial $foo -file NoName]
+    list $result [file exists $bar]
+} {0 0}
+
+test File-saveAs-4 {Query and cancel} {
+    _mkfile $foo {You can quote me on that}
+    _rmfile $bar
+    _file -file $foo
+    # Have to put in this call to after{} because of
+    # constructor weirdnesses using after{}
+    update
+    after 1000
+    # To simulate the user selection of the new filename,
+    # perform the modal-dialog-workaround-dance
+    set TY_TEST_SERIES {
+        {
+            update
+            after 1000
+            %0 invoke cancel
+        }
+    }
+    set result [.f saveAs]
+    list $result [file exists $bar]
+} {0 0}
+
+test File-saveAs-5 {Query and overwrite an existing file} {
+    _mkfile $foo {Adding a sparkle to Henry's day}
+    _mkfile $bar {Cheaper than you think, buddy}
+    _file -file $foo
+    # Have to put in this call to after{} because of
+    # constructor weirdnesses using after{}
+    update
+    after 1000
+    # To simulate the user selection of the new filename,
+    # perform the modal-dialog-workaround-dance
+    set TY_TEST_SERIES {
+        {
+            %0 clear
+            %0 insert entry [file join $TYCHO kernel test testFile.knuj]
+            update
+            after 1000
+            %0 ok
+        }
+        {
+            %0 invoke yes
+        }
+    }
+    set result [.f saveAs]
+    list $result [_rdfile $bar]
+} {1 {Adding a sparkle to Henry's day}}
+
+test File-saveAs-6 {Query and cancel overwrite of an existing file} {
+    _mkfile $foo {Cheaper than you think, buddy}
+    _mkfile $bar {Adding a sparkle to Henry's day}
+    _file -file $foo
+    # Have to put in this call to after{} because of
+    # constructor weirdnesses using after{}
+    update
+    after 1000
+    # To simulate the user selection of the new filename,
+    # perform the modal-dialog-workaround-dance
+    set TY_TEST_SERIES {
+        {
+            %0 clear
+            %0 insert entry [file join $TYCHO kernel test testFile.knuj]
+            update
+            after 1000
+            %0 ok
+        }
+        {
+            %0 invoke no
+        }
+    }
+    set result [catch {.f saveAs} msg]
+    list $result $msg [_rdfile $bar]
+} {1 silent {Adding a sparkle to Henry's day}}
+update
+after 500
+.f save
+
+############################################################################
+# save{}
+#
+test File-save-1 {Insert data and save} {
+    set foo [file join $TYCHO kernel test testFile.junk]
+    _file -file $foo
+    # Insert data and call save
+    .f insertData {Oh, for goodness' sake, not the elephant again!}
+    .f save
+    _rdfile $foo
+} {Oh, for goodness' sake, not the elephant again!}
+
+test File-save-2 {Insert data and save new file} {
+    set foo [file join $TYCHO kernel test testFile.junk]
+    _rmfile $foo
+    _file
+    .f insertData {Realistically? Not a chance.}
+    update
+    after 500
+    # Script to select a filename
+    set TY_TEST_SERIES {
+        {
+            %0 clear
+            %0 insert entry [file join $TYCHO kernel test testFile.junk]
+            update
+            after 1000
+            %0 ok
+        }
+    }
+    # Save it
+    set result [.f save]
+    list $result [_rdfile $foo]
+} {1 {Realistically? Not a chance.}}
+
+test File-save-3 {Insert data and overwrite existing file} {
+    set foo [file join $TYCHO kernel test testFile.junk]
+    _mkfile $foo {Hardly worth deleting...}
+    _file
+    .f insertData {Magic! she thought.}
+    # Script to select a filename
+    set TY_TEST_SERIES {
+        {
+            %0 clear
+            %0 insert entry [file join $TYCHO kernel test testFile.junk]
+            update
+            after 1000
+            %0 ok
+        }
+        {
+            %0 invoke yes
+        }
+    }
+    # Save it
+    set result [.f save]
+    list $result [_rdfile $foo]
+} {1 {Magic! she thought.}}
+
+test File-save-4 {Don't overwrite existing file} {
+    set foo [file join $TYCHO kernel test testFile.junk]
+    _mkfile $foo {Hardly worth deleting...}
+    _file
+    .f insertData {Sinister thoughts crept unsummoned...}
+    update
+    after 500
+    # Script to select a filename
+    set TY_TEST_SERIES {
+        {
+            %0 clear
+            %0 insert entry [file join $TYCHO kernel test testFile.junk]
+            update
+            after 1000
+            %0 ok
+        }
+        {
+            %0 invoke no
+        }
+    }
+    # Save it
+    set result [catch {.f save} msg]
+    list $result $msg [_rdfile $foo]
+} {1 silent {Hardly worth deleting...}}
+# So we can delete it..
+.f configure -file $foo
+.f save
+
+test File-save-5 {Save an auto-save file} {
+    set foo [file join $TYCHO kernel test #auto#testFile.junk]
+    set bar [file join $TYCHO kernel test testFile.junk]
+    _mkfile $foo {Marvin's bullet-proof quilt}
+    _rmfile $bar
+    _file -file $foo
+    update
+    after 500
+     # Script to select a filename
+    set TY_TEST_SERIES {
+        {
+            update
+            after 1000
+            %0 ok
+        }
+    }
+    # Save it
+    set result [.f save]
+    list $result [_rdfile $bar]
+} {1 {Marvin's bullet-proof quilt}}
+
+test File-save-6 {Cancel saving an auto-save file} {
+    set foo [file join $TYCHO kernel test #auto#testFile.junk]
+    set bar [file join $TYCHO kernel test testFile.junk]
+    _mkfile $foo {The first warning sign of hypothermia}
+    _rmfile $bar
+    _file -file $foo
+    update
+    after 500
+     # Script to select a filename
+    set TY_TEST_SERIES {
+        {
+            update
+            after 1000
+            %0 invoke cancel
+        }
+    }
+    # Save it
+    set result [.f save]
+    list $result [file exists $bar]
+} {0 0}
+
+test File-save-7 {Save a NoName auto-save file} {
+    set foo [file join $TYCHO kernel test #auto#NoName]
+    set bar [file join $TYCHO kernel test testFile.junk]
+    _mkfile $foo {Mmmm... donuts}
+    _rmfile $bar
+    _file -file $foo
+    update
+    after 500
+    # Script to select a filename
+    set TY_TEST_SERIES {
+        {
+            set result1 [%0 get entry]
+            %0 insert entry [file join $TYCHO kernel test testFile.junk]
+            update
+            after 1000
+            %0 ok
+        }
+    }
+    # Save it
+    set result2 [.f save]
+    list $result1 $result2 [_rdfile $bar]
+} {{} 1 {Mmmm... donuts}}
+
+
+############################################################################
+# saveQuery{}
+#
+test File-saveQuery-1 {If not modified, do nothing} {
+    set foo [file join $TYCHO kernel test testFile.junk]
+    _mkfile $foo {Verbal veracity}
+    _file -file $foo
+    # Wait around for a while...
+    update
+    after 1000
+    # Save it, checking that the file is not touched
+    set fd [open $foo "w+"]
+    close $fd
+    set result [.f saveQuery]
+    list $result [_rdfile $foo]
+} {2 {}}
+
+test File-saveQuery-2 {If modified, answer yes} {
+    set foo [file join $TYCHO kernel test testFile.junk]
+    _mkfile $foo {Voluminous verbiage}
+    _file -file $foo
+    # Wait around for a while...
+    update
+    after 1000
+    # Modify it
+    .f insertData {Voluble vilification}
+    update
+    after 500
+   # Script to answer dialog
+    set TY_TEST_SERIES {
+        {
+            %0 invoke yes
+        }
+    }
+    # Save it, checking that the file is overwritten
+    set fd [open $foo "w+"]
+    close $fd
+    set result [.f saveQuery]
+    list $result [_rdfile $foo]
+} {1 {Voluble vilification}}
+
+test File-saveQuery-3 {If modified, answer no} {
+    set foo [file join $TYCHO kernel test testFile.junk]
+    _mkfile $foo {Vellacious vivre}
+    _file -file $foo
+    # Wait around for a while...
+    update
+    after 1000
+    # Modify it
+    .f insertData {Vitriolic verve}
+    update
+    after 500
+    # Script to answer dialog
+    set TY_TEST_SERIES {
+        {
+            %0 invoke no
+        }
+    }
+    # Save it, checking that the file is not touched
+    set fd [open $foo "w+"]
+    close $fd
+    set result [.f saveQuery]
+    list $result [_rdfile $foo]
+} {0 {}}
+# So we can delete it...
+.f save
+
+test File-saveQuery-4 {If modified, cancel} {
+    set foo [file join $TYCHO kernel test testFile.junk]
+    _mkfile $foo {Vital vivisection}
+    _file -file $foo
+    # Wait around for a while...
+    update
+    after 1000
+    # Modify it
+    .f insertData {Vapid Volvos}
+    update
+    after 500
+    # Script to answer dialog
+    set TY_TEST_SERIES {
+        {
+            %0 invoke cancel
+        }
+    }
+    # Save it, checking that the file is not touched
+    set fd [open $foo "w+"]
+    close $fd
+    set result [catch {.f saveQuery} msg]
+    list $result $msg [_rdfile $foo]
+} {1 silent {}}
+# So we can delete it...
+.f save
