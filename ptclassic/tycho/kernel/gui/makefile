@@ -49,7 +49,6 @@ TCL_SRCS =
 ITCL_SRCS = \
 	ButtonBox.itcl \
 	BuilderDialog.itcl \
-	CircularList.itcl \
 	ColorBrowser.itcl \
 	ColorManager.itcl \
 	ColorPicker.itcl \
@@ -79,7 +78,6 @@ ITCL_SRCS = \
 	RevControlSCCS.itcl \
 	RevControlRCS.itcl \
 	Shortcuts.itcl \
-	Stack.itcl \
 	StatusBar.itcl \
 	StyleSheet.itcl \
 	Subpanel.itcl \
