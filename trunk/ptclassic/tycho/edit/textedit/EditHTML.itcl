@@ -48,8 +48,7 @@ class ::tycho::EditHTML {
 
     #### reload
     # Override the base-class reload to recolorize.
-    method reload {{askuser 1} {filename \
-	"defaultfileforreloadmethod"}}
+    method reload {}
 
     constructor {args} {}
     destructor {}
@@ -116,8 +115,7 @@ body ::tycho::EditHTML::help {} {
 #### reload
 # Override the base-class reload to recolorize.
 #
-body ::tycho::EditHTML::reload {{askuser 1} {filename \
-	"defaultfileforreloadmethod"}} {
-    Edit::reload $askuser $filename 
+body ::tycho::EditHTML::reload {} {
+    Edit::reload 
     $itk_component(text) parse
 }
