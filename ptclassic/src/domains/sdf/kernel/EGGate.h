@@ -107,6 +107,15 @@ public:
 	// remove myself
 	void removeMe();
 
+	// input or output?
+	int isItInput() { return pPort->isItInput(); }
+
+	// readName
+	const char* readName() const { return pPort->readName(); }
+
+	// hide me from the node
+	void hideMe(int flag = 0);
+
 	//  a pointer to the far end node
 	EGNode* farEndNode() 
 		{ if (far==0) return 0;
