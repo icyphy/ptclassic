@@ -60,9 +60,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class TyTcl : public TclObj {
 
 public:
-	// the active Tcl interpreter, for error reporting.
-	static Tcl_Interp* activeInterp;
-
 	Tk_Window tkwin;
 
 	TyTcl(Tcl_Interp* interp, Tk_Window tkwin);

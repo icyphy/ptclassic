@@ -158,9 +158,6 @@ void TyTcl::registerFuncs() {
 	}
 }
 
-// static member: tells which Tcl interpreter is "innermost"
-Tcl_Interp* TyTcl::activeInterp = 0;
-
 // dispatch the functions.
 int TyTcl::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char* argv[])
 			   {
@@ -172,10 +169,6 @@ int TyTcl::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char* argv[])
 	}
 	int i = int(which);
 	// this code makes an effective stack of active Tcl interpreters.
-	Tcl_Interp* save = activeInterp;
-	activeInterp = interp;
-	int status = (obj->*(funcTable[i].func))(argc,argv);
-	activeInterp = save;
-	return status;
+	return (obj->*(funcTable[i].func))(argc,argv);
 }
 
