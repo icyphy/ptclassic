@@ -172,7 +172,7 @@ body ::tycho::EditSTD::constructor {args} {
 
     # If no machine type is specified yet, initialize it.
     if {![info exists machineType]} {
-	set w [$this windowName].editMachineType
+	set w $prefix.editMachineType
 	::tycho::DialogWindow $w -title "Edit the Machine Type"\
 		-text "Press button to choose the machine type:"
 	$w addButton mixed -text "Mixed"\
@@ -197,12 +197,12 @@ body ::tycho::EditSTD::clear {} {
 
 #    foreach node [$canvas find withtag node] {
 #	# destroy the corresponding edit state window if it exists.
-#	set w [$this windowName].stdEditState$node
+#	set w $prefix.stdEditState$node
 #	if [winfo exists $w] { destroy $w }
 #    }
 #    foreach arc [$canvas find withtag arc] {
 #	# destroy the corresponding edit arc window if it exists.
-#	set w [$this windowName].stdEditArc$arc
+#	set w $prefix.stdEditArc$arc
 #	if [winfo exists $w] { destroy $w }
 #    } 
 
@@ -220,7 +220,7 @@ body ::tycho::EditSTD::clear {} {
 # Edit an arc.
 #
 body ::tycho::EditSTD::editArc {arc} {
-    set w [$this windowName].stdEditArc$arc
+    set w $prefix.stdEditArc$arc
     if [winfo exists $w] {
 	wm deiconify $w
 	raise $w
@@ -350,7 +350,7 @@ body ::tycho::EditSTD::editItem {item} {
 #
 body ::tycho::EditSTD::editState {node} {
     
-    set w [$this windowName].stdEditState$node
+    set w $prefix.stdEditState$node
     if [winfo exists $w] {
 	wm deiconify $w
 	raise $w
@@ -402,7 +402,7 @@ body ::tycho::EditSTD::editStateDone {node w} {
 body ::tycho::EditSTD::getInfo {} {
     set nodes [$canvas find withtag node]
     set arcs [$canvas find withtag arc]
-    set w [$this windowName].getInfo
+    set w $prefix.getInfo
     catch {destroy $w}
     ::tycho::Message $w -text "Machine type: $machineType\
 	    \n# of nodes  : [llength $nodes]\
@@ -416,7 +416,7 @@ body ::tycho::EditSTD::getInfo {} {
 #
 body ::tycho::EditSTD::ioPortNames {} {
 
-    set w [$this windowName].stdIOPortNames
+    set w $prefix.stdIOPortNames
     if [winfo exists $w] {
 	wm deiconify $w
 	raise $w
@@ -492,7 +492,7 @@ body ::tycho::EditSTD::lookInsideState {node} {
 # Make a icon for this STD to be put into a VEM palette facet.
 body ::tycho::EditSTD::makeIcon {} {
 
-    set w [$this windowName].stdMakeIcon
+    set w $prefix.stdMakeIcon
     if [winfo exists $w] {
 	wm deiconify $w
 	raise $w
