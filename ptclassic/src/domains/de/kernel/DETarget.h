@@ -46,10 +46,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class DETarget : public Target {
 public:
+	// constructor
 	DETarget();
-	Block* makeNew() const;
+
+	// destructor
 	~DETarget();
+
+	// return a new copy
+	/* virtual */ Block* makeNew() const;
+
+	// call the begin method on the galaxy
 	/* virtual */ void begin();
+
+	// return the domain of the galaxy if it exists and "DE" otherwise
+	/* virtual */ const char* domain();
+
 protected:
 	void setup();
 	FloatState timeScale;	// relative time scale for interface with
