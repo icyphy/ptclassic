@@ -271,13 +271,17 @@ void CGTarget::setup() {
 void CGTarget :: chooseScheduler() {
 
     const char* tmpname = loopingLevel;
+    Tokenizer lexer(tmpname,"#");
+    char buf[1024];
+    lexer >> buf;
+    loopingLevel.setCurrentValue(buf);
 
     // Full path name of the log file
     StringList logPath = logFilePathName(destDirectory, "schedule.log");
 	delete [] schedFileName;
 	schedFileName = logPath.newCopy();
 
-    if (strcasecmp(tmpname,"ACYLOOP") == 0) {
+    if (strcasecmp(buf,"ACYLOOP") == 0) {
 	// Determine if the graph is acyclic.  It not, use
 	// another loop scheduler.
 	// FIXME:
