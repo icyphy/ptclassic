@@ -152,6 +152,10 @@ proc ptkRunControl { name octHandle } {
 #
 proc ptkRunControlDel { name window octHandle defNumIter} {
     global ptkRunFlag
+    if {![info exists ptkRunFlag($name)]} {
+	# Assume the window has been deleted already and ignore command
+	return
+    }
     if {$ptkRunFlag($name) == {ACTIVE} || \
 	    $ptkRunFlag($name) == {STOP_PENDING} } {
 	ptkImportantMessage .message {System is still running.  Please stop it.}
@@ -170,6 +174,10 @@ proc ptkRunControlDel { name window octHandle defNumIter} {
 # procedure to stop a run
 proc ptkStop { name } {
     global ptkRunFlag
+    if {![info exists ptkRunFlag($name)]} {
+	# Assume the window has been deleted already and ignore command
+	return
+    }
     # Ignore if the named system is not running
     if {$ptkRunFlag($name) != {ACTIVE}} return
     set ptkRunFlag($name) STOP_PENDING
@@ -209,14 +217,18 @@ proc ptkGo {name octHandle} {
     set w .run_$name
     set numIter [$w.iter.entry get]
     global ptkRunFlag
+    set univ [curuniverse]
     # For now, we allow only one run at a time.
-    if {$ptkRunFlag([curuniverse]) == {ACTIVE} || \
-	    $ptkRunFlag([curuniverse]) == {STOP_PENDING}} {
+    if {[info exists ptkRunFlag($univ)] && \
+        ($ptkRunFlag($univ) == {ACTIVE} || \
+	 $ptkRunFlag($univ) == {STOP_PENDING})} {
         ptkImportantMessage .error \
 		"Sorry.  Only one run at time. "
 	return
     }
-    set prevRunFlag $ptkRunFlag($name)
+    if {[info exists ptkRunFlag($name)]} {
+    	set prevRunFlag $ptkRunFlag($name)
+    } { set prevRunFlag IDLE }
     set ptkRunFlag($name) ACTIVE
     catch {$cntrWindow.panel.go configure -relief sunken}
     catch {$cntrWindow.panel.pause configure -relief raised}
