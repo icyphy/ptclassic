@@ -227,7 +227,7 @@ void ArchTarget :: trailerCode() {
 	  VHDLSignal* newSignal = new VHDLSignal;
 
 	  StringList newSignalName = port->getName();
-	  newSignalName << "_IN";
+	  //	  newSignalName << "_IN";
 	  newSignal->setName(newSignalName);
 	  newSignal->setType(port->getType());
 
@@ -249,7 +249,7 @@ void ArchTarget :: trailerCode() {
 	  VHDLSignal* newSignal = new VHDLSignal;
 
 	  StringList newSignalName = port->getName();
-	  newSignalName << "_OUT";
+	  //	  newSignalName << "_OUT";
 	  newSignal->setName(newSignalName);
 	  newSignal->setType(port->getType());
 
@@ -261,11 +261,11 @@ void ArchTarget :: trailerCode() {
     }
   }
 
-  // Iterate through tokenList and crate registers for each token.
+  // Iterate through tokenList and create registers for each token.
   VHDLTokenListIter nextToken(tokenList);
   VHDLToken* token;
   while ((token = nextToken++) != 0) {
-    cout << "Token:  " << token->getName() << "\n";
+    //    cout << "Token:  " << token->getName() << "\n";
     cout.flush();
 
     VHDLSignal* newSignal = new VHDLSignal;
@@ -279,9 +279,22 @@ void ArchTarget :: trailerCode() {
     newReg->setType(token->getType());
     newReg->setOutput(newSignal);
 
-    VHDLSignal* clockSignal = mainSignalList.vhdlSignalWithName(token->clockName);
-    cout << "token->clockName:  " << token->clockName << "\n";
+    VHDLSignal* clockSignal =
+      mainSignalList.vhdlSignalWithName(token->clockName);
     if (clockSignal) {
+      newReg->setClock(clockSignal);
+    }
+    else {
+      // No clock signal set for token - must be generated
+      // from feedback from previous iterations.
+      StringList clockName = "feedback_clock";
+      StringList clockType = "BOOLEAN";
+
+      clockSignal = new VHDLSignal;
+      clockSignal->setName(clockName);
+      clockSignal->setType(clockType);
+      mainSignalList.put(*clockSignal);
+
       newReg->setClock(clockSignal);
     }
 
@@ -291,26 +304,31 @@ void ArchTarget :: trailerCode() {
     sourceFiring = token->getSourceFiring();
     if (sourceFiring) {
       // Now get the real firing out of the firing list.
-      sourceFiring = masterFiringList.vhdlFiringWithName(sourceFiring->getName());
+      sourceFiring =
+	masterFiringList.vhdlFiringWithName(sourceFiring->getName());
       // Get the real port from the firing's port list.
-      VHDLPort* realPort = (sourceFiring->portList)->vhdlPortWithName(token->getName());
+      StringList tokenOutPortName = token->getName();
+      tokenOutPortName << "_OUT";
+      VHDLPort* realPort =
+	(sourceFiring->portList)->vhdlPortWithName(tokenOutPortName);
       if (realPort) {
+	/*
 	cout << "  sourceFiring:  " << "firing:  " << sourceFiring->getName();
 	cout << "  port:  ";
-	cout << ((sourceFiring->portList)->vhdlPortWithName(token->getName()))->getName();
+	cout << realPort->getName();
 	cout << "\n";
 	cout.flush();
-
+	*/
 	newReg->setInput(realPort->signal);
       }
       else {
 	Error::error(sourceFiring->getName(),
-		     ": has no port with name ", token->getName());
+		     ": has no port with name ", tokenOutPortName);
 	return;
       }
     }
     else {
-      cout << "Token:  " << token->getName() << ": has no sourceFiring";
+      cout << "Token:  " << token->getName() << ": has no sourceFiring\n";
     }
     // Finally, put the reg in the list AFTER its members have been set.
     regList.put(*newReg);
@@ -323,16 +341,21 @@ void ArchTarget :: trailerCode() {
     if (destFiringList->size()) {
       while ((destFiring = nextFiring++) != 0) {
 	// Now get the real firing out of the firing list.
-	destFiring = masterFiringList.vhdlFiringWithName(destFiring->getName());
+	destFiring =
+	  masterFiringList.vhdlFiringWithName(destFiring->getName());
 	// Get the real port from the firing's port list.
-	VHDLPort* realPort = (destFiring->portList)->vhdlPortWithName(token->getName());
+	StringList tokenInPortName = token->getName();
+	tokenInPortName << "_IN";
+	VHDLPort* realPort =
+	  (destFiring->portList)->vhdlPortWithName(tokenInPortName);
 	if (realPort) {
+	  /*
 	  cout << "  destFiring:  " << "firing:  " << destFiring->getName();
 	  cout << "  port:  ";
-	  cout << ((destFiring->portList)->vhdlPortWithName(token->getName()))->getName();
+	  cout << realPort->getName();
 	  cout << "\n";
 	  cout.flush();
-
+	  */
 	  VHDLMux* existMux = muxList.vhdlMuxWithName(realPort->getName());
 	  if (existMux) {
 	    newSignal->setControlValue(1);
@@ -346,13 +369,13 @@ void ArchTarget :: trailerCode() {
 	}
 	else {
 	  Error::error(destFiring->getName(),
-		       ": has no port with name ", token->getName());
+		       ": has no port with name ", tokenInPortName);
 	  return;
 	}
       }
     }
     else {
-      cout << "Token:  " << token->getName() << ": has no destFirings";
+      cout << "Token:  " << token->getName() << ": has no destFirings\n";
     }
   }
 
@@ -364,13 +387,16 @@ void ArchTarget :: trailerCode() {
     // If its a constant source, need to do things a bit differently:
     // only have a source with a signal, feedback of state.
     if (state->constant) {
-      mainSignalList.put(state->name, state->type);
-      VHDLSignal* stateSignal = mainSignalList.vhdlSignalWithName(state->name);
-      if (stateSignal) {
-	connectSource(state->initVal, stateSignal);
+      //      mainSignalList.put(state->name, state->type);
+      StringList initName = state->name;
+      initName << "_INIT";
+      mainSignalList.put(initName, state->type);
+      VHDLSignal* initSignal = mainSignalList.vhdlSignalWithName(initName);
+      if (initSignal) {
+	connectSource(state->initVal, initSignal);
       }
       else {
-	Error::abortRun(state->name,
+	Error::abortRun(initName,
 			": no such signal with this name in mainSignalList");
 	return;
       }
@@ -382,8 +408,9 @@ void ArchTarget :: trailerCode() {
 	return;
       }
       else {
-	firstRefReg->setInput(stateSignal);
-	VHDLSignal* startClockSignal = mainSignalList.vhdlSignalWithName("start_clock");
+	firstRefReg->setInput(initSignal);
+	VHDLSignal* startClockSignal =
+	  mainSignalList.vhdlSignalWithName("start_clock");
 	if (!startClockSignal) {
 	  startClockSignal = new VHDLSignal;
 	  startClockSignal->setName("start_clock");
@@ -391,14 +418,13 @@ void ArchTarget :: trailerCode() {
 	  mainSignalList.put(*startClockSignal);
 	}
 	firstRefReg->setClock(startClockSignal);
-	connectSource(state->initVal, stateSignal);
       }
     }
     // If firings change state, need to connect a reg and a mux
     // between the lastRef to the state and the firstRef to the state.
     if (!(state->constant)) {
       StringList initName = state->name;
-      initName << "_Init";
+      initName << "_INIT";
 
       VHDLSignal* initSignal = new VHDLSignal;
       initSignal->setName(initName);
@@ -408,8 +434,11 @@ void ArchTarget :: trailerCode() {
 	mainSignalList.vhdlSignalWithName(state->lastRef);
       VHDLReg* firstRefReg =
 	regList.vhdlRegWithName(state->firstRef);
+
+      StringList firstRefMuxName = state->firstRef;
+      firstRefMuxName << "_IN";
       VHDLMux* firstRefMux =
-	muxList.vhdlMuxWithName(state->firstRef);
+	muxList.vhdlMuxWithName(firstRefMuxName);
       if (!lastRefSignal) {
 	Error::abortRun(state->lastRef, ": no such signal in mainSignalList");
 	return;
@@ -419,7 +448,7 @@ void ArchTarget :: trailerCode() {
 	return;
       }
       else if (!firstRefMux) {
-	Error::abortRun(state->firstRef, ": no such mux in muxList");
+	Error::abortRun(firstRefMuxName, ": no such mux in muxList");
 	return;
       }
       else {
@@ -427,7 +456,8 @@ void ArchTarget :: trailerCode() {
 	firstRefMux->addInput(initSignal);
 	connectSource(state->initVal, initSignal);
       }
-      VHDLSignal* iterClockSignal = mainSignalList.vhdlSignalWithName("start_clock");
+      VHDLSignal* iterClockSignal =
+	mainSignalList.vhdlSignalWithName("start_clock");
       if (!iterClockSignal) {
 	iterClockSignal = new VHDLSignal;
 	iterClockSignal->setName("start_clock");
@@ -436,7 +466,8 @@ void ArchTarget :: trailerCode() {
       }
       firstRefReg->setClock(iterClockSignal);
 
-      VHDLSignal* firstIterDone = mainSignalList.vhdlSignalWithName("FIRST_ITER_DONE");
+      VHDLSignal* firstIterDone =
+	mainSignalList.vhdlSignalWithName("FIRST_ITER_DONE");
       if (!firstIterDone) {
 	firstIterDone = new VHDLSignal;
 	firstIterDone->setName("FIRST_ITER_DONE");
@@ -450,40 +481,25 @@ void ArchTarget :: trailerCode() {
     }
   }
 
-  // Mux control signals:
-  // Generate the correct control signals in the correct order.
-  // In the case of simply firing single firings one by one,
-  // we just assert that each token is ready after it is ready.
-  // This doesn't do much for ports that have single-input muxs.
-  // But for state inputs, the assertion of FIRST_ITER_DONE matters.
-  assertClock("FIRST_ITER_DONE", 1);
-
-  toggleClock("start_clock");
-
-  //  assertClock("tokenXready", hashfunction(tokenXname));
-  //  assertClock(ctlSignal->getName(), ctlSignal->getControlValue());
-
-  // Iterate through regList and connect registers for each one.
-  VHDLRegListIter nextReg(regList);
-  VHDLReg* reg;
-  while ((reg = nextReg++) != 0) {
-    cout << "Registername:  " << reg->getName() << "\n";
-    if (!reg->getClock()) {
-      VHDLSignal* newSignal = new VHDLSignal;
-      newSignal->setName("DummyClock");
-      newSignal->setType("BOOLEAN");
-      mainSignalList.put(*newSignal);
-      reg->setClock(newSignal);
+  // Temporary, because it's used elsewhere.
+  {
+    VHDLSignal* iterClockSignal =
+      mainSignalList.vhdlSignalWithName("start_clock");
+    if (!iterClockSignal) {
+      iterClockSignal = new VHDLSignal;
+      iterClockSignal->setName("start_clock");
+      iterClockSignal->setType("BOOLEAN");
+      mainSignalList.put(*iterClockSignal);
     }
-    connectRegister(reg->getInput(), reg->getOutput(), reg->getClock());
-  }
 
-  // Iterate through muxList and connect muxes for each one.
-  VHDLMuxListIter nextMux(muxList);
-  VHDLMux* mux;
-  while ((mux = nextMux++) != 0) {
-    connectMultiplexor(mux->getName(), mux->getInputs(), mux->getOutput(),
-		       mux->getControl());
+    VHDLSignal* firstIterDone =
+      mainSignalList.vhdlSignalWithName("FIRST_ITER_DONE");
+    if (!firstIterDone) {
+      firstIterDone = new VHDLSignal;
+      firstIterDone->setName("FIRST_ITER_DONE");
+      firstIterDone->setType("INTEGER");
+      mainSignalList.put(*firstIterDone);
+    }
   }
 
   // Iterate through the arc list.
@@ -516,12 +532,85 @@ void ArchTarget :: trailerCode() {
       VHDLSignal* destSignal = new VHDLSignal;
       destSignal->setName(destName);
       destSignal->setType(arc->getType());
-      VHDLSignal* clockSignal = new VHDLSignal;
-      clockSignal->setName("feedback_clock");
-      clockSignal->setType("boolean");
+
+      // FIXME: feedback_clock and first_iter_done should be merged.
+      //      VHDLSignal* clockSignal = new VHDLSignal;
+      //      clockSignal->setName("feedback_clock");
+      //      clockSignal->setType("boolean");
+
+      // NEW NEW NEW
+      mainSignalList.put(*sourceSignal);
+      mainSignalList.put(*destSignal);
+      //      mainSignalList.put(*clockSignal);
+
+      StringList clockName = "feedback_clock";
+      StringList clockType = "BOOLEAN";
+
+      VHDLSignal* clockSignal =
+	mainSignalList.vhdlSignalWithName(clockName);
+      if (!clockSignal) {
+	clockSignal = new VHDLSignal;
+	clockSignal->setName(clockName);
+	clockSignal->setType(clockType);
+	mainSignalList.put(*clockSignal);
+      }
+
+      VHDLReg* sourceReg = regList.vhdlRegWithName(sourceName);
+      if (sourceReg) {
+	if (sourceReg->getOutput()) {
+	  // Reg already created by token and output already set.
+	  sourceSignal = sourceReg->getOutput();
+	}
+	else {
+	  sourceReg->setOutput(sourceSignal);
+	}
+      }
+      else {
+	sourceReg = new VHDLReg;
+	sourceReg->setName(sourceName);
+	sourceReg->setType(arc->getType());
+	sourceReg->setOutput(sourceSignal);
+	sourceReg->setClock(clockSignal);
+
+	regList.put(*sourceReg);
+      }
+
+      VHDLReg* destReg = regList.vhdlRegWithName(destName);
+      if (destReg) {
+	if (destReg->getInput()) {
+	  Error::error(destReg->getName(),
+		       "Reg's input set already, but shouldn't be yet.");
+	  //	  destSignal = destReg->getInput();
+	}
+	else {
+	  // Source signal is the signal out of source register.
+	  // Dest signal is the signal out of dest register.
+	  destReg->setInput(sourceSignal);
+	  //	  destReg->setInput(destSignal);
+	}
+	//	destReg->setInput(sourceSignal);
+      }
+      else {
+	destReg = new VHDLReg;
+	destReg->setName(destName);
+	destReg->setType(arc->getType());
+	destReg->setInput(sourceSignal);
+	destReg->setClock(clockSignal);
+
+	regList.put(*destReg);
+      }
+      /*
+      VHDLToken* sourceToken = tokenList.vhdlTokenWithName(sourceName);
+      if (sourceToken) {
+      }
+      VHDLToken* destToken = tokenList.vhdlTokenWithName(sourceName);
+      if (destToken) {
+      }
+      */
+      // NEW NEW NEW
 
       // sourceName is input to register, destName is output of register.
-      connectRegister(sourceSignal, destSignal, clockSignal);
+      //      connectRegister(sourceSignal, destSignal, clockSignal);
       toggleClock("feedback_clock");
 
       // Must also create signals for those lines which are neither read nor
@@ -530,6 +619,7 @@ void ArchTarget :: trailerCode() {
       // Will have created a system port input instead.
 
       // If no system port by the given name, go ahead and make the signal.
+      // This shouldn't cause a problem even if the signals already exist.
       if (sx < arc->lowWrite) {
 	mainSignalList.put(sourceName, arc->type);
       }
@@ -538,6 +628,74 @@ void ArchTarget :: trailerCode() {
       }
     }
   }
+
+  // Mux control signals:
+  // Generate the correct control signals in the correct order.
+  // In the case of simply firing single firings one by one,
+  // we just assert that each token is ready after it is ready.
+  // This doesn't do much for ports that have single-input muxs.
+  // But for state inputs, the assertion of FIRST_ITER_DONE matters.
+  assertClock("FIRST_ITER_DONE", 1);
+
+  toggleClock("start_clock");
+
+  //  assertClock("tokenXready", hashfunction(tokenXname));
+  //  assertClock(ctlSignal->getName(), ctlSignal->getControlValue());
+
+  // Iterate through regList and connect registers for each one.
+  VHDLRegListIter nextReg(regList);
+  VHDLReg* reg;
+  while ((reg = nextReg++) != 0) {
+    //    cout << "Registername:  " << reg->getName() << "\n";
+    if (!reg->getClock()) {
+      VHDLSignal* newSignal = new VHDLSignal;
+      newSignal->setName("DummyClock");
+      newSignal->setType("BOOLEAN");
+      mainSignalList.put(*newSignal);
+      reg->setClock(newSignal);
+    }
+    connectRegister(reg->getInput(), reg->getOutput(), reg->getClock());
+  }
+
+  // Iterate through muxList and connect muxes for each one.
+  VHDLMuxListIter nextMux(muxList);
+  VHDLMux* mux;
+  while ((mux = nextMux++) != 0) {
+    if (mux->getInputs()->size() > 1) {
+      connectMultiplexor(mux->getName(), mux->getInputs(), mux->getOutput(),
+			 mux->getControl());
+    }
+    else if (mux->getInputs()->size() == 1) {
+      // Get the name of the only output signal
+      StringList outName = mux->getOutput()->getName();
+      // Iterate through all firings
+      int foundIt = 0;
+      VHDLPort* port;
+      VHDLPort* thePort;
+      VHDLFiringListIter nextFiring(masterFiringList);
+      VHDLFiring* firing;
+      while ((firing = nextFiring++) != 0) {
+	// Find the port with the given name
+	port = firing->portList->vhdlPortWithName(outName);
+	if (port) {
+	  foundIt = 1;
+	  thePort = port;
+	}
+      }
+      if (foundIt) {
+	// Re-connect that port to the only input signal's name
+	thePort->connect(mux->getInputs()->head());
+      }
+      else {
+	Error::error(outName,
+		     ":  Couldn't find a firing with a port of this name");
+      }
+    }
+    else {
+      Error::error(mux->getName(), ":  Mux has zero inputs");
+    }
+  }
+
   /*
   // NEW 7/18/96 -- Relocate the addition of registers after all outputs of
   // firings to here.  Attempt to consolidate this as a postaction in prelude
@@ -615,59 +773,245 @@ void ArchTarget :: trailerCode() {
 
   masterFiringList.put(*ctlerFi);
 
+  // What I really need here is a new list:
+  // a list of lists of firings.  Each list
+  // of firings in the list represents a group
+  // of firings to be executed on the same processor.
+  // Knowing this, we can generate the right control
+  // and other signals for each firing.  You can't really
+  // separate portvar transfers, actions, and varport transfers.
+
+  // Somehow get things into firegroupList.
+  // Then deal them out, one firingList at a time
+  // For each individual firingList, one firing at a time.
+
+  // Examine each firing, and see what group number it has.
+  // Then put it's information into that group.
+  // The controller will be handled differently, in its own group.
+
+  {
+    // Go through and list each firing's group number.
+    VHDLFiringListIter nextFiring(masterFiringList);
+    VHDLFiring* firing;
+    while ((firing = nextFiring++) != 0) {
+      //      firing->groupNum = 21;
+      cout << "Firing:  " << firing->getName() << "\t\t";
+      cout << "GroupNum:  " << firing->groupNum << "\n";
+    }
+  }
+
+  // Re-construct the controller firing's name.
+  StringList ctlerName = hashstring(filePrefix);
+  ctlerName << "controller";
+  const char* ctlString = (const char*) ctlerName;
+
+  {
+    VHDLFiringListIter nextFiring(masterFiringList);
+    VHDLFiring* firing;
+    while ((firing = nextFiring++) != 0) {
+      // Construct the firegroup's name.
+      // If the firing is the controller, do it differently.
+      StringList firegroupName = "FIREGROUP_";
+      if (!strcmp(firing->name,ctlString)) {
+	firegroupName << "CONTROLLER";
+      }
+      else {
+	firegroupName << firing->groupNum;
+      }
+      /*
+      cout << "Firing Name:  " << firing->name << "\n";
+      cout << "FiregroupName:  " << firegroupName << "\n";
+      cout << "\n";
+      */
+
+      // See see if the firegroup exists.  If not, create it.
+      VHDLFiregroup* firegroup;
+      firegroup = firegroupList.vhdlFiregroupWithName(firegroupName);
+      if (!firegroup) {
+	firegroup = new VHDLFiregroup;
+	firegroup->setName(firegroupName);
+      }
+
+      // Put the firing in the firegroup's firingList.
+      firegroup->firingList->put(*firing);
+      // Put the firegroup in the firegroup list.
+      firegroupList.put(*firegroup);
+    }
+  }
+
+  // Unpack the firegroups from firegroupList and
+  // generate code for each one.
   int level = 0;
-  // Iterate through the firing list.
-  // Generate entity, architecture for each firing.
-  VHDLFiringListIter nextFiring(masterFiringList);
-  VHDLFiring* firing;
-  while ((firing = nextFiring++) != 0) {
-    // Begin constructing the firing's code in myCode.
-    myCode << "\n-- Firing " << firing->name << "\n";
+  {
+    int newFireNum = 0;
+    VHDLFiregroupListIter nextFiregroup(firegroupList);
+    VHDLFiregroup* firegroup;
+    while ((firegroup = nextFiregroup++) != 0) {
+      VHDLFiringList* firingList = firegroup->firingList;
 
-    myCode << "\n";
-    myCode << useLibs;
-    myCode << "\n";
-    myCode << "entity " << firing->name << " is\n";
+      VHDLGenericList* newGenericList = new VHDLGenericList;
+      VHDLPortList* newPortList = new VHDLPortList;
+      VHDLVariableList* newVariableList = new VHDLVariableList;
 
-    myCode << addGenericRefs(firing->genericList, level);
-    myCode << addPortRefs(firing->portList, level);
+      VHDLFiringListIter nextFiring(*firingList);
+      VHDLFiring* firing;
+      while ((firing = nextFiring++) != 0) {
+	VHDLGenericListIter nextGeneric(*(firing->genericList));
+	VHDLGeneric* ge;
+	while ((ge = nextGeneric++) != 0) {
+	  VHDLGeneric* newGeneric = new VHDLGeneric;
+	  newGeneric = ge->newCopy();
+	  newGenericList->put(*newGeneric);
+	}
+	VHDLPortListIter nextPort(*(firing->portList));
+	VHDLPort* po;
+	while ((po = nextPort++) != 0) {
+	  VHDLPort* newPort = new VHDLPort;
+	  newPort = po->newCopy();
+	  newPortList->put(*newPort);
+	}
+	VHDLVariableListIter nextVariable(*(firing->variableList));
+	VHDLVariable* va;
+	while ((va = nextVariable++) != 0) {
+	  VHDLVariable* newVariable = new VHDLVariable;
+	  newVariable = va->newCopy();
+	  newVariableList->put(*newVariable);
+	}
+      }
 
-    myCode << indent(level) << "end " << firing->name << ";\n";
-    myCode << "\n";
-    myCode << "architecture " << "behavior" << " of "
-	   << firing->name << " is\n";
-    myCode << "begin\n";
-    myCode << "process\n";
+      StringList newFireName = firegroup->getName();
+      //      StringList newFireName = "NEW_FIRING";
+      //      newFireName << "_" << newFireNum;
 
-    // To please the Synopsys synthesis:
-    // it insists on there being a sensitivity list.
-    myCode << addSensitivities(firing, level);
+      // Add a port for the control signal to select which firing to do.
+      VHDLPort* controlPort = new VHDLPort;
+      StringList controlName = newFireName;
+      controlName << "_CTL";
+      controlPort->setName(controlName);
+      controlPort->setType("INTEGER");
+      controlPort->setDirec("IN");
+      // FIXME: Connect to the correct control signal.
+      VHDLSignal* iterSignal =
+	mainSignalList.vhdlSignalWithName("FIRST_ITER_DONE");
+      if (!iterSignal) {
+	Error::error("Can't find FIRST_ITER_DONE signal in mainSignalList");
+	return;
+      }
+      controlPort->connect(iterSignal);
+      newPortList->put(*controlPort);
 
-    myCode << addDeclarations(firing, level);
-    myCode << addVariableRefs(firing, level);
+      newFireNum++;
+      VHDLFiring* combinedFiring = new VHDLFiring;
+      combinedFiring->setName(newFireName);
+      combinedFiring->starClassName = "MERGED_FIRING";
+      combinedFiring->portList = newPortList;
+      combinedFiring->genericList = newGenericList;
+      combinedFiring->variableList = newVariableList;
 
-    myCode << "begin\n";
+      // Iterate through the firing list.
+      // Generate entity, architecture for each firing.
+      //      VHDLFiringListIter nextFiring(newFiringList);
+      //  VHDLFiringListIter nextFiring(masterFiringList);
+      //      VHDLFiring* firing;
 
-    // To please the Synopsys simulation:
-    // It refuses to initialize ports and variables, and if you
-    // don't put a wait statement at the beginning of a process in lieu
-    // of explicit initialization for everything (which is unsynthesizable)
-    // then you get arithmetic overflow when you hit arithmetic expressions
-    // whose inputs are unitiialized variables.
-    // Currently we are handling this by doing an explicit global
-    // initialization to zero of these values in the simulation
-    // command file.
+      // Still keep around nextFiring list iter, as well
+      // as the new combinedFiring, because we really need both.
 
-    //   myCode << addWaitStatement(firing, level);
+      nextFiring.reset();
+      while ((firing = nextFiring++) != 0) {
+	// Begin constructing the firing's code in myCode.
+	myCode << "\n-- Firing " << firing->name << "\n";
+      }
 
-    myCode << addPortVarTransfers(firing, level);
-    myCode << addActions(firing, level);
-    myCode << addVarPortTransfers(firing, level);
+      myCode << "\n";
+      myCode << useLibs;
+      myCode << "\n";
+      myCode << "entity " << combinedFiring->name << " is\n";
 
-    myCode << "end process;\n";
-    myCode << "end behavior;\n";
-    
-    registerAndMerge(firing);
+      myCode << addGenericRefs(newGenericList, level);
+      myCode << addPortRefs(newPortList, level);
+
+      myCode << indent(level) << "end " << combinedFiring->name << ";\n";
+      myCode << "\n";
+      myCode << "architecture " << "behavior" << " of "
+	     << combinedFiring->name << " is\n";
+      myCode << "begin\n";
+      myCode << "process\n";
+
+      // To please the Synopsys synthesis:
+      // it insists on there being a sensitivity list.
+      // WAIT! does it?  what is the effect of no sensitivities?
+      //      myCode << addSensitivities(combinedFiring, level);
+
+      myCode << addDeclarations(combinedFiring, level);
+      myCode << addVariableRefs(combinedFiring, level);
+
+      myCode << "begin\n";
+
+      // To please the Synopsys simulation:
+      // It refuses to initialize ports and variables, and if you
+      // don't put a wait statement at the beginning of a process in lieu
+      // of explicit initialization for everything (which is unsynthesizable)
+      // then you get arithmetic overflow when you hit arithmetic expressions
+      // whose inputs are unitiialized variables.
+      // Currently we are handling this by doing an explicit global
+      // initialization to zero of these values in the simulation
+      // command file.
+
+      //   myCode << addWaitStatement(combinedFiring, level);
+
+      // FIXME: Need to simplify this if there is only one firing
+      // These core operations of each firing need to be separated by firing
+      // and conditioned on the correct control input.
+      nextFiring.reset();
+      int firingCount = 0;
+      VHDLFiring* lastFiring;
+
+      if (firegroup->firingList->size() > 1) {
+	while ((firing = nextFiring++) != 0) {
+	  // Remember the last firing encountered.
+	  lastFiring = firing;
+	  if (!firingCount) {
+	    myCode << "case " << combinedFiring->name << "_CTL" << " is\n";
+	  }
+	  firingCount++;
+	  myCode << "-- SUB-FIRING " << firingCount << ":  " << firing->name << "\n";
+
+	  myCode << "when " << firingCount << " => \n";
+
+	  myCode << addPortVarTransfers(firing, level);
+	  myCode << addActions(firing, level);
+	  myCode << addVarPortTransfers(firing, level);
+	}
+	if (firingCount) {
+	  // Need to cover all cases, so cover others.
+	  myCode << "when " << "others" << " => \n";
+	  //	myCode << addPortVarTransfers(lastFiring, level);
+	  //	myCode << addActions(lastFiring, level);
+	  //	myCode << addVarPortTransfers(lastFiring, level);
+
+	  myCode << "end case;\n";
+	}
+	myCode << "end process;\n";
+	myCode << "end behavior;\n";
+      }
+      else {
+	while ((firing = nextFiring++) != 0) {
+	  // Remember the last firing encountered.
+	  lastFiring = firing;
+	  firingCount++;
+	  myCode << "-- SUB-FIRING " << firingCount << ":  " << firing->name << "\n";
+
+	  myCode << addPortVarTransfers(firing, level);
+	  myCode << addActions(firing, level);
+	  myCode << addVarPortTransfers(firing, level);
+	}
+	myCode << "end process;\n";
+	myCode << "end behavior;\n";
+      }
+
+      registerAndMerge(combinedFiring);
+    }
   }
   
   buildEntityDeclaration(level);
@@ -756,6 +1100,15 @@ void ArchTarget :: mergeSignalList(VHDLSignalList* starSignalList) {
   }
 }
 
+// Register temporary variable reference.
+void ArchTarget :: registerTemp(const char* name, const char* type) {
+    VHDLVariable* newVar = new VHDLVariable;
+    newVar->setName(name);
+    newVar->setType(type);
+
+    firingVariableList.put(*newVar);
+}
+
 // Register PortHole reference.
 void ArchTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
 				      int firing,
@@ -774,9 +1127,33 @@ void ArchTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
   // The registry keeps track of all refed arcs, and their min/max R/W offsets.
   registerArcRef(port, tokenNum);
 
+  /*
+  cout << "registerPortHole:  " << dataName;
+  cout << "  tokenNum:  " << tokenNum << "\n";
+  */
+
   StringList ref = dataName;
   ref << part;
+  // Name for the variable to use.
+  StringList varName = ref;
+  // Name for the token to use.
   StringList tokenName = ref;
+  // Name for ports that are a source of this token to use.
+  StringList sourcePortName = ref;
+  sourcePortName << "_OUT";
+  // Name for ports that are a dest of this token to use.
+  StringList destPortName = ref;
+  destPortName << "_IN";
+  // Now test for direction and set ref accordingly.
+  if (port->isItInput()) {
+    //    cout << "It's an input\n";
+    ref = destPortName;
+  }
+  if (port->isItOutput()) {
+    //    cout << "It's an output\n";
+    ref = sourcePortName;
+  }
+  //  cout << "Port's name shall be:  " << ref << "\n";
 
   // Data clock name.  Needs to be the name of the firing, not the star.
   StringList clockName = sanitize(port->parent()->fullName());
@@ -793,33 +1170,54 @@ void ArchTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
     newPort->setDirec(port->direction());
     newPort->setFire(currentFiring);
 
+    VHDLVariable* newVar = new VHDLVariable;
+    newVar->setName(varName);
+    newVar->setType(port->dataType());
+
+    newPort->setVar(newVar);
+
+    firingVariableList.put(*newVar);
+
     // If it's an input port, find the token holding the data.
     if (!strcmp(newPort->direction,"IN")) {
       VHDLToken* existToken = tokenList.vhdlTokenWithName(tokenName);
       // Check for token already existing.
       if (existToken) {
-	// existToken exists with ref as name, so associate with it.
-	newPort->setToken(existToken);
-	existToken->addDestFiring(currentFiring);
+	// If tokenNum is negative, and token exists, must have
+	// already been referenced.  Need to add another dest firing.
+	// Also need to set newPort's token to this token.
+	if (tokenNum < 0) {
+	  newPort->setToken(existToken);
+	  existToken->addDestFiring(currentFiring);
 
-	{
-	  // Register a new VHDLDependency.
-	  VHDLDependency* dep = new VHDLDependency;
-	  // Port is IN, so source is existToken's port's firing.
-	  VHDLFiring* sourceFiring = existToken->getSourceFiring();
-	  if(!sourceFiring) {
-	    Error::abortRun(existToken->name, "has NULL sourceFiring");
+	  // Don't add a dependency in this case - reading a delay token.
+	}
+	else {
+	  // existToken exists with ref as name, so associate with it.
+	  newPort->setToken(existToken);
+	  existToken->addDestFiring(currentFiring);
+
+	  // Add a dependency in this case.
+	  {
+	    // Register a new VHDLDependency.
+	    VHDLDependency* dep = new VHDLDependency;
+	    // Port is IN, so source is existToken's port's firing.
+	    VHDLFiring* sourceFiring = existToken->getSourceFiring();
+	    if(!sourceFiring) {
+	      Error::abortRun(existToken->name,
+			      " has NULL sourceFiring in registerPort");
+	    }
+	    dep->source = sourceFiring;
+
+	    // Port is IN, so sink is currentFiring.
+	    dep->sink = currentFiring;
+
+	    // Need dep to have unique name before putting into list.
+	    StringList depName = "";
+	    depName << sourceFiring->name << "," << currentFiring->name;
+	    dep->setName(depName);
+	    dependencyList.put(*dep);
 	  }
-	  dep->source = sourceFiring;
-
-	  // Port is IN, so sink is currentFiring.
-	  dep->sink = currentFiring;
-
-	  // Need dep to have unique name before putting into list.
-	  StringList depName = "";
-	  depName << sourceFiring->name << "," << currentFiring->name;
-	  dep->setName(depName);
-	  dependencyList.put(*dep);
 	}
       }
       else {
@@ -838,8 +1236,8 @@ void ArchTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
 	// tokenNum not negative: token should already exist, but doesn't.
 	else {
 	  Error::abortRun(ref,
-			  ": Need to associate with token for data which hasn't",
-			  " been generated yet - firing order error?");
+			  ": Need to associate with token for data which ",
+			  "hasn't been generated yet - firing order error?");
 	  return;
 	}
       }
@@ -894,7 +1292,7 @@ void ArchTarget :: registerState(State* state, const char* varName,
   StringList stType = stateType(state);
   StringList root;
   StringList initVal;
-  
+
   // Initialize the state and check for inconsistencies.
   if (pos >= 0) {
     if (!(state->isArray())) {
@@ -924,23 +1322,43 @@ void ArchTarget :: registerState(State* state, const char* varName,
     initVal << state->currentValue();
   }
   
+  // If state is constant, according to its attributes, do things
+  // a bit differently: have all references refer only to the single
+  // constant source, rather than passing through values from one firing
+  // to the next, which is useless and restrictive.
+  // Also, there should be no output on which to pass on the value,
+  // since it isn't changed by this exu.
+
+  // FIXME: Remove redundancy of constState and listState->constant.
+  int constState;
+  if (state->attributes() & AB_CONST) {
+    constState = 1;
+  }
+  else {
+    constState = 0;
+  }
+
   // Root is ref, without marking for any particular firing.
   root = ref;
 
   StringList refIn = sanitize(ref);
-  //  refIn << "_F" << thisFiring << "_In";
   StringList refOut = sanitize(ref);
+  //  refIn << "_F" << thisFiring << "_In";
   //  refOut << "_F" << thisFiring << "_Out";
-  StringList reg = sanitize(root);
-  reg << "_Reg";
+  //  StringList reg = sanitize(root);
+  //  reg << "_Reg";
   //  StringList inTokenName = refIn;
   //  StringList outTokenName = refOut;
   StringList inTokenName = ref;
-  inTokenName << "_F" << (thisFiring-1);
   StringList outTokenName = ref;
-  outTokenName << "_F" << thisFiring;
+  if (!constState) {
+    inTokenName << "_F" << (thisFiring-1);
+    outTokenName << "_F" << thisFiring;
+  }
   refIn = inTokenName;
+  refIn << "_IN";
   refOut = outTokenName;
+  refOut << "_OUT";
 
   // Data clock name.  Needs to be the name of the firing, not the star.
   StringList clockName = sanitize(state->parent()->fullName());
@@ -949,12 +1367,29 @@ void ArchTarget :: registerState(State* state, const char* varName,
 
   // look for state in stateList
   // if don't find it, enter it with -1 as state->lastFiring
+  int stateLastFiring = -1;
+  VHDLState* listState = stateList.vhdlStateWithName(root);
+  if (!listState) {
+    // Create a new VHDLState and put it in the list.
+    listState = new VHDLState;
+    listState->setName(root);
+    listState->firstRef = inTokenName;
+    listState->lastRef = outTokenName;
+    listState->initVal = initVal;
+    listState->type = stType;
+    listState->lastFiring = -1;
+    stateList.put(*listState);
+  }
+  listState = stateList.vhdlStateWithName(root);
+  stateLastFiring = listState->lastFiring;
+
+  /*
   if (!(stateList.inList(root))) {
     // Allocate memory for a new VHDLState and put it in the list.
     VHDLState* newState = new VHDLState;
     newState->setName(root);
-    newState->firstRef = refIn;
-    newState->lastRef = refOut;
+    newState->firstRef = inTokenName;
+    newState->lastRef = outTokenName;
     newState->initVal = initVal;
     newState->type = stType;
     newState->lastFiring = -1;
@@ -966,6 +1401,7 @@ void ArchTarget :: registerState(State* state, const char* varName,
   if ((listState = stateList.vhdlStateWithName(root)) != 0) {
     stateLastFiring = listState->lastFiring;
   }
+  */
   
   int isFirstStateRef = (stateLastFiring == -1);
   
@@ -975,23 +1411,6 @@ void ArchTarget :: registerState(State* state, const char* varName,
     // Inside this if clause, this state is being referenced
     // for the first time in this firing, perhaps the first time ever.
 
-    int constState = 0;
-    
-    // If state is constant, according to its attributes, do things
-    // a bit differently: have all references refer only to the single
-    // constant source, rather than passing through values from one firing
-    // to the next, which is useless and restrictive.
-    // Also, there should be no output on which to pass on the value,
-    // since it isn't changed by this exu.
-
-    if (state->attributes() & AB_CONST) {
-      constState = 1;
-      listState->constant = 1;
-    }
-    else {
-      listState->constant = 0;
-    }
-    
     /*
     // Contstruct the name of the last ref to the state.
     StringList state_in = root;
@@ -1016,7 +1435,11 @@ void ArchTarget :: registerState(State* state, const char* varName,
     firingVariableList.put(*inVar);
 
     if (constState) {
+      listState->constant = 1;
       if (isFirstStateRef) {
+	listState->firstRef = ref;
+	listState->lastRef = ref;
+
 	VHDLToken* inToken = new VHDLToken;
 	inToken->setName(inTokenName);
 	inToken->setType(stType);
@@ -1033,8 +1456,8 @@ void ArchTarget :: registerState(State* state, const char* varName,
 	VHDLToken* existToken = tokenList.vhdlTokenWithName(inTokenName);
 	if (!existToken) {
 	  Error::abortRun(inTokenName,
-			  ": Not first const state ref, ",
-			  "but can't find any existing source token created for it");
+			  ": Not first const state ref, but can't",
+			  " find any existing source token created for it");
 	  return;
 	}
 	inPort->setToken(existToken);
@@ -1043,6 +1466,7 @@ void ArchTarget :: registerState(State* state, const char* varName,
     }
 
     if (!(constState)) {
+      listState->constant = 0;
       // Create a new output token to carry the updated state value.
       VHDLPort* outPort = new VHDLPort;
       outPort->setName(refOut);
@@ -1083,12 +1507,33 @@ void ArchTarget :: registerState(State* state, const char* varName,
 	VHDLToken* existToken = tokenList.vhdlTokenWithName(inTokenName);
 	if (!existToken) {
 	  Error::abortRun(inTokenName,
-			  ": Not first nonconst state ref, ",
-			  " but can't find any existing output token created for it");
+			  ": Not first nonconst state ref, but can't",
+			  " find any existing output token created for it");
 	  return;
 	}
 	inPort->setToken(existToken);
 	existToken->addDestFiring(currentFiring);
+	{
+	  // Register a new VHDLDependency.
+	  VHDLDependency* dep = new VHDLDependency;
+	  // Not first firing state ref, so source is
+	  // existToken's port's firing.
+	  VHDLFiring* sourceFiring = existToken->getSourceFiring();
+	  if(!sourceFiring) {
+	    Error::abortRun(existToken->name,
+			    " has NULL sourceFiring in registerState");
+	  }
+	  dep->source = sourceFiring;
+
+	  // Reading state token in, so sink is currentFiring.
+	  dep->sink = currentFiring;
+
+	  // Need dep to have unique name before putting into list.
+	  StringList depName = "";
+	  depName << sourceFiring->name << "," << currentFiring->name;
+	  dep->setName(depName);
+	  dependencyList.put(*dep);
+	}
       }
 
       VHDLVariable* outVar = new VHDLVariable;
@@ -1597,19 +2042,8 @@ StringList ArchTarget :: addActions(VHDLFiring* firing, int /*level*/) {
     StringList body;
 
     int actionCount = 0;
-      if (!actionCount) {
-	body << "-- if " << firing->name << "_SELECT" << " = " << firing->name
-	     << " then\n";
-      }
-      else {
-	body << "-- elsif " << firing->name << "_SELECT" << " = " << firing->name
-	     << " then\n";
-      }
       body << firing->action;
       actionCount++;
-    if (actionCount) {
-      body << "-- endif\n";
-    }
 
     if (actionCount) {
       all << body;
@@ -2068,6 +2502,15 @@ void ArchTarget :: initVHDLObjLists() {
   mainCompDeclList.initialize();
   mainSignalList.initialize();
   stateList.initialize();
+
+  masterFiringList.initialize();
+  newFiringList.initialize();
+  firegroupList.initialize();
+  dependencyList.initialize();
+  tokenList.initialize();
+  muxList.initialize();
+  regList.initialize();
+  clockList.initialize();
 
   ctlerGenericList.initialize();
   ctlerPortList.initialize();

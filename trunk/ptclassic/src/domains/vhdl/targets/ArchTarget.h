@@ -45,6 +45,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLSignal.h"
 #include "VHDLState.h"
 #include "VHDLFiring.h"
+#include "VHDLFiregroup.h"
 #include "VHDLDependency.h"
 #include "Attribute.h"
 #include "VHDLToken.h"
@@ -93,17 +94,24 @@ public:
 	// Register the State reference.
 	/*virtual*/ void registerState(State*, const char*, int=-1, int=-1);
 
+	// Register temporary variable reference.
+	/*virtual*/ void registerTemp(const char*, const char*);
+
 	// Register PortHole reference.
 	/*virtual*/ void registerPortHole(VHDLPortHole*, const char*, int,
 					  int=-1, const char* ="");
 
 	// Return the assignment operators for States and PortHoles.
 	/*virtual*/ const char* stateAssign() { return ":=" ; }
-	/*virtual*/ const char* portAssign() { return "<=" ; }
+	/*virtual*/ const char* portAssign() { return ":=" ; }
+//	/*virtual*/ const char* portAssign() { return "<=" ; }
 
 protected:
 	// Members to support dependency graph construction.
 	VHDLFiringList masterFiringList;
+	VHDLFiringList newFiringList;
+
+	VHDLFiregroupList firegroupList;
 
 	VHDLDependencyList dependencyList;
 	VHDLTokenList tokenList;
@@ -167,10 +175,6 @@ private:
 	VHDLCompDeclList mainCompDeclList;
 	VHDLSignalList mainSignalList;
 	VHDLStateList stateList;
-//	VHDLClusterList clusterList;
-
-//	// This is where to store and look for persistent signals.
-//      VHDLSignalList topSignalList;
 
 	// The following are for keeping track of components and
 	// signals within one firing.
