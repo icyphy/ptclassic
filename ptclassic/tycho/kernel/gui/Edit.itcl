@@ -2299,7 +2299,7 @@ body ::tycho::Edit::incSearch {key} {
     set foundLength 0
     # Search the text
     set searchIndex [$textWidget search \
-            $dirflag -exact -count foundLength -nocase \
+            $dirflag -exact -count foundLength -nocase -- \
             $_incSearchText $_incSearchFrom $_incSearchTo]
     
     # Test for success
