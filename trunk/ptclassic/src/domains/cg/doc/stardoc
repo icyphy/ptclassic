@@ -19,9 +19,12 @@ stars have two more methods, called
 The
 .c setup()
 method is called before the schedule is generated and
-before any memory is allocated.  In this method, a star writer can
-alter a array state buffer size which can then be properly allocated
-and automatically initialized.  The
+before any memory is allocated.  In this method, we usually
+initialize local variables or states. Note that the setup method of
+a star may be called multiple times. It means that the
+user should be careful so that the behaviour of the star does not
+change even though setup method is called multiple times. 
+The
 .c initCode()
 method of a star is called
 after the the static schedule has been generate and before the schedule is
@@ -46,7 +49,23 @@ have meaning relative to one another and are used by the parallel
 schedulers.  In the assembly code generation domains, the integer
 returned is the main loop code execution time in DSP instruction
 cycles. The better the execTime estimates are for each star, the more
-efficient the parallel schedule becomes.
+efficient the parallel schedule becomes. 
+.pp
+If a star is invoked more than once during a iteration period, the
+precedence relation between stars should be known to the parallel scheduler.
+If there is no precedence relation between invocations, the parallel
+scheduler parallelize them. By default, there is precedence relation
+between invocations for any star. To claim that there is no
+such relation for a star, we have to call "noInternalState()" method
+in the constructor:
+.(c
+        constructor {
+                noInternalState();
+        }
+.)c
+It is strongly recommended that the star designer determine whether
+the star is parallelizable or not, and call "noInternalState()"
+method if yes. 
 .pp
 .Id "CGStar, class"
 The
