@@ -35,6 +35,20 @@ from other cases:
 	by consuming or generating Particles
 ****************************************************************/
 
+    
+        //////////////////////////////////////////
+        // class DFPortHole
+        //////////////////////////////////////////
+
+// Common ancestor for BDFPortHole and SDFPortHole.
+
+class DFPortHole : public PortHole
+{
+public:
+	virtual PortHole* assocPort() { return 0;}
+	virtual int assocRelation() const { return -1;}
+};
+
         //////////////////////////////////////////
         // class SDFPortHole
         //////////////////////////////////////////
@@ -42,7 +56,7 @@ from other cases:
 // Contains all the special features required for
 //   synchronous dataflow (SDF)
 
-class SDFPortHole : public PortHole
+class SDFPortHole : public DFPortHole
 {
 private:
 	int maxBackValue;	// maximum % argument allowed
@@ -65,6 +79,9 @@ public:
 
 	// Tell whether port uses old values
 	int usesOldValues() const { return maxBackValue >= numberTokens;}
+
+	// access the maximum delay
+	int maxDelay() const { return maxBackValue;}
 
 	// Modify simulated counts on geodesics, for scheduling
 	void decCount(int n);
