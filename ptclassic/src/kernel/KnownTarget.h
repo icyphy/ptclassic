@@ -33,7 +33,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 The KnownTarget class.
 
 This class provides a list of all known targets.  There is a single
-list, so all unlike blocks, all target names must be unique.
+list, so unlike blocks, all target names must be unique.
 
 The idea is that each target that is "known to the system"
 should add an instance of itself to the known list by code something
@@ -43,7 +43,7 @@ static MyType proto;
 static KnownTarget entry(proto,"MyType");
 
 Then the static method KnownTarget::clone(name) can produce a new
-instance of the named class in the current domain.
+instance of the named target class.
 
 *******************************************************************/
 
