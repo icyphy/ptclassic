@@ -16,8 +16,7 @@
 # 		Focus on next entry
 # 		Focus on previous entry
 # Tab		Focus on next entry
-# Return	Update parameter value
-# Any-leave	Update parameter value
+# Return	Focus on next entry
 
 # Width of entry in average-sized chars of font
 set ed_MaxEntryLength 60
@@ -641,7 +640,6 @@ proc ed_UpdateOnMReturn {facet number} {
 	ed_UpdateParam $facet $number \
 		$ed_ToplevelNumbers($facet,$number,$count) \
 		[$focus get]
-#puts "$ed_ToplevelNumbers($facet,$number,$count)] [$focus get] hello: $count"
     }
 }
 
@@ -690,7 +688,6 @@ proc ed_Apply {facet number} {
    if $changeFlag {
 	ptkSetParams $facet $number $newParamArray
 	set paramArray($facet,$number) $newParamArray
-#	puts "New: $newParamArray"
    }
 }
 
@@ -804,7 +801,6 @@ proc ed_ConfigCanvas {top facet number} {
     set c $top.f.c
     set f $c.f
 
-#puts "CONFIG_CANVAS"
     set mm [winfo fpixels $c 1m]
 #    set maxWidth [winfo fpixels $c 5.5i]
 #    set maxHeight [winfo fpixels $c 7.5i]
@@ -841,11 +837,17 @@ proc ed_ConfigCanvas {top facet number} {
 
     $c configure -scrollregion "0 0 $scrollWidth $scrollHeight"
     $c configure -width $canvWidth -height $canvHeight
-    if {[string first . $canvWidth] != -1} {
-	    scan $canvWidth "%d." intWidth
+
+    set buttonWidth [winfo reqwidth $top.b]
+    set intWidth \
+	[expr ($buttonWidth > $canvWidth) ? $buttonWidth : $canvWidth]
+    if [winfo exist $top.f.vscroll] {
+	set intWidth [expr $intWidth+[winfo reqWidth $top.f.vscroll]]
+    }
+    if {[string first . $intWidth] != -1} {
+	    scan $intWidth "%d." intWidth
 	    incr intWidth
-    } else { set intWidth $canvWidth }
-#puts num
+    } else { set intWidth $intWidth }
    
     set topHeight [expr $canvHeight+[winfo reqheight $top.header]+[
 	winfo reqheight $top.b]]
@@ -856,6 +858,5 @@ proc ed_ConfigCanvas {top facet number} {
     wm minsize $top $intWidth 0
     wm maxsize $top $intWidth [winfo screenheight .]
     wm geometry $top ${intWidth}x${intHeight}
-#puts "$intWidth $intHeight"
-}
 
+}
