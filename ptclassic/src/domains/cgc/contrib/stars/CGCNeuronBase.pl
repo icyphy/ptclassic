@@ -56,7 +56,7 @@ The number of the weights must be equal to the number of the inputs.
 
 	codeblock(initial) {
 	  double kthweight, out = 0.0;
-	  int k, index = 0;
+	  int index = 0;
 	}
 
 	codeblock(iteration, "int k") {
