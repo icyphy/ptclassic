@@ -31,13 +31,13 @@ Tcl package.
 <H2><A NAME="autoconf software package">Autoconf</A></H2>
 
 Autoconf is a package from the Free Software Foundation that is used
-to configure software.  Autoconf has extensive documentation, but the
-overview is that the software author writes a <A NAME="configure.in
+to configure software.  Although Autoconf has extensive documentation, the
+basic idea is that the software author writes a <A NAME="configure.in
 file"><CODE>configure.in</CODE></A> which <CODE>autoconf</CODE>
 converts to a <A NAME="configure script"><CODE>configure</CODE> script</A>.
 
  <P>The user runs <CODE>configure</CODE> which examines the operating
-systems for idiosyncrasies and the reads in the <A NAME="makefile.in
+systems for idiosyncrasies and then reads in the <A NAME="makefile.in
 template file"><CODE>makefile.in</CODE> template file</A> and produces
 a <CODE>makefile</CODE>.  The user can then run <CODE>make</CODE> and
 compile and install the package.
@@ -60,8 +60,8 @@ architectures.  To set the <CODE>PTARCH</CODE> variable, under <CODE>/bin/csh</C
 setenv PTARCH `$TYCHO/bin/ptarch`
 </PRE>
 
-The user then cds to
-<CODE>$TYCHO</CODE> and then types <A NAME="tclexts makefile
+The user then changes to the
+<CODE>$TYCHO</CODE> directory and then types <A NAME="tclexts makefile
 rule"><CODE>make tclexts</CODE></A>.
 
 The <CODE>tclexts</CODE> makefile rule configures, builds and installs
@@ -74,11 +74,11 @@ all the tcl extensions.  Below we discuss each step in turn:
 <CODE>$TYCHO/obj.$PTARCH</CODE>.
 
 <DT> <CODE>all_tclexts</CODE>
-<DD> The rule cds into <CODE>$TYCHO/obj.$PTARCH</CODE> and builds
+<DD> The rule changes directories to <CODE>$TYCHO/obj.$PTARCH</CODE> and builds
 all the binaries.
 
 <DT> <CODE>install_tclexts</CODE>
-<DD> This rule cds into <CODE>$TYCHO/obj.$PTARCH</CODE> and installs
+<DD> This rule changes directories to <CODE>$TYCHO/obj.$PTARCH</CODE> and installs
 the shared libraries into <CODE>$TYCHO/lib.$PTARCH</CODE>
 
 </DL>
@@ -95,8 +95,8 @@ architecture dependent, <CODE>configure</CODE> determines these flags
 by reading the <CODE>tclConfig.sh</CODE> file located in the
 architecture dependent Tcl library directory.
 
- <P>The shared object has a architecture dependent file extension,
-such as <CODE>.so</CODE> under Solaris2, and <CODE>.sl</CODE> under
+ <P>The shared object has an architecture-dependent file extension,
+such as <CODE>.so</CODE> under Solaris 2, and <CODE>.sl</CODE> under
 HPUX.  To see what the extension is on your system, start up
 <CODE>tclsh</CODE> or <CODE>itkwish</CODE> and run <A
 NAME="sharedlibextension"><CODE>info sharedlibextension</CODE></A>.
@@ -105,7 +105,7 @@ NAME="sharedlibextension"><CODE>info sharedlibextension</CODE></A>.
 called by Tcl.  The name of the procedure depends on the name of the
 package or file that is being loaded, see the Tcl <CODE>load</CODE>
 command documentation.  Usually, this procedure is used to create new
-Tcl commands that call user supplied C procedures.
+Tcl commands that call user-supplied C procedures.
 
  <P>If you use Tycho to open a file with the <CODE>sharedlibextension</CODE>
 then Tycho passes that file to the Tcl <CODE>load</CODE> command.
@@ -179,7 +179,7 @@ and add your extension directory to the <CODE>DIRS</CODE> macro.
 
 <LI> Edit the <CODE>makefile.in</CODE> appropriately. 
 <MENU>
-	<LI> Substitute in the name of your <CODE>.c</CODE> file
+	<LI> Substitute with the name of your <CODE>.c</CODE> file
 
 	<LI> Modify the name of the library to be produced.  It is
 	best if the shared object that is produced starts with
