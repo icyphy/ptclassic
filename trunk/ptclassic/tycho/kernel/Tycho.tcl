@@ -219,7 +219,7 @@ if {$tychoWelcomeWindow != 0} {
 # option was not given, open a console window
 if {$tychoOpenFiles == 0} {
     if {$tychoConsoleWindow != 0} {
-	uplevel #0 {::tycho::Console .mainConsole \
+	uplevel #0 {::tycho::TclConsole .mainConsole \
 		-master 1 -text "Welcome to Tycho\n" -geometry +0+0}
 	wm deiconify .mainConsole
     }
