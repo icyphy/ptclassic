@@ -30,6 +30,7 @@
 #                                        COPYRIGHTENDKEY
 #######################################################################
 
+
 # The procs in this file implement the server side of a simple interface
 # between two Tcl interpreters running as separate processes.
 # We use this to communicate between Itcl2.2 and Tcl Blend.  We
@@ -43,6 +44,10 @@
 # to the server and run arbitrary commands as the user that is running
 # the server.
 
+
+# Ugly nasty global variable for the command read from the socket
+# so far
+set _JRPC_command_ ""
 
 ########################################################################
 #### JRPCServer_CreateServer
@@ -84,20 +89,37 @@ proc _JRPCServer_RegisterClient {channel clientAddress clientPort} {
 # Event handler for reading from sockets.
 # 
 proc _JRPCServer_ReadOrClose {fd} {
+    global _JRPC_command_
+
     set line [gets $fd]
+    puts !$line
     # puts "_JRPCServer_ReadOrClose: $line"
+
+    # Check for cookie and execute command if one was got
+    if { $line == "_JRPC_EndCommand_Cookie_" } {
+        puts "Executing \"$_JRPC_command_\""
+
+        if [catch {uplevel #0 $_JRPC_command_} result] {
+            puts "Returning [list 1 $result]"
+            puts $fd [list 1 $result]
+            flush $fd
+        } else {
+            puts "Returning [list 0 $result]"
+            puts $fd [list 0 $result]
+            flush $fd
+        }
+        set _JRPC_command_ ""
+
+    } else {
+        append _JRPC_command_ \n $line
+    }
+    
+    # Exit if done
     if [eof $fd] {
         if ![catch {close $fd} errMsg] {
 	    puts "_JRPCServer_ReadOrClose: close $fd failed: $errMsg "
 	}
 	return;
-    }
-    if [catch {uplevel #0 $line} result] {
-	puts $fd [list 1 $result]
-	flush $fd
-    } else {
-	puts $fd [list 0 $result]
-	flush $fd
     }
 }
 
@@ -105,8 +127,12 @@ proc _JRPCServer_ReadOrClose {fd} {
 # If this file is sourced in a Tcl that has the java package loaded
 # then start up the server and wait forever
 #
-if {[lsearch [package names ] java] == 1} {
-    # FIXME: the port number is hardwired.
-    JRPCServer_CreateServer 19876
+if {[lsearch [package names] java] != -1} {
+    if { [llength $argv] >= 2 } {
+        set portnum [lindex $argv 2]
+    } else {
+        set portnum 19876
+    }
+    JRPCServer_CreateServer $portnum
 }
 
