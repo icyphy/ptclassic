@@ -16,7 +16,11 @@ limitation of liability, and disclaimer of warranty provisions.
       name { fileName }
       type { string }
       default { "/dev/audio" }
-      desc { File for PCM data.  If blank, use standard IO. }
+      desc { File for reading/writing data. If the file is 
+	     something other than /dev/audio, the file should 
+	     be in Sun audio format. If the file is in another
+             format, use conversion program available on web eg. 
+             SOX - Sound Exchange http://www.spies.com/sox }
     }	
 
     defstate {
@@ -79,14 +83,28 @@ limitation of liability, and disclaimer of warranty provisions.
 	int standardIO:1;
     }
 
+    codeblock(globalDecl) {
+      /* Struct that contains the header information */
+      /* for Sun audio files */
+      typedef struct sound_struct {
+	int magic;               /* magic number SND_MAGIC */
+	int dataLocation;        /* offset or pointer to the data */
+	int dataSize;            /* number of bytes of data */
+	int dataFormat;          /* the data format code */
+	int samplingRate;        /* the sampling rate */
+	int channelCount;        /* the number of channels */
+	char info[4];            /* optional text information */
+      } SndSoundStruct;
+    }
+    
+    codeblock(globals) {
+      int $starSymbol(file);      
+    }
 
     codeblock(declarations, "const char* datatype, int size") {
       @datatype $starSymbol(buffer)[@size];
       @datatype *$starSymbol(bufferptr);
-    }
-
-    codeblock(globals) {
-      int $starSymbol(file);
+      SndSoundStruct $starSymbol(header);
     }
 
     codeblock(noOpen) {
@@ -94,22 +112,62 @@ limitation of liability, and disclaimer of warranty provisions.
 	$starSymbol(file) = 0;
     }
 
+
     codeblock(openFileForReading) {
       /* Open file for reading */
+      /* If the file is something other than /dev/audio, open the  */
+      /* file and strip of the header */
       if (($starSymbol(file) = open("$val(fileName)",O_RDONLY,0666)) == -1)
 	{
 	  perror("$val(fileName): Error opening read-file");
 	  exit(1);
 	}	
+      /* To remove the header from the audio file */
+      if ((strcasecmp("$val(fileName)", "/dev/audio")) != 0)
+	{
+	  read($starSymbol(file), (&$starSymbol(header)), 28);
+	  /* check whether file is in Sun audio format */
+	  if($starSymbol(header).magic != 0x2e736e64)
+	    {
+	      perror("$val(fileName): File not in Sun audio
+                   format. Please refer to the star Profile.");
+	      exit(1);
+	    }
+	}
     }
-
     codeblock(openFileForWriting) {
       /* Open file for writing */
+      /* If the file is something other than /dev/audio, open the */
+      /* and add in the header at the top */
+      /* the values for the fields will be taken from the parameters */
       if (($starSymbol(file) = open("$val(fileName)",O_WRONLY|O_CREAT,0666)) == -1)
 	{
 	  perror("$val(fileName): Error opening write-file");
 	  exit(1);
 	}	
+      /* Attach the header to the generated audio file */
+      if ((strcasecmp("$val(fileName)", "/dev/audio")) != 0)
+	{ 
+	  /* magic is a magic number used to identify the structure */
+	  /* as a SNDSoundStruct */
+	  $starSymbol(header).magic = 0x2e736e64;
+	  /* offset to the first byte of sound data */
+	  $starSymbol(header).dataLocation = 28;
+	  /* DataSize should equal size of audio file */
+	  $starSymbol(header).dataSize = $val(blockSize);
+	  if(strcasecmp("$val(encodingType)", "linear16") == 0) {
+	    /* linear16 encoding  = 3 */
+	    $starSymbol(header).dataFormat = 3;
+	  }
+	  else {
+	    /* ulaw8 encoding = 1 */
+	    $starSymbol(header).dataFormat = 1;
+	  }
+	  $starSymbol(header).samplingRate = $val(sampleRate);
+	  $starSymbol(header).channelCount = $val(channels);
+
+	  write($starSymbol(file),(&$starSymbol(header)), 28);
+	}
     }	
 
     codeblock(read) {
@@ -317,6 +375,8 @@ limitation of liability, and disclaimer of warranty provisions.
       addInclude("<math.h>");
       /* Define audio driver : HACK: This is Sun Specific */
       addInclude("<sys/audioio.h>");
+      /* Define the SunSound Struct for audio file header*/
+      addGlobal(globalDecl, "global");
       addGlobal(globals);
       addProcedure(audio_setupDef,   "CGCAudioBase_audio_setup");
       addProcedure(audio_controlDef, "CGCAudioBase_audio_control");
