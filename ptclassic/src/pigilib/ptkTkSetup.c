@@ -55,6 +55,8 @@ long size;                      /* number of items in the array */
 */
 
 void PrintVersion();
+extern void KcSetEventLoop(/*int on*/);
+extern void PrintErr();
 
 static int
 _ptkAppInit( ip, win)
@@ -79,7 +81,6 @@ ptkTkSetup(funcArray, size)
     char *appName = "pigi";
     char *appClass = "Pigi";
     char *pt;
-    int result;
 
     RPCdata.funcArray = funcArray;
     RPCdata.size = size;
@@ -125,7 +126,7 @@ ptkTkSetup(funcArray, size)
     return (RPC_OK);
 }
 
-int
+void
 ptkMainLoop ()
 {
     Tk_MainLoop ();
