@@ -45,6 +45,7 @@ extern "C" {
 #include "ptkPlot.h"
 }
 #include "ieee.h"
+#include "ptkTclCommands.h"
 
 /////////////////////////////////////////////////////////////////////////
 //			Methods for XYPlot class
@@ -61,7 +62,7 @@ XYPlot::XYPlot () {
 	// class may be created before the Tcl interpreter has started.
 	if (ptkInterp) {
 	  InfString sourceCmd = "source $env(PTOLEMY)/src/ptklib/ptkPlot.tcl";
-	  if (Tcl_GlobalEval(ptkInterp, sourceCmd) != TCL_OK) {
+	  if (Tcl_GlobalEval(ptkInterp, (char *)sourceCmd) != TCL_OK) {
 	    Error::abortRun("XYPlot constructor: failed to source ptkPlot.tcl");
 	  }
 	}
@@ -91,6 +92,7 @@ int XYPlot::setup (Block* /*star*/,         // The star I am in
 		   int    numSets/* = 1*/,  // number of datasets
 		   int    style/*= 0*/ )    // plot style
 {
+  if (!ptkInterp) return FALSE;
 
   const char * XYPlot_window_base = ".xyPlot";
 
@@ -99,8 +101,9 @@ int XYPlot::setup (Block* /*star*/,         // The star I am in
   // stem of the window name.  This means that the window will
   // be a child window of the control panel, and hence will be
   // destroyed when the control panel window is destroyed.
-  if(Tcl_GlobalEval(ptkInterp,
-		    "global ptkControlPanel;set ptkControlPanel") != TCL_OK) {
+  char initControlPanelCmd[ sizeof(PTK_CONTROL_PANEL_INIT) ];
+  strcpy(initControlPanelCmd, PTK_CONTROL_PANEL_INIT);
+  if (Tcl_GlobalEval(ptkInterp, initControlPanelCmd) != TCL_OK) {
     winName = XYPlot_window_base;
     winName += starID;
   } else {
@@ -120,19 +123,24 @@ int XYPlot::setup (Block* /*star*/,         // The star I am in
 }
 
 int XYPlot::addPoint(double x, double y, int set /*= 1*/) {
+  if (!ptkInterp) return FALSE;
+
   if (!ptkPlotPoint(ptkInterp, &plot, set, x, y)) {
     Error::abortRun(ptkPlotErrorMsg());
-    return 0;
+    return FALSE;
   }
-  return 1;
+
+  return TRUE;
 }
 
 int XYPlot::breakPlot(int set /* = 1*/) {
+  if (!ptkInterp) return FALSE;
+
   if (!ptkPlotBreak(ptkInterp, &plot, set)) {
     Error::abortRun(ptkPlotErrorMsg());
-    return 0;
+    return FALSE;
   }
-  return 1;
+  return TRUE;
 }
 
 // Initialize the static counter for unique names,
