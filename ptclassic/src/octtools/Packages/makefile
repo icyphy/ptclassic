@@ -29,7 +29,7 @@
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
-DIRS = avl cp da errtrap fang fc gu harpoon kd lel list mm nle oct octmm \
+DIRS = avl cp da errtrap fang fc gu harpoon kd lel list nle oct octmm \
 	oh options pep port pq region st symbolic symlib tap th timer \
 	tr uprintf utility vov vulcan
 
