@@ -291,6 +291,7 @@ DupSheet *ds;
     *ds = NULL;
 }
 
+/* It looks like DupSheetAdd is used to record compiling universes */
 boolean
 DupSheetAdd(ds, item)
 DupSheet *ds;
@@ -306,6 +307,10 @@ char *item;
     return(TRUE);
 }
 
+/* It looks like DupSheetAdd is used to record compiling galaxies.
+ * The moreinfo field stores the domain name of the galaxy, and is
+ * NULL for universes
+ */
 boolean
 DupSheetAdd2(ds, item, item2)
 DupSheet *ds;
@@ -334,7 +339,8 @@ char *item;
     DupSheetNode *p;
 
     for (p = *ds; p != NULL; p = p->next) {
-	if (strcmp(p->info, item) == 0) {
+        /* moreinfo is NULL for universes. */
+        if (p->moreinfo && strcmp(p->moreinfo, item2) == 0) {
 	    return(TRUE);
 	}
     }
