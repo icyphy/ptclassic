@@ -77,8 +77,12 @@ class ::tycho::StatusBar {
     # Flag to indicate whether to leave space for a scroll bar
     itk_option define -scrollbarpad scrollbarPad ScrollbarPad 0
 
-    # The font to use for the close button
-    itk_option define -font font Font [::tycho::font screen]
+    # The font to use for the close button and the file status
+    itk_option define -font font Font [::tycho::font helvetica]
+
+    # The font to use for messages and the entry widget
+    itk_option define -messagefont messageFont MessageFont \
+            [::tycho::font helvetica]
 
     ###################################################################
     ####                         public methods                    ####
@@ -323,15 +327,21 @@ body ::tycho::StatusBar::_filestatushelp {} {
 # <ul>
 # <li><b>-command</b>: The command to execute when the user hits
 # Return. The current contents of the widget will be substituted
-# for any occurrence of the string "%s", and the command evaluated
-# at the global scope. The default is null.
+# for any occurrence of the string "%%", and the command evaluated
+# at the global scope. Note that "%%" should be enclosed in
+# braces. The default is null.
+# <li><b>-tabcommand</b>: The command to execute when the user hits
+# Tab. The current contents of the widget will be substituted
+# for any occurrence of the string "%%", and the command evaluated
+# at the global scope. Note that "%%" should be enclosed in
+# braces. The default is null.
 # <li><b>-default</b>: The default text to place into the entry field.
 # <li><b>-keycommand</b>: The command to execute when the user hits
 # any key other than return, tab, or escape. The character input
 # will be substituted for any occurrence of the string "%A,"
 # and the command evaluated in the global scope.
 # <li><b>-returnfocus</b>: A widget to return the focus to if
-# <Escape> is pressed. Defaults to the toplevel containging
+# <Escape> is pressed. Defaults to the toplevel containing
 # this status bar.
 # </ul>
 # More options will be implemented at a later date, including options
@@ -343,7 +353,7 @@ body ::tycho::StatusBar::entry {label args} {
     }
 
     # Extract args
-    array set opts {-command {} -keycommand {} -default {}}
+    array set opts {-command {} -keycommand {} -default {} -tabcommand {}}
     array set opts [list -returnfocus [winfo toplevel $itk_component(hull)]]
     array set opts $args
 
@@ -353,7 +363,6 @@ body ::tycho::StatusBar::entry {label args} {
     # Configure the entry widget
     if { $opts(-default) != "" } {
         $itk_component(feedback) insert 0 $opts(-default)
-        $itk_component(feedback) insert end [::tycho::directorySeparator]
     }
     if { $opts(-command) != "" } {
         bind $itk_component(feedback) <Return> \
@@ -362,14 +371,17 @@ body ::tycho::StatusBar::entry {label args} {
     if { $opts(-keycommand) != "" } {
         bind $itk_component(feedback) <Key> $opts(-keycommand)
     }
-
-    # By default, the Tab key breaks (to prevent tab-traversal)
-    bind $itk_component(feedback) <Tab> {break}
-   
-    # The Escape key returns the focus
+    # Make sure the Tab key breaks to prevent tab-traversal
+    if { $opts(-keycommand) != "" } {
+        bind $itk_component(feedback) <Tab> \
+                "[list $this _entrycommand $opts(-tabcommand)]; break"
+    } else {
+        bind $itk_component(feedback) <Tab> {break}
+    }
+    # The Escape key returns the focus to where it was
     bind $itk_component(feedback) <Escape> "$opts(-returnfocus) focusin"
    
-    # Focus on it
+    # Now focus on the entry
     focus $itk_component(feedback)
 }
 
