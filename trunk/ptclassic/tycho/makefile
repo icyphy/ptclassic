@@ -38,6 +38,8 @@ ROOT =		..
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
+MISC_FILES =	README.files copyright
+
 makefiles all install clean depend realclean checkjunk sccsinfo itcldocs:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
