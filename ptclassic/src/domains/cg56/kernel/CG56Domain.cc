@@ -1,3 +1,4 @@
+static const char file_id[] = "CG56Domain.cc";
 /**********************************************************************
 Version identification:
 $Id$
@@ -37,21 +38,21 @@ public:
 		// return *new CG56Wormhole(innerGal,innerTarget);
 		Error::abortRun("No CG56 wormhole implemented yet");
 		// Following is a hack
-		return *(new SDFStar);
+		LOG_NEW; return *(new SDFStar);
 	}
 
 	// new input porthole
-	PortHole& newInPort() { return *new InCG56Port;}
+	PortHole& newInPort() { LOG_NEW; return *new InCG56Port;}
 
 	// new output porthole
-	PortHole& newOutPort() { return *new OutCG56Port;}
+	PortHole& newOutPort() { LOG_NEW; return *new OutCG56Port;}
 
 	// new fromUniversal EventHorizon
 	EventHorizon& newFrom() {
 		// return *new CGfromUniversal;
 		Error::abortRun("No CG56 EventHorizon implemented yet");
 		// Following is a hack
-		return *(new EventHorizon);
+		LOG_NEW; return *(new EventHorizon);
 	}
 
 	// new toUniversal EventHorizon
@@ -59,11 +60,11 @@ public:
 		// return *new CGtoUniversal;
 		Error::abortRun("No CG56 EventHorizon implemented yet");
 		// Following is a hack
-		return *(new EventHorizon);
+		LOG_NEW; return *(new EventHorizon);
 	}
 
 	// new node (geodesic)
-	Geodesic& newNode() { return *new CG56Geodesic;}
+	Geodesic& newNode() { LOG_NEW; return *new CG56Geodesic;}
 
 	// constructor
 	CG56Domain() : Domain("CG56") {}
