@@ -40,7 +40,7 @@ EXTRA_DESTS =	ptplay.sun4 ptplay.irix5 ptplay.irix5.cfront \
 	ptplay.irix6 ptplay.irix6.cfront \
 	ptplay.hppa ptplay.linux ptplay.linux.debug ptplay.linux.static \
 	ptplay.cfront ptplay.sol2 ptplay.sol2.cfront ptplay.irix4 \
-	ptplay.hppa.cfront ptplay.freebsd \
+	ptplay.hppa.cfront ptplay.hppa9 ptplay.freebsd \
 	ptplay.sol2.5 ptplay.sol2.5.cfront
 
 KRUFT = ptplay.sol2 ptplay	
@@ -76,6 +76,8 @@ ptplay.irix6: ptplay.irix5
 ptplay.irix6.cfront: ptplay.irix5
 	ln -s $^ $@ 
 ptplay.hppa.cfront: ptplay.hppa
+	ln -s $^ $@ 
+ptplay.hppa9: ptplay.hppa
 	ln -s $^ $@ 
 ptplay.linux.debug: ptplay.linux
 	ln -s $^ $@ 
