@@ -51,6 +51,7 @@ public:
             const char* assocDomain = ACSdomainName);
     /* virtual */ Block* makeNew() const;
 
+    ACSTarget :: ~ACSTarget();
     // Class identification.
     /*virtual*/ int isA(const char*) const;
 
