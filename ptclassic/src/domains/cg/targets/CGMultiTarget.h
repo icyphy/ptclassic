@@ -35,6 +35,8 @@ public:
 	int setup(Galaxy&);
 	void wrapup();
 
+	void setStopTime(float);
+
 	void addCode(const char*);
 
 	// compute profile
