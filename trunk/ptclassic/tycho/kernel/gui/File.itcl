@@ -887,6 +887,7 @@ body ::tycho::File::save {{name ""}} {
         regsub {(#auto#)|(#crash#)} $ft {} prefname
         ::tycho::FileBrowser::setLastFile $prefname
 	if {[saveAs] == 0} {return 0}
+        set filename $file
     } elseif {$filename != {} && $filename != "NoName"} {
         set txt [saveText]
 	set fd [open $filename w+]
@@ -895,12 +896,13 @@ body ::tycho::File::save {{name ""}} {
     } {	
 	# The file has not been specified.  Invoke saveAs
 	if {[saveAs] == 0} {return 0}
+        set filename $file
     }
     if {$name == ""} {
 	removeBackupFiles
     }
     markUnmodified
-    putStatus "Saved $file"
+    putStatus "Saved $filename"
     return 1
 }
 
