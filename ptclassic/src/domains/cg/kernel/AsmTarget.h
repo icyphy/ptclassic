@@ -93,7 +93,7 @@ public:
 	void headerCode();
 
 	//lookup a shared state
-	State* lookupSharedState(const State& s) const {
+	const State* lookupSharedState(const State& s) const {
 		return sharedStarStates.equivalentState(s);	
 	}
 

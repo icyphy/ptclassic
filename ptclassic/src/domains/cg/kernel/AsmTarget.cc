@@ -298,7 +298,7 @@ void AsmTarget::restoreProgramCounter() {
 }
 
 ProcMemory* AsmTarget::lookupSharedEntry(State& s,unsigned& a) {
-	State* sharedState = lookupSharedState(s);
+	const State* sharedState = lookupSharedState(s);
 	if (sharedState == 0) {
 		return 0;
 	}

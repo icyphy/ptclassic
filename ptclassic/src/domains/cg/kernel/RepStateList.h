@@ -46,7 +46,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class RepStateList : public StateList {
 public:
-	State* equivalentState(const State& s) const;
+	const State* equivalentState(const State& s) const;
 };
 
 #endif
