@@ -40,14 +40,9 @@ public:
     // Destructor.
     virtual ~PtThread() {}
 
-    static void setup() {}
-    static void go() {}
-    static void stop() {}
-    static void wrapup() {}
-
 protected:
     // Main function of the thread.
-    // The thread will delete itself upon termination.
+    // The thread will self-destruct upon termination.
     virtual void run() = 0;
 };
 
