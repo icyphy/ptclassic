@@ -114,12 +114,6 @@ cd ..
 	mkarch domains/pn{,/kernel,/stars}
 #endif
 
-# Make thread and CP directories (currently specific to sun)
-if ($PTARCH =~ sun?*) then
-	mkarch thread/lwp
-	mkarch domains/cp{,/kernel,/stars,/infopad{,/stars}}
-endif
-
 # Make link for pxgraph bitmaps
 cd pxgraph
 optlink ../../src/pxgraph bitmaps
@@ -206,7 +200,7 @@ foreach x ( cg56/dsp/stars cg96/dsp/stars \
 	mdsdf/tcltk/stars \
 	de/atm/stars \
 	de/tcltk/stars \
-	cgc/targets/main cgc/targets/cm5 cgc/targets/NOWam \
+	cgc/targets/main cgc/targets/NOWam \
 	cgc/tcltk/stars cgc/tcltk/targets \
 	$EXPSUBEXTRAS )
 	optmkdir $x
