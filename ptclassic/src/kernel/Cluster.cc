@@ -39,11 +39,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include <iostream.h>           // gcc-3.0: This include should be first
 #include "Cluster.h"
 #include "Scheduler.h"
 #include "GraphUtils.h"
 #include "Scope.h"
-#include <iostream.h>
 #include "InfString.h"
 
 /**********************************************************************
