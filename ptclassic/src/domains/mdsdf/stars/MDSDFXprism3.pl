@@ -74,7 +74,7 @@ for a complete explanation of the options.
 	    char* nm = tempFileName();
 	    strcpy(fileName, nm);
 	    del = 1;
-	    LOG_DEL; delete nm;
+	    LOG_DEL; delete [] nm;
 	  }
 	  
 	  FILE * fptr = fopen(fileName, "w");
