@@ -44,6 +44,7 @@ EXTRA_SRCS =	\
 	ColorBrowserHelp.html \
 	DirSearchHelp.html \
 	EditHelp.html \
+	ExecHelp.html \
 	FileBrowserHelp.html \
 	FileHelp.html \
 	FontDialogHelp.html \
