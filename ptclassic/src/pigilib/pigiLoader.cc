@@ -92,7 +92,7 @@ extern char *sys_errlist[];
 #endif /* mips */
 
 // __hppa__ is not defined under hppa cfront
-#ifdef hppa
+#if defined(hppa)  || defined(__hppa__)
 #define ARCH "snake"
 #endif
 
