@@ -33,6 +33,10 @@ static char SccsId[]="$Id$";
 #include "internal.h"
 #include "io.h"
 
+#include "io_procs.h"
+
+#include "net.h"
+
 extern struct object_desc oct_default_desc;
 static struct object_desc *super = &oct_default_desc;
 
@@ -42,6 +46,7 @@ static int net_write_fields();
 static int net_read_fields();
 static int net_modify();
 
+void
 oct_net_desc_set(object_desc)
 struct object_desc *object_desc;
 {
@@ -74,6 +79,8 @@ int size;
     if (copy->name != NIL(char)) {
 	copy->name = oct_str_intern(copy->name);
     }
+    return OCT_OK;		/* Return OCT_OK because we take the
+				   pointer of this func */
 }
 
 static int
@@ -85,6 +92,8 @@ generic *ptr;
     if (net->user_net.name != NIL(char)) {
 	oct_str_free(net->user_net.name);
     }
+    return OCT_OK;		/* Return OCT_OK because we take the
+				   pointer of this func */
 }
     
 static octStatus
