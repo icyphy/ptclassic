@@ -9,7 +9,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1993 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -45,14 +45,12 @@ variable.
 
 **************************************************************************/
 
-#include <stream.h>
-#include <std.h>
-#include <stddef.h>
-
+class ostream;
 typedef unsigned short uint16;
 typedef unsigned long  uint32;
 typedef unsigned char  uchar;
 typedef long int32;
+typedef void (*mask_func_pointer)(int, uint16*);
 
 #define WORDS_PER_FIX   4         // maximum size of the array Bits
 extern const int   FIX_MAX_LENGTH;
@@ -69,7 +67,9 @@ private:
     uchar  intBits;               // # of bits to the left of the binary point 
     uchar  format;                // 2's complement if 0, unsigned if 1.
     uchar  ovflow;                // overflow characteristic
-
+    static mask_func_pointer MASK;// masking function.
+    // internal function.
+    static void make_bit_pattern(int,int,double,uint16*);
 public:
 
     int len() const { return length; }
@@ -153,17 +153,17 @@ public:
     friend void     overflow_handler(Fix&, const Fix&);
     friend void     overflow_handler(Fix&, const double&);
     friend void     complement(Fix&);
+
+// utility functions
+    static int  get_intBits(const char *p);
+    static int  get_length(const char *p);
+
+// possibilities for mask_truncate
+    static void mask_truncate(int, uint16*);
+    static void mask_truncate_round(int, uint16*);
+
+    static mask_func_pointer Set_MASK(mask_func_pointer);
 };
-
-int  get_intBits(const char *p);
-int  get_length(const char *p);
-
-void mask_truncate(int, uint16*);
-void mask_truncate_round(int, uint16*);
-
-typedef void (*mask_func_pointer)(int, uint16*);
-
-extern mask_func_pointer Set_MASK(mask_func_pointer);
 
 ostream& operator<<(ostream&, const Fix&);
 #endif
