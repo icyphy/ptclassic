@@ -143,17 +143,23 @@ curDomainName() {
 
 // start a galaxy definition
 extern "C" boolean
-KcDefgalaxy(char *galname) {
+KcDefgalaxy(char *galname, char *domain) {
 	saveGalaxy = currentGalaxy;
 	currentGalaxy = new InterpGalaxy;
 	currentGalaxy->setBlock(galname, saveGalaxy);
-	return TRUE;
+	// Set the domain of the galaxy
+	return currentGalaxy->setDomain(domain);
 }
 
 extern "C" boolean
-KcEndDefgalaxy() {
-// add to the knownlist for the current domain
-	currentGalaxy->addToKnownList(KnownBlock::domain());
+KcEndDefgalaxy(const char* outerDomain) {
+	//
+	// add to the knownlist for the outer domain, and create a
+	// wormhole if that is different from current domain.
+	// note that this call also restores the KnownBlock::currentDomain
+	// to equal the outerDomain.
+	currentGalaxy->addToKnownList(outerDomain);
+
 	currentGalaxy = saveGalaxy;
 	return TRUE;
 }
