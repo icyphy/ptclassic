@@ -216,6 +216,7 @@ body ::tycho::FileBrowser::constructor {args} {
 	    if [file isdirectory $default] {
 		set CWD $default 
 		set localCWD $CWD
+                $itk_component(dir) config -text $CWD
 		updateListbox
 	    }
         }
