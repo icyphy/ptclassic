@@ -439,12 +439,13 @@ ifdef DE
 	endif
 	# Contributed stars by third-party users
 	ifdef DECONTRIB
-		# The contrib stars use Tcl/Tk
-		TK = 1
-		CUSTOM_DIRS += $(DEDIR)/contrib/stars
-		STARS += $(LIBDIR)/decontribstars.o
-		LIBS += -ldecontribstars
-		LIBFILES += $(LIBDIR)/libdecontribstars.$(LIBSUFFIX)
+		ifdef TK
+			# The contrib stars use Tk
+			CUSTOM_DIRS += $(DEDIR)/contrib/stars
+			STARS += $(LIBDIR)/decontribstars.o
+			LIBS += -ldecontribstars
+			LIBFILES += $(LIBDIR)/libdecontribstars.$(LIBSUFFIX)
+		endif
 	endif
 	# Java stars
 	ifdef DEJAVA
