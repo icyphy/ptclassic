@@ -9,6 +9,8 @@
 #define quote(x) "x"
 #endif
 
+extern "C" int strcmp(const char*,const char*);
+
 #define ISA_FUNC(me,parent)\
 int me :: isA (const char* cname) const {\
 	if (strcmp(cname,quote(me)) == 0) return 1;\
