@@ -1,5 +1,11 @@
 .\" $Id$
-.H1 "Writing C++ code"
+.H1 "Writing C++ code for stars"
+.pp
+This section assumes a knowledge of the C++ language; no attempt
+will be made to teach the language.  We recommend ``C++ Primer'',
+by Stanley Lippman (from Prentice-Hall) for those new to the
+language.
+.IE C++ Primer
 .pp
 C++ code segments are an important part of any star definition.
 They can appear in the
@@ -28,11 +34,25 @@ defined with the
 and
 .c private
 directives.
+.H2 "The structure of a Ptolemy star"
+.pp
+In general, the task of a Ptolemy star is to receive input Particles
+and/or produce output Particles; in addition, there may be side effects
+(reading or writing files; displaying graphs).  As for all C++ objects,
+the constructor is called when the object is created, and the destructor
+is called when the object is destroyed.  In addition, the start() method,
+if any, is called every time a new simulation run is started, the go()
+method (which always exists except for stars like BlackHole and Null
+that do nothing) is called each time a star is to be executed, and
+the wrapup() method is called to complete the simulation run.
 .H2 "Reading inputs and writing outputs"
 .pp
 The precise mechanism for references to input and output portholes
-depends somewhat on the domain.
+depends somewhat on the domain.  This is because stars in the domain
+XYZ use objects of class InXYZPort and OutXYZPort (derived from PortHole)
+for input and output, respectively.
 We will explain here how such references are used in the SDF domain.
+A later section discusses the DE domain.
 For information about other domains, please see the domain document in
 the Almagest.
 .H3 "PortHoles and Particles"
@@ -57,8 +77,10 @@ of an SDF star,
 		type {float}
 	}
 .)c
-a member of type
-.c InSDFPort
+a member named
+.c in ,
+of type
+.c InSDFPort ,
 will become part of the star.
 .pp
 We are not usually interested in directly accessing these porthole classes,
@@ -150,10 +172,15 @@ go {
 	out%0 << t;
 }
 .)c
-The right-hand side of the ``<<'' operator need not be of class
-.c Particle ,
-but can rather be any compatible type.
-Automated type conversion is discussed below.
+Note the distinction between the ``<<'' operator and the assignment
+operator; the latter operator copys Particles, the former operator
+loads data into particles.  The type of the right-side operand
+of ``<<'' may be
+.c int ,
+.c float ,
+or
+.c Complex ;
+the appropriate type conversion will be performed.
 .H3 "SDF PortHole parameters"
 .pp
 In the above example, where
@@ -312,31 +339,243 @@ is created and used to access the inputs.
 .pp
 Upon occation, the
 .c numberPorts()
-method of the porthole, which
-returns the number of ports, is useful.
+method of class
+.c MultiPortHole ,
+which returns the number of ports, is useful.
 .H3 "Type conversion"
 .pp
 .IE "Particle types"
 .IE types
-As currently defined, each type of
+The type conversion operators and ``<<'' operators are defined
+as virtual methods in the base class
+.c Particle .
+There are never really objects of class
 .c Particle
-has a cast defined to other types of particles.
-For instance, a float particle can be cast to an int,
-in which case the integer part is taken.
-Or a complex particle can be cast to float, in which
-case the magnitude is taken.
+in the system; instead, there are objects of class
+.c IntSample ,
+.c FloatSample ,
+and
+.c ComplexSample ,
+which hold data of type
+.c int ,
+.c float ,
+and
+.c Complex ,
+respectively.  The conversion and loading operators are designed
+to ``do the right thing'' when an attempt is made to convert
+between mismatched types.
+.pp
+Clearly we can convert an
+.c int
+to a
+.c float
+or
+.c Complex ,
+or a
+.c float
+to a
+.c Complex ,
+with no loss of information.  Attempts to convert in the opposite
+direction work as follows: conversion of a
+.c Complex
+to a
+.c float
+produces the magnitude of the complex number.
+Conversion of a
+.c float
+to an
+.c int
+produces the greatest integer that is less than or equal to
+to
+.c float
+value.
+.pp
 This gives considerable flexibility in defining code that
 operates on ANYTYPE.
 For instance, since ANYTYPE of particle can be cast to float,
 a plotting star can accept ANYTYPE of input, and internally
 the star only has to cast the input to float.
-Of course, if the input is complex, some information is lost.
-Each particle also has a
+Of course, if the input is complex, some information is lost;
+thus when complex values are fed directly to the Xgraph star,
+the magnitudes of the values are plotted.
+.pp
+Each particle also has a virtual
 .c print()
 method, so a star that writes particles to a file can
 also accept ANYTYPE.
+.H3 "PortHoles in the DE domain"
+.pp
+In the DE domain, there is a time associated with each event;
+.IE "DE timestamps"
+this time is set in the star's
+.c arrivalTime
+member.
+When a star's
+.c go()
+function is called, the
+.c arrivalTime
+.IE arrivalTime
+member
+contains the current time.  If there is only one input
+.c DEPortHole ,
+then it is guaranteed that there is a Particle in that
+.c DEPortHole .
+.IE DEPortHole
+If the star has more than one input porthole, then you must
+poll to find out which porthole has new data; that is done by
+checking the
+.c dataNew
+.IE dataNew
+member of the
+.c DEPortHole .
+It is possible
+for simultaneous events to arrive on each of several input porthole,
+however, if simultaneous events arrive on the same input, the
+scheduler fires the star two separate times, presenting the
+events one at a time.  The result is that any input porthole
+has at most one event (particle).
+.pp
+For convenience a
+.c completionTime
+.IE completionTime
+data member is provided in
+.c DEStar s,
+but the user need not use it; it is initialized to zero at the
+start of execution.  By convention,
+.c completionTime
+is used
+to compute the timestamp to be used for output Particles; doing
+this in a data member allows it to be remembered across executions.
+However, the star writer is not required to use
+.c completionTime
+at all.
+.pp
+Particles may be read from
+.c DEPortHole s
+either by using
+.c input%0
+as for other types of portholes, or by using the
+.c get()
+method.
+.c  input.get()
+is identical to
+.c input%0
+except that the
+.c dataNew
+flag of input is cleared as well.
+To write Particles to output DEPortHoles, the
+.c put(double)
+method is used.  The argument to
+.c put
+is a timestamp value, and it returns a
+reference to a Particle; you may copy another Particle to this reference
+or load data into it.  For example:
+.(c
+	output.put(completionTime) = input.get();
+
+	output.put(completionTime) << dataValue;
+.)c
+If a particle arrives on an input and you do not
+.c get()
+it, it is discarded; it is not queued (to implement a queue, the
+.c Queue
+class defined in
+.c DataStruct.h
+may be used).  In many cases an input signal is used
+for timing control (as a clock input) and you don't care about the
+data value at all; in that case, code typically just resets the
+.c dataNew
+flag of the porthole.
+.c
+A
+.c DEStar
+must have at least one input porthole to work correctly.
+How, then, are source stars defined?  They are produced by deriving
+from class
+.c DERepeatStar .
+.IE DERepeatStar
+A
+.c DERepeatStar
+has a hidden pair of portholes
+that form a feedback loop, but this is hidden from you and you don't
+need to worry about it.  A
+.c DERepeatStar
+is always fired at time zero,
+and the method
+.c refireAtTime(double)
+is provided; this allows the star
+to schedule itself for later execution.  In many cases it is convenient
+to schedule the first execution at time zero; think of this as actually
+occurring at time epsilon for a very small epsilon.  If a
+.c DERepeatStar
+defines a start function, that function must call
+.c DERepeatStar::start() .
+.pp
+Here is a (simplified) version of DEClock, which outputs a zero-valued
+token every 5 time units (the real star is parametized):
+.(c
+go {
+	output.put(completionTime) << 0.0;
+	refireAtTime(completionTime);
+	completionTime += 5.0;
+}
+.)c
+Notice that there are two firings at time zero; the first produces
+a token at time zero, the second at time 5.0.
+.pp
+When MultiPortHoles are used, we can't just use an
+.c MPHIter
+because
+it returns a pointer to class
+.c PortHole
+and we need to use
+.c DEPortHole
+specific methods.  To handle this, two additional iterator classes are
+provided:
+.c OutDEMPHIter ,
+for output multiportholes, and
+.c InDEMPHIter ,
+.IE OutDEMPHIter
+.IE InDEMPHIter
+.IE InDEPort
+.IE OutDEPort
+for input multiportholes.  The former returns a pointer to
+.c OutDEPort
+on each execution, and the latter returns a pointer to 
+.c InDEPort
+on each execution.
+.pp
+Here is the
+.c go()
+function from
+.c DEFork :
+.(c
+go {
+	completionTime = arrivalTime;
+	Particle& pp = input.get();
+	OutDEMPHIter nextp(output);
+	OutDEPort *oport;
+	while ((oport = nextp++) != 0)
+		oport->put(completionTime) = pp;
+}
+.)c
+Here is the go() function from DEMerge.  Here, we use the dataNew flag
+to see which input(s) contain(s) new data:
+.(c
+go {
+	completionTime = arrivalTime;
+	InDEMPHIter nextp(input);
+	InDEPort* iport;
+	while ((iport = nextp++) != 0) {
+		if (iport->dataNew)
+			output.put(completionTime) = iport->get();
+	}
+}
+.)c
 .H2 "States"
 .pp
+This section is not domain-specific; states are the same in any
+domain.
 .IE "state"
 .IE "attributes"
 A state is defined by the
@@ -377,8 +616,9 @@ The derived state classes currently defined in the kernel are
 .c ComplexState ,
 .c StringState ,
 .c FloatArrayState ,
+.c IntArrayState ,
 and
-.c IntArrayState .
+.c ComplexArrayState .
 .pp
 A state can be used in a star method
 just like the corresponding predefined data types.
@@ -402,10 +642,10 @@ To use the value of a state, it should be cast to type
 either explicitly by the programmer or implicitly by the context.
 For example, the value of this state can be accessed in the
 .c go
-method as follows
+method as follows:
 .(c
 go {
-	output%0 << myState * (float)(input%0);
+	output%0 << myState * float(input%0);
 }
 .)c
 The references to input and output are explained above.
@@ -546,6 +786,7 @@ with dimension four, with each element initialized to zero.
 Quotes must surround the initial values.
 Alternatively, you can specify a file name with a prefix 
 .c "<".
+.IE "initializing states from files"
 If you have a file named "foo" that contains the default values for
 an array state,
 you can write,
@@ -567,7 +808,7 @@ objects: the two value strings
 	default { "1.0 [5]" }
 	default { "1.0 1.0 1.0 1.0 1.0" }
 .)c
-are equivalent.
+are equivalent.  Any integer expression may appear inside the braces.
 .pp
 The number of elements in an
 .c ArrayState
@@ -669,10 +910,10 @@ PTOLEMY: (star printer Printer)
 PTOLEMY: (connect (foop output)(fir signalIn))
 PTOLEMY: (connect (fir signalOut)(printer input))
 PTOLEMY: (show fir)
-Star: Universe.mainGalaxy.fir
+Star: mainGalaxy.fir
 	...
 States in the star fir:
-Universe.mainGalaxy.fir.taps type: FloatArray
+mainGalaxy.fir.taps type: FloatArray
  initial value: -.040609 -.001628 .17853 .37665 .37665 .17853 -.001628 -.040609
  current value:
 0 -0.040609
@@ -696,10 +937,10 @@ The resulting interpreter commands are:
 .(c
 PTOLEMY: (setstate fir taps "<foo 5.5")
 PTOLEMY: (show fir)
-Star: Universe.mainGalaxy.fir
+Star: mainGalaxy.fir
 	...
 States in the star fir:
-Universe.mainGalaxy.fir.taps type: FloatArray
+mainGalaxy.fir.taps type: FloatArray
  initial value: <foo 5.5
  current value:
 0 1.1
@@ -722,6 +963,19 @@ occurs in an
 .i initial-value ,
 it is processed exactly as if the whole file were substituted at
 that point.
+.H3 "Modifying states in derived classes"
+.pp
+When one star is derived from another, it inherits all the states
+of the baseclass star.  Sometimes we want to modify some aspect
+of the behavior of a baseclass state in the derived class.  This
+is done by placing calls to member functions of the state in the
+constructor of the derived star.  Useful functions include
+.c setValue
+to change the default value, and
+.c setAttibututes
+and
+.c clearAttributes
+to modify attributes.
 .H2 "Programming examples"
 .pp
 The following star has no inputs, just an output.
