@@ -163,7 +163,7 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 		if (is_idchar(*token)) {
 			const State* s = lookup(token,parent()->parent());
 			if (!s) {
-				parseError ("undefined symbol", token);
+				parseError ("undefined symbol: ", token);
 				t.tok = T_ERROR;
 				return t;
 			}
@@ -183,7 +183,7 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 		}
 		else {
 			// if we get here, next token is bogus
-			parseError ("unexpected token", token);
+			parseError ("unexpected token: ", token);
 			t.tok = T_ERROR;
 			return t;
 		}
