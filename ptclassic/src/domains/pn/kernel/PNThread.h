@@ -34,27 +34,22 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "Thread.h"
+#include "LwpThread.h"
 
 class MTDFStar;
 class TimeVal;
 
-class MTDFThread : public Thread
+class MTDFThread : public LwpThread
 {
 public:
     // Constructor.
     MTDFThread(int priority, void (*thread)(MTDFStar*), MTDFStar*);
 
-    // Change the Thread's priority.
-    int setPriority(int);
-
-    // System-wide limits on priority.
-    static int setMaxPriority(int);
-    static int maxPriority();
-    static int minPriority();
-
     // Disable Thread for the specified time.
     int sleep(TimeVal);
+
+    // New MTDFThread object corresponding to the current thread.
+    static MTDFThread* currentThread();
 };
 
 #endif
