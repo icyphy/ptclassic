@@ -83,9 +83,8 @@ Block* S56XTarget::makeNew() const {
 }
 
 void S56XTarget :: trailerCode () {
-	myCode << "	jmp	ERROR\n";
-	inProgSection = TRUE;
 	CG56Target::trailerCode();
+	trailer << "\tjmp\tERROR\n";
 }
 
 int S56XTarget :: compileCode() {
@@ -97,17 +96,19 @@ int S56XTarget :: compileCode() {
 }
 
 void S56XTarget :: writeCode() {
-	/*
-	 * generate .aio data file
-	 */
+    /*
+     * generate .aio data file
+     */
+    if (aioCmds.numPieces() > 0) {
 	if (!writeFile(aioCmds,".aio")) {
-	    Error::abortRun(*this,"Aio data file write failed");
-	    return;
+    		Error::abortRun(*this,"Aio data file write failed");
+    		return;
 	}
-
-	/*
-	 * generate shell-cmd file (/bin/sh)
-	 */
+    }
+    /*
+     * generate shell-cmd file (/bin/sh)
+     */
+    if (!parent()) {
 	const char *monprog = monitorProg;
 	StringList realcmds = "#!/bin/sh\n";
 	realcmds << headerComment("# ");
@@ -120,11 +121,11 @@ void S56XTarget :: writeCode() {
 	    Error::abortRun(*this,"Shell command file write failed");
 	    return;
 	}
-
-	/*
-	 * generate the .asm file (and optionally display it)
-	 */
-	CG56Target :: writeCode();
+    }
+    /*
+     * generate the .asm file (and optionally display it)
+     */
+    CG56Target :: writeCode();
 }
 
 int S56XTarget :: runCode() {

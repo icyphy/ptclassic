@@ -47,9 +47,10 @@ limitation of liability, and disclaimer of warranty provisions.
     }
 
     go {
+	CGCS56XBase::go();
 	const char* intSend = "value = $ref(input,i)";
 	const char* fixSend = "value = $ref(input,i)*(1<<23)";
-	if (input.resolvedType()==INT)
+	if (strcmp(input.resolvedType(),INT)==0)
 	    addCode(sendData(input.numXfer(),intSend));
 	else
 	    addCode(sendData(input.numXfer(),fixSend));

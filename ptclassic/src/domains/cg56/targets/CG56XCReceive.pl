@@ -12,6 +12,7 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 Target Directory }
+	ccinclude { "CGCS56XReceive.h" }
 	explanation {
 	}
 	output {
@@ -35,6 +36,14 @@ $label(WHL)
 	nop
 	}
 
+	setup {
+	    CG56S56XCGCBase::setup();
+	    PortHole* input = cgcSide->portWithName("input");
+	    DataType inputType = input->resolvedType();
+	    if (strcmp(inputType,FLOAT) == 0) {
+		    output.setPort("output",this,FIX);
+	    }
+	}
 	go {
 		addCode(wordCntCB);
 		if (output.numXfer()==1)

@@ -4,8 +4,7 @@ defstar {
     desc { Base star from  CGC to S56X Send Receive}
     version { $Id$ }
     author { Jose L. Pino }
-    hinclude { "CodeStream.h" }
-    ccinclude { "CGTarget.h" } 
+    hinclude { "CGCS56XTarget.h" "CG56S56XCGCBase.h" }
     copyright { 
 Copyright (c) 1993 The Regents of the University of California.
 All rights reserved.
@@ -23,6 +22,16 @@ limitation of liability, and disclaimer of warranty provisions.
 	       CGCS56XTarget::create{Send,Receive}
 	}
     }
+
+    header {
+	class CG56S56XCGCBase;
+    }
+
+    protected {
+	friend class CGCS56XTarget;
+	CG56S56XCGCBase* s56xSide;
+    }
+
     codeblock(downloadCode,"const char* filePrefix,const char* s56path") {
     {
 	Params dspParams;
@@ -92,6 +101,11 @@ limitation of liability, and disclaimer of warranty provisions.
 		s56path = expandPathName("$PTOLEMY/vendors/s56dsp");
 	addMainInit(downloadCode(S56XFilePrefix,s56path),"s56load");
     }
+
+    go {
+	StringList starName = this->fullName();
+	s56xSide->cgcCommOrder(starName);
+    }	
     
 }
 
