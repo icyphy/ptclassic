@@ -1,0 +1,30 @@
+#! /bin/csh -f
+# $Id$
+# print a list of "extra" files.
+
+set res = 0
+set prefix = ""
+if ($#argv >= 1 && "$1" == "-v") then
+	set prefix = "Extra files in ${cwd}: "
+	shift argv
+endif
+
+set files = ()
+foreach x ($*)
+	if (-r $x) set files = ($files $x)
+end
+
+ls . > /tmp/cj1$$
+
+ls -d $files > /tmp/cj2$$
+
+set files = (`comm -23 /tmp/cj1$$ /tmp/cj2$$`)
+if ($#files > 0) then
+	set res = 1
+	echo "$prefix$files"
+endif
+
+rm -f /tmp/cj[12]$$
+exit $res
+endif
+
