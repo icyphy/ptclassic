@@ -556,7 +556,8 @@ int Linker::multiLink (int argc, char** argv) {
 	cmd << " " << myDefaultOpts;
 
 	if (system (cmd)) {
-		Error::abortRun("Error in linking file");
+	        Error::abortRun("Error linking file, command was\n",
+				command);
 		return FALSE;
 	}
 
