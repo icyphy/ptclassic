@@ -512,7 +512,7 @@ octObject *facetPtr;
 
 extern char* curDomainName();
 
-static boolean
+boolean
 CompileGal(galFacetPtr)
 octObject *galFacetPtr;
 {
