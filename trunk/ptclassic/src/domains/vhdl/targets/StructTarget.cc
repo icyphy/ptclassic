@@ -439,7 +439,8 @@ void StructTarget :: registerState(State* state, int thisFiring/*=-1*/,
     }
   }
   else {
-    initVal << state->initValue();
+    state->initialize();
+    initVal << state->currentValue();
   }
   
   // Root is ref, without marking for any particular firing.
