@@ -135,7 +135,7 @@ and disclaimer of warranty provisions, push the button below. "
     bind $w.f.bm <Button> "destroy $w"
     bind $w <Key> "destroy $w"
     bind $w.f <Key> "destroy $w"
-    grab -global $w
+    grab $w
     tkwait window $w
 }
 
