@@ -1,7 +1,7 @@
 /**************************************************************************
 Version identification:
 $Id$
-
+ 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
@@ -220,6 +220,16 @@ public:
 	// InterpGalaxy::reset for more details
 	void requestReset();
 	int resetRequested();
+
+	// Returns TRUE if this target requests to schedule a self-firing
+	// with the outer domain, FALSE otherwise. NOrmally used only with 
+	// wormholes inside timed domains
+	virtual int selfFiringRequested();
+
+	
+	// Returns the time the next self-firing should be scheduled at.
+	// Call this method only if selfFiringRequested() returns TRUE.
+	virtual double nextFiringTime();
 
 protected:
 	// Run galaxySetup and schedulerSetup
