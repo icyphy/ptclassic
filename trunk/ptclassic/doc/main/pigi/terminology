@@ -3,7 +3,8 @@
 .pp
 The \*(PT interactive graphical interface (pigi) is a design editor
 based on tools from the Berkeley CAD framework.
-.IE pigi
+.Id pigi
+.IE "graphical interface"
 Using pigi, \*(PT applications are constructed graphically,
 by interconnecting icons.
 Hierarchy is used to manage complexity, to abstract subsystem designs,
@@ -13,24 +14,24 @@ version \*(PV.
 .pp
 In \*(PT, applications are constructed by connecting
 .c Block s.
-.IE Block
+.Id Block
 In pigi, a block is represented by an icon with \fIterminals\fR,
 corresponding to its
 .c Porthole s
 in \*(PT.
-.IE terminal
-.IE porthole
+.Id terminal
+.Id porthole
 The application hierarchy can be traversed by looking inside an icon
 to see how it is constructed.
 Elementary blocks are called
 .c Star s.
-.IE Star
+.Id Star
 Looking inside a star reveals the C++ code that defines it
 (actually, most stars are written in a special preprocessor language).
 A
 .c Galaxy
 is a block that contains stars and other galaxies.
-.IE Galaxy
+.Id Galaxy
 From the outside, a galaxy looks like a star, and can be treated
 exactly like a star.
 But looking inside a galaxy reveals the block diagram that defines it.
@@ -42,48 +43,58 @@ to parameters of its internal blocks.
 The outermost block,
 which does not have any external connections, is called a
 .c Universe.
-.IE Universe
+.Id Universe
 A universe encapsulates an entire application.
 .pp
 A
 .c Wormhole,
-.IE Wormhole
+.Id Wormhole
 like a galaxy, looks like a star from the outside,
 and contains a block diagram on the inside.
 Unlike a galaxy, however, the model of computation
 (or the
 .c Domain )
-.IE Domain
+.Id Domain
 is not the same on the inside as on the outside.
 In pigi, wormholes are almost indistinguishable from galaxies.
 They are created automatically when two different domains interact.
 Domains that are currently supported in pigi include synchronous
-dataflow (SDF), dynamic dataflow (DDF), and discrete events (DE).
+dataflow (SDF), dynamic dataflow (DDF), discrete events (DE),
+circuit simulation (Thor),
+code generation (CG), code generation with dynamic dataflow (CGDDF),
+C code generation (CGC, derived from CG), and assembly code generation for
+the Motorola DSP56000 family (CG56, derived from CG) and the
+DSP96000 family (CG96, derived from CG).
 See the manual sections for these domains for an explanation
 of their operation.
+Code generation domains are distinguished not only by the model
+of computation, but also by the language synthesized.
+.Id "code generation domains"
+Currently, all code generation domains except CG-DDF use the
+synchronous dataflow (SDF) model of computation.
 Knowledgeable users can define new domains and link them into pigi.
 .pp
 A
 .c State
-.IE State
+.Id State
 is a data-structure associated with a block, used to remember
 data values from one invocation to the next.
 For example, the gain of an automatic gain control is a state.
 A state need not be dynamic; for instance, the gain of fixed
 amplifier is a state.
 A \fIparameter\fR
-.IE parameter
+.Id parameter
 is the initial value of a state.
 Pigi is responsible for storing parameter values.
 .pp
 Pigi is built on top of
 existing CAD tools that are part of the Berkeley CAD framework.  A
 central component of this framework is \fBOct\fP, which is a design
-.IE Oct
+.Id Oct
 manager.  Oct keeps track of block connections,
 parameter values, hierarchy, and file structure.
 \fBVEM\fR is an interactive graphical editor for Oct.
-.IE VEM
+.Id VEM
 VEM provides one of many ways to examine and edit designs
 stored by Oct.
 This section gives enough information about VEM to use it with \*(PT
@@ -92,16 +103,25 @@ part of the octtools distribution version 5, is being used.
 More complete documentation is contained in the VEM
 section of the Almagest.
 A third component of this system, called \fBRPC\fR, is
-.IE RPC
+.Id RPC
 a link between applications and VEM.
+.pp
 In pigi, the \*(PT kernel runs as an RPC application.
-.IE kernel
+.Id kernel
 Users edit designs using VEM, store their designs using Oct,
 and execute their application through the RPC link to the \*(PT
-kernel.
+kernel.  The \*(PT kernel and VEM are separate Unix\** processes,
+.(f
+Unix is a trademark of AT&T.
+.)f
+called \fIvem\fR and \fIpigiRpc\fR.
+.Id pigiRpc
+These processes interact with another using ``remote procedure calls'',
+.Ir "remote procedure calls"
+hence the ``Rpc'' suffix.
 .pp
 Oct objects are called facets.  A \fIfacet\fP is
-.IE facet
+.Id facet
 the fundamental unit that a user edits with VEM.  As an analogy, we can
 think of a facet as a text file in a computer system and VEM as a text
 editor, such as
@@ -117,23 +137,24 @@ Facets may define a universe, a galaxy, or a wormhole.
 They also define the physical appearance and formal
 terminals of icons that represent stars, galaxies, universes,
 and wormholes.  
+.pp
 A facet may also contain a \fIpalette\fR,
 which is simply a collection of disconnected icons.
-.IE palette
+.Id palette
 Palettes are directories of stars, galaxies, universes,
 and wormholes in a library.
-Note that facet names, just like file names, may not contain spaces.
+Note that facet names, like file names in Unix, may not contain spaces.
 .pp
 Here is a quick summary of terms:
 .ip \*(PT 1i
 The entire design environment.
-.ip \fBPigi\fP 1i
+.ip \fBpigi\fP 1i
 A \*(PT graphical interface.
 .ip \fBOct\fP 1i
 The design manager and database.
 .ip \fBVEM\fP 1i
 A graphical editor for Oct, upon which pigi is built.
-.ip \fBRPC\fP 1i
+.ip \fBRpc\fP 1i
 The link between VEM and the \*(PT kernel.
 .ip \fBfacet\fP 1i
 A fundamental object in Oct that the user edits with VEM.
@@ -151,6 +172,7 @@ complete system that the user can execute.
 .ip \fBdomain\fP 1i
 A model of computation, or a set of semantic rules
 defining the behavior of a network of blocks.
+In code generation, a domain also corresponds to single target language.
 .ip \fBwormhole\fP 1i
 A block that does not have the same domain on the outside 
 as the inside.
