@@ -1,3 +1,4 @@
+static const char file_id[] = "CG56Target.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -39,10 +40,10 @@ CG56Target :: CG56Target(const char* nam, const char* desc,
 }
 
 CG56Target :: ~CG56Target () {
-	delete &mem;
+	LOG_DEL; delete &mem;
 }
 
 Block* CG56Target :: clone () const {
-	return new CG56Target(readName(),readDescriptor(),xa,xl,ya,yl);
+	LOG_NEW; return new CG56Target(readName(),readDescriptor(),xa,xl,ya,yl);
 }
 

@@ -1,3 +1,4 @@
+static const char file_id[] = "CG56Connect.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -25,13 +26,13 @@ int MultiOutCG56Port :: isItOutput() const { return TRUE; }
 int MultiCG56Port :: someFunc() { return 1; }
 
 PortHole& MultiInCG56Port :: newPort () {
-        PortHole& p = *new InCG56Port;
+        LOG_NEW; PortHole& p = *new InCG56Port;
         p.numberTokens = numberTokens;
         return installPort(p);
 }
 
 PortHole& MultiOutCG56Port :: newPort () {
-        PortHole& p = *new OutCG56Port;
+        LOG_NEW; PortHole& p = *new OutCG56Port;
         p.numberTokens = numberTokens;
         return installPort(p);
 }
