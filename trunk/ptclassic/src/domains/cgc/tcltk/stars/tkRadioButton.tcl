@@ -40,19 +40,22 @@ proc ${uniqueSymbol}setupTcl {identifier initialChoice pairs} {
     set s .middle.radio$uniqueSymbol
 
     frame $s -bd 3 -relief raised
-    pack append .middle $s {top fill}
     label $s.lbl -text $identifier
     pack append $s $s.lbl {top fill}
 
+    frame $s.buttons
+
     foreach pair $pairs {
 	set pairlbl [lindex $pair 0]
-	radiobutton $s."p_$pairlbl" -text $pairlbl -val \
+	radiobutton $s.buttons."p_$pairlbl" -text $pairlbl -val \
 		[lindex $pair 1] -var $s \
 		-com "${uniqueSymbol}setOutputs [lindex $pair 1]"
-	pack append $s $s."p_$pairlbl" { top fill expand }
+	pack $s.buttons $s.buttons."p_$pairlbl" -side left
     }
+    pack append $s $s.buttons {top fill}
+    pack append .middle $s {top fill}
 
-    $s."p_$initialChoice" select
+    $s.buttons."p_$initialChoice" select
 }
 
 proc ${uniqueSymbol}callTcl {} {
