@@ -47,6 +47,23 @@ extern const char VHDLdomainName[];
 // My domain.
 const char* VHDLStar :: domain() const { return VHDLdomainName; }
 
+// Perform initialization.
+void VHDLStar :: initialize() {
+  CGStar::initialize();
+  firing = 0;
+  // Initialize hashstrings for quick comparison.
+  hashBLANK = hashstring("");
+}
+
+// Run this star.
+int VHDLStar :: run() {
+  int status = 0;
+  firing++;
+  status = targ()->runIt(this);
+  updateOffsets();
+  return status;
+}
+
 // Expand macros.  Return empty StringList on error.  ArgList must be
 // passed by reference so that the StringList is not consolidated.
 StringList VHDLStar :: expandMacro(const char* func, const StringList&
@@ -180,8 +197,7 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset,
     else {
       // Generate constant for index from string.
       // Must first convert offset from char* to int.
-//      if (!strcmp(offset,"")) {
-      if (hashstring(offset) == hashstring("")) {
+      if (hashstring(offset) == hashBLANK) {
 	offsetInt = 0;
       }
       else {
@@ -251,7 +267,7 @@ StringList VHDLStar :: expandInterOp(const char* oper, const char* args,
       MPHIter nextPort(*multiPort);
       VHDLPortHole* port;
       while ((port = (VHDLPortHole*) nextPort++) != 0) {
-	if (hashstring(part) == hashstring("")) {
+	if (hashstring(part) == hashBLANK) {
 	  finalList << expandRef(port->name(), "", "");
 	}
 	else {
@@ -260,7 +276,7 @@ StringList VHDLStar :: expandInterOp(const char* oper, const char* args,
       }
     }
     else {
-      if (hashstring(part) == hashstring("")) {
+      if (hashstring(part) == hashBLANK) {
 	finalList << expandRef(item, "", "");
       }
       else {
@@ -356,21 +372,6 @@ const char* VHDLStar :: expandDefine(const char* name, const char* type,
   }
 
   return define;
-}
-
-// Perform initialization.
-void VHDLStar :: initialize() {
-	CGStar::initialize();
-	firing = 0;
-}
-
-// Run this star.
-int VHDLStar :: run() {
-  int status = 0;
-  firing++;
-  status = targ()->runIt(this);
-  updateOffsets();
-  return status;
 }
 
 // Update the offset read and write pointers to the porthole queues.

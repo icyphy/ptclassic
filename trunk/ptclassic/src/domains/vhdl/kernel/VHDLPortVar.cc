@@ -50,7 +50,7 @@ VHDLPortVar :: ~VHDLPortVar() {}
 // Return a pointer to a new copy of the VHDLPort.
 VHDLPortVar* VHDLPortVar :: newCopy() {
   VHDLPortVar* newPortVar = new VHDLPortVar;
-  newPortVar->name = hashstring(this->name);
+  newPortVar->setName(this->name);
   newPortVar->variable = this->variable;
 
   return newPortVar;
@@ -78,9 +78,8 @@ VHDLPortVarList* VHDLPortVarList :: newCopy() {
 
 // Allocate memory for a new VHDLPortVar and put it in the list.
 void VHDLPortVarList :: put(StringList name, StringList variable) {
-  if (this->inList(name)) return;
   VHDLPortVar* portVar = new VHDLPortVar;
-  portVar->name = hashstring(name);
+  portVar->setName(name);
   portVar->variable = variable;
   this->put(*portVar);
 }
