@@ -178,7 +178,7 @@ group source -label {Source Icons} {
 }
 
 group sink -label {Sink Icons} {
-    icon plotter \
+    icon plot \
             -slatetype IconFrame \
             -label {Plotter} \
             -text Plotter \
