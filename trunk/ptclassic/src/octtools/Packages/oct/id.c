@@ -27,8 +27,9 @@ static char SccsId[]="$Id$";
 #include "copyright.h"
 #include "port.h"
 #include "internal.h"
+#include "oct_id.h"
 
-static int do_free_table();
+static void do_free_table();
 
   /* 
    * This file implements the oct id table that maps between object 
@@ -61,6 +62,7 @@ static struct {
  * used only by internal statistics routines
  */
 
+int
 oct_id_table_size()
 {
     int div = ID_BLOCK_SIZE;
@@ -119,7 +121,7 @@ register octId id;
     }
 }
 
-
+octStatus
 oct_set_id(id, ptr)
 register octId id;
 generic *ptr;
@@ -146,6 +148,7 @@ generic *ptr;
 			base[id&BOTTOM_MASK] = (char *)ptr;
 		}
     }
+    return OCT_OK;
 }
 
 
@@ -263,7 +266,7 @@ oct_free_id_table()
 }
 
 
-static int
+static void
 do_free_table(block, ilevel, partial)
 char **block;
 int ilevel;
