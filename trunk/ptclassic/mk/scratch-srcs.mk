@@ -141,6 +141,7 @@ xv_configure: $(OBJARCH)/xv \
 
 $(OBJARCH)/xv:
 	if [ ! -d $(OBJARCH) ]; then \
+		echo "Making $(OBJARCH)"; \
 		mkdir $(OBJARCH); \
 	fi
 	mkdir $(OBJARCH)/xv
