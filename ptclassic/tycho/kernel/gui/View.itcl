@@ -115,6 +115,9 @@ class ::tycho::View {
     # displayed text.
     protected method indicateReadOnly {bool}
 
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+
     ###################################################################
     ####                         protected variables               ####
 
@@ -125,19 +128,19 @@ class ::tycho::View {
     protected variable viewType {}
 
     ###################################################################
-    ####                         protected variables               ####
+    ####                          private variables                ####
 
     # Name of my displayer
-    protected variable myDisplayer {}
+    private variable myDisplayer {}
 
     # Name of my menubar
-    protected variable myMenubar {}
+    private variable myMenubar {}
 
     # Name of my status bar
-    protected variable myStatusbar {}
+    private variable myStatusbar {}
 
     # Name of my toolbar
-    protected variable myToolbar {}
+    private variable myToolbar {}
 }
 
 #########################################################################
@@ -158,25 +161,7 @@ configbody ::tycho::View::readonly {
 #### constructor
 #
 body ::tycho::View::constructor {args} {
-    # Figure out whether I'm in a displayer, and if so, set myDisplayer.
-    set top [winfo parent $prefix]
-    set cmd [winfo command $top]
-    if ![catch {set disp [$cmd isa ::tycho::Displayer]}] {
-        if $disp {
-            set myDisplayer $cmd
-        }
-    }
-
     eval itk_initialize $args
-
-    # Attach myself to the displayer and get back my menu bar, status
-    # bar, and tool bar. The view won't
-    # actually be displayed: the caller must do that later with
-    # the Displayer method showView.
-    set bars [displayer attachView $this]
-    set myMenubar [lindex $bars 0]
-    set myStatusbar [lindex $bars 1]
-    set myToolbar [lindex $bars 2]
 }
 
 #######################################################################
@@ -223,7 +208,7 @@ body ::tycho::View::displayer {{method {}} args} {
 # appropriate subwindow.
 #
 body ::tycho::View::focusin {} {
-    ::tycho::TWidget::focusin
+    chain
     displayer setCurrentView $this
 }
 
@@ -300,4 +285,31 @@ body ::tycho::View::indicateReadOnly {bool} {
     } {
         statusbar configure -filestatus "readwrite"
     }
+}
+
+#####################################################################
+#### initialize
+# Set myDisplayer if I'm in a displayer, and initialize the menu, status, 
+# and toolbars associated with this widget. Children of view will redefine
+# and chain this method to create their own menu/status/toolbars.
+#
+# This functionality used to be in the constructor, however that design
+# was not flexible and didn't fit with the notion of multiple views.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::View::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+    # Figure out whether I'm in a displayer, and if so, set myDisplayer.
+    set top [winfo toplevel $prefix]
+    set cmd [winfo command $top]
+    if ![catch {set disp [$cmd isa ::tycho::Displayer]}] {
+        if $disp {
+            set myDisplayer $cmd
+        }
+    }
+
+    set myMenubar $menubar
+    set myStatusbar $statusbar
+    set myToolbar $toolbar
 }
