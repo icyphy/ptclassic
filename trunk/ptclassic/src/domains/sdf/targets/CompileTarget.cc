@@ -319,6 +319,9 @@ StringList CompileTarget::tcltkSetup() {
     myCode += "// Include files needed by Tcl/Tk commands\n";
     myCode += "#include <iostream.h>\n";
     myCode += "#include \"SimControl.h\"\n";
+    myCode += "extern \"C\" {\n";
+    myCode += "#include \"ptk.h\"\n";
+    myCode += "}\n";
     myCode += "\n";
     myCode += "// Tcl/Tk commands\n";
     myCode += "// halt command -- ptkStop defined as synonym\n";
