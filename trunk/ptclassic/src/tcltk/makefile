@@ -1,6 +1,6 @@
 # Version Identification:
 # $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1995 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -52,21 +52,32 @@ TCL_VERSION =	tcl7.3
 TK_MAJOR_VERSION = 	tk3.6
 TK_VERSION =	tk3.6p1
 
+#TCL_VERSION =	tcl7.4b2
+#TK_MAJOR_VERSION = 	tk4.0
+#TK_VERSION =	tk4.0b2
+
+ITCL_VERSION =	itcl-1.5
+
+
 # Location of the tcl source
 TCL_SRC =	$(TCLTK_SRC)/$(TCL_VERSION)
-
 # Location of the tk source
 TK_SRC =	$(TCLTK_SRC)/$(TK_VERSION)
+# Location of the itcl source
+ITCL_SRC =	$(TCLTK_SRC)/$(ITCL_VERSION)
+
 
 # Location of the tcl only object files
 TCL_OBJ =	$(TCLTK_OBJ)/tcl
-
 # Location of the tk only object files
 TK_OBJ =	$(TCLTK_OBJ)/tk
+# Location of the tk only object files
+ITCL_OBJ =	$(TCLTK_OBJ)/itcl
+
 
 # Destination of tcl only machine dependent files
 TCL_DEST =	$(TCLTK_DEST)/tcl.$(ARCH)
-# Destination of the machine INDEPENDENTendent tcl files
+# Destination of the machine independent tcl files
 TCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/tcl
 
 # Destination of tk only machine dependent files
@@ -74,17 +85,25 @@ TK_DEST =	$(TCLTK_DEST)/tk.$(ARCH)
 # Destination of the machine independent tk files
 TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/tk
 
-all: 		configure tcl tk
+# Destination of itcl only machine dependent files
+ITCL_DEST =	$(TCLTK_DEST)/itcl.$(ARCH)
+# Destination of the machine independent itcl files
+ITCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/itcl
+
+all: 		configure tcl tk itcl
 configure:	$(TCL_OBJ)/config.status $(TK_OBJ)/config.status \
+			$(ITCL_OBJ)/config.status \
 			$(TCLTK_OBJ)/$(TCL_VERSION) $(TCLTK_OBJ)/makefile
-bin:		tcl tk
-install:	install_tcl install_tk
-clean:		clean_tcl clean_tk
-realclean:	clean_tcl clean_tk
+bin:		tcl tk itcl
+install:	install_tcl install_tk install_itcl
+clean:		clean_tcl clean_tk clean_itcl
+realclean:	clean_tcl clean_tk clean_itcl
 
-.PHONY:	tcl tk configure install_tcl install_tk	clean_tcl clean_tk realclean
+.PHONY:	tcl tk itcl configure install_tcl install_tk install_itcl \
+		clean_tcl clean_tk clean_itcl realclean 
 
-#
+
+###########################################################################
 # Rules for tcl
 #
 
@@ -128,7 +147,7 @@ $(TCL_DEST)/lib:
 clean_tcl:
 	(cd $(TCL_OBJ); $(MAKE) clean)
 
-##############
+######################################################################
 # Rules for tk
 #
 
@@ -218,5 +237,85 @@ $(TK_INDEPENDENT_DEST):
 clean_tk:
 	(cd $(TK_OBJ); $(MAKE) clean)
 
+######################################################################
+# Rules for itcl
+# itcl is an extension for tcl that provides tcl 'classes'
+#
+
+# Configure itcl
+$(ITCL_OBJ)/config.status: config_itcl
+config_itcl: $(TCLTK_OBJ) $(ITCL_OBJ) \
+		$(TCL_OBJ)/libtcl.a $(TK_OBJ)/libtk.a \
+		$(TCL_OBJ)/tclInt.h $(TCL_OBJ)/tcl.h \
+		$(TCL_OBJ)/tclRegexp.h $(TK_OBJ)/tk.h
+	@echo "Configuring itcl"
+	(chdir $(ITCL_OBJ); PWD=$(ITCL_OBJ); export PWD; $(ITCL_SRC)/configure --srcdir=$(ITCL_SRC) --prefix=$(ITCL_INDEPENDENT_DEST) --exec-prefix=$(ITCL_DEST)) 
+	@echo "Create link for itcl.h installation"
+	-(cd $(ITCL_OBJ)/src; ln -s $(ITCL_SRC)/src/itcl.h itcl.h)
+	-(cd $(ITCL_OBJ)/library; ln -s $(ITCL_SRC)/library/*.tcl .)
+
+$(ITCL_OBJ): $(TCLTK_OBJ)
+	if [ ! -d $@ ]; then \
+		echo "Making $@"; \
+		mkdir $@; \
+	fi
+
+$(TCL_OBJ)/tclInt.h:  $(TCL_OBJ)
+	if [ ! -f $@ ]; then \
+		(cd $<; ln -s $(TCL_SRC)/tclInt.h .); \
+	fi
+
+$(TCL_OBJ)/tclRegexp.h:  $(TCL_OBJ)
+	if [ ! -f $@ ]; then \
+		(cd $<; ln -s $(TCL_SRC)/tclRegexp.h .); \
+	fi
+
+$(TCL_OBJ)/tcl.h:  $(TCL_OBJ)
+	if [ ! -f $@ ]; then \
+		(cd $<; ln -s $(TCL_SRC)/tcl.h .); \
+	fi
+
+$(TK_OBJ)/tk.h:  $(TK_OBJ)
+	if [ ! -f $@ ]; then \
+		(cd $<; ln -s $(TK_SRC)/tk.h .); \
+	fi
+
+# This link is necessary for the itcl build to find libtcl.a
+#$(TCLTK_OBJ)/$(TCL_VERSION): $(TCL_OBJ)
+#	(cd $(TCLTK_OBJ); ln -s $(TCL_OBJ) $(TCLTK_OBJ)/$(TCL_VERSION))
+
+# This link is necessary for the itcl build to find libtk.a
+#$(TCLTK_OBJ)/$(TK_MAJOR_VERSION): $(TK_OBJ)
+#	(cd $(TCLTK_OBJ); ln -s $(ITCL_OBJ) $(TCLTK_OBJ)/$(TK_MAJOR_VERSION))
+
+# Build itcl
+itcl: $(ITCL_OBJ)/libitcl.a 
+$(ITCL_OBJ)/libitcl.a: $(ITCL_OBJ) 
+	@echo "Making all in itcl"
+	(cd  $(ITCL_OBJ); $(MAKE) \
+		X11_INCLUDES="$(X11_INCSPEC)" \
+		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
+		all)
+
+# Install itcl
+install_itcl: $(ITCL_DEST)/lib/libitcl.a
+$(ITCL_DEST)/lib/libitcl.a: $(ITCL_OBJ)/libitcl.a $(TCLTK_DEST) \
+		$(ITCL_DEST) $(ITCL_DEST)/lib $(ITCL_INDEPENDENT_DEST)
+	(cd  $(ITCL_OBJ); $(MAKE) \
+		X11_INCLUDES="$(X11_INCSPEC)" \
+		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
+		install)
+
+$(ITCL_DEST):
+	mkdir $(ITCL_DEST)
+$(ITCL_DEST)/lib:
+	mkdir $(ITCL_DEST)/lib
+$(ITCL_INDEPENDENT_DEST):
+	mkdir $(ITCL_INDEPENDENT_DEST)
+
+clean_itcl:
+	(cd $(ITCL_OBJ); $(MAKE) clean)
+
+##################################################################
 $(TCLTK_OBJ)/makefile:
 	ln -s $(TCLTK_SRC)/makefile $@
