@@ -44,11 +44,13 @@ VPATH         = $(ROOT)/src/ptklib
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-HDRS	      = ptkBarGraph.h ptkPlot.h ptkPlot_defs.h
+HDRS	      = ptkBarGraph.h ptkPlot.h ptkPlot_defs.h \
+		BarGraph.h TclStarIfc.h XYPlot.h \
 
-LIBCSRCS      = ptkBarGraph.c ptkPlot.c
+LIBCSRCS      = ptkBarGraph.c ptkPlot.c ptkGlobals.c
 
-LIBCPPSRCS    =
+
+LIBCPPSRCS    = BarGraph.cc TclStarIfc.cc XYPlot.cc ptkRunEvents.cc 
 
 SRCS = 		$(LIBCSRCS) $(LIBCPPSRCS)
 
@@ -63,8 +65,6 @@ OBJS = 		$(LIBCSRCS:.c=.o) $(LIBCPPSRCS:.cc=.o)
 #LIB =		libptk.$(LIBSUFFIX)
 LIBNONSHARED=	libptk.a
 
-
-
 # extra source files: tcl/tk script files
 SCRIPTS = ptkPlot.tcl
 
@@ -74,13 +74,14 @@ all:	makefile $(LIBNONSHARED)
 
 install: makefile $(LIBNONSHARED) $(LIBDIR)/$(LIBNONSHARED)
 
-# include the X11, oct and tcl headers for C++ as well as C
-INCL =		-I$(KERNDIR) -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
+# include the X11, tcl headers for C++ as well as C
+INCL =		$(PTCOMPAT_INCSPEC) -I$(KERNDIR) -I$(ROOT)/src/pigilib \
+			-I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
 # include the headers from the kernel, even though C++ objects should be
 # avoided.  As of this writing, ieee.h is the only file referenced.
-C_INCL =	$(PTCOMPAT_INCSPEC) -I$(KERNDIR) -I$(TCL_INCDIR) \
-		-I$(TK_INCDIR) $(X11_INCSPEC)
+C_INCL =	$(PTCOMPAT_INCSPEC) -I$(KERNDIR) -I$(ROOT)/src/pigilib \
+			-I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
 lint:	$(LIBCSRCS)
 	lint -u $(LIBCSRCS) > lint
