@@ -6,17 +6,18 @@ Upon receiving an input event, output the next value specified by the
 array parameter "value" (default "1 -1"). This array can periodically
 repeat with any period, and you can halt a simulation when the end of
 the array is reached. The following table summarizes the capabilities:
-.nf
-haltAtEnd   periodic   period    operation
------------------------------------------------------------------------
-NO          YES        0         The period is the length of the array
-NO          YES        N>0       The period is N
-NO          NO         anything  Output the array once, then zeros
-YES         anything   anything  Stop after outputting the array once
-.fi
+<pre>
+<b>haltAtEnd   periodic   period    operation <br>
+-----------------------------------------------------------------------</b>
+    NO          YES        0         The period is the length of the array 
+    NO          YES        N&gt;0       The period is N 
+    NO          NO         anything  Output the array once, then zeros 
+    YES         anything   anything  Stop after outputting the array once 
+</pre>
+<p>
 The first line of the table gives the default settings.
 The array may be read from a file by simply setting value to something
-of the form "< filename".
+of the form "&lt; filename".
 	}
 	htmldoc {
 This star may be used to read a file by simply setting "value" to
