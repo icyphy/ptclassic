@@ -2,7 +2,7 @@
 #
 # @Author: John Reekie
 #
-# @Version: @(#)create.tcl	1.5 02/23/98
+# @Version: $Id$
 #
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
@@ -44,8 +44,6 @@
 #
 proc ::pakman::create {pkgname args} {
     global env
-
-puts "pakman create $pkgname $args"
 
     array set options $args
 
@@ -164,6 +162,7 @@ proc ::pakman::_create {template dir pkgname args} {
 	    set text [read $fd]
 	    close $fd
 
+	    regsub -all %percent $text % text
 	    if [info exists substs(-copyright)] {
 		regsub -all %copyright% $text $substs(-copyright) text
 	    }
@@ -194,7 +193,9 @@ proc ::pakman::_create {template dir pkgname args} {
     set subdirs {}
     foreach subdir [glob -nocomplain [file join $template *]] {
 	if [file isdirectory $subdir] {
-	    lappend subdirs [file tail $subdir]
+	    if { [lsearch -exact {SCCS RCS CVS} $subdir] == -1 } {
+		lappend subdirs [file tail $subdir]
+	    }
 	}
     }
     foreach subdir $subdirs {
