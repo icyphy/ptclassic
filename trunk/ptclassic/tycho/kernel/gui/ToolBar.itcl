@@ -33,7 +33,9 @@
 #######################################################################
 #### ToolBar
 # A tool bar with any of a variety of widgets.  It is meant to be put at
-# the top of a Displayer.
+# the top of a Displayer. ToolBar extends the ButtonBox class
+# by adding additional widgets, such as entry widgets and
+# other forms of user-settable fields.
 #
 # Examples:
 # <pre><tcl>
