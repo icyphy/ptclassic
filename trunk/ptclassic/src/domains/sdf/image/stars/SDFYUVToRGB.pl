@@ -1,0 +1,111 @@
+ defstar {
+//////// INFO ON STAR.
+    name      { Yuv2Rgb }
+    domain    { SDF }
+    version   { $Id$ }
+    author    { Sun-Inn Shih }
+    copyright { 1991 The Regents of the University of California }
+    location  { SDF image library }
+    desc {
+Read three packets that describe a color image in YUV format, and output
+three packets that describe an image in RGB format.
+The inputs and outputs are packets of type GrayImage.
+    }
+
+    ccinclude { "GrayImage.h", "Error.h" }
+
+//////// OUTPUTS AND STATES.
+    input {
+        name { input1 }
+        type { packet }
+    }
+    input {
+        name { input2 }
+        type { packet }
+    }
+    input {
+        name { input3 }
+        type { packet }
+    }
+    output {
+        name { output1 }
+        type { packet }
+    }
+    output {
+        name { output2 }
+        type { packet }
+    }
+    output {
+        name { output3 }
+        type { packet }
+    }
+
+    method {
+        name { quant }
+        type { "unsigned char" }
+        arglist { "(float inval)" }
+        access { protected }
+        code {
+            if (inval < 0.5) return ((unsigned char) 0);
+            else if (inval > 254.5) return ((unsigned char) 255);
+            else return ((unsigned char) inval+0.5);
+        }
+    } // end quant()
+
+    go {
+// Read inputs.
+        Packet pkt1, pkt2, pkt3;
+        (input1%0).getPacket(pkt1);
+        (input2%0).getPacket(pkt2);
+        (input3%0).getPacket(pkt3);
+        if(!(StrStr(pkt1.dataType(), "GrayI"))) {
+            Error::abortRun(*this, pkt1.typeError("GrayI"));
+            return;
+        }
+        if(!(StrStr(pkt2.dataType(), "GrayI"))) {
+            Error::abortRun(*this, pkt2.typeError("GrayI"));
+            return;
+        }
+        if(!(StrStr(pkt3.dataType(), "GrayI"))) {
+            Error::abortRun(*this, pkt3.typeError("GrayI"));
+            return;
+        }
+
+// Change into RGB format
+        GrayImage* redI = (GrayImage*) pkt1.writableCopy();
+        int width     = redI->retWidth();
+        int height    = redI->retHeight();
+        unsigned char* rptr = redI->retData();
+        GrayImage* greenI = (GrayImage*) pkt2.writableCopy();
+        unsigned char* gptr = greenI->retData();
+        GrayImage* blueI = (GrayImage*) pkt3.writableCopy();
+        unsigned char* bptr = blueI->retData();
+
+        int i, j, temp1, temp2;
+        unsigned char rrr, ggg, bbb;
+        for (i = 0; i < height; i++) {
+            temp1 = i*width;
+            for (j = 0; j < width; j++){
+                temp2 = j + temp1;
+                rrr = quant(rptr[temp2]
+                     +1.4026*(bptr[temp2]-128)+0.5);
+                ggg = quant(rptr[temp2]
+                     -0.3444*(gptr[temp2]-128)
+                     -0.7144*(bptr[temp2]-128)+0.5);
+                bbb = quant(rptr[temp2]
+                     +1.773*(gptr[temp2]-128) + 0.5);
+                rptr[temp2] = rrr;
+                gptr[temp2] = ggg;
+                bptr[temp2] = bbb;
+            }
+        }
+
+// Write whole frame to output here...
+        Packet pkty(*redI);
+        Packet pktu(*greenI);
+        Packet pktv(*blueI);
+        output1%0 << pkty;
+        output2%0 << pktu;
+        output3%0 << pktv;
+    } // end go{}
+} // end defstar{ Yuv2Rgb }
