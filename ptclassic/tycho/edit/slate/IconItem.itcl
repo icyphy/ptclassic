@@ -119,6 +119,9 @@ class ::tycho::Connectible {
     # Access a component
     proc component {id canvas slate {name {}}}
 
+    # Get the region of the icon
+    proc region {id canvas slate args}
+
     ###################################################################
     ####                          protected procs                  ####
 
@@ -159,6 +162,7 @@ class ::tycho::Connectible {
 
     set methodtable(aspect)      ::tycho::Connectible::aspect
     set methodtable(component)   ::tycho::Connectible::component
+    set methodtable(region)      ::tycho::Connectible::region
 
     #### Set option defaults
     array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
@@ -442,6 +446,14 @@ body ::tycho::Connectible::coords {id canvas slate x0 y0 x1 y1} {
     redrawoutputs $id $canvas $slate $positions
 }
 
+##########################################################################
+#### region
+#
+# Get the region of the primary.
+#
+body ::tycho::Connectible::region {id canvas slate args} {
+    eval $slate region $primary($id) $args
+}
 
 ##########################################################################
 #### redrawinputs
@@ -460,7 +472,7 @@ body ::tycho::Connectible::redrawinputs {id canvas slate positions} {
 		    $x $y \
 		    [lrange $option(intype$id) 1 end] \
 		    -direction [list [list $a $b]] \
-		    -tags [list $tags]]
+		    -tags input]
 	} else {
 	    $slate coords $p $x $y
 	    # Should be able to optimise this out
@@ -487,7 +499,7 @@ body ::tycho::Connectible::redrawoutputs {id canvas slate positions} {
 		    $x $y \
 		    [lrange $option(outtype$id) 1 end] \
 		    -direction [list [list $a $b]] \
-		    -tags [list $tags]]
+		    -tags output]
 	} else {
 	    $slate coords $p $x $y
 	    # Should be able to optimise this out
