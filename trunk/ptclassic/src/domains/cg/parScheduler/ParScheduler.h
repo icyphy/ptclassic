@@ -16,6 +16,7 @@ Date of last revision:
 
 *****************************************************************/
 
+#include "pt_fstream.h"
 #include "SDFScheduler.h"
 #include "BaseMultiTarget.h"
 #include "ParProcessors.h"
@@ -38,7 +39,7 @@ private:
 	
 protected:
 	const char* logFile;
-	ostream* logstrm;	// for logging.
+	pt_ofstream logstrm;	// for logging.
 
 	BaseMultiTarget* mtarget;
 	Galaxy* myGal;
@@ -87,8 +88,7 @@ protected:
 
 public:
   	// Constructor
-  	ParScheduler(BaseMultiTarget* t, const char* log = 0) : mtarget(t),
-		logstrm(0), logFile(log), exGraph(0) { inUniv = TRUE; }
+  	ParScheduler(BaseMultiTarget* t, const char* log = 0);
 
 	virtual ~ParScheduler();
 
