@@ -322,6 +322,27 @@ stdkey2:
 
 /* version identifier */
 version:
+        '$' IDENTIFIER ':' IDENTIFIER '$'
+   '$' IDENTIFIER ':' IDENTIFIER '/' IDENTIFIER '/' IDENTIFIER
+                 IDENTIFIER ':' IDENTIFIER ':' IDENTIFIER '$'
+                { char b[SMALLBUFSIZE];
+                  objVer = $4;
+                  sprintf(b, "\"%s/%s/%s %s:%s:%s\"", $9, $11, $13, $14, $16, $18);
+                  objDate = save(b);
+                }
+|
+        '$' IDENTIFIER '$' '$' IDENTIFIER '$'
+                {
+                  char b[SMALLBUFSIZE];
+                  long t;
+                  objVer = "?.?";
+                  t = time((time_t *)0);
+                  b[0] = QUOTE;
+                  strncat(b,ctime(&t),24);
+                  strcat(b,"\"");
+                  objDate = save(b);
+                }
+|
 	'@' '(' '#' ')' IDENTIFIER
 		IDENTIFIER
 		IDENTIFIER '/' IDENTIFIER '/' IDENTIFIER
@@ -453,9 +474,7 @@ portitem:
 |	TYPE '{' '=' ident '}'		{ portInherit = $4;} 
 |	NUM '{' expval '}'		{ portNum = $3;}
 |	attrib BODY			{ portAttrib = $2; bodyMode = 0;}
-|	DESC '{' 			{ descMode = 1; docMode = 1;}
-		BODY			{ portDesc = $4;
-					  docMode = 0;
+|	DESC '{' 			{ descMode = 1; docMode = 1;} BODY			{ portDesc = $4; docMode = 0;
 					  descMode = 0;}
 ;
 
@@ -1445,7 +1464,14 @@ yylex () {
 		yylval = save(yytext);
 		return STRING;
 	}
-	else if (!isalnum(c) && c != '.') {
+/* Change proposed by Egbert Ammicht to make Ptlang combatible with RCS */
+#if NO_UNDERSCORE_IN_IDENTIFIER
+#define IDENTCHAR(c) (isalnum(c) || c == '.')
+#else
+#define IDENTCHAR(c) (isalnum(c) || c == '.' || c == '_')
+#endif
+        else if (! IDENTCHAR(c) ) {
+/* end change */
 		yytext[0] = c;
 		yytext[1] = 0;
 		c = 0;
@@ -1455,7 +1481,9 @@ yylex () {
 	else do {
 		*p++ = c;
 		input();
-	} while (isalnum(c) || c == '.');
+/* Change proposed by Egbert Ammicht to make Ptlang combatible with RCS */
+        } while ( IDENTCHAR(c) );
+/* end change */
 	*p = 0;
 	yylval = save(yytext);
 	if ((key = lookup (yytext)) != 0) {
@@ -1577,3 +1605,4 @@ char *s;
 	fprintf (stderr, "\"%s\", line %d: %s\n", inputFile, yyline, s);
 	return;
 }
+
