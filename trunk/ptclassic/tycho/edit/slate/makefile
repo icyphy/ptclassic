@@ -40,9 +40,7 @@ VPATH =		$(ROOT)/editors/slate
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-TCL_SRCS = \
-	pkgIndex.tcl \
-	slate.tcl
+TCL_SRCS =
   
 ITCL_SRCS = \
 	Animator.itcl \
@@ -82,9 +80,11 @@ ITCL_SRCS = \
 	Stepper.itcl \
 	Terminal.itcl
 
-EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =		tclIndex doc img test
+MISC_FILES = tclIndex doc img test
+	pkgIndex.tcl \
+	slate.tcl
 
 # Sub directories to run make in.
 DIRS =			test doc
