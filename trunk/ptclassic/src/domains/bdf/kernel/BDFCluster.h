@@ -360,6 +360,7 @@ public:
 	BDFClustPort* outPtr() {
 		return far() ? 0 : pOutPtr;
 	}
+
 	int feedForward() const { return feedForwardFlag;}
 	void markFeedForward() { feedForwardFlag = 1;}
 
@@ -377,9 +378,14 @@ public:
 
 	void makeExternLink(BDFClustPort* val);
 
+	int isBagPort() const { return bagPortFlag;}
+
 	BDFClustPort* inPtr() {
 		return bagPortFlag ? (BDFClustPort*)&pPort : 0;
 	}
+
+	// this one just traverses "inPtr" all the way.
+	BDFClustPort* innermost();
 
 	void setRelation(int r, BDFClustPort* assoc = 0);
 
