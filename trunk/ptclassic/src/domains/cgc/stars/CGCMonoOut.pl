@@ -51,30 +51,29 @@ provisions.
     $starSymbol(bufferptr) = $starSymbol(buffer);
   }  
 
-  codeblock (convert_linear16) {
+  codeblock (convert) {
     {
+      /* select convert procedure depending on encodingType */
       int i;
-      for (i=0; i <($val(blockSize)/2); i++) {
-	/* Convert from floating point [-1.0,1.0] to 16-bit sample */
-	$starSymbol(buffer)[i] = ceil($ref(input, i)*32768.0);
-      }	
-    }	
+      if (strcasecmp($ref(encodingType), "linear16") == 0)
+	{
+	  for (i=0; i <($val(blockSize)/2); i++) {
+	    /* Convert from floating point [-1.0,1.0] to 16-bit sample */
+	    $starSymbol(buffer)[i] = ceil($ref(input, i)*32768.0);
+	  }
+	}
+      else
+	{
+	  for(i = 0; i < $val(blockSize); i++) {
+	    /* Convert from floating point [-1.0,1.0] to 16-bit sample */
+	    int sample16 = (int)($ref(input,i) * 32768.0);
+	    /* Convert 16-bit sample to PCM mu-law */
+	    $starSymbol(buffer)[$val(blockSize)-1-i] = 
+	      Ptdsp_LinearToPCMMuLaw(sample16);
+	  }
+	}
+    }
   }
-
-  codeblock (convert_ulaw8) {
-    /* Convert from floating point [-1.0,1.0] to mu-law PCM. */	
-    {
-      int i;
-      for(i = 0; i < $val(blockSize); i++) {
-	/* Convert from floating point [-1.0,1.0] to 16-bit sample */
-	int sample16 = (int)($ref(input,i) * 32768.0);
-	/* Convert 16-bit sample to PCM mu-law */
-	$starSymbol(buffer)[$val(blockSize)-1-i] = 
-	  Ptdsp_LinearToPCMMuLaw(sample16);
-      }
-    }	
-  }
-
   
   setup {
     if (strcasecmp(encodingType, "ulaw8") == 0){
@@ -103,29 +102,15 @@ provisions.
     if(strcasecmp(fileName, "/dev/audio") == 0)
       {
 	/* audio_setup : to set encodingType, sampleRate and channels */
-	StringList setupParameters = "$sharedSymbol(CGCAudioBase,audio_setup)";
-	setupParameters  << "($starSymbol(file), "
-			 << "\"" << encodingType << "\", "
-			 <<  sampleRate << ", " 
-			 <<  channels   << ");\n";
-
-	addCode(setupParameters);
+	addCode("$sharedSymbol(CGCAudioBase,audio_setup)($starSymbol(file), $ref(encodingType), $ref(sampleRate), $ref(channels));");
 	/* audio_control : to set portType, volume and balance */
-	StringList controlParameters = "$sharedSymbol(CGCAudioBase,audio_control)";
-	controlParameters << "($starSymbol(file), "
-			  << "\"" << portType << "\", "
-			  <<  volume << ", " 
-			  <<  balance << ", "
-			  << "0);\n";
-	addCode(controlParameters);
+	addCode("$sharedSymbol(CGCAudioBase,audio_control)($starSymbol(file), $ref(portType), $ref(volume), $ref(balance), 0);");
       }
   }
 
+
   go {
-    if (strcasecmp(encodingType, "linear16") == 0)
-      addCode(convert_linear16);
-    else
-      addCode(convert_ulaw8);
+    addCode(convert);
     if ((int)aheadLimit >= 0 ) addCode(sync);
     addCode(setbufptr);
     addCode(write);
