@@ -54,14 +54,25 @@ void ComplexState  :: initialize() {
 	double imagval;
 	ParseToken t =getParseToken(lexer);
 	if (t.tok == T_ID) {
+		if (!t.s->isA("ComplexState")) {
+			parseError ("invalid state type: ", t.s->readFullName());
+			return;
+		}
 		val = ((ComplexState*)t.s)->val;
 		return;
 	}
+	// if it does not begin with '(', assume a purely real value.
 	if (t.tok != '(') {
-		parseError ("syntax error, want (1.2, 3.4) type syntax");
+		pushback = t;
+		t = evalFloatExpression(lexer);
+		if (t.tok == T_Float) {
+			realval = t.doubleval;
+			imagval = 0.0;
+		}
 		return;
 	}
-	t =  evalExpression(lexer);
+	// get real , imag
+	t =  evalFloatExpression(lexer);
 	if (t.tok != T_Float) return;
 	realval = t.doubleval;
 	t = getParseToken(lexer);
@@ -69,7 +80,7 @@ void ComplexState  :: initialize() {
 		parseError ("expected a comma");
 		return;
 	}
-	t =  evalExpression(lexer);
+	t =  evalFloatExpression(lexer);
 	if (t.tok != T_Float) return;
 	imagval = t.doubleval;
 	val = Complex(realval,imagval);
@@ -77,30 +88,7 @@ void ComplexState  :: initialize() {
 	if (t.tok != ')')
 		parseError ("expected )");
 	return;
-	return;
 }
-
-ParseToken ComplexState :: evalExpression(Tokenizer& lexer) {
-	double signflag = 1;
-	
-        ParseToken t = getParseToken(lexer, T_Float);
-	while (t.tok == '-') {
-		t = getParseToken(lexer, T_Float);
-		signflag = -signflag;
-	}
-	if (t.tok == T_EOF) {
-		parseError ("unexpected end of string");
-		return t;
-	}
-	if (t.tok == T_Float) {
-		t.doubleval *= signflag;
-		return t;
-	}
-	parseError ("syntax error");
-	t.tok = T_ERROR;
-	return t;
-}
-
 
 // make knownstate entry
 static ComplexState proto;
