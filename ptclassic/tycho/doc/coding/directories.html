@@ -79,9 +79,15 @@ parallel trees, but the amount of training is fairly substantial.
 <A NAME="gnu make">GNU <CODE>make</CODE></A>
  extensions so that the makefiles can be used with non-GNU
 <CODE>make</CODE>.  Over time we are migrating away from makefiles and
-using scripts instead.
+using Tcl scripts and the BuilderDialog instead.
 
- <P>The general structure of a Tycho makefile is
+ <P>
+The Makefile editor can insert a makefile template by using the
+<CODE>Template</CODE> choice of the <CODE>Special</CODE> menu.
+<A HREF="../../editors/textedit/templates/Cmakefile.mk"><CODE>$TYCHO/editors/textedi/templates/Cmakefile.mk</CODE></A> contains the template that the
+Makefile editor actually inserts.
+
+The general structure of a Tycho makefile is
 <OL>
 
 <LI> A header that includes a one line summary, author, version and
