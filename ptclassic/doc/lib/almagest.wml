@@ -90,13 +90,13 @@ NODE FirstPage
               button("[Next] ",    filename(next), "[Next] "),
               button("[Contents] ",filename(exttoc),   "[Contents] "),
               button("[Index] ",   filename(INDEX), "[Index] "),
-              button("[Search] ",  "http://ptolemy.eecs.berkeley.edu/cgi-bin/users-man-wais.pl", "[Search] ")
+              button("[Search] ",  "http://ptolemy.eecs.berkeley.edu/cgi-bin/almagest-wais.pl", "[Search] ")
                          );
     write(*,paragraph(@NavPanel));
   }
   FOOTER
   {
-    write(*,toc(1,local));
+    write(*,toc(1,global));
     write(*,hrule());
     write(*,address(concatenate(maintitle()," - ",date())));
     write(*,paragraph(@NavPanel));
@@ -119,7 +119,7 @@ NODE LevelOne
               button("[Top] ",     filename(top),      "[Top] "      ),
               button("[Contents] ",filename(exttoc),      "[Contents] " ),
               button("[Index] ",   filename(INDEX),    "[Index] "    ),
-              button("[Search] ",  "http://ptolemy.eecs.berkeley.edu/cgi-bin/users-man-wais.pl", "[Search] ")
+              button("[Search] ",  "http://ptolemy.eecs.berkeley.edu/cgi-bin/almagest-wais.pl", "[Search] ")
                          );
     write(*,paragraph(@NavPanel));
     write(*,paragraph(maintitle()));
@@ -146,7 +146,7 @@ NODE LevelTwo
               button("[Top] ",     filename(top),      "[Top] "      ),
               button("[Contents] ",filename(exttoc),      "[Contents] " ),
               button("[Index] ",   filename(INDEX),    "[Index] "    ),
-              button("[Search] ",  "http://ptolemy.eecs.berkeley.edu/cgi-bin/users-man-wais.pl", "[Search] ")
+              button("[Search] ",  "http://ptolemy.eecs.berkeley.edu/cgi-bin/almagest-wais.pl", "[Search] ")
                          );
     write(*,paragraph(@NavPanel));
     write(*,paragraph(concatenate(headingnumber(up)," ",headingtext(up))));
@@ -177,7 +177,7 @@ NODE IndexNode
               button("[Previous] ",filename(previous), "[Previous] " ),
               button("[Top] ",     filename(top),      "[Top] "      ),
               button("[Contents] ",filename(exttoc),      "[Contents] " ),
-              button("[Search] ", "http://ptolemy.eecs.berkeley.edu/cgi-bin/users-man-wais.pl" , "[Search] ")
+              button("[Search] ", "http://ptolemy.eecs.berkeley.edu/cgi-bin/almagest-wais.pl" , "[Search] ")
                          );
     write(*,paragraph(@NavPanel));
     write(*,paragraph(maintitle()));
@@ -662,7 +662,7 @@ PARAGRAPH "L1GlossaryHeader" TYPE List
   KIND Glossary
   ACTIONS
   {
-     write(*,glossterm(text(current,1,1)))
+     write(*,glossterm(text(current,1,1)));
   }
 }
 
@@ -945,18 +945,24 @@ PARAGRAPH "Default" TYPE Normal
 
 # Paragraph formats used AND contained in the paragraph catalog(s).
 
-PARAGRAPH "Title" TYPE Normal { USES "FMDocumentTitle" }
-PARAGRAPH "ExternalTOC" TYPE Heading { USES "ExtTOCHeading-TocNode" }
+#PARAGRAPH "Title" TYPE Normal { USES "FMDocumentTitle" }
+# prog_manTOC.MIF has Title
+PARAGRAPH "Title" TYPE Heading { USES "ExtTOCHeading-TocNode" }
+# users_manTOC.MIF has ContTitle
+PARAGRAPH "ContTitle" TYPE Heading { USES "ExtTOCHeading-TocNode" }
 
+# There must be one and only one ExternalTOC
+#PARAGRAPH "ExternalTOC" TYPE Heading { USES "ExtTOCHeading-TocNode" }
+PARAGRAPH "ExternalTOC" TYPE Normal { USES "Default" }
 
 PARAGRAPH "1Heading" TYPE Heading { USES "L1H1HR-Node1" } 
-PARAGRAPH "1HeadingTOC" TYPE Heading { USES "L1H1HR-Node1" } 
+PARAGRAPH "1HeadingTOC" TYPE Normal { USES "Ignore" } 
 PARAGRAPH "Appendix" TYPE Heading { USES "L1H1HR-Node1" }
 PARAGRAPH "AppendixCont" TYPE Heading { USES "L1H1HR" }
 PARAGRAPH "2Heading" TYPE Heading { USES "L2H1HR-Node2" } 
-PARAGRAPH "2HeadingTOC" TYPE Heading { USES "L2H1HR-Node2" } 
+PARAGRAPH "2HeadingTOC" TYPE Normal { USES "Ignore" } 
 PARAGRAPH "3Heading" TYPE Heading { USES "L3H1HR-Node2" } 
-PARAGRAPH "3HeadingTOC" TYPE Heading { USES "L3H1HR-Node2" } 
+PARAGRAPH "3HeadingTOC" TYPE Normal { USES "Ignore" } 
 PARAGRAPH "4Heading" TYPE Heading { USES "L4H1" } 
 
 # Used by title.MIF
@@ -974,83 +980,78 @@ PARAGRAPH "WideDefinition2" TYPE List { USES "L1GlossaryItem-2" }
 PARAGRAPH "NarrowDefinition" TYPE List { USES "L1GlossaryItem-2" }
 
 #PARAGRAPH "TitleTOC" TYPE Heading { USES "ExtTOCHeading-TocNode" } 
-PARAGRAPH "TitleTOC" TYPE Normal { USES "Default"  }
-PARAGRAPH "SectionTOC" TYPE Normal { USES "Default" } 
-PARAGRAPH "AppendixTOC" TYPE Normal { USES "Default" } 
+PARAGRAPH "TitleTOC" TYPE Normal { USES "Ignore"  }
+PARAGRAPH "SectionTOC" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "AppendixTOC" TYPE Normal { USES "Ignore" } 
 
 PARAGRAPH "Commands" TYPE Normal { USES "FixedWidthText" }
 PARAGRAPH "CommandsCont" TYPE Normal { USES "FixedWidthText" } 
 PARAGRAPH "Code" TYPE Normal { USES "FixedWidthText" } 
 
+# Used in prog_man
+PARAGRAPH "LCode" TYPE Normal { USES "FixedWidthText" } 
+
 # InfoHeader is used by ptglossary.MIF
 PARAGRAPH "InfoHeader" TYPE List { USES "L1GlossaryHeader" } 
 PARAGRAPH "InfoBody" TYPE List { USES "L1GlossaryBody" } 
 
-PARAGRAPH "IndexExampleLOM" TYPE Normal { USES "Default" } 
-PARAGRAPH "Type 18LOM" TYPE Normal { USES "Default" } 
+PARAGRAPH "GroupTitlesIX" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "IndexDefinitionIX" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "IndexDefinitionLOM" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "IndexExampleIX" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "IndexExampleLOM" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "IndexIX" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "IndexLOM" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "IndexReferenceIX" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "IndexReferenceLOM" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "IndexStarDefIX" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "IndexStarDefLOM" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "IndexStarExIX" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "IndexStarExLOM" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "IndexStarRefIX" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "IndexStarRefLOM" TYPE Normal { USES "Ignore" } 
 
-PARAGRAPH "IndexExampleIX" TYPE Normal { USES "Default" } 
+PARAGRAPH "Level1IX" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "Level2IX" TYPE Normal { USES "Ignore" } 
+
+PARAGRAPH "Type 11LOM" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "Type 12LOM" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "Type 13LOM" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "Type 14LOM" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "Type 15LOM" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "Type 16LOM" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "Type 17LOM" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "Type 18LOM" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "Type 19LOM" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "Type 20LOM" TYPE Normal { USES "Ignore" } 
 
 PARAGRAPH "Display" TYPE Normal { USES "Default" } 
 PARAGRAPH "ExerciseCont" TYPE Normal { USES "Default" } 
-PARAGRAPH "IndexStarExLOM" TYPE Normal { USES "Default" } 
-PARAGRAPH "IndexStarRefLOM" TYPE Normal { USES "Default" } 
-
-PARAGRAPH "IndexStarExIX" TYPE Normal { USES "Default" } 
 PARAGRAPH "Heading" TYPE Normal { USES "Default" } 
 PARAGRAPH "Figure" TYPE Normal { USES "Default" } 
 PARAGRAPH "Footnote" TYPE Normal { USES "Default" } 
 PARAGRAPH "Exercise1" TYPE Normal { USES "Default" } 
-
-PARAGRAPH "IndexStarDefIX" TYPE Normal { USES "Default" } 
-
 PARAGRAPH "Definition" TYPE Normal { USES "Default" } 
-PARAGRAPH "IndexReferenceLOM" TYPE Normal { USES "Default" } 
-PARAGRAPH "GroupTitlesIX" TYPE Normal { USES "Default" } 
 PARAGRAPH "OtherContrib" TYPE Normal { USES "Default" } 
-PARAGRAPH "IndexDefinitionIX" TYPE Normal { USES "Default" } 
 PARAGRAPH "Reference" TYPE Normal { USES "Default" } 
-PARAGRAPH "Type 14LOM" TYPE Normal { USES "Default" } 
 PARAGRAPH "AlphaList" TYPE Normal { USES "Default" } 
 PARAGRAPH "Equation" TYPE Normal { USES "Default" } 
-
-PARAGRAPH "Type 19LOM" TYPE Normal { USES "Default" } 
-PARAGRAPH "IndexIX" TYPE Normal { USES "Default" } 
 PARAGRAPH "Indent" TYPE Normal { USES "Default" } 
 PARAGRAPH "Exercise" TYPE Normal { USES "Default" } 
 PARAGRAPH "Body" TYPE Normal { USES "Default" } 
-PARAGRAPH "IndexLOM" TYPE Normal { USES "Default" } 
-PARAGRAPH "Type 15LOM" TYPE Normal { USES "Default" } 
-PARAGRAPH "IndexStarRefIX" TYPE Normal { USES "Default" } 
-PARAGRAPH "Level1IX" TYPE Normal { USES "Default" } 
-
-
 PARAGRAPH "Shrinked Figure" TYPE Normal { USES "Default" } 
-PARAGRAPH "Type 11LOM" TYPE Normal { USES "Default" } 
 PARAGRAPH "Footer" TYPE Normal { USES "Default" } 
-
 PARAGRAPH "Part" TYPE Normal { USES "Default" } 
 PARAGRAPH "PartA" TYPE Normal { USES "Default" } 
-PARAGRAPH "IndexDefinitionLOM" TYPE Normal { USES "Default" } 
-PARAGRAPH "Type 16LOM" TYPE Normal { USES "Default" } 
-PARAGRAPH "IndexReferenceIX" TYPE Normal { USES "Default" } 
 
 #PARAGRAPH "Author" TYPE Heading { USES "ExtTOCHeading-TocNode" }
 PARAGRAPH "Author" TYPE Normal { USES "Default" } 
 
-PARAGRAPH "ContTitle" TYPE Normal { USES "Default" } 
-PARAGRAPH "Type 12LOM" TYPE Normal { USES "Default" } 
 PARAGRAPH "LBody" TYPE Normal { USES "Default" } 
 PARAGRAPH "Table" TYPE Normal { USES "Default" } 
 PARAGRAPH "PartCont" TYPE Normal { USES "Default" } 
-
-PARAGRAPH "Type 17LOM" TYPE Normal { USES "Default" } 
 PARAGRAPH "Header" TYPE Normal { USES "Default" } 
 PARAGRAPH "AlphaList1" TYPE Normal { USES "Default" } 
-PARAGRAPH "IndexStarDefLOM" TYPE Normal { USES "Default" } 
-PARAGRAPH "Type 13LOM" TYPE Normal { USES "Default" } 
-PARAGRAPH "Type 20LOM" TYPE Normal { USES "Default" } 
-PARAGRAPH "Level2IX" TYPE Normal { USES "Default" } 
 PARAGRAPH "5Heading" TYPE Normal { USES "Default" } 
 
 # Paragraph formats NOT used but contained in the paragraph catalog(s).
@@ -1071,15 +1072,15 @@ PARAGRAPH "Affiliation" TYPE Normal { USES "Default" }
 PARAGRAPH "computer" TYPE Normal { USES "Default" } 
 PARAGRAPH "computerA" TYPE Normal { USES "Default" } 
 #
-PARAGRAPH "ActiveIX" TYPE Normal { USES "Default" } 
-PARAGRAPH "IgnoreCharsIX" TYPE Normal { USES "Default" } 
+PARAGRAPH "ActiveIX" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "IgnoreCharsIX" TYPE Normal { USES "Ignore" } 
 # from pigi.MIF
 PARAGRAPH "MenuHeader" TYPE Normal { USES "Default" } 
 PARAGRAPH "MenuBody" TYPE Normal { USES "Default" } 
 #
-PARAGRAPH "SortOrderIX" TYPE Normal { USES "Default" } 
-PARAGRAPH "ActiveTOC" TYPE Normal { USES "Default" } 
-PARAGRAPH "SeparatorsIX" TYPE Normal { USES "Default" } 
+PARAGRAPH "SortOrderIX" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "ActiveTOC" TYPE Normal { USES "Ignore" } 
+PARAGRAPH "SeparatorsIX" TYPE Normal { USES "Ignore" } 
 
 
 #---------------------------------------------------------------------
