@@ -291,7 +291,7 @@ extern int vfprintf(FILE *, const char *, char *);
 
 #if !defined(PTIRIX5) && !defined(PTHPPA) && ! defined(PTALPHA) && !defined(PTLINUX)
 				/* thor/kernel/rpc.c use bind2(), listen(). */
-#if defined(PTFREEBSD) || defined(SOLARIS2_6)
+#if defined(PTFREEBSD) || defined(PTSOL2_6)
 /* Under linux and libc-5.2.18, bind() takes a const second arg */
 extern int bind(int, const struct sockaddr *, int);
 #else /* PTFREEBSD */
@@ -378,6 +378,7 @@ extern int errno;
 #else
 #ifdef PT_NT4VC
 #include <stdlib.h>
+#include <sys/errno.h>
 #else /* PT_NT4VC */
 extern int sys_nerr;
 #if defined (__GLIBC__) && (__GLIBC__ >= 2)
@@ -396,6 +397,17 @@ extern int errno;
 #include <winsock.h>
 #endif
 #endif /* NEED_TIMEVAL */
+
+/* Under NT, we need to open files in either textmode or binarymode.
+ * In theory, modern Unixes should be able to handle "wb", but why try?
+ */
+#ifdef PTNT
+#define PT_FOPEN_WRITE_BINARY "wb"
+#define PT_FOPEN_READ_BINARY "rb"
+#else
+#define PT_FOPEN_WRITE_BINARY "w"
+#define PT_FOPEN_READ_BINARY "r"
+#endif    
 
 #ifdef PTNT
 /* src/kernel/TimeVal.cc uses timercmp */
@@ -502,8 +514,10 @@ extern int errno;
 #endif
 
 /* Is char* environ defined? See octtools/Packages/vov/lib.c */
-#if defined(PTHPPA) || defined(PTLINUX)
-/* Under PTHPPA and PTLINUX, don't need environ declaration. */
+#if defined(PTHPPA) || (defined(PTLINUX) && (!defined(__GLIBC__) || (__GLIBC__ < 2)))
+/* Under PTHPPA, and PTLINUX , don't need environ declaration.
+ * Under PTLINUX with egcs1.0.2 and glibc-2.0.6, we do need it
+ */
 #else
 #define NEED_ENVIRON_DECL
 #endif
