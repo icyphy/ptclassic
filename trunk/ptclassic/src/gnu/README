@@ -1,4 +1,4 @@
--*-Mode:text-*- -[Wed Aug 11 11:25:57 1999 by cxh]-
+-*-Mode:text-*- -[Wed Sep  1 08:39:39 1999 by cxh]-
 Version: $Id$
 
 src/gnu/README
@@ -17,12 +17,12 @@ distribution, you will need to have gcc available.
 Note that the tcl/tk source is elsewhere.
 
 This directory contains the following GNU tools
-	egcs-1.1.1
+	gcc-2.95.1
 	make-3.77
 
 If you obtained the hp GNU tar file, then you should also have:
         binutils-2.9.1
-	bison-1.25
+	bison-1.28
 	flex-2.5.4
 
 The makefile in this directory has only been tested with Solaris2.5.1
@@ -33,6 +33,7 @@ Versions
 --------
 	In general, you are better off using the versions above.
 	gcc-2.8.0 has problems, see $PTOLEMY/doc/release.html
+	egcs-1.1.1 worked at one time.
 	gcc-2.7.2.2 should work, but has not been tested extensively.
 
 	Ptolemy is not very sensitive to the version of GNU make.  Any
