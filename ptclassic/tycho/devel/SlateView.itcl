@@ -499,26 +499,26 @@ body ::tycho::SlateView::destructor {} {
 body ::tycho::SlateView::addMyMenus {} {
 
     # Add File menu
-    $myMenubar addMenu File left {} -underline 0
+    $myMenubar addMenu File -underline 0
 
     # Add commands to the existing File menu which is standard on
     # the displayer
-    $myMenubar addMenuItem {Open} File \
+    $myMenubar add {Open} File \
 	    -command {error "Sorry not implemented yet"} \
 	    -state normal 
-    $myMenubar addMenuItem {Save} File \
+    $myMenubar add {Save} File \
 	    -command {error "Sorry not implemented yet"} \
 	    -state normal 
-    $myMenubar addMenuItem {Save As...} File \
+    $myMenubar add {Save As...} File \
 	    -command {error "Sorry not implemented yet"} \
 	    -state normal 
 
-    $myMenubar addMenuSeparator File
+    $myMenubar addSeparator File
 
-    $myMenubar addMenuItem {Close} File \
+    $myMenubar add {Close} File \
 	    -command {error "Sorry not implemented yet"} \
 	    -state normal
-    $myMenubar addMenuItem {Quit} File \
+    $myMenubar add {Quit} File \
 	    -command "$this quit" \
 	    -state normal 
 }

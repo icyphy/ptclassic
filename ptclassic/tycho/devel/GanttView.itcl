@@ -296,64 +296,64 @@ body ::tycho::GanttView::destructor {} {
 body ::tycho::GanttView::addMyMenus {} {
 
     # Add File menu
-    $myMenubar addMenu File left {} -underline 0
+    $myMenubar addMenu File -underline 0
 
     # First add commands to the existing File menu which is standard on
     # the displayer
-    $myMenubar addMenuItem {Open} File \
+    $myMenubar add {Open} File \
 	    -command [code "$this open"] \
 	    -state normal
  
-    $myMenubar addMenuItem {Save} File \
+    $myMenubar add {Save} File \
 	    -command [code "$this save"] \
 	    -state normal 
 
-    $myMenubar addMenuSeparator File
+    $myMenubar addSeparator File
 
-    $myMenubar addMenuItem {Print Chart...} File \
+    $myMenubar add {Print Chart...} File \
 	    -command [code "$this print"] \
 	    -state normal 
 
-    $myMenubar addMenuSeparator File
+    $myMenubar addSeparator File
 
-    $myMenubar addMenuItem {Close} File \
+    $myMenubar add {Close} File \
 	    -command "$this quit" \
 	    -state normal 
 
     # Add the Edit menu
-    $myMenubar addMenu {Edit} left {} -underline 0
+    $myMenubar addMenu {Edit} -underline 0
 
     # Add Edit menu items
     # FIXME: add these later - see Graphics object
     
     # Add the Zoom menu
-    $myMenubar addMenu {Zoom} left {} -underline 0
+    $myMenubar addMenu {Zoom} -underline 0
     
     # Add the Zoom menu items
-    $myMenubar addMenuItem {In} Zoom \
+    $myMenubar add {In} Zoom \
 	    -command [code "$this zoom in"] \
 	    -state normal
 
-    $myMenubar addMenuItem {Out} Zoom \
+    $myMenubar add {Out} Zoom \
 	    -command [code "$this zoom out"] \
 	    -state normal
 
-    $myMenubar addMenuSeparator Zoom
+    $myMenubar addSeparator Zoom
 
-    $myMenubar addMenuItem {Set Zoom Factor...} Zoom \
+    $myMenubar add {Set Zoom Factor...} Zoom \
 	    -command [code "$this setZoomFactor"] \
 	    -state normal
 
     # Add legend menu
-    $myMenubar addMenu {Legend} left {} -underline 0
+    $myMenubar addMenu {Legend} -underline 0
 
     # Add legend menu items
     # FIXME: add these items
 
     # Add Help menu
-    $myMenubar addMenu {Help} right {} -underline 0
+    $myMenubar addMenu {Help} -side right -underline 0
 
-    $myMenubar addMenuItem {Gantt Chart Help} Help \
+    $myMenubar add {Gantt Chart Help} Help \
 	    -command [code "$this help"] \
 	    -state normal
 }

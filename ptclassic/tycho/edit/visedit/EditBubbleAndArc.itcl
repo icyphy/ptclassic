@@ -132,9 +132,6 @@ class ::tycho::EditBubbleAndArc {
     # This is needed for creating new node/arc.
     protected variable create_item
 
-    # The name of the Tk canvas as a variable, for convenience.
-    protected variable canvas
-
     # Array that stores info about the nodes/states
     protected variable nodeInfo
     # Array that stores info about the edges/transitions
@@ -160,44 +157,43 @@ body ::tycho::EditBubbleAndArc::constructor {args} {
     interactiveEnable 0
 
     # Disable and remove items in Edit menu
-    menubar disableMenuItem "Cut" Edit
-    menubar disableMenuItem "Copy" Edit
-    menubar disableMenuItem "Paste" Edit
-    menubar disableMenuItem "Edit Item" Edit
+    menubar disable "Cut"
+    menubar disable "Copy"
+    menubar disable "Paste"
+    menubar disable "Edit Item"
 
     # Renew items in Edit menu
-    menubar addMenuItem {Delete} Edit -underline 0 \
+    menubar add {Delete} Edit -underline 0 \
 	    -command "$this deleteItem selected"
 
     # Add an Special menu
-    menubar addMenu Special left Window -underline 0
-    menubar addMenuItem {Smooth Toggle} Special -underline 0 \
+    menubar addMenu Special -before Window -underline 0
+    menubar add {Smooth Toggle} Special -underline 0 \
 	    -command "$this smoothToggleArc selected"
-    menubar addMenuItem {Add Point Downstream} Special -underline 0 \
+    menubar add {Add Point Downstream} Special -underline 0 \
 	    -command "$this addPoint"
-    menubar addMenuItem {Delete Point} Special -underline 0 \
+    menubar add {Delete Point} Special -underline 0 \
 	    -command "$this deletePoint"
-    menubar addMenuSeparator Special
-    menubar addMenuItem "Get Info" Special -underline 0 \
+    menubar addSeparator Special
+    menubar add "Get Info" Special -underline 0 \
             -command "$this getInfo"
 
     # Add new commands into Edit menu.
-    menubar addMenuSeparator Edit
-    menubar addMenuItem {New Node} Edit -underline 4 -accelerator "N" \
+    menubar addSeparator Edit
+    menubar add {New Node} Edit -underline 4 -accelerator "N" \
 	    -command "$this newNode"
-    menubar addMenuItem {New Arc} Edit -underline 4 -accelerator "A" \
+    menubar add {New Arc} Edit -underline 4 -accelerator "A" \
 	    -command "$this newArc"
 
     # Initialize the variables.
     set create_item {}
-    set canvas [canvasName]
 
     # Set up bindings for the canvas.
     $this setUpCanvasBindings
 
     # Setup menu hot key binding
-    bind $canvas <Key-N> "$this newNode"
-    bind $canvas <Key-A> "$this newArc"
+    bind $slate <Key-N> "$this newNode"
+    bind $slate <Key-A> "$this newArc"
 
     eval itk_initialize $args
 
@@ -211,7 +207,7 @@ body ::tycho::EditBubbleAndArc::constructor {args} {
 #
 body ::tycho::EditBubbleAndArc::clear {} {
     if [getReadOnly] {bell; return}
-    $canvas delete all
+    $slate delete all
     foreach index [array names nodeInfo] {
 	unset nodeInfo($index)
     }
@@ -231,9 +227,9 @@ body ::tycho::EditBubbleAndArc::setReadOnly {bool} {
     ::tycho::File::setReadOnly $bool
     if [winfo exists $prefix] {
 	if {$bool} {
-            menubar disableMenuItem {Delete} Edit
+            menubar disable {Delete}
 	} {
-            menubar enableMenuItem {Delete} Edit
+            menubar enable {Delete}
 	}
     }
 }
@@ -243,13 +239,13 @@ body ::tycho::EditBubbleAndArc::setReadOnly {bool} {
 # Toggle the mode of an arc between smooth (Bezier curve) or zigzag
 #
 body ::tycho::EditBubbleAndArc::smoothToggleArc {item} {
-    if {[lsearch -exact [$canvas gettags $item] arc] >= 0} {
+    if {[lsearch -exact [$slate gettags $item] arc] >= 0} {
 	# item is an arc
 	# arc can only be made smooth when it has more than two points
-	if {[llength [$canvas coords $item]] > 4} {
-	    set s [$canvas itemcget $item -smooth]
+	if {[llength [$slate coords $item]] > 4} {
+	    set s [$slate itemcget $item -smooth]
 	    # toggle it
-	    $canvas itemconfigure $item -smooth [expr !$s]
+	    $slate itemconfigure $item -smooth [expr !$s]
 	    $this markModified
 	}
     }
@@ -263,16 +259,16 @@ body ::tycho::EditBubbleAndArc::smoothToggleArc {item} {
 #
 body ::tycho::EditBubbleAndArc::addPoint {} {
     # return immediately if no doubly-selected point
-    if {[$canvas find withtag dblselpt] == {}} return
+    if {[$slate find withtag dblselpt] == {}} return
     
     # the index of the doubly-selected point is recorded in the
     # member dblselpt_index.  Get the coords of the edge.
-    set coords [$canvas coords selected]
+    set coords [$slate coords selected]
     if {$dblselpt_index == [expr [llength $coords]/2 - 1]} {
 	inform "The doubly-selected point is a terminal\
 		endpoint.\nIt doesn't have downstream."
     } else {
-	set edge [$canvas find withtag selected]
+	set edge [$slate find withtag selected]
 	set x1 [lindex $coords [expr 2*$dblselpt_index]]
 	set y1 [lindex $coords [expr 2*$dblselpt_index+1]]
 	set x2 [lindex $coords [expr 2*$dblselpt_index+2]]
@@ -280,11 +276,11 @@ body ::tycho::EditBubbleAndArc::addPoint {} {
 	# x,y coords of the midpoint
 	set x [expr ($x1+$x2)*0.5]
 	set y [expr ($y1+$y2)*0.5]
-	set point [$canvas create rectangle \
+	set point [$slate create rectangle \
 	        [expr $x-2] [expr $y-2] [expr $x+2] [expr $y+2] \
 	        -fill red -outline red]
-	$canvas addtag selectedpoint withtag $point
-	eval $canvas coords $edge [linsert $coords \
+	$slate addtag selectedpoint withtag $point
+	eval $slate coords $edge [linsert $coords \
 		[expr 2*$dblselpt_index+2] $x $y]
 	# move the arc label
 	$this adjustArcLabel $edge
@@ -304,11 +300,11 @@ body ::tycho::EditBubbleAndArc::addPoint {} {
 #
 body ::tycho::EditBubbleAndArc::deletePoint {} {
     # return immediately if no doubly-selected point to delete
-    if {[$canvas find withtag dblselpt] == {}} return
+    if {[$slate find withtag dblselpt] == {}} return
     
     # the index of the doubly-selected point is recorded in the
     # member dblselpt_index.  Get the coords of the edge.
-    set coords [$canvas coords selected]
+    set coords [$slate coords selected]
     if {$dblselpt_index == 0 || \
 	    $dblselpt_index == [expr [llength $coords]/2 - 1]} {
 	# Can't delete endpoint
@@ -316,10 +312,10 @@ body ::tycho::EditBubbleAndArc::deletePoint {} {
     } else {
 	# an internal point
 	# delete it from canvas
-	$canvas delete dblselpt
+	$slate delete dblselpt
 	# update the edge coords
-	set edge [$canvas find withtag selected]
-	eval $canvas coords $edge [lreplace $coords \
+	set edge [$slate find withtag selected]
+	eval $slate coords $edge [lreplace $coords \
 	        [expr 2*$dblselpt_index] [expr 2*$dblselpt_index+1]]
 	# move the arc label
 	$this adjustArcLabel $edge
@@ -329,7 +325,7 @@ body ::tycho::EditBubbleAndArc::deletePoint {} {
 	if {[llength $edgeInfo($edge,points)] == 2} {
 	    # if the edge has only two points left, it can't be a
 	    # Bezier spline curve.  
-	    $canvas itemconfigure $edge -smooth 0
+	    $slate itemconfigure $edge -smooth 0
 	}
 	set dblselpt_index {}
 	$this markModified
@@ -340,8 +336,8 @@ body ::tycho::EditBubbleAndArc::deletePoint {} {
 #### getInfo
 #
 body ::tycho::EditBubbleAndArc::getInfo {} {
-    set nodes [$canvas find withtag node]
-    set arcs [$canvas find withtag arc]
+    set nodes [$slate find withtag node]
+    set arcs [$slate find withtag arc]
     set w [$this windowName].getInfo
     catch {destroy $w}
     ::tycho::Message $w -text "# of nodes: [llength $nodes]\
@@ -355,7 +351,7 @@ body ::tycho::EditBubbleAndArc::getInfo {} {
 body ::tycho::EditBubbleAndArc::newNode {} {
     $this unselect
     # In item creation mode, cursor is crosshair.
-    $canvas configure -cursor crosshair
+    $slate configure -cursor crosshair
     set create_item node
 }
 
@@ -366,7 +362,7 @@ body ::tycho::EditBubbleAndArc::newArc {} {
     $this unselect
     set point_to_draw first
     # In item creation mode, cursor is crosshair.
-    $canvas configure -cursor crosshair
+    $slate configure -cursor crosshair
     set create_item arc
 }
 
@@ -375,8 +371,8 @@ body ::tycho::EditBubbleAndArc::newArc {} {
 # Canvas-wide bindings
 #
 body ::tycho::EditBubbleAndArc::bind_B1 {x y} {
-    set x [$canvas canvasx $x]
-    set y [$canvas canvasy $y]
+    set x [$slate canvasx $x]
+    set y [$slate canvasy $y]
     # debug message
     #puts stdout <Button-1>
     
@@ -389,7 +385,7 @@ body ::tycho::EditBubbleAndArc::bind_B1 {x y} {
 	default {
 	    # If we are not in item-creating state, and mouse
 	    # is not over any item, unselect the selected item.
-	    if {[$canvas find withtag current] == {}} {
+	    if {[$slate find withtag current] == {}} {
 		$this unselect
 	    }
 	}
@@ -397,34 +393,34 @@ body ::tycho::EditBubbleAndArc::bind_B1 {x y} {
 }
 
 body ::tycho::EditBubbleAndArc::bind_B1_Motion {x y} {
-    set x [$canvas canvasx $x]
-    set y [$canvas canvasy $y]
+    set x [$slate canvasx $x]
+    set y [$slate canvasy $y]
     if {$create_item == "node"} {
-	$canvas coords $node_id $oldx $oldy $x $y
+	$slate coords $node_id $oldx $oldy $x $y
     }
 }
 
 body ::tycho::EditBubbleAndArc::bind_BR1 {x y} {
-    set x [$canvas canvasx $x]
-    set y [$canvas canvasy $y]
+    set x [$slate canvasx $x]
+    set y [$slate canvasy $y]
     set button1_down 0
     if {$create_item == "node"} {
 	if [close_enough $oldx $oldy $x $y] {
 	    # too small! abort and retry
 	    set node_create_state first
-	    $canvas delete $node_id
+	    $slate delete $node_id
 	    return
 	} else {
 	    # creation of new node completed
-	    $canvas coords $node_id $oldx $oldy $x $y
-	    $canvas itemconfigure $node_id -outline black -tags node
+	    $slate coords $node_id $oldx $oldy $x $y
+	    $slate itemconfigure $node_id -outline black -tags node
 	    # change cursor back to normal
-	    $canvas configure -cursor {top_left_arrow black white}
+	    $slate configure -cursor {top_left_arrow black white}
 	    set nodeInfo($node_id,inEdges) {}
 	    set nodeInfo($node_id,outEdges) {}
 	    # id of the associated text item which displays the label
 	    # of this node at the center
-	    set nodeInfo($node_id,label) [$canvas create text \
+	    set nodeInfo($node_id,label) [$slate create text \
 		    [expr ($oldx+$x)*0.5] [expr ($oldy+$y)*0.5]]
 	    # new node has been created
 	    set create_item {}
@@ -436,11 +432,11 @@ body ::tycho::EditBubbleAndArc::bind_BR1 {x y} {
 }
 
 body ::tycho::EditBubbleAndArc::bind_Motion {x y} {
-    set x [$canvas canvasx $x]
-    set y [$canvas canvasy $y]
+    set x [$slate canvasx $x]
+    set y [$slate canvasy $y]
     if {[string compare $create_item arc] == 0 && \
 	    [string compare $point_to_draw nonfirst] == 0} {
-	eval $canvas coords $arc_id $arc_coords $x $y
+	eval $slate coords $arc_id $arc_coords $x $y
     }
 }
 
@@ -454,22 +450,22 @@ body ::tycho::EditBubbleAndArc::bind_Motion {x y} {
 # a node to select it.  Click mouse button 1 in the empty area
 # to un-select the selected node, if there is any.
 body ::tycho::EditBubbleAndArc::bind_node_B1 {x y} {
-    set x [$canvas canvasx $x]
-    set y [$canvas canvasy $y]
+    set x [$slate canvasx $x]
+    set y [$slate canvasy $y]
     
     # return immediately if we are in item-creating state
     if {$create_item != {}} return
 
-    if {[$canvas find withtag current] != [$canvas find withtag selected]} {
+    if {[$slate find withtag current] != [$slate find withtag selected]} {
 	$this unselect
 	
-	$canvas itemconfigure current -outline red
-	$canvas addtag selected withtag current
-	$canvas raise current
+	$slate itemconfigure current -outline red
+	$slate addtag selected withtag current
+	$slate raise current
 	$this chooseCursorOverNode $x $y
-	$canvas itemconfigure $nodeInfo([$canvas find withtag current],label) \
+	$slate itemconfigure $nodeInfo([$slate find withtag current],label) \
 		-fill red
-	$canvas raise $nodeInfo([$canvas find withtag current],label)
+	$slate raise $nodeInfo([$slate find withtag current],label)
     }
     set oldx $x
     set oldy $y
@@ -477,32 +473,32 @@ body ::tycho::EditBubbleAndArc::bind_node_B1 {x y} {
 }
 
 body ::tycho::EditBubbleAndArc::bind_arc_B1 {x y} {
-    set x [$canvas canvasx $x]
-    set y [$canvas canvasy $y]
+    set x [$slate canvasx $x]
+    set y [$slate canvasy $y]
     
     if {$create_item == {}} {
 	# not creating an item: unselect and select
-	set arc [$canvas find withtag current]
-	if {$arc != [$canvas find withtag selected]} {
+	set arc [$slate find withtag current]
+	if {$arc != [$slate find withtag selected]} {
 	    $this unselect
 	    
 	    # select the current arc
 	    # selected arc will be red
-	    $canvas itemconfigure current -fill red
-	    $canvas addtag selected withtag current
-	    $canvas raise current
+	    $slate itemconfigure current -fill red
+	    $slate addtag selected withtag current
+	    $slate raise current
 	    $this chooseCursorOverArc $x $y
 	    
 	    # show the points
 	    foreach point $edgeInfo($arc,points) {
-		$canvas itemconfigure $point -fill red -outline red
-		$canvas addtag selectedpoint withtag $point
-		$canvas raise $point
+		$slate itemconfigure $point -fill red -outline red
+		$slate addtag selectedpoint withtag $point
+		$slate raise $point
 	    }
 	    
 	    # highlight the label
-	    $canvas itemconfigure $edgeInfo($arc,label) -fill red
-	    $canvas addtag selarclabel withtag $edgeInfo($arc,label)
+	    $slate itemconfigure $edgeInfo($arc,label) -fill red
+	    $slate addtag selarclabel withtag $edgeInfo($arc,label)
 	}
 	set oldx $x
 	set oldy $y
@@ -525,17 +521,17 @@ body ::tycho::EditBubbleAndArc::bind_selected_Enter {x y} {
 body ::tycho::EditBubbleAndArc::bind_selected_Leave {} {
     set over_selected 0
     if !$button1_down {
-	$canvas config -cursor {top_left_arrow black white}
+	$slate config -cursor {top_left_arrow black white}
     }
 }
 
 body ::tycho::EditBubbleAndArc::bind_selected_B1_Motion {x y} {
-    set x [$canvas canvasx $x]
-    set y [$canvas canvasy $y]
-    if {[lsearch -exact [$canvas gettags selected] node] >= 0} {
+    set x [$slate canvasx $x]
+    set y [$slate canvasy $y]
+    if {[lsearch -exact [$slate gettags selected] node] >= 0} {
 	# selected item is a node
 	$this bind_selected_node_B1_Motion $x $y
-    } elseif {[lsearch -exact [$canvas gettags selected] arc] >= 0} {
+    } elseif {[lsearch -exact [$slate gettags selected] arc] >= 0} {
 	# selected item is an arc, do nothing
 	return
     } else {
@@ -544,7 +540,7 @@ body ::tycho::EditBubbleAndArc::bind_selected_B1_Motion {x y} {
 }
 
 body ::tycho::EditBubbleAndArc::bind_selected_node_B1_Motion {x y} {
-    set coords [$canvas coords selected]
+    set coords [$slate coords selected]
     set x1 [lindex $coords 0]
     set y1 [lindex $coords 1]
     set x2 [lindex $coords 2]
@@ -581,38 +577,38 @@ body ::tycho::EditBubbleAndArc::bind_selected_node_B1_Motion {x y} {
 	}
 	move {
 	    # move the node
-	    set node [$canvas find withtag selected]
+	    set node [$slate find withtag selected]
 	    set xdelta [expr $x-$oldx]
 	    set ydelta [expr $y-$oldy]
-	    $canvas move $node $xdelta $ydelta
+	    $slate move $node $xdelta $ydelta
 	    # move the label
-	    $canvas move $nodeInfo($node,label) $xdelta $ydelta
+	    $slate move $nodeInfo($node,label) $xdelta $ydelta
 	    # move the edges
 	    foreach edge $nodeInfo($node,outEdges) {
 		# move first point of edge
-		set coords [$canvas coords $edge]
+		set coords [$slate coords $edge]
 		set x1 [lindex $coords 0]
 		set y1 [lindex $coords 1]
 		set x1 [expr $x1+$xdelta]
 		set y1 [expr $y1+$ydelta]
-		eval $canvas coords $edge $x1 $y1 [lrange $coords 2 end]
+		eval $slate coords $edge $x1 $y1 [lrange $coords 2 end]
 		# update coords of the first point
-		$canvas coords [lindex $edgeInfo($edge,points) 0] \
+		$slate coords [lindex $edgeInfo($edge,points) 0] \
 			[expr $x1-2] [expr $y1-2] [expr $x1+2] [expr $y1+2]
 		$this adjustArcLabel $edge
 	    }
 	    foreach edge $nodeInfo($node,inEdges) {
 		# move last point of edge
-		set coords [$canvas coords $edge]
+		set coords [$slate coords $edge]
 		set len [llength $coords]
 		set x_last [lindex $coords [expr $len - 2]]
 		set y_last [lindex $coords [expr $len - 1]]
 		set x_last [expr $x_last+$xdelta]
 		set y_last [expr $y_last+$ydelta]
-		eval $canvas coords $edge [lrange $coords 0 [expr $len - 3]] \
+		eval $slate coords $edge [lrange $coords 0 [expr $len - 3]] \
 			$x_last $y_last
 		# update coords of the last point
-		$canvas coords [lindex $edgeInfo($edge,points) \
+		$slate coords [lindex $edgeInfo($edge,points) \
 			[expr [llength $edgeInfo($edge,points)] - 1]] \
 			[expr $x_last-2] [expr $y_last-2] \
 			[expr $x_last+2] [expr $y_last+2]
@@ -634,7 +630,7 @@ body ::tycho::EditBubbleAndArc::bind_selected_BR1 {x y} {
     if $over_selected {
 	$this chooseCursor $x $y
     } else {
-	$canvas config -cursor {top_left_arrow black white}
+	$slate config -cursor {top_left_arrow black white}
     }
 }
 
@@ -643,37 +639,37 @@ body ::tycho::EditBubbleAndArc::bind_selected_BR1 {x y} {
 # These methods are handlers for events on the "selectedpoint" tag.
 #
 body ::tycho::EditBubbleAndArc::bind_selectedpoint_B1 {x y} {
-    set x [$canvas canvasx $x]
-    set y [$canvas canvasy $y]
+    set x [$slate canvasx $x]
+    set y [$slate canvasy $y]
     # debug message
     #puts stdout "selectedpoint <Button-1>"
     
-    if {[$canvas find withtag current] != [$canvas find withtag dblselpt]} {
-	$canvas itemconfigure dblselpt -outline red -fill red
-	$canvas dtag dblselpt
+    if {[$slate find withtag current] != [$slate find withtag dblselpt]} {
+	$slate itemconfigure dblselpt -outline red -fill red
+	$slate dtag dblselpt
 	
-	$canvas itemconfigure current -outline blue -fill blue
-	$canvas addtag dblselpt withtag current
+	$slate itemconfigure current -outline blue -fill blue
+	$slate addtag dblselpt withtag current
 	#$this chooseCursorOverNode $x $y
 	# figure out which point it is on the arc, and record this
 	# index
 	set dblselpt_index [lsearch -exact \
-		$edgeInfo([$canvas find withtag selected],points) \
-		[$canvas find withtag dblselpt]]
+		$edgeInfo([$slate find withtag selected],points) \
+		[$slate find withtag dblselpt]]
     }
     set oldx $x
     set oldy $y
 }
 
 body ::tycho::EditBubbleAndArc::bind_selectedpoint_B1_Motion {x y} {
-    set x [$canvas canvasx $x]
-    set y [$canvas canvasy $y]
+    set x [$slate canvasx $x]
+    set y [$slate canvasy $y]
     # move the doubly-selected point
     # move the edge
     # the index of the doubly-selected point is recorded in the
     # variable dblselpt_index.  Get the coords of the edge.
-    set coords [$canvas coords selected]
-    set id [$canvas find withtag selected]
+    set coords [$slate coords selected]
+    set id [$slate find withtag selected]
     if {$dblselpt_index == 0} {
 	# source endpoint, it has to be snapped to the oval
 	set node $edgeInfo($id,src)
@@ -686,8 +682,8 @@ body ::tycho::EditBubbleAndArc::bind_selectedpoint_B1_Motion {x y} {
 	set y [lindex $snap 1]
 	set edgeInfo($id,outSlope) [lindex $snap 2]
 	set edgeInfo($id,outXneg) [lindex $snap 3]
-	$canvas coords dblselpt [expr $x-2] [expr $y-2] [expr $x+2] [expr $y+2]
-	eval $canvas coords $id [lreplace $coords 0 1 $x $y]
+	$slate coords dblselpt [expr $x-2] [expr $y-2] [expr $x+2] [expr $y+2]
+	eval $slate coords $id [lreplace $coords 0 1 $x $y]
     } elseif {$dblselpt_index == [expr [llength $coords]/2 - 1]} {
 	# terminating  endpoint, it has to be snapped to the oval
 	set node $edgeInfo($id,dest)
@@ -698,19 +694,19 @@ body ::tycho::EditBubbleAndArc::bind_selectedpoint_B1_Motion {x y} {
 	set y [lindex $snap 1]
 	set edgeInfo($id,inSlope) [lindex $snap 2]
 	set edgeInfo($id,inXneg) [lindex $snap 3]
-	$canvas coords dblselpt [expr $x-2] [expr $y-2] [expr $x+2] [expr $y+2]
-	eval $canvas coords $id [lreplace $coords \
+	$slate coords dblselpt [expr $x-2] [expr $y-2] [expr $x+2] [expr $y+2]
+	eval $slate coords $id [lreplace $coords \
 		[expr 2*$dblselpt_index] end $x $y]
     } else {
 	# an internal point
 	# change the index'th coords by the move delta, and set the
 	# new coords.
-	$canvas move dblselpt [expr $x-$oldx] [expr $y-$oldy]
+	$slate move dblselpt [expr $x-$oldx] [expr $y-$oldy]
 	set x1 [expr [lindex $coords \
 		[expr 2*$dblselpt_index]]+$x-$oldx]
 	set y1 [expr [lindex $coords \
 		[expr 2*$dblselpt_index+1]]+$y-$oldy]
-	eval $canvas coords selected [lreplace $coords \
+	eval $slate coords selected [lreplace $coords \
 		[expr 2*$dblselpt_index] \
 		[expr 2*$dblselpt_index+1] $x1 $y1]
 	set oldx $x
@@ -726,33 +722,33 @@ body ::tycho::EditBubbleAndArc::bind_selectedpoint_B1_Motion {x y} {
 # These methods are handlers for events on the "selarclabel" tag.
 #
 body ::tycho::EditBubbleAndArc::bind_selarclabel_B1 {x y} {
-    set x [$canvas canvasx $x]
-    set y [$canvas canvasy $y]
+    set x [$slate canvasx $x]
+    set y [$slate canvasy $y]
     # debug message
     #puts stdout "selarclabel <Button-1>"
     
     # change color to blue
-    $canvas itemconfigure selarclabel -fill blue
+    $slate itemconfigure selarclabel -fill blue
     
     set oldx $x
     set oldy $y
 }
 
 body ::tycho::EditBubbleAndArc::bind_selarclabel_B1_Motion {x y} {
-    set x [$canvas canvasx $x]
-    set y [$canvas canvasy $y]
+    set x [$slate canvasx $x]
+    set y [$slate canvasy $y]
     # move the label
-    $canvas move selarclabel [expr $x-$oldx] [expr $y-$oldy]
+    $slate move selarclabel [expr $x-$oldx] [expr $y-$oldy]
     set oldx $x
     set oldy $y
 }
 
 body ::tycho::EditBubbleAndArc::bind_selarclabel_BR1 {} {
-    $canvas itemconfigure selarclabel -fill red
-    set coords [$canvas coords selarclabel]
+    $slate itemconfigure selarclabel -fill red
+    set coords [$slate coords selarclabel]
     set x [lindex $coords 0]
     set y [lindex $coords 1]
-    set arc [$canvas find withtag selected]
+    set arc [$slate find withtag selected]
     set mid_xy [$this lineMidpoint $arc]
     set mid_x [lindex $mid_xy 0]
     set mid_y [lindex $mid_xy 1]
@@ -779,11 +775,11 @@ body ::tycho::EditBubbleAndArc::bind_selarclabel_BR1 {} {
 body ::tycho::EditBubbleAndArc::deleteItem {item} {
     # The indices in the nodeInfo and edgeInfo arrays
     # are item IDs.
-    set id [$canvas find withtag $item]
-    if {[lsearch -exact [$canvas gettags $id] node] >= 0} {
+    set id [$slate find withtag $item]
+    if {[lsearch -exact [$slate gettags $id] node] >= 0} {
 	# id is a node.
 	$this deleteNode $id
-    } elseif {[lsearch -exact [$canvas gettags $id] arc] >= 0} {
+    } elseif {[lsearch -exact [$slate gettags $id] arc] >= 0} {
 	# id is an arc.
 	$this deleteArc $id
     }
@@ -809,13 +805,13 @@ body ::tycho::EditBubbleAndArc::deleteNode {node} {
 		$index $index]
 	unset edgeInfo($edge,src) edgeInfo($edge,dest)
 	# Delete the points
-	eval $canvas delete $edgeInfo($edge,points)
+	eval $slate delete $edgeInfo($edge,points)
 	unset edgeInfo($edge,points)
 	# Delete the arc label
-	$canvas delete $edgeInfo($edge,label)
+	$slate delete $edgeInfo($edge,label)
 	unset edgeInfo($edge,label) edgeInfo($edge,label_deltax) \
 		edgeInfo($edge,label_deltay)
-	$canvas delete $edge
+	$slate delete $edge
     }
     unset nodeInfo($node,inEdges)
     
@@ -829,20 +825,20 @@ body ::tycho::EditBubbleAndArc::deleteNode {node} {
 		$index $index]
 	unset edgeInfo($edge,src) edgeInfo($edge,dest)
 	# Delete the points.
-	eval $canvas delete $edgeInfo($edge,points)
+	eval $slate delete $edgeInfo($edge,points)
 	unset edgeInfo($edge,points)
 	# Delete the arc label.
-	$canvas delete $edgeInfo($edge,label)
+	$slate delete $edgeInfo($edge,label)
 	unset edgeInfo($edge,label) edgeInfo($edge,label_deltax) \
 		edgeInfo($edge,label_deltay)
-	$canvas delete $edge
+	$slate delete $edge
     }
     unset nodeInfo($node,outEdges)
     
     # Finally, delete the node itself.
-    $canvas delete $nodeInfo($node,label)
+    $slate delete $nodeInfo($node,label)
     unset nodeInfo($node,label)
-    $canvas delete $node
+    $slate delete $node
     $this markModified
 }
 
@@ -864,13 +860,13 @@ body ::tycho::EditBubbleAndArc::deleteArc {arc} {
     set nodeInfo($dest,inEdges) [lreplace $nodeInfo($dest,inEdges) \
 	    $index $index]
     # Delete the points.
-    eval $canvas delete $edgeInfo($arc,points)
+    eval $slate delete $edgeInfo($arc,points)
     unset edgeInfo($arc,src) edgeInfo($arc,dest) edgeInfo($arc,points)
     # Delete the arc label.
-    $canvas delete $edgeInfo($arc,label)
+    $slate delete $edgeInfo($arc,label)
     unset edgeInfo($arc,label) edgeInfo($arc,label_deltax) \
             edgeInfo($arc,label_deltay)
-    $canvas delete $arc
+    $slate delete $arc
     $this markModified
 }
 
@@ -881,7 +877,7 @@ body ::tycho::EditBubbleAndArc::deleteArc {arc} {
 body ::tycho::EditBubbleAndArc::mkNode {x y} {
     set oldx $x
     set oldy $y
-    set node_id [$canvas create oval $x $y \
+    set node_id [$slate create oval $x $y \
 	    [expr $x+0.2] [expr $y+0.2] -outline brown -fill white]
 }
 
@@ -898,7 +894,7 @@ body ::tycho::EditBubbleAndArc::mkArc {x y} {
 	set x [lindex $snap 0]
 	set y [lindex $snap 1]
 	set arc_coords [lrange $snap 0 1]
-	set arc_id [$canvas create line $x $y $x $y \
+	set arc_id [$slate create line $x $y $x $y \
 		-arrow last -tags arc -fill brown]
 	# the first point has been drawn
 	set point_to_draw nonfirst
@@ -906,7 +902,7 @@ body ::tycho::EditBubbleAndArc::mkArc {x y} {
 	set edgeInfo($arc_id,src) $close_node
 	set edgeInfo($arc_id,outSlope) [lindex $snap 2]
 	set edgeInfo($arc_id,outXneg) [lindex $snap 3]
-	set edgeInfo($arc_id,points) [$canvas create rectangle \
+	set edgeInfo($arc_id,points) [$slate create rectangle \
 		[expr $x-2] [expr $y-2] [expr $x+2] [expr $y+2] \
 		-fill {} -outline {}]
 	# debug messages
@@ -923,8 +919,8 @@ body ::tycho::EditBubbleAndArc::mkArc {x y} {
 	    # no close node
 	    # this is just an internal point
 	    lappend arc_coords $x $y
-	    eval $canvas coords $arc_id $arc_coords
-	    lappend edgeInfo($arc_id,points) [$canvas create rectangle \
+	    eval $slate coords $arc_id $arc_coords
+	    lappend edgeInfo($arc_id,points) [$slate create rectangle \
 		    [expr $x-2] [expr $y-2] [expr $x+2] [expr $y+2] \
 		    -fill {} -outline {}]
 	} else {
@@ -936,25 +932,25 @@ body ::tycho::EditBubbleAndArc::mkArc {x y} {
 	    # Change x and y to the new snapped-to values.
 	    set x [lindex $snap 0]
 	    set y [lindex $snap 1]
-	    eval $canvas coords $arc_id $arc_coords $x $y
-	    $canvas itemconfigure $arc_id -fill black
-	    lappend edgeInfo($arc_id,points) [$canvas create rectangle \
+	    eval $slate coords $arc_id $arc_coords $x $y
+	    $slate itemconfigure $arc_id -fill black
+	    lappend edgeInfo($arc_id,points) [$slate create rectangle \
 		    [expr $x-2] [expr $y-2] [expr $x+2] [expr $y+2] \
 		    -fill {} -outline {}]
 	    # if the arc has more than two points, make it a Bezier
 	    # spline curve.
-	    if {[llength [$canvas coords $arc_id]] > 4} {
-		$canvas itemconfigure $arc_id -smooth 1
+	    if {[llength [$slate coords $arc_id]] > 4} {
+		$slate itemconfigure $arc_id -smooth 1
 	    }
 	    # arc has been created
 	    set create_item {}
 	    # change cursor back to normal
-	    $canvas configure -cursor {top_left_arrow black white}
+	    $slate configure -cursor {top_left_arrow black white}
 	    lappend nodeInfo($close_node,inEdges) $arc_id
 	    set edgeInfo($arc_id,dest) $close_node
 	    set edgeInfo($arc_id,inSlope) [lindex $snap 2]
 	    set edgeInfo($arc_id,inXneg) [lindex $snap 3]
-	    set edgeInfo($arc_id,label) [eval $canvas create text \
+	    set edgeInfo($arc_id,label) [eval $slate create text \
 		    [$this lineMidpoint $arc_id] -fill black]
 	    set edgeInfo($arc_id,label_deltax) 0
 	    set edgeInfo($arc_id,label_deltay) 0
@@ -975,27 +971,27 @@ body ::tycho::EditBubbleAndArc::mkArc {x y} {
 # Only used by bind_selected_node_B1_Motion
 #
 body ::tycho::EditBubbleAndArc::resizeNode {tag x1 y1 x2 y2} {
-    set node [$canvas find withtag $tag]
+    set node [$slate find withtag $tag]
     
     # resize the node
-    $canvas coords $node $x1 $y1 $x2 $y2
+    $slate coords $node $x1 $y1 $x2 $y2
     
     # move the node label
-    $canvas coords $nodeInfo($node,label) [expr ($x1+$x2)*0.5] \
+    $slate coords $nodeInfo($node,label) [expr ($x1+$x2)*0.5] \
 	    [expr ($y1+$y2)*0.5]
     
     # move the edges
     foreach edge $nodeInfo($node,outEdges) {
 	# move first point of edge
-	set coords [$canvas coords $edge]
+	set coords [$slate coords $edge]
 	# Snap (x_first,y_first) to the node
 	set snap [oval_slope $node \
 		$edgeInfo($edge,outSlope) $edgeInfo($edge,outXneg)]
 	set x_first [lindex $snap 0]
 	set y_first [lindex $snap 1]
-	eval $canvas coords $edge $x_first $y_first [lrange $coords 2 end]
+	eval $slate coords $edge $x_first $y_first [lrange $coords 2 end]
 	# update coords of the first point
-	$canvas coords [lindex $edgeInfo($edge,points) 0] \
+	$slate coords [lindex $edgeInfo($edge,points) 0] \
 		[expr $x_first-2] [expr $y_first-2] \
 		[expr $x_first+2] [expr $y_first+2]
 	$this adjustArcLabel $edge
@@ -1008,11 +1004,11 @@ body ::tycho::EditBubbleAndArc::resizeNode {tag x1 y1 x2 y2} {
 	set x_last [lindex $snap 0]
 	set y_last [lindex $snap 1]
 	
-	set coords [$canvas coords $edge]
-	eval $canvas coords $edge [lrange $coords 0 \
+	set coords [$slate coords $edge]
+	eval $slate coords $edge [lrange $coords 0 \
 		[expr [llength $coords] - 3]] $x_last $y_last
 	# update coords of the last point
-	$canvas coords [lindex $edgeInfo($edge,points) \
+	$slate coords [lindex $edgeInfo($edge,points) \
 		[expr [llength $edgeInfo($edge,points)] - 1]] \
 		[expr $x_last-2] [expr $y_last-2] \
 		[expr $x_last+2] [expr $y_last+2]
@@ -1025,7 +1021,7 @@ body ::tycho::EditBubbleAndArc::resizeNode {tag x1 y1 x2 y2} {
 # Only used by resizeNode
 #
 body ::tycho::EditBubbleAndArc::oval_slope {oval m xneg} {
-    set coords [$canvas coords $oval]
+    set coords [$slate coords $oval]
     set x1 [lindex $coords 0]
     set y1 [lindex $coords 1]
     set x2 [lindex $coords 2]
@@ -1068,7 +1064,7 @@ body ::tycho::EditBubbleAndArc::adjustArcLabel {arc} {
     set mid_xy [$this lineMidpoint $arc]
     set mid_x [lindex $mid_xy 0]
     set mid_y [lindex $mid_xy 1]
-    $canvas coords $edgeInfo($arc,label) \
+    $slate coords $edgeInfo($arc,label) \
             [expr $mid_x + $edgeInfo($arc,label_deltax)] \
             [expr $mid_y + $edgeInfo($arc,label_deltay)]
 }
@@ -1077,12 +1073,12 @@ body ::tycho::EditBubbleAndArc::adjustArcLabel {arc} {
 #### chooseCursor
 #
 body ::tycho::EditBubbleAndArc::chooseCursor {x y} {
-    set x [$canvas canvasx $x]
-    set y [$canvas canvasy $y]
-    if {[lsearch -exact [$canvas gettags current] node] >= 0} {
+    set x [$slate canvasx $x]
+    set y [$slate canvasy $y]
+    if {[lsearch -exact [$slate gettags current] node] >= 0} {
 	# current item is a node
 	$this chooseCursorOverNode $x $y
-    } elseif {[lsearch -exact [$canvas gettags current] arc] >= 0} {
+    } elseif {[lsearch -exact [$slate gettags current] arc] >= 0} {
 	# current item is an arc
 	$this chooseCursorOverArc $x $y
     } else {
@@ -1093,30 +1089,30 @@ body ::tycho::EditBubbleAndArc::chooseCursor {x y} {
 body ::tycho::EditBubbleAndArc::chooseCursorOverArc {x y} {
     # For now, just change color to red.
     # To be refined.
-    $canvas config -cursor {top_left_arrow red white}
+    $slate config -cursor {top_left_arrow red white}
 }
 
 body ::tycho::EditBubbleAndArc::chooseCursorOverNode {x y} {
-    set coords [$canvas coords selected]
+    set coords [$slate coords selected]
     set x1 [lindex $coords 0]
     set y1 [lindex $coords 1]
     set x2 [lindex $coords 2]
     set y2 [lindex $coords 3]
     # -cursor bottom_left_corner etc not implemented now
     if [close_enough $x $y $x1 [expr ($y1+$y2)/2]] {
-	$canvas config -cursor {left_side red white}
+	$slate config -cursor {left_side red white}
 	set drag_action left
     } elseif [close_enough $x $y $x2 [expr ($y1+$y2)/2]] {
-	$canvas config -cursor {right_side red white}
+	$slate config -cursor {right_side red white}
 	set drag_action right
     } elseif [close_enough $x $y [expr ($x1+$x2)/2] $y1] {
-	$canvas config -cursor {top_side red white}
+	$slate config -cursor {top_side red white}
 	set drag_action top
     } elseif [close_enough $x $y [expr ($x1+$x2)/2] $y2] {
-	$canvas config -cursor {bottom_side red white}
+	$slate config -cursor {bottom_side red white}
 	set drag_action bottom
     } else {
-	$canvas config -cursor {top_left_arrow red white}
+	$slate config -cursor {top_left_arrow red white}
 	set drag_action move
     }
 }
@@ -1128,12 +1124,12 @@ body ::tycho::EditBubbleAndArc::chooseCursorOverNode {x y} {
 #
 body ::tycho::EditBubbleAndArc::find_close_node {x y} {
     # gravity = 5
-    set close_items [$canvas find overlapping [expr $x-5] [expr $y-5] \
+    set close_items [$slate find overlapping [expr $x-5] [expr $y-5] \
 	    [expr $x+5] [expr $y+5]]
     # see if any of the close items is a node
     set close_node {}
     foreach item $close_items {
-	if {[lsearch -exact [$canvas gettags $item] node] >= 0} {
+	if {[lsearch -exact [$slate gettags $item] node] >= 0} {
 	    set close_node $item
 	    break
 	}
@@ -1146,7 +1142,7 @@ body ::tycho::EditBubbleAndArc::find_close_node {x y} {
 # Return the (x,y) coordinates of the midpoint of a line
 #
 body ::tycho::EditBubbleAndArc::lineMidpoint {arc} {
-    set coords [$canvas coords $arc]
+    set coords [$slate coords $arc]
     # n is the number of coordinates, hence twice the number
     # of points
     set n [llength $coords]
@@ -1172,7 +1168,7 @@ body ::tycho::EditBubbleAndArc::lineMidpoint {arc} {
 # on the oval.
 #
 body ::tycho::EditBubbleAndArc::snap_to_oval {oval x y} {
-    set coords [$canvas coords $oval]
+    set coords [$slate coords $oval]
     set x1 [lindex $coords 0]
     set y1 [lindex $coords 1]
     set x2 [lindex $coords 2]
@@ -1224,26 +1220,28 @@ body ::tycho::EditBubbleAndArc::snap_to_oval {oval x y} {
 #
 body ::tycho::EditBubbleAndArc::unselect {} {
     # Different items have different options for specifying their colors.
-    set sel_item [$canvas find withtag selected]
-    if {[lsearch -exact [$canvas gettags selected] node] >= 0} {
-	$canvas itemconfigure selected -outline black
-	$canvas itemconfigure $nodeInfo($sel_item,label) \
-		-fill black
-    } elseif {[lsearch -exact [$canvas gettags selected] arc] >= 0} {
-	$canvas itemconfigure selected -fill black
-	# hide the points
-	foreach point $edgeInfo($sel_item,points) {
-	    $canvas itemconfigure $point -fill {} -outline {}
-	    $canvas lower $point
+    set sel_item [$slate find withtag selected]
+    if { $sel_item != "" } {
+	if {[lsearch -exact [$slate gettags $sel_item] node] >= 0} {
+	    $slate itemconfigure selected -outline black
+	    $slate itemconfigure $nodeInfo($sel_item,label) \
+		    -fill black
+	} elseif {[lsearch -exact [$slate gettags $sel_item] arc] >= 0} {
+	    $slate itemconfigure selected -fill black
+	    # hide the points
+	    foreach point $edgeInfo($sel_item,points) {
+		$slate itemconfigure $point -fill {} -outline {}
+		$slate lower $point
+	    }
+	    # de-highlight the label
+	    $slate itemconfigure $edgeInfo($sel_item,label) \
+		    -fill black
+	    $slate dtag selectedpoint
+	    $slate dtag dblselpt
+	    $slate dtag selarclabel
 	}
-	# de-highlight the label
-	$canvas itemconfigure $edgeInfo($sel_item,label) \
-		-fill black
-	$canvas dtag selectedpoint
-	$canvas dtag dblselpt
-	$canvas dtag selarclabel
     }
-    $canvas dtag selected
+    $slate dtag selected
 }
 
 proc close_enough {x1 y1 x2 y2} {
@@ -1260,51 +1258,51 @@ proc close_enough {x1 y1 x2 y2} {
 #
 body ::tycho::EditBubbleAndArc::setUpCanvasBindings {} {
     # Bindings for the node.
-    $canvas bind node <Button-1> [list $this bind_node_B1 %x %y]
+    $slate bind node <Button-1> [list $this bind_node_B1 %x %y]
     
     # Bindings for the arc.
-    $canvas bind arc <Button-1> [list $this bind_arc_B1 %x %y]
+    $slate bind arc <Button-1> [list $this bind_arc_B1 %x %y]
     
     # Bindings for the "selected" tag.
     # The "selected" item is either a "node" or an "arc".
     # Note that <Button-1> is dealt with by the two bindings above.
-    $canvas bind selected <Enter> [list $this bind_selected_Enter %x %y]
-    $canvas bind selected <Motion> [list $this chooseCursor %x %y]
-    $canvas bind selected <Leave> [list $this bind_selected_Leave]
-    $canvas bind selected <B1-Motion> \
+    $slate bind selected <Enter> [list $this bind_selected_Enter %x %y]
+    $slate bind selected <Motion> [list $this chooseCursor %x %y]
+    $slate bind selected <Leave> [list $this bind_selected_Leave]
+    $slate bind selected <B1-Motion> \
 	    [list $this bind_selected_B1_Motion %x %y]
-    $canvas bind selected <ButtonRelease-1> \
+    $slate bind selected <ButtonRelease-1> \
 	    [list $this bind_selected_BR1 %x %y]
     
     # Bindings for the "selectedpoint" tag.
     # The "selectedpoint" is the selected point on the "selected" arc.
-    $canvas bind selectedpoint <Enter> \
-	    [list $canvas config -cursor {top_left_arrow red white}]
-    $canvas bind selectedpoint <Button-1> \
+    $slate bind selectedpoint <Enter> \
+	    [list $slate config -cursor {top_left_arrow red white}]
+    $slate bind selectedpoint <Button-1> \
 	    [list $this bind_selectedpoint_B1 %x %y]
-    $canvas bind selectedpoint <B1-Motion> \
+    $slate bind selectedpoint <B1-Motion> \
 	    [list $this bind_selectedpoint_B1_Motion %x %y]
-    $canvas bind selectedpoint <Leave> \
-	    [list $canvas config -cursor {top_left_arrow black white}]
+    $slate bind selectedpoint <Leave> \
+	    [list $slate config -cursor {top_left_arrow black white}]
     
     # Bindings for the "selarclabel" tag.
     # The "selarclabel" is the label of the "selected" arc.
     # The selarclabel is normally red.  When button 1 is pressed, it
     # becomes blue.  When button 1 is released, it changes back to red.
-    $canvas bind selarclabel <Enter> \
-	    [list $canvas config -cursor {top_left_arrow red white}]
-    $canvas bind selarclabel <Button-1> \
+    $slate bind selarclabel <Enter> \
+	    [list $slate config -cursor {top_left_arrow red white}]
+    $slate bind selarclabel <Button-1> \
 	    [list $this bind_selarclabel_B1 %x %y]
-    $canvas bind selarclabel <B1-Motion> \
+    $slate bind selarclabel <B1-Motion> \
 	    [list $this bind_selarclabel_B1_Motion %x %y]
-    $canvas bind selarclabel <Leave> \
-	    [list $canvas config -cursor {top_left_arrow black white}]
-    $canvas bind selarclabel <ButtonRelease-1> \
+    $slate bind selarclabel <Leave> \
+	    [list $slate config -cursor {top_left_arrow black white}]
+    $slate bind selarclabel <ButtonRelease-1> \
 	    [list $this bind_selarclabel_BR1]
     
     # Canvas-wide bindings.
-    bind $canvas <Button-1> [list $this bind_B1 %x %y]
-    bind $canvas <B1-Motion> [list $this bind_B1_Motion %x %y]
-    bind $canvas <ButtonRelease-1> [list $this bind_BR1 %x %y]
-    bind $canvas <Motion> [list $this bind_Motion %x %y]
+    bind $slate <Button-1> [list $this bind_B1 %x %y]
+    bind $slate <B1-Motion> [list $this bind_B1_Motion %x %y]
+    bind $slate <ButtonRelease-1> [list $this bind_BR1 %x %y]
+    bind $slate <Motion> [list $this bind_Motion %x %y]
 }

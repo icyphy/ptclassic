@@ -286,7 +286,7 @@ body ::tycho::EditForest::redrawGraph {} {
     # Disable the undo system.
     set saveinteractiveEnabled $interactiveEnabled
     interactiveEnable 0
-    $canvas delete node line arrow
+    $slate delete node line arrow
     selectionClear
     catch {unset nametable}
 
@@ -319,7 +319,6 @@ body ::tycho::EditForest::redrawGraph {} {
 # subtree (for horizontally stacking them).
 #
 body ::tycho::EditForest::drawSubgraph {root xcoord ycoord {pntloc {}}} {
-    set cvs $itk_component(canvas)
     set xincr $itk_option(-indent)
 
     set textx [expr $xcoord+20]
@@ -336,9 +335,9 @@ body ::tycho::EditForest::drawSubgraph {root xcoord ycoord {pntloc {}}} {
             set bm [file join @$TYCHO kernel img arrowclose.xbm]
             set cmd [list $this expand $root]
         }
-        set arrow [$cvs create bitmap $xcoord $ycoord -bitmap $bm \
+        set arrow [$slate create bitmap $xcoord $ycoord -bitmap $bm \
                 -anchor nw -tag arrow]
-        $cvs bind $arrow <Button-1> $cmd
+        $slate bind $arrow <Button-1> $cmd
     } {
         set xcoord $textx
     }
@@ -353,7 +352,7 @@ body ::tycho::EditForest::drawSubgraph {root xcoord ycoord {pntloc {}}} {
         set startx [lindex $pntloc 0]
         set starty [lindex $pntloc 1]
         set ydest [expr ($y1+$y2)/2]
-        component canvas create line $startx $starty \
+        $slate create line $startx $starty \
                 $startx $ydest \
                 $x1 $ydest \
                 -width 2.0 -tags line -fill \
