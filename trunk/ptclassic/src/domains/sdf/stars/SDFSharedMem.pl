@@ -10,7 +10,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 
 }
-  desc { base class for shared memory }
+  desc { Base class for shared memory }
   header {
 
     class VarReg {
@@ -35,8 +35,8 @@ limitation of liability, and disclaimer of warranty provisions.
   protected {
     static HashTable regList;
   }
-  method
-  {
+
+  method {
     name {ReadVar}
     arglist { "(const char *name, float& value)" }
     type { int }
@@ -44,8 +44,7 @@ limitation of liability, and disclaimer of warranty provisions.
     {
       VarReg* reg;
 
-      if (regList.hasKey(name))
-      {
+      if (regList.hasKey(name)) {
 	reg = (VarReg *) regList.lookup(name);
 
 	value = reg->GetContents();
@@ -55,8 +54,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	return 0;
     }
   }
-  method
-  {
+  method {
     name { RemoveVar }
     arglist { "(const char *name)" }
     type { void }
@@ -64,8 +62,7 @@ limitation of liability, and disclaimer of warranty provisions.
     {
       VarReg* reg;
 
-      if (regList.hasKey(name))
-      {
+      if (regList.hasKey(name)) {
         reg = (VarReg *) regList.lookup(name);
 	regList.remove(name);
 	LOG_DEL; delete reg;
@@ -81,18 +78,14 @@ limitation of liability, and disclaimer of warranty provisions.
     {
       VarReg* reg;
 
-      if (regList.hasKey(name))
-      {
+      if (regList.hasKey(name)) {
         reg = (VarReg *) regList.lookup(name);
       }
-      else
-      {
+      else {
 	LOG_NEW; reg = new VarReg;
 	regList.insert(name,reg);
       }
       reg->SetContents(value);
     }
-  }
-  destructor {
   }
 }
