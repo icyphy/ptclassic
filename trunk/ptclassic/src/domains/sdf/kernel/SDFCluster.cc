@@ -285,8 +285,8 @@ int SDFClusterGal :: removeDelay() {
 			if (p->isItInput()) continue;
 			if (p->numTokens() == 0) continue;
 			// this port has a delay on the arc.
-			stopList.initialize();
 			SDFCluster* peer = p->far()->parentClust();
+			stopList.initialize();
 			if (!findPath(peer,c))  {
 				// if no feedback path, remove delay
 				p->setDelay(0);
@@ -454,6 +454,11 @@ SDFCluster* SDFClusterGal::merge(SDFCluster* c1, SDFCluster* c2) {
 	return c1Bag;
 }
 
+void SDFClusterBag :: createScheduler() {
+	LOG_DEL; delete sched;
+	LOG_NEW; sched = new SDFBagScheduler;
+}
+
 // This function absorbs an atomic cluster into a bag.
 
 void SDFClusterBag::absorb(SDFCluster* c,Galaxy* par) {
@@ -546,11 +551,14 @@ ostream& SDFClusterBag::printOn(ostream& o) {
 
 // generate the bag's schedule.  Also make schedules for "the bags within".
 int SDFClusterBag::genSched() {
+	// create scheduler
+	createScheduler();
+
 	SDFClusterBagIter nextClust(*this);
 	SDFCluster* c;
 	while ((c = nextClust++) != 0)
 		if (!c->genSched()) return FALSE;
-	return sched.setup(gal);
+	return (sched->setup(gal));
 }
 
 // indent by depth tabs.
@@ -570,7 +578,7 @@ StringList SDFClusterBag::displaySchedule(int depth) {
 		sch += "*{\n";
 		depth++;
 	}
-	sch += sched.displaySchedule(depth);
+	sch += sched->displaySchedule(depth);
 	if (loop() > 1) {
 		depth--;
 		sch += tab(depth);
@@ -581,8 +589,8 @@ StringList SDFClusterBag::displaySchedule(int depth) {
 
 // run the cluster, taking into account the loop factor
 void SDFClusterBag::go() {
-	sched.setStopTime(loop()+exCount);
-	sched.run(gal);
+	sched->setStopTime(loop()+exCount);
+	sched->run(gal);
 	exCount += loop();
 }
 
@@ -602,6 +610,7 @@ SDFClusterBag::~SDFClusterBag() {
 	while ((b = nextB++) != 0) {
 		LOG_DEL; delete b;
 	}
+	delete sched;
 }
 
 // find an attractive and compatible neighbor.
@@ -723,7 +732,7 @@ int SDFAtomCluster::myExecTime() {
 // constructor for SDFClustPort, port for use in cluster.
 // if bp is set it's a "bag port" belonging to an SDFClusterBag.
 SDFClustPort::SDFClustPort(SDFPortHole& port,SDFCluster* parent, int bp)
-: pPort(port), bagPortFlag(bp)
+: pPort(port), bagPortFlag(bp), pOutPtr(0)
 {
 	const char* name = bp ? port.readName() : mungeName(port);
 	setPort(name,parent,INT);
@@ -750,6 +759,12 @@ void SDFClustPort::makeExternLink(SDFClustPort* bagPort) {
 	}
 }
 
+// return the real far port aliased to bag ports.
+SDFClustPort* SDFClustPort :: realFarPort(SDFCluster* outsideCluster) {
+	if (parentClust() == outsideCluster) return 0;
+	if (far()) return far();
+	return pOutPtr->realFarPort(outsideCluster);
+}
 
 // methods for SDFClustSched, the clustering scheduler.
 
@@ -844,7 +859,7 @@ StringList SDFClusterBag::genCode(Target& t, int depth) {
 		out += t.beginIteration(loop(), depth);
 		depth++;
 	}
-	out += sched.genCode(t, depth);
+	out += sched->genCode(t, depth);
 	if (loop() > 1) {
 		depth--;
 		out += t.endIteration(loop(), depth);

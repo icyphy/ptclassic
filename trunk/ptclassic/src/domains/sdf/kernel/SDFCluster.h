@@ -1,3 +1,6 @@
+#ifndef _SDFCluster_h
+#define _SDFCluster_h 1
+
 /**************************************************************************
 Version identification:
 $Id$
@@ -55,12 +58,15 @@ class ostream;
 class SDFClusterGal : public DynamicGalaxy {
 private:
 	int bagNumber;		// number for generating bag names
-	ostream* logstrm;	// for logging errors
 	SequentialList stopList;// this list is used by fullSearchMerge.
+
+protected:
+	ostream* logstrm;	// for logging errors
 
 public:
 	// constructor creates flat galaxy of atomic clusters
 	SDFClusterGal(Galaxy&,ostream* log = 0);
+	SDFClusterGal(ostream* log = 0) : logstrm(log), bagNumber(-1) {}
 
 	// destructor zaps all the member clusters (inherited)
 	~SDFClusterGal() {}
@@ -113,12 +119,16 @@ public:
 class SDFCluster : public SDFStar {
 protected:
 	int pLoop;		// loop count
+	int visitFlag;		// visit flag
 public:
 	// constructor: looping is 1 by default
 	SDFCluster() : pLoop(1) {}
 
 	// make destructor virtual
 	virtual ~SDFCluster() {}
+
+	void setVisit(int i) { visitFlag = i; }
+	int  visited() { return visitFlag; }
 
 	// repetitions value
 	int reps() const { return repetitions.numerator;}
@@ -202,10 +212,10 @@ protected:
 	int prepareGalaxy(Galaxy&) { return TRUE;}
 public:
 	// return the schedule
-	StringList displaySchedule(int depth);
+	virtual StringList displaySchedule(int depth);
 
 	// code generation
-	StringList genCode(Target&, int depth);
+	virtual StringList genCode(Target&, int depth);
 };
 
 // An SDFClusterBag is a composite object.  In some senses it is like
@@ -214,15 +224,21 @@ public:
 class SDFClusterBag : public SDFCluster {
 	friend class SDFClusterBagIter;
 private:
-	Galaxy gal;
-	SDFBagScheduler sched;
 	int owner;
+
+protected:
+	SDFBagScheduler* sched;
+	Galaxy gal;
 	int exCount;
+
 public:
 	// constructor: makes an empty bag
-	SDFClusterBag() : owner(TRUE), exCount(0) {}
+	SDFClusterBag() : owner(TRUE), exCount(0), sched(0) {}
 	// destructor deletes contents if owner is set
 	~SDFClusterBag();
+
+	// createScheduler
+	void createScheduler();
 
 	// absorb adds the SDFCluster argument to the bag
 	void absorb(SDFCluster*,Galaxy*);
@@ -233,6 +249,7 @@ public:
 
 	// asBag returns myself, since I am a bag
 	SDFClusterBag* asBag() { return this;}
+	Galaxy& myGal() { return gal; }
 
 	// print me
 	ostream& printOn(ostream&);
@@ -272,6 +289,10 @@ public:
 	SDFClustPort* outPtr() {
 		return far() ? 0 : pOutPtr;
 	}
+
+	// return the real far port alised to bagPorts.
+	// If the bagPort is a port of the outsideCluster, return zero.
+	SDFClustPort* realFarPort(SDFCluster* outsideCluster);
 
 	void makeExternLink(SDFClustPort* val);
 
@@ -320,3 +341,5 @@ public:
 	SDFCluster* operator++() { return next();}
 	ListIter::reset;
 };
+
+#endif
