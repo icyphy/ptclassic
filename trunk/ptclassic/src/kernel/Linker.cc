@@ -505,7 +505,7 @@ int Linker::multiLink (int argc, char** argv) {
 	// if a Block was dynamically linked in, or if it was compiled-in.
 	if (!perm) activeFlag = TRUE;	
 				// Call with tname, not objName
-	int nCalls = invokeConstructors(tname, dlhandle);
+	int nCalls = invokeConstructors(tname, (void *)NULL;
 #endif //USE_DLOPEN
 
 
