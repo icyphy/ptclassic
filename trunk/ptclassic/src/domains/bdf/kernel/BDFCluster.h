@@ -91,6 +91,9 @@ public:
 	// destructor zaps all the member clusters (inherited)
 	~BDFClusterGal() {}
 
+        // remove blocks from this galaxy without deallocating the blocks
+	void orphanBlocks();
+
 	// how many?
 	int numberClusts() const { return numberBlocks();}
 
