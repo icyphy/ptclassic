@@ -24,17 +24,17 @@ $Id$
 class Sim56Target :public CG56Target, public MotorolaSimTarget {
 private:
 	void initStates();
+protected:
+        void headerCode();
+        void trailerCode();
 public:
 	Sim56Target(const char*,const char*);
 	Sim56Target(const Sim56Target&);
-	void headerCode();
-	void wrapup();
 	int compileCode();
 	int loadCode();
 	int runCode();
 	Block* makeNew() const;
 	int isA(const char*) const;
-	const char* className() const {return "Sim56Target";}
 };
 
 #endif

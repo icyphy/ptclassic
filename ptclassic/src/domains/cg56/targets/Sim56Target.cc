@@ -53,16 +53,16 @@ int Sim56Target::runCode() {
 void Sim56Target :: headerCode () {
 	CG56Target :: headerCode();
 	MotorolaSimTarget :: headerCode();
-	addCode("	movep	#$0000,x:m_bcr\n\n");
+	myCode << "	movep	#$0000,x:m_bcr\n\n";
 };
 
 Block* Sim56Target::makeNew() const {
 	LOG_NEW; return new Sim56Target(*this);
 }
 
-void Sim56Target :: wrapup () {
-	MotorolaSimTarget :: wrapup();
-	CG56Target::wrapup();
+void Sim56Target :: trailerCode () {
+	MotorolaSimTarget :: trailerCode();
+	CG56Target::trailerCode();
 }
 
 ISA_FUNC(Sim56Target,CG56Target);

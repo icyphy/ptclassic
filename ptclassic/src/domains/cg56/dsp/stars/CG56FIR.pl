@@ -147,7 +147,7 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
                 oldsampleSize=oldsample.size();
 
 		if (oldsampleSize>0) 
-                     gencode(block);
+                     addCode(block);
         }
         
 	go {
@@ -156,61 +156,61 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
                 if (tp > decimation) dec=decimation;
 		adjust = decimation - tp;
 		if (adjust<0) adjust=0;
-		if((tp*interpolation) >1)  gencode(first);
-                if(tp>decimation) gencode(old);
-	        if(tp>(decimation+1)) gencode(second); 
+		if((tp*interpolation) >1)  addCode(first);
+                if(tp>decimation) addCode(old);
+	        if(tp>(decimation+1)) addCode(second); 
 
 // Normal case
                 if(dec==1 && interpolation==1) {
-                     gencode(must);
-	             if(tp>2) gencode(greaterTwo);
-		     if(tp==2) gencode(equalTwo);
-		     if(tp<2) gencode(lessTwo);
+                     addCode(must);
+	             if(tp>2) addCode(greaterTwo);
+		     if(tp==2) addCode(equalTwo);
+		     if(tp<2) addCode(lessTwo);
 		}
 // decimation
                 else if(dec>1) {
-                     gencode(decmust);
-	             if(tp > (1+dec)) gencode(decgreater);
-		     if(tp == (1+dec)) gencode(decequal);
-		     if(tp < (1+dec)) gencode(decless);
+                     addCode(decmust);
+	             if(tp > (1+dec)) addCode(decgreater);
+		     if(tp == (1+dec)) addCode(decequal);
+		     if(tp < (1+dec)) addCode(decless);
 	        }   
 // interpolation
                 else {
-                     gencode(interpmust);
+                     addCode(interpmust);
 	             if(tp>2) {
-                          gencode(greater);
-		          if(interpolation-1 > 1) gencode(greaterloop);
-		          if(interpolation-1 ==1) gencode(gone);
+                          addCode(greater);
+		          if(interpolation-1 > 1) addCode(greaterloop);
+		          if(interpolation-1 ==1) addCode(gone);
 			  if(tp-2==2) {
-		              gencode(grep);
-			      gencode(grep);
+		              addCode(grep);
+			      addCode(grep);
 			  }
                           else if(tp-2==1) 
-			      gencode(grep);
+			      addCode(grep);
 		          else if(interpolation-2>0) 
-		              gencode(repGreater);
+		              addCode(repGreater);
 
-                          gencode(gcont);
+                          addCode(gcont);
 	             }
 		     if(tp==2) {
-                          gencode(equal);
-		          if(interpolation-2 > 1) gencode(fullloop);
-		          if(interpolation-2 ==1) gencode(equalone);
-                          gencode(equalcont);
+                          addCode(equal);
+		          if(interpolation-2 > 1) addCode(fullloop);
+		          if(interpolation-2 ==1) addCode(equalone);
+                          addCode(equalcont);
 		     }
 		     if(tp<2) {
-		          gencode(less);
+		          addCode(less);
 			  if(interpolation-2==2) {
-		              gencode(lessrep);
-			      gencode(lessrep);
+		              addCode(lessrep);
+			      addCode(lessrep);
 			  }
                           else if(interpolation-2==1) 
-			      gencode(lessrep);
+			      addCode(lessrep);
 
 		          else if(interpolation-2>0) 
-		              gencode(rep);
+		              addCode(rep);
 
-			  gencode(lesscont);
+			  addCode(lesscont);
 		    }
                }
 	}

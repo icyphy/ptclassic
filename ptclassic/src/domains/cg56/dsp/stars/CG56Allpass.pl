@@ -70,10 +70,10 @@ reverberation business', Computer Music. Journal, Vol 3, No.2
                 delayBuf.resize(delay);
         }
         initCode {
-                gencode(block);
+                addCode(block);
 	}
         go {
-                gencode(std);
+                addCode(std);
         }		
 	execTime { 
                  return 16;

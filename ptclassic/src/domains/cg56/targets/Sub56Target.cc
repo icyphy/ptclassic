@@ -39,21 +39,18 @@ void Sub56Target :: initStates() {
 	yMemMap.setAttributes(A_SETTABLE|A_NONCONSTANT);
 }
 
-int Sub56Target :: run() {
-	addCode("	rts\n");
-	addCode("ptolemyMain\n");
-	scheduler()->setStopTime(1);
-	int i = Target::run();
-	addCode("	rts\n");
-	return i;
+/*virtual*/ void Sub56Target :: mainLoopCode() {
+	myCode << "	rts\n" << "ptolemyMain\n";
+	scheduler()->compileRun();
+	myCode << "	rts\n";
 }
 
 void Sub56Target :: headerCode () {
-	addCode("	org p:\n"
-		"ptolemyInit\n");
+	myCode << "	org p:\n" << "ptolemyInit\n";
 	CG56Target :: headerCode();
 };
 
+ 
 Block* Sub56Target::makeNew() const {
 	LOG_NEW; return new Sub56Target(*this);
 }

@@ -66,7 +66,7 @@ With the default parameters, there is a pole at z=0.5 +/- j0.5, and no zero.
 	}
 	exectime { return 9;}
 	go {
-		gencode(std);
+		addCode(std);
 	}
 }
 
