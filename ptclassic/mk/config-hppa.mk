@@ -118,8 +118,8 @@ CFLAGS =	-g -DUSG $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MISCCFLAGS)
 # and add -Xlinker -E
 #LINKFLAGS = 	-L$(LIBDIR) -Xlinker -x -static 
 #LINKFLAGS_D = 	-L$(LIBDIR) -g -static
-LINKFLAGS = 	-L$(LIBDIR) -Xlinker -x -Xlinker -E
-LINKFLAGS_D = 	-L$(LIBDIR) -g -Xlinker -E
+LINKFLAGS = 	-L$(LIBDIR) -Xlinker -x -Xlinker -E $(SHARED_LIBRARY_R_LIST)
+LINKFLAGS_D = 	-L$(LIBDIR) -g -Xlinker -E $(SHARED_LIBRARY_R_LIST)
 
 LIBSUFFIX =		sl
 
