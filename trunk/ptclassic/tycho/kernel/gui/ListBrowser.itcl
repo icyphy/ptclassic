@@ -215,63 +215,91 @@ body ::tycho::ListBrowser::constructor {args} {
     #
     # Any key breaks a sequence of Tabs
     bind $itk_component(tag_entry) <KeyPress> "$this breakCompleteSequence"
-    bind $itk_component(tag_entry) <Tab> {%Q complete; break}
+    bind $itk_component(tag_entry) <Tab> "$this complete; break"
     bind $itk_component(tag_entry) <<NextPane>> "focus $itk_component(listbox)"
 
     # Mouse bindings
     bind $itk_component(listbox) <Double-1> \
-            {%Q selectItem [%Q get entry]; break}
-    bind $itk_component(listbox) <1> {%Q chooseItem %W %y}
+            "$this selectItem \[$this get entry\]; break"
+    bind $itk_component(listbox) <1> [code $this chooseItem %W %y]
     bind $itk_component(listbox) <<NextPane>> "focus $itk_component(hull)"
 
     # Navigation bindings
-    bind $itk_component(tag_entry) <<UpPage>> {%Q scroll -1 pages; break}
-    bind $itk_component(tag_entry) <<DownPage>> {%Q scroll 1 pages; break}
-    bind $itk_component(tag_entry) <<UpLine>> {%Q scroll -1 units; break}
-    bind $itk_component(tag_entry) <<DownLine>> {%Q scroll 1 units; break}
-    bind $itk_component(tag_entry) <<Bottom>> {%Q goto end; break}
-    bind $itk_component(tag_entry) <<Top>> {%Q goto 0; break}
-
-    bind $itk_component(listbox) <<UpPage>> {%Q scroll -1 pages; break}
-    bind $itk_component(listbox) <<DownPage>> {%Q scroll 1 pages; break}
-    bind $itk_component(listbox) <<UpLine>> {%Q scroll -1 units; break}
-    bind $itk_component(listbox) <<DownLine>> {%Q scroll 1 units; break}
-    bind $itk_component(listbox) <<Bottom>> {%Q goto end; break}
-    bind $itk_component(listbox) <<Top>> {%Q goto 0; break}
-
-    # Special keys for moving about.
-    bind $itk_component(tag_entry) <Prior> {%Q scroll -1 pages; break}
-    bind $itk_component(tag_entry) <Next> {%Q scroll 1 pages; break}
-    bind $itk_component(tag_entry) <Up> {%Q scroll -1 units; break}
-    bind $itk_component(tag_entry) <Down> {%Q scroll 1 units; break}
+    bind $itk_component(tag_entry) <<UpPage>> \
+	    "$this scroll -1 pages; break"
+    bind $itk_component(tag_entry) <<DownPage>> \
+	    "$this scroll 1 pages; break"
+    bind $itk_component(tag_entry) <<UpLine>> \
+	    "$this scroll -1 units; break"
+    bind $itk_component(tag_entry) <<DownLine>> \
+	    "$this scroll 1 units; break"
+    bind $itk_component(tag_entry) <<Bottom>> \
+	    "$this goto end; break"
+    bind $itk_component(tag_entry) <<Top>> \
+	    "$this goto 0; break"
     
-    bind $itk_component(listbox) <Prior> {%Q scroll -1 pages; break}
-    bind $itk_component(listbox) <Next> {%Q scroll 1 pages; break}
-    bind $itk_component(listbox) <Up> {%Q scroll -1 units; break}
-    bind $itk_component(listbox) <Down> {%Q scroll 1 units; break}
-
+    bind $itk_component(listbox) <<UpPage>> \
+	    "$this scroll -1 pages; break"
+    bind $itk_component(listbox) <<DownPage>> \
+	    "$this scroll 1 pages; break"
+    bind $itk_component(listbox) <<UpLine>> \
+	"$this scroll -1 units; break"
+    bind $itk_component(listbox) <<DownLine>> \
+	    "$this scroll 1 units; break"
+    bind $itk_component(listbox) <<Bottom>> \
+	    "$this goto end; break"
+    bind $itk_component(listbox) <<Top>> \
+	    "$this goto 0; break"
+    
+    # Special keys for moving about.
+    bind $itk_component(tag_entry) <Prior> \
+	    "$this scroll -1 pages; break"
+    bind $itk_component(tag_entry) <Next> \
+	"$this scroll 1 pages; break"
+    bind $itk_component(tag_entry) <Up> \
+	    "$this scroll -1 units; break"
+    bind $itk_component(tag_entry) <Down> \
+	    "$this scroll 1 units; break"
+    
+    bind $itk_component(listbox) <Prior> \
+	    "$this scroll -1 pages; break"
+    bind $itk_component(listbox) <Next> \
+	    "$this scroll 1 pages; break"
+    bind $itk_component(listbox) <Up> \
+	"$this scroll -1 units; break"
+    bind $itk_component(listbox) <Down> \
+	    "$this scroll 1 units; break"
+    
     # We have gotten some reported problems about these keys
     # being undefined on some machines.  But they also seem
     # be needed for other machines.  Hence the catch.
     catch {
-	bind $itk_component(tag_entry) <KP_Prior> {%Q scroll -1 pages; break}
-	bind $itk_component(tag_entry) <KP_Next> {%Q scroll 1 pages; break}
-	bind $itk_component(tag_entry) <KP_Up> {%Q scroll -1 units; break}
-	bind $itk_component(tag_entry) <KP_Down> {%Q scroll 1 units; break}
-
-	bind $itk_component(listbox) <KP_Prior> {%Q scroll -1 pages; break}
-	bind $itk_component(listbox) <KP_Next> {%Q scroll 1 pages; break}
-	bind $itk_component(listbox) <KP_Up> {%Q scroll -1 units; break}
-	bind $itk_component(listbox) <KP_Down> {%Q scroll 1 units; break}
+    bind $itk_component(tag_entry) <KP_Prior> \
+	    "$this scroll -1 pages; break"
+	bind $itk_component(tag_entry) <KP_Next> \
+		"$this scroll 1 pages; break"
+	bind $itk_component(tag_entry) <KP_Up> \
+		"$this scroll -1 units; break"
+	bind $itk_component(tag_entry) <KP_Down> \
+		"$this scroll 1 units; break"
+	
+	bind $itk_component(listbox) <KP_Prior> \
+	    "$this scroll -1 pages; break"
+	bind $itk_component(listbox) <KP_Next> \
+		"$this scroll 1 pages; break"
+	bind $itk_component(listbox) <KP_Up> \
+		"$this scroll -1 units; break"
+	bind $itk_component(listbox) <KP_Down> \
+		"$this scroll 1 units; break"
     }
 
     # Get preferences. No real need to subscribe for dialogs.
     set caseSensitiveCompletion \
-            [stylesheet get interaction caseSensitiveCompletion]
-
+	    [stylesheet get interaction caseSensitiveCompletion]
+    
     # Process any unevaluated arguments.
     eval itk_initialize $args
-
+    
     wm resizable $prefix 1 1
     # NOTE: There seems to be no way to find out the actual
     # window size at this point.  The commands "wm reqwidth"
@@ -420,7 +448,7 @@ body ::tycho::ListBrowser::complete {} {
         # Set the entry widget to the longest common string among all the
         # matches. If no common initial string (example: *blue), clear the
         # entry.
-        set compMatch [lsubstring $matches]
+        set compMatch [::tycho::lsubstring $matches]
         setEntry $compMatch
 	bell
     }
