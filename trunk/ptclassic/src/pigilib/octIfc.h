@@ -101,22 +101,36 @@ extern boolean IsVemConnector();
 extern boolean IsIoPort();
 extern boolean IsInputPort();
 extern boolean IsDelay();
+extern boolean IsDelay2();
 extern boolean IsGal();
 extern boolean IsStar();
 extern boolean IsUniv();
 extern boolean IsGalFacet();
+extern boolean IsMarker();
+extern boolean IsCursor();
+
 extern boolean GetCommentProp();
 extern boolean SetCommentProp();
 extern boolean GOCDomainProp();
 extern int GetIterateProp();
 extern void SetIterateProp();
 
+extern boolean FreeOctMembers(/* octObject *o */);
+
 /* Added for POct.cc */
 extern boolean IsUnivFacet();
 extern boolean IsBus();
 extern boolean MyOpenMaster();
+extern boolean IsPal();
 extern boolean OpenFacet();
+extern boolean AutoLoadCk();
+extern boolean GetStringizedProp( /* octObject *objPtr, char *name,
+				     char*dest, int dlen */);
 extern boolean IsPalFacet();
+extern boolean LoadTheStar(/* octObject* instPtr, int permB, char*
+			      linkArgs */);
+extern boolean GetDefaultParams(/* octObject *instPtr, ParamListType
+				 *pListPtr */); 
 extern boolean SetTargetParams();
 extern boolean GetTargetParams();
 extern boolean GOCTargetProp();
@@ -128,5 +142,12 @@ extern boolean GetGalTerms();
 extern boolean GetHardwareProp();
 extern boolean SetHardwareProp();
 extern boolean GOCArchProp();
+
+/* This is defined in octtools/Packages/oct/gen.c, and used in
+ * octIfc.c, mkIcon.c and palette.c
+ */
+extern int octInitGenContentsSpecial(/* octObject *object,
+				      octObjectMaskmask, octGenerator
+				      *generator */);
 #endif /* __cplusplus*/
 #endif /* OCTIFC_H */
