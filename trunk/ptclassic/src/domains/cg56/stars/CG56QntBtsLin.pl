@@ -56,8 +56,8 @@ an optional offset can be added to shift the output levels up or down.
   	ccinclude {<math.h>}
 
         go { 
-		
-                double a = pow(2,1-double(noBits));
+		// There is no IntState to double cast, so cast to int first.
+                double a = pow(2,1-double(int(noBits)));
    		X=a;
  		addCode(std);
  	}
