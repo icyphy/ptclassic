@@ -33,7 +33,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // with templates we will need only
 // template<class T> inline T abs(T a) { return (a >= 0) ? a : -a;}
 
-#if defined(PTHPPA) || defined(PTAIX_XLC)
+/* Can't use PTHPPA and PTAIX here, since we might not have included compat.h*/
+#if defined(hpux) || defined(__hpux) || defined(_AIX)
 #else
 inline double abs(double a) { return (a >= 0) ? a : -a;}
 inline int abs(int a) { return (a >= 0) ? a : -a;}
