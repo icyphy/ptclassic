@@ -109,6 +109,7 @@ ddsData data;			/* Should be (ddsEnumerate *)         */
 		 "Items of type DDS_EXTERN must have a parent");
 	/*NOTREACHED*/
     }
+    return (ddsHandle)NULL;
 }
 
 
@@ -162,6 +163,7 @@ ddsInternal *child;		/* New child     */
     errRaise(ddsPackageName, DDS_BAD_PARENT,
 	     "DDS_EXTERNAL components may not have child components");
     /*NOTREACHED*/
+    return (Widget)NULL;
 }
 
 /*ARGSUSED*/
