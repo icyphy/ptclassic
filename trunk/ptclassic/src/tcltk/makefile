@@ -153,7 +153,7 @@ tk: $(TK_OBJ)/libtk.a
 $(TK_OBJ)/libtk.a: $(TK_OBJ) $(TK_OBJ)/xpm/libxpm.a
 	@echo "Making all in tk"
 	(cd  $(TK_OBJ); $(MAKE) \
-		X11_INCLUDES=$(X11_INCSPEC) \
+		X11_INCLUDES="$(X11_INCSPEC)" \
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		all)
 
@@ -184,7 +184,7 @@ $(TK_OBJ)/xpm/libxpm.a: $(TK_OBJ)/xpm
 install_tk: $(TK_DEST)/lib/libtk.a $(TK_DEST)/lib/libxpm.a
 $(TK_DEST)/lib/libtk.a: $(TK_OBJ)/libtk.a $(TCLTK_DEST) $(TK_DEST) $(TK_DEST)/lib $(TK_INDEPENDENT_DEST)
 	(cd  $(TK_OBJ); $(MAKE) \
-		X11_INCLUDES=$(X11_INCSPEC) \
+		X11_INCLUDES="$(X11_INCSPEC)" \
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		install)
 
