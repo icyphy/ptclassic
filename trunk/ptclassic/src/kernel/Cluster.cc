@@ -47,8 +47,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 extern int setPortIndices(Galaxy&);
 
-// Constructors.
-Nebula::Nebula(Star& self) : selfStar(self), master(NULL) {};
+Nebula::Nebula(Star& self) : selfStar(self), master(NULL),
+sched(0) {};
+
+Nebula::~Nebula() {
+    LOG_DEL; delete sched;
+}
+
+void Nebula::setInnerSched(Scheduler* s) {
+    LOG_DEL; delete sched;
+    sched = s;
+    sched.setGalaxy(gal);
+}
 
 void Nebula::setMasterBlock(Block* m,PortHole** newPorts) {
     if (master) {
