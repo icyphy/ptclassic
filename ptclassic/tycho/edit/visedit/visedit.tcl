@@ -45,7 +45,7 @@ if { [lsearch -exact $auto_path $env(VISEDIT_LIBRARY)] == -1 } {
 
 ### Stylesheets
 ::tycho::register stylesheet "graphics" \
-	[file join {$TYCHO} editors visedit graphics.style] \
+	[file join $env(VISEDIT_LIBRARY) graphics.style] \
 	[file join ~ .Tycho styles graphics.style]
 
 ### MODE MAPPINGS
