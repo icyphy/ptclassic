@@ -12,7 +12,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 
-	hinclude { "pt_fstream.h" }
+	ccinclude { "iostream.h" }
 
 	input
 	{
@@ -20,24 +20,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    type { anyType }
 	}
 
-	protected
-	{
-	    pt_ofstream output;
-	}
-
-	setup
-	{
-	    // abortRun is called on open failure
-	    output.open("<cerr>");
-	}
-
 	go
 	{
-	    output << '\007';	// ASCII BEL character.
-	}
-
-	wrapup
-	{
-		output.flush();
+	    cerr << '\007';	// ASCII BEL character.
 	}
 }
