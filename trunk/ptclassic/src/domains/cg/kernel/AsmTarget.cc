@@ -327,8 +327,10 @@ int AsmTarget :: genFile(const char* stuff,const char* base,const char* suffix)
 	pt_ofstream o(fullName);
 	if (!o) status = FALSE;
 	else {
-		o << stuff;
+		const char* stuff_str = stuff;	// hack
+		o << stuff_str;
 		o.flush();
+		o.close();			// hack
 		status = TRUE;
 	}
 	LOG_DEL; delete fullName;
