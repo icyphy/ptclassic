@@ -1,5 +1,6 @@
 #include "Block.h"
 #include "StringList.h"
+#include "Output.h"
 
 /**************************************************************************
 Version identification:
@@ -19,7 +20,7 @@ $Id$
 
 **************************************************************************/
 
-Block :: operator char* ()
+Block :: operator StringList ()
 {
 	StringList out;
 	out = "Block: ";
@@ -31,11 +32,11 @@ Block :: operator char* ()
 
 	out += "Ports in the block:\n";
 	for(int i = numberPorts(); i>0; i--)
-		out += nextPort();
+		out += (StringList) nextPort();
 // This will change when we have multiple MultiPortHoles supported better
 	if (saveMPH) {
 		out += "MultiPortHoles in the block:\n";
-		out += *saveMPH;
+		out += (StringList) *saveMPH;
 	}
 	return out;
 }
@@ -51,7 +52,7 @@ void Block :: initialize()
 // If the name refers to a MultiPortHole, a new PortHole is created.
 // The real port is always returned (no need to check for aliases).
 PortHole *
-Block::portWithName (char *name) {
+Block::portWithName (const char* name) {
 	// If the MultiPortHole name matches, return that
 	// (this will create a new connection)
 	if (saveMPH && strcmp (name,saveMPH->readName()) == 0)
@@ -65,4 +66,16 @@ Block::portWithName (char *name) {
 	}
 	// Still not found, return NULL
 	return NULL;
+}
+
+// The following function is an error catcher -- it is called if
+// a star or galaxy in the known list hasn't redefined the clone
+// method.
+Block* Block::clone() {
+	extern Error errorHandler;
+	StringList msg = "The star or galaxy \"";
+	msg += readName();
+	msg += "\" doesn't implement the \"clone\" method!\n";
+	errorHandler.error(msg);
+	return 0;
 }
