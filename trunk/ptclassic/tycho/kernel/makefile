@@ -92,6 +92,7 @@ ITCL_SRCS = \
 	IndexBrowser.itcl \
 	Interchange.itcl \
 	KeyedDigraph.itcl \
+	Library.itcl \
 	ListBrowser.itcl \
 	MenuBar.itcl \
 	MenuSupport.itcl \
@@ -100,6 +101,7 @@ ITCL_SRCS = \
 	Monitor.itcl \
 	MultiPanel.itcl \
 	Object.itcl \
+	ParameterEdit.itcl \
 	PreferenceDialog.itcl \
 	PreferenceEditor.itcl \
 	PopupMenu.itcl \
