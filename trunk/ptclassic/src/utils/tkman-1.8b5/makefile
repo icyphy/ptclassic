@@ -36,7 +36,11 @@ include $(CONFIG)
 
 SRCS =
 
-KRUFT =
+KRUFT = 
+
+MISC_FILES = 	Copyright MANIFEST Makefile.dist README-tkman contrib \
+		searchbox.tcl taputils.tcl tkman-help.html tkman-help.tcl \
+		tkman.1 tkman.tcl
 
 # common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
 LIB = foo
@@ -75,6 +79,15 @@ $(ROOT)/man/man1/tkman.1: tkman.1
 	rm -f $@
 	ln $< $@
 sources:	$(EXTRA_SRCS) $(SRCS) makefile
+
+depend:
+	@echo no dependencies in tkman directory (contributed code)
+
+sccsinfo:
+	sccs info
+checkjunk:
+	@checkextra -v $(SRCS) $(OBJS) $(MISC_FILES) makefile SCCS
+
 clean:
 	rm -f tkman *~
 # Don't add anything after the next line; makedepend will zap it.
