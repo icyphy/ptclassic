@@ -91,6 +91,16 @@ public:
 	// inherit virtual destructor, which zaps inherited data members
 	virtual ~BDFClusterGal();
 
+	// override addBlock
+	inline void addBlock(Block& b, const char* bname) {
+		dynamicClusterList.append(&b);
+		DynamicGalaxy::addBlock(b, bname);
+	}
+	inline void addBlock(Block& b) {
+		dynamicClusterList.append(&b);
+		DynamicGalaxy::addBlock(b);
+	}
+
 	// override removeBlock
 	inline int removeBlock(Block& b) {
 		dynamicClusterList.remove(&b);
