@@ -36,6 +36,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "DEStar.h"
 #include "DEScheduler.h"
+#include "DEWormhole.h"
 #include "StringList.h"
 #include "PriorityQueue.h"
 
@@ -51,8 +52,24 @@ DEStar :: DEStar()
 // initialize DE-specific members.
 void DEStar :: initialize() {
 	Star::initialize();
+	if (SimControl::haltRequested()) return;
 	arrivalTime = 0.0;
 	completionTime = 0.0;
+
+	// Set the internal pointer to the event queue
+	Scheduler *mysched;
+	// Need different access methods to the scheduler for
+	// wormholes and for stars, unfortunately
+	if (isItWormhole()) {
+	  mysched = ((DEWormhole*)this)->outerSched();
+	} else {
+	  mysched = scheduler();
+	}
+	if (!mysched || !(mysched->isA("DEBaseSched"))) {
+	  Error::abortRun(*this,"Scheduler is not a recognized type");
+	  return;
+	}
+	eventQ = ((DEBaseSched*)mysched)->queue();
 
 	// in case of PHASE mode, create internal queue.
 	if (mode == PHASE) {
