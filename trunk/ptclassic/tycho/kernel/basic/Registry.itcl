@@ -408,12 +408,6 @@ class ::tycho::Registry {
     # Deregister a viewer widget
     proc deregisterWindow {tag {window *}}
 
-    # Link to an open model
-    proc linkModel {path key}
-
-    # Open a TIM model file and return the model
-    proc openModel {name {path {}}}
-
     # Raise a widget, testing for various nasty conditions
     proc raiseWindow {tag window}
 
@@ -437,9 +431,6 @@ class ::tycho::Registry {
 
     # Register a viewer widget
     proc registerWindow {tag window args}
-
-    # Unlink from an open model
-    proc unlinkModel {path key}
 
     ###################################################################
     ####                           private procs                   ####
@@ -474,17 +465,8 @@ class ::tycho::Registry {
     # The array of registered modes
     private common _modes
 
-    # The array of open models 
-    private common _openModels
-
     # The array of registered protocols 
     private common _protocols
-
-    # The mapping from TIM submode to Model class 
-    private common _timMapping
-    array set _timMapping {
-    	{} text
-    }
 
     # Info about window submenus. category' is the category
     # with "new" or "open" prepended.
@@ -657,73 +639,6 @@ body ::tycho::Registry::initWindowMenu {menubar} {
 		bind $toplevel <Alt-Key-$a> "$menubar invoke [list $tag]"
 	    }
 	}
-    }
-}
-
-##########################################################################
-## linkModel
-#
-# Link a client to the model. A model remains in memory for as
-# long as there are clients with links to it. The _key_ argument
-# is used only to unlink from the model later -- usually, you can
-# use the name of the calling object. This method raises an error
-# if the key has already been used to link to the model. Linking
-# and unlinking uses keys because it's likely to be more reliable
-# than a simple link count.
-#
-body ::tycho::Registry::linkModel {path key} {
-    if ![::info exists _openModels($path)] {
-        error "Model $path is not open"
-    }
-    if [::info exists _linkedClients($path,$key)] {
-        error "Model $path is already linked by $key"
-    }
-    set _linkedClients($path,$key) 1
-}
-
-##########################################################################
-## openModel
-#
-# Open a TIM model file and return the model. The first argument
-# is the file name, either absolute or relative to the TIM_PATH
-# preference. If the second argument is supplied and not null,
-# it is prepended to the search path. If the model already
-# exists, just return it. The link count of the model is
-# not altered. The argument is the path to the model,
-# <i>relative to the TIM_PATH preference</i>. Clients should be sure
-# to perform a linkModel if this is the first time they have
-# accessed this model. Returns null if the file was not found.
-#
-body ::tycho::Registry::openModel {name {path {}}} {
-    if [::info exists _openModels($name)] {
-        # Already open, so return
-        return $_openModels($name)
-    } else {
-        # Get the default suffix-based mode and sub-mode
-        ::tycho::Registry::registeredMode $name hdr
-        
-        # Find the file
-	set file [::tycho::urlPathSearch $name \
-		[concat $path [::tycho::splitPath \
-		[::tycho::preference get config TIM_PATH]]]]
-
-        # Read the actual file header to override defaults
-        ::tycho::readFileHeader $file hdr
-        
-        # If not a TIM file, abort
-        if { [string tolower $hdr(mode)] != "tim" } {
-	    error "$file is not a TIM file"
-        }
-        
-        # The sub-mode determines what to do with the file
-        if ![::info exists hdr(submode)] {
-	    set hdr(submode) {}
-        }
-        if ![::info exists _timMapping($hdr(submode))] {
-	    error "Unknown TIM type: $hdr(submode)"
-        }
-        
-        FIXME: Unfinished
     }
 }
 
@@ -1186,22 +1101,5 @@ body ::tycho::Registry::registerWindow {tag window args} {
 		$mb enable $cat
 	    }
         }
-    }
-}
-
-##########################################################################
-## unlinkModel
-#
-# Unlink from a model. The key must be a key that was previously
-# used to link to the model, or an error is raised.
-#
-body ::tycho::Registry::unlinkModel {path key} {
-    if ![::info exists _linkedClients($path,$key)] {
-        error "Model $path is not linked by $key"
-    }
-    unset _linkedClients($path,$key)
-    if { [array names _linkedClients($path,*)] == "" } {
-        delete object $_openModels($path)
-        unset openModels($path)
     }
 }
