@@ -1,0 +1,14 @@
+#!/bin/sh
+%w%	$Date$
+exec $S56DSP/bin/load56 -q -e START $*
+#desthost="carson"
+#
+#hostname=`hostname`
+#case $hostname in
+#	$desthost.*|$desthost)
+#		export S56DSP
+#		S56DSP=/usr/users/gabriel/vendors/s56dsp
+#		exec $S56DSP/bin/load56 -q -e START $* ;;
+#	*)
+#		exec execon $desthost $0 $* ;;
+#esac
