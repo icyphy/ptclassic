@@ -35,11 +35,13 @@ if ![info exists TESTS] {
 }
 
 proc print_verbose {test_name test_description contents_of_test code answer} {
+    global FAILED
     puts stdout "\n"
     puts stdout "==== $test_name $test_description"
     puts stdout "==== Contents of test case:"
     puts stdout "$contents_of_test"
     if {$code != 0} {
+	incr FAILED
         if {$code == 1} {
             puts stdout "==== Test generated error:"
             puts stdout $answer
@@ -82,8 +84,9 @@ proc test {test_name test_description contents_of_test passing_results} {
             print_verbose $test_name $test_description $contents_of_test \
                     $code $answer
             puts stdout "++++ $test_name PASSED"
-	    incr PASSED
+
         }
+	incr PASSED
     } else {
         print_verbose $test_name $test_description $contents_of_test $code \
                 $answer 
@@ -112,8 +115,9 @@ proc dotests {file args} {
 #
 proc doneTests {args} {
     global PASSED FAILED
-    puts "Total: [expr $PASSED + $FAILED] Passed: $PASSED Failed: $FAILED"
-    flush stdout
+    puts stderr \
+	    "Total: [expr $PASSED + $FAILED] (Passed: $PASSED Failed: $FAILED)"
+    flush stderr
 }
 
  
