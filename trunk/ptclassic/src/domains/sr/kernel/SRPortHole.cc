@@ -24,10 +24,10 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
-    Programmer:		T.M. Parks
-    Date of creation:	5 January 1992
+    Author:	S. A. Edwards
+    Created:	14 April 1996
 
-    Code for domain-specific PortHole classes.
+    Code for the SR domain's PortHole classes.
 */
 
 #ifdef __GNUG__
@@ -35,6 +35,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "SRPortHole.h"
+#include "SRStar.h"
+#include "Error.h"
+#include "Plasma.h"
 
 // Class identification.
 ISA_FUNC(SRPortHole,PortHole);
@@ -75,4 +78,127 @@ PortHole& MultiOutSRPort::newPort()
 {
 	LOG_NEW; PortHole& p = *new OutSRPort;
 	return installPort(p);
+}
+
+int SRPortHole::known() const {
+  Error::abortRun("known() called on class SRPortHole");
+  return FALSE;
+}
+
+int SRPortHole::present() const {
+  Error::abortRun("present() called on class SRPortHole");
+  return FALSE;
+}
+
+// Return TRUE if the the output is known
+int OutSRPort::known() const
+{
+  if ( emittedParticle ) {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+// Return TRUE if the far port exists and the output is known
+int InSRPort::known() const
+{
+  OutSRPort * farPort;
+
+  if ( (farPort = (OutSRPort *) far()) != (OutSRPort *) 0 ) {
+    return farPort->known();
+  }
+
+  return FALSE;
+}
+
+// Return TRUE if the particle is known present
+int OutSRPort::present() const
+{
+
+  if ( emittedParticle > (Particle *) 1 ) {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+// Return TRUE if the far port exists and has a present particle
+int InSRPort::present() const
+{
+  OutSRPort * farPort;
+
+  if ( (farPort = (OutSRPort *) far()) != (OutSRPort *) 0 ) {
+    return farPort->present();
+  }
+
+  return FALSE;
+}
+
+// Return the particle that has been emitted
+Particle & InSRPort::get() const
+{
+  OutSRPort * farPort;
+
+  if ( (farPort = (OutSRPort *) far()) != (OutSRPort *) 0 ) {
+    if ( farPort->emittedParticle > (Particle *) 1 ) {
+      return *(farPort->emittedParticle);
+    } else {
+      Error::abortRun("Attempted to get an unknown or absent particle from port ",
+		      name());
+      
+    }
+  } else {
+    Error::abortRun("Attempted to get a particle from unconnected port ", name());
+  }
+
+  // A kludge--return some particle to avoid a core dump.
+  // This leaks memory!
+  return *myPlasma->get();
+
+}
+
+// Make the particle absent
+void OutSRPort::absent()
+{
+  if ( emittedParticle ) {
+    Error::error("Repeated emission on port ", name() );
+    emittedParticle->die();
+  }
+
+  emittedParticle = (Particle *) 1; 
+}
+
+// Emit a particle
+Particle & OutSRPort::emit()
+{
+  if ( emittedParticle ) {
+    Error::error("Repeated emission on port ", name() );
+    emittedParticle->die();
+  }
+
+  return *(emittedParticle = myPlasma->get());  
+}
+
+// Destroy the particle in the port, if any, resetting it to "unknown"
+void OutSRPort::clearPort()
+{
+  if ( emittedParticle > (Particle *) 1 ) {
+    emittedParticle->die();
+  }
+
+  emittedParticle = (Particle *) 0;
+}
+
+// Reset the particle in the port
+void OutSRPort::initialize()
+{
+  if ( !setResolvedType () ) {
+    Error::abortRun( *this, "can't determine DataType" );
+    return;
+  }
+
+  if ( !allocatePlasma() ) return;
+
+  emittedParticle = (Particle *) 0;
 }
