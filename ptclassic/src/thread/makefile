@@ -9,24 +9,26 @@
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
-
 ROOT = ../..
-OBJ = $(ROOT)/obj.$(ARCH)
 
 DIRS =
 
+# sol2 and sol2.cfront
 ifneq (,$(filter sol%,$(ARCH)))
 DIRS = posix
 endif
 
+# sun4
 ifneq (,$(filter sun%,$(ARCH)))
 DIRS = Awesime awe lwp posix
 endif
 
+# cfront
 ifeq (cfront,$(ARCH))
 DIRS = lwp posix
 endif
 
+# mips
 ifeq (mips,$(ARCH))
 DIRS = Awesime awe
 endif
@@ -48,96 +50,89 @@ else
 	@echo "No need to do anything in thread directory for this ARCH."
 endif
 
+############################################################
+
+# Directories for installing include files and libraries
+# for thread packages.
+THREAD_INCLUDE = $(ROOT)/thread/include.$(ARCH)
+THREAD_LIB = $(ROOT)/thread/lib.$(ARCH)
+
+$(THREAD_INCLUDE) $(THREAD_LIB) $(THREAD_INCLUDE)/pthread :
+	mkdir $@
 
 #
-# Rules for the gthreads library.
+# Rules for the gthreads package.
 #
 
-THREAD_OBJ = $(OBJ)/thread
-THREAD_INSTALL = $(ROOT)/thread
-THREAD_INCLUDE = $(THREAD_INSTALL)/include.$(ARCH)
-THREAD_LIB = $(THREAD_INSTALL)/lib.$(ARCH)
+# Source and object directories for the gthreads package.
+GT_SRC = $(ROOT)/src/thread/gthreads
+GT_OBJ = $(ROOT)/obj.$(ARCH)/thread/gthreads
 
-GT_OBJ = $(THREAD_OBJ)/gthreads
-GT_SRC = ../$(ROOT)/src/thread/gthreads
-GT_LIBS = libgthreads.a
-GT_CC = gcc
-GT_CFLAGS =	-DASM_SETJMP -DNOERR_CHECK -DSTACK_CHECK -DSIGNAL_STACK \
-		-DCLEANUP_HEAP -DC_CONTEXT_SWITCH \
+# Include files that need to be installed.
+GT_INCLUDE= $(THREAD_INCLUDE)/pthread.h \
+ $(THREAD_INCLUDE)/pthread/config.h \
+ $(THREAD_INCLUDE)/pthread/errno.h \
+ $(THREAD_INCLUDE)/pthread/limits.h \
+ $(THREAD_INCLUDE)/pthread/pthread_asm.h \
+ $(THREAD_INCLUDE)/pthread/signal.h \
+ $(THREAD_INCLUDE)/pthread/stdtypes.h \
+ $(THREAD_INCLUDE)/pthread/unistd.h
+
+# Redefined make variables.
+GT_CFLAGS =	-DASM_SETJMP -DNOERR_CHECK -DSTACK_CHECK -DC_CONTEXT_SWITCH \
 		-DSRP -DC_INTERFACE
-GT_COMP_ASM = $$(CC) $$(INC1) $$(INC2) $$(CFLAGS) -c $$*.S
+GT_COMP_ASM =	$$(CC) $$(INC1) $$(INC2) $$(CFLAGS) -c $$*.S
 
-#
-# Build required directories if necessary.
-#
-
-$(THREAD_INSTALL):
-	-mkdir $@
-
-$(THREAD_INCLUDE) \
-$(THREAD_LIB): $(THREAD_INSTALL)
-	-mkdir $@
-
-$(OBJ):
-	-mkdir $@
-
-$(THREAD_OBJ): $(OBJ)
-	-mkdir $@
-
-$(GT_OBJ): $(THREAD_OBJ)
-	-mkdir $@
-
-$(GT_OBJ)/include $(GT_OBJ)/src: $(GT_OBJ)
-	-mkdir $@
-
-$(GT_OBJ)/include/pthread: $(GT_OBJ)/include
-	-mkdir $@
+# Install gthreads library and include files.
+gthreads_install: $(THREAD_LIB) $(THREAD_INCLUDE) $(THREAD_INCLUDE)/pthread \
+	$(THREAD_LIB)/libgthreads.a $(GT_INCLUDE)
 
 # Clean up.
-gthreads_clean: $(GT_OBJ)/src
-	(cd $(GT_OBJ)/src; $(MAKE) \
-		LIBS=$(GT_LIBS) \
-		clean; \
-	)
+gthreads_clean: $(GT_OBJ)
+	$(MAKE) -C $(GT_OBJ)/src clean;
 
-# Make symbolic links for all source and header files.
-gthreads_sources: $(GT_OBJ)/src $(GT_OBJ)/include \
-	$(GT_OBJ)/include/pthread
-	-(cd $(GT_OBJ)/include; ln -s ../$(GT_SRC)/include/*.h .)
-	-(cd $(GT_OBJ)/include/pthread; ln -s ../../$(GT_SRC)/include/pthread/*.h .)
-	-(cd $(GT_OBJ)/src; ln -s ../$(GT_SRC)/src/* .)
+# Install gthreads include files.
+$(THREAD_INCLUDE)/pthread/config.h:	$(GT_OBJ)/include/pthread/config.h
+	cp $< $@
 
-# Build and install everything.
-gthreads_install: gthreads_$(ARCH) $(THREAD_INCLUDE) $(THREAD_LIB)
-	-cp -r $(GT_OBJ)/include/* $(THREAD_INCLUDE)
-	-cp $(GT_OBJ)/src/$(GT_LIBS) $(THREAD_LIB)
+$(THREAD_INCLUDE)/pthread/%.h: $(GT_SRC)/pthread/%.h
+	ln $< $@
 
-# Build objects for sol2.
-gthreads_sol2: gthreads_sources 
-	(cd $(GT_OBJ)/src; $(MAKE) $(MFLAGS) $(MAKEVARS) \
-		CC=$(GT_CC) \
+$(THREAD_INCLUDE)/%.h: $(GT_SRC)/include/%.h
+	ln $< $@
+
+# Install gthreads library.
+$(THREAD_LIB)/libgthreads.a: $(GT_OBJ)/lib/libgthreads.a
+	ln $< $@
+
+# Build a shadow tree to hold object files.
+$(GT_OBJ): $(GT_SRC)
+	mkdir $@
+	lndir ../$< $@
+
+# Build gthreads library.
+$(GT_OBJ)/lib/libgthreads.a: gthreads_$(ARCH)
+
+# Build library for sol2 using Gnu compiler.
+gthreads_sol2: $(GT_OBJ)
+	$(MAKE) -C $(GT_OBJ)/src $(MFLAGS) $(MAKEVARS) \
+		CC=gcc \
 		CFLAGS='$(GT_CFLAGS) -DSOLARIS -DSVR4' \
 		COMP_ASM='$(GT_COMP_ASM) -traditional' \
-		LIBS=$(GT_LIBS) \
-		all ; \
-	)
+		all;
 
-# Build objects for sol2 using Sun's compiler.
-gthreads_sol2.cfront: gthreads_sources
-	(cd $(GT_OBJ)/src; $(MAKE) $(MFLAGS) $(MAKEVARS) \
+# Build library for sol2 using Sun's compiler.
+gthreads_sol2.cfront: $(GT_OBJ)
+	$(MAKE) -C $(GT_OBJ)/src $(MFLAGS) $(MAKEVARS) \
 		CC=cc \
 		CFLAGS='$(GT_CFLAGS) -DSOLARIS -DSVR4' \
 		CCFLAGS='-xO3 $$(CFLAGS)' \
-		LIBS=$(GT_LIBS) \
-		all ; \
-	)
+		all;
 
-# Build objects for sun4.
-gthreads_sun4: gthreads_sources
-	(cd $(GT_OBJ)/src; $(MAKE) $(MFLAGS) $(MAKEVARS) \
-		CC=$(GT_CC) \
+# Build library for sun4 using Gnu compiler.
+gthreads_sun4: $(GT_OBJ)
+	$(MAKE) -C $(GT_OBJ)/src $(MFLAGS) $(MAKEVARS) \
+		CC=gcc \
 		CFLAGS='$(GT_CFLAGS)' \
 		COMP_ASM='$(GT_COMP_ASM)' \
-		LIBS=$(GT_LIBS) \
-		all ; \
-	)
+		all;
