@@ -48,6 +48,8 @@ public:
 
     /*virtual*/ void setup();
 
+    /*virtual*/ int computeSchedule(Galaxy&);
+
     // Pass through functions
     
     /*virtual*/ int run() { return topCluster->run(); }
@@ -67,7 +69,9 @@ public:
 	return schedule;
     }
 
-    /*virtual*/ void compileRun() { /*topCluster->compileRun();*/ }
+    /*virtual*/ void compileRun();
+
+    /*virtual*/ void prepareCodeGen();
 
 private:
     CGCluster* topCluster;

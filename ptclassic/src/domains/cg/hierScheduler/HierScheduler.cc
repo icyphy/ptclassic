@@ -42,6 +42,9 @@ void MultiScheduler :: setup () {
 	Error::abortRun("MultiScheduler: no galaxy!");
 	return;
     }
+    
+    if (!checkConnectivity()) return;
+
     // Need to initialize galaxy BEFORE constructing the Clusters.
     // If not, the porthole parameters are not properly propigated.
     galaxy()->initialize();
@@ -54,8 +57,8 @@ void MultiScheduler :: setup () {
     // We should set the target of the topCluster before construction
     // the clusters for the galaxy, so that all the internal clusters
     // have their target set correctly
-    topCluster->setTarget(&target());
     topCluster->setMasterBlock(galaxy());
+    topCluster->setTarget(&target());
 
     // set the top level scheduler
     topScheduler.setTarget(target());
@@ -68,5 +71,26 @@ void MultiScheduler :: setup () {
 	fatCluster->innerSched()->setTarget(*mtarget->child((fatCluster->getProcId())));
     topCluster->generateSchedule();
 
+    // Before we can fix the buffers sizes we must set the repetitions
+    // count of the top cluster.
+    topCluster->repetitions = 1;
+
+    // Now fix buffer sizes
+    topCluster->fixBufferSizes(1);
+
     return;
+}
+
+int MultiScheduler::computeSchedule(Galaxy& g) {
+     return topCluster->generateSchedule();
+}
+
+void MultiScheduler :: compileRun() {
+    topScheduler.compileRun();
+}
+
+void MultiScheduler :: prepareCodeGen() {
+    // prepare code generation for each processing element:
+    // galaxy initialize, copy schedule, and simulate the schedule.
+    ParScheduler::prepareCodeGen();
 }
