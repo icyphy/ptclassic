@@ -1,7 +1,7 @@
 static const char file_id[] = "MDSDFPortHole.cc";
 
 /**************************************************************************
-  Version $Id$
+  $Id$
 
 Copyright (c) 1990-1994
    The Regents of the University of California. All rights reserved.
@@ -47,41 +47,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
 	//////////////////////////////////////////
 
 // constructor
-MDSDFPortHole::MDSDFPortHole() : numRows(0), numCols(0), rowsInBuffer(0),
-                                 colsInBuffer(0), myBuffer(0) {};
+MDSDFPortHole::MDSDFPortHole() : numRows(0), numCols(0), myBuffer(0) {};
 
 // destructor
 MDSDFPortHole::~MDSDFPortHole() {
   myBuffer.freeup();
-//  LOG_DEL; delete myBuffer;
 }
-
-// This function is called by the scheduler to set the number of row
-// and column firing repetitions per iteration.
-//void MDSDFPortHole::setRepetitions(int row, int col) {
-//  rowFiringsPerIteration = row;
-//  colFiringsPerIteration = col;
-//}
 
 // Function to set the number of new tokens (in terms of columns and
 // rows) read at each firing, the dimensions of the tokens, 
 // and the number of past tokens needed in each dimension.
 PortHole& MDSDFPortHole::setMDSDFParams(unsigned rowDimensions,
-					unsigned colDimensions,
-					unsigned numPastRows,
-					unsigned numPastCols) {
+					unsigned colDimensions) {
+
   numRows = rowDimensions;
   numCols = colDimensions;
-//  numRowTokens = nRowTokens;
-//  numColTokens = nColTokens;
-  ((MDSDFGeodesic*)myGeodesic)->setDelay(numPastRows,numPastCols);
-//  maxPastRowTokens = numPastRows;
-//  maxPastColTokens = numPastCols;
-//  if(myBuffer)
-//    initialize();   // only re-initialize a connected PortHole
-//  Doesn't seem like the above is needed since we don't initPorts until
-//  after this is done, as long as setMDSDFParams is only called in the
-//  setup() method of each star and not in the go() method.
   return *this; 
 }
 
@@ -92,18 +72,6 @@ int MDSDFPortHole::rowFiringsPerIteration() {
 int MDSDFPortHole::colFiringsPerIteration() {
   return int(((MDSDFStar*)parent())->colRepetitions);
 }
-
-//void MDSDFPortHole::allocateBuffer() {
-  // If there is a buffer, release its memory
-//  LOG_DEL; delete myBuffer;
-
-  // Allocate new buffer, and fill it with MatrixParticles
-//  LOG_NEW; myBuffer = new CircularBuffer2D(rowsInBuffer,colsInBuffer);
-//  for(int i = myBuffer->size(); i>0; i--) {
-//    Particle** p = myBuffer->next();
-//    *p = myPlasma->get();
-//  }
-//}
 
 Geodesic* MDSDFPortHole::allocateGeodesic() {
   char buf[80];
@@ -155,7 +123,6 @@ void MDSDFPortHole::initialize() {
     myGeodesic->initialize();
 }
 
-
 // Returns a subMatrix inside a particle, argument is not used, only gets
 // the current particle (ie, as if delay was 0)
 Particle& MDSDFPortHole::operator % (int) {
@@ -187,46 +154,6 @@ inline double InMDSDFPort::getFloatInput(int rowDelay, int colDelay) {
 						     rowDelay, colDelay);
 }
 
-// Get particles from the Geodesic and call die() for all the particles
-// currently in the buffer.  Is is assumed this routine is called before
-// a star executes.  It gets numRowTokens by numColTokens of MatrixParticles
-// from the Geodesic and stores them in the buffer, then sets the current
-// time to the last Particle input
-
-// Needs to be changed to two dimensional!, buffer of a porthole might
-// need to be bigger to accomodate delayed particles
-void InMDSDFPort::receiveData() { 
-//  for(int row = numRowTokens; row > 0; row--) {
-//    for(int col = numColTokens; col > 0; col--) {
-//  for(int i = numberTokens; i > 0; i--) {
-      // Move the current time pointer in the buffer
-      // Get a pointer to the next Particle* in the buffer.
-//      MatrixParticle** pOld = (MatrixParticle**)myBuffer->next();
-  
-      // Get another MatrixParticle from the Geodesic.
-//      MatrixParticle* pNew = (MatrixParticle*)myGeodesic->get();
-  
-//      if(!pNew) {
-//        Error::abortRun(*this, "Attempt to read from empty geodesic");
-//        return;
-//      }
-  
-      // Release the MatrixParticle data by calling die() and put the
-      // MatrixParticle back into the Plasma.
-//      pOld->die();
-  
-      // Put the new particle into the buffer.
-//      *pOld = pNew;
-//    }
-//  }
-}
-
-//void InMDSDFPort::decCount(int n) {
-//  // used in schedule simulation when an outPortHole fires
-//  (MDSDFGeodesic*)myGeodesic->decOutCount(n);
-//}
-
-
 	////////////////////////////////////////////
 	// class OutMDSDFPort
 	////////////////////////////////////////////
@@ -245,104 +172,16 @@ inline double& OutMDSDFPort::getFloatOutput() {
   return ((MDSDFGeodesic*)myGeodesic)->getFloatOutput(rowIndex,colIndex);
 }
 
-// Is is assumed this routine is called before a star executes.
-// Prepares the particles in the portHole's buffer to be used when the
-// star executes.  Requests the Geodesic to fill the buffer, only if the
-// buffer is empty!
-// In the first model of static buffering, this star will be fired the
-// total number of repetitions times that it is scheduled for in one
-// iteration consequtively, before the receiving porthole can fire.  To
-// simplify things, myGeodesic->initialize() is called at the start of each
-// iteration and will fill the buffer with all the particles needed
-// for the firing repetitions in one iteration.
-void OutMDSDFPort::receiveData() {
-//  if(numParticlesInBuffer == 0)
-//    myGeodesic->initialize();
-}
-
-void OutMDSDFPort::sendData() { 
-//  numParticlesInBuffer -= numRowTokens*numColTokens;
-
-  // Increment the MDSDFGeodesic counter of the number of input tokens
-  // received.  The geodesic's output tokens are not "valid" until
-  // the required number of input tokens have been received.
-  int rIndex = ((MDSDFStar*)parent())->rowIndex;
-  int cIndex = ((MDSDFStar*)parent())->colIndex;
-  
-  ((MDSDFGeodesic*)myGeodesic)->setValid((rIndex+1)*numRows-1,
-					 (cIndex+1)*numCols-1);
-
-  // Advance buffer to next token
-//  myBuffer->next();
-}
-
-//void OutMDSDFPort::incCount(int rown) {
-//  // used in schedule simulation when an outPortHole fires
-//  myGeodesic->incCount(n);
-//}
-
-// Initialize the porthole.  The Geodesic connected to this PortHole
-// must be initialized first so we call myGeodesic->initialize().  The
-// Geodesic will in turn call initializeBuffer().
-// is already initialized, nothing needs to be done.
-//void OutMDSDFPort::initialize() {
-//  if(!setResolvedType()) {
-//    Error::abortRun(*this,"can't determine DataType");
-//    return;
-//  }
-//  if(!allocatePlasma()) return;
-//
-//  // If this is an output PortHole (or connected to an input porthole),
-//  // initialize myGeodesic
-//  if (far() && myGeodesic && (isItOutput() || (!asEH() && atBoundary())))
-//    myGeodesic->initialize();
-//}
-    
-/*void OutMDSDFPort::initializeBuffer(MatrixParticle* motherMatrix,
-				    int rowDelay, int colDelay) {
-  // This function should be called after Geodesic::initialize(), and after
-  // the scheduler has computed a schedule.
-
-  rowsInBuffer = rowFiringsPerIteration();
-  colsInBuffer = colFiringsPerIteration();
-//  numParticlesInBuffer = rowsInBuffer * colsInBuffer;
-//  if(myBuffer == NULL || myBuffer->rowSize() != rowsInBuffer ||
-//     myBuffer->colSize() != colsInBuffer)
-//    allocateBuffer();
-
-  // initialize buffer, creates the complete number of MatrixParticles
-  // that will used during this iteration, there is an offset given by the
-  // paramenters rowDelay and colDelay
-
-//  MatrixParticle** p = (MatrixParticle**)myBuffer->here();
-//  for(int row = rowDelay-1; row < numRows*rowsInBuffer; row += numRows) {
-//    for(int col = colDelay-1; col < numCols*colsInBuffer; col+= numCols) {
-//      SubMatrix* child = motherMatrix->subMatrix(row,col,numRows,numCols);
-//      if(*p)
-//        // set data of MatrixParticle to child
-//        (*p)->initialize(child,motherMatrix);   
-//      else {
-//        *p = (MatrixParticle*)myPlasma->get();
-//        (*p)->initialize(child,motherMatrix);  
-//      }
-//      p = (MatrixParticle**)myBuffer->next();
-//    }
-//  }
-}
-*/
         //////////////////////////////////////////
         // class MultiMDSDFPort
         //////////////////////////////////////////
 
 MultiPortHole& MultiMDSDFPort :: setMDSDFParams(unsigned rowDimensions,
-						unsigned colDimensions,
-						unsigned numPastRows,
-						unsigned numPastCols) {
+						unsigned colDimensions) {
   MPHIter next(*this);
   PortHole *p;
   while((p = next++) != 0)
-    ((MDSDFPortHole*)p)->setMDSDFParams(rowDimensions, colDimensions,
-					numPastRows, numPastCols);
+    ((MDSDFPortHole*)p)->setMDSDFParams(rowDimensions, colDimensions);
   return *this;
 }
 
@@ -357,7 +196,6 @@ int MultiInMDSDFPort::isItInput() const { return TRUE;}
 PortHole& MultiInMDSDFPort::newPort() 
 {
 	LOG_NEW; MDSDFPortHole& p = *new InMDSDFPort;
-//        p.setMDSDFParams(1,1,0,0);  // set default to 1x1 matrix
 	return installPort(p);
 }
 
@@ -372,7 +210,6 @@ int MultiOutMDSDFPort::isItOutput() const { return TRUE;}
 PortHole& MultiOutMDSDFPort::newPort()
 {
 	LOG_NEW; MDSDFPortHole& p = *new OutMDSDFPort;
-//        p.setMDSDFParams(1,1,0,0);  // set default to 1x1 matrix
 	return installPort(p);
 }
 

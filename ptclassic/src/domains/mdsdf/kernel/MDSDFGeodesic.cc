@@ -2,8 +2,7 @@ static const char file_id[] = "MDSDFGeodesic.cc";
 
 /*  $Id$
 
-Copyright (c) 1990, 1991, 1992, 1993 The Regents of the University of
-                                      California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -44,10 +43,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // constructor
 MDSDFGeodesic::MDSDFGeodesic() : lastRow(-1), lastCol(-1), motherParticle(0) {}
 
-// destructor
-MDSDFGeodesic::~MDSDFGeodesic() {
-}
-
 // Allocate a motherMatrix data structure, create a local buffer of
 // MatrixParticles holding subMatrices that point to the motherMatrix.
 // This function should only be called once, before the universe runs.
@@ -72,15 +67,9 @@ void MDSDFGeodesic::initialize() {
   // dimensions of the matrices the destination port expects
   int dNumRows = ((MDSDFPortHole*)destinationPort)->numRowXfer();
   int dNumCols = ((MDSDFPortHole*)destinationPort)->numColXfer();
-  // number of past tokens in each dimension that the destination port wants
-//  int maxPastRowTokens = ((MDSDFPortHole*)destinationPort)->pastRowTokens();
-//  int maxPastColTokens = ((MDSDFPortHole*)destinationPort)->pastColTokens();
   // dimensions of the matrices the originating port produces
   int oNumRows = ((MDSDFPortHole*)originatingPort)->numRowXfer();
   int oNumCols = ((MDSDFPortHole*)originatingPort)->numColXfer();
-  // dimensions of the mother matrix
-//  mNumRows = (destNumRowsPerIter + maxPastRowTokens) * dNumRows;
-//  mNumCols = (destNumColsPerIter + maxPastColTokens) * dNumCols;
   mNumRows = destNumRowsPerIter * dNumRows;
   mNumCols = destNumColsPerIter * dNumCols;
 
@@ -104,13 +93,13 @@ void MDSDFGeodesic::initialize() {
       Error::abortRun("not enough delay arguements to describe 2-D delay");
       return;
     }
-    rowDelays = (int)initDelays[0] * oNumRows;
-    colDelays = (int)initDelays[1] * oNumCols;
+    rowDelays = (int)initDelays[0];
+    colDelays = (int)initDelays[1];
 
-    // for now, the row and column delays must not be greater than the
-    // size of the mother matrix
-    if(rowDelays > mNumRows || colDelays > mNumCols) {
-      Error::abortRun("row and column delay specifications too large");
+    // for now, the row and column delays must be a multiple of the
+    // originating porthole's dimensions
+    if((rowDelays%oNumRows != 0) || (colDelays%oNumCols != 0)) {
+      Error::abortRun("row and column delay specifications must be multiples of the dimensions of the input porthole");
       return;
     }
 
@@ -126,9 +115,11 @@ void MDSDFGeodesic::initialize() {
       lastRow = rowDelays-1;
       lastCol = mNumCols;
     }
-
-    mNumRows += rowDelays; // add extra rows for useless data
-    mNumCols += mNumCols;  // double the number of columns
+    
+    // add extra rows for useless data
+    mNumRows += rowDelays; 
+    // add extra cols, must be multiples of original mother matrix dimensions
+    mNumCols += (1 + (colDelays-1)/mNumCols)*mNumCols;
   }
 
   // get motherParticle
@@ -141,77 +132,6 @@ void MDSDFGeodesic::initialize() {
   pstack.putTail(motherParticle);
 
 }
-
-/*void MDSDFGeodesic::reInit() {
-  // the number of row and column firings for the destination as determined
-  // by the balance equations
-  int destNumRowsPerIter = ((MDSDFPortHole*)destinationPort)->rowFiringsPerIteration();
-  int destNumColsPerIter = ((MDSDFPortHole*)destinationPort)->colFiringsPerIteration();
-  // dimensions of the matrices the destination port expects
-  int dNumRows = ((MDSDFPortHole*)destinationPort)->numRowXfer();
-  int dNumCols = ((MDSDFPortHole*)destinationPort)->numColXfer();
-  // dimensions of the matrices the originating port produces
-  int oNumRows = ((MDSDFPortHole*)originatingPort)->numRowXfer();
-  int oNumCols = ((MDSDFPortHole*)originatingPort)->numColXfer();
-  // dimensions of the mother matrix
-//  int mNumRows = destNumRowsPerIter * dNumRows;
-//  int mNumCols = destNumColsPerIter * dNumCols;
-  mNumRows = destNumRowsPerIter * dNumRows;
-  mNumCols = destNumColsPerIter * dNumCols;
-
-  // Remove any Particles already on the Geodesic and return them to the Plasma
-  myBuffer.freeup();
-
-  // allocate a motherMatrix
-  MatrixParticle* motherParticle = (MatrixParticle*)((MDSDFPortHole*)originatingPort)->myPlasma->get();
-  // tell the particle to create a data matrix (of appropriate type) with
-  // the given (row,col) dimensions.
-  motherParticle->initMatrix(mNumRows, mNumCols);
-
-  // fill the Geodesic buffer with MatrixParticles holding submatrices.
-  // These particles will be used by the destination porthole.
-  for(int row = 0; row < mNumRows; row += dNumRows) {
-    for(int col = 0; col < mNumCols; col += dNumCols) {
-      Matrix* child = motherParticle->subMatrix(row,col,dNumRows,dNumCols);
-      Particle* p = ((MDSDFPortHole*)originatingPort)->myPlasma->get();
-      ((MatrixParticle*)p)->initialize(child,motherParticle);
-      pstack.putTail(p);
-    }
-  }
-  // handling row delays, column delays only handled once
-  for(int row = 0; row < maxPastRowTokens; row++)
-    motherParticle->setRow(row,0);  // set data values of entire row to 0
-
-  ((OutMDSDFPort*)originatingPort)->initializeBuffer(motherParticle,
-						     rowDelay,0);
-  inputCount = 0;
-
-
-}
-*/
-// Increment the count of the number of input tokens received in each
-// dimension.  The output tokens in the buffer are not valid until
-// enough input tokens have been received.
-/*void MDSDFGeodesic::incReceiveCount(int numRowTokens, int numColTokens) {
-  CriticalSection region(gate);
-  rowInputCount += numRowTokens;
-  colInputCount += numColTokens;
-  if(rowInputCount >= rowInputsRequired && 
-     colInputCount >= colInputsRequired) {
-    rowInputCount -= rowInputsRequired;
-    colInputCount -= colInputsRequired;
-//    sz += ((DFPortHole*)destinationPort)->parentReps();
-//    sz += numOutputsGenerated;
-    bufferRowSize += numRowOutputsGenerated;
-    bufferColSize += numColOutputsGenerated;*/
-//    maxBufLength += sz;  /* is this needed any longer? */
-/*  }
-}*/
-
-// Functions for simulating
-//void MDSDFGeodesic::incCount(int n) {
-//  incReceiveCount(n);
-//}
 
 // Accessing the location of a single scalar value, no type checking done
 double MDSDFGeodesic::getFloatInput(int rowFiringIndex,int colFiringIndex,

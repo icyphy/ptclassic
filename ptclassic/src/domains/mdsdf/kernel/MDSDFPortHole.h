@@ -1,6 +1,6 @@
-/*  Version $Id$
+/*  $Id$
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -86,11 +86,6 @@ class MDSDFPortHole : public DFPortHole
   int numRowXfer() const { return numRows; }
   int numColXfer() const { return numCols; }
 
-  // functions to return the number of past tokens in each dimension
-  //   needed for input at each firing
-//  int pastRowTokens() const { return maxPastRowTokens; }
-//  int pastColTokens() const { return maxPastColTokens; }
-
   // funtions to return the index of the last valid row and column
   //   on the geodesic buffer connected to this porthole
   int lastValidRowOnGeo() const { 
@@ -117,9 +112,7 @@ class MDSDFPortHole : public DFPortHole
   // numRows and numCols to zero implies that ANYSIZE, ie. the output
   // has the same dimensions as the input ??????
   virtual PortHole& setMDSDFParams(unsigned rowDimensions,
-				   unsigned colDimensions,
-				   unsigned maxPastRowTokens = 0,
-				   unsigned maxPastColTokens = 0);
+				   unsigned colDimensions);
 
   int rowFiringsPerIteration();
   int colFiringsPerIteration();
@@ -135,29 +128,13 @@ class MDSDFPortHole : public DFPortHole
   virtual Matrix* getOutput();
 
  protected:
-  // the number of matrix particles (specified in terms of a row & column
-  // pair) that are consumed at each firing
-//  int numRowTokens;
-//  int numColTokens;
-
   // the dimensions of matrix particles that flow through this porthole
   int numRows;
   int numCols;
 
-  // the number of past matrix particles read in each dimension
-//  int maxPastRowTokens;
-//  int maxPastColTokens;
-
   // replacement buffer, this is a simple particle stack for keeping
   // track of particles that were created and need to be deleted later
   ParticleStack myBuffer;
-
-  // the dimensions of the buffer
-  int rowsInBuffer;
-  int colsInBuffer;
-
-  // allocate new 2D buffer
-//  /* virtual */ void allocateBuffer();
 };
 
 	///////////////////////////////////////////
@@ -173,13 +150,6 @@ class InMDSDFPort : public MDSDFPortHole {
   /*virtual*/ inline Matrix* getInput(int rowDelay = 0, int colDelay = 0);
   /*virtual*/ inline double getFloatInput(int rowDelay = 0, int colDelay = 0);
 
-  // Get Particles from input Geodesic
-  void receiveData();
-
-  // Used in scheduler simulation, decrease the count of the number of
-  //  particles ready to be removed from the geodesic by this inPorthole.
-//    virtual void decCount(int n);
-
 };
 
 	////////////////////////////////////////////
@@ -190,29 +160,8 @@ class OutMDSDFPort : public MDSDFPortHole {
  public:
   int isItOutput() const;       // returns TRUE
 
-  // Initialize the particles in the buffer to hold matrices.  Should
-  // be called before the go() method.
-  virtual void receiveData();
-
-  // Put the Particles that we generated into the output MDSDFGeodesic 
-  // and then tell MDSDFGeodesic to resize the data held in the Particles --
-  // this method is invoked by the MDSDFScheduler after go()
-  void sendData();
-
   /*virtual*/ inline Matrix* getOutput();
   /*virtual*/ inline double& getFloatOutput();
-
-  // Used in scheduler simulation, increment the count of the number of
-  //  particles put into the geodesic by this porthole.
-  // Redefined from DFPortHole.h
-//    virtual void incCount(int n);
-
-  // called by Geodesic::initialize()
-//  virtual void initializeBuffer(MatrixParticle*,int rowDelay,int colDelay); 
-
-//private:
-//  int numParticlesInBuffer;
-
 };
 
         //////////////////////////////////////////
@@ -224,9 +173,7 @@ class OutMDSDFPort : public MDSDFPortHole {
 class MultiMDSDFPort : public MultiDFPort {
  public:
   MultiPortHole& setMDSDFParams(unsigned rowDimensions,
-				unsigned colDimensions,
-				unsigned maxPastRowTokens = 0,
-				unsigned maxPastColTokens = 0);
+				unsigned colDimensions);
 };
  
         //////////////////////////////////////////
@@ -258,3 +205,4 @@ class MultiOutMDSDFPort : public MultiMDSDFPort
 };
 
 #endif
+
