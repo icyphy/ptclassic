@@ -143,6 +143,7 @@ proc ptkRunControl { name octHandle } {
 
     set ctrlPanel .run_$octHandle
     if {[info exists ptkRunFlag($name)] && [winfo exists $ctrlPanel]} {
+	wm deiconify $ctrlPanel
 	raise $ctrlPanel
 	return
     }
