@@ -96,6 +96,8 @@ private:
   void fDFSVisit( int, Set &, int &, int * );
   void bDFSVisit( int, Set &, Set &);
 
+  void destroySCCs( SequentialList * );
+
 };
 
 #endif
