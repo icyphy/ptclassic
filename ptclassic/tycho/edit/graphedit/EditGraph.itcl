@@ -39,8 +39,8 @@ proc ::tycho::editgraph {file} {
 
     # FIXME FIXME
     # Load stars and icons
-    $nm loadStars [::tycho::expandPath {$TYCHO/editors/visedit/stars.tim}]
-    $nm loadIcons [::tycho::expandPath {$TYCHO/editors/visedit/icons.tim}]
+    $nm loadStars [::tycho::expandPath {$TYCHO/edit/graphedit/stars.tim}]
+    $nm loadIcons [::tycho::expandPath {$TYCHO/edit/graphedit/icons.tim}]
 
     return $nm
 }
