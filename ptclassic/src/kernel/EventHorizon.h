@@ -69,7 +69,13 @@ public:
 	// set ports
 	PortHole& setPort(inOutType inOut, const char* portName, 
 		Wormhole* parentWormhole, Star* parentStar,
-		dataType type = FLOAT, unsigned numTokens = 1 );
+		DataType type = FLOAT, unsigned numTokens = 1 );
+
+	// this method lets transferData access the ghostPort's buffer.
+	// I'd prefer not to make it public, but the rules for protected
+	// members require it (could make ToEventHorizon and FromEventHorizon
+	// friends).
+	Particle** nextInBuffer(); // { return myBuffer->next();}
 
 private:
 	int inOrOut;

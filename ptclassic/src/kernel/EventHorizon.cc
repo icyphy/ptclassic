@@ -37,6 +37,8 @@ Code for functions declared in WormConnect.h
 
 **************************************************************************/
 
+inline Particle** EventHorizon :: nextInBuffer() { return myBuffer->next(); }
+
 void 
 EventHorizon :: ghostConnect(EventHorizon& to)
 {
@@ -50,8 +52,8 @@ PortHole& EventHorizon :: setPort (
 			     const char* s,
                              Wormhole* parentWormhole,
                              Star* parentStar,
-                             dataType t = FLOAT,
-			     unsigned numTokens = 1)
+                             DataType t,
+			     unsigned numTokens)
 {
 	// Initialize PortHole
         PortHole::setPort(s, parentStar,t);
@@ -113,7 +115,7 @@ void ToEventHorizon :: transferData ()
 
 		// get pointers to each of the CircularBuffer objects.
 		Particle** p = myBuffer->next();
-		Particle** q = ghostPort->myBuffer->next();
+		Particle** q = ghostPort->nextInBuffer();
 
 		// In the following code, particles aren't copied, only
 		// pointers to Particles.
