@@ -2,28 +2,35 @@ defstar {
 	name { UDCounter }
 	domain { DE }
 	desc {
-This is a general counter which can count up or down.
+This is a general counter that can count up or down.
 The processing order of the ports is:
-countUp/Down -> demand -> reset.
-Simultaneous demand and reset events are ignored.
+countUp -> countDown -> demand -> reset.
+If multiple countUp or countDown events with the same time stamp
+are pending, all will be processed.  If multiple demand events with
+the same time stamp are pending, they will be consolidated into a
+single demand, so only one output will be produced.
 	}
 	version { $Id$}
 	author { Soonhoi Ha }
 	copyright { 1991 The Regents of the University of California }
 	location { DE main library }
 	explanation {
-This is a rather general counter.
-Increase or decrease the count upon receiving a "countUp" or "countDown" input.
+This is an up/down counter.
+Receiving events on the "countUp" or "countDown" inputs causes the
+internal state of the counter to increment or decrement.
 Special cases, such as an up only counter, can be realized by connect
 a Null star to the unneeded inputs.
 .pp
-When a "reset" input is received, the count is reset to zero.
+When a "reset" input is received, the count is reset to "resetValue".
 An output is generated when a "demand" input is received.
-When "demand" and "reset" particles arrive at the same time,
-the output is generated before the count is reset.
-The "countUp(or Down)" input is processed before the "demand" input.
-The simultaneous demand inputs or reset inputs are ignored; if there
-are three "demand" input at the same time, we generate only one output.
+When "demand" and "reset" events arrive with the same time stamp,
+the output is produced before the count is reset.
+The "countUp" and "countDown" inputs are processed before the "demand" input,
+so if the time stamps are identical, the output will reflect the
+pending increment(s) and/or decrement(s).
+Simultaneous "demand" inputs are consolidated; if there
+are multiple "demand" input events with the same time stamp,
+the star generates only one output.
 .pp
 This star operates in the phase-based mode, in which all simultaneous
 events in the global event queue are fed into the star at each firing.
@@ -31,29 +38,33 @@ events in the global event queue are fed into the star at each firing.
 	input {
 		name { countUp }
 		type { anytype }
+		desc { Increment internal state. }
 	}
 	input {
 		name { countDown }
 		type { anytype }
+		desc { Decrement internal state. }
 	}
 	input {
 		name { reset }
 		type { anytype }
+		desc { Reset internal state to resetValue. }
 	}
 	input {
 		name { demand }
 		type { anytype }
-		desc { Stimulate an output. }
+		desc { Read internal state and send to output. }
 	}
 	output {
 		name { output }
 		type { int }
+		desc { Internal count value at the time of the demand input. }
 	}
 	defstate {
 		name { resetValue }
 		type { int }
 		default { "0" }
-		desc {  Initial value for the counter. }
+		desc {  Initial and reset value for the counter. }
 	}
 	private {
 		int content;
