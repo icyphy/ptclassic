@@ -26,9 +26,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 /*  Version $Id$
 
-    Copyright 1992 The Regents of the University of California.
-			All Rights Reserved.
-
     Programmer:		T.M. Parks
     Date of creation:	28 August 1992
 
