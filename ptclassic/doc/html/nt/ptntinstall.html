@@ -37,6 +37,20 @@ you should also do:
 cp /Cygnus/B19/H-i386-cygwin32/bin/rm.exe /bin
 </pre>
 
+
+<li> Create <CODE>/etc/passwd</CODE> and <CODE>/etc/group</CODE>
+by running 
+<pre>
+mkdir /etc
+mkpasswd -d -l -g
+mkgroup -d -l
+</pre>
+For more information, type <CODE>mkpasswd</CODE> and <CODE>mkgroup</CODE>
+without any arguments.  The Cygwin faq also covers these programs.
+If you do not have <CODE>/etc/passwd</CODE>, then you will get errors
+from <CODE>GetTildePath()</CODE> when trying to create an icon.
+(Reported by Sascha Schwarz &lt;saschas@natasha.auslabs.lucent.com&gt;)
+
 <li> Install 19.1 from:
 <a href="ftp://go.cygnus.com/pub/ftp.cygnus.com/gnu-win32/latest/b19.1-update/"><CODE>ftp://go.cygnus.com/pub/ftp.cygnus.com/gnu-win32/latest/b19.1-update/</CODE></a>.  The installation is fairly straightforward - exit all programs
 that use Cygwin32 and substitute in the new <CODE>libcygwinb19.dll</CODE>.
