@@ -148,8 +148,11 @@ class ::tycho::TopLevel {
     # Open a file and go to its internal point identified by name.
     method hyperJump {file {point {}}}
 
-    # Shift the focus to the next window in the topLevelWindows list.
+    # Shift the focus to the next window created.
     method nextWindow {{raise 0}}
+
+    # Shift the focus to the previous window created.
+    method prevWindow {{raise 0}}
 
     # Raise the window.
     method raiseWindow {}
@@ -169,6 +172,9 @@ class ::tycho::TopLevel {
     # Specify whether to exit when the last window is closed.
     public proc exitWhenNoMoreWindows {bool} {}
 
+    # Set or report whether C-q is bound to exit.
+    proc normalExit {{enable {}}} {}
+
     #################################################################
     ####                  protected methods                      ####
 
@@ -187,6 +193,9 @@ class ::tycho::TopLevel {
 
     #################################################################
     ####                  protected variables                    ####
+
+    # If 1, C-q will be bound in future instances to exit the program.
+    protected common normalexit 1
 
     # The prefix is just a shorthand for $itk_component(hull).
     # It is the name of the top-level window.
@@ -214,8 +223,8 @@ class ::tycho::TopLevel {
     private variable alreadyexiting 0
 
     # A circular list of top-level windows is kept here and supported by
-    # the <Control-x><o> binding, which switches the focus to the
-    # next window in the list.  The order of the windows in the list
+    # the <<NextWindow>> and <<PrevWindow>> bindings, which switch the focus
+    # between windows in the list.  The order of the windows in the list
     # is determined as follows: If a window in this application has the
     # focus when a new window is created, then the new window is put in
     # the list right before the one with the focus.  Otherwise, it is
@@ -290,7 +299,7 @@ body ::tycho::TopLevel::constructor {args} {
     # Support for switching the focus from one window to the next.
     # A top-level window is inserted in the list of windows before the
     # window that currently has the focus, if there is one.
-    # Thus, scrolling through windows using the "C-x o" binding
+    # Thus, scrolling through windows using the "C-n" binding
     # will go from this window to the window that had the focus when
     # it was created.
     set before [focus]
@@ -317,22 +326,23 @@ body ::tycho::TopLevel::constructor {args} {
     if !$done {
         $topLevelWindows insert $prefix
     }
+    # We use virtual event bindings so that the style sheets can change
+    # sets of bindings.
+    bind $prefix <<Close>> "$this prevWindow; delete object $this; break"
+    bind $prefix <<Iconify>> "$this prevWindow; \
+            wm iconify $itk_component(hull); break"
+    bind $prefix <<NextWindow>> "$this nextWindow 1; break"
+    bind $prefix <<PrevWindow>> "$this prevWindow 1; break"
+    bind $prefix <<Open>> {::tycho::File::openWin %W; break}
 
-    # Emacs-like bindings.
-    bind $prefix <Control-x><k> \
-            "$this nextWindow; delete object $this; break"
-    bind $prefix <Control-x><Control-f> \
-            {::tycho::File::openWin %W; break}
-    bind $prefix <Control-x><O> \
-            "$this nextWindow 1; break"
+    # Exit the program if in normal exit mode.
+    if {$normalexit == 1} {
+        bind $prefix <<Exit>> {::tycho::TopLevel::exitProgram}
+        bind all <Alt-F4> {::tycho::TopLevel::exitProgram}
+    } else {
+        bind $prefix <<Exit>> {}
+    }
     
-    # To prevent handled characters from appearing in Entry windows,
-    bind Entry <Control-x><o> { }
-    bind Entry <Control-x><k> { }
-    
-    # Window manager interface bindings.
-    bind $prefix <Control-x><0> "$this nextWindow; \
-	    wm iconify $itk_component(hull); break"
     # Explicitly handle configs that may have been ignored earlier.
     eval itk_initialize $args
 
@@ -342,7 +352,7 @@ body ::tycho::TopLevel::constructor {args} {
 
     # Prevent the window manager delete function from exiting.
     wm protocol $prefix WM_DELETE_WINDOW \
-	    "$this nextWindow; delete object $this"
+	    "$this prevWindow; delete object $this"
 }
 
 #####################################################################
@@ -354,7 +364,7 @@ body ::tycho::TopLevel::constructor {args} {
 # exit the program anyway. The latter functionality
 # can be disabled by calling
 # <code>::tycho::TopLevel::exitWhenNoMoreWindows</code> with the
-# argument "0". Normally, you should call <code>nextWindow</code>
+# argument "0". Normally, you should call <code>prevWindow</code>
 # before destroying any top-level that has the focus. This puts the
 # focus into the next logical window in the window sequence. Note that
 # if the mouse is not over a window belonging to this application after
@@ -382,7 +392,7 @@ body ::tycho::TopLevel::destructor {} {
     if {[info exists topLevelWindows] && \
 	    [info exists prefix] && \
 	    [info exists exitflag]} {
-	# NOTE: It would be nice to call nextWindow here, rather than
+	# NOTE: It would be nice to call prevWindow here, rather than
 	# having to call it each time before invoking the destructor.
 	# However, this produces very erratic behavior.  Often, the
 	# application has lost the focus by the time the destructor
@@ -552,11 +562,46 @@ body ::tycho::TopLevel::hyperJump {file {point {}}} {
 
 #####################################################################
 #### nextWindow
-# Switch the focus to the next window listed in the array topLevelWindows.
+# Switch the focus to the previous window listed in the circular
+# list topLevelWindows, which is normally the one created after this one.
 # If an argument is given, and is non-zero, then raise the window as well.
 # If the focus is not currently in this window, ignore.
 #
 body ::tycho::TopLevel::nextWindow {{raise 0}} {
+    # Needed for focus to settle.
+    safeUpdate $this
+    if ![string match "$prefix*" [focus]] {return}
+    set wins [$topLevelWindows elements]
+    # Start with the last element of the list.
+    set nw [lindex $wins [expr [llength $wins] -1]]
+    foreach win $wins {
+	if {$win == $prefix} {break}
+        set nw $win
+    }
+    if {$nw != $prefix} {
+	if {[winfo exists $nw] && \
+		[winfo ismapped $nw] && \
+		[uplevel #0 info which -command $nw] != {} && \
+		[$nw isa ::tycho::TopLevel]} {
+            # Deferred version overrides wm focus change due to window
+            # exposure.
+	    # Use a catch in case the window has been deleted. (Why
+	    # does this happen? -- hjr )
+            after 200 [list catch "$nw focusin"]
+	    $nw focusin
+	    if {$raise != 0} {$nw raiseWindow}
+	}
+    }
+}
+
+#####################################################################
+#### prevWindow
+# Switch the focus to the next window listed in the circular list
+# topLevelWindows, which is normally the one created prior to this one.
+# If an argument is given, and is non-zero, then raise the window as well.
+# If the focus is not currently in this window, ignore.
+#
+body ::tycho::TopLevel::prevWindow {{raise 0}} {
     # Needed for focus to settle.
     safeUpdate $this
     if ![string match "$prefix*" [focus]] {return}
@@ -577,6 +622,7 @@ body ::tycho::TopLevel::nextWindow {{raise 0}} {
 	}
     }
 }
+
 
 #####################################################################
 #### raiseWindow
@@ -751,6 +797,22 @@ body ::tycho::TopLevel::exitWhenNoMoreWindows {bool} {
     set exitflag $bool
 }
 
+###################################################################
+#### normalExit
+# If the argument is 1, then for all instances of TopLevel or derived
+# classes created henceforth, bind C-q to exit the program.
+# If the argument is 0, then make no such binding.  If the argument
+# is absent, then report whether such a binding has been set.
+# This procedure is provided for the benefit of other applications
+# that might be using Tycho, but which have their own method for exiting.
+#
+body ::tycho::TopLevel::normalExit {{enable {}}} {
+    if {$enable != {}} {
+        set normalexit $enable
+    }
+    return $normalexit
+}
+
     #################################################################
     #################################################################
     ####                  protected methods                      ####
@@ -782,7 +844,7 @@ body ::tycho::TopLevel::confirmDestruct {} {
     # window but schedule another attempt later on.
     if $disableDestruction {
         # Schedule a future attempt at destruction.
-        after 1000 "::tycho::TWidget::evalIfExists $this nextWindow; \
+        after 1000 "::tycho::TWidget::evalIfExists $this prevWindow; \
                 delete object $this"
         ::tycho::silentError
     }
