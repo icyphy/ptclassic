@@ -2,9 +2,9 @@ defstar {
 	name { Mux }
 	domain { SDF }
 	desc {
-Multiplex any number of inputs onto one output stream.
-B particles are consumed on each input, where B is the blockSize.
-But only one of these blocks of particles is copied to the output.
+Multiplex any number of inputs onto one output stream.  At each
+firing, blockSize particles are consumed on each input port, but
+only one of these blocks of particles is copied to the output.
 The one copied is determined by the "control" input.
 Integers from 0 through N-1 are accepted at the "control" input,
 where N is the number of inputs.  If the control input is outside
@@ -51,21 +51,23 @@ limitation of liability, and disclaimer of warranty provisions.
 	go {
 		int numports = input.numberPorts();
 		int n = int(control%0);
-		if (n < 0 || n >= numports) {
+		int j = int(blockSize);
+		if (n >= 0 && n < numports) {
+			MPHIter nexti(input);
+			PortHole* p = 0;
+			for (int i = 0; i <= n; i++) {
+				p = nexti++;
+			}
+			while (j--) {
+				output%j = (*p)%j;
+			}
+		}
+		else {
 			StringList msg = "Control input ";
 			msg << n << " is out of the range [0,"
 			    << (numports - 1) << "]";
 			Error::abortRun(*this, msg);
 			return;
-		}
-
-		MPHIter nexti(input);
-		PortHole* p = 0;
-		for (int i = 0; i <= n; i++) {
-			p = nexti++;
-		}
-		for (int j = int(blockSize)-1; j >= 0; j--) {
-			output%j = (*p)%j;
 		}
 	}
 }
