@@ -77,8 +77,8 @@ int For :: checkTopology (CGMacroClusterGal* galaxy) {
 		if (s->asSpecialBag()) {
 
 			// check connections.
-			CGClustPort* p;
-			CGClustPortIter nextp(*s);
+			CGMacroClustPort* p;
+			CGMacroClustPortIter nextp(*s);
 			int flag = 0;
 	
 			while ((p = nextp++) != 0) {

@@ -108,8 +108,8 @@ int Case :: checkTopology (CGMacroClusterGal* galaxy) {
 		if (s->asSpecialBag()) {
 
 			// check connections.
-			CGClustPort* p;
-			CGClustPortIter nextp(*s);
+			CGMacroClustPort* p;
+			CGMacroClustPortIter nextp(*s);
 			int flag = 0;
 			int index = 0;
 			int errorFlag = 0;

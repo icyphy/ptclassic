@@ -140,8 +140,8 @@ int CGDDFClusterBag :: prepareBag(MultiTarget* t, ostream* l) {
 	}
 
 	// adjust sample rates
-	CGClustPortIter nextPort(*this);
-	CGClustPort* p;
+	CGMacroClustPortIter nextPort(*this);
+	CGMacroClustPort* p;
 	while ((p = nextPort++) != 0 ) {
 		if (p->numIO() == 0) p->setNumXfer(1);
 	}

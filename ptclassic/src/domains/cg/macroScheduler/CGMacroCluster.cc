@@ -52,7 +52,7 @@ boundaries.
 
 The virtual baseclass CGMacroCluster refers to either type of cluster.
 
-The remaining class defined here is CGClustPort, a porthole for use
+The remaining class defined here is CGMacroClustPort, a porthole for use
 in CGMacroCluster objects.
 
 **************************************************************************/
@@ -88,7 +88,7 @@ CGMacroClusterGal::CGMacroClusterGal(Galaxy* gal, ostream* log)
 : logstrm(log), myGal(gal), owner(0), bagNumber(1)
 {
 	int nports = setPortIndices(*gal);
-	LOG_NEW; CGClustPort** ptable = new CGClustPort*[nports];
+	LOG_NEW; CGMacroClustPort** ptable = new CGMacroClustPort*[nports];
 	for (int i = 0; i < nports; i++)
 		ptable[i] = 0;
 	DFGalStarIter nextStar(*gal);
@@ -96,8 +96,8 @@ CGMacroClusterGal::CGMacroClusterGal(Galaxy* gal, ostream* log)
 	while ((s = (CGStar*) nextStar++) != 0) {
 		LOG_NEW; CGAtomCluster* c = new CGAtomCluster(*s,this);
 		addBlock(*c);
-		CGClustPortIter nextPort(*c);
-		CGClustPort *p;
+		CGMacroClustPortIter nextPort(*c);
+		CGMacroClustPort *p;
 		while ((p = nextPort++) != 0) {
 			ptable[p->real().index()] = p;
 		}
@@ -106,9 +106,9 @@ CGMacroClusterGal::CGMacroClusterGal(Galaxy* gal, ostream* log)
 	// There may be fewer cluster ports than real ports if there are
 	// self-loops, for such cases, ptable[i] will be null.
 	for (i = 0; i < nports; i++) {
-		CGClustPort* out = ptable[i];
+		CGMacroClustPort* out = ptable[i];
 		if (!out || out->isItInput()) continue;
-		CGClustPort* in = ptable[out->real().far()->index()];
+		CGMacroClustPort* in = ptable[out->real().far()->index()];
 		int delay = out->real().numTokens();
 		out->connect(*in,delay);
 		out->initGeo();
@@ -241,8 +241,8 @@ CGMacroCluster* CGMacroClusterGal::fullSearchMerge() {
 	CGMacroClusterGalIter nextClust(*this);
 	CGMacroCluster* c;
 	while ((c = nextClust++) != 0) {
-		CGClustPortIter nextPort(*c);
-		CGClustPort *p;
+		CGMacroClustPortIter nextPort(*c);
+		CGMacroClustPort *p;
 		while ((p = nextPort++) != 0) {
 			if (p->far() == 0) continue;
 			// check requirement 1: same rate and no delay
@@ -335,8 +335,8 @@ int CGMacroClusterGal::parallelLoopMergePass() {
 int CGMacroClusterGal::indirectPath(CGMacroCluster* src, CGMacroCluster* dst) {
 	stopList.initialize();
 	stopList.put(src);
-	CGClustPortIter nextP(*src);
-	CGClustPort* p;
+	CGMacroClustPortIter nextP(*src);
+	CGMacroClustPort* p;
 	while ((p = nextP++) != 0) {
 		if (p->far() == 0) continue;
 		CGMacroCluster* peer = p->far()->parentClust();
@@ -354,8 +354,8 @@ int CGMacroClusterGal::indirectPath(CGMacroCluster* src, CGMacroCluster* dst) {
 
 int CGMacroClusterGal::findPath(CGMacroCluster* start, CGMacroCluster* dst) {
 	stopList.put(start);
-	CGClustPortIter nextP(*start);
-	CGClustPort* p;
+	CGMacroClustPortIter nextP(*start);
+	CGMacroClustPort* p;
 	while ((p = nextP++) != 0) {
 		if (p->isItInput() || p->far() == 0) continue;
 		CGMacroCluster* peer = p->far()->parentClust();
@@ -366,7 +366,7 @@ int CGMacroClusterGal::findPath(CGMacroCluster* start, CGMacroCluster* dst) {
 	return FALSE;
 }
 
-static ostream& operator<<(ostream& o, CGClustPort& p);
+static ostream& operator<<(ostream& o, CGMacroClustPort& p);
 
 // This routine marks all feed-forward delays on a clusterGal to
 // enhance the looping capability without hazard of dead-lock condition.
@@ -382,8 +382,8 @@ int CGMacroClusterGal :: markFeedForwardDelayArcs() {
 	CGMacroCluster* c;
 
 	while ((c = nextClust++) != 0) {
-		CGClustPortIter nextP(*c);
-		CGClustPort* p;
+		CGMacroClustPortIter nextP(*c);
+		CGMacroClustPort* p;
 		while ((p = nextP++) != 0) {
 			if (p->isItInput() || p->far() == 0) continue;
 			if (p->numTokens() == 0) continue;
@@ -434,8 +434,8 @@ int CGMacroClusterGal::loopTwoClusts() {
 	// and that a sample rate change is needed.
 	// we can ignore delays that are >= the total # of tokens
 	// moved in the entire execution of the schedule.
-	CGClustPortIter nextPort(*c1);
-	CGClustPort* p;
+	CGMacroClustPortIter nextPort(*c1);
+	CGMacroClustPort* p;
 	int r1 = c1->reps();
 	while ((p = nextPort++) != 0) {
 		if (p->far() == 0) continue;
@@ -503,10 +503,10 @@ int CGMacroClusterGal::integralLoopPass(int doAnyLoop) {
 // it better match the sample rate of its neighbors.
 int CGMacroCluster::loopFactor(int doAnyLoop) {
 	int retval = 0;
-	CGClustPortIter nextPort(*this);
-	CGClustPort* p;
+	CGMacroClustPortIter nextPort(*this);
+	CGMacroClustPort* p;
 	while ((p = nextPort++) != 0) {
-		CGClustPort* pFar = p->far();
+		CGMacroClustPort* pFar = p->far();
 		int myIO = p->numIO();
 		int peerIO = pFar->numIO();
 		// can't loop if connected to a different rate star by a delay
@@ -529,9 +529,9 @@ int CGMacroCluster::loopFactor(int doAnyLoop) {
 }
 
 // fn to print a single port of a cluster
-static ostream& operator<<(ostream& o, CGClustPort& p) {
+static ostream& operator<<(ostream& o, CGMacroClustPort& p) {
 	o << p.parent()->name() << "." << p.name();
-	CGClustPort* pFar = p.far();
+	CGMacroClustPort* pFar = p.far();
 	if (p.isItOutput())
 		o << "=>";
 	else
@@ -549,8 +549,8 @@ static ostream& operator<<(ostream& o, CGClustPort& p) {
 // fn to print ports of a cluster.
 ostream& CGMacroCluster::printPorts(ostream& o) {
 	const char* prefix = "( ";
-	CGClustPortIter next(*this);
-	CGClustPort* p;
+	CGMacroClustPortIter next(*this);
+	CGMacroClustPort* p;
 	while ((p = next++) != 0) {
 		o << prefix << *p;
 		prefix = "\n\t  ";
@@ -562,8 +562,8 @@ ostream& CGMacroCluster::printPorts(ostream& o) {
 void CGMacroCluster::loopBy(int fac) {
 	pLoop *= fac;
 	repetitions *= Fraction(1,fac);
-	CGClustPortIter nextPort(*this);
-	CGClustPort* p;
+	CGMacroClustPortIter nextPort(*this);
+	CGMacroClustPort* p;
 	while ((p = nextPort++) != 0)
 		p->loopBy(fac);
 }
@@ -574,8 +574,8 @@ int CGMacroCluster::unloop() {
 	int fac = pLoop;
 	pLoop = 1;
 	repetitions *= Fraction(fac);
-	CGClustPortIter nextPort(*this);
-	CGClustPort* p;
+	CGMacroClustPortIter nextPort(*this);
+	CGMacroClustPort* p;
 	while ((p = nextPort++) != 0)
 		p->unloopBy(fac);
 	return fac;
@@ -760,8 +760,8 @@ void CGMacroClusterGal :: selectTargetGals(Galaxy& outGal) {
 }
 
 void CGMacroClusterGal :: incrementalSearch(CGMacroCluster* c, CGMacroClusterBag* bag) {
-	CGClustPortIter nextP(*c);
-	CGClustPort* p;
+	CGMacroClustPortIter nextP(*c);
+	CGMacroClustPort* p;
 	while ((p = nextP++) != 0) {
 		CGMacroCluster* s = p->far()->parentClust();
 		if (s->visited()) continue;
@@ -901,8 +901,8 @@ int CGMacroClusterGal :: clusterSCC() {
 SequentialList* CGMacroClusterGal :: findSCComponent(CGMacroCluster* c) {
 	c->setVisit(1);
 		
-	CGClustPortIter nextP(*c);
-	CGClustPort* p;
+	CGMacroClustPortIter nextP(*c);
+	CGMacroClustPort* p;
 
 	while ((p = nextP++) != 0) {
 		// downward direction.
@@ -933,8 +933,8 @@ SequentialList* CGMacroClusterGal :: makeList(CGMacroCluster* start, CGMacroClus
 	while (path != stop) {
 		newList->prepend(path);
 
-		CGClustPortIter nextP(*path);
-		CGClustPort* p;
+		CGMacroClustPortIter nextP(*path);
+		CGMacroClustPort* p;
 
 		while ((p = nextP++) != 0) {
 			//  upward direction.
@@ -1021,14 +1021,14 @@ void CGMacroClusterBag::absorb(CGMacroCluster* c,CGMacroClusterGal* par) {
 // adjust the bag porthole list.  Some of c's ports will now become
 // external ports of the cluster, while some external ports of the
 // cluster that connnect to c will disappear.
-	CGClustPortIter next(*c);
-	CGClustPort* cp;
+	CGMacroClustPortIter next(*c);
+	CGMacroClustPort* cp;
 	while ((cp = next++) != 0) {
-		CGClustPort* pFar = cp->far();
+		CGMacroClustPort* pFar = cp->far();
 		if (pFar && pFar->parent() == this) {
 			// the far side of this guy is one of my bag pointers.
 			// zap it and connect directly.
-			CGClustPort* p = pFar->inPtr();
+			CGMacroClustPort* p = pFar->inPtr();
 			int del = cp->numTokens();
 			LOG_DEL; delete pFar;
 			cp->connect(*p, del);
@@ -1036,8 +1036,8 @@ void CGMacroClusterBag::absorb(CGMacroCluster* c,CGMacroClusterGal* par) {
 		}
 		else {
 			// add a new connection to the outside for this guy
-			LOG_NEW; CGClustPort *np =
-				new CGClustPort(*cp,this,1);
+			LOG_NEW; CGMacroClustPort *np =
+				new CGMacroClustPort(*cp,this,1);
 			cp->makeExternLink(np);
 			addPort(*np);
 		}
@@ -1074,8 +1074,8 @@ int CGMacroClusterGal::isTree() {
 		while ((c = nextClust++) != 0) {
 			if (c->visited()) continue;
 			int nI = 0, nO = 0;
-			CGClustPortIter nextPort(*c);
-			CGClustPort* p;
+			CGMacroClustPortIter nextPort(*c);
+			CGMacroClustPort* p;
 			while ((p = nextPort++) != 0) {
 				if (p->far() == 0 ||
 				    p->far()->parentClust()->visited())
@@ -1110,8 +1110,8 @@ CGMacroClusterBag::merge(CGMacroClusterBag* b,CGMacroClusterGal* par) {
 	// get a list of all "bagports" that connect the two clusters.
 	// we accumulate them on one pass and delete on the next to avoid
 	// problems with iterators.
-	CGClustPortIter nextbp(*this);
-	CGClustPort* p;
+	CGMacroClustPortIter nextbp(*this);
+	CGMacroClustPort* p;
 	SequentialList zap;
 	while ((p = nextbp++) != 0)
 		if (p->far() && p->far()->parent() == b) zap.put(p);
@@ -1119,9 +1119,9 @@ CGMacroClusterBag::merge(CGMacroClusterBag* b,CGMacroClusterGal* par) {
 	// become internal connections so we zap them from both bags' lists
 	// of external pointers.
 	ListIter nextZap(zap);
-	while ((p = (CGClustPort*)nextZap++) != 0) {
-		CGClustPort* near = p->inPtr();
-		CGClustPort* far = p->far()->inPtr();
+	while ((p = (CGMacroClustPort*)nextZap++) != 0) {
+		CGMacroClustPort* near = p->inPtr();
+		CGMacroClustPort* far = p->far()->inPtr();
 		int del = p->numTokens();
 		LOG_DEL; delete p->far();
 		LOG_DEL; delete p;
@@ -1134,7 +1134,7 @@ CGMacroClusterBag::merge(CGMacroClusterBag* b,CGMacroClusterGal* par) {
 	while ((c = nextC++) != 0) {
 		gal->addBlock(*c,c->name());
 	}
-	CGClustPortIter nextP(*b);
+	CGMacroClustPortIter nextP(*b);
 	while ((p = nextP++) != 0) {
 		p->setNameParent(p->name(),this);
 		addPort(*p);
@@ -1167,8 +1167,8 @@ ostream& CGMacroClusterBag::printOn(ostream& o) {
 
 // The following procedures are used in the propagation of arc
 // counts from outer to inner arcs.
-int CGClustPort::maxArcCount() {
-	CGClustPort* p = this;
+int CGMacroClustPort::maxArcCount() {
+	CGMacroClustPort* p = this;
 	while (p && !p->geo()) p = p->outPtr();
 	if (p) return p->geo()->maxNumParticles();
 	Error::abortRun(*this, "can't find outer geodesic");
@@ -1176,10 +1176,10 @@ int CGClustPort::maxArcCount() {
 }
 
 // if I have a geodesic, set its count, else look inside.
-void CGClustPort::setMaxArcCount(int n) {
-	CGClustPort* p = this;
+void CGMacroClustPort::setMaxArcCount(int n) {
+	CGMacroClustPort* p = this;
 	while (p && !p->geo()) {
-		CGClustPort* q = p->inPtr();
+		CGMacroClustPort* q = p->inPtr();
 		if (q == 0) {
 			p->real().geo()->setMaxArcCount(n);
 			return;
@@ -1196,10 +1196,10 @@ void CGMacroClusterBag::fixBufferSizes(int nReps) {
 	// account for looping of this cluster
 	nReps *= loop();
 	// pass down sizes of external buffers.
-	CGClustPortIter nextPort(*this);
-	CGClustPort* p;
+	CGMacroClustPortIter nextPort(*this);
+	CGMacroClustPort* p;
 	while ((p = nextPort++) != 0) {
-		CGClustPort* in = p->inPtr();
+		CGMacroClustPort* in = p->inPtr();
 		int n = p->maxArcCount();
 		in->setMaxArcCount(n);
 	}
@@ -1234,8 +1234,8 @@ int CGMacroClusterBag :: prepareBag(MultiTarget* t, ostream* l) {
 	optNum = 1;	// initialize optNum
 
 	// adjust sample rate of myself
-	CGClustPortIter nextPort(*this);
-	CGClustPort* p;
+	CGMacroClustPortIter nextPort(*this);
+	CGMacroClustPort* p;
 	while ((p = nextPort++) != 0) {
 		int i = p->numIO() * p->inPtr()->parentClust()->reps();
 		p->setNumXfer(i);
@@ -1305,11 +1305,11 @@ int CGMacroClusterBag :: examineProcIds(IntArray& procId) {
 	// first check whether all stars on the boundary have the same procId.
 	// If not, signal error
 	// The processor assigned to the boundary should be procId[0]
-	CGClustPortIter nextP(*this);
-	CGClustPort* p;
+	CGMacroClustPortIter nextP(*this);
+	CGMacroClustPort* p;
 	int temp = -1;
 	while ((p = nextP++) != 0) {
-		CGClustPort* inp = p->inPtr();
+		CGMacroClustPort* inp = p->inPtr();
 		while (inp->parentClust()->asSpecialBag()) inp = inp->inPtr();
 		CGAtomCluster* s = (CGAtomCluster*) inp->parentClust();
 		if (s->real().isItFork()) continue;
@@ -1399,10 +1399,10 @@ CGMacroCluster* CGMacroCluster::mergeCandidate() {
 	CGMacroCluster *src = 0, *dst = 0;
 	int multiSrc = 0, multiDst = 0;
 	CGMacroCluster* srcOK = 0, *dstOK = 0;
-	CGClustPortIter nextPort(*this);
-	CGClustPort* p;
+	CGMacroClustPortIter nextPort(*this);
+	CGMacroClustPort* p;
 	while ((p = nextPort++) != 0) {
-		CGClustPort* pFar = p->far();
+		CGMacroClustPort* pFar = p->far();
 		if (pFar == 0) continue;
 		CGMacroCluster* peer = pFar->parentClust();
 		int myIO = p->numIO();
@@ -1446,7 +1446,7 @@ CGAtomCluster::CGAtomCluster(CGStar& star,Galaxy* parent) : pStar(star)
 		// do not make a port in the cluster if it is a "loopback" port
 		// also don't make a port for a wormhole connection.
 		if (p->atBoundary() || p->far()->parent() == &star) continue;
-		LOG_NEW; CGClustPort *cp = new CGClustPort(*p,this);
+		LOG_NEW; CGMacroClustPort *cp = new CGMacroClustPort(*p,this);
 		addPort(*cp);
 		cp->numIO();	// test
 	}
@@ -1456,7 +1456,7 @@ CGAtomCluster::CGAtomCluster(CGStar& star,Galaxy* parent) : pStar(star)
 	if(star.isItFork()) isaFork();
 }
 
-// destroy an atomic cluster.  Main job: delete the CGClustPorts.
+// destroy an atomic cluster.  Main job: delete the CGMacroClustPorts.
 CGAtomCluster::~CGAtomCluster() {
 	BlockPortIter nextPort(*this);
 	PortHole* p;
@@ -1493,8 +1493,8 @@ ostream& CGAtomCluster::printOn(ostream& o) {
 void CGAtomCluster::fixBufferSizes(int nReps) {
 	// # times real star is executed
 	nReps *= loop();
-	CGClustPortIter nextPort(*this);
-	CGClustPort *cp;
+	CGMacroClustPortIter nextPort(*this);
+	CGMacroClustPort *cp;
 	while ((cp = nextPort++) != 0) {
 		DFPortHole& rp = cp->real();
 		int sz = cp->maxArcCount();
@@ -1528,9 +1528,9 @@ int CGMacroClusterBag::myExecTime() {
 	return sched->getTotalWork();
 }
 
-// constructor for CGClustPort, port for use in cluster.
+// constructor for CGMacroClustPort, port for use in cluster.
 // if bp is set it's a "bag port" belonging to an CGMacroClusterBag.
-CGClustPort::CGClustPort(DFPortHole& port,CGMacroCluster* parent, int bp)
+CGMacroClustPort::CGMacroClustPort(DFPortHole& port,CGMacroCluster* parent, int bp)
 : pPort(port), pOutPtr(0), bagPortFlag(bp), feedForwardFlag(0)
 {
 	/* const char* name = bp? port.name() : mungeName(port); */
@@ -1540,17 +1540,17 @@ CGClustPort::CGClustPort(DFPortHole& port,CGMacroCluster* parent, int bp)
 	numberTokens = port.numXfer();
 }
 
-void CGClustPort::initGeo() { myGeodesic->initialize();}
+void CGMacroClustPort::initGeo() { myGeodesic->initialize();}
 
 // This method is called on a cluster porthole to create a connection
 // with a "bag port" in the parent ClusterBag.  
 
-void CGClustPort::makeExternLink(CGClustPort* bagPort) {
+void CGMacroClustPort::makeExternLink(CGMacroClustPort* bagPort) {
 	pOutPtr = bagPort;
 	bagPort->numberTokens = numberTokens;
 	// if I am connected, disconnect me and connect my peer
 	// to my external link (the bagPort)
-	CGClustPort* pFar = far();
+	CGMacroClustPort* pFar = far();
 	if (pFar) {
 		int del = numTokens();
 		disconnect();
@@ -1560,7 +1560,7 @@ void CGClustPort::makeExternLink(CGClustPort* bagPort) {
 }
 
 // return the real far port aliased to bag ports.
-CGClustPort* CGClustPort :: realFarPort(CGMacroCluster* outsideCluster) {
+CGMacroClustPort* CGMacroClustPort :: realFarPort(CGMacroCluster* outsideCluster) {
 	if (parentClust() == outsideCluster) return 0;
 	if (far()) return far();
 	return pOutPtr->realFarPort(outsideCluster);

@@ -235,10 +235,10 @@ static int _compareType (CGStar& s, const char* t) {
 //     star
 
 Geodesic* CGConScheduler :: findGeo(CGStar* macroS, const char* nm) {
-	CGClustPortIter nextp(*owner);
-	CGClustPort* p = 0;
+	CGMacroClustPortIter nextp(*owner);
+	CGMacroClustPort* p = 0;
 	while ((p = nextp++) != 0) {
-		CGClustPort* inp = p->inPtr();
+		CGMacroClustPort* inp = p->inPtr();
 		CGMacroCluster* ins = inp->parentClust();
 		CGAtomCluster* as = 0;
 		if (!nm) {
@@ -270,8 +270,8 @@ Geodesic* CGConScheduler :: findGeo(CGStar* macroS, const char* nm) {
 // if flag = 1, output and connected to "Case" or "EndCase" or others
 // if flag = 2, output and connected to "Fork" and eventually to "control".
 CGPortHole* CGConScheduler :: boundaryPort(CGMacroCluster* s, int flag) {
-	CGClustPortIter nextp(*s);
-	CGClustPort* p;
+	CGMacroClustPortIter nextp(*s);
+	CGMacroClustPort* p;
 	while ((p = nextp++) != 0) {
 		if ((!flag && p->isItInput()) || (flag && p->isItOutput())) {
 			if (flag) {
@@ -296,8 +296,8 @@ CGPortHole* CGConScheduler :: boundaryPort(CGMacroCluster* s, int flag) {
 	return copyPortHole(p);
 }
 	
-CGPortHole* CGConScheduler :: copyPortHole(CGClustPort* p) {
-	CGClustPort* temp = p->inPtr();
+CGPortHole* CGConScheduler :: copyPortHole(CGMacroClustPort* p) {
+	CGMacroClustPort* temp = p->inPtr();
 	const char* pname = temp->real().name();
 	ParNode* smallest = (ParNode*) temp->parentClust()->myMaster();
 	DataFlowStar* copyS = smallest->getCopyStar();

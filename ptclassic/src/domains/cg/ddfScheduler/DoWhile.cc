@@ -80,8 +80,8 @@ int DoWhile :: checkTopology (CGMacroClusterGal* galaxy) {
 			if (mCount > 1) return FALSE;
 
 			// check connections of the macro.
-			CGClustPort* p;
-			CGClustPortIter nextp(*s);
+			CGMacroClustPort* p;
+			CGMacroClustPortIter nextp(*s);
 	
 			while ((p = nextp++) != 0) {
 

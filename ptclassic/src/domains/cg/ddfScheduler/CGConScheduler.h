@@ -166,7 +166,7 @@ protected:
 
 	// return the porthole of the copy star associated with the
 	// argument clust PortHole
-	CGPortHole* copyPortHole(CGClustPort*);
+	CGPortHole* copyPortHole(CGMacroClustPort*);
 
 	// down-load the code of the body of the argument macro actor
 	int downLoadBodyCode(CGMacroClusterBag* cbag, int pix, CGTarget* t);
