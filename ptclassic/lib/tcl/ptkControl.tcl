@@ -85,9 +85,7 @@ proc ptkRunControl { name octHandle } {
     set ptkControlPanel .run_$octHandle
     
     if {[info exists ptkRunFlag($name)] && [winfo exists $ptkControlPanel]} {
-            ptkImportantMessage .error \
-		"You already have a run control window open for $name"
-	    return
+	    raise $ptkControlPanel
     }
     # Mark an open window, but with no run yet.
     set ptkRunFlag($name) IDLE
