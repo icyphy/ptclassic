@@ -112,12 +112,6 @@ class ::tycho::IncrCanvas {
     constructor {args} {}
     destructor {}
 
-    # A debug method, which just evaluates its argument in this
-    # object's context
-    method debug {args} {
-	eval $args
-    }
-
     ###################################################################
     ####                         public methods                    ####
 

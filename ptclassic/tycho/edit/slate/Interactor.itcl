@@ -256,11 +256,6 @@ class ::tycho::Interactor {
 	Key           key
 	KeyRelease    key
     }       
-
-    # Debugging only
-    method debug {args} {
-	eval $args
-    }
 }
 
 
