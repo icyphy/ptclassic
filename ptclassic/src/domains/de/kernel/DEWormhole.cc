@@ -82,7 +82,7 @@ void DEWormhole :: go()
         if (myTarget()->selfFiringRequested()) {
                 DEBaseSched* sched = (DEBaseSched*) outerSched();
                 DEStar* me = this;
-                sched->queue()->levelput(me, myTarget()->nextFiringTime(), 0);
+                sched->queue()->levelput(me, (sched->now())+(myTarget()->nextFiringTime()), 0);
         }
  
 	// run the inner scheduler.
