@@ -1,54 +1,43 @@
-
-------- tclXprofile.c -------
-*** /tmp/da000eF	Wed Dec 31 16:00:00 1969
---- tclXprofile.c	Fri Aug 16 09:33:07 1996
+*** tclXprofile.c.orig	Wed Nov 20 17:53:19 1996
+--- tclXprofile.c	Sat Nov 30 13:25:43 1996
 ***************
-*** 392,397 ****
---- 392,401 ----
+*** 525,538 ****
+  {
+      Interp *iPtr = (Interp *) interp;
       profInfo_t *infoPtr = (profInfo_t *) clientData;
-      int procLevel = (iPtr->varFramePtr == NULL) ? 0 : iPtr->varFramePtr->level;
-      clock_t realTime, cpuTime;
-+ #ifdef ITCL_NAMESPACES
-+     char *commandNamesp;
-+     Tcl_DString commandWithNs;
+-     Tcl_HashEntry *hPtr;
+      Command *cmdPtr;
+!     
+      if (infoPtr->currentCmdPtr != NULL)
+          panic (PROF_PANIC, 5);
+  
+      hPtr = Tcl_FindHashEntry (&iPtr->commandTable, argv [0]);
+      cmdPtr = (Command *) Tcl_GetHashValue (hPtr);
+  
+      if ((cmdPtr->proc != cmdProc) || (cmdPtr->clientData != cmdClientData))
+          panic (PROF_PANIC, 6);
+--- 525,548 ----
+  {
+      Interp *iPtr = (Interp *) interp;
+      profInfo_t *infoPtr = (profInfo_t *) clientData;
+      Command *cmdPtr;
+! #ifdef ITCL_NAMESPACES      
+!     Tcl_Command cmd;
+! #else
+!     Tcl_HashEntry *hPtr;
+! #endif    
+! 
+      if (infoPtr->currentCmdPtr != NULL)
+          panic (PROF_PANIC, 5);
+  
++ #ifdef ITCL_NAMESPACES      
++     if (Itcl_FindCommand((Tcl_Interp*)iPtr, argv [0], 0, &cmd) != TCL_OK)
++         panic (PROF_PANIC, 56);
++     cmdPtr = (Command*)cmd;
++ #else
+      hPtr = Tcl_FindHashEntry (&iPtr->commandTable, argv [0]);
+      cmdPtr = (Command *) Tcl_GetHashValue (hPtr);
 + #endif
   
-      /*
-       * Calculate the time spent since the last trace.
-***************
-*** 439,447 ****
-       * handle the entry.
-       */
-  
-!     if (infoPtr->allCommands || (TclFindProc (iPtr, argv [0]) != NULL))
-          ProcEntry (infoPtr, argv [0], procLevel + 1, evalLevel + 1);
-! 
-      /*
-       * Save the exit time of the profiling trace handler.
-       */
---- 443,467 ----
-       * handle the entry.
-       */
-  
-!     if (infoPtr->allCommands || (TclFindProc (iPtr, argv [0]) != NULL)) {
-! #ifdef ITCL_NAMESPACES      
-!         /* Append the namespace of the command */
-!         Tcl_DStringInit(&commandWithNs);
-! 	if ( (commandNamesp =
-! 	      Itcl_GetNamespPath(Itcl_GetActiveNamesp(interp)))) {
-! 	  Tcl_DStringAppend(&commandWithNs, commandNamesp, -1);
-! 	  /* If the argument does not have a leading ::, then append one */
-! 	  if (!strcmp(argv[0], "::")) 
-! 	    Tcl_DStringAppend(&commandWithNs, "::", -1); 
-! 	}
-! 	Tcl_DStringAppend(&commandWithNs, argv[0], -1); 
-! 	ProcEntry (infoPtr, Tcl_DStringValue(&commandWithNs),
-! 		   procLevel + 1, evalLevel + 1);
-! 	Tcl_DStringFree(&commandWithNs);
-! #else
-          ProcEntry (infoPtr, argv [0], procLevel + 1, evalLevel + 1);
-! #endif
-!     }
-      /*
-       * Save the exit time of the profiling trace handler.
-       */
+      if ((cmdPtr->proc != cmdProc) || (cmdPtr->clientData != cmdClientData))
+          panic (PROF_PANIC, 6);
