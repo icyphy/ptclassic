@@ -1081,28 +1081,7 @@ body ::tycho::IncrCanvas::itemconfigure {tag args} {
 # item with that tag.
 #
 body ::tycho::IncrCanvas::lower {tag {belowThis {}}} {
-    # Figure out which item we're talking about
-    set items [find withtag $tag]
-    if { $items == "" } {
-	return ""
-    } else {
-	set id [lindex $items 0]
-
-	if { $belowThis == "" } {
-	    $canvas lower $id
-	} elseif { [string match {[_0-9]*} $belowThis] } {
-	    # Got an item, so use it
-	    $canvas lower $id $belowThis
-	} else {
-	    # Got a id, so use the first matching item
-	    set items [find withtag $belowThis]
-	    if { $items == "" } {
-		$canvas lower $id
-	    } else {
-		$canvas lower $id [lindex $items 0]
-	    }
-	}
-    }
+    eval $canvas lower $tag $aboveThis
 }
 
 #######################################################################
@@ -1181,28 +1160,7 @@ body ::tycho::IncrCanvas::postscript {args} {
 # with that tag.
 #
 body ::tycho::IncrCanvas::raise {tag {aboveThis {}}} {
-    # Figure out which item we're talking about
-    set items [find withtag $tag]
-    if { $items == "" } {
-	return ""
-    } else {
-	set id [lindex $items 0]
-
-	if { $aboveThis == "" } {
-	    $canvas raise $id
-	} elseif { [string match {[_0-9]*} $aboveThis] } {
-	    # Got an item, so use it
-	    $canvas raise $id $aboveThis
-	} else {
-	    # Got a id, so use the first matching item
-	    set items [find withtag $aboveThis]
-	    if { $items == "" } {
-		$canvas raise $id
-	    } else {
-		$canvas raise $id [lindex $items 0]
-	    }
-	}
-    }
+    eval $canvas raise $tag $aboveThis
 }
 
 #######################################################################
