@@ -33,12 +33,12 @@ limitation of liability, and disclaimer of warranty provisions.
   }
   go
   {
-    float val;
+    double val;
 
     // method ReadVar() sets the value of val (passed by reference)
     if ( !SDFSharedMem::ReadVar(name,val) )
     {
-      val = float(initial);
+      val = initial;
     }
     out%0 << val;
   }
