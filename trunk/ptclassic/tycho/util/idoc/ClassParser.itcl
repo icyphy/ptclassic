@@ -480,7 +480,7 @@ body ::tycho::IDocSys::shortDesc {comment} {
             return [string range $comment 0 $index]
         }
         if {$letter == "@"} {
-            return [string range $comment 0 [decr index]]
+            return [string range $comment 0 [incr index -1]]
         }
     }
     return $comment
