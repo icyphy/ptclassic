@@ -41,7 +41,7 @@ public:
      ClassName();
      // Destructor
     ~ClassName();
-    prote:
+protected:
 private:
 };
 
