@@ -3,9 +3,9 @@
 # This file starts up Open Windows, configured correctly to run pigi with
 # the Open Look window manager.
 # The following files define the configuration:
-# .xinitrc, .Xresources, .twmrc
+# .xinitrc.ow.twm, .Xresources, .twmrc
 setenv OPENWINHOME /usr/openwin
-setenv XINITRC ~/.xinitrc.ow
+setenv XINITRC ~/.xinitrc.ow.twm
 openwin
 clear_colormap
 kbd_mode -a
