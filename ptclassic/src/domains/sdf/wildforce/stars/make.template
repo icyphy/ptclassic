@@ -65,7 +65,7 @@ HDRS= $(SRCS:.cc=.h)
 STAR_MK=sdfwildforcestars
 DOMAIN=SDF_WILDFORCE
 DOMAIN_2=SDF
-EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS) pe0_controller.m68
+EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS) pe0_controller.m68 xbar_cfg.dat
  
 all:            makefile stars_all
  
