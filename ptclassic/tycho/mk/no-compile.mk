@@ -31,6 +31,16 @@
 # This makefile is to be included if we don't need the compiler
 # and we don't need to generate any dependencies.  Please don't use
 # GNU make extensions in this file, such as 'ifdef'.
+#
+# The primary difference between a makefile that uses compile.mk and one
+# that uses no-compile.mk is that in a directory that uses
+# no-compile.mk, all the 'work' is done by make sources, and the make
+# all command usually does nothing.
+# 
+# Another difference is that no-compile.mk should probably never appear
+# in a make.template, since if there is a make.template, then we are
+# calculating dependencies on the fly and creating a makefile, which
+# probably means that we are compiling.
 
 all install TAGS: $(EXTRA_SRCS) $(HDRS) $(MISC_FILES)
 	@echo "Nothing to be done in this directory"
@@ -162,8 +172,9 @@ extraclean:
 
 # Create tclIndex from .tcl and .itcl files
 # This rule must be after the TCL_SRC and ITCL_SRC lines in the makefile
-# that includes this makefile
-tclIndex: $(TCL_SRCS) $(ITCL_SRCS)
+# that includes this makefile.  tclIndex should depend on the makefile
+# in case we edit the makefile and move a tcl file to another location.
+tclIndex: $(TCL_SRCS) $(ITCL_SRCS) makefile
 	@echo "Updating tclIndex"
 	rm -f $@
 	echo 'set auto_path [linsert $$auto_path 0 [info library] ]; auto_mkindex . $(TCL_SRCS) $(ITCL_SRCS)' | $(ITCLSH)
