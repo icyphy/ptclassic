@@ -29,6 +29,11 @@ static char SccsId[]="$Id$";
 #include "utility.h"
 #include "pq.h"
 
+#include "ansi.h"
+
+int getline
+	ARGS((FILE *f, char *s));
+int
 main()
 {
     pq_t *queue, *queue1;
@@ -144,10 +149,10 @@ main()
 
     pq_free_queue(queue1);
 
-    exit(0);
-
+    return 0;
 }
 
+int
 getline(f, s)
 FILE *f;
 char *s;
