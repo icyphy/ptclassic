@@ -58,6 +58,7 @@ Error :: error(cc* m1, cc* m2, cc* m3) {
 		p3(m1,m2,m3);
 		return;
 	}
+// if there is already a result, append to it.
 	char* res = PTcl::activeInterp->result;
 	StringList msg;
 	if (res && *res)
@@ -78,20 +79,9 @@ Error :: warn(cc* m1, cc* m2, cc* m3) {
 
 void
 Error :: error (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
-	if (PTcl::activeInterp == 0) {
-		cerr << "ERROR: ";
-		Error::message(o,m1,m2,m3);
-		return;
-	}
-	if (!m2) m2 = "";
-	if (!m3) m3 = "";
-	StringList s = o.fullName();
-	const char* name = s;
-	int l = strlen(name) + strlen(m1) + strlen(m2) + strlen(m3) + 10;
-	LOG_NEW; char* msg = new char[l];
-	sprintf (msg, "ERROR: %s: %s%s%s", name, m1, m2, m3);
-	Tcl_SetResult(PTcl::activeInterp, msg, TCL_VOLATILE);
-	LOG_DEL; delete msg;
+	StringList n_m1 = o.fullName();
+	n_m1 << ":" << m1;
+	error(n_m1,m2,m3);
 }
 
 void
