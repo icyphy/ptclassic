@@ -25,75 +25,78 @@ $Id$
 
 **************************************************************************/
 
-unsigned int is_idchar(char c) {
+// See if character is part of an identifier
+inline unsigned int is_idchar(char c) {
         return isalnum(c) || c == '_';
 }
 
-ParseToken State :: getParseToken(const char* string, Block* blockIAmIn) {
-register	int c;
-register	int namelen;
-register	const char *tokstart;
+// The state tokenizer: return next token
+ParseToken
+State :: getParseToken(const char* string, Block* blockIAmIn) {
+	int c;
+	int namelen;
+	const char *tokstart;
 	ParseToken   t;
-	retry:
-
+ retry:
+	
 	tokstart = lexptr;
 	c  = *tokstart;
 	switch (c) {
-	case 0:
-		{ t.tok = 0;
+	case 0:			// End of string
+		t.tok = 0;
 		return t;
-		}
 
-	case ' ':
+	case ' ':		// White-space, skip it
 	case '\t':
 	case '\n':
 		lexptr++;
 		goto retry;
-	case '/':
+
+	case '/':		// one-character token
 	case '+':
 	case '-':
 	case '*':
 	case '(':
 	case ')':
-		{ lexptr++;
-		  t.tok = (char*)c;
+		lexptr++;
+		t.tok = (char*)c;
 		return t;
-		}
+
 	}
 
-	if  (c >= '0'  && c<= '9') {
-	int floatflag = 0;
-	namelen = 0;
-	c = tokstart[namelen];
-	while(is_idchar(c) || c == '.')
-		{ 
-		if(c == '.') floatflag =  1;
-		namelen++;
+	if  (c >= '0'  && c<= '9') { // digit
+		int floatflag = 0;
+		namelen = 0;
 		c = tokstart[namelen];
+		while(is_idchar(c) || c == '.')
+		{ 
+			if(c == '.') floatflag =  1;
+			namelen++;
+			c = tokstart[namelen];
 		};	
 
-	if(floatflag)
-	{ 	t.dval = atof(tokstart);
-		t.tok = "FLOAT"; }
-	else
-	{ 	t.ival = atoi(tokstart);
-		t.tok = "INT"; }
-	lexptr +=  namelen;
-	return t;
+		if(floatflag)
+		{ 	t.dval = atof(tokstart);
+			t.tok = "FLOAT"; }
+		else
+		{ 	t.ival = atoi(tokstart);
+			t.tok = "INT"; }
+		lexptr +=  namelen;
+		return t;
 	}
 
-	namelen=0;
+	namelen=0;		// otherwise: assume ID
 	c = tokstart[namelen];
 	while(is_idchar(c))
-		{
+	{
 		namelen++;
 		c = tokstart[namelen];
-		};
+	};
 
 
 	char yytext[namelen+1];
 	for(int i = 0 ; i < namelen + 1 ; i++) {
-	yytext[i] = tokstart[i];
+		yytext[i] = tokstart[i];
 	};
 
 	State* s = lookup(yytext, blockIAmIn);
@@ -102,7 +105,7 @@ register	const char *tokstart;
 
 	lexptr  += namelen;
 	return t;
-	};
+};
 
 State* State :: lookup (char* name, Block* blockIAmIn) {
         while (blockIAmIn) {
@@ -113,46 +116,38 @@ State* State :: lookup (char* name, Block* blockIAmIn) {
         return NULL;
 }
 
-// The following function is an error catcher -- it is called if
-// a state in the known list hasn't redefined the clone
-// method.
-State* State::clone() {
-        extern Error errorHandler;
-        StringList msg = "The state \"";
-        msg += readName();
-        msg += "\" doesn't implement the \"clone\" method!\n";
-        errorHandler.error(msg);
-        return 0;
-}
-
 // put info.
-State::operator StringList() {
-                StringList  out;
-                out = "         State: ";
-                out += readFullName();
-                out += initValue;
-                out += "\n";
+StringList
+State::printVerbose() {
+	StringList  out;
+	out = readFullName();
+	out += " type: ";
+	out += type();
+	out += ", initial value: ";
+	out += initValue;
+	out += ", current value: ";
+	out += currentValue();
+	out += "\n";
         return out;
 };
 
-
 // initialize elements
 void StateList::initElements() {
-                State *p;
-                for(int i=size(); i>0; i--)  {
-                        p  = (State  *)next();
-                        p->initialize();
-                        };
-        };
+	State *p;
+	for(int i=size(); i>0; i--)  {
+		p  = (State  *)next();
+		p->initialize();
+	};
+};
 
 // Find a state with the given name and return pointer
 State* StateList::stateWithName(const char* name) {
-		State *sp;
-                for (int i =  size(); i>0;i--) {
-			sp = (State *) next();
-                        if (strcmp(name,sp->readName()) == 0)
-                       	  return  sp;
-                        }
-                return  NULL;
-        };
+	State *sp;
+	for (int i =  size(); i>0;i--) {
+		sp = (State *) next();
+		if (strcmp(name,sp->readName()) == 0)
+			return  sp;
+	}
+	return  NULL;
+}
 
