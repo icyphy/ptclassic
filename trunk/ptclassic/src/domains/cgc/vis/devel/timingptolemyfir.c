@@ -72,7 +72,7 @@ filtertaps = (vis_s16 *) memalign(sizeof(double),sizeof(short)*taplength);
 filtertaps_d64 = (vis_d64 *) memalign(sizeof(double),sizeof(double)*taplength);
 srcptolemy = (vis_s16 *) memalign(sizeof(double),sizeof(short)*length);
 /**************setup filtertaps***********************************/
-  for(i=0;i<LENGTH;i++){
+  for(i=0;i<length;i++){
     sinarg = twopiover50;
     twopiover50 += 0.628318530717958;
     src0[i] = (short)SCALE * (double) sin(sinarg);
