@@ -26,7 +26,7 @@ first before copying.
 Start pigi.
 .BU
 Use \fIopen-palette\fP (or ``O'') to open the
-``~ptolemy/lib/technology/ptolemy/system'' palette (the last one in
+``$PTOLEMY/lib/colors/ptolemy/system'' palette (the last one in
 the list of palettes).
 The system palette contains input and output ports which can be instantiated
 into schematics just like stars.
@@ -59,6 +59,9 @@ than before.  It names output terminals when given a text argument.
 .BU
 We now have a galaxy.  The fact that a schematic has input
 or output ports distinguishes it as a galaxy.
+This galaxy that you just created is similar to the ``singen'' galaxy
+in the ``Signal Sources'' palette.  Find it, and look inside, to make the
+comparison.
 .H2 "Using a galaxy"
 .pp
 We have just created a galaxy that we would like to use in another
@@ -89,7 +92,7 @@ Click ``OK''.
 Wait until \fImake-schem-icon\fP is done.
 VEM informs you that it is done with a message in the VEM console
 window, which may be buried by now.
-You must find it and bring it to the surface.
+You should find it and bring it to the surface.
 .BU
 Open the palette called ``user.pal'' using \fIopen-palette\fP (``O'').  The
 newly created galaxy icon should appear in this palette along with
@@ -111,10 +114,9 @@ name ``modulation''.
 In the ``modulation:schematic'' window, create a universe which
 takes two ``singen'' galaxies, multiplies their outputs together,
 and then outputs the result using ``Xgraph''.
-Unless the main ``sdf'' palette is already open, you'll probably
-need to open it to create instances of the ``Xgraph'' and
-``FloatProduct'' stars (the latter star is in the third row,
-seventh from the left).
+The ``Xgraph'' star can be found again in the ``Signal Sinks'' subpalette
+of the SDF palette.
+The multiplier star, called Mpy, is in the ``Arithmetic'' subpalette.
 \fBHint\fR: If you place the icons so that their terminals
 fall on top of one another, then a connection gets made without
 having to draw a wire.
@@ -143,6 +145,9 @@ in the galaxy and then link the formal parameters to the
 formal and actual parameters, are analogous to formal and actual
 parameters in any procedural programming language.  An example
 will make this clear.
+.Id "formal parameters"
+.Id "actual parameters"
+.Id "galaxy parameters"
 .BU
 Create formal parameters:
 .LE
@@ -226,8 +231,10 @@ in ``init.pal''.
 On some workstations (currently only Sun Sparcstations), \*(PT
 can play sounds over the workstation speaker.  You can try this with
 the universe you just created.
-Replace the ``Xgraph'' star in ``waveform'' with an instance of the ``Play''
-star (second row of main.pal, on the right, with a stylized loudspeaker
+Replace the ``Xgraph'' star in ``waveform:schematic''
+with an instance of the ``Play''
+star (second row of of the sinks palette, right of center,
+with a stylized loudspeaker
 as an icon).  Edit the parameters of the ``Play'' star entering 16000
 for the gain parameter. (To see details about the ``Play'' star,
 execute the ``profile'' command in the ``Other'' menu, or type a comma
@@ -263,6 +270,7 @@ when you create new galaxies and universes that depend on each
 other, it is a good idea to keep them together in one directory.
 For example, all of the facets we have created so far are in the
 ``example'' directory.
+You can use the extensive \*(PT demos as models.
 .H2 "An Important Note"
 .pp
 Whenever the contents of a galaxy are changed so that
