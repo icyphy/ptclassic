@@ -60,7 +60,7 @@
   (figureGroupDefault delayOutline
       (userData priority 12)
       (width -2)
-      (color 0 900 0)
+      (color 136 556 136)
       (fillPattern 1 1 "0")
       (borderPattern 1 "1")
   )
@@ -99,14 +99,14 @@
   (figureGroupDefault greenOutline
       (userData priority 5)
       (width -2)
-      (color 0 900 0)
+      (color 136 556 136)
       (fillPattern 1 1 "0")
       (borderPattern 1 "1")
   )
   (figureGroupDefault greenSolid
       (userData priority 5)
       (width -2)
-      (color 0 900 0)
+      (color 136 556 136)
       (fillPattern 1 1 "1")
   )
   (figureGroupDefault orangeOutline
@@ -207,7 +207,7 @@
   (figureGroupDefault packetColor
       (userData priority 5)
       (width -2)
-      (color 0 900 0)    (comment "green")
+      (color 136 556 136)    (comment "green")
       (fillPattern 1 1 "1")
   )
   (figureGroupDefault fixColor
@@ -293,14 +293,14 @@
   (figureGroupDefault greenOutline7
       (userData priority 7)
       (width -2)
-      (color 0 900 0)
+      (color 136 556 136)
       (fillPattern 1 1 "0")
       (borderPattern 1 "1")
   )
   (figureGroupDefault greenSolid7
       (userData priority 7)
       (width -2)
-      (color 0 900 0)
+      (color 136 556 136)
       (fillPattern 1 1 "1")
   )
   (figureGroupDefault orangeOutline7
@@ -426,14 +426,14 @@
   (figureGroupDefault greenOutline6
       (userData priority 6)
       (width -2)
-      (color 0 900 0)
+      (color 136 556 136)
       (fillPattern 1 1 "0")
       (borderPattern 1 "1")
   )
   (figureGroupDefault greenSolid6
       (userData priority 6)
       (width -2)
-      (color 0 900 0)
+      (color 136 556 136)
       (fillPattern 1 1 "1")
   )
   (figureGroupDefault orangeOutline6
@@ -559,14 +559,14 @@
   (figureGroupDefault greenOutline4
       (userData priority 4)
       (width -2)
-      (color 0 900 0)
+      (color 136 556 136)
       (fillPattern 1 1 "0")
       (borderPattern 1 "1")
   )
   (figureGroupDefault greenSolid4
       (userData priority 4)
       (width -2)
-      (color 0 900 0)
+      (color 136 556 136)
       (fillPattern 1 1 "1")
   )
   (figureGroupDefault orangeOutline4
@@ -692,14 +692,14 @@
   (figureGroupDefault greenOutline3
       (userData priority 3)
       (width -2)
-      (color 0 900 0)
+      (color 136 556 136)
       (fillPattern 1 1 "0")
       (borderPattern 1 "1")
   )
   (figureGroupDefault greenSolid3
       (userData priority 3)
       (width -2)
-      (color 0 900 0)
+      (color 136 556 136)
       (fillPattern 1 1 "1")
   )
   (figureGroupDefault orangeOutline3
