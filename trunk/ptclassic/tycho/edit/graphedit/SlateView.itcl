@@ -1,4 +1,4 @@
-##########################################################################
+>##########################################################################
 # Version: $Id$
 # Author: John Reekie
 #
@@ -63,7 +63,7 @@ class ::tycho::SlateView {
     method dtag {tag}
 
     # Get the id of an item given its name
-    method id {name} {return $_itemID($name)}
+    method id {name}
 
     # Add a new item
     method item {name spec args}
@@ -87,7 +87,7 @@ class ::tycho::SlateView {
     method moverelease {tag x y}
 
     # Get or set the name of an item given its id
-    method name {id {name {}}}
+    method  { {id {name {}}}
 
     # Handle change notification from the layout model
     method notify {method args}
@@ -134,7 +134,7 @@ class ::tycho::SlateView {
 #
 body ::tycho::SlateView::constructor {args} {
     # Evaluate options
-    eval itk_initialize $args
+    eval configure $args
     
     # Check correct usage
     if { $slate == "" } {
@@ -185,11 +185,27 @@ body ::tycho::SlateView::dtag {tag} {
 }
 
 ########################################################################
+#### id
+#
+# Return the id of an item given its name. If the id is unknown,
+# return the argument on the assumption that it's a valid canvas
+# tag.
+#
+body ::tycho::SlateView::id {name} {
+    if ![::info exists _itemID($name)] {
+        return $_itemID($name)
+    } else {
+        return $name
+    }
+}
+
+########################################################################
 #### item
 #
 # Add a new item to the view.
 #
 body ::tycho::SlateView::item {name spec args} {
+    # puts "::tycho::SlateView::item $name $spec $args"
     set id [eval $slate create $spec $args]
     set _itemID($name) $id
     set _nameof($id) $name
@@ -213,13 +229,13 @@ body ::tycho::SlateView::itemconfigure {name args} {
 body ::tycho::SlateView::load {layout {context {}}} {
     # Create items
     if { $context == "" } {
-    	# Top-level items
-    	foreach item [$layout names] {
-	    eval [list item $item \
-		    [$layout type $item]] \
-		    [$layout coords $item] \
-		    [$layout attributes $item]
-
+        # Top-level items
+        foreach item [$layout names] {
+            eval [list item $item \
+                    [$layout type $item]] \
+                    [$layout coords $item] \
+                    [$layout attributes $item]
+            
             # Recursive call to do nested items
             load $item
         }
@@ -249,6 +265,7 @@ body ::tycho::SlateView::move {tag x y} {
 #### moveclick
 #
 body ::tycho::SlateView::moveclick {tag x y} {
+    # puts "moveclick $tag"
     if { [::info exists _itemID($tag)] } {
         eval $slate moveclick $_itemID($tag) $x $y
     } else {
@@ -281,12 +298,39 @@ body ::tycho::SlateView::moverelease {tag x y} {
 ########################################################################
 #### name
 #
+# Get or set the name of an item. With no arguments, just return
+# the name of the given id if it's a valid id and it's been
+# previsouly registerd. If it's not a valid id, _assume_ that
+# it is intended as a tag and just return it. If it's an ID
+# that doesn't exists, throw an error.
+# With an argument and if the id is valid, register the name
+# with the id; throw an error if the id is invalid.
+#
 body ::tycho::SlateView::name {id {name {}}} {
     if { $name != "" } {
-    	set _nameof($id) $name
-    	set _itemID($name) $id
+        # Bind a name to an id
+        if [regexp {^[_0-9][0-9]*$} $id] {
+            # It's a valid id
+            set _nameof($id) $name
+            set _itemID($name) $id
+            return $name
+        } else {
+            error "Invalid id $id"
+        }
+    } else {
+        # Get a name
+        if [regexp {^[_0-9][0-9]*$} $id] {
+            # It's a valid id
+            if [::info exists _nameof($id)] {
+                return $_nameof($id)
+            } else {
+                error "Unknown id $id"
+            }
+        } else {
+            # Assume it's a valid tag
+            return $id
+        }
     }
-    return $nameof($id)
 }
 
 ########################################################################
@@ -366,7 +410,7 @@ body ::tycho::SlateView::subitem {context name spec args} {
 body ::tycho::SlateView::withtag {tag} {
     set result {}
     foreach id [$slate find withtag $tag] {
-	lappend result $nameof($id)
+	lappend result $_nameof($id)
     }
     return $result
 }
