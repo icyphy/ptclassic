@@ -35,6 +35,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
  * corresponding object doesnt exist, create it.  return a ptr to
  * the object in either case
  */
+/* Note that we use ANSI cpp here to substitute in the value of
+ * id into a literal string
+ */
 #define GET_ID_AND_PTR(id, ptr, type) \
     if (!oct_get_32(&id)) {\
 	return 0;\
@@ -46,7 +49,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 	ptr->contents = ptr->containers = NIL(struct chain);\
 	CLEAR_FLAGS(ptr);\
 	if (id != oct_new_id(ptr)) {\
-	    oct_error("Panic: Corrupted facet: id's out of sequence");\
+	    oct_error("Panic: Corrupted facet: %s's out of sequence",#id);\
 	    return 0;\
 	}\
     }
