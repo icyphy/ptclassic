@@ -34,10 +34,23 @@
 # Based on pp 344-346 of Harrison and McClellan's "Effective Tcl/Tk
 # Programming" book
 
+package require tycho.edit.graphedit
 package provide tycho.edit.pn 1.0
+
 global env auto_path
 set env(PN_LIBRARY) [file dirname [info script]]
 if { [lsearch -exact $auto_path $env(PN_LIBRARY)] == -1 } {
     lappend auto_path $env(PN_LIBRARY)
 }
+
+### MODE MAPPINGS
+::tycho::register extensions "pn" .pn
+
+### MODES
+::tycho::register mode "pn" \
+	-command {::tycho::view PNEdit -file {%s}} \
+	-viewclass ::tycho::PNEdit \
+	-label {Process Networks Simulation}  \
+	-category "graphics" \
+	-underline 0
 
