@@ -246,3 +246,35 @@ void AsmStar::prepareForScheduling() {
 	CGStar::prepareForScheduling();
 }
 
+void AsmStar::addRunCmd(const char* cmd,const char* cmd2 = NULL) {
+	((AsmTarget*)targetPtr)->addRunCmd(cmd);
+	if (cmd2 != NULL) ((AsmTarget*)targetPtr)->addRunCmd(cmd2);
+}
+
+void AsmStar::addMiscCmd(const char* cmd,const char* cmd2 = NULL) {
+	((AsmTarget*)targetPtr)->addMiscCmd(cmd);
+	if (cmd2 != NULL) ((AsmTarget*)targetPtr)->addRunCmd(cmd2);
+}
+
+void AsmStar::genRunCmd(CodeBlock& cb) {
+	const char* t = processCode(cb);
+	addRunCmd(t);
+}
+
+void AsmStar::genMiscCmd(CodeBlock& cb) {
+	const char* t = processCode(cb);
+	addMiscCmd(t);
+}
+
+// fire: prefix the code with a comment
+
+int AsmStar::fire() {
+	StringList code = "code from star ";
+	code += readFullName();
+	code += " (class ";
+	code += readClassName();
+	code += ")\n";
+	((AsmTarget*)targetPtr)->outputComment(code);
+	return CGStar::fire();
+}
+
