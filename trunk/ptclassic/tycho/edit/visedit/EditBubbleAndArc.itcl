@@ -874,7 +874,7 @@ body ::tycho::EditBubbleAndArc::deleteArc {arc} {
 body ::tycho::EditBubbleAndArc::mkNode {x y} {
     set oldx $x
     set oldy $y
-    set node_id [$slate create LabelledOval $x $y \
+    set node_id [$slate create LabeledOval $x $y \
 	    [expr $x+0.2] [expr $y+0.2] -outline brown -fill white]
 }
 
