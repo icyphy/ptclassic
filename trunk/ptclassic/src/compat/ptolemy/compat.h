@@ -357,11 +357,16 @@ extern int unlink(const char *);
 /* See also kernel/State.h */
 extern const int sys_nerr;
 extern const char *const sys_errlist[];
+extern int errno;
 #else
+#ifdef PT_NT4VC
+#include <stdlib.h>
+#else /* PT_NT4VC */
 extern int sys_nerr;
 extern char *sys_errlist[];
-#endif /* PTNBSD_386 */
 extern int errno;
+#endif /* PTNBSD_386 */
+#endif /* PT_NT4VC */
 #endif /* NEED_SYS_ERRLIST */
 
 #ifdef NEED_TIMEVAL
@@ -370,10 +375,6 @@ extern int errno;
 #include <winsock.h>
 #endif
 #endif /* NEED_TIMEVAL */
-
-#ifdef PT_NT4VC
-#define strcasecmp(a,b) stricmp((a),(b))
-#endif
 
 #ifdef PTNT
 /* src/kernel/TimeVal.cc uses timercmp */
