@@ -149,7 +149,7 @@ void pt_ofstream::open(const char* name, int mode, int prot) {
 	}
 	else if (fd > 0) {
 		rdbuf()->attach(fd);
-#ifdef __GNUG__
+#ifdef NEED_DONT_CLOSE
 		// this should not be needed: problem with libg++ 2.5
 		setf(ios::dont_close);
 #endif
