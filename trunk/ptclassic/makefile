@@ -46,6 +46,30 @@ sources depend:
 obj.$(ARCH):		MAKEARCH
 	csh -f MAKEARCH
 
+# This rule builds and installs gcc and tcl/tk from scratch, then octtools,
+# then everything else.
+# gcc source is distributed as a separate tar file
+# tcltk and octtools source are distributed as a separate tar file
+bootstrap: obj.$(ARCH) install_gnu install_tcltk install_octtools install
+
+.PHONY:	install_gnu install_tcltk install_octtools install
+
+# The gcc INSTALL file says:
+#     If you are building with a previous GNU C compiler, do not use
+#     `CC=gcc' on the make command or by editing the Makefile.  Instead,
+#     use a full pathname to specify the compiler, such as
+#     `CC=/usr/local/bin/gcc'.  This is because make might execute the
+#     `gcc' in the current directory before all of the compiler
+#     components have been built.
+# If you already have gcc, you will need to change this variable, or
+# building gcc/main.c may fail
+#GNU_BUILD_CC=/usr/tools/gnu/bin/gcc
+GNU_BUILD_CC=cc
+install_gnu:
+	$(MAKE) -f mk/scratch-srcs.mk CC=$(GNU_BUILD_CC) $(MFLAGS) gnu_all
+install_tcltk:
+	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) tcltk_all
+
 # Usually rebuilding vem and the octtools library is not done everytime.
 # Currently, vem will not run properly if it is built with gcc.
 OCT_CC=cc
@@ -54,9 +78,3 @@ octtools: obj.$(ARCH)
 install_octtools: obj.$(ARCH)
 	cd obj.$(ARCH)/octtools; $(MAKE) CC=$(OCT_CC) $(MFLAGS) install
 
-# This rule builds and installs gcc and tcl/tk from scratch, then octtools,
-# then everything else.  gcc and tcl/tk source are usually distributed as a
-# separate tar file. 
-bootstrap: obj.$(ARCH)
-	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) install
-	$(MAKE) $(MFLAGS) install_octtools install
