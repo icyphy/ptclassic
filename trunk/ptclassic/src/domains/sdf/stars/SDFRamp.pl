@@ -8,7 +8,7 @@ incrementing by step size "step" (default 1) on each firing.
 	version {$Id$}
 	author { D. G. Messerschmitt }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

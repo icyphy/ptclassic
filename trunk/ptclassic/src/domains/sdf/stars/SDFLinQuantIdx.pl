@@ -12,7 +12,7 @@ This integer output is useful for stars that need an integer input, such as Thor
 	}
 	author { Asawaree Kalavade }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

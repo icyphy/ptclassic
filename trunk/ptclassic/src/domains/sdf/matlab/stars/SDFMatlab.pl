@@ -8,7 +8,7 @@ Base star for Matlab interface stars in the SDF domain.
 	author { Brian L. Evans }
 	acknowledge { Steve L. Eddins, The MathWorks Inc., Natick, MA }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
