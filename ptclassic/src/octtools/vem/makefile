@@ -42,8 +42,6 @@ include $(CONFIG)
 # Oct Tools libraries.
 OCTLIBS = -loh -lrpc -llist -ltr -lutility -lst -lerrtrap -luprintf -lport
 
-LIBS	= $(OCTLIBS)
-
 # We use "frozen" Oct libraries so we do not depend on them.  Mistake?
 LIBFILES = 
 
@@ -55,8 +53,8 @@ VERSION=0.5-development
 	$(CPLUSPLUS) $(GPPFLAGS) $(INCL) -c $<
 
 all: vem vem.debug
-vem: include $(OBJECTS) $(LIBS) linkvem
-vem.debug: include $(OBJECTS) $(LIBS) linkvem.debug
+vem: include $(OBJECTS) linkvem
+vem.debug: include $(OBJECTS) linkvem.debug
 
 DIRS=bags buffers dialogs dispatch doc drawing drs lib main \
 	options patterns physical properties rpc schematic select strings \
@@ -88,6 +86,7 @@ LIBS=bags/libbags.a buffers/libbuffers.a \
 	strings/libstrings.a symbolic/libsymbolic.a \
 	utility/libutility.a windows/libwindows.a 
 
+# All the .o files in the LIBS above.
 OBJECTS=bags/bags.o buffers/bufinternal.o \
 	buffers/change.o buffers/general.o buffers/layers.o \
 	buffers/open.o buffers/save.o dialogs/vemDMhelp.o \
@@ -169,14 +168,14 @@ _vem:
 	done
 
 
-linkvem.debug: $(OBJECTS) $(LIBS)
+linkvem.debug: $(OBJECTS)
 	$(CC) -g -o vem.debug $(OBJECTS) $(VEMLIBS)
-linkvem: $(OBJECTS) $(LIBS)
+linkvem: $(OBJECTS)
 	$(CC) -o vem $(OBJECTS) $(VEMLIBS)
 
-linkvem.debug.gcc: $(OBJECTS) $(LIBS)
+linkvem.debug.gcc: $(OBJECTS)
 	$(LINKER) $(LINKFLAGS_D) -g -o vem.debug $(OBJECTS) $(VEMLIBS)
-linkvem.gcc: $(OBJECTS) $(LIBS)
+linkvem.gcc: $(OBJECTS)
 	$(LINKER) $(LINKFLAGS) -o vem $(OBJECTS) $(VEMLIBS)
 
 OCTBINDIR =	$(OCTTOOLS)/bin.$(ARCH)
