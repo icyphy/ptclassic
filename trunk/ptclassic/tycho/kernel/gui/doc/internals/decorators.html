@@ -219,7 +219,7 @@ The ToolBar is a bar designed to be placed along the top of
 top-level windows. It contains a row of buttons that make
 commonly-used functions highly visible to the inexperienced
 user. It can also display entry widgets below the buttons -- these
-are typically used when the temporary mature of the StatusBar
+are typically used when the temporary nature of the StatusBar
 display is not sufficient, or when direct user input is desired
 without popping up a dialog box (or both!).
 
@@ -244,7 +244,6 @@ $fr.tb button foo -description "The first button" &#92
 $fr.tb button bar -description "The second button"   &#92
        -text "Push Me Too" &#92
        -command {::tycho::post {Thanks again!}}
-set bogus ""
 </pre></tcl>
 
 Notice that the button description is displayed in the
@@ -265,7 +264,6 @@ To add entry widgets to the toolbar, do this:
 
 <tcl quiet><pre>
 $fr.tb entry thing "Enter something here" "Start with" {::tycho::post}
-set bogus ""
 </pre></tcl>
 
 If you press the Return key while in the entry widget, the contents of the
