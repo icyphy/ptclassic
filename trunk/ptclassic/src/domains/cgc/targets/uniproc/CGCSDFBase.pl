@@ -5,7 +5,7 @@ defstar {
     desc { Base comm star b/w CGC & SDF  }
     author { Jose Luis Pino }
     copyright {
-Copyright (c) 1995-%Y% The Regents of the University of California.
+Copyright (c) 1995-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
