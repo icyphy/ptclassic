@@ -32,8 +32,8 @@ mkdir /tmp /bin /etc
 cp /Cygnus/cygwin-b20/H-i586-cygwin32/bin/bash.exe /bin/sh.exe
 cp /Cygnus/cygwin-b20/H-i586-cygwin32/bin/bash.exe /bin/bash.exe
 cp /Cygnus/cygwin-b20/H-i586-cygwin32/bin/rm.exe /bin
-mkpasswd -l -g &gt; /etc/passwd
-mkgroup -l &gt; /etc/group
+mkpasswd -d -l -g &gt; /etc/passwd
+mkgroup -d -l &gt; /etc/group
 </pre>
 (<CODE>/bin/bash.exe</CODE> is used when we 
 <a href="ptntbugs.html#loadingastarfails">load a star</a>)
@@ -46,7 +46,7 @@ PTARCH nt4
 CC gcc
 </pre>
 Your <CODE>PATH</CODE> should include
-<CODE>%PTOLEMY%\bin:%PTOLEMY%\bin.nt4</CODE>
+<CODE>%PTOLEMY%\bin;%PTOLEMY%\bin.nt4</CODE>
 
 
 <li> In a bash shell, do
@@ -127,12 +127,18 @@ without any arguments.  The Cygwin faq also covers these programs.
 If you do not have <CODE>/etc/passwd</CODE>, then you will get errors
 from <CODE>GetTildePath()</CODE> when trying to create an icon.
 (Reported by Sascha Schwarz &lt;s_schwa@informatik.uni-kl.de&gt;)
+ <br>The <CODE>-d</CODE> option will include all the users in
+the domain.  Tim Kurzweg &lt;tim@ee.pitt.edu&gt; reports
+that <a href="ptntbugs.html#mkgroup"><CODE>mkgroup</CODE></a>
+sometimes not place the user
+administrator in the administrator group.
 
 <li> Download X11 for b20 from 
-<a href="http://www.xemacs.freeserve.co.uk/"><CODE>http://www.xemacs.freeserve.co.uk/</CODE></a>
+<a href="http://dao.gsfc.nasa.gov/software/grads/win32/X11R6.3/"><CODE>http://dao.gsfc.nasa.gov/software/grads/win32/X11R6.3/</CODE></a>
 
  <br> Below are other possibilities:
 <menu>
+<li> <a href="http://www.xemacs.freeserve.co.uk/"><CODE>http://www.xemacs.freeserve.co.uk/</CODE></a>
 <li> <a href="http://sourceware.cygnus.com/cygwin/links.html">Cygwin links to software ports</a>
 <li> X11 for b19, b20 <a href="ftp://www.lexa.ru/pub/domestic/sos/ports/"><CODE>ftp://www.lexa.ru/pub/domestic/sos/ports/</CODE></a>
 <li> X11 for b19<a href="http://dao.gsfc.nasa.gov/software/grads/win32/X11R6.3"><CODE>http://dao.gsfc.nasa.gov/software/grads/win32/X11R6.3</CODE></a>.
@@ -140,13 +146,10 @@ from <CODE>GetTildePath()</CODE> when trying to create an icon.
 
 
 <li> Install X11R6.4:
-The <CODE>bunzip2</CODE> executable is included in the Cygwin distribution.
-
 <pre>
 mkdir /usr
 cd /usr
-bunzip2 /tmp/cygwin-b20-x11_tar.bz2
-tar -xf /tmp/cygwin-b20-x11_tar
+tar -xf /tmp/B20_X11R6_4_tar.gz
 </pre>
 
 
@@ -171,7 +174,8 @@ and then running <CODE>/usr/X11R6.4/bin/xclock</CODE>.
 download
 <a href="http://www.javasoft.com/products/jdk/1.1/index.html">JDK1.1</a>.
 The JDK should be installed in <CODE>c:/jdk1.1.<I>n</I></CODE>
-and you will need to update your path.  
+and you will need to update your path to include 
+<CODE>c:/jdk1.1.n/bin</CODE>
 
  <br>For a prebuilt X11 pxgraph binary, see:
 <a href="ftp://ptolemy.eecs.berkeley.edu/pub/misc/pxgraph/index.html"><CODE>ftp://ptolemy.eecs.berkeley.edu/pub/misc/pxgraph/index.html</CODE></a>
@@ -213,8 +217,10 @@ For example:
 /users/ptolemy/tcltk/tcl/man/mann/toplevel.n
 </pre>
 In the short term, you can ignore the above errors.
-
-
+ <br>
+If you do not have enough space for Ptolemy on your disk, you may
+be able to use the Cygwin <a href="ptnthints.html#mount"><CODE>mount</CODE></a>
+command to mount a disk with enough space.
 
 <li> You may need to do:
 <pre>
@@ -269,7 +275,7 @@ In the NT System Environment control panel, set your <CODE>PATH</CODE>
 to include
 
 <pre>
-%PTOLEMY%\bin:%PTOLEMY%\bin.nt4
+%PTOLEMY%\bin;%PTOLEMY%\bin.nt4
 </pre>
 Note that if you are setting variables directly in bash, then you should
 not use the DOS <CODE>%foo%</CODE> syntax, instead use <CODE>$foo</CODE>.
