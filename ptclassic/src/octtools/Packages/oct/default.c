@@ -1,7 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -28,6 +28,14 @@ static char SccsId[]="$Id$";
 #include "port.h"
 #include "internal.h"
 #include "io.h"
+#include "chain.h"
+#include "io_procs.h"
+#include "mark.h"
+#include "oct_id.h"
+#include "oct_utils.h"
+
+#include "default.h"
+
 /* 
  * Here the basic behavior of objects is defined.  Most of the actual
  * objects just modify a few of the operations defined here and 
@@ -71,7 +79,7 @@ octStatus oct_get_container_by_default();
 octStatus oct_gen_contents_default(), oct_gen_containers_default();
 octStatus oct_gen_contents_offset_default();
 octStatus oct_gen_first_content_default(), oct_gen_first_container_default();
-octStatus default_read_fields(), default_write_fields();
+static octStatus default_read_fields(), default_write_fields();
 octStatus oct_write_object(), oct_read_object();
 octStatus oct_subclass_responsibility();
 
@@ -106,6 +114,7 @@ octStatus oct_init_default_desc()
     oct_default_desc.fix_fields_func = (int (*)()) 0;
     oct_default_desc.name_offset = ILLEGAL_OFFSET;
     oct_default_desc.bb_offset = ILLEGAL_OFFSET;
+    return OCT_OK;
 }
 
 octStatus oct_create_default(desc, object, new_p)
@@ -172,6 +181,7 @@ int32 old_xid,old_id;
     return OCT_OK;
 }
 
+octStatus
 oct_unmodify_default(ptr,new)
 generic *ptr;
 struct octObject *new;
@@ -185,6 +195,7 @@ struct octObject *new;
     return OCT_OK;
 }
 
+octStatus
 oct_modify_default(ptr, new)
 generic *ptr;
 struct octObject *new;
@@ -198,6 +209,7 @@ struct octObject *new;
     return OCT_OK;
 }
 
+octStatus
 oct_free_default(obj)
 generic *obj;
 {
@@ -210,6 +222,7 @@ generic *obj;
 }
 
 /*ARGSUSED*/
+octStatus
 oct_uncreate_default(obj, by_user)
 generic *obj;
 int by_user;
@@ -232,7 +245,7 @@ int by_user;
 
 
 /*ARGSUSED*/
-oct_delete_default(obj, by_user)
+octStatus oct_delete_default(obj, by_user)
 generic *obj;
 int by_user;
 {
@@ -274,6 +287,7 @@ generic *obj;
  * the external id) and then the object specific fields
  */
 
+octStatus
 oct_write_object(obj)
 generic *obj;
 {
