@@ -84,16 +84,16 @@ SDFSchedule :: printVerbose () const {
 
 // runs the number of times indicated by numIters.
 int SDFScheduler :: run () {
-        if (!galaxy()) {
-            Error::abortRun("No galaxy to run");
+        if (! galaxy()) {
+            Error::abortRun("SDF Scheduler has no galaxy to run");
             return FALSE;
         }
 	if (haltRequested()) {
-            Error::abortRun(*galaxy(), ": Can't continue after run-time error");
+            Error::abortRun(*galaxy(), "Can't continue after run-time error");
 	    return FALSE;
 	}
 	if (invalid) {
-	    if (galaxy()) Error::abortRun(*galaxy(),
+	    Error::abortRun(*galaxy(),
 	            "Can't run because the setup is invalid");
 	    return FALSE;
 	}
@@ -132,10 +132,11 @@ extern int warnIfNotConnected (Galaxy&);
 	////////////////////////////
 
 void SDFScheduler :: setup () {
-	if (!galaxy()) {
-		Error::abortRun("SDFScheduler: no galaxy!");
+	if (! galaxy()) {
+		Error::abortRun("SDF Scheduler has no galaxy defined");
 		return;
 	}
+
 	numItersSoFar = 0;
 	numIters = 1;			// reset the member "numIters"
 	clearHalt();
@@ -178,12 +179,14 @@ void SDFScheduler :: setup () {
 
 int SDFScheduler::prepareGalaxy()
 {
+	if (! galaxy()) return FALSE;
 	galaxy()->initialize();
 	return TRUE;
 }
 
 int SDFScheduler::checkConnectivity()
 {
+	if (! galaxy()) return FALSE;
 	if (warnIfNotConnected (*galaxy())) {
                 invalid = TRUE;
                 return FALSE;
@@ -203,6 +206,8 @@ int SDFScheduler::checkConnectivity()
 
 int SDFScheduler::checkStars()
 {
+	if (! galaxy()) return FALSE;
+
 	DFGalStarIter nextStar(*galaxy());
 	DataFlowStar* s;
 	while ((s = nextStar++) != 0) {
@@ -234,6 +239,8 @@ int SDFScheduler::checkStars()
 // wormhole boundary is restrained to transfer only one sample at a time.
 
 void SDFScheduler::adjustSampleRates() {
+	if (! galaxy()) return;
+
 	BlockPortIter nextPort(*galaxy());
 	PortHole* p;
 	while ((p = nextPort++) != 0) {
@@ -346,7 +353,8 @@ int SDFScheduler::addIfWeCan (DataFlowStar& star, int defer) {
 	////////////////////////////
 
 int SDFScheduler :: repetitions () {
-	
+	if (! galaxy()) return FALSE;
+
 	// The following iteration occurs exactly as many times as
 	// there are blocks in the universe.  This way we can step
 	// through all the connected subgraphs.
