@@ -42,7 +42,7 @@ include $(CONFIG)
 
 HDRS		= cp.h \
 		cp_internal.h \
-		cp_procs.c
+		cp_procs.h
 
 LIBCSRCS	= cp.c \
 		cp_procs.c \
@@ -55,6 +55,8 @@ OBJS =		$(LIBCSRCS:.c=.o)
 LIB = 		libcp.$(LIBSUFFIX)
 
 EXPHDR =	cp.h
+
+MISC_FILES =	cp.doc
 
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
