@@ -377,7 +377,7 @@ body ::tycho::IncrCanvas::constructor {args} {
 # need to do that (for testing, say ... :-/), use
 # <pre>
 #    $slate addtag current withtag [$slate primary $item]
-# <pre>
+# </pre>
 #
 body ::tycho::IncrCanvas::addtag {add mode args} {
     # Find all items using find{}, and then

@@ -1113,21 +1113,26 @@ body ::tycho::Slate::selector {args} {
 # <ul>
 # <li><b>rectangle</b>: A rectangular shape with four coordinates,
 # being the top, left, bottom, and right coordinates. Items
-# with this shape are manipulated by the <a href="Rectangle.html"> class.
+# with this shape are manipulated by the
+# <a href="Rectangle.html">Rectangle</a> class.
 # <li><b>oval</b>: An oval shape with four coordinates,
 # being the top, left, bottom, and right coordinates. Items
-# with this shape are manipulated by the <a href="Oval.html"> class.
+# with this shape are manipulated by the
+# <a href="Oval.html"> Rectangle</a> class.
 # <li><b>line</b>: A line with at least four coordinates, where
 # each pair are the x and y coordinates of a vertex. Items
-# with this shape are manipulated by the <a href="Line.html"> class.
+# with this shape are manipulated by the
+# <a href="Line.html">  Rectangle</a> class.
 # <li><b>polygon</b>: A polygon with at least six coordinates, where
 # each pair are the x and y coordinates of a vertex. The last
 # pair may or may not be the same as the first. Items
-# with this shape are manipulated by the <a href="Polygon.html"> class.
+# with this shape are manipulated by the
+# <a href="Polygon.html">  Rectangle</a> class.
 # <li><b>point</b>: An item with just two coordinates, which
 # represent the coordinates of a particular point on the item.
 # By default, this is usually the center. Items
-# with this shape are manipulated by the <a href="Point.html"> class.
+# with this shape are manipulated by the
+# <a href="Point.html">  Rectangle</a> class.
 # </ul>
 #
 body ::tycho::Slate::shape {id} {
