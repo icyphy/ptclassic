@@ -43,6 +43,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // in other contexts)
 
 void DynamicGalaxy :: zero () {
+	// remove nodes
+	nodes.deleteAll();
 	// delete component blocks
 	deleteAllBlocks();
 	// delete component ports and multiports.
