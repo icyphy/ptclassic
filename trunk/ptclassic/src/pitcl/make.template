@@ -84,6 +84,8 @@ NON_LIB_SRCS =	ptclAppInit.cc
 TCL_SRCS =	gendoc.tcl
 SRCS =		$(LIB_SRCS) $(LIB_CSRCS) $(NON_LIB_SRCS) $(TCL_SRCS)
 
+MISC_FILES =		doc test
+
 # 'make realclean' should remove these
 REALCLEAN_STUFF =	doc/codeDoc/ptcl.html
 
