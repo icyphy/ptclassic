@@ -51,8 +51,8 @@ char *def;                      /* Default value */
 int excluded(name)
 char* name;
 {
-    return (!strncmp(name,"$PTOLEMY/lib/technology/ptolemy/con",35) ||
-	    !strncmp(name,"$PTOLEMY/lib/technology/ptolemy/delay",37));
+    return (!strncmp(name,"$PTOLEMY/lib/colors/ptolemy/con",31) ||
+	    !strncmp(name,"$PTOLEMY/lib/colors/ptolemy/delay",33));
 }
 
 char *expandPathName(name)
