@@ -203,7 +203,7 @@ int DLParProcs :: compareCost(DLNode* node, int* earliest) {
 	// prepare the sortest list of the finish times of the ancestors.
 	prepareComm(node);
 
-	int leng; 
+	int leng = 0; 
 	if (!node->myMaster()) leng = node->getExTime();
 
 	int ix = 0;	// candidate array index
@@ -293,7 +293,7 @@ void DLParProcs :: scheduleBig(DLNode* node, int when, IntArray& avail)
 	// schedule the idle node and the profile into the processors.
 	int shift = pf->frontIdleLength(avail);
 
-	int saveStart, saveFinish = 0;
+	int saveStart = 0, saveFinish = 0;
 	for (int i = optNum - 1; i >= 0; i--) {
 		// calculate time durations.
 		int t = shift + when + pf->getStartTime(i);
