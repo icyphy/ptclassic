@@ -32,12 +32,12 @@
 
 
 # Itcl2.1 shell: [incr Tcl] sh  (tclsh + namespaces)
-#ISH =	$(PTOLEMY)/tcltk/itcl.$(PTARCH)/bin/ish
-ISH =	ish
+#ITCLSH =	$(PTOLEMY)/tcltk/itcl.$(PTARCH)/bin/itclsh
+ITCLSH =	itclsh
 
 # Create tclIndex from .tcl and .itcl files
 tclIndex: $(TCL_SRCS) $(ITCL_SRCS)
 	@echo "Updating tclIndex"
 	rm -f $@
-	echo 'set auto_path [linsert $$auto_path 0 [info library] ]; auto_mkindex . $(TCL_SRCS) $(ITCL_SRCS)' | $(ISH)
+	echo 'set auto_path [linsert $$auto_path 0 [info library] ]; auto_mkindex . $(TCL_SRCS) $(ITCL_SRCS)' | $(ITCLSH)
 
