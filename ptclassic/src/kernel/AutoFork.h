@@ -49,7 +49,7 @@ class PortHole;
 
 class AutoFork {
 public:
-	AutoFork(Geodesic& g) : geo(g), forkStar(0), forkOutput(0) {}
+	AutoFork(Geodesic& g);
 	~AutoFork();
 	// attach source or destination to the autofork
 	PortHole* setSource(GenericPort&, int delay = 0);
@@ -59,6 +59,8 @@ private:
 	Geodesic& geo;
 	// associated automatically inserted fork star
 	Block* forkStar;
+	// points to input of fork
+	PortHole* forkInput;
 	// points to output multiport of fork
 	MultiPortHole* forkOutput;
 	// cruft used for generating names for autoforks
