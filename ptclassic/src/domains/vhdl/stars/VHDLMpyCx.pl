@@ -22,10 +22,6 @@ defstar {
   constructor {
     noInternalState();
   }
-  codeblock (std) {
-    $ref(output) $assign(output) $interOp(*, input);
-    $ref(output) $assign(output) $interOp(*, input);
-  }
   go {
     StringList out;
 
@@ -42,6 +38,16 @@ defstar {
       StringList reA, imA, reB, imB;
       StringList rere, imim, reim, imre;
       StringList rediff, imsum;
+      reA = "reA";
+      imA = "imA";
+      reB = "reB";
+      imB = "imB";
+      rere = "rere";
+      imim = "imim";
+      reim = "reim";
+      imre = "imre";
+      rediff = "rediff";
+      imsum = "imsum";
 
       out << "$temp(" << rediff;
       out << input.numberPorts();
@@ -60,21 +66,6 @@ defstar {
       out << ";\n";
 
       for (int i = input.numberPorts() - 2 ; i >= 0 ; i--) {
-	reA = "reA";
-	imA = "imA";
-	reB = "reB";
-	imB = "imB";
-	rere = "rere";
-	imim = "imim";
-	reim = "reim";
-	imre = "imre";
-	rediff = "rediff";
-	imsum = "imsum";
-
-	out << "$refCx(input#";
-	out << i+1;
-	out << ",real)";
-
 	// handle case: if one input, vs if more than one input
 
 	out << "$temp(" << reA;
@@ -145,7 +136,7 @@ defstar {
 	out << ",float)";
 	out << ";\n";
 
-	out << "$(temp" << imre;
+	out << "$temp(" << imre;
 	out << i+1;
 	out << ",float) := ";
 	out << "$temp(" << imA;
@@ -182,8 +173,19 @@ defstar {
 	out << ";\n";
 	
       }
+      out << "$refCx(output,real) $assign(output) ";
+      out << "$temp(" << rediff;
+      out << 1;
+      out << ",float)";
+      out << ";\n";
+
+      out << "$refCx(output,imag) $assign(output) ";
+      out << "$temp(" << imsum;
+      out << 1;
+      out << ",float)";
+      out << ";\n";
     }
     
-    addCode(std);
+    addCode(out);
   }
 }

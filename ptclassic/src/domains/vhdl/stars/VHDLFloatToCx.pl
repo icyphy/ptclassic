@@ -42,7 +42,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  for (int i = 0; i < int(numSample); i++) {
 	    out << "$refCx(output, ";
 	    out << -i;
-	    out << ", real) $assign(output) $refCx(input, ";
+	    out << ", real) $assign(output) $ref(input, ";
 	    out << -i;
 	    out << ");\n";
 	    out << "$refCx(output, ";
