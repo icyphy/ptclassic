@@ -46,7 +46,8 @@ be registered to provide for an arbitrary action when this bit is set.
 
 The poll function, if enabled, is called between each action function
 and when the flag bits are checked.  It can be used as an X event loop,
-for example.
+for example.  The poll flag may be set via a timer, or manually.
+Polling functions added by Alan Kamas, 1/95
 
 **************************************************************************/
 
@@ -73,7 +74,10 @@ typedef void (*SIG_PF)(int);
 #include "SimAction.h"
 #include "SimControl.h"
 #include "PtGate.h"
+#include <sys/time.h>
 #include <signal.h>
+
+extern "C" int setitimer( int, struct itimerval *, struct itimerval *);
 
 // declare action list stuff.
 SimActionList* SimControl::preList = 0;
@@ -156,10 +160,18 @@ void SimControl::processFlags() {
 			flags |= error;
 	}
 	if ((flags & poll) != 0) {
-		// if onPoll is set, call the polling function.
-		// optionally turn polling off.
-		if (onPoll && !onPoll())
+		// check to see if a polling function is defined
+		if (onPoll) {
+		    // polling function defined.  Reset the polling
+		    // flag only if the polling function has failed
+		    // otherwise it is assumed that the polling function
+		    // will handle resetting the flag.
+		    if (!onPoll()) 
 			flags &= ~poll;
+		} else {
+		    // There is no polling function defined.  Reset the flag.
+		     flags &= ~poll;
+		}
 	}
 }
 
@@ -180,8 +192,14 @@ void SimControl::declareErrorHalt ()
 }
 	
 void SimControl::clearHalt () {
+	// turns off the halt and error flag bits
+	// NOTE: it does not turn off either the interrupt or the poll
+	// flag.  A previous version of clearHalt cleared ALL flags.
+	// any old code that depends upon clearHalt to clear flags other 
+	// than error or halt will fail.
 	CriticalSection region(gate);
-	flags = 0;
+	flags &= ~halt;
+	flags &= ~error;
 }
 
 SimActionList::SimActionList() {}
@@ -193,9 +211,6 @@ SimActionList::~SimActionList() {
 		LOG_DEL; delete a;
 	}
 }
-
-
-
 
 
 
@@ -234,12 +249,37 @@ SimHandlerFunction SimControl::setInterrupt(SimHandlerFunction f) {
 	return ret;
 }
 
+        // Set the Poll Flag true
+void SimControl::setPollFlag() {
+        flags |= poll;
+}
+	
 	// register a function to be called if the poll flag is set.
 	// Returns old handler if any.
-SimHandlerFunction SimControl::setPoll(SimHandlerFunction f) {
+SimHandlerFunction SimControl::setPollAction(SimHandlerFunction f) {
+        CriticalSection region(gate);
 	SimHandlerFunction ret = onPoll;
 	onPoll = f;
-	flags |= poll;
+	flags |= poll;		// Makes sure onPoll can get called 
 	return ret;
+}
+
+	// use the system timer to set the poll flag at the future time
+	// specified by the passed parameters.
+	// To make this code as portable as possible, only "basic" system
+	// calls are used here.
+void SimControl::setPollTimer( int seconds, int micro_seconds ) {
+        CriticalSection region(gate);
+	// reset the timer - this cancels any current timing in progress
+        struct itimerval i;
+	i.it_interval.tv_sec = i.it_interval.tv_usec = 0;
+        i.it_value.tv_sec = seconds;
+        i.it_value.tv_usec = micro_seconds;
+	// Turn on the poll flag when the timer expires
+	signal(SIGALRM, setPollFlag);
+	// Turn off the poll flag until the timer fires
+	flags &= ~poll;
+	// Start the timer
+	setitimer(ITIMER_REAL, &i, 0);
 }
 
