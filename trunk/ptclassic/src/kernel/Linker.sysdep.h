@@ -87,8 +87,8 @@ const int linkingNotSupported =
 // defined(sun)
 #define DLOPEN_FLAGS RTLD_LAZY
 #endif // PTLINUX
-#endif // PTSOL2
-#endif // PTSOL2 || PTSUN4
+#endif // PTSOL2 || PTALPHA
+#endif // PTSVR4_STYLE_LINKING
 
 #ifdef __GNUG__
 #if defined(PTSOL2) || defined(PTIRIX5) || defined(PTLINUX_ELF) || defined (PTSVR4)
