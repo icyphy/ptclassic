@@ -66,22 +66,19 @@ body ::tycho::EditStack::constructor {args} {
     markUnmodified
 
     # Remove irrelevant capabilities from the menus.
-    set fm $itk_component(fileMenu)
-    $fm delete "Switch File..."
-    $fm delete "Insert..."
-    $fm delete "Save"
-    $fm delete Reload
-    $fm delete "Revision Control..."
+    disableMenuItem  "Switch File..." File
+    disableMenuItem  "Insert..." File
+    disableMenuItem  "Save" File
+    disableMenuItem  Reload File
+    disableMenuItem  "Revision Control..." File
 
-    set em $itk_component(editMenu)
-    $em delete "Undo/Redo"
-    $em delete "Cut"
-    $em delete "Paste"
+    disableMenuItem "Undo/Redo" Edit
+    disableMenuItem "Cut" Edit
+    disableMenuItem "Paste" Edit
 
-    set fm $itk_component(formatMenu)
-    $fm delete "Fill Region"
-    $fm delete "Right Fill Column"
-    $fm delete "Set Fill Prefix"
+    disableMenuItem "Fill Region" Format
+    disableMenuItem "Right Fill Column" Format
+    disableMenuItem "Set Fill Prefix" Format
 }
 
 ###################################################################

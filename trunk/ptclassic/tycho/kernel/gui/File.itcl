@@ -1,7 +1,7 @@
 # Definition of a basic window with a menu bar and dismiss button
 #
 # @Author: Edward A. Lee
-# @Contributors: Joel King
+# @Contributors: Joel King, Farhana Sheikh
 #
 # @Version: $Id$
 #
@@ -206,6 +206,9 @@ class ::tycho::File {
     # Query the user for another file to edit in the same window.
     method altFile {}
 
+    # Save a backup file and arrange to be called again later.
+    method autoSave {}
+
     # In derived classes, clear the data being displayed or edited.
     method clear {} {}
 
@@ -298,6 +301,36 @@ class ::tycho::File {
 	    {baseFilename {}}} {}
 	
     ##########################################################################
+    ####                  protected methods                               ####
+
+    # Add a menu to the menu bar.
+    protected method addMenu {name side before args}
+    
+    # Add a menu item to the specified menu.
+    protected method addMenuItem {itemName inMenu args}
+
+    # Add a separator to the specified menu.
+    protected method addMenuSeparator {menu args}
+
+    # Disable the item in the specified menu.
+    protected method disableMenuItem {itemName inMenu}
+
+    # Enable the item in the specified menu.
+    protected method enableMenuItem {itemName inMenu}
+
+    # Insert a menu item to the specified menu before the specified item.
+    protected method insertMenuItem {itemName before inMenu args}
+
+    # Remove the specified menu.
+    protected method removeMenu {menu}
+
+    # Remove the item from the specified menu.
+    protected method removeMenuItem {itemName inMenu}
+
+    # Return the data to be saved. Redefine in derived classes.
+    protected method saveText {}
+
+    ##########################################################################
     ####                         protected variables                      ####
 
     # FIXME: This should be removed when Itk is fixed to understand
@@ -319,22 +352,16 @@ class ::tycho::File {
     protected variable previousfile {}
 
     ##########################################################################
-    ####                  protected methods and procedures                ####
-
-    # Add the specified file to the window menu entry.
-    protected method addWindowMenuEditor {desc command}
-
-    # Save a backup file and arrange to be called again later.
-    protected method autoSave {}
-
-    # Check for auto-save or crash-recovery files, and return the file to open.
-    protected proc checkForAutoSaveFiles {filename} {}
+    ####                  private methods                                 ####
 
     # Remove the backup file that gets automatically created periodically.
-    protected method removeBackupFiles {}
+    private method removeBackupFiles {}
 
-    # Return the data to be saved. Redefine in derived classes.
-    protected method saveText {}
+    ##########################################################################
+    ####                  private procedures                              ####
+
+    # Check for auto-save or crash-recovery files, and return the file to open.
+    private proc checkForAutoSaveFiles {filename} {}
 
     ##########################################################################
     ####                         private variables                        ####
@@ -456,154 +483,70 @@ body ::tycho::File::constructor {args} {
 	    -before $itk_component(childsite)
     
     # Insert items in the menubar.
-    # First, a file menu.
-    itk_component add fileMenuButton {
-	menubutton $itk_component(menuFrame).file \
-		-text File \
-		-underline 0 \
-		-menu $itk_component(menuFrame).file.menu
-    } {
-	keep -font -activebackground -cursor -activeforeground \
-		-background -foreground -highlightbackground \
-		-highlightcolor
-    }
-    
-    # Next a window menu
-    itk_component add windowMenuButton {
-	menubutton $itk_component(menuFrame).window \
-		-text Window \
-		-underline 0 \
-		-menu $itk_component(menuFrame).window.menu
-    } {
-	keep -font -activebackground -cursor -activeforeground \
-		-background -foreground -highlightbackground \
-		-highlightcolor
-    }
-    
-    # Next, the help menu.
-    itk_component add helpMenuButton {
-	menubutton $itk_component(menuFrame).help \
-		-text Help \
-		-underline 0 \
-		-menu $itk_component(menuFrame).help.menu
-    } {
-	keep -font -activebackground -cursor -activeforeground \
-		-background -foreground -highlightbackground \
-		-highlightcolor
-    }
-    
-    # Arrangement of menu items
-    pack $itk_component(fileMenuButton) -side left
-    pack $itk_component(windowMenuButton) -side left
-    pack $itk_component(helpMenuButton) -side right
-    
-    ##################################################################
+    addMenu File left {} -underline 0
+    addMenu Window left {} -underline 0
+    addMenu Help right {} -underline 0
+
+    #
     # File menu contents
     #
-    itk_component add fileMenu {
-	menu $itk_component(fileMenuButton).menu -tearoff 0
-    } {
-	keep -font -activebackground -cursor -activeforeground \
-		-background -foreground
-    }
     
-    $itk_component(fileMenu) add command \
-	    -label {Open...} \
-	    -underline 0 \
-	    -accelerator "C-x C-f" \
+    addMenuItem {Open...} File -underline 0 -accelerator "C-x C-f" \
 	    -command "::tycho::File::openWin"
     
-    $itk_component(fileMenu) add command \
-	    -label "Switch File..."\
-	    -underline 4 \
-	    -accelerator "C-x C-v" \
+    addMenuItem "Switch File..." File -underline 4 -accelerator "C-x C-v" \
 	    -command "$this altFile"
     
-    $itk_component(fileMenu) add command \
-	    -label {Insert...}\
-	    -underline 0 \
-	    -accelerator "C-x i" \
+    addMenuItem {Insert...} File -underline 0 -accelerator "C-x i" \
 	    -command "$this insertFile"
     
-    $itk_component(fileMenu) add command \
-	    -label Save \
-	    -underline 0 \
-	    -accelerator "C-x C-s" \
+    addMenuItem Save File -underline 0 -accelerator "C-x C-s" \
 	    -command "$this save"
     
-    $itk_component(fileMenu) add command \
-	    -label {SaveAs...} \
-	    -underline 4 \
-	    -accelerator "C-x C-w" \
+    addMenuItem {SaveAs...} File -underline 4 -accelerator "C-x C-w" \
 	    -command "$this saveAs"
     
-    $itk_component(fileMenu) add command \
-	    -label {Print...} \
-	    -underline 0 \
-	    -accelerator "C-x p" \
+    addMenuItem {Print...} File -underline 0 -accelerator "C-x p" \
 	    -command "$this print"
     
-    $itk_component(fileMenu) add command \
-	    -label Evaluate \
-	    -underline 0 \
-	    -accelerator "C-x C-r" \
+    addMenuItem Evaluate File -underline 0 -accelerator "C-x C-r" \
 	    -command "$this evaluate"
     
-    $itk_component(fileMenu) add command \
-	    -label Reload \
-	    -underline 0 \
+    addMenuItem Reload File -underline 0 \
 	    -command "$this reload"
     
-    $itk_component(fileMenu) add command \
-	    -label "Toggle Read-Only" \
-	    -underline 0 \
-	    -accelerator "C-x C-q" \
+    addMenuItem "Toggle Read-Only" File -underline 0 -accelerator "C-x C-q" \
 	    -command "$this toggleReadOnly"
 
-    $itk_component(fileMenu) add command \
-	    -label "Revision Control..." \
-	    -underline 2 \
-	    -accelerator "C-x v" \
+    addMenuItem "Revision Control..." File -underline 2 -accelerator "C-x v" \
 	    -command "$this revisionControl"
 
-    $itk_component(fileMenu) add separator
+    addMenuSeparator File
     
-    $itk_component(fileMenu) add command \
-	    -label Close \
-	    -underline 0 \
-	    -accelerator "C-x k" \
+    addMenuItem Close File -underline 0 -accelerator "C-x k" \
 	    -command "$this nextWindow; delete object $this"
  
     if {$normalExit == 1} {
-	$itk_component(fileMenu) add command \
-		-label Quit \
-		-underline 0 \
-		-accelerator "C-x C-c" \
-		-command "::tycho::TopLevel::exitProgram"
+        addMenuItem Quit File -underline 0 -accelerator "C-x C-c" \
+                -command "::tycho::TopLevel::exitProgram"
     }
 
     # Undo the binding in the base class, where Return dismisses
     # the window.
     bind $prefix <Return> {}
     
-    ##################################################################
+    #
     # Window menu contents
     #
-    itk_component add windowMenu {
-	menu $itk_component(windowMenuButton).menu -tearoff 0
-    } {
-	keep -font -activebackground -cursor -activeforeground \
-		-background -foreground
-    }
     
     # Use the editors variable to construct menu entries for registered
     # editors.
     foreach entry $windowMenuEntries {
 	set editor [lindex $entry 0]
 	set desc [lindex $entry 1]
-	addWindowMenuEditor $desc "::tycho::File::newEditor $editor"
+	addMenuItem $desc Window -command "::tycho::File::newEditor $editor"
     }
-    $itk_component(windowMenu) add separator
+    addMenuSeparator Window
 
     # use the filesOpen variable to construct menu entries for all open
     # files.
@@ -614,30 +557,17 @@ body ::tycho::File::constructor {args} {
 	}
     }
 
-    ##################################################################
+    #
     # Help menu contents
     #
-    itk_component add helpMenu {
-	menu $itk_component(helpMenuButton).menu -tearoff 0
-    } {
-	keep -font -activebackground -cursor -activeforeground \
-		-background -foreground
-    }
     
-    $itk_component(helpMenu) add command \
-	    -label "About Tycho" \
-	    -underline 0 \
-	    -command \
+    addMenuItem "About Tycho" Help -underline 0 -command \
 	    {::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo}
     
-    $itk_component(helpMenu) add command \
-	    -label "User's Guide" \
-	    -underline 0 \
+    addMenuItem "User's Guide" Help -underline 0 \
 	    -command "$this help"
-
-    $itk_component(helpMenu) add command \
-	    -label "Index" \
-	    -underline 0 \
+    
+    addMenuItem "Index" Help -underline 0 \
 	    -command {::tycho::File::openContext $TYCHO/tycho.idx}
     
     # Bindings
@@ -730,6 +660,32 @@ body ::tycho::File::altFile {} {
     if {$filename != {}} {
 	configure -file $filename
 	windowMenuRemoveAll $prevfile
+    }
+}
+
+#####################################################################
+#### autoSave
+# If the data has been modified, save the data to a file with the name
+# given in the -file option, but with the prefix "#auto#". Then arrange
+# to be called later again, with the time interval given by the option
+# -autosaveinterval.  A value of zero for this option disables auto-saving.
+#
+body ::tycho::File::autoSave {} {
+    if {$modified && $file != ""} {
+	set filename [file tail $file]
+	set filename [format "#auto#%s" $filename]
+	set filename [format "%s/%s" [file dirname $file] $filename]
+	if {[catch "save $filename" message] != 0} {
+	    ::tycho::warn "Auto-save failed: $message"
+	}
+	markModified
+    }
+    set interval [expr int(60000*$itk_option(-autosaveinterval))]
+    if {$interval < 0 || $interval > 7200000} {
+	error "Auto-save interval is out of range (object $this)"
+    }
+    if {$interval != 0} {
+	after $interval "::tycho::File::callAutoSave $this"
     }
 }
 
@@ -1066,22 +1022,24 @@ body ::tycho::File::windowMenuAddAll {label} {
 #### windowMenuAppend
 # Append the name of an open file editor to the "Window" menu.
 # The second argument, normally a filename, gives the menu label.
+# This method really just provides specialized public access to the
+# <code>addMenuItem</code> protected method.
 #
 body ::tycho::File::windowMenuAppend {obj label} {
     # Avoid entries with empty names or NoName
     if {$label != {NoName} && $label != {}} {
-	$itk_component(windowMenu) add command \
-		-label $label \
-		-command "$obj raiseWindow"
+        addMenuItem $label Window -command "$obj raiseWindow"
     }
 }
 
 #####################################################################
 #### windowMenuRemove
 # Remove the name of an open file from the "Window" menu.
+# This just provides specialized public access to the protected method
+# <code>removeMenuItem</code>.
 #
 body ::tycho::File::windowMenuRemove {filename} {
-    $itk_component(windowMenu) delete $filename
+    removeMenuItem $filename Window
 }
 
 #####################################################################
@@ -1255,40 +1213,231 @@ body ::tycho::File::registerEditor {extensions editorClass {description {}} \
 ####                          protected methods                      ####
 
 #####################################################################
-#### addWindowMenuEditor
-# Add the specified file to the "Window" menu entry.
+#### addMenu
+# Add a menu to the menu bar.  The first argument is the name of the
+# menu.  This should be a single word, with the first character 
+# capitalized.  The second argument should have value either "left"
+# or "right".  It determines on which side of the menu bar the menu
+# will be packed.  The third argument should be either an empty string
+# or the name of a menu before which this menu button should be packed.
+# If the string is empty, then the menu is button is placed in the next
+# logical position. The remaining arguments are passed unchanged to the Tk
+# <code>menubutton</code> command.
 #
-body ::tycho::File::addWindowMenuEditor {desc command} {
-    $itk_component(windowMenu) add command \
-	    -label $desc \
-	    -command $command
+body ::tycho::File::addMenu {name side before args} {
+    
+    # Avoid adding new menus with the same name.
+    if [info exists itk_component(menu$name)] {
+        error "Menu $name already exists."
+    }
+
+    # Create the new menu button.
+    itk_component add menuButton$name {
+	eval menubutton $itk_component(menuFrame).menuButton$name \
+		-text "$name" \
+		-menu $itk_component(menuFrame).menuButton$name.menu \
+		$args
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground -highlightbackground \
+		-highlightcolor
+    }
+
+    if {$before != {}} {
+        if {![info exists itk_component(menu$before)]} {
+            error "Menu $before does not exist."
+        }
+        pack $itk_component(menuButton$name) -side $side \
+                -before $itk_component(menuButton$before)
+    } {
+        pack $itk_component(menuButton$name) -side $side
+    }
+
+    # New menu contents
+    itk_component add menu$name {
+	menu $itk_component(menuButton$name).menu -tearoff 0
+    } {
+	keep -font -activebackground -cursor -activeforeground \
+		-background -foreground
+    }
 }
 
 #####################################################################
-#### autoSave
-# If the data has been modified, save the data to a file with the name
-# given in the -file option, but with the prefix "#auto#". Then arrange
-# to be called later again, with the time interval given by the option
-# -autosaveinterval.  A value of zero for this option disables auto-saving.
+#### addMenuItem
+# Add a menu item to the specified menu. The first argument is the
+# label to use in the menu for the item. By convention, this should
+# have the first character of each word capitalized. The second
+# argument should be the name of a menu created with
+# <code>addMenu</code>. The remaining arguments are passed unchanged to
+# the Tk <i>menu</i> <code>add command</code> directive.  If a menu
+# item already exists with the given name, then it is configured using
+# the arguments after the second one.
 #
-body ::tycho::File::autoSave {} {
-    if {$modified && $file != ""} {
-	set filename [file tail $file]
-	set filename [format "#auto#%s" $filename]
-	set filename [format "%s/%s" [file dirname $file] $filename]
-	if {[catch "save $filename" message] != 0} {
-	    ::tycho::warn "Auto-save failed: $message"
-	}
-	markModified
+body ::tycho::File::addMenuItem {itemName inMenu args} {
+    
+    if {![info exists itk_component(menu$inMenu)]} {
+	error "Menu $inMenu does not exist."
     }
-    set interval [expr int(60000*$itk_option(-autosaveinterval))]
-    if {$interval < 0 || $interval > 7200000} {
-	error "Auto-save interval is out of range (object $this)"
-    }
-    if {$interval != 0} {
-	after $interval "::tycho::File::callAutoSave $this"
+    
+    # check if itemName does not already exists
+    if [catch {set check [$itk_component(menu$inMenu) index "$itemName"]}] {
+	
+	# create a new menu item 
+	eval $itk_component(menu$inMenu) add command \
+		[list -label "$itemName"] \
+		$args
+	
+    } {
+	# if it does then link it to cmd
+	eval $itk_component(menu$inMenu) entryconfigure "$itemName" $args
     }
 }
+
+#####################################################################
+#### addMenuSeparator
+# Add a separator to the specified menu. The first argument is the name
+# of the menu. The remaining arguments are passed unchanged to the Tk
+# <i>menu</i> <code>add separator</code> command.
+#
+body ::tycho::File::addMenuSeparator {menu args} {
+    eval $itk_component(menu$menu) add separator $args
+}
+
+#####################################################################
+#### disableMenuItem
+# Disable the item in the specified menu.
+#
+body ::tycho::File::disableMenuItem {itemName inMenu} {
+
+    if {![info exists itk_component(menu$inMenu)]} {
+	error "Menu $inMenu does not exist."
+    }
+    
+    # check if itemName exists
+    if [catch {set check [$itk_component(menu$inMenu) index "$itemName"] } ] {
+	error "Menu item $itemName does not exist."
+    } {
+	$itk_component(menu$inMenu) entryconfigure "$itemName" -state disabled
+    }
+}
+
+#####################################################################
+#### enableMenuItem
+# Enable the item in the specified menu.
+#
+body ::tycho::File::enableMenuItem {itemName inMenu} {
+
+    if {![info exists itk_component(menu$inMenu)]} {
+	error "Menu $inMenu does not exist."
+    }
+    
+    # check if itemName exists
+    if [catch {set check [$itk_component(menu$inMenu) index "$itemName"] } ] {
+	error "Menu item $itemName does not exist."
+    } {
+	$itk_component(menu$inMenu) entryconfigure "$itemName" -state normal
+    }
+}
+
+#####################################################################
+#### insertMenuItem
+# Insert a menu item to the specified menu. The first argument is the
+# label to use in the menu for the item. By convention, this should
+# have the first character of each word capitalized. The second
+# argument is the label of an existing menu item before which the new
+# item should be inserted. The third arguments is the name of a menu
+# created with <code>addMenu</code>. The remaining arguments are passed
+# unchanged to the Tk <i>menu</i> <code>add command</code> directive.
+# If a menu item already exists with the given name, then it is
+# configured using the arguments after the second one.
+#
+body ::tycho::File::insertMenuItem {itemName before inMenu args} {
+    
+    if {![info exists itk_component(menu$inMenu)]} {
+	error "Menu $inMenu does not exist."
+    }
+
+    # Check validity of the "before" argument.
+    if [catch {set check [$itk_component(menu$inMenu) index "$before"]}] {
+        error "Menu item $before does not exist."
+    }
+
+    # check if itemName does not already exists
+    if [catch {set check [$itk_component(menu$inMenu) index "$itemName"]}] {
+	
+	# create a new menu item 
+	eval $itk_component(menu$inMenu) insert \
+                [list $before] command \
+		[list -label "$itemName"] \
+		$args
+	
+    } {
+	# if it does then link it to cmd
+	eval $itk_component(menu$inMenu) entryconfigure "$itemName" $args
+    }
+}
+
+#####################################################################
+#### removeMenu
+# Remove the specified menu.
+#
+body ::tycho::File::removeMenu {menu} {
+
+    if {![info exists itk_component(menuButton$menu)]} {
+	error "Menu $menu does not exist."
+    }
+    destroy $itk_component(menuButton$menu)
+}
+
+#####################################################################
+#### removeMenuItem
+# Remove the item in the specified menu.
+#
+body ::tycho::File::removeMenuItem {itemName inMenu} {
+
+    if {![info exists itk_component(menu$inMenu)]} {
+	error "Menu $inMenu does not exist."
+    }
+    
+    # check if itemName exists
+    if [catch {set check [$itk_component(menu$inMenu) index "$itemName"] } ] {
+	error "Menu item $itemName does not exist."
+    } {
+	$itk_component(menu$inMenu) delete "$itemName"
+    }
+}
+
+#####################################################################
+#### saveText
+# Return the text to save.  In this base class, trigger an error,
+# since we don't know how to save.  This should be redefined in derived
+# classes.
+#
+body ::tycho::File::saveText {} {
+    error "Tried to save to file: $file.\nSave not implemented yet."
+}
+
+#########################################################################
+#########################################################################
+####                          private methods                        ####
+
+#####################################################################
+#### removeBackupFiles
+# Remove the backup file that gets automatically created periodically,
+# if it exists.  Also remove the crash-recovery file, if it exists.
+#
+body ::tycho::File::removeBackupFiles {} {
+    set savefile [format "%s/#auto#%s" [file dirname $file] [file tail $file]]
+    # NOTE: Unix-only implementation here.
+    exec rm -f $savefile
+    set savefile [format "%s/#crash#%s" [file dirname $file] [file tail $file]]
+    exec rm -f $savefile
+}
+
+
+#########################################################################
+#########################################################################
+####                          private procedures                     ####
 
 #####################################################################
 #### checkForAutoSaveFiles
@@ -1325,28 +1474,4 @@ body ::tycho::File::checkForAutoSaveFiles {filename} {
     # The original file is the file to open.
     return $filename
 }
-
-#####################################################################
-#### removeBackupFiles
-# Remove the backup file that gets automatically created periodically,
-# if it exists.  Also remove the crash-recovery file, if it exists.
-#
-body ::tycho::File::removeBackupFiles {} {
-    set savefile [format "%s/#auto#%s" [file dirname $file] [file tail $file]]
-    # NOTE: Unix-only implementation here.
-    exec rm -f $savefile
-    set savefile [format "%s/#crash#%s" [file dirname $file] [file tail $file]]
-    exec rm -f $savefile
-}
-
-#####################################################################
-#### saveText
-# Return the text to save.  In this base class, trigger an error,
-# since we don't know how to save.  This should be redefined in derived
-# classes.
-#
-body ::tycho::File::saveText {} {
-    error "Tried to save to file: $file.\nSave not implemented yet."
-}
-
 
