@@ -56,6 +56,10 @@ Block* CGCWormhole :: clone() const {
 
 Wormhole* CGCWormhole :: asWormhole() { return this; }
 
+void CGCWormhole :: go() {
+    scheduler()->compileRun();
+}
+
 /**************************************************************************
 
 	methods for CGCtoUniversal

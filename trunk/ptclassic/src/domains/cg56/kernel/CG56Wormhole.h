@@ -89,6 +89,8 @@ public:
 	// return myself as a wormhole
 	/*virtual*/ Wormhole* asWormhole();
 
+protected:
+        /*virtual*/ void go();
 };
 
         //////////////////////////////////////////

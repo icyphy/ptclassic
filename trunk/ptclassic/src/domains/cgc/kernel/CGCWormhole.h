@@ -86,6 +86,8 @@ public:
 	// return myself
         /*virtual*/ Wormhole* asWormhole();
 
+protected:
+        /*virtual*/ void go();
 };
 
 // Input Boundary of ??inCGC_Wormhole

@@ -57,6 +57,9 @@ Block* CG56Wormhole :: clone() const {
 
 Wormhole* CG56Wormhole :: asWormhole() { return this; }
 
+void CG56Wormhole :: go() {
+    scheduler()->compileRun();
+}
 
 /**************************************************************************
 
