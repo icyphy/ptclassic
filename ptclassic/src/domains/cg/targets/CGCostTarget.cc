@@ -93,6 +93,8 @@ int CGCostTarget::run() {
 
     // Each star in the galaxy will be extracted to form a test universe,
     // which will be used to generate implementation costs for that star
+    // FIXME: Is calling initializeStarPorts necessary here given that
+    // Ptcl code generation has already been done?
     initializeStarPorts(*galaxy());
     disconnectAllStars(*galaxy());
 
@@ -188,6 +190,8 @@ int CGCostTarget::costInfoForOneTarget(CGTarget* userTarget) {
 	// Initialize and run the galaxy, and report implementation costs
 	if (!errorFlag) {
 	    initializeStarPorts(*childGalaxy);
+	    userTarget->setState("show memory usage?", "YES");
+	    userTarget->setState("show run time?", "YES");
 	    userTarget->setGalaxy(*childGalaxy);
 	    userTarget->initialize();
 	    userTarget->begin();
