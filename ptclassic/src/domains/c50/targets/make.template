@@ -65,7 +65,7 @@ INCL=-I$(C50DIR) -I$(CGDIR) -I$(CGSTARDIR) -I$(SDFDIR) -I$(KERNDIR) \
      -I$(PARDIR) -I$(CGTARDIR) -I$(C50STARDIR)
 
 # objects to make
-OBJS=	DSKC50Target.o SubC50Target.o
+OBJS=	DSKC50Target.o SimC50Target.o SubC50Target.o
 
 SRCS=	$(OBJS:.o=.cc)
 
