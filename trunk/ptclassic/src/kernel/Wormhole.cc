@@ -129,19 +129,3 @@ StringList Wormhole :: print (int recursive) {
 	return out;
 }
 
-/* void Wormhole :: checkSDF()
-{
-// check if the repetition member of the SDFstars at the wormhole
-// boundary is one. If not, CURRENTLY, report as ERROR!
-	if (!strcmp(type, SDFstring)) {
-	   for (int i = numberPorts(); i > 0; i--) {
-		PortHole* p = ((EventHorizon&) nextPort()).insidePort;
-		SDFStar* s = (SDFStar*) p->parent();
-		if (s->repetitions > 1)
-			errorHandler.error("Repetition should be one:",
-				s->readFullName());
-	   }
-	}
-}
-*/
-
