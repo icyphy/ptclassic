@@ -76,6 +76,7 @@ s/^\.PP/.pp/
 s/^\.AU/<Author> /
 s/^\.AE/<Body> /
 s/^\.BU/<Bullet> /
+s/^\.bu/<Bullet> /
 s/^\.LE/<Bullet> /
 s/^\.IP/<Definition>/
 s/^\.lp/<LBody>/
