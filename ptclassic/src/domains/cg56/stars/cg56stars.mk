@@ -33,6 +33,7 @@ CG56STARS = \
  $(CG56)/CG56Log.o \
  $(CG56)/CG56Mult.o \
  $(CG56)/CG56Neg.o \
+ $(CG56)/CG56Parent.o \
  $(CG56)/CG56Peak.o \
  $(CG56)/CG56Pickmin.o \
  $(CG56)/CG56PickminVal.o \

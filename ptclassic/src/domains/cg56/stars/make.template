@@ -51,6 +51,7 @@ PL_SRCS= \
  CG56Log.pl \
  CG56Mult.pl \
  CG56Neg.pl \
+ CG56Parnet.pl \
  CG56Peak.pl \
  CG56Pickmin.pl \
  CG56PickminVal.pl \
