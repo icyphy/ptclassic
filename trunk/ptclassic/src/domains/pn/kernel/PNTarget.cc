@@ -40,6 +40,9 @@ static const char file_id[] = "$RCSfile$";
 #include "PNTarget.h"
 #include "PNScheduler.h"
 
+// Defined in PNDomain.cc
+extern const char PNdomainName[];
+
 // Constructor.
 PNTarget::PNTarget() : Target("default-PN", "DataFlowStar",
 	"Schedule dataflow systems as process networks.")
@@ -73,5 +76,5 @@ void PNTarget::wrapup()
 
 const char* PNTarget::domain()
 {
-    return galaxy() ? galaxy()->domain() : "PN";
+    return galaxy() ? galaxy()->domain() : PNdomainName;
 }
