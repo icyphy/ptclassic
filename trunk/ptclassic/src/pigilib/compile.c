@@ -786,6 +786,12 @@ octObject *facetPtr;
     name = BaseName(facetPtr->contents.facet.cell);
     TCL_CATCH_ERR1(Tcl_VarEval(ptkInterp, "domain ", domain, "; ",
     				"target ", target, (char*) NULL));
+    /* The following is temporarily required, until we complete the
+     * conversion to ptcl calls, because the above target command
+     * creates a new instance of the target. Is the above really
+     * necessary?
+     */
+    ERR_IF1(!ProcessTargetParams(target,facetPtr));
     ERR_IF1(!ProcessSubGals(facetPtr));
     xferedBool = DupSheetIsDup(&xfered, name);
     if (xferedBool && !IsDirtyOrGone(facetPtr)) {
