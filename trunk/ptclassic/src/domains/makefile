@@ -15,7 +15,7 @@ DIRS = sdf de ddf
 
 MAKEVARS = "ARCH=$(ARCH)"
 
-makefile:
+makefiles:
 	@for x in $(DIRS); do \
 		cd $$x ; \
 		echo Updating makefile in domains/$$x ; \
