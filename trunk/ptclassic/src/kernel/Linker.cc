@@ -68,6 +68,14 @@ to become a permanent part of the system.
 // Define DEBUG for dynamic linking debugging
 // DEBUG should be undefined for shipping
 //#define DEBUG
+#ifdef DEBUG
+void DebugMessage(char *str1, char *str2)
+{
+  char buf[2000];
+  sprintf("%s %s\n",str1, str2);
+  Error::message(buf);
+}
+#endif //DEBUG
 
 // static data objects
 int Linker::activeFlag = 0;
@@ -194,6 +202,7 @@ int Linker::multiLink (int argc, char** argv) {
 	// DYNLIB is hppa specific
 	sprintf (command, "%s %s -A %s %s %x %s -o ",
 		 LOADER, LOADOPTS, symTableName, LOC_OPT, availMem, DYNLIB);
+
 	StringList cmd = command;
 	cmd << tname;
 	for (int i = 1; i < argc; i++) {
@@ -202,6 +211,12 @@ int Linker::multiLink (int argc, char** argv) {
 	}
 	// these options go last so libraries will be searched properly.
 	cmd << " " << myDefaultOpts;
+
+#ifdef DEBUG
+	DebugMessage("multiLink():",command);
+	DebugMessage(objName, myDefaultOpts);
+#endif //DEBUG
+
 	if (system (cmd)) {
 		Error::abortRun("Error in linking file");
 		return FALSE;
@@ -292,7 +307,7 @@ static void debugInvokeConstructors(char *symbol,long addr, const
 	  if (nlist(tmpname,nl))
 	  {
 	     Error::abortRun("nlist failed");
-	     return(-1);
+	     return();
 	  }
 
 	  addr = nl[0].n_value;
