@@ -43,7 +43,7 @@
 #
 namespace ::tycho {
     proc autoName {stem} {
-	global autoNames
+	global ::autoNames
 	if {[info exists autoNames] && [info exists autoNames($stem)]} {
 	    incr autoNames($stem)
 	} else {
@@ -61,6 +61,17 @@ namespace ::tycho {
 rename ::exit ::tclexit
 proc ::exit {{queryUser 1}} {
     ::tycho::TopLevel::exitProgram $queryUser
+}
+
+##########################################################################
+#### tkMbLeave
+# FIXME: For some mysterious reason¸ tk occationally issues this command
+# when the window it refers to no longer exists.  A seemly random error
+# message appears on the screen.  For now, we just catch.
+#
+rename ::tkMbLeave ::originalTkMbLeave
+proc ::tkMbLeave {arg} {
+    catch {::originalTkMbLeave $arg}
 }
 
 ##########################################################################
@@ -86,11 +97,21 @@ proc ::tycho::saferUpdate {obj} {
 
 ##########################################################################
 #### TopLevel
-# This class creates a top-level window with nothing in it, and provides
-# a repository for common functions on windows, such as centering them
-# on the screen.  The window is created in the withdrawn state.  It is
-# up to derived classes to map the window using either "wm deiconify"
-# or the method "centerOnScreen".
+# This class creates a top-level window with a single frame in it
+# (called $itk_component(childsite). The class provides methods and
+# options for controlling the position of the window on the screen, its
+# size, and the focus. It also manages a global list of top-level
+# windows for controlling the switching of the focus from one window to
+# the next. It also defines miscellaneous generic procedures and
+# methods. The window is created in the withdrawn state. It is up to
+# the creator of the window to map the window using either "wm
+# deiconify" or the method "centerOnScreen". This is normally done
+# right after creating the window. The reason for requiring this
+# explicit mapping is that windows are often constructed piecemeal by
+# combining widgets, and deferring the mapping prevents the visually
+# distracting artifact of seeing the window being constructed piece by
+# piece. Also, by the time the window gets mapped, its size is known,
+# so its position can be controlled effectively.
 #
 class ::tycho::TopLevel {
 
@@ -119,6 +140,10 @@ class ::tycho::TopLevel {
 
     #################################################################
     ####                     public methods                      ####
+
+    #### busy
+    # Change the cursor to the "watch" and execute the arguments.
+    method busy {args} {}
 
     #### centerOnScreen
     # Center the window on the screen.
@@ -215,9 +240,20 @@ configbody ::tycho::TopLevel::before {
 #
 body ::tycho::TopLevel::constructor {args} {
     
+    # Import the tycho namespace
+    import add ::tycho
+
     # The name of the window
     set prefix $itk_component(hull)
     wm withdraw $prefix
+    
+    # Create a childsite for the contents of the window
+    itk_component add childsite {
+	frame $itk_interior.childsite
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(childsite) -fill both -expand yes
     
     # Create a single common instance of the topLevelWindows list.
     if {![info exists topLevelWindows]} {
@@ -229,7 +265,7 @@ body ::tycho::TopLevel::constructor {args} {
     # later moved using the -before option.
     $topLevelWindows insert $prefix
 
-    bind $prefix <Control-x><o> "$this nextWindow 1; break"
+    bind $prefix <Control-x><o> [code "$this nextWindow 1; break"]
     
     # To prevent the "o" from appearing in Entry windows,
     bind Entry <Control-x><o> { }
@@ -238,13 +274,14 @@ body ::tycho::TopLevel::constructor {args} {
     eval itk_initialize $args
 
     # Grab the focus when the window gets mapped.
-    bind $itk_component(hull) <Map> "$this focusin; break"
+    bind $itk_component(hull) <Map> [code "$this focusin; break"]
 
     # Bind the file-open command.
-    bind $prefix <Control-x><Control-f> "File::openWin; break"
+    bind $prefix <Control-x><Control-f> "::tycho::File::openWin; break"
 
     # Prevent the window manager delete function from exiting.
-    wm protocol $prefix WM_DELETE_WINDOW "$this nextWindow; delete object $this"
+    wm protocol $prefix WM_DELETE_WINDOW \
+	    [code "$this nextWindow; delete object $this"]
 }
 
 #####################################################################
@@ -297,6 +334,39 @@ body ::tycho::TopLevel::destructor {} {
 #################################################################
 #################################################################
 ####                     public methods                      ####
+
+#####################################################################
+#### busy
+# Change the cursor in the childsite widget of this window to the
+# "watch" cursor (to indicate that the object is busy), execute the
+# arguments as a method invocation for this object, and change the
+# cursor back to whatever it was before. In order for the cursor to
+# actually change, the mryhod calls "update", and therefore the object
+# may no longer exist when the procedure returns (it might be deleted
+# during the call to update). If the object does not exist, the
+# procedure returns 0. Otherwise, it returns 1 (or an error). You
+# should test the return value immediately and return from all methods
+# immediately. A typical invocation is therefore as follows:
+# <pre>
+#     if {![busy methodname arg1 arg2]} {return}
+# </pre>
+# Be sure you are not just returning to another method.
+# If the method is invoked at the top-level, for example in response to
+# a key binding, then there is no need to test its return value.
+#
+body ::tycho::TopLevel::busy {args} {
+    set oldCursor [lindex [$itk_component(childsite) config -cursor] end]
+    $itk_component(childsite) config -cursor {watch}
+    if {![::tycho::saferUpdate $this]} {return 0}
+
+    # Catch errors so that we can reset the cursor
+    if {[catch [code [concat $this $args]] msg] != 0} {
+	$itk_component(childsite) config -cursor $oldCursor
+	error $msg
+    }
+    $itk_component(childsite) config -cursor $oldCursor
+    return 1
+}
 
 #####################################################################
 #### centerOnScreen
@@ -395,7 +465,7 @@ body ::tycho::TopLevel::raiseWindow {} {
 #
 body ::tycho::TopLevel::exitProgram {{queryUser 1}} {
     if {$queryUser == 1} {
-	set response [askuser "OK to exit the program?"]
+	set response [::tycho::askuser "OK to exit the program?"]
     } else {
 	set response 1
     }
