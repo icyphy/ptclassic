@@ -39,8 +39,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "Block.h"
-#include "ptk.h"
 #include "StringList.h"
+extern "C" {
+#include "ptk.h"
+}
 
 // TclStarIfc will be instantiated by each star 
 
