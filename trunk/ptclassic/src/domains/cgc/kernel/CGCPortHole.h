@@ -7,7 +7,7 @@ $Id$
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: E. A. Lee
+ Programmer: E. A. Lee, S. Ha
 
  These classes are portholes for stars that generate C code.  
 
@@ -64,7 +64,10 @@ public:
 
 	// set and get the buffer type
 	void setBufType(BufType b) { myType = b; }
-	BufType  bufType() const { return myType; }
+	BufType  bufType() const { 
+		if (atBoundary()) return myType;
+		return isItOutput()? myType: realFarPort()->bufType(); 
+	}
 
 	void setGeoName(char* n);
 	const char* getGeoName() const;
