@@ -130,7 +130,7 @@ body ::tycho::Glimpse::constructor {args} {
     }
     if {$buttonList != {Tycho}} {
         lappend buttonList {Clear}
-        addRadioQuery defaultIndex {Default Index:} $buttonList \
+        radio defaultIndex {Default Index:} $buttonList \
                 Tycho -command "$this updateGlimpseIndex"
     }
 
@@ -141,7 +141,7 @@ body ::tycho::Glimpse::constructor {args} {
 
     if {! [file exists [file join $TYCHO .glimpse_index]]} {
         set nm [::tycho::autoName .glimpseYNC]
-        ::tycho:::YesNoCancel $nm \
+        ::tycho::YesNoCancel $nm \
                 -text "The glimpse file \
                 `[file join $TYCHO .glimpse_index]' \
                 does not exist.  Create it now?"
