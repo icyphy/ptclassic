@@ -476,7 +476,7 @@ extern long lrand48();
 #define srandom(a) srand48(a)
 #define bzero(a,b) memset(a, 0, b)
 #else
-#if !defined(PTALPHA)
+#if !defined(PTALPHA) && !defined(PTNT)
 /* Sun CC 2.1 requires the __cplusplus below */
 #if !defined (__GLIBC__) || (__GLIBC__ < 2)
 #if !defined(PTIRIX5) && !defined(__cplusplus)
@@ -484,7 +484,7 @@ extern VOID_HACK srandom();
 #endif
 extern long random();
 #endif /* ! __GLIBC__ */
-#endif /* ! PTALPHA */
+#endif /* ! PTALPHA ! PTNT */
 #endif
 #endif /* _std_h */
 
