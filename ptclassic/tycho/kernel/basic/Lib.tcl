@@ -117,7 +117,7 @@ namespace ::tycho {
     #        {::tycho::view CommandShell  {-file {%s}}} \
     #        {Command shell} "tools"
 
-    if {$tcl_platform(platform) =! macintosh} {
+    if {$tcl_platform(platform) != "macintosh"} {
 	::tycho::File::registerExtensions {} \
 		{set w [::tycho::autoName .glimpse]; \
                 ::tycho::Glimpse $w -geometry +0+0;\

@@ -115,8 +115,8 @@ configbody ::tycho::EditSpell::edit {
 #
 body ::tycho::EditSpell::constructor {args} {
     global tcl_platform
-    if {$tcl_platform(platform) != unix} {
-	error "Sorry, EditSpell is only supported under Unix,\nas it\
+    if {$tcl_platform(platform) == "macintosh"} {
+	error "Sorry, EditSpell is not supported under the Macintosh,\nas it\
 		uses the Tcl exec command to start a \"spell\" process."
     }
 
