@@ -36,37 +36,87 @@ HELPDIR=~ptolemy/lib
 # Library name
 LIB=libptolemy.a
 
-# Library sources
-LIBCCSRCS=Animate.cc AutoForkNode.cc \
- Block.cc Code.cc Connect.cc ComplexArrayState.cc ComplexState.cc \
- DataStruct.cc Display.cc Domain.cc Error.cc Fraction.cc Galaxy.cc \
- GalIter.cc Geodesic.cc Histogram.cc InterpGalaxy.cc InterpUniverse.cc \
- Interpreter.cc Linker.cc KnownBlock.cc KnownTarget.cc NamedObj.cc \
- Packet.cc Particle.cc PriorityQueue.cc Scheduler.cc Star.cc StringList.cc \
- Target.cc Tokenizer.cc Universe.cc UserOutput.cc Wormhole.cc WormConnect.cc \
- checkConnect.cc expandPath.cc \
- FloatArrayState.cc FloatState.cc IntArrayState.cc IntState.cc \
- KnownState.cc State.cc StringState.cc \
- FloatVecData.cc IntVecData.cc ImageData.cc
+# Library sources.  CCS_WITH_H_FILES includes all .cc files with a
+# corresponding .h file with the same root.
+
+CCS_WITH_H_FILES=\
+ Animate.cc \
+ AutoForkNode.cc \
+ Block.cc \
+ Code.cc \
+ ComplexArrayState.cc \
+ ComplexState.cc \
+ Connect.cc \
+ DataStruct.cc \
+ Display.cc \
+ Domain.cc \
+ Error.cc \
+ FixSample.cc \
+ FixState.cc \
+ FloatArrayState.cc \
+ FloatState.cc \
+ FloatVecData.cc \
+ Fraction.cc \
+ GalIter.cc \
+ Galaxy.cc \
+ Geodesic.cc \
+ Histogram.cc \
+ ImageData.cc \
+ IntArrayState.cc \
+ IntState.cc \
+ IntVecData.cc \
+ InterpGalaxy.cc \
+ InterpUniverse.cc \
+ Interpreter.cc \
+ KnownBlock.cc \
+ KnownState.cc \
+ KnownTarget.cc \
+ Linker.cc \
+ NamedObj.cc \
+ Packet.cc \
+ Particle.cc \
+ PriorityQueue.cc \
+ Scheduler.cc \
+ Star.cc \
+ State.cc \
+ StringList.cc \
+ StringState.cc \
+ Target.cc \
+ Tokenizer.cc \
+ Universe.cc \
+ UserOutput.cc \
+ WormConnect.cc \
+ Wormhole.cc
+
+# The complete list of .cc files used in the library
+LIBCCSRCS=$(CCS_WITH_H_FILES) \
+ checkConnect.cc \
+ expandPath.cc
+
+# .c sources used in the library.
 LIBCSRCS=gnulib3a.c
 
 LIBSRCS = $(LIBCCSRCS) $(LIBCSRCS)
 # All sources.
 SRCS=$(LIBSRCS) interpmain.cc
 
-# Header files
-HDRS= Animate.h Attribute.h AutoForkNode.h \
- Block.h CircularBuffer.h Code.h ComplexSubset.h Connect.h \
- DataStruct.h Display.h Domain.h Error.h Fraction.h Galaxy.h \
- GalIter.h Geodesic.h Histogram.h InterpGalaxy.h InterpUniverse.h \
- Interpreter.h KnownBlock.h KnownTarget.h Linker.h Linker.sysdep.h \
- NamedObj.h Output.h Packet.h Particle.h ParticleQueue.h ParticleStack.h \
- Plasma.h PriorityQueue.h Scheduler.h Star.h StringList.h Target.h \
- Tokenizer.h Universe.h UserOutput.h WormConnect.h Wormhole.h \
- dataType.h miscFuncs.h type.h isa.h \
- ComplexArrayState.h ComplexState.h FloatState.h FloatArrayState.h \
- IntArrayState.h IntState.h KnownState.h State.h StringState.h \
- FloatVecData.h IntVecData.h ImageData.h
+# Header files.  When adding a new header, add it here only if there is
+# no corresponding .cc file; otherwise add the .cc file to CCS_WITH_H_FILES.
+HDRS= $(CCS_WITH_H_FILES:.cc=.h) \
+ Attribute.h \
+ CircularBuffer.h \
+ ComplexSubset.h \
+ ConstIters.h \
+ FixArrayState.h \
+ Linker.sysdep.h \
+ Output.h \
+ ParticleQueue.h \
+ ParticleStack.h \
+ Plasma.h \
+ dataType.h \
+ isa.h \
+ miscFuncs.h \
+ type.h
 
 # Library objects
 LIBOBJS=$(LIBCCSRCS:.cc=.o) $(LIBCSRCS:.c=.o)
@@ -97,7 +147,6 @@ clean:
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	$(SRCS) $(HDRS) make.template XDomain.ccP
 
-UI=/usr/include
 depend:
 		cd $(VPATH); \
 		g++ -MM $(SRCS) | cat make.template - > makefile.n; \
