@@ -81,7 +81,7 @@ proc tychoFindAllHTML {} {
     foreach name [exec ls] {
 	if [file isdirectory $name] {
 	    # Skip SCCS and RCS directories and anything called "junk"
-	    if {$name != {SCCS} && $name != {RCS} && $name != {junk}} {
+	    if {$name != {SCCS} && $name != {RCS} && $name != {junk} && $name != {codeDoc} } {
 		cd $name
 		set subfiles [tychoFindAllHTML]
 		cd ..
@@ -105,6 +105,8 @@ proc tychoStandardIndex {} {
     cd $TYCHO
 
     set files [tychoFindAllHTML]
+    # cd back in case we have followed links in tychoFindAllHTML
+    cd $TYCHO
     eval tychoMkIndex {{Tycho index}} tycho.idx $files
     cd $olddir
 }
