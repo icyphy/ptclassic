@@ -476,9 +476,17 @@ void SDFScheduler::compileRun () {
     }
 }
 
+// Instead of executing SDF scheduling algorithm, we copy the schedule
+// from the argument list (necessary for copying from the parallel scheduling
+// result). Here, we calculate repetitions.
 void SDFScheduler :: copySchedule(SDFSchedule& s) {
-	mySchedule.initialize();
 
+	// calculate repetition properties of the galaxy
+	invalid = 0;
+	repetitions();
+
+	// main copying routine.
+	mySchedule.initialize();
 	SDFSchedIter nextStar(s);
 	DataFlowStar* star;
 	while ((star = nextStar++) != 0) {
