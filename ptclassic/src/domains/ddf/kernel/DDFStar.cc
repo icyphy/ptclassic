@@ -78,3 +78,5 @@ extern const char DDFdomainName[];
 const char* DDFStar :: domain () const { return DDFdomainName;}
 
 int DDFStar :: isItSelf() { return FALSE ;}
+
+const char* DDFStar :: readClassName () { return "unspecified method";}

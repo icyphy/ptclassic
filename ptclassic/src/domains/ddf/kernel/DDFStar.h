@@ -44,8 +44,14 @@ public:
 	// wait until this porthole has as many tokens as "waitNum"
 	void waitFor(PortHole& p, int num = 1) ;
 	
+	// return the number of tokens waiting for waitPort
+	int reqTokens() { return (waitNum - waitPort->numTokens()) ; }
+	int hasWaitPort() { return ( waitPort ? TRUE : FALSE ) ;}
+
 	// is it recursion star?
 	virtual int isItSelf();
+
+	virtual const char* readClassName();
 };
 
 #endif
