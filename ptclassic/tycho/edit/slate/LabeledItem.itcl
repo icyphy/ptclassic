@@ -40,7 +40,7 @@
 # This class is the abstract superclass of the LabeledOval, 
 # LabeledRect, and LabeledFrame items.
 #
-# <p><a name="Slate LabeledItem class Options"></a><b>Options</b>
+# <p><a name="LabeledItem class Options"></a><b>Options</b>
 #
 # <ul>
 # <li><b>-font</b>:

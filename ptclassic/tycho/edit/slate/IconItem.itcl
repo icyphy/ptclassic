@@ -49,9 +49,9 @@
 # lines to the item.
 # </ul>
 # 
-# <p><a name=#"options"><b>Options</b>:
+# <p><a name="IconItem class Options"><b>Options</b>:
 # 
-# See also <a href="LabeledItem.html#options">LabeledItem</a>.
+# See also <a href="LabeledItem.html#LabeledItem class options">LabeledItem</a>.
 #
 # <ul>
 # <li><b>-anchor</b>:
