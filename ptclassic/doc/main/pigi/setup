@@ -75,9 +75,22 @@ setenv PRINTER lw
 You should replace
 .c "lw"
 with whatever printer name you are using.
+.pp
+If, for some reason, you wish to use an alternate version of the
+.i pigiRpc
+process, you will need to set your PIGIRPC environment variable
+to the complete pathname of the executable file for the ``alternate
+pigiRpc'' you wish to use (advanced users use this feature when
+they want to, say, link in their own domains to Ptolemy).  This
+variable must be set in your ``.cshrc'' or ``.profile'' to be
+effective because of the way
+.i vem
+invokes
+.i pigiRpc .
 .H2 "The X Window System"
 .pp
 Pigi uses the X window system, version 11 release 4 (X11R4).
+It will also run correctly under X11R3.
 This section provides just enough information about using X
 so that if you are not familiar with it you will nonetheless
 be able to get started.
@@ -211,3 +224,27 @@ This file defines some basic resources, including some
 which work around some bugs in X11R4.
 If you already have a file with this name, then you can probably
 use the one you have as is.
+.H3 "Running Pigi using Open Windows"
+.pp
+Pigi will run under Sun's Open Windows (which is based on a combination
+of X11R4 and NeWS, another windowing protocol).  This document will
+not attempt to teach you how to use Open Windows; there are excellent
+tutorial documents available from Sun.  We'll assume as a starting
+point that you are configured to run Open Windows;
+.i "do not"
+attempt to use the .login and .cshrc in the ptolemy account in
+this case.  First, make sure that your .cshrc file defines the ARCH
+environment variable as above.  Now add the
+directories ``~ptolemy/bin'' and ``~ptolemy/bin.$ARCH'' to your
+path, as described above.  You'll need to have the ``olwm'' window
+manager run in the mode where focus follows the mouse (in this
+mode, your keystrokes go to whatever window your mouse points to);
+to do this, find the line in your .xinitrc file that invokes olwm;
+add the option
+.c -follow
+to the olwm command.  If, for some reason, you must run olwm in the
+click-to-focus mode, you must click the mouse in each window before
+Pigi will accept keyboard commands in that window; it is possible
+but annoying to use Pigi this way.
+
+
