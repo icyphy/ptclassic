@@ -21,7 +21,7 @@ $Id$
 #endif
 
 #include "LSNode.h"
-#include "SDFStar.h"
+#include "SDFCluster.h"
 class LSGraph;
 class ClusterNodeList;
 
@@ -48,7 +48,7 @@ public:
 // Each cluster contains two components associated with the repetition
 // counters.
 
-class LSCluster : public SDFStar {
+class LSCluster : public SDFBaseCluster {
 private:
 	SDFFiring* firing;	// local schedule
 	SDFFiring* prev;	// previous firing.
@@ -67,9 +67,6 @@ public:
 	// fire the cluster
 	int fire();
 	void go() { fire();}
-
-	// class identification
-	int isA(const char*) const;
 
 	// generate code
 	void genCode(Target&, int);

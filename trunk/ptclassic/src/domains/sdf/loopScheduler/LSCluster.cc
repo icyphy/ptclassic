@@ -110,9 +110,6 @@ int LSCluster :: fire() {
 	return TRUE;
 }
 	
-// isA functions
-ISA_FUNC(LSCluster,SDFStar);
-
 // indent by depth tabs.
 static const char* tab_2(int depth) {
 	// this fails for depth > 20, so:
@@ -134,11 +131,10 @@ StringList LSCluster :: displaySchedule(int depth) {
 			depth++;
 		}
 
-		if (f->s->isA("LSCluster") == 1) {
-			sch += ((LSCluster*) f->s)->displaySchedule(depth);
-		} else {
-			sch += ((SDFCluster*) f->s)->displaySchedule(depth);
-		}
+		
+		SDFBaseCluster* temp = (SDFBaseCluster*)(f->s);
+		sch += temp->displaySchedule(depth);
+
 		if (f->count > 1) {
 			depth--;
 			sch += tab_2(depth);
@@ -156,17 +152,18 @@ void LSCluster :: genCode(Target& t, int depth) {
 	while (f) {
 		if (f->count > 1) {
 			t.beginIteration(f->count, depth);
+			depth++;
 		}
-		SDFStar* temp = f->s;
-		if (temp->isA("LSCluster")) {
-			((LSCluster*) temp)->genCode(t, depth+1);
-		} else {
-			((SDFCluster*) temp)->genCode(t, depth);
-		}
+		SDFBaseCluster* temp = (SDFBaseCluster*)(f->s);
+
+		temp->genCode(t, depth);
+
 		if (f->count > 1) {
+			depth--;
 			t.endIteration(f->count, depth);
 		}
 		f = f->next;
 	}
 	return;
 }
+
