@@ -18,11 +18,13 @@ $Id$
 #include "AsmGeodesic.h"
 #include "miscFuncs.h"
 
+// attributes
+extern const Attribute P_CIRC(PB_CIRC,0);
+
 // we require circular access either if the PB_CIRC attribute is set
 // (indicating a user request for it), or if the number of tokens
 // read or written each time doesn't evenly divide the buffer size.
 
-// This one may need more thought.
 int AsmPortHole::circAccess() const {
 	if ((attributes() & PB_CIRC) != 0) return TRUE;
 	if (numberTokens > 1 && bufferSize % numberTokens != 0) return TRUE;
@@ -48,6 +50,16 @@ Geodesic* AsmPortHole::allocateGeodesic() {
 	LOG_NEW; Geodesic *g = new AsmGeodesic;
 	g->setNameParent(hashstring(nm), parent());
 	return g;
+}
+
+// initialize.  Main job here is to set up the offset.
+void AsmPortHole::initialize() {
+	PortHole::initialize();
+	if (isItOutput()) offset = 0;
+	else {
+		offset = numTokens();
+		while (offset > numberTokens) offset -= numberTokens;
+	}
 }
 
 int AsmPortHole::bufSize() const {
