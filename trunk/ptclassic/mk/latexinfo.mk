@@ -1,12 +1,19 @@
 # Version $Id$
 # Author:	T. M. Parks
 # Created:	11 January 1994
+#
+# This file is included by the makefile in $PTOLEMY/doc/kernel_man
+# that builds the kernel manual
 
 # Command used for getting files from SCCS. (Gnu make)
 GET=safe-get
 
+# Add more directories to TEXINPUTS TeX search path for input files
+# -- define it in shell format, e.g. MORE_TEXINPUTS=dir1:dir2:
+# -- end the definition with a : to which TeX will add default directories
+MORE_TEXINPUTS=
+
 LATEXINFO= /usr/tools/gnu/src/latexinfo
-MORE_TEXINPUTS= $(LATEXINFO)/styles
 TEXINPUTS= .:$(ROOT)/doc/tex:$(LATEXINFO)/styles:$(MORE_TEXINPUTS)
 
 INFO=	-l $(ROOT)/doc/elisp/default.el -l $(LATEXINFO)/.emacs \
