@@ -9,7 +9,7 @@
 # This will add the dependencies to the makefile.
 
 # SRCDIR is the directory containing the Ptolemy kernel source.
-SRCDIR = ..
+SRCDIR = /usr/tools/ptolemy/src/kernel
 GFLAGS = -g -I$(SRCDIR)
 GNU = g++
 GNUINCLUDE = -I$(SRCDIR) -I/usr/gnu/lib/g++-include
