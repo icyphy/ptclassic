@@ -170,5 +170,13 @@ extern vemStatus bufModified
   ARGS((octId fctId));
   /* Returns VEM_OK if the buffer has been modified */
 
+/* Really this should be internal, but physical/createmod.c, rpc/vemRpc.c
+ * and files in symbolic all use it.
+ * (bufinternal.h)
+ */
+void bufMarkActive
+    ARGS((octId id));
+
+
 #endif
 
