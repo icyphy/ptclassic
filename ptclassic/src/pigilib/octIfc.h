@@ -24,5 +24,6 @@ extern boolean SetHardwareProp();
 extern boolean GetCommentProp();
 extern boolean SetCommentProp();
 extern boolean GOCDomainProp();
+extern boolean GOCArchProp();
 extern int GetIterateProp();
 extern void SetIterateProp();
