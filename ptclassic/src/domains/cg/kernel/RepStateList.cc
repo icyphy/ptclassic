@@ -38,7 +38,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "RepStateList.h"
 
 State* RepStateList::equivalentState(const State& s) const {
-	StateListIter nextState(*this);
+	StateListIter tmpState= *this;
+	StateListIter nextState(tmpState);
 	State *stateP;
 	while ((stateP = nextState++) != 0) {
 		if ( (strcmp(s.name(),stateP->name()) == 0) && 
