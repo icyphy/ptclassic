@@ -176,12 +176,6 @@ proc ::tycho::view {view args} {
 # focus changes between views. Only one each of the menu, status, and
 # tool bars are displayed at a time, the one corresponding to the view
 # with the focus.
-# <p>
-# FIXME: Here is an example:
-# <tcl><pre>
-# ::tycho::Displayer .dm
-# .dm centerOnScreen
-# </pre></tcl>
 #
 class ::tycho::Displayer {
     inherit ::tycho::TopLevel
