@@ -106,7 +106,7 @@ LIBDIR =	$(ROOT)/lib.$(PTARCH)
 # multiply defined rules for $(LIBDIR)/$(LIB_DEBUG) if LIB_DEBUG is empty.
 LIBR_DEBUG =	libdummy_g
 
-# Itcl2.1 shell: [incr Tcl] sh  (tclsh + namespaces)
+# Itcl shell
 #ITCLSH =	$(PTOLEMY)/tcltk/tcl.$(PTARCH)/bin/itclsh
 ITCLSH =	itclsh
 
