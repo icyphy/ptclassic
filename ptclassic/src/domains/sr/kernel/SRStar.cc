@@ -40,15 +40,9 @@ extern const char SRdomainName[];
 
 // Class identification.
 ISA_FUNC(SRStar, Star);
-ISA_FUNC(SRNonStrictStar, Star);
 
 // Domain identification.
 const char* SRStar::domain() const
-{
-  return SRdomainName;
-}
-
-const char * SRNonStrictStar::domain() const
 {
   return SRdomainName;
 }
@@ -80,12 +74,14 @@ int SRStar::tick()
 
 // Inter-instant time advacement
 // For this strict star, it calls go() at most once an instant when
-// all its inputs are known
+// all its inputs are known, and at least one is present if it's a
+// reactive star
 int SRStar::run()
 {
   if ( !hasFired ) {
 
     int ableToFire = 1;
+    int presentInputs = 0;
 
     BlockPortIter nextPort(*((Block *) this) );
     PortHole * p;
@@ -95,25 +91,21 @@ int SRStar::run()
 	if ( !((InSRPort *) p)->known() ) {
 	  ableToFire = 0;
 	  break;
+	} else {
+	  if ( ((InSRPort *) p)->present() ) {
+	    presentInputs = TRUE;
+	  }
 	}
       }
     }
 
-    if ( ableToFire ) {
+    if ( ableToFire && (!isReactive || presentInputs) ) {
       go();
       hasFired = 1;
     }
 
   }
 
-  return 0;
-}
-
-// Inter-instant time advancement
-// For this non-strict star, just call go()
-int SRNonStrictStar::run()
-{
-  go();
   return 0;
 }
 
@@ -127,7 +119,7 @@ int SRStar::knownOutputs()
 
   while ( ( p = nextPort++) != 0 ) {
     if ( p->isItOutput() ) {
-      if ( !((InSRPort *) p)->known() ) {
+      if ( ((InSRPort *) p)->known() ) {
 	number++;
       }
     }
@@ -135,4 +127,12 @@ int SRStar::knownOutputs()
 
   return number;
 
+}
+
+// Initialize all domain-specific flags
+void SRStar::initialize()
+{
+  Star::initialize();
+
+  isReactive = 0;
 }
