@@ -171,6 +171,9 @@ GET=safe-get
 # yacc is used by ptlang and islang
 YACC = yacc
 
+# lex is used by islang on the hp
+LEX = flex
+
 # command to generate dependencies (cfront users can try CC -M)
 DEPEND=g++ -MM
 
