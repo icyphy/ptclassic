@@ -488,7 +488,7 @@ long userOptionWord;
     FindClear();
 
     TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditValues ",
-                   " \"Edit Seed\" ",
+                   " \"Set Seed\" ",
                    " \"ptkSetSeed %s \" ",
                    " \"{Seed for Random Number} [ptkGetSeed]\" ",
                    (char *)NULL) )
