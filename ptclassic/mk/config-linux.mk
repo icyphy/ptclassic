@@ -215,19 +215,21 @@ CC_STATIC = #-static
 # Matlab architecture
 MATARCH = lnx86
 
-# If you have MATLAB 4 then you can set the environment variable MATLABDIR
-# to the MATLAB 4 root directory. Ptolemy won't link with MATLAB 5 libmat.so.
+# If you have MATLAB then you can set the environment variable MATLABDIR
+# to the MATLAB root directory.
 ifdef MATLABDIR
-# Check if MATLABDIR points to a MATLAB 4 directory
+# Check if MATLABDIR points to a MATLAB directory
 # MATLAB 4 has a static libmat.a whereas MATLAB 5 has a DLL libmat.so 
 INCLUDE_MATLAB := $(shell \
-	if [ -r "$(MATLABDIR)/extern/lib/$(MATARCH)/libmat.a" ]; \
+	if [ -r "$(MATLABDIR)/extern/lib/$(MATARCH)/libmat.a" -o -r "$(MATLABDIR)/extern/lib/$(MATARCH)/libmat.so" ]; \
 	then echo yes; else echo no; echo \
-	'Warning: $$MATLABDIR is not a MATLAB 4 root dir! Ignoring setting.' \
++	'Warning: $$MATLABDIR is not a MATLAB root dir! Ignoring setting.' \
 	>&2; fi)
 else
 INCLUDE_MATLAB = no
 endif
+# Shared library option to search MATLAB's Linux DLLs
+MATLABEXTRAOPTS=-Wl,-R,$(MATLABDIR)/sys/$(MATARCH)
 
 # If you have Mathematica 2 then you can set the environment variable
 # MATHEMATICADIR to the Mathematica 2 root directory. Ptolemy won't link
