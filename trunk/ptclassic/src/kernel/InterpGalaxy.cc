@@ -335,8 +335,9 @@ InterpGalaxy::nodeConnect (const char* star, const char* port,
 		noInstance (node, name());
 		return FALSE;
 	}
-	if (ph->isItOutput())
+	if (ph->isItOutput()) {
 		if (!g->setSourcePort (*ph, 0)) return FALSE;
+	}
 	else if (*initDelayValues) {
 	  Error::abortRun ("delay not allowed when nodeConnecting an input");
 	  return FALSE;
