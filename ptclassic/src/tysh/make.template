@@ -121,7 +121,7 @@ endif
 endif
 
 ifndef VERSION
-	VERSION =	0.01devel.$(BASENAME)_Ptolemy0.6.1devel
+	VERSION =	0.01devel.$(BASENAME)_Ptolemy0.7pre
 endif
 
 TK = 		1
