@@ -12,10 +12,14 @@ $Id$
 
 **************************************************************************/
 
-void BlockOfCode :: printCode () {
+void CodeBlock:: printCode () {
+	cout << text << "\n";
+}
+
+void CodeBlockList :: printCode () {
 	CodeBlockIter line(*this);
 	for(int i = size(); i>0; i--) {
-		LineOfCode* p = line++;
-		cout << p->getText() << "\n";
+		CodeBlock* p = line++;
+		p->printCode();
 	}
 }
