@@ -71,6 +71,7 @@ const int MAX_NO_GRAPHS = 64;
 #include <math.h>
 #include "streamCompat.h"
 #include "paths.h"
+#include "SimControl.h"
 
 // constructor initializes streams and filenames
 XGraph :: XGraph () : strm(0), tmpFileNames(0), count(0), blockIamIn(0), ng(0)
@@ -201,6 +202,7 @@ void XGraph :: addPoint (int dataSet, float x, float y) {
 	count[didx]++;
 	fcheck(x,dataSet);
 	fcheck(y,dataSet);
+	if (SimControl::haltRequested()) return;
 	if (count[didx] >= nIgnore && strm[didx]) {
 	    if (ascii) {
 		fprintf(strm[didx], "%g %g\n", x, y);
