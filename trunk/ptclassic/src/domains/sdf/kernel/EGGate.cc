@@ -42,24 +42,20 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SDFStar.h"
 
 StringList EGGate::printMe() {
-	StringList out;
-	out += "nsam = ";
-	out += samples();
-	out += ", and delay = ";
-	out += delay();
-	out += "\n";
+	StringList out = "nsam = ";
+	out << samples() << ", and delay = " << delay() << "\n";
 	return out;
 }
 
-void EGGate::allocateArc(EGGate *dest, int no_samples, int no_delays) 
-{
-	far=dest;
-	dest->far=this;
+void EGGate::allocateArc(EGGate* dest, int no_samples, int no_delays) {
+	far = dest;
+	dest->far = this;
+	LOG_DEL; delete arc;
 	LOG_NEW; arc = new EGArc(no_samples, no_delays);
 	dest->arc = arc; 
 }
 
-// disconnect this node & it's far end node, fix the gate pointers and
+// disconnect this node and it's far end node, fix the gate pointers and
 // deallocate this gate.  The far gate will be deallocated by the far EGNode
 EGGate::~EGGate() 
 {
@@ -69,9 +65,7 @@ EGGate::~EGGate()
     far->arc = 0;
     far = 0;
   }
-  if (arc) {
-    LOG_DEL; delete arc; 
-  }
+  LOG_DEL; delete arc; 
 }
 
 void EGGate::hideMe(int flag) {
@@ -79,13 +73,14 @@ void EGGate::hideMe(int flag) {
 	myLink->removeMeFromList();
 	parent->hiddenGates.insertGate(this, 0);
 }
-	
+
 DataFlowStar* EGGate :: farEndMaster() {
-	if (far == 0) return 0;
-	return farEndNode()->myMaster(); }
+	return far ? farEndNode()->myMaster() : (DataFlowStar*)0;
+}
 
 int EGGate :: farEndInvocation() {
-	return farEndNode()->invocationNumber(); }
+	return far ? farEndNode()->invocationNumber() : 0;
+}
 
 ////////////////////////////
 // EGGateList methods //
@@ -107,8 +102,6 @@ EGGate* EGGateList::findMaster(DataFlowStar *master) {
 	return q;
 }
 
-
-
 // This routine searches the precedence list for the node, NEXT TO 
 // WHICH "node" should be placed. If the new node should be placed 
 // AFTER the returned node, ret is set to +1; if the node should go
@@ -119,18 +112,17 @@ EGGate* EGGateList::findMaster(DataFlowStar *master) {
 
 EGGateLink* EGGateList::findInsertPosition (EGNode *node, int delay, int& ret)
 {
-
-	DataFlowStar *master = node->myMaster();
+	DataFlowStar* master = node->myMaster();
 	int invocation = node->invocationNumber();
 
-	EGGate *p = findMaster(master);
+	EGGate* p = findMaster(master);
 	if (p == 0) {   // no entries having this master
 		return 0;
 	}
 
-	EGGateLink *prev = 0;
-	EGGateLink *cur = p->getLink();
-	while (cur != 0) {
+	EGGateLink* prev = 0;
+	EGGateLink* cur = p->getLink();
+	while (cur) {
 		p = cur->gate();
 		if (p->farEndMaster() != master) {
 			ret = 1;
@@ -138,7 +130,7 @@ EGGateLink* EGGateList::findInsertPosition (EGNode *node, int delay, int& ret)
 		}      
 
 		if (p->farEndInvocation() == invocation) {
-			while (cur != 0) {
+			while (cur) {
 				p = cur->gate();
 				if (p->farEndInvocation() != invocation) {
 					ret=1;
@@ -183,14 +175,12 @@ StringList EGGateList::printMe() {
 	EGGate *p;
 	StringList out;
 	while((p = next_pnode++)!=0) {
-		out += "-- list of gates -- \n";
-		out += p->printMe();
-		out += "-- end of list -- \n";
+		out << "-- list of gates -- \n"
+		    << p->printMe()
+		    << "\n-- end of list -- \n";
 	}
 	return out;
 }
-
-
 
 // Insert the argument precedence node into the list.  Return a pointer 
 // to the node after it's inserted.
@@ -200,41 +190,45 @@ StringList EGGateList::printMe() {
 
 void EGGateList :: insertGate(EGGate *pgate, int update) 
 {
-	int pos;
-	EGGateLink *p = 
-		findInsertPosition(pgate->farEndNode(),pgate->delay(),pos);
-
-	EGGateLink* temp = (EGGateLink*) createLink(pgate);
+	int pos = 0;
+	EGGateLink* p = findInsertPosition(pgate->farEndNode(),
+					   pgate->delay(), pos);
+	EGGateLink* temp = (EGGateLink*)createLink(pgate);
 
 	if (p == 0)  // no entries of this master yet  
 		insertLink(temp);
+	else if (pos > 0)
+		insertBehind(temp, p);
+	else if (pos < 0)
+		insertAhead(temp, p);
 	else {
-		if (pos > 0) insertBehind(temp,p);
-		else if (pos < 0) insertAhead(temp,p);
-		else {
-			// compare the porthole
-			if (pgate->aliasedPort() != p->gate()->aliasedPort()) {
-				insertBehind(temp, p);
-	
-			// If a link to the same EGNode, with the same delay,
-			//  already exists, then simply update the number of
-			// samples in the existing node, and delete this one,
-			// because it is redundant. If we're updating now,
-			// save the arc -- we'll use it to insert the other
-			// endpoint (this is our convention).
-			} else if (update) {
-				p->gate()->addSamples(pgate->samples());
-			} else { LOG_DEL; delete pgate; }
-			return;
+		// compare the porthole
+		if (pgate->aliasedPort() != p->gate()->aliasedPort()) {
+			insertBehind(temp, p);
 		}
-	}  
+		// If a link to the same EGNode, with the same delay,
+		// already exists, then simply update the number of
+		// samples in the existing node, and delete this one,
+		// because it is redundant. If we're updating now,
+		// save the arc -- we'll use it to insert the other
+		// endpoint (this is our convention).
+		else if (update) {
+			p->gate()->addSamples(pgate->samples());
+			LOG_DEL; delete temp;
+		}
+		else {
+			LOG_DEL; delete pgate;
+			LOG_DEL; delete temp;
+		}
+		return;
+	}
 	temp->myList = this;
 }
 
 void EGGateList::initialize() {
 	EGGateLinkIter iter(*this);
-	EGGate *p;
-	while ((p=iter++)!=0) {
+	EGGate* p;
+	while ((p = iter++) != 0) {
 		LOG_DEL; delete p;
 	}
 	DoubleLinkList :: initialize();
