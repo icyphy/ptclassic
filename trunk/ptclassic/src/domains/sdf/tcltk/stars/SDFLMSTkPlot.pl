@@ -78,7 +78,6 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	    InfString butName;
 	    InfString sliderName;
-	    InfString command;
 
 	    // initial position of slider
 	    int position;
@@ -97,11 +96,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    if (!ptkInterp) return;
 
 	    // Remove Tcl commands
-	    command = butName;
-	    Tcl_DeleteCommand (ptkInterp, (char*)command);
-
-	    command = sliderName;
-	    Tcl_DeleteCommand(ptkInterp, (char*)command);
+	    Tcl_DeleteCommand(ptkInterp, (char*)butName);
+	    Tcl_DeleteCommand(ptkInterp, (char*)sliderName);
 	}
 	setup {
 	    // Initialize iteration count
@@ -133,16 +129,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	    }
 
 	    // Register the callback functions with Tcl
-	    command = sliderName;
-	    Tcl_CreateCommand(ptkInterp, (char*)command, setStep,
+	    Tcl_CreateCommand(ptkInterp, (char*)sliderName, setStep,
 			      (ClientData)this, NULL );
-	    command = butName;
-	    Tcl_CreateCommand(ptkInterp, (char*)command, reset,
+	    Tcl_CreateCommand(ptkInterp, (char*)butName, reset,
 			      (ClientData)this, NULL);
 
 	    // Put controls entries into the window
 	    // First, a button to reset the taps
-	    command = "ptkMakeButton ";
+	    InfString command = "ptkMakeButton ";
 	    command += bg.winName;
 	    command += ".middle ";
 	    command += butName;
@@ -226,7 +220,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		    + (double(stepSizeHigh) - double(stepSizeLow))
 		    * (position/100.0);
 		// display the slider value
-		command = bg.winName;
+		InfString command = bg.winName;
 		command += ".low.";
 		command += sliderName;
 		command += ".value configure -text {";
