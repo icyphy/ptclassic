@@ -121,12 +121,12 @@ void SRScheduler::runOneInstant()
     nextStar.reset();
 
     while ( ( s = nextStar++ ) != 0 ) {
-      cout << "Firing " << ((SRStar *) s)->name() << "\n";
+      // cout << "Firing " << ((SRStar *) s)->name() << "\n";
       ((SRStar *) s)->run();
       numKnown += ((SRStar *) s)->knownOutputs();
     }
 
-    cout << "Completed iteration, " << numKnown << " outputs known\n";
+    // cout << "Completed iteration, " << numKnown << " outputs known\n";
 
   } while ( numKnown != lastNumKnown );     
 
@@ -138,7 +138,7 @@ void SRScheduler::runOneInstant()
     ((SRStar *) s)->tick();
   }
 
-  cout << "Completed instant\n";
+  // cout << "Completed instant\n";
 
 }
 

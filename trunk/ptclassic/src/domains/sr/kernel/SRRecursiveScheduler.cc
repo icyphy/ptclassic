@@ -158,7 +158,7 @@ void SRRecursiveScheduler::runOneInstant()
     ((SRStar *) s)->tick();
   }
 
-  cout << "Completed instant\n";
+  // cout << "Completed instant\n";
 
 }
 
