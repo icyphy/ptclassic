@@ -29,7 +29,7 @@
 ##########################################################################
 
 
-DIRS = kernel
+DIRS = bin doc kernel
 
 makefiles all install clean sources depend realclean checkjunk sccsinfo:
 	@for x in $(DIRS); do \
