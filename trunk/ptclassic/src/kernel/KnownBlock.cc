@@ -205,7 +205,7 @@ KnownBlock::find(const char* type, const char* dom) {
 			if (en) return en->b;
 		}
 	}
-	return e ? e->b : NULL;
+	return e ? e->b : (const Block*) NULL;
 }
 
 // return TRUE if indicated name refers to a dynamically linked block.

@@ -83,12 +83,12 @@ KnownState::find(const char* type) {
 		else *t++ = c;
 	}
 	*t = 0;
-        return numStates == 0 ? NULL : allStates->stateWithName(upcaseType);
+        return numStates == 0 ? (const State*) NULL : allStates->stateWithName(upcaseType);
 }
 
 const State*
 KnownState::lookup(const char* name) {
-	return numGlobals == 0 ? NULL : allGlobals->stateWithName(name);
+	return numGlobals == 0 ? (const State*) NULL : allGlobals->stateWithName(name);
 }
 
 // The main cloner.  This method gives us a new state of the named
