@@ -91,7 +91,7 @@ protected:
 	int computeCutCost(int flag_loc, int leftFlagValue);
 	void findIndepBndryNodes(int type, Cluster* c, SequentialList& indepBndryNodes);
 	int costOfMovingAcross(Cluster* bndryNode, int direction);
-	void updateBestCut(int numOnLeftSide);
+	void updateBestCut();
 
 };
 
