@@ -237,7 +237,7 @@ proc ptolemyStarHTMLIndex { domain outputfilename args} {
     # Create a title from the outputfilename 
     # FIXME: this is a big time hack.
     set subdomain {}
-    regexp {.*/domains/.*/(.*)/doc/stars} $outputfilename dummy subdomain
+    regexp {.*/domains/.*/(.*)/stars} $outputfilename dummy subdomain
     if {$subdomain != {}} {
 	set title "$domain $subdomain stars"
     } else {
