@@ -193,6 +193,7 @@ char* objCopyright;		/* copyright */
 char* objExpl;			/* long explanation for troff formatting */
 char* objHTMLdoc;		/* long explanation for HTML formatting */
 char* objLocation;		/* location string */
+char* coreCategory;		/* core category (i.e. Fix) for this Core */
 char* coronaName;		/* name of the Corona of this Core */
 int   galDef;			/* true if obj is a galaxy */
 char* domain;			/* domain of object (if star) */
@@ -287,7 +288,7 @@ typedef char * STRINGVAL;
 %}
 
 %token DEFSTAR DEFCORONA DEFCORE GALAXY
-%token NAME DESC DEFSTATE CORONA DOMAIN NUMPORTS NUM VIRTUAL
+%token NAME DESC DEFSTATE CORONA CORECATEGORY DOMAIN NUMPORTS NUM VIRTUAL
 %token DERIVED ALSODERIVED CONSTRUCTOR DESTRUCTOR STAR ALIAS INPUT OUTPUT
 %token INOUT ACCESS INMULTI OUTMULTI INOUTMULTI
 %token TYPE DEFAULT CLASS BEGIN SETUP GO WRAPUP TICK CONNECT ID
@@ -358,8 +359,8 @@ gallist:galitem
 |	gallist galitem
 ;
 
-/* items allowed in both stars and galaxies */
-sgitem:
+/* items allowed in stars, coronas, cores and galaxies */
+commonitem:
 	NAME '{' ident '}'		{ objName = $3;}
 |	VERSION '{'			{ versionMode = 1;}
 		version '}'		{ versionMode = 0;}
@@ -393,6 +394,11 @@ sgitem:
 					  bodyMode = 0;
 					  docMode = 0;}
 |	SEEALSO '{' seealso '}'		{ }
+;
+
+/* items allowed in stars, cores and galaxies */
+sgitem:
+	commonitem
 |	DEFSTATE 			{ clearStateDefs();}
 		'{' dstatelist '}'	{ genState(); describeState();}
 
@@ -570,12 +576,19 @@ version:
 /* star items */
 staritem:
 	sgitem
-|	DOMAIN '{' ident '}'		{ domain = $3;}
-|	DERIVED '{' ident '}'		{ derivedFrom = $3;}
-|	ALSODERIVED '{' alsoderivedlist '}'		{}
+|	domainorderived
 |	portkey '{' portlist '}'	{ genPort();
 					  describePort(); }
-|	CODEBLOCK '(' ident cbargs ')' '{'
+|	codeblock 
+
+domainorderived:
+	DOMAIN '{' ident '}'		{ domain = $3;}
+|	DERIVED '{' ident '}'		{ derivedFrom = $3;}
+|	ALSODERIVED '{' alsoderivedlist '}'		{}
+;
+
+codeblock:
+	CODEBLOCK '(' ident cbargs ')' '{'
 					{ char* b = malloc(SMALLBUFSIZE);
 					  blockID = $3;
 					  strcpy(b,blockID);
@@ -647,15 +660,23 @@ coronalist:coronaitem
 |	coronalist coronaitem
 ;
 
-
 coronaitem:
-	sgitem
+	commonitem
+|	domainorderived
+|	DEFSTATE 			{ clearStateDefs();}
+		'{' dstatelist '}'	{ genState(); describeState();}
+|	portkey '{' portlist '}'	{ genPort();
+					  describePort(); }
+
 ;
 
 /* core items */
 coreitem:
-	sgitem
-	CORONA '{' ident '}'		{ coronaName = $3;}
+	domainorderived
+|	CORONA '{' ident '}'		{ coronaName = $3;}
+|	CORECATEGORY '{' ident '}'		{ coreCategory = $3;}
+|	sgitem
+|	codeblock
 ;
 	
 
@@ -800,7 +821,7 @@ ident:	keyword
 
 /* keyword in identifier position */
 keyword:	DEFSTAR|DEFCORONA|DEFCORE|GALAXY
-|NAME|DESC|DEFSTATE|DOMAIN|NUMPORTS|DERIVED
+|CORECATEGORY|CORONA|NAME|DESC|DEFSTATE|DOMAIN|NUMPORTS|DERIVED
 |ALSODERIVED|CONSTRUCTOR|DESTRUCTOR|STAR|ALIAS
 |INPUT|OUTPUT|INOUT|INMULTI|OUTMULTI|INOUTMULTI
 |TYPE
@@ -835,9 +856,9 @@ int g;
 	int i;
 	for (i = 0; i < NSTATECLASSES; i++) stateMarks[i] = 0;
 	galDef = g;
-	objName = objVer = objDesc = coronaName = domain = derivedFrom =
-		objAuthor = objCopyright = objExpl = objHTMLdoc =
-                objLocation = NULL;
+	objName = objVer = objDesc = coronaName = coreCategory =
+		domain = derivedFrom = objAuthor = objCopyright =
+		objExpl = objHTMLdoc = objLocation = NULL;
 	consStuff[0] = ccCode[0] = hCode[0] = consCalls[0] = 0;
 	publicMembers[0] = privateMembers[0] = protectedMembers[0] = 0;
 	inputDescriptions[0] = outputDescriptions[0] = inoutDescriptions[0] = 0;
@@ -1826,6 +1847,8 @@ struct tentry keyTable[] = {
 	{"consCalls", CONSCALLS},
 	{"constructor", CONSTRUCTOR},
 	{"copyright", COPYRIGHT},
+	{"corecategory", CORECATEGORY},
+	{"coreCategory", CORECATEGORY},
 	{"corona", CORONA},
 	{"default", DEFAULT},
 	{"defcore", DEFCORE},
