@@ -1,84 +1,82 @@
 defstar {
-	name { Shifter }
-	domain { CG56 }
-	desc { Hard shifter. }
-	version { $Id$ }
-	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
-	location { CG56 demo library }
-	explanation {
-Scale by shifting left N (default 1) bit.
+    name { Shifter }
+    domain { CG56 }
+    desc { Hard shifter. }
+    version { $Id$ }
+    author { Chih-Tsung Huang, ported from Gabriel }
+    copyright { 1992 The Regents of the University of California }
+    location { CG56 demo library }
+    explanation {
+Scale by shifting left \fIleftShifts\fP bits.
 Negative values of N implies right shifting.
-	}
-	input {
-		name {input}
-		type {FIX}
-	}
-	output {
-		name {output}
-		type {FIX}
-	}
-        state {
-                name {N}
-	        type {int}
-	        default { 1 }
-	        desc { N shifts }
-	}
-        state {
-		name { saturation }
-		type { string }
-		default { "YES" }
-		desc { If true, use saturation arithmetic }
-	}
-        codeblock(shiftblock) {
+Arithmetic shifts are used.
+    }
+    input {
+	    name {input}
+	    type {FIX}
+    }
+    output {
+	    name {output}
+	    type {FIX}
+    }
+    state {
+	    name {leftShifts}
+	    type {INT}
+	    default { 1 }
+	    desc { Number of left shifts. }
+    }
+    state {
+	    name {absShifts}
+	    type {INT}
+	    desc { Absolute value of number of bit shifts. }
+	    attributes { A_NONSETTABLE }
+    }
+    state {
+	    name { saturation }
+	    type { string }
+	    default { "YES" }
+	    desc { If true, use saturation arithmetic }
+    }
+    protected {
+	int doSat;
+    }
+    start {
+	int scnt = int(leftShifts);
+	absShifts = scnt >= 0 ? scnt : - scnt;
+	const char *str = saturation;
+	doSat = str[0]=='Y' || str[0]=='y';
+    }
+    codeblock(cbLoad) {
         move    $ref(input),a
-        }
-	codeblock (one) {
-        asl     a
- 	}
-        codeblock (neg_one) {
-        asr     a
-        }
-        codeblock (g_one) {
-        rep     #$val(N)
-        asl     a
-        }
-        codeblock (l_neg_one) {
-        rep     -#$val(N)
-        asr     a
-        }
- 	codeblock (sat) {
+    }
+    codeblock(cbShifts) {
+	IF	$val(absShifts) >= 1
+          rep     #$val(absShifts)
+	ENDIF
+
+	IF	$val(leftShifts) > 0
+          asl     a
+	ELSE
+          asr     a
+	ENDIF
+    }
+    codeblock(cbSaveSat) {
 	move	a,$ref(output)
-        }
-	codeblock  (nosat) {
+    }
+    codeblock(cbSaveNosat) {
 	move	a1,$ref(output)
+    }
+    go {
+    	gencode(cbLoad);
+	if ( int(absShifts)!=0 ) {
+	    gencode(cbShifts);
 	}
-        go {
-		const char* p = saturation;
-                gencode(shiftblock);
-		if (int(N)==1) 
-			gencode(one);
-                if (int(N)==-1)
-                        gencode(neg_one);
-                if (int(N)>1)
-	                gencode(g_one);
-		if (int(N)<-1)
-	                gencode(l_neg_one);
-		switch (p[0]) {
-	        case 'Y': case 'y':
-              	               gencode(sat);
-			       break;
-                case 'N': case 'n':
-	                       gencode(nosat);
-			       break;
-                }
-	    }
-	exectime {
-		if (int(N)>=0)
-		   return int(N)+3;
-		else
-                   return -int(N)+3;  
-	}
+	if ( doSat )		gencode(cbSaveSat);
+	else			gencode(cbSaveNosat);
+    }
+    exectime {
+	return int(absShifts) + 3;
+    }
 }
 
 
