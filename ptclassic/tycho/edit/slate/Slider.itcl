@@ -34,7 +34,7 @@
 # Tk <code>scale</code> widget, and is supposed to be reminiscent
 # of a vertical ``slider'' as used in audio equipment. It also
 # provides a good example of how Tycho's
-# <a href="../../../../slate/interactors/doc/codeDoc/Slate.html">
+# <a href="../../../../slate/kernel/doc/codeDoc/Slate.html">
 # <i>Slate</i></a> widget can be used to (relatively) quickly
 # create new interactive components.
 # <p>
