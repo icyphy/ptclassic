@@ -133,7 +133,7 @@ body ::tycho::Edit::constructor {args} {
 	    -label {Undo/Redo} \
 	    -accelerator "C-x u" \
 	    -underline 0 \
-	    -command "[winfo command $itk_component(text)] undo"
+	    -command "$this component text undo"
     
     $itk_component(editMenu) add separator
     
@@ -141,19 +141,19 @@ body ::tycho::Edit::constructor {args} {
 	    -label Cut \
 	    -underline 0 \
 	    -accelerator "C-w" \
-	    -command "[winfo command $itk_component(text)] cut"
+	    -command "$this component text cut"
     
     $itk_component(editMenu) add command \
 	    -label Copy \
 	    -underline 1 \
 	    -accelerator "M-w" \
-	    -command "[winfo command $itk_component(text)] copy"
+	    -command "$this component text copy"
     
     $itk_component(editMenu) add command \
 	    -label Paste \
 	    -underline 0 \
 	    -accelerator "C-y" \
-	    -command "[winfo command $itk_component(text)] paste"
+	    -command "$this component text paste"
     
     $itk_component(editMenu) add separator
     
@@ -161,31 +161,31 @@ body ::tycho::Edit::constructor {args} {
 	    -label "Select All" \
 	    -underline 0 \
 	    -accelerator "C-/" \
-	    -command "[winfo command $itk_component(text)] selectAll"
+	    -command "$this component text selectAll"
     
     $itk_component(editMenu) add command \
 	    -label "Unselect" \
 	    -underline 0 \
 	    -accelerator "C-\\" \
-	    -command "[winfo command $itk_component(text)] unselectAll"
+	    -command "$this component text unselectAll"
     
     $itk_component(editMenu) add command \
 	    -label "Find/Change..." \
 	    -underline 0 \
 	    -accelerator "C-s" \
-	    -command "[winfo command $itk_component(text)] search"
+	    -command "$this component text search"
     
     $itk_component(editMenu) add command \
 	    -label "Spelling..." \
 	    -underline 2 \
 	    -accelerator "M-$" \
-	    -command "[winfo command $itk_component(text)] spellCheck"
+	    -command "$this component text spellCheck"
     
     $itk_component(editMenu) add command \
 	    -label {Goto Line...}\
 	    -underline 0 \
 	    -accelerator "C-c C-g" \
-	    -command "[winfo command $itk_component(text)] gotoLine"
+	    -command "$this component text gotoLine"
 
     # Add a Format menu
     itk_component add formatMenuButton {
@@ -219,19 +219,19 @@ body ::tycho::Edit::constructor {args} {
 	    -label "Fill Region" \
 	    -accelerator "M-q" \
 	    -underline 2 \
-	    -command "[winfo command $itk_component(text)] busy fillSelection"
+	    -command "$this component text busy fillSelection"
     
     $itk_component(formatMenu) add command \
 	    -label "Right Fill Column" \
 	    -accelerator "C-x f" \
 	    -underline 2 \
-	    -command "[winfo command $itk_component(text)] queryFillColumn"
+	    -command "$this component text queryFillColumn"
     
     $itk_component(formatMenu) add command \
 	    -label "Set Fill Prefix" \
 	    -accelerator "C-x ." \
 	    -underline 1 \
-	    -command "[winfo command $itk_component(text)] queryFillPrefix"
+	    -command "$this component text queryFillPrefix"
     
     # The following initialize options and then invoke any
     # configuration options, assuming there are options specified.
