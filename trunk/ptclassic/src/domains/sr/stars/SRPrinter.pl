@@ -51,6 +51,7 @@ Before the first data are flushed, the file will not exist.
     // In case the file was not closed earlier by wrapup()..
     LOG_DEL; delete p_out;
     LOG_NEW; p_out = new pt_ofstream(fileName);
+    reactive();
   }
 
   go {
