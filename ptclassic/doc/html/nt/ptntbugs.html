@@ -432,6 +432,30 @@ try usually works.
 </BLOCKQUOTE>
 
 
+<li> Incremental linking still fails
+<pre>
+    Error: Error in creating shared object, command failed: g++ -shared -o
+    /tmp/__ptlink1032_2.so /usr/cxh/src/pt/SDFMyRamp.o
+</pre>
+In brief, the problem is that incremental linking of user stars is
+broken in the NT port.  In the past, I've tried to build a shared
+library version of Ptolemy under NT, but had various problems
+with the constructors etc.
+
+ <p>The alternative to building a shared library version is to build
+a static version of pigiRpc, which is what is currently built under
+NT.  The problem with a static pigiRpc is that incremental linking is
+tricky.  We had it working under SunOS years ago, and it might work
+again.  I definitely need to poke around in the sources and see what
+the problem is.
+
+ <p>One workaround would be to avoid incrementally linking your stars
+and instead build a pigiRpc that had the stars built in.  The way
+to do this is to create a makefile for your stars, build a library
+and then modify $PTOLEMY/mk/stars.mk so that your stars are built in.
+The programmer's manual has some info about this, see also
+$PTOLEMY/src/pigiExample
+
 <li> Tk demos don't run 
  <p>Formerly, 
 running the SDF butterfly demo within pigi
@@ -444,7 +468,8 @@ is used in <CODE>src/ProfileTimer.cc</CODE> and
 <CODE>src/SimControl.cc</CODE>.  However, Cygwin20 has itimers
 so we removed the <CODE>-DPT_NO_TIMER</CODE> from 
 <CODE>config-nt4.mk</CODE>, and the butterfly demo is much faster.
- <p>Now, the problem is that the Tk demos hang. The workaround
+ <p>Now, if we use itimers, then 
+the problem is that the Tk demos hang. The workaround
 is to either edit <CODE>config-nt4.mk</CODE> and add the 
 <CODE>-DPT_NO_TIMER</CODE> flag and recompile, or to do the following:
 <pre>
@@ -454,7 +479,8 @@ make USERFLAGS=-DPT_NO_TIMER install
 cd ../pigiRpc
 make install
 </pre>
-I'm leaving the event loop speed ups in so that I can debug this problem.
+Currently, in 0.7.2devel, the itimers are not used, so
+the butterfly demo is slow, but at least the Tk demos run.
 
 </MENU>
 
