@@ -34,8 +34,9 @@ DIRS = html_library idx itclcov tydoc util widgets
 # Root of Tycho directory
 ROOT =		..
 
+ME = 		lib
 # True source directory
-VPATH =		$(ROOT)/lib
+VPATH =		$(ROOT)/$(ME)
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
