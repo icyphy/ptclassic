@@ -68,9 +68,9 @@ proc ::tycho::icanvas {pathName args} {
 # according to their function:
 #
 # <ul>
-# <li><i>Picture</i> and subclasses.
+# <li><i>ComplexItem</i> and subclasses.
 # These classes implement the functionality needed by the icanvas to 
-# actually create complex items. Subclasses of Picture includes things
+# actually create complex items. Subclasses of ComplexItem includes things
 # like ``3D'' rectangles and
 # polygons, and ``smart'' objects like self-routing lines.
 # </ul>
@@ -297,7 +297,7 @@ class ::tycho::IncrCanvas {
 
     # Unique IDs and tags are created using this counter.
     # Note: this _must_ be common so item ids are unique across 
-    # all icanvases -- because Picture classes use common arrays
+    # all icanvases -- because ComplexItem classes use common arrays
     # indexed by ID.
     private common secretcounter 0
 }
@@ -350,7 +350,7 @@ body ::tycho::IncrCanvas::addtag {add mode args} {
 	} else {
 	    # Complex item
 	    set tags [$canvas gettags \
-		    [@scope ::tycho::Picture [list set primary($id)]]]
+		    [@scope ::tycho::ComplexItem [list set primary($id)]]]
 	    set root [string range [lindex $tags [lsearch $tags {!*}]] 1 end]
 	    
  	    if { $root == $id } {
@@ -515,7 +515,7 @@ body ::tycho::IncrCanvas::coords {tag args} {
 #
 # Create a top-level item. If the _type_ arg starts with a lower-case
 # letter, this method creates a simple (canvas item); if not, it
-# assumes that the type is the name of a subclass of Picture, and
+# assumes that the type is the name of a subclass of ComplexItem, and
 # creates the corresponding complex item. In either case, _args_ contains
 # the coordinates of the item, followed by option-value pairs.
 #
@@ -610,7 +610,7 @@ body ::tycho::IncrCanvas::createchild {parent type args} {
 #
 # Create a child item. The first argument is the hierarchy
 # tags of the parent as passed to the construct{} procs of the
-# Picture classes or as obtained by *gethtags*; the second
+# ComplexItem classes or as obtained by *gethtags*; the second
 # is the additional tags of the new item.
 #
 body ::tycho::IncrCanvas::createchild* {parent ptags tags type args} {
@@ -655,7 +655,7 @@ body ::tycho::IncrCanvas::createrootchild {parent type args} {
 #
 # Create a root child item. The first argument is the hierarchy
 # tags of the parent as passed to the construct{} procs of the
-# Picture classes or as obtained by *gethtags*; the second
+# ComplexItem classes or as obtained by *gethtags*; the second
 # is the additional tags of the new item.
 #
 body ::tycho::IncrCanvas::createrootchild* {parent ptags tags type args} {
@@ -881,7 +881,7 @@ body ::tycho::IncrCanvas::gethtags {id} {
     } else {
 	# If a complex item, get the tags from the primary
 	$canvas gettags \
-		[@scope ::tycho::Picture [list set primary($id)]]
+		[@scope ::tycho::ComplexItem [list set primary($id)]]
     }
 }
 
@@ -1096,7 +1096,7 @@ body ::tycho::IncrCanvas::root {id} {
     } elseif { [string match {_*} $id] } {
 	# A complex item ID. Use the primary tags to find the item to return
 	set tags [$canvas gettags \
-		[@scope ::tycho::Picture [list set primary($id)]]]
+		[@scope ::tycho::ComplexItem [list set primary($id)]]]
     	return [string range [lindex $tags [lsearch $tags {!*}]] 1 end]
     } else {
 	error "Argument ($id) is not an item ID"
@@ -1115,7 +1115,7 @@ body ::tycho::IncrCanvas::scale {tag xOrigin yOrigin xScale yScale} {
 	if { [string match {_*} $id] } {
 	    set newcoords {}
 	    set coords [$canvas coords \
-		    [@scope ::tycho::Picture [list set primary($id)]]]
+		    [@scope ::tycho::ComplexItem [list set primary($id)]]]
 	    foreach {a b} $coords {
 		lappend newcoords \
 			[expr $xOrigin + $xScale * ($a - $xOrigin)] \
@@ -1327,7 +1327,7 @@ body ::tycho::IncrCanvas::findall {} {
     # Find complex roots
     foreach id [array names itemClass] {
 	set tags [$canvas gettags \
-		[@scope ::tycho::Picture [list set primary($id)]]]
+		[@scope ::tycho::ComplexItem [list set primary($id)]]]
 	set root [string range \
 		[lindex $tags [lsearch $tags {!*}]] 1 end]
 	# If the item is not invisible and not found, mark as found

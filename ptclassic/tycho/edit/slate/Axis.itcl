@@ -63,12 +63,12 @@
 # $axis configure -length 50
 # </pre></tcl>
 #
-# <a href="../internals/howtoread.html">Reading <i>Picture</i> documentation</a>.
+# <a href="../internals/howtoread.html">Reading <i>ComplexItem</i> documentation</a>.
 #
 # <b>Note</b>: This is an experimental class.
 #
 class ::tycho::Axis {
-    inherit ::tycho::Picture
+    inherit ::tycho::ComplexItem
 
     # Create a new Axis
     proc construct {id canvas slate tags x0 y0 args}
@@ -140,25 +140,25 @@ class ::tycho::Axis {
     ####                       class initialization                ####
 
     #### Set method table
-    array set methodtable [array get ::tycho::Picture::methodtable]
+    array set methodtable [array get ::tycho::ComplexItem::methodtable]
 
     set methodtable(_digits)	 ::tycho::Axis::_digits
-    set methodtable(_from)		 ::tycho::Axis::_from
+    set methodtable(_from)	 ::tycho::Axis::_from
     set methodtable(_length)	 ::tycho::Axis::_length
     set methodtable(_ticklength) ::tycho::Axis::_ticklength
-    set methodtable(_to)		 ::tycho::Axis::_to
+    set methodtable(_to)	 ::tycho::Axis::_to
 
     set methodtable(construct)	::tycho::Axis::construct
-    set methodtable(coords)		::tycho::Axis::coords
+    set methodtable(coords)	::tycho::Axis::coords
 
     #### Set option defaults
-    array set optiondefault [array get ::tycho::Picture::optiondefault]
+    array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
 
-    set optiondefault(-digits)		0
-    set optiondefault(-from)		0
+    set optiondefault(-digits)	    0
+    set optiondefault(-from)	    0
     set optiondefault(-length)      200
-    set optiondefault(-ticklength)	6
-    set optiondefault(-to)			100
+    set optiondefault(-ticklength)  6
+    set optiondefault(-to)          100
 }
 
 ##########################################################################
