@@ -1,8 +1,7 @@
 $Id$
-README file for Tycho0.1.1
+README file for Tycho0.1.2
 
-Tycho0.1.1 is syntax manager implemented in Itcl.
-Currently, only graphical editors are supported.
+Tycho0.1.2 is a textual and graphical editor implemented in Itcl
 
 See doc/overview.html for more information.
-See doc/releasenotes0.1.html for the release notes.
+See doc/releasenotes0.1.2.html for the release notes.
