@@ -67,6 +67,12 @@ public:
 			 stopAfterOutput = FALSE;
 			 stopBeforeDeadlocked = FALSE ;}
 
+	// output the stopTime
+	float whenStop() { return stopTime ;}
+
+	// relative time scale to the outer domain when it is a inner domain.
+	float relTimeScale;
+
 	// special methods since DE is a "timed" domain
 	int amITimed();
 	float nextTime();	// return when the next event is scheduled.
