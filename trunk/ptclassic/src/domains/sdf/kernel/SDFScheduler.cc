@@ -2,11 +2,12 @@
 #include "SDFScheduler.h"
 #include "SDFStar.h"
 #include "Fraction.h"
-#include "Output.h"
+#include "Error.h"
 #include "StringList.h"
 #include "FloatState.h"
 #include "Geodesic.h"
 #include "GalIter.h"
+#include <std.h>
 
 /**************************************************************************
 Version identification:
@@ -190,13 +191,25 @@ int SDFScheduler :: setup (Block& block) {
 	} while (passValue == 0);
 	// END OF MAIN LOOP
 	
-	if (passValue == 1) {
-		Error::abortRun (*dead,
-				 ": DEADLOCK in a loop containing this block");
-		invalid = TRUE;
-	}
+	if (passValue == 1) reportDeadlock(nextStar);
 	return !invalid;
 }
+
+// function to report deadlock.
+void SDFScheduler::reportDeadlock (GalStarIter& next) {
+	if (Error::canMark()) {
+		next.reset();
+		SDFStar *s;
+		while ((s = (SDFStar*)next++) != 0)
+			if (notRunnable(*s) == 1) Error::mark(*s);
+		Error::abortRun ("DEADLOCK: the indicated stars cannot be run");
+	}
+	else
+		Error::abortRun (*dead,
+				 ": DEADLOCK in a loop containing this block");
+	invalid = TRUE;
+}
+
 
 // This routine simulates running the star, adding it to the
 // schedule where it can be run
@@ -360,10 +373,12 @@ int SDFScheduler :: reptArc (PortHole& nearPort, PortHole& farPort){
 	else {
 		// farStarRepetitions has been set, so test for equality
 		if (!(farStarRepetitions == farStarShouldBe)) {
-			StringList msg = "Sample rate problem between ";
+			StringList msg = "Sample rate inconsistency between ";
 			msg += nearStar.readFullName();
 			msg += " and ";
 			msg += farStar.readFullName();
+			Error::mark(nearStar);
+			Error::mark(farStar);
 			Error::abortRun(msg);
 			invalid = TRUE;
 		}
