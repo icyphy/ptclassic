@@ -78,7 +78,7 @@ end
 # everything must have one slash (be two levels down)
 
 foreach x (thor/pepp cg/architectures sdf/expgraph sdf/image ddf/constructs \
-	cg/loopScheduler cg/gilsScheduler cg/topologies)
+	sdf/loopScheduler cg/gilsScheduler cg/topologies)
 	optmkdir $x
 	cd $x
 	optlink ../../../../src/domains/$x make.template
