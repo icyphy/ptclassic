@@ -1,10 +1,10 @@
-# Makefile for Ptolemy Tycho visual editors
+# Package index for the Tycho tycho.edit.visedit package
 #
-# @Author: Christopher Hylands
+# @Author: John Reekie
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c)  The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,44 +30,5 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# Root of Tycho directory
-ROOT =		../..
-
-# True source directory
-VPATH =		$(ROOT)/editors/visedit
-
-# Get configuration info
-CONFIG =	$(ROOT)/mk/tycho.mk
-include $(CONFIG)
-
-TCL_SRCS = 
-  
-ITCL_SRCS = \
-	EditBubbleAndArc.itcl \
-	EditDAG.itcl \
-	EditForest.itcl \
-	EditPalette.itcl \
-	EditSTD.itcl \
-	Graphics.itcl \
-	HTMLExport.itcl \
-	ProfileTcl.itcl 
-
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
-	graphics.style
-
-MISC_FILES =		doc img test tclIndex 
-
-# Sub directories to run make in.
-DIRS =			doc test
-
-# 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =	tclIndex
-
-# Title for the tydoc index page
-TYDOC_DESC =		Index of classes in tycho/kernel/visedit
-
-all install: $(MISC_SRCS) tclIndex 
-
-# We don't include common.mk since we don't use the compiler here
-include $(ROOT)/mk/no-compile.mk
-
+package ifneeded tycho.edit.visedit 2.0 \
+	[list source [file join $dir visedit.tcl]]
