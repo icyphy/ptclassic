@@ -31,7 +31,30 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Version: $Id$
 
 ***********************************************************************/
+#ifdef __GNUG__
+#pragma interface
+#endif
 
-class ACSCorona {
+
+#include "CGStar.h"
+#include "NamedList.h"
+
+class ACSCorona : public CGStar {
 public:
+
+        // my domain
+        const char* domain() const;
+
+        // class identification
+        int isA(const char*) const;
+
+	// select core to be used
+	selectCore(const char*);
+
+	// register Core in list
+	registerCore(Core &);
+
+protected:
+
+	Core *corelist;
 }
