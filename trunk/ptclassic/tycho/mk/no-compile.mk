@@ -37,7 +37,7 @@ all install TAGS: $(EXTRA_SRCS) $(HDRS) $(MISC_FILES)
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 # You probably don't want to add $(SRCS) to this, rather, change
 # the makefile that includes this one to use $(EXTRA_SRCS)
-sources:	$(EXTRA_SRCS) $(HDRS) $(MISC_FILES) makefile
+sources::	$(EXTRA_SRCS) $(HDRS) $(MISC_FILES) makefile
 ifdef DIRS
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
