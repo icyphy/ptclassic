@@ -35,6 +35,9 @@ $Id$
 #include "paramStructs.h"
 #include "oct.h"
 
+/* Length of an oct facet handle string */
+#define	POCT_FACET_HANDLE_LEN	16
+
 #ifdef __cplusplus
 
 /* C function prototypes in ANSI C style */
