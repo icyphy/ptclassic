@@ -216,6 +216,9 @@ protected:
 	int addTopLevelCluster(Galaxy* gal);
 
 private:
+	// flag to indicate whether schedule was successfully computed.
+	int schedSuccess;
+
 	// log file where all output from here is written to if specified
 	const char* logFile;
 
