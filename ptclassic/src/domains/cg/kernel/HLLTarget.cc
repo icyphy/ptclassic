@@ -1,4 +1,3 @@
-static const char file_id[] = "HLLTarget.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -33,6 +32,11 @@ This Target produces and compiles a standalone C++ program for
 a universe.
 
 *******************************************************************/
+static const char file_id[] = "HLLTarget.cc";
+
+#ifdef __GNUG__
+#pragma implementation
+#endif
 
 #include "HLLTarget.h"
 #include "KnownTarget.h"

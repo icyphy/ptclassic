@@ -1,4 +1,3 @@
-static const char file_id[] = "CGUtilities.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -31,6 +30,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Misc CG routines.
  
 *******************************************************************/
+static const char file_id[] = "CGUtilities.cc";
+
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include <stdio.h>		// Pick up decl for pclose().
 #include "pt_fstream.h"
 #include "CGUtilities.h"

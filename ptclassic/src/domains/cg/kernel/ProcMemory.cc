@@ -1,4 +1,3 @@
-static const char file_id[] = "ProcMemory.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -39,6 +38,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // but the allocations don't take place until performAllocation is
 // called.
 ******************************************************************/
+static const char file_id[] = "ProcMemory.cc";
+
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "ProcMemory.h"
 #include "AsmStar.h"
 #include "miscFuncs.h"
