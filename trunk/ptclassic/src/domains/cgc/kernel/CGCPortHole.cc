@@ -52,7 +52,7 @@ int CGCPortHole :: initOffset() {
 void CGCPortHole :: finalBufSize() {
 	if (isItInput()) return;
 
-	maxBuf = cgGeo().getMaxNum();
+	int reqSize = cgGeo().getMaxNum();
 	CGCPortHole* p = realFarPort();
 	if (p->fork()) {
 		// determine the maximum offset.
@@ -63,13 +63,24 @@ void CGCPortHole :: finalBufSize() {
 			int temp = inp->cgGeo().getMaxNum();
 			temp += inp->cgGeo().forkDelay();
 			temp += inp->inBufSize() - inp->numberTokens;
-			if (temp > maxBuf) maxBuf = temp;
+			if (temp > reqSize) reqSize = temp;
 		}
 	} else {
-		maxBuf += p->inBufSize() - p->numberTokens;
+		reqSize += p->inBufSize() - p->numberTokens;
 	}
 
-	if (maxBuf < bufferSize) maxBuf = bufferSize;
+	if (reqSize < bufferSize) reqSize = bufferSize;
+
+	// check whether this size is set manually or not.
+	// If yes, range check.
+	if (manualFlag) {
+		if (maxBuf < reqSize) {
+			Error::warn(*this, "buffer request is too small.");
+			maxBuf = reqSize;
+		}
+	} else {
+		maxBuf = reqSize;
+	}
 }
 
 // setup ForkDests

@@ -22,7 +22,7 @@ $Id$
 class CGCPortHole : public CGPortHole {
 friend class ForkDestIter;
 public:
-	CGCPortHole() : maxBuf(1) {}
+	CGCPortHole() : maxBuf(1), manualFlag(0) {}
 
 	CGCPortHole* getForkSrc() { return (CGCPortHole*) forkSrc; }
 
@@ -68,8 +68,14 @@ public:
 	// determine the buffer size finally
 	void finalBufSize();
 
+	// Set the maxBuf manually. In finalBufSize() method, we will
+	// compare this manual value with what the current scheduler
+	// calculates. If this manual value is smaller, signal an error.
+	void requestBuf(int i) { maxBuf = i; manualFlag = TRUE; }
+
 private:
 	int maxBuf;
+	int manualFlag;
 
 	SequentialList& myDest() { return forkDests; }
 };
