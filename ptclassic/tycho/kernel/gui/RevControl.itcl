@@ -2,7 +2,7 @@
 #
 # @Authors: Joel King and Edward A. Lee
 #
-# @Version: $Id$
+# @Version: $Id$ %G
 #
 # @Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
@@ -180,6 +180,7 @@ body ::tycho::RevControl::constructor {args} {
 # and update the history information, if it is being viewed.
 #
 body ::tycho::RevControl::checkInAndUpdate {} {
+    $object saveQuery 1
     # Procs are not virtual. Itcl bug?
     [info class]::checkIn $object
     if {![isCheckedOut]} {
@@ -210,6 +211,7 @@ body ::tycho::RevControl::initializeRevControl {} {
     if {$file == {}} {
 	error "Revision control: no file specified"
     }
+    $object saveQuery 1
 }
 
 ###################################################################
@@ -223,16 +225,8 @@ body ::tycho::RevControl::unedit {} {
     if {$file == {}} {
 	error "Revision control: no file specified"
     }
-    if {![$object isModified]} {
-	enableButton checkout
-    } else {
-        if [::tycho::askuser \
-                "Are you sure you want to discard your changes (if any)?"] {
-            enableButton checkout
-        } {
-            ::tycho::silentError
-            # error "Unedit cancelled"
-        }
+    if [$object saveQuery 1] {
+        enableButton checkout
     }
 }
 
@@ -256,11 +250,7 @@ body ::tycho::RevControl::checkIn {object} {
     if {$file == {}} {
 	error "checkIn: no file associated with the object $object"
     }
-    if [$object isModified] {
-	if [::tycho::askuser "Save modifications before checking in?"] {
-	    $object save 
-	}
-    }
+    $object saveQuery 1
 }
 
 ###################################################################
