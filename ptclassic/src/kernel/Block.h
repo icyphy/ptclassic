@@ -1,6 +1,7 @@
 #ifndef _Block_h
 #define _Block_h 1
 
+#include "NamedObj.h"
 #include "Connect.h"
 
 /**************************************************************************
@@ -20,6 +21,9 @@ $Id$
 		2) add the virtual method "clone".
 		3) add the method "portWithName" (defined in Block.cc)
 
+	3/23/90 - J. Buck
+		Make a Block a type of NamedObj
+
  Block is the basic unit of computation...it is an abstraction that has
  inputs and outputs and certain generic methods common to all
  computational units
@@ -27,7 +31,7 @@ $Id$
 **************************************************************************/
 
 
-class Block
+class Block : NamedObj
 {
 public:
 	// Initialize the data structures
@@ -38,33 +42,17 @@ public:
 	int numberPorts() {return ports.size();}
 	PortHole& nextPort()  {return ports++;}
 
-	// Get the block name and descriptor
-	char* readName() {return name;}
-	char* readDescriptor() {return descriptor;}
-
-	// return the full name in the form:
-	//   universeName.galaxyName...galaxyName.blockName
-	char* readFullName();
-
-	// Pointer to the parent
-	Block* blockIamIn;
-
 	// Method setting internal data in the Block
 	// If the parent pointer is not provied, it defaults to NULL
 	Block& setBlock(char* s, Block* parent = NULL) {
-		name=s;
-		blockIamIn = parent;
+		setNameParent (s, parent);
 		return *this;
 		}
 
-	// Constructor sets key values to prevent segmentation faults
-	// if setBlock is not called, or if certain members such as
-	// the descriptor are not set.
-	Block() {name = "noName";
-		 descriptor = "noDescriptor";
-		 blockIamIn = NULL;
+	// Constructor
+	Block() { 
 		 saveMPH = NULL;
-		}
+	}
 
 	// Method to set the parameters of the block
 	// NOT CURRENTLY IMPLEMENTED
@@ -100,7 +88,6 @@ protected:
 	// Database for this block
 
 	// The following are set from within the Block; hence, protected
-	char* descriptor;
 	PortList ports;
 	
 	// This function saves the given MultiPortHole so portWithName
@@ -109,10 +96,6 @@ protected:
 	addPort(MultiPortHole& p) {saveMPH = &p;}
 
 private:
-	// Name is private, because it should be set only by setBlock()
-	// and not changed again.
-        char* name;
-
 	// This may be changed to a structure holding multiple MultiPortHoles.
 	MultiPortHole *saveMPH;
 };
