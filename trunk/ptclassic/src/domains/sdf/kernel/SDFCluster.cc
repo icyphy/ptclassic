@@ -67,6 +67,8 @@ SDFClusterGal::SDFClusterGal(Galaxy& gal, ostream* log)
 {
 	int nports = setPortIndices(gal);
 	LOG_NEW; SDFClustPort** ptable = new SDFClustPort*[nports];
+	for (int i = 0; i < nports; i++)
+		ptable[i] = 0;
 	DFGalStarIter nextStar(gal);
 	DataFlowStar* s;
 	while ((s = nextStar++) != 0) {
@@ -78,10 +80,12 @@ SDFClusterGal::SDFClusterGal(Galaxy& gal, ostream* log)
 			ptable[p->real().index()] = p;
 		}
 	}
-	// now connect up the cluster ports to match the real ports
-	for (int i = 0; i < nports; i++) {
+	// now connect up the cluster ports to match the real ports.
+	// There may be fewer cluster ports than real ports if there are
+	// self-loops, for such cases, ptable[i] will be null.
+	for (i = 0; i < nports; i++) {
 		SDFClustPort* out = ptable[i];
-		if (out->isItInput()) continue;
+		if (!out || out->isItInput()) continue;
 		SDFClustPort* in = ptable[out->real().far()->index()];
 		int delay = out->real().numTokens();
 		out->connect(*in,delay);
@@ -376,6 +380,7 @@ int SDFClusterGal::loopPass() {
 int SDFClusterGal::nonIntegralLoopPass() {
 	// this assumes there are only two clusters.
 	// We can ignore feedforward delays.
+	// We can ignore feedback delays if large enough.
 	SDFClusterGalIter nextClust(*this);
 	SDFCluster* c1 = nextClust++;
 	SDFCluster* c2 = nextClust++;
@@ -384,8 +389,9 @@ int SDFClusterGal::nonIntegralLoopPass() {
 	SDFClustPortIter nextPort(*c1);
 	SDFClustPort* p;
 	while ((p = nextPort++) != 0) {
-		if (p->fbDelay() ||
-		    p->numIO() == p->far()->numIO()) return FALSE;
+		if (p->numIO() == p->far()->numIO()) return FALSE;
+		if (p->fbDelay() && p->numTokens() >= p->numIO()
+		    && p->numTokens() >= p->far()->numIO()) return FALSE;
 	}
 	// ok, loop both clusters so that their
 	// repetitions values become 1.
@@ -429,8 +435,9 @@ int SDFCluster::loopFactor(int doAnyLoop) {
 		int myIO = p->numIO();
 		int peerIO = pFar->numIO();
 		// can't loop if connected to a different rate star by a delay
-		// (unless it is a feedforward).
-		if (p->fbDelay() && myIO != peerIO) return 0;
+		// (unless it is a feedforward or value is large enough).
+		if (p->fbDelay() && myIO != peerIO
+		    && p->numTokens() < myIO * reps()) return 0;
 		// don't loop if peer should loop first
 		if (myIO > peerIO) return 0;
 		// try looping if things go evenly.
