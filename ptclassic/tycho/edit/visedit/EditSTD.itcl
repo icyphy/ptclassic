@@ -241,39 +241,37 @@ body ::tycho::EditSTD::editArc {arc} {
 		-text $title -queries [list $labelQuery $guardQuery]\
 		-okcommand [list catch $cmd]
 
-	if {$machineType == "Mixed"} {
-	    foreach outName $portNames(out) {
-		if "![info exists edgeInfo($arc,output,$outName)]" {
-		    set edgeInfo($arc,output,$outName) 0
-		} 
-		$w line outputFor$outName "Output for \"${outName}\":"\
-			$edgeInfo($arc,output,$outName)
-	    }
-
-	    foreach internalName $portNames(internal) {
-		if "![info exists edgeInfo($arc,action,$internalName)]" {
-		    set edgeInfo($arc,action,$internalName) 0
-		} 
-		$w line actionFor$internalName "Action for\
-			\"$internalName\":" \
-			$edgeInfo($arc,action,$internalName)
-	    }
-
-	    if "![info exists edgeInfo($arc,preemptive)]" {
-		set edgeInfo($arc,preemptive) NO
+	foreach outName $portNames(out) {
+	    if "![info exists edgeInfo($arc,output,$outName)]" {
+		set edgeInfo($arc,output,$outName) 0
 	    } 
-	    $w radio preemptive {Preemptive:} {NO YES}\
-		$edgeInfo($arc,preemptive)
-
-	    if "![info exists edgeInfo($arc,entryType)]" {
-		set edgeInfo($arc,entryType) History
-	    } 
-	    $w radio entryType {Entry Type:} {History Default}\
-		    $edgeInfo($arc,entryType)
+	    $w line outputFor$outName "Output for \"${outName}\":"\
+		    $edgeInfo($arc,output,$outName)
 	}
 
-	$w centerOnScreen
+	foreach internalName $portNames(internal) {
+	    if "![info exists edgeInfo($arc,action,$internalName)]" {
+		set edgeInfo($arc,action,$internalName) 0
+	    } 
+	    $w line actionFor$internalName "Action for\
+		    \"$internalName\":" \
+		    $edgeInfo($arc,action,$internalName)
+	}
+
+	if "![info exists edgeInfo($arc,preemptive)]" {
+	    set edgeInfo($arc,preemptive) NO
+	} 
+	$w radio preemptive {Preemptive:} {NO YES}\
+		$edgeInfo($arc,preemptive)
+	
+	if "![info exists edgeInfo($arc,entryType)]" {
+	    set edgeInfo($arc,entryType) History
+	} 
+	$w radio entryType {Entry Type:} {History Default}\
+		$edgeInfo($arc,entryType)
     }
+    
+    $w centerOnScreen
 }
 
 body ::tycho::EditSTD::editArcDone {arc w} {
@@ -290,35 +288,32 @@ body ::tycho::EditSTD::editArcDone {arc w} {
 	$this markModified
     }
 
-    if {$machineType == "Mixed"} {
-	set newPreemptive [$w get preemptive]
-	if {$edgeInfo($arc,preemptive) != $newPreemptive} {
-	    set edgeInfo($arc,preemptive) $newPreemptive
-	    $this markModified	
-	}
+    set newPreemptive [$w get preemptive]
+    if {$edgeInfo($arc,preemptive) != $newPreemptive} {
+	set edgeInfo($arc,preemptive) $newPreemptive
+	$this markModified	
+    }
 
-	set newEntryType [$w get entryType]
-	if {$edgeInfo($arc,entryType) != $newEntryType} {
-	    set edgeInfo($arc,entryType) $newEntryType
-	    $this markModified	
-	}
+    set newEntryType [$w get entryType]
+    if {$edgeInfo($arc,entryType) != $newEntryType} {
+	set edgeInfo($arc,entryType) $newEntryType
+	$this markModified	
+    }
 
-	foreach outName $portNames(out) {
-	    set newValue [$w get outputFor$outName]
-	    if {$edgeInfo($arc,output,$outName) != $newValue} {
-		set edgeInfo($arc,output,$outName) $newValue
-		$this markModified
-	    }
+    foreach outName $portNames(out) {
+	set newValue [$w get outputFor$outName]
+	if {$edgeInfo($arc,output,$outName) != $newValue} {
+	    set edgeInfo($arc,output,$outName) $newValue
+	    $this markModified
 	}
+    }
 
-	foreach internalName $portNames(internal) {
-	    set newValue [$w get actionFor$internalName]
-	    if {$edgeInfo($arc,action,$internalName) != $newValue} {
-		set edgeInfo($arc,action,$internalName) $newValue
-		$this markModified
-	    }
+    foreach internalName $portNames(internal) {
+	set newValue [$w get actionFor$internalName]
+	if {$edgeInfo($arc,action,$internalName) != $newValue} {
+	    set edgeInfo($arc,action,$internalName) $newValue
+	    $this markModified
 	}
-
     }
 }
 
@@ -361,12 +356,10 @@ body ::tycho::EditSTD::editState {node} {
 		-text $title -queries [list $labelQuery]\
 		-okcommand [list catch $cmd]
 
-	if {$machineType == "Mixed"} {
-	    if "![info exists nodeInfo($node,machine)]" {
-		set nodeInfo($node,machine) ""
-	    }
-	    $w line machine {Internal Machine:} $nodeInfo($node,machine)
+	if "![info exists nodeInfo($node,machine)]" {
+	    set nodeInfo($node,machine) ""
 	}
+	$w line machine {Internal Machine:} $nodeInfo($node,machine)
 
 	$w centerOnScreen
     }
@@ -383,12 +376,10 @@ body ::tycho::EditSTD::editStateDone {node w} {
 	$this markModified
     }
 
-    if {$machineType == "Mixed"} {
-	set newMachine [$w get machine]
-	if {$nodeInfo($node,machine) != $newMachine} {
-	    set nodeInfo($node,machine) $newMachine
-	    $this markModified	
-	}
+    set newMachine [$w get machine]
+    if {$nodeInfo($node,machine) != $newMachine} {
+	set nodeInfo($node,machine) $newMachine
+	$this markModified	
     }
 }
 
@@ -563,13 +554,12 @@ body ::tycho::EditSTD::ptkCompile {} {
 	    append outPorts \"$outName\"     ;#" (emacs highlighting)
 	}
 	targetparam outputNameMap $outPorts
-	if {$machineType == "Mixed"} {
-	    set internalEvents "";
-	    foreach internalName $portNames(internal) {
-		append internalEvents \"$internalName\"  ;#" (emacs highlighting)
-	    }
-	    targetparam internalNameMap $internalEvents
+	set internalEvents "";
+	foreach internalName $portNames(internal) {
+	    append internalEvents \"$internalName\"  ;#" (emacs highlighting)
 	}
+	targetparam internalNameMap $internalEvents
+
         targetparam machineType $machineType
         
         # Setup In/Out Ports
@@ -619,66 +609,63 @@ body ::tycho::EditSTD::ptkCompile {} {
 	    }
 	    setstate [set star$node] conditions $conditions
 	 
-	    if {$machineType == "Mixed"} {
-		# Mixed machine.
-		if { ![info exists nodeInfo($node,machine)] } {
-		    setstate [set star$node] inMachNm ""
-		    setstate [set star$node] where_is_defined ""
-		} else {
-		    set inMachNm [file tail $nodeInfo($node,machine)]
-		    setstate [set star$node] inMachNm $inMachNm
-		    set dirname [file dirname $nodeInfo($node,machine)]
-		    setstate [set star$node] where_is_defined $dirname
-		}
-
-		set preemptive ""
-		set entryType ""
-		set actions ""
-		foreach arc $nodeInfo($node,outEdges) {
-		    if "![info exists edgeInfo($arc,preemptive)]" {
-			set edgeInfo($arc,preemptive) NO
-		    }
-		    if {$edgeInfo($arc,preemptive) == "NO"} {
-			append preemptive "0\ "
-		    } elseif {$edgeInfo($arc,preemptive) == "YES"}  {
-			append preemptive "1\ "
-		    } else {
-			error "Unrecognized preemptive! "
-		    }
-
-		    if "![info exists edgeInfo($arc,entryType)]" {
-			set edgeInfo($arc,entryType) History
-		    }
-		    if {$edgeInfo($arc,entryType) == "History"} {
-			append entryType "0\ "
-		    } elseif {$edgeInfo($arc,entryType) == "Default"}  {
-			append entryType "1\ "
-		    } else {
-			error "Unrecognized entryType! "
-		    }
-
-		    append actions "\{"
-		    foreach outName $portNames(out) {
-			if "![info exists edgeInfo($arc,output,$outName)]" {
-			    set edgeInfo($arc,output,$outName) 0
-			}
-			append actions \"$edgeInfo($arc,output,$outName)\" ;#"
-		    }
-		    foreach internalName $portNames(internal) {
-			if "![info exists edgeInfo($arc,action,$internalName)]" {
-			    set edgeInfo($arc,action,$internalName) 0
-			}
-			append actions \"$edgeInfo($arc,action,$internalName)\" ;#"
-		    }
-		    append actions "\}"
-		}
-		setstate [set star$node] preemptive $preemptive
-		setstate [set star$node] entryType $entryType
-		setstate [set star$node] actions $actions
-
+	    if { ![info exists nodeInfo($node,machine)] } {
+		setstate [set star$node] inMachNm ""
+		setstate [set star$node] where_is_defined ""
 	    } else {
-		error "Unrecognized machine type: $machineType. "
+		set inMachNm [file tail $nodeInfo($node,machine)]
+		setstate [set star$node] inMachNm $inMachNm
+		set dirname [file dirname $nodeInfo($node,machine)]
+		setstate [set star$node] where_is_defined $dirname
 	    }
+
+	    set preemptive ""
+	    set entryType ""
+	    set actions ""
+	    foreach arc $nodeInfo($node,outEdges) {
+		if "![info exists edgeInfo($arc,preemptive)]" {
+		    set edgeInfo($arc,preemptive) NO
+		}
+		if {$edgeInfo($arc,preemptive) == "NO"} {
+		    append preemptive "0\ "
+		} elseif {$edgeInfo($arc,preemptive) == "YES"}  {
+		    append preemptive "1\ "
+		} else {
+		    error "Unrecognized preemptive! "
+		}
+
+		if "![info exists edgeInfo($arc,entryType)]" {
+		    set edgeInfo($arc,entryType) History
+		}
+		if {$edgeInfo($arc,entryType) == "History"} {
+		    append entryType "0\ "
+		} elseif {$edgeInfo($arc,entryType) == "Default"}  {
+		    append entryType "1\ "
+		} else {
+		    error "Unrecognized entryType! "
+		}
+
+		append actions "\{"
+		foreach outName $portNames(out) {
+		    if "![info exists edgeInfo($arc,output,$outName)]" {
+			set edgeInfo($arc,output,$outName) 0
+		    }
+		    append actions \"$edgeInfo($arc,output,$outName)\" ;#"
+		}
+		foreach internalName $portNames(internal) {
+		    if "![info exists edgeInfo($arc,action,$internalName)]" {
+			set edgeInfo($arc,action,$internalName) 0
+		    }
+		    append actions \"$edgeInfo($arc,action,$internalName)\" ;#"
+		}
+		append actions "\}"
+	    }
+	    setstate [set star$node] preemptive $preemptive
+	    setstate [set star$node] entryType $entryType
+	    setstate [set star$node] actions $actions
+
+	} else {
+	    error "Unrecognized machine type: $machineType. "
 	}
 
 	# Do the output connection of each star :
@@ -692,6 +679,7 @@ body ::tycho::EditSTD::ptkCompile {} {
 		incr count
 	    }
 	}
+
     }
 
     # Done
@@ -825,14 +813,12 @@ body ::tycho::EditSTD::saveText {} {
 # 	}
 #	append text "\]\n"
 
-	if {$machineType == "Mixed"} {
-	    # Internal machine
-	    if "[info exists nodeInfo($node,machine)]" {
-		append text "# Internal machine:\n"
-		append text "set nodeInfo(\$node$node,machine)\
-			[list $nodeInfo($node,machine)]\n"
-	    }
-	} 
+        # Internal machine
+        if "[info exists nodeInfo($node,machine)]" {
+	    append text "# Internal machine:\n"
+	    append text "set nodeInfo(\$node$node,machine)\
+		    [list $nodeInfo($node,machine)]\n"
+	}
 
 	append text "\n"
     }
@@ -902,31 +888,28 @@ body ::tycho::EditSTD::saveText {} {
 		    [list $edgeInfo($arc,guard)]\n"
 	}
 
-	if {$machineType == "Mixed"} {
-	    if [info exists edgeInfo($arc,preemptive)] {
-		append text "set edgeInfo(\$arc,preemptive)\
-			$edgeInfo($arc,preemptive)\n"
-	    }
+	if [info exists edgeInfo($arc,preemptive)] {
+	    append text "set edgeInfo(\$arc,preemptive)\
+		    $edgeInfo($arc,preemptive)\n"
+	}
 
-	    if [info exists edgeInfo($arc,entryType)] {
-		append text "set edgeInfo(\$arc,entryType)\
-			$edgeInfo($arc,entryType)\n"
-	    }
+	if [info exists edgeInfo($arc,entryType)] {
+	    append text "set edgeInfo(\$arc,entryType)\
+		    $edgeInfo($arc,entryType)\n"
+	}
 
-	    foreach outName $portNames(out) {
-		if [info exists edgeInfo($arc,output,$outName)] {
-		    append text "set edgeInfo(\$arc,output,$outName)\
-			    [list $edgeInfo($arc,output,$outName)]\n"
-		}
+	foreach outName $portNames(out) {
+	    if [info exists edgeInfo($arc,output,$outName)] {
+		append text "set edgeInfo(\$arc,output,$outName)\
+			[list $edgeInfo($arc,output,$outName)]\n"
 	    }
+	}
 
-	    foreach internalName $portNames(internal) {
-		if [info exists edgeInfo($arc,action,$internalName)] {
-		    append text "set edgeInfo(\$arc,action,$internalName)\
-			    [list $edgeInfo($arc,action,$internalName)]\n"
-		}
+	foreach internalName $portNames(internal) {
+	    if [info exists edgeInfo($arc,action,$internalName)] {
+		append text "set edgeInfo(\$arc,action,$internalName)\
+			[list $edgeInfo($arc,action,$internalName)]\n"
 	    }
-
 	}
 
 	append text "\n"
