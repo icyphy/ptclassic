@@ -36,18 +36,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-class PtThread
-{
-public:
-    // Destructor.
-    // The thread must terminate when it is deleted
-    // if it has not done so already.
-    virtual ~PtThread() {}
-
-protected:
-    // Main function of the thread.
-    virtual void run() = 0;
-};
+class PtThread;
 
 class ThreadScheduler
 {
@@ -61,5 +50,24 @@ public:
     // Delete (and terminate) all threads.
     virtual ~ThreadScheduler() {}
 };
+
+
+class PtThread
+{
+public:
+    // Constructor.
+    // Every thread must be registered with a scheduler.
+    PtThread(ThreadScheduler& s) { s.add(this); }
+
+    // Destructor.
+    // The thread must terminate when it is deleted
+    // if it has not done so already.
+    virtual ~PtThread() {}
+
+protected:
+    // Main function of the thread.
+    virtual void run() = 0;
+};
+
 
 #endif
