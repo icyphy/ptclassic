@@ -80,6 +80,20 @@ inline static Block* findClass (const char* name) {
 	return b->multiPortWithName (mph) ? b : 0;
 }
 
+// Return the domain of an object: note, it may not be the current
+// domain (e.g. SDF in DDF)
+extern "C" char *
+KcDomainOf(char* name) {
+	Block* b = findClass (name);
+	if (!b) {
+		ErrAdd("Unknown block");
+		return NULL;
+	}
+	if (b->isItAtomic())
+		return b->asStar().domain();
+	else return b->asGalaxy().myDomain;
+}
+
 // Delete the universe and make another
 extern "C" void
 KcClearUniverse() {
