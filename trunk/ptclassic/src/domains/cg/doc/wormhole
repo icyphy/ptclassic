@@ -1,0 +1,30 @@
+.\" $Id$
+.H1 "Wormhole Interface"
+.pp
+When a code generation domain resides inside a simulation domain,
+the data should be passed through physical communication link
+between the host machine and the target machine. The interface code
+is written by some target methods (
+.c wormInputCode ,
+.c wormOutputCode
+), and the actual data transfer is also
+performed by other target methods (
+.c sendWormData ,
+and
+.c receiveWormData
+). Hence the 
+.c EventHorizon
+classes for the CG domain is not involved in actual data communication.
+They just perform other functions such as input data synchronization.
+The code-generation domain is fired only when all inputs are available
+from the simulation domain.
+.pp
+A
+.c Wormhole
+of the CG domain is very restricted. It should be a CG-DDF domain or
+a CG-BDF domain. Thus, the CG wormhole is to support data-dependent
+behavior in the generated code. In this release, we 
+include some examples in the CG-DDF domain demos. 
+Since the CG-DDF domain is still under development, code for data-dependent
+behavior is not generated in this release. Refer to the CG-DDF domain
+documentation for details.
