@@ -78,6 +78,7 @@ CompileCGSubsystems::
 CompileCGSubsystems(const char* name,const char* starType,const char* desc):
 CGSharedBus(name,starType,desc),cgcWorm(0) {
     childType.setInitValue("default-CGC");
+    destDirectory.setInitValue("$HOME/PTOLEMY_SYSTEMS/MIXED");
 }
 
 void CompileCGSubsystems::prepareChildren() {
