@@ -33,6 +33,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
  of targets.
 
 **************************************************************************/
+#ifdef __GNUG_
+#pragma implementation
+#endif
+
 #include "Linker.h"
 #include "Target.h"
 #include "KnownTarget.h"
