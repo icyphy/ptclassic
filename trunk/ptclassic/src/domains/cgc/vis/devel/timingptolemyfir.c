@@ -218,6 +218,7 @@ srcptolemy = (vis_s16 *) memalign(sizeof(double),sizeof(short)*length);
   }
   end = gethrtime();
   time3 = (float) (end - start)/1000000/ntime;
+  printf("  VIS-GL Time = %f msec\n", time3);
 /***************************************************************/
   if (print) {
     printf("compare outputs\n");
@@ -227,7 +228,6 @@ srcptolemy = (vis_s16 *) memalign(sizeof(double),sizeof(short)*length);
     }
   }
   if (verbose) {
-    printf("  VIS-GL Time = %f msec\n", time3);
     printf("  CINT-GL/VIS-GL = %f\n", time1/time3);
     printf("  CFLOAT-GL/VIS-GL = %f\n", time2/time3);
     printf("\n");
