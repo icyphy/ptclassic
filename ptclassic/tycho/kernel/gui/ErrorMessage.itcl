@@ -84,7 +84,7 @@ proc ::tycho::showStack {args} {
 # of similarly named procedures in pigi, the predecessor to Tycho.
 # The window name in the first argument is ignored (since they bring
 # up modal dialogs, the window names are not important anyway).
-proc ::ptkImportantMessage {win msg} {::tkerror $msg}
+proc ::ptkImportantMessage {win msg} {::tycho::warn $msg}
 
 # COMPATIBILITY procedure.  This procedure emulates the behavior
 # of similarly named procedures in pigi, the predecessor to Tycho.
