@@ -82,13 +82,14 @@ proc popupMessage {w text} {
 
 # procedure to issue an error message from any internal tk error
 proc tkerror message {
-     popupMessage .error "Background error in Tk"
+     # In case the application is exiting, catch errors
+     catch {popupMessage .error "Background error in Tk"}
      global REPORT_TCL_ERRORS
-     if {$REPORT_TCL_ERRORS == 1} {popupMessage .error $message}
+     if {$REPORT_TCL_ERRORS == 1} {catch {popupMessage .error $message}}
 }
 
 # Destroy a window if it exists
-proc ptkSafeDestroy {win} {if {[winfo exists $win]} {destroy $win}}
+proc ptkSafeDestroy {win} {catch {destroy $win}}
 
 # Read Ptolemy color settings from the Ptolemy Library
 source [expandEnvVars \$PTOLEMY/lib/tcl/ptkColor.tcl]
@@ -166,9 +167,9 @@ proc makeRunWindow {} {
 
 # procedure to stop a run
 proc ptkStop {name} {
-	stopCmd
 	.control.gofr.go configure -relief raised
 	.control.pause configure -relief raised
+	stopCmd
 }
 
 # procedure to pause a run
@@ -183,9 +184,6 @@ proc ptkGo {} {
 	.control.gofr.go configure -relief sunken
 	.control.pause configure -relief raised
 	goCmd
-	# The catch is needed in case the control window
-	# was dismissed.
-	catch {.control.gofr.go configure -relief raised}
 }
 
 # procedure to update the number of iterations
