@@ -375,7 +375,6 @@ body ::tycho::EditDAG::constructor {args} {
     # expensive.
     set defaultfont [::tycho::.tychoFonts findFont \
             [option get $itk_component(hull) defaultFont EditDAG]]
-puts "defaultfont: $defaultfont"
 
     eval itk_initialize $args
 }
