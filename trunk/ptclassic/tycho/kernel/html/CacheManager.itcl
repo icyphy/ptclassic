@@ -43,9 +43,9 @@ ensemble ::tycho::cache {
     option getsize {url}        {::tycho::CacheManager::getsize $url}
 
     # The following are used directly by Resource<protocol>
-    # Test if a resource exists.
     option exists {url} {::tycho::CacheManager::exists $url}
-    # True if url still has the same information
+    option initialize {} {::tycho::CacheManager::initialize}
+    option remap {file1 file2} {::tycho::CacheManager::remap $file1 $file2}
     option same {url date size contenttype} {
         ::tycho::CacheManager::same $url $date $size $contenttype
     }
@@ -92,14 +92,15 @@ class ::tycho::CacheManager {
     # getcontenttype, getsize, and getdate.
     proc returninfo  {url idx}
 
-    # The following are used directly by Resource<protocol>
+    # The following are used directly by Resource(protocol)
     # Test if a physical file exists.
     proc exists {url}
 
-    # Initialization routine, called to reset the common variable,
-    # then read from the database file if it exists. Also, create
-    # appropriate cache file, etc...
+    # Initialization routine.
     proc initialize {}
+
+    # Remap the database.
+    proc remap {file1 file2}
 
     # True if url still has the same information
     proc same {url date size contenttype}
@@ -189,12 +190,13 @@ body ::tycho::CacheManager::returninfo {url idx} {
 
 #####################################################################
 #### initialize
-# Make sure that the cache directory exists. Also make sure that
-# the index.db (database) exists.
+# 1) Called to reset the common variable, then read from the database 
+#    file if it exists. Also, create appropriate cache file, etc...
 #
-# Read back from the database.
+# 2) Read back from the database.
 #
-# Compact the database if necessary
+# 3) "Compact" the database if multiple entries exist (ie. newer
+#    remote file will cause updating).
 #
 body ::tycho::CacheManager::initialize {} {
     global TYCHO
@@ -239,7 +241,7 @@ body ::tycho::CacheManager::initialize {} {
     foreach filename [glob -nocomplain [file join $CACHEDIR *]] {
         set filename [file tail $filename]
         if {![info exists _fname($filename)]} {
-            ::puts "Deleting $filename"
+            #::puts "Deleting $filename"
             file delete [file join $CACHEDIR $filename]
         }
     }
@@ -249,7 +251,7 @@ body ::tycho::CacheManager::initialize {} {
     foreach url [array names _URL] {
         set file [lindex $_URL($url) 3]
         if {![file exists [file join $CACHEDIR $file]]} {
-            ::puts "deleting: $file"
+            #::puts "deleting: $file"
             catch {unset _URL($url)}
             set dirtyIndex 1
         }
@@ -262,6 +264,30 @@ body ::tycho::CacheManager::initialize {} {
     }
     close $fd
     file copy -force [file join $CACHEDIR index.bak] $INDEXFILE
+}
+
+#####################################################################
+#### remap
+# This is useful if we need to transform MIME type,
+# or types that our browser can't use. For example, our browser
+# cannot read JPEG format, so after converting JPEG->GIF, we remap
+# the database to read the new GIF file instead of the JPEG file.
+# This is an expensive operation, but is still much faster than
+# converting files on the fly.
+#
+body ::tycho::CacheManager::remap {url file} {
+    foreach i [array names _URL] {
+        if {$url == $i} {
+            set newdate        [getdate $i]
+            set newcontenttype [getcontenttype $i]
+            set newsize        [getsize $i]
+            # Update the new URL, with this new file name.
+            # Now we have remapped from file1 --> file2 in the database.
+            update $i $newdate $newsize $newcontenttype $file
+            return 1
+        }
+    }
+    return 0
 }
 
 #####################################################################
