@@ -16,6 +16,9 @@ cat > $dbgcmdfile <<EOF
 apm ../../src/pigilib $PTOLEMY/src/pigilib
 apm ../../src/pigiRpc $PTOLEMY/src/pigiRpc
 b main
+z 12 rs # do not stop or report SIGSYS 
+z 18 rs # do not stop or report SIGCHILD 
+z 20 rs # do not stop or report SIGVTALARM
 r $*
 EOF
 
