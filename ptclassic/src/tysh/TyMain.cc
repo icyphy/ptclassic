@@ -124,5 +124,6 @@ main(int argc, char **argv) {
 
     Tk_MainLoop();
     console.tyExit(0);
+    return 0;
 }
 
