@@ -94,6 +94,7 @@ IPUSDIR = $(CROOT)/src/domains/ipus
 MDSDFDIR = $(CROOT)/src/domains/mdsdf
 PNDIR = $(CROOT)/src/domains/pn
 SDFDIR = $(CROOT)/src/domains/sdf
+SRDIR = $(CROOT)/src/domains/sr
 VHDLBDIR = $(CROOT)/src/domains/vhdlb
 VHDLDIR = $(CROOT)/src/domains/vhdl
 
@@ -110,7 +111,18 @@ ifndef TK
 	HOF=
 	SDFTK=
 	SDFDFM=
-endif 
+endif
+
+# Synchronous/Reactive domain
+
+ifdef SR
+	PALETTES += PTOLEMY/src/domains/sr/icons/sr.pal
+	STARS += $(LIBDIR)/srstars.o
+	LIBS += -lsrstars -lsr
+	LIBFILES += $(LIBDIR)/libsrstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libsr.$(LIBSUFFIX)
+	CUSTOM_DIRS += $(SRDIR)/stars $(SRDIR)/kernel 
+endif
 
 # Motorola DSP assembly code generation domain
 
