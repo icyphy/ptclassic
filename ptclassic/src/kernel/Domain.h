@@ -26,15 +26,15 @@ $Id$
 
 #include "StringList.h"
 
-class Scheduler;
 class Block;
 class Star;
 class Galaxy;
 class PortHole;
 class EventHorizon;
 class Geodesic;
+class Target;
 
-const int NUMDOMAINS = 10;		// maximum # of domains
+const int NUMDOMAINS = 20;		// maximum # of domains
 
 class Domain {
 public:
@@ -43,8 +43,7 @@ public:
 		allDomains[index] = this;
 		name = domname;
 	}
-	virtual Scheduler& newSched() = 0;
-	virtual Star& newWorm(Galaxy& innerGal) = 0;
+	virtual Star& newWorm(Galaxy& innerGal,Target* innerTarget = 0) = 0;
 	virtual PortHole& newInPort() = 0;
 	virtual PortHole& newOutPort() = 0;
 	virtual EventHorizon& newFrom() = 0;
