@@ -95,6 +95,21 @@ RPCFunction CommandArray[] = {
     {ExitApp, "Other", "exit-pigi"}
 };
 
+static char* pigiRpcName;
+
+/* The entry point.  RPCmain does the real setup; this just sets
+   the program name.
+ */
+
+main (argc, argv)
+int argc;
+char **argv;
+{
+    pigiRpcName = argv[0];
+    RPCMain (argc, argv);
+    exit (0);
+}
+
 int
 UserMain(display, spot, cmdList, userOptionWord, array)
 char *display;
@@ -104,10 +119,6 @@ long userOptionWord;
 RPCFunction **array;
 {
     char buf[MSG_BUF_MAX], *envVar, *getenv();
-
-/* try to find myself, using getenv as a guru */
-    char* pigiRpcName = getenv("PIGIRPC");
-    if (pigiRpcName == 0) pigiRpcName = "pigiRpc";
 
     __main();  /* for c++ initialization */
 
