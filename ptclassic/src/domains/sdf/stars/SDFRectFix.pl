@@ -6,13 +6,12 @@ Generate a fixed-point rectangular pulse of height "height"
 (default 1.0) and width "width" (default 8).
 If "period" is greater than zero, then the pulse is repeated with the
 given period.
-The precision of "height" is specified by the precision of "outputPrecision".
 	}
         author { A. Khazeni }
 	version { $Id$ }
 	location { SDF main library }
         explanation {
-The "outputPrecision" is specified using an l.r format, where
+The "OutputPrecision" is specified using an l.r format, where
 l is the number of bits to the left of the decimal place
 (including the sign bit) and r is the number of bits to the
 right of the sign bit.
@@ -24,19 +23,19 @@ number with 1 sign bit, 1 integer bit, and 22 fractional bits.
 		type { fix }
 	}
         defstate {
-                name { outputPrecision }
+                name { OutputPrecision }
                 type { string }
                 default { "4.14" }
                 desc {
-Precision of the output, in bits.
-The complex number is cast to a double and then converted to this precision.
-If the value of the double cannot be represented by the number of bits
-specified in the precision parameter, then a error message is given.
+Precision of the output in bits.
+The value of the "height" parameter is cast to this precision and then output.
+If the value cannot be represented by this precision, then
+the OverflowHandler will be called.
                 }
         }
 	defstate {
 		name { height }
-		type { float }
+		type { fix }
 		default { "1.0" }
                 desc { Height of the rectangular pulse. }
 	}
@@ -59,36 +58,18 @@ specified in the precision parameter, then a error message is given.
 		desc { Internal counting state. }
 		attributes { A_NONSETTABLE|A_NONCONSTANT }
 	}
-        defstate {
-                name { masking }
-                type { string }
-                default { "truncate" }
-                desc {
-Masking method.
-This parameter is used to specify the way the complex number converted to
-a double is masked for casting to the fixed-point notation.
-The keywords are: "truncate" (the default) and "round".
-                }
-        }
 	protected {
 		Fix out;
 	}
         setup {
-                const char* Masking = masking;
-                const char* OutputPrecision = outputPrecision;
-                int outIntBits = Fix::get_intBits(OutputPrecision);
-                int outLen = Fix::get_length(OutputPrecision);
+                const char* OP = OutputPrecision;
+                int outIntBits = Fix::get_intBits(OP);
+                int outLen = Fix::get_length(OP);
                 out = Fix(outLen, outIntBits);
-                if ( strcasecmp(Masking, "truncate") == 0)
-                  out.Set_MASK(Fix::mask_truncate);
-                else if ( strcasecmp(Masking, "round") == 0)
-                  out.Set_MASK(Fix::mask_truncate_round);
-                else
-                  Error::abortRun(*this, ": not a valid function for masking");
         }
 	go {
 		out = 0.0;
-		if ( int(count) < int(width) ) out = height;
+		if ( int(count) < int(width) ) out = Fix(height);
 		output%0 << out;
 		count = int(count) + 1;
 		if ( int(period) > 0 && int(count) >= int(period) ) count = 0;
