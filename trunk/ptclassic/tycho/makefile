@@ -110,9 +110,13 @@ typt/lib/PtolemyFacets.fst: FORCE
 # glimpse is not included with Tycho, see http://glimpse.cs.arizona.edu
 GLIMPSEINDEX =	/usr/sww/bin/glimpseindex
 glimpse: .glimpse_exclude
-	$(GLIMPSEINDEX) -H $(PTOLEMY)/tycho $(PTOLEMY)/tycho
-	chmod a+r $(PTOLEMY)/tycho/.glimpse_*
-
+	if [ "$(TYCHO)" = "" ]; then \
+		$(GLIMPSEINDEX) -H $(PTOLEMY)/tycho $(PTOLEMY)/tycho; \
+		chmod a+r $(PTOLEMY)/tycho/.glimpse_*; \
+	else \
+		$(GLIMPSEINDEX) -H $(TYCHO) $(TYCHO); \
+		chmod a+r $(TYCHO)/tycho/.glimpse_*; \
+	fi
 
 # Check html docs for problems
 # htmlchek is not shipped with tycho, see:
