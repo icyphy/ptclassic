@@ -42,7 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Is linking supported?
 const int linkingNotSupported =
-#if defined(__alpha) || defined(SOL2)
+#if defined(__alpha)
  1;
 #else
  0;
@@ -53,10 +53,34 @@ const int linkingNotSupported =
 // that are to be dynamically linked must be built with the -N option
 // 2. Use the System V Release 4 dlopen() style call.  SunOS4.1.x,
 // Solaris2.x and Irix5.x support this
-#if defined(__sgi)
+#if defined(__sgi) || defined(SOL2)
 #include <dlfcn.h>
+#include <sys/stat.h>
 #define USE_DLOPEN
+// Use dlsym() to get the address of the constructor functions
+#define USE_DLSYM
+#if defined(__GNUG__)
+#define SHARED_OBJECT_COMMAND "g++ -shared -o"
+#endif // __GNUG__
 #endif
+
+#if defined(SOL2) && defined(__GNUG__)
+// Don't call InvokeConstructors if gcc-2.5.8 has Ron Guilmette's SVR4
+// patches.  
+// This is still experimental.  If this works, then there will be no
+// need to call dlsym().
+//
+// Joe Buck's g++ FAQ says:
+// `If you want to build shared libraries from g++ compiled code on any
+// sort of SVr4 system (including Solaris) you should contact Ron Guilmette
+// <rfg@netcom.com>.  He has patches that insure that any file-scope static-
+// storage objects within such libraries will be properly initialized when
+// the libraries are first attached to your running process. (The patches
+// are for g++ 2.5.8.  They *might* be incorporated into the g++ 2.6 standard
+// distribution, but that's not certain yet.)'
+//#define NO_INVOKECONSTRUCTORS
+#endif
+
 
 // The loader should do incremental linking; use a 4.3/Sun-style loader
 // or use the Gnu loader.
@@ -64,8 +88,12 @@ const int linkingNotSupported =
 // For USE_DLOPEN, we need ld so we can process .o files into .so files
 #define LOADER "/usr/bin/ld"
 #else
+#if defined(SOL2)
+#define LOADER "/usr/ccs/bin/ld"
+#else
 #define LOADER "/bin/ld"
-#endif
+#endif // SOL2
+#endif // sgi
 
 // Full pathname of the "nm" program; it reads symbol names from a .o
 // file.  Do NOT use a "demangling" version such as gnu nm.
@@ -73,8 +101,12 @@ const int linkingNotSupported =
 #if defined(__sgi) || defined (sgi)
 #define NM_PROGRAM "/usr/bin/nm"
 #else
+#if defined(SOL2)
+#define NM_PROGRAM "/usr/ccs/bin/nm"
+#else
 #define NM_PROGRAM "/bin/nm"
-#endif
+#endif // SOL2
+#endif // sgi
 
 // Options to give the loader.  We also give it "-T hex-addr" to specify
 // the starting address and "-A ptolemy-name" to get the symbols for the
@@ -129,9 +161,9 @@ extern "C" size_t getpagesize(void);
 
 // Prefix for constructor-calling symbols
 // This is an attempt to support both g++ and cfront.
-#ifdef __GNUG__
+#if defined(__GNUG__)
 #if defined(mips) || defined(hpux)
-#if defined(sgi)
+#if defined(__sgi) || defined(sgi)
 #define CONS_PREFIX "_GLOBAL_.I."
 #define CONS_LENGTH 11
 #else
@@ -139,11 +171,15 @@ extern "C" size_t getpagesize(void);
 #define CONS_LENGTH 11
 #endif // sgi
 #else /* g++, nonmips & nonhpux */
+#if defined(SOL2)
+#define CONS_PREFIX "_GLOBAL_.I."
+#define CONS_LENGTH 11
+#else /*SOL2*/
 #define CONS_PREFIX "__GLOBAL_$I$"
 #define CONS_LENGTH 12
+#endif/*SOL2*/
 #endif
 #else /* not __GNUG__ (i.e. cfront) */
-// *** srs 940308: Defined CONS_PREFIX and CONS_LENGTH for HP-UX.
 #if defined(hpux)
 #define CONS_PREFIX "__sti"
 #define CONS_LENGTH 5
@@ -153,19 +189,29 @@ extern "C" size_t getpagesize(void);
 #endif /* hpux */
 #endif
 
-#ifdef hpux
-#define NM_OPTIONS "-e -p -x"
+#if defined(hpux) || defined(__sgi) || defined(sgi) || defined(SOL2)
+// -p print easily parsable, terse output
+// -h don't print the output heading data
+// -x print in hex rather than decimal
+#define NM_OPTIONS "-phx"
+#else
+#define NM_OPTIONS "-g"
+#endif
+
+#if defined(hpux)
 // On the hppa a symbol can have the same name in the code and an
 // entry segments.  nm -p cannot differentiate between the two, so we
 // define a separate method of checking for symbols
 #define USE_NM_GREP
 #define NM_GREP_STRING "..*|extern|entry'"
-#else
-#ifdef sgi
-#define NM_OPTIONS "-Bg"
-#else
-#define NM_OPTIONS "-g"
 #endif
+
+// Optionally skip '0x' the first 2 characters of nm output.
+// The Solaris2.3 sscanf barfs on numbers that begin with 0x
+#ifdef SOL2
+#define NM_ADDR_OFFSET 2
+#else
+#define NM_ADDR_OFFSET 0
 #endif
 
 // g++ has to see the following before it sees the declaration of
