@@ -185,7 +185,7 @@ ensemble ::tycho::stylesheet {
 	}
 
 	# Set it and publish
-	$model publish itemconfigure \
+	$model publish attrset \
                 [$model namebystyle $style $param] -value $value
     }
 
@@ -448,13 +448,13 @@ body ::tycho::StyleSheet::constructor {args} {
 #
 # Callback for notification when a parameter is changed. We
 # reconfigure subscribed widgets only if _command_
-# is <b>itemconfigure</b> and _args_ contains a <b>-value</b>
+# is <b>attrset</b> and _args_ contains a <b>-value</b>
 # attribute.
 #
 body ::tycho::StyleSheet::_notify {command name args} {
     # Make sure we have something to do
     array set attrs $args
-    if { $command != "itemconfigure" || ! [::info exists attrs(-value)] } {
+    if { $command != "attrset" || ! [::info exists attrs(-value)] } {
     	return
     }
     
@@ -485,15 +485,15 @@ body ::tycho::StyleSheet::_notify {command name args} {
 ########################################################################
 #### dfltcget
 #
-# Get an attribute of an item. This is like itemcget, except that
-# it searches in the master style-sheet to find missing
+# Get an attribute of an item. This is like <b>attrset</b>, except
+# that it searches in the master style-sheet to find missing
 # values: If the attribute is not present here, look in
 # the same stylesheet in the master. If it is not present
 # there, look in the "default" stylesheet of the master.
 #
 body ::tycho::StyleSheet::dfltcget {name attribute} {
     if [exists $name] {
-	array set attrs [assign $name]
+	array set attrs [itemset $name]
 	if [::info exists attrs($attribute)] {
 	    return $attrs($attribute)
 	}
@@ -506,7 +506,7 @@ body ::tycho::StyleSheet::dfltcget {name attribute} {
 	regexp {[^:]+$} [lindex $name 0] style
 	if { $style == "default" } {
 	    # Can't go any further
-	    itemcget $name $attribute
+	    attrset $name $attribute
 	} else {
 	    # Try default style
 	    dfltcget [lreplace $name 0 0 style:default] $attribute
@@ -703,7 +703,6 @@ body ::tycho::StyleSheet::subscribe {mode {subscriber {}} args} {
 # parameters that are not in the master.
 #
 body ::tycho::StyleSheet::synchronize {master} {
-    # puts "Synchronizing stylesheet: $modelname"
     foreach s [match style] {
 	_sync $master $s {}
     }
@@ -813,8 +812,6 @@ body ::tycho::StyleSheet::load {stylesheet} {
     }
     # If it's not loaded, load it
     if ![::info exists _stylemodel($stylesheet)] {
-	# puts "Loading stylesheet: $stylesheet"
-	
 	set userfile [::tycho::expandPath $_userfile($stylesheet)]
 	set masterfile [::tycho::expandPath $_masterfile($stylesheet)]
 	
@@ -892,7 +889,7 @@ body ::tycho::StyleSheet::_describeparameter {name {prefix {}}} {
     set string "${prefix}parameter $tail"
 
     # Print value
-    array set attrs [assign $name]
+    array set attrs [itemset $name]
     lappend string $attrs(-value)
     unset attrs(-value)
 
