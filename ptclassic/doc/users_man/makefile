@@ -53,6 +53,10 @@ FIXFRAMEPS =	$(PTOLEMY)/bin/fixframeps
 # Update all the cross references and then Create postscript files
 fm2ps: update_book
 	$(FMPRINT2PS) $(DOCS)
+	@echo "Don't forget to print out install.ps separately"
+	@echo "  Appendix A, the installation guide, is 3 separate files"
+	@echo "First generate/update the book, then print out the 3 files that"
+	@echo "make up appendix A as one file."
 	$(FIXFRAMEPS) *.ps
 	-chmod g+w *.ps
 	rm -f *.ps.bak
