@@ -187,7 +187,7 @@ been completed, an End-of-Transmission (EOT) packet is sent.
                         double d1, d2;
                         d2 = (*randomUnif)();
     
-                        if (d2 < 1.0/double(meanPacketsSpurt))  {
+                        if (d2 < 1.0/double(int(meanPacketsSpurt)))  {
                             d1 = (*randomExp)();
                             completionTime += d1;
                         }
