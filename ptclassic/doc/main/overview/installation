@@ -305,35 +305,6 @@ any warning about file_id' defined but not used.
  ../../src/ptcl/PTcl.cc:<n>: warning: cast discards `const' from pointer target type (this warning may appear four times with different values of <n>)
 .br
  ../../src/ptcl/ptclMain.cc:75: warning: unused variable `ptcl'
-.H2 "Troubleshooting"
-.pp
-If when you start pigi you get the message "permission denied"
-and the \*(PT greeting window fails to pop up, then Vem was
-unable to start pigiRpc, the associated \*(PT process.
-This process is started using the Unix "rsh" command.
-This command can fail if your workstation does not have
-networking enabled, or the user's .rhosts file does not include
-the name of the workstation on which you are running.
-The following simple test checks your networking and .rhosts configuration:
-.(c
-	rsh name echo "hello world"
-.)c
-where "name" is the name of your workstation.  If you get back
-"hello world", then your workstation networking is correct.
-If you get the "permission denied" message again,
-then either your .rhosts is incorrect or networking is turned off
-on your workstation.
-If the latter is the problem,
-please ask your system administrator to enable networking.
-.pp
-If you succeed in invoking pigi, but graphs do not appear, but messages
-saying that the xgraph program could not be found appear instead,
-your path is set incorrectly.  Because pigi uses
-.i rsh 
-to start up \*(PT, your path
-must be defined in your .cshrc file, not just in your .login file.
-The path must be defined even when ``prompt'' is not set, since
-your .cshrc file will be read in non-interactive mode.
 .EQ
 delim $$
 .EN
