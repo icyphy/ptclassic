@@ -136,6 +136,7 @@ CCS_WITH_H_FILES=\
 SRCS=$(CCS_WITH_H_FILES) \
  checkConnect.cc \
  expandPath.cc \
+ subCharByString.cc \
  RanGen.cc \
  hashstring.cc
 
