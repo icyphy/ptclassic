@@ -30,10 +30,22 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
+# Types of revision control software, in order of preference.
+# It is assumed that for each type listed, there is a class defined
+# called RevControl$type, where $type is the type, and that this
+# class is derived from RevControl.
+option add *revisionControlTypes {SCCS RCS} widgetDefault
+
 #######################################################################
 #### RevControl
-# This class defines how revision control will be handled, and is 
-# intended to be contained within objects that use such facilities.
+# Base class for revision control objects. The main entry point is is
+# the procedure "setup", which will create a revision control window of
+# the appropriate type. The list of revision control types is given by
+# the option "revisionControlTypes", which lists them in order of
+# preference (e.g. "SCCS RCS", which is the default value). It is
+# assumed that for each type listed, there is a class defined called
+# RevControl$type, where $type is the type, and that this class is
+# derived from RevControl.
 #
 class ::tycho::RevControl {
     inherit ::tycho::DialogWindow
@@ -72,6 +84,21 @@ class ::tycho::RevControl {
     method viewHistory {} {error "Sorry, not implemented yet"}
 
     ###################################################################
+    ####                      public procs                         ####
+
+    #### isUnderRevControl
+    # Return 1 if the given file is under revision control, 0 otherwise.
+    proc isUnderRevControl {file} {return 0}
+
+    #### makeRev
+    # Make a revision control of the specified type.
+    proc makeRev {type editorWin editorObj} {}
+
+    #### setup
+    # Setup revision control for an editor.
+    proc setup {editorWin editorObj} {}
+
+    ###################################################################
     ####                   protected methods                       ####
 
     #### enableButton
@@ -81,10 +108,6 @@ class ::tycho::RevControl {
     #### isCheckedOut
     # Return 1 if the file is checked out, 0 otherwise.
     method isCheckedOut {} {return 0}
-
-    #### isUnderRevControl
-    # Return 1 if the file is under revision control, 0 otherwise.
-    protected method isUnderRevControl {} {return 0}
 
     #### cdDir
     # Change to the given directory with appropriate error checks.
@@ -118,14 +141,8 @@ configbody ::tycho::RevControl::object {
     }
     set file [$object cget -file]
     configure -title "Revision control for $file"
-    if {![isUnderRevControl]} {
-	if {![askuser "This file is not currently under revision control.\
-		Do you want it placed under revision control?"]} {
-	    error "Revision control cancelled"
-	} {
-	    initializeRevControl
-	}
-    }
+    set retval [isUnderRevControl $file]
+    initializeRevControl
     if [isCheckedOut] {
 	enableButton checkin
     } {
@@ -187,6 +204,75 @@ body ::tycho::RevControl::unedit {} {
 	enableButton checkout
     } {
 	error "Unedit cancelled"
+    }
+}
+
+###################################################################
+#### makeRev
+# Make a revision control.  The first argument is the type (SCCS, RCS, ...),
+# the second argument is the window name for the editor, and the third
+# argument is the editor object.
+#
+body ::tycho::RevControl::makeRev {type editorWin editorObj} {
+    # Create a revision control window
+    uplevel #0 " \
+	    ::tycho::RevControl$type $editorWin.revcontrol \
+	    -object $editorObj \
+	    -geometry +0+0 \
+	    -before $editorWin"
+    wm deiconify $editorWin.revcontrol
+}
+
+###################################################################
+#### setup
+# Setup revision control for an editor.  The arguments are the name
+# of the top-level editor window and the name of the editor object.
+#
+body ::tycho::RevControl::setup {editorWin editorObj} {
+
+    # If a rev control window is already open, use it.
+    if [winfo exists $editorWin.revcontrol] {
+	wm deiconify $editorWin.revcontrol
+	raise $editorWin.revcontrol
+	$editorWin.revcontrol focusin
+	return
+    }
+
+    set pref [option get . revisionControlTypes Tycho]
+    set currentFile [$editorObj filename]
+    set revclass {}
+
+    # Step through possible revision control systems and determine
+    # whether they control the file.
+    foreach type $pref {
+	if [RevControl$type::isUnderRevControl $currentFile] {
+	    set revclass "$type"
+	    break
+	}
+    }
+    # If the file is not under revision control, query the user
+    # for permission to put it under revision control.
+    if {$revclass == {}} {
+	set dlg [::tycho::autoName .rev]
+	::tycho::DialogWindow $dlg -text \
+		"This file is not currently under revision control.\
+		Do you want it placed under revision control?"
+
+	set default {}
+	foreach type $pref {
+	    $dlg addButton $type -text "Yes ($type)" -command \
+		    "::tycho::RevControl::makeRev $type $editorWin $editorObj; \
+		    destroy $dlg"
+	    if {$default == {}} {
+		$dlg default $type
+		set default $type
+	    }
+	}
+	$dlg addButton no -text "No <Esc>"
+	bind $dlg <Escape> "destroy $dlg"
+	$dlg centerOnScreen
+    } else {
+	::tycho::RevControl::makeRev $revclass $editorWin $editorObj
     }
 }
 
