@@ -90,7 +90,11 @@ void  ignoreAlarm()
     return ;
 }
 
-#ifdef SYSV
+#if defined (SYSV) || defined (linux)
+#define USE_SIGACTION
+#endif
+
+#ifdef USE_SIGACTION
 /* This is a fairly accurate timer routine */
 void Timer( val )
     int  val;			/* microseconds */
@@ -115,7 +119,7 @@ void Timer( val )
 
     return;
 }
-#else
+#else /* USE_SIGACTION */
 
 /* This is a fairly accurate timer routine */
 void Timer( val )
@@ -151,5 +155,5 @@ void Timer( val )
     return;
 }
 
-#endif /*SYSV*/
+#endif /*USE_SIGACTION*/
 #endif /*sewuent*/
