@@ -180,7 +180,8 @@ if [file isdirectory [file join $PTOLEMY tcltk itcl lib]] {
 		    puts "Error sourcing Ptolemy tcltk files:\n\
 			    $errMsg\nThis sort of thing could happen if\
 			    you are using a itkwish that is a later\n\
-			    release than Ptolemy.\nOr it could mean trouble\
+			    release than the itkwish in your\
+			    Ptolemy installation.\nOr it could mean trouble\
 			    with your Ptolemy tcltk installation.\n\
 			    Continuing. . ."
 		}
