@@ -2,7 +2,7 @@ defstar {
 	name { XMgraph }
 	domain { SDF }
 	desc {
-Generate a multi-signal plot with the xgraph program.
+Generate a multi-signal plot with the pxgraph program.
 This program has many options; see the User's manual
 of The Almagest.
 	}
@@ -16,19 +16,20 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
 	htmldoc {
-The input signal is plotted using the <i>xgraph</i></b> program.
+The input signal is plotted using the <i>pxgraph</i></b> program.
 This program must be in your path, or this star will not work!
 The <i>title</i></b> parameter specifies a title for the plot.
 The <i>saveFile</i></b> parameter optionally specifies a file for
-storing the data in a syntax acceptable to xgraph.
+storing the data in a syntax acceptable to pxgraph.
 A null string prevents any such storage.
-The <i>options</i></b> string is passed directly to the xgraph program
-as command-line options.  See the manual section describing xgraph
+The <i>options</i></b> string is passed directly to the pxgraph program
+as command-line options.  See the manual section describing pxgraph
 for a complete explanation of the options.
 <a name="graph, X window, multi-signal"></a>
+<a name="pxgraph program"></a>
 <a name="xgraph program"></a>
 	}
-	seealso { Xgraph xgraph XYgraph Xhistogram }
+	seealso { Xgraph $PTOLEMY/src/pxgraph/pxgraph.htm XYgraph Xhistogram }
 	inmulti {
 		name { input }
 		type { float }
