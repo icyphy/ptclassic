@@ -69,9 +69,41 @@ CGCTCL = $(OBJDIR)/domains/cgc/tcltk/targets
 CGT = $(OBJDIR)/domains/cg/targets
 SDFT = $(OBJDIR)/domains/sdf/targets
 
+BDFDIR = $(CROOT)/src/domains/bdf
+CGCDIR = $(CROOT)/src/domains/cgc
+CG96DIR = $(CROOT)/src/domains/cg96
+CG56DIR = $(CROOT)/src/domains/cg56
+SILAGEDIR = $(CROOT)/src/domains/silage
+THORDIR = $(CROOT)/src/domains/thor
+CGDDFDIR = $(CROOT)/src/domains/cg
+DDFDIR = $(CROOT)/src/domains/ddf
+VHDLFDIR = $(CROOT)/src/domains/vhdlf
+VHDLBDIR = $(CROOT)/src/domains/vhdlb
+MDSDFDIR = $(CROOT)/src/domains/mdsdf
+CPDIR = $(CROOT)/src/domains/cp
+PNDIR = $(CROOT)/src/domains/pn
+IPUSDIR = $(CROOT)/src/domains/ipus
+MQDIR = $(CROOT)/src/domains/mq
+DEDIR = $(CROOT)/src/domains/de
+CGDIR = $(CROOT)/src/domains/cg
+SDFDIR = $(CROOT)/src/domains/sdf
+HOFDIR = $(CROOT)/src/domains/hof
+
 # Tcl/Tk stars can be used in pigiRpc but not ptcl, for this we define TK
 
+ifndef TK
+	# We can't include the ipus domain since the non-tk ipus stars need 
+	# Blackboard* symbols, which are defined in the tk ipus stars.
+	# Set up definitions for stars.mk
+	IPUS=
+
+	SDFTK=
+	HOF=
+endif 
+
 ifdef CG96
+	CUSTOM_DIRS += $(CG96DIR)/kernel $(CG96DIR)/stars \
+		$(CG96DIR)/targets $(CG96DIR)/dsp/stars
 	CG = 1
 	PALETTES += PTOLEMY/src/domains/cg96/icons/cg96.pal
 	STARS += $(LIBDIR)/cg96dspstars.o $(LIBDIR)/cg96stars.o
@@ -83,6 +115,8 @@ ifdef CG96
 endif
 
 ifdef CG56
+	CUSTOM_DIRS += $(CG56DIR)/kernel $(CG56DIR)/stars \
+		$(CG56DIR)/targets $(CG56DIR)/dsp/stars
 	CG = 1
 	PALETTES += PTOLEMY/src/domains/cg56/icons/main.pal
 	STARS += $(LIBDIR)/cg56dspstars.o $(LIBDIR)/cg56stars.o
@@ -93,15 +127,18 @@ ifdef CG56
 	else
 		TARGETS += $(CG56T)/Sim56Target.o $(CG56T)/S56XTarget.o \
 			$(CG56T)/S56XTargetWH.o \
-			$(CG56T)/Sub56Target.o $(CG56T)/CG56MultiSimTarget.o \
+			$(CG56T)/Sub56Target.o \
+			$(CG56T)/CG56MultiSimTarget.o \
 			$(CG56T)/CG56MultiSimSend.o \
 			$(CG56T)/CG56MultiSimReceive.o \
 			$(CG56T)/CG56XCReceive.o $(CG56T)/CG56XCSend.o \
 			$(CG56T)/CG56XCPeek.o $(CG56T)/CG56XCPoke.o \
 			$(CG56T)/CGCXReceive.o $(CG56T)/CGCXSend.o \
 			$(CG56T)/CGCXPeek.o $(CG56T)/CGCXPoke.o \
-	 		$(CG56T)/CGCXSynchComm.o $(CG56T)/CG56XCSynchComm.o \
-			$(CG56T)/CGCXAsynchComm.o $(CG56T)/CG56XCAsynchComm.o \
+	 		$(CG56T)/CGCXSynchComm.o \
+			$(CG56T)/CG56XCSynchComm.o \
+			$(CG56T)/CGCXAsynchComm.o \
+			$(CG56T)/CG56XCAsynchComm.o \
 			$(CG56T)/CGCXBase.o  $(CG56T)/CGCS56XTarget.o
 	endif
 	# Window star in cg56/dsp/stars needs the Cephes Library
@@ -109,6 +146,8 @@ ifdef CG56
 endif
 
 ifdef SILAGE
+	CUSTOM_DIRS += $(SILAGEDIR)/kernel $(SILAGEDIR)/stars \
+		$(SILAGEDIR)/targets
 	CG = 1
 	SDFLIB = 1
 	PALETTES += PTOLEMY/src/domains/silage/icons/silage.pal
@@ -118,7 +157,40 @@ ifdef SILAGE
 		$(LIBDIR)/libsilage.$(LIBSUFFIX)
 endif
 
+ifdef THOR
+	CUSTOM_DIRS += $(THORDIR)/kernel $(THORDIR)/stars \
+		$(THORDIR)/pepp $(THORDIR)/analyzerX11
+	PALETTES += PTOLEMY/src/domains/thor/icons/thor.pal
+	STARS += $(LIBDIR)/thorstars.o
+	LIBS += -lthorstars -lthor
+	LIBFILES += $(LIBDIR)/libthorstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libthor.$(LIBSUFFIX)
+endif
+
+ifdef CGCFULL
+	CGC = 1
+	CM5 = 1
+	ifdef TK
+		CGCTK = 1
+	endif
+endif
+
+ifdef CGDDF
+	CUSTOM_DIRS += $(CGDDFDIR)/ddfScheduler
+	CGDDFLIB = 1
+	DDF = 1
+	CGC = 1
+	CGFULL = 1
+	TARGETS += $(CGCT)/main/CGCDDFTarget.o
+endif
+
+ifdef CGFULL
+	CG = 1
+	CGPAR = 1
+endif
+
 ifdef DDF
+	CUSTOM_DIRS += $(DDFDIR)/kernel $(DDFDIR)/stars 
 	SDFLIB = 1
 	# There are many DDF code generators and schedulers
 	# (HuScheduler, dcScheduler, ddfScheduler, dlScheduler, etc.)
@@ -134,41 +206,10 @@ ifdef DDF
 		$(LIBDIR)/libddf.$(LIBSUFFIX)
 endif
 
-ifdef THOR
-	PALETTES += PTOLEMY/src/domains/thor/icons/thor.pal
-	STARS += $(LIBDIR)/thorstars.o
-	LIBS += -lthorstars -lthor
-	LIBFILES += $(LIBDIR)/libthorstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libthor.$(LIBSUFFIX)
-endif
-
-ifdef CGCFULL
-	CGC = 1
-	CGCTK = 1
-	CM5 = 1
-endif
-
-ifdef CGFULL
-	CG = 1
-	CGPAR = 1
-endif
-
-ifdef CGDDF
-	CGC = 1
-	STARS += $(LIBDIR)/cgddfstars.o
-	TARGETS += $(CGCT)/main/CGCDDFTarget.o
-	LIBS += -lcgddf
-	LIBFILES += $(LIBDIR)/libddfstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libddf.$(LIBSUFFIX)
-else
-	#FIXME!!  We shouldn't have to include CGDDF if we want CGPAR!
-	#This is for a CGMultiTarget dependency
-	ifdef CGPAR
-		LIBS += -lcgddf
-	endif
-endif
-
 ifdef VHDL
+	CUSTOM_DIRS += $(VHDLFDIR)/kernel $(VHDLFDIR)/stars \
+		 $(VHDLFDIR)/targets  $(VHDLBDIR)/targets \
+		$(VHDLBDIR)/kernel $(VHDLBDIR)/stars 
 	CG = 1
 	SDFLIB = 1
 	PALETTES += PTOLEMY/src/domains/vhdlf/icons/vhdlf.pal
@@ -182,6 +223,7 @@ ifdef VHDL
 endif
 
 ifdef MDSDF
+	CUSTOM_DIRS += $(MDSDFDIR)/kernel $(MDSDFDIR)/stars
 	PALETTES += PTOLEMY/src/domains/mdsdf/icons/mdsdf.pal
 	SDFLIB = 1
 	STARS +=  $(LIBDIR)/mdsdfstars.o
@@ -189,6 +231,7 @@ ifdef MDSDF
 	LIBFILES += $(LIBDIR)/libmdsdfstars.$(LIBSUFFIX) \
 		$(LIBDIR)/libmdsdf.$(LIBSUFFIX)
 	ifdef TK 
+		CUSTOM_DIRS += $(MDSDFDIR)/tcltk/stars
 		STARS += $(LIBDIR)/mdsdftclstars.o
 		LIBFILES += $(LIBDIR)/libmdsdftclstars.$(LIBSUFFIX)
 		LIBS += -lmdsdftclstars
@@ -196,8 +239,10 @@ ifdef MDSDF
 endif
 
 ifdef CP
+	CUSTOM_DIRS += $(CPDIR)/kernel $(CPDIR)/stars \
+		$(CPDIR)/infopad/kernel $(CPDIR)/infopad/stars
 	PALETTES += PTOLEMY/src/domains/cp/icons/cp.pal
-	LPW = 1
+	LWP = 1
 	STARS += $(LIBDIR)/cpstars.o $(LIBDIR)/cpipstars.o
 	LIBS += -lcpstars -lcpipstars -lcp -laudio
 	LIBFILES += $(LIBDIR)/libcpstars.$(LIBSUFFIX) \
@@ -205,12 +250,13 @@ ifdef CP
 		$(LIBDIR)/libcp.$(LIBSUFFI
 endif
 
-ifdef LPW
+ifdef LWP
 	LIBS += -llwpthread -llwp
 	LIBFILES += $(LIBDIR)/liblwpthread.$(LIBSUFFIX)
 endif
 
 ifdef PN
+	CUSTOM_DIRS += $(PNDIR)/kernel $(PNDIR)/stars 
 	SDFLIB = 1
 	PALETTES += PTOLEMY/src/domains/pn/icons/pn.pal
 	ifneq (,$(filter sun% sol%,$(PTARCH)))
@@ -228,13 +274,12 @@ endif
 # Blackboard* symbols, which are defined in the tk ipus stars.
 # Set up definitions for stars.mk
 
-ifndef TK
-	IPUS=
-endif
-
 ifdef IPUS
+	CUSTOM_DIRS += $(IPUSDIR)/kernel $(IPUSDIR)/stars 
 	PALETTES += PTOLEMY/src/domains/ipus/icons/ipus.pal
 	ifdef TK
+		CUSTOM_DIRS += $(IPUSDIR)/tcltk/kernel \
+			$(IPUSDIR)/tcltk/stars 
 		STARS += $(LIBDIR)/ipustclstars.o
 		LIBFILES += $(LIBDIR)/libipustclstars.$(LIBSUFFIX) \
 			$(LIBDIR)/libipustcltk.$(LIBSUFFIX)
@@ -248,73 +293,80 @@ ifdef IPUS
 endif
 
 ifdef MQ
-	SDF = 1
-	DE = 1
-	ATMSTARS = $(LIBDIR)/mqstars.o $(LIBDIR)/deatmstars.o \
-		$(LIBDIR)/sdfatmstars.o
-	ATM_LIBFILES = $(LIBDIR)/libmq.$(LIBSUFFIX) \
-		$(LIBDIR)/libmqstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libdeatmstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libsdfatmstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libatm.$(LIBSUFFIX)
-	ATM_LIBS= -lmqstars -lmq -ldeatmstars -lsdfatmstars -latm
+	ATM = 1
+	CUSTOM_DIRS += $(MQDIR)/kernel $(MQDIR)/stars
+	ATMSTARS = $(LIBDIR)/mqstars.o
+	LIBFILES += $(LIBDIR)/libmq.$(LIBSUFFIX) \
+		$(LIBDIR)/libmqstars.$(LIBSUFFIX)
+	LIBS += -lmqstars -lmq 
 endif
 
 ifdef DE
+	ifdef ATM
+		CUSTOM_DIRS += $(DEDIR)/atm
+		LIBS += -ldeatmstars
+		LIBFILES += $(LIBDIR)/libdeatmstars.$(LIBSUFFIX)
+	endif
+	IMAGE = 1
+	SDFLIB = 1
 	PALETTES += PTOLEMY/src/domains/de/icons/de.pal
 	STARS += $(LIBDIR)/destars.o
 	LIBS += -ldestars -lde
 	LIBFILES += $(LIBDIR)/libdestars.$(LIBSUFFIX) \
 		$(LIBDIR)/libde.$(LIBSUFFIX)
+	CUSTOM_DIRS += $(DEDIR)/stars $(DEDIR)/kernel 
 	ifdef TK
+		CUSTOM_DIRS += $(DEDIR)/tcltk/stars
 		STARS += $(LIBDIR)/detclstars.o
 		LIBS += -ldetclstars
 		LIBFILES += $(LIBDIR)/libdetclstars.$(LIBSUFFIX)
 	endif
-	#FIXME - This is ugly, there are DE stars that depend on the image lib
-	ifndef SDFIMAGE
-		LIBS += -lImage
-		LIBFILES += $(LIBDIR)/libImage.$(LIBSUFFIX)
-	endif
 endif
 
 ifdef CM5
+	CUSTOM_DIRS += $(ROOT)/src/domains/cgc/targets/cm5
 	CGC = 1
 	TARGETS += $(CGCT)/cm5/CGCcm5Send.o $(CGCT)/cm5/CGCcm5Recv.o \
 		$(CGCT)/cm5/CGCcm5Target.o $(CGCT)/cm5/CGCcm5peTarget.o
 endif
 
 ifdef CGC
-	SDFLIB = 1
-	PALETTES += PTOLEMY/src/domains/cgc/icons/cgc.pal
+	CUSTOM_DIRS += $(CGCDIR)/targets/main $(CGCDIR)/stars \
+		$(CGCDIR)/kernel
 	ifdef CGCTK
+		CUSTOM_DIRS += $(CGCDIR)/tcltk/stars $(CGCDIR)/tcltk/targets
 		STARS += $(LIBDIR)/cgctcltkstars.o
 		LIBS += -lcgctcltk
 		LIBFILES += $(LIBDIR)/libcgctcltk.$(LIBSUFFIX)
+		TARGETS += $(CGCTCL)/CGCTclTkTarget.o
 	endif
 	CG = 1
-	STARS += $(LIBDIR)/cgcstars.o
+	SDFLIB = 1
+	BDFLIB = 1
 	ifeq ($(USE_SHARED_LIBS),yes) 
-		TARGETS += $(CGCTCL)/CGCTclTkTarget.o
 		LIBS += -lcgctargets
 		LIBFILES += $(LIBDIR)/libcgctargets.$(LIBSUFFIX)
 	else
 		TARGETS += $(CGCT)/main/CGCUnixSend.o \
 			$(CGCT)/main/CGCUnixReceive.o \
 			$(CGCT)/main/CGCMultiTarget.o \
-			$(CGCTCL)/CGCTclTkTarget.o \
-			$(CGCT)/main/CGCMacroStar.o $(CGCT)/main/CGCDDFCode.o \
+			$(CGCT)/main/CGCMacroStar.o \
+			$(CGCT)/main/CGCDDFCode.o \
 			$(CGCT)/main/CGCSDFSend.o \
 			$(CGCT)/main/CGCSDFReceive.o \
 			$(CGCT)/main/CGCSDFBase.o \
 			$(CGCT)/main/CGCTargetWH.o
 	endif
+	PALETTES += PTOLEMY/src/domains/cgc/icons/cgc.pal
+	STARS += $(LIBDIR)/cgcstars.o
 	LIBS += -lcgcstars -lcgc
 	LIBFILES += $(LIBDIR)/libcgcstars.$(LIBSUFFIX) \
 		$(LIBDIR)/libcgc.$(LIBSUFFIX)
 endif
 
 ifdef BDF
+	CUSTOM_DIRS += $(BDFDIR)/stars
+	BDFLIB = 1
 	PALETTES += PTOLEMY/src/domains/bdf/icons/bdf.pal
 	SDF = 1
 	STARS += $(LIBDIR)/bdfstars.o
@@ -324,31 +376,27 @@ ifdef BDF
 	ifdef CGC
 		TARGETS += $(CGCT)/main/CGCBDFTarget.o
 	endif
-	LIBS += -lbdfstars -lbdf
-	LIBFILES += $(LIBDIR)/libbdfstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libbdf.$(LIBSUFFIX)
-else
-	#FIXME - you need bdf in CGCBDFTarget.... maybe it shouldn't be
-	#part of the cgc target shared library?
-	ifdef CGC
-		LIBS += -lbdf
-	endif
+	LIBS += -lbdfstars
+	LIBFILES += $(LIBDIR)/libbdfstars.$(LIBSUFFIX)
 endif
 
 ifdef CG
+	CUSTOM_DIRS += $(CGDIR)/kernel $(CGDIR)/targets $(CGDIR)/stars
 	PALETTES += PTOLEMY/src/domains/cg/icons/cg.pal
 	ifdef CGPAR
-		LIBS += -lMacro -lDC -lHu -lDL -lMSH -lPar -lcg
+		CUSTOM_DIRS += $(CGDIR)/HuScheduler $(CGDIR)/ddfScheduler \
+			$(CGDIR)/macroScheduler $(CGDIR)/dcScheduler  \
+			$(CGDIR)/dlScheduler $(CGDIR)/multiScheduler \
+			$(CGDIR)/parScheduler
+		LIBS += -lMacro -lDC -lHu -lDL -lMSH -lcgddf -lPar -lcg
 		TARGETS += $(CGT)/CGMultiTarget.o $(CGT)/CGSharedBus.o 
 		LIBFILES += $(LIBDIR)/libDC.$(LIBSUFFIX) \
 			$(LIBDIR)/libHu.$(LIBSUFFIX) \
 			$(LIBDIR)/libMacro.$(LIBSUFFIX) \
-			$(LIBDIR)/libcgddf.$(LIBSUFFIX) \
 			$(LIBDIR)/libDL.$(LIBSUFFIX) \
 			$(LIBDIR)/libMSH.$(LIBSUFFIX) \
-			$(LIBDIR)/libPar.$(LIBSUFFIX) \
-			$(LIBDIR)/libcgstars.$(LIBSUFFIX) \
-			$(LIBDIR)/libcg.$(LIBSUFFIX)
+			$(LIBDIR)/libcgddf.$(LIBSUFFIX) \
+			$(LIBDIR)/libPar.$(LIBSUFFIX)
 	endif
 	SDFLIB = 1
 	CGSTARS = $(LIBDIR)/cgstars.o
@@ -369,56 +417,59 @@ ifdef SDFFULL
 	endif
 endif
 
-# Cephes library is used by the Window star
-ifdef SDFDSP
-	CEPHESLIB = 1
+ifdef ATM
+	SDF=1
 endif
-
-ifdef CEPHESLIB
-	LIBS += -lcephes
-	LIBFILES += $(LIBDIR)/libcephes.$(LIBSUFFIX)
-endif
-
-ifndef TK
-	SDFTK=
-endif 
 
 ifdef SDF 
 	PALETTES += PTOLEMY/src/domains/sdf/icons/sdf.pal
 	ifdef SDFTK
+		CUSTOM_DIRS += $(SDFDIR)/tcltk/stars
 		SDFDSP=1
 		STARS += $(LIBDIR)/sdftclstars.o
 		LIBFILES += $(LIBDIR)/libsdftclstars.$(LIBSUFFIX)
 		LIBS += -lsdftclstars
 	endif
+	ifdef ATM
+		CUSTOM_DIRS += $(SDFDIR)/atm/stars
+		LIBS += -lsdfatmstars
+		LIBFILES += $(LIBDIR)/libsdfatmstars.$(LIBSUFFIX)
+	endif
 	ifdef SDFDSP 
+		CUSTOM_DIRS += $(SDFDIR)/dsp/stars
+		# Cephes library is used by the Window star
+		CEPHESLIB = 1
 		STARS += $(LIBDIR)/sdfdspstars.o
 		LIBS += -lsdfdspstars
 		LIBFILES += $(LIBDIR)/libsdfdspstars.$(LIBSUFFIX)
 	endif
 	ifdef SDFMATRIX 
+		CUSTOM_DIRS += $(SDFDIR)/matrix/stars
 		STARS += $(LIBDIR)/sdfmatrixstars.o
 		LIBS += -lsdfmatrixstars
 		LIBFILES += $(LIBDIR)/libsdfmatrixstars.$(LIBSUFFIX)
 	endif
 	ifdef SDFIMAGE
+		CUSTOM_DIRS += $(SDFDIR)/image/stars
+		IMAGE = 1
 		STARS += $(LIBDIR)/sdfimagestars.o
-		LIBS += -lsdfimagestars -lImage
-		LIBFILES += $(LIBDIR)/libsdfimagestars.$(LIBSUFFIX) \
-			 $(LIBDIR)/libImage.$(LIBSUFFIX)
+		LIBS += -lsdfimagestars
+		LIBFILES += $(LIBDIR)/libsdfimagestars.$(LIBSUFFIX) 
 	endif
 	ifdef SDFMATLAB
+		CUSTOM_DIRS += $(SDFDIR)/matlab/stars
 		STARS += $(MATLABSTARS_DOT_O)
 		LIBS += $(MATLABSTAR_LIB) $(MATLABEXT_LIB)
 		LIBFILES += $(MATLABSTAR_LIBFILE)
 	endif
 	ifdef SDFCONTRIB
+		CUSTOM_DIRS += $(SDFDIR)/contrib/stars
 		STARS += $(LIBDIR)/sdfcontribstars.o
 		LIBFILES += $(LIBDIR)/libsdfcontribstars.$(LIBSUFFIX)
 		LIBS += -lsdfcontribstars
 	endif
+	CUSTOM_DIRS += $(SDFDIR)/stars $(SDFDIR)/targets 
 	STARS += $(LIBDIR)/sdfstars.o 
-	TARGETS += $(OBJDIR)/domains/sdf/loopScheduler/LoopTarget.o 
 	ifdef CG
 		TARGETS += $(SDFT)/CompileTarget.o
 	endif
@@ -427,9 +478,34 @@ ifdef SDF
 	SDFLIB = 1
 endif
 
+ifdef IMAGE
+	CUSTOM_DIRS += $(SDFDIR)/image/kernel
+	LIBS +=  -lImage
+	LIBFILES += $(LIBDIR)/libImage.$(LIBSUFFIX)
+endif
+
+ifdef ATM
+	CUSTOM_DIRS += $(SDFDIR)/atm/kernel
+	LIBFILES += $(LIBDIR)/libatm.$(LIBSUFFIX)
+	LIBS += -latm
+endif
+
+ifdef CEPHESLIB
+	LIBS += -lcephes
+	LIBFILES += $(LIBDIR)/libcephes.$(LIBSUFFIX)
+endif
+
+ifdef BDFLIB
+	CUSTOM_DIRS += $(BDFDIR)/kernel
+	LIBS += -lbdf
+	LIBFILES += (LIBDIR)/libbdf.$(LIBSUFFIX)
+endif
+
 ifdef SDFLIB
+	CUSTOM_DIRS += $(SDFDIR)/kernel $(SDFDIR)/loopScheduler
 	LIBS += -lLS -lsdf
-	LIBFILES += $(LIBDIR)/libLS.$(LIBSUFFIX) $(LIBDIR)/libsdf.$(LIBSUFFIX)
+	LIBFILES += $(LIBDIR)/libLS.$(LIBSUFFIX) \
+		$(LIBDIR)/libsdf.$(LIBSUFFIX)
 endif
 
 # HOF stars can be used in pigiRpc but not ptcl.
@@ -438,6 +514,7 @@ endif
 # STOP button and abort the run.  But Tk is not linked into ptcl, so
 # this call cannot be done.
 ifdef HOF
+	CUSTOM_DIRS += $(HOFDIR)/kernel $(HOFDIR)/stars
 	STARS += $(LIBDIR)/hofstars.o
 	LIBS +=	-lhofstars -lhof
 	LIBFILES += $(LIBDIR)/libhofstars.$(LIBSUFFIX) \
@@ -449,10 +526,14 @@ ifeq ($(USE_SHARED_LIBS),yes)
 endif
 
 ifdef TK
+	CUSTOM_DIRS += $(CROOT)/src/ptklib $(CROOT)/src/pigilib
 	LIBS += -lptk -lgantt $(ITK_LIBSPEC) $(TK_LIBSPEC) $(X11_LIBSPEC) 
 	PT_DEPEND += $(LIBDIR)/libptk.a \
 		$(LIBDIR)/libgantt.$(LIBSUFFIX)
 endif
+
+CUSTOM_DIRS += $(CROOT)/src/kernel $(CROOT)/src/pigiRpc $(CROOT)/src/ptcl \
+	$(CROOT)/mk $(CROOT)/src/tycho/kernel
 
 PT_DEPEND += $(LIBDIR)/libptcl.$(LIBSUFFIX) $(LIBDIR)/libptolemy.a \
 	$(LIBFILES) $(STARS)
