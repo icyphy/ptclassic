@@ -5,10 +5,11 @@ defstar {
 	desc {
 This filter tries to lock onto the strongest sinusoidal component in
 the input signal, and outputs the current estimate of the cosine
-of the frequency of the strongest component.  It is a three-tap
-Least-Mean Square (LMS) filter whose first and third coefficients are
-fixed at one.  The second coefficient is adapted.  It is a normalized
-version of the Direct Adaptive Frequency Estimation Technique.
+of the frequency of the strongest component and the error signal.
+It is a three-tap Least-Mean Square (LMS) filter whose first and third
+coefficients are fixed at one.  The second coefficient is adapted.
+It is a normalized version of the Direct Adaptive Frequency Estimation
+Technique.
 	}
 	version { $Id$ }
 	author { Brian L. Evans }
