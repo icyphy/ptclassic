@@ -228,7 +228,7 @@ CGTARGETS =	$(CGT)/CGMultiTarget.o $(CGT)/CGSharedBus.o \
 ifeq ($(USE_SHARED_LIBS),yes) 
 CGCTARGETS =	$(CGCTCL)/CGCTclTkTarget.o
 CGCTARGETS_LIBS = 	-lcgctargets
-CGCTARGETS_LIBSFILES = $(LIBDIR)/libcgctargets.$(LIBSUFFIX)
+CGCTARGETS_LIBFILES = $(LIBDIR)/libcgctargets.$(LIBSUFFIX)
 else
 CGCTARGETS =	$(CGCT)/main/CGCUnixSend.o $(CGCT)/main/CGCUnixReceive.o \
 		$(CGCT)/main/CGCMultiTarget.o $(CGCTCL)/CGCTclTkTarget.o \
@@ -236,7 +236,7 @@ CGCTARGETS =	$(CGCT)/main/CGCUnixSend.o $(CGCT)/main/CGCUnixReceive.o \
 		$(CGCT)/main/CGCSDFSend.o $(CGCT)/main/CGCSDFReceive.o \
 		$(CGCT)/main/CGCSDFBase.o $(CGCT)/main/CGCTargetWH.o
 CGCTARGETS_LIBS =
-CGCTARGETS_LIBSFILES =
+CGCTARGETS_LIBFILES =
 endif
 
 CGCDDFTARGETS =	$(CGCT)/main/CGCDDFTarget.o
@@ -245,7 +245,7 @@ BDFTARGETS =	$(CGT)/CGBDFTarget.o $(CGCT)/main/CGCBDFTarget.o
 ifeq ($(USE_SHARED_LIBS),yes) 
 CG56TARGETS =
 CG56TARGETS_LIBS = 	-lcg56targets
-CG56TARGETS_LIBSFILES = $(LIBDIR)/libcg56targets.$(LIBSUFFIX)
+CG56TARGETS_LIBFILES = $(LIBDIR)/libcg56targets.$(LIBSUFFIX)
 else
 CG56TARGETS =	$(CG56T)/Sim56Target.o $(CG56T)/S56XTarget.o \
 		$(CG56T)/S56XTargetWH.o \
@@ -259,7 +259,7 @@ CG56TARGETS =	$(CG56T)/Sim56Target.o $(CG56T)/S56XTarget.o \
 		$(CG56T)/CGCXAsynchComm.o $(CG56T)/CG56XCAsynchComm.o \
 		$(CG56T)/CGCXBase.o  $(CG56T)/CGCS56XTarget.o
 CG56TARGETS_LIBS =
-CG56TARGETS_LIBSFILES =
+CG56TARGETS_LIBFILES =
 endif
 
 CG96TARGETS =	$(CG96T)/Sim96Target.o
