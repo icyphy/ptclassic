@@ -75,17 +75,12 @@ limitation of liability, and disclaimer of warranty provisions.
 
     codeblock(read) {
 	/* Read blockSize bytes of data from the file */
-	if (read($starSymbol(file), $starSymbol(buf), $val(blockSize)) != $val(blockSize))
-	{
-	    perror("$val(fileName): Error reading from file.");
-	    exit(1);
-	}
+	read($starSymbol(file), $starSymbol(buf), $val(blockSize));
     }
 
     codeblock(write) {
 	/* Write blockSize bytes to file */
-	if (write($starSymbol(file), $starSymbol(buf), $val(blockSize)) != $val(
-blockSize))
+	if (write($starSymbol(file), $starSymbol(buf), $val(blockSize)) != $val(blockSize))
 	{
 	    perror("$val(fileName): Error writing to file.");
 	    exit(1);
