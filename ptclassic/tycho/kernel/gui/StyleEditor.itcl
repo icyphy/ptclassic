@@ -108,10 +108,10 @@ class ::tycho::StyleEditor {
     # The mapping from style labels to style names
     private variable _index
 
-   # The mapping from style names to style labels
+    # The mapping from style names to style labels
     private variable _unindex
 
-   # The model I'm editing
+    # The model I'm editing
     private variable _model ""
 
     # The master of the model I'm editing
@@ -345,6 +345,12 @@ configbody ::tycho::StyleEditor::stylesheet {
 #### -style
 #
 configbody ::tycho::StyleEditor::style {
+    # If the options are not evaluated in the "right" order,
+    # postpone doing this one until later
+    if { $itk_option(-stylesheet) == "" } {
+	whenConstructed "$this configure -style $itk_option(-style)"
+	return
+    }
     set style $itk_option(-style)
     $itk_component(items) assign style-chooser $_unindex($style)
     foreach parameter [$_master match parameter $style] {
@@ -386,7 +392,7 @@ configbody ::tycho::StyleEditor::style {
 body ::tycho::StyleEditor::constructor {args} {
     # Create the labeled grid. Give it a columnspan of just 2
     itk_component add items {
-	iwidgets::labeledgrid $itk_component(childsite).items \
+	labeledgrid $itk_component(childsite).items \
                 -columnspan 6 -childcolumnspan 5 \
                 -labelforeground blue
     } {
@@ -413,7 +419,7 @@ body ::tycho::StyleEditor::constructor {args} {
             -command "$this cancel"
     $bbox add close \
             -text "Close" \
-            -command "delete object $this"
+            -command "::delete object $this"
     
     $bbox default close
 

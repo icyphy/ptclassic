@@ -243,7 +243,8 @@ configbody ::tycho::TopLevel::master {
 body ::tycho::TopLevel::constructor {args} {
     
     # Import the tycho namespace
-    import add ::tycho
+    # Removed April 98, hjr -- not needed!
+    # import add ::tycho
 
     # Start with the window unmapped
     wm withdraw $prefix
@@ -427,7 +428,7 @@ body ::tycho::TopLevel::freezeWindowSize {} {
 #
 body ::tycho::TopLevel::nextWindow {{raise 0}} {
     # Needed for focus to settle.
-    safeUpdate $this
+    ::tycho::safeUpdate $this
     if ![string match "$prefix*" [focus]] {return}
     set wins [$topLevelWindows elements]
     # Start with the last element of the list.
@@ -461,7 +462,7 @@ body ::tycho::TopLevel::nextWindow {{raise 0}} {
 #
 body ::tycho::TopLevel::prevWindow {{raise 0}} {
     # Needed for focus to settle.
-    safeUpdate $this
+    ::tycho::safeUpdate $this
     if ![string match "$prefix*" [focus]] {return}
     foreach win [$topLevelWindows elements $prefix] {
 	if {$win == $prefix} {continue}

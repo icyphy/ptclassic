@@ -248,8 +248,8 @@ body ::tycho::MenuBar::delete {tag} {
 
 	destroy $itk_component($tag)
 	destroy $itk_component(button$tag)
-	unset itk_component($tag)
-	unset itk_component(button$tag)
+	catch {unset itk_component($tag)}
+	catch {unset itk_component(button$tag)}
 	unset _menupath($tag)
 	set menubuttons [::tycho::ldelete $menubuttons $tag]
     } else {

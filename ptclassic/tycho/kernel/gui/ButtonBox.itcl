@@ -344,8 +344,9 @@ body ::tycho::ButtonBox::add {tag args} {
 
     # Bind description output.
     bind $itk_component(button$tag) <Enter> \
-	    [code [list %Q putStatus $_description($tag)]]
-    bind $itk_component(button$tag) <Leave> [code "%Q putStatus {}"]
+	    [list @scope [info class] $this putStatus $_description($tag)]
+    bind $itk_component(button$tag) <Leave> \
+	    [list @scope [info class] $this putStatus {}]
 
     # If a character was underlined, bind the hull to invoke the button.
     if {[::info exists buttopts(-underline)]} {

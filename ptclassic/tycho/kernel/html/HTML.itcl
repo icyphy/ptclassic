@@ -1744,7 +1744,7 @@ proc HMlink_callback {win href} {
     if {![winfo exists $win]} {return}
 
     # Get the name of the HTML widget.
-    set HTML [uplevel #0 winfo command [winfo megawidget $win]]
+    set HTML [uplevel #0 info command [winfoMegawidget $win]]
 
     # NOTE: https is secure HTTP, which we don't support.
     if [regexp -nocase {^gopher:|^news:|^telnet:|^wais:|^https:} $href] {
@@ -1934,7 +1934,7 @@ proc HMrender {win tag not param text} {
 #
 proc HMset_image {win handle src} {
     # Get the name of the HTML widget.
-    set HTML [uplevel #0 winfo command [winfo megawidget $win]]
+    set HTML [uplevel #0 info command [winfoMegawidget $win]]
 
     # If the slowNetwork misc preference is set, then don't display images.
     if {![$HTML isSlowNetwork]} {
@@ -2370,7 +2370,8 @@ proc HMtag_img {win param text} {
 	}
 
         # Get the name of the HTML widget.
-        set HTML [uplevel #0 winfo command [winfo megawidget $win]]
+	set HTML [uplevel #0 info command [winfoMegawidget $win]]
+
         if { [$HTML isa ::tycho::View] == 1} {
             # Add a binding for links to display the destination.
             bind $label <Enter> "$HTML linkEnter {} {} $item"
@@ -2428,13 +2429,12 @@ proc HMtag_tcl {win param text} {
     upvar #0 HM$win var
 
     # Get the name of the HTML window and widget command.
-    set HTML [winfo megawidget $win]
-    set HTMLcommand [winfo command $HTML]
+    set HTML [uplevel #0 info command [winfoMegawidget $win]]
 
     set color [::tycho::stylesheet get text activeColor]
     $win tag configure tcl -foreground $color
     $win tag bind tcl <Double-Button-1> \
-		"uplevel #0 $HTMLcommand execTcl %x %y; break"
+		"uplevel #0 $HTML execTcl %x %y; break"
 
     if {[HMextract_param $param quiet]} {
         set var(Ttclq) tclq

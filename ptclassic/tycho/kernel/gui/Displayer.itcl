@@ -528,7 +528,13 @@ body ::tycho::Displayer::destroyView {view} {
     # of the following code will be executed.
     set tag $_viewtag($view)
     if { [::info which -command $view] != "" } {
-        delete object [winfo command $view]
+	# FIXME: Itcl 3.0
+	global tcl_version
+	if { $tcl_version >= 8.0 } {
+	    delete object $view
+	} else {
+	    delete object [winfo command $view]
+	}
     }
 
     # As long as the view destroyed successfully (it could have
@@ -564,7 +570,13 @@ body ::tycho::Displayer::destroyView {view} {
 #
 body ::tycho::Displayer::focusin {} {
     if {$currentView != {}} {
-	[winfo command $currentView] focusin
+	# FIXME: Itcl 3.0
+	global tcl_version
+	if { $tcl_version >= 8.0 } {
+	    $currentView focusin
+	} else {
+	    [winfo command $currentView] focusin
+	}
     }
 }
 
@@ -829,8 +841,12 @@ body ::tycho::Displayer::setEmptyView {} {
     if { $currentView == "" || [info which -command $currentView] == "" } {
 	set tag ""
     } else {
-	set tag $_viewtag($currentView)
+	# FIXME: this doesn't work for tcl++. For now, insert this
+	# kludge
+	# set tag $_viewtag($currentView)
+	set tag ""
     }
+
     catch {pack forget $itk_component(menubar$tag)}
     catch {pack forget $itk_component(status$tag)}
     catch {pack forget $itk_component(toolbar$tag)}
@@ -872,6 +888,15 @@ body ::tycho::Displayer::showView {view args} {
 
     # If view is already visible, give it the focus and return.
     if $_showing($view) {
+	if { [::info which -command $view] != "" } {
+	    # FIXME: Itcl 3.0
+	    global tcl_version
+	    if { $tcl_version >= 8.0 } {
+		$view focusin
+	    } else {
+		[winfo command $view] focusin
+	    }
+	}
 	[winfo command $view] focusin
 	return
     }
@@ -892,7 +917,14 @@ body ::tycho::Displayer::showView {view args} {
     # while still in the View constructor. Deferment is no longer
     # needed because showView is called after the constructor returns.
     # after idle [code [winfo command $view] focusin]
-    [winfo command $view] focusin
+
+    # FIXME: Itcl 3.0
+    global tcl_version
+    if { $tcl_version >= 8.0 } {
+	$view focusin
+    } else {
+	[winfo command $view] focusin
+    }
 }
 
 #################################################################

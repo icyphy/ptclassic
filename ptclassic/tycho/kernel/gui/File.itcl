@@ -508,13 +508,13 @@ body ::tycho::File::destructor {} {
 	    saveQuery
 	}
     }
-    # Remove this file from all menubars
-    windowMenuRemoveAll $completeFilePath
-
     # Deregister this menubar
     if { [menubar] != "" } {
 	::tycho::deregister menubar [menubar]
     }
+    # Remove this file from all menubars
+    windowMenuRemoveAll $completeFilePath
+
     # If an error occurred in construction, this may not exist.
     if [::info exists fileObjects($this)] {
 	unset fileObjects($this)
@@ -1292,7 +1292,7 @@ body ::tycho::File::openContext {filename {mode {}}} {
 body ::tycho::File::openWin {{megawidget {}}} {
     # Get the megawidget corresponding to the widget
     if { $megawidget != {} } {
-        set mw [winfo megawidget $megawidget]
+        set mw [winfoMegawidget $megawidget]
         if { $mw != "" } {
             set megawidget $mw
         }
