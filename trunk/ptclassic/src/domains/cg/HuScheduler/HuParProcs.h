@@ -56,10 +56,6 @@ public:
 
 	/* virtual */ void scheduleSmall(DLNode*);
 
-  	// determine the pattern of processor availability before scheduling
-  	// a dynamic construct (or non-atomic node).
-  	/* virtual */ int determinePPA(DLNode*, IntArray&);
-
 protected:
 	// Fire a node. Check the runnability of descendants.
 	/* virtual */ void fireNode(DLNode*);
@@ -69,9 +65,6 @@ private:
 	/* virtual */ void prepareComm(DLNode*);	//  do nothing
 	/* virtual */ void scheduleIPC(int);	//  do nothing
 
-	// Among candidate processors, choose a processor that can execute
-	// the node earliest.
-	/* virtual */ int decideStartingProc(DLNode*, int*);
 	int isCandidate(int);	// determine if specified proc is in the "candidate" array
 };
 

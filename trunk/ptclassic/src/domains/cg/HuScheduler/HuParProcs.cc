@@ -94,16 +94,21 @@ void HuParProcs :: scheduleSmall(DLNode* node)
 		earliest = costAssignedTo(pd, pix, targetTime);
                 if (earliest == targetTime) canProc = pix;
         } else {
-                candidate = mtarget->candidateProcs(this, node->myMaster());
+		if(!candidateProcs(node->myMaster())) {
+		   Error::abortRun(*node->myMaster(), " is not supported.",
+		   " please check resource constraints.");
+		   return;
+		}
+
 		// get the canProc or the earliest available time
 		int pix = pd->getPreferredProc();
 		earliest = costAssignedTo(pd, pix, targetTime);
 		if ((earliest == targetTime) && (isCandidate(pix))) {
 			canProc = pix;
 		} else {
-			int bound = candidate->size();
+			int bound = candidate.size();
 			for (int i = 0; i < bound; i++) {
-				pix = candidate->elem(i);
+				pix = candidate.elem(i);
 				int cost = costAssignedTo(pd, pix, targetTime);
 				if (cost == targetTime) {
 					canProc = pix;
@@ -115,11 +120,6 @@ void HuParProcs :: scheduleSmall(DLNode* node)
 		}
         }
 
-	if (candidate->size() == 0) {
-		Error::abortRun(*pd->myMaster(), " is not supported.",
-			" please check resource constraits");
-	}
-
 	// check whether canProc is set or not.
 	// If set, schedule the node. If not, put this node back to the 
 	// runnable node list.
@@ -129,7 +129,6 @@ void HuParProcs :: scheduleSmall(DLNode* node)
 
 		// renew the states of the graph
 		myGraph->decreaseNodes();
-		myGraph->decreaseWork(pd->getExTime());
 	} else {
 		pd->setAvailTime(earliest);
 		myGraph->sortedInsert(myGraph->runnableNodes, pd, 1);
@@ -139,79 +138,11 @@ void HuParProcs :: scheduleSmall(DLNode* node)
 void HuParProcs :: scheduleIPC(int) {}
 void HuParProcs :: prepareComm(DLNode*) {}
 
-/*****************************************************************
-		Scheduling BIG block
- ****************************************************************/
-
-int HuParProcs :: determinePPA(DLNode* node, IntArray& avail) {
-	HuNode* pd = (HuNode*) node;
-
-	// examine candidate processors
-	candidate = mtarget->candidateProcs(this, node->myMaster());
-
-	// decide the starting processor assigned to the construct.
-	int earliest;
-	int optId = decideStartingProc(pd, &earliest);
-	
-	if (optId < 0) {
-		pd->setAvailTime(earliest);
-		myGraph->sortedInsert(myGraph->runnableNodes, pd, 1);
-		return -1;
-	} 
-
-	// sort the processor indices with available time.
-	sortWithAvailTime(earliest);
-
-	// fill out the array.
-	for (int i = numProcs-1; i >= 0; i--) {
-		int temp = getProc(pIndex[i])->getAvailTime();
-		if (temp > earliest) {
-			avail[i] = temp - earliest;     // positive.
-		} else {
-			if (pIndex[i] == optId) {
-				int t = pIndex[0];
-				pIndex[0] = optId;
-				pIndex[i] = t;
-				temp = getProc(t)->getAvailTime();
-			}
-			avail[i] = temp - earliest;     // non-positive.
-		}
-	}
-	return earliest;
-}
-
-int HuParProcs :: decideStartingProc(DLNode* node, int* earliest) {
-
-	HuNode* pd = (HuNode*) node;
-
-	int targetTime = pd->availTime();
-	int canProc = -1;
-
-	int pix = pd->getPreferredProc();
-	*earliest = getProc(pix)->getAvailTime();
-	if (((*earliest) <= targetTime) && isCandidate(pix)) {
-		canProc = pix;
-	} else {
-		int bound = candidate->size();
-		for (int i = 0; i < bound; i++) {
-			pix = candidate->elem(i);
-			int cost = getProc(pix)->getAvailTime();
-			if (cost <= targetTime) {
-				canProc = pix;
-				break;
-			} else if (cost < *earliest) {
-				*earliest = cost;
-			}
-		}
-	}
-	return canProc;
-}
-
 int HuParProcs :: isCandidate(int proc) {
 	
 	int isAcandidate = 0;
 	
-	for (int i = 0; i < candidate->size(); i++) 
-		if (candidate->elem(i) == proc) isAcandidate = 1;
+	for (int i = 0; i < candidate.size(); i++) 
+		if (candidate.elem(i) == proc) isAcandidate = 1;
 	return isAcandidate;
 }

@@ -37,7 +37,6 @@ Date of last revision:
 #endif
 
 #include "HuScheduler.h"
-#include "CGWormBase.h"
 #include "Error.h"
 
 /////////////////////////////
@@ -75,44 +74,10 @@ int HuScheduler :: scheduleIt()
 		// read the star
 		CGStar* obj = node->myStar();
 
-		// check the atomicity of the star
-		if (obj->isItWormhole() && node->invocationNumber() > 1) {
-			node->withProfile(obj->getProfile(numProcs));
-			parSched->copyBigSchedule(node, avail);
-
-		} else if (obj->isParallel()) {
-			// determine the pattern of processor availability.
-			int when = parSched->determinePPA(node, avail);
-			if (when < 0) continue;
-
-			// compute the work-residual which can be scheduled in 
-			// parallel with this construct.  
-			// If the residual work is too small, we may 
-			// want to devote more processors to the construct. 
-			// If the residual work is big, use the optimal value.
-			// int resWork = myGraph->sizeUnschedWork() - 
-				// myGraph->workAfterMe(node);
-
-			// We do not support wormholes, we may in the future
-			if (obj->isItWormhole()) {
-				// CGWormBase* worm = obj->myWormhole();
-
-				// Possible revision: decide optimal number of 
-				// processors by an iterative procedure.
-				// calculate the optimal number of processors 
-				// talking the "front-idle-time" into account.
-				// worm->computeProfile(numProcs,resWork,&avail);
-				if (haltRequested()) return FALSE;
-
-			} else {
-				// TO_DO:
-				// for data parallel star, obtain the best
-				// profile.
-			}
-
-			node->withProfile(obj->getProfile(numProcs));
-			parSched->scheduleBig(node, when, avail);
-
+		if (obj->isParallel()) {
+			Error::abortRun("Sorry. This scheduler can not ",
+			"support parallel tasks. Try macroScheduler.");
+			return FALSE;
 		} else {
 			// schedule the object star.
 			parSched->scheduleSmall(node);	
@@ -135,7 +100,7 @@ int HuScheduler :: scheduleIt()
 	mtarget->clearCommPattern();
 	myGraph->resetGraph();
 	parSched->initialize(myGraph);
-	parSched->listSchedule(myGraph);
+	if (parSched->listSchedule(myGraph) < 0) return FALSE;
 	return TRUE;
 }
 
