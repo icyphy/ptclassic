@@ -3,8 +3,9 @@ defstar {
 	domain { SDF }
 	desc {
 Prints out one sample from each input port per line
-If "fileName" is not equal to "cout" (the default), it
-specifies the filename to write to.
+If "fileName" is not equal to "<stdout>" (the default), it
+specifies the filename to write to.  <stderr> prints on the
+standard error stream.
 	}
 	version {$Id$}
 	author { D. G. Messerschmitt and J. Buck }
@@ -22,7 +23,7 @@ the same line, separated by tabs.
 	defstate {
 		name { fileName }
 		type { string }
-		default { "/dev/tty" }
+		default { "<stdout>" }
 		desc { Filename for output. }
 	}
 	hinclude { "pt_fstream.h" }
