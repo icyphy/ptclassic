@@ -30,7 +30,7 @@
 
 #if defined(hppa) || defined(SYSV) || defined (SVR4)
 #include <stdlib.h>
-#include <sys/unistd.h>
+#include <unistd.h>
 #include "../../kernel/miscFuncs.h"
 inline long random() { return lrand48();}
 inline void srandom(int seed) { srand48(seed);}
