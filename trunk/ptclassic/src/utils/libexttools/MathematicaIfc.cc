@@ -169,23 +169,25 @@ int MathematicaIfc::GetMathematicaIfcInstanceCount () {
 
 // A. low-level interfaces
 int MathematicaIfc::OpenMathLink(int argc, char **argv) {
-    int retval = TRUE;
     env = MLInitialize(NULL);
     if ( env == NULL ) {
-	fprintf(stderr, "Problem initializing the link to Mathematica.\n");
-	retval = FALSE;
+        SetErrorString("Problem initializing the link to Mathematica.\n");
+	return FALSE;
     }
+
     gMathLink = MLOpen(argc, argv);
     if ( gMathLink == NULL ) {
-	fprintf(stderr, "Problem opening the link to Mathematica.\n");
-	retval = FALSE;
-    } else {
-	MLPutFunction(gMathLink, "EvaluatePacket", 1);
-	MLPutFunction(gMathLink, "Get", 1);
-	MLPutString(gMathLink, "Motif.m");      /* NeXT.m on a NeXT */
-	MLEndPacket(gMathLink);
+	MLDeinitialize(env);
+	env = 0;
+	SetErrorString("Problem opening the link to Mathematica.\n");
+	return FALSE;
     }
-    return retval;
+
+    MLPutFunction(gMathLink, "EvaluatePacket", 1);
+    MLPutFunction(gMathLink, "Get", 1);
+    MLPutString(gMathLink, "Motif.m");      /* NeXT.m on a NeXT */
+    MLEndPacket(gMathLink);
+    return TRUE;
 }
 
 
@@ -195,6 +197,12 @@ int MathematicaIfc::OpenMathLink(int argc, char **argv) {
 int MathematicaIfc::SendToMathLink(char* command) {
   int retval = TRUE;
   InfString completeReturnString, previousReturnString;
+
+  // Return an error if Mathematica is not running
+  if ( ! MathematicaIsRunning() ) {
+    SetErrorString("Mathematica is not running!");
+    return FALSE;
+  }
 
   // Put Mathematica commands on the link
   // FIXME: Check for errors
@@ -315,8 +323,14 @@ int MathematicaIfc::SendToMathLink(char* command) {
 // CloseMathLink:
 // FIXME: Check return values of MLClose and MLDeinitialize
 int MathematicaIfc::CloseMathLink() {
-  MLClose(gMathLink);
-  MLDeinitialize(env);
+  if (gMathLink) {
+    MLClose(gMathLink);
+    gMathLink = 0;
+  }
+  if (env) {
+    MLDeinitialize(env);
+    env = 0;
+  }
   return TRUE;
 }
 
@@ -325,17 +339,7 @@ int MathematicaIfc::CloseMathLink() {
 
 // EvaluateOneCommand:
 int MathematicaIfc::EvaluateOneCommand(char* command) {
-
-    int result = 0;		// FIXME: What should the default value be?
-
-    if ( MathematicaIsRunning() ) {
-	result = SendToMathLink(command);
-    }
-    else {
-	SetErrorString("Mathematica is not running!");
-    }
-
-    return result;
+    return SendToMathLink(command);
 }
 
 
@@ -344,23 +348,23 @@ int MathematicaIfc::EvaluateOneCommand(char* command) {
 
 // StartMathematica
 int MathematicaIfc::StartMathematica() {
+    // Initialize the error string to a null string and accumulate errors
+    InitErrorMessages();
+
+    // Kill the current connection to Mathematica if one exists
     KillMathematica();
 
     // Set default link options
-    int oargc = 6;
-    char *oargv[] = {"-linkmode", "launch",
-		     "-linkname",
-		     "math -mathlink -linkprotocol tcp -linkmode parentconnect",
-		     "-linkprotocol", "tcp",
-		     0};
+    int oargc = 2;
+    char* oargv[] = {"-linkname", "math -mathlink", 0};
 
     // FIXME: Design a mechanism to allow the user to specify options
     OpenMathLink(oargc, oargv);
-
     if ( ! MathematicaIsRunning() ) {
-	errorString = "Could not start Mathematica using the options ";
+	AddErrorMessage("Could not start Mathematica using MathLink with the options");
 	for (int i = 0; i < oargc; i++) {
-	  errorString << oargv[i];
+	  AddErrorMessage(" ");
+	  AddErrorMessage(oargv[i]);
 	}
 	return FALSE;
     }
@@ -370,7 +374,7 @@ int MathematicaIfc::StartMathematica() {
 
 // MathematicaIsRunning
 int MathematicaIfc::MathematicaIsRunning() {
-    return ( gMathLink != 0 );
+    return ( env != 0 && gMathLink != 0 );
 }
 
 /*****************************************************************************
@@ -385,10 +389,19 @@ int MathematicaIfc::EvaluateUserCommand(char* command) {
 int MathematicaIfc::KillMathematica() {
     if ( MathematicaIsRunning() ) {
 	if ( ! CloseMathLink() ) {
-	    errorString = "Error when terminating connection to the Mathematica kernel";
+	    errorString << "Error when terminating connection to the Mathematica kernel\n";
 	    return FALSE;
 	}
     }
 
     return TRUE;
+}
+
+// Method to add to the error messages
+void MathematicaIfc::AddErrorMessage(const char *msg) {
+    errorString << msg;
+}
+
+void MathematicaIfc::InitErrorMessages() {
+    errorString.initialize();
 }
