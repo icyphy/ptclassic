@@ -38,6 +38,34 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define COMMANDSIZE 1024
 #define REPORT_TCL_ERRORS 1
 
+/* 
+ * Include files for signal handling (a timer is used to trigger a signal
+ * which in turn causes the tk event loop to be called at the next oportune
+ * moment. Note, SIG_PF should be the same type as SIG_IGN and the same type
+ * as the second parameter to signal().
+ * FIXME: I have only included the sun4, sol2 versions.  See SimControl.cc.
+ */
+#include "compat.h"
+
+/*
+ * Note, SIG_PF should be the same type as SIG_IGN and the same type
+ * as the second parameter to signal()
+ */
+#if !defined(PTIRIX5) 
+
+/* PTIRIX5 defines SIG_PF in <signal.h> */
+#if defined(PTSUN4) || defined(PTSOL2)
+
+/* sun4, sol2 */
+typedef void (*SIG_PF)();
+#else
+typedef void (*SIG_PF)(int);
+#endif /* defined sun4, sol2 */
+#endif /* !defined PTIRIX5 */
+
+#include <sys/time.h>
+#include <signal.h>
+
 /*
  * Global variables used by the main program:
  */
@@ -105,6 +133,168 @@ char *message;
 #endif
 }
 
+/*
+ *----------------------------------------------------------------------
+ * Following is a set of procedures drawn from SimControl and ptsignals
+ * to handle the tk event loop during a run using a timer and signals.
+ *----------------------------------------------------------------------
+ */
+#if defined(PTSOL2) || defined(PTIRIX5) || defined(PTLINUX) || defined(PTALPHA)
+static void ptSafeSig( int SigNum ) {
+	struct sigaction pt_alarm_action;
+	sigaction( SigNum, NULL, &pt_alarm_action);
+        pt_alarm_action.sa_flags |= SA_RESTART;
+        sigaction( SigNum, &pt_alarm_action, NULL);
+}
+static void ptBlockSig ARGS((int SigNum)) {};
+static void ptReleaseSig ARGS((int SigNum)) {};
+
+#else 
+#if defined(PTHPPA)
+static void ptSafeSig( int ) {}
+static long signalmask;
+static void ptBlockSig( int SigNum ) {
+	signalmask = sigblock(sigmask(SigNum));
+}
+static void ptReleaseSig( int SigNum ) {
+	/* remove this signal from the signal mask */
+	signalmask &= !(sigmask(SigNum));
+	sigsetmask(signalmask);
+}
+
+#else
+#if defined(PTSUN4)
+static void ptBlockSig ARGS((int SigNum)) {};
+static void ptReleaseSig ARGS((int SigNum)) {};
+static void ptSafeSig ARGS((int SigNum)) {};
+
+#else
+/*default is no assignment*/
+static void ptBlockSig (int SigNum) {};
+static void ptReleaseSig (int SigNum) {};
+static void ptSafeSig( int SigNum ) {};
+
+#endif /* PTSUN4 */
+#endif /* PTHPPA */
+#endif /* PTSOL2  PTIRIX5  PTLINUX PTALPHA */
+
+/* The following conditional is needed because cc on Sun */
+/* does not understand VOLATILE. */
+
+static VOLATILE int pollflag = 0;
+
+static void setPollFlag() {
+        pollflag = 1;
+}
+
+/*
+ *----------------------------------------------------------------------
+ * Procedure to set the timer.
+ * Based on a similar procedure in SimControl.
+ *----------------------------------------------------------------------
+ */
+static void setPollTimer( seconds, micro_seconds )
+int seconds;
+int micro_seconds;
+{
+
+	/* reset the timer - this cancels any current timing in progress */
+        struct itimerval i;
+	i.it_interval.tv_sec = i.it_interval.tv_usec = 0;
+        i.it_value.tv_sec = seconds;
+        i.it_value.tv_usec = micro_seconds;
+
+	/* Turn on the poll flag when the timer expires */
+	signal(SIGALRM, (SIG_PF)setPollFlag);
+
+	/* Make the signal safe from interrupting system calls */
+        ptSafeSig(SIGALRM);
+
+	/* Block the signal so that it will not interrupt system calls */
+	ptBlockSig(SIGALRM);
+
+	/* Turn off the poll flag until the timer fires */
+	pollflag = 0;
+
+	/* Start the timer */
+	setitimer(ITIMER_REAL, &i, 0);
+}
+
+/*
+ *----------------------------------------------------------------------
+ * Procedure that processes Tk events during a run.
+ * Based on a similar procedure in pigi.
+ *----------------------------------------------------------------------
+ */
+static int runEventsOnTimer ()
+{
+	int sec, usec;
+	sec = 0; 
+	/* every 50,000 micro seconds = 20 times/sec */
+	usec = 50000;
+	/* Process all pending events */
+        while (Tk_DoOneEvent(TK_DONT_WAIT|TK_ALL_EVENTS));
+	/* Reset the Timer so that it will fire again */
+	setPollTimer( sec, usec);
+	return 1;
+}
+
+typedef int (*SimHandlerFunction)();
+
+static SimHandlerFunction onPoll = 0;
+
+/*
+ *----------------------------------------------------------------------
+ * Register a function to be called if the poll flag is set.
+ * Returns old handler if any.
+ *----------------------------------------------------------------------
+ */
+SimHandlerFunction setPollAction(f)
+SimHandlerFunction f;
+{
+	SimHandlerFunction ret;
+	ret = onPoll;
+	onPoll = f;
+	pollflag = 1;	/* Makes sure onPoll can get called */
+	return ret;
+}
+
+/*
+ *----------------------------------------------------------------------
+ * Get the value of the pollflag.  Turn off signal blocking briefly
+ * to allow a blocked signal to get through.
+ *----------------------------------------------------------------------
+ */
+static int getPollFlag() {
+	ptReleaseSig(SIGALRM);
+        ptBlockSig(SIGALRM);
+        return pollflag;
+}
+
+/*
+ *----------------------------------------------------------------------
+ * React according to how the pollflag is set
+ *----------------------------------------------------------------------
+ */
+static void processFlags() {
+	if (pollflag != 0) {
+		/* check to see if a polling function is defined */
+		if (onPoll) {
+		    /*
+		     * polling function defined.  Reset the polling
+		     * flag only if the polling function has failed
+		     * otherwise it is assumed that the polling function
+		     * will handle resetting the flag.
+		     */
+		    if (!onPoll()) 
+			pollflag = 0;
+		} else {
+		    /* There is no polling function defined.  Reset the flag. */
+		     pollflag = 0;
+		}
+	}
+}
+
 
 /*
  *----------------------------------------------------------------------
@@ -140,7 +330,12 @@ goCmd(dummy, interp, argc, argv)
 		return TCL_OK;
 	}
 
+	setPollAction(runEventsOnTimer);
+
 	go();
+
+	setPollAction(NULL);
+
 	Tcl_Eval(interp,".go configure -relief raised");
 	runFlag = 0;
 	return TCL_OK;
