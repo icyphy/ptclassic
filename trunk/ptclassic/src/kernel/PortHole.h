@@ -40,6 +40,55 @@ Plasma: The place where Particles reside in transit back.
 Particles: Defined in Particle.h
 ******************************************************************/
 
+	/////////////////////////////////////////
+	// class CircularBuffer
+	/////////////////////////////////////////
+
+/*
+class CircularBuffer manages a circular buffer
+(array with modulo addressing) containing Pointer's
+
+It is used to store Particle*'s corresponding to past
+input or output Particles
+*/
+
+class CircularBuffer
+{
+public:
+        // Argument is the dimension of the array to allocate
+        CircularBuffer(int);
+        ~CircularBuffer();
+
+        // Reset to the beginning of the buffer
+        void reset() {current=0;}
+
+	// ZERO out the contents of the buffer
+	void initialize();
+
+        // Return current Pointer on the buffer
+        Pointer* here();
+
+        // Return next Pointer on the buffer
+        Pointer* next();
+
+        // Back up one Pointer on the buffer
+        Pointer* last();
+ 
+        // Access buffer relative to current
+        Pointer* previous(int);
+ 
+        // Size of the buffer
+        int size() {return dimen;}
+ 
+private:
+        // Number of Pointers on the buffer
+        int dimen;
+        // Index of the current Pointer
+        int current;
+        // Pointer array
+        Pointer* buffer;
+};
+
 class Geodesic;
 class Plasma;
 class Block;
@@ -61,6 +110,9 @@ public:
         PortHole& setPort(char* portName,
                           Block* parent,                // parent block pointer
                           dataType type = FLOAT);       // defaults to FLOAT
+
+	// Initialize when starting a simulation
+	virtual void initialize();
 
         // Name is private (below) so that it can't be changed.
         char* readName() { return name;}
@@ -98,11 +150,28 @@ public:
         virtual int isItInput () {return FALSE; }
         virtual int isItOutput () {return FALSE; }
 
-	// Operator to return the last Particle input or output
-        // At present, argument must be zero 
+	// Methods that are called by the Star::beforeGo()
+	//  and Star::afterGo() before and after go()
+	// Can be used for things like inputing and output
+	//  Particles
+	virtual void beforeGo() {}
+	virtual void afterGo() {}
+
+	// Operator to return Particles previously input or output
+	// Argument is the delay in the past
         Particle& operator % (int);
 
-	// Maintain pointer to Geodesic
+	// Set the maximum delay that past Particles can be
+	//  accessed -- defaults to zero if never called
+	void setMaxDelay(int delay);
+
+	// Number of Particles stored in the buffer each
+	// time the Geodesic is accessed -- normally this is
+	// one except for SDF, where it is the number of
+	// Particles consumed or generated
+	int numberTokens;
+
+	// Maintain pointer to Geodesic connected to this PortHole
 	Geodesic* myGeodesic;
 
 	// Maintain pointer to the Plasma where we get
@@ -117,12 +186,15 @@ protected:
 	// Type of data carried by this PortHole
 	dataType type;
 
-	// The Particle that is currently being access
-	//  with delay 0 by the Star
-	Particle* currentParticle;
+	// Buffer where the Particle*'s are stored
+	CircularBuffer* myBuffer;
+
+	// Allocate new buffer
+	void allocateBuffer(int size);
 
 private:
-	char* name;             // Name of this PortHole
+	// Name of this PortHole
+	char* name;
 };
 
         //////////////////////////////////////////
@@ -135,8 +207,13 @@ class PortList : SequentialList
         friend class Block;
         friend class MultiPortHole;
 
+	void initialize() {SequentialList::initialize();}
+
         // Return size of list
         int size() {return SequentialList::size();}
+
+	// Reset the list to beginning
+	void reset() {SequentialList::reset();}
 
         // Return next PortHole on list
         PortHole& operator ++ () {return *(PortHole*)next();}
@@ -171,6 +248,7 @@ public:
 class MultiPortHole
 {
 public:
+	void initialize() {ports.initialize();}
  
         // Every MultiPortHole must be initialized with the setPort function
         // Arguments are the name and type (see type.h for supported types).
@@ -210,8 +288,11 @@ public:
         // Return the number of physical port currently allocated
         int numberPorts() {return ports.size();}
 
-        // return the next port in the list      
-        PortHole& operator ++ () {return ports++;}
+        // Return the next port in the list      
+        PortHole& operator () () {return ports++;}
+
+	// Reset the list to the beginning
+	void reset() {ports.reset();}
 
         // Add a new physical port to the MultiPortHole list
         virtual PortHole& newPort();
@@ -249,19 +330,15 @@ from other cases:
 class SDFPortHole : public PortHole
 {
 public:
-        // The number of Particles consumed
-        unsigned numberTokens;
-        
         // The setPort function is redefined to take one more optional
-        // argument, the number of Particles consumed
+        // argument, the number of Particles consumed/generated
         PortHole& setPort(char* portName,
                           Block* parent,
-                          dataType type = FLOAT,        // defaults to FLOAT
-                          unsigned numTokens = 1);      // defaults to 1
-
-	// Increment time, by reading in or sending out Particles
-        // Argument is the number of Particles
-        virtual void increment(int numberTimes) {}
+                          dataType type = FLOAT,
+			  // Number Particles consumed/generated
+                          unsigned numTokens = 1,
+			  // Maximum delay the Particles are accessed
+			  unsigned delay = 0);
 
 	// Services of PortHole that are often used:
 	// setPort(dataType d);
@@ -277,7 +354,8 @@ class InSDFPort : public SDFPortHole
 public:
 	int isItInput () {return TRUE; }
 
-	void increment(int numberTimes);
+	// Get Particles from input Geodesic
+	void beforeGo();
 
         // Services of PortHole that are often used: 
         // setPort(dataType d); 
@@ -293,7 +371,16 @@ class OutSDFPort : public SDFPortHole
 public:
         int isItOutput () {return TRUE; }
 
-	void increment(int numberTimes);
+	void increment();
+
+	// Move the current Particle in the input buffer -- this
+	// method is invoked by the SDFScheduler before go()
+	void beforeGo();
+
+	// Put the Particles that were generated into the
+	// output Geodesic -- this method is invoked by the
+	// SDFScheduler after go()
+	void afterGo();
 
         // Services of PortHole that are often used: 
         // setPort(dataType d); 
@@ -425,14 +512,12 @@ public:
                      destinationPort = NULL;
 		     numInitialParticles = 0;}
 
-	// Initializer -- this is not part of the constructor
-	//  because it has to be called each time the system
-	//  is initialized and run again
-	// This routine initializes the Geodesic to the number of Particles
-	// given by the numInitialParticles field.
+	// initialize() for Geodesic initializes the number of Particles
+	// to that given by the numInitialParticles field, and
+	// also calls initialize() for each of those Particles
 	// TO BE DONE:  There should be a way to specify the value
 	// of these initial particles.
-	virtual void initialize();
+	void initialize();
 
 	// Put a Particle into the Geodesic
 	void put(Particle* p) {pushBottom(p);}

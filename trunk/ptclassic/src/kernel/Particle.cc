@@ -36,7 +36,7 @@ Particle* Plasma :: get()
 			);
         } else {
                 p = Stack::popTop();
-		p->wash();
+		p->initialize();
 	}
 
 	return p;

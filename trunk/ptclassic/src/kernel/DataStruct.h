@@ -8,7 +8,6 @@ $Id$
 
  Programmer:  D. G. Messerschmitt
  Date of creation: 1/17/89
- Revisions: 1/22/90 : corrected destructors (EAL)
 
 This header file contains basic container class data structures
 used widely. Each container class stores a set of void*'s,
@@ -49,7 +48,7 @@ protected:
 	Pointer next();		// Return next node on list, relative to
 				// last reference
 	Pointer elem(int);	// Return arbitary node of list
-	void clear();		// Remove all links
+	void initialize();	// Remove all links
 
         // Reset the last reference pointer so that accesses start
         // at the head of the list
@@ -57,7 +56,7 @@ protected:
 
 	SingleLinkList() { lastNode = 0; }
 	SingleLinkList(Pointer);
-	~SingleLinkList()  { clear(); }
+	~SingleLinkList()  { initialize(); }
 
 private:
 
@@ -138,7 +137,7 @@ inline Pointer SingleLinkList :: elem(int i)
 	return f->e;
 }
 
-inline void SingleLinkList :: clear()
+inline void SingleLinkList :: initialize()
 {
 	if (lastNode == 0) return;	// List already empty
 
@@ -183,7 +182,7 @@ protected:
 	Pointer elem (int index);
 
 	// Clear out the data structure
-	void clear() {SingleLinkList::clear(); dimen=0;}
+	void initialize() {SingleLinkList::initialize(); dimen=0;}
 
 	Vector() {dimen = 0;}
 
@@ -220,7 +219,7 @@ public:
 	int length() {return numberNodes;}
 
 	// Clear the queue
-        void clear() {SingleLinkList::clear(); numberNodes=0;}
+        void initialize() {SingleLinkList::initialize(); numberNodes=0;}
 
 	Queue() {numberNodes = 0;}
 };
@@ -257,7 +256,7 @@ protected:
 	void reset() {SingleLinkList::reset();}
 
 	// Clear the data structure
-	void clear() {SingleLinkList::clear(); dimen=0;}
+	void initialize() {SingleLinkList::initialize(); dimen=0;}
 
 	SequentialList() {dimen=0;}
 
@@ -292,7 +291,7 @@ protected:
 	Pointer accessTop() {return getNotRemove();}
 
 	// Clear the data structure
-	void clear() {SingleLinkList::clear(); dimen=0;}
+	void initialize() {SingleLinkList::initialize(); dimen=0;}
 
 	int size() {return dimen;}
 

@@ -39,7 +39,7 @@ public:
 	virtual operator char* () {return "";};
 
 	// Zero or initialize this Particle
-	virtual void wash() {};
+	virtual void initialize() {};
 
 	// Load the Particle with data
 	virtual operator << (int) {};
@@ -90,7 +90,7 @@ public:
 	IntSample() {data=0;}
 
 	// Wash the Particle
-	void wash() {data=0;}
+	void initialize() {data=0;}
 
 	// Load up with data
 	operator << (int i) {data=i;}
