@@ -27,6 +27,7 @@ the \fIuse_past_inputs\fR parameter is set to FALSE and not accessible.
 
 	go {
 		offset = int(offsetCntrl%0);
+		computeRange();
 		SDFChop :: go();
 	}
 }
