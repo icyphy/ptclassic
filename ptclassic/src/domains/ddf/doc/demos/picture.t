@@ -5,6 +5,7 @@ Two dimensional random walk with equally spaced points.
 .DE
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
+.LO "~ptolemy/src/domains/ddf/demo"
 .LD
 .Ie "wormholes, nested"
 .Ie "nested wormholes"
