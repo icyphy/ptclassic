@@ -61,6 +61,9 @@ extern int RpcEditSeed ARGS((RPCSpot *spot, lsList cmdList,
 extern int RpcEditTarget ARGS((RPCSpot *spot, lsList cmdList,
 			       long userOptionWord));
 extern int RpcGetObjectNames ARGS((RPCSpot *spot, lsList cmdList,
-			       long userOptionWord));
+				   long userOptionWord));
+extern void getSelectedObjNames ARGS((int* numObjs, char *nameList[]));
+extern void clearSelectedObjNames();
+extern int getFacetContents ARGS((char* facetName, int* numObjs, char* fname));
 
 #endif   /* _EDIT_H */
