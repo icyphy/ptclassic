@@ -143,7 +143,7 @@ static const MultiPortHole* findMPH(const Block* b,const char* name) {
 	CBlockMPHIter next(*b);
 	const MultiPortHole* m;
 	while ((m = next++) != 0) {
-		if (strcmp (name, m->readName()) == 0)
+		if (strcmp (name, m->name()) == 0)
 			return m;
 	}
 	return NULL;
@@ -352,11 +352,12 @@ KcRun(int n) {
  	LOG << "run " << n << "\nwrapup\n";
 	LOG.flush();
 	SimControl::clearHalt();
-	if (!universe->initSched())
+	universe->initTarget();
+	if (SimControl::haltRequested())
 		return FALSE;
 	universe->setStopTime(n);
 	universe->run();
-	universe->endSimulation();
+	universe->wrapup();
 	return TRUE;
 }
 
@@ -372,7 +373,7 @@ KcDisplaySchedule() {
 	    return FALSE;
 	}
 	StringList name;
-	name << "~/schedule." << universe->readName();
+	name << "~/schedule." << universe->name();
 	pt_ofstream str(name);
 	if (str) {
 		str << galTarget->displaySchedule();
@@ -407,7 +408,7 @@ extern "C" boolean
 KcIsCompiledInStar(char *className) {
 	const Block* b = findClass(className);
 	if (b == 0 || b->isA("InterpGalaxy")) return FALSE;
-	return !KnownBlock::isDynamic(b->readName());
+	return !KnownBlock::isDynamic(b->name());
 }
 
 /* 12/22/91 - by Edward A. Lee
@@ -580,9 +581,9 @@ realGetParams(const Block* block, ParamListType* pListPtr)
 		    const State* s = nexts++;
 		    // Only return settable states
 		    if (s->attributes() & AB_SETTABLE) {
-		        tempArray[j].name = s->readName();
+		        tempArray[j].name = s->name();
 			tempArray[j].type = s->type();
-		        tempArray[j++].value = s->getInitValue();
+		        tempArray[j++].value = s->initValue();
 		    }
 	    }
 	    /* Now we know there are exactly j settable states.
@@ -647,8 +648,8 @@ KcInfo(char* name, char** info)
 		ErrAdd("Unknown block");
 		return FALSE;
 	}
-	StringList msg = b->printVerbose();
-	*info = savestring((const char *)msg);
+	StringList msg = b->print(0);
+	*info = savestring(msg);
 	return TRUE;
 }
 
@@ -674,8 +675,8 @@ KcProfile (char* name) {
 	}
 	clr_accum_string ();
 	// if dynamically linked, say so
-	if (tFlag && KnownTarget::isDynamic(b->readName())
-	    || !tFlag && KnownBlock::isDynamic (b->readName()))
+	if (tFlag && KnownTarget::isDynamic(b->name())
+	    || !tFlag && KnownBlock::isDynamic (b->name()))
 		accum_string ("Dynamically linked ");
 	if (tFlag) {
 		accum_string ("Target: ");
@@ -684,7 +685,7 @@ KcProfile (char* name) {
 	}
 	else if (b->isItWormhole()) {
 		// get the first line put out by printVerbose.
-		StringList pv = b->printVerbose();
+		StringList pv = b->print(0);
 		char* msg = pv.newCopy();
 		char* p = strchr(msg, ':');
 		if (p) {
@@ -711,7 +712,7 @@ KcProfile (char* name) {
 		accum_string (b->asGalaxy().myDomain);
 		accum_string (")\n");
 	}
-	const char* desc = b->readDescriptor();
+	const char* desc = b->descriptor();
 	accum_string (desc);
 // some descriptors don't end in '\n'
 	if (desc[strlen(desc)-1] != '\n')
@@ -751,17 +752,17 @@ static void displayStates(const Block *b) {
 	const State *s;
 	while ((s = nexts++) != 0) {
 		accum_string ("   ");
-		accum_string (s->readName());
+		accum_string (s->name());
 		accum_string (" (");
 		accum_string (s->type());
 		accum_string ("): ");
-		const char* d = s->readDescriptor();
-		if (d && strcmp (d, s->readName()) != 0) {
+		const char* d = s->descriptor();
+		if (d && strcmp (d, s->name()) != 0) {
 			accum_string (d);
 			accum_string (": ");
 		}
 		accum_string ("default = ");
-		const char* v = s->getInitValue();
+		const char* v = s->initValue();
 		if (!v) v = "";
 		if (strlen (v) > 32) accum_string ("\n        ");
 		accum_string (v);
@@ -784,7 +785,7 @@ Return the number of domains that the system knows about
 */
 extern "C" int
 numberOfDomains() {
-        return Domain::numberOfDomains();
+        return Domain::number();
 }
 
 /* 9/22/90, by eal
@@ -792,7 +793,7 @@ Return the name of the nth domain in the list of known domains
 */
 extern "C" const char*
 nthDomainName(int n) {
-        return Domain::nthDomainName(n);
+        return Domain::nthName(n);
 }
 
 // add a node with the given name
