@@ -4,7 +4,7 @@
 #
 # Version: $Id$
 #
-# Copyright (c) 1995-%Q% The Regents of the University of California.
+# Copyright (c) 1995-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -261,13 +261,24 @@ proc ::tycho::lsubset {l1 l2} {
 #
 # Return a string that is a substring of all elements of l from left to right.
 # Idea is that if it's sorted and the first and last elements match from
-# left to right, all will. Example:
+# left to right, all will. Takes a -nocase switch. Example:
 #
 # <pre><tcl>
 #   ::tycho::lsubstring {appliance apple apple-icious applejacks applaud}
 # </tcl></pre>
 #
-proc ::tycho::lsubstring {l} {
+proc ::tycho::lsubstring {l {switch {}}} {
+    if {$switch == "-nocase"} {
+        # call regular case
+        set caseSub [::tycho::lsubstring $l]
+        # tolower entire list
+        set length [llength $l]
+        for {set i 0} {$i < $length} {incr i} {
+            set lcase [string tolower [lindex $l $i]]
+            set l [lreplace $l $i $i $lcase]
+        }                     
+        # go through substring procedure below
+    }
     set llength [llength $l]
 
     if {$llength == 1} {
@@ -295,7 +306,15 @@ proc ::tycho::lsubstring {l} {
     if {$index == 0} {
         return {}
     } else {
-        return [string range $first 0 [expr $index - 1]]
+        set retval [string range $first 0 [expr $index - 1]]
+        if [info exists caseSub] {
+            # merge: tycho Ty -> Tycho
+            set length [string length $caseSub]
+            set retval $caseSub[string range $retval $length end]
+            return $retval
+        } else {
+            return $retval
+        }
     }
 }
 
@@ -363,3 +382,4 @@ proc ::tycho::ltake {list n} {
 proc ::tycho::lunion {l1 l2} {
     return [lnub [concat $l1 $l2]]
 }
+
