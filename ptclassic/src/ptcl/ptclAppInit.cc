@@ -66,6 +66,9 @@ EXTERN int		Ptcl_Init _ANSI_ARGS_((Tcl_Interp *interp));
  */
 
 EXTERN int matherr();
+/* This line produces a warning under hppa.cfront:
+ *  warning: pointer to function cast to pointer to non-function (149)
+ */
 int *tclDummyMathPtr = (int *) matherr;
 
 #if TCL_MAJOR_VERSION >= 7 && TCL_MINOR_VERSION >= 5
