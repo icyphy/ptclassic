@@ -72,6 +72,7 @@ Shape boxShape = {
 };
 /* end of boxShape */
 
+/* FIXME: packetColor should become messageColor!!! */
 
 static octObject *facetPtr, wiringLayer;
 static octObject floatColorLayer, intColorLayer, complexColorLayer,
@@ -189,6 +190,8 @@ int totalNumber;
     } else if (strcmp(type, "anytype") == 0 || strcmp(type, "ANYTYPE") == 0) {
 	layerPtr = &anytypeColorLayer;
     } else if (strcmp(type, "packet") == 0 || strcmp(type, "PACKET") == 0) {
+	layerPtr = &packetColorLayer;
+    } else if (strcmp(type, "message") == 0 || strcmp(type, "MESSAGE") == 0) {
 	layerPtr = &packetColorLayer;
     } else if (strcmp(type, "fix") == 0 || strcmp(type, "FIX") == 0) {
 	    /* temporary, should get own color */
