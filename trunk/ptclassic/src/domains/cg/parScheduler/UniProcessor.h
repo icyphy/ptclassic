@@ -94,8 +94,9 @@ friend class ParProcessors;
 friend class ProcessorIter;
 public:
 	// constructor
-	UniProcessor() : availTime(0), curSchedule(0), numFree(0), parent(0),
-			 freeNodeSched(0), subGal(0), targetPtr(0) {
+	UniProcessor() : availTime(0), curSchedule(0), 
+			  targetPtr(0), freeNodeSched(0), numFree(0),
+	  subGal(0), parent(0) {
 		specialStars.initialize();
 	}
 	~UniProcessor();
