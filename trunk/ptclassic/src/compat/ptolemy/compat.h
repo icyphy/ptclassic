@@ -43,6 +43,11 @@ extern "C" {
 #define PTAIX
 #endif
 
+#if defined(_AIX) && ! defined(__GNUC__)
+/* AIX with IBM xlc and xlC */
+#define PTAIX_XLC
+#endif
+
 #if defined(__alpha)
 /* DEC Alpha */
 #define PTALPHA
@@ -133,13 +138,15 @@ extern int sprintf();
 #ifndef PTULTRIX
 #ifndef PTHPPA
 #ifndef PTAIX
+#ifndef PTALPHA
 #if !(defined(sun) && defined (__GNUC__)) && !defined(hppa) && !defined(__hppa__)
-#if defined(sun) && !defined(__GNUC__) && defined(__cplusplus) && !defined(SOL2)
+#if defined(sun) && !defined(__GNUC__) && defined(__cplusplus) && !defined(SOL2) && 
 /* SunOS4.1.3 Sun Cfront */	
 #else
 extern char *sprintf();
 #endif
 #endif /*sun && __GNUC__*/
+#endif /* PTALPHA */
 #endif /* PTAIX */
 #endif /* PTHPPA */
 #endif /* PTULTRIX */
@@ -217,7 +224,7 @@ extern int vfprintf(FILE *, const char *, char *);
 /* Here we define common missing function prototypes */
 /* Alphabetical, please */
 
-#if !defined(PTIRIX5) && !defined(PTHPPA)
+#if !defined(PTIRIX5) && !defined(PTHPPA) && ! defined(PTALPHA)
 				/* thor/kernel/rpc.c use bind2(), listen(). */
 extern int bind(int, struct sockaddr *, int);
 #endif /* ! PTIRIX5 && ! PTHPPA */
@@ -259,8 +266,10 @@ extern int puts (const char *);
 extern int setitimer( int, struct itimerval *, struct itimerval *);
 #endif /* PTSUN4 || PTULTRIX */
 
+#if !defined(PTALPHA)
 extern void setpwent();		/* octtools/Packages/fc/fc.c and
 				   octtools/Packages/utility/texpand.c */
+#endif
 
 extern int sscanf (const char *, const char *, ...);
 extern int socket(int, int, int); /* thor/kernel/rpc.c uses socket() */
