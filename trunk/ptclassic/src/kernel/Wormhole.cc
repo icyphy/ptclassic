@@ -107,6 +107,11 @@ void Wormhole :: buildEventHorizons () {
 		if (galp.isItInput()) {
 			EventHorizon& to = outSideDomain->newTo();
 			EventHorizon& from = inSideDomain->newFrom();
+			// If event horizons of either the inside or
+			// the outside domain transfer only one token
+			// at a time, set numToken to be 1.
+			if (to.onlyOne() || from.onlyOne())
+				numToken = 1;
 			to.setEventHorizon(in, galp.name(), this, 
 				&selfStar, type, numToken);
 			selfStar.addPort(*(to.asPort()));
@@ -120,6 +125,11 @@ void Wormhole :: buildEventHorizons () {
 		else {
 			EventHorizon& to = inSideDomain->newTo();
 			EventHorizon& from = outSideDomain->newFrom();
+			// If event horizons of either the inside or
+			// the outside domain transfer only one token
+			// at a time, set numToken to be 1.
+			if (to.onlyOne() || from.onlyOne())
+				numToken = 1;
 			from.setEventHorizon(out, galp.name(), this, 
 				&selfStar, type, numToken);
 			selfStar.addPort(*(from.asPort()));
