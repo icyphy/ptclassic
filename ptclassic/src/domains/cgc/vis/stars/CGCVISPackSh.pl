@@ -1,7 +1,7 @@
 defstar {
-	name { FloatToVis64 }
-	domain { SDF }
-	version { @(#)SDFFloatToVis64.pl	1.5 04/10/96 }
+	name { PackVis64 }
+	domain { CGC }
+	version { $Date$ $Id$ } 
 	author { William Chen }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -9,7 +9,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF vis library }
+	location { CGC vis library }
 	desc { 
 	  Pack four floating point numbers into a single floating
 	  point number.  Each input floating point number is first
@@ -25,7 +25,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { float }
 		desc { Output float type }
 	}
-        ccinclude {<vis_proto.h>}
 	defstate {
 	        name { scale }
 		type { float }
@@ -33,47 +32,46 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { Input scale }
 		attributes { A_CONSTANT|A_SETTABLE }
 	}
-	code {
-                #define NumIn (4)
-                #define UpperBound (32767) 
-                #define LowerBound (-32768)
-	}
-	protected{
-	  short *packedout;
+	code{
+#define PACKIN (4)
 	}
 	constructor{
-	  packedout = 0;
-	}
-	destructor{
-	  free(packedout);
+	  noInternalState();
 	}
         setup {
-	  in.setSDFParams(NumIn,NumIn-1);
+	  in.setSDFParams(PACKIN,PACKIN-1);
 	}
-	begin {
-	  free(packedout);
-	  packedout = (short *) memalign(sizeof(double),sizeof(short)*NumIn);
-        }
-	go {
-	  
-	  int index;
-	  double invalue;
-	  double *outvalue;
-	  
-	  //scale input, check bounds of the input, 
-	      //  and cast each float to short
-	      for (index=0;index<NumIn;index++){
-		invalue = (double) scale * double(in%(index));
-		if (invalue <= (double) LowerBound)
-		  packedout[index] = (short) LowerBound;
-		else if (invalue >= (double) UpperBound)
-		  packedout[index] = (short) UpperBound;
+	codeblock(mainDecl){
+	  const int NUMIN = 4;
+	  const int UPPERBOUND = 32767;
+	  const int LOWERBOUND = -32768;
+	  int $starSymbol(index);
+	  double $starSymbol(invalue);
+	  double* $starSymbol(outvalue);
+	  short* $starSymbol(packedout) = (short *)memalign(sizeof(double),sizeof(short)*NUMIN);
+	}
+	codeblock(packit){
+	  /*scale input, check bounds of the input,*/ 
+	  /*and cast each float to short*/
+	      for ($starSymbol(index)=0;$starSymbol(index)<NUMIN;$starSymbol(index)++){
+		$starSymbol(invalue) = (double) $val(scale) * (double) $ref2(in,$starSymbol(index));
+		if ($starSymbol(invalue) <= (double) LOWERBOUND)
+		  $starSymbol(packedout)[$starSymbol(index)] = (short) LOWERBOUND;
+		else if ($starSymbol(invalue) >= (double) UPPERBOUND)
+		  $starSymbol(packedout)[$starSymbol(index)] = (short) UPPERBOUND;
 		else 
-		  packedout[index] = (short) invalue;
+		  $starSymbol(packedout)[$starSymbol(index)] = (short) $starSymbol(invalue);
 	      }	
-
 	  /*output packed double*/	  
-	  outvalue = (double *) packedout;
-	  out%0 << *outvalue;
+	  $starSymbol(outvalue) = (double *) $starSymbol(packedout);
+	  $ref(out) = *$starSymbol(outvalue);
+	}
+	go {
+	  addDeclaration(mainDecl);
+	  addCode(packit);
+	}
+	wrapup{
+	  addCode("free($starSymbol(packedout));\n");
 	}
 }
+

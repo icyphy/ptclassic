@@ -1,7 +1,7 @@
 defstar {
-	name { Vis64ToFloat }
-	domain { SDF }
-	version { @(#)SDFVis64ToFloat.pl	1.1 3/14/96 }
+	name { UnpackVis64 }
+	domain { CGC }
+	version { $Id$ }
 	author { William Chen }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -9,7 +9,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF vis library }
+	location { CGC vis library }
 	desc { 
 	  UnPack a single floating point number into four floating 
 	  point numbers.  The input floating point number is first
@@ -25,7 +25,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { float }
        		desc { Output float type }
 	}
-	ccinclude {<vis_proto.h>}
 	defstate {
 	        name { scale }
 		type { float }
@@ -33,38 +32,34 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { Output scale }
 		attributes { A_CONSTANT|A_SETTABLE }
 	}
-	code {
-                #define NumOut (4)
+	code{
+#define PACKOUT (4)
 	}
-	protected{
-	  double *packedin;
-	}
-	constructor{
-	  packedin = 0;
-	}
-	destructor{
-	  free(packedin);
-       	}
 	setup {
-	  out.setSDFParams(NumOut,NumOut-1);
-	}
-	begin {
-	  free(packedin);
-	  packedin = (double *) memalign(sizeof(double),sizeof(double));
+	  out.setSDFParams(PACKOUT,PACKOUT-1);
 	}
 	go {
+	  addDeclaration(mainDecl);
+	  addCode(unpackit);
+	}
+	codeblock(mainDecl){
+	  const int NUMOUT = 4;
+	  int $starSymbol(index);
+	  double $starSymbol(outvalue);
+	  short *$starSymbol(invalue);
+          double *$starSymbol(packedin) = (double *)memalign(sizeof(double),sizeof(double));
+	}
+	codeblock(unpackit){
+	  *$starSymbol(packedin) = (double) $ref(in);
+	  $starSymbol(invalue) = (short *) $starSymbol(packedin);
 	  
-	  int index;
-	  double outvalue;
-	  short *invalue;
-	  
-	  *packedin = double(in%0);
-	  invalue = (short *) packedin;
-	  
-	  //scale input and unpack output
-	      for (index=0;index<NumOut;index++){
-		outvalue = (double) scale* (double) invalue[index];
-		out%(index) << outvalue;
-	      }
+	  /*scale input and unpack output*/
+	      for ($starSymbol(index)=0;$starSymbol(index)<NUMOUT;$starSymbol(index)++){
+		$starSymbol(outvalue) = (double) $val(scale)* (double) $starSymbol(invalue)[$starSymbol(index)];
+		$ref2(out,$starSymbol(index)) = $starSymbol(outvalue);
+	      }	
       	}
+	wrapup{
+	  addCode("free($starSymbol(packedin));\n");
+       	}
 }
