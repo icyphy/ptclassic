@@ -20,6 +20,7 @@ $Id$
 #endif
 
 #include "FixArrayState.h"
+#include "KnownState.h"
 
 extern long scaleUpArgument(double val, int nBits);
 

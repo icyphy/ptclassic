@@ -6,7 +6,7 @@ static const char file_id[] = "ComplexState.cc";
 
 #include <std.h>
 #include "ComplexState.h"
-#include "FloatState.h"
+#include "KnownState.h"
 #include "Tokenizer.h"
 
 
