@@ -22,8 +22,9 @@ include $(CONFIG)
 
 # SDF directory
 SDFDIR=$(ROOT)/src/domains/sdf/kernel
+LOOPDIR=$(ROOT)/src/domains/sdf/loopScheduler
 
-INCL= -I$(KERNDIR) -I$(SDFDIR)
+INCL= -I$(KERNDIR) -I$(SDFDIR) -I$(LOOPDIR)
 
 # Library name
 LIB=libcg.a
