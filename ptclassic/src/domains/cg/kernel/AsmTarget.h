@@ -25,11 +25,12 @@ class AsmStar;
 class AsmTarget : public CGTarget {
 private:
 	const char* starClass;
+	SequentialList spliceList;
 protected:
 	ProcMemory* mem;
 
-	// redefine buffer assignment
-	int decideBufSize(Galaxy&);
+	// what it says
+	int allocateMemory(Galaxy&);
 
 	// redefine init routine for code generation
 	int codeGenInit(Galaxy&);
@@ -37,12 +38,23 @@ protected:
 	// Request memory for all structures in a Star
 	int allocReq(AsmStar&);
 
+	// make modifications to interface circular to linear buffers
+	// and handling of long delays.
+	int modifyGalaxy(Galaxy&);
+
+	// splice in a new star, returning a pointer to its input
+	// porthole.  Spliced stars are assumed to have one input
+	// named "input" and one output named "output".
+	PortHole* spliceStar(PortHole*, const char*, int delayBefore);
+       
 	void doInitialization(CGStar&);
 
 public:
 	AsmTarget(const char* nam, const char* desc,
 		  const char* stype, ProcMemory* m = 0) :
 		CGTarget(nam,stype,desc), mem(m) {}
+
+	~AsmTarget();
 
 	Block* clone() const = 0;
 
@@ -59,7 +71,7 @@ public:
 	// set to 'mode.'
 	int genDisFile(StringList& stuff,char* base,
 		       const char* suffix=NULL,const char* mode=NULL);
-
+  
 	// Return full file name including path.  
 	// NOTE: User must delete the char* returned after use.
 	char* fullFileName(char* base, const char* suffix=NULL);
