@@ -613,8 +613,10 @@ int PTcl::domain(int argc,char ** argv) {
 	// check to see if existing target is legal for the new domain,
 	// if not, revert to default target.
 	if (!definingGal) {
-		if (!legalTarget(curDomain, universe->myTarget()))
+		if (!legalTarget(curDomain, universe->myTarget())) {
 			universe->newTarget ();
+			currentTarget = universe->myTarget();
+		}
 	}
 	return TCL_OK;
 }
@@ -631,9 +633,10 @@ int PTcl::target(int argc,char ** argv) {
 	else {
 		const char* tname = hashstring(argv[1]);
 		int status;
-		if (!definingGal)
+		if (!definingGal) {
 			status = universe->newTarget(tname);
-		else {
+			currentTarget = universe->myTarget();
+		} else {
 		// shouldn't need this test. Compiler bug?
 			if (currentTarget) { LOG_DEL; delete currentTarget; }
 			currentTarget = KnownTarget::clone(tname);
