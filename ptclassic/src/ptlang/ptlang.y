@@ -146,7 +146,7 @@ void clearDefs(), clearStateDefs(), addMembers(), genState(), describeState(),
      initPort(), genPort(), describePort(), clearMethodDefs(), wrapMethod(),
      genInstance(), genStdProto(), yyerror(), yyerr2(), cvtCodeBlockExpr(),
      cvtCodeBlock(), genCodeBlock(), cvtMethod(), genMethod(), genDef(),
-     yywarn(), mismatch();
+     yywarn(), mismatch(), genAlias();
 
 char* inputFile;		/* input file name */
 char* idBlock;			/* ID block */
