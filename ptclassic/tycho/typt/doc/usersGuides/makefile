@@ -40,7 +40,8 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 EXTRA_SRCS =	\
-	contents.html
+	contents.html \
+	ptindices.html
 
 MISC_FILES =
 
