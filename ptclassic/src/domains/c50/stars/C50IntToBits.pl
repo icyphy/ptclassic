@@ -27,14 +27,14 @@ most significant bit first.
 	name {nBits}
 	type {int}
 	desc {Number of bits to place in one word}
-	default {23}
+	default {16}
     }
     constructor {
 	noInternalState();
     }
     setup {
-	if (int(nBits) > 23) {
-	    Error::abortRun(*this,"nBits needs to be less than 24");
+	if (int(nBits) > 16) {
+	    Error::abortRun(*this,"nBits needs to be less than 17");
 	    return;
 	}
 	output.setSDFParams(int(nBits),int(nBits)-1);
@@ -47,19 +47,19 @@ most significant bit first.
 	mar	*,ar0
 	lacl	#@(nBits-1)
 	samm	brcr		; set up repeat block counter
-	lacc	*,0,ar2
-	rptb	$label(decompress)
+	lacc	*,0,ar1
+	rptb	$label(dcrmp)
 	sfr
 	sar	ar2,*
 	xc	1,C	
 	sar	ar3,*
-$label(decompress)
+$label(dcrmp)
 	mar	*-
 	}
 
 
     go {
-	addCode(readNwrite);
+	addCode(readNwrite());
     }
     exectime {
 	return int(nBits)*5 + 9;
