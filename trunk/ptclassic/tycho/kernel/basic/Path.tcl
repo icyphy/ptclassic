@@ -268,7 +268,7 @@ proc ::tycho::rm { args } {
 }
 
 ##############################################################################
-#### rmLinkIfNotWritable
+#### rmIfNotWritable
 # Remove a file if we can't open it for writing.
 # Lots of times a user will have symbolic links to a master tree
 # that they don't have write permission to.  If one of these links is
@@ -276,7 +276,7 @@ proc ::tycho::rm { args } {
 # not be able to update the documentation file if it is not writable
 # by the user.  The solution is to break the link.
 #
-proc ::tycho::rmLinkIfNotWritable { file } {
+proc ::tycho::rmIfNotWritable { file } {
     if {[file exists $file] && ![file writable $file]} {
 	catch {::tycho::rm -f $file}
     }
