@@ -64,9 +64,17 @@ SDFWormhole :: SDFWormhole(Galaxy& g) : Wormhole(*this,g)
 	buildEventHorizons ();
 }
 
+StringList SDFWormhole :: printVerbose() const {
+	return Wormhole :: print(0);
+}
+
+StringList SDFWormhole :: printRecursive() const {
+	return Wormhole :: print(1);
+}
+
 
 // cloner -- clone the inside and make a new wormhole from that.
-Block* SDFWormhole :: clone() {
+Block* SDFWormhole :: clone() const {
 	return new SDFWormhole(gal.clone()->asGalaxy());
 }
 
