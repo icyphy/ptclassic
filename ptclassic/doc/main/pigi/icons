@@ -6,13 +6,13 @@ when you invoke the \fImake-star\fP or
 \fImake-schem-icon\fP command from the Extend menu.
 Pigi puts the new icon in a user-specified palette,
 which by default is user.pal in the directory in which you
-started Pigi.
+started pigi.
 More or less any VEM manipulations can be performed on this icon,
 but some guidelines should be followed.
 These icons
 have a generic symbol.  To change it,
 place the cursor over the icon and execute the
-\fIedit-icon\fP (``I'') command in the Pigi menu.\**
+\fIedit-icon\fP (``I'') command in the pigi menu.\**
 .IE edit-icon
 .(f
 \** You must have write
@@ -73,7 +73,7 @@ This usually provokes a dialog box to resolve ambiguities.
 Delete whatever parts of the icon you don't want using ``D'' or
 Selection:delete-objects.  WARNING: Do not delete terminals!
 If you accidentally delete a terminal, the easiest action is
-begin again from scratch, asking Pigi to create a new icon.
+begin again from scratch, asking pigi to create a new icon.
 .ip 2)
 Bring up the VEM color palette by typing ``P'' (or System:palette in
 the menu).
@@ -97,7 +97,7 @@ Objects can be moved by selecting them, dragging the mouse
 (using the right button)
 to produce an image of the object in the desired place, and typing ``m''.
 .ip 7)
-You may change (or delete) the label that Pigi automatically
+You may change (or delete) the label that pigi automatically
 puts at the bottom of the icon.  To change it, select it and type ``E''
 (Edit:edit-label in the menu).  The resulting dialog box is self
 explanatory.  The standard Emacs-like editing commands apply.

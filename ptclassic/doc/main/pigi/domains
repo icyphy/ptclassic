@@ -14,9 +14,9 @@ Recall that a
 .c Wormhole
 in \*(PT is a block that has a different domain on the outside than
 on the inside.
-.IE "wormholes in Pigi"
-.IE "domains in Pigi"
-In Pigi, wormholes look exactly like galaxies.
+.IE "wormholes in pigi"
+.IE "domains in pigi"
+In pigi, wormholes look exactly like galaxies.
 The only difference is that the domain is different on the inside
 than on the outside.
 .pp

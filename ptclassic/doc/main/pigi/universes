@@ -11,7 +11,7 @@ mkdir example
 cd example
 .)c
 .BU
-Start Pigi:
+Start pigi:
 .(c
 pigi &
 .)c
@@ -33,13 +33,13 @@ usually written as ``cell:view:facet''.  The first component is the
 .IE cell
 .IE cell
 .IE facet
-cell name which is used to name the design.  In Pigi, the second
+cell name which is used to name the design.  In pigi, the second
 component, called the view name, will always be
 ``schematic''.\**
 .IE schematic
 .(f
 \** Other Oct applications use other views such as
-``symbolic'' or ``physical'' but these are not used by Pigi.
+``symbolic'' or ``physical'' but these are not used by pigi.
 .)f
 Last,
 there is the facet component which can either be ``contents'' or
@@ -81,7 +81,7 @@ Instead of using this facet, we will create a new one.
 Place cursor in window labeled ``init.pal:schematic''.
 .LE
 Select the \fIopen-facet\fP command from the ``Window''
-Pigi menu (shift-middle-button).
+pigi menu (shift-middle-button).
 Alternatively, type an ``F''.
 .IE open-facet
 .LE
@@ -96,7 +96,7 @@ Open a palette:
 Place cursor in the new window labeled ``wave:schematic''.
 .LE
 Select the \fIopen-palette\fP command from the ``Window''
-Pigi menu (shift-middle-button).
+pigi menu (shift-middle-button).
 .IE open-palette
 Alternatively, type an ``O''.
 .LE
@@ -151,22 +151,23 @@ key, backspace key, or ``control-u'', which deletes all the current arguments.
 There are three ways to enter commands:
 .BU
 Menus: middle-button for VEM commands, shift-middle-button
-for Pigi commands.  Menus are of the ``walking'' variety, as explained before.
+for pigi commands.  Menus are of the ``walking'' variety, as explained before.
 .BU
 Key bindings: commands can be bound to single keys
 and activated by just pressing the key.
 .IE "key bindings"
 .IE "bindings"
 Key bindings are case sensitive.
-We'll give key bindings for the Pigi commands that have them
+We'll give key bindings for the pigi commands that have them
 as we go along.
 There are also tables at the end of this document summarizing
-VEM and Pigi commands and their key bindings.
+VEM and pigi commands and their key bindings.
 .BU
 Type-in: type a colon followed by the command name
 .lp
 Let's try a few examples.
-Place the cursor in the palette window and:
+Place the cursor in the palette window (the one with the library
+stars) and:
 .BU
 Type ``shift-Z'' (capital Z) for \fIzoom-out\fP.
 This makes everything smaller.
@@ -304,7 +305,7 @@ Create the remaining instances:
 .LE
 Create an instance of the ``Sin'' icon to the right of
 the ramp.
-``Sin'' is the fourth icon down from the
+``Sin'' is the fifth icon down from the
 upper left corner of the ``sdf'' palette.
 Make sure it does not overlap with the
 ramp icon.
@@ -312,7 +313,8 @@ If it overlaps, you can delete it and create a new one.
 .LE
 Create an ``Xgraph'' instance to the right of the
 Sin icon.
-``Xgraph'' is just below the ``Sin'' icon on the palette.
+``Xgraph'' is the second icon down from the upper
+left corner.
 We now have three icons: a FloatRamp, a Sin, and an Xgraph.  Next,
 we will connect them together.
 .in -0.5i
@@ -348,12 +350,13 @@ Run the universe:
 We now have a complete universe that we can simulate.
 .in +0.5i
 .LE
-Execute the \fIrun\fP command from the Pigi ``Exec'' menu,
+Execute the \fIrun\fP command from the pigi ``Exec'' menu,
 or type an ``R''.
 .LE
 Enter ``100'' for the number of iterations.
 Do this by typing ``control-k'' to remove the default entry,
 typing 100, and clicking ``OK''.
+Instead of clicking ``OK'' you can also hit ``meta-return''.
 .LE
 A new window with a graph of a rough
 sine wave should appear.
@@ -378,7 +381,7 @@ can change the parameters of the ramp star as follows:
 .in +0.5i
 .LE
 Place the cursor over the ramp icon and execute
-\fIedit-params\fP in the Pigi menu (or type ``e'').  A dialog box will appear
+\fIedit-params\fP in the pigi menu (or type ``e'').  A dialog box will appear
 that shows the current parameters of the ramp.
 .IE edit-params
 .LE
@@ -410,7 +413,7 @@ A dialog box appears asking for the name of the
 palette in which you would like to put the icon.
 By convention, we put universe icons in
 palettes called ``init.pal''.
-So replace the default entry with ``init.pal''.
+So replace the default entry (which should be ``./user.pal'') with ``init.pal''.
 When making the icon is finished, find the ``init.pal''
 window that first opened when you started the system,
 and type ``f'' to show all.
@@ -426,7 +429,7 @@ will be this ``init.pal'' window.
 Our example is now complete.  To exit:
 .in +0.5i
 .LE
-Close all xgraph windows.
+Close all xgraph windows with ``control-d''.
 .LE
 Type ``control-d'' in the VEM console window.
 A dialog box will appear asking you to choose buffers to be saved.
@@ -439,53 +442,3 @@ Do not attempt to save any facets belonging to the user ``ptolemy''.
 A final warning appears telling you that closing the console window
 will terminate the program.  Click on ``Yes''.
 .in -0.5i
-.H2 "Particle Types"
-.pp
-The packets of data that pass from one star to another
-in \*(PT are called \fIparticles\fR.
-.IE "particle type"
-.IE "types"
-So far, all particles have been simply floating point numbers representing
-samples of signals.  However, several other data types are supported.
-Each star icon has a protrusion for each porthole.
-.IE "porthole type"
-In pigi, if you are using a color monitor, the color of the stem
-indicates the type of data that the porthole consumes or produces.
-A blue stem on an input
-or output of a star icon indicates type "float", a white stem
-indicates type "complex", a green stem indicates "packet",
-and a red stem indicates "anytype".
-.pp
-Ptolemy usually make conversions between these types automatically.
-The float to complex conversion does the obvious thing,
-putting the float value into the real part of the complex,
-and setting the imaginary part to zero.  The complex to float
-conversion computes the magnitude of the complex number.
-The XGraph star, and most other stars that generate output,
-accept "anytype" of input.  If the input is complex, the magnitude
-will be plotted, because it will be cast to a float internally.
-If you want to plot both the real and imaginary parts, you
-should use the ComplexReal conversion star first.
-.pp
-For technical reasons too involved to explain here, automatic type conversions
-cannot always be made.  In particular, Ptolemy can only do one
-type conversion for any given output of a star.  So if a single
-output is connected to multiple inputs of different types,
-Ptolemy may complain.  For example, suppose you connect a "float" output
-to both a "complex" input and a "float" input.  Ptolemy will complain.
-A simple solution is to insert a unit gain (use the FloatGain star)
-between the "float" output and the "complex" input.
-Then the type conversion occurs on the output of the FloatGain star,
-which goes only to a "complex" input.
-.pp
-Automatic type conversions have one potentially serious pitfall.
-Suppose you connect a "float" output to a "complex" and "anytype" input.
-This is legal, because Ptolemy can satisfy the constraints with just
-one type conversion, float to complex.  However, suppose the "anytype"
-input belongs to an XGraph star.  As explained above, the XGgraph
-star plots the magnitude of a complex number, unless you have
-an explicit ComplexReal conversion star.  Hence, instead of plotting
-the "float" output, XGraph will plot the magnitude, converting
-all negative numbers to positive.  Inserting a ComplexReal is one
-way to correct the problem.  Another way is to use the FloatGain star
-with unity gain to postpone the conversion to complex on the other fork.
