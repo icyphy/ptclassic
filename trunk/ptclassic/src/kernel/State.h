@@ -54,7 +54,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 extern int sys_nerr;
 
-#ifdef netbsd_i386
+#if defined(netbsd_i386) || defined(freebsd)
 extern const char *const sys_errlist[];
 #else
 extern char *sys_errlist[];
