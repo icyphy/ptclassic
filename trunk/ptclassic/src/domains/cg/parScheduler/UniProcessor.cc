@@ -351,7 +351,7 @@ void UniProcessor :: convertSchedule() {
 	ParNode* n;
 	while ((n = schedIter.nextNode()) != 0) {
 		if (n->getType() > 0) continue;
-		SDFStar* s = n->getCopyStar();
+		DataFlowStar* s = n->getCopyStar();
 		sched.append(*s);
 	}
 	targetPtr->copySchedule(sched);
@@ -364,10 +364,10 @@ void UniProcessor :: simRunSchedule() {
 	
 	while ((n = iter.nextNode()) != 0) {
 		if (n->getType() > 0) continue;
-		SDFStar* copyS = n->getCopyStar();
+		DataFlowStar* copyS = n->getCopyStar();
 
-		SDFStarPortIter piter(*copyS);
-		SDFPortHole* p;
+		DFStarPortIter piter(*copyS);
+		DFPortHole* p;
 		while ((p = piter++) != 0) {
 			if (p->isItInput())
 				p->decCount(p->numXfer());

@@ -23,7 +23,7 @@ Date of last revision:
                         ///  *Constructor*  ///
                         ///////////////////////
 
-ParNode::ParNode(SDFStar* s, int invoc_no) : EGNode(s, invoc_no)
+ParNode::ParNode(DataFlowStar* s, int invoc_no) : EGNode(s, invoc_no)
 {
 	StaticLevel = 0;	// Initialize to something invalid
 	type = 0;		
@@ -104,7 +104,7 @@ void ParNode::copyAncDesc(ParGraph* g, int flag) {
 }
 
 // set informations for sub-universe generation
-void ParNode :: setCopyStar(SDFStar* s, ParNode* prevN) {
+void ParNode :: setCopyStar(DataFlowStar* s, ParNode* prevN) {
 	clonedStar = s;
 	if (prevN) {
 		prevN->nextNode = this;

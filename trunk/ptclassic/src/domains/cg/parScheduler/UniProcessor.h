@@ -202,18 +202,18 @@ private:
 	int index;
 
 	// create special stars and connect them
-	SDFStar* makeSpread(PortHole* srcP, ParNode* sN);
-	SDFStar* makeCollect(PortHole* destP, ParNode* dN);
+	DataFlowStar* makeSpread(PortHole* srcP, ParNode* sN);
+	DataFlowStar* makeCollect(PortHole* destP, ParNode* dN);
 	void makeReceive(int pindex, PortHole* rP,
 		int delay, ParNode*, EGGate*, PortHole* orgP = 0);
 	void makeSend(int pindex, PortHole* sP, ParNode*, 
 		EGGate*, PortHole* orgP = 0);
 
 	// Depending on OSOPReq(), make connections
-	void makeOSOPConnect(PortHole* p, SDFStar* org, SDFStar* far,
+	void makeOSOPConnect(PortHole* p, DataFlowStar* org, DataFlowStar* far,
 			     SequentialList&);
-	void makeGenConnect(PortHole* p, ParNode*, SDFStar* org, SDFStar* far,
-			     SequentialList&);
+	void makeGenConnect(PortHole* p, ParNode*, DataFlowStar* org,
+			    DataFlowStar* far, SequentialList&);
 
         // Check whether the user want to assign all invocations of a star
         // into the same processor or not.

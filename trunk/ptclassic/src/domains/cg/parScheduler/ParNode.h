@@ -40,7 +40,7 @@ friend class ParDescendantIter;
 
 private:
 	// necessary information for sub universe generation
-	SDFStar* clonedStar;
+	DataFlowStar* clonedStar;
 	ParNode* nextNode;	// next invoc. assigned to the same processor
 	ParNode* firstNode;	// the earliest invoc. assigned.
 	int numCopied;		// number of invoc. assigned
@@ -73,7 +73,7 @@ protected:
 
 public: 
 	// Constructor declaration
-	ParNode(SDFStar* Mas, int invoc_no);
+	ParNode(DataFlowStar* Mas, int invoc_no);
 
 	// Constructor used for idle nodes or communication nodes
 	ParNode(int type);
@@ -133,9 +133,9 @@ public:
 
 	// set informations for sub-universe generation
 	// should be called in the increasing order of the invocation number.
-	void setCopyStar(SDFStar* s, ParNode* prevN);
+	void setCopyStar(DataFlowStar* s, ParNode* prevN);
 
-	SDFStar* getCopyStar() { return clonedStar; }
+	DataFlowStar* getCopyStar() { return clonedStar; }
 	ParNode* getNextNode() { return nextNode; }
 	ParNode* getFirstNode() { return firstNode; }
 	int numAssigned() { return numCopied; }

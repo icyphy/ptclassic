@@ -37,8 +37,8 @@ static void copyActualStates(const Block& src, Block& dest) {
 }
 
 // clone a star
-SDFStar* cloneStar(SDFStar* org) {
-	SDFStar* newS = (SDFStar*) org->clone();
+DataFlowStar* cloneStar(DataFlowStar* org) {
+	DataFlowStar* newS = (DataFlowStar*) org->clone();
 	copyActualStates(*org, *newS);
 	if (org->numberMPHs() <= 0) return newS;
 	
@@ -53,9 +53,9 @@ SDFStar* cloneStar(SDFStar* org) {
 	return newS;
 }
 
-PortHole* clonedPort(SDFStar* s, PortHole* p) {
+PortHole* clonedPort(DataFlowStar* s, PortHole* p) {
 	ParNode* n = (ParNode*) s->myMaster();
-	SDFStar* copyS = n->getCopyStar();
+	DataFlowStar* copyS = n->getCopyStar();
 	return copyS->portWithName(p->name());
 }
 
@@ -86,7 +86,7 @@ void UniProcessor :: createSubGal() {
 
 		// for each node assigned to the processor
 		// we deal with the node of the smallest invocation first.
-		SDFStar* org = n->myMaster();
+		DataFlowStar* org = n->myMaster();
 
 		// If already dealt with, continue.
 		if (touchedStars.member(org)) continue;
@@ -97,7 +97,7 @@ void UniProcessor :: createSubGal() {
 		while (smallest && (smallest->getProcId() != myId()))
 			smallest = (ParNode*) smallest->getNextInvoc();
 
-		SDFStar* copyS = cloneStar(org);
+		DataFlowStar* copyS = cloneStar(org);
 		copyS->setTarget(targetPtr);
 
 		ParNode* prevN = 0;
@@ -123,7 +123,7 @@ void UniProcessor :: createSubGal() {
 	ListIter siter(assignedFirstInvocs);
 	ParNode* pn;
 	while ((pn = (ParNode*) siter++) != 0) {
-		SDFStar* org = pn->myMaster();
+		DataFlowStar* org = pn->myMaster();
 		BlockPortIter piter(*org);
 		PortHole* p;
 		while ((p = piter++) != 0) {
@@ -140,7 +140,7 @@ void UniProcessor :: createSubGal() {
 				continue;
 			}
 
-			SDFStar* farS = (SDFStar*) p->far()->parent();
+			DataFlowStar* farS = (DataFlowStar*) p->far()->parent();
 			
 			// depending on OSOPreq()
 			if (OSOPreq()) {
@@ -156,7 +156,7 @@ void UniProcessor :: createSubGal() {
 			// makeOSOPConnect
 			////////////////////////////
 
-void UniProcessor :: makeOSOPConnect(PortHole* p, SDFStar* org, SDFStar* farS,
+void UniProcessor :: makeOSOPConnect(PortHole* p, DataFlowStar* org, DataFlowStar* farS,
 				     SequentialList& touchedStars) {
 
 	if (touchedStars.member(farS)) {
@@ -181,8 +181,8 @@ void UniProcessor :: makeOSOPConnect(PortHole* p, SDFStar* org, SDFStar* farS,
 			// makeGenConnect
 			///////////////////////////////
 
-void UniProcessor :: makeGenConnect(PortHole* p, ParNode* pn, SDFStar*,
-			  SDFStar* farS, SequentialList& touchedStars) {
+void UniProcessor :: makeGenConnect(PortHole* p, ParNode* pn, DataFlowStar*,
+			  DataFlowStar* farS, SequentialList& touchedStars) {
 
 	ParNode* farN = 0;
 	if (touchedStars.member(farS)) {
@@ -219,7 +219,10 @@ const char* newName(int flag) {
 }
 	
 // find a porthole with a given name and set the numberTokens parameter
-PortHole* findPortHole(SDFStar* s, const char* n, int num) {
+// FIXME: need DFPortHole methods to fix SDF parameters.  This should
+// use DFPortHole instead.
+// also, is 0 right for maxDelay?
+PortHole* findPortHole(DataFlowStar* s, const char* n, int num) {
 	SDFPortHole* p = (SDFPortHole*) s->portWithName(n);
 	p->setSDFParams(num,0);
 	return p;
@@ -306,9 +309,9 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 	
 	// Now make connections.
 	// STEP1: get the cloned stars and identify portholes
-	SDFStar* src = 0;
+	DataFlowStar* src = 0;
 	PortHole* srcP = 0;
-	SDFStar* dest = dN->getCopyStar();
+	DataFlowStar* dest = dN->getCopyStar();
 	PortHole* destP = dest->portWithName(ref->name());
 
 	if (sN) {
@@ -319,8 +322,8 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 	// STEP2: create Spread and Collect star if necessary and make
 	//	  connections between these stars and source/dest stars.
 
-	SDFStar* newSpread = 0;
-	SDFStar* newCollect = 0;
+	DataFlowStar* newSpread = 0;
+	DataFlowStar* newCollect = 0;
 	if (scatterReq) newSpread =  makeSpread(srcP,sN); 
 	if (gatherReq) newCollect = makeCollect(destP, dN);
 
@@ -469,7 +472,7 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 		ListIter piter(scatterGates);
 		sP = (PortHole*) piter++;
 		int curNum = sP->numXfer();
-		SDFStar* curScat = 0;
+		DataFlowStar* curScat = 0;
 
 		n = firstNode;
 		numSamples = 0;
@@ -562,7 +565,7 @@ UniProcessor :: makeReceive(int pindex, PortHole* rP, int delay, ParNode*,
 	int numSample = rP->numXfer();
 	
 	// create target specific Receive star
-	SDFStar* newR = mtarget->createReceive(pindex,myId(),numSample);
+	DataFlowStar* newR = mtarget->createReceive(pindex,myId(),numSample);
 	newR->setTarget(targetPtr);
 	subGal->addBlock(*newR,newName(2));
 
@@ -584,7 +587,7 @@ void UniProcessor :: makeSend(int pindex, PortHole* sP,
 	int numSample = sP->numXfer();
 	
 	// create target specific Send star
-	SDFStar* newS = mtarget->createSend(myId(), pindex, numSample);
+	DataFlowStar* newS = mtarget->createSend(myId(), pindex, numSample);
 	newS->setTarget(targetPtr);
 	subGal->addBlock(*newS,newName(3));
 
@@ -606,8 +609,8 @@ void UniProcessor :: makeSend(int pindex, PortHole* sP,
 
 // create a Spread star and connect it to the source porthole.
 
-SDFStar* UniProcessor :: makeSpread(PortHole* srcP, ParNode* sN) {
-	LOG_NEW; SDFStar* newSpread = new CGSpread; 
+DataFlowStar* UniProcessor :: makeSpread(PortHole* srcP, ParNode* sN) {
+	LOG_NEW; DataFlowStar* newSpread = new CGSpread; 
 	newSpread->setTarget(targetPtr);
 	subGal->addBlock(*newSpread,newName(1));
 	int numTok;
@@ -622,8 +625,8 @@ SDFStar* UniProcessor :: makeSpread(PortHole* srcP, ParNode* sN) {
 
 // create a Collect star and connect it to the destination porthole.
 
-SDFStar* UniProcessor :: makeCollect(PortHole* destP, ParNode* dN) {
-	LOG_NEW; SDFStar* newCollect = new CGCollect;
+DataFlowStar* UniProcessor :: makeCollect(PortHole* destP, ParNode* dN) {
+	LOG_NEW; DataFlowStar* newCollect = new CGCollect;
 	newCollect->setTarget(targetPtr);
 	subGal->addBlock(*newCollect,newName(0));
 	int numTok;
@@ -662,10 +665,10 @@ void UniProcessor :: makeBoundary(ParNode* sN, PortHole* ref) {
 	} while(n);
 
 M:
-	SDFStar* src = sN->getCopyStar();
+	DataFlowStar* src = sN->getCopyStar();
 	PortHole* srcP = src->portWithName(ref->name());
 
-	SDFStar* newSpread = 0;
+	DataFlowStar* newSpread = 0;
 	if (count > 1) {
 		newSpread = makeSpread(srcP, sN);
 	}

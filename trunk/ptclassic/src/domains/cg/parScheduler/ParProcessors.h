@@ -73,7 +73,7 @@ public:
 
 	// Match comm. nodes with the comm. stars created during subGalaxy
 	// generation.
-	ParNode* matchCommNodes(SDFStar*, EGGate*, PortHole*);
+	ParNode* matchCommNodes(DataFlowStar*, EGGate*, PortHole*);
 
 protected:
 	// number of processors.

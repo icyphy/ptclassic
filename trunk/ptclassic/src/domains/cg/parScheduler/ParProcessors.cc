@@ -231,7 +231,7 @@ ParNode*  ParProcessors :: createCommNode(int i) {
 		Match comm. nodes with given comm. star
  ****************************************************************/
 
-ParNode* ParProcessors :: matchCommNodes(SDFStar* s, EGGate* g, PortHole* p) {
+ParNode* ParProcessors :: matchCommNodes(DataFlowStar* s, EGGate* g, PortHole* p) {
 	// set the cloned star pointer of the comm. node
 	EGNodeListIter iter(SCommNodes);
 	ParNode* pn;

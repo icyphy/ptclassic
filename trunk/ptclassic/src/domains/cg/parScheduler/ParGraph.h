@@ -52,7 +52,7 @@ protected:
 	int SetNodeSL(ParNode*);
 
 	// redefine these virtual allocator to allocate DL Nodes.
-	EGNode *newNode(SDFStar*, int);
+	EGNode *newNode(DataFlowStar*, int);
 
 	// for logging information
 	ostream* logstrm;
