@@ -20,7 +20,6 @@ is to output it first (phase = 0). The maximum phase is "factor" - 1.
 	output {
 		name {output}
 		type {FIX}
-		attributes { P_CIRC }
 	}
 	state {
 		name {factor}
