@@ -39,6 +39,7 @@ Date of last revision:
 #include "ParProcessors.h"
 #include "ParGraph.h"
 #include "StringList.h"
+#include "SimControl.h"
 
 ParProcessors :: ParProcessors(int pNum, MultiTarget* t) : mtarget(t) {
 	numProcs = pNum;
@@ -427,6 +428,7 @@ void ParProcessors :: prepareCodeGen() {
 void ParProcessors :: generateCode() {
 	for (int i = 0; i < numProcs; i++) {
 		StringList& foo = getProc(i)->generateCode();
+		if (SimControl::haltRequested()) return;
 		mtarget->addProcessorCode(i, (const char*) foo);
 	}
 }		
