@@ -425,6 +425,9 @@ static void pl_print_method( fp, node, autotick, unittime )
     fprintf( fp, "    type { void }\n" );
     fprintf( fp, "    code {\n" );
     
+
+    fprintf( fp, "    printf(\"emitting event to interrupt Q\");fflush(0);\n\n");
+
     output_event_count = 1;
     foreach_net_node_fanout( node, var ) {
         pvar = isOutputEvent( var, node );
@@ -490,6 +493,7 @@ static void pl_print_method( fp, node, autotick, unittime )
     fprintf( fp, "    type { void }\n" );
     fprintf( fp, "    arglist { \"(PolisEvent* event, double emitTime)\" }\n" );
     fprintf( fp, "    code {\n" );
+    fprintf( fp, "      printf(\"emitting event\");fflush(0);\n\n");
     fprintf( fp, "      ((OutDEPort*)event->dest->far())->put(emitTime) << event->data; \n");
     fprintf( fp, "      event->~PolisEvent(); \n");
     fprintf( fp, "    }\n  }\n");
@@ -509,6 +513,7 @@ static void pl_print_method( fp, node, autotick, unittime )
     fprintf( fp, "    type { \"SequentialList*\" }\n" );
     fprintf( fp, "    arglist { \"()\" }\n" );
     fprintf( fp, "    code {\n" );
+    fprintf( fp, "      printf(\"returning list of emitted events\");fflush(0);\n\n");
     fprintf( fp, "      return emittedEvents;\n" );
     fprintf( fp, "    }\n}\n\n");
 
@@ -789,15 +794,17 @@ static void pl_print_begin( fp, node, option, trace )
     st_table *local_vars;
     st_generator *gen;
     
-    node_name = net_node_name( node );
+        node_name = net_node_name( node );
     model_name = net_node_name( net_node_model( node ));
     fprintf( fp, "  begin {\n" );
+    fprintf( fp, "          printf(\"Entering begin method\");\n\n"); 
     fprintf( fp, "    char stemp[1024];\n" );
     fprintf( fp, "    InfString name;\n\n" );
     /* set variables which reflect Star parameters, and others*/
     fprintf( fp, "    /* set variables which reflect Star parameters*/ \n");
     fprintf( fp, "    priority = Priority;\n");
     fprintf( fp, "    clkFreq = Clock_freq;\n\n"); 
+    fprintf( fp, "    clkFreq = (1000000)*clkFreq;\n\n");
     fprintf( fp, "    strcpy(resource, resourceName); \n" );
     fprintf( fp, "    if (!strcmp(resource, \"HW\")) needResource = 0;\n");
     fprintf( fp, "    else needResource = 1; \n");
@@ -1006,9 +1013,9 @@ static void pl_print_go( fp, node, option, trace, autotick, unittime )
     /* Fire the Star! */
     fprintf( fp, "    min_time = -1;\n" );
     fprintf( fp, "    nemitevent = 0;\n" );
-    fprintf( fp, "    _delay = 1.0;\n" );
+    fprintf( fp, "    _delay = 0.0;\n" );
     fprintf( fp, "    _t_%s(0,0); // fire the star\n", util_map_pathname( node_name ));
-    fprintf( fp, "    emitEventToIntQ(0, _delay,1);// emit dummy event \n");
+    fprintf( fp, "    if (needResource) emitEventToIntQ(0, _delay,1);// emit dummy event \n");
     fprintf( fp, "    timeOfArrival = -1;// reset this as have finished this firing \n");
     if ( trace ) {
         fprintf( fp, "    if ( debug ) {\n" );
