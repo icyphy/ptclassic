@@ -31,7 +31,7 @@
 #  Based heavily on the tycho::Query widget by Edward A. Lee of UC Berkeley.
 #  The iwidgets::Query widget makes the widget an itk::Widget instead of an
 #  itk::Toplevel, makes grid placement more structured, and adds the notion
-#  of allowing arbitrary child widget types. Additional conrtibutions
+#  of allowing arbitrary child widget types. Additional contributions
 #  by Joel R. King, Bilung Lee, Christopher Hylands, Seehyun Kim, and
 #  Mark L. Ulferts. Query is contributed to [incr Widgets] by the Tycho
 #  project at UC Berkeley: http://ptolemy.eecs.berkeley.edu/tycho.
@@ -70,17 +70,17 @@
 #
 itk::usual Query {
     keep -disabledforeground -highlightthickness -borderwidth \
-	    -font -highlightcolor -background \
-	    -foreground -activebackground -cursor -activeforeground 
+            -font -highlightcolor -background \
+            -foreground -activebackground -cursor -activeforeground 
 }
 
 # ------------------------------------------------------------------
-##                            GRIDDEDITEMS
+##                            QUERY
 # ------------------------------------------------------------------
 #
 # The Query class provides support a grid of widgets useful for user input,
 # such as entry fields, radiobuttons and checkbuttons, option menus, and
-# so on. It provides a simple mechanism designed to easily produce goo
+# so on. It provides a simple mechanism designed to easily produce good
 # layouts, based on the principles described on pp 162 - 167 of Mullet
 # and Sano, <i>Designing Visual Interfaces: Communication Oriented
 # Techniques</i>, SunSoft Press, 1995.
@@ -144,11 +144,11 @@ itk::usual Query {
 # of different kinds of widget that could be placed into a
 # Query window is potentially unlimited, the Query
 # class can have new widget types added to its collection of
-# known widget types by calling the <b>addtype</b> procedure, together
+# known widget types by calling the <b>newtype</b> procedure, together
 # with options that tell it how to create and access widgets of
 # that type.
 #
-# <h2>Item types</h2>
+# <h3>Item types</h3>
 #
 # By default, Query recognises a number of widget types. Unless
 # indicated otherwise, these all accept any options valid
@@ -179,7 +179,8 @@ itk::usual Query {
 # created widget. The default is one.
 #
 # <li><b>-sticky</b> _string_: The "stickiness" of the widget within
-# its alloted boxes.
+# its alloted boxes. This overrides the <b>-sticky</b> option specified
+# for its type.
 # </ul>
 #
 # The known widget types are as follows. (Note that additional types
@@ -208,9 +209,9 @@ itk::usual Query {
 # <dt><b>group</b> _tag_ ?_option value_...? ?contents?
 # <dd>
 # A group of items. A group has a label, and contains a set of
-# items within it. See <i>Item Groups</b> below.
+# items within it. See <i>Item Groups</i> below.
 # The <b>group</b> command also accepts a declarative
-# specification of its contents -- see <i>Declarative Syntax</b>.
+# specification of its contents -- see <i>Declarative Syntax</i>.
 #
 # <dt><b>hline</b> _tag_ ?_option value_...?
 # <dd>
@@ -249,7 +250,7 @@ itk::usual Query {
 #
 # </dl>
 #
-# <h2>Item groups</h2>
+# <h3>Item groups</h3>
 #
 # The item type <b>group</b> creates a label and then allocates
 # space for a group of items. Items within a group have hierarchical
@@ -347,7 +348,7 @@ itk::usual Query {
 #
 # Note that individual items within a group are not labeled.
 #
-# <h2>Control Scripts</h>
+# <h3>Control Scripts</h3>
 #
 # Query provides a fairly straight-forward mechanism for defining
 # new item types. For each of the operations it supports on
@@ -396,7 +397,7 @@ itk::usual Query {
 # The default is <code>{usual}</code>.
 # </ul>
 #
-# <h2>Declarative Syntax</b>
+# <h3>Declarative Syntax</h3>
 #
 # The Query class supports a recursive declarative syntax for
 # creating Query widgets and groups within Query widgets. For
@@ -425,119 +426,140 @@ itk::usual Query {
 # method.
 # 
 class iwidgets::Query {
-	inherit itk::Widget
-
+    inherit itk::Widget
+    
     constructor {args} {}
     destructor {}
     
     public variable columnspan 4
-    public variable childspan 1
+    public variable childspan 4
+
+    itk_option define -entrybackground entryBackground Background grey90
+
+    itk_option define -font font Font \
+            "-Adobe-Helvetica-Medium-R-Normal--*-120-*-*-*-*-*-*"
+    itk_option define -labelfont labelFont Font  \
+            "-Adobe-Helvetica-Bold-R-Normal--*-120-*-*-*-*-*-*"
+    itk_option define -labelcolor labelColor Foreground black
+    itk_option define -labelanchor labelAnchor Anchor "e"
 
     itk_option define -linepad linePad LinePad 4
     itk_option define -linerelief lineRelief LineRelief sunken
 
-    itk_option define -labelfont labelFont Font 8x13
-    itk_option define -labelcolor labelColor Foreground black
-    itk_option define -labelanchor labelAnchor LabelAnchor nw
-
-	itk_option define -padx padX PadX 0
-	itk_option define -pady padY PadY 0
-
-    method add {type tag args}
-    method assign {tag value}
-    method delete {tag}
+    itk_option define -padx padX PadX 0
+    itk_option define -pady padY PadY 0
+    
+    method add     {type tag args}
+    method assign  {tag value}
+    method delete  {tag}
     method disable {tag}
-    method enable {tag}
-    method exists {tag}
-    method get {{pattern {}}}
-    method hskip {{columns 1}}
-    method itemcget {tag option}
+    method enable  {tag}
+    method exists  {tag}
+    method get     {{pattern {}}}
+    method hskip   {columns {parent {}}}
+    method itemcget      {tag option}
     method itemconfigure {tag {option {}} args}
-    method parse {contents {parent {}} {level 1}}
-    method vskip {{rows 1}}
+    method parse   {contents {parent {}} {level 1}}
+    method vskip   {{parent {}}}
     
     proc newtype {type args}   ;# add a new type
+    
+    private method _getcmd   {mode tag args}
+    private method _group    {mode tag args}
+    private method _addgroup {tag args}
+    private method _addhline {tag args}
 
-	private method _cmd {mode tag}
-	private method _group {mode tag args}
-	private method _hline {path args}
-
-	private common _knowntypes {
-		checkbutton
-		entry
-		group
-		radiobutton
-	}
+    # Common information about item types
+    private common _knowntypes {
+	checkbutton
+	entry
+	group
+        hline
+	radiobutton
+    }
     private common _assign     ;# assign to a widget
     private common _create     ;# create a new widget
     private common _disable    ;# disable a widget
     private common _enable     ;# enable a widget
     private common _get        ;# get a widget's value
+    private common _sticky     ;# options for stickiness of each type
     private common _options    ;# options for itk_component add
+    
+    # Unique counters
+    private common widgetCounter 0   ;# counter to generate unique numbers
+    private variable itemCounter 0   ;# Counter to generate widget paths
+    private variable unique          ;# unique for each widget
+    
+    # Gridding variables: one entry per item, indexed by tag
+    private variable _row           ;# item row
+    private variable _column        ;# item column
+    private variable _rowspan       ;# item row span
+    private variable _columnspan    ;# item column span
+    private variable _curcol        ;# current grid column
+    private variable _currow        ;# current grid row
+    private variable _childspan     ;# default span of child widgets
 
-	private common uniqueCounter 0   ;# counter to generate unique numbers
-	private variable unique          ;# unique for each widget
-	
-	private variable _row           ;# item row
-	private variable _column        ;# item column
-	private variable _rowspan       ;# item row span
-	private variable _columnspan    ;# item column span
-	private variable _curcol        ;# current grid column
-	private variable _currow        ;# current grid row
-	private variable _childspan     ;# default span of child widgets
-	private variable _rowheight     ;# The height of each item row
-	private variable _type          ;# the type of each item
-	private variable _children      ;# the children of each group
+    # The height of each row
+    private variable _rowheight     ;# The height of each item row
 
-	# Initialize common arrays
-	array set _assign {
-		default     {set %v {%a}}
-		entry       {%w clear; %w insert 0 {%a}}
-		group       {_group assign {%a}}
-		hline       {}
+    # Item information, one per item
+    private variable _type          ;# the type of each item
+    private variable _children      ;# the children of each group
+
+    # Initialize common arrays
+    array set _assign {
+	default     {set {%v} %a}
+	entry       {%w delete 0 end; %w insert 0 %a}
+	group       {_group assign %a}
+	hline       {}
+    }
+    array set _create {
+	default     {}
+	checkbutton {eval ::checkbutton %w -variable {{%v}} %a}
+	entry       {eval ::entry %w -textvariable {{%v}} %a}
+        hline       {eval _addhline %t %a}
+	radiobutton {eval ::radiobutton %w -variable {{%v}} %a}
+    }
+    array set _delete {
+	default     {destroy %w}
+	group       {_group delete %t}
+    }
+    array set _disable {
+	default     {%w configure -state disabled}
+	group       {_group disable %t}
+	hline       {}
+    }	
+    array set _enable {
+	default     {%w configure -state normal}
+	group       {_group enable %t}
+	hline       {}
+    }	
+    array set _get {
+	default     {set {%v}}
+	group       {_group get %t}
+	hline       {}
+    }
+    array set _sticky {
+	default     "ew"
+	checkbutton "w"
+	radiobutton "w"
+    }
+    array set _options {
+	default {usual}
+	entry {
+	    usual
+	    rename -background -entrybackground entryBackground Background
 	}
-	array set _create {
-		default     {}
-		checkbutton {::checkbutton %w -variable %v %a}
-		entry       {::entry %w -textvariable %v %a}
-		hline       {_hline %t %a}
-		radiobutton {::radiobutton %w -variable %v %a}
+    }
+    foreach mode {assign create delete disable enable get sticky options} {
+	foreach type $_knowntypes {
+	    if ![::info exists _[set mode]($type)] {
+		set _[set mode]($type) [set _[set mode](default)]
+	    }
 	}
-	array set _delete {
-		default     {destroy %w}
-		group       {_group delete %t}
-	}
-	array set _disable {
-		default     {%w configure -state disabled}
-		group       {_group disable %t}
-		hline       {}
-	}	
-	array set _enable {
-		default     {%w configure -state normal}
-		group       {_group enable %t}
-		hline       {}
-	}	
-	array set _get {
-		default     {set %v}
-		group       {_group get %t}
-		hline       {}
-	}
-	array set _options {
-		default {usual}
-		entry {
-			usual
-			rename -background -entrybackground -entryBackground Background
-		}
-	}
-	foreach mode {assign create delete disable enable get options} {
-		foreach type $_knowntypes {
-			if ![::info exists _[set mode]($type)] {
-				set _[set mode]($type) _[set mode]($default)
-			}
-		}
-	}
+    }
     method debug {args} {
-        eval $args
+	eval $args
     }
 }
 
@@ -554,36 +576,37 @@ class iwidgets::Query {
 # widgets with a single call.
 #
 proc ::iwidgets::query { path args } {
-	if { [llength $args] & 1 } {
-		set script [lindex $args end]
-		set args [lreplace $args end end]
-	} else {
-		set contents {}
-	}
-	# Create widget
+    if { [llength $args] & 1 } {
+	set script [lindex $args end]
+	set args [lreplace $args end end]
+    } else {
+	set contents {}
+    }
+    # Create widget
     uplevel ::iwidgets::Query $path $args
     
     # Evaluate script if present. Note that substitution is
     # in caller's context.
     if { $contents != "" } {
-	    $path parse $contents {} 2
-	}
+	$path parse $contents {} 2
+    }
 }
 
 # ------------------------------------------------------------------
 ##                        CONSTRUCTOR
 # ------------------------------------------------------------------
 body iwidgets::Query::constructor {args} {
-	set _row() 0
-	set _column() 0
-	set _currow() 0
-	set _curcol() 0
-	set _rowheight(,0) 1
-
-	set unique [incr uniqueCounter]
-	
-	# Evaluate options
-	eval configure $args
+    set _row() 0
+    set _column() 0
+    set _currow() 0
+    set _curcol() 0
+    set _childspan() 0
+    set _rowheight(,0) 1
+    
+    set unique [incr widgetCounter]
+    
+    # Evaluate options
+    eval itk_initialize $args
 }
 
 
@@ -599,7 +622,7 @@ body iwidgets::Query::constructor {args} {
 # to the grid, not of items already added.
 # ----------------------------------------------------------------------
 configbody iwidgets::Query::columnspan {
-	set _columnspan() $itk_option(-columnspan)
+    set _columnspan() $itk_option(-columnspan)
 }
 
 # ----------------------------------------------------------------------
@@ -611,7 +634,7 @@ configbody iwidgets::Query::columnspan {
 # groups subsequently added to the grid, not of items already added. 
 # ----------------------------------------------------------------------
 configbody iwidgets::Query::childspan {
-	set _childspan() $itk_option(-childspan)
+    set _childspan() $itk_option(-childspan)
 }
 
 # ----------------------------------------------------------------------
@@ -676,9 +699,9 @@ configbody iwidgets::Query::labelfont {
 # ----------------------------------------------------------------------
 configbody iwidgets::Query::padx {
     foreach slave [grid slaves $itk_interior] {
-    	if { [grid info $slave -padx] != $itk_option(-padx) } {
-    		grid configure $slave -padx $itk_option(-padx)
-    	}
+	if { [grid info $slave -padx] != $itk_option(-padx) } {
+	    grid configure $slave -padx $itk_option(-padx)
+	}
     }
 }
 
@@ -696,9 +719,9 @@ configbody iwidgets::Query::padx {
 # ----------------------------------------------------------------------
 configbody iwidgets::Query::pady {
     foreach slave [grid slaves $itk_interior] {
-    	if { [grid info $slave -pady] != $itk_option(-pad) } {
-    		grid configure $slave -pady $itk_option(-pady)
-    	}
+	if { [grid info $slave -pady] != $itk_option(-pady) } {
+	    grid configure $slave -pady $itk_option(-pady)
+	}
     }
 }
 
@@ -720,127 +743,135 @@ configbody iwidgets::Query::pady {
 # hold its value, which can be accessed within control scripts
 # as *%v*.
 #
-body iwidgets::Query::add {type name args} {
-	if [::info exists _row($tag)] {
-		error "Item already exists: \"$tag\""
-	}
-	if ![::info exists _create($type)] {
-		error "Unknown item type \"$type\": must be one of $_knowntypes"
-	}
+body iwidgets::Query::add {type tag args} {
+    if [::info exists _row($tag)] {
+	error "Item already exists: \"$tag\""
+    }
+    if ![::info exists _create($type)] {
+	error "Unknown item type \"$type\": must be one of $_knowntypes"
+    }
     # Decompose the tag
-    if ![regexp {^((([^\.]+)?.*)?\.)?[^\.]+$} $tag _ _ par]
-    	error "Illegal item tag: \"$tag\""
-	}
-	# Remember key parameters
-	set _type($tag) $type
+    if ![regexp {^((([^\.]+)?.*)?\.)?[^\.]+$} $tag _ _ par] {
+        error "Illegal item tag: \"$tag\""
+    }
+    # Remember key parameters
+    set _type($tag) $type
 
-	# The group type may have an extra argument
-	if { $type == "group" && [llength $args] & 1 } {
-		set contents [lindex $args end]
-		set arg [lreplace $args end end]
-	} else {
-		set contents {}
-	}
-	# Get options
-	array set opts [list \
-		-initial {} \
-		-label {} \
-		-row $_currow($par)
-		-column $_curcol($par) \
-		-rowspan 1 \
-		-columnspan $_childspan($par) \
-		-childspan 1 \
-		-sticky "nsew" ]
-	array set opts $args
+    # The group type may have an extra argument
+    if { $type == "group" && [llength $args] & 1 } {
+        set contents [lindex $args end]
+        set arg [lreplace $args end end]
+    } else {
+        set contents {}
+    }
+    # Get options
+    array set opts [list \
+            -initial {} \
+            -label {} \
+            -row $_currow($par) \
+            -column $_curcol($par) \
+            -rowspan 1 \
+            -columnspan $_childspan($par) \
+            -childspan 1 \
+            -sticky $_sticky($type) ]
+    array set opts $args
+    
+    set init              $opts(-initial)
+    set label             $opts(-label)
+    set _row($tag)        $opts(-row)
+    set _column($tag)     $opts(-column)
+    set _rowspan($tag)    $opts(-rowspan)
+    set _columnspan($tag) $opts(-columnspan)
+    set _childspan($tag)  $opts(-childspan)
+    set stk               $opts(-sticky)
+    
+    set col $_column($tag)
+    set csp $_columnspan($tag)
 
-	set init $opts(-initial)
-	set label $opts(-label)
-	set _row($tag) $opts(-row)
-	set _column($tag) $opts(-column)
-	set col $_column($tag)
-	set _rowspan($tag) $opts(-rowspan)
-	set _columnspan($tag) $opts(-columnspan)
-	set _childspan($tag) $opts(-childspan)
-	set stk $opts(-sticky)
+    unset opts(-initial)  opts(-label) \
+            opts(-row) opts(-column) \
+            opts(-rowspan) opts(-columnspan) opts(-childspan) \
+            opts(-sticky)
 
-	unset opts(-initial)  opts(-label) \
-			opts(-row) opts(-column) \
-			opts(-rowspan) opts(-columnspan) opts(-sticky)
+    set args [array get opts]
 
-	# Remember the largest rowspan in this row
-	if { $_rowspan($tag) > $_rowheight($par,$_row($tag)) } {
-		set _rowheight($par,$_row($tag)) $_rowspan($tag)
-	}
-	# If this is a nested item, make sure we haven't gone
-	# past the end of the group.
-	if { $par != "" } {
-		lappend _children($par) $tag
-		if { $_row($tag) >= $_rowspan($par) } {
-			error "Moved past end of group: $par"
-		}
-	}
-	# Create the label only if this is a top-level item
-	if { $par == "" } {
-		itk_component add ${tag}label {
-				label $itk_interior ${tag}label -text $label
-		} {
-			usual
-			rename -font -labelfont labelFont LabelFont
-			rename -foreground -labelcolor labelColor LabelColor
-		}
-		# Grid it
-		grid $itk_component(${tag}label) \
-			-row [expr $row($par) + $_row($tag)] \
-			-column [expr $_column($par) + $col] \
-			-sticky $itk_option(-labelanchor)
-		incr col
-	}
-	if { $type == "group" } {
-		# Create a group. We have a dummy frame that we subsequently ignore
-		frame $itk_interior.$tag
-		
-		# If the initial value is not null, create the shared
-		# variable -- that way we know it's a shared group later
-		if { $init != "" } {
-			set [scope $tag$unique] $init
-		}
-		# Set up grid variables
-		set _currow($tag) 0
-		set _curcol($tag) 1
-		set _rowheight($tag,0) $_rowspan($tag)
+    # Remember the largest rowspan in this row
+    if { $_rowspan($tag) > $_rowheight($par,$_row($tag)) } {
+        set _rowheight($par,$_row($tag)) $_rowspan($tag)
+    }
+    # If this is a nested item, make sure we haven't gone
+    # past the end of the group. Also get the widget path
+    if { $par != "" } {
+        lappend _children($par) $tag
+        if { $_row($tag) > $_rowspan($par) } {
+            error "Moved past end of group: $par"
+        }
+        set path $itk_interior.__[incr itemCounter]
+    } else {
+        set path $itk_interior.$tag
+    }
+    # Create the label only if this is a top-level item
+    if { $par == "" } {
+        itk_component add ${tag}label {
+            label ${path}label -text $label
+        } {
+            keep -background -cursor
+            rename -font -labelfont labelFont Font
+            rename -foreground -labelcolor labelColor Foreground
+        }
+        # Grid it
+        grid $itk_component(${tag}label) \
+                -row [expr $_row($par) + $_row($tag)] \
+                -column [expr $_column($par) + $col] \
+                -sticky $itk_option(-labelanchor)
+        incr col
+        incr csp -1
+    }
+    if { $type == "group" } {
+        # Create a group. We have a dummy frame that we subsequently ignore
+        frame $itk_interior.$tag
+        
+        # If the initial value is not null, create the shared
+        # variable -- that way we know it's a shared group later
+        if { $init != "" } {
+            set [scope $tag$unique] $init
+        }
+        # Set up grid variables
+        set _currow($tag) 0
+        set _curcol($tag) 1
+        set _rowheight($tag,0) $_rowspan($tag)
+        
+        # If there's a contents description, evaluate it
+        if { $contents != "" } {
+            parse $contents $tag 2
+        }
+    } else {
+        # Create a regular item
+        if ![::info exists _create($type)] {
+            error "Cannot create item type \"$type\""
+        }
+        set itk_component($tag) $path ;# for _getcmd
+        itk_component add $tag {
+            eval [_getcmd create $tag $args]
+        } $_options($type)
 
-		# If there's a contents description, evaluate it
-		if { $contents != "" } {
-			parse $contents $tag 2
-		}
-	} else {
-		# Create a regular item
-		if [::info exists _create($type)] {
-			itk_component add $tag {
-				eval [_cmd create $tag $args]
-			} $_options($type)
-		}
-		# Set its initial value
-		if { $_assign($type) != "" } {
-			assign $tag $init
-		}
-		# Grid it
-		eval grid $itk_interior.$tag \
-			-row [expr $_row($par) + $_row($tag)] \
-			-column [expr $_column($par) + $col] \
-			-rowspan $_rowspan($this) \
-			-columnspan $_columnspan(this) \
-			-sticky $stk \
-			-padx $itk_option(-padx) \
-			-pady $itk_option(-pady) \
-			-in $itk_interior
-	}
-	# Increment row and column counters
-	if { $par == "" } {
-		hskip [expr 1+$_columnspan($tag)]
-	} else {
-		hskip $_columnspan($tag) $par
-	}
+        # Set its initial value
+        if { $_assign($type) != "" } {
+            assign $tag $init
+        }
+        # Grid it
+        eval grid $path \
+                -row [expr $_row($par) + $_row($tag)] \
+                -column [expr $_column($par) + $col] \
+                -rowspan $_rowspan($tag) \
+                -columnspan $csp \
+                -sticky $stk \
+                -padx $itk_option(-padx) \
+                -pady $itk_option(-pady) \
+                -in $itk_interior
+    }
+    # Increment row and column counters
+    hskip $_columnspan($tag) $par
 }
 
 # ------------------------------------------------------------------
@@ -854,10 +885,10 @@ body iwidgets::Query::add {type name args} {
 # Raise an error if _tag_ does not exist.
 #
 body iwidgets::Query::assign {tag value} {
-	if ![::info exists _row($tag)] {
-		error "Unknown tag: \"$tag\""
-	}
-	eval [_cmd assign $tag $value]
+    if ![::info exists _row($tag)] {
+	error "Unknown tag: \"$tag\""
+    }
+    eval [_getcmd assign $tag $value]
 }
 
 # ------------------------------------------------------------------
@@ -866,30 +897,30 @@ body iwidgets::Query::assign {tag value} {
 # Delete an item. If the item is a group, all members of the group
 # will also be deleted. Raise an error if _tag_ does not exist.
 #
-body iwidgets::Query::delete {tag value} {
-	if ![::info exists _row($tag)] {
-		error "Unknown tag: \"$tag\""
-	}
-	if { $_delete($tag) == "" } {
-		return
-	}
-	grid forget $itk_component(tag)
-	eval [_cmd delete $tag]
-	
-	# Clean up internal data
-	unset itk_component($tag)
-	unset _row($tag)
-	unset _column($tag)
-	unset _currow($tag)
-	unset _curcol($tag)
-	unset _columnspan($tag)
-	unset _rowspan($tag)
-	unset _childspan($tag)
-
-    if [regexp {^((([^\.]+).)*)[^\.]+$} $tag _ _ par]
-    	set t [lsearch -exact $_children($par) $tag]
-    	set _children($par) [lreplace $_children($par) $t $t]
-	}
+body iwidgets::Query::delete {tag} {
+    if ![::info exists _row($tag)] {
+	error "Unknown tag: \"$tag\""
+    }
+    if { $_delete($tag) == "" } {
+	return
+    }
+    grid forget $itk_component(tag)
+    eval [_getcmd delete $tag]
+    
+    # Clean up internal data
+    unset itk_component($tag)
+    unset _row($tag)
+    unset _column($tag)
+    unset _currow($tag)
+    unset _curcol($tag)
+    unset _columnspan($tag)
+    unset _rowspan($tag)
+    unset _childspan($tag)
+    
+    if [regexp {^((([^\.]+).)*)[^\.]+$} $tag _ _ par] {
+        set t [lsearch -exact $_children($par) $tag]
+        set _children($par) [lreplace $_children($par) $t $t]
+    }
 }
 
 # ------------------------------------------------------------------
@@ -899,10 +930,10 @@ body iwidgets::Query::delete {tag value} {
 # will also be disabled. Raise an error if _tag_ does not exist.
 #
 body iwidgets::Query::disable {tag} {
-	if ![::info exists _row($tag)] {
-		error "Unknown tag: \"$tag\""
-	}
-	eval [_cmd disable $tag]
+    if ![::info exists _row($tag)] {
+	error "Unknown tag: \"$tag\""
+    }
+    eval [_getcmd disable $tag]
 }
 
 # ------------------------------------------------------------------
@@ -912,10 +943,10 @@ body iwidgets::Query::disable {tag} {
 # will also be enabled. Raise an error if _tag_ does not exist.
 #
 body iwidgets::Query::enable {tag} {
-	if ![::info exists _row($tag)] {
-		error "Unknown tag: \"$tag\""
-	}
-	eval [_cmd enable $tag]
+    if ![::info exists _row($tag)] {
+	error "Unknown tag: \"$tag\""
+    }
+    eval [_getcmd enable $tag]
 }
 
 # ------------------------------------------------------------------
@@ -935,38 +966,43 @@ body iwidgets::Query::enable {tag} {
 # the selected tags and the corresponding values.
 #
 body iwidgets::Query::get {{pattern {}}} {
-	if [::info exists _row($pattern)] {
-		# Get a single item
-		return [eval [_cmd get $pattern]]
-	} elseif { $pattern == "" } {
-		set tags [array names _row]
-	} else {
-		set tags [array names _row $pattern]
-	}
-	set result {}
-	foreach tag $tags {
-		lappend result $tag [eval [_cmd get $tag]]
-	}
-	return $result
+    if { $pattern == "" } {
+	set tags [array names _type]
+    } elseif [::info exists _type($pattern)] {
+	# Get a single item
+	return [eval [_getcmd get $pattern]]
+    } elseif { $pattern == "" } {
+	set tags [array names _type]
+    } else {
+	set tags [array names _type $pattern]
+    }
+    set result {}
+    foreach tag $tags {
+        set cmd [_getcmd get $tag]
+        if { $cmd != "" } {
+            lappend result $tag [eval [_getcmd get $tag]]
+        }
+    }
+    return $result
 }
 
 # ------------------------------------------------------------------
-## METHOD: hskip distance ?parent?
+## METHOD: hskip columns ?parent?
 #
-# Skip one or more columns. The _distance_ argument specifies
+# Skip one or more columns. The _columns_ argument specifies
 # the number of columns to skip. The _parent_
 # argument, if supplied, is the name of a group within which to skip.
-# If the distance given takes the current column past the end of the
+# If the columns given takes the current column past the end of the
 # grid or the group, call <b>vskip</b> to move to the next row.
 #
-body iwidgets::Query::hskip {distance {parent {}}} {
-	if { $parent != "" && ![::info exists _column($parent)] } {
-		error "Unknown group: \"$parent\""
-	}
-	incr _curcol($parent) $distance
-	if { $_curcol($parent) >= $_columnspan($parent)-2 } {
-		vskip $parent
-	}
+body iwidgets::Query::hskip {columns {parent {}}} {
+    if { $parent != "" && ![::info exists _column($parent)] } {
+	error "Unknown group: \"$parent\""
+    }
+    incr _curcol($parent) $columns
+    if { $_curcol($parent) >= $_columnspan($parent) } {
+	vskip $parent
+    }
 }
 
 # ------------------------------------------------------------------
@@ -977,17 +1013,17 @@ body iwidgets::Query::hskip {distance {parent {}}} {
 # an error if _tag_ does not exist.
 #
 body iwidgets::Query::itemcget {tag option} {
-	if ![::info exists _row($tag)] {
-		error "Unknown tag: \"$tag\""
-	}
-	if { $option == "-label" } {
-		$itk_component(${tag}label) cget -text
-	} elseif [regexp {^-(row|column|rowspan|columnspan|sticky)$} $option] {
-		array set opts [grid info $itk_component($tag)
-		set opts($option)
-	} else { 
-		$itk_component($tag) cget $option
-	}
+    if ![::info exists _row($tag)] {
+	error "Unknown tag: \"$tag\""
+    }
+    if { $option == "-label" } {
+	$itk_component(${tag}label) cget -text
+    } elseif [regexp {^-(row|column|rowspan|columnspan|sticky)$} $option] {
+	array set opts [grid info $itk_component($tag)
+	set opts($option)
+    } else { 
+	$itk_component($tag) cget $option
+    }
 }
 
 # ------------------------------------------------------------------
@@ -1013,41 +1049,41 @@ body iwidgets::Query::itemcget {tag option} {
 # </ul>
 #
 body iwidgets::Query::itemconfigure {tag {option {}} args} {
-	if ![::info exists _row($tag)] {
-		error "Unknown tag: \"$tag\""
+    if ![::info exists _row($tag)] {
+	error "Unknown tag: \"$tag\""
+    }
+    if { $option == "" } {
+	set result {}
+	foreach o {row column rowspan columnspan sticky} {
+	    lappend result [itemconfigure $tag $o]
 	}
-	if { $option == "" } {
-		set result {}
-		foreach o {row column rowspan columnspan sticky} {
-			lappend result [itemconfigure $tag $o]
-		}
-		return $result
-	} elseif { $args == "" } {
-		if { $option == "-label" } {
-			$itk_component(${tag}label) configure -text
-		} elseif [regexp {^-(row|column|rowspan|columnspan|sticky)$} $option] {
-			array set opts [grid info $itk_component($tag)
-			list $option {} {} $opts($option) $opts($option)
-		} elseif [regexp {^-(initial|childspan)$} {
-			return ""
-		} else {
-			$itk_component($tag) configure $option
-		}
+	return $result
+    } elseif { $args == "" } {
+	if { $option == "-label" } {
+	    $itk_component(${tag}label) configure -text
+	} elseif [regexp {^-(row|column|rowspan|columnspan|sticky)$} $option] {
+	    array set opts [grid info $itk_component($tag)
+	    list $option {} {} $opts($option) $opts($option)
+	} elseif [regexp {^-(initial|childspan)$} {
+	    return ""
 	} else {
-		foreach {option value} [concat $option $args] {
-			if { $option == "-label" } {
-				$itk_component(${tag}label) configure -text $value
-			} elseif { $option == "-sticky" } {
-				grid configure $itk_component($tag) -sticky $value
-			} elseif [regexp {^-(row|column|rowspan|columnspan)$} $option] {
-				;# do nothing
-			} elseif [regexp {^-(initial|childspan)$} {
-				;# Do nothing
-			} else {
-				$itk_component($tag) configure $option $value
-			}
-		}
+	    $itk_component($tag) configure $option
 	}
+    } else {
+	foreach {option value} [concat $option $args] {
+	    if { $option == "-label" } {
+		$itk_component(${tag}label) configure -text $value
+	    } elseif { $option == "-sticky" } {
+		grid configure $itk_component($tag) -sticky $value
+	    } elseif [regexp {^-(row|column|rowspan|columnspan)$} $option] {
+		;# do nothing
+	    } elseif [regexp {^-(initial|childspan)$} {
+		;# Do nothing
+	    } else {
+		$itk_component($tag) configure $option $value
+	    }
+	}
+    }
 }
 
 # ------------------------------------------------------------------
@@ -1066,40 +1102,40 @@ body iwidgets::Query::itemconfigure {tag {option {}} args} {
 # but still contain commands and variable references.
 #
 body iwidgets::Query::parse {description {parent {}} {level 1}} {
-	# Substitution
-	if { $level != 0 } {
-		uplevel $level [list subst $description]
-	}
-	# This makes termination testing easier
+    # Substitution
+    if { $level != 0 } {
+	uplevel $level [list subst $description]
+    }
+    # This makes termination testing easier
     append $data "\n"
     
-	# Parse the string. Unfortunately, we cannot simply 
-	# do an eval and rely on private methods to catch
-	# evaluation of each command as in iwidgets::Menubar, for
-	# instance, because the available widget types can be
-	# extended dynamically. So we really do parse the string,
-	# more-or-less.
+    # Parse the string. Unfortunately, we cannot simply 
+    # do an eval and rely on private methods to catch
+    # evaluation of each command as in iwidgets::Menubar, for
+    # instance, because the available widget types can be
+    # extended dynamically. So we really do parse the string,
+    # more-or-less.
     while { $data != "" } {
-        # Get the next line
-        regexp "^(\[^\n\]*)\n(.*)" $data _ line data
-        # Process if not a space or comment line
-        if ![regexp "^\[ \t\]*#" $line] {
-            # Get lines until a complete command 
-            set command $line
-            while { ! [::info complete $command] && $data != "" } {
-                regexp "^(\[^\n\]*)\n(.*)" $data _ line data
-                append command "\n" $line
-            }
-            # Process the command
-            if [regexp {^(hskip|vskip)$} [lindex $command 0]] {
-            	eval $command $parent
-            } else {
-            	set type [lindex $command 0]
-            	set tag $parent.[lindex $command 1]
-            	set args [lreplace $command 0 1]
-            	eval add $type $tag $args
-            }
-        }
+	# Get the next line
+	regexp "^(\[^\n\]*)\n(.*)" $data _ line data
+	# Process if not a space or comment line
+	if ![regexp "^\[ \t\]*#" $line] {
+	    # Get lines until a complete command 
+	    set command $line
+	    while { ! [::info complete $command] && $data != "" } {
+		regexp "^(\[^\n\]*)\n(.*)" $data _ line data
+		append command "\n" $line
+	    }
+	    # Process the command
+	    if [regexp {^(hskip|vskip)$} [lindex $command 0]] {
+		eval $command $parent
+	    } else {
+		set type [lindex $command 0]
+		set tag $parent.[lindex $command 1]
+		set args [lreplace $command 0 1]
+		eval add $type $tag $args
+	    }
+	}
     }
 }
 
@@ -1113,14 +1149,14 @@ body iwidgets::Query::parse {description {parent {}} {level 1}} {
 # that group is incremented.
 #
 body iwidgets::Query::vskip {{parent {}}} {
-	if { $parent != "" && ![::info exists _row($parent)] } {
-		error "Unknown group: \"$parent\""
-	}
-	incr _currow($parent) $_rowheight($parent,$_currow($parent))
-	set _curcol($parent) 0
-	if ![::info exists _rowheight($parent,$_currow($parent))] {
-		set _rowheight($parent,$_currow($parent)) 1
-	}
+    if { $parent != "" && ![::info exists _row($parent)] } {
+	error "Unknown group: \"$parent\""
+    }
+    incr _currow($parent) $_rowheight($parent,$_currow($parent))
+    set _curcol($parent) 0
+    if ![::info exists _rowheight($parent,$_currow($parent))] {
+	set _rowheight($parent,$_currow($parent)) 1
+    }
 }
 
 # ------------------------------------------------------------------
@@ -1128,27 +1164,27 @@ body iwidgets::Query::vskip {{parent {}}} {
 # ------------------------------------------------------------------
 
 # ------------------------------------------------------------------
-## METHOD: _cmd mode tag ?arg...?
+## METHOD: _getcmd mode tag ?arg...?
 #
 # Get the command to evaluate for a widget. The _mode_ argument
 # selects the widget mode and must be one of <b>get</b>, <b>assign</b>,
 # <b>enable</b>, <b>delete</b>, <b>disable</b>, or <b>create</b>.
 # The _tag_ argument is the item to evaluate the command on.
 #
-body iwidgets::Query::_cmd {mode tag args} {
-	set type $_type($tag)
-	if { ! [::info exists _[set mode]($type)] } {
-		error "Cannot get _[set mode] script of type \"$type\""
-	}
-	set command $_[set mode]($type)
-
-	regsub -all %w $command $itk_interior.$tag command
-	regsub -all %v $command [scope $tag$unique] command
-	regsub -all %a $command $args command
-	regsub -all %t $command $tag command
-	regsub -all %Q $command $this command
-
-	return $command
+body iwidgets::Query::_getcmd {mode tag args} {
+    set type $_type($tag)
+    if { ! [::info exists _[set mode]($type)] } {
+	error "Cannot get _[set mode] script of type \"$type\""
+    }
+    set command [set _[set mode]($type)]
+    if { $command != "" } {
+        regsub -all %w $command $itk_component($tag) command
+        regsub -all %v $command [scope $tag$unique] command
+        regsub -all %t $command $tag command
+        regsub -all %Q $command $this command
+        regsub -all %a $command $args command
+    }
+    return $command
 }
 
 # ------------------------------------------------------------------
@@ -1158,73 +1194,77 @@ body iwidgets::Query::_cmd {mode tag args} {
 # or get.
 #
 body iwidgets::Query::_group {mode tag args} {
-	switch -exact $mode {
-		"assign" {
-			if [::info exists [scope $tag$unique]] {
-				# Shared group
-				set [scope $tag$unique] $args
-			} else {
-				# Not a shared group
-				foreach t $_children($tag) v $args {
-					assign $t $v
-				}
-			}
+    switch -exact $mode {
+	"assign" {
+	    if [::info exists [scope $tag$unique]] {
+		# Shared group
+		set [scope $tag$unique] $args
+	    } else {
+		# Not a shared group
+		foreach t $_children($tag) v $args {
+		    assign $t $v
 		}
-		"delete" {
-			foreach t $_children($tag) {
-				delete $t
-			}
-			grid forget $itk_component(${tag}label)
-			destroy $itk_component(${tag}label)
-			destroy $itk_component($tag)
-			unset itk_component(${tag}label)
-			foreach i [array names _rowheight $tag,*] {
-				unset _rowheight
-		}
-		"disable" {
-			foreach t $_children($tag) {
-				disable $t
-			}
-		}
-		"enable" {
-			foreach t $_children($tag) {
-				enable $t
-			}
-		}
-		"get" {
-			if [::info exists [scope $tag$unique]] {
-				# Shared group
-				set [scope $tag$unique]
-			} else {
-				# Not a shared group
-				set result {}
-				foreach t $_children($tag) {
-					lappend result [get $t]
-				}
-				return $result
-			}
-		}
+	    }
 	}
+	"delete" {
+	    foreach t $_children($tag) {
+		delete $t
+	    }
+	    grid forget $itk_component(${tag}label)
+	    destroy $itk_component(${tag}label)
+	    destroy $itk_component($tag)
+	    unset itk_component(${tag}label)
+	    foreach i [array names _rowheight $tag,*] {
+		unset _rowheight
+	    }
+	}
+	"disable" {
+	    foreach t $_children($tag) {
+		disable $t
+	    }
+	}
+	"enable" {
+	    foreach t $_children($tag) {
+		enable $t
+	    }
+	}
+	"get" {
+	    if [::info exists [scope $tag$unique]] {
+		# Shared group
+		set [scope $tag$unique]
+	    } else {
+		# Not a shared group
+		set result {}
+		foreach t $_children($tag) {
+		    lappend result [get $t]
+		}
+		return $result
+	    }
+	}
+    }
 }
-
+    
 # ------------------------------------------------------------------
-## METHOD: _hline path ?option value ...?
+## METHOD: _addhline path ?option value ...?
 #
 # Create a horizontal line.
 #
-body iwidgets::Query::_hline {path args} {
-	array set opts [list \
-		-pad $itk_option(-linepad) \
-		-borderwidth 1 \
-		-relief $itk_option(-relief)]
-	array set opts $args
-	set pad $opts(-pad)
-	unset opts(-pad)
-	set args [array get opts]
+body iwidgets::Query::_addhline {tag args} {
+    array set opts [list \
+	    -pad $itk_option(-linepad) \
+	    -borderwidth 2 \
+            -height 2 \
+	    -relief $itk_option(-linerelief)]
+    array set opts $args
+    set pad $opts(-pad)
+    unset opts(-pad)
+    set args [array get opts]
 
-	frame $path
-	eval frame $path.f $args
-	pack $path.f -fill x -expand on
+    frame $itk_interior.$tag
+    eval frame $itk_interior.$tag.f $args
+    pack $itk_interior.$tag.f -fill x -expand on
+
+    return $itk_interior.$tag.f
 }
 
 # ------------------------------------------------------------------
@@ -1241,20 +1281,20 @@ body iwidgets::Query::_hline {path args} {
 # if an invalid option is specified.
 #
 body iwidgets::Query::newtype {type args} {
-	if { [lsearch -exact $_knowntypes $type] != -1 } {
-		error "Type \"$type\" is already defined"
+    if { [lsearch -exact $_knowntypes $type] != -1 } {
+	error "Type \"$type\" is already defined"
+    }
+    array set opts $args
+    foreach c {assign create delete disable enable get sticky options} {
+	if ![::info exists opts(-$c) {
+	    set _[set c]($type) [set _[set c](default)]
+	} else {
+	    set _[set c]($type) $opts(-$c)
+	    unset opts(-$c)
 	}
-	array set opts $args
-	foreach c {assign create delete disable enable get options} {
-		if ![::info exists opts(-$c) {
-			set _[set c]($type) [set _[set c](default)]
-		} else {
-			set _[set c]($type) $opts(-$c)
-			unset opts(-$c)
-		}
-	}
-	if { [array names opts] != "" } {
-		error "bad option: \"[lindex [array names opts] 0]\""
-	}
-	lappend _knowntypes $type
+    }
+    if { [array names opts] != "" } {
+	error "bad option: \"[lindex [array names opts] 0]\""
+    }
+    lappend _knowntypes $type
 }
