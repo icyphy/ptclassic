@@ -24,7 +24,7 @@ The data input is interpreted as weighted impulses.  An output is triggered
 by a clock input.  Assuming a clock input event triggers the star at time $T$,
 the output is:
 .EQ
-y(T) ~=~ d sup {(T ~-~ tau)} s( tau )
+y(T) ~=~ d sup {(T ~-~ tau )} s( tau )
 .EN
 where $tau$ is the time of the latest data input event, $s( tau )$ is the
 state of the filter at time $tau$,
