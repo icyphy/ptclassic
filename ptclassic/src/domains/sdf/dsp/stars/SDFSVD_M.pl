@@ -237,7 +237,7 @@ Data_M
         U = A;
 
         // Create a temporary working array
-        LOG_NEW; double *temp = new double[numCols];
+        double temp[numCols];
 
         // Reduce the U matrix to bidiagonal form with Householder transforms.
 
@@ -391,7 +391,7 @@ Data_M
                     V[j][k] = -V[j][k];
                 }
               }
-              break; // break out of testsplitting 
+              break; // break out of test splitting 
             }
             if( its == (int)max_iterations - 1) {
               Error::abortRun(*this,"no convergence in SVD routine");
@@ -449,9 +449,8 @@ Data_M
             temp[l] = 0.0;
             temp[k] = f;
             W.entry(k) = x;
-          } // end testsplittng iteration loop
-       }  // end k loop
-       LOG_DEL; delete[] temp;
-       } // close code
+          } // end test splitting iteration loop
+        }  // end k loop
+      } // close code
     } // end method
 } // end defstar
