@@ -45,7 +45,7 @@ At compile time, this star appears to just be an atomic star.
 		code { return TRUE;}
 	}
 	method {
-		name { readClassName }
+		name { readTypeName }
 		access { public }
 		type { "const char*" }
 		code { return "Self"; }

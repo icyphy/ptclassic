@@ -27,7 +27,7 @@ the "output".
 		int readyToGo;
 	}
 	method {
-		name { readClassName }
+		name { readTypeName }
 		access { public }
 		type { "const char *"}
 		code { return "EndCase";}

@@ -10,7 +10,7 @@ defstar {
 This star generates (int-1), (int-2), ... 1,0 samples for (int) input.
 	}
 	method {
-		name { readClassName }
+		name { readTypeName }
 		access { public }
 		type { "const char *" }
 		code { return "UpSample"; }

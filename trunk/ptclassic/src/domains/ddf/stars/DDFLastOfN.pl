@@ -26,7 +26,7 @@ where N is the control input.
 		int readyToGo;
 	}
 	method {
-		name { readClassName }
+		name { readTypeName }
 		access { public }
 		type { "const char *" }
 		code { return "DownSample"; }
