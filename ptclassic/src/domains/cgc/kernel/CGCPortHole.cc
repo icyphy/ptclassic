@@ -17,7 +17,15 @@ $Id$
 
 #include "CGCConnect.h"
 #include "CGCGeodesic.h"
+#include "SDFStar.h"
 #include "Error.h"
+
+#define SETFLAGS(p) \
+	if ((p->asLinearBuf == TRUE) && (maxBuf % p->numXfer() != 0)) \
+		p->asLinearBuf = FALSE; \
+	if (p->asLinearBuf == FALSE) p->hasStaticBuf = FALSE; \
+	else if (maxBuf != p->numXfer() * ((SDFStar*) p->parent())->reps()) \
+		p->hasStaticBuf = FALSE; 
 
 		////////////////////////////////////////
 		// Buffer size determination routines
@@ -42,7 +50,6 @@ int CGCPortHole :: initOffset() {
 		Error :: abortRun(*this, " delay is too large\n");
 		return FALSE;
 	}
-	offset = offset + numXfer() - 1;
 	return TRUE;
 }
 
@@ -56,12 +63,15 @@ void CGCPortHole :: finalBufSize(int statBuf) {
 	int staticSize = localBufSize();
 	int tryFlag = TRUE;	// try to achieve static buffering
 
-	if (far()->isItOutput()) return;	// check wormhole boundary.
+	if (far()->isItOutput()) {
+		maxBuf = staticSize;
+		return;	// check wormhole boundary.
+	}
 
-	if (reqSize < bufferSize) {
-		reqSize = bufferSize;
-		hasStaticBuf = FALSE;
+	if (bufferSize > numXfer()) {
+		asLinearBuf = FALSE;
 		tryFlag = FALSE;
+		if (reqSize < bufferSize) reqSize = bufferSize;
 	}
 
 	CGCPortHole* p = realFarPort();
@@ -83,16 +93,16 @@ void CGCPortHole :: finalBufSize(int statBuf) {
 			if (temp > reqSize) reqSize = temp;
 
 			// determine whether p can be of static buffering
-			if (!myTry || (hasStaticBuf == FALSE)) {
-				inp->hasStaticBuf = FALSE;
+			if (!myTry) {
 				tryFlag = FALSE;
+				inp->asLinearBuf = FALSE;
 			}
 		}
 	} else {
 		int temp = p->inBufSize() - p->numXfer();
 		if (temp || (p->numTokens() % p->numXfer() != 0)) { 
 			tryFlag = FALSE;
-			p->hasStaticBuf = FALSE;
+			p->asLinearBuf = FALSE;
 		}
 		reqSize += temp;
 	}
@@ -109,28 +119,27 @@ void CGCPortHole :: finalBufSize(int statBuf) {
 	} else { // static buffering option.
 		if (tryFlag && (reqSize % staticSize != 0)) {
 			maxBuf = ((reqSize/staticSize)+1) * staticSize;
-		} else if ((hasStaticBuf != 0) && (reqSize % numXfer() != 0)) {
+		} else if ((asLinearBuf != 0) && (reqSize % numXfer() != 0)) {
 			maxBuf = ((reqSize / numXfer()) + 1) * numXfer();
 		} else {
 			maxBuf = reqSize;
 		}
 	}
-	if (maxBuf % numXfer() != 0) hasStaticBuf = FALSE;
 
-	// confirm the hasStaticBuf flag of fork-destination ports
+	// set the static buffering option and offserReq flag
+	SETFLAGS(this)
+
+	// confirm the asLinearBuf flag of fork-destination ports
 	if (p->fork()) {
 		// determine the maximum offset.
 		ForkDestIter next(p);
 		CGCPortHole* outp;
 		while ((outp = next++) != 0) {
 			CGCPortHole* inp = outp->realFarPort();
-			if (inp->hasStaticBuf == TRUE) {
-				if (maxBuf % inp->numXfer() != 0)
-					inp->hasStaticBuf = FALSE;
-			}
+			SETFLAGS(inp);
 		}
 	} else {
-		if (maxBuf % p->numXfer() != 0) p->hasStaticBuf = FALSE;
+		SETFLAGS(p);
 	}
 }
 
