@@ -38,6 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include "Scheduler.h"
 #include "miscFuncs.h"
 #include "SDFPTclTarget.h"
 #include "GalIter.h"
@@ -45,10 +46,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DFPortHole.h"
 #include "KnownTarget.h"
 #include "pt_fstream.h"
+#include "ProfileTimer.h"
 
 // Constructor
 SDFPTclTarget::SDFPTclTarget(const char* nam,const char* desc)
-: SDFTarget(nam,desc)
+: SDFTarget(nam,desc), numIters(0)
 {
 }
 
@@ -56,16 +58,29 @@ Block* SDFPTclTarget::makeNew() const {
 	LOG_NEW; return new SDFPTclTarget(name(), descriptor());
 }
 
-// do not call the begin methods
-// this prevents Tcl/Tk windows from popping up twice
-void SDFPTclTarget::begin() {
+
+void  SDFPTclTarget::writeFiring(Star& s, int) {
+    ProfileTimer firingTimer;
+    if (! s.run()) SimControl::requestHalt();
+    starProfiles.lookup(s)->addTime(firingTimer.elapsedCPUTime());
+}
+
+// We really shouldn't have to do this.  There should not be a
+// compileRun method for the scheduler, just a run.  In the compile
+// mode the scheduler()->setStopTime(1) (to print out one iteration) -
+// in the simulation mode the stop time should be set to the number of
+// iterations.  For now, code duplication is done FIXME.
+void SDFPTclTarget::setStopTime (double limit) {
+	numIters = int(floor(limit + 0.001));
 }
 
 int SDFPTclTarget::run() {
+    starProfiles.set(*galaxy());
+    int numItersSoFar=0;
+    while (numItersSoFar++ < numIters && !SimControl::haltRequested())
+	scheduler()->compileRun();
     StringList ptclCode;
     ptclCode << "reset\nnewuniverse " << galaxy()->name() << " SDF\n";
-    // We don't specify the target
-    // << "target Scheduler-Tester\n\ttargetparam foo \"\"\n";
     GalStarIter nextStar(*galaxy());
     Star* star;
     int nports = setPortIndices(*galaxy());
@@ -77,7 +92,8 @@ int SDFPTclTarget::run() {
 	setstate << "\tsetstate" << starName;
 	ptclCode << "\n\tstar" << starName << "CGCMultiInOut\n"
 		 << setstate << "name " << star->className() << "\n"
-		 << setstate << "execTime 1\n";
+		 << setstate << "execTime "
+		 << starProfiles.lookup(*star)->avgTime() << "\n";
 	int input=1;
 	int output=1;
 	StringList inputParams, outputParams;
@@ -114,8 +130,8 @@ int SDFPTclTarget::run() {
     }
     StringList ptclFileName;
     const char* path = expandPathName("~/PTOLEMY_SYSTEMS/ptcl/");
-    delete [] path;
     ptclFileName << path << galaxy()->name() << ".pt";
+    delete [] path;
     pt_ofstream ptclFile(ptclFileName);
     ptclFile << ptclCode;
     return TRUE;
