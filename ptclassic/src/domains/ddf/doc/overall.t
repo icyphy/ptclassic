@@ -267,7 +267,6 @@ In this case, we wish to override this a create a wormhole for DDF galaxies
 within DDF galaxies.
 .)f
 This option helps the recognizer identify recognized constructs.
-.pp
 On this line, more changes are expected regarding the following issues:
 .ip 1
 flexibility to add new dynamic constructs without changing the kernel
@@ -275,6 +274,21 @@ of the DDF domain, and
 .ip 2
 systematic methods to identify a dynamic construct, rather than the simplistic
 topology matching idea.
+.pp
+Grouping of the connected SDF stars into a DDF wormhole may create
+an artificial dead-lock condition while the original system is not
+dead-locked.  Since dead-lock detection of a non-homogeneous dataflow
+graph is not a simple problem, we do not attempt to detect any artificial
+dead-lock situation during the restructuring process.  
+As a result, the programmer
+will receive an error message on the dead-lock condition.  The programmer
+has an option to disable the restructuring process by defining an
+integer parameter, called \fIrestructure\fR,
+.IE "restructure, parameter"
+and resetting it.  Then, the original dynamic DDF scheduling is
+invoked and no compile-time scheduling is tried.
+For efficiency reason, we recommend the user to group SDF stars as a
+galaxy in such cases.
 .H1 "Programming Stars in the \\*(DO Domain
 .pp
 There is an attempt to maintain uniformity across
