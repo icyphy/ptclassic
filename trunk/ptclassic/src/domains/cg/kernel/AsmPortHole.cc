@@ -20,7 +20,7 @@ $Id$
 
 // attributes
 extern const Attribute P_CIRC(PB_CIRC,0);
-extern const Attribute P_SHARED(PB_SHARED,0);
+extern const Attribute P_SYMMETRIC(PB_SYMMETRIC,0);
 
 // we require circular access either if the PB_CIRC attribute is set
 // (indicating a user request for it), or if the number of tokens
@@ -71,6 +71,10 @@ int AsmPortHole::bufSize() const {
 	return geo().bufSize();
 }
 
+int AsmPortHole::localBufSize() const {
+	return geo().localBufSize();
+}
+
 void AsmPortHole::assignAddr(ProcMemory& m, unsigned a) {
 	geo().assignAddr(m,a);
 }
@@ -97,7 +101,7 @@ AsmPortHole :: ~AsmPortHole() {
 	OutAsmPort* p;
 	while ((p = (OutAsmPort*)next++) != 0) p->setForkSource(0);
 	if (forkSrc)
-		forkSrc->remEntry(this);
+		forkSrc->forkDests.remove(this);
 }
 
 // make me a fork destination; set my source.
@@ -106,7 +110,6 @@ void AsmPortHole::setForkSource(AsmPortHole * p) {
 	if (!p) return;
 	// add me as one of forkSrc's destinations
 	forkSrc->forkDests.put(this);
-	forkSrc->forkIn = 1;
 }
 
 int InAsmPort :: isItInput() const {return TRUE; }

@@ -20,10 +20,10 @@ $Id$
 
 // portholes for AsmCodeStars and derived stars
 const bitWord PB_CIRC = 0x40;
-const bitWord PB_SHARED = 0x200;
+const bitWord PB_SYMMETRIC = 0x200;
 
 extern const Attribute P_CIRC;
-extern const Attribute P_SHARED;
+extern const Attribute P_SYMMETRIC;
 
 // attributes for code generation portholes
 
@@ -36,13 +36,11 @@ class AsmPortHole : public SDFPortHole {
 	friend class AsmGeodesic;
 protected:
 	int offset;
-	int forkIn;
 // Stuff to support fork buffers
-protected:
 	SequentialList forkDests;
 	AsmPortHole* forkSrc;
 public:
-	AsmPortHole() : offset(0), forkIn(0), forkSrc(0) {}
+	AsmPortHole() : offset(0), forkSrc(0) {}
 
 	~AsmPortHole();
 
@@ -57,12 +55,22 @@ public:
 	// Return the size of the buffer connected to this PortHole.
 	int bufSize() const;
 
+	// Return the size of the "local buffer" connected to this
+	// PortHole.  This returns zero for cases where no separate
+	// buffer is allocated, e.g. fork outputs (all destinations
+	// of the fork share the same buffer, whose size is returned
+	// by bufSize).
+	int localBufSize() const;
+
 	// Assign a memory address to the geodesic connected to this PortHole.
 	void assignAddr(ProcMemory& m, unsigned a);
 
 	// Return the base address of the memory allocated to the
 	// geodesic connected to this PortHole.
 	unsigned baseAddr() const;
+
+	// return the offset position in the buffer.
+	unsigned bufPos() const { return offset;}
 
 	// Return the memory allocated to the
 	// geodesic connected to this PortHole.
@@ -76,7 +84,8 @@ public:
 	// consumed in this PortHole when the Star fires.
 	virtual void advance() {
 		offset += numberTokens;
-		if (offset >= bufSize()) offset -= bufSize();
+		int sz = bufSize();
+		if (offset >= sz) offset -= sz;
 	}
 
 	// Return TRUE if a circular buffer access is ever required
@@ -94,12 +103,10 @@ public:
 	// Initialize
 	void initialize();
 public:
-	// Mark me as a fork input port
-	void makeForkBuf() { forkIn = 1;}
+	// return true if I am a fork input
 	int fork() const { return forkDests.size() > 0;}
-	void remEntry(AsmPortHole* p) { forkDests.remove(p);}
-	AsmPortHole* forkSource() { return forkSrc;}
-	const AsmPortHole* forkSource() const { return forkSrc;}
+
+	// set a fork source
 	void setForkSource(AsmPortHole* p);
 
 };
