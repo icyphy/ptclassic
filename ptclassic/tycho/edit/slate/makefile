@@ -43,11 +43,6 @@ include $(CONFIG)
 TCL_SRCS = 
   
 ITCL_SRCS = \
-	AsLine.itcl \
-	AsOval.itcl \
-	AsPoint.itcl \
-	AsPolygon.itcl \
-	AsRectangle.itcl \
 	Axis.itcl \
 	Bounder.itcl \
 	Editor.itcl \
@@ -55,13 +50,18 @@ ITCL_SRCS = \
 	Frame.itcl \
 	Interactor.itcl \
 	IncrCanvas.itcl \
-	LabelledFrame.itcl \
-	LabelledItem.itcl \
-	LabelledLine.itcl \
-	LabelledOval.itcl \
-	LabelledRect.itcl \
+	LabeledFrame.itcl \
+	LabeledItem.itcl \
+	LabeledLine.itcl \
+	LabeledOval.itcl \
+	LabeledRect.itcl \
+	Line.itcl \
 	Node.itcl \
+	Oval.itcl \
 	Picture.itcl \
+	Point.itcl \
+	Polygon.itcl \
+	Rectangle.itcl \
 	Repeater.itcl \
 	Selector.itcl \
 	Shades.itcl \
