@@ -1,3 +1,4 @@
+/* Ptolemy version: $Id$ */
 /*
  * HPGL Output
  *
@@ -8,9 +9,9 @@
 #define MAPY(state,y) ( MAXY - (y) + P1Y - state->clipminY)
 
 #include "copyright.h"
+#include <stdio.h>
 #include "xgout.h"
 #include "plotter.h"
-#include <stdio.h>
 #include <math.h>
 #define MAX(a,b) ( ((a)>(b)) ? (a) : (b) )
 #define MIN(a,b) ( ((a)<(b)) ? (a) : (b) )
