@@ -9,6 +9,10 @@
 # of the directory tree, and include this file.
 # ARCH is assumed set to, say, "sun4", "sun3", or "vax".
 
+# Full path to the ~ptolemy directory (you may need to change this
+# for your installation)
+PTOLEMY_FULL_PATH = /usr/users/ptolemy
+
 # C++ compiler to use
 GNU = g++
 # flags for C++ compilation
