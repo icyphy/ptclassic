@@ -7,11 +7,9 @@
 # The PTOLEMY environment variable must be set to point to the home
 # directory of the Ptolemy installation.
 #
-# Usage:
-#         Cat sect.* files to xxxx.mm.
-#         Run nr2mml xxxx.mm.
-#         Create a new maker file (e.g. using ~FRAME/TEMPLATES/printpaper)
-#         Import xxxx.mml.
+# Usage: nr2mml infile
+# The result can be imported into a FrameMaker file using formats like
+# those in $PTOLEMY/doc/samples/documents.doc
 #
 # Copyright (c) 1993 The Regents of the University of California.
 # All rights reserved.
@@ -44,15 +42,17 @@ BEGIN	{ FS = " "; OFS = " "; bodynext = 1; eachline = 0;
 # The following is printed directly, rather than through an include file,
 # to avoid having to search the file system for the include file.
        printf("<!DefineFont Class\n <Family Courier>\n <pts 11>\n <Bold> >\n");
-       printf("<!DefineFont Norm\n <Family Times>\n <pts 12> >\n");
+       printf("<!DefineFont Norm\n <Family Times>\n <pts 12> <Plain> >\n");
        printf("<!DefineTag 1Heading>\n");
        printf("<!DefineTag 2Heading>\n");
        printf("<!DefineTag 3Heading>\n");
+       printf("<!DefineTag 4Heading>\n");
        printf("<!DefineTag Affiliation>\n");
        printf("<!DefineTag Author>\n");
        printf("<!DefineTag Body>\n");
        printf("<!DefineTag Bullet>\n");
        printf("<!DefineTag Commands>\n");
+       printf("<!DefineTag CommandsCont>\n");
        printf("<!DefineTag Definition>\n");
        printf("<!DefineTag Display>\n");
        printf("<!DefineTag Explanation>\n");
@@ -93,17 +93,17 @@ BEGIN	{ FS = " "; OFS = " "; bodynext = 1; eachline = 0;
          for (i=2; i <= NF; i++) { printf("%s ", $i); };
          printf("\n") ; bodynext = 1 ; next}
 /^\.ip/	{print ""; printf("<Definition>\n") ;
-         for (i=2; i <= NF-1; i++) { printf("%s ", $i); };
-         printf("\t") ; bodynext = 0 ; next}
+	 if (NF >= 2) printf("%s\\t",$2);
+         bodynext = 0 ; next}
 #
 # Commands to convert displays
-/^\.(c/	{print ""; printf("<Commands>\n") ;
+/^\.\(c/{print ""; printf("<Commands>\n") ;
          eachline++ ; next}
-/^\.)c/	{print ""; printf("<LBody>\n") ;
+/^\.\)c/{print ""; printf("<LBody>\n") ;
          eachline-- ; next}
-/^\.(d/	{print ""; printf("<Commands>\n") ;
+/^\.\(d/{print ""; printf("<Commands>\n") ;
          eachline++ ; next}
-/^\.)d/	{print ""; printf("<LBody>\n") ;
+/^\.\)d/{print ""; printf("<LBody>\n") ;
          eachline-- ; next}
 #
 # Commands to convert index entries
@@ -131,30 +131,38 @@ BEGIN	{ FS = " "; OFS = " "; bodynext = 1; eachline = 0;
 #
 # Commands to convert fonts
 /^\.c/	{printf("<Class>") ;
-         for (i=2; i <= NF; i++) { printf("%s ", $i); };
-         printf("<Norm>\n") ; bodynext = 0 ; next}
+	 if (NF >= 2) printf("%s<Norm>",$2);
+         for (i=3; i <= NF; i++) { printf("%s ", $i); };
+	 if (NF == 2) printf(" ");
+         bodynext = 0 ; next}
 /^\.I/	{printf("<Italic>") ;
-         for (i=2; i <= NF; i++) { printf("%s ", $i); };
-         printf("<Plain>\n") ; bodynext = 0 ; next}
+	 if (NF >= 2) printf("%s<Plain>",$2);
+         for (i=3; i <= NF; i++) { printf("%s ", $i); };
+	 if (NF == 2) printf(" ");
+         bodynext = 0 ; next}
 /^\.i/	{printf("<Italic>") ;
-         for (i=2; i <= NF; i++) { printf("%s ", $i); };
-         printf("<Plain>\n") ; bodynext = 0 ; next}
+	 if (NF >= 2) printf("%s<Plain>",$2);
+         for (i=3; i <= NF; i++) { printf("%s ", $i); };
+	 if (NF == 2) printf(" ");
+         bodynext = 0 ; next}
 /^\.BO/	{printf("<Bold>") ;
-         for (i=2; i <= NF; i++) { printf("%s ", $i); };
-         printf("<Plain>\n") ; bodynext = 0 ; next}
+	 if (NF >= 2) printf("%s<Plain>",$2);
+         for (i=3; i <= NF; i++) { printf("%s ", $i); };
+	 if (NF == 2) printf(" ");
+         bodynext = 0 ; next}
 /^\.b/	{printf("<Bold>") ;
-         for (i=2; i <= NF; i++) { printf("%s ", $i); };
-         printf("<Plain>\n") ; bodynext = 0 ; next}
+	 if (NF >= 2) printf("%s<Plain>",$2);
+         for (i=3; i <= NF; i++) { printf("%s ", $i); };
+	 if (NF == 2) printf(" ");
+         bodynext = 0 ; next}
 #
 # Miscellaneous conversions
-/^\.SP/	{bodynext = 1 ; next} # make space same as paragraph
-/^\.sp/	{bodynext = 1 ; next} # make space same as paragraph
 /^\.nf/	{eachline++ ; next }  # no fill
-/^\.fi/	{eachline-- ; next }  # fill again
+/^\.fi/	{printf("<LBody>"); eachline-- ; next }  # fill again
 /^\.ce/	{printf("<Display>\n") ; bodynext = 0; next}
 /^\.\\\\"/	{bodynext = 1 ; next}  # scratch comment. Extra \\ from sed
 /^\./	{printf("\n"); print ; bodynext = 1; next} # other cmds stay in
-	{ if ( eachline > 0) printf("\n");
+	{ if ( eachline > 0) printf("<CommandsCont>\n");
           if (bodynext > 0) {print defaultparagraph ;
                              bodynext-- ;} ;
           print ; next}

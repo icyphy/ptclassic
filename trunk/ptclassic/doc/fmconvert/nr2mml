@@ -60,6 +60,7 @@ fi
 
 FRAMEBIN=$PTOLEMY/doc/fmconvert
 
-sed -f $FRAMEBIN/nr2mml.sed $* | \
+soelim $* | \
+   sed -f $FRAMEBIN/nr2mml.sed | \
    awk -f $FRAMEBIN/nr2mml.awk > ${1}.mml
 
