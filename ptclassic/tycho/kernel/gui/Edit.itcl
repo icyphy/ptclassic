@@ -55,6 +55,12 @@ class ::tycho::Edit {
     ###################################################################
     ####                      public methods                       ####
 
+    # Clear the text.
+    method clear {} {$itk_component(text) deleteRange 1.0 end}
+
+    # Return the current insertion point in a form usable by seePoint.
+    method currentPoint {}
+
     # Hand the focus to the text subwindow.
     method focusin {}
 
@@ -64,36 +70,28 @@ class ::tycho::Edit {
     # Insert the given data at the insertion cursor.
     method insertData {data}
 
-    # Open a file browser and insert the contents of the selected file.
-    method insertFile {}
-
     # Return 1 if the text has been modified since the last save, 0 otherwise.
     method isModified {}
 
-    # Insert the contents of the specified file at the insertion cursor.
-    method loadFile {filename}
-
-    # Reload the current file. 
+    # Reload from the last saved version of the file.
     method reload {}
 
-    # Save text to the current file or a specified filename.
-    method save {{name ""}}
-
-    # Go to the point in the text given by the specified regular expression.
-    method seeName {regexpr}
+    # Go to the specified point in the text.
+    method seePoint {point}
 
     # Query the user for an alternative font.
     method setFont {}
 
-    # Set the insertion point to the value of the argument.
-    method setInsert {position}
-
     ###################################################################
     ####                     protected methods                     ####
+
+    # Return the text to save.
+    protected method saveText {}
 
     # Return the name of the type of text widget to use (EditText).
     protected method textWidget {} {return ::tycho::EditText}
 }
+
 
 ###################################################################
 #
@@ -241,15 +239,20 @@ body ::tycho::Edit::constructor {args} {
     # The following initialize options and then invoke any
     # configuration options, assuming there are options specified.
     eval itk_initialize $args
-
-    loadFile $file
-
-    markUnmodified
 }
 
 ###################################################################
 ###################################################################
 ####                      public methods                       ####
+
+###################################################################
+#### currentPoint
+# Return the current insertion point in a form usable by seePoint.
+#
+body ::tycho::Edit::currentPoint {} {
+    set idx [[component text textWinName] index insert]
+    return [list range $idx $idx]
+}
 
 ###################################################################
 #### focusin
@@ -278,18 +281,6 @@ body ::tycho::Edit::insertData {data} {
 }
 
 ###################################################################
-#### insertFile
-# Open a file browser to query the user for a filename, and then
-# insert the contents of that file at the insertion cursor.
-#
-body ::tycho::Edit::insertFile {} {
-    set filename [::tycho::DialogWindow::newModal FileBrowser \
-	    [::tycho::autoName .filebr] -text {File to Insert}]
-    $itk_component(text) readFile $filename
-    markModified
-}
-
-###################################################################
 #### isModified
 #
 body ::tycho::Edit::isModified {} {
@@ -297,99 +288,44 @@ body ::tycho::Edit::isModified {} {
 }
 
 #####################################################################
-#### loadFile
-# Load the specified file, if it exists and does not have the name
-# "NoName".  Otherwise, do nothing.
-# If the file exists but is not readable, flag an error.
-#
-body ::tycho::Edit::loadFile {filename} {
-    # Read contents from the specified file, unless the name is "NoName".
-    if {$filename != {NoName} && $filename != {}} {
-	if [file exists $filename] {
-	    if [file readable $filename] {
-		$itk_component(text) initFile $filename
-	    } else {
-		error "File $filename is not readable"
-	    }
-	}
-    }
-}
-
-###################################################################
 #### reload
-# Reload the current file. If the contents are modified, then
-# ask the user first for confirmation. The text is reparsed for
-# coloration, etc.
+# Reload from the last saved version of the current file. This method
+# first disables read-only status (if it is set), then replaces the
+# current data with data from the current file, and then sets read-only
+# status based on the permissions of the file. The data is marked
+# unmodified after loading the file, and the clipboard is restored
+# to its state before the method was called. If the file does not exist, then
+# the current data is cleared, leaving a blank slate. If the current
+# file exists but is not readable, an error occurs. The actual
+# replacement of the data occurs via the method
+# <code>insertData</code>.
 #
 body ::tycho::Edit::reload {} {
-    if {$file == "NoName" || $file == ""} {
-	return 
-    }
-    set hull $itk_component(hull)
-    set text $itk_component(text)
-
-    # Save the position of the cursor.
-    set ins [$text returnInsert]
-    if {$modified} {
-	if {![::tycho::askuser \
-		"This file has been modified. Proceed anyway?"]} {
-	    return 
-	}
-    }
-    $hull configure -readonly 0
-    $text deleteRange 1.0 end
-    loadFile $file
-    $text setInsert $ins
-    $text center
-    markUnmodified
-    if {[file writable $file]} {
-	$hull configure -readonly 0
-    } else {
-	$hull configure -readonly 1
-    }
-    # change title 
-    wm title $hull $file
-    $text parseRegion 1.0 end
+    set saveclipboard [component text getClipboard]
+    File::reload
+    component text setClipboard $saveclipboard
 }
 
 ###################################################################
-#### save
-# Save text to a file. If no argument is given, the filename is taken
-# from the -file option for the class. If the value of the -file option
-# is "NoName" (the default), then saveAs is invoked. Remove backup
-# files (auto-save or crash-recovery) if the write succeeds. If the
-# specified file is not writable, trigger an error. Return 1 if the
-# write succeeds, 0 otherwise.
+#### seePoint
+# Go to the specified point in the text, moving the insertion cursor
+# to that point, and adjusting the view so that the point is in view.
+# The point can be specified in any of three ways:
+# <pre>
+#    {line <i>linenumber</i>}
+#    {range <i>startindex endindex</i>}
+#    <i>regexp</i>
+# <pre>
+# In the first two forms, the point is a list beginning with the keyword
+# "line" or "range".  If the point has neither of these forms, then
+# it is interpreted as a regular expression, and the first match of
+# the regular expression is taken to be the specified point.
+# In all cases, the background color of the matching text is changed
+# temporarily.  Notice that this will not be visible if the "range" form
+# is used and the two indices are equal.
 #
-body ::tycho::Edit::save {{name ""}} {
-    if {$name == ""} {
-	set filename $file
-    } {
-	set filename $name
-    }
-    if {$filename != "" && $filename != "NoName"} {
-	set fd [open $filename w+]
-	puts -nonewline $fd [$itk_component(text) get 1.0 {end -1 char}]
-	close $fd
-    } {	
-	# The file has not been specified.  Invoke saveAs
-	if {[saveAs] == 0} {return 0}
-    }
-    if {$name == ""} {
-	removeBackupFiles
-    }
-    markUnmodified
-    return 1
-}
-
-###################################################################
-#### seeName
-# Go to the point in the text given by the specified regular expression.
-# The insertion cursor is moved to the first match, and the background
-# color of the matching text is changed temporarily.
-#
-body ::tycho::Edit::seeName {regexpr} {
-    $itk_component(text) seeName $regexpr
+body ::tycho::Edit::seePoint {point} {
+    $itk_component(text) seePoint $point
 }
 
 ###################################################################
@@ -406,11 +342,14 @@ body ::tycho::Edit::setFont {} {
 	    "$this configure -textfont \[$wname getCurrentFont\]"
 }
 
+    ###################################################################
+    ###################################################################
+    ####                      protected methods                    ####
+
 ###################################################################
-#### setInsert
-# Set the insert point to the given position, where the position can be
-# any mark understood by the underlying Tk text widget.
+#### saveText
+# Return the text to save.
 #
-body ::tycho::Edit::setInsert {position} {
-    $itk_component(text) setInsert $position
+body ::tycho::Edit::saveText {} {
+    return [$itk_component(text) get 1.0 {end -1 char}]
 }
