@@ -128,6 +128,9 @@ INC_LINK_FLAGS = -shared $(SHARED_COMPILERDIR_FLAG)
 # Note that cc uses -Bstatic
 CC_STATIC =
 
+# Binaries end with this extension
+BINARY_EXT = .exe
+
 #
 # Directories to use
 #
