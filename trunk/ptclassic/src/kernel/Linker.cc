@@ -495,7 +495,7 @@ int Linker::multiLink (int argc, char** argv) {
 	      (char *)NULL)
 	    return FALSE;
 	  
-	if ( (lib_handle = shl_load(objName, BIND_IMMEDIATE | DYNAMIC_PATH | BIND_VERBOSE  | BIND_FIRST, 0)) == NULL) {
+	if ( (lib_handle = shl_load(objName, BIND_IMMEDIATE | BIND_VERBOSE  | BIND_FIRST, 0)) == NULL) {
 	  StringList msg = "Error linking file ";
 	  msg << objName << " dlopen: " << strerror (errno);
 	  // This is a bug workaround, so we violate our rule of no
