@@ -14,7 +14,12 @@
 # be a poor place to do error checking.
 
 # Find out the name that we are being called as
-set progname = `basename $0`
+# Check if $0 is set so we can source this from the csh prompt for testing.
+if ( $?0 ) then
+	set progname = `basename $0`
+else
+	set progname = ptsetup.csh
+endif
 
 if ( ! $?PTARCH ) then
     setenv PTARCH `$PTOLEMY/bin/ptarch`
@@ -60,7 +65,7 @@ endif
 
 setenv TMPLD_LIBRARY_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/$PTARCH/lib:$PTOLEMY/tcltk/itcl.${PTARCH}/lib/itcl
 
-if ($PTARCH =~ hppa?*) then
+if ($PTARCH =~ hppa*) then
 	if ( ! $?SHLIB_PATH ) then
 		setenv SHLIB_PATH $TMPLD_LIBRARY_PATH
 	else
