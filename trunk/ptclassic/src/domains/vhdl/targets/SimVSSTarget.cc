@@ -44,6 +44,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 SimVSSTarget :: SimVSSTarget(const char* name,const char* starclass,
 			     const char* desc) :
 VHDLTarget(name,starclass,desc) {
+  addState(simarch.setState("simarch",this,"sparcOS5",
+			    "value for SIM_ARCH environment variable."));
   addState(analyze.setState("analyze",this,"YES",
 			    "switch for analyzing code."));
   addState(startup.setState("startup",this,"YES",
@@ -55,8 +57,8 @@ VHDLTarget(name,starclass,desc) {
   addState(interactive.setState("interactive",this,"NO",
 			    "switch for simulating interactively."));
 
-  addStream("preSynch", &preSynch);
-  addStream("postSynch", &postSynch);
+//  addStream("preSynch", &preSynch);
+//  addStream("postSynch", &postSynch);
   needC2V = 0;
   needV2C = 0;
   pairNumber = 0;
@@ -67,16 +69,24 @@ Block* SimVSSTarget :: makeNew() const {
   LOG_NEW; return new SimVSSTarget(name(), starType(), descriptor());
 }
 
+static SimVSSTarget proto("SimVSS-VHDL", "VHDLStar",
+  "VHDL code generation target for Synopsys simulation");
+static KnownTarget entry(proto,"SimVSS-VHDL");
+
 void SimVSSTarget :: setup() {
   needC2V = 0;
   needV2C = 0;
   pairNumber = 0;
+
+  // Generate the command to set the SIM_ARCH environment variable here.
+  StringList command = "";
+  command << "set SIM_ARCH = " << (const char*) simarch;
+  command << " ; ";
+  command << "echo SIM_ARCH = $SIM_ARCH";
+  system(command);
+
   VHDLTarget :: setup();
 }
-
-static SimVSSTarget proto("SimVSS-VHDL", "VHDLStar",
-			 "VHDL code generation target for Synopsys simulation");
-static KnownTarget entry(proto,"SimVSS-VHDL");
 
 // Routines to construct CG wormholes, using the
 // $PTOLEMY/src/domains/cgc/targets/main/CGWormTarget
@@ -296,9 +306,9 @@ end;
   code << "\n" << loopOpener;
   
   // myCode contains the main action of the main process
-  code << preSynch;
+//  code << preSynch;
   code << myCode;
-  code << postSynch;
+//  code << postSynch;
   
   code << "\n" << loopCloser;
   code << "\n" << architecture_body_closer;
