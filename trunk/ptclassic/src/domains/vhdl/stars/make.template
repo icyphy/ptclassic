@@ -56,8 +56,6 @@ PL_SRCS = \
  VHDLQuant.pl \
  VHDLUpSample.pl \
  VHDLDownSample.pl \
- VHDLCReceive.pl \
- VHDLCSend.pl \
  VHDLXgraph.pl \
  VHDLXYgraph.pl \
 
