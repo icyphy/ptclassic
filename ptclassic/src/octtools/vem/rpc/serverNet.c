@@ -46,6 +46,11 @@ static char SccsId[]="$Id$";
 #include <sys/types.h>
 #include <sys/socket.h>
 
+#ifdef SYSV
+#include <sys/time.h>
+#include <sys/resource.h>
+#endif
+
 #include <netinet/in.h>
 #ifdef DNET
 #include <netdnet/dn.h>
@@ -387,8 +392,16 @@ RPCFindSlot()
 {
     int i;
 
+#ifdef SYSV
+    struct rlimit	rlp;
+#endif
     if (RPCMaxApplications == 0) {
+#ifdef SYSV
+	getrlimit(RLIMIT_NOFILE, &rlp);
+	RPCMaxApplications = rlp.rlim_cur - 1 - 4; /* -4 for stdin, out, err, X */
+#else
 	RPCMaxApplications = getdtablesize() - 4; /* -4 for stdin, out, err, X */
+#endif
 	RPCApplication = RPCARRAYALLOC(struct RPCApplication, RPCMaxApplications);
 	for (i = 0; i < RPCMaxApplications; i++) {
 	    RPCApplication[i].active = 0;
