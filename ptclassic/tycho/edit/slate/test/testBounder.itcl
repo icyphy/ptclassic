@@ -154,7 +154,7 @@ test Bounder-prefix-1 {Test -click/drag/releaseprefix options} {
     list [.s coords $r] $X $Y $Z
 
 } [list {40.0 40.0 80.0 80.0} \
-	[list $r 100 100 -button 1] [list $r 200.0 200.0] [list $r 200.0 200.0]]
+	[list $r 100 100 -button 1] [list $r 200.0 200.0] [list $r %1 %2]]
     
 #######################################################################
 #### -activate/drag/deactivatecommand
@@ -189,7 +189,7 @@ test Bounder-command-1 {Test -activate/drag/deactivatecommand options} {
    list [.s coords $r] $X $Y $Z
 
 } [list {140.0 140.0 180.0 180.0} \
-	[list $r 100 100 %3 %4] [list $r 200.0 200.0] [list $r 300 300]]
+	[list $r 100 100 %3 %4] [list $r 200.0 200.0] [list $r %1 %2]]
 
 #######################################################################
 #### activate

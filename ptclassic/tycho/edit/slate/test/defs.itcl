@@ -111,7 +111,7 @@ proc _interact {prefix tag xinc yinc n args} {
 	update idletasks
 	incr n -1
     }
-    eval ${prefix}release $tag .s.canvas .s $x $y
+    eval ${prefix}release $tag .s.canvas .s
     .s coords $tag
 }
 
@@ -131,7 +131,7 @@ proc _interactslate {prefix tag xinc yinc n args} {
 	update idletasks
 	incr n -1
     }
-    eval .s ${prefix}release $tag $x $y
+    eval .s ${prefix}release $tag
     .s coords $tag
 }
 
