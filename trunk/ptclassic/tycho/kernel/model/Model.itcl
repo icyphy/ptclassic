@@ -675,19 +675,22 @@ body ::tycho::Model::defineAttributes {args} {
 # The special attribute <b>-valued</b> is a flag that states
 # whether an entity has a value (default is zero); the special attribute
 # <b>-ordered</b> sets the flag that states whether instances of
-# this type of entity are ordered.. This method is not
-# undoable or publishable. 
+# this type of entity are ordered; <b>-leaf</b> sets the flag that
+# states that instances of this type of entity are always
+# leaves. This method is not undoable or publishable. 
 # Flag an error if the given type already exists (either as an
 # entity or a link). This method is not undoable or pubishable.
 #
 body ::tycho::Model::defineEntityType {type args} {
-    array set temp {-valued 0 -ordered 0}
+    array set temp {-valued 0 -ordered 0 -leaf 0}
     array set temp $args
     set valued $temp(-valued)
     set ordered $temp(-ordered)
+    set leaf $temp(-leaf)
     unset temp(-valued)
     unset temp(-ordered)
-    _defineentity $type $valued $ordered [array get temp]
+    unset temp(-leaf)
+    _defineentity $type $valued $ordered $leaf [array get temp]
     return ""
 }
 
