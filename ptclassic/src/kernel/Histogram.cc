@@ -35,7 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 **************************************************************************/
 #ifdef __GNUG__
-#pragma interface
+#pragma implementation
 #endif
 
 #include "Histogram.h"

@@ -30,7 +30,7 @@ A small complex class -- a subset of the cfront and libg++ versions,
 but written from scratch.
 **************************************************************************/
 #ifdef __GNUG__
-#pragma interface
+#pragma implementation
 #endif
 
 #include "ComplexSubset.h"
