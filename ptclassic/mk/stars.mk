@@ -130,7 +130,6 @@ ifndef TK
 	CGCVISTK=
 	CODESIGN=
 	FSM=
-	HOF=
 	SDFTK=
 	SDFDFM=
 endif
