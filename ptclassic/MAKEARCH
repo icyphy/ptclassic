@@ -131,6 +131,13 @@ if ( -d ../src/tst ) then
 		optmkdir $x
 		cd $x
 		optlink ../../../src/tst/$x makefile
+		if ( -d ../../../src/tst/$x/stars) then
+			optmkdir stars
+			cd stars
+			optlink ../../../src/tst/$x make.template
+			optlink ../../../src/tst/$x makefile
+			cd ..
+		endif
 		cd ..
 	end
 	cd ..
