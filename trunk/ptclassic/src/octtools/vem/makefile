@@ -161,6 +161,7 @@ INC_FILES = \
 	../drs/drs.h \
 	../main/ansi.h ../main/defaults.h ../main/errors.h ../main/general.h \
 	../main/message.h ../main/cursors.h ../main/vemMain.h ../main/xvals.h \
+	../options/opts.h \
 	../patterns/fill_pat.h ../patterns/tech.h \
 	../select/hilite.h ../select/selset.h ../select/selection.h \
 	../strings/str.h \
