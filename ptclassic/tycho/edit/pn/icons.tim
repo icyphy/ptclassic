@@ -273,10 +273,12 @@ group dynamic -label {Dynamic Icons} {
             -label {Sieve} \
             -text Sieve \
             -color lightblue \
-	    {
-	terminal input -coords {0 50} -direction w \
-		-style circle -fill blue
-    }
+            -termstyles {
+	         1-1-east
+	         1-1-north
+	         1-1-south
+	         1-1-west
+            } \
 }
 
 group sink -label {Sink Icons} {
