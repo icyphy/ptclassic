@@ -16,9 +16,9 @@ and automatically initialized.  The initCode() method of a star is called
 after the the static schedule has been generate and before the schedule is
 fired. This method is used to generate the code outside of the main
 loop such as initialization code and procedure declaration code. 
-To generate startup code, use the initCode method, NOT the start method,
-since start is called before scheduling and memory allocation.  The
-main use of the start method, as in SDF, is to tell the scheduler
+To generate startup code, use the initCode method, NOT the setup method,
+since setup is called before scheduling and memory allocation.  The
+main use of the setup method, as in SDF, is to tell the scheduler
 if more than one sample is to be accessed from a porthole with the
 setSDFParams call.
 .pp
@@ -61,6 +61,7 @@ defstar {
 		name {output}
 		type {float}
 	}
+	...
 .)c
 .H2 "Codeblocks"
 .Id "Codeblock"
@@ -318,7 +319,7 @@ macros are actually expanded.
 .pp
 .Id "macro, $$"
 To have ``$'' appear in the output code, put ``$$'' in the codeblock.
-For a domain where ``$'' is a frequently used character in target 
+For a domain where ``$'' is a frequently used character in the target 
 language, it is possible to use a different character instead by
 redefining the virtual function ``substChar'' (defined in CGStar) to
 return a different character.
@@ -339,9 +340,9 @@ do not modify data at all. A good, and also ubiquitous, example is a
 \fBFork\fR star. When a Fork star has \fIN\fR outputs, the default
 behavior is to create \fIN\fR buffers for output connections and copy
 data from input buffer to \fIN\fR output buffers, which is a very
-expensive and silly approach. Therefore, we pay special attention stars
-displaying this type of behavior.  In the start method these stars,
-\fBforkInit()\fR method is invoked to indicate that the star is a
+expensive and silly approach. Therefore, we pay special attention to stars
+displaying this type of behavior.  In the setup method of these stars,
+the \fBforkInit()\fR method is invoked to indicate that the star is a
 Fork-type star.  For example, the \fBCGCFork\fR star is defined as
 .(c
 defstar {
@@ -375,11 +376,14 @@ are laid out; no code is required.
 	}
 }
 .)c
-Were ever possible, code generation domains take advantage of Fork-type
+Where possible, code generation domains take advantage of Fork-type
 stars by not allocating output buffers, but instead the stars reuse the
 input buffers.  Unfortunately, in the current implementation, assembly
 language fork stars can not do their magic if the buffer size gets too
-large.  Here, forks that copy inputs to outputs must be used.
+large (specifically, if the size of the buffer that must be allocated is
+greater than the total number of tokens generated or read by some port
+during the entire execution of the schedule).  Here, forks or delay stars
+that copy inputs to outputs must be used.
 .pp
 .Id "Spread, star"
 Another example of a Fork-Type star is the \fBSpread\fR star. The star
@@ -401,9 +405,9 @@ input. For example, in the \fBCGCSpread\fR star:
 .)c
 Notice that the output is a multi-porthole. During setup, we express
 how each output is embedded in the input starting at \fIloc\fR
-location.  At buffer allocation stage, we do not allocate buffers for
+location.  At the buffer allocation stage, we do not allocate buffers for
 the outputs, but instead reuse the input buffer for all outputs. This
-feature, however, has not implemented been implemented in the assembly
+feature, however, has not yet been implemented in the assembly
 language generation domains. 
 .pp
 .Id "Collect, star"
@@ -423,12 +427,14 @@ A \fBCollect\fR star embeds its inputs in its output buffer:
 .pp
 .Id "static buffering"
 Other examples of embedded relationships are \fBUpSample\fR and
-\fBDownSample\fR stars. One restriction of embedding, however, is that
-the embedded buffer must be static. Automatic insertion of Spread and
-Collect stars in multi-processor targets(refer to the target section)
-guarantees static buffering. If there is no delay (ie, no initial
-token) in the embedded buffer, the static buffering is enforced by
-default.  A buffer is called \fIstatic\fR when a star instance consumes
-or produces data in the same buffer location in any schedule period. If
-the buffer size divides the \fIlcm\fR value of the number of tokens
-consumed and produced, the buffer is static.
+\fBDownSample\fR stars. One restriction of embedding, however, is that the
+embedded buffer must be static. Automatic insertion of Spread and Collect
+stars in multi-processor targets (refer to the target section) guarantees
+static buffering. If there is no delay (ie, no initial token) in the
+embedded buffer, the static buffering is enforced by default.  A buffer is
+called \fIstatic\fR when a star instance consumes or produces data in the
+same buffer location in any schedule period.  Static buffering requires a
+size that divides the least common multiple of the number of tokens
+consumed and produced; if such a size exists that equals or exceeds the
+maximum number of data values that will ever be in the buffer, static
+allocation is performed.
