@@ -8,7 +8,7 @@ Author: Joel R. King
 
 Defines the signal handlers for Tycho in both release and debug modes.
 
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -34,6 +34,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 
 **************************************************************************/
+
+// Define SIG_PF
+#include "ptsignals.h"
 
 #ifdef PTHPPA
 typedef void (*SIG_PF)(int);
