@@ -80,11 +80,23 @@ gthreads_clean: $(GT_OBJ)
 	$(MAKE) -C $(GT_OBJ)/src clean;
 
 # Build a shadow tree to hold object files.
+GT_OBJ_SUBDIRS =	include lib src
 $(GT_OBJ): $(GT_SRC)
 	-mkdir $@
-	lndir ../$< $@
+	# lndir is not available everywhere, so we can't use it.
+	#lndir ../$< $@
+	-for mydir in $(GT_OBJ_SUBDIRS); \
+	do \
+		if [ ! -d $(GT_OBJ)/$$mydir ]; then \
+			echo "Making $(GT_OBJ)/$$mydir"; \
+			mkdir $(GT_OBJ)/$$mydir; \
+			(cd $(GT_OBJ)/$$mydir; \
+				ln -s ../../$(GT_SRC)/$$mydir/* .); \
+		fi; \
+	done
+	#rm -f $(GT_OBJ)/src/Makefile
 # Oops! There is no default Makefile in the distribution.
-	cd $(GT_OBJ)/src; ln -s Makefile.Solaris Makefile
+	#cd $(GT_OBJ)/src; ln -s Makefile.Solaris Makefile
 
 # Build library for sol2 using Gnu compiler.
 gthreads_sol2: $(GT_OBJ)
