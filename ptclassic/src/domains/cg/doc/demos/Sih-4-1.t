@@ -41,4 +41,5 @@ will not use all the processors.  For example, if you make the communication
 cost very large, everything will be placed on one processor.  If the
 communication cost is 1 (the default), and four processors are provided,
 only three will be used.
+.ES
 
