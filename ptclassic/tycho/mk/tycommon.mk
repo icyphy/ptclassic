@@ -93,6 +93,7 @@
 # The variables below are for the SunTest JavaScope code coverage tool
 # See http://www.suntest.com/JavaScope
 # JSINSTR	The 'jsinstr' command, which instruments Java code.
+# JSINTRFLAGS	Flags to pass to jsintr.
 # JSRESTORE	The 'jsrestore' command which uninstruments Java code.
 
 ##############
@@ -383,10 +384,10 @@ updatewebsite: $(JDISTS)
 
 # Instrument Java code for use with JavaScope.
 jsinstr:
-	$(JSINSTR) $(JSRCS)
+	$(JSINSTR) $(JSINTRFLAGS) $(JSRCS)
 # If the jsoriginal directory does not exist, then instrument the Java files.
 jsoriginal:
-	@if [ ! -d jsoriginal ]; then $(JSINSTR) $(JSRCS); fi
+	@if [ ! -d jsoriginal ]; then $(JSINSTR) $(JSINTRFLAGS) $(JSRCS); fi
 
 # Back out the instrumentation.
 jsrestore:
@@ -476,6 +477,8 @@ alljtests.tcl: makefile
 			echo "if [ file exists $$x ] {source $$x}" >> $@; \
 		done; \
 	fi
+	echo "# This is to flush the JavaScope code coverage tables" >> $@
+	echo "java::call pt.kernel.test.JavaScopeFlush flush" >> $@
 	echo "doneTests" >> $@
 	echo "exit" >> $@
 
