@@ -135,7 +135,7 @@ installvem: $(OCTTOOLS) $(OCTTOOLS)/lib.$(ARCH) $(OCTTOOLS)/include
 $(OCTTOOLS) $(OCTTOOLS)/include $(OCTTOOLS)/lib $(OCTTOOLS)/lib.$(ARCH):
 	-mkdir $@
 
-clean realclean sources depend checkjunk sccsinfo lint:
+clean realclean sources depend checkjunk sccsinfo lint tests:
 	@for x in $(ALLDIRS); do \
 		cd $$x ; \
 		echo making $@ in $$x ; \
