@@ -57,14 +57,22 @@ class ::tycho::Compile {
     ####                         public methods                    ####
 
     # Compile each file in the list of filenames.
-    method compile { filenames}
+    public method compile { filenames}
 
     # Compile and load in each file in the list of filenames.
-    method compileAndLoad { filenames}
+    public method compileAndLoad { filenames}
 
     # Compile and run in each file in the list of filenames.
-    method compileAndRun { filenames}
+    public method compileAndRun { filenames}
 
+    # If the editor widget exists, then jump to the next error
+    public method jumpToLine {line}
+    public method jumpNextError {} 
+    private variable editorWidget {}
+    private variable errorList {}
+    public method setErrorCount {num}
+    private variable errorCount {}
+    
     ###################################################################
     ####                         public methods                    ####
 
@@ -84,6 +92,9 @@ class ::tycho::Compile {
 
     # Create a makefile.
     protected method createMakefile {}
+
+    # Jump to line number in the Edit class, used by parseError only.
+    protected method jumpToParent {line Edit} {}
 
     # Initialize variables from the filename list.
     protected method initialize {filenames}
@@ -126,6 +137,11 @@ class ::tycho::Compile {
 #### constructor
 #
 body ::tycho::Compile::constructor {args} {
+    # compileWidget is the execModal widget
+    set editorName [$this cget -view]
+    set editorWidget $editorName.history.text
+    puts "Okay, created, editor name is $editorName"
+    puts "Okay, this is $this"
 }
 
 
@@ -188,23 +204,104 @@ body ::tycho::Compile::compileAndRun {filenames} {
 # file_name:line_number: Error message here
 #
 body ::tycho::Compile::parseError {results} {
+    # Default is that we don't have an error
+    set errorCount -1
+
     # Simple parse the results here.
-    set text [lindex $results 1].history.text
+    set editorName [$this cget -view]
+    set text $compileWidget.history.text
+
+    # Set the next button so it calls to our nextError function
+    $compileWidget.bbox buttonconfigure next \
+            -command "$this jumpNextError"
+
+    puts "editorName=$editorName, compileWidget=$compileWidget, text=$text, this=$this"
+    set eLineNum -1     ;# We haven't read the line number yet
+    set cLineNum 0      ;# Compiler's line starts at 0
+    set errorCount 0    ;# If errorCount==-1, then we have no error
+    set errorList {}    ;# Default is that our list is empty
+
+    # Get the output of the compiler
     set output [[lindex $results 1].history get 0.0 end]
     set output [split $output "\n"]
-    set editorName [$this cget -view]
-    for {set i 0} {$i < [llength $output]} {incr i} {
+    foreach line $output {
+        incr cLineNum
         # The text index starts off on 1, the lindex starts off on 0
-        set line [lindex $output [expr $i-1]]
-        # Does it match the format: "test.cc:15: Error message here"
-        if {[regexp {([^:]+):([0-9]+):(.+)} $line temp fileName lineNum msg]} {
-            $text tag add error$i $i.0 $i.end
-            $text tag configure error$i -foreground red -underline 0
-            $text tag bind error$i <Double-Button-1> \
-                    "$editorName seeFragment \"line $lineNum\""
+        #set line [lindex $output [expr $i-1]]
+
+        # Does it match the format? "test.cc:15: Error message here"
+        # Does it match the format? "test.cc:15: warning: Error_msg_here"
+        if {[regexp {([^:]+):([0-9]+): (.+)} $line tmp fname tmpeLineNum msg]\
+                && $tmpeLineNum!=$eLineNum} {
+            incr errorCount
+            # This ensures only one line per many lines of error output
+            set eLineNum $tmpeLineNum
+            if {[regexp {(warning): (.+)} $msg]} {
+                #Default as warning message
+                set color {purple}
+            } else {
+                #Default as error message
+                set color {red}
+                lappend errorList [list $cLineNum $eLineNum]
+            }
+            $text tag add error$errorCount $cLineNum.0 $cLineNum.end
+            $text tag configure error$errorCount -foreground $color -underline 0
+            # Two actions to the error binding:
+            # 1) jump to the lines (and highlight)
+            # 2) update internal count, so Next button will know where to jump
+            $text tag bind error$errorCount <Double-Button-1> \
+                    "$this jumpToLine \{$cLineNum $eLineNum\} ;\
+                    $this setErrorCount $errorCount"
         }
     }
+    # If we have detected an error, then we want to start from the beginning
+    if {$errorCount!=-1} {set errorCount 0}
 }
+
+body ::tycho::Compile::setErrorCount {count} {
+    set errorCount $count
+}
+
+#######################################################################
+#### jumpNextError
+# Make sure we don't jump too far. errorList has the following format:
+# { {cLineNum eLineNum} {cLineNum eLineNum} ... }
+# Where cLinNum is the compiler's line number, along with
+# eLineNum, which is the editor's line number.
+#
+body ::tycho::Compile::jumpNextError {} {
+    puts "jumpNextError... errorCount=$errorCount   errorList=$errorList"
+    if {$errorCount!=-1 && $errorCount<[llength $errorList]} {
+        set entry [lindex $errorList $errorCount]
+        jumpToLine $entry
+        incr errorCount
+    } else {
+        set errorCount 0
+    }
+
+}
+
+body ::tycho::Compile::jumpToLine {entry} {
+    # Name of our editor/viewer
+    set editorName [$this cget -view]
+
+    # Jump to the line in editor
+    if {[winfo exists $editorName]} {
+        $editorName seeFragment "line [lindex $entry 1]"
+        $editorName raiseWindow
+    } else {
+        error "Editor doesn't exist."
+    }
+
+    # Jump to the line in the compile/exec widget
+    set history $compileWidget.history
+    if {[winfo exists $history]} {
+        $history seeFragment "line [lindex $entry 0]"
+    } else {
+        error "Compile/Exec widget doesn't exist."
+    }
+}
+
 
 
 #######################################################################
@@ -240,10 +337,9 @@ body ::tycho::Compile::compileFiles {} {
     }
     set compileWidget [lindex $retList 1]
     # Make sure we parse the output of the compiler (ie. esp. error msg)
-    puts "postWidget = $compileWidget"
 
-    # Parse the error messages
     parseError $retList
+
     putStatus ""
     return $retList
 }
