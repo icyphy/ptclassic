@@ -110,7 +110,13 @@ struct timestruct *timer;
     timer->startElapsedTime.time = tb.time;
     timer->startElapsedTime.millitm = tb.millitm;
 #else
+#if defined(_BSD_TIME) || defined(_BSD_COMPAT)
+    /* For irix5 */
+    BSDgettimeofday(&tb,(struct timezone*)NULL);
+#else
     gettimeofday(&tb);
+#endif /* _BSD_TIME || _BSD_COMPAT*/
+
     timer->startElapsedTime.tv_sec = tb.tv_sec;
     timer->startElapsedTime.tv_usec = tb.tv_usec;
 #endif
@@ -185,7 +191,13 @@ struct timestruct *timer;
 		 += (tb.millitm - timer->startElapsedTime.millitm);
     }
 #else /*HAS_TIMEB*/
+#if defined(_BSD_TIME) || defined(_BSD_COMPAT)
+    /* For irix5 */
+    BSDgettimeofday(&tb,(struct timezone*)NULL);
+#else
     gettimeofday(&tb);
+#endif /* _BSD_TIME || _BSD_COMPAT*/
+
     timer->currentElapsedTime.tv_sec
              += (tb.tv_sec - timer->startElapsedTime.tv_sec);
     if (tb.tv_usec < timer->startElapsedTime.tv_usec) {
