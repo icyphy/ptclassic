@@ -48,7 +48,8 @@ TCL_SRCS =
 
 ITCL_SRCS = 
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS)
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
+	dltest.html
 
 MISC_FILES = 
 
