@@ -62,7 +62,7 @@ public:
         // Return NULL if not.
         virtual DDFWormhole* myWorm();
 
-	virtual const char* readClassName() const;
+	virtual const char* readTypeName();
 };
 
 #endif

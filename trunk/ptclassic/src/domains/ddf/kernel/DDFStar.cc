@@ -71,6 +71,6 @@ int DDFStar :: isItSelf() { return FALSE ;}
 // return NULL
 DDFWormhole* DDFStar :: myWorm() { return NULL; }
 
-const char* DDFStar :: readClassName () const { return "unspecified method";}
+const char* DDFStar :: readTypeName () { return "unspecified method";}
 
 ISA_FUNC(DDFStar,DataFlowStar);
