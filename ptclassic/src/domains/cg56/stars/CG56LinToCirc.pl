@@ -29,7 +29,7 @@ is repeated inline so may not be efficient for large N.
 	}
 	output {
 		name { output }
-		type { anytype }
+		type { =input }
 		attributes { P_CIRC }
 	}
 	defstate {
