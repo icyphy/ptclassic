@@ -350,6 +350,8 @@ alltests.itcl: makefile
 	echo '#' >> $@
 	echo '# Set the following to avoid endless calls to exit' >> $@
 	echo "if {![info exists reallyExit]} {set reallyExit 0}" >> $@
+	echo '# Exiting when there are no more windows is wrong' >> $@
+	echo "::tycho::TopLevel::exitWhenNoMoreWindows 0" >> $@
 	echo "#Do an update so that we are sure tycho is done displaying" >> $@
 	echo "update" >> $@
 	echo "set savedir \"[pwd]\"" >> $@
@@ -362,6 +364,7 @@ alltests.itcl: makefile
 		done; \
 	fi
 	echo "doneTests" >> $@
+	echo "exit" >> $@
 
 # all.itcl is used to source all the *.itcl files
 all.itcl: makefile
