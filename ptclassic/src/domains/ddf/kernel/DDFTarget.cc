@@ -161,5 +161,9 @@ StringList DDFTarget::pragma (const char* parentname,
   return "";
 }
 
+const char* DDFTarget::domain() {
+  return galaxy() ? galaxy()->domain() : "DDF";
+}
+
 const char* DDFTarget::className() const { return "DDFTarget";}
 ISA_FUNC(DDFTarget,Target);
