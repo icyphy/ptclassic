@@ -37,46 +37,24 @@ provisions.
       attributes { A_GLOBAL }
     }
 
-    constructor {
-      blockSize.setAttributes(A_NONCONSTANT|A_NONSETTABLE);
-      blockSize.setInitValue(8180);
-    }
-
     protected {
       int standardOutput:1;
-    }
-    codeblock(globalDecl){
-      union $sharedSymbol(CGCVISStereoOut,regoverlay) {
-	vis_d64 regvaluedbl;
-	vis_s16 regvaluesh[4];
-      };
-    }
-    codeblock(mainDecl){
-      union $sharedSymbol(CGCVISStereoOut,regoverlay) $starSymbol(unpackit);
     }
     codeblock (convert) {
 	/* Take data from Input and put it in buffer */
 	/* Data in buffer is alternate left and right channels */
-	for (i = 0; i < ($val(blockSize)/8); i ++) {
-	  j = 4 * i;
-	  $starSymbol(unpackit).regvaluedbl = $ref(leftright,i);
-	  $starSymbol(buf)[j] = $starSymbol(unpackit).regvaluesh[0];
-	  $starSymbol(buf)[j+1] = $starSymbol(unpackit).regvaluesh[1];
-	  $starSymbol(buf)[j+2] = $starSymbol(unpackit).regvaluesh[2];
-	  $starSymbol(buf)[j+3] = $starSymbol(unpackit).regvaluesh[3];
+	for (i = 0; i < ($val(blockSize)/2); i ++) {
+	  $starSymbol(buf)[i] = ceil($ref(leftright,i)*32768.0);	
 	}
     }
 
     setup {
       CGCStereoBase::setup();
-      leftright.setSDFParams(int(blockSize/8), int(blockSize/8)-1);
+      leftright.setSDFParams(int(blockSize/2), int(blockSize/2)-1);
     }
       
     initCode {
       CGCStereoBase::initCode();
-      addInclude("<vis_types.h>");
-      addGlobal(globalDecl,"CGCVISStereoOut_globalDecl");
-      addDeclaration(mainDecl);
       if (standardIO) {
 	addCode(noOpen);
       }
@@ -97,7 +75,7 @@ provisions.
     }
 
     go {
-      addDeclaration("int i, j;");
+      addDeclaration("int i;");
       addCode(convert);
       addCode(write);
     }
