@@ -264,6 +264,34 @@ proc readoption {option listname} {
 }
 
 
+## getalloptions varname listname
+#
+# Get all options from an argument list into the specified
+# variable. This assumes that all arguments from the first
+# option onwards are options.
+#
+# This is very handy for processing non-option arguments in
+# a uniform way: co-ordinates are the example for which this
+# procedure was originally written.
+#
+proc getalloptions {varname listname} {
+
+    upvar $listname l
+    upvar $varname  v
+
+    set v {}
+    set t [lsearch -glob $l -*]
+    if { $t != -1 } {
+	set v [lrange $l $t end]
+	set l [lrange $l 0 [expr $t-1]]
+
+	return 1
+    }
+
+    return 0
+}
+
+
 #
 # getflag
 #
