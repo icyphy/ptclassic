@@ -407,7 +407,6 @@ void UniProcessor :: simRunSchedule() {
 		CGPortHole* p;
 		while ((p = (CGPortHole*) piter++) != 0) {
 			if (p->far() == NULL) continue;
-			else if (p->atBoundary()) continue;
 			// in case of embedding
 			if (p->embedded() || p->embedding()) continue;
 			CGPortHole* pFar = (CGPortHole*) p->far();
