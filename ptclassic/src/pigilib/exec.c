@@ -80,8 +80,8 @@ long userOptionWord;
         ViDone();
     }
 
-    if((! KcSetKBDomain(DEFAULT_DOMAIN)) || (setCurDomainF(&facet) == NULL)) {
-        PrintErr("Domain error in universe.");
+    if(! KcSetKBDomain(DEFAULT_DOMAIN)) {
+        PrintErr("Failed to set default domain.");
         ViDone();
     }
 
@@ -110,6 +110,11 @@ long userOptionWord;
 {
     ViInit("re-run");
     ErrClear();
+
+    if(! KcSetKBDomain(DEFAULT_DOMAIN)) {
+        PrintErr("Failed to set default domain.");
+        ViDone();
+    }
 
     if (lastFacet.type == OCT_UNDEFINED_OBJECT
 	|| spot->facet != lastFacet.objectId) {
