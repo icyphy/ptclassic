@@ -29,9 +29,9 @@
 #
 # Bindings for widget classes in the tcl/tk Ptolemy interface
 #
-# Author: Wei-Jen Huang
-#         Text Bindings by Alan Kamas
-#
+# Authors: Wei-Jen Huang
+#          Text Bindings by Alan Kamas
+#	   Clean up and port to tk4.0 by Christopher Hylands
 #---------------------------------------------------------------------------
 #
 # Entry bindings augmenting and overwriting start-up bindings defined
@@ -41,177 +41,141 @@
 # Text bindings for the Text widget as well.  All Text bindings mirror
 # the functionality of the Entry bindings.
 #
+# See entry.tcl and text.tcl for the complete bindings.  These two files
+# are found in the tk library, possibly at $PTOLEMY/tcltk/tk/lib/tk
 #---------------------------------------------------------------------------
 # Emacs and shell style bindings
 #---------------------------------------------------------------------------
 #  For motion:
 #---------------------------------------------------------------------------
-#  C-F		|	Forward one character
-#  C-B		|	Backward one character
-#  C-A		|	Goto beginning of line
-#  C-E		|	Goto EOL
-#  M-F		|	Forward one word
 #  M-B		|	Backward one word
+#  M-F		|	Forward one word
+
+
 #---------------------------------------------------------------------------
 #  For erasing:
 #---------------------------------------------------------------------------
 #  C-U		|	Kill line
-#  C-W		|	(Backward) Kill word
 #  C-K		|	Kill to EOL
-#  C-D		|	Delete insertion point character
+#  C-W		|	(Backward) Kill word
 #  C-Y		|	Yank from Kill Buffer
 #  C-H		|	Backspace
-#  C-?		|	Backspace
 #  M-D		|	(Forward) Kill word
 #  <space>	|	Kill current selection/insert space character
 #		|	 depending on context
 #---------------------------------------------------------------------------
 
-# COMPATIBILITY
-if { $tk_version >= 4.0 } {
-  set ptkBind_Compatibility(Caret) tkEntrySeeInsert
-} else {
-  set ptkBind_Compatibility(Caret) tk_entrySeeCaret
-}
-
-#  C-F          |       Forward one character
-    bind Entry <Control-f> {
-	%W icursor [expr [%W index insert]+1]; $ptkBind_Compatibility(Caret) %W
+# Focus
+    bind Entry <Any-Enter> {
+        #selection own %W
+        focus %W
     }
-    bind Text <Control-f> {
-	%W mark set insert "insert + 1 char"
-    }
-
-#  C-B          |       Backward one character
-    bind Entry <Control-b> {
-	%W icursor [expr [%W index insert]-1]; $ptkBind_Compatibility(Caret) %W
-    }
-    bind Text <Control-b> {
-	%W mark set insert "insert - 1 char"
-    }
-
-#  C-A          |       Goto beginning of line
-    bind Entry <Control-a> {
-	%W icursor 0; $ptkBind_Compatibility(Caret) %W
-    }
-    bind Text <Control-a> {
-        %W mark set insert "insert linestart"
-    }
-
-#  C-E          |       Goto EOL
-    bind Entry <Control-e> {
-	%W icursor end; $ptkBind_Compatibility(Caret) %W
-    }
-    bind Text <Control-e> {
-        %W mark set insert "insert lineend"
+    bind Text <Any-Enter> {
+        selection own %W
+	focus %W
     }
 
 #  C-U          |       Kill line
     bind Entry <Control-u> {
-	set ptkKillBuffer [%W get]
-	%W delete 0 end
+      clipboard clear -displayof %W
+      clipboard append -displayof %W [%W get]
+      %W delete 0 end
     }
     bind Text <Control-u> {
-	set ptkKillBuffer [%W get "insert linestart" "insert lineend"]
-	%W delete "insert linestart" "insert lineend"
+      clipboard clear -displayof %W
+      clipboard append -displayof %W \
+	[%W get {insert linestart} {insert lineend}]
+      if [%W compare {insert linestart} == {insert lineend}] {
+	%W delete {insert linestart}
+      } else {
+	%W delete {insert linestart} {insert lineend}
+      }
     }
 
 #  C-K          |       Kill to EOL
     bind Entry <Control-k> {
-	set ptkKillBuffer [
-	 string range [%W get] [%W index insert] [%W index end]
-	]
-	%W delete insert end; $ptkBind_Compatibility(Caret) %W
+	clipboard clear -displayof %W
+	clipboard append -displayof %W [string range [%W get] \
+					[%W index insert] [%W index end]]
+	%W delete insert end
     }
     bind Text <Control-k> {
-	set ptkKillBuffer [%W get insert "insert lineend"]
-	%W delete insert "insert lineend"
-    }
-
-#  C-D          |       Delete insertion point character
-    bind Entry <Control-d> {
-	%W delete insert; $ptkBind_Compatibility(Caret) %W
-    }
-    bind Text <Control-d> {
-	%W delete insert
-    }
-
-# Focus
-    bind Entry <Any-Enter> {
-	focus %W
-    }
-    bind Text <Any-Enter> {
-	focus %W
-    }
-
-#  C-Y          |       Yank from Kill Buffer
-    bind Entry <Control-y> {
-	if [info exists ptkKillBuffer] {
-		%W insert insert $ptkKillBuffer
-	}
-    }
-    bind Text <Control-y> {
-	if [info exists ptkKillBuffer] {
-		%W insert insert $ptkKillBuffer
-	}
+      clipboard clear -displayof %W
+      clipboard append -displayof %W [%W get insert {insert lineend}]
+      %W delete insert {insert lineend}
+      puts "[%W get insert {insert lineend}]"
     }
 
 #  C-W          |       (Backward) Kill word
-    # This line copied and modified from Tk3.6 (file "tk.tcl")
-    bind Entry <Control-w> {
-        entry_BackWordAndSave %W; $ptkBind_Compatibility(Caret) %W
-    }
-    bind Text <Control-w> {text_BackWordAndSave %W}
     # FIXME: consecutive Control-w's should cause kill buffer to grow
+    # Note that we override C-W in tk4.0 entry.tcl (why?)
+    bind Entry <Control-w> {
+      clipboard clear -displayof %W
+      set insert [%W index insert]
+      set start [string wordstart [%W get] $insert]
+      clipboard append -displayof %W [string range [%W get] $start $insert]
+      if {$insert == $start} {
+	%W delete $start
+      } {
+	%W delete $start $insert
+      }
+    }
+
+    # Note that we override C-W in tk4.0 text.tcl (why?)
+    bind Text <Control-w> {
+      clipboard clear -displayof %W
+      clipboard append -displayof %W [%W get {insert -1c wordstart} insert]
+      if [%W compare insert == {insert -1c wordstart} ] {
+	%W delete insert
+      } {
+	%W delete {insert -1c wordstart} insert
+      }
+    }
+
       
 #  M-D          |       (Forward) Kill word
     bind Entry <Key-Escape><Key-d> {
-	entry_ForwardWordAndSave %W; $ptkBind_Compatibility(Caret) %W
+      clipboard clear -displayof %W
+      catch {
+	clipboard append -displayof %W [string range [%W get] \
+					[%W index insert] \
+					  [string wordend [%W get] \
+					   [%W index insert]]]
+	%W delete [%W index insert] [string wordend [%W get] [%W index insert]]
+      }
     }
     bind Text <Key-Escape><Key-d> {
-	text_ForwardWordAndSave %W
+	#text_ForwardWordAndSave %W
+	clipboard clear -displayof %W
+	clipboard append -displayof %W [%W get insert {insert wordend}]
+	%W delete insert {insert wordend}
     }
 
     bind Entry <Key-Escape> {puts -nonewline ""}
     bind Text <Key-Escape> {puts -nonewline ""}
 
 
+# Set up the same bindings for Escape as tk4.0's entry.tcl sets up for Meta
 #  M-B          |       Backward one word
     bind Entry <Key-Escape><Key-b> {
-	set curs [expr [%W index insert]-1]
-	set x [entry_BackWordIdx %W $curs]
-	%W icursor $x
+      tkEntrySetCursor %W \
+		[string wordstart [%W get] [expr [%W index insert] - 1]]
     }
     bind Text <Key-Escape><Key-b> {
-	text_BackWordIdx %W
+	tkTextSetCursor %W {insert - 1c wordstart}
     } 
 
 #  M-F          |       Forward one word
-    bind Entry <Key-Escape><Key-f> {
-	set curs [expr [%W index insert]+1]
-	set x [entry_ForwardWordIdx %W $curs]
-	%W icursor $x
+     bind Entry <Key-Escape><Key-f> {
+       # The next line is from the tk4.0 entry.tcl.
+       tkEntrySetCursor %W [string wordend [%W get] [%W index insert]]
     }
     bind Text <Key-Escape><Key-f> {
-	text_ForwardWordIdx %W
+       # The next line is from the tk4.0 text.tcl.
+       tkTextSetCursor %W {insert wordend}
     } 
 
-    #bind third mouse button to scanning
-    bind Entry <3> {%W scan mark %x}
-    bind Entry <B3-Motion> {%W scan dragto %x}
-    # not added for Text widgets
-
-    #bind second mouse button to selection insertion
-    bind Entry <2> {
-        %W insert insert [selection get]; $ptkBind_Compatibility(Caret) %W
-    }
-    bind Entry <B2-Motion> ""
-    bind Text <2> {catch {%W insert insert [selection get]} }
-    bind Text <B2-Motion> ""
-
-# (reenabled and fixed):
-# not added for Text widgets
-
+    # Kill current selection/insert space character depending on context
     bind Entry <space> {
 	if {[selection own] == [focus]} {
 	   if [info exists errorInfo] {
@@ -221,20 +185,22 @@ if { $tk_version >= 4.0 } {
 	   } else {set exists 0}
 	   catch {selection get}
 	   if {! [info exists errorInfo]} {
-		set ptkKillBuffer [
-		  string range [%W get] [%W index sel.first] \
-			[%W index sel.last]
-		  ]
-		%W delete sel.first sel.last
-		selection clear %W
+              if {[selection own -displayof %W] == "%W"} {
+		clipboard clear -displayof %W
+		catch {
+		  clipboard append -displayof %W 0 end
+		  %W delete sel.first sel.last
+		}
+	      }
+             selection clear %W
 	   } else {
 		%W insert insert %A
-		$ptkBind_Compatibility(Caret) %W
+		tkEntrySeeInsert %W
 	   }
 	   if {$exists} { set errorInfo $temp }
 	} else {
 		%W insert insert %A
-		$ptkBind_Compatibility(Caret) %W
+		tkEntrySeeInsert %W
 	}
     }
 
@@ -244,89 +210,4 @@ proc ptkRecursiveBind {widget keySeq action} {
     foreach child [winfo children $widget] {
 	ptkRecursiveBind $child $keySeq $action
     }
-}
-
-# This procedure comes directly from tk_entryBackword
-#   (Tk3.6, file "entry.tcl")
-# It has been modified to save the deletion into ptkKillBuffer
-# FIXME: Allow the buffer to expand when this binding is invoked
-#  successively
-
-# the text_ versions of these commands are original 
-
-proc entry_BackWordIdx {w curs} {
-    set string [$w get]
-    if {$curs < 0} {return 0}
-    for {set x $curs} {$x > 0} {incr x -1} {
-        if {([string first [string index $string $x] " \t"] < 0)
-                && ([string first [string index $string [expr $x-1]] " \t"]
-                >= 0)} {
-            break
-	}
-    }
-    return $x
-}
-proc text_BackWordIdx w {
-    set position 1
-    while { [$w index "insert - $position char"] != "1.0" && 
-            [$w get "insert - $position char"] == " " } {
-        set position [expr $position + 1]
-    }
-    $w mark set insert "insert - $position c wordstart" 
-}
-	
-proc entry_ForwardWordIdx {w curs} {
-    set string [$w get]
-    set length [string length $string]
-    if {$curs >= $length} {return $length}
-    for {set x $curs} {$x < $length} {incr x} {
-        if {([string first [string index $string $x] " \t"] >= 0)
-                && ([string first [string index $string [expr $x-1]] " \t"]
-                < 0)} {
-            break
-	}
-    }
-    return $x
-}
-proc text_ForwardWordIdx w {
-    set position 0
-    while { [$w get "insert + $position char"] == " " } {
-        set position [expr $position + 1]
-    }
-    $w mark set insert "insert + $position c wordend" 
-}
-
-proc entry_BackWordAndSave w {
-    global ptkKillBuffer
-    set curs [expr [$w index insert]-1]
-    set x [entry_BackWordIdx $w $curs]
-    set ptkKillBuffer [string range [$w get] $x $curs]
-    $w delete $x $curs
-}
-proc text_BackWordAndSave w {
-    global ptkKillBuffer
-    set position 1
-    while { [$w index "insert - $position char"] != "1.0" && 
-            [$w get "insert - $position char"] == " " } {
-        set position [expr $position + 1]
-    }
-    set ptkKillBuffer [$w get "insert - $position char wordstart" insert]
-    $w delete "insert - $position c wordstart" insert
-}
-
-proc entry_ForwardWordAndSave w {
-    global ptkKillBuffer
-    set curs [$w index insert]
-    set x [entry_ForwardWordIdx $w [expr $curs+1]]
-    set ptkKillBuffer [string range [$w get] $curs $x]
-    $w delete $curs $x
-}
-proc text_ForwardWordAndSave w {
-    global ptkKillBuffer
-    set position 0
-    while { [$w get "insert + $position char"] == " " } {
-        set position [expr $position + 1]
-    }
-    set ptkKillBuffer [$w get insert "insert + $position c wordend"]
-    $w delete insert "insert + $position c wordend"
 }
