@@ -300,7 +300,10 @@ proc pftFixFacet { facet } {
 	puts stdout "\tCan't examine $facet:\n\t$why\n\tSkipping..."
 	return "skip"
     }
-    set masters [pftOctLs $facet]
+    if { [catch {set masters [pftOctLs $facet]} why]} {
+	puts stdout "\toctls failed to open $facet:\n\t$why\n\tSkipping..."
+	return "skip"	
+    }
     if { "$do_domainchange" != "0" } {
 	regsub -all {:} $facet {/} facetpath
 	if [file writable "$facetpath\;"] {
@@ -363,7 +366,10 @@ proc pftListFacet { facet } {
 	return
     }
     set finfo [split $facet ":"]
-    set masters [pftOctLs $facet]
+    if { [catch {set masters [pftOctLs $facet]} why]} {
+	puts stdout "\toctls failed to open $facet:\n\t$why\n\tSkipping..."
+	return
+    }
     puts stdout "[lindex $finfo 0]:[lindex $finfo 1] contains" no
     if { "$masters"=="" } {
 	puts stdout " no masters"
