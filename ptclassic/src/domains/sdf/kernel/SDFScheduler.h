@@ -116,6 +116,9 @@ public:
 	// Constructor sets default options
 	SDFScheduler ();
 
+	// Destructor
+	~SDFScheduler ();
+
 	// timing/interation control
 	void setStopTime (float limit);
 	void resetStopTime (float v);
