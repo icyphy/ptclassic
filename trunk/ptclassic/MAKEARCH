@@ -188,7 +188,8 @@ foreach x ( cg56/dsp/stars cg96/dsp/stars \
 	mdsdf/tcltk/stars \
 	de/atm/stars \
 	de/tcltk/stars \
-	cgc/targets/main cgc/targets/cm5 cgc/tcltk/stars cgc/tcltk/targets )
+	cgc/targets/main cgc/targets/cm5 cgc/tcltk/stars cgc/tcltk/targets \
+	cgc/rtlib )
 	optmkdir $x
 	cd $x
 	optlink ../../../../../src/domains/$x make.template
