@@ -1,6 +1,6 @@
 static const char file_id[] = "DERCScheduler.cc";
 /******************************************************************** 
-Version identification:  	@(#)DERCScheduler.cc	1.9 03/12/98
+Version identification:  $Id$
  
 Author: Mudit Goel
         Neil Smyth
