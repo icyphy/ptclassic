@@ -1,4 +1,4 @@
-#! /bin/csh -f
+#! /bin/sh
 
 # This shell script simply finds the appropriate (platform dependent)
 # version of masters and invokes it.
@@ -8,9 +8,13 @@
 # 	All Rights Reserved.
 #
 
-if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
-if ( ! $?PTARCH ) then
-    setenv PTARCH `$PTOLEMY/bin/ptarch`
-endif
+PTOLEMY=${PTOLEMY:-/users/ptolemy}
+if [ ! -d "$PTOLEMY" ]; then
+	echo "$0: '$PTOLEMY' does not exist, try setting \$PTOLEMY. "
+	exit
+fi 
+if [ -z "$PTARCH" ]; then
+	PTARCH=`$PTOLEMY/bin/ptarch`
+fi
 
-exec $PTOLEMY/bin.$PTARCH/masters $*
+exec $PTOLEMY/bin.$PTARCH/masters ${1+"$@"}

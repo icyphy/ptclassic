@@ -1,4 +1,4 @@
-#! /bin/csh -f
+#! /bin/sh
 # usage: ptcl
 # or: ptcl filename
 
@@ -12,9 +12,14 @@
 # 	All Rights Reserved.
 #
 
-if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+PTOLEMY=${PTOLEMY:-/users/ptolemy}
+if [ ! -d "$PTOLEMY" ]; then
+	echo "$0: '$PTOLEMY' does not exist, try setting \$PTOLEMY. "
+	exit
+fi 
 
 # Set the commonly used environment variables
-source $PTOLEMY/bin/ptsetup.csh
+# PTARCH is needed for the subsequent commands
+. "$PTOLEMY/bin/ptsetup.sh"
 
-exec $PTOLEMY/bin.$PTARCH/ptcl $*
+exec $PTOLEMY/bin.$PTARCH/ptcl ${1+"$@"}

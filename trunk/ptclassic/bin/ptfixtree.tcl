@@ -528,6 +528,18 @@ proc pftPreLoadMap {} {
 
 	pftSetCellMap {$PTOLEMY/lib/colors/ptolemy/%pOutput} \
 		{$PTOLEMY/lib/colors/ptolemy/percentpOutput}
+
+	# lib/technology is usually a link to lib/colors
+	pftSetCellMap {$PTOLEMY/lib/technology/ptolemy/%dDelay} \
+		{$PTOLEMY/lib/technology/ptolemy/percentdDelay}
+
+	pftSetCellMap {$PTOLEMY/lib/technology/ptolemy/%pInput} \
+		{$PTOLEMY/lib/technology/ptolemy/percentpInput}
+
+	pftSetCellMap {$PTOLEMY/lib/technology/ptolemy/%pOutput} \
+		{$PTOLEMY/lib/technology/ptolemy/percentpOutput}
+
+	# NT can't have files or directories named 'con'
 	pftSetCellMap {$PTOLEMY/lib/colors/ptolemy/con} \
 		{$PTOLEMY/lib/colors/ptolemy/con0}
     }

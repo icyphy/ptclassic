@@ -10,13 +10,14 @@
 # Programmer: Kennard White
 # Version: $Id$
 #
-# Two forms, because I cant decide whether to use sh or csh.
-# I cant figure out the equivalent of sh's "$@".  The big gotcha is
-# '~' homedir expansions happening siliently by home
-# If csh, remember to use "-f".
-#
-PTOLEMY=${PTOLEMY:-~/ptolemy}
-PTARCH=`$PTOLEMY/bin/ptarch`
-tclscript=$PTOLEMY/bin/ptfixtree.tcl
-ptolemytcl=$PTOLEMY/tcltk/tcl.$PTARCH/bin/itclsh
-exec $ptolemytcl $tclscript "$@"
+
+PTOLEMY=${PTOLEMY:-/users/ptolemy}
+if [ ! -d "$PTOLEMY" ]; then
+	echo "$0: '$PTOLEMY' does not exist, try setting \$PTOLEMY. "
+	exit
+fi 
+if [ -z "$PTARCH" ]; then
+	PTARCH=`$PTOLEMY/bin/ptarch`
+fi
+
+exec $PTOLEMY/tcltk/tcl.$PTARCH/bin/itclsh $PTOLEMY/bin/ptfixtree.tcl ${1+"$@"}
