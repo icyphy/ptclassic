@@ -6,6 +6,7 @@
 #include "DEStar.h"
 #include "PriorityQueue.h"
 #include "WormConnect.h"
+#include "CircularBuffer.h"
  
 /**************************************************************************
 Version identification:
