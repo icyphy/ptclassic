@@ -45,7 +45,6 @@ TCL_SRCS = \
   
 ITCL_SRCS = \
 	ClassSchedule.itcl \
-	Curriculum.itcl \
 	EditLattice.itcl \
 	GanttView.itcl \
 	GanttDF.itcl \
