@@ -98,7 +98,8 @@ void SimpleIntMatrix :: resize(int nr, int nc) {
 							  
 // equality operator
 SimpleIntMatrix& SimpleIntMatrix :: operator=(const SimpleIntMatrix& a) {
-  for(int i=0; i<nrows; i++) delete [] m[i];
+  int i;  
+  for(i=0; i<nrows; i++) delete [] m[i];
     delete [] m;
     m = new int *[nrows=a.nrows];
     ncols=a.ncols;
