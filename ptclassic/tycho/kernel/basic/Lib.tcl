@@ -102,9 +102,10 @@ namespace ::tycho {
     #       {::tycho::view EditFSM -file {%s}} \
     #       {Finite state machine editor}
 
-    ::tycho::File::registerExtensions {.graph} \
+    ::tycho::File::registerExtensions {.dfg} \
             {::tycho::view EditGraph -file {%s}} \
             {Graph editor} "graphics"
+
     if !$ptolemyfeature(octtools) {
         # Vem is not present.
         ::tycho::File::registerContents [file join schematic {contents;}] \
