@@ -162,6 +162,7 @@ execution.  Thus this should not be used unless it is absolutely necessary.
 	    }
 	}
 	go {
+	    int j;
 	    if (myGal == 0) {
 		// clone the recursion galaxy
 		myGal = (InterpGalaxy*) masterGal->clone();
@@ -193,7 +194,7 @@ execution.  Thus this should not be used unless it is absolutely necessary.
 
 	    // move data into galaxy
 	    MPHIter nexti(input);
-	    for (int j = input.numberPorts(); j > 0; j--) {
+	    for (j = input.numberPorts(); j > 0; j--) {
 	    	InDDFPort& p = *(InDDFPort*) nexti++;
 	    	p.receiveData();
 		if (Scheduler :: haltRequested()) return;

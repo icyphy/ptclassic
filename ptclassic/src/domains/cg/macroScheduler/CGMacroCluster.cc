@@ -1260,6 +1260,7 @@ int CGMacroClusterBag :: recurPrepareBag(MultiTarget* t, ostream* l) {
 }
 
 int CGMacroClusterBag::parallelSchedule(MultiTarget* t) {
+        int i;
 	sched->setGalaxy(*gal);
 	if (gal) { 
 		IntState* fix = (IntState*)t->galParam(gal, "fixedNum");
@@ -1281,7 +1282,7 @@ int CGMacroClusterBag::parallelSchedule(MultiTarget* t) {
 	sched->setProfile(&profile[0]);
 	int limit = 1;
 
-	for (int i = 2; i <= t->nProcs(); i++) {
+	for (i = 2; i <= t->nProcs(); i++) {
 		t->resetResources();
 		sched->setUpProcs(i);
 		int leng = sched->mainSchedule();
@@ -1301,13 +1302,14 @@ int CGMacroClusterBag::parallelSchedule(MultiTarget* t) {
 Profile* CGMacroClusterBag :: getProfile(int i) { return profile + i; }
 
 int CGMacroClusterBag :: examineProcIds(IntArray& procId) {
-
+    
 	// first check whether all stars on the boundary have the same procId.
 	// If not, signal error
 	// The processor assigned to the boundary should be procId[0]
 	CGMacroClustPortIter nextP(*this);
 	CGMacroClustPort* p;
 	int temp = -1;
+        int sumP;
 	while ((p = nextP++) != 0) {
 		CGMacroClustPort* inp = p->inPtr();
 		while (inp->parentClust()->asSpecialBag()) inp = inp->inPtr();
@@ -1350,7 +1352,7 @@ int CGMacroClusterBag :: examineProcIds(IntArray& procId) {
 			}
 		}
 	}
-	for (int sumP = 0; sumP < mtarget->nProcs(); sumP++) {
+	for (sumP = 0; sumP < mtarget->nProcs(); sumP++) {
 		if (procId[sumP] < 0) break;
 	}
 	return sumP;

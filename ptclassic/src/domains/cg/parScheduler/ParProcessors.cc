@@ -60,7 +60,8 @@ ParProcessors :: ~ParProcessors() {
 
 void ParProcessors :: initialize()
 {
-	for (int i = 0; i < numProcs; i++) {
+        int i;
+	for (i = 0; i < numProcs; i++) {
 		pIndex[i] = i;
 	}
 
@@ -457,9 +458,9 @@ void ParProcessors :: sortWithAvailTime(int guard) {
  ****************************************************************/
 
 void ParProcessors :: createSubGals() {
-
+        int i;
 	// processor index set.
-	for (int i = 0; i < numProcs; i++) 
+	for (i = 0; i < numProcs; i++) 
 		getProc(i)->index = i;
 
 	// create sub-Universes
