@@ -44,26 +44,43 @@ limitation of liability, and disclaimer of warranty provisions.
 		noInternalState();
 	}
 	setup {
+		if ( int(blockSize) < 1 ) {
+		 	Error::abortRun(*this, "blockSize must be positive");
+			return;
+		}
 		output.setSDFParams(int(blockSize),int(blockSize)-1);
 		input.setSDFParams(int(blockSize),int(blockSize)-1);
 	}
+	codeblock(init) {
+	int n = $ref(control);
+	int j = $val(blockSize);
+	}
+	codeblock(switchStatement) {
+	switch(n)
+	}
+	codeblock(copydata,"int i, int portnum") {
+	    case @i:
+		while (j--) {
+			$ref(output,j) = $ref(input#@portnum,j);
+		}
+		break;
+	}
+	codeblock(badPortNum) {
+	    default:
+		fprintf(stderr, "invalid control input %d", n);
+	}
 	go {
-	    StringList out;
-	    out << "\tint n, j;\n\tn = $ref(control);\n";
-
-	    for (int i = 0; i < input.numberPorts(); i++) {
-		out << "\t";
-		if (i > 0) out << "else ";
-		out << "if (n == " << i << ") {\n";
-		out << "\t\tfor (j = $val(blockSize)-1; j >= 0; j--) \n";
-		out << "\t\t\t$ref(output,j) = $ref(input#" << i+1 << ",j);\n";
-		out << "\t}\n";
-	    }
-	    out << "\telse \n\t\tprintf(\"invalid control input to Mux\");\n";
-	    addCode(out);
+		addCode(init);
+		addCode(switchStatement);
+		addCode("\t{\n");
+		// control value i means port number i+1
+		for (int i = 0; i < input.numberPorts(); i++) {
+			addCode(copydata(i,i+1));
+		}
+		addCode(badPortNum);
+		addCode("\t}\n");
 	}
 	exectime {
-		/* worst case */
-		return int(blockSize) + input.numberPorts();  
+		return int(blockSize) + 3;  
 	}
 }
