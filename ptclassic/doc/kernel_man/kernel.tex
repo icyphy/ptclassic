@@ -157,14 +157,14 @@ Pointer head() const;
 Return the first item from the list (0 if the list is empty).  The
 list is not changed.
 
-@example	
+@example
 Pointer tail() const;
 @end example
 
 Return the last item from the list (0 if the list is empty).  The
 list is not changed.
 
-@example	
+@example
 Pointer elem(int @var{n}) const;
 @end example
 
@@ -188,7 +188,7 @@ Return 1 if the list has a Pointer that is equal to @var{arg}, 0 if not.
 
 These functions modify the list they are applied to.
 
-@example	
+@example
 void prepend(Pointer @var{p});
 @end example
 
@@ -348,7 +348,7 @@ NamedObj has a default constructor, which sets the name and
 descriptor to empty strings and the parent pointer to null, and a
 three-argument constructor:
 
-@example        
+@example
 NamedObj(const char* @var{name},Block* @var{parent},const char* @var{descriptor})
 @end example
 
@@ -590,11 +590,11 @@ which makes a more exact duplicate (with the same values for states,
 for example).
 
 @menu
-* Block constructors and destructors::  
-* Block public "information" members::  
-* other Block public members::  
-* Block protected members::     
-* Block iterator classes::      
+* Block constructors and destructors::
+* Block public "information" members::
+* other Block public members::
+* Block protected members::
+* Block iterator classes::
 @end menu
 
 @node Block constructors and destructors, Block public "information" members, class Block, class Block
@@ -820,7 +820,7 @@ Block* copyStates(const Block& @var{src});
 
 method for copying states during cloning.  It is designed for use
 by clone methods, and it assumes that the src argument has the same
-state list as the @code{this} object.  
+state list as the @code{this} object.
 
 @node Block iterator classes,  , Block protected members, class Block
 @subsection Block iterator classes
@@ -2146,7 +2146,7 @@ from Wormhole and some kind of Star.  For example:
 @example
 class SDFWormhole : public Wormhole, public SDFStar @{
 public:
-    SDFWormhole(Galaxy& g,Target* t) : Wormhole(*this,g,t) @{ 
+    SDFWormhole(Galaxy& g,Target* t) : Wormhole(*this,g,t) @{
         buildEventHorizons();
     @}
 @};
@@ -2345,7 +2345,7 @@ EventHorizon* ghostPort;
 @end example
 
 This is the peer event horizon.
-	
+
 @example
 Wormhole* wormhole;
 @end example
@@ -2379,7 +2379,7 @@ The constructor simply calls the baseclass constructor, passing along
 its argument.
 
 @example
-void initialize(); 
+void initialize();
 @end example
 
 The initialize function prepares the object for execution.
@@ -2412,7 +2412,7 @@ FromEventHorizon(PortHole* @var{p});
 The constructor simply calls the EventHorizon constructor.
 
 @example
-void initialize(); 
+void initialize();
 @end example
 
 The initialize function prepares the object for execution.
@@ -2945,7 +2945,7 @@ Particle** last();
 @end example
 
 Back up the pointer one position (circularly) and return the new value.
- 
+
 @example
 void advance(int @var{n});
 @end example
@@ -3037,7 +3037,7 @@ MultiPortHole& setPort(const char* @var{portName},
                        Block* @var{parent},DataType @var{type} = FLOAT);
 @end example
 
-@example 
+@example
 int numberPorts() const;
 @end example
 
@@ -3293,7 +3293,7 @@ some port withing that MultiPortHole, and aliases will be resolved.
 The return value is the ``real porthole'' used.
 
 In the default implementation, if there is already a destination port,
-any preexisting connection is broken and a new connection is completed. 
+any preexisting connection is broken and a new connection is completed.
 
 
 @example
@@ -3304,7 +3304,7 @@ Set the destination port to @code{@var{dest}.newConnection()}.  The
 return value is the ``real porthole'' used.
 
 In the default implementation, if there is already a source port,
-any preexisting connection is broken and a new connection is completed. 
+any preexisting connection is broken and a new connection is completed.
 
 @example
 virtual int disconnect (PortHole & @var{p});
@@ -3675,7 +3675,7 @@ virtual Particle* useNew() const = 0;
 @end example
 
 This is similar to @code{clone}, except that the particle is allocated
-from the heap rather than from the Plasma.  
+from the heap rather than from the Plasma.
 
 @example
 virtual void die() = 0;
@@ -3848,7 +3848,7 @@ Envelope objects refer to the same Message object.
 
 The constructor for Message creates a reference count that lives on
 the heap.  This means that the reference count is non-const even when
-the Message object itself is const. 
+the Message object itself is const.
 
 The copy constructor for Message ignores its argument and creates a
 new Message with a new reference count.  This is necessary so that no
@@ -4310,7 +4310,7 @@ These four functions implement a simple recursive-descent expression
 parser.
 
 An expression is either a term or a series of terms with intervening '+'
-or '-' signs.  
+or '-' signs.
 
 A term is either a factor or a series of factors with interventing '*'
 or '/' signs.
@@ -4916,11 +4916,11 @@ FIXME: say more.
 
 @menu
 * Mathematical classes::        Mathematical classes
-* IntervalList::                IntervalList
+* class IntervalList::          Class IntervalList
 * Time::                        Time
 @end menu
 
-@node Mathematical classes, IntervalList, Misc, Misc
+@node Mathematical classes, class IntervalList, Misc, Misc
 @section Mathematical classes
 
 Class Complex is a simple subset of functions provided in the Gnu
@@ -4940,7 +4940,7 @@ as a series of intervals of integers that belong to the set.
 
 FIXME: say more.
 
-@node Time,  , IntervalList, Misc
+@node Time,  , class IntervalList, Misc
 @section Time
 
 These classes provide simple means of interacting with the operating
