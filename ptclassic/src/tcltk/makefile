@@ -99,8 +99,9 @@ REL_ITCL_BINDIR =	../tcltk/$(TCL8_DEST_BASE)/bin
 ITCL_DEST_LIB = $(TCL8_DEST)/lib
 
 # Itcl contains its own custom tcltk
-all: 		configure_tcltk8 tcltk8 install_tcltk8 configure itcl
-configure:	$(PTOLEMY)/src/tcltk/tcl_shared \
+all: 		configure itcl
+configure:	configure_tcltk8 tcltk8 install_tcltk8 \
+			(PTOLEMY)/src/tcltk/tcl_shared \
 			$(ITCL_OBJ)/config.status $(TCLTK_OBJ)/makefile
 bin:		itcl
 install:	install_itcl
@@ -207,7 +208,7 @@ install_itcl: $(ITCL_DEST_LIB)/libitcl.a fixlinks \
 $(TCL8_INDEPENDENT_DEST)/include/itclInt.h:
 	if [ ! -f $@ ]; then \
 		echo "Copying itclInt.h"; \
-		cp $(ITCL_SRC)/generic/tclInt.h $@; \
+		cp $(ITCL_SRC)/itcl/generic/itclInt.h $@; \
 	fi
 
 $(TCL8_INDEPENDENT_DEST)/include/tclInt.h:
