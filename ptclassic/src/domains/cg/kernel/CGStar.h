@@ -40,12 +40,10 @@ public:
 	// define the firing 
 	void fire();
 
-	// set the target architecture
-	void setTarget (Architecture* t);
+	// class identification
+	int isA(const char*) const;
 
 protected:
-	// Target architecture is specified here.
-	Architecture *target;
 
 	// Output lines of code
 	void gencode(CGCodeBlock& block);
