@@ -59,7 +59,6 @@ public:
 	CGCMultiTarget(const char* name, const char* starclass, const char* desc);
 	~CGCMultiTarget();
 
-	void setup();
 	void wrapup();
 	Block* makeNew() const;
 	int isA(const char*) const;
@@ -81,6 +80,8 @@ public:
 	void pairSendReceive(DataFlowStar* s, DataFlowStar* r);
 
 protected:
+	void setup();
+
 	// redefine 
 	Target* createChild();
 

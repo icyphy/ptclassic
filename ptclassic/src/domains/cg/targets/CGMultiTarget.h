@@ -51,7 +51,6 @@ class CGMultiTarget : public MultiTarget {
 public:
 	CGMultiTarget(const char* name,const char* sClass,const char* desc);
 	~CGMultiTarget();
-	void setup();
 	int run();
 	void wrapup();
 
@@ -111,6 +110,8 @@ public:
 	void wormOutputCode(PortHole&);
 
 protected:
+	void setup();
+
 	StringState childType;
 	StringState filePrefix;
 	IntState useCluster;
