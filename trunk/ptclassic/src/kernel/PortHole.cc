@@ -195,21 +195,37 @@ Plasma*
 PortHole :: setPlasma () {
 	// zeroth case: disconnected porthole.  Return what I am.
 	if (far() == NULL) return myPlasma;
-	// first case: my type is known, and I'm an input.  Leave alone.
-	if (myPlasma && (isItInput()))
-		return myPlasma;
-	// second case: I've been told where to look for the type
-	if (typePort)
-		myPlasma = typePort->setPlasma();
-	if (myPlasma && (isItInput() == far()->isItInput()))
-		return myPlasma;
-	// third case: I'm an input porthole, use type of connected
-	// output porthole.
-	// fourth case: I'm an output, and the connected input
-	// specifies a type
-	if (isItInput() || far()->myPlasma)
-		myPlasma = far()->setPlasma();
+
+	// If it is an input PortHole
+	if (isItInput()) {
+		// first, my type is known.
+		if (myPlasma) return myPlasma;
+		// second, I am of ANYTYPE, look for typePort or far()
+		if (typePort) myPlasma = typePort->setPlasma();
+		else	      myPlasma = far()->setPlasma();
+	} 
+	// If it is an output PortHole.
+	else {	
+		// first, far() has known type and not on wormhole boundary
+		if (far()->myPlasma && far()->isItInput()) {
+			myPlasma = far()->myPlasma;
+			return myPlasma;
+		}
+		// second, look for typePort (ANYTYPE or on wormhole boundary)
+		if (typePort)
+			myPlasma = typePort->setPlasma();
+		// third, deal with rare case : all portholes around wormhole
+		//	  boundary are of ANYTYPE.
+		if (myType() == ANYTYPE && far()->isItOutput()) {
+			PortHole* p = (PortHole*) far()->typePort;
+			// if far()->typePort is defined and output, and
+			// its far() has a known type.
+			if (p && p->isItOutput() && p->far()->myPlasma)
+				myPlasma = p->far()->myPlasma;
+		}
+	}
 	if (myPlasma) return myPlasma;
+
 	errorHandler.error ("Can't determine type of ",readFullName());
 	return 0;
 }
