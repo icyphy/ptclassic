@@ -67,7 +67,10 @@ is repeated inline so may not be efficient for large N.
 		addCode(setupC);
 		for (int j = 0; j < n; j++) {
 			i = j;
-			addCode(one);
+			if (input.resolvedType() == COMPLEX)
+				addCode(oneComplex);
+			else
+				addCode(oneReal);
 		}
 		addCode(restore);
 	}
@@ -85,10 +88,17 @@ is repeated inline so may not be efficient for large N.
 	move	#$size(output)-1,m0
 	move	$ref(ptr),r0
 	}
-	codeblock(one) {
-	move	$ref2(input,i),x0
+
+	codeblock(oneReal) {
+	move	$ref(input,i),x0
 	move	x0,x:(r0)+
 	}
+
+	codeblock(oneComplex) {
+	move	L:$addr(input,i),a
+	move	a,L:(r0)+
+	}
+
 	codeblock(restore) {
 	move	r0,$ref(ptr)
 	move	m7,m0
