@@ -30,4 +30,4 @@
 #include "ansi.h"
 int fa_compar_vertex
 	ARGS((fa_vertex *a, fa_vertex *b));
-#endif FA_SORT_H
+#endif /* FA_SORT_H */
