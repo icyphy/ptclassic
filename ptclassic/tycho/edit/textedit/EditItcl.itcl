@@ -188,7 +188,8 @@ body ::tycho::EditItcl::evaluate {} {
     # NOTE: Itcl 2.0 and 2.1 can dump core here if here we delete a class that
     # has objects existing as components of another class.
     if {$itclClasses != {}} {
-        if {![::tycho::askuser "Warning: all objects with the following \
+        if {![safeEval ::tycho::askuser \
+                "Warning: all objects with the following \
                 classes (and derived classes) will be deleted: \n \
                 $itclClasses\n \
                 Proceed anyway? \
@@ -275,10 +276,10 @@ body ::tycho::EditItcl::fileTemplate {} {
 		set className $newClassName
 
 	    } {
-		::tycho::warn "File is not readable: $filename"
+		safeEval ::tycho::warn "File is not readable: $filename"
 	    }
 	} {
-	    ::tycho::warn "File does not exist: $filename"
+	    safeEval ::tycho::warn "File does not exist: $filename"
 	}
     }
 }

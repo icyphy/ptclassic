@@ -436,7 +436,7 @@ body ::tycho::EditProgram::indentLine {} {
 body ::tycho::EditProgram::indentSelection {} {
     if $readOnly {bell; return}
     if {[getSelection] !=  {}} {
-	if [::tycho::askuser "No Undo. Ok to proceed?"] {
+	if [safeEval ::tycho::askuser "No Undo. Ok to proceed?"] {
 	    set prevInsert [$itk_component(text) index insert]
 	    $itk_component(text) mark set insert sel.first
 	    while {[$itk_component(text) compare insert < sel.last] == 1} {

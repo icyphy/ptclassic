@@ -105,7 +105,7 @@ body ::tycho::EditTcl::evaluate {} {
     if {$ret != {}} {
 	puts $ret
 	putStatus "$type evaluated"
-	::tycho::inform "$type evaluation returned:\n$ret"
+	safeEval ::tycho::inform "$type evaluation returned:\n$ret"
 	putStatus ""
     } {
         putStatus "$type evaluated (empty result)"
