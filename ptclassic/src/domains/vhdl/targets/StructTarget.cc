@@ -91,12 +91,6 @@ void StructTarget :: setup() {
 
   // Need to make this conditional depending on if doing sim or synth.
   setSystemClockUsed();
-
-  // Don't init code streams, because you lose stuff from init,
-  // like the sysWrapup for graphing an xgraph.
-  //  initCodeStreams();
-  //  initVHDLObjLists();
-  //  initFiringLists();
 }
 
 // Main routine.
@@ -122,7 +116,6 @@ int StructTarget :: runIt(VHDLStar* s) {
   StringList tempName = s->fullName();
 
   StringList clsName = s->className();
-  printf("Class Name: %s\n", (const char *) clsName);
   if (!strcmp(clsName,"VHDLCReceive") || !strcmp(clsName,"VHDLCSend")) {
     fi->noSensitivities = TRUE;
     // Do not tack on the firing number to the name.
@@ -142,58 +135,29 @@ int StructTarget :: runIt(VHDLStar* s) {
   VHDLCluster* ncl;
   while ((ncl = nextCl++) != 0) {
     if (!strcmp(ncl->name,fiName)) {
-      printf("Repeated S/R Firing:  %s\n", (const char*) fiName);
       foundFiring = 1;
       VHDLFiring* nfi = ncl->firingList->head();
       // We found a cluster (firing) with the same name.
       // Presume it to be a send/receive star, since only those
       // have non-unique names from firing to firing.
       // Add to the generic list.
-      VHDLGenericListIter nextGen(firingGenericList);
-      VHDLGeneric* ngen;
-      while ((ngen = nextGen++) != 0) {
-	nfi->genericList->put(*ngen);
-      }
+      nfi->genericList->addList(firingGenericList);
       // Add to the port list.
-      VHDLPortListIter nextPort(firingPortList);
-      VHDLPort* nport;
-      while ((nport = nextPort++) != 0) {
-	nfi->portList->put(*nport);
-      }
+      nfi->portList->addList(firingPortList);
       // Add to the generic map list.
-      VHDLGenericMapListIter nextGenMap(firingGenericMapList);
-      VHDLGenericMap* ngenmap;
-      while ((ngenmap = nextGenMap++) != 0) {
-	nfi->genericMapList->put(*ngenmap);
-      }
+      nfi->genericMapList->addList(firingGenericMapList);
       // Add to the port map list.
-      VHDLPortMapListIter nextPortMap(firingPortMapList);
-      VHDLPortMap* nportmap;
-      while ((nportmap = nextPortMap++) != 0) {
-	nfi->portMapList->put(*nportmap);
-      }
+      nfi->portMapList->addList(firingPortMapList);
       // Add to the signal list.
-      VHDLSignalListIter nextSignal(firingSignalList);
-      VHDLSignal* nsignal;
-      while ((nsignal = nextSignal++) != 0) {
-	nfi->signalList->put(*nsignal);
-      }
+      nfi->signalList->addList(firingSignalList);
       // Add to the declarations.
       nfi->decls << mainDecls;
       // Add to the local variable declarations.
       nfi->decls << addVariableDecls(&localVariableList);
       // Add to the variable list.
-      VHDLVariableListIter nextVar(firingVariableList);
-      VHDLVariable* nvar;
-      while ((nvar = nextVar++) != 0) {
-	nfi->variableList->put(*nvar);
-      }
+      nfi->variableList->addList(firingVariableList);
       // Add to the PortVar list.
-      VHDLPortVarListIter nextPortVar(firingPortVarList);
-      VHDLPortVar* nportvar;
-      while ((nportvar = nextPortVar++) != 0) {
-	nfi->portVarList->put(*nportvar);
-      }
+      nfi->portVarList->addList(firingPortVarList);
       // Add to the action list.
       StringList naction = "";
       naction << preSynch;
@@ -204,11 +168,7 @@ int StructTarget :: runIt(VHDLStar* s) {
       firingAction.initialize();
       postSynch.initialize();
       // Add to the VarPort list.
-      VHDLPortVarListIter nextVarPort(firingVarPortList);
-      VHDLPortVar* nvarport;
-      while ((nvarport = nextVarPort++) != 0) {
-	nfi->varPortList->put(*nvarport);
-      }
+      nfi->varPortList->addList(firingVarPortList);
     }
   }
 
@@ -321,9 +281,8 @@ void StructTarget :: trailerCode() {
       initName << "_Init";
 
       mainSignalList.put(initName, state->type, "", "");
-      //      connectRegister(state->lastRef, tempName, "feedback_clock", state->type);
-      //      connectMultiplexor(tempName, state->firstRef, initName, state->type);
-      connectMultiplexor(state->lastRef, state->firstRef, initName, state->type);
+      connectMultiplexor(state->lastRef, state->firstRef, initName,
+			 state->type);
       connectSource(state->initVal, initName, state->type);
     }
   }
@@ -359,7 +318,6 @@ void StructTarget :: trailerCode() {
       destName << "_sink";
 
       // sourceName is input to register, destName is output of register.
-      //      connectRegister(sourceName, destName, "feedback_clock", "INTEGER");
       connectRegister(sourceName, destName, "feedback_clock", arc->type);
 
       // Must also create signals for those lines which are neither read nor
@@ -369,11 +327,9 @@ void StructTarget :: trailerCode() {
 
       // If no system port by the given name, go ahead and make the signal.
       if (sx < arc->lowWrite) {
-	//	mainSignalList.put(sourceName, "INTEGER", "", "");
 	mainSignalList.put(sourceName, arc->type, "", "");
       }
       if (ix < arc->lowWrite) {
-	//	mainSignalList.put(destName, "INTEGER", "", "");
 	mainSignalList.put(destName, arc->type, "", "");
       }
     }
@@ -406,7 +362,6 @@ void StructTarget :: trailerCode() {
   
   // Add the cluster to the main list of clusters.
   clusterList.put(*ctlerCl);
-
 
   // Special Action: merge all firings into one cluster
   //  allFiringsOneCluster();
@@ -519,64 +474,11 @@ void StructTarget :: frameCode() {
 
   // Prepend the header, declarations, and initialization.
   prepend(code, myCode);
-
-  // after generating code, initialize codeStreams again.
-  //  initCodeStreams();
 }
 
 // Write the code to a file.
 void StructTarget :: writeCode() {
-  /*
-  ////////////////////////////////////////////
-  // Print out the list of clock names.
-  printf("CLOCK FIRINGS IN ORDER:\n\n");
-  StringListIter nextClock(clockList);
-  const char* clockName;
-  while ((clockName = nextClock++) != 0) {
-    printf("ASSERT:  %s\n", clockName);
-  }
-
-  StringList ctlerCode = "";
-  ctlerCode << "entity CONTROLLER is\n";
-  ctlerCode << "  port\n";
-  ctlerCode << "  (\n";
-  int portCount = 0;
-  nextClock.reset();
-  while ((clockName = nextClock++) != 0) {
-    if (portCount) {
-      ctlerCode << ";\n";
-    }
-    ctlerCode << "    " << clockName << ": OUT BOOLEAN";
-    portCount++;
-  }
-  ctlerCode << "\n";
-  ctlerCode << "  );\n";
-  ctlerCode << "end CONTROLLER;\n";
-  ctlerCode << "\n";
-  ctlerCode << "architecture SEQUENCE of CONTROLLER is\n";
-  ctlerCode << "begin\n";
-  ctlerCode << "process\n";
-  ctlerCode << "begin\n";
-  nextClock.reset();
-  while ((clockName = nextClock++) != 0) {
-    ctlerCode << "  " << clockName << " <= '1';\n";
-  }
-  ctlerCode << "end process;\n";
-  ctlerCode << "end SEQUENCE;\n";
-
-  printf("Sequencer Code:\n");
-  printf("%s", (const char*) ctlerCode);
-  ////////////////////////////////////////////
-  */
-
   SimVSSTarget::writeCode();
-  /*
-  writeFile(myCode,".vhdl",displayFlag);
-  if (writeCom) {
-    writeComFile();
-  }
-  singleUnderscore();
-  */
 }
 
 // Compile the code.
@@ -737,10 +639,6 @@ void StructTarget :: registerState(State* state, const char* varName,
 	firingPortMapList.put(refIn, root);
       }
       if (!(constState)) {
-	//	firingSignalList.put(stateSignal, stType, stateSignal, refIn);
-	//	firingSignalList.put(stateSignal, stType, stateSignal, refIn);
-	//	firingPortMapList.put(refIn, stateSignal);
-	//	firingPortMapList.put(refOut, refOut);
 	firingSignalList.put(temp_state, stType, temp_state, refIn);
 	firingPortMapList.put(refIn, temp_state);
 	firingPortMapList.put(refOut, temp_out);
@@ -753,12 +651,6 @@ void StructTarget :: registerState(State* state, const char* varName,
       firingPortList.put(refIn, "IN", stType);
     }
     if (!(constState)) {
-      //      firingSignalList.put(refOut, stType, refOut, "");
-      //      firingVariableList.put(ref, stType, "");
-      //      firingPortVarList.put(refIn, ref);
-      //      firingVarPortList.put(refOut, ref);
-      //      firingPortList.put(refIn, "IN", stType);
-      //      firingPortList.put(refOut, "OUT", stType);
       firingSignalList.put(temp_out, stType, temp_out, "");
       firingVariableList.put(ref, stType, "");
       firingPortVarList.put(refIn, ref);
@@ -773,14 +665,10 @@ void StructTarget :: registerState(State* state, const char* varName,
       // Create a register for data value.
       connectRegister(temp_out, temp_out_reg, clockName, stType);
       firingSignalList.put(temp_out_reg, stType, temp_out_reg, "");
- 
     }
 
     // Reset state's lastRef name.
-    //  listState->lastRef = refOut;
-    //    listState->lastRef = temp_out;
     listState->lastRef = temp_out_reg;
-
   }
 
   // Reset state's lastFiring tag just before exiting.
@@ -1062,10 +950,8 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
     //    systemPortList.put(ref, port->direction(), port->dataType());
   }
   else {
-    //    firingSignalList.put(ref, port->dataType(), ref, ref);
     firingSignalList.put(sourceName, port->dataType(), ref, ref);
     firingSignalList.put(sinkName, port->dataType(), ref, ref);
-    //    firingSignalList.put(clockName, "boolean", ref, ref);
   }
 }
 
@@ -1087,8 +973,6 @@ ISA_FUNC(StructTarget,SimVSSTarget);
 
 // Method called by C2V star to place important code into structure.
 void StructTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
-//  printf("RegisterC2V Method of SimVSSTarget called\n");
-
   // Create a string with the right VHDL data type
   StringList vtype = "";
   StringList name = "";
@@ -1160,8 +1044,6 @@ void StructTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
 
 // Method called by V2C star to place important code into structure.
 void StructTarget :: registerV2C(int pairid, int numxfer, const char* dtype) {
-//  printf("RegisterV2C Method of SimVSSTarget called\n");
-
   // Create a string with the right VHDL data type
   StringList vtype = "";
   StringList name = "";
@@ -1335,36 +1217,11 @@ StringList StructTarget :: addWaitStatement(VHDLCluster* cl, int level) {
 StringList StructTarget :: addVariableRefs(VHDLCluster* cl, int level) {
   StringList all;
   if ((*(cl->firingList)).head()) {
-    //    StringList body;
-
     VHDLFiringListIter nextFiring(*(cl->firingList));
     VHDLFiring* nfiring;
-    //    int varCount = 0;
     while ((nfiring = nextFiring++) != 0) {
       all << addVariableDecls(nfiring->variableList,level);
-
-      /*
-      VHDLVariableListIter nextVar(*(nfiring->variableList));
-      VHDLVariable* nvar;
-      while ((nvar = nextVar++) != 0) {
-	level++;
-	body << indent(level) << "variable " << nvar->name << ": "
-	     << nvar->type;
-	if ((nvar->initVal).length() > 0) {
-	  body << " := " << nvar->initVal;
-	}
-	body << ";\n";
-	varCount++;
-	level--;
-      }
-      */
     }
-    
-    /*Don't use varcount anymore
-    if (varCount) {
-      all << body;
-    }
-    */
   }
   return all;
 }
@@ -1519,7 +1376,8 @@ void StructTarget :: registerAndMerge(VHDLCluster* cl) {
 
   mainCompDeclList.put(clName, masterPortList, masterGenericList);
   mergeSignalList(masterSignalList);
-  mainCompMapList.put(clLabel, clName, masterPortMapList, masterGenericMapList);
+  mainCompMapList.put(clLabel, clName, masterPortMapList,
+		      masterGenericMapList);
 }
 
 // Generate the entity_declaration.
@@ -1530,7 +1388,6 @@ void StructTarget :: buildEntityDeclaration(int level) {
   entity_declaration << "use IEEE.STD_LOGIC_1164.all;\n";
   entity_declaration << "use std.textio.all;\n";
 
-  //  entity_declaration << "entity " << galaxy()->name() << " is\n";
   entity_declaration << "entity " << (const char*) filePrefix << " is\n";
   if (systemPortList.head()) {
     level++;
@@ -1631,8 +1488,9 @@ void StructTarget :: buildArchitectureBodyCloser(int /*level*/) {
 
 // Add in configuration declaration here from mainCompDeclList.
 void StructTarget :: buildConfigurationDeclaration(int level) {
-  configuration_declaration << "configuration " << (const char*) filePrefix << "_parts"
-			    << " of " << (const char*) filePrefix << " is\n";
+  configuration_declaration << "configuration " << (const char*) filePrefix
+			    << "_parts" << " of " << (const char*) filePrefix
+			    << " is\n";
   configuration_declaration << "for " << "structure" << "\n";
 
   configuration_declaration << cli_configs;
@@ -1648,7 +1506,8 @@ void StructTarget :: buildConfigurationDeclaration(int level) {
   }
 
   configuration_declaration << "end " << "for" << ";\n";
-  configuration_declaration << "end " << (const char*) filePrefix << "_parts" << ";\n";
+  configuration_declaration << "end " << (const char*) filePrefix << "_parts"
+			    << ";\n";
 }
 
 // Generate the clock generator entity and architecture.
@@ -1802,30 +1661,6 @@ void StructTarget :: addClock(const char* clock) {
 		<< "system_clock'event and system_clock = TRUE;\n";
     ctlerAction << clock << " <= FALSE;\n";
   }
-  /*
-  if (clockList.tail()) {
-    if (strcmp(clockList.tail(),clock)) {
-      clockList << clock;
-      ctlerAction << "     -- Toggle " << clock << "\n";
-      ctlerAction << "wait until "
-		  << "system_clock'event and system_clock = TRUE;\n";
-      ctlerAction << clock << " <= TRUE;\n";
-      ctlerAction << "wait until "
-		  << "system_clock'event and system_clock = TRUE;\n";
-      ctlerAction << clock << " <= FALSE;\n";
-    }
-  }
-  else {
-    clockList << clock;
-    ctlerAction << "     -- Toggle " << clock << "\n";
-    ctlerAction << "wait until "
-		<< "system_clock'event and system_clock = TRUE;\n";
-    ctlerAction << clock << " <= TRUE;\n";
-    ctlerAction << "wait until "
-		<< "system_clock'event and system_clock = TRUE;\n";
-    ctlerAction << clock << " <= FALSE;\n";
-  }
-  */
 }
 
 int StructTarget :: codeGenInit() {
@@ -1844,57 +1679,6 @@ int StructTarget :: codeGenInit() {
   }
   return TRUE;
 }
-
-/*
-// Assign names for each geodesic according to port connections.
-void StructTarget :: setGeoNames(Galaxy& galaxy) {
-  GalStarIter nextStar(galaxy);
-  Star* s;
-  while ((s = nextStar++) != NULL) {
-    BlockPortIter nextPort(*s);
-    VHDLPortHole* p;
-    while ((p = (VHDLPortHole*) nextPort++) != NULL) {
-      if (p->isItInput()) {
-	// Create temporary StringLists; allows safe (const char*) casts.
-	StringList sl = sanitizedFullName(*p);
-	p->setGeoName(savestring(sl));
-      }
-    }
-  }
-  nextStar.reset();
-  while ((s = nextStar++) != NULL) {
-    BlockPortIter nextPort(*s);
-    VHDLPortHole* p;
-    while ((p = (VHDLPortHole*) nextPort++) != NULL) {
-      if (p->isItOutput()) {
-	// Create temporary StringLists; allows safe (const char*) casts.
-	StringList sl = sanitizedFullName(*p);
-	p->setGeoName(savestring(sl));
-      }
-    }
-  }
-}
-*/
-
-/*
-// The only reason for redefining this from HLLTarget
-// is to change the separator from "." to "_".
-StringList StructTarget :: sanitizedFullName (const NamedObj& obj) const {
-  StringList out;
-  if(obj.parent() != NULL) {
-    Block* b = obj.parent();
-    if (b->isItWormhole() == 0) {
-      out = sanitizedFullName(*obj.parent());
-      out += "_";
-    }
-    out += sanitizedName(obj);
-  }
-  else {
-    out = sanitizedName(obj);
-  }
-  return out;
-}
-*/
 
 // Method to write out com file for VSS if needed.
 void StructTarget :: writeComFile() {
