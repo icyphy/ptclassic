@@ -44,6 +44,7 @@ Kluwer Academic Publishers, Norwood, MA, 1996
 #endif
 
 #include "AcyCluster.h"
+#include <limits.h>
 
 // following are for Blocks
 // NODE_NUM holds the number of the node produced by numberBlocks().
@@ -67,9 +68,15 @@ Kluwer Academic Publishers, Norwood, MA, 1996
 // TNSE = total number of samples exchanged in a complete period of an
 // SDF schedule.
 
+/****
+Weight all portholes by the arcs weight: TNSE
+
+@SideEffects the flag location <code>#defined</code> by <code>WEIGHT</code>
+is set to TNSE for all PortHoles.
+
+****/
 void AcyCluster::weightArcs()
 {
-    // weight all portholes by the arcs weight: TNSE
     SynDFCluster* c;
     int cost;
     SynDFClusterPort *outArc;
@@ -87,9 +94,20 @@ void AcyCluster::weightArcs()
     }
 }
 
+/****
+Mark those portholes whose arcs have >= delays than the TNSE.
+
+@Description This function marks those arcs that have more than or equal to
+TNSE delays.  This distinction is important because for such arcs, there is
+effectively no precedence constraint since all firings of the sink node on the
+arc can be executed before any of the source arc.
+
+@SideEffects flag location at <code>DELAY_TAG</code> is marked 1 for such
+PortHole pairs
+
+****/
 void AcyCluster::tagDelayArcs()
 {
-    // Mark those portholes whose arcs have >= delays than the TNSE.
 
     SynDFCluster* c;
     SynDFClusterPort *outArc;
@@ -108,14 +126,21 @@ void AcyCluster::tagDelayArcs()
     }
 }
 
+/****
+Mark c and all the successors of c and return the number of successors.
+
+@Description
+The marking is done by setting the <code>TMP_PARTITION</code> flag to 1
+in computing the number of successors, we include the total number of
+blocks inside all the clusters that might be inside us; however, only
+the top-level clusters are actually marked
+
+@SideEffects flag location at <code>TMP_PARTITION</code> is marked 1
+for nodes that are successors.
+
+****/
 int AcyCluster::markSuccessors(AcyCluster* c)
 {
-    // Mark c and all the successors of c and return the number of successors.
-    // The marking is done by setting the TMP_PARTITION flag to 1
-
-    // in computing the number of successors, we include the total number of
-    // blocks inside all the clusters that might be inside us; however, only
-    // the top-level clusters are actually marked
     
     int numSucc=c->totalNumberOfBlocks();
     SynDFClusterPort* out;
@@ -138,6 +163,7 @@ int AcyCluster::markSuccessors(AcyCluster* c)
     return numSucc;
 }
 
+// Symmetric to <code>markSuccessors(AcyCluster*)</code>
 int AcyCluster::markPredecessors(AcyCluster* c)
 {
     // Note:  The following code is pretty much symmetric
@@ -161,16 +187,24 @@ int AcyCluster::markPredecessors(AcyCluster* c)
     return numPred;
 }
 
+/****
+Compute the cost of a cut.
+
+@Description
+It is assumed here that the cut
+is specified by marking nodes at <code>flags[flag_loc]</code> by
+<code>leftFlagValue</code> (left side of cut).
+
+The cost of the cut is defined to be sums of the costs of all
+arcs crossing from left to right, plus the number of delays on
+arcs crossing from right to left.  Recall that the cost of an arc
+is the TNSE plus the number of delays on it.
+
+@Returns Int: cost of the cut
+
+****/
 int AcyCluster::computeCutCost(int flag_loc, int leftFlagValue)
 {
-    // Compute the cost of a cut.  It is assumed here that the cut
-    // is specified by marking nodes at flags[flag_loc] by leftFlagValue
-    // (left side of cut).
-
-    // The cost of the cut is defined to be sums of the costs of all
-    // arcs crossing from left to right, plus the number of delays on
-    // arcs crossing from right to left.  Recall that the cost of an arc
-    // is the TNSE plus the number of delays on it.
 
     SynDFCluster* c;
     int cutVal = 0;
@@ -204,23 +238,28 @@ int AcyCluster::computeCutCost(int flag_loc, int leftFlagValue)
     return cutVal;
 }
 
+/****
+Find the independent boundary nodes after a cut formed by markSuccessors or markPredecessors.
+
+@Description
+A cut of <code>type</code> = 0 is the cut
+where the nodes {c+successors_of_c} are on the right side.
+<code>type</code> = 1 is the cut where the set of nodes
+{c+predecessors_of_c} are on the left side of the cut.
+It is assumed that <code>mark{Successors,Predecessors}</code> was called
+for cluster c.
+    
+Independent boundary nodes are nodes that are neither
+predecessors nor successors of c
+<b>(*independent*)</b>
+and are such that all their successors are successors of c (type=0)
+<b>(*boundary*)</b> (or all their predecessors are predecessors of c for
+type=1 cuts).
+
+@SideEffects the input list indepBndryNodes is filled with such nodes
+****/
 void AcyCluster::findIndepBndryNodes(int type, Cluster* c, SequentialList& indepBndryNodes)
-{
-    // Find the independent boundary nodes after a cut formed by
-    // markSuccessors or markPredecessors.  A cut of type = 0 is the cut
-    // where the nodes {c+successors_of_c} are on the right side.
-    // type = 1 is the cut where the set of nodes {c+predecessors_of_c} are
-    // on the left side of the cut.
-    // It is assumed that mark{Successors,Predecessors} was called
-    // for cluster c.
-    
-    // Independent boundary nodes are nodes that are neither
-    // predecessors nor successors of c
-    // (*independent*)
-    // and are such that all their successors are successors of c (type=0)
-    // (*boundary*) (or all their predecessors are predecessors of c for
-    // type=1 cuts).
-    
+{    
     Cluster *tmp;
     ClusterPort* arc;
     int flag, flag2;
@@ -284,12 +323,40 @@ void AcyCluster::findIndepBndryNodes(int type, Cluster* c, SequentialList& indep
     }
 }
 
+/****
+The most important routine in AcyCluster; finds a legal bounded cut of the graph
+
+@Description
+Produce a legal cut into bounded sets while minimizing weight of arcs
+crossing the cut.
+The following conditions have to hold for cuts found by this method:
+<li> a) the number of nodes on
+either side of the partition does not exceed K (Bounded sets)
+<li> b) All arcs cross the cut in the same direction (legality)
+<li> c) the cut value is equal to the supplied cutValue (to ensure that
+he heuristic was minimizing the correct metric.
+<p>
+<a href="#ClassAcyCluster">See the  book refered to in
+the comments for the class for more details.</a>
+<p>
+<a href="http://ptolemy.eecs.berkeley.edu/papers/PganRpmcDppo/">
+Also see the first paper at this site.</a>
+
+@SideEffects the flag at <code>PARTITION</code> is marked
+for all nodes by the parents value
+at that location if the node is on the left side of the cut and by the number
+of nodes on the left side of the cut of the node is on the right side of the
+cut.
+
+@Returns Int: value of the cut if successful, -1 else.  <code>
+AcyLoopScheduler::RPMC</code>, the only function that uses this function
+currently, the value of the cut returned her is not really used except to
+ensure that it is not -1.
+
+****/
 int AcyCluster::legalCutIntoBddSets(int K)
-{
-    // Produce a legal cut into bounded sets while minimizing weight of arcs
-    // crossing the cut.
-    
-    int minCutVal = (int)HUGE_VAL;
+{ 
+    int minCutVal = INT_MAX;
     int numSucc=0, numPred=0, cutVal;
     int Dtmp;
     AcyCluster* c;
@@ -451,6 +518,23 @@ int AcyCluster::legalCutIntoBddSets(int K)
     return minCutVal;
 }
 
+/****
+Compute the cost of moving an independent boundary node across the cut.
+
+@Description
+If <code>direction</code> is 1, then the node is moved
+from left to right; if <code>direction</code> is -1, then it is moved
+moved from right to left.  Hence, in one case, <code>Atmp</code> represents
+the cost of all the internal arcs that will become external if
+the node is moved across (<code>direction = -1</code>), and in the other
+case it represents the cost of all external arcs (ie, arcs crossing
+the cut) which will become internal if the node is moved across.
+If <code>Atmp</code> is the internal cost, then <code>Btmp</code> is the
+external cost and vice-versa.
+
+@Returns Int, the cost
+
+****/
 int AcyCluster::costOfMovingAcross(Cluster* bndryNode, int direction)
 {
     // Compute the cost of moving an independent boundary node
@@ -503,17 +587,24 @@ int AcyCluster::costOfMovingAcross(Cluster* bndryNode, int direction)
     return 0;
 }
 
+/****
+Update best cut.
+
+@Description
+Uses the following numbering scheme
+to indicate the partition.  Nodes on the left side of the
+cut get the value of their parent while the nodes on the
+right side of the cut get the value of parent (that is,
+<code>this->PARTITION</code>) plus the number of
+nodes on the left hand side.  This is to make it easy to deduce the
+ordering if this function is called recursively many times.
+<code>numOnLeftSide</code> is the number of nodes on the left side of the cut.
+
+@SideEffects see description above
+
+****/    
 void AcyCluster::updateBestCut(int numOnLeftSide)
 {    
-    // Update best cut.  Also, use the following numbering scheme
-    // to indicate the partition.  Nodes on the left side of the
-    // cut get the value of their parent while the nodes on the
-    // right side of the cut get the value of parent (that is, this->PARTITION)
-    // + number of
-    // nodes on left hand side.  This is to make it easy to deduce the
-    // ordering if this function is called recursively many times.
-    // numOnLeftSide is the number of nodes on the left side of the cut.
-    
     Cluster* tmp;
     ClusterIter nextTmp(*this);
     while((tmp = nextTmp++) !=NULL) {
@@ -522,19 +613,26 @@ void AcyCluster::updateBestCut(int numOnLeftSide)
     }
 }
 
+/****
+This procedure checks the answer given by <code>legalCutIntoBddSets</code>.
+
+@Description
+The assumptions are that <code>legalCutIntoBddSets</code>
+has marked the nodes in <code>*this</code> by which side of the partition
+they are on.  Hence, the check should be called before those flags
+are potentially reset by some other method.  In this method, we
+go through the blocks and ensure that
+<li>a) the number of nodes on
+either side of the partition does not exceed K (Bounded sets)
+<li>b) All arcs cross the cut in the same direction (legality)
+<li>c) the cut value is equal to the supplied cutValue (to ensure that
+the heuristic was minimizing the correct metric.
+
+@Returns Int: TRUE or FALSE depending on success.
+
+****/
 int AcyCluster::checkLegalCut(int cutValue, int bdd)
 {
-    // This procedure checks the answer given by the procedure
-    // legalCutIntoBddSets.  The assumptions are that legalCutIntoBddSets
-    // has marked the nodes in *this by which side of the partition they
-    // are on.  Hence, the check should be called before those flags
-    // are potentially reset by some other method.  In this method, we
-    // go through the blocks and ensure that
-    // a) the number of nodes on
-    // either side of the partition does not exceed K (Bounded sets)
-    // b) All arcs cross the cut in the same direction (legality)
-    // c) the cut value is equal to the supplied cutValue (to ensure that
-    // the heuristic was minimizing the correct metric.
 
     int K=0;
     int check = TRUE;
@@ -578,5 +676,3 @@ int AcyCluster::checkLegalCut(int cutValue, int bdd)
     }
     return check;
 }
-
-
