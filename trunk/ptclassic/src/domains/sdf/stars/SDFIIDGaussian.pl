@@ -2,7 +2,7 @@ defstar {
 	name { IIDGaussian }
 	domain { SDF }
 	desc {
-Generates a white Gaussian pseudo-random process with mean
+Generate a white Gaussian pseudo-random process with mean
 "mean" (default 0) and variance "variance" (default 1).
 	}
 	version {$Id$}

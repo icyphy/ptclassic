@@ -2,8 +2,8 @@ defstar {
 	name { Reverse }
 	domain { SDF }
 	desc {
-On each execution, reads a block of "N" samples (default 64)
-and writes them out backwards.
+On each execution, read a block of "N" samples (default 64)
+and write them out backwards.
 	}
 	version {$Id$}
 	author { J. T. Buck }

@@ -2,12 +2,13 @@ defstar {
 	name { Quant }
 	domain { SDF }
 	desc {
-Quantizes input to one of N+1 possible output levels using N thresholds.
+Quantize the input value to one of N+1 possible output levels using N thresholds.
 For an input less than or equal to the n-th threshold, but larger than all
 previous thresholds, the output will be the n-th level.  If the input is
 greater than all thresholds, the output is the N+1-th level.  If level is
 specified, there must be one more level than thresholds; the default
-value for level is 0, 1, 2, ... N.
+value for level is 0, 1, 2, ... N.  This star is much slower than LinQuantIdx,
+so if possible, that one should be used instead.
 	}
 	version {$Id$}
 	author { E. A. Lee and J. Buck }

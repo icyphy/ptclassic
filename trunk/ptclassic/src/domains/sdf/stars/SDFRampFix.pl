@@ -2,9 +2,9 @@ defstar {
 	name { RampFix }
 	domain { SDF }
 	desc {
-Generates a fixed-point ramp signal, starting at "value" (default 0)
-with step size "step" (default 1). The precision of these
-parameters can be specified in bits.  
+Generate a fixed-point ramp signal, starting at "value" (default 0.0)
+with step size "step" (default 1.0). The precision of these parameters
+can be specified in bits.
 	}
         author { A. Khazeni }
 	version { $Id$ }

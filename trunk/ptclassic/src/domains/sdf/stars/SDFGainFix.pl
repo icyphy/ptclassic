@@ -2,9 +2,11 @@ defstar {
 	name { GainFix }
 	domain { SDF }
 	desc { 
-Amplifier: output is input times "gain" (default 1.0). The precision
-of "gain", input, and the output can be specified in bits. } 
-        author { A. Khazeni }
+This is an amplifier; the fixed-point output is the fixed-point input
+multiplied by the "gain" (default 1.0). The precision of "gain", the
+input, and the output can be specified in bits.
+	}
+	author { A. Khazeni }
 	version { $Id$ }
 	location { SDF main library }
         explanation { 

@@ -10,7 +10,7 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF conversion palette }
-	desc { Converts an integer input to a float type output. }
+	desc { Convert an integer input to a floating-point output. }
 	input {
 		name { input }
 		type { int }

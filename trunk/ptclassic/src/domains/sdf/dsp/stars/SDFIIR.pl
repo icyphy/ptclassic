@@ -2,9 +2,14 @@ defstar {
     name {IIR}
     domain {SDF}
     desc {
-A Infinite Impulse Response (IIR) filter.
-Coefficients are in the "numerator" and "denominator", and both start
-with $z^0$ terms and decrease in powers of $z$.
+An infinite impulse response (IIR) filter implemented in direct form 2.
+The transfer function is of the form H(z) = G*N(1/z)/D(1/z),
+where N() and D() are polynomials.  The parameter "gain" specifies G, and
+the floating-point arrays "numerator" and "denominator" specify N() and D(),
+respectively. Both arrays start with the constant terms of the polynomial
+and decrease in powers of z (increase in powers of 1/z). Note that the
+constant term of D is not omitted, as is common in other programs that
+assume it is always normalized to unity.
     }
     version { $Id$ }
     author { Kennard White }
@@ -21,13 +26,6 @@ This star implements an infinite impulse response filter of arbitrary order.
 The parameters of the star specify $H(z)$, the $Z$-transform of an
 impulse response $h(n)$.  The output of the star is the convolution
 of the input with $h(n)$.
-.PP
-The transfer function implemented is of the form $H(z) ~=~ G*N(1/z)/D(1/z)$,
-where $N()$ and $D()$ are polynomials.  The state "gain" specifies $G$, and
-the state arrays "numerator" and "denominator" specify $N$ and $D$,
-respectively.
-Both arrays start with $z^0$ terms and decrease in powers of $z$ (increase in
-powers of $1/z$).  Note that the leading term of $D$ is *not* omitted.
 .PP
 Note that the numerical finite precision noise increases with the filter order.
 To minimize this distortion, it is often desirable to expand the filter

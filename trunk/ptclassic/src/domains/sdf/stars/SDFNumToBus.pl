@@ -2,9 +2,9 @@ defstar {
 	name { NumToBus }
 	domain { SDF }
 	desc {
-Receive as its input an integer corresponding to the bus contents and it
-converts it to a bus with the required number of lines (which is read in
-as a parameter).
+This star accepts an integer and outputs the low-order bits that
+make up the integer on a number of outputs, one bit per output.
+The number of outputs should not exceed the wordsize of an integer.
 	}
 	author { Asawaree Kalavade }
 	copyright {

@@ -5,13 +5,11 @@ defstar {
     author	{ Mike J. Chen }
     location    { SDF dsp library }
     descriptor	{
-Computes the singular-value decomposition of a matrix A
-by finding A = U*W*V', where U and V are orthogonal matrices, and V' represents
-the transpose of V.  W is a diagonal matrix composed of the singular values
-of A, and the columns of U and V are the left and right singular vectors of
-A. 
-
-This star uses the Matrix class.
+Compute the singular-value decomposition of a Toeplitz data matrix A
+by decomposing A into A = UWV', where U and V are orthogonal matrices,
+and V' represents the transpose of V. W is a diagonal matrix composed
+of the singular values of A, and the columns of U and V are the left
+and right singular vectors of A.
     } 
     defstate {
 	name 	{ rows }

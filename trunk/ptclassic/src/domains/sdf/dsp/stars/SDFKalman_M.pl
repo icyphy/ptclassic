@@ -1,10 +1,9 @@
 defstar {
   name      { Kalman_M }
   domain    { SDF }
-  desc      { 
-Kalman filter using one-step prediction algorithm, outputs
-only the state vector using the Matrix message class.  
-This star uses the Matrix classs.
+  desc      {
+Output the state vector estimates of a Kalman filter using
+a one-step prediction algorithm.
   }
   version   { $Id$ }
   author    { Mike J. Chen }

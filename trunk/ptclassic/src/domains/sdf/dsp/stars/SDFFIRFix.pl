@@ -2,11 +2,12 @@ defstar {
         name {FIRFix}
         domain {SDF}
         desc {
-A Finite Impulse Response (FIR) filter with fixed-point capabilities.
-The fixed-point coefficients are in the "taps" state variable.
-Default coefficients give an 8th-order, linear phase lowpass filter.
+A finite impulse response (FIR) filter with fixed-point capabilities.
+The fixed-point coefficients are specified by the "taps" parameter.
+The default coefficients give an 8th-order, linear phase lowpass filter.
 To read coefficients from a file, replace the default coefficients
-with "<fileName".
+with "< fileName", preferably specifying a complete path.
+Polyphase multirate filtering is also supported.
         }
         version { $Id$ }
         author { E. A. Lee, A. Khazeni }

@@ -2,7 +2,7 @@ defstar {
 	name {DownSample}
 	domain {SDF}
 	desc { 
-A decimator by "factor" (default 2).
+A decimator by a given "factor" (default 2).
 The "phase" tells which sample to output.
 If phase = 0, the most recent sample is the output,
 while if phase = factor-1 the oldest sample is the output.

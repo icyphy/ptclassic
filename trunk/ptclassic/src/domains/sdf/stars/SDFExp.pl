@@ -1,7 +1,7 @@
 defstar {
 	name { Exp }
 	domain { SDF } 
-	desc { 	Outputs the exponential function of the input. }
+	desc { 	Compute the exponential function of the input. }
 	version {$Id$}
 	author { J. T. Buck }
 	copyright {

@@ -3,11 +3,12 @@ defstar {
 	domain { SDF }
 	derivedFrom { LMSCx }
 	desc {
-Complex adaptive filter using LMS adaptation algorithm.  In addition,
-the tap coefficients are plotted using the xgraph program, with a
-separate plot for the magnitude and phase.  If "trace" is NO, only the
-final tap values are plotted; if it is YES, a trace of each tap is
-plotted as it adapts.
+This star is exactly like the LMSCx star, except that, in addition
+to the functions of LMSCx, it makes a plot of the tap coefficients,
+with a separate plot for the magnitude and phase.
+It can produce two types of plots: a plot of the final tap values
+or a plot that traces the time evolution of each tap value.
+The time evolution is obtained if the value of the parameter "trace" is "YES".
 	}
 	version {$Id$}
 	author { J. T. Buck }
@@ -19,12 +20,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF dsp library }
 	explanation {
-This star is exactly like the LMSCx star, except that, in addition,
-it makes a plot of the tap coefficients, one plot for the magnitude,
-one for the phase.  It can produce two types of plots: a plot
-of the final tap values or a plot that traces the
-time evolution of each tap value: the time evolution is obtained
-if \fItrace\fP is YES.
 .Id "adaptive filter, complex"
 .Id "filter, adaptive, complex"
 .Id "LMS adaptive filter, complex"
@@ -36,9 +31,9 @@ if \fItrace\fP is YES.
 values on the command line when the magnitudes are plotted, and
 \fIGraphOptsPhase\fP serves the same function for the phase.
 .lp
-If \fItrace\fP is YES, there may not be more than 64 taps in the filter.
+If \fItrace\fP is "YES", there may not be more than 64 taps in the filter.
 	}
-	seealso {LMSCx, Xgraph, XMgraph}
+	seealso {LMSCx, XMgraph, LMSPlot, LMSTkPlot, LMSTkPlot }
 	hinclude { "Display.h" }
 	state {
 		name { graphOptsMag }

@@ -11,8 +11,11 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
     location { SDF main library }
-    descriptor { Read ASCII data from a file. }
-
+    descriptor {
+Read ASCII data from a file.  The simulation can be halted
+on end-of-file, or the file contents can be periodically
+repeated, or the file contents can be padded with zeros.
+	}
     hinclude { "streamCompat.h" }
     ccinclude { "SimControl.h" }
 

@@ -12,7 +12,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { SDF image library }
 	desc {
 Accept a black-and-white image from an input packet, and generate the
-individual pixels.
+individual pixels. A single firing will produce a very large number
+of output particles.
 	}
 	ccinclude { "GrayImage.h" }
 	input {

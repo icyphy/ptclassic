@@ -2,10 +2,11 @@ defstar {
 	name { Trainer }
 	domain { SDF }
 	desc {
-Passes the "train" input to the output for the first "trainLength"
-samples, then passes the "decision" input to the output.  Designed
-for use in decision feedback equalizers, but can be used for other
-purposes.
+Pass the value of the "train" input to the output for the first "trainLength" samples,
+then pass the "decision" input to the output. This star is designed for use with
+adaptive equalizers that require a training sequence at startup, but it can be
+used whenever one sequence is used during a startup phase, and another sequence
+after that. 
 	}
 	version { $Id$ }
 	author { J. T. Buck }
@@ -17,6 +18,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
 	explanation {
+During the startup phase, the "decision" inputs are discarded.  After the
+startup phase, the "train" inputs are discarded.
 .Id "DFE training"
 .Id "decision feedback equalizer training"
 .Id "equalizer, decision feedback, training"

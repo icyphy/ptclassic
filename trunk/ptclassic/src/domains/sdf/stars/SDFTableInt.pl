@@ -2,9 +2,10 @@ defstar {
 	name { TableInt }
 	domain { SDF }
 	desc {
-Implements a integer-valued lookup table.  The "values" state contains the
-values to output; its first element is element zero.  An error occurs if
-an out of bounds value is received.
+This star implements a real-valued lookup table indexed by an integer-valued input.
+The input must lie between 0 and N-1, inclusive, where N is the size of the table
+The "values" parameter specifies the table.  Its first element is indexed by a
+zero-valued input. An error occurs if the input value is out of bounds.
 	}
 	version {$Id$}
 	author { J. T. Buck }

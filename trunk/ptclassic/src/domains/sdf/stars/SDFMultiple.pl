@@ -1,7 +1,7 @@
 defstar {
 	name { Multiple }
 	domain { SDF } 
-	desc { Outputs a 1 if top input is a multiple of bottom input }
+	desc { Output a 1 if top input is a multiple of bottom input }
 	version {$Id$}
 	author { E. A. Lee }
 	copyright {

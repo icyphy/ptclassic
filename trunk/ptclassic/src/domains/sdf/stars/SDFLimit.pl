@@ -1,7 +1,10 @@
 defstar {
 	name {Limit}
 	domain {SDF}
-	desc { Hard limiter. }
+	desc { 
+The output of this star is the value of the input limited
+to the range between "bottom" and "top" inclusive.
+	}
 	version {$Id$}
 	author { E. A. Lee }
 	copyright {
@@ -11,11 +14,6 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
-This star hard limits input samples to keep the in the range
-of (\fIbottom, top\fR).
-.Id "hard limiter"
-	}
 	input {
 		name{input}
 		type{float}

@@ -2,8 +2,8 @@ defstar {
 	name { RampInt }
 	domain { SDF }
 	desc {
-Generates an integer ramp signal, starting at value (default 0)
-with step size step (default 1).
+Generate an integer ramp signal, starting at "value" (default 0)
+and incrementing by step size "step" (default 1) on each firing.
 	}
 	version {$Id$}
 	author { D. G. Messerschmitt }

@@ -2,8 +2,10 @@ defstar {
     name {Window}
     domain {SDF}
     desc {
-Generates standard window functions:
+Generate standard window functions or periodic repetitions of standard
+window functions.  The possible functions are
 Rectangle, Bartlett, Hanning, Hamming, Blackman, and SteepBlackman.
+One period of samples is produced on each firing.
     }
     explanation {
 .lp
@@ -19,11 +21,9 @@ that most window functions have a zero value at the first and last sample.
 The parameter \fIperiod\fR specifies the period of the output signal:
 the window will be zero-padded if required.  A \fIperiod\fR of 0
 means a period equal to \fIlength\fR.  A negative period will
-produce only one window, and then outputs zero for all later samples.
+produce only one window, and then output zero for all later samples.
 A period of less than the window length will be equivalent to a period of
-the window length (i.e., period=0).
-.lp
-One period of samples is produced at each firing of this star.
+the window length (i.e., \fIperiod\fR = 0).
     }
     version { $Id$ }
     author { Kennard White }

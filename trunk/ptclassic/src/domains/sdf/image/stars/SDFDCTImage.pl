@@ -11,8 +11,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location	{ SDF image library }
 	desc {
-This star takes GrayImage input and does discrete
-cosine transform (DCT) and outputs a DCTImage.
+This star takes a GrayImage input particle,
+computes the discrete cosine transform (DCT),
+and outputs a DCTImage particle.
 	}
 	explanation {
 .Id "discrete cosine transform"

@@ -2,7 +2,7 @@ defstar {
 	name { Mux }
 	domain { SDF }
 	desc {
-Multiplexes any number of inputs onto one output stream.
+Multiplex any number of inputs onto one output stream.
 B particles are consumed on each input, where B is the blockSize.
 But only one of these blocks of particles is copied to the output.
 The one copied is determined by the "control" input.

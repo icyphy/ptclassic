@@ -11,6 +11,7 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	explanation {
+Two floating-point inputs are converted into two floating-point outputs.
 .Id "polar to rectangular conversion"
 .Id "format conversion, polar to rectangular"
 .Ir "magnitude"

@@ -2,8 +2,9 @@ defstar {
 	name { IntToBits }
 	domain { SDF }
 	desc {
-Reads the least significant "nBits" bits from an integer input, and
-outputs the bits serially on the output, most significant bit first.
+Read the least significant nBits bits from an integer input,
+and output the bits as integers serially on the output,
+most significant bit first.
 	}
 	version { $Id$ }
 	author { J. T Buck }

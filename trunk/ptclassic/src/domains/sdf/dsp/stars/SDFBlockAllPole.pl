@@ -2,7 +2,12 @@ defstar {
 	name { BlockAllPole }
 	domain { SDF }
 	version {$Id$}
-	desc { An all-pole filter whose coefficients are externally supplied. }
+	desc {
+This star implements an all pole filter with the denominator
+coefficients of the transfer function externally supplied.
+For each set of coefficients, a block of input samples is processed,
+all in one firing.
+	}
 	author { E. A. Lee }
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
@@ -12,7 +17,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF dsp library }
 	explanation {
-.pp
 This star implements an all-pole filter with coefficients that
 are periodically updated
 .Id "all-pole filter, block"

@@ -2,13 +2,12 @@ defstar {
 	name {BlockRLattice}
 	domain {SDF}
 	desc {
-A block Recursive (Backward) (IIR) Lattice filter.
-It is identical to the RLattice star, except that
-the reflection coefficients are updated each time the star fires
-by reading the "coefs" input.
-The "order" parameter indicates how many coefficient
-should be read.  The "blockSize" parameter specifies how many
-signalIn samples should be processed for each set of coefficients.
+A block recursive (IIR) lattice filter.
+It is identical to the RLattice star, except that the reflection
+coefficients are updated each time the star fires by reading the
+"coefs" input. The "order" parameter indicates how many coefficient
+should be read. The "blockSize" parameter specifies how many data
+samples should be processed for each set of coefficients.
 	}
 	version {$Id$}
 	author { Alan Kamas and Edward Lee }

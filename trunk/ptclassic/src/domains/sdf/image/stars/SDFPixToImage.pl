@@ -11,9 +11,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF image library }
 	desc {
-Accept integer values, and assemble them into an image.  Warning: this
-star produces large sample rate changes, use the loop scheduler!
-}
+Accept integer values, and assemble them into an image.
+Warning: this star produces large sample-rate changes. 
+	}
 	ccinclude { "GrayImage.h" }
 	input {
 		name { input }

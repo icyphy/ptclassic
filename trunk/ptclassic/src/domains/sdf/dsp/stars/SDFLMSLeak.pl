@@ -12,16 +12,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	location	{ SDF dsp library }
 	derivedFrom { LMS }
 	desc {
-An LMS-based adaptive filter in which the step size is input (to the
-"step" input) every iteration. The "stepSize" state is unused.
-
-Values in the "taps" array change as the filter adapts to minimize the
-energy at the "error" input.
-
-The "mu" state is used as a leak factor in the formula that updates
-the filter coefficients.
+An LMS adaptive filter in which the step size is input
+(to the "step" input) every iteration. In addition,
+the "mu" parameter specifies a leakage factor in the
+updates of the filter coefficients.
 	}
-
 	explanation {
 If two identical "LMSLeak" filters are used as an adaptive predictive
 coder and decoder, then with "mu" nearly equal to but greater than 0.0,
@@ -29,8 +24,11 @@ the effects of channel errors between the coder and decoder will decay
 away rather than accumulate. As "mu" increases, the effects of channel
 errors decay away more quickly, but the size of the "error" input
 increases also.
-
-See pg 54 of _Adaptive_Filters_, Honig and Messerschmitt.
+See pg 54 of [1].
+.UH References
+.ip [1]
+W. Honig and D. G. Messerschmitt,
+\fIAdaptive_Filters\fR, Kluwer Academic Publishers, Norwood MA, 1985.
 	}
 
 	seealso { LMS }

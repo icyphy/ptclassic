@@ -2,19 +2,19 @@ defstar {
 	name { Integrator }
 	domain { SDF }
 	desc {
-
-An integrator with leakage, limits, and reset.
+This is an integrator with leakage, limits, and reset.
 With the default parameters, input samples are simply accumulated,
 and the running sum is the output.  To prevent any resetting in the
-middle of a run, connect a d.c. source with value 0.0 to the "reset"
+middle of a run, connect a Const source with value 0 to the "reset"
 input.  Otherwise, whenever a non-zero is received on this input,
 the accumulated sum is reset to the current input (i.e. no feedback).
 
 Limits are controlled by the "top" and "bottom" parameters.
-If top <= bottom, no limiting is performed (default).  Otherwise,
-the output is kept between "bottom" and "top".  If "saturate" = YES,
-saturation is performed.  If "saturate" = NO, wrap-around is performed
-(default).  Limiting is performed before output.
+If top <= bottom, no limiting is performed (this is the default).
+Otherwise, the output is kept between "bottom" and "top".
+If "saturate" = YES, saturation is performed.  If "saturate" = NO,
+wrap-around is performed (this is the default).
+Limiting is performed before output.
 
 Leakage is controlled by the "feedbackGain" state (default 1.0).
 The output is the data input plus feedbackGain*state, where state

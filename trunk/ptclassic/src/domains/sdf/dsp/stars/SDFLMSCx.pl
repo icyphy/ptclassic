@@ -3,12 +3,13 @@ defstar {
 	domain { SDF }
 	derivedFrom { FIRCx }
 	desc {
-Complex adaptive filter using LMS adaptation algorithm.
-Initial coefficients are in the "taps" state variable.
-Default initial coefficients give an 8th order, linear phase
+A complex adaptive filter using the LMS adaptation algorithm.
+The initial coefficients are given by the "taps" parameter.
+The default initial coefficients give an 8th order, linear phase
 lowpass filter.  To read initial coefficients from a file,
-replace the default coefficients with "<fileName".
-Supports decimation, but not interpolation.
+replace the default coefficients with "< fileName",
+preferably specifying a complete path.
+This star supports decimation, but not interpolation.
 	}
 	version { $Id$ }
 	author { J. T Buck, E. A. Lee }
@@ -43,7 +44,7 @@ If the \fIsaveTapsFile\fR string is non-null, a file will
 be created by the name given by that string, and the final tap values
 will be stored there after the run has completed.
 	}
-	seealso {FIRCx, LMS, adaptFilter}
+	seealso {FIRCx, LMS, adaptFilter, LMSPlotCx, LMSTkPlotCx }
 	input {
 		name { error }
 		type { complex }

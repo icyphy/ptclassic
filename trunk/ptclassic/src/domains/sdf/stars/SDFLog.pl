@@ -1,7 +1,7 @@
 defstar {
 	name { Log }
 	domain { SDF } 
-	desc { Outputs natural log of input. }
+	desc { Output the natural log of the input value. }
 	version {$Id$}
 	author { J. T. Buck }
 	copyright {

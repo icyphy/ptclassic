@@ -1,7 +1,9 @@
 defstar {
 	name { Xgraph }
 	domain { SDF }
-	desc { Generate a plot with the xgraph program. }
+	desc {
+Generate a plot of a single signal with the xgraph program.
+	}
 	version {$Id$}
 	author { J. T. Buck }
 	copyright {

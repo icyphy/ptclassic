@@ -2,7 +2,8 @@ defstar {
         name { SubFix }
         domain { SDF }
         desc {
-Output as a fixed-point number the "pos" input minus all "neg" inputs. }
+Output as a fixed-point number the "pos" input minus all "neg" inputs.
+	}
         author { A. Khazeni }
 	version { $Id$ }
         location { SDF main library }

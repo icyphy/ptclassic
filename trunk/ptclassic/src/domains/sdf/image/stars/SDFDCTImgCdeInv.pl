@@ -11,13 +11,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location	{ SDF image palette }
 	desc {
-This star reads two coded DCTImages (one high priority and one
-low-priority), inverts the run-length encoding,
-and outputs the resulting DCTImage.
+This star reads two coded DCTImages (one high priority and one low-priority),
+inverts the run-length encoding, and outputs the resulting DCTImage.
 Protection is built in to avoid crashing even if some of the coded
 input data is affected by loss.
 
-NOTE!! This star is different from the SDFRunLenInv star.
+Note: This star is different from the SDFRunLenInv star.
 This one works on DCTImages, not GrayImages.
 	}
 	seealso { DCTImageCode }

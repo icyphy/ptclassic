@@ -2,7 +2,7 @@ defstar {
 	name { Impulse }
 	domain { SDF }
 	desc {
-Generates a stream of impulses of size "level" (default 1.0).
+Generate a stream of impulses of size "level" (default 1.0).
 The period is given by "period" (default 0).
 If period = 0 then only one impulse is generated.
 	}

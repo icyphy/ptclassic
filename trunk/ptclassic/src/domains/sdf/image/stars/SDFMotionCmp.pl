@@ -11,18 +11,18 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location	{ SDF image palette }
 	desc {
-If the 'past' input is not a GrayImage (e.g. 'dummyMessage'), copy
-the 'input' image unchanged to the 'diffOut' output and send a null
-field of motion vectors to the 'mvOut' output. This should usually
+If the ’past’ input is not a GrayImage (e.g. ’dummyMessage’), copy
+the ’input’ image unchanged to the ’diffOut’ output and send a null
+field of motion vectors to the ’mvOut’ output. This should usually
 happen only on the first firing of the star.
 
 For all other inputs, perform motion compensation and write the
 difference frames and motion vector frames to the corresponding outputs.
 
-This star can be derived from, to implement slightly different motion
-compensation algorithms. For example, synchronization techniques
+This star can be used as a base class to implement slightly different
+motion compensation algorithms. For example, synchronization techniques
 can be added or reduced-search motion compensation can be performed.
-}
+	}
 	explanation {
 .Id "motion compensation"
 .Id "image, motion compensation"

@@ -3,7 +3,8 @@ defstar {
 	domain {SDF}
 	version {$Id$}
 	desc {
-Discards all inputs.
+Discard all inputs.  This star is useful for terminating
+signals that are not useful.
 	}
 	author { J. T. Buck }
 	copyright {

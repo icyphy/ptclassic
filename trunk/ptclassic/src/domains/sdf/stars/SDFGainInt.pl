@@ -1,7 +1,10 @@
 defstar {
 	name { GainInt }
 	domain { SDF }
-	desc { Integer gain: output is input times "gain" (default 1). }
+	desc {
+This is an amplifier; the integer output is the integer input
+multiplied by the integer "gain" (default 1).
+	}
 	version {$Id$}
 	author { E. A. Lee }
 	copyright {

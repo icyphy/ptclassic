@@ -2,8 +2,8 @@ defstar {
 	name { Ramp }
 	domain { SDF }
 	desc {
-Generates a ramp signal, starting at "value" (default 0)
-with step size "step" (default 1).
+Generate a ramp signal, starting at "value" (default 0) and
+incrementing by step size "step" (default 1) on each firing.
 	}
 	version {$Id$}
 	author { D. G. Messerschmitt }

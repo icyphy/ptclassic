@@ -1,7 +1,10 @@
 defstar {
 	name { Xscope }
 	domain { SDF }
-	desc { Generate a multi-trace plot with the xgraph program. }
+	desc {
+Generate a multi-trace plot with the xgraph program.
+Successive traces are overlaid on one another.
+	}
 	derivedFrom { Xgraph }
 	version {$Id$}
 	author { J. T. Buck }

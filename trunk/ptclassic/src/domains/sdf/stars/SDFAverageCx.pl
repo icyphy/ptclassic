@@ -2,7 +2,8 @@ defstar {
 	name { AverageCx }
 	domain { SDF }
 	desc {
-Averages some number of input samples or blocks of input samples.
+Average some number of complex input samples or blocks of complex
+input samples. Blocks of successive input samples are treated as vectors.
 	}
 	version {$Id$}
 	author { E. A. Lee }
