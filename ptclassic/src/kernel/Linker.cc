@@ -673,15 +673,11 @@ Linker::invokeConstructors (const char* objName, void * dlhandle) {
 	int nCalls = 0;
 #ifdef USE_SHLLOAD
 // we need to get the basename of the objfile
-	char* lastslash = strrchr (objName, '/');
-	char* basestart;
-	if (lastslash == NULL)
-	  basestart = strdup(objName);
-	else
-	  basestart = lastslash + 1;
+	const char* lastslash = strrchr(objName, '/');
+	const char* basestart = lastslash ? (lastslash + 1) : objName;
 	char ConsName[256];
-	strcpy (ConsName, "_GLOBAL__FI_");
-	strcat (ConsName, basestart);
+	strcpy(ConsName, "_GLOBAL__FI_");
+	strcat(ConsName, basestart);
 // get rid of ".sl" extension
 	char* baseend = strrchr (ConsName, '.');
 	*baseend = '\0';
@@ -698,13 +694,11 @@ Linker::invokeConstructors (const char* objName, void * dlhandle) {
  	if (shl_findsym (&handle, ConsName, TYPE_PROCEDURE, &A_ptr)) {
  	  StringList msg = "shl_findsym failed :";
  	  msg << ConsName << " " << strerror (errno);
-	  free(basestart);
  	  Error::abortRun (msg);
  	  return -1;
  	}
 
 	if (shl_findsym (&handle, ConsName, TYPE_PROCEDURE, &A_ptr)) {
-	  free(basestart);
 	  Error::abortRun ("shl_findsym failed");
 	}
 	(*A_ptr)();
