@@ -958,41 +958,38 @@ FixMatrix::FixMatrix(const FixMatrix& src) {
 }
 
 // special conversion copy constructors
-FixMatrix::FixMatrix(const ComplexMatrix& src, int ln, int ib, 
-                     mask_func_pointer mask) {
+FixMatrix::FixMatrix(const ComplexMatrix& src, int ln, int ib, int round) {
   nRows = src.nRows;
   nCols = src.nCols;
   totalDataSize = src.totalDataSize;
   LOG_NEW; data = new Fix[totalDataSize];
 
   for(int i = 0; i < totalDataSize; i++) {
-    data[i].Set_MASK(mask);
+    data[i].set_rounding(round);
     data[i] = (double)abs(src.entry(i));
   }
 }
 
-FixMatrix::FixMatrix(const FloatMatrix& src, int ln, int ib, 
-                     mask_func_pointer mask) {
+FixMatrix::FixMatrix(const FloatMatrix& src, int ln, int ib, int round) {
   nRows = src.nRows;
   nCols = src.nCols;
   totalDataSize = src.totalDataSize;
   LOG_NEW; data = new Fix[totalDataSize];
 
   for(int i = 0; i < totalDataSize; i++) {
-    data[i].Set_MASK(mask);
+    data[i].set_rounding(round);
     data[i] = src.entry(i);
   }
 }
 
-FixMatrix::FixMatrix(const IntMatrix& src, int ln, int ib, 
-                     mask_func_pointer mask) {
+FixMatrix::FixMatrix(const IntMatrix& src, int ln, int ib, int round) {
   nRows = src.nRows;
   nCols = src.nCols;
   totalDataSize = src.totalDataSize;
   LOG_NEW; data = new Fix[totalDataSize];
 
   for(int i = 0; i < totalDataSize; i++) {
-    data[i].Set_MASK(mask);
+    data[i].set_rounding(round);
     data[i] = (double)src.entry(i);
   }
 }
