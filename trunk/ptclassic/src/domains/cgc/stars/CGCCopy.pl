@@ -57,13 +57,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	}
 	go {
-		if (strcmp(input.resolvedType(), "COMPLEX") == 0) 
+		if (input.resolvedType() == COMPLEX) 
 			addCode(complexBody);
 		else
 			addCode(floatBody);
 	}
 	exectime {
-		if (strcmp(input.resolvedType(), "COMPLEX") == 0) 
+		if (input.resolvedType() == COMPLEX) 
 			return 2 * int(numSample);
 		else
 			return int(numSample);
