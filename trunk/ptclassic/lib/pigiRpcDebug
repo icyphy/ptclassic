@@ -15,5 +15,5 @@ DEBUG='xterm -sl 1000 -title pigiRpc_debug_window -bg black -fg green -e gdb'
 
 ${PT_DEBUG-$DEBUG} -command=$dbgcmdfile $PIGIRPC
 
-/bin/rm $dbgcmdfile
+rm $dbgcmdfile
 
