@@ -31,37 +31,45 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "tkConfig.h"
 #include "tkInt.h"
+/*
+ * Note that although the following include is in the ptolemy kernel
+ * directory, it does not pull in any C++ code.
+ */
+#include "ieee.h"
 #define COMMANDSIZE 512
 #define REPORT_TCL_ERRORS 1
 
 static char command[COMMANDSIZE];
 
-
 /*
  *----------------------------------------------------------------------
- * Internal functions for bar graph
+ * Compute the edges of a rectagle given a bunch of parameters
  *----------------------------------------------------------------------
- * Routine to scale the fullScale data member of the owner of a bar graph.
+ *	x0,x1,y0,y1:	pointers to integers into which to store the results
+ *	i,j:		bar number and trace number
+ *	numTraces:	number of traces
+ *	numBars:	number of bars
+ *	width:		width the of the canvas
+ *	height:		height the of the canvas
+ *	top:		top of the range
+ *	bottom:		bottom of the range
+ *	data:		data to plot, relative to top and bottom
  */
-static int
-verticalScale(fullScale, interp, argc, argv)
-    double* fullScale;
-    Tcl_Interp *interp;
-    int argc;
-    char **argv;
+void ptkFigureBarEdges(x0,x1,y0,y1,
+		i,j,
+		numTraces, numBars, width, height,
+		top, bottom, data)
+    int *x0, *x1, *y0, *y1, i, j, numTraces, numBars, width, height;
+    double top, bottom, data;
 {
-    float temp;
-    if(sscanf(argv[1], "%4f", &temp) != 1) {
-	Tcl_AppendResult(interp,
-		"Cannot reset full scale in bar graph",(char*) NULL);
-	return TCL_ERROR;
-    }
-    *fullScale = *fullScale * temp;
-
-    /* Return new full scale value to tcl */
-    sprintf(interp->result, "%f", *fullScale);
-
-    return TCL_OK;
+	    *x0 = ((i+0.125-j*0.25/numTraces)*width)/numBars;
+	    *y0 = height*top/(top - bottom);
+	    if (*y0 > height) *y0 = height;
+	    if (*y0 < 0) *y0 = 0;
+	    *x1 = ((i+0.875-j*0.25/numTraces)*width)/numBars;
+	    if(IsNANorINF(data) || data > top) *y1 = 0;
+	    else if(data < bottom) *y1 = height;
+	    else *y1 = height*(top-data)/(top-bottom);
 }
 
 /*
@@ -71,10 +79,12 @@ verticalScale(fullScale, interp, argc, argv)
  *     interp: pointer to the tcl interpreter
  *     name: name of the top level window
  *     desc: description to be put in the window
- *     data: an array of data to be plotted
+ *     data: an array of arrays of data to be plotted
+ *     numTraces: number of traces in the bar graph
  *     numBars: number of bars in the bar graph
- *     fullScale: pointer to value of the full scale on the bar graph
- *     id: an array to fill with item IDs
+ *     top: top of the range of bar graph
+ *     bottom: bottom of the range of bar graph
+ *     id: an array of arrays to fill with item IDs
  *     geo: geometry of the overall window, in the form =AxB+C+D
  *     width: width of the bar graph itself
  *     height: height of the bar graph itself
@@ -83,25 +93,21 @@ verticalScale(fullScale, interp, argc, argv)
  */
 
 int ptkMakeBarGraph
-(interp, win, name, desc, data, numBars, fullScale, id, geo, deswidth, desheight)
+(interp, win, name, desc, data, numTraces, numBars, top, bottom,
+id, geo, deswidth, desheight)
     Tcl_Interp *interp;
     Tk_Window *win;
     char *name, *desc;
-    double *data, *fullScale;
-    int numBars;
-    int *id;
+    double **data, top, bottom;
+    int numTraces, numBars;
+    int **id;
     char *geo;
     double deswidth, desheight;
 {
-    int i;
+    int i,j;
     int width, height;
     int x0, y0, x1, y1;
     Tk_Window plotwin;
-
-    /* Register the function to reset fullScale with Tcl */
-    sprintf(command, "%sverticalScale", name);
-    Tcl_CreateCommand (interp, command, verticalScale,
-            (ClientData) fullScale, (void (*)()) NULL);
 
     /* Make the bar graph */
     sprintf(command, "ptkMakeBarGraph %s \"%s\" \"%s\" %d %f %f",
@@ -116,21 +122,23 @@ int ptkMakeBarGraph
     width = Tk_Width (plotwin);
     height = Tk_Height (plotwin);
 
-    for (i=0;i<numBars;i++) {
-	x0 = ((i+0.1)*width)/numBars;
-	y0 = height/2.0;
-	x1 = ((i+0.9)*width)/numBars;
-	y1 = (1-data[i]/(*fullScale))*height/2;
-        sprintf(command, "%s.pf.plot coords %d %d %d %d %d",
-		name, id[i], x0, y0, x1, y1);
+    for (j=0;j<numTraces;j++) {
+	for (i=0;i<numBars;i++) {
+	    ptkFigureBarEdges(&x0,&x1,&y0,&y1, i,j,
+                numTraces, numBars, width, height,
+                top, bottom, data[j][i]);
 
-        sprintf(command,
+            sprintf(command, "%s.pf.plot coords %d %d %d %d %d",
+		name, id[j][i], x0, y0, x1, y1);
+
+            sprintf(command,
 		"%s.pf.plot create rect %fc %fc %fc %fc -fill red3",
 		name, x0, y0, x1, y1);
-        if(Tcl_Eval(interp, command, 0, (char**)NULL) != TCL_OK)
-            return 0;
-        else
-            sscanf(interp->result,"%d",&id[i]);
+            if(Tcl_Eval(interp, command, 0, (char**)NULL) != TCL_OK)
+                return 0;
+            else
+                sscanf(interp->result,"%d",&id[j][i]);
+	}
     }
     return 1;
 }
@@ -142,38 +150,27 @@ int ptkMakeBarGraph
  *     interp: pointer to the tcl interpreter
  *     win: a pointer to a reference window (top level window)
  *     name: name of the top level window
- *     data: an array of data to be plotted
+ *     data: an array of arrays of data to be plotted
  *     numBars: number of bars in the bar graph
- *     fullScale: pointer to value of the full scale on the bar graph
- *     id: an array of item IDs filled by makeBarChart
+ *     top: top of the range of bar graph
+ *     bottom: bottom of the range of bar graph
+ *     id: an array of arrays of item IDs filled by makeBarChart
  *
  * Returns 1 if bar graph is successfully updated, 0 otherwise.
+ * This procedure queries the window for its actual current width.
  */
 
-/* this check traps IEEE infinities and NaN values
- * the ifdef condition should really be: implement this function if the
- * processor uses IEEE arithmetic.
- */
-#ifdef mips
-#include <nan.h>
-#endif
-#ifdef sun
-#define IsNANorINF(X) (isnan(X) || isinf(X))
-#endif
-#ifndef IsNANorINF
-#define IsNANorINF(X) 0
-#endif
-
-int ptkSetBarGraph (interp, win, name, data, numBars, fullScale, id)
+int ptkSetBarGraph (interp, win, name, data, numTraces,
+	numBars, top, bottom, id)
     Tcl_Interp *interp;
     Tk_Window *win;
     char *name;
-    double *data;
-    int numBars;
-    double *fullScale;
-    int *id;
+    double **data;
+    int numTraces, numBars;
+    double top, bottom;
+    int **id;
 {
-    int i;
+    int i,j;
     int width, height;
     int x0, y0, x1, y1;
     Tk_Window plotwin;
@@ -185,17 +182,17 @@ int ptkSetBarGraph (interp, win, name, data, numBars, fullScale, id)
     width = Tk_Width (plotwin);
     height = Tk_Height (plotwin);
 
-    for (i=0;i<numBars;i++) {
-	x0 = ((i+0.1)*width)/numBars;
-	y0 = height*0.5;
-	x1 = ((i+0.9)*width)/numBars;
-	if(IsNANorINF(data[i]) || data[i] > *fullScale) y1 = 0.0;
-	else if(data[i] < -(*fullScale)) y1 = height;
-	else y1 = (1-data[i]/(*fullScale))*height*0.5;
-        sprintf(command, "%s.pf.plot coords %d %d %d %d %d",
-		name, id[i], x0, y0, x1, y1);
-        if(Tcl_Eval(interp, command, 0, (char**)NULL) != TCL_OK)
-            return 0;
+    for (j=0;j<numTraces;j++) {
+	for (i=0;i<numBars;i++) {
+	    ptkFigureBarEdges(&x0,&x1,&y0,&y1, i,j,
+                numTraces, numBars, width, height,
+                top, bottom, data[j][i]);
+
+            sprintf(command, "%s.pf.plot coords %d %d %d %d %d",
+		name, id[j][i], x0, y0, x1, y1);
+            if(Tcl_Eval(interp, command, 0, (char**)NULL) != TCL_OK)
+                return 0;
+	}
     }
     return 1;
 }
