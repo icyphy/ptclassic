@@ -39,51 +39,55 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <stream.h>
 #include "Scheduler.h"
 #include "NamedObj.h"
+#include "PtGate.h"
 
 typedef const char cc;
 
-static void p3(cc* m1, cc* m2, cc* m3) {
+KeptGate gate;
+
+static void p4(cc* m1, cc* m2, cc* m3=0, cc* m4=0) {
+	CriticalSection region(gate);
 	if (!m2) m2 = "";
 	if (!m3) m3 = "";
+	if (!m4) m4 = "";
 	cerr << m1 << " " << m2 << " " << m3 << "\n";
 }
 
 void
 Error :: error(cc* m1, cc* m2, cc* m3) {
-	cerr << "ERROR: ";
-	p3(m1,m2,m3);
+	p4("ERROR: ",m1,m2,m3);
 }
 
 void
 Error :: warn(cc* m1, cc* m2, cc* m3) {
-	cerr << "Warning: ";
-	p3(m1,m2,m3);
+	p4("Warning: ",m1,m2,m3);
 }
 
 void
 Error :: error (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
-	StringList n = o.fullName();
-	cerr << "ERROR: " << n << ": ";
-	p3(m1,m2,m3);
+	StringList n = "ERROR: ";
+	n << o.fullName() << ": ";
+	p4(n,m1,m2,m3);
 }
 
 void
 Error :: warn (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
-	StringList n = o.fullName();
-	cerr << "Warning: " << n << ": ";
-	p3(m1,m2,m3);
+	StringList n = "Warning: ";
+	n << o.fullName() << ": ";
+	p4(n,m1,m2,m3);
 }
 
 void
 Error :: message(cc* m1, cc* m2, cc* m3) {
-	p3(m1,m2,m3);
+	CriticalSection region(gate);
+	p4(m1,m2,m3);
 }
 
 void
 Error :: message (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 	StringList n = o.fullName();
-	cerr << n << ": ";
-	p3(m1,m2,m3);
+	n << ": ";
+	p4(n,m1,m2,m3);
 }
 
 void
