@@ -33,11 +33,11 @@
 # Tycho test bed, see $TYCHO/doc/coding/testing.html for more information.
 
 set TYCHO [file join $env(PTOLEMY) tycho]
+set env(TYCHO) $TYCHO
 
-# Load up the test definitions.
-if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
-} {}
+lappend auto_path $TYCHO
+package require tycho.kernel.basic
+package require tycho.util.tytest
 
 # Uncomment this to get a full report, or set in your Tcl shell window.
 # set VERBOSE 1
@@ -87,12 +87,12 @@ proc readTmpFile {tmpfile} {
 # Initialize a universe by resetting, setting the name and the target.
 # This would be a good place to test schedulers.
 #
-proc sdfInitUniverse {{name {SDF_Init_Universe}} {target loop-SDF}} {
+proc sdfInitUniverse {{name {SDF_Init_Universe}} {target default-SDF}} {
     reset __empty__
     domain SDF
     newuniverse ${name}Test SDF
     seed 100
-    target default-SDF
+    target $target
     #target loop-SDF
     #targetparam loopScheduler "DEF #choices: DEF, CLUST,ACYLOOP"
 }
