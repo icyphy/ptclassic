@@ -38,9 +38,6 @@ complete filename of the displayed image.
 	ccinclude {
 		"GrayImage.h" , <std.h> , <stdio.h>, "Error.h"
 	}
-
-// INPUT AND STATES.
-
 	input { name { inData } type { message } }
 	defstate {
 		name { command }
@@ -61,31 +58,31 @@ complete filename of the displayed image.
 		desc { If 'y' or 'Y', then save the file }
 	}
 
-// CODE.
 	go {
-// Read data from input.
+		// Read data from input.
 		Envelope envp;
 		(inData%0).getMessage(envp);
 		TYPE_CHECK(envp, "GrayImage");
 		const GrayImage* image = (const GrayImage*) envp.myData();
 		if (image->fragmented() || image->processed()) {
-			Error::abortRun(*this,
-					"Can't display fragmented or processed image.");
-			return;
+		  Error::abortRun(*this,
+			"Cannot display fragmented or processed image.");
+		  return;
 		}
 
-// Set filename and save values.
+		// Set filename and save values.
 		const char* saveMe = saveImage;
 		int del = !((saveMe[0] == 'y') || (saveMe[0] == 'Y'));
 
-		char fileName[256]; fileName[0] = '\000';
+		char fileName[256];
+		fileName[0] = '\000';
 		if ((const char*) imageName) {
-			strcpy(fileName, (const char*) imageName);
+		  strcpy(fileName, (const char*) imageName);
 		}
 		if (fileName[0] == '\000') {
-			char* nm = tempFileName();
-			strcpy(fileName, nm);
-			LOG_DEL; delete nm;
+		  char* nm = tempFileName();
+		  strcpy(fileName, nm);
+		  LOG_DEL; delete [] nm;
 		}
 		char numstr[16];
 		sprintf(numstr, ".%d", image->retId());
@@ -93,24 +90,24 @@ complete filename of the displayed image.
 
 		FILE* fptr = fopen(fileName, "w");
 		if (fptr == (FILE*) NULL) {
-			Error::abortRun(*this, "can not create: ", fileName);
-			return;
+		  Error::abortRun(*this, "cannot create: ", fileName);
+		  return;
 		}
 
-// Write the PGM header and the data, and then run.
-		fprintf (fptr, "P5\n %d %d 255\n", image->retWidth(),
-				image->retHeight());
-		fwrite((const char*)image->constData(), sizeof(unsigned char),
+		// Write the PGM header and the data, and then run.
+		fprintf(fptr, "P5\n %d %d 255\n", image->retWidth(),
+			image->retHeight());
+		fwrite( (const char*)image->constData(), sizeof(unsigned char),
 			(unsigned) image->retWidth() * image->retHeight(), fptr);
 		fclose(fptr);
 
 		char cmdbuf[256];
 		sprintf (cmdbuf, "(%s %s", (const char*) command, fileName);
 		if (del) {
-			strcat (cmdbuf, "; rm -f ");
-			strcat (cmdbuf, fileName);
+		  strcat(cmdbuf, "; rm -f ");
+		  strcat(cmdbuf, fileName);
 		}
-		strcat (cmdbuf, ")&");		// Run command in the background
-		system (cmdbuf);
+		strcat(cmdbuf, ")&");		// Run command in the background
+		system(cmdbuf);
 	} // end go{}
 } // end defstar { DisplayImage }

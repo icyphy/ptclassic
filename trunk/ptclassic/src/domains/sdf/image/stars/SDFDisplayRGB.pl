@@ -41,7 +41,6 @@ to produce the full filename of the displayed image.
 		"GrayImage.h" , <std.h> , <stdio.h>,  "Error.h"
 	}
 
-// INPUT AND STATES.
 	input { name { rinput } type { message } }
 	input { name { ginput } type { message } }
 	input { name { binput } type { message } }
@@ -65,9 +64,8 @@ to produce the full filename of the displayed image.
 		desc { If 'y' or 'Y', then save the file }
 	}
 
-
 	go {
-// Read data from input.
+		// Read data from input.
 		Envelope renvp, genvp, benvp;
 		(rinput%0).getMessage(renvp);
 		TYPE_CHECK(renvp, "GrayImage");
@@ -87,18 +85,19 @@ to produce the full filename of the displayed image.
 		}
 
 
-// Set filename and save values.
+		// Set filename and save values.
 		const char* saveMe = saveColor;
 		int del = !((saveMe[0] == 'y') || (saveMe[0] == 'Y'));
 
-		char fileName[256]; fileName[0] = '\000';
+		char fileName[256];
+		fileName[0] = '\000';
 		if ((const char*) imageName) {
-			strcpy(fileName, (const char*) imageName);
+		  strcpy(fileName, (const char*) imageName);
 		}
 		if (fileName[0] == '\000') {
-			char* nm = tempFileName();
-			strcpy(fileName, nm);
-			LOG_DEL; delete nm;
+		  char* nm = tempFileName();
+		  strcpy(fileName, nm);
+		  LOG_DEL; delete [] nm;
 		}
 		char numtmp[16];
 		sprintf(numtmp, ".%d", imgR->retId());
@@ -106,11 +105,11 @@ to produce the full filename of the displayed image.
 
 		FILE* fptr = fopen(fileName, "w");
 		if (fptr == (FILE*) NULL) {
-			Error::abortRun(*this, fileName, ": can't create");
+			Error::abortRun(*this, fileName, ": cannot create");
 			return;
 		}
 
-// change into RGB format
+		// change into RGB format
 		int Width = imgR->retWidth();
 		int Height = imgR->retHeight();
 
@@ -132,7 +131,7 @@ to produce the full filename of the displayed image.
 				rgbfp[temp3+2] = bdata[temp2];
 		}	}
 
-// Write the PPM header and then the data.
+		// Write the PPM header and then the data.
 		fprintf(fptr, "P6\n %d %d 255\n", Width, Height);
 		fwrite((const char*) rgbfp, sizeof(unsigned char),
 				unsigned(3*Width*Height), fptr);
@@ -146,7 +145,7 @@ to produce the full filename of the displayed image.
 			strcat(buf, "; rm -f ");
 			strcat(buf, fileName);
 		}
-// Run command in the background
+		// Run command in the background
 		strcat (buf, ")&");
 		system (buf);
 	} // end go{}
