@@ -477,30 +477,30 @@ ifdef CGC
 	endif
 	# Multiprocessor targets are included if CGPAR is defined
 	ifdef CGPAR
-		CUSTOM_DIRS += $(CGCDIR)/targets/multiprocessor
+		CUSTOM_DIRS += $(CGCDIR)/targets/multiproc
 		ifeq ($(USE_SHARED_LIBS),yes) 
 			LIBS += -lcgcmultitargets
 			LIBFILES += $(LIBDIR)/libcgcmultitargets.$(LIBSUFFIX)
 		else
-			TARGETS += $(CGCT)/multiprocessor/CGCUnixSend.o \
-				$(CGCT)/multiprocessor/CGCUnixReceive.o \
-				$(CGCT)/multiprocessor/CGCMultiTarget.o \
-				$(CGCT)/multiprocessor/CGCMacroStar.o \
-				$(CGCT)/multiprocessor/CGCDDFCode.o \
-				$(CGCT)/multiprocessor/CompileCGSubsystems.o
+			TARGETS += $(CGCT)/multiproc/CGCUnixSend.o \
+				$(CGCT)/multiproc/CGCUnixReceive.o \
+				$(CGCT)/multiproc/CGCMultiTarget.o \
+				$(CGCT)/multiproc/CGCMacroStar.o \
+				$(CGCT)/multiproc/CGCDDFCode.o \
+				$(CGCT)/multiproc/CompileCGSubsystems.o
 		endif
 	endif
 	# Uniprocessor targets are included by default
-	CUSTOM_DIRS += $(CGCDIR)/targets/uniprocessor
+	CUSTOM_DIRS += $(CGCDIR)/targets/uniproc
 	ifeq ($(USE_SHARED_LIBS),yes) 
 		LIBS += -lcgctargets
 		LIBFILES += $(LIBDIR)/libcgctargets.$(LIBSUFFIX)
 	else
-		TARGETS += $(CGCT)/uniprocessor/CGCMakefileTarget.o \
-			   $(CGCT)/uniprocessor/CGCSDFBase.o \
-			   $(CGCT)/uniprocessor/CGCSDFSend.o \
-			   $(CGCT)/uniprocessor/CGCSDFReceive.o \
-			   $(CGCT)/uniprocessor/CreateSDFStar.o
+		TARGETS += $(CGCT)/uniproc/CGCMakefileTarget.o \
+			   $(CGCT)/uniproc/CGCSDFBase.o \
+			   $(CGCT)/uniproc/CGCSDFSend.o \
+			   $(CGCT)/uniproc/CGCSDFReceive.o \
+			   $(CGCT)/uniproc/CreateSDFStar.o
 	endif
 	# kernel and stars
 	STARS += $(LIBDIR)/cgcdspstars.o $(LIBDIR)/cgcstars.o
@@ -532,7 +532,7 @@ ifdef BDF
 		TARGETS += $(CGT)/CGBDFTarget.o 
 	endif
 	ifdef CGC
-		TARGETS += $(CGCT)/uniprocessor/CGCBDFTarget.o
+		TARGETS += $(CGCT)/uniproc/CGCBDFTarget.o
 	endif
 	# kernel and stars
 	CUSTOM_DIRS += $(BDFDIR)/stars
