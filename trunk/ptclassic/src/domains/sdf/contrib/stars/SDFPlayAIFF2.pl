@@ -33,20 +33,31 @@ limitation of liability, and disclaimer of warranty provisions.
 	ccinclude {"SimControl.h", <string.h>, <math.h>, "miscFuncs.h", "paths.h", <std.h>}
 
 	header {
-	    // AIFF Type Definitions
-		typedef char  ID[4];
 
-	    struct  Chunk {
-		ID      ckID;
-		long    ckSize;
-		ID      formType;
-	    };
+#define AIFF_NUM_CHANNELS 2
+#define AIFF_BITS_PER_SAMPLE 16
+#define AIFF_ID_LENGTH 4
+#define AIFF_ID_EMPTY "   "
 
-	    struct  ChunkHeader {
-		ID      ckID;
-		long    ckSize;
-	    };
-	}
+// AIFF Type Definitions
+typedef char  AIFF_ID[AIFF_ID_LENGTH];
+
+struct  AIFFChunk {
+    AIFF_ID ckID;
+    long    ckSize;
+    AIFF_ID formType;
+};
+
+#define AIFF_CHUNK_INITIAL { AIFF_ID_EMPTY, 0L, AIFF_ID_EMPTY }
+
+struct  AIFFChunkHeader {
+    AIFF_ID ckID;
+    long    ckSize;
+};
+
+#define AIFF_CHUNK_HEADER_INITIAL { AIFF_ID_EMPTY, 0L }
+
+}
 
 	input {
 		name { left }
@@ -83,23 +94,23 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 
 	private {
-	    int WriteChunk(const Chunk &chunk);
-	    int WriteChunkHeader(const ChunkHeader &chunk);
-	    int WriteID(const ID id);
+	    int WriteChunk(const AIFFChunk &chunk);
+	    int WriteChunkHeader(const AIFFChunkHeader &chunk);
+	    int WriteID(const AIFF_ID id);
 	    int WriteLONG(long item);
 	    int WriteULONG(unsigned long item);
 	    int WriteSHORT(int item);
 	    void double_to_extended(unsigned char *ps, double pd);
 	    
 	    pt_ofstream output;
-	    const char *useName;
+	    char *useName;
 	    int numChannels;
 	    unsigned long numSampleFrames;
             int delFile;
 	}
 
-        constructor {useName = NULL;}
-	destructor {delete [] useName; output.close();}
+        constructor { useName = 0; }
+	destructor { delete [] useName; output.close(); }
 
 	setup {
    // Check for required program
@@ -129,20 +140,20 @@ limitation of liability, and disclaimer of warranty provisions.
    }
 
    // Write the file header
-   Chunk form;
-   strncpy(form.ckID, "FORM", 4);
-   strncpy(form.formType, "AIFF", 4);
+   AIFFChunk form = AIFF_CHUNK_INITIAL;
+   strncpy(form.ckID, "FORM", AIFF_ID_LENGTH);
+   strncpy(form.formType, "AIFF", AIFF_ID_LENGTH);
    form.ckSize = 0;      // Have to rewrite later
    WriteChunk(form);
 
    // Start the SSND chunk
-   ChunkHeader ssnd;
-   strncpy(ssnd.ckID, "SSND", 4);
+   AIFFChunkHeader ssnd = AIFF_CHUNK_HEADER_INITIAL;
+   strncpy(ssnd.ckID, "SSND", AIFF_ID_LENGTH);
    ssnd.ckSize = 0;           // Have to rewrite later
    WriteChunkHeader(ssnd);
 
-   WriteULONG(0l);
-   WriteULONG(0l);
+   WriteULONG(0L);
+   WriteULONG(0L);
 
    // We are ready to write audio at this point (we write the other stuff last)
    numSampleFrames = 0;
@@ -171,13 +182,15 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	wrapup {
    // Write the COMM header
-   ChunkHeader comm;
-   strncpy(comm.ckID, "COMM", 4);
+   AIFFChunkHeader comm = AIFF_CHUNK_HEADER_INITIAL;
+   strncpy(comm.ckID, "COMM", AIFF_ID_LENGTH);
    comm.ckSize = 18;
    WriteChunkHeader(comm);
-   WriteSHORT(2);      // 2 channels
+
+   WriteSHORT(AIFF_NUM_CHANNELS);        // two channels
    WriteULONG(numSampleFrames);
-   WriteSHORT(16);     // sample size in bits
+   WriteSHORT(AIFF_BITS_PER_SAMPLE);     // sample size in bits
+
    unsigned char xsampleRate[10];
    double_to_extended(xsampleRate, sampleRate);
    output.write((const char *)xsampleRate, 10);
@@ -187,7 +200,7 @@ limitation of liability, and disclaimer of warranty provisions.
    output.seekp(4);
    WriteULONG(filelen - 8);
    output.seekp(16);
-   WriteULONG(numSampleFrames * 4 + 8);
+   WriteULONG(numSampleFrames * sizeof(long) + 8);
 
    if(!output)
    {
@@ -219,12 +232,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	code {
 /*
  *  Name :         SDFPlayAIFF2::WriteChunk()
- *  Description :  This writes an object of type Chunk to disk,
+ *  Description :  This writes an object of type AIFFChunk to disk,
  *                 for any type of machine.
  */
 
 int
-SDFPlayAIFF2::WriteChunk(const Chunk &chunk)
+SDFPlayAIFF2::WriteChunk(const AIFFChunk &chunk)
 {
    WriteID(chunk.ckID);
    WriteLONG(chunk.ckSize);
@@ -236,12 +249,12 @@ SDFPlayAIFF2::WriteChunk(const Chunk &chunk)
 
 /*
  *  Name :         SDFPlayAIFF2::WriteChunkHeader()
- *  Description :  This writes an object of type ChunkHeader to disk,
+ *  Description :  This writes an object of type AIFFChunkHeader to disk,
  *                 for any type of machine.
  */
 
 int
-SDFPlayAIFF2::WriteChunkHeader(const ChunkHeader &chunk)
+SDFPlayAIFF2::WriteChunkHeader(const AIFFChunkHeader &chunk)
 {
    WriteID(chunk.ckID);
    WriteLONG(chunk.ckSize);
@@ -251,13 +264,13 @@ SDFPlayAIFF2::WriteChunkHeader(const ChunkHeader &chunk)
 
 /*
  *  Name :         SDFPlayAIFF2::WriteID()
- *  Description :  Writes an AIFF/AIFC file object of type ID.
+ *  Description :  Writes an AIFF/AIFC file object of type AIFF_ID.
  */
 
 int
-SDFPlayAIFF2::WriteID(const ID id)
+SDFPlayAIFF2::WriteID(const AIFF_ID id)
 {
-   output.write(id, 4);
+   output.write(id, AIFF_ID_LENGTH);
    return 1;
 }
 
@@ -271,15 +284,15 @@ int
 SDFPlayAIFF2::WriteLONG(long item)
 {
    int i;
-   unsigned char b[4];
+   unsigned char b[sizeof(long)];
 
-   for(i=0;  i<4;  i++)
+   for(i = 0; i < int(sizeof(long));  i++)
    {
       b[3-i] = (unsigned char) (item & 0xff);
       item >>= 8;
    }
 
-   output.write(b, 4);
+   output.write(b, sizeof(long));
 
    return 1;
 }
@@ -294,15 +307,15 @@ int
 SDFPlayAIFF2::WriteULONG(unsigned long item)
 {
    int i;
-   unsigned char b[4];
+   unsigned char b[sizeof(long)];
 
-   for(i=0;  i<4;  i++)
+   for(i = 0; i < int(sizeof(long)); i++)
    {
       b[3-i] = (unsigned char)(item & 0xff);
       item >>= 8;
    }
 
-   output.write(b, 4);
+   output.write(b, sizeof(long));
 
    return 1;
 }
