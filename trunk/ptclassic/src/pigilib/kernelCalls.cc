@@ -287,16 +287,6 @@ KcDomainOf(char* name) {
 	return b->domain();
 }
 
-// Delete the universe and make another
-extern "C" void
-KcClearUniverse(const char* name) {
-	// ptcl function replaces old Kernel Calls code:
-	ptcl -> resetUniverse();
-	LOG << "reset\n";
-	LOG << "# Creating universe '" << name << "'\n";
-	logDomain();
-}
-
 // Create a new instance of star or galaxy and set params for it
 extern "C" boolean
 KcInstance(char *name, char *ako, ParamListType* pListPtr) {
