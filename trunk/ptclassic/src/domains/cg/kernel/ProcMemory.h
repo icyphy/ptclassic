@@ -70,8 +70,8 @@ public:
 	// required PortHole attributes for any states or ports that
 	// will be assigned this memory.
 	ProcMemory (const char* n, const Attribute& a, const Attribute& p)
-		: myName(n), reqdStateAttributeBits(a), reqdPortAttributeBits(p)
-		{}
+		: reqdStateAttributeBits(a), reqdPortAttributeBits(p),
+	          myName(n) {}
 
 	// Destructor.  Dummy here, but declare it virtual.
 	virtual ~ProcMemory() {}
