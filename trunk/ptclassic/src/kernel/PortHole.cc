@@ -1,6 +1,7 @@
 static const char file_id[] = "Connect.cc";
 #ifdef __GNUG__
 #pragma implementation
+#pragma implementation "CircularBuffer.h"
 #endif
 
 #include "Connect.h"
@@ -635,6 +636,15 @@ void PortHole :: putParticle()
 // This method is called after go(); the buffer now contains numberTokens
 // Particles that are to be send to the output Geodesic
 
+	if (numberTokens == 1) {
+		// fast case for when moving one particle
+		// most common case.
+		p = myBuffer->here();
+		myGeodesic->put(*p);
+		*p = myPlasma->get();
+		return;
+	}
+	// slow case for multiple particles.
 	// Back up in the buffer by numberTokens
 	myBuffer->backup(numberTokens);
 
