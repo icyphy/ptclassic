@@ -36,24 +36,23 @@
 #
 ensemble ::tycho::cache {
     # The following returns information regarding the path (url).
-    # If exists, return the physical file name associated with this path.
-    option getcachefile {path}   {::tycho::CacheManager::getcachefile $path}
-    option getcontenttype {path} {::tycho::CacheManager::getcontenttype $path}
-    option getdate {path}        {::tycho::CacheManager::getdate $path}
-    # Get the size
-    option getsize {path}        {::tycho::CacheManager::getsize $path}
+    # If exists, return the physical file name associated with this url.
+    option getcachefile {url}   {::tycho::CacheManager::getcachefile $url}
+    option getcontenttype {url} {::tycho::CacheManager::getcontenttype $url}
+    option getdate {url}        {::tycho::CacheManager::getdate $url}
+    option getsize {url}        {::tycho::CacheManager::getsize $url}
 
     # The following are used directly by Resource<protocol>
     # Test if a resource exists.
-    option exists {path} {::tycho::CacheManager::exists $path}
-    # True if path still has the same information
-    option same {path date size contenttype} {
-        ::tycho::CacheManager::same $path $date $size $contenttype
+    option exists {url} {::tycho::CacheManager::exists $url}
+    # True if url still has the same information
+    option same {url date size contenttype} {
+        ::tycho::CacheManager::same $url $date $size $contenttype
     }
-    option tmpCacheName {path}   {::tycho::CacheManager::tmpCacheName $path}
-    option update {path date size contenttype newphysicalfile} {
+    option tmpCacheName {url}   {::tycho::CacheManager::tmpCacheName $url}
+    option update {url date size contenttype newphysicalfile} {
         ::tycho::CacheManager::update \
-                $path $date $size $contenttype $newphysicalfile
+                $url $date $size $contenttype $newphysicalfile
     }
     option debugprint {} {::tycho::CacheManager::debugprint}
 }
@@ -77,40 +76,40 @@ class ::tycho::CacheManager {
     ###################################################################
     ####                           public procs                    ####
 
-    # Return the full path and name of the cache associated with $path
-    proc getcachefile   {path}     {}
+    # Return the full url and name of the cache associated with $url
+    proc getcachefile   {url}     {}
 
-    # Return the contenttype associated with $path
-    proc getcontenttype {path}     {returninfo $path 2}
+    # Return the contenttype associated with $url
+    proc getcontenttype {url}     {returninfo $url 2}
 
-    # Return the size associated with $path
-    proc getsize        {path}     {returninfo $path 1}
+    # Return the size associated with $url
+    proc getsize        {url}     {returninfo $url 1}
 
-    # Return the date associated with $path
-    proc getdate        {path}     {returninfo $path 0}
+    # Return the date associated with $url
+    proc getdate        {url}     {returninfo $url 0}
 
     # Return the information in the common array, used by getcachefile,
     # getcontenttype, getsize, and getdate.
-    proc returninfo  {path idx}
+    proc returninfo  {url idx}
 
     # The following are used directly by Resource<protocol>
     # Test if a physical file exists.
-    proc exists {path} {return [info exists _url($path)]}
+    proc exists {url}
 
     # Initialization routine, called to reset the common variable,
     # then read from the database file if it exists. Also, create
     # appropriate cache file, etc...
     proc initialize {}
 
-    # True if path still has the same information
-    proc same {path date size contenttype}
+    # True if url still has the same information
+    proc same {url date size contenttype}
 
-    # Return the full path and name of the next cache file, along with
+    # Return the full url and name of the next cache file, along with
     # the correct file extension. Similar to ::tycho::tmpFileName.
     proc tmpCacheName {filename}
 
     # Update in the database the new file
-    proc update {path date size contenttype newphysicalfile}
+    proc update {url date size contenttype physicalfile}
 
     # Debugging purpose only, print out the memory
     proc debugprint {}
@@ -122,7 +121,7 @@ class ::tycho::CacheManager {
     ####                        protected commons                  ####
 
     # Array which returns cache file name, contenttype, date, and size.
-    protected common _url
+    protected common _URL
 
     # The directory name of the cache
     protected common CACHEDIR
@@ -159,24 +158,32 @@ body ::tycho::CacheManager::destructor {} {
 ####                      public methods                             ####
 
 #####################################################################
+#### exists
+# If the cache exists in database (index.db), and exists physically,
+# return true. 
+body ::tycho::CacheManager::exists {url} {
+    return [expr [::info exists _URL($url)] && \
+            [::file exists [::tycho::cache getcachefile $url]]]
+}
+
+#####################################################################
 #### getcachefile
-# Return the cache file name (with it's full path) that's associated
-# with $path
+# Return the cache file name (with it's full url) that's associated
+# with $url
 #
-body ::tycho::CacheManager::getcachefile {path} {
-    set returnstring [returninfo $path 3]
+body ::tycho::CacheManager::getcachefile {url} {
+    set returnstring [returninfo $url 3]
     if {$returnstring!={}} {
         return [::tycho::url join $CACHEDIR $returnstring]
     }
-    return $returnstring
 }
 
 #####################################################################
 #### returninfo
 # Helper function for cachefile, contenttype, date, and size. 
-body ::tycho::CacheManager::returninfo {path idx} {
-    if [info exists _url($path)] {
-        return [lindex $_url($path) $idx]
+body ::tycho::CacheManager::returninfo {url idx} {
+    if [info exists _URL($url)] {
+        return [lindex $_URL($url) $idx]
     }
 }
 
@@ -192,7 +199,7 @@ body ::tycho::CacheManager::returninfo {path idx} {
 body ::tycho::CacheManager::initialize {} {
     global TYCHO
     # Reset the variable in memory.
-    catch {unset _url}
+    catch {unset _URL}
 
     # Cache directory is in ~/.Tycho/cache
     set TYCHODIR [::tycho::url expand [::tycho::tychoDir]]
@@ -207,22 +214,22 @@ body ::tycho::CacheManager::initialize {} {
     set newidx 0
     # Open up the index file, associate link name with other info.
     # Each line in index.db has the format:
-    #                0                1     2            3
-    # link name      date modified    size  contenttype  file name
-    # http://ptolemy {{11/15/95 1:50} 1152  text/html    [0-9]+.html}
+    #                0                1     2            3           (4)?
+    # link name      date modified    size  contenttype  file name   (isdir)?
+    # http://ptolemy {{11/15/95 1:50} 1152  text/html    [0-9]+.html          }
     set fd [open $INDEXFILE]
     while {![eof $fd]} {
         set line [gets $fd]
         if {$line!={}} {
             set link [lindex $line 0]
             # Associate URL with other information
-            set _url($link) [lindex $line 1]
+            set _URL($link) [lindex $line 1]
             
             # Associate filename (if it exists)
-            set _fname([lindex $_url($link) 3]) 1
+            set _fname([lindex $_URL($link) 3]) 1
             
             # Retrieve the index by the name of the cache file
-            regexp {^([0-9]+).*$} [lindex $_url($link) 3] _ newidx
+            regexp {^([0-9]+).*$} [lindex $_URL($link) 3] _ newidx
             if {$newidx > $INDEX} {set INDEX $newidx}
         }
     }
@@ -239,19 +246,19 @@ body ::tycho::CacheManager::initialize {} {
 
     # Clean up index.db (files in index.db not exist in cache directory)
     set dirtyIndex 0
-    foreach url [array names _url] {
-        set file [lindex $_url($url) 3]
+    foreach url [array names _URL] {
+        set file [lindex $_URL($url) 3]
         if {![file exists [file join $CACHEDIR $file]]} {
-            ::puts "BAD: $file"
-            catch {unset _url($url)}
+            ::puts "deleting: $file"
+            catch {unset _URL($url)}
             set dirtyIndex 1
         }
     }
 
     # Rewrite index.db to compact the database list.
     set fd [open [file join $CACHEDIR index.bak] w+]
-    foreach url [array names _url] {
-        puts $fd [list $url $_url($url)]
+    foreach url [array names _URL] {
+        puts $fd [list $url $_URL($url)]
     }
     close $fd
     file copy -force [file join $CACHEDIR index.bak] $INDEXFILE
@@ -259,23 +266,28 @@ body ::tycho::CacheManager::initialize {} {
 
 #####################################################################
 #### same
-# True if path still has the same information
-body ::tycho::CacheManager::same {path date size contenttype} {
-    if {    [date $path]==$date && [size $path]==$path && \
-            [contenttype $path]==$contenttype} {
-        return 1
+# True if url still has the same information
+body ::tycho::CacheManager::same {url date size contenttype} {
+    # If a field is empty, then the file cannot be cached! Must
+    # update frequently.
+    if {[getdate $url]=={} || [getsize $url]=={} || [getcontenttype $url]=={}} {
+        return 0
     }
-    return 0
+
+    # If anything is different, then it's a different file.
+    return [expr \
+            [string match [getdate $url] $date] && \
+            [string match [getsize $url] $size] && \
+            [string match [getcontenttype $url] $contenttype]]
 }
 
 #####################################################################
 #### tmpCacheName
-# Return the full path and name of the next cache file.
+# Return the full url and name of the next cache file.
 # Similar to ::tycho::tmpFileName.
 # 
 body ::tycho::CacheManager::tmpCacheName {filename} {
     incr INDEX
-    ::puts "tmp [file join $CACHEDIR $INDEX][::tycho::url extension $filename]"
     return [file join $CACHEDIR $INDEX][::tycho::url extension $filename]
 }
 
@@ -284,9 +296,8 @@ body ::tycho::CacheManager::tmpCacheName {filename} {
 # Update in the database the new file. The new file must conform
 # to the regular expression [0-9]+.* to keep track of indices.
 #
-body ::tycho::CacheManager::update {path date size contenttype newfile} {
-    ::puts "UPDATING $path $date $size $contenttype $newfile"
-    # Make sure that the filename is inside the cache's path
+body ::tycho::CacheManager::update {url date size contenttype newfile} {
+    # Make sure that the filename is inside the cache's url
     if {![regexp "\^$CACHEDIR" $newfile]} {
         error "Cache file is not located in the right directory: $CACHEDIR
         return
@@ -295,12 +306,11 @@ body ::tycho::CacheManager::update {path date size contenttype newfile} {
     # Parse newfile so that it will only contain file name
     # (no directory name)
     set newfile [file tail $newfile]
-    set info [list [list $date $size $contenttype $newfile]]
-    set _url($path) $info
+    set _URL($url) [list $date $size $contenttype $newfile]
     # append it to the index database
-    set fd [open $INDEXFILE a]
-    puts $fd "$path $info"
-    close $fd
+    set fd [::open $INDEXFILE a]
+    ::puts $fd "$url [list $_URL($url)]"
+    ::close $fd
 }
 
 #####################################################################
@@ -308,14 +318,11 @@ body ::tycho::CacheManager::update {path date size contenttype newfile} {
 # debugging purpose only, dump the memory content
 body ::tycho::CacheManager::debugprint {} {
     ::puts "Current index: $INDEX"
-    foreach i [array names _url] {
+    foreach i [lsort [array names _URL]] {
         puts "\t$i"
-        puts "\t\t$_url($i)"
+        puts "\t\t$_URL($i)"
     }
 }
 
-
-
-
-
+catch {::tycho::ResourceHTTP::initialize}
 ::tycho::CacheManager::initialize
