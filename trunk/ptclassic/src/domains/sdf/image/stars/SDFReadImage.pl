@@ -1,11 +1,11 @@
 defstar {
 //////// INFO ON STAR.
-	name { ReadImage }
-	domain { SDF }
-	version { $Id$ }
-	author { Paul Haskell }
-	copyright { 1991 The Regents of the University of California }
-	location { SDF image library }
+	name	{ ReadImage }
+	domain	{ SDF }
+	version	{ $Id$ }
+	author	{ Paul Haskell }
+	copyright	{ 1991, 1992 The Regents of the Univ. of California }
+	location	{ SDF image library }
 	desc {
 Read a sequence of PGM-format images from different files and
 send them out in Packets (with data of type GrayImage).
@@ -74,23 +74,43 @@ are read and output are 'dir.2/pic2', 'dir.3/pic3', etc.
 		}
 
 // Read header, skipping 1 whitespace character at end.
-		char magic[80];
+		char word[80];
 		int width, height, maxval;
-		fscanf(fp, "%s %d %d %d%*c", magic, &width, &height, &maxval);
-		if (strcmp(magic, "P5")) { // "P5" is PGM magic number.
+		fscanf(fp, "%s", word);
+		if (strcmp(word, "P5")) { // "P5" is PGM magic number.
 			Error::abortRun(*this, fullName, ": not in PGM format");
 			return;
 		}
+		fscanf(fp, "%s", word);
+		while (word[0] == '#') {
+			fscanf(fp, "%*[^\n]%s", word);
+		}
+		sscanf(word, "%d", &width);
+		fscanf(fp, "%s", word);
+		while (word[0] == '#') {
+			fscanf(fp, "%*[^\n]%s", word);
+		}
+		sscanf(word, "%d", &height);
+		fscanf(fp, "%s", word);
+		while (word[0] == '#') {
+			fscanf(fp, "%*[^\n]%s", word);
+		}
+		sscanf(word, "%d", &maxval);
 		if (maxval > 255) {
 			Error::abortRun(*this, fullName,": not in 8-bit format.");
 			return;
 		}
-		LOG_NEW; GrayImage* imgData = new GrayImage(width, height, int(frameId));
-		frameId = int(frameId) + 1; // increment frame id
+		fscanf(fp, "%*c"); // skip one whitespace char.
+
+// Create image object and fill it with data.
+		LOG_NEW; GrayImage* imgData = new GrayImage(width, height,
+				int(frameId));
 		fread((char*)imgData->retData(), sizeof(unsigned char),
 				unsigned(width*height), fp);
 		fclose(fp);
-// Write whole frame to output here...
+		frameId = int(frameId) + 1; // increment frame id
+
+// Write the new frame to output...
 		Packet pkt(*imgData);
 		output%0 << pkt;
 	} // end go{}
