@@ -87,12 +87,7 @@
 #
 # <p><b>Bugs</b>
 # <ul>
-# <li> The bind delegation does not work properly. There are
-# all sorts of interactions between bindings that I haven't
-# figured out yet...
-# <li>
-# <li>
-# <li>
+# <li> ...
 # </ul>
 #
 # <p><b>Enhancements</b> (none)
@@ -338,7 +333,7 @@ body ::tycho::Selector::bind {tag args} {
 body ::tycho::Selector::clear {} {
     _detach
     _rebind
-    $slate selection clear
+    $slate select clear
 }
 
 #######################################################################
@@ -666,7 +661,7 @@ body ::tycho::Selector::_attach {interactor id x y options} {
 #
 body ::tycho::Selector::_clear {} {
     if { $clearprefix == "" } {
-	$slate _selection clear
+	$slate select clear
     } else {
 	eval $clearprefix
     }
@@ -753,7 +748,7 @@ body ::tycho::Selector::_delegate {mode id x y args} {
 #
 body ::tycho::Selector::_deselect {id} {
     if { $deselectprefix == "" } {
-	$slate _selection remove $id
+	$slate select remove $id
     } else {
 	eval $deselectprefix $id
     }
@@ -791,7 +786,7 @@ body ::tycho::Selector::_rebind {} {
 #
 body ::tycho::Selector::_select {id} {
     if { $selectprefix == "" } {
-	$slate _selection add $id
+	$slate select add $id
     } else {
 	eval $selectprefix $id
     }
