@@ -1,6 +1,6 @@
 {configure -canvasheight 600} {configure -canvaswidth 800}
 {titleSet title {Tycho Package Hierarchy}}
-{titleSet subtitle {created: Wed Jul 23 23:29:22 PDT 1997}}
+{titleSet subtitle {Version: $Id$, Last Modified: $Date$}}
 
 {add ::typack::Kernel {label {Kernel Package} color red} {}}
 {add ::tycho::Uninstantiable {label {Uninstantiable} altlink {$TYCHO/kernel/Uninstantiable.itcl {[ 	]*class[ 	]+::tycho::Uninstantiable}} link {$TYCHO/kernel/doc/codeDoc/Uninstantiable.html {}}} {::typack::Kernel}}
