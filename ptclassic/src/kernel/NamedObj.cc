@@ -30,3 +30,11 @@ StringList NamedObj :: readFullName () const
 	}
 	return out;
 }
+
+// These virtual functions do nothing in the baseclass; still it
+// is more efficient spacewise (and no time penalty) to put them here.
+void NamedObj::initialize() {}
+
+StringList NamedObj::printRecursive() { return printVerbose ();}
+
+NamedObj::~NamedObj() {}

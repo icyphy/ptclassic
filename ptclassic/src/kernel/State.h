@@ -51,11 +51,7 @@ class State : public NamedObj
 public:
 
         // Constructor
-        State()  {};
-
-        // Destructor.  Nothing to destroy here, but make it virtual
-        // so subclasses can be destroyed given only a State*
-        virtual ~State() {};
+        State()  {initValue = 0;}
 
 	// Method setting internal data  in the State
 	State& setState(const char* stateName,
@@ -83,13 +79,14 @@ public:
 	const char* getInitValue () const { return initValue;}
 
         // return the parameter type (for use in GUI, interpreter)
-        virtual char* type() { return "STRING";}
+        virtual char* type();
 
         // return the parameter size (redefined for array states)
-        virtual int size() { return 1;}
+        virtual int size();
 
 	// Initialize when starting or restarting a simulation
-	virtual void initialize(){};
+	// (inherits from NamedObj)
+	// virtual void initialize(){};
 
 	// get Token  from  string 
 	ParseToken getParseToken(Tokenizer&, Block*, char*);
@@ -102,7 +99,7 @@ public:
 
         // return the current value as a string.  Here we just give
         // back initValue
-	virtual StringList currentValue() { return initValue;}
+	virtual StringList currentValue();
 
 	// force all state classes to redefine this
 	virtual State* clone() = 0;

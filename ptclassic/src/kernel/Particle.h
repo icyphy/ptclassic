@@ -88,26 +88,26 @@ class IntSample : public Particle
 {
 public:
 	// Tell this world this Particle contains an int
-	dataType readType() const {return INT;}
+	dataType readType() const;
 
 	// Cast to an int, float, and Complex
-	operator int () const {return data;}
-	operator float () const {return (float)data;}
-	operator Complex () const {return Complex(data);}
+	operator int () const;
+	operator float () const;
+	operator Complex () const;
 
 	char* print() const;
 
 	// Initialize
-	IntSample(int i) {data=i;}
+	IntSample(int i) { data = i;}
 	IntSample() {data=0;}
 
 	// Wash the Particle
-	void initialize() {data=0;}
+	void initialize();
 
 	// Load up with data
-	void operator << (int i) {data=i;}
-	void operator << (float f) {data=(int)f;}
-	void operator << (Complex& c) {data=(int)c.real();}
+	void operator << (int i);
+	void operator << (float f);
+	void operator << (Complex& c);
 
 	// Copy the Particle
 	Particle& operator = (const Particle&);
@@ -124,12 +124,12 @@ class FloatSample : public Particle
 {
 public:
         // Tell this world this Particle contains an float
-        dataType readType() const {return FLOAT;}
+        dataType readType() const;
  
         // Cast to an int, float, and Complex
-        operator int () const {return (int)data;}
-        operator float () const {return data;}
-	operator Complex () const {return Complex(data);}
+        operator int () const;
+        operator float () const;
+	operator Complex () const;
 
 	char* print() const;
  
@@ -138,12 +138,12 @@ public:
         FloatSample() {data=0.0;}
  
         // Initialize the Particle
-        void initialize() {data=0.0;}
+        void initialize();
  
         // Load up with data
-        void operator << (int i) {data=(float)i;}
-        void operator << (float f) {data=f;}
-        void operator << (Complex& c) {data=(float)c.real();}
+        void operator << (int i);
+        void operator << (float f);
+        void operator << (Complex& c);
 
         // Copy the Particle
         Particle& operator = (const Particle&);
@@ -158,29 +158,29 @@ public:
 class ComplexSample : public Particle
 {
 public:
-        // Tell this world this Particle contains an float
-        dataType readType() const {return COMPLEX;}
+        // Tell this world this Particle contains a Complex
+        dataType readType() const;
  
         // Cast to an int, float, Complex
-        operator int () const {return (int)data.real();}
-        operator float () const {return (float)data.real();}
-	operator Complex () const {return data;}
+        operator int () const;
+        operator float () const;
+	operator Complex () const;
 
 	char* print() const;
  
         // Initialize
-        ComplexSample(Complex c) {data=c;}
+        ComplexSample(const Complex& c) {data=c;}
 	ComplexSample(float f) {data=f;}
 	ComplexSample(int i) {data = (float)i;}
         ComplexSample() {data=0.0;}
 
         // Initialize the Particle
-        void initialize() {data=0.0;}
+        void initialize();
 
         // Load up with data
-        void operator << (int i) {data=Complex(i);}
-        void operator << (float f) {data=Complex(f);}
-	void operator << (Complex& c) {data=c;}
+        void operator << (int i);
+        void operator << (float f);
+	void operator << (Complex& c);
 
         // Copy the Particle
         Particle& operator = (const Particle&);
