@@ -32,31 +32,6 @@
 
 
 ##########################################################################
-#### autoName 
-# Return a name constructed by augmenting the provided
-# stem with a number to guarantee that the name is unique. A global
-# (within the tycho namespace) array autoNames is used to keep track of
-# the numbers used for each stem. This procedure should be used for
-# window classes instead of the #auto facility in itcl to assign to the
-# class valid names for windows. Window names must begin with a period.
-# By convention, for a class named "Class", we would use the stem
-# ".class". Thus, the single argument should be ".class".
-# Note that if you invoke this outside the namespace "tycho", you
-# must call it "::tycho::autoName".
-#
-namespace ::tycho {
-    proc autoName {stem} {
-	global ::autoNames
-	if {[info exists autoNames] && [info exists autoNames($stem)]} {
-	    incr autoNames($stem)
-	} else {
-	    set autoNames($stem) 0
-	}
-	return "$stem$autoNames($stem)"
-    }
-}
-
-##########################################################################
 #### exit
 # Redefine the Tcl exit procedure to cleanly exit, querying the user
 # to save work.
