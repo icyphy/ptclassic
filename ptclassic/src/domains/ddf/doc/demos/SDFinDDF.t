@@ -6,19 +6,19 @@ Demonstrates a DDF Wormhole whose inside domain is SDF.
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD
-.IE Switch
+.IE Case
 This rather trivial demo illustrates the use of a wormhole.
 The DDF domain has an \fIif-then-else\fR overall structure, consisting
 of a pair of
-.c Switch
+.c Case
 and
-.c Select
+.c EndCase
 stars.  If the \fIcontrol\fR boolean is FALSE, the input token to the
-.c Switch
-star routes to the \fIfalseOutput\fR port, then the
-wormhole, and finally to the \fIfalseInput\fR
+.c Case
+star routes to the false output(output#1) port, then the
+wormhole, and finally to the false input(input#1)
 port of the
-.c Select
+.c EndCase
 star.  Otherwise, the wormhole is bypassed.  The inside domain of
 the wormhole is SDF.  In the wormhole, the input value
 is multiplied by another ramp.
@@ -28,6 +28,6 @@ deciding on runnable blocks at runtime.
 Using wormholes for SDF systems is recommended, since the SDF scheduler
 runs considerably faster than the DDF scheduler.
 .SA
-Select,
-Switch.
+Case,
+EndCase.
 .ES
