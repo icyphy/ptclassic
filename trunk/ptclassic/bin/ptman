@@ -104,11 +104,28 @@ end
 # Exit if we didn't find anything to print
 if ("$domfiles" == "") exit 1
 
+if ($?printer) then
+
+  else if ($?DISPLAY) then
+
+
+# Uncomment the line below if we are using groff
+# Neal Becker suggested the groff lines below.
+set usegroff=1
+
 # Preview, nroff, or print it
 if ($?printer) then
-	soelim $headers $files | ditroff -me -eqn -tbl $printer
+	if ($?usegroff) then
+	        soelim $headers $files | groff -me -e -t | lp $printer
+	else 
+		soelim $headers $files | ditroff -me -eqn -tbl $printer
+	endif
 else if ($?DISPLAY) then
-	soelim $headers $files | ditroff -me -eqn -tbl -t > /tmp/ptman.$$
+	if ($?usegroff) then
+	        soelim $headers $files | groff -me -e -t -TX100
+	else
+		soelim $headers $files | ditroff -me -eqn -tbl -t > /tmp/ptman.$$
+	endif
 	if ($status) then
 		echo "ptman: problems running ditroff, trying nroff"
 		goto do_nroff
