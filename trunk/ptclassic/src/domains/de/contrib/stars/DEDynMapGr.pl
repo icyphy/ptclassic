@@ -40,7 +40,11 @@ derived from, for further details.
         InfString outputMap, inputMap;
     }
     constructor {
-        DEDynBlock::DEDynBlock();
+	// hppa.cfront fails with:
+	// line 43: error: qualified name DEDynBlock::DEDynBlock
+	//     not found in DEDynBlockGr (1290)	
+	// If the next line is uncommented.
+        // DEDynBlock::DEDynBlock();
         out.inheritTypeFrom(dummyIn);
         input_map.clearAttributes(A_SETTABLE);
         output_map.clearAttributes(A_SETTABLE);
