@@ -167,6 +167,7 @@ proc ::ptkExpandEnvVar { path } {::tycho::expandPath $path}
 # reassemble the colon separated list and return it.
 #
 proc ::tycho::expandPathSplit {inputPathList} {
+    set outputList {}
     foreach inputPath [split $inputPathList :] {
 	lappend outputList [::tycho::expandPath $inputPath]
     }
