@@ -208,7 +208,7 @@ body ::tycho::TopLevel::constructor {args} {
     # later moved using the -before option.
     $topLevelWindows insert $prefix
 
-    bind $prefix <Control-x><o> "$this nextWindow 1; break"
+    bind $prefix <Control-x><o> "code $this nextWindow 1; code break"
     
     # To prevent the "o" from appearing in Entry windows,
     bind Entry <Control-x><o> { }
@@ -217,10 +217,10 @@ body ::tycho::TopLevel::constructor {args} {
     eval itk_initialize $args
 
     # Grab the focus when the window gets mapped.
-    bind $itk_component(hull) <Map> "$this focusin; break"
+    bind $itk_component(hull) <Map> "code $this focusin; code break"
 
     # Bind the file-open command.
-    bind $prefix <Control-x><Control-f> "File::openWin; break"
+    bind $prefix <Control-x><Control-f> "code File::openWin; code break"
 }
 
 #####################################################################

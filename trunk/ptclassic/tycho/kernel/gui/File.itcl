@@ -544,14 +544,15 @@ body ::tycho::File::constructor {args} {
 	    -command "$this help"
     
     # Bindings
-    bind $prefix <Control-x><Control-f> "File::openWin; break"
-    bind $prefix <Control-x><Control-s> "$this save; break"
-    bind $prefix <Control-x><Control-v> "$this altFile; break"
-    bind $prefix <Control-x><Control-w> "$this saveAs; break"
-    bind $prefix <Control-x><Key-i> "$this insertFile; break"
-    bind $prefix <Control-x><Key-p> "$this print; break"
-    bind $prefix <Control-x><Control-r> "$this evaluate; break"
-    bind $itk_component(hull) <Control-x><v> "$this nextRevAction; break"
+    bind $prefix <Control-x><Control-f> "code File::openWin; code break"
+    bind $prefix <Control-x><Control-s> "code $this save; code break"
+    bind $prefix <Control-x><Control-v> "code $this altFile; code break"
+    bind $prefix <Control-x><Control-w> "code $this saveAs; code break"
+    bind $prefix <Control-x><Key-i> "code $this insertFile; code break"
+    bind $prefix <Control-x><Key-p> "code $this print; code break"
+    bind $prefix <Control-x><Control-r> "code $this evaluate; code break"
+    bind $itk_component(hull) <Control-x><v> "code $this nextRevAction; \
+	    code break"
 
     # The following initialize options and then invoke any
     # configuration options, assuming there are options specified.

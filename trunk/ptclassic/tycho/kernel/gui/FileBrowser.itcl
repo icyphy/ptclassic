@@ -231,15 +231,15 @@ body ::tycho::FileBrowser::constructor {args} {
     # bindings
     #
     bind $itk_component(listbox) <Double-1> \
-	    "$this open \[selection get\]; break"
+	    "code $this open \[selection get\]; code break"
     bind $itk_component(listbox) <1> \
-	    "$this selectFile %W %y"
+	    "code $this selectFile %W %y"
     bind $itk_component(hull) <Return> \
-	    "$this ok; break"
+	    "code $this ok; code break"
     bind $itk_component(hull) <Escape> \
-	    "$this nextWindow; delete object $this"
+	    "code $this nextWindow; code delete object $this"
     
-    bind $itk_component(hull) <Any-Enter> "$this focusin"
+    bind $itk_component(hull) <Any-Enter> "code $this focusin"
     
     # Process any unevaluated arguments.
     eval itk_initialize $args
