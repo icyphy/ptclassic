@@ -152,6 +152,7 @@ public:
 	// The first method returns a generic port, the second returns
 	// a real PortHole with all aliases resolved
 	GenericPort *genPortWithName (const char* name);
+	const GenericPort *genPortWithName (const char* name) const;
 	PortHole *portWithName(const char* name);
 
 	// Retrieve the MultiPortHole with the given name
