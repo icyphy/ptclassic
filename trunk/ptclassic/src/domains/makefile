@@ -23,12 +23,7 @@ include $(CONFIG)
 
 # Include CP and PN domains on SunOS architectures.
 ifneq (,$(filter sun%,$(PTARCH)))
-EXPDOMAINS = cp pn
-endif
-
-# Include CP domain for cfront.
-ifeq (cfront,$(PTARCH))
-EXPDOMAINS = cp
+EXPDOMAINS = pn #cp
 endif
 
 # Include PN doman for mips and Solaris.
@@ -43,8 +38,9 @@ else
 IPUSDOMAIN =
 endif
 
-DOMAINS = sdf hof de ddf bdf thor cg sproc silage cgc cg56 cg96 vhdlf vhdlb \
-          vhdl mq mdsdf $(IPUSDOMAIN) $(EXPDOMAINS) 
+
+DOMAINS = sdf hof de ddf bdf thor cg cgc cg56 vhdlb \
+          vhdl mdsdf $(IPUSDOMAIN) $(EXPDOMAINS) 
 
 MAKEVARS = "PTARCH=$(PTARCH)"
 
