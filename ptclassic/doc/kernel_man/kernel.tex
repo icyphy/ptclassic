@@ -1693,13 +1693,15 @@ just sets its galaxy pointer @code{gal} to point to @var{g}.
 virtual void setStopTime(double @var{when});
 @end example
 
-Set the stopping condition.
+Set the stopping condition.  The default implementation just passes
+this on to the scheduler.
 
 @example
 virtual void resetStopTime(double @var{when});
 @end example
 
-Reset the stopping condition (FIXME: why different?).
+Reset the stopping condition.  The default implementation just passes
+this on to the scheduler.  (FIXME: explain distinction).
 
 @example
 virtual void setCurrentTime(double @var{now});
@@ -1847,11 +1849,12 @@ Return directory name previously set by @code{writeDirectoryName}.
 char* writeFileName(const char* @var{fileName} = 0);
 @end example
 
-Method to set a file name for writing.  Prepends dirFullName (which was
-set by @code{writeDirectoryName}) to fileName with ``/'' between.  Always returns
-a pointer to a string in new memory.  It is up to the user to delete the
-memory when no longer needed.  If dirFullName or fileName is NULL then
-it returns a pointer to a new copy of the string ``/dev/null''.
+Method to set a file name for writing.  @var{writeFileName} prepends
+dirFullName (which was set by @code{writeDirectoryName}) to
+@var{fileName} with ``/'' between.  Always returns a pointer to a string
+in new memory.  It is up to the user to delete the memory when no longer
+needed.  If dirFullName or @var{fileName} is NULL then it returns a pointer to
+a new copy of the string ``/dev/null''.
 
 @node class Scheduler, class Error, class Target, Control of execution
 @section Class Scheduler
@@ -1918,7 +1921,8 @@ virtual void resetStopTime(double @var{limit});
 @end example
 
 FIXME: Soonhoi says: hack method to set stopping time of wormhole.
-Why different from @code{setStopTime}?
+The default implementation simply calls @code{setStopTime} with
+the same argument.  When is this different from @code{setStopTime}?
 
 @example
 virtual int run() = 0;
@@ -1998,13 +2002,15 @@ not the error bit.
 static int haltRequested();
 @end example
 
-Calls @code{SimControl::haltRequested}.
+Calls @code{SimControl::haltRequested}.  Returns TRUE if the
+execution should halt.
 
 @example
 static void clearHalt();
 @end example
 
-Calls @code{SimControl::clearHalt}.
+Calls @code{SimControl::clearHalt}.  Clears the halt and error
+bits.
 
 @node Scheduler protected members,  , Scheduler public members, class Scheduler
 @subsection Scheduler protected members
@@ -2082,14 +2088,156 @@ this interface.  It is a no-op if marking is not implemented.
 @node class SimControl,  , class Error, Control of execution
 @section Class SimControl
 
-[ FIXME: To be written ]
+The SimControl class controls execution of the simulation.  It has
+some global status flags that indicate whether there has been an
+error in the execution or if a halt has been requested.  It also
+has mechanisms for registering functions to be called before or
+after star executions, or in response to a particular star's execution,
+and responding to interrupts.
+
+This class interacts with the Error class (which sets error and halt
+bits) and the Star class (to permit execution of registered actions when
+stars are fired).  Schedulers and Targets are expected to monitor
+the SimControl halt flag to halt execution when errors are signaled
+and halts are requested.  Once exceptions are commonplace in C++
+implementations, a cleaner implementation could be produced.
+
+@menu
+* SimControl status flags::     Access to SimControl status flags.
+* pre- and postactions::        Preactions and Postactions
+* SimControl interrupts and polling::  SimControl interrupts and polling
+@end menu
+
+@node SimControl status flags, pre- and postactions, class SimControl, class SimControl
+@subsection Access to SimControl status flags.
+
+SimControl currently has four global status bits: the error bit,
+the halt bit, the interrupt bit, and the poll bit.  These functions
+set, clear, or report on these bits.
 
 @example
-SimAction /SimAction.h:26:
-SimActionList : public SequentialList /SimAction.h:41:
-SimActionListIter : private ListIter /SimAction.h:49:
-SimControl /SimControl.h:44:
+static void requestHalt ();
 @end example
+
+This function sets the halt bit.  The effect is to cause schedulers
+and targets to cease execution.  It is important to note that this
+function does not alter flow of control; it only sets a flag.
+
+@example
+static void declareErrorHalt ();
+@end example
+
+This is the same as @code{requestHalt} except that it also sets the
+error bit.  It is called, for example, by @code{Error::abortRun}.
+
+@example
+static int haltRequested ();
+@end example
+
+This function returns true if the halt bit is set, false otherwise.
+If the poll or interrupt bits are set, it calls handlers for them
+(see the subsection describing these).
+
+@example
+static void clearHalt ();
+@end example
+
+This function clears the halt and error flags.
+
+@node pre- and postactions, SimControl interrupts and polling, SimControl status flags, class SimControl
+@subsection Preactions and Postactions
+
+SimControl can register a function that will be called before
+or after the execution of a particular star, or before or after
+the execution of all stars.  A function that is called before
+a star is a @emph{preaction}; on that is called after a star is
+a @emph{postaction}.
+
+The functions that can be registered have take two arguments: a
+pointer to a Star (possibly null), and a @code{const char*} pointer
+that points to a string (possibly null).  The type definition
+
+@example
+typedef void (*SimActionFunction)(Star*,const char*);
+@end example
+
+gives the name SimActionFunction to functions of this type;
+several SimControl functions take arguments of this form.
+
+@example
+static SimAction* registerAction(SimActionFunction action, int pre,
+ const char* textArg = 0, Star* which = 0);
+@end example
+
+Register a preaction or postaction.  If "pre" is TRUE it is a preaction.
+If @var{textArg} is given, it is passed as an argument when the
+action function is called.  If @var{which} is 0, the function will
+be called unconditionally by @code{doPreActions} (if it is a preaction)
+or @code{doPostActions} (if it is a postaction; otherwise it will
+only be called if the star being executed has the same address as
+@code{which}.
+
+The return value represents the registered action; class SimAction
+is treated as an ``opaque class'' (I'm not telling you what is in it)
+which can be used for @code{cancel} calls.
+
+@example
+static int doPreActions(Star * which);
+static int doPostActions(Star * which);
+@end example
+
+Execute all pre-actions, or post-actions, for a the particular Star
+@var{which}.  The @var{which} pointer is passed to each action
+function, along with any text argument declared when the action
+was registered.
+
+Return TRUE if no halting condition arises, FALSE if we are to halt.
+
+@example
+static int cancel(SimAction* @var{action});
+@end example
+
+Cancel @var{action}.  Warning: argument is deleted.
+
+Future versions will provide more ways of cancelling actions.
+
+@node SimControl interrupts and polling,  , pre- and postactions, class SimControl
+@subsection SimControl interrupts and polling
+
+Features in this section will be used in a new graphic interface;
+they are mostly untested at this point.
+
+The SimControl class can handle interrupts and can register a
+polling function that is called for every star execution.
+It only provides one handler.
+
+@example
+static void catchInt(int signo = -1, int always = 0);
+@end example
+
+This signal installs a simple interrupt handler for the signal with
+Unix signal number @var{signo}.  If @var{always} is true, the
+signal is always caught; otherwise the signal is not caught
+if the current status of the signal is that it is ignored
+(for example, processes running in the background ignore
+interrupt signals from the keyboard).  This handler simply sets
+the SimControl interrupt bit; on the next call to @code{haltRequested},
+the user-specified interrupt handler is called.
+
+@example
+static SimHandlerFunction setInterrupt(SimHandlerFunction @var{f});
+@end example
+
+Set the user-specified interrupt handler to @var{f}, and return
+the old handler, if any.  This function is called in response to
+any signals specified in @code{catchInt}.
+
+@example
+static SimHandlerFunction setPoll(SimHandlerFunction f);
+@end example
+
+Register a function to be called by @code{haltRequested} if the poll
+flag is set.  Returns old handler if any.
 
 @node Interfacing domains, connection classes, Control of execution, Top
 @chapter Interfacing domains -- wormholes and related classes
@@ -2466,9 +2614,9 @@ This protected member transfers data from peer event horizon to me.
 virtual int ready();
 @end example
 
-FIXME: Soonhoi needs to explain the following, which is his text:
-``make sure this port is ready for inside Galaxy if it is an input.
-if ready, set up the stopping condition for the inner-domain.''
+This is a protected member.  By default, it always returns TRUE (1).
+Derived classes have it return TRUE if the event horizon is ``ready''
+(there is enough data for execution to proceed), and false otherwise.
 
 @node class WormMultiPort,  , class FromEventHorizon, Interfacing domains
 @section Class WormMultiPort
@@ -3198,8 +3346,9 @@ the parent galaxy (the parent of the geodesic).
 @subsection Class AutoForkNode
 
 Class AutoForkNode is multiply inherited from Geodesic and AutoFork.
-It redefined @code{isItPersistent} to return TRUE, and redefines
-@code{setSourcePort} and @code{setDestPort} to call the
+
+This class redefines @code{isItPersistent} to return TRUE, and redefines
+the @code{setSourcePort} and @code{setDestPort} functions to call the
 @code{setSource} and @code{setDest} functions of AutoFork.
 The exact same form could be used to generate other types of
 auto-forking nodes (that is, this class could have been done with
@@ -4734,7 +4883,71 @@ KnownState manages two lists of states, one to represent the types of
 states known to the system (integer, string, complex, array of floating,
 etc), and one to represent certain predeclared global states.
 
-[ FIXME: say more ]
+It is very much like KnownBlock in internal structure.  Since it manages
+two lists, there are two kinds of constructors.
+
+@example
+KnownState (State &@var{state}, const char* @var{name});
+@end example
+
+This constructor adds an entry to the state type list.  For example,
+
+@example
+static IntState proto;
+static KnownState entry(proto,"INT");
+@end example
+
+permits IntStates to be produced by cloning.  The @var{type} argument
+must be in uppercase, because of the way @code{find} works (see below).
+
+The second type of constructor takes three arguments:
+
+@example
+KnownState (State &@var{state}, const char* @var{name}, const char* @var{value});
+@end example
+
+This constructor permits names to be added to the global state symbol
+list, for use in state expresssions.  For example, we have
+
+@example
+static FloatState pi;
+KnownState k_pi(pi,"PI","3.14159265358979323846");
+@end example
+
+@example
+static const State* find (const char* @var{type});
+@end example
+
+The @code{find} method returns a pointer the appropriate prototype
+state in the state type list.  The argument is always changed to
+uppercase.  A null pointer is returned if there is no match.
+
+@example
+static const State* lookup (const char* @var{name});
+@end example
+
+The lookup method returns a pointer to the appropriate state in
+the global state list, or null if there is no match.
+
+@example
+static State* clone (const char* type);
+@end example
+
+The clone method takes a string, finds the appropriate state using
+@code{find}, and returns a clone of that block.  A null pointer is
+returned if there is no match, and @code{Error::error} is also called.
+
+@example
+static StringList nameList();
+@end example
+
+Return the names of all the known state types, separated by newlines.
+
+@example
+static int nKnown();
+@end example
+
+Return the number of known states.
 
 @node I/O classes, Misc, known lists, Top
 @chapter I/O classes
@@ -4904,6 +5117,15 @@ that contains the default whitespace characters: space, newline,
 and tab.  It is possible to change the definition of whitespace
 for a particular constructor.
 
+@menu
+* Initializing Tokenizers::     Initializing Tokenizer objects
+* reading from Tokenizers::     Reading from Tokenizers
+* Tokenizer include files::     Tokenizer include files
+@end menu
+
+@node Initializing Tokenizers, reading from Tokenizers, class Tokenizer, class Tokenizer
+@subsection Initializing Tokenizer objects
+
 Tokenizer provides three different constructors:
 
 @example
@@ -4954,6 +5176,9 @@ char setCommentChar(char n);
 Use an argument of 0 to disable the feature.  The old comment character
 is returned.
 
+@node reading from Tokenizers, Tokenizer include files, Initializing Tokenizers, class Tokenizer
+@subsection Reading from Tokenizers
+
 The next operation is the basic mechanism for reading tokens from
 the Tokenizer:
 
@@ -4979,24 +5204,6 @@ Tokenizer tin;
 while (tin) @{ ... do stuff ... @}
 @end example
 
-FIXME: more to write here.
-
-@example
-const char* current_file() const;
-int current_line() const;
-@end example
-
-@example
-int fromFile(const char* name);
-@end example
-
-@example
-int readingFromFile() const;
-@end example
-
-Returns true (1) if the Tokenizer is reading from an include file,
-false (0) if not.
-
 @example
 int eof() const;
 @end example
@@ -5010,13 +5217,49 @@ before making this test.
 void skipwhite();
 @end example
 
-Skip whitespace (closing include file if no more space).
+Skip whitespace in the input.
 
 @example
 void flush();
 @end example
 
-discard current line, or close file (error cleanup)
+If in an include file, the file is closed.  If at the top level,
+discard the rest of the current line.
+
+@node Tokenizer include files,  , reading from Tokenizers, class Tokenizer
+@subsection Tokenizer include files
+
+Tokenizer can use include files, and can nest them to any depth.
+It maintains a stack of include files, and as EOF is reached in each
+file, it is closed and popped off of the stack.
+
+The method
+
+@example
+int fromFile(const char* @var{name});
+@end example
+
+opens a new file and the Tokenizer will then read from that.  When that
+file ends, Tokenizer will continue reading from the current point in
+the current file.
+
+@example
+const char* current_file() const;
+int current_line() const;
+@end example
+
+These methods report on the file name and line number where Tokenizer is
+currently reading from.  This information is maintained for include
+files.  At the top level,  @code{current_file} returns a null pointer,
+but @code{current_line} returns one more than the number of line feeds
+seen so far.
+
+@example
+int readingFromFile() const;
+@end example
+
+Returns true (1) if the Tokenizer is reading from an include file,
+false (0) if not.
 
 @node augmented fstreams, class XGraph, class Tokenizer, I/O classes
 @section pt_ifstream and pt_ofstream: augmented fstream classes
@@ -5132,14 +5375,101 @@ delete the temporary files.
 @node Histogram classes,  , class XGraph, I/O classes
 @section Histogram classes
 
-The Histogram class accumulates data in a histogram.
+The Historgram class accepts a stream of data and accumulates a
+histogram.  The XHistogram class uses a Histogram to collect the
+data and an XGraph to display it.
 
-The XHistogram class displays it using the xgraph program.
+@menu
+* class Histogram::             Class Histogram
+* class XHistogram::            Class XHistogram
+@end menu
 
-FIXME: say more.
+@node class Histogram, class XHistogram, Histogram classes, Histogram classes
+@subsection Class Histogram
+
+The Histogram class accumulates data in a histogram.  Its constructor
+is as follows:
+
+@example
+Histogram(double @var{width} = 1.0, int @var{maxBins} = HISTO_MAX_BINS);
+@end example
+
+The default maximum number of bins is 1000.  The bin centers will be at
+integer multiples of the specified bin width.  The total width of the
+histogram depends on the data; however, there will always be a bin that
+includes the first point.
+
+@example
+void add(double @var{x});
+@end example
+
+Add the point @var{x} to the histogram.
+
+@example
+int numCounts() const;
+double mean() const;
+double variance() const;
+@end example
+
+Return the number of counts, the mean, and the variance of the data
+in the histogram.
+
+@example
+int getData(int @var{binno}, int& @var{count}, double& @var{binCenter});
+@end example
+
+Get counts and bin centers by bin number, where 0 indicates the smallest
+bin.  Return TRUE if this is a valid bin.  Thus the entire histogram
+data can be retrieved by stepping from 0 to the first failure.
+
+@node class XHistogram,  , class Histogram, Histogram classes
+@subsection Class XHistogram
+
+An XHistogram object has a private XGraph member and a private Histogram
+member.  The functions
+
+@example
+int numCounts() const;
+double mean() const;
+double variance();
+@end example
+
+@noindent
+simply pass through to the Histogram object, and
+
+@example
+void addPoint(float y);
+@end example
+
+adds a point to the histogram and does other bookkeeping.  There
+are two remaining methods:
+
+@example
+void initialize(Block* parent, double binWidth,
+   const char* options, const char* title,
+   const char* saveFile, int maxBins = HISTO_MAX_BINS);
+@end example
+
+This method initializes the graph and histogram object.  @var{parent}
+is the parent Block, used for error messages.  @var{binWidth} and
+@var{maxBins} initialize the Histogram object.  @var{options} is a
+string that is included in the command line to the xgraph program;
+other options, including @code{-bar -nl -brw @var{value}}, are passed as
+well.  @var{title} is the graph title, and @var{saveFile}, if non-null,
+gives a file in which the histogram data is saved (this data is the
+histogram counts, not the data that was input with @code{addPoint}).
+
+@example
+void terminate();
+@end example
+
+This method completes the histogram, flushes out the temporary files,
+and executes xgraph.
 
 @node Misc,  , I/O classes, Top
-@chapter Misc
+@chapter Miscellaneous classes
+
+This section includes classes that did not fit elsewhere.
 
 @menu
 * Mathematical classes::        Mathematical classes
