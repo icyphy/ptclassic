@@ -625,7 +625,8 @@ long userOptionWord;
         PrintErr(ErrGet());
         ViDone();
     }
-    PrintCon(sprintf(buf, "domain = '%s'", domain));
+    sprintf(buf, "domain = '%s'", domain);
+    PrintCon(buf);
     free(items);
     
     ViDone();
@@ -651,7 +652,8 @@ long userOptionWord;
     FindClear();
 
     /* default seed is 1 */
-    item.value = sprintf(buf, "%d", oldN);
+    sprintf(buf, "%d", oldN);
+    item.value = buf;
     if (dmMultiText("Edit-Seed", 1, &item) != VEM_OK) {
             PrintCon("Aborted entry");
             PrintErr(ErrGet());
@@ -748,7 +750,8 @@ long userOptionWord;
         PrintErr(ErrGet());
         ViDone();
     }
-    PrintCon(sprintf(buf, "target = '%s'", target));
+    sprintf(buf, "target = '%s'", target);
+    PrintCon(buf);
     free(items);
 /* now edit target parameters */
     if (strcmp(target, "<parent>") != 0) {

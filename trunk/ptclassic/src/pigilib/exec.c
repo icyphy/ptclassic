@@ -33,7 +33,8 @@ int *nPtr;
     if ((oldN = GetIterateProp(facetPtr)) == -1) {
 	oldN = 10;
     }
-    item.value = sprintf(buf, "%d", oldN);
+    sprintf(buf, "%d", oldN);
+    item.value = buf;
     if (dmMultiText("Iterations", 1, &item) != VEM_OK) {
 	    PrintCon("Aborted entry");
 	    return (FALSE);

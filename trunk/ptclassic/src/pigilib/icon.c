@@ -87,7 +87,8 @@ char *fileName;
     sprintf(buf, "xedit -name ptolemy_code %s", fileName);
     PrintDebug(buf);
     if (util_csystem(buf)) {
-	ErrAdd(sprintf(buf, "Cannot edit Ptolemy code file '%s'", fileName));
+	sprintf(buf, "Cannot edit Ptolemy code file '%s'", fileName);
+	ErrAdd(buf);
 	return(FALSE);
     }
     return (TRUE);
@@ -106,7 +107,8 @@ char *fileName;
     sprintf(buf, "xedit -name ptolemy_code %s &", fileName);
     PrintDebug(buf);
     if (util_csystem(buf)) {
-	ErrAdd(sprintf(buf, "Cannot edit Ptolemy code file '%s'", fileName));
+	sprintf(buf, "Cannot edit Ptolemy code file '%s'", fileName);
+	ErrAdd(buf);
 	return (FALSE);
     }
     return (TRUE);
@@ -188,7 +190,8 @@ static dmTextItem items[] = {
 	    PrintErr("Cannot get password entry");
 	    ViDone();
 	}
-	items[2].value = sprintf(buf, "~%s/", pwent->pw_name);
+	sprintf(buf, "~%s/", pwent->pw_name);
+	items[2].value = buf;
     }
     if (dmMultiText(ViGetName(), ITEMS_N, items) != VEM_OK) {
 	PrintCon("Aborted entry");

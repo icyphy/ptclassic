@@ -177,7 +177,8 @@ char *dir, *baseName, **outPtr;
 	ERR_IF1(!StrDup(outPtr, baseName));
     } else {
 	ERR_IF1(!UMalloc(&buf, strlen(dir) + strlen(baseName) + 2));
-	*outPtr = sprintf(buf, "%s/%s", dir, baseName);
+	sprintf(buf, "%s/%s", dir, baseName);
+	*outPtr = buf;
     }
     return(TRUE);
 }
@@ -270,7 +271,8 @@ char *s;
 	}
     }
     ip = (int *) &found->data;
-    return(DupString(sprintf(buf, "%s%d", s, ++ (*ip))));
+    sprintf(buf, "%s%d", s, ++ (*ip));
+    return(DupString(buf));
 }
 /***** End UniqName routines */
 

@@ -67,7 +67,8 @@ long userOptionWord;
     sprintf(buf, "prfacet %s %s", item.value, fullName);
     PrintDebug(buf);
     if (util_csystem(buf)) {
-        PrintErr(sprintf(buf, "Error invoking prfacet utility."));
+        sprintf(buf, "Error invoking prfacet utility.");
+	PrintErr(buf);
     }
     ViDone();
 }
@@ -87,7 +88,8 @@ long userOptionWord;
                 xDisplay);
     PrintDebug(buf);
     if (util_csystem(buf)) {
-        PrintErr(sprintf(buf, "Error invoking optfir program."));
+        sprintf(buf, "Error invoking optfir program.");
+	PrintErr(buf);
     }
     ViDone();
 }
@@ -106,7 +108,7 @@ long userOptionWord;
                 xDisplay);
     PrintDebug(buf);
     if (util_csystem(buf)) {
-        PrintErr(sprintf(buf, "Error invoking wfir program."));
+        PrintErr("Error invoking wfir program.");
     }
     ViDone();
 }
