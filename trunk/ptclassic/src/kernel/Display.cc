@@ -32,6 +32,7 @@ XGraph :: XGraph () {
 	    strm[i] = NULL;
 	    tmpFileNames[i] = NULL;
 	}
+	ng = 0;
 }
 
 // close all files, and remove any files that might be open
@@ -47,6 +48,7 @@ void XGraph :: zapFiles () {
 			delete name;
 		}
 	}
+	ng = 0;
 }
 
 void XGraph :: initialize(Block* parent,
@@ -220,6 +222,7 @@ void XGraph :: terminate () {
 		delete name;
 		tmpFileNames[i] = 0;
         }
+	ng = 0;
         cmd += ")";
         cmd += "&";
         system (cmd);
