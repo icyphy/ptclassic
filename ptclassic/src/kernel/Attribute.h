@@ -23,21 +23,20 @@ typedef unsigned long bitWord;
 
 // Class Attribute is used to specify a set of bits that must be on
 // and a set of bits that must be off in a bitWord.
-class Attribute {
-private:
+
+// Attribute objects are initialized like structs, as in
+// Attribute foo = { bitsOn, bitsOff };
+// to avoid order-of-constructor problems.
+
+struct Attribute {
+// these should be treated as private
 	bitWord bitsOn;
 	bitWord bitsOff;
 public:
-	// constructor
-	Attribute(bitWord on, bitWord off) : bitsOn(on), bitsOff(off) {}
-
-	// copy constructor
-	Attribute(const Attribute& a) : bitsOn(a.bitsOn), bitsOff(a.bitsOff){}
-
 	// Specify the combination of two attributes.
 	// This combination means that requirements of both attributes
 	// must be satisfied.  Hence, it really should be called an "and"
-	// operation.
+	// operation.  The name reflects what happens to the masks.
 	Attribute& operator |= (const Attribute& a) {
 		bitsOn |= a.bitsOn;
 		bitsOff |= a.bitsOff;
@@ -47,7 +46,7 @@ public:
 	// Specify the combination of two attributes.
 	// This combination means that requirements of either attribute
 	// must be satisfied.  Hence, it really should be called an "or"
-	// operation.
+	// operation.  The name reflects what happens to the masks.
 	Attribute& operator &= (const Attribute& a) {
 		bitsOn &= a.bitsOn;
 		bitsOff &= a.bitsOff;
@@ -74,17 +73,17 @@ public:
 
 // This combination means that requirements of both attributes
 // must be satisfied.  Hence, it really should be called an "and"
-// operation.
+// operation.  The name reflects what happens to the masks.
 inline Attribute operator | (const Attribute& a, const Attribute& b) {
-	Attribute t(a);
+	Attribute t = a;
 	return t |= b;
 }
 
 // This combination means that requirements of either attribute
 // must be satisfied.  Hence, it really should be called an "or"
-// operation.
+// operation.  The name reflects what happens to the masks.
 inline Attribute operator & (const Attribute& a, const Attribute& b) {
-	Attribute t(a);
+	Attribute t = a;
 	return t &= b;
 }
 #endif
