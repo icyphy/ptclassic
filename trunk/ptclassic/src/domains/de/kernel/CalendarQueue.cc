@@ -4,7 +4,7 @@ Version identification:
 $Id$ $Revision$
 
 WANRNING experimental version
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -39,12 +39,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Set the properties of the CqLevelLink class.
 CqLevelLink* CqLevelLink :: setLink(Pointer a, double v, double fv,
-			  Star* d, CqLevelLink* n, CqLevelLink* b) 
+			  Star* d, unsigned long abs,
+			  CqLevelLink* n, CqLevelLink* b) 
 {
 	e = a;
 	level = v;
 	fineLevel = fv;
 	dest = d;
+	absEventNum = abs;
 	next = n;
 	before = b;
 	return this;
@@ -57,7 +59,7 @@ CqLevelLink* CalendarQueue :: getFreeLink()
 	CqLevelLink* temp;
 	if (freeLinkHead) {
 		temp = freeLinkHead;
-		freeLinkHead = (CqLevelLink*)temp->next;
+		freeLinkHead = temp->next;
 		numFreeLinks--;
 	} else {
 		LOG_NEW; temp = new CqLevelLink;
@@ -83,7 +85,7 @@ void CalendarQueue :: clearFreeList()
 	CqLevelLink* temp;
 	while (freeLinkHead->next) {
 		temp = freeLinkHead;
-		freeLinkHead = (CqLevelLink*)freeLinkHead->next;
+		freeLinkHead = freeLinkHead->next;
 		LOG_DEL; delete temp;
 	}
 	LOG_DEL; delete freeLinkHead;
@@ -135,7 +137,8 @@ CqLevelLink* CalendarQueue :: levelput(Pointer a, double v, double fv,
 					Star* dest)
 {
     CqLevelLink* newLink = getFreeLink();
-    newLink->setLink(a, v, fv, dest, 0, 0);
+    // use the event counter to set the finest level of the sort
+    newLink->setLink(a, v, fv, dest, cq_absEventCounter, 0, 0);
     int i = (int) (v / cq_interval);	// find virtual bucket
     i = i % cq_bucketNum;	// find actual bucket
     InsertEventInBucket(&cq_bucket[i], newLink);
@@ -147,13 +150,11 @@ CqLevelLink* CalendarQueue :: levelput(Pointer a, double v, double fv,
 
 void CalendarQueue :: InsertEventInBucket(CqLevelLink **bucket, CqLevelLink *link)
 {
-    register CqLevelLink *current, *least_link = NULL;
-    int i, save_resizeEnabled, virtualBucket;
-    double year;
+    register CqLevelLink *current = NULL;
+    int virtualBucket;
 
-// This is not in the paper, but you have to check if the new event
-// actually has the smallest timestamp, if so, "cq_lastTime" should
-// be reset
+// This is not in the paper, but you have to check if the new event actually 
+// has the smallest timestamp, if so, "cq_lastTime" should be reset
     // I am overriding Hui's patch with mine which checks for the
     // condition on which the bucket needs to be set based on the
     // present bucket position and the new event, rather than the
@@ -181,50 +182,75 @@ void CalendarQueue :: InsertEventInBucket(CqLevelLink **bucket, CqLevelLink *lin
 	// Now we are going to look for the first element
 	// such that ((current->level > link->level) or
 	//            (level == level) and (finer_level > link->finer_level) or
-	//            (l == l) and (fl == fl) and (dest >= dest))
+	//            (l==l) and (fl==fl) and (current->dest > link->dest))
+	// 	      (l==l) and (fl==fl) and (dest == dest) 
+	// 	             and (current->absEventNum > link->absEventNum)
+
+	// Sort on time stamp
 	while (current->level < link->level) 
 	    if (current->next)
-		current = (CqLevelLink*)current->next;
+		current = current->next;
 	    else {
 		current->next = link;
 		link->before = current;
 		link->next = NULL;
 		cq_eventNum++;
+		cq_absEventCounter++;
 		return;
 	    }
-	assert(current->level >= link->level);
-	// Moreover it is the first such element
+	
+	// Sort on fine level (topological sort)
 	while ((current->level == link->level) && 
 	        (current->fineLevel < link->fineLevel))
 	    if (current->next)
-		current = (CqLevelLink*)current->next;
+		current = current->next;
 	    else {
 		current->next = link;
 		link->before = current;
 		link->next = NULL;
 		cq_eventNum++;
+		cq_absEventCounter++;
 		return;
 	    }
-	assert((current->level > link->level) || ((current->level == link->level) && (current->fineLevel >= link->fineLevel)));
-	// Moreover it is the first such element
+
+	// Sort on destination
 	while  ((current->level == link->level) &&
 		(current->fineLevel == link->fineLevel) &&
 		(current->dest < link->dest))
 	    if (current->next)
-		current = (CqLevelLink*)current->next;
+		current = current->next;
 	    else {
 		current->next = link;
 		link->before = current;
 		link->next = NULL;
 		cq_eventNum++;
+		cq_absEventCounter++;
 		return;
 	    }
-	assert((current->level > link->level) || ((current->level == link->level) && (current->fineLevel > link->fineLevel)) || ((current->level == link->level) && (current->fineLevel == link->fineLevel) && (current->dest >= link->dest)));
-	// Moreover it is the first such element
+
+	// Sort on event number so that events with all of the above the
+	// same will be sorted by the order that they were inserted
+	while  ((current->level == link->level) &&
+		(current->fineLevel == link->fineLevel) &&
+		(current->dest == link->dest) &&
+		(current->absEventNum < link->absEventNum))
+	    if (current->next)
+		current = current->next;
+	    else {
+		current->next = link;
+		link->before = current;
+		link->next = NULL;
+		cq_eventNum++;
+		cq_absEventCounter++;
+		return;
+	    }
+
+
+	// Done sorting, put it in the bucket
 	if (current->before) {
 	    link->before = current->before;
 	    link->next = current;
-	    ((CqLevelLink*)current->before)->next = link;
+	    current->before->next = link;
 	    current->before = link;
 	}  else {
 	    link->before = NULL;
@@ -232,11 +258,12 @@ void CalendarQueue :: InsertEventInBucket(CqLevelLink **bucket, CqLevelLink *lin
 	    current->before = link;
 	    *bucket = link;
 	}
-    } else { /* empty bucket */
+    } else { // empty bucket 
 	link->before = link->next = NULL;
 	*bucket = link;
     }
     cq_eventNum++;
+    cq_absEventCounter++;
     return;
     
 }
@@ -245,7 +272,7 @@ void CalendarQueue :: InsertEventInBucket(CqLevelLink **bucket, CqLevelLink *lin
 CqLevelLink* CalendarQueue :: NextEvent()
 {
     register CqLevelLink **reg_cq_bucket = cq_bucket;
-    register int i, virtualBucket;
+    register int i;
     int year;
     CqLevelLink *result;
 
@@ -265,7 +292,7 @@ CqLevelLink* CalendarQueue :: NextEvent()
 	    // might cause a event to look bad if it was just on the border.
 	    assert(result->level >= ( cq_bucketTop- 1.6*cq_interval ));
 	    cq_lastTime = result->level;	
-	    if (reg_cq_bucket[i] = (CqLevelLink*)reg_cq_bucket[i]->next) 
+	    if (reg_cq_bucket[i] = reg_cq_bucket[i]->next) 
 		reg_cq_bucket[i]->before = NULL;
 	    cq_lastBucket = i;
 	    cq_eventNum--;
@@ -343,7 +370,7 @@ void CalendarQueue :: Resize(int newSize)
     for (i = oldBucketNum - 1; i>=0; i--) {
 	currentEvent = oldBucket[i];
 	while (currentEvent) {
-	    CqLevelLink *nextEvent = (CqLevelLink*)currentEvent->next;
+	    CqLevelLink *nextEvent = currentEvent->next;
 	    int virtualBucket;
 	    virtualBucket = (int)(currentEvent->level/cq_interval);
 	    virtualBucket = virtualBucket% cq_bucketNum; 
@@ -460,7 +487,7 @@ void CalendarQueue :: initialize()
 		// Put all Links into the free List.
 		for (CqLevelLink *l = cq_bucket[i]; l != NULL;) {
 			CqLevelLink *ll = l;
-			l = (CqLevelLink*)l->next;
+			l = l->next;
 			putFreeLink(ll);
 		}
 
@@ -476,3 +503,4 @@ CalendarQueue :: ~CalendarQueue () {
 	initialize();
 	clearFreeList();
 }
+	
