@@ -1,0 +1,17 @@
+
+dnl	This file is an input file used by the GNU "autoconf" program to
+dnl	generate the file "configure", which is run to configure the
+dnl	Makefile in this directory.
+# Version $Id$
+
+AC_INIT(itcl3.0/configure.in)
+
+AC_CONFIG_SUBDIRS(tcl8.0.3/unix tk8.0.3/unix itcl3.0 tclBlend1.1a1/unix)
+
+for dir in tcl8.0.3 tk8.0.3 tclBlend1.1a1 ; do
+    if test ! -d $dir; then
+	mkdir $dir
+    fi
+done
+
+AC_OUTPUT(Makefile)
