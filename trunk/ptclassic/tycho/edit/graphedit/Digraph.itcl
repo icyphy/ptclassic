@@ -166,15 +166,11 @@ body ::tycho::Digraph::acyclic {} {
 ########################################################################
 #### children
 #
-# Return the children of a vertex. An empty list will be returned
+# Return the children of a vertex. An error will result
 # if the vertex does not exist.
 #
 body ::tycho::Digraph::children {vertex} {
-    set result {}
-    foreach {_ edge} [array get _adjacency $vertex^*] {
-	lappend result [lindex $edge 1]
-    }
-    return $result
+	return $_adjacency($vertex.children) 
 }
 
 ########################################################################
@@ -231,7 +227,7 @@ body ::tycho::Digraph::connect {source target args} {
 # This method can be used to perform naive reachability, by giving
 # a single vertex as argument and examining the result list.
 #
-body ::tycho::AbstractGraph::depthFirst {{roots {}}} {
+body ::tycho::Digraph::depthFirst {{roots {}}} {
     # If we already have it, just return it
     set cacheindex depthfirst.[join $roots -]
     if { [::info exists _cache($cacheindex)] } {
@@ -284,17 +280,24 @@ body ::tycho::AbstractGraph::depthFirst {{roots {}}} {
 # depth. If the graph contains a cycle, then the sort will be as
 # though an arbitrary edge in each cycle were deleted.
 #
+# The sort works by initializing each vertex with the number of
+# parents it has. When the node is seen by a parent, the count is
+# is decremented. When the count reaches zero, the vertex has been
+# seen by all its parents, and should therefore go into the layer
+# following the one in which its last parent is. After processing
+# all the children of the current layer, the algorithm moves onto
+# the nodes in the next layer.
+#
 # If the graph has cycles, the algorithm will still function, returning
 # a sort of a similar acyclic graph (the same graph with cycles
 # broken). If the second argument is supplied, it is a list of starting
 # vertices -- this may be needed for cyclic graphs.
 # 
-# FIXME: Not working
-#
-body ::tycho::AbstractGraph::depthSort {{roots {}}} {
+body ::tycho::Digraph::depthSort {{roots {}}} {
     # If we already have it, just return it
-    if { [::info exists _cache(depthsort)] } {
-	return $_cache(depthsort)
+    set cacheindex depthsort.[join $roots -]
+    if { [::info exists _cache($cacheindex)] } {
+	return $_cache($cacheindex)
     }
 
     # The current vertices and  result list
@@ -302,12 +305,14 @@ body ::tycho::AbstractGraph::depthSort {{roots {}}} {
 	set roots [roots]
     }
     set current $roots
-    set _cache(depthsort) {}
+    set result [list $current]
 
-    # Initialize visited flags to 0
+    # Initialize visited flags to the number of parents
     foreach v [array names _vertices] {
-	set _cache($v.visited) [llength [children $v]]
+	set _cache($v.visited) [llength [parents $v]]
     }
+    
+    # A counter that tells us whether we are done
     set count [expr [llength [vertices *]] - [llength $current]]
 
     # Keep looking until we run out of vertices
@@ -315,22 +320,34 @@ body ::tycho::AbstractGraph::depthSort {{roots {}}} {
 	# The next layer of vertices
 	set next {}
 	
-	# Foreach in the current "layer," add each child that has been
-	# visited by all of its parents.
+	# Foreach in the current "layer," decrement the count of each
+	# child that has not already been done. If it has been seen by all
+	# its parents, add it to the next layer.
 	foreach v $current {
 	    foreach w [children $v] {
-		incr _cache($w.visited) -1
-		if { ! $_cache($w.visited) } {
-		    lappend next $w
-		    incr count -1
+		if { $_cache($w.visited) } {
+		    incr _cache($w.visited) -1
+		    if { ! $_cache($w.visited) } {
+			lappend next $w
+			incr count -1
+		    }
 		}
 	    }
 	}
 
-	# There are no next vertices: either we are done or there is
-	# a cycle
-	if { $next == "" } {
-	    if { $count } {
+	# If all vertices are processed, we're done
+	if { ! $count } {
+	    lappend result $next
+	    break
+	} elseif { $next == "" } {
+	    # If there are no next vertices, there's a cycle. To break
+	    # it, choose a child of a vertex of the current layer
+	    # which is still "live," and decrement its count (i.e. break
+	    # a link. We know we're done when "count" reaches zero.
+	    if { ! $count } {
+		# We're done
+		break
+	    } else {
 		# There's a cycle, so choose a child of a vertex
 		# of the current layer, decrement its count (i.e. delete
 		# an edge), and try again
@@ -356,9 +373,11 @@ body ::tycho::AbstractGraph::depthSort {{roots {}}} {
 	}
 
 	# Move on to the next layer
-	lappend _cache(depthsort) $next
+	lappend result $next
 	set current $next
     }
+    set _cache($cacheindex) $result
+    return $result
 }
 
 ########################################################################
@@ -396,12 +415,11 @@ body ::tycho::Digraph::disconnect {source target} {
 # Return the "leaves" of the graph.
 #
 body ::tycho::Digraph::leaves {} {
-    # Start with all vertices
-    set result [array names _vertices]
-
-    # Delete the ones that have children
-    foreach {_ edge} [array get _adjacency *^*] {
-	set result [ldelete $result [lindex $edge 0]]
+    set result {}
+    foreach v [array names _vertices] {
+    	if { $_adjacency($v.children) == "" } {
+	    lappend result $v
+	}
     }
     return $result
 }
@@ -409,15 +427,11 @@ body ::tycho::Digraph::leaves {} {
 ########################################################################
 #### parents
 #
-# Return the parents of a vertex. An empty list will be returned
+# Return the parents of a vertex. An error will result
 # if the vertex does not exist.
 #
 body ::tycho::Digraph::parents {vertex} {
-    set result {}
-    foreach {_ edge} [array get _adjacency *^$vertex] {
-	lappend result [lindex $edge 0]
-    }
-    return $result
+	return $_adjacency($vertex.parents) 
 }
 
 ########################################################################
@@ -426,12 +440,11 @@ body ::tycho::Digraph::parents {vertex} {
 # Return the roots of the graph.
 #
 body ::tycho::Digraph::roots {} {
-    # Start with all vertices
-    set result [array names _vertices]
-    
-    # Delete the ones that have parents
-    foreach {_ edge} [array get _adjacency *^*] {
-	set result [ldelete $result [lindex $edge 1]]
+    set result {}
+    foreach v [array names _vertices] {
+    	if { $_adjacency($v.parents) == "" } {
+	    lappend result $v
+	}
     }
     return $result
 }
@@ -464,7 +477,7 @@ body ::tycho::Digraph::roots {} {
 # FIXME: If the graph is cyclic, the sort should break at
 # a "backwards" edge.
 #
-body ::tycho::AbstractGraph::topologicalSort {{leaves {}}} {
+body ::tycho::Digraph::topologicalSort {{leaves {}}} {
     # If we already have it, just return it
     if { [::info exists _cache(topologicalsort)] } {
 	return $_cache(topologicalsort)
@@ -564,7 +577,6 @@ body ::tycho::Digraph::traverse1 {} {
 	# Add the child vertices to the stack for processing
 	eval lappend stack [children $current]
     }
-
     # Return the accumulated result
     return $result
 }
@@ -610,7 +622,6 @@ body ::tycho::Digraph::traverse2 {} {
 	    }
 	}
     }
-
     # Return the accumulated result
     return $result
 }
@@ -684,7 +695,6 @@ body ::tycho::Digraph::traverse3 {} {
  	    }
  	}
     }
-    
     # Return the result
     return $result
 }
