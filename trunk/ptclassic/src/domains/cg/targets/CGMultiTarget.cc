@@ -108,8 +108,11 @@ Block* CGMultiTarget::makeNew() const {
 /////////////////////////
 
 void CGMultiTarget::setup() {
+    // Method works okay if gal is NULL
+    Galaxy* gal = galaxy();
+
     // if the filePrefix is not set, set it to the galaxy name.
-    if (filePrefix.null()) filePrefix = galaxy()->name();		
+    if (filePrefix.null() && gal) filePrefix = gal->name();		
 
     // prepare child targets
     prepareChildren();
@@ -122,9 +125,9 @@ void CGMultiTarget::setup() {
     // We only want to modify the galaxy once.  See the comment in
     // CGMultiTarget.h for protected member modifiedGalaxy for details.
     if (!modifiedGalaxy) {
-	if (!galaxy() || haltRequested()) return;
-	galaxy()->setTarget(this);
-	galaxy()->initialize();
+	if (!gal || haltRequested()) return;
+	gal->setTarget(this);
+	gal->initialize();
 	modifiedGalaxy = 1;
 	if (!modifyGalaxy()) return;
     }
@@ -147,13 +150,13 @@ void CGMultiTarget::setup() {
     if (inWormHole()) wormPrepare();
     
     ParScheduler* sched = (ParScheduler*) scheduler();
-    sched->setGalaxy(*galaxy());
+    if (gal) sched->setGalaxy(*gal);
     sched->setUpProcs(nChildrenAlloc);
 
     // CG stuff
     myCode.initialize();
 
-    if (galaxy()->parent()) {
+    if (gal && gal->parent()) {
 	sched->ofWorm();
     }
     installDDF();
@@ -369,6 +372,7 @@ void CGMultiTarget :: chooseScheduler() {
 
 void CGMultiTarget :: flattenWorm() {
     Galaxy* myGalaxy = galaxy();
+    if (! myGalaxy) return;
     GalStarIter next(*myGalaxy);
     CGStar* s;
     while ((s = (CGStar*) next++) != 0) {
@@ -447,6 +451,7 @@ int CGMultiTarget :: run() {
 }
 
 int CGMultiTarget :: allSendWormData() {
+    if (! galaxy()) return FALSE;
     BlockPortIter nextPort(*galaxy());
     PortHole* p;
     while ((p = nextPort++) != 0) {
@@ -468,6 +473,7 @@ int CGMultiTarget :: allSendWormData() {
 }
 
 int CGMultiTarget :: allReceiveWormData() {
+    if (! galaxy()) return FALSE;
     BlockPortIter nextPort(*galaxy());
     PortHole* p;
     while ((p = nextPort++) != 0) {
@@ -560,6 +566,8 @@ int CGMultiTarget :: childSupport(Target* t, Star* s) {
 // we are careful in searching the stars at the wormhole boundary!
 
 void CGMultiTarget :: allWormInputCode() {
+    if (! galaxy()) return;
+
     int* iprocs = new int[nChildrenAlloc];
     for (int i = 0; i < nChildrenAlloc; i++)
 	iprocs[i] = 0;
@@ -588,6 +596,8 @@ void CGMultiTarget :: allWormInputCode() {
 }
 
 void CGMultiTarget :: allWormOutputCode() {
+    if ( !galaxy()) return;
+
     int* iprocs = new int[nChildrenAlloc];
     for (int i = 0; i < nChildrenAlloc; i++)
 	iprocs[i] = 0;
