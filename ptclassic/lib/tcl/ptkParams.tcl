@@ -533,12 +533,17 @@ proc ptkEditParams {facet number args} {
     } elseif {[ptkIsDelay $number]} {
 	  set editType Delay
     } else {
-	  set editType "Parameters"
-
+	# Add the name in if this is a star
+	if {[ptkIsStar $number]} {
+		set editType "[ptkGetStarName $number] Parameters"
+	} elseif {[ptkIsGalaxy $number]} {
+		set editType "Galaxy Parameters"
+	} else {
+		set editType "Parameters"
+	}
 	# Uncomment the following if differentiation between
 	# Formal and Actual Parameters is desired.
 	# set editType "[lindex $editType 1] Parameters"
-
     }
 
     toplevel $top
