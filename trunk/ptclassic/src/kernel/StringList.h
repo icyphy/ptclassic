@@ -2,7 +2,7 @@
 #define _StringList_h 1
 #include <std.h>
 #include "DataStruct.h"
-
+#include "Output.h"
 
 // SCCS version identification
 // $Id$
@@ -47,13 +47,22 @@ public:
 
 	StringList(double d) {totalSize=0; *this += d;}
 
+	// Copy constructor
 	StringList(StringList& s) {totalSize=0; *this += s;}
 
-	// Destructor: delete all substrings
-	~StringList() {
-		for (int i=size(); i > 0; i--)
-			delete next();
+	// Assignment operator
+	StringList& operator = (StringList& sl) {
+		// check for assignment to self and do nothing
+		if (this != &sl) {
+			totalSize = 0;
+			initialize ();
+			*this += sl;
+		}
+		return *this;
 	}
+
+	// Destructor
+	~StringList();
 
 	// Put first string on list: same as +=
 	// Use of this operator to add something to a nonempty
@@ -61,7 +70,6 @@ public:
 	StringList& operator = (const char* s) { return *this += s;}
 	StringList& operator = (int i) { return *this += i;}
 	StringList& operator = (double d) { return *this += d;}
-	StringList& operator = (StringList& s) { return *this += s;}
 
         // Add string to list
         StringList& operator += (const char*);
@@ -90,5 +98,11 @@ private:
 	char* consolidate();
 	int totalSize;
 };
+
+inline UserOutput& operator << (UserOutput& o, StringList& sl) {
+	char* s = sl;		// cast
+	o << s;
+	return o;
+}
 
 #endif
