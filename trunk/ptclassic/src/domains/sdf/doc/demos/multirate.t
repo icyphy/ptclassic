@@ -3,9 +3,10 @@
 .SD
 A universe that upsamples a signal by a ratio of 5/2.
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ "October 15, 1990"
 .AL "E. A. Lee"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 This universe generates a sine wave using the
 .c singen

@@ -3,9 +3,10 @@
 .SD
 A universe that does motion compensation and DCT image coding.
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ "November 12, 1992"
 .AL "P. E. Haskell"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 This universe reads images from a file and performs motion compensation,
 the discrete cosine transform (DCT), zig-zag scanning of the DCT

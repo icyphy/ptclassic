@@ -3,9 +3,10 @@
 .SD
 The butterfly curves.
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 .Ir "butterfly curve"
 This system computes and plots a curve known as the butterfly curve [1].

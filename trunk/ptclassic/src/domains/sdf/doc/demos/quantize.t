@@ -3,9 +3,10 @@
 .SD
 Demonstrate the Quantizer star.
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 This trivial system shows how to use the
 .c Quantizer

@@ -3,9 +3,10 @@
 .SD
 A universe that does differential pulse code modulation (DPCM).
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ "August 19, 1991"
 .AL "P. E. Haskell"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 .Ie "image DPCM"
 .Ie "DPCM, image"

@@ -3,6 +3,8 @@
 .SD
 Synthesize an amplitude-shift keyed (ASK) signal
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD

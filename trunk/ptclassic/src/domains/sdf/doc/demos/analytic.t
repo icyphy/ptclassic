@@ -3,10 +3,11 @@
 .SD
 Analytic sample rate conversion.
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .Se ComplexFIR
 .SV $Revision$ "October 15, 1990"
 .AL "Edward A. Lee"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 This system uses a ComplexFIR filter to reduce the sample rate
 of a sinusoid by a factor of 8/5, and at the same time

@@ -3,9 +3,10 @@
 .SD
 Stabilization of IIR filters using the cepstrum
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Joseph T. Buck"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 .Id "IIR filter stabilization"
 .Id "cepstral analysis"

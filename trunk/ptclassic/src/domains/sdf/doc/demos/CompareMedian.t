@@ -3,9 +3,10 @@
 .SD
 A universe that median filters an image.
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ "August 19, 1991"
 .AL "P. E. Haskell"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 This universe reads an image from a file and median filters the
 image.

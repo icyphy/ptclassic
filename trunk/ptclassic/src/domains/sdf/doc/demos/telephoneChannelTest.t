@@ -3,12 +3,13 @@
 .SD
 A sinusoidal test signal is sent over a telephone channel simulation.
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Edward A. Lee"
 .EQ
 delim off
 .EN
-.LO "~ptolemy/src/domains/sdf/demo"
 .EQ
 delim $$
 .EN

@@ -3,9 +3,10 @@
 .SD
 Two mechanisms for linear prediction are compared.
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ "October 31, 1990"
 .AL "E. A. Lee"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 This demo performs linear prediction on a test signal consisting
 of three sinusoids in colored, Gaussian noise.

@@ -3,9 +3,10 @@
 .SD
 Sinusoidal modulator
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ "October 15, 1990"
 .AL "Edward A. Lee"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 This system uses galaxy to produce a sinusoid, and
 another galaxy to modulate it.

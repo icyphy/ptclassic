@@ -3,9 +3,10 @@
 .SD
 Compare three methods for estimating a power spectrum.
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 .Ir "Levinson-Durbin algorithm"
 .Ir "Burg's algorithm"

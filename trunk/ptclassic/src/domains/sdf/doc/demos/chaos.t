@@ -3,10 +3,11 @@
 .SD
 A simple demonstration of chaos.
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .IE chaos
 .SV $Revision$	$Date$
 .AL "E. A. Lee"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 .Ir "Henon map"
 .Ir "chaos"

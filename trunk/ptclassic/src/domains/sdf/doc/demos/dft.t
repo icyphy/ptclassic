@@ -3,9 +3,10 @@
 .SD
 Compute a discrete Fourier transform of a finite signal
 .DE
+.LO "~ptolemy/src/domains/sdf/utilities"
+.DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Edward A. Lee"
-.LO "~ptolemy/src/domains/sdf/utilities"
 .LD
 This demo computes a DFT (using the FFT star) of a finite signal.
 .Ie "discrete Fourier transform"

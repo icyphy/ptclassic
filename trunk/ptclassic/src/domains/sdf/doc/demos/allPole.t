@@ -3,9 +3,10 @@
 .SD
 A universe showing two ways to implement an all-pole filter.
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$	"%D%"
 .AL "E. A. Lee"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 A noise signal is fed into two realizations
 of an all pole filter.

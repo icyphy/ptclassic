@@ -3,9 +3,10 @@
 .SD
 Phased array antenna simulation.
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ "October 15, 1990"
 .AL "E. A. Lee"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 .Ie "phased array antenna"
 .Ie "antenna, phased array"
