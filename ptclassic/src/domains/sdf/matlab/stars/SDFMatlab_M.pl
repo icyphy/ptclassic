@@ -227,9 +227,13 @@ extern "C" {
 		  mxSetPi(matlabInputMatrices[i], imagVector);
 		}
 
-		// evaluate the Matlab command
-		if ( ! engEvalString( matlabEnginePtr, matlabCommand ) ) {
-		  Error::abortRun( *this, "Error evaluating Matlab command ",
+		// evaluate the Matlab command (non-zero means error)
+		int mstatus = engEvalString( matlabEnginePtr, matlabCommand );
+		if ( mstatus == 0 ) {
+		  char numstr[64];
+		  sprintf(numstr, "Matlab returned %d indicating ", mstatus);
+		  Error::abortRun( *this, numstr,
+				   "an error in the Matlab command ",
 				   matlabCommand );
 		}
 
