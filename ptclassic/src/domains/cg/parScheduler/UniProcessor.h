@@ -21,7 +21,7 @@ class ostream;
 #include "ParNode.h"
 #include "DataStruct.h"
 #include "DynamicGalaxy.h"
-#include "BaseMultiTarget.h"
+#include "MultiTarget.h"
 #include "StringList.h"
 
 ////////////////////////
@@ -86,7 +86,7 @@ public:
 	Galaxy* myGalaxy() { return subGal; }
 
 	// set the target pointer
-	void setTarget(BaseMultiTarget* t, ParProcessors* p) 
+	void setTarget(MultiTarget* t, ParProcessors* p) 
 		{ mtarget = t; parent = p; }
 
 	// create the galaxy
@@ -170,7 +170,7 @@ protected:
 	NodeSchedule* curSchedule;
 
 	// target pointer
-	BaseMultiTarget* mtarget;	// multi-target
+	MultiTarget* mtarget;	// multi-target
 	CGTarget* targetPtr;		// my target processor
 
 	// sum of idle time
@@ -181,7 +181,7 @@ protected:
 	void clearFree();		// remove all created NodeSchedules.
 	
 	// sub-universe creation
-	void makeConnection(ParNode* dN, ParNode* sN, PortHole* ref);
+	void makeConnection(ParNode* dN, ParNode* sN, PortHole* ref, ParNode*);
 	void makeBoundary(ParNode* sN, PortHole* ref);
 
 	// Simulate the schedule: obtain the buffer requirement.
@@ -205,9 +205,8 @@ private:
 	DataFlowStar* makeSpread(PortHole* srcP, ParNode* sN);
 	DataFlowStar* makeCollect(PortHole* destP, ParNode* dN);
 	void makeReceive(int pindex, PortHole* rP,
-		int delay, ParNode*, EGGate*, PortHole* orgP = 0);
-	void makeSend(int pindex, PortHole* sP, ParNode*, 
-		EGGate*, PortHole* orgP = 0);
+		int delay, EGGate*, PortHole* orgP = 0);
+	void makeSend(int pindex, PortHole* sP, EGGate*, PortHole* orgP = 0);
 
 	// Depending on OSOPReq(), make connections
 	void makeOSOPConnect(PortHole* p, DataFlowStar* org, DataFlowStar* far,
