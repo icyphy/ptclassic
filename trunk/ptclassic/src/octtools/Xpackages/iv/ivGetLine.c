@@ -26,10 +26,14 @@ static char rcsid[] = "$Header$";
 #include "cursor.bitmap.11"
 #include "iv.h"
 
-#if defined(hpux) || defined(SYSV)
-#include <termios.h>
+
+#if defined(hpux) || defined(SYSV) || defined(sgi)
+#define HAS_TERMIOS
 #endif
 
+#ifdef HAS_TERMIOS
+#include <termios.h>
+#endif
 
 #define IVRINGBELL( d ) { XBell ((d),50); XFlush( (d) ); }
 
@@ -51,7 +55,7 @@ char ezQuitChar;                    /* users quit character                 */
 
 int ivTextInit( )
 {
-#if defined(hpux) || defined(SYSV)
+#ifdef HAS_TERMIOS
     struct termios tty;
 
     if ( tcgetattr( fileno(stdin), &tty) < 0 ) {
@@ -109,7 +113,6 @@ int ivKeyOk(keyEventPtr)
 {
     Display     *display = keyEventPtr->display;
     char xTextPtr[10], c;
-    int status;
     KeySym keysym;
 
     if (debugXEvents) xFormatEvent( display, keyEventPtr);
@@ -137,7 +140,7 @@ int ivGetLine( IVwin, keyEventPtr, x, y, bufferSize, keepGoing)
     ivBuf* 	buffer = &IVwin->buffer;
     Display     *display = keyEventPtr->display;
     XEvent      report;
-    int         j, k;
+    int         k;
     int  	textLength = 0;
     int  	curLoc, status = IV_ERROR;
     char        xTextPtr[BUFSIZ];
