@@ -20,7 +20,7 @@ that polls the Magnavox and busy waits if samples are not available.
 Interrupt-based code can be forced by setting the string
 parameter \fIforceInterrupts\fP to "yes".
 The interrupt buffer will be the minimum required size if the
-parameter \fIinterruptBufferSize\fP is "default".
+parameter \fIinterruptBufferSize\fP is "default=4".
 If this parameter is a number, it will be used for the length
 (in words) of the interrupt buffer.
 .PP

@@ -7,9 +7,43 @@ defstar {
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
         explanation {
-DSP56000 - An input star for the Ariel digital microphone
-           Parameter 'sample_rate' can be one of 88200, 44100,
-           22050, 11025, or 5512.
+.PP
+This star produces left and right channel sample outputs from
+the Ariel digital microphone.
+.PP
+The parameter \fIsampleRate\fP can be one of
+88200, 44100, 22050, 11025, or 5512.
+Of course, since both left and right channel samples are produced
+each time the star fires, the effective sample rate is really twice the
+value indicated.
+.PP
+The star will generate polling-based code if it is
+not repeated in a schedule; if it is repeated, interrupt-based code
+will be generated.
+Interrupt code can be forced by setting the \fIforceInterrupt\fP
+parameter to "yes".
+Additionally, the interrupt buffer size can be set to a user-defined number
+of words by supplying a numeric parameter for
+\fIinterruptBufferSize\fP.
+This is useful when talking to a device with suitable average throughput but
+high latency, e.g., a Sun workstation.
+The default buffering size can be obtained by making this parameter
+the string "default=4".
+.PP
+Realtime violations will be ignored if the parameter
+\fIabortOnRealtimeError\fP is "no".
+If it is "yes",
+they will cause the universe to abort execution with hex error code
+123041 in register y0.
+.PP
+The digital microphone can be used with an ADS system or the Dolby board.
+Variable sample rates are not supported on the Dolby board at the present
+time, and the sample rate will be 44100 regardless of the \fIsampleRate\fP
+parameter.
+.SH BUGS
+The parameter \fIabortOnRealtimeError\fP is currently ignored if
+interrupt-based code is generated, and the universe will abort on a realtime
+violation in this mode regardless of the value of the parameter.
 	}
         
         output {
