@@ -54,7 +54,7 @@
 /* To get around an inaccurate log */
 #define nlog10(x)	(x == 0.0 ? 0.0 : log10(x) + 1e-15)
 
-#define ISCOLOR		(wi->dev_info.dev_flags & D_COLOR)
+#define ISCOLOR		((wi->dev_info.dev_flags & D_COLOR) != 0 && getenv("PIGIBW") == 0)
 
 #define PIXVALUE(set) 	((set) % MAXATTR)
 
@@ -147,6 +147,7 @@ static char *defColors[MAXATTR] = {
 
 extern void init_X();
 extern void do_error();
+extern char* getenv();
 
 static char *tildeExpand();
 static void ReverseIt();
@@ -185,7 +186,6 @@ typedef struct local_win {
     double YUnitsPerPixel;	/* Y Axis scale factor                  */
     xgOut dev_info;		/* Device information                   */
     Window close, hardcopy;	/* Buttons for closing and hardcopy     */
-    Window about;		/* Version information                  */
     int flags;			/* Window flags                         */
 } LocalWin;
 
@@ -689,12 +689,6 @@ double asp;			/* Aspect ratio       */
 	XMoveWindow(disp, new_info->hardcopy,
 		    (int) (BTNPAD + cl_frame.width + BTNINTER),
 		    BTNPAD);
-	xtb_bt_new(new_window, "About", abt_func,
-		   (xtb_data) new_window, &ab_frame);
-	new_info->about = ab_frame.win;
-	XMoveWindow(disp, new_info->about,
-		    (int) (BTNPAD + cl_frame.width + BTNINTER +
-			   hd_frame.width + BTNINTER), BTNPAD);
 
 	new_info->flags = 0;
 	XSelectInput(disp, new_window,
@@ -731,7 +725,6 @@ LocalWin *win_info;		/* Local Info */
     XDeleteContext(disp, win, win_context);
     xtb_bt_del(win_info->close, &info);
     xtb_bt_del(win_info->hardcopy, &info);
-    xtb_bt_del(win_info->about, &info);
     free((char *) win_info);
     XDestroyWindow(disp, win);
     Num_Windows -= 1;
@@ -927,7 +920,7 @@ int InitSets()
     param_set("YHighLimit", DBL, DEF_HIGH_LIMIT);
 
     /* Depends critically on whether the display has color */
-    if (depth < 4) {
+    if (depth < 4 || getenv("PIGIBW") != 0) {
 	/* Its black and white */
 	param_set("Background", PIXEL, DEF_BW_BACKGROUND);
 	param_set("Border", PIXEL, DEF_BW_BORDER);
@@ -1442,9 +1435,17 @@ LineInfo *result;		/* Returned result */
     }
     return result->type;
 }
-
 
 int ReadData(stream, filename)
+FILE *stream;
+char *filename;
+{
+	/* we support two data formats */
+    return Prog_Name[0] == 'b'  ? ReadBinaryData(stream, filename)
+				: ReadAsciiData(stream, filename);
+}
+
+int ReadAsciiData(stream, filename)
 FILE *stream;
 char *filename;
 /*
@@ -1495,6 +1496,64 @@ char *filename;
 	    if (filename) {
 		(void) fprintf(stderr, "Error in file `%s' at line %d:\n  %s\n",
 			       filename, line_count, info.val.str);
+		errors++;
+	    }
+	    break;
+	}
+    }
+    if (errors) return -1; else return rdFindMax();
+}
+
+int ReadBinaryData(stream, filename)
+FILE *stream;
+char *filename;
+/*
+ * Reads in the data sets in binary form from the supplied stream.
+ * If the format
+ * is correct,  it returns the current maximum number of points across
+ * all data sets.  If there is an error,  it returns -1.
+ */
+{
+    char buffer[MAXBUFSIZE];
+    float pointPair[2];
+    int line_count = 0;
+    int errors = 0;
+    int cmd;
+    
+    if (!rdSet(filename)) {
+	(void) fprintf(stderr, "Error in file `%s' at line %d:\n  %s\n",
+		       filename, line_count,
+		       "Too many data sets - extra data ignored");
+	return -1;
+    }
+    while (!errors && (cmd = getc(stream)) != EOF) {
+	line_count++;
+	switch (cmd) {
+	case 'e':		/* end of set, start new one */
+	    if (!rdSet(filename)) {
+		(void) fprintf(stderr, "Error in file `%s' at line %d:\n  %s\n",
+			       filename, line_count,
+			       "Too many data sets - extra data ignored");
+		return -1;
+	    }
+	    break;
+	case 'n':		/* new set name: ends in \n */
+	    fgets (buffer, MAXBUFSIZE, stream);
+	    rdSetName(buffer);
+	    break;
+	case 'm':		/* move to point */
+	    rdGroup();
+	    getc(stream);	/* skip next character */
+	    /* the actual text is "md x y" */
+	    /* fall through */
+	case 'd':		/* draw point */
+	    fread((char*)pointPair,sizeof (float), 2, stream);
+	    rdPoint(pointPair[0],pointPair[1]);
+	    break;
+	default:
+	    if (filename) {
+		(void) fprintf(stderr, "Error in file `%s' at line %d: '%c'\n",
+			       filename, line_count, cmd);
 		errors++;
 	    }
 	    break;
