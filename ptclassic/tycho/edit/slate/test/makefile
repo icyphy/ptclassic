@@ -50,9 +50,6 @@ ITCL_SRCS = \
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
 MISC_FILES = \
-	748.gif \
-	900ss.gif \
-	australia.gif \
 	bind.tcl \
 	constraint.tcl \
 	demo.itcl \
