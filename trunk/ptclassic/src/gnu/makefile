@@ -295,6 +295,34 @@ irix5_configure: $(GNU_OBJ)
 		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
 
 ############################################################
+# egcs - experimental gnu compiler
+# See http://www.cygnus.com/egcs
+EGCS_OBJ = $(GNU_OBJ)/egcs
+EGCS_SRC = $(GNU_SRC)/egcs
+EGCS_DEST = $(PTOLEMY)/gnu/egcs
+EGCS_PREFIX=$(EGCS_DEST)/common
+EGCS_EXEC_PREFIX=$(EGCS_DEST)/$(PTARCH)
+all_egcs: configure_egcs bin_egcs install_egcs
+configure_egcs: $(EGCS_OBJ)
+	(cd $(EGCS_OBJ); \
+	$(EGCS_SRC)/configure --srcdir=$(EGCS_SRC) \
+		--prefix=$(EGCS_PREFIX) --exec-prefix=$(EGCS_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS))
+bin_egcs:
+	(cd $(EGCS_OBJ); $(MAKE) bootstrap)
+install_egcs: $(EGCS_DEST) $(EGCS_PREFIX) $(EGCS_EXEC_PREFIX)
+	(cd $(EGCS_OBJ); $(MAKE) install)
+
+$(EGCS_OBJ): $(GNU_OBJ) 
+	-mkdir "$(EGCS_OBJ)"
+$(EGCS_DEST):
+	-mkdir "$(EGCS_DEST)"
+$(EGCS_PREFIX): $(EGCS_DEST)
+	-mkdir "$(EGCS_PREFIX)"
+$(EGCS_EXEC_PREFIX):  $(EGCS_DEST)
+	-mkdir "$(EGCS_EXEC_PREFIX)"
+
+############################################################
 # dejaGNU
 # dejaGNU is the GNU test suite system.  We don't ship it yet.
 # Note that dejaGNU uses tcl and expect, but since it uses tcl7.3, we 
