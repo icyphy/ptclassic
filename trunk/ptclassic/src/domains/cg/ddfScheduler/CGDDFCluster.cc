@@ -126,7 +126,7 @@ int CGDDFClusterBag :: prepareBag(MultiTarget* t, ostream* l) {
 }
 
 // make parallel schedule of CGDDF constructs.
-int CGDDFClusterBag::parallelSchedule(MultiTarget* t) {
+int CGDDFClusterBag::parallelSchedule(MultiTarget* /*t*/) {
 	if (!conSched->getStatistics()) return FALSE;
 	
 	// scheduler setup

@@ -85,7 +85,7 @@ void MultiScheduler :: setup () {
     return;
 }
 
-int MultiScheduler::computeSchedule(Galaxy& g) {
+int MultiScheduler::computeSchedule(Galaxy& /*g*/) {
      return topCluster->generateSchedule();
 }
 

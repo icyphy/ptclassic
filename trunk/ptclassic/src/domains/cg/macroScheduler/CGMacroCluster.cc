@@ -1334,7 +1334,8 @@ int CGMacroClusterBag :: examineProcIds(IntArray& procId) {
 }
 
 // TO_BE_FILLED LATER
-int CGMacroClusterBag :: computeProfile(int nP, int rW, IntArray* avail) {
+int CGMacroClusterBag :: computeProfile(int nP, int /*rW*/,
+					IntArray* /*avail*/) {
 	numProcs = nP;
 	return TRUE;
 }
@@ -1343,7 +1344,7 @@ Profile* CGMacroClusterBag :: manualSchedule(int) {
 	return 0;
 }
 
-void CGMacroClusterBag :: downLoadCode(CGStar*, int invoc, int pix) {
+void CGMacroClusterBag :: downLoadCode(CGStar*, int /*invoc*/, int /*pix*/) {
 }
 
 // TO_BE_FILLED LATER END
