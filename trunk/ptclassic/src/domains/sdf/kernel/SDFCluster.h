@@ -118,6 +118,8 @@ public:
 	// generate schedules for interior clusters
 	void genSubScheds();
 
+	// Note: The remaining public methods are not in BDFClusterGal
+
 	// virtual method to create a cluster-bag
 	virtual SDFClusterBag* createBag();
 
@@ -137,10 +139,6 @@ protected:
 	// merge two clusters, returning the result.
 	SDFCluster* merge(SDFCluster* c1,SDFCluster* c2);
 
-	// There might be more restriction for merging two clusters.
-	// In this base class, just ignore.
-	virtual int canMerge(SDFCluster*, SDFCluster*) { return TRUE; }
-
 	// generate a name for a new member ClusterBag
 	const char* genBagName();
 
@@ -154,6 +152,12 @@ protected:
 	// mark feed-forward delays
 	int markFeedForwardDelayArcs();
 
+	// Note: The remaining protected methods are not in BDFClusterGal
+
+	// There might be more restrictions for merging two clusters.
+	// In this base class, just ignore.
+	virtual int canMerge(SDFCluster*, SDFCluster*) { return TRUE; }
+
 	// interior portions of loop pass
 	int integralLoopPass(int doAnyLoop);
 	int loopTwoClusts();
@@ -163,6 +167,7 @@ protected:
 
 	// predicate to determine whether cluster has a tree topology
 	int isTree();
+
 private:
 	int bagNumber;		// number for generating bag names
 	SequentialList stopList;// this list is used by fullSearchMerge.
@@ -199,7 +204,7 @@ protected:
 
 public:
 	// constructor: looping is 1 by default
-	SDFCluster() : pLoop(1) {}
+	SDFCluster() : pLoop(1), visitFlag(0) {}
 
 	// make destructor virtual
 	virtual ~SDFCluster() {}
