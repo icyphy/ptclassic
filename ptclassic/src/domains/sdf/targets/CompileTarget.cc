@@ -271,7 +271,7 @@ void CompileTarget::wrapup() {
 
 // Make the string origstr a valid C++ data structure specification
 // by replacing characters that are neither alpha-numeric nor a period
-// with an underscore character.  -BLE
+// with an underscore character.  Mostly duplication of ptSanitize.  -BLE
 static StringList mySanitize(const char *origstr) {
     char* cleanstr = savestring(origstr);
     char* strp = cleanstr;
@@ -284,13 +284,14 @@ static StringList mySanitize(const char *origstr) {
     return out;
 }
 
-void CompileTarget::writeFiring(Star& s, int depth) {
-    // Generate the C++ version of the star name.
-    // If we use sanitizedFullName(s), then we get code such as
-    // sinMod_singen1_Ramp1 instead of sinMod.singen1.Ramp1.
-    // So, we sanitize each field in the star name and leave the periods
-    // between the fields since the periods access data members in
-    // the universe class.  -BLE
+// sanitizedStarName
+// Generate the C++ version of a star name.
+// If we use sanitizedFullName(s), then we get code such as
+// sinMod_singen1_Ramp1 instead of sinMod.singen1.Ramp1.
+// So, we sanitize each field in the star name and leave the periods
+// between the fields since the periods access data members in
+// the universe class.  Mostly duplication of fullName method.  -BLE
+StringList CompileTarget::sanitizedStarName(const Star& s) const {
     StringList starName;
     if ( s.scope() ) {
 	starName << mySanitize(s.scope()->fullName()) << ".";
@@ -299,9 +300,12 @@ void CompileTarget::writeFiring(Star& s, int depth) {
 	starName << mySanitize(s.parent()->fullName()) << ".";
     }
     starName << sanitize(s.name());
+    return starName;
+}
 
-    // Generate code for this star firing
-    myCode << indent(depth) << starName << ".run();\n";
+// Generate code for this star firing (usually from a schedule)
+void CompileTarget::writeFiring(Star& s, int depth) {
+    myCode << indent(depth) << sanitizedStarName(s) << ".run();\n";
 }
 
 const GenericPort* CompileTarget::findMasterPort(const PortHole* p) const {

@@ -55,6 +55,7 @@ public:
 	void wrapup ();
 	CompileTarget(const char* nam, const char* stype, const char* desc);
 	Block* makeNew() const;
+
 	// Routines for writing code: schedulers may call these
 	void writeFiring(Star& s, int depth);
 
@@ -70,6 +71,9 @@ private:
 	// Returns the name of an ordinary porthole, or
 	// "name.newPort()" for a MultiPortHole.
 	StringList expandedName(const GenericPort* p) const;
+
+	// Create a sanitized C++ identifier for a star
+	StringList sanitizedStarName(const Star& c) const; 
 
 	// Replaces quotation marks with quoted quotation marks
 	// in a string (i.e. " => \")
