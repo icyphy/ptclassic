@@ -78,14 +78,24 @@ public:
 	void trailerCode() { CGTarget::trailerCode(); }
 #endif
 
-	ImplementationCost* implementationCost() {
+	// Return implementation cost information
+	const ImplementationCost* implementationCost() {
 		return softwareCost;
 	}
+
+	// Compute implementation cost information
 	int computeImplementationCost();
-	const char* printImplementationCost();
-	inline void resetImplementationCost() {
+
+	// Displaying implementation cost information
+	const char* describeImplementationCost();
+
+	// Resetting implementation cost information
+	void resetImplementationCost() {
 		if (softwareCost) softwareCost->initialize();
 	}
+
+	// Indicate whether target can compute memory usage
+	int canComputeMemoryUsage() { return TRUE; }
 
 	inline const char* setAssemblerOptions(const char* options) {
 		assemblerOptions = options;
@@ -99,7 +109,6 @@ protected:
 	// Target parameters (states)
 	StringState xMemMap;
 	StringState yMemMap;
-	IntState reportMemoryUsage;
 	IntState subFire;	// Write star firings as subroutine calls.
 
 #ifdef __GNUG__
@@ -119,9 +128,14 @@ protected:
 	void saveProgramCounter();
 	void restoreProgramCounter();
 
-	// Implementation cost: 1 processor, 2 banks of memory
+	// Implementation cost information
 	ImplementationCost* softwareCost;
+
+	// Printed form of implementation cost
 	StringList costString;
+
+	// Computes memory usage
+	int computeMemoryUsage(int* words);
 
 	// Other data members
 	int inProgSection;

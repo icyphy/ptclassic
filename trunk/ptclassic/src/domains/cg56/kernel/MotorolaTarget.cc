@@ -71,9 +71,9 @@ void MotorolaTarget :: initStates() {
 	addState(yMemMap.setState("yMemMap", this, "0-4095", "Y memory map"));
 	addState(subFire.setState("subroutines?", this, "-1",
 	    "Write star firings as subroutine calls."));
-	addState(reportMemoryUsage.setState(
-	    "show memory usage?", this, "NO",
-	    "Report program and data memory usage" ) );
+
+	// Make reportMemoryUsage visible
+	reportMemoryUsage.setAttributes(A_SETTABLE);
 
 	// Initialize other data members
 	inProgSection = 0;
@@ -86,7 +86,7 @@ void MotorolaTarget :: initStates() {
 void MotorolaTarget :: setup() {
 	int haltFlag = SimControl::haltRequested();
 	if (haltFlag || ! galaxy()) {
-	    Error::abortRun("Motorola Target has no galaxy defined.");
+	    Error::abortRun(*this, "Target has no galaxy defined.");
 	    return;
 	}
 
@@ -120,6 +120,8 @@ void MotorolaTarget :: setup() {
 	      }
 	    }
 	}
+
+	resetImplementationCost();
 }
 
 MotorolaTarget :: ~MotorolaTarget () {
@@ -214,14 +216,12 @@ const char* end, const char* cont) {
 
 // Determine whether or not the star firing can be implemented with
 // static code which could be enclosed in a loop or subroutine.
-int staticCode(CGStar& star)
-{
+int staticCode(CGStar& star) {
     BlockPortIter nextPort(star);
     CGPortHole* port;
 
     // Test the parameters of all ports.
-    while ( (port = (CGPortHole*)nextPort++) != NULL)
-    {
+    while ( (port = (CGPortHole*)nextPort++) != NULL) {
 	// If the buffer size is not the same as the number of
 	// particles transferred in one firing, then each firing must
 	// read from a different location.
@@ -233,21 +233,18 @@ int staticCode(CGStar& star)
     return TRUE;
 }
 
-void MotorolaTarget::writeFiring(Star& s, int level)
-{
+void MotorolaTarget::writeFiring(Star& s, int level) {
     CGStar& star = (CGStar&)s;
     int threshold = int(subFire);
 
-    if (threshold >= 0 && star.reps() > threshold && staticCode(star))
-    {
+    if (threshold >= 0 && star.reps() > threshold && staticCode(star)) {
 	if (star.index() < 0 && galaxy()) setStarIndices(*galaxy());
 
 	StringList label = star.className();
 	label << separator << star.index();
 
 	// Generate procedure definition.
-	if (procedures.put("",label))
-	{
+	if (procedures.put("",label)) {
 	    procedures << label << '\n';
 
 	    CodeStream* previous = defaultStream;
@@ -264,8 +261,7 @@ void MotorolaTarget::writeFiring(Star& s, int level)
 	// Invoke procedure.
 	mainLoop << "	jsr " << label << '\n';
     }
-    else
-    {
+    else {
 	AsmTarget::writeFiring(s,level);
     }
 }
@@ -327,14 +323,29 @@ static int memoryRequirements(const char* filename, int* words) {
 }
 
 int MotorolaTarget::computeImplementationCost() {
-        int words[3] = {0, 0, 0};
+	int retval = TRUE;
 
 	// Motorola 56000 architecture is one processor and two banks of memory
 	if (softwareCost) softwareCost->initialize();
 	else softwareCost = new ImplementationCost(1,2);
 
+	if ( int(reportMemoryUsage) ) {
+	    int words[3] = {0, 0, 0};
+	    retval = computeMemoryUsage(words);
+	    if (retval) {
+		softwareCost->setProgMemoryCost(0, words[PMEMORY_INDEX]);
+		softwareCost->setDataMemoryCost(0, words[XMEMORY_INDEX]);
+		softwareCost->setDataMemoryCost(1, words[YMEMORY_INDEX]);
+	    }
+	}
+
+	return retval;
+}
+
+int MotorolaTarget::computeMemoryUsage(int* words) {
 	// Figure out where the .lod file is
 	// If it is on a remote machine, then copy it over
+	// Return FALSE if the .lod file could not be found
 	int deleteFlag = FALSE;
 	StringList loadfilename;
 	loadfilename << filePrefix << ".lod";
@@ -344,28 +355,15 @@ int MotorolaTarget::computeImplementationCost() {
 	if ( loadpathname.length() == 0 ) return FALSE;
 
 	// Compute the memory requirements from the .lod file
+	// Returns an error if the .lod file couldn't be opened
 	int valid = memoryRequirements(loadpathname, words);
-	if (valid) {
-	    softwareCost->setProgMemoryCost(0, words[PMEMORY_INDEX]);
-	    softwareCost->setDataMemoryCost(0, words[XMEMORY_INDEX]);
-	    softwareCost->setDataMemoryCost(1, words[YMEMORY_INDEX]);
-	}
-	else {
-	    Error::warn("Could not open ", loadpathname, " for reading");
-	}
 
-	if ( deleteFlag ) {
-	    StringList removeCommand = "rm ";
-	    removeCommand << loadpathname;
-	    StringList errmsg = "Could not remove ";
-	    errmsg << loadpathname;
-	    systemCall(removeCommand, errmsg);
-	}
+	cleanupLocalFileName(loadpathname, deleteFlag);
 
 	return valid;
 }
 
-const char* MotorolaTarget::printImplementationCost() {
+const char* MotorolaTarget::describeImplementationCost() {
 	costString = "Motorola 56000 implementation costs: ";
 	if (softwareCost) {
 		costString << "program memory = "
