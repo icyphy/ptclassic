@@ -64,11 +64,16 @@
 #
 # <H2>CLASSPATH</H2>
 # The *CLASSPATH* environment variable controls where the Java tools
-# such as *javac*, *java*, and *appletviewer*.   *javac* and *java* tak
+# such as *javac*, *java*, and *appletviewer*.   *javac* and *java* take
 # a *-classpath* option, *appletviewer* does not.
-# Tycho reads the *classpath* preference and sets the *CLASSPATH* environment
-# variable before calling the java tools.  The *classpath* preference is
-# set in the miscellaneous preferences.
+#
+# If *useEnvClassPath* preference is true, then the *CLASSPATH* is read
+# from the environment *$env(CLASSPATH)* and passed to *java* or *javac*
+#
+# If the *useEnvClassPath* preference is false, then Tycho reads the
+# *classPath* preference and sets the *CLASSPATH* environment
+# variable before calling the java tools.  The *useEnvClassPath* and 
+# *classpath* preferences are set in the miscellaneous preferences.
 #
 # <p>
 # Here is an example of how to use the CompileJava class:
@@ -136,28 +141,46 @@ body ::tycho::CompileJava::destructor {} {
 #### compileAndRun
 # Compile and optionally run a java file.
 #
+# If useEnvClassPath is true, then get the CLASSPATH from $env(CLASSPATH).
+# If useEnvClassPath is false, then get the CLASSPATH from the classPath
+# preference.
+#
 body ::tycho::CompileJava::compileAndRun {filenames} {
     global env
-    set classPath [preference get classPath]
-    if {$classPath == {} } { 
-        if [info exists env(CLASSPATH)] { 
-            unset env(CLASSPATH)
-        }
+
+    if [preference get useEnvClassPath] {
+	if [info exists env(CLASSPATH)] { 
+	    set classPath [preference get classPath]
+	    set classPathArg "-classpath $classPath"
+	} else {
+	    set classPathArg ""
+	}
     } else {
-        set env(CLASSPATH) $classPath
-    }
+	set classPath [preference get classPath]
+	if {$classPath == {} } { 
+	    if [info exists env(CLASSPATH)] { 
+		unset env(CLASSPATH)
+	    }
+	    set classPathArg ""
+	} else {
+	    set env(CLASSPATH) $classPath
+	    set classPathArg "-classpath $classPath"
+	}
+    } 
+
     ::tycho::Compile::compileAndRun $filenames
     foreach javaFile $filenameList {
         lappend classNameList [file tail [file rootname $javaFile]]
     }
     if [checkSourceFiles] {
         # We have a main(), so we don't run appletviewer
-        set compileString "java -cs -v $classNameList"
+        set compileString "java -cs $classPathArg -v $classNameList"
         set runAppletViewer 0
     } else {
         # There was no main, so run the appletviewer.
         # FIXME: we should be checking that we are extending Applet here.
-	set compileString "javac -verbose $filenameList"
+	set compileString \
+		"javac -verbose $classPathArg $filenameList"
         set runAppletViewer 1
     }
 
