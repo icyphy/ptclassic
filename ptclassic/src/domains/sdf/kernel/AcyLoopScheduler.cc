@@ -426,7 +426,7 @@ hierarchy, and several class data members are created.
 int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 {
     Block *d;
-    int i = 0, rpmc, apgan, rpmcDppo, apganDppo;
+    int i = 0, rpmc, apgan, rpmcDppo=-1, apganDppo=-1;
     SequentialList wellOrderedList;
     StringList message = "AcyLoopScheduler::computeSchedule:\n";
 
@@ -511,10 +511,8 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
             if (logstrm)
 	    	*logstrm << "RPMC cost (w/out DPPO) is " << rpmc << ".\n";
 
-	    // Call DPPO
 	    rpmcDppo = DPPO();
 	    if (rpmcDppo >= 0) {
-
 	    	if (logstrm)
 		    *logstrm << "RPMC+DPPO schedule:\n" << displaySchedule();
 
@@ -548,6 +546,8 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 	}
 
 	// check if either heuristic ran to completion.
+	// Here, RPMC ran to completition if DPPO also ran on it;
+	// same for APGAN.
 	if (apganDppo < 0 && rpmcDppo < 0) {
 	    message << "Both APGAN and RPMC failed to produce valid "
 		    << "schedules due to previous errors.  Aborting...\n";
