@@ -124,6 +124,9 @@ public:
 	// Method replies FALSE to indicate that component blocks
 	// can be seen from outside.
 	virtual int isItAtomic () const {return FALSE;}
+
+	// Return myself as a Galaxy.  Overrides Block::asGalaxy.
+	Galaxy& asGalaxy() const { return *this;}
 };
 
 

@@ -36,6 +36,8 @@ $Id$
 
 **************************************************************************/
 
+class Star;
+class Galaxy;
 
 class Block : public NamedObj
 {
@@ -120,6 +122,11 @@ public:
         setState(const char* stateName, const char* expression) {
                         stateWithName(stateName)->setValue(expression);}
 
+	// Return reference to Block as a Star.  Error if it's not.
+	virtual Star& asStar() const;
+
+	// Return reference to Block as a Galaxy.  Error if it's not.
+	virtual Galaxy& asGalaxy() const;
 
 protected:
 	// Database for this block
