@@ -69,12 +69,12 @@ PortHole& EventHorizon :: setPort (
         return *this;
 }
 
-int EventHorizon :: isItInput() {
+int EventHorizon :: isItInput() const {
 	if (inOrOut < 2) return TRUE;
 	else		 return FALSE;
 }
 
-int EventHorizon :: isItOutput() {
+int EventHorizon :: isItOutput() const {
 	if (inOrOut > 1) return TRUE;
 	else		 return FALSE;
 }
@@ -170,7 +170,7 @@ void FromEventHorizon :: transferData ()
 
 void FromEventHorizon :: initialize()
 {
-	// call initialization routine for itselt
+	// call initialization routine for myself
 	PortHole :: initialize();
 
 	// Initialize members
