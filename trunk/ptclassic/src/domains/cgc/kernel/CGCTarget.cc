@@ -33,6 +33,8 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
                         "static buffering is enforced between portholes."));
 	addState(funcName.setState("funcName",this,"main",
                         "function name to be created."));
+        addState(doCompile.setState("doCompile",this,"YES",
+                "disallow compiling during development stage"));
 	addState(compileCommand.setState("compileCommand",this,"cc",
                         "function name to be created."));
 	addState(compileOptions.setState("compileOptions",this,"",
@@ -51,14 +53,17 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
 }
 
 StringList CGCTarget :: sectionComment(StringList s) {
-	StringList out = comment(s, " /**** ", " *****/");
+	StringList out = "\n/****** ";
+	out << s << " ******/\n";
 	return out;
 }
 
 void CGCTarget :: headerCode () {
-	globalDecls << headerComment("/* ", " */", " * ");
+	StringList code = "Generated C code for target ";
+	code += fullName();
+	StringList tmp = sectionComment(code);
+	globalDecls << tmp;
 }
-
 
 // galaxy declaration
 void CGCTarget :: galDataStruct(Galaxy& galaxy, int) {
@@ -133,6 +138,7 @@ void CGCTarget :: frameCode () {
     runCode += mainDecls;
     runCode += mainInit;
     runCode += myCode;
+    runCode += "}\n";
     
     myCode.initialize();
     myCode += runCode;
@@ -141,25 +147,21 @@ void CGCTarget :: frameCode () {
     initCodeStrings();
 }
 
-void CGCTarget :: generateCode() {
-	CGTarget :: generateCode();
-	myCode += "}\n";
+void CGCTarget :: writeCode(const char* name) {
+	if (name == NULL) CGTarget :: writeCode("code.c");
+	else CGTarget :: writeCode(name);
 }
 
 void CGCTarget :: wrapup () {
+	display(myCode);
+	if (inWormHole() == FALSE) wormLoadCode();
+}
 
-	if(Scheduler::haltRequested()) return;
-	Target::wrapup();
-
-	myCode += indent(1);
-	myCode += "exit(0);\n";
-	myCode += "}\n";
-
-	// display code
-	char* codeFileName = writeFileName("code.c");
-	if(!display(myCode, codeFileName)) return;
-
+int CGCTarget :: wormLoadCode() {
+	if (int(doCompile) == 0) return TRUE;
 	if(compileCode()) runCode();
+	if(Scheduler::haltRequested()) return FALSE;
+	return TRUE;
 }
 	
 // compile the code
@@ -190,10 +192,8 @@ int CGCTarget :: runCode() {
 	StringList cmd = "cd ";
 	cmd += (const char*)destDirectory;
 	cmd += "; a.out";
-	if(system(cmd)) {
-		Error::abortRun("Error(s) executing the generated program.");
-		return FALSE;
-	}
+	system(cmd);
+
 	// Move the code into files of more reasonable names
 	cmd = "cd ";
 	cmd += (const char*)destDirectory;
