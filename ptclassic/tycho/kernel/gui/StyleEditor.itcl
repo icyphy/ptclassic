@@ -347,8 +347,11 @@ configbody ::tycho::StyleEditor::stylesheet {
 configbody ::tycho::StyleEditor::style {
     set style $itk_option(-style)
     $itk_component(items) assign style-chooser $_unindex($style)
-
     foreach parameter [$_master match parameter style:$style] {
+        # If it's not in the labeled grid, ignore
+        if ![$itk_component(items) exists $parameter] {
+            continue
+        }
         set type [$_master itemcget "style:default parameter:$parameter" -type]
         set value [$_model dfltcget "style:$style parameter:$parameter" -value]
         switch -exact $type {
@@ -515,10 +518,6 @@ body ::tycho::StyleEditor::_loaddata \
     set sheet $itk_option(-stylesheet)
     if { $sheet == "" } {
 	return
-    }
-    # Initialize lists of parameters by type
-    foreach type {boolean choice font color integer string number} {
-	set $type {}
     }
     # Build list of parameters by type
     foreach parameter [$_master match parameter style:default] {
