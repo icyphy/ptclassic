@@ -54,13 +54,15 @@ public:
 	AsmTarget(const char* nam, const char* desc,
 		  const char* stype, ProcMemory* m = 0);
 
-	Block* makeNew() const = 0;
+	AsmTarget::~AsmTarget();
+	Block* makeNew() const { return new AsmTarget(name(),starType(),
+					descriptor());}
 
 	// Class identification.
 	/*virtual*/ int isA(const char*) const;
 
 	// output a directive that switches to the code section
-	virtual void codeSection() = 0;
+	virtual void codeSection() {}
 
 	/*virtual*/ void writeCode();
 
@@ -106,6 +108,14 @@ public:
 	ProcMemory* lookupSharedEntry(State&,unsigned&);
 
 	/*virtual*/ void frameCode();
+
+	// Re-define this CGTarget method to produce comments
+	// with ";" as the first character
+
+	/* virtual */  StringList comment(const char* cmt,
+		const char* begin=NULL, const char* end=NULL,
+		const char* cont=NULL);
+
 
 protected:
 	/*virtual*/ void setup();
