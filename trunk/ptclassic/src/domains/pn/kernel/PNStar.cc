@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1993 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -20,10 +20,9 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
 */
 /*  Version $Id$
-    Author:	T.M. Parks
+    Author:	T. M. Parks
     Created:	7 February 1992
 */
 
@@ -51,23 +50,22 @@ const char* MTDFStar::domain() const
 // Execute the Star.
 int MTDFStar::run()
 {
-    BlockPortIter next(*this);
+    BlockPortIter portIter(*this);
+    DFPortHole* port;
 
     // Receive data for synchronous ports.
-    for(int i = numberPorts(); i > 0; i--)
+    while((port = (DFPortHole*)portIter++) != NULL)
     {
-	MTDFPortHole& port = *(MTDFPortHole*)next++;
-	if(!port.isDynamic()) port.receiveData();
+	if(!port->isDynamic()) port->receiveData();
     }
 
     int status = Star::run();
 
     // Send data for synchronous ports, even on error.
-    next.reset();
-    for(i = numberPorts(); i > 0; i--)
+    portIter.reset();
+    while((port = (DFPortHole*)portIter++) != NULL)
     {
-	MTDFPortHole& port = *(MTDFPortHole*)next++;
-	if(!port.isDynamic()) port.sendData();
+	if(!port->isDynamic()) port->sendData();
     }
     return status;
 }
@@ -85,7 +83,7 @@ MTDFThread& MTDFStar::thread()
     return *myThread;
 }
 
-void MTDFStar::sleepUntil(TimeVal wake)
+void MTDFStar::sleepUntil(double wake)
 {
     MTDFScheduler& sched = *(MTDFScheduler*)scheduler();
     thread().sleep(sched.delay(wake));

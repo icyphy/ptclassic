@@ -49,10 +49,13 @@ MTDFThread::MTDFThread(int priority, void (*thread)(MTDFStar*), MTDFStar* star)
 { }
 
 // Disable Thread for the specified time.
-int MTDFThread::sleep(TimeVal delay)
+int MTDFThread::sleep(double delay)
 {
     if (delay > 0.0)
-	return lwp_sleep((timeval*)&delay);
+    {
+	TimeVal t(delay);
+	return lwp_sleep((timeval*)&t);
+    }
     else
 	return 0;
 }
