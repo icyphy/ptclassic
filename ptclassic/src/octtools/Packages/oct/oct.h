@@ -345,7 +345,16 @@ struct octFacetInfo {
 
 struct octObject {
     int type;
+#if defined(PTALPHA) && defined(__GNUC__)
+    /* Set up alignment for 64 bit archs.  If objectId is not aligned
+       on 8 bytes on the Alpha, then vem will produce lots of
+       alignment faults.  The problem is that bufChanges() has a cast
+       that passes the objectId to st_gen().
+     */
+    octId objectId __attribute__((aligned(8)));
+#else
     octId objectId;
+#endif
     union {
 	struct octFacet facet;
 	struct octInstance instance;
