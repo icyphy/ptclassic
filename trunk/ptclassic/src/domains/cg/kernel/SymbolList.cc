@@ -51,7 +51,8 @@ const char* BaseSymbolList::append(const char* name)
 {
     if (counter == NULL) return NULL;
 
-    char* sym = savestring(symbol(name));
+    StringList temp = symbol(name);
+    char* sym = savestring(temp);
     if (NamedList::append(sym, name)) return sym;
     else return NULL;
 }
@@ -62,7 +63,8 @@ const char* BaseSymbolList::prepend(const char* name)
 {
     if (counter == NULL) return NULL;
 
-    char* sym = savestring(symbol(name));
+    StringList temp = symbol(name);
+    char* sym = savestring(temp);
     NamedList::prepend(sym, name);
     return sym;
 }
@@ -71,10 +73,10 @@ const char* BaseSymbolList::prepend(const char* name)
 // Return FALSE on error.
 int BaseSymbolList::remove(const char* name)
 { 
-    char* symbol = (char*)NamedList::get(name);
-    if (symbol != NULL)
+    char* sym = (char*)NamedList::get(name);
+    if (sym != NULL)
     {
-	LOG_DEL; delete symbol;
+	LOG_DEL; delete sym;
 	return NamedList::remove(name);
     }
     else return FALSE;
@@ -83,10 +85,10 @@ int BaseSymbolList::remove(const char* name)
 // Delete all the symbols in the list.
 void BaseSymbolList::deleteSymbols()
 {
-    NamedListIter symbol(*this);
+    NamedListIter sym(*this);
     char* s;
 
-    while((s = (char*)symbol++) != NULL)
+    while((s = (char*)sym++) != NULL)
     {
 	LOG_DEL; delete s;
     }
@@ -94,16 +96,16 @@ void BaseSymbolList::deleteSymbols()
 
 const char* SymbolList::lookup(const char* name)
 {
-    const char* symbol = get(name);
-    if (symbol == NULL) symbol = append(name);
-    return symbol;
+    const char* sym = get(name);
+    if (sym == NULL) sym = append(name);
+    return sym;
 }
 	
 StringList SymbolStack::pop()
 {
-    StringList symbol = get();
+    StringList sym = get();
     remove();
-    return symbol;
+    return sym;
 }
 
 const char* ScopedSymbolList::lookup(const char* scope, const char* name)
@@ -114,8 +116,8 @@ const char* ScopedSymbolList::lookup(const char* scope, const char* name)
 	LOG_NEW; list = new SymbolList(separator, counter);
 	append(list, scope);
     }
-    const char* symbol = list->lookup(name);
-    return symbol;
+    const char* sym = list->lookup(name);
+    return sym;
 }
 
 // Delete all the SymbolLists in the list.
