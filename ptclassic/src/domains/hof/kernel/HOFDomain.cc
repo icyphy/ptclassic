@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer:  J. T. Buck
  Date of creation: 7/2/90
  Based on Version: @(#)XDomain.ccP	1.15	7/30/96
- HOFDomains.cc Version: $Id$ G%
+ HOFDomains.cc Version: $Id$
 
  A device to produce the correct portholes, wormholes, event horizons,
  etc, for the HOF domain so the interpreter can generate them dynamically.
