@@ -892,10 +892,12 @@ body ::tycho::IDoc::display {} {
         Java {
             set package [$classModel modelcget -package]
             if {$package != {}} {
-                set className $package.$mainClass
+                set classname $package.$mainClass
+            } {
+                set classname $mainClass
             }
             $myContents appendlabel class \
-                    -text $className \
+                    -text $classname \
                     -font [$this cget -headfont] \
                     -fg [$this cget -publiccolor]
         }
