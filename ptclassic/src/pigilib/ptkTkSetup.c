@@ -108,7 +108,33 @@ _ptkAppInit( ip)
     if (Itcl_Init(ip) == TCL_ERROR) {
       return TCL_ERROR;
     }
-#endif
+
+#if ITCL_MAJOR_VERSION >= 3
+    Tcl_StaticPackage(ip, "Itcl", Itcl_Init, Itcl_SafeInit);
+    Tcl_StaticPackage(ip, "Itk", Itk_Init, (Tcl_PackageInitProc *) NULL);
+
+    /*
+     *  This is itclsh, so import all [incr Tcl] commands by
+     *  default into the global namespace.  Set the "itcl::native"
+     *  variable so we can do the same kind of import automatically
+     *  during the "auto_mkindex" operation.
+     */
+    if (Tcl_Import(ip, Tcl_GetGlobalNamespace(ip),
+            "::itk::*", /* allowOverwrite */ 1) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (Tcl_Import(ip, Tcl_GetGlobalNamespace(ip),
+            "::itcl::*", /* allowOverwrite */ 1) != TCL_OK) {
+        return TCL_ERROR;
+    }
+
+    if (!Tcl_SetVar(ip, "::itcl::native", "1", TCL_LEAVE_ERR_MSG)) {
+        return TCL_ERROR;
+    }
+#endif /* ITCL_MAJOR_VERSION */
+#endif /* PT_NO_ITCL */
+
 #ifdef ITCL_VERSION
     /* ITCL2.0 or better */
     if (Itk_Init(ip) == TCL_ERROR) {
@@ -126,8 +152,10 @@ ptkTkSetup(funcArray, size)
 {
     static RPCClientData RPCdata;
     static char buf[256];
+#if TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1
     char *appName = "pigi";
     char *appClass = "Pigi";
+#endif
     char *pt;
 
     RPCdata.funcArray = funcArray;
