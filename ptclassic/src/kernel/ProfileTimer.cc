@@ -40,7 +40,7 @@ static const char file_id[] = "ProfileTimer.cc";
 #include <sys/time.h>
 #include "compat.h"
 
-#if !defined(PTSOL2_4)
+#if !defined(PTSOL2_4) && (!defined (__GLIBC__) || (__GLIBC__ < 2))
 extern "C" int getitimer(int, struct itimerval *);
 #endif
 
