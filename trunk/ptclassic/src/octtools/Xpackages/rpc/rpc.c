@@ -873,14 +873,14 @@ STREAM stream;
     
     if (!RPCByteSwapped) {
 	if (fread((char *) value, sizeof(long), (int) 1, stream) != 1) {
-	    (void) fprintf(stderr, "RPC Error: fread of long failed\n");
+	    (void) fprintf(stderr, "Ptolemy failed to receive response from Vem!\n");
 	    return RPC_FALSE;
 	} else {
 	    return RPC_TRUE;
 	}
     } else {
 	if (fread((char *) value, sizeof(long), (int) 1, stream) != 1) {
-	    (void) fprintf(stderr, "RPC Error: fread of long failed\n");
+	    (void) fprintf(stderr, "Ptolemy failed to receive response from Vem!\n");
 	    return RPC_FALSE;
 	} else {
 	    buf = (char *) value;
