@@ -26,9 +26,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	lar	ar0,#$addr(input)
 	lar	ar1,#$addr(output)
 	mar	*,ar0
-	lacc	*,0,ar1
-	sacl	*+,0
-	sach	*,0
+	lacc	*,16,ar1
+	sach	*+,0
+	sacl	*,0
     }
     go {
 	addCode(convert);
