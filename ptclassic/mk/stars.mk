@@ -23,7 +23,7 @@
 
 # Stub files that pull in the stars.
 SDFSTARS = $(LIBDIR)/sdfstars.o $(LIBDIR)/sdfimagestars.o \
- 	   $(LIBDIR)/sdfdspstars.o $(LIBDIR)/sdfmatrix.o
+ 	   $(LIBDIR)/sdfdspstars.o $(LIBDIR)/sdfmatrixstars.o
 CGCSTARS = $(LIBDIR)/cgcstars.o $(LIBDIR)/cgctcltkstars.o
 CG96STARS = $(LIBDIR)/cg96dspstars.o $(LIBDIR)/cg96stars.o
 CG56STARS = $(LIBDIR)/cg56dspstars.o $(LIBDIR)/cg56stars.o
