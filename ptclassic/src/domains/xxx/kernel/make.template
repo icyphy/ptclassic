@@ -38,6 +38,8 @@ VPATH = $(ROOT)/src/domains/xxx/kernel
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
+
+# Include path
 INCL = -I$(KERNDIR)
 
 # Library name
