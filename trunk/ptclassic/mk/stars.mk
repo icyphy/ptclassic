@@ -23,6 +23,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #
+#
 # stars.mk :: Common definitions of star and target subsets.
 # Version: $Id$ 
 #
@@ -186,7 +187,10 @@ SDFTARGETS =	$(OBJDIR)/domains/sdf/loopScheduler/LoopTarget.o
 CGTARGETS =	$(CGT)/CGMultiTarget.o $(CGT)/CGSharedBus.o \
 		$(SDFT)/CompileTarget.o 
 CGCTARGETS =	$(CGCT)/main/CGCUnixSend.o $(CGCT)/main/CGCUnixReceive.o \
-		$(CGCT)/main/CGCMultiTarget.o $(CGCTCL)/CGCTclTkTarget.o
+		$(CGCT)/main/CGCMultiTarget.o $(CGCTCL)/CGCTclTkTarget.o \
+		$(CGCT)/main/CGCSDFSend.o $(CGCT)/main/CGCSDFReceive.o \
+		$(CGCT)/main/CGCSDFBase.o $(CGCT)/main/CGCTargetWH.o
+
 CGCDDFTARGETS =	$(CGCT)/main/CGCDDFTarget.o
 BDFTARGETS =	$(CGT)/CGBDFTarget.o $(CGCT)/main/CGCBDFTarget.o
 CG56TARGETS =	$(CG56T)/Sim56Target.o $(CG56T)/S56XTarget.o $(S56WH_O)\
