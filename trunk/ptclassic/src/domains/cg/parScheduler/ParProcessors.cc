@@ -17,26 +17,210 @@ Date of last revision:
 #endif
 
 #include "ParProcessors.h"
+#include "ParGraph.h"
 #include "StringList.h"
 
 ParProcessors :: ParProcessors(int pNum, BaseMultiTarget* t) : mtarget(t) {
-         numProcs = pNum;
-         pIndex.create(pNum);
-         pId.create(pNum); 
+	numProcs = pNum;
+	pIndex.create(pNum);
+	pId.create(pNum); 
+	SCommNodes.initialize();
+	commCount = 0;
+}
+
+ParProcessors :: ~ParProcessors() {
+	removeCommNodes();
 }
 
 void ParProcessors :: initialize()
 {
-	// reset the pattern of processor availability.
-	// initialize parallel schedules.
 	for (int i = 0; i < numProcs; i++) {
-		getProc(i)->initialize();
 		pIndex[i] = i;
 		pId[i] = i;
 	}
+
+	// reset the pattern of processor availability.
+	// initialize parallel schedules.
+	for (i = 0; i < numProcs; i++) {
+		UniProcessor* p = getProc(i);
+		p->setTarget(mtarget);
+		p->initialize();
+	}
+
+	SCommNodes.initialize();
+	commCount = 0;
+}
+
+// remove comm. nodes
+void ParProcessors :: removeCommNodes() {
+	EGNode* en;
+	while ((en = (EGNode*) SCommNodes.takeFromFront()) != 0) {
+		LOG_DEL; delete en;
+	}
+	SCommNodes.initialize();
 }
 
 UniProcessor* ParProcessors :: getProc(int num) { return 0; }
+
+// calculate the makespan...
+int ParProcessors :: getMakespan() {
+	int max = 0;
+	for (int i = 0; i < numProcs; i++) {
+		int temp = getProc(i)->getAvailTime();
+		if (temp > max) max = temp;
+	}
+	return max;
+}
+
+/*****************************************************************
+		list scheduling
+ ****************************************************************/
+
+// copy node lists
+static void copyNodes(EGNodeList& from, EGNodeList& to) {
+	to.initialize();
+	EGNodeListIter niter(from);
+	EGNode* node;
+	while ((node = niter++) != 0)
+		to.append(node);
+}
+
+// find the earliest time when all ancestors are scheduled.
+static int ancestorsFinish(ParNode* node) {
+	int finish = 0;
+	ParAncestorIter iter(node);
+	ParNode *pg;
+	while ((pg = iter++) != 0) {
+		if (pg->getFinishTime() > finish)
+			finish = pg->getFinishTime();
+	}
+	return finish;
+}
+
+			/////////////////////
+			///  listSchedule ///
+			/////////////////////
+// The list scheduler which obtains the makespan.  It finds all the
+//      instances of interprocessor communication, constructs
+//      new ParNodes to represent them, and schedules them along
+//      with the other ParNodes.
+int ParProcessors :: listSchedule(ParGraph* graph) {
+
+	// runnable nodes
+	EGNodeList readyNodes;
+	copyNodes(graph->runnableNodes, readyNodes);
+
+	// reset the graph
+	graph->replenish(0);
+
+	// find communication nodes and insert them into the graph.
+	findCommNodes(graph, readyNodes);
+
+	while (readyNodes.mySize() > 0) {
+		ParNode* node = (ParNode*) readyNodes.takeFromFront();
+		UniProcessor* p = getProc(node->whichProc());
+
+		// compute the earliest schedule time
+		int start = ancestorsFinish(node);
+		
+		// If node is a comm node, call topology dependent section
+		// to see if there are any constraints
+		if (node->getType() < 0) {
+			p->scheduleCommNode(node, start);
+		} else {
+			// schedule a regular node
+			p->addNode(node, start);
+		}
+
+		// check whether any descendant is runnable after this node.
+		ParDescendantIter iter(node);
+		ParNode* n;
+		while ((n = iter++) != 0) {
+			if (n->fireable())
+				graph->sortedInsert(readyNodes, n, 1);
+		}
+	}
+	return getMakespan();
+}
+
+			///////////////////////
+			///  findCommNodes  ///
+			///////////////////////
+// Makes send and receive ParNodes for each interprocessor communication.
+// Want to splice these into tempAncs and tempDescs for list scheduling.
+
+void ParProcessors::findCommNodes(ParGraph* graph, EGNodeList& readyNodes) {
+
+	// Make sure the list of communication nodes is clear
+	removeCommNodes();
+	int hidden = FALSE;
+
+	EGIter iter(*graph);
+	ParNode *pg, *desc;
+	while ((pg = (ParNode*) iter++) != 0) {
+	   hidden = FALSE;
+	   EGGateLinkIter giter(pg->descendants);
+	   EGGate* g;
+	   for (int i = 2; i > 0; i--) {	// loop twice
+		while ((g = giter++) != 0) {
+			if (hidden && g->isItInput()) continue;
+			ParNode* desc = (ParNode*)(g->farEndNode());
+			int from = pg->whichProc();
+			int to = desc->whichProc();
+			if (from != to) {
+				int num = g->samples();
+
+				// make comm nodes.
+				// 1. compute communication times.
+				int sTime = mtarget->commTime(from,to,num,0);
+				int rTime = mtarget->commTime(from,to,num,1);
+
+				// 2. make send and receive nodes
+				ParNode* snode = createCommNode(-1);
+				snode->assignProc(from);
+				snode->setOrigin(g);
+				if (hidden) {
+					// can be done later.
+					snode->assignSL(1);	
+				} else {
+					snode->assignSL(pg->getLevel() + 1);
+				}
+				snode->setExTime(sTime);
+				
+				ParNode* rnode = createCommNode(-2);
+				rnode->assignProc(to);
+				rnode->setOrigin(g->farGate()); 
+				if (hidden) {
+				   // right before the node.
+				   rnode->assignSL(desc->getLevel());
+				   if (desc->root()) readyNodes.remove(desc);
+				   graph->sortedInsert(readyNodes, rnode, 1);
+				} else {
+					rnode->assignSL(desc->getLevel());
+				}
+				rnode->setExTime(rTime);
+
+				// 3. insert them into the graph.
+				pg->connectedTo(snode);
+				rnode->connectedTo(desc);
+				// if not hidden
+				if(!hidden) snode->connectedTo(rnode);
+
+				SCommNodes.insert(snode);
+				SCommNodes.insert(rnode);
+			}
+		}
+		giter.reconnect(pg->hiddenGates);
+		hidden = TRUE;
+	   }
+	}
+	// Set the communcation node count for the schedule
+	commCount = (int)(SCommNodes.mySize() / 2);
+}
+
+ParNode*  ParProcessors :: createCommNode(int i) {
+	LOG_NEW; return new ParNode(i);
+}
 
 /*****************************************************************
 		DISPLAY 
@@ -82,6 +266,10 @@ StringList ParProcessors :: display (NamedObj* galaxy) {
 	return out;
 }
 
+/*****************************************************************
+		sort the processors 
+ ****************************************************************/
+
 void ParProcessors :: sortWithFinishTime() {
 
 	// insertion sort
@@ -98,16 +286,6 @@ void ParProcessors :: sortWithFinishTime() {
                 j++;
                 pId[j] = temp;
         }
-}
-
-// calculate the makespan...
-int ParProcessors :: getMakespan() {
-	int max = 0;
-	for (int i = 0; i < numProcs; i++) {
-		int temp = getProc(i)->getAvailTime();
-		if (temp > max) max = temp;
-	}
-	return max;
 }
 
 // sort the processor ids with available times.
@@ -153,4 +331,33 @@ void ParProcessors :: sortWithAvailTime(int guard) {
                 j++;
                 pIndex[j] = temp;
         }
+}
+
+/*****************************************************************
+		create sub Galaxies for each processor
+ ****************************************************************/
+
+void ParProcessors :: createSubGals() {
+
+	// processor index set.
+	for (int i = 0; i < numProcs; i++) 
+		getProc(i)->index = i;
+
+	// create sub-Universes
+	for (i = 0; i < numProcs; i++) {
+		getProc(i)->createSubGal();
+	}
+}
+
+StringList ParProcessors :: displaySubUnivs() {
+
+	StringList out;
+	for (int i = 0; i < numProcs; i++) {
+		out += " << Processor #";
+		out += i;
+		out += " >> \n";
+		out += getProc(i)->displaySubUniv();
+		out += "\n";
+	}
+	return out;
 }

@@ -59,8 +59,14 @@ public:
 	ParGraph(): logstrm(0), myGal(0) {};
 	~ParGraph();
 
+	// A list of initially runnable Nodes
+	EGNodeList runnableNodes;
+
+	// fill runnableNodes list.
+	void findRunnableNodes();
+
 	// Function which actually constructs the expanded graph
-	int createMe(Galaxy& galaxy);
+	int createMe(Galaxy& galaxy, int selfLoopFlag = 0);
 
 	// The sum of node execution times in the graph
 	int getExecTotal() {return ExecTotal;}
@@ -78,8 +84,15 @@ public:
 	// Sorts highest SL first if flag = 1, lowest SL first if flag = 0
 	void sortedInsert(EGNodeList&, ParNode *, int flag);
 
+	// Replenishes the tempAncs and tempDescs for each node in the DCGraph.
+	void replenish(int flag);
+
         // redefine
         void removeArcsWithDelay();
+
+	// restore hidden gates
+	void restoreHiddenGates();
+
 };
 
 class NodePair {

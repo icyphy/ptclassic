@@ -17,6 +17,7 @@ Date of last revision:
 #endif
 
 #include "ParNode.h"
+#include "ParGraph.h"
 
                         ///////////////////////
                         ///  *Constructor*  ///
@@ -29,6 +30,7 @@ ParNode::ParNode(SDFStar* s, int invoc_no) : EGNode(s, invoc_no)
 	procId = 0;
 	exTime = s->myExecTime();
 	waitNum = 0;
+	origin = 0;
 }
 
 // Alternate constructor for idle nodes and communication nodes
@@ -42,6 +44,7 @@ ParNode::ParNode(int t) : EGNode(0,0) {
 	procId = 0;
 	exTime = 0;
 	waitNum = 0;
+	origin = 0;
 }
 
                            ///////////////
@@ -59,5 +62,56 @@ StringList ParNode::print() {
 	out += myMaster()->myExecTime();
 	out += ")\n";
 	return out;
+}
+
+                        /////////////////////
+                        ///  copyAncDesc  ///
+                        /////////////////////
+// This function copies the ancestors and descendants of the node
+//	into temporary variables tempAncs and tempDescs.
+// If flag = 0, copy normally
+// If flag = 1, copy ancestors into tempDescs and descendants into tempAncs
+
+void ParNode::copyAncDesc(ParGraph* g, int flag) {
+
+	resetWaitNum();
+
+	EGGateLinkIter dfiter1(ancestors);
+	EGGateLinkIter dfiter2(descendants);
+	EGGate *dfl;
+
+	// Clear tempAncs and tempDescs completely
+	tempAncs.initialize();
+	tempDescs.initialize();
+
+	// Restore tempAncs (sorted smallest SL first)
+	while ((dfl = dfiter1++) != 0) {
+	   if (flag == 0)
+		g->sortedInsert(tempAncs, (ParNode*)(dfl->farEndNode()), 0);
+	   else
+		g->sortedInsert(tempDescs, (ParNode*)(dfl->farEndNode()), 0);
+	}
+
+	// Restore tempDescs (sorted largest SL first)
+	while ((dfl = dfiter2++) != 0) {
+	   if (flag == 0)
+		g->sortedInsert(tempDescs, (ParNode*)(dfl->farEndNode()), 1);
+	   else
+		g->sortedInsert(tempAncs, (ParNode*)(dfl->farEndNode()), 1);
+	}
+}
+
+// set informations for sub-universe generation
+void ParNode :: setCopyStar(SDFStar* s, ParNode* prevN) {
+	clonedStar = s;
+	if (prevN) {
+		prevN->nextNode = this;
+		firstNode = prevN->firstNode;
+		firstNode->numCopied++;
+	} else {
+		firstNode = this;
+		numCopied = 1;
+	}
+	nextNode = 0;
 }
 
