@@ -75,6 +75,9 @@ protected:
 		return (AsmPortHole*)portWithName(name);
 	}
 
+	// Save PC, gencode, Restore PC & set interruptFlag=TRUE.
+	void genInterruptCode(CodeBlock& block);
+
 	// Look up the value of state and return it as a StringList.
 	// A zero-length StringList is returned if there is no such State.
 	StringList lookupVal(const char* name);
