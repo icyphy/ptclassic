@@ -153,8 +153,10 @@ BlockPortIter nextp(*galaxy());
 	return nInP;
 }
 
-//Determines the next-self-firing-time of the wormhole that has to be triggered
-//by itself, as it doesn't have any inputs to trigger it off
+//This is called by a wormhole of a timed domain to determine the 
+//next-self-firing-time relative to "now", of the wormhole. This would normally 
+//be called if the wormhole has no inputs and has to trigger itself, ie 
+//selfFiringRequested() returns TRUE
 double SDFTarget :: nextFiringTime(){
-return ((scheduler()->now()) + (double)schedulePeriod);
+return ((double)schedulePeriod);
 }
