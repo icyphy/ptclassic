@@ -41,8 +41,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Error.h"
 #include <ostream.h>
 
-ISA_FUNC(VHDLGeodesic,CGGeodesic);
-
 // Return the name assigned to the buffer.
 // If I am a fork destination, my buffer name is that of the source.
 char* VHDLGeodesic :: getBufName() const {
@@ -70,6 +68,11 @@ void VHDLGeodesic :: getTokens(int num) {
   nextOut += num;
 //  cout << nextOut << "\n";
   if (nextOut > nextIn) {
-    Error::error("Read from geodesic beyond available tokens");
+    // Don't worry about it (for now) if over-read from wormhole port.
+    if (!(destPort()->atBoundary())) {
+      Error::error(*this, "Read from geodesic beyond available tokens");
+    }
   }
 }
+
+ISA_FUNC(VHDLGeodesic,CGGeodesic);

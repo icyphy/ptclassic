@@ -63,6 +63,7 @@ public:
 	VHDLPortVarList firingPortVarList;
 	VHDLPortVarList firingVarPortList;
 
+	VHDLPortList systemPortList;
 	VHDLCompDeclList compDeclList;
 	VHDLSignalList signalList;
 	VHDLCompMapList compMapList;
@@ -121,7 +122,10 @@ public:
 	/*virtual*/ void registerTemp(const char*, const char*);
 
 	// Register the State reference.
-	/*virtual*/ void registerState(State*, int=-1);
+	/*virtual*/ void registerState(State*, int=-1, int=-1);
+
+	// Add a register component declaration.
+	void registerRegister(State*);
 
 	// Register PortHole reference.
 	/*virtual*/ void registerPortHole(VHDLPortHole*, int=-1);
@@ -136,10 +140,7 @@ protected:
 	CodeStream component_mappings;
 	CodeStream starDecls;
 	CodeStream starInit;
-//	CodeStream firingVarDecls;
-//	CodeStream firingPreAction;
 	CodeStream firingAction;
-//	CodeStream firingPostAction;
 
 	// virtual function to add additional codeStreams.
 	virtual void addCodeStreams();
@@ -159,14 +160,15 @@ protected:
 	// Combine all sections of code;
 	/*virtual*/ void frameCode();
 
-	// Generate declarations and initialization code for
-	// Star PortHoles and States.
-/*
-	virtual void declareGalaxy(Galaxy&);
-	virtual void declareStar(VHDLStar*);
-*/
-
 private:
+	// Flag indicating if registers are needed.
+        int regsUsed;
+
+	// Set the condition indicating registers are needed.
+	void setRegisters() { regsUsed = 1; }
+
+	// Return the condition indicating if registers are needed.
+        int registers() { return regsUsed; }
 };
 
 #endif

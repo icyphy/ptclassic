@@ -60,6 +60,10 @@ public:
 	// Main routine.
 	virtual int runIt(VHDLStar*);
 
+//	// Redefined from CGTarget to avoid cout messages.
+//	/*virtual*/ sendWormData(PortHole&);
+//	/*virtual*/ receiveWormData(PortHole&);
+
 	// redefine writeCode: default file is "code.vhd"
 	/*virtual*/ void writeCode();
 
@@ -81,14 +85,14 @@ public:
 	// Run the code.
 	/*virtual*/ int runCode();
 
+	// Generate code for reading from a wormhole input port.
+	/*virtual*/ void wormInputCode(PortHole&);
+
+	// Generate code for writing to a wormhole output port.
+	/*virtual*/ void wormOutputCode(PortHole&);
+
 	// Assign names for each geodesic according to port connections.
 	void setGeoNames(Galaxy&);
-
-	// Declare PortHole buffer.
-//	virtual StringList declBuffer(const VHDLPortHole*);
-
-	// Declare State variable.
-//	virtual StringList declState(const State*, const char*);
 
 	// Return the VHDL type corresponding to the State type.
 	virtual StringList stateType(const State* st);
@@ -97,7 +101,7 @@ public:
 	virtual void registerTemp(const char*, const char*);
 
 	// Register the State reference.
-	virtual void registerState(State*, int=-1);
+	virtual void registerState(State*, int=-1, int=-1);
 
 	// Register PortHole reference.
 	virtual void registerPortHole(VHDLPortHole*, int=-1);
@@ -112,8 +116,6 @@ public:
 protected:
 	CodeStream entity_declaration;
 	CodeStream architecture_body_opener;
-//	CodeStream mainInit;
-//	CodeStream mainDecls;
 	CodeStream variable_declarations;
 	CodeStream architecture_body_closer;
 
@@ -135,10 +137,8 @@ protected:
 	// Combine all sections of code;
 	/*virtual*/ void frameCode();
 
-	// Generate declarations and initialization code for
-	// Star PortHoles and States.
-//	virtual void declareGalaxy(Galaxy&);
-//	virtual void declareStar(VHDLStar*);
+	// Clean up the code by wrapping around long lines as separate lines.
+	void wrapAround(StringList*);
 
 private:
 };

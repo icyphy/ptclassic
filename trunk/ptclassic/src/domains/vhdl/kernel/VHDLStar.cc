@@ -114,22 +114,15 @@ StringList VHDLStar :: expandRef(const char* name) {
     StringList type;
     StringList initVal;
 
-//    ref << starSymbol.lookup(state->name());
-//    ref << targ()->sanitizedFullName(*state);
-//    ref << starSymbol.lookup(tempName);
     StringList tempName = targ()->sanitizedFullName(*state);
     ref = sanitize(tempName);
+    ref << "_";
+    ref << firing;
     
-    if (firing >= 0) ref << "_" << firing;
     type = targ()->stateType(state);
     initVal = state->initValue();
 
-//    registerState(state);
-//    cout << "Call to targ()->registerState(state);\n";
     targ()->registerState(state, firing);
-
-    // Register this variable reference for use by target.
-//    registerVariable(ref, type, initVal);
   }
   
   // Check if it's a PortHole reference.
@@ -153,13 +146,6 @@ StringList VHDLStar :: expandRef(const char* name) {
     type = port->dataType();
     
     targ()->registerPortHole(port, port->getOffset());
-
-    // Register this port reference for use by target.
-//    registerPort(ref, direction, type);
-    // Register this port mapping for use by target.
-//    registerPortMap(ref, mapping);
-    // Register the signal mapped to for use by target.
-//    registerSignal(ref, type, ref, ref);
   }
 
   // Error:  couldn't find a State or a PortHole with given name.
@@ -182,7 +168,7 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
 
   ref.initialize();
     
-  // Use State value as offset (if such a State exists).
+  // Convert offset State value to  offset (if such a State exists).
   if ((offsetState = stateWithName(offset)) != NULL) {
     // Get State value as a string.
     if (offsetState->isA("IntState")) {
@@ -196,36 +182,44 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
     }
   }
 
-  // Expand array State reference.
+  // Expand array State reference (since expandRef called with two args).
   if ((state = stateWithName(name)) != NULL) {
     StringList type;
     StringList initVal;
 
     if (state->isArray()) {
-//      Error::error(*state, "...VHDLStar not set up to handle array states.");
-
-//      ref << starSymbol.lookup(state->name());
-//      ref << targ()->sanitizedFullName(*state);
-//      ref << starSymbol.lookup(tempName);
-
-//      int offsetInt = *(IntState*)offsetState;
-//      ref << "_" << offsetInt;
       StringList tempName = targ()->sanitizedFullName(*state);
       ref = sanitize(tempName);
 
-      targ()->registerState(state, firing);
+      // generate constant for index from state
+      if (offsetState != NULL) {
+	int offsetInt = *(IntState*)offsetState;
+	targ()->registerState(state, firing, offsetInt);
+	ref << "_P";
+	ref << offsetInt;
+	ref << "_";
+	ref << firing;
+      }
 
-      if (firing >= 0) ref << "_" << firing;
+      // generate constant for index
+      else {
+	// must first convert offset from char* to int
+	int offsetInt = 0;
+	for (int i=0; offset[i]>='0' && offset[i]<='9'; i++) {
+	  offsetInt = 10*offsetInt + (offset[i]-'0');
+	}
+	ref << "_P";
+	ref << offsetInt;
+	ref << "_";
+	ref << firing;
+	targ()->registerState(state, firing, offsetInt);
+      }
     }
     else {
       codeblockError(name, " is not an array state");
       ref.initialize();
     }
-    type = targ()->stateType(state);
-    initVal = state->initValue();
-
-    // Register this variable reference for use by target.
-//    registerVariable(ref, type, initVal);
+    return ref;
   }
 
   // Expand PortHole reference with offset.
@@ -251,7 +245,7 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
       if (offsetState != NULL) {
 	int offsetInt = *(IntState*)offsetState;
 	ref << (port->getOffset() + offsetInt);
-    targ()->registerPortHole(port, offsetInt);
+	targ()->registerPortHole(port, offsetInt);
       }
 
       // generate constant for index
@@ -262,19 +256,9 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
 	  offsetInt = 10*offsetInt + (offset[i]-'0');
 	}
 	ref << (port->getOffset() + offsetInt);
-    targ()->registerPortHole(port, offsetInt);
+	targ()->registerPortHole(port, offsetInt);
       }
     }
-    mapping = ref;
-    direction = port->direction();
-    type = port->dataType();
-    
-    // Register this port reference for use by target.
-//    registerPort(ref, direction, type);
-    // Register this port mapping for use by target.
-//    registerPortMap(ref, mapping);
-    // Register the signal mapped to for use by target.
-//    registerSignal(ref, type, ref, ref);
   }
 
   return ref;

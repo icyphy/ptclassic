@@ -39,12 +39,28 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLForkNode.h"
 #include "VHDLGeodesic.h"
 #include "VHDLTarget.h"
+#include "VHDLWormhole.h"
 
 extern const char VHDLdomainName[] = "VHDL";
 
 class VHDLDomain : public Domain {
 public:
-	// new geodesic
+        // no XXXinVHDL wormholes yet, so no newWorm,
+  	// error check in Domain.cc
+
+	// new fromUniversal EventHorizon
+	EventHorizon& newFrom() {
+		LOG_NEW; 
+		return *new VHDLfromUniversal;
+	}
+
+	// new toUniversal EventHorizon
+	EventHorizon& newTo() {
+		LOG_NEW; 
+		return *new VHDLtoUniversal;
+	}
+
+        // new geodesic
 	Geodesic& newGeo(int multi) {
 		if (multi) { LOG_NEW; return *new VHDLForkNode;}
 		else { LOG_NEW; return *new VHDLGeodesic;}
