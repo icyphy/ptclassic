@@ -1,12 +1,12 @@
 // This may look like C code, but it is really -*- C++ -*-
 
-#ifndef fft_h
-#define fft_h
+#ifndef nb_fft_h
+#define nb_fft_h
 
 /* #include <Complex.h> */
 #include "Constants.h"
 
-class fft {
+class nb_fft {
 
 protected:
 
@@ -20,7 +20,7 @@ private:
 
 public:
 
-  fft( int _Inverse, int size ) : N( size ), Inverse( _Inverse ) {}
+  nb_fft( int inverse, int size ) : N( size ), Inverse( inverse ) {}
 
   Complex* Compute( Complex* z1, Complex* z2 );
 
