@@ -38,8 +38,8 @@ static const char file_id[] = "CGUtilities.cc";
 #pragma implementation
 #endif
 
-#include <stdio.h>		// Pick up prototype for pclose
-#include <unistd.h>		// Pick up prototype for access
+#include <stdio.h>		// declare pclose
+#include <unistd.h>		// declare access
 #include "pt_fstream.h"
 #include "type.h"
 #include "CGUtilities.h"
@@ -47,15 +47,15 @@ static const char file_id[] = "CGUtilities.cc";
 #include "miscFuncs.h"
 #include "Error.h"
 #include <sys/param.h>
-#include <ctype.h>		// Pick up definition of isspace
-#include <string.h>
+#include <ctype.h>		// declare isspace, isdigit, isalnum, isupper
+#include <string.h>		// declare strlen and strcasecmp
 #include "compat.h"
-
-#if defined(hpux) || defined(SYSV) || defined(SVR4) || defined(__svr4__) || defined(PTIRIX5_CFRONT) || defined(linux)
-#include <sys/stat.h>		// Pick up chmod declaration.
-#endif /* hpux SYSV SVR4 */
+#include <sys/stat.h>		// declare stat structure and chmod function
 
 static const char defaultDisplay[] = "xedit -name ptolemy_code %s";
+
+// Maximum number of characters in the name of a host machine
+#define MAX_HOSTNAME_LEN 128
 
 // Make a writeable local or remote directory.  Returns 0 on success
 // and -1 on failure.  If a writeable directory already exists, it
@@ -67,12 +67,23 @@ int makeWriteableDirectory(const char* hname, const char* directory) {
     StringList command = "mkdir -p ";
     int retval = 0;
     command << directory;
+
     if (onHostMachine(hname)) {
 	// Create a new directory if a writeable directory of the same
-	// name does not exist
-	// FIXME: The access command only detects that a file exists
-	// and is writeable.  It does not check to see if it is a directory
-	if (access(directory, W_OK) == -1) retval = rshSystem(hname, command);
+	// name does not exist.  We do not use the access command here
+	// because the access command could only detect if a file exists
+	// and is writeable.  It does not check to see if it is a directory.
+	struct stat stbuf;
+        if (stat(directory, &stbuf) == -1) {
+            // Directory does not exist.  Attempt to create it.
+	    retval = rshSystem(hname, command);
+	}
+	else {
+            // Something by that name exists, see whether it's a directory
+            if ((stbuf.st_mode & S_IFMT) != S_IFDIR) {
+                retval = -1;
+            }
+	}
     }
     else {
 	retval = rshSystem(hname, command);
@@ -102,7 +113,7 @@ static int copyNetworkedFiles(const char* hname, const char* source,
 
 // Converts a string to lower case
 char* makeLower(const char* name) {
-    LOG_NEW; char* newp = new char[strlen(name)+1];
+    LOG_NEW; char* newp = new char[strlen(name) + 1];
     char *o = newp;
     while (*name) {
 	char c = *name++;
@@ -151,7 +162,7 @@ int rshSystem(const char* hname, const char* cmd, const char* dir) {
     
 	StringList preCmd, postCmd;
 	const char* cmdtext = rshCommand;
-	if ( strchr(cmdtext,'\'') ) {
+	if ( strchr(cmdtext, '\'') ) {
 	    // cmd has quotes.  put it in file and send through pipe.
 	    char *cmdfilename = tempnam( NULL, "pt");
 	    if ( cmdfilename == 0 ) {
@@ -165,7 +176,8 @@ int rshSystem(const char* hname, const char* cmd, const char* dir) {
 	    preCmd << "/bin/cat " << cmdfilename << " | ";
 	    postCmd << " ; /bin/rm -f " << cmdfilename;
 	    free(cmdfilename);
-	} else {
+	}
+	else {
 	    // cmd is quoteless.  Just echo it directly into the pipe.
 	    preCmd << "echo '" << rshCommand << "' | ";
 	}
@@ -197,7 +209,7 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
 	directory << dir;
     }
     else {
-	char *expandedName = expandPathName(dir);
+	char* expandedName = expandPathName(dir);
 	directory << expandedName;
 	delete [] expandedName;
     }
@@ -205,14 +217,12 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
     fileName << directory << "/" << file;
 
     // create the directory if necessary
-    makeWriteableDirectory(hname, directory);
+    if (makeWriteableDirectory(hname, directory) == -1) return FALSE;
 
     cout << "rcpWriteFile: writing file " << file << "\n";
     cout.flush();
 
     // write file to local machine 
-    // cfront1.0 barfs because there is not StringList ? operand, so
-    // don't use it.  However, this is a poor solution.
     const char* outputFileName = tmpFile ? tmpFile : fileName.chars();
     pt_ofstream o(outputFileName);
     if (o) {
@@ -227,32 +237,24 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
     //  chmod to appropriate mode.  Since we use the -p flag on rcp
     //  the mode settings will be copied as well if we are writing to
     //  a external host
-    if (mode != -1) {
-        if (tmpFile)
-	  chmod((const char*)tmpFile,mode);
-	else
-	  chmod((const char*)fileName,mode);
-    }
+    if (mode != -1) chmod(outputFileName, mode);
 
-//  rcp the file to another machine if necessary
+    //  rcp the file to another machine if necessary
     int status = TRUE;
     if (tmpFile) {
-        StringList rcp;
-        rcp <<"rcp -p "<<tmpFile<<" "<<hname<<":"<<fileName;
-        if(system(rcp)) status = FALSE;
+        StringList rcp = "rcp -p ";
+        rcp << tmpFile << " " << hname << ":" << fileName;
+        if (system(rcp)) status = FALSE;
 	// if we display the file, we must delete the tmpfile after
 	// it is displayed, otherwise we delete it here
         if (!displayFlag) unlink(tmpFile);
    }
 
-//  display the file on local machine
+    //  display the file on local machine
     if (displayFlag) {
-	const char* disp = getenv ("PT_DISPLAY");
+	const char* disp = getenv("PT_DISPLAY");
 	char cmdbuf[256];
-	if(tmpFile)
-	  sprintf(cmdbuf,(disp?disp:defaultDisplay), tmpFile);
-	else 
-	  sprintf(cmdbuf,(disp?disp:defaultDisplay), fileName.chars());
+	sprintf(cmdbuf, (disp ? disp : defaultDisplay), outputFileName);
 	StringList displayCommand;
 	if (tmpFile) displayCommand << "(";
 	displayCommand << cmdbuf;
@@ -379,10 +381,10 @@ int onHostMachine(const char* hname) {
 	}
 
 	int retval = FALSE;
-	char line[80];
-	if (fgets(line, 80, fp) != NULL) {
-	    line[79] = 0;
-	    retval = ( strncasecmp(line, hname, strlen(hname)) == 0 );
+	char line[MAX_HOSTNAME_LEN];
+	if (fgets(line, MAX_HOSTNAME_LEN, fp) != NULL) {
+	    line[MAX_HOSTNAME_LEN - 1] = 0;
+	    retval = ( strcasecmp(line, hname) == 0 );
 	}
 	pclose(fp);
 	return retval;
@@ -400,18 +402,18 @@ const char* ptSanitize(const char* string) {
     // holds the result string.  The pointer is static so that we can
     // remember the buffer allocated in the previous invocation of
     // this function.
-    static char *sanitizedString = 0;
+    static char* sanitizedString = 0;
 
     // Allocate a new buffer for this invocation.
     delete [] sanitizedString;
-    LOG_NEW; sanitizedString = new char [strlen(string) + 2];
-    char *cPtr = sanitizedString;
+    LOG_NEW; sanitizedString = new char[strlen(string) + 2];
+    char* cPtr = sanitizedString;
 
     // Check for leading digit.
     if (isdigit(*string)) *(cPtr++) = 'x';
 
     // Replace non-alphanumeric characters.
-    while (*string != 0) {
+    while (*string) {
 	if (isalnum(*string))
 	    *(cPtr++) = *string;
         else
