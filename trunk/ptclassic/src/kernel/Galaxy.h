@@ -101,6 +101,11 @@ protected:
 
 public:
 
+	// system initialize method.  Derived Galaxies should not
+	// redefine initialize; they should write a start() method
+	// to do any class-specific startup.
+	void initialize();
+
         // Define States of component Blocks by States of this Block
         stateAlias(Block& b, char* stateName, char* expression)  {
                 b.stateWithName(stateName)->setValue(expression);
