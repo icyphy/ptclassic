@@ -78,12 +78,12 @@ protected:
 
 	// Connect a Galaxy PortHole to a PortHole of a sub-block
 	alias(PortHole& galPort, PortHole& blockPort) {
-		galPort.alias = &blockPort;
+		galPort.setAlias(blockPort);
 	}
 
 	// Overload to alias MultiPortHoles
 	alias(MultiPortHole& galPort, MultiPortHole& blockPort) {
-		galPort.alias = &blockPort;
+		galPort.setAlias(blockPort);
 	}
 
 	// support blockWithName message to access internal block list
