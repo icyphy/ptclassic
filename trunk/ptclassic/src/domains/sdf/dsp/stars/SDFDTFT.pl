@@ -11,12 +11,12 @@ This star computes arbitrary samples of the discrete-time Fourier
 transform of a finite length sequence.
 The \fIsignal\fR input is the signal to be transformed.
 The number of input samples consumed is given by \fIlength\fR.
-Let these be written $a(1), ~ ... ~ ,~ a(L)$, where
+Let these be written $a(0), ~ ... ~ ,~ a(L-1)$, where
 $L$ is the \fIlength\fR.
 Then the output is
 .EQ
 A ( j omega ) ~=~
-{ sum from k=0 to L a(k) e sup {- j omega k T} }
+{ sum from k=0 to L-1 a(k) e sup {- j omega k T} }
 .EN
 where $T$ is the time between samples (\fItimeBetweenSamples\fR).
 The number of samples produced at the output is determined
