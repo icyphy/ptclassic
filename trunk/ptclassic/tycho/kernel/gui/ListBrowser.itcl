@@ -186,16 +186,9 @@ body ::tycho::ListBrowser::constructor {args} {
     }
     pack $itk_component(scroll) -side right -fill y
 
-    # Extra buttonbox above the usual Dialog button box.
-    itk_component add buttons {
-	buttonbox $itk_component(hull).buttons
-    } {
-	keep -background -cursor
-    }
-    pack $itk_component(buttons) -expand no -before $itk_component(bbox)
-
-    $itk_component(buttons) add help -text "    Help    " \
-	    -command "$this help"
+    $itk_component(bbox) add help -text "    Help    " \
+	    -command "$this help" \
+	    -row 1 -column 1
 
     ###################################################################
     # bindings
