@@ -49,40 +49,46 @@ a universe.
 
 class CompileTarget : public HLLTarget {
 public:
+	// Constructor
+	CompileTarget(const char* nam, const char* stype, const char* desc);
+
 	void setup();
 	void begin();
 	int run();
 	void wrapup ();
-	CompileTarget(const char* nam, const char* stype, const char* desc);
-	Block* makeNew() const;
+
+	// Return a copy of itself
+	/*virtual*/ Block* makeNew() const;
+
+	// Return the domain of the galaxy if it exists and "SDF" otherwise
+	/*virtual*/ const char* domain();
 
 	// Routines for writing code: schedulers may call these
 	void writeFiring(Star& s, int depth);
 
 private:
-	// Method to return a pointer to the MultiPortHole that spawned a
-	// given PortHole, if there is such a thing.  If not, the pointer
-	// to the PortHole is returned as pointer to a GenericPort.
+	// Return pointer to its MultiPortHole and return itself otherwise
 	const GenericPort* findMasterPort(const PortHole* p) const;
 
-	// Returns the name of an ordinary porthole, or
-	// "name.newPort()" for a MultiPortHole.
+	// Return porthole name if PortHole or name.newPort() if MultiPortHole
 	StringList expandedName(const GenericPort* p) const;
 
 	// Create a sanitized C++ identifier for a star
 	StringList sanitizedStarName(const Star& c) const; 
 
-	// Replaces quotation marks with quoted quotation marks
-	// in a string (i.e. " => \")
+	// Replace quotation marks with quoted quotation marks (i.e. " => \")
 	StringList quoteQuotationMarks(const char* str);
 
 	StringList tcltkSetup();
+
 	StringList tcltkInitialize(StringList& universeName);
 
 	StringList galDef(Galaxy* galaxy, StringList className, int level);
 
 	int writeGalDef(Galaxy& galaxy, StringList className);
 
+	// Pathname of the log file for schedulers
+	StringList logPath;
 };
 
 #endif
