@@ -224,15 +224,19 @@ proc ptkSetRunInteractivity { name octHandle } {
 	set ptkDebug($name) 0
 	# Close down debug window
 	ptkSetOrClearDebug $name $octHandle
-	# If the run is in progress, turn off the event loop
-	if {$ptkRunFlag($name)=={ACTIVE} || $ptkRunFlag($name)=={PAUSED} } {
-	    ptkSetEventLoop off
-	}
 	# mark the pause, stop, and debug buttons inactive
         if {[winfo exists $Panelwindow]} {
 	    $Panelwindow.panel.pause configure -state disabled
 	    $Panelwindow.panel.stop configure -state disabled
 	    $Panelwindow.iter.debug configure -state disabled
+	}
+	# If the run is in progress, turn off the event loop
+	if {$ptkRunFlag($name)=={ACTIVE} || $ptkRunFlag($name)=={PAUSED} } {
+	    # one last call to update to make sure that the pause/stop/debug
+            # buttons get turned off
+	    update idletasks
+            # now turn off the event loop
+	    ptkSetEventLoop off
 	}
     }
 }
