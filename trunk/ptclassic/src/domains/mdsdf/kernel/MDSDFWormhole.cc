@@ -53,7 +53,7 @@ void MDSDFWormhole :: go() {
 }
 
 void MDSDFWormhole :: wrapup() {
-	target->wrapup();
+	myTarget()->wrapup();
 }
 
 MDSDFWormhole :: ~MDSDFWormhole() { freeContents();}
@@ -76,12 +76,12 @@ StringList MDSDFWormhole :: printRecursive() const {
 // cloner -- clone the inside and make a new wormhole from that.
 Block* MDSDFWormhole :: clone() const {
 	LOG_NEW; return new MDSDFWormhole(gal.clone()->asGalaxy(),
-					target->cloneTarget());
+					myTarget()->cloneTarget());
 }
 
 Block* MDSDFWormhole :: makeNew() const {
 	LOG_NEW; return new MDSDFWormhole(gal.makeNew()->asGalaxy(),
-					target->cloneTarget());
+					myTarget()->cloneTarget());
 }
 
 // return stop time

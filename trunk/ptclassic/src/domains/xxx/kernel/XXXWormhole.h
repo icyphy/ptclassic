@@ -50,7 +50,7 @@ public:
 	void setup();
 	void go();
 	void wrapup();
-	Scheduler* mySched() const { return target->scheduler();}
+	Scheduler* mySched() const { return myTarget()->scheduler();}
 	// clone -- allows interpreter/pigi to make copies
 	Block* clone() const;
 	Block* makeNew() const;
