@@ -114,7 +114,7 @@ public:
 	void saveBooleans(Star& s);
 
 	// retrieve boolean value for a star
-	getBoolValue(const PortHole& p) const {
+	int getBoolValue(const PortHole& p) const {
 		return info(p).lastRead;
 	}
 
