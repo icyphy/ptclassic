@@ -221,6 +221,9 @@ The input particles are only cast to this precision if the parameter
 		Accum.setPrecision(AccumulationPrecision);
 	}
 
+        // An initCode method is inherited from CGCFix
+        // If you define your own, you should call CGCFix::initCode()
+
    codeblock(bodyDecl) {
 	int phase, tapsIndex, inC, i;
 	int outCount = $val(interpolation) - 1;
