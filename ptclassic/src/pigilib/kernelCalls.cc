@@ -26,6 +26,9 @@ static InterpGalaxy *saveGalaxy = NULL;  // used to build galaxies
 
 ostream LOG("pigiLog.pt", "w");
 
+// Write a string to the log file
+extern "C" void KcLog(const char* str) { LOG << str; }
+
 // Parse a classname
 // We allow classnames to be specified as, say
 // Printer.input=2
@@ -231,6 +234,16 @@ Outputs: return = whether name is known
 extern "C" boolean
 KcIsKnown(char *className) {
 	return findClass(className) ? TRUE : FALSE;
+}
+
+/* 3/28/91
+Return TRUE if name is a compiled-in star, false if static or unknown.
+*/
+extern "C" boolean
+KcIsCompiledInStar(char *className) {
+	const Block* b = findClass(className);
+	if (b == 0) return FALSE;
+	return !KnownBlock::isDynamic(b->readName());
 }
 
 /* 5/17/90
