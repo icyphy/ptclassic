@@ -111,7 +111,7 @@ body ::tycho::BuilderDialog::destructor {args} {
 body ::tycho::BuilderDialog::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-            [file join \$TYCHO kernel doc usersGuides BuilderDialogHelp.html]
+            [file join \$TYCHO kernel gui doc usersGuides BuilderDialogHelp.html]
 
 }
 
@@ -153,10 +153,10 @@ body ::tycho::BuilderDialog::checkFiles { {displayOKMessage 0}} {
     global TYCHO
     set origmsg "The following Tycho files do not exist:" 
     set msg $origmsg
-    if ![file exists [file join $TYCHO kernel doc codeDoc File.html]] {
+    if ![file exists [file join $TYCHO kernel gui doc codeDoc File.html]] {
 	set msg "$msg\n The Tycho Itcl HTML documentation might not be \
 		built, for example the file:\n\
-		[file join $TYCHO kernel doc codeDoc File.html] \
+		[file join $TYCHO kernel gui doc codeDoc File.html] \
 		does not exist."
     } 
     if ![file exists [file join $TYCHO doc tychoClasses.dag]] {
