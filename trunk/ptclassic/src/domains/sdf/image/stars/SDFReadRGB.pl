@@ -27,11 +27,10 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 .Id "image reading"
 .Ir "PPM image format"
 .Ir "image format, portable pixmap (PPM)"
-}
+	}
 
-	ccinclude { "GrayImage.h", <std.h>, <stdio.h>, "Error.h" }
+	ccinclude { "GrayImage.h", <std.h>, <stdio.h>, "Error.h", "StringList.h", "miscFuncs.h" }
 
-//////// OUTPUTS AND STATES.
 	output { name { output1 } type { message } desc { Red image. } }
 	output { name { output2 } type { message } desc { Green image. } }
 	output { name { output3 } type { message } desc { Blue image. } }
@@ -52,13 +51,13 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 
 	method {
 		name { genFileName }
-		type { "char *" }
+		type { "char*" }
 		arglist { "(const char* str, const int d)" }
 		access { protected }
 		code {
-			const char* filename = expandPathName(str);
 			char num[16];
 			sprintf(num, "%d", d);
+			char* filename = expandPathName(str);
 			char* newfilename = subCharByString(filename, '#', num);
 			delete [] filename;
 			return newfilename;
@@ -66,9 +65,9 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 	}
 
 	go {
-// Open file containing the image.
-		char *expandedName = genFileName(fileName, int(frameId));
-		StringList fullname = expandedName;
+		// Open file containing the image.
+		char* expandedName = genFileName(fileName, int(frameId));
+		StringList fullName = expandedName;
 		delete [] expandedName;
 		FILE* fp = fopen(fullName, "r");
 		if (fp == (FILE*) NULL) {
@@ -76,7 +75,7 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 			return;
 		}
 
-// Read header, skipping 1 whitespace character at end.
+		// Read header, skipping 1 whitespace character at end.
 		char word[80];
 		int width, height, maxval;
 		fscanf(fp, "%s", word);
