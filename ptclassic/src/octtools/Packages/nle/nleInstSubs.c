@@ -200,7 +200,7 @@ octObject *Facet;
                 while (termPtr != NLE_NULL && strcmp(termPtr->name, newTermPtr->name)<0){
                     termPtr = termPtr->next;
                 }
-                /* if (termPtr == NLE_NULL) abort(); /* debug stoppoint */
+                /* if (termPtr == NLE_NULL) abort(); *//* debug stoppoint */
 
                 newTermPtr->next = termPtr;
                 newTermPtr->prec = termPtr->prec;
