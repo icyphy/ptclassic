@@ -142,8 +142,23 @@ proc ::tycho::autoName {stem} {
 
 #####################################################################
 #### tmpFileName
-# Return a temporary filename that is unique
-proc ::tycho::tmpFileName { {stem {tytmp}}} {
+# Return a temporary filename that does not exist yet.
+# The <CODE>TMPDIR</CODE> environment variable is as a base used if it is
+# present, if <CODE>TMPDIR</CODE> is not present, then <CODE>/tmp</CODE>
+# is used.
+# If the optional arg `stem' is present, then a unique string is appended
+# on to it.  The stem arg defaults to tytmp.
+# If the optional arg `extension' is present, then the extension is appended
+# after the unique string is appended.  If extension is the empty string
+# then nothing is appended.  The default is the empty string.
+#
+# For example, the following command under Unix:
+# <tcl><pre>
+# ::tycho::tmpFileName myfile .itcl
+# </pre></tcl>
+# might return something like <CODE>/tmp/myfile1.itcl</CODE>
+#
+proc ::tycho::tmpFileName { {stem {tytmp}} {extension {}}} {
     # Unix-isms here
     global env
     if [info exists env(TMPDIR)] {
@@ -152,7 +167,7 @@ proc ::tycho::tmpFileName { {stem {tytmp}}} {
 	set tmpdir /tmp
     }
     
-    return [::tycho::uniqueFileName [ file join $tmpdir $stem]]
+    return [::tycho::uniqueFileName [ file join $tmpdir $stem] $extension]
 }
 
 ##############################################################################
@@ -173,10 +188,25 @@ proc ::tycho::rm { args } {
 
 #####################################################################
 #### uniqueFileName
-# Return a filename that is unique
-proc ::tycho::uniqueFileName { {stem {tyuniq}}} {
+# Return a filename that is unique, and does not yet exist
+# If the optional arg `stem' is present, then a unique string is appended
+# on to it.  The stem arg defaults to tyuniq.
+# If the optional arg `extension' is present, then the extension is appended
+# after the unique string is appended.
+#
+# For example
+# <tcl><pre>
+# ::tycho::uniqueFileName myfile .itcl
+# </pre></tcl>
+# might return something like <CODE>myfile1.itcl</CODE>
+#
+proc ::tycho::uniqueFileName { {stem {tyuniq}} {extension {}}} {
     while {1} {
-	set tmpname [::tycho::autoName $stem]
+        if {$extension == {} } {
+            set tmpname "[::tycho::autoName $stem]"
+        } else {
+            set tmpname "[::tycho::autoName $stem]$extension"
+        }
 	if {![file exists $tmpname]} {
 	    break
 	}
