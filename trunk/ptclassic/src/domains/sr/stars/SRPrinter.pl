@@ -54,22 +54,22 @@ Before the first data are flushed, the file will not exist.
     reactive();
   }
 
-  go {
+  tick {
     pt_ofstream & output = *p_out;
     MPHIter nexti(input);
     InSRPort * p;   
     while ( (p = (InSRPort *)(nexti++)) != NULL ) {
-      output << p->name() << ": ";
-      if ( p->known() ) {
-	output << "unknown\n";
+      if ( !(p->known()) ) {
+	output << "unknown ";
       } else {
 	if ( p->present() ) {
-	  output << p->get().print() << "\n";
+	  output << p->get().print() << ' ';
 	} else {
-	  output << "absent\n";
+	  output << "absent ";
 	}	    
       }
     }
+    output << '\n';
   }
 
   wrapup {
