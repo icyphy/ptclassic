@@ -13,6 +13,7 @@
 # We need to see if $(INCLUDE_IPUS_DOMAIN) is set
 # Root of Ptolemy directory
 ROOT =		../..
+VPATH =		$(ROOT)/src/domains
 
 # get configuration info
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
@@ -36,7 +37,7 @@ DOMAINS = sdf hof de ddf bdf thor cg cgc c50 cg56 vhdlb \
 
 MAKEVARS = "PTARCH=$(PTARCH)"
 
-makefiles all install clean depend realclean checkjunk sccsinfo:
+makefiles all install clean depend realclean clean_indices checkjunk sccsinfo:
 	@for x in $(DOMAINS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
@@ -59,14 +60,34 @@ subsources:
 	    fi ; \
 	done
 
-starHTML.idx: $(addsuffix /starHTML.idx, $(DOMAINS))
-	@echo "Updating $@:"
-	rm -f $@
-	echo "set TYCHO $(PTOLEMY)/tycho; \
+# Remove thor, add starHTML.idx, add the VPATH.
+ALLDOMAINIDXS =	$(addprefix $(VPATH)/, \
+			$(addsuffix /starHTML.idx, \
+				$(filter-out thor, $(DOMAINS))))
+
+# Star index of all the star index files
+$(VPATH)/starHTML.idx: domainstarHTML
+	@echo "Merging $@"
+	@rm -f $@
+	@echo "set TYCHO $(PTOLEMY)/tycho; \
 		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
-		tychoMergeIndices \"All Ptolemy $(ME) stars\" $@ \
-			$(addsuffix /starHTML.idx, $(DOMAINS)) \
-			" | itclsh
+		tychoVpathMergeIndices {} $@ $(VPATH)/ $(ALLDOMAINIDXS)" \
+		| itclsh
+
+domainstarHTML:
+	@for x in $(DOMAINS); do \
+	    if [ -w $$x/ ] ; then \
+		( cd $$x ; \
+		  echo making doc/stars/starHTML.idx in domains/$$x ; \
+		  $(MAKE) $(MFLAGS) $(MAKEVARS) \
+			VPATH=../../../src/domains/$$x 	\
+			starHTML.idx ; \
+		) \
+	    fi ; \
+	done
+
+
+
 
 .PHONY:	TAGS
 TAGS:
@@ -85,4 +106,3 @@ starindex:
 	-mkdir $(ROOT)/doc
 	-mkdir $(ROOT)/doc/star-demo-index
 	mkStarIndex "$(sort $(DOMAINS))" $(ROOT)/doc/star-demo-index
-
