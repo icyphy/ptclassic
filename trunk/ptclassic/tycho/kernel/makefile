@@ -63,6 +63,7 @@ ITCL_SRCS = \
 	File.itcl \
 	FileBrowser.itcl \
 	FontManager.itcl \
+	Fonts.itcl \
 	Forest.itcl \
 	Glimpse.itcl \
 	Graph.itcl \
