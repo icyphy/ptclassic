@@ -33,9 +33,9 @@ static const char file_id[] = "$RCSfile$";
 #pragma implementation
 #endif
 
+#include "PNThread.h"
 #include "DataFlowStar.h"
 #include "DFPortHole.h"
-#include "PNThread.h"
 
 extern const char PNdomainName[];
 
