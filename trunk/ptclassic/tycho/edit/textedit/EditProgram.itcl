@@ -44,7 +44,8 @@ class ::tycho::EditProgram {
 
     #### reload
     # Reload the previously saved version and recolorize.
-    method reload {}
+    method reload {{askuser 1} {filename \
+	"defaultfileforreloadmethod"}}
 
     constructor {args} {}
     destructor {}
@@ -121,8 +122,9 @@ body ::tycho::EditProgram::constructor {args} {
 #### reload
 # Override the base-class reload to recolorize.
 #
-body ::tycho::EditProgram::reload {} {
-    Edit::reload
+body ::tycho::EditProgram::reload {{askuser 1} {filename \
+	"defaultfileforreloadmethod"}} {
+    Edit::reload $askuser $filename 
     $itk_component(text) parse
 }
 
