@@ -15,12 +15,12 @@ functions use Tcl to report errors, unless there is no active
 Tcl interpreter.
 
 *******************************************************************/
+#include "PTcl.h"
 #include "Error.h"
 #include "SimControl.h"
 #include "NamedObj.h"
 #include <stream.h>
 #include <stdio.h>
-#include "PTcl.h"
 #include "miscFuncs.h"
 
 typedef const char cc;
