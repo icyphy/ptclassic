@@ -20,7 +20,7 @@ MTDIRS = kernel pigilib libgantt xgraph ptcl ptklib
 LDIRS = ptlang pigiRpc filters utils
 
 # directories with subtrees
-SDIRS = domains thread
+SDIRS = domains
 
 MAKEVARS = "ARCH=$(ARCH)"
 
