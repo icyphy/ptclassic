@@ -31,6 +31,7 @@ $Id$
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "miscFuncs.h"
+#include "SimControl.h"
 
 // constructor
 Target::Target(const char* nam, const char* starClass,const char* desc) :
@@ -73,6 +74,7 @@ void Target::setGalaxy(Galaxy& g) {
 // do Scheduler::setup.
 
 void Target::setup() {
+	SimControl::clearHalt();
 	GalStarIter next(*gal);
 	Star* s;
 	while ((s = next++) != 0) {
