@@ -48,6 +48,11 @@ VPATH         = $(ROOT)/src/pigiRpc
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
+# if you want to create a custom pigiRpc, define a override.mk
+# file that defines the necessary variables to pull in the domains
+# you want.  See $(ROOT)/mk/stars.mk.  This files must at least 
+# define the variable PIGI which defines the name of the pigiRpc binary.
+
 -include override.mk
 
 ifdef FULL
@@ -66,7 +71,6 @@ ifdef FULL
 	SDFFULL=1
 	SILAGE=1
 	THOR=1
-	TK=1
 	VHDL=1
 endif
 
@@ -79,7 +83,6 @@ ifdef PTINY
 	SDFDSP=1
 	SDFMATRIX=1
 	SDFMATLAB=1
-	TK=1
 endif
 
 ifdef PTRIM
@@ -91,7 +94,6 @@ ifdef PTRIM
 	DDF=1
 	DE=1
 	SDFFULL=1
-	TK=1
 endif
 
 ifndef PIGI
