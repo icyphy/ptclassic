@@ -288,6 +288,10 @@ body ::tycho::TopLevel::constructor {args} {
     set before [focus]
     # If anything at all goes wrong with the below, use the default.
     set done 0
+
+    # Save the errorInfo so that the user sees their errors, not ours
+    global errorInfo
+    set saveErrorInfo $errorInfo
     catch {
         if {$before != {}} {
             set tl [winfo toplevel $before]
@@ -300,6 +304,8 @@ body ::tycho::TopLevel::constructor {args} {
             }
         }
     }
+    set errorInfo $saveErrorInfo
+
     if !$done {
         $topLevelWindows insert $prefix
     }
