@@ -40,7 +40,7 @@ during the simulation.
         protected {
 		int overflows, totalChecks;
         }
-	inline method {
+	method {
 		name { checkOverflow }
 		type { "int" }
 		arglist { "(Fix& fix)" }
@@ -55,15 +55,9 @@ during the simulation.
 			return overflag;
 		}
 	}
-        method {
-		name { initialize }
-		type { "void" }
-		arglist { "()" }
-		access { public }
-		code {
-			overflows = 0;
-			totalChecks = 0;
-		}
+        begin {
+		overflows = 0;
+		totalChecks = 0;
 	}
 	// derived stars should call this method if they defined their 
 	// own wrapup method
