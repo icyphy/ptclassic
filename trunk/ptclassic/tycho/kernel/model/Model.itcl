@@ -812,13 +812,15 @@ body ::tycho::Model::load {args} {
     array set temp $args
 
     # Figure out which is the most recent file.
-    set time 0 ;# FIXME: is this reliable???
+    # Set the time to a very negative number:  -pow(2^32). 
+    # Note that on the mac, mtime returns negative integers.
+    set time -2.14748e+09
     set file ""
     set type ""
     foreach {y f} [array get temp] {
 	if { $f  != "" } {
 	    set f [::tycho::expandPath $f]
-	    if { [file exists $f] } {
+	    if { [file exists $f] && [file size $f] > 0} {
 		set t [file mtime $f]
 		if { $t > $time } {
 		    set file $f
