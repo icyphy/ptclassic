@@ -6,7 +6,7 @@
 # $Id$
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/domains.  Instead
-# run in from ~ptolemy/obj.$ARCH/domains (through the symbolic link) -- that
+# run in from ~ptolemy/obj.$PTARCH/domains (through the symbolic link) -- that
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
@@ -14,24 +14,31 @@
 # which are assumed to follow the same directory structure.
 
 # Include CP and PN domains on SunOS architectures.
-ifneq (,$(filter sun%,$(ARCH)))
+ifneq (,$(filter sun%,$(PTARCH)))
 EXPDOMAINS = cp pn
 endif
 
 # Include CP domain for cfront.
-ifeq (cfront,$(ARCH))
+ifeq (cfront,$(PTARCH))
 EXPDOMAINS = cp
 endif
 
 # Include PN doman for mips and Solaris.
-ifneq (,$(filter mips sol%,$(ARCH)))
+ifneq (,$(filter mips sol%,$(PTARCH)))
 EXPDOMAINS = pn
 endif
 
-DOMAINS = sdf hof de ddf bdf thor cg sproc silage cgc cg56 cg96 vhdlf vhdlb \
-          mq mdsdf ipus $(EXPDOMAINS)
+# Don't include IPUS if your are running a non GNU c++
+ifneq (, $(filter %cfront,$(PTARCH)))
+IPUSDOMAIN=
+else
+IPUSDOMAIN= ipus
+endif
 
-MAKEVARS = "ARCH=$(ARCH)"
+DOMAINS = sdf hof de ddf bdf thor cg sproc silage cgc cg56 cg96 vhdlf vhdlb \
+          mq mdsdf $(IPUSDOMAIN) $(EXPDOMAINS) 
+
+MAKEVARS = "PTARCH=$(PTARCH)"
 
 makefiles all install clean sources depend realclean checkjunk sccsinfo:
 	@for x in $(DOMAINS); do \
