@@ -73,6 +73,16 @@ public:
 	// with the above methods.  The default implementation does nothing.
 	virtual void pairSendReceive(DataFlowStar* s, DataFlowStar* r);
 
+        // create a peek/poke communication pair.  This is described in
+        // detail in:
+        // J.L. Pino, T.M. Parks and E.A. Lee, "Mapping Multiple Independent
+        // Synchronous Dataflow Graphs onto Heterogeneous Multiprocessors," 
+        // Proc. of IEEE Asilomar Conf. on Signals, Systems, and Computers, 
+        // Pacific Grove, CA, Oct. 31 - Nov. 2, 1994.
+	virtual int createPeekPoke(
+	    PortHole& peekPort, PortHole& pokePort,
+	    CGStar*& peek, CGStar*& poke);
+
         // Inform how many processors are available.
         void setTargets(int);
 
