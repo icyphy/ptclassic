@@ -16,3 +16,6 @@ all install clean check sources:
 		$(MAKE) $(MFLAGS) $(MAKEVARS) PTOLEMY=../../.. VPATH=../../../src/filters/$$x $@ ;\
 	  	cd .. ; \
 	 done
+
+sccsinfo:
+		sccs info
