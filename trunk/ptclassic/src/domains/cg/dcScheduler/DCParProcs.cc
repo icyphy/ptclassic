@@ -89,9 +89,10 @@ int DCParProcs::findSLP(DCNodeList *slp) {
 	// the time we trace the path to, going backwards from the makespan
 	//	down to zero.
 	int time = getMakespan();
+        int curProc;
 
 	// Find the lowest index proc which finishes exactly at the makespan
-	for (int curProc = 0; curProc < numProcs; curProc++) {
+	for (curProc = 0; curProc < numProcs; curProc++) {
 		if ((getProc(curProc)->getAvailTime() == time))
 			break;
 	}
@@ -161,9 +162,9 @@ int DCParProcs::findSLP(DCNodeList *slp) {
 
 void DCParProcs::categorizeLoads(int* procs) {
 
-        int maxload = 0;
+        int i, maxload = 0;
 
-        for (int i = 0; i < numProcs; i++) {
+        for (i = 0; i < numProcs; i++) {
                 UniProcessor* sch = getProc(i);
                 int load = sch->computeLoad();
                 if (load > maxload) maxload = load;

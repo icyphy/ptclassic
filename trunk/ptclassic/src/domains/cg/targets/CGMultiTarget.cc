@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include <unistd.h>             // unlink()
 #include "Domain.h"
 #include "Profile.h"
 #include "ParNode.h"
@@ -238,7 +239,8 @@ void CGMultiTarget :: prepareChildren() {
     }
     reorderChildren(0);	// first call initializes the structure
     StringList tname;
-    for (int i = 0; i < nChildrenAlloc; i++) {
+    int i;
+    for (i = 0; i < nChildrenAlloc; i++) {
       Target* t = createChild(i);
       if (!t) return;
       addChild(*t);
@@ -712,7 +714,8 @@ int CGMultiTarget :: execTime(DataFlowStar* s, CGTarget* t) {
 
     // for heterogeneous case, we need to consider relative time
     // scale
-    for (int i = 0; i < nChildrenAlloc; i++) 
+    int i;
+    for (i = 0; i < nChildrenAlloc; i++) 
 	if (child(i) == t) break;
     int mx = relTimeScales.size() - 1;
     if (i > mx) i = mx;

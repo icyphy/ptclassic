@@ -550,7 +550,8 @@ int DeclustScheduler::loadShift(DCClusterList &, DCClusterList *slpC) {
 	// Categorize each processor as being heavily(1) or lightly(-1) loaded
 	// We include at most one idle processor in lightly loaded procs.
 	LOG_NEW; int *procs = new int [numProcs];
-	for (int i = 0; i < numProcs; i++) procs[i] = 0;
+        int i;
+	for (i = 0; i < numProcs; i++) procs[i] = 0;
 	bestSchedule->categorizeLoads(procs);
 
 	// Find the SLP clusters which are on the heavy procs
@@ -705,11 +706,11 @@ int DeclustScheduler::commReduction(DCClusterList &remC, DCClusterList *slpC) {
 
 	// Iterate through the 3 slp clusters with highest scores
 	while ((cls = iter++) != 0) {
-		int myP = cls->getProc();
+		int i, myP = cls->getProc();
 		if (haltRequested()) return FALSE;
 
 		// Find other valid processors that cls communications with
-		for (int i = 0; i < numProcs; i++) canProcs[i] = 0;
+		for (i = 0; i < numProcs; i++) canProcs[i] = 0;
 		myGraph->commProcs(cls, canProcs);
 
 		// find out the cluster switching candidates

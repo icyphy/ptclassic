@@ -248,8 +248,8 @@ int CGCaseScheduler :: setProfile(int num, int /*resWork*/, Profile* prof) {
 	// write the final profile : finishTime..
 	prof->setEffP(num);
 	double tCost = 0;
-
-	for (int j = 0; j < num; j++) {
+        int j; 
+	for (j = 0; j < num; j++) {
 		prof->setFinishTime(j, taus[j].val);
 		tCost += prof->getFinishTime(j) - prof->getStartTime(j);
 	}
@@ -376,7 +376,8 @@ int CGCaseScheduler :: decreaseTaus(int num, int indexArc) {
 	//		     indexs with theta[indexArc].
 
 	int magTheta = 0;	// cardinality of "theta" index set.
-	for (int i = 0; i < num; i++) {
+        int i;
+	for (i = 0; i < num; i++) {
 		if (arcProfile[indexArc]->getFinishTime(i) - taus[i].val
 			>= deltas[indexArc])
 		magTheta++;

@@ -180,10 +180,10 @@ int CGDDFClusterBag :: computeProfile(int nP, int rW, IntArray* avail) {
 
 Profile* CGDDFClusterBag :: manualSchedule(int count) {
 	// collect processor Ids of the component stars	
-	int sz = mtarget->nProcs();
+	int i, sz = mtarget->nProcs();
 	IntArray procId;
 	procId.create(sz);
-	for (int i = sz - 1; i >= 0; i--) {
+	for (i = sz - 1; i >= 0; i--) {
 		procId[i] = -1;
 	}
 	int nP = examineProcIds(procId);
@@ -214,7 +214,8 @@ Profile* CGDDFClusterBag :: manualSchedule(int count) {
 			CGMacroCluster* ac;
 			while ((ac = nextC++) != 0) {
 				if (ac->asSpecialBag()) continue;
-				for (int k = 0; k < nP; k++) 
+                                int k;
+				for (k = 0; k < nP; k++) 
 					if (procId[k] == ac->getProcId()) 
 						break;
 				if (k >= nP) k = -1;
@@ -256,9 +257,9 @@ int CGDDFClusterBag :: finalSchedule(int numProcs) {
 		// fill up the processor assignment array for inner
 		// schedule
 		IntArray procMap;
-		int sz = inprof->getEffP();
+		int i, sz = inprof->getEffP();
 		procMap.create(sz);
-		for (int i = 0; i < sz; i++) {
+		for (i = 0; i < sz; i++) {
 			int flag = TRUE;
 			for (int j = 0; j < sz; j++)
 				if (inprof->getProcId(j) == i) {
