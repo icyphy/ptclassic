@@ -58,9 +58,6 @@ public:
 
     // End simulation.
     /* virtual */ void wrapup();
-
-    // Return the domain of the galaxy if it exists and "PN" otherwise
-    /* virtual */ const char* domain();
 };
 
 #endif

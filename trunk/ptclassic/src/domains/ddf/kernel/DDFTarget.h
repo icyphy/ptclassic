@@ -109,9 +109,6 @@ public:
 	// (a private member, see below).
 	/*virtual*/ Block* clone () const;
 
-	// Return the domain of the galaxy if it exists and "DDF" otherwise
-	/*virtual*/ const char* domain();
-
 protected:
 	// The user can specify the maximum buffer size on each arc.
 	// Unbounded arc is detected at runtime by comparing the arc size

@@ -59,7 +59,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 extern const char DDFdomainName[];
 
 DDFTarget::DDFTarget() :
-Target("default-DDF","DataFlowStar","default DDF target")
+Target("default-DDF", "DataFlowStar", "default DDF target", DDFdomainName)
 {
 	addState(maxBufferSize.setState("maxBufferSize",this,"1024",
 	    "capacity of an arc. For the runtime detection of unbounded arc."));
@@ -165,9 +165,6 @@ StringList DDFTarget::pragma (const char* parentname,
   return "";
 }
 
-const char* DDFTarget::domain() {
-  return galaxy() ? galaxy()->domain() : DDFdomainName;
-}
+const char* DDFTarget::className() const { return "DDFTarget"; }
 
-const char* DDFTarget::className() const { return "DDFTarget";}
 ISA_FUNC(DDFTarget,Target);

@@ -45,7 +45,8 @@ extern const char PNdomainName[];
 
 // Constructor.
 PNTarget::PNTarget() : Target("default-PN", "DataFlowStar",
-	"Schedule dataflow systems as process networks.")
+	"Schedule dataflow systems as process networks.",
+	PNdomainName)
 {
 }
 
@@ -72,9 +73,4 @@ void PNTarget::wrapup()
 {
     Target::wrapup();
     delSched();
-}
-
-const char* PNTarget::domain()
-{
-    return galaxy() ? galaxy()->domain() : PNdomainName;
 }

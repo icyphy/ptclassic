@@ -37,6 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 ***********************************************************************/
 static const char file_id[] = "BDFTarget.cc";
+
 #ifdef __GNUG__
 #pragma implementation
 #endif
@@ -45,16 +46,19 @@ static const char file_id[] = "BDFTarget.cc";
 #include "BDFScheduler.h"
 #include "BDFCluster.h"
 #include "pt_fstream.h"
+#include "miscFuncs.h"
 
 // Defined in BDFDomain.cc
 extern const char BDFdomainName[];
 
 BDFTarget::BDFTarget() :
-Target("simulate-BDF","DataFlowStar",
+Target("simulate-BDF", "DataFlowStar",
 "Runs BDF systems on the local workstation using either the default\n"
-"one-processor BDF scheduler or Joe's clustering loop scheduler.")
+"one-processor BDF scheduler or Joe's clustering loop scheduler.",
+BDFdomainName),
+logPath(0)
 {
-	addState(logFile.setState("logFile",this,"",
+	addState(logFile.setState("logFile", this, "",
 		"Log file to write to (none if empty)"));
 	addState(allowDynamic.setState("allowDynamic",this,"NO",
 		"Specify whether to try dynamic execution if the graph\n"
@@ -72,19 +76,17 @@ Block* BDFTarget::makeNew() const {
 
 BDFTarget::~BDFTarget() {
 	delSched();
+	delete [] logPath;
 }
 
 void BDFTarget::setup() {
 	delSched();
-	LOG_NEW; BDFClustSched* s = new BDFClustSched((const char*) logFile,
+	logPath = expandPathName((const char*) logFile)
+	LOG_NEW; BDFClustSched* s = new BDFClustSched(logPath,
 					  int(allowDynamic),
 					  int(requireStronglyConsistent));
 	s->schedulePeriod = schedulePeriod;
 	if (galaxy()) s->setGalaxy(*galaxy());
 	setSched(s);
 	Target::setup();
-}
-
-const char* BDFTarget::domain() {
-	return galaxy() ? galaxy()->domain() : BDFdomainName;
 }

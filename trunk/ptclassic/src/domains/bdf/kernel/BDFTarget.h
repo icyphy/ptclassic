@@ -48,6 +48,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "FloatState.h"
 
 class BDFTarget : public Target {
+public:
+	// Constructor
+	BDFTarget();
+
+	// Destructor
+	~BDFTarget();
+
+	void setup();
+
+	Block* makeNew() const;
+
 protected:
 	StringState logFile;
 	IntState allowDynamic;
@@ -56,13 +67,7 @@ protected:
 	// schedulePeriod for interface with a timed domain.
 	FloatState schedulePeriod;
 
-	// return the domain of the galaxy if it exists and "BDF" otherwise
-	const char* domain();
-
-public:
-	BDFTarget();
-	void setup();
-	Block* makeNew() const;
-	~BDFTarget();
+private:
+	char* logPath;
 };
 #endif
