@@ -92,13 +92,13 @@ class ::tycho::Shape {
     proc _grapple {id canvas slate interactor args}
 
     # Start a move interaction sequence
-    proc _moveclick {id canvas slate x y args}
+    proc _moveclick {tag canvas slate x y args}
 
     # Continue a move interaction sequence
-    proc _movedrag {id canvas slate x y}
+    proc _movedrag {tag canvas slate x y}
 
     # Terminate a move interaction sequence
-    proc _moverelease {id canvas slate}
+    proc _moverelease {tag canvas slate}
 
     # Reshape one or more aspects of an item
     proc _reshape {id canvas slate x y args}
@@ -186,8 +186,8 @@ body ::tycho::Shape::_grapple {id canvas slate interactor args} {
 #######################################################################
 #### _moveclick
 #
-body ::tycho::Shape::_moveclick {id canvas slate x y args} {
-    set unique $id.[$slate uniqueid]
+body ::tycho::Shape::_moveclick {tag canvas slate x y args} {
+    set unique $tag.[$slate uniqueid]
 
     # Remember where we started
     set scratch(prevX.$unique) $x
@@ -195,7 +195,7 @@ body ::tycho::Shape::_moveclick {id canvas slate x y args} {
 
     # If the -ghost option is specified, create the ghost
     if { [lsearch -exact $args -ghost] != -1 } {
-	$slate ghost $id
+	$slate ghost $tag
 	set scratch(start.$unique) [list $x $y]
 	set scratch(ghost.$unique) 1
     } else {
@@ -206,14 +206,14 @@ body ::tycho::Shape::_moveclick {id canvas slate x y args} {
 #######################################################################
 #### _movedrag
 #
-body ::tycho::Shape::_movedrag {id canvas slate x y} {
-    set unique $id.[$slate uniqueid]
+body ::tycho::Shape::_movedrag {tag canvas slate x y} {
+    set unique $tag.[$slate uniqueid]
 
     # If there's a ghost, move it, else move the item.
     if $scratch(ghost.$unique) {
-	set movethis ghost.$id
+	set movethis ghost.$tag
     } else {
-	set movethis $id
+	set movethis $tag
     }
 
     # Move is a delta operation.
@@ -229,18 +229,18 @@ body ::tycho::Shape::_movedrag {id canvas slate x y} {
 #######################################################################
 #### _moverelease
 #
-body ::tycho::Shape::_moverelease {id canvas slate} {
-    set unique $id.[$slate uniqueid]
+body ::tycho::Shape::_moverelease {tag canvas slate} {
+    set unique $tag.[$slate uniqueid]
 
     # If there's a ghost, move the complex item to its
     # position and then delete it
     if $scratch(ghost.$unique) {
 	::tycho::assign a b $scratch(start.$unique)
 
-	$slate move $id \
+	$slate move $tag \
                 [expr $scratch(prevX.$unique) - $a] \
                 [expr $scratch(prevY.$unique) - $b]
-	$slate delete ghost.$id
+	$slate delete ghost.$tag
 
 	unset scratch(start.$unique)
     }
