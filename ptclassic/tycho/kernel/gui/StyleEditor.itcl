@@ -78,25 +78,25 @@ configbody ::tycho::PreferenceEditor::preferences {
 		"number" -
 		"string" {
 		    line $preference $description \
-			    [::preference current $group $preference]
+			    [::preference get $group $preference]
 		}
 		"choice" {
 		    radio $preference $description \
 			    [::preference cget $group $preference -values] \
-			    [::preference current $group $preference]
+			    [::preference get $group $preference]
 		}
 		"boolean" {
 		    check $preference $description \
-			    [::preference current $group $preference]
+			    [::preference get $group $preference]
 		}
 		"custom" {
 		    mediated $preference $description \
-			    [::preference current $group $preference] \
+			    [::preference get $group $preference] \
 			    [::preference cget $group $preference -edit]
 		}
 		default {
 		    line $preference $description \
-			    [::preference current $group $preference]
+			    [::preference get $group $preference]
 		}
 	    }
 	}
