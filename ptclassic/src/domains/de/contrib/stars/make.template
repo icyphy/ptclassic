@@ -23,7 +23,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 # Makefile for Ptolemy DE stars contributed by users
-# $Id$
+# $Id$ 
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -62,11 +62,11 @@ DEcell_list.pl \
 DEpos_generator.pl \
 DEpropag_uldl.pl \
 DErrmanager_uldl.pl \
-DEDynBlockBase.pl \
-DEDynBlock.pl \
-DEDynBlockGr.pl \
+DEDynMapBase.pl \
+DEDynMap.pl \
+DEDynMapGr.pl \
 DEDynMerge.pl \
-DEDynFork.pl \
+DEDynForkBase.pl \
 DEDynForkInt.pl
 
 
@@ -99,7 +99,7 @@ include $(ROOT)/mk/common.mk
 
 # Workaround bug in gcc-2.7.2 optimizer
 ifeq ($(USE_GPLUSPLUS),yes)
-DEDynBlock.o: DEDynBlock.cc
+DEDynMap.o: DEDynMap.cc
 	$(UNOPTIMIZED_WARNING_MESSAGE)
 	$(UNOPTIMIZED_COMPILE_RULE) $<
 
