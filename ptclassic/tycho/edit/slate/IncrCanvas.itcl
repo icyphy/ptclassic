@@ -744,7 +744,7 @@ body ::tycho::IncrCanvas::delete {args} {
 body ::tycho::IncrCanvas::delete_ {id} {
     # Delete a complex item. Make sure it still exists
     if { ! [::info exists itemClass($id)] } {
-	continue
+	return
     }
 
     # Call its destruct method
