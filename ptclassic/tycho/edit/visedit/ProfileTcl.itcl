@@ -207,22 +207,18 @@ body ::tycho::ProfileTcl::updateTimes {} {
     set totalCPU $contents(cpu)
 
     array set contents [$fst contents $node]
-    addInfo count {Call count} $contents(count) 10 \
-            "Number of times the function under the cursor was called."
-    addInfo real {Real time} $contents(real) 10 \
-            "Amount of Real time in milliseconds the function under the \
-            cursor consumed."
-    addInfo realPercent {Real %} \
-            [format "%5.3f" [expr {$contents(real) / ($totalReal + 0.0) *100}]] \
-            8 \
-            "Percentage of the total Real time in milliseconds the function \
-            under the cursor"
-    addInfo cpu {CPU time} $contents(cpu) 10 \
-            "Amount of CPU time in milliseconds the function under the \
-            cursor consumed."
-    addInfo cpuPercent {CPU %} \
-            [format "%5.3f" [expr {$contents(cpu) / ($totalCPU + 0.0) *100}]] \
-            8 \
-            "Percentage of the total CPU time in milliseconds the function \
-            under the cursor"
+
+    addInfo count {Call count} $contents(count) 
+    addInfo real {Real time} $contents(real) 
+    if {$totalReal != 0.0} {
+        addInfo realPercent {Real %} \
+                [format "%5.3f" \
+                [expr {$contents(real) / ($totalReal + 0.0) *100}]]
+    }
+    addInfo cpu {CPU time} $contents(cpu) 
+    if {$totalCPU != 0.0} {
+        addInfo cpuPercent {CPU %} \
+                [format "%5.3f" \
+                [expr {$contents(cpu) / ($totalCPU + 0.0) *100}]]
+    }
 }
