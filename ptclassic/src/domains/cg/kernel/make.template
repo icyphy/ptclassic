@@ -52,10 +52,11 @@ MReq.h \
 MemMap.h \
 ProcMemory.h \
 Profile.h \
-StringStack.h \
+NameList.h \
 
 # Header files
-HDRS= $(H_WITH_MATCH) 
+HDRS= $(H_WITH_MATCH) \
+CodeStreamList.h
 
 # Library objects
 OBJS= $(H_WITH_MATCH:.h=.o) CGDomain.o AsmTargetInit.o
