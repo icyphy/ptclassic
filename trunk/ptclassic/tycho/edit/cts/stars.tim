@@ -46,6 +46,12 @@ group arithmetic -label {Basic Arithmetic} {
         port in -composite 1
         port out -composite 0
     }
+    star add3 \
+            -label Add3 \
+            -icon {edit/cts/icons.tim#arithmetic.add3} {
+        port in -composite 1
+        port out -composite 0
+    }
     star multiply \
             -label Multiply \
             -icon {edit/graphedit/icons.tim#arithmetic.multiply} {
@@ -65,4 +71,5 @@ group arithmetic -label {Basic Arithmetic} {
         port in -composite 0
         port out -composite 0
     }
+
 }
