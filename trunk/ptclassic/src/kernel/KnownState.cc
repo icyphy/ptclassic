@@ -18,8 +18,7 @@ description.
 
 #include "KnownState.h"
 #include "Error.h"
-#include "string.h"
-#include "std.h"
+#include <std.h>
 #include <ctype.h>
 
 StateList *KnownState::allStates;       // the list of state types
