@@ -10,7 +10,7 @@ Itcl files written for Tycho should follow a certain style in body.
 The <A HREF="fileheader.html">file header</A> is discussed elsewhere.
 <p>
 <OL>
-	<LI> <a href="itcl comment conventions">Itcl Comment conventions</a>
+	<LI> <a href="itcl comment conventions">Itcl comment conventions</a>
 	<LI> <a href="itcl class comments">Itcl class comments</a>
 	<LI> <a href="itcl class declaration body">Itcl class declaration
 	body</a>
@@ -18,7 +18,7 @@ The <A HREF="fileheader.html">file header</A> is discussed elsewhere.
 	bodies</a>
 </OL>
 	
-<h2><a name="itcl comment conventions">Itcl Comment conventions</a></h2>
+<h2><a name="itcl comment conventions">Itcl comment conventions</a></h2>
 In general, comments should follow the <A HREF="style.html#comment conventions"> conventions</A> described in the Tycho style guide.
 
  <P>The <A HREF="../../lib/tydoc/doc/index.html"><CODE>tydoc</CODE></A>
@@ -64,19 +64,21 @@ Below is an example class comment:
 </PRE>	
 Class comments have the following elements:
 <OL>
-	<LI> A line of comment characters that starts the class comment
+	<LI> A line of comment characters that starts the class comment.
 	<PRE>
 	######################################################################
 	</PRE>
 
-	<LI> Four comment characters, followed by the classname
+	<LI> Four comment characters, followed by the class name.  This
+	tells the reader what class is being defined, which is useful
+	if the actual comment is long.
 	<PRE>
 	#### MyClass
 	</PRE>
 
 	<LI> The actual comment, which is usually multiple lines.  A
 	line that consists of only a hashmark and white space will
-	get expanded into a paragraph break by <CODE>tydoc</CODE>
+	get expanded into a paragraph break by <CODE>tydoc</CODE>.
 	<PRE>
 	# This class does very little, but here is an example
 	</PRE>
@@ -91,7 +93,7 @@ Class comments have the following elements:
 	
 	<LI> The last line of the class comment, located right before
 	the actual class definition should be a blank comment line, consisting
-	of only a single hashmark
+	of only a single hashmark.
 	<PRE>
 	#
 	</PRE>
@@ -135,8 +137,8 @@ template</a> file for a complete example of a Itcl class body.  Below we discuss
 	}
 	</PRE>
 	
-	<LI> The declarations in the class body should be in the following
-	order
+	<LI> The remaining declarations in the class body should be in
+	the following order:
 	<OL>
 	<LI> <CODE>options</CODE>
 	<LI> <CODE>public methods</CODE>
