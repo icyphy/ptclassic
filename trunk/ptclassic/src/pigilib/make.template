@@ -95,7 +95,6 @@ LIBCSRCS      = main.c \
 		edit.c \
 		exec.c \
 		err.c \
-		ganttChart.c \
 		ganttIfc.c \
 		octIfc.c \
 		icon.c \
@@ -123,7 +122,9 @@ LIBCPPSRCS    = kernelCalls.cc \
 		PVem.cc \
 		TclStarIfc.cc \
 		BarGraph.cc \
-		XYPlot.cc
+		XYPlot.cc \
+		ganttChart.cc
+
 
 
 SRCS = $(LIBCSRCS) $(LIBCPPSRCS)
