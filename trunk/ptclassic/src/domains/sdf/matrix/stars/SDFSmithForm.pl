@@ -242,8 +242,8 @@ int extendedGCD( int a, int b, int *alpha, int *beta)
 	  int endflag;
 
 	  // perform the basic Smith form decomposition
-	  int mVector[m];
-	  int nVector[n];
+	  int *mVector = new int[m];
+	  int *nVector = new int[n];
 	  int r = intmin(m, n);
 	  for ( int dim = 0; dim < r - 1; dim++ ) {
 	    endflag = FALSE;
@@ -331,6 +331,8 @@ int extendedGCD( int a, int b, int *alpha, int *beta)
 	      }
 	    }
 	  }
+	  delete [] mVector;
+	  delete [] nVector;
 
 	  // put the Smith form into canonical form
 	  // (1) pull out negative signs
