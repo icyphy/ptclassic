@@ -79,12 +79,6 @@ class ::tycho::DataModel {
     # Add a new item
     method add {name args}
 
-    # Get options of an attribute
-    method attrcget {type attribute {option {}}}
-
-    # Configure an attribute
-    method attrconfigure {type attribute args}
-
     # Remove all data
     method clear {}
 
@@ -109,6 +103,12 @@ class ::tycho::DataModel {
     # Get a list children of a given type
     method listing {type {context {}}}
 
+    # Get attributes of the model
+    method modelcget {{attribute {}}}
+
+    # Configure the model
+    method modelconfigure {args}
+
     # Get the names of each item matching a pattern
     method names {{pattern *}}
 
@@ -117,6 +117,9 @@ class ::tycho::DataModel {
 
     # Sort items in a given context
     method sort {type {context {}} args}
+
+    # Define or configure item types
+    method type {mode {type {}} args}
 
     #################################################################
     ####                   protected methods                     ####
@@ -135,9 +138,6 @@ class ::tycho::DataModel {
 
     # Manipulate the data cache
     protected method cache {mode args}
-
-    # Define a new type of item
-    protected method definetype {type args}
 
     #################################################################
     ####                  protected variables                    ####
@@ -184,6 +184,7 @@ class ::tycho::DataModel {
     # <pre>
     #    _typeinfo($scope)                -> List of types in order defined
     #    _typeinfo($scope,$type)          -> $type
+    #    _typeinfo($scope,$type,defaults) -> Class-wide attribute defaults
     #    _typeinfo($scope,$type,leafonly) -> Must be a leaf?
     #    _typeinfo($scope,$type,override) -> Use a method to parse items?
     #    _typeinfo($scope,$type,strict)   -> Are attributes checked strictly?
@@ -194,7 +195,6 @@ class ::tycho::DataModel {
     # Default attributes, per object
     # <pre>
     #    _attrinfo($type)       -> Default values
-    #    _attrinfo($type,$attr) -> Attribute options
     # </pre>
     private variable _attrinfo
 
@@ -271,62 +271,6 @@ body ::tycho::DataModel::add {name args} {
     }
     # Return undo command
     list delete $name
-}
-
-########################################################################
-#### attrcget
-#
-# Get options of an attribute of a type. The options are those
-# set by calls to attrconfigure{}. There is only one option
-# define by default, which is *-default*, the default value
-# of this attribute. If _option_ is not given, return an
-# option-value list of all options. Note that _attribute_
-# does not include a leading dash.
-#
-body ::tycho::DataModel::attrcget {type attribute {option {}}} {
-    if ![::info exists _attrinfo($type)] {
-        error "Unknown type \"$type\""
-    }
-    if ![::info exists _attrinfo($type,$attribute)] {
-        error "Unknown attribute \"$attribute\""
-    }
-    if { $option == "" } {
-        return $_attrinfo($type,$attribute)
-    }
-    array set opts $_attrinfo($type,$attribute)
-    if ![::info exists opts($option)] {
-        error "Unknown option \"$option\""
-    }
-    return $opts(option)
-}
-
-########################################################################
-#### attrconfigure
-#
-# Configure an option of an attribute of a type. If the attribute
-# does not exist, create it with a *-default* option of null.
-# Note that if data of _type_ already exists and the *-default*
-# option is modified, the value of the attribute for that data
-# will not change. This method is not undoable. Note that _attribute_
-# does not include a leading dash.
-#
-body ::tycho::DataModel::attrconfigure {type attribute args} {
-    if ![::info exists _attrinfo($type)] {
-        error "Unknown type \"$type\""
-    }
-    set opts(-default) ""
-    if [::info exists _attrinfo($type,$attribute)] {
-        array set opts $_attrinfo($type,$attribute)
-    }
-    array set opts $args
-    set _attrinfo($type,$attribute) [array get opts]
-
-    # Update the default list
-    array set temp $_attrinfo($type)
-    set temp(-$attribute) $opts(-default)
-    set _attrinfo($type) [array get temp]
-
-    return ""
 }
 
 ########################################################################
@@ -537,6 +481,28 @@ body ::tycho::DataModel::listing {type {context {}}} {
 }
 
 ########################################################################
+#### modelcget
+#
+# Get attributes of the model. If a single argument is supplied,
+# return its value. If no argument is supplied, return a name-value
+# list of all attribute.
+#
+body ::tycho::DataModel::modelcget {{attribute {}}} {
+    error "Not implemented"
+}
+
+########################################################################
+#### modelconfigure
+#
+# Configure attributes of the model. The arguments are a list of
+# name-value pairs. If an attribute doesn't exist, this method will
+# define it. Return the undo command.
+#
+body ::tycho::DataModel::modelconfigure {args} {
+    error "Not implemented"
+}
+
+########################################################################
 #### names
 #
 # Return item names that match _pattern_.
@@ -586,6 +552,142 @@ body ::tycho::DataModel::sort {type {context {}} args} {
     set var [set modelname].[set type]($context)
     @scope $scope set $var [eval lsort $args [list @scope $scope set $var]]
 }
+
+########################################################################
+#### type
+#
+# Manipulate item types. This command has several forms, depending
+# on the valud of teh_mode_ argument:
+#
+# <dl>
+# <dt><b>cget</b> _type_ _attribute_
+# <dd>
+# Get the value of the _attribute_ attribute of _type_.
+#
+# <dt><b>configure</b> _type_ ?_attribute_ _value_ ...?
+# <dd>
+# Configure attributes of _type_. With no additional arguments,
+# return a list of all attributes. With additional arguments,
+# configure the attributes of the type. If any of the type-control
+# attributes are specified, regenerate the parsing procedure for
+# _type_.
+# 
+# <dt><b>define</b> _type_ ?_attribute_ _value_... ?
+# <dd>
+# Define a new type. The new type will be defined only the first
+# time this option is called for a given most-specific class.
+# Thereafter, the type-control attributes (see below) can be
+# changed only with the <b>configure</b> option.
+#
+# <dt><b>names</b>
+# <dd>
+# Return a list of types defined for this class.
+#
+# </dl>
+#
+# Attributes of types fall into two classes. _Type-control_
+# attributes control how the type is interpreted, and are set
+# class-wide. _Type-value_ attributes are attributes that are
+# instantiated in individual items of that type -- the value
+# of this attribute is the default value given to items. Th
+# following type-control attributes are recognized:
+#
+# <dl>
+# <dt><b>-leafonly</b> _bool_
+# <dd>
+# If true, items of this type most be
+# a leaf item -- that is, they cannot contain nested items. This should
+# be set in any situation where a type can only be a leaf, since
+# parsing is more efficient. The default is false.
+#
+# <dt><b>-override</b> _bool_
+# <dd>
+# If true, items of this type will
+# be parsed by calling a method with the same name as _type_
+# on the target object. This can be used if models need to do
+# additional processing when items are parsed.
+#
+# <dt><b>-strict</b> _bool_
+# <dd>
+# If true, the options of this type
+# are limited to those that are declared with definetype{}.
+# If not true, any options can be given to items of this type.
+# The default is false.
+#
+# <dt><b>-valued</b> _bool_
+# <dd>
+# If true, items of this type have
+# a value. If not true, no value will be parsed or printed in the
+# external format. The default is false.
+#
+# </dl>
+#
+# Any other specified attributes are treated as type-value attributes.
+# For example, the call
+# <pre>
+#     $NewInterchange type defined foo -valued 1 -bar hello
+# </pre>
+# will create the type <b>foo</b> and give it valued.
+# In addition, any item of type <b>foo</b> can accept the option
+# </b>-bar</b>, which will have the default value "hello."
+#
+body ::tycho::DataModel::type {mode {type {}} args} {
+    array set opts $defaulttypeoptions
+
+    switch -exact $mode {
+	"cget" {
+	    array set attrs _attrinfo($type)
+	    return $_attrinfo($type)
+	}
+	"configure" {
+	    array set opts $defaulttypeoptions
+	    foreach {attr val} $args {
+		if [::info exists opts($attr)] {
+		    error "Reconfiguring type-control attribute not supported"
+		}
+	    }
+	    array set attrs $_attrinfo($type)
+	    array set attrs $args
+	    set _attrinfo($type) [array get attrs]
+	}
+	"define" {
+	    array set opts $defaulttypeoptions
+	    array set opts $args
+
+	    # If this is the first time this is called in this scope,
+	    # create the parsing procedure.
+	    if { [@scope $scope ::info procs __parse_$type] == "" } {
+		lappend _typeinfo($scope) $type
+
+		# Set special options
+		set _typeinfo($scope,$type) $type
+		foreach {a _} $defaulttypeoptions {
+		    set _typeinfo($scope,$type,[string trim $a "-"]) $opts($a)
+		    unset opts($a)
+		}
+		
+		# Create and define the parsing proc
+		@scope $scope eval [eval _mkparseproc $type $args]
+		
+		# Link the proc into the safe interpreter
+		$safeinterp alias $scope::$type $scope::__parse_$type
+
+                # Record the class-wide default attributes
+                set _typeinfo($scope,$type,default) [array get opts]
+	    }
+            # Copy class-wide attributes into local attributes
+            set _attrinfo($type) $_typeinfo($scope,$type,default)
+	}
+	"names" {
+	    return $_typeinfo($scope)
+	}
+	default {
+	    error "unknown option: must be one of \
+		    \"cget, configure, define, or names\""
+        }
+    }
+}
+
 
 #####################################################################
 #####################################################################
@@ -804,81 +906,6 @@ body ::tycho::DataModel::cache {mode args} {
 	    error "bad option \"$mode\": should be delete, get, invalidate, \
 		    set, update, or valid"
 	}
-    }
-}
-
-########################################################################
-#### definetype
-#
-# Define a new item type. The first argument is the type of the item.
-# Following arguments are option names and their default values.
-# The following special options are recognised the _first_ time this
-# method is called for a given class:
-# <ul>
-# <li><b>-leafonly</b> _bool_: If true, items of this type most be
-# a leaf item -- that is, they cannot contain nested items. This should
-# be set in any situation where a type can only be a leaf, since
-# parsing is more efficient. The default is false.
-# <li><b>-override</b> _bool_: If true, items of this type will
-# be parsed by calling a method with the same name as _type_
-# on the target object. This can be used if models need to do
-# additional processing when items are parsed.
-# <li><b>-strict</b> _bool_: If true, the options of this type
-# are limited to those that are declared with definetype{}.
-# If not true, any options can be given to items of this type.
-# The default is false.
-# <li><b>-valued</b> _bool_: If true, items of this type have
-# a value. If not true, no value will be parsed or printed in the
-# external format. The default is false.
-# </ul>
-# Any other option names become an option of this type. For
-# example, the call
-# <pre>
-#     $NewInterchange newtype foo -ordered 1 -bar hello
-# </pre>
-# will create the type *foo* and make instances of it ordered.
-# In addition, any item of type *foo* can accept the option
-# *-bar*, which will have the default value "hello." An error
-# will be raised if the type already exists.
-#
-# <b>Note</b>: the special options are recognised only the first
-# time this method is called for a given model class. On the
-# second and subsequent calls, they will be ignored.
-#
-body ::tycho::DataModel::definetype {type args} {
-    array set opts $defaulttypeoptions
-    array set opts $args
-
-    # The first time in this scope, create parsing proc and
-    # recognise special options
-    if { [@scope $scope ::info procs __parse_$type] == "" } {
-        lappend _typeinfo($scope) $type
-
-	# Set special options
-        set _typeinfo($scope,$type) $type
-        foreach {a _} $defaulttypeoptions {
-            set _typeinfo($scope,$type,[string trim $a "-"]) $opts($a)
-            unset opts($a)
-        }
-
-        # Create and define the parsing proc
-        # puts [list @scope $scope eval [eval _mkparseproc $type $args]]
-        @scope $scope eval [eval _mkparseproc $type $args]
-
-        # Link the proc into the safe interpreter
-        # puts [list $safeinterp alias $scope::$type $scope::__parse_$type]
-        $safeinterp alias $scope::$type $scope::__parse_$type
-
-    } else {
-        # Second and subsequent times, ignore special options.
-        foreach {a _} $defaulttypeoptions {
-            unset opts($a)
-        }
-    }
-    # Set defaults
-    set _attrinfo($type) [array get opts]
-    foreach {attr dflt} [array get opts] {
-        lappend _attrinfo($type,[string trimleft $attr -]) -default $dflt
     }
 }
 
