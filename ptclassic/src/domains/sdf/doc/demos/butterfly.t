@@ -4,17 +4,16 @@
 This system uses sines and cosines to compute a curve
 known as the butterfly curve, invented by T. Fay.
 The curve is plotted in polar form.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"
+.EQ
+delim $$
+.EN
 .LD
 .Ir "butterfly curve"
 The butterfly curve was described in [1].

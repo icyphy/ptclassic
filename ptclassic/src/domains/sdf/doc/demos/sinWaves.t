@@ -4,17 +4,16 @@
 Demonstrate
 .c TkBarGraph
 star by generating and displaying a complex exponential.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"
+.EQ
+delim $$
+.EN
 .LD
 This system uses the Tk X window toolkit to generated
 an animated display.

@@ -4,17 +4,16 @@
 Generate raised cosine and square-root raised cosine pulses
 and demonstrates matched filtering with the square-root raised
 cosine pulse.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Edward A. Lee"
+.EQ
+delim $$
+.EN
 .LD
 .pp
 This demo generates a 25% excess bandwidth raised cosine pulse

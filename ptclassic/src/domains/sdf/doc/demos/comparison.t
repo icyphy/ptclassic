@@ -4,18 +4,17 @@
 Compare two sinusoidal signals using the
 c. Test
 star.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .IE comparison
 .SV $Revision$	$Date$
 .AL "Edward A. Lee"
+.EQ
+delim $$
+.EN
 .LD
 .Ir "Zero crossing"
 .Ir "Signal crossing"

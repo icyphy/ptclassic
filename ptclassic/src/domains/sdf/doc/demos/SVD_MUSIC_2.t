@@ -4,18 +4,23 @@
 This demo shows the use of the Multiple Signal Classification (MUSIC)
 algorithm to identify three sinusoids in noise that have frequencies very
 close to one another.
-.DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/matrix/demo"
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Mike J. Chen"
+.EQ
+delim $$
+.EN
+.LD
 .Se SVD
 .Se MUSIC
 .Ir "SVD"
 .Ir "singular-value decomposition"
 .Ir "Multiple-Signal Characterization"
 .Ir "MUSIC"
-.LD
 The MUSIC algorithm takes advantage of the singular-value decomposition (SVD)
 of a given data matrix to provide estimates of the frequencies of sinusoids
 in the input.

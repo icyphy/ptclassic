@@ -4,11 +4,17 @@
 This demo compares the convergence properties of a Kalman filter to
 those of an LMS filter when addressing the problem of adaptive equalization
 of a process in noise.
-.DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/matrix/demo"
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Mike J. Chen"
+.EQ
+delim $$
+.EN
+.LD
 .Se Kalman_M
 .Ir "Kalman Filter"
 .Ie "linear equalization"
@@ -16,7 +22,6 @@ of a process in noise.
 .Ie "filter, adaptive"
 .Ie "filter, LMS adaptive"
 .Ie "filter, Kalman adaptive"
-.LD
 The Kalman filter has faster convergence properties than an LMS filter.
 The plot that is generated compares the power of the error process for
 the two filters.

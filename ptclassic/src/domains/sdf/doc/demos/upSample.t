@@ -4,24 +4,17 @@
 Convert from the compact disc sampling rate (44.1 kHz) to the digital
 audio tape sampling rate (48 kHz).
 The conversion is performed in multiple stages for better performance.
-.SE
-.SV $Revision$ $Date$
-.AL "T. M. Parks"
-.EQ
 delim off
-.EN
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.SV $Revision$ $Date$
+.AL "T. M. Parks"
 .EQ
 delim $$
 .EN
 .LD
-.EQ
-delim $$
-.EN
-.pp
 Converting sampling rates from 44.1 kHz to 48 kHz is a difficult problem.
 A naive approach would be to interpolate (upsample) to a sampling frequency
 which is the least common multiple of these two frequencies, filter to

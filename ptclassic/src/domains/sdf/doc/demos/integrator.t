@@ -3,17 +3,16 @@
 .SD
 Demonstrate the features of the integrator star,
 such as limiting, leakage, and resetting.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Edward A. Lee"
+.EQ
+delim $$
+.EN
 .LD
 This system shows the various features of the
 .c Integrator

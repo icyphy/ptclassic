@@ -2,17 +2,16 @@
 .NA MC_DCT
 .SD
 A universe that performs motion compensation and DCT encoding of video.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Paul E. Haskell"
+.EQ
+delim $$
+.EN
 .LD
 This universe reads images from a file and performs motion compensation,
 the discrete cosine transform (DCT), zig-zag scanning of the DCT

@@ -2,17 +2,16 @@
 .NA sinMod
 .SD
 Modulate a sinusoid my multiplying by another sinusoid.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Edward A. Lee"
+.EQ
+delim $$
+.EN
 .LD
 This system uses galaxy to produce a sinusoid, and
 another galaxy to modulate it.

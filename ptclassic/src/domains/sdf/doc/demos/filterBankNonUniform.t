@@ -3,19 +3,17 @@
 .SD
 This universe implements a simple split of the frequency domain into
 two non-uniform frequency bands.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Brian L. Evans"
+.EQ
+delim $$
+.EN
 .LD
-.pp
 .Ie "filter bank"
 .Ie "filter, multirate"
 .Ie "perfect reconstruction"

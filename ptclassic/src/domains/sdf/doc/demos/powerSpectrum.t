@@ -5,17 +5,16 @@ Compare three methods for estimating a power spectrum of
 a signal with three sinusoids plus colored noise.
 The three methods are the periodogram method, the autocorrelation
 method, and Burg's method. 
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"
+.EQ
+delim $$
+.EN
 .LD
 .IR "Levinson-Durbin algorithm"
 .IR "Burg's algorithm"

@@ -3,22 +3,12 @@
 .SD
 Change the sampling rate of the input signal by a rational factor.
 The input, filter, and output are plotted on a common frequency scale.
-.SE
-.SV $Revision$ $Date$
-.AL "T. M. Parks"
-.EQ
-delim off
-.EN
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
-.EQ
-delim $$
-.EN
+.SV $Revision$ $Date$
+.AL "T. M. Parks"
 .IH
 .NE
 \fIinput\fR (FLOAT): input signal.
@@ -47,6 +37,9 @@ delim $$
 \fIinputRate\fR (FLOAT): Sampling rate of the input singal.
 .DF "1.0"
 .ET
+.EQ
+delim $$
+.EN
 .LD
 Change the sampling rate of \fIinput\fR by a rational factor,
 \fIinterpolation\fR:\fIdecimation\fR.

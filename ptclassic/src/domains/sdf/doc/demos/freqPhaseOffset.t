@@ -4,20 +4,19 @@
 Impose frequency jitter and phase offset on a sinusoid using the
 .c freqPhase
 SDF block.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.DM SDF Universe
+.SV $Revision$	$Date$
+.AL "Edward A. Lee"
 .EQ
 delim $$
 .EN
-.DM SDF Universe
+.LD
 .Ir "frequency offset"
 .Ir "phase jitter"
-.SV $Revision$	$Date$
-.AL "Edward A. Lee"
-.LD
 A 400 Hz sinusoid, sampled at 8kHz, is generated.
 On the upper path, 15 degrees (peak) phase jitter is
 imposed on the sinusoid, and the result displayed using overlaid

@@ -2,19 +2,17 @@
 .NA fmplay
 .SD
 Sound generator using FM modulation that plays on the workstation speaker.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Edward A. Lee and Tom M. Parks"
+.EQ
+delim $$
+.EN
 .LD
-.pp
 .Ir "Chowning, H. M."
 .Ie "sound synthesis"
 .Ie "audio, Sparcstation"

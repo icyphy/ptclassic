@@ -3,17 +3,16 @@
 .SD
 Use the Levinson-Durbin algorithm to estimate the parameters of an
 autoregressive process.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Edward A. Lee"
+.EQ
+delim $$
+.EN
 .LD
 .Ie "system identification"
 This demo generates an autoregressive (AR) random process by filtering

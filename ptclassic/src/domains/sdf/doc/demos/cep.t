@@ -6,17 +6,16 @@ find a minimum-phase polynomial.
 Thus, given the coefficients of the denominator polynomial of an unstable
 filter, this demo will compute the coefficients of a stable denominator
 polynomial that has the same magnitude frequency response.
-.DE
 .EQ
 delim off
 .EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
-.EQ
-delim $$
-.EN
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Joseph T. Buck"
+.EQ
+delim $$
+.EN
 .LD
 .Id "IIR filter stabilization"
 .Id "cepstral analysis"
