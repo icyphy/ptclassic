@@ -440,11 +440,21 @@ body ::tycho::EditHTML::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
         menubar command recolorize format \
 		-label "Recolorize" -underline 0 \
                 -command "$this parseRegion 1.0 end"
+        
+        menubar add separator editsep4 edit
+        
+        menubar command checklinks edit \
+		-label "Check Links" -underline 6 \
+                -command "$this busy $this checkLinks"
+        
+        menubar command filetemplate special \
+		-label "File Template" -underline 0 \
+                -command "$this fileTemplate"
 
-        menubar add separator formatsep4 format
+        menubar add separator formatsep4 special
 
 	# These keys are special in HTML
-        menubar add cascade chars format -label "Characters"
+        menubar add cascade chars special -label "Characters"
 
         menubar command ampersand chars -label "Ampersand (&)" \
 		-accelerator "C-c &" \
@@ -471,7 +481,7 @@ body ::tycho::EditHTML::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
 		"$this menubar invoke backslash; break"
 
 	# HTML blocks
-        menubar add cascade blocks format -label "Blocks"
+        menubar add cascade blocks special -label "Blocks"
 
         menubar command address blocks -label "Address" \
 		-accelerator "C-c a" \
@@ -504,25 +514,25 @@ body ::tycho::EditHTML::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
                 "$this menubar invoke image; break"
 
         menubar command header1 blocks -label "1Header" \
-		-accelerator "C-c h" \
+		-accelerator "C-c h 1" \
 		-command "$this insertAndMove {\n<h1></h1>\n} -6"
         bind $text <Control-c><Key-h><Key-1> \
                 "$this menubar invoke header1; break"
 
         menubar command header2 blocks -label "2Header" \
-		-accelerator "C-c h" \
+		-accelerator "C-c h 2" \
 		-command "$this insertAndMove {\n<h2></h2>\n} -6"
         bind $text <Control-c><Key-h><Key-2> \
                 "$this menubar invoke header2; break"
 
         menubar command header3 blocks -label "3Header" \
-		-accelerator "C-c h" \
+		-accelerator "C-c h 3" \
 		-command "$this insertAndMove {\n<h3></h3>\n} -6"
         bind $text <Control-c><Key-h><Key-3> \
                 "$this menubar invoke header3; break"
 
         menubar command header4 blocks -label "4Header" \
-		-accelerator "C-c h" \
+		-accelerator "C-c h 4" \
 		-command "$this insertAndMove {\n<h4></h4>\n} -6"
         bind $text <Control-c><Key-h><Key-4> \
                 "$this menubar invoke header4; break"
@@ -591,7 +601,7 @@ body ::tycho::EditHTML::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
                 "$this menubar invoke plaintext; break"
         
         # Various fonts
-        menubar add cascade fonts format -label "Fonts"
+        menubar add cascade fonts special -label "Fonts"
 
         menubar command bold fonts -label "Bold" \
 		-accelerator "C-c C-b" \
@@ -653,17 +663,6 @@ body ::tycho::EditHTML::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
 		-command "$this insertAndMove {<var></var>} -6"
         bind $text <Control-c><Control-v> \
                 "$this menubar invoke variable; break"
-        
-        
-        menubar add separator editsep4 edit
-        
-        menubar command checklinks edit \
-		-label "Check Links" -underline 6 \
-                -command "$this busy $this checkLinks"
-        
-        menubar command filetemplate special \
-		-label "File Template" -underline 0 \
-                -command "$this fileTemplate"
 
     }
 }
