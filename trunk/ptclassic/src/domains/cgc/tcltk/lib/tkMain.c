@@ -96,7 +96,6 @@ static char initCmd[] = "source $env(PTOLEMY)/src/domains/cgc/tcltk/lib/ptolemy-
 static int runFlag = 0;
 
 void tkSetup();
-
 /*
  *----------------------------------------------------------------------
  * Error handler
@@ -553,18 +552,25 @@ verticalScale(fullScale, interp, argc, argv)
  *----------------------------------------------------------------------
  */
 
-main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     Tk_3DBorder border;
     interp = Tcl_CreateInterp();
 #if TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1
     w = Tk_CreateMainWindow(interp, display, name, appClass);
 #else
+    if (Tcl_Init(interp) == TCL_ERROR) {
+        fprintf(stderr,
+		"%s: Error while trying to initialize tcl: %s\n",
+		argv[0], interp->result);
+        exit(1);
+      }
     if (Tk_Init(interp) == TCL_ERROR)  {
         fprintf(stderr,
 		"%s: Error while trying to get main window: %s\n",
 		argv[0], interp->result);
         exit(1);
     }
+    Tcl_StaticPackage(interp, "Tk", Tk_Init, (Tcl_PackageInitProc *) NULL);
     w = Tk_MainWindow(interp);
 #endif /* TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1 */
     if (w == NULL) {
