@@ -69,6 +69,21 @@ BDFSchList.o: BDFSchList.cc
 	$(CPLUSPLUS) $(CC_SHAREDFLAGS) -DUSG -g $(WARNINGS) -I$(VPATH) $(INCL) -c $< 
 endif
 
+# Alpha version seems to have the same problem
+
+ifeq ($(ARCH),alpha)
+BDFSchList.o: BDFSchList.cc
+	@echo "DANGER: serious GNU compiler bug suspected here."
+	@echo "If, under gcc-2.6.0, BDFSchList is compiled with optimization"
+	@echo "turned on, then at link time, the symbol:"
+	@echo "   info__C12BDFSchedulerRC8PortHole (data)"
+	@echo "will be undefined."
+	@echo "This symbol comes from void BDFTestNode::run(BDFScheduler& sch)"
+	@echo "   int test = sch.getBoolValue(port);"
+	@echo "So we compile this file without the optimizer on alpha as well"
+	$(CPLUSPLUS) $(CC_SHAREDFLAGS) -DUSG -g $(WARNINGS) -I$(VPATH) $(INCL) -c $< 
+endif
+
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
