@@ -71,14 +71,6 @@ PARLIBFILES = $(LIBDIR)/libDC.$(LIBSUFFIX) $(LIBDIR)/libHu.$(LIBSUFFIX) \
 	$(LIBDIR)/libPar.$(LIBSUFFIX) \
 	$(LIBDIR)/libcgstars.$(LIBSUFFIX) $(LIBDIR)/libcg.$(LIBSUFFIX)
 
-# If S56DIR is defined, then compile in the S56X Wormhole target.
-# This is defined in config-sun4.mk.
-ifdef S56DIR
-S56WH_LIB= -lqckMon
-S56WH_LIBDIR= -L$(S56DIR)/lib
-S56WH_O= $(CG56T)/S56XTargetWH.o 
-endif
-
 # if MATLABDIR is defined, then compile with Matlab external interface library
 ifdef MATLABLIBDIR
 MATLABEXT_LIB= -lmat
@@ -159,7 +151,6 @@ $(ATM_LIBS) \
 -lcgcstars -lcgc -lcgctcltk \
 -lcg96dspstars -lcg96stars -lcg96 \
 -lcg56dspstars -lcg56stars -lcg56 \
-$(S56WH_LIBDIR) $(S56WH_LIB) \
 -lsilagestars -lsilage \
 -lcgstars -lDC -lHu -lDL -lMSH -lPar -lcg \
 -lddfstars -lddf \
@@ -193,7 +184,8 @@ CGCTARGETS =	$(CGCT)/main/CGCUnixSend.o $(CGCT)/main/CGCUnixReceive.o \
 
 CGCDDFTARGETS =	$(CGCT)/main/CGCDDFTarget.o
 BDFTARGETS =	$(CGT)/CGBDFTarget.o $(CGCT)/main/CGCBDFTarget.o
-CG56TARGETS =	$(CG56T)/Sim56Target.o $(CG56T)/S56XTarget.o $(S56WH_O)\
+CG56TARGETS =	$(CG56T)/Sim56Target.o $(CG56T)/S56XTarget.o \
+		$(CG56T)/S56XTargetWH.o \
 		$(CG56T)/Sub56Target.o $(CG56T)/CG56MultiSimTarget.o \
 		$(CG56T)/CG56MultiSimSend.o $(CG56T)/CG56MultiSimReceive.o \
 		$(CG56T)/CG56XCReceive.o $(CG56T)/CG56XCSend.o \
