@@ -298,9 +298,9 @@ FILE *dump_file;
 		oct_type_names[i]+4,
 		f_stats.obj_counts[i].size,
 		f_stats.obj_counts[i].num,
-		(int)(f_stats.obj_counts[i].num*f_stats.obj_counts[i].size +
-		    f_stats.obj_counts[i].additional_size),
-		f_stats.obj_counts[i].num_chains*sizeof(struct chain),
+		f_stats.obj_counts[i].num*f_stats.obj_counts[i].size +
+		    f_stats.obj_counts[i].additional_size,
+		(int)(f_stats.obj_counts[i].num_chains*sizeof(struct chain)),
 		f_stats.obj_counts[i].namesize,
 		f_stats.obj_counts[i].avg_content,
 		STD_DEV(f_stats.obj_counts[i],avg_content, avg_content_sq),
