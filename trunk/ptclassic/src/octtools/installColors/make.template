@@ -67,7 +67,7 @@ LIBS	= -L$(OCTLIBDIR) -loh$(DBGFLAG) -lvov$(DBGFLAG) \
 	-lerrtrap$(DBGFLAG) -luprintf$(DBGFLAG) -lport$(DBGFLAG)   
 
 installColors:	$(OBJS)
-	$(LINKER) $(LINKFLAGS) $(OBJS) \
+	$(CLINKER) $(LINKFLAGS) $(OBJS) \
 		-o installColors \
 		$(LIBS) $(X11_LIBSPEC) $(SYSLIBS) -lm 
 

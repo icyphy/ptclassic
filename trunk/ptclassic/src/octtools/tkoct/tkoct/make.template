@@ -35,16 +35,16 @@ TKOCT_LIBS =  -L../tkgraph -ltkgraph -L../top -ltop \
 	-lregion -lkd -lgu -ltap -llist -loh -lvov -loct -ltr -lst \
 	-lutility -lerrtrap -luprintf -lport
 
-# Use the $(LINKER) so the binary is statically linked for distribution.
+# Use the $(CLINKER) so the binary is statically linked for distribution.
 # On suns, cc takes -Bstatic, gcc takes -static, so we can't just add a flag
 # here.
 tkoct:	$(OBJS)
 	rm -f tkoct
-	$(LINKER) $(LINKFLAGS) -o $@ $(OBJS) $(TKOCT_LIBS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
+	$(CLINKER) $(LINKFLAGS) -o $@ $(OBJS) $(TKOCT_LIBS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
 
 tkoct.debug:	$(OBJS)
 	rm -f tkoct
-	$(LINKER) $(LINKFLAGS_D) -o $@ $(OBJS) $(TKOCT_LIBS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
+	$(CLINKER) $(LINKFLAGS_D) -o $@ $(OBJS) $(TKOCT_LIBS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
 
 
 OUT =		$(BINDIR)/tkoct

@@ -59,7 +59,7 @@ LIBS	= -L$(OCTLIBDIR) -loh$(DBGFLAG) -lvov$(DBGFLAG) \
 	-lerrtrap$(DBGFLAG) -luprintf$(DBGFLAG) -lport$(DBGFLAG)   
 
 octfix:	$(OBJS)
-	$(LINKER) $(LINKFLAGS) $(OBJS) \
+	$(CLINKER) $(LINKFLAGS) $(OBJS) \
 		-o octfix \
 		$(LIBS) $(SYSLIBS) -lm 
 
