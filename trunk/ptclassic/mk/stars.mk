@@ -561,8 +561,6 @@ ifdef SDF
 		STARS += $(LIBDIR)/sdfdspstars.o
 		LIBS += -lsdfdspstars
 		LIBFILES += $(LIBDIR)/libsdfdspstars.$(LIBSUFFIX)
-		# ptdsp library is used by the Window and RaiseCosine stars
-		PTDSPLIB = 1
 	endif
 	ifdef SDFMATRIX 
 		CUSTOM_DIRS += $(SDFDIR)/matrix/stars
@@ -609,7 +607,7 @@ ifdef SDF
 	LIBS += -lsdfstars
 	LIBFILES += $(LIBDIR)/libsdfstars.$(LIBSUFFIX)	
 	SDFLIB = 1
-	# ptdsp library is used by the Play star
+	# ptdsp library is used by the Play star as well as the SDF/DSP stars
 	PTDSPLIB = 1
 endif
 
@@ -719,7 +717,7 @@ endif
 ifdef PTDSPLIB
 	CUSTOM_DIRS += $(CROOT)/src/utils/libptdsp
 	LIBS += -lptdsp
-	LIBFILES += $(LIBDIR)/libptdsp.$(LIBSUFFIX)
+	LIBFILES += $(LIBDIR)/libptdsp.a
 endif
 
 # External interface support - we need to expand libexttools, because it
