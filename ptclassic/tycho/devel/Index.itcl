@@ -49,13 +49,13 @@
 # By default, a NamedData will accept any options. To limit
 # the options that will be accepted and to set the default values,
 # set the *-entryoptions* option (of the NamedData, not of an entry):
-#
+# <pre>
 #     $dataarray configure -entryoptions {-ingratiating always -glib usually}
+# </pre>
 #
 # Because this class supports glob-style pattern matching in
 # many of its functions, it can be used to implement hierarchical
 # arrays (i.e. forests) with barely any extra effort. For example,
-#
 # <pre>
 #     $dataarray add Fred.greeting "Hello!"
 #     $dataarray add Fred.farewell "See ya!"
@@ -91,9 +91,12 @@ class ::tycho::NamedData {
     #################################################################
     ####                        options                          ####
 
-    # The default options of each data entry -- if empty, any are legal
+    # The default options of each data entry
     public variable entryoptions {}
     
+    # If true, options are checked, otherwise any are allowed
+    public variable checkoptions 1
+
     #################################################################
     ####                     public methods                      ####
 
@@ -107,7 +110,7 @@ class ::tycho::NamedData {
     method delete {index}
 
     # Describe the entries matched by a pattern
-    method describe {pattern args}
+    method describe {{pattern *} args}
 
     # Get an option or options of an entry
     method entrycget {index option}
@@ -129,6 +132,9 @@ class ::tycho::NamedData {
 
     #################################################################
     ####                  protected methods                      ####
+
+    # Internalize a description
+    method internalize {description}
 
     # Write data to a data file and image file.
     protected method writeData {fd id}
@@ -163,25 +169,28 @@ body ::tycho::NamedData::add {index data args} {
 	error "Data $index already exists in $dataname"
     }
 
+    # Set options
+    if { ! $checkoptions } {
+	# If this is turned off, don't even remove duplicates
+	# from the option list. It won't matter, since the
+	# option handling code all works anyway.
+	set _optns($index) [concat $entryoptions $args]
+    } else {
+     	# Set default options then given options. Flag an error
+     	# if a given option is not in the defaults
+ 	array set temp $entryoptions
+ 	foreach {option value} $args {
+ 	    if { ! [::info exists temp($option)] } {
+ 		error "Unknown option $option in $dataname"
+ 	    }
+ 	    set temp($option) $value
+ 	}
+ 	set _optns($index) [array get temp]
+    }
     # set value
     set _value($index) $data
 
-    # Set options
-    if { $entryoptions != "" } {
-    	# Set default options then given options. Flag an error
-    	# if a given option is not in the defaults
-	array set temp $entryoptions
-	foreach {option value} $args {
-	    if { ! [::info exists temp($option)] } {
-		error "Unknown option $option in $dataname"
-	    }
-	    set temp($option) $value
-	}
-	set _optns($index) [array get temp]
-    } else {
-	# Set the options. Any options are legal
-	set _optns($index) $args
-    }
+    # Return the undo command
     return [list delete $index]
 }
 
@@ -221,27 +230,29 @@ body ::tycho::NamedData::delete {index} {
 #### describe
 #
 # Return a low-level "description" of the entries matching the
-# given pattern. All options are included in the result.
+# given pattern. All options are included in the result. If no
+# arguments are given, then the pattern "*" is used.
 #
 # Additional flags recognized by this routine are *-regexp*, which
 # selects regular-expression matching instead of glob-style matching,
 # and *-nohistory*, which prevents the undo history from being
-# generated.
+# generated. Note that flags can be given only if the _pattern_
+# argument is specified too.
 #
-body ::tycho::NamedData::describe {pattern args} {
+body ::tycho::NamedData::describe {{pattern *} args} {
     set description ""
     
     # Add the undo history if not inhibited
     if { [lsearch -exact $args "-nohistory"] == -1 } {
-	append description [::tycho::NamedData::describe $pattern]
+	append description [::tycho::Model::describe $pattern]
     }
 
     # If the pattern is *, then do the most efficient thing
     if { $pattern == "*" } {
 	append description "\n\n# Values of data $dataname\n\n"
-	append description "array set _value [array get _value]\n"
+	append description "array set _value \{[array get _value]\}\n"
 	append description "\n\n# Options of data $dataname\n\n"
-	append description "array set _optns [array get optns]\n"
+	append description "array set _optns \{[array get _optns]\}\n"
 	return $description
     } else {
 	# Get matching indexes.
@@ -373,6 +384,13 @@ body ::tycho::NamedData::indexes {{pattern *} {regexpflag {}}} {
 }
 
 ########################################################################
+#### internalize
+#
+body ::tycho::NamedData::internalize {description} {
+    eval $description
+}
+
+########################################################################
 #### match
 #
 # Return a list of index-value pairs based on the given pattern. The
@@ -434,6 +452,7 @@ body ::tycho::NamedData::match {pattern args} {
 	    set result {}
 	    foreach index $matching {
 		lappend result $index $_value($index)
+		append result "\n"
 	    }
 	    return $result
 	}
@@ -453,11 +472,13 @@ body ::tycho::NamedData::match {pattern args} {
 	    foreach index $matching {
 		lappend result $index [concat [list $_value($index)] \
 			[array get _optns $index@*]]
+		append result "\n"
 	    }		
 	} else {
 	    foreach index $matching {
 		lappend result $index $_value($index) \
 			[array get _optns $index@*]
+		append result "\n"
 	    }
 	}
     } else {
@@ -470,6 +491,7 @@ body ::tycho::NamedData::match {pattern args} {
 		    lappend r $_optns($index@$opt)
 		}
 		lappend result $r
+		append result "\n"
 	    }		
 	} else {
 	    foreach index $matching {
@@ -477,6 +499,7 @@ body ::tycho::NamedData::match {pattern args} {
 		foreach opt $withoptions {
 		    lappend result $_optns($index@$opt)
 		}
+		append result "\n"
 	    }
 	}
     }
@@ -498,5 +521,5 @@ body ::tycho::NamedData::writeData {fd id} {
     if { $id != "" } {
 	puts $id "set entryoptions [list $entryoptions]"
     }
-    ::tycho::Model::writeData $fd $id
+    chain $fd $id
 }
