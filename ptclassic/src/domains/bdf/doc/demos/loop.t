@@ -7,7 +7,6 @@ A sequence of integers (a ramp) is the overall input.
 Each input value gets multiplied by 0.5 inside the loop
 until its magnitude is smaller than 0.5.
 Then that smaller result is sent to the output.
-.DE
 .EQ
 delim off
 .EN
