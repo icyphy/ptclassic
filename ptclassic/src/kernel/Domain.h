@@ -27,6 +27,7 @@ class Star;
 class Galaxy;
 class PortHole;
 class EventHorizon;
+class Geodesic;
 
 const int NUMDOMAINS = 10;		// maximum # of domains
 
@@ -43,6 +44,7 @@ public:
 	virtual PortHole& newOutPort() = 0;
 	virtual EventHorizon& newFrom() = 0;
 	virtual EventHorizon& newTo() = 0;
+	virtual Geodesic& newNode() = 0;
 	const char* domainName() { return name;}
 	static Domain* named(const char* name);
 	static Domain* domainOf(Block&);
