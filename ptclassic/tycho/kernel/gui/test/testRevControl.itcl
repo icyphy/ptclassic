@@ -32,7 +32,6 @@
 
 if {[string compare test [info procs test]] == 1} then { 
     source [file join $TYCHO kernel test testDefs.tcl]
-    source testDefs.tcl
 } {}
 
 set testsuite 1
