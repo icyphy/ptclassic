@@ -85,8 +85,7 @@ int CG56Target :: setup(Galaxy& g) {
 }
 
 void CG56Target :: initializeCmds() {
-	downloadCmds = "cd ";downloadCmds+=dirFullName;downloadCmds += "\n";
-	assembleCmds = downloadCmds;
+	assembleCmds = downloadCmds = "#/bin/sh\n";
 }
 
 void CG56Target :: headerCode () {
@@ -116,7 +115,8 @@ void CG56Target :: wrapup () {
 }
 
 int CG56Target :: assembleCode() {
-	if (rshSystem(targetHost,assembleCmds) != 0 ) {
+	if (!genFile(assembleCmds,uname,".mk","u+x")) return FALSE;
+	if (rshSystem("localhost",fileName(uname,".mk"),dirFullName) != 0 ) {
 		StringList asmError ="Errors in assembly of ";
 		asmError += uname; 
 		asmError += " universe";
@@ -127,7 +127,8 @@ int CG56Target :: assembleCode() {
 }
 
 int CG56Target :: downloadCode() {
-	if (rshSystem(targetHost,downloadCmds) != 0 ) {
+	if (!genFile(downloadCmds,uname,NULL,"u+x")) return FALSE;
+	if (rshSystem(targetHost,uname,dirFullName) != 0 ) {
 		StringList dError = "Errors in loading ";
 		dError += uname;
 		dError += " universe on ";
