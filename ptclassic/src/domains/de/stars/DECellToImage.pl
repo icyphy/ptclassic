@@ -4,8 +4,12 @@ defstar {
 	version		{ $Id$ }
 	author		{ Paul Haskell }
 	location	{ DE main library }
-WARNING: CHECK COPYRIGHT - not UC
-	copyright	{ (c) 1991, 1992 Univ. of Calif. Regents }
+        copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+        }
 	desc {
 This star reads in NetworkCells containing image data and outputs whole
 images. The current image is sent to the output when the star reads

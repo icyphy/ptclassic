@@ -8,7 +8,12 @@ Calculation by table lookup.  Input range of (-1,1) scaled by pi.
 	version { $Id$ }
 	acknowledge { Gabriel version by Maureen O'Reilly }
 	author { J. Pino (ported from Gabriel) }
-	copyright { 1992 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CG56 demo library }
 	explanation {
 .Id "cosine"

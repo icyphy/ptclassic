@@ -4,8 +4,12 @@ defstar {
 	domain	{ SDF }
 	version	{ $Id$ }
 	author	{ Paul Haskell }
-WARNING: CHECK COPYRIGHT - not UC
-	copyright	{ 1991, 1992 The Regents of the Univ. of California }
+        copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+        }
 	location	{ SDF image library }
 	desc {
 Read a sequence of PGM-format images from different files and

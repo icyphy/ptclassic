@@ -4,8 +4,12 @@ defstar {
 	version		{ $Id$ }
 	author		{ Paul Haskell }
 	location	{ DE main library }
-WARNING: CHECK COPYRIGHT - not UC
-	copyright	{ (c) 1992 U.C. Regents }
+        copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+        }
 	desc {
 This star reads in input "NetworkCell"s from multiple input
 sources and routes them to the appropriate output.
