@@ -1154,7 +1154,7 @@ body ::tycho::File::openContext {filename} {
         if {$reg != {}} {
             if [catch {
                 set command [format $reg $filename]
-                set result [eval $command]
+                set result [uplevel #0 $command]
             } msg] {
                 global ::errorInfo
                 set saveInfo $errorInfo
