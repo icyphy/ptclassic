@@ -402,7 +402,7 @@ ifdef CGC
 		CUSTOM_DIRS += $(CGCDIR)/vis/targets
 		ifeq ($(USE_SHARED_LIBS),yes) 
 			LIBS += -lcgcvistargets
-			LIBFILES += $(LIBDIR)/libcgcvistargets.(LIBSUFFIX)
+			LIBFILES += $(LIBDIR)/libcgcvistargets.$(LIBSUFFIX)
 		else
 			TARGETS += $(CGCDIR)/vis/CGCVISTarget.o
 		endif
