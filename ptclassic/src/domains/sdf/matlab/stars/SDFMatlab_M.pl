@@ -175,9 +175,10 @@ During the wrapup procedure, there is no data passing into or out of the star.
 	}
 
 	begin {
-		char* setupCommand = (char*) MatlabSetUp;
+		const char* setupCommand = (const char*) MatlabSetUp;
 		if ( setupCommand && *setupCommand ) {
-		  int err = matlabInterface.EvaluateUserCommand(setupCommand);
+		  InfString matlabCommand = setupCommand;
+		  int err = matlabInterface.EvaluateUserCommand(matlabCommand);
 		  if ( err ) {
 		    Error::abortRun( *this, matlabInterface.GetErrorString() );
 		  }
@@ -212,9 +213,10 @@ During the wrapup procedure, there is no data passing into or out of the star.
 	}
 
 	wrapup {
-		char* wrapupCommand = (char*) MatlabWrapUp;
+		const char* wrapupCommand = (const char*) MatlabWrapUp;
 		if ( wrapupCommand && *wrapupCommand ) {
-		  int err = matlabInterface.EvaluateUserCommand(wrapupCommand);
+		  InfString matlabCommand = wrapupCommand;
+		  int err = matlabInterface.EvaluateUserCommand(matlabCommand);
 		  if ( err ) {
 		    Error::abortRun( *this, matlabInterface.GetErrorString() );
 		  }
