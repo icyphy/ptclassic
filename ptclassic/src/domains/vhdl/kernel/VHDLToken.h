@@ -50,6 +50,9 @@ class VHDLToken : public VHDLTypedObj
  public:
   // Constructors.
   VHDLToken();
+  VHDLToken(const char* n, const char* t)
+    : VHDLTypedObj(n,t), arc(NULL), tokenNumber(0), sourceFiring(NULL),
+    destFirings(new VHDLFiringList), clockName("UNINITIALIZED") {}
   VHDLToken(const char* n, const char* t, VHDLArc* a, int tn,
 	    VHDLFiring* sp, VHDLFiringList* dps, StringList cn)
     : VHDLTypedObj(n,t), arc(a), tokenNumber(tn), sourceFiring(sp),

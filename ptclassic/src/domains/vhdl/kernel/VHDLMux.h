@@ -54,7 +54,8 @@ class VHDLMux : public VHDLFiring
   // Constructors.
   VHDLMux();
   VHDLMux(const char* n, const char* t)
-    : type(t) { setName(n); }
+    : inputList(new VHDLSignalList), output(NULL), control(NULL), type(t)
+      { setName(n); }
 
   // Destructor.
   ~VHDLMux();

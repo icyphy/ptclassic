@@ -45,6 +45,8 @@ class VHDLVariable : public VHDLTypedObj
  public:
   // Constructors.
   VHDLVariable();
+  VHDLVariable(const char* n, const char* t)
+    : VHDLTypedObj(n,t), initVal("") {}
   VHDLVariable(const char* n, const char* t, const char* iv)
     : VHDLTypedObj(n,t), initVal(iv) {}
 
