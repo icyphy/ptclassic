@@ -101,7 +101,6 @@ RPCFunction CommandArray[] = {
     {RpcEditIcon, "Window", "edit-icon", "I", 0},
     {RpcLookInside, "Window", "look-inside", "i", 0},
     {RpcRun, "Exec", "run", "R", 0},
-    {RpcReRun, "Exec", "re-run", "!", 0},
     {RpcRunAllDemos, "Exec", "run-all-demos"},
     {RpcCompileFacet, "Exec", "compile-facet"},
     {RpcDisplaySchedule, "Exec", "display-schedule"},
