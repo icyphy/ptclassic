@@ -42,6 +42,7 @@ defstar {
 	}
 	constructor {
 		input.inheritTypeFrom(output);
+		delayType = TRUE;
 	}
 	go {
 	   // No overlapped execution. set the time.
