@@ -138,8 +138,13 @@ void DebugMessage(char *str1, char *str2)
 int Linker::activeFlag = 0;
 const char* Linker::ptolemyName = 0;
 const char* Linker::symTableName = 0;
+
 // by default, search math and C libraries
+#if defined(USE_SHLLOAD)
+const char* Linker::myDefaultOpts = "/lib/libm.sl";
+#else
 const char* Linker::myDefaultOpts = "-lm -lc";
+#endif
 
 // If USE_DLOPEN is defined, then we don't use these vars
 char* Linker::memBlock = 0;
@@ -157,12 +162,12 @@ const size_t LINK_MEMORY = (size_t)(1024L * 1024L);
 int Linker::isActive() { return activeFlag;}
 
 void Linker::adjustMemory() {
-#ifdef USE_DLOPEN
+#if defined(USE_DLOPEN) || defined(USE_SHLLOAD)
   char buf[1024];
   sprintf(buf,
     "Linker: adjustMemory() not used on architectures that support dlopen()");
   Error::abortRun(buf);
-#else // USE_DLOPEN
+#else // USE_DLOPEN || USE_SHLLOAD
 	if (!memBlock) {
 		memBlock = new char[LINK_MEMORY];
 		availMem = memBlock;
@@ -174,7 +179,7 @@ void Linker::adjustMemory() {
 	size_t ps = getpagesize();
 	size_t t2 = (t / ps) * ps;
 	if (t2 < t) availMem = (char *) (t2 + ps);
-#endif // USE_DLOPEN
+#endif // USE_DLOPEN || USE_SHLLOAD
 }
 
 
@@ -248,7 +253,7 @@ int Linker::multiLink (const char* args, int perm) {
 }
 
 
-#ifdef USE_DLOPEN
+#if defined(USE_DLOPEN) || defined(USE_SHLLOAD)
 
 #define PATHNAME_LENGTH 1024
 // Create a .so file from one or more .o or .so files
@@ -262,7 +267,11 @@ int Linker::multiLink (const char* args, int perm) {
 // up deconstruction.
 
 // sprintf format string that will name the temporary file
+#ifdef USE_SHLLOAD
+#define DLOPEN_TMP_FILE_FORMAT "/tmp/__ptlink%d_%d.sl"
+#else
 #define DLOPEN_TMP_FILE_FORMAT "/tmp/__ptlink%d_%d.so"
+#endif
 
 char *
 Linker::generateSharedObject(int argc, char **argv, char* objName, int maxsize)
@@ -278,6 +287,13 @@ Linker::generateSharedObject(int argc, char **argv, char* objName, int maxsize)
 
   // Create the command to produce the shared object
   command << " " << objName;
+
+#ifdef USE_SHLLOAD // I don't think we need all this (neal@ctd.comsat.com)
+  for (int i = 1; i < argc; i++) {
+    const char* fullObjName = expandPathName(argv[i]);
+    command << " " << fullObjName;
+  }
+#else // USE_SHLLOAD
 
   for (int i = 1; i < argc; i++) {
     const char* fullObjName = expandPathName(argv[i]);
@@ -314,7 +330,7 @@ Linker::generateSharedObject(int argc, char **argv, char* objName, int maxsize)
 
   if ( permlinkFiles.length() > 0 )
     command << " " << permlinkFiles;
-
+#endif //USE_SHLLOAD
 #ifdef DEBUG
   {
     char buf[4*PATHNAME_LENGTH];
@@ -457,6 +473,37 @@ int Linker::multiLink (int argc, char** argv) {
 	int nCalls = invokeConstructors(objName, dlhandle);
 
 #else //USE_DLOPEN
+#ifdef USE_SHLLOAD
+	shl_t lib_handle;
+
+	char objName[PATHNAME_LENGTH];
+
+	if ( argc > 2 ||
+	     (argc == 2 && strncmp(argv[1]+strlen(argv[1])-3, ".sl", 3) != 0))
+	  if (generateSharedObject(argc, argv, objName, PATHNAME_LENGTH) ==
+	      (char *)NULL)
+	    return FALSE;
+	  
+	if ( (lib_handle = shl_load(objName, BIND_DEFERRED | DYNAMIC_PATH | BIND_VERBOSE  | BIND_FIRST, 0)) == NULL) {
+	  char buf[1024];
+	  sprintf(buf,"Error linking file %s: dlopen: %s", objName, strerror (errno));
+	  Error::abortRun(buf);
+	  return FALSE;
+	}
+
+// flag for permanent-link or not
+	int perm = (argv[0][0] == 'p');	// KLUDGE!
+
+// invoke constructors in the newly read in code
+
+	// activeFlag is checked by the KnownBlock constructors, and a flag
+	// inside KnownBlock is saved.  This is how we can later tell
+	// if a Block was dynamically linked in, or if it was compiled-in.
+	if (!perm) activeFlag = TRUE;	
+				// Call with objName, not tname
+	int nCalls = invokeConstructors(objName, (void*)lib_handle);
+
+#else //USE_SHLLOAD
 
 // round up to be on a page boundary
 	adjustMemory();
@@ -508,6 +555,7 @@ int Linker::multiLink (int argc, char** argv) {
 	if (!perm) activeFlag = TRUE;	
 				// Call with tname, not objName
 	int nCalls = invokeConstructors(tname, (void *)NULL);
+#endif //USE_SHLLOAD
 #endif //USE_DLOPEN
 
 
@@ -521,7 +569,7 @@ int Linker::multiLink (int argc, char** argv) {
 	activeFlag = FALSE;	// turn off the indication.
 	if (status) {
 // we do not bump the memory pointer until now; this makes it official
-#ifndef USE_DLOPEN
+#if !defined(USE_DLOPEN) && !defined(USE_SHLLOAD)
 		availMem += size;
 #endif
 // if this is a "permalink", make tfile the new symbol file
@@ -531,7 +579,7 @@ int Linker::multiLink (int argc, char** argv) {
 }
 
 void Linker::installTable(const char* newTable) {
-#ifndef USE_DLOPEN
+#if !defined(USE_DLOPEN) && !defined(USE_SHLLOAD)
 	if (ptolemyName == symTableName) {
 		symTableName = getenv("PTOLEMY_SYM_TABLE");
 		if (!symTableName) symTableName =
@@ -548,7 +596,7 @@ void Linker::installTable(const char* newTable) {
 		char ch;
 		while (in.get(ch)) out.put(ch);
 	}
-#endif // !USE_DLOPEN
+#endif // !USE_DLOPEN && !USE_SHLLOAD
 }
 
 
@@ -597,6 +645,37 @@ Linker::invokeConstructors (const char* objName, void * dlhandle) {
 #ifdef NO_INVOKECONSTRUCTORS
         return 1;
 #else //NO_INVOKECONSTRUCTORS  
+	int nCalls = 0;
+#ifdef USE_SHLLOAD
+// we need to get the basename of the objfile
+	char* lastslash = strrchr (objName, '/');
+	char* basestart;
+	if (lastslash == NULL) basestart = objName;
+	else basestart = lastslash + 1;
+	char ConsName[256];
+	strcpy (ConsName, "_GLOBAL__FI_");
+	strcat (ConsName, basestart);
+// get rid of ".sl" extension
+	char* baseend = strrchr (ConsName, '.');
+	*baseend = '\0';
+// add "_sl"
+	strcat (ConsName, "_sl");
+// Now we know what symbol to look for
+#ifdef DEBUG
+        {
+	  char buf[256];
+	  sprintf(buf, "Constructor Symbol: %s", ConsName);
+	  Error::message(buf);
+	}
+#endif
+	shl_t handle = NULL;
+	void (*A_ptr)();
+	if (shl_findsym (&handle, ConsName, TYPE_PROCEDURE, &A_ptr))
+	  Error::abortRun ("shl_findsym failed");
+
+	(*A_ptr)();
+	nCalls++;
+#else // USE_SHLLOAD	
 #ifdef USE_NM_GREP
 // On the hppa a symbol can have the same name in the code and
 // an entry segments.  nm -p cannot differentiate between the
@@ -632,7 +711,6 @@ Linker::invokeConstructors (const char* objName, void * dlhandle) {
 	}
 // read the output from nm, searching for GLOBAL symbols with
 // value > base.
-	int nCalls = 0;
 	long addr;
 #ifdef USE_NM_GREP
  	char line[1024], *symbol, *p_addr;
@@ -704,12 +782,13 @@ Linker::invokeConstructors (const char* objName, void * dlhandle) {
 	}
 #endif //USE_NM_GREP
 	pclose (fd);
+#endif //USE_SHLLOAD
 	return nCalls;
 #endif //NO_INVOKECONSTRUCTORS
 }
 
 size_t Linker::readInObj(const char* objName) {
-#ifdef USE_DLOPEN
+#if defined (USE_DLOPEN) || defined (USE_SHLLOAD)
   char buf[1024];
   sprintf(buf,"Linker: readInObj(%s) not used on architectures that support dlopen()",objName);
   Error::abortRun(buf);
@@ -779,7 +858,7 @@ public:
 		delete [] Linker::memBlock;
 		if (Linker::ptolemyName != Linker::symTableName)
 			unlink(Linker::symTableName);
-#ifdef USE_DLOPEN
+#if defined (USE_DLOPEN) || defined (USE_SHLLOAD)
 		cleanupSharedObjects(Linker::linkSeqNum);
 #endif
 	}

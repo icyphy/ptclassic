@@ -106,6 +106,17 @@ const int linkingNotSupported =
 #endif // PTSOL2
 #endif // PTIRIX5
 
+#if defined(PTHPPA) &&  __GNUG__ > 1
+// Uncomment the # diretives below for Neal Becker's HPPA shl_load() style
+// dynamic linking.
+// To get this to work, you'll need currently
+// (3/95) unreleased patches to gcc-2.6.3.u6 and a shared libg++.
+// #define USE_SHLLOAD
+// #define SHARED_OBJECT_COMMAND "g++ -shared -fPIC -nostdlib -o"
+// #include <dl.h>
+// #include <errno.h>
+#endif
+
 // Full pathname of the "nm" program; it reads symbol names from a .o
 // file.  Do NOT use a "demangling" version such as gnu nm.
 
