@@ -23,7 +23,7 @@ resulting Matlab matrices to Ptolemy matrices, and outputs the matrices.
 The \fIMatlabFunction\fR state can either be a Matlab function name,
 a call to a Matlab function, or one Matlab command.
 The star will add the missing pieces to form a complete command.
-
+.pp
 For example, if \fIMatlabFunction\fR were "eig" and the star had one input
 and two outputs, then the star would build the Matlab command
 "[output#1, output#2] = eig(input#1);".
@@ -57,6 +57,7 @@ The values of the input ports will be passed as arguments to this function.
 
 	// Matrix.h is from the Ptolemy kernel
 	hinclude { "dataType.h", "Matrix.h", "StringList.h", "InfString.h" }
+	hinclude { "MatlabIfc.h", "MatlabIfcFuns.h" }
 
 	header { typedef Matrix *MatrixPtr; }
 
@@ -68,7 +69,6 @@ The values of the input ports will be passed as arguments to this function.
 		// Ptolemy (C++) structures for Matlab calls
 		char **matlabInputNames;    // array of Matlab variable names
 		char **matlabOutputNames;   // array of Matlab variable names
-		char *matlabCommand;
 
 		// Variables for number of inputs and outputs to this star
 		int numInputs;
@@ -81,7 +81,6 @@ The values of the input ports will be passed as arguments to this function.
 
 		matlabInputNames = 0;
 		matlabOutputNames = 0;
-		matlabCommand = 0;
 
 		numInputs = 0;
 		numOutputs = 0;
@@ -119,7 +118,8 @@ The values of the input ports will be passed as arguments to this function.
 		  freeStringArray(matlabInputNames, numInputs);
 		  delete [] matlabInputNames;
 		  matlabInputNames = new char*[numInputs];
-		  nameMatlabMatrices(matlabInputNames, numInputs, "input");
+		  matlabInterface.NameMatlabMatrices(matlabInputNames,
+		  				     numInputs, "input");
 		}
 
 		// allocate Matlab output matrices and generate their names
@@ -134,17 +134,15 @@ The values of the input ports will be passed as arguments to this function.
 		  freeStringArray(matlabOutputNames, numOutputs);
 		  delete [] matlabOutputNames;
 		  matlabOutputNames = new char*[numOutputs];
-		  nameMatlabMatrices(matlabOutputNames, numOutputs, "output");
+		  matlabInterface.NameMatlabMatrices(matlabOutputNames,
+		  				     numOutputs, "output");
 		}
 
 		// create the command to be sent to the Matlab interpreter
-		InfString commandString;
-		buildMatlabCommand(commandString,
-				   matlabInputNames, numInputs,
-				   (const char *) MatlabFunction,
-				   matlabOutputNames, numOutputs);
-		delete [] matlabCommand;
-		matlabCommand = commandString.newCopy();
+		matlabInterface.BuildMatlabCommand(
+			matlabInputNames, numInputs,
+			(const char *) MatlabFunction,
+			matlabOutputNames, numOutputs);
 	}
 
 	go {
@@ -155,7 +153,7 @@ The values of the input ports will be passed as arguments to this function.
 		processInputMatrices();
 
 		// evaluate the Matlab command (non-zero means error)
-		int merror = evaluateMatlabCommand(matlabCommand);
+		int merror = matlabInterface.EvaluateUserCommand();
 		if ( merror ) {
 		  freeMatlabMatrices(matlabInputMatrices, numInputs);
 		  freeMatlabMatrices(matlabOutputMatrices, numOutputs);
@@ -184,7 +182,6 @@ The values of the input ports will be passed as arguments to this function.
 		delete [] matlabInputNames;
 		freeStringArray(matlabOutputNames, numOutputs);
 		delete [] matlabOutputNames;
-		delete [] matlabCommand;
 	}
 
 	method {
@@ -353,7 +350,7 @@ The values of the input ports will be passed as arguments to this function.
 
 		  // let Matlab know about the new Matlab matrix we've defined
 		  // FIXME: Memory Leak
-		  putMatlabMatrix(matlabMatrix);
+		  matlabInterface.MatlabEnginePutMatrix(matlabMatrix);
 
 		  // save the pointer to the new Matlab matrix for deallocation
 		  matlabInputMatrices[i] = matlabMatrix;
@@ -387,7 +384,8 @@ The values of the input ports will be passed as arguments to this function.
 
 		  // create a new Matlab matrix for deallocation and save ref.
 		  // FIXME: Memory leak
-		  Matrix *matlabMatrix = getMatlabMatrix(matlabOutputNames[j]);
+		  Matrix *matlabMatrix =
+		  matlabInterface.MatlabEngineGetMatrix(matlabOutputNames[j]);
 
 		  // save the pointer to the new Matlab matrix for deallocation
 		  matlabOutputMatrices[j] = matlabMatrix;
@@ -397,7 +395,7 @@ The values of the input ports will be passed as arguments to this function.
 		    if ( ! nullMatlabMatrix ) {
 		      nullMatlabMatrix = TRUE;
 		      nerrstr = "For the Matlab command ";
-		      nerrstr << matlabCommand << ", ";
+		      nerrstr << matlabInterface.GetMatlabCommand() << ", ";
 		      nverbstr = " is not defined.";
 		    }
 		    else {
@@ -460,7 +458,7 @@ The values of the input ports will be passed as arguments to this function.
 		    if ( ! matlabFatalError ) {
 		      matlabFatalError = TRUE;
 		      merrstr = "For the Matlab command ";
-		      merrstr << matlabCommand << ", ";
+		      merrstr << matlabInterface.GetMatlabCommand() << ", ";
 		      mverbstr = " is not a full matrix.";
 		    }
 		    else {
@@ -482,7 +480,7 @@ The values of the input ports will be passed as arguments to this function.
 		  Error::warn(*this, nerrstr, nverbstr);
 		}
 		if ( matlabFatalError ) {
-		  Error::warn( *this, merrstr, mverbstr );
+		  Error::warn(*this, merrstr, mverbstr );
 		}
 
 		return( incompatibleOutportPort ||
