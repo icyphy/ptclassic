@@ -42,7 +42,6 @@ CGConnect.h \
 CGDisplay.h \
 CGGeodesic.h \
 CGStar.h \
-CGSymbol.h \
 CGTarget.h \
 CGUtilities.h \
 CGWormConnect.h \
@@ -51,9 +50,10 @@ Code.h \
 IntArray.h \
 MReq.h \
 MemMap.h \
+NamedList.h \
 ProcMemory.h \
 Profile.h \
-NameList.h \
+SymbolList.h \
 
 # Header files
 HDRS= $(H_WITH_MATCH) \
