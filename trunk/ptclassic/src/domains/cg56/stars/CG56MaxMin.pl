@@ -2,10 +2,10 @@
 	name { MaxMin }
 	domain { CG56 }
 	desc { Finds maximum or minimum value. }
-	version {$Id$}
+	version {@(#)CG56MaxMin.pl	1.10 2/7/96}
 	author { Chih-Tsung Huang }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -65,9 +65,9 @@ Also, the index of the output is provided (count starts at 0).
 	
         codeblock(main) {
 	clr	b
-	move	b0,r1
+	move	b,r1
         move    #<$addr(input),r0
-        nop
+        move 	b,r2
         move    x:(r0)+,a
         do      #$val(N)-1,$starSymbol(end)
         move    x:(r0)+,x1
