@@ -72,23 +72,20 @@ A delay star of \fItotalDelay\fR unit time delays.
 	move	a,$ref(output)
 	}
         setup {
-                delayBuf.resize(totalDelay);
+                delayBuf.resize(int(totalDelay));
         }		
         initCode {
                 addCode(block);
 	}
         go {
-		if(totalDelay==0)
-		     addCode(zero);
-                else if(totalDelay==1)
-	             addCode(one);
-		else     
-                     addCode(std);
+		if (int(totalDelay) == 0) addCode(zero);
+                else if (int(totalDelay) == 1) addCode(one);
+		else addCode(std);
         }		
 
 	execTime { 
-		if (totalDelay==0) return 2;
-		else if (totalDelay==1) return 5;
+		if (int(totalDelay) == 0) return 2;
+		else if (int(totalDelay) == 1) return 5;
 		else return 8;
 	}
 }
