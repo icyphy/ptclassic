@@ -53,6 +53,13 @@ static double minFeature = VULCAN_DFLT_MIN_FEATURE;
 static vulcanDebugType debugType = VULCAN_NO_DEBUG;
 static char *outputFacetName = "interface";
 
+static void handleOptions
+	ARGS((int argc, char *argv[]));
+static void messageHandler
+	ARGS((vulcanMessageType type, char *message));
+
+
+int
 main(argc, argv)
 int argc;
 char *argv[];
@@ -132,9 +139,10 @@ char *argv[];
     octEnd();
 
     VOVend(retCode);
+    return retCode;
 }
 
-static handleOptions(argc, argv)
+static void handleOptions(argc, argv)
 int argc;
 char *argv[];
 {
@@ -194,6 +202,10 @@ char *message;
 	    (void) fprintf(stderr, "%s:  start of long message\n%s\n",
 				optProgName, message);
 	    break;
+	case VULCAN_FATAL:
+	    (void) fprintf(stderr, "%s:  fatal: %s", optProgName, message);
+	    break;
+
     }
     (void) fflush(stderr);
 }
