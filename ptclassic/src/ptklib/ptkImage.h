@@ -45,8 +45,9 @@ This file contains declarations for Tk ptimage related things that
 are visible outside of the Tk module itself.
  */
 
-/* Log tcl.h and tk.h, and define global Tcl and Tk interpreters */
-#include "ptk.h"
+/* Load tcl.h and tk.h */
+#include "tcl.h"
+#include "tk.h"
 
 /* Pull in X window colormap definitions and other data structures */
 #include <X11/Xutil.h>
