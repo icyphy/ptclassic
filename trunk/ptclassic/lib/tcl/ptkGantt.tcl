@@ -1,41 +1,45 @@
 # Version: $Id$
 # Programmer: Matt Tavis
 
-proc ptkGantt_PrintChart { chartName {printer 0} } {
+proc ptkGantt_PrintChart { chartName } {
     global env
+    set universe [string trimleft $chartName .gantt_]
     if [winfo exists .print] {
-	set PRINTER $printer
-	.print.msg configure -text "You have requested to print $chartName \
-		to $PRINTER. Is this OK?"
+	.print.msg configure -text "You have requested to print $universe \
+		to $env(PRINTER). Is this OK?"
     } else {
+	if {![info exists env(PRINTER)]} { 
+	    set env(PRINTER) "lp"
+	}
 	toplevel .print
 	message .print.msg  -width 10c -relief sunken -pady 2m -padx 1m \
-		-text "You have requested to print $chartName to  \
+		-text "You have requested to print $universe to  \
 		$env(PRINTER). Is this OK?"
 	pack .print.msg
-	button .print.ok -text OK -command {ptkGantt_Print $chartName; \
-		destroy .print}
+	button .print.ok -text OK -command "ptkGantt_Print $chartName; \
+		destroy .print"
 	button .print.cancel -text Cancel -command {destroy .print}
 	button .print.change -text "Change Printer" -command \
-		ptkGantt_ChangePrinter $chartName
+		"ptkGantt_ChangePrinter $chartName"
 	pack .print.ok .print.cancel .print.change -side left -fill x -expand 1
     }
 }
 
-proc ptkGantt_ChangePrinter { chartName} {
+proc ptkGantt_ChangePrinter { chartName } {
     global env
     toplevel .printer
     label .printer.label -text "Output printer:"
     entry .printer.entry -relief sunken -bd 2 -textvariable env(PRINTER)
     pack .printer.label .printer.entry -side left -expand 1 -fill x
-    button .printer.ok -text OK -command {destroy .printer; \
-	    ptkGantt_PrintChart $universe $chartName $env(PRINTER)}
+    button .printer.ok -text OK -command "destroy .printer; \
+	    ptkGantt_PrintChart $chartName"
     pack .printer.ok -fill x -expand 1 -side bottom -after .printer.entry
     focus .printer.entry
 }
 
-proc ptkGantt_Print { chartName} {
-    set OUTPUT [open |lpr w]
+proc ptkGantt_Print { chartName } {
+    global env
+    set OUTPUT [open "|lpr -P$env(PRINTER)" w]
     puts $OUTPUT [${chartName}.chart.graph postscript -colormode gray \
 	    -pageheight 10i -pagewidth 8i -rotate 1]
     close $OUTPUT
@@ -43,15 +47,18 @@ proc ptkGantt_Print { chartName} {
 
 
 proc ptkGantt_HelpButton {} {
-
-    toplevel .nh
-    message .nh.msg -text "Sorry, no help is available yet." -bd 2 -relief \
-	    raised -width 100
-    button .nh.ok -text "OK <Return>" -command {destroy .nh}
-    bind .nh.ok <Return> {destroy .nh}
-    pack .nh.msg .nh.ok -fill x -expand 1
-    focus .nh.ok
-    
+    ptkMessage {
+Gantt Chart help:
+  - Use the zoom buttons to zoom along the x-axis only.
+  - The print chart functionality only works if you first
+       drag the gantt chart window to display the entire
+       chart area and then use the print function.
+       Note: The processor albel and the ruler will not be
+             printed.
+  - Use Control-d or Exit from the file menu to close the
+       gantt chart.  It will not be closed by the run
+       control panel.
+   }
 }
 
 
@@ -107,6 +114,7 @@ proc ptkGantt_Zoom { universe num_procs period dir } {
     }
 
     # delete labels and bar then scale boxes and ruler
+    ptkClearHighlights
     $chartName.chart.graph delete slabel bar
     $chartName.chart.graph scale box 1c 0 $scale 1.0
     $chartName.chart.ruler scale all 1c 0 $scale 1.0
@@ -383,6 +391,8 @@ proc ptkGantt_SetRuntime { num } {
 proc ptkGantt_MakeLabel {universe period min prcent opt} {
 
     set chartName .gantt_${universe}
+    set prcent [format %.5f $prcent]
+    set opt [format %.5f $opt]
     label $chartName.label -relief sunken -text "period =  \
 	    $period (vs. PtlgMin $min), busy time = \
 	    ${prcent}% (vs. max ${opt}%)"
@@ -394,7 +404,7 @@ proc ptkGantt_Bindings {universe num_procs} {
     set chartName .gantt_${universe}
     # Here we set up the bindings
     bind $chartName <Enter> "focus ${chartName}.mbar"
-    bind ${chartName}.mbar <Control-d> "destroy $chartName"
+    bind ${chartName}.mbar <Control-d> "ptkClearHighlights; destroy $chartName"
     bind ${chartName}.chart.graph <Button-1> "ptkGantt_MoveMarker $chartName \
 	    $num_procs %x"
     bind ${chartName}.chart.graph <Button-3> "ptkGantt_MoveMouse"
@@ -409,7 +419,7 @@ proc ptkGanttDisplay { universe {inputFile ""} } {
 
     wm minsize $ganttChartName 100 50
     wm maxsize $ganttChartName 1000 800
-    wm geometry $ganttChartName 500x400
+    # wm geometry $ganttChartName 500x400
 
     # Here we have the menu bar.
 
@@ -422,11 +432,11 @@ proc ptkGanttDisplay { universe {inputFile ""} } {
 	    ptkGantt_HelpButton
     pack $ganttChartName.mbar.help -side right
     
-    menu $ganttChartName.mbar.file.menu
+    menu $ganttChartName.mbar.file.menu -tearoff 0
     $ganttChartName.mbar.file.menu add command -label "Print Chart..." \
 	    -command "ptkGantt_PrintChart $ganttChartName"
     $ganttChartName.mbar.file.menu add command -label "Exit" -command \
-	    "destroy $ganttChartName" -accelerator "Ctrl+d"
+	    "ptkClearHightlights; destroy $ganttChartName" -accelerator "Ctrl+d"
     
     # Here is where we open the file and parse its contents
 
@@ -455,15 +465,15 @@ proc ptkGanttDisplay { universe {inputFile ""} } {
 		runtime { set runtime [lindex $LINEARR 1]l
 			continue}
 	    	\$end { incr proc_num ; continue}
-		default { ptkGantt_DrawProc "standalone" $num_procs $period \
+		default { ptkGantt_DrawProc $universe $num_procs $period \
 			$proc_num [lindex $LINEARR 0] [string trimleft \
 			[lindex $LINEARR 2] (] [string trimright \
 			[lindex $LINEARR 3] )]}
 	    }
 	}   
 	close $GFILE_ID
-	ptkGantt_MakeLabel "standalone" $period $min $prcent $opt
-	ptkGantt_Bindings "standalone" $num_procs
+	ptkGantt_MakeLabel $universe $period $min $prcent $opt
+	ptkGantt_Bindings $universe $num_procs
     }
 }
 
