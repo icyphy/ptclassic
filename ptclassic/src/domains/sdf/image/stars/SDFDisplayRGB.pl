@@ -18,7 +18,7 @@ Send the filename to a user-specified command
 .EQ
 delim off
 .EN
-"$PTOLEMY/bin.$ARCH/xv"
+"xv"
 .EQ
 delim $$
 .EN
@@ -49,7 +49,7 @@ to produce the full filename of the displayed image.
 	defstate {
 		name { command }
 		type { string }
-		default { "$PTOLEMY/bin.$ARCH/xv" }
+		default { "xv" }
 		desc { Program to run on PGM data }
 	}
 	defstate {
