@@ -17,7 +17,7 @@ The file format that is read is the same as the one written by the Play
 star.
 	}
 	hinclude { "streamCompat.h" }
-	ccinclude { "Scheduler.h" }
+	ccinclude { "SimControl.h" }
 
 	output	{
 		name { output }
@@ -107,7 +107,7 @@ star.
 		else if (input->eof())
 		{
 			if (haltAtEnd)		// halt the run
-				Scheduler::requestHalt();
+				SimControl::requestHalt();
 			else if (periodic)	// close and re-open file
 			{
 				LOG_DEL; delete input; input = 0;

@@ -20,7 +20,7 @@ there is no other star dedicated to this purpose.
 .IE "reading from a file"
 .IE "halting a simulation"
 	}
-	version {$Id$}
+	version {$Id$ }
 	author { J. T. Buck and E. A. Lee }
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
@@ -29,7 +29,7 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	ccinclude { "Scheduler.h" }
+	ccinclude { "SimControl.h" }
 	output {
 		name { output }
 		type { complex }
@@ -60,7 +60,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	go {
 		if (int(haltAtEnd) && (pos >= value.size()))
-			Scheduler::requestHalt();
+			SimControl::requestHalt();
 		if (pos >= value.size())
 			output%0 << Complex(0.0,0.0);
 		else

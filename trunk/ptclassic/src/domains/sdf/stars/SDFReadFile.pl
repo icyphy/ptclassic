@@ -14,7 +14,7 @@ limitation of liability, and disclaimer of warranty provisions.
     descriptor { Read ASCII data from a file. }
 
     hinclude { "streamCompat.h" }
-    ccinclude { "Scheduler.h" }
+    ccinclude { "SimControl.h" }
 
     output
     {
@@ -73,7 +73,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	if (input->eof())
 	{
 	    if (haltAtEnd)		// halt the run
-		Scheduler::requestHalt();
+		SimControl::requestHalt();
 	    else if (periodic)		// close and re-open file
 	    {
 		LOG_DEL; delete input; input = 0;
