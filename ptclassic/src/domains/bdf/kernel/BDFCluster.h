@@ -87,7 +87,7 @@ public:
 	: logstrm(log), bagNumber(-1), urateFlag(FALSE) {}
 
 	// inherit virtual destructor, which zaps inherited data members
-	/* virtual */ ~BDFClusterGal();
+	/* virtual */ ~BDFClusterGal() {}
 
         // remove all blocks in this galaxy without deallocating the blocks
 	void orphanBlocks();
@@ -200,7 +200,7 @@ public:
 		BDFClusterGal(g,log), sched(0) {}
 
 	// destructor
-	/* virtual */ ~BDFTopGal() {};
+	/* virtual */ ~BDFTopGal() {}
 
 	Scheduler* scheduler() const { return sched;}
 	inline void setSched(Scheduler* s) { sched = s;}
@@ -226,9 +226,9 @@ public:
 	// constructor: looping is 1 by default
 	BDFCluster() : pLoop(1), visitFlag(0), pCond(0), pType(DO_ITER) {}
 
-	// make destructor virtual so that delete p works properly when
-	// p can be either a BDFCluster* or a pointer to child of BDFCluster
-	virtual ~BDFCluster() { deleteAllGenPorts(); }
+	// destructor is virtual so that delete p works properly when p is
+	// either a BDFCluster* or a pointer to derived class of BDFCluster
+	/* virtual */ ~BDFCluster() { deleteAllGenPorts(); }
 
 	inline void setVisit(int i) { visitFlag = i; }
 	inline int  visited() { return visitFlag; }
