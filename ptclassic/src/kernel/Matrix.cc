@@ -654,6 +654,23 @@ PtMatrix& ComplexMatrix::operator = (const PtMatrix& m) {
   return *this;
 }
 
+ComplexMatrix& ComplexMatrix::operator = (const ComplexMatrix& src) {
+// WARNING: any SubMatricies refering to the data in this matrix 
+// will become invalid if this matrix's storage is reallocated.
+  if(compareType(src)) {
+    if(totalDataSize != src.totalDataSize) {
+      LOG_DEL; delete [] data;
+      totalDataSize = src.totalDataSize;
+      data = new Complex[totalDataSize];
+    }
+    nRows = src.nRows;
+    nCols = src.nCols;
+    for(int i = 0; i < totalDataSize; i++)
+      entry(i) = src.entry(i);
+  }
+  return *this;
+}
+
 ComplexMatrix& ComplexMatrix::operator = (const Complex& value) {
   for(int i = 0; i < totalDataSize; i++)
     entry(i) = value;
@@ -1105,6 +1122,23 @@ PtMatrix& FixMatrix::operator = (const PtMatrix& m) {
   return *this;
 }
 
+FixMatrix& FixMatrix::operator = (const FixMatrix& src) {
+// WARNING: any SubMatricies refering to the data in this matrix 
+// will become invalid if this matrix's storage is reallocated.
+  if(compareType(src)) {
+    if(totalDataSize != src.totalDataSize) {
+      LOG_DEL; delete [] data;
+      totalDataSize = src.totalDataSize;
+      data = new Fix[totalDataSize];
+    }
+    nRows = src.nRows;
+    nCols = src.nCols;
+    for(int i = 0; i < totalDataSize; i++)
+      entry(i) = src.entry(i);
+  }
+  return *this;
+}
+
 FixMatrix& FixMatrix::operator = (const Fix& value) {
   for(int i = 0; i < totalDataSize; i++)
     entry(i) = value;
@@ -1431,6 +1465,23 @@ PtMatrix& FloatMatrix::operator = (const PtMatrix& m) {
 // will become invalid if this matrix's storage is reallocated.
   if(compareType(m)) {
     const FloatMatrix& src = *((const FloatMatrix*)&m);
+    if(totalDataSize != src.totalDataSize) {
+      LOG_DEL; delete [] data;
+      totalDataSize = src.totalDataSize;
+      data = new double[totalDataSize];
+    }
+    nRows = src.nRows;
+    nCols = src.nCols;
+    for(int i = 0; i < totalDataSize; i++)
+      entry(i) = src.entry(i);
+  }
+  return *this;
+}
+
+FloatMatrix& FloatMatrix::operator = (const FloatMatrix& src) {
+// WARNING: any SubMatricies refering to the data in this matrix 
+// will become invalid if this matrix's storage is reallocated.
+  if(compareType(src)) {
     if(totalDataSize != src.totalDataSize) {
       LOG_DEL; delete [] data;
       totalDataSize = src.totalDataSize;
@@ -1771,6 +1822,23 @@ PtMatrix& IntMatrix::operator = (const PtMatrix& m) {
 // will become invalid if this matrix's storage is reallocated.
   if(compareType(m)) {
     const IntMatrix& src = *((const IntMatrix*)&m);
+    if(totalDataSize != src.totalDataSize) {
+      LOG_DEL; delete [] data;
+      totalDataSize = src.totalDataSize;
+      data = new int[src.totalDataSize];
+    }
+    nRows = src.nRows;
+    nCols = src.nCols;
+    for(int i = 0; i < totalDataSize; i++)
+      entry(i) = src.entry(i);
+  }
+  return *this;
+}
+
+IntMatrix& IntMatrix::operator = (const IntMatrix& src) {
+// WARNING: any SubMatricies refering to the data in this matrix 
+// will become invalid if this matrix's storage is reallocated.
+  if(compareType(src)) {
     if(totalDataSize != src.totalDataSize) {
       LOG_DEL; delete [] data;
       totalDataSize = src.totalDataSize;
