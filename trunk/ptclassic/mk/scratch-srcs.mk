@@ -172,7 +172,7 @@ xv_bin: $(OBJARCH)/xv
 xv_install: $(OBJARCH)/xv $(XV_DEST)/bin.$(ARCH)
 	(cd $(OBJARCH)/xv; cp xv $(XV_DEST)/bin.$(ARCH))
 	chmod a+rx $(PTOLEMY)/bin.$(ARCH)/xv
-	strip $(PTOLEMY)/bin.$(ARCH)/xv
+	-strip $(PTOLEMY)/bin.$(ARCH)/xv
 
 $(XV_DEST)/bin.$(ARCH):
 	if [ ! -d $(XV_DEST)/bin.$(ARCH) ]; then \
