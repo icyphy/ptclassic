@@ -43,7 +43,7 @@ MAKEVARS =	\
 all install clean realclean sources depend checkjunk sccsinfo:
 	@for x in $(DIRS); do \
 		cd $$x ; \
-		echo making $@ in filters/$$x ; \
+		echo making $@ in utils/$$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/utils/$$x $@ ;\
 		cd .. ; \
 	done
