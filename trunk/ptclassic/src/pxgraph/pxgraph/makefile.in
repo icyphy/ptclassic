@@ -171,7 +171,10 @@ pxgraph:	$(OBJS)
 	rm -f pxgraph
 	$(CC) @LD_FLAGS@ -o $@ $(OBJS) $(LIBS)
 
-makefile: $(SRC_DIR)/makefile.in $(SRC_DIR)/configure
+config.status: $(SRC_DIR)/makefile.in $(SRC_DIR)/configure
+	configure
+
+makefile: config.status
 	$(SHELL) config.status	
 
 install:	makefile
