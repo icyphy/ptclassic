@@ -14,6 +14,7 @@ $Id$
 **************************************************************************/
 
 #include "Particle.h"
+#include "Plasma.h"
 #include "Output.h"
 #include <builtin.h>		// for gnu form(...) function
 
@@ -163,6 +164,34 @@ void ComplexSample :: operator << (int i) {data=Complex(i);}
 void ComplexSample :: operator << (float f) {data=Complex(f);}
 void ComplexSample :: operator << (Complex& c) {data=c;}
 
+
+// ParticleStack methods
+// Destructor -- deletes all Particles EXCEPT the last one
+// we don't delete the last one because it's the "reference"
+// particle (the first one); it normally isn't a dynamically
+// created object.
+
+ParticleStack :: ~ParticleStack () {
+	if (!head) return;
+	Particle* p;
+	while (head->link) {
+		p = head;
+		head = head->link;
+		delete p;
+	}
+}
+
+// freeup -- returns all Particles to their Plasma (including
+// the last one)
+void ParticleStack :: freeup () {
+	Particle* p;
+	while (head) {
+		p = head;
+		head = head->link;
+		p->die();
+	}
+}
+
 Plasma* Plasma :: getPlasma(dataType t)
 {
 	Plasma* p = plasmaList;
@@ -182,13 +211,3 @@ Plasma* Plasma :: getPlasma(dataType t)
 	return 0;
 }
 
-// Plasma destructor
-
-Plasma :: ~Plasma () {
-	Particle* p = head->link;
-	while (p) {
-		delete head;
-		head = p;
-		p = p->link;
-	}
-}
