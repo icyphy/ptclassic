@@ -152,6 +152,7 @@ int CompileTarget::run() {
 
     myCode += "\n\nstatic const char file_id[] = \"code.cc\";\n\n";
 
+    myCode += "char DEFAULT_DOMAIN[] = \"SDF\";";
     myCode += "// INCLUDE FILES\n";
     myCode += "#include \"CompiledUniverse.h\"\n";
     myCode += "#include \"GalIter.h\"\n";
@@ -367,6 +368,8 @@ StringList CompileTarget::tcltkSetup() {
     myCode += "#include \"SimControl.h\"\n";
     myCode += "extern \"C\" {\n";
     myCode += "#include \"ptk.h\"\n";
+    myCode += "#include \"itcl.h\"\n";
+    myCode += "#include \"itk.h\"\n";
     myCode += "}\n";
     myCode += "\n// ptk.h includes tk.h which defines Complex to be 0\n";
     myCode += "#ifdef Complex\n";
@@ -399,7 +402,8 @@ StringList CompileTarget::tcltkInitialize(StringList& universeName) {
     myCode += "#endif /* TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1 */\n";
     myCode +=
 "if (Tcl_Init(ptkInterp) == TCL_ERROR) {\n"
-"    cerr << \"Tcl_Init: Error initializing the Tcl interpreter\";\n"
+"    cerr << \"Tcl_Init: Error initializing the Tcl interpreter\n\" <<\n"
+"      Tcl_GetVar(ptkInterp, \"errorInfo\", TCL_GLOBAL_ONLY) << \"\n\";\n"
 "    exit(1);\n"
 "}\n";
 
@@ -414,7 +418,22 @@ StringList CompileTarget::tcltkInitialize(StringList& universeName) {
 "Tcl_CreateCommand(ptkInterp, \"halt\", halt_Cmd, 0, 0);\n"
 "Tcl_CreateCommand(ptkInterp, \"ptkStop\", halt_Cmd, 0, 0);\n"
 "if (Tk_Init(ptkInterp) == TCL_ERROR) {\n"
-"    cerr << \"Tk_Init: Error initializing the Tk interpreter\";\n"
+"    cerr << \"Tk_Init: Error initializing the Tk interpreter\n\" <<\n"
+"      Tcl_GetVar(ptkInterp, \"errorInfo\", TCL_GLOBAL_ONLY) << \"\n\";\n"
+"    exit(1);\n"
+"}\n";
+
+    myCode +=
+"if (Itcl_Init(ptkInterp) == TCL_ERROR) {\n"
+"    cerr << \"Tk_Init: Error initializing the Itcl interpreter\n\" <<\n"
+"      Tcl_GetVar(ptkInterp, \"errorInfo\", TCL_GLOBAL_ONLY) << \"\n\";\n"
+"    exit(1);\n"
+"}\n";
+
+    myCode +=
+"if (Itk_Init(ptkInterp) == TCL_ERROR) {\n"
+"    cerr << \"Tk_Init: Error initializing the Itk interpreter\n\" <<\n"
+"      Tcl_GetVar(ptkInterp, \"errorInfo\", TCL_GLOBAL_ONLY) << \"\n\";\n"
 "    exit(1);\n"
 "}\n";
 
@@ -428,7 +447,9 @@ StringList CompileTarget::tcltkInitialize(StringList& universeName) {
 "// Read pigi tcl initialization files to set key bindings, colors, etc.\n"
 "char *fulldirname = expandPathName(\"$PTOLEMY/lib/tcl/pigilib.tcl\");\n"
 "if (Tcl_EvalFile(ptkInterp, fulldirname) != TCL_OK) {\n"
-"    cerr << \"Tcl_EvalFile: Error in evaluating $PTOLEMY/lib/tcl/pigilib.tcl\";\n"
+"    cerr << \"Tcl_EvalFile: Error in evaluating \" <<\n"
+"      fulldirname << \"\n\" << \n"
+"      Tcl_GetVar(ptkInterp, \"errorInfo\", TCL_GLOBAL_ONLY) << \"\n\";\n"
 "    exit(1);\n"
 "}\n"
 "delete [] fulldirname;\n";
