@@ -265,15 +265,14 @@ char *s;
 Updates: 4/13/90 = allow multiple DupSheets
 */
 
-boolean
+void
 DupSheetInit(ds)
 DupSheet *ds;
 {
     *ds = NULL;
-    return TRUE;
 }
 
-boolean
+void
 DupSheetClear(ds)
 DupSheet *ds;
 {
@@ -282,11 +281,10 @@ DupSheet *ds;
     p = *ds;
     while (p != NULL) {
 	hold = p->next;
-	UFree((char *) p);
+  	UFree((char *) p);
 	p = hold;
     }
     *ds = NULL;
-    return(TRUE);
 }
 
 boolean
@@ -298,11 +296,32 @@ char *item;
     
     ERR_IF1(!UMalloc(&new, sizeof(DupSheetNode)));
     new->info = item;
+    new->moreinfo = NULL;
     new->next = *ds;
     *ds = new;
     return(TRUE);
 }
 
+boolean
+DupSheetAdd2(ds, item, item2)
+DupSheet *ds;
+char *item;
+char *item2;
+{
+    DupSheetNode *new;
+    
+    ERR_IF1(!UMalloc(&new, sizeof(DupSheetNode)));
+    new->info = item;
+    new->moreinfo = item2;
+    new->next = *ds;
+    *ds = new;
+    return(TRUE);
+}
+
+/*
+ * The way this is used, could probably compare the pointer values
+ * rather than the strings.  But for conservatism, we don't do that.
+ */
 boolean
 DupSheetIsDup(ds, item)
 DupSheet *ds;
@@ -313,6 +332,23 @@ char *item;
     for (p = *ds; p != NULL; p = p->next) {
 	if (strcmp(p->info, item) == 0) {
 	    return(TRUE);
+	}
+    }
+    return(FALSE);
+}
+boolean
+DupSheetIsDup2(ds, item, item2)
+DupSheet *ds;
+char *item;
+char *item2;
+{
+    DupSheetNode *p;
+
+    for (p = *ds; p != NULL; p = p->next) {
+	if (strcmp(p->info, item) == 0) {
+	  if (strcmp(p->moreinfo, item2) == 0) {
+	    return(TRUE);
+	  }
 	}
     }
     return(FALSE);
