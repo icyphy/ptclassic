@@ -761,11 +761,11 @@ void ArchTarget :: trailerCode() {
   // we just assert that each token is ready after it is ready.
   // This doesn't do much for ports that have single-input muxs.
   // But for state inputs, the assertion of FIRST_ITER_DONE matters.
-  assertClock("FIRST_ITER_DONE", 1);
+  //  assertClock("FIRST_ITER_DONE", 1);
   //  assertClock("tokenXready", hashfunction(tokenXname));
   //  assertClock(ctlSignal->getName(), ctlSignal->getControlValue());
 
-  toggleClock("start_clock");
+  //  toggleClock("start_clock");
 
   // Iterate through regList and connect registers for each one.
   VHDLRegListIter nextReg(regList);
@@ -831,6 +831,47 @@ void ArchTarget :: trailerCode() {
   // Call the method to interactively rework the arch, if
   // it is provided (by derived targets)
   interact();
+
+  // Update the timing of the controller based on the new
+  // timing info from the interactive scheduling.
+  
+  // Okay, TkSched comes out with each firing having a startTime,
+  // and endTime, and a latency.  Start times should determine the
+  // times by which control values should have been set up before
+  // a given computation can proceed.  End times should determine
+  // when output values can be latched.
+  {
+    // Add the clockCount increment and reset to the head of
+    // the controller action code.
+    int deadline = 500;
+    StringList action = "";
+
+    action << "wait until "
+	   << "system_clock'event and system_clock = TRUE;\n";
+    action << "if clockCount < " << deadline << " then\n";
+    action << "     clockCount := clockCount + 1;\n";
+    action << "else\n";
+    action << "     clockCount := 0;\n";
+    action << "end if;\n";
+
+    action << ctlerAction;
+    ctlerAction.initialize();
+    ctlerAction << action;
+
+    pulseClock("start_clock", deadline);
+    assertValue("FIRST_ITER_DONE", deadline, 1);
+
+    VHDLFiringListIter nextFiring(masterFiringList);
+    VHDLFiring* firing;
+    while ((firing = nextFiring++) != 0) {
+      // Add a clock at the right time to latch when the firing is done.
+      StringList clockName = firing->getName();
+      clockName << "_clk";
+      int clockTime = firing->endTime;
+      pulseClock(clockName, clockTime);
+    }
+  }
+
 
 
   // Add in the entity, architecture, entity declaration, and
@@ -1346,7 +1387,7 @@ void ArchTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
 
   // Only provide a toggled clock for firing if data is output.
   if (port->isItOutput()) {
-    toggleClock(clockName);
+    //    toggleClock(clockName);
   }
 
   // FIXME: Wormholes not currently supported
@@ -1610,7 +1651,7 @@ void ArchTarget :: registerState(State* state, const char* varName,
       firingPortList.put(*outPort);
 
       // FIXME: Stil need to get that clock timing right.
-      toggleClock(clockName);
+      //      toggleClock(clockName);
     }
 
     // Reset state's lastRef name.
@@ -2464,6 +2505,21 @@ void ArchTarget :: endIteration(int /*reps*/, int /*depth*/) {
   //  toggleClock("iter_clock");
 }
 
+// Pulse the given clock TRUE at the given time.
+void ArchTarget :: pulseClock(const char* clockName, int clockTime) {
+  clockList << clockName;
+  ctlerAction << "     -- Pulse " << clockName << " TRUE\n";
+  ctlerAction << "if clockCount = " << clockTime << " then\n";
+  ctlerAction << "     " << clockName << " <= TRUE;\n";
+  ctlerAction << "else\n";
+  ctlerAction << "     " << clockName << " <= FALSE;\n";
+  ctlerAction << "end if;\n";
+
+  ctlerVariableList.put("clockCount", "INTEGER", "0");
+  ctlerPortList.put(clockName, "boolean", "OUT", clockName, NULL);
+  ctlerSignalList.put(clockName, "boolean");
+}
+
 // Add the clock to the clock list and generate code to toggle it.
 void ArchTarget :: toggleClock(const char* clock) {
   // Pulse it HI-LO if it isn't already at the end of the list.
@@ -2479,6 +2535,20 @@ void ArchTarget :: toggleClock(const char* clock) {
     ctlerPortList.put(clock, "boolean", "OUT", clock, NULL);
     ctlerSignalList.put(clock, "boolean");
   }
+}
+
+// Assert the given clock with the given value at the given time.
+void ArchTarget :: assertValue(const char* clockName, int clockTime,
+			       int value) {
+  clockList << clockName;
+  ctlerAction << "     -- Assert " << clockName << " with " << value << " \n";
+  ctlerAction << "if clockCount = " << clockTime << " then\n";
+  ctlerAction << "     " << clockName << " <= " << value <<";\n";
+  ctlerAction << "end if;\n";
+
+  ctlerVariableList.put("clockCount", "INTEGER", "0");
+  ctlerPortList.put(clockName, "INTEGER", "OUT", clockName, NULL);
+  ctlerSignalList.put(clockName, "INTEGER");
 }
 
 // Add the clock to the clock list and generate code
