@@ -198,26 +198,22 @@ void CGCDDFCode :: endCode_Recur(Geodesic* gd, const char* fName,
 	temp = t->removeStream("mainDecls");
 	out << *temp;
 	LOG_DEL; delete temp;
-	temp->initialize();
 
 	// initialization.
 	temp = t->removeStream("mainInit");
 	out << *temp;
 	LOG_DEL; delete temp;
-	temp->initialize();
 
 	// body
 	temp = t->removeStream("code");
 	out << *temp;
 	LOG_DEL; delete temp;
-	temp->initialize();
 
 	// closure
 	temp = t->removeStream("mainClose");
 	// do not add wrap code inside the recursion function.
 	// out << *temp;
 	LOG_DEL; delete temp;
-	temp->initialize();
 
 	if (gd) {
 		out << "\t return ";
