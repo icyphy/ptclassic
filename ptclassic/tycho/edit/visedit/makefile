@@ -52,8 +52,7 @@ ITCL_SRCS = \
 	Forest.itcl \
 	Graph.itcl \
 	Graphics.itcl \
-	HTMLExport.itcl \
-	ProfileTcl.itcl 
+	HTMLExport.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	graphics.style \
