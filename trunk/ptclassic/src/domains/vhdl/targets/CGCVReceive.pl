@@ -2,7 +2,7 @@ defstar {
   name { VReceive }
   domain { CGC }
   desc { Receive data synchronously from VHDL to CGC }
-//  derivedFrom { VSynchComm }
+  derivedFrom { VSynchComm }
   version { $Id$ }
   author { Michael C. Williamson, Jose Luis Pino }
   copyright { 
@@ -14,31 +14,13 @@ defstar {
 
   location { VHDL Target Directory }
   explanation { }
-  public {
-    int numXfer;
-  }
   output {
     name {output}
     type {ANYTYPE}
   }
-  defstate {
-    name {pairNumber}
-    type {int}
-    default {0}
-  }
-  defstate {
-    name {destDir}
-    type {string}
-    default {"~/PTOLEMY_SYSTEMS"}
-  }
-  defstate {
-    name {filePre}
-    type {string}
-    default {"CGCVHDL"}
-  }
   setup {
     numXfer = output.numXfer();
-//    CGCVSynchComm::setup();
+    CGCVSynchComm::setup();
   }
 
   initCode {
@@ -126,18 +108,6 @@ defstar {
       (void) sscanf($starSymbol(buffer), \"%d\", &$ref(output));
     }
   }
-");
-  }
-
-  wrapup {
-    addCode("
-  /* Wrapup */
-  (void) shutdown($starSymbol(xmitsock),2);
-  (void) close($starSymbol(xmitsock));
-  (void) unlink($starSymbol(xmitaddr).sa_data);
-  (void) shutdown($starSymbol(nearsock),2);
-  (void) close($starSymbol(nearsock));
-  (void) unlink($starSymbol(nearaddr).sa_data);
 ");
   }
 

@@ -2,7 +2,7 @@ defstar {
   name { VSend }
   domain { CGC }
   desc { Send data synchronously from CGC to VHDL }
-//  derivedFrom { VSynchComm }
+  derivedFrom { VSynchComm }
   version { $Id$ }
   author { Michael C. Williamson, Jose Luis Pino }
   copyright { 
@@ -14,31 +14,13 @@ defstar {
 
   location { VHDL Target Directory }
   explanation { }
-  public {
-    int numXfer;
-  }
   input {
     name {input}
     type {ANYTYPE}
   }
-  defstate {
-    name {pairNumber}
-    type {int}
-    default {0}
-  }
-  defstate {
-    name {destDir}
-    type {string}
-    default {"~/PTOLEMY_SYSTEMS"}
-  }
-  defstate {
-    name {filePre}
-    type {string}
-    default {"CGCVHDL"}
-  }
   setup {
     numXfer = input.numXfer();
-//    CGCVSynchComm::setup();
+    CGCVSynchComm::setup();
   }
 
   initCode {
@@ -121,18 +103,6 @@ defstar {
       perror($starSymbol(dummy));
     }
   }
-");
-  }
-
-  wrapup {
-    addCode("
-  /* Wrapup */
-  (void) shutdown($starSymbol(xmitsock),2);
-  (void) close($starSymbol(xmitsock));
-  (void) unlink($starSymbol(xmitaddr).sa_data);
-  (void) shutdown($starSymbol(nearsock),2);
-  (void) close($starSymbol(nearsock));
-  (void) unlink($starSymbol(nearaddr).sa_data);
 ");
   }
 
