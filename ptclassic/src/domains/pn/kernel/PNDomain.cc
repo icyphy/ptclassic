@@ -1,5 +1,3 @@
-static const char file_id[] = "$RCSfile$";
-
 /*  Version $Id$
 
     Copyright 1992 The Regents of the University of California.
@@ -10,47 +8,27 @@ static const char file_id[] = "$RCSfile$";
 
 */
 
+static const char file_id[] = "$RCSfile$";
+
 #include "Domain.h"
 #include "KnownTarget.h"
 #include "MTDFTarget.h"
-#include "MTDFScheduler.h"
-#include "MTDFWormhole.h"
-#include "MTDFConnect.h"
-#include "MTDFWormConnect.h"
-#include "MTDFGeodesic.h"
-
+#include "MTDFForkNode.h"
 
 extern const char MTDFdomainName[] = "MTDF";
 
-class MTDFDomain : public Domain {
+class MTDFDomain : public Domain
+{
 public:
-	// new wormhole
-	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
-		LOG_NEW; return *new MTDFWormhole(innerGal,innerTarget);
-	}
+    // Constructor.
+    MTDFDomain() : Domain(MTDFdomainName) {}
 
-	// new input porthole
-	PortHole& newInPort() { LOG_NEW; return *new InMTDFPort;}
-
-	// new output porthole
-	PortHole& newOutPort() { LOG_NEW; return *new OutMTDFPort;}
-
-	// new fromUniversal EventHorizon
-	EventHorizon& newFrom() { LOG_NEW; return *new MTDFfromUniversal;}
-
-	// new toUniversal EventHorizon
-	EventHorizon& newTo() { LOG_NEW; return *new MTDFtoUniversal;}
-
-	// new node (geodesic)
-	Geodesic& newNode() { LOG_NEW; return *new MTDFGeodesic;}
-
-	// constructor
-	MTDFDomain() : Domain(MTDFdomainName) {}
+    /* virtual */ Geodesic& newNode() { LOG_NEW; return *new MTDFForkNode; }
 };
 
-// declare a prototype
+// Declare a prototype.
 static MTDFDomain protoDomain;
 
-// Add a prototype MTDFTarget to the KnownTarget list.
+// Add a prototype Target to the KnownTarget list.
 static MTDFTarget protoTarget;
 static KnownTarget entry(protoTarget,"default-MTDF");
