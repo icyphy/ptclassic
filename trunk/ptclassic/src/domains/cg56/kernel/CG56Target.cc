@@ -45,6 +45,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CG56Star.h"
 #include "ConversionTable.h"
 
+#define CONVERSION_TABLE_ROWS 6
+
 // HPPA CC under HPUX10.01 cannot deal with arrays, the message is:
 //  'sorry, not implemented: general initializer in initializer lists'
 // if we have an array:
@@ -54,7 +56,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class CG56ConversionTable: public ConversionTable {
 public:
-   CG56ConversionTable():ConversionTable(6) {
+   CG56ConversionTable():ConversionTable(CONVERSION_TABLE_ROWS) {
      tblRow(  FIX,	COMPLEX,	"FixToCx"	);
      tblRow(  FIX,	INT,		"FixToInt"	);
      tblRow(  COMPLEX, 	FIX, 		"CxToFix"	);
@@ -81,7 +83,7 @@ MotorolaTarget(src.name(), src.descriptor(),
 void CG56Target::initDataMembers() {
     // Initialize type conversion table
     typeConversionTable = &cg56ConversionTable;
-    typeConversionTableRows = 6;
+    typeConversionTableRows = CONVERSION_TABLE_ROWS;
 
     // Initialize the assembler options
     assemblerOptions = "-A  -B -L -Oso";

@@ -61,6 +61,8 @@ extern const char CGCdomainName[];
 #define MAINLOOP (*getStream("mainLoop"))
 #define MAINCLOSE (*getStream("mainClose"))
 
+#define CONVERSION_TABLE_ROWS 15
+
 // HPPA CC under HPUX10.01 cannot deal with arrays, the message is:
 //  'sorry, not implemented: general initializer in initializer lists'
 // if we have an array:
@@ -70,12 +72,20 @@ extern const char CGCdomainName[];
 
 class CGCConversionTable: public ConversionTable {
 public:
-  CGCConversionTable():ConversionTable(7) {
+  CGCConversionTable():ConversionTable(CONVERSION_TABLE_ROWS) {
+    tblRow(  COMPLEX, 	FLOAT,		"CxToFloat"	);
     tblRow(  COMPLEX, 	FIX, 		"CxToFix"	);
     tblRow(  COMPLEX, 	ANYTYPE,	"CxToFloat"	);
+    tblRow(  FLOAT, 	COMPLEX,	"FloatToCx"	);
+    tblRow(  FLOAT, 	FIX,		"FloatToFix"	);
+    tblRow(  FLOAT, 	INT,		"FloatToInt"	);
     tblRow(  FIX,	COMPLEX,	"FixToCx"	);
+    tblRow(  FIX,	FLOAT,		"FixToFloat"	);
     tblRow(  FIX,	FIX,		"FixToFix"	);
+    tblRow(  FIX,	INT,		"FixToInt"	);
     tblRow(  FIX,	ANYTYPE,	"FixToFloat"	);
+    tblRow(  INT,	FLOAT,		"IntToFloat"	);
+    tblRow(  INT,	FIX,		"IntToFix"	);
     tblRow(  ANYTYPE, 	COMPLEX,	"FloatToCx"	);  
     tblRow(  ANYTYPE, 	FIX,		"FloatToFix"	);
   }
@@ -132,7 +142,7 @@ HLLTarget(name, starclass, desc, assocDomain) {
 
 	// Initialize type conversion table
 	typeConversionTable = &cgcConversionTable;
-	typeConversionTableRows = 7;
+	typeConversionTableRows = CONVERSION_TABLE_ROWS;
 }
 
 StringList CGCTarget::comment(const char* text, const char* b,
