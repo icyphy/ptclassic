@@ -33,13 +33,9 @@ Domain* Domain::named(const char* nm) {
 	return 0;
 }
 
-// get the domain of a block.  For a galaxy, it is the domain of the
-// first star we find (since we don't allow multiple domains in the
-// same galaxy, this is not ambiguous)
+// get the domain of a block.
 
 Domain* Domain::domainOf (Block& b) {
-	Block *pb = &b;
-	if (pb->isItAtomic()) return named(pb->asStar().domain());
-	return named(pb->asGalaxy().myDomain);
+	return named(b.domain());
 }
 
