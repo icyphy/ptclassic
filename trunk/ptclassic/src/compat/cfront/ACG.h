@@ -6,7 +6,7 @@
 // stream, with seed set by srandom and values read by random.
 // This works fine within Ptolemy.
 
-#ifdef hppa
+#if defined(hppa) || defined(SVR4) || defined(SYSV)
 #ifndef __GNUG__
 extern "C" void srand48(long int);
 
