@@ -1,10 +1,11 @@
 .\" $Id$
 .NA testServers
 .SD
-Demonstrates uniform and exponential servers.
+This simple system demonstrates servers with random
+service times (uniform and exponential).
 .DE
-.LO "~ptolemy/src/domains/de/demo"
-.SV $Revision$ "October 22, 1990"
+.LO "$PTOLEMY/src/domains/de/demo"
+.SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD
 .IE Sampler

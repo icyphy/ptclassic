@@ -1,10 +1,13 @@
 .\" $Id$
 .NA LBTest
 .SD
-Simulate leaky bucket network rate monitors.
+Simulate leaky bucket network rate controllers.
+These controllers moderate the flow of packets
+to keep them within specified rate and burstiness
+bounds.
 .DE
-.LO "~ptolemy/src/domains/de/demo"
-.SV $Revision$ 11/9/92
+.LO "$PTOLEMY/src/domains/de/demo"
+.SV $Revision$ $Date$
 .AL "Paul Haskell."
 .LD
 The
@@ -25,7 +28,7 @@ such as with bounds on a connection's loss rates and delay,
 the network needs to ensure that individual connections do not send
 data more quickly than allowed.
 The \fIleaky bucket\fR controller is one popular method for
-monitoring a variable-rate source to ensure that it does
+moderating a variable-rate source to ensure that it does
 not transmit data too quickly.
 .pp
 The leaky bucket acts much like a queue with deterministic service.

@@ -1,19 +1,22 @@
 .\" $Id$
 .NA sampler
 .SD
-Demonstrates the Sampler star.
+This rather trivial system demonstrates the Sampler star.
+A counting process with regular arrivals at intervals of 5.0
+is sampled at regular intervals of 1.0.  As expected, this
+produces 5 samples for each level of the counting process.
 .DE
-.LO "~ptolemy/src/domains/de/demo"
-.SV $Revision$ "October 22, 1990"
+.LO "$PTOLEMY/src/domains/de/demo"
+.SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD
 .IE Sampler
-This rather trivial demo shows what the
+The "clock" input of the
 .c Sampler
-star does.
-A counting process with regular arrivals at intervals of 5.0 is
-sampled at regular intervals of 1.0.
-As expected, this produces 5 samples for each level of the counting process.
+star is given a regular sequence of events with time interval 1.0.
+Each time this input gets an event, the star produces an output.
+The value of the output is simply the value of the most recently received
+sample on the data input.
 .SA
 Sampler.
 .ES

@@ -1,9 +1,12 @@
 .\" $Id$
 .NA blockage
 .SD
-Demonstrates the simulation of a blocking strategy in the queueing network.
+Demonstrate a blocking strategy in a queueing network.
+In a cascade of two queues and servers, when the second queue
+fills up, it prevents any further dequeuing of particles from
+the first queue until it once again has space.
 .DE
-.LO "~ptolemy/src/domains/de/demo"
+.LO "$PTOLEMY/src/domains/de/demo"
 .SV $Revision$ $Date$
 .AL "S. Ha and E. A. Lee"
 .LD

@@ -1,12 +1,12 @@
-.\" @(#)adpcmMissTrack 1.1 10/20/92
+.\" $Id$
 .NA "ADPCMMissTrack"
 .SD
- This demonstrations represents the pitfalls of using a simple
+This system demonstrates the pitfalls of using a simple
 voice-recovery technique such as zero-sample substitution in
 an ADPCM packet-switched network. 
 .SE
-.LO "~ptolemy/src/domains/de/demo"
-.SV $Revision$	10/20/92
+.LO "$PTOLEMY/src/domains/de/demo"
+.SV $Revision$	$Date$
 .AL "G. S. Walter"
 .LD
  This demonstrations reads 8 kHz voice samples and converts

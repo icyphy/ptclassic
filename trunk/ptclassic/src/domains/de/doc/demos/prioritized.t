@@ -1,9 +1,10 @@
 .\" $Id$
 .NA "prioritized"
 .SD
-High-level simulation of a shared memory with prioritized arbitration.
+This is a high-level simulation of a shared memory
+with prioritized arbitration.
 .SE
-.LO "~ptolemy/src/domains/de/demo"
+.LO "$PTOLEMY/src/domains/de/demo"
 .SV $Revision$ $Date$
 .AL "T.M. Parks"
 .LD

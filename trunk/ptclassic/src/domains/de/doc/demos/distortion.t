@@ -1,23 +1,20 @@
 .\" $Id$
 .NA distortion
 .SD
- Simulates the effect on a sinusoid of random delay and reordering of samples.
+This demo shows the effects on real-time signals of a highly
+simplified packet-switch network.  Packets can arrive out of
+order, and they can also arrive too late to be useful.
+In this simplified system, a sinusoid is generated in the SDF domain,
+launched into the communication network implemented in the DE domain,
+and compared to the output of the communication network.  Plots are
+given in the time and frequency domain of the sinusoid before and
+after the network.
 .DE
-.LO "~ptolemy/src/domains/de/demo"
-.SV $Revision$ "October 15, 1990"
+.LO "$PTOLEMY/src/domains/de/demo"
+.SV $Revision$ $Date$
 .AL "Edward A. Lee"
 .LD
- This demo shows the effects on real-time signals of a highly
-simplified packet-switch network.
- Packets can arrive out of order, and they can also arrive too late
-to be useful.
-.pp
- In this simplified system, a sinusoid is generated in the SDF domain,
-launched into the communication network, and compared to the output of
-the communication network.
- Plots are given in the time and frequency domain of the sinusoid
-before and after the network.
- On the time domain plot, two phenomena can be observed,
+On the time domain plot, two phenomena can be observed,
 reordering and reuse.
  Reordering is where two samples have exchanged places, thereby causing
 unexpected jagged edges in the waveform.
