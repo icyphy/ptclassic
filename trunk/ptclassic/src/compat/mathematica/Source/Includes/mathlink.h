@@ -39,9 +39,15 @@ info@wolfram.com.
 #ifndef ARGS
 #if defined(__STDC__) || defined(__cplusplus)
 #define ARGS(args)      args
-#define MLCONST const
 #else
 #define ARGS(args)      ()
+#endif
+#endif
+
+#ifndef MLCONST
+#if defined(__STDC__) || defined(__cplusplus)
+#define MLCONST const
+#else
 #define MLCONST
 #endif
 #endif
