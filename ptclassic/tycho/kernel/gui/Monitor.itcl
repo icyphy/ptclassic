@@ -34,21 +34,21 @@
 #### Monitor
 # inherits from Exec, with tk widgets added. This function is added
 # for fully backward compatibility with the original Exec.
-# <p>
-# <b>Simple examples on using the Monitor:</b><br>
-# The two are equivalent to use Monitor:
+#
+# The following two examples illustrate a simple invocation
+# of the Monitor. The two examples are equivalent:
 # <tcl><pre>
 #   ::tycho::view Monitor -toolbar 1 -command {ls} -autostart 1
 # </pre></tcl>
-#    or
+#    or:
 # <tcl><pre>
 #   set win [::tycho::view Monitor -toolbar 1 -command {ls}]
 #   $win execProcess
 # </pre></tcl>
 #
-#
-# In the following example, we bring up the Monitor window and then wait  
-# until the user closes it. Try manually executing (press Enter) or force kill.
+# In the next example, we bring up the Monitor window and then wait  
+# until the user closes it. Try manually executing (press Return) or
+# force kill:
 # <tcl><pre>
 #   set win [::tycho::view Monitor -toolbar 1 -command {ls -al}]
 #   set retStatus [$win getStatusWait]
@@ -56,7 +56,7 @@
 # </pre></tcl>
 #
 # In another example, we automatically start up the subprocess, and then
-# close the window if the subprocess completed without an error
+# close the window if the subprocess completed without an error:
 # <tcl><pre>
 #   ::tycho::view Monitor -toolbar 1 &#92
 #      -command {ls -al} -autostart 1 -autodestroy 10
@@ -64,11 +64,10 @@
 # If the make in the above example had returned an error, then the window
 # would not have been destroyed.
 #
-# <hr>
-# <b>There are many ways to interface with the Monitor:</b><br>
-# The next set of examples show how to read in the input, parse, 
+# There are many ways to interface with the Monitor.
+# The last example shows how to read in the input, parse, 
 # change screen, etc. In this particular example, we changed the
-# attribute for the file owner (ie. changing color and underline).
+# attribute for the file owner (ie. changing color and underline):
 # <tcl><pre> 
 # set win [::tycho::view Monitor -toolbar 1 &#92
 #             -command {ls -al} -autostart 1 -autodestroy 0]
