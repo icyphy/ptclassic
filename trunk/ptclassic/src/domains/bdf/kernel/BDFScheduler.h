@@ -106,6 +106,9 @@ protected:
 	// compute the BDF schedule (the biggie)
 	int computeSchedule(Galaxy&);
 
+	// compute repetitions for all stars
+	virtual int repetitions ();
+
 private:
 	// return info structure for a star
 	BDFStarSchedInfo& info(const Star& s) const {
@@ -138,9 +141,6 @@ private:
 
 	// test to see if a star is runnable
 	int notRunnable (Star& atom, int useKnownBools = TRUE);
-
-	// compute repetitions for all stars
-	int repetitions ();
 
 	// subroutine of repetitions
 	int reptConnectedSubgraph (Block&);
