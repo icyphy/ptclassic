@@ -527,7 +527,15 @@ body ::tycho::DocSys::parseFileAsList {fileAsList} {
     set constructAccess public
     set constructArgList {}
 
-    foreach item $fileAsList {
+    # Check to see if we are going to fail because fileAsList is not
+    # a proper list
+    if { [catch {llength $fileAsList} errMsg] == 1} {
+	error "Problem with reading the file as a list.\nThe error message \
+		was:\n$errMsg\nThe contents of the file:\n$fileAsList"
+    }
+
+
+    foreach item "$fileAsList" {
 	if {$item == "#"} {
 	    set inComment 1
 	    if $wasInComment {
@@ -634,8 +642,9 @@ body ::tycho::DocSys::parseFileAsList {fileAsList} {
 			if [ catch {
 			    ${construct}Clause $commentBody $constructAccess \
 				    $constructArgList} errMsg ] {
-				puts "Failed to call ${construct}Clause: $errMsg"
-				puts " CommentBody was: $commentBody"
+				puts "Failed to call\
+					${construct}Clause:\n---\n$errMsg"
+				puts "---\nCommentBody was: '$commentBody'"
 			    }
 		        #puts "..>$construct:\t <$commentBody> <$constructAccess> <$constructArgList>"
 
@@ -862,7 +871,12 @@ body ::tycho::ListDocSys::appendConstruct {construct comment access argList } {
 	    }
 
 	    if {! $foundClass} {
-		error "Warning, did not find a class for $construct."
+		# Print out the argList of what ever failed on us.
+		set textWithNewlines $argList
+		catch {regsub -all "$newlineMagicCookie" $argList "\n" \
+			textWithNewlines}
+		error "Warning, did not find a class for\
+			'$construct'.\nAt or near:\n$textWithNewlines"
 	    }
 	} else {
 	    # If we get here, then we have a construct that is outside 
