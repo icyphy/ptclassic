@@ -46,11 +46,13 @@ This type of State is an array of strings.
 #include "KnownState.h"
 
 void StringArrayState :: zap() {
-	for (int i = 0; i < nElements; i++) {
+	if ( val ) {
+	    for (int i = 0; i < nElements; i++) {
 		LOG_DEL; delete [] val[i];
+	    }
+	    LOG_DEL; delete [] val;
+	    val = 0;
 	}
-	LOG_DEL; delete [] val;
-	val = 0;
 	nElements = 0;
 }
 
@@ -108,129 +110,169 @@ StringList StringArrayState :: currentValue() const {
 State* StringArrayState :: clone() const
 { LOG_NEW; return new StringArrayState;}
 
+// parameters for parsing a StringArrayState parameter expression
+// -- number of string pointers to allocate statically (max. array length)
 const int MAXLEN = 20000;
+// -- maximum size of each string element 
 const int MAXSTRINGLEN = 4096;
 
 // Parse initValue to set value
 void StringArrayState  :: initialize() {
-// free any old memory
+	// free any old memory
 	zap();
-	val = 0;
-	nElements = 0;
 
-	// handle empty value
+	// handle empty initial value
 	const char* inival = initValue();
 	if (inival == 0 || *inival == 0) return;
-	char* buf[MAXLEN];
-	char tokbuf[MAXSTRINGLEN];
-	const char* specialChars = "<{[]}";
-	Tokenizer lexer(inival,specialChars);
 
-	int i = 0, err = 0;
-	int numRepeats;
-	char* saveValue = 0;
-	ParseToken t;
+	// initialize lexical parsing
+	const char* specialChars = "<{[]}";
+	Tokenizer lexer(inival, specialChars);
 	lexer.clearwhite();
-	while(!lexer.eof() && i < MAXLEN && err == 0) {
+
+	int i = 0, err = FALSE;
+	char* saveValue = 0;
+	char* buf[MAXLEN];
+	while(!lexer.eof() && i < MAXLEN && !err) {
+		char tokbuf[MAXSTRINGLEN];
 		lexer >> tokbuf;
 		char c = tokbuf[0];
 		if (c != 0 && tokbuf[1]) c = 0;
 		switch (c) {
-		case '<':
-		       {
+
+		  case '<':
+		      {
 			char filename[MAXLEN];
-// temporarily disable special characters, so '/' (for instance)
-// does not screw us up.
+			// temporarily disable special characters, so '/'
+			// (for instance) does not screw us up.
                 	const char* tc = lexer.setSpecial ("");
                 	lexer >> filename;
-// put special characters back.
+			// put special characters back.
                 	lexer.setSpecial (tc);
                 	if (!lexer.fromFile(filename)) {
                         	StringList msg;
                         	msg << filename << ": " << why();
                         	parseError ("can't open file ", msg);
-				err = 1;
+				err = TRUE;
                 	}
-		       }
-		       break;
-		case '[':
-			t = evalIntExpression(lexer);
+		      }
+		      break;
+
+		  case '[':
+		      {
+			if ( saveValue == 0 ) {
+				parseError ("no string to repeat ",
+				   "([ must appear after a string).");
+				err = TRUE;
+				break;
+			}
+			ParseToken t = evalIntExpression(lexer);
 			if (t.tok != T_Int) {
 				parseError ("expected integer expression after '['");
-				err = 1;
+				err = TRUE;
 				break;
 			}
-			numRepeats = t.intval - 1;
+			int numRepeats = t.intval - 1;
+			if ( numRepeats < 0 ) {
+				parseError ("cannot repeat a string a negative number of times.");
+				err = TRUE;
+				break;
+			}
 			if (i + numRepeats > MAXLEN) {
-				parseError ("too many elements!");
-				err = 1;
+				parseError ("too many strings while repeating ",
+					    saveValue);
+				err = TRUE;
 				break;
 			}
-			while ( numRepeats != 0) {
+			while ( numRepeats > 0) {
 				buf[i++] = savestring(saveValue);
 				numRepeats--;   
 			}
 			t = getParseToken(lexer);
 			if (t.tok != ']') {
 				parseError ("expected ']'");
-				err = 1;
+				err = TRUE;
 				break;
 			}
-			break;
-		case '{':
-			{
+		      }
+		      break;
+
+		  case '{':
+		      {
 			// next token must be a state name.
 			lexer >> tokbuf;
-			const State* s = lookup(tokbuf,parent()->parent());
+			const State* s = lookup(tokbuf, parent()->parent());
 			if (!s) {
-				parseError ("undefined symbol: ",tokbuf);
-				err = 1;
+				parseError ("undefined symbol: ", tokbuf);
+				err = TRUE;
 				break;
 			}
+
+			// save name of included parameter for error messages
+			StringList parameterName = tokbuf;
+
+			// read the next token
 			lexer >> tokbuf;
 			if (tokbuf[0] != '}') {
 				parseError ("expected '}'");
-				err = 1;
+				err = TRUE;
 				break;
 			}
 			// stringarraystate: copy element-by-element
 			if (s->isA("StringArrayState")) {
 				const StringArrayState *ss = 
 					(const StringArrayState*)s;
-				for (int j = 0; j < ss->size(); j++)
-					buf[i++] = savestring(ss->val[j]);
+				int numstrings = ss->size();
+				if (i + numstrings > MAXLEN) {
+					parseError ("too many strings encountered while including the StringArrayState parameter ",
+						    parameterName );
+					err = TRUE;
+					break;
+				}
+				else {
+					for (int j = 0; j < numstrings; j++)
+					    buf[i++] = savestring(ss->val[j]);
+				}
 			}
 			else if (s->isArray()) {
-				parseError(
-		   "StringArrayStates cannot substitute values of type ",
+				parseError( "StringArrayStates cannot substitute values of type ",
 					   s->type());
-				err = 1;
+				err = TRUE;
 				break;
 			}
 			// others: one string only
 			else {
 				buf[i++] = s->currentValue().newCopy();
 			}
-			}
-			break;
-		default:
-			buf[i++] = savestring(tokbuf);
+		      }
+		      break;
+
+		  default:
+		      buf[i++] = savestring(tokbuf);
 		}
 		saveValue = buf[i-1];
 		lexer.clearwhite();
 	}
+
+	// Make sure that we did not exceed the capacity of buf
+	if ( !lexer.eof() && i == MAXLEN ) {
+		parseError ("too many strings!");
+		err = TRUE;
+	}
+
+	// val was deallocated at the beginning of the routine
 	if (!err) {
 		nElements  = i;
 		LOG_NEW; val = new char* [nElements];
-		for(i = 0; i < nElements; i++)
-			val[i] = buf[i];
+		for(int j = 0; j < nElements; j++)
+			val[j] = buf[j];
 	}
 	return;
 }
 
 int StringArrayState::member(const char* v) const {
 	for (int i = 0; i < nElements; i++) {
-		if (strcmp(v,val[i]) == 0) return TRUE;
+		if (strcmp(v, val[i]) == 0) return TRUE;
 	}
 	return FALSE;
 }
