@@ -25,7 +25,7 @@ LIB =		libtkgraph.$(LIBSUFFIX)
 
 all: 		$(OBJS) $(LIB)
 
-install:	makefile $(OUT)
+install:	makefile $(LIB) $(OUT)
 
 
 TOPDIR = 	$(VPATH)/../top		# top is a package used by tkoct

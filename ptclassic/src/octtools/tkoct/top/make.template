@@ -32,7 +32,7 @@ LIB =		libtop.$(LIBSUFFIX)
 
 all: 		makefile $(LIB)
 
-install:	makefile $(OUT)
+install:	makefile $(LIB) $(OUT)
 
 
 TOPDIR =	$(VPATH)/../top	# top is a package used by tkoct
