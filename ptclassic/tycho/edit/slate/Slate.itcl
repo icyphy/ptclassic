@@ -56,27 +56,44 @@
 # A procedure to create a new widget, as recommended on the
 # itk web pages. This turns out to be useful to have anyway,
 # since we need to muck about with the binding order for the
-# widget, and itk doesn't seem to like having $this referenced
-# in the constructor...
+# widget ...
 #
 proc ::tycho::slate {pathName args} {
-    #
     # Create the widget
-    #
     uplevel ::tycho::Slate $pathName $args
 
+    # Muck about with the binding tags in order to make events
+    # on the canvas appear to be on the mega-widget. The default
+    # bindtags for the slate (say ".s") are:
     #
-    # Now muck about with the bindings in order to
-    # make events on the canvas appear to be on the mega-widget.
-    # This simply sets the bindtags for the canvas to be the
-    # the same as those for the megawidget, effectively removing
-    # the canvas itself from the event chain. It has the side-effect
-    # of causing some events to occur twice, but so far this appears
-    # to happen only with Enter and Leave events.
+    #    itk-delete-.s .s Slate . all
     #
-    bindtags [$pathName component canvas] [concat \
-	    [list lhead [bindtags [$pathName component canvas]]] \
-	    [ltail [bindtags $pathName]]]
+    # and for the canvas are:
+    #
+    #    itk-destroy-.s.canvas .s.canvas Canvas . all
+    #
+    # The following code changes the binding tags to:
+    #
+    #    itk-delete-.s Slate . all
+    #
+    # and:
+    #
+    #    itk-destroy-.s.canvas .s Canvas . all
+    #
+    # What this does is: a) make scripts bound to the _slate_ (.s)
+    # be matched when an event occurs on the _canvas_; b) removes
+    # the slate from its own binding tags so that scripts bound to
+    # events like Enter, Leave, Configure don't get executed
+    # twice twice.
+    #
+    # I don't what the itk-delete-.s and itk-destroy-.s.canvas
+    # tags are for.
+    set slatetags  [bindtags $pathName]
+    set canvastags [bindtags [$pathName component canvas]]
+
+    bindtags [$pathName component canvas] \
+	    [lreplace $canvastags 1 1 [lindex $slatetags 1]]
+    bindtags $pathName [lreplace $slatetags 1 1]
 
     return $pathName
 }
