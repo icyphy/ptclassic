@@ -315,10 +315,10 @@ body ::tycho::TclShell::constructor {args} {
 	    -command "$this setFont"
 
     menubar addMenuItem "Edit history" Special -underline 0 \
-	    -command "$this component text displayHistory"
+	    -command "$this displayHistory"
 
     menubar addMenuItem "Clear history" Special -underline 0 \
-	    -command "$this component text clearHistory"
+	    -command "$this clearHistory"
 
     printPrompt ""
 
@@ -473,7 +473,7 @@ body ::tycho::TclShell::deleteRange {first last} {
 #
 body ::tycho::TclShell::displayHistory {} {
     set history [join $commandList "\n"]
-    wm deiconify [::tycho::EditTcl [::tycho::autoName .edittcl] -text $history]
+    ::tycho::view EditTcl [list -text \"$history\"]
 }
  
 #########################################################################
