@@ -1,5 +1,5 @@
 defstar {
-	name		{ DCTImageCode }
+	name		{ DCTImgCde }
 	domain		{ SDF }
 	version		{ $Id$ }
 	author		{ Paul Haskell }
@@ -166,4 +166,4 @@ not GrayImages.
 		Envelope dcEnvp(*dcImage); hiport%0 << dcEnvp;
 		Envelope acEnvp(*acImage); loport%0 << acEnvp;
 	} // end go{}
-} // end defstar { DctCode }
+} // end defstar { DctImgCde }
