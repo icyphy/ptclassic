@@ -30,10 +30,10 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-DIRS =  kernel shapes pictures interactors combinators
+DIRS =  kernel shapes pictures interactors combinators doc
 
 makefiles all install clean sources depend realclean checkjunk sccsinfo \
-itcldocs extraclean:
+itcldocs extraclean echohtmls:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
