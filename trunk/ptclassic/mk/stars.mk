@@ -80,6 +80,7 @@ include $(ROOT)/mk/matlab.mk
 # Mathematica settings
 include $(ROOT)/mk/mathematica.mk
 
+ACST = $(OBJDIR)/domains/acs/targets
 C50T = $(OBJDIR)/domains/c50/targets
 CG56T = $(OBJDIR)/domains/cg56/targets
 CGCT = $(OBJDIR)/domains/cgc/targets
@@ -399,8 +400,13 @@ ifdef ACS
 		LIBS += -lacstargets
 		LIBFILES += $(LIBDIR)/libacstargets.$(LIBSUFFIX)
 	else
-		#FIXME - add more targets
-		TARGETS += $(ACST)/CGCUnixSend.o
+		TARGETS += $(ACST)/ACSCGCTarget.o \
+				$(ACST)/ACSCGTarget.o \
+				$(ACST)/ACSFPGATarget.o \
+				$(ACST)/ACSFixTarget.o \
+				$(ACST)/ACSFloatTarget.o \
+				$(ACST)/ACSJavaTarget.o \
+				$(ACST)/ACSSimTarget.o
 	endif
 
 	LIBS += -lacsstars -lacs
