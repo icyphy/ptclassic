@@ -45,6 +45,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownTarget.h"
 #include "miscFuncs.h"
 
+// These files included for use within compileCode() and runCode().
+#include "ptk.h"
+#include "PTcl.h"
+#include "CGUtilities.h"
+
 // constructor
 CGCTychoTarget::CGCTychoTarget(const char* name,const char* starclass,
                    const char* desc) : CGCTarget(name,starclass,desc) {
@@ -67,6 +72,36 @@ void CGCTychoTarget :: initCodeStrings() {
 // clone
 Block* CGCTychoTarget :: makeNew () const {
 	LOG_NEW; return new CGCTychoTarget(name(),starType(),descriptor());
+}
+
+int CGCTychoTarget :: compileCode() {
+  // Create a string and call Tycho to evaluate it
+  StringList cmd, error;
+  cmd << "puts " << filePrefix << "\n";
+  cmd << "::tycho::compileC "
+      << expandPathName(destDirectory) << "/" << filePrefix << ".c";
+
+  Tcl_Eval( PTcl::activeInterp, cmd.chars() );
+
+  // Always return 1 -- what else can we do?
+  return 1;
+}
+
+// Run the code. Start another Tycho process and give it the
+// "loader" file as argument.
+int CGCTychoTarget :: runCode() {
+  StringList ldr, fname;
+  fname << filePrefix << "_ld.tcl";
+  ldr << "::tycho::File::openContext " 
+      << expandPathName(destDirectory) << "/" << filePrefix << ".so";
+  rcpWriteFile(targetHost, destDirectory, fname, ldr);
+
+  // Exec another Tycho -- note "&" in the command so
+  // pigi doesn't go dead...
+  StringList cmd, error;
+  cmd << "tycho -e " << filePrefix << "_ld.tcl &";
+  error << "Could not run " << filePrefix;
+  return (systemCall(cmd, error, targetHost) == 0);
 }
 
 /////////////////////////////////////////
