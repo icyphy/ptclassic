@@ -28,8 +28,8 @@ domain { \fIidentifier\fP }
 where
 .i identifier
 specifies the domain.  Currently, the SDF, DDF, and DE domains
-are fully supported; a separate group is working on the Thor domain
-but that is not yet supported by the preprocessor.
+are fully supported; for the Thor domain, a separate preprocessor
+is normally used.
 .UH derivedfrom
 .pp
 .IE "derivedfrom { }"
@@ -433,7 +433,13 @@ You generally need a destructor only if you allocate memory in the
 constructor; termination functions that happen with every run should
 appear in the
 .c wrapup
-function.
+function.  The optional keyword
+.c inline
+may appear before
+.c destructor ;
+if so, the destructor function definition appears inline, in the header
+file.  Since the destructor for all stars is virtual, this is only a
+win when the star is used as a base for derivation.
 .UH start
 .pp
 .IE "start { }"
@@ -443,6 +449,11 @@ method, which is called every time the simulation is restarted.  Syntax:
 .(c
 start { \fIbody\fP }
 .)c
+The optional keyword
+.c inline
+may appear before the
+.c start
+keyword.
 It is common for this method to set parameters of input and output
 portholes, and to initialize states.
 The code syntax for doing this is explained below.
@@ -454,6 +465,11 @@ Syntax:
 .(c
 go { \fIbody\fP }
 .)c
+The optional keyword
+.c inline
+may appear before the
+.c go
+keyword.
 The go methods will typically read input particles and write outputs.
 The code syntax for doing this is explained below.
 .UH wrapup
@@ -465,8 +481,30 @@ method, which is called at the completion of a simulation.  Syntax:
 .(c
 wrapup { \fIbody\fP }
 .)c
+The optional keyword
+.c inline
+may appear before the
+.c wrapup
+keyword.
 The wrapup methods might display or store final state values.
 The code syntax for doing this is explained below.
+.UH "exectime"
+This item defines the optional
+.c myExecTime()
+function, which is used in code generation to specify how many time
+units are required to execute the star's code.  The item is very similar
+to the
+.c go
+item, except that the function must return an integer value.
+Syntax:
+.(c
+exectime { \fIbody\fP }
+.)c
+The optional keyword
+.c inline
+may appear before the
+.c exectime
+keyword.
 .UH "public, protected, private"
 .pp
 .IE "public { }"
@@ -548,6 +586,15 @@ Syntax:
 .(c
 code { \fIbody\fP }
 .)c
+.UH header
+.pp
+.IE "header { }"
+This keyword allows the user to specify an arbitrary set of definitions
+that will appear in the header file.  Everything between the curly
+brackets is inserted into the
+.c .h
+file after the include files but before everything else.  The outermost
+pair of curly braces is skipped.
 .UH method
 .pp
 .IE "method { }"
@@ -557,7 +604,7 @@ item provides a fully general way to specify an additional method
 for the class of star or galaxy that is being defined.  Here is an
 example:
 .(c
-method {
+virtual method {
 	name { exec }
 	access { protected }
 	arglist { "(const char* extraOpts)" }
@@ -567,6 +614,27 @@ method {
 	}
 }
 .)c
+An optional function type specification may appear before the
+.c method
+keyword, which must be one of the following:
+.(c
+virtual
+inline
+pure
+pure virtual
+inline virtual
+.)c
+The
+.c virtual
+keyword makes a virtual member function; if
+.c pure
+is given, a pure virtual member function is declared and there must
+be no
+.c code
+item in this case.
+.c inline
+declares the function to be inline.
+.pp
 Here are the
 .c method
 subitems:
@@ -591,4 +659,10 @@ return type is
 .c void
 (no value is returned).
 .ip \f(\*Fcode\fR:
-The code that implements the method.  This is a required item.
+The code that implements the method.  This is a required item, unless
+the
+.c pure
+keyword appears, in which case this item
+.i cannot
+appear.
+
