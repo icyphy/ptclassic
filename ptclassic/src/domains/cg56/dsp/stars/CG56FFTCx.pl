@@ -54,9 +54,13 @@ setup {
 initCode {
 	halfOrder.setInitValue(order/2);
 	if (addCode("; Include FFT macro","code","FFT_Macro")) {
+		char *expandedName =
+			expandPathName("$PTOLEMY/lib/cg56/fftr2a.asm");
 		StringList macro = "	include '";
-		macro << expandPathName("$PTOLEMY/lib/cg56/fftr2a.asm'\n");
+		macro << expandedName;
+		macro << "'\n";
 		addCode(macro);
+		delete [] expandedName;
 	}
 	StringList twcos, twsin;
 	for(int i = 0; i < int(halfOrder); i++) {

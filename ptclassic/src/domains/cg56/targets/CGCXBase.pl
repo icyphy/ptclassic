@@ -99,14 +99,18 @@ initCode {
 	// We do this here so that all the stars can do there initialization
 	// before starting the DSP
        	const char *s56path = getenv("S56DSP");
-	if (s56path == NULL)
-		s56path = expandPathName("$PTOLEMY/vendors/s56dsp");
+	int newmemory = FALSE;
+	if (s56path == NULL) {
+	    s56path = expandPathName("$PTOLEMY/vendors/s56dsp");
+	    newmemory = TRUE;
+	}
 	addMainInit(downloadCode(S56XFilePrefix,s56path),"s56load");
 #ifdef PTSOL2
 	addMainInit(signalSOL2,"s56signal");
 #else
 	addMainInit(signalSUN4,"s56signal");
 #endif
+	if ( newmemory) delete [] s56path;
 }
 
 wrapup {
