@@ -19,18 +19,26 @@ description.
 
 extern Error errorHandler;
 
-BlockList *KnownBlock::allstars;	// define the static member
+BlockList *KnownBlock::allBlocks;	// define the static member
+
+int KnownBlock::numBlocks = 0;		// define the number of blocks
+
+// Constructor.  Adds a block to the known list
 
 KnownBlock::KnownBlock (Block &block, const char* name) {
-	static int n_known = 0;
-
 // on the first call, create the known block list.
-	if (n_known == 0)
-		allstars = new BlockList;
-	n_known++;
+// It's done this way to get around the order-of-static-constructors problem.
+	if (numBlocks == 0)
+		allBlocks = new BlockList;
+	numBlocks++;
 // set my name and add to the list
 	block.setBlock (name,NULL);
-	allstars->put (&block);
+	allBlocks->put (&block);
+}
+
+Block*
+KnownBlock::find(const char* type) {
+	return numBlocks == 0 ? NULL : allBlocks->blockWithName(type);
 }
 
 // The main cloner.  This method gives us a new block of the named
@@ -38,21 +46,26 @@ KnownBlock::KnownBlock (Block &block, const char* name) {
 
 Block *
 KnownBlock::clone(const char* type) {
-	Block *p = allstars->blockWithName(type);
+	Block *p = find(type);
 	if (p) return p->clone();
 // If we get here, we don't know the block.  Report error, return NULL.
 	errorHandler.error("KnownBlock::clone: unknown star/galaxy name: ",type);
 	return 0;
 }
 
-// print the known list
-void
-KnownBlock::printAll (UserOutput &output) {
-	Block *p;
-	int n = allstars->size ();
-	output << "The following " << n << " star/galaxy classes are known:\n";
-	for (int i=n; i>0; i--) {
-		p = (Block *)allstars->next();
-		output << p->readName() << "\n";
+// Return known list as text, separated by linefeeds
+StringList
+KnownBlock::nameList () {
+	StringList s;
+	if (numBlocks > 0) {
+		allBlocks->reset();
+		for (int i=numBlocks; i>0; i--) {
+			Block& b = (*allBlocks)++;
+			s += b.readName();
+			s += "\n";
+		}
 	}
+	return s;
 }
+
+
