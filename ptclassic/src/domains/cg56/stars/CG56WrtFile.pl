@@ -46,8 +46,9 @@ output $ref(outVal) $val(fileName).sim -RF
 	move	$ref(input),a
 	move	a,$ref(outVal)
 	}
-	go {
+        initCode {
 		genMiscCmd(logOut);
+	go {
 		if (input.bufSize() >= 1) gencode(copy);
 	}
 }
