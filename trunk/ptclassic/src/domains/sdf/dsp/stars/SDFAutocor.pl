@@ -28,8 +28,9 @@ the autocorrelation estimate is
 <pre>
 r hat (k) ~=~ 1 over N sum from n=0 to N-1-k x(n)x(n+k)
 </pre>
-for <i>k  </i>=<i>  </i>0<i>, ... ,   p</i>, where <i>N</i> is the number of inputs to average
-(<i>noInputsToAvg</i>) and <i>p</i> is the number of lags to estimate (<i>noLags</i>).
+for <i>k </i>=0<i>, ... , p</i>, where <i>N</i> is the number of
+inputs to average (<i>noInputsToAvg</i>) and <i>p</i> is the number of
+lags to estimate (<i>noLags</i>).
 This estimate is biased because the outermost lags have fewer than <i>N</i>
 <a name="biased autocorrelation"></a>
 terms in the summation, and yet the summation is still normalized by <i>N</i>.

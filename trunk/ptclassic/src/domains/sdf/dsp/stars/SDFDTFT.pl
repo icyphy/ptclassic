@@ -35,7 +35,7 @@ The values of <i>omega</i> at which samples are taken are provided
 by the <i>omega</i> input.
 Hence, any frequency range or ranges can be examined at any desired
 resolution, and samples need not be taken at uniform intervals.
-Note that <i>omega  </i>=<i>  </i>2<i> pi / T</i> is the sampling frequency.
+Note that <i>omega  </i>= 2<i> pi / T</i> is the sampling frequency.
 <h3>References</h3>
 <p>[1]  
 A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i>,
