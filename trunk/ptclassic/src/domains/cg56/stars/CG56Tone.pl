@@ -57,18 +57,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	setup {
 		// maximum fixed point value
-		double twoPiF = 2.0 * M_PI * double(frequency);
+		double twoPiF = 2.0 * M_PI * frequency.asDouble();
 		X = cos(twoPiF);
-		if (double(X) > CG56_ONE) X = CG56_ONE;
 		const char* p = calcType;
 		switch (*p) {
 		case 's':	// sine
 			state1 = 0.0;
-			state2 = double(amplitude) * sin(twoPiF);
+			state2 = amplitude.asDouble() * sin(twoPiF);
 			break;
 		case 'c':	// cosine
-			state1 = double(amplitude);
-			state2 = double(amplitude) * cos(twoPiF);
+			state1 = amplitude;
+			state2 = amplitude.asDouble() * cos(twoPiF);
 			break;
 		default:
 			Error::abortRun(*this, "calcType must be sin or cos");

@@ -48,15 +48,15 @@ done with g++ (type "long long"), but it isn't portable.
 		addCode(initSeed);
 	}
 	setup {
-		scaledRange = int(double(range) * 8388608);
+		scaledRange = int(range.asDouble() * 8388608);
 	}
 	go {
 		addCode(random);
-		if (double(range) < CG56_ONE) addCode(rangeScale);
+		if (range.asDouble() < CG56_ONE) addCode(rangeScale);
 		else addCode (range1);
 	}
 	execTime {
-		return (double(range) < CG56_ONE) ? 17 : 15;
+		return (range.asDouble() < CG56_ONE) ? 17 : 15;
 	}
 	// "code" to initialize the seed
 	codeblock(initSeed) {
