@@ -186,6 +186,24 @@ int SynDFCluster::merge(Cluster& c, int removeFlag)
 // constructor
 SynDFCluster :: SynDFCluster() : loopFac(0), tnob(-1) , Cluster() {}
 
+// Return the number of input ports *this has.
+int SynDFCluster :: numInputs()
+{
+    int numInp = 0;
+    SynDFClusterPortIter nextP(*this);
+    SynDFClusterPort* p;
+    while ((p = nextP++) != NULL) {
+	if (p->isItInput()) numInp++;
+    }
+    return numInp;
+}
+
+// Return the number of outputs ports *this has.
+int SynDFCluster :: numOutputs()
+{
+    return numberPorts()-numInputs();
+}
+
 /****
 
 TNSE = Total Number of Samples Exchanged in a complete period of an SDF schedule.
