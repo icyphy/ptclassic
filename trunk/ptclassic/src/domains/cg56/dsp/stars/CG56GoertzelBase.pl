@@ -135,9 +135,11 @@ $label(_GoertzelBase)
 	}
 
 	exectime {
-		// The do command takes 6 oscillator cycles
-		// However, the exectime is given in half oscillator cycles
-		// Why?  Because that's the way it was done in Gabriel
+                // FIXME. Estimates of execution time are given in pairs of
+		// oscillator cycles because that's the way it was done in
+		// Gabriel: they simply counted the number of instructions.
+
+		// However, the do command takes 3 pairs of oscillator cycles
 		return (4 + 3*int(N));
 	}
 }

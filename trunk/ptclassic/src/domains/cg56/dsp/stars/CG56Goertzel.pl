@@ -95,6 +95,10 @@ which is a function of k and N
 	}
 
 	exectime {
+                // FIXME. Estimates of execution time are given in pairs of
+		// oscillator cycles because that's the way it was done in
+		// Gabriel: they simply counted the number of instructions.
+
 		return 4 + CG56GoertzelBase::myExecTime();
 	}
 }
