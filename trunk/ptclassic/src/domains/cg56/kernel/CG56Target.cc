@@ -87,10 +87,13 @@ void CG56Target::initDataMembers() {
 int CG56Target :: compileCode() {
     StringList assembleCmds = "asm56000 ";
     assembleCmds << assemblerOptions << " " << filePrefix;
-    resetImplementationCost();
     int valid = !systemCall(assembleCmds, "Errors in assembly", targetHost);
-    if (valid && int(reportMemoryUsage) && computeImplementationCost() ) {
-	Error::message(*this, printImplementationCost());
+    if (valid && int(reportMemoryUsage)) {
+	if ( computeImplementationCost() )
+	    Error::message(*this, describeImplementationCost());
+	else
+	    Error::message(*this, "Could not read the ", filePrefix,
+			   ".lod file to extract the memory usage");
     }
     return valid;
 }
