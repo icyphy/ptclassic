@@ -87,8 +87,10 @@ int MathematicaTcl::error(const char* msg) {
 int MathematicaTcl::init() {
     // Start a connection to Mathematica called MathematicaTcl in which
     // Mathematica starts up in a private namespace (context) "MathematicaTcl`"
+    // We also disable the display of the input and the output number
     if (mathematicaInterface == 0) {
-	mathematicaInterface = new MathematicaIfc("MathematicaTcl", TRUE);
+	mathematicaInterface =
+		new MathematicaIfc("MathematicaTcl", TRUE, FALSE, FALSE);
     }
 
     if (! mathematicaInterface->MathematicaIsRunning()) {
