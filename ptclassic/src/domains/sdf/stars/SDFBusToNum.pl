@@ -31,8 +31,6 @@ it disregards the lsb from the codec that is lost at ThorSerToPar
 		default {"0"}
 		desc {previous value of output}
 	}
-	start {
-	      }
 	
 	go {
 		int b;
@@ -63,7 +61,7 @@ it disregards the lsb from the codec that is lost at ThorSerToPar
 		{
 		if(binary[i] ==3){
 		change=1;
-	output%0 << previous; 
+		output%0 << int(previous); 
 //		printf("returning\n");
 		return; }
 		}
