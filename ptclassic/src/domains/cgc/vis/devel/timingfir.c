@@ -1,7 +1,7 @@
 /* Copyright (C) 1995, Sun Microsystems, Inc. */
 
 /***************************************************************/
-
+#include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -13,10 +13,7 @@
 
 #define NTIME 1000
 #define LENGTH 8192
-#define NTAP 16
-
-static vis_s16 scale[]  = {0x7f, 0x7f, 0x7f, 0x7f};
-static vis_s16 offset[] = {0x7f, 0x7f, 0x7f, 0x7f};
+#define NTAPS 16
 
 /***************************************************************/
 
@@ -29,9 +26,11 @@ main (int argc, char *argv[])
   int      verbose;
   hrtime_t start, end;
   float    time1, time2;
-  vis_s16  
-  int      j;
+  double sinarg,twopiover50;
+  vis_s16  *dst,*src,*filtertaps;
+  int      i,j;
 
+  twopiover50 = 0.0;
   ntime = NTIME;
   length = LENGTH;
   verbose = 0;
@@ -53,13 +52,13 @@ main (int argc, char *argv[])
     };
 /***************************************************************/
 dst = (vis_s16 *) memalign(sizeof(double),sizeof(short)*LENGTH);
-src = (vis_s16 *) memalign(sizeof(double),sizeof(short)*(LENGTH+NTAPS-1);
+src = (vis_s16 *) memalign(sizeof(double),sizeof(short)*(LENGTH+NTAPS-1));
 filtertaps = (vis_s16 *) memalign(sizeof(double),sizeof(short)*NTAPS);
 /***************************************************************/
   for(i=0;i<LENGTH;i++){
     sinarg = twopiover50;
     twopiover50 += 0.628318530717958;
-    dst[i] = (short)16383.5 * sin(sinarg);
+    dst[i] = (short)32767 * (double) sin(sinarg);
   }
     filtertaps[0]=(short)32767* -4.10485902015429e-05;
     filtertaps[1]=(short)32767*-6.27991234694974e-06;
@@ -109,8 +108,7 @@ filtertaps = (vis_s16 *) memalign(sizeof(double),sizeof(short)*NTAPS);
     printf("  C-GL/VIS-GL = %f\n", time1/time2);
     printf("\n");
   } else {
-    printf("%d\t%f\t%f\t%f\n",
-           length, time1, time2, time1/time2,
+    printf("%d\t%f\t%f\t%f\n", length, time1, time2, time1/time2);
   }
 
   exit(0); 
