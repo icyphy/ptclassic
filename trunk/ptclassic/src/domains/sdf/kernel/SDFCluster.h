@@ -115,6 +115,9 @@ public:
 	// generate schedules for interior clusters
 	void genSubScheds();
 
+	// virtual method to create a cluster-bag
+	virtual SDFClusterBag* createBag();
+
 protected:
 	ostream* logstrm;	// for logging errors
 
@@ -130,6 +133,10 @@ protected:
 
 	// merge two clusters, returning the result.
 	SDFCluster* merge(SDFCluster* c1,SDFCluster* c2);
+
+	// There might be more restriction for merging two clusters.
+	// In this base class, just ignore.
+	virtual int canMerge(SDFCluster*, SDFCluster*) { return TRUE; }
 
 	// generate a name for a new member ClusterBag
 	const char* genBagName();
@@ -186,6 +193,7 @@ class SDFCluster : public SDFBaseCluster {
 protected:
 	int pLoop;		// loop count
 	int visitFlag;		// visit flag
+
 public:
 	// constructor: looping is 1 by default
 	SDFCluster() : pLoop(1) {}
@@ -260,6 +268,9 @@ public:
 
 	// return my insides
 	DataFlowStar& real() { return pStar;}
+
+	// redefine
+	/* virtual */ int isSDF() const;
 
 	// "pass-along" functions
 	int run();
