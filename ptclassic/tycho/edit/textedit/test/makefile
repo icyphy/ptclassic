@@ -84,7 +84,7 @@ REALCLEAN_STUFF = $(OPTIONAL_FILES)
 tests:: test_graphics
 
 test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
-	tycho -noconsole -e alltests.itcl
+	tytest $(GRAPHICAL_TESTS)
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
