@@ -43,7 +43,7 @@ proc methodOutsideAClass {} {
 
 #######################################################################
 ## DocSysTest
-# This class is a test class for the tycho doc system
+# This class is a test class for the tycho doc system.
 #
 # The line above intentionally left blank
 class ::tycho::DocSysTest {
@@ -124,8 +124,9 @@ class ::tycho::DocSysTestSimple {
     constructor {args} { puts "DocSysTestSimple"}
 }
 
-# This is a child class that test the ability of more than one class to appear
-# in one file
+# This is a child class that test the ability of more than one class
+# to appear in one file.  This comment is fairly long, in hopes of
+# causing trouble with the index page.
 class ::tycho::DocSysTestChild {
     inherit DocSysTest DocSysTestSimple
     # A destructor
