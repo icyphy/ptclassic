@@ -58,7 +58,7 @@ GRAPHICAL_TESTS = \
 	testResourceHTTP.itcl \
 	testResourceRemote.itcl
 
-ITCL_SRCS = $(SIMPLE_TESTS) $(GRAPHICAL_TESTS)
+ITCL_SRCS = $(SIMPLE_TESTS) $(GRAPHICAL_TESTS) all.itcl alltests.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	dltest.html
