@@ -1068,7 +1068,7 @@ int POct::ptkGetTargetNames (int aC,char** aV) {
     octObject facet;
     char *defaultTarget, *target ;
     char *domain;
-    char *targetNames[MAX_NUM_TARGETS];
+    const char *targetNames[MAX_NUM_TARGETS];
     int nTargets, nChoices, i;
 
     if (aC != 2) return  
@@ -1109,7 +1109,7 @@ int POct::ptkGetTargetNames (int aC,char** aV) {
 
     if (nChoices == 1) {
 	// Only one element means that no ordering need be done.
-	Tcl_AppendElement ( interp, targetNames[0] );
+	Tcl_AppendElement ( interp, (char *)targetNames[0] );
 	return TCL_OK;
     }
 
@@ -1131,7 +1131,7 @@ int POct::ptkGetTargetNames (int aC,char** aV) {
     for (i = 0; i < nChoices; i++) {
         // Only add it if it has not already been used
         if (strcmp(targetNames[i],"NIL")!=0) {
-            Tcl_AppendElement(interp, targetNames[i]);
+            Tcl_AppendElement(interp, (char *)targetNames[i]);
         }
     }   
     return TCL_OK;
