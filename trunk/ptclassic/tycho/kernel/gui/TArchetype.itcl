@@ -81,7 +81,7 @@
 #
 # <li>Style-sheets. Each Tycho package can define one or more
 # style-sheets that the user can edit to specify widget
-# apperances and user-interface options. The <b>stylesheet</b>
+# appearances and user-interface options. The <b>stylesheet</b>
 # method provides access to the stylesheet code.
 #
 # <li>Hyperlinking. Tycho has a uniform hyperlinking

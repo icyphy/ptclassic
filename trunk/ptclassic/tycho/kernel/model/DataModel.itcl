@@ -1178,7 +1178,7 @@ body ::tycho::DataModel::type {mode {type {}} args} {
 #### uniqueid
 #
 # Get a unique ID based on the given prefix. This method is useful
-# for automatically alocating names but ensuring that they do not
+# for automatically allocating names but ensuring that they do not
 # clash with existing names in the model.
 #
 body ::tycho::DataModel::uniqueid {prefix} {
