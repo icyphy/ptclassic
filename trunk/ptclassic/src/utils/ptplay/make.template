@@ -43,7 +43,7 @@ KRUFT = ptplay.sol2 ptplay
 
 all:	makefile ptplay
 
-ifeq ($(ARCH),sol2)
+ifeq ($(basename $(ARCH)),sol2)
 ptplay: ptplay.sol2
 	cp ptplay.sol2 ptplay
 else
