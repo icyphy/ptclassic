@@ -37,7 +37,7 @@
 # of the graph.
 #
 class ::tycho::DFGVertexController {
-	inherit ::tycho::ViewController
+    inherit ::tycho::ViewController
 	
     constructor {args} {}
     destructor {}
@@ -201,7 +201,7 @@ body ::tycho::DFGVertexController::click {tag x y args} {
 #
 # Initialize the context-sensitive pop-up menu. 
 #
-body ::tycho::ViewController::contextmenu {slateid type} {
+body ::tycho::DFGVertexController::contextmenu {slateid type} {
     set name [itemname $slateid]
 
     if { $type == "vertex" } {
