@@ -45,7 +45,8 @@ Block* DEWormhole :: clone() const
 void DEWormhole :: sumUp() {
 	if (scheduler->stopBeforeDeadlocked) {
 		DEScheduler* sched = (DEScheduler*) parent()->mySched();
-		sched->eventQ.levelput(this, scheduler->currentTime ,0);
+		sched->eventQ.levelput(&(this->selfStar), 
+			scheduler->currentTime ,0);
 	}
 }
 		
