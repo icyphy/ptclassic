@@ -37,6 +37,7 @@ include $(CONFIG)
 EXTRA_SRCS = \
 esterel2pl.tcl \
 gantt.tcl \
+mathexpr.tcl \
 message.tcl \
 pigilib.tcl \
 ptcl.tcl \
