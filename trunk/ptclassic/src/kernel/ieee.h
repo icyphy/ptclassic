@@ -34,8 +34,12 @@ Version: $Id$
 #define _IEEE 1
 #include <nan.h>
 #endif
-#ifdef sun
+#if defined(sun) 
+#if defined(__svr4__)
+#define IsNANorINF(X) (isnan(X))
+#else
 #define IsNANorINF(X) (isnan(X) || isinf(X))
+#endif
 #endif
 #ifndef IsNANorINF
 #define IsNANorINF(X) 0
