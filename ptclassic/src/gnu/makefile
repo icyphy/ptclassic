@@ -47,7 +47,7 @@ GNU_OBJ=$(OBJ_DIR)/gnu
 # Machine independent files
 GNU_PREFIX=$(GNU_DEST)/common
 
-GCC_VERSION=2.7.0
+GCC_VERSION=2.7.2
 
 # Machine dependent files
 GNU_EXEC_PREFIX=$(GNU_DEST)/$(PTARCH)
@@ -186,11 +186,13 @@ hp_configure: $(GNU_OBJ)
 	(cd $(GNU_OBJ); \
 	$(HP_GNU_SRC)/configure $(HP_MACH) --srcdir=$(HP_GNU_SRC) \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS) \
 		--with-gnu-as)
 	@echo "Now reconfigure gcc with -gas"
 	(cd $(GNU_OBJ)/gcc; \
 	$(HP_GNU_SRC)/gcc/configure --srcdir=$(HP_GNU_SRC)/gcc \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS) \
 		--with-gnu-as hppa1.1-hp-hpux)
 	@echo "Make links for the source files.  Some makes are not smart"
 	@echo " enough to handle vpath"
@@ -242,8 +244,15 @@ $(GNU_DEST)/$(PTARCH):
 
 # We must use gas with hp, so we change the path so the GNU as is first
 hp_bin:
-	#(cd $(GNU_OBJ); $(MAKE) -f $(PTOLEMY)/src/gnu/makefile bin)
-	(PATH=$(GNU_OBJ)/gas:$(PATH) ;echo $$PATH; cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC="$(CC)" )
+	#(PATH=$(GNU_OBJ)/gas:$(PATH) ;echo $$PATH; cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC="$(CC)" )
+	@echo "Build gcc first, so we can build shared libiberty.so"
+	(PATH=$(GNU_OBJ)/gas:$(PATH) ;echo $$PATH; \
+		cd $(GNU_OBJ)/gcc; $(MAKE) $(MFLAGS) CC="$(CC)" MAKE=$(GMAKE) \
+		LANGUAGES=c )
+	@echo "Building libiberty and g++"
+	(PATH=$(GNU_OBJ)/gas:$(PATH) ;echo $$PATH; \
+		cd $(GNU_OBJ); $(MAKE) $(MFLAGS) \
+		CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ MAKE=$(GMAKE))
 
 # In gcc-2.5.8, collect2 is not automagically installed.  The symptom
 # of this is that ptcl says that there is no SDF domain, and that perhaps
