@@ -96,14 +96,6 @@ int CGCTclTkTarget :: codeGenInit() {
 	return CGCTarget::codeGenInit();
 }
 
-// Star States are global so that they may be accessed by call-back functions.
-void CGCTclTkTarget::declareStar(CGCStar* star)
-{
-    globalDecls << star->declareStates();
-    mainDecls << star->declarePortHoles();
-    mainInit << star->initCodeStates();
-}
-
 void CGCTclTkTarget :: beginIteration(int repetitions, int depth) {
 	CGCTarget::beginIteration(repetitions, depth);
 	myCode += "Tk_DoOneEvent(1);\n";
@@ -120,8 +112,8 @@ void CGCTclTkTarget :: mainLoopCode() {
 	myCode << indent(1);
 	mainDecls << indent(1)
 		  << "int " << targetNestedSymbol.push("i") << ";\n";
-	myCode << targetNestedSymbol.get() << "=0; " << "while (++"
-	       << targetNestedSymbol.pop() << " != " << "numIterations"
+	myCode << targetNestedSymbol.get() << "=0; " << "while ("
+	       << targetNestedSymbol.pop() << "++ != " << "numIterations"
 	       << ") {\n";
 	myCode += wormIn;
 
