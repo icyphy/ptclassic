@@ -37,7 +37,7 @@ Date of last revision:
 #endif
 
 #include "DLScheduler.h"
-#include "CGWormhole.h"
+#include "CGWormBase.h"
 #include "Error.h"
 
 /////////////////////////////
@@ -62,9 +62,6 @@ DLScheduler :: ~DLScheduler() {
 
 int DLScheduler :: scheduleIt()
 {
-	// temporal hack
-	wormFlag = FALSE;
-
   	parSched->initialize(myGraph);
 
   	// reset the graph for the new parallel schedule
@@ -82,13 +79,11 @@ int DLScheduler :: scheduleIt()
 	   CGStar* obj = node->myStar();
 
 	   // check the atomicity of the star
-	   if (obj->isItWormhole()) {
+	   if (obj->isItWormhole() && node->invocationNumber() > 1) {
+		node->withProfile(obj->getProfile(numProcs));
+		parSched->copyBigSchedule(node, avail);
 
-		// hack
-		wormFlag = TRUE;
-
-	   	CGWormhole* worm = obj->myWormhole();
-
+	   } else if (obj->isParallel()) {
 	   	// determine the pattern of processor availability.
 		// And return the schedule time.
 	   	int when = parSched->determinePPA(node, avail);
@@ -101,13 +96,25 @@ int DLScheduler :: scheduleIt()
 	   	int resWork = myGraph->sizeUnschedWork() - 
 			myGraph->workAfterMe(node);
 
-		// Possible future revision: decide optimal number of 
-		// processors by an iterative procedure.
-	   	// calculate the optimal number of processors taking 
-		// the "front-idle-time" into account.
-	   	worm->computeProfile(numProcs, resWork, &avail);
+		if (obj->isItWormhole()) {
+	   		CGWormBase* worm = obj->myWormhole();
 
-	   	parSched->scheduleBig(node, numProcs, when, avail);
+			// Possible future revision: decide optimal number of 
+			// processors by an iterative procedure.
+	   		// calculate the optimal number of processors taking 
+			// the "front-idle-time" into account.
+	   		worm->computeProfile(numProcs, resWork, &avail);
+           		if (haltRequested()) return FALSE;
+
+		} else {
+			// TO DO later.
+			// For data parallel stars, choose the best profile.
+			// setting the effP member of the profile.
+			
+		}
+
+		node->withProfile(obj->getProfile(numProcs));
+	   	parSched->scheduleBig(node, when, avail);
 
 	   } else {
 	   	// schedule the object star.
@@ -125,18 +132,13 @@ int DLScheduler :: scheduleIt()
 		return FALSE;
 	}
   
-  // By dynamic level scheduling, we obtain a schedule for a system
-  // which overlaps communication with computation.
-  // In case there is no wormhole inside, and we set the flag saying
-  // NO overlapComm, then we do additional list scheduling at the end
+  // We do additional list scheduling at the end
   // based on the processor assignment determined by the dynamic level
   // scheduling algorithm.
-  if (!wormFlag) {
-	mtarget->clearCommPattern();
-	myGraph->resetGraph();
-	parSched->initialize(myGraph);
-	parSched->listSchedule(myGraph);
-  }
+  mtarget->clearCommPattern();
+  myGraph->resetGraph();
+  parSched->initialize(myGraph);
+  parSched->listSchedule(myGraph);
   mtarget->saveCommPattern();
 	
   return TRUE;
@@ -157,8 +159,3 @@ StringList DLScheduler :: displaySchedule() {
 	return out;
 }
 
-int DLScheduler :: createSubGals() {
-	if ((!wormFlag) && noOverlap)
-		 return ParScheduler :: createSubGals();
-	else return FALSE;
-}
