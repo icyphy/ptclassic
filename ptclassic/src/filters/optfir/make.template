@@ -49,33 +49,35 @@ include $(CONFIG)
 # optfir-f2c.c:	optfir.f converted to C with f2c
 # optfir.c:	hand massaged C version that works
 
-SRCS	      = optfir.c
+SRCS =		optfir.c
 EXTRA_SRCS = 	optfir.f optfir-f2c.c
-EXTRA_DESTS= 	optfir-fortran
+EXTRA_DESTS = 	optfir-fortran
 
-OBJS = $(SRCS:.c=.o)
+OBJS = 		$(SRCS:.c=.o)
 
 # common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
-LIB = foo
+LIB = 		foo
 
 C_INCL =	$(PTCOMPAT_INCSPEC)
  
-REALCLEAN_STUFF =	optfir
+BINARY = optfir$(BINARY_EXT)
 
-all:	makefile $(LIB) optfir
+REALCLEAN_STUFF =	$(BINARY)
 
-install: makefile $(BINDIR)/optfir
+all:	makefile $(BINARY)
+
+install: makefile $(BINDIR)/$(BINARY)
 
 # Use the $(CLINKER) so the binary is statically linked for distribution.
 # On suns, cc takes -Bstatic, gcc takes -static, so we can't just add a flag
 # here.
-optfir:	optfir.o 
-	rm -f optfir
+$(BINARY):	optfir.o 
+	rm -f $@
 	$(CLINKER) $(LINKFLAGS) $^ -lm -o $@
 
-$(BINDIR)/optfir:	optfir
-	rm -f $(BINDIR)/optfir
-	ln optfir $(BINDIR)/optfir
+$(BINDIR)/$(BINARY):	$(BINARY)
+	rm -f $@
+	ln $^ $@
 
 optfir.purify: optfir.o
 	$(PURIFY) $(CLINKER) $(LINKFLAGS) $^ -lm -o $@
