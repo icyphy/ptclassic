@@ -224,7 +224,7 @@ body ::tycho::GanttView::constructor {args} {
     set layout(TICK) 0.35
 
     # set the font
-    set layout(SMFONT) [.tychoFonts findFont {helvetica 10 medium r}]
+    set layout(SMFONT) [::tycho::font helvetica -size 10]
     
     # Label parameters
 
