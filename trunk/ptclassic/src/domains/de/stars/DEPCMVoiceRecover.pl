@@ -1,5 +1,5 @@
 defstar {
-	name { InsertPacket }
+	name { PCMVoiceRecover }
 	domain { DE }
 	author { GSWalter }
 	version { $Id$ }
@@ -7,22 +7,31 @@ defstar {
 	location { DE main palette }
 
 	desc {
-Checks packet sequence and will prompt SDF galaxy to
-create a new packet using a pattern-matching method
-if a packet is found to be missing.
+This star inputs a stream of SeqATMCell objects.  All the
+information bits in objects received with correct sequence
+numbers are sent to 'output'.
+
+If a missing SeqATMCell object is detected, this star sends the most
+recent 8 * 'tempSize' received bits to the 'temp' output, and the
+most recent (8 * 'searchWindowSize' + 'numInfoBits') received bits
+to the 'window' output.
+
+The bits output on the 'window' and 'temp' outputs can be used by
+the 'PatternMatch' galaxy to implement lost-speech recovery.
 	}
+
 	explanation {
 .pp
 This star performs a specific function related to a
 voice-packet interpolation technique for PCM encoded
 data.  On its \fIinput\fR port, this star reads in
-.c BitArray
+.c SeqATMCell
 types which have a field containing a packet sequence
 number.  The sequence number is read and it is determined
 whether or not a packet has been dropped during network
 transmission.  If the missing packet is one of the
 first five
-.c BitArray
+.c SeqATMCell
 s to be sent over the network, this star will substitutue
 all zero bits for the bits which were lost during
 transmission.  These bits are sent through the \fIoutput\fR
@@ -33,9 +42,9 @@ performed as follows:
 .pp
 Say the packet six was found to be missing by this
 star after it sees a
-.c BitArray
+.c SeqATMCell
 numbered seven immediately following a
-.c BitArray
+.c SeqATMCell
 numbered five.  This star will then output a string
 of bits on its \fItemp\fR port of size \fItempSize\fR
 * 8.  These bits describe the first \fItempSize\fR
@@ -43,7 +52,7 @@ samples immediately preceeding the missing packet.  Likewise,
 \fIsearchWindowSize\fR * 8 + \fInumInfoBits\fR bits
 are sent through the \fIwindow\fR port.  These bits describe
 the
-.c BitArray
+.c SeqATMCell
 immediately preceeding the lost packet as well as the
 previous \fIsearchWindowSize\fR samples before that.
 In this example of a missing sixth packet, this means
@@ -59,11 +68,11 @@ galaxy will take the \fInumInfoBits\fR / 8 samples
 from the \fIwindow\fR samples following the \fIwindow\fR's
 best match with the \fItemp\fR samples. These samples
 are then encoded, loaded into a
-.BitArray
+.SeqATMCell
 and sent back to the DE domain where they enter the
 \fIsubIn\fR port of this star.  This star unloads
 the bits from this
-.c BitArray
+.c SeqATMCell
 and outputs them in their proper order on the \fIoutput\fR
 port.  If more than one packet was missing, this star
 will repeat the derived packet enough times to fill the
@@ -104,19 +113,19 @@ Missing Speech Segments in Packet Voice Communications,"
 	output { name { window } type { int } }
 	output { name { output } type { int } }
 
-	hinclude { "BitArray.h" }
+	hinclude { "SeqATMCell.h" }
 
 	protected {
 		int startTemp, stopTemp, startPkt5, stopPkt5;
 		int count, missingPkt;
 		//pkt1 more recently arrived than pkt5
-		BitArray *pkt1, *pkt2, *pkt3, *pkt4, *pkt5, *currentPkt,
+		SeqATMCell *pkt1, *pkt2, *pkt3, *pkt4, *pkt5, *currentPkt,
 				*created;
 	}
 
 	start {
 		if ( numInfoBits > 384 )
-			Error::abortRun( *this, "illegal BitArray size" );
+			Error::abortRun( *this, "illegal SeqATMCell size" );
 		if ( searchWindowSize > 4*int(numInfoBits)/8 ||
 				searchWindowSize < 3*int(numInfoBits)/8 )
 			Error::abortRun( *this, "illegal searchWindowSize" );
@@ -139,8 +148,8 @@ Missing Speech Segments in Packet Voice Communications,"
 			int i, j;
 			Envelope inPkt;
 			input.get().getMessage( inPkt );
-			TYPE_CHECK( inPkt, "BitArray" );
-			currentPkt = ( BitArray* ) inPkt.writableCopy();
+			TYPE_CHECK( inPkt, "SeqATMCell" );
+			currentPkt = ( SeqATMCell* ) inPkt.writableCopy();
 
 			// if proper order, output packet
 			if ( ( currentPkt->readSeq() ) == count ) {
@@ -173,7 +182,7 @@ Missing Speech Segments in Packet Voice Communications,"
 					pkt3 = pkt2;
 					pkt2 = pkt1;
 					pkt1 = 0;
-					LOG_NEW; pkt1 = new BitArray;
+					LOG_NEW; pkt1 = new SeqATMCell;
 				} // end while
 
 				// at this point there may still be missing packets
@@ -253,8 +262,8 @@ Missing Speech Segments in Packet Voice Communications,"
 			int k, n;
 			Envelope subPkt;
 			subIn.get().getMessage( subPkt );
-			TYPE_CHECK( subPkt, "BitArray" );
-			created = ( BitArray* ) subPkt.writableCopy();
+			TYPE_CHECK( subPkt, "SeqATMCell" );
+			created = ( SeqATMCell* ) subPkt.writableCopy();
 			// output packet missingPkt times
 			for ( n = 1; n <= missingPkt; n++ ) {
 				for ( k = 40; k < int ( 40 + numInfoBits ); k++ ) {

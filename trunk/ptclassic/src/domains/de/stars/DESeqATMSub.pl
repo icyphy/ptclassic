@@ -1,18 +1,19 @@
 defstar {
-	name { PrevPacketSub }
+	name { SeqATMSub }
 	domain { DE }
 	author { GSWalter }
-	derivedFrom { ZeroSubstitution }
+	derivedFrom { SeqATMZero }
 	version { $Id$ }
 	copyright { 1992 (c) U. C. Regents }
 	location { DE main palette }
 	desc {
-This star reads in a sequence of BitArrays. It will
-check sequence numbers and if a BitArray is found
-missing, the bits of the previously arrived BitArray
-will be used in its place. The bits from each
-BitArray are unloaded before being sent through
-the output port.
+This star reads in a sequence of SeqATMCells. It will
+check sequence numbers and if a SeqATMCell is found
+missing, the information bits of the previously arrived
+SeqATMCell will be output in its place.
+
+The information bits from each correctly received
+SeqATMCell are unloaded and sent to the output port.
 	}
 
 	protected { int* reserve; }
@@ -21,16 +22,16 @@ the output port.
 		LOG_NEW; reserve = new int[ int( numInfoBits ) ];
 		for ( int i = 0; i < numInfoBits; i++ )
 			reserve[ i ] = 0;
-		DEZeroSubstitution :: setup();
+		DESeqATMZero :: setup();
 	}
 
 	go {
 		if ( input.dataNew ) {
 			Envelope inPkt;
 			input.get().getMessage( inPkt );
-			TYPE_CHECK( inPkt, "BitArray" );
+			TYPE_CHECK( inPkt, "SeqATMCell" );
 			count %= 8;
-			const BitArray* voiceCell = ( const BitArray* )
+			const SeqATMCell* voiceCell = ( const SeqATMCell* )
 					inPkt.myData();
 
 			// if packet missing, output previous packet
@@ -42,14 +43,15 @@ the output port.
 			}
 
 			// output current packet and store in reserver
-			for ( int j = 40; j < int( 40 + numInfoBits ); j++ ) {
+			for ( int j = headerLength;
+					j < int( headerLength + numInfoBits ); j++ ) {
 				if ( voiceCell->isON( j ) ) {
 					output.put( arrivalTime ) << 1;
-					reserve[ j - 40 ] = 1;
+					reserve[ j - headerLength ] = 1;
 				}
 				else {
 					output.put( arrivalTime ) << 0;
-					reserve[ j - 40 ] = 0;
+					reserve[ j - headerLength ] = 0;
 				} // end else
 			} // end for
 
