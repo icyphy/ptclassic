@@ -24,7 +24,7 @@ defstar {
 	desc { "Generate a histogram with the xgraph program." }
 	input {
 		name { input }
-		type { float }
+		type { anytype }
 	}
 	defstate {
 		name {title}
@@ -58,7 +58,7 @@ defstar {
 	hinclude {"DataStruct.h" "Display.h", "StringList.h" }
 	go {
 	    completionTime = arrivalTime;
-	    float data = input%0;
+	    float data = float(input%0);
 	    int i, numToAdd;
 	    int* count;
 	    if (bins.size() == 0) {
