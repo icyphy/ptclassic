@@ -8,20 +8,20 @@
 
 <p> This class provides a text editor specialized for editing Ptcl
 source.  Ptcl is the Ptolemy extension to Tcl.  It is automatically
-invoked whenever you open any file with an <a name=".ptcl">".ptcl"
-extension</a> or <a name=".pt">".pt" extension</a> or if a directory is
-opened and it contains a <CODE>schematic/contents;</CODE> subfile,
-and the directory is not named <CODE>*.pal</CODE>.
+invoked whenever you open any file with an <a
+name=".ptcl"><CODE>.ptcl</CODE> extension</a> or <a
+name=".pt"><CODE>.pt</CODE> extension</a> or if a directory is opened
+and it contains a <CODE>schematic/contents;</CODE> subfile, and the
+directory is not named <CODE>*.pal</CODE>.
 
 <P> Ptolemy is a software environment that provides simulation an code
-generation capabilities.  <A
-HREF="http://ptolemy.eecs.berkeley.edu">http://ptolemy.eecs.berkeley.edu</A>
-describes the Ptolemy project in detail.
-The <a name="EditPtcl class">EditPtcl class</a> is derived from the
-<a href="EditItclHelp.html">EditItcl class</a>, and
-therefore inherits all of its features.
-It colors certain Ptcl constructs, such as comments
-and universe definitions.
+generation capabilities.
+<A HREF="http://ptolemy.eecs.berkeley.edu"><CODE>http://ptolemy.eecs.berkeley.edu</CODE></A>
+describes the Ptolemy project in detail.  The <a name="EditPtcl
+class">EditPtcl class</a> is derived from the <a
+href="EditItclHelp.html">EditItcl class</a>, and therefore inherits
+all of its features.  It colors certain Ptcl constructs, such as
+comments and universe definitions.
 
 <P>To evaluate a ptcl file, you must have the ptcl extensions built
 into the binary that tycho is running.  To start tycho with the ptcl
@@ -33,15 +33,20 @@ documentation</A> for more information.
 The Ptcl editor has a <CODE>Special</CODE> menubutton, which has the 
 following choices:
 <MENU>
-<LI> Retarget - Brings up the <A HREF="../../../../typt/editors/doc/usersGuides/RetargetHelp.html">Retargetting</A> editor, which can be used to 
-retarget a Ptolemy universe between domains.
 
-<LI> List Stars - List the names of the stars used by the ptcl file.
+<LI> <CODE>Retarget</CODE> - Brings up the
+<A HREF="../../../../typt/editors/doc/usersGuides/RetargetHelp.html">Retargetting</A>
+editor, which can be used to retarget a Ptolemy universe between
+domains.  The <CODE>Retarget</CODE> menu choice is disable if
+the Tycho binary does not have the Ptolemy kernel built in.
 
-<LI> Ptolemy Universes - Bring up a browser that shows all the Ptolemy
-universes in the Ptolemy tree.
+<LI> <CODE>List Domains</CODE> - List the domains used by the ptcl file.
 
-<LI> Universe Name - Show the name of the universe defined by this file.
+<LI> <CODE>List Stars</CODE> - List the names of the stars used by the ptcl
+file. 
+
+<LI> <CODE>Universe Name</CODE> - Show the name of the universe defined by
+this file.
 
 </MENU>
 
