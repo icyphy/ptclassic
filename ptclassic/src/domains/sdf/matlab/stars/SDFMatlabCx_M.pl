@@ -14,7 +14,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF main library }
+	location { SDF Matlab library }
 	explanation {
 See the explanation for Matlab_M star.
 The only difference is that this star forces the outputs to be complex matrices.
