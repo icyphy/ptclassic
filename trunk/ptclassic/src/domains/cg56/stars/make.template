@@ -37,6 +37,7 @@ PL_SRCS= \
  CG56Distributor.pl \
  CG56DownSample.pl \
  CG56Gain.pl \
+ CG56HostAOut.pl \
  CG56HostScale.pl \
  CG56HostOut.pl \
  CG56HostSlider.pl \
