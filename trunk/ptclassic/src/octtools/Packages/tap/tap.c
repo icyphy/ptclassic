@@ -319,7 +319,7 @@ char *mode;
     /* create technology view name */
     viewStr = util_strsav(view);
     for (cPtr = viewStr; *cPtr; cPtr++) {
-	if (isupper(*cPtr)) *cPtr = tolower(*cPtr);
+	if (isupper((int)*cPtr)) *cPtr = tolower((int)*cPtr);
     }
 
     /* open technology facet */
