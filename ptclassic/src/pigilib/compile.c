@@ -805,7 +805,8 @@ static boolean
 CompileUniv(facetPtr)
 octObject *facetPtr;
 {
-    char msg[512];
+    char buf[512];   /* for assemblying a string that may be an error
+			message or a Tcl command. */
     char *name;
     boolean xferedBool;
     char *domain;
@@ -814,33 +815,39 @@ octObject *facetPtr;
     name = BaseName(facetPtr->contents.facet.cell);
     if (!GOCDomainProp(facetPtr, &domain, DEFAULT_DOMAIN)) {
 	PrintErr(ErrGet());
-	sprintf(msg, "Domain error in facet %s", name);
-	PrintErr(msg);
+	sprintf(buf, "Domain error in facet %s", name);
+	PrintErr(buf);
 	return FALSE;
     }
-    TCL_CATCH_ERR1(Tcl_VarEval(ptkInterp, "reset; domain ",
-		   domain, (char*) NULL));
+    sprintf(buf, "reset\ndomain %s\n", domain);
+    KcLog(buf);
+    TCL_CATCH_ERR1(Tcl_Eval(ptkInterp, buf));
 
     recompileFlag = 0;
     ERR_IF1(!ProcessSubGals(facetPtr));
     xferedBool = DupSheetIsDup(&xfered, name);
     if (xferedBool && !IsDirtyOrGone(facetPtr) && !recompileFlag) {
 	/* universe already xfered to kernel and is unchanged */
-	Tcl_VarEval(ptkInterp, "curuniverse ", name, (char *) NULL);
+	sprintf(buf, "curuniverse %s\n", name);
+	KcLog(buf);
+	Tcl_VarEval(ptkInterp, buf);
 	return (TRUE);
     }
 
-    sprintf(msg, "CompileUniv: facet = %s, %s universe", name, domain);
-    PrintDebug(msg);
-    TCL_CATCH_ERR1(Tcl_VarEval(ptkInterp, "newuniverse ", name, " ",
-		   domain, (char*) NULL));
+    sprintf(buf, "CompileUniv: facet = %s, %s universe", name, domain);
+    PrintDebug(buf);
+    sprintf(buf, "newuniverse %s %s\n", name, domain);
+    KcLog(buf);
+    TCL_CATCH_ERR1(Tcl_Eval(ptkInterp, buf));
 
     /* get the target */
     if (!GOCTargetProp(facetPtr, &target, KcDefTarget(domain))) {
         PrintErr(ErrGet());
         return (FALSE);
     }
-    TCL_CATCH_ERR1(Tcl_VarEval(ptkInterp, "target ", target, (char*) NULL));
+    sprintf(buf, "target %s\n", target);
+    KcLog(buf);
+    TCL_CATCH_ERR1(Tcl_Eval(ptkInterp, buf));
     ERR_IF1(!ProcessTargetParams(target,facetPtr));
     ERR_IF1(!ProcessFormalParams(facetPtr));
     ERR_IF1(!ProcessInsts(facetPtr));
