@@ -133,7 +133,7 @@ proc tychoFindCodeDocHTML { {dirname .} {depth 0}} {
 		    $name != {test} && \
 		    $name != {junk} } {
 		set subfiles [tychoFindCodeDocHTML [file join $dirname $name] \
-g			[expr $depth + 1]]
+			[expr $depth + 1]]
 		cd $dirname
 		foreach file $subfiles {
 		    lappend files [file join $name $file]
