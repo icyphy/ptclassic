@@ -310,7 +310,6 @@ return TRUE;
 // fetch an event on request.
 int DEScheduler :: fetchEvent(InDEPort* p, double timeVal) 
 {
-    cerr << "Entering DEScheduler ::fetchEvent" << p << "," << timeVal ;
 	CqLevelLink *store = NULL;
 	eventQ.DisableResize();
 	while (1)
@@ -329,7 +328,6 @@ int DEScheduler :: fetchEvent(InDEPort* p, double timeVal)
                         if (tl == p) {
                                 if (tl->getFromQueue(ent->p)){
 					eventQ.putFreeLink(h);
-    cerr << ":Extracting " << h->level << "," << h->fineLevel << "," << h->dest;
 				}
 				else
 					eventQ.pushBack(h);
@@ -339,7 +337,6 @@ int DEScheduler :: fetchEvent(InDEPort* p, double timeVal)
 				      eventQ.pushBack(temp);
 				}
 				eventQ.EnableResize();
-    cerr << '\n';
                                 return TRUE;
                         }
                 }
