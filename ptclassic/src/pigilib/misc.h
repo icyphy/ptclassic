@@ -1,3 +1,6 @@
+#ifndef MISC_H
+#define MISC_H 1
+
 /* 
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
@@ -27,14 +30,21 @@ Version identification:
 $Id$
 */
 
+extern int ShowFacetNum();
 extern int Man();
 extern int Profile();
 extern int PrintFacet();
 extern int RpcOpenFacet();
-extern int RpcPlot();
 extern int RpcLoadStar();
 extern int RpcLoadStarPerm();
-extern int RpcCompileStar();
 extern int ERFilterDesign();
 extern int WFilterDesign();
+extern int ptOpenFacet();
+
+/* FIXME: The following functions are not in misc.c */
+extern int RpcPlot();
+extern int RpcCompileStar();
 extern int RpcParamCheck();
+
+#endif /* MISC_H */
+
