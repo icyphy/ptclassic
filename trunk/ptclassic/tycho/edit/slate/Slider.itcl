@@ -122,22 +122,20 @@ class ::tycho::Slider {
     # Move the slider down one increment.
     method down {} {}
 
-
     ###################################################################
     ####                   private methods                         ####
 
     # Jump the slider to a position indicated by coordinates.
-    private method jump {x y} {}
+    private method jump {ignore x y} {}
 
     # Redraw the slider completely
     private method redraw {} {}
 
-    # Update the slider display. Do not use.
-    private method updatevalue {} {}
+    # Update the slider display
+    private method updatevalue {args} {}
 
     # Given hit coordinates, move the slider up or down one increment
-    private method upordown {x y} {}
-
+    private method upordown {ignore x y} {}
 
     ###################################################################
     ####                   private variables                       ####
@@ -399,7 +397,7 @@ body ::tycho::Slider::get {} {
 # Given x and y coordinates (relative to the slate), move the
 # bar to that position. (Currently, y is ignored.) PRIVATE.
 #
-body ::tycho::Slider::jump {x y} {
+body ::tycho::Slider::jump {ignore x y} {
     ::set value [expr $itk_option(-from) \
 	    + double($sliderbottom-$y)/$itk_option(-length) \
 	    * ($itk_option(-to) - $itk_option(-from))]
@@ -489,15 +487,13 @@ body ::tycho::Slider::redraw {} {
     $bounder bind $bar -button 1
 
     # Configure the interactor that "jumps" and moves the bar
-    $shifter configure -activatecommand \
- 	        [list @scope [info class] \
-	        "$this jump %2 %3; $shifter target $bar"] \
+    $shifter configure \
+    	-activatecommand "@scope [info class] $this jump" \
 	    -bounds $bounds
     $shifter bind $back -button 2
 
     # Configure the interactor that moves the bar one step at a time
-    $repeater configure -command \
-	    [list @scope [info class] "$this upordown %2 %3"]
+    $repeater configure -command "@scope [info class] $this upordown"
     $repeater bind $back -button 1
 
     # Configure the resolution to make sure the slider starts
@@ -569,9 +565,11 @@ body ::tycho::Slider::up {} {
 #### updatevalue
 #
 # Recalculate and display the current value of the slider.
-# Call the -command option if there is one.
+# Call the -command option if there is one. All arguments
+# are ignored (but allowed for calling from interactor
+# callbacks).
 #
-body ::tycho::Slider::updatevalue {} {
+body ::tycho::Slider::updatevalue {args} {
     if { ! $initialized } {
 	return
     }
@@ -605,7 +603,7 @@ body ::tycho::Slider::updatevalue {} {
 #
 # Given hit coordinates, move the slider up or down one increment
 #
-body ::tycho::Slider::upordown {x y} {
+body ::tycho::Slider::upordown {ignore x y} {
     if { $y < [lindex [$itk_component(slate) coords $bar] 1] } {
 	$this up
     } elseif { $y > [lindex [$itk_component(slate) coords $bar] 3] } {
