@@ -395,8 +395,13 @@ KcSetKBDomain(const char* domain) {
 		Error::abortRun("Invalid domain: ", domain);
 		return FALSE;
 	}
+	// FIXME: this isn't quite right, but can go away when we
+	// complete the job of eliminating current domain.  We avoid
+	// changing the galaxy domain if it is non-empty.
+
 	// equality can be used here because of hashstring call.
-	if (currentGalaxy && currentGalaxy->domain() != domain &&
+	if (currentGalaxy && currentGalaxy->numberBlocks() == 0 &&
+	    currentGalaxy->domain() != domain &&
 	    !currentGalaxy->setDomain(domain))
 		return FALSE;
 	curDomain = domain;
