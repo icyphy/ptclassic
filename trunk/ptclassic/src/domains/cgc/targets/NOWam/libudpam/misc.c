@@ -749,7 +749,7 @@ void *TimeoutThread(void *voidbundle)
   timestruc_t      ts_quanta;
   struct timeval   tv_quanta;
   
-  flag = 0;
+  err = 0;
   bundle = (eb_t)voidbundle;
   ts_quanta.tv_nsec = 0;
   tv_quanta.tv_sec = QUANTA;
