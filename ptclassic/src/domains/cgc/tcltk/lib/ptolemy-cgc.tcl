@@ -52,9 +52,9 @@ proc expandEnvVars { path } {
 }
 
 # These paths changed with Itcl3.0
-set env(TCL_LIBRARY) [expandEnvVars \$PTOLEMY/tcltk/itcl/lib/tcl]
+set env(TCL_LIBRARY) [expandEnvVars \$PTOLEMY/tcltk/tcl/lib/tcl]
 source [info library]/init.tcl
-set tk_library [expandEnvVars \$PTOLEMY/tcltk/itcl/lib/tk]
+set tk_library [expandEnvVars \$PTOLEMY/tcltk/tcl/lib/tk]
 source $tk_library/tk.tcl
 
 ###################################################################
