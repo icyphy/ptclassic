@@ -43,16 +43,18 @@ include $(CONFIG)
 TCL_SRCS = 
 
 ITCL_SRCS = \
-	dataview.itcl \
 	SimpleModel.itcl \
 	SimpleView.itcl
 
-EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
+DEMO_SRCS = \
+	simpleview
 
-MISC_FILES =		doc test tclIndex
+EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS) $(DEMO_SRCS)
+
+MISC_FILES =		tclIndex
 
 # Sub directories to run make in.
-DIRS =			doc test
+DIRS =			
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex
@@ -60,8 +62,14 @@ REALCLEAN_STUFF =	tclIndex
 # Title for the tydoc index page
 TYDOC_DESC =	Index of classes in tycho/kernel/demo
 
+sources:: $(DEMO_SRCS)
+	chmod a+x $(DEMO_SRCS)
+
 # Do make sources so that we ensure that the subdirectories are checked out
 all install: sources $(MISC_SRCS) tclIndex
+
+sources:: $(DEMO_SRCS)
+	chmod a+x $(DEMO_SRCS)
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
