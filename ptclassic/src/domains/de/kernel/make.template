@@ -17,7 +17,7 @@ ROOT = ../../../../..
 VPATH = $(ROOT)/src/domains/sdf/image/kernel
 
 # get configuration info
-CONFIG=$(ROOT)/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 # SDF kernel
@@ -42,7 +42,7 @@ install:	makefile $(LIBDIR)/$(LIB)
 
 
 # include common definitions, rules
-include $(ROOT)/common.mk
+include $(ROOT)/mk/common.mk
 
 
 # Don't add anything after the next line; makedepend will zap it.

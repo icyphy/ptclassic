@@ -12,7 +12,7 @@ ROOT = ../../../../..
 VPATH = $(ROOT)/src/domains/sdf/matrix/stars
 
 # get configuration info
-CONFIG=$(ROOT)/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 # SDFDIR is the directory containing SDF domain support
@@ -71,7 +71,7 @@ all:		$(SRCS) stars_all
 install:	stars_install
 
 # include common definitions, rules
-include $(ROOT)/common.mk
+include $(ROOT)/mk/common.mk
 
 
 # Don't add anything after the next line; makedepend will zap it.

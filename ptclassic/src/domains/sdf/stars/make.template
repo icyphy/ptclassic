@@ -12,7 +12,7 @@ ROOT = ../../../..
 VPATH = $(ROOT)/src/domains/sdf/stars
 
 # get configuration info
-CONFIG=$(ROOT)/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 # SDFDIR is the directory containing SDF domain support

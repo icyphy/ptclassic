@@ -36,7 +36,7 @@ ROOT=../../../..
 VPATH = $(ROOT)/src/domains/xxx/kernel
 
 # get configuration info
-CONFIG=$(ROOT)/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 INCL = -I$(KERNDIR)
 
@@ -60,7 +60,7 @@ all:	makefile $(LIB)
 install:	makefile $(LIBDIR)/$(LIB)
 
 # include common definitions, rules
-include $(ROOT)/common.mk
+include $(ROOT)/mk/common.mk
 
 # Commands to make some sources from templates
 
