@@ -222,7 +222,7 @@ body ::tycho::Displayer::constructor {args} {
     # Emacs-like bindings.
     bind $prefix <Control-x><k> "$this nextWindow; \
 	    delete object $this; break"
-    bind $prefix <Control-x><Control-f> {::tycho::File::openWin}
+    bind $prefix <Control-x><Control-f> {::tycho::File::openWin; break}
     
     # Window manager interface bindings.
     bind $prefix <Control-x><0> "$this nextWindow; \
