@@ -48,6 +48,7 @@ INCL = -I$(CGCDIR) -I$(CGDIR) -I$(KERNDIR) $(PTCOMPAT_INCSPEC)
 # source files for all stars, using preprocessor
 PL_SRCS= \
  CGCAdd.pl \
+ CGCAddCx.pl \
  CGCAddFix.pl \
  CGCBitsToInt.pl \
  CGCBlackHole.pl \
@@ -96,6 +97,7 @@ PL_SRCS= \
  CGCModulo.pl \
  CGCModuloInt.pl \
  CGCMpy.pl \
+ CGCMpyCx.pl \
  CGCMpyFix.pl \
  CGCMux.pl \
  CGCPad.pl \
