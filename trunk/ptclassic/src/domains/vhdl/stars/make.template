@@ -63,6 +63,8 @@ PL_SRCS = \
  VHDLCos.pl \
  VHDLSin.pl \
  VHDLExp.pl \
+ VHDLRectToCx.pl \
+ VHDLCxToRect.pl \
  VHDLRectToPolar.pl \
  VHDLPolarToRect.pl \
  VHDLQuant.pl \
