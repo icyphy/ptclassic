@@ -220,7 +220,7 @@ void HierScheduler :: setup () {
     ClusterIter clusters(*galaxy());
     Cluster* cluster;
     while ((cluster = clusters++) != NULL) {
-	if (cluster->scheduler()) {
+	if (cluster->clusterScheduler()) {
 	    // First, resolve the procId 
 	    int procId = resolveProcId(*cluster);
 	    // Make sure there wasn't a inconsistancy in resolving the procId
@@ -270,7 +270,7 @@ void HierScheduler :: setup () {
 
 	    // Set the scheduler/compute the schedule
 	    shadow->setGalaxy(*cluster);
-	    shadow->setScheduler(cluster->scheduler());
+	    shadow->setScheduler(cluster->clusterScheduler());
 	    shadow->initialize();
 	}
     }
