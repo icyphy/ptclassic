@@ -39,6 +39,9 @@
 # JAVAHOME = 	/opt/SUNWjws/JDK
 JAVAHOME = 	/opt/jdk1.1.6
 
+# The home of the most recent JDK, possibly experimental or prerelease.
+LATEST_JAVAHOME = /opt/jdk1.2latest
+
 # Location of the Java html documentation.
 # The file java.lang.Object.html should
 # be at $JAVAHTMLDIR/java.lang.Object.html
