@@ -105,10 +105,6 @@ class MatrixParticle : public Particle {
         virtual Matrix* subMatrix(int startRow, int startCol,
 				  int numRows, int numCols) = 0;
  
-        // Never used but need to be declared
-        /*virtual*/ int initParticleStack(Block* parent,ParticleStack& pstack,
-					  Plasma* myPlasma, 
-					  const char* delay = 0) {}
  protected:
         // some error functions
         virtual void errorAssign(const char*) const = 0;
