@@ -162,6 +162,7 @@ body ::tycho::DirectedAcyclicGraph::depthSort {} {
         # graph is empty.
         return {}
     }
+    set result {}
     attributeInit depth -1
     set searchid [array startsearch contentslist]
     while {[set node [array nextelement contentslist $searchid]] != {}} {
