@@ -62,11 +62,13 @@ void QSParProcs :: assignNode(QSNode* pd, int leng, int pNum)
 		proc->appendNode(&idleNode, idle);
 	proc->appendNode(pd, leng);
 	pd->setScheduledTime(proc->getTimeFree());
+	pd->setProcId(pNum);
 
 	// update the clock of the processors.
 	int ck = proc->getTimeFree() + leng;
         proc->setTimeFree(ck);
         proc->setAvailTime(ck);
+	pd->setFinishTime(ck);
 }
 
 void QSParProcs :: setIndex(int v)
@@ -131,19 +133,25 @@ void QSParProcs :: advanceClock(int ix)
 	// of "temp" which have become fireable as a result of "temp"
 	// being finished its execution.
 	do {	
-		NodeSchedule* ns = proc->getCurrentSchedule();
-		QSNode* temp = (QSNode*) ns->getNode();
-		if (temp) {
-			if (ns->getDuration()) {
-				temp->setAssignedFlag();
+		int t = proc->getNextFiringTime();
+		while ((clock >= t) && (t > 0)) {
+			NodeSchedule* ns = proc->nextNodeToBeFired();
+			QSNode* temp = (QSNode*) ns->getNode();
+			if (temp) {
+				if (ns->getDuration()) {
+					temp->setAssignedFlag();
+				}
+				if (temp->alreadyAssigned()) {
+					proc->setFiringInfo(ns,
+						temp->getFinishTime());
+					fireNode(temp,k);
+				}
 			}
-			if (temp->alreadyAssigned()) {
-				fireNode(temp,k);
-			}
+			t = proc->getNextFiringTime();
 		}
 		k++;
 		if (k < numProcs) proc = getSchedule(pIndex[k]);
-	} while (k < numProcs && clock >= proc->getTimeFree());
+	} while (k < numProcs);
 }
 			
 // fire a node and add runnable descendants into the list.
@@ -155,7 +163,7 @@ void QSParProcs :: fireNode(QSNode* n, int preferredProc) {
 		if (pd->fireable()) {
 			pd->setAssignedFlag();
 			myGraph->sortedInsert(myGraph->runnableNodes,pd,1);
-			pd->setProcId(pIndex[preferredProc]);
+			pd->setPreferredProc(pIndex[preferredProc]);
 		}
 	}
 }
@@ -174,7 +182,7 @@ void QSParProcs :: checkPreferredProc(int pNum)
 		if (proc->getPrevTime() == clock) {
 			QSNode* qn = (QSNode*) proc->getCurrentNode();
 			QSNode* q = (QSNode*) getSchedule(pIndex[0])->getCurrentNode();
-			if ((qn->getProcId() != pNum) && (qn != q)) {
+			if ((qn->getPreferredProc() != pNum) && (qn != q)) {
 				// exchange the nodes.
 				int length = proc->getAvailTime() - clock;
 				proc->removeLastSchedule();
@@ -204,13 +212,20 @@ void QSParProcs :: scheduleSmall(QSNode* pd)
 	// advance the global clock if necessary
 	advanceClock(0);
 
-	// check whether preferredProc is available or not.
-	checkPreferredProc(pd->getProcId());
+	// check OSOP option
+	if (OSOPreq() && pd->invocationNumber() > 1) {
+		ParNode* firstN = (ParNode*) pd->myMaster()->myMaster();
+		int whichP =  firstN->getProcId();
+		assignNode(pd, pd->myExecTime(), whichP);
+	} else {
+		// check whether preferredProc is available or not.
+		checkPreferredProc(pd->getPreferredProc());
 
-	// schedule the node on the first available processor
-	assignNode(pd, pd->myExecTime(), pIndex[0]);
+		// schedule the node on the first available processor
+		assignNode(pd, pd->myExecTime(), pIndex[0]);
 
-	if (pd->myExecTime() == 0) fireNode(pd,0);
+		if (pd->myExecTime() == 0) fireNode(pd,0);
+	}
 
 	// renew the states of the graph
 	myGraph->decreaseNodes();
@@ -236,7 +251,7 @@ void QSParProcs :: scheduleBig(QSNode* node, int opt, IntArray& avail)
 
 	// check whether preferredProc is available or not.
 	advanceClock(0);
-	checkPreferredProc(node->getProcId());
+	checkPreferredProc(node->getPreferredProc());
 	int shift = pf.frontIdleLength(avail);
 
 	// schedule the runnable nodes into the idle slot
