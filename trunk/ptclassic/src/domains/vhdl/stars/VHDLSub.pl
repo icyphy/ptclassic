@@ -15,7 +15,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		name{ pos }
 		type{ float }
 	}
-	input {
+	inmulti {
 		name{ neg }
 		type{ float }
 	}
@@ -27,7 +27,7 @@ limitation of liability, and disclaimer of warranty provisions.
                 noInternalState();
         }
 	codeblock (std) {
-$ref(output) $assign(output) $ref(pos) - $ref(neg);
+$ref(output) $assign(output) $ref(pos) - ($interOp(+, neg));
 	}
         go {
 	  addCode(std);
