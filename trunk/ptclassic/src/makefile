@@ -81,8 +81,21 @@ makefiles:
 	    fi ; \
 	done
 
-all install clean realclean sources depend checkjunk sccsinfo:
+all install clean realclean sources depend checkjunk sccsinfo::
 	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making $@ in $$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../src/$$x $@ ;\
+		) \
+	    fi ; \
+	done
+
+# Special rule to get sources in directories that do not have makefiles
+# but have files under version control
+VCDIRS = compat
+sources::
+	@for x in $(VCDIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
 		echo making $@ in $$x ; \
@@ -102,17 +115,3 @@ TAGS:
 	    fi ; \
 	done
 	-cat -s $(TDIRS:%=%/TAGS) > $@
-
-
-# Quick way to build a small fast ptcl
-ptcl/ptcl.ptiny:
-	(cd kernel; $(MAKE) install)
-	(cd domains/de; $(MAKE) install)
-	(cd domains/sdf; $(MAKE) install)
-	(cd ptcl; $(MAKE) ptcl.ptiny)
-
-# Quick way to build a small fast pigiRpc
-pigiRpc/ptinyRpc: ptcl/ptcl.ptiny
-	(cd pigilib; $(MAKE) install)
-	(cd ptklib; $(MAKE) install)
-	(cd pigiRpc; $(MAKE) ptinyRpc)
