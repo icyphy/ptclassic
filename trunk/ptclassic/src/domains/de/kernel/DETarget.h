@@ -87,6 +87,9 @@ public:
             return sched->nextFiringTime();
         }
 
+	// Return TRUE if the ResourceContentionQueue is being used
+	int isResource();
+
 protected:
 	void setup();
 

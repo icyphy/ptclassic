@@ -122,6 +122,10 @@ int DETarget::isMutable() {
 	return int(mutableQ);
 }
 
+int DETarget::isResource() {
+	return int(dercQ);
+}
+
 Block* DETarget :: makeNew() const  {
 	LOG_NEW; return new DETarget;
 }
