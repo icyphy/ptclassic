@@ -168,7 +168,7 @@ public:
 };
 
 // define << operator to use virt fn.
-ostream& operator<<(ostream& o, SDFCluster& cl) {
+inline ostream& operator<<(ostream& o, SDFCluster& cl) {
 	return cl.printOn(o);
 }
 
@@ -213,6 +213,9 @@ protected:
 public:
 	// return the schedule
 	virtual StringList displaySchedule(int depth);
+
+	// default version (since SDFScheduler has a no-argument version)
+	StringList displaySchedule() { return displaySchedule(0);}
 
 	// code generation
 	virtual StringList genCode(Target&, int depth);
