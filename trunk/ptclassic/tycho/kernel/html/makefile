@@ -46,7 +46,14 @@ DIRS =
 
 TCL_SRCS = 
 
-ITCL_SRCS = 
+ITCL_SRCS = \
+	HTML.itcl \
+	HTMLMessage.itcl \
+	ResourceRemote.itcl \
+	ResourceFTP.itcl \
+	ResourceHTTP.itcl \
+	ResourceMail.itcl \
+	WelcomeMessage.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	html.tcl \

@@ -46,7 +46,49 @@ DIRS =
 
 TCL_SRCS = 
 
-ITCL_SRCS = 
+ITCL_SRCS = \
+	ButtonBox.itcl \
+	BuilderDialog.itcl \
+	CircularList.itcl \
+	ColorBrowser.itcl \
+	ColorManager.itcl \
+	ColorPicker.itcl \
+	Displayer.itcl \
+	Edit.itcl \
+	EditSearch.itcl \
+	EditSpell.itcl \
+	EditStack.itcl \
+	ErrorMessage.itcl \
+	File.itcl \
+	FileBrowser.itcl \
+	FontManager.itcl \
+	FontDialog.itcl \
+	IndexBrowser.itcl \
+	ListBrowser.itcl \
+	MenuBar.itcl \
+	MenuSupport.itcl \
+	Message.itcl \
+	Monitor.itcl \
+	PopupMenu.itcl \
+	StyleChooser.itcl \
+	StyleEditor.itcl \
+	Query.itcl \
+	Registry.itcl \
+	RevControl.itcl \
+	RevControlSCCS.itcl \
+	RevControlRCS.itcl \
+	Shortcuts.itcl \
+	StatusBar.itcl \
+	StyleSheet.itcl \
+	TArchetype.itcl \
+	TclShell.itcl \
+	ToolBar.itcl \
+	TopLevel.itcl \
+	TWidget.itcl \
+	UserProfile.itcl \
+	View.itcl \
+	YesNoCancel.itcl \
+	YesNoQuery.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	gui.tcl \
