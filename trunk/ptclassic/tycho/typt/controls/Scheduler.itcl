@@ -380,7 +380,7 @@ body ::tycho::Scheduler::startC {procname args} {
     set realtime 0
     ::tycho::getopt notify args
     ::tycho::getopt realtime args
-    set taskname [::info namespace tail $procname]
+    set taskname [namespace tail $procname]
 
     start $taskname \
             [list eval $procname setup $args] \
