@@ -1508,9 +1508,9 @@ body ::tycho::HTML::initializeToolbar {toolbar} {
     # support the SHIFT-B1 binding... just simple button.
     catch {
         bind $toolbar.buttonsite.inside.buttonreload <Shift-Button-1> \
-                "::tycho::ResourceHTTP::initialize"
+                "::tycho::ResourceRemote::initialize"
         bind $toolbar.buttonsite.inside.buttonreload <Control-Button-1> \
-                "::tycho::ResourceHTTP::initialize"
+                "::tycho::ResourceRemote::initialize"
     }
     
     $toolbar button open \
