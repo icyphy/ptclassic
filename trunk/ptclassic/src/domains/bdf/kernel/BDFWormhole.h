@@ -1,6 +1,10 @@
 #ifndef _BDFWormhole_h
 #define _BDFWormhole_h 1
 
+#ifdef __GNUG__
+#pragma interface
+#endif
+
 #include "StringList.h"
 #include "Wormhole.h"
 #include "BDFStar.h"

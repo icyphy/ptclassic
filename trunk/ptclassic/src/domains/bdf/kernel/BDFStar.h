@@ -14,8 +14,11 @@ $Id$
 
 *******************************************************************/
 
-#include "Star.h"
-#include "Fraction.h"
+#ifdef __GNUG__
+#pragma interface
+#endif
+
+#include "SDFStar.h"
 #include "BDFConnect.h"
 #include "Particle.h"
 
@@ -23,7 +26,7 @@ $Id$
 	// class BDFStar
 	////////////////////////////////////
 
-class BDFStar : public Star  {
+class BDFStar : public DataFlowStar  {
 
 public:
 	// my domain
@@ -32,6 +35,30 @@ public:
 	// domain specific initialization
 	void prepareForScheduling();
 
+	// functions for schedule generation
+	int notRunnable();
+	int simRunStar(int deferFiring);
+	int deferrable();
+	// identification
+	int isSDF() const;
+	int isA(const char*) const;
+};
+
+class BDFStarPortIter : public BlockPortIter {
+public:
+	BDFStarPortIter(BDFStar& s) : BlockPortIter(s) {}
+	BDFPortHole* next() { return (BDFPortHole*)BlockPortIter::next();}
+	BDFPortHole* operator++() { return next();}
+};
+
+// I want to put the following into SDFStar.h eventually.
+
+class DFStarPortIter : public BlockPortIter {
+public:
+	DFStarPortIter(DataFlowStar& s) 
+	: BlockPortIter(s) {}
+	DFPortHole* next() { return (DFPortHole*)BlockPortIter::next();}
+	DFPortHole* operator++() { return next();}
 };
 
 #endif

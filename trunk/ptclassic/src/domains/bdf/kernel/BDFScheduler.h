@@ -14,6 +14,10 @@ $Id$
 
 *******************************************************************/
 
+#ifdef __GNUG__
+#pragma interface
+#endif
+
 #include "BDFStar.h"
 #include "BDFBool.h"
 #include "SDFScheduler.h"
@@ -54,7 +58,7 @@ class BDFPortSchedInfo {
 	// destructor
 	~BDFPortSchedInfo();
 	// trace back porthole relationships
-        void traceBack (const BDFPortHole&);
+        void traceBack (DFPortHole&);
 };
 
 class BDFScheduler : public SDFScheduler {
@@ -113,8 +117,8 @@ private:
 	}
 
 	// initialization functions for info structures.
-	void initInfoBDF (const Star&);
-	void initInfoSDF (const Star&);
+	void initInfo (Star&);
+	void commonPortInfo (PortHole&);
 
 	// compute # of tokens to be moved on each arc, based on booleans
 	void computeTokens (const Star&, int useKnownBools = TRUE);

@@ -14,6 +14,10 @@ $Id$
 
 *******************************************************************/
 
+#ifdef __GNUG__
+#pragma interface
+#endif
+
 #include "Connect.h"
 
 class StringList;
