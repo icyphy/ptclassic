@@ -121,8 +121,18 @@ if {$tychostartfile != {} && \
 }
 unset tychostartfile
 
+set tychoWelcomeWindow 1
+set tychoConsoleWindow 1
+set tychoOpenFiles 0
 foreach file $argv {
-    File::openContext $file
+    if {$file == {-nowelcome}} {
+	set tychoWelcomeWindow 0
+    } elseif {$file == {-noconsole}} {
+	set tychoConsoleWindow 0
+    } else {
+	set tychoOpenFiles 1
+	File::openContext $file
+    }
 }
 
 # To disable the welcome message, set the global variable
@@ -131,13 +141,21 @@ foreach file $argv {
 # FIXME: This should be implemented as a command-line option
 # rather than a global variable.
 #
-if {![info exists tychoWelcomeMessage] || $tychoWelcomeMessage != 0} {
+if {$tychoWelcomeWindow != 0} {
     ::tycho::welcomeMessage
 }
 
-# If there are no command-line arguments, open a console window
-if {$argv == {}} {
-    uplevel #0 {::tycho::Console .mainConsole \
-	    -master 1 -text "Welcome to Tycho\n" -geometry +0+0}
-    wm deiconify .mainConsole
+# If there are no command-line arguments, and the -noconsole
+# option was not given, open a console window
+if {$tychoOpenFiles == 0} {
+    if {$tychoConsoleWindow != 0} {
+	uplevel #0 {::tycho::Console .mainConsole \
+		-master 1 -text "Welcome to Tycho\n" -geometry +0+0}
+	wm deiconify .mainConsole
+    }
 }
+
+unset tychoWelcomeWindow
+unset tychoConsoleWindow
+unset tychoOpenFiles
+
