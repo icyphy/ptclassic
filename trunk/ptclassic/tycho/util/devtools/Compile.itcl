@@ -78,6 +78,10 @@ class ::tycho::Compile {
     # Compile the file.
     protected method compileFiles {}
 
+    # Parse the error message, determine action (language dependent)
+    # This is always called by compileFiles. It's generic here
+    protected method parseError {results } {}
+
     # Create a makefile.
     protected method createMakefile {}
 
@@ -166,6 +170,40 @@ body ::tycho::Compile::compileAndRun {filenames} {
     ###################################################################
     ####                      protected methods                    ####
 
+#####################################################################
+#### parseError
+#
+# Parse the error output from a compiler. Although this function is
+# generic, it works for many different compilers such as gcc,
+# javac, etc.
+#
+# The convention is:
+# ::parseError {result}
+# Where result is in the following form "status EditWidget_name"
+#
+# The output of an error message must be in the following:
+# file_name:line_number: Error message here
+#
+body ::tycho::Compile::parseError {results} {
+    # Simple parse the results here.
+    set text [lindex $results 1].history.text
+    set output [[lindex $results 1].history get 0.0 end]
+    set output [split $output "\n"]
+    set editorName [$this cget -view]
+    for {set i 0} {$i < [llength $output]} {incr i} {
+        # The text index starts off on 1, the lindex starts off on 0
+        set line [lindex $output [expr $i-1]]
+        # Does it match the format: "test.cc:15: Error message here"
+        if {[regexp {([^:]+):([0-9]+):(.+)} $line temp fileName lineNum msg]} {
+            $text tag add error$i $i.0 $i.end
+            $text tag configure error$i -foreground red -underline 0
+            $text tag bind error$i <Double-Button-1> \
+                    "$editorName seeFragment \"line $lineNum\""
+        }
+    }
+}
+
+
 #######################################################################
 #### checkSourceFiles
 # Check the source files for necessary features. 
@@ -186,24 +224,7 @@ body ::tycho::Compile::compileFiles {} {
     set results [::tycho::execModal "make -f $makefile" $dirname]
     putStatus ""
 
-    # Simple parse the results here.
-    # FIXME This should be relocated to CompileC class:
-    set text [lindex $results 1].history.text
-    set output [[lindex $results 1].history get 0.0 end]
-    set output [split $output "\n"]
-    set editorName [$this cget -view]
-    for {set i 0} {$i < [llength $output]} {incr i} {
-        # The text index starts off on 1, the lindex starts off on 0
-        set line [lindex $output [expr $i-1]]
-        # Does it match the format: "test.cc:15: Error message here"
-        if {[regexp {([^:]+):([0-9]+):(.+)} $line temp fileName lineNum msg]} {
-            $text tag add error$i $i.0 $i.end
-            $text tag configure error$i -foreground red -underline 0
-            $text tag bind error$i <Double-Button-1> \
-                    "$editorName seeFragment \"line $lineNum\""
-        }
-    }
-    #puts "This: $this, parent [$this cget -view], Monitor:$results"
+    parseError $results
 
     return $results
 }
