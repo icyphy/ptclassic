@@ -69,7 +69,7 @@ The other parameters common to all CGC targets are listed below.  Not
 all of these parameters are made available to the user by every
 target, and some targets define additional parameters.
 
-\begin{statelist}{parameter}
+\begin{indexlist}{ parameter}
 \state{INT}{staticBuffering}{TRUE}
 If \samp{TRUE}, then attempt to use static, compile-time addressing of data
 buffers between stars.  Otherwise, generate code for dynamic,
@@ -91,7 +91,7 @@ Options passed to the linker.
 
 \state{STRINGARRAY}{resources}{STDIO}
 List of abstract resources that the \var{host} computer has.
-\end{statelist}
+\end{indexlist}
 
 \node CGC Single-Processor Targets
 \subsection{Single-Processor Targets}
@@ -124,7 +124,7 @@ must be used when Tcl/Tk stars are present in
 the program graph.  The parameters differ from those of the
 \code{default-CGC} target only in their default values.
 
-\begin{statelist}{parameter}
+\begin{indexlist}{ parameter}
 
 \state{INT}{Looping Level}{1}
 
@@ -140,7 +140,7 @@ the program graph.  The parameters differ from those of the
 -L$PTOLEMY/tcltk/tk.$ARCH/lib \\
 -L/usr/X11/lib -ltk -ltcl -lptk -lXpm -lX11 -lm}
 
-\end{statelist}
+\end{indexlist}
 
 The \code{bdf-CGC} target
 \tpindexbold{bdf-CGC target}
@@ -188,7 +188,7 @@ the \code{unixMulti_C} target.
 \label{table unixMultiC parameters}
 \end{table}
 
-\begin{statelist}{parameter}
+\begin{indexlist}{ parameter}
 \state{INT}{portNumber}{7654}
 The starting TCP/IP port number used by send/receive stars.  The port number
 is incremented for each send/receive pair.  It is the
@@ -207,7 +207,7 @@ Otherwise, specify the proper domain name, including a leading period.
 This string is appended to the names in \var{machineNames} to form the
 fully qualified host names.
 
-\end{statelist}
+\end{indexlist}
 
 \node CGC Star Overview
 \section{An Overview of CGC Stars}
@@ -253,14 +253,14 @@ Stars that are unique to the CGC domain are described briefly below.
 \label{figure CGC source stars}
 \end{figure}
 
-\begin{blocklist}{(CGC block)}
+\begin{indexlist}{ (CGC block)}
 
 \block{PCMread}
 Read \(\mu\)-law PCM from a file and convert to linear floating point.
 The file can be the audio port \file{/dev/audio},
 if supported by the workstation.
 
-\end{blocklist}
+\end{indexlist}
 
 \node CGC Sink Stars
 \subsection{Sink Stars}
@@ -284,7 +284,7 @@ Stars that are unique to the CGC domain are described briefly below.
 \label{figure CGC sink stars}
 \end{figure}
 
-\begin{blocklist}{(CGC block)}
+\begin{indexlist}{ (CGC block)}
 \block{PCMwrite}
 Convert input to \(\mu\)-law PCM and write it to a file.
 The file can be the audio port \file{/dev/audio},
@@ -299,7 +299,7 @@ If the \var{aheadLimit} parameter is non-negative, then it specifies
 the maximum number of samples that the program is allowed to compute
 ahead of real time.
 
-\end{blocklist}
+\end{indexlist}
 
 \node CGC Arithmetic Stars
 \subsection{Arithmetic Stars}
@@ -350,7 +350,7 @@ Stars that are unique to the CGC domain are described briefly below.
 \label{figure CGC nonlinear stars}
 \end{figure}
 
-\begin{blocklist}{(CGC block)}
+\begin{indexlist}{ (CGC block)}
 
 \block{Expr}
 General expression evaluation.  This star evaluates the expression
@@ -363,7 +363,7 @@ Compares \var{input} values to \var{threshold}.  The \var{output} is
 \samp{0} if \var{input} \( \leq \) \var{threshold}, otherwise it is
 \samp{1}.
 
-\end{blocklist}
+\end{indexlist}
 
 \node CGC Control Stars
 \subsection{Control Stars}
@@ -385,7 +385,7 @@ Stars that are unique to the CGC domain are described briefly below.
 \label{figure CGC control stars}
 \end{figure}
 
-\begin{blocklist}{(CGC block)}
+\begin{indexlist}{ (CGC block)}
 
 \block{Sleep}
 Suspend execution for an interval (in milliseconds).
@@ -404,7 +404,7 @@ This star does not generate code. In multiprocessor code generation,
 it is automatically attached to a porthole if it has multiple sources.
 Its role is just opposite to that of \code{Spread} star.
 
-\end{blocklist}
+\end{indexlist}
 
 \node CGC Conversion Stars
 \subsection{Conversion Stars}
@@ -464,7 +464,7 @@ can only transfer single tokens in one firing.
 \label{figure CGC BDF stars}
 \end{figure}
 
-\begin{blocklist}{(CGC Block)}
+\begin{indexlist}{ (CGC block)}
 \block{Select}
 This star requires a BDF scheduler.
 If the value on the \var{control} line is nonzero, \var{trueInput}
@@ -477,7 +477,7 @@ the value of the \var{control} input.  If \var{control} is true, the
 value is written to \var{trueOutput}; otherwise it is written to
 \var{falseOutput}.
 
-\end{blocklist}
+\end{indexlist}
 
 \node CGC Tcl/Tk Stars
 \subsection{Tcl/Tk Stars}
@@ -495,7 +495,7 @@ given below.
 \label{figure CGC tcltk stars}
 \end{figure}
 
-\begin{blocklist}{(CGC block)}
+\begin{indexlist}{ (CGC block)}
 
 \block{TclScript}
 Sends input values to a Tcl script.  Gets output values from a Tcl script.
@@ -512,7 +512,7 @@ Just like \code{SunSound} (\pxref{CGC Sink Stars}),
 except that a Tk slider is put in the master
 control panel to control the volume.
 
-\end{blocklist}
+\end{indexlist}
 
 \node CGC Demo Overview
 \section{An Overview of CGC Demos}
@@ -554,7 +554,7 @@ The other demos in this palette are described briefly below.
 \label{figure CGC basic demos}
 \end{figure}
 
-\begin{blocklist}{(CGC demo)}
+\begin{indexlist}{ (CGC demo)}
 
 \block{nonlinear}
 This simple system plots four nonlinear functions over the range
@@ -565,7 +565,7 @@ square root, and reciprocal.
 This simple demo tests the automatic splicing in of type conversion stars.
 It only generates code and does not run.
 
-\end{blocklist}
+\end{indexlist}
 
 \node CGC Multirate Demos
 \subsection{Multirate Demos}
@@ -585,7 +585,7 @@ The other demos in this palette are described briefly below.
 \label{figure CGC multirate demos}
 \end{figure}
 
-\begin{blocklist}{(CGC demo)}
+\begin{indexlist}{ (CGC demo)}
 
 \block{upsample}
 This simple up-sample demo tests static buffering.
@@ -602,7 +602,7 @@ star is static.
 This demo demonstrates the code size reduction achieved with a loop-generating
 scheduling algorithm.
 
-\end{blocklist}
+\end{indexlist}
 
 \node CGC Signal Processing Demos
 \subsection{Signal Processing Demos}
@@ -639,7 +639,7 @@ actually run faster on a single processor, but they do serve as a
 \label{figure CGC multiprocessor demos}
 \end{figure}
 
-\begin{blocklist}{(CGC demo)}
+\begin{indexlist}{ (CGC demo)}
 
 \block{adaptFilter_multi}
 This is a multi-processor version of the \code{adaptFilter} demo.
@@ -653,7 +653,7 @@ This system demonstrates the \code{Spread} and \code{Collect} stars.
 It shows how multiple invocations of a star can be scheduled onto more
 than one processor.
 
-\end{blocklist}
+\end{indexlist}
 
 \node CGC Sound-Making Demos
 \subsection{Sound-Making Demos}
@@ -672,12 +672,12 @@ for these demos to work.
 \label{figure CGC sound demos}
 \end{figure}
 
-\begin{blocklist}{(CGC demo)}
+\begin{indexlist}{ (CGC demo)}
 
 \block{sound}
 Generate a sound to play over the workstation speaker (or headphones).
 
-\end{blocklist}
+\end{indexlist}
 
 \node CGC Tcl/Tk Demos
 \subsection{Tcl/Tk Demos}
@@ -703,7 +703,7 @@ available.
 \label{figure CGC tcltk demos}
 \end{figure}
 
-\begin{blocklist}{(CGC demo)}
+\begin{indexlist}{ (CGC demo)}
 
 \block{tremolo}
 This demo produces a tremolo (amplitude modulation) effect  on the
@@ -750,7 +750,7 @@ updated asynchronously.
 This demo shows the movements of the Sun, Venus, Earth, and Mars in a
 Ptolemaic (Earth-centered) universe.
 
-\end{blocklist}
+\end{indexlist}
 
 \node CGC BDF Demos
 \subsection{BDF Demos}
