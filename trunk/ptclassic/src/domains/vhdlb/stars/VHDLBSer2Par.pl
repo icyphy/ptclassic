@@ -55,6 +55,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		name { bus8 }
 		type { int }
 	}
+        defstate {
+                name { delay }
+                type { int }
+                default { 1 }
+                desc { The propagation delay, in nsec }
+        }
 	go {
 	}
 }

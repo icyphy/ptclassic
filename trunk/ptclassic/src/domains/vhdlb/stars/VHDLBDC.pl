@@ -21,7 +21,13 @@ limitation of liability, and disclaimer of warranty provisions.
 		name { level }
 		type { int }
 		default { 0.0 }
-		desc { The constant value. }
+		desc { The constant value }
+	}
+	defstate {
+		name { interval }
+		type { int }
+		default { 1 }
+		desc { The interval between output transactions, in nsec }
 	}
 	go {
 	}
