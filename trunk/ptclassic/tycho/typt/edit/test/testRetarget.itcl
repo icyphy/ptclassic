@@ -1,0 +1,4 @@
+source DomainInfo.itcl
+source RetargEdit.itcl
+::tycho::EditRetarg .t
+.t centerOnScreen
