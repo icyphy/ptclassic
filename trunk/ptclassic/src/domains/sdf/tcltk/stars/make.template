@@ -62,6 +62,7 @@ PL_SRCS= \
  SDFTkBreakPt.pl \
  SDFTkButtons.pl \
  SDFTkMeter.pl \
+ SDFTkPicture.pl \
  SDFTkPlot.pl \
  SDFTkShowBooleans.pl \
  SDFTkSlider.pl \
