@@ -46,7 +46,37 @@ Date of creation: 2/97
 // still incomplete. In certain cases, the commands are designed to try
 // to hide blemishes in the design of the kernel, providing a more
 // sensible interface. All commands are defined in the ::pitcl
-// namespace.
+// namespace, except the *matlab* and *mathematica* commands, which are
+// defined in both the global namespace and the ::pitcl namespace.
+//
+// Because interaction with Itcl is not as rich as it might be, this
+// implementation preserves from its predecessor the notion of a
+// current galaxy and current universe. This seems to be the simplest
+// approach, and is hidden from the user by the classes in the
+// ::ptolemy namespace. For commands that operate on a block, the block
+// can usually be a star, galaxy, universe, wormhole, or target. Names
+// of blocks can take any of the following forms:
+// <ol>
+// <li> _name_
+// <li> _name1.name2_
+// <li> _name1.name2...nameN_
+// <li> _.name_
+// <li> _.name1.name2_
+// <li> _.name1.name2...nameN_
+// <li> this
+// <li> target
+// </ol>
+//
+// The first can specify a member of the current galaxy, a master star,
+// a master galaxy, or a target (names conflicts are resolved in that order).
+// The second can specify a star within a galaxy within the current galaxy,
+// or a star or galaxy within a master galaxy.
+// The third is just the obvious generalization of this.
+// The fourth specifies a universe.
+// The fifth specifies a block (star or galaxy) within a universe.
+// The sixth is the obvious generalization.
+// The seventh specifies the current galaxy, and the last specifies
+// the current target.
 //
 // Remaining to be done:
 // <ul>
@@ -1575,10 +1605,10 @@ static MathematicaTcl mathematicatcl;
 // Possible commands and their arguments are given below:
 // <pre>
 //   terminate session:             end
-//   evaluate Mathematica command:  eval <script>
-//   get expression in Tcl form:    get <name> ?<script>?
-//   evaluate Mathematica command:  send <script>
-//   start a session:               start ?<identifier>?
+//   evaluate Mathematica command:  eval _script_
+//   get expression in Tcl form:    get _name_ ?_script_?
+//   evaluate Mathematica command:  send _script_
+//   start a session:               start ?_identifier_?
 //   Tcl/Mathematica status:        status
 // </pre>
 //  
@@ -1623,12 +1653,12 @@ static MatlabTcl matlabtcl;
 // their arguments are given below:
 // <pre>
 //   terminate session:           end
-//   evaluate Matlab script:      eval <script>
-//   get matrix as Tcl lists:     get <name> ?<script>?
-//   get matrix as ordered pairs: getpairs <name> ?<script>?
-//   evaluate Matlab script:      send <script>
-//   set matrix as Tcl lists:     set <name> <rows> <cols> <real> ?<imag>?
-//   start a session:             start ?<identifier>? ?<start_command>?
+//   evaluate Matlab script:      eval _script_
+//   get matrix as Tcl lists:     get _name_ ?_script_?
+//   get matrix as ordered pairs: getpairs _name_ ?_script_?
+//   evaluate Matlab script:      send _script_
+//   set matrix as Tcl lists:     set _name_ _rows_ _cols_ _real_ ?_imag_?
+//   start a session:             start ?_identifier_? ?_start_command_?
 //   Tcl/Matlab status:           status
 //   unset a matrix:              unset
 // </pre>
@@ -1636,8 +1666,10 @@ static MatlabTcl matlabtcl;
 // The "matlab send" command will not return output from by Matlab (unless
 // an error occurs), "matlab eval" will return output as a single string, and
 // "matlab get" sends the script for evaluation and returns the value of
-// the variable name. For example, "<tcl>matlab send {plot( [1 2 3] )}</tcl>"
-// will create a simple plot, and "<tcl>matlab eval {help plot}</tcl>" will
+// the variable name. For example,
+// "<tcl>::pitcl::matlab send {plot( [1 2 2.5 1] )}</tcl>"
+// will create a simple plot, and
+// "<tcl>::pitcl::matlab eval {help plot}</tcl>" will
 // return help information about the plot command.
 //
 // The "matlab status" command returns 0 if the Tcl/Matlab connection is
@@ -1652,6 +1684,13 @@ static MatlabTcl matlabtcl;
 //  
 // Note that Matlab syntax uses square brackets to denote vectors and matrices,
 // which will cause errors if Tcl tries to evaluate a string containing them.
+//
+// NOTE: The matlab command can cause Tycho to hang if it is being run
+// in the background.  This is because the external interface provided
+// for matlab assumes that a terminal is connected to the program.  To
+// unhang tycho, put it in the foreground.  We have also sometimes seen
+// matlab hang the entire X window session.  To correct this, kill the
+// matlab process.  Bugs should be reported to the Math Works, Inc.
 //
 int PTcl::matlab(int argc,char** argv) {
     matlabtcl.SetTclInterpreter(interp);
@@ -2978,12 +3017,17 @@ struct InterpTableEntry {
 
 // Here is the function table and dispatcher function.
 // These macros define entries for the table
-// All commands are registerd in the pitcl namespace.
+// All commands are registerd in the pitcl namespace,
+// unless the GLOBAL macro is used instead of ENTRY,
+// in which case the command will be registered in the global
+// namespace.
 
 #define ENTRY(verb) { quote(::pitcl::verb), PTcl::verb }
+#define GLOBAL(verb) { quote(verb), PTcl::verb }
 
 // synonyms or overloads on argv[0]
-#define ENTRY2(verb,action) { quote(verb), PTcl::action }
+#define ENTRY2(verb,action) { quote(::pitcl::verb), PTcl::action }
+#define GLOBAL2(verb,action) { quote(verb), PTcl::action }
 
 // Here is the table.  Make sure it ends with "0,0"
 // CAUTION: the dispatcher treats the first two entries specially
@@ -3030,7 +3074,9 @@ static InterpTableEntry funcTable[] = {
     ENTRY(knownUniverses),
     ENTRY(link),
     ENTRY(matlab),
+    GLOBAL(matlab),
     ENTRY(mathematica),
+    GLOBAL(mathematica),
     ENTRY(multilink),
     ENTRY(node),
     ENTRY(nodeconnect),
