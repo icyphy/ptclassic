@@ -9,15 +9,20 @@
 Tycho includes several Tcl extensions that consist of C code that is
 compiled and loaded into a vanilla <CODE>itkwish</CODE>:
 
-<MENU>
-<LI> <A HREF="../../java/tycho/doc/internals/index.html">Tycho/Java Interface</A>
+<OL>
+<LI> <A HREF="../../java/tycho/doc/internals/index.html">TclJava</A> requires
+	JDK1.1.1.
 
-<LI> <A HREF="../../editors/visedit/doc/usersGuides/ProfileTclHelp.html">Tcl Profiler</A>
-</MENU>
+<LI> <A HREF="../../editors/visedit/doc/usersGuides/ProfileTclHelp.html">Tcl Profiler</A> requires <CODE>tclInt.h</CODE>, which is part of the Tcl sources.
+
+<LI> <A HREF="../../src/tytimer/index.html">Tycho's timer package</A>
+
+<LI> <A HREF="../../src/tksteal/index.html">TkSteal</A> requires
+<CODE>tkPort.h</CODE>, which is part of the Tk Sources.
+</OL>
 
 This page discusses the mechanism behind building and installing Tcl
-extensions.  This information is primarily useful for adding your own
-Tcl package.
+extensions.  
 
 <MENU>
 <LI> <A HREF="#autoconf software package">Autoconf</A>
@@ -27,6 +32,87 @@ Tcl package.
 <LI> <A HREF="#tcl extensions, files">Files used to build Tcl extensions</A>
 <LI> <A HREF="#tcl extensions, adding">Adding a Tcl extension</A>
 </MENU>
+
+<H2><A NAME="tcl extensions, building">Overall Tcl Extension Build Procedure</A></H2>
+
+ <P>To build and install all the Tcl extensions, set the <A
+NAME="PTARCH environment variable"> <CODE>PTARCH</CODE> environment
+variable</A>.  This variable is used to differentiate between different
+architectures.  To set the <CODE>PTARCH</CODE> variable,
+under <CODE>/bin/csh</CODE>, do:
+<PRE>
+setenv PTARCH `$TYCHO/bin/ptarch`
+</PRE>
+
+To do the build:
+<PRE>
+cd $TYCHO
+make tclexts
+</PRE>
+
+ <P>Tycho uses GNU autoconf to configure the Tcl extensions. 
+<CODE>$TYCHO/makefile</CODE> has a rule that calls <CODE>configure</CODE>
+and builds the proper directories.
+
+ <P><CODE>configure</CODE> has a number of options, type
+<CODE>$TYCHO/src/configure -help</CODE> to see them.  To pass options to
+<CODE>configure</CODE>, set the <CODE>CONFIGURE_ARGS</CODE> option.
+ <P>For example to build without Java, do:
+<PRE>
+make CONFIGURE_ARGS=--without-java tclexts
+</PRE>
+
+To pass multiple <CODE>configure</CODE> arguments, wrap them in
+quotes:
+
+<PRE>
+make CONFIGURE_ARGS="--with-java=/opt/jdk1.1 --with-ptolemy=/users/ptdesign" tclexts
+</PRE>
+
+
+<H3>$TYCHO/makefile Tcl Extension Rules</H3>
+
+ <P>The <CODE>tclexts</CODE> makefile rule configures, builds and installs
+all the tcl extensions.  Below we discuss each step in turn:
+
+<DL>
+<DT> <CODE>config_tclexts</CODE>
+<DD> This rule creates <CODE>$TYCHO/obj.$PTARCH</CODE> and then runs
+<CODE>configure</CODE>, which creates the <CODE>makefiles</CODE> below
+<CODE>$TYCHO/obj.$PTARCH</CODE>.
+
+<DT> <CODE>all_tclexts</CODE>
+<DD> The rule changes directories to <CODE>$TYCHO/obj.$PTARCH</CODE> and builds
+all the binaries.
+
+<DT> <CODE>install_tclexts</CODE>
+<DD> This rule changes directories to <CODE>$TYCHO/obj.$PTARCH</CODE> and installs
+the shared libraries into <CODE>$TYCHO/lib.$PTARCH</CODE>
+
+</DL>
+
+<H3>Running configure in $TYCHO/src</H3>
+<CODE>$TYCHO/makefile</CODE> is setup to support multiple architectures
+by creating separate <CODE>lib.$PTARCH</CODE>
+and <CODE>obj.$PTARCH</CODE> directories.  It is possible to
+call <CODE>configure</CODE> directly and create binaries in 
+<CODE>$TYCHO/src</CODE>, but there are the following problems:
+<OL>
+<LI> The <CODE>$TYCHO/lib.$PTARCH</CODE> directory is not
+built automatically, you would need to do something like:
+<PRE>
+cd $TYCHO/src
+configure
+mkdir ../lib.$PTARCH
+make install
+</PRE>
+
+<LI> Some parts of Tycho expect <CODE>$TYCHO/obj.$PTARCH/java.mk</CODE>
+and <CODE>$TYCHO/obj.$PTARCH/tcl.mk</CODE> to be present.
+
+</OL>
+ <HR>
+
 
 <H2><A NAME="autoconf software package">Autoconf</A></H2>
 
@@ -49,43 +135,13 @@ produce a new <CODE>configure</CODE> file.  If <CODE>autoconf</CODE>
 is not available, then it is possible to edit the <CODE>configure</CODE>
 file directly, it is merely a <CODE>/bin/sh</CODE> script.
 
-<H2><A NAME="tcl extensions, building">Overall Tcl Extension Build Procedure</A>
-</H2>
-
-To build and install all the Tcl Extensions, the user sets the <A
-NAME="PTARCH environment variable"> <CODE>PTARCH</CODE> environment
-variable</A>.  This variable is used to differentiate between different
-architectures.  To set the <CODE>PTARCH</CODE> variable, under <CODE>/bin/csh</CODE>, do:
-<PRE>
-setenv PTARCH `$TYCHO/bin/ptarch`
-</PRE>
-
-The user then changes to the
-<CODE>$TYCHO</CODE> directory and then types <A NAME="tclexts makefile
-rule"><CODE>make tclexts</CODE></A>.
-
-The <CODE>tclexts</CODE> makefile rule configures, builds and installs
-all the tcl extensions.  Below we discuss each step in turn:
-
-<DL>
-<DT> <CODE>config_tclexts</CODE>
-<DD> This rule creates <CODE>$TYCHO/obj.$PTARCH</CODE> and then runs
-<CODE>configure</CODE>, which creates the <CODE>makefiles</CODE> below
-<CODE>$TYCHO/obj.$PTARCH</CODE>.
-
-<DT> <CODE>all_tclexts</CODE>
-<DD> The rule changes directories to <CODE>$TYCHO/obj.$PTARCH</CODE> and builds
-all the binaries.
-
-<DT> <CODE>install_tclexts</CODE>
-<DD> This rule changes directories to <CODE>$TYCHO/obj.$PTARCH</CODE> and installs
-the shared libraries into <CODE>$TYCHO/lib.$PTARCH</CODE>
-
-</DL>
 
 <H2><A NAME="tcl extensions, overview">Tcl Extensions Overview</A></H2>
 
-In Tcl7.5 and later it is fairly easy to load in shared objects that
+(The information below is primarily useful for adding your own
+Tcl package).
+
+ <P>In Tcl7.5 and later it is fairly easy to load in shared objects that
 add new Tcl commands.  The Tcl <CODE>load</CODE> and
 <CODE>package</CODE> command man pages cover the details.
 
