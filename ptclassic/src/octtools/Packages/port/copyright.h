@@ -54,8 +54,4 @@
  *
  */
 
-#if !defined(lint) && !defined(SABER)
-static char octtools_copyright[] =
- "Copyright (c) 1988, 1989, 1990, 1991, 1992, 1993 Regents of the University of California.  All rights reserved.";
-#endif
 #endif 
