@@ -17,6 +17,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	input {
 		name { input }
 		type { ANYTYPE }
+		num { 0 }
 	}
 	input {
 		name { control }
@@ -33,6 +34,13 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { "monitor how many tokens added" }
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
+	method {
+		name { readTypeName }
+		access { public }
+		type { "const char *" }
+		code { return "DownSample"; }
+	}
+
 	codeblock (block) {
 	if ($ref(status) == 0) {
 		$ref(output) = 0;
