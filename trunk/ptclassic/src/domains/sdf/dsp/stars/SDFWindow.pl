@@ -18,6 +18,8 @@ The parameter \fIperiod\fR specifies the period of the output signal:
 the window will be zero-padded if required.  A \fIperiod\fR of 0
 means a period equal to \fIlength\fR.  A negative period will
 produce only one window, and then outputs zero for all later samples.
+A period of less than window length will be equivalent to a period of
+window length (i.e, period=0).
 .lp
 One period of samples are produced on every firing.
     }
@@ -104,7 +106,7 @@ One period of samples are produced on every firing.
 	    return;
 	}
 	realPeriod = int(period);
-	if ( realPeriod <= 0 )
+	if ( realPeriod < realLen )
 	    realPeriod = realLen;
 	output.setSDFParams( realPeriod, realPeriod-1);
 
