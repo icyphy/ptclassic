@@ -51,7 +51,8 @@ input data is affected by loss.
   }
 
   //// CODE
-  hinclude { "Matrix.h", "Error.h", "ptdspRunLength.h" }
+  hinclude { "Matrix.h", "Error.h" }
+  ccinclude { "ptdspRunLength.h" }
 
   method { // Do the run-length decoding.
     name { invRunLen }
