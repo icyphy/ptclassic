@@ -33,23 +33,11 @@ $Id$
 */
 
 /* Data Structures */
-#ifdef __cplusplus
-
-struct ParamStruct {
-    const char *name;
-    const char *type;
-    const char *value;
-};
-
-#else
-
 struct ParamStruct {
     char *name;
     char *type;
     char *value;
 };
-
-#endif
 
 typedef struct ParamStruct ParamType;
 
@@ -57,6 +45,7 @@ struct ParamListStruct {
     int length;			/* length of array */
     ParamType* array;		/* points to first element */
     char* dynamic_memory;	/* pointer to allocated string memory */
+    int flat_plist_flag;	/* indicates whether it's a flat param list */
 };
 typedef struct ParamListStruct ParamListType;
 
@@ -65,5 +54,7 @@ typedef struct ParamListStruct ParamListType;
 extern void FreeFlatPList ARGS((ParamListType *pListPtr));
 extern boolean PStrToPList ARGS((const char *pStr, ParamListType *pListPtr));
 extern char* PListToPStr ARGS((ParamListType *pListPtr));
+extern boolean CopyFlatPList ARGS((ParamListType* srcPtr,
+				   ParamListType* destPtr));
 
 #endif  /* _PARAMSTRUCTS_H */
