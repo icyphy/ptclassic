@@ -11,7 +11,7 @@ All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-    location { CG56 library }
+    location { CG56 io library }
     explanation {
 .PP
 This star is a generic star to provide input/ouput for the 560001's
