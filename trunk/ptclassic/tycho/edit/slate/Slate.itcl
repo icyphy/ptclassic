@@ -155,8 +155,8 @@ class ::tycho::Slate {
     method find {searchSpec args}
 
     # Focus on an item
-    method focus {{id {}}} {
-	eval $canvas $id
+    method focus {args} {
+	eval $canvas focus $args
     }
 
     # Get the tags of an item or pict
@@ -164,17 +164,17 @@ class ::tycho::Slate {
 
     # Set the insertion cursor
     method icursor {id index} {
-	 $canvas $id $index
+	 $canvas icursor $id $index
     }
 
     # Return the numerical value of a symbolic index
     method index {id index} {
-	 $canvas $id $index
+	 $canvas index $id $index
     }
 
     # Insert text at the insertion cursor
     method insert {id beforeThis string} {
-	 $canvas $id $beforeThis $string
+	 $canvas insert $id $beforeThis $string
     }
 
     # Interact with pictures
