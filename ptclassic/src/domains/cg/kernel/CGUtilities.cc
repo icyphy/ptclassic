@@ -2,7 +2,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: Jose L. Pino, J. Buck
+ Programmer: Jose Luis Pino, J. Buck
 
  Misc CG routines.
  
@@ -133,11 +133,17 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
     fileName << directory << "/" << file;
 
 // create the directory if necessary (-p)
-    if (access(directory, F_OK) == -1) {
-      mkdir << "mkdir -p " << directory;
-      if (rshSystem(hname,mkdir)) return FALSE;
+    if (onHostMachine(hname)) {
+	if (access(directory, W_OK) == -1) {
+	    mkdir << "mkdir " << directory;
+	    if (system(mkdir)) return FALSE;
+	}
     }
-
+    else {
+	mkdir << "mkdir -p " << directory;
+	if (rshSystem(hname,mkdir)) return FALSE;
+    }
+	    
     cout << "rcpWriteFile: writing file " << file << "\n";
     cout.flush();
 
@@ -209,10 +215,51 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
     return status;
 }
 
+int rcpCopyFile(const char* hname, const char* dir, const char* filePath,
+		int deleteOld, const char* newFileName) {
+    StringList expandedFilePath;
+    expandedFilePath << expandPathName(filePath);
+    if (access(expandedFilePath,R_OK) == -1) {
+	Error::abortRun("rcpCopyFile: ",filePath," does not exist");
+	return FALSE;
+    }
+
+    StringList fileName;
+    if (newFileName)
+	fileName << newFileName;
+    else {
+	char* fileNameStart = strrchr(filePath,'/');
+	if (fileNameStart)
+	    fileName << ++fileNameStart;
+	else
+	    fileName << expandedFilePath;
+    }
+
+    StringList directory = expandPathName(dir);
+    StringList command;
+    StringList rmOldFile;
+    if (deleteOld) 
+	rmOldFile << "/bin/rm -f " << directory << "/" << fileName << "; ";
+    if (onHostMachine(hname)) {
+	if (access(directory, W_OK) == -1)
+	    command << "mkdir " << directory << "; ";
+	command << rmOldFile << "cp " << expandedFilePath << " " 
+		<< directory << "/" << fileName;
+    }
+    else {
+	command << "mkdir -p " << directory << "; " << rmOldFile;
+	rshSystem(hname,command);
+	command.initialize();
+	command << "rcp -p " << expandedFilePath << " " << hname << ":" 
+		<< directory << "/" << fileName;
+    }
+    return !rshSystem("localhost",(const char*)command);
+}
+    
 int onHostMachine(const char* hname) {
 	if (hname==NULL||*hname=='\0'||(strcmp(hname,"localhost")==0))
 		return TRUE;
-	FILE* fp = popen("/bin/hostname", "r");
+	FILE* fp = popen("hostname", "r");
 	if (fp == NULL) {
 		Error::warn("popen error");
 	} else {

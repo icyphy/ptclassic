@@ -58,6 +58,14 @@ int rshSystem(const char* hostname,const char* command,const char* directory = N
 int rcpWriteFile(const char* hname,const char* dir,const char* file,
 const char* text,int displayFlag = FALSE, int mode = -1);
 
+//////////////////////////////////////////////////////////////////////////
+//copy a file to a directory.  This will either perform a link system
+//call or do a rcp to copy a file over the network. Returns TRUE if
+//successful
+
+int rcpCopyFile(const char* hname, const char* dir, const char* filePath,
+		int deleteOld = TRUE, const char* newFileName = NULL);
+
 /////////////////////////////////////////////////////////////////////////
 //returns TRUE if hname is the machine Ptolemy is running on.  NULL, "\0"
 //and "localhost" all return TRUE as well.
