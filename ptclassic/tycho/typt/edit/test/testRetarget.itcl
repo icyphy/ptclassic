@@ -50,4 +50,4 @@ source ../../kernel/DomainInfo.itcl
 
 catch {delete class ::tycho::Retarget}
 source ../Retarget.itcl
-::tycho::view Retarget {} Displayer {-toolbar 1}
+::tycho::view Retarget -toolbar 1
