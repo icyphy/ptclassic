@@ -281,7 +281,7 @@ ifdef CP
 	LIBS += -lcpstars -lcpipstars -lcp -laudio
 	LIBFILES += $(LIBDIR)/libcpstars.$(LIBSUFFIX) \
 		$(LIBDIR)/libcpipstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libcp.$(LIBSUFFI
+		$(LIBDIR)/libcp.$(LIBSUFFIX)
 endif
 
 ifdef LWP
