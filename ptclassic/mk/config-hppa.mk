@@ -35,16 +35,8 @@
 # --------------------------------------------------------------------
 include $(ROOT)/mk/config-default.mk
 
-# Get the g++ definitions; we override some below.
-include $(ROOT)/mk/config-g++.mk
-
-CPLUSPLUS_COMPAT =  -I$(ROOT)/src/compat/cfront
-
-# We must pase -DPT_EGCS so that make depend works properly.  Otherwise
-# we get messages like:
-# ../../src/compat/cfront/std.h:65: warning: No include path in which
-#	 to find sysent.h 
-CPLUSPLUS = g++ $(CPLUSPLUS_COMPAT) -DPT_EGCS
+# Get the egcs definitions; we override some below.
+include $(ROOT)/mk/config-egcs.mk
 
 # The HPUX9/HPUX10 dependencies are below here
 
