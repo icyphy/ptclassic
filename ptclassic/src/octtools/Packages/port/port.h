@@ -75,6 +75,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 
+#ifdef aix
+#define __aix		aix
+#define _POSIX_SOURCE
+#define _GNU_SOURCE
+#define _BSD_SOURCE
+#endif
+
 #ifdef MIPSEL
 #define	__MIPSEL      MIPSEL
 #endif
@@ -339,16 +346,18 @@ extern VOID_HACK rewind();
 extern int abort();
 extern void free(), exit(), perror();
 #else
-#if defined(_IBMR2) 
+#if defined(_IBMR2) && !defined(PTAIX_XLC)
 extern int abort(), exit();
 extern void free(), perror();
-#else /* _IBMR2 */
+#else /* _IBMR2 && !PTAIX_XLC*/
 #if defined(SYSV)
 extern int abort();
 extern void free();
 extern void perror();
 #else /* SYSV */
+#if !defined(PTAIX_XLC)
 extern VOID_HACK abort(), free(), exit(), perror();
+#endif /* !PTAIX_XLC */
 #endif /* SYSV */
 #endif /* _IBMR2 */
 extern char *getenv();
@@ -359,7 +368,9 @@ extern char *getenv();
 extern void *malloc(), *realloc(), *calloc();
 #endif /* _local_h */
 #else
+#if !defined(PTAIX_XLC)
 extern char *malloc(), *realloc(), *calloc();
+#endif /* PTAIX_XLC */
 #endif
 #endif
 
@@ -389,18 +400,22 @@ extern int sscanf();
 #if defined(ultrix4)
 #include <strings.h>
 #else
+#ifndef PTAIX_XLC
 extern char *strcpy(), *strncpy(), *strcat(), *strncat(), *strerror();
 extern char *strpbrk(), *strtok(), *strchr(), *strrchr(), *strstr();
 extern int strcoll(), strncmp();
+#endif /* PTAIX_XLC */
 #ifndef PTIRIX5
 #ifndef PTSOL2
-#if !(defined(sun) && defined(__GNUC__))
+#if !(defined(sun) && defined(__GNUC__)) && !defined(PTAIX_XLC)
 extern int strxfrm(), strlen(), strspn(), strcspn();
 #endif
 #endif /* PTSOL2 */
 #endif /* PTIRIX5 */
+#ifndef PTAIX_XLC
 extern char *memmove(), *memccpy(), *memchr(), *memcpy(), *memset();
 extern int memcmp(), strcmp();
+#endif /* PTAIX_XLC */
 #endif /* ultrix4 */
 #endif /* __STDC__ */
 
