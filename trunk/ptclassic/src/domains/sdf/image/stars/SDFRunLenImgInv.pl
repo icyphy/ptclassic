@@ -7,8 +7,9 @@ defstar {
 	location	{ SDF image library }
 	desc {
 Accept a GrayImage and inverse run-length encode it.
-See SDFrunLen.
+Check to make sure we don't write past unallocated memory.
 	}
+	seealso { RunLen }
 
 	hinclude { "GrayImage.h", "Error.h" }
 
@@ -22,7 +23,9 @@ See SDFrunLen.
 		type { packet }
 	}
 
-// CODE.
+// Note: we need to check for indx2 < fullFrame in case of lost data.
+// Otherwise we might crash the program when we write past allocated
+// memory.
 	method {
 		name { invRunLen }
 		type { "void" }
@@ -30,25 +33,32 @@ See SDFrunLen.
 		arglist { "(GrayImage* inImage)" }
 		code {
 // Do the run-length coding.
-			int size = inImage->retSize();
+			const int size = inImage->retSize();
+			const int fullFrame = inImage->retWidth() *
+					inImage->retHeight();
 			unsigned char* ptr1 = inImage->retData();
 
-			LOG_NEW; unsigned char* ptr2 = new unsigned char[
-					int(inImage->retWidth() * inImage->retHeight())];
+			LOG_NEW; unsigned char* ptr2 = new unsigned char[fullFrame];
 
 			int indx1 = 0, indx2 = 0, count;
-			while (indx1 < size) {
-				while ((indx1 < size) && (ptr1[indx1] == 0 )) {
+			while ((indx1 < size) && (indx2 < fullFrame)) {
+// Do a zero-run.
+				while ((indx1 < size) && (ptr1[indx1] == 0 ) &&
+						(indx2 < fullFrame)) {
 					indx1++; // Skip to run length.
-					for(count = 0; count < int(ptr1[indx1]); count++) {
+					for(count = 0; (count < int(ptr1[indx1])) &&
+							(indx2 < fullFrame); count++) {
 						ptr2[indx2++] = (unsigned char) 0;
 					}
 					indx1++; // Skip past run length.
 				}
-				while ((indx1 < size) && (ptr1[indx1] != 0)) {
-					ptr2[indx2] = ptr1[indx1]; indx2++; indx1++;
+// Handle a non-zero run.
+				while ((indx1 < size) && (ptr1[indx1] != 0) &&
+						(indx2 < fullFrame)) {
+					ptr2[indx2++] = ptr1[indx1++];
 				}
 			}
+
 // Copy the data back.
 			inImage->setSize(indx2);
 			ptr1 = inImage->retData();
