@@ -340,8 +340,8 @@ body ::tycho::RevControlSCCS::isCheckedOutBy {} {
 body ::tycho::RevControlSCCS::updateHistory {} {
     if {[info exists itk_component(history)] && \
 	    [winfo exists $itk_component(history)]} {
-	delete object $itk_component(history)
-	viewHistory
+        #delete object $itk_component(history)
+        viewHistory
     }
 }
 
