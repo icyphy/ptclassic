@@ -18,7 +18,7 @@ It must become free, and then serve them.
 	}
 	output {
 		name {output}
-		type {anytype}
+		type {=input}
 	}
 	defstate {
 		name {serviceTime}
@@ -27,7 +27,6 @@ It must become free, and then serve them.
 		desc { Service time. }
 	}
 	constructor {
-		input.inheritTypeFrom(output);
 		delayType = TRUE;
 	}
 	go {

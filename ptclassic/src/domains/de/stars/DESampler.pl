@@ -26,10 +26,7 @@ The exact meaning of this depends on the particle type.
 	}
 	output {
 		name {output}
-		type {anytype}
-	}
-	constructor {
-		input.inheritTypeFrom(output);
+		type {=input}
 	}
 	go {
 	   // Check to see whether the star was triggered by a clock input

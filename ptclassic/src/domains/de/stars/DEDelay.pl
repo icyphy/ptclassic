@@ -14,7 +14,7 @@ Delays its input by an amount given by the delay parameter.
 	}
 	output {
 		name {output}
-		type {anytype}
+		type {=input}
 	}
 	defstate {
 		name {delay}
@@ -23,7 +23,6 @@ Delays its input by an amount given by the delay parameter.
 		desc { Amount of time delay. }
 	}
 	constructor {
-		input.inheritTypeFrom(output);
 		delayType = TRUE;
 	}
 	go {

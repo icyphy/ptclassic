@@ -15,7 +15,7 @@ Probability is equal for each output. The time delay is zero.
 	}
 	outmulti {
 		name{output}
-		type{ANYTYPE}
+		type{=input}
 	}
 	hinclude { <Uniform.h> }
 	ccinclude { <ACG.h> }
@@ -27,7 +27,6 @@ Probability is equal for each output. The time delay is zero.
 		extern ACG gen;
 	}
 	constructor {
-		input.inheritTypeFrom(output);
 		random = new Uniform(0,1,&gen);
 	}
 	destructor {
