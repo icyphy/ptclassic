@@ -131,6 +131,8 @@ void UniProcessor :: createSubGal() {
 	ProcessorIter pIter(*this);
 	ParNode* n;
 	while ((n = pIter.nextNode()) != 0) {
+		// the second condition checks whether it is a wormhole(or
+		// parallel star) node or not.
 		if (n->getType() || (n->getProcId() != myId())) continue;
 
 		// for each node assigned to the processor

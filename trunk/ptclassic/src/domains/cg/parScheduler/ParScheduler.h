@@ -143,7 +143,7 @@ protected:
 	// with given number of processors.
 	int computeSchedule(Galaxy& g);
 
-	// virtual methods: prepare scheduling. By default, do nothing
+	// virtual methods: prepare scheduling. 
 	virtual int preSchedule();
 
 	// check whether the galaxy contains a data-parallel star or not.
