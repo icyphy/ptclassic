@@ -77,7 +77,7 @@ endif
 
 cd obj.$ARCH
 optlink ../src makefile
-foreach x (domains interp ptcl kernel pigiRpc pigilib libgantt ptlang xgraph ptklib octtools)
+foreach x (domains interp ptcl kernel pigiRpc pigilib libgantt ptlang pxgraph ptklib octtools)
 	optmkdir $x
 	cd $x
 	optlink ../../src/$x makefile
@@ -122,9 +122,9 @@ if ($ARCH =~ sun?*) then
 	mkarch domains/cp{,/kernel,/stars,/infopad{,/stars}}
 endif
 
-# Make link for xgraph bitmaps
-cd xgraph
-optlink ../../src/xgraph bitmaps
+# Make link for pxgraph bitmaps
+cd pxgraph
+optlink ../../src/pxgraph bitmaps
 cd ..
 
 # EXPDOMAINS = experimental domains

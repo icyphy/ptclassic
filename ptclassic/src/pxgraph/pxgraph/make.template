@@ -3,13 +3,13 @@
 # it accepts binary input if you use the -binary command line switch.
 # Version identification:
 # $Id$
-# Copyright (c) 1991 The Regents of the University of California.
+# Copyright (c) 1991-1994 The Regents of the University of California.
 #                       All Rights Reserved.
 
 # Root of Ptolemy directory
 ROOT=../..
 # Where we are
-VPATH = ../../src/xgraph
+VPATH = ../../src/pxgraph
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
