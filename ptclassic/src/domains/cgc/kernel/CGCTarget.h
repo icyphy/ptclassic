@@ -50,6 +50,9 @@ public:
 	// name the offset of portholes
 	StringList offsetName(CGCPortHole*);
 
+	// make public this method
+	StringList correctName(NamedObj& p) {return  sanitizedFullName(p); }
+
 protected:
 	char *schedFileName;
 	StringList staticDeclarations;
