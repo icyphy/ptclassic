@@ -124,7 +124,10 @@ void ExpandedGraph::initialize_invocations()
 // class use this fact for efficiency reason (e.g. ParNode constructor).
 void ExpandedGraph::createInvocations(DataFlowStar* s)
 {
-	int num = s->repetitions;
+        // Need explicit cast to int here for sol2.cfront, otherwise
+        // cgc:multirate:loop will consume all swap because num will
+        // be very large.  See bug cg56/254.
+	int num = (int) s->repetitions;
 	EGNode* prev = 0;
 	for (int i = 1; i <= num ; i++) {
 		EGNode * new_node = newNode(s,i);
