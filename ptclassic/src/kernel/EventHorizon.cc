@@ -12,6 +12,7 @@ static const char file_id[] = "EventHorizon.cc";
 #include "Plasma.h"
 #include "CircularBuffer.h"
 #include "Domain.h"
+#include "Scheduler.h"
  
 /**************************************************************************
 Version identification:
@@ -107,6 +108,13 @@ void EventHorizon::moveFromGhost(EventHorizon& from, int num) {
 		*p = tmp;
 	}
 }
+
+// return the scheduler of the inner domain.
+Scheduler* EventHorizon :: innerSched() 
+	{ return selfPort->parent()->scheduler(); }
+// return the scheduler of the outer domain.
+Scheduler* EventHorizon :: outerSched()
+	{ return selfPort->parent()->parent()->scheduler(); }
 
 
 /**************************************************************************

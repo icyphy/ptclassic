@@ -12,6 +12,7 @@
 enum inOutType {IN, in, OUT, out};
 class Star;
 class Wormhole;
+class Scheduler;
 
 /**************************************************************************
 Version identification:
@@ -81,6 +82,11 @@ public:
 
 	// virtual initialize
 	virtual void initialize();
+
+	// return the scheduler of the inner domain.
+	Scheduler* innerSched();
+	// return the scheduler of the outer domain.
+	Scheduler* outerSched();
 
 protected:
 	// Access the myBuffer of the porthole
