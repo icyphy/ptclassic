@@ -37,20 +37,21 @@
 #
 # where the suffix is one of: .bin, .debug, .purify, .quantify, .purecov
 #
-
 # matlab.mk and mathematica.mk check these vars before traversing the path
+
 NEED_MATLABDIR =        1
 NEED_MATHEMATICADIR =   1
 
 
 ROOT=$(PTOLEMY)
+OBJDIR=$(ROOT)/obj.$(PTARCH)
+
+include $(ROOT)/mk/config-$(PTARCH).mk
 
 ifndef NOPTOLEMY
 	include $(ROOT)/mk/stars.mk
 	INCL= $(foreach dir,$(CUSTOM_DIRS),-I$(ROOT)$(dir))
 endif
-
-include $(ROOT)/mk/config-$(PTARCH).mk
 
 #if we define NOPTOLEMY variable, we just want to use the pure make commands &
 #none of the PTOLEMY libs
@@ -59,7 +60,7 @@ ifdef NOPTOLEMY
 	#Remove rpath which may have been defined
 	SHARED_LIBRARY_R_LIST=
 endif
-	
+
 VPATH=.
 
 ifndef LIB
@@ -70,19 +71,19 @@ endif
 include $(ROOT)/mk/common.mk
 
 %.bin: %.o $(PT_DEPEND)
-	$(PURELINK) $(LINKER) $(LINKFLAGS) $< $(LIBS) -o $(@F)
+	$(PURELINK) $(LINKER) $(LINKFLAGS) $< $(STARS) $(TARGETS) $(LIBS) -o $(@F)
 
 %.debug: %.o  $(PT_DEPEND)
-	$(PURELINK) $(LINKER) $(LINKFLAGS_D) $< $(LIBS) -o $(@F)
+	$(PURELINK) $(LINKER) $(LINKFLAGS_D) $< $(STARS) $(TARGETS) $(LIBS) -o $(@F)
 
 %.purify: %.o $(PT_DEPEND)
-	$(PURIFY) $(LINKER) $(LINKFLAGS_D)  $< $(LIBS) -o $(@F)
+	$(PURIFY) $(LINKER) $(LINKFLAGS_D)  $<  $(STARS) $(TARGETS) $(LIBS) -o $(@F)
 
 %.quantify: %.o $(PT_DEPEND)
-	$(QUANTIFY) $(LINKER) $(LINKFLAGS) $< $(LIBS) -o $(@F)
+	$(QUANTIFY) $(LINKER) $(LINKFLAGS) $<  $(STARS) $(TARGETS) $(LIBS) -o $(@F)
 
 $.purecov: %.o $(PT_DEPEND)
-	$(PURECOV) $(LINKER) $(LINKFLAGS) $< $(LIBS) -o $(@F)
+	$(PURECOV) $(LINKER) $(LINKFLAGS) $<  $(STARS) $(TARGETS) $(LIBS) -o $(@F)
 
 
 
