@@ -227,20 +227,19 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 ; state variables
         org     $ref(oldsample)
         bsc     $val(oldsampleSize),0
-        org     p:
 
 ; pointer to state variable buffer
-
-        org     $ref(oldsampleStart)
-        dc      $addr(oldsample)
+        org     p:
+        move    #>$addr(oldsample),x0
+        move    x0,$ref(oldsampleStart)
         org     p:
         }
 
         codeblock(first) {
-; tp: $val(tp)
+; tap size: $val(tp)
 ; interpolation : $val(interpolation)
-; dec: $val(dec)
-        move    #$val(tp)*$val(interpolation)+$addr(taps)-1,r0
+; decimation: $val(dec)
+        move    #>($val(tp)*$val(interpolation)+$addr(taps)-1),r0
         }
         codeblock(old) {
         move    $ref(oldsampleStart),r5
@@ -272,7 +271,7 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
         move    a,$ref(output)
         }
         codeblock(decmust) {
-        move    #$val(adjust)+$addr(input),r6
+        move    #>($val(adjust)+$addr(input)),r6
         }
         codeblock(decgreater) {
         clr     a         x:(r5)+,x1      y:(r0)-,y1
@@ -303,7 +302,7 @@ $label(loop)
         }
         codeblock(interpmust) {
         move    $ref2(input,adjust),x0
-        move    #$addr(output),r6
+        move    #>$addr(output),r6
         }
         codeblock(greater) {
         clr   a         x:(r5)+,x1      y:(r0)-,y1
