@@ -292,10 +292,10 @@ if ( ! $?selectPtolemy && $?selectJava) then
 			endif
 			echo "${0}: CLASSPATH is not set,"
 			echo "  setting it to $CLASSPATH"
-		else if ( -f /opt/jdk1.1/lib/classes.zip) then
-			setenv CLASSPATH /opt/jdk1.1/lib/classes.zip
+		else if ( -f /opt/jdk1.1.1/lib/classes.zip) then
+			setenv CLASSPATH /opt/jdk1.1.1/lib/classes.zip
 			if ( ! $?JAVA_HOME ) then
-				setenv JAVA_HOME /opt/jdk1.1
+				setenv JAVA_HOME /opt/jdk1.1.1
 			endif
 			echo "${0}: CLASSPATH is not set,"
 			echo "  setting it to $CLASSPATH"
