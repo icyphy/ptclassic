@@ -84,11 +84,11 @@ provisions.
     }
 
     constructor {
-	blockSize = 8180;
+      	blockSize = 8180;
     }
 
     codeblock (inDeclarations) {
-      short $starSymbol(buffer)[$val(blockSize)/2];
+      short $starSymbol(buf)[$val(blockSize)/2];
       int $starSymbol(counter);
     }
     
@@ -160,9 +160,9 @@ provisions.
 	   $starSymbol(counter)++) {
 
 	$ref(left,$starSymbol(counter)) = 
-	  $starSymbol(buffer)[2*$starSymbol(counter)] /32768.0;
+	  $starSymbol(buf)[2*$starSymbol(counter)] /32768.0;
 	$ref(right,$starSymbol(counter)) = 
-	  $starSymbol(buffer)[2*$starSymbol(counter)+1] /32768.0;
+	  $starSymbol(buf)[2*$starSymbol(counter)+1] /32768.0;
 	
       }
     }
