@@ -573,7 +573,9 @@ char* iconFile, *sourceFile, *domain;
 		dom = 0;
 	}
 	if (!dom) {
-		sprintf (sourceFile, "Can't find source file for %s", base);
+		sprintf (sourceFile,
+			 "Can't find source file for %s, perhaps that domain is not built in to this image?",
+			 base);
 		ErrAdd (sourceFile);
 		return FALSE;
 	}
