@@ -75,7 +75,7 @@ A two-pole, two-zero IIR filter.
 	}
         initCode{
 	  addInclude("<math.h>");
-          addDeclaration(mainDecl);
+          addGlobal(mainDecl);
 	  addCode(settapDef);
 	}
 	codeblock(localDecl){
