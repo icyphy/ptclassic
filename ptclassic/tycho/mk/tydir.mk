@@ -31,11 +31,11 @@
 # Author: Christopher Hylands
 
 makefiles all install clean sources depend realclean checkjunk sccsinfo \
-itcldocs extraclean:
+itcldocs extraclean tests:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
-		echo making $@ in tycho/lib/$$x ; \
+		echo making $@ in $(ME)/$$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
 		) \
 	    fi ; \
