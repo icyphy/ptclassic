@@ -15,9 +15,14 @@ VPATH = $(ROOT)/src/domains/sdf/matrix/stars
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
+ifdef MATLABDIR
+MATLABINC_DIR= $(MATLABDIR)/extern/include
+MATLABSTARS= SDFMatlab_M.pl
+endif
+
 # SDFDIR is the directory containing SDF domain support
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
-INCL = -I$(SDFDIR) -I$(KERNDIR)
+INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(MATLABINC_DIR)
 
 # Library name
 LIB=libsdfmatrixstars.a
@@ -61,6 +66,7 @@ PL_SRCS= \
   SDFInverseFix_M.pl \
   SDFInverseInt_M.pl \
   SDFInverse_M.pl \
+  $(MATLABSTARS) \
   SDFMatrix.pl \
   SDFMatrixCx.pl \
   SDFMatrixFix.pl \
