@@ -74,10 +74,10 @@ HDRS =		$(SRCS:.cc=.h)
 STAR_MK =	decontribstars
 DOMAIN =	DE_CONTRIB
 DOMAIN_2 =	DE
-MISC_FILES =	README
+MISC_FILES =	WiNeS.tcl bs.xbm ms.xbm	topo.dxf
 
-EXTRA_SRCS =	$(STAR_MK).c $(PL_SRCS) $(MISC_FILES) \
-		WiNeS.tcl bs.xbm ms.xbm	topo.dxf
+EXTRA_SRCS =	$(STAR_MK).c $(PL_SRCS) $(MISC_FILES)
+
 
 all:		$(SRCS) stars_all
 
