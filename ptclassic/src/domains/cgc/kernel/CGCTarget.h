@@ -35,23 +35,6 @@ public:
 	void beginIteration(int repetitions, int depth);
 	void endIteration(int repetitions, int depth);
 
-	// Method available to stars to add to lines that are
-	// put at the beginning of the code file.
-	void addInclude(const char* inc);
-
-	// Method available to stars to add to declarations that are
-	// put at the beginning of the main code segment.
-	void addDeclaration(const char* decl);
-
-	// Method available to stars to add to static declarations.
-	void addGlobal(const char* decl);
-
-	// Method available to stars to add to procedures.
-	void addProcedure(const char* decl);
-
-	// Method available to stars to add to main initialization.
-	void addMainInit(const char* decl);
-
 	// name the offset of portholes
 	StringList offsetName(const CGCPortHole* p); 
 
@@ -68,7 +51,7 @@ public:
 	int runCode();
 
 	// generate code for a single processor in a multiprocessor target
-	StringList generateCode();
+	void generateCode();
 
 	// static buffering option can be set by parent target
 	void wantStaticBuffering() { staticBuffering = TRUE; }
@@ -76,15 +59,12 @@ public:
 
 protected:
 	char *schedFileName;
-	StringList staticDeclarations;
-	StringList procedures;
-	StringList include;
-	StringList mainDeclarations;
-	StringList mainInitialization;
-	StringList wormIn;
-	StringList wormOut;
-	StringList includeFiles;
-	StringList globalDecls;
+	CodeStream globalDecls(SHARE);
+	CodeStream include(SHARE);
+	CodeStream mainDecls(SHARE);
+	CodeStream mainInit(SHARE);
+	CodeStream wormIn;
+	CodeStream wormOut;
 
 	// virtual function to initialize strings
 	virtual void initCodeStrings();
@@ -121,7 +101,7 @@ protected:
 	int galId;
 
 private:
-	StringList sectionComment(const StringList s);
+	StringList sectionComment(StringList s);
 	virtual void galDataStruct(Galaxy& galaxy, int level=0);
 	virtual void starDataStruct(CGCStar* block, int level=0);
 	void setGeoNames(Galaxy& galaxy);

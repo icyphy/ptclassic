@@ -59,17 +59,23 @@ protected:
 	void addInclude(const char* decl);
 
 	// Add declarations, to be put at the beginning of the main section
-	void addDeclaration(const char* decl);
+	void addDeclaration(const char* decl, const char* name = NULL) {
+		if (name == NULL) name = decl;
+		addCode(decl, "mainDecls", name);
+	}
 
 	// Add global declarations, to be put ahead of the main section
-	void addGlobal(const char* decl);
-
-	// Add procedures, to be put ahead of the main section
-	void addProcedure(const char* decl);
+	void addGlobal(const char* decl, const char* name = NULL) {
+		if (name == NULL) name = decl;
+		addCode(decl, "globalDecls", name);
+	}
 
 	// Add main initializations, to be put at the beginning of the main 
-	// section
-	void addMainInit(const char* decl);
+	// section. By giving the name, you can have only one initialization
+	// routine among all star instances.
+	void addMainInit(const char* decl, const char* name = NULL) {
+		addCode(decl, "mainInit", name);
+	}
 
 	// After each firing, update the offset pointers
 	virtual void updateOffsets();
@@ -83,6 +89,12 @@ protected:
 	// shared buffers (for example, Spread/Collect) since these movements
 	// are not visible from the user.
 	void moveDataBetweenShared();
+
+	// If automatic type conversion is necessary, do it.
+	void doTypeConversion();
+
+	// get the actual buffer reference.
+	virtual StringList getActualRef(CGCPortHole* p, const char* offset);
 
 private:
 	// define and initialize variables for C program.
@@ -103,7 +115,6 @@ private:
 
 	// offset initialize
 	void initBufPointer();
-
 };
 
 #endif
