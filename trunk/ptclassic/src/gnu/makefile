@@ -119,7 +119,7 @@ $(BINDIR):
 install: $(BINDIR) 
 	(cd $(GNU_OBJ); $(MAKE) CC="$(CC)" MAKEINFO="$(MAKEINFO)" install)
 	-(cd $(BINDIR); ln -s $(REL_GNU_BINDIR)/* .)
-	-(cd $(BINDIR); rm -f gperf genclass unprotoize protoize hp* dec* c++ make.old)
+	-(cd $(BINDIR); rm -f gperf unprotoize protoize hp* dec* c++ make.old)
 
 # The bin rule above compiles gcc with cc, which may result in a buggy
 # gcc.  See src/gnu/src/gcc/INSTALL for more info.
