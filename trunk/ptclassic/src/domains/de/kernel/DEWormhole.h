@@ -24,9 +24,8 @@
 class DEWormhole : public Wormhole, public DEStar {
 
 public:
-	// Restriction : all outputs are synchronized.
 
-	void start() {Wormhole :: setup() ;}
+	void start();
 	void go();
 	void wrapup() { endSimulation(); }
 
