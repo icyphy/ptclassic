@@ -171,7 +171,7 @@ body ::tycho::Exec::execProcess {} {
     set dirToExecFrom [get dirToExecFrom]
     if { $dirToExecFrom != {} } {
         set saveDir [pwd]
-        cd $dirToExecFrom
+        cd "$dirToExecFrom"
     }
 
     # Set the busy cursor
@@ -190,7 +190,7 @@ body ::tycho::Exec::execProcess {} {
     fileevent $fd readable "$this readOrClose $fd"
 
     if { $dirToExecFrom != {} } {
-        cd $saveDir
+        cd "$saveDir"
     }
 }
 
