@@ -29,16 +29,35 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 *******************************************************************/
 
-#include "CGSharedBus.h"
+#ifndef _CGWormTarget_h
+#define _CGWormTarget_h 1
 
+#ifdef __GNUG__
+#pragma interface
 #endif
+
+#include "CGSharedBus.h"
+#include "StringState.h"
+
 class CGWormTarget: public CGSharedBus {
 public:	
     CGWormTarget(const char* name,const char* starType,const char* desc);
     
     // Add dummy CGC stars - set StringArrayState childType based on
     // wormholes.
-    /*virtual*/ setup();
+    /*virtual*/ void setup();
+    /*virtual*/ int isA(const char*) const;
+    /*virtual*/ Block* makeNew() const {
+	 return new CGWormTarget(name(),starType(),descriptor());
+     }
+    /*virtual*/ DataFlowStar* createSend(int from, int to, int num);
+    /*virtual*/ DataFlowStar* createReceive(int from, int to, int num);
+    /*virtual*/ void pairSendReceive(DataFlowStar* s, DataFlowStar* r);
+    /*virtual*/ int runCode();
+private:
+    int replaceCommBlock
+    (DataFlowStar& /*newStar*/, DataFlowStar& /*oldStar*/);
 };
 
+#endif
     
