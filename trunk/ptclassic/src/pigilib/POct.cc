@@ -195,7 +195,7 @@ POct::~POct() {
 // it and finally sending it back.
 // FIXME: Is there a way to modify and send it to the base without doing
 //        the get first?
-int POct::SetBusParams( octObject *instPtr, ParamListType *pList) {
+int POct::SetBusParams(octObject *instPtr, ParamListType *pList) {
     octObject prop;
 
     // Set up the Prop
@@ -220,7 +220,7 @@ int POct::SetBusParams( octObject *instPtr, ParamListType *pList) {
 // it and finally sending it back.
 // FIXME: Is there a way to modify and send it to the base without doing
 //        the get first?
-int POct::SetDelayParams( octObject *instPtr, ParamListType *pList) {
+int POct::SetDelayParams(octObject *instPtr, ParamListType *pList) {
     octObject prop;
 
     // Set up the Prop
@@ -241,25 +241,30 @@ int POct::SetDelayParams( octObject *instPtr, ParamListType *pList) {
 
 // Deletes all of the elements of the passed parameter list pList
 // The memory was allocated in POct::MakePList below 
-void POct::DeletePList( ParamListType* pList) {
-    for (int i=0; i < pList->length; i++) {
-	
-	// FIXME: a consistent decision should be made about
-	// whether a ParamListType owns its strings or not,
-	// and if so they should not be "const char *".
-	// Note that it is not legal C++ to delete a "const T *"
-	// pointer, hence the casts.
+void POct::DeletePList(ParamListType* pList) {
+    if ( pList ) {
+	if ( pList->array ) {
+	    for (int i=0; i < pList->length; i++) {
 
-	// strings created by savestring, which uses the new operator
-        delete [] (char*)(pList->array[i].name);
-        pList->array[i].name = 0;
-        delete [] (char*)(pList->array[i].type);
-        pList->array[i].type = 0;
-        delete [] (char*)(pList->array[i].value);
-        pList->array[i].value = 0;
+		// FIXME: a consistent decision should be made about
+		// whether a ParamListType owns its strings or not,
+		// and if so they should not be "const char *".
+		// Note that it is not legal C++ to delete a "const T *"
+		// pointer, hence the casts.
+
+		// strings created by savestring, which uses the new operator
+		delete [] (char*)(pList->array[i].name);
+		pList->array[i].name = 0;
+		delete [] (char*)(pList->array[i].type);
+		pList->array[i].type = 0;
+		delete [] (char*)(pList->array[i].value);
+		pList->array[i].value = 0;
+    	    }
+    	    delete [] pList->array;
+	    pList->array = 0;
+	}
+	pList->length = 0;
     }
-    delete [] pList->array;
-    pList->array = 0;
 }
 
 
@@ -269,7 +274,7 @@ void POct::DeletePList( ParamListType* pList) {
 // elements as well.  Note that all of the elements must
 // be freed once the pList is no longer needed.  DeletePList
 // does this.
-int POct::MakePList( char* parameterList, ParamListType* pList) {
+int POct::MakePList(char* parameterList, ParamListType* pList) {
     int aC, Element_aC;
     char **aV, **Element_aV;
     int i;
@@ -279,7 +284,7 @@ int POct::MakePList( char* parameterList, ParamListType* pList) {
     if (strcmp(parameterList,"NIL")==0) {
         // Create a "NIL" pList with 0 elements
         pList->length = 0;
-        pList->array = NULL;
+        pList->array = 0;
         return 1;
     }
        
