@@ -432,24 +432,21 @@ body ::tycho::EditHTML::fixLink {link start end err} {
 #
 body ::tycho::EditHTML::parseLink {dest} {
     if [regexp -nocase \
-	    {\<a[ \t]+href[ \t]*=[ \t]*\"?(file:)?([^>#\"]*)#?([^>\"]*)\"?\>} \
-	    $dest dummy1 dummy2 filename name] {
-	# If the filename is not absolute, use the directory
-	# of the current file.  This only works if we are inside
-	# a file object.
-	if {$filename != {} && ![string match /* $filename] && \
-            ![string match "\$*" $filename] && ![string match "~*" $filename]} {
-	    set tl [winfo toplevel $itk_component(hull)]
-	    if {[uplevel #0 info objects $tl] != {} && \
-		    [$tl isa ::tycho::File]} {
-		set filename [file dirname [$tl filename]]/$filename
-	    }
+            {\<a[ \t]+href[ \t]*=[ \t]*\"?(file:)?([^>#\"]*)#?([^>\"]*)\"?\>} \
+            $dest dummy1 dummy2 filename name] {
+        # If the filename is not absolute, use the directory
+        # of the current file.  This only works if we are inside
+        # a file object.
+        if {$filename != {} && ![string match /* $filename] && \
+                ![string match "\$*" $filename] && \
+                ![string match "~*" $filename]} {
+            set filename [file dirname [$this filename]]/$filename
+        } else {
             set filename [::tycho::expandPath $filename]
-	}
-	return [list $filename $name]
-    } {
-	return {}
+        }
+        return [list $filename $name]
     }
+    return {}
 }
 
 #####################################################################
