@@ -22,8 +22,25 @@
 
 class SDFWormhole : public Wormhole, public SDFStar {
 
+private:
+	// time interval between samples.
+	float space;
+
+	// flag to be set after fired once.
+	int mark;
+
+	// token's arrival time.
+	float arrivalTime;
+
+protected:
+	// redefine the getStopTime() 
+	float getStopTime();
+
+	// no necessary of sumUp method.
+
 public:
-	void start() {Wormhole :: setup() ;}
+	void start() { Wormhole :: setup();
+		       mark = 0; }
 	void go();
 	void wrapup() { endSimulation();}
 
@@ -39,6 +56,10 @@ public:
 
 	// clone -- allows interpreter to make copies
 	Block* clone();
+
+	// get the token's arrival time to the wormhole
+	float getArrivalTime();
+
 };
 	
 #endif
