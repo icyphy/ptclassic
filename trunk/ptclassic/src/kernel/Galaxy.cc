@@ -128,3 +128,12 @@ BlockList::blockWithName (const char* ident) {
 	}
 	return NULL;
 }
+
+// return myDomain if set, else use domain of first sub-block.
+const char*
+Galaxy::domain() const {
+	if (myDomain) return myDomain;
+	if (numberBlocks() == 0)
+		return "UNKNOWN";
+	else return blocks.head().domain();
+}
