@@ -22,10 +22,11 @@ The exact Hilbert transform cannot be realized; instead, we just truncate
 the response symmetrically at $-N/2$ and $N/2$ [1].
 This is accurate enough for some applications, but for high accuracy we
 suggest the use of the Parks-McClellan algorithm [2] to design a Hilbert
-transformer filter with the desired characteristics [3].
+transformer filter with the desired characteristics [1,3].
 The "optfir" program supplied with Ptolemy can do this.
 .Ir "optfir program"
 .ID "Oppenheim, A. V."
+.ID "Rabiner, L. R."
 .ID "Schafer, R. W."
 .ID "Parks, T. W."
 .UH REFERENCES
