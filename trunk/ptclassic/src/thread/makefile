@@ -11,11 +11,11 @@
 
 DIRS =
 
-ifeq ($(ARCH),sun4)
+ifneq (,$(filter sun% cfront,$(ARCH)))
 DIRS = Awesime awe lwp
 endif
 
-ifeq ($(ARCH),mips)
+ifeq (mips,$(ARCH))
 DIRS = Awesime awe
 endif
 
@@ -27,7 +27,7 @@ makefiles all install clean sources depend realclean checkjunk sccsinfo:
 		( cd $$x ; \
 		  echo making $@ in thread/$$x ; \
 		  $(MAKE) $(MFLAGS) $(MAKEVARS) \
-		      VPATH=../../../src/thread/$$x $@ ;\
+		      VPATH=../../../src/thread/$$x $@ ; \
 		) \
 	    fi ; \
 	done
