@@ -50,9 +50,12 @@ CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 # system libraries (libraries from the environment)
 SYSLIBS=-lsocket -lnsl -ldl -lg++ -lm
 
+# Ask ld to strip symbolic information, otherwise, expect a 32Mb pigiRpc
+LINKSTRIPFLAGS=-Wl,-s
+
 # Can't use -static here, or we won't be able to find -ldl, and
 # dynamic linking will not work.
-LINKFLAGS=-L$(LIBDIR) -Wl,-R,$(PTOLEMY)/lib.$(ARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR)
+LINKFLAGS=-L$(LIBDIR) -Wl,-R,$(PTOLEMY)/lib.$(ARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR) $(LINKSTRIPFLAGS)
 # link flags if debugging symbols are to be left
 LINKFLAGS_D=-L$(LIBDIR) -Wl,-R,$(PTOLEMY)/lib.$(ARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR)
 
