@@ -1549,6 +1549,10 @@ void genDef ()
 	}
 
 /* Include files */
+	checkIncludes(nHInclude);
+	for (i = 0; i < nHInclude; i++) {
+		fprintf (fp, "#include %s\n", hInclude[i]);
+	}
 	if ( coreDef == 1 )
 		fprintf(fp, "#include \"%s%s.h\"\n", domain, objName);
 	fprintf (fp, "#include \"%s.h\"\n", baseClass);
@@ -1556,10 +1560,6 @@ void genDef ()
 		fprintf (fp, "#include \"%s.h\"\n", alsoDerivedFrom[i] );
         }
 	
-	checkIncludes(nHInclude);
-	for (i = 0; i < nHInclude; i++) {
-		fprintf (fp, "#include %s\n", hInclude[i]);
-	}
 /* Include files for states */
 	for (i = 0; i < NSTATECLASSES; i++)
 		if (stateMarks[i])
