@@ -120,10 +120,9 @@ class ::tycho::DomainInfo {
 #
 body ::tycho::DomainInfo::constructor {args} {
     set domainName [lindex $args 0]
-    ::pitcl::setDomain $domainName
 
     # Cycle through the list of all stars and fill the array
-    foreach star [::pitcl::knownBlocks] {
+    foreach star [::pitcl::knownBlocks $domainName] {
         set stars($star) [starInfo $star]
     }
 }
@@ -317,7 +316,7 @@ body ::tycho::DomainInfo::diffStars {domainA domainB} {
 # that may or may not be out of date.
 #
 body ::tycho::DomainInfo::starInfo {starName} {
-    ::pitcl::domain $domainName
+    #::pitcl::domain $domainName
     set printResults [::pitcl::print $starName]
     # Search printResults for keywords
     set descriptor {}
