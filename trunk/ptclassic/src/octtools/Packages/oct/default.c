@@ -81,7 +81,6 @@ octStatus oct_gen_contents_offset_default();
 octStatus oct_gen_first_content_default(), oct_gen_first_container_default();
 static octStatus default_read_fields(), default_write_fields();
 octStatus oct_write_object(), oct_read_object();
-octStatus oct_subclass_responsibility();
 
 octStatus oct_init_default_desc()
 {
