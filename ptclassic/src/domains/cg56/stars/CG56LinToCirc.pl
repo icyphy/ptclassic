@@ -95,8 +95,8 @@ is repeated inline so may not be efficient for large N.
 	}
 
 	codeblock(oneComplex) {
-	move	L:$addr(input,i),a
-	move	a,L:(r0)+
+	move	L:$addr(input,i),x
+	move	x,L:(r0)+
 	}
 
 	codeblock(restore) {

@@ -96,8 +96,8 @@ is repeated inline so may not be efficient for large N.
 	move	x0,$ref(output,i)
 	}
 	codeblock(oneComplex) {
-	move	L:(r0)+,a
-	move	a,L:$addr(output,i)
+	move	L:(r0)+,x
+	move	x,L:$addr(output,i)
 	}
 	codeblock(restore) {
 	move	r0,$ref(ptr)
