@@ -54,33 +54,6 @@ static const char file_id[] = "BDFCluster.cc";
 inline int TorF(BDFRelation r) { return r == BDF_TRUE || r == BDF_FALSE;}
 inline int SorC(BDFRelation r) { return r == BDF_SAME || r == BDF_COMPLEMENT;}
 
-// classes used to mark ports that need remapping.
-
-class BDFremap {
-	friend class BDFRemapList;
-	BDFClustPort* orig;
-	BDFClustPort* remap;
-	BDFRelation rel;
-	BDFremap(BDFClustPort* o,BDFClustPort* r, BDFRelation rr)
-	: orig(o), remap(r), rel(rr) {}
-};
-
-class BDFRemapList : public SequentialList
-{
-public:
-	BDFRemapList() {}
-	void put(BDFremap& p) { SequentialList::put(&p);}
-	void add(BDFClustPort* o,BDFClustPort* r,BDFRelation re = BDF_SAME);
-	BDFClustPort* lookup(BDFClustPort* o,BDFRelation&);
-	void initialize();
-	~BDFRemapList() { initialize();}
-};
-
-// Having this object makes this non-reentrant.  It contains remappings
-// for buried control arcs.
-
-static BDFRemapList remaps;
-
 // A BDFClusterGal is a Galaxy, built from another galaxy.
 
 // function to print an BDFClusterGal on an ostream.
@@ -122,7 +95,12 @@ BDFClusterGal::BDFClusterGal(Galaxy& gal, ostream* log)
 
 		// create corresponding assocPort relations, if they exist.
 		DFPortHole& realP = curCP->real();
-		PortHole* a = realP.assocPort();
+
+		// hack until we figure out how to do wormholes right --
+		// assume wormholes are SDF.
+		PortHole* a = realP.parent()->isItWormhole()
+			? 0 : realP.assocPort();
+
 		if (a) {
 			// find the ClustPort that corresponds to a, and
 			// set me to be associated with that.
@@ -281,8 +259,6 @@ BDFCluster* BDFClusterGal::fullSearchMerge() {
 				// requirement 3: no buried control arcs.
 				// if met, do the merge and return the
 				// result.
-				// buriedCtlArcs fills remaps in.
-				remaps.initialize();
 				if (!indirectPath(src,dest) &&
 				    !buriedCtlArcs(src,dest))
 					return merge(src,dest);
@@ -482,34 +458,44 @@ int BDFClusterGal::loopPass() {
 }
 
 // get the control port.  We don\'t care here about "same data" relations.
-static PortHole* controlPort(DFPortHole* p,BDFRelation& relation) {
-	PortHole* a = p->assocPort();
-	int r = p->assocRelation();
-	if (!TorF(r)) {
+static BDFClustPort* controlPort(BDFClustPort* p,BDFRelation& relation) {
+	BDFClustPort* a = p->assoc();
+	relation = p->relType();
+	if (!TorF(relation)) {
 		relation = BDF_NONE;
 		a = 0;
 	}
-	else relation = (BDFRelation)r;
 	return a;
 }
 
-// determine whether two signals are "the same"
-static int sameSignal(PortHole* a1,PortHole* a2) {
-	// this needs to be smarter.
-	return (a1 == a2);
+// determine whether two signals have a fixed relation or not.  It
+// returns one of BDF_SAME, BDF_COMPLEMENT, or BDF_NONE.
+
+static BDFRelation sameSignal(BDFClustPort* a1, BDFClustPort* a2)
+{
+	BDFRelation rel;
+	BDFClustPortRelIter iter(*a1);
+	BDFClustPort* p;
+	while ((p = iter.next(rel)) != 0) {
+		if (p == a2) return rel;
+	}
+	return BDF_NONE;
 }
 
-
 // determine whether two ports have matching conditions
-static int condMatch(DFPortHole* p1,DFPortHole* p2) {
+static int condMatch(BDFClustPort* p1, BDFClustPort *p2) {
 	BDFRelation r1, r2;
-	PortHole* a1 = controlPort(p1,r1);
-	PortHole* a2 = controlPort(p2,r2);
-	if (r1 != r2) return FALSE;
-	if (a1 == 0) return TRUE;
-// both have the same condition; we need to know if the signal is the
-// same.
-	return sameSignal(a1,a2);
+
+	BDFClustPort* a1 = controlPort(p1,r1);
+	BDFClustPort* a2 = controlPort(p2,r2);
+	if (r1 == r2) {
+		return (r1 == BDF_NONE) || sameSignal(a1,a2) == BDF_SAME;
+	}
+	else if (r1 == BDF_NONE || r2 == BDF_NONE) return FALSE;
+	else {
+		// opposite conditions -- but two complements cancel out
+		return sameSignal(a1,a2) == BDF_COMPLEMENT;
+	}
 }
 
 // This function returns TRUE if a cluster matches the rate of all its
@@ -805,14 +791,10 @@ void BDFClusterBag::adjustAssociations() {
 		BDFClustPort* upper = lower->outPtr();
 		if (TorF(r)) {
 			if (upper == 0) {
-				// lower should be remappable.
-				BDFRelation r_remap;
-				lower = remaps.lookup(lower,r_remap);
-				if (lower) upper = findPort(this,lower);
-				// "upper" should always be non-null now
-				if (!upper) {
-					Error::abortRun(*bagp,msg);
-					return;
+				BDFRelation r_remap = BDF_NONE;
+				BDFClustPortRelIter iter(*lower);
+				while (!upper && (lower = iter.next(r_remap)) != 0) {
+					upper = lower->outPtr();
 				}
 				if (r_remap == BDF_COMPLEMENT) {
 					// reverse the sense of the relation
@@ -820,39 +802,34 @@ void BDFClusterBag::adjustAssociations() {
 						BDF_FALSE : BDF_TRUE;
 				}
 			}
-			bagp->setRelation(r, upper);
-			upper->setControl(TRUE);
+			// "upper" should always be non-null now
+			if (!upper) {
+				Error::abortRun(*bagp,msg);
+				bagp->setRelation(BDF_NONE);
+			}
+			else {
+				bagp->setRelation(r, upper);
+				upper->setControl(TRUE);
+			}
 			continue;
 		}
 		// handle BDF_SAME and BDF_COMPLEMENT now.
 		// reversed expresses the relationship between
 		// bagp->inPtr() at a given time.
 
-		int reversed = (r == BDF_COMPLEMENT);
+		// if upper is 0, then we must skip past the internal port
+		// to the next one that is related to bagp and is, at the
+		// same time, external.  The iterator steps through all
+		// ports with an identity relationship.
 
-		while (!upper && SorC(r = lower->relType())) {
-
-			// first one is not a bag port, but there is more
-			// to the chain.  If connected to another star
-			// with SAME and COMPLEMENT links we also include
-			// those.
-			if (lower->numTokens() == 0 &&
-			    SorC(lower->far()->relType())) {
-				lower = lower->far();
-				r = lower->relType();
-				// the fall-through here is intentional: if i
-				// am internal, so is my peer.
+		if (upper == 0) {
+			BDFClustPortRelIter iter(*bagp->inPtr());
+			while (!upper && (lower = iter.next(r)) != 0) {
+				upper = lower->outPtr();
 			}
-			lower = lower->assoc();
-			upper = lower->outPtr();
-			if (r == BDF_COMPLEMENT) reversed = !reversed;
 		}
-		// we have either found a bag port that we are related to
-		// (same or complement) or we have gone around to ourselves.
-		if (upper == 0 || upper == bagp)
-			bagp->setRelation(BDF_NONE);
-		else bagp->setRelation(reversed ? BDF_COMPLEMENT : BDF_SAME,
-				       upper);
+		if (upper) bagp->setRelation(r, upper);
+		else bagp->setRelation(BDF_NONE);
 	}
 }
 
@@ -936,61 +913,27 @@ BDFClusterBag::~BDFClusterBag() {
 	LOG_DEL; delete sched;
 }
 
-// This function searches for a port related to ctlP with SAME or
-// COMPLEMENT arcs that is connected to a port that is not a child either
-// of "me" or of "you".  That is, if "me" and "you" are merged, this port
-// will be an external port rather than an internal connection in the cluster.
-// if one is found, "rel" gives the relationship: same or complement,
-// and the return value is the port.  Otherwise 0 is returned.
-
-static BDFClustPort *seekExternal(BDFClustPort* ctlP,BDFCluster *me,
-				  BDFCluster* you, BDFRelation& rel) {
-	BDFRelation r = ctlP->relType();
-	if (!SorC(r)) return 0;
-	int reversed = (r == BDF_COMPLEMENT);
-	BDFClustPort *a = ctlP;
-	BDFCluster *cl;
-	while (a && ((cl = a->far()->parentClust()) == me || cl == you)) {
-		r = a->relType();
-		a = a->assoc();
-		if (a == ctlP) return 0;
-		if (r == BDF_COMPLEMENT) reversed = !reversed;
-		else if (r != BDF_SAME) a = 0;
-	}
-	if (a) {
-		rel = r;
-		return a;
-	}
-	else return 0;
-}
-
 // This function, given a BDFClustPort, tries to find another port that
 // is the SAME or COMPLEMENT of it that will remain an external
 // port if the two clusters it connects are merged.
 // it returns null if there is no such port; otherwise it returns
-// the port as well as the relationship \(through rel\) which is either
+// the port as well as the relationship (through rel) which is either
 // BDF_SAME or BDF_COMPLEMENT.
 
-static BDFClustPort* remapAfterMerge(BDFClustPort* ctlP,BDFRelation& rel)
-{
-	BDFClustPort *pFar = ctlP->far();
+// if the needInput flag is true, only input portholes are considered.
+
+static BDFClustPort *remapAfterMerge(BDFClustPort* ctlP, BDFRelation& rel,
+				  int needInput) {
 	BDFCluster *me = ctlP->parentClust();
-	BDFCluster *you = pFar->parentClust();
-
-// step 1: we can remap if ctlP is connected by SAME or COMPLEMENT
-// arcs to a port that is connected to some other cluster than me or you.
-
-	BDFClustPort *a = seekExternal(ctlP,me,you,rel);
-	if (a) return a;
-
-// we can also remap if there is no delay between ctlP and pFar, and
-// pFar has an external match.
-	if (ctlP->numTokens() == 0 &&
-	    (a = seekExternal(pFar,me,you,rel)))
-		return a;
-	else {
-		return 0;
-	}
+	BDFCluster *you = ctlP->far()->parentClust();
+	BDFClustPortRelIter iter(*ctlP);
+	BDFClustPort* a;
+	BDFCluster *cl;
+	while ((a = iter.next(rel)) != 0
+	       && ((cl = a->far()->parentClust()) == me || cl == you)
+	       && (needInput && a->isItOutput()))
+		;
+	return a;
 }
 
 // This function is called to check whether a merge operation that
@@ -1003,6 +946,9 @@ static BDFClustPort* remapAfterMerge(BDFClustPort* ctlP,BDFRelation& rel)
 // control signal itself is returned \(no remapping is required\).
 // If the control signal is available externally \(because of SAME
 // or COMPLEMENT relations\) the alias is returned.
+
+// Furthermore, input arcs must be controlled by input arcs.  This
+// is checked for as well.
 
 static BDFClustPort* remapControl (BDFClustPort *ctlP, BDFRelation& r) {
 	BDFClustPort *pFar = ctlP->far();
@@ -1017,6 +963,7 @@ static BDFClustPort* remapControl (BDFClustPort *ctlP, BDFRelation& r) {
 	BDFClustPortIter nextPort(*me);
 	BDFClustPort *p;
 	int sorry = FALSE;
+	int needInput = TRUE;
 	while ((p = nextPort++) != 0) {
 		if ((a = p->assoc()) != ctlP || !TorF(p->relType()))
 			continue;
@@ -1025,6 +972,7 @@ static BDFClustPort* remapControl (BDFClustPort *ctlP, BDFRelation& r) {
 		cl = p->far()->parentClust();
 		if (cl != me && cl != you) {
 			sorry = TRUE;
+			if (p->isItInput()) needInput = TRUE;
 			break;
 		}
 	}
@@ -1039,7 +987,7 @@ static BDFClustPort* remapControl (BDFClustPort *ctlP, BDFRelation& r) {
 	// it may come from a fork.  If so, we return the remapped
 	// value, if not, return 0.
 
-	return remapAfterMerge(ctlP,r);
+	return remapAfterMerge(ctlP,r,needInput);
 }
 
 // check for any buried control arcs resulting from merging
@@ -1057,15 +1005,11 @@ int BDFClusterGal::buriedCtlArcs(BDFCluster* src, BDFCluster* dest)
 		if (pFar->parentClust() != dest) continue;
 		if (p->isControl()) {
 			pRemap = remapControl(p,r);
-			if (pRemap)
-				remaps.add(p,pRemap,r);
-			else pFail = p;
+			if (!pRemap) pFail = p;
 		}
 		if (pFar->isControl() && !pFail) {
 			pRemap = remapControl(pFar,r);
-			if (pRemap)
-				remaps.add(pFar,pRemap,r);
-			else pFail = p;
+			if (!pRemap) pFail = p;
 		}
 		if (pFail) {
 			if (logstrm) {
@@ -1274,6 +1218,49 @@ void BDFClustPort :: setRelation(int r, BDFClustPort* assoc) {
 	setBDFParams(numIO(),assoc,(BDFRelation)r,nT);
 }
 
+// method for BDFClustPortRelIter.  This iterator steps through
+// all ports that are "the same" or "the complement" of the original
+// port.  The far() port is included in this iteration if there is
+// no delay and neither side is a conditional port.  Q: should we
+// generalize this to admit conditional ports controlled by the same
+// conditions?
+
+BDFClustPort* BDFClustPortRelIter :: next(BDFRelation& rel) {
+	if (pos == 0) return 0;
+	BDFRelation posrel = pos->relType();
+	BDFClustPort* pfar = pos->far();
+	// we see if we should jump over to the farSidePort.
+	// it must be connected, have the same rate and no delay.
+	// the "noFar" flag avoids crossing the same arc twice in
+	// a row.
+	if (!justDidFar && pfar && pos->numTokens() == 0 &&
+	    pos->numXfer() == pfar->numXfer() &&
+	    !TorF(posrel) && !TorF(pfar->relType())) {
+		pos = pos->far();
+		justDidFar = 1;
+		rel = BDF_SAME;
+		return pos;
+	}
+	// if we hopped over but there are no links on this side,
+	// hop back and proceed from there.
+	if (justDidFar && !SorC(posrel)) {
+		pos = pfar;
+		posrel = pfar->relType();
+	}
+	if (!SorC(posrel)) pos = 0;
+	else {
+		if (posrel == BDF_COMPLEMENT) rev = !rev;
+		pos = pos->assoc();
+		rel = (rev ? BDF_COMPLEMENT : BDF_SAME);
+		justDidFar = 0;
+	}
+	if (pos == start) return 0;
+	else return pos;
+}
+
+
+
+
 // methods for BDFClustSched, the clustering scheduler.
 
 BDFClustSched::~BDFClustSched() { LOG_DEL; delete cgal;}
@@ -1391,40 +1378,4 @@ void BDFBagScheduler::genCode(Target& t, int depth) {
 //	}
 }
 
-// Remap methods
-
-// Add a remapping to the list.  We use the "translated" versions of the
-// original and remapped value.  We avoid putting bag ports into the
-// list because they are dynamically created or deleted; the innermost
-// ports stay fixed throughout the clustering.
-
-void BDFRemapList :: add(BDFClustPort* o,BDFClustPort* r,BDFRelation rr) {
-	if (o != r) {
-		o = o->innermost();
-		r = r->innermost();
-		LOG_NEW; put(*new BDFremap(o,r,rr));
-	}
-}
-
-BDFClustPort* BDFRemapList :: lookup(BDFClustPort* o, BDFRelation& rel) {
-	ListIter next(*this);
-	o = o->innermost();
-	BDFremap *r;
-	while ((r = (BDFremap*)next++) != 0) {
-		if (r->orig == o) {
-			rel = r->rel;
-			return r->remap;
-		}
-	}
-	return 0;
-}
-
-void BDFRemapList :: initialize() {
-	ListIter next(*this);
-	BDFremap *r;
-	while ((r = (BDFremap*)next++) != 0) {
-		LOG_DEL; delete r;
-	}
-	SequentialList::initialize();
-}
 
