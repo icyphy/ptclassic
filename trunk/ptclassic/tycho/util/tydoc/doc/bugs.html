@@ -16,14 +16,14 @@
 	a bunch of declarations.  Currently tydoc dumps the first 
 	declaration, and then the comment, and then the other declarations. 
 
-	<LI> The arguments to <CODE>itk_option</CODE> are not
+	<LI> The arguments to <CODE>option</CODE> are not
 	handled properly.  We currently print:
 	<LISTING>
-	itk_option define {-master} 
+	option add {*RevControlSCCS.versionColor}
 	</LISTING>
 	Instead of:
 	<LISTING>
-	itk_option define -master master Master "0"
+	option add *RevControlSCCS.versionColor [ptkColor blue black] widgetDefault
 	</LISTING>
 
 	<LI> If we have a destructor that looks like:
