@@ -431,6 +431,9 @@ configbody ::tycho::File::file {
 	wm iconname $prefix [file tail $file]
         configure -title "$file"
     }
+    # We assume that all the checking about modification has been done
+    # now, so in case the file is still marked modified,
+    markUnmodified
     reload
 
     # Keep track of which files are open by name.
