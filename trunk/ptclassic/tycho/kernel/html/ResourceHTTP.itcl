@@ -74,11 +74,11 @@ set _httpstatus(http://127.0.0.1) done
 # <pre>  $httpobj open r
 # </pre></tcl>
 #
-# <li><b>Print out first 50 lines in this HTML file</b><tcl>
+# <li><b>Print out next 25 lines in this HTML file</b><tcl>
 # <pre>  set i 0
 #   set line {}
-#   while {![$httpobj eof] && [incr i]!=50} {
-#     lappend line [$httpobj gets]
+#   while {![$httpobj eof] && [incr i]!=25} {
+#     append line "[$httpobj gets]\n"
 #   }
 #   ::tycho::inform $line
 # </pre></tcl>
@@ -105,17 +105,16 @@ set _httpstatus(http://127.0.0.1) done
 # $httpobj2 connect $site2
 # $httpobj3 connect $site3</pre></tcl>
 #
-# <li><b>Open up connection, download:</b><tcl>
+# <li><b>Open up connection, download simultaneously:</b><tcl>
 # <pre>$httpobj1 open r
 # $httpobj2 open r
 # $httpobj3 open r</pre></tcl>
 #
 # <li><b>Read in the lines (you can press multiple times)</b><tcl>
 # <pre>set line {}
-# lappend line [list &#92
-#   "site1 returns:\n[$httpobj1 gets]\n\n" &#92
-#   "site2 returns:\n[$httpobj2 gets]\n\n" &#92
-#   "site3 returns:\n[$httpobj3 gets]\n\n"]
+# append line "site1 returns:\n[$httpobj1 gets]\n\n"
+# append line "site2 returns:\n[$httpobj2 gets]\n\n"
+# append line "site3 returns:\n[$httpobj3 gets]\n\n"
 # ::tycho::inform $line</pre></tcl>
 # </ul>
 class ::tycho::ResourceHTTP {
@@ -146,14 +145,6 @@ class ::tycho::ResourceHTTP {
 
     # Read a string from a streamable resource
     method gets {{varName {}}}
-
-    # FIXME: This is a hack to get the internal variables.
-    # Used by proc contenttype, and mostly exists
-    method getcontenttype {} {return $contenttype}
-    # FIXME: This is a hack to get the internal variables.
-    method getsize {} {return $contentlength}
-    # FIXME: This is a hack to get the internal variables.
-    method getdate {} {return $lastmodified}
 
     # Test if the file is currently open
     method isopen {}
@@ -229,6 +220,14 @@ class ::tycho::ResourceHTTP {
 
     # Puts a string to console of the debug option is set
     protected method debugputs {string}
+
+    # FIXME: This is a hack to get the internal variables.
+    # Used by proc contenttype, and mostly exists
+    protected method getcontenttype {} {return $contenttype}
+    # FIXME: This is a hack to get the internal variables.
+    protected method getsize {} {return $contentlength}
+    # FIXME: This is a hack to get the internal variables.
+    protected method getdate {} {return $lastmodified}
 
     # Abort an HTTP GET
     protected method httpabort {}
