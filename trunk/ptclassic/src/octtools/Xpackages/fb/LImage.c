@@ -463,7 +463,7 @@ Region region;			/* Merged regions */
 
     /* Draw the image */
     x = (wi - sw->lImage.image.width)/2;
-    y = (he - real_he)/2 + sw->lImage.padding;
+    y = (int)(he - real_he)/2 + sw->lImage.padding;
     gc = LiGC(w, fg, bg, sw->lImage.image.map, x, y, (XFontStruct *) 0);
     XFillRectangle(XtDisplay(w), XtWindow(w), gc, x, y,
 		   sw->lImage.image.width, sw->lImage.image.height);
@@ -473,7 +473,7 @@ Region region;			/* Merged regions */
     y += (sw->lImage.image.height + sw->lImage.padding + sw->lImage.font->ascent);
     for (i = 0;  i < sw->lImage.num_lines;  i++) {
 	XDrawString(XtDisplay(w), XtWindow(w), gc,
-		    (wi - sw->lImage.line_array[i].width)/2, y,
+		    (int)(wi - sw->lImage.line_array[i].width)/2, y,
 		    sw->lImage.line_array[i].line,
 		    sw->lImage.line_array[i].count);
 	y += sw->lImage.font->ascent + sw->lImage.font->descent + 1;

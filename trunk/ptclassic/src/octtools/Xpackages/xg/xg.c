@@ -1576,7 +1576,7 @@ static int xgiTransformCompute(xg)
 
 	maxName = 0;
 	for (set= 0 ; set < xg->numPlots ; set++) {
-		maxName = MAX(maxName, strlen(xg->dataSet[set].setName));
+		maxName = MAX(maxName, (int)strlen(xg->dataSet[set].setName));
 	} /* for... */
 
 	/* Worst case size of the X axis label: */
