@@ -33,9 +33,9 @@ void LSGraph::resetVisits()
 		n->resetVisit();
 }
 
-int LSGraph::createMe(Galaxy& galaxy) {
+int LSGraph::createMe(Galaxy& galaxy, int) {
 	clusters.initialize();
-	int flag = ExpandedGraph :: createMe(galaxy);
+	int flag = ExpandedGraph :: createMe(galaxy, 0);
 	removeArcsWithDelay();
 	if (flag) flag = makeRM();
 	return flag;
