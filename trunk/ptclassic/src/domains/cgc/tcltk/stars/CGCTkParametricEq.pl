@@ -119,23 +119,11 @@ limitation of liability, and disclaimer of warranty provisions.
             }
 	    /* set the new gain  */
 	    $ref(gain) = tkgain/5.0 - 10.0;
-	    
+	    /* procedure calls to update; defined in base class */
 	    $starSymbol(setparams)(&$starSymbol(parametric));
-	    if (strcasecmp("$val(filtertype)", "LOW") == 0){
-	      $sharedSymbol(CGCParamBiquad,lowpass)(&$starSymbol(parametric),
-				   $starSymbol(filtercoeff));
-	    }
-	    else if (strcasecmp("$val(filtertype)", "HI") == 0){
-	      $sharedSymbol(CGCParamBiquad,hipass)(&$starSymbol(parametric),
-				  $starSymbol(filtercoeff));
-	    }
-	    else if (strcasecmp("$val(filtertype)", "BAND") == 0){
-	      $sharedSymbol(CGCParamBiquad,bandpass)(&$starSymbol(parametric),
-				    $starSymbol(filtercoeff));
-	    }
-	    $sharedSymbol(CGCParamBiquad,setfiltertaps)
+	    $sharedSymbol(CGCParamBiquad,selectFilter)
 	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
-	       $starSymbol(filtertaps));  
+	       $starSymbol(filtertaps), "$val(filtertype)");
 
 	    sprintf(buf, "%.2f", $ref(gain));
 	    displaySliderValue(".low", "$starSymbol(scale1)", buf);
@@ -160,23 +148,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	    $ref(centerFreq) = 
 	      tkcenter*($val(highFreq) - $val(lowFreq))/100 
 	      + $val(lowFreq);
-	    
+	    /* procedure calls to update; defined in base class */	    
 	    $starSymbol(setparams)(&$starSymbol(parametric));
-	    if (strcasecmp("$val(filtertype)", "LOW") == 0){
-	      $sharedSymbol(CGCParamBiquad,lowpass)(&$starSymbol(parametric),
-				   $starSymbol(filtercoeff));
-	    }
-	    else if (strcasecmp("$val(filtertype)", "HI") == 0){
-	      $sharedSymbol(CGCParamBiquad,hipass)(&$starSymbol(parametric),
-				  $starSymbol(filtercoeff));
-	    }
-	    else if (strcasecmp("$val(filtertype)", "BAND") == 0){
-	      $sharedSymbol(CGCParamBiquad,bandpass)(&$starSymbol(parametric),
-				    $starSymbol(filtercoeff));
-	    }
-	    $sharedSymbol(CGCParamBiquad,setfiltertaps)
+	    $sharedSymbol(CGCParamBiquad,selectFilter)
 	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
-	       $starSymbol(filtertaps));  
+	       $starSymbol(filtertaps), "$val(filtertype)");
 
 	    sprintf(buf, "%.2f", $ref(centerFreq));
 	    displaySliderValue(".middle", "$starSymbol(scale2)", buf);
@@ -200,15 +176,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	    /* conveying the value changes of bandwidth to audio */
 	    /* only for bandpass filters, else inactive          */
 	    $ref(bandwidth) = tkband*0.0399 + 0.01;
-	    	    
-	    if (strcasecmp("$val(filtertype)", "BAND") == 0){
+	    /* procedure calls to update; defined in base class */
 	    $starSymbol(setparams)(&$starSymbol(parametric));
-	    $sharedSymbol(CGCParamBiquad,bandpass)(&$starSymbol(parametric),
-				    $starSymbol(filtercoeff));
-	    $sharedSymbol(CGCParamBiquad,setfiltertaps)
+	    $sharedSymbol(CGCParamBiquad,selectFilter)
 	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
-	       $starSymbol(filtertaps));  	    
-	    }
+	       $starSymbol(filtertaps), "$val(filtertype)");
 
 	    sprintf(buf, "%.4f", $ref(bandwidth));
 	    displaySliderValue(".high", "$starSymbol(scale3)", buf);
@@ -229,23 +201,16 @@ limitation of liability, and disclaimer of warranty provisions.
                 errorReport("Invalid pass freq");
                 return TCL_ERROR;
             }
-	    /* set the new pass frequency  */
+	    /* set the new pass frequency, only if its a high   */
+	    /* or low pass filter.				*/
 	    $ref(passFreq) = 
 	      tkpass*($val(highFreq) - $val(lowFreq))/100 
 	      + $val(lowFreq);
-	    
+	    /* procedure calls to update; defined in base class */	    
 	    $starSymbol(setparams)(&$starSymbol(parametric));
-	    if (strcasecmp("$val(filtertype)", "LOW") == 0){
-	      $sharedSymbol(CGCParamBiquad,lowpass)(&$starSymbol(parametric),
-				   $starSymbol(filtercoeff));
-	    }
-	    else if (strcasecmp("$val(filtertype)", "HI") == 0){
-	      $sharedSymbol(CGCParamBiquad,hipass)(&$starSymbol(parametric),
-				  $starSymbol(filtercoeff));
-	    }
-	    $sharedSymbol(CGCParamBiquad,setfiltertaps)
+	    $sharedSymbol(CGCParamBiquad,selectFilter)
 	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
-	       $starSymbol(filtertaps));  
+	       $starSymbol(filtertaps), "$val(filtertype)");
 
 	    sprintf(buf, "%.2f", $ref(passFreq));
 	    displaySliderValue(".middle", "$starSymbol(scale4)", buf);
