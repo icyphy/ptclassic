@@ -58,6 +58,9 @@ public:
     // Input/output identification.
     virtual int isItOutput() const;
 
+    // Update buffer pointer (for % operator) and clear old Particles.
+    virtual void grabData();
+
     // Put data into the Geodesic.
     virtual void sendData();
 };

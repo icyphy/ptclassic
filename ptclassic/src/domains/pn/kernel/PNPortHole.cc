@@ -117,6 +117,12 @@ int OutMTDFPort::isItOutput() const
     return TRUE;
 }
 
+// Update buffer pointer (for % operator) and clear old Particles.
+void OutMTDFPort::grabData()
+{
+    clearParticle();
+}
+
 // Put data into the Geodesic.
 void OutMTDFPort::sendData()
 {
