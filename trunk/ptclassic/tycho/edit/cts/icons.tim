@@ -201,8 +201,8 @@ group sink -label {Sink Icons} {
 group dynamic -label {Dynamic Icons} {
     icon integral \
             -slatetype IconFrame \
-            -label {Integrater} \
-            -text Integrater \
+            -label {Integrator} \
+            -text Integrator \
             -color blue \
             -termstyles {1-1-east} \
             -graphics {
