@@ -36,52 +36,64 @@
 # operate asynchronously.
 
 set s .${uniqueSymbol}field
-catch {destroy $s}
-toplevel $s
-wm title $s "Playing Field"
-wm iconname $s "Playing Field"
 
-frame $s.f -bd 10
-canvas $s.f.pad -relief sunken -bg AntiqueWhite3 -height 5c -width 10c
-scale $s.f.slider -orient horizontal -from 0 -to 100 -bg tan4 \
+# If the window doesn't already exist, create it.
+# If the window does exist, assume it was created by a previous run
+# of this same star, and hence is configured properly to work as is.
+# To check whether it was created by a previous run, we check the
+# existence of the variable ${uniqueSymbol}ballId.
+
+if {![winfo exists $s] || ![info exists ${uniqueSymbol}ballId]} {
+    catch {destroy $s}
+    toplevel $s
+    wm title $s "Playing Field"
+    wm iconname $s "Playing Field"
+
+    frame $s.f -bd 10
+    canvas $s.f.pad -relief sunken -bg AntiqueWhite3 -height 5c -width 10c
+    scale $s.f.slider -orient horizontal -from 0 -to 100 -bg tan4 \
 	-sliderforeground bisque1 -fg bisque1 -length 10c \
         -command ${uniqueSymbol}setOut -showvalue 0
-button $s.f.ok -text "DISMISS" -command "destroy $s"
-pack append $s.f $s.f.pad top $s.f.slider {top} $s.f.ok {top fillx}
-pack append $s $s.f top
+    # FIX ME: dismissing the window should stop the run
+    button $s.f.ok -text "DISMISS" -command "destroy $s"
+    pack append $s.f $s.f.pad top $s.f.slider {top} $s.f.ok {top fillx}
+    pack append $s $s.f top
 
-proc ${uniqueSymbol}setOut {value} {
-	global uniqueSymbol
-	${uniqueSymbol}setOutputs [expr {$value/20.0}]
-}
+    set c $s.f.pad
+    set ballRadius 0.5
+    set x1 [expr 5.0-$ballRadius]
+    set y1 [expr 2.5-$ballRadius]
+    set x2 [expr 5.0+$ballRadius]
+    set y2 [expr 2.5+$ballRadius]
 
-# Initialize the output
-${uniqueSymbol}setOut 0
-
-set c $s.f.pad
-set ballRadius 0.5
-set x1 [expr 5.0-$ballRadius]
-set y1 [expr 2.5-$ballRadius]
-set x2 [expr 5.0+$ballRadius]
-set y2 [expr 2.5+$ballRadius]
-
-set ${uniqueSymbol}ballId [$c create oval ${x1}c ${y1}c ${x2}c ${y2}c \
+    set ${uniqueSymbol}ballId [$c create oval ${x1}c ${y1}c ${x2}c ${y2}c \
         -outline white -fill firebrick4 ]
 
-proc ${uniqueSymbol}callTcl {} {
-        global uniqueSymbol
+    # Conditionally define procedures, only if they haven't been defined before
+    proc ${uniqueSymbol}setOut {value} "
+	${uniqueSymbol}setOutputs \[expr {\$value/20.0}]
+    "
+
+    proc ${uniqueSymbol}callTcl {} "
         global ${uniqueSymbol}ballId
         set s .${uniqueSymbol}field
-        set c $s.f.pad
+        set c \$s.f.pad
         set ballRadius 0.5
-        set inputVals [${uniqueSymbol}grabInputs]
-        set xin [lindex $inputVals 0]
-        set yin [lindex $inputVals 1]
-        set x1 [expr {$xin-$ballRadius}]
-        set y1 [expr {$yin-$ballRadius}]
-        set x2 [expr $x1+2*$ballRadius]
-        set y2 [expr $y1+2*$ballRadius]
+        set inputVals \[${uniqueSymbol}grabInputs]
+    	set xin \[lindex \$inputVals 0]
+        set yin \[lindex \$inputVals 1]
+        set x1 \[expr {\$xin-\$ballRadius}]
+        set y1 \[expr {\$yin-\$ballRadius}]
+        set x2 \[expr \$x1+2*\$ballRadius]
+        set y2 \[expr \$y1+2*\$ballRadius]
         after 15
         update
-        $c coords [set ${uniqueSymbol}ballId] ${x1}c ${y1}c ${x2}c ${y2}c
+        \$c coords \[set ${uniqueSymbol}ballId] \${x1}c \${y1}c \${x2}c \${y2}c
+    "
+
+    # Initialize the output
+    ${uniqueSymbol}setOut 0
+} {
+    # If the window previously existed, use the current value of the slider
+    ${uniqueSymbol}setOut [$s.f.slider get]
 }
