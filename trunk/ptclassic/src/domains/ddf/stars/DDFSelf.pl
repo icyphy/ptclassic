@@ -54,7 +54,7 @@ At compile time, this star appears to just be an atomic star.
 		gal = 0;
 	}	
 	start {
-		if (gal) return TRUE;
+		if (gal) return;
 
 		StringList msg = "DDFSelf Star \"";
 		msg += readName();
