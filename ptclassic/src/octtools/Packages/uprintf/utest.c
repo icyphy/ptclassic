@@ -91,10 +91,11 @@ va_dcl
 
 #define PI 3.14159
 
+int
 main()
 /* Tests error routine */
 {
     Fprintf(stderr, "Begin processing\n");
     error("main", __FILE__, __LINE__, "value of pi is %f\n", PI);
-    exit(0);
+    return 0;
 }
