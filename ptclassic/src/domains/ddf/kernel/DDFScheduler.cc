@@ -15,7 +15,7 @@
 #include "ForScheduler.h"
 #include "DoWhileScheduler.h"
 #include "SDFScheduler.h"
-
+	
 /**************************************************************************
 Version identification:
 $Id$
@@ -34,7 +34,7 @@ $Id$
 These are the methods for the dynamic dataflow scheduler.
 
 **************************************************************************/
-
+	
 extern const char DDFdomainName[];
 
 void fireSource(Star&, int);
@@ -46,23 +46,23 @@ static CaseScheduler caseSched;
 static ForScheduler  forSched;
 static DoWhileScheduler dowhileSched;
 static SDFScheduler sdfSched;
-
+	
 /*******************************************************************
  error messages for inconsistent graphs
 *******************************************************************/
 
 static char* err0 = " lies in an inconsistent DDF system : \n";
 static char* err1_1 = "First check DELAY-FREE LOOP or ";
-static char* err1_2 = "The auto-wormholization procedure may create an \
-artificial deadlock.\n";
-static char* err1_3 = "You can disable the procedure by defining a IntState \
-(restructure) and \nsetting 0 in the DDF galaxy.";
+static char* err1_2 = "The auto-wormholization procedure may create an "
+"artificial deadlock.\n";
+static char* err1_3 = "You can disable the procedure by defining a IntState "
+"(restructure) and \nsetting 0 in the DDF galaxy.";
 static char* err2_1 = " needs too large input buffer size (>";
 static char* err2_2 = ") \nFirst check INCONSISTENT SAMPLE RATES or ";
 static char* err2_3 = "other semantic errors \n... (sorry for poor hints) \n";
 static char* err2_4 = "You may increase the max buffer size by defining a ";
 static char* err2_5 = "IntState (maxBufferSize) \nin the DDF galaxy.";
-
+	
 #define MAXTOKEN 1024
 static int maxToken;
 static int lazyDepth;
@@ -192,7 +192,6 @@ int DDFScheduler :: setup (Block& b) {
 		
 	return !haltRequested();
 }
-
 
 	////////////////////////////
 	// run
@@ -435,7 +434,7 @@ int DDFScheduler :: lazyEval(Star* s) {
 	} else
 		return FALSE;
 }
-	
+
 int DDFScheduler :: checkLazyEval(Star* s) {
 	BlockPortIter nextp(*s);
 
@@ -551,3 +550,34 @@ Scheduler* DDFScheduler :: selectScheduler(Galaxy& galaxy) {
 	if (!flag)
 		canDom = DDF;
 }
+
+// constructor: set default options
+
+DDFScheduler::DDFScheduler () {
+	stopTime = 1;
+	canDom = UnKnown;
+	numOverlapped = 1; 
+	restructured = FALSE;
+	schedulePeriod = 10000.0;
+}
+
+// setStopTime, for compatibility with DE scheduler.
+// for now, we assume each schedule interation takes 1.0
+// time units.  (Argh).  Deal with roundoff problems.
+void DDFScheduler::setStopTime (float limit) {
+	stopTime = int(limit + 0.001) ;
+}
+
+void DDFScheduler::resetStopTime (float v) {
+	stopTime = 1; numFiring = 0;
+}
+
+int DDFScheduler::isSDFType() {
+	int flag = 1;
+	if (canDom == DDF) flag = 0;
+	else if (canDom == SDF) flag = 2;
+	return flag;
+}
+
+void DDFScheduler::resetFlag() { restructured = FALSE ;}
+
