@@ -45,26 +45,11 @@ This file contains declarations for Tk ptimage related things that
 are visible outside of the Tk module itself.
  */
 
-
-/* Taken from ptk.h */
-
-#include "tcl.h"
-
-/* Note that if we are including ptkImage.h in a C++ file, we must include
- * ptkImage.h last because ptkImage.h includes tk.h which eventually includes
- * X11/X.h, which on Solaris2.4 there is a #define Complex 0, which
- * causes no end of trouble.
- */
-#include "tk.h"
-
-extern Tcl_Interp *ptkInterp;
-extern Tk_Window ptkW;
-
+/* Log tcl.h and tk.h, and define global Tcl and Tk interpreters */
+#include "ptk.h"
 
 /* Pull in X window colormap definitions and other data structures */
-
 #include <X11/Xutil.h>
-
 
 /*
  *------------------------------------------------------------------
