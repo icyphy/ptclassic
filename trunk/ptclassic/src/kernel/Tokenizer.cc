@@ -77,11 +77,11 @@ Tokenizer::Tokenizer() {
 // file being read from
 
 struct TokenContext {
-	const char* filename;
+	char* filename;
 	istream* savestrm;
 	int line_num;
 	TokenContext* link;
-	TokenContext(const char* f,istream* s,int ln, TokenContext* l)
+	TokenContext(char* f,istream* s,int ln, TokenContext* l)
 		: filename(f), savestrm(s), line_num(ln), link(l) {}
 };
 
