@@ -54,10 +54,18 @@ class VHDLBPortHole;
 
 class VHDLBTarget : public HLLTarget {
 public:
+	// constructor
 	VHDLBTarget(const char* name, const char* starclass, const char* desc);
+
 	// copy constructor
 	VHDLBTarget(const VHDLBTarget&);
-	Block* makeNew() const;
+
+	// return a new copy of itself
+	/*virtual*/ Block* makeNew() const;
+
+	// return the domain of the galaxy if it exists or "VHDLB" otherwise
+	/*virtual*/ const char* domain();
+
 	void headerCode();
 	virtual void setup();
 	int run();
@@ -73,8 +81,7 @@ public:
 	// Return the portHole direction.
 	StringList direction(const GenericPort* port);
 
-// public?
-// 	put this a diff name to generate VHDL compatible code
+	// put this a diff name to generate VHDL compatible code
 	StringList vhdlCode;
 	StringList galaxyList;
 	StringList univName;

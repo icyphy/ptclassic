@@ -39,16 +39,20 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+// Includes from Ptolemy domains
+#include "SDFScheduler.h"
+#include "VHDLBStar.h"
 #include "VHDLBTarget.h"
 #include "CGUtilities.h"
+
+// Includes from the Ptolemy kernel
 #include "FloatArrayState.h"
-#include "VHDLBStar.h"
+#include "Galaxy.h"
 #include "GalIter.h"
 #include "ConstIters.h"
 #include "miscFuncs.h"
 #include "pt_fstream.h"
 #include "Linker.h"
-#include "SDFScheduler.h"
 #include "PortHole.h"
 #include "KnownTarget.h"
 #include "FixState.h"
@@ -76,8 +80,7 @@ VHDLBTarget::VHDLBTarget(const char* name,const char* starclass,
 
 StringList VHDLBTarget :: sectionComment(const StringList s) {
   StringList out = "\n-- ";
-  out << s;
-  out << "\n\n";
+  out << s << "\n\n";
   return out;
 }
 
@@ -109,7 +112,7 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 
   /* If className = "InterpGalaxy", then we're at the top level,
      so use universe name instead */
-  if(!strcmp(galaxy.className(),"InterpGalaxy")) {
+  if (strcmp(galaxy.className(),"InterpGalaxy") == 0) {
     blockName = galaxy.name();
   }
   else {
@@ -123,6 +126,7 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
   while ((pgalaxy = galaxyNext++) != 0) {
     if (!strcmp(blockName,pgalaxy)) isNewGal = 0;
   }
+
   /* don't repeat galaxy code generation */
   if(isNewGal == 0) {
     return TRUE;
@@ -130,7 +134,6 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
   else {
     galaxyList << blockName;
   }
-
 
   /* StringLists to be used in the ENTITY DECLARATION */
 
@@ -141,7 +144,7 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
   /* Define the generic interface list, if any */
 
   /* GALAXY'S STATE SCAN */
-  if(galaxy.numberStates()) {
+  if (galaxy.numberStates()) {
     CBlockStateIter galStateIter(galaxy);
     const State* st;
     while ((st = galStateIter++) != 0) {
@@ -151,12 +154,11 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
     }
   }
   /* END GALAXY'S STATE SCAN */
-  
 
   /* Make a list of the inputs and outputs by name */
-  
+
   /* GALAXY'S SINGLE PORT SCAN */
-  if(galaxy.numberPorts()) {
+  if (galaxy.numberPorts()) {
     CBlockPortIter galPortIter(galaxy);
     const PortHole* ph;
     while ((ph = galPortIter++) != 0) {
@@ -171,16 +173,16 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 	   only the outermost level is not aliased from aother port */
 	/* Sometimes outer port is "at boundary" when inner,
 	   alias port is not */
-	if(!(innerPortHole->atBoundary()) || (ph->aliasFrom())) {
+	if (!(innerPortHole->atBoundary()) || (ph->aliasFrom())) {
 	  StringList tempString = sanitize(ph->name());
 	  tempString << ": " << direction(ph) << " ";
 	  tempString << translateType(ph->type());
-	  if(ph->isItOutput()) {
-	    if(outputs.numPieces() > 1) outputs << "; ";
+	  if (ph->isItOutput()) {
+	    if (outputs.numPieces() > 1) outputs << "; ";
 	    outputs << tempString;
 	  }
 	  else {
-	    if(inputs.numPieces() > 1) inputs << "; ";
+	    if (inputs.numPieces() > 1) inputs << "; ";
 	    inputs << tempString;
 	  }
 	}
@@ -191,7 +193,7 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 
 
   /* GALAXY'S MULTI PORT SCAN */
-  if(galaxy.numberMPHs()) {
+  if (galaxy.numberMPHs()) {
     integerVecs = TRUE;
 
     CBlockMPHIter galMPHIter(galaxy);
@@ -212,7 +214,7 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
       tempString << sanitize(mph->name())  << "_";
       tempString << innerStar->portWidthName(innerMultiPort) << ")";
 
-      if(mph->isItOutput()) {
+      if (mph->isItOutput()) {
 	if(outputs.numPieces() > 1) outputs << "; ";
 	outputs << tempString;
        }
@@ -220,7 +222,7 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 	if(inputs.numPieces() > 1) inputs << "; ";
 	inputs << tempString;
       }
-      if(genericList.numPieces() > 1) genericList << "; ";
+      if (genericList.numPieces() > 1) genericList << "; ";
       genericList << sanitize(mph->name()) << "_";
       genericList << innerStar->portWidthName(innerMultiPort) << ": ";
       genericList << "INTEGER";
@@ -233,16 +235,15 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 
   vhdlCode = "\n";
   vhdlCode << "entity " << blockName << " is\n";
-  if(genericList.numPieces() > 1) {
+  if (genericList.numPieces() > 1) {
     vhdlCode << indent(1) << "generic(" << genericList << ");\n";
   }
-  if((inputs.numPieces() > 1) || (outputs.numPieces() > 1)) {
+  if ((inputs.numPieces() > 1) || (outputs.numPieces() > 1)) {
     vhdlCode << indent(1) << "port(" << inputs;
     if((inputs.numPieces() > 1) && (outputs.numPieces() > 1)) vhdlCode << "; ";
     vhdlCode << outputs << ");\n";
   }
   vhdlCode << "end " << blockName << ";\n\n";
-
 
   /* StringLists to be used in the ARCHITECTURE BODY */
 
@@ -308,15 +309,14 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
       StringList generics = "";
       StringList portDecl = "";
       StringList ports = "";
-      
 
       /* BLOCK'S STATE SCAN */
-      if(b->numberStates()) {
+      if (b->numberStates()) {
 	CBlockStateIter stIter(*b);
 	const State* st;
 	while ((st = stIter++) != 0) {
 	  /* Skip the state "procId" if present since we don't use it */
-	  if(strcmp(st->name(), "procId")) {
+	  if (strcmp(st->name(), "procId") != 0) {
 	    /* Generic declarations for component declarations */
 	    if(genericDecl.numPieces() > 1) genericDecl << "; ";
 	    genericDecl << sanitize(st->name()) << ": ";
@@ -329,9 +329,8 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
       }
       /* END BLOCK'S STATE SCAN */
       
-      
       /* BLOCK'S SINGLE PORT SCAN */
-      if(b->numberPorts()) {
+      if (b->numberPorts()) {
 	CBlockPortIter phIter(*b);
 	const VHDLBPortHole* ph;
 	while ((ph = (const VHDLBPortHole*) phIter++) != 0) {
@@ -347,18 +346,13 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 	       Sometimes outer port is "at boundary" when inner,
 	       alias port is not */
 	    const GenericPort* outer = ph->aliasFrom();
-	    if(outer) {
-	      outer = outer->aliasFrom();
-	    }
-	    else {
-	      outer = (const GenericPort*) ph;
-	    }
-	    if((terminal->atBoundary()) && !(outer)) {
+	    outer = (outer) ? outer->aliasFrom() : (const GenericPort*) ph;
+	    if ((terminal->atBoundary()) && !(outer)) {
 	      StringList geoName;
 	      geoName = ((const VHDLBPortHole*) (ph->aliasFrom()))->getGeoReference();
 	      wormProcs << indent(1) << "Worm" << geoName << ": ";
 	      
-	      const char *uniqueName = (const char*) geoName;
+	      const char* uniqueName = (const char*) geoName;
 	      const int uniqueLenDiff = 30 - strlen(uniqueName);
 	      StringList tempCode = geoName;
 	      for(int count = 0; count < uniqueLenDiff; count++) {
@@ -378,19 +372,21 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 	      }
 	      wormProcs << ph->getGeoReference() << ");\n";
 	    }
-	    if((!(outer) && (terminal->atBoundary())) || (ph->isItOutput() && !(ph->aliasFrom()))) {
+	    if ((!(outer) && (terminal->atBoundary())) ||
+		(ph->isItOutput() && !(ph->aliasFrom()))) {
 	      signals << indent(1) << "signal " << ph->getGeoReference();
 	      signals << ": " << translateType(ph->type()) << ";\n";
 	    }
 
 	    /* Port declarations for component declarations */
-	    if(portDecl.numPieces() > 1) portDecl << "; ";
+	    if (portDecl.numPieces() > 1) portDecl << "; ";
 	    portDecl << sanitize(ph->name()) << ": " << direction(ph);
 	    portDecl << " " << translateType(ph->type());
 	    
 	    /* Port maps for process declarations */
 	    if(ports.numPieces() > 1) ports << ", ";
 	    ports << sanitize(ph->name()) << " => ";
+
 	    /* Eliminate '@' chars due to delays; we ignore delays for now */
 	    StringList dirtyList = ph->getGeoReference();
 	    dirtyList << '\0';
@@ -403,17 +399,16 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 	}
       }
       /* END BLOCK'S SINGLE PORT SCAN */
-      
-      
+
       /* BLOCK'S MULTI PORT SCAN */
-      if(b->numberMPHs()) {
+      if (b->numberMPHs()) {
 	integerVecs = TRUE;
 
 	BlockMPHIter mphIter(*b);
 	MultiPortHole* mph;
 	while ((mph = (MultiPortHole*) mphIter++) != 0) {
 	  /* Generate signals ONLY for output ports (unique naming) */
-	  if(mph->isItOutput()) {
+	  if (mph->isItOutput()) {
 	    MPHIter portsIter(*mph);
 	    const VHDLBPortHole* mpPort;
 	    int portNum = 0;
@@ -438,7 +433,7 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 	  /* If mph has an alias, then distinguish its portWidthName
 	     with a unique prefix in case its parent is reused at this
 	     level; else just use the portWidthName by itself */
-	  if(mph->alias()) { /* not at bottom of alias chain */
+	  if (mph->alias()) { /* not at bottom of alias chain */
 	    portDecl << sanitize(mph->name()) << "_";
 	  }
 	  VHDLBStar* innerStar = (VHDLBStar*) innerMultiPort->parent();
@@ -450,7 +445,7 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 	     the individual portHoles to their signals;
 	     But if we're at any level below that, map the whole
 	     multiPortHole to the containing galaxy's multiPortHole */
-	  if(!(mph->aliasFrom())) { /* at top of alias chain */
+	  if (!(mph->aliasFrom())) { /* at top of alias chain */
 	    MPHIter innerPortsIter(*innerMultiPort);
 	    int portNum = 0;
 	    const VHDLBPortHole* mpPort;
@@ -462,7 +457,7 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 	    }
 	  }
 	  else { /* not at top of alias chain */
-	    if(ports.numPieces() > 1) ports << ", ";
+	    if (ports.numPieces() > 1) ports << ", ";
 	    ports << sanitize(mph->name()) << " => ";
 	    /* Analogous to what getGeoReference does for
 	       single portHoles which are aliased from a terminal;
@@ -475,8 +470,8 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 	  /* If mph has an alias, then distinguish its portWidthName
 	     with a unique prefix in case its parent is reused at this
 	     level; else just use the portWidthName by itself */
-	  if(genericDecl.numPieces() > 1) genericDecl << "; ";
-	  if(mph->alias()) { /* not at bottom of alias chain */
+	  if (genericDecl.numPieces() > 1) genericDecl << "; ";
+	  if (mph->alias()) { /* not at bottom of alias chain */
 	    genericDecl << sanitize(mph->name()) << "_";
 	  }
 	  genericDecl << innerStar->portWidthName(innerMultiPort) << ": ";
@@ -487,8 +482,8 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 	  /* If mph has an alias, then distinguish its portWidthName
 	     with a unique prefix in case its parent is reused at this
 	     level; else just use the portWidthName by itself */
-	  if(generics.numPieces() > 1) generics << ", ";
-	  if(mph->alias()) { /* not at bottom of alias chain */
+	  if (generics.numPieces() > 1) generics << ", ";
+	  if (mph->alias()) { /* not at bottom of alias chain */
 	    generics << sanitize(mph->name()) << "_";
 	  }
 	  generics << innerStar->portWidthName(innerMultiPort) << " => ";
@@ -497,7 +492,7 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 	     numberPorts, determined by this mph's connections;
 	     But if we're at any level below that, use the portWidthName,
 	     which comes from the innerMultiPort star's portWidthName */
-	  if(!(mph->aliasFrom())) { /* at top of alias chain */
+	  if (!(mph->aliasFrom())) { /* at top of alias chain */
 	    generics << innerMultiPort->numberPorts();
 	  }
 	  else { /* not at top of alias chain */
@@ -507,29 +502,27 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 	}
       }
       /* END BLOCK'S MULTI PORT SCAN */
-      
-      
+
       /* Add the generics and ports to both the
 	 component declarations and process declarations */
       
-      if(genericDecl.numPieces() > 1) {
+      if (genericDecl.numPieces() > 1) {
 	componentDecl << " generic(" << genericDecl << ");";
       }
-      if(generics.numPieces() > 1) {
+      if (generics.numPieces() > 1) {
 	processes << " generic map(" << generics << ")";
       }
       
-      if(portDecl.numPieces() > 1) {
+      if (portDecl.numPieces() > 1) {
 	componentDecl << " port(" << portDecl << ");";
       }
-      if(ports.numPieces() > 1) {
+      if (ports.numPieces() > 1) {
 	processes << " port map(" << ports << ")";
       }
       
       componentDecl << " end component;\n";
       processes << ";\n";
-      
-      
+
       /* Add component to component list and component declaration to
 	 component declaration code if it is newly declared */
       StringListIter compNext(componentList);
@@ -539,7 +532,7 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
       while ((pcomp = compNext++) != 0) {
 	if (!strcmp(componentName,pcomp)) isNewComp = 0;
       }
-      if(isNewComp == 1) { /* add new component */
+      if (isNewComp == 1) { /* add new component */
 	componentList << componentName;
 	components << componentDecl;
       }
@@ -547,14 +540,14 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
   }
   
   /* Vestigial code for wormhole stars */
-  if(dataIns == TRUE) {
+  if (dataIns == TRUE) {
     components << indent(1);
     components << "component dataIn generic(unique: STRING(1 to 30)); port(output: out INTEGER); end component;\n";
     wormParts << indent(1);
     wormParts << "for all:dataIn use entity work.dataIn(dataIn_behavior); end for;\n";
   }
 
-  if(dataOuts == TRUE) {
+  if (dataOuts == TRUE) {
     components << indent(1);
     components << "component dataOut generic(unique: STRING(1 to 30)); port(input: in INTEGER); end component;\n";
     wormParts << indent(1);
@@ -583,7 +576,6 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
   vhdlCode << "end for;" << "\n";
   vhdlCode << "end " << blockName << "_parts;" << "\n\n";
 
-
   /* Put current-level code in front of previous (higher-level) code */
 
   /* Put use-clause in front of galaxy code if needed */
@@ -595,7 +587,6 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 
   vhdlCode = galaxyCode;
   vhdlCode << tempCode;
-
 
   /* Now define each of the subordinate galaxies */
 
@@ -611,7 +602,6 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 /////////////////////////////////////////
 
 void VHDLBTarget :: setup () {
-
   Galaxy* gal = galaxy();
   if (! gal) {
     Error::abortRun("The VHDLB target has encountered a null galaxy.");
@@ -741,11 +731,12 @@ void VHDLBTarget :: setGeoNames(Galaxy& galaxy) {
 
 StringList VHDLBTarget :: sanitizedFullName (const NamedObj& obj) const {
   StringList out;
-  if(obj.parent() != NULL && obj.parent()->parent() != NULL) {
+  if (obj.parent() != NULL && obj.parent()->parent() != NULL) {
     out = sanitizedFullName(*obj.parent());
     out << "_";
     out << sanitizedName(obj);
-  } else {
+  }
+  else {
     out = sanitizedName(obj);
   }
   return out;
@@ -757,12 +748,9 @@ StringList VHDLBTarget :: sanitizedFullName (const NamedObj& obj) const {
 
 StringList VHDLBTarget :: sanitizedShortName (const NamedObj& obj) const {
   StringList out;
-  if(obj.parent() != NULL)
-    out = sanitizedName(*obj.parent());
-  else
-    out = "XX";
-  out << "_";
-  out << sanitizedName(obj);
+  if (obj.parent()) out = sanitizedName(*obj.parent());
+  else out = "XX";
+  out << "_" << sanitizedName(obj);
   return out;
 }
 
@@ -795,13 +783,13 @@ int VHDLBTarget :: codeGenInit() {
 
 StringList VHDLBTarget :: translateType (const char* type) {
   StringList newType;
-  if(!strcmp(type, "INT")) {
+  if (strcmp(type, "INT") == 0) {
     newType = "INTEGER";
   }
-  else if(!strcmp(type, "FLOAT")) {
+  else if (strcmp(type, "FLOAT") == 0) {
     newType = "REAL";
   }
-  else if(!strcmp(type, "ANYTYPE")) {
+  else if (strcmp(type, "ANYTYPE") == 0) {
     newType = "REAL";
   }
   else {
@@ -816,14 +804,18 @@ StringList VHDLBTarget :: translateType (const char* type) {
 
 StringList VHDLBTarget :: direction (const GenericPort* port) {
   StringList direct;
-  if(port->isItInput()) {
+  if (port->isItInput()) {
     direct = "in";
   }
-  else if(port->isItOutput()) {
+  else if (port->isItOutput()) {
     direct = "out";
   }
   else {
     direct = "inout";
   }
   return direct;
+}
+
+const char* VHDLBTarget::domain() {
+  return galaxy() ? galaxy()->domain() : "VHDLB";
 }
