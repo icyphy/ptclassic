@@ -33,6 +33,10 @@ void oct_change_record_desc_set
 
 int oct_must_record
 	ARGS((generic *obj,int operation));
+
+octStatus oct_make_change_record_marker
+	ARGS((octId clid));
+
 octStatus oct_record_change
 	ARGS((generic *obj, unsigned int type, int operation, int32 c_xid, octObject *old_value, int num_points, struct octPoint *points, struct octBox *bbox));
 octStatus oct_do_record_copy
