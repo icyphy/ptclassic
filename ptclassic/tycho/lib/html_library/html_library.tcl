@@ -713,7 +713,16 @@ proc HMset_font {win tag font} {
 # generate an X font name
 proc HMx_font {family size weight style {adjust_size 0}} {
 	catch {incr size $adjust_size}
-	return "-*-$family-$weight-$style-normal-*-*-${size}0-*-*-*-*-*-*"
+	set font "-*-$family-$weight-$style-normal-*-*-${size}0-*-*-*-*-*-*"
+	if {![winfo exists .html_library_test_text_object]} {
+	    text .html_library_test_text_object
+	}
+	if {[catch {.html_library_test_text_object configure -font \
+		$font}] == 0} {
+	    return $font
+	} else {
+	    return fixed
+	}
 }
 
 # Optimize HMrender (hee hee)
