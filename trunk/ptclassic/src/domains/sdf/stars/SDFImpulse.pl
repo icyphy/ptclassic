@@ -38,6 +38,7 @@ defstar {
 		type { int }
 		default { 0 }
 		desc { "internal" }
+		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 	go {
 		double t = 0.0;

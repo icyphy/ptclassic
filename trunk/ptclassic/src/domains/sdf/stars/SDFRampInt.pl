@@ -36,7 +36,8 @@ defstar {
 		name { value }
 		type { int }
 		default { 0.0 }
-		desc { "value output by Ramp" }
+		desc { "initial (or last) value output by Ramp" }
+		attributes { A_SETTABLE|A_NONCONSTANT }
 	}
 	go {
 		int t = value;

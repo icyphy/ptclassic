@@ -59,14 +59,15 @@ defstar {
 	defstate {
 		name {saturate}
 		type {int}
-		default {"0"}
-		desc {"saturate if 1, wrap around if 0"}
+		default {"YES"}
+		desc {"saturate if true, wrap around otherwise"}
 	}
 	defstate {
 		name {state}
 		type {float}
 		default {"0.0"}
 		desc {"internal state"}
+		attributes { A_NONSETTABLE|A_NONCONSTANT }
 	}
 	protected {
 		double spread;
@@ -84,13 +85,13 @@ defstar {
 
 		    // Take care of the top
 		    if (t > double(top))
-			if (int(saturate) == 1) t = double(top);
+			if (int(saturate)) t = double(top);
 			else do t -= spread;
 			     while (t > double(top));
 
 		    // Take care of the bottom
 		    if (t < double(bottom))
-			if (int(saturate) == 1) t = double(bottom);
+			if (int(saturate)) t = double(bottom);
 			else do t += spread;
 			     while (t < double(bottom));
 		}

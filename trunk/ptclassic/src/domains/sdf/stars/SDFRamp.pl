@@ -36,7 +36,8 @@ defstar {
 		name { value }
 		type { float }
 		default { 0.0 }
-		desc { "value output by Ramp" }
+		desc { "initial (or last) value output by Ramp" }
+		attributes { A_SETTABLE|A_NONCONSTANT }
 	}
 	go {
 		double t = value;
