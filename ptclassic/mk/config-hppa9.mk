@@ -32,16 +32,11 @@
 # --------------------------------------------------------------------
 # |  Please see the file ``config-default.mk'' in this directory!    |
 # --------------------------------------------------------------------
-include $(ROOT)/mk/config-default.mk
 
-# Get the g++ definitions; we override some below.
-include $(ROOT)/mk/config-g++.mk
-
-# Get the g++ definitions for shared libraries; we override some below.
-# Comment the next line out if you don't want shared libraries.
-include $(ROOT)/mk/config-g++.shared.mk
-
-# Use the hpux10 config file and modify as necessary
+# Use the hpux10 config file and modify as necessary.  Note that in
+# the default, config-hppa.mk is setup to build a shared library
+# version of Ptolemy.  If you would like to build a static library
+# version of Ptolemy under hpux9.x, you will need to edit config-hppa.mk
 include $(ROOT)/mk/config-hppa.mk
 
 # Note that hppa does support shl_load() style dynamic linking, see
@@ -54,13 +49,3 @@ ARCHFLAGS =
 
 # PN domain is not supported under hpux9
 INCLUDE_PN_DOMAIN = no
-
-# Used to flush the cache on the hppa.  (source is in the kernel/ directory)
-# If you are running under HPUX9.x, you may want to 
-# comment out FLUSH_CACHE and LIB_FLUSH_CACHE
-#FLUSH_CACHE =	flush_cache.o
-FLUSH_CACHE =
-# Destination of flush_cache.  Can't just subsitute $(LIBDIR)/flush_cache.o
-# in pigiRpc/makefile, or the make will fail on other archs.
-#LIB_FLUSH_CACHE = $(LIBDIR)/flush_cache.o
-LIB_FLUSH_CACHE =
