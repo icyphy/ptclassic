@@ -80,7 +80,9 @@ ifdef FULL
 	DMM = 		1
 	HOF =		1
 	MDSDF =		1
-	PN =		1
+	ifeq ($(INCLUDE_PN_DOMAIN),yes)
+		PN =		1
+	endif
 	SDFFULL =	1
 	SILAGE =	1
 	THOR =		1
