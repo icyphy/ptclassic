@@ -34,7 +34,8 @@ provisions.
       name { blockSize }
       type { int }
       default { 8180 }
-      desc { Number of bytes to read. }
+      desc { Number of bytes to read. Defaulted to the size of the
+	       audio driver. Should be a multiple of 4. }
     }
 
     defstate {
@@ -90,8 +91,15 @@ provisions.
     }
 
     output {
-      name { output }
+      name { left }
       type { float }
+      desc { Left channel output }
+    }
+
+    output {
+      name { right }
+      type { float }
+      desc { Right channel output }
     }
 
     codeblock (declarations) {
@@ -125,14 +133,14 @@ provisions.
 	   input_val = 0x02; 	// Line_In
 	 else
 	   input_val = 0x04;	// Internal_CD_In
-	 
+
+	 ioctl($starSymbol(ctlfile), AUDIO_SETINFO, (caddr_t)(&info));	 
+
 	 info.record.encoding = encoding_val;
-//	 info.play.encoding = encoding_val;
 
 	 ioctl($starSymbol(ctlfile), AUDIO_SETINFO, (caddr_t)(&info));
 
 	 info.record.precision = 8;
-//	 info.play.precision =8;
 
 	 ioctl($starSymbol(ctlfile), AUDIO_SETINFO, (caddr_t)(&info));
 
@@ -142,18 +150,10 @@ provisions.
 	 info.record.gain = AUDIO_MAX_GAIN*$ref(volume)/100;
 	 info.record.balance = AUDIO_MID_BALANCE*$ref(balance)/50;
 
-//	 info.play.balance = AUDIO_MID_BALANCE;
-//	 info.play.channels = 2;
-//	 info.play.port = AUDIO_LINE_OUT;
-//	 info.play.sample_rate = $ref(sampleRate);
-//	 info.play.gain = AUDIO_MAX_GAIN*$ref(volume)*0.85/100;
-
 	 ioctl($starSymbol(ctlfile), AUDIO_SETINFO, (caddr_t)(&info));
 
 	 info.record.precision = $ref(precision);
-//	 info.play.precision =$ref(precision);
 	 info.record.sample_rate = $ref(sampleRate);
-//	 info.play.sample_rate = $ref(sampleRate);
 
 	 ioctl($starSymbol(ctlfile), AUDIO_SETINFO, (caddr_t)(&info));
       
@@ -195,8 +195,14 @@ provisions.
     codeblock (convert) {
       /* Convert data in buffer to Output format */
 
-      for ($starSymbol(counter)=0; $starSymbol(counter) < ($val(blockSize)/2); $starSymbol(counter)++) {
-	$ref(output,$starSymbol(counter)) = $starSymbol(buffer)[$starSymbol(counter)] /32768.0;
+      for ($starSymbol(counter)=0; $starSymbol(counter) <($val(blockSize)/4);
+	   $starSymbol(counter)++) {
+
+	$ref(left,$starSymbol(counter)) = 
+	  $starSymbol(buffer)[2*$starSymbol(counter)] /32768.0;
+	$ref(right,$starSymbol(counter)) = 
+	  $starSymbol(buffer)[2*$starSymbol(counter)+1] /32768.0;
+	
       }
     }
     
@@ -220,7 +226,8 @@ provisions.
     setup {
       fileName.clearAttributes(A_SETTABLE);
       standardInput = (strcmp(fileName,"") == 0);
-      output.setSDFParams(int(blockSize/2), int(blockSize/2)-1);
+      left.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
+      right.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
     }
       
     initCode {
