@@ -41,6 +41,7 @@ Date of last revision:
 #include "StringList.h"
 #include "Profile.h"
 #include "HuNode.h"
+#include "Error.h"
 
 // constructor
 HuParProcs :: HuParProcs(int pNum, MultiTarget* t) : DLParProcs(pNum,t) {}
@@ -111,6 +112,11 @@ void HuParProcs :: scheduleSmall(DLNode* node)
 			}
 		}
         }
+
+	if (candidate->size() == 0) {
+		Error::abortRun(*pd->myMaster(), " is not supported.",
+			" please check resource constraits");
+	}
 
 	// check whether canProc is set or not.
 	// If set, schedule the node. If not, put this node back to the 
