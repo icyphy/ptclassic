@@ -134,16 +134,17 @@ IntState.h IntState.cc : ScalarState.hP ScalarState.ccP
 
 
 FloatArrayState.h FloatArrayState.cc : ArrayState.hP ArrayState.ccP
-	genclass -2 Float val double val ArrayState; 
-	mv Float.double.ArrayState.h FloatArrayState.h;
-	sed 's/"Float"/"FLOAT"/' Float.double.ArrayState.cc > FloatArrayState.cc;
-	rm Float.double.ArrayState.cc; 
+	cd $(VPATH); genclass -2 Float val double val ArrayState; \
+	mv Float.double.ArrayState.h FloatArrayState.h; \
+	sed 's/"Float"/"FLOAT"/' \
+		Float.double.ArrayState.cc > FloatArrayState.cc; \
+	rm Float.double.ArrayState.cc
 
 IntArrayState.h IntArrayState.cc : ArrayState.hP ArrayState.ccP
-	genclass -2 Int val int val ArrayState;
-	mv Int.int.ArrayState.h IntArrayState.h;
-	sed 's/"Int"/"INT"/' Int.int.ArrayState.cc > IntArrayState.cc;
-	rm Int.int.ArrayState.cc;
+	cd $(VPATH); genclass -2 Int val int val ArrayState; \
+	mv Int.int.ArrayState.h IntArrayState.h; \
+	sed 's/"Int"/"INT"/' Int.int.ArrayState.cc > IntArrayState.cc; \
+	rm Int.int.ArrayState.cc
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
