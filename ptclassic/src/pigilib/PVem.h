@@ -35,6 +35,7 @@ a Tcl interpreter.
 
 #ifndef _PVem_h
 #define _PVem_h 1
+#include <std.h>
 #include "tcl.h"
 #include "TclObj.h"
 
