@@ -5,7 +5,7 @@ defstar {
     version { $Id$ }
     author { Jose Luis Pino }
     copyright { 
-Copyright (c) 1994,1993 The Regents of the University of California.
+Copyright (c) 1993-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -55,31 +55,6 @@ codeblock(signalSOL2){
 }
 }
 
-codeblock(signalSUN4) {
-{
-    Params dspParams;
-    /* get the DSP parameters */
-    if (ioctl($val(S56XFilePrefix)_dsp->fd,DspGetParams, (char*) &dspParams) == -1) {
-	perror("Read failed on S-56X parameters");
-	EXIT_CGC(0);
-    }
-
-    dspParams.writeMode = DspWordCnt | DspPack24;
-    dspParams.readMode = dspParams.writeMode;
-    dspParams.topFill = 0;
-    dspParams.midFill = 0;
-    dspParams.dmaTimeout = 1000;
-
-    dspParams.signal = SIGUSR1;
-
-    /* set the DSP parameters */
-    if (ioctl($val(S56XFilePrefix)_dsp->fd,DspSetParams, (char*) &dspParams) == -1) {
-	perror("Write failed on S-56X parameters");
-	EXIT_CGC(0);
-    }
-}
-}
-
 codeblock(startDSP) {    
     if (qckJsr($val(S56XFilePrefix)_dsp,"START") == -1) {
 	perror(qckErrString);
@@ -106,11 +81,7 @@ initCode {
 	    newmemory = TRUE;
 	}
 	addMainInit(downloadCode(s56path),"s56load");
-#ifdef PTSOL2
 	addMainInit(signalSOL2,"s56signal");
-#else
-	addMainInit(signalSUN4,"s56signal");
-#endif
 	if ( newmemory) delete [] s56path;
 }
 
