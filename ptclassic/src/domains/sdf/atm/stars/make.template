@@ -18,7 +18,7 @@ include $(CONFIG)
 
 # SDFDIR is the directory containing SDF domain support
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
-ATM = $(ROOT)/src/domains/de/atm/kernel
+ATM = $(ROOT)/src/domains/sdf/atm/kernel
 INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(ATM)
 
 # Library name
