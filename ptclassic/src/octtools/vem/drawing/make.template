@@ -45,8 +45,9 @@ HDRS		= attributes.h \
 
 LIBCSRCS	= attributes.c \
 		display.c \
-		mt.c \
 		polymod.c
+
+OTHERSRCS	= mt.c
 
 SRCS = $(LIBCSRCS)
 
