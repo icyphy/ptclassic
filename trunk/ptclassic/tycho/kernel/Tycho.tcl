@@ -265,8 +265,22 @@ package require tycho.edit.visedit
 
 ###package require tycho.edit.graphedit
 
+# Load ptolemy packages if they are present
+if [file exists [file join $TYCHO typt kernel]] {
+    package require tycho.typt.kernel
+}
+if [file exists [file join $TYCHO typt edit]] {
+    package require tycho.typt.edit
+}
+
 # For now, check for the existence of these new packages
-if {[file exists [file join $TYCHO edit ptII]] && [info exist env(PTII)] } {
+if {[file exists [file join $TYCHO edit ptII]] \
+	&& [info exist env(PTII)] \
+	&& $ptolemyfeature(octtools) != 1 } {
+    # Only load this package if PTII is set and we are not running Tycho
+    # from within pigi.  As of 12/98, 'package require java' would
+    # crash pigi upon startup with a message like:
+    #    Vem RPCfread(): read 0 bytes, connection has been broken.
     package require tycho.edit.ptII
 }
 
@@ -281,14 +295,6 @@ if {[file exists [file join $TYCHO edit ptII]] && [info exist env(PTII)] } {
 package require tycho.util.devtools
 package require tycho.util.tydoc
 package require tycho.util.idoc
-
-# Load ptolemy packages if they are present
-if [file exists [file join $TYCHO typt kernel]] {
-    package require tycho.typt.kernel
-}
-if [file exists [file join $TYCHO typt edit]] {
-    package require tycho.typt.edit
-}
 
 ::tycho::_announce "Loaded packages"
 
