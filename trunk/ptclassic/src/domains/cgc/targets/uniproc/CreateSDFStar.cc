@@ -418,7 +418,7 @@ int CGCTargetWH::linkFiles ()
 
     dir << expandPathName((const char*) destDirectory);
     linkCmd << dir << "/" << (const char*) filePrefix << ".o " 
-	    << "-L" << getenv("PTOLEMY") << "/lib." <<getenv("ARCH")
+	    << "-L" << getenv("PTOLEMY") << "/lib." <<getenv("PTARCH")
 	    << " -lCGCrtlib " << starLinkOptions;
 
     const char* argv[2];

@@ -232,7 +232,7 @@ int CGCTarget::compileCode()
 	StringList ptolemy;
 	ptolemy << getenv("PTOLEMY");
 	rtlib << "-I" << ptolemy << "/src/domains/cgc/rtlib -L" 
-	      << ptolemy << "/lib." << getenv("ARCH") << " -lCGCrtlib" ;
+	      << ptolemy << "/lib." << getenv("PTARCH") << " -lCGCrtlib" ;
     }
     else {
 	rtlib << "CGCrtlib.c";
