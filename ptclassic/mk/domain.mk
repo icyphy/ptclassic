@@ -62,5 +62,22 @@ $(VPATH)/starHTML.idx: $(ALLSTARIDXS)
 		tychoVpathMergeIndices \"$(ME) stars\" \
 			 $@ $(VPATH)/ $(ALLSTARIDXS)" | itclsh
 
+
+
+# star/demo recursive index
+STARDEMOIDXS = 	$(VPATH)/starDemo.idx
+
+$(STARDEMOIDXS): $(wildcard $(dir $@)/schematic/contents\;)
+	echo "source $(PTOLEMY)/lib/tcl/starindex.tcl; \
+		starindex_WriteDemoIndex $(ME) " | itclsh
+
+$(VPATH)/domain.idx: $(STARDEMOIDXS) $(VPATH)/starHTML.idx
+	@echo "Merging $@"
+	@rm -f $@
+	@echo "set TYCHO $(PTOLEMY)/tycho; \
+		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
+		tychoVpathMergeIndices \"$(ME) stars\" \
+			 $@ $(VPATH)/ $^" | itclsh
+
 clean_indices:
-	rm -f $(ALLSTARIDXS) starHTML.idx starHTML.idx.fst
+	rm -f $(ALLSTARIDXS) starHTML.idx starHTML.idx.fst $(STARDEMOIDXS)
