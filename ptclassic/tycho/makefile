@@ -109,3 +109,24 @@ GLIMPSEINDEX =	/usr/sww/bin/glimpseindex
 glimpse: .glimpse_exclude
 	$(GLIMPSEINDEX) -H $(PTOLEMY)/tycho $(PTOLEMY)/tycho
 	chmod a+r $(PTOLEMY)/tycho/.glimpse_*
+
+
+# Check html docs for problems
+# htmlchek is not shipped with tycho, see:
+# 	ftp://ftp.cs.buffalo.edu/pub/htmlchek/
+HTMLCHEK=/usr/tools/www/htmlchek
+HTMLCHEKOUT=htmlchekout
+htmlchek:
+	rm -f $(HTMLCHEKOUT)*
+	@HTMLCHEK=$(HTMLCHEK); \
+	if [ "$(TYCHO)" = "" ]; then \
+		echo "TYCHO is not set so we assume we are part of PTOLEMY"; \
+		sh $(HTMLCHEK)/runachek.sh $(PTOLEMY)/tycho $(HTMLCHEKOUT) \
+			$(PTOLEMY)/tycho map=1 \
+			netscape=1 nowswarn=1 arena=1 strictpair=TCL,AUTHOR; \
+	else \
+		sh $(HTMLCHEK)/runachek.sh $(TYCHO) $(HTMLCHEKOUT) \
+			$(TYCHO) map=1 \
+			netscape=1 nowswarn=1 arena=1 strictpair=TCL,AUTHOR; \
+	fi
+	-chmod g+w $(HTMLCHEKOUT)*
