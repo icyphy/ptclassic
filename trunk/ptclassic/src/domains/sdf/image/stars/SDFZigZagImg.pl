@@ -16,19 +16,6 @@ This is useful before quantization.
 	hinclude { "DCTImage.h", "Error.h" }
 
 
-	method {
-		name { checkSize }
-		type { int }
-		access { protected }
-		arglist { "(const DCTImage& img)" }
-		code {
-			int retval = (img.retFullSize() ==
-					(img.fullWidth() * img.fullHeight()));
-			retval &= (img.retFullSize() == img.retSize());
-			return retval;
-	}	}
-
-
 	method { // zig-zag scan one block. "fData" holds output.
 		name { zigzag }
 		type { "void" }
@@ -126,12 +113,12 @@ This is useful before quantization.
 		TYPE_CHECK(inPkt, "DCTImage");
 
 		DCTImage* image = (DCTImage*) inPkt.writableCopy();
-		if (!checkSize(*image)) {
+		if (image->fragmented() || image->processed()) {
+			delete image;
 			Error::abortRun(*this, "Processed or fragmented.");
 			return;
 		}
 		doZigZag(*image);
-
 		Packet outPkt(*image); outport%0 << outPkt;
 	}
 } // end defstar { ZigZag }

@@ -16,19 +16,6 @@ This star inverse zig-zag scans a DCTImage.
 	hinclude { "DCTImage.h", "Error.h" }
 
 
-	method {
-		name { checkSize }
-		type { int }
-		access { protected }
-		arglist { "(const DCTImage& img)" }
-		code {
-			int retval = (img.retFullSize() ==
-					(img.fullWidth() * img.fullHeight()));
-			retval &= (img.retFullSize() == img.retSize());
-			return retval;
-	}	}
-
-
 	method { // invert zig-zag scan. "imData" holds output.
 		name { ziginv }
 		type { "void" }
@@ -125,13 +112,12 @@ This star inverse zig-zag scans a DCTImage.
 		TYPE_CHECK(inPkt, "DCTImage");
 		DCTImage* image = (DCTImage*) inPkt.writableCopy();
 
-		if(!checkSize(*image)) {
+		if(image->fragmented() || image->processed()) {
+			delete image;
 			Error::abortRun(*this, "Processed or fragmented.");
 			return;
 		}
-
 		invZigZag(*image);
-
 		Packet temp(*image);
 		outport%0 << temp;
 	}
