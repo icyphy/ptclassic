@@ -77,6 +77,7 @@ ifdef FULL
 	CODESIGN =	1
 	DDF =		1
 	DE =		1
+	FSM = 		1
 	ifeq ($(INCLUDE_IPUS_DOMAIN),yes)
 		# Non G++ compilers fail to compile IPUS' templates
 		IPUS =		1
@@ -89,8 +90,6 @@ ifdef FULL
 	SDFFULL =	1
 	VHDL =		1
 	VHDLB =		1
-	FSM = 		1
-
 endif
 
 ifdef PTINY
@@ -99,10 +98,8 @@ ifdef PTINY
 	DE =		1
 	HOF =		1
 	SDF =		1
-	ifdef TK
-		SDFTK =		1
-		SDFDFM =	1
-	endif
+	SDFTK =		1
+	SDFDFM =	1
 	SDFDSP =	1
 	SDFMATRIX =	1
 	SDFMATLAB =	1
@@ -120,6 +117,7 @@ ifdef PTRIM
 	SDFFULL =	1
 endif
 
+# build up the list of dependent directories and libraries
 include $(ROOT)/mk/stars.mk
 
 # matlab.mk and mathematica.mk check these vars before traversing the path
