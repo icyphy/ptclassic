@@ -68,6 +68,7 @@ protected:
 
 public:
 	void setup();
+	void begin() { Wormhole::begin(); }
 	void go();
 	void wrapup();
 
@@ -75,13 +76,15 @@ public:
 	SDFWormhole(Galaxy& g,Target* t = 0);
 
 	// Destructor
-	~SDFWormhole() { freeContents();}
+	~SDFWormhole() { freeContents(); }
 
 	// return my scheduler
-	Scheduler* scheduler() const { return myTarget()->scheduler();}
+	Scheduler* scheduler() const { return myTarget()->scheduler(); }
 
 	// print method
-	StringList print(int verbose) const { return Wormhole::print(verbose);}
+	StringList print(int verbose) const {
+		return Wormhole::print(verbose);
+	}
 
 	// clone -- allows interpreter/pigi to make copies
 	Block* clone() const;
@@ -91,7 +94,7 @@ public:
 	double getArrivalTime();
 
 	// identify myself as a wormhole
-	int isItWormhole() const { return TRUE;}
+	int isItWormhole() const { return TRUE; }
 
 	// use statelist for inner galaxy for stateWithName
 	State* stateWithName (const char* name) {
@@ -99,7 +102,7 @@ public:
 	}
 	
 	// state initialize
-	void initState() { gal.initState() ;}
+	void initState() { gal.initState(); }
 };
 
         //////////////////////////////////////////
