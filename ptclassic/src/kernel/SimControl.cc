@@ -108,7 +108,7 @@ PtGate* SimControl::gate = 0;
 
 int SimControl::internalDoActions(SimActionList* l, Star* which) {
 	SimActionListIter nextAction(*l);
-	SimAction* a;
+	SimAction* a = (SimAction *)NULL;
 	while (!haltRequested() && (a = nextAction++) != 0)
 		if (a->match(which)) a->apply(which);
 	return !haltRequested();
