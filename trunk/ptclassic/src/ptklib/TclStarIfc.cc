@@ -41,9 +41,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // the inputs.
 static int grabInputs(
     ClientData tcl,                     // Pointer to the Tcl interface
-    Tcl_Interp *interp,                 // Current interpreter
-    int argc,                           // Number of arguments
-    char **argv                         // Argument strings
+    Tcl_Interp*,                 	// Current interpreter
+    int,                           	// Number of arguments
+    char*[]                         	// Argument strings
 ) {
 	InfString inputs = ((TclStarIfc*)tcl)->getInputs();
 	Tcl_SetResult(ptkInterp,(char*)inputs, TCL_VOLATILE);
@@ -54,9 +54,9 @@ static int grabInputs(
 // the outputs.
 static int setOutputs(
     ClientData tcl,                     // Pointer to the Tcl interface
-    Tcl_Interp *interp,                 // Current interpreter
+    Tcl_Interp*,                 	// Current interpreter
     int argc,                           // Number of arguments
-    char **argv                         // Argument strings
+    char *argv[]      			// Argument strings
 ) {
 	float temp;
 	for(int i=0; i < (argc-1); i++) {
