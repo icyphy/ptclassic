@@ -15,6 +15,7 @@ Some code borrowed from Interpreter.cc, see this file for more info.
 #include "KnownBlock.h"
 #include "Block.h"
 #include "StringList.h"
+#include "State.h"
 
 /* boolean data type for pigi */
 typedef int boolean;
@@ -43,7 +44,7 @@ typedef struct TermList_s TermList;
 
 // Parameter structs for pigi
 struct ParamStruct {
-    char *name;
+    const char *name;
     char *value;
 };
 typedef struct ParamStruct ParamType;
@@ -165,9 +166,10 @@ KcGetTerms(char* name, TermList* terms)
     return (TRUE);
 }
 
-/* 5/17/90
+/* 6/15/90
 Get params of a block.
-Not implemented yet, must wait for param/state methods in kernel.
+First attempt at an implementation, by Joe Buck who doesn't know
+how this is really supposed to work.
 Inputs:
     name = name of block to get params of
     pListPtr = the address of a ParamList node
@@ -181,8 +183,18 @@ Outputs:
 extern "C" boolean
 KcGetParams(char* name, ParamListType* pListPtr)
 {
-    /* for now, say that star has no params */
-    pListPtr->length = 0;
+    Block *block;
+    if ((block = KnownBlock::find(name)) == 0) {
+	return (FALSE);
+    }
+    int n = block->numberStates();
+    pListPtr->length = n;
+    for (int i = 0; i < n; i++) {
+	    State& s = block->nextState();
+	    pListPtr->array[i].name = s.readName();
+	    // we want the initValue; use baseclass method always
+	    pListPtr->array[i].value = s.State::currentValue();
+    }
     return (TRUE);
 }
 
