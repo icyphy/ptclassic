@@ -53,7 +53,7 @@ REALCLEAN_STUFF =	tclIndex *.html
 # Title for the tydoc index page
 TYDOC_DESC =	Index of classes in tycho/typt/editors
 
-DIRS =		test #doc
+DIRS =		test doc
 
 all install: tclIndex $(MISC_SRCS)
 
