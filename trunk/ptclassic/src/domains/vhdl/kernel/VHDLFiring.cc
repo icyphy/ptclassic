@@ -42,6 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // Constructors.
 VHDLFiring :: VHDLFiring() {
   noSensitivities = 0;
+  noOutclocking = 0;
   VHDLObj::initialize();
 }
 
@@ -64,6 +65,7 @@ VHDLFiring* VHDLFiring :: newCopy() {
   newFiring->portMapList = this->portMapList->newCopy();
   newFiring->signalList = this->signalList->newCopy();
   newFiring->noSensitivities = this->noSensitivities;
+  newFiring->noOutclocking = this->noOutclocking;
 
   return newFiring;
 }

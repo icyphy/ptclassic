@@ -81,6 +81,8 @@ class VHDLFiring : public VHDLObj
   StringList decls;
   // Suppress sensitivity lists.
   int noSensitivities;
+  // Suppress output clocking.
+  int noOutclocking;
 
   // Class Idenitification.
   /* virtual */ int isA(const char*) const;
