@@ -588,7 +588,7 @@ int disc;
  */
 {
     kd_list *others;
-    int cur_disc, val;
+    int cur_disc, val = 0;
 
     others = CDR(*eq);
     RCDR(*eq, KDNIL);
