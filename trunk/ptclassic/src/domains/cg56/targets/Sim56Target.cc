@@ -6,7 +6,7 @@ $Id$
  Copyright (c) 1992 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: J. Buck
+ Programmer: J. Buck, J. Pino
 
  Target for Motorola 56000 assembly code generation that runs its
  output on the simulator.
@@ -40,6 +40,10 @@ void Sim56Target :: initStates() {
 				    "graph title (if any)"));
 	addState(plotOptions.setState("plotOptions",this,"",
 				      "xgraph options"));
+	addState(disCode.setState("Display code?",this,"YES",
+	                          "display code if YES."));
+	addState(simCode.setState("Simulate code?",this,"YES",
+	                          "display code if YES."));
 }
 
 Sim56Target :: ~Sim56Target() {
@@ -94,26 +98,6 @@ void Sim56Target :: headerCode () {
 		"	movep	#0,x:m_bcr\n\n");
 };
 
-int Sim56Target :: genFile (StringList& stuff, const char* suffix) {
-	int status;
-	StringList bname = uname;
-	bname += suffix;
-	char* fullName = writeFileName(bname);
-	UserOutput o;
-	if (!o.fileName(fullName)) {
-		Error::abortRun(*this, "can't open file for writing: ",
-				fullName);
-		status = FALSE;
-	}
-	else {
-		o << stuff;
-		o.flush();
-		status = TRUE;
-	}
-	LOG_DEL; delete fullName;
-	return status;
-}
-
 Block* Sim56Target::clone() const {
 	LOG_NEW; return new Sim56Target(*this);
 }
@@ -136,44 +120,48 @@ void Sim56Target :: wrapup () {
 	inProgSection = TRUE;
 	StringList map = mem->printMemMap(";","");
 	addCode (map);
-	Target::wrapup();
+	const char *p = disCode;
+	if (p[0]=='y'||p[0]=='Y') CGTarget::wrapup();
 // put the stuff into the files.
-	if (!genFile(myCode, ".asm")) return;
-	if (!genFile(cmds, ".cmd")) return;
+	if (!genFile(myCode, uname, ".asm")) return;
+	if (!genFile(cmds, uname,".cmd")) return;
 // directive to change to the working directory
 	StringList cd = "cd "; cd += dirFullName; cd += ";";
 // execute the assembler
-	StringList ass = cd;
-	ass += "asm56000 -A -B -L ";
-	ass += uname;
-	if (system(ass) != 0) {
-		StringList listing = (const char*)dirName;
-		listing += "/";
-		listing += uname;
-		listing += ".list";
-		Error::abortRun(
-		"Errors in assembly: see assembler listing in file ",
-				listing, " for errors");
-		return;
-	}
+	p = simCode;
+	if (p[0]=='y'||p[0]=='Y') {
+		StringList ass = cd;
+		ass += "asm56000 -A -B -L ";
+		ass += uname;
+		if (system(ass) != 0) {
+			StringList listing = (const char*)dirName;
+			listing += "/";
+			listing += uname;
+			listing += ".list";
+			Error::abortRun(
+			"Errors in assembly: see assembler listing in file ",
+					listing, " for errors");
+			return;
+		}
 // execute the simulator
-	StringList ex = cd;
-	ex += "xterm -e sim56000 ";
-	ex += uname;
-	ex += ".cmd";
-	system (ex);
+		StringList ex = cd;
+		ex += "xterm -e sim56000 ";
+		ex += uname;
+		ex += ".cmd";
+		system (ex);
 // now plot the result if requested
-	const char* file = plotFile;
-	if (*file == 0) return;
-	StringList plot = cd;
-	plot += "awk '{print ++n, $1}' ";
-	plot += file;
-	plot += " | xgraph -t '";
-	plot += (const char*)plotTitle;
-	plot += "' ";
-	plot += (const char*)plotOptions;
-	plot += "&";
-	system (plot);
+		const char* file = plotFile;
+		if (*file == 0) return;
+		StringList plot = cd;
+		plot += "awk '{print ++n, $1}' ";
+		plot += file;
+		plot += " | xgraph -t '";
+		plot += (const char*)plotTitle;
+		plot += "' ";
+		plot += (const char*)plotOptions;
+		plot += "&";
+		system (plot);
+	}
 }
 
 ISA_FUNC(Sim56Target,CG56Target);
