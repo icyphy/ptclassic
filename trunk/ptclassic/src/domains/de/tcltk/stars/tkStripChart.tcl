@@ -224,7 +224,8 @@ proc tkStripChartMkWindow { top stopTime starID univ} {
 	set ${starID}(unitDistance) [expr $curWidth/[set ${starID}(TimeWindow)]]
 	$top.d$m.c configure -xscrollcommand "$top.pf.scroll set"
 	$top.d$m.c configure -scrollregion "0 0 $scrollWidth ${ht}c"
-	$top.d$m.c configure -scrollincrement 40
+	# The following no longer works as of Tk4.0
+	# $top.d$m.c configure -scrollincrement 40
 
 	tkwait visibility $top.d$m.yBar
 	tkStripChartMkYScale $top.d$m.yBar $m $starID
@@ -255,9 +256,13 @@ proc tkStripChartMkWindow { top stopTime starID univ} {
 ###########################################################################
 # tkStripChartScroll
 #
-proc tkStripChartScroll { top numPlots position } {
+proc tkStripChartScroll { top numPlots args} {
     for {set m 0} {$m < $numPlots} {incr m} {
-	$top.d$m.c xview $position
+	if {[llength $args] == 2} {
+		$top.d$m.c xview moveto [lindex $args 1]
+	} else {
+		$top.d$m.c xview scroll [lindex $args 1] units
+	}
     }
 }
 
@@ -469,7 +474,7 @@ proc tkStripChartPlotPoint { canv x y plotNum starID} {
     # scroll each canvas based when time has advanced by timeWindow or more
     set timeWindow [set ${starID}(TimeWindow)]
     if {[expr $x/$timeWindow] >= [set ${starID}(scrollCount,$plotNum)]} {
-	$canv xview [expr round([expr $scaledTime/40])]
+	$canv xview moveto [expr round([expr $scaledTime/40])]
 	incr ${starID}(scrollCount,$plotNum)
     }
     incr ${starID}(count,$plotNum)
