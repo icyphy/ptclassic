@@ -49,10 +49,6 @@ class ::tycho::EditJava {
     ##########################################################################
     ####                            options                               ####
 
-    # Location of the template file
-    itk_option define -filetemplate fileTemplate FileTemplate \
-	    $TYCHO/editors/textedit/templates/JavaTemplate.java {}
-
     # Pathname to the java distribution
     itk_option define -javahome javaHome JavaHome \
 	    /opt/SUNWjws/JDK
@@ -70,7 +66,7 @@ class ::tycho::EditJava {
     method evaluate {}
 
     # Get the blank Java template for a file and insert it into the window
-    method fileTemplate { fileTemplate {newClassName {}}}
+    method fileTemplate {{newClassName {}}}
 
     # Generate and display a doc file from the current buffer
     method gendocBuffer {}
@@ -121,14 +117,12 @@ body ::tycho::EditJava::constructor {args} {
 
     # Set the fill prefix to be the comment character for Java.
     set fillPrefix "//"
-    menubar addMenu Special -underline 0
 
-    menubar add "Body Template" Special -underline 0 \
-	    -command "$this bodyTemplate"
+    menubar delete ".cc File Template"
+    menubar delete ".h File Template"
 
     menubar add "File Template" Special -underline 0 \
-	    -command "$this fileTemplate $itk_option(-filetemplate) \
-	    		\[$this getClassName\]"
+	    -command "$this fileTemplate \[$this getClassName\]"
 
     menubar addSeparator Special
 
@@ -195,15 +189,17 @@ body ::tycho::EditJava::evaluate {} {
 #####################################################################
 #### fileTemplate
 # Insert the blank template into the file.
-# The fileTemplate argument names the template file that should by used.  
-# $TYCHO/editors/textedit/templates contains some sample templates.
+#
 # If the optional className argument is set, then its value will 
 # be substituted wherever the template file contains the string 'ClassName'
 #
 # The Java 'package' line is adjusted if this file is located below
 # $TYCHO/java, otherwise the Java package line is commented out.
 #
-body ::tycho::EditJava::fileTemplate {fileTemplate {newClassName {}}} {
+body ::tycho::EditJava::fileTemplate {{newClassName {}}} {
+    global TYCHO
+    set fileTemplate \
+	    [file join $TYCHO editors textedit templates JavaTemplate.java]
     ::tycho::EditProgram::fileTemplate $fileTemplate $newClassName
     set className $newClassName
 
