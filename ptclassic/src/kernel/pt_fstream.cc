@@ -68,8 +68,9 @@ static void reportError(const char* op) {
 // check for special file names
 // This uses the hardcoded descriptors 0,1,2.  These are appropriate
 // for UNIX only.
-static int check_special(const char *name, int *pNobufB) {
-	int	fd = -1, bufB = TRUE;
+static int check_special(const char *name, int &nobufB) {
+	int	fd = -1;
+	nobufB = FALSE;
 
 // see if we begin with "<c" or "<std".  If so, skip prefix, else
 // exit immediately.
@@ -84,17 +85,15 @@ static int check_special(const char *name, int *pNobufB) {
 	else if (strcmp(name,"out>") == 0)
 	{
 		fd = 1;
-		bufB = FALSE;
+		nobufB = TRUE;
 	}
 	else if ( strcmp(name,"err>")==0)
 	{
 		fd = 2;
-		bufB = FALSE;
+		nobufB = TRUE;
 	}
 	else if ( strcmp(name,"log>")==0)
 		fd = 2;
-	if ( pNobufB )
-		*pNobufB = ! bufB;
 	return fd;
 }
 
@@ -106,7 +105,7 @@ pt_ifstream::pt_ifstream(const char *name,int mode, int prot) {
 
 void pt_ifstream::open(const char* name, int mode, int prot) {
 	int nobufB;
-	int fd = check_special(name, &nobufB);
+	int fd = check_special(name, nobufB);
 	if (fd == 0) rdbuf()->attach(fd);
 	else if (fd > 0) {
 		Error::abortRun("Can't open ", name,
@@ -124,7 +123,7 @@ pt_ofstream::pt_ofstream(const char *name,int mode, int prot) {
 
 void pt_ofstream::open(const char* name, int mode, int prot) {
 	int nobufB;
-	int fd = check_special(name, &nobufB);
+	int fd = check_special(name, nobufB);
 	if (fd == 0) {
 		Error::abortRun("Can't open ", name,
 				" for writing: can't write to standard input");
