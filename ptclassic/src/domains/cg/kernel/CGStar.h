@@ -36,6 +36,9 @@ public:
 	// my domain
 	const char* domain() const;
 
+	// method for generating initial code
+	virtual void initCode() {}
+
 	// define the firing 
 	void fire();
 
