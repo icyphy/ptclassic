@@ -112,18 +112,18 @@ void DEScheduler :: setup () {
 	if (warnIfNotConnected(*galaxy())) return;
 
 	galaxy()->initialize();
-	if (SimControl::haltRequested()) return;
+	if (SimControl::haltRequested() || !galaxy()) return;
 	
 	// Check connectivity again because the galaxy may have
 	// changed after initialization due to e.g. hof stars
 	// performing block replacement.
-	if (warnIfNotConnected (*galaxy())) return;
+	if (warnIfNotConnected(*galaxy())) return;
 
 	if (!checkDelayFreeLoop() || !computeDepth()) return;
 
 	if (!relTimeScale) {
 		Error::abortRun(*galaxy(),
-				": zero timeScale is not allowed in DE.");
+				"zero timeScale is not allowed in DE.");
 	}
 }
 
@@ -144,10 +144,7 @@ int DEScheduler :: checkDelayFreeLoop() {
 
 // set the depth of the stars...
 int DEScheduler :: computeDepth() {
-	if (! galaxy()) {
-		Error::abortRun("Discrete Event scheduler has no galaxy defined.");
-		return FALSE;
-	}
+	if (! galaxy()) return FALSE;
 
 	GalStarIter next(*galaxy());
 	DEStar* s;
@@ -175,16 +172,10 @@ int DEScheduler :: computeDepth() {
 int
 DEScheduler :: run () {
 
-        if (!galaxy()) {
+        if (SimControl::haltRequested() || !galaxy()) {
             Error::abortRun("Discrete Event scheduler has no galaxy to run");
             return FALSE;
         }
-
-	if (haltRequested()) {
-		Error::abortRun(*galaxy(),
-				"Cannot continue after run-time error");
-		return FALSE;
-	}
 
 	while (eventQ.length() > 0) {
 
@@ -192,8 +183,8 @@ DEScheduler :: run () {
 		   		    // boundary of a wormhole of DE domain.
 
 		// fetch the earliest event.
-		LevelLink* f   = eventQ.get();
-		double level    = f->level;
+		LevelLink* f = eventQ.get();
+		double level = f->level;
 
 		// if level > stopTime, RETURN...
 		if (level > stopTime)	{

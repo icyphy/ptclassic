@@ -1,4 +1,3 @@
-
 /* 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -75,21 +74,21 @@ void CQScheduler :: setup () {
 	eventQ.initialize();
 
 	// check connectivity
-	if (warnIfNotConnected (*galaxy())) return;
+	if (warnIfNotConnected(*galaxy())) return;
 
 	galaxy()->initialize();
-	if(SimControl::haltRequested()) return;
+	if(SimControl::haltRequested() || !galaxy()) return;
 
 	// Check connectivity again because the galaxy may have
 	// changed after initialization due to e.g. hof stars
 	// performing block replacement.
-	if (warnIfNotConnected (*galaxy())) return;
+	if (warnIfNotConnected(*galaxy())) return;
 	
 	if (!checkDelayFreeLoop() || !computeDepth()) return;
 
 	if (!relTimeScale) {
 		Error::abortRun(*galaxy(),
-				": zero timeScale is not allowed in DE.");
+				"zero timeScale is not allowed in DE.");
 	}
 }
 
@@ -110,11 +109,7 @@ int CQScheduler :: checkDelayFreeLoop() {
 
 // set the depth of the stars...
 int CQScheduler :: computeDepth() {
-	if (! galaxy()) {
-		Error::abortRun("Calendar Queue scheduler has no galaxy defined");
-		return FALSE;
-	}
-
+	if (! galaxy()) return FALSE;
 
 	GalStarIter next(*galaxy());
 	DEStar* s;
@@ -142,15 +137,9 @@ int CQScheduler :: computeDepth() {
 
 int CQScheduler :: run () {
 
-    if (!galaxy()) {
+    if (SimControl::haltRequested() || !galaxy()) {
         Error::abortRun("Calendar Queue scheduler has no galaxy to run");
         return FALSE;
-    }
-
-    if (haltRequested()) {
-	    Error::abortRun(*galaxy(),
-			    "Can't continue after run-time error");
-	    return FALSE;
     }
 
     while (TRUE) {
