@@ -58,7 +58,9 @@ To implement the tests "<" or "<=", simply reverse the inputs.
 		name { crossingsOnly }
 		type { int }
 		default { "FALSE" }
-		desc { If TRUE, outputs are TRUE only when the sense of the test changes. }
+		desc {
+If TRUE, outputs are TRUE only when the sense of the test changes.
+		}
 	}
 	defstate {
 		name { prevResult }
@@ -70,63 +72,49 @@ test.  This ensures that the first test result will always be TRUE.
 		}
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
-	defstate {
-		name { test }
-		type { int }
-		default { "-1" }
-		desc { Logic test }
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
+	private {
+		StringList test;
 	}
 	code {
-#define EQID 0
-#define NEID 1
-#define GTID 2
-#define GEID 3
+#define EQID "=="
+#define NEID "!="
+#define GTID ">"
+#define GEID ">="
 	}
 	setup {
 		const char* cn = condition;
 		if ( strcasecmp(cn, "EQ") == 0) test = EQID;
-		else if ( strcasecmp(cn, "NE") == 0) test = NEID;
-		else if ( strcasecmp(cn, "GT") == 0) test = GTID;
-		else if ( strcasecmp(cn, "GE") == 0) test = GEID;
-		else if ( strcasecmp(cn, "==") == 0) test = EQID;
-		else if ( strcasecmp(cn, "!=") == 0) test = NEID;
-		else if ( strcasecmp(cn, ">") == 0) test = GTID;
-		else if ( strcasecmp(cn, ">=") == 0) test = GEID;
+		else if ( strcasecmp(cn, "NE") == 0 ) test = NEID;
+		else if ( strcasecmp(cn, "GT") == 0 ) test = GTID;
+		else if ( strcasecmp(cn, "GE") == 0 ) test = GEID;
+		else if ( strcasecmp(cn, "==") == 0 ) test = EQID;
+		else if ( strcasecmp(cn, "!=") == 0 ) test = NEID;
+		else if ( strcasecmp(cn, ">") == 0 ) test = GTID;
+		else if ( strcasecmp(cn, ">=") == 0 ) test = GEID;
 		else Error::abortRun(*this, "Unrecognized test.");
 	}
-	codeblock(macros) {
-#define EQID 0
-#define NEID 1
-#define GTID 2
-#define GEID 3
-	}
 	codeblock(decl) {
-		int result = 0;
-		double left = $ref(upper,0);
-		double right = $ref(lower,0);
+		int result;
 	}
-	codeblock(compare) {
-		/* compare the values */
-		switch ( $val(test) ) {
-			case EQID:  result = (left == right);  break;
-			case NEID:  result = (left != right);  break;
-			case GTID:  result = (left >  right);  break;
-			case GEID:  result = (left >= right);  break;
-		}
-		if ( $val(crossingsOnly) ) {
-			if ( $ref(prevResult) != result )
-				$ref(output,0) = 1;
-			else
-				$ref(output,0) = 0;
-		}
-		else
-			$ref(output,0) = result;
+	codeblock(crossings) {
+		$ref(output) = ( $ref(prevResult) != result );
 		$ref(prevResult) = result;
 	}
 	go {
-		addCode(macros);
-		addCode(decl);
-		addCode(compare);
+		StringList compare = "$ref(left) ";
+		compare << test << " $ref(right);\n";
+
+		if ( int(crossingsOnly) ) {
+			addCode(decl);
+			StringList setResult = "result = ";
+			setResult << compare;
+			addCode(setResult);
+			addCode(crossings);
+		}
+		else {
+			StringList simpleCode = "$ref(output) = ";
+			simpleCode << compare;
+			addCode(simpleCode);
+		}
 	}
 }
