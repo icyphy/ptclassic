@@ -140,11 +140,15 @@ public:
 	int
         addState(const char* statename, const char* stateclass, const char* statevalue);
 
-// set a state
+// set a state of a block within the galaxy
 	int
         setState(const char* blockname, const char* statename, const char* statevalue);
 
-/// make portholes with a multiporthole
+// set a state of the galaxy itself
+	int
+	setState(const char* stateName, const char* expression);
+
+// make portholes with a multiporthole
 	int
 	numPorts(const char* starname, const char* portname, int numP);
 	
