@@ -128,9 +128,11 @@ delim $$
 		  InDEPort* iportp;
 		  int portnum = 0;
 		  while ((iportp = nextp++) != 0) {
+		    if (iportp->isItOutput()) continue;
 		    if ( iportp->dataNew ) {
 		      // set proper entry of newInputFlags of the Tcl object
-		      tcl.setOneNewInputFlag(portnum, TRUE);
+			tcl.setOneNewInputFlag(portnum, TRUE);
+			iportp->dataNew = FALSE;
 		    }
 		    portnum++;
 		  }
