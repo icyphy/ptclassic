@@ -51,8 +51,11 @@ class Star : public Block  {
 
 public:
 // The writer of a Star code has the option to
-// provide the methods setup, go, and wrapup.
+// provide the methods setup, begin, go, and wrapup.
 // Any Block, however, may have setup and wrapup.
+
+	// initialization that is called after Scheduler::setup().
+	virtual void begin () {}
 
 	// define firing.  Derived classes must call Star::run.
 	/* virtual */ int run();
