@@ -55,7 +55,6 @@ PL_SRCS= \
  CGCPCMwrite.pl \
  CGCQuant.pl \
  CGCSGIAudio.pl \
- CGCStereoBase.pl \
  CGCXgraph.pl \
  CGCAbs.pl \
  CGCAdaptLinQuant.pl \
