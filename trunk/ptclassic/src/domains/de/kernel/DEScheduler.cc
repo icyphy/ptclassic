@@ -49,11 +49,10 @@ extern int warnIfNotConnected (Galaxy&);
 	// setup
 	////////////////////////////
 
-int DEScheduler :: setup (Block& b) {
+int DEScheduler :: setup (Galaxy& galaxy) {
 	clearHalt();
 	currentTime = 0;
 
-	Galaxy& galaxy = b.asGalaxy();
 	GalStarIter next(galaxy);
 
 	// initialize the global event queue and process queue.
@@ -132,11 +131,11 @@ int DEScheduler :: setup (Block& b) {
 // and fire the destination star. Check all simultaneous events to the star.
 // Run until StopTime.
 int
-DEScheduler :: run (Block& galaxy) {
+DEScheduler :: run (Galaxy& g) {
 
 
 	if (haltRequested()) {
-		Error::abortRun(galaxy,": Can't continue after run-time error");
+		Error::abortRun(g, "Can't continue after run-time error");
 		return FALSE;
 	}
 	while (eventQ.length() > 0 && !haltRequested()) {
@@ -326,6 +325,7 @@ int DEScheduler :: checkLoop(PortHole* p, DEStar* s) {
 		if (!fromP->depth) 	return TRUE;
 		else if (fromP->depth < 0) {
 			if (fromP->far()->isItInput()) {
+			   	fromP->depth = 1;
 				if (!checkLoop(fromP->far(), s)) return FALSE;
 			   	fromP->depth = 0;
 			}
@@ -384,9 +384,10 @@ int DEScheduler :: checkLoop(PortHole* p, DEStar* s) {
 	   // 2. If it is an output, look at the connected input.
 	   } else if (!s->delayType) {
 		if (dp->far()->isItInput()) {
-			dp->depth = 0;
+			dp->depth = 1;
 			if(!checkLoop(dp->far(),(DEStar*) dp->far()->parent()))
 				return FALSE;
+			dp->depth = 0;
 		}
 	   } else dp->depth = 0;
 	}
