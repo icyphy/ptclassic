@@ -43,6 +43,7 @@ EXTRA_SRCS =	\
 	compatibility.html \
 	fsm.html \
 	index.html \
+	leapfrog.html \
 	minorchanges.html \
 	newstars.html \
 	newwork.html \
