@@ -35,12 +35,12 @@
 # For convenience, a procedure to create a Tycho welcome message.
 #
 proc ptkStartupMessage {{version ""} {binary ""}} {
-#    set nm [::tycho::autoName .ptwelcome]
-#    uplevel #0 [list ::tycho::PtWelcomeMessage $nm \
-#	    -version $version \
-#	    -executable $binary \
-#	    -persistent 0]
-#    $nm centerOnScreen
+    set nm [::tycho::autoName .ptwelcome]
+    uplevel #0 [list ::tycho::PtWelcomeMessage $nm \
+	    -version $version \
+	    -executable $binary \
+	    -persistent 0]
+    $nm centerOnScreen
 }
 
 ##########################################################################
@@ -71,7 +71,7 @@ class ::tycho::PtWelcomeMessage {
 body ::tycho::PtWelcomeMessage::constructor {args} {
 
     global ::TYCHO ::PTOLEMY
-    set slowNetwork [preference get slowNetwork]
+    set slowNetwork [stylesheet get system slowNetwork]
 
     if {$slowNetwork == 0} {  
 	# An option -palette 3/3/2 below restricts the palette,
