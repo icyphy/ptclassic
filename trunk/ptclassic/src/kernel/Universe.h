@@ -46,8 +46,10 @@ public:
 	Universe(Scheduler* s,const char* typeDesc, Galaxy* g) :
 		scheduler(s), type(typeDesc), myTopology(g) {}
 
-	// destructor
-	virtual ~Universe() { delete scheduler; delete myTopology;}
+	// destructor.  Note that myTopology is NOT destroyed and
+	// that scheduler is.  This is arbitrary but works with our
+	// current setup.
+	virtual ~Universe() { delete scheduler;}
 protected:
 	// print, possibly recursively
 	StringList print(int recursive);
