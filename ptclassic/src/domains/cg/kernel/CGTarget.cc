@@ -66,6 +66,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>			// define stat structure
+#include <unistd.h>                     // cuserid()
 
 extern const char* CODE = "code";
 extern const char* PROCEDURE = "procedure";
