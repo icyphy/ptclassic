@@ -140,14 +140,17 @@ static void fft_rif(float *data, int nn, int isign)
 	constructor {
 		data = 0;
 	}
+	destructor {
+		LOG_DEL; delete data;
+	}
 	start {
 		fftSize = 1 << order;
 		if (fftSize < int(size)) {
 			Error::abortRun(*this, "2^order must be >= size");
 			return;
 		}
-		delete data;
-		data = new float[2*fftSize];
+		LOG_DEL; delete data;
+		LOG_NEW; data = new float[2*fftSize];
 		input.setSDFParams (int(size), int(size)-1);
 		output.setSDFParams (fftSize, fftSize-1);
 	}
