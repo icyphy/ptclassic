@@ -466,7 +466,7 @@ static void pl_print_method( fp, node, autotick, unittime )
                     fprintf( fp, "%s;\n", util_make_valid_name( assoc_var ));
                 }
             }
-            fprintf( fp, "                     tl->sendData();\n");
+            /*fprintf( fp, "                     tl->sendData();\n");*/
             fprintf( fp, "                     newEvent->~DERCEvent();\n");
             fprintf( fp, "                }\n");
             fprintf( fp, "                else newEvent->outputPort = ");
@@ -1029,8 +1029,6 @@ static void pl_print_go( fp, node, option, trace, autotick, unittime )
                 fprintf( fp, "          }\n" );
                 fprintf( fp, "        }\n" );
                 fprintf( fp, "        %s_flag = 1;\n", st );
-                fprintf( fp, "        while ( %s.dataNew )\n", st );
-                fprintf( fp, "          %s.getSimulEvent();\n", st );
                 fprintf( fp, "    }\n" );
             }
         }
