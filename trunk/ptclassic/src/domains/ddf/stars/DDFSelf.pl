@@ -127,7 +127,7 @@ At compile time, this star appears to just be an atomic star.
 		// move data into galaxy
 		MPHIter nexti(input);
 		for (i = input.numberPorts(); i > 0; i--) {
-			InDDFPort& p = (InDDFPort&) *nexti++;
+			InDDFPort& p = *(InDDFPort*) nexti++;
 			p.grabData();
 			p.moveData();
 		}
@@ -138,7 +138,7 @@ At compile time, this star appears to just be an atomic star.
 		// move data out of galaxy
 		MPHIter nexto(output);
 		for (i = output.numberPorts(); i > 0; i--) {
-			OutDDFPort& p = (OutDDFPort&) *nexto++;
+			OutDDFPort& p = *(OutDDFPort*) nexto++;
 			p.moveData();
 			p.sendData();
 		}
