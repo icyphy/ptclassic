@@ -42,6 +42,11 @@
 #	::tycho::Retarget .t
 #	.t centerOnScreen
 # </pre></tcl>
+#
+# Under no circumstances should the code in Retarget.itcl call ::pitcl
+# methods.  Instead, the code here should call ::tycho::DomainInfo methods
+# so that this file can support both ptcl and pitcl.
+#
 class ::tycho::Retarget {
     inherit ::tycho::EditForest
 
@@ -295,8 +300,8 @@ body ::tycho::Retarget::compareDomains { {universeName {}} \
             [llength [lindex $clashList 4]] \
             [llength [lindex $clashList 5]] \
             [llength [lindex $clashList 0]] \
-            [llength [::pitcl::knownBlocks $domainB]] \
-            [llength [::pitcl::knownBlocks $domainA]]
+            [llength [::tycho::DomainInfo::knownBlocks $domainB]] \
+            [llength [::tycho::DomainInfo::knownBlocks $domainA]]
 
     #[graph] redrawGraph
     set dirtyCompareDomains 0
@@ -321,10 +326,12 @@ body ::tycho::Retarget::help {} {
 # Print the same star from two different domains
 # This procedure is called when the user double clicks on a star name
 body ::tycho::Retarget::printStars { starName relation domainA domainB} {
-    if [catch {set domainAPrint [::pitcl::print $starName $domainA]}] {
+    if [catch {set domainAPrint \
+            [::tycho::DomainInfo::print $starName $domainA]}] {
         set domainAPrint "Star $starName is not present in domain $domainA"
     }
-    if [catch {set domainBPrint [::pitcl::print $starName $domainB]}] {
+    if [catch {set domainBPrint \
+            [::tycho::DomainInfo::print $starName $domainB]}] {
         set domainBPrint "Star $starName is not present in domain $domainB"
     }
     
