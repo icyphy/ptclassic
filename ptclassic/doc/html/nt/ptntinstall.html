@@ -136,16 +136,17 @@ avoid FAT partitions and placing the sources on a NTFS partition.
 <LI> If you have not yet done so, download the Ptolemy <CODE>src</CODE>
 zip file from
 <a href="http://ptolemy.eecs.berkeley.edu/pt0.7.1/download.html"><CODE>http://ptolemy.eecs.berkeley.edu/pt0.7.1/download.html</CODE></a>
-and then use winzip to unzip them.
- <br>Note that there seems to be 
-<a href="ptntbugs.html#tar">problem with <CODE>$PTOLEMY/colors/ptolemy/con</CODE></a>,
-so you should download the zip version of the Ptolemy src
-file instead of the tar version.  The tar version
-of other.src and Tycho should work fine, 
-if you get a warning like
+and then use GNU tar of Winzip to extract the file
+winzip to unzip them.
+ <br>Note that if you use Winzip, then you may see messages about
+overwriting files with the same name.  These messages occur because
+two files have the same name, but the names are made up of letters
+that have different cases.
+ <br>Note that Ptolemy 0.7.1p1 and earlier had problems with
+<a href="ptntbugs.html#tar">problem with <CODE>$PTOLEMY/colors/ptolemy/con</CODE></a> and file names that contained percent characters.  These
+problems have been fixed in 0.7.2devel
+ <br> If you are using tar and you get a warning like
 <CODE>tar: Error exit delayed from previous errors</CODE>, you can ignore it.
-The warning probably comes from files that 
-are included twice in the tar file because of symbolic links.
 
 
 <li> Building Itcl, Octtools and Ptolemy will require about 470Mb of
