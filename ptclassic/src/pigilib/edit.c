@@ -17,6 +17,7 @@ $Id$
 #include "err.h"
 #include "octIfc.h"
 
+#define dmWidth 40
 
 /* EditDelayParams  5/27/88
 Edit the delay value associated with a delay instance.
@@ -105,7 +106,7 @@ static boolean
 EditFormalParams(galFacetPtr)
 octObject *galFacetPtr;
 {
-static dmTextItem defaultItem = {NULL, 1, 80, NULL, NULL};
+static dmTextItem defaultItem = {NULL, 1, dmWidth, NULL, NULL};
     int i, j, itemsN, paramsN;
     ParamListType pList;
     ParamType *place;
