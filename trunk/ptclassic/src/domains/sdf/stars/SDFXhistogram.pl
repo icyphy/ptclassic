@@ -1,7 +1,10 @@
 defstar {
 	name { Xhistogram }
 	domain { SDF }
-	desc { Generate a histogram with the xgraph program. }
+	desc {
+Generate a histogram with the xgraph program.  'binWidth' determines the
+bin width.  'options' passes extra options to xgraph.
+	}
 	version {$Id$}
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
@@ -12,6 +15,9 @@ is on your path, or this will not work!
 The \fIbinWidth\fR parameter specifies how wide histogram
 bin will be.  The number of bins is determined automatically from
 the input data.
+.pp
+By default, the xgraph program gets the options ``-bar -nl -brw \fIhalfw\fR''
+where \fIhalfw\fR is half the bin width.
 	}
 	input {
 		name { input }
@@ -38,94 +44,21 @@ the input data.
 	defstate {
 		name {options}
 		type {string}
-		default {"-bar -nl"}
-		desc {Command line options for xgraph.}
+		default {""}
+		desc {Extra Command line options for xgraph.}
 	}
 	protected {
-		SequentialList bins;
-		float lowValue, highValue;	// current range of bins
+		// The XHistogram class does all the work.
+		XHistogram his;
 	}
-	ccinclude { "miscFuncs.h" <math.h> }
-	hinclude {"DataStruct.h" "Display.h", "StringList.h" }
+	hinclude { "Histogram.h" }
+	start {
+		his.initialize(this,binWidth,options,title,saveFile);
+	}
 	go {
-	    float data = float(input%0);
-	    int i, numToAdd;
-	    int* count;
-	    if (bins.size() == 0) {
-		// first element
-		count = new int;
-		*count = 1;
-		bins.put(count);
-		lowValue = int(data/double(binWidth))*double(binWidth);
-		highValue = lowValue + double(binWidth);
-		return;
-	    }
-	    if (data < lowValue) {
-		// add elements to the beginning of the list until
-		// the data value has a bin.
-		// Figure out how many that is
-		numToAdd = int(ceil((lowValue-data)/double(binWidth)));
-		// Add the zero-valued elements
-		for ( i = numToAdd-1; i > 0; i--) {
-		    count = new int;
-		    *count = 0;
-		    bins.tup(count);
-		}
-		// Add the one-valued element
-		count = new int;
-		*count = 1;
-		bins.tup(count);
-		lowValue = int(data/double(binWidth))*double(binWidth);
-		return;
-	    }
-	    if (data >= highValue) {
-		// add elements to the end of the list until
-		// the data value has a bin.
-		// Figure out how many that is (minus one)
-		numToAdd = int((data-highValue)/double(binWidth));
-		// Add the zero-valued elements
-		for ( i = numToAdd; i > 0; i--) {
-		    count = new int;
-		    *count = 0;
-		    bins.put(count);
-		}
-		// Add the one-valued element
-		count = new int;
-		*count = 1;
-		bins.put(count);
-		highValue = int(data/double(binWidth))*double(binWidth)
-			+ double(binWidth);
-		return;
-	    }
-	    // If we get to this point, the data value fits within the range
-	    // Compute the index
-	    int index = int((data - lowValue)/double(binWidth));
-	    ListIter next(bins);
-	    for (int t = index; t>=0; t--)
-	    	count = (int*)next++;
-	    *count = *count + 1;
+		his.addPoint(float(input%0));
 	}
 	wrapup {
-		// Begin by constructing the options string
-		StringList exOptions;
-		char barWidth[128];
-		sprintf(barWidth, " -brw %g", double(binWidth)/2);
-		exOptions += (char *) options;
-		exOptions += barWidth;
-
-		XGraph graph;
-		graph.initialize(this, 1, (const char*) exOptions,
-				    (const char*) title,
-				    (const char*) saveFile);
-
-		// Write data from bin structure into file
-		ListIter next(bins);
-		int size = bins.size();
-		float x = lowValue + double(binWidth)/2;
-		for (int i = 1; i <= size; i++ ) {
-		   graph.addPoint(x, double(*(int*)next++));
-		   x += double(binWidth);
-		}
-		graph.terminate();
+		his.terminate();
 	}
 }
