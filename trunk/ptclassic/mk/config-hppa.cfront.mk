@@ -58,7 +58,7 @@ SYSLIBS =	-lm /usr/lib/end.o
 #      +A   Cause the linker ld(1) to use only archive libraries for all
 #           occurrences of the -l option.  Also inform the C++ runtime
 #           environment that no shared libraries will be used by the program.
-# Note that the +A option seems to cause warnings about:
+# Note that the +A option seems to cause errors about:
 # c++patch: could not find __head symbol. Did you link in libcxx.a?
 # We use the +A flag to produce statically linked binaries so that we can
 # more easily distribute the binaries.  If you don't need statically linked
@@ -66,10 +66,11 @@ SYSLIBS =	-lm /usr/lib/end.o
 # whether a binary is dynamically or statically linked)
 
 # link flags
-LINKFLAGS =	+A -L$(LIBDIR) 
+LINKFLAGS =	-L$(LIBDIR) 
 # link flags if debugging symbols are to be left
 # In cfront, this will result in a 69Mb pigiRpc
-LINKFLAGS_D =	+A -L$(LIBDIR) -g
+#   -g causes chaos with /usr/lib/end.o and xdb, so we skip it
+LINKFLAGS_D =	-L$(LIBDIR)
 
 #
 # Directories to use
