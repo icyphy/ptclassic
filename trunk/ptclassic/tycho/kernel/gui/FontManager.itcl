@@ -75,6 +75,7 @@ proc ::tycho::xfont {family {size 12} {weight medium} {style r} {shift 0}} {
 # <code>getFont</code> procedure, which always returns a valid font.
 #
 class ::tycho::FontManager {
+    inherit ::tycho::Singleton
 
     constructor {args} {
 	error "The FontManager class cannot be instantiated"
