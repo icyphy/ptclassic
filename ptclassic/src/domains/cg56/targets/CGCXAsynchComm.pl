@@ -53,7 +53,6 @@ codeblock(declarations,"const char* cgcType") {
 QckItem $starSymbol(s56xBuffer);
 int $starSymbol(bufferAddr);
 @cgcType $starSymbol(buffer)[@blockSize];
-@cgcType $starSymbol(temp);
 int $starSymbol(bufStart) = 0;
 }
 
