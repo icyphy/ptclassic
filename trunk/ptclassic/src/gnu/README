@@ -1,4 +1,4 @@
--*-Mode:text-*- -[Mon Feb  9 21:59:10 1998 by cxh]-
+-*-Mode:text-*- -[Tue Feb 10 10:10:19 1998 by cxh]-
 Version: $Id$
 
 src/gnu/README
@@ -154,18 +154,20 @@ Solaris
 	gcc version 2.7.2
 	cxh@watson 81% 
 
-	Under solaris libg++-2.7.1 has a bug where /usr/ucb/ln will
+	Under solaris libg++-2.8.0 has a bug where /usr/ucb/ln will
 	fail:
 
-	gcc -h libstdc++.so.2.7.1 -shared -o libstdc++.so.2.7.1 `cat piclist` -lm
-	ln -sf libstdc++.so.2.7.1 libstdc++.so
+	/users/cxh/pt/obj.sol2.5/gnu/gcc/xgcc -h libg++.so.2.8.0 -shared -o libg++.so.2.8.0 `cat piclist` -lm
+	ln -s -f libg++.so.2.8.0 libg++.so
 	Usage: ln [-f] [-s] f1
 	       ln [-f] [-s] f1 f2
 	       ln [-f] [-s] f1 ... fn d1
+	make[2]: *** [libg++.so] Error 1
+        make[2]: Leaving directory `/export/carson/carson2/cxh/pt/obj.sol2.5/gnu/libg++/libraries/libg++'
 
-	The fix is to place /bin in your path before /usr/ucb.  This
-	bug will probably be fixed in the next release of libg++
-
+	The fix is to place /bin in your path before /usr/ucb, and 
+	then run:
+	     cd $PTOLEMY/src/gnu; make bin_libg++ install
 
 	If, while trying to configure make, you get:
 
