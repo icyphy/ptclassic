@@ -2,6 +2,7 @@ defstar {
   name { PowerEst }
   domain { SDF }
   desc { Power Estimator }
+  version { $Id$ }
   location { SDF user contribution library }
   author { N. Becker }
   explanation {
