@@ -43,10 +43,17 @@
 #
 # Subpanels are added using the <code>append</code> command and can
 # contain any number of optional arguments that a subpanel widget will
-# accept.
+# accept. They can be given any Tcl string as an element name, which will
+# then be used to identify them.
 #
 # Labels are added using the <code>appendlabel</code> command and can
 # contain any number of optional arguments that a label widget will accept.
+# They can be given any Tcl string as an element name, which will then be
+# used to identify them.
+#
+# Because parent nodes need to know their child nodes a priori, children 
+# must be created before parents. Currently, new labels and subpanels are 
+# appended to the end of the list.
 #
 # MultiPanel uses a circular list to keep track of nodes:
 # either subpanels or labels. The actual widget names 
@@ -206,7 +213,12 @@ body ::tycho::MultiPanel::destructor {} {
 
 #######################################################################
 #### append
-# Add a subpanel to the bottom of the MultiPanel.
+# Add a subpanel to the bottom of the MultiPanel. 
+#
+# @param element   A Tcl string to identify the new subpanel
+# @param children  Element names of desired children of this element.
+# @param args      Any number of optional arguments that a 
+# <a href = "SubPanel.idoc"> subpanel</a> widget will accept.  
 #
 body ::tycho::MultiPanel::append {element {children} args} {
 
@@ -259,6 +271,10 @@ body ::tycho::MultiPanel::append {element {children} args} {
 #### appendlabel
 # Add a label to the bottom of the MultiPanel.
 #
+# @param element A Tcl string to identify the new label
+# @param args Any number of optional arguments that a 
+# label widget will accept.  
+#
 body ::tycho::MultiPanel::appendlabel {element args} {
 
     # do this first in case there's an error
@@ -277,6 +293,10 @@ body ::tycho::MultiPanel::appendlabel {element args} {
 #####################################################################
 #### bind
 # Bind events to internal subpanel widgets. Identical to global bind.
+#
+# @param element   The user supplied name to identify the element to bind
+# @param args      Identical to arguments that the
+# standard Tk bind would accept.
 #
 body ::tycho::MultiPanel::bind {element args} {
 
@@ -354,6 +374,8 @@ body ::tycho::MultiPanel::redoScroll {} {
 # Remove an element. FIXME: Children of subpanels are not removed yet 
 # will no longer be seen or useful.
 #
+# @param element   The user supplied name to identify the element to remove
+#
 body ::tycho::MultiPanel::remove {element} {
     set elname [elementinfo $element]
     unset myData($element)
@@ -365,6 +387,10 @@ body ::tycho::MultiPanel::remove {element} {
 #### itemcget 
 # cget on an individual subpanel.
 #
+# @param element   The user supplied name to identify the element to cget
+# @param args      Identical to arguments that the
+# standard Tk cget would accept.
+#
 body ::tycho::MultiPanel::itemcget {element args} {
 
     set elname [elementinfo $element]
@@ -372,8 +398,12 @@ body ::tycho::MultiPanel::itemcget {element args} {
 }
 
 #####################################################################
-#### itemconfigure 
+#### itemconfig 
 # configure on an individual subpanel.
+#
+# @param element   The user supplied name to identify the element to config
+# @param args      Identical to arguments that the
+# standard Tk config would accept.
 #
 body ::tycho::MultiPanel::itemconfig {element args} {
     
@@ -386,7 +416,7 @@ body ::tycho::MultiPanel::itemconfig {element args} {
 
 #####################################################################
 #### elementinfo
-# Return the widget name of a subpanel or label.
+# Return the widget name of any number of subpanels or labels.
 #
 body ::tycho::MultiPanel::elementinfo {args} {
 
