@@ -79,12 +79,14 @@ PortHole& MultiOutACSPort::newPort()
 	return installPort(p);
 }
 
+// Used for simulation particle I/O.
 void InACSPort :: receiveData () { getParticle();}
 
 void OutACSPort :: receiveData () { clearParticle();}
 
 void OutACSPort :: sendData () { putParticle();}
 
+// Allows Target to change Plasma type for Fixed-Point simulation.
 int ACSPortHole :: allocatePlasma() {
 	ACSTarget* myTarget = (ACSTarget*)(parent()->target());
 	myPlasma = Plasma::getPlasma(myTarget->mapType(resolvedType()));

@@ -51,16 +51,20 @@ public:
 	// ACSCore* makeNew( ACSCorona & ).
 	ACSFixSimCore(ACSCorona & corona_);
 
+	// provides fixed-point support.
 	/* virtual */ void wrapup();
 
+	// tells target this is a fixed point core.
 	/* virtual */ int isFixedPoint() const { return TRUE; }
 
-//protected:
+protected:
+
+	// provides fixed-point support.
 	/* virtual */ void setup();
 	StringState OverflowHandler;
 	IntState ReportOverflow;
 	IntState RoundFix;
-# line 51 "SDFFix.pl"
+
 	int overflows, totalChecks;
 	int checkOverflow (Fix& fix);
 

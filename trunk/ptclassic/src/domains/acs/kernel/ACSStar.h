@@ -49,6 +49,8 @@ public:
     // Domain identification.
     /*virtual*/ const char* domain() const;
 
+    // For simulation we just call the base-class simulation star.
+    // for code-generation we call something else.
     int run() { return(DataFlowStar::run()); } // FIXME
 };
 
