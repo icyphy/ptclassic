@@ -54,7 +54,7 @@ proc winfoMegawidget {w} {
     global tcl_version
     if { $tcl_version >= 8.0 } {
 	while {$w != ""} {
-	    if {![catch {$w isa Object}]} {
+	    if {![catch {uplevel "$w isa ::itk::Archetype"}]} {
 		return $w
 	    } else {
 		set w [winfo parent $w]
