@@ -119,14 +119,14 @@ processes DCTImages, not GrayImages.
 			for(i = 0; i < indxDc; i++) {
 				tmpPtr[i] = outDc[i];
 			}
-			LOG_DEL; delete outDc;
+			LOG_DEL; delete [] outDc;
 
 			acImage->setSize(indxAc);
 			tmpPtr = acImage->retData();
 			for(i = 0; i < indxAc; i++) {
 				tmpPtr[i] = outAc[i];
 			}
-			LOG_DEL; delete outAc;
+			LOG_DEL; delete [] outAc;
 		} // end { doRunLen }
 	}
 
@@ -149,7 +149,7 @@ processes DCTImages, not GrayImages.
 // Do processing and send out.
 		DCTImage* dcImage = (DCTImage*) inPkt.writableCopy();
 		if (dcImage->fragmented() || dcImage->processed()) {
-			delete dcImage;
+			LOG_DEL; delete dcImage;
 			Error::abortRun(*this,
 					"Can't encode a fragment or precoded image!");
 			return;

@@ -100,7 +100,7 @@ This one works on DCTImages, not GrayImages.
 // Copy the data back.
 			hiImage.setSize(fullFrame);
 			copy(fullFrame, hiImage.retData(), outPtr);
-			LOG_DEL; delete outPtr;
+			LOG_DEL; delete [] outPtr;
 		}
 	} // end { invRunLen }
 
@@ -140,19 +140,19 @@ This one works on DCTImages, not GrayImages.
 		if ((hiImage->retBS() != loImage->retBS()) ||
 				(hiImage->fullWidth() != loImage->fullWidth()) ||
 				(hiImage->fullHeight() != loImage->fullHeight())) {
-			delete hiImage;
+			LOG_DEL; delete hiImage;
 			Error::abortRun(*this, "Two input images don't match");
 			return;
 		}
 		if (hiImage->fragmented() || (hiImage->retFullSize() !=
 				int(HiPri) * (hiImage->fullWidth() * hiImage->fullHeight()) /
 				(hiImage->retBS() * hiImage->retBS()))) {
-			delete hiImage;
+			LOG_DEL; delete hiImage;
 			Error::abortRun(*this, "Hi-pri image wrong size.");
 			return;
 		}
 		if (loImage->fragmented()) {
-			delete hiImage;
+			LOG_DEL; delete hiImage;
 			Error::abortRun(*this, "Low-pri image fragmented.");
 			return;
 		}
