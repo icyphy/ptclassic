@@ -70,6 +70,7 @@ public:
 
         // Return myself as a Cluster
         virtual Cluster* asCluster();
+        virtual const Cluster* asCluster() const;
     
 	// Return my indexValue.
 	int index() const { return indexValue;}

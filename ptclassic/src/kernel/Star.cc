@@ -75,6 +75,7 @@ Star& Star :: asStar () { return *this;}
 const Star& Star :: asStar () const { return *this;}
 
 Cluster* Star::asCluster() { return NULL; }
+const Cluster* Star::asCluster() const { return NULL; }
 
 // make a duplicate Star.  This will call Block::clone 
 // and then set Star specific data members such as the target pointer.

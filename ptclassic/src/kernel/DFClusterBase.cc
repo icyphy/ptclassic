@@ -45,9 +45,9 @@ Cluster(self,domain) {};
 int DFClusterBase::isClusterSDFinContext() const {
     if (isClusterAtomic())
 	return Cluster::master?((DataFlowStar*)Cluster::master)->isSDFinContext():TRUE;
-    GalStarIter nextStar(gal);
-    DataFlowStar* s;
-    while ((s = (DataFlowStar*) nextStar++) != 0)
+    CDFClusterStarIter nextStar(*this);
+    const DataFlowStar* s;
+    while ((s = nextStar++) != 0)
 	if (!s->isSDFinContext()) return FALSE;
     return TRUE;
 }

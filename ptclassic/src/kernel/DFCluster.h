@@ -66,6 +66,8 @@ public:
 
     /*virtual*/ Cluster* asCluster() { return this; }
     
+    /*virtual*/ const Cluster* asCluster() const { return this; }
+    
     /*virtual*/ int isSDFinContext() const {
 	return isClusterSDFinContext();
     }

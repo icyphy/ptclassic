@@ -46,6 +46,7 @@ class ClusterPort;
 
 class Cluster {
 friend class ClusterIter;
+friend class CClusterIter;
 friend class ClusterPortIter;
 public:
 
@@ -140,6 +141,19 @@ public:
 
     Cluster* operator++(POSTFIX_OP) { return next();}
     GalStarIter::reset;
+};
+
+class CClusterIter : private CGalStarIter {
+public:
+    CClusterIter(Cluster& n):CGalStarIter(n.gal) {};
+
+    const Cluster* next() {
+	const Star* star = CGalStarIter::next();
+	return star? star->asCluster(): NULL;
+    }
+
+    const Cluster* operator++(POSTFIX_OP) { return next();}
+    CGalStarIter::reset;
 };
 
 class ClusterPort {
