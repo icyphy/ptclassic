@@ -256,26 +256,27 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
     /* Find the names of the parameters and their values */
     CBlockStateIter stIter(*b);
     const State* st;
-    /* Skip the first state, procId, since we don't use it here */
-    st = stIter++;
     while ((st = stIter++) != 0) {
-      /* Generic declarations for component declarations */
-      if(genericDecl.numPieces() > 1) genericDecl << "; ";
-      genericDecl << sanitize(st->name()) << ": ";
-      if(!strcmp(st->type(), "INT")) {
-	genericDecl << "INTEGER";
+      /* Skip the state "procId" if present since we don't use it */
+      if(strcmp(st->name(), "procId")) {
+	/* Generic declarations for component declarations */
+	if(genericDecl.numPieces() > 1) genericDecl << "; ";
+	genericDecl << sanitize(st->name()) << ": ";
+	if(!strcmp(st->type(), "INT")) {
+	  genericDecl << "INTEGER";
+	}
+	else if(!strcmp(st->type(), "FLOAT")) {
+	  genericDecl << "REAL";
+	}
+	else {
+	  genericDecl << sanitize(st->type());
+	}
+	/* Generic maps for process declarations */
+	if(generics.numPieces() > 1) generics << ", ";
+	generics << sanitize(st->name()) << " => " << st->currentValue();
       }
-      else if(!strcmp(st->type(), "FLOAT")) {
-	genericDecl << "REAL";
-      }
-      else {
-	genericDecl << sanitize(st->type());
-      }
-      
-      /* Generic maps for process declarations */
-      if(generics.numPieces() > 1) generics << ", ";
-      generics << sanitize(st->name()) << " => " << st->currentValue();
     }
+
     if(generics.numPieces() > 1) {
       processes << " generic map(" << generics << ")";
     }
@@ -489,8 +490,8 @@ void VHDLBTarget :: setup () {
 	runCode << sectionComment(leader) << mainInitialization << vhdlCode;
 	vhdlCode = runCode;
 
-// Display the code
-        writeFile(vhdlCode, "", 1);
+// Display the code and write it to a file
+        writeFile(vhdlCode, ".vhdl", 1);
 }
 
 // The following was copied from Target.cc before this method was removed
