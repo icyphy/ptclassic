@@ -58,11 +58,11 @@ A list browser and derived file browser and index browser.
 These browsers support pattern-based search.
 <li>
 An Emacs-like text editing widget that significantly extends
-the capabilities of the Tk text widget, including a sophisticated
+the capabilities of the Tk text widget, including a
 search capability, undo/redo, text filling, and carefully designed menus
 and key bindings.
 <li>
-A shell-like console for interacting with Tcl with a thorough
+A shell-like console for interacting with Tcl with a
 history mechanism fashioned after the Unix tcsh.
 <li>
 An integrated documentation system based on HTML with automatic
@@ -86,7 +86,7 @@ large directory trees for textual patterns.
 <li>
 Error handling with a stack display.
 <li>
-Auto-save
+Auto-save.
 <li>
 Some elementary data structures: Stack, CircularList, Graph,
 DirectedAcyclicGraph, Forest.
@@ -99,8 +99,8 @@ In addition to the basic Emacs-like text editor described above and
 the Tcl shell, a number of additional editors and shells have been
 designed.
 The editors provide capabilities similar to those of Emacs modes,
-although the potential goes beyond what Emacs can do because of
-the future inclusion of graphical elements.
+although they have the potential to go beyond Emacs modes because of
+the planned inclusion of graphical elements.
 <p>
 The editors and shells included in release 0.2 are:
 <p>
@@ -121,7 +121,7 @@ The editors and shells included in release 0.2 are:
 	a method or procedure body, or the entire file can be evaluated.
 
 	<li> Java editor.  It includes menu choices to run
-	<CODE>appletviewer</CODE>, and to compile Java files
+	<CODE>appletviewer</CODE>, and to compile Java files.
 
 	<li> C and C++ editors.  These color and fill comments and
 	handle indentation, and include a menu choices to compile files.
@@ -145,7 +145,6 @@ The editors and shells included in release 0.2 are:
 </ul>
 <H3>Graphical Editors</H3>
 <ul>
-	<li> EditBubbleAndArc
 	<li> EditDAG - Directed Acyclic Graph Editor
 	<li> EditForest - Forest Editor (a forest is a collection of trees)
 	<li> EditPalette - Prototype of a Ptolemy Palette editor
@@ -167,14 +166,15 @@ There were many changes between Tycho 0.1.1 and Tycho 0.2, we only
 discuss some of the important changes.
  <P>Widget changes
 <UL>
-<LI> The Slate graphical system was rewritten and documented
+<LI> The Slate graphical system was rewritten and documented.
 
-<LI> Improvements to the <A HREF="../kernel/doc/usersGuides/PreferencesHelp.html">Preferences</A> system that use a Model/View system.
+<LI> Improvements to the <A HREF="../kernel/doc/usersGuides/PreferencesHelp.html">Preferences</A> system, which uses a Model/View architecture.
 
-<LI> Compiling C,C++ and Java files from within Tycho is now better
+<LI> Compilation of C,C++ and Java files from within Tycho is now better
 supported.
 
-<LI> New editors for file diffs, System Description Language (SDL) files.
+<LI> New editors for viewing file diffs, System Description
+Language (SDL) files.
 
 
 <LI> The Monitor widget replaces the graphical Exec widget.
@@ -216,6 +216,7 @@ See the
 
 <LI> The <CODE>Exec</CODE> class is now non-graphical, see the
 <CODE>Monitor</CODE> class for a graphical version.
+
 </UL>
 
 <p>
