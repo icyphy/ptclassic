@@ -1,5 +1,5 @@
 # Version Identification:
-# $Id$ %C%
+# $Id$
 # Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
@@ -223,7 +223,7 @@ clean::
 realclean:	clean
 
 
-sources depend sccsinfo clean:
+sources depend sccsinfo clean lint:
 	@for x in $(DIRS); do \
 		cd $$x ; \
 		echo making $@ in $$x ; \

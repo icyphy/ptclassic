@@ -57,7 +57,7 @@ makefiles:
 		cd .. ; \
 	done
 
-all install clean realclean sources depend checkjunk sccsinfo header:
+all install clean realclean sources depend checkjunk sccsinfo header lint:
 	@for x in $(DIRS); do \
 		cd $$x ; \
 		echo making $@ in $$x ; \
