@@ -126,57 +126,6 @@ if {![info exists ptolemy]} {
 }
 ::tycho::_announce "TYCHO=$TYCHO"
 
-global ::ptolemyfeature
-
-# ptolemyfeature(ptolemy) is set to 1 if ptolemy is present
-set ptolemyfeature(ptolemy) 0
-
-# ptolemyfeature(ptolemyinstalled) is set if the file
-# $ptolemy/copyright exists.
-# This is not the same as having ptolemy present,
-# which means the executing binary can execute ptolemy commands.
-set ptolemyfeature(ptolemyinstalled) \
-        [file exists [file join $ptolemy copyright]]
-
-# ptolemyfeature(pitcl) is set to 1 if the ::pitcl commands are present,
-# which indicates that we have access to the ptolemy kernel
-# via ::pitcl
-if {[uplevel #0 info namespace all pitcl] == "pitcl"} {
-    set ptolemyfeature(pitcl) 1
-    set ptolemyfeature(ptolemy) 1
-} {
-    set ptolemyfeature(pitcl) 0
-}
-
-# ptolemyfeature(ptcl) is set to 1 if the ptcl commands are present,
-# which indicates that we have access to the ptolemy kernel
-# via the older ptcl interface
-if {[uplevel #0 info commands domains] !=  {}} {
-    set ptolemyfeature(ptcl) 1
-    set ptolemyfeature(ptolemy) 1
-} {
-    set ptolemyfeature(ptcl) 0
-}
-
-# ptolemyfeature(octtools) is set to 1 if the ptk commands are present,
-# which indicates that we have access to the tcl/octtools commands.
-if {[uplevel #0 info commands ptkOpenFacet] != {} && \
-	[uplevel #0 info commands pvOpenWindow] != {}} {
-    set ptolemyfeature(octtools) 1
-    set ptolemyfeature(ptolemy) 1
-} {
-    set ptolemyfeature(octtools) 0
-}
-
-# Check to see if there is a configuration problem
-if {$ptolemyfeature(ptolemy) == 1 && $ptolemyfeature(ptolemyinstalled) == 0} {
-    puts stderr "Warning: This binary is ptolemy enabled, but we failed\nto\
-	    detect a complete ptolemy installation because\n\
-	    `[file join $ptolemy copyright]' is missing."
-    set ptolemyfeature(ptolemyinstalled) 1
-}
-
-
 global ::tychokernel
 set tychokernel [file join $tycho kernel]
 
@@ -315,14 +264,20 @@ package require tycho.edit.graphedit
 if [file exists [file join $TYCHO edit cts]] {
     package require tycho.edit.cts
 }
-
-# For now, check for the existence of these new packages
 if [file exists [file join $TYCHO edit pn]] {
     package require tycho.edit.pn
 }
 
 package require tycho.util.devtools
 package require tycho.util.tydoc
+
+# Load ptolemy packages if they are present
+if [file exists [file join $TYCHO typt kernel]] {
+    package require tycho.typt.kernel
+}
+if [file exists [file join $TYCHO typt editors]] {
+    package require tycho.typt.editors
+}
 
 ::tycho::_announce "Loaded packages"
 
