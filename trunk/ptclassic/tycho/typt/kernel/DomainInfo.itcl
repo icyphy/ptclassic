@@ -35,9 +35,11 @@ catch {delete class DomainInfo}
 #######################################################################
 #### DomainInfo
 # One DomainInfo object contains information about all the stars
-# in that domain
+# in that domain.  This class uses ptcl commands that are part of Ptolemy
+# so you should start tycho with -pigi, -ptrim or -ptiny.
 # <p>
-# Here is an example of how to use the DomainInfo:
+# Here is an example of how to use the DomainInfo that diffs the SDF
+# and CGC domains
 # <tcl><pre>
 #     ::tycho::DomainInfo .sdf SDF
 #     ::tycho::DomainInfo .cgc CGC
@@ -73,7 +75,7 @@ class ::tycho::DomainInfo {
     # Return the states for starName
     method states {starName} {}
 
-    # Print the contents of the current DomainInfo object
+    # Print all the stars in the current DomainInfo object
     method print {}
     
     # Print one star in the current DomainInfo object
@@ -84,14 +86,6 @@ class ::tycho::DomainInfo {
 
     # Compare two domainInfo objects
     public proc diffDomains {domainA domainB}
-
-    ###################################################################
-    ####                   protected methods                       ####
-
-
-    ###################################################################
-    ####                   protected variables                     ####
-
 
     ###################################################################
     ####                   protected procs                         ####
@@ -109,12 +103,11 @@ class ::tycho::DomainInfo {
     ####                   private variables                       ####
 
     # This object contains information about the domainName domain.
-    public variable domainName
+    private variable domainName
 
-    # Keywords that the ptcl print command returns 
-    private common starKeywords { Descriptor: MultiPorts: States:}
-
-    public variable stars
+    # Array that contains the data for individual stars in keyword
+    # value pairs.
+    private variable stars
 }
 
 
@@ -124,7 +117,8 @@ class ::tycho::DomainInfo {
 body ::tycho::DomainInfo::constructor {args} {
     set domainName [lindex $args 0]
     domain $domainName
-    #set stars(Gain) [starInfo Gain]
+
+    # Cycle through the list of all stars and fill the array
     foreach star [knownlist] {
         set stars($star) [starInfo $star]
     }
@@ -144,28 +138,39 @@ body ::tycho::DomainInfo::destructor {} {
 
 
 
+#######################################################################
+#### stars
 # Return all of the stars
 body ::tycho::DomainInfo::stars {} {
     return [array names stars]
 }
 
+#######################################################################
+#### descriptor
 # Return the descriptor for starName
 body ::tycho::DomainInfo::descriptor {starName} {
     set starList $stars($starName)
     return [lindex $starList [lsearch $starList {Descriptor*}]]
 }
 
+#######################################################################
+#### ports
 # Return the descriptor for starName
 body ::tycho::DomainInfo::ports {starName} {
     set starList $stars($starName)
     return [lindex $starList [lsearch $starList {Ports*}]]
 }
+
+#######################################################################
+#### multiports
 # Return the descriptor for starName
 body ::tycho::DomainInfo::multiports {starName} {
     set starList $stars($starName)
     return [lindex $starList [lsearch $starList {MultiPorts*}]]
 }
 
+#######################################################################
+#### states
 # Return the descriptor for starName
 body ::tycho::DomainInfo::states {starName} {
     set starList $stars($starName)
@@ -174,15 +179,18 @@ body ::tycho::DomainInfo::states {starName} {
 
 #######################################################################
 #### print
-# Return the contents of this domain as a list
+# Print all the stars in the current DomainInfo object
 #
 body ::tycho::DomainInfo::print {} {
     foreach id [array names stars] {
-        lappend results [printStar $id ]
+       lappend results [printStar $id ]
     }
     return [list $domainName $results] 
 }
 
+#######################################################################
+#### printStar
+# Print all the stars in the current DomainInfo object
 body ::tycho::DomainInfo::printStar {id} {
     set stateList [lindex [states $id] 1]
     set stateResults {}
@@ -202,11 +210,16 @@ body ::tycho::DomainInfo::printStar {id} {
 
 #######################################################################
 #### diffDomains
-# Compare two domains, passed in as strings
-# Return three lists:
-# stars that are common to both
-# stars only in domainA
-# stars only in domainB
+# Compare two domains, passed in as strings.
+# Return a list consisting of five sublists:
+# <OL>
+# <LI>stars that are common to both
+# <LI>stars that are common, but have port mismatches
+# <LI>stars that are common, but have multiport mismatches
+# <LI>stars that are common, but have state mismatches
+# <LI>stars only in domainA
+# <LI>stars only in domainB
+# </OL>
 body ::tycho::DomainInfo::diffDomains {domainA domainB} {
     ::tycho::DomainInfo .domainA $domainA
     ::tycho::DomainInfo .domainB $domainB
@@ -228,11 +241,16 @@ body ::tycho::DomainInfo::diffDomains {domainA domainB} {
 
 #######################################################################
 #### diffStars
-# Compare two domainInfo objects
-# Return three lists:
-# stars that are common to both
-# stars only in domainA
-# stars only in domainB
+# Compare two domainInfo objects.
+# Return a list consisting of five sublists:
+# <OL>
+# <LI>stars that are common to both
+# <LI>stars that are common, but have port mismatches
+# <LI>stars that are common, but have multiport mismatches
+# <LI>stars that are common, but have state mismatches
+# <LI>stars only in domainA
+# <LI>stars only in domainB
+# </OL>
 body ::tycho::DomainInfo::diffStars {domainA domainB} {
     set starsA [$domainA stars]
     set starsB [$domainB stars]
@@ -282,6 +300,17 @@ body ::tycho::DomainInfo::diffStars {domainA domainB} {
 #######################################################################
 #### starInfo
 # Return the star information as a list of keyword value pairs
+#
+# This procedure parses the ptcl print output.  In theory the ptcl print
+# command should be modified to return information as a list.
+#
+# I chose to use the ptcl print command, and parse the output so that
+# this tool would work (in theory) with a 0.6 tysh (I have not tried
+# it).
+# 
+# Also, by using the ptcl print command, then we are querying the stars
+# that are actually in the binary, instead of looking for source files
+# that may or may not be out of date.
 #
 body ::tycho::DomainInfo::starInfo {starName} {
     domain $domainName
