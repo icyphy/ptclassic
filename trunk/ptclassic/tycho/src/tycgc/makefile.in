@@ -54,7 +54,7 @@ OTHERCFLAGS =
 # 'configure' creates these in the directory above.
 include ../tcl.mk
 
-LIB =		libtycgc$(TCL_SHLIB_SUFFIX)
+LIBR =		libtycgc$(TCL_SHLIB_SUFFIX)
 
 INCLUDE = \
 	-I./ \
@@ -75,11 +75,11 @@ LIBPATH = \
 	-L$(TCL_LIB_DIR) \
 	-L$(TK_LIB_DIR)
 
-all: $(LIB) $(MISC_SRCS) 
+all: $(LIBR) $(MISC_SRCS) 
 
-install: $(LIBDIR)/$(LIB)
+install: $(LIBDIR)/$(LIBR)
 
-$(LIB) : $(OBJS)
+$(LIBR) : $(OBJS)
 	$(TCL_SHLIB_LD) $(OBJS) -o $@ $(TCL_LD_SEARCH_FLAGS) $(LIBS)
 
 depend:
