@@ -53,35 +53,20 @@
 # </pre></tcl>
 #
 class ::tycho::EditForest {
-    inherit ::tycho::Graphics
+    inherit ::tycho::EditDAG
 
     constructor {args} {}
     destructor {}
     
     ###################################################################
-    ####                            options                        ####
-
-    # Specify the forest object to display and edit.
-    itk_option define -forest forest Forest {}
-
-    ###################################################################
     ####                         public methods                    ####
-
-    # Clear the display, discarding the current forest.
-    method clear {}
 
     # Open a help window.
     method help {}
 
-    # Reload data from the current file.
-    method reload {}
-
     # Find the node in the forest identified by "name".
     # FIXME: Implement this.
     # method seePoint {name}
-
-    # Specify whether or not modifications are allowed in the displayed text.
-    method setReadOnly {bool}
 
     ###################################################################
     ####                   protected methods                       ####
@@ -91,31 +76,9 @@ class ::tycho::EditForest {
 }
 
 #######################################################################
-#### -forest option configuration
-# If an non-empty string is given as the value to this argument, it is
-# taken to be the name of an instance of class Forest to display and
-# edit.  The instance must exist already and be accessible in the
-# current scope.
-#
-configbody ::tycho::EditForest::forest {
-    set fst $itk_option(-forest)
-    if {$fst != {}} {
-        $itk_component(graphics) configure -forest $fst
-    }
-}
-
-#######################################################################
 #### constructor
 #
 body ::tycho::EditForest::constructor {args} {
-    addMenuSeparator Edit
-
-    addMenuItem {New Root} Edit -underline 4 -accelerator "R" \
-	    -command "$this component graphics addRoot"
-
-    addMenuItem {New Child} Edit -underline 4 -accelerator "C" \
-	    -command "$this component graphics addChild"
-
     eval itk_initialize $args
 }
 
@@ -124,49 +87,9 @@ body ::tycho::EditForest::constructor {args} {
     ####                      public methods                       ####
 
 #######################################################################
-#### clear
-# Clear the display, discarding the current forest.
-#
-body ::tycho::EditForest::clear {} {
-    if [getReadOnly] {bell; return}
-    [component graphics forest] clear
-    ::tycho::Graphics::clear
-}
-
-#######################################################################
 #### help
 # Open a help window.
 #
 body ::tycho::EditForest::help {} {
     hyperJump "\$TYCHO/editors/visedit/doc/usersGuides/EditForestHelp.html" {}
-}
-
-#######################################################################
-#### reload
-# Reload the current file. This is redefined in order to redraw the forest.
-#
-body ::tycho::EditForest::reload {} {
-    component graphics undoBoundary
-    ::tycho::File::reload
-    component graphics redrawForest
-}
-
-#####################################################################
-#### setReadOnly
-# Specify whether or not modifications are allowed in the displayed text.
-# Note that this is independent of whether the associated file is readonly.
-# It merely determines whether the buffer can be modified, not whether the
-# file can be modified.  To control the file, use <code>toggleReadOnly</code>.
-#
-body ::tycho::EditForest::setReadOnly {bool} {
-    ::tycho::Graphics::setReadOnly $bool
-    if [winfo exists $prefix] {
-	if {$bool} {
-            disableMenuItem {New Root} Edit
-            disableMenuItem {New Child} Edit
-	} {
-            enableMenuItem {New Root} Edit
-            enableMenuItem {New Child} Edit
-	}
-    }
 }
