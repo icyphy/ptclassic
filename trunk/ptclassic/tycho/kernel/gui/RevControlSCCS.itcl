@@ -52,6 +52,14 @@ class ::tycho::RevControlSCCS {
     # Checkout the file associated with this class.
     method checkOut {}
 
+    #### createComment
+    # Create the comment from the list returned by the EntryQuery class.
+    method createComment {list} 
+
+    #### getComments
+    # Get the users comments.
+    method getComments {} 
+
     #### nextAction
     # Perform the next logical action.
     method nextAction {}
@@ -77,6 +85,11 @@ class ::tycho::RevControlSCCS {
     # control.
     protected method checkRevControl {}
 
+    ###################################################################
+    ####                    protected variable                     ####
+
+    protected variable comment ""
+
 }
 
 ###################################################################
@@ -91,6 +104,30 @@ body ::tycho::RevControlSCCS::constructor {args} {
 #### destructor
 #
 body ::tycho::RevControlSCCS::destructor {} {
+}
+
+#####################################################################
+#### createComment
+# 
+body ::tycho::RevControlSCCS::createComment {list} {
+    if {$list == ""} {
+	set comment ""
+	return
+    }
+    set summary [lindex [lindex $list 0] 1]
+    set body [lindex [lindex $list 1] 1]
+    set comment [format "SUMMARY: %s BODY: %s" $summary $body]
+}
+
+#####################################################################
+#### getComments
+# 
+body ::tycho::RevControlSCCS::getComments {} {
+    set list [DialogWindow::newModal EntryQuery [autoName .getcomment] \
+	    -queries {{first {Comment Summary:} {}} \
+	    {second {Comment Body:} {}}}  \
+	    -entrywidth 60]
+    $this createComment $list
 }
 
 #####################################################################
@@ -114,8 +151,11 @@ body ::tycho::RevControlSCCS::checkIn {} {
 		resides in."
 	return 
     }
-    set comments [::tycho::queryinfo "Enter comments:" "" 60]
-    catch {exec echo $comments | sccs delget $basefile} output
+    $this getComments
+    if {$comment == ""} {
+	return
+    }
+    catch {exec echo $comment | sccs delget $basefile} output
     if {[file exists [format "%s/SCCS/p.$basefile" $dir]]} {
 	::tycho::inform "The checkin operation failed with the following\
 		error message: $output"
@@ -182,7 +222,6 @@ body ::tycho::RevControlSCCS::unedit {} {
 	return 
     }
     catch {exec sccs unedit $file} output 
-    puts "output: $output"
     if {[file exists [format "%s/SCCS/p.$basefile" $dir]]} {
 	::tycho::inform "The following error was encountered while trying to\
 		unedit the desired file: $output"
