@@ -103,10 +103,10 @@ void VHDLBTarget :: headerCode () {
 /////////////////////////////////////////
 
 int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
-  char IntGal[15] = "InterpGalaxy";
-  char intType[10] = "INT";
-  char floatType[10] = "FLOAT";
-  char anytypeType[10] = "ANYTYPE";
+  char IntGal[CHAR15] = "InterpGalaxy";
+  char intType[CHAR10] = "INT";
+  char floatType[CHAR10] = "FLOAT";
+  char anytypeType[CHAR10] = "ANYTYPE";
   StringList tempCode = "";
   StringList blockName = "";
   int dataIns = FALSE;
@@ -186,9 +186,9 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
     }
   }
 
-  if(inputs.numPieces() > 1 | outputs.numPieces() > 1) {
+  if((inputs.numPieces() > 1) | (outputs.numPieces() > 1)) {
     vhdlCode << indent(1) << "port(" << inputs;
-    if(inputs.numPieces() > 1 && outputs.numPieces() > 1) vhdlCode << "; ";
+    if((inputs.numPieces() > 1) && (outputs.numPieces() > 1)) vhdlCode << "; ";
     vhdlCode << outputs << ");\n";
   }
   vhdlCode << "end " << blockName << ";\n\n";
