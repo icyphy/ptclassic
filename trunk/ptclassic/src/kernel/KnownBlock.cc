@@ -68,7 +68,7 @@ KnownListEntry::~KnownListEntry () {
 
 static KnownListEntry* allBlocks[NUMDOMAINS];
 static const char* domainNames[NUMDOMAINS];
-int KnownBlock :: currentDomain = 0;
+int KnownBlock :: defaultDomainCode = 0;
 int KnownBlock :: numDomains = 0;
 
 // Special class to clean up at end.
@@ -98,15 +98,30 @@ static void bombNoDomains() {
 		
 // KnownBlock methods
 
-const char* KnownBlock::domain()  {
+const char* KnownBlock::defaultDomain()  {
 	if (numDomains == 0) bombNoDomains();
-	return domainNames[currentDomain];
+	return domainNames[defaultDomainCode];
 }
 
+int KnownBlock::setDefaultDomain(const char* newDom) {
+	int idx = domainIndex(newDom,0);
+	if (idx >= 0) {
+		defaultDomainCode = idx;
+		return TRUE;
+	}
+	Error::abortRun("No such domain: ",newDom);
+	return FALSE;
+}
+
+int KnownBlock::validDomain(const char* newDom) {
+	return newDom && domainIndex(newDom,0) >= 0;
+}
+	
 // This function looks up a domain.  It returns -1 if not found and
-// we specified no adding.
+// we specified no adding.  For a null argument, we always return -1.
 
 int KnownBlock::domainIndex (const char* myDomain, int addIfNotFound) {
+	if (myDomain == 0) return -1;
 	for (int i = 0; i < numDomains; i++) {
 		if (strcmp (domainNames[i], myDomain) == 0)
 			return i;
@@ -171,12 +186,15 @@ KnownBlock::findEntry (const char* name, KnownListEntry* l) {
 }
 
 const Block*
-KnownBlock::find(const char* type) {
+KnownBlock::find(const char* type, const char* dom) {
+	int domidx = domainIndex(dom);
+// if no such domain, return 0.
+	if (domidx < 0) return 0;
 	// search the list for this domain
-	KnownListEntry* e = findEntry (type, allBlocks[currentDomain]);
+	KnownListEntry* e = findEntry (type, allBlocks[domidx]);
 	if (!e) {
 		// try the lists for any subdomains
-		Domain* dp = Domain::named(domainNames[currentDomain]);
+		Domain* dp = Domain::named(domainNames[domidx]);
 		StringListIter next(dp->subDomains);
 		const char* sub;
 		while ((sub = next++) != 0) {
@@ -190,8 +208,10 @@ KnownBlock::find(const char* type) {
 
 // return TRUE if indicated name refers to a dynamically linked block.
 int
-KnownBlock::isDynamic(const char* type) {
-	KnownListEntry* e = findEntry (type, allBlocks[currentDomain]);
+KnownBlock::isDynamic(const char* type, const char* dom) {
+	int domidx = domainIndex(dom);
+	if (domidx < 0) return 0;
+	KnownListEntry* e = findEntry (type, allBlocks[domidx]);
 	if (!e) return FALSE;
 	return e->dynLinked;
 }
@@ -200,43 +220,33 @@ KnownBlock::isDynamic(const char* type) {
 // type, by asking the matching block on the list to clone itself.
 
 Block*
-KnownBlock::clone(const char* type) {
+KnownBlock::clone(const char* type, const char* dom) {
 	if (numDomains == 0) bombNoDomains();
-	const Block* p = find(type);
+	const Block* p = find(type,dom);
 	if (p) return p->clone();
-	StringList msg = "No star/galaxy named '";
-	msg += type;
-	msg += "' in domain '";
-	msg += domainNames[currentDomain];
-	msg += "'";
-	Error::abortRun (msg);
+	noMatch(type,dom);
 	return 0;
+}
+
+void KnownBlock::noMatch(const char* type,const char* dom) {
+	int domidx = domainIndex(dom);
+	if (domidx < 0) {
+		Error::abortRun("No such domain: ", dom);
+	}
+	else {
+		StringList msg = "No star/galaxy named '";
+		msg << type << "' in domain '" << dom << "'";
+		Error::abortRun (msg);
+	}
 }
 
 Block*
-KnownBlock::makeNew(const char* type) {
+KnownBlock::makeNew(const char* type, const char* dom) {
 	if (numDomains == 0) bombNoDomains();
-	const Block* p = find(type);
+	const Block* p = find(type,dom);
 	if (p) return p->makeNew();
-	StringList msg = "No star/galaxy named '";
-	msg += type;
-	msg += "' in domain '";
-	msg += domainNames[currentDomain];
-	msg += "'";
-	Error::abortRun (msg);
+	noMatch(type,dom);
 	return 0;
-}
-
-// Function to set the domain.
-int
-KnownBlock::setDomain (const char* newDom) {
-	int idx = domainIndex (newDom);
-	if (idx < 0) {
-		Error::error ("Unknown domain: ", newDom);
-		return FALSE;
-	}
-	currentDomain = idx;
-	return TRUE;
 }
 
 // comparison function for qsort.  Done this way to shut up the compiler;
@@ -274,13 +284,7 @@ KnownBlock::nameListForDomain (int idx) {
 	return s;
 }
 
-// Return known list as text, separated by linefeeds
-StringList
-KnownBlock::nameList () {
-	return nameListForDomain (currentDomain);
-}
-
-// Same as above, but the user specifies the domain.
+// Return name list for given domain.
 StringList
 KnownBlock::nameList (const char* dom) {
 	int idx = domainIndex (dom);
@@ -298,10 +302,7 @@ void KnownBlockIter::reset() {
 }
 
 KnownBlockIter::KnownBlockIter (const char* dom) {
-	if (dom)
-		idx = KnownBlock :: domainIndex (dom, 0);
-	else 
-		idx = KnownBlock :: currentDomain;
+	idx = KnownBlock :: domainIndex (dom, 0);
 	reset();
 }
 
