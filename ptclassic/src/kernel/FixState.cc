@@ -5,6 +5,7 @@ static const char file_id[] = "FixState.cc";
 #endif
 
 #include "FixState.h"
+#include "PrecisionState.h"
 #include "KnownState.h"
 #include "Tokenizer.h"
 
@@ -52,6 +53,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // the type
 const char* FixState :: type() const { return "FIX";}
 
+// constructor
+FixState :: FixState()
+{
+	val = 0.0;
+	overrideablePrecision = TRUE;
+	symbolic_length = symbolic_intBits = NULL;
+}
+
 // the value as a string
 StringList FixState :: currentValue() const {
         StringList s = val.value();
@@ -97,10 +106,10 @@ void FixState :: initialize() {
                 // if wrong type, evalFloatExpression has already complained
                 else return;
         }
+
         // possibility three: ( exp , exp ) or ( value , precision )
         // where each exp is a floating expression.
         else {
-                // get 
                 t =  evalFloatExpression(lexer);
                 if (t.tok != T_Float) return;
                 double fixval = t.doubleval;
@@ -109,27 +118,61 @@ void FixState :: initialize() {
                         parseError ("expected a comma");
                         return;
                 }
-                t =  evalFloatExpression(lexer);
-                if (t.tok != T_Float) return;
-		// we rely on the StringList feature that prints
-		// 3.0 for a 3 value.
-		StringList prec = t.doubleval;
+		const Precision prec =
+			PrecisionState::parsePrecisionString(
+				lexer, name(), parent());
+		if (!prec.isValid())
+			return;	// parser error already reported in parsePrec.String
+
 		val = Fix(prec, fixval);
+		// might happen if requested length of precision exceeds implementation limit
 		if (val.invalid()) {
 			parseError ("invalid Fix precision specifier");
 			return;
 		}
+
                 t = getParseToken (lexer);
                 if (t.tok != ')') {
                         parseError ("expected )");
                         return;
                 }
         }
+
         // check for extra cruft (this also eats up any pushback token)
         ParseToken t2 = getParseToken (lexer);
         if (t2.tok != T_EOF)
                 parseError ("extra text after valid expression");
         return;
+}
+
+// Explicitly set the precision;
+// if overrideable is FALSE the symbolic expressions may not be redefined
+// in the future.
+void FixState::setPrecision(const Precision& p, int overrideable)
+{
+	// change the precision of the fix value
+	Fix f(p.len(),p.intb(), val);
+	val.initialize();
+	val = f;
+
+	// set the symbolic expressions for the precision
+	if (overrideablePrecision) {
+	    if (symbolic_length) {
+		LOG_DEL; delete [] symbolic_length;
+	    }
+	    if (symbolic_intBits) {
+		LOG_DEL; delete [] symbolic_intBits;
+	    }
+	    symbolic_length  = p.symbolic_len()  ? savestring(p.symbolic_len())  : NULL;
+	    symbolic_intBits = p.symbolic_intb() ? savestring(p.symbolic_intb()) : NULL;
+
+	    overrideablePrecision = overrideable;
+	}
+}
+
+Precision FixState::precision() const
+{
+	return Precision(val.len(),val.intb(), symbolic_length,symbolic_intBits);
 }
 
 
