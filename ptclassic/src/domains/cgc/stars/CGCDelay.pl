@@ -35,13 +35,18 @@ limitation of liability, and disclaimer of warranty provisions.
     codeblock (declarations)
     {
 	/* static so that buffer will be initialized to zero */
-	static double $starSymbol(buffer)[$val(delay)];
+	double $starSymbol(buffer)[$val(delay)];
 	int $starSymbol(index);
     }
 
     codeblock (init)
     {
 	$starSymbol(index) = 0;
+    {
+	int i;
+	for (i = 0 ; i < $val(delay) ; i++)
+	    $starSymbol(buffer)[i] = 0;
+    }
     }
 
     codeblock (main)
