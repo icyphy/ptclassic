@@ -56,9 +56,9 @@ subsources:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
-		  echo making subsources in domains/$(ME)/$$x ; \
+		  echo making sources in domains/$(ME)/$$x ; \
 		  $(MAKE) $(MFLAGS) $(MAKEVARS) \
-			VPATH=../../../../src/domains/$(ME)/$$x subsources ; \
+			VPATH=../../../../src/domains/$(ME)/$$x sources ; \
 		) \
 	    fi ; \
 	done
