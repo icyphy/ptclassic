@@ -84,7 +84,8 @@ body ::tycho::PreferenceDialog::constructor {args} {
 	if { $description != "" } {
 	    itk_component add $set {
 		button $itk_interior.$set -text $description \
-			-command "$this edit $set"
+			-command "$this edit $set" \
+			-highlightthickness 0
 	    } {
 		keep -background -cursor
 	    }
