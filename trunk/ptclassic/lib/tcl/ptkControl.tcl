@@ -45,6 +45,7 @@ set ptkRunFlag(main) IDLE
 # panel window that is currently being used for a run.  This name is therefore
 # available to stars that wish to insert frames into the control panel.
 # It is equal to .run_$octHandle.
+set ptkControlPanel ""
 
 #######################################################################
 # Set the ptkRunFlag to FINISHED, indicating the run is over, and pop up the
@@ -81,12 +82,12 @@ proc ptkHasRun { name } {
 # Procedure to run a universe.
 #
 proc ptkRunControl { name octHandle } {
-    global ptkRunFlag ptkDebug ptkRunEventLoop ptkControlPanel ptkOctHandles \
+    global ptkRunFlag ptkDebug ptkRunEventLoop ptkOctHandles \
 	ptkScriptOn
 
-    set ptkControlPanel .run_$octHandle
-    if {[info exists ptkRunFlag($name)] && [winfo exists $ptkControlPanel]} {
-	raise $ptkControlPanel
+    set ctrlPanel .run_$octHandle
+    if {[info exists ptkRunFlag($name)] && [winfo exists $ctrlPanel]} {
+	raise $ctrlPanel
 	return
     }
 
@@ -98,60 +99,60 @@ proc ptkRunControl { name octHandle } {
     # Mark an open window, but with no run yet.
     set ptkRunFlag($name) IDLE
 
-    catch {destroy $ptkControlPanel}
+    catch {destroy $ctrlPanel}
     # Sets the Class of the Window.  This is used to set all options
     #   for widgets used in the Contol window
-    toplevel $ptkControlPanel -class PigiControl
-    wm title $ptkControlPanel "Run $name"
-    wm iconname $ptkControlPanel "Run $name"
+    toplevel $ctrlPanel -class PigiControl
+    wm title $ctrlPanel "Run $name"
+    wm iconname $ctrlPanel "Run $name"
 
     set defNumIter [ptkGetRunLength $octHandle]
 
-    message $ptkControlPanel.msg \
+    message $ctrlPanel.msg \
 	    -width 25c -text "Control panel for $name" -justify center
 
-    frame $ptkControlPanel.options
-	checkbutton $ptkControlPanel.options.debug -text "Debug" \
+    frame $ctrlPanel.options
+	checkbutton $ctrlPanel.options.debug -text "Debug" \
 	    -variable ptkDebug($name) -relief flat \
 	    -command "ptkSetOrClearDebug $name $octHandle"
-	checkbutton $ptkControlPanel.options.script -text "Script" \
+	checkbutton $ctrlPanel.options.script -text "Script" \
 	    -variable ptkScriptOn($name) -relief flat \
 	    -command "ptkToggleScript $name $octHandle"
-	pack append $ptkControlPanel.options \
-	    $ptkControlPanel.options.debug {right padx 20} \
-	    $ptkControlPanel.options.script {right padx 20}
+	pack append $ctrlPanel.options \
+	    $ctrlPanel.options.debug {right padx 20} \
+	    $ctrlPanel.options.script {right padx 20}
 
     # Define the entry that controls the number of iterations
     # Note: This may be replaced by the user with the script window
     # defined below.
-    frame $ptkControlPanel.iter -bd 10
-	label $ptkControlPanel.iter.label -text "When to stop:"
-        entry $ptkControlPanel.iter.entry -relief sunken
-	$ptkControlPanel.iter.entry insert @0 $defNumIter
-	pack $ptkControlPanel.iter.label -side left
-	pack $ptkControlPanel.iter.entry -side left -fill x -expand yes
+    frame $ctrlPanel.iter -bd 10
+	label $ctrlPanel.iter.label -text "When to stop:"
+        entry $ctrlPanel.iter.entry -relief sunken
+	$ctrlPanel.iter.entry insert @0 $defNumIter
+	pack $ctrlPanel.iter.label -side left
+	pack $ctrlPanel.iter.entry -side left -fill x -expand yes
 
     # Alternative to the iter frame: a script window
-    frame $ptkControlPanel.tclScript -bd 10
-        pack [label $ptkControlPanel.tclScript.label -text "Tcl Script:" ] \
+    frame $ctrlPanel.tclScript -bd 10
+        pack [label $ctrlPanel.tclScript.label -text "Tcl Script:" ] \
             -side top -anchor w
-        pack [frame $ptkControlPanel.tclScript.tframe] \
+        pack [frame $ctrlPanel.tclScript.tframe] \
 	    -side top -fill both -expand 1
-        scrollbar $ptkControlPanel.tclScript.tframe.vscroll \
+        scrollbar $ctrlPanel.tclScript.tframe.vscroll \
 	    -relief flat \
-	    -command "$ptkControlPanel.tclScript.tframe.text yview"
-        pack $ptkControlPanel.tclScript.tframe.vscroll \
+	    -command "$ctrlPanel.tclScript.tframe.text yview"
+        pack $ctrlPanel.tclScript.tframe.vscroll \
 	    -side right -fill y
-        text $ptkControlPanel.tclScript.tframe.text \
+        text $ctrlPanel.tclScript.tframe.text \
 	    -wrap word -height 8 -width 40 -setgrid true \
-	    -yscrollcommand "$ptkControlPanel.tclScript.tframe.vscroll set" \
+	    -yscrollcommand "$ctrlPanel.tclScript.tframe.vscroll set" \
 	    -relief sunken -bd 2
 	set scriptValue [ptkGetStringProp $octHandle script]
 	if {$scriptValue == ""} {
 	    set scriptValue "run $defNumIter\nwrapup\n"
 	}
-	$ptkControlPanel.tclScript.tframe.text insert end $scriptValue
-        pack $ptkControlPanel.tclScript.tframe.text -expand yes -fill both
+	$ctrlPanel.tclScript.tframe.text insert end $scriptValue
+        pack $ctrlPanel.tclScript.tframe.text -expand yes -fill both
 
     # The following empty frames are created so that they are available
     # to stars to insert custom controls into the control panel.
@@ -159,60 +160,60 @@ proc ptkRunControl { name octHandle } {
     # for buttons, and "low" for sliders.  The full name for the
     # frame is .run_${octHandle}.$position, where $name is the name of the
     # universe, and $position is "high", "middle", or "low".
-    frame $ptkControlPanel.high
-    frame $ptkControlPanel.middle
-    frame $ptkControlPanel.low
+    frame $ctrlPanel.high
+    frame $ctrlPanel.middle
+    frame $ctrlPanel.low
 
     # Define the panel of control buttons
-    frame $ptkControlPanel.panel -bd 10
-	frame $ptkControlPanel.panel.gofr  -relief sunken -bd 2
-	button $ptkControlPanel.panel.gofr.go -text " GO <Return> " \
+    frame $ctrlPanel.panel -bd 10
+	frame $ctrlPanel.panel.gofr  -relief sunken -bd 2
+	button $ctrlPanel.panel.gofr.go -text " GO <Return> " \
 	    -command "ptkGo $name $octHandle" -width 14
-	pack append $ptkControlPanel.panel.gofr \
-	    $ptkControlPanel.panel.gofr.go {fill}
+	pack append $ctrlPanel.panel.gofr \
+	    $ctrlPanel.panel.gofr.go {fill}
 		
-	button $ptkControlPanel.panel.pause -text "PAUSE <Space>" \
+	button $ctrlPanel.panel.pause -text "PAUSE <Space>" \
 		-command "ptkPause $name $octHandle" -width 14
-	button $ptkControlPanel.panel.stop -text "STOP <Escape>" \
+	button $ctrlPanel.panel.stop -text "STOP <Escape>" \
 		-command "ptkStop $name" -width 14
-	pack append $ptkControlPanel.panel \
-	    $ptkControlPanel.panel.gofr {left fill} \
-	    $ptkControlPanel.panel.pause {left fill} \
-	    $ptkControlPanel.panel.stop {right fill}
+	pack append $ctrlPanel.panel \
+	    $ctrlPanel.panel.gofr {left fill} \
+	    $ctrlPanel.panel.pause {left fill} \
+	    $ctrlPanel.panel.stop {right fill}
 
     # The debug panel will be filled with buttons when debugging is
     # turned on.  It starts out off always.
-    frame $ptkControlPanel.debug -bd 10
+    frame $ctrlPanel.debug -bd 10
 
     # Animation is off by default
     ptkGrAnimation 0
 
-    frame $ptkControlPanel.disfr
-    button $ptkControlPanel.disfr.dismiss -text "DISMISS" -command \
-	"ptkRunControlDel $name $ptkControlPanel $octHandle $defNumIter"
-    pack append $ptkControlPanel.disfr \
-	$ptkControlPanel.disfr.dismiss {top fillx}
+    frame $ctrlPanel.disfr
+    button $ctrlPanel.disfr.dismiss -text "DISMISS" -command \
+	"ptkRunControlDel $name $octHandle $defNumIter"
+    pack append $ctrlPanel.disfr \
+	$ctrlPanel.disfr.dismiss {top fillx}
 
     # Newer syntax for pack command used below
-    pack $ptkControlPanel.msg -fill both
-    pack $ptkControlPanel.options
+    pack $ctrlPanel.msg -fill both
+    pack $ctrlPanel.options
     if {[ptkGetStringProp $octHandle usescript] == "1"} {
 	set ptkScriptOn($name) 1
-	pack $ptkControlPanel.tclScript -expand 1 -fill both \
-	    -after $ptkControlPanel.options
+	pack $ctrlPanel.tclScript -expand 1 -fill both \
+	    -after $ctrlPanel.options
     } {
-        pack $ptkControlPanel.iter -anchor w -fill x
+        pack $ctrlPanel.iter -anchor w -fill x
     }
-    pack $ptkControlPanel.panel
-    pack $ptkControlPanel.high -fill x -padx 10
-    pack $ptkControlPanel.middle -fill x -padx 10
-    pack $ptkControlPanel.low -fill x -padx 10
-    pack $ptkControlPanel.disfr -fill x
+    pack $ctrlPanel.panel
+    pack $ctrlPanel.high -fill x -padx 10
+    pack $ctrlPanel.middle -fill x -padx 10
+    pack $ctrlPanel.low -fill x -padx 10
+    pack $ctrlPanel.disfr -fill x
 
-    wm geometry $ptkControlPanel +400+400
-    focus $ptkControlPanel
-    wm protocol $ptkControlPanel WM_DELETE_WINDOW \
-	"ptkRunControlDel $name $ptkControlPanel $octHandle $defNumIter"
+    wm geometry $ctrlPanel +400+400
+    focus $ctrlPanel
+    wm protocol $ctrlPanel WM_DELETE_WINDOW \
+	"ptkRunControlDel $name $octHandle $defNumIter"
 
     set olduniverse [curuniverse]
     newuniverse $name
@@ -226,15 +227,15 @@ proc ptkRunControl { name octHandle } {
 
     curuniverse $olduniverse
 
-    bind $ptkControlPanel.iter.entry <Return> \
+    bind $ctrlPanel.iter.entry <Return> \
 		"ptkGo $name $octHandle"
-    bind $ptkControlPanel.iter.entry <Escape> "ptkStop $name"
-    bind $ptkControlPanel.iter.entry <space> "ptkPause $name $octHandle"
-    bind $ptkControlPanel <Return> "ptkGo $name $octHandle"
-    bind $ptkControlPanel <space> "ptkPause $name $octHandle"
-    bind $ptkControlPanel <Escape> "ptkStop $name"
-    bind $ptkControlPanel <Control-d> \
-	"ptkRunControlDel $name $ptkControlPanel $octHandle $defNumIter"
+    bind $ctrlPanel.iter.entry <Escape> "ptkStop $name"
+    bind $ctrlPanel.iter.entry <space> "ptkPause $name $octHandle"
+    bind $ctrlPanel <Return> "ptkGo $name $octHandle"
+    bind $ctrlPanel <space> "ptkPause $name $octHandle"
+    bind $ctrlPanel <Escape> "ptkStop $name"
+    bind $ctrlPanel <Control-d> \
+	"ptkRunControlDel $name $octHandle $defNumIter"
 }
 
 
@@ -401,13 +402,10 @@ proc ptkGrAnimation { on} {
 
 #######################################################################
 # Procedure to light up a star.
-# A one second delay is inserted to make this more useful when running
-# open loop.
 #
 proc ptkHighlightStar { star } {
     ptkClearHighlights
     ptkHighlight $star
-    update
 }
 
 #######################################################################
@@ -462,8 +460,10 @@ proc ptkPrintStarName { star } {
 #######################################################################
 # Procedure to delete a control window
 #
-proc ptkRunControlDel { name window octHandle defNumIter} {
+proc ptkRunControlDel { name octHandle defNumIter } {
     global ptkDebug ptkOctHandles ptkRunEventLoop ptkRunFlag ptkScriptOn
+
+    set ctrlPanel .run_$octHandle
 
     if {![info exists ptkRunFlag($name)]} {
 	# Assume the window has been deleted already and ignore command
@@ -482,11 +482,10 @@ proc ptkRunControlDel { name window octHandle defNumIter} {
 
     if [regexp {^ACTIVE$|^PAUSED$} $ptkRunFlag($name)] {
 	ptkAbort $name 
-	update
     }
     if [regexp {^STOP_PENDING$|^ABORT$} $ptkRunFlag($name)] {
 	# If the universe hasn't stopped already, try again later
-	after 200 ptkRunControlDel $name $window $octHandle $defNumIter
+	after 200 ptkRunControlDel $name $octHandle $defNumIter
 	return
     }
     catch {unset ptkDebug($name)}
@@ -495,11 +494,25 @@ proc ptkRunControlDel { name window octHandle defNumIter} {
     catch {unset ptkRunFlag($name)}
     catch {unset ptkScriptOn($name)}
     # update the oct facet only if the number of iterations has changed.
-    if {$defNumIter != [$window.iter.entry get]} {
-         ptkSetRunLength $octHandle [$window.iter.entry get]
+    if {$defNumIter != [$ctrlPanel.iter.entry get]} {
+         ptkSetRunLength $octHandle [$ctrlPanel.iter.entry get]
     }
+
+    # The global variable ptkControlPanel is the control panel
+    # for the currently running universe.  It is possible that
+    # another universe is currently running.  Since some tcltk
+    # stars' destructors use the variable ptkControlPanel, we
+    # temporatily set ptkControlPanel to the control panel of
+    # the universe to be deleted so that the destructors can work
+    # correctly.  After deleting the universe, we restore 
+    # ptkControlPanel to its old value.
+    global ptkControlPanel
+    set oldCtrlPanel $ptkControlPanel
+    set ptkControlPanel $ctrlPanel
     deluniverse $name
-    catch {destroy $window}
+    set ptkControlPanel $oldCtrlPanel
+
+    catch {destroy $ctrlPanel}
 }
 
 #######################################################################
