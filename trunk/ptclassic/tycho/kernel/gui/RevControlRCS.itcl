@@ -135,7 +135,7 @@ body ::tycho::RevControlRCS::checkIn {} {
         error "The file \"$basefile\" is not checked out."
     }
     cdDir $dir
-    set comment [$this getComments]
+    set comment [getComments]
     if {$comment == ""} {
 	# cancelled
 	return
@@ -326,7 +326,7 @@ body ::tycho::RevControlRCS::viewHistory {} {
 	parseHistory $history [$itk_component(history) textWinName]
 
 	# Delay or the focus command is ignored.  Tk bug?
-	after 500 "focus [$itk_component(history) textWinName]"
+	after 500 [code "focus [$itk_component(history) textWinName]"]
 
 	cd $olddir
     }
@@ -358,7 +358,8 @@ body ::tycho::RevControlRCS::isUnderRevControl {file} {
 # Open a dialog box to query the user for comments.
 # 
 body ::tycho::RevControlRCS::getComments {} {
-    set list [DialogWindow::newModal EntryQuery [autoName .getcomment] \
+    set list [::tycho::DialogWindow::newModal EntryQuery \
+	    [::tycho::autoName .getcomment] \
 	    -queries {{body {Comment:} {} 5}}  \
 	    -entrywidth 60]
     set comments [lindex [lindex $list 0] 1]

@@ -175,7 +175,7 @@ body ::tycho::RevControl::checkIn {} {
 	error "Revision control: no file specified"
     }
     if [$object isModified] {
-	if [askuser "Save modifications before checking in?"] {
+	if [::tycho::askuser "Save modifications before checking in?"] {
 	    $object save 
 	}
     }
@@ -200,7 +200,8 @@ body ::tycho::RevControl::unedit {} {
     if {$file == {}} {
 	error "Revision control: no file specified"
     }
-    if [askuser "Are you sure you want to discard your changes (if any)?"] {
+    if [::tycho::askuser \
+	    "Are you sure you want to discard your changes (if any)?"] {
 	enableButton checkout
     } {
 	error "Unedit cancelled"
@@ -245,7 +246,7 @@ body ::tycho::RevControl::setup {editorWin editorObj} {
     # Step through possible revision control systems and determine
     # whether they control the file.
     foreach type $pref {
-	if [RevControl$type::isUnderRevControl $currentFile] {
+	if [::tycho::RevControl$type::isUnderRevControl $currentFile] {
 	    set revclass "$type"
 	    break
 	}
@@ -261,15 +262,15 @@ body ::tycho::RevControl::setup {editorWin editorObj} {
 	set default {}
 	foreach type $pref {
 	    $dlg addButton $type -text "Yes ($type)" -command \
-		    "::tycho::RevControl::makeRev $type $editorWin $editorObj; \
-		    destroy $dlg"
+		    [code "::tycho::RevControl::makeRev $type $editorWin \
+		    $editorObj; delete object $dlg"]
 	    if {$default == {}} {
 		$dlg default $type
 		set default $type
 	    }
 	}
-	$dlg addButton no -text "No <Esc>" -command "destroy $dlg"
-	bind $dlg <Escape> "destroy $dlg"
+	$dlg addButton no -text "No <Esc>" -command [code "delete object $dlg"]
+	bind $dlg <Escape> [code "delete object $dlg"]
 	$dlg centerOnScreen
     } else {
 	::tycho::RevControl::makeRev $revclass $editorWin $editorObj

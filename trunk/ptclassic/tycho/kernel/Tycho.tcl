@@ -38,9 +38,9 @@ wm withdraw .
 # is set, try to find a user named ptolemy.  If all this fails, issue
 # an error message.
 #
-global env tk_library tk_version
-global ptolemy PTOLEMY
-global tycho TYCHO
+global ::env ::tk_library ::tk_version
+global ::ptolemy ::PTOLEMY
+global ::tycho ::TYCHO
 
 if [info exist env(TYCHO)] {
     set tycho $env(TYCHO)
@@ -82,16 +82,16 @@ if {![info exists ptolemy]} {
     set PTOLEMY $ptolemy
 }
 
-global tychokernel
+global ::tychokernel
 set tychokernel $tycho/kernel
 
-global tycholib
+global ::tycholib
 set tycholib $tycho/lib
 
-global tychoslate
+global ::tychoslate
 set tychoslate $tycho/slate
 
-global tychoeditors
+global ::tychoeditors
 set tychoeditors $tycho/editors
 
 # Check to see whether the usual exit mechanism (where we exit
@@ -168,7 +168,7 @@ if {[info exists argv]} {
 	    set tychoConsoleWindow 0
 	} else {
 	    set tychoOpenFiles 1
-	    File::openContext $file
+	    ::tycho::File::openContext $file
 	}
     }
 }
