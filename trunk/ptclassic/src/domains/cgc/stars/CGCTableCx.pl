@@ -38,6 +38,9 @@ limitation of liability, and disclaimer of warranty provisions.
 		default { YES }
 		desc { "If YES, check range of index at runtime, else omit"}
 	}
+	initCode {
+		addInclude("<stdio.h>");
+	}
 	go {
 		addCode(readIdx);
 		if (runTimeCheck) addCode(check);

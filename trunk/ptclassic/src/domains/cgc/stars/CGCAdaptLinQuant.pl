@@ -51,6 +51,9 @@ as a non-negative integer between 0 and 2^<i>bits</i> - 1, inclusive.
 		type {int}
 		default { "8" }
 	}
+	initCode {
+		addInclude("<stdio.h>");
+	}
 	go {
 		addCode(adaptlinquant);
 	}

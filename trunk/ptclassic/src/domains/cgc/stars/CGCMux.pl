@@ -69,6 +69,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	    default:
 		fprintf(stderr, "invalid control input %d", n);
 	}
+	initCode {
+		addInclude("<stdio.h>");
+	}
 	go {
 		addCode(init);
 		addCode(switchStatement);
