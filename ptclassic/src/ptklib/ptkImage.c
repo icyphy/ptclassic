@@ -51,23 +51,28 @@ The global variables tkPtimageImageType and tkPtImgFmtPPM are
 defined below, and are also declared in ptkImage.h.
  */
 
-#include <unistd.h>
-#include <math.h>
-#include <ctype.h>
-#include <string.h>
-#include <stdlib.h>
-#include "sol2compat.h"         /* define boolean */
-#include "compat.h"             /* define architecture settings */
-#include "err.h"
+/* ANSI C Standard Include Files */
+#include <ctype.h>		/* define isspace */
+#include <string.h>		/* define strncmp */
+#include <stdio.h>		/* define fseek and _filbuf */
+#include <limits.h>		/* define number of bits per byte CHAR_BIT */
+#include <stdlib.h>		/* define malloc and free on some machines */
+
+/* Ptolemy include files */
+#include "sol2compat.h"		/* define boolean */
+#include "compat.h"		/* define architecture settings like SUN4 */
+
+/* Non-ANSI C Standard Include Files */
+#include <unistd.h>		/* define SEEK_SET */
+
+#ifdef SUN4
+#include <memory.h>		/* define memset */
+extern int fseek ARGS((FILE *, long, int));
+extern int strncasecmp ARGS((const char *, const char *, size_t));
+#endif
 
 /* We must include ptkImage.h last because it pulls in ptk.h.  See ptk.h. */
 #include "ptkImage.h"
-
-/* FIXME: Define the number of bits per byte */
-/* NBBY defined in <sys/param.h> for Solaris/HP and <sys/types.h> for Sun OS */
-#ifndef NBBY
-#define NBBY 8
-#endif
 
 #if (TK_MAJOR_VERSION == 4 && TK_MINOR_VERSION >= 1) || TK_MAJOR_VERSION > 4
 
@@ -96,11 +101,14 @@ extern void		Tk_PreserveColormap _ANSI_ARGS_((Display *display,
 #define UCHAR(c)	(c)
 #endif
 
-/* panic is a function in Tcl/Tk we redefine to use pigilib error reporting */
-/* FIXME: we can't use ErrAdd here, since it is only defined in pigilib
- * and not in tycho, so instead we just print
+/*
+ * panic is a function in Tcl/Tk we redefine to use pigilib error reporting.
+ * 
+ * #define panic(msg)	ErrAdd(msg)
+ * 
+ * FIXME: we can't use ErrAdd here, since it is only defined in pigilib
+ * and not in tycho, so instead we just print an error message.
  */
-/*#define panic(msg)	ErrAdd(msg)*/
 #define panic(msg)	fprintf(stderr,"%s",msg)
 
 /*
@@ -889,7 +897,7 @@ ImgPtimageConfigureInstance(instancePtr)
 		    char c[sizeof(int)];
 		} kludge;
 
-		imagePtr->bitmap_unit = sizeof(pixel) * NBBY;
+		imagePtr->bitmap_unit = sizeof(pixel) * CHAR_BIT;
 		kludge.i = 0;
 		kludge.c[0] = 1;
 		imagePtr->byte_order = (kludge.i == 1) ? LSBFirst : MSBFirst;
@@ -935,7 +943,7 @@ UpdatePixmap(instancePtr)
     imW = width + nullCount; 
 
     ximage = instancePtr->imagePtr;
-    imdata = ximage->data;
+    imdata = (byte *) ximage->data;
 
     colorPtr = instancePtr->colorTablePtr;
     picptr = instancePtr->masterPtr->newPix8;
@@ -1486,10 +1494,11 @@ AllocateColors(colorPtr)
     PtimageMaster *masterPtr;
     double igam;
 
-    /* 16-bit intensity value for i/n of full intensity. */
-#   define CFRAC(i, n)	((i) * 65535 / (n))
-    /* As for CFRAC, but apply exponent of g. */
-#   define CGFRAC(i, n, g)	((int)(65535 * pow((double)(i) / (n), (g))))
+/* 16-bit intensity value for i/n of full intensity. */
+#define CFRAC(i, n)	((i) * 65535 / (n))
+
+/* As for CFRAC, but apply exponent of g. */
+#define CGFRAC(i, n, g)	((int)(65535 * pow((double)(i) / (n), (g))))
 
     display   = colorPtr->id.display;
     colormap  = colorPtr->id.colormap;
@@ -1507,13 +1516,16 @@ AllocateColors(colorPtr)
     else {
 
       /* PseudoColor, StaticColor, GrayScale or StaticGray visual:
-       * we have to allocate each color in the color cube separately.  */
+       * we have to allocate each color in the color cube separately.
+       */
 
       /* My stuff goes here. It is essentially my allocROColors() for the
-       * stand-alone display test program */  
+       * stand-alone display test program
+       */  
 
       unsigned long *xPixVals;
       unsigned long *freeColors;
+
       int nFreeColors = 0;
       int *FC2PColor;
       byte *rMap, *gMap, *bMap;
@@ -1561,6 +1573,7 @@ AllocateColors(colorPtr)
           failed[i] = 1;
 
       for (i = 0; i < masterPtr->numColors && unique < maxColors; i++) {
+
           c = masterPtr->allocOrder[i];
           defs[c].red   = rMap[c]<<8;
           defs[c].green = gMap[c]<<8;
@@ -1569,11 +1582,13 @@ AllocateColors(colorPtr)
           defs[c].flags = DoRed | DoGreen | DoBlue;
 
           if (XAllocColor(display, colormap, &defs[c])) {
-             unsigned long pixel, *fcptr;
+	     unsigned long pixel, *fcptr;
 
              pixel = xPixVals[c] = defs[c].pixel;
-                       /* xPixVals[], maps the pic's original pixel values to
-                        * to X pixel values                                 */
+
+             /* xPixVals[], maps the pic's original pixel values to
+              * to X pixel values
+	      */
              failed[c] = 0;
 
              /* See if the newly allocated color is new and different */
