@@ -444,7 +444,7 @@ int CGMultiTarget :: allReceiveWormData() {
     int status = MultiTarget::schedulerSetup();
 
     if (int(displaySchedulerStats)) {
-	double schedulingTime =  schedulingTimer.elapsedTime();
+	double schedulingTime =  schedulingTimer.elapsedCPUTime();
 
 	StringList message;
 
