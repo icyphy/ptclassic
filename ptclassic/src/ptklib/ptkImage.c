@@ -74,6 +74,14 @@ extern int strncasecmp ARGS((const char *, const char *, size_t));
 /* We must include ptkImage.h last because it pulls in ptk.h.  See ptk.h. */
 #include "ptkImage.h"
 
+#ifndef TRUE
+#define TRUE 1
+#endif
+
+#ifndef FALSE
+#define FALSE 0
+#endif
+
 #if (TK_MAJOR_VERSION == 4 && TK_MINOR_VERSION >= 1) || TK_MAJOR_VERSION > 4
 
 /* From Tk's generic/tkInt.h */
@@ -1484,163 +1492,146 @@ FreeColorTable(colorPtr)
  *----------------------------------------------------------------------
  */
 
+/* Supporting routine for AllocateColors */
 static void
-AllocateColors(colorPtr)
+MeiAllocateColors(colorPtr)
     ColorTable *colorPtr;	/* Pointer to the color table requiring
 				 * colors to be allocated. */
 {
     Display *display;
     Colormap colormap;
     PtimageMaster *masterPtr;
-    double igam;
 
-/* 16-bit intensity value for i/n of full intensity. */
-#define CFRAC(i, n)	((i) * 65535 / (n))
+    unsigned long *xPixVals;
+    unsigned long *freeColors;
+    int nFreeColors = 0;
+    int *FC2PColor;
 
-/* As for CFRAC, but apply exponent of g. */
-#define CGFRAC(i, n, g)	((int)(65535 * pow((double)(i) / (n), (g))))
+    byte *rMap, *gMap, *bMap;
+    XColor   defs[256], xcolorTab[256];
+    int      failed[256];
+    int      i, j, c;
+
+    int maxColors = 256;  
+    int unique = 0; /* # of different colors that get allocated successfully */
+    int dispCells = 256; /* # of cells in default colormap of screen  */
+    unsigned int length = 256; 
 
     display   = colorPtr->id.display;
     colormap  = colorPtr->id.colormap;
     masterPtr = colorPtr->id.masterPtr;
-    igam = 1.0 / masterPtr->gamma;
 
-    /* Calculate the RGB coordinates of the colors we want to
-     * allocate and store them in *colors.  */
+    /* PseudoColor, StaticColor, GrayScale or StaticGray visual:
+     * we have to allocate each color in the color cube separately.
+     */
 
-    if ((colorPtr->visualInfo.class == DirectColor)
-	    || (colorPtr->visualInfo.class == TrueColor)) {
-        /* Direct/True Color: allocate shades of red, green, blue
-	 * independently.  */
+    xPixVals = (unsigned long *) ckalloc(length * sizeof(unsigned long));
+    if (!xPixVals) panic("Could not alloc xPixVals in AllocateColors.");
+
+    freeColors = (unsigned long *) ckalloc(length * sizeof(unsigned long));
+    if (!freeColors) panic("Could not alloc freeColors in AllocateColors.");
+
+    FC2PColor = (int *) ckalloc(length * sizeof(int));
+    if (!FC2PColor) panic("Could not alloc FC2PColor in AllocateColors.");
+
+    colorPtr->xPixVals = xPixVals;
+    colorPtr->freeColors = freeColors;
+    colorPtr->FC2PColor = FC2PColor;
+    rMap = colorPtr->id.masterPtr->rMap;
+    gMap = colorPtr->id.masterPtr->gMap;
+    bMap = colorPtr->id.masterPtr->bMap;
+
+    /* FIRST PASS COLOR ALLOCATION:
+     * for each color in the 'desired colormap', try to get it via
+     * XAllocColor().  If for any reason it fails, mark that pixel
+     * 'unallocated' and worry about it later.  Repeat.
+     */
+
+    /* attempt to allocate first 'maxColors' (256 for PseudoColor) entries
+     * in the post-compress desired colormap note: On displays with less
+     * than 8 bits per RGB gun, it's quite possible that different colors
+     * in the original picture will be mapped to the same color on the screen.
+     * X does this for you silently.  However, this is not-desirable for
+     * this application, because when I say 'allocate me 32 colors' I want
+     * it to allocate 32 different colors, not 32 instances of the same 4
+     * shades...
+     */
+
+    for (i = 0; i < 256; i++) {
+        failed[i] = 1;
     }
-    else {
 
-      /* PseudoColor, StaticColor, GrayScale or StaticGray visual:
-       * we have to allocate each color in the color cube separately.
-       */
+    for (i = 0; i < masterPtr->numColors && unique < maxColors; i++) {
+        c = masterPtr->allocOrder[i];
+        defs[c].red   = rMap[c] << 8;
+        defs[c].green = gMap[c] << 8;
+        defs[c].blue  = bMap[c] << 8;
 
-      /* My stuff goes here. It is essentially my allocROColors() for the
-       * stand-alone display test program
-       */  
+        defs[c].flags = DoRed | DoGreen | DoBlue;
 
-      unsigned long *xPixVals;
-      unsigned long *freeColors;
+        if (XAllocColor(display, colormap, &defs[c])) {
+	    unsigned long lpixel, *fcptr;
 
-      int nFreeColors = 0;
-      int *FC2PColor;
-      byte *rMap, *gMap, *bMap;
-      XColor   defs[256], xcolorTab[256];
-      int      failed[256];
-      int      i, j, c, maxColors = 256;  
+            lpixel = xPixVals[c] = defs[c].pixel;
 
-      int unique = 0;/* # of different colors that get allocated successfully*/
+            /* xPixVals[], maps the pic's original pixel values to
+             * to X pixel values
+	     */
+            failed[c] = 0;
 
-      int dispCells = 256; /* # of cells in default colormap of screen  */
+            /* See if the newly allocated color is new and different */
+            for (j = 0, fcptr = freeColors; j < nFreeColors && *fcptr != lpixel;
+                j++, fcptr++);
+            if (j == nFreeColors) unique++;
 
-      unsigned int length = 256; 
+            FC2PColor[nFreeColors] = c;
+            freeColors[nFreeColors++] = lpixel;
+        }
+        else {			/* The allocation failed. */
+            failed[c] = 1;	/* Just make sure */
+        }
+    }  /* FIRST PASS */
 
-      xPixVals = (unsigned long *) ckalloc(length * sizeof(unsigned long));
-      if (!xPixVals) panic("Could not alloc xPixVals in AllocateColors.");
-
-      freeColors = (unsigned long *) ckalloc(length * sizeof(unsigned long));
-      if (!freeColors) panic("Could not alloc freeColors in AllocateColors.");
-
-      FC2PColor = (int *) ckalloc(length * sizeof(int));
-      if (!FC2PColor) panic("Could not alloc FC2PColor in AllocateColors.");
-
-      colorPtr->xPixVals = xPixVals;
-      colorPtr->freeColors = freeColors;
-      colorPtr->FC2PColor = FC2PColor;
-      rMap = colorPtr->id.masterPtr->rMap;
-      gMap = colorPtr->id.masterPtr->gMap;
-      bMap = colorPtr->id.masterPtr->bMap;
-
-      /* FIRST PASS COLOR ALLOCATION:
-       * for each color in the 'desired colormap', try to get it via
-       * XAllocColor().  If for any reason it fails, mark that pixel
-       * 'unallocated' and worry about it later.  Repeat.                    */
-
-      /* attempt to allocate first 'maxColors' (256 for PseudoColor) entries
-       * in the post-compress desired colormap note: On displays with less
-       * than 8 bits per RGB gun, it's quite possible that different colors
-       * in the original picture will be mapped to the same color on the screen.
-       * X does this for you silently.  However, this is not-desirable for
-       * this application, because when I say 'allocate me 32 colors' I want
-       * it to allocate 32 different colors, not 32 instances of the same 4
-       * shades...                                                           */
-
-      for (i = 0; i < 256; i++)
-          failed[i] = 1;
-
-      for (i = 0; i < masterPtr->numColors && unique < maxColors; i++) {
-
-          c = masterPtr->allocOrder[i];
-          defs[c].red   = rMap[c]<<8;
-          defs[c].green = gMap[c]<<8;
-          defs[c].blue  = bMap[c]<<8;
-
-          defs[c].flags = DoRed | DoGreen | DoBlue;
-
-          if (XAllocColor(display, colormap, &defs[c])) {
-	     unsigned long pixel, *fcptr;
-
-             pixel = xPixVals[c] = defs[c].pixel;
-
-             /* xPixVals[], maps the pic's original pixel values to
-              * to X pixel values
-	      */
-             failed[c] = 0;
-
-             /* See if the newly allocated color is new and different */
-             for (j = 0, fcptr = freeColors; j < nFreeColors && *fcptr != pixel;
-                     j++, fcptr++);
-             if (j == nFreeColors) unique++;
-
-             FC2PColor[nFreeColors] = c;
-             freeColors[nFreeColors++] = pixel;
-          }
-          else {
-               /* The allocation failed. */
-               failed[c] = 1;    /* Just make sure */
-          }
-      }  /* FIRST PASS */
-
-      if (nFreeColors == masterPtr->numColors) {
+    if (nFreeColors == masterPtr->numColors) {
          /* Got all desired colors in the first pass. Great, return */
 	 goto nextstep;
-      }
+    }
 
-      /* SECOND PASS COLOR ALLOCATION:
-       * Allocating 'exact' colors failed.  Now try to allocate 'closest'
-       * colors.
+    /* SECOND PASS COLOR ALLOCATION:
+     * Allocating 'exact' colors failed.  Now try to allocate 'closest'
+     * colors.
 
-       * Read entire X colormap (or first 256 entries) in from display.
-       * for each unallocated pixel, find the closest color that actually
-       * is in the X colormap.  Try to allocate that color (read only).
-       * If that fails, the THIRD PASS will deal with it.               */
+     * Read entire X colormap (or first 256 entries) in from display.
+     * for each unallocated pixel, find the closest color that actually
+     * is in the X colormap.  Try to allocate that color (read only).
+     * If that fails, the THIRD PASS will deal with it.
+     */
 
-      /* Read entire colormap (or first 256 entries) into 'xcolorTab' */
+    /* Read entire colormap (or first 256 entries) into 'xcolorTab' */
 
-      if (dispCells > 0) {
-                   /* only do SECOND PASS if there IS a colormap to read */
+    if (dispCells > 0) {
+        /* only do SECOND PASS if there IS a colormap to read */
 
-         for (i = 0; i < dispCells; i++)
-             xcolorTab[i].pixel = (unsigned long) i;
-         XQueryColors(display, colormap, xcolorTab, dispCells) ;
+        for (i = 0; i < dispCells; i++) {
+            xcolorTab[i].pixel = (unsigned long) i;
+	}
+        XQueryColors(display, colormap, xcolorTab, dispCells) ;
 
-         for (i = 0; i < masterPtr->numColors && unique < maxColors; i++) {
-             c = masterPtr->allocOrder[i];
+        for (i = 0; i < masterPtr->numColors && unique < maxColors; i++) {
+            c = masterPtr->allocOrder[i];
 
-             if (failed[c]) {  /* An unallocated pixel */
-                int dist, mindist, close;
-                int rdist, gdist, bdist;
-                int ri, gi, bi;           /* corresponding to "i" loop */
+            if (failed[c]) {  /* An unallocated pixel */
+		int dist, mindist, close;
+		int rdist, gdist, bdist;
+		int ri, gi, bi;           /* corresponding to "i" loop */
 
-                mindist = 200000;   close = -1;
-                ri = rMap[c];  gi = gMap[c];  bi = bMap[c];
+                mindist = 200000;
+		close = -1;
+                ri = rMap[c];
+		gi = gMap[c];
+		bi = bMap[c];
 
                 for (j = 0; j < dispCells; j++) {
-
                     rdist = ri - (xcolorTab[j].red  >>8);
                     gdist = gi - (xcolorTab[j].green>>8);
                     bdist = bi - (xcolorTab[j].blue >>8);
@@ -1655,80 +1646,96 @@ AllocateColors(colorPtr)
 
                 if (close < 0) panic("This Can't Happen!");
                 if (XAllocColor(display, colormap, &xcolorTab[close])) {
-                   safeBcopy((char *) &xcolorTab[close], (char *) &defs[c],
-                                 sizeof(XColor));
-                   failed[c]= 0;
-                   xPixVals[c]  = xcolorTab[close].pixel;
-                   FC2PColor[nFreeColors] = c;
-                   freeColors[nFreeColors++] = xPixVals[c];
-                   unique++;
+                    safeBcopy((char *) &xcolorTab[close], (char *) &defs[c],
+                              sizeof(XColor));
+                    failed[c]= 0;
+                    xPixVals[c]  = xcolorTab[close].pixel;
+                    FC2PColor[nFreeColors] = c;
+                    freeColors[nFreeColors++] = xPixVals[c];
+                    unique++;
                 }
-             }
-         }
-      } /* SECOND PASS */
+            }
+        }
+    } /* SECOND PASS */
 
-      /* THIRD PASS COLOR ALLOCATION:
-       * We've alloc'ed all the colors we can.  Now, we have to map any
-       * remaining unalloced pixels into the colors found in the entire
-       * X colormap */
-
-      for (i = 0; i < masterPtr->numColors; i++) {
-          c = masterPtr->allocOrder[i];
-
-          if (failed[c]) {  /* An unallocated pixel */
-             int dist, mindist, close;
-             int rdist, gdist, bdist;
-             int ri, gi, bi;               /* Corresponding to the "i" - loop */
-
-             mindist = 200000;   close = -1;
-             ri = rMap[c];  gi = gMap[c];  bi = bMap[c];
-
-             /* search the the entire X colormap */
-             for (j = 0; j < dispCells; j++) {
-
-                 rdist = ri -(xcolorTab[j].red  >>8);
-                 gdist = gi -(xcolorTab[j].green>>8);
-                 bdist = bi -(xcolorTab[j].blue >>8);
-
-                 dist = rdist * rdist + gdist * gdist + bdist * bdist;
-
-                 if (dist < mindist) {
-                    mindist = dist;
-                    close = j;
-                 }
-             }
-
-             if (close < 0) panic("Pass3: Failed to alloc ANY colors!");
-             safeBcopy((char *) &xcolorTab[close], (char *) &defs[c],
-                          sizeof(XColor));
-             failed[c]= 0;
-             xPixVals[c]  = defs[c].pixel;
-          }
-      } /* THIRD PASS */
-
-      nextstep:
-
-      colorPtr->nFreeColors = nFreeColors;
-      
-    } /* end of this LONG 'else' */
-
-    /* For simplicity, let me assume it is a color display */
-    colorPtr->flags |= COLOR_WINDOW;
-
-    /* The following is a hairy hack.  We only want to index into
-     * the pixelMap on colormap displays.  However, if the display
-     * is on Windows, then we actually want to store the index not
-     * the value since we will be passing the color table into the
-     * TkPutImage call.
+    /* THIRD PASS COLOR ALLOCATION:
+     * We've alloc'ed all the colors we can.  Now, we have to map any
+     * remaining unalloced pixels into the colors found in the entire
+     * X colormap
      */
 
-    if ((colorPtr->visualInfo.class != DirectColor)
-                && (colorPtr->visualInfo.class != TrueColor)) {
+    for (i = 0; i < masterPtr->numColors; i++) {
+        c = masterPtr->allocOrder[i];
+
+        if (failed[c]) {		/* An unallocated pixel */
+	    int dist, mindist, close;
+	    int rdist, gdist, bdist;
+	    int ri, gi, bi;           /* corresponding to "i" loop */
+
+            mindist = 200000;
+	    close = -1;
+            ri = rMap[c];
+	    gi = gMap[c];
+	    bi = bMap[c];
+
+            /* search the the entire X colormap */
+            for (j = 0; j < dispCells; j++) {
+                rdist = ri -(xcolorTab[j].red  >>8);
+                gdist = gi -(xcolorTab[j].green>>8);
+                bdist = bi -(xcolorTab[j].blue >>8);
+
+                dist = rdist * rdist + gdist * gdist + bdist * bdist;
+
+                if (dist < mindist) {
+                    mindist = dist;
+                    close = j;
+                }
+            }
+
+            if (close < 0) panic("Pass3: Failed to alloc ANY colors!");
+            safeBcopy((char *) &xcolorTab[close], (char *) &defs[c],
+                      sizeof(XColor));
+            failed[c]= 0;
+            xPixVals[c]  = defs[c].pixel;
+         }
+    } /* THIRD PASS */
+
+nextstep:
+    colorPtr->nFreeColors = nFreeColors;
+}
+
+static void
+AllocateColors(colorPtr)
+    ColorTable *colorPtr;	/* Pointer to the color table requiring
+				 * colors to be allocated. */
+{
+    /* Calculate the RGB coordinates of the colors we want to
+     * allocate and store them in *colors.
+     */
+    if ((colorPtr->visualInfo.class == DirectColor)
+	    || (colorPtr->visualInfo.class == TrueColor)) {
+	/* Direct/True Color: allocate shades of red, green, blue independently
+	 */
+    }
+    else {
+        /* My stuff goes here. It is essentially my allocROColors() for the
+         * stand-alone display test program
+         */  
+	MeiAllocateColors(colorPtr);
+
+	/* The following is a hairy hack.  We only want to index into
+	 * the pixelMap on colormap displays.  However, if the display
+	 * is on Windows, then we actually want to store the index not
+	 * the value since we will be passing the color table into the
+	 * TkPutImage call.
+	 */
 #ifndef _Windows
-            colorPtr->flags |= MAP_COLORS;
+	colorPtr->flags |= MAP_COLORS;
 #endif /* _Windows */
     }
 
+    /* FIXME: For simplicity, let's assume it is a color display */
+    colorPtr->flags |= COLOR_WINDOW;
 }
 
 /*
@@ -2796,7 +2803,7 @@ int width, height, maxcols;
      has found into a colormap, and changing instances of a color in pic24
      into colormap indices in pic8 */
 
-  unsigned long xpixels[256], pixel;
+  unsigned long xpixels[256], lpixel;
   int           i, nc, low, high, mid;
   byte         *picptr, *pixelptr;
 
@@ -2804,18 +2811,18 @@ int width, height, maxcols;
   nc = 0;  mid = 0;
 
   for (i = width * height, picptr = pic24; i; i--) {
-      pixel  = (((unsigned long) *picptr++) << 16);
-      pixel += (((unsigned long) *picptr++) << 8);
-      pixel += *picptr++;
+      lpixel  = (((unsigned long) *picptr++) << 16);
+      lpixel += (((unsigned long) *picptr++) << 8);
+      lpixel += *picptr++;
 
       /* Binary search the 'xpixels' array to see if it's in there */
       low = 0; high = nc - 1;
 
       while (low <= high) {
             mid = (low + high) / 2;
-            if (pixel < xpixels[mid])
+            if (lpixel < xpixels[mid])
                high = mid - 1;
-            else if (pixel > xpixels[mid])
+            else if (lpixel > xpixels[mid])
                     low  = mid + 1;
             else break;
       }
@@ -2825,7 +2832,7 @@ int width, height, maxcols;
             return 0;
          safeBcopy((char *) &xpixels[low], (char *) &xpixels[low +1],
                            (nc - low) * sizeof(unsigned long));
-         xpixels[low] = pixel;
+         xpixels[low] = lpixel;
          nc++;
       }
   }
@@ -2834,17 +2841,17 @@ int width, height, maxcols;
      pic24 into colormap offsets into 'xpixels' */
 
   for (i = width*height, picptr = pic24, pixelptr = pic8; i; i--, pixelptr++) {
-      pixel  = (((unsigned long) *picptr++) << 16);
-      pixel += (((unsigned long) *picptr++) << 8);
-      pixel +=  *picptr++;
+      lpixel  = (((unsigned long) *picptr++) << 16);
+      lpixel += (((unsigned long) *picptr++) << 8);
+      lpixel +=  *picptr++;
 
       /* Binary search the 'xpixels' array.  It *is* in there */
       low = 0;  high = nc - 1;
       while (low <= high) {
             mid = (low + high) / 2;
-            if (pixel < xpixels[mid])
+            if (lpixel < xpixels[mid])
                high = mid - 1;
-            else if (pixel > xpixels[mid])
+            else if (lpixel > xpixels[mid])
                     low  = mid + 1;
             else break;
       }
@@ -2934,25 +2941,22 @@ static int on_odd_row;	/* flag to remember which row we are on */
 static JSAMPROW colormap[3];	/* selected colormap */
 static int num_colors;	/* number of selected colors */
 
-
-static void   fill_histogram (byte *, int);
-static boxptr find_biggest_color_pop (boxptr, int);
-static boxptr find_biggest_volume (boxptr, int);
-static void   update_box (boxptr);
-static int    median_cut (boxptr, int, int);
-static void   compute_color (boxptr, int);
-static void   select_colors (int);
-static int    find_nearby_colors (int, int, int, JSAMPLE[]);
-static void   find_best_colors (int,int,int,int, JSAMPLE[], JSAMPLE[]);
-static void   fill_inverse_cmap (int, int, int);
-static void   map_pixels (byte *, int, int, byte *);
-static void   init_error_limit (void);
-
-#define TRUE   1
-#define FALSE  0
+static void   fill_histogram _ANSI_ARGS_((byte *, int));
+static boxptr find_biggest_color_pop _ANSI_ARGS_((boxptr, int));
+static boxptr find_biggest_volume _ANSI_ARGS_((boxptr, int));
+static void   update_box _ANSI_ARGS_((boxptr));
+static int    median_cut _ANSI_ARGS_((boxptr, int, int));
+static void   compute_color _ANSI_ARGS_((boxptr, int));
+static void   select_colors _ANSI_ARGS_((int));
+static int    find_nearby_colors _ANSI_ARGS_((int, int, int, JSAMPLE[]));
+static void   find_best_colors _ANSI_ARGS_((int, int, int,
+					   int, JSAMPLE[], JSAMPLE[]));
+static void   fill_inverse_cmap _ANSI_ARGS_((int, int, int));
+static void   map_pixels _ANSI_ARGS_((byte *, int, int, byte *));
+static void   init_error_limit _ANSI_ARGS_((void));
 
 /* RANGE forces a to be in the range b..c (inclusive) */
-#define RANGE(a,b,c) { if (a < b) a = b; if (a > c) a = c; }
+#define RANGE(a,b,c) { if ((a) < (b)) (a) = (b); if ((a) > (c)) (a) = (c); }
 
 /* Master control for heckbert() quantizer. */
 static int
@@ -3552,10 +3556,10 @@ map_pixels (pic24, width, height, pic8)
 byte *pic24, *pic8;
 int width, height;
 {
-  register LOCFSERROR cur0, cur1, cur2;	/* current error or pixel value */
+  LOCFSERROR cur0, cur1, cur2;	/* current error or pixel value */
   LOCFSERROR belowerr0, belowerr1, belowerr2; /* error for pixel below cur */
   LOCFSERROR bpreverr0, bpreverr1, bpreverr2; /* error for below/prev col */
-  register FSERRPTR errorptr;	/* => fserrors[] at column before current */
+  FSERRPTR errorptr;		/* => fserrors[] at column before current */
   JSAMPROW inptr;		/* => current input pixel */
   JSAMPROW outptr;		/* => current output pixel */
   histptr cachep;
