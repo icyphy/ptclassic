@@ -40,6 +40,7 @@ PL_SRCS=\
  VHDLBSer2Par.pl \
  VHDLBxx73.pl \
  VHDLBxx74.pl \
+ VHDLBAnd.pl \
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
