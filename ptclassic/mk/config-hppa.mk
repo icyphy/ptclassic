@@ -205,3 +205,6 @@ MATARCH = hp700
 # functions for pigiRpc, ptcl and tycho, we need to be sure that
 # libpigi, libptcl and libtycho are all static on the hppa.
 USE_CORE_STATIC_LIBS = 1
+
+# Build gthreads
+INCLUDE_GTHREADS =	yes
