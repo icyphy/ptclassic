@@ -340,32 +340,32 @@ StringList CompileTarget::tcltkInitialize(StringList& universeName) {
     myCode += universeName;
     myCode += "\", \"Pigi\");\n";
     myCode +=
-"if (Tcl_Init(ptkInterp) == TCL_ERROR) {\n\
-    cerr << \"Tcl_Init: Error initializing the Tcl interpreter\";\n\
-    exit(1);\n\
-}\n";
+"if (Tcl_Init(ptkInterp) == TCL_ERROR) {\n"
+"    cerr << \"Tcl_Init: Error initializing the Tcl interpreter\";\n"
+"    exit(1);\n"
+"}\n";
 
     myCode +=
-"\n\
-// Define halt and ptkStop Tcl commands, and initialize Tk\n\
-Tcl_CreateCommand(ptkInterp, \"halt\", halt_Cmd, 0, 0);\n\
-Tcl_CreateCommand(ptkInterp, \"ptkStop\", halt_Cmd, 0, 0);\n\
-if (Tk_Init(ptkInterp) == TCL_ERROR) {\n\
-    cerr << \"Tk_Init: Error initializing the Tk interpreter\";\n\
-    exit(1);\n\
-}";
+"\n"
+"// Define halt and ptkStop Tcl commands, and initialize Tk\n"
+"Tcl_CreateCommand(ptkInterp, \"halt\", halt_Cmd, 0, 0);\n"
+"Tcl_CreateCommand(ptkInterp, \"ptkStop\", halt_Cmd, 0, 0);\n"
+"if (Tk_Init(ptkInterp) == TCL_ERROR) {\n"
+"    cerr << \"Tk_Init: Error initializing the Tk interpreter\";\n"
+"    exit(1);\n"
+"}\n";
 
     myCode +=
-"\n\
-// Read pigi tcl initialization files to set key bindings, colors, etc.\n\
-const char *expandeddirname = expandPathName(\"$PTOLEMY/lib/tcl/pigilib.tcl\");\n\
-char *fulldirname = new char[strlen(expandeddirname) + 1];
-strcpy(fulldirname, expandeddirname);
-if (Tcl_EvalFile(ptkInterp, fulldirname) != TCL_OK) {\n\
-    cerr << \"Tcl_EvalFile: Error in evaluating $PTOLEMY/lib/tcl/pigilib.tcl\";\n\
-    exit(1);\n\
-}\n\
-delete [] fulldirname;\n";
+"\n"
+"// Read pigi tcl initialization files to set key bindings, colors, etc.\n"
+"const char *expandeddirname = expandPathName(\"$PTOLEMY/lib/tcl/pigilib.tcl\");\n"
+"char *fulldirname = new char[strlen(expandeddirname) + 1];\n"
+"strcpy(fulldirname, expandeddirname);\n"
+"if (Tcl_EvalFile(ptkInterp, fulldirname) != TCL_OK) {\n"
+"    cerr << \"Tcl_EvalFile: Error in evaluating $PTOLEMY/lib/tcl/pigilib.tcl\";\n"
+"    exit(1);\n"
+"}\n"
+"delete [] fulldirname;\n";
 
     myCode += "\n// Some Tcl/Tk stars use these ptcl commands.\n";
     myCode += "Tcl_Eval(ptkInterp, \"proc curuniverse {} { return ";
