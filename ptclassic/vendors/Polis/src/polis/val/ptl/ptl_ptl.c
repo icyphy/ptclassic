@@ -333,7 +333,7 @@ int compat, unittime;
   st_generator *gen;
   
   fprintf( fp, "  state {\n" );
-  fprintf( fp, "    name { priority }\n" );
+  fprintf( fp, "    name { Priority }\n" );
   fprintf( fp, "    type { int }\n" );
   fprintf( fp, "    default { 0 }\n" );
   fprintf( fp, "    desc { Priority: 0 -> lower }\n" );
@@ -365,27 +365,26 @@ int compat, unittime;
   fprintf( fp, "    desc { File to write overflow information }\n" );
   fprintf( fp, "    attributes { A_NONSETTABLE }\n" );
   fprintf( fp, "  }\n" );
-  /* if ( unittime ) { */
-    fprintf( fp, "  state {\n" );
-    fprintf( fp, "    name { Clock_freq }\n" );
-    fprintf( fp, "    type { float }\n" );
-    fprintf( fp, "    default{ Clock_freq }\n" );
-    fprintf( fp, "    desc { CPU Clock frequency }\n" );
-    fprintf( fp, "    attributes { A_NONSETTABLE }\n" );
-    fprintf( fp, "  }\n" );
-/*   }  */
+  fprintf( fp, "  state {\n" );
+  fprintf( fp, "    name { Clock_freq }\n" );
+  fprintf( fp, "    type { float }\n" );
+  fprintf( fp, "    default{ Clock_freq }\n" );
+  fprintf( fp, "    desc { CPU Clock frequency }\n" );
+  fprintf( fp, "    attributes { A_NONSETTABLE }\n" );
+  fprintf( fp, "  }\n" );
+
     
   /* Settable constants */
   local_vars = s2c_local_vars( node );
   st_foreach_item( local_vars, gen, (char **) &pvar, (char **) &var ) {
-    if ( net_var_type( pvar, USER_CONSTANT )) { 
-      fprintf( fp, "  state {\n" );
-      fprintf( fp, "    name { %s }\n", util_make_valid_name( pvar ) + 2 );
-      fprintf( fp, "    type { int }\n" );
-      fprintf( fp, "    default { \"%d\" }\n", net_var_const_value( pvar ));
-      fprintf( fp, "    desc { Settable constant }\n" );
-      fprintf( fp, "  }\n" );
-    }
+      if ( net_var_type( pvar, USER_CONSTANT )) { 
+          fprintf( fp, "  state {\n" );
+          fprintf( fp, "    name { %s }\n", util_make_valid_name( pvar ) + 2 );
+          fprintf( fp, "    type { int }\n" );
+          fprintf( fp, "    default { \"%d\" }\n", net_var_const_value( pvar ));
+          fprintf( fp, "    desc { Settable constant }\n" );
+          fprintf( fp, "  }\n" );
+      }
   }
 /*  st_free_table( local_vars ); */
 }
@@ -394,10 +393,10 @@ static void pl_print_constructor( fp, node )
 FILE *fp;
 net_node_t *node;
 {
-  fprintf( fp, "  constructor {\n    delayType = TRUE;\n" );
-  fprintf( fp, "    clkFreq = Clock_freq;\n" );
-  fprintf( fp, "    emittedEvents = new SequentialList(); \n" );
-  fprintf( fp, " }\n" );
+    fprintf( fp, "  constructor {\n    delayType = TRUE;\n" );
+    fprintf( fp, "    clkFreq = Clock_freq;\n" );
+    fprintf( fp, "    emittedEvents = new SequentialList(); \n" );
+    fprintf( fp, " }\n" );
 }
 
 static void pl_print_method( fp, node, autotick, unittime )
@@ -411,7 +410,9 @@ int autotick, unittime;
 
 
     /*
-    * Prepare to Emit function
+    * Method to emit events. It knows whether the evenet being emitted
+    * is the dummy event by means of a passed flag. If flag is set (!=0) then
+    * it is a dummy event.
     */
     fprintf( fp, "  method {\n" );
     fprintf( fp, "    name { emitEvent }\n" );
@@ -501,7 +502,6 @@ int autotick, unittime;
   model_name = net_node_name( net_node_model( node ));
 
   fprintf( fp, "  code {\n" );
-
   fprintf( fp, "#include \"swlib.c\"\n" );
   fprintf( fp, "#include \"uC_types.h\"\n\n" );
 
@@ -713,11 +713,11 @@ int autotick, unittime;
 	fprintf( fp, "    Tcl_SetResult( ptkInterp, (char *) value, " );
 	fprintf( fp, "TCL_VOLATILE );\n" );
 	fprintf( fp, "    return TCL_OK;\n" );
-    fprintf( fp, "}\n\n" );
+        fprintf( fp, "}\n\n" );
   }
   fprintf( fp, "#include \"%s.c\"\n", util_map_pathname( node_name ));
   fprintf( fp, "  }\n" );
-/*  st_free_table( local_vars ); */
+/*  st_free_table( local_vars );  FIXME : ???? */
 }
 
 static void pl_print_setup( fp, node, compat )
@@ -725,23 +725,12 @@ FILE *fp;
 net_node_t *node;
 int compat;
 {
-  fprintf( fp, "  setup {\n" );
-/*  if ( !compat ) {
-    fprintf( fp, "    strcpy( stemp, implem );\n" );
-    fprintf( fp, "    needResource = getImplem( stemp );\n" );
-  } else {
-*/
-/*    fprintf( fp, "    needResource = is_SW;\n" ); */
-/*  } */
-
+    fprintf( fp, "  setup {\n" );
     fprintf( fp, "    if (resource == NULL) needResource = 0;\n" );
     fprintf( fp, "    else needResource = 1;\n" );
-/*    fprintf( fp, "    needResource = is_SW;\n" );
-  fprintf( fp, "    if ( needResource < 2 ) {\n" ); */
-  fprintf( fp, "      resetStar();\n" );
-  fprintf( fp, "      Closeflow();\n" );
-/*  fprintf( fp, "    }\n" ); */
-  fprintf( fp, "  }\n" );
+    fprintf( fp, "      resetStar();\n" );
+    fprintf( fp, "      Closeflow();\n" );
+    fprintf( fp, "  }\n" );
 }
 
 static void pl_print_begin( fp, node, option, trace )
@@ -761,6 +750,13 @@ char *option;
   fprintf( fp, "    char stemp[ 256 ];\n" );
   fprintf( fp, "    InfString name;\n" );
   fprintf( fp, "    int saveimpl;\n\n" );
+
+  /* set variables which reflect Star parameters */
+  fprintf( fp, "    // set variables which reflect Star parameters /n");
+  fprintf( fp, "    priority = Priority;\n");
+  fprintf( fp, "    clkFreq = Clock_freq;\n"); 
+
+ 
   fprintf( fp, "    if ( needResource < 2 ) {\n" );
   fprintf( fp, "      %s%s_Star = this;\n", model_name, option );
 
@@ -768,15 +764,15 @@ char *option;
   fprintf( fp, "      /* State and output variables initialization */\n" );   
   local_vars = s2c_local_vars( node );
   st_foreach_item( local_vars, gen, (char **) &pvar, (char **) &var ) {
-    if ( net_var_type( var, ST )) {
-      assoc_var = net_var_assoc_var( var );
-      assert(assoc_var==NIL(net_var_t) || !net_var_type(assoc_var,EVENT));
-      n = net_var_number_init_values( var );
-      if ( n == 1 || !net_var_type( var, OUTPUT )) {
-        init = net_var_get_init_value( var, 0 );
-        fprintf( fp, "      %s = %d;\n", util_make_valid_name(pvar) + 2, init );
+      if ( net_var_type( var, ST )) {
+          assoc_var = net_var_assoc_var( var );
+          assert(assoc_var==NIL(net_var_t) || !net_var_type(assoc_var,EVENT));
+          n = net_var_number_init_values( var );
+          if ( n == 1 || !net_var_type( var, OUTPUT )) {
+              init = net_var_get_init_value( var, 0 );
+              fprintf( fp, "      %s = %d;\n", util_make_valid_name(pvar) + 2, init );
+          }
       }
-    }
   }
   foreach_net_node_trans_out( node, var ) {
     if ( net_var_type( var, VALUE ) && !net_var_assoc_var( var )) {
@@ -902,7 +898,7 @@ int autotick, unittime;
   char st[ 1024 ];
 
   if ( strlen( option ) > 0 && option[ 1 ] == 'F' ) {
-    firing = 1;
+      firing = 1;
   }
 
   node_name = net_node_name( node );
@@ -911,107 +907,70 @@ int autotick, unittime;
   fprintf( fp, "  go {\n" );
   
   /* Initialization */
-/*FIXME: */
-  if ( unittime ) {
-    fprintf( fp, ", ckfrq" );
-  }
   fprintf( fp, "    char stemp[ 1024 ];\n" );
   fprintf( fp, "    StringList name;\n" );
-/*FIXME: */
-/*  if ( unittime ) {
-    fprintf( fp, "    ckfrq = Clock_freq;\n" );
-    fprintf( fp, "    now = arrivalTime * ckfrq;\n" );
-  } else { */
   fprintf( fp, "    now = arrivalTime;\n" );
-
   fprintf( fp, "    name = Block::fullName();\n" );
-/*FIXME: */
-/*  if ( unittime ) {
-    fprintf( fp, "      frac = now - floor( now + 0.001 );\n" );
-    fprintf( fp, "      if ( frac > 0.99 ) frac -= 1.0;\n" );
-    fprintf( fp, "      if ( fabs( frac - 0 ) < 0.01 ) frac = 0.0;\n" );
-    fprintf( fp, "      else if ( fabs( frac - 0.3 ) < 0.1 ) frac = 0.3;\n" );
-    fprintf( fp, "      else if ( fabs( frac - 0.6 ) < 0.1 ) frac = 0.6;\n" );
-    fprintf( fp, "      else if ( fabs( frac - 0.9 ) < 0.1 ) frac = 0.9;\n" );
-  } else { 
-    fprintf( fp, "      frac = now - floor( now );\n" );
-  }*/
-  fprintf( fp, "      %s%s_Star = this;\n", model_name, option );
-  /*fprintf( fp, "      sens = 0;\n" ); */
+  fprintf( fp, "    %s%s_Star = this;\n", model_name, option );
   
   /* Check input variables and check for missed deadlines */
-  /*fprintf( fp, "      if ( frac == 0.0 ) {\n" );*/
   foreach_net_node_fanin( node, var ) {
-    if ( pvar = isInputEvent( var, node )) {
-      strcpy( st, util_make_valid_name( pvar ));
-      if ( strcmp( st, "e__selftrigger" ) || !autotick ) {
-        fprintf( fp, "      if ( %s.dataNew ) {\n", st );
-        fprintf( fp, "        if ( fpover ) {\n" );
-        fprintf( fp, "          if ( %s.numSimulEvents() > 0 || %s_flag ) {\n", 
-                 st, st );
-
-        fprintf( fp, "            sprintf( stemp, \"%%s: %%d %s\\n\", ", st );
-        fprintf( fp, "(const char*) name, now;\n" );
-        
-        fprintf( fp, "            Printoverflow( stemp );\n" );
-        fprintf( fp, "          }\n" );
-        fprintf( fp, "        }\n" );
-        fprintf( fp, "        %s_flag = 1;\n", st );
-        /*fprintf( fp, "          sens = 1;\n" ); */
-        fprintf( fp, "        while ( %s.dataNew )\n", st );
-        fprintf( fp, "          %s.getSimulEvent();\n", st );
-        fprintf( fp, "      }\n" );
+      if ( pvar = isInputEvent( var, node )) {
+          strcpy( st, util_make_valid_name( pvar ));
+          if ( strcmp( st, "e__selftrigger" ) || !autotick ) {
+              fprintf( fp, "    if ( %s.dataNew ) {\n", st );
+              fprintf( fp, "        if ( fpover ) {\n" );
+              fprintf( fp, "          if ( %s.numSimulEvents() > 0 || %s_flag ) {\n", st, st );
+              fprintf( fp, "            sprintf( stemp, \"%%s: %%d %s\\n\", ", st );
+              fprintf( fp, "(const char*) name, now;\n" );       
+              fprintf( fp, "            Printoverflow( stemp );\n" );
+              fprintf( fp, "          }\n" );
+              fprintf( fp, "        }\n" );
+              fprintf( fp, "        %s_flag = 1;\n", st );
+              fprintf( fp, "        while ( %s.dataNew )\n", st );
+              fprintf( fp, "          %s.getSimulEvent();\n", st );
+              fprintf( fp, "    }\n" );
+          }
       }
-    }
   } end_foreach_net_node_fanin;
 
   /* Read input values */
   foreach_net_node_fanin( node, var ) {
-    if ( assoc_var = isInputValue( var, node )) {
-      pvar = net_var_parent_var( var, node );
-      fprintf( fp, "          %s = ", 
-               util_make_valid_name( net_var_parent_var( assoc_var, node )));
-      fprintf( fp, "(%s)%%0;\n", util_make_valid_name( pvar ));
-    }
-  } end_foreach_net_node_fanin;
-  foreach_net_node_fanin( node, var ) {
-    if ( pvar = isSensor( var, node )) {
-      fprintf( fp, "          %s = ", util_make_valid_name( pvar ));
-      fprintf( fp, "(s_%s)%%0;\n", util_make_valid_name( pvar ) + 2 );
-    }
+      if ( assoc_var = isInputValue( var, node )) {
+          pvar = net_var_parent_var( var, node );
+          fprintf( fp, "    %s = ", 
+          util_make_valid_name( net_var_parent_var( assoc_var, node )));
+          fprintf( fp, "(%s)%%0;\n", util_make_valid_name( pvar ));
+      }
   } end_foreach_net_node_fanin;
 
-/*  if ( firing ) {
-    if ( unittime ) {
-      fprintf( fp, "            if (needResource) firing.put(now/ckfrq) << (int) priority;\n" );
-    } else {
-      fprintf( fp, "            if (needResource) firing.put(now) << (int) priority;\n" );
-    }
-  } */
-  fprintf( fp, "          if ( fpfire && needResource) {\n" );
-  /*  if ( unittime ) {
-    fprintf( fp, "              sprintf( stemp, \"%%s: %%f %%d start\\n\", " );
-    fprintf( fp, "(const char*) name, (now / ckfrq), temp );\n" );
-  } else { */
-    fprintf( fp, "              sprintf( stemp, \"%%s: %%d %%d start\\n\", " );
-    fprintf( fp, "(const char*) name, now, priority );\n" );
-/*  } */
-  fprintf( fp, "            Printfiring( stemp );\n" );
-  fprintf( fp, "          }\n" );
+  foreach_net_node_fanin( node, var ) {
+      if ( pvar = isSensor( var, node )) {
+          fprintf( fp, "    %s = ", util_make_valid_name( pvar ));
+          fprintf( fp, "(s_%s)%%0;\n", util_make_valid_name( pvar ) + 2 );
+      }
+  } end_foreach_net_node_fanin;
+ 
+  /* output ecah CFSM to the firing file */
+  fprintf( fp, "    if ( fpfire && needResource) {\n" );
+  fprintf( fp, "        sprintf( stemp, \"%%s: %%d %%d start\\n\", " );
+  fprintf( fp, "(const char*) name, now, priority );\n" );
+  fprintf( fp, "        Printfiring( stemp );\n" );
+  fprintf( fp, "    }\n" );
   
   /* Initialize event time schedules */
-/*FIXME: */
-  fprintf( fp, "          min_time = -1;\n" );
-  fprintf( fp, "          nemitevent = 0;\n" );
-  fprintf( fp, "          _delay = 1.0;\n" );
-  fprintf( fp, "          _t_%s(0,0);\n", util_map_pathname( node_name ));
-  fprintf( fp, "          emitEvent(0, _delay, 1); // emit dummy event \n");
+  /*FIXME: */
+  fprintf( fp, "    min_time = -1;\n" );
+  fprintf( fp, "    nemitevent = 0;\n" );
+  fprintf( fp, "    _delay = 1.0;\n" );
+  fprintf( fp, "    _t_%s(0,0);\n", util_map_pathname( node_name ));
+  fprintf( fp, "    emitEvent(0, _delay, 1);   // emit dummy event \n");
   if ( trace ) {
-    fprintf( fp, "          if ( debug ) {\n" );
-   fprintf( fp, "             tcl.go();\n" );
-    fprintf( fp, "          }\n" );
-    fprintf( fp, "     }\n" );
-}
+      fprintf( fp, "    if ( debug ) {\n" );
+      fprintf( fp, "        tcl.go();\n" );
+      fprintf( fp, "    }\n" );
+      fprintf( fp, "  }\n" );
+  }
 } 
 
   
