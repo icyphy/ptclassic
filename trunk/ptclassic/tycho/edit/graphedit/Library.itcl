@@ -112,13 +112,11 @@ body ::tycho::Library::constructor {args} {
 
     # The group type.
     type define group \
-    	-valued 0 \
     	-label "" \
     	-description ""
 
     # The xref entity type. Label is for menu display.
     type define xref \
-    	-valued 1 \
     	-leafonly 1
 }
 
