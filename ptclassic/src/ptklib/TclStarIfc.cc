@@ -224,8 +224,11 @@ int TclStarIfc::setup (Block* star,
 	while ((s = next++) != 0) {
 		InfString val = s->currentValue();
 		InfString name = s->name();
+		// In case the currentValue is null, use an empty string.
+		char* v = (char*)val;
+		if (v == NULL) { v = ""; }
 		Tcl_SetVar2(ptkInterp, (char*)starID, (char*)name,
-			(char*)val, TCL_GLOBAL_ONLY);
+			v, TCL_GLOBAL_ONLY);
 	}
 
 	// Add the full name of the star to the $starID array
