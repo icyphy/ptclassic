@@ -168,7 +168,11 @@ void $sharedSymbol(CGCVISBiquad,settaps)(vis_d64* filtertaps, vis_s16* tapmatrix
 	}
 
 	codeblock(mainDecl) {
-	  vis_s16* $starSymbol(tapmatrix) = (vis_s16*)memalign(sizeof(vis_d64),sizeof(vis_s16)*32);
+	  $starSymbol(tapmatrix) = (vis_s16*)memalign(sizeof(vis_d64),sizeof(vis_s16)*32);
+	}
+	
+	codeblock(globaldec) {
+	  vis_s16* $starSymbol(tapmatrix) = NULL;
 	  vis_d64  $starSymbol(betabott), $starSymbol(betatop);
 	  vis_f32  $starSymbol(currentstate);
 	  vis_s16  $starSymbol(scaledown);
@@ -189,7 +193,8 @@ void $sharedSymbol(CGCVISBiquad,settaps)(vis_d64* filtertaps, vis_s16* tapmatrix
 	  addInclude("<vis_proto.h>");
 	  addInclude("<vis_types.h>");
 	  addGlobal("vis_d64 $starSymbol(filtertaps)[5];");
-	  addDeclaration(mainDecl);
+	  addGlobal(globaldec);
+	  addCode(mainDecl);
 	  addProcedure(quadmult, "CGCVISBiquad_mult4x4");
 	  addProcedure(settaps, "CGCVISBiquad_settaps");
 	  addCode(initialize);
