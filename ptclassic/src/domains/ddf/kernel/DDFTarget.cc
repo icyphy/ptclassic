@@ -1,9 +1,9 @@
 static const char file_id[] = "DDFTarget.cc";
 /**********************************************************************
 Version identification:
-$Id$
+@(#)DDFTarget.cc	1.1	8/15/95
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990- The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -137,13 +137,13 @@ StringList DDFTarget::pragma (const char* parentname,
 StringList DDFTarget::pragma (const char* parentname,
 			      const char* blockname,
 			      const char* pragmaname) const {
-  const char* c;
+  const char* c = 0;
   InfString compoundname;
   compoundname << parentname << "." << blockname;
-  if (strcmp(pragmaname,"firingsPerIteration") != 0 ||
-      !(c = firings->lookup(compoundname))) {
-    c = "";
+  if (strcmp(pragmaname,"firingsPerIteration") == 0) {
+      c = firings->lookup(compoundname);
   }
+  if (!c) c = "";
   return c;
 }
 
