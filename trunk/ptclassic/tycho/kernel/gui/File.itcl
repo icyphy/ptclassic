@@ -59,7 +59,7 @@ proc ::tycho::openContext {filename args} {
 # a standard itkwish.
 # <p>
 # If the File is "attached" to a Displayer object, then the File
-# object initialize its menu bar with three menus. The "File" menu
+# object initializes its menu bar with three menus. The "File" menu
 # contains commands to open a file, insert a file, save data to a file,
 # save as some other file name, print, evaluate the data, reload the
 # last saved version, toggle read-only, version control, close the
