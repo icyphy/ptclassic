@@ -139,13 +139,43 @@ class PortList : SequentialList
 
 class Geodesic
 {
+private:
+	// For now, the number of Particles on the Geodesic is simply
+	// stored as an integer.  Note that the SDFScheduler manipulates
+	// this number using the public methods below without actually
+	// putting any Particles on the geodesic.  The SDFScheduler
+	// guarantees that when it is done, the noParticles value will
+	// be the same as when it started, or the run will have been aborted
+	// due to a sample-rate inconsistency.
+	int noParticles;
+
+	// Make the SDFScheduler a friend so that noParticles can be
+	// manipulated directly.  Note that if the implementation of
+	// noParticles changes, so must the implementation of the SDFScheduler
+	friend class SDFScheduler;
 public:
         // We keep a pointer to the PortHoles corresponding to
         // this Geodesic
         PortHole *originatingPort;
         PortHole *destinationPort;
 
-	Geodesic() { originatingPort = NULL; destinationPort = NULL; }
+	// Constructor
+	Geodesic() { originatingPort = NULL;
+		     destinationPort = NULL;
+		     noParticles = 0;}
+
+	// Return the number of Particles currently on the Geodesic
+	int getNoParticles() {return noParticles;}
+
+	// When a connection contains a delay, initial particles
+	// should be put on the Geodesic.  Something should be added
+	// here to put the right number of zero-valued particles
+	// on the geodesic (what is meant by "zero-valued" will
+	// depend on the Particle type).  Also, setInitialParticles
+	// should optionally accept two arguments,
+	// the second of which is a Particle& specifying
+	// some specific initial value.
+	void setInitialParticles (int howMany) {noParticles = howMany;}
 };
 
 #endif
