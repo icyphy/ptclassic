@@ -267,7 +267,7 @@ alltests.itcl: makefile
 	echo '# will source all the .itcl files in the current directory' >> $@
 	echo '#' >> $@
 	echo '# Set the following to avoid endless calls to exit' >> $@
-	echo "set reallyExit 0" >> $@
+	echo "if {![info exists reallyExit]} {set reallyExit 0}" >> $@
 	echo "#Do an update so that we are sure tycho is done displaying" >> $@
 	echo "update" >> $@
 	echo "set savedir \"[pwd]\"" >> $@
@@ -279,6 +279,7 @@ alltests.itcl: makefile
 			echo "source $$x" >> $@; \
 		done; \
 	fi
+	echo "doneTests" >> $@
 
 # all.itcl is used to source all the *.itcl files
 all.itcl: makefile
@@ -291,6 +292,8 @@ all.itcl: makefile
 	echo '#' >> $@
 	echo '# Set the following to avoid endless calls to exit' >> $@
 	echo 'set reallyExit 0' >> $@
+	echo 'set PASSED 0' >> $@
+	echo 'set FAILED 0' >> $@
 	echo 'foreach file [glob *.itcl] {' >> $@
 	echo '    if {$$file != "all.itcl" && $$file != "alltests.itcl"} {' >> $@
 	echo '         source $$file' >> $@
