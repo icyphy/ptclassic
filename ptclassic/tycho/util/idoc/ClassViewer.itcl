@@ -170,7 +170,6 @@ class ::tycho::IDoc {
 
     ###################################################################
     ####                      protected variables                  ####
-
     # The name of the currently displayed class (others are related to this)
     protected variable mainClass
 
@@ -203,6 +202,11 @@ class ::tycho::IDoc {
 
     # Location where mouse button was pressed.
     protected variable lastPress
+
+    ###################################################################
+    ####                     protected methods                     ####
+
+    protected method preference {mode args}
 
     ###################################################################
     ####                      private methods                      ####
@@ -239,9 +243,6 @@ class ::tycho::IDoc {
 
     # Setup the resizing handles to behave properly.
     private method setupHandles {}
-     
-    # Preference function for this class
-    private method preference {mode args}
 }
 
 #########################################################################
@@ -417,7 +418,15 @@ body ::tycho::IDoc::constructor {args} {
         $myMenubar delete "Evaluate"
         $myMenubar delete "Revision Control..."
         
-        $myMenubar addMenu Special -after Window -underline 0
+        $myMenubar addMenu Format -after Window -underline 0
+        # Add font size control
+        $myMenubar command "Bigger Font" Format -underline 0\
+                -accelerator "C-+" -command "$this upSize"
+        
+        $myMenubar command "Smaller Font" Format -underline 0\
+                -accelerator "C--" -command "$this downSize"
+        
+        $myMenubar addMenu Special -after Format -underline 0
         # Add a way to get the text description.
         $myMenubar command Describe Special \
                 -underline 0 -command "::tycho::inform \[$this describe\]"
@@ -425,13 +434,6 @@ body ::tycho::IDoc::constructor {args} {
         $myMenubar command Inherit Special \
                 -underline 0 -command "$this inheritAll"
        
-        $myMenubar addMenu Format -after Special -underline 0
-        # Add font size control
-        $myMenubar command "Bigger Font" Format -underline 0\
-                -accelerator "C-+" -command "$this upSize"
-        
-        $myMenubar command "Smaller Font" Format -underline 0\
-                -accelerator "C--" -command "$this downSize"
     }
 
     set myDisplayer [[$this displayer] windowName]
@@ -558,16 +560,21 @@ body ::tycho::IDoc::inheritAll {} {
             lappend myHeritage $parent
 
             set myClass($parent) [::tycho::Class [::tycho::autoName class]]
+            putStatus "Loading $parent"
+            update idletasks
             $myClass($parent) read file $parentFile
             
             # Load my parents too.
             set newparents [$myClass($parent) parents]
             set parents "$parents $newparents"
         } else {
-            puts "$parent idoc file not found"
+            putStatus "$parent idoc file not found."
         }
     }
+    putStatus "Redisplaying contents."
+    update idletasks
     display
+    putStatus ""
 }
 
 
@@ -665,12 +672,26 @@ body ::tycho::IDoc::docFile {classname} {
     foreach dir $dirs {
         set findfile [file join $dir doc codeDoc $docname]
         set findfile [::tycho::expandPath $findfile]
-        set file [glob -nocomplain $findfile]
-        if {$file != {}} {
+        set docfile [glob -nocomplain $findfile]
+        if {$docfile != {}} {
             break
         }
     }
-    return "$file"
+    return "$docfile"
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                     protected methods                     ####
+
+
+#####################################################################
+#### preference
+# preference function for IDoc
+#
+body ::tycho::IDoc::preference {mode args} {
+    eval ::tycho::preference $mode "idoc" $args
 }
 
     ###################################################################
@@ -799,7 +820,7 @@ body ::tycho::IDoc::display {} {
         # Variables        
         displayVar $protection   
         # Methods
-        displayMeth $protection   
+        displayMeth $protection
     }
 }
 
@@ -831,17 +852,12 @@ body ::tycho::IDoc::displayMeth {protection} {
                 lappend subnames $method\m
             }
             # check for inherited methods
-            if {$protection == "public" || $protection == "private"} {
-                if {$protection == "public"} {
-                    set inprotection "public"
-                } {
-                    set inprotection "protected"
-                }
+            if {$protection == "public" || $protection == "protected"} {
                 foreach class $myHeritage {
                     set currLabels [$myContents labels]
                     set currentModel $myClass($class)
                     foreach method [$currentModel methods \
-                            -protection $inprotection -scope instance] {
+                            -protection $protection -scope instance] {
                         # put label into contents widget if not there
                         if {[lsearch -exact $currLabels "$method\m"] == -1} {
                             $myContents appendlabel $method\m \
@@ -859,6 +875,7 @@ body ::tycho::IDoc::displayMeth {protection} {
             # insert panel if any methods found
             if {$subnames != {}} {
                 set temp [::tycho::capitalize $protection]
+                set subnames [lsort $subnames]
                 $myContents append $protection\m "$subnames" \
                         -text "$temp Methods" \
                         -font [$this cget -headfont] \
@@ -880,17 +897,12 @@ body ::tycho::IDoc::displayMeth {protection} {
                 lappend subnames $method\p
             }
             # check for inherited procs
-            if {$protection == "public" || $protection == "private"} {
-                if {$protection == "public"} {
-                    set inprotection "public"
-                } {
-                    set inprotection "protected"
-                }
+            if {$protection == "public" || $protection == "protected"} {
                 foreach class $myHeritage {
                     set currLabels [$myContents labels]
                     set currentModel $myClass($class)
                     foreach method [$currentModel methods \
-                            -protection $inprotection -scope class] {
+                            -protection $protection -scope class] {
                         # put label into contents widget if not there
                         if {[lsearch -exact $currLabels "$method\p"] == -1} {
                             $myContents appendlabel $method\p \
@@ -908,6 +920,7 @@ body ::tycho::IDoc::displayMeth {protection} {
             # insert panel if any procs found
             if {$subnames != {}} {
                 set temp [::tycho::capitalize $protection]
+                set subnames [lsort $subnames]
                 $myContents append $protection\p "$subnames" \
                         -text "$temp Procs" \
                         -font [$this cget -headfont] \
@@ -991,6 +1004,7 @@ body ::tycho::IDoc::displayVar {protection} {
 
             # insert panel if any itk_options found
             if {$subnames != {}} {
+                set subnames [lsort $subnames]
                 $myContents append $protection\i "$subnames" \
                         -text "Itk Options" \
                         -font [$this cget -headfont] \
@@ -1013,17 +1027,12 @@ body ::tycho::IDoc::displayVar {protection} {
             }
 
             # check for inherited variables
-            if {$protection == "public" || $protection == "private"} {
-                if {$protection == "public"} {
-                    set inprotection "public"
-                } {
-                    set inprotection "protected"
-                }
+            if {$protection == "public" || $protection == "protected"} {
                 foreach class $myHeritage {
                     set currLabels [$myContents labels]
                     set currentModel $myClass($class)
                     foreach variable [$currentModel variables \
-                            -protection $inprotection -modifiers {}] {
+                            -protection $protection -modifiers {}] {
                         # put label into contents widget if not there
                         if {[lsearch -exact $currLabels "$variable\v"] == -1} {
                             $myContents appendlabel $variable\v \
@@ -1042,6 +1051,7 @@ body ::tycho::IDoc::displayVar {protection} {
 
             # insert panel if any variables found
             if {$subnames != {}} {
+                set subnames [lsort $subnames]
                 set temp [::tycho::capitalize $protection]
                 $myContents append $protection\v "$subnames" \
                         -text "$temp Variables" \
@@ -1198,12 +1208,3 @@ body ::tycho::IDoc::setupHandles {} {
         %Q ghostHandle 1 0
     }
 }
-
-#####################################################################
-#### preference
-# preference function for IDoc
-#
-body ::tycho::IDoc::preference {mode args} {
-    eval ::tycho::preference $mode "idoc" $args
-}
-  
