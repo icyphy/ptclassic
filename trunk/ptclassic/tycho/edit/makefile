@@ -29,12 +29,12 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-DIRS = textedit visedit slate graph
+DIRS = textedit visedit slate graphedit
 
 # Root of Tycho directory
 ROOT =		..
 
-ME = 		editors
+ME = 		edit
 # True source directory
 VPATH =		$(ROOT)/$(ME)
 
