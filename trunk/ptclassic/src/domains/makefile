@@ -21,7 +21,7 @@ include $(CONFIG)
 
 # The EXPDOMAINS environment variable can be used to build experimental domains
 # which are assumed to follow the same directory structure.
-EXPDOMAINS = sr fsm
+EXPDOMAINS = sr srcgc fsm
 
 ifeq ($(INCLUDE_PN_DOMAIN),yes)
 EXPDOMAINS += pn
