@@ -14,7 +14,7 @@ limitation of liability, and disclaimer of warranty provisions.
     location { PN library }
 
     hinclude { "InterpGalaxy.h" }
-    ccinclude { "Geodesic.h", "PNThread.h", "PNMonitor.h" }
+    ccinclude { "Geodesic.h", "PNThread.h" }
 
     protected
     {
