@@ -59,7 +59,7 @@
 # The data of an item is a list of named attributes. By convention,
 # attribute names begine with a leading dash, although there is
 # no requirement that this be so. This data can be accessed
-# individually, with the <b>itemset</b> method, or collectively,
+# individually, with the <b>assign</b> method, or collectively,
 # with the <b>attrset</b> method. The names and number of attributes
 # is arbitrary, so attributes can be added and deleted dynamically.
 # A number of other methods add and delete data: <b>add</b>,
@@ -69,7 +69,7 @@
 # <b>publish</b> methods of the _Model_ superclass.
 #
 # There are several methods that provide ways of accessing the
-# data in a model. <b>itemset</b> and <b>attrset</b> can be used
+# data in a model. <b>assign</b> and <b>attrset</b> can be used
 # to query data from a single item, while <b>names</b> and
 # <b>get</b> perform glob-style matching on item names, in the same
 # way as the Tcl <b>array</b> command. The <b>match</b> method
@@ -102,6 +102,9 @@ class ::tycho::DataModel {
     # Add a new item
     method add {name args}
 
+    # Set or get the value of an item
+    method assign {name args}
+
     # Set or get individual attributes of an item
     method attrset {name {attr {}} args}
 
@@ -122,9 +125,6 @@ class ::tycho::DataModel {
 
     # Get the names and attributes of each item matching a pattern
     method get {{pattern *}}
-
-    # Set or get the value of an item
-    method itemset {name args}
 
     # Match children of a given type with matching attributes
     method match {type {context {}} args}
@@ -321,6 +321,48 @@ body ::tycho::DataModel::add {name args} {
 }
 
 ########################################################################
+#### assign
+#
+# Set or get the data of the item named _name_. If only the _name_
+# argument is supplied, return the attribute list of that item,
+# _without_ any defaults defined for its type. (Note the difference
+# in behaviour to <b>attrset</b>.) If additional arguments are supplied,
+# they specify an attribute list which replaces the existing attribute
+# list. If _args_ contains just one value, this is taken to be the new
+# attribute list; otherwise, _args_ is taken to be the new attribute list.
+# Note that any existing attributes that are not present in the new
+# list will be removed. Append to the history if recording.
+# if the item does not exist, raise an error.
+#
+body ::tycho::DataModel::assign {name args} {
+    _verify $name
+
+    # Remember the old data
+    set old [@scope $scope set [set _dataname]($name)]
+
+    if { $args == "" } {
+        # Return old value
+        return $old
+    } elseif { [llength $args] == 1 } {
+        # Got a single list
+        set data [lindex $args 0]
+    } else {
+        set data $args
+    }
+
+    # Append to the history
+    if $recording {
+        history append [list assign $name $data] [list assign $name $old]
+    }
+
+    # Invalidate cache
+    @scope $scope set [set _dataname].cachevalid 0
+        
+    # Write the new data
+    @scope $scope set [set _dataname]($name) $data
+}
+
+########################################################################
 #### attrset
 #
 # Set or get individual attributes of the item given by _name_.
@@ -330,7 +372,7 @@ body ::tycho::DataModel::add {name args} {
 # to it.  If further arguments are supplied, the complete argument
 # list is an attribute-value list, and the given attributes are changed
 # to the corresponding value. Note that attributes are merged, not
-# replaced (as in <b>itemset</b>). Append to the history if recording.
+# replaced (as in <b>assign</b>). Append to the history if recording.
 # Raise an error if the item does not exist.
 #
 body ::tycho::DataModel::attrset {name {attr {}} args} {
@@ -362,7 +404,7 @@ body ::tycho::DataModel::attrset {name {attr {}} args} {
         if { $recording } {
             history append \
                     "attrset $name $args" \
-                    "itemset $name [@scope $scope set [set _dataname]($name)]"
+                    "assign $name [@scope $scope set [set _dataname]($name)]"
         }
         # Merge the new data and return result
         array set attrs [@scope $scope set [set _dataname]($name)]
@@ -445,9 +487,9 @@ body ::tycho::DataModel::delete {name} {
     if $recording {
         set cd [_describechildren $name]
         if { $cd != "" } {
-            history append "delete $name" "add $name [itemset $name] \{\n$cd\}"
+            history append "delete $name" "add $name [assign $name] \{\n$cd\}"
         } else {
-            history append "delete $name" "add $name [itemset $name]"
+            history append "delete $name" "add $name [assign $name]"
         }
     }
     # Delete children, making sure that commands are not recorded
@@ -555,48 +597,6 @@ body ::tycho::DataModel::exists {name {attribute {}}} {
 #
 body ::tycho::DataModel::get {{pattern *}} {
     @scope $scope array get $_dataname $pattern
-}
-
-########################################################################
-#### itemset
-#
-# Set or get the data of the item named _name_. If only the _name_
-# argument is supplied, return the attribute list of that item,
-# _without_ any defaults defined for its type. (Note the difference
-# in behaviour to <b>attrset</b>.) If additional arguments are supplied,
-# they specify an attribute list which replaces the existing attribute
-# list. If _args_ contains just one value, this is taken to be the new
-# attribute list; otherwise, _args_ is taken to be the new attribute list.
-# Note that any existing attributes that are not present in the new
-# list will be removed. Append to the history if recording.
-# if the item does not exist, raise an error.
-#
-body ::tycho::DataModel::itemset {name args} {
-    _verify $name
-
-    # Remember the old data
-    set old [@scope $scope set [set _dataname]($name)]
-
-    if { $args == "" } {
-        # Return old value
-        return $old
-    } elseif { [llength $args] == 1 } {
-        # Got a single list
-        set data [lindex $args 0]
-    } else {
-        set data $args
-    }
-
-    # Append to the history
-    if $recording {
-        history append [list itemset $name $data] [list itemset $name $old]
-    }
-
-    # Invalidate cache
-    @scope $scope set [set _dataname].cachevalid 0
-        
-    # Write the new data
-    @scope $scope set [set _dataname]($name) $data
 }
 
 ########################################################################
