@@ -62,6 +62,7 @@ To implement the tests "<" or "<=", simply reverse the inputs.
 If TRUE, outputs are TRUE only when the sense of the test changes.
 		}
 	}
+	// The A_YMEM attribute is set or cleared below in the setup method
 	defstate {
 		name { prevResult }
 		type { int }
@@ -100,63 +101,85 @@ test.  This ensures that the first test result will always be TRUE.
 		// depending on the setting of crossingsOnly
 		if ( int(crossingsOnly) ) {
 			// FIXME: need to declare internal state
-			prevResult.setAttributes(A_XMEM);
+			prevResult.setAttributes(A_YMEM);
 		}
 		else {
 			// FIXME: need to declare no internal state
-			prevResult.clearAttributes(A_XMEM);
+			prevResult.clearAttributes(A_YMEM);
 		}
 	}
+
+	// Register usage:
+	//   accumulator a   initially upper input; at end, output of test
+	//   accumulator b   zero
+	//   register x0     lower input
+	//   register y0     previous result
+
+	// 1. Load inputs
+
 	codeblock(data) {
-		move	$ref(lower),x0		; load inputs from X memory
-		move	$ref(upper),a
+; Test star: a = upper input and x0 = lower input
+	clr	b	$ref(lower),x0
+	move	$ref(upper),a
 	}
-	codeblock(compare) {
-		cmp	x0,a
+
+	codeblock(dataAndPrevResult) {
+; Test star: a = upper input, x0 = lower input, and y0 = previous result
+	clr	b	$ref(lower),x0	$ref(prevResult),y0
+	move	$ref(upper),a
 	}
-	codeblock(compareCrossings) {
-		cmp	x0,a	$ref(prevResult),x1
+
+	// 2. Perform comparison
+
+	codeblock(equalTest) {
+	cmp	x0,a	#$$FF,a		; test a - x0 and set a = TRUE
+	tne	b,a		; if lower != upper then a = FALSE
 	}
-	codeblock(saveStatus) {
-		movec	sr,a	; save status register (has condition codes)
+	codeblock(notEqualTest) {
+	sub	x0,a		; test a - x0 which returns a Boolean
 	}
+	codeblock(greaterThan) {
+	cmp	x0,a	#$$FF,a		; test a - x0 and set a = TRUE
+	tgt	b,a		; if upper > lower, then a = TRUE
+	}
+	codeblock(greaterEqual) {
+	cmp	x0,a	#$$FF,a		; test a - x0 and set a = TRUE
+	tge	b,a		; if upper >= lower, then a = TRUE
+	}
+
+	// 3. Post-process
+
 	codeblock(crossings) {
 ; compare previous and current results, and save current result
-		cmp	x1,a	a,$ref(prevResult)
+	sub	y0,a	a,$ref(prevResult)
 	}
+
+	// 4. Save result
 	codeblock(saveResult) {
-		move	a,$ref(output)
+	move	a,$ref(output)
 	}
+
 	go {
-		StringList header = "; Testing if $ref(upper) ";
-		header << (const char*)condition << " $ref(lower)\n"
-		       << "; compare $ref(lower) to $ref(upper) and "
-		       << "return masked condition codes\n"
-		       << "; using zero (Z) and negative (N) condition bits";
+		StringList header = "; Testing if upper ";
+		header << (const char*)condition << " lower\n";
 		addCode(header);
 
-		addCode(data);
-		if ( int(crossingsOnly) ) addCode(compareCrossings);
-		else addCode(compare);
+		if ( int(crossingsOnly) ) addCode(dataAndPrevResult);
+		else addCode(data);
 
 		// Evaluate test, leaving the result in accumulator a
 		switch (test) {
 		    case EQID:
-			addCode(saveStatus);
-			addCode("and #0x04,a	; test Z bit");
+			addCode(equalTest);
 			break;
 		    case NEID:
-			addCode("; accumulator is zero when upper = lower");
-			addCode("; and non-zero otherwise; so just return it");
+			addCode(notEqualTest);
 			break;
 		    case GTID:
-			addCode(saveStatus);
-			addCode("and #0x0B,a	; test N and Z bits");
-			addCode("eor #0x04,a	; make sure Z bit is off");
+			addCode(greaterThan);
 			break;
 		    case GEID:
-			addCode(saveStatus);
-			addCode("and #0x0B,a	; test N and Z bits");
+			addCode(greaterEqual);
 			break;
 		}
 
@@ -167,24 +190,28 @@ test.  This ensures that the first test result will always be TRUE.
 		addCode(saveResult);
 	}
 	exectime {
-		// Time to read in the two inputs and write out the result
-		int ticks = 6;
-		// Add number of cycles
-		if ( int(crossingsOnly) ) ticks += 2;
+                // FIXME. Estimates of execution time are given in pairs of
+		// oscillator cycles because that's the way it was done in
+		// Gabriel: they simply counted the number of instructions.
+
+		// Time to read in the two inputs and write out one result
+		int pairsOfCycles = 3;
+		// Add number of pairs of cycles
+		if ( int(crossingsOnly) ) pairsOfCycles++;
 		switch (test) {
 		    case EQID:
-			ticks += 6;
+			pairsOfCycles += 2;
 			break;
 		    case NEID:
-			ticks += 2;
+			pairsOfCycles += 1;
 			break;
 		    case GTID:
-			ticks += 8;
+			pairsOfCycles += 2;
 			break;
 		    case GEID:
-			ticks += 6;
+			pairsOfCycles += 2;
 			break;
 		}
-		return ticks;
+		return pairsOfCycles;
 	}
 }
