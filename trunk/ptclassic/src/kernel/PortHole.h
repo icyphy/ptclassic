@@ -417,9 +417,16 @@ protected:
 
 class GalMultiPort : public MultiPortHole {
 public:
+	// a GalMultiPort always has an alias
 	GalMultiPort(GenericPort& a) { setAlias(a);}
+
+	// queries pass through to the inside
 	int isItInput() const;
 	int isItOutput() const;
+
+	// when making a new port, create it both locally and in the
+	// alias and connect the two together.
+	PortHole& newPort();
 };
 
 
