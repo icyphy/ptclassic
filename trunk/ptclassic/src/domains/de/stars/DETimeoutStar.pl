@@ -6,7 +6,7 @@ defstar
     descriptor
     {
 Base class for stars which check timeout conditions.  The methods
-"set", "clear", and "expired" are provided for seting and testing the
+"set", "clear", and "expired" are provided for setting and testing the
 timer.
     }
     version { $Id$ }
@@ -22,7 +22,7 @@ limitation of liability, and disclaimer of warranty provisions.
     explanation
     {
 The \fIset\fP method resets and starts a timer.  Invoking \fIset\fP
-again will reset the timer and start it again.  Invoking \fIclear\fP
+again will reset the timer and restart it.  Invoking \fIclear\fP
 stops the timer.  The \fIexpired\fP method indicates whether or not the
 timer has reached \fItimeout\fR.
     }
