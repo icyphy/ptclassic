@@ -30,8 +30,13 @@
 
 #######################################################################
 #### ToolBar
-# A very simple tool bar display, for putting at the
-# top of a Displayer.
+# A tool bar with any of a variety of widgets.  It is meant to be put at
+# the top of a Displayer.
+#
+# NOTE: There is a certain amount of duplication here with the
+# Query object, but enough differences that it is hard to see how to
+# merge the two.  The objectives are somewhat different.  As facilities
+# get added to each, we should try to at least keep the same interface.
 #
 class ::tycho::ToolBar {
     inherit ::tycho::TWidget
@@ -42,10 +47,10 @@ class ::tycho::ToolBar {
     ###################################################################
     ####                            options                        ####
 
-    # The status bar to use for print help message.
+    # The status bar to use for print help messages.
     itk_option define -statusbar statusBar StatusBar {}
 
-    # The font to use for the buttons
+    # The font to use.
     itk_option define -font font Font [::tycho::font screen]
 
     # The horizontal button padding
@@ -65,14 +70,23 @@ class ::tycho::ToolBar {
     # Add a button to the toolbar.
     method button {tag description args}
 
-    # Disable a button to the toolbar.
-    method buttonDisable {tag}
+    # Clear all widgets or one widget.
+    method clear {{tag {}}}
 
-    # Enable a button to the toolbar.
-    method buttonEnable {tag}
+    # Disable user interaction with the widget with the given tag.
+    method disable {tag}
+
+    # Enable user interaction with the widget with the given tag
+    method enable {tag}
 
     # Add an entry widget to the toolbar.
     method entry {tag label default command args}
+
+    # Get the current value of the widgets (or one widget). Ignored for buttons.
+    method get {{tag {}}}
+
+    # Insert the specified string into the specified entry box.
+    method insert {tag str}
 
     ###################################################################
     ####                         protected methods                 ####
@@ -88,6 +102,24 @@ class ::tycho::ToolBar {
 
     # Remember the number of entries currently in this widget
     protected variable numentries 0
+
+    # Keep track of tags in the order in which they are created.
+    private variable tags {}
+
+    # Array of clear commands for each tag.
+    private variable tagsclear
+
+    # Array of disable commands.
+    private variable tagsdisable
+
+    # Array of enable commands.
+    private variable tagsenable
+
+    # Array of insert commands for each tag.
+    private variable tagsinsert
+
+    # Array of get commands for each tag.
+    private variable tagsget
 }
 
 #######################################################################
@@ -171,23 +203,59 @@ body ::tycho::ToolBar::button {tag description args} {
     # Bind description output.
     bind $itk_component($tag) <Enter> [code [list %Q putStatus $description]]
     bind $itk_component($tag) <Leave> [code "%Q putStatus {}"]
+
+    # Record the tag and its access methods.  Note that clear and get
+    # do nothing.
+    lappend tags $tag
+    set tagsclear($tag) {}
+    set tagsget($tag) {$itk_component($tag) cget -text}
+    set tagsinsert($tag) {$itk_component($tag) configure -text}
+    set tagsenable($tag) "$itk_component($tag) configure -state normal"
+    set tagsdisable($tag) "$itk_component($tag) configure -state disabled"
 }
 
 #####################################################################
-#### buttonDisable
-# Disable a button added with <code>button</code>, graying out
-# the button.
-#
-body ::tycho::ToolBar::buttonDisable {name} {
-    component $name configure -state disabled
+#### clear
+# If no argument is given, clear all widgets. If a tag
+# is given as an argument, clear the corresponding widget. If the tag is
+# not recognized, do nothing.
+# 
+body ::tycho::ToolBar::clear {{tag {}}} {
+    if {$tag == {}} {
+	foreach tag $tags {
+            set cmd $tagsclear($tag)
+            if {$cmd != {}} {
+                eval $cmd
+            }
+        }
+    } {
+        set cmd $tagsclear($tag)
+        if {$cmd != {}} {
+            eval $cmd
+        }
+    }
 }
 
 #####################################################################
-#### buttonEnable
-# Enable a button added with <code>button</code.
+#### disable
+# Disable user interaction with the widget with the given tag.
 #
-body ::tycho::ToolBar::buttonEnable {name} {
-    component $name configure -state normal
+body ::tycho::ToolBar::disable {tag} {
+    set cmd $tagsdisable($tag)
+    if {$cmd != {}} {
+        eval $cmd
+    }
+}
+
+#####################################################################
+#### enable
+# Enable user interaction with the widget with the given tag.
+#
+body ::tycho::ToolBar::enable {tag} {
+    set cmd $tagsenable($tag)
+    if {$cmd != {}} {
+        eval $cmd
+    }
 }
 
 #####################################################################
@@ -248,6 +316,61 @@ body ::tycho::ToolBar::entry {tag label default command args} {
     "
     
     incr numentries
+
+    # Record the tag and its access methods
+    lappend tags $tag
+    set tagsclear($tag) "$itk_component(tag_$tag) delete 0 end"
+    set tagsinsert($tag) "$itk_component(tag_$tag) insert insert"
+    set tagsget($tag) "$itk_component(tag_$tag) get"
+    set tagsenable($tag) "$itk_component(tag_$tag) configure -state normal"
+    set tagsdisable($tag) "$itk_component(tag_$tag) configure -state disabled"
+}
+
+#####################################################################
+#### get
+# If no argument is given, get the current value of the queries,
+# and return as a list in the form {tag value tag value ...}.  This list
+# can be directly assigned to an array using <code>array set</code>,
+# making it easy to use the results of the query. If a tag is given as an
+# argument, return the value of the corresponding entry only. If the tag
+# is not recognized, return an empty string.  For buttons, the label
+# of the button is returned.
+# 
+body ::tycho::ToolBar::get {{tag {}}} {
+    set response {}
+    if {$tag == {}} {
+	foreach tag $tags {
+            lappend response $tag
+            set cmd $tagsget($tag)
+            if {$cmd != {}} {
+                set rp [eval $cmd]
+            } {
+                set rp $tag
+            }
+            lappend response $rp
+        }
+    } {
+        set cmd $tagsget($tag)
+        if {$cmd != {}} {
+            set response [eval $cmd]
+        } {
+            set response $tag
+        }
+    }
+    return $response
+}
+
+#####################################################################
+#### insert
+# Insert the specified string into the specified entry box.
+# If the tag is not recognized, flag an error.  For button widgets,
+# the label of the button is changed.
+# 
+body ::tycho::ToolBar::insert {tag str} {
+    set cmd $tagsinsert($tag)
+    if {$cmd != {}} {
+        eval $cmd [list $str]
+    }
 }
 
 #########################################################################
