@@ -99,7 +99,7 @@ StringList CGCStar::getRef2(const char* name, const char* offset) {
 	return out;
 }
 
-void CGCStar :: offsetInit() {
+void CGCStar :: initBufPointer() {
 	BlockPortIter next(*this);
 	CGCPortHole* p;
 	while ((p = (CGCPortHole*) next++) != 0) {
