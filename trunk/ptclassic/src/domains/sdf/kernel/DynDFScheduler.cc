@@ -306,7 +306,7 @@ int DynDFScheduler :: isRunnable(DataFlowStar& s) {
 
 		// if dynamic, enable lazy evaluation.
 		lazyDepth++;
-		int lzStatus;
+		int lzStatus = 0;
 		while (wp->numTokens() < nwait &&
 		       (lzStatus = lazyEval(srcStar) != 0))
 			;	// empty loop body, go until enough tokens
