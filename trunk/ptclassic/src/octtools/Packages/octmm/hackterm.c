@@ -30,8 +30,25 @@ static char SccsId[]="$Id$";
 #include "oct.h"
 #include "hackterm.h"
 
+static void convertLayer
+     ARGS((octObject *facetPtr, octObject *layerPtr));
+static int implementTerminal
+	ARGS((octObject *facetPtr, octObject *terminalPtr, octObject *labelPtr, octObject *layerPtr));
+static int createTerminal
+	ARGS((octObject *facetPtr, octObject *terminalPtr, octObject *geoPtr));
+
+static int geoAlreadyImplementsTerm
+	ARGS((octObject *geoPtr, char *safeName));
+
+static int differentBaseName
+	ARGS((char *termName, char *match));
+
+static void bagTerminals
+	ARGS((octObject *facetPtr, octObject *origTermPtr, octObject *newTermPtr));
+
 static int makeBags;
 
+void
 hackTerm(facetPtr, joinFlag)
 octObject *facetPtr;
 int joinFlag;
@@ -81,7 +98,7 @@ int joinFlag;
 #endif
 }
 
-static convertLayer(facetPtr, layerPtr)
+static void convertLayer(facetPtr, layerPtr)
 octObject *facetPtr;	/* facet being worked on */
 octObject *layerPtr;	/* layer we're looking for labels on */
 {
@@ -116,7 +133,8 @@ octObject *layerPtr;	/* layer we're looking for labels on */
     }
 }
 
-static implementTerminal(facetPtr, terminalPtr, labelPtr, layerPtr)
+static int
+implementTerminal(facetPtr, terminalPtr, labelPtr, layerPtr)
 octObject *facetPtr;		/* facet we're working on */
 octObject *terminalPtr;		/* new formal terminal */
 octObject *labelPtr;		/* label that we're replacing */
@@ -258,7 +276,7 @@ char *match;
     return(*termName != '\0');
 }
 
-static bagTerminals(facetPtr, origTermPtr, newTermPtr)
+static void bagTerminals(facetPtr, origTermPtr, newTermPtr)
 octObject *facetPtr;		/* facet whose terminals are being munged */
 octObject *origTermPtr;		/* original terminal (may already have bag) */
 octObject *newTermPtr;		/* new terminal (to put into bag) */
