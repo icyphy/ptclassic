@@ -43,13 +43,11 @@ public:
 	void append(DataFlowStar& s) { SequentialList::put(&s);}
 
 	// Return the number of elements on the list
-	int size() const {return SequentialList::size();}
+	SequentialList::size;
+	SequentialList::initialize;
 
 	// Display the schedule
 	StringList printVerbose () const;
-
-	// Clear the data structure
-	void initialize() {SequentialList::initialize();}
 };
 
 	////////////////////////////
