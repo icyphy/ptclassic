@@ -239,8 +239,8 @@ double value;
 }
 
 /*
-assign fix maximum or minimum value (if sign == 1)
-Example: for a precision of 2.1 and sign = 1, the maximum value is
+assign fix maximum or minimum value (if sign = 1)
+Example: for a precision of 2.1 and sign = 0, the maximum value is
 1.5 which is represented as 0110 0000 0000 0000 since only the first
 2 bits are the int (in 2's complement). -ykl
 */
@@ -251,59 +251,64 @@ FIX_WORD *dst_r;
 int sign;
 {
     if (sign) {			/* assign (negative) minimum value */
-	int i = FIX_WORDS_PER_FIX;
+	int numZeroWords = FIX_WORDS_PER_FIX;
 	*dst_r++ = (FIX_WORD) (1 << (FIX_BITS_PER_WORD-1));
-	while (--i) *dst_r++ = (FIX_WORD) 0;
+	while (--numZeroWords) *dst_r++ = (FIX_WORD) 0;
     } 
     else {			/* assign (positive) maxmimum value */
-	int and_mask, i, j;
-	i = FIX_Words(dst_l);
-	j = FIX_WORDS_PER_FIX - i;
-	and_mask = ~(FIX_MAX_UNSIGNED >> (dst_l % FIX_BITS_PER_WORD));
+	int andMask = 0;
+	int numNonZeroWords = FIX_Words(dst_l);
+	int numZeroWords = 0;
+	int shift = dst_l % FIX_BITS_PER_WORD;
+	if ( shift > 0 ) andMask = ~(FIX_MAX_UNSIGNED >> (shift-1));
 
 	*dst_r++ = FIX_MAX_UNSIGNED;
-	while (--i > 0) *dst_r++ = (FIX_WORD) ~0;
-	dst_r[-1] &= and_mask;
-	while (j-- > 0) *dst_r++ = (FIX_WORD) 0;
+	while (--numNonZeroWords > 0) *dst_r++ = (FIX_WORD) ~0;
+	if (andMask) dst_r[-1] &= andMask;
+
+	numZeroWords = FIX_WORDS_PER_FIX - numNonZeroWords;
+	while (numZeroWords-- > 0) *dst_r++ = (FIX_WORD) 0;
     }
 }
 
 /* convert a fix to a double value */
-double FIX_Fix2Double(src_l,src_i,src_r)
+double FIX_Fix2Double(src_l, src_i, src_r)
 int src_l;
 int src_i;
 CONST FIX_WORD *src_r;
 {
-    double retval;
+    double retval = 0.0;
+    int sign = FIX_Sign(src_r);
 
-    if (src_l > 2 * FIX_BITS_PER_WORD) {
+    if (src_l > (2 * FIX_BITS_PER_WORD)) {
 
 	fix t;
 	double d = 0.0;
 	CONST FIX_WORD *tp;
-	int i, nwords, sign;
-
+	int i;
+	int nwords = FIX_Words(src_l);
 	double word_scale = (double) (1L << FIX_BITS_PER_WORD);
 
-	if ((sign = FIX_Sign(src_r))) {
+	if (sign) {
 	    pFIX_Complement(t, src_r);
 	    tp = t;
 	}
-	else tp = src_r;
+	else {
+	    tp = src_r;
+	}
 
-	nwords = FIX_Words(src_l);
-
-	for (i = nwords; i--;)
+	for (i = nwords; i--;) {
 	    d = d * word_scale + *tp++;
+	}
 
 	d *= pFIX_TwoRaisedTo(src_i-nwords*FIX_BITS_PER_WORD);
 
 	retval = sign ? -d : d;
 
     }
-    else {	/* optimization for short word lengths */
+    else {			/* optimization for short word lengths */
 
-	if (FIX_Sign(src_r)) 
+	if (sign) 
 	    retval = -pFIX_TwoRaisedTo(src_i-2*FIX_BITS_PER_WORD) *
 	    	 (((FIX_DWORD)~src_r[0] << FIX_BITS_PER_WORD) + (FIX_WORD)~src_r[1] +1);
 	else
