@@ -283,7 +283,11 @@ extern VOID_HACK abort(), free(), exit(), perror();
 #endif
 extern char *getenv();
 #ifdef ultrix4
+/* Hack for Ptolemy pigilib/local.h:  skip this if we've seen local.h
+   already */
+#ifndef _local_h
 extern void *malloc(), *realloc(), *calloc();
+#endif /* _local_h */
 #else
 extern char *malloc(), *realloc(), *calloc();
 #endif
