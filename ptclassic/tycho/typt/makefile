@@ -30,7 +30,7 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-DIRS = kernel lib editors doc demo controls
+DIRS = kernel lib edit doc demo controls
 
 # Root of Tycho directory
 ROOT =		..
