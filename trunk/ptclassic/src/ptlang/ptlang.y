@@ -2391,4 +2391,87 @@ int dsize;
 		}
 		s += 2;
 	    } else
-		*d++ = *
+		*d++ = *s++;
+	    if(i++ >= dsize) {
+		*d = (char)NULL; /* terminate the string */
+		return(1);
+	    }
+	}
+	*d = (char)NULL; /* terminate the string */
+	return(0);
+}
+
+/* main program, just calls parser */
+int main (argc, argv)
+int argc;
+char **argv;
+{
+	if (argc != 2) {
+		fprintf (stderr, "Usage: %s file\n", *argv);
+		exit (1);
+	}
+	inputFile = argv[1];
+	if ((yyin = fopen (inputFile, "r")) == NULL) {
+		perror (inputFile);
+		exit (1);
+	}
+	yyparse ();
+	return nerrs;
+}
+
+void yyerr2 (x, y)
+char *x, *y;
+{
+	strcpy (str1, x);
+	strcat (str1, y);
+	yyerror (str1);
+}
+
+void yyerror(s)
+char *s;
+{
+	/* ugly: figure out if yacc is reporting syntax error at EOF */
+	if (strcmp(s, "syntax error") == 0 && yychar == 0)
+		s = "Unexpected EOF (mismatched curly braces?)";
+	fprintf (stderr, "\"%s\", line %d: %s\n", inputFile, yyline, s);
+	nerrs++;
+	return;
+}
+
+void yywarn(s)
+char *s;
+{
+	fprintf (stderr, "\"%s\", line %d: %s\n", inputFile, yyline, s);
+	return;
+}
+
+void mismatch(s)
+char *s;
+{
+	yyerr2 ("Extra token appears after valid input: ", s);
+	exit (1);
+}
+
+/* Check that we are not blowing the top off an array */
+void checkIncludes(numIncludes)
+int numIncludes;
+{
+	if (numIncludes > NINC) {
+		fprintf (stderr, 
+    "Too many include files(%d), recompile ptlang with NINC (%d) larger.\n",
+		numIncludes, NINC);
+		exit(1);
+	}
+}
+
+/* Check that we are not blowing the top off an array */
+void checkSeeAlsos(numSeeAlsos)
+int numSeeAlsos;
+{
+	if (numSeeAlsos > NSEE) {
+		fprintf (stderr, 
+	 "Too many see alsos (%d), recompile ptlang with NSEE (%d) larger.\n",
+		numSeeAlsos, NSEE);
+		exit(1);
+	}
+}
