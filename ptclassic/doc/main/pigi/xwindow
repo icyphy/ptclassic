@@ -47,14 +47,13 @@ The supplied .xinitrc file reads:
 .IE ".xinitrc file"
 .IE ".xsession file"
 .(c
-#! /bin/csh -f
-xrdb ~/.Xresource
-twm &
-xclock -geometry 120x120-0+0 &
+xrdb $HOME/.Xresources
+twm&
 xterm -geometry 80x30+0-0 -fn 9x15 -name "bottom left" &
+xclock -geometry 120x120-0+0 &
 exec xterm -geometry +0+0 -fn 9x15 -name "login" -ls
 .)c
-The second line reads X resources from the file ~/.Xresources.
+The first line reads X resources from the file ~/.Xresources.
 Then the window manager called ``twm'' is started.
 The next three lines open windows using the xterm and xclock commands.
 The .xsession file works pretty much the same way for xdm installations.
