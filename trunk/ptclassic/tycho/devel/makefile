@@ -1,4 +1,4 @@
- # Makefile for Ptolemy Tycho system, devel directory.
+# Makefile for Ptolemy Tycho system, devel directory.
 #
 # $Id$
 # Makefile Author: Christopher Hylands
@@ -50,8 +50,11 @@ TCL_SRCS =
   
 ITCL_SRCS = \
 	Displayer.itcl \
-	View.itcl \
-	SlateView.itcl
+	Graphics.itcl \
+	Options.tcl \
+	Preferences.itcl \
+	SlateView.itcl \
+	View.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
