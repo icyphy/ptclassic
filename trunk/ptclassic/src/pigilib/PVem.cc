@@ -177,7 +177,7 @@ int PVem::pvOpenWindow (int aC,char** aV) {
 
     if (aC != 2) return usage ("pvOpenWindow <OctInstanceHandle>");
 
-    octObject facet;
+    octObject facet = {OCT_UNDEFINED_OBJECT};
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
