@@ -54,6 +54,7 @@ SIMPLE_TESTS = \
 GRAPHICAL_TESTS = \
 	testBuilderDialog.itcl \
 	testExec.itcl \
+	testFile.itcl \
 	testIndexBrowser.itcl \
 	testRevControl.itcl \
 	testToolBar.itcl \
