@@ -588,28 +588,28 @@ char *domain;
 /* 1/28/91, EAL
 */
 boolean
-GOCArchProp(facetPtr, archPtr, defaultArch)
+GOCTargetProp(facetPtr, targetPtr, defaultTarget)
 octObject *facetPtr;
-char **archPtr;
-char *defaultArch;
+char **targetPtr;
+char *defaultTarget;
 {
     octObject prop;
 
-    CK_OCT(ohGetOrCreatePropStr(facetPtr, &prop, "architecture", defaultArch));
-    *archPtr = prop.contents.prop.value.string;
+    CK_OCT(ohGetOrCreatePropStr(facetPtr, &prop, "target", defaultTarget));
+    *targetPtr = prop.contents.prop.value.string;
     return (TRUE);
 }
 
 /* 1/28/91, EAL
 */
 boolean
-SetArchProp(facetPtr, arch)
+SetTargetProp(facetPtr, target)
 octObject *facetPtr;
-char *arch;
+char *target;
 {
     octObject prop;
 
-    CK_OCT(ohCreateOrModifyPropStr(facetPtr, &prop, "architecture", arch));
+    CK_OCT(ohCreateOrModifyPropStr(facetPtr, &prop, "target", target));
     return (TRUE);
 }
 
