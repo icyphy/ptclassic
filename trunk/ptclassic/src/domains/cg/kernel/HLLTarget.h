@@ -25,19 +25,15 @@ class BaseCTarget : public CGTarget {
 public:
 	// constructor
 	BaseCTarget(const char* nam, const char* startype, const char* desc);
-	void start();
 	void wrapup ();
 	Block* clone() const = 0;
 
 	// Routines for writing code: schedulers may call these
-	StringList beginIteration(int repetitions, int depth);
-	StringList endIteration(int repetitions, int depth);
+	void beginIteration(int repetitions, int depth);
+	void endIteration(int repetitions, int depth);
 
-	~BaseCTarget() { delSched();}
 protected:
-	StringState destDirectory;
-	IntState loopScheduler;
-	char *schedFileName;
+
 
 	// Counter used to generate unique identifiers
 	int unique;
