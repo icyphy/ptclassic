@@ -125,7 +125,7 @@ void SDFtoUniversal :: receiveData ()
 }
 
 void SDFtoUniversal :: initialize() {
-	InSDFPort :: initialize();
+	PortHole :: initialize();
 	ToEventHorizon :: initialize();		
 }
 
@@ -173,7 +173,7 @@ int SDFfromUniversal :: ready() {
 }
 
 void SDFfromUniversal :: initialize() {
-	OutSDFPort :: initialize();
+	PortHole :: initialize();
 	FromEventHorizon :: initialize();
 }
 
