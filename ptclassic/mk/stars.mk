@@ -543,7 +543,7 @@ CUSTOM_DIRS += $(CROOT)/src/kernel $(CROOT)/src/pigiRpc $(CROOT)/src/ptcl \
 	$(CROOT)/mk $(CROOT)/src/tycho/kernel
 
 PT_DEPEND += $(LIBDIR)/libptcl.$(LIBSUFFIX) $(LIBDIR)/libptolemy.a \
-	$(LIBFILES) $(STARS)
+	$(LIBFILES) $(STARS) $(TARGETS)
 
 # this would not be defined if we are making a small stand-alone 
 # program to test the ptolemy libraries, see standalone.mk
