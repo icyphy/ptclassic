@@ -19,7 +19,7 @@ $Id$
  Its initialization expression can have arbitrary floating values,
  as long as the final value is within the [-1,1] range.
 
- bitVal(int nBits) returns the value as an n-bit 2's complement integer.
+ bitVal(int nBits) returns the value as an n-bit 2s complement integer.
  nBits can be no more than the number of bits in a long.
 
 **************************************************************************/
@@ -45,5 +45,9 @@ public:
 	const char* readClassName() const {return "FixState";}
 
 	State* clone () const; // { return new FixState;}
+
+	// assignment: does check and truncation
+	double operator=(double rvalue);
+
 };
 #endif

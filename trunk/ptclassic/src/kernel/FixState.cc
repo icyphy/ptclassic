@@ -62,6 +62,13 @@ State* FixState :: clone() const {
 	return new FixState;
 }
 
+// assignment operator: truncate the value
+double FixState :: operator = (double rvalue) {
+	if (rvalue > 1.0) rvalue = 1.0;
+	else if (rvalue < -1.0) rvalue = -1.0;
+	return FloatState::operator=(rvalue);
+}
+
 static FixState proto;
 static KnownState entry(proto,"FIX");
 
