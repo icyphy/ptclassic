@@ -333,7 +333,7 @@ body ::tycho::MenuSupport::enable {name} {
 body ::tycho::MenuSupport::empty {name} {
     # Check validity
     if { ! [::info exists menupath($name)] } {
-	error "Menu $name does not exist
+	error "Menu $name does not exist"
     }
     return [string match [$menupath($name) index last] "none"]
 }
