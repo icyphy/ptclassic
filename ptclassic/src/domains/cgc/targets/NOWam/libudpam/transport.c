@@ -371,8 +371,8 @@ op_t ReplyErrorCheck(ea_t requestEndpoint, int type, tag_t pktTag,
   else 
   if (((pktHandler < 0) && (pktHandler != UDPAM_EMPTY_HANDLER)) || 
 	   (pktHandler >= requestEndpoint->num_handlers) ||
-	   (requestEndpoint->handler_table[pktHandler] == abort) &&
-	   (pktHandler != UDPAM_EMPTY_HANDLER)) 
+	   ((requestEndpoint->handler_table[pktHandler] == abort) &&
+	   (pktHandler != UDPAM_EMPTY_HANDLER))) 
     return(EBADHANDLER);
   else if (((type == UDPAM_REPLY_LONG_4) || (type == UDPAM_REPLY_LONG_8)) && 
 	   ((destOffset < 0) || (destOffset > requestEndpoint->length)))
@@ -696,8 +696,6 @@ int AM_RequestXfer4(ea_t request_endpoint, int reply_endpoint,
 		    void *source_addr, int nbytes,
 		    int arg0, int arg1, int arg2, int arg3)
 {
-  int                segsize;
-  caddr_t            segstartaddr;
   UDPAM_Buf          *buf;
   UDPAM_Long4_Pkt    *packet;
   struct sockaddr_in dest_sockaddr;
@@ -744,8 +742,6 @@ int AM_RequestXfer8(ea_t request_endpoint, int reply_endpoint,
 		    int arg0, int arg1, int arg2, int arg3,
 		    int arg4, int arg5, int arg6, int arg7)
 {
-  int                 segsize;
-  caddr_t             segstartaddr;
   UDPAM_Buf           *buf;
   UDPAM_Long8_Pkt     *packet;
   struct sockaddr_in  dest_sockaddr;
@@ -1073,9 +1069,7 @@ int AM_ReplyXfer4(void *token, int dest_offset,
 		  handler_t handler, void *source_addr, int nbytes, 
 		  int arg0, int arg1, int arg2, int arg3)
 {
-  int                 segsize;
   ea_t                source_ep;
-  caddr_t             segstartaddr;
   UDPAM_Buf           *buf;
   UDPAM_Long4_Pkt     *packet;
   struct sockaddr_in  dest_sockaddr;
@@ -1123,9 +1117,7 @@ int AM_ReplyXfer8(void *token, int dest_offset,
 		  int arg0, int arg1, int arg2, int arg3,
 		  int arg4, int arg5, int arg6, int arg7)
 {
-  int                   segsize;
   ea_t                  source_ep;
-  caddr_t               segstartaddr;
   UDPAM_Buf             *buf;
   UDPAM_Long8_Pkt       *packet;
   struct sockaddr_in    dest_sockaddr;
