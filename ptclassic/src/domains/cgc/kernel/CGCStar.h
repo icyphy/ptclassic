@@ -47,18 +47,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class CGCTarget;
 
 // New attribute bit definition
-const bitWord AB_VARPREC  = 0x40;
+extern const bitWord AB_VARPREC  /* = 0x40 */;
 
-const Attribute ANY = {0,0};
+extern const Attribute ANY /* = {0,0} */;
 
 // New attribute for ports and states of type FIX/FIXARRAY.
 // These attributes are ignored for ports/states of other types.
 
 // fixed point precision may change at runtime;
 // declare a precision variable holding the actual precision
-const Attribute A_VARPREC   = {AB_VARPREC,0};
+extern const Attribute A_VARPREC /* = {AB_VARPREC,0} */;
 // fixed point precision does not change at runtime (the default)
-const Attribute A_CONSTPREC = {0,AB_VARPREC};
+extern const Attribute A_CONSTPREC /* = {0,AB_VARPREC} */;
 
 
 class CGCStar : public CGStar {

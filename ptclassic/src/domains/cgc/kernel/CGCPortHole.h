@@ -41,7 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGPortHole.h"
 #include "PrecisionState.h"
 
-const bitWord PB_GLOBAL = 0x20;
+extern const bitWord PB_GLOBAL;
 extern const Attribute P_GLOBAL;
 extern const Attribute P_LOCAL;
 
