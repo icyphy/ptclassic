@@ -194,6 +194,9 @@ glimpse: .glimpse_exclude
 # Check html docs for problems
 # htmlchek is not shipped with tycho, see:
 # 	ftp://ftp.cs.buffalo.edu/pub/htmlchek/
+#
+# See $TYCHO/doc/coding/testing.html for instructions.
+#
 HTMLCHEK=/usr/tools/www/htmlchek
 HTMLCHEKOUT=htmlchekout
 htmlchek:
