@@ -81,7 +81,8 @@
 # JFLAGS	Flags to pass to javac.
 # JAVADOC	The 'javadoc' program
 # JDOCFLAGS	Flags to pass to javadoc.
-# JZIP		Zip file to be produced.
+# JZIP		Zip file of classes to be produced.
+# JDIST		The name and version of the tar.gz and zip files of the sources
 # JTESTHTML	Test html file for a java class.
 
 ##############
@@ -257,7 +258,7 @@ htest-netscape: $(JTESTHTML) $(JCLASS)
 # We cd up one level so that the zip file has the proper package name
 jzip: $(JZIP)
 $(JZIP): $(JSRCS) $(JCLASS)
-	(cd ..; zip $(JPACKAGE)/$@ $(JPACKAGE)/*.class)
+	(cd ..; zip -n .class $(JPACKAGE)/$@ $(JPACKAGE)/*.class)
 
 
 # Rules to build Java package distributions
@@ -275,6 +276,25 @@ $(JDIST).tar.gz:  $(JDIST_EX)
 
 $(JDIST).zip:
 	(cd ..; zip -r $(JPACKAGE)/$@ $(JPACKAGE) -x \*/SCCS/\* -x \*/makefile -x \*/$(JDIST).tar.gz -x \*/$(JDIST).zip)
+
+# Create a distribution and install it.
+# This rule is particular to our local installation
+JDESTDIR = /vol/ptolemy/pt0/ftp/pub/ptolemy/www/java
+
+updatewebsite: $(JDISTS)
+	@echo "Updating website"
+	cp $(JDISTS) $(JDESTDIR)
+	(cd $(JDESTDIR); rm -rf $(JPACKAGE); \
+	 gtar -zxf $(JDIST).tar.gz; \
+	 chmod g+w $(JDISTS); chmod g+ws $(JPACKAGE))
+
+installjdist:
+	$(MAKE) clean
+	@echo "We must use JDK1.0.2 to compile for use with Netscape"
+	$(MAKE) JAVAHOME=/usr/sww/lang/java-1.0.2
+	$(MAKE) install
+	$(MAKE) jdist
+	$(MAKE) updatewebsite
 
 ##############
 # Rules for testing 
