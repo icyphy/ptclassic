@@ -53,9 +53,10 @@ INCL =		-I$(DEDIR) -I$(KERNDIR) -I$(PIGIDIR) -I$(PTKLIB) \
 LIB =		libdejavastars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
+# DEJavaIfc.pl
 PL_SRCS= \
-DEJNITest.pl \
-DEJavaIfc.pl
+DEJNITest.pl
+
 
 # The .cc files
 SRCS =		$(PL_SRCS:.pl=.cc)
@@ -69,7 +70,7 @@ HDRS =		$(SRCS:.cc=.h)
 STAR_MK =	dejavastars
 DOMAIN =	DE_JAVA
 DOMAIN_2 =	DE
-MISC_FILES =	jni.tcl
+MISC_FILES =	jnitest.tcl
 
 EXTRA_SRCS =	$(STAR_MK).c $(PL_SRCS) $(MISC_FILES)
 
