@@ -189,6 +189,9 @@ class ::tycho::DataModel {
     # The context currently being parsed in
     protected common _context_ {}
 
+    # The namespace of this object
+    protected variable dataspace
+
     #################################################################
     ####                    private methods                      ####
 
@@ -220,7 +223,7 @@ class ::tycho::DataModel {
     ####                  private variables                    ####
 
     # The name used to construct the data arrays
-    private variable _dataname
+    # private variable _dataname
 
     # Default attributes, indexed by type
     private variable _defaults
@@ -248,25 +251,46 @@ class ::tycho::DataModel {
 #### constructor
 #
 body ::tycho::DataModel::constructor {args} {
+    # Create the namespace for this object's data
+    set dataspace ${scope}::[info namespace tail $this]
+    namespaceEval $dataspace
 
     # Make sure the namespaces exist in the safe interpreter
-    $safeinterp eval namespace ::tycho
-    $safeinterp eval namespace $scope
+    # FIXME: when Itcl3.0 comes out
+    global tcl_version
+    if { $tcl_version >= 8.0 } {
+	$safeinterp eval "namespace eval ::tycho {}"
+	$safeinterp eval "namespace eval $scope {}"
+	$safeinterp eval "namespace eval $dataspace {}"
 
+	set [set scope]::_context_ {}
+    } else {
+	$safeinterp eval namespace ::tycho
+	$safeinterp eval namespace $scope
+	$safeinterp eval namespace $dataspace
+    }	
     # Initialize the array name
-    set _dataname [::info namespace tail $this]
+    # set _dataname [::info namespace tail $this]
 
     # Create a proc to parse the "configure" syntax
     @scope $scope eval {
-        proc __parse_configure {args} {
-            global _object_
-            global $_object_
-            eval $_object_ configure $args
-        }
+ 	if { $tcl_version >= 8.0 } {
+	    proc __parse_configure {args} {
+		variable _object_
+		global $_object_
+		eval $_object_ configure $args
+	    }
+	} else {
+	    proc __parse_configure {args} {
+		global _object_
+		global $_object_
+		eval $_object_ configure $args
+	    }
+	}
     }
 
     # Link it into the safe interpreter
-    $safeinterp alias $scope::configure $scope::__parse_configure
+    $safeinterp alias ${scope}::configure ${scope}::__parse_configure
 
     # Evaluate options
     eval configure $args
@@ -293,18 +317,19 @@ body ::tycho::DataModel::destructor {} {
 #
 body ::tycho::DataModel::add {type name args} {
     # Do lots of time-consuming error-checking
-    if [@scope $scope ::info exists [set _dataname]($name)] {
-        error "A $type \"$name\" already exists in $modelname"
+    if [@scope $dataspace ::info exists data($name)] {
+        # error "A $type \"$name\" already exists in $modelname"
+        puts "A $type \"$name\" already exists in $modelname"
     }
     if ![::info exists _typeconfig($scope:$type)] {
 	error "Unknown type \"$type\" in $modelname"
     }
     # Invalidate cache
-    @scope $scope set [set _dataname].cachevalid 0
+    @scope $dataspace set cachevalid 0
 
     set context [lreplace $name end end]
     if { $context != "" \
-            && ![@scope $scope ::info exists [set _dataname]($context)] } {
+            && ![@scope $dataspace ::info exists data($context)] } {
 	error "Unknown context \"$context\" in $modelname"
     }
 
@@ -322,13 +347,13 @@ body ::tycho::DataModel::add {type name args} {
     }
 
     # Store the data of this item
-    @scope $scope set [set _dataname]($name) $args
+    @scope $dataspace set data($name) $args
 
     # Store the type of this item
-    @scope $scope set [set _dataname].type($name) $type
+    @scope $dataspace set type($name) $type
 
     # Add it to the list of children of its parent
-    @scope $scope lappend [set _dataname]:[set type]($context) \
+    @scope $dataspace lappend children:[set type]($context) \
 	    [lindex $name end]
 
     # Parse contents
@@ -351,7 +376,7 @@ body ::tycho::DataModel::attrdel {name args} {
     _verify $name
 
     # Get attributes
-    array set attrs [@scope $scope set [set _dataname]($name)]
+    array set attrs [@scope $dataspace set data($name)]
     
     # Delete each
     if { $recording } {
@@ -371,7 +396,7 @@ body ::tycho::DataModel::attrdel {name args} {
 	    }
 	}
     }
-    @scope $scope set [set _dataname]($name) [array get attrs]
+    @scope $dataspace set data($name) [array get attrs]
 }
 
 ########################################################################
@@ -388,9 +413,9 @@ body ::tycho::DataModel::attrget {name {attr {}}} {
     _verify $name
 
     # Get defaults
-    set type [@scope $scope set [set _dataname].type($name)]
+    set type [@scope $dataspace set type($name)]
     array set attrs $_defaults($type)
-    array set attrs [@scope $scope set [set _dataname]($name)]
+    array set attrs [@scope $dataspace set data($name)]
 
     if { $attr == "" } {
         # Return all attributes
@@ -399,7 +424,7 @@ body ::tycho::DataModel::attrget {name {attr {}}} {
 	# Return a single attribute
 	if { ! [::info exists attrs($attr)] } {
 	    error "Unknown attribute $attr of $type \"$name\"" in $modelname"
-	}
+	} ;#"
 	return $attrs($attr)
     }
 }
@@ -419,14 +444,14 @@ body ::tycho::DataModel::attrset {name args} {
 
     # If no arguments, return data without defaults
     if { $args == "" } {
-        return [@scope $scope set [set _dataname]($name)]
+        return [@scope $dataspace set data($name)]
     }
 
     # Invalidate cache
-    @scope $scope set [set _dataname].cachevalid 0
+    @scope $dataspace set cachevalid 0
     
     # Get current data
-    array set attrs [@scope $scope set [set _dataname]($name)]
+    array set attrs [@scope $dataspace set data($name)]
     
     # Add to history
     if { $recording } {
@@ -458,7 +483,7 @@ body ::tycho::DataModel::attrset {name args} {
 
     # Merge the new data and return result
     array set attrs $args
-    @scope $scope set [set _dataname]($name) [array get attrs]
+    @scope $dataspace set data($name) [array get attrs]
 }
 
 ########################################################################
@@ -479,11 +504,11 @@ body ::tycho::DataModel::clear {} {
     }
 
     # Unset the data of all items and the children of each type
-    catch {@scope $scope unset $_dataname}
-    catch {@scope $scope unset $_dataname.type}
-    catch {@scope $scope unset $_dataname.cachevalid}
+    catch {@scope $dataspace unset data}
+    catch {@scope $dataspace unset type}
+    catch {@scope $dataspace unset cachevalid}
     foreach type $_types($scope) {
-        catch {@scope $scope unset $_dataname:$type}
+        catch {@scope $dataspace unset children:$type}
     }
 }
 
@@ -530,11 +555,11 @@ body ::tycho::DataModel::configure {{option {}} args} {
 #
 body ::tycho::DataModel::delete {name} {
     _verify $name
-    set type [@scope $scope set [set _dataname].type($name)]
+    set type [@scope $dataspace set type($name)]
     set context [lreplace $name end end]
 
     # Invalidate cache
-    @scope $scope set [set _dataname].cachevalid 0
+    @scope $dataspace set cachevalid 0
 
     if $recording {
         # Mark the history
@@ -563,13 +588,13 @@ body ::tycho::DataModel::delete {name} {
         }
     }
     # Remove from the parent list
-    @scope $scope set [set _dataname]:[set type]($context) \
+    @scope $dataspace set children:[set type]($context) \
             [::tycho::ldelete \
-            [@scope $scope set [set _dataname]:[set type]($context)] \
+            [@scope $dataspace set children:[set type]($context)] \
             [lindex $name end]]
 
     # Delete data
-    @scope $scope unset [set _dataname]($name)
+    @scope $dataspace unset data($name)
 }
 
 # Helper method to delete children while recording
@@ -586,10 +611,10 @@ body ::tycho::DataModel::_delete {context name type} {
             "add $type [list $name] [attrset $name]"
     
     # Delete the parent's child list
-    @scope $scope set [set _dataname]:[set type]($context) {}
+    @scope $dataspace set children:[set type]($context) {}
 
     # Delete data
-    @scope $scope unset [set _dataname]($name)
+    @scope $dataspace unset data($name)
 }
 
 # Helper method to delete children while not recording
@@ -601,10 +626,10 @@ body ::tycho::DataModel::_deletenorecord {context name type} {
         }
     }
     # Delete the parent's child list
-    @scope $scope set [set _dataname]:[set type]($context) {}
+    @scope $dataspace set children:[set type]($context) {}
 
     # Delete data
-    @scope $scope unset [set _dataname]($name)
+    @scope $dataspace unset data($name)
 }
 
 ########################################################################
@@ -622,6 +647,7 @@ body ::tycho::DataModel::_deletenorecord {context name type} {
 # prepend the prefix to each line produced.
 #
 body ::tycho::DataModel::describe {{name {}} {prefix {}}} {
+puts Foo
     if { $name!= "" } {
 	# Describe a single item
         _verify $name
@@ -640,7 +666,7 @@ body ::tycho::DataModel::describe {{name {}} {prefix {}}} {
 	foreach opt $printable {
 	    if { $v($opt) != $d($opt) } {
 		append string "\n$prefix"
-		lappend string configure $opt $v($opt)
+		append string [list configure $opt $v($opt)]
 	    }
         }
 
@@ -666,12 +692,12 @@ body ::tycho::DataModel::describe {{name {}} {prefix {}}} {
 #
 body ::tycho::DataModel::exists {name {attribute {}}} {
     if { $attribute == "" } {
-	@scope $scope ::info exists [set _dataname]($name)
+	@scope $dataspace ::info exists data($name)
     } else {
-	if [@scope $scope ::info exists [set _dataname]($name)] {
-	    set type [@scope $scope set [set _dataname].type($name)]
+	if [@scope $dataspace ::info exists data($name)] {
+	    set type [@scope $dataspace set type($name)]
 	    array set data $_defaults($type)
-	    array set data [@scope $scope set [set _dataname]($name)]
+	    array set data [@scope $dataspace set data($name)]
 	    ::info exists data($attribute)
 	} else {
 	    return 0
@@ -690,7 +716,7 @@ body ::tycho::DataModel::exists {name {attribute {}}} {
 # be ordered.
 #
 body ::tycho::DataModel::get {{pattern *}} {
-    @scope $scope array get $_dataname $pattern
+    @scope $dataspace array get data $pattern
 }
 
 ########################################################################
@@ -716,8 +742,8 @@ body ::tycho::DataModel::match {type {context {}} args} {
         error "Unknown context \"$context\" in $modelname"
     }
     # Get all children in order
-    if [@scope $scope ::info exists [set _dataname]:[set type]($context)] {
-        set children [@scope $scope set [set _dataname]:[set type]($context)]
+    if [@scope $dataspace ::info exists children:[set type]($context)] {
+        set children [@scope $dataspace set children:[set type]($context)]
         if { $args == "" } {
             return $children
         }
@@ -730,7 +756,7 @@ body ::tycho::DataModel::match {type {context {}} args} {
         set name [concat $context $n]
 
         array set attrs $_defaults($type)
-        array set attrs [@scope $scope set [set _dataname]($name)]
+        array set attrs [@scope $dataspace set data($name)]
 
     	set matching 1
     	foreach {attr val} $args {
@@ -757,7 +783,7 @@ body ::tycho::DataModel::match {type {context {}} args} {
 # of <code>foo</code>. The returned list is not be ordered.
 #
 body ::tycho::DataModel::names {{pattern *}} {
-    @scope $scope array names $_dataname $pattern
+    @scope $dataspace array names data $pattern
 }
 
 ########################################################################
@@ -777,14 +803,20 @@ body ::tycho::DataModel::parse {data {context {}}} {
 	error "Unknown context \"$context\" in $modelname"
     }
 
-    global _current_ _context_ _object_
-    set saved $_context_
+    #global _current_ _context_ _object_
+    set saved [set [set scope]::_context_]
+    set _current_ $dataspace
+    set [set scope]::_context_ $context
+    set [set scope]::_object_ $this
 
-    set _current_ $_dataname
-    set _context_ $context
-    set _object_ $this
-    $safeinterp eval [list @scope $scope $data]
-    set _context_ $saved
+    # FIXME: Itcl 3.0
+    global tcl_version
+    if { $tcl_version >= 8.0 } {
+	$safeinterp eval [list namespace eval $scope $data]
+    } else {
+	$safeinterp eval [list @scope $scope $data]
+    }
+    set [set scope]::_context_ $saved
     return
 }
 
@@ -815,7 +847,7 @@ body ::tycho::DataModel::reorder {type {context {}} {list {}}} {
     if { [lsort $list] != [lsort [match $type $context]] } {
         error "Child names do not match"
     }
-    @scope $scope set [set _dataname]:[set type]($context) $list
+    @scope $dataspace set children:[set type]($context) $list
 }
 
 ########################################################################
@@ -893,7 +925,7 @@ body ::tycho::DataModel::search {mode defaults args} {
         set tempdata $data
         set data {}
         foreach {name attr} $tempdata {
-	    	set type [@scope $scope set [set _dataname].type($name)]
+	    	set type [@scope $dataspace set type($name)]
             array set t $_defaults($type)
             array set t $attr
             lappend data $name [array get t]
@@ -1117,7 +1149,7 @@ body ::tycho::DataModel::type {mode {type {}} args} {
                 @scope $scope eval [_mkparseproc $type]
 
 		# Link the proc into the safe interpreter
-		$safeinterp alias $scope::$type $scope::__parse_$type
+		$safeinterp alias ${scope}::$type ${scope}::__parse_$type
 	    }
 	}
 	"exists" {
@@ -1130,7 +1162,7 @@ body ::tycho::DataModel::type {mode {type {}} args} {
 	"get" {
             set name $type
             _verify $name
-            @scope $scope set [set _dataname].type($name)
+            @scope $dataspace set type($name)
         }
 	"names" {
             return $_types($scope)
@@ -1174,7 +1206,7 @@ body ::tycho::DataModel::uniqueid {prefix} {
 # in the TIM format. _prefix_, if supplied, is prepended to each line.
 #
 body ::tycho::DataModel::_describe {name {prefix {}}} {
-    set type [@scope $scope set [set _dataname].type($name)]
+    set type [@scope $dataspace set type($name)]
 
     # If override is on for this type, call its method
     if $_override($type) {
@@ -1186,14 +1218,14 @@ body ::tycho::DataModel::_describe {name {prefix {}}} {
 
     # Print attributes
     # This is fast:
-    eval lappend string [@scope $scope set [set _dataname]($name)]
+    eval lappend string [@scope $dataspace set data($name)]
     #
     # This looks better:
     # It's also broken! breakLines adds a back-slash that makes
     # Tcl back-slash escape the whole string. Tcl is such a piece
     # of shit.
     #append string " " [string trimleft [::tycho::breakLines \
-    #        [@scope $scope set [set _dataname]($name)] \
+    #        [@scope $scope set data($name)] \
     #        -length 60 \
     #        -substring " -" \
     #        -prefix $prefix] " "]
@@ -1232,7 +1264,7 @@ body ::tycho::DataModel::_describechildren {name {prefix {}}} {
 # for use by subclasses. The item is assumed to be know to exist.
 #
 body ::tycho::DataModel::_type {name} {
-    @scope $scope set [set _dataname].type($name)
+    @scope $dataspace set type($name)
 }
 
 ########################################################################
@@ -1242,7 +1274,7 @@ body ::tycho::DataModel::_type {name} {
 # This is short-cut version of <b>cache update</b>.
 #
 body ::tycho::DataModel::_update {} {
-    if ![@scope $scope set [set _dataname].cachevalid] {
+    if ![@scope $dataspace set cachevalid] {
         _updatecache
     }
 }
@@ -1296,7 +1328,7 @@ body ::tycho::DataModel::cache {mode args} {
 	    if { $args != "" } {
 		error "wrong # args: should be \"cache invalidate\""
 	    }
-	    @scope $scope set [set _dataname].cachevalid 0
+	    @scope $dataspace set cachevalid 0
         }
         "update" {
  	    if { $args != "" } {
@@ -1308,13 +1340,13 @@ body ::tycho::DataModel::cache {mode args} {
 	    if { $args != "" } {
 		error "wrong # args: should be \"cache valid\""
 	    }
-	    @scope $scope set [set _dataname].cachevalid
+	    @scope $dataspace set cachevalid
 	}
         "validate" {
 	    if { $args != "" } {
 		error "wrong # args: should be \"cache validate\""
 	    }
-	    @scope $scope set [set _dataname].cachevalid 1
+	    @scope $dataspace set cachevalid 1
         }
 	default {
 	    error "bad option \"$mode\": should be invalidate, \
@@ -1333,8 +1365,10 @@ body ::tycho::DataModel::cache {mode args} {
 # Create a proc to parse an item
 #
 body ::tycho::DataModel::_mkparseproc {type} {
+    global tcl_version
+
     # Proc header
-    set proc "proc $scope::__parse_$type "
+    set proc "proc ${scope}::__parse_$type "
     if $_override($type) {
         append proc "{args}"
     } else {
@@ -1345,32 +1379,44 @@ body ::tycho::DataModel::_mkparseproc {type} {
     # Proc body
     append proc "    set type $type\n"
 
-
     # If the override option is set, call a method on the
     # object instead of generating code to load its data.
     if $_override($type) {
-        append proc {
-            global _object_
-            global $_object_
-            eval $_object_ _add$type $args
-        }
+	# FIXME: Itcl3.0
+	if { $tcl_version >= 8.0 } {
+	    append proc {
+		variable _object_
+		global $_object_
+		eval $_object_ _add$type $args
+	    }
+	} else {
+	    append proc {
+		global _object_
+		global $_object_
+		eval $_object_ _add$type $args
+	    }
+	}
     } else {
         # Declare various data global
-        append proc {
-            global _current_ _context_
-            global $_current_
-            global $_current_:$type
-            global $_current_.type
-            global $_current_.cachevalid
-        }
+	if { $tcl_version >= 8.0 } {
+	    append proc {
+		variable _current_
+		variable _context_
+	    }
+	} else {
+	    append proc {
+		global _current_ _context_
+	    }
+	}
         # Generate the full name of the item
         append proc {
             set name [concat $_context_ $tail]
         }
         # Check whether the item already exists
         append proc {
-            if [::info exists [set _current_]($name)] {
-                error "A $type \"$name\" already exists in $_current_"
+            if [@scope $_current_ ::info exists data($name)] {
+                # error "A $type \"$name\" already exists in $_current_"
+		puts "A $type \"$name\" already exists in $_current_"
             }
         }
         # Extract contents if the item is not always a leaf
@@ -1386,19 +1432,19 @@ body ::tycho::DataModel::_mkparseproc {type} {
         }
         # Set the data of this item
         append proc {
-            set [set _current_]($name) $args
+            @scope $_current_ set data($name) $args
 	}
         # Remember its type
         append proc {
-            set [set _current_].type($name) $type
+            @scope $_current_ set type($name) $type
 	}
         # Add the item tail to the list of children of its parent
         append proc {
-            lappend [set _current_]:[set type]($_context_) $tail
+	    @scope $_current_ lappend children:[set type]($_context_) $tail
         }
         # Clear the cache valid flag
         append proc {
-            set $_current_.cachevalid 0
+            @scope $_current_ set cachevalid 0
         }
         # Parse contents if the item is not a leaf. Use the safe
 	# interpreter to ensure safety.
@@ -1408,7 +1454,15 @@ body ::tycho::DataModel::_mkparseproc {type} {
                 set saved $_context_
                 set _context_ $name
             }
-            append t "$safeinterp eval @scope $scope \$contents\n"
+	    # FIXME: Itcl 3.0
+	    global tcl_version
+	    if { $tcl_version >= 8.0 } {
+		append t "$safeinterp eval namespace \
+			\"eval $scope \{\$contents\n\}\""
+	    } else {
+		append t "$safeinterp eval @scope $scope \$contents\n"
+	    }
+            # append t "$safeinterp eval @scope $scope \$contents\n"
             append t {
                 set _context_ $saved
             }
@@ -1426,7 +1480,7 @@ body ::tycho::DataModel::_mkparseproc {type} {
 # error if it does not.
 #
 body ::tycho::DataModel::_verify {name} {
-    if ![@scope $scope ::info exists [set _dataname]($name)] {
+    if ![@scope $dataspace ::info exists data($name)] {
     	error "Unknown item \"$name\" in $modelname"
     }
 }
