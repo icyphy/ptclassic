@@ -1,3 +1,4 @@
+# -*- model: tcl -*-
 #
 # $Id$
 #
@@ -23,4 +24,8 @@ style default \
     parameter destColor forestGreen \
 	    -type color \
 	    -label "?destColor?"
+
+    parameter targetColor lightskyblue \
+	-type color \
+	-label "?Target color?"
 }
