@@ -91,6 +91,7 @@ PL_SRCS= \
  SDFRampInt.pl \
  SDFReadFile.pl \
  SDFReadPCM.pl \
+ SDFReadVar.pl \
  SDFReciprocal.pl \
  SDFRect.pl \
  SDFRectFix.pl \
@@ -100,6 +101,7 @@ PL_SRCS= \
  SDFReverse.pl \
  SDFSgn.pl \
  SDFSin.pl \
+ SDFSharedMem.pl \
  SDFSqrt.pl \
  SDFSub.pl \
  SDFSubCx.pl \
@@ -116,6 +118,7 @@ PL_SRCS= \
  SDFWaterfall.pl \
  SDFWaveForm.pl \
  SDFWaveFormCx.pl \
+ SDFWriteVar.pl \
  SDFXMgraph.pl \
  SDFXYgraph.pl \
  SDFXgraph.pl \
