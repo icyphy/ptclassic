@@ -529,6 +529,11 @@ body ::tycho::Edit::constructor {args} {
     bind $text <Control-d> "%Q del fchar; break"
     bind $text <Meta-d> "%Q del fword; break"
     bind $text <Escape><d> "%Q del fword; break"
+
+    # The virtual event <<Tab>> is the alternative for Tab.
+    # In some derived classes, the tab key is rebound.  This binding
+    # here ensures a uniform alternative.
+    bind $itk_component(text) <<Tab>> "%Q insertString insert {\t}; break"
     
     # Cutting and pasting
     bind $text <<Paste>> "%Q paste; break"
