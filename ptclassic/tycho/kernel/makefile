@@ -42,8 +42,7 @@ include $(CONFIG)
 
 TCL_SRCS = \
 	Color.tcl \
-	Lib.tcl \
-	tychoMakeIndex.tcl
+	Lib.tcl
   
 ITCL_SRCS = \
 	CircularList.itcl \
