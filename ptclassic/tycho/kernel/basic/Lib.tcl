@@ -76,5 +76,6 @@ namespace ::tycho {
     tycho::File::registerEditor {.mk .template} EditMake {Makefile editor} \
 	    {Makefile makefile GNUmakefile}
     tycho::File::registerEditor {.vhdl .VHDL} EditVHDL {VHDL editor}
+    tycho::File::registerEditor {} EditBubbleAndArc {Base graphical editor}
     tycho::File::registerEditor {.fsm} EditFSM {Finite state machine editor}
 }
