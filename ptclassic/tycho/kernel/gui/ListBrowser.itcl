@@ -34,6 +34,8 @@
 option add *ListBrowser*entryWidth 30 widgetDefault
 option add *ListBrowser*entryBackground \
 	[ptkColor antiqueWhite white] widgetDefault
+option add *ListBrowser*entryForeground \
+	[ptkColor black black] widgetDefault
 option add *ListBrowser*textBackground \
 	[ptkColor antiqueWhite white] widgetDefault
 option add *ListBrowser.textForeground \

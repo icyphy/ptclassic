@@ -35,6 +35,8 @@
 option add *FileBrowser*entryWidth 30 widgetDefault
 option add *FileBrowser*entryBackground \
 	[ptkColor antiqueWhite white] widgetDefault
+option add *FileBrowser*entryForeground \
+	[ptkColor black black] widgetDefault
 option add *FileBrowser*textBackground \
 	[ptkColor antiqueWhite white] widgetDefault
 option add *FileBrowser.textForeground \
