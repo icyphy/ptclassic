@@ -1,5 +1,5 @@
 defstar {
-	name		{ RunLenImageInv }
+	name		{ RunLenImgInv }
 	domain		{ SDF }
 	version		{ $Id$ }
 	author		{ Paul Haskell }
@@ -20,7 +20,7 @@ Check to make sure we don't write past unallocated memory.
 .Id "run length decoding"
 .Id "image, run length decoding"
 	}
-	seealso { RunLenImage }
+	seealso { RunLenImg }
 
 	hinclude { "GrayImage.h", "Error.h" }
 
@@ -100,4 +100,4 @@ Check to make sure we don't write past unallocated memory.
 		invRunLen(inImage);
 		Envelope outEnvp(*inImage); outData%0 << outEnvp;
 	}
-} // end defstar { RunLenInv }
+} // end defstar { RunLenImgInv }
