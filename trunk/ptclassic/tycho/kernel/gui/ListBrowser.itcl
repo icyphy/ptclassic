@@ -398,7 +398,9 @@ body ::tycho::ListBrowser::select {name} {
         }
     } msg] {
         set closing 0
-        error $msg
+        global ::errorInfo
+        set saveInfo $errorInfo
+        error $msg $saveInfo
     }
     if $complete {
         # nextWindow not used because focus goes to the new window.
