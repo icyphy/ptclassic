@@ -57,6 +57,7 @@ TCL_SRCS = \
 
 ITCL_SRCS = \
 	Builder.itcl \
+	Exec.itcl \
 	Object.itcl \
 	Resource.itcl \
 	ResourceFile.itcl \
