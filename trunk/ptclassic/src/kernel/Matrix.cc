@@ -525,7 +525,7 @@ ComplexMatrix::ComplexMatrix(int numRow, int numCol, PortHole& ph) {
 
   // Load the data from the PortHole into the matrix.
   for(int i = 0; i < totalDataSize; i++)
-    entry(i) = Complex(ph%(totalDataSize - i - 1));
+    entry(i) = Complex((const Complex &)(ph%(totalDataSize - i - 1)));
 }
 
 // constructor:
@@ -919,7 +919,7 @@ FixMatrix::FixMatrix(int numRow, int numCol, PortHole& ph) {
 
   // Load the data from the PortHole into the matrix.
   for(int i = 0; i < totalDataSize; i++)
-    data[i] = Fix(ph%(totalDataSize - i - 1));
+      data[i] = Fix((const Fix &)(ph%(totalDataSize - i - 1)));
 }
 
 // Constructor: 
