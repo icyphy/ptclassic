@@ -36,7 +36,7 @@ public:
 	void addDest(AsmGeodesic *d) {
 		d->forkType |= F_DEST;
 		d->src = this;
-		dests.append(d);
+		dests.put(d);
 	}
 	AsmGeodesic() : maxNumParticles(0), forkType(0), src(0), mem(0) {}
 	void assignAddr(ProcMemory& m, unsigned a) {

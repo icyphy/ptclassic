@@ -46,7 +46,7 @@ void MReqList::appendSorted(MReq& m) {
 	return;
 }
 
-MReqList::zero() {
+void MReqList::zero() {
 	while (first) {
 		MReq* p = first;
 		first = p->next;

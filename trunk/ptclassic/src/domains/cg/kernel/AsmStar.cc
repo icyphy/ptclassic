@@ -102,7 +102,7 @@ class StateAddrEntry {
 };
 
 // add a new state to the table.
-void AsmStar::addEntry(State& s,ProcMemory& m, unsigned a) {
+void AsmStar::addEntry(const State& s,ProcMemory& m, unsigned a) {
 	addrList = new StateAddrEntry(s.readName(),m,a,addrList);
 }
 

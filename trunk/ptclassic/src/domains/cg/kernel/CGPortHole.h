@@ -82,9 +82,10 @@ public:
 // Synchronous dataflow MultiPortHole for code generation
  
 class MultiCGPort : public MultiSDFPort {
+protected:
 	int memLoc;
 public:
-	void setMemLoc(int i) { memLoc = 1;}
+	void setMemLoc(int i) { memLoc = i;}
 
 	// Services of MultiSDFPort that are used often:
 	// setPort(const char* portName, Block* parent, dataType type,

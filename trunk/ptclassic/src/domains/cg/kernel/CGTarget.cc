@@ -22,7 +22,7 @@ $Id$
 
 // constructor
 CGTarget::CGTarget(const char* name,const char* starclass,
-		   const char* desc) : Target(name,starclass,0,desc) {}
+		   const char* desc) : Target(name,starclass,desc) {}
 
 void CGTarget :: initialize() {
 	myCode.initialize();
