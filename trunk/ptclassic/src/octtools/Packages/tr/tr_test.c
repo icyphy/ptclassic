@@ -38,6 +38,7 @@ i - is_{manhattan,mirrored}, s - scale, g - print top of stack as rotation\n\
 . - print top of stack, h, ? - this message.\n\
 Capitals cause left-multiply\n"
 
+int
 main()
 {
     int32 x, y, tx, ty, scaler;
@@ -46,7 +47,9 @@ main()
     char c[2];
     tr_stack *stack;
     int add_after = 0;
-    
+    long tlx,tly;		/* Read in as longs, because int32
+				   could be long or int */
+
     PRINTF(HELP);
 
     stack = tr_create();
@@ -86,13 +89,14 @@ main()
 
 	case 't' :
 	    PRINTF("    translate by: ");
-	    (void) scanf("%d %d", &x, &y);
+	    (void) scanf("%ld %ld", &tlx, &tly);
+	    x = tlx; y = tly;
 	    tr_translate(stack, x, y, add_after);
 	    break;
 
 	case 's' :
 	    PRINTF("    scale by: ");
-	    (void) scanf("%g", &scale);
+	    (void) scanf("%lg", &scale);
 	    tr_scale(stack, scale, add_after);
 	    break;
 
@@ -111,7 +115,8 @@ main()
 
 	case 'd' :
 	    PRINTF("    direction vector: ");
-	    (void) scanf("%d %d", &x, &y);
+	    (void) scanf("%ld %ld", &tlx, &tly);
+	    x = tlx; y = tly;
 	    tr_rotate_dir(stack, x, y, add_after);
 	    break;
 
@@ -135,9 +140,10 @@ main()
 	    switch (c[0]) {
 	    case 'v' :
 		PRINTF("        xform the vector: ");
-		(void) scanf("%d %d", &x, &y);
+		(void) scanf("%ld %ld", &tlx, &tly);
+		x = tlx; y = tly;
 		tr_transform(stack, &x, &y);
-		PRINTF("yielding (%d,%d)\n", x, y);
+		PRINTF("yielding (%ld,%ld)\n", (long)x, (long)y);
 		break;
 	    case 'a' :
 		PRINTF("        xform the angle: ");
@@ -147,21 +153,23 @@ main()
 		break;
 	    case 's' :
 		PRINTF("        xform the scaler: ");
-		(void) scanf("%d", &scaler);
+		(void) scanf("%ld", &tlx);
+		scaler = tlx;
 		tr_scaler_transform(stack, &scaler);
-		PRINTF("yielding (%d)\n", scaler);
+		PRINTF("yielding (%ld)\n", (long)scaler);
 		break;
 	    case 'd':
 		PRINTF("        xform the direction: ");
-		(void) scanf("%d %d", &x, &y);
+		(void) scanf("%ld %ld", &tlx, &tly);
+		x = tlx; y = tly;
 		tr_itransform(stack, &x, &y);
-		PRINTF("yielding (%d,%d)\n", x, y);
+		PRINTF("yielding (%ld,%ld)\n", (long)x, (long)y);
 		break;
 	    case 'i' :
 		PRINTF("    inverse transform the vector: ");
-		(void) scanf("%d %d", &x, &y);
+		(void) scanf("%ld %ld", &x, &y);
 		tr_inverse_transform(stack, &x, &y);
-		PRINTF("yielding (%d,%d)\n", x, y);
+		PRINTF("yielding (%ld,%ld)\n", (long)x, (long)y);
 		break;
 	    default:
 		PRINTF("one of v(ector), a(ngle), s(caler), d(irection) i(nverse)\n");
@@ -193,13 +201,14 @@ main()
 	    break;
 	case '.' :
 	    tr_get_transform(stack, dm, &tx, &ty, &op);
-	    PRINTF("yields [%g,%g][%g,%g] (%s) by (%d,%d)\n",
+	    PRINTF("yields [%g,%g][%g,%g] (%s) by (%ld,%ld)\n",
 		   dm[0][0], dm[0][1], dm[1][0], dm[1][1], tr_op_name[op],
-		   tx, ty);
+		   (long)tx, (long)ty);
 	    break;
 	case '?' :
 	case 'h' :
 	    PRINTF(HELP);
 	}
     }
+    return 0;
 }
