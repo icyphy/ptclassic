@@ -49,11 +49,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /* For a complete discussion of gettimeofday under sol2.5,
  * see /usr/include/sys/time.h
  */
-#ifdef PTSOL2_5
-#define SOL2_5
+#if defined (PTSOL2_5) || (PTSOL2_6)
+#define SOL2_5ORHIGHER
 #else
 int gettimeofday(struct timeval *);
-#endif /* PTSOL2_5 */
+#endif /* PTSOL2_5 || PTSOL2_6 */
 #endif /* SOLARIS */
 
 /*
@@ -73,7 +73,7 @@ void ScanTimeoutList(ea_t ea)
 
   num_elements = ea->txtimeout.num_elements;
   timeout_elem = ea->txtimeout.head;
-#ifdef SOL2_5
+#ifdef SOL2_5ORHIGHER
   gettimeofday(&curr_time, NULL);
 #elif SOLARIS
   gettimeofday(&curr_time);
@@ -551,7 +551,7 @@ void MoveToTailTimeout(ea_t endpoint, struct timeout_elem *timeout_elem)
   list = &(endpoint->txtimeout);
   timeout_elem->num_tries++;  
   if ((list->num_elements == 1) || (timeout_elem == list->tail)) {
-#ifdef SOL2_5
+#ifdef SOL2_5ORHIGHER
     gettimeofday(&(timeout_elem->timestamp), NULL);
 #elif SOLARIS
     gettimeofday(&(timeout_elem->timestamp));
@@ -566,7 +566,7 @@ void MoveToTailTimeout(ea_t endpoint, struct timeout_elem *timeout_elem)
     timeout_elem->prev->next = timeout_elem->next;
     timeout_elem->next->prev = timeout_elem->prev;
   }
-#ifdef SOL2_5
+#ifdef SOL2_5ORHIGHER
   gettimeofday(&(timeout_elem->timestamp), NULL);
 #elif SOLARIS
   gettimeofday(&(timeout_elem->timestamp));
@@ -628,7 +628,7 @@ void AddTimeout(ea_t endpoint, UDPAM_Buf *buf, int req_buf_id,
   list->unackmessages[i].message = buf;
   list->unackmessages[i].req_buf_id = req_buf_id;    /* BufID of Request */
   list->unackmessages[i].req_seq_num = req_seq_num;  /* SeqNum of Request */
-#ifdef SOL2_5
+#ifdef SOL2_5ORHIGHER
   gettimeofday(&(list->unackmessages[i].timestamp), NULL);
 #elif SOLARIS
   gettimeofday(&(list->unackmessages[i].timestamp));
