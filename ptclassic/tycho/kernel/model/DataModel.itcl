@@ -87,6 +87,9 @@
 # certain properties of items of that type -- for example, whether
 # they can contain other items.
 #
+# For examples illustrating the use of the DataModel class, see
+# the <a href="SimpleModel.html">SimpleModel</a> class.
+#
 class ::tycho::DataModel {
     inherit ::tycho::Model
 
@@ -403,7 +406,7 @@ body ::tycho::DataModel::attrset {name {attr {}} args} {
         # Append to the history
         if { $recording } {
             history append \
-                    "attrset $name $args" \
+                    "attrset $name $attr $args" \
                     "assign $name [@scope $scope set [set _dataname]($name)]"
         }
         # Merge the new data and return result
@@ -458,11 +461,11 @@ body ::tycho::DataModel::configure {{option {}} args} {
 	}
 	# Build undo command
 	set undo configure
-	foreach {opt _} $args {
+	foreach {opt _} [concat $option $args] {
 	    lappend undo $opt $current($opt)
 	}
 	# Record
-	history append "configure $attr $args" $undo
+	history append "configure $option $args" $undo
     }
     # Call superclass
     eval chain $option $args
@@ -648,14 +651,15 @@ body ::tycho::DataModel::match {type {context {}} args} {
 
     	set matching 1
     	foreach {attr val} $args {
-	    if { $attrs($attr) != $val } {
+	    if { ![::info exists attrs($attr)] || $attrs($attr) != $val } {
                 set matching 0
                 break
             }
         }
         if { $matching } {
             lappend result $n
-    	}
+        }
+        unset attrs
     }
     return $result
 }
@@ -950,8 +954,8 @@ body ::tycho::DataModel::type {mode {type {}} args} {
                 error "Unknown type: \"$type\""
             }
 	    if { [llength $args] <= 1 } {
-		array set attrs _typeconfig($type)
-		array set attrs _defaults($type)
+		array set attrs $_typeconfig($scope:$type)
+		array set attrs $_defaults($type)
 		if { $args == "" } {
 		    # Return whole list
 		    array get attrs
@@ -1068,6 +1072,9 @@ body ::tycho::DataModel::_describe {name {prefix {}}} {
     # eval lappend string [@scope $scope set [set _dataname]($name)]
     #
     # This looks better:
+    # FIXME: We really want the line-breaking to be more intelligent:
+    # if the whole item fits on a line, there is no need
+    # to put in line breaks.
     array set attrs [@scope $scope set [set _dataname]($name)]
     foreach attr [lsort [array names attrs]] {
         append string " \\\n$prefix        "
