@@ -9,7 +9,7 @@ All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
         }
-	location { Ptolemy SDF Signal Processing palette }
+	location { SDF dsp palette }
 	desc {
 This star accepts a template and a search window.
 The template is slid over the window one sample
