@@ -497,7 +497,7 @@ int CGCTarget::needsTypeConversionStar(PortHole& port) {
     // splice a FixToFix star if the precisions do not match or
     // one or both side uses precision variables that can change at
     // runtime
-    if (port.resolvedType() == FIX) {
+    if (port.isItOutput() && port.resolvedType() == FIX) {
 
 	Precision p1, p2;
 
@@ -507,6 +507,16 @@ int CGCTarget::needsTypeConversionStar(PortHole& port) {
 	CGCPortHole* far_port  = (CGCPortHole*)port.far();
 	CGCPortHole* this_port = far_port->realFarPort();
 
+	// This is a hack - we really need to clean up these casts.
+	// If this or the far star is a wormhole, and the port
+	// associated to the wormhole is a multiport - 
+	// the multiport will be a WormMultiPort not a MultiCGCPort.
+	// In this case, we assume that we do need a type conversion star.
+	// FIXME
+	if (far_port->parent()->isItWormhole() ||
+	    this_port->parent()->isItWormhole())
+	    return TRUE;
+	
 	// if this or the far side is a multiporthole, refer to the
 	// multiport rather than to the normal porthole itself;
 	// this is because when deriving a new port from the multiport,
