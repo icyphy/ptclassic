@@ -61,6 +61,8 @@ DRVROBJ =	test.o
 
 DRVRLIBS =	-lport -lerrtrap -luprintf
 
+MISC_FILES =	avl.doc
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)

@@ -62,6 +62,8 @@ DRVROBJ =	errtrap-test.o
 
 DRVRLIBS =	-lport -luprintf
 
+MISC_FILES =	errtrap.doc sample.out
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
