@@ -53,5 +53,9 @@ ToEpsi:
 	exit
 
 ToPrint:
-	oct2ps $fixedArgs $argv[*]\:schematic | lpr -P$PRINTER
+	if ( $ARCH =~ hppa* ) then
+		oct2ps $fixedArgs $argv[*]\:schematic | lp -d$PRINTER
+	else
+		oct2ps $fixedArgs $argv[*]\:schematic | lpr -P$PRINTER
+	endif
 	exit
