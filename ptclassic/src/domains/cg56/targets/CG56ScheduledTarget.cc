@@ -89,7 +89,7 @@ void CG56ScheduledTarget :: setup() {
 	{
 		fscanf(fp,"%s",starName);
 		len = strlen(starName);
-		name=malloc(len);
+		name= (char*) malloc(len);
 		if(name== NULL) 	
 		{
 			Error::abortRun("Error reading schedule file.");
