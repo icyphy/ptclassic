@@ -43,25 +43,16 @@ namespace ::tycho {
 # <i>LabeledOval</i> is an oval with a text label and graphics.
 # In all other respects, it can be treated like any other oval item.
 #
-# <p><b>Options</b>
+# <p><a name="#options"></a><b>Options</b>
 #
 # <ul>
-# <li><b>-anchor</b>:
-# See <a href="LabeledItem.html">LabeledItem</a>.
-#
 # <li><b>-fill</b>:
 # The color with which the oval is filled. By default, 
 # it is "", which means that the oval is not filled.
 #
-# <li><b>-graphics</b>:
-# See <a href="LabeledItem.html">LabeledItem</a>.
-#
 # <li><b>-outline</b>:
 # The color of the outline of the oval. If "", 
 # the oval has no outline. By default, it is black.
-#
-# <li><b>-text</b>:
-# See <a href="LabeledItem.html">LabeledItem</a>.
 #
 # <li><b>-width</b>:
 # The width of the outline of the oval, in pixels. By 
@@ -202,15 +193,16 @@ body ::tycho::LabeledOval::construct {id canvas slate tags x0 y0 x1 y1 args} {
 # Set or read the oval's coordinates
 #
 body ::tycho::LabeledOval::coords {id canvas slate args} {
+    set coords [$canvas coords $primary($id)]
+
     # No args: just return coordinates
     if { $args == "" } {
-	return [$canvas coords $primary($id)]
+        return $coords
     }
 
     # Move the oval itself
     eval $canvas coords $primary($id) $args
 
-    # Move and scale the text and graphics FIXME: Inefficient
-    _graphics $id $canvas $slate $option(graphics$id)
-    _anchor   $id $canvas $slate $option(anchor$id)
+    # Move and scale the text and graphics
+    eval ::tycho::LabeledItem::coords $id $canvas $slate $coords $args
 }

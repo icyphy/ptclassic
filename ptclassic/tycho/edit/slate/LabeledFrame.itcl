@@ -48,28 +48,10 @@ namespace ::tycho {
 # At present, the graphics do not take account of the width
 # of the 3D border.
 #
-# <p><b>Options</b>
+# <p><a name="#options"></a><b>Options</b>
 #
-# <ul>
-# <li><b>-anchor</b>
-# See <a href="LabeledItem.html">LabeledItem</a>.
-#
-# <li><b>-borderwidth</b>
-# See <a href="Frame.html">Frame</a>
-#
-# <li><b>-color</b>
-# See <a href="Frame.html">Frame</a>
-#
-# <li><b>-graphics</b>
-# See <a href="LabeledItem.html">LabeledItem</a>.
-#
-# <li><b>-relief</b>
-# See <a href="Frame.html">Frame</a>
-#
-# <li><b>-text</b>
-# See <a href="LabeledItem.html">LabeledItem</a>.
-#
-# </ul>
+# See <a href="LabeledItem.html#options">LabeledItem</a>
+# and <a href="Frame.html#options">Frame</a>.
 #
 # <p><b>Bugs</b>: (none)
 #
@@ -161,15 +143,16 @@ body ::tycho::LabeledFrame::construct {id canvas slate tags x0 y0 x1 y1 args} {
 # Set or read the frame's coordinates
 #
 body ::tycho::LabeledFrame::coords {id canvas slate args} {
+    set coords [$canvas coords $primary($id)]
+
     # No args: just return coordinates
     if { $args == "" } {
-        return [$canvas coords $primary($id)]
+        return $coords
     }
 
     # Move the frame itself
     eval ::tycho::Frame::coords $id $canvas $slate $args
 
-    # Move and scale the text and graphics FIXME: Inefficient
-    _graphics $id $canvas $slate $option(graphics$id)
-    _anchor   $id $canvas $slate $option(anchor$id)
+    # Move and scale the text and graphics
+    eval ::tycho::LabeledItem::coords $id $canvas $slate $coords $args
 }
