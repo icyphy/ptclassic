@@ -1671,7 +1671,7 @@ body ::tycho::Edit::search {} {
 #
 body ::tycho::Edit::searchQuery {backwards nochange} {
     if $readOnly {set nochange 1}
-    set tl [winfo toplevel $itk_component(hull)]
+    set tl $itk_component(hull)
     if [winfo exists $tl.search] {
 	wm deiconify $tl.search
 	raise $tl.search
@@ -1778,7 +1778,7 @@ body ::tycho::Edit::selectRange {start stop} {
 # it.  Otherwise, create one.
 #
 body ::tycho::Edit::spellCheck {} {
-    set tl [winfo toplevel $itk_component(hull)]
+    set tl $itk_component(hull)
     if [winfo exists $tl.spell] {
 	wm deiconify $tl.spell
 	raise $tl.spell
