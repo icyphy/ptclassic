@@ -58,18 +58,19 @@ LIB=libdetclstars.$(LIBSUFFIX)
 STARDOCDIR = ../../doc/stars
 
 # source files for all stars, using preprocessor
+# list base stars first
 PL_SRCS= \
  DETclScript.pl \
+ DETkShowValues.pl \
+ DETkXYPlot.pl \
  DETkBarGraph.pl \
  DETkButtons.pl \
  DETkMeter.pl \
  DETkPlot.pl \
  DETkShowEvents.pl \
- DETkShowValues.pl \
  DETkSlider.pl \
  DETkStripChart.pl \
  DETkText.pl \
- DETkXYPlot.pl \
  DETkLogicAnalyzer.pl
 
 # DELMSTkPlot.pl \
