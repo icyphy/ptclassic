@@ -75,7 +75,7 @@ char** strParser(const char* string,int& numStr,const char* type) {
 			"type for strParser. Original string: ", string);
 	return 0;
     }
-    parsedStr = (char **) new (char *)[numStr];
+    parsedStr = new char *[numStr];
 
     start = 0;
     end = 0;
