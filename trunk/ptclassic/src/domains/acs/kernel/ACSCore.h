@@ -37,16 +37,16 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 
-#include "CGStar.h"
+#include "ACSStar.h"
 #include "ACSCorona.h"
 
 class ACSCorona;
 
-class ACSCore : public CGStar {
+class ACSCore : public ACSStar {
 public:
 
         // constructor takes a reference to a Corona
-        ACSCore(ACSCorona &);
+        ACSCore(ACSCorona &, const char *);
 
         // my domain
         const char* domain() const;
@@ -60,11 +60,13 @@ public:
 protected:
 
 	// returns reference to the core's corona
-	inline ACSCorona & corona() const { return _corona; };
+	inline ACSCorona & getCorona() const { return corona; };
+
+        const char *category;
 
 private:
 
-        ACSCorona & _corona;
+        ACSCorona & corona;
 
 };
 #endif //_ACSCore_h
