@@ -1,7 +1,7 @@
 static const char file_id[] = "Cluster.cc";
 /******************************************************************
 Version identification:
- $Id$
+$Id$
 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -78,7 +78,7 @@ void ClusterPort::update() {
     }
     else {
 	farSidePort = ((PortHole*)alias())->farSidePort;
-	farSidePort->farSidePort = this;
+	if (farSidePort) farSidePort->farSidePort = this;
 	if (!alias()->parent()->isItAtomic())
 	    ((PortHole*)alias())->farSidePort = 0;
     }
@@ -112,12 +112,13 @@ int Cluster::absorb(Cluster& cluster, int removeFlag) {
     Block* clusterParent =  cluster.parent();
     cout << "Absorbing " << cluster.name() << " into "
 	 << name() << ".\n";
+    
     // Make sure we are not absorbing ourselves
     if (this == &cluster) {
-    StringList message;
-    message << "Can't absorb a cluster into itself.  Aborting.";
-    Error::abortRun(*this, message);
-    return FALSE;
+	StringList message;
+	message << "Can't absorb a cluster into itself";
+	Error::abortRun(*this, message);
+	return FALSE;
     }
     // First we must make sure that both clusters share the
     // same parent
@@ -168,6 +169,13 @@ int Cluster::merge(Cluster& clusterToEmpty, int removeFlag) {
     cout << "Merging " << clusterToEmpty.name() << " into "
 	 << name() << ".\n";
 
+    // Make sure we are not merging ourselves
+    if (this == &clusterToEmpty) {
+	StringList message;
+	message << "Can't merge a cluster with itself";
+	Error::abortRun(*this, message);
+	return FALSE;
+    }
     // First make sure that both clusters share the same parent
     if (parent() != clusterToEmpty.parent()) return FALSE;
 
@@ -340,6 +348,16 @@ Cluster* ClusterIter::next() {
     return (Cluster*)b;
 }
 
+// The following is the same except that it returns the next cluster
+// where the block has flags[flag_loc]=flag_val
+
+Cluster* ClusterIter::next(int flag_loc, int flag_val) {
+    Block* b;
+    while ((b = GalTopBlockIter::next()) != NULL) {
+	if (b->flags[flag_loc]==flag_val && !b->isItAtomic() && isValidCluster(*(Cluster*)b,&prnt)) break;
+    }
+    return (Cluster*)b;
+}
 Cluster* SuccessorClusterIter::next() {
     Cluster* cluster;
     while ((cluster = (Cluster*)SuccessorIter::next()) != NULL &&
@@ -347,10 +365,25 @@ Cluster* SuccessorClusterIter::next() {
     return cluster;
 }
 
+Cluster* SuccessorClusterIter::next(int flag_loc, int flag_val) {
+    Cluster* cluster;
+    while ((cluster = (Cluster*)SuccessorIter::next(flag_loc,flag_val)) != NULL
+    		&& !isValidCluster(*cluster,prnt));
+    return cluster;
+}
+
+
 Cluster* PredecessorClusterIter::next() {
     Cluster* cluster;
     while ((cluster = (Cluster*)PredecessorIter::next()) != NULL &&
 	   !isValidCluster(*cluster,prnt));
+    return cluster;
+}
+
+Cluster* PredecessorClusterIter::next(int flag_loc, int flag_val) {
+    Cluster* cluster;
+    while ((cluster = (Cluster*)PredecessorIter::next(flag_loc,flag_val)) 
+		!= NULL && !isValidCluster(*cluster,prnt));
     return cluster;
 }
 
