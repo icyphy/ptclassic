@@ -487,6 +487,10 @@ body ::tycho::DialogWindow::newModal {class instance args} {
 	# Because of the above grab, it is not safe to return before
 	# the window actually disappears.  The grab may never be released
 	# if an I/O operation is done before the window is released.
+	# NOTE: This update is risky.  If during the update, this newModal
+	# procedure is called with the same instance name (hopefully an
+	# unlikely event), then the code following the update will
+	# use the values of the new dialog window, not the old.
 	update
     }
     set returnVal $commandResult($instance)
