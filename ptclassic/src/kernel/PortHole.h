@@ -240,7 +240,7 @@ class MultiPortHole: public GenericPort
 public:
 	MultiPortHole();
 
-	void initialize();
+	virtual void initialize();
 
 	// make a bus connection with another multiporthole
 	void busConnect (MultiPortHole&, int width, int delay = 0);
@@ -478,12 +478,12 @@ protected:
 	// from Plasma as well.
 	void deletePlasma();
 
+	// Allocate new buffer
+	void allocateBuffer();
+
 private:
 	// resolved type for the connection
 	DataType myResolvedType;
-
-	// Allocate new buffer
-	void allocateBuffer();
 
 	// index value, for making scheduler tables
 	int indexValue;
