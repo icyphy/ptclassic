@@ -156,7 +156,7 @@ CGStar::processMacro(const char* func, const char* id, const char* arg2) {
 	if (strcasecmp(func,"ref2") == 0) {
 		if (*arg2 == 0) codeblockError("two arguments needed for ref2");
 		else {
-			s = getRef2(id,int(arg2));
+			s = getRef2(id,arg2);
 		}
 	}
 	// if more two-arg funcs are added, put them before here!
@@ -193,7 +193,7 @@ CGStar::getRef(const char* name) {
 
 // lookup reference with offset
 StringList
-CGStar::getRef2(const char* name, int offset) {
+CGStar::getRef2(const char* name, const char* offset) {
 	StringList s = readFullName();
 	s += ".";
 	s += name;
