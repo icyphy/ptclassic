@@ -49,6 +49,7 @@ HDRS		= ansi.h \
 		general.h \
 		message.h \
 		version.h \
+		vemMain.h \
 		xvals.h
 
 LIBCSRCS	= basic.c \
