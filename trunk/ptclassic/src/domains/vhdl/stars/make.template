@@ -59,7 +59,6 @@ LIB=libvhdlstars.$(LIBSUFFIX)
 # source files for all stars, using preprocessor
 # put any derived stars first in the list
 PL_SRCS = \
- VHDLXgraph.pl \
  VHDLAdd.pl \
  VHDLAddCx.pl \
  VHDLAddInt.pl \
@@ -101,8 +100,9 @@ PL_SRCS = \
  VHDLWaveForm.pl \
  VHDLWaveFormCx.pl \
  VHDLWindow.pl \
+ VHDLXgraph.pl \
  VHDLXMgraph.pl \
- VHDLXYgraph.pl
+ VHDLXYgraph.pl \
 
 # The .cc files
 SRCS =	$(PL_SRCS:.pl=.cc)
