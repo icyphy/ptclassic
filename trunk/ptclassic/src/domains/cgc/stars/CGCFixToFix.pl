@@ -44,6 +44,15 @@ minimum for negative magnitudes).
 	// an initCode method is inherited from CGCFix
 	// if you define your own, you should call CGCFix::initCode()
 
+	begin {
+		// if the precision for the output port is not defined
+		// - neither by this nor the successor star -, the actual
+		// precision is determined at runtime
+
+		if (!output.precision().isValid())
+			output.setAttributes(A_VARPREC);
+	}
+
 	go {
 		// insert code to clear overflow flag
 		CGCFix::clearOverflow();
