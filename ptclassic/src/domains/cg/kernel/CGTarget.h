@@ -220,6 +220,29 @@ public:
 	return sym;
     }
 
+    // Directory to store code files in.
+    StringState destDirectory;
+
+    // Stream to collect makefile commands
+    CodeStream makefile;
+
+    // Codestream to collect all the files to include in for a make
+    // all.  Make sure you add each file name with a space character
+    // prepended.  For example: makeAllList << " foo.o";
+    CodeStream  makeAllList;
+
+    // The following virtual functions do the stages of CGTarget::setup.
+    // generally, derived classes should overload these functions rather
+    // than overloading setup.
+
+    // perform necessary modifications to the galaxy (e.g. splice in
+    // additional stars).  This happens before initialization.
+    // returns FALSE on error.  This class has a do-nothing version.
+    // if defined, it is responsible for calling galaxy.initialize()
+    // if needed to do the start functions.
+    virtual int modifyGalaxy();
+
+
 protected:
 
     // Initialization for code generation.
@@ -246,9 +269,6 @@ protected:
 
     // Host machine on which to compile or assemble code.
     StringState targetHost;
-
-    // Directory to store code files in.
-    StringState destDirectory;
 
     // Prefix for file names.  This is automatically set in the setup
     // method to the galaxy name if = "".
@@ -277,13 +297,6 @@ protected:
     // The following virtual functions do the stages of CGTarget::setup.
     // generally, derived classes should overload these functions rather
     // than overloading setup.
-
-    // perform necessary modifications to the galaxy (e.g. splice in
-    // additional stars).  This happens before initialization.
-    // returns FALSE on error.  This class has a do-nothing version.
-    // if defined, it is responsible for calling galaxy.initialize()
-    // if needed to do the start functions.
-    virtual int modifyGalaxy();
 
     // call the scheduler compileRun(). Make this method virtual to
     // allow derived target to manage the target code streams.
