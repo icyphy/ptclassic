@@ -24,10 +24,17 @@ INCL = -I$(CGCDIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
 
 # source files for all stars, using preprocessor
 PL_SRCS= \
+ CGCDownSample.pl \
+ CGCFIR.pl \
+ CGCFloatDiff.pl \
  CGCFloatRamp.pl \
  CGCFork.pl \
+ CGCIIDUniform.pl \
+ CGCLMS.pl \
  CGCPrinter.pl \
- CGCUpSample.pl
+ CGCSin.pl \
+ CGCUpSample.pl \
+ CGCXMgraph.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)

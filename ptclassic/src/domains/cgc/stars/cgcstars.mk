@@ -6,7 +6,15 @@
 # for the stars.
 
 CGCSTARS = \
+ $(CGC)/CGCDownSample.o \
+ $(CGC)/CGCFIR.o \
+ $(CGC)/CGCFloatDiff.o \
  $(CGC)/CGCFloatRamp.o \
  $(CGC)/CGCFork.o \
- $(CGC)/CGCPrinter.o
+ $(CGC)/CGCIIDUniform.o \
+ $(CGC)/CGCLMS.o \
+ $(CGC)/CGCPrinter.o \
+ $(CGC)/CGCSin.o \
+ $(CGC)/CGCUpSample.o \
+ $(CGC)/CGCXMgraph.o 
 
