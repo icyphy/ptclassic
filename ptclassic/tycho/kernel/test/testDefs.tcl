@@ -54,10 +54,6 @@
 #
 
 
-# Define testsuite in the global context so that we can check to
-# see if it is set inside functions that use dialog boxes.
-# set testsuite 1
-
 if [info exist env(PTOLEMY)] {
     set TYCHO $env(PTOLEMY)/tycho
 }
@@ -111,6 +107,8 @@ proc print_verbose {test_name test_description contents_of_test code answer} {
 
 proc test {test_name test_description contents_of_test passing_results} {
     global VERBOSE
+    # Define TY_TESTING in the global context so that we can check to
+    # see if it is set inside functions that use dialog boxes.
     global TY_TESTING
     global TESTS PASSED FAILED
 
