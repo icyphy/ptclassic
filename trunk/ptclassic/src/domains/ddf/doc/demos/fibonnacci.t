@@ -4,7 +4,13 @@
 Generate the Fibonnacci sequence using a rather inefficient recursive
 algorithm that is nonetheless a good example of how to realize recursion.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/ddf/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "S. Ha and E. A. Lee"
 .LD
