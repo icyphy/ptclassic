@@ -76,21 +76,21 @@ which is a function of k and N
 	}
 
 	codeblock(result) {
-; compute complex-valued Goertzel filter output
-; a = real part = state1 - state2*cos(theta)
-; b = imag part = -state2*sin(theta)
-; a already contains the value of state1
-		clr	b		#$val(negWnImag),y1
-		mac	y1,x1,b		#$val(negWnReal),y0
-		mac	x1,y0,a		a,x:$addr(output)
-		move	b,y:$addr(output)
+; compute complex-valued Goertzel filter output a + j b.  Register usage:
+; a  = state1 - state2*cos(theta)   where  x0 = state1  and  y0 = -cos(theta)
+; b  = -state2*sin(theta)           where  x1 = state2  and  y1 = -sin(theta)
+; note that accumulator a initially contains the value of state1
+	move	#$val(negWnImag),y1
+	mpyr	y1,x1,b		#$val(negWnReal),y0
+	macr	x1,y0,a		b,y:$addr(output)
+	move	a,x:$addr(output)
 	}
 
 	go {
 		// Discard all but the last sample
 		CG56GoertzelBase::go();
 
-		// Register status after CG56GoertzelBase::go():
+		// Compute the complex result 
 		addCode(result);
 	}
 
