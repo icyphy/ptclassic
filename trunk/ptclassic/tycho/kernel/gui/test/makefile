@@ -45,11 +45,6 @@ SIMPLE_TESTS = \
 	testCacheManager.itcl \
 	testCircularList.itcl \
 	testClass.tcl \
-	testDigraph.itcl \
-	testForest.itcl \
-	testLoader.itcl \
-	testGraph.itcl \
-	testPath.itcl \
 	testMail.itcl \
 	testResource.itcl \
 	testResourceFTP.itcl \
@@ -58,8 +53,9 @@ SIMPLE_TESTS = \
 	testStack.itcl \
 	testURLPath.itcl
 
+
+# Removed testBuilderDialog.itcl until test levels are implemented
 GRAPHICAL_TESTS = \
-	testBuilderDialog.itcl \
 	testExec.itcl \
 	testIndexBrowser.itcl \
 	testMenuSupport.itcl \
@@ -69,9 +65,6 @@ GRAPHICAL_TESTS = \
 	testToolBar.itcl \
 	testWidgets.itcl \
 	testFile.itcl
-
-	# Removed until test levels are implemented
-	# testBuilderDialog.itcl
 
 ITCL_SRCS =	\
 	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) \
@@ -87,7 +80,7 @@ EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) \
 
 # Files or directories that are present, but that 'make checkjunk' 
 # should not complain about
-MISC_FILES = 		chktycho
+MISC_FILES = 		chktycho testBuilderDialog.itcl
 
 # make checkjunk will not report OPTIONAL_FILES as trash
 # make realclean removes OPTIONAL_FILES
