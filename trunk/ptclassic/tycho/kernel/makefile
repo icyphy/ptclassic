@@ -75,6 +75,7 @@ ITCL_SRCS = \
 	RevControlSCCS.itcl \
 	RevControlRCS.itcl \
 	Stack.itcl \
+	StatusBar.itcl \
 	Subpanel.itcl \
 	TclConsole.itcl \
 	TopLevel.itcl \
