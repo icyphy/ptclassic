@@ -19,4 +19,4 @@ exit
 set CLASSPATH=%tycho%
 echo Starting jtclsh with $TYCHO = "%tycho%" 
 echo 1 "%1" 2 "%2" 3 "%3"
-tclsh80 %tycho%/lib/windows/jtclsh.tcl %1 %2 %3 %4 %5
+tclsh80 %tycho%/lib/windows/jtclsh.tcl dummyarg %1 %2 %3 %4 %5
