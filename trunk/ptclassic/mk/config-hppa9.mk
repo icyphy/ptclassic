@@ -37,21 +37,50 @@ include $(ROOT)/mk/config-default.mk
 # Get the g++ definitions; we override some below.
 include $(ROOT)/mk/config-g++.mk
 
+# The HPUX9/HPUX10 dependencies are below here
+
 # Get the g++ definitions for shared libraries; we override some below.
-# Comment the next line out if you don't want shared libraries.
+# Comment the next 2 lines out if you don't want shared libraries.
+# CAUTION: don't try to use shared libraries if you don't have a fairly
+# recent patch release of ld & dld.sl (as of 3/97, PHSS_8253 is current).
 ifndef BUILD_STATIC_BINARIES
 include $(ROOT)/mk/config-g++.shared.mk
+LIBSUFFIX =		sl
 endif
+
+# ptbin.mk uses this to decide whether to include the PN stars
+# If you are under HPUX10, then the PN domain requires DCE threads.
+#  you will need to install the DCE development set of the OS cds.
+#  If you don't have a /usr/include/pthread.h, then you probably
+#  don't have the DCE developement set installed.  If you don't have
+#  this installed, set INCLUDE_PN_DOMAIN to no
+#INCLUDE_PN_DOMAIN = yes
+INCLUDE_PN_DOMAIN = no
+
+# Misc. flags for OS version, if you are under HPUX9.x:
+ARCHFLAGS =	-DPTNO_THREADS -D_CMA_NOWRAPPERS_ -D_REENTRANT -D_HPUX_SOURCE
+# If you are under HPUX10 and don't have DCE installed, add -DPTNO_THREADS
+#  to ARCHFLAGS.
+# If you are under HPUX10.x:
+#ARCHFLAGS =	-DPTHPUX10 -D_CMA_NOWRAPPERS_ -D_REENTRANT -D_HPUX_SOURCE
+
+# src/kernel/makefile uses this to compile flush_cache.s.
+# Under HPUX9.x, use /bin/as
+HP_AS = 	/bin/as
+#HP_AS =		/usr/ccs/bin/as
+
+# end of HPUX9/HPUX10 dependencies
+
 
 # gcc-2.7.2 under hpux10 requires '-shared -fPIC' to produce shared
 # libraries, '-shared' by itself won't work, so we override these three
 # variables from config-g++.shared.mk
 
 # Command to build C++ shared libraries
-SHARED_LIBRARY_COMMAND = $(LINKER) -shared $(CC_SHAREDFLAGS) $(SHARED_COMPILERDIR_FLAG) -o
+SHARED_LIBRARY_COMMAND = g++ -shared $(CC_SHAREDFLAGS) $(SHARED_COMPILERDIR_FLAG) -o
 
 # Command to build C shared libraries
-CSHARED_LIBRARY_COMMAND = $(CLINKER) -shared $(C_SHAREDFLAGS) $(SHARED_COMPILERDIR_FLAG) -o
+CSHARED_LIBRARY_COMMAND = gcc -shared $(C_SHAREDFLAGS) $(SHARED_COMPILERDIR_FLAG) -o
 
 # Used by cgwork.mk
 INC_LINK_FLAGS =	-shared $(CC_SHAREDFLAGS) $(SHARED_COMPILERDIR_FLAG)
@@ -65,9 +94,6 @@ SHARED_LIBRARY_R_LIST = -Wl,+s,+b,$(SHARED_LIBRARY_PATH)
 # $(PTOLEMY)/src/kernel/Linker.sysdep.h for more information.
 # You may need to get the latest HP linker patch for shl_load to work.
 # As of 4/95 the linker patch was PHSS_5083* for hpux9.x
-# As of 4/95, patch PHSS_6352 was the latest linker patch for hpux9.x
-# For PHSS-6352, what /bin/ld returns '92453-07 A.09.74.22 Linker'
-# You can get the lasest patch from http://support.mayfield.hp.com
 #
 # Programs to use
 #
@@ -76,8 +102,6 @@ RANLIB =	ranlib
 YACC =		bison -y
 # islang uses lex, which is not necessarily part of hpux10.x
 LEX =		flex
-# src/kernel/makefile uses this to 
-HP_AS =		/bin/as
 # Use gcc everywhere, including octtools
 CC =		gcc
 
@@ -100,10 +124,6 @@ OPTIMIZER =	-O2
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wsynth #-Wcast-qual 
 
-# Misc. flags for OS version, if you are under HPUX9.x:
-ARCHFLAGS =	
-# If you are under HPUX10.x:
-#ARCHFLAGS =	-DPTHPUX10 
 # Under gcc-2.7.0, you will need to add -fno-for-scope to LOCALCCFLAGS
 LOCALCCFLAGS =	-g -DUSG -DUSE_SHLLOAD $(GCC_270_OPTIONS)
 
@@ -143,26 +163,26 @@ CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 # to remove the -static below
 # If you are trying out the shl_load feature, then remove -static
 # and add -Wl,-E
+# Under HPUX10.01, ld takes the following arguments
+#   -x partially strip the output file, leaving out local symbols
+#   -E export all syms
+#   -G Strip all unloadable data from the output file
+#   +s use SHLIB_PATH
+#   +b list of directories to be searched
 #LINKFLAGS = 	-L$(LIBDIR) -Xlinker -x -static 
 #LINKFLAGS_D = 	-L$(LIBDIR) -g -static
-LINKFLAGS = 	-L$(LIBDIR) -Wl,-x,-E $(SHARED_LIBRARY_R_LIST)
+LINKFLAGS = 	-L$(LIBDIR) -Wl,-x,-E,-G $(SHARED_LIBRARY_R_LIST)
 LINKFLAGS_D = 	-L$(LIBDIR) -g -Wl,-E $(SHARED_LIBRARY_R_LIST)
-
-LIBSUFFIX =		sl
 
 #
 # Directories to use
 #
 # Too bad hp can't ship a complete set of X includes and libs
 #  in a standard location
-X11DIR = 	/usr/sww/X11R5
-X11_INCSPEC =	-I$(ROOT)/src/compat -I$(X11DIR)/include
-X11_LIBDIR =	$(X11DIR)/lib
-X11_LIBSPEC =	-L$(X11_LIBDIR) -lX11
-
-#X11_INCSPEC =	-I$(ROOT)/src/compat
-#X11_LIBDIR  =   /usr/lib/X11R5
-#X11_LIBSPEC =	-L$(X11_LIBDIR) -lX11
+X11_INCSPEC =	-I$(ROOT)/src/compat -I/usr/include/X11R5
+X11_LIBSPEC =	-L/usr/lib/X11R5 -lX11
+# X11_LIBDIR is used in the SHARED_LIBRARY_PATH
+X11_LIBDIR =	/usr/lib/X11R5
 
 # Use -lSM -lICE for X11R6, don't use then for X11R5
 #X11EXT_LIBSPEC=-lXext -lSM -lICE
