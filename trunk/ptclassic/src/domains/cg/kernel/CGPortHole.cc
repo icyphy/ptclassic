@@ -47,7 +47,7 @@ static const char file_id[] = "CGPortHole.cc";
 
 // constructor
 CGPortHole :: CGPortHole() : offset(0), forkSrc(0), embeddedPort(0),
-	embeddingFlag(0), switchFlag(0) {}
+	embeddedLoc(-1), embeddingFlag(0), switchFlag(0) {}
 
 // destructor: remove forklist references.
 CGPortHole :: ~CGPortHole() {
