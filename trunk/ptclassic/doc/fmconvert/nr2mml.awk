@@ -107,25 +107,25 @@ BEGIN	{ FS = " "; OFS = " "; bodynext = 1; eachline = 0;
          eachline-- ; next}
 #
 # Commands to convert index entries
-/^\.IE/	{printf("<Marker <MType 10> <MText `") ;
+/^\.IE/	{printf("<Marker <MType 11> <MText `") ;
          for (i=2; i <= NF; i++) { printf("%s ", $i); };
          printf("'>>") ; bodynext = 0 ; next}
-/^\.Ir/	{printf("<Marker <MType 10> <MText `") ;
+/^\.Ir/	{printf("<Marker <MType 11> <MText `") ;
          for (i=2; i <= NF; i++) { printf("%s ", $i); };
          printf("'>>") ; bodynext = 0 ; next}
-/^\.Ie/	{printf("<Marker <MType 11> <MText `") ;
+/^\.Ie/	{printf("<Marker <MType 12> <MText `") ;
          for (i=2; i <= NF; i++) { printf("%s ", $i); };
          printf("'>>") ; bodynext = 0 ; next}
-/^\.Id/	{printf("<Marker <MType 12> <MText `") ;
+/^\.Id/	{printf("<Marker <MType 13> <MText `") ;
          for (i=2; i <= NF; i++) { printf("%s ", $i); };
          printf("'>>") ; bodynext = 0 ; next}
-/^\.Sr/	{printf("<Marker <MType 13> <MText `") ;
+/^\.Sr/	{printf("<Marker <MType 14> <MText `") ;
          for (i=2; i <= NF; i++) { printf("%s ", $i); };
          printf("'>>") ; bodynext = 0 ; next}
-/^\.Se/	{printf("<Marker <MType 14> <MText `") ;
+/^\.Se/	{printf("<Marker <MType 15> <MText `") ;
          for (i=2; i <= NF; i++) { printf("%s ", $i); };
          printf("'>>") ; bodynext = 0 ; next}
-/^\.Sd/	{printf("<Marker <MType 15> <MText `") ;
+/^\.Sd/	{printf("<Marker <MType 16> <MText `") ;
          for (i=2; i <= NF; i++) { printf("%s ", $i); };
          printf("'>>") ; bodynext = 0 ; next}
 #
