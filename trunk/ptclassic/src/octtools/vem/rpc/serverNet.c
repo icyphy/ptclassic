@@ -34,7 +34,7 @@ static char SccsId[]="$Id$";
 /* for EWOULDBLOCK */
 #include <errno.h>
 
-#if defined(ULTRIX)
+#if defined(ultrix)
 #include <time.h>
 #else
 /* kludge - due to moving target, handled in -I */
