@@ -32,6 +32,7 @@ LIB=libhofstars.$(LIBSUFFIX)
 PL_SRCS= \
  HOFBase.pl \
  HOFBaseHiOrdFn.pl \
+ HOFBusDeinterleave.pl \
  HOFBusInterleave.pl \
  HOFBusMerge.pl \
  HOFBusSplit.pl \
