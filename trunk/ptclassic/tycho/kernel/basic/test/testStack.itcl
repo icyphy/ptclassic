@@ -63,5 +63,3 @@ test Stack-1.3 {Build a Stack, push {} onto it twice} {
     set geta [foo pop]
     list $getnothing $getb $geta
 } {{} {} {}}
-
-doneTests
