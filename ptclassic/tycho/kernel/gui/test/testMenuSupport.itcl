@@ -1,0 +1,463 @@
+# Test suite for the MenuSupport class.
+#
+# @Authors: John Reekie
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1995-1997 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+if {[string compare test [info procs test]] == 1} then { 
+    source [file join $TYCHO kernel test testDefs.tcl]
+} {}
+
+source [file join $TYCHO kernel test MenuSupportTester.itcl]
+
+###########################################################################
+#### Define a proc that creates a "standard" test Menu
+#
+proc _stdmenu {args} {
+    _menu
+    .m post
+    .m add command command-entry top \
+            -label {A command entry} \
+            -command {string range {A command} 0 end}
+    .m add radiobutton radiobutton-entry top \
+            -label {A radiobutton entry} \
+            -command {string range {A radiobutton} 0 end}
+    .m add checkbutton checkbutton-entry top \
+            -label {A checkbutton entry} \
+            -command {string range {A checkbutton} 0 end}
+    .m add separator separator-entry top
+    .m add cascade cascade-entry top \
+            -label {A cascade entry}
+    update
+    .m post cascade-entry
+    .m add command cascade-entry-1 cascade-entry \
+            -label {A cascade sub-entry} \
+            -command {string range {A cascade sub-entry} 0 end}
+    .m add command cascade-entry-2 cascade-entry \
+            -label {Another cascade sub-entry} \
+            -command {string range {Another cascade sub-entry} 0 end}
+    .m add cascade cascade-entry-3 cascade-entry \
+            -label {Another cascaded menu}
+    .m add command foo cascade-entry-3 -label {Foo} 
+    .m add command bar cascade-entry-3 -label {Bar} 
+    update
+    .m post cascade-entry-3
+    update
+}
+
+
+############################################################################
+# constructor{}
+test MenuSupport-constructor-1 {Create MenuSupportTester widget} {
+    catch {delete object .m}
+    ::tycho::MenuSupportTester .m
+} {.m}
+
+test MenuSupport-constructor-2 \
+	{Create MenuSupportTester widget using utility proc} {
+    _menu
+} {.m}
+
+test MenuSupport-constructor-3 \
+	{Create and post/unpost} {
+    _menu
+    .m post
+    .m unpost
+    winfo ismapped .m.top
+} {0}
+
+############################################################################
+# add{}, empty{}, exists{}
+#
+_menu
+.m post
+test MenuSupport-empty-1 {Menu is empty} {
+    .m empty top
+} {1}
+test MenuSupport-exists-1 {Menu entry does not exist} {
+    .m exists bogus
+} {0}
+
+test MenuSupport-add-1 {Insert a command entry} {
+    .m add command command-entry top \
+	    -label {A command entry} \
+	    -command {string range {A command} 0 end}
+} {command-entry}
+update
+
+test MenuSupport-empty-2 {Menu is not empty} {
+    .m empty top
+} {0}
+test MenuSupport-exists-2 {Menu entry exists} {
+    .m exists command-entry
+} {1}
+
+test MenuSupport-add-2 {Insert a radiobutton entry} {
+    .m add radiobutton radiobutton-entry top \
+	    -label {A radiobutton entry} \
+	    -command {string range {A radiobutton} 0 end}
+} {radiobutton-entry}
+update
+
+test MenuSupport-add-3 {Insert a checkbutton entry} {
+    .m add checkbutton checkbutton-entry top \
+	    -label {A checkbutton entry} \
+	    -command {string range {A checkbutton} 0 end}
+} {checkbutton-entry}
+update
+
+test MenuSupport-add-4 {Insert a separator} {
+    .m add separator separator-entry top
+} {separator-entry}
+update
+
+test MenuSupport-add-5 {Insert cascade menu} {
+    .m add cascade cascade-entry top \
+	    -label {A cascade entry}
+} {cascade-entry}
+update
+.m post cascade-entry
+
+test MenuSupport-add-6 {Insert cascaded entry, 1} {
+    .m add command cascade-entry-1 cascade-entry \
+	    -label {A cascade sub-entry} \
+	    -command {string range {A cascade sub-entry} 0 end}
+} {cascade-entry-1}
+update
+
+test MenuSupport-add-7 {Insert cascaded entry, 2} {
+    .m add command cascade-entry-2 cascade-entry \
+	    -label {Another cascade sub-entry} \
+	    -command {string range {A cascade sub-entry} 0 end}
+} {cascade-entry-2}
+update
+
+test MenuSupport-add-8 {Even more cascaded entries} {
+    .m add cascade cascade-entry-3 cascade-entry \
+	    -label {Another cascaded menu}
+    .m add command foo cascade-entry-3 -label {Foo} 
+    .m add command bar cascade-entry-3 -label {Bar} 
+} {bar}
+update
+.m post cascade-entry-3
+update
+
+############################################################################
+# delete{}
+#
+_stdmenu
+test MenuSupport-delete-1 {Delete entry} {
+    .m delete foo
+    list [.m empty cascade-entry-3] [.m exists foo] [.m exists bar]
+} {0 0 1}
+update
+
+test MenuSupport-delete-2 {Delete another entry} {
+    .m delete bar
+    list [.m empty cascade-entry-3] [.m exists foo] [.m exists bar]
+} {1 0 0}
+update
+
+test MenuSupport-delete-3 {Delete an empty cascade entry} {
+    .m delete cascade-entry-3
+    list [.m exists cascade-entry-3]
+} {0}
+update
+
+test MenuSupport-delete-4 {Delete a non-empty cascade entry} {
+    .m delete cascade-entry
+    list [.m exists cascade-entry]
+} {0}
+update
+
+############################################################################
+# clear{}
+#
+_stdmenu
+test MenuSupport-clear-1 {Clear menu} {
+    .m clear cascade-entry-3
+    list [.m empty cascade-entry-3] [.m exists foo] [.m exists bar]
+} {1 0 0}
+update
+
+test MenuSupport-clear-2 {Clear top-level menu} {
+    .m clear top
+    list [.m empty top] [.m exists cascade-entry]
+} {1 0}
+update
+
+############################################################################
+# command{}, separator{}
+#
+_stdmenu
+test MenuSupport-separator-1 {Add a separator} {
+    .m separator bazsep top
+} {bazsep}
+update
+after 500
+
+test MenuSupport-command-1 {Add a command} {
+    .m command baz top -label "A new command entry"
+} {baz}
+update
+after 500
+
+test MenuSupport-separator-2 {Add a separator} {
+    .m separator zazsep cascade-entry
+} {zazsep}
+update
+after 500
+
+test MenuSupport-command-2 {Add a command} {
+    .m command zaz cascade-entry -label "Another new command entry"
+} {zaz}
+update
+after 500
+
+############################################################################
+# disable{}, enable{}
+#
+_stdmenu
+test MenuSupport-disable-1 {Disable an entry} {
+    .m disable command-entry
+    .m entrycget command-entry -state
+} {disabled}
+update
+after 500
+
+test MenuSupport-enable-1 {Enable an entry} {
+    .m enable command-entry
+    .m entrycget command-entry -state
+} {normal}
+update
+after 500
+
+test MenuSupport-disable-2 {Disable a cascaded menu} {
+    .m disable cascade-entry
+    .m entrycget cascade-entry -state
+} {disabled}
+update
+after 500
+
+test MenuSupport-enable-2 {Enable a cascaded menu} {
+    .m enable cascade-entry
+    .m entrycget cascade-entry -state
+} {normal}
+update
+.m post cascade-entry
+after 500
+
+############################################################################
+# entrycget{}, entryconfigure{}
+#
+_stdmenu
+set i 0
+foreach {option value} {
+    accelerator <Push-me>
+    command {Call me!}
+    label {I am Solomon}
+    underline 5
+    state disabled
+} {
+    test MenuSupport-entryconfigure-$i "Configure and get option $option" {
+        update
+        after 500
+        incr i
+        .m entryconfigure command-entry -$option $value
+        .m entrycget command-entry -$option
+    } $value
+}
+
+############################################################################
+# index{}
+#
+_stdmenu
+set i 0
+foreach {tag index} {
+    command-entry 0
+    cascade-entry 4
+    foo 0
+    bar 1
+} {
+    test MenuSupport-entrycget-$i "Get index of $tag" {
+        incr i
+        .m index $tag
+    } $index
+}
+
+############################################################################
+# insert{}
+#
+_menu
+.m post
+test MenuSupport-insert-1 {Insert a command entry} {
+    .m add command command-entry top \
+	    -label {A command entry} \
+	    -command {string range {A command} 0 end}
+} {command-entry}
+update
+
+test MenuSupport-insert-2 {Insert a radiobutton entry} {
+    .m insert radiobutton radiobutton-entry command-entry \
+	    -label {A radiobutton entry} \
+	    -command {string range {A radiobutton} 0 end}
+} {radiobutton-entry}
+update
+
+test MenuSupport-insert-3 {Insert a checkbutton entry} {
+    .m insert checkbutton checkbutton-entry radiobutton-entry \
+	    -label {A checkbutton entry} \
+	    -command {string range {A checkbutton} 0 end}
+} {checkbutton-entry}
+update
+
+test MenuSupport-insert-4 {Insert a separator} {
+    .m insert separator separator-entry checkbutton-entry
+} {separator-entry}
+update
+
+test MenuSupport-insert-5 {Insert cascade menu} {
+    .m insert cascade cascade-entry separator-entry \
+	    -label {A cascade entry}
+} {cascade-entry}
+update
+.m post cascade-entry
+
+test MenuSupport-insert-6 {Add cascaded entry, 1} {
+    .m add command cascade-entry-1 cascade-entry \
+	    -label {A cascade sub-entry} \
+	    -command {string range {A cascade sub-entry} 0 end}
+} {cascade-entry-1}
+update
+
+test MenuSupport-insert-7 {Insert cascaded entry, 2} {
+    .m insert command cascade-entry-2 cascade-entry-1 \
+	    -label {Another cascade sub-entry} \
+	    -command {string range {A cascade sub-entry} 0 end}
+} {cascade-entry-2}
+update
+
+############################################################################
+# inmenu{}
+#
+_stdmenu
+set i 0
+foreach {tag menu} {
+    command-entry top
+    cascade-entry top
+    cascade-entry-3 cascade-entry
+    foo cascade-entry-3
+    bar cascade-entry-3
+} {
+    test MenuSupport-inmenu-$i "Get menu containing $tag" {
+        incr i
+        .m inmenu $tag
+    } $menu
+}
+
+############################################################################
+# invoke{}
+#
+_stdmenu
+set i 0
+foreach {tag string} {
+    command-entry {A command}
+    radiobutton-entry {A radiobutton}
+    checkbutton-entry {A checkbutton}
+    cascade-entry-1 {A cascade sub-entry}
+    cascade-entry-2 {Another cascade sub-entry}
+} {
+    test MenuSupport-invoke-$i "Invoke command of $tag" {
+        incr i
+        .m invoke $tag
+    } $string
+}
+
+############################################################################
+# menucget{}, menuconfigure{}
+#
+_stdmenu
+set i 0
+foreach menu {top cascade-entry cascade-entry-3} {
+    foreach {option value} {
+        relief sunken
+        tearoff 1
+    } {
+        test MenuSupport-menuconfigure-$i \
+                "Configure and get menu option $option" {
+            incr i
+            .m menuconfigure $menu -$option $value
+            .m unpost
+            .m post $menu
+            after 500
+            .m menucget $menu -$option
+        } $value
+    }
+}
+
+############################################################################
+# post{}, unpost{}
+#
+_stdmenu
+test MenuSupport-unpost-1 {Unpost top-level menu} {
+    .m unpost
+    list \
+            [winfo ismapped .m.top] \
+            [winfo ismapped .m.top.menucascade-entry] \
+            [winfo ismapped .m.top.menucascade-entry.menucascade-entry-3]
+} {0 0 0}
+
+test MenuSupport-post-1 {Post top-level menu} {
+    .m post top
+    list \
+            [winfo ismapped .m.top] \
+            [winfo ismapped .m.top.menucascade-entry] \
+            [winfo ismapped .m.top.menucascade-entry.menucascade-entry-3]
+} {1 0 0}
+
+test MenuSupport-post-2 {Post top-level menu} {
+    .m unpost
+    .m post cascade-entry-3
+    list \
+            [winfo ismapped .m.top] \
+            [winfo ismapped .m.top.menucascade-entry] \
+            [winfo ismapped .m.top.menucascade-entry.menucascade-entry-3]
+} {1 1 1}
+
+test MenuSupport-unpost-2 {Unpost bottom-level menu} {
+    .m unpost cascade-entry-3
+    list \
+            [winfo ismapped .m.top] \
+            [winfo ismapped .m.top.menucascade-entry] \
+            [winfo ismapped .m.top.menucascade-entry.menucascade-entry-3]
+} {1 1 0}
+          
+
+########################################################################
+## CLEAN UP
