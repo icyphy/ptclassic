@@ -48,60 +48,53 @@ void ComplexState  :: initialize() {
 
 	double realval;
 	double imagval;
-	ParseToken t =getParseToken(lexer, parent()->parent());
-
-        if(!strcmp(t.tok,"ID")) {
-			val = ((ComplexState*)t.s)->val;
-			return;
-			}
-
-	if(strcmp(t.tok,"OP")) return;
-	if(t.cval != '(') return;
-	t =  evalExpression(lexer, parent()->parent());
-	if(!strcmp(t.tok,"ERROR")) return;
-	if(!strcmp(t.tok,"EOF")) return;
-	{if(!strcmp(t.tok,"FLOAT")) realval = t.doubleval;
-        else if(!strcmp(t.tok,"ID")) val = *(double*)((FloatState*)t.s);
+	ParseToken t =getParseToken(lexer);
+	if (t.tok == T_ID) {
+		val = ((ComplexState*)t.s)->val;
+		return;
 	}
-	t = getParseToken(lexer,  parent()->parent());
-	if(strcmp(t.tok,"SEPARATOR")) return;
-	if(t.cval != ',') return;
-	t =  evalExpression(lexer, parent()->parent());
-	if(!strcmp(t.tok,"ERROR")) return;
-	if(!strcmp(t.tok,"EOF")) return;
-	{if(!strcmp(t.tok,"FLOAT")) imagval = t.doubleval;
-        else if(!strcmp(t.tok,"ID")) val = *(double*)((FloatState*)t.s);
+	if (t.tok != '(') {
+		parseError ("syntax error, want (1.2, 3.4) type syntax");
+		return;
 	}
-	t =getParseToken(lexer, parent()->parent());
-	if(strcmp(t.tok,"OP")) return;
-	if(t.cval != ')') return;
+	t =  evalExpression(lexer);
+	if (t.tok != T_Float) return;
+	realval = t.doubleval;
+	t = getParseToken(lexer);
+	if (t.tok != ',') {
+		parseError ("expected a comma");
+		return;
+	}
+	t =  evalExpression(lexer);
+	if (t.tok != T_Float) return;
+	imagval = t.doubleval;
 	val = Complex(realval,imagval);
+	t = getParseToken (lexer);
+	if (t.tok != ')')
+		parseError ("expected )");
+	return;
 	return;
 }
 
-ParseToken ComplexState :: evalExpression(Tokenizer& lexer, Block*  blockIAmIn) {
-	
+ParseToken ComplexState :: evalExpression(Tokenizer& lexer) {
 	double signflag = 1;
-        ParseToken t = getParseToken(lexer, blockIAmIn, "FLOAT");
-
-	if(!strcmp(t.tok,"EOF")) return t;
-	if(!strcmp(t.tok,"OP"))
-	{
-	if(t.cval == '-')
-		{signflag = -1;
-		t = getParseToken(lexer, blockIAmIn, "FLOAT");
-		if(!strcmp(t.tok,"NULL")) {t.tok = "ERROR"; return t;}	
-		}
-        }
-	if(!strcmp(t.tok,"FLOAT")) {
-					t.doubleval = signflag * t.doubleval;
-					return  t;
-				}
-        else if(!strcmp(t.tok,"ID")) {
-					t.doubleval = signflag * (*(double*)((FloatState*)t.s));
-					return t;
-				}
-        else {t.tok = "ERROR"; return t;}
+	
+        ParseToken t = getParseToken(lexer, T_Float);
+	while (t.tok == '-') {
+		t = getParseToken(lexer, T_Float);
+		signflag = -signflag;
+	}
+	if (t.tok == T_EOF) {
+		parseError ("unexpected end of string");
+		return t;
+	}
+	if (t.tok == T_Float) {
+		t.doubleval *= signflag;
+		return t;
+	}
+	parseError ("syntax error");
+	t.tok = T_ERROR;
+	return t;
 }
 
 
