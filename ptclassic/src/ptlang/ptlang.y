@@ -890,7 +890,8 @@ void describeState ()
 	strcat(stateDescriptions,str1);
 
         /* html version */
-	sprintf(str1,"<tr>\n<td><i>%s</i></td><td>%s</td>\n",
+        sprintf(str1,
+                 "<tr>\n<td><i><b><font color=blue>%s</font></b></i></td><td>%s</td>\n",
                  stateName,stateClass);
 	strcat(stateDescHTML,str1);
 	if (stateDesc) {
@@ -955,12 +956,21 @@ void genPort ()
 
 void describePort ()
 {
-	char *dest, *destHTML;
+	char *dest, *destHTML, *color;
 	char descriptString[MEDBUFSIZE];
-	dest = portDir==2 ? inoutDescriptions 
-	  : (portDir==1 ? outputDescriptions : inputDescriptions);
-	destHTML = portDir==2 ? inoutDescHTML 
-	  : (portDir==1 ? outputDescHTML : inputDescHTML);
+        if (portDir==2) {
+            dest = inoutDescriptions;
+            color = "darkviolet";
+            destHTML = inoutDescHTML;
+        } else if (portDir==1) {
+            dest = outputDescriptions;
+            color = firebrick;
+            destHTML = outputDescHTML;
+        } else {
+            dest = inputDescriptions;
+            color = forestGreen;
+            destHTML = inputDescHTML;
+        }
 	if (portMulti) {
 	    sprintf(str1,".NE\n\\fI%s\\fR (multiple), (%s)",portName,portType);
             strcat(dest,str1);
@@ -970,8 +980,7 @@ void describePort ()
 	} else {
 	    sprintf(str1,".NE\n\\fI%s\\fR (%s)",portName,portType);
             strcat(dest,str1);
-	    sprintf(str1,"<tr>\n<td><i>%s</i></td><td>%s</td>\n",
-                    portName,portType);
+	    sprintf(str1,"<tr>\n<td><i><b><font color=%s>%s</font></b></i></td><td>%s</td>\n", color, portName,portType);
             strcat(destHTML,str1);
 	}
 
