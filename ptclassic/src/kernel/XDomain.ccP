@@ -1,6 +1,6 @@
 /**********************************************************************
 Version identification:
-$Id$  (<T>Domain.cc)
+$Id$ (<T>Domain.cc)
 
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
@@ -58,9 +58,9 @@ static <T>Domain proto;
 class <T>Target : public Target {
 public:
 	<T>Target() : Target("default-<T>","<T>Star","default <T> target"){}
-	void start() { if (!sched) sched = new <T>Scheduler;}
+	void start() { if (!mySched()) setSched(new <T>Scheduler);}
 	Block* clone() const { return new <T>Target;}
-	~<T>Target() { delete sched;}
+	~<T>Target() { delSched();}
 };
 
 static <T>Target default<T>target;
