@@ -49,19 +49,19 @@ static KeptGate gate;
 
 typedef const char cc;
 
+// Post an error or warning message, if possible.
+// If it is an error message, then Tcl error is called.
+//
 static void outMsg(cc* obj, int warn, cc* m1, cc* m2, cc* m3) {
   CriticalSection region(gate);
-  const char* status = warn ? "warning: " : "";
+  InfString msg = warn ? "::tycho::warn " : "error ";
+  msg << "{";
   if (!m2) m2 = "";
   if (!m3) m3 = "";
-  InfString msg = status;
   if (obj) msg << obj << ": ";
   msg << m1 << m2 << m3;
-  if (Tcl_VarEval(ptkInterp, "ptkImportantMessage .ptkMessage \"", (char*)msg, "\"", NULL)
-      != TCL_OK) {
-    fprintf(stderr, (char*)msg);
-    fflush(stderr);
-  }
+  msg << "}\n";
+  Tcl_VarEval(ptkInterp, (char*)msg, (char*)NULL);
 }
 
 void
