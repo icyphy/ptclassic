@@ -31,18 +31,8 @@ VPATH = .
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
-CGCDIR = $(ROOT)/lib/cgc
+CGCDIR = $(ROOT)/src/domains/cgc/rtlib
 INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(CGCDIR) $(WORM_INCL)
 include $(ROOT)/mk/common.mk
-
-.o.a:
-ifeq ($(USE_SHARED_LIBS),yes)
-	-rm -f lib$@
-	$(SHARED_LIBRARY_COMMAND) lib$@ $^
-else
-	-rm -f lib$@
-	$(AR) cq lib$@ $^ 
-	$(RANLIB) lib$@
-endif
 
 all: $(WORM_ALL) 
