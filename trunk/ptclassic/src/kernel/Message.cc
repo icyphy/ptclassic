@@ -211,7 +211,7 @@ int MessageParticle::initParticleStack(Block* /*parent*/,
 				       ParticleStack& /*pstack*/,
 				       Plasma* /*myPlasma*/, 
 				       const char* /*delay*/) {
-  Error::abortRun("delays with initial values not supported by general Messages");
+  Error::abortRun("Initialized delays not supported by non-primitive types");
   return 0;
 }
 
@@ -267,7 +267,8 @@ void MessageParticle::die() {
 void MessageParticle::errorAssign(const char* argType) const {
 	StringList msg = "Attempt to assign type ";
 	msg += argType;
-	msg += " to a MessageParticle";
+	msg += " to a ";
+	msg += type();
 	Error::abortRun(msg);
 }
 
