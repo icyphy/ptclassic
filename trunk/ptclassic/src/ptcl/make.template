@@ -58,15 +58,18 @@ endif
 
 INCL = 		-I$(KERNDIR) -I$(ITCL_INCDIR) -I$(TCL_INCDIR) \
 			$(PTCOMPAT_INCSPEC)
-# Sources
-SRCS =		PTcl.cc ptclMain.cc ptclError.cc ptclAppInit.cc ptclGantt.cc \
-		ptclInvokeInterp.cc
+
+# Sources: LIB_SRCS contains the files that make up libptcl.so.
+# NON_LIB_SRCS contains the files that do not go into libptcl.so.
+LIB_SRCS =	PTcl.cc ptclError.cc ptclGantt.cc ptclInvokeInterp.cc
+NON_LIB_SRCS =	ptclMain.cc ptclAppInit.cc
+SRCS =		$(LIB_SRCS) $(NON_LIB_SRCS)
 
 # Header files
 HDRS =		PTcl.h ganttChart.h
 
-# Objects
-OBJS =		$(SRCS:.cc=.o)
+# Objects that make up the library
+OBJS =		$(LIB_SRCS:.cc=.o)
 
 LIB =		libptcl.$(LIBSUFFIX)
 
@@ -77,9 +80,9 @@ ifndef PIGI
 endif
 endif
 
-PT_DEPEND += ptclMain.o
+PT_DEPEND += $(NON_LIB_SRCS:.cc=.o)
 
-PIGI_OBJS += ptclMain.o 
+PIGI_OBJS += $(NON_LIB_SRCS:.cc=.o) 
 
 INSTALL = $(LIBDIR)/$(LIB)
  
@@ -92,4 +95,3 @@ include $(ROOT)/mk/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
