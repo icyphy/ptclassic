@@ -1,7 +1,7 @@
 defstar {
 	name { PattMatch }
 	domain { SDF }
-	author { G. S. Walter, E. A. Lee }
+	author { G. S. Walter and E. A. Lee }
 	version { $Id$ }
         copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -9,17 +9,15 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
         }
-	location { SDF dsp palette }
+	location { SDF dsp library }
 	desc {
-This star accepts a template and a search window.
-The template is slid over the window one sample at a time, and
-cross-correlations are calculated at each step.
-The cross-correlations are output on the "values" output.
+This star accepts a template and a search window.  The template is slid
+over the window one sample at a time, and cross-correlations are calculated
+at each step.  The cross-correlations are output on the "values" output.
 The "index" output is the value of the time shift which gives the largest
-cross-correlation.
-This index refers to the position on the search window,
-beginning with 0, that corresponds to the earliest sample in
-the search window that is part of the "best match" with the template.
+cross-correlation.  This index refers to the position on the search window,
+beginning with 0, that corresponds to the earliest sample in the search
+window that is part of the "best match" with the template.
 	}
 
 	input { name { templ } type { float } }
