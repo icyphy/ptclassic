@@ -45,9 +45,8 @@ TCL_SRCS =
 ITCL_SRCS =  \
 	AbstractGraph.itcl \
 	Digraph.itcl \
-	DFGEdgeController.itcl \
-	DFGEditor.itcl \
-	DFGVertexController.itcl \
+	EdgeController.itcl \
+	GraphEditor.itcl \
 	IconLibrary.itcl \
 	IconPalette.itcl \
 	Junction.itcl \
@@ -57,9 +56,11 @@ ITCL_SRCS =  \
 	PortedGraph.itcl \
 	SlateView.itcl \
 	StarLibrary.itcl \
+	VertexController.itcl \
 	ViewController.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
+	graphedit.style \
 	icons.tim \
 	stars.tim \
 	graphedit.tcl \
