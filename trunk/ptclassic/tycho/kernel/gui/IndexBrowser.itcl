@@ -83,6 +83,9 @@ class ::tycho::IndexBrowser {
     # Open a help window.
     method help {}
 
+    # Open a file and go to its internal point identified by name.
+    method hyperJump {filename point}
+
     ##################################################################
     ####                   protected methods                      ####
 
@@ -160,6 +163,31 @@ body ::tycho::IndexBrowser::help {} {
 	    $TYCHO/kernel/doc/usersGuides/IndexBrowserHelp.html
 }
 
+#####################################################################
+#### hyperJump
+# Open a file and go to its internal point identified by name. If the
+# filename is relative (does not begin with "/", "~", or "$"), then
+# prepend the directory of the file currently being edited or viewed.
+# Then, expand the filename using <code>::tycho::expandPath</code> and
+# open the resulting file with <code>::tycho::File::openContext</code>,
+# which will choose an editor based on the filename extension. Finally,
+# invoke <code>seePoint</code> to view the specified point within the
+# file. The format for the <i>point</i> argument depends on the type of
+# file being opened. For HTML files, it will normally be the name of an
+# anchor in the file. For text files, it will normally be either "{line
+# <i>linenumber</i>}" or "{range <i>start</i> <i>end</i>}", where
+# <i>start</i> and <i>end</i> have the form
+# <i>linenumber.characternumber</i>.
+#
+body ::tycho::IndexBrowser::hyperJump {filename point} {
+    set char [string index $filename 0]
+    if {$char != "/" && $char != "~" && $char != "\$" && $CWD != {}} {
+        set filename [format "%s/%s" $CWD $filename]
+    }
+    ::tycho::TopLevel::hyperJump $filename $point
+}
+
+
     ##################################################################
     ##################################################################
     ####                   protected methods                      ####
@@ -182,21 +210,6 @@ body ::tycho::IndexBrowser::processItem {id} {
     set filename [lindex $entry 1]
     set point [lindex $entry 2]
 
-    # In case the filename starts with an environment variable, expand
-    set file [::tycho::expandPath $filename]
-    
-    set file [string trim $file]
-    if {$file == ""} {return 0}
-    
-    # Name of the file before calculating the absolute path.
-    set relPath $file
-    
-    # If the name is relative, calculate the absolute path.
-    set char [string index $file 0]
-    if {$char != "/" && $char != "~" && $CWD != {}} {
-	set file $CWD/$file
-    }
-
-    after idle [list ::tycho::File::hyperJump $file $point]
+    hyperJump $filename $point
     return 1
 }
