@@ -48,11 +48,11 @@ limitation of liability, and disclaimer of warranty provisions.
 		// read control value, and route input
 		// to output depending on it.
 		MPHIter nexti(output);
-		PortHole* oportp = nexti++;
 		for (int i = 0; i < outputNum; i++) {
-		    oportp = nexti++;
+		    nexti++;
 		}
-		(*oportp)%0 = input%0;
-		oportp->sendData();
+		OutDDFPort& oport = *(OutDDFPort *)nexti++;
+		oport%0 = input%0;
+		oport.sendData();
 	}
 }
