@@ -71,7 +71,7 @@ MACH=`$(GNU_SRC)/gcc/config.guess`
 # hurt, either
 configure: $(GNU_OBJ)
 	(cd $(GNU_OBJ); \
-	$(GNU_SRC)/configure --srcdir=$(GNU_SRC) \
+	$(GNU_SRC)/configure -v --srcdir=$(GNU_SRC) \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) )
 	@echo "Now reconfiguring gcc directory so we set up gcc/cp right."
 	rm -rf $(GNU_OBJ)/gcc
