@@ -44,7 +44,7 @@ VPATH  = 	$(ROOT)/src
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-DIRS = kernel thread ptlang domains utils ptcl pigilib ptklib tycho pigiRpc pxgraph filters
+DIRS = kernel thread ptlang domains utils ptcl pigilib ptklib tysh pigiRpc pxgraph filters
 
 # "leaf" directories with a make.template
 MTDIRS = kernel pigilib pxgraph ptcl ptklib pigiRpc
