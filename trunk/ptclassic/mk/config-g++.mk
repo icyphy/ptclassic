@@ -30,7 +30,7 @@ BINDIR=$(ROOT)/bin.$(ARCH)
 KERNDIR=$(ROOT)/src/kernel
 
 # where the Gnu library and linker is
-GNULIB=/usr/tools/gnu/lib
+GNULIB=/usr/gnu/lib
 # linker to use for pigi and interpreter.  g++ is not used because we
 # wish to control flags handed to the linker.
 LINKER=$(GNULIB)/gcc-ld -e start -dc -dp
