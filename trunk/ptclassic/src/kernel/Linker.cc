@@ -308,13 +308,16 @@ Linker::generateSharedObject(int argc, char **argv, char* objName,
       permlinkFiles << " " << fullObjName;
     } else {
       // Don't add the file if it is already in the list.
-      char *p;
-      char *tmpString = savestring(permlinkFiles);
-      p = strtok(tmpString, " ");
-      while( p) {
-	if( strcmp(p, fullObjName) == 0)
+      // -- Parse permlinkFiles w/ strtok_r, multithread-safe version of strtok
+      // -- Use a copy of permlinkFiles because strtok_r alters string
+      char* tmpString = savestring(permlinkFiles);
+      char* lasts = 0;
+      char* p = strtok_r(tmpString, " ", &lasts);
+      while (p) {
+	if ( strcmp(p, fullObjName) == 0 ) {
 	  break;
-	p = strtok((char *)NULL, " ");
+	}
+	p = strtok_r((char *)NULL, " ", &lasts);
       }
       // If we made it all the way through the list, and p is NULL,
       // then add our element to the list of files to be permlinked.
@@ -325,7 +328,7 @@ Linker::generateSharedObject(int argc, char **argv, char* objName,
       // file, so add it to the command line.
       if (!perm && p == (char*)NULL)
 	command << " " << fullObjName;
-      delete tmpString;
+      delete [] tmpString;
     } 
   } // for loop
 
@@ -732,13 +735,14 @@ Linker::invokeConstructors (const char* objName, void * dlhandle) {
 #endif //USE_DLOPEN
 
 #ifdef USE_NM_GREP
-
+	char* lasts = 0;
 	while (fscanf(fd, "%s%*s", line) == 1) {
 
-          symbol = strtok( line, "|" );
-          p_addr = strtok( NULL, "|" );
+          // Parse line with strtok_r, multithread-safe version of strtok
+          symbol = strtok_r(line, "|", &lasts);
+          p_addr = strtok_r(NULL, "|", &lasts);
 
-	  addr = atol( p_addr );
+	  addr = atol(p_addr);
 
 	  D( debugInvokeConstructors(symbol, addr, objName); )
 
