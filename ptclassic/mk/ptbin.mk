@@ -83,7 +83,7 @@ ifdef FULL
 	MDSDF =		1
 	PN =		1
 	SDFFULL =	1
-#	SR =		1
+	SR =		1
 	VHDL =		1
 	VHDLB =		1
 endif
