@@ -75,8 +75,8 @@ proc ::tycho::querycolor {string {default {}}} {
 # are displayed in a list box.  Clicking on any color (or using the standard
 # mechanism in Tycho list browsers to scroll through pattern matches) causes
 # the selected color to be displayed.  For example, to scroll through all
-# the greens, enter "*green*" in the entry box and repeatedly hit <Tab>.
-# Typing <Return> dismisses the window. Note that the display may not be
+# the greens, enter "*green*" in the entry box and repeatedly hit &lt;Tab&gt;.
+# Typing &lt;Return&gt; dismisses the window. Note that the display may not be
 # perfect, since it relies on Tk's colormap handling.  If you run out of
 # colors in your colormap, Tk selects the nearest color in the colormap.
 #
