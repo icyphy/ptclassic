@@ -25,15 +25,7 @@ use all the latest features in the newest compilers or every nook and
 cranny of Ellis and Stroustrup's Annotated Reference Manual, because
 of unimplemented features or lack of stability of implementation.
 Instead, we focused on stability.  Accordingly, Ptolemy can be built with
-the Gnu C++ compiler, version 2.2.2, with version 2.2 of the library
-\code{libg++} (though we are now using much more recent versions of
-the g++ compiler); it also works fine Sun C++ 2.1, a port of the AT&T
-\file{cfront} compiler to the Sun, and with Hewlett-Packard's C++ compiler.
-
-Ptolemy also builds under the (at the time of writing) latest versions
-of g++ (2.5.7) and libg++ (2.5.2), but it is important that the same
-version of compiler and libraries be used for compilation of all of
-Ptolemy.
+a number of different C++ compilers.
 
 This means, for one thing, that templates are not used.  In addition,
 some features that do not work that well yet under g++, such as
@@ -843,6 +835,89 @@ Inline definitions of operators \code{&} and \code{|} are also defined
 to implement nondestructive forms of the \code{&=} and \code{|=}
 operations.
 
+\node FlagArray
+\section{FlagArray}
+
+\code{FlagArray} is a lightweight, self-expanding array of integers.
+It is meant to store an array of flags or counters, and its main
+appearance in Ptolemy is as a public member of class \code{Block}.
+Targets and schedulers use this member to keep track of various kinds
+of data. Many schedulers and targets need to be able to mark blocks
+in various ways, for example to count invocations, or flag
+that the block has been visited, or to classify it
+as a particular type of block. This class provides a simple
+mechanism for doing this.
+
+A \code{FlagArray} object is indexed like an array, using
+square brackets.  If \code{x} is a \code{FlagArray} and \code{i}
+is a non-negative integer, then \code{x[i]} is a reference to
+an integer element of the array. If \code{i} is out of bounds
+(beyond the currently allocated limits of the array), then
+the class automatically increases the size of the array.
+New elements are filled with zeros.  Thus, a \code{FlagArray}
+may be viewed as an infinite dimensional array of integers initialized
+with zeros.
+If \code{i} is a negative integer, then \code{x[i]} is an
+error.  For efficiency, the class does not test for this error
+at run time, so you could get a core dump if you make this error.
+ 
+\node FlagArray constructors and destructor
+\subsection{FlagArray constructors and destructor}
+
+\begin{example}
+FlagArray()
+\end{example}
+
+This constructor creates a zero-length flag array.
+
+\begin{example}
+FlagArray(int size)
+\end{example}
+
+This constructor creates a flag array with the specified
+size already allocated and filled with zeros.
+
+\begin{example}
+FlagArray(int size, int fill_value)
+\end{example}
+
+This constructor creates a flag array with the specified
+size filled with the specified integer value.
+
+The destructor frees the memory allocated to store the array
+of integers.
+
+\node FlagArray public methods
+\subsection{FlagArray public methods}
+
+\begin{example}
+FlagArray &	operator = (const FlagArray & v)
+\end{example}
+
+An assignment to one \code{FlagArray} from another simply copies
+its size and data.
+
+\begin{example}
+int size() const
+\end{example}
+
+Return the current allocated size of the array.
+
+\begin{example}
+int & operator [] (int n)
+\end{example}
+
+If \code{n} is less than the currently allocated size
+of the array, then this returns a reference to the n-th element
+of the array. If \code{n} is greater than or equal to
+the currently allocated size of the array, then the size
+of the array is increased, the new elements are filled with zeros,
+and a reference to the n-th element is returned.
+Indexing of elements begins with zero.
+The returned reference, of course,
+can be used on the left-hand side of an assignment.
+This is how values are written into an array.
+
 \node Support for multithreading
 \chapter{Support for multithreading}
 
@@ -1216,7 +1291,9 @@ virtual Block* clone() const
 
 The distinction between \code{clone} and \code{makeNew} is that the
 former does some extra copying.  The default implementation calls
-\code{makeNew} and then \code{copyStates}; it may be overridden to
+\code{makeNew} and then \code{copyStates},
+and also copies additional members like \code{flags};
+it may be overridden in derived classes to
 copy more information.  The intent is that \code{clone} should produce
 an identical object.
 
@@ -1263,6 +1340,52 @@ int setState(const char* \var{stateName}, const char* \var{expression});
 Search for a state in the block named \var{stateName}.  If not found,
 return 0.  If found, set its initial value to \var{expression} and
 return 1.
+
+\begin{example}
+FlagArray flags
+\end{example}
+
+Many schedulers and targets need to be able to mark blocks
+in various ways, to count invocations, or flag
+that the block has been visited, or to classify it
+as a particular type of block.  To support this,
+we provide an array of flags that are not used
+by class Block, and may be used in any way by a Target.
+The target may defer their use to its schedulers.
+The array can be of any size, and the size
+will be increased automatically as elements are referenced.
+For readability and consistency, the user should define an enum
+in the target or scheduler class to give the indices,
+so that mnemonic names
+can be associated with flags, and so that multiple schedulers
+for the same target are consistent.
+For instance, if \code{b} is a pointer to a \code{Block},
+a target might contain the following:
+\begin{example}
+private:
+   enum {
+      visited = 0,
+      fired = 1
+   }
+\end{example}
+which can then be used in code to set and read flags in a
+readable way,
+\begin{example}
+   b->flags[visited] = TRUE;
+   ...
+   if (b->flags[visited]) { ... }
+\end{example}
+
+\emph{WARNING:} For efficiency, there is no checking to prevent
+two different pieces of code (say a target and scheduler) from
+using the same flags (which are indexed only by non-negative
+integers) for different purposes.  The policy, therefore, is
+that \emph{the target is in charge}.  It is incumbent upon
+the writer of the target to know what flags are used by schedulers
+invoked by that target, and to avoid corrupting those flags
+if the scheduler needs them preserved.
+We weighed a more modular, more robust solution, but ruled
+in out in favor of something very lightweight and fast.
 
 \node Block protected members
 \subsection{Block protected members}
@@ -4804,7 +4927,7 @@ interpreter, which likes to pass arguments to commands in this
 style.  In this case, \code{\var{argv}[0]} indicates the type of
 link: if it begins with the character \code{p}, a permanent link
 is performed; otherwise a temporary link is performed.  The remaining
-arguments are concatentated (separated by spaces) and appear in the
+arguments are concatenated (separated by spaces) and appear in the
 argument to the Unix linker.
 
 \begin{example}
@@ -5887,7 +6010,7 @@ a single string, so that operation should be avoided if extensive
 use of StringListIter is planned.
 
 \node class InfString
-\section{InfString, a class suporting unbounded strings}
+\section{InfString, a class supporting unbounded strings}
 
 Class InfString provides a mechanism for building strings
 of unbounded size.  It provides a subset of the functions in a
@@ -6312,7 +6435,7 @@ delete the temporary files.
 \node Histogram classes
 \section{Histogram classes}
 
-The Historgram class accepts a stream of data and accumulates a
+The Histogram class accepts a stream of data and accumulates a
 histogram.  The XHistogram class uses a Histogram to collect the
 data and an XGraph to display it.
 
