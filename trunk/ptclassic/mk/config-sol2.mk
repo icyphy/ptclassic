@@ -157,3 +157,6 @@ MATHLINKLIBNAME = MLelf
 
 # Build gthreads
 INCLUDE_GTHREADS =	yes
+
+# Include the PN domain.
+INCLUDE_PN_DOMAIN =	yes

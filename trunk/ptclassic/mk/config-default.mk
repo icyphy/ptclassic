@@ -241,7 +241,7 @@ PTCOMPAT_INCSPEC =	-I$(ROOT)/src/compat/ptolemy
 INCLUDE_IPUS_DOMAIN = yes
 
 # ptbin.mk uses this to decide whether to include the PN stars
-INCLUDE_PN_DOMAIN = yes
+INCLUDE_PN_DOMAIN = no
 
 # src/thread/makefile uses this to decide whether to build gthreads
 # gthreads should be built only on sol2, sol2.cfront and sun4.
