@@ -67,10 +67,10 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	README.txt \
 	pkgIndex.tcl
 
-MISC_FILES =		doc test tclIndex icons.tim stars.tim
+MISC_FILES =		$(DIRS) tclIndex
 
 # Sub directories to run make in.
-DIRS =			doc test
+DIRS =			adm bin demos doc test
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex
