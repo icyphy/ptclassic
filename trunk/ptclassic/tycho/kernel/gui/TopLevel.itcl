@@ -73,13 +73,13 @@ proc ::tkMbLeave {arg} {
 # Unfortunately, currently the "info" command in Itcl, used here to
 # check whether the object still exists, is broken.  It will claim that
 # the object does not exist even if it does.  As a temporary workaround,
-# pass as an argument the name of the window of widget associated with
+# pass as an argument the name of the <i>window</i> of widget associated with
 # the object.  If there is none, then you are on your own.  Argue with
 # the Itcl designers to get "info" fixed.
 #
 proc ::tycho::safeUpdate {obj} {
     update
-    if {[uplevel #0 info objects $obj] == {}} {
+    if {[uplevel #0 info objects $obj] == {} && ![winfo exists $obj]} {
         puts "command aborted: $obj does not exist"
         ::tycho::silentError
     }
