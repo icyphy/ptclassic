@@ -3,7 +3,7 @@ defstar {
 	domain { CG56 }
 	desc { Hard shifter. }
 	version { $Id$ }
-	author { Chih-Tsung Huang }
+	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {

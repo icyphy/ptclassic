@@ -3,7 +3,7 @@ defstar {
 	domain { CG56 }
 	desc { Sine or cosine function using second order oscillator }
 	version { $Id$ }
-	author { ported from Gabriel by J. Buck }
+	author { J. Buck, ported from Gabriel }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	output {

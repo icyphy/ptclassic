@@ -3,6 +3,7 @@ defstar {
 	domain { CG56 }
 	desc { Allpass filter }
 	version { $Id$ }
+	acknowledge { Gabriel version by E. A. Lee }
 	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
