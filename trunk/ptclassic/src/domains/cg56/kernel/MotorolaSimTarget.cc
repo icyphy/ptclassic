@@ -47,15 +47,15 @@ void MotorolaSimTarget :: initStates(const char* dsp,const char* start,
 	startAddress = start;
 	endAddress = end;
 	addState(interactiveFlag.setState(
-		"Interactive Simulation",this,"YES",""));
-	addStream("simulatorCmds",&simulatorCmds);
-	addStream("shellCmds",&shellCmds);
+			"Interactive Simulation",this,"YES",""));
+	addStream("simulatorCmds", &simulatorCmds);
+	addStream("shellCmds", &shellCmds);
 }
 
 int MotorolaSimTarget::compileCode() {
 	StringList assembleCmds;
 	assembleCmds << "asm" << dspType << " -A -b -l " << filePrefix << ".asm";
-	return !systemCall(assembleCmds,"Errors in assembly");
+	return !systemCall(assembleCmds, "Errors in assembly");
 }
 
 int MotorolaSimTarget::loadCode() {
@@ -64,13 +64,11 @@ int MotorolaSimTarget::loadCode() {
 		<< "break pc>=$" << endAddress << "\ngo $" << startAddress
 		<< "\n";
 	if (!interactiveFlag) cmdFile << "quit\n";
-	return writeFile(cmdFile,".cmd");
+	return writeFile(cmdFile, ".cmd");
 }
 
 void MotorolaSimTarget::writeCode() {
-    /*
-     * generate shell-cmd file (/bin/sh)
-     */
+    // Generate shell-cmd file for /bin/sh
     if (!parent()) {
 	StringList realcmds = "#!/bin/sh\n";
 	realcmds << headerComment("# ");
@@ -89,24 +87,21 @@ void MotorolaSimTarget::writeCode() {
 	    return;
 	}
     }
-    /*
-     * generate the .asm file (and optionally display it)
-     */
+
+    // generate the .asm file (and optionally display it)
     MotorolaTarget:: writeCode();
 }
 
 int MotorolaSimTarget::runCode() {
 	StringList runCmd;
 	runCmd << "./" << filePrefix << " &";
-	if (systemCall(runCmd,"Problems running code onto simulator")!=0)
-	    return FALSE;
-	return TRUE;
+	return !systemCall(runCmd, "Problems running code in the simulator");
 }
 
 void MotorolaSimTarget :: headerCode () {
 	simulatorCmds.initialize();
 	shellCmds.initialize();
-	myCode << "	org	p:$" << startAddress << "\nSTART\n";
+	myCode << "\torg\tp:$" << startAddress << "\nSTART\n";
 };
 
 void MotorolaSimTarget :: trailerCode () {
