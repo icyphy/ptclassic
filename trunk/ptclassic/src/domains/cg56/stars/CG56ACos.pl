@@ -29,15 +29,15 @@ The output is scaled down by pi.
         jmp     $label(l23)
 $label(l22)
         cmp     x0,b            #-1.0,a
-        jne     l24
+        jne     $label(l24)
         clr     a
-        jmp     l23
-l24
+        jmp     $label(l23)
+$label(l24)
         cmp     x0,a
-        jne     l25
+        jne     $label(l25)
         move    #.99999999,a
-        jmp     l23
-l25
+        jmp     $label(l23)
+$label(l25)
         mpyr    x0,x0,b         #.445156695,y1
         move    #0.5,a          b,y0
         mac     y1,y0,a         #.440833333,y1
@@ -89,7 +89,7 @@ l25
         neg     a               #0.5,x0
         add     x0,a
 
-l23
+$label(l23)
         move    a,$ref(output)
 	}
 	go {
