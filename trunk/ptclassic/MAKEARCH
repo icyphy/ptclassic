@@ -7,34 +7,48 @@ if (! $?ARCH ) then
 	exit 1
 endif
 
+# optmkdir -- make a directory if it does not exist
+alias optmkdir \
+'if ( ! -d \!:1 ) echo making directory $cwd/\!:1 ; if ( ! -d \!:1 ) mkdir \!:1'
+
+# optlink -- make a symbolic link if it does not exist, from a file in a
+# different directory to the same name in this directory.  args: dir filename
+
+alias optlink \
+'if ( ! -e \!:2 ) echo making link \!:1/\!:2 ; if ( ! -e \!:2 ) ln -s \!:1/\!:2 .'
+
 # Make the top-level directories
-mkdir bin.$ARCH lib.$ARCH obj.$ARCH
+optmkdir bin.$ARCH
+optmkdir lib.$ARCH
+optmkdir obj.$ARCH
 
 # Now, make stuff under obj.$ARCH
 
 cd obj.$ARCH
-ln -s ../src/makefile .
+optlink ../src makefile
 foreach x (domains interp kernel pigiRpc pigilib tests preproc)
-	mkdir $x
+	optmkdir $x
 	cd $x
-	ln -s ../../src/$x/makefile .
-	if (-r ../../src/$x/make.template) ln -s ../../src/$x/make.template .
+	optlink ../../src/$x makefile
+	if (-r ../../src/$x/make.template) then
+		optlink ../../src/$x make.template
+	endif
 	cd ..
 end
 
 foreach x (xgraph filters)
-	mkdir $x
+	optmkdir $x
 	cd $x
-	ln -s ../../src/$x/Makefile .
+	optlink ../../src/$x Makefile
 	cd ..
 end
 
 # Make subdirectories of filters
 cd filters
 foreach x (optfir wfir)
-	mkdir $x
+	optmkdir $x
 	cd $x
-	ln -s ../../../src/filters/$x/Makefile .
+	optlink ../../../src/filters/$x Makefile
 	cd ..
 end
 cd ..
@@ -45,13 +59,14 @@ set EXPDOMAINS=cg
 
 cd domains
 foreach x (sdf ddf de thor $EXPDOMAINS)
-	mkdir $x
+	optmkdir $x
 	cd $x
-	ln -s ../../../src/domains/$x/makefile .
+	optlink ../../../src/domains/$x makefile
 	foreach y (kernel stars)
-		mkdir $y
+		optmkdir $y
 		cd $y
-		ln -s ../../../../src/domains/$x/$y/{make.template,makefile} .
+		optlink ../../../../src/domains/$x/$y make.template
+		optlink ../../../../src/domains/$x/$y makefile
 		cd ..
 	end
 	cd ..
@@ -59,42 +74,17 @@ end
 
 # At this point, we are in obj.$ARCH/domains.
 
-#make subdirectories of cg.
-mkdir cg; cd cg
-foreach x (loopScheduler gilsScheduler topologies)
-    mkdir $x
-    cd $x
-    ln -s ../../../../src/domains/cg/$x/{make.template,makefile} .
-    cd ..
+# create extra directories under domain-specific directories
+# everything must have one slash (be two levels down)
+
+foreach x (thor/pepp cg/architectures sdf/expgraph sdf/image ddf/constructs \
+	cg/loopScheduler cg/gilsScheduler cg/topologies)
+	optmkdir $x
+	cd $x
+	optlink ../../../../src/domains/$x make.template
+	optlink ../../../../src/domains/$x makefile
+	cd ../..
 end
-cd ..
-
-# back in obj.$ARCH/domains
-
-# special case: thor/pepp
-mkdir thor/pepp
-cd thor/pepp
-ln -s ../../../../src/domains/thor/pepp/{make.template,makefile} .
-cd ../..
-
-#special case: cg/architectures
-mkdir cg/architectures
-cd cg/architectures
-ln -s ../../../../src/domains/cg/architectures/{make.template,makefile} .
-cd ../..
-
-#special case: sdf/expgraph
-mkdir sdf/expgraph
-cd sdf/expgraph
-ln -s ../../../../src/domains/sdf/expgraph/{make.template,makefile} .
-cd ../..
-
-#special case: sdf/image
-mkdir sdf/image
-cd sdf/image
-ln -s ../../../../src/domains/sdf/image/{make.template,makefile} .
-cd ../..
-
 
 # This is for the makefile
 cd ../..
