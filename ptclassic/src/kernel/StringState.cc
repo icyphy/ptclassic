@@ -66,12 +66,15 @@ const char* StringState :: type() const { return "STRING"; }
 
 void StringState :: initialize() {
 	// Delete the previously parsed value (set to zero in case of error)
-	delete [] val;
+	LOG_DEL; delete [] val;
 	val = 0;
 
 	// Make sure that the initial string is not null;
 	const char* initString = initValue();
-	if (initString == 0 || *initString == 0) return;
+	if (initString == 0 || *initString == 0) {
+		val = savestring("");
+		return;
+	}
 
 	// Parse the initial string
 	// -- Substitute parameters that fall in between curly braces {}
@@ -82,17 +85,16 @@ void StringState :: initialize() {
 	const char* whiteSpace = "";
 	Tokenizer lexer(initString, specialChars, whiteSpace);
 	char unprintableChar = ASCII_CONTROL_B_CHAR;
-	StringList parsedString;
-	int saveString = FALSE;
+	StringList parsedString = "";
+
 	lexer.setQuoteChar(unprintableChar);
 	while (TRUE) {
         	ParseToken t = getParseToken(lexer, T_STRING);
 		if (t.tok == T_EOF || t.tok == T_ERROR) break;
-		saveString = TRUE;
 		parsedString << t.sval;
 		delete [] t.sval;
 	}
-	if (saveString) val = savestring(parsedString);
+	val = savestring(parsedString);
 }
 
 StringState& StringState :: operator=(const char* newStr) {
