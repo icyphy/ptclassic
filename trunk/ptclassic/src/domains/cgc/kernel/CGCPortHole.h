@@ -181,7 +181,7 @@ class ForkDestIter : private ListIter {
 public:
 	ForkDestIter(CGCPortHole* p) : ListIter(p->myDest()) {}
 	CGCPortHole* next() { return (CGCPortHole*) ListIter::next(); }
-	CGCPortHole* operator++ () { return next(); }
+	CGCPortHole* operator++ (POSTFIX_OP) { return next(); }
 	ListIter::reset;
 };
 
