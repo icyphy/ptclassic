@@ -41,6 +41,9 @@ if { [lsearch -exact $auto_path $env(DEVTOOLS_LIBRARY)] == -1 } {
     lappend auto_path $env(DEVTOOLS_LIBRARY)
 }
 
+### MODE MAPPINGS
+::tycho::register extensions "javaprofile" .prof
+
 ### MODES
 ########### Compound viewers (alphabetical)
 
@@ -82,3 +85,10 @@ if {$tcl_platform(platform) != "macintosh"} {
 	-category "tool" \
 	-underline 5
 
+# Directed-acyclic graph viewer
+::tycho::register mode "javaprofile" \
+	-command {::tycho::view ProfileJava -file {%s} -toolbar 1} \
+	-viewclass ::tycho::ProfileJava \
+	-label {View Java Profile}  \
+	-category "tool" \
+	-underline 0
