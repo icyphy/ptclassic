@@ -249,6 +249,8 @@ bin_dejagnu:
 
 install_dejagnu:
 	(cd $(GNU_OBJ)/dejagnu; $(MAKE) install)
+	@echo"Move libtcl.a to dejagnu so we don't get confused later"
+	mv $(GNU_EXEC_PREFIX)/lib/libtcl.a $(GNU_EXEC_PREFIX)/lib/dejagnu
 
 ############################################################
 # Create various directories
