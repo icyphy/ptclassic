@@ -140,7 +140,7 @@ public:
 	virtual void addProcessorCode(int pid, const char*);
 
 	// return the array of candidate processors.
-	virtual IntArray* candidateProcs(ParProcessors*);
+	virtual IntArray* candidateProcs(ParProcessors*, DataFlowStar*);
 
 	// determine the processor assignment of the profile manually
 	// and return the profile.
