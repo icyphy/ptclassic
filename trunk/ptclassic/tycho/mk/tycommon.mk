@@ -143,10 +143,16 @@ tybin_install:
 				rm -f $(PTOLEMY)/bin/$$f; \
 				ln $$f $(PTOLEMY)/bin; \
 			fi; \
-			if [ -w "$(TYCHO)/bin" ]; then \
-				echo "Installing $$f in $(TYCHO)/bin";\
-				rm -f $(TYCHO)/bin/$$f; \
-				ln $$f $(TYCHO)/bin; \
+			if [ -w "$(PTOLEMY)/tycho/bin" ]; then \
+				echo "Installing $$f in $(PTOLEMY)/tycho/bin";\
+				rm -f $(PTOLEMY)/tycho/bin/$$f; \
+				ln $$f $(PTOLEMY)/tycho/bin; \
+			else \
+				if [ -w "$(TYCHO)/bin" ]; then \
+					echo "Installing $$f in $(TYCHO)/bin";\
+					rm -f $(TYCHO)/bin/$$f; \
+					ln $$f $(TYCHO)/bin; \
+				fi; \
 			fi; \
 		done ; \
 	fi
