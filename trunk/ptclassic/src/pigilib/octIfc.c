@@ -452,13 +452,13 @@ LoadTheStar(instPtr, permB, linkArgs)
 
 /* find a parameter name in a ParamListType. */
 ParamType*
-findParam(name, pList)
+findParam(name, pListp)
 char* name;
-ParamListType *pList;
+ParamListType *pListp;
 {
     int i;
-    ParamType* curr = pList->array;
-    for (i = 0; i < pList->length; i++) {
+    ParamType* curr = pListp->array;
+    for (i = 0; i < pListp->length; i++) {
 	if (strcmp (name, curr->name) == 0) return curr;
 	curr++;
     }
@@ -504,7 +504,8 @@ octObject *instPtr;
 ParamListType *pListPtr;
 {
     octObject prop = {OCT_PROP};
-    ParamListType tempList = {0, 0, 0};
+    ParamListType tempList = {0, 0, 0, FALSE};
+    int retval = TRUE;
 
     ERR_IF1(!GetDefaultParams(instPtr, pListPtr));
 
@@ -515,28 +516,23 @@ ParamListType *pListPtr;
     /* If no parameters, return default list */
     /* FIXME: Memory leak */
     if (octGetByName(instPtr, &prop) == OCT_NOT_FOUND) {
-	ERR_IF1(!SetSogParams(instPtr, pListPtr));
-	return(TRUE);
+	retval = SetSogParams(instPtr, pListPtr);
     }
-    if (!PStrToPList(prop.contents.prop.value.string, &tempList)) {
-	if (prop.contents.prop.type == OCT_STRING) {
-	    free(prop.contents.prop.value.string);
-	}
-	return(FALSE);
+    else if (!PStrToPList(prop.contents.prop.value.string, &tempList)) {
+	retval = FALSE;
     }
- 
-    /* Merge parameters: if false, no parameters from tempList were used */
-    if (!MergeParams(pListPtr, &tempList)) {
-	free(tempList.array[0].name);		/* allocated by PStrToPList */
+    /* Merge parameters: if true, strings from tempList were used */
+    else if (MergeParams(pListPtr, &tempList)) {
+	CopyFlatPList(pListPtr, pListPtr);
     }
 
-    /* Free memory */
+    /* Free dynamic memory */
+    FreeFlatPList(&tempList);			/* allocated by PStrToPList */
     if (prop.contents.prop.type == OCT_STRING) {
 	free(prop.contents.prop.value.string);	/* allocated by octGetByName */
     }
-    free(tempList.array);			/* allocated by PStrToPList */
 
-    return(TRUE);
+    return(retval);
 }
 
 /* GetOrInitTargetParams
@@ -555,7 +551,8 @@ octObject *facetPtr;
 ParamListType *pListPtr;
 {
     octObject prop = {OCT_PROP};
-    ParamListType tempList = {0, 0, 0};
+    ParamListType tempList = {0, 0, 0, FALSE};
+    int retval = TRUE;
 
     ERR_IF1(!KcGetTargetParams(targName, pListPtr));
 
@@ -564,27 +561,23 @@ ParamListType *pListPtr;
 
     /* If no parameters, return default list */
     if (octGetByName(facetPtr, &prop) == OCT_NOT_FOUND) {
-	return(TRUE);
+	retval = TRUE;
     }
-    if (!PStrToPList(prop.contents.prop.value.string, &tempList)) {
-	if (prop.contents.prop.type == OCT_STRING) {
-	    free(prop.contents.prop.value.string);
-	}
-	return(FALSE);
+    else if (!PStrToPList(prop.contents.prop.value.string, &tempList)) {
+	retval = FALSE;
     }
-
-    /* Merge parameters: if false, no parameters from tempList were used */
-    if (!MergeParams(pListPtr, &tempList)) {
-	free(tempList.array[0].name);		/* allocated by PStrToPList */
+    /* Merge parameters: if true, strings from tempList were used */
+    else if (MergeParams(pListPtr, &tempList)) {
+	CopyFlatPList(pListPtr, pListPtr);
     }
 
-    /* Free memory */
+    /* Deallocate dynamic memory */
+    FreeFlatPList(&tempList);			/* allocated by PStrToPList */
     if (prop.contents.prop.type == OCT_STRING) {
 	free(prop.contents.prop.value.string);	/* allocated by octGetByName */
     }
-    free(tempList.array);			/* allocated by PStrToPList */
 
-    return(TRUE);
+    return(retval);
 }
 
 /* GetDefaultParams
