@@ -1,10 +1,10 @@
 /*  Version $Id$
 
-    Copyright 1991 The Regents of the University of California.
+    Copyright 1992 The Regents of the University of California.
 			All Rights Reserved.
 
     Programmer:		T.M. Parks
-    Date of creation:	5 January 1991
+    Date of creation:	5 January 1992
 
     Definitions of domain-specific PortHole classes.
 */
@@ -24,9 +24,6 @@ class XXXPortHole : public PortHole
 public:
     // Class identification.
     virtual int isA(const char* className) const;
-
-    // Domain-specific initialization.
-    PortHole& setPort(const char* name, Block* parent, DataType type = FLOAT);
 };
 
 class InXXXPort : public XXXPortHole
@@ -34,9 +31,6 @@ class InXXXPort : public XXXPortHole
 public:
     // Input/output identification.
     virtual int isItInput() const;
-
-    // Get Particles from input Geodesic.
-    virtual void grabData();
 };
 
 
@@ -45,17 +39,11 @@ class OutXXXPort : public XXXPortHole
 public:
     // Input/output identification.
     virtual int isItOutput() const;
-
-    // Put Particles into the output Geodesic.
-    virtual void sendData();
 };
 
  
 class MultiXXXPort : public MultiPortHole
 {
-public:
-    // Domain-specific initialization.
-    MultiPortHole& setPort(const char* name, Block* parent, DataType type = FLOAT);
 };
 
 class MultiInXXXPort : public MultiXXXPort
