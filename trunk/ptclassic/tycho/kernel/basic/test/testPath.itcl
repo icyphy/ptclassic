@@ -204,7 +204,7 @@ test Path-6.1 {Test out simplifyPath} {
     set env(TYCHO) $TYCHO
     # Simple case
     set r1 [::tycho::simplifyPath [::tycho::expandPath \
-	    [file join \$TYCHO README.files]] \
+	    [file join \$TYCHO README.txt]] \
 	    [list TYCHO]]
 
     # This envvar does not exist
@@ -223,7 +223,7 @@ test Path-6.1 {Test out simplifyPath} {
 	    [list NOTAENVVAR TYCHO]]
 
     list $r1 $r2 $r3 $r4
-} {{$TYCHO/README.files} 1 {$TYCHO/foo.r3} /tmp/elvis/bar.r4}
+} {{$TYCHO/README.txt} 1 {$TYCHO/foo.r3} /tmp/elvis/bar.r4}
 
 test Path-7.1 {Test out isRelative} {
     list \
