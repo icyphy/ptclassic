@@ -1,3 +1,4 @@
+static const char file_id[] = "SDFScheduler.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -628,6 +629,11 @@ SDFScheduler::SDFScheduler () {
 	numIters = 1;
 	invalid = 1;
 	schedulePeriod = 10000.0;
+}
+
+// destructor
+SDFScheduler::~SDFScheduler () {
+	invalid = 1;		// dummy for breakpoint.
 }
 
 // setStopTime, for compatibility with DE scheduler.
