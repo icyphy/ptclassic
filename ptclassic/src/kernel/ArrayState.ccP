@@ -35,12 +35,12 @@ $Id$
 }
 
 // destructor
-<T>ArrayState :: ~<T>ArrayState () {delete[nElements] val;}
+<T>ArrayState :: ~<T>ArrayState () {delete val;}
 
 // assignment operator
 <T>ArrayState &	<T>ArrayState :: operator = (const <T>ArrayState & v) {
 	if (this != &v) {
-		delete[nElements] val;
+		delete val;
 		val  = new <C> [nElements = v.nElements];
 		<C>* top = &(val[nElements]);
 		<C>* t = val;
@@ -54,7 +54,7 @@ $Id$
 int <T>ArrayState :: size() { return nElements;}
 
 // type (not inline because it's virtual)
-char* <T>ArrayState :: type() { return "<T>Array";}
+const char* <T>ArrayState :: type() { return "<T>Array";}
 
 // the value as a string
 
@@ -81,12 +81,12 @@ void <T>ArrayState  :: initialize() {
 	nElements = 0;
 
 	<C> buf[MAXLEN];
-	char* specialChars = "*+-/()<[]";
+	const char* specialChars = "*+-/()<[]";
 	Tokenizer lexer(initValue,specialChars);
 
 	int i = 0, err = 0;
 	int numRepeats;
-	<C> saveValue;
+	<C> saveValue = 0;
 	while(!lexer.eof() && i < MAXLEN && err == 0) {
 		ParseToken t = evalExpression(lexer);
 		if (t.tok == T_EOF) break;
@@ -130,7 +130,6 @@ void <T>ArrayState  :: initialize() {
 
 ParseToken <T>ArrayState :: evalExpression(Tokenizer& lexer)
 {
-        <C> signflag = 1;
         ParseToken t = getParseToken(lexer, T_<T>);
 	if (t.tok != '-') return t;
 	t = getParseToken(lexer, T_<T>);
