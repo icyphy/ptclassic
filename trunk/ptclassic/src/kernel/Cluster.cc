@@ -400,15 +400,6 @@ StringList printClusterDot(Galaxy& galaxy) {
 	while ((successor = nextSuccessor++) != NULL)
 	    dot << "  " << sourceName << " -> " << dotName(*successor) <<";\n";
     }
-    nextCluster.reset();
-    while ((cluster = nextCluster++) != NULL) {	
-	InfString sourceName;
-	sourceName << dotName(*cluster);
- 	PredecessorIter nextSuccessor(*cluster);
-	Block* successor;
-	while ((successor = nextSuccessor++) != NULL)
-	    dot << "  " << sourceName << " -> " << dotName(*successor) <<";\n";
-    }
     dot << "}\n";
     return dot;
 }

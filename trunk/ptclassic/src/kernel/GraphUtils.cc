@@ -101,6 +101,7 @@ StringList dotName(Block& b){
     name << b.name() << "_" << b.flags[0];
     replaceString(name,"=","_");
     replaceString(name,".","_");
+    replaceString(name,"-","_");
     StringList out = name;
     return out;
 }
@@ -151,3 +152,6 @@ void deleteGalaxy(Galaxy&g) {
 	delete port;
     delete &g;
 }
+
+
+
