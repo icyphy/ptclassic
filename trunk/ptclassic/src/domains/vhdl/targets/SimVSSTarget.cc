@@ -95,8 +95,6 @@ static SimVSSTarget proto("SimVSS-VHDL", "VHDLStar",
 static KnownTarget entry(proto,"SimVSS-VHDL");
 
 void SimVSSTarget :: begin() {
-//  printf("Begin Method of SimVSSTarget called\n");
-
   // Init members here to avoid erasing code and items created
   // during begin method of stars.
   VHDLTarget::setup();
@@ -108,8 +106,6 @@ void SimVSSTarget :: begin() {
 }
 
 void SimVSSTarget :: setup() {
-//  printf("Setup Method of SimVSSTarget called\n");
-
   synopsys.initialize();
   arch.initialize();
   simarch.initialize();
@@ -370,9 +366,6 @@ ISA_FUNC(SimVSSTarget,VHDLTarget);
 
 // Method called by comm stars to place important code into structure.
 void SimVSSTarget :: registerComm(int direction, int pairid, int numxfer, const char* dtype) {
-
-  printf("RegisterComm Called\n");
-
   // direction == 0 --> C2V ; direction == 1 --> V2C.
   // Create a string with the right VHDL data type
   StringList vtype = "";
