@@ -80,8 +80,8 @@ int Linker::linkObj (const char* objName) {
 #ifdef COFF
 	filehdr h1;
 	aouthdr h2;
-	if (read (fd, (void*) &h1, sizeof h1) <= 0 ||
-	    read (fd, (void*) &h2, sizeof h2) <= 0) {
+	if (read (fd, (char*) &h1, sizeof h1) <= 0 ||
+	    read (fd, (char*) &h2, sizeof h2) <= 0) {
 		Error::error("Linker: Can't read header from ", objName);
 		return FALSE;
 	}
@@ -89,7 +89,7 @@ int Linker::linkObj (const char* objName) {
 #else
 	exec header;
 
-	if (read (fd, (void*) &header, sizeof(header)) <= 0) {
+	if (read (fd, (char*) &header, sizeof(header)) <= 0) {
 		Error::error("Linker: Can't read header from ", objName);
 		return FALSE;
 	}
@@ -132,15 +132,15 @@ int Linker::linkObj (const char* objName) {
 	else {
 		// clean up
 		unlink (headerName);
-		delete headerName;
+		delete (char*)headerName;
 	}
 	fd = open (tname, 2, 0);
 // unix lets us do this: the file actually disappears when closed.
 	unlink (tname);
 
 #ifdef COFF
-	if (fd < 0 || read (fd, (void*) &h1, sizeof h1) <= 0 ||
-	    read (fd, (void*) &h2, sizeof h2) <= 0) {
+	if (fd < 0 || read (fd, (char*) &h1, sizeof h1) <= 0 ||
+	    read (fd, (char*) &h2, sizeof h2) <= 0) {
 		Error::abortRun("Can't read header from incremental link output");
 		delete codeBlock;
 		close (fd);
@@ -149,7 +149,7 @@ int Linker::linkObj (const char* objName) {
 	long seekpos = N_TXTOFF(h1, h2);
 	lseek (fd, seekpos, 0);
 #else
-	if (fd < 0 || read (fd, (void*) &header, sizeof(header)) <= 0) {
+	if (fd < 0 || read (fd, (char*) &header, sizeof(header)) <= 0) {
 		Error::abortRun("Can't read header from incremental link output");
 		delete codeBlock;
 		close (fd);
