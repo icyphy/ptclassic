@@ -47,7 +47,7 @@ void ParProcessors :: initialize()
 		p->initialize();
 	}
 
-	SCommNodes.initialize();
+	removeCommNodes();
 	commCount = 0;
 }
 
@@ -198,10 +198,13 @@ void ParProcessors::findCommNodes(ParGraph* graph, EGNodeList& readyNodes) {
 				rnode->assignProc(to);
 				rnode->setOrigin(g->farGate()); 
 				if (hidden) {
-				   // right before the node.
-				   rnode->assignSL(desc->getLevel());
-				   if (desc->root()) readyNodes.remove(desc);
-				   graph->sortedInsert(readyNodes, rnode, 1);
+					// can be done later
+					rnode->assignSL(1);
+					// disable to fire rnode again.
+					if (desc->root()) {
+						desc->incWaitNum();
+						rnode->setFinishTime(0);
+					}
 				} else {
 					rnode->assignSL(desc->getLevel());
 				}
@@ -210,8 +213,7 @@ void ParProcessors::findCommNodes(ParGraph* graph, EGNodeList& readyNodes) {
 				// 3. insert them into the graph.
 				pg->connectedTo(snode);
 				rnode->connectedTo(desc);
-				// if not hidden
-				if(!hidden) snode->connectedTo(rnode);
+				snode->connectedTo(rnode);
 
 				snode->setPartner(rnode);
 				SCommNodes.insert(snode);
