@@ -62,7 +62,9 @@ TYDOC_DESC =
 all: sources $(MISC_SRCS)
 	chmod a+x html
 
-install: all
+install: all tybin_install
+
+.PHONY: all install tybin_install
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/tycommon.mk
