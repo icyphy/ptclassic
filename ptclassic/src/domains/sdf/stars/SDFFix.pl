@@ -37,6 +37,16 @@ the star will report the number of overflow errors if any occurred
 during the simulation.
                 }
         }
+        defstate {
+                name { RoundFix }
+                type { int }
+                default { "YES" }
+                desc {
+If YES or TRUE, then all fixed-point computations, assignments, and
+data type conversions will be rounded.
+Otherwise, truncation will be used.
+                }
+        }
         protected {
 		int overflows, totalChecks;
         }
