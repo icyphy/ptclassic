@@ -4,7 +4,7 @@
 # @Version: $Id$
 # @Author: H. John Reekie
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -107,7 +107,7 @@ proc ::tycho::icanvas {pathName args} {
 # further functionality.
 #
 class ::tycho::IncrCanvas {
-    inherit ::tycho::TWidget
+    inherit ::itk::Widget
 
     constructor {args} {}
     destructor {}
@@ -1375,7 +1375,7 @@ body ::tycho::IncrCanvas::search {mode tag x0 y0 x1 y1} {
 # Manipulate the selection. This method has several forms, depending
 # on the value of the _mode_ argument. If _mode_ is <b>adjust</b>,
 # <b>from</b>, or <b>to</b>, then complex items will respond
-# to this method only of they have provided a <b>select</b> procedure
+# to this method only if they have provided a <b>select</b> procedure
 # in their method tables. Valid modes are:
 # <dl>
 # <dt><b>adjust</b> _tagOrId_ _index_
