@@ -83,6 +83,58 @@ until the comment ends.
  <P> There are two types of doc tags, those that are file
 wide, and those that are only for one particular doc comment.
 (Note that much of the tag support is currently incomplete).
+
+ <P> The text associated with a doc tag is assumed to be HTML
+source. However, to make writing comments a little simpler, tydoc
+applies some simple conversion rules to the text:
+
+<ul>
+<LI> Comment lines containing only white space are treated as
+a new paragraph (&lt;P&gt;).
+
+<LI> The underscore-as-emphasis convention is used to generate
+italicized text. For example,
+<BLOCKQUOTE>
+    _I_ think this is a _perfectly reasonable convention_!
+</BLOCKQUOTE>
+
+will be converted into 
+
+<BLOCKQUOTE>
+    &lt;i&gt;I&lt;/i&gt; think this is a &lt;i&gt;perfectly reasonable
+	convention&lt;/i&gt;!
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+    <i>I</i> think this is a <i>perfectly reasonable
+	convention</i>!
+</BLOCKQUOTE>
+
+
+<li> Two kinds of formatting are used to generate constant-width
+text for program identifiers and so on. In both of these cases, the
+text can be only a single word:
+
+<BLOCKQUOTE>
+    The method fred{} uses the global variable *rightSaid*.
+</BLOCKQUOTE>
+
+will be converted into 
+
+<BLOCKQUOTE>
+    The method &lt;code&gt;fred&lt;code&gt; uses the global
+    variable &lt;code&gt;rightSaid&lt;/code&gt;.
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+    The method <code>fred</code> uses the global
+    variable <code>rightSaid</code>.
+</BLOCKQUOTE>
+
+<li> If a comment doesn't end with a period, question mark,
+or exclamation mark, then one is put in for you. This is useful
+for catching single-line comments.
+
+</ul>
+
 <H3>File-wide doc tags</H3>
 <DL>
 	<BR><DT> <CODE>@Author</CODE>
