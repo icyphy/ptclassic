@@ -790,3 +790,20 @@ extern "C" void
 KcCatchSignals() {
 	Scheduler::catchInt(SIGUSR1);
 }
+
+// dummy class to clean up at end
+
+class KernelCallsOwner {
+public:
+	KernelCallsOwner() {}
+	~KernelCallsOwner() {
+		if (currentGalaxy != universe) {
+			LOG_DEL; delete currentGalaxy;
+		}
+		LOG_DEL; delete universe;
+	}
+};
+
+// constructor for this guy is called before main; destructor at end.
+
+static KernelCallsOwner kco;
