@@ -49,9 +49,6 @@ INCL = 		-I$(SDFDIR) \
 # Library name
 LIB =		libsdfcontribstars.$(LIBSUFFIX)
 
-# Where star doc files go
-STARDOCDIR = 	../../doc/stars
-
 # source files for all stars, using preprocessor
 PL_SRCS= \
 SDFCIIDGaussian.pl \
