@@ -58,7 +58,7 @@
 .c.o:
 	$(CC) $(C_SHAREDFLAGS) $(CFLAGS) $(C_INCL) -c $<
 
-# The optimizer in g++-2.7.2 has a bug that we workaround by turning
+# The optimizer in g++-2.7.2 and later have bugs that we workaround by turning
 # off the optimizer.  The problem is that when the optimizer is turned on, 
 # certain files end up needing  operator= or a copy constructor from 
 # a parent class.  Unfortunately, the parent class does not define what
@@ -76,7 +76,7 @@
 # UNOPTIMIZED_COMPILE_RULE.  Having this rule in config-g++.mk means
 # that we don't see architecture dependent variables.
 #
-UNOPTIMIZED_WARNING_MESSAGE = @echo "DANGER: gcc-2.7.2 optimizer workaround here, see $$PTOLEMY/mk/config-g++.mk"
+UNOPTIMIZED_WARNING_MESSAGE = @echo "DANGER: gcc-2.7.2 and later optimizer workaround here, see $$PTOLEMY/mk/compile.mk"
 
 UNOPTIMIZED_COMPILE_RULE = 	$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(WARNINGS) \
 					$(ARCHFLAGS) $(LOCALCCFLAGS) \
