@@ -40,11 +40,11 @@ public:
 	void addDeclaration(const char* decl);
 protected:
 	char *schedFileName;
-	StringList staticDeclarations = "";
-	StringList include = "";
-	StringList mainDeclarations = "";
-	StringList mainInitialization = "";
-	StringList mainCode = "";
+	StringList staticDeclarations;
+	StringList include;
+	StringList mainDeclarations;
+	StringList mainInitialization;
+	StringList mainCode;
 private:
 	StringList sectionComment(const StringList s);
 	int galDataStruct(Galaxy& galaxy, int level=0);
