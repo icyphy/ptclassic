@@ -32,6 +32,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer: Soonhoi Ha
  The authors gratefully acknowledge the contributions of Richard Stevens.
 
+ Richard Stevens is an employee of the U.S. Government whose contributions
+ to this computer program fall within the scope of 17 U.S.C. A7 105
 
  Declaration for DDFTarget, the default target to be used in the DDF
  domain.

@@ -30,6 +30,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers: Soonhoi Ha, Joe Buck
  The authors gratefully acknowledge the contributions of Richard Stevens.
+
+ Richard Stevens is an employee of the U.S. Government whose contributions
+ to this computer program fall within the scope of 17 U.S.C. A7 105
+
  Date of creation: 7/20/94
 
  Methods for the DDF Scheduler

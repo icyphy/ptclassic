@@ -30,6 +30,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer:  Soonhoi Ha and Edward A. Lee
  The authors gratefully acknowledge the contributions of Richard Stevens
+
+ Richard Stevens is an employee of the U.S. Government whose contributions
+ to this computer program fall within the scope of 17 U.S.C. A7 105
+
  Date of creation (simpler version): 7/20/94
 
  Declaration for DDF Target, the default target to be used in the DDF

@@ -39,6 +39,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmers:	Joseph Buck, Soonhoi Ha, E. A. Lee,
 		Thomas Parks, R. S. Stevens
 
+Richard Stevens is an employee of the U.S. Government whose contributions
+to this computer program fall within the scope of 17 U.S.C. A7 105
+
 These are the methods for the basic dynamic dataflow scheduler.  It
 can handle any type of DataFlowStar.  When given an SDF system,
 this scheduler attempts to match the notion of an iteration that
