@@ -88,7 +88,7 @@ public:
 	SynDFCluster();
 
 	/* virtual */ Block* makeNew() const { return new SynDFCluster; }
-	inline virtual SynDFClusterPort* makeNewPort(GenericPort& p) {
+	inline virtual ClusterPort* makeNewPort(GenericPort& p) {
 	    return new SynDFClusterPort(p);
 	}
 	/* virtual */ Cluster* convertStar(Star&);
