@@ -75,25 +75,25 @@ gnu_all: gnu_configure gnu_bin gnu_install
 
 .PHONY: gnu_configure gnu_bin gnu_install
 
-gnu_configure: stats $(OBJARCH)/gnu
+gnu_configure: $(OBJARCH)/gnu
 $(OBJARCH)/gnu: $(OBJARCH) 
 	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) GNU_DEST=$(GNU_DEST) configure)
 
-gnu_bin: stats $(OBJARCH)/gnu
+gnu_bin: $(OBJARCH)/gnu
 	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) GNU_DEST=$(GNU_DEST) bin)
 
-gnu_install: stats $(OBJARCH)/gnu
+gnu_install: $(OBJARCH)/gnu
 	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) ARCH=$(ARCH) PTOLEMY=$(PTOLEMY) GNU_DEST=$(GNU_DEST) install)
 
 gnu_clean:
 	(cd $(PTOLEMY)/src/gnu; $(MAKE) clean)
 
 # For hppa
-hpgnu_all: stats  $(OBJARCH)/gnu
+hpgnu_all: $(OBJARCH)/gnu
 	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) ARCH=$(ARCH) PTOLEMY=$(PTOLEMY) GNU_DEST=$(GNU_DEST) hp_all)
 
 # For irix5
-irix5gnu_all: stats  $(OBJARCH)/gnu
+irix5gnu_all: $(OBJARCH)/gnu
 	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) ARCH=$(ARCH) PTOLEMY=$(PTOLEMY) GNU_DEST=$(GNU_DEST) irix5_all)
 
 	
@@ -105,21 +105,21 @@ tcltk_all: tcltk_configure tcltk_bin tcltk_install
 .PHONY: tcltk_configure tcltk_bin tcltk_install
 
 tcltk_configure: $(OBJARCH)/tcltk
-$(OBJARCH)/tcltk: stats $(OBJARCH) 
+$(OBJARCH)/tcltk: $(OBJARCH) 
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
 		CC=$(CC) \
 		RANLIB=$(RANLIB) \
 		TCLTK_DEST=$(TCLTK_DEST) \
 		configure)
 
-tcltk_bin: stats $(OBJARCH)/tcltk
+tcltk_bin: $(OBJARCH)/tcltk
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
 		CC=$(CC) \
 		RANLIB=$(RANLIB) \
 		TCLTK_DEST=$(TCLTK_DEST) \
 		bin)
 
-tcltk_install: stats $(OBJARCH)/tcltk
+tcltk_install: $(OBJARCH)/tcltk
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
 		CC=$(CC) \
 		RANLIB=$(RANLIB) \
@@ -200,11 +200,3 @@ xv_clean:
 
 $(OBJARCH):
 	mkdir $@ 
-
-# Print out information during the build
-stats:
-	@echo "========================================================"
-	@date
-	-df $(PTOLEMY)
-
-
