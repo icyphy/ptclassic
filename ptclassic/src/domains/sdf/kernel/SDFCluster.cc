@@ -97,9 +97,9 @@ ostream& operator<< (ostream& o, SDFClusterGal& g) {
 SDFClusterGal::SDFClusterGal(Galaxy& gal, ostream* log)
 : logstrm(log), bagNumber(1)
 {
-	int nports = setPortIndices(gal);
+	int i, nports = setPortIndices(gal);
 	SDFClustPort** ptable = new SDFClustPort*[nports];
-	for (int i = 0; i < nports; i++) {
+	for (i = 0; i < nports; i++) {
 		ptable[i] = 0;
 	}
 	DFGalStarIter nextStar(gal);

@@ -623,10 +623,11 @@ KcCheckTerms(const char* name, const char** newNames, const char** newTypes,
 	int nm = block->multiPortNames(names+n, types+n,
 				       isOut+n, MAX_NUM_TERMS-n);
 	int numOrdPorts = n;
+        int j;
 
 	// Copy all the names of the ordinary portHoles
 	int newNameCount = 0;
-	for (int j = 0; j < numOrdPorts; j++) {
+	for (j = 0; j < numOrdPorts; j++) {
 		newNames[newNameCount] = names[j];
 		newTypes[newNameCount] = types[j];
 		newIsOut[newNameCount++] = isOut[j];
@@ -726,6 +727,7 @@ realGetParams(const Block* block, ParamListType* pListPtr,
 
 	int n = block->numberStates();
 	int j = 0; // # of settable states, initialized to 0
+        int i;
 	if (n) { 
 	    /* Since we don't know beforehand how many of the n states
 	       are nonsettable, we temporarily request n ParamStructs
@@ -736,7 +738,7 @@ realGetParams(const Block* block, ParamListType* pListPtr,
 		return FALSE;
 	    }
 	    CBlockStateIter nexts(*block);
-	    for (int i = 0; i < n; i++) {
+	    for (i = 0; i < n; i++) {
 		    int pos;
 		    const State* s = nexts++;
 		    // Only return settable states that are not in
@@ -834,9 +836,10 @@ static void displayStates(const Block *b,char** names,int n_names);
 extern "C" int
 KcPrintTerms(const char* name) {
 	TermList terms;
+        int i;
 	if (!MkGetTerms(name, &terms)) return FALSE;
 	if (terms.in_n) accum_string ("Inputs:\n");
-	for (int i = 0; i < terms.in_n; i++) {
+	for (i = 0; i < terms.in_n; i++) {
 		accum_string ("   ");
 		accum_string (terms.in[i].name);
 		if (terms.in[i].multiple) accum_string (" (multiple)");
