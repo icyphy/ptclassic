@@ -1,11 +1,11 @@
-#! /usr/tools/bin/wish -f
+# This Tcl script works recursively on a Ptolemy tree.
 #
-# ptfixtree (pft)
-# 
-# Author: Kennard White (kennard@ohm)
+# Copyright (c) 1990-%Q% The Regents of the University of California.
+# All Rights Reserved.
+# See $PTOLEMY/copyright for the complete copyright notice.
 #
-# $Id$
-#
+# Author: Kennard White
+# Version: $Id$
 
 proc pftUsage { {msg} "Usage Information" } {
     puts stderr $msg
@@ -399,9 +399,9 @@ proc pftProcessArgs { } {
 #puts stdout "WithinPaths: ``$within_paths''"
     pftAddCheckCells $argCells
 
-#        set path_octmvlib $env(PTOLEMY)/octtools/bin.$env(ARCH)/octmvlib
+#        set path_octmvlib $env(PTOLEMY)/octtools/bin.$env(PTARCH)/octmvlib
     if { $path_octmvlib == "" } {
-        set path_octmvlib $env(PTOLEMY)/bin.$env(ARCH)/octfix
+        set path_octmvlib $env(PTOLEMY)/bin.$env(PTARCH)/octfix
     }
     if { ![file isfile $path_octmvlib] || ![file exec $path_octmvlib] } {
 	puts stderr "Can't find octmvlib program."
@@ -410,7 +410,7 @@ proc pftProcessArgs { } {
     }
 
     if { $path_octls == "" } {
-        set path_octls $env(PTOLEMY)/bin.$env(ARCH)/octls
+        set path_octls $env(PTOLEMY)/bin.$env(PTARCH)/octls
     }
     if { ![file isfile $path_octls] || ![file exec $path_octls] } {
 	puts stderr "Can't find octls program."
@@ -427,13 +427,13 @@ proc pftMain { } {
     if ![info exist env(PTOLEMY)] {
 	set env(PTOLEMY) [glob ~ptolemy]
     }
-    if ![info exist env(ARCH)] {
+    if ![info exist env(PTARCH)] {
 	if { [catch {exec /bin/arch} arch] } {
 	    if { [catch {exec /bin/machine} arch] } {
-		pftUsage "Unknown ARCH"
+		pftUsage "Unknown PTARCH"
 	    }
 	}
-	set env(ARCH) $arch
+	set env(PTARCH) $arch
     }
 
     uplevel #0 source $env(PTOLEMY)/lib/tcl/topgetopt.tcl
