@@ -19,7 +19,7 @@ Programmer: Soonhoi Ha
 #include "KnownTarget.h"
 
 CGSharedBus::CGSharedBus(const char* name,const char* starType,
-	const char* desc) : CGFullConnect(name,starType,desc) {}
+	const char* desc) : CGMultiTarget(name,starType,desc) {}
 
 void CGSharedBus :: resetResources() {
 	bus.initialize();
@@ -69,7 +69,7 @@ int CGSharedBus::scheduleComm(ParNode *cNode, int when, int limit) {
 // Since this is a shared bus architecture, one unused processor
 //	is the same as any other, so it returns the used processors
 // 	and one unused processor. (to reduce scheduling time)
-// Same as default method defined in CGQuasiTarget.cc
+// Same as default method defined in CGMultiTarget.cc
 
 Block* CGSharedBus::makeNew() const {
 	LOG_NEW; return	new CGSharedBus(name(),starType(),descriptor());

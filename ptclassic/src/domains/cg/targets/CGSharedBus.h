@@ -16,11 +16,11 @@ Programmer: Soonhoi Ha
 #pragma interface
 #endif
 
-#include "CGFullConnect.h"
+#include "CGMultiTarget.h"
 #include "UniProcessor.h"
 #include "ParNode.h"
 
-class CGSharedBus : public CGFullConnect {
+class CGSharedBus : public CGMultiTarget {
 public:
 	CGSharedBus(const char* name,const char* starType,const char* desc);
 
