@@ -1183,7 +1183,7 @@ body ::tycho::IDocSys::formatDesc {comment} {
 
     if {$comment == {}} {
         # IDoc assumes all entities have a description
-        set comment "No description given."
+        return " "
     }
 
     # Catch comments that don't have a terminating period (or other
