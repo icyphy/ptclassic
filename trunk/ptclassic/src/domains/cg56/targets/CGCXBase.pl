@@ -83,13 +83,8 @@ codeblock(startDSP) {
 }
 
 initCode {
-        CodeStream *compileOptions, *linkOptions;
-        if ((compileOptions = getStream("compileOptions")) == FALSE)
-            return;
-        if ((linkOptions = getStream("linkOptions")) == FALSE)
-            return;
-        compileOptions->put("-I$S56DSP/include ","S56X Include");
-        linkOptions->put("-L$S56DSP/lib -l$QCKMON ","S56X Link");
+        addCompileOption("-I$S56DSP/include");
+        addLinkOption("-L$S56DSP/lib -l$QCKMON");
 	addInclude("<sys/types.h>");
 	addInclude("<sys/uio.h>");
 	addInclude("<signal.h>");
