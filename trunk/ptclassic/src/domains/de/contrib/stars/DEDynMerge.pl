@@ -2,7 +2,7 @@ defstar{
     name { DynMerge }
     domain { DE }
     author { J. Voigt }
-    version { 1.0 9/4/97
+    version { $Id$
         }
     copyright { copyright (c) 1997 Dresden University of Technology
                 WiNeS-project }

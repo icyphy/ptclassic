@@ -3,7 +3,7 @@ defstar{
     domain { DE }
     derivedfrom { DEDynBlockBase }
     author { J. Voigt }
-    version { 1.1 11/19/97 
+    version { $Id$
     }
     copyright { copyright (c) 1997 Dresden University of Technology
                 WiNeS-Project }
