@@ -2992,11 +2992,29 @@ int PTcl::abort(int /*argc*/, char ** /*argv*/) {
 
 
 
-// FIXME: Remove this garbage.  Kept only temporarily for the
-// DomainInfo object.
+// FIXME: ::pitcl::print kept only temporarily for the  DomainInfo object.
+// This method should go away, but the problem is that the kernel print()
+// methods print out the data in a very hard to parse manner.
+//
+// Usage:  print <block-or-classname> ?<domain>?
+//
+// Print out the the description of the block or class name
+//
 int PTcl::print(int argc,char** argv) {
-	if (argc > 2) return usage("print ?<block-or-classname>?");
+	if (argc < 2  || argc > 3)
+	  return usage("print <block-or-classname> ?<domain>?");
+	const char* savedomain = curdomain;
+	if (argc == 3) {
+	    curdomain = argv[2];
+	    if (!KnownBlock::validDomain(curdomain)) {
+                Tcl_AppendResult(interp, "No such domain: ", curdomain,
+				 (char *) NULL);
+		curdomain = savedomain;
+                return TCL_ERROR;
+	    }
+	}
 	const Block* b = getBlock(argv[1]);
+	curdomain = savedomain;
 	if (!b) return TCL_ERROR;
 	return result(b->print(0));
 }
