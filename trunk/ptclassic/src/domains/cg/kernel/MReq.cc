@@ -59,8 +59,28 @@ int MPortReq::circ() {
 	return myport.circAccess();
 }
 
+StringList MPortReq::print() {
+	StringList out = "port ";
+	out += myport.parent()->readFullName();
+	out += "(";
+	out += myport.readName();
+	out += "), type ";
+	out += myport.myType();
+	return out;
+}
+
 int MStateReq::circ() {
 	return (mystate.attributes() & AB_CIRC) != 0;
+}
+
+StringList MStateReq::print() {
+	StringList out = "state ";
+	out += mystate.parent()->readFullName();
+	out += "(";
+	out += mystate.readName();
+	out += "), type ";
+	out += mystate.type();
+	return out;
 }
 
 void MStateReq::assign(ProcMemory& proc, unsigned addr) {
@@ -72,6 +92,28 @@ const State* MConsecStateReq::state() {
 	MReqListIter next(lis);
 	MReq* m = next++;
 	return m ? m->state() : 0;
+}
+
+StringList MConsecStateReq::print() {
+	StringList out = "consecutive states:";
+	MReqListIter next(lis);
+	int first = 1;
+	MReq* m;
+	const char* sep;
+	while ((m = next++) != 0) {
+		const State* s = m->state();
+		if (!s) { out += "???"; return out;}
+		if (first) {
+			out += s->parent()->readFullName();
+			sep = "(";
+			first = 0;
+		}
+		out += sep;
+		out += s->readName();
+		sep = ", ";
+	}
+	out += ")";
+	return out;
 }
 
 void MConsecStateReq::assign(ProcMemory& proc, unsigned addr) {

@@ -40,6 +40,9 @@ public:
 
 	// return TRUE if the request is for a circular buffer.
 	virtual int circ() { return 0;}
+
+	// print name of object requesting storage
+	virtual StringList print() = 0;
 };
 
 // a list of requests.
@@ -64,6 +67,7 @@ public:
 	void assign(ProcMemory& proc, unsigned addr) {
 		myport.assignAddr(proc,addr);
 	}
+	StringList print();
 	int size() { return myport.bufSize();}
 
 	// Return a pointer to the AsmPortHole using the requested memory.
@@ -78,6 +82,7 @@ public:
 	MStateReq(const State& s) : mystate(s) {}
 	void assign(ProcMemory& proc, unsigned addr);
 	int size() { return mystate.size();}
+	StringList print();
 
 	// Return a pointer to the State using the requested memory.
 	const State* state() { return &mystate; }
@@ -94,6 +99,7 @@ public:
 		INC_LOG_NEW; lis.append(*new MStateReq(s));
 		sz += s.size();
 	}
+	StringList print();
 	int size() { return sz;}
 	void zero();
 	~MConsecStateReq() { zero();}
