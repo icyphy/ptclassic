@@ -91,10 +91,12 @@ PortHole* AutoFork::setDest (GenericPort &gp, int alwaysFork) {
 	}
 	// second connection: must make a Fork
 	else {
+		Galaxy& parentGal = geo.parent()->asGalaxy();
+		const char* dom = parentGal.domain();
 		PortHole * forkInput;
 
 		// create the Fork star
-		if ((forkStar = KnownBlock::makeNew("Fork")) == 0 ||
+		if ((forkStar = KnownBlock::makeNew("Fork", dom)) == 0 ||
 		    (forkOutput = forkStar->multiPortWithName("output")) == 0
 		    || (forkInput = forkStar->portWithName("input")) == 0) {
 			Error::abortRun (geo, "can't create Fork star");
@@ -106,7 +108,7 @@ PortHole* AutoFork::setDest (GenericPort &gp, int alwaysFork) {
 		}
 
 		// install fork in parent galaxy
-		geo.parent()->asGalaxy().addBlock(*forkStar, autoForkName());
+		parentGal.addBlock(*forkStar, autoForkName());
 
 		// connect old output connection to Fork instead.
 		// also connect new output, and connect to the Fork.
