@@ -6,29 +6,13 @@
 
 #include "BaseImage.h"
 
-/********* strstr is part of the regular lib, but not of Ptolemy
-This will be replaced by the "isA()" function in PacketData class,
-when that function becomes supported.
-extern "C" char* strstr(const char*, const char*);
-*********/
-const char* StrStr(const char* a, const char* b)
-{
-	const char* origB = b;
-	const char* retval = (char*) NULL;
-	while ((*a != '\000') && (*b != '\000')) {
-		while ((*a != '\000') && (*a != *b)) { a++; }
-		retval = a;
-		while ((*a!='\000') && (*b!='\000') && (*a==*b)) {
-			a++; b++;
-		}
-		if (*b == '\000') { return retval; }
-		else { b = origB; retval = (char*) NULL; }
-	}
-	return(retval);
-}
+BaseImage* BaseImage::fragment(int, int) { return 0;}
+void BaseImage::assemble(const BaseImage*) {}
+const char* BaseImage::dataType() const { return "BaseImage";}
+PacketData* BaseImage::clone() const { return new BaseImage(*this); }
+PacketData* BaseImage::clone(int a) const { return new BaseImage(*this,a);}
 
-
-void BaseImage::copy(int len, float* into, float* from)
+void BaseImage::copy(int len, float* into, const float* from)
 {
 	for(int travel = 0; travel < len%5; travel++) {
 		into[travel] = from[travel];
@@ -44,7 +28,7 @@ void BaseImage::copy(int len, float* into, float* from)
 
 
 void BaseImage::copy(int len, unsigned char* into,
-		unsigned char* from)
+		const unsigned char* from)
 {
 	for(int travel = 0; travel < len%5; travel++) {
 		into[travel] = from[travel];
@@ -57,3 +41,5 @@ void BaseImage::copy(int len, unsigned char* into,
 		into[travel+4] = from[travel+4];
 	}
 } // end BaseImage::copy()
+
+ISA_FUNC(BaseImage,PacketData);

@@ -21,23 +21,22 @@ protected:
 	void init();
 
 public:
-	GrayImage(int, int, int, int);	// width, height, frameId, fullSize
-	GrayImage(int, int, int);		// width, height, frameId
-	GrayImage(BaseImage&);			// get params from BaseImage
-	GrayImage(GrayImage&, int = 0);	// get params, maybe copy data
+	GrayImage(int, int, int, int); // width, height, frameId, fullSize
+	GrayImage(int, int, int);      // width, height, frameId
+	GrayImage(const BaseImage&);   // get params from BaseImage
+	GrayImage(const GrayImage&, int = 0);	// get params, maybe copy data
 	virtual ~GrayImage();
 
 	virtual BaseImage*	fragment(int, int);
-	virtual void		assemble(BaseImage*);
+	virtual void		assemble(const BaseImage*);
 	unsigned char*		retData();
-	void				setSize(int);
+	void			setSize(int);
 
 // PacketData-like stuff
-	virtual const char* dataType() const { return("GrayI.BaseI"); }
-	virtual PacketData* clone() const
-			{ return new GrayImage(*this); }
-	virtual PacketData* clone(int a) const
-			{ return new GrayImage(*this, a); }
+	virtual const char* dataType() const;
+	virtual PacketData* clone() const;
+	virtual PacketData* clone(int a) const;
+	int isA(const char*) const;
 };
 
 #endif // #ifndef _GrayImage_h
