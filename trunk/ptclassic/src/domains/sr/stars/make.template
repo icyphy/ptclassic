@@ -25,7 +25,8 @@ LIB=libsrstars.$(LIBSUFFIX)
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list
 PL_SRCS= \
-  SRNop.pl SRConst.pl SRPrinter.pl SRAdd.pl SRPre.pl
+  SRAdd.pl SRAnd.pl SRConst.pl SRMux.pl SRNop.pl SRPre.pl SRPrinter.pl \
+  SRSub.pl SRWhen.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
