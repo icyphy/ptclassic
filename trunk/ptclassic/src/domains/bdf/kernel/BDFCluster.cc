@@ -48,6 +48,7 @@ static const char file_id[] = "BDFCluster.cc";
 #include "Geodesic.h"
 #include "Target.h"
 #include "pt_fstream.h"
+// #include "DFDynScheduler.h"
 #include "Error.h"
 #include <assert.h>
 
@@ -299,7 +300,8 @@ BDFCluster* BDFClusterGal::fullSearchMerge() {
 			if (p->far() == 0) continue;
 			BDFCluster *peer = p->far()->parentClust();
 			// check requirement 1: same rate and no delay
-			if (peer != this && !p->fbDelay() && p->sameRate()) {
+			// also, do not try to merge with myself.
+			if (peer != c && !p->fbDelay() && p->sameRate()) {
 				BDFCluster *src, *dest;
 				// sort them so src is the source.
 				if (p->isItOutput()) {
@@ -312,20 +314,25 @@ BDFCluster* BDFClusterGal::fullSearchMerge() {
 				}
 				// requirement 2: no indirect path.
 				// requirement 3: no buried control arcs.
-				// if met, do the merge and return the
+				// if 3 is not met, it may be possible to
+				// make a while-loop.
+				// if we can, do the merge and return the
 				// result.
 				if (!indirectPath(src,dest)) {
-					if (!buriedCtlArcs(src,dest))
+					if (!buriedCtlArcs(src,dest) &&
+					    !buriedCtlArcs(dest,src))
 						return merge(src,dest);
-					else return tryLoopMerge(src,dest);
+					else {
+						BDFCluster* tlm =
+							tryLoopMerge(src,dest);
+						if (tlm) return tlm;
+					}
 				}
 			}
 		}
 	}
 	return 0;
 }
-
-static int allowBury = FALSE;
 
 BDFCluster* BDFClusterGal::tryLoopMerge(BDFCluster* a,BDFCluster* b) {
 	// assumption: a and b meet every condition for merging
@@ -532,9 +539,16 @@ int BDFClusterGal :: markFeedForwardDelayArcs() {
 		BDFClustPortIter nextP(*c);
 		BDFClustPort* p;
 		while ((p = nextP++) != 0) {
-			if (p->isItInput() || p->far() == 0) continue;
+			BDFClustPort* pFar = p->far();
+			if (p->isItInput() || pFar == 0) continue;
 			if (p->numTokens() == 0) continue;
 			// this port has a delay on the arc.
+			// cannot mark if either end is a control port.
+
+			// FIXME: may want to leave the mark, but make
+			// sure the delay is not forgotten where it matters.
+
+			if (p->isControl() || pFar->isControl()) continue;
 			BDFCluster* peer = p->far()->parentClust();
 			stopList.initialize();
 			if (!findPath(peer,c))  {
@@ -1136,13 +1150,12 @@ void BDFClusterBag::adjustAssociations() {
 					r = reverse(r);
 				}
 			}
-			// "upper" should always be non-null now
+			// "upper" should always be non-null now.  Bomb the
+			// program if something has screwed up.
 			if (!upper) {
 				bagp->setRelation(BDF_NONE);
-				if (!allowBury) {
-					die(*bagp,msg);
-					return;
-				}
+				die(*bagp,msg);
+				return;
 			}
 			else
 				bagp->setRelation(r, upper);
@@ -1292,7 +1305,6 @@ void BDFCluster::go() {
 		int v = (int(boolToken) != 0);
 		if (v != (pType == DO_IFTRUE)) return;
 	}
-	// do-while not yet supported: assume standard.
 	runInner();
 }
 
@@ -1336,83 +1348,32 @@ BDFClusterBag::~BDFClusterBag() {
 // if the needInput flag is true, only input portholes are considered.
 
 static BDFClustPort *remapAfterMerge(BDFClustPort* ctlP, BDFRelation& rel,
-				  int needInput) {
+				     int needInput) {
 	BDFCluster *me = ctlP->parentClust();
 	BDFCluster *you = ctlP->far()->parentClust();
 	BDFClustPortRelIter iter(*ctlP);
 	BDFClustPort* a;
-	BDFCluster *cl;
-	while ((a = iter.next(rel)) != 0
-	       && ((cl = a->far()->parentClust()) == me || cl == you)
-	       && (needInput && a->isItOutput()))
-		;
-	return a;
-}
 
-// This function is called to check whether a merge operation that
-// makes the argument, which is a controlling port, an internal port
-// will result in a cluster that is not a legal BDF actor.  It returns
-// 0 if the control arc will be lost and the star I/O will depend
-// on a hidden signal.
-
-// If only internal arcs are controlled by the control signal, the
-// control signal itself is returned \(no remapping is required\).
-// If the control signal is available externally \(because of SAME
-// or COMPLEMENT relations\) the alias is returned.
-
-// Furthermore, input arcs must be controlled by input arcs.  This
-// is checked for as well.
-
-static BDFClustPort* remapControl (BDFClustPort *ctlP, BDFRelation& r) {
-	BDFClustPort *pFar = ctlP->far();
-	assert(pFar);
-	BDFClustPort *a;
-	BDFCluster *me = ctlP->parentClust();
-	BDFCluster *you = pFar->parentClust();
-	BDFCluster *cl;
-
-	// we can return ourself (no remapping needed) if no arc
-	// controlled by ctlP will end up external.
-
-	BDFClustPortIter nextPort(*me);
-	BDFClustPort *p;
-	int sorry = FALSE;
-	int needInput = TRUE;
-	while ((p = nextPort++) != 0) {
-		if ((a = p->assoc()) != ctlP || !TorF(p->relType()))
-			continue;
-		// OK, ctlP controls p.  But this is OK if p connects
-		// to a port belonging to "me" or "you".
-		cl = p->far()->parentClust();
-		if (cl != me && cl != you) {
-			sorry = TRUE;
-			if (p->isItInput()) needInput = TRUE;
-			break;
-		}
+	while ((a = iter.next(rel)) != 0) {
+		if (needInput && a->isItOutput()) continue;
+		BDFClustPort* afar = a->far();
+		if (afar == 0) continue;
+		BDFCluster *cl = afar->parentClust();
+		if (cl != me && cl != you) return a;
 	}
-	// if sorry is false, all controlled ports are internal so we
-	// can merge without remapping.  We return the original argument.
-	if (!sorry) {
-		r = BDF_SAME;	// I am the same as myself!
-		return ctlP;
-	}
-
-	// OK, see if the control signal is exported -- for example,
-	// it may come from a fork.  If so, we return the remapped
-	// value, if not, return 0.
-
-	return remapAfterMerge(ctlP,r,needInput);
+	return 0;
 }
 
 // check for any buried control arcs resulting from merging
 // the two stars.
+// find conditional ports that will remain external, and check their
+// control arcs.  We search only arcs on the src cluster, so buriedCtlArcs
+// must be called TWICE: with args in both orders.
 
 int BDFClusterGal::buriedCtlArcs(BDFCluster* src, BDFCluster* dest)
 {
 	BDFClustPortIter nextp(*src);
 	BDFClustPort *p;
-// find conditional ports that will remain external, and check their
-// control arcs.
 	while ((p = nextp++) != 0) {
 		BDFClustPort *pFar = p->far();
 		if (pFar == 0) continue;
@@ -1428,20 +1389,16 @@ int BDFClusterGal::buriedCtlArcs(BDFCluster* src, BDFCluster* dest)
 			continue;
 		// OK, control arc connects src and dest w/o delay.
 		// Cannot merge unless we can remap it.
-		BDFClustPort *pFail = 0;
+		// If p is an input, remapped port must also be input,
+		// hence isItInput is used to get the argument.
 		BDFRelation r;
-		BDFClustPort *pRemap = remapControl(ctl,r);
-		if (!pRemap) pFail = ctl;
-		if (pFar->isControl() && !pFail) {
-			pRemap = remapControl(pFar,r);
-			if (!pRemap) pFail = ctl;
-		}
-		if (pFail) {
+		if (!remapAfterMerge(ctl,r,p->isItInput())) {
 			if (logstrm) {
 				*logstrm << "Can't merge " << src->name()
 					<< " and " << dest->name() <<
 					": would bury a control arc:\n"
-					<< *pFail << "\n";
+					<< *ctl << "\n"
+					<< "Arc controlled: " << *p << "\n";
 			}
 			return TRUE;
 		}
@@ -1646,7 +1603,32 @@ int BDFAtomCluster::myExecTime() {
 
 // methods for BDFClustSched, the clustering scheduler.
 
-BDFClustSched::~BDFClustSched() { LOG_DEL; delete cgal;}
+BDFClustSched::BDFClustSched(const char* log , int canDoDyn)
+: cgal(0), logFile(log), dynamicAllowed(canDoDyn), dynSched(0) {}
+
+BDFClustSched::~BDFClustSched() {
+	LOG_DEL; delete cgal;
+#if 0
+	LOG_DEL; delete dynSched;
+#endif
+}
+
+// timing control
+void BDFClustSched::setStopTime (double limit) {
+	BDFScheduler::setStopTime(limit);
+#if 0
+	if (dynSched)
+		dynSched->setStopTime(limit);
+#endif
+}
+
+void BDFClustSched::resetStopTime (double limit) {
+	BDFScheduler::resetStopTime(limit);
+#if 0
+	if (dynSched)
+		dynSched->resetStopTime(limit);
+#endif
+}
 
 // for now, we assume we are SDF at top level.
 void BDFClustSched::runOnce() { SDFScheduler::runOnce();}
@@ -1685,35 +1667,76 @@ int BDFClustSched::computeSchedule (Galaxy& gal) {
 	}
 	cgal->initialize();
 	setGalaxy(*cgal);
-// verify that top level is SDF (have not yet implemented BDF or dynamic
-// cases).
+// verify that top level is SDF.  If not, handle as dynamic case.
+// NOTE: it is possible to schedule some BDF universes statically even
+// if the top level is not SDF -- not yet implemented.
+	int status;
 	if (!SDFcheck(*cgal)) {
-		Error::abortRun(gal, "Top level of clustering is not SDF",
-				"\nThis case is not yet implemented");
-		return FALSE;
+		status = handleDynamic(gal);
 	}
-// recompute top-level repetitions.
-	SDFScheduler::repetitions();
-// generate schedule -- this assumes top level is SDF.  FIXME
-	if (SDFScheduler::computeSchedule(*cgal)) {
-		if (logstrm) {
+	else {
+		// top level is SDF.
+		SDFScheduler::repetitions();
+		status = SDFScheduler::computeSchedule(*cgal);
+	}
+	if (logstrm) {
+		if (status)
 			*logstrm << "Schedule:\n" << displaySchedule();
-			LOG_DEL; delete logstrm;
-		}
-		return TRUE;
+		LOG_DEL; delete logstrm;
 	}
-	else return FALSE;
+	return status;
 }
 
 // display the top-level schedule.
 StringList BDFClustSched::displaySchedule() {
 	StringList sch;
-	SDFSchedIter next(*this);
 	BDFCluster* c;
-	while ((c = (BDFCluster*)next++) != 0) {
-		sch << c->displaySchedule(0);
+	if (dynSched) {
+		sch << "Dynamic execution of " << cgal->numberClusts()
+		    << " clusters:\n";
+		int i = 1;
+		BDFClusterGalIter next(*cgal);
+		while ((c = next++) != 0) {
+			sch << "Cluster " << i++ << ":\n";
+			sch << c->displaySchedule(1);
+		}
+	}
+	else {
+		SDFSchedIter next(*this);
+		while ((c = (BDFCluster*)next++) != 0) {
+			sch << c->displaySchedule(0);
+		}
 	}
 	return sch;
+}
+
+int BDFClustSched::handleDynamic(Galaxy& gal) {
+	if (!dynamicAllowed) {
+		Error::abortRun(gal, "Top level of clustering is not SDF",
+				"\nDynamic execution would b");
+		return FALSE;
+	}
+#if 1
+	Error::abortRun("Dynamic execution not yet implemented");
+	return FALSE;
+#else
+	LOG_DEL; delete dynSched;
+	LOG_NEW; dynSched = new DFDynScheduler;
+	dynSched->setGalaxy(*cgal);
+	// create schedules for each cluster
+	BDFClusterGalIter nextClust(*cgal);
+	BDFCluster* c;
+	while ((c = nextClust++) != 0) c->genSched();
+	dynSched->setup();
+	return !haltRequested();
+#endif
+}
+
+int BDFClustSched::run() {
+#if 0
+	if (dynSched) return dynSched->run();
+#endif
+	return BDFScheduler::run();
 }
 
 StringList BDFBagScheduler::displaySchedule(int depth) {
