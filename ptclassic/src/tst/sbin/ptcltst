@@ -26,9 +26,9 @@
 #
 # Programmer: Christopher Hylands
 
-# Script to run an older version of ptlc
+# Script to run an older version of ptcl
 
 setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl/lib/tcl
 setenv TK_LIBRARY $PTOLEMY/tcltk/tk/lib/tk
 
-exec $PTOLEMY/bin.$ARCH/ptcl $*
+exec $PTOLEMY/bin.$PTARCH/ptcl $*
