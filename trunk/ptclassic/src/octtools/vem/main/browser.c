@@ -60,7 +60,7 @@ static char SccsId[]="$Id$";
 #include "xvals.h"
 #include <stdio.h>
 #include <sys/types.h>
-#ifdef SYSV
+#ifdef USE_DIRENT_H
 #include <dirent.h>
 #include <unistd.h>
 #else
@@ -283,7 +283,7 @@ fb_item **items;		/* Returned list of items */
  */
 {
     DIR *dp;
-#ifdef SYSV
+#ifdef USE_DIRENT_H
     struct dirent *entry;
 #else
     struct direct *entry;
@@ -345,7 +345,7 @@ dary all;			/* Complete list        */
  */
 {
     DIR *top, *lv;
-#ifdef SYSV
+#ifdef USE_DIRENT_H
     struct dirent *one, *two;
 #else
     struct direct *one, *two;
