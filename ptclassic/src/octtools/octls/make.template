@@ -38,7 +38,7 @@ ROOT	      = ../../..
 VPATH         = $(ROOT)/src/octtools/octls
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 HDRS		= 
@@ -63,7 +63,7 @@ octls:	$(OBJS)
 		-o octls \
 		$(LIBS) -lm 
 
-DEST = $(OCTTOOLS)/bin.$(ARCH)/octls
+DEST = $(OCTTOOLS)/bin.$(PTARCH)/octls
 
 $(DEST):	octls
 		@echo Installing octls
@@ -73,7 +73,7 @@ $(DEST):	octls
 install: makefile $(DEST) $(BINDIR)/octls
 
 $(BINDIR)/octls:
-	(cd $(BINDIR); ln -s ../octtools/bin.$(ARCH)/octls .)
+	(cd $(BINDIR); ln -s ../octtools/bin.$(PTARCH)/octls .)
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	

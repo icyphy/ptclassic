@@ -38,7 +38,7 @@ ROOT	      = ../../..
 VPATH         = $(ROOT)/src/octtools/masters
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 HDRS		= 
@@ -65,7 +65,7 @@ masters:	$(OBJS)
 		-o masters \
 		$(LIBS) -lm 
 
-DEST = $(OCTTOOLS)/bin.$(ARCH)/masters
+DEST = $(OCTTOOLS)/bin.$(PTARCH)/masters
 
 $(DEST):	masters
 		@echo Installing masters
@@ -75,7 +75,7 @@ $(DEST):	masters
 install: makefile $(DEST) $(BINDIR)/masters
 
 $(BINDIR)/masters:
-	(cd $(BINDIR); rm -f masters; ln -s ../octtools/bin.$(ARCH)/masters .)
+	(cd $(BINDIR); rm -f masters; ln -s ../octtools/bin.$(PTARCH)/masters .)
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	

@@ -41,7 +41,7 @@ ROOT	      = ../../..
 VPATH         = $(ROOT)/src/octtools/oct2ps
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 HDRS		= 
@@ -100,7 +100,7 @@ sample-tmp:
 sample2-tmp:
 	cp -r $(VPATH)/sample2 $@
 
-DEST = $(ROOT)/octtools/bin.$(ARCH)/oct2ps
+DEST = $(ROOT)/octtools/bin.$(PTARCH)/oct2ps
 
 $(DEST):	oct2ps
 		@echo Installing oct2ps
@@ -110,7 +110,7 @@ $(DEST):	oct2ps
 install: makefile $(DEST) $(ROOT)/lib/oct2ps.pro $(BINDIR)/oct2ps
 
 $(BINDIR)/oct2ps:
-	(cd $(BINDIR); rm -f oct2ps; ln -s ../octtools/bin.$(ARCH)/oct2ps .)
+	(cd $(BINDIR); rm -f oct2ps; ln -s ../octtools/bin.$(PTARCH)/oct2ps .)
 
 $(ROOT)/lib/oct2ps.pro: $(VPATH)/oct2ps.pro
 	rm -f $@

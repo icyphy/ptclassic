@@ -38,7 +38,7 @@ ROOT	      = ../../..
 VPATH         = $(ROOT)/src/octtools/octfix
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 HDRS		= 
@@ -63,7 +63,7 @@ octfix:	$(OBJS)
 		-o octfix \
 		$(LIBS) -lm 
 
-DEST = $(OCTTOOLS)/bin.$(ARCH)/octfix
+DEST = $(OCTTOOLS)/bin.$(PTARCH)/octfix
 
 $(DEST):	octfix
 		@echo Installing octfix
@@ -73,7 +73,7 @@ $(DEST):	octfix
 install: makefile $(DEST) $(BINDIR)/octfix
 
 $(BINDIR)/octfix:
-	(cd $(BINDIR); rm -f octfix; ln -s ../octtools/bin.$(ARCH)/octfix .)
+	(cd $(BINDIR); rm -f octfix; ln -s ../octtools/bin.$(PTARCH)/octfix .)
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	
