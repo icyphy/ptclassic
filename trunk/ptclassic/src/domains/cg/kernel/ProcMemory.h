@@ -7,7 +7,7 @@ $Id$
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: J. Buck
+ Programmer: J. Buck and E. A. Lee
 
 // a ProcMemory object represents a processor's memory.  In the base
 // class, no assumption about the organization of the memory is made.
@@ -61,11 +61,21 @@ public:
 		return consistent(p.attributes(), reqdPortAttributes());
 	}
 
-	virtual void allocReq(const State& s) = 0;
+	// Returns TRUE if the attributes of the state match the required
+	// attributes for states of the memory, and hence the request was
+	// registered.
+	virtual int allocReq(const State& s) = 0;
 
-	virtual void allocReq(AsmPortHole& p) = 0;
+	// Returns TRUE if the attributes of the PortHole match the required
+	// attributes for PortHoles of the memory, and hence the request was
+	// registered.
+	virtual int allocReq(AsmPortHole& p) = 0;
 
+	// Perform all registered allocation requests
 	virtual int performAllocation() = 0;
+
+	// Reset the memory, clearing all previous allocations
+	virtual void reset() = 0;
 };
 
 // An interval of memory
@@ -85,13 +95,13 @@ class MemoryList {
 	// body of copy constructor
 	void copy(const MemoryList& src);
 
-	// body of destructor
+	// Remove all MemIntervals.
 	void zero();
 
 public:
 	// Constructor with starting address and length of memory.
 	MemoryList(unsigned addr,unsigned len) : min(addr), max(addr+len-1) {
-		INC_LOG_NEW; l = new MemInterval(addr,len);
+		l = new MemInterval(addr,len);
 	}
 
 	// allocate using first-fit
@@ -113,13 +123,16 @@ public:
 	// destructor
 	~MemoryList() { zero();}
 
-	// add a new piece to the memory list.  It must not lie in the
+	// Add a new piece to the memory list.  It must not lie in the
 	// range of the existing list.
 	// This is useful when some objects must be allocated in a
 	// restricted range -- first use a MemoryList with a small range,
 	// allocate the objects, then grow the memory, then allocate
 	// more objects.
 	int addChunk(unsigned addr,unsigned len);
+
+	// Reset the memory, clearing all previous allocations.
+	void reset();
 };
 
 class LinProcMemory : public ProcMemory {
@@ -137,45 +150,68 @@ public:
 		: ProcMemory(n,a,p), mem(addr,len), consec(0) {}
 
 	~LinProcMemory() { reset();}
+
+	// Reset the memory, clearing all previous allocations
 	void reset();
-	void allocReq(AsmPortHole& p);
-	void allocReq(const State& s);
+
+	// Returns TRUE if the attributes of the state match the required
+	// attributes for states of the memory, and hence the request was
+	// registered.
+	int allocReq(const State& s);
+
+	// Returns TRUE if the attributes of the PortHole match the required
+	// attributes for PortHoles of the memory, and hence the request was
+	// registered.
+	int allocReq(AsmPortHole& p);
+
+	// Perform all registered allocation requests
 	int performAllocation();
+
 	void copyMem(MemoryList& src) { mem = src;}
 };
 
 // this models a two-address-space chip such as the Motorola 56000
 // or the Analog Devices 2100 family.  All porthole buffers are placed
 // in x memory.  States may go into either memory (based on attributes)
-// or go into both memory if they have the AB_SHARED attribute.
-
+// or go into both memories if they have the AB_SHARED attribute.
 class DualMemory : public LinProcMemory {
-private:
-	const char* name_y;
 protected:
 	LinProcMemory x;
 	LinProcMemory y;
 	unsigned sAddr, sLen;
 	unsigned xAddr, xLen;
 	unsigned yAddr, yLen;
-	Attribute xmemAttr;
 public:
 	// Constructor
 	DualMemory(const char* n_x,	// name of the first memory space
-		   const char* n_y,	// name of the second memory space
-		   const Attribute& st,	// attribute for states
-		   const Attribute& p,	// attribute for portholes
-		   const Attribute& a_x,// attribute for X, as opposed to
-					// Y memory.
+		   const Attribute& st_x,	// attribute for states
+		   const Attribute& p_x,	// attribute for portholes
 		   unsigned x_addr,	// start of x memory
 		   unsigned x_len,	// length of x memory
+		   const char* n_y,	// name of the second memory space
+		   const Attribute& st_y,	// attribute for states
+		   const Attribute& p_y,	// attribute for portholes
 		   unsigned y_addr,	// start of y memory
 		   unsigned y_len	// length of y memory
 	);
+
+	// Reset the memory, clearing all previous allocations
 	void reset();
+
+	// Destructor
 	~DualMemory() { reset();}
-	void allocReq(const State&);
-	void allocReq(AsmPortHole&);
+
+	// Returns TRUE if the attributes of the state match the required
+	// attributes for states of the memory, and hence the request was
+	// registered.
+	int allocReq(const State&);
+
+	// Returns TRUE if the attributes of the PortHole match the required
+	// attributes for PortHoles of the memory, and hence the request was
+	// registered.
+	int allocReq(AsmPortHole&);
+
+	// Perform all registered allocation requests
 	int performAllocation();
 };
 	
