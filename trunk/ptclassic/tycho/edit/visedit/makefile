@@ -47,6 +47,7 @@ ITCL_SRCS = \
 	EditDAG.itcl \
 	EditForest.itcl \
 	EditGraph.itcl \
+	EditLattice.itcl \
 	EditPalette.itcl \
 	EditSTD.itcl \
 	Graphics.itcl \
