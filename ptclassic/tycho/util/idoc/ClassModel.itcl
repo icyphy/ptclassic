@@ -162,7 +162,7 @@
 # Here is an example of a class model. This creates
 # a model and loads it with a string in TIM format -- usually,
 # though, you would set the *-datafile* option and
-# call load{} (see <a href="Model.html">Model</a>). After
+# call load{} (see <a href="Model.idoc">Model</a>). After
 # creating it, call the describe{} method to confirm its
 # contents:
 # <pre><tcl>
