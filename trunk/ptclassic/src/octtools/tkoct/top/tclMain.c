@@ -301,6 +301,221 @@ topTclPrompt(Tcl_Interp *ip, TOPLogical partialB, char *defPrompt) {
     fflush(stdout);
 }
 
+#if TCL_MAJOR_VERSION >= 8
+EXTERN int		TclObjCommandComplete _ANSI_ARGS_((Tcl_Obj *cmdPtr));
+
+int
+topTclMainLoop( Tcl_Interp *ip_in, char *prompt, char *appname, int initB) {
+#define BUFFER_SIZE 1000
+    Tcl_Interp	*interp;
+    Tcl_Obj *prompt1NamePtr = NULL;
+    Tcl_Obj *prompt2NamePtr = NULL;
+    Tcl_Obj *resultPtr;
+    Tcl_Obj *commandPtr = NULL;
+    char buffer[1000], /* *args, */ *fileName = NULL, *bytes;
+    int code, gotPartial, tty, length;
+    int exitCode = 0;
+    Tcl_Channel inChannel, outChannel, errChannel;
+
+
+    Tcl_FindExecutable(appname);
+
+    interp = ip_in ? ip_in : Tcl_CreateInterp();
+
+#ifdef TCL_MEM_DEBUG
+    Tcl_InitMemory(interp);
+    Tcl_CreateCommand(interp, "checkmem", CheckmemCmd, (ClientData) 0,
+	    (Tcl_CmdDeleteProc *) NULL);
+#endif
+
+    /*
+     * Set the "tcl_interactive" variable.
+     */
+
+    tty = isatty(0);
+    Tcl_SetVar(interp, "tcl_interactive",
+	    ((fileName == NULL) && tty) ? "1" : "0", TCL_GLOBAL_ONLY);
+    
+    /*
+     * Invoke application-specific initialization.
+     */
+
+#define TKOCT
+#ifdef TKOCT
+    if ( initB ) {
+        int result;
+	if ( (result=topTclSourceInitFile(interp, appname, NULL)) != TCL_OK ) {
+	    fprintf( stderr, "%s: %s\n", appname ? appname : "???", 
+	      topTclGetRetMsg( interp, result));
+	    return TCL_ERROR;
+	}
+    }
+#else /* TKOCT */
+    if ((*appInitProc)(interp) != TCL_OK) {
+	errChannel = Tcl_GetStdChannel(TCL_STDERR);
+	if (errChannel) {
+	    Tcl_Write(errChannel,
+		    "application-specific initialization failed: ", -1);
+	    Tcl_Write(errChannel, interp->result, -1);
+	    Tcl_Write(errChannel, "\n", 1);
+	}
+    }
+#endif /* TKOCT */
+
+    /*
+     * If a script file was specified then just source that file
+     * and quit.
+     */
+
+    if (fileName != NULL) {
+	code = Tcl_EvalFile(interp, fileName);
+	if (code != TCL_OK) {
+	    errChannel = Tcl_GetStdChannel(TCL_STDERR);
+	    if (errChannel) {
+		/*
+		 * The following statement guarantees that the errorInfo
+		 * variable is set properly.
+		 */
+
+		Tcl_AddErrorInfo(interp, "");
+		Tcl_Write(errChannel,
+			Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY), -1);
+		Tcl_Write(errChannel, "\n", 1);
+	    }
+	    exitCode = 1;
+	}
+	goto done;
+    }
+
+    /*
+     * We're running interactively.  Source a user-specific startup
+     * file if the application specified one and if the file exists.
+     */
+
+    Tcl_SourceRCFile(interp);
+
+    /*
+     * Process commands from stdin until there's an end-of-file.  Note
+     * that we need to fetch the standard channels again after every
+     * eval, since they may have been changed.
+     */
+
+    commandPtr = Tcl_NewObj();
+    Tcl_IncrRefCount(commandPtr);
+    prompt1NamePtr = Tcl_NewStringObj("tcl_prompt1", -1);
+    Tcl_IncrRefCount(prompt1NamePtr);
+    prompt2NamePtr = Tcl_NewStringObj("tcl_prompt2", -1);
+    Tcl_IncrRefCount(prompt2NamePtr);
+    
+    inChannel = Tcl_GetStdChannel(TCL_STDIN);
+    outChannel = Tcl_GetStdChannel(TCL_STDOUT);
+    gotPartial = 0;
+    while (1) {
+	if (tty) {
+	    Tcl_Obj *promptCmdPtr;
+
+	    promptCmdPtr = Tcl_ObjGetVar2(interp,
+		    (gotPartial? prompt2NamePtr : prompt1NamePtr),
+		    (Tcl_Obj *) NULL, TCL_GLOBAL_ONLY);
+	    if (promptCmdPtr == NULL) {
+                defaultPrompt:
+		if (!gotPartial && outChannel) {
+		    Tcl_Write(outChannel, "% ", 2);
+		}
+	    } else {
+		code = Tcl_EvalObj(interp, promptCmdPtr);
+		inChannel = Tcl_GetStdChannel(TCL_STDIN);
+		outChannel = Tcl_GetStdChannel(TCL_STDOUT);
+		errChannel = Tcl_GetStdChannel(TCL_STDERR);
+		if (code != TCL_OK) {
+		    if (errChannel) {
+			resultPtr = Tcl_GetObjResult(interp);
+			bytes = Tcl_GetStringFromObj(resultPtr, &length);
+			Tcl_Write(errChannel, bytes, length);
+			Tcl_Write(errChannel, "\n", 1);
+		    }
+		    Tcl_AddErrorInfo(interp,
+			    "\n    (script that generates prompt)");
+		    goto defaultPrompt;
+		}
+	    }
+	    if (outChannel) {
+		Tcl_Flush(outChannel);
+	    }
+	}
+	if (!inChannel) {
+	    goto done;
+	}
+        length = Tcl_GetsObj(inChannel, commandPtr);
+	if (length < 0) {
+	    goto done;
+	}
+	if ((length == 0) && Tcl_Eof(inChannel) && (!gotPartial)) {
+	    goto done;
+	}
+
+        /*
+         * Add the newline removed by Tcl_GetsObj back to the string.
+         */
+
+	Tcl_AppendToObj(commandPtr, "\n", 1);
+	if (!TclObjCommandComplete(commandPtr)) {
+	    gotPartial = 1;
+	    continue;
+	}
+
+	gotPartial = 0;
+	code = Tcl_RecordAndEvalObj(interp, commandPtr, 0);
+	inChannel = Tcl_GetStdChannel(TCL_STDIN);
+	outChannel = Tcl_GetStdChannel(TCL_STDOUT);
+	errChannel = Tcl_GetStdChannel(TCL_STDERR);
+	Tcl_SetObjLength(commandPtr, 0);
+	if (code != TCL_OK) {
+	    if (errChannel) {
+		resultPtr = Tcl_GetObjResult(interp);
+		bytes = Tcl_GetStringFromObj(resultPtr, &length);
+		Tcl_Write(errChannel, bytes, length);
+		Tcl_Write(errChannel, "\n", 1);
+	    }
+	} else if (tty) {
+	    resultPtr = Tcl_GetObjResult(interp);
+	    bytes = Tcl_GetStringFromObj(resultPtr, &length);
+	    if ((length > 0) && outChannel) {
+		Tcl_Write(outChannel, bytes, length);
+		Tcl_Write(outChannel, "\n", 1);
+	    }
+	}
+#ifdef TCL_MEM_DEBUG
+	if (quitFlag) {
+	    Tcl_DecrRefCount(commandPtr);
+	    Tcl_DecrRefCount(prompt1NamePtr);
+	    Tcl_DecrRefCount(prompt2NamePtr);
+	    Tcl_DeleteInterp(interp);
+	    Tcl_Exit(0);
+	}
+#endif
+    }
+
+    /*
+     * Rather than calling exit, invoke the "exit" command so that
+     * users can replace "exit" with some other command to do additional
+     * cleanup on exit.  The Tcl_Eval call should never return.
+     */
+
+    done:
+    if (commandPtr != NULL) {
+	Tcl_DecrRefCount(commandPtr);
+    }
+    if (prompt1NamePtr != NULL) {
+	Tcl_DecrRefCount(prompt1NamePtr);
+    }
+    if (prompt2NamePtr != NULL) {
+	Tcl_DecrRefCount(prompt2NamePtr);
+    }
+    sprintf(buffer, "exit %d", exitCode);
+    return Tcl_Eval(interp, buffer);
+}
+#else /* TCL_MAJOR_VERSION >= 8 */
 int
 topTclMainLoop( Tcl_Interp *ip_in, char *prompt, char *appname, int initB) {
 #define BUFFER_SIZE 1000
@@ -371,3 +586,4 @@ topTclMainLoop( Tcl_Interp *ip_in, char *prompt, char *appname, int initB) {
     if ( ip_in == NULL )	Tcl_DeleteInterp(ip);
     return TCL_OK;
 }
+#endif /* TCL_MAJOR_VERSION >= 8 */
