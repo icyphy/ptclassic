@@ -1,7 +1,6 @@
 defstar {
 	name { VISFFTCx }
 	domain { CGC }
-	derivedFrom { VISBase }
 	version { $Id$ }
 	author { William Chen }
 	copyright {
@@ -177,7 +176,6 @@ void $sharedSymbol(CGCVISFFTFx,reorderfft)(vis_s16* s1, vis_s16* s2, int nn) {
 	    ($starSymbol(sinsarray),$starSymbol(cossarray),$val(orderfft),$val(sizeoffft));
 	}
 	initCode {
-	  CGCVISBase::initCode();
 	  addInclude("<vis_proto.h>");
 	  addInclude("<vis_types.h>");
 	  addInclude("<math.h>");

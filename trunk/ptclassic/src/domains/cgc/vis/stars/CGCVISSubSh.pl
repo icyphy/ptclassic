@@ -1,7 +1,6 @@
 defstar {
 	name { VISSubSh }
 	domain { CGC }
-	derivedFrom { VISBase }
 	version { $Id$ }
 	author { William Chen }
 	copyright {
@@ -38,7 +37,6 @@ so that overflow results in wrap around.
                 noInternalState();
 	}
 	initCode{
-	  CGCVISBase::initCode();
 	  addInclude("<vis_proto.h>");
 	  addInclude("<vis_types.h>");
 	}
