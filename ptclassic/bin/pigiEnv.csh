@@ -25,24 +25,51 @@ endif
 
 if ( ! $?PIGIRPC ) setenv PIGIRPC $PTOLEMY/bin.$ARCH/pigiRpc
 
-if ( "$1" == "-debug" ) then
-    shift
-    set pigidebug
-    if ( -x $PIGIRPC.debug ) setenv PIGIRPC $PIGIRPC.debug
-endif
+set cell = init.pal
+set resfile = pigiXRes9
 
-if ( "$1" == "-console" ) then
-    shift
-    set pigiconsole
+while ($#argv)
+	switch ($argv[1])
+		case -rpc:
+			setenv PIGIRPC $argv[2]
+			shift
+			breaksw
+		case -xres:
+			setenv PIGIXRES $argv[2]
+			shift
+			breaksw
+		case -debug:
+			set pigidebug
+			breaksw
+		case -console:
+			set pigiconsole
+			breaksw
+		case -bw:
+			set resfile = pigiXRes9.bw
+			breaksw
+		case -cp:
+			set resfile = pigiXRes9.cp
+			breaksw
+		case -*:
+			echo Bad option: $argv[1]
+			exit 1
+			breaksw
+		case *:
+			set cell=$1
+			breaksw
+	endsw
+	shift
+end
+
+
+if ($?pigidebug && -x $PIGIRPC.debug ) setenv PIGIRPC $PIGIRPC.debug
+
 endif
 
 if ( "$1" =~ "-*" ) then
     echo "${0}: Bad option: $1"
     exit 1
 endif
-
-# Allow a user-specified starting palette,
-set cell=$1; if ( $cell == "" ) set cell = "init.pal"
 
 # Check starting palette/facet for validity.
 if ( -f $cell || ( -d $cell && ! -d $cell/schematic )) then
@@ -59,14 +86,7 @@ if ( ! -d $cell ) then
 endif
 
 set dbfile = /tmp/pigiXR$$
-set resfile = pigiXRes9
-if ( $?PIGIBW ) then
-     xrdb -query > $dbfile
-     set resfile = pigiXRes9.bw
-else if ( $?PIGICP ) then
-     xrdb -query > $dbfile
-     set resfile = pigiXRes9.cp
-endif
+xrdb -query > $dbfile
 xrdb -merge $PTOLEMY/lib/$resfile
 
 # Allow user-specified X resources
@@ -74,7 +94,7 @@ if ( $?PIGIXRES ) then
     xrdb -merge $PIGIXRES
 endif
 
- set path = ( $PTOLEMY/octtools/bin.$ARCH $path )
+set path = ( $PTOLEMY/octtools/bin.$ARCH $path )
 
 set cmdfile = /tmp/pigiCmds.$USER
 /bin/rm -f $cmdfile
