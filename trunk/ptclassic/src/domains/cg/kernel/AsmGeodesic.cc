@@ -40,6 +40,7 @@ F_SRC|F_DEST:
 
 #include "AsmGeodesic.h"
 #include "Error.h"
+#include "ProcMemory.h"
 #include <builtin.h>
 
 int AsmGeodesic::forkType() const {
@@ -110,6 +111,11 @@ int AsmGeodesic :: internalBufSize() const {
 				" (not yet supported)");
 	}
 	return bsiz;
+}
+
+// Assign a memory and address to the Geodesic
+void AsmGeodesic :: assignAddr(ProcMemory& m, unsigned a) {
+	mem = &m; addr = a;
 }
 
 // return the number of delays on all geodesics that are outputs of forks
