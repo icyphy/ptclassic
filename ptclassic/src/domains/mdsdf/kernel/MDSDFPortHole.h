@@ -124,8 +124,8 @@ class MDSDFPortHole : public DFPortHole
   virtual double& getFloatOutput();
 
   // get submatrix inputs and outputs
-  virtual Matrix* getInput(int rowDelay = 0, int colDelay = 0);
-  virtual Matrix* getOutput();
+  virtual PtMatrix* getInput(int rowDelay = 0, int colDelay = 0);
+  virtual PtMatrix* getOutput();
 
  protected:
   // the dimensions of matrix particles that flow through this porthole
@@ -147,7 +147,7 @@ class InMDSDFPort : public MDSDFPortHole {
   int isItInput() const;     // returns TRUE
 
   // get submatrix inputs and outputs
-  /*virtual*/ inline Matrix* getInput(int rowDelay = 0, int colDelay = 0);
+  /*virtual*/ inline PtMatrix* getInput(int rowDelay = 0, int colDelay = 0);
   /*virtual*/ inline double getFloatInput(int rowDelay = 0, int colDelay = 0);
 
 };
@@ -160,7 +160,7 @@ class OutMDSDFPort : public MDSDFPortHole {
  public:
   int isItOutput() const;       // returns TRUE
 
-  /*virtual*/ inline Matrix* getOutput();
+  /*virtual*/ inline PtMatrix* getOutput();
   /*virtual*/ inline double& getFloatOutput();
 };
 
