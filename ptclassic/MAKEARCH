@@ -120,7 +120,7 @@ cd $PTOLEMY/obj.$PTARCH
 set EXPDOMAINS=(c50 cg56 cgc fsm vhdlb vhdl mdsdf hof sr)
 set EXPEXTRAS=(c50/targets cg56/targets vhdl/targets )
 
-set ALLDOMAINS=(sdf ddf de thor bdf cg $EXPDOMAINS)
+set ALLDOMAINS=(sdf ddf de bdf cg $EXPDOMAINS)
 
 # If the tst directory is present, then populate it
 if ( -d ../src/tst ) then
@@ -176,8 +176,8 @@ end
 # create extra directories under domain-specific directories
 # everything must have one slash (be two levels down)
 
-foreach x (thor/pepp cg/targets sdf/image sdf/targets \
-	sdf/loopScheduler sdf/tcltk de/tcltk cg/parScheduler thor/analyzerX11 \
+foreach x (cg/targets sdf/image sdf/targets \
+	sdf/loopScheduler sdf/tcltk de/tcltk cg/parScheduler \
 	cg/dlScheduler cg/HuScheduler cg/dcScheduler \
 	cg/macroScheduler cg/ddfScheduler cgc/targets cgc/tcltk cgc/vis \
 	c50/dsp cg56/dsp \
@@ -192,9 +192,6 @@ foreach x (thor/pepp cg/targets sdf/image sdf/targets \
 	cd $PTOLEMY/obj.$PTARCH/domains
 end
 
-# create Bitmaps for analyzerX11
-cd thor/analyzerX11
-optlink ../../../../src/domains/thor/analyzerX11 Bitmaps
 cd $PTOLEMY/obj.$PTARCH/domains
 
 # create extra subsub dirs in each domain
