@@ -54,8 +54,17 @@ class Profile;
 
 class CGMultiTarget : public MultiTarget {
 public:
-	CGMultiTarget(const char* name,const char* sClass,const char* desc);
+	// Constructor
+	CGMultiTarget(const char* name, const char* sClass,
+		      const char* desc,
+		      const char* assocDomain = CGdomainName);
+
+	// Destructor
 	~CGMultiTarget();
+
+	// Return a copy of itself
+	/*virtual*/ Block* makeNew() const;
+
 	int run();
 
 	// If within a WormHole, do nothing.
@@ -77,12 +86,10 @@ public:
 
 	void setStopTime(double);
 
-	Block* makeNew() const;
-
-	// communication cost
+	// Communication cost
 	int commTime(int,int,int,int);
 
-	// resource management
+	// Resource management
 	int scheduleComm(ParNode* /*comm*/, int when, int /*limit*/ = 0) 
 		{ return when; }
 
@@ -90,29 +97,27 @@ public:
 	// just before the argument node on the same communication resource.
 	ParNode* backComm (ParNode* n);
 
-	// redefine 
+	// Redefine 
 	DataFlowStar* createSend(int from, int to, int num);
 	DataFlowStar* createReceive(int from, int to, int num);
 	DataFlowStar* createSpread();
 	DataFlowStar* createCollect();
 	CGStar* createMacro(CGStar*, int, int, int);
  
-	// generate Gantt chart
+	// Generate Gantt chart
 	void writeSchedule();
 
-	// redefine. Methods for generating code for reading and writing
-	// wormhole ports.
-	// When nChildrenAlloc = 1, we call the corresponding
-	// methods of the child target.
+	// Methods for generating code for reading and writing wormhole ports.
+	// If nChildrenAlloc = 1, call corresponding methods of child target.
 	/*virtual*/ void allWormInputCode();
 	/*virtual*/ void wormInputCode(PortHole&);
 	/*virtual*/ void allWormOutputCode();
 	/*virtual*/ void wormOutputCode(PortHole&);
 
-	// redefine the execution time of a star
+	// Redefine the execution time of a star
 	/* virtual */ int execTime(DataFlowStar*, CGTarget*);
 
-	// check whether communication amortization is possible.
+	// Check whether communication amortization is possible.
 	// If yes, return TRUE, else return FALSE.
 	int amortize(int from, int to);
 

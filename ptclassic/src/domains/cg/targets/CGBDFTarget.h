@@ -41,15 +41,21 @@ BDF code generation!
 
 class CGBDFTarget : public CGTarget {
 public:
-	CGBDFTarget(const char* name, const char* starclass, const char* desc);
+	CGBDFTarget(const char* name, const char* starclass, const char* desc,
+		    const char* assocDomain = CGdomainName);
+
 	/* virtual */ void setup();
+
+	// Return a copy of itself
 	/* virtual */ Block* makeNew() const;
 
-	// code to generate if-blocks
+	// code to generate if/then/else constructs
 	/* virtual */ void beginIf(PortHole& cond,int truthdir,
 				  int depth,int haveElsePart);
 	/* virtual */ void beginElse(int depth);
 	/* virtual */ void endIf(int depth);
+
+	// Code to generate while loops
 	/* virtual */ void beginDoWhile(int depth);
 	/* virtual */ void endDoWhile(PortHole& cond,int truthdir,int depth);
 };

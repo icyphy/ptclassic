@@ -54,14 +54,15 @@ public:
 
 class MotorolaTarget : public AsmTarget {
 public:
-	// copy constructor
-	MotorolaTarget(const char* nam, const char* desc, const char* stype);
-
-	// destructor
-	~MotorolaTarget();
+	// constructor
+	MotorolaTarget(const char* nam, const char* desc, const char* stype,
+		       const char* assocDomain);
 
 	// copy constructor
 	MotorolaTarget(const MotorolaTarget&);
+
+	// destructor
+	~MotorolaTarget();
 
 	// return a copy of itself
 	/*virtual*/ Block* makeNew() const;
