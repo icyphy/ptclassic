@@ -1,5 +1,5 @@
 # Makefile for sdf/matrix
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 #                         All Rights Reserved.
 #		       
 # $Id$
