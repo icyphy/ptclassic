@@ -170,11 +170,9 @@ private:
 	VHDLPortVarList ctlerPortVarList;
 	VHDLPortVarList ctlerVarPortList;
 
-	// Method called by C2V star to place important code into structure.
-        /*virtual*/ void registerC2V(int, int, const char*);
 
-	// Method called by V2C star to place important code into structure.
-	/*virtual*/ void registerV2C(int, int, const char*);
+	// Method called by comm stars to place important code into structure.
+	/*virtual*/ void registerComm(int, int, int, const char*);
 
 	// Merge the Star's signal list with the Target's signal list.
 	void mergeSignalList(VHDLSignalList*);
