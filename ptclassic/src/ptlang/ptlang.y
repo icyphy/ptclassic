@@ -1,7 +1,6 @@
 %{
 /************************************************************************
- Version identification:
- $Id$
+ Version: $Id$
 
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
@@ -82,6 +81,7 @@ char* codeBlocks[NUMCODEBLOCKS];
 char* codeBlockNames[NUMCODEBLOCKS];
 char* codeBlockLines[NUMCODEBLOCKS];
 char* codeBlockArgs[NUMCODEBLOCKS];
+char* codeBlockTmp;
 int numBlocks = 0;
 
 /* scratch buffers */
@@ -302,7 +302,7 @@ sgitem:
 		'{' dstatelist '}'	{ genState(); describeState();}
 
 /* definitions of the constructor, destructor, etc. */
-|	inl stdmethkey BODY		{ inlineFlag[methKey] = $1 ? 1 : 0;
+|	inl 	stdmethkey BODY		{ inlineFlag[methKey] = $1 ? 1 : 0;
 					  codeBody[methKey] = $3;
 					  bodyMode = 0;
 					}
@@ -445,18 +445,9 @@ staritem:
 					  codeMode = 1;
 					  codeModeBraceCount = 1;
 					}
-		lines '}'		{ char* b = save(codeBlock);
-					  codeBlocks[numBlocks++]=b;
-					  codeMode = 0; 
-					  codeBlock[0] = 0;
+		BODY	 		{ codeBlocks[numBlocks++]=save($8);
+					  codeMode = 0;
 					}
-;
-
-lines:	/* nothing */
-|	lines LINE		{ char b[SMALLBUFSIZE];
-		sprintf(b,"\"%s\\n\"\n",$2);
-		strcat(codeBlock,b);
-				}
 ;
 
 cbargs: /*nothing*/		{ $$ = (char*)0; }
@@ -633,7 +624,7 @@ optcomma:/* nothing */
 ident:	keyword
 |	IDENTIFIER
 /* also allow strings; strip quotation marks */
-|STRING					{ $$ = stripQuotes ($1);}
+|	STRING					{ $$ = stripQuotes ($1);}
 ;
 
 /* keyword in identifier position */
@@ -990,69 +981,115 @@ int i;
 		fprintf (fp, "%s\n\t}\n", codeBody[i]);
 }
 
+
+
+cvtCodeBlockExpr( src, src_len, pDst)
+    char *src, **pDst;
+    int src_len;
+{
+    char *dst = *pDst;
+
+    /*IF*/ if ( src_len==6 && strncmp(src,"LBRACE",6)==0 ) {
+	*dst++ = '{';		/* } (to balance 'vi') */
+    } else if ( src_len==6 && strncmp(src,"RBRACE",6)==0 ) {
+	/* { (to balance 'vi') */
+	*dst++ = '}';
+    } else {
+	strcpy(dst,"\" << ("); dst += strlen(dst);
+	strncpy( dst, src, src_len); dst += src_len;
+	strcpy(dst,") << \""); dst += strlen(dst);
+    }
+    *pDst = dst;
+}
+
 /**
-    Generate a code block's function internals.  Basically just
-    parsing the string {str} and looking for ``@'' substitutions,
-    writing the result to {fp}.  Syntax rules:
+    Convert a codeblock.  If extendB is FALSE, a set of string literals
+    will be produced, with the contents of {src} escaped into proper C
+    strings.  If extendB is TRUE, The ``@'' substitutions below will
+    be processed and merged with the string literals using the "<<" syntax.
+    Syntax rules:
 	@@	==> @			(double ``@'' goes to single)
 	@LBRACE ==> {			(LBRACE is literal string)
-	@RBRACE ==> }			(LBRACE is literal string)
+	@RBRACE ==> }			(RBRACE is literal string)
 	@id	==> C++ token {id}	(id is one or more alphanumerics)
 	@(expr) ==> C++ expr {expr}	(expr is arbitrary with balanced parens)
+        @anything_else is passed through unchanged (including the @).
+    If extendB is FALSE, then none of the ``@'' process occurs.
 **/
-genCodeBlockFunc( fp, str)
-FILE *fp;
-char *str;
+cvtCodeBlockFunc( src_in, dst_in, extendB)
+    char *src_in, *dst_in;
+    int extendB;
 {
-    char	*s;
-    int		c;
+    char	*src = src_in, *dst = dst_in;
+    char	*src_expr;
+    int		c, parenCnt;
 
-    for ( s=str, c = *s++; c != '\0'; c = *s++) {
-	if ( c != '@' ) {
-	    putc( c, fp);
-	    continue;
-	}
-	c = *s++;
-	/*IF*/ if ( c == '@' ) {
-	    /* this is same as default case below, but be explicit */
-	    putc( c, fp);
-	} else if ( c == '(' ) {
-	    fputs( "\" << (", fp);
-	    for ( c = *s++; c != ')'; c = *s++) {
-		if ( c == '(' ) {
-		    do {
-			putc( c, fp);
-			c = *s++;
-		    } while ( c != ')' && c != '\0');
-		}
-		if ( c == '\0' ) {
-		    fprintf(stderr,"Unbalanced parans in @() codeblock\n");
-		    exit(1);
-		}
-		putc( c, fp);
+    *dst++ = QUOTE;
+    for (; (c = *src++) != '\0'; ) {
+	switch ( c ) {
+	case ESC:
+	    /* one backslash in input becomes two in output */
+	    *dst++ = ESC;
+	    *dst++ = ESC;
+	    break;
+	case QUOTE:
+	    *dst++ = ESC;
+	    *dst++ = QUOTE;
+	    break;
+	case NEWLINE:
+	    *dst++ = ESC; *dst++ = 'n';
+	    if ( *src == '\0' )	break;
+	    *dst++ = '"'; *dst++ = NEWLINE; *dst++ = '"';
+	    break;
+	case '@':
+	    if ( ! extendB ) {
+		*dst++ = c;
+		break;
 	    }
-	    fputs( ") << \"", fp);
-	} else if ( isalnum(c) ) {
-	    /*IF*/ if ( strncmp(s-1,"LBRACE",6)==0 ) {
-		putc( '{', fp);		/* } (to balance 'vi') */
-		s += 5;
-	    } else if ( strncmp(s-1,"RBRACE",6)==0 ) {
-		/* { (to balance 'vi') */
-		putc( '}', fp);	
-		s += 5;
+	    c = *src++;
+	    /*IF*/ if ( c == '@' ) {
+		/* this is same as default case below, but be explicit */
+		*dst++ = c;
+	    } else if ( c == '(' ) {
+		for ( src_expr=src, parenCnt=1; parenCnt > 0; ) {
+		    c = *src++;
+		    /*IF*/ if ( c=='\0' ) {
+			fprintf(stderr,"Unbalanced parans in @() codeblock\n");
+			exit(1);
+		    } else if ( c=='(' ) {
+			++parenCnt;
+		    } else if ( c==')' ) {	
+		        if ( --parenCnt == 0 )
+			    break;
+		    }
+		}
+		cvtCodeBlockExpr( src_expr, src-src_expr-1, &dst);
+	    } else if ( isalpha(c) ) {
+		    for ( src_expr=src-1; c=*src++, isalnum(c); )
+			;
+		    cvtCodeBlockExpr( src_expr, src-src_expr-1, &dst);
+		    --src;	/* for() loop will advance */
 	    } else {
-		fputs( "\" << ", fp);
-		do { 
-		    putc( c, fp);
-		    c = *s++;
-		} while ( isalnum(c) );
-		fputs( " << \"", fp);
-		--s;	/* for() loop will advance */
+		*dst++ = c;
 	    }
-	} else {
-	    putc( c, fp);
+	    break;
+	default:
+	    *dst++ = c;
 	}
     }
+    *dst++ = QUOTE;
+    *dst = '\0';
+}
+
+genCodeBlock( fp, src, extendB)
+    FILE *fp;
+    char *src;
+    int extendB;
+{
+    char *dst = malloc(strlen(src)*2+MEDBUFSIZE);
+    cvtCodeBlockFunc( src, dst, extendB);
+    fputs( dst, fp);
+    free(dst);
 }
 
 /* This is the main guy!  It outputs the complete class definition. */
@@ -1147,6 +1184,7 @@ genDef ()
 	if (!pureFlag)
 		fprintf (fp, "\t/* virtual */ Block* makeNew() const;\n");
         fprintf (fp, "\t/* virtual*/ const char* className() const;\n");
+        fprintf (fp, "\t/* virtual*/ int isA(const char*) const;\n");
 /* The code blocks */
 	for (i=0; i<numBlocks; i++) {
 		if ( codeBlockArgs[i] == NULL ) {
@@ -1207,6 +1245,7 @@ genDef ()
 	fprintf (fp, "\nconst char *star_nm_%s = \"%s\";\n", fullClass, fullClass);
         fprintf (fp, "\nconst char* %s :: className() const {return star_nm_%s;}\n",
 		fullClass, fullClass);
+	fprintf (fp, "\nISA_FUNC(%s,%s);\n",fullClass,baseClass);
 	if (!pureFlag) {
 		fprintf (fp, "\nBlock* %s :: makeNew() const { LOG_NEW; return new %s;}\n",
 			 fullClass, fullClass);
@@ -1214,15 +1253,16 @@ genDef ()
 /* generate the CodeBlock constructor calls */
 	for (i=0; i<numBlocks; i++) {
 	    if ( codeBlockArgs[i] == NULL ) {
-		fprintf (fp, "\nCodeBlock %s :: %s (\n%s\n%s);\n",
-			fullClass,codeBlockNames[i],codeBlockLines[i],
-			codeBlocks[i]);
+		fprintf (fp, "\nCodeBlock %s :: %s (\n%s\n",
+			fullClass,codeBlockNames[i],codeBlockLines[i]);
+		genCodeBlock( fp, codeBlocks[i], 0);
+		fprintf (fp, ");\n");
 	    } else {
 		fprintf (fp, "\nconst char* %s :: %s(%s) {\n%s\n",
 			fullClass,codeBlockNames[i],codeBlockArgs[i],
 			codeBlockLines[i]);
 		fprintf (fp, "\tstatic StringList _str_; _str_.initialize(); _str_ << \n");
-		genCodeBlockFunc( fp, codeBlocks[i]);
+		genCodeBlock( fp, codeBlocks[i], 1);
 		fprintf (fp, ";\n\treturn (const char*)_str_;\n}\n");
 	    }
 	}
@@ -1441,14 +1481,17 @@ struct tentry keyTable[] = {
 	0, 0,
 };
 
-#define input() ((c = getc(yyin))==10?(yyline++,c):c)
+int
+yyinput() {
+    int	c;
+    if ( (c=getc(yyin)) == NEWLINE ) {
+	++yyline;
+    }
+    return c;
+}
 
-/* The lexical analyzer */
-yylex () {
-	static int c = 0;
-	int key;
-	char* p = yytext;
-	if (c == EOF) return 0;
+
+#ifdef notdef
 /*
  * In codeMode, we look for LINEs and return them.
  * A LINE is an exact copy of of line of input that
@@ -1456,266 +1499,392 @@ yylex () {
  * When a line is encountered that contains the closing '}'
  * that closing '}' is returned.  Anything else on the line is lost.
  */
-	if (codeMode) {
-	    int inQuote = 0;
-	    /* eat spaces until a newline */
-	    while (!c || (isspace(c) && c != NEWLINE))
-		input();
-	    /* now eat the newline */
-	    if (c == NEWLINE) input();
-	    /* now transfer characters to yytext until the next newline,
-	       or the closing brace. */
-	    while (c != NEWLINE) {
-		*p++ = c;
-		switch (c) {
-			/* one backslash in input becomes two in output */
-		  case ESC:
-		    *p++ = c;
-		    break;
-		  case QUOTE:
-		    /* quote in input is escaped */
-		    p[-1] = ESC;
-		    *p++ = c;
-		    inQuote = !inQuote;
-		    break;
-		  case EOF:
-		    yyerror ("Unexpected EOF in body!");
-		    exit (1);
-		  default:
-		    if (!inQuote) {
-			if (c == '{') codeModeBraceCount++;
-			else if (c == '}') {
-			    codeModeBraceCount--;
-			    if (codeModeBraceCount == 0) {
-				/* output doesn't include the '}' */
-				p[0] = 0;
-				c = 0;
-				yylval = save(yytext);
-				return '}';
-			    }
-			}
+int
+yylexCode_old(pCurChar)
+    int *pCurChar;
+{
+    int		inQuote = 0;
+    char	*p = yytext;
+    int		c = *pCurChar;
+    int		rettok = LINE;
+
+    /* eat spaces until a newline */
+    while (c==0 || (isspace(c) && c != NEWLINE))
+	c = yyinput();
+    /* now eat the newline */
+    if (c == NEWLINE) c = yyinput();
+    /* now transfer characters to yytext until the next newline,
+       or the closing brace. */
+    while (c != NEWLINE) {
+	*p++ = c;
+	switch (c) {
+		/* one backslash in input becomes two in output */
+	  case ESC:
+	    *p++ = c;
+	    break;
+	  case QUOTE:
+	    /* quote in input is escaped */
+	    p[-1] = ESC;
+	    *p++ = c;
+	    inQuote = !inQuote;
+	    break;
+	  case EOF:
+	    yyerror ("Unexpected EOF in body!");
+	    exit (1);
+	  default:
+	    if (!inQuote) {
+		if (c == '{') codeModeBraceCount++;
+		else if (c == '}') {
+		    if ( --codeModeBraceCount == 0 ) {
+			/*{*/ rettok = '}';
+			c = 0;
+			goto done;
 		    }
 		}
-		input();
 	    }
-	    /* output doesn't include the NEWLINE */
-	    p[0] = 0;
-	    yylval = save(yytext);
-	    return LINE;
 	}
+	c = yyinput();
+    }
+done:
+    /* output doesn't include the NEWLINE or right-brace */
+    *pCurChar = c;
+    p[0] = 0;
+    yylval = save(yytext);
+    return rettok;
+}
+
+#endif
+
+/*
+ * new-style codeMode.  Very much like body-mode: we return an entire
+ * multi-line brace-delimined token.  We dont handle ``//'' style comments
+ * (or any comments, for that matter).
+ */
+int
+yylexCode(pCurChar)
+    int *pCurChar;
+{
+    int		inQuote = 0;
+    char	*p = yytext;
+    int		c = *pCurChar;
+    int		brace = 1;
+    int		startLine = yyline;
+    int		startQLine = yyline;
+
+    /* eat spaces until a newline */
+    while (c==0 || (isspace(c) && c != NEWLINE))
+	c = yyinput();
+    /* now eat the newline */
+    if (c == NEWLINE) c = yyinput();
+    /* now transfer characters to yytext until the next newline,
+       or the closing brace. */
+    while (1) {
+	*p++ = c;
+	switch (c) {
+#ifdef notdef
+	case ESC:
+	    c = yyinput();
+	    *p++ = c;
+	    break;
+#endif
+	case EOF:
+	    sprintf(yytext, "Unterminated %s: it began on line %d",
+	     inQuote ? "codeblock string" : "codeblock",
+	     inQuote ? startQLine : startLine);
+	    yyerror(yytext);
+	    exit(1);
+	case QUOTE:
+	    inQuote = !inQuote;
+	    startQLine = yyline;
+	    break;
+	case '{':
+	    if ( inQuote )	break;
+	    ++brace;
+	    break;
+	case '}':
+	    if ( inQuote )	break;
+	    if ( --brace == 0 ) {
+		/* strip last brace and white space up to but not including
+		 * the last newline.  (e.g., last char will be newline)
+		 */
+		*--p = ' ';
+		for ( ; p>yytext && isspace(*p) && *p!=NEWLINE; --p)
+		    ;
+		*++p = 0;
+		*pCurChar = 0;
+		yylval = save(yytext);
+		return BODY;
+	    }
+	    break;
+	}
+	c = yyinput();
+    }
+}
+
+
+
 
 /* bodyMode causes a whole function or document
  * body to be returned as a single token.
  * Leading and trailing spaces are removed
  */
-	while (!c || isspace(c)) {
-		input();
-	}
-	if (bodyMode) {
-		int brace = 1;
-		int inQuote = 0;
-		int inComment = 0;
-		int startLine = yyline;
-		int startQLine = yyline;
-/* if !docMode, put a "#line" directive in the token */
-		if (!docMode) {
-		   sprintf(p, "# line %d \"%s\"\n", yyline, inputFile);
-		   p += strlen(p);
-		}
+int
+yylexBody(pCurChar)
+    int *pCurChar;
+{
+    int		c = *pCurChar;
+    char*	p = yytext;
+    int		brace = 1;
+    int		inQuote = 0;
+    int		inComment = 0;
+    int		startLine = yyline;
+    int		startQLine = yyline;
 
-		while (brace > 0) {
-			*p++ = c;
-			switch (c) {
-			case ESC:
-				input();
-				*p++ = c;
-				break;
-			case QUOTE:
-				if (!inComment) {
-					inQuote = !inQuote;
-					startQLine = yyline;
-				}
-				break;
-			case EOF:
-				sprintf (yytext,
-			"Unterminated %s at EOF: it began on line %d",
-			inQuote ? "string" : "code block",
-			inQuote ? startQLine : startLine);
-				yyerror (yytext);;
-				exit (1);
-			case '/':
-				if (inQuote) break;
-				c = getc(yyin);
-				if (c == '/') {
-					inComment = 1;
-					*p++ = c;
-				}
-				else ungetc(c,yyin);
-				break;
-			case NEWLINE:
-				inComment = 0;
-				break;
-			default:
-				if (!inQuote && !inComment) {
-				   if (c == '{') brace++;
-				   else if (c == '}') brace--;
-				}
-			}
-			input();
-		}
-/* The BODY token does not include the closing '}' though it is removed
- * from the input.
- */
-		--p;
-/* trim trailing whitespace */
-		--p;
-		while (isspace(*p)) --p;
-		p[1] = 0;
-		c = 0;
-		yylval = save(yytext);
-		return BODY;
-	}
+    /* if !docMode, put a "#line" directive in the token */
+    if (!docMode) {
+	sprintf(p, "# line %d \"%s\"\n", yyline, inputFile);
+	p += strlen(p);
+    }
 
-/* descMode causes a whole descriptor body to be returned as a single token
- * in the form of a string with newlines indicated as "\n" and quotes
- * escaped (\").
- */
-	if (descMode) {
-		int brace = 1;
-		int inQuote = 0;
-		while (brace > 0) {
-			*p++ = c;
-			switch (c) {
-			case ESC:
-				input();
-				*p++ = c;
-				break;
-			case QUOTE:
-				/* escape the quote */
-				--p;
-				*p++ = ESC;
-				*p++ = QUOTE;
-				inQuote = !inQuote;
-				break;
-			case NEWLINE:
-				/* replace with "\n" */
-				--p;
-				*p++ = ESC;
-				*p++ = 'n';
-				break;
-			case EOF:
-				yyerror ("Unexpected EOF in descriptor!");
-				exit (1);
-			default:
-				if (!inQuote) {
-				  if (c == '{') brace++;
-				  else if (c == '}') brace--;
-				}
-				break;
-			}
-			input();
-		}
-/* The BODY token does not include the closing '}' though it is removed
- * from the input.
- */
-		--p;
-/* trim trailing whitespace or '\n' */
-		--p;
-		while (isspace(*p) || (*p == 'n' && *(p-1) == ESC)) {
-			if(*p == 'n') p -= 2;
-			else --p;
-		}
-		p[1] = 0;
-		c = 0;
-		yylval = save(yytext);
-		return BODY;
+    while (brace > 0) {
+	*p++ = c;
+	switch (c) {
+	case ESC:
+	    c = yyinput();
+	    *p++ = c;
+	    break;
+	case QUOTE:
+	    if (!inComment) {
+		    inQuote = !inQuote;
+		    startQLine = yyline;
+	    }
+	    break;
+	case EOF:
+	    sprintf (yytext,
+	      "Unterminated %s at EOF: it began on line %d",
+	      inQuote ? "string" : "body block",
+	      inQuote ? startQLine : startLine);
+	    yyerror(yytext);
+	    exit(1);
+	case '/':
+	    if (inQuote) break;
+	    c = getc(yyin);
+	    if (c == '/') {
+		    inComment = 1;
+		    *p++ = c;
+	    } else {
+		ungetc(c,yyin);
+	    }
+	    break;
+	case NEWLINE:
+	    inComment = 0;
+	    break;
+	default:
+	    if (!inQuote && !inComment) {
+	       if (c == '{') brace++;
+	       else if (c == '}') brace--;
+	    }
 	}
+	c = yyinput();
+    }
+    /* The BODY token does not include the closing '}' though it is removed
+     * from the input.
+     */
+    --p;
+    /* trim trailing whitespace */
+    --p;
+    while (isspace(*p)) --p;
+    p[1] = 0;
+    yylval = save(yytext);
+    *pCurChar = 0;
+    return BODY;
+}
 
-/* regular code (not BODY mode) */
-
-/* loop to eat up blanks and comments.  A comment starts with // and
- * continues for the rest of the line.  If a single / is seen in the
- * loop a '/' token is returned.
- */
-	while (1) {
-		if (c != '/') break;
-		else {
-			input();
-			if (c != '/') {
-				*yytext = '/';
-				yytext[1] = 0;
-				return '/';
-			}
-			/* comment -- eat rest of line */
-			while (input() != NEWLINE && c != EOF);
+/**
+    Return an entire descriptor.
+    descMode causes a whole descriptor body to be returned as a single token
+    in the form of a string with newlines indicated as "\n" and quotes
+    escaped (\").
+**/
+int
+yylexDesc(pCurChar)
+    int *pCurChar;
+{
+    int		c = *pCurChar;
+    char*	p = yytext;
+    int		brace = 1;
+    int		inQuote = 0;
+    while (brace > 0) {
+	*p++ = c;
+	switch (c) {
+	case ESC:
+		c = yyinput();
+		*p++ = c;
+		break;
+	case QUOTE:
+		/* escape the quote */
+		--p;
+		*p++ = ESC;
+		*p++ = QUOTE;
+		inQuote = !inQuote;
+		break;
+	case NEWLINE:
+		/* replace with "\n" */
+		--p;
+		*p++ = ESC;
+		*p++ = 'n';
+		break;
+	case EOF:
+		yyerror ("Unexpected EOF in descriptor!");
+		exit (1);
+	default:
+		if (!inQuote) {
+		  if (c == '{') brace++;
+		  else if (c == '}') brace--;
 		}
-		while (isspace(c)) { input(); }
+		break;
 	}
+	c = yyinput();
+    }
+   /* The BODY token does not include the closing '}' though it is removed
+    * from the input.
+    */
+    --p;
+    /* trim trailing whitespace or '\n' */
+    --p;
+    while (isspace(*p) || (*p == 'n' && *(p-1) == ESC)) {
+	    if(*p == 'n') p -= 2;
+	    else --p;
+    }
+    p[1] = 0;
+    *pCurChar = 0;
+    yylval = save(yytext);
+    return BODY;
+}
+
+
+
+/**
+    regular code (not BODY mode)
+   loop to eat up blanks and comments.  A comment starts with // and
+   continues for the rest of the line.  If a single / is seen in the
+   loop a '/' token is returned.
+**/
+int
+yylexNormal(pCurChar)
+    int *pCurChar;
+{
+    int		c = *pCurChar;
+    char    	*p = yytext;
+    int		key;
+
+    while (1) {
+	if (c != '/') {
+	    break;
+	} else {
+		c = yyinput();
+		if (c != '/') {
+			*yytext = '/';
+			yytext[1] = 0;
+			*pCurChar = c;
+			return '/';
+		}
+		/* comment -- eat rest of line */
+		while ((c=yyinput()) != NEWLINE && c != EOF);
+	}
+	while (isspace(c)) { c = yyinput(); }
+    }
+    if (c == EOF) {
+	*pCurChar = c;
+	return 0;		
+    }
+    if (c == QUOTE) {
 	/*
 	 * STRING token includes surrounding quotes
 	 * If the STRING includes a NEWLINE, a warning is issued.
 	 */
-	if (c == EOF) return 0;		
-	if (c == QUOTE) {
-		p = yytext;
-		*p++ = c;
-		while (1) {
-			*p++ = input();
-			if (c == QUOTE) {
-				*p = 0;
-				break;
-			}
-			else if (c == ESC) {
-				*p++ = input();
-			}
-			else if (c == NEWLINE) {
-				yywarn ("warning: multi-line string");
-			}
-			else if (c == EOF) {
-				yyerror ("Unexpected EOF in string");
-				exit (1);
-			}
+	*p++ = c;
+	while (1) {
+		*p++ = c = yyinput();
+		if (c == QUOTE) {
+			*p = 0;
+			break;
 		}
-		c = 0;
-		yylval = save(yytext);
-		return STRING;
-	}
-	/* Token like <stdio.h> */
-	else if (c == '<') {
-		p = yytext;
-		*p++ = c;
-		while (1) {
-			*p++ = input();
-			if (c == '>') {
-				*p = 0;
-				break;
-			}
-			else if (c == EOF) {
-				yyerror ("Unexpected EOF in string");
-				exit (1);
-			}
+		else if (c == ESC) {
+			*p++ = c = yyinput();
 		}
-		c = 0;
-		yylval = save(yytext);
-		return STRING;
+		else if (c == NEWLINE) {
+			yywarn ("warning: multi-line string");
+		}
+		else if (c == EOF) {
+			yyerror ("Unexpected EOF in string");
+			exit (1);
+		}
 	}
-        else if (! IDENTCHAR(c) ) {
-		yytext[0] = c;
-		yytext[1] = 0;
-		c = 0;
-		return yytext[0];
-	}
-/* note: we also return numeric values as IDENTIFIER: digits and '.' allowed */
-	else do {
-		*p++ = c;
-		input();
-        } while ( IDENTCHAR(c) );
-	*p = 0;
+	*pCurChar = 0;
 	yylval = save(yytext);
-	if ((key = lookup (yytext)) != 0) {
-		return key;
+	return STRING;
+    } else if (c == '<') {
+        /* Token like <stdio.h> */
+	p = yytext;
+	*p++ = c;
+	while (1) {
+	    *p++ = c = yyinput();
+	    if (c == '>') {
+		    *p = 0;
+		    break;
+	    } else if (c == EOF) {
+		    yyerror ("Unexpected EOF in <> string");
+		    exit (1);
+	    }
 	}
-	return IDENTIFIER;
+	*pCurChar = 0;
+	yylval = save(yytext);
+	return STRING;
+    } else if (! IDENTCHAR(c) ) {
+	    yytext[0] = c;
+	    yytext[1] = 0;
+	    *pCurChar = 0;
+	    return yytext[0];
+    } else {
+        /* we also return numeric values as IDENTIFIER: 
+	 * digits and '.' allowed
+	 */
+        do {
+	    *p++ = c;
+	    c = yyinput();
+        } while ( IDENTCHAR(c) );
+    }
+    *p = 0;
+    *pCurChar = c;
+    yylval = save(yytext);
+    if ((key = lookup (yytext)) != 0) {
+	    return key;
+    }
+    return IDENTIFIER;
+}
+
+/* #define input() ((c = getc(yyin))==10?(yyline++,c):c) */
+
+/* The lexical analyzer */
+yylex () {
+    static int	c = 0;
+    if (c == EOF) return 0;
+
+    if (codeMode) {
+	return yylexCode(&c);
+    }
+    while (c==0 || isspace(c)) {
+	    c = yyinput();
+    }
+    if (bodyMode) {
+	return yylexBody(&c);
+    }
+
+    if (descMode) {
+	return yylexDesc(&c);
+    }
+    return yylexNormal(&c);
 }
 
 int lookup (text)
@@ -1752,14 +1921,14 @@ char* savelineref()
     strip quotes, save token in dynamic memory
     A previous version of this used to special case the situation where
     the string was only two characters (presumbly just ``""'') and would
-    return exactly that.  This breaks things, so now an empty string
+    return exactly that.  This breaks things, so now return an empty string
     (instead of ``""'') is returned -- kennard
 **/
 char* stripQuotes(in)
 char* in;
 {
 	char* out;
-	int l = strlen (in);
+	int l = strlen(in);
 	if ( l<2 || in[0]!=QUOTE || in[l-1]!=QUOTE ) {
 		yyerror("String without quotes in stripQuotes().");
 		return save(in);
