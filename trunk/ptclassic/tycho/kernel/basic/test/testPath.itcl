@@ -266,10 +266,12 @@ foreach {c t} {
 	"Variables, with spaces" {-*- mode : themode ; other : theother -*-}
 	"Variables, with tabs" "-*-\tmode\t:\tthemode\t;\tother\t:\ttheother\t-*-"
 	"Variables, extra semicolon" {-*- mode: themode; other: theother ; -*-}
+	"Variables, multiline" "-*- mode : themode -*-\n -*- other : theother -*-"
 } r {
 	{mode themode}
 	{mode themode}
 	{mode themode}
+	{mode themode other theother}
 	{mode themode other theother}
 	{mode themode other theother}
 	{mode themode other theother}
