@@ -140,6 +140,8 @@ $(PIGI): $(PT_DEPEND) $(ADD_OBJS)
 	echo char '*gVersion = "Version:' $(VERSION) \
 		$(VERSION_DESC) \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	echo "char DEFAULT_DOMAIN[] = \"$(DEFAULT_DOMAIN)\";" \
+		>> version.c
 	$(CC) -c version.c
 	$(PURELINK) $(LINKER) $(LINKFLAGS) $(PIGI_OBJS) $(LIBS) -o $@
 
@@ -149,6 +151,8 @@ $(PIGI).debug: $(PT_DEPEND) $(ADD_OBJS)
 		$(VERSION_DESC) \
 		'and debugging symbols.' \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	echo "char DEFAULT_DOMAIN[] = \"$(DEFAULT_DOMAIN)\";" \
+		>> version.c
 	$(CC) -c version.c
 	$(PURELINK) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
 
@@ -158,6 +162,8 @@ $(PIGI).debug.purify: $(PT_DEPEND) $(ADD_OBJS)
 		$(VERSION_DESC) \
 		'and debugging symbols and purify.' \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	echo "char DEFAULT_DOMAIN[] = \"$(DEFAULT_DOMAIN)\";" \
+		>> version.c
 	$(CC) -c version.c
 	$(PURIFY) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
 
@@ -167,6 +173,8 @@ $(PIGI).debug.quantify: $(PT_DEPEND) $(ADD_OBJS)
 		$(VERSION_DESC) \
 		'and debugging symbols and quantify.' \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	echo "char DEFAULT_DOMAIN[] = \"$(DEFAULT_DOMAIN)\";" \
+		>> version.c
 	$(CC) -c version.c
 	$(QUANTIFY) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
 
@@ -176,13 +184,10 @@ $(PIGI).debug.purecov: $(PT_DEPEND) $(ADD_OBJS)
 		$(VERSION_DESC) \
 		'and debugging symbols and purecov.' \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.c
+	echo "char DEFAULT_DOMAIN[] = \"$(DEFAULT_DOMAIN)\";" \
+		>> version.c
 	$(CC) -c version.c
 	$(PURECOV) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
-
-version.$(PIGI).o: $(PT_DEPEND)
-	echo char '*gVersion = "Version:' $(VERSION) \
-		'%created' `date` '";' | sed 's/%/\\n/g' > version.$(PIGI).c
-	$(CC) -c version.$(PIGI).c
 
 INSTALL += makefile $(BINDIR)/$(PIGI)
 
