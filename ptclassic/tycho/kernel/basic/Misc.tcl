@@ -175,6 +175,8 @@ proc ::tycho::assign {args} {
 # a uniform way: co-ordinates are the example for which this
 # procedure was originally written.
 #
+# <b>Deprecated -- do not use.</b>
+#
 proc ::tycho::getalloptions {varname listname} {
 
     upvar $listname l
@@ -214,8 +216,7 @@ proc ::tycho::getalloptions {varname listname} {
 # </pre>
 # the variable fred is set to "nerks" and args is set to "1 2 3 4".
 #
-# FIXME: Make listname an optional argument. By default, this proc
-# should use "args."
+# <b>Deprecated -- do not use.</b>
 #
 proc ::tycho::getopt {option listname} {
 
@@ -240,8 +241,7 @@ proc ::tycho::getopt {option listname} {
 # option flag is there, else 0. Delete the option flag 
 # from the argument list.
 #
-# FIXME: Make listname an optional argument. By default, this proc
-# should use "args."
+# <b>Deprecated -- do not use.</b>
 #
 proc ::tycho::getflag {option listname} {
 
@@ -276,8 +276,7 @@ proc ::tycho::getflag {option listname} {
 # Note that readopt{} does not make getopt{} redundant, since getopt{]
 # does not change the option variable if the option is not present.
 #
-# FIXME: Make listname an optional argument. By default, this proc
-# should use "args."
+# <b>Deprecated -- do not use.</b>
 #
 proc ::tycho::readopt {option listname} {
 
@@ -299,8 +298,7 @@ proc ::tycho::readopt {option listname} {
 # Like readopt{}, but returns all arguments
 # following the option flag up to the next option flag.
 #
-# FIXME: Make listname an optional argument. By default, this proc
-# should use "args."
+# <b>Deprecated -- do not use.</b>
 #
 proc ::tycho::readoption {option listname} {
 
