@@ -126,9 +126,11 @@ FLUSH_CACHE =	flush_cache.o
 # in pigiRpc/makefile, or the make will fail on other archs.
 LIB_FLUSH_CACHE = $(LIBDIR)/flush_cache.o
 
+# Defines to build xv
+XMKMF =		/usr/sww/X11/bin/xmkmf
+
 # Matlab architecture
 MATARCH = hp700
 
 # Ipus uses templates in a way that is compatible with g++, but not hppa.cfront
-INCLUDE_IPUS_DOMAIN = no
 INCLUDE_IPUS_DOMAIN = no
