@@ -65,6 +65,9 @@ class ::tycho::Exec {
     # Get the contents of the history window, if any.
     method getHistory {start {end end}} {}
 
+    # Open a help window.
+    method help {}
+
     # Read from the file descriptor, and close if we are at eof.
     method readOrClose {fd}
 
@@ -118,6 +121,10 @@ body ::tycho::Exec::constructor {args} {
     $itk_component(bbox) buttonconfigure ok \
 	    -text {Exec <Ret>} \
 	    -command "$this execProcess"
+
+    $itk_component(bbox) add help \
+	    -text "Help" \
+	    -command "$this help"
 }
 
 #######################################################################
@@ -165,7 +172,11 @@ body ::tycho::Exec::execProcess {} {
     ::tycho::safeUpdate $this
 
     # Open a non-blocking pipe from the command
-    set fd [open [concat "|[get commandToExec]"] {RDONLY NONBLOCK}]
+    if [catch {set fd [open \
+	    [concat "|[get commandToExec]"] {RDONLY NONBLOCK}]} errMsg {
+        config -cursor $oldCursor
+	error "$errMsg"
+    }
 
     # Register our file event handler
     fileevent $fd readable "$this readOrClose $fd"
@@ -185,6 +196,16 @@ body ::tycho::Exec::getHistory {start {end end}} {
 	return {}
     }
     return [$itk_component(history) get $start $end]
+}
+
+######################################################################
+#### help
+# Open a help window.
+#
+body ::tycho::Exec::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+	    [file join $TYCHO kernel doc usersGuides ExecHelp.html]
 }
 
 #####################################################################
