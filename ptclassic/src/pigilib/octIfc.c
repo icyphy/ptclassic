@@ -741,7 +741,7 @@ char *target;
 
 /* 1/28/91, EAL
 
-/*****  5/2/90 10/23/89
+  5/2/90 10/23/89
 Iterate prop stores the number of iterations for a universe.
 */
 
