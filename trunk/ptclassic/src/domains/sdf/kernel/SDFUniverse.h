@@ -33,8 +33,7 @@ public:
 	Block* myTopology;
 
 	int initialize() {scheduler.setup(*myTopology);}
-	int go(int numIterations = 1)
-		{scheduler.run(*myTopology, numIterations);}
+	int go() {scheduler.run(*myTopology);}
 	int wrapup () {scheduler.wrapup(*myTopology);}
 
 	// Redefine char* cast

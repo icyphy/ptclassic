@@ -54,7 +54,7 @@ SDFSchedule :: operator char* () {
 	// run
 	////////////////////////////
 
-int SDFScheduler :: run (Block& galaxy, int numIterations = 1) {
+int SDFScheduler :: run (Block& galaxy) {
 
    int i,j;
 
@@ -65,7 +65,6 @@ int SDFScheduler :: run (Block& galaxy, int numIterations = 1) {
    // Dummy statement to prevent compiler warning
    galaxy;
 
-   for (j = numIterations; j>0; j--)
 	for (i = mySchedule.size(); i>0; i--) {
 
 	    // Next star in the list
@@ -76,7 +75,7 @@ int SDFScheduler :: run (Block& galaxy, int numIterations = 1) {
 	    currentStar.beforeGo();
 	    currentStar.go();
 	    currentStar.afterGo();
-	}
+		}
 }
 
 
