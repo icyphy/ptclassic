@@ -66,6 +66,7 @@ char *prog_name;
     exit(1);
 }
 
+int
 main(argc, argv)
 int argc;
 char *argv[];
@@ -696,9 +697,9 @@ octObject *obj;
 	(void) sprintf(END(ibuf), " OCT_FULL_TRANSFORM");
 	break;
     }
-    (void) sprintf(END(ibuf), "  (%d,%d)]",
-	    obj->contents.instance.transform.translation.x,
-	    obj->contents.instance.transform.translation.y);
+    (void) sprintf(END(ibuf), "  (%ld,%ld)]",
+		   (long)obj->contents.instance.transform.translation.x,
+		   (long)obj->contents.instance.transform.translation.y);
     return ibuf;
 }
 
@@ -727,12 +728,15 @@ octObject *obj;
     pntbuf[0] = '\0';
     if (num > MAX_PNTS) {
 	for (i = 0;  i < MAX_PNTS-1;  i++) {
-	    (void) sprintf(END(pntbuf), " %d,%d",  points[i].x, points[i].y);
+	    (void) sprintf(END(pntbuf), " %ld,%ld",
+			   (long)points[i].x, (long)points[i].y);
 	}
-	(void) sprintf(END(pntbuf), " ... %d,%d", points[num-1].x, points[num-1].y);
+	(void) sprintf(END(pntbuf), " ... %ld,%ld", 
+		       (long)points[num-1].x, (long)points[num-1].y);
     } else {
 	for (i = 0;  i < num;  i++) {
-	    (void) sprintf(END(pntbuf), " %d,%d", points[i].x, points[i].y);
+	    (void) sprintf(END(pntbuf), " %ld,%ld",
+			   (long)points[i].x, (long)points[i].y);
 	}
     }
     return pntbuf;
@@ -753,8 +757,8 @@ octObject *obj;
 	(void) sprintf(END(propbuf), " OCT_NULL]");
 	break;
     case OCT_INTEGER:
-	(void) sprintf(END(propbuf), " OCT_INTEGER=%d]",
-		obj->contents.prop.value.integer);
+	(void) sprintf(END(propbuf), " OCT_INTEGER=%ld]",
+		       (long)obj->contents.prop.value.integer);
 	break;
     case OCT_REAL:
 	(void) sprintf(END(propbuf), " OCT_REAL=%g]",
@@ -782,8 +786,8 @@ octObject *obj;
     case OCT_INTEGER_ARRAY:
 	(void) sprintf(END(propbuf), " OCT_INTEGER_ARRAY=<");
 	for (i = 0;  i < obj->contents.prop.value.integer_array.length;  i++) {
-	    (void) sprintf(END(propbuf), " %d",
-		    obj->contents.prop.value.integer_array.array[i]);
+	    (void) sprintf(END(propbuf), " %ld",
+		   (long)obj->contents.prop.value.integer_array.array[i]);
 	}
 	(void) sprintf(END(propbuf), ">]");
 	break;
@@ -918,38 +922,42 @@ octObject *obj;
 	break;
     case OCT_BOX:
 	(void) octGenFirstContainer(obj, OCT_LAYER_MASK, &layerObj);
-	(void) sprintf(END(final), "OCT_BOX_%s[%s; %d,%d %d,%d]", octFormatId(obj->objectId),
-		layerObj.contents.layer.name,
-		obj->contents.box.lowerLeft.x,
-		obj->contents.box.lowerLeft.y,
-		obj->contents.box.upperRight.x,
-		obj->contents.box.upperRight.y);
+	(void) sprintf(END(final), "OCT_BOX_%s[%s; %ld,%ld %ld,%ld]",
+		       octFormatId(obj->objectId), 
+		       layerObj.contents.layer.name,
+		       (long)obj->contents.box.lowerLeft.x,
+		       (long)obj->contents.box.lowerLeft.y,
+		       (long)obj->contents.box.upperRight.x,
+		       (long)obj->contents.box.upperRight.y);
 	break;
     case OCT_CIRCLE:
 	(void) octGenFirstContainer(obj, OCT_LAYER_MASK, &layerObj);
-	(void) sprintf(END(final), "OCT_CIRCLE_%s[%s; %d,%d R=%d,%d A=%d,%d]",
-		octFormatId(obj->objectId),
-		layerObj.contents.layer.name,
-		obj->contents.circle.center.x,
-		obj->contents.circle.center.y,
-		obj->contents.circle.innerRadius,
-		obj->contents.circle.outerRadius,
-		obj->contents.circle.startingAngle,
-		obj->contents.circle.endingAngle);
+	(void) sprintf(END(final),
+		       "OCT_CIRCLE_%s[%s; %ld,%ld R=%ld,%ld A=%ld,%ld]",
+		       octFormatId(obj->objectId),
+		       layerObj.contents.layer.name,
+		       (long)obj->contents.circle.center.x,
+		       (long)obj->contents.circle.center.y,
+		       (long)obj->contents.circle.innerRadius,
+		       (long)obj->contents.circle.outerRadius,
+		       (long)obj->contents.circle.startingAngle,
+		       (long)obj->contents.circle.endingAngle);
 	break;
     case OCT_PATH:
 	(void) octGenFirstContainer(obj, OCT_LAYER_MASK, &layerObj);
-	(void) sprintf(END(final), "OCT_PATH_%s[%s; %d]:%s", octFormatId(obj->objectId),
-		layerObj.contents.layer.name,
-		obj->contents.path.width, disp_points(obj));
+	(void) sprintf(END(final), "OCT_PATH_%s[%s; %ld]:%s",
+		       octFormatId(obj->objectId), 
+		       layerObj.contents.layer.name,
+		       (long)obj->contents.path.width, disp_points(obj));
 	break;
     case OCT_LABEL:
 	(void) octGenFirstContainer(obj, OCT_LAYER_MASK, &layerObj);
-	(void) sprintf(END(final), "OCT_LABEL_%s[%s; %d,%d `%s']", octFormatId(obj->objectId),
-		layerObj.contents.layer.name,
-		obj->contents.label.region.lowerLeft.x,
-		obj->contents.label.region.lowerLeft.y,
-		obj->contents.label.label);
+	(void) sprintf(END(final), "OCT_LABEL_%s[%s; %ld,%ld `%s']",
+		       octFormatId(obj->objectId),
+		       layerObj.contents.layer.name,
+		       (long)obj->contents.label.region.lowerLeft.x,
+		       (long)obj->contents.label.region.lowerLeft.y,
+		       obj->contents.label.label);
 	break;
     case OCT_PROP:
 	(void) sprintf(END(final), "%s", disp_prop(obj));
@@ -963,16 +971,19 @@ octObject *obj;
 		obj->contents.layer.name);
 	break;
     case OCT_POINT:
-	(void) sprintf(END(final), "OCT_POINT_%s[%d,%d]", octFormatId(obj->objectId),
-		obj->contents.point.x,
-		obj->contents.point.y);
+	(void) sprintf(END(final), "OCT_POINT_%s[%ld,%ld]",
+		       octFormatId(obj->objectId),
+		       (long)obj->contents.point.x,
+		       (long)obj->contents.point.y);
 	break;
     case OCT_EDGE:
-	(void) sprintf(END(final), "OCT_EDGE_%s[%d,%d to %d,%d]", octFormatId(obj->objectId),
-		obj->contents.edge.start.x,
-		obj->contents.edge.start.y,
-		obj->contents.edge.end.x,
-		obj->contents.edge.end.y);
+	(void) sprintf(END(final),
+		       "OCT_EDGE_%s[%ld,%ld to %ld,%ld]",
+		       octFormatId(obj->objectId),
+		       (long)obj->contents.edge.start.x,
+		       (long)obj->contents.edge.start.y,
+		       (long)obj->contents.edge.end.x,
+		       (long)obj->contents.edge.end.y);
 	break;
     case OCT_CHANGE_LIST:
 	(void) sprintf(END(final), "OCT_CHANGE_LIST_%s[%s, %s]",
@@ -1031,7 +1042,7 @@ static st_table *read_table()
 	    st_free_table(result);
 	}
 	result = st_init_table(strcmp, st_strhash);
-	while (buf = get_line()) {
+	while ( (buf = get_line()) ) {
 	    (void) st_insert(result, buf, (char *) 0);
 	}
 	return result;
