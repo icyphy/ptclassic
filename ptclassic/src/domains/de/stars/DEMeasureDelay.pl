@@ -45,6 +45,9 @@ defstar {
 	protected {
 		PriorityQueue firstArrivalQ;
 	}
+	constructor {
+		input.inheritTypeFrom(output);
+	}
 	start {
 		firstArrivalQ.initialize();
 	}
