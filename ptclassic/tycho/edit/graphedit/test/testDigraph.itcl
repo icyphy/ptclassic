@@ -34,42 +34,160 @@ if {[string compare test [info procs test]] == 1} then {
     source [file join $TYCHO kernel test testDefs.tcl]
 } {}
 
-# Create the graph used for testing
+# Create the first, fairly simple, graph used for testing. 
 catch {delete object digraph}
-set digraph [::tycho::Digraph [::tycho::autoName digraph]]
+::tycho::Digraph digraph
 digraph configureEntityType vertex -label ""
 digraph configureLinkType edge -weight 0
 digraph read string {
     vertex a -label "First vertex"
     vertex b -label "Second vertex"
     vertex c
+    vertex aa
     edge a b
     edge b c
     edge a c -weight 3
 }
 
-test Digraph-1.1 {Get vertices} {
-    digraph vertices
-} {a b c}
+# set VERBOSE 1
 
-test Digraph-1.2 {Get edges} {
-    digraph vertices
+# Test set 1: Accessing vertices and edges
+test Digraph-1.1 {Get vertices} {
+    lsort [digraph vertices]
+} {a aa b c}
+
+test Digraph-1.2 {Get vertices by pattern} {
+    lsort [digraph vertices {a*}]
+} {a aa}
+
+test Digraph-1.3 {Get edges} {
+    digraph edges
 } {a b a c b c}
 
-test Digraph-1.3 {Delete single vertex, test return value} {
+test Digraph-1.4 {Get edges by pattern: source} {
+    digraph edges a
+} {a b a c}
+
+test Digraph-1.5 {Get edges by pattern: target} {
+    digraph edges * c
+} {a c b c}
+
+test Digraph-1.6 {Get number of vertices} {
+    digraph numberofvertices
+} {4}
+
+test Digraph-1.7 {Get number of edges} {
+    digraph numberofedges
+} {3}
+
+# Test set 2: Adding and deleting vertices and edges
+test Digraph-2.1 {Delete single vertex, test return value} {
     digraph vertexdelete a
 } {vertex a -description {} -label {First vertex}}
 
-test Digraph-1.4 {Add a single vertex, test return value} {
+test Digraph-2.1a {Make sure edges not touched} {
+    digraph edges
+} {a b a c b c}
+
+test Digraph-2.2 {Add a single vertex, test return value} {
     digraph vertex a -label {First vertex}
 } {vertexdelete a}
 
-test Digraph-1.5 {Test default attribute of vertex} {
-    digraph vertexcget a -label
+test Digraph-2.2a {Make sure vertex list is still OK} {
+    lsort [digraph vertices]
+} {a aa b c}
+
+# Test set 3: Configuring attributes
+test Digraph-3.1 {Test default attribute of vertex} {
+    digraph vertexcget c -label
 } {}
 
-test Digraph-1.6 {Test configuring attribute of vertex} {
+test Digraph-3.2 {Test configuring attribute of vertex} {
     digraph vertexconfigure a -label {This label}
     digraph vertexcget a -label
 } {This label}
 
+# Create another, more complex graph, for testing algorithms
+#   d----+
+#        v
+#   a--->b<==>c
+#   |         ^
+#   +---------+
+catch {delete object digraph}
+::tycho::Digraph digraph
+digraph configureEntityType vertex -label ""
+digraph configureLinkType edge -weight 0
+digraph read string {
+         vertex a
+         vertex b
+         vertex c
+         vertex d
+         edge a b
+         edge b c
+         edge a c
+         edge c b
+         edge d b
+}
+
+# Test set 4: More access methods
+test Digraph-4.1 {Roots} {
+    lsort [digraph roots]
+} {a d}
+
+test Digraph-4.2 {Leaves} {
+    digraph leaves
+} {}
+
+test Digraph-4.3 {Parents} {
+    lsort [digraph parents b]
+} {a c d}
+
+test Digraph-4.4 {Children} {
+    lsort [digraph children a]
+} {b c}
+
+test Digraph-4.5 {Edges in subgraph} {
+    digraph subgraphEdges a b d
+} {{a b} {d b}}
+
+test Digraph-4.6 {Subgraph inputs} {
+    digraph subgraphInputs a c
+} {{b c}}
+
+test Digraph-4.7 {Subgraph outputs} {
+    digraph subgraphOutputs a b
+} {{a c} {b c}}
+
+
+# Test set 5: Algorithms
+test Digraph-5.1 {Depth sort} {
+    digraph depthSort
+} {0 {a d} 1 b 2 c}
+
+test Digraph-5.2 {Topological sort} {
+    digraph topologicalSort
+} {a d b c}
+
+test Digraph-5.3 {Cyclic} {
+    digraph acyclic
+} {0}
+
+test Digraph-5.4 {Acyclic} {
+    digraph edgedelete b c
+    digraph acyclic
+} {1}
+
+# Test set 6: Checking and repairing
+test Digraph-6.1 {Verify} {
+    digraph verify
+} {1}
+
+test Digraph-6.2 {Add stray vertex and verify} {
+    digraph edge d q
+    digraph verify
+} {0}
+
+test Digraph-6.3 {Repair} {
+    digraph repair
+    digraph edges
+} {a b a c c b d b}
