@@ -72,11 +72,6 @@ char* name;
 		ViDone();
 	}
 
-	if(! KcSetKBDomain(DEFAULT_DOMAIN)) {
-		PrintErr("Failed to set default domain.");
-		ViDone();
-	}
-
         /* Create a Tk window to handle the editing and
            then do the run command */
         ptkOctObj2Handle(&facet,facetHandle);
@@ -147,10 +142,6 @@ long userOptionWord;
         ViDone();
     }
 
-    if(! KcSetKBDomain(DEFAULT_DOMAIN)) {
-        PrintErr("Failed to set default domain.");
-        ViDone();
-    }
     ptkRun(&facet,FALSE);
     ViDone();
 }
