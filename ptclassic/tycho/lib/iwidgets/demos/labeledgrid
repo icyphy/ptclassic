@@ -7,10 +7,10 @@
 	exec itkwish -f "$0" ${1+"$@"}
 
 catch {delete class iwidgets::Query}
-source query.itk.saved
+source ../generic/query.itk
 
 catch {delete class iwidgets::Widgettree}
-source ../Widgettree/widgettree.itk
+source ../generic/widgettree.itk
 
 
 catch {delete object .f}
@@ -20,8 +20,6 @@ iwidgets::scrolledframe .f \
 
 set w [.f childsite].w
 iwidgets::widgettree $w -createcommand "createQuery $w" \
-        -openedbitmap @../Widgettree/arrowopen.xbm \
-        -closedbitmap @../Widgettree/arrowclose.xbm \
 	-font "-Adobe-Helvetica-Medium-R-Normal--*-120-*-*-*-*-*-*"
 $w options query {
 	rename -labelfont -font font Font

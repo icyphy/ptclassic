@@ -6,7 +6,8 @@
 #\
 	exec itkwish -f "$0" ${1+"$@"}
 
-source widgettree.itk
+catch {delete class iwidgets::Widgettree}
+source ../generic/widgettree.itk
 
 # The first widget is a simple expanding widget that doesn't
 # do anything other than demonstrate how the Widgettree
