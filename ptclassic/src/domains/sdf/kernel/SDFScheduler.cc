@@ -17,7 +17,9 @@ $Id$
                        All Rights Reserved.
 
  Programmer:  E. A. Lee and D. G. Messerschmitt
+ Revision by Shuvra.
  Date of creation: 1/17/90
+ Date of revision: 5/7/91
  Revisions: 5/29/90 -- renamed to SDFScheduler.cc from Scheduler.cc
 		Other schedulers will go in separate files.
 
@@ -112,17 +114,13 @@ int SDFScheduler :: setup (Block& block) {
 	Galaxy& galaxy = block.asGalaxy();
 	numItersSoFar = 0;
 	numIters = 1;			// reset the member "numIters"
-	invalid = FALSE;
 	haltRequestFlag = FALSE;
+	invalid = FALSE;
 
-// check connectivity
-	if (warnIfNotConnected (galaxy)) {
-		invalid = TRUE;
-		return FALSE;
-	}
-
-	// initialize galaxy and all contents.
-	galaxy.initialize();
+        checkConnectivity(galaxy);
+        if (invalid) return FALSE;
+       
+        prepareGalaxy(galaxy); 
 
 	// set schedulePeriod if user gives it.
 	FloatState* st = (FloatState*) galaxy.stateWithName("schedulePeriod");
@@ -134,82 +132,129 @@ int SDFScheduler :: setup (Block& block) {
 		return FALSE;
 	}
 
-	GalStarIter nextStar(galaxy);
-	Star* s;
 
 	// force recomputation of repetitions and noTimes.  Also make
 	// sure all stars are SDF.
-
-	while ((s = nextStar++) != 0) {
-		if (!isDomainSupported(s->domain())) {
-			Error::abortRun(*s, " is not an SDF star");
-			invalid = TRUE;
-			return FALSE;
-		}
-		s->prepareForScheduling();
-	}
-
-	// This computes the number of times each component star must be
-	// run in one cycle of a periodic schedule.
-
-	repetitions(galaxy);
-	
+        
+        checkStars(galaxy);	
 	if (invalid) return FALSE;
+  
+        prepareStars(galaxy);
+	if (invalid) return FALSE;
+       
+	repetitions(galaxy);
+	if (invalid) return FALSE;
+
+        // Schedule the graph.
+
+        computeSchedule(galaxy);
+	return !invalid;
+}
+
+
+int SDFScheduler::prepareGalaxy(Galaxy& galaxy)
+{
+  galaxy.initialize();
+  return TRUE;
+}
+
+
+
+int SDFScheduler::checkConnectivity(Galaxy& galaxy)
+{
+  if (warnIfNotConnected (galaxy)) {
+                invalid = TRUE;
+                return FALSE;
+  }
+ return TRUE; 
+}
+
+// Check that all stars in "galaxy" are SDF stars.
+int SDFScheduler::checkStars(Galaxy& galaxy)
+{
+  GalStarIter nextStar(galaxy);
+  Star* s;
+  while ((s = nextStar++) != 0) {
+    if (!isDomainSupported(s->domain())) {
+        Error::abortRun(*s, " is not an SDF star");
+        invalid = TRUE;
+        return FALSE;
+    }
+  }
+  return TRUE;
+}
+
+
+
+int SDFScheduler::prepareStars(Galaxy& galaxy)
+{
+  GalStarIter nextStar(galaxy);
+  Star* s;
+  while ((s = nextStar++) != 0) 
+    s->prepareForScheduling();
+  return TRUE;
+}
+
+
+int SDFScheduler::computeSchedule(Galaxy& galaxy)
+{
+   GalStarIter nextStar(galaxy);
+   Star* s;
 
 	mySchedule.initialize();
 
-	// MAIN LOOP
-	// After a scheduler pass, the passValue tells us whether the
-	// scheduler is finished.  After the pass, the meaning of the
-	// possible values is:
-	// 	2 - scheduler is finished
-	// 	1 - scheduler is deadlocked
-	// 	0 - more passes are required
+        // MAIN LOOP
+        // After a scheduler pass, the passValue tells us whether the
+        // scheduler is finished.  After the pass, the meaning of the
+        // possible values is:
+        //      2 - scheduler is finished
+        //      1 - scheduler is deadlocked
+        //      0 - more passes are required
 
-	do {
-		passValue = 2;
-		numDeferredBlocks = 0;
 
-		nextStar.reset();
-		while ((s = nextStar++) != 0) {
-			SDFStar& atom = *(SDFStar*)s;
-			int runResult;
+  do {
+                passValue = 2;
+                numDeferredBlocks = 0;
 
-			do {
-				runResult = addIfWeCan(atom,deferredFiring);
-			} while (repeatedFiring && (runResult == 0));
-		}
-		
-		// If the deferred firing option is set, we must now schedule
-		// the deferred blocks
+                nextStar.reset();
+                while ((s = nextStar++) != 0) {
+                        SDFStar& atom = *(SDFStar*)s;
+                        int runResult;
 
-		for (int i=0; i<numDeferredBlocks; i++) {
-			SDFStar& atom = (SDFStar&)deferredBlocks[i]->asStar();
-			addIfWeCan (atom);
-		}
-		
-	} while (passValue == 0);
-	// END OF MAIN LOOP
-	
-	if (passValue == 1) reportDeadlock(nextStar);
-	return !invalid;
+                        do {
+                                runResult = addIfWeCan(atom,deferredFiring);
+                        } while (repeatedFiring && (runResult == 0));
+                }
+
+                // If the deferred firing option is set, we must now schedule
+                // the deferred blocks
+
+                for (int i=0; i<numDeferredBlocks; i++) {
+                        SDFStar& atom = (SDFStar&)deferredBlocks[i]->asStar();
+                        addIfWeCan (atom);
+                }
+
+  } while (passValue == 0);
+  // END OF MAIN LOOP
+
+  if (passValue == 1) reportDeadlock(nextStar);
+  return !invalid;
 }
 
 // function to report deadlock.
 void SDFScheduler::reportDeadlock (GalStarIter& next) {
-	if (Error::canMark()) {
-		next.reset();
-		SDFStar *s;
-		while ((s = (SDFStar*)next++) != 0)
-			if (notRunnable(*s) == 1) Error::mark(*s);
-		Error::abortRun ("DEADLOCK: the indicated stars cannot be run");
-	}
-	else
-		Error::abortRun (*dead,
-				 ": DEADLOCK in a loop containing this block");
-	invalid = TRUE;
+        if (Error::canMark()) {
+                next.reset();
+                SDFStar *s;
+                while ((s = (SDFStar*)next++) != 0)
+                        if (notRunnable(*s) == 1) Error::mark(*s);
+                Error::abortRun ("DEADLOCK: the indicated stars cannot be run");
+        }
+        else
+                Error::abortRun (*dead,
+                                 ": DEADLOCK in a loop containing this block");
+        invalid = TRUE;
 }
-
 
 // This routine simulates running the star, adding it to the
 // schedule where it can be run
@@ -232,10 +277,10 @@ int SDFScheduler::addIfWeCan (SDFStar& star, int defer = FALSE) {
 // use the SDF scheduler.  They have to redefine this method.
 
 int SDFScheduler::isDomainSupported(const char* dom) {
-	if(strcmp (dom, SDFdomainName) == 0)
-		return TRUE;
-	else
-		return FALSE;
+        if(strcmp (dom, SDFdomainName) == 0)
+                return TRUE;
+        else
+                return FALSE;
 }
 
 /*******************************************************************
@@ -373,13 +418,13 @@ int SDFScheduler :: reptArc (PortHole& nearPort, PortHole& farPort){
 	else {
 		// farStarRepetitions has been set, so test for equality
 		if (!(farStarRepetitions == farStarShouldBe)) {
-			StringList msg = "Sample rate inconsistency between ";
+			StringList msg = "Sample rate problem between ";
 			msg += nearStar.readFullName();
 			msg += " and ";
 			msg += farStar.readFullName();
-			Error::mark(nearStar);
-			Error::mark(farStar);
-			Error::abortRun(msg);
+                        Error::mark(nearStar);
+                        Error::mark(farStar);
+                        Error::abortRun(msg);
 			invalid = TRUE;
 		}
 		return FALSE;
@@ -574,3 +619,4 @@ int SDFScheduler :: notRunnable (SDFStar& atom) {
 }
 
 const char* SDFScheduler::domain() const { return SDFdomainName;}
+
