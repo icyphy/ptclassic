@@ -65,7 +65,7 @@ public:
 	Link * appendGet( CqLevelLink * obj ); 
 
 	// return and remove head of list
-	Pointer getHeadAndRemove(); 
+	void freeHeadAndRemove(); 
 
 	// Clear list
 	LinkedList::initialize;
