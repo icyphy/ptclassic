@@ -124,10 +124,21 @@ void Wormhole :: buildEventHorizons () {
 	return;
 }
 
-Wormhole::~Wormhole () {
-// to be done: destroy event horizons if dynamicHorizons is TRUE.
+// free the contents of the wormhole.  This isn't the destructor because
+// we need to get the ordering right; instead, this function is called
+// from the XXXWormhole destructor for each XXXWormhole.
+void Wormhole::freeContents () {
+	if (!dynamicHorizons) return;
+	BlockPortIter nextp(selfStar);
+	EventHorizon* p;
+	while ((p = (EventHorizon*)nextp++) != 0) {
+		LOG_DEL; delete p->ghostPort;
+		LOG_DEL; delete p;
+	}
+	// delete the inner galaxy.
+	LOG_DEL; delete &gal;
 }
-	
+
 // method for printing info on a wormhole
 StringList Wormhole :: print (int recursive) const {
 	StringList out;
