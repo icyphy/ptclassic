@@ -12,7 +12,8 @@ the Tcl interpreter.  Note that Tk and Itcl are understood by
 this interpreter, as are, of course, all Tycho commands.
 If you are running a version of Tycho with Ptolemy attached,
 the ptcl commands are also understood.
-By default, commands are executed at the global scope (<CODE>namespace "::"</CODE>),
+By default, commands are executed at the global scope namespace
+(<CODE>::</CODE>),
 but this can be changed by invoking the <CODE>Set namespace</CODE>
 command in the <CODE>Special</CODE> menu.
 A shell windows is derived from the <a href="EditHelp.html">Edit window</a>,
@@ -52,11 +53,11 @@ line, but rather deletes to the end of the command.
 <p>
 <h2><a name="shell window, special features">Special Features</a></h2>
 <p>
-The Shell window has a number of features designed to make
-it easier to experiment with Tcl scripts.  Foremost among
-these is the <a name=history>history</a>
-mechanism, which keeps a record of previously
-executed commands.  A "Special" menu provides two commands related to this:
+The Shell window has a number of features designed to make it easier
+to experiment with Tcl scripts.  Foremost among these is the <a
+name=history>history</a> mechanism, which keeps a record of previously
+executed commands.  A <CODE>Special</CODE> menu provides two commands
+related to this:
 <p>
 <dl>
 <dt><CODE>Edit history</CODE><dd>
@@ -68,7 +69,8 @@ can be edited and evaluated.
 Reset the history buffer.
 </dl>
 <p>
-Note that the Save-As command, unlike the Edit history command,
+Note that the <CODE>Save As</CODE> command, unlike the 
+<CODE>Edit History</CODE>command,
 saves a snapshot of the previously executed command together with
 the returned values and prompts.
 Thus, it provides a mechanism for documenting an interaction
