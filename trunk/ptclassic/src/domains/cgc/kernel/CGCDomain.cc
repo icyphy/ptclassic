@@ -39,7 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownTarget.h"
 #include "CGCPortHole.h"
 #include "CGCForkNode.h"
-#include "CGWormhole.h"
+#include "CGCWormhole.h"
 
 // for error messages (temporary, until wormholes exist):
 #include "Error.h"
@@ -52,12 +52,12 @@ public:
 
 	// new fromUniversal EventHorizon
 	EventHorizon& newFrom() {
-		LOG_NEW; return *(new CGfromUniversal);
+		LOG_NEW; return *(new CGCfromUniversal);
 	}
 
 	// new toUniversal EventHorizon
 	EventHorizon& newTo() {
-		LOG_NEW; return *(new CGtoUniversal);
+		LOG_NEW; return *(new CGCtoUniversal);
 	}
 
 	// new node (geodesic)
