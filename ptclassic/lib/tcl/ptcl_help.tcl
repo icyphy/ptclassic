@@ -146,7 +146,8 @@ the linked-in code can be redefined.  See "multilink" for an alternative.
 
 add_to_help print {?<block-or-classname>?} {
 Print out a description of the named block, if an argument is given,
-or of the current galaxy, if no argument is given.
+or of the current galaxy, if no argument is given.  The special argument
+"target" will print the target description.
 }
 
 add_to_help reset {} {
@@ -244,6 +245,22 @@ add_to_help renameuniv {?<oldname>? <newname>} {
 With one argument, rename the current universe to <newname>.  With two
 arguments, rename the universe named <oldname> to <newname>.  Any existing
 universe named <newname> is deleted.
+}
+
+add_to_help schedtime {[actual]} {
+Returns the current time from the schedule of the current top-level
+universe.  If the target has a state named "schedulePeriod", the value
+returned by calling "now" on the scheduler is divided by the
+schedulePeriod value, unless the "actual" argument is given, in which case
+the division is omitted.  This is done to cause the time to match the
+number of iterations specified for the SDF, DDF, and BDF domains.
+}
+
+add_to_help listobjs {[states|ports|multiports] ?<block-or-classname>} {
+Return a list of either the states, ports, or multiports in the named
+block or class.  If the last argument is omitted, the current galaxy is
+used.  The special name "target" may be used to list the states in the
+target.
 }
 
 proc help {args} {
