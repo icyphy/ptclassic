@@ -135,14 +135,18 @@ if {$tychostartfile != {} && \
 }
 unset tychostartfile
 
-foreach file $argv {
-    if {$file == {-nowelcome}} {
-	set tychoWelcomeWindow 0
-    } elseif {$file == {-noconsole}} {
-	set tychoConsoleWindow 0
-    } else {
-	set tychoOpenFiles 1
-	File::openContext $file
+# Check this in case we are being sourced within a interpreter where
+# argv has been unset.
+if {[info exists argv]} {
+    foreach file $argv {
+	if {$file == {-nowelcome}} {
+	    set tychoWelcomeWindow 0
+	} elseif {$file == {-noconsole}} {
+	    set tychoConsoleWindow 0
+	} else {
+	    set tychoOpenFiles 1
+	    File::openContext $file
+	}
     }
 }
 
