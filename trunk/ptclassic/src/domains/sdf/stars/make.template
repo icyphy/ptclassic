@@ -97,6 +97,7 @@ SRCS= \
  SDFIIDGaussian.pl \
  SDFIIDUniform.pl \
  SDFIIR.pl \
+ SDFImageToPix.pl \
  SDFIntRamp.pl \
  SDFIntTable.pl \
  SDFIntToBits.pl \
@@ -113,6 +114,7 @@ SRCS= \
  SDFMux.pl \
  SDFNewQuant.pl \
  SDFNumToBus.pl \
+ SDFPixToImage.pl \
  SDFPlay.pl \
  SDFPolarRect.pl \
  SDFPrinter.pl \
