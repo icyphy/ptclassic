@@ -130,6 +130,12 @@ void InDEPort :: triggers (GenericPort& op)
 	if (triggerList) triggerList->put(&op);
 }
 
+// destructor
+InDEPort :: ~InDEPort () {
+	LOG_DEL; delete inQue;
+	LOG_DEL; delete triggerList;
+}
+
 Particle& OutDEPort :: put(float stamp)
 {
 // if there is a new Particle, send it
@@ -179,6 +185,11 @@ void OutDEPort :: sendData ()
 	dataNew = FALSE;
    }
 }	
+
+MultiInDEPort :: ~MultiInDEPort ()
+{
+	LOG_DEL; delete triggerList;
+}
 
 void MultiInDEPort :: triggers (GenericPort& op)
 {
