@@ -7,10 +7,10 @@
 	copyright	{ 1991 The Regents of the University of California }
 	location	{ SDF image library }
 	desc {
-Read three packets that describe a color image in RGB format, and output
-three packets that describe an image in YUV format. No downsampling
-is done on the U and V signals.
-The inputs and outputs are packets of type GrayImage.
+Read three GrayImages that describe a color image in RGB format and
+output three GrayImages that describe an image in YUV format.
+No downsampling is done on the U and V signals.
+The inputs and outputs are all GrayImages.
 	}
 	explanation {
 .Id "format conversion, RGB to YUV"
@@ -22,30 +22,12 @@ The inputs and outputs are packets of type GrayImage.
 	ccinclude { "GrayImage.h", "Error.h" }
 
 //////// OUTPUTS AND STATES.
-	input {
-		name { input1 }
-		type { packet }
-	}
-	input {
-		name { input2 }
-		type { packet }
-	}
-	input {
-		name { input3 }
-		type { packet }
-	}
-	output {
-		name { output1 }
-		type { packet }
-	}
-	output {
-		name { output2 }
-		type { packet }
-	}
-	output {
-		name { output3 }
-		type { packet }
-	}
+	input { name { input1 } type { message } }
+	input { name { input2 } type { message } }
+	input { name { input3 } type { message } }
+	output { name { output1 } type { message } }
+	output { name { output2 } type { message } }
+	output { name { output3 } type { message } }
 
 	inline method {
 		name { quant }
@@ -61,23 +43,24 @@ The inputs and outputs are packets of type GrayImage.
 
 	go {
 // Read inputs.
-		Packet pkt1, pkt2, pkt3;
-		(input1%0).getPacket(pkt1);
-		(input2%0).getPacket(pkt2);
-		(input3%0).getPacket(pkt3);
-		TYPE_CHECK(pkt1, "GrayImage");
-		TYPE_CHECK(pkt2, "GrayImage");
-		TYPE_CHECK(pkt3, "GrayImage");
+		Envelope envp1, envp2, envp3;
+		(input1%0).getMessage(envp1);
+		(input2%0).getMessage(envp2);
+		(input3%0).getMessage(envp3);
+		TYPE_CHECK(envp1, "GrayImage");
+		TYPE_CHECK(envp2, "GrayImage");
+		TYPE_CHECK(envp3, "GrayImage");
 
 // Change into YUV format
-		GrayImage* redI = (GrayImage*) pkt1.writableCopy();
-		GrayImage* greenI = (GrayImage*) pkt2.writableCopy();
-		GrayImage* blueI = (GrayImage*) pkt3.writableCopy();
+		GrayImage* redI = (GrayImage*) envp1.writableCopy();
+		GrayImage* greenI = (GrayImage*) envp2.writableCopy();
+		GrayImage* blueI = (GrayImage*) envp3.writableCopy();
 
 		if (redI->fragmented() || redI->processed() ||
 				greenI->fragmented() || greenI->processed() ||
 				blueI->fragmented() || blueI->processed()) {
-			delete redI; delete greenI; delete blueI;
+			LOG_DEL; delete redI; LOG_DEL; delete greenI;
+			LOG_DEL; delete blueI;
 			Error::abortRun(*this,
 					"Can't handle fragmented or processed inputs.");
 			return;
@@ -88,7 +71,8 @@ The inputs and outputs are packets of type GrayImage.
 				(greenI->retHeight() != height) ||
 				(blueI->retWidth() != width) ||
 				(blueI->retHeight() != height)) {
-			delete redI; delete greenI; delete blueI;
+			LOG_DEL; delete redI; LOG_DEL; delete greenI;
+			LOG_DEL; delete blueI;
 			Error::abortRun(*this,
 					"Input image sizes don't match.");
 			return;
@@ -119,11 +103,11 @@ The inputs and outputs are packets of type GrayImage.
 		}	}
 
 // Write whole frame to output here...
-		Packet pkty(*redI);
-		Packet pktu(*greenI);
-		Packet pktv(*blueI);
-		output1%0 << pkty;
-		output2%0 << pktu;
-		output3%0 << pktv;
+		Envelope envpy(*redI);
+		Envelope envpu(*greenI);
+		Envelope envpv(*blueI);
+		output1%0 << envpy;
+		output2%0 << envpu;
+		output3%0 << envpv;
 	} // end go{}
 } // end defstar{ Rgb2Yuv }

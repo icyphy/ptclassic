@@ -12,7 +12,7 @@ individual pixels.
 	ccinclude { "GrayImage.h" }
 	input {
 		name { input }
-		type { packet }
+		type { message }
 	}
 	output {
 		name { output }
@@ -38,10 +38,10 @@ individual pixels.
 		output.setSDFParams(np, np-1);
 	}
 	go {
-		Packet pkt;
-		(input%0).getPacket(pkt);
-		TYPE_CHECK(pkt, "GrayImage");
-		const GrayImage* imD = (const GrayImage*) pkt.myData();
+		Envelope envp;
+		(input%0).getMessage(envp);
+		TYPE_CHECK(envp, "GrayImage");
+		const GrayImage* imD = (const GrayImage*) envp.myData();
 		if (imD->retWidth() != int(width) ||
 			imD->retHeight() != int(height)) {
 			Error::abortRun(*this, "Got image with wrong size");
