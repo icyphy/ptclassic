@@ -56,7 +56,9 @@ C_INCL= -I../include $(PTCOMPAT_INCSPEC)
 
 MISC_FILES =	oct2tim.1
 
-all::	 makefile oct2tim
+BINARY =	oct2tim$(BINARY_EXT)
+
+all::	 makefile $(BINARY)
 
 LIBS	= -L$(OCTLIBDIR) -llel$(DBGFLAG) -lda$(DBGFLAG) -ltap$(DBGFLAG) \
 	-loh$(DBGFLAG) -lvov$(DBGFLAG) -loptions$(DBGFLAG) \
@@ -64,8 +66,8 @@ LIBS	= -L$(OCTLIBDIR) -llel$(DBGFLAG) -lda$(DBGFLAG) -ltap$(DBGFLAG) \
 	-lutility$(DBGFLAG) -lerrtrap$(DBGFLAG) \
 	-luprintf$(DBGFLAG) -lport$(DBGFLAG) 
 
-oct2tim:	$(OBJS)
-	$(CLINKER) $(LINKFLAGS) $(OBJS) -o $@ $(LIBS) $(CSYSLIBS) 
+$(BINARY): $(OBJS)
+	$(CLINKER) $(LINKFLAGS) $(OBJS)	-o $@ $(LIBS) $(CSYSLIBS) 
 
 oct2tim.debug:	$(OBJS)
 	$(CLINKER) $(LINKFLAGS_D) $(OBJS) -o $@ $(LIBS) $(CSYSLIBS) 
@@ -82,18 +84,21 @@ test: $(TESTBINARY)
 testicon: $(TESTBINARY)
 	$(TESTBINARY) -f interface $(PTOLEMY)/src/domains/sdf/icons/sources.pal:schematic > /tmp/i.tim
 
-DEST = $(ROOT)/octtools/bin.$(PTARCH)/oct2tim
+$(BINARY): $(OBJS)
+	$(CLINKER) $(LINKFLAGS) $(OBJS) \
+		-o $@ \
+		$(LIBS) $(CSYSLIBS) 
 
-$(DEST):	oct2tim
-		@echo Installing oct2tim
-		rm -f $(DEST)
-		ln oct2tim$(BINARY_EXT) $(DEST)
+DEST = $(OCTTOOLS)/bin.$(PTARCH)/$(BINARY)
 
-install: makefile $(DEST) $(BINDIR)/oct2tim
+$(DEST): $(BINARY)
+		@echo Installing $(BINARY)
+		rm -f $(DEST);  ln $^ $@
 
-$(BINDIR)/oct2tim:
-	(cd $(BINDIR); rm -f oct2tim; ln -s ../octtools/bin.$(PTARCH)/oct2tim .)
+install: makefile $(DEST) $(BINDIR)/$(BINARY)
 
+$(BINDIR)/$(BINARY):
+	(cd $(BINDIR); rm -f $(BINARY); ln -s ../octtools/bin.$(PTARCH)/$(BINARY) .)
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	

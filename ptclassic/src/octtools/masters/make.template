@@ -53,7 +53,7 @@ C_INCL= -I../include $(PTCOMPAT_INCSPEC)
 
 MISC_FILES =	README doc
 
-BINARY =	masters(BINARY_EXT)
+BINARY =	masters$(BINARY_EXT)
 
 all::	 makefile $(BINARY)
 

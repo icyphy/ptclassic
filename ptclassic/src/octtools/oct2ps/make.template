@@ -57,7 +57,7 @@ C_INCL= -I../include $(PTCOMPAT_INCSPEC)
 
 MISC_FILES =	oct2ps.1 oct2ps.pro sample sample.ps sample2 sample2.ps
 
-BINARY =	masters(BINARY_EXT)
+BINARY =	oct2ps$(BINARY_EXT)
 
 all::	 makefile $(BINARY)
 
