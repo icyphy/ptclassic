@@ -279,7 +279,7 @@ body ::tycho::TopLevel::constructor {args} {
         if {$before != {}} {
             set tl [winfo toplevel $before]
             if {$tl != {} &&  \
-                    [uplevel #0 info which $tl] != {} && \
+		    [::infoWhichCommand $tl] != {} && \
                     [$tl isa ::tycho::TopLevel] && \
                     $tl != $prefix} {
                 $topLevelWindows insert $prefix $tl
