@@ -104,6 +104,7 @@ public:
 	// It will be set by go() method in each  star definition.
 	double completionTime;
 	double arrivalTime;
+	int isRCStar;
 
 	// Pointer to the event queue of the universe or warmhole
 	// in which the DEstar is. It is set by the Scheduler :
