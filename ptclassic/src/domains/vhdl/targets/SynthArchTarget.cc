@@ -47,9 +47,11 @@ SynthArchTarget :: SynthArchTarget(const char* name,const char* starclass,
 			 const char* desc) :
 ArchTarget(name,starclass,desc) {
   addState(elaborate.setState("elaborate",this,"YES",
-			    "switch for elaborating design into structure."));
+			    "Switch for elaborating design into structure."));
   addState(compile.setState("compile",this,"YES",
-			    "switch for compiling structure into gates."));
+			    "Switch for compiling structure into gates."));
+  addState(precision.setState("precision",this,"INTEGER RANGE 0 to 15",
+			      "Specifies precision for synthesis."));
 }
 
 // Clone the Target.
@@ -61,25 +63,129 @@ static SynthArchTarget proto("SynthArch-VHDL", "VHDLStar",
 			 "VHDL code generation target for Synopsys");
 static KnownTarget entry(proto,"SynthArch-VHDL");
 
+
+void SynthArchTarget :: setup() {
+    precision.initialize();
+    StringList precisionString;
+    precisionString = precision.currentValue();
+    precSpec = savestring(precisionString);
+
+    ArchTarget::setup();
+}
+
 // Write the code to a file.
 void SynthArchTarget :: writeCode() {
     //  writeFile(myCode,".vhdl",displayFlag);
     ArchTarget::writeCode();
 
-  // FIXME: Need to do this inside before code is generated instead.
-  // Change all integers to 4-bit types to simplify synthesis.
+  // HACK: Change all REALs to INTEGERs.
   StringList command = "";
   command << "cd " << (const char*) destDirectory;
   command << " ; ";
   command << "rm -f " << "temp" << filePrefix << ".vhdl";
   command << " ; ";
-  command << "sed s/\" INTEGER\"/\" INTEGER range 0 to 15\"/g ";
+  // REAL; -> INTEGER;
+  command << "sed s/\" REAL;\"/\" INTEGER;\"/g ";
   command << filePrefix << ".vhdl" << " > " << "temp" << filePrefix << ".vhdl";
   command << " ; ";
   command << "mv -f " << "temp" << filePrefix << ".vhdl" << " "
 	  << filePrefix << ".vhdl";
   command << " ; ";
-  command << "sed s/\" integer\"/\" INTEGER range 0 to 15\"/g ";
+  // real; -> INTEGER;
+  command << "sed s/\" real;\"/\" INTEGER;\"/g ";
+  command << filePrefix << ".vhdl" << " > " << "temp" << filePrefix << ".vhdl";
+  command << " ; ";
+  command << "mv -f " << "temp" << filePrefix << ".vhdl" << " "
+	  << filePrefix << ".vhdl";
+  command << " ; ";
+  // IN REAL -> IN INTEGER
+  command << "sed s/\"IN REAL\"/\"IN INTEGER\"/g ";
+  command << filePrefix << ".vhdl" << " > " << "temp" << filePrefix << ".vhdl";
+  command << " ; ";
+  command << "mv -f " << "temp" << filePrefix << ".vhdl" << " "
+	  << filePrefix << ".vhdl";
+  command << " ; ";
+  // OUT REAL -> OUT INTEGER
+  command << "sed s/\"OUT REAL\"/\"OUT INTEGER\"/g ";
+  command << filePrefix << ".vhdl" << " > " << "temp" << filePrefix << ".vhdl";
+  command << " ; ";
+  command << "mv -f " << "temp" << filePrefix << ".vhdl" << " "
+	  << filePrefix << ".vhdl";
+  command << " ; ";
+  // in REAL -> IN INTEGER
+  command << "sed s/\"in REAL\"/\"IN INTEGER\"/g ";
+  command << filePrefix << ".vhdl" << " > " << "temp" << filePrefix << ".vhdl";
+  command << " ; ";
+  command << "mv -f " << "temp" << filePrefix << ".vhdl" << " "
+	  << filePrefix << ".vhdl";
+  command << " ; ";
+  // out REAL -> OUT INTEGER
+  command << "sed s/\"out REAL\"/\"OUT INTEGER\"/g ";
+  command << filePrefix << ".vhdl" << " > " << "temp" << filePrefix << ".vhdl";
+  command << " ; ";
+  command << "mv -f " << "temp" << filePrefix << ".vhdl" << " "
+	  << filePrefix << ".vhdl";
+  command << " ; ";
+  // : REAL -> : INTEGER
+  command << "sed s/\": REAL\"/\": INTEGER\"/g ";
+  command << filePrefix << ".vhdl" << " > " << "temp" << filePrefix << ".vhdl";
+  command << " ; ";
+  command << "mv -f " << "temp" << filePrefix << ".vhdl" << " "
+	  << filePrefix << ".vhdl";
+  command << " ; ";
+  // .0 -> 0
+  command << "sed s/\"[.]0\"/\"0\"/g ";
+  command << filePrefix << ".vhdl" << " > " << "temp" << filePrefix << ".vhdl";
+  command << " ; ";
+  command << "mv -f " << "temp" << filePrefix << ".vhdl" << " "
+	  << filePrefix << ".vhdl";
+  command << " ; ";
+  // 0. -> 0
+  command << "sed s/\"0[.]\"/\"0\"/g ";
+  command << filePrefix << ".vhdl" << " > " << "temp" << filePrefix << ".vhdl";
+  command << " ; ";
+  command << "mv -f " << "temp" << filePrefix << ".vhdl" << " "
+	  << filePrefix << ".vhdl";
+  command << " ; ";
+  // -0 -> 0
+  command << "sed s/\"-0\"/\"0\"/g ";
+  command << filePrefix << ".vhdl" << " > " << "temp" << filePrefix << ".vhdl";
+  command << " ; ";
+  command << "mv -f " << "temp" << filePrefix << ".vhdl" << " "
+	  << filePrefix << ".vhdl";
+  command << " ; ";
+  // -1 -> 1
+  command << "sed s/\"-1\"/\"1\"/g ";
+  command << filePrefix << ".vhdl" << " > " << "temp" << filePrefix << ".vhdl";
+  command << " ; ";
+  command << "mv -f " << "temp" << filePrefix << ".vhdl" << " "
+	  << filePrefix << ".vhdl";
+  command << " ; ";
+  // float -> INTEGER
+  command << "sed s/\" float;\"/\" INTEGER;\"/g ";
+  command << filePrefix << ".vhdl" << " > " << "temp" << filePrefix << ".vhdl";
+  command << " ; ";
+  command << "mv -f " << "temp" << filePrefix << ".vhdl" << " "
+	  << filePrefix << ".vhdl";
+  system(command);
+
+  // FIXME: Need to do this inside before code is generated instead.
+  // Change all integers to 4-bit types to simplify synthesis.
+  //  StringList command = "";
+  command = "";
+  command << "cd " << (const char*) destDirectory;
+  command << " ; ";
+  command << "rm -f " << "temp" << filePrefix << ".vhdl";
+  command << " ; ";
+  //  command << "sed s/\" INTEGER\"/\" INTEGER range -16 to 15\"/g ";
+  command << "sed s/\" INTEGER\"/\" " << precSpec << "\"/g ";
+  command << filePrefix << ".vhdl" << " > " << "temp" << filePrefix << ".vhdl";
+  command << " ; ";
+  command << "mv -f " << "temp" << filePrefix << ".vhdl" << " "
+	  << filePrefix << ".vhdl";
+  command << " ; ";
+  //  command << "sed s/\" integer\"/\" INTEGER range -16 to 15\"/g ";
+  command << "sed s/\" integer\"/\" " << precSpec << "\"/g ";
   command << filePrefix << ".vhdl" << " > " << "temp" << filePrefix << ".vhdl";
   command << " ; ";
   command << "mv -f " << "temp" << filePrefix << ".vhdl" << " "
