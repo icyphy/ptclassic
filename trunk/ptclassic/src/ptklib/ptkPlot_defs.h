@@ -52,8 +52,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define INCR_ALLOC_PTS 128
 #define LARGE_ENOUGH 10000000
 
+#ifndef MAX
 #define MAX(xx,yy)	((xx) > (yy) ? (xx) : (yy))
+#endif
+#ifndef MIN
 #define MIN(xx,yy)	((xx) < (yy) ? (xx) : (yy))
+#endif
 #define LOG10(xx)	((xx) == 0.0 ? 0.0 : log10(xx) + 1e-15)
 
 #define MAPX(xx)	(plotPtr->llx + ((xx)-plotPtr->xMin)*plotPtr->scalex)
