@@ -80,6 +80,7 @@
 # Java Variables
 # JAVAHOME	The home of the Java Developer's Kit (JDK)
 # JAVAC		The 'javac' compiler.
+# JFCHOME	The home of the Java Foundation Classes (JFC) aka Swing
 # JFLAGS	Flags to pass to javac.
 # JAVADOC	The 'javadoc' program
 # JDOCFLAGS	Flags to pass to javadoc.
