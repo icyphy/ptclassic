@@ -1,4 +1,4 @@
--*-Mode:text-*- -[Thu May 14 15:37:30 1998 by cxh]-
+-*-Mode:text-*- -[Thu Jan  7 09:01:29 1999 by cxh]-
 Version: $Id$
 
 src/gnu/README
@@ -17,11 +17,11 @@ distribution, you will need to have gcc available.
 Note that the tcl/tk source is elsewhere.
 
 This directory contains the following GNU tools
-	egcs-1.0.2
-	make-3.76.1
+	egcs-1.1.1
+	make-3.77
 
 If you obtained the hp GNU tar file, then you should also have:
-        binutils-2.8.1
+        binutils-2.9.1
 	bison-1.25
 	flex-2.5.4
 
@@ -127,10 +127,9 @@ Solaris
 	with.
 
 	In this case, the compiler was built with solaris2.5.1:
-cxh@carson 57% gcc -v
-Reading specs from /users/ptdesign/gnu/sol2.5/lib/gcc-lib/sparc-sun-solaris2.5.1/egcs-2.90.27/specs
-gcc version egcs-2.90.27 980315 (egcs-1.0.2 release)
-cxh@carson 58% 
+cxh@carson 26% gcc -v
+Reading specs from /users/cxh/pt/gnu/sol2.5/lib/gcc-lib/sparc-sun-solaris2.5.1/egcs-2.91.57/specs
+gcc version egcs-2.91.57 19980901 (egcs-1.1 release)
 
 	If you see messages like:
 	Usage: ln [-f] [-s] f1
