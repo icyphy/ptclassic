@@ -129,13 +129,10 @@ int CompileTarget::writeGalDef(Galaxy& galaxy, StringList className) {
 }
 
 int CompileTarget::run() {
-    if (!galaxy()) {
-	Error::abortRun("SDF compile target has no galaxy to run");
-	return FALSE;
-    }
 
-    if (haltRequested()) {
-	Error::abortRun(*galaxy(), "cannot continue after a run-time error");
+    // Call haltRequested to process pending events
+    if (SimControl::haltRequested() || !galaxy()) {
+	Error::abortRun("The compile-SDF target has no galaxy to run");
 	return FALSE;
     }
 
