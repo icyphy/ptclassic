@@ -52,7 +52,7 @@ HDRS= DEPortHole.h DEScheduler.h DEStar.h \
  MutableCalendarQueue.h MutableCQEventQueue.h MutableCQScheduler.h \
  NetworkCell.h SeqATMCell.h BaseImage.h GrayImage.h \
  DCTImage.h MVImage.h \
- DERCScheduler.h Resource.h DERCStar.h DERCEventQ.h
+ DERCScheduler.h Resource.h DERCStar.h 
 
 SRCS = $(HDRS:.h=.cc) DEDomain.cc
 
