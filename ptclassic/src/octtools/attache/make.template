@@ -86,7 +86,7 @@ DESTBIN = $(OCTTOOLS)/bin.$(PTARCH)/attache
 $(DESTBIN):	attache
 		@echo Installing attache
 		rm -f $(DESTBIN)
-		ln attache $(DESTBIN)
+		ln attache$(BINARY_EXT) $(DESTBIN)
 
 install: makefile $(DESTBIN) $(BINDIR)/attache
 
