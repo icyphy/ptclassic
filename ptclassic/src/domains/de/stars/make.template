@@ -18,7 +18,7 @@ include $(CONFIG)
 
 # DEDIR is the directory containing DE domain support
 DEDIR = $(ROOT)/src/domains/de/kernel
-NETWK = $(ROOT)/src/domains/sdf/image
+NETWK = $(ROOT)/src/domains/sdf/image/kernel
 INCL = -I$(DEDIR) -I$(KERNDIR) -I$(NETWK)
 
 PL_SRCS= \
