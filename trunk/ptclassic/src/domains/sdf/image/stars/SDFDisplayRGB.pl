@@ -4,7 +4,7 @@ defstar {
 	version		{ $Id$ }
 	author		{ Sun-Inn Shih }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -12,7 +12,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	location	{ SDF image library }
 	desc {
 Accept three ColorImages (Red, Green, and Blue) from three input
-GrayImages and generate a color image file in Portable Pixmap (PPM) format.
+float matrix and generate a color image file in Portable Pixmap (PPM) format.
 Send the filename to a user-specified command 
 (by default,
 .EQ
@@ -38,12 +38,14 @@ to produce the full filename of the displayed image.
 	}
 
 	ccinclude {
-		"GrayImage.h" , <std.h> , <stdio.h>,  "Error.h"
+		"Matrix.h" , <std.h> , <stdio.h>,  "Error.h"
 	}
 
-	input { name { rinput } type { message } }
-	input { name { ginput } type { message } }
-	input { name { binput } type { message } }
+	input { name { rinput } type { FLOAT_MATRIX_ENV } }
+	input { name { ginput } type { FLOAT_MATRIX_ENV } }
+	input { name { binput } type { FLOAT_MATRIX_ENV } }
+        input { name { frameIdIn } type {int} }
+        
 
 	defstate {
 		name { command }
@@ -65,25 +67,32 @@ to produce the full filename of the displayed image.
 	}
 
 	go {
-		// Read data from input.
-		Envelope renvp, genvp, benvp;
-		(rinput%0).getMessage(renvp);
-		TYPE_CHECK(renvp, "GrayImage");
-		(ginput%0).getMessage(genvp);
-		TYPE_CHECK(genvp, "GrayImage");
-		(binput%0).getMessage(benvp);
-		TYPE_CHECK(benvp, "GrayImage");
-		const GrayImage* imgR = (const GrayImage*) renvp.myData();
-		const GrayImage* imgG = (const GrayImage*) genvp.myData();
-		const GrayImage* imgB = (const GrayImage*) benvp.myData();
-		if (imgR->fragmented() || imgR->processed() ||
-				imgG->fragmented() || imgG->processed() ||
-				imgB->fragmented() || imgB->processed()) {
-			Error::abortRun(*this,
-					"Can't display fragmented or processed images.");
-			return;
-		}
+		// Read data from inputs.
+                Envelope rpkt,gpkt,bpkt;
+                (rinput%0).getMessage(rpkt);
+                (ginput%0).getMessage(gpkt);
+                (binput%0).getMessage(bpkt);
+                const FloatMatrix& rimage = *(const FloatMatrix*)rpkt.myData();
+                const FloatMatrix& gimage = *(const FloatMatrix*)gpkt.myData();
+                const FloatMatrix& bimage = *(const FloatMatrix*)bpkt.myData();
 
+		int height = rimage.numRows();
+		int width  = rimage.numCols();
+
+		// Create an array to read into image data.
+		unsigned char* rgbfp = new unsigned char[3*height*width];
+
+		int i, j, temp1, temp2, temp3;
+		for (i = 0; i < height; i++) {
+			temp1 = i*width;
+			for (j = 0; j < width; j++){
+				temp2 = j+temp1;
+				temp3 = 3*temp2;
+				rgbfp[temp3] = (unsigned char)(rimage.entry(temp2));
+				rgbfp[temp3+1] = (unsigned char)(gimage.entry(temp2));
+				rgbfp[temp3+2] = (unsigned char)(bimage.entry(temp2));
+			}
+		}
 
 		// Set filename and save values.
 		const char* saveMe = saveColor;
@@ -98,7 +107,7 @@ to produce the full filename of the displayed image.
 		  nm = tempFileName();
 		}
 		StringList fileName = nm;
-		fileName << "." << imgR->retId();
+		fileName << "." << int(frameIdIn%0);
 		delete [] nm;
 
 		FILE* fptr = fopen(fileName, "w");
@@ -107,32 +116,10 @@ to produce the full filename of the displayed image.
 			return;
 		}
 
-		// change into RGB format
-		int Width = imgR->retWidth();
-		int Height = imgR->retHeight();
-
-		unsigned const char* rdata = imgR->constData();
-		unsigned const char* gdata = imgG->constData();
-		unsigned const char* bdata = imgB->constData();
-
-		unsigned char* rgbfp = new unsigned char[3*Width*Height];
-
-		int i, j, temp1, temp2, temp3;
-		for (i = 0; i < Height; i++) {
-			temp1 = i*Width;
-			for (j = 0; j < Width; j++){
-				temp2 = j+temp1;
-				temp3 = 3*temp2;
-				rgbfp[temp3] = rdata[temp2];
-				rgbfp[temp3+1] = gdata[temp2];
-				rgbfp[temp3+2] = bdata[temp2];
-			}
-		}
-
 		// Write the PPM header and then the data.
-		fprintf(fptr, "P6\n %d %d 255\n", Width, Height);
+		fprintf(fptr, "P6\n %d %d 255\n", width, height);
 		fwrite((const char*) rgbfp, sizeof(unsigned char),
-				unsigned(3*Width*Height), fptr);
+				unsigned(3*width*height), fptr);
 		fclose(fptr);
 
 		delete [] rgbfp;
