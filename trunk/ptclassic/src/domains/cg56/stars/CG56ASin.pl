@@ -16,10 +16,10 @@ limitation of liability, and disclaimer of warranty provisions.
 .Id "sine, inverse"
 .Id "inverse sine"
 .Ir "power series"
-Arc Sine function using power series approximation.  
+Arc sine function using power series approximation.  
 The output, in principal range -pi/2 to pi/2, is scaled down by pi.
+}
 	seealso { ACos, Cos, Sin }
-	}
 	execTime {
 		return 55;
 	}

@@ -1,10 +1,10 @@
 defstar {
 	name { HostOut }
 	domain { CG56 }
-	desc { Syncronous Host Output. }
+	desc { Synchronous host port output. }
 	version { $Id$ }
 	acknowledge { Gabriel version by Phil Lapsley }
-	author { Kennard, Chih-Tsung Huang (ported from Gabriel) }
+	author { Kennard White, Chih-Tsung Huang (ported from Gabriel) }
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
@@ -17,7 +17,7 @@ Output data from DSP to host via host port synchronously.
 .UH IMPLEMENTATION:
 .pp
 We distiguish between single word transfers and multiword transfers.
-The single word case is much simple in that we can use the \fIref\fP macro to
+The single word case is simpler in that we can use the \fIref\fP macro to
 access the value.  The multiword case requires a loop.  Currently
 we distinguish the two cases by \fIsamplesConsumed\fP, but I think it should
 be \fIsamplesOuput\fP.
@@ -26,7 +26,8 @@ In blocking mode we wait until the host is ready to read our samples.
 In non-blocking mode, we completely skip the transfer if the host
 is not ready.
 .LP
-This implementation currently uses the "unsafe" START/STOP DMA.
+This implementation currently uses the "unsafe" START/STOP host port DMA
+flow control.
 	}
 	input	{
 		name { input }
