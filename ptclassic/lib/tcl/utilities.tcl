@@ -173,10 +173,10 @@ proc ptkMakeEntry {win name desc default callback} {
     entry $s.entry -relief sunken -width 20 -insertofftime 0 -bg burlywood1
     label $s.label -text "${desc}:"
     pack append $s $s.label left $s.entry right
-    pack append .$win $s {top fill expand}
+    pack append $win $s {top fill expand}
     $s.entry insert 0 $default
     bind $s.entry <Return> \
-	"$callback \[.$win.$name.entry get\]; focus ."
+	"$callback \[$win.$name.entry get\]; focus ."
     bind $s.entry <Escape> "stop"
 }
 
@@ -191,7 +191,7 @@ proc ptkMakeButton {win name desc callback} {
     set s $win.$name
     catch {destroy $s}
     button $s -text "$desc" -fg tan4 -command $callback
-    pack append .$win $s {top fill expand}
+    pack append $win $s {top fill expand}
     bind $s <ButtonPress-1> "$s configure -relief sunken; $s invoke"
     bind $s <ButtonRelease-1> "$s configure -relief raised"
 }
@@ -220,67 +220,5 @@ proc ptkMakeScale {win name desc position callback} {
 	-command $callback -showvalue 0
     $s.scale set $position
     pack append $s $s.msg left $s.scale right $s.value right
-    pack append .$win $s {top fill}
-}
-
-
-#######################################################################
-# Procedure to make an animated bar chart display of an array.
-# Arguments:
-#	w		toplevel window name to use (without the leading period)
-#	desc		description to attach to the window
-#	geo		geometry of the window
-#	numBars		number of bars in the bar chart
-#	barChartWidth	width in centimeters
-#	barChartHeight	height in centimeters
-proc ptkMakeBarChart {w desc geo numBars barChartWidth barChartHeight} {
-    catch {destroy .$w}
-    toplevel .$w
-    wm title .$w "$desc"
-    wm iconname .$w "$desc"
-
-    message .$w.msg -font -Adobe-times-medium-r-normal--*-180* -width 5i \
-            -text "$desc"
-    frame .$w.cntr -bd 10
-    label .$w.cntr.label -text "Full scale:"
-    set startScale [${w}verticalScale 1.0]
-    label .$w.cntr.value -width 10 -text $startScale
-    button .$w.cntr.d10 -text "Scale/10" -command "changeBarScale $w 0.1"
-    button .$w.cntr.hv -text "Scale/2" -command "changeBarScale $w 0.5"
-    button .$w.cntr.dbl -text "Scale*2" -command "changeBarScale $w 2.0"
-    button .$w.cntr.t10 -text "Scale*10" -command "changeBarScale $w 10.0"
-    pack append .$w.cntr \
-	.$w.cntr.label left \
-	.$w.cntr.value left \
-	.$w.cntr.d10 left \
-	.$w.cntr.hv left \
-	.$w.cntr.dbl left \
-	.$w.cntr.t10 left
-
-    frame .$w.pf -bd 10
-    canvas .$w.pf.plot -relief sunken -bd 3 -bg AntiqueWhite3 \
-	    -height ${barChartHeight}c -width ${barChartWidth}c
-    pack append .$w.pf .$w.pf.plot {top fill expand}
-
-    # bar entry, button and slider section, empty by default
-    frame .$w.cp_high -bd 10
-    frame .$w.cp_middle -bd 10
-    frame .$w.cp_low -bd 10
-
-    button .$w.quit -text "QUIT" -command "destroy .$w"
-    pack append .$w .$w.msg {top fillx } \
-		.$w.cntr {top fillx} \
-		.$w.pf {top fill expand } \
-		.$w.cp_high {top fillx } \
-		.$w.cp_middle {top fillx } \
-		.$w.cp_low {top fillx } \
-		.$w.quit {top fillx }
-
-    wm geometry .$w $geo
-    wm minsize .$w 400 200
-}
-
-proc changeBarScale {w s} {
-    set newScale [${w}verticalScale $s]
-    .$w.cntr.value configure -text $newScale
+    pack append $win $s {top fill}
 }
