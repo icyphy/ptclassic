@@ -15,12 +15,16 @@ OBJ = $(ROOT)/obj.$(ARCH)
 
 DIRS =
 
+ifneq (,$(filter sol%,$(ARCH)))
+DIRS = posix
+endif
+
 ifneq (,$(filter sun%,$(ARCH)))
-DIRS = Awesime awe lwp
+DIRS = Awesime awe lwp posix
 endif
 
 ifeq (cfront,$(ARCH))
-DIRS = lwp
+DIRS = lwp posix
 endif
 
 ifeq (mips,$(ARCH))
@@ -58,8 +62,8 @@ GT_OBJ = $(THREAD_OBJ)/gthreads
 GT_SRC = ../$(ROOT)/src/thread/gthreads
 GT_LIBS = libgthreads.a
 GT_CC = gcc
-GT_CFLAGS = -DASM_SETJMP -DNOERR_CHECK -DSTACK_CHECK -DSIGNAL_STACK \
-	-DSRP -DC_INTERFACE
+GT_CFLAGS =	-DASM_SETJMP -DNOERR_CHECK -DSTACK_CHECK -DSIGNAL_STACK \
+		-DSRP -DC_INTERFACE
 GT_COMP_ASM = $$(CC) $$(INC1) $$(INC2) $$(CFLAGS) -c $$*.S
 
 #
