@@ -28,7 +28,7 @@ endif
 set tclscript = ""
 
 while ($#argv)
-	switch ($argv[1])
+	switch ("$argv[1]")
 		case -help:
 			echo "$usagestring"
 			echo " -debug         Bring up in debug mode"
@@ -99,7 +99,7 @@ while ($#argv)
 			breaksw
 		case *:
 			if (! $?filename) then
-			    set filename=$1
+			    set filename="$1"
 			else
 			    set filename="$filename $1"
 			endif
@@ -113,7 +113,7 @@ if ( ! $?TYCHO ) then
 		setenv TYCHO $PTOLEMY/tycho
 	else
 		setenv TYCHO ~ptolemy/tycho
-		if ( -d $TYCHO ) then
+		if ( -d "$TYCHO" ) then
 			echo 'Neither $TYCHO or $PTOLEMY set, so we are setting TYCHO to ~ptolemy/tycho'
 		else
 		    echo 'You must set $TYCHO or $PTOLEMY for tycho to work'
@@ -122,7 +122,7 @@ if ( ! $?TYCHO ) then
 	endif
 endif
 
-if ( ! -d $TYCHO) then
+if ( ! -d "$TYCHO") then
 	echo "The directory $TYCHO does not exist!  Cannot find Tycho."
 	exit 2
 endif
@@ -140,12 +140,12 @@ if ( ! $?selectPtolemy) then
 		endif
 		set debugcmdfile = /tmp/tychodbg.$$
 		echo "break main" > $debugcmdfile
-		echo "run -f $TYCHO/kernel/Tycho.tcl $filename" >> $debugcmdfile
+		echo "run -f \"$TYCHO/kernel/Tycho.tcl\" \"$filename\"" >> $debugcmdfile
 		set prog = ($debugger -x $debugcmdfile itkwish)
 
 		#set prog = (itkwish.purify -f $TYCHO/kernel/Tycho.tcl)
 	else
-		set prog = (itkwish -f $TYCHO/kernel/Tycho.tcl)
+		set prog = (itkwish -f \"\$TYCHO/kernel/Tycho.tcl\")
 	endif
 else
 	# We selected Ptolemy
@@ -243,8 +243,8 @@ if (! -x $prog[1] && ($?tyedit || $?selectPtolemy)) then
 	echo "Program does not exist: $prog"
 else
     if (! $?filename || $?tychodebug) then
-	$prog
+	eval $prog
     else
-	$prog $filename
+	eval $prog $filename
     endif
 endif
