@@ -25,7 +25,7 @@ $(PAPER).bbl:	$(PAPERBIB)
 # Convert to HTML and make gif image backgrounds transparent
 # The palatino.sty file is necessary for good-looking pdf files
 # but causes latex2html to fail, so we work around the problem
-$(HTMLDIR)/$(PAPER):	$(PAPERDEPEND)
+$(HTMLDIR)/$(PAPER)/$(PAPER).html:	$(PAPERDEPEND)
 	-mkdir -p $(HTMLDIR)
 	-mv palatino.sty palatino.$$$$.sty
 	echo '\typeout{Stub palatino.sty file for latex2html compatibility}' >palatino.sty
