@@ -108,9 +108,6 @@ PURIFY = 	purify -cache-dir=/var/pure/cache
 QUANTIFY = 	quantify	
 PURECOV =	purecov -cache-dir=/var/pure/cache
 
-# Variable for the Ariel DSP56000 board
-S56DIR =
-
 # Variables for local Matlab installation
 # -- If Matlab is installed, then MATLABDIR points to where MATLAB is installed
 #    and MATLABLIBDIR points to the directory containing the Matlab libraries
