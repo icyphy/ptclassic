@@ -75,12 +75,18 @@ void ptkFigureBarEdges(x0,x1,y0,y1,
 	    *x0 = ((i+0.125)*width)/numBars;
 	    *x1 = ((i+0.875)*width)/numBars;
 	}
-	    *y0 = height*top/(top - bottom);
+	    if (top-bottom == 0)
+	      *y0 = 0;
+	    else
+	      *y0 = height*top/(top - bottom);
 	    if (*y0 > height) *y0 = height;
 	    if (*y0 < 0) *y0 = 0;
 	    if(IsNANorINF(data) || data > top) *y1 = 0;
 	    else if(data < bottom) *y1 = height;
-	    else *y1 = height*(top-data)/(top-bottom);
+	    else if (top-bottom == 0) 
+	      *y1 = 0;
+	    else
+	      *y1 = height*(top-data)/(top-bottom);
 }
 
 /*
