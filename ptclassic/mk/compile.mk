@@ -210,6 +210,14 @@ checkjunk:
 		$(STAR_MK).o $(STAR_MK).mk $(EXTRA_DESTS) \
 		$(MISC_FILES) makefile make.template SCCS TAGS
 
+# Check out the star documentation for bogus html
+# weblint is not shipped with Ptolemy, you can get it from
+# http://www.khoros.unm.edu/staff/neilb/weblint.html
+# weblint uses perl
+weblint:
+	weblint  -x Netscape *.htm*
+
+
 # "check" does not print anything if nothing is being edited.
 sccsinfo:
 	@sccs check || true

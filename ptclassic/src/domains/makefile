@@ -37,7 +37,8 @@ DOMAINS = sdf hof de ddf bdf thor cg cgc c50 cg56 vhdlb \
 
 MAKEVARS = "PTARCH=$(PTARCH)"
 
-makefiles all install clean depend realclean clean_indices checkjunk sccsinfo:
+makefiles all install clean depend realclean clean_indices checkjunk sccsinfo \
+		weblint:
 	@for x in $(DOMAINS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \

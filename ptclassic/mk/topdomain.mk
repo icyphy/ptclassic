@@ -40,7 +40,7 @@ makefiles:
 	    fi ; \
 	done
 
-all install clean  realclean checkjunk sccsinfo:
+all install clean  realclean checkjunk sccsinfo weblint:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
