@@ -52,6 +52,7 @@ public:
 
 	State* clone () const; // {return new StringState;}
 
+	~StringState ();
 private:
 	char* val;
 };	
