@@ -72,6 +72,7 @@ public:
 private:
     ParScheduler& topScheduler;
     CGCluster* topCluster;
+    int sdfStars;
 };
 
 #endif

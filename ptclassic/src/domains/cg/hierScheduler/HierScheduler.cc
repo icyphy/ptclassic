@@ -49,7 +49,9 @@ Programmer: Jose Luis Pino
 
 /*virtual*/ StringList MultiScheduler::displaySchedule(){
     StringList schedule;
-    schedule << "Hierarchical Scheduler:  Top-level scheduler is - ";
+    schedule << "J.L. Pino's Hierarchical Scheduler\n\t["
+	     << sdfStars << " SDF Nodes]\t[" << dagNodes()
+	     << " Precedence DAG Nodes]\n\tTop-level ";
     if (topCluster) schedule << topCluster->displaySchedule();
     return schedule;
 }   
@@ -78,8 +80,13 @@ void MultiScheduler :: setup () {
     
     // Need to set repetitions of the master galaxy
     repetitions();
+    
+    GalStarIter nextStar(*galaxy());
+    DataFlowStar* star;
+    sdfStars = 0;
+    while ((star = (DataFlowStar*) nextStar++) != NULL) sdfStars++;
 
-    LOG_NEW; topCluster = new CGCluster(galaxy()->domain());
+    LOG_NEW; topCluster = new CGCluster(galaxy()->domain());    
     
     // We should set the target of the topCluster before construction
     // the clusters for the galaxy, so that all the internal clusters
