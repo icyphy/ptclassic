@@ -136,18 +136,19 @@ body ::tycho::EditSpell::constructor {args} {
 
     $itk_component(bbox) buttonconfigure ok \
 	    -text {Next <Ret>} \
-	    -command [code "$this busy next"]
+	    -command "$this busy next"
 
     addButton clear -text {Clear Marks} \
-	    -command [code "$this clearFindMatch"]
+	    -command "$this clearFindMatch"
 
     addButton recheck -text {Recheck} \
-	    -command [code "$this busy recheck"]
+	    -command "$this busy recheck"
 
     if {$itk_option(-nochange) == 0} {
 	addButton replace -text {Change <M-Ret>} \
-		-command [code "$this replace"]
-	bind $itk_component(hull) <Meta-Return> [code "$this replace; break"]
+		-command "$this replace"
+	bind $itk_component(hull) <Meta-Return> \
+		"$this replace; break"
     }
 
     #
@@ -155,7 +156,7 @@ body ::tycho::EditSpell::constructor {args} {
     #
     itk_component add dbox {
 	button $itk_component(childsite).dbox -text {Dictionary}\
-		-command [code "$this dictionary"] -pady 0 -width 14
+		-command "$this dictionary" -pady 0 -width 14
     } {
 	keep -background -cursor
     }
@@ -163,7 +164,7 @@ body ::tycho::EditSpell::constructor {args} {
 
     itk_component add lbox {
 	button $itk_component(childsite).lbox -text {Learn} \
-		-command [code "$this learn"] -pady 0 -width 14
+		-command "$this learn" -pady 0 -width 14
     } {
 	keep -background -cursor
     }
@@ -195,8 +196,9 @@ body ::tycho::EditSpell::dictionary {} {
 
 #####################################################################
 #### learn
-# Add to the personal dictionary the word currently in the misspell window.
-# The dictionary file is sorted is sorted while we are at it.
+# Add to the personal dictionary the word currently in the misspell
+# window. Then move to the next spelling error. The dictionary file is
+# sorted is sorted while we are at it.
 # 
 body ::tycho::EditSpell::learn {} {
     set changeto [get word]
@@ -207,6 +209,7 @@ body ::tycho::EditSpell::learn {} {
 	    writeDictionary $dict
 	}
     }
+    next
 }
 
 #####################################################################
@@ -285,6 +288,8 @@ body ::tycho::EditSpell::recheck {} {
 
 #####################################################################
 #### replace
+# Replace the selection with the word currently in the spelling entry.
+# Then move to the next spelling error.
 # 
 body ::tycho::EditSpell::replace {} {
     set editWindow $itk_option(-edittext)
@@ -296,6 +301,7 @@ body ::tycho::EditSpell::replace {} {
     } {
 	error "No selection to change"
     }
+    next
 }
 
 #####################################################################
