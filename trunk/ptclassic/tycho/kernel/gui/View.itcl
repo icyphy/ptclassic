@@ -90,6 +90,9 @@ class ::tycho::View {
     # Give the window or a subwindow the focus and set the menu bar (if any).
     method focusin {}
 
+    # Cause subviews to be unable to affect their displayer.
+    method forgetDisplayer {} {set myDisplayer {}}
+
     # Return 1 if the data is read-only, 0 otherwise.
     method getReadOnly {} 
 
@@ -308,7 +311,6 @@ body ::tycho::View::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
             set myDisplayer $cmd
         }
     }
-
     set myMenubar $menubar
     set myStatusbar $statusbar
     set myToolbar $toolbar
