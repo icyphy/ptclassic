@@ -1,6 +1,6 @@
 defstar {
 	name {DownSample}
-	domain {SDF}
+	domain {VHDL}
 	desc { 
 A decimator by a given "factor" (default 2).
 The "phase" tells which sample to output.
@@ -10,8 +10,8 @@ Phase = 0 is the default.  Note that "phase" has the opposite
 sense of the phase parameter in the UpSample star, but the
 same sense as the phase parameter in the FIR star.
 	}
-	version {@(#)SDFDownSample.pl	2.11	3/2/95}
-	author { J. T. Buck }
+	version { $Id$ }
+	author { Michael C. Williamson, J. T. Buck }
 	copyright {
 Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
@@ -48,7 +48,10 @@ limitation of liability, and disclaimer of warranty provisions.
 			Error::abortRun(*this, ": phase must be < factor");
 	}
 	go {
-		output%0 = input%int(phase);
+	  StringList out;
+	  out << "$ref(output, 0) $assign(output) ";
+	  out << "$ref(input, " << - int(phase) << ")";
+	  addCode(out);
 	}
 }
 
