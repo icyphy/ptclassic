@@ -43,6 +43,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "palette.h"
 #include "main.h"
 #include "ptk.h"
+#include "octIfc.h"
+#include "kernelCalls.h"
+#include "pigiLoader.h"
+#include "handle.h"
+#include "utility.h"		/* Pick up util_csystem() */
+
+#include "icon.h"
 
 #define DM_WIDTH 80  /* dialog entry width */
 #define EDIT_ICON_SNAP 5 /* snap size of vem window for edit-icon */
