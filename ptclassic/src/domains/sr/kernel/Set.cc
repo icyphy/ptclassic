@@ -29,6 +29,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  */
 
+#include "Set.h"
+
 // Allocate an empty set of the given size
 //
 // @Description If this is a Set(i), then the indices of its contents
@@ -38,7 +40,7 @@ Set::Set(int s)
 {
   mysize = s;
   words = new int[word(s-1)];
-  for ( i = word(s) ; --i >= 0 ; ) {
+  for ( int i = word(s) ; --i >= 0 ; ) {
     words[i] = 0;
   }
 }
@@ -54,7 +56,7 @@ Set::~Set()
 
 int Set::cardinality()
 {
-  count = 0;
+  int count = 0;
   for ( int i = mysize ; --i >= 0 ; ) {
     if ((*this)[i]) {
       count++;
@@ -67,7 +69,7 @@ int Set::cardinality()
 
 // Add a set to a set
 
-Set & operator |= (Set & s)
+Set & Set::operator |= (Set & s)
 {
   for ( int i = word(mysize-1)+1 ; --i >= 0 ; ) {
     words[i] |= s.words[i];
@@ -76,7 +78,7 @@ Set & operator |= (Set & s)
 }
 
 // Remove a set from a set
-Set & operator -= (Set & s) {
+Set & Set::operator -= (Set & s) {
   for ( int i = word(mysize-1)+1 ; --i >= 0 ; ) {
     words[i] &= ~(s.words[i]);
   }
