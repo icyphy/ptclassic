@@ -221,14 +221,15 @@ public:
 	void requestReset();
 	int resetRequested();
 
-	// Returns TRUE if this target requests to schedule a self-firing
-	// with the outer domain, FALSE otherwise. NOrmally used only with 
-	// wormholes inside timed domains
+	// For a target within a Wormhole, if this method returns TRUE
+	// and the outside domain is timed, then the target will be
+	// fired again at the time returned by the nextFiringTime method.
+	// In this base class, always return FALSE.
 	virtual int selfFiringRequested();
 
 	
-	// Returns the time the next self-firing should be scheduled at.
-	// Call this method only if selfFiringRequested() returns TRUE.
+	// If selfFiringRequested returns TRUE, return the time at which
+	// this firing is requested.
 	virtual double nextFiringTime();
 
 protected:
