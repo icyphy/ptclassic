@@ -1221,7 +1221,7 @@ proc HMstack {win push list} {
 proc HMtag_body {win param text} {
     upvar #0 HM$win var
     if {[HMextract_param $param bgcolor]} {
-        set color [ptkColor $bgcolor grey]
+        set color [::tycho::color $bgcolor grey]
         $win configure -background $color
         set var(bgcolor) $color
         # Make the insertion cursor invisible
@@ -1230,14 +1230,14 @@ proc HMtag_body {win param text} {
     
     set savetext $text
     if {[HMextract_param $param text]} {
-        set color [ptkColor $text black]
+        set color [::tycho::color $text black]
         $win configure -foreground $color
         set var(fgcolor) $color
     }
     set text $savetext
 
     if {[HMextract_param $param link]} {
-        set color [ptkColor $link blue]
+        set color [::tycho::color $link blue]
         set var(linkfg) $color
         $win tag configure link -foreground $color
     }
@@ -1254,7 +1254,7 @@ proc HMtag_body {win param text} {
 proc HMtag_color {win param text} {
 	set value black
 	HMextract_param $param value
-	set value [ptkColor $value black]
+	set value [::tycho::color $value black]
 	$win tag configure $value -foreground $value
 	$win tag lower $value
 	HMstack $win "" "Tcolor $value"
@@ -1276,7 +1276,7 @@ proc HMtag_font {win param text} {
         HMstack $win "" [list size [lindex $var(size) end]]
     }
     if {[HMextract_param $param color]} {
-        set color [ptkColor $color black]
+        set color [::tycho::color $color black]
         HMstack $win "" "Tcolor color$color"
         $win tag configure color$color -foreground $color
     } else {
