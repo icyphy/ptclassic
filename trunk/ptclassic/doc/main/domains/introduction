@@ -1,8 +1,8 @@
 .\" $Id$
 .H1 "Introduction
 .pp
-One of the key objective of the \*(PT design environment
-is to support coexistence and interaction of diverse
+One of the key objectives of the \*(PT design environment
+is to support the coexistence and interaction of diverse
 computational models, called \fIdomains\fR.
 .IE domains
 For instance, a dataflow domain can exist within a discrete-event
@@ -10,7 +10,7 @@ domain, so that for example
 a signal processing subsystem can be cleanly incorporated
 within a communication network simulation.
 This mixing of domains is one of the primary research objectives
-in the \*(PT project.  We do not consider all problems solved,
+of the \*(PT project.  We do not consider all problems solved,
 and some details of the domain construction and inter-domain interface
 may change in the future.
 .pp
@@ -22,7 +22,7 @@ and an entire
 application is called a 
 .c Universe .
 The domain of a star
-is specified in its definition and determines its class
+is specified in the star's definition and determines its class
 ancestry.  For example, all stars
 in the SDF domain are derived from the
 .c SDFStar
