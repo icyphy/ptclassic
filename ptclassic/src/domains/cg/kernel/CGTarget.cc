@@ -99,8 +99,9 @@ schedFileName(0), noSchedule(0), typeConversionTable(0)
 	    destDirName, "Directory to write to"));
 	addState(filePrefix.setState("file", this, "",
 	    "Prefix for file names."));
+        // SDF-Compile will not work with ACYLOOP
 	addState(loopingLevel.setState
-		("Looping Level",this,"ACYLOOP #choices are: DEF, CLUST, SJS, ACYLOOP",
+		("Looping Level",this,"DEF #choices are: DEF, CLUST, SJS, ACYLOOP",
 		"SDF Schedulers:\n"
 		"\tDEF - The default SDF scheduler\n"
 		"\tCLUST - J. Buck's loop scheduler\n"
