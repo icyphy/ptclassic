@@ -95,9 +95,6 @@ public:
 	// command.
 	double *outputValues;
 
-	// Array of flags indicating which outputs are new
-	int *outputNewFlags;
-
 	// Method to set one value of the above array with boundary checking
 	virtual void setOneOutput(int outNum, double outValue);
 
@@ -108,7 +105,7 @@ protected:
 	// A static variable used to create names that are
 	// guaranteed to be unique.  After each use, it should
 	// be incremented.
-	static unique;
+	static int unique;
 
 	// Array of flags indicating which inputs are new
 	int *inputNewFlags;
