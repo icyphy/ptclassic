@@ -14,6 +14,7 @@ limitation of liability, and disclaimer of warranty provisions.
         explanation {
 This star computes the base two logarithm of its input divided by 32,
 using polynomial approximation with eight bits of accuracy.
+The coefficients of the polynomial are given by \fId\fR.
 .Id "logarithm"
         }
         input {
