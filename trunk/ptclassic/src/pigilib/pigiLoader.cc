@@ -37,11 +37,11 @@ $Id$
 #endif
 
 // architecture-specific stuff
-#ifdef __sun__
+#if defined(__sun__) || defined(sun)
 #ifdef __mc68000__
 #define ARCH "sun3"
 #endif
-#ifdef __sparc__
+#if defined(__sparc__) || defined(sparc)
 #define ARCH "sun4"
 #endif
 #endif
