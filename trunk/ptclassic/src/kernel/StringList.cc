@@ -42,7 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "miscFuncs.h"
 
 
-#define SMALL_STRING 20
+#define SMALL_STRING 32
 
 // Note: all components of a StringList are in dynamic memory,
 // and are deleted by the StringList destructor
