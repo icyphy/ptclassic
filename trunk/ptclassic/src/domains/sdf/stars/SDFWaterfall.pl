@@ -26,18 +26,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { Number of samples per trace. }
 	}
 	defstate {
-		name {xUnits}
-		type {float}
-		default {"1.0"}
-		desc { Number of horizontal units per input sample. }
-	}
-	defstate {
-		name {xInit}
-		type {float}
-		default {"0.0"}
-		desc { Horizontal value of the first input sample. }
-	}
-	defstate {
 		name {xOffset}
 		type {int}
 		default {"4"}
