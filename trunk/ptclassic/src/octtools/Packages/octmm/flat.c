@@ -30,6 +30,10 @@ static char SccsId[]="$Id$";
 #include "oh.h"
 #include "tr.h"
 
+/* Forward reference */
+octStatus flatten_instance
+	ARGS((octObject *facet, octObject *inst, tr_stack *stack));
+
 octStatus flatten_contacts(facet)
 octObject *facet;
 {
