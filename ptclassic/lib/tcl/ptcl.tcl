@@ -56,3 +56,6 @@ ptcl_init_env
 
 # Load the help system for ptcl
 source $env(PTOLEMY)/lib/tcl/ptcl_help.tcl
+
+# Math extensions for parameter parsing
+source $env(PTOLEMY)/lib/tcl/mathexpr.tcl

@@ -112,6 +112,8 @@ source $ptolemy/lib/tcl/ptkParams.tcl
 #source $ptolemy/lib/tcl/ptkBarGraph.tcl
 #source $ptolemy/lib/tcl/ptkPrfacet.tcl
 
+# Math extensions for parameter parsing
+source $ptolemy/lib/tcl/mathexpr.tcl
 
 proc tkoct_bind_class {} {
     option add *XPGedWidget.background grey startupFile
