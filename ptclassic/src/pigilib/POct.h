@@ -93,8 +93,9 @@ public:
         int ptkGetTargetParams (int argc,char** argv);
         int ptkSetTargetParams (int argc,char** argv);
         int ptkFacetContents (int argc,char** argv);
-        int ptkGetMaster (int argc,char** argv);
+        int ptkOpenMaster (int argc,char** argv);
         int ptkOpenFacet (int argc,char** argv);
+	int ptkCloseFacet (int argc,char** argv);
         int ptkIsStar (int argc,char** argv);
         int ptkIsGalaxy (int argc,char** argv);
         int ptkIsBus (int argc,char** argv);
