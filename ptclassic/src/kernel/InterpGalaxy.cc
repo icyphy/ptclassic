@@ -623,7 +623,7 @@ Block* InterpGalaxy::blockWithDottedName (const char* dotname) {
 	Block* b = blockWithName (dotname);
 	if (b) return b;
 	char buf[256];
-	const char* p = index (dotname, '.');
+	const char* p = strchr (dotname, '.');
 	if (p == NULL) return 0;
 	int n = p - dotname;
 	strncpy (buf, dotname, n);

@@ -32,7 +32,7 @@ expandPathName(const char* name) {
 
 	// find first / after the env-var or the username
 
-	const char* pslash = index (name, '/');
+	const char* pslash = strchr (name, '/');
 	if (pslash == NULL) pslash = name + strlen(name);
 
 	// copy the username or variable name into buf.
