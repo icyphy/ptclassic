@@ -84,7 +84,7 @@ This star is based on the MaxMin star in the CG56 domain.
 	while ( i-- > 0 ) {
 		current = $ref(input,i);
 		currentCmp = cmpMagFlag ? FABS(current) : current;
-		minChangeFlag = ( currentCmp < valueCmp )
+		minChangeFlag = ( currentCmp < valueCmp );
 
 		/* Logical exclusive OR between maxflag and minChangeFlag
 		   but we cannot use the bitwise xor ^ */
@@ -106,12 +106,8 @@ This star is based on the MaxMin star in the CG56 domain.
 	/* Send the maximum/minimum value to the output port */
 	$ref(output) = value;
 
-	// Adjust the index due to the LIFO nature of input data
+	/* Adjust the index due to the LIFO nature of input data */
 	$ref(index) = $val(N) - valueIndex - 1;
-	}
-
-	initCode {
-		addCode(macros);
 	}
 
 	setup {
@@ -124,6 +120,7 @@ This star is based on the MaxMin star in the CG56 domain.
 	}
 
  	go {
+		addCode(macros);
 		addCode(decl);
 		addCode(initData);
 		addCode(compareData);
