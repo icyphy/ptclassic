@@ -797,7 +797,8 @@ body ::tycho::StyleSheet::load {stylesheet} {
 	set masterfile [::tycho::expandPath $_masterfile($stylesheet)]
 	
 	# Create the master
-	set master [::tycho::StyleSheet [::tycho::autoName masterstylesheet] \
+	set master [uplevel #0 ::tycho::StyleSheet \
+		[::tycho::autoName masterstylesheet] \
 		-modelname master$stylesheet \
 		-filename $masterfile]
 	
@@ -807,7 +808,8 @@ body ::tycho::StyleSheet::load {stylesheet} {
 	close $fd
 	
 	# Create the user stylesheet
-	set model [::tycho::StyleSheet [::tycho::autoName stylesheet] \
+	set model [uplevel #0 ::tycho::StyleSheet \
+		[::tycho::autoName stylesheet] \
 		-modelname $stylesheet \
 		-filename $userfile \
 		-master [infoWhichCommand $master]]
@@ -835,7 +837,8 @@ body ::tycho::StyleSheet::load {stylesheet} {
 	set model $_stylemodel($stylesheet)
     }
     # Return the full namespace path so it can be passed around
-    return ::tycho::StyleSheet::$model
+    # return ::tycho::StyleSheet::$model
+    return $model
 }
 
 #####################################################################
@@ -848,10 +851,8 @@ body ::tycho::StyleSheet::load {stylesheet} {
 # Add a parameter.
 #
 body ::tycho::StyleSheet::_addparameter {tail value args} {
-    global _context_
- 
     # Get the full name of the item
-    set name [concat $_context_ $tail]
+    set name [concat [set ${ns}::_context_] $tail]
     
     # Add it.
     eval [list add parameter $name -value $value] $args
