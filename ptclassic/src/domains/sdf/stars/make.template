@@ -35,12 +35,12 @@ SRCS= \
  SDFBiQuad.pl \
  SDFBlackHole.pl \
  SDFBlockFIR.pl \
+ SDFBlockAllPole.pl \
  SDFBurg.pl \
  SDFCommutator.pl \
  SDFComplexDC.pl \
  SDFComplexFFT.pl \
  SDFComplexFIR.pl \
- SDFComplexPower.pl \
  SDFComplexProduct.pl \
  SDFComplexReal.pl \
  SDFComplexSum.pl \
