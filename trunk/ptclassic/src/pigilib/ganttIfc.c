@@ -111,7 +111,7 @@ else return NULL if there are no more such characters.
 */
 char *
 incr(s)
-char *s;
+const char *s;
 {
     char *end;
 
@@ -221,15 +221,16 @@ char *name;
 
 void
 FindAndMark(facetP, name, pattern)
-octObject *facetP;
-char *name;
+octObject* facetP;
+const char* name;
 int pattern;
 {
+    char* strippedName;
     static RgbValue color = {65535, 0, 0};
 /* name contains the universe name as well, which must be stripped */
-    name = incr(name);
-    if (!name) return;
-    FrameStar(facetP, name, &color, findSets, &findDepth, pattern);
+    strippedName = incr(name);
+    if (!strippedName) return;
+    FrameStar(facetP, strippedName, &color, findSets, &findDepth, pattern);
 }
 
 /* CreateFrames  2/26/90 7/6/88
@@ -315,11 +316,12 @@ char *stars[];
 
 void
 FindAndMarkColor(facetP, name, pattern,Color)
-octObject *facetP;
-char *name;
+octObject* facetP;
+const char* name;
 int pattern;
-char *Color;
+const char* Color;
 {
+	char* strippedName;
         static RgbValue color;
         if(strcmp(Color,"red")==0)
         {
@@ -351,15 +353,14 @@ char *Color;
                 color.green = 33410;
                 color.blue = 61166;
         }
-        else if(strcmp(Color,"oilve")==0)
+        else if(strcmp(Color,"olive")==0)
         {
                 color.red = 27499;
                 color.green = 36494;
                 color.blue = 8995;
         }
-/* name contains the universe name as well, which must be stripped */
-        name = incr(name);
-        if (!name) return;
-        FrameStar(facetP, name, &color, findSets, &findDepth, pattern);
+	/* name contains the universe name as well, which must be stripped */
+        strippedName = incr(name);
+        if (!strippedName) return;
+        FrameStar(facetP, strippedName, &color, findSets, &findDepth, pattern);
 }
-
