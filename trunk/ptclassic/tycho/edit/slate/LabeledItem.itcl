@@ -141,7 +141,7 @@ class ::tycho::LabeledItem {
     array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
 
     set optiondefault(-anchor)		"center"
-    set optiondefault(-font)		[::tycho::font Helvetica 18]
+    set optiondefault(-font)		[::tycho::font Helvetica 12]
     set optiondefault(-graphics)	""
     set optiondefault(-text)		""
 }
