@@ -12,7 +12,7 @@ star takes on the order of log N steps to find the right level, whereas
 the LinQuantIdx star takes a constant amount of time.  Therefore, use
 the LinQuantIdx star when possible.
 	}
-	version {$Id$}
+	version { $Id$ }
 	author { E. A. Lee and J. Buck }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -41,8 +41,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		default {""}
 		desc { Output levels.  If empty, use 0, 1, 2, ...}
 	}
-	public {
-		int quantizationLevel;
+	defstate {
+		name { quantizationLevel }
+		type { int }
+		default {0}
+		desc { The quantization level }
+		attributes { A_NONSETTABLE|A_NONCONSTANT }
 	}
 	setup {
 		int n = thresholds.size();
