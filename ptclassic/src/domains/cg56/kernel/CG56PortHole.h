@@ -19,11 +19,6 @@ $Id$
 #include "SDFConnect.h"
 #include "AsmConnect.h"
 
-// portholes for CG56CodeStars and derived stars
-const bitWord PB_CIRC = 0x40;
-
-// attributes for code generation portholes
-
 class ProcMemory;
 class AsmGeodesic;
 
