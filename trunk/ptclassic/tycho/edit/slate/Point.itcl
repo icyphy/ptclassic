@@ -111,7 +111,7 @@ body ::tycho::Point::_aspect {id canvas slate x y args} {
 		    set result $coords
 		}
 		default {
-		    error "Invalid aspect \"$aspect\" of line shape"
+		    error "Invalid aspect \"$aspect\" of Point shape"
 		}
 	    }
 	}
