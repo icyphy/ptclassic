@@ -191,6 +191,15 @@ class ::tycho::Graphics {
     # Edit the specified items, or if none, the selected items.
     method edit {{ids {}}}
 
+    # Generate a GIF file with the contents of the canvas.
+    method exportGif {filename}
+
+    # Generate a postscript file with the contents of the canvas.
+    method exportPs {win}
+
+    # Generate an X window dump file with the contents of the canvas.
+    method exportXwd {filename}
+
     # Give the canvas the focus.
     method focusin {}
 
@@ -211,15 +220,6 @@ class ::tycho::Graphics {
 
     # Print the contents of the canvas, using conversion to postscript.
     method print {}
-
-    # Generate a GIF file with the contents of the canvas.
-    method printGif {filename}
-
-    # Generate a postscript file with the contents of the canvas.
-    method printPs {win}
-
-    # Generate an X window dump file with the contents of the canvas.
-    method printXwd {filename}
 
     # Redo using the current redo buffer.
     method redo {}
@@ -991,6 +991,105 @@ body ::tycho::Graphics::edit {{ids {}}} {
     }
 }
 
+#######################################################################
+#### exportGif
+# Generate a GIF file with the contents of the canvas.
+# NOTE: Unix-only implementation.  Also, depends on the programs
+# xwdtopnm, ppmtogif, and xwd, which must be in your path.
+#
+body ::tycho::Graphics::exportGif {filename} {
+    set fn1 [::tycho::tmpFileName]
+    exportXwd $fn1
+    # NOTE: -transparent color option should be added for the background.
+    ::tycho::invoke xwdtopnm $fn1 | ppmtogif -interlace > $filename 2> /dev/null
+    ::tycho::rm $fn1
+    # FIXME: Should display the gif!
+}
+
+#######################################################################
+# Generate a postscript file and print it.
+# FIXME: This method needs major rework.  It should only create the postscript
+# file.
+#
+body ::tycho::Graphics::exportPs {win} {
+    set height [winfo height [canvasName]]
+    if {$height == 1} {
+        # Canvas has not been mapped yet
+        set height [cget -canvasheight]
+    }
+    set width [winfo width [canvasName]]
+    if {$width == 1} {
+        # Canvas has not been mapped yet
+        set width [cget -canvaswidth]
+    }
+
+    set pageheight [$win.page.pageheight.entry get]
+    set pagewidth [$win.page.pagewidth.entry get]
+    set pagey [$win.page.pagey.entry get]
+    set pagex [$win.page.pagex.entry get]
+
+    set printCmd [$win.command.entry get]
+
+    set rotate [set [scope $itk_component(hull)_rotate]]
+    if {$rotate == "Landscape"} {
+	set rotate 1
+    } else {
+	set rotate 0
+    }
+
+    # Adjust the offset.
+    set pagey [expr $pageheight/2+$pagey]
+    set pagex [expr $pagewidth/2+$pagex]
+
+    set color [set [scope $itk_component(hull)_color]]
+
+    set ps [ [canvasName] postscript\
+	     -height $height -width $width\
+	     -pageheight ${pageheight}i -pagewidth ${pagewidth}i\
+	     -rotate $rotate -colormode $color]
+
+    if [set [scope $itk_component(hull)_tofile]] {
+	set fileID [open [$win.tofile.entry get] w]
+	puts $fileID $ps
+	close $fileID
+
+    } else {
+	set tmpFile [file join /tmp [$this windowName]]
+	catch {exec "rm -f $tmpFile"}
+
+	set fileID [open $tmpFile w]
+	puts $fileID $ps
+	close $fileID
+
+	eval exec "$printCmd $tmpFile"
+
+	catch {exec "rm -f $tmpFile"}
+    }
+
+    destroy $win
+}
+
+#######################################################################
+#### exportXwd
+# Generate an X window dump with the contents of the canvas.
+# NOTE: The xwd program seems to consistently give a "BadMatch" error,
+# but works nonetheless, albeit a bit slowly.  Thus, we ignore the
+# error.
+# NOTE: Unix-only implementation.
+#
+body ::tycho::Graphics::exportXwd {filename} {
+    set id [winfo id $itk_component(canvas)]
+    raiseWindow
+    # NOTE: Temporarily pass $prefix rather than $this until "info"
+    # is fixed in itcl.
+    ::tycho::safeUpdate $prefix
+    # NOTE: xwd always returns an error status.
+    catch {::tycho::invoke xwd -id $id -debug -out $filename >& /dev/null} msg
+    if ![file exists $filename] {
+        error $msg
+    }
+}
+
 #########################################################################
 #### focusin
 # Put the focus in the canvas.
@@ -1127,112 +1226,6 @@ body ::tycho::Graphics::print {} {
 	button $w.buttons.cancel -text "Cancel" -command "destroy $w" -bd 5
 	pack $w.buttons.print $w.buttons.cancel -fill both -expand 1\
 		-side left -padx 2 -pady 2
-    }
-}
-
-#######################################################################
-#### printGif
-# Generate a GIF file with the contents of the canvas.
-# NOTE: Unix-only implementation.  Also, depends on the programs
-# xwdtopnm, ppmtogif, and xwd, which must be in your path.
-#
-body ::tycho::Graphics::printGif {filename} {
-    set fn1 [::tycho::tmpFileName]
-    set fn2 [::tycho::tmpFileName]
-    printXwd $fn1
-    if [catch {exec xwdtopnm $fn1 > $fn2 2> /dev/null} msg] {
-        error "The following command failed:\n \
-                xwdtopnm $fn1 > $fn2 2> /dev/null\n \
-                Is the program xwdtopnm in your path?\n$msg"
-    }
-    # NOTE: -transparent color option should be added for the background.
-    if [catch {exec ppmtogif -interlace $fn2 > $filename 2> /dev/null} msg] {
-        error "The following command failed:\n \
-                ppmtogif -interlace $fn2 > $filename 2> /dev/null\n \
-                Is the program ppmtogif in your path?\n$msg"
-    }
-    ::tycho::rm $fn1
-    ::tycho::rm $fn2
-    # FIXME: Should display the gif!
-}
-
-#######################################################################
-# Generate a postscript file and print it.
-# FIXME: This method needs major rework.
-#
-body ::tycho::Graphics::printPs {win} {
-    set height [winfo height [canvasName]]
-    if {$height == 1} {
-        # Canvas has not been mapped yet
-        set height [cget -canvasheight]
-    }
-    set width [winfo width [canvasName]]
-    if {$width == 1} {
-        # Canvas has not been mapped yet
-        set width [cget -canvaswidth]
-    }
-
-    set pageheight [$win.page.pageheight.entry get]
-    set pagewidth [$win.page.pagewidth.entry get]
-    set pagey [$win.page.pagey.entry get]
-    set pagex [$win.page.pagex.entry get]
-
-    set printCmd [$win.command.entry get]
-
-    set rotate [set [scope $itk_component(hull)_rotate]]
-    if {$rotate == "Landscape"} {
-	set rotate 1
-    } else {
-	set rotate 0
-    }
-
-    # Adjust the offset.
-    set pagey [expr $pageheight/2+$pagey]
-    set pagex [expr $pagewidth/2+$pagex]
-
-    set color [set [scope $itk_component(hull)_color]]
-
-    set ps [ [canvasName] postscript\
-	     -height $height -width $width\
-	     -pageheight ${pageheight}i -pagewidth ${pagewidth}i\
-	     -rotate $rotate -colormode $color]
-
-    if [set [scope $itk_component(hull)_tofile]] {
-	set fileID [open [$win.tofile.entry get] w]
-	puts $fileID $ps
-	close $fileID
-
-    } else {
-	set tmpFile [file join /tmp [$this windowName]]
-	catch {exec "rm -f $tmpFile"}
-
-	set fileID [open $tmpFile w]
-	puts $fileID $ps
-	close $fileID
-
-	eval exec "$printCmd $tmpFile"
-
-	catch {exec "rm -f $tmpFile"}
-    }
-
-    destroy $win
-}
-
-#######################################################################
-#### printXwd
-# Generate an X window dump with the contents of the canvas.
-# NOTE: Unix-only implementation.
-#
-body ::tycho::Graphics::printXwd {filename} {
-    set id [winfo id $itk_component(canvas)]
-    raiseWindow
-    ::tycho::safeUpdate $this
-    # NOTE: xwd always returns an error status.
-    catch {exec xwd -id $id > $filename 2> /dev/null} msg
-    if ![file exists $filename] {
-        error "The following command failed:\n \
-                xwd -id $id > $filename 2> /dev/null\n \
-                Is the xwd program in your path?\n$msg"
     }
 }
 
