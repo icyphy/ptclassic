@@ -33,13 +33,13 @@
 # The _KeyedDigraph_ model extends the _Digraph_ class with the
 # notion of "keys" at each vertex. Edges between vertices must
 # connect to a key of a vertex rather than just the vertex.
-# Keys are implemented as a special kind of entity nested within
-# vertices, and can therefore have a value and attributes.
+# Keys are implemented as an entity nested within
+# vertices, and can therefore be configured with attributes.
 # The most obvious application of this kind of graph is dataflow
-# graphs, in which each edge from a vrtex must be uniquely identified.
-# Note that keys are not constrained to be "inputs" or "outputs".
+# graphs, in which each edge from a vertex must be uniquely identified.
+# Note, however, that keys are not constrained to be "inputs" or "outputs".
 #
-# Here are some example of creating and accessing a keyed digraph.
+# Here are some examples of creating and accessing a keyed digraph.
 # See the <a href="AbstractGraph.html">AbstractGraph</a> and
 # <a href="Digraph.html">Digraph</a> classes for more information
 # about graphs and directed graphs, and the <a href="Model.html">Model</a> 
@@ -48,8 +48,8 @@
 # <tcl><pre>
 #     catch {delete object $graph}
 #     set graph [::tycho::KeyedDigraph [::tycho::autoName graph]]
-#     $graph configureLink edge -initialdelay {}
-#     $graph configureEntity key -tokencount 1 -type input
+#     $graph configureLinkType edge -initialdelay {}
+#     $graph configureEntityType key -tokencount 1 -type input
 # </tcl></pre>
 #
 # Load data into the graph:
@@ -59,8 +59,6 @@
 #   b-----+--->d
 # </pre>
 # <tcl><pre>
-#     catch {delete object $graph}
-#     set graph [::tycho::KeyedDigraph [::tycho::autoName graph]]
 #     $graph read string {
 #         vertex a {
 #             key out -tokencount 2 -type output
@@ -198,6 +196,15 @@ class ::tycho::KeyedDigraph {
     # "Repair" a graph by deleting improperly-connected edges
     method repair {}
 
+    # Get the edges within a subgraph
+    method subgraphEdges {args}
+
+    # Get the input edges to a subgraph
+    method subgraphInputs {args}
+
+    # Get the output edges from a subgraph
+    method subgraphOutputs {args}
+
     # Test whether a graph is correctly constructed
     method verify {}
 
@@ -224,7 +231,7 @@ body ::tycho::KeyedDigraph::constructor {args} {
     configure -separator " "
     
     # Define the "key" entity: no value, no default attributes
-    defineEntity key
+    defineEntityType key
 
     # Evaluate options
     eval configure $args
@@ -273,18 +280,18 @@ body ::tycho::KeyedDigraph::delete {vertex} {
     _verify vertex $vertex
 
     # Start inverse command
-    set inverse ""
+    set inverse [list sequence]
 
     # Delete outward edges
     foreach {v1 k1 v2 k2} [edges $vertex * * *] {
-	append inverse "\n" [edgedelete $v1 $k1 $v2 $k2]
+		lappend inverse [edgedelete $v1 $k1 $v2 $k2]
     }
     # Delete inward edges
     foreach {v1 k1 v2 k2} [edges * * $vertex *] {
-	append inverse "\n" [edgedelete $v1 $k1 $v2 $k2]
+		lappend inverse [edgedelete $v1 $k1 $v2 $k2]
     }
     # Delete the vertex. (NB: This must follow the edge deletion.)
-    append inverse "\n" [vertexdelete $vertex]
+    	lappend inverse [vertexdelete $vertex]
 
     # Return the inverse command
     return $inverse
@@ -486,6 +493,73 @@ body ::tycho::KeyedDigraph::repair {} {
     }
     # Return null so record{} or publish{} will complain.
     return ""
+}
+
+########################################################################
+#### subgraphEdges
+#
+# Return the edges within a sub-graph. The arguments are the vertices
+# of the subgraph. The returned list of edges are source-target pairs
+# (not a flat list as in some other methods). This is to make graph
+# editors more generic.
+#
+body ::tycho::KeyedDigraph::subgraphEdges {args} {
+    set result {}
+    foreach u $args {
+        foreach v $args {
+            foreach quad [array names _info [list edge * * [list $u * $v *]]] {
+                lappend result [lindex $quad 3]
+            }
+            foreach quad [array names _info [list edge * * [list $v * $u *]]] {
+                lappend result [lindex $quad 3]
+            }
+        }
+    }
+    return $result
+}
+
+########################################################################
+#### subgraphInputs
+#
+# Return the input edges to a sub-graph. The arguments are the vertices
+# of the subgraph. The returned list of edges are source-target pairs
+# (not a flat list as in some other methods). This is to make graph
+# editors more generic.
+#
+body ::tycho::KeyedDigraph::subgraphInputs {args} {
+    set result {}
+    set vertices [array names _vertices]
+    foreach v $args {
+        foreach quad [array names _info [list edge * * [list * * $v *]]] {
+            set edge [lindex $quad 3]
+            if { [lsearch -exact $vertices [lindex $edge 0]] < 0 } {
+                lappend result $edge
+            }
+        }
+    }
+    return $result
+}
+
+########################################################################
+#### subgraphOutputs
+#
+# Return the output edges from a sub-graph. The arguments are the vertices
+# of the subgraph. The returned list of edges are source-target pairs
+# (not a flat list as in some other methods). This is to make graph
+# editors more generic.
+#
+body ::tycho::KeyedDigraph::subgraphOutputs {args} {
+    set result {}
+    set vertices [array names _vertices]
+    foreach v $args {
+        foreach quad [array names _info [list edge * * [list $v * * *]]] {
+            set edge [lindex $quad 3]
+            if { [lsearch -exact $vertices [lindex $edge 2]] < 0 } {
+                lappend result $edge
+            }
+        }
+    }
+    return $result
 }
 
 ########################################################################
