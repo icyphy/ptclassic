@@ -145,7 +145,7 @@ proc makeRunWindow {} {
     frame .low -bd 10
 
     # quit button
-    button .quit -text DISMISS -command "ptkStop cgc_prog; destroy ."
+    button .quit -text DISMISS -command "ptkStop cgc_prog; exit"
 
     # overall structure
     pack append . \
