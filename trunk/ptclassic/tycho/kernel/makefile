@@ -57,13 +57,8 @@ ITCL_SRCS = \
 	ConsoleText.itcl \
 	DialogWindow.itcl \
 	Dismiss.itcl \
-	Edit.itcl \
 	EditFSM.itcl \
-	EditProgram.itcl \
-	EditProgramText.itcl \
 	EditSearch.itcl \
-	EditSpice.itcl \
-	EditSpiceText.itcl \
 	EntryQuery.itcl \
 	ErrorMessage.itcl \
 	File.itcl \
