@@ -139,6 +139,7 @@ reparse:
 }
 
 const State* State :: lookup (char* name, const Block* blockIAmIn) const {
+	if (blockIAmIn->isItWormhole()) blockIAmIn = blockIAmIn->parent();
         while (blockIAmIn) {
                 State* p = blockIAmIn->stateWithName(name);
                 if (p) return p;
