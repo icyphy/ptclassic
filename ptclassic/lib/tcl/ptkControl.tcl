@@ -80,9 +80,11 @@ proc ptkHasRun { name } {
 # Procedure to run a universe.
 #
 proc ptkRunControl { name octHandle } {
-    global ptkRunFlag ptkDebug ptkRunEventLoop ptkControlPanel ptkOctHandles
+    global ptkRunFlag ptkDebug ptkRunEventLoop ptkControlPanel ptkOctHandles \
+	ptkScriptOn
     set ptkDebug($name) 0
     set ptkRunEventLoop($name) 1
+    set ptkScriptOn($name) 0
     set ptkOctHandles($name) $octHandle
     set ptkControlPanel .run_$octHandle
     
@@ -104,22 +106,52 @@ proc ptkRunControl { name octHandle } {
     message $ptkControlPanel.msg \
 	    -width 25c -text "Control panel for $name" -justify center
 
-    # Define the entry that controls the number of iterations
-    frame $ptkControlPanel.iter -bd 10
-	label $ptkControlPanel.iter.label -text "When to stop:"
-        entry $ptkControlPanel.iter.entry -relief sunken -width 10
-	$ptkControlPanel.iter.entry insert @0 $defNumIter
-	checkbutton $ptkControlPanel.iter.debug -text "Debug" \
+    frame $ptkControlPanel.options
+	checkbutton $ptkControlPanel.options.debug -text "Debug" \
 	    -variable ptkDebug($name) -relief flat \
 	    -command "ptkSetOrClearDebug $name $octHandle"
-	checkbutton $ptkControlPanel.iter.event -text "Interactive" \
+	checkbutton $ptkControlPanel.options.event -text "Interactive" \
 	    -variable ptkRunEventLoop($name) -relief flat \
 	    -command "ptkSetRunInteractivity $name $octHandle"
-	pack append $ptkControlPanel.iter \
-	    $ptkControlPanel.iter.label left \
-	    $ptkControlPanel.iter.entry left \
-	    $ptkControlPanel.iter.debug {right padx 20} \
-	    $ptkControlPanel.iter.event {right padx 20} 
+	checkbutton $ptkControlPanel.options.script -text "Script" \
+	    -variable ptkScriptOn($name) -relief flat \
+	    -command "ptkToggleScript $name $octHandle"
+	pack append $ptkControlPanel.options \
+	    $ptkControlPanel.options.debug {right padx 20} \
+	    $ptkControlPanel.options.event {right padx 20} \
+	    $ptkControlPanel.options.script {right padx 20}
+
+    # Define the entry that controls the number of iterations
+    # Note: This may be replaced by the user with the script window
+    # defined below.
+    frame $ptkControlPanel.iter -bd 10
+	label $ptkControlPanel.iter.label -text "When to stop:"
+        entry $ptkControlPanel.iter.entry -relief sunken
+	$ptkControlPanel.iter.entry insert @0 $defNumIter
+	pack $ptkControlPanel.iter.label -side left
+	pack $ptkControlPanel.iter.entry -side left -fill x -expand yes
+
+    # Alternative to the iter frame: a script window
+    frame $ptkControlPanel.tclScript -bd 10
+        pack [label $ptkControlPanel.tclScript.label -text "Tcl Script:" ] \
+            -side top -anchor w
+        pack [frame $ptkControlPanel.tclScript.tframe] \
+	    -side top -fill both -expand 1
+        scrollbar $ptkControlPanel.tclScript.tframe.vscroll \
+	    -relief flat \
+	    -command "$ptkControlPanel.tclScript.tframe.text yview"
+        pack $ptkControlPanel.tclScript.tframe.vscroll \
+	    -side right -fill y
+        text $ptkControlPanel.tclScript.tframe.text \
+	    -wrap word -height 8 -width 40 -setgrid true \
+	    -yscrollcommand "$ptkControlPanel.tclScript.tframe.vscroll set" \
+	    -relief sunken -bd 2
+	set scriptValue [ptkGetStringProp $octHandle script]
+	if {$scriptValue == ""} {
+	    set scriptValue "run $defNumIter\nwrapup\n"
+	}
+	$ptkControlPanel.tclScript.tframe.text insert end $scriptValue
+        pack $ptkControlPanel.tclScript.tframe.text -expand yes -fill both
 
     # The following empty frames are created so that they are available
     # to stars to insert custom controls into the control panel.
@@ -137,16 +169,16 @@ proc ptkRunControl { name octHandle } {
 	button $ptkControlPanel.panel.gofr.go -text " GO <Return> " \
 	    -command "ptkGo $name $octHandle" -width 14
 	pack append $ptkControlPanel.panel.gofr \
-	    $ptkControlPanel.panel.gofr.go {expand fill}
+	    $ptkControlPanel.panel.gofr.go {fill}
 		
 	button $ptkControlPanel.panel.pause -text "PAUSE <Space>" \
 		-command "ptkPause $name $octHandle" -width 14
 	button $ptkControlPanel.panel.stop -text "STOP <Escape>" \
 		-command "ptkStop $name" -width 14
 	pack append $ptkControlPanel.panel \
-	    $ptkControlPanel.panel.gofr {left expand fill expand} \
-	    $ptkControlPanel.panel.pause {left expand fill expand} \
-	    $ptkControlPanel.panel.stop {right expand fill expand}
+	    $ptkControlPanel.panel.gofr {left fill} \
+	    $ptkControlPanel.panel.pause {left fill} \
+	    $ptkControlPanel.panel.stop {right fill}
 
     # The debug panel will be filled with buttons when debugging is
     # turned on.  It starts out off always.
@@ -159,16 +191,23 @@ proc ptkRunControl { name octHandle } {
     button $ptkControlPanel.disfr.dismiss -text "DISMISS" -command \
 	"ptkRunControlDel $name $ptkControlPanel $octHandle $defNumIter"
     pack append $ptkControlPanel.disfr \
-	$ptkControlPanel.disfr.dismiss {top fill expand}
+	$ptkControlPanel.disfr.dismiss {top fillx}
 
     # Newer syntax for pack command used below
-    pack $ptkControlPanel.msg -fill both -expand yes
-    pack $ptkControlPanel.iter
+    pack $ptkControlPanel.msg -fill both
+    pack $ptkControlPanel.options
+    if {[ptkGetStringProp $octHandle usescript] == "1"} {
+	set ptkScriptOn($name) 1
+	pack $ptkControlPanel.tclScript -expand 1 -fill both \
+	    -after $ptkControlPanel.options
+    } {
+        pack $ptkControlPanel.iter -anchor w -fill x
+    }
     pack $ptkControlPanel.panel
-    pack $ptkControlPanel.high -fill x -padx 10 -expand yes
-    pack $ptkControlPanel.middle -fill x -padx 10 -expand yes
-    pack $ptkControlPanel.low -fill x -padx 10 -expand yes
-    pack $ptkControlPanel.disfr -fill both -expand yes
+    pack $ptkControlPanel.high -fill x -padx 10
+    pack $ptkControlPanel.middle -fill x -padx 10
+    pack $ptkControlPanel.low -fill x -padx 10
+    pack $ptkControlPanel.disfr -fill x
 
     wm geometry $ptkControlPanel +400+400
     focus $ptkControlPanel
@@ -215,7 +254,7 @@ proc ptkSetRunInteractivity { name octHandle } {
         if {[winfo exists $Panelwindow]} {
 	    $Panelwindow.panel.pause configure -state normal
 	    $Panelwindow.panel.stop configure -state normal
-	    $Panelwindow.iter.debug configure -state normal
+	    $Panelwindow.options.debug configure -state normal
 	}
 	# Debug is now allowed
 	ptkSetOrClearDebug $name $octHandle
@@ -228,7 +267,7 @@ proc ptkSetRunInteractivity { name octHandle } {
         if {[winfo exists $Panelwindow]} {
 	    $Panelwindow.panel.pause configure -state disabled
 	    $Panelwindow.panel.stop configure -state disabled
-	    $Panelwindow.iter.debug configure -state disabled
+	    $Panelwindow.options.debug configure -state disabled
 	}
 	# If the run is in progress, turn off the event loop
 	if {$ptkRunFlag($name)=={ACTIVE} || $ptkRunFlag($name)=={PAUSED} } {
@@ -238,6 +277,26 @@ proc ptkSetRunInteractivity { name octHandle } {
             # now turn off the event loop
 	    ptkSetEventLoop off
 	}
+    }
+}
+
+#######################################################################
+# Procedure to toggle between scripted runs and non-scripted runs
+#
+proc ptkToggleScript { name octHandle } {
+    global ptkControlPanel ptkScriptOn
+    set ptkControlPanel .run_$octHandle
+    if {$ptkScriptOn($name)} {
+	# Switching to scripted runs
+	pack forget $ptkControlPanel.iter
+	pack $ptkControlPanel.tclScript -expand 1 -fill both \
+	    -after $ptkControlPanel.options
+    } {
+	# Reverting to non-scripted run
+	pack forget $ptkControlPanel.tclScript
+	pack $ptkControlPanel.iter -anchor w -fill x \
+	    -after $ptkControlPanel.options
+	wm geometry $ptkControlPanel ""
     }
 }
 
@@ -401,7 +460,11 @@ proc ptkPrintStarName { star } {
 # Procedure to delete a control window
 #
 proc ptkRunControlDel { name window octHandle defNumIter} {
-    global ptkRunFlag ptkDebug
+    global ptkRunFlag ptkDebug ptkScriptOn
+
+    # Remember for next time whether the control panel is set
+    # for scripted runs or simple runs.
+    ptkSetStringProp $octHandle usescript $ptkScriptOn($name)
 
     # Turn debug off
     if {$ptkDebug($name)} {
@@ -531,6 +594,7 @@ proc ptkStepTrap { name octHandle star } {
 #procedure to go
 proc ptkGo {name octHandle} {
     global ptkRunFlag ptkRunEventLoop
+
     # For now, we allow only one run at a time.
     set univ [curuniverse]
     if {[info exists ptkRunFlag($univ)] && \
@@ -539,16 +603,30 @@ proc ptkGo {name octHandle} {
             ptkImportantMessage .error "Sorry.  Only one run at time. "
 	    return
     }
+
     global ptkControlPanel
     set ptkControlPanel .run_$octHandle
+
     # Turn the event loop on (or off) for this run 
     ptkSetEventLoop $ptkRunEventLoop($name)
+
+    # arrange to call the routine which updates the
+    # iteration count displayed in the debug window.
+    # the debug flag controls it being called after 
+    # the first time, so this places the control of the
+    # update in the ptkUpdateCount routine.
     after 200 ptkUpdateCount $name $octHandle
+
     catch {$ptkControlPanel.panel.gofr.go configure -relief sunken}
     catch {$ptkControlPanel.panel.pause configure -relief raised}
+
     # So that error highlighting, etc. works
     if {$univ != $name} {ptkSetHighlightFacet $octHandle}
     ptkClearHighlights
+
+    # if we are currently paused, then all we have to do
+    # is set the status back to ACTIVE, and return to 
+    # ensure things start up again.
     if {[info exists ptkRunFlag($name)] && \
     	$ptkRunFlag($name) == {PAUSED}} {
 	    # Setting of ptkRunFlag should
@@ -557,21 +635,44 @@ proc ptkGo {name octHandle} {
     	    set ptkRunFlag($name) ACTIVE
 	    return
     }
+
+    # we were not PAUSED, so we have extra stuff to do
+    # besides setting the flag to ACTIVE, but get that
+    # out of the way first, and make sure the change in 
+    # button relief gets displayed
     set ptkRunFlag($name) ACTIVE
-    # Make sure the button relief gets displayed
     update
+
     # catch errors and reset the run flag.
     if {[catch {
         curuniverse $name
         ptkCompile $octHandle
         set w .run_$octHandle
-        set numIter [$w.iter.entry get]
-        run $numIter
-	if {[info exists ptkRunFlag($name)] &&
-	    $ptkRunFlag($name) != {ABORT}} { wrapup } {
-	    # Mark an error if the system was aborted
-	    set ptkRunFlag($name) ERROR
+
+	global ptkScriptOn 
+
+	if { $ptkScriptOn($name) } {
+	    # we want to run the script. This means we have to
+	    # get the contents of the text window, and then get
+	    # the TCL interpreter to evaluate it
+	    ptkSetStringProp $octHandle script \
+	        [$ptkControlPanel.tclScript.tframe.text get 0.0 end]
+	    eval [$ptkControlPanel.tclScript.tframe.text get 0.0 end]
+	} {
+	    # default run: just run through the specified number
+	    # of iterations, finishing by invoking
+	    # wrapup if no error occurred.
+            set numIter [$w.iter.entry get]
+            run $numIter
+    
+    	    if {[info exists ptkRunFlag($name)] &&
+    	        $ptkRunFlag($name) != {ABORT}} { wrapup } {
+    	        # Mark an error if the system was aborted
+    	        set ptkRunFlag($name) ERROR
+	    }
 	}
+
+        # we have finished running
 	ptkClearRunFlag $name $octHandle
     } msg] == 1} {
 	# An error has occurred.
