@@ -23,11 +23,11 @@ limitation of liability, and disclaimer of warranty provisions.
 <a name="filter, adaptive, with coefficient plotting"></a>
 <a name="filter, LMS, with coefficient plotting"></a>
 <a name="LMS adaptive filter with coefficient plotting"></a>
-The value of the <i>graphTitle\fP parameter
-is used for the title of the plot; the value of <i>graphOptions\fP
+The value of the <i>graphTitle</i> parameter
+is used for the title of the plot; the value of <i>graphOptions</i>
 is handed to the xgraph program as option values on the command line.
 <p>
-If <i>trace\fP is YES, then there may not be more than 64 taps in the filter,
+If <i>trace</i> is YES, then there may not be more than 64 taps in the filter,
 since this is the maximum number of plots that the xgraph program can handle.
 	}
 	seealso {LMS, XMgraph, LMSTkPlot, LMSPlotCx, LMSTkPlotCx}
