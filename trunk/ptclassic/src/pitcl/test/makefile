@@ -52,7 +52,9 @@ SIMPLE_TESTS = \
 	testName.itcl \
 	testPorts.itcl \
 	testPredicates.itcl \
-	testRemove.itcl
+	testRemove.itcl \
+	testRun.itcl \
+	testTarget.itcl
 
 # We need at least one GRAPHICAL_TEST so that we can generate alltests.itcl
 GRAPHICAL_TESTS = \
