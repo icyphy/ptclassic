@@ -1,6 +1,7 @@
 # Definition of a Tcl context-sensitive editor.
 #
 # @Author: Edward A. Lee
+# @Contributor: Christopher Hylands
 #
 # @Version: $Id$
 #
@@ -61,6 +62,9 @@ class ::tycho::EditTcl {
     # Color the Tcl code in a region.
     method parseNow {start stop} {}
 
+    # Select the proc that the insertion cursor is inside of.
+    method selectConstruct {}
+
     # Tag identifiers in the file that are defined elsewhere.
     method tagLinks {}
 
@@ -78,6 +82,12 @@ class ::tycho::EditTcl {
 
     # Counter for hyperlinks.
     protected variable hypcount 0
+
+    ##########################################################################
+    ####                         protected commons                        ####
+
+    # Regular expression to select a construct
+    protected common selectConstructRegexp {^proc}
 }
 
 ###################################################################
@@ -88,6 +98,8 @@ body ::tycho::EditTcl::constructor {args} {
     
     # Set the fill prefix to be the comment character for Tcl.
     set fillPrefix "#"
+
+    menubar insert "Select Body" "Unselect"  -command "$this selectConstruct"
 }
 
 #####################################################################
@@ -168,6 +180,35 @@ body ::tycho::EditTcl::parseNow {start stop} {
     }
 }
 
+#########################################################################
+#### selectConstruct
+# Select the proc that the insertion cursor is inside of.
+# This method is useful for selecting a proc to be evaluated
+# The selectConstructRegexp common variable can be modified in the
+# child classes to cause this method to highlight other constructs.
+#
+# FIXME: This is a little evil, but what we do is search backwards from
+# the current point for a line that begins with 'proc' with no
+# whitespace in front of proc, and then search forward for a line
+# that begins with a curly bracket that has no white space in front.
+# The real solution would be to have a function that counts parentheses
+# and also gets the header
+#
+body ::tycho::EditTcl::selectConstruct {} {
+    set idx [$itk_component(text) index insert]
+    set start [findOne 1 1 1 1 {^(proc|body|configbody)} $idx 0.0 {}]
+    if {$start == ""} {
+	set stop 0.0
+    }
+    set stop [findOne 1 0 1 1 {^\}} $idx end {} ]
+    if {$stop == ""} {
+	set stop end
+    }
+    selectRange [lindex $start 0] \
+            [$itk_component(text) index "[lindex $stop 0] +1 char"]
+}
+
+#########################################################################
 #### tagLinks
 # This method tags identifiers in the file that are defined elsewhere
 # and are registered for auto-loading in the global array "auto_index".
