@@ -258,7 +258,7 @@ static const Block* findClass (const char* name) {
 	if (!c) return 0;
 	const Block* b = KnownBlock::find (c, ptcl->curDomain);
 	if (!b) return b;
-	return checkFields(b,names,nf,isMPH) ? b : 0;
+	return checkFields(b,(const char **)names,nf,isMPH) ? b : 0;
 }
 
 // This function writes the domain to the log file, if and only if
@@ -295,7 +295,7 @@ KcInstance(char *name, char *ako, ParamListType* pListPtr) {
 	const char* cname = parseClass (ako, nf, names, values);
 	if (!cname) return FALSE;
 	const Block* b = KnownBlock::find(cname, ptcl->curDomain);
-	if (!b || !checkFields(b,names,nf,isMPH)) return FALSE;
+	if (!b || !checkFields(b,(const char **)names,nf,isMPH)) return FALSE;
 	if (!cname || !ptcl->currentGalaxy->addStar(name, cname))
 		return FALSE;
  	LOG << "\tstar " << SafeTcl(name) << " " << SafeTcl(cname) << "\n";
@@ -539,7 +539,7 @@ KcGetTerms(char* name, TermList* terms)
 	cname = parseClass (name, nf, mphname, npspec);
 	
 	if (!cname || (block = findClass(name)) == 0 ||
-	    !checkFields(block,mphname,nf,isMPH)) {
+	    !checkFields(block,(const char **)mphname,nf,isMPH)) {
 		char buf[80];
 		sprintf (buf, "Invalid Galaxy Name '%s' (interpreted as '%s')",
 			name, cname);
@@ -600,7 +600,7 @@ KcGetTerms(char* name, TermList* terms)
 	// Now look for any multiPortHoles that were not converted
 	for(int mphNum = 0; mphNum < nm; mphNum++) {
 	    int mpos;
-	    if(isStringInList(names[n+mphNum], mphname, nf, mpos) &&
+	    if(isStringInList(names[n+mphNum],(const char **)mphname, nf, mpos) &&
 			npspec[mpos])
 		continue;
 	    newNames[newNameCount] = names[n+mphNum];
@@ -679,7 +679,7 @@ realGetParams(const Block* block, ParamListType* pListPtr,char** names,
 		    // Only return settable states that are not in
 		    // the names list.
 		    if ((s->attributes() & AB_SETTABLE) &&
-			!isStringInList(s->name(),names,n_names,pos)) {
+			!isStringInList(s->name(),(const char **)names,n_names,pos)) {
 		        tempArray[j].name = s->name();
 			tempArray[j].type = s->type();
 		        tempArray[j++].value = s->initValue();
@@ -855,7 +855,7 @@ static void displayStates(const Block *b,char** names,int n_names) {
 	int pos;
 	while ((s = nexts++) != 0) {
 		if ((s->attributes() & AB_SETTABLE) == 0 ||
-		    isStringInList(s->name(),names,n_names,pos))
+		    isStringInList(s->name(),(const char **)names,n_names,pos))
 			continue;
 		accum_string ("   ");
 		accum_string (s->name());
