@@ -131,7 +131,7 @@ StringList AsmStar::lookupAddress(const char* name, const char* offset)
     {
 	// compute offset within buffer, circularly
 	off += port->bufPos();
-	off %= port->bufSize();
+	if ( port->bufSize() ) off %= port->bufSize();
 
 	int a = port->baseAddr() + off;
 	addr = a;
