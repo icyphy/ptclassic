@@ -612,7 +612,7 @@ void VHDLBTarget :: setup () {
 
   Galaxy* gal = galaxy();
   if (! gal) {
-    Error::abortRun("The VHDLB target cannot find a galaxy.");
+    Error::abortRun("The VHDLB target has encountered a null galaxy.");
     return;
   }
   if (warnIfNotConnected(*gal)) return;
