@@ -68,11 +68,9 @@ body ::tycho::EditTcl::constructor {args} {
     eval itk_initialize $args
     
     # Add to the format menu a command to recolorize.
-    $itk_component(formatMenu) add separator
+    addMenuSeparator Format
         
-    $itk_component(formatMenu) add command \
-	    -label "Show Links" \
-	    -underline 1 \
+    addMenuItem "Show Links" Format -underline 1 \
 	    -command "$this component text busy tagLinks"
 }
 
@@ -83,6 +81,7 @@ body ::tycho::EditTcl::constructor {args} {
 #
 body ::tycho::EditTcl::evaluate {} {
     return [$itk_component(text) evaluate]
+    focusin
 }
 
 ###################################################################
