@@ -24,7 +24,7 @@ simulations.
 <p>
 The magnitude of the height of the pulse is equal to
 <pre>
-SqrPthn 10 sup {{SNRn} over {20}}
+SqrPthn * 10 <sup>SNRn/20</sup>
 </pre>
 The phase of the height of the pulse is equal to
 <pre>
