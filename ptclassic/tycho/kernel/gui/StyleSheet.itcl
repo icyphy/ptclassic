@@ -703,7 +703,7 @@ body ::tycho::StyleSheet::subscribe {mode {subscriber {}} args} {
 # parameters that are not in the master.
 #
 body ::tycho::StyleSheet::synchronize {master} {
-    puts "Synchronizing stylesheet: $modelname"
+    # puts "Synchronizing stylesheet: $modelname"
     foreach s [match style] {
 	_sync $master $s {}
     }
@@ -813,7 +813,7 @@ body ::tycho::StyleSheet::load {stylesheet} {
     }
     # If it's not loaded, load it
     if ![::info exists _stylemodel($stylesheet)] {
-	puts "Loading stylesheet: $stylesheet"
+	# puts "Loading stylesheet: $stylesheet"
 	
 	set userfile [::tycho::expandPath $_userfile($stylesheet)]
 	set masterfile [::tycho::expandPath $_masterfile($stylesheet)]
