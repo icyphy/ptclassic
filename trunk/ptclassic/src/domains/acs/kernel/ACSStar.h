@@ -1,7 +1,8 @@
 #ifndef _ACSStar_h
 #define _ACSStar_h
 
-/*  Version @(#)ACSStar.h	1.7 04/01/98
+/*
+@Version: $Id$
 
 @Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.
