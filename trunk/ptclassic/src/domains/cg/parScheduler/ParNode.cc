@@ -38,6 +38,9 @@ Date of last revision:
 
 #include "ParNode.h"
 #include "ParGraph.h"
+#include "SDFPortHole.h"
+#include "CGStar.h"
+#include "Error.h"
 
                         ///////////////////////
                         ///  *Constructor*  ///
@@ -52,6 +55,33 @@ ParNode::ParNode(DataFlowStar* s, int invoc_no) : EGNode(s, invoc_no)
 	waitNum = 0;
 	origin = 0;
 	partner = 0;
+	pf = 0;
+
+	// check whether it lies in the wormhole boundary or not.
+	if (invoc_no == 1) {
+		atBoundaryFlag = FALSE;
+		DFStarPortIter nextPort(*s);
+		DFPortHole* p;
+		while ((p = nextPort++) != 0) {
+			if (p->atBoundary()) {
+				if (((CGStar*) s)->isParallel()) {
+					Error::abortRun("a parallel star can not be at the wormhole boundary");
+					return; 
+				}
+				atBoundaryFlag = TRUE;
+				claimSticky();
+				return;
+			}
+		}
+	} else {
+		ParNode* n = (ParNode*) s->myMaster();
+		if (n->atBoundary()) {
+			atBoundaryFlag = TRUE;
+			claimSticky();
+		} else {
+			atBoundaryFlag = FALSE;
+		}
+	}
 }
 
 // Alternate constructor for idle nodes and communication nodes
@@ -67,6 +97,8 @@ ParNode::ParNode(int t) : EGNode(0,0) {
 	waitNum = 0;
 	origin = 0;
 	partner = 0;
+	pf = 0;
+	atBoundaryFlag = 0;
 }
 
                            ///////////////
