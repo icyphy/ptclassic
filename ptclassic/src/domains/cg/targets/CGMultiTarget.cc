@@ -37,6 +37,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include "Domain.h"
+#include "Profile.h"
+#include "ParNode.h"
+#include "ParProcessors.h"
 #include "CGMultiTarget.h"
 #include "DLScheduler.h"
 #include "HuScheduler.h"
@@ -51,6 +55,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "pt_fstream.h"
 #include "stdlib.h"
 #include "BooleanMatrix.h"
+#include "MultiScheduler.h"
 
 CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
 			     const char* desc) :
@@ -75,6 +80,9 @@ CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
 				   "processor can overlap communication?"));
 	addState(useCluster.setState("useCluster",this,"NO",
 				   "Use Gil's declustering algorithm?"));
+	addState(useMultipleSchedulers.setState("Use multiple schedulers?",
+						this,"NO",
+				   "Use hierarchical schedulers?"));
 	addedStates.initialize();
 }
 
@@ -252,28 +260,38 @@ void CGMultiTarget :: resourceInfo() {
 		
 // select the scheduler depending on the options.
 void CGMultiTarget :: chooseScheduler() {
-	delSched();
-	if (int(ignoreIPC)) {
-		LOG_NEW; setSched(new HuScheduler(this, logFile));
-	} else if (int(overlapComm)) {
-		LOG_NEW; setSched(new DLScheduler(this, logFile, 0));
-	} else if (int(useCluster)) {
-		if (childType.size() > 1) {
-			Error :: warn("Declustering technique can not be",
+    delSched();
+    ParScheduler* mainScheduler;
+    if (int(ignoreIPC)) {
+	LOG_NEW; mainScheduler = new HuScheduler(this, logFile);
+    }
+    else if (int(overlapComm)) {
+	LOG_NEW; mainScheduler = new DLScheduler(this, logFile, 0);
+    }
+    else if (int(useCluster)) {
+	if (childType.size() > 1) {
+	    Error :: warn("Declustering technique can not be",
 			  "applied for heterogeneous targets.\n By default",
 			  "we use dynamic-level scheduling");
-			LOG_NEW; setSched(new DLScheduler(this, logFile, 1));
-		} else if (resources.size() > 1) {
-			Error :: warn("Declustering technique can not be",
+	    LOG_NEW; mainScheduler = new DLScheduler(this, logFile, 1);
+	}
+	else if (resources.size() > 1) {
+	    Error :: warn("Declustering technique can not be",
 			  "applied with resource restriction.\n By default",
 			  "we use dynamic-level scheduling");
-			LOG_NEW; setSched(new DLScheduler(this, logFile, 1));
-		} else {
-			LOG_NEW; setSched(new DeclustScheduler(this, logFile));
-		}
-	} else {
-		LOG_NEW; setSched(new DLScheduler(this, logFile, 1));
+	    LOG_NEW; mainScheduler = new DLScheduler(this, logFile, 1);
 	}
+	else {
+	    LOG_NEW; mainScheduler = new DeclustScheduler(this, logFile);
+	}
+    }
+    else {
+	LOG_NEW; mainScheduler = new DLScheduler(this, logFile, 1);
+    }
+    if(int(useMultipleSchedulers)) {
+	LOG_NEW; mainScheduler=new MultiScheduler(this,logFile,*mainScheduler);
+    }
+    setSched(mainScheduler);
 }
 
 void CGMultiTarget :: flattenWorm() {
@@ -492,7 +510,11 @@ void CGMultiTarget::wrapup() {
         }
         return status;
 }
-	
+
+int CGMultiTarget :: childSupport(Target* t, Star* s) {
+    return t->support(s);
+}
+
 // Trickiness again for wormholes. 
 // Since more than one ParNodes are correspond to one star in a subGal,
 // we are careful in searching the stars at the wormhole boundary!
@@ -515,7 +537,7 @@ void CGMultiTarget :: allWormInputCode() {
 				if (iprocs[ip] == 0) {
 					iprocs[ip] = 1;
 					CGStar* s = (CGStar*)pn->getCopyStar();
-					s->myTarget()->wormInputCode(
+					s->cgTarget()->wormInputCode(
 					 *(s->portWithName(realP.name())));
 				}
 				pn = (ParNode*) pn->getNextInvoc();
@@ -543,7 +565,7 @@ void CGMultiTarget :: allWormOutputCode() {
 				if (iprocs[ip] == 0) {
 					iprocs[ip] = 1;
 					CGStar* s = (CGStar*)pn->getCopyStar();
-					s->myTarget()->wormOutputCode(
+					s->cgTarget()->wormOutputCode(
 					 *(s->portWithName(realP.name())));
 				}
 				pn = (ParNode*) pn->getNextInvoc();
@@ -589,7 +611,7 @@ IntArray* CGMultiTarget :: candidateProcs(ParProcessors* parSched,
 	for (int i = 0; i < parSched->size(); i++) {
 		UniProcessor* uni = parSched->getProc(i);
 		CGTarget* t = uni->target();
-		if (s && t && !t->support(s)) continue;
+		if (s && t && !childSupport(t,s)) continue;
 		else if (s && t && !childHasResources(*s, i)) continue;
 		else if (uni->getAvailTime() || hetero) {
 			canProcs[k] = i;
@@ -637,7 +659,7 @@ DataFlowStar* CGMultiTarget :: createCollect() {
 // If the target does not support the star, return -1.
 int CGMultiTarget :: execTime(DataFlowStar* s, CGTarget* t) {
 	if ((!t) || (relTimeScales.size() <= 1)) return s->myExecTime();
-	else if (!t->support(s)) return -1;
+	else if (!childSupport(t,s)) return -1;
 
 	// for heterogeneous case, we need to consider relative time
 	// scale

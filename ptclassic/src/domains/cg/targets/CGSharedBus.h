@@ -38,8 +38,8 @@ Programmer: Soonhoi Ha
 
 #include "CGMultiTarget.h"
 #include "UniProcessor.h"
-#include "ParNode.h"
 
+class ParNode;
 class CGSharedBus : public CGMultiTarget {
 public:
 	CGSharedBus(const char* name,const char* starType,const char* desc);

@@ -37,6 +37,7 @@ Programmer: Soonhoi Ha
 
 #include "CGSharedBus.h"
 #include "KnownTarget.h"
+#include "ParNode.h"
 
 CGSharedBus::CGSharedBus(const char* name,const char* starType,
 	const char* desc) : CGMultiTarget(name,starType,desc) {}
