@@ -243,6 +243,9 @@ class ::tycho::File {
     # This variable keeps track of registered editors to put them into
     # the Window menu.
     private common windowMenuEntries {}
+
+    # Class identifier
+    private variable myclass {}
 }
 
 #########################################################################
@@ -315,13 +318,14 @@ configbody ::tycho::File::readonly {
     if [winfo exists $prefix] {
 	if {$itk_option(-readonly)} {
 	    configure -title "$file (read only)"
-	    $itk_component(dismiss) configure -text "DISMISS (read only)"
+	    $itk_component(dismiss) configure -text \
+                    "DISMISS  $myclass (read only)"
 	} {
 	    configure -title "$file"
-	    $itk_component(dismiss) configure -text "DISMISS"
+	    $itk_component(dismiss) configure -text "DISMISS  $myclass"
 	}
     } {
-	$itk_component(dismiss) configure -text "DISMISS"
+	$itk_component(dismiss) configure -text "DISMISS  $myclass"
     }
 }
 
@@ -332,6 +336,9 @@ configbody ::tycho::File::readonly {
 ###################################################################
 #
 body ::tycho::File::constructor {args} {
+
+    # Store my class identifier in a private variable.
+    set myclass "\[[info class] class\]"
 
     # Set up the menubar
     itk_component add menuFrame {
@@ -698,7 +705,7 @@ body ::tycho::File::insertFile {} {
 #
 body ::tycho::File::markModified {} {
     if {!$modified} {
-	$itk_component(dismiss) configure -text "DISMISS (modified)"
+	$itk_component(dismiss) configure -text "DISMISS  $myclass  (modified)"
 	set modified 1
     }
 }
@@ -710,9 +717,10 @@ body ::tycho::File::markModified {} {
 body ::tycho::File::markUnmodified {} {
     if {$modified} {
 	if {$itk_option(-readonly)} {
-	    $itk_component(dismiss) configure -text "DISMISS (read only)"
+	    $itk_component(dismiss) configure -text \
+                    "DISMISS   $myclass  (read only)"
 	} {
-	    $itk_component(dismiss) configure -text "DISMISS"
+	    $itk_component(dismiss) configure -text "DISMISS  $myclass"
 	}
 	set modified 0
     }
