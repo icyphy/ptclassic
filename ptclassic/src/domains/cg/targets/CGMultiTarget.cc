@@ -56,7 +56,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "pt_fstream.h"
 #include "stdlib.h"
 #include "BooleanMatrix.h"
-#include "MultiScheduler.h"
+#include "HierScheduler.h"
+#include "Cluster.h"
 
 CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
 			     const char* desc) :
@@ -141,7 +142,6 @@ void CGMultiTarget::setup() {
     ParScheduler* sched = (ParScheduler*) scheduler();
     sched->setGalaxy(*galaxy());
     sched->setUpProcs(nChildrenAlloc);
-    
 
     // CG stuff
     myCode.initialize();
@@ -168,6 +168,22 @@ void CGMultiTarget::setup() {
 	else Error::abortRun(*this, "could not compile!");
     }
 }
+
+inline int hierSchedulerTest(const char* c) {
+    if (strlen(c) < 2) return FALSE;
+    return *(c+1) == 'I' || *(c+1) == 'i';
+}
+
+/*virtual*/ int CGMultiTarget::schedulerSetup() {
+    int status = MultiTarget::schedulerSetup();
+    if (status && int(writeScheduleFlag) && hierSchedulerTest(schedName)) {
+	StringList dot;
+    	dot << printClusterDot(*galaxy());
+	writeFile(dot,".dot");
+    }
+    return status;
+}    
+
 
 void CGMultiTarget :: prepareChildren() {
     deleteChildren();
@@ -270,7 +286,7 @@ void CGMultiTarget :: chooseScheduler() {
     const char* sname = schedName;
     int hierSchedulingFlag = FALSE;
     size_t snamelen = strlen(sname);
-    if(*sname == 'H' || *sname == 'h') {
+    if(hierSchedulerTest(sname)) {
 	hierSchedulingFlag = TRUE;
 	const char* paren = strchr(sname,'(');
 	if (paren && ! ++paren == '\0') sname = paren;
@@ -301,11 +317,11 @@ void CGMultiTarget :: chooseScheduler() {
     	LOG_NEW; mainScheduler = new CGDDFScheduler(this, logFile);
     }
     else {
-    	LOG_NEW; mainScheduler = new DLScheduler(this, logFile, 1);
+    	mainScheduler = new DLScheduler(this, logFile, 1);
     }
 
     if (hierSchedulingFlag)
-	mainScheduler=new MultiScheduler(this,logFile,*mainScheduler);
+	mainScheduler=new HierScheduler(this,logFile,*mainScheduler);
 
     setSched(mainScheduler);
 }
@@ -529,7 +545,7 @@ int CGMultiTarget :: childSupport(Target* t, Star* s) {
 // we are careful in searching the stars at the wormhole boundary!
 
 void CGMultiTarget :: allWormInputCode() {
-    LOG_NEW; int* iprocs = new int[nChildrenAlloc];
+    int* iprocs = new int[nChildrenAlloc];
     for (int i = 0; i < nChildrenAlloc; i++)
 	iprocs[i] = 0;
 
@@ -557,7 +573,7 @@ void CGMultiTarget :: allWormInputCode() {
 }
 
 void CGMultiTarget :: allWormOutputCode() {
-    LOG_NEW; int* iprocs = new int[nChildrenAlloc];
+    int* iprocs = new int[nChildrenAlloc];
     for (int i = 0; i < nChildrenAlloc; i++)
 	iprocs[i] = 0;
 
@@ -615,23 +631,23 @@ ParNode* CGMultiTarget :: backComm(ParNode* n) {
 
 // create communication stars
 DataFlowStar* CGMultiTarget :: createSend(int from, int to, int /*num*/) {
-    LOG_NEW; CGSend* newS = new CGSend;
+    CGSend* newS = new CGSend;
     newS->registerProcs(from, to);
     return newS;
 }
 
 DataFlowStar* CGMultiTarget :: createReceive(int from, int to, int /*num*/) {
-    LOG_NEW; CGReceive* newS = new CGReceive;
+    CGReceive* newS = new CGReceive;
     newS->registerProcs(from, to);
     return newS;
 }
 
 // create Spread and Collect
 DataFlowStar* CGMultiTarget :: createSpread() {
-    LOG_NEW; return (new CGSpread);
+    return (new CGSpread);
 }
 DataFlowStar* CGMultiTarget :: createCollect() {
-    LOG_NEW; return (new CGCollect);
+    return (new CGCollect);
 }
 
 // create Macro Star
