@@ -129,7 +129,7 @@ be a parameter.
 	go {
 		if (!strm) return;
 		// add gain, cvt to integer
-		int data = int(float(input%0) * double(gain));
+		int data = int(double(input%0) * double(gain));
 		putc (ulaw(data), strm);
 	}
 // wrapup.  Does nothing if open failed, or 2nd wrapup call.
