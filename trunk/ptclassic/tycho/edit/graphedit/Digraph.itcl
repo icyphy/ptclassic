@@ -112,6 +112,9 @@ class ::tycho::Digraph {
     # Get the children of a vertex
     method children {vertex}
 
+    # Remove a vertex _and_ adjacent edges from the graph
+    method delete {vertex}
+
     # Add an edge and attributes to the graph
     method edge {vertex1 vertex2 args}
 
@@ -248,6 +251,33 @@ body ::tycho::Digraph::acyclic {} {
 #
 body ::tycho::Digraph::children {vertex} {
     return $_adjacency($vertex,children) 
+}
+
+########################################################################
+#### delete
+#
+# Delete a vertex and all connected edges from the graph, and
+# return the inverse command.
+#
+body ::tycho::Digraph::delete {vertex} {
+    _verify vertex $vertex
+
+    # Start inverse command
+    set inverse ""
+
+    # Delete outward edges
+    foreach {src tgt} [edges $vertex *] {
+	append inverse "\n" [edgedelete $src $tgt]
+    }
+    # Delete inward edges
+    foreach {src tgt} [edges * $vertex] {
+	append inverse "\n" [edgedelete $src $tgt]
+    }
+    # Delete the vertex. (NB: This must follow the edge deletion.)
+    append inverse "\n" [vertexdelete $vertex]
+
+    # Return the inverse command
+    return $inverse
 }
 
 ########################################################################
