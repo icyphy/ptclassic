@@ -295,7 +295,7 @@ proc ptkToggleScript { name octHandle } {
 # Procedure to open or close the debug section of the control panel
 #
 proc ptkSetOrClearDebug { name octHandle } {
-    global ptkDebug ptkVerboseErrors
+    global ptkDebug ptkVerboseErrors ptkTimeFlag
     set w .run_$octHandle
     if {$ptkDebug($name)} {
 	# Turning debug on.  Enable verbose Tcl messages.
@@ -323,16 +323,19 @@ proc ptkSetOrClearDebug { name octHandle } {
 	    pack append $w.debug.left \
 	        $w.debug.left.buttons {top fill expand} \
 	        $w.debug.left.runcount {top fill expand}
-	    frame $w.debug.anim -bd 10
+	    frame $w.debug.anim
 	    checkbutton $w.debug.anim.gr -text "Graphical Animation" \
 	        -variable ptkGrAnimationFlag -relief flat \
 	        -command {ptkGrAnimation $ptkGrAnimationFlag}
 	    checkbutton $w.debug.anim.tx -text "Textual Animation" \
 	        -variable ptkTxAnimationFlag -relief flat \
 	        -command {ptkTxAnimation $ptkTxAnimationFlag}
+	    checkbutton $w.debug.anim.time -text "Time the Run" \
+	        -variable ptkTimeFlag -relief flat
 	    pack append $w.debug.anim \
 	        $w.debug.anim.tx {top frame w} \
-	        $w.debug.anim.gr {top frame w}
+	        $w.debug.anim.gr {top frame w} \
+	        $w.debug.anim.time {top frame w}
 	    pack append $w.debug \
 	        $w.debug.left {left frame w} \
 	        $w.debug.anim {left fill expand}
@@ -347,6 +350,10 @@ proc ptkSetOrClearDebug { name octHandle } {
 	# Turning debug off.  Turn off animation first.
 	ptkGrAnimation 0
 	ptkTxAnimation 0
+
+	# Turn off timing
+	set ptkTimeFlag 0
+
 	# Close control panel.
 	catch {pack forget $w.debug}
 	# Disable verbose Tcl errors
@@ -633,6 +640,25 @@ proc ptkStepTrap { name octHandle star } {
 }
 
 #######################################################################
+# ptkCondTime
+# Time the given script if and only if the ptkTimeFlag global
+# variable is set. The result is displayed.
+proc ptkCondTime {script} {
+    global ptkTimeFlag
+    if $ptkTimeFlag {
+	set elapsedTime [time {
+	    eval $script
+	} 1]
+	set timeInSec [expr [lindex $elapsedTime 0]/1000000.0]
+	ptkMessage \
+	    "The run of [curuniverse] took $timeInSec seconds\
+             not including compile or wrapup"
+    } {
+	eval $script
+    }
+}
+
+#######################################################################
 #procedure to go
 proc ptkGo {name octHandle} {
     global ptkRunFlag ptkRunEventLoop
@@ -699,14 +725,15 @@ proc ptkGo {name octHandle} {
 	    # the TCL interpreter to evaluate it
 	    ptkSetStringProp $octHandle script \
 	        [$ptkControlPanel.tclScript.tframe.text get 0.0 end]
-	    eval [$ptkControlPanel.tclScript.tframe.text get 0.0 end]
+	    ptkCondTime \
+		"eval [$ptkControlPanel.tclScript.tframe.text get 0.0 end]"
 	} {
 	    # default run: just run through the specified number
 	    # of iterations, finishing by invoking
 	    # wrapup if no error occurred.
             set numIter [$w.iter.entry get]
-            run $numIter
-    
+	    ptkCondTime "run $numIter"
+
     	    if {[info exists ptkRunFlag($name)] &&
     	        $ptkRunFlag($name) != {ABORT}} { wrapup } {
     	        # Mark an error if the system was aborted
