@@ -180,26 +180,23 @@ class ::tycho::Selector {
     ###################################################################
     ####                        protected methods                  ####
 
-    # Activate delegate interactors
-    protected method _delegate {mode id x y args}
-
     # Record a single delegate interactor.
     protected method _attach {interactor id x y options}
+
+    # Text if an item has an attached interactor.
+    protected method _attached {id}
 
     # Clear the selection
     protected method _clear {}
 
-    # Remove an item from the selector.
-    protected method _debind {interactor id}
+    # Activate delegate interactors
+    protected method _delegate {mode id x y args}
 
     # Deselect an item
     protected method _deselect {id}
     
     # Remove all delegate interactors.
     protected method _detach {}
-
-    # Restore all items to the selector.
-    protected method _rebind {}
 
     # Select an item
     protected method _select {id}
@@ -209,9 +206,6 @@ class ::tycho::Selector {
 
     # Currently activated delegates
     private variable _attached
-
-    # Currently debound items
-    private variable _debinded
 
     # The delegate interactors
     private variable _delegates
@@ -287,6 +281,9 @@ body ::tycho::Selector::activate {tag x y args} {
 # option, to reduce the chances of accidental
 # interference between different interactors.
 #
+# Note: do not specify an item ID as the first argument. This must
+# be a tag or the selector won't work properly.
+#
 # FIXME: If the background item does not cover the whole slate,
 # drag-selecting will need to be adjusted by the origin of that
 # item.
@@ -332,7 +329,6 @@ body ::tycho::Selector::bind {tag args} {
 #
 body ::tycho::Selector::clear {} {
     _detach
-    _rebind
     $slate select clear
 }
 
@@ -351,7 +347,6 @@ body ::tycho::Selector::click {x y args} {
 
     # Detach delegate interactors
     _detach
-    _rebind
 
     # Figure out which tags are valid for selection
     set targetTags {}
@@ -514,9 +509,13 @@ body ::tycho::Selector::itemclick {tag x y args} {
     # Give the slate the focus for key events etc
     $slate focusin
 
-    # Detach delegate interactors
+    # If this item has an active interactor, do nothing
+    if { [_attached $current] != "" } {
+        return
+    }
+ 
+    # Otherwise detach any other attached interactors
     _detach
-    _rebind
 
     # Extract options
     array set opt [concat -toggle 0 $args]
@@ -596,7 +595,6 @@ body ::tycho::Selector::itemclick {tag x y args} {
 #
 body ::tycho::Selector::refresh {args} {
     _detach
-    _rebind
 }
 
 #######################################################################
@@ -657,6 +655,21 @@ body ::tycho::Selector::_attach {interactor id x y options} {
 }
 
 #######################################################################
+#### _attached
+#
+# Test if an interactor is attached to a given item. If there is,
+# return it, otherwise return null.
+#
+body ::tycho::Selector::_attached {id} {
+    foreach {interactor _} [array get _attached] {
+        if { [$interactor target] == $id } {
+            return $interactor
+        }
+    }
+    return ""
+}
+
+#######################################################################
 #### _clear
 #
 body ::tycho::Selector::_clear {} {
@@ -665,17 +678,6 @@ body ::tycho::Selector::_clear {} {
     } else {
 	eval $clearprefix
     }
-}
-
-#######################################################################
-#### _debind
-#
-# Record a single delegate interactor.
-#
-body ::tycho::Selector::_debind {interactor id} {
-    set _debinded($id) 1
-    debind $id
-    $interactor configure -deactivatecommand "$this refresh"
 }
 
 #######################################################################
@@ -693,22 +695,21 @@ body ::tycho::Selector::_debind {interactor id} {
 # The interactor is then activated on the sub-selection.
 #
 body ::tycho::Selector::_delegate {mode id x y args} {
+    $slate dtag "subsel"
+    $slate dtag "highlight.subsel"
     switch -exact $mode {
 	"0" -
 	"1" {
 	    foreach index [array names _delegates [list $mode * *]] {
                 ::tycho::assign _ interactor options $index
                 set tags $_delegates($index)
-		# Activate the delegate interactor if that item is
-                # in the tags or if it has a tag that is in the tags
+		# Activate the delegate interactor if that item
+                # has a tag that is in the tags
 		if { $args == $options } {
-		    if { [::tycho::lmember $tags $id] \
-			    || ! [::tycho::ldisjoint $tags \
-			    [$slate gettags $id]] } {
+		    if { ! [::tycho::ldisjoint $tags [$slate gettags $id]] } {
 			# Activate it
-                        _debind $interactor $id
                         _attach $interactor $id $x $y $options
-			return 1
+			return $interactor
 		    }
 		}
 	    }
@@ -719,28 +720,24 @@ body ::tycho::Selector::_delegate {mode id x y args} {
                 ::tycho::assign _ interactor options $index
                 set tags $_delegates($index)
 		# Find the sub-selection: an item is in the sub-selection
-                # it is in the interactor's tags or if it has a tag that is.
+                # it has a tag that is in the interactor's tags
 		if { $args == $options } {
-		    set ok 1
 		    foreach item [$slate find withtag "sel"] {
-                        if { [::tycho::lmember $tags $item] \
-                                || ![::tycho::ldisjoint $tags \
-				[$slate gettags $item]] } {
-                            # Add the "subsel" also tag its highlight
+                        if { ![::tycho::ldisjoint $tags [$slate gettags $item]] } {
+                            # Add the "subsel" tag and also tag its highlight
                             $slate addtag "subsel" withtag $item
                             $slate addtag "highlight.subsel" \
                                     withtag highlight.$item
                         }
                     }
                     # Activate it
-                    _debind $interactor $id
                     _attach $interactor "subsel" $x $y $options
-                    return 1
+                    return $interactor
                 }
 	    }
 	}
     }
-    return 0
+    return ""
 }
 
 #######################################################################
@@ -757,28 +754,16 @@ body ::tycho::Selector::_deselect {id} {
 #######################################################################
 #### _detach
 #
-# Remove all delegate interactors.
+# Remove any delegate interactors that haven't already detached
+# themselves from an item.
 #
 body ::tycho::Selector::_detach {} {
     foreach {interactor info} [array get _attached] {
-        $interactor configure -deactivatecommand ""
-        eval $interactor deactivate $info
+        if { [$interactor target] != "" } {
+            eval $interactor deactivate $info
+        }
     }
     catch {unset _attached}
-    $slate dtag "subsel"
-    $slate dtag "highlight.subsel"
-}
-
-#######################################################################
-#### _rebind
-#
-# Restore all debound items to the selector.
-#
-body ::tycho::Selector::_rebind {} {
-    foreach id [array names _debinded] {
-        eval $this rebind $id
-    }
-    catch {unset _debinded}
 }
 
 #######################################################################
