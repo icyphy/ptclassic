@@ -54,7 +54,7 @@ EXTRA_SRCS =	abbreviations.html \
 		running.html \
 		sponsors.html
 
-MISC_FILES =		coding
+MISC_FILES =		coding img
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
