@@ -230,7 +230,7 @@ config_blt: $(BLT_OBJ)
 		--srcdir=$(BLT_SRC) \
 		--prefix=$(ITCL_INDEPENDENT_DEST) \
 		--exec-prefix=$(ITCL_DEST) \
-		$(ENABLE_SHARED) $(ENABLE_GCC))
+		$(ENABLE_SHARED) --with-cc=gcc)
 
 blt: 
 	@echo "Making all in blt"
