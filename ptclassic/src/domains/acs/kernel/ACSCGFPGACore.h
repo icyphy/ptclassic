@@ -63,13 +63,13 @@ public:
   /*virtual*/ int isA(const char*) const;
   
   // This is the default constructor for the FPGA core category.
-  ACSCGFPGACore::ACSCGFPGACore(void);
-  ACSCGFPGACore::ACSCGFPGACore(const char* category);
+  ACSCGFPGACore(void);
+  ACSCGFPGACore(const char* category);
 
   // This is the flavor of constructor used by ACSCore* makeNew( ACSCorona & ).
-  ACSCGFPGACore::ACSCGFPGACore(ACSCorona& corona_);
+  ACSCGFPGACore(ACSCorona& corona_);
 
-  ACSCGFPGACore::~ACSCGFPGACore();
+  ~ACSCGFPGACore();
 
   // JMS
   // A unique identifier to this core smart generator
