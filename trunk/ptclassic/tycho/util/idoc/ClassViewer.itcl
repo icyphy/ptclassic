@@ -31,18 +31,6 @@
 #######################################################################
 
 #######################################################################
-#### options
-
-# Default height of the HTML and text widgets in lines
-#option add *Idoc.height 50 widgetDefault
-
-# Default width of the HTML widget in characters
-#option add *Idoc.htmlWidth 80 widgetDefault
-
-# Default width of the text widget in characters
-#option add *Idoc.textWidth 32 widgetDefault
-
-#######################################################################
 #### Idoc
 # This class defines a combination of an HTML widget and a text widget
 # which will eventually be used for more efficient class browsing.
