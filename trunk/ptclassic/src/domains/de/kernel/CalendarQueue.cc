@@ -121,7 +121,7 @@ double lastTime)
 
     cq_lastTime = lastTime;
     n = (int) (lastTime/cq_interval);
-    cq_lastBucket = n % cq_bucketNum;
+    cq_lastBucket = (int) (n % cq_bucketNum);
     cq_bucketTop = (n+1.5)*cq_interval;
 
 // set up queue size change thresholds 
