@@ -57,6 +57,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define PTARCH "alpha"
 #endif
 
+#ifdef PTFREEBSD
+#define PTARCH "freebsd"
+#endif
+
 #ifdef PTHPPA
 #define PTARCH "hppa"
 #endif
