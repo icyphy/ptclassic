@@ -55,7 +55,7 @@ int HOFScheduler::run()
 }
 
 // Set the stopping time.
-void HOFScheduler::setStopTime(double limit)
+void HOFScheduler::setStopTime(double /*limit*/)
 {
 }
 

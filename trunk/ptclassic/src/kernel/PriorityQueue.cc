@@ -2,7 +2,6 @@ static const char file_id[] = "PriorityQueue.cc";
 /**************************************************************************
 Version identification:
 $Id$
-@(#)PriorityQueue.cc	1.21	1/28/94
 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -54,19 +53,19 @@ LevelLink* LevelLink :: setLink(Pointer a, double v, double fv, LevelLink* n,
 	return this;
 }
 
-void BasePrioQueue::pushHead (Particle* p, PortHole* port,
-    double lvl, double flvl)
+void BasePrioQueue::pushHead (Particle* /*p*/, PortHole* /*port*/,
+    double /*lvl*/, double /*flvl*/)
 {
     Error::abortRun("pushHead() not implemented in base class!");
 }
 
-void BasePrioQueue::pushTail(Particle* p, PortHole* port,
-    double lvl, double flvl)
+void BasePrioQueue::pushTail(Particle* /*p*/, PortHole* /*port*/,
+    double /*lvl*/, double /*flvl*/)
 {
     Error::abortRun("pushTail() not implemented in base class!");
 }
 
-LevelLink* BasePrioQueue::levelput(Pointer a, double v, double fv)
+LevelLink* BasePrioQueue::levelput(Pointer /*a*/, double /*v*, double /*fv*/)
 {
     Error::abortRun("levelput() not implemented in base class!");
     return 0;
