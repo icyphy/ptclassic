@@ -39,7 +39,7 @@
 # requires Ptolemy be installed locally, and could take a few minutes
 # to bring up an editor
 # <tcl><pre>
-#     ::tycho::view EditPalette -facet $PTOLEMY/init.pal
+#     ::tycho::view EditPalette -facet $PTOLEMY/src/domains/cgc/demo/sounds.pal
 # </pre></tcl>
 #
 class ::tycho::EditPalette {
@@ -90,6 +90,14 @@ configbody ::tycho::EditPalette::facet {
 #
 body ::tycho::EditPalette::constructor {args} {
     eval itk_initialize $args
+    menubar addMenu Special -underline 0
+    menubar add "Show Ptcl" Special -underline 0 \
+            -command "::tycho::view EditPtcl -facet $itk_option(-facet)"
+
+    menubar add "Retarget" Special -underline 0 \
+            -command "::tycho::view Retarget -edit $this -toolbar 1"
+
+
 }
 
     ###################################################################
