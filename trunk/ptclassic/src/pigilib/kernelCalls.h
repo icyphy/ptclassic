@@ -38,9 +38,9 @@ typedef struct ParamListStruct ParamListType;
 
 class InterpUniverse : public InterpGalaxy, public Runnable {
 public:
-        InterpUniverse () : Runnable(KnownBlock::newSched(),
+        InterpUniverse (const char* name) : Runnable(KnownBlock::newSched(),
                                      KnownBlock::domain(),this)
-        { setBlock("mainGalaxy",NULL);}
+        { setBlock(name,NULL);}
         void newSched() {
                 delete scheduler;
                 scheduler = KnownBlock::newSched();
