@@ -19,25 +19,72 @@ $Id$
 #include "palette.h"
 #include "main.h"
 
-#define dmWidth 80  /* dialog entry width */
+#define DM_WIDTH 80  /* dialog entry width */
 #define EDIT_ICON_SNAP 5 /* snap size of vem window for edit-icon */
 
 
 /*  5/9/90
 Takes the code directory of a star and returns it's icon directory.
+If code directory ends in /stars and ../icons (default icon directory) exists,
+then set icon directory to be ../icons. Otherwise, set icon directory
+the same as star source code directory.
+Warning: it will get rid of the trailing '/' in the string codeDir.
+For example, if the user specify the star source code directory (codeDir)
+as "~user/work/stars/" with a trailing '/', then codeDir will becomes
+"~user/work/stars" upon returning from CodeDirToIconDir.
 */
 static boolean
 CodeDirToIconDir(codeDir, iconDir)
 char *codeDir, **iconDir;
 {
-    char dir[512], buf[512];
+    char dir[DM_WIDTH]; /* intermediate string var for icon directory name */
+    int len;            /* length of the string codeDir*/
+    struct stat stbuf;  /* used by system call stat */
+    char *charPtr;      /* points to "/stars" in dir */
+    char fullName[DM_WIDTH]; /* full name of the default icon directory */
+
+    len = strlen(codeDir);
+
+    /* remove trailing '/' from codeDir if there is any */
+    if (*(codeDir+len-1) == '/') {
+	*(codeDir+(--len)) = '\0';  
+    }
 
     strcpy(dir, codeDir);
-    DirName(dir);
-    sprintf(buf, "%s/icons", dir);
-    ERR_IF1(!StrDup(iconDir, buf));
-    return (TRUE);
+	
+    /* Test if the star source directory name ends in "/stars" */
+    /* We first test if dir contains "/stars" at all, if it does, */
+    /* then test if the occurence of "/stars" is at the end of dir. */
+    /* Note that 6 is the length of the string "/stars".*/
+    if ((charPtr = strstr(dir, "/stars")) != NULL  
+	&& charPtr - dir == len - 6)  {
+	*charPtr = '\0';  /* delete "/stars" from dir */
+
+        /* concatenate "/icons" to dir, this is the default icon directory */
+	strcat(dir, "/icons");
+
+	/* Must expand ~ before calling system call stat */
+	TildeExpand(dir, fullName);
+
+	/* Test if fullName exists and is a directory
+	 * If yes, means the default icon directory exists,
+	 * then store icon there.
+         */
+	if (stat(fullName, &stbuf) != -1 && (stbuf.st_mode & S_IFMT) == S_IFDIR)
+	{
+	    ERR_IF1(!StrDup(iconDir, dir));
+	    return(TRUE);
+        }
+    }
+
+    /* Now either codeDir does not end in "/stars",  or the
+     * directory ".../icons" does not exist.  So we store the icon
+     * in the same directory where the star source code is.
+     */
+    ERR_IF1(!StrDup(iconDir, codeDir));
+    return(TRUE);
 }
+
 
 /* 5/8/90
 Open a window and run vi on a file.
@@ -88,8 +135,8 @@ static boolean
 MkStar(name, domain, dir)
 char *name, *domain, *dir;
 {
-static dmTextItem item = {"Palette", 1, 80, "./user.pal", NULL};
-static dmTextItem itTemplate = {"Template", 1, 80, NULL, NULL};
+static dmTextItem item = {"Palette", 1, DM_WIDTH, "./user.pal", NULL};
+static dmTextItem itTemplate = {"Template", 1, DM_WIDTH, NULL, NULL};
 static char *q1 = "Cannot find star definition.  Define a new star?";
     char *iconDir;
     
@@ -118,9 +165,9 @@ lsList cmdList;
 long userOptionWord;
 {
 static dmTextItem items[] = {
-    {"Star name", 1, dmWidth, NULL, NULL},
-    {"Domain", 1, 80, DEFAULT_DOMAIN, NULL},
-    {"Star src directory", 1, dmWidth, NULL, NULL}
+    {"Star name", 1, DM_WIDTH, NULL, NULL},
+    {"Domain", 1, DM_WIDTH, DEFAULT_DOMAIN, NULL},
+    {"Star src directory", 1, DM_WIDTH, NULL, NULL}
 };
 #define ITEMS_N sizeof(items) / sizeof(dmTextItem)
     struct passwd *pwent;
@@ -291,7 +338,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-static dmTextItem item = {"Palette", 1, dmWidth, "./user.pal", NULL};
+static dmTextItem item = {"Palette", 1, DM_WIDTH, "./user.pal", NULL};
     octObject facet;
     char buf[512];
 
