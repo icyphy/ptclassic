@@ -347,7 +347,7 @@ class ::tycho::Slate {
 # use the procedure ::tycho::slate{}.
 #
 body ::tycho::Slate::constructor {args} {
-
+puts $this
     # Create the canvas and pack it
     itk_component add canvas {
 	# Create at the global scope to avoid calls to unknown{}
@@ -598,8 +598,7 @@ body ::tycho::Slate::canvasy {screeny {gridspacing {}}} {
 # name if it matches -- using component to access the canvas inside
 # the slate thus still works as expected.
 #
-# <b>Note</b>: Unlike the canvas version, the first argument cannot
-# be an arbitrary tag.
+# <b>Note</b>: The first argument cannot be an arbitrary tag.
 #
 body ::tycho::Slate::component {id {component {}} {method {}} args} {
     # Check for "component canvas"
@@ -649,21 +648,32 @@ body ::tycho::Slate::component {id {component {}} {method {}} args} {
 #######################################################################
 #### coords
 #
-# Get or set the coordinates of an item or pict.
-#
-# <b>Note</b>: Unlike the canvas version, the first argument cannot
-# be an arbitrary tag.
+# Get or set the coordinates of an item or pict. If the argument
+# is a tag, perform this operation on the first item on the
+# slatereturned by `find withtag'.
 #
 body ::tycho::Slate::coords {id args} {
-
-    # If this is not a picture, just call the canvas
-    if { ! [string match {_*} $id] } {
-	return [eval $canvas coords $id $args]
+    # If this is a canvas item, call the canvas
+    if { [string match {[0-9]*} $id] } {
+	eval $canvas coords $id $args
+    } elseif { [string match {_*} $id] } {
+	# Call the picture's coords method
+	@scope ::tycho::$picttype($id) [list \
+		eval \[set methodtable(coords)\] $id $canvas $args]
+    } else {
+	# It's a tag, so get the first matching item and process that
+	set picts [$this find withtag $id]
+	if { $picts == "" } {
+	    return ""
+	}
+	set id [lindex $picts 0]
+	if { [string match {[0-9]*} $id] } {
+	    eval $canvas coords $id $args
+	} elseif { [string match {_*} $id] } {
+	    @scope ::tycho::$picttype($id) [list \
+		    eval \[set methodtable(coords)\] $id $canvas $args]
+	}
     }
-
-    # Call the picture's coords method
-    @scope ::tycho::$picttype($id) [list \
-	    eval \[set methodtable(coords)\] $id $canvas $args]
 }
 
 #######################################################################
@@ -943,7 +953,6 @@ body ::tycho::Slate::find {mode args} {
 	    # enclosed by looking at its region. If it is, include
 	    # it in the result list, and process its parent.
 	    set result {}
-	    set slate [canvasslate $canvas]
 	    while { $items != "" } {
 		set item [lindex $items 0]
 		set pict [$this owner $item]
@@ -952,11 +961,11 @@ body ::tycho::Slate::find {mode args} {
 		    lappend result $item
 		    set items [lreplace $items 0 0]
 		} else {
-		    if { [rectInside [$slate region $pict] $args] } {
+		    if { [rectInside [$this region $pict] $args] } {
 			set result [lsetadd $result $pict]
 			while { $parent($pict) != "" } {
 			    set pict $parent($pict)
-			    if { [rectInside [$slate region $pict] $args] } {
+			    if { [rectInside [$this region $pict] $args] } {
 				set result [lsetadd $result $pict]
 			    } else {
 				break
@@ -1054,12 +1063,18 @@ body ::tycho::Slate::focusin {} {
 #
 # Returns the tags of an item or pict. The slate does not
 # attempt to hide its internal tags, so they are all returned by
-# this method in addition to any "user-specified" tags.
-#
-# <b>Note</b>: Unlike the canvas version, the first argument cannot
-# be an arbitrary tag.
+# this method in addition to any "user-specified" tags. If the argument
+# is a tag, perform this operation on the first item on the
+# slate returned by `find withtag'.
 #
 body ::tycho::Slate::gettags {id} {
+    # If a tag, get the first matching item
+    set picts [$this find withtag $id]
+    if { $picts == "" } {
+	return ""
+    }
+    set id [lindex $picts 0]
+
     # If a picture, get the primary
     if { [string match {_*} $id] } {
 	set id [@scope ::tycho::Picture [list set primary($id)]]
@@ -1141,17 +1156,30 @@ body ::tycho::Slate::interact {mode id args} {
 ##########################################################################
 #### itemcget
 #
-# Read a configuration option.
-#
-# <b>Note</b>: Unlike the canvas version, the first argument cannot
-# be an arbitrary tag
+# Read a configuration option.  If the argument
+# is a tag, perform this operation on the first item on the
+# slate returned by `find withtag'.
 #
 body ::tycho::Slate::itemcget {id option} {
-    if { ! [string match {_*} $id] } {
-	# If this is not a picture, just call the canvas
+    if { [string match {[0-9]*} $id] } {
+	# If this is a canvas item, just call the canvas
 	return [$canvas itemcget $id $option]
 
-    } elseif { ! [string compare $option -tags] } {
+    } elseif { ! [string match {_*} $id] } {
+	# It's a tag, so get the first matching picture
+	set picts [$this find withtag $id]
+	if { $picts == "" } {
+	    return ""
+	}
+	set id [lindex $picts 0]
+	if { [string match {[0-9]*} $id] } {
+	    # In the end, it's a canvas item
+	    return [$canvas itemcget $id $option]
+	}
+    }
+
+    # If we get to here, id must be a picture item
+    if { ! [string compare $option -tags] } {
 	# Return the tags of this picture using the primary
 	return [$canvas gettags \
 		[@scope ::tycho::$picttype($id) [list set primary($id)]]]
@@ -1169,27 +1197,38 @@ body ::tycho::Slate::itemcget {id option} {
 #######################################################################
 #### itemconfigure
 #
-# Set configuration option.
+# Set configuration option. If the argument
+# is a tag, perform this operation on the first item on the
+# slate returned by `find withtag'.
 #
 # Note also that dtag{}, gettags{}, and addtag{} are faster (and safer)
 # ways of manipulating tags and should be used in preference to
 # itemcget{} and itemconfigure{}.
 #
-# <b>Note</b>: Unlike the canvas version, the first argument cannot
-# be an arbitrary tag
-#
 body ::tycho::Slate::itemconfigure {id args} {
 
     # If this is an item, just call the canvas
-    if { ! [string match {_*} $id] } {
+    if { [string match {[0-9]*} $id] } {
 	return [eval $canvas itemconfigure $id $args]
+    } elseif { ! [string match {_*} $id] } {
+	# It's a tag, so get the first matching picture
+	set picts [$this find withtag $id]
+	if { $picts == "" } {
+	    return ""
+	}
+	set id [lindex $picts 0]
+	if { [string match {[0-9]*} $id] } {
+	    # In the end, it's a canvas item
+	    return [eval $canvas itemconfigure $id $args]
+	}
     }
-
+    
+    # If we get to here, the id represents a picture item
     if { [llength $args] == 0 } {
 	# We've been asked for all configuration values. Use
 	# the defaultoptions array to get the names of all options,
 	# and read their values.
-	set result {}
+ 	set result {}
 	foreach option [@scope ::tycho::$picttype($id) \
 		{array names optiondefault}] {
 	    # Read its value
@@ -1269,14 +1308,34 @@ body ::tycho::Slate::itemconfigure {id args} {
 #######################################################################
 #### lower
 #
-# Lower the specified picture or item to the bottom of, or below
-# a specified picture or tag in the display list.
+# Lower the specified pictures or items to the bottom of the display
+# list. If _belowThis_ is specified, then lower below that item,
+# or if _belowThis_ is a tag, then lower below the first item
+# with that tag.
 #
-# <b>Note</b>: Unlike the canvas version, the first argument cannot
-# be an arbitrary tag
+# FIXME: I am by no means certain that this works correctly!
 #
 body ::tycho::Slate::lower {id {belowThis {}}} {
-    eval $canvas lower $id $belowThis
+    # We have to intercept the "current" tag since it applies
+    # only to an item, not a picture
+    if { $id == "current" } {
+	set id [$this find withtag current]
+    }
+
+    if { $belowThis == "" } {
+	$canvas lower $id
+    } elseif { [string match {[_0-9]*} $belowThis] } {
+	# Got an item or pict, so use it
+	$canvas lower $id $belowThis
+    } else {
+	# Got a id, so use the first matching item
+	set picts [$this find withtag $belowThis]
+	if { $picts == "" } {
+	    $canvas lower $id
+	} else {
+	    $canvas lower $id [lindex $picts 0]
+	}
+    }
 }
 
 #######################################################################
@@ -1375,14 +1434,34 @@ body ::tycho::Slate::postscript {args} {
 #######################################################################
 #### raise
 #
-# Raise the specified pict or item to the top of, or above
-# a specified picture or tag in the display list.
+# Raise the specified pictures or items to the top of the display
+# list. If _aboveThis_ is specified, then raise above that item,
+# or if _aboveThis_ is a tag, then raise above the first item
+# with that tag.
 #
-# <b>Note</b>: Unlike the canvas version, the first argument cannot
-# be an arbitrary tag
+# FIXME: I am by no means certain that this works correctly!
 #
 body ::tycho::Slate::raise {id {aboveThis {}}} {
-    eval $canvas raise $id $aboveThis
+    # We have to intercept the "current" tag since it applies
+    # only to an item, not a picture
+    if { $id == "current" } {
+	set id [$this find withtag current]
+    }
+
+    if { $aboveThis == "" } {
+	$canvas raise $id
+    } elseif { [string match {[_0-9]*} $aboveThis] } {
+	# Got an item or pict, so use it
+	$canvas raise $id $aboveThis
+    } else {
+	# Got a tag, so use the first matching item
+	set picts [$this find withtag $aboveThis]
+	if { $picts == "" } {
+	    $canvas raise $id
+	} else {
+	    $canvas raise $id [lindex $picts 0]
+	}
+    }
 }
 
 #######################################################################
@@ -1456,7 +1535,7 @@ body ::tycho::Slate::region {id args} {
     if { $args == "" } {
 	# For a canvas item, use the coords if it's a 4-list, else
 	# use the bounding box shrunk by 2 in each direction
-	if { ! [string match {_*} $id] } {
+	if { [string match {[0-9]*} $id] } {
 	    set region [$canvas coords $id]
 	    if { [llength $region] == 4 } {
 		return $region
@@ -1486,9 +1565,11 @@ body ::tycho::Slate::region {id args} {
 #######################################################################
 #### scale
 #
+# FIXME: Won't work if first argument is a tag!!!
+#
 body ::tycho::Slate::scale {id xOrigin yOrigin xScale yScale} {
-    # If this is not a picture, just call the canvas
-    if { ! [string match {_*} $id] } {
+    # If this is a canvas item, just call the canvas
+    if { [string match {[0-9]*} $id] } {
 	$canvas scale $id $xOrigin $yOrigin $xScale $yScale
 	return
     } else {
