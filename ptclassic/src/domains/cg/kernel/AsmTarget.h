@@ -52,6 +52,13 @@ public:
 	// generate file of stuff named base.suffix
 	int genFile(StringList& stuff, char* base,const char* suffix);
 
+	// generate file of stuff named base.suffix and display it.
+	int genDisFile(StringList& stuff, char* base,const char* suffix);
+
+	// Return file name.  User must delete the char* returned after 
+	// use.
+	char* fullFileName(char* base, const char* suffix);
+
 	// output an "org" directive that switches to the specified
 	// memory and address
 	virtual void orgDirective(const char* mem, unsigned addr) = 0;

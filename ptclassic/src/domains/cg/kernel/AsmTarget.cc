@@ -19,6 +19,7 @@ $Id$
 #include "AsmStar.h"
 #include "ProcMemory.h"
 #include "UserOutput.h"
+#include "CGDisplay.h"
 
 int AsmTarget::decideBufSize(Galaxy& g) {
 // clear the memory
@@ -116,11 +117,25 @@ void AsmTarget :: outputLineOrientedComment(const char* prefix,
 	LOG_DEL; delete line;
 }
 
-int AsmTarget :: genFile (StringList& stuff, char* base, const char* suffix) {
-	int status;
+char* AsmTarget :: fullFileName(char* base, const char* suffix)
+{
 	StringList bname = base;
 	bname += suffix;
 	char* fullName = writeFileName(bname);
+	return fullName;
+}
+
+int AsmTarget ::genDisFile(StringList& stuff, char* base, const char* suffix)
+{
+	char* name = fullFileName(base,suffix);
+	int status = display(stuff,name);
+	LOG_DEL; delete name;
+	return status;
+}
+
+int AsmTarget :: genFile (StringList& stuff, char* base, const char* suffix) {
+	int status;
+	char* fullName = fullFileName(base, suffix);
 	UserOutput o;
 	if (!o.fileName(fullName)) {
 		Error::abortRun(*this, "can't open file for writing: ",
