@@ -32,7 +32,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define _std_h
 /*  _std_h     is defined by the g++ std.h file */
 
-#if defined(hpux) || defined(__hpux) && ! defined(__GNUC__)
+#if (defined(hpux) || defined(__hpux)) && ! defined(__GNUC__)
 #ifndef PTHPPA_CFRONT
 #define PTHPPA_CFRONT
 #endif
