@@ -32,7 +32,12 @@
 // gcd(0,n) = gcd(n,0) = n
 
 int gcd(int a,int b);
-inline int lcm(int a,int b) { return a * b / gcd(a,b);}
+
+// order of the multiplication and division is chosen to avoid overflow
+// in cases where a*b > MAXINT but lcm(a,b) < MAXINT.  The division always
+// goes evenly.
+
+inline int lcm(int a,int b) { return a == b ? a : a * (b / gcd(a,b));}
 
 class Fraction
 {
