@@ -45,7 +45,15 @@ State :: getParseToken(Tokenizer& lexer, Block* blockIAmIn) {
         char token[TOKSIZE];
 	ParseToken t;
 
-        lexer >> token;
+	lexer >> token;
+        if (*token == '<') {
+                char filename[TOKSIZE];
+                lexer >> filename;
+                if (!lexer.fromFile(filename))
+                        { t.tok = "ERROR";  return t;}
+                else lexer >> token;
+        }
+
         if (*token == 0) {
                 t.tok = "EOF";
                 return t;
@@ -108,9 +116,9 @@ State::printVerbose() {
 	out = readFullName();
 	out += " type: ";
 	out += type();
-	out += ", initial value: ";
+	out += "\n initial value: ";
 	out += initValue;
-	out += ", current value: ";
+	out += "\n current value: ";
 	out += currentValue();
 	out += "\n";
         return out;
