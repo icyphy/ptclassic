@@ -112,10 +112,6 @@ public:
 	virtual const char* stateAssign();
 	virtual const char* portAssign();
 
-  	// The only reason for redefining this from HLLTarget
- 	// is to change the separator from "." to "_".
- 	virtual StringList sanitizedFullName(const NamedObj&) const;
-
 protected:
 	CodeStream entity_declaration;
 	CodeStream architecture_body_opener;
