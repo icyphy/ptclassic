@@ -41,7 +41,7 @@ include $(CONFIG)
 LIB= libposixthread.$(LIBSUFFIX)
 
 # Extra directories to include
-INCL= -I$(KERNDIR)
+INCL= $(PTCOMPAT_INCSPEC) -I$(KERNDIR)
 ifeq ($(INCLUDE_GTHREADS),yes)
 INCL += -I$(ROOT)/thread/include.$(PTARCH)
 endif
