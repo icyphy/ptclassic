@@ -39,9 +39,9 @@
 # -- If Mathematica is installed, then set MATHEMATICADIR accordingly
 #
 # The Mathematica include files are in $(MATHEMATICADIR)/Source/Includes.
-# At link time, Ptolemy is linked against libexttools.a (MathematicaIfc class)
+# At link time, Ptolemy is linked against libexttools.so (MathematicaIfc class)
 # and either
-# (a) libptmathematica.a if Mathematica is not installed, or
+# (a) libptmathematica.so if Mathematica is not installed, or
 # (b) libMLelf.a if Mathematica is installed.
 #
 
