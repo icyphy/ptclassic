@@ -48,6 +48,8 @@ struct {  \
 }
 
 #include "fsQuick.h"
+/* Needed to pick up defn for random under Solaris2 etc (-DNO_RANDOM) */
+#include "xv.h"
 
 void FatalError fsQ_proto((char *message));
 
