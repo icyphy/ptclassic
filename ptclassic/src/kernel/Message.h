@@ -237,7 +237,7 @@ public:
 	Particle* useNew() const;
 	void die();
 
-private:
+protected:
 	void errorAssign(const char*) const;
 	Envelope data;
 };
