@@ -52,19 +52,19 @@ if {![winfo exists $s]} {
 		 destroy $win"
             pack append $win $win.ok {top fillx}
         }
-
 	if {[set ${starID}(wait_between_outputs)]} {
-	    # Modify the control panel stop button to release the wait
-	    # HACK ALERT: highly non-local code.  Will work only if the
-	    # the design of the control panel does not change.
-	    $ptkControlPanel.panel.stop configure -command \
-		"incr ${starID}(tkShowValueWaitTrig); ptkStop $univ"
-	    bind $ptkControlPanel.iter.entry <Escape> \
-		"incr ${starID}(tkShowValueWaitTrig); ptkStop $univ"
-	    bind $ptkControlPanel <Escape> \
-		"incr ${starID}(tkShowValueWaitTrig); ptkStop $univ"
+	    # Arrange for the tkShowValueWaitTrig variable
+	    # to be updated if the run status changes (for example,
+	    # a halt is requested)
+	    global ptkRunFlag
+	    trace variable ptkRunFlag($univ) w tkShowValueReleaseWait
 	}
     }
+
+    proc tkShowValueReleaseWait {runflag univ op} "
+	global ${starID}
+	incr ${starID}(tkShowValueWaitTrig)
+    "
 
     tkShowValueMakeWindow [set ${starID}(put_in_control_panel)] \
 	$s [set ${starID}(label)] \
@@ -79,7 +79,7 @@ if {![winfo exists $s]} {
 	}
     }
 
-    proc tkShowValueWait {flag starID numInputs win} {
+    proc tkShowValueWait {flag starID numInputs win univ} {
 	if {$flag} {
 	    global $starID
 	    set ${starID}(tkShowValueWaitTrig) 0
@@ -99,7 +99,7 @@ if {![winfo exists $s]} {
     proc goTcl_$starID {starID} "
         tkShowValueSetValues $starID [set ${starID}(numInputs)] $s
 	tkShowValueWait [set ${starID}(wait_between_outputs)] $starID \
-		[set ${starID}(numInputs)] $s
+		[set ${starID}(numInputs)] $s [curuniverse]
     "
 
     proc destructorTcl_$starID {starID} {
