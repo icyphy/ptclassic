@@ -36,11 +36,7 @@
 # ptkVerboseErrors controls whether we get a stack trace
 #
 if {[file exists [glob -nocomplain ~/.ptkrc ]]} {
-    global gSlowX11Link
     source ~/.ptkrc
-    if {! [info exists gSlowX11Link] } {
-	set gSlowX11Link 0
-    }
 }
 
 proc pigilib_init_env {} {
@@ -64,6 +60,12 @@ proc pigilib_init_env {} {
 
     set tcl_prompt1 "puts -nonewline stdout {pigi> }"
     set tcl_prompt2 "puts -nonewline stdout {pigi? }"
+
+    global gSlowX11Link
+    if {! [info exists gSlowX11Link] } {
+	set gSlowX11Link 0
+    }
+
 }
 
 pigilib_init_env
