@@ -54,12 +54,14 @@ set printoptions = "-me -tbl -eqn -P$PRINTER"
 set contentscmd = $PTOLEMY/doc/bin/contents
 set previewcommand = "xditview -"
 set psincludecommand = $PTOLEMY/doc/bin/ditpsinc
+set troffFileNames = "*.t"
+
+# Temporary files
 set tempdir = /tmp
 set tempTroffFile = $tempdir/pt$$.t
 set tempIndexFile = $tempdir/index$$
 set tempNroffFile = $tempdir/pt$$.n
 set tempPSFile = $tempdir/pt$$.ps
-set troffFileNames = "*.t"
 
 # Variables
 set indexonly = 0
@@ -114,7 +116,7 @@ endif
 if ( -d targets ) then
         if (-e targettitle) then
                 # set type for this section
-                echo '.ds TY "target' >> $tempTroffFile
+                echo '.ds TY "target"' >> $tempTroffFile
                 cat targettitle >> $tempTroffFile
         endif
         cd targets
@@ -126,7 +128,7 @@ endif
 if ( -d stars ) then
 	if (-e starstitle) then
 		# set type for this section
-		echo '.ds TY "star' >> $tempTroffFile
+		echo '.ds TY "star"' >> $tempTroffFile
 		cat starstitle >> $tempTroffFile
 	endif
 	cd stars
@@ -140,7 +142,7 @@ endif
 if ( -d demos ) then
 	if (-e demotitle) then
 		# set type for this section
-		echo '.ds TY "demo' >> $tempTroffFile
+		echo '.ds TY "demo"' >> $tempTroffFile
 		cat demotitle >> $tempTroffFile
 	endif
 	cd demos
