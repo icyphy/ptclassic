@@ -407,8 +407,11 @@ body ::tycho::File::constructor {args} {
     # Store my class identifier in a private variable.
     set myclass "[info class]"
 
-    # Bindings. Those commented out have been moved to TopLevel.
-    # bind $prefix <Control-x><Control-f> "::tycho::File::openWin; break"
+    # Bindings.
+    # Bind C-xC-f so that it opens a browser in the same directory
+    # as the current file.
+    bind $prefix <Control-x><Control-f> \
+	    "$this ::tycho::File::openWinMethod; break"
     bind $prefix <Control-x><Control-s> "$this save; break"
     bind $prefix <Control-x><Control-v> "$this altFile; break"
     bind $prefix <Control-x><Control-w> "$this saveAs; break"
