@@ -555,5 +555,14 @@ body ::tycho::IDoc::formatexpl {item} {
     if [catch {set expl [$myClass annotationget $item.explanation]}] {
         set expl [$myClass annotationget $item.description]
     }
-    set html "$item \n $expl"
+    set paramlist {}
+    foreach parameter [$myClass parameters $item] {
+        set default [$myClass parametercget $item.$parameter -default]
+        if {$default == {}} {
+            lappend paramlist $parameter
+        } else {
+            lappend paramlist "$parameter $default"
+        }
+    }
+    set html "$item $paramlist\n $expl"
 }
