@@ -128,14 +128,14 @@ KnownState k_pi(pi,"PI","3.14159265358979323846");
 const char one[] = "1";
 const char zero[] = "0";
 
-static IntState true;
-KnownState k_true(true,"TRUE",one);
+static IntState trueState;
+KnownState k_true(trueState,"TRUE",one);
 
 static IntState yes;
 KnownState k_yes(yes,"YES",one);
 
-static IntState false;
-KnownState k_false(false,"FALSE",zero);
+static IntState falseState;
+KnownState k_false(falseState,"FALSE",zero);
 
 static IntState no;
 KnownState k_no(no,"NO",zero);
