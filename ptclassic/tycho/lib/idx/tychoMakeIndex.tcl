@@ -58,7 +58,7 @@ proc tychoMkIndex {name filename args} {
 		!= 0} {
 	    set nm [string range $contents [lindex $matchname 0] \
 		    [lindex $matchname 1]]
-	    set entry [list $nm $file $nm]
+	    set entry [list $nm [file join \$TYCHO $file] $nm]
 	    lappend entries $entry
 	    set contents [string range $contents [lindex $matchname 1] end]
 	}
@@ -95,11 +95,11 @@ proc tychoFindAllHTML { {dirname .} {depth 0}} {
 		    $name != {test} && \
 		    $name != {codeDoc} && \
 		    $name != {junk} } {
-		set subfiles [tychoFindAllHTML $dirname/$name \
+		set subfiles [tychoFindAllHTML [file join $dirname $name] \
 			[expr $depth + 1]]
 		cd $dirname
 		foreach file $subfiles {
-		    lappend files "$name/$file"
+		    lappend files [file join $name $file]
 		}
 	    }
 	}
@@ -119,7 +119,7 @@ proc tychoFindAllHTML { {dirname .} {depth 0}} {
 #
 proc tychoFindCodeDocHTML { {dirname .} {depth 0}} {
     cd $dirname
-    set files [glob -nocomplain {codeDoc/*.html}]
+    set files [glob -nocomplain [file join codeDoc *.html]]
     foreach name [exec ls] {
 	if [file isdirectory $name] {
 	    # Skip SCCS, RCS, adm, test directories and anything called "junk"
@@ -128,11 +128,11 @@ proc tychoFindCodeDocHTML { {dirname .} {depth 0}} {
 		    $name != {adm} && \
 		    $name != {test} && \
 		    $name != {junk} } {
-		set subfiles [tychoFindCodeDocHTML $dirname/$name \
+		set subfiles [tychoFindCodeDocHTML [file join $dirname $name] \
 			[expr $depth + 1]]
 		cd $dirname
 		foreach file $subfiles {
-		    lappend files "$name/$file"
+		    lappend files [file join $name $file]
 		}
 	    }
 	}
