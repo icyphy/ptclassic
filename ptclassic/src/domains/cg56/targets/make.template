@@ -1,0 +1,67 @@
+# Makefile for extra CG56 domain targets
+# Version identification:
+# $Id$
+# Copyright (c) 1992 The Regents of the University of California.
+#                       All Rights Reserved.
+# Date of creation: 2/19/92
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+# Root of Ptolemy directory
+ROOT=../../../..
+# True source directory
+VPATH = $(ROOT)/src/domains/cg56/targets
+
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
+
+# SDF directory
+SDFDIR=$(ROOT)/src/domains/sdf/kernel
+
+# CG directory
+CGDIR=$(ROOT)/src/domains/cg/kernel
+
+# CG56 kernel support
+CG56DIR=$(ROOT)/src/domains/cg56/kernel
+
+INCL=-I$(CG56DIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
+# Rule for compiling with g++
+.SUFFIXES: .cc
+.cc.o:
+	$(GNU) $(GPPFLAGS) $(INCL) -c $<
+
+# objects to make
+OBJS=	Sim56Target.o
+
+SRCS=	$(OBJS:.o=.cc)
+
+HDRS=	$(OBJS:.o=.h)
+
+all:	makefile $(OBJS)
+
+install:	all
+	@echo Installation complete.
+
+clean:
+		rm -f *.o core *~ *#
+
+sources:	$(SRCS) $(HDRS) make.template
+
+depend:		$(SRCS)
+		cd $(VPATH);\
+		$(DEPEND) $(INCL) $(SRCS) | cat make.template - > makefile.n;\
+		mv -f makefile.n makefile
+
+makefile:	make.template
+		cd $(VPATH); make -f make.template sources depend
+		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
+		@echo makefile remade -- you must rerun make.
+		exit 1
+
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
