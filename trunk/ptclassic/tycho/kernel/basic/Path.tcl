@@ -459,10 +459,16 @@ proc ::tycho::tychoDir {} {
     set tychorc [file join $dotTycho tychorc.tcl]
     if {![file exists $tychorc] && \
             [file exists [file join [glob ~] .tycho]]} {
-        if [::tycho::askuser \
-                {Ok to copy your ~/.tycho file to the new place: $tychorc?}] {
-            exec cp [file join [glob ~] .tycho] $tychorc
-        }
+	# Don't call ::tycho::askuser here, as we might have
+	# called this function because we are trying to load the preferences
+	# and at this point the preferences are not fully operational
+	# and askuser requires the preferences, so it will crash.
+       if {[tk_dialog [::tycho::autoName .tychoDirQuery] \
+	       {Update ~/.tycho?} \
+	       {Ok to copy your ~/.tycho file to the new place: $tychorc?} \
+	       questhead 0 Yes No] == 0} {
+	   file copy [file join [glob ~] .tycho] $tychorc
+       }
     }
     return [file join ~ .Tycho]
 }
