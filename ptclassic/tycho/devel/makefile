@@ -48,7 +48,6 @@ ITCL_SRCS = \
 	GanttView.itcl \
 	GanttDF.itcl \
 	HyperGraph.itcl \
-	IconIndex.itcl \
 	Index.itcl \
 	Lattice.itcl \
 	ModelDebug.itcl \
