@@ -348,7 +348,7 @@ int Cluster::generateSchedule() {
     return TRUE;
 }
 
-ClusterPort::ClusterPort(PortHole& self, const PortHole& myMaster, Star* parent)
+ClusterPort::ClusterPort(PortHole& self, PortHole& myMaster, Star* parent)
 :selfPort(self),clusterAliasedTo(0),master(myMaster) {
     selfPort.setPort(real().name(),parent,INT);
     selfPort.myPlasma = Plasma::getPlasma(INT);
