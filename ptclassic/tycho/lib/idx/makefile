@@ -39,9 +39,16 @@ ROOT =		../..
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
+TCL_SRCS = \
+	tychoMakeIndex.tcl
+
 MISC_FILES =	
 
-INDICES = 	tycho.idx codeDoc.idx
+INDICES = \
+	tycho.idx \
+	codeDoc.idx
+
+EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
 # make clean will remove the indices.
 KRUFT =		$(INDICES)
