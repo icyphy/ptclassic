@@ -7,7 +7,7 @@ on any number of inputs and outputs.  The output value is always
 zero.  IT IS INTENDED FOR TESTING SCHEDULERS ONLY.
 	}
 	version { $Id$ }
-	author { E. A. Lee, D. Stevens, C. Scannell }
+	author { Edward A. Lee, Dick Stevens, and Christopher Scannell }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -47,25 +47,31 @@ limitation of liability, and disclaimer of warranty provisions.
 	  DFPortHole *p;
 	  int i = 0;
 	  while ((p = (DFPortHole*)nexti++) != 0) {
-	    p->setSDFParams(consume[i++],1);
+	    p->setSDFParams(consume[i],1);
+	    i++;
 	  }
 	  MPHIter nexto(output);
 	  i = 0;
 	  while ((p = (DFPortHole*)nexto++) != 0) {
-	    p->setSDFParams(produce[i++],1);
+	    p->setSDFParams(produce[i],1);
+	    i++;
 	  }
 	}
 	go {
 	  printf("Running %s\n", name());
+
+	  // Don't need to read each input port: SDF scheduler handles it
+	  // because we set setSDFParams for input ports in the setup method
+
+	  // Output the right number of zeroes on each output port
 	  MPHIter nexto(output);
 	  DFPortHole *p;
 	  int j = 0;
 	  while ((p = (DFPortHole*)nexto++) != 0) {
-	    for (int i = 0; i < consume[j++]; i++) {
-	      (*p)%0 << 0.0;
+	    for (int i = 0; i < produce[j]; i++) {
+	      (*p)%i << 0.0;
 	    }
+	    j++;
 	  }
 	}
 }
-
-
