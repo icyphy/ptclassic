@@ -95,11 +95,11 @@ proc applyl {script actuals} {
 #
 proc applylkernel {script actuals} {
     if { [lindex $script 0] == "lambda" } {
-	# This is the more complicated case. Get the names of the formals.
-	# The split will produce eg {{lambda x y} {} {expr $x + $y}}.
-	set bits [split $script "->"]
-	set formals [lrange [lindex $bits 0] 1 end]
-	set script  [lindex $bits 2]
+	# This is the more complicated case. Get the names of the formals
+	# and the body of the script.
+	set arrow [lsearch -exact $script {->}]
+	set formals [lrange $script 1 [expr $arrow - 1]]
+	set script  [lrange $script [expr $arrow + 1]  end]
 
 	# If the script is "fully applied," then substitute all
 	# formals and evaluate it (ignore extra args, if any)
