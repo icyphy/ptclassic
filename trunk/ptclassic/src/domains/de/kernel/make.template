@@ -31,9 +31,9 @@ GNUINCLUDE = /usr/gnu/lib/g++-include
 .cc.o:
 	$(GNU) $(GPPFLAGS) -I$(SDFKERNDIR) -I$(KERNDIR) -c $<
 
-SOURCES =	BaseImage.cc GrayImage.cc
+SOURCES =	BaseImage.cc DCTImage.cc GrayImage.cc MVImage.cc
 
-HEADERS =	BaseImage.h GrayImage.h
+HEADERS =	BaseImage.h DCTImage.h GrayImage.h MVImage.h
 
 #Library name
 LIB=libImage.a
