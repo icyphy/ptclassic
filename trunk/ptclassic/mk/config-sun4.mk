@@ -43,23 +43,29 @@ TK_VERSION_NUM=42i
 ITCL_VERSION_NUM=22
 ITK_VERSION_NUM=22
 
+# If we are using shared tcl libraries, then tell the linker to do the
+# right thing
+LD_DYNAMIC=-Wl,-Bdynamic
+
 # Combined -L and -l options to link with tcl library.
-TCL_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl -ltcl$(TCL_VERSION_NUM)
+TCL_LIBSPEC=$(LD_DYNAMIC) -L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl \
+	-ltcl$(TCL_VERSION_NUM)
 
 # Directory containing Tk include files
 TK_INCDIR=$(TCL_ROOT)/itk/include
 
 # Combined -L and -l options to link with tk library.  Can add
 # addtional -L and/or -l options to support tk extensions.
-TK_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl -ltk$(TK_VERSION_NUM) #-lXpm
+TK_LIBSPEC=$(LD_DYNAMIC) -L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl \
+	 -ltk$(TK_VERSION_NUM) #-lXpm
 
 # Directory containing itcl include files
 ITCL_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
-ITCL_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
+ITCL_LIBSPEC=$(LD_DYNAMIC) -L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
 	-litcl$(ITCL_VERSION_NUM)
 
 ITK_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
-ITK_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
+ITK_LIBSPEC=$(LD_DYNAMIC) -L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
 	-litk$(ITCL_VERSION_NUM)
 
 # Location of the ish binary (tcl + namespaces)
