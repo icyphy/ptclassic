@@ -1,7 +1,7 @@
 defstar {
 	name { Sub }
 	domain { C50 }
-	desc { any input subtractor }
+	desc { Input subtractor }
 	version { $Id$ }
 	author { A. Baensch }
 	copyright {
@@ -27,20 +27,13 @@ Output the \fIpos\fR minus all \fIneg\fR inputs.
 		name { output }
 		type { fix }
 	}
-        state  {
-                name { inputNum }
-                type { int }
-                default { 0 }
-                desc { input#() }
-                attributes { A_NONCONSTANT|A_NONSETTABLE }
-        }
         codeblock(main) {
 	mar	*,AR0
 	lar	AR0,#$addr(pos)			;Address pos		=>AR0
         lacc    *,15,AR1			;Accu	= pos
         }
-        codeblock(loop) {
-	lar	AR1,#$addr(neg#inputNum)	;Address neg#i		=>AR1
+        codeblock(loop, "int i") {
+	lar	AR1,#$addr(neg#@i)		;Address neg#i		=>AR1
         sub	*,15				;Accu pos-neg#i
         }
         codeblock(done) {
@@ -52,12 +45,11 @@ Output the \fIpos\fR minus all \fIneg\fR inputs.
 	go {
 		addCode(main);
 		for (int i = 1; i <= neg.numberPorts(); i++) {
-			inputNum = i;
-			addCode(loop);
+			addCode(loop(i));
 		}
 		addCode(done);
 	}
 	execTime {
-		return 2 * int  (neg.numberPorts()) + 6;
+		return 2 * int(neg.numberPorts()) + 6;
 	}
 }
