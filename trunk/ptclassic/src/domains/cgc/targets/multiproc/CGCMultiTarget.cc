@@ -49,6 +49,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGCUnixReceive.h"
 #include <ctype.h>
 #include <stdio.h>
+#include <sys/types.h>
 #include <netdb.h>			// for struct hostent
 
 extern "C" {
