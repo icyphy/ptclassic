@@ -94,7 +94,7 @@
 SRCS=$(PL_SRCS:.pl=.cc)
 
 # object files for all stars
-OBJS= $(SRCS:.cc=.o)
+OBJS= $(PL_SRCS:.pl=.o)
 
 # header files for all stars
 HDRS= $(SRCS:.cc=.h)
