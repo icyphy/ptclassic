@@ -296,35 +296,31 @@ body ::tycho::Picture::itemconfigure {id canvas slate scope args} {
     } else {
 	foreach {option value} $args {
 	    if { ! [string compare $option -tags] } {
-		# Set the tags of the complex item. Figure out the differences.
-		set tags [lsort [$canvas gettags $primary($id)]]
-		
-		# Filter out hierarchy tags.
-		set t [lsearch $tags {[^!_]*}]
-		if { $t != -1 } {
-		    set tags [lrange $tags $t end]
-		    set new [lsubtract $value $tags]
-		    set old [lsubtract $tags $value]
-		} else {
-		    set tags {}
-		    set old {}
-		    set new $value
+		# Set the tags of the complex item. This is awkward and
+		# slow... First get the tags of the item
+		set tags [$slate gettags $primary($id)]
+
+		# Process given tags to find out what to add
+		foreach tag $value {
+		    # If the tag is a hierarchy tag, ignore
+		    if { [string match {[!_]*} $tag] } {
+			continue
+		    } elseif { [lsearch -exact $tags $tag] == -1 } {
+			# If the item doesn't already have the tag, add it
+			$slate addtag $tag withtag $id
+		    }
 		}
 		
-		# Delete old tags, add new tags
-		foreach t $old {
-		    $slate dtag $id $t
-		}
-		foreach t $new {
-		    $slate addtag $t withtag $id
+		# Process existing tags to find out what to delete
+		foreach tag $tags {
+		    if { [lsearch -exact $value $tag] == -1 } {
+			$slate dtag $id $tag
+		    }
 		}
 	    } else {
 		# Call the proc on the class to set the option
 		if { [@scope $scope \
 			[list ::info exists optiondefault($option)]] } {
-#		    $scope::_[string trimleft $option -] \
-#			    $id $canvas $slate $value
-
                     @scope $scope [list eval \
                         \[set methodtable(_[string trimleft $option -])\] \
                         $id $canvas $slate [list $value]]
