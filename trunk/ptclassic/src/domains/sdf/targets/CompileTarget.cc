@@ -257,12 +257,11 @@ StringList CompileTarget::quoteQuotationMarks(const char* str) {
     StringList ret;
     char piece[101];
     if (!str) return "";
-    /* Cast NULL here to char for sol2 and hppa */
-    while (*str != (char)NULL) {
+    while (*str != `\0`) {
 	char* piecep = piece;
         for (int i = 0; i < 100; i++) {
-	    if (*str == (char)NULL) {
-		*(piecep++) = (char)NULL;
+	    if (*str == `\0`) {
+		*(piecep++) = `\0`;
 		break;
 	    } else if (*str == '\"') {
 	        *(piecep++) = '\\';
