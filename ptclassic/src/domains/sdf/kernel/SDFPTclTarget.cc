@@ -48,31 +48,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "pt_fstream.h"
 #include "ProfileTimer.h"
 
-// Constructor
-SDFPTclTarget::SDFPTclTarget(const char* nam,const char* desc) :
-SDFTarget(nam,desc), numIters(0) {
-    addState(destDirectory.setState("directory", this,
-	"$HOME/PTOLEMY_SYSTEMS/ptcl", "Directory to write to"));
-}
-
-Block* SDFPTclTarget::makeNew() const {
-    LOG_NEW; return new SDFPTclTarget(name(), descriptor());
-}
-
-void  SDFPTclTarget::writeFiring(Star& s, int) {
-    ProfileTimer firingTimer;
-    if (! s.run()) SimControl::requestHalt();
-    starProfiles.lookup(s)->addTime(firingTimer.elapsedCPUTime());
-}
-
-// FIXME: We really shouldn't have to do this.  There should not be a
-// compileRun method for the scheduler, just a run.  In the compile
-// mode the scheduler()->setStopTime(1) (to print out one iteration) -
-// in the simulation mode the stop time should be set to the number of
-// iterations.  For now, code duplication is done.
-void SDFPTclTarget::setStopTime (double limit) {
-    numIters = int(floor(limit + 0.001));
-}
+// Supporting routines
 
 // Write out the header which resets the state of ptcl and declares the
 // new galaxy name
@@ -80,41 +56,6 @@ static StringList ptclHeaderCode(Galaxy* localGalaxy) {
     StringList ptclCode = "reset\n";
     ptclCode << "newuniverse " << localGalaxy->name() << " "
 			       << localGalaxy->domain() << " \n";
-    return ptclCode;
-}
-
-// Generate the PTcl code describing the run-time estimates collected
-// by repeated runs of the galaxy in the CGC domain 
-StringList SDFPTclTarget::ptclExecTimeCode() {
-    StringList ptclCode;
-
-    // Iterate over the stars in the galaxy
-    GalStarIter nextStar(*galaxy());
-    Star* star;
-    while ((star = nextStar++) != NULL) {
-	StringList starName;
-	starName << " \"" << star->fullName() << "\" ";
-	StringList setstate;
-	setstate << "\tsetstate" << starName;
-	ptclCode << "\n\tstar" << starName << "CGCMultiInOut\n"
-		 << setstate << "name " << star->className() << "\n"
-		 << setstate << "execTime "
-		 << starProfiles.lookup(*star)->avgTime() << "\n";
-	StringList inputParams, outputParams;
-	inputParams << setstate << "inputParams \"{ ";
-	outputParams << setstate << "outputParams \"{ ";
-	BlockPortIter nextPort(*star);
-	DFPortHole* port;
-	while ((port = (DFPortHole*)nextPort++) != NULL) {
-	    (port->isItInput() ? inputParams: outputParams)
-		<< "(" << port->numXfer() << "," << port->maxDelay() << ") ";
-	}
-	inputParams << "}\"\n"; 
-	outputParams << "}\"\n";
-	ptclCode << inputParams << outputParams;
-    }
-    ptclCode << '\n';
-
     return ptclCode;
 }
 
@@ -169,6 +110,100 @@ static void writePtclCode(StringList& ptclCode, const char* path) {
     ptclFile << ptclCode;
 }
 
+// Generate a PTcl description for galaxy without having to execute it
+// If the galaxy is null, then a null StringList will be returned.
+StringList ptclDescription(Galaxy* localGalaxy, const char* path,
+			   int addHeader, const char* preamble,
+			   const char* epilog) {
+    StringList ptclCode;
+
+    if (localGalaxy) {
+	if (addHeader) {
+	    // FIXME: Necessary to store returned StringList to ensure that
+	    // temporary variables are handled correctly.  GNU 2.7 bug.
+    	    StringList headerCode = ptclHeaderCode(localGalaxy);
+    	    ptclCode << headerCode << "\n";
+	}
+
+	// Conditionally add the preamble
+	if (preamble) ptclCode << preamble << "\n";
+
+	// FIXME: Necessary to store returned StringList to ensure that
+	// temporary variables are handled correctly.  GNU 2.7 bug.
+	StringList galCode = ptclGalaxyCode(localGalaxy);
+	ptclCode << galCode << "\n";
+
+	// Conditionally add the epilog
+	if (epilog) ptclCode << epilog << "\n";
+
+	// Conditionally write the ptcl code to the file called path
+	if (path && *path) writePtclCode(ptclCode, path);
+    }
+
+    return ptclCode;
+}
+
+// Constructor
+SDFPTclTarget::SDFPTclTarget(const char* nam,const char* desc) :
+SDFTarget(nam,desc), numIters(0) {
+    addState(destDirectory.setState("directory", this,
+	"$HOME/PTOLEMY_SYSTEMS/ptcl", "Directory to write to"));
+}
+
+Block* SDFPTclTarget::makeNew() const {
+    LOG_NEW; return new SDFPTclTarget(name(), descriptor());
+}
+
+void  SDFPTclTarget::writeFiring(Star& s, int) {
+    ProfileTimer firingTimer;
+    if (! s.run()) SimControl::requestHalt();
+    starProfiles.lookup(s)->addTime(firingTimer.elapsedCPUTime());
+}
+
+// FIXME: We really shouldn't have to do this.  There should not be a
+// compileRun method for the scheduler, just a run.  In the compile
+// mode the scheduler()->setStopTime(1) (to print out one iteration) -
+// in the simulation mode the stop time should be set to the number of
+// iterations.  For now, code duplication is done.
+void SDFPTclTarget::setStopTime (double limit) {
+    numIters = int(floor(limit + 0.001));
+}
+
+// Generate the PTcl code describing the run-time estimates collected
+// by repeated runs of the galaxy in the CGC domain 
+StringList SDFPTclTarget::ptclExecTimeCode() {
+    StringList ptclCode;
+
+    // Iterate over the stars in the galaxy
+    GalStarIter nextStar(*galaxy());
+    Star* star;
+    while ((star = nextStar++) != NULL) {
+	StringList starName;
+	starName << " \"" << star->fullName() << "\" ";
+	StringList setstate;
+	setstate << "\tsetstate" << starName;
+	ptclCode << "\n\tstar" << starName << "CGCMultiInOut\n"
+		 << setstate << "name " << star->className() << "\n"
+		 << setstate << "execTime "
+		 << starProfiles.lookup(*star)->avgTime() << "\n";
+	StringList inputParams, outputParams;
+	inputParams << setstate << "inputParams \"{ ";
+	outputParams << setstate << "outputParams \"{ ";
+	BlockPortIter nextPort(*star);
+	DFPortHole* port;
+	while ((port = (DFPortHole*)nextPort++) != NULL) {
+	    (port->isItInput() ? inputParams: outputParams)
+		<< "(" << port->numXfer() << "," << port->maxDelay() << ") ";
+	}
+	inputParams << "}\"\n"; 
+	outputParams << "}\"\n";
+	ptclCode << inputParams << outputParams;
+    }
+    ptclCode << '\n';
+
+    return ptclCode;
+}
+
 int SDFPTclTarget::run() {
     // Call haltRequested to process pending events and check for halt
     // If the user hit the DISMISS button in the run control panel,
@@ -186,35 +221,12 @@ int SDFPTclTarget::run() {
 	scheduler()->compileRun();
 
     // Generate the PTcl code
-    StringList ptclCode = ptclHeaderCode(galaxy());
-    ptclCode << ptclExecTimeCode() << ptclGalaxyCode(galaxy());
+    StringList execTimeCode = ptclExecTimeCode();
     StringList ptclFileName;
     ptclFileName << destDirectory << "/" << galaxy()->name() << ".pt";
-    writePtclCode(ptclCode, ptclFileName);
+    ptclDescription(galaxy(), ptclFileName, TRUE, execTimeCode);
 
     return TRUE;
-}
-
-// Generate a PTcl description for galaxy without having to execute it
-StringList ptclDescription(
-		Galaxy* localGalaxy, int addHeader, const char* path) {
-    StringList ptclCode;
-    if (localGalaxy) {
-	if (addHeader) {
-	    // FIXME: Necessary to store returned StringList to ensure that
-	    // temporary variables are handled correctly.  GNU 2.7 bug.
-    	    StringList headerCode = ptclHeaderCode(localGalaxy);
-    	    ptclCode << headerCode;
-	}
-	// FIXME: Necessary to store returned StringList to ensure that
-	// temporary variables are handled correctly.  GNU 2.7 bug.
-	StringList galCode = ptclGalaxyCode(localGalaxy);
-	ptclCode << galCode;
-    }
-
-    if (path && *path) writePtclCode(ptclCode, path);
-
-    return ptclCode;
 }
 
 void SDFPTclTarget::wrapup() {
