@@ -46,13 +46,13 @@ proc ::tycho::readFileHeader {filename var} {
     set fo [::tycho::resource new $filename]
     $fo open
     set string [$fo gets]
-    while { string != "" } {
+    while { $string != "" } {
 	set string [$fo gets]
     }
     $fo close
     delete object $fo
-    if [regexp {-\*-.*-\*-} $string header] {
-	return ::tycho::parseHeaderString $string v
+    if [regexp -- {-\*-.*-\*-} $string header] {
+	return [::tycho::parseHeaderString $string v]
     } else {
 	return ""
     }
