@@ -1,0 +1,16 @@
+# $Id$
+#
+# Makefile for subsections of the main Almagest manual section.
+# Don't copy this file; use symbolic links instead to link this
+# into Makefile for each section.
+
+PTOLEMY       = ../../..
+DOCBIN	      = $(PTOLEMY)/doc/bin
+PRINTSEC      = printsec
+
+print:
+	$(DOCBIN)/$(PRINTSEC) -H standalone overall
+
+preview:
+	$(DOCBIN)/$(PRINTSEC) -preview -H standalone overall
+
