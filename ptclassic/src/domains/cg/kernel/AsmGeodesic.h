@@ -36,7 +36,14 @@ public:
 	void incCount(int);
 	// class identification
 	int isA(const char*) const;
+
+	// return the size of the buffer, or the size of the associated
+	// fork buffer for fork destinations.
 	int bufSize() const;
+
+	// return the size of the buffer itself (zero is returned for
+	// fork output geodesics)
+	int localBufSize() const;
 
 	// return my "fork type"
 	int forkType() const;
@@ -61,10 +68,10 @@ public:
 	
 protected:
 	AsmPortHole* src() {
-		return ((AsmPortHole*)originatingPort)->forkSource();
+		return ((AsmPortHole*)originatingPort)->forkSrc;
 	}
 	const AsmPortHole* src() const {
-		return ((const AsmPortHole*)originatingPort)->forkSource();
+		return ((const AsmPortHole*)originatingPort)->forkSrc;
 	}
 private:
 	int internalBufSize() const;
