@@ -27,11 +27,13 @@
 #
 
 # This makefile has only been tested with Solaris2.4, SunOS4.1.3 and
-# HPUX10.01.  It may work on other platforms, but we have not tried.
+# HPUX10.20.  It may work on other platforms, but we have not tried.
 
 # This makefile will install the GNU tools for non-hp and hp platforms.
 # hp's need GNU gas for -g to work, and they don't come with lex or yacc,
 # so we need some additional rules to build the GNU tools for hp.
+
+# See the README file in this directory for details.
 
 # Destination of the GNU binaries, libraries and include files.
 GNU_DEST=$(PTOLEMY)/gnu
@@ -155,7 +157,8 @@ install: $(BINDIR)
 	-(cd $(BINDIR); \
 	  rm -f gperf unprotoize protoize hp* make-* sparc-* c++ make.old)
 	# Make local relative links here
-	-(cd $(GNU_DEST)/$(PTARCH)/lib; rm libstdc++.so libg++.so; \
+	# On the hppa, we remove these later
+	-(cd $(GNU_DEST)/$(PTARCH)/lib; rm -f libstdc++.so libg++.so; \
 		ln -s libg++.so.$(LIBGPLUSPLUS_VERSION) libg++.so; \
 		ln -s libstdc++.so.$(LIBGPLUSPLUS_VERSION) libstdc++.so)
 	# Create links in libio for info files
@@ -236,7 +239,9 @@ hp_bin_others:
 	$(GNU_SRC)/flex/configure --srcdir=$(GNU_SRC)/flex \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
 		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
-	(cd $(GNU_OBJ)/flex; $(GNU_OBJ)/make/make YACC="$(GNU_OBJ)/bison/bison -y")
+	(cd $(GNU_OBJ)/flex; $(GNU_OBJ)/make/make \
+		CC=$(BINDIR)/gcc; \
+		YACC="$(GNU_OBJ)/bison/bison -y")
 
 hp_postgcc_install:
 	(cd $(GNU_OBJ)/bison; $(GNU_OBJ)/make/make install)
@@ -252,7 +257,9 @@ hp_post_install:
 			mv $(GNU_EXEC_PREFIX)/bin/$$file $(GNU_EXEC_PREFIX)/bin/g$$file; \
 		fi; \
 	done
-
+	# The hp uses .sl files, so remove the .so files we created in install
+	rm -f $(GNU_DEST)/$(PTARCH)/lib/libg++.so.$(LIBGPLUSPLUS_VERSION)
+	rm -f $(GNU_DEST)/$(PTARCH)/lib/libstdc++.so.$(LIBGPLUSPLUS_VERSION)
 
 ############################################################
 # Build the GNU tools for SGI IRIX5 machines
