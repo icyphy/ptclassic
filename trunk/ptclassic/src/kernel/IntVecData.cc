@@ -66,7 +66,8 @@ IntVecData::~IntVecData() { LOG_DEL; delete [] data;}
 
 StringList IntVecData::print() const {
 	StringList out = "{";
-	for (int i = 0; i < len-1; i++) {
+        int i;
+	for (i = 0; i < len-1; i++) {
 		out += data[i];
 		out += ", ";
 	}

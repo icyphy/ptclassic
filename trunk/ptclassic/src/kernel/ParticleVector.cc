@@ -104,8 +104,9 @@ ParticleVector::~ParticleVector() {
 }
 
 StringList ParticleVector::print() const {
+        int i;
 	StringList out = "{";
-	for (int i = 0; i < len-1; i++) {
+	for (i = 0; i < len-1; i++) {
 		out += data[i]->print();
 		out += ", ";
 	}

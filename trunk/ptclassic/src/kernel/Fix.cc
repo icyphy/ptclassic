@@ -194,6 +194,7 @@ void Fix::makeBits(double d, int round) {
 
 static void shift_bit_pattern(int nbits, uint16* bits)
 { 
+    int i;
     uint16 temp16_1, temp16_2, temp16_3 =0;
     uint16 tempbits[WORDS_PER_FIX];
 
@@ -202,7 +203,7 @@ static void shift_bit_pattern(int nbits, uint16* bits)
     offset--;
     mbits = mbits - (offset * FIX_BITS_PER_WORD);
 
-    for (int i=0; i < WORDS_PER_FIX; i++) {
+    for (i=0; i < WORDS_PER_FIX; i++) {
 	if (nbits >= 0){
 	    if (i < offset) tempbits[i] = 0;
 	    else            tempbits[i] = bits[i - offset];

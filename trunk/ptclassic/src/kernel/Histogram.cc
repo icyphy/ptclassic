@@ -50,11 +50,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // and copied.
 
 void intVec::resize(int newSize) {
+        int i;
 	if (newSize == xsize) return;
 	int* oldData = data;
 	LOG_NEW; data = new int[newSize];
 	int ncopy = min(newSize, xsize);
-	for (int i = 0; i < ncopy; i++)
+	for (i = 0; i < ncopy; i++)
 		data[i] = oldData[i];
 	for (i = ncopy; i < newSize; i++)
 		data[i] = 0;
