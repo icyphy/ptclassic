@@ -47,6 +47,11 @@ include $(CONFIG)
 
 INCL = 		-I$(KERNDIR) -I$(TCL_INCDIR) $(PTCOMPAT_INCSPEC)
 
+# config-default.mk sets this to 'yes', but we can't include the ipus domain
+# since the non-tk ipus stars need Blackboard* symbols, which are defined in
+# the tk ipus stars.
+INCLUDE_IPUS_DOMAIN  = no
+
 # Include information on all stars and targets.
 include $(ROOT)/mk/stars.mk
 
