@@ -30,6 +30,9 @@ $(BINDIR)/ptlang:	ptlang
 
 sources:	ptlang.y
 
+clean:
+	rm -f ptlang.c ptlang.o ptlang
+
 depend:
 	echo no dependencies to make in this directory
 
