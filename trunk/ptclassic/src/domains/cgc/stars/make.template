@@ -117,6 +117,7 @@ PL_SRCS= \
  CGCMpy.pl \
  CGCMpyCx.pl \
  CGCMpyFix.pl \
+ CGCMpyInt.pl \
  CGCMux.pl \
  CGCPad.pl \
  CGCPCM.pl \
@@ -145,6 +146,7 @@ PL_SRCS= \
  CGCSqrt.pl \
  CGCSub.pl \
  CGCSubFix.pl \
+ CGCSubInt.pl \
  CGCSpread.pl \
  CGCSunSound.pl \
  CGCTable.pl \
