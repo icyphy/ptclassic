@@ -92,11 +92,6 @@ class ::tycho::ItclClassList {
 #### constructor
 #
 body ::tycho::ItclClassList::constructor {args} {
-    toolbar button browseClassDiagram \
-            {Choose a filename for the class diagram output to go into} \
-            -text {Output File} \
-        -command "$this browseClassDiagram"
-
     toolbar button includeTychoClasses  \
             {Insert all Tycho classes into the current file} \
             -text {Include Tycho} \
@@ -111,6 +106,12 @@ body ::tycho::ItclClassList::constructor {args} {
             {Clear the contents of the current file} \
             -text Clear \
             -command "$this deleteRange 0.0 end"
+
+    toolbar button browseClassDiagram \
+            {Choose a filename for the class diagram output to go into} \
+            -text {Diagram File Name} \
+        -command "$this browseClassDiagram"
+
 
     toolbar button updateClassDiagram \
             {Generate a class diagram from the files listed in the \
