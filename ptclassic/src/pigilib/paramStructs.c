@@ -46,6 +46,26 @@ Updates: 4/14/89 to PStrToPList()
 #include "err.h"
 #include "paramStructs.h"
 
+
+/* FreeFlatPList 10/26/95 BLE */
+void
+FreeFlatPList(pListPtr)
+ParamListType *pListPtr;
+{
+    if (pListPtr) {
+	if (pListPtr->array) {
+	    free(pListPtr->array);
+	    pListPtr->array = 0;
+	}
+	if (pListPtr->dynamic_memory) {
+	    free(pListPtr->dynamic_memory);
+	    pListPtr->dynamic_memory = 0;
+	}
+	pListPtr->length = 0;
+    }
+}
+
+
 /* PStrToPList  11/14/88 4/18/88
 Converts a param str to a ParamList.
 Use FreeFlatList to deallocate the ParamList allocated by PStrToPList.
@@ -65,23 +85,6 @@ Updates:
 */
 #define CTLA 1			/* control-A */
 
-void
-FreeFlatPList(pListPtr)
-ParamListType *pListPtr;
-{
-	if (pListPtr) {
-	    if (pListPtr->array) {
-		free(pListPtr->array);
-		pListPtr->array = 0;
-	    }
-	    if (pListPtr->dynamic_memory) {
-		free(pListPtr->dynamic_memory);
-		pListPtr->dynamic_memory = 0;
-	    }
-	    pListPtr->length = 0;
-	}
-}
-
 boolean
 PStrToPList(pStr, pListPtr)
 const char *pStr;
@@ -96,6 +99,7 @@ ParamListType *pListPtr;
     pListPtr->length = 0;
     pListPtr->array = 0;
     pListPtr->dynamic_memory = 0;
+    pListPtr->flat_plist_flag = TRUE;
 
     if (*pStr == '\0') {
 	/* invalid param string: star is not a member of knownstars */
@@ -188,29 +192,75 @@ Inputs:
     pListPtr = the address of a ParamList.
 Outputs:
     return = a formatted param string.  Can free() when no longer needed.
-Caveats: should make sure string is not longer than buffer lengths!
 */
-#define STR_BUF_N 4096
-#define PARAM_BUF_N 1024
 char *
 PListToPStr(pListPtr)
 ParamListType *pListPtr;
 {
-    char strBuf[STR_BUF_N], paramBuf[PARAM_BUF_N];
-    int i;
+    char *strBuf, *paramBuf;
+    char tempBuf[32];
+    int i, index, maxparambuflen, parambuflen, strbuflen;
     ParamType *place;
 
-    sprintf(strBuf, "%d%c", pListPtr->length, CTLA);
+    /* Compute how large of a parameter string we need */
+    sprintf(tempBuf, "%d%c", pListPtr->length, CTLA);
+    strbuflen = strlen(tempBuf);
+    maxparambuflen = strbuflen;
+    place = pListPtr->array;
+    for (i = 0; i < pListPtr->length; i++) {
+	if (!place->type) place->type = "";
+	parambuflen = strlen(place->name) + strlen(place->type) +
+		      strlen(place->value) + 3;
+	if ( parambuflen > maxparambuflen ) maxparambuflen = parambuflen;
+	strbuflen += parambuflen;
+	place++;
+    }
 
+    /* Allocate buffers: add one to length for the end-of-string marker */
+    strBuf = (char *) malloc(strbuflen + 1);
+    paramBuf = (char *) malloc(maxparambuflen + 1);
+    if ( paramBuf == 0 || strBuf == 0 ) {
+	if ( paramBuf ) free(paramBuf);
+	if ( strBuf ) free(strBuf);
+	ErrAdd("PListToPStr: malloc failed.");
+	return(0);
+    }
+
+    /* Create the parameter string */
+    sprintf(strBuf, "%d%c", pListPtr->length, CTLA);
+    index = strlen(strBuf);
     place = pListPtr->array;
     for (i = 0; i < pListPtr->length; i++) {
 	if (!place->type) place->type = "";
 	sprintf(paramBuf, "%s%c%s%c%s%c", place->name, CTLA,
 		place->type, CTLA, place->value, CTLA);
-	strcat(strBuf, paramBuf);
+	strcpy(&strBuf[index], paramBuf);
+	index += strlen(paramBuf);
 	place++;
     }
-    return(DupString(strBuf));
+
+    free(paramBuf);
+    return(strBuf);
 }
-#undef STR_BUF_N
-#undef PARAM_BUF_N
+
+
+/* CopyFlatPList 11/10/95 BLE
+Makes a dynamic copy of a flat parameter list.
+If the source parameter list pointer is equal to the destination
+pointer, then the source parameter list is freed before it is overwritten.
+*/
+boolean
+CopyFlatPList(srcPtr, destPtr)
+ParamListType* srcPtr;
+ParamListType* destPtr;
+{
+    char *parameterString;
+    boolean retval;
+
+    parameterString = PListToPStr(srcPtr);
+    if (srcPtr == destPtr) FreeFlatPList(srcPtr);
+    retval = PStrToPList(parameterString, destPtr);
+    free(parameterString);
+
+    return(retval);
+}
