@@ -14,29 +14,42 @@ Discrete Wavelet Transform Filter Bank
 .Ie "perfect reconstruction"
 .Ie "wavelet transform"
 .Ie "wavelets"
-This universe implements an 8-level perfect reconstruction filter bank
-based on a biorthogonal wavelet decomposition. It is inspired by the paper
-"Wavelets and Filter Banks: Theory and Design", \fIIEEE Transactions on
-Signal Processing\fR, \fB40(9)\fR, September, 1992.
+ This universe implements an eight-level perfect reconstruction one-dimensional
+filter bank based on bi-orthogonal wavelet decomposition.
+ It is inspired by the paper ``Wavelets and Filter Banks: Theory and Design,''
+\fIIEEE Transactions on Signal Processing\fR, \fB40(9)\fR, September, 1992.
+by M. Vetterli and C. Herley.
 .Ir "M. Vetterli and C. Herley"
-This is a form of sub-band coder, where the sample rate is decreasing by
-powers of two, forming a dyadic decomposition of the frequency axis.
-At each stage of the analysis section, the incoming signal is split into
-highpass and lowpass components via two FIR filters. These components are
-then decimated by a factor of two. The decimated high-pass signal proceeds
-directly to the synthesis filterbank, while the decimated low-pass signal
-gets sent down to the next level of analysis. The effect is to split the
-frequency domain into progressively finer bins, with the highest resolution
-at the lowest frequencies.This can be seen as a binary 'tree' structure, 
-where successive representations have progressively better frequency resolution
-at the expense of progressively lower time resolution. 
+ This filter bank is a form of subband coder, in which the sample rate
+decreases by powers of two, thereby forming a dyadic decomposition of the
+frequency axis.
+ Each stage of the analysis section splits the incoming signal into
+highpass and lowpass components via two (multirate) FIR filter stars.
+ These components are then decimated by a factor of two.
+ The decimated highpass signal proceeds directly to the synthesis filterbank,
+whereas the decimated lowpass signal is sent to the next level of analysis.
+ The effect is to split the frequency domain progressively into finer bins,
+with higher resolution at the lower frequencies.
+ This frequency decomposition can be viewed as a binary 'tree' structure, 
+in which successive representations have progressively better frequency
+resolution at the expense of progressively lower time resolution. 
+ Such octave-band frequency decompositions have been studied extensively
+since the early 1970's (e.g., see the 1983 book
+\fIMultirate Digital Signal Processing\fR,
+by R. E. Crochiere and L. R. Rabiner, or the 1984 paper
+``A Procedure for Designing Exact Reconstruction Filter Banks
+for Tree-Structured Subband Coders'' by M. J. T. Smith and T. P. Barnwell
+which appeared in the
+\fIInt. Conf. on Acoustics, Speech, and Signal Processing\fR,
+pp. 27.1.1--27.1.3).
+.Ir "M. J. T. Smith and T. P. Barnwell"
 .pp
-The multi-resolution representation at the analysis bank outputs is actually
-the Discrete Wavelet Transform (DWT) decomposition of the original signal. The 
-DWT is characterized by having this power-of-2 resolution decomposition. 
+ The multi-resolution representation at the analysis bank outputs is actually
+the Discrete Wavelet Transform (DWT) decomposition of the original signal.
+ The DWT is characterized by having this power-of-two resolution decomposition. 
 .pp
-The synthesis filter bank performs the inverse function of the analysis bank.
-That is, incoming signals from two levels of the analysis section are each 
+ The synthesis filter bank performs the inverse function of the analysis bank.
+ That is, incoming signals from two levels of the analysis section are each 
 upsampled by 2, passed through a different set of FIR filters, and added 
 together, yielding a new signal at twice the component signals' sampling rate.
 This then gets combined with the next highest rate signal from the analysis
@@ -45,25 +58,34 @@ bank, and so on, until the original sampling rate is restored.
 For specially designed FIR filters, the reconstructed signal will be an exact
 replica of the input (to within coefficient roundoff error). This property,
 known as the 'perfect reconstruction' property, has been studied in great
-detail in the literature. See, for example, "Quadrature Mirror Filter Banks,
-M-Band Extensions, and Perfect-Reconstruction Techniques", \fIIEEE ASSP Magazine
-\fR, \fB37(12)\fR, July, 1987. 
+detail in the literature.
+ See, for example, ``Quadrature Mirror Filter Banks, M-Band Extensions, and
+Perfect-Reconstruction Techniques,'' \fIIEEE ASSP Magazine \fR, \fB37(12)\fR,
+July, 1987, by P. P. Vaidyanathan.
+.Ir ""P. P. Vaidyanathan"
 .pp
-All analysis stages are identical, as are all synthesis stages. There are, in 
-all, only 4 unique FIR filters used. The impulse response of the analysis 
-filters form a pair of biorthogonal wavelets. Biorthogonality is not quite as
-strong as orthogonality, and the reader is referred to Vetterli et al for
-more details.
+ All analysis stages are identical, as are all synthesis stages.
+ There are, in all, only four unique FIR filters used.
+ The impulse response of the analysis filters form a pair of bi-orthogonal
+wavelets.
+ Bi-orthogonality is not quite as strong as orthogonality, and the reader
+is referred to Vetterli \fIet al.\fR for more details.
 .pp
-.c ana is the basic analysis filter block, and .c syn is the corresponding
-synthesis block. The source used is a sinewave burst. Note the sharp edges
-in the output image at the precise onset and offset times of the burst.
-By typing 'e' in the image window, the color map can be edited to enhance
-details. The galaxy prescaler has gain and offset parameters which can be
+ Concerning the schematic layout,
+.c ana
+is the basic analysis filter block, and
+.c syn
+is the corresponding synthesis block.
+ The source used is a sine wave burst.
+ Note the sharp edges in the output image at the precise onset and offset
+times of the burst.
+ By typing 'e' in the image window, the color map can be edited to enhance
+details.
+ The galaxy prescaler has gain and offset parameters which can be
 adjusted to optimize the dynamic range of the image.
 .pp
-The \fIsfb\fR universe is a four-level decomposition using the same filters.
-It runs much more quickly.
+ The \fIsfb\fR universe is a four-level decomposition using the same filters.
+ It runs much more quickly.
 .SA
 sfb
 .ES
