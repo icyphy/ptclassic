@@ -298,7 +298,7 @@ class ::tycho::Graphics {
     ###################################################################
     ####                   protected variables                     ####
     
-    # The name of the Tk canvas as a variable, for convenience.
+    # The name of the raw Tk canvas. Use with caution!
     protected variable canvas {}
 
     # An object that manages dragging and selecting of items
@@ -318,6 +318,9 @@ class ::tycho::Graphics {
 
     # An object that manages selection of items
     protected variable selector
+
+    # The name of the slate contained within this widget
+    protected variable slate {}
 
     ###################################################################
     ####                   private methods                         ####
@@ -383,26 +386,27 @@ body ::tycho::Graphics::constructor {args} {
     pack $itk_component(top) -fill both -expand yes -side top
 
     # The canvas.
-    itk_component add canvas {
-        uplevel #0 ::tycho::slate $itk_component(top).canvas
+    itk_component add slate {
+        uplevel #0 ::tycho::slate $itk_component(top).slate
     } {
         keep -cursor
         rename -background -canvascolor canvasColor CanvasColor
         rename -height -canvasheight canvasHeight CanvasHeight
         rename -width -canvaswidth canvasWidth CanvasWidth
     }
-    set canvas $itk_component(canvas)
-    pack $canvas -expand yes -fill both -side left
+    set slate $itk_component(slate)
+    set canvas [$slate component canvas]
+    pack $slate -expand yes -fill both -side left
 
     # NOTE: This used to be bound to the hull of TopLevel, which caused
-    # focusin to be called a very large number of times.
-    bind $itk_component(canvas) <Map> "$this focusin; break"
+    # Focusin to be called a very large number of times.
+    bind $slate <Map> "$this focusin; break"
 
     # Create vertical scrollbar. This may not be packed.
     itk_component add vsb {
         scrollbar $itk_component(top).vsb \
                 -orient vertical \
-                -command "$itk_component(canvas) yview"
+                -command "$slate yview"
     } {
         keep -background -cursor
     }
@@ -420,7 +424,7 @@ body ::tycho::Graphics::constructor {args} {
     itk_component add hsb {
         scrollbar $itk_component(bottom).hsb \
                 -orient horizontal \
-                -command "$itk_component(canvas) xview"
+                -command "$slate xview"
     } {
         keep -background -cursor
     }
@@ -432,7 +436,7 @@ body ::tycho::Graphics::constructor {args} {
 	keep  -background -cursor
     }
 
-    $canvas configure \
+    $slate configure \
             -xscrollcommand "$itk_component(hsb) set" \
             -yscrollcommand "$itk_component(vsb) set"
 
@@ -446,117 +450,117 @@ body ::tycho::Graphics::constructor {args} {
 
     # Create and configure the widget's menu bar
 
-    menubar insertMenuItem {Export} {Print...} File -underline 1 \
+    menubar insert {Export} {Print...} -underline 1 \
             -command "$this export"
 
-    menubar addMenu Edit left Window -underline 0
+    menubar addMenu Edit -before Window -underline 0
 
-    menubar addMenuItem {Undo} Edit -underline 0 -accelerator "M-z" \
+    menubar add {Undo} Edit -underline 0 -accelerator "M-z" \
 	    -command "$this undo"
 
-    menubar addMenuItem {Redo} Edit -underline 0 -accelerator "M-d" \
+    menubar add {Redo} Edit -underline 0 -accelerator "M-d" \
 	    -command "$this redo"
 
-    menubar addMenuSeparator Edit
+    menubar addSeparator Edit
 
-    menubar addMenuItem Cut Edit -underline 0 -accelerator "M-x" \
+    menubar add Cut Edit -underline 0 -accelerator "M-x" \
 	    -command "$this modify cut"
     
-    menubar addMenuItem Copy Edit -underline 1 -accelerator "M-c" \
+    menubar add Copy Edit -underline 1 -accelerator "M-c" \
 	    -command "$this copy"
     
-    menubar addMenuItem Paste Edit -underline 0 -accelerator "M-v" \
+    menubar add Paste Edit -underline 0 -accelerator "M-v" \
 	    -command "$this modify paste"
     
-    menubar addMenuSeparator Edit
+    menubar addSeparator Edit
 
-    menubar addMenuItem {Title...} Edit -underline 0 -accelerator "M-T" \
+    menubar add {Title...} Edit -underline 0 -accelerator "M-T" \
             -command "$this titleAdd"
 
-    menubar addMenuItem {Edit Item} Edit -underline 0 -accelerator "M-e" \
+    menubar add {Edit Item} Edit -underline 0 -accelerator "M-e" \
 	    -command "$this edit"
 
-    menubar addMenu Format left {} -underline 1
+    menubar addMenu Format -underline 1
 
-    menubar addMenuItem {Scrollbars...} Format -underline 0 \
+    menubar add {Scrollbars...} Format -underline 0 \
             -command "$this scrollQuery"
 
     # Undo and Redo menu start out disabled
-    menubar disableMenuItem Undo Edit
-    menubar disableMenuItem Redo Edit
+    menubar disable Undo
+    menubar disable Redo
 
     eval itk_initialize $args
 
     # Prevent shadowing of bindings in the File class.
-    bind $canvas <Control-x> { }
-    bind $canvas <Control-x><Control-w> { }
-    bind $canvas <Control-x><v> { }
-    bind $canvas <Control-x><i> { }
-    bind $canvas <Control-x><p> { }
-    bind $canvas <Control-x><k> { }
+    bind $slate <Control-x> { }
+    bind $slate <Control-x><Control-w> { }
+    bind $slate <Control-x><v> { }
+    bind $slate <Control-x><i> { }
+    bind $slate <Control-x><p> { }
+    bind $slate <Control-x><k> { }
 
     # Simpler bindings provided because this is not a text editor.
     # These are fashioned after the Macintosh commands
-    bind $canvas <Meta-z> "$this undo; break"
-    bind $canvas <Meta-d> "$this redo; break"
-    bind $canvas <Meta-x> "$this modify cut; break"
-    bind $canvas <Meta-c> "$this copy; break"
-    bind $canvas <Meta-v> "$this modify paste; break"
-    bind $canvas <Meta-e> "$this edit; break"
+    bind $slate <Meta-z> "$this undo; break"
+    bind $slate <Meta-d> "$this redo; break"
+    bind $slate <Meta-x> "$this modify cut; break"
+    bind $slate <Meta-c> "$this copy; break"
+    bind $slate <Meta-v> "$this modify paste; break"
+    bind $slate <Meta-e> "$this edit; break"
 
     # Specialized bindings.
-    bind $canvas <Meta-T> "$this titleAdd; break"
+    bind $slate <Meta-T> "$this titleAdd; break"
 
     # Bindings provided for compatibility with emacs conventions.
     # These must be specified after the simpler bindings above.
     # FIXME: How can we recover these?
-    # bind $canvas <Meta-x> { }
-    # bind $canvas <Control-x><u> "$this undo; break"
-    # bind $canvas <Control-w> "$this modify cut; break"
-    # bind $canvas <Meta-w> "$this copy; break"
-    # bind $canvas <Control-y> "$this modify paste; break"
+    # bind $slate <Meta-x> { }
+    # bind $slate <Control-x><u> "$this undo; break"
+    # bind $slate <Control-w> "$this modify cut; break"
+    # bind $slate <Meta-w> "$this copy; break"
+    # bind $slate <Control-y> "$this modify paste; break"
 
     # Bind configure events to update the display.
     # Interactivity is enabled only after the first configure event.
     bind $itk_component(bottom) <Configure> \
             "$this updateScrollbars; $this dependenceUpdate resize"
-# FIXME:
-#            $this interactiveEnable 1
+    # FIXME:
+    #            $this interactiveEnable 1
 
     # Create the selector. Shift-click toggles selected items.
-    set selector [$canvas interact create Selector \
+    set selector [$slate interact create Selector \
 	    -dragcolor grey60 -highlightcolor black -highlightwidth 1]
     $selector bind selectable -button 1
     $selector bind selectable -button 1 -modifiers shift -toggle
 
     # Move selected items only if all are tagged "moveable"
     $selector configure -movepredicate \
-	    "lnull \[lsubtract \[$selector contents\] \[$canvas find withtag moveable\]\]"
+	    "lnull \[lsubtract \[$selector contents\] \[$slate find withtag moveable\]\]"
 
     # Create the background item used for drag-selecting
-    $canvas create rect 0 0 0 0 -outline "" -tags background
-    ::bind $canvas <Configure> \
-	    "$canvas coords background 0 0 \
-	        \[winfo width $canvas\] \[winfo height $canvas\]"
+    $slate create rect 0 0 0 0 -outline "" -tags background
+    ::bind $slate <Configure> \
+	    "$slate coords background 0 0 \
+	    \[winfo width $slate\] \[winfo height $slate\]"
 
     # Create the drag-selector. Shift-click or button 2 toggles items
-    set dragselector [$canvas interact create Follower]
+    set dragselector [$slate interact create Follower]
     $dragselector bind background -button 1
     $dragselector bind background -button 1 -modifiers shift -toggle
     $dragselector cascade $selector
 
     # Create an editor for text items. Button 2 activates
-    set lineeditor [$canvas interact create Editor]
+    set lineeditor [$slate interact create Editor]
     $lineeditor bind editable -button 2
 
     # Starting editing clears all selected items and prevents
     # selection on the text item
     $lineeditor configure -activatecommand \
-	    "$selector clear; $canvas dtag \[$lineeditor target\] selectable"
+	    "$selector clear; $slate dtag \[$lineeditor target\] selectable"
 
     # Stopping editing makes the text item selectable again
     $lineeditor configure -deactivatecommand \
-	    "$canvas addtag selectable withtag \[$lineeditor target\]"
+	    "$slate addtag selectable withtag \[$lineeditor target\]"
 
     # Selecting or deselecting an item deactivates the text editor
     $selector configure -selectcommand "$lineeditor stop"
@@ -584,9 +588,9 @@ body ::tycho::Graphics::destructor {} {
     }
 }
 
-    ###################################################################
-    ###################################################################
-    ####                      public methods                       ####
+###################################################################
+###################################################################
+####                      public methods                       ####
 
 #######################################################################
 #### clear
@@ -596,9 +600,9 @@ body ::tycho::Graphics::clear {} {
     if [getReadOnly] {bell; return}
     
     # Delete all items on the slate _except_ the background
-    $canvas addtag temp all
-    $canvas dtag background temp
-    $canvas delete temp
+    $slate addtag temp all
+    $slate dtag background temp
+    $slate delete temp
 }
 
 # NOTE: The following implementation assumes that the visible portion
@@ -637,17 +641,17 @@ body ::tycho::Graphics::clear {} {
 #
 body ::tycho::Graphics::centeredText \
         {text {tag {}} {below {}} {color black} {font {}}} {
-    if {$tag != {} && [$canvas find withtag $tag] != {}} {
-        if [catch {set oldtext [$canvas itemcget $tag -text]}] {
+    if {$tag != {} && [$slate find withtag $tag] != {}} {
+        if [catch {set oldtext [$slate itemcget $tag -text]}] {
             set oldtext {}
         }
-        $canvas delete $tag
+        $slate delete $tag
     } {
         set oldtext {}
     }
     if {$text != {}} {
         set top [eval bottomOf $below]
-        set cwidth [winfo width $canvas]
+        set cwidth [winfo width $slate]
         if {$cwidth == 1} {
             # The canvas has not been mapped yet.  Use the requested width.
             set cwidth [cget -canvaswidth]
@@ -663,7 +667,7 @@ body ::tycho::Graphics::centeredText \
             set usefont [::tycho::.tychoFonts defaultFont variable]
         }
         set usecolor [ptkColor $color]
-        set id [$canvas create text $xcoord $top \
+        set id [$slate create text $xcoord $top \
                 -width $cwidth \
                 -justify center \
                 -anchor n \
@@ -672,7 +676,7 @@ body ::tycho::Graphics::centeredText \
                 -tags {selectable editable moveable} \
                 -font $usefont]
         if {$tag != {}} {
-            $canvas addtag $tag withtag $id
+            $slate addtag $tag withtag $id
             # NOTE: add a command to update position rather than just
             # recreating the text on an update.
             set cmd [list centeredText $text $tag $below $color $font]
@@ -719,7 +723,7 @@ body ::tycho::Graphics::centeredTextEdit {{tag {}}} {
     }
     selectionClear
     if {$tag != {}} {
-        set id [$canvas find withtag $tag]
+        set id [$slate find withtag $tag]
         if {$id != {}} {
             if {[info exists itemCreate($id)]} {
                 set create $itemCreate($id)
@@ -774,7 +778,7 @@ body ::tycho::Graphics::copy {{ids {}}} {
 #
 body ::tycho::Graphics::create {args} {
     undoBoundary
-    set id [eval $canvas create $args]
+    set id [eval $slate create $args]
     register $id [concat create $args] [list delete $id] [list delete $id]
     markModified
     return $id
@@ -813,10 +817,10 @@ body ::tycho::Graphics::cut {{ids {}}} {
 body ::tycho::Graphics::delete {args} {
     undoBoundary
     foreach tag $args {
-        foreach id [$canvas find withtag $tag] {
+        foreach id [$slate find withtag $tag] {
             if [info exists itemCreate($id)] {
                 if {[lindex $itemDelete($id) 0] == {delete}} {
-                    eval $canvas $itemDelete($id)
+                    eval $slate $itemDelete($id)
                     undoAppend $itemCreate($id)
                 } {
                     eval $this $itemDelete($id)
@@ -826,7 +830,7 @@ body ::tycho::Graphics::delete {args} {
                 unset itemEdit($id)
             } {
                 # Nothing registered.  Just delete.
-                $canvas delete $id
+                $slate delete $id
             }
         }
     }
@@ -909,7 +913,7 @@ body ::tycho::Graphics::dependenceUpdate {args} {
         }
         foreach node $nodes {
             set name [lindex $node 0]
-            set ids [$canvas find withtag $name]
+            set ids [$slate find withtag $name]
             # Skip the node if there is nothing in the canvas that matches.
             if {$ids == {}} {continue}
             set contents [lindex $node 1]
@@ -953,13 +957,13 @@ body ::tycho::Graphics::dependenceUpdate {args} {
 body ::tycho::Graphics::describe {} {
 
     # First, describe the canvas dimensions
-    set height [winfo height $canvas]
+    set height [winfo height $slate]
     if {$height == 1} {
         # Canvas has not been mapped yet
         set height [cget -canvasheight]
     }
     lappend dsc [list configure -canvasheight $height]
-    set width [winfo width $canvas]
+    set width [winfo width $slate]
     if {$width == 1} {
         # Canvas has not been mapped yet
         set width [cget -canvaswidth]
@@ -973,7 +977,7 @@ body ::tycho::Graphics::describe {} {
     # Although it is undocumented, the "find withtags all" returns
     # items in the order in which they are displayed.  We describe
     # them in this same order.
-    foreach id [$canvas find withtag all] {
+    foreach id [$slate find withtag all] {
         if [info exists itemCreate($id)] {
             lappend dsc $itemCreate($id)
         }
@@ -1084,7 +1088,7 @@ body ::tycho::Graphics::exportEps \
     } else {
 	set rotate 0
     }
-    set bbox [[canvasName] bbox all]
+    set bbox [$slate bbox all]
     set cheight [expr [lindex $bbox 3]-[lindex $bbox 1]]
     set cwidth [expr [lindex $bbox 2]-[lindex $bbox 0]]
 
@@ -1093,7 +1097,7 @@ body ::tycho::Graphics::exportEps \
     } {
         set wopt {}
     }
-    eval [canvasName] postscript \
+    eval $slate postscript \
             -file $filename \
             -width $cwidth \
             -height $cheight \
@@ -1111,7 +1115,7 @@ body ::tycho::Graphics::exportEps \
 # NOTE: Unix-only implementation.
 #
 body ::tycho::Graphics::exportXwd {filename} {
-    set id [winfo id $itk_component(canvas)]
+    set id [winfo id $slate]
     raiseWindow
     # NOTE: Temporarily pass $prefix rather than $this until "info"
     # is fixed in itcl.
@@ -1130,7 +1134,7 @@ body ::tycho::Graphics::exportXwd {filename} {
 body ::tycho::Graphics::focusin {} {
     # FIXME: The following does not work.  Slate gets the focus, but
     # not the canvas.
-    focus [$canvas component canvas]
+    focus [$slate component canvas]
     displayer setCurrentView $viewName
 }
 
@@ -1233,7 +1237,7 @@ body ::tycho::Graphics::redo {} {
         eval $this $cmd
     }
     set redoCommands {}
-    catch {$itk_option(-top) disableMenuItem Redo Edit}
+    catch {$itk_option(-top) disableMenuItem Redo}
     markModified
 }
 
@@ -1314,13 +1318,13 @@ body ::tycho::Graphics::setReadOnly {bool} {
     ::tycho::File::setReadOnly $bool
     if [winfo exists $prefix] {
 	if {$bool} {
-            menubar disableMenuItem {Edit Item} Edit
-            menubar disableMenuItem {Cut} Edit
-            menubar disableMenuItem {Paste} Edit
+            menubar disable {Edit Item}
+            menubar disable {Cut}
+            menubar disable {Paste}
 	} {
-            menubar enableMenuItem {Edit Item} Edit
-            menubar enableMenuItem {Cut} Edit
-            menubar enableMenuItem {Paste} Edit
+            menubar enable {Edit Item}
+            menubar enable {Cut}
+            menubar enable {Paste}
 	}
     }
 }
@@ -1344,7 +1348,7 @@ body ::tycho::Graphics::titleAdd {{newcategory 0}} {
                 [option get $itk_component(hull) titleTypes Graphics]
         set categories {}
         foreach cat $titleTypes {
-            if {[$canvas find withtag $cat] == {}} {
+            if {[$slate find withtag $cat] == {}} {
                 lappend categories $cat
             }
         }
@@ -1429,7 +1433,7 @@ body ::tycho::Graphics::undo {} {
     }
     set undoing 0
     set undoCommands {}
-    catch {$itk_option(-top) disableMenuItem Undo Edit}
+    catch {$itk_option(-top) disableMenuItem Undo}
     markModified
 }
 
@@ -1444,10 +1448,10 @@ body ::tycho::Graphics::undo {} {
 body ::tycho::Graphics::undoAppend {command} {
     if !$interactiveEnabled {return}
     if $undoing {
-        catch {$itk_option(-top) enableMenuItem Redo Edit}
+        catch {$itk_option(-top) enableMenuItem Redo}
         lappend redoCommands $command
     } {
-        catch {$itk_option(-top) enableMenuItem Undo Edit}
+        catch {$itk_option(-top) enableMenuItem Undo}
         lappend undoCommands $command
     }
 }
@@ -1462,12 +1466,12 @@ body ::tycho::Graphics::undoBoundary {} {
     if !$interactiveEnabled {return}
     if $undoing {
         if {$itk_option(-top) != {}} {
-            catch {$itk_option(-top) disableMenuItem Redo Edit}
+            catch {$itk_option(-top) disableMenuItem Redo}
         }
         set redoCommands {}
     } {
         if {$itk_option(-top) != {}} {
-            catch {$itk_option(-top) disableMenuItem Undo Edit}
+            catch {$itk_option(-top) disableMenuItem Undo}
         }
         set undoCommands {}
     }
@@ -1484,10 +1488,10 @@ body ::tycho::Graphics::undoBoundary {} {
 body ::tycho::Graphics::undoPrepend {command} {
     if !$interactiveEnabled {return}
     if $undoing {
-        catch {$itk_option(-top) enableMenuItem Redo Edit}
+        catch {$itk_option(-top) enableMenuItem Redo}
         set redoCommands [concat [list $command] $redoCommands]
     } {
-        catch {$itk_option(-top) enableMenuItem Undo Edit}
+        catch {$itk_option(-top) enableMenuItem Undo}
         set undoCommands [concat [list $command] $undoCommands]
     }
 }
@@ -1505,9 +1509,9 @@ body ::tycho::Graphics::updateScrollbars {} {
     }
 }
 
-    ###################################################################
-    ###################################################################
-    ####                      protected methods                    ####
+###################################################################
+###################################################################
+####                      protected methods                    ####
 
 #####################################################################
 #### addInfo
@@ -1587,8 +1591,8 @@ body ::tycho::Graphics::bottomOf {args} {
     set id {}
     set bottom 2
     foreach tag $args {
-        foreach item [$canvas find withtag $tag] {
-            set bot [expr [lindex [$canvas bbox $item] 3]+2]
+        foreach item [$slate find withtag $tag] {
+            set bot [expr [lindex [$slate bbox $item] 3]+2]
             if {$bot > $bottom} {set bottom $bot}
         }
     }
@@ -1605,10 +1609,10 @@ body ::tycho::Graphics::bottomOf {args} {
 #
 body ::tycho::Graphics::findAll {args} {
     if {$args == {}} {
-        return [$canvas find withtag all]
+        return [$slate find withtag all]
     } {
         # Get a list of all ids with the first tag.
-        set ids [$canvas find withtag [lindex $args 0]]
+        set ids [$slate find withtag [lindex $args 0]]
 
         # Construct a list of the remaining tags
         set rest [lrange $args 1 end]
@@ -1617,7 +1621,7 @@ body ::tycho::Graphics::findAll {args} {
         # verify that it has all the rest of the tags.
         set toret {}
         foreach id $ids {
-            set tags [$canvas gettags $id]
+            set tags [$slate gettags $id]
 
             # Verify that all tags in the list "rest" are in the list "tags"
             set in 1
@@ -1706,7 +1710,7 @@ body ::tycho::Graphics::register {id create undo remove {edit {}}} {
     set itemCreate($id) $create
     set itemDelete($id) $remove
     undoPrepend $undo
-	set itemEdit($id) $edit
+    set itemEdit($id) $edit
 }
 
 #######################################################################
@@ -1723,9 +1727,9 @@ body ::tycho::Graphics::saveText {} {
     return $dsc
 }
 
-    ###################################################################
-    ###################################################################
-    ####                      private methods                      ####
+###################################################################
+###################################################################
+####                      private methods                      ####
 
 #########################################################################
 #### configureScrollbars
@@ -1735,19 +1739,19 @@ body ::tycho::Graphics::saveText {} {
 body ::tycho::Graphics::configureScrollbars {} {
     set bwidth 0
     set bheight 0
-    set bbox [$canvas bbox all]
+    set bbox [$slate bbox all]
     if {$itk_option(-scrolling) == {auto}} {
-        set cwidth [winfo width $canvas]
+        set cwidth [winfo width $slate]
         if {$cwidth == 1} {
             # The canvas has not been mapped yet.  Use the requested width.
             set cwidth [cget -canvaswidth]
         }
-        set cheight [winfo height $canvas]
+        set cheight [winfo height $slate]
         if {$cheight == 1} {
             # The canvas has not been mapped yet.  Use the requested width.
             set cheight [cget -canvasheight]
         }
-    
+	
         if {$bbox != {}} {
             # So that the scrollbars don't move to the edge of the contents
             set marg 4
@@ -1769,13 +1773,13 @@ body ::tycho::Graphics::configureScrollbars {} {
             $bwidth > $cwidth || \
             $bheight > $cheight} {
         pack $itk_component(vsb) -side right -fill y -expand 0 \
-                -before $itk_component(canvas)
+                -before $slate
         pack $itk_component(hsb) -side left -fill x -expand 1
         set fillwidth [winfo reqwidth $itk_component(vsb)]
         $itk_component(filler) configure -width $fillwidth
         pack $itk_component(filler) -side right -expand 0
-    
-        $canvas configure -scrollregion $bbox
+	
+        $slate configure -scrollregion $bbox
     } {
         if [winfo ismapped $itk_component(vsb)] {
             pack forget $itk_component(vsb)
