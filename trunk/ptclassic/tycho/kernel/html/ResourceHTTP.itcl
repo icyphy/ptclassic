@@ -33,15 +33,54 @@
 # FIXME: Currently use one single global status flag
 # for the non-blocking download. Need to make one per URL
 # (and non-global?)
-set _httpstatus done
+#
+# DO NOT USE THIS VARIABLE DIRECTLY! Use method httpset instead.
+set _httpstatus(http://127.0.0.1) done
 
 #######################################################################
 #### ResourceHTTP
+#
 # This provides an abstraction of remote files for anything that
 # uses Resource. Using this class, attributes are abstracted away
 # from functionalities which include: cache, updating cache, HTTP
 # protocol, socket error, etc.
 #
+# Here is a quick mini-tutorial to get familiar with this class. You
+# can also take a look at the global procedure "::tycho::resource"
+# to see how it interacts with this class.<br>
+# <ul>
+# <li><b>Select the site to see...</b>
+# <tcl>1:<pre>  set site "http://ptolemy.eecs.berkeley.edu"</pre></tcl>
+# <tcl>2:<pre>  set site "http://www.eecs.berkeley.edu"</pre></tcl>
+# <tcl>3:<pre>  set site "http://www.cs.berkeley.edu"</pre></tcl>
+# <tcl>4:<pre>  set site "http://http.cs.berkeley.edu"</pre></tcl>
+#
+# <li><b>See if the object exists or not</b><tcl>
+# <pre>  ::tycho::ResourceHTTP::exists $site
+# </pre></tcl>
+#
+# <li><b>Create a new HTTP object</b><tcl>
+# <pre>  set httpobj [::tycho::autoName httpdemo]
+#   ::tycho::ResourceHTTP $httpobj
+# </tcl></pre>
+#
+# <li><b>Set the pathname, in our case, the site</b><tcl>
+# <pre>  $httpobj connect $site
+# </tcl></pre>
+#
+# <li><b>Open for reading</b><tcl>
+# <pre>  $httpobj open r
+# </tcl></pre>
+#
+# <li><b>Print out first 50 lines in this HTML file</b><tcl>
+# <pre>  set i 0
+#   set line {}
+#   while {![$httpobj eof] && [incr i]!=50} {
+#     lappend line [$httpobj gets]
+#   }
+#   ::tycho::inform $line
+# </tcl></pre>
+# </ul>
 class ::tycho::ResourceHTTP {
     inherit ::tycho::Resource
 
@@ -159,6 +198,9 @@ class ::tycho::ResourceHTTP {
     # The file event handler
     protected method httpread {}
 
+    # Set or read the http status. If newvalue is {}, then just return
+    protected method httpstatus {newvalue}
+
     # Wait until an HTTP GET completes.
     protected method httpwait {}
 
@@ -190,6 +232,8 @@ class ::tycho::ResourceHTTP {
     # The current status of an http get. This is a common array
     # so that tkwait can access it. Can be "header," "body,"
     # "abort," or "done".
+    #
+    # DO NOT USE THIS VARIABLE! Instead, use the method httpset
     #protected common _httpstatus
 
     ###################################################################
@@ -320,7 +364,7 @@ body ::tycho::ResourceHTTP::gets {{varName {}}} {
 	::gets $fileid
     } else {
 	upvar $varName v
-	uplevel ::get $fileid v
+	uplevel ::gets $fileid v
     }
 }
 
@@ -656,12 +700,8 @@ body ::tycho::ResourceHTTP::debugputs {string} {
 # (There should be a status flag to deal with this.)
 #
 body ::tycho::ResourceHTTP::httpabort {} {
-    # First see that there is a GET running
-    if ![::info exists _httpstatus] {
-	return
-    }
     # Set the status so that httpdone knows what to do
-    set _httpstatus "abort"
+    httpstatus _httpstatus "abort"
 
     # Terminate with httpdone. This will enable any
     # threads hanging off tkwait to continue.
@@ -679,7 +719,7 @@ body ::tycho::ResourceHTTP::httpbusy {} {
 	    && ! [string compare $_httpstatus done] }]"
 
     expr { [::info exists _httpstatus] \
-	    && ! [string compare $_httpstatus done] }
+	    && ! [string compare [httpstatus] done] }
 }
 
 #########################################################################
@@ -736,7 +776,7 @@ body ::tycho::ResourceHTTP::httpdone {} {
     # Unfortunately, this is bogus, since our httpread{}
     # is putting an additional end-of-line at the end of the file.
     set junkcode {
-	if { $_httpstatus != "abort" && $requestMode == "file" } {
+	if { [httpstatus] != "abort" && $requestMode == "file" } {
 	    if { [::file size $filename] != $contentlength } {
 		if $debug {
 		    # debugputs "Received HTTP file size ([::file size \
@@ -747,7 +787,8 @@ body ::tycho::ResourceHTTP::httpdone {} {
 	}
     }
     # Set the status
-    uplevel #0 "set _httpstatus done"
+    #uplevel #0 "set _httpstatus done"
+    httpstatus "done"
     
     # One last update of notifycommand
     if { $notifycommand != "" } {
@@ -781,7 +822,8 @@ body ::tycho::ResourceHTTP::httpget {url type} {
 	set fileid [::open $filename "w+"]
 	debugputs "Cache file $filename on $fileid"
     }
-    uplevel #0 "set _httpstatus header"  ;# Initially we're getting the header
+    #uplevel #0 "set _httpstatus header"  ;# Initially we're getting the header
+    httpstatus "header"
     set status -1                   ;# Initial status - ?
     set requestMode $type           ;# header or file
     set contentloaded 0             ;# how much is loaded
@@ -853,7 +895,7 @@ body ::tycho::ResourceHTTP::httpread {} {
     ::fileevent $socketid readable {}
 
     # Currently reading header or body?
-    if { [uplevel #0 "set _httpstatus"] == "header" } {
+    if { [httpstatus] == "header" } {
         # Get a line
         ::gets $socketid line
 	# Header mode, the information about this http get.
@@ -868,7 +910,8 @@ body ::tycho::ResourceHTTP::httpread {} {
 	} else {
 	    # End of header is denoted by an empty line
 	    debugputs "            <-"
-	    uplevel #0 "set _httpstatus body"
+            #uplevel #0 "set _httpstatus body"
+            httpstatus "body"
 
 	    # Check status codes
 	    if {$status>=300 && $status<=399} {
@@ -892,7 +935,7 @@ body ::tycho::ResourceHTTP::httpread {} {
                 fconfigure $fileid -translation lf
             }
 	}
-    } elseif { [uplevel #0 "set _httpstatus"] == "body" } {
+    } elseif { [httpstatus] == "body" } {
 	# Body mode (content of http get), write to the cache file.
 	# Note that we only do this if the status _is_ "body," in
 	# case an abort is in progress.
@@ -922,6 +965,23 @@ body ::tycho::ResourceHTTP::httpread {} {
     after idle [list ::fileevent $socketid readable \
 	    [list catch [list @scope ::tycho::ResourceHTTP \
             [list $this httpread]]]]
+}
+
+#########################################################################
+#### httpstatus
+# A procedure that handles set and read of the status.
+#
+body ::tycho::ResourceHTTP::httpstatus {{value {}}} {
+    if {$value!={}} {
+        uplevel #0 "set _httpstatus($currentURL) $value"
+    }
+
+    if ![uplevel #0 "::info exists _httpstatus($currentURL)"] {
+        error "ASSERTION FAILED: _httpstatus($currentURL) does not exist!"
+    }
+
+    # Return the value
+    uplevel #0 "set _httpstatus($currentURL)"
 }
 
 #########################################################################
@@ -962,9 +1022,12 @@ body ::tycho::ResourceHTTP::splitURL {url} {
 # Wait until the current GET completes
 body ::tycho::ResourceHTTP::httpwait {} {
     # Wait until the status becomes "done"
-    while { [uplevel #0 "set _httpstatus"] != "done" } {
-	uplevel #0 "tkwait variable _httpstatus"
+    #::puts -nonewline ">>>>Waiting ($currentURL=" ; flush stdout
+    while { [httpstatus] != "done" } {
+        uplevel #0 "tkwait variable _httpstatus($currentURL)"
+        #tkwait variable _httpstatus
     }
+    #::puts "=$currentURL) DONE<<<<" ; flush stdout
     return
 }
 
