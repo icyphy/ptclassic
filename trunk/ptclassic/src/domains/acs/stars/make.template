@@ -23,7 +23,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 # Makefile for Ptolemy ACS stars
-# @(#)make.template	1.2   01/16/98
+# $Id$
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
