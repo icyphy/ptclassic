@@ -2525,7 +2525,7 @@ proc HMwent_to {win where {count 0} {color {}}} {
     }
 
     if {$color == {}} {
-        set color [stylesheet get text targetColor]
+        set color [::tycho::stylesheet get text targetColor]
     }
 
     # Temporarily change the background color
