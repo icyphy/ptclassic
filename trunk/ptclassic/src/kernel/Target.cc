@@ -291,7 +291,7 @@ const char* Target::writeDirectoryName(const char* dirName) {
 	// delete old value if any
 	LOG_DEL; delete [] dirFullName;
 	// expand the path name
-	dirFullName = savestring(expandPathName(dirName));
+	dirFullName = expandPathName(dirName);
 
 	// check to see whether the directory exists, create it if not
 	struct stat stbuf;
