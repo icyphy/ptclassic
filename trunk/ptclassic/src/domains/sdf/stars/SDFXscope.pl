@@ -22,8 +22,8 @@ for a complete explanation of the options.
 Multiple traces may be plotted by setting the \fItraceLength\fR
 state to a nonzero value.  In this case, a new plot (starting at
 x value zero) is started every \fItraceLength\fR samples.  The
-first \fIignore\fR traces (not samples, as the state descriptor says)
-are not plotted; this is useful for letting transients die away.
+first \fIignore\fR samples are not plotted; this is useful for letting
+transients die away.
 	}
 	defstate {
 		name {traceLength}
@@ -40,19 +40,16 @@ are not plotted; this is useful for letting transients die away.
 		SDFXgraph::start();
 		traceCount = 0;
 		nTracesSoFar = 0;
-		// we will handle the ignoring here.
-		graph.setIgnore(0);
 	}
 
 	go {
 		if (int(traceLength) > 0 && traceCount >= int(traceLength)) {
 			traceCount = 0;
-			if (nTracesSoFar >= int(ignore))
-				graph.newTrace();
+			graph.newTrace();
+			index = xInit;	// reinitialize x index
 			nTracesSoFar++;
 		}
 		traceCount++;
-		if (nTracesSoFar >= int(ignore))
-			SDFXgraph::go();
+		SDFXgraph::go();
 	}
 }
