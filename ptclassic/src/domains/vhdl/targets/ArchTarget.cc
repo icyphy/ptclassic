@@ -764,17 +764,6 @@ void ArchTarget :: trailerCode() {
     }
   }
 
-  // Stupid test code
-  StringList hall = "Halleluia!";
-  const char* blank = 0;
-  StringList end = "\n";
-  cout << hall << end;
-  savestring(hall);
-  cout << blank << end;
-  savestring(blank);
-
-  // Stupid test code
-
 
   // Call the method to interactively rework the arch, if
   // it is provided (by derived targets)
