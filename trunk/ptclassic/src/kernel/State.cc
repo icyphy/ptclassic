@@ -70,7 +70,7 @@ int State :: size () const { return 1;}
 
 // See if character is part of an identifier
 inline unsigned int is_idchar(char c) {
-        return isalnum(c) || c == '_';
+	return isalnum(c) || c == '_';
 }
 
 // setState -- two versions
@@ -110,12 +110,12 @@ const State* tempLookup (const char* name, Block* blockIAmIn) {
        while (blockIAmIn) {
 		if (blockIAmIn->isItWormhole())
 			blockIAmIn = blockIAmIn->parent();
-                State* p = blockIAmIn->stateWithName(name);
-                if (p) return p;
-                blockIAmIn = blockIAmIn->parent();
-        }
+		State* p = blockIAmIn->stateWithName(name);
+		if (p) return p;
+		blockIAmIn = blockIAmIn->parent();
+	}
 	// not found, consult global symbol list
-        return KnownState::lookup(name);
+	return KnownState::lookup(name);
 }
 
 // This could be moved as a member function of State so that other states
@@ -126,8 +126,10 @@ StringList parseFileName(State& state, const char* fileName) {
     char tokbuf[MAXSTRINGLEN];
     const char* specialChars = "{}";
     Tokenizer lexer(fileName,specialChars);
-    int i = 0;
-    while(!lexer.eof() && i < MAXLEN) {
+
+    // this code used to limit the number of tokens parsed to MAXLEN
+    // because the code did not use StringLists
+    while( !lexer.eof() ) {
 	lexer >> tokbuf;
 	char c = tokbuf[0];
 	if (c != 0 && tokbuf[1]) c = 0;
@@ -156,44 +158,133 @@ StringList parseFileName(State& state, const char* fileName) {
     return parsedFileName;
 }
 
+// We parse nested sub-expressions appearing in the expression, e.g.
+// {{{FilterTapFile}/{File}}}, that might be passed off to another
+// interpreter for evaluation, e.g. Tcl.  Code derived from parseFileName.
+StringList parseNestedExpression(State& state, const char* expression) {
+    StringList parsedExpression;
+    char tokbuf[MAXSTRINGLEN], tmptokbuf[MAXSTRINGLEN];
+    const char* curSeparator = "";
+    const char* tokSeparator = " ";
+    const char* specialChars = "{}";
+    Tokenizer lexer(expression,specialChars);
+
+    while( !lexer.eof() ) {
+	lexer >> tokbuf;
+	char c = tokbuf[0];
+	if (c != 0 && tokbuf[1]) c = 0;
+	switch (c) {
+	  // only substitute for expressions such as {parameterName}
+	  case '{': {
+	    // iterate through consecutive open curly braces
+	    lexer >> tokbuf;
+	    while ( tokbuf[0] == '{' ) {
+	      parsedExpression << curSeparator << '{';
+	      curSeparator = tokSeparator;
+	      lexer >> tokbuf;
+	    }
+	    parsedExpression << curSeparator;
+	    curSeparator = tokSeparator;
+
+	    // lookup the next token on the parameter list
+	    const State* s = tempLookup(tokbuf,state.parent()->parent());
+	    if (s) {
+	      lexer >> tmptokbuf;
+	      if ( tmptokbuf[0] == '}' ) {
+		parsedExpression << s->currentValue();
+	      }
+	      else {
+		lexer.pushBack(tmptokbuf);
+		parsedExpression << '{' << curSeparator << tokbuf;
+	      }
+	    }
+	    else {
+	      parsedExpression << '{' << curSeparator << tokbuf;
+	    }
+	    break;
+	  }
+	  default: {
+	    parsedExpression << curSeparator << tokbuf;
+	  }
+	}
+	curSeparator = tokSeparator;
+    }
+    return parsedExpression;
+}
+
+// send a string to an external interpreter for evaluation
+const char*
+State :: externalInterpreter(const char* expression) {
+    parseError("no interpreter defined for the ! operator to evaluate ",
+	       expression);
+    return NULL;
+}
+
 // The state tokenizer: return next token when parsing a state
 // initializer string.  Handles references to files and other states.
 ParseToken
 State :: getParseToken(Tokenizer& lexer, int stateType) {
-        char token[TOKSIZE];
-// allow for one pushback token.
-	ParseToken t = pushback();
+	char token[TOKSIZE];
+	ParseToken t = pushback();	// allow for one pushback token.
 	if (t.tok) {
 		clearPushback();
 		return t;
 	}
 	lexer >> token;
-        if (*token == '<') {
-                char filename[TOKSIZE];
-// temporarily disable special characters, so '/' (for instance)
-// does not screw us up.
+
+	// read tokens from a file name
+	if (*token == '<') {
+		char filename[TOKSIZE];
+		// temporarily disable special characters, e.g. so '/' 
+		// does not screw us up.
 		const char* tc = lexer.setSpecial("");
-                lexer >> filename;
+		lexer >> filename;
 		StringList parsedFileName = parseFileName(*this,filename);
-// put special characters back.
+		// enable special characters
 		lexer.setSpecial(tc);
-// check for an error in parsing the file name
+		// check for an error in parsing the file name
 		if (parsedFileName.length() == 0) return t;
-// parse the contents of the file
-                if (!lexer.fromFile(parsedFileName)) {
+		// parse the contents of the file
+		if (!lexer.fromFile(parsedFileName)) {
 			StringList msg;
 			msg << parsedFileName << ": " << why();
 			parseError ("can't open file ", msg);
 			t.tok = T_ERROR;
 			return t;
 		}
-                else lexer >> token;
-        }
-	
-        if (*token == 0) {
-                t.tok = T_EOF;
-                return t;
-        }
+		else lexer >> token;
+	}
+
+	// read tokens from the output of an external interpreter
+	if (*token == '!') {
+		char shellCommand[TOKSIZE];
+		// temporarily disable special characters because we don't
+		// know what special characters the external interpreter uses
+		const char* tc = lexer.setSpecial("");
+		lexer >> shellCommand;
+		StringList parsedCommand =
+			parseNestedExpression(*this,shellCommand);
+		// enable special characters
+		lexer.setSpecial(tc);
+		// send the command to the external interpreter
+		const char* result = externalInterpreter(parsedCommand);
+		// check for an error from the interpreter
+		if (result == 0) {
+			StringList msg;
+			msg << "'" << shellCommand << "'"
+			    << " which was expanded into "
+			    << "'" << parsedCommand << "'";
+			parseError("could not evaluate ", msg);
+			t.tok = T_ERROR;
+			return t;
+		}
+		else lexer.pushBack(result);
+	}
+
+	if (*token == 0) {
+		t.tok = T_EOF;
+		return t;
+	}
 	
 // handle all special characters
 	if (strchr (",[]+*-/()^", *token)) {
@@ -257,15 +348,15 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 }
 
 const State* State :: lookup (const char* name, Block* blockIAmIn) {
-        while (blockIAmIn) {
+	while (blockIAmIn) {
 		if (blockIAmIn->isItWormhole())
 			blockIAmIn = blockIAmIn->parent();
-                State* p = blockIAmIn->stateWithName(name);
-                if (p) return p;
-                blockIAmIn = blockIAmIn->parent();
-        }
+		State* p = blockIAmIn->stateWithName(name);
+		if (p) return p;
+		blockIAmIn = blockIAmIn->parent();
+	}
 	// not found, consult global symbol list
-        return KnownState::lookup(name);
+	return KnownState::lookup(name);
 }
 
 // put info.
