@@ -1,5 +1,8 @@
 #! /bin/sh
 # usage: pigiRpcShell <vem-rpc-args>
+# Version: $Id$
+# Copyright (c) 1990,1991,1992 The Regents of the University of California.
+# All Rights Reserved.
 #
 # This shell is invoked by vem via vem's rpc mechanism.  It is our
 # job to recover our environment from the other side of the link,
@@ -10,9 +13,6 @@
 #    a csh script, use the "-f" option so that the user's .cshrc
 #    doesnt clobber the environment.
 
-# Version: $Id$
-# Copyright (c) 1990,1991,1992 The Regents of the University of California.
-# All Rights Reserved.
 
 #
 # check if we have an environment-passing file
