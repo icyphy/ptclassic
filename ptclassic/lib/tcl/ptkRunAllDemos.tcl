@@ -27,13 +27,17 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 
+# Iteration over a tree of demo facets is controlled by compile.c.
+# This file handles the user control panel for the process as
+# well as compilation and execution of a single demo universe.
 
 #######################################################################
 # Procedure to bring up the control panel for run-all-demos
 #
 proc ptkRunAllDemos {name octHandle} {
-    global ptkControlPanel
+    global ptkControlPanel ptkRunAllFlag
     set ptkControlPanel .run_all_demos_$octHandle
+    set ptkRunAllFlag 1
     
     if {[winfo exists $ptkControlPanel]} {
         ptkImportantMessage .error \
@@ -74,7 +78,7 @@ proc ptkRunAllDemos {name octHandle} {
     # Define the panel of control buttons
     frame $ptkControlPanel.panel -bd 10
     button $ptkControlPanel.panel.abortAll -text "Abort all" \
-	-command {ptkImportantMessage .error "Abort all: not implemented"} \
+	-command "ptkAbortAll $name" \
 	-width 14
     button $ptkControlPanel.panel.abortCurrent -text "Abort current" \
 	-width 14
@@ -91,8 +95,8 @@ proc ptkRunAllDemos {name octHandle} {
     ptkClearHighlights
 
     frame $ptkControlPanel.disfr
-    # DISMISS button does nothing for now, no command binding.
-    button $ptkControlPanel.disfr.dismiss -text "DISMISS (not implemented)"
+    button $ptkControlPanel.disfr.dismiss -text "DISMISS" \
+	-command "ptkRunAllDemosDel $name $octHandle"
     pack $ptkControlPanel.disfr.dismiss -side top -fill both -expand yes
 
     pack $ptkControlPanel.msg -fill both -expand yes
@@ -115,8 +119,22 @@ proc ptkRunAllDemos {name octHandle} {
 # Procedure to delete a run-all-demos control window
 #
 proc ptkRunAllDemosDel { name octHandle } {
+    # make sure run is stopped
+    ptkAbortAll $name
     # destroy the window
     catch {destroy .run_all_demos_$octHandle}
+}
+
+
+#######################################################################
+# Procedure to abort the whole recursive demo run
+#
+proc ptkAbortAll { name } {
+    global ptkControlPanel ptkRunAllFlag
+    # stop the current run
+    catch { $ptkControlPanel.panel.abortCurrent invoke }
+    # tell compile.c to abort out of scan through palettes
+    set ptkRunAllFlag 0
 }
 
 
@@ -137,7 +155,7 @@ proc ptkDelLite { name octHandle } {
     }
     unset ptkRunFlag($name)
     unset ptkOctHandles($name)
-    $ptkControlPanel.panel.abortCurrent configure -command ""
+    catch { $ptkControlPanel.panel.abortCurrent configure -command "" }
     deluniverse $name
 }
 
@@ -146,7 +164,7 @@ proc ptkDelLite { name octHandle } {
 # A blend of ptkRunControl (everything without the control panel part)
 # and ptkGo.  No debugging, animation.
 proc ptkCompileRun {name octHandle} {
-    global ptkRunFlag ptkOctHandles ptkControlPanel
+    global ptkRunFlag ptkOctHandles ptkControlPanel ptkRunAllFlag
 
     # For now, we allow only one run at a time.
     set univ [curuniverse]
@@ -192,12 +210,7 @@ proc ptkCompileRun {name octHandle} {
 	    set numIter [ptkGetRunLength $octHandle]
 	    $ptkControlPanel.iter configure -text "$numIter iterations"
             run $numIter
-
-	    if {[info exists ptkRunFlag($name)] &&
-		$ptkRunFlag($name) != {ABORT}} { wrapup } {
-	        # Mark an error if the system was aborted
-	        set ptkRunFlag($name) ERROR
-	    }
+	    wrapup
 	}
 
 	# we have finished running
@@ -206,6 +219,9 @@ proc ptkCompileRun {name octHandle} {
 	# An error has occurred.
 	# Mark an error
 	set ptkRunFlag($name) ERROR
-	error $msg
+	# Report the error, unless it was just caused by a user abort
+	if {$msg != "" && $msg != "Aborted" && $ptkRunAllFlag} {
+	    ptkImportantMessage .error $msg
+	}
     }
 }
