@@ -53,9 +53,9 @@ CGPortHole :: CGPortHole() : offset(0), forkSrc(0), embeddedPort(0),
 CGPortHole :: ~CGPortHole() {
 	ListIter next(forkDests);
 	OutCGPort* p;
-	while ((p = (OutCGPort*)next++) != 0) p->setForkSource(0);
+	while ((p = (OutCGPort*)next++) != 0) p->zeroForkSource();
 
-	if (forkSrc) forkSrc->forkDests.remove(this);
+	if (forkSrc) forkSrc->removeForkDest(this);
 
 	// If myGeodesic is switched, the pointer is set to zero to prevent
 	// deleting the same geodesic multiple times.  Make sure that
@@ -76,7 +76,7 @@ void CGPortHole::setForkSource(CGPortHole* p) {
 	// set new forkSrc
 	forkSrc = p;
 	// add me as one of forkSrc's destinations
-	if (forkSrc) forkSrc->forkDests.put(this);
+	if (forkSrc) forkSrc->putForkDest(this);
 }
 
 // processing for each port added to a fork buffer

@@ -51,9 +51,9 @@ baseclass DFPortHole.
 
 ****************************************************************/
 
-        //////////////////////////////////////////
-        // class CGPortHole
-        //////////////////////////////////////////
+	//////////////////////////////////////////
+	// class CGPortHole
+	//////////////////////////////////////////
 
 // Contains all the special features required for
 //   synchronous dataflow and boolean dataflow (CG)
@@ -71,9 +71,9 @@ public:
 	// setBDFParams(...)
 
 	// Return the geodesic connected to this PortHole.
-        // This is typesafe because allocateGeodesic
-        // makes myGeodesic of this type.
-        CGGeodesic& cgGeo() const { return *(CGGeodesic*)myGeodesic;}
+	// This is typesafe because allocateGeodesic
+	// makes myGeodesic of this type.
+	CGGeodesic& cgGeo() const { return *(CGGeodesic*)myGeodesic;}
 
 	// switch myGeodesic pointer to the argument Geodesic
 	// If the geodesic is switched, no longer need to allocate the
@@ -87,22 +87,22 @@ public:
 					myGeodesic = g; }
 	int switched() const { return switchFlag; }
 
-        // Return the size of the buffer connected to this PortHole.
-        virtual int bufSize() const;
+	// Return the size of the buffer connected to this PortHole.
+	virtual int bufSize() const;
 
-        // Return the size of the "local buffer" connected to this
-        // PortHole.  This returns zero for cases where no separate
-        // buffer is allocated, e.g. fork outputs (all destinations
-        // of the fork share the same buffer, whose size is returned
-        // by bufSize).
-        virtual int localBufSize() const;
+	// Return the size of the "local buffer" connected to this
+	// PortHole.  This returns zero for cases where no separate
+	// buffer is allocated, e.g. fork outputs (all destinations
+	// of the fork share the same buffer, whose size is returned
+	// by bufSize).
+	virtual int localBufSize() const;
 
 	// return the offset position in the buffer.
 	unsigned bufPos() const { return offset;}
 
-        // Advance the offset by the number of tokens produced or
-        // consumed in this PortHole when the Star fires.
-        virtual void advance();
+	// Advance the offset by the number of tokens produced or
+	// consumed in this PortHole when the Star fires.
+	virtual void advance();
 
 	// The buffer assigned to this porthole is embedded in a buffer:
 	// ex) input.embed(output) means that the buffer of the input
@@ -119,19 +119,24 @@ public:
 	// return true if I am a fork input
 	int fork() const { return forkDests.size();}
 
+	// Manage fork destinations
+	int removeForkDest(CGPortHole* p) { return forkDests.remove(p); }
+	void putForkDest(CGPortHole* p) { forkDests.put(p); }
+
 	// set a fork source
-        void setForkSource(CGPortHole* p);
+	void setForkSource(CGPortHole* p);
+	inline void zeroForkSource() { forkSrc = 0; }
 
 	// functions for moving data across wormhole boundaries
-	void forceSendData() { putParticle();}
-	void forceGrabData() { getParticle();}
+	void forceSendData() { putParticle(); }
+	void forceGrabData() { getParticle(); }
 
 protected:
 	int offset;
 	// Stuff to support fork buffers
 	SequentialList forkDests;
 	CGPortHole* forkSrc;
-	
+
 	// Where I am embedded.
 	CGPortHole* embeddedPort;
 	int embeddedLoc;
@@ -160,12 +165,12 @@ public:
 class OutCGPort : public CGPortHole
 {
 public:
-        int isItOutput () const; // {return TRUE; }
+	int isItOutput () const; // {return TRUE; }
 };
 
-        //////////////////////////////////////////
-        // class MultiCGPort
-        //////////////////////////////////////////
+	//////////////////////////////////////////
+	// class MultiCGPort
+	//////////////////////////////////////////
  
 // Synchronous dataflow MultiPortHole for code generation
 // FIXME: by deriving from MultiDFPort we only support
@@ -189,30 +194,30 @@ public:
 	//	unsigned numTokens)
 };
 
-        //////////////////////////////////////////
-        // class MultiInCGPort
-        //////////////////////////////////////////
-        
+	//////////////////////////////////////////
+	// class MultiInCGPort
+	//////////////////////////////////////////
+	
 // MultiInCGPort is an CG input MultiPortHole
  
 class MultiInCGPort : public MultiCGPort {
 public:
-        int isItInput () const; // {return TRUE; }
+	int isItInput () const; // {return TRUE; }
 
 	// Add a new physical port to the MultiPortHole list
 	PortHole& newPort();
 };
  
  
-        //////////////////////////////////////////
-        // class MultiOutCGPort
-        //////////////////////////////////////////
+	//////////////////////////////////////////
+	// class MultiOutCGPort
+	//////////////////////////////////////////
 
 // MultiOutCGPort is an CG output MultiPortHole  
 
 class MultiOutCGPort : public MultiCGPort {     
 public:
-        int isItOutput () const; // {return TRUE; }
+	int isItOutput () const; // {return TRUE; }
 
 	// Add a new physical port to the MultiPortHole list
 	PortHole& newPort();
