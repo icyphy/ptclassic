@@ -30,7 +30,7 @@ Version: $Id$
 
 #include <string.h>
 #include <math.h>
-#include "cephes.h"
+#include "PTDSPcephes.h"
 #include "PTDSPWindow.h"
 
 /* Returns the window identification number from a window name as a string */
