@@ -83,9 +83,6 @@
 # an item also specifies certain properties of items of that type -- for
 # example, whether they can contain other items.
 #
-# For examples illustrating the use of the DataModel class, see the
-# <a href="../../demo/doc/codeDoc/SimpleModel.html">SimpleModel</a> class.
-#
 class ::tycho::DataModel {
     inherit ::tycho::Model
 
