@@ -42,20 +42,22 @@ test Path-1.1 { Check out files in the current dir vs. paths with env vars} {
     set localfile [::tycho::expandPath foo]
     set envfile [::tycho::expandPath \
 	    [file join \$MYVAR foo]]
+    set localfilebyhand [file join [pwd] foo]
 
     # Verify that expanding a local file results in part
     # of the directory being tycho/kernel/test
     set localfilecheck [string range $localfile \
 	    [ expr {[string length $localfile] - \
-	    [string length [file join tycho kernel test foo]]}] end]
+	    [string length $localfilebyhand]}] end]
 
     set envfilecheck [string range $envfile \
 	    [ expr {[string length $envfile] - \
-	    [string length [file join tycho kernel test foo]]}] end]
+	    [string length $localfilebyhand]}] end]
     
     # Verify that localfile is the same as envfile
-    list [expr {$localfile == $envfile}] $localfilecheck $envfilecheck
-} {1 tycho/kernel/test/foo tycho/kernel/test/foo}
+    list [expr {$localfile == $envfile}] \
+            [expr {$localfilecheck == $localfilebyhand}]
+} {1 1}
 
 test Path-1.2 { tilde expand a user that does not exist} {
     catch {::tycho::expandPath ~anonexistantUser} errMsg
@@ -131,6 +133,7 @@ proc testEq { a b } {
     }
     return [list $a $b]
 }
+
 test Path-4.1 {Test out relativePath} {
     global env
     if [info exist env(PTOLEMY)] {
@@ -279,4 +282,19 @@ foreach {c t} {
             array get arr
 	} $r
 }
+
+#######################################################################
+#### ::tycho::egrep
+#
+test Path-9.1 {Test out egrep -i and -nocase} {
+    set a [::tycho::egrep -i Author *.tcl makefile]
+    update
+    set b [::tycho::egrep -nocase Author *.tcl makefile]
+    update
+    set c [::tycho::egrep -nocase author *.tcl makefile]
+    update
+    set d [::tycho::egrep Author *.tcl makefile]
+    list [expr {$a == $b}] [expr {$a == $c}] [expr {$a == $d}]
+} {1 1 0}
+
 
