@@ -195,13 +195,19 @@ protected:
 	// Size of State or PortHole.
 	StringList expandSize(const char*);
 
-	// lookup a code StringList that is supported by the target.  If
+	// lookup a code CodeStream that is supported by the target.  If
 	// the stream does not exist, Error::abortRun is called.  The
-	// target should set up pointers that are set to the StringLists they
+	// target should set up pointers that are set to the CodeStreams they
 	// need rather that allowing functions to call this routine directly.
 	// Initialize the pointers by overloading the star public member
 	// function void setTarget(Target* ).
 	CodeStream* getStream(const char* name);
+
+	// create a new CodeStream with a given name.  It is legal to call this
+	// function multiple times with the same name.  In this case, only the
+	// first call will actually create a new CodeStream.  Error::abortRun
+	// is called if this fails.
+	CodeStream* newStream(const char* name);
 	
 	// Update all PortHoles so that the offset is incremented by the
 	// number of samples consumed or produced.

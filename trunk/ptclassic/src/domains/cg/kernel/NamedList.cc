@@ -35,34 +35,22 @@ Programmer: J. Pino, T. M. Parks
 #include "NamedList.h"
 #include "miscFuncs.h"
 
-// Hidden class used by NamedList.
-class NamedNode
+NamedNode::NamedNode(Pointer objt, const char* name) 
 {
-    friend class NamedList;
-    friend class NamedListIter;
-
-    NamedNode(Pointer object, const char* name);
-    ~NamedNode();
-    char* name;
-    Pointer object;
-};
-
-NamedNode::NamedNode(Pointer obj, const char* nm) 
-{
-    object = obj;
-    name = savestring(nm);
+    obj = objt;
+    nm = savestring(name);
 }
 
 NamedNode::~NamedNode()
 {
-    LOG_DEL; delete name;
+    LOG_DEL; delete nm;
 }
 
 // Next object in the list, not the next NamedNode.
 Pointer NamedListIter::next()
 {
     NamedNode* node = (NamedNode*)ListIter::next();
-    if (node != NULL) return node->object;
+    if (node != NULL) return node->object();
     else return NULL;
 }
 
@@ -74,7 +62,7 @@ int NamedList::append(Pointer object, const char* name)
     if (node != NULL)
     {
 	// Adding two objects with the same name is not allowed.
-	if (node->object != object) return FALSE;
+	if (node->object() != object) return FALSE;
 	// Adding the same object twice is allowed. Only one copy is kept.
 	else return TRUE;
     }
@@ -99,7 +87,7 @@ void NamedList::prepend(Pointer object, const char* name)
 Pointer NamedList::get(const char* name) const
 {
     NamedNode* node = getNamedNode(name);
-    if (node != NULL) return node->object;
+    if (node != NULL) return node->object();
     else return NULL;
 }
 
@@ -141,7 +129,7 @@ NamedNode* NamedList::getNamedNode(const char* name) const
 	ListIter node(*this);
 	while ((n = (NamedNode*)node++) != NULL)
 	{
-	    if(strcmp(name, n->name) == 0) break;
+	    if(strcmp(name, n->name()) == 0) break;
 	}
     }
     return n;

@@ -93,18 +93,27 @@ void CGStar::advance() {
 const int MAXLINELEN = 1024;
 const int TOKLEN = 80;
 
-// Find the code StringList called name, if a StringList doesn't exist 
+// Find the CodeStream called name, if a CodeStream doesn't exist 
 // with the name name specified Error::abortRun is called.
 CodeStream* CGStar::getStream(const char* name) {
-	CodeStream* slist = myTarget()->getStream(name);
-	if (slist == NULL) 
-	{
+	CodeStream* code = myTarget()->getStream(name);
+	if (code == NULL) {
 		StringList message;
 		message << "getStream: " << name
 		   << " does not exist. Maybe your target is wrong?";
 		Error::abortRun(*this,message);
 	}
-	return slist;
+	return code;
+}
+
+// Create a new CodeStream called 'name' if it doesn't exist.  Return it's 
+// pointer.
+CodeStream* CGStar::newStream(const char* name) {
+	CodeStream* code = myTarget()->newStream(name);
+	if (!code) {
+		Error::abortRun(*this,"newStream: allocation failed ",name);
+	}
+	return code;
 }
 
 // Lookup a shared symbol by scope name & symbol name.
