@@ -18,10 +18,10 @@ include $(CONFIG)
 # SDFDIR is the directory containing SDF domain support
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
 SDFDSPSTARS = $(ROOT)/src/domains/sdf/dsp/stars
-PTKDIR = $(ROOT)/src/ptklib
+TCLDIR = $(ROOT)/tcl/include
 PIGIDIR = $(ROOT)/src/pigilib
-INCL =	-I$(SDFDIR) -I$(KERNDIR) -I$(PTKDIR) -I$(PIGIDIR) -I$(SDFDSPSTARS) \
-	-I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
+INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(PIGIDIR) \
+ -I$(SDFDSPSTARS) -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
 # Library name
 LIB=libsdftclstars.a
@@ -32,8 +32,9 @@ STARDOCDIR = ../../doc/stars
 # source files for all stars, using preprocessor
 PL_SRCS= \
  SDFLMSTkPlot.pl \
- SDFTclScript.pl \
+ SDFTkBarGraph.pl \
  SDFTkMeter.pl \
+ SDFTclScript.pl \
  SDFTkShowValues.pl \
  SDFTkSlider.pl \
  SDFTkText.pl
