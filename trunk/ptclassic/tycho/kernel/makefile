@@ -99,11 +99,12 @@ ITCL_SRCS = \
 	MenuBar.itcl \
 	MenuSupport.itcl \
 	Message.itcl \
+	MetaData.itcl \
 	Model.itcl \
-	OldModel.itcl \
 	Monitor.itcl \
 	MultiPanel.itcl \
 	Object.itcl \
+	OldModel.itcl \
 	ParameterEdit.itcl \
 	PopupMenu.itcl \
 	PortedDigraph.itcl \
