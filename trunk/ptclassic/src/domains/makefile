@@ -29,10 +29,10 @@ EXPDOMAINS = pn
 endif
 
 # Don't include IPUS if your are running a non GNU c++
-ifneq (, $(filter %cfront,$(PTARCH)))
-IPUSDOMAIN=
+ifeq ($(INCLUDE_IPUS_DOMAIN),yes)
+IPUSDOMAIN = ipus
 else
-IPUSDOMAIN= ipus
+IPUSDOMAIN =
 endif
 
 DOMAINS = sdf hof de ddf bdf thor cg sproc silage cgc cg56 cg96 vhdlf vhdlb \
