@@ -921,6 +921,8 @@ body ::tycho::File::saveAs {} {
     # Ignore if the user cancels
     if {$filename != {}} {
 	return [saveAsFile $filename]
+    } {
+        return 0
     }
 }
 
