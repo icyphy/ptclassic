@@ -36,7 +36,7 @@ DSP56000 - A variable length pulse generator.
                 name { onVal }
 		type { fix }
 		desc { maximum val }
-		default { 1.0 }
+		default { ONE }
         }
         state  {
                 name { offVal }
