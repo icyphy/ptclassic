@@ -104,7 +104,7 @@ ITCL_VERSION=itcl
 TCL_INCDIR=$(TCL_ROOT)/itcl/include
 
 # Combined -L and -l options to link with tcl library.
-TCL_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl -ltcl
+TCL_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl -ltcl7.6i
 
 # Directory containing Tk include files
 TK_INCDIR=$(TCL_ROOT)/itk/include
