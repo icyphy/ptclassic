@@ -39,6 +39,7 @@ static const char file_id[] = "FSMTarget.cc";
 #pragma implementation
 #endif
 
+#include "InfString.h"
 #include "Galaxy.h"
 #include "FSMTarget.h"
 #include "FSMScheduler.h"
@@ -52,8 +53,12 @@ Target("default-FSM", "FSMStar", "default FSM target")
 	   "Assign the name for each PortHole in the output MultiPortHole. Each name should be embraced in a pair of double quotes."));
   addState(internalNameMap.setState("internalNameMap", this, "",
 	   "Assign the name for each internal event. Each name should be embraced in a pair of double quotes."));
-  addState(machineType.setState("machineType", this, "Moore",
-	   "Moore or Mealy machine."));
+  addState(machineType.setState("machineType", this, "Pure",
+	   "Choices: Pure, Valued."));
+  addState(evaluationType.setState("evaluationType", this, "Strict",
+	   "Specify how this FSM will be evaluated: Strict or NonStrict."));
+  addState(oneWriterType.setState("oneWriterType", this, "Compile",
+	   "Specify when to do the one-writer rule checking."));
   addState(schedulePeriod.setState("schedulePeriod", this, "0.0",
 	   "schedulePeriod for interface with a timed domain."));
 }
@@ -66,8 +71,10 @@ FSMTarget::~FSMTarget() { delSched(); }
 
 void FSMTarget::setup() {
   FSMScheduler* fsmSched;
-  if (!strcmp(machineType,"Mixed")) {
-    fsmSched = new FSMScheduler;
+  InfString buf = (const char*)evaluationType;
+  buf << (const char*)machineType;
+  if (!strcmp(buf,"StrictPure")) {
+    fsmSched = new SPureSched;
   } else {
       Error::abortRun("FSMTarget: ", 
 		      "Unregconized machine type!");
@@ -85,6 +92,10 @@ void FSMTarget::setup() {
   fsmSched->internalNameMap = savestring(internalNameMap);
   delete [] fsmSched->machineType;
   fsmSched->machineType = savestring(machineType);
+  delete [] fsmSched->evaluationType;
+  fsmSched->evaluationType = savestring(evaluationType);
+  delete [] fsmSched->oneWriterType;
+  fsmSched->oneWriterType = savestring(oneWriterType);
 //	fsmSched->schedulePeriod = schedulePeriod;
 
   if (galaxy()) fsmSched->setGalaxy(*galaxy());

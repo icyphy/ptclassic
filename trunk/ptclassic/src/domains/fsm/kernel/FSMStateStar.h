@@ -48,8 +48,27 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "IntArrayState.h"
 #include "tcl.h"
 
-class FSMStateStar : public FSMStar
-{
+class SlaveProcess {
+public:
+  Star* worm;
+  StringList inNmList;
+  StringList outNmList;
+  Geodesic **inGeo;
+  Geodesic **outGeo;
+  int* inGeoIndx;
+  int* outGeoIndx;
+  SlaveProcess() { 
+    worm = NULL;
+    inGeo = NULL; outGeo = NULL;
+    inGeoIndx = NULL; outGeoIndx = NULL;
+  }
+  ~SlaveProcess() { 
+    delete [] inGeo; delete [] outGeo;
+    delete [] inGeoIndx; delete [] outGeoIndx;
+  }
+};
+
+class FSMStateStar : public FSMStar {
 public:
     // constructor & destructor
     FSMStateStar();
@@ -67,11 +86,14 @@ public:
     // Return the next state according the conditions.
     virtual FSMStateStar *nextState(int& condNum, int preemption);
 
-    // Do the action.
-    virtual int doAction(int actNum);
+    // Execute the action.
+    virtual int execAction(int);
 
     // Execute the internal machine.
-    virtual int doInMach(int);
+    virtual int execSlave(int);
+
+    // Compile time one-writer rule checking.
+    virtual int compOneWriterCk();
 
     // Get the entry type of a possible transition out of this state.
     int getEntryType(int transNum);
@@ -82,23 +104,30 @@ protected:
     StringState actions;
     IntArrayState entryType;
     IntArrayState preemptive;
-
-    Tcl_Interp *myInterp;
+    StringState slaveNm;
+    StringState where_is_defined;
 
     char** parsedCond;
     int numConds;
-    char*** parsedAct;
+    IntArrayState* parsedAct;
 
-    const StringList* internalEventNm;
+    SlaveProcess* slave;
 
     static int count;
 
-    /* virtual */ void setup();
+    // Following just point to the copies of its master FSM.
+    char* oneWriterType;
+    const StringList* internalEventNm;
+    Tcl_Interp *myInterp;
+
+    /* virtual */ void setup();  // Redefine.
+    /* virtual */ void begin();  // Redefine.
+    /* virtual */ void wrapup(); // Redefine.
 
     Star * createWormhole (const char *galname, const char* where_defined);
     const char* ptkCompile(const char *galname, const char* where_defined);
     int ioNmLists(StringList& inNmList, StringList& outNmList, Star* worm);
-    virtual Geodesic** setupGeodesic (PortList& pList, MultiPortHole* mph,
+    virtual Geodesic** setupGeodesic (int* indxArray, MultiPortHole* mph,
 				      Star* worm, StringList& pNmList);
 };
 #endif
