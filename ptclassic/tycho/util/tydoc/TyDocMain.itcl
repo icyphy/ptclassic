@@ -1010,6 +1010,8 @@ class ::tycho::HTMLDocSys {
     # Generate an Index file for the classes we have generated
     public method generateHTMLIndex { title  }
 
+    # Check if the given file is newer than its related documentation.
+    method modCheck {filename}
 
     ###################################################################
     ####                      public procs                         ####
@@ -1393,6 +1395,50 @@ body ::tycho::HTMLDocSys::generateHTMLIndex { {title {"Index of classes"}}} {
     close $fd
 }
 
+#####################################################################
+#### modCheck
+# Checks if the current file is newer than it's associated documentation.
+# And returns 1 if so. (This function is repeated in ::tycho::IDocSys)
+# This was not made general because I plan to supersede this file. :)
+#
+# This requires searching for all classes defined within the file and
+# checking if those class's documents are older. Takes about 5% of 
+# the time to create the docs.
+#
+# A more ideal system would check which classes need to be redocumented.
+# However, there are few sources with more than one class so this is a
+# decent compromise.
+#
+# One bug, it doesn't know how to check if a classfile_rel.html should be
+# created, so doesn't check. This is not critical because docs are 
+# generated at the same time, so if one is okay, the other must be as well. 
+#
+# For non-itcl files, it silently returns 1 because it can't tell.
+#
+body ::tycho::HTMLDocSys::modCheck {filename} {
+    if {[file extension $filename] != ".itcl"} {
+        return 1
+    }
+    
+    set sourceTime [file mtime $filename]
+
+    set classes [::tycho::IDocSys::getClassesInSource $filename]
+    foreach class $classes {
+        set docFile [file join doc codeDoc [info namespace tail $class].html]
+        if ![file exists $docFile] {
+            # There is no documentation.
+            return 1
+        }
+        if {$sourceTime > [file mtime $docFile]} {
+            # The source is newer.
+            return 1
+        }
+    }
+    # not modified
+    return 0
+}
+
+
     ###################################################################
     ###################################################################
     ####                      public procedures                    ####
@@ -1413,11 +1459,21 @@ body ::tycho::HTMLDocSys::generateHTML {verbose debug generateIndex \
     set retval ""
     foreach filename $filelist {
         if $debug {
-            puts "$filename"
+            puts -nonewline "$filename"
         }
 	if ![file readable $filename] {
 	    set retval "$retval\nWarning: generateHTML: $filename is not readable"
 	} else {
+            if ![$HTMLDocSys modCheck $filename] {
+                if $debug {
+                    puts " <not modified>"
+                }
+                continue
+            }
+            if $debug {
+                # Put newline
+                puts ""
+            }
 	    $HTMLDocSys readFile $filename
 	    cd doc/codeDoc
 	    if [catch {$HTMLDocSys generateClassHTML} errMsg] {
