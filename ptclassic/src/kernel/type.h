@@ -54,4 +54,19 @@ typedef void* Pointer;
 #define FALSE 0
 #endif
 
+// Older C++ compilers make no distinction between prefix and postfix
+// operator++.  For such compilers, POSTFIX_OP should be defined as the
+// empty string.  Newer C++ compilers use operator++() as the prefix
+// form (++obj) and operator++(int) as the postfix form.  For these we
+// have POSTFIX_OP defined to be int.  This is the default, except for
+// g++, since newer g++'s accept the prefix form for backward compatibility.
+
+#ifndef POSTFIX_OP
+#ifdef __GNUG__
+#define POSTFIX_OP
+#else
+#define POSTFIX_OP int
+#endif
+#endif
+
 #endif
