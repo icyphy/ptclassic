@@ -27,8 +27,37 @@
 # ENHANCEMENTS, OR MODIFICATIONS.
 # 							COPYRIGHTENDKEY
 
+global ptkPlotButtonFlag
+set ptkPlotButtonFlag 0
 
-proc ptkCreateXYPlot {w title geo} {
+proc ptkPlotPress {w x y} {
+    global ptkPlotButtonFlag
+    if {$ptkPlotButtonFlag == 0} {
+	$w.pf.c create rectangle $x $y $x $y -tag zoomrect -outline #ffffff
+	global ptkPlotButtonFlag
+	set ptkPlotButtonFlag 1
+    } {
+	set ptkPlotButtonFlag 0
+	ptkPlotMotion $w $x $y
+	eval ptkXYPlotResize$w [$w.pf.c coords zoomrect]
+	$w.pf.c delete zoomrect
+    }
+}
+
+proc ptkPlotMotion {w x y} {
+    global ptkPlotButtonFlag
+    if $ptkPlotButtonFlag {
+	set currentcoords [$w.pf.c coords zoomrect]
+	if {[llength $currentcoords] == {4}} {
+	    $w.pf.c coords zoomrect \
+		    [lindex $currentcoords 0] \
+		    [lindex $currentcoords 1] \
+		    $x $y
+	}
+    }
+}
+
+proc ptkCreateXYPlot {w title geo univ} {
     catch {destroy $w}
     toplevel $w
     wm title $w "TkPlot: $title"
@@ -38,21 +67,32 @@ proc ptkCreateXYPlot {w title geo} {
     wm minsize $w 200 200
 
     pack [frame $w.mbar -bd 2 -relief raised] -side top -fill x
-    pack [menubutton $w.mbar.f -text File -underline 0 -menu $w.mbar.f.m] \
-	-side left
-    pack [menubutton $w.mbar.v -text View -underline 0 -menu $w.mbar.v.m] \
-	-side left
-    menu $w.mbar.f.m
-    $w.mbar.f.m add command -label "Print ..." -command "ptkPrintXYPlot $w $w.pf.c \"$title\""
-    $w.mbar.f.m add command -label "Quit" -command "destroy $w
-	proc $w.pf.c args \"\""
-    menu $w.mbar.v.m
-    $w.mbar.v.m add command -label "Zoom Fit" -command "ptkXYPlotZoomFit$w"
-    $w.mbar.v.m add command -label "Zoom In" -command "ptkXYPlotZoomIn$w"
-    $w.mbar.v.m add command -label "Zoom Out" -command "ptkXYPlotZoomOut$w"
-
+    pack [button $w.mbar.pr -text "  Print  " -command "ptkPrintXYPlot $w \"$title\""] \
+	    -side left
+    pack [button $w.mbar.zf -text "zoom fit (f)" -command "ptkXYPlotZoomFit$w"] \
+	    -side right
+    pack [button $w.mbar.zo -text "zoom out (Z)" -command "ptkXYPlotZoom$w 1.5"] \
+	    -side right
+    pack [button $w.mbar.zi -text "zoom in (z) " -command "ptkXYPlotZoom$w 0.75"] \
+	    -side right
+    pack [button $w.mbar.zor -text "zoom original (o)" -command "ptkXYPlotZoomOriginal$w"] \
+	    -side right
     pack [frame $w.pf -bd 2m] -side top -fill both -expand yes
-    pack [canvas $w.pf.c -bg #cdc0b0 -relief sunken] -expand yes -fill both
+    pack [canvas $w.pf.c -relief sunken] -expand yes -fill both
+    bind $w.pf <KeyPress-f> "ptkXYPlotZoomFit$w"
+    bind $w.pf <KeyPress-z> "ptkXYPlotZoom$w 0.75"
+    bind $w.pf <KeyPress-Z> "ptkXYPlotZoom$w 1.5"
+    bind $w.pf <KeyPress-o> "ptkXYPlotZoomOriginal$w 1.5"
+    bind $w.pf <Control-d> "ptkStop $univ; destroy $w; proc $w.pf.c args \"\""
+    bind $w.pf <q> "ptkStop $univ; destroy $w; proc $w.pf.c args \"\""
+    bind $w.pf <Enter> "focus $w.pf"
+
+    bind $w.pf.c <ButtonPress> "ptkPlotPress $w %x %y"
+    bind $w.pf.c <Motion> "ptkPlotMotion $w %x %y"
+
+    pack [button $w.quit -text DISMISS \
+	    -command "ptkStop $univ; destroy $w; proc $w.pf.c args \"\""] \
+	    -side bottom -fill x
 
     # To support redrawing when the window is resized.
     update
@@ -62,7 +102,7 @@ proc ptkCreateXYPlot {w title geo} {
 # possible FIXME: generalize ptkPrfacet.tcl routines so that they
 # it can be consolidated with this routine.
 
-proc ptkPrintXYPlot {w canv title} {
+proc ptkPrintXYPlot {w title} {
     catch "destroy ${w}_print"
     toplevel [set wpr ${w}_print]
     wm title $wpr "Print Plot: $title"
@@ -92,7 +132,7 @@ proc ptkPrintXYPlot {w canv title} {
     #
     pack [frame $wpr.cntr] -side bottom -fill x -expand 1 -padx 5 -pady 5
     frame $wpr.cntr.prfr -relief sunken -bd 2
-    button $wpr.cntr.prfr.print -text "PRINT" -command "ptkPrintXYPlotGo $w $canv; destroy $wpr"
+    button $wpr.cntr.prfr.print -text "PRINT" -command "ptkPrintXYPlotGo $w; destroy $wpr"
     button $wpr.cntr.cancel -text "CANCEL" -command "destroy $wpr"
 
     pack $wpr.cntr.prfr.print -fill x -expand 1
@@ -104,7 +144,7 @@ proc ptkPrintXYPlot {w canv title} {
     #
     pack [entry $wpr.file -relief ridge -bg wheat3] \
        -side bottom -padx 5 -pady 5 -fill x
-    bind $wpr.file <Return> "ptkPrintXYPlotGo $w $canv; destroy $wpr"
+    bind $wpr.file <Return> "ptkPrintXYPlotGo $w; destroy $wpr"
     bind $wpr.file <Tab> "focus $wpr.size.b.height"
     $wpr.file insert @0 [pwd]/[lindex $title 0].ps
     # Guess about the number of characters in the window here.
@@ -124,7 +164,7 @@ proc ptkPrintXYPlot {w canv title} {
     pack [label $wpr.p.plabel -text "Printer: "] \
 	 -side left -fill none -anchor nw
     pack [entry $wpr.p.printer -relief ridge -bg wheat3 -width 10] -side right
-    bind $wpr.p.printer <Return> "ptkPrintXYPlotGo $w $canv; destroy $wpr"
+    bind $wpr.p.printer <Return> "ptkPrintXYPlotGo $w; destroy $wpr"
     bind $wpr.p.printer <Tab> "focus $wpr.file"
     pack $wpr.p -side bottom -anchor w -padx 5 -pady 5
     global env
@@ -136,7 +176,7 @@ proc ptkPrintXYPlot {w canv title} {
 
 }
 
-proc ptkPrintXYPlotGo {w canv} {
+proc ptkPrintXYPlotGo w {
 	
    global env
    set wpr ${w}_print
@@ -145,7 +185,7 @@ proc ptkPrintXYPlotGo {w canv} {
    set canvHeight [winfo height $w]
 
    set psfile [$wpr.file get]
-   set command "$canv postscript -file ${psfile}"
+   set command "$w.pf.c postscript -file ${psfile}"
 
    upvar #0 ${wpr}Orient orient
 
