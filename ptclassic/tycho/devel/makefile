@@ -44,11 +44,9 @@ TCL_SRCS = \
 	tychoSend.tcl
   
 ITCL_SRCS = \
-	ClassSchedule.itcl \
 	EditLattice.itcl \
 	GanttView.itcl \
 	GanttDF.itcl \
-	HierModel.itcl \
 	HyperGraph.itcl \
 	IconIndex.itcl \
 	Index.itcl \
