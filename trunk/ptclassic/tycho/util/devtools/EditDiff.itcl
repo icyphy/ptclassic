@@ -77,6 +77,9 @@ class ::tycho::EditDiff {
     # Open a help window.  This should be redefined in derived classes.
     method help {}
 
+    # openContext a file, then jump to the line
+    method hyperJump {filename line} {}
+
     # Put in the file name in the list entry
     method insertFileName {num nameAndPath} {}
 
@@ -88,9 +91,6 @@ class ::tycho::EditDiff {
 
     # Jump to the next difference
     method jumpDifference {incrdecr idx} {}
-
-    # openContext a file, then jump to the line
-    method jumpToLine {filename line} {}
 
     ####################################################################
     ####           protected methods and variables                  ####
@@ -319,7 +319,7 @@ body ::tycho::EditDiff::compareFile {} {
             gets $fd2
             incr fileLineCount2
         }
-        
+
         # If changed (character c), delete (d), or added (a)
         set differenceBlock {}
         if {$info=="c" || $info=="d" || $info=="a"} {
@@ -333,7 +333,7 @@ body ::tycho::EditDiff::compareFile {} {
         $text tag bind l1$tag <Leave> "$text config -cursor left_ptr;\
                 $this putStatus \"\""
         $text tag bind l1$tag <Double-Button-1> \
-                "$this jumpToLine $itk_option(-filename1) $fileLineCount1"
+                "$this hyperJump $itk_option(-filename1) $fileLineCount1"
         $text tag bind l1$tag <Button-1> \
                 "$this jumpDifference {} [llength $differenceList]"
 
@@ -343,7 +343,7 @@ body ::tycho::EditDiff::compareFile {} {
         $text tag bind l2$tag <Leave> "$text config -cursor left_ptr;\
                 $this putStatus \"\""
         $text tag bind l2$tag <Double-Button-1> \
-                "$this jumpToLine $itk_option(-filename2) $fileLineCount2"
+                "$this hyperJump $itk_option(-filename2) $fileLineCount2"
         $text tag bind l2$tag <Button-1> \
                 "$this jumpDifference {} [llength $differenceList]"
 
@@ -560,10 +560,10 @@ body ::tycho::EditDiff::jumpDifference {{incrdecr 1} {idx {}}} {
 }
 
 #######################################################################
-#### jumpToLine
+#### hyperJump
 # This will open file context, and jump to entry number.
 #
-body ::tycho::EditDiff::jumpToLine {filename line} {
+body ::tycho::EditDiff::hyperJump {filename line} {
     # FIXME: directory could potentially be anywhere, specified in Makefile.
     # Name of our editor/viewer
     set editorName [::tycho::File::openContext $filename]
@@ -574,7 +574,7 @@ body ::tycho::EditDiff::jumpToLine {filename line} {
     # THe following is added because if a file has not been opened,
     # then seeFragment will be called too quickly, thus no line
     # will be selected.
-    after 1500 "$editorName seeFragment \"line $line\""
+    after 1000 "$editorName seeFragment \"line $line\""
 }
 
 
