@@ -51,6 +51,9 @@ class ::tycho::EditCTS {
     #################################################################
     ####                  protected methods                      ####
 
+    # Initialize the menu/status/tool bars
+    protected method _initializeBars {menubar statusbar toolbar}
+
     #################################################################
     ####                 protected variables                     ####
     
@@ -72,14 +75,30 @@ body ::tycho::EditCTS::constructor {args} {
     # be loaded correctly later
     # FIXME: Is this the right place for this?
     $_graph configure -modelmode "cts"
+}
 
-    # FIXME FIXME
-    # Load the library. Should the library info be in the model?
-    library load [file join edit cts stars.tim]
-    library addtomenu stars stars \
-            -command "$this newstar stars" \
-            -customizecommand "$this _initmenu stars" \
-            -types {star}
+###################################################################
+###################################################################
+####                      protected methods                    ####
+
+#####################################################################
+#### _initializeBars
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in its initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by its displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::EditCTS::_initializeBars {menubar statusbar toolbar} {
+    chain $menubar $statusbar $toolbar
+
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::EditCTS::_initializeMenubar $menubar
+    }
 }
 
     #####################################################################
@@ -91,5 +110,12 @@ body ::tycho::EditCTS::constructor {args} {
 # Adds entries to the menu bar specific to this class.
 #
 body ::tycho::EditCTS::_initializeMenubar {menubar} {
-    ;# Nothing here yet
+    puts !
+    # FIXME FIXME
+    # Load the library. Should the library info be in the model?
+    library load [file join edit cts stars.tim]
+    library addtomenu stars stars \
+            -command "$this newstar stars" \
+            -customizecommand "$this _initmenu stars" \
+            -types {star}
 }
