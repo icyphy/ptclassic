@@ -112,9 +112,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	setup {
 	    myUnique = unique++;
-	    sprintf(buf,"set uniqueSymbol tclScript%d", myUnique);
-	    if(Tcl_Eval(ptkInterp, buf, 0, (char **) NULL) != TCL_OK) {
-		Error::abortRun(*this, "Error accessing tcl");
+	    sprintf(buf,"tclScript%d", myUnique);
+	    if(Tcl_SetVar(ptkInterp, "uniqueSymbol", buf, TCL_GLOBAL_ONLY)
+			== NULL) {
+		Error::abortRun(*this, "Failed to set uniqueSymbol");
+		return;
 	    }
 
 	    if (input.numberPorts() > 0) {
@@ -132,19 +134,21 @@ limitation of liability, and disclaimer of warranty provisions.
 	    }
 
 	    if(((const char*)tcl_file)[0] == '$') {
-	        sprintf(buf,"source [ptkExpandEnvVar \\%s]",
+	        sprintf(buf,"uplevel #0 {source [ptkExpandEnvVar \\%s]}",
 			    (const char*)tcl_file);
 	        if(Tcl_Eval(ptkInterp, buf, 0, (char **) NULL) != TCL_OK) {
 		    Tcl_Eval(ptkInterp, "ptkDisplayErrorInfo",
 					0, (char **) NULL);
 		    Error::abortRun(*this, "Cannot source tcl script");
+		    return;
 		}
 	    } else {
-	        sprintf(buf,"source %s",(const char*)tcl_file);
+	        sprintf(buf,"uplevel #0 {source %s}",(const char*)tcl_file);
 	        if(Tcl_Eval(ptkInterp, buf, 0, (char **) NULL) != TCL_OK) {
 		    Tcl_Eval(ptkInterp, "ptkDisplayErrorInfo",
 					0, (char **) NULL);
 		    Error::abortRun(*this, "Cannot source tcl script");
+		    return;
 	        }
 	    }
 
@@ -156,6 +160,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		    Tcl_Eval(ptkInterp, "ptkDisplayErrorInfo",
 					0, (char **) NULL);
 		    Error::abortRun(*this, "Failed to run callTcl procedure");
+		    return;
 	        }
 	    }
 	}
