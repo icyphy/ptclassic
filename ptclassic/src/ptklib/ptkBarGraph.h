@@ -29,8 +29,42 @@ Version identification:
 $Id$
 */
 
-extern "C" int ptkMakeBarGraph();
-extern "C" int ptkSetBarGraph();
-extern "C" void ptkFigureBarEdges();
+#include "tk.h"
 
+extern "C" int ptkMakeBarGraph( Tcl_Interp *interp,
+			        Tk_Window *win,
+				char *name,
+				char *desc,
+				double **data,
+				int numTraces,
+				int numBars,
+				double top,
+				double bottom,
+				int** id,
+				char* geo,
+				double deswidth,
+				double desheight);
+extern "C" int ptkSetBarGraph(	Tcl_Interp *interp,
+				Tk_Window *win,
+				char *name,
+				double **data,
+				int numTraces,
+				int numBars,
+				double top,
+				double bottom,
+				int** id);
+extern "C" void ptkFigureBarEdges(
+				int* x0,
+				int* x1,
+				int *y0,
+				int *y1,
+				int i,
+				int j,
+				int numTraces,
+				int numBars,
+				int width,
+				int height,
+				double top,
+				double bottom,
+				double data);
 #endif /* PTKBARGRAPH_H */
