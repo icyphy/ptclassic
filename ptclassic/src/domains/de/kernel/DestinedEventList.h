@@ -29,6 +29,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
                                                 PT_COPYRIGHT_VERSION_2
                                                 COPYRIGHTENDKEY
 
+ Programmer: John Davis
+ Date: 5/19/97
+	The DestinedEventList class is used to store CqLevelLinks
+	of the Calendar Queue. Each DEStar has a DestinedEventList
+	associated with it. When a star dies, its DestinedEventList
+	removes pending events destined for the star.
 **************************************************************************/
 
 #ifdef __GNUG__
