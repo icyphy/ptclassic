@@ -89,19 +89,26 @@ TK_VERSION_NUM=42i
 ITCL_VERSION_NUM=22
 
 # Combined -L and -l options to link with tcl library.
-TCL_LIBSPEC= c:/Itcl2.2/tcl7.6/win/Tcl76i.lib
+#TCL_LIBSPEC= c:/Itcl2.2/tcl7.6/win/Tcl76i.lib
+TCL_LIBSPEC=d:/Progra~1/Tcl/lib/tcl80vc.lib
+TCL_LIBSPEC=-L/usr/local/lib -ltcl8.0
 #TCL_LIBSPEC=-L$(TCL_ROOT)/Bin -ltcl$(TCL_VERSION_NUM)
 
+TCL_ROOT=d:/Progra~1/Tcl
 # Directory containing Tk include files
-TK_INCDIR=$(TCL_ROOT)/itk/include
+#TK_INCDIR=$(TCL_ROOT)/itk/include
+TK_INCDIR=$(TCL_ROOT)/include
 
 # Combined -L and -l options to link with tk library.  Can add
 # addtional -L and/or -l options to support tk extensions.
-TK_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl -ltk$(TK_VERSION_NUM) #-lXpm
+#TK_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl -ltk$(TK_VERSION_NUM) #-lXpm
+TK_LIBSPEC=-L$(TCL_ROOT)/lib -ltk8.0vc.lib
 
 # Directory containing itcl include files
-ITCL_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
-ITCL_LIBSPEC= c:/Itcl2.2/itcl/win/Itcl22.lib 
+#ITCL_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
+ITCL_INCDIR=$(TCL_ROOT)/include
+#ITCL_LIBSPEC= c:/Itcl2.2/itcl/win/Itcl22.lib 
+
 #
 # Variables for the linker
 #
