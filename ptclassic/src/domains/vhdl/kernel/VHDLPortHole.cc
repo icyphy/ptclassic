@@ -88,9 +88,10 @@ const VHDLPortHole* VHDLPortHole :: realFarPort() const {
 	return p;
 }
 
-void VHDLPortHole :: setGeoName(char* n) {
-	if (myGeodesic == 0) bufName = n;
-	else geo().setBufName(n);
+void VHDLPortHole :: setGeoName(const char* n) {
+    delete [] bufName;
+    if (myGeodesic == 0) bufName = savestring(n);
+    else geo().setBufName(n);
 }
 
 const char* VHDLPortHole :: getGeoName() const {

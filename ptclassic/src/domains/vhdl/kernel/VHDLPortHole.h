@@ -66,7 +66,7 @@ public:
 	void setupForkDests();
 
 	// name the porthole in the data structure.
-	void setGeoName(char*);
+	void setGeoName(const char*);
 	const char* getGeoName() const;
 
 	// Return the geodesic connected to this PortHole.
