@@ -54,11 +54,7 @@ the \fIphase jitter amplitude\fR parameters
 are inside the \fBCG96Tone\fR star.
 .PP
 Nonlinear distortion is introduced by squaring and cubing the signal.
-.SH BUGS
+.UH BUGS:
 The nonlinear distortion introduces DC components,
 which does not accurately reflect the behavior of a telephone channel.
 .ES
-
-
-
-
