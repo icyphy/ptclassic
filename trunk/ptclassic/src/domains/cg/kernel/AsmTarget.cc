@@ -60,6 +60,8 @@ AsmTarget::allocReq(AsmStar& star) {
 	BlockStateIter nextState(star);
 	State* s;
 	while ((s = nextState++) != 0) {
+		// skip states that are not in memory
+		if ((s->attributes() & AB_MEMORY) == 0) continue;
 		if (!mem->allocReq(*s)) {
 			Error::abortRun(*s,
 			      "memory allocation failed for state buffer");
