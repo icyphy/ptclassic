@@ -40,7 +40,6 @@ libDC.exp\
 libDL.exp\
 libHu.exp\
 libMSH.exp\
-libImage.exp\
 libLS.exp\
 libPar.exp\
 libatm.exp\
