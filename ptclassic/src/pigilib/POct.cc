@@ -47,6 +47,7 @@ a Tcl interpreter.
 #include <string.h>
 
 #include "POct.h"
+#include "ptcl.h"
 #include "SimControl.h"
 
 extern "C" {
@@ -1861,11 +1862,21 @@ int POct::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char* argv[])
 		       "Internal error in POct::dispatcher!");
 		return TCL_ERROR;
 	}
+	// Make sure kernelCalls.cc will use the right PTcl object.
+	PTcl* PTobj = PTcl::findPTcl(interp);
+	if (PTobj == 0) {
+		Tcl_SetResult(interp,
+		       "POct::dispatcher could not find ptcl!",TCL_STATIC);
+		return TCL_ERROR;
+	}
 	int i = int(which);
 	// this code makes an effective stack of active Tcl interpreters.
 	Tcl_Interp* save = activeInterp;
 	activeInterp = interp;
+	PTcl* saveptcl = ptcl;
+	ptcl = PTobj;
 	int status = (obj->*(funcTable[i].func))(argc,argv);
 	activeInterp = save;
+	ptcl = saveptcl;
 	return status;
 }
