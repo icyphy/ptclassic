@@ -26,6 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
                                                         COPYRIGHTENDKEY
 
 
+ Programmers: Soonhoi Ha, Joe Buck
  The authors gratefully acknowledge the contributions of Richard Stevens.
  Date of creation: 7/20/94
 
