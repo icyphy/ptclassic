@@ -53,16 +53,23 @@ if ( ! $?S56DSP ) then
 	setenv S56DSP /users/ptdesign/vendors/s56dsp
 endif
 
+setenv TMP_LD_LIBRARY_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/$PTARCH/lib:$PTOLEMY/tcltk/itcl.${PTARCH}/lib/itcl
+
 if ($PTARCH =~ hppa?*) then
 	if ( ! $?SHLIB_PATH ) then
-		setenv SHLIB_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/$PTARCH/lib:$PTOLEMY/tcltk/itcl.{$PTARCH}/lib/itcl
+		setenv SHLIB_PATH $TMP_LD_LIBRARY_PATH
+	else
+		setenv SHLIB_PATH ${TMP_LD_LIBRARY_PATH}:${SHLIB_PATH}
 	endif
 else
 	if ( ! $?LD_LIBRARY_PATH ) then
-		setenv LD_LIBRARY_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/$PTARCH/lib:/usr/X11/lib:/usr/openwin/lib:/usr/local/X11/lib:$PTOLEMY/tcltk/itcl.{$PTARCH}/lib/itcl 
+		setenv LD_LIBRARY_PATH $TMP_LD_LIBRARY_PATH
+	else
+		setenv LD_LIBRARY_PATH ${TMP_LD_LIBRARY_PATH}:${LD_LIBRARY_PATH}
+
 	endif
 endif
-
+unsetenv TMP_LD_LIBRARY_PATH
 
 if ( -f "$PTOLEMY/tcltk/itcl/lib/itcl/itcl/itcl.tcl" ) then
 	# Itcl2.1
