@@ -72,6 +72,7 @@ DEEtherSend.pl \
 DEFIFOQueue.pl \
 DEFillNullEvent.pl \
 DEFilter.pl \
+DEFloatToInt.pl \
 DEFlipFlopD.pl \
 DEFlipFlopJK.pl \
 DEFlipFlopT.pl \
@@ -81,6 +82,7 @@ DEImageToCell.pl \
 DEImageToMx.pl \
 DEImpulse.pl \
 DEIntPacketize.pl \
+DEIntToFloat.pl \
 DEIntUnPacketize.pl \
 DELogic.pl \
 DEMeasureDelay.pl \
