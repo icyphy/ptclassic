@@ -367,6 +367,34 @@ alltests.itcl: makefile
 	echo "doneTests" >> $@
 	echo "exit" >> $@
 
+# alljtests.itcl is used to source all the tcl files that use Java
+alljtests.itcl: makefile
+	rm -f $@
+	echo '# CAUTION: automatically generated file by a rule in tycommon.mk' > $@
+	echo '# This file will source all the Tcl files that use Java. ' >> $@ 
+	echo '# This file will source the .itcl files list in the' >> $@
+	echo '# makefile SIMPLE_JTESTS and GRAPHICAL_JTESTS variables' >> $@ 
+	echo '# This file is different from all.itcl in that all.itcl' >> $@ 
+	echo '# will source all the .itcl files in the current directory' >> $@
+	echo '#' >> $@
+	echo '# Set the following to avoid endless calls to exit' >> $@
+	echo "if {![info exists reallyExit]} {set reallyExit 0}" >> $@
+	echo '# Exiting when there are no more windows is wrong' >> $@
+	echo "::tycho::TopLevel::exitWhenNoMoreWindows 0" >> $@
+	echo "#Do an update so that we are sure tycho is done displaying" >> $@
+	echo "update" >> $@
+	echo "set savedir \"[pwd]\"" >> $@
+	echo "if {\"$(SIMPLE_JTESTS)\" != \"\"} {foreach i [list $(SIMPLE_JTESTS)] {puts \$$i; cd \"\$$savedir\"; if [ file exists \$$i ] {source \$$i}}}" >> $@
+	if [ "x$(GRAPHICAL_JTESTS)" != "x" ]; then \
+		for x in $(GRAPHICAL_JTESTS); do \
+			echo "puts stderr $$x" >> $@; \
+			echo "cd \"\$$savedir\"" >> $@; \
+			echo "source $$x" >> $@; \
+		done; \
+	fi
+	echo "doneTests" >> $@
+	echo "exit" >> $@
+
 # all.itcl is used to source all the *.itcl files
 all.itcl: makefile
 	rm -f $@
