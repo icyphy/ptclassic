@@ -66,6 +66,7 @@
 # is assumed to use every such resource for its duration. Tasks can
 # also contain task entities -- that is, sub-tasks. Note that task
 # names must be _unique_ at any level of the schedule.
+#
 # <li><b>resource</b> _name_: A resource that can be used by tasks.
 # The resource entity can contain task entities, in which case those
 # tasks are taken to all use that resource. Resources have the
@@ -77,6 +78,7 @@
 #       of the resource. Default is a null string.
 #   </ul>
 # Note that resource names must be unique.
+#
 # <li><b>annotation</b> _name_ _string_: An annotation to whatever contains
 # it. Annotations are completely arbitrary. Note that each annotation
 # must, however, be given a unique name at the elvel of the schedule
@@ -87,6 +89,7 @@
 #   <li><b>-writetime</b>: The date and time the annotation was generated.
 #    Default is a null string.
 #   </ul>
+#
 # <li><b>dependency</b> _type_ _a_ _b_: This is an association
 # between tasks, and is a more complex version of the _dependson_
 # attribute of tasks. The _type_ value can have the value:
@@ -97,6 +100,7 @@
 #   entity.
 #   <li><b>completebefore</b>: _b_ completes before after _a_ completes.
 #   </ul>
+#
 # The association can have the following attributes:
 #   <ul>
 #   <li><b>-strict</b>: The dependency is mandatory. Otherwise it
