@@ -150,7 +150,7 @@ class ::tycho::TopLevel {
     method freezeWindowSize {}
 
     # Open a file and go to its internal point identified by name.
-    method hyperJump {file point}
+    method hyperJump {file {point {}}}
 
     # Shift the focus to the next window in the topLevelWindows list.
     method nextWindow {{raise 0}}
@@ -447,7 +447,7 @@ body ::tycho::TopLevel::freezeWindowSize {} {
 # <i>start</i> and <i>end</i> have the form
 # <i>linenumber.characternumber</i>.
 # 
-body ::tycho::TopLevel::hyperJump {file point} {
+body ::tycho::TopLevel::hyperJump {file {point {}}} {
     if {$file != {}} {
         set obj [uplevel #0 [list ::tycho::File::openContext $file]]
         if {$point != {}} {
