@@ -1,3 +1,7 @@
+# Microsoft VC++ nmake file, based on stars.mk, but modified by hand.
+#
+# Version: $Id$
+#
 # Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
@@ -25,7 +29,6 @@
 #
 #
 # stars.mk :: Common definitions of star and target subsets.
-# Version: @(#)stars.mk	$Id$
 #
 # Eventually this file will be automatically generated.
 # But for now, we do it by hand.
@@ -112,11 +115,11 @@ FSMDIR = $(CROOT)\src\domains\fsm
 
 !if "$(INCLUDE_IPUS_DOMAIN)" != "yes" #ifneq
 	# Non G++ compilers fail to compile IPUS' templates
-IPUS =
+!undef IPUS
 !endif
 
 !if "$(INCLUDE_PN_DOMAIN)" != "yes" #ifneq
-PN =
+!undef PN
 !endif
 
 # Tcl\Tk stars can be used in pigiRpc but not ptcl, for this we define TK
@@ -125,15 +128,15 @@ PN =
 	# We can't include the ipus domain since the non-tk ipus stars need 
 	# Blackboard* symbols, which are defined in the tk ipus stars.
 	# Set up definitions for stars.mk
-IPUS =
+!undef IPUS
 
-CGCTK =
-CGCVISTK =
-CODESIGN =
-FSM =
-SDFTK =
-SDFDFM =
-VHDLTK =
+!undef CGCTK
+!undef CGCVISTK
+!undef CODESIGN
+!undef FSM
+!undef SDFTK
+!undef SDFDFM
+!undef VHDLTK
 !endif
 
 # Synchronous\Reactive domain
@@ -368,7 +371,7 @@ SDFLIB = 1
 # 				$(CROOT)\thread\include.$(PTARCH) \
 # 				$(CROOT)\thread\lib.$(PTARCH)
 # 			# POSIX thread library from Florida State University.
-# LIBFILES = $(LIBFILES) $(ROOT)\thread\lib.$(PTARCH)\libgthreads.a
+# LIBFILES = $(LIBFILES) $(ROOT)\thread\lib.$(PTARCH)\libgthreads.$(LIBNONSHAREDSUFFIX)
 # LIBS = $(LIBS) -lposixthread \
 # 				-L$(ROOT)\thread\lib.$(PTARCH) -lgthreads
 # !else
@@ -467,8 +470,8 @@ LIBFILES = $(LIBFILES) $(LIBDIR)\libdetclstars.$(LIBSUFFIX)
 !endif
 	# kernel and stars
 CUSTOM_DIRS = $(CUSTOM_DIRS) $(DEDIR)\stars $(DEDIR)\kernel 
-STARS = $(STARS) $(LIBDIR)\destars.o
-LIBS = $(LIBS) -ldestars -lde
+STARS = $(STARS) #$(LIBDIR)\destars.o
+LIBS = $(LIBS) $(PTOLEMY)\lib.$(PTARCH)\libdestars.lib $(PTOLEMY)\lib.$(PTARCH)\libde.lib
 LIBFILES = $(LIBFILES) $(LIBDIR)\libdestars.$(LIBSUFFIX) \
 		$(LIBDIR)\libde.$(LIBSUFFIX)
 	# dependencies
@@ -829,7 +832,7 @@ LIBVOV = -lvov
 		-lutility -lst -lerrtrap -luprintf #-lport
 
 !ifdef  USE_CORE_STATIC_LIBS
-LIBPIGI = $(LIBDIR)\libpigi.a
+LIBPIGI = $(LIBDIR)\libpigi.$(LIBNONSHAREDSUFFIX)
 !else
 LIBPIGI = $(LIBDIR)\libpigi.$(LIBSUFFIX)
 !endif
@@ -846,7 +849,7 @@ LIBPIGI = $(LIBDIR)\libpigi.$(LIBSUFFIX)
 !ifdef  TK
 CUSTOM_DIRS = $(CUSTOM_DIRS) $(CROOT)\src\ptklib 
 LIBS = $(LIBS) -lptk $(ITK_LIBSPEC) $(TK_LIBSPEC) $(X11_LIBSPEC) 
-PT_DEPEND = $(PT_DEPEND) $(LIBDIR)\libptk.a
+PT_DEPEND = $(PT_DEPEND) $(LIBDIR)\libptk.$(LIBNONSHAREDSUFFIX)
 !endif
 
 CUSTOM_DIRS = $(CUSTOM_DIRS) $(CROOT)\src\kernel $(CROOT)\src\pigiRpc $(CROOT)\src\ptcl \
@@ -857,20 +860,20 @@ CUSTOM_DIRS = $(CUSTOM_DIRS) $(CROOT)\src\kernel $(CROOT)\src\pigiRpc $(CROOT)\s
 	# Under some architectures, we need to use static libraries or we get
 	# GateKeeper errors.
 !ifdef  USE_CORE_STATIC_LIBS
-LIBPTCL = $(LIBDIR)\libpitcl.a
+LIBPTCL = $(LIBDIR)\libpitcl.$(LIBNONSHAREDSUFFIX)
 !else
 LIBPTCL = $(LIBDIR)\libpitcl.$(LIBSUFFIX)
 !endif
 !else
 	# Use libptcl, not libpitcl
 !ifdef  USE_CORE_STATIC_LIBS
-LIBPTCL = $(LIBDIR)\libptcl.a
+LIBPTCL = $(LIBDIR)\libptcl.$(LIBNONSHAREDSUFFIX)
 !else
 LIBPTCL = $(LIBDIR)\libptcl.$(LIBSUFFIX)
 !endif
 !endif
 
-PT_DEPEND = $(PT_DEPEND) $(LIBPTCL) $(LIBDIR)\libptolemy.a \
+PT_DEPEND = $(PT_DEPEND) $(LIBPTCL) $(LIBDIR)\libptolemy.$(LIBNONSHAREDSUFFIX) \
 	$(LIBFILES) $(STARS) $(TARGETS)
 
 # unfortunately, if we are building a stand-alone program and
@@ -885,9 +888,9 @@ PIGI =1
 # Program to test the ptolemy libraries, see standalone.mk
 !ifdef  PIGI
 !ifdef  PITCL
-LIBS = $(LIBS) version.o -lpitcl
+LIBS = $(LIBS) version.obj libpitcl.lib
 !else
-LIBS = $(LIBS) version.o -lptcl
+LIBS = $(LIBS) version.obj libptcl.lib
 !endif
 !endif
 
@@ -907,6 +910,6 @@ LIBFILES = $(LIBFILES) $(LIBDIR)\libptdsp.$(LIBSUFFIX)
 #LIBFILES += $(LIBDIR)\libexttools.$(LIBSUFFIX)
 
 # Now, pull in the Ptolemy kernel support, system libraries and tcl
-LIBS = $(LIBS) -lptolemy $(ITCL_LIBSPEC) $(TCL_LIBSPEC) \
+LIBS = $(LIBS) $(PTOLEMY)\src\kernel\libptolemy.lib $(ITCL_LIBSPEC) $(TCL_LIBSPEC) \
 	$(SYSLIBS) $(LIB_FLUSH_CACHE)
 
