@@ -47,6 +47,7 @@ PL_SRCS= \
  CGCIntegrator.pl \
  CGCIIDGaussian.pl \
  CGCIIDUniform.pl \
+ CGCLimit.pl \
  CGCLMS.pl \
  CGCLog.pl \
  CGCMpy.pl \
