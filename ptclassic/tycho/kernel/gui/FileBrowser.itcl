@@ -157,16 +157,15 @@ body ::tycho::FileBrowser::constructor {args} {
     global ::env
     
     if {! [info exists CWD]} {
-	# First FileBrowser window constructed.
-	# If the environment variable PTPWD exists, it gives the directory.
-	# Otherwise, we issue the Tcl command pwd.
-	if [info exists env(PTPWD)] {
-	    set CWD $env(PTPWD)
-	} {
-	    set CWD [pwd]
-	}
+      # First FileBrowser window constructed.
+      # If the environment variable PTPWD exists, it gives the directory.
+      # Otherwise, we issue the Tcl command pwd.
+      if [info exists env(PTPWD)] {
+          set CWD $env(PTPWD)
+      } {
+          set CWD [pwd]
+      }
     }
-
     set localCWD $CWD
 
     # Current directory display.
@@ -192,10 +191,29 @@ body ::tycho::FileBrowser::constructor {args} {
     preference subscribe $this \
 	    -width  fileBrowserWidth \
 	    -height fileBrowserHeight
+    if [::preference get dialogs fileBrowserUseLastDirectory] {
+	# If the we prefer to always have the FileBrowser open
+	# the last directory we visted.
 
-    # In case updateListbox inserts into the entry; to avoid repetition
-    clear entry
-    insert entry $fileLastOpened
+        # In case updateListbox inserts into the entry; to avoid repetition
+        clear entry
+        insert entry $fileLastOpened
+    } else {
+	# If we would like the FileBrowser to always open the 
+	# same directory as the current file.
+	if {$itk_option(-default) != {} && \
+		[file pathtype $itk_option(-default)] == "absolute" } {
+	    set default $itk_option(-default)
+	    if ![file isdirectory $default] {
+		set default [file dirname $default]
+	    }
+	    if [file isdirectory $default] {
+		set CWD $default 
+		set localCWD $CWD
+		updateListbox
+	    }
+        }
+    }
 }
 
 
