@@ -51,6 +51,12 @@ defstar {
 		desc { "file to save final tap values" }
 	}
 	ccinclude { "miscFuncs.h" }
+	constructor {
+		// remove interpolation as a settable parameter
+		interpolation.clearAttributes(A_SETTABLE);
+		// taps are no longer constant
+		taps.clearAttributes(A_CONSTANT);
+	}
 	start {
 	// First check to be sure that interpolation is 1.
 		if (int(interpolation) != 1) {
@@ -103,5 +109,3 @@ defstar {
 		}
 	}
 }
-
-	
