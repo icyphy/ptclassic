@@ -20,6 +20,7 @@ $Id$
 #endif
 
 #include "AsmGeodesic.h"
+#include "Error.h"
 #include <builtin.h>
 
 PortHole* AsmGeodesic::setSourcePort (GenericPort & sp, int delay) {
@@ -28,6 +29,7 @@ PortHole* AsmGeodesic::setSourcePort (GenericPort & sp, int delay) {
 		forkType |= F_DEST;
 		src = p->forkSource();
 	}
+	return p;
 }
 
 PortHole* AsmGeodesic::setDestPort (GenericPort& dp) {
@@ -35,6 +37,7 @@ PortHole* AsmGeodesic::setDestPort (GenericPort& dp) {
 	if (p->fork()) {
 		forkType |= F_SRC;
 	}
+	return p;
 }
 
 void AsmGeodesic :: initialize() {
@@ -47,22 +50,51 @@ void AsmGeodesic :: incCount(int n) {
 	if (size() > maxNumParticles) maxNumParticles = size();
 }
 
-// recursive function to sum up fork buffer sizes
+static int gcd(int a, int b) {
+	// swap to make a > b if needed
+	if (a < b) { int t = a; a = b; b = t;}
+	while (1) {
+		if (b <= 1) return b;
+		int rem = a%b;
+		if (rem == 0) return b;
+		a = b;
+		b = rem;
+	}
+}
+
+inline int lcm(int a, int b) { return a * b / gcd(a,b);}
+
+// recursive function to compute buffer and forkbuf sizes
 int AsmGeodesic :: internalBufSize() const {
+	int bsiz;
 	switch (forkType) {
 	case 0:
-		return maxNumParticles;
+		// a normal buffer
+		bsiz = lcm(originatingPort->numberTokens,
+			   destinationPort->numberTokens);
+		break;
+		// output of fork: no buffer at all (we share the forkbuf)
 	case F_DEST:
 		return 0;
-	default:{
-		ListIter next(src->forkDests);
-		int omax = 0;
-		AsmGeodesic *d;
-		while ((d = (AsmGeodesic*)next++) != 0)
-			omax = max(omax,d->internalBufSize());
-		return omax + maxNumParticles;
+	default:
+		// an F_SRC (true fork buffer) or F_SRC|F_DEST buffer
+		// (a buffer that sits between fork stars).  Want the lcm
+		// of all connected ports.
+		{
+			ListIter next(src->forkDests);
+			bsiz = (forkType == F_SRC ?
+				originatingPort->numberTokens : 1);
+			AsmPortHole* p;
+			while ((p = (AsmPortHole*)next++) != 0)
+				bsiz = lcm(bsiz,p->geo().internalBufSize());
 		}
 	}
+	if (maxNumParticles > bsiz) {
+		Error::abortRun(*destinationPort,
+				"number of delay tokens exceeds buffer size",
+				" (not yet supported)");
+	}
+	return bsiz;
 }
 
 // return the number of delays on all geodesics that are outputs of forks
