@@ -57,12 +57,11 @@ proc ptkMakeMeter {win name desc low high} {
     catch {destroy $w}
     frame $s
     if {$desc != ""} {
-        message $s.msg -font -Adobe-times-medium-r-normal--*-180* \
-            -text "$desc" -width 10c
+        message $s.msg -text "$desc" -width 10c
     }
     frame $s.bar -bd 10
 	# Control for the low end of the meter
-	entry $s.bar.low -relief sunken -width 5 -bg burlywood1
+	entry $s.bar.low -relief sunken -width 5 -bg [ptkColor burlywood1]
 
 	# Set default values in case the parameters supplied are invalid
 	global ptklowMeterEdge ptkhighMeterEdge
@@ -77,22 +76,24 @@ proc ptkMakeMeter {win name desc low high} {
 
 	# overload display on the low side
 	canvas $s.bar.lowOL -width 0.3c -height 0.6c \
-	    -bg AntiqueWhite3 -relief sunken 
-	$s.bar.lowOL create rect 0c 0c 0.3c 0.6c -fill AntiqueWhite3 \
+	    -bg [ptkColor AntiqueWhite3] -relief sunken 
+	$s.bar.lowOL create rect 0c 0c 0.3c 0.6c \
+            -fill [ptkColor AntiqueWhite3] \
 	    -tags lowOL
 
 	# The meter display itself
-	canvas $s.bar.plot -relief sunken -bg AntiqueWhite3 \
+	canvas $s.bar.plot -relief sunken -bg [ptkColor AntiqueWhite3] \
             -height 0.6c -width 10c
 
 	# High overload display
 	canvas $s.bar.highOL -relief sunken -width 0.3c -height 0.6c \
 	    -bg AntiqueWhite3
-	$s.bar.highOL create rect 0c 0c 0.3c 0.6c -fill AntiqueWhite3 \
+	$s.bar.highOL create rect 0c 0c 0.3c 0.6c \
+            -fill [ptkColor AntiqueWhite3] \
 	    -tags highOL
 
 	# Control for the high end of the meter
-	entry $s.bar.high -relief sunken -width 5 -bg burlywood1
+	entry $s.bar.high -relief sunken -width 5 -bg [ptkColor burlywood1]
 	$s.bar.high insert 0 $high
 	ptkSetMeterEdge high $high $s
 	bind $s.bar.high <Return> "ptkSetMeterEdge high \[$s.bar.high get] $s"
@@ -107,8 +108,8 @@ proc ptkMakeMeter {win name desc low high} {
     pack append $s $s.bar {top fillx}
     pack append $win $s top
 
-    $s.bar.plot create rect 0c 0c 0c 0c -fill red -tags negative
-    $s.bar.plot create rect 0c 0c 0c 0c -fill blue -tags positive
+    $s.bar.plot create rect 0c 0c 0c 0c -fill [ptkColor red] -tags negative
+    $s.bar.plot create rect 0c 0c 0c 0c -fill [ptkColor blue] -tags positive
 }
 
 #######################################################################
@@ -153,10 +154,10 @@ proc ptkSetMeter {win name value} {
 	$s.bar.plot coords positive ${origin}c 0c ${x}c 0.6c
 	$s.bar.plot coords negative ${origin}c 0c ${origin}c 0.6c
     }
-    if {$value > $high} { $s.bar.highOL itemconfigure highOL -fill red } \
-		{ $s.bar.highOL itemconfigure highOL -fill AntiqueWhite3 }
-    if {$value < $low}  { $s.bar.lowOL itemconfigure lowOL -fill blue } \
-		{ $s.bar.lowOL itemconfigure lowOL -fill AntiqueWhite3 }
+    if {$value > $high} { $s.bar.highOL itemconfigure highOL -fill [ptkColor red] } \
+		{ $s.bar.highOL itemconfigure highOL -fill [ptkColor AntiqueWhite3] }
+    if {$value < $low}  { $s.bar.lowOL itemconfigure lowOL -fill [ptkColor blue] } \
+		{ $s.bar.lowOL itemconfigure lowOL -fill [ptkColor AntiqueWhite3] }
 }
 
 #######################################################################
@@ -170,7 +171,8 @@ proc ptkMakeEntry {win name desc default callback} {
     set s $win.$name
     catch {destroy $s}
     frame $s
-    entry $s.entry -relief sunken -width 20 -insertofftime 0 -bg burlywood1
+    entry $s.entry -relief sunken -width 20 -insertofftime 0 \
+	-bg [ptkColor burlywood1]
     label $s.label -text "${desc}:"
     pack append $s $s.label left $s.entry right
     pack append $win $s {top fill expand}
@@ -190,7 +192,8 @@ proc ptkMakeEntry {win name desc default callback} {
 proc ptkMakeButton {win name desc callback} {
     set s $win.$name
     catch {destroy $s}
-    button $s -text "$desc" -fg tan4 -command $callback
+    # FIXME this should be an option
+    button $s -text "$desc" -fg [ptkColor tan4] -command $callback
     pack append $win $s {top fill expand}
     bind $s <ButtonPress-1> "$s configure -relief sunken; $s invoke"
     bind $s <ButtonRelease-1> "$s configure -relief raised"
@@ -215,8 +218,7 @@ proc ptkMakeScale {win name desc position callback} {
     frame $s
     label $s.msg -text "${desc}:"
     label $s.value -width 6
-    scale $s.scale -orient horizontal -from 0 -to 100 -bg tan4 \
-	-sliderforeground bisque1 -fg bisque1 -length 7c \
+    scale $s.scale -orient horizontal -from 0 -to 100 -length 7c \
 	-command $callback -showvalue 0
     $s.scale set $position
     pack append $s $s.msg left $s.scale right $s.value right
