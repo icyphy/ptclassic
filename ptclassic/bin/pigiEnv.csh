@@ -50,14 +50,7 @@ if ( ! $?QCKMON ) then
 endif
 
 if ( ! $?S56DSP ) then
-    switch ($PTARCH)
-	case sol2:
-	    setenv S56DSP /users/ptdesign/vendors/s56sol2
-	    breaksw
-	case sun4:
-            setenv S56DSP /users/ptdesign/vendors/s56dsp
-	    breaksw
-    endsw
+	setenv S56DSP /users/ptdesign/vendors/s56dsp
 endif
 
 if ( ! $?LD_LIBRARY_PATH ) then
