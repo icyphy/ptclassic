@@ -81,12 +81,12 @@ typedef const char cc;
 static void outMsg(cc* obj, int warn, cc* m1, cc* m2, cc* m3) {
 	CriticalSection region(gate);
 	StringList buf;
-	if ( warn ) buf << "warning: ";
+	buf << (warn ? "Warning: " : "Error: ");
 	if ( obj ) buf << obj << ": ";
 	if ( m1 ) buf << m1;
 	if ( m2 ) buf << m2;
 	if ( m3 ) buf << m3;
-	PrintErr(buf);
+	PrintErrNoTag(buf);
 }
 
 void
