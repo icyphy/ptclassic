@@ -16,7 +16,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
 	explanation {
-See the explanation for SDFMatlab_M star.
+See the explanation for Matlab_M star.
 The only difference is that this star forces the outputs to be complex matrices.
 .Ir "Matlab interface"
 	}
