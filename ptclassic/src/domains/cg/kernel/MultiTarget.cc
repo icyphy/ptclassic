@@ -26,12 +26,21 @@ $Id$
 // constructor
 BaseMultiTarget::BaseMultiTarget(const char* name,const char* starclass,
 		   const char* desc) : CGTarget(name,starclass,desc),
-	nChildrenAlloc(0), curChild(0) {
+	nChildrenAlloc(0), curChild(0), iters(0) {
         addState(nprocs.setState("nprocs",this,"2","number of processors"));
         addState(inheritProcessors.setState(
 	     "inheritProcessors",this,"NO","If yes, inherit child targets"));
         addState(sendTime.setState("sendTime",this,"1",
                                    "time to send one datum"));
+}
+
+int BaseMultiTarget :: run() {
+	// Sorry about the following horrible cast.
+	// Design of kernel Scheduler makes it very difficult to avoid
+	iters = ((SDFScheduler*)mySched())->getStopTime();
+	mySched()->setStopTime(1);
+	int i = Target::run();
+	return i;
 }
 
 void BaseMultiTarget :: setProfile(Profile*) {}
