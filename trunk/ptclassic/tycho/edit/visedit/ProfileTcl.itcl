@@ -82,8 +82,8 @@ body ::tycho::ProfileTcl::constructor {args} {
     toolbar button cancel {Cancel profile, discarding collected data} \
             -text Cancel -command "$this profileCancel"
 
-    toolbar buttonDisable off
-    toolbar buttonDisable cancel
+    toolbar disable off
+    toolbar disable cancel
 
     # Add a display at the bottom for the profile stats.
     addInfo count {Call count} 0 10 \
@@ -144,9 +144,9 @@ body ::tycho::ProfileTcl::help {} {
 #
 body ::tycho::ProfileTcl::profileCancel {} {
     profile off results
-    toolbar buttonDisable off
-    toolbar buttonDisable cancel
-    toolbar buttonEnable on
+    toolbar disable off
+    toolbar disable cancel
+    toolbar enable on
 }
 
 #######################################################################
@@ -207,9 +207,9 @@ body ::tycho::ProfileTcl::profileDisplay {} {
         array donesearch results $id
         incr depth
     }
-    toolbar buttonDisable off
-    toolbar buttonDisable cancel
-    toolbar buttonEnable on
+    toolbar disable off
+    toolbar disable cancel
+    toolbar enable on
     redrawGraph
 }
 
@@ -218,9 +218,9 @@ body ::tycho::ProfileTcl::profileDisplay {} {
 # Turn profiling on.
 #
 body ::tycho::ProfileTcl::profileStart {} {
-    toolbar buttonEnable off
-    toolbar buttonEnable cancel
-    toolbar buttonDisable on
+    toolbar enable off
+    toolbar enable cancel
+    toolbar disable on
     profile -commands on
 }
 
