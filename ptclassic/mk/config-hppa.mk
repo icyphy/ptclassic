@@ -119,7 +119,7 @@ X11_LIBSPEC =	-L/usr/sww/X11R5/lib -lX11
 X11EXT_LIBSPEC=-lXext
 
 # Variables for Pure Inc tools (purify, purelink, quantify)
-COLLECTOR = 	-collector=$(ROOT)/gnu/sun4/lib/gcc-lib/hppa1.1-hp-hpux/2.6.3/ld
+COLLECTOR = 	-collector=$(ROOT)/gnu/$(PTARCH)/lib/gcc-lib/$(PTARCH)/2.7.2/ld
 
 # Purelink is not available on hppa
 PURELINK =
