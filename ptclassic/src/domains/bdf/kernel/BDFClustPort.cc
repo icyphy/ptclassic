@@ -46,7 +46,8 @@ BDFClustPort::~BDFClustPort() {
 	if (isBagPort())
 		inPtr()->pOutPtr = 0;
 	if (pOutPtr) {
-		cerr << fullName() << " has an outPtr!\n";
+		// cerr << fullName() << " has an outPtr!\n";
+		pOutPtr = 0;
 	}
 }
 
