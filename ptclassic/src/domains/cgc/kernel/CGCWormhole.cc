@@ -40,6 +40,24 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /**************************************************************************
 
+	class CGCWormhole methods
+
+********************************************************************/
+// Constructor
+CGCWormhole :: CGCWormhole(Galaxy& g, Target* t) : CGWormBase(*this,g,t)
+	{ buildEventHorizons(); }
+
+CGCWormhole :: ~CGCWormhole() { freeContents(); }
+
+// cloner -- clone the inside and make a new wormhole from that.
+Block* CGCWormhole :: clone() const {
+	LOG_NEW; return new CGCWormhole(gal.clone()->asGalaxy(), myTarget()->cloneTarget());
+}
+
+Wormhole* CGCWormhole :: asWormhole() { return this; }
+
+/**************************************************************************
+
 	methods for CGCtoUniversal
 
 **************************************************************************/
