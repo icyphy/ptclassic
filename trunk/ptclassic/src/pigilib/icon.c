@@ -150,7 +150,7 @@ long userOptionWord;
 {
 static dmTextItem items[] = {
     {"Star name", 1, dmWidth, NULL, NULL},
-    {"Star directory", 1, dmWidth, NULL, NULL}
+    {"Star src directory", 1, dmWidth, NULL, NULL}
 };
 #define ITEMS_N sizeof(items) / sizeof(dmTextItem)
     struct passwd *pwent;
@@ -171,11 +171,11 @@ static dmTextItem items[] = {
 	ViDone();
     }
     if (*items[1].value != '~' || !isalpha(items[1].value[1])) {
-	PrintErr("Star directory must begin with '~user'");
+	PrintErr("Star src directory must begin with '~user'");
 	ViDone();
     }
     if (strcmp(BaseName(items[1].value), "src") != 0) {
-	PrintErr("Star directory must end with '/src'");
+	PrintErr("Star src directory must end with '/src'");
 	ViDone();
     }
     if (!MkStar(items[0].value, items[1].value)) {
