@@ -131,6 +131,9 @@ class ::tycho::IncrCanvas {
     # Convert a screen y coordinate into a canvas y coordinate
     method canvasy {screeny {gridspacing {}}}
 
+    # Get the children of an item
+    method children {tag}
+
     # Set or get the coordinates of an item
     method coords {tag args}
 
@@ -140,17 +143,17 @@ class ::tycho::IncrCanvas {
     # Create a new item
     method create* {tags type args}
 
-    # Create a root component item
-    method createrootchild {parent type args}
-
-    # Create a root component item
-    method createrootchild* {parenttags tags type args}
-
     # Create a component item
     method createchild {parent type args}
 
     # Create a component item
-    method createchild* {parenttags tags type args}
+    method createchild* {parent ptags tags type args}
+
+    # Create a root component item
+    method createrootchild {parent type args}
+
+    # Create a root component item
+    method createrootchild* {parent ptags tags type args}
 
     # Delete characters
     method dchars {id first {last {}}} {
@@ -175,7 +178,10 @@ class ::tycho::IncrCanvas {
     method focusin {}
 
     # Get the tags of an item
-    method gettags {tag args}
+    method gettags {tag}
+
+    # Get the hierarchy tags of an item
+    method gethtags {id}
 
     # Set the insertion cursor
     method icursor {id index} {
@@ -203,6 +209,9 @@ class ::tycho::IncrCanvas {
 
     # Move items
     method move {tag xAmount yAmount}
+
+    # Get the parent of an item
+    method parent {tag}
 
     # Generate postscript
     method postscript {args}
@@ -241,6 +250,9 @@ class ::tycho::IncrCanvas {
     ###################################################################
     ####                    protected methods                      ####
 
+    # Helper method for deleting a complex items
+    protected method delete_ {id}
+
     # Find the item above the given one
     protected method findabove {tag}
 
@@ -268,11 +280,14 @@ class ::tycho::IncrCanvas {
     # The canvas on which I draw
     protected variable canvas
 
+    # An array storing parent-child links
+    private variable parentChild
+
     # An array storing items and tags
     private variable taggedItems
 
     # Remember the class of each complex item
-    protected variable itemclass
+    protected variable itemClass
 
     # Storage for temporary variables
     protected variable scratch
@@ -417,7 +432,7 @@ body ::tycho::IncrCanvas::bind {tag {sequence {}} args} {
 # code here is "in-lined."
 #
 body ::tycho::IncrCanvas::call {id method args} {
-    @scope ::tycho::$itemclass($id) [list \
+    @scope ::tycho::$itemClass($id) [list \
 	    eval \[set methodtable($method)\] $id $canvas $this $args]
 }
 
@@ -433,6 +448,38 @@ body ::tycho::IncrCanvas::canvasx {screenx {gridspacing {}}} {
 #
 body ::tycho::IncrCanvas::canvasy {screeny {gridspacing {}}} {
     eval $canvas canvasy $screeny $gridspacing
+}
+
+#######################################################################
+#### children
+#
+# Get the children of an item. If the item is a simple item, null
+# is returned; otherwise all children of the complex item are returned.
+# If the argument is a tag, perform this operation on the first item
+# returned by `find withtag'.
+#
+body ::tycho::IncrCanvas::children {tag} {
+    # If a tag, get the first matching item
+    if { ! [string match {[_0-9]*} $tag] } {
+	set items [find withtag $tag]
+	if { $items == "" } {
+	    return ""
+	}
+	set id [lindex $items 0]
+    } else {
+	set id $tag
+    }
+
+    # Scan the list of parent-child links and use to delete marker tag
+    $canvas addtag temp withtag $id
+    set result {}
+    foreach {_ pc} [array get parentChild $id,*] {
+	lappend result [lindex $pc 1]
+	$canvas dtag [lindex $pc 1] temp
+    }
+    set result [concat $result [$canvas find withtag temp]]
+    $canvas dtag temp
+    return $result
 }
 
 #######################################################################
@@ -458,7 +505,7 @@ body ::tycho::IncrCanvas::coords {tag args} {
     if { [string match {[0-9]*} $id] } {
 	eval $canvas coords $id $args
     } elseif { [string match {_*} $id] } {
-	@scope ::tycho::$itemclass($id) [list \
+	@scope ::tycho::$itemClass($id) [list \
 		eval \[set methodtable(coords)\] $id $canvas $this $args]
     }
 }
@@ -492,7 +539,7 @@ body ::tycho::IncrCanvas::create {type args} {
 	incr secretcounter
 	
 	# Remember its class
-	set itemclass($id) $type
+	set itemClass($id) $type
 	
 	# Extract the tags from the options list
 	set indx [lsearch -exact $args -tags]
@@ -526,7 +573,7 @@ body ::tycho::IncrCanvas::create* {tags type args} {
     } else {
 	set id _$secretcounter
 	incr secretcounter
-	set itemclass($id) $type
+	set itemClass($id) $type
 	set indx [lsearch -exact $args -tags]
 	foreach t $tags {
 	    set taggedItems($t,$id) $id
@@ -553,11 +600,9 @@ body ::tycho::IncrCanvas::createchild {parent type args} {
     } else {
 	set tags {}
     }
-
-    set parenttags [$canvas gettags \
-	    [@scope ::tycho::$itemclass($parent) [list set primary($parent)]]]
-
-    eval [list createchild* $parenttags $tags $type] $args
+    set ptags [$canvas gettags \
+	    [@scope ::tycho::$itemClass($parent) [list set primary($parent)]]]
+    eval [list createchild* $parent $ptags $tags $type] $args
 }
 
 #######################################################################
@@ -565,20 +610,21 @@ body ::tycho::IncrCanvas::createchild {parent type args} {
 #
 # Create a child item. The first argument is the hierarchy
 # tags of the parent as passed to the construct{} procs of the
-# Picture classes or as obtained by *gettags -hierarchy*; the second
+# Picture classes or as obtained by *gethtags*; the second
 # is the additional tags of the new item.
 #
-body ::tycho::IncrCanvas::createchild* {parenttags tags type args} {
+body ::tycho::IncrCanvas::createchild* {parent ptags tags type args} {
     if { [string match {[a-z]*} $type] } {
-	eval $canvas create $type $args [list -tags [concat $parenttags $tags]]
+	eval $canvas create $type $args [list -tags [concat $ptags $tags]]
     } else {
 	set id _$secretcounter
 	incr secretcounter
-	set itemclass($id) $type
+	set itemClass($id) $type
 	foreach t $tags {
 	    set taggedItems($t,$id) $id
 	}
-	eval lappend tags $parenttags $id
+	set parentChild($parent,$id) [list $parent $id]
+	eval lappend tags $ptags $id
 	eval ::tycho::$type::construct $id $canvas $this [list $tags] $args
 	return $id
     }
@@ -599,11 +645,9 @@ body ::tycho::IncrCanvas::createrootchild {parent type args} {
     } else {
 	set tags {}
     }
-
-    set parenttags [$canvas gettags \
-	    [@scope ::tycho::$itemclass($parent) [list set primary($parent)]]]
-
-    eval [list createrootchild* $parenttags $tags $type] $args
+    set ptags [$canvas gettags \
+	    [@scope ::tycho::$itemClass($parent) [list set primary($parent)]]]
+    eval [list createrootchild* $parent $ptags $tags $type] $args
 }
 
 #######################################################################
@@ -611,25 +655,26 @@ body ::tycho::IncrCanvas::createrootchild {parent type args} {
 #
 # Create a root child item. The first argument is the hierarchy
 # tags of the parent as passed to the construct{} procs of the
-# Picture classes or as obtained by *gettags -hierarchy*; the second
+# Picture classes or as obtained by *gethtags*; the second
 # is the additional tags of the new item.
 #
-body ::tycho::IncrCanvas::createrootchild* {parenttags tags type args} {
-    set t [lsearch $parenttags {!*}]
-    set parenttags [lreplace $parenttags $t $t]
+body ::tycho::IncrCanvas::createrootchild* {parent ptags tags type args} {
+    set t [lsearch $ptags {!*}]
+    set ptags [lreplace $ptags $t $t]
 
     if { [string match {[a-z]*} $type] } {
 	set id [eval $canvas create $type $args \
-		[list -tags [concat $parenttags $tags]]]
+		[list -tags [concat $ptags $tags]]]
 	$canvas addtag !$id withtag $id
     } else {
 	set id _$secretcounter
 	incr secretcounter
-	set itemclass($id) $type
+	set itemClass($id) $type
 	foreach t $tags {
 	    set taggedItems($t,$id) $id
 	}
-	eval lappend tags $parenttags !$id $id
+	set parentChild($parent,$id) [list $parent $id]
+	eval lappend tags $ptags !$id $id
 	eval ::tycho::$type::construct $id $canvas $this [list $tags] $args
 	return $id
     }
@@ -644,26 +689,51 @@ body ::tycho::IncrCanvas::delete {args} {
 	    # Delete a canvas item
 	    $canvas delete $id
 	} elseif { [string match {_*} $id] } {
-	    # Delete a complex item. Make sure it still exists
-	    if { ! [::info exists itemclass($id)] } {
-		continue
-	    }
-	    # Call its destruct method
-	    @scope ::tycho::$itemclass($id) [list \
-		    eval \[set methodtable(destruct)\] $id $canvas $this]
+	    # Delete children and clear arrays
+	    delete_ $id
 
-	    # Then remove all items
+	    # Delete canvas items
 	    $canvas delete $id
-	    
-	    # Then forget the item
-	    unset itemclass($id)
-	    foreach i [array names taggedItems *,$id] {
-		unset taggedItems($i)
-	    }
+
 	} else {
 	    # Delete by tag: call myself again for simplicity
 	    eval $this delete [find withtag $id]
 	}
+    }
+}
+
+#######################################################################
+#### delete_
+#
+# Helper method for deleting complex items.
+#
+body ::tycho::IncrCanvas::delete_ {id} {
+    # Delete a complex item. Make sure it still exists
+    if { ! [::info exists itemClass($id)] } {
+	continue
+    }
+
+    # Call its destruct method
+    if { [@scope ::tycho::$itemClass($id) \
+	    [list ::info exists methodtable(destruct)]] } {
+	@scope ::tycho::$itemClass($id) [list \
+		eval \[set methodtable(destruct)\] $id $canvas $this]
+    }
+
+    # Delete complex item components
+    foreach {_ pc} [array get parentChild $id,*] {
+	delete_ [lindex $pc 1]
+    }
+
+    # Remove the parent link (if there is one)
+    foreach ix [array names parentChild *,$id] {
+	unset parentChild($ix)
+    }
+
+    # Then forget the item
+    unset itemClass($id)
+    foreach i [array names taggedItems *,$id] {
+	unset taggedItems($i)
     }
 }
 
@@ -758,9 +828,8 @@ body ::tycho::IncrCanvas::focusin {} {
 #
 # Get the tags of an item. This method returns the tags explicitly given
 # to an item -- that is, tags used by IncrCanvas to manage complex
-# items and tags inherited from a parent item will not (by
-# default) be included in the result. To get all tags without
-# this filtering, supply the additional argument *-raw*.
+# items and tags inherited from a parent item -- will not be included in
+# the result. To get those tags, use gethtags{}.
 #
 # Note that this routine works properly only if called with
 # a root simple item or a complex item as argument. If a simple
@@ -770,7 +839,7 @@ body ::tycho::IncrCanvas::focusin {} {
 # If the first argument is a tag, perform this operation on the first
 # item on the icanvas returned by `find withtag'.
 #
-body ::tycho::IncrCanvas::gettags {tag args} {
+body ::tycho::IncrCanvas::gettags {tag} {
     # If a tag, get the first matching item
     if { ! [string match {[_0-9]*} $tag] } {
 	set items [find withtag $tag]
@@ -783,24 +852,37 @@ body ::tycho::IncrCanvas::gettags {tag args} {
     }
 
     if { [string match {_*} $id] } {
-	getflag raw args
-	# Complex item
-	if { ! $raw } {
-	    # Get the tags from the taggedItems array
-	    set tags {}
-	    foreach tagid [array names taggedItems *,$id] {
-		lappend tags [lindex [split $tagid ,] 0]
-	    }
-	} else {
-	    # Get the tags from the primary component
-	    set tags [$canvas gettags \
-		    [@scope ::tycho::Picture [list set primary($id)]]]
+	# Get the tags from the taggedItems array
+	set tags {}
+	foreach tagid [array names taggedItems *,$id] {
+	    lappend tags [lindex [split $tagid ,] 0]
 	}
     } else {
 	# Simple item: get the tags from the canvas
 	set tags [$canvas gettags $id]
     }
     return $tags
+}
+
+#######################################################################
+#### gethtags
+#
+# Get the "hierarchy tags" of an item -- that is, the tags used internally
+# by the slate to manage the hierarchy of complex items. The
+# argument must be an item ID. If the item is a simple item, then
+# its tags are returned; if it is a complex item, then the tags
+# given to it by the slate are returned. These tags are those required
+# by the createchild*{} and createrootchild*{} methods.
+#
+body ::tycho::IncrCanvas::gethtags {id} {
+    # If a simple item, just return tags
+    if { [string match {[0-9]*} $id] } {
+	$canvas gettags $id
+    } else {
+	# If a complex item, get the tags from the primary
+	$canvas gettags \
+		[@scope ::tycho::Picture [list set primary($id)]]
+    }
 }
 
 ##########################################################################
@@ -827,9 +909,9 @@ body ::tycho::IncrCanvas::itemcget {tag option} {
     if { [string match {[0-9]*} $id] } {
 	eval $canvas itemcget $tag $option
     } else {
-	@scope ::tycho::$itemclass($id) [list \
+	@scope ::tycho::$itemClass($id) [list \
 		eval \[set methodtable(itemcget)\] $id $canvas $this \
-		::tycho::$itemclass($id) $option]
+		::tycho::$itemClass($id) $option]
     }
 }
 
@@ -861,9 +943,9 @@ body ::tycho::IncrCanvas::itemconfigure {tag args} {
     if { [string match {[0-9]*} $id] } {
 	eval $canvas itemconfigure $id $args
     } else {
-	@scope ::tycho::$itemclass($id) [list \
+	@scope ::tycho::$itemClass($id) [list \
 		eval \[set methodtable(itemconfigure)\] $id $canvas $this \
-		::tycho::$itemclass($id) $args]
+		::tycho::$itemClass($id) $args]
     }
 }
 
@@ -921,6 +1003,33 @@ body ::tycho::IncrCanvas::move {tag x y} {
 	$canvas move temp $x $y
 	$canvas dtag temp
     }
+}
+
+#######################################################################
+#### parent
+#
+# Get the parent of an item. Return null of it does not have one.
+# If the argument is a tag, perform this operation on the first item
+# returned by `find withtag'.
+#
+body ::tycho::IncrCanvas::parent {tag} {
+    # If a tag, get the first matching item
+    if { ! [string match {[_0-9]*} $tag] } {
+	set items [find withtag $tag]
+	if { $items == "" } {
+	    return ""
+	}
+	set id [lindex $items 0]
+    } else {
+	set id $tag
+    }
+
+    # Scan the list of parent-child links
+    set result {}
+    foreach {_ pc} [array get parentChild *,$id] {
+	lappend result [lindex $pc 0]
+    }
+    return $result
 }
 
 #######################################################################
@@ -1176,7 +1285,7 @@ body ::tycho::IncrCanvas::type {id} {
     if { [string match {[0-9]*} $id] } {
 	$canvas type $id
     } else {
-	return $itemclass($id)
+	return $itemClass($id)
     }
 }
 
@@ -1214,24 +1323,23 @@ body ::tycho::IncrCanvas::findall {} {
     # items fast, we have used this approach: find all root
     # items and then remove a marker tag from each of those.
     # Remaining items with the marker tag are simple roots.
-            
+
     # Find complex roots
-    set found {}
-    foreach id [array names itemclass] {
+    foreach id [array names itemClass] {
 	set tags [$canvas gettags \
 		[@scope ::tycho::Picture [list set primary($id)]]]
 	set root [string range \
 		[lindex $tags [lsearch $tags {!*}]] 1 end]
-	# If the item is not invisible, mark as found
-	if { [lsearch $tags {#}] == -1 } {
-	    lappend found [string range \
-		    [lindex $tags [lsearch $tags {!*}]] 1 end]
+	# If the item is not invisible and not found, mark as found
+	if { [lsearch $tags {#}] == -1 && ! [::info exists found($root)] } {
+	    set found($root) 1
 	}
     }
+    set result [array names found]
 
     # Tag all items and remove tag from complex items
     $canvas addtag temp.find all
-    foreach i [lnub $found] {
+    foreach i $result {
 	$canvas dtag $i temp.find
     }
             
@@ -1239,9 +1347,9 @@ body ::tycho::IncrCanvas::findall {} {
     $canvas dtag "#" temp.find
             
     # Return all roots
-    eval lappend found [$canvas find withtag temp.find]
+    set result [concat $result [$canvas find withtag temp.find]]
     $canvas dtag temp.find
-    return $found
+    return $result
 }
 
 #######################################################################
