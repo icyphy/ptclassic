@@ -910,7 +910,9 @@ body ::tycho::EditBubbleAndArc::mkArc {x y} {
     if {[string compare $point_to_draw first] == 0} {
 	# Drawing the first endpoint, which must be over a node.
 	set close_node [find_close_node $x $y]
-	if {$close_node == {}} return  # no close node
+	if {$close_node == {}} {
+	    return  ;# no close node
+	}
 	# Snap (x,y) to the node
 	set snap [snap_to_oval $close_node $x $y]
 	# Change x and y to the new snapped-to values.
