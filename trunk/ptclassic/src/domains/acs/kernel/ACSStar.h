@@ -35,10 +35,27 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "CGStar.h"
+#include "ACSPortHole.h"
+#include "Attribute.h"
 
 // The following include is not really required for this file,
 // but any star for this domain will need it, so we include it here.
 #include "ACSPortHole.h"
+
+// New attribute bit definition
+const bitWord AB_VARPREC  = 0x40;
+
+const Attribute ANY = {0,0};
+
+// New attribute for ports and states of type FIX/FIXARRAY.
+// These attributes are ignored for ports/states of other types.
+
+// fixed point precision may change at runtime;
+// declare a precision variable holding the actual precision
+const Attribute A_VARPREC   = {AB_VARPREC,0};
+// fixed point precision does not change at runtime (the default)
+const Attribute A_CONSTPREC = {0,AB_VARPREC};
+
 
 class ACSStar : public CGStar
 {
@@ -52,6 +69,40 @@ public:
     // For simulation we just call the base-class simulation star.
     // for code-generation we call something else.
     int run() { return(DataFlowStar::run()); } // FIXME
+
+	 // main routine.
+	 virtual int runIt() { return FALSE; }
+
+    // add a splice star to the spliceClust list.  If atEnd
+    // is true, append it to the end, otherwise prepend it.
+    virtual void addSpliceStar(ACSStar* s, int atEnd) { if ( s || atEnd ) return; }
+
+    // unfortunate, but we need to make special treatment for
+    // Spread/Collect stars when splicing. Note that Spread/Collect
+    // are not regular stars
+    // If Spread, redefine to return -1, if Collect, return 1, otherwise 0.
+    virtual int amISpreadCollect() { return FALSE; }
+
+    // Generate declaration, initialization and function codes for
+    // command-line arguments
+    virtual StringList cmdargStates(Attribute a=ANY) { if ( a.on() ) return StringList(""); return StringList(""); }
+    virtual StringList cmdargStatesInits(Attribute a=ANY) { if ( a.on() ) return StringList(""); return StringList(""); }
+    virtual StringList setargStates(Attribute a=ANY) { if ( a.on() ) return StringList(""); return StringList(""); }	
+    virtual StringList setargStatesHelps(Attribute a=ANY) { if ( a.on() ) return StringList(""); return StringList(""); }	
+
+    // Generate declarations and initialization code for PortHoles
+    virtual StringList declarePortHoles(Attribute a=ANY) { if ( a.on() ) return StringList(""); return StringList(""); }
+    virtual StringList initCodePortHoles(Attribute a=ANY) { if ( a.on() ) return StringList(""); return StringList(""); }
+
+    // Generate declarations and initialization code for States
+    virtual StringList declareStates(Attribute a=ANY) { if ( a.on() ) return StringList(""); return StringList(""); }
+    virtual StringList initCodeStates(Attribute a=ANY) { if ( a.on() ) return StringList(""); return StringList(""); }
+
+	SymbolList& getStarSymbol() { return starSymbol; }
+
+	virtual StringList BufferIndex(const ACSPortHole * port, const char * name, const char * offset) { if ( port || name || offset ) return StringList(""); return StringList(""); }
+
+
 };
 
 #endif

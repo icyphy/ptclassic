@@ -61,7 +61,9 @@ HDRS= \
 	ACSKnownCategory.h \
 	ACSFPSimCore.h \
 	ACSFixSimCore.h \
-	# ACSGeodesic.h
+	ACSCGCore.h \
+	ACSCGCCore.h \
+	ACSGeodesic.h
 
 # Library sources
 SRCS= $(HDRS:.h=.cc) ACSDomain.cc
