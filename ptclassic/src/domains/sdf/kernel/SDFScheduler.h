@@ -117,8 +117,22 @@ public:
 	SDFScheduler () {
 		repeatedFiring = TRUE;
 		deferredFiring = TRUE;
+		numItersSoFar = 0;
+		numIters = 1;
 	}
+
+	// setStopTime, for compatibility with DE scheduler.
+	// for now, we assume each schedule interation takes 1.0
+	// time units.  (Argh).  Deal with roundoff problems.
+	void setStopTime (float limit) { numIters = int(limit + 0.001);}
 private:
+	// This is a kludge to help integrate SDFScheduler and
+	// DEScheduler together.  numIters says how many times
+	// to run the schedule.
+	void runOnce();
+	int numIters;
+	int numItersSoFar;
+
 	/******************************************************
 		Members used in computing the repetitions
 	*******************************************************/

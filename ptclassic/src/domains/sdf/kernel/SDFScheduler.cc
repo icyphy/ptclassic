@@ -53,22 +53,32 @@ SDFSchedule :: printVerbose () {
 		Main SDF scheduler routines
 *******************************************************************/
 
+
 	////////////////////////////
 	// run
 	////////////////////////////
 
+// runs the number of times indicated by numIters.
 int SDFScheduler :: run (Block& galaxy) {
+	galaxy;			// dummy statement
+	while (numItersSoFar < numIters) {
+		runOnce();
+		numItersSoFar++;
+	}
+}
 
-   int i,j;
+	////////////////////////////
+	// runOnce
+	////////////////////////////
+
+// What is now runOnce used to be called run
+void SDFScheduler :: runOnce () {
 
    // assume the schedule has been set by the setup member
    // Adjust the schedule pointer to point to the beginning of the schedule.
-   mySchedule.reset();
+	mySchedule.reset();
 
-   // Dummy statement to prevent compiler warning
-   galaxy;
-
-	for (i = mySchedule.size(); i>0; i--) {
+	for (int i = mySchedule.size(); i>0; i--) {
 
 	    // Next star in the list
 	    SDFStar& currentStar = (SDFStar&)mySchedule.nextBlock();
@@ -100,6 +110,8 @@ int SDFScheduler :: wrapup (Block& galaxy) {
 	////////////////////////////
 
 int SDFScheduler :: setup (Block& galaxy) {
+
+   numItersSoFar = 0;
 
    // initialize the SpaceWalk member
    alanShepard.setupSpaceWalk((Galaxy&)galaxy);
