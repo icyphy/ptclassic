@@ -425,6 +425,7 @@ endif
 ifdef DEFULL
 	DE = 1
 	DECONTRIB = 1
+	DEJAVA = 1
 endif
 ifdef DE
 	# star icons
@@ -444,6 +445,16 @@ ifdef DE
 		STARS += $(LIBDIR)/decontribstars.o
 		LIBS += -ldecontribstars
 		LIBFILES += $(LIBDIR)/libdecontribstars.$(LIBSUFFIX)
+	endif
+	# Java stars
+	ifdef DEJAVA
+		# Note that because we use the Tycho tyjni interface,
+		# we don't have to have Java present to link in these stars.
+		# However, Java does need to be present at runtime
+		CUSTOM_DIRS += $(DEDIR)/java/stars
+		STARS += $(LIBDIR)/dejavastars.o
+		LIBS += -ldejavastars
+		LIBFILES += $(LIBDIR)/libdejavastars.$(LIBSUFFIX)
 	endif
 	# Tcl/Tk stars
 	ifdef TK
