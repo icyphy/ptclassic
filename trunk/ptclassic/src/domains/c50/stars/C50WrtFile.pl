@@ -30,10 +30,10 @@ Writes data to a file, for use with the TI DSK320C5x simulator.
 		desc { 'Root' of filename that gets the data.}
 	}
 	state {
-		name { outVal}
+		name { outVal }
 		type { FIX }
-		attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT }
-		default { "0"}
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM }
+		default { "0" }
 	}
 	codeblock (copy) {
 	mar	*,AR6
