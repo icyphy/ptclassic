@@ -33,6 +33,15 @@ This changes the appearance of the button, and has the side effect
 of binding the <CODE>Return</CODE> key so that invokes the button.  Try placing
 the mouse in the window and hitting <CODE>Return</CODE>.
 <p>
+Usually, you will also want to bind a keyboard shortcut for
+invoking the button.  This is done by giving a <code>-underline</code>
+option as follows:
+<tcl><pre>
+.m addButton x -text Bell -underline 0 -command bell
+</pre></tcl>
+Clicking on this new button causes the bell to ring.
+In addition, typing "b" or "B" causes the bell to ring.
+<p>
 You can also directly invoke a button from a script using the
 <a name="invoke method"><CODE>invoke</CODE> method</a>:
 <tcl quiet><pre>
@@ -64,10 +73,7 @@ command, using the Tk <a name="photo widget">photo widget</a>.
 image create photo ptgif -file $TYCHO/kernel/img/tychologo.gif
 .m configure -image ptgif
 </pre></tcl>
-You can remove the Dialog object with the following command:
-<tcl><pre>
-delete object .m
-</pre></tcl>
+You can remove the Dialog window by typing the Escape key.
 <p>
 There are two procedures defined in the Dialog class to support
 creation of
@@ -81,6 +87,8 @@ dialog:
 ::tycho::Dialog::new Message .y -text &#92
     {This message is automatically mapped}
 </pre></tcl>
+The <code><a href="messageclasses.html">Message</a></code> class
+is a simple class derived from <code>Dialog</code> that adds an "OK" button.
 The only advantage of using this feature is that message automatically
 appears in the center of the screen, without having to issue a second
 command.  This is not a big advantage.

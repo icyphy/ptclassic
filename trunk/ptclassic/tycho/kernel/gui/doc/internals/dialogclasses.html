@@ -27,11 +27,19 @@ labeled <CODE>Yes</CODE> and <CODE>No</CODE>.  For example:
     -yescommand {::tycho::inform {You said yes!}} &#92
     -nocommand {::tycho::inform {Then how did you click on the No button?}}
 wm deiconify .y
+.y focusin
 </pre></tcl>
+Typing "y" or "n" will invoke the corresponding button.
+Typing Return (or Enter on some keyboards) will invoke the "Yes" button."
+Typing Escape will dismiss the dialog without invoking either button.
+<p>
 The options <a name="yescommand option"><CODE>-yescommand</CODE></a> and
 <a name="nocommand option"><CODE>-nocommand</CODE></a>
 specify scripts to be executed
-in response to these buttons.  The default scripts simply destroy
+in response to these buttons.  
+If you do not specify these options, nothing interesting will happen
+when you click on the buttons.  This is because
+the default scripts simply destroy
 the window and return 0 or 1, but the return value is lost.
 To get the return value, you must make the dialog modal using
 the <a href="dialog.html#wait"><code>wait</code></a> procedure
@@ -39,13 +47,15 @@ of the <code>Dialog</code> class.
 For example,
 <tcl><pre>
 ::tycho::YesNoQuery .z -text {Are you awake?}
-if [::tycho::Dialog::wait .z] {
+set response [::tycho::Dialog::wait .z]
+if {$response == 1} {
     ::tycho::inform {You said yes!}
-} {
+} elseif {$response == 0} {
     ::tycho::inform {Then how did you click on the No button?}
 }
 </pre></tcl>
-
+Notice that the response may in fact be a null string.
+This occurs if the user types Escape without invoking either button.
 <p>
 
 There is a bit of a technicality with using this capability.  Suppose
@@ -91,6 +101,9 @@ By default, the cancel button returns <CODE>-1</CODE>, unless you specify
 something different withe the <CODE>-cancelcommand</CODE> option.
 Similarly, by default, the <CODE>Yes</CODE>button returns <CODE>1</CODE>
 and the <CODE>No</CODE> button <CODE>0</CODE>.
+As usual, typing Escape dismisses the window without invoking
+any of the buttons, so the above will return an empty string in this
+case.
 
 <p>
 <h2><a name="Query class">Query Class</a></h2>
@@ -172,13 +185,11 @@ text edit boxes, as in the following example:
 </pre></tcl>
 <p>
 Now the query will have four lines.
-An Edit widget is used, providing
-an Emacs-like text editor.
-Note that the <CODE>OK</CODE> button
-is no longer triggered by <CODE>Return</CODE>.  It can now be triggered by
-<CODE>Meta-Return</CODE>.
-This is because in a multi-line entry box, <CODE>Return</CODE>
-moves the insertion cursor to a new line.
+Note that typing Return will no longer invoke the <CODE>OK</CODE> button
+while the focus is in the multi-line text widget.
+Typing <code>Control+Tab</code> will move the focus to the next item in the
+query box (a simple <code>Tab</code> simply inserts a tab in the text window.
+Then Return works again to invoke <code>OK</code>.
 <p>
 The <code><a name="radio method">radio</a></code> method
 puts radio buttons into the dialog.  For example, assuming you
@@ -187,17 +198,14 @@ then just recreate it),
 <tcl><pre>
 .bb radio selmonth {Select Month} {Jan Feb March} Jan
 .bb radio selday {Select Day} {Mon Tue Wed Thu Fri} Mon
+::tycho::Dialog::wait .bb
 </pre></tcl>
 <p>
 The arguments are a name for the bank of buttons, a label,
 the list of possible values, and the default selection.
 <p>
-In simple queries, the <CODE>Tab</CODE> key moves the focus
-from one query entry to the next.
-When there are multi-line queries in a <code>Query</code> object,
-then instead of <CODE>Tab</CODE>, <CODE>C-Tab</CODE> moves the insertion
-cursor from query to query.  Within a radio button, 
-<CODE>C-Tab</CODE> moves the focus
+Within a radio button, <code>Tab</code> or
+<CODE>Control+Tab</CODE> moves the focus
 from button to button.  The <CODE>Space</CODE> key selects the current button.
 <p>
 It is also possible to have queries that are mediated by some other
@@ -354,7 +362,7 @@ You also have access to the "new" method of the base class.
 For example,
 <tcl quiet><pre>
 ::tycho::Dialog::new &#92
-    Query .z -queries {{line n {Enter value} {default}}}
+    Query .cc -queries {{line n {Enter value} {default}}}
 </pre></tcl>
 <p>
 <h2><a name="FileBrowser class">FileBrowser Class</a></h2>
@@ -383,7 +391,7 @@ As usual, you can get a modal file browser using <code>wait</code>:
 </pre></tcl>
 <p>
 <h2><a name="ColorBrowser class">ColorBrowser Class</a></h2>
-A related dialog box is a color browser.
+A related dialog box is a color dialog.
 Consider the example:
 <tcl><pre>
 ::tycho::ColorBrowser .f -command "::tycho::inform"

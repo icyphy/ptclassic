@@ -103,9 +103,12 @@ and taking some action accordingly.  The
 if [::tycho::askuser "Are you awake?"] {
     ::tycho::inform "You said yes!"
 } {
-    ::tycho::inform "Then how did you click on the No button?"
+    ::tycho::inform "Wake up!"
 }
 </pre></tcl>
+Note that <code>askuser</code> returns 0 if either the user
+clicks on the "no" button or if the user dismisses the dialog window
+by typing Escape.
 
 
 <h2><a name="file name dialog">Getting a File Name</a></h2>
