@@ -88,9 +88,6 @@ initCode {
 	unsigned int currentBuffer;
 	s56xSide->lookupEntry("currentBuffer",currentBuffer);
 	addGlobal(s56xInterrupt(currentBuffer),"s56xInterrupt");
-}
-wrapup {
-    CGCXBase::wrapup();
 #ifdef PTSOL2
 	addMainInit("	sigset(SIGUSR1,s56xSignal);","s56x_sigset");
 	addMainInit("	dsp->intr=sbusMemHostIntr;","s56x_dspintr");
