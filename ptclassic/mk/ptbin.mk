@@ -82,10 +82,17 @@ ifdef FULL
 	IPUS =		1
 	MDSDF =		1
 	PN =		1
+	RTG =		1
 	SDFFULL =	1
 	SR =		1
 	VHDLFULL =	1
 	VHDLB =		1
+endif
+
+ifdef RTINY
+	PIGI=		$(BASENAME).rtiny
+	VERSION_DESC =	'With Retarget domain (RTG) only'
+	RTG =		1
 endif
 
 ifdef PTINY
@@ -126,6 +133,8 @@ PIGI_BINARIES = 	$(PIGI) $(PIGI).debug $(PIGI).debug.purify \
 			$(PIGI).debug.quantify $(PIGI).debug.purecov
 
 EVERY_BINARY= $(PIGI_BINARIES) \
+		$(PIGI).rtiny $(PIGI).rtiny.debug $(PIGI).rtiny.debug.purify \
+		$(PIGI).rtiny.debug.quantify $(PIGI).rtiny.debug.purecov \
 		$(PIGI).ptiny $(PIGI).ptiny.debug $(PIGI).ptiny.debug.purify \
 		$(PIGI).ptiny.debug.quantify $(PIGI).ptiny.debug.purecov \
 		$(PIGI).ptrim $(PIGI).ptrim.debug $(PIGI).ptrim.debug.purify \
@@ -152,7 +161,7 @@ ifndef ALLBINARIES
 # On certain archs (hppa9), we can run strip -x and get a smaller binary
 # Note that doing a full strip on a binary will disable incremental linking
 # 
-# This is the default target
+# This is the defautl target
 $(PIGI): $(PT_DEPEND) $(ADD_OBJS)
 	echo char '*gVersion = "Version:' $(VERSION) \
 		$(VERSION_DESC) \
@@ -214,7 +223,8 @@ $(BINDIR)/$(PIGI): $(PIGI)
 
 else
 
-INSTALL += $(BINDIR)/$(BASENAME) $(BINDIR)/$(BASENAME).ptrim $(BINDIR)/$(BASENAME).ptiny
+INSTALL += $(BINDIR)/$(BASENAME) $(BINDIR)/$(BASENAME).ptrim \
+		$(BINDIR)/$(BASENAME).ptiny $(BINDIR)/$(BASENAME).rtiny
 
 
 .PHONY: $(BASENAME).ptrim $(BASENAME).ptiny \
@@ -222,6 +232,9 @@ INSTALL += $(BINDIR)/$(BASENAME) $(BINDIR)/$(BASENAME).ptrim $(BINDIR)/$(BASENAM
 	$(BASENAME).ptrim.debug.purify $(BASENAME).ptiny.debug.purify \
 	$(BASENAME).ptrim.debug.quantify $(BASENAME).ptiny.debug.quantify \
 	$(BASENAME).ptrim.debug.purecov $(BASENAME).ptiny.debug.purecov
+	$(BASENAME).rtiny $(BASENAME).rtiny.debug \
+	$(BASENAME).rtiny.debug.purify $(BASENAME).rtiny.debug.quantify \
+	$(BASENAME).rtiny.debug.purecov
 
 # The .ptrim and .ptiny files below should not depend on $(PT_DEPEND), or
 # else we must have all the libs installed to build ptrim and ptiny, even
@@ -236,6 +249,10 @@ $(BASENAME).ptrim:
 $(BASENAME).ptiny:
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny
 
+$(BASENAME).rtiny:
+	$(MAKE) RTINY=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=RTG \
+		$(BASENAME).rtiny 
+
 $(BASENAME).debug: $(PT_DEPEND)
 	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug
 
@@ -244,6 +261,10 @@ $(BASENAME).ptrim.debug:
 
 $(BASENAME).ptiny.debug: 
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug
+
+$(BASENAME).rtiny.debug: 
+	$(MAKE) RTINY=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=RTG \
+		$(BASENAME).rtiny.debug
 
 
 $(BASENAME).debug.purify: $(PT_DEPEND)
@@ -256,6 +277,10 @@ $(BASENAME).ptrim.debug.purify:
 $(BASENAME).ptiny.debug.purify:
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purify
 
+$(BASENAME).rtiny.debug.purify:
+	$(MAKE) RTINY=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=RTG \
+		$(BASENAME).rtiny.debug.purify
+
 
 $(BASENAME).debug.quantify: $(PT_DEPEND)
 	$(MAKE) FULL=1 BASENAME=$(BASENAME) INCLUDE_PN_DOMAIN=no \
@@ -266,6 +291,10 @@ $(BASENAME).ptrim.debug.quantify:
 
 $(BASENAME).ptiny.debug.quantify: 
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.quantify
+
+$(BASENAME).rtiny.debug.quantify: 
+	$(MAKE) RTINY=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=RTG \
+		$(BASENAME).rtiny.debug.quantify
 
 
 $(BASENAME).debug.purecov: $(PT_DEPEND)
@@ -278,6 +307,10 @@ $(BASENAME).ptrim.debug.purecov:
 $(BASENAME).ptiny.debug.purecov: 
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purecov
 
+$(BASENAME).rtiny.debug.purecov: 
+	$(MAKE) RTINY=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=RTG \
+		$(BASENAME).rtiny.debug.purecov
+
 
 $(BINDIR)/$(BASENAME): $(BASENAME) 
 	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BINDIR)/$(BASENAME)
@@ -288,6 +321,10 @@ $(BINDIR)/$(BASENAME).ptrim: $(BASENAME).ptrim
 $(BINDIR)/$(BASENAME).ptiny: $(BASENAME).ptiny 
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BINDIR)/$(BASENAME).ptiny
 
+$(BINDIR)/$(BASENAME).rtiny: $(BASENAME).rtiny 
+	$(MAKE) RTINY=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=RTG \
+		$(BINDIR)/$(BASENAME).rtiny
+
 endif #ALLBINARIES
 
 PTDEPEND:
@@ -295,8 +332,8 @@ PTDEPEND:
 
 install: $(INSTALL)
 
-# Build three binaries
-all: makefile $(LIB) $(PIGI) $(PIGI).ptiny $(PIGI).ptrim
+# Build four binaries
+all: makefile $(LIB) $(PIGI) $(PIGI).rtiny $(PIGI).ptiny $(PIGI).ptrim
 
 # Print the names of all the binaries that can be produced
 echo_every_binary:
