@@ -422,6 +422,10 @@ ifdef IPUS
 	endif
 endif
 
+ifdef DEFULL
+	DE = 1
+	DECONTRIB = 1
+endif
 ifdef DE
 	# star icons
 	PALETTES += PTOLEMY/src/domains/de/icons/de.pal
@@ -441,11 +445,10 @@ ifdef DE
 	endif
 	# Contributed stars by third-party users
 	ifdef DECONTRIB
-		CUSTOM_DIRS += $(DEDIR)/contrib/kernel $(DEDIR)/contrib/stars
+		CUSTOM_DIRS += $(DEDIR)/contrib/stars
 		STARS += $(LIBDIR)/decontribstars.o
-		LIBS += -ldecontribstars -ldecontrib 
-		LIBFILES += $(LIBDIR)/libdecontribstars.$(LIBSUFFIX) \
-			$(LIBDIR)/libdecontrib.$(LIBSUFFIX)
+		LIBS += -ldecontribstars
+		LIBFILES += $(LIBDIR)/libdecontribstars.$(LIBSUFFIX)
 	endif
 	# kernel and stars
 	CUSTOM_DIRS += $(DEDIR)/stars $(DEDIR)/kernel 
@@ -610,11 +613,6 @@ ifdef CG
 		$(LIBDIR)/libcg.$(LIBSUFFIX)
 	# dependencies
 	SDFLIB = 1
-endif
-
-ifdef DEFULL
-	DE = 1
-	DECONTRIB = 1
 endif
 
 ifdef FSM
