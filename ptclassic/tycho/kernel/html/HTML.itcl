@@ -178,9 +178,6 @@ class ::tycho::HTML {
     # Output the rendering status from 0 (not done) to 1 (complete)
     method progress {}
 
-    # Raise the HTML browser window and the source window (if any).
-    method raiseWindow {}
-
     # Reload from the last saved version of the file.
     method reload {}
 
@@ -198,12 +195,6 @@ class ::tycho::HTML {
   
     # Increase the current font size in this widget.
     method upSize {}
-
-    # Add a file editor object to the window menus of all open File objects.
-    method windowMenuAddAll {label}
-
-    # Remove a filename from the window menus of all open File objects.
-    method windowMenuRemoveAll {filename}
 
     ###################################################################
     ####                      public procedures                    ####
@@ -250,9 +241,6 @@ class ::tycho::HTML {
     # Push a new file onto the stack.
     private method pushNextHTMLFile {}
 
-    # Return 1 if the sourcewin window is a valid source window.
-    private method sourcewinIsMine {}
-
     # Return 1 if the extension is the extension of an image file.
     private method isAnImageFileExtension {extension}
 
@@ -270,9 +258,6 @@ class ::tycho::HTML {
     
     # Keep count of the number of calls to seeFragment
     private variable seecount 0
-
-    # Keep track of the current source window for the current file.
-    private variable sourcewin {}
 
     # The "stack" of traversed files. This is really just a Tcl list.
     private variable stack {}
@@ -390,9 +375,6 @@ configbody ::tycho::HTML::underlinelinks {
 #
 body ::tycho::HTML::constructor {args} {
 
-    # Set the view "type" for the Window menu
-    set viewType "html"
-
     set text $itk_component(text)
 
     # Initialize the text window.  The returned value is supposed to be
@@ -471,11 +453,6 @@ body ::tycho::HTML::constructor {args} {
 #
 body ::tycho::HTML::destructor {} {
     stopRendering
-    if [sourcewinIsMine] {
-	# Schedule this for after destruction is complete because the
-	# base class destructor removes the menu entry.
-	after idle "$sourcewin windowMenuAddAll [filename]"
-    }
 }
 
     ###################################################################
@@ -1007,13 +984,9 @@ body ::tycho::HTML::openNewBrowser {win x y} {
 # Open the source file using an editor specialized for editing HTML.
 #
 body ::tycho::HTML::openSource {} {
-    # If a source window already exists, just raise it.
-    if [sourcewinIsMine] {
-	$sourcewin raiseWindow
-	return
-    }
-    set obj [::tycho::view EditHTML -file [filename]]
-    set sourcewin $obj
+    # Pass openContext the "edithtml" mode to make it open the
+    # same file in another mode
+    ::tycho::openContext [filename] edithtml
 }
 
 #####################################################################
@@ -1050,17 +1023,6 @@ body ::tycho::HTML::progress {} {
         expr [uplevel #0 set HMrender_progress([component text])] \
                 / double($currentHTMLLength)
     }
-}
-
-#####################################################################
-#### raiseWindow
-# Raise this window and also the source window, if it is open.
-#
-body ::tycho::HTML::raiseWindow {} {
-    if [sourcewinIsMine] {
-	$sourcewin raiseWindow
-    }
-    ::tycho::TWidget::raiseWindow
 }
 
 #####################################################################
@@ -1236,41 +1198,6 @@ body ::tycho::HTML::upSize {} {
     render $this
 }
 
-
-#####################################################################
-#### windowMenuAddAll
-# Add me to the window menus of all open File objects.
-# This is redefined in order to coordinate the source window, which
-# may be open, and to refrain from adding to the menu if I'm a sub-view
-# ignorant of the displayer.
-#
-body ::tycho::HTML::windowMenuAddAll {label} {
-    if {[displayer] != {}} {
-        # Reclaim the source window, if it is open.
-        if {[info exists filesOpen($label)]} {
-            set sourcewin $filesOpen($label)
-            $sourcewin windowMenuRemoveAll $label
-        } {
-            set sourcewin {}
-        }
-        ::tycho::File::windowMenuAddAll $label
-    }
-}
-
-#####################################################################
-#### windowMenuRemoveAll
-# Remove a filename from the window menus of all open File objects.
-# This is redefined in order to coordinate the source window, which
-# may be open.
-#
-body ::tycho::HTML::windowMenuRemoveAll {filename} {
-    ::tycho::File::windowMenuRemoveAll $filename
-    if [sourcewinIsMine] {
-        $sourcewin windowMenuAddAll $filename
-        set sourcewin {}
-    }
-}
-
     ###################################################################
     ###################################################################
     ####                      public procedures                    ####
@@ -1384,11 +1311,6 @@ body ::tycho::HTML::initialize {{menubar {}} \
     }
 
     configure -readonly 1
-
-    # Add myself to the list of open files. 
-    if {$itk_option(-file) != "NoName"} {
-        windowMenuAddAll [filename]
-    }
 
     # Disable auto-save.
     configure -save 0
@@ -1531,8 +1453,6 @@ body ::tycho::HTML::initializeToolbar {toolbar} {
 
 #####################################################################
 #### pushNextHTMLFile
-# Return 1 if the sourcewin window is the source window for the
-# currently open HTML text. Otherwise, return 0.
 #
 body ::tycho::HTML::pushNextHTMLFile {} {
     # Clear windows from this one ahea
@@ -1549,24 +1469,6 @@ body ::tycho::HTML::pushNextHTMLFile {} {
     # Disable the "forward" button, enable the "back" button
     toolbar disable forward
     toolbar enable back
-}
-
-#####################################################################
-#### sourcewinIsMine
-# Return 1 if the sourcewin window is the source window for the
-# currently open HTML text. Otherwise, return 0.
-#
-body ::tycho::HTML::sourcewinIsMine {} {
-    if {$sourcewin != {}} {
-        # Test to see whether the window still exists.
-        # We use catch here because other Itcl methods seem to be too tricky.
-        if [catch {$sourcewin isModified}] {
-            return 0
-        }
-	return 1
-    } {
-	return 0
-    }
 }
 
 #####################################################################
