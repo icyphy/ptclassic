@@ -144,10 +144,20 @@ KcInstance(char *name, char *ako, ParamListType* pListPtr) {
 	return TRUE;
 }
 
-// 7/25/90
 // create a new state for the galaxy
 extern "C" boolean
 KcMakeState(char *name, char *type, char *initVal) {
+// first check to see if state type is known
+	if (!KnownState::find(type)) {
+		StringList msg = ": parameter '";
+		msg += name;
+		msg += "' has unknown type: '";
+		msg += type;
+		msg += "'\nThe following parameter types are known:\n";
+		msg += KnownState::nameList();
+		Error::abortRun(*currentGalaxy, msg);
+		return FALSE;
+	}
 	LOG << "\t(state " << name << " " << type << " \"" <<
 		initVal << "\")\n";
 	return currentGalaxy->addState(name, type, initVal);
@@ -167,7 +177,7 @@ KcConnect(char *inst1, char *t1, char *inst2, char *t2, int delay) {
 // create a galaxy formal terminal
 extern "C" boolean
 KcAlias(char *fterm, char *inst, char *aterm) {
-	LOG << "\t(alias " << fterm << " " << inst << " " << aterm << ")\n";
+	LOG << "\t(alias " << fterm << " " << inst << " \"" << aterm << "\")\n";
 	return currentGalaxy->alias(fterm, inst, aterm);
 }
 
