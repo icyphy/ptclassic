@@ -17,6 +17,10 @@ $Id$
 	5/26/90 - I. Kuroda 
 	Add method Galaxy::initState
 
+	5/29/90 - J. Buck
+	Change operator StringList to printVerbose.  Galaxy::connect
+	is gone; it's now done by GenericPort class instead.
+
 Methods for class Galaxy
 ***************************************************************************/
 #include "Star.h"
@@ -26,52 +30,11 @@ Methods for class Galaxy
 
 
 	////////////////////////////////////
-	// connect
+	// Galaxy::printVerbose()
 	////////////////////////////////////
 
-// Need to add error checking
-
-Geodesic& Galaxy :: connect (GenericPort& source, GenericPort& destination,
-			int numberDelays = 0) {
-
-	// Resolve any aliases and MultiPortHole stuff:
-	// newConnection is a virtual function that does the right
-	// thing for all types of PortHoles.
-	PortHole& realSource = source.newConnection();
-	PortHole& realDest = destination.newConnection();
-
-	Geodesic* geo = realSource.allocateGeodesic();
-	geo->originatingPort = &realSource;
-	geo->destinationPort = &realDest;
-	realSource.myGeodesic = geo;
-	realDest.myGeodesic = geo;
-
-	// Set the farSidePort pointers in both blocks
-	// This information is redundant, since it also appears in the
-	// Geodesic, but to get it from the Geodesic, you have to know
-	// which PortHole is an input, and which is an output.
-	realSource.farSidePort = &realDest;
-	realDest.farSidePort = &realSource;
-
-	// Set the number of delays
-	geo->numInitialParticles = numberDelays;
-
-	return *geo;
-}
-
-
-// TO BE DONE:  need another connect method that accepts a Particle
-// reference as a fourth parameter giving the value of the initial Particle
-// put on the Geodesic.
-
-
-
-	////////////////////////////////////
-	// operator StringList ()
-	////////////////////////////////////
-
-
-Galaxy :: operator StringList () {
+StringList
+Galaxy :: printVerbose () {
 	StringList out;
 	out = "GALAXY: ";
 	out += readFullName();
@@ -86,7 +49,7 @@ Galaxy :: operator StringList () {
 	out += printStates("Galaxy");
 	out += "Blocks in the Galaxy:----------------------------------\n";
 	for(int i = numberBlocks(); i>0; i--)
-		out += StringList(nextBlock());
+		out += nextBlock().printVerbose();
 	return out;
 }
 
