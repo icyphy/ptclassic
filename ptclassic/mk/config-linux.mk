@@ -87,16 +87,17 @@ CPLUSPLUS = 	g++ -b i486-linuxaout
 endif
 endif
 
-DEPEND= $(CPLUSPLUS) -MM
+DEPEND = $(CPLUSPLUS) -MM
 
 # where the Gnu library is
-GNULIB= /usr/lib #$(PTOLEMY)/gnu/$(PTARCH)/lib
+# GNULIB = $(PTOLEMY)/gnu/$(PTARCH)/lib
+GNULIB = /usr/lib
 
 # linker to use for pigi and interpreter.
-LINKER	= $(CPLUSPLUS)
+LINKER = $(CPLUSPLUS)
 
 # Location of GNU libg++ shared libraries
-SHARED_COMPILERDIR =	/usr/lib#$(PTOLEMY)/gnu/$(PTARCH)/lib
+SHARED_COMPILERDIR = $(GNULIB)
 SHARED_COMPILERDIR_FLAG = -L$(SHARED_COMPILERDIR)
 
 # Command to build C++ shared libraries
