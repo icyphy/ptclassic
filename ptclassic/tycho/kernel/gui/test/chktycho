@@ -27,7 +27,9 @@ if [ $status = 1 ]; then
 	echo " ~/.Tycho/tychorc.tcl by hand and remove the last two lines."
 	echo " If let the script run, then the edit will be done for you."
 	echo "$chktychomagic" >> $tychorc
+	echo "puts \"$tychorc contains a line that will exit tycho after 8 seconds\"" >> $tychorc
 	echo 'after 8000 ::tycho::TopLevel::exitProgram 1' >> $tychorc
+	echo 'after 10000 ::tclexit' >> $tychorc
 fi
 
 tclscript=/tmp/tclscript$USER.tcl
@@ -38,23 +40,23 @@ fi
 echo "---"
 echo "Complex example:"
 set -x
-tycho -nowelcome -e $tclscript /tmp/foo.tcl /tmp/bar.c
+#tycho -nowelcome -e $tclscript /tmp/foo.tcl /tmp/bar.c
 set +x
 
 echo "---"
 echo "Checking out the worst case"
 set -x
-tycho -debug -nowelcome -noconsole -ptiny -e $tclscript /tmp/a.tcl /tmp/b.c
+#tycho -debug -nowelcome -noconsole -ptiny -e $tclscript /tmp/a.tcl /tmp/b.c
 set +x
 
 
 echo "---"
 echo "Exhaustive search of all option combinations:"
+for tclscriptflag in "-e $tclscript" ""
+do
 for debug in "" -debug
 do
-for binary in -ptiny "" -ptrim -pigi -java
-do
-for tclscript in "" "-e $tclscript"
+for binary in -tty "" -ptiny -ptrim -pigi -java
 do
 for noconsole in "" -noconsole
 do
@@ -65,7 +67,7 @@ for filelist in "" /tmp/foo.tcl "/tmp/foo.tcl /tmp/bar.c"
 do
 	# Actually run
 	set -x
-	tycho $binary $debug $tclscript $noconsole $nowelcome $filelist
+	tycho $binary $debug $tclscriptflag $noconsole $nowelcome $filelist
 	set +x
 done
 done
