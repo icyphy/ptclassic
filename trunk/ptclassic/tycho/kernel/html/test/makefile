@@ -46,6 +46,12 @@ DIRS =
 
 TCL_SRCS = 
 
+SIMPLE_TESTS = \
+	testCacheManager.itcl \
+	testResourceFTP.itcl \
+	testResourceHTTP.itcl \
+	testResourceRemote.itcl
+
 ITCL_SRCS = 
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
