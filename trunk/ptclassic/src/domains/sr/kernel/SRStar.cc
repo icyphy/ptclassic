@@ -24,8 +24,8 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
-    Author:	T.M. Parks
-    Created:	5 January 1992
+    Author:	S. A. Edwards
+    Created:	14 April 1996
 
 */
 
@@ -34,14 +34,105 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "SRStar.h"
+#include "Block.h"
 
 extern const char SRdomainName[];
 
 // Class identification.
-ISA_FUNC(SRStar,Star);
+ISA_FUNC(SRStar, Star);
+ISA_FUNC(SRNonStrictStar, Star);
 
 // Domain identification.
 const char* SRStar::domain() const
 {
-    return SRdomainName;
+  return SRdomainName;
+}
+
+const char * SRNonStrictStar::domain() const
+{
+  return SRdomainName;
+}
+
+// Initialize the star for the beginning of an instant:
+//  Clear all the output ports
+//  Reset the hasFired flag
+void SRStar::initializeInstant()
+{
+
+  PortHole * p;
+  BlockPortIter portIter(*((Block *) this) );
+  while ( (p = portIter++) != 0 ) {
+    if ( p->isItOutput() ) {
+      ((OutSRPort *) p)->clearPort();
+    }
+  }
+
+  hasFired = 0;
+
+}
+
+// Inter-instant time advancement
+// By default, do nothing
+int SRStar::tick()
+{
+  return 0;
+}
+
+// Inter-instant time advacement
+// For this strict star, it calls go() at most once an instant when
+// all its inputs are known
+int SRStar::run()
+{
+  if ( !hasFired ) {
+
+    int ableToFire = 1;
+
+    BlockPortIter nextPort(*((Block *) this) );
+    PortHole * p;
+
+    while ( ( p = nextPort++) != 0 ) {
+      if ( p->isItInput() ) {
+	if ( !((InSRPort *) p)->known() ) {
+	  ableToFire = 0;
+	  break;
+	}
+      }
+    }
+
+    if ( ableToFire ) {
+      go();
+      hasFired = 1;
+    }
+
+  }
+
+  return 0;
+}
+
+// Inter-instant time advancement
+// For this non-strict star, just call go()
+int SRNonStrictStar::run()
+{
+  go();
+  return 0;
+}
+
+// Return the number of known outputs
+int SRStar::knownOutputs()
+{
+  int number = 0;
+
+  BlockPortIter nextPort(*((Block *) this) );
+  PortHole * p;
+
+  while ( ( p = nextPort++) != 0 ) {
+    if ( p->isItOutput() ) {
+      if ( !((InSRPort *) p)->known() ) {
+	number++;
+      }
+    }
+  }
+
+  return number;
+
 }

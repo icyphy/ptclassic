@@ -34,6 +34,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "SRScheduler.h"
+#include "SRStar.h"
 #include "Galaxy.h"
 #include "GalIter.h"
 #include "Error.h"
@@ -65,8 +66,6 @@ void SRScheduler::setup()
     }
 
     galaxy()->initialize();
-
-    /* Insert your own initialiazation code. */
 }
 
 // Run (or continue) the simulation.
@@ -77,16 +76,49 @@ int SRScheduler::run()
 	return FALSE;
     }
 
-    /* Insert your own code to run the simulation. */
-
     GalStarIter nextStar( *galaxy() );
     Star *s;
 
-    while ( ( s = nextStar++ ) != 0 ) {
-      cout << s->fullName() << "\n";
-    }
+    while ( currentTime < stopTime ) {
 
-    cout.flush();
+      // Begin the instant by initializing all the stars
+
+      nextStar.reset();
+      while ( ( s = nextStar++ ) != 0 ) {
+	((SRStar *) s)->initializeInstant();
+      }
+
+      int numKnown = 0;
+      int lastNumKnown;
+
+      // Simulate the instant by calling each star's go() method until
+      // no additional outputs become known
+
+      do {
+	lastNumKnown = numKnown;
+	numKnown = 0;
+
+	nextStar.reset();
+
+	while ( ( s = nextStar++ ) != 0 ) {
+	  ((SRStar *) s)->run();
+	  numKnown += ((SRStar *) s)->knownOutputs();
+	}
+
+      } while ( numKnown != lastNumKnown );     
+
+      // Finish the instant by calling each star's tick() method
+
+      nextStar.reset();
+
+      while ( ( s = nextStar++ ) != 0 ) {
+	((SRStar *) s)->tick();
+      }
+
+      // Advance to the next tick
+
+      currentTime += 1.0;
+    }
 
     return !SimControl::haltRequested();
 }
@@ -94,18 +126,11 @@ int SRScheduler::run()
 // Get the stopping time.
 double SRScheduler::getStopTime()
 {
-    /* Replace this code with your own. */
-    return 0.0;
+    return stopTime;
 }
 
 // Set the stopping time.
 void SRScheduler::setStopTime(double limit)
 {
-    /* Insert your own code to set the stopping condition. */
-}
-
-// Set the stopping time when inside a Wormhole. */
-void SRScheduler::resetStopTime(double limit)
-{
-    /* Insert your own code to set the stopping condition. */
+  stopTime = limit;
 }

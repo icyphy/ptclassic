@@ -1,3 +1,5 @@
+/* -*- C++ -*- */
+
 #ifndef _SRStar_h
 #define _SRStar_h
 
@@ -25,8 +27,8 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
-    Author:	T.M. Parks
-    Created:	5 January 1992
+    Author:	S. A. Edwards
+    Created:	14 April 1996
 
 */
 
@@ -40,14 +42,46 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // but any star for this domain will need it, so we include it here.
 #include "SRPortHole.h"
 
-class SRStar : public Star
-{
-public:
-    // Class identification.
-    /*virtual*/ int isA(const char*) const;
+class SRStar : public Star {
 
-    // Domain identification.
-    /*virtual*/ const char* domain() const;
+private:
+
+  // flag indicating whether the star has fired in the instant
+  // Used by strict stars to ensure they fire at most once in an instant
+  int hasFired;
+
+public:
+  // Class identification.
+  /*virtual*/ int isA(const char*) const;
+
+  // Domain identification.
+  /*virtual*/ const char* domain() const;
+
+  // Inter-instant time advancement
+  // Default is to do nothing; derived non-strict stars should override this
+  virtual int tick();
+
+  // Beginning-of-instant initialization
+  virtual void initializeInstant();
+
+  // Intra-instant time advancement
+  /*virtual*/ int run();  
+
+
+  // Return the number of known outputs
+  int knownOutputs();
+
+};
+
+class SRNonStrictStar : public SRStar {
+
+  // Class identification.
+  /*virtual*/ int isA(const char*) const;
+
+  // Domain identification.
+  /*virtual*/ const char* domain() const;
+
+  /*virtual*/ int run();
 };
 
 #endif
