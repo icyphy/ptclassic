@@ -345,7 +345,7 @@ limitation of liability, and disclaimer of warranty provisions.
 
     codeblock (syncCounter) {
       /* Hack for Sun only */
-      unsigned $starSymbol(count) = 0;
+      unsigned $starSymbol(count);
     }
 
     codeblock (syncUlaw) {
