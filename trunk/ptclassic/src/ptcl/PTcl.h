@@ -278,6 +278,7 @@ public:
 	int star(int argc,char** argv);
 	int statevalue(int argc,char** argv);
 	int target(int argc,char** argv);
+	int targetHint(int argc,char** argv);
 	int targetparam(int argc,char** argv);
 	int targets(int argc,char** argv);
 	int topblocks(int argc,char** argv);

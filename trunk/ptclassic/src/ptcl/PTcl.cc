@@ -830,6 +830,34 @@ int PTcl::targetparam(int argc,char ** argv) {
 	return TCL_OK;
 }
 
+// If no arguments are given, return the names, types, and default values
+// of the hints supported by the current target. If one argument is
+// given, assume it is a block name, and return the names and values
+// of all hints that have been set for that block.  If two arguments
+// are given, then assume they are blockname and hintname, and return
+// the value of the particular hint.  If three arguments are given,
+// use the third argument to set the value of the hint.
+//
+int PTcl::targetHint(int argc,char ** argv) {
+    if (!currentTarget) {
+	Tcl_AppendResult(interp,
+			 "targetHint: Target has not been created yet.",
+			 (char*) NULL);
+	return TCL_ERROR;
+    }
+    if (argc == 1) {
+	return staticResult(currentTarget->hint());
+    } else if (argc == 2) {
+	return staticResult(currentTarget->hint(argv[1]));
+    } else if (argc == 3) {
+	return staticResult(currentTarget->hint(argv[1],argv[2]));
+    } else if (argc == 4) {
+	return staticResult(currentTarget->hint(argv[1],argv[2],argv[3]));
+    } else {
+	return usage("targetHint ?<blockname ?<hintname ?<value>?>?>?");
+    }
+}
+
 // Run dynamic linker to load a file
 int PTcl::link(int argc,char ** argv) {
 	if (argc != 2) return usage("link <objfile>");
@@ -1066,6 +1094,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(star),
 	ENTRY(statevalue),
 	ENTRY(target),
+	ENTRY(targetHint),
 	ENTRY(targetparam),
 	ENTRY(targets),
 	ENTRY(topblocks),
