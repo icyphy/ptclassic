@@ -421,6 +421,8 @@ body ::tycho::Slate::animate {mode {tagOrID {}} {x {}} {y {}} args} {
 # are supplied, return a list of legal aspects. (Note that the 
 # legal aspects are not necessarily constant over the lifetime of an item 
 # -- for example, adding a vertex to a polygon will also add an aspect.)
+# Complex items can choose to override the default behaviour of this
+# method by providing an aspect{} procedure in their method table.
 #
 body ::tycho::Slate::aspect {id args} {
     set t [lsearch -exact $args -shape]
@@ -442,7 +444,7 @@ body ::tycho::Slate::delete {args} {
     eval chain $args
     set h {}
     foreach a $args {
-	lappend h highlight.$a
+		lappend h highlight.$a
     }
     eval chain $h
 }
@@ -499,21 +501,19 @@ body ::tycho::Slate::describe {args} {
 #
 # Create a ghost of an item and return the ID of the ghost item.
 # This is a grey outline of the item for use when moving and resizing
-# the item. Complex items can choose their
-# own style of ghosting by providing a ghost{} procedure.
-# Each created ghost item is tagged with "ghost" and
-# "ghost._id_", where _id_ is the item it ghosts, and any
-# additional arguments to this method. If the first argument is
-# tag, then each ghosted item is also tagged with
-# "ghost._tag_". The return value is a list of created items.
+# the item. Complex items can choose their own style of ghosting by
+# providing a ghost{} procedure in their method table. Each created
+# ghost item is tagged with "ghost" and "ghost._id_", where _id_ is
+# the item it ghosts, and any additional arguments to this method. If
+# the first argument is a tag, then each ghosted item is also tagged
+# with "ghost._tag_". The return value is a list of created items.
 #
 # Note: It is the caller's responsibility to delete ghosts after
 # completion with a call such as <code>$slate delete ghost</code>.
 #
 body ::tycho::Slate::ghost {tag args} {
     if { [string match {_*} $tag] } {
-	# If it's a complex item and it has a ghost{} method,
-	# call that
+	# If it's a complex item and it has a ghost{} method, call that
         set class ::tycho::$itemClass($tag)
 	if { [@scope $class ::info exists methodtable(ghost)] } {
 	    return [eval [@scope $class set methodtable(ghost)] \
@@ -573,6 +573,11 @@ body ::tycho::Slate::ghost {tag args} {
 # The following optional arguments are recognized:
 #
 # <dl>
+# <dt><b>-aspects</b>
+# <dd>
+# The aspects to attach grapples to. The default is null, in which case
+# this method will use the grapples given by a call to <b>aspect</b>.
+#
 # <dt><b>-button</b>
 # <dd>
 # The button to bind the interactor with. The default is button 1.
@@ -608,7 +613,7 @@ body ::tycho::Slate::ghost {tag args} {
 body ::tycho::Slate::grapple {id args} {
     # Extract options
     array set opts {-interactor {} -tags {} -button 1 -modifiers {} \
-            -class Grapple -options {}}
+            -class Grapple -options {} -aspects {}}
     array set opts $args
 	
     if { $opts(-interactor) == "" } {
@@ -617,12 +622,14 @@ body ::tycho::Slate::grapple {id args} {
         }
         set opts(-interactor) $_reshaper
     }
+    if { $opts(-aspects) == "" } {
+    	set opts(-aspects) [aspect $id]
+    }
     set tags $opts(-tags)
     unset opts(-tags)
     
     # Create the grapples
-    foreach a [aspect $id] {
-puts "$a: [find withtag $a.$id]"
+    foreach a $opts(-aspects) {
         if { [find withtag $a.$id] == "" } {
             set g [eval create $opts(-class) [aspect $id $a] \
                     [list \
