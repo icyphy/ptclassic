@@ -75,8 +75,9 @@ public:
 	// event horizons of proper type
 	void buildEventHorizons ();
 
-	// Destructor
-	~Wormhole ();
+	// function to delete the event horizons and inside galaxy,
+	// to be called from XXXWormhole destructors.
+	void freeContents ();
 
 protected :
 	// get the stopping condition for the inner domain.
