@@ -13,51 +13,65 @@
 	 inherited from Universe, can have PortHoles.
 ********************************************************************/
 
+	
+#include "Galaxy.h"
+#include "Scheduler.h"
+#include "StringList.h"
+
+	//////////////////////////////
+	// Runnable
+	//////////////////////////////
+
+class Runnable {
+public:
+	// constructor
+	Runnable(Scheduler* s, const char* t, Galaxy* g) :
+		type(t), scheduler(s), gal(*g) {}
+
+	// initialize and/or generate schedule
+	void initSched() {
+		gal.initState();
+		scheduler->setup(gal);
+	}
+
+	// run, until stopping condition
+	void run() { scheduler->run(gal);}
+
+	// wrapup simulation
+	void wrapup() {scheduler->wrapup(gal);}
+
+	// set the stopping condition.  A hack.
+	void setStopTime(float limit) {scheduler->setStopTime(limit);}
+
+	// display schedule
+	StringList displaySchedule() {return scheduler->displaySchedule();}
+
+	// destructor: deletes scheduler
+	~Runnable() { delete scheduler;}
+
+protected:
+	const char* type;
+	Scheduler* scheduler;
+	Galaxy& gal;
+};
+
 	//////////////////////////////
 	// Universe
 	//////////////////////////////
 	
 
-#include "Galaxy.h"
-#include "Scheduler.h"
-#include "StringList.h"
-
-class Universe : virtual public Galaxy {
+class Universe : public Galaxy, public Runnable {
 public:
-	// generate the schedule and/or initialize scheduler
-	void initialize() {
-		initState();
-		scheduler->setup(*this);
-	}
-
-	// run the simulation
-	void go() {scheduler->run(*this);}
-
-	// wrap up the simulation
-	void wrapup() {scheduler->wrapup(*this);}
-
-	// set the stopping condition.  A hack.
-	void setStopTime(float limit) {scheduler->setStopTime(limit);}
-
 	// print methods
 	StringList printVerbose() {return print(0);}
 	StringList printRecursive() {return print(1);}
 
-	// display schedule
-	StringList displaySchedule() {return scheduler->displaySchedule();}
-
 	// constructor
 	Universe(Scheduler* s,const char* typeDesc) :
-		scheduler(s), type(typeDesc) {}
+		Runnable(s,typeDesc,this) {}
 
-	// destructor.  Destroys scheduler.
-	virtual ~Universe() { delete scheduler;}
 protected:
 	// print, possibly recursively
 	StringList print(int recursive);
-
-	const char* type;
-
-	Scheduler* scheduler;
 };
 #endif
