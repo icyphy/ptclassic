@@ -64,7 +64,7 @@ codeblock(sendData,"const char* command,int numXfer") {
 	EXIT_CGC(buffer);
     }
     s56xSemaphores[@(pairNumber/24)] |= semaphoreMask;
-    if (qckPutY(dsp,@(semaphorePtr+pairNumber/24),s56xSemaphores[@(pairNumber/24)]) == -1) { 
+    if (qckPutY(dsp,$sharedSymbol(comm,semaphorePtr)+@(pairNumber/24),s56xSemaphores[@(pairNumber/24)]) == -1) { 
 	char buffer[128];
 	sprintf(buffer, "Semaphore update failed, Pair @pairNumber: %s", qckErrString);
 	EXIT_CGC(buffer);

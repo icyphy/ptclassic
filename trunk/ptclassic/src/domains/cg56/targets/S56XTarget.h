@@ -51,10 +51,19 @@ public:
     /*virtual*/ int runCode();
     /*virtual*/ Block* makeNew() const;
     /*virtual*/ int isA(const char*) const;
+    
+    // Routines to construct CG wormholes, using the
+    // $PTOLEMY/src/domains/cgc/targets/main/CGWormTarget
+    /*virtual*/ CommPair fromCGC(PortHole&);
+    /*virtual*/ CommPair toCGC(PortHole&);
+    
 protected:
     /*virtual*/ void headerCode();
     /*virtual*/ void trailerCode();
+    /*virtual*/ void setup();
 private:
+    int pairNumber;
+    inline void configureCommPair(CommPair&);
     void initStates();
     CodeStream aioCmds;
     CodeStream shellCmds;

@@ -24,14 +24,18 @@ limitation of liability, and disclaimer of warranty provisions.
 	state {
 		name {bufferSemaphore}
 		type {intarray}
-		attributes {A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_SHARED}
+		attributes {
+		    A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_SHARED|A_NOINIT
+		}
 		default {0}
 	}
  
  	state {
  		name {currentBuffer}
  		type {int}
- 		attributes {A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_SHARED}
+ 		attributes {
+		    A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_SHARED|A_NOINIT
+		}
  		default {0}
  	}
 
@@ -41,14 +45,14 @@ limitation of liability, and disclaimer of warranty provisions.
 
  	public {
 		CGCXSynchComm* cgcSide;
-		int commCount;
+		int *commCount;
 		int numXfer;
 		int pairNumber;
 	}
 
 	setup {
 		buffer.resize(numXfer);
-		bufferSemaphore.resize(commCount/24+1);
+		bufferSemaphore.resize(*commCount/24+1);
 	}
 
 codeblock(processPendingInterrupts,"int pairNumber") {
@@ -81,13 +85,24 @@ method {
     }
 }
 
+codeblock(buffSemInit) {
+        org	$ref(currentBuffer)
+PTOLEMY_S56X_BUF
+        dc	0
+        org	$ref(bufferSemaphore)
+PTOLEMY_S56X_SEM
+        dc	0
+        org	p:
+}
+
 initCode {
-	addCode("	bset	#m_hf3,x:m_hcr",NULL,"hostInterruptEnable");
-	@	org	$ref(buffer)
-	@$starSymbol(buffer)
-        for(int i=0;i<numXfer;i++)
-	    @	dc	0
-	@	org	p:
+    addCode(buffSemInit,NULL,"PTOLEMY_S56X_SEM");
+    addCode("	bset	#m_hf3,x:m_hcr",NULL,"hostInterruptEnable");
+    @	org	$ref(buffer)
+    @$starSymbol(buffer)
+    for(int i=0;i<numXfer;i++)
+        @	dc	0
+    @	org	p:
 }
 
 }
