@@ -30,13 +30,18 @@ class Block;
 
 class Scheduler {
 public:
-	// The dummy expressions below are just to prevent compiler warnings
-	// about galaxy being unused.
+	// setup sets up the schedule; it returns TRUE for success
+	// and FALSE for failure.
 	virtual int setup(Block& galaxy) = 0;
+
+	// run runs the simulation.
 	virtual int run(Block& galaxy) = 0;
-	virtual int wrapup(Block& galaxy) = 0;
+
+	// hack method to set stopping time
 	virtual void setStopTime(float limit) = 0;
-	virtual StringList displaySchedule() { return "not implemented";}
+
+	// display schedule
+	virtual StringList displaySchedule() { return "not implemented\n";}
 protected:
 	// The following member is used to visit all atomic blocks
 	// (stars and wormholes) in the galaxy exacly once each
