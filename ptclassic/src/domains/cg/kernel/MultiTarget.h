@@ -27,7 +27,7 @@ $Id$
 #include "IntArray.h"
 
 class Profile;
-class DLNode;
+class ParNode;
 class ParProcessors;
 
 class BaseMultiTarget : public CGTarget {
@@ -78,17 +78,19 @@ public:
         virtual void downLoadCode(int, Profile*);
 
 	// return the array of candidate processors.
-	virtual IntArray* candidateProcs(DLNode*, ParProcessors*);
+	virtual IntArray* candidateProcs(ParProcessors*);
 
 	// resource management
 	virtual void saveCommPattern();
 	virtual void restoreCommPattern();
 	virtual void clearCommPattern();
 
-	// reserve resource
-	// arguments (1) src (2) dest (3) time (4) # tokens.
-	virtual int reserveComm(int, int, int, int);
-	virtual int scheduleComm(DLNode*, int, int);
+	// schedule communication link.
+	virtual int scheduleComm(ParNode*, int);
+
+	// find out a communication node which is scheduled right ahead of
+	// the given communication node.
+        virtual ParNode* backComm(ParNode*);
 
 protected:
 	IntState nprocs;
