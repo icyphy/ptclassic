@@ -3,25 +3,25 @@ defstar {
 	domain { VHDL }
 	desc { Output the "pos" input minus all "neg" inputs }
 	version { $Id$ }
-	author { A. P. Kalavade, M. C. Williamson }
+	author { Michael C. Williamson, A. P. Kalavade }
 	copyright { 
 Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { Silage main library }
+	location { VHDL main library }
 	input {
 		name{ pos }
-		type{ int }
+		type{ float }
 	}
 	input {
 		name{ neg }
-		type{ int }
+		type{ float }
 	}
 	output {
 		name{ output }
-		type{ int }
+		type{ float }
 	}
         constructor {
                 noInternalState();
