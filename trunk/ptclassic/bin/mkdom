@@ -1,6 +1,6 @@
 #!/bin/csh -f -v
 #
-# @(#)mkdom	1.4  6/8/95
+# Version: $Id$
 #
 # Use this script to create a new domain that compiles and can be linked
 # with ptcl or pigi.  To use it, create a directory in which to put
@@ -12,7 +12,7 @@
 # This script does not create any parallel object tree.  You will have
 # to do this manually (or write a script).
 #
-# Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -51,8 +51,8 @@ if ($#argv < 1) then
 endif
 
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
-if ( ! $?ARCH ) then
-    setenv ARCH `$PTOLEMY/bin/ptarch`
+if ( ! $?PTARCH ) then
+    setenv PTARCH `$PTOLEMY/bin/ptarch`
 endif
 
 set XXX = $PTOLEMY/src/domains/xxx
