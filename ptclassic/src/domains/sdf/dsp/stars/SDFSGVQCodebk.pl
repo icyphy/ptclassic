@@ -349,7 +349,7 @@ represent a training vector.
   wrapup {
     const char* sf1 = saveShapeCodebook;
     if (sf1 != NULL && *sf1 != 0) {
-      char* saveFileName = expandPathName(sf1);
+      const char* saveFileName = expandPathName(sf1);
       // open the file for writing
       FILE* fp;
       if (!(fp = fopen(saveFileName,"w"))) {
@@ -368,7 +368,7 @@ represent a training vector.
     }
     const char* sf2 = saveGainCodebook;
     if (sf2 != NULL && *sf2 != 0) {
-      char* saveFileName = expandPathName(sf2);
+      const char* saveFileName = expandPathName(sf2);
       // open the file for writing
       FILE* fp;
       if (!(fp = fopen(saveFileName,"w"))) {
