@@ -449,6 +449,43 @@ proc ::tycho::tmpFileName { {stem {tytmp}} {extension {}}} {
 }
 
 #####################################################################
+#### tychoDir
+# Return the (abbreviated) path to the Tycho directory. In UNIX,
+# this is ~/.Tycho. If the directory does not exist, make it. If
+# there is a file by the name "~/.tycho" (the old name for the
+# Tycho initialization file), and no file named
+# ~/.Tycho/tychorc.tcl, then copy ~/.tycho into ~/.Tycho/tychorc.tcl.
+# Note that the directory name will need to be passed to
+# <code>::tycho::expandPath</code> before being given to the
+# file system.
+#
+# <b>NOTE</b>: Unix implementation.
+#
+# <b>FIXME</b>: Test for Mac and Windows and act accordingly.
+# 
+proc ::tycho::tychoDir {} {
+    set dotTycho [file join [glob ~] .Tycho]
+
+    if {![file exists $dotTycho]} {
+	::tycho::mkdir $dotTycho
+    } {
+        if {![file isdirectory $dotTycho]} {
+            error "Cannot create $dotTycho directory because a file \
+                    exists by that name."
+        }
+    }
+    set tychorc [file join $dotTycho tychorc.tcl]
+    if {![file exists $tychorc] && \
+            [file exists [file join [glob ~] .tycho]]} {
+        if [::tycho::askuser \
+                {Ok to copy your ~/.tycho file to the new place: $tychorc?}] {
+            exec cp [file join [glob ~] .tycho] $tychorc
+        }
+    }
+    return [file join ~ .Tycho]
+}
+
+#####################################################################
 #### uniqueFileName
 # Return a filename that is unique, and does not yet exist
 # If the optional arg `stem' is present, then a unique string is appended
