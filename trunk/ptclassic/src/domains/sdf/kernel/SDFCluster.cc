@@ -1143,6 +1143,13 @@ int SDFClustSched::computeSchedule (Galaxy& g) {
 	else return FALSE;
 }
 
+StringList SDFClustSched::displaySchedule() {
+    StringList out;
+    out << "J.T. Buck and S.S. Bhattacharyya's SDF Loop Scheduler\n\n"
+	<< mySchedule.printVerbose();
+    return out;
+}
+
 // generate sub-schedules and fix buffer sizes.
 void SDFClusterGal::genSubScheds() {
 	SDFClusterGalIter nextClust(*this);
