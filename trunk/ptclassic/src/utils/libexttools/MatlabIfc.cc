@@ -408,6 +408,7 @@ int MatlabIfc :: KillMatlab() {
 	    retval = FALSE;
 	}
     }
+    if ( matlabEnginePtr ) free(matlabEnginePtr);
     matlabEnginePtr = 0;
     return retval;
 }
