@@ -77,7 +77,7 @@ int warnIfNotConnected (Galaxy& g) {
 	const char* str = msg;	// cast to char*
 	// check for non-zero-length message
 	if (str && *str) {
-		Error::error (str);
+		Error::abortRun (str);
 		return 1;
 	}
 	else return 0;
