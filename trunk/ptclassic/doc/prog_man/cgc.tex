@@ -1,39 +1,53 @@
-\node CGC Domain, Index, Top, Top
+\c Version $Id$
+\node CGC Domain
 \chapter{CGC Domain}
-\author{S. Ha}
-\version{0.$Revision$}
+\Author{J. Buck \\
+S. Ha \\
+E. A. Lee \\
+T. M. Parks}
 \date{$Date$}
-\begin{menu}
-* Introduction::		
-* Single-Processor Target::	
-* Programming Stars in the CGC Domain::	 
-* Multi-Processor Targets::	
-* Customized Targets::		
-\end{menu}
 
-\node Introduction, Single-Processor Target, CGC Domain, CGC Domain
-\section{Introduction}
+The \defn{CGC domain} is used to generate \code{C} code. The generated
+code is compiled, downloaded, and run on the \var{host} computer, by
+default the computer where Ptolemy is running.  The chapter on the CG
+domain describes the features common to all code generation domains.
+This chapter explains features specific to the CGC domain.  You should
+also refer to CGC domain chapter in the user's manual.
 
-The
-\code{CGC}
-domain is used to generate C code. The generated c-code is
-compiled, downloaded, and run in the target machine, by default
-the \Ptolemy host machine. Before reading this document, please
-read the CG domain document first for the common features and
-general structure of code generation domains. In this chapter, we
-will explain the features specific to the c-code generation.
+\node Single-Processor Target
+\section{Single-Processor Targets}
 
-\node Single-Processor Target, Programming Stars in the CGC Domain, Introduction, CGC Domain
-\section{Single-Processor Target}
-
-The default target,
-\code{CGCTarget }
+The default target \code{default-CGC}, which is implemented by the
+\code{CGCTarget}
 \cpindexbold{CGCTarget, class}
-class, is a single processor target. The target machine is specified
+class, is a single processor target.
+The parameters described in the user's manual are implemented by the state
+members of the \code{CGCTarget} class listed in Table \ref{CGC-param}.
+
+\begin{table}
+\begin{tabular{ll}
+\var{host} & \code{targetHost} \\
+\var{directory} & \code{destDirectory} \\
+\var{file} & \code{filePrefix} \\
+\var{display?} & \code{displayFlag} \\
+\var{compile?} & \code{compileFlag} \\
+\var{run?} & \code{runFlag} \\
+\var{staticBuffering & \code{staticBuffering} \\
+\var{funcName} & \code{funcName} \\
+\var{compileCommand} & \code{compileCommand} \\
+\var{compileOptions} & \code{compileOptions} \\
+\var{linkOptions} & \code{linkOptions} \\
+\var{resources} & \code{resources}
+\end{tabular}
+\caption{Correspondence between paramters and states
+for the \protect\code{CGCTarget} class.}
+\end{table}
+
+The target computer is specified
 by the
-\code{hostMachine}
-\cindex{hostMachine, parameter}
-parameter, which is set to the \Ptolemy host machine by default.
+\var{host}
+\cindex{host, parameter}
+parameter, which is set to the Ptolemy host machine by default.
 The CGCTarget contains several other parameters.
 The
 \code{funcName}
@@ -181,7 +195,7 @@ cases, we try to achieve static buffering. In the generated code,
 the user will see index pointers, porthole name appended by "_ix", if
 we do not achieve static or linear buffering.
 
-\node Programming Stars in the CGC Domain, Multi-Processor Targets, Single-Processor Target, CGC Domain
+\node Programming Stars in the CGC Domain
 \section{Programming Stars in the CGC Domain}
 
 Programming a CGC star is rather straightforward compared with other
@@ -512,7 +526,7 @@ use the manual scheduling option to make a serious test from this release.
 Or, the user may want to edit all CGC stars to specify the execution time
 for the target of interest.
 
-\node Multi-Processor Targets, Customized Targets, Programming Stars in the CGC Domain, CGC Domain
+\node Multi-Processor Targets
 \section{Multi-Processor Targets}
 
 An exemplary multi-processor target,
@@ -560,7 +574,7 @@ Target section in the CG domain documentation for details). The files
 are shipped to the actual computers via remote shell commands. They
 are compiled and run there.
 
-\node Customized Targets,  , Multi-Processor Targets, CGC Domain
+\node Customized Targets
 \section{Customized Targets}
 
 For a specific target, the user should design a target class.
