@@ -71,7 +71,9 @@ PL_SRCS= \
  SDFQuadMult16x16.pl \
  SDFQuadSub16.pl \
  SDFVis64ToFloat.pl \
- SDFQuadFir.pl
+ SDFQuadFir.pl \
+ SDFQuadBiquad.pl \
+ SDFQuadRFFT8.pl
 
 # The .cc files
 SRCS= $(PL_SRCS:.pl=.cc)
