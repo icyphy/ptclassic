@@ -375,10 +375,10 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
                         q->time = q->time + updateDelay;
                     }
                 }    
-                this->timeWhenFree = now + updateDelay;
+                this->timeWhenFree = ((StarLLCell*)(starUsingResource)->emittedEvents->tail())->time;
 
                 // now add the firing star to the resources list of executing stars
-                LOG_NEW; p = new ResLLCell(starUsingResource, (now+updateDelay), starUsingResource->priority);
+                LOG_NEW; p = new ResLLCell(starUsingResource, (this->timeWhenFree), starUsingResource->priority);
                 intStarList->prepend(p);
             }
         }
