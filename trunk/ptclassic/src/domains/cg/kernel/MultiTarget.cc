@@ -103,7 +103,7 @@ int MultiTarget :: scheduleComm(ParNode*,int when, int)
 
 ParNode* MultiTarget :: backComm(ParNode*) { return 0; }
 
-IntArray* MultiTarget :: candidateProcs(ParProcessors*) 
+IntArray* MultiTarget :: candidateProcs(ParProcessors*, DataFlowStar*) 
 	{ return NULL; }
 
 void MultiTarget :: setTargets(int n) { 
