@@ -36,7 +36,6 @@
 
 # Todo:
 #   Check out with compile-sdf
-#   Build Shared itcl libraries
 #   Make a non-shared library
 #
 # To create a custom executable, you should define a file named override.mk
@@ -68,7 +67,7 @@ endif
 
 # Note that some of these settings will be filtered out by stars.mk
 ifdef FULL
-	PIGI = 		$(BASENAME)
+	PIGI = 		$(BASENAME)$(BINARY_EXT)
 	VERSION_DESC =	'With All Common Domains'
 	BDF =		1
 	C50 =		1
@@ -91,13 +90,13 @@ ifdef FULL
 endif
 
 ifdef ACSBIN
-	PIGI=		$(BASENAME).acs
+	PIGI=		$(BASENAME).acs$(BINARY_EXT)
 	VERSION_DESC =	'With Adaptive Computing Systems (ACS) Domain only'
 	ACS =		1
 endif
 
 ifdef PTINY
-	PIGI=		$(BASENAME).ptiny
+	PIGI=		$(BASENAME).ptiny$(BINARY_EXT)
 	VERSION_DESC =	'With SDF (no image stars) and DE domains only'
 	DE =		1
 	HOF =		1
@@ -110,7 +109,7 @@ ifdef PTINY
 endif
 
 ifdef PTRIM
-	PIGI =		$(BASENAME).ptrim
+	PIGI =		$(BASENAME).ptrim$(BINARY_EXT)
 	VERSION_DESC =	'With SDF, DE, BDF, DDF and CGC domains only'
 	BDF =		1
 	CGCFULL =	1
@@ -130,16 +129,29 @@ NEED_MATHEMATICADIR = 	1
 
 PIGI_OBJS += $(STARS) $(TARGETS) $(MISC_OBJS)
 
-PIGI_BINARIES = 	$(PIGI) $(PIGI).debug $(PIGI).debug.purify \
-			$(PIGI).debug.quantify $(PIGI).debug.purecov
+PIGI_BINARIES = 	$(BASENAME) \
+			$(BASENAME).debug$(BINARY_EXT)\
+			$(BASENAME).debug.purify$(BINARY_EXT) \
+			$(BASENAME).debug.quantify$(BINARY_EXT) \
+			$(BASENAME).debug.purecov$(BINARY_EXT)
 
 EVERY_BINARY= $(PIGI_BINARIES) \
-		$(PIGI).acs $(PIGI).acs.debug $(PIGI).acs.debug.purify \
-		$(PIGI).acs.debug.quantify $(PIGI).acs.debug.purecov \
-		$(PIGI).ptiny $(PIGI).ptiny.debug $(PIGI).ptiny.debug.purify \
-		$(PIGI).ptiny.debug.quantify $(PIGI).ptiny.debug.purecov \
-		$(PIGI).ptrim $(PIGI).ptrim.debug $(PIGI).ptrim.debug.purify \
-		$(PIGI).ptrim.debug.quantify $(PIGI).ptrim.debug.purecov
+		$(BASENAME).acs \
+		$(BASENAME).acs.debug \
+		$(BASENAME).acs.debug.purify \
+		$(BASENAME).acs.debug.quantify \
+		$(BASENAME).acs.debug.purecov \
+		$(BASENAME).ptiny \
+		$(BASENAME).ptiny.debug \
+		$(BASENAME).ptiny.debug.purify \
+		$(BASENAME).ptiny.debug.quantify \
+		$(BASENAME).ptiny.debug.purecov \
+		$(BASENAME).ptrim \
+		$(BASENAME).ptrim.debug \
+		$(BASENAME).ptrim.debug.purify \
+		$(BASENAME).ptrim.debug.quantify \
+		$(BASENAME).ptrim.debug.purecov
+
 REALCLEAN_STUFF =	$(EVERY_BINARY)
 
 ####################################################################
@@ -219,13 +231,15 @@ $(PIGI).debug.purecov: $(PT_DEPEND) $(ADD_OBJS)
 
 $(BINDIR)/$(PIGI): $(PIGI)
 		@echo Installing $<
-		rm -f $(BINDIR)/$(PIGI)$(BINARY_EXT)
-		ln $<$(BINARY_EXT) $(BINDIR)/$(PIGI)$(BINARY_EXT)
+		rm -f $@
+		ln $< $@
 
 else
 
-INSTALL += $(BINDIR)/$(BASENAME) $(BINDIR)/$(BASENAME).ptrim \
-		$(BINDIR)/$(BASENAME).ptiny $(BINDIR)/$(BASENAME).acs
+INSTALL += $(BINDIR)/$(BASENAME)$(BINARY_EXT) \
+		$(BINDIR)/$(BASENAME).ptrim$(BINARY_EXT) \
+		$(BINDIR)/$(BASENAME).ptiny$(BINARY_EXT) \
+		$(BINDIR)/$(BASENAME).acs$(BINARY_EXT)
 
 
 # If the user wants to build anything but a full pigiRpc or ptcl, then
@@ -234,103 +248,106 @@ INSTALL += $(BINDIR)/$(BASENAME) $(BINDIR)/$(BASENAME).ptrim \
 # to be .PHONY so that they will always be built.  Since the rules
 # for these binaries invokes a submake process, the new submake process
 # will have the proper dependencies for the specific binary we are building.
-.PHONY: $(BASENAME).ptrim $(BASENAME).ptiny \
-	$(BASENAME).ptrim.debug $(BASENAME).ptiny.debug \
-	$(BASENAME).ptrim.debug.purify $(BASENAME).ptiny.debug.purify \
-	$(BASENAME).ptrim.debug.quantify $(BASENAME).ptiny.debug.quantify \
-	$(BASENAME).ptrim.debug.purecov $(BASENAME).ptiny.debug.purecov \
-	$(BASENAME).acs $(BASENAME).acs.debug \
-	$(BASENAME).acs.debug.purify $(BASENAME).acs.debug.quantify \
+.PHONY: $(BASENAME).ptrim$(BINARY_EXT) \
+	$(BASENAME).ptiny$(BINARY_EXT) \
+	$(BASENAME).ptrim.debug$(BINARY_EXT) \
+	$(BASENAME).ptiny.debug$(BINARY_EXT) \
+	$(BASENAME).ptrim.debug.purify$(BINARY_EXT) \
+	$(BASENAME).ptiny.debug.purify$(BINARY_EXT) \
+	$(BASENAME).ptrim.debug.quantify$(BINARY_EXT) \
+	$(BASENAME).ptiny.debug.quantify$(BINARY_EXT) \
+	$(BASENAME).ptrim.debug.purecov$(BINARY_EXT) \
+	$(BASENAME).ptiny.debug.purecov$(BINARY_EXT) \
+	$(BASENAME).acs$(BINARY_EXT) \
+	$(BASENAME).acs.debug$(BINARY_EXT) \
+	$(BASENAME).acs.debug.purify$(BINARY_EXT) \
+	$(BASENAME).acs.debug.quantify$(BINARY_EXT) \
 	$(BASENAME).acs.debug.purecov
 
 # The .ptrim and .ptiny files below should not depend on $(PT_DEPEND), or
 # else we must have all the libs installed to build ptrim and ptiny, even
 # though ptrim and ptiny do not use all the libs.
 
-$(BASENAME): $(PT_DEPEND)
-	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME)
+$(BASENAME)$(BINARY_EXT): $(PT_DEPEND)
+	$(MAKE) FULL=1 BASENAME=$(BASENAME) $@
 
-$(BASENAME).ptrim: 
-	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim
+$(BASENAME).ptrim$(BINARY_EXT): 
+	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $@
 
-$(BASENAME).ptiny:
-	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny
+$(BASENAME).ptiny$(BINARY_EXT):
+	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $@
 
-$(BASENAME).acs:
-	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
-		$(BASENAME).acs 
-
-$(BASENAME).debug: $(PT_DEPEND)
-	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug
-
-$(BASENAME).ptrim.debug: 
-	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug
-
-$(BASENAME).ptiny.debug: 
-	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug
-
-$(BASENAME).acs.debug: 
-	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
-		$(BASENAME).acs.debug
+$(BASENAME).acs$(BINARY_EXT):
+	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS $@
 
 
-$(BASENAME).debug.purify: $(PT_DEPEND)
-	$(MAKE) FULL=1 BASENAME=$(BASENAME) INCLUDE_PN_DOMAIN=no \
-		$(BASENAME).debug.purify
 
-$(BASENAME).ptrim.debug.purify:
-	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.purify
+$(BASENAME).debug$(BINARY_EXT): $(PT_DEPEND)
+	$(MAKE) FULL=1 BASENAME=$(BASENAME) $@
 
-$(BASENAME).ptiny.debug.purify:
-	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purify
+$(BASENAME).ptrim.debug$(BINARY_EXT): 
+	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $@
 
-$(BASENAME).acs.debug.purify:
-	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
-		$(BASENAME).acs.debug.purify
+$(BASENAME).ptiny.debug$(BINARY_EXT): 
+	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $@
 
-
-$(BASENAME).debug.quantify: $(PT_DEPEND)
-	$(MAKE) FULL=1 BASENAME=$(BASENAME) INCLUDE_PN_DOMAIN=no \
-		$(BASENAME).debug.quantify
-
-$(BASENAME).ptrim.debug.quantify: 
-	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.quantify
-
-$(BASENAME).ptiny.debug.quantify: 
-	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.quantify
-
-$(BASENAME).acs.debug.quantify: 
-	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
-		$(BASENAME).acs.debug.quantify
+$(BASENAME).acs.debug$(BINARY_EXT): 
+	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS $@
 
 
-$(BASENAME).debug.purecov: $(PT_DEPEND)
-	$(MAKE) FULL=1 BASENAME=$(BASENAME) INCLUDE_PN_DOMAIN=no \
-		$(BASENAME).debug.purecov
 
-$(BASENAME).ptrim.debug.purecov: 
-	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.purecov
+$(BASENAME).debug.purify$(BINARY_EXT): $(PT_DEPEND)
+	$(MAKE) FULL=1 BASENAME=$(BASENAME) INCLUDE_PN_DOMAIN=no $@
 
-$(BASENAME).ptiny.debug.purecov: 
-	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purecov
+$(BASENAME).ptrim.debug.purify$(BINARY_EXT):
+	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $@
 
-$(BASENAME).acs.debug.purecov: 
-	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
-		$(BASENAME).acs.debug.purecov
+$(BASENAME).ptiny.debug.purify$(BINARY_EXT):
+	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $@
+
+$(BASENAME).acs.debug.purify$(BINARY_EXT):
+	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS $@
 
 
-$(BINDIR)/$(BASENAME): $(BASENAME) 
-	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BINDIR)/$(BASENAME)
 
-$(BINDIR)/$(BASENAME).ptrim: $(BASENAME).ptrim 
-	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $(BINDIR)/$(BASENAME).ptrim
+$(BASENAME).debug.quantify$(BINARY_EXT): $(PT_DEPEND)
+	$(MAKE) FULL=1 BASENAME=$(BASENAME) INCLUDE_PN_DOMAIN=no $@
 
-$(BINDIR)/$(BASENAME).ptiny: $(BASENAME).ptiny 
-	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BINDIR)/$(BASENAME).ptiny
+$(BASENAME).ptrim.debug.quantify$(BINARY_EXT): 
+	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $@
 
-$(BINDIR)/$(BASENAME).acs: $(BASENAME).acs 
-	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
-		$(BINDIR)/$(BASENAME).acs
+$(BASENAME).ptiny.debug.quantify$(BINARY_EXT): 
+	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $@
+
+$(BASENAME).acs.debug.quantify$(BINARY_EXT): 
+	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS $@
+
+
+
+$(BASENAME).debug.purecov$(BINARY_EXT): $(PT_DEPEND)
+	$(MAKE) FULL=1 BASENAME=$(BASENAME) INCLUDE_PN_DOMAIN=no $@
+
+$(BASENAME).ptrim.debug.purecov$(BINARY_EXT): 
+	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $@
+
+$(BASENAME).ptiny.debug.purecov$(BINARY_EXT): 
+	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $@
+
+$(BASENAME).acs.debug.purecov$(BINARY_EXT): 
+	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS $@
+
+
+$(BINDIR)/$(BASENAME)$(BINARY_EXT): $(BASENAME)$(BINARY_EXT)
+	$(MAKE) FULL=1 BASENAME=$(BASENAME) $@
+
+$(BINDIR)/$(BASENAME).ptrim$(BINARY_EXT): $(BASENAME).ptrim$(BINARY_EXT) 
+	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $@
+
+$(BINDIR)/$(BASENAME).ptiny$(BINARY_EXT): $(BASENAME).ptiny$(BINARY_EXT) 
+	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $@
+
+$(BINDIR)/$(BASENAME).acs$(BINARY_EXT): $(BASENAME).acs$(BINARY_EXT)
+	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS $@
 
 endif #ALLBINARIES
 
