@@ -40,31 +40,28 @@ reset.
 		type {FIX}
 		default {"1.0"}
 		desc { The gain on the feedback path.}
-		attributes { A_CONSTANT|A_SETTABLE }
 	}
  	state {
 		name {onOverflow}
 		type {string}
 		default {"wrap around"}
 		desc { On overflow, either wrap around, saturate or reset.}
-		attributes { A_CONSTANT|A_SETTABLE }
 	}
 	state {
 		name {initialValue}
 		type {FIX}
 		default {"0.0"}
 		desc { Value at time zero and also reset value if used. }
-		attributes { A_CONSTANT|A_SETTABLE }		
 	}
 	state {
 		name {sum}
 		type {FIX}
 		default {"0.0"}
 		desc { An internal state.}
-		attributes { A_NONSETTABLE|A_RAM }
+		attributes { A_NONSETTABLE|A_YMEM|A_NONCONSTANT }
 	}
  	start {
-//		sum = initialValue;
+		sum = initialValue;
 	}
 	codeblock (setLeakage) {
 	move	#$val(feedbackGain),x0
