@@ -263,7 +263,7 @@ int Fix::is_zero() const {
 	if (Bits[i] != 0) return FALSE;
     // need to mask the last word.
     int m = length & 0x0f;
-    uint16 mask = (m == 0 ? 0xffff : (uint16)(0xffff0000L >> m));
+    uint16 mask = ( (m == 0) ? 0xffff : ((uint16)(0xffff0000L >> m)) );
     return ((Bits[nwords-1] & mask) == 0);
 }
 
@@ -472,7 +472,7 @@ Fix::Fix(int ln, int ib, const Fix& x)
 	applyMask(roundFlag);
     }
     else 
-	overflow_handler((x < 0));
+	overflow_handler(x.signBit());
 }
 
 /////////////////////
