@@ -52,6 +52,7 @@ PL_SRCS= \
  SDFRGBToYUV.pl \
  SDFRunLenImage.pl \
  SDFRunLenImageInv.pl \
+ SDFSumImage.pl \
  SDFYUVToRGB.pl \
  SDFZigZagImage.pl \
  SDFZigZagImageInv.pl
