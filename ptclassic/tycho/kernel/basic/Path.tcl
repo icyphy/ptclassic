@@ -31,6 +31,29 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
+##########################################################################
+#### autoName 
+# Return a name constructed by augmenting the provided
+# stem with a number to guarantee that the name is unique. A global
+# (within the tycho namespace) array autoNames is used to keep track of
+# the numbers used for each stem. This procedure should be used for
+# window classes instead of the #auto facility in itcl to assign to the
+# class valid names for windows. Window names must begin with a period.
+# By convention, for a class named "Class", we would use the stem
+# ".class". Thus, the single argument should be ".class".
+# Note that if you invoke this outside the namespace "tycho", you
+# must call it "::tycho::autoName".
+#
+proc ::tycho::autoName {stem} {
+    global ::autoNames
+    if {[info exists autoNames] && [info exists autoNames($stem)]} {
+        incr autoNames($stem)
+    } else {
+        set autoNames($stem) 0
+    }
+    return "$stem$autoNames($stem)"
+}
+
 ########################################################################
 #### expandPath
 # Expand a filename, returning an absolute filename with the complete path.
@@ -117,28 +140,41 @@ proc ::tycho::expandPath { path } {
 # COMPATIBILITY procedure.  Use <code>::tycho::expandPath</code>.
 proc ::ptkExpandEnvVar { path } {::tycho::expandPath $path}
 
-##########################################################################
-#### autoName 
-# Return a name constructed by augmenting the provided
-# stem with a number to guarantee that the name is unique. A global
-# (within the tycho namespace) array autoNames is used to keep track of
-# the numbers used for each stem. This procedure should be used for
-# window classes instead of the #auto facility in itcl to assign to the
-# class valid names for windows. Window names must begin with a period.
-# By convention, for a class named "Class", we would use the stem
-# ".class". Thus, the single argument should be ".class".
-# Note that if you invoke this outside the namespace "tycho", you
-# must call it "::tycho::autoName".
+##############################################################################
+#### invoke
+# Invoke an external program, passing it the specified arguments.
+# The format of the command is exactly that of the Tcl "exec" command.
+# The main purpose of this procedure is to generate an informative
+# error message if the "exec" fails.
 #
-proc ::tycho::autoName {stem} {
-	global ::autoNames
-	if {[info exists autoNames] && [info exists autoNames($stem)]} {
-	    incr autoNames($stem)
-	} else {
-	    set autoNames($stem) 0
-	}
-	return "$stem$autoNames($stem)"
+proc ::tycho::invoke { args } {
+    # NOTE: Unix-ism.
+    if [catch {eval exec $args} msg] {
+        # The command failed.  It would be nice to check to see
+        # whether the program exists, and generate a suitable message,
+        # but it's not clear how to do this.
+        error "The following command invocation failed:\n \
+                $args\n \
+                Is the program [lindex $args 0] installed and in your path?\n \
+                $msg"
     }
+}
+
+##############################################################################
+#### mkdir
+# Create a directory
+proc ::tycho::mkdir { args } {
+    # Unix-ism
+    eval exec mkdir $args
+}
+
+##############################################################################
+#### rm
+# Removed a file
+proc ::tycho::rm { args } {
+    # Unix-ism
+    eval exec rm $args
+}
 
 #####################################################################
 #### tmpFileName
@@ -168,22 +204,6 @@ proc ::tycho::tmpFileName { {stem {tytmp}} {extension {}}} {
     }
     
     return [::tycho::uniqueFileName [ file join $tmpdir $stem] $extension]
-}
-
-##############################################################################
-#### mkdir
-# Create a directory
-proc ::tycho::mkdir { args } {
-    # Unix-ism
-    eval exec mkdir $args
-}
-
-##############################################################################
-#### rm
-# Removed a file
-proc ::tycho::rm { args } {
-    # Unix-ism
-    eval exec rm $args
 }
 
 #####################################################################
