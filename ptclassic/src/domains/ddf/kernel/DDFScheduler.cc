@@ -61,8 +61,8 @@ static char* err1_1 = "First check DELAY-FREE LOOP or ";
 static char* err2_1 = " needs too large input buffer size (>";
 static char* err2_2 = ") \nFirst check INCONSISTENT SAMPLE RATES or ";
 static char* err2_3 = "other semantic errors \n... (sorry for poor hints)...";
-static char* err2_4 = "\nYou may increase the buffer size by defining a ";
-static char* err2_5 = "FloatState (bufferSize) \nin the DDF galaxy.";
+static char* err2_4 = "\nYou may increase the max buffer size by defining a ";
+static char* err2_5 = "FloatState (maxBufferSize) \nin the DDF galaxy.";
 
 #define MAXTOKEN 1024
 static int maxToken;
@@ -142,8 +142,8 @@ int DDFScheduler :: setup (Block& b) {
 	FloatState* fst = (FloatState*) galaxy.stateWithName("schedulePeriod");
 	if (fst) schedulePeriod = float ((double) *fst);
 
-	// If user gives the option of bufferSize, set it.
-	FloatState* bst = (FloatState*) galaxy.stateWithName("bufferSize");
+	// If user gives the option of maxBufferSize, set it.
+	FloatState* bst = (FloatState*) galaxy.stateWithName("maxBufferSize");
 	if (bst) maxToken = int(double(*bst));
 	else	 maxToken = MAXTOKEN;
 
