@@ -127,7 +127,7 @@ CommPair cgcOutgoing(PortHole& p,int numXfer, CGTarget& target) {
     // being called by the setup method of CGCTarget.  This target is
     // being used as a helper target.  Only call modifyGalaxy when this target
     // is NOT being used as a helper target.
-    if(galaxy()->parent()->isItWormhole())
+    if(!galaxy()->parent()->isItWormhole())
 	return CGCTarget::modifyGalaxy();
     return TRUE;
 }
