@@ -41,7 +41,7 @@ ifdef S56DIR
 S56WHO= S56XTargetWH.o CGCS56XTarget.o
 S56WHI= -I$(S56DIR)/include  -I$(CGCDIR)
 S56PL_SRCS = CG56S56XCGCSend.pl CG56S56XCGCReceive.pl \
-	     CGCS56XSend.pl CGCS56XReceive.pl
+	     CGCS56XSend.pl CGCS56XReceive.pl CGCS56XBase.pl
 endif
 
 INCL=-I$(CG56DIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR) \
