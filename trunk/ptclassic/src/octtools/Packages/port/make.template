@@ -78,10 +78,14 @@ LIB = 		libport.a
 
 EXPHDR =	port.h
 
-# pigilib needs the octtools copyright.h
-header:: $(OCTTOOLS)/include/copyright.h
+# pigilib needs the octtools copyright.h and ansi.h
+header:: $(OCTTOOLS)/include/copyright.h $(OCTTOOLS)/include/ansi.h
 
 $(OCTTOOLS)/include/copyright.h: copyright.h
+	rm -f $@
+	cp $? $@
+
+$(OCTTOOLS)/include/ansi.h: ansi.h
 	rm -f $@
 	cp $? $@
 
