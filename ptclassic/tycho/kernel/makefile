@@ -70,6 +70,8 @@ ITCL_SRCS = \
 	Font.itcl \
 	HTML.itcl \
 	HTMLText.itcl \
+	Matlab.itcl \
+	MatlabText.itcl \
 	Message.itcl \
 	Preferences.itcl \
 	Stack.itcl \
