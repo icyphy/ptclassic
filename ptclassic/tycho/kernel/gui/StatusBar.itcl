@@ -64,11 +64,11 @@ class ::tycho::StatusBar {
     ###################################################################
     ####                         public methods                    ####
 
-    # Set the class type
-    # method class {class} {}
-    
     # Get the most recent string written to the status bar
     method get {}
+
+    # Display the file status help
+    method helpFileStatus {} {}
 
     # Put a string to the status bar
     method puts {string}
@@ -76,16 +76,29 @@ class ::tycho::StatusBar {
     # Set the line and column display, and clear the status string
     method lineColumn {line column}
 
+    # Start or update progress display
+    method progress {{label {}} {command {}}}
+    
+    ###################################################################
+    ####                       private methods                     ####
+
+    # Draw the progress bar
+    private method drawProgress {progress}
+
+    # Set the current display mode
+    private method setMode {mode}
+
     ###################################################################
     ####                       private variables                   ####
 
-    private variable filestatus readwrite
+    # The current file status setting
+    private variable filestatus "readwrite"
 
-    ###################################################################
-    ####                         public methods                    ####
+    # The current mode: "status" or "progress"
+    private variable currentMode ""
 
-    # Display the file status help
-    method helpFileStatus {} {}
+    # The command to get the current progress
+    private variable progressCommand ""
 }
 
 
@@ -210,8 +223,7 @@ body ::tycho::StatusBar::constructor {args} {
     }
     pack $itk_component(closeButton) -side right
 
-    # Create the status output display
-    # FIXME: Use a preference for the font
+    # Create the status output display (but don't pack it yet)
     itk_component add mainStatus {
 	label $itk_interior.mainStatus \
 		-anchor w -justify left \
@@ -221,10 +233,9 @@ body ::tycho::StatusBar::constructor {args} {
 	keep -background -cursor
 	rename -font -messagefont messageFont MessageFont
     }
-    pack $itk_component(mainStatus) \
-	    -fill both -expand on \
-	    -padx 0 -pady 2 \
-	    -side left
+    
+    # Set up the display
+    setMode "status"
 
     # Initialise options
     eval itk_initialize $args
@@ -268,13 +279,135 @@ body ::tycho::StatusBar::lineColumn {line column} {
 }
 
 #######################################################################
+#### progress
+#
+# Start or update the progress bar. If the command argument
+# is supplied, then the progress bar is set to zero,
+# the command remembered, and an after{} callback set up
+# to this method with no argument. If the _command_ argument
+# is not supplied, then the remembered command is evaluated
+# at the global scope and the return value used to set the
+# status bar display. The returned value is expected to be
+# between 0.0 and 1.0. Another callback is generated if
+# the command does not throw an error and the returned
+# value is less than 1.0. The update rate of
+# the progress bar is set to about 5 times per second.
+#
+body ::tycho::StatusBar::progress {{label {}} {command {}}} {
+    setMode "progress"
+    if { $command == "" } {
+	if { $progressCommand != "" } {
+	    if ![catch {uplevel #0 $progressCommand} progress] {
+		# Redraw the progress bar
+		drawProgress $progress
+		if { $progress < 1.0 } {
+		    after 200 "$this progress"
+		}
+	    } else {
+		# FIXME: For now, keep goign even if failed,
+		# because of a bug in RresourceHTTP::progress{}
+		after 200 "$this progress"
+	    }
+	}
+    } else {
+	$itk_component(progressLabel) configure -text $label:
+	set progressCommand $command
+	drawProgress 0
+	after 200 "$this progress"
+    }
+}
+
+#######################################################################
 #### puts
 #
 # Put an arbitrary string to the status bar. To enforce
 # wrap-around, set the wrap-length of the label to its current width.
 #
 body ::tycho::StatusBar::puts {string} {
+    setMode "status"
     $itk_component(mainStatus) configure -wraplength \
 	    [expr [winfo width $itk_component(mainStatus)] - 4]
     $itk_component(mainStatus) configure -text "$string"
+}
+
+#######################################################################
+#### drawProgress
+#
+# Draw or update the progress bar.
+#
+body ::tycho::StatusBar::drawProgress {progress} {
+    if { $progress < 0 } {
+	set progress 0
+    } elseif { $progress > 1.0 } {
+	set progress 1.0
+    }
+    # First get/create an item
+    if { [$itk_component(progressDisplay) find withtag foo] == "" } {
+	$itk_component(progressDisplay) create rectangle \
+		0 0 0 0 \
+		-outline "" \
+		-fill blue \
+		-tags foo
+    }
+    set width  [winfo width $itk_component(progressDisplay)]
+    set height [winfo height $itk_component(progressDisplay)]
+    set width  [expr $width * $progress]
+    $itk_component(progressDisplay) coords foo 0 0 $width $height
+}
+
+#######################################################################
+#### setMode
+#
+# Set up the display according to the current mode
+#
+body ::tycho::StatusBar::setMode {mode} {
+    if { $mode == $currentMode } {
+	return
+    }
+    set currentMode $mode
+    switch $mode {
+	"progress" {
+	    if ![::info exists itk_component(progress)] {
+		# Create the progress output display
+		itk_component add progress {
+		    frame $itk_interior.progress
+		} {
+		    keep -background -cursor
+		}
+		itk_component add progressLabel {
+		    label $itk_interior.progress.label
+		} {
+		    keep -background -cursor
+		    rename -font -messagefont messageFont MessageFont
+		}
+		pack $itk_component(progressLabel) -side left
+		itk_component add progressDisplay {
+		    canvas $itk_interior.progress.display \
+			    -height [expr [winfo height [component hull]]/3] \
+			    -borderwidth 2 \
+			    -relief sunken
+		} {
+		    keep -background -cursor
+		}
+		pack $itk_component(progressDisplay) \
+			-side left -fill x -expand on
+	    }
+	    # Unpack the status display and pack the progress display
+	    pack forget $itk_component(mainStatus)
+	    pack $itk_component(progress) \
+		    -fill both -expand on \
+		    -padx 0 -pady 2 \
+		    -side left
+	}
+	"status" {
+	    catch {pack forget $itk_component(progress)}
+	    pack $itk_component(mainStatus) \
+		    -fill both -expand on \
+		    -padx 0 -pady 2 \
+		    -side left
+	}
+	default {
+	    error "Unknown mode $mode"
+	}
+    }
 }
