@@ -162,7 +162,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "Message.h"
-#include "Uniform.h"
+#include <Uniform.h>
 #include <stream.h>
 
 #define numTrees 5
