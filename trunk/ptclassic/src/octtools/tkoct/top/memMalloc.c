@@ -11,6 +11,7 @@ static char SccsId[] = "$Id$";
 #endif
 
 #include "topFixup.h"
+#include <sys/types.h>		/* hppa.cfront needs size_t for malloc.h */
 #include <malloc.h>
 #include <stdarg.h>
 #include "topStd.h"
