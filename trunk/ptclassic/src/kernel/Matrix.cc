@@ -503,6 +503,7 @@ int PtMatrix::compareType(const PtMatrix & m) const {
 // Constructor: make an unitialized matrix with no data
 ComplexMatrix::ComplexMatrix() {
   nRows = nCols = totalDataSize = 0;
+  data = 0;
 }
 
 // Constructor: make an unitialized matrix with the given dimensions
@@ -865,6 +866,7 @@ ComplexMatrix::~ComplexMatrix() {
 // Constructor: make an unitialized matrix with no data
 FixMatrix::FixMatrix() {
   nRows = nCols = totalDataSize = 0;
+  data = 0;
 }
 
 // Constructor: make an unitialized matrix with the given dimensions,
@@ -1296,6 +1298,7 @@ FixMatrix::~FixMatrix() {
 // Constructor: make an unitialized matrix with no data
 FloatMatrix::FloatMatrix() {
   nRows = nCols = totalDataSize = 0;
+  data = 0;
 }
 
 // Constructor: make an unitialized matrix with the given dimensions
@@ -1635,6 +1638,7 @@ FloatMatrix::~FloatMatrix() {
 // Constructor: make an unitialized matrix with no data
 IntMatrix::IntMatrix() {
   nRows = nCols = totalDataSize = 0;
+  data = 0;
 }
 
 // Constructor: make an unitialized matrix with the given dimensions
