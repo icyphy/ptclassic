@@ -1,6 +1,6 @@
 /* 
 Signal interfaces for Sim Control
-$Date$ $Id$
+$Id$
 */
 /*
 Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -37,4 +37,17 @@ void ptSafeSig( int SigNum ) ;
 void ptBlockSig (int SigNum) ;
 
 void ptReleaseSig (int SigNum);
+
+// Special support for libgthreads under SunOS and Solaris.
+#if defined(PTSUN4) || defined(PTSOL2)
+#if defined(PTSOL2)
+typedef void (*SIG_PF)(int);
+#else
+typedef void (*SIG_PF)();
+#endif
+extern "C" SIG_PF ptSignal(int, SIG_PF);
+#else
+#define ptSignal(sig, handler) signal(sig, handler)
+#endif
+
 
