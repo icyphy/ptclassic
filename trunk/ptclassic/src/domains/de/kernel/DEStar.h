@@ -40,18 +40,30 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "type.h"
+#include "IntState.h"
 #include "DEPortHole.h"
 #include "Particle.h"
 #include "Star.h"
+#include "LinkedList.h"
+#include "PendingEventList.h"
+#include "CalendarQueue.h"
 
 enum FiringMode {SIMPLE, PHASE};
 class BasePrioQueue;
+class MutableCQEventQueue;
+class MutableCalendarQueue;
+class DEDynMapBase;
 
 	////////////////////////////////////
 	// class DEStar
 	////////////////////////////////////
 
 class DEStar : public Star {
+
+	friend MutableCQEventQueue;
+	friend MutableCalendarQueue;
+	friend DEDynMapBase;
+
 public:
 	// initialize domain-specific members (+ std initialize)
 	/* virtual */ void initialize();
@@ -71,8 +83,17 @@ public:
 	// prepare a new phase of firing.
 	virtual void startNewPhase();
 
+	// Return TRUE if this star is mutable
+	int isMutable();
+
+	// Make this star mutable.
+	void makeMutable();
+
 	// constructor
 	DEStar();
+
+	// destructor
+	~DEStar();
 
 	// Store the completion time of the current execution, which in turn
 	// the next free time. But, it may not be the start time of the next
@@ -109,6 +130,34 @@ protected:
 	// portholes is one, so unneccesary.
 	void setMode(FiringMode m) { mode = m; }
 
+private:
+	// This variable is set to true if the star is mutable
+	int _mutabilitySet;
+
+	// List of Pending Events Destined for this Star
+	PendingEventList *_pendingEventList;
+
+	// Remove one of this star's pending events
+	CqLevelLink * removePendingEvent(Link *);
+
+	// Clear this Star's Pending Event List and Erase 
+	// Events from the MutableCalendarQueue
+	void clearAllPendingEvents();
+
+	// Clear Pending Events that are destined for this
+        // Star via a particular PortHole. Erase the corresponding
+	// Events from the MutableCalendarQueue
+	void clearPendingEventsOfPortHole(DEPortHole *);
+
+	// Add an event to this stars's pending event list.
+	// CqLevelLinks are used as the stored elements on
+	// the list. Note that this method _appends_ the
+	// pending event list.
+	Link* addToPendingEventList(CqLevelLink*);
+
 };
 
 #endif
+
+
+
