@@ -143,6 +143,7 @@ PL_SRCS= \
  CGCTable.pl \
  CGCTableCx.pl \
  CGCTableInt.pl \
+ CGCTest.pl \
  CGCThresh.pl \
  CGCUpSample.pl \
  CGCWaveForm.pl \
