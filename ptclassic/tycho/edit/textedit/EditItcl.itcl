@@ -124,7 +124,7 @@ body ::tycho::EditItcl::constructor {args} {
     menubar add "Generate doc" Special -underline 0 \
 	    -command "$this gendocBuffer"
 
-    menubar add "Class diagram" Special -underline 0 \
+    menubar add "Generate class diagram" Special -underline 0 \
 	    -command {
 	set nm [::tycho::autoName .itclclassdiagram]
 	::tycho::ItclClassDiagram $nm
