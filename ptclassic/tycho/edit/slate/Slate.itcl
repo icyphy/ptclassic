@@ -614,7 +614,7 @@ body ::tycho::Slate::delete {args} {
 	} elseif { [string match {_*} $id] } {
 	    # Delete a picture. First call its destruct method
 	    @scope ::tycho::$picttype($id) [list \
-		    \[set methodtable(destruct)\] $id $canvas]
+		    eval \[set methodtable(destruct)\] $id $canvas]
 
 	    # Then remove all items
 	    $canvas delete $id
