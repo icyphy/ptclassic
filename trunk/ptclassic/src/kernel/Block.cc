@@ -1,7 +1,8 @@
+#include <std.h>
 #include "Block.h"
 #include "StringList.h"
-#include "Output.h"
-#include <stream.h>
+#include "Error.h"
+
 /**************************************************************************
 Version identification:
 $Id$
@@ -15,8 +16,6 @@ $Id$
 Routines implementing class Block methods
  
 **************************************************************************/
-
-extern Error errorHandler;
 
 StringList
 Block :: printPorts (const char* type) const {
@@ -117,10 +116,8 @@ MultiPortHole* Block::multiPortWithName(const char* name) const {
 // a star or galaxy in the known list hasn't redefined the clone
 // method.
 Block* Block::clone() const {
-	StringList msg = "The star or galaxy \"";
-	msg += readName();
-	msg += "\" doesn't implement the \"clone\" method!\n";
-	errorHandler.error(msg);
+	Error::abortRun ("The star or galaxy \"", readName(),
+		      "doesn't implement the clone method");
 	return 0;
 }
 
@@ -170,13 +167,13 @@ class Galaxy;
 
 Star&
 Block::asStar () const {
-	errorHandler.error (readFullName(), " is not a Star!");
+	Error::error (readFullName(), " is not a Star!");
 	exit (1);
 }
 
 Galaxy&
 Block::asGalaxy () const {
-	errorHandler.error (readFullName(), " is not a Galaxy!");
+	Error::error (readFullName(), " is not a Galaxy!");
 	exit (1);
 }
 
