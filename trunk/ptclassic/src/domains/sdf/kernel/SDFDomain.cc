@@ -42,6 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SDFWormhole.h"
 #include "SDFPortHole.h"
 #include "AutoForkNode.h"
+#include "SDFPTclTarget.h"
 
 extern const char SDFdomainName[] = "SDF";
 
@@ -79,4 +80,6 @@ static SDFTarget defaultSDFtarget("default-SDF",
 "Runs SDF systems on the local workstation using either the default\n"
 "one-processor SDF scheduler or Joe's clustering loop scheduler.");
 
-static KnownTarget entry(defaultSDFtarget,"default-SDF");
+static KnownTarget entryDefault(defaultSDFtarget,"default-SDF");
+
+static KnownTarget entryPTcl(SDFPTclTargetProto,"SDF-to-PTcl");
