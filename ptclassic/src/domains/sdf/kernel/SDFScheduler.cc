@@ -315,23 +315,16 @@ int SDFScheduler::addIfWeCan (DataFlowStar& star, int defer) {
 		Routines for computing the repetitions
 *******************************************************************/
 
-// WARNING: For disconnected systems, the repetitions properties
-// are all multiplied by the least common multiple of the denominators
-// of *all* the repetitions properties, not just those is a connected
-// subsystem.  Hence for disconnected systems, the relative number
-// of times the subsystems are invoked may not be obvious.
+// For disconnected systems, the connected subgraph is normalized
+// independently.  Thus one iteration for the entire system 
+// is equivalent to one iteration of each subgraph.
 
 	////////////////////////////
 	// repetitions
 	////////////////////////////
 
 int SDFScheduler :: repetitions () {
-
-	// Initialize the least common multiple, which after all the
-	// repetitions properties have been set, will equal the lcm
-	// of the all the denominators.
-	lcmOfDenoms = 1;
-
+	
 	// The following iteration occurs exactly as many times as
 	// there are blocks in the universe.
 	// Note that for a connected universe, this iteration would
@@ -341,35 +334,43 @@ int SDFScheduler :: repetitions () {
 	DataFlowStar* s;
 	while ((s = next++) != 0) {
 		// Get the next atomic block:
-
+		
 		// First check to see whether a repetitions property has
 		// been set.  If so, do nothing.  Otherwise, compute the
 		// repetitions property.
-
+		
 		if(s->repetitions.num() == 0) {
+			// Initialize the least common multiple, which
+			// after all the repetitions properties of each node
+			// in a connected subgraph have been set, will equal
+			// the lcm of the all the denominators.
+			lcmOfDenoms = 1;
+
+			subgraph.initialize();
+			subgraph.put(*s);
 
 			// Set repetitions to 1 and set repetitions for
 			// all blocks connected to the current block.
+			// build the 'subgraph' as each connected node
+			// is found.
 			s->repetitions = 1;
 			reptConnectedSubgraph(*s);
-			if (invalid) return FALSE;
+ 			if (invalid) return FALSE;
+
+			// Normalize the subgraph so that all repetitions
+			// of the nodes are integers 
+			BlockListIter nextSub(subgraph);
+			nextSub.reset();
+			DataFlowStar* ds;
+			while (( ds = (DataFlowStar*)nextSub++) !=0){
+				ds->repetitions *= Fraction(lcmOfDenoms);
+				ds->repetitions.simplify();
+			}
+			
 		}
-	}
-
-	// Once all the repetitions properties are set, the lcm member
-	// contains the least common multiple of all the denominators
-	// of all the fractional repetitions.  To convert them to
-	// integers, we multiply through by lcm.
-
-	next.reset();
-	while ((s = next++) != 0) {
-		// Get the next atomic block:
-		s->repetitions *= Fraction(lcmOfDenoms);
-		s->repetitions.simplify();
 	}
 	return TRUE;
 }
-
 
 	////////////////////////////
 	// reptConnectedSubgraph
@@ -378,6 +379,8 @@ int SDFScheduler :: repetitions () {
 // The following function sets the repetitions property of
 // all atomic blocks connected to block, directly or indirectly.
 // It is assumed that block has its repetitions property already set.
+// The function also builds the a BlockList 'subgraph' which after
+// the recursion will contain an entire connected subgraph.
 
 int SDFScheduler :: reptConnectedSubgraph (Block& block) {
 
@@ -392,8 +395,10 @@ int SDFScheduler :: reptConnectedSubgraph (Block& block) {
 		// recursively call this function on the farSideBlock,
 		// having determined that it has not previously been done.
 
-		if(reptArc(nearPort,farPort))
+		if(reptArc(nearPort,farPort)) {
 			reptConnectedSubgraph (*(farPort.parent()));
+			subgraph.put(farPort.parent()->asStar());
+		}
 	}
 	return TRUE;
 }
