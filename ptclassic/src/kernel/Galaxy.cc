@@ -100,6 +100,11 @@ Galaxy :: printVerbose () const {
 
 void Galaxy :: initialize() {
 	Block::initialize();
+	initSubblocks();
+}
+
+// this is separate so derived galaxies can have more control.
+void Galaxy :: initSubblocks() {
 	GalTopBlockIter next(*this);
 	Block* b;
 	while ((b = next++) != 0 && !Scheduler::haltRequested())
@@ -129,6 +134,12 @@ void Galaxy :: wrapup() {
 
 void Galaxy :: initState() {
         Block::initState();
+	initStateSubblocks();
+}
+
+// separate for additional control in derived galaxies.
+
+void Galaxy :: 	initStateSubblocks() {
 	GalTopBlockIter next(*this);
 	Block* b;
 	while ((b = next++) != 0 && !Scheduler::haltRequested())
