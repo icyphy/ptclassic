@@ -107,13 +107,7 @@ proc ::tycho::safeUpdate {obj} {
 # so its position can be controlled effectively.
 #
 class ::tycho::TopLevel {
-
-    inherit ::itk::Toplevel
-
-    # Specify the size and/or placement of the window.
-    itk_option define -geometry geometry Geometry "" {
- 	wm geometry $itk_component(hull) $itk_option(-geometry)
-    }
+    inherit ::tycho::TArchetype
 
     constructor {args} {}
     destructor {}
@@ -121,32 +115,27 @@ class ::tycho::TopLevel {
     ###################################################################
     ####                            options                        ####
 
+    # Specify the size and/or placement of the window.
+    itk_option define -geometry geometry Geometry "" {
+ 	wm geometry $itk_component(hull) $itk_option(-geometry)
+    }
+
     # If non-zero, treat this window as the application master.
     itk_option define -master master Master "0"
 
+    ####
+    itk_option define -title title Title "" {
+        wm title $itk_component(hull) $itk_option(-title)
+    }
+ 
     #################################################################
     ####                     public methods                      ####
-
-    # Change the cursor to the "watch" and execute the arguments.
-    method busy {args}
 
     # Center the window on the screen.
     method centerOnScreen {}
 
-    # Configure options of this top-level.
-    method configure {args}
-
-    # In derived classes, return the current point for use by seeFragment.
-    method currentPoint {} {return {}}
-
-    # Give the window or a subwindow the focus.
-    method focusin {}
-
-    # Prevent interactive resizing of the window.
+   # Prevent interactive resizing of the window.
     method freezeWindowSize {}
-
-    # Open a file and go to its internal point identified by name.
-    method hyperJump {file {point {}}}
 
     # Shift the focus to the next window created.
     method nextWindow {{raise 0}}
@@ -157,10 +146,7 @@ class ::tycho::TopLevel {
     # Raise the window.
     method raiseWindow {}
 
-    # Access stylesheets of this widget
-    method stylesheet {mode args}
-
-    # Return the name of my top-level window.
+    # <b>Obsolete</b>: use <code>hull</code> instead.
     method windowName {} {return $itk_component(hull)}
 
     #################################################################
@@ -184,18 +170,8 @@ class ::tycho::TopLevel {
     # Update the -master configuration option
     protected method configureMaster {master}
 
-    # Remember explicitly-set options and then call the built-in
-    # itk_initialize
-    protected method itk_initialize {args}
-
-    # Prevent destruction of this object while evaluating the arguments.
-    protected method safeEval {args}
-
-    # Register code to be evaluated when the widget has been constructed.
-    protected method whenConstructed {command}
-
-    # Register a command to execute when a component is mapped
-    protected method whenMapped {component command}
+    # Return the type of widget to use for the hull
+    protected method _hulltype {} {return "toplevel"}
 
     #################################################################
     ####                  protected variables                    ####
@@ -203,40 +179,14 @@ class ::tycho::TopLevel {
     # If 1, C-q will be bound in future instances to exit the program.
     protected common normalexit 1
 
-    # The prefix is just a shorthand for $itk_component(hull).
-    # It is the name of the top-level window.
-    protected variable prefix
-
     #################################################################
     ####                  private procedures                     ####
 
     # Check to see whether any windows are left and exit the program if not.
     private proc exitIfNoMoreWindows {} {}
 
-    ###################################################################
-    ####                         private methods                   ####
-
-    # Execute code waiting for the status bar to be mapped
-    private method _notifymapped {component}
-
     #################################################################
     ####                  private variables                      ####
-
-    # An array of subscribed style-sheets
-    private variable _styleSheets
-
-    # An array of options subscribed by "stylesheet subscribe"
-    private variable _subscribedOptions
-
-    # An array of options overridden by itk_initialize or configure
-    private variable _overriddenOptions
-
-    # Commands to execute when the widget has been constructed
-    private variable _whenConstructed {}
-
-    # A array of lists of commands to execute when a component
-    # is mapped. The array is indexed by the component name
-    private variable _whenMapped
 
     # Avoid self-destructing recursively -- FIXME: is this needed???
     private variable alreadyexiting 0
@@ -258,9 +208,6 @@ class ::tycho::TopLevel {
     # If this is non-zero, then when the last window is closed,
     # the program will be exited.
     private common exitflag 1
-
-    # If non-zero, disable destruction.
-    private variable disableDestruction 0
 }
 
 #####################################################################
@@ -298,8 +245,7 @@ body ::tycho::TopLevel::constructor {args} {
     # Import the tycho namespace
     import add ::tycho
 
-    # The name of the window
-    set prefix $itk_component(hull)
+    # Start with the window unmapped
     wm withdraw $prefix
     
     # Create a childsite for the contents of the window
@@ -405,9 +351,6 @@ body ::tycho::TopLevel::destructor {} {
     # saved if necessary, and remove the window from the list
     # of top-level windows.
 
-    # Delete myself from stylesheets
-    stylesheet remove
-
     if {[info exists topLevelWindows] && \
 	    [info exists prefix] && \
 	    [info exists exitflag]} {
@@ -424,44 +367,11 @@ body ::tycho::TopLevel::destructor {} {
             after 100 [code ::tycho::TopLevel::exitIfNoMoreWindows]
         }
     }
-
-    # Unsubscribe from all preferences
-    # stylesheet unsubscribe options $this
 }
 
 #################################################################
 #################################################################
 ####                     public methods                      ####
-
-#####################################################################
-#### busy
-# Change the cursor in the interior of this widget to the "watch"
-# cursor (to indicate that the object is busy), execute the arguments
-# and then change the cursor back to
-# whatever it was before. In order for the cursor to actually change,
-# the method calls "update", during which time the object may be deleted.
-# If the object is deleted, this method never returns (it unwinds the stack
-# by triggering a silent error).
-# A typical invocation is as follows:
-# <pre>
-#     busy $this methodname arg1 arg2
-# </pre>
-#
-body ::tycho::TopLevel::busy {args} {
-    set oldCursor [lindex [config -cursor] end]
-    config -cursor {watch}
-    ::tycho::safeUpdate $prefix
-    # If we get here, then the object $this still exists.
-    # Catch errors so that we can reset the cursor.
-    if {[catch {eval $args} msg] != 0} {
-        config -cursor $oldCursor
-        global ::errorInfo
-        set saveInfo $errorInfo
-	error $msg $saveInfo
-    }
-    config -cursor $oldCursor
-    return $msg
-}
 
 #####################################################################
 #### centerOnScreen
@@ -500,88 +410,12 @@ body ::tycho::TopLevel::centerOnScreen {} {
 }
 
 #####################################################################
-#### configure
-# Configure a widget. This method overrides the default in itk::Archetype.
-# Any given options are unsubscribed from any style sheets that they
-# are subscribed to. This ensures that the widget keeps the value
-# set by this method -- that is, setting options with this method
-# "overrides" the style preferences.
-#
-# This is actually rather slow, since every time a megawidget
-# creates a component that is a megawidget, this method
-# will get called from within the keep{} and rename{}
-# statements. To speed it up, we should keep a record of which
-# options have been subscribed and which haven't...
-#
-# If this method is modified, be sure to also update the
-# *itk_initialize{} method, and the same methods in ::tycho::TWidget.
-#
-body ::tycho::TopLevel::configure {args} {
-    # As long as there are two or more args...
-    if { [llength $args] >= 2 } {
-        # If any options are subscribed, unsubscribe them
-        foreach {option _} $args {
-            if [::info exists _subscribedOptions($option)] {
-                ::tycho::stylesheet unsubscribe $this \
-                        $_subscribedOptions($option) $option
-                unset _subscribedOptions($option)
-            }
-        }
-        # Remember the over-ridden options
-        array set _overriddenOptions $args
-    }
-    # Configure the options
-    eval ::itk::Archetype::configure $args
-}
-
-#########################################################################
-#### focusin
-# Grab the focus.  This should be redefined in derived classes to give
-# the focus to the appropriate subwindow.
-#
-body ::tycho::TopLevel::focusin {} {
-    focus $itk_component(hull)
-}
-
-#####################################################################
 #### freezeWindowSize
 # This method freezes the window at its current size, prohibiting
 # resizing by the user.
 #
 body ::tycho::TopLevel::freezeWindowSize {} {
     wm resizable $prefix 0 0
-}
-
-#####################################################################
-#### hyperJump
-# Open a file and go to its internal point identified by name. If the
-# filename is the empty string, just call <code>seeFragment</code>,
-# passing it the second argument. Otherwise, the
-# file is opened  with <code>::tycho::File::openContext</code>,
-# which will choose an editor based on the filename extension.
-# Invoke <code>seeFragment</code> to view the specified point within the
-# file. The format for the <i>point</i> argument depends on the type of
-# file being opened. For HTML files, it will normally be the name of an
-# anchor in the file. For text files, it will normally be either "{line
-# <i>linenumber</i>}" or "{range <i>start</i> <i>end</i>}", where
-# <i>start</i> and <i>end</i> have the form
-# <i>linenumber.characternumber</i>. The seeFragment{} method of the
-# target widget is responsible for making sure that the <i>point</i>
-# is displayed properly, using the whenMapped{} method if necessary to
-# defer the jump until after the widget is mapped to the screen
-# (see Edit.itcl for an example).
-# 
-body ::tycho::TopLevel::hyperJump {file {point {}}} {
-    if {$file != {}} {
-        set obj [uplevel #0 [list ::tycho::File::openContext $file]]
-        if {$point != {}} {
-            # The seeFragment{} method is called directly here,
-            # on the assumption that $obj works properly.
-            $obj seeFragment $point
-        }
-    } {
-        seeFragment $point
-    }
 }
 
 #####################################################################
@@ -657,96 +491,6 @@ body ::tycho::TopLevel::raiseWindow {} {
     wm deiconify $itk_component(hull)
     raise $itk_component(hull)
     focusin
-}
-
-#####################################################################
-#### stylesheet
-# Access stylesheets of this widget. This method should be used
-# to set widget option preferences instead of direct access using the
-# *::tycho::stylesheet* procedure, since it ensures that user-set
-# options are not overridden by style-sheets. The method has several
-# forms, depending on the value of the _mode_ argument:
-#
-# <dl>
-# <dt><b>get</b> _stylesheet_ _parameter_
-# <dd>
-# Get the value of the given _parameter_ of _stylesheet_,
-# where _parameter_ is parameter name with a style of the
-# style-sheet. The style user is the correct style for this
-# particular widget, based upon user's style prefeernces.
-# Color and font values are converted to raw X values
-# before returning.
-# 
-# <dt><b>list</b>
-# <dd>
-# Return a list of subscribed stylesheets.
-#
-# <dt><b>remove</b>
-# <dd>
-# Remove myself from all stylesheets. To be called prior
-# to destruction.
-#
-# <dt><b>subscribe</b> ?_option_ _stylesheet_ _parameter_ ...?
-# <dd>
-# Subscribe each names _option_ to the given _stylesheet_
-# _parameter_. Each _option_ that has not been explicitly
-# overridden by supplying a value to the widget's constructor
-# will be set to the current value of _parameter_, and any
-# future changes to _parameter_ will update the option.
-#
-# </dl>
-#
-body ::tycho::TopLevel::stylesheet {mode args} {
-    switch -exact $mode {
-        "get" {
- 	    set sheet [lindex $args 0]
-	    set param [lindex $args 1]
-		    
-            # Get my style
-            set style [::tycho::userprofile getstyle $sheet $this]
-
-            # Get the value
-            ::tycho::stylesheet get $sheet $style $param
-        }
-        "list" {
-	    array names _styleSheets
-        }
-        "remove" {
-	    foreach sheet [array names _styleSheets] {
-		::tycho::stylesheet style $sheet $this "delete"
-	    }
-        }
-	"subscribe" {
-	    # Pre-digest arguments
-	    foreach {option sheet param} $args {
-		if ![::info exists _overriddenOptions($option)] {
-		    # Make lists of options per sheet
-		    lappend lists($sheet) $option $param
-
-		    # If an option is already subscribed, then
-		    # remove that subscription so the new one will work
-		    if [::info exists _subscribedOptions($option)] {
-			::tycho::stylesheet unsubscribe $this \
-				$_subscribedOptions($option) $option
-		    }
-
-		    # Remember the subscribed options
-		    set _subscribedOptions($option) $sheet
-		}
-	    }
-	    # Call the stylesheets to do the work
-	    foreach {sheet opts} [array get lists] {
-		# Tell the style manager what style I prefer
-		if ![::info exists _styleSheets($sheet)] {
-		    set style [::tycho::userprofile getstyle $sheet $this]
-		    ::tycho::stylesheet style $sheet $this $style
-		    set _styleSheets($sheet) $sheet
-		}		
-		# Subscribe to it
-		eval ::tycho::stylesheet subscribe $this $sheet $opts
-	    }
-	}
-    }
 }
 
 #################################################################
@@ -866,7 +610,7 @@ body ::tycho::TopLevel::configureMaster {master} {
 body ::tycho::TopLevel::confirmDestruct {} {
     # If we are in the middle of a safe update, then don't destroy this
     # window but schedule another attempt later on.
-    if $disableDestruction {
+    if [destructionDisabled] {
         # Schedule a future attempt at destruction.
         after 1000 "::tycho::TWidget::evalIfExists $this prevWindow; \
                 delete object $this"
@@ -888,160 +632,6 @@ body ::tycho::TopLevel::confirmDestruct {} {
             after idle ::tycho::TopLevel::exitProgram
             ::tycho::silentError
 	}
-    }
-}
-
-#####################################################################
-#### itk_initialize
-# Initialize options of a widget. This method overrides the
-# default itk_initialize{} provided in ::itk::Archetype to
-# remember the options that have been explicitly set by the
-# user. This is used by the preferences manager so that these
-# options "override" any option subscriptions.
-#
-# If this method is modified, be sure to also update the
-# *configure{} method, and the same methods in ::tycho::TWidget.
-#
-body ::tycho::TopLevel::itk_initialize {args} {
-    # If any options are subscribed, unsubscribe them
-    foreach {option _} $args {
-	if [::info exists _subscribedOptions($option)] {
-	    ::tycho::stylesheet unsubscribe $this \
-		    $_subscribedOptions($option) $option
-	    unset _subscribedOptions($option)
-	}
-    }
-    # Remember the over-ridden options
-    array set _overriddenOptions $args
-
-    # Configure the options
-    uplevel ::itk::Archetype::itk_initialize $args
-
-    # If called from the most specific class, execute the
-    # post-construction commands.
-    if { [uplevel info context] == [info class] } {
-        foreach {scope cmd} $_whenConstructed {
-            @scope $scope $cmd
-        }
-	set _whenConstructed {}
-	set _isConstructed 1
-    }
-}
-
-#####################################################################
-#### safeEval
-# Prevent destruction of this object while evaluating the arguments.
-# Destruction will be cancelled by invoking a silent error, and will
-# be scheduled for another attempt in the future.
-# <p>
-# This method is a workaround for a defect in Itcl. If "update",
-# "update idletasks", or "tkwait" is called directly or indirectly from
-# within an Itcl method, and during the update the Itcl object is
-# destroyed, then when update returns, you may get a catastrophic failure
-# of the application (a core dump).
-#
-body ::tycho::TopLevel::safeEval {args} {
-    set disableDestruction 1
-    set retval {}
-    if [catch {set retval [eval $args]} msg] {
-        global ::errorInfo
-        set saveInfo $errorInfo
-        set disableDestruction 0
-        error $saveInfo
-    }
-    set disableDestruction 0
-    return $retval
-}
-
-########################################################################
-#### whenConstructed
-#
-# Register a command to be executed when the last constructor in the
-# chain of constructor executes. The command will be executed
-# in the scope of the class from which this method was called,
-# at the completion of the call to itk_initialize. The purpose of
-# this method is to delay evaluation of code until construction
-# of the widget is complete.
-#
-# If the widget is already constructed, the command will be
-# executed immediately in the caller's context -- this method
-# can therefore be called from methods that will only sometimes
-# be executed within an object's constructor.
-#
-body ::tycho::TopLevel::whenConstructed {command} {
-    set w [string trimleft $this :]
-    if $_isConstructed {
-        uplevel $command
-    } else {
-        lappend _whenConstructed [uplevel info context] $command
-    }
-}
-
-#######################################################################
-#### whenMapped
-#
-# Register a command to be executed when a component of the mega-widget
-# is mapped. Any number of commands can be registered for each component.
-# If the component is already mapped, the command will be executed
-# immediately in the caller's scope; if not, a binding will be made
-# to the component for the &lt;Map&gt; event and the pending commands
-# executed within the caller's scope when the binding is triggered.
-# The purpose of this method is to support code that depends on the
-# screen appearance or size of the component. The first argument is
-# the symbolic name of the component (not the Tk window name), and the
-# second argument is the command to be executed.
-#
-# Note that it is necessary to specify the deferred commands
-# on a component basis (rather than just for the whole mega-widget),
-# since Tk maps containing widgets before contained widgets.
-#
-body ::tycho::TopLevel::whenMapped {component command} {
-    set w [component $component]
-    if [winfo ismapped $w] {
-        uplevel $command
-    } else {
-        lappend _whenMapped($component) [uplevel info context] $command
-
-        # Make the binding to the component
-        bind $w <Map> "@scope [info context] $this _notifymapped $component"
-    }
-}
-
-    #################################################################
-    #################################################################
-    ####                  private methods                        ####
-
-#######################################################################
-#### _notifymapped
-#
-# This method is a callback to be executed when the <Map>
-# event is triggered on a component. If the component is not
-# already mapped, return without doing anything. Otherwise,
-# evaluate the commands registered with the *whenMapped* method
-# and remove the binding that triggered this callback.
-#
-body ::tycho::TopLevel::_notifymapped {component} {
-    set w [component $component]
-
-    # Just check this to make sure...
-    if ![winfo ismapped $w] {
-        # Not mapped: return
-        return
-    } else {
-        # Mapped: evaluate commands and then remove the binding
-        # Regrettably, we have to unset before evaluating in case
-        # there is an update in the commands evaluated.  Otherwise,
-        # That update may process another <Map> event and invoke this
-        # same command a second time.  Make a local copy of the command
-        # first.
-        set local_copy $_whenMapped($component)
-        unset _whenMapped($component)
-        foreach {scope cmd} $local_copy {
-            @scope $scope $cmd
-        }
-        if { [::info which -command $w] != "" } {
-            bind $w <Map> {}
-        }
     }
 }
 
