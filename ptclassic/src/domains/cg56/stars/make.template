@@ -35,6 +35,7 @@ PL_SRCS= \
  CG56DownSample.pl \
  CG56DummySource.pl \
  CG56DummySink.pl \
+ CG56HostOut.pl \
  CG56IIDUniform.pl \
  CG56Integrator.pl \
  CG56Sub.pl \
