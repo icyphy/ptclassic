@@ -36,8 +36,8 @@ Particle& IntSample :: operator = (const Particle& p)
 	return *this;
 }
 
-IntSample :: operator char* ()
-	{ return form("%d",data);}
+char* IntSample :: print () { return form("%d",data);}
+
 
 	////////////////////////////////////////
 	// class FloatSample
@@ -56,8 +56,7 @@ Particle& FloatSample :: operator = (const Particle& p)
 	return *this;
 }
 
-FloatSample :: operator char* ()
-        { return form("%f",data);}
+char* FloatSample :: print () { return form("%f",data);}
 
         ////////////////////////////////////////
         // class ComplexSample
@@ -76,7 +75,7 @@ Particle& ComplexSample :: operator = (const Particle& p)
         return *this;
 }
 
-ComplexSample :: operator char* ()
+char* ComplexSample :: print ()
         { return form("(%f,%f)",data.real(),data.imag());}
 
 
