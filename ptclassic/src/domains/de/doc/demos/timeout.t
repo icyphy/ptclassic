@@ -12,7 +12,13 @@ The signal that clears the timer is a
 process with a mean interarrival time of one time unit.
 Thus, the timer expires quite often.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "Tom Parks"
 .LD

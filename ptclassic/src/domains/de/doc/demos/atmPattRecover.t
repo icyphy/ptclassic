@@ -5,7 +5,13 @@ This demonstration implements a voice-cell recovery technique.
 Cells which have been dropped are replaced by samples determined
 through a complicated pattern matching technique.
 .SE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "G. S. Walter"
 .LD
@@ -70,7 +76,7 @@ Missing Speech Segment in Packet Voice Communications,"
 \fIIEEE Trans. on ASSP\fR, vol ASSP-34, no. 6, pp. 1440-1448,
 December 1986.
 .SA
-.c ATMPrevCellSub,
-.c ATMZeroCellSub,
-.c PCMVoiceRecover.
+ATMPrevCellSub,
+ATMZeroCellSub,
+PCMVoiceRecover.
 .ES

@@ -4,7 +4,13 @@
 This demonstration implements a simple voice-cell recovery technique.
 Cells which have been dropped during transmission are replaced with all 0 bits.
 .SE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "G. S. Walter"
 .LD
@@ -55,6 +61,6 @@ approximately 1.04 cells.
 Running the demonstration for 580 iterations will produce 604 cells
 consuming about 29,000 voice samples.
 .SA
-.c ATMPrevCellSub,
-.c ATMPattRecover.
+ATMPrevCellSub,
+ATMPattRecover.
 .ES

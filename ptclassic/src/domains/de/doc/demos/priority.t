@@ -9,7 +9,13 @@ The upper input to the
 has priority over the lower input.
 Thus, when the queue overflows, data is lost from the lower input.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD

@@ -9,7 +9,13 @@ The input test signal is a pair of ramps, with each event repeated once after
 some delay.
 Since the ramps have different steps, they will cross.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "Rolando Diesta and Edward A. Lee"
 .LD

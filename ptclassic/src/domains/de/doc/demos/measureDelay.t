@@ -6,7 +6,13 @@ Demonstrate the use of the
 block to measure the sojourn time of particles in a simple queueing system
 with a single server with a random service time.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "S. Ha"
 .LD

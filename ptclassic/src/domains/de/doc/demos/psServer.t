@@ -7,7 +7,13 @@ regardless of how busy it is.
 Accepting a new input, however, slows down the service to all
 particles currently being served.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD

@@ -9,7 +9,13 @@ of the presented video and audio streams.
 The video display requires that the Utah Raster Toolkit be installed
 and available in the user's path.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "Paul Haskell and Greg Walter."
 .LD

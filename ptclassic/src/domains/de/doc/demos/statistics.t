@@ -10,7 +10,13 @@ This action is triggered by an event produced by the
 .c StopTimer
 star.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "S. Ha"
 .LD

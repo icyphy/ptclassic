@@ -6,7 +6,13 @@ values from a ramp, sends these packets to a server with a
 random service time, and then deconstructs the packets by
 reading the items in the packet one by one.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "J. T. Buck"
 .LD

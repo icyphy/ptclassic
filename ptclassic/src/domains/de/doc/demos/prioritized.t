@@ -4,7 +4,13 @@
 This is a high-level simulation of a shared memory
 with prioritized arbitration.
 .SE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "T.M. Parks"
 .LD

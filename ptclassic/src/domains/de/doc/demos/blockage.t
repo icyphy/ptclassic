@@ -6,7 +6,13 @@ In a cascade of two queues and servers, when the second queue
 fills up, it prevents any further dequeuing of particles from
 the first queue until it once again has space.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "S. Ha and E. A. Lee"
 .LD

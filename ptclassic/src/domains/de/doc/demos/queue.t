@@ -21,7 +21,13 @@ is set with a smaller capacity than the
 star, so it overflows first.
 Overflow events are displayed.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD

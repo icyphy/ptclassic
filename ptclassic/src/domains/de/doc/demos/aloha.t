@@ -11,7 +11,13 @@ This simulation is built out of very low-level stars, and its complexity
 illustrates very clearly that this is not a reasonable approach
 for simulation.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "Rolando Diesta"
 .LD

@@ -4,7 +4,13 @@
 This simple system demonstrates servers with random
 service times (uniform and exponential).
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD

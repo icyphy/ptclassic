@@ -5,7 +5,13 @@ This system demonstrates the pitfalls of using a simple voice-recovery
 technique such as zero-sample substitution in an adaptive differential
 pulse-coded modulation (ADPCM) packet-switched network. 
 .SE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$	$Date$
 .AL "G. S. Walter"
 .LD

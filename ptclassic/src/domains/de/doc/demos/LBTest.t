@@ -5,7 +5,13 @@ Simulate leaky bucket network rate controllers.
 These controllers moderate the flow of packets to keep them within
 specified rate and burstiness bounds.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "Paul Haskell."
 .LD

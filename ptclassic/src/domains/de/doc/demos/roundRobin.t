@@ -4,7 +4,13 @@
 This is a high-level simulation of a shared memory with
 round-robin arbitration.
 .SE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "T.M. Parks"
 .LD
@@ -21,8 +27,8 @@ graphed.
 One graph shows the data traffic on the shared bus, while the other graphs
 monitor each output to verify that responses have been routed properly.
 .SA
-prioritized,
 Poisson,
+prioritized,
 rom,
 roundRobin4.
 .ES
