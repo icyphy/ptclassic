@@ -41,16 +41,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Constructors.
 VHDLState :: VHDLState() {
-//  VHDLObj::initialize();
-//  State::initialize();
+  VHDLTypedObj::initialize();
 }
-
-/*
-  VHDLState :: VHDLState(const char* n, Block* p, const char* d) : State(n,p,d) {
-//  VHDLObj::initialize();
-  State::initialize();
-}
-*/
 
 // Destructor.
 VHDLState :: ~VHDLState() {}
@@ -58,11 +50,8 @@ VHDLState :: ~VHDLState() {}
 /*
 // Return a pointer to a new copy of the VHDLState.
 VHDLState* VHDLState :: newCopy() {
-  VHDLState* newState = new VHDLState;
-  newState->setName(this->name);
-  newState->lastFiring = this->lastFiring;
-  newState->type = this->type;
-
+  VHDLState* newState = new VHDLState(name, type, lastRef, firstRef, initVal,
+                                      constant);
   return newState;
 }
 */
@@ -70,7 +59,7 @@ VHDLState* VHDLState :: newCopy() {
 // Class identification.
 const char* VHDLState :: className() const { return "VHDLState"; }
 
-ISA_FUNC(VHDLState,VHDLObj);
+ISA_FUNC(VHDLState,VHDLTypedObj);
 /*
 // Return a pointer to a new copy of the list.
 VHDLStateList* VHDLStateList :: newCopy() {

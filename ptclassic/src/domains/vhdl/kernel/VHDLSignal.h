@@ -38,25 +38,22 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "VHDLObj.h"
-#include "VHDLObjList.h"
+#include "VHDLTypedObj.h"
 #include "VHDLPort.h"
 
 class VHDLPort;
 
-class VHDLSignal : public VHDLObj
+class VHDLSignal : public VHDLTypedObj
 {
  public:
   // Constructors.
   VHDLSignal();
   VHDLSignal(const char* n, const char* t, VHDLPort* s)
-    : type(t), source (s) { setName(n); }
+    : VHDLTypedObj(n,t), source (s) {}
 
   // Destructor.
   ~VHDLSignal();
 
-  // Type.
-  StringList type;
   // Pointer to source VHDLPort.
   VHDLPort* source;
 
@@ -67,8 +64,6 @@ class VHDLSignal : public VHDLObj
   // Return a pointer to a new copy of the VHDLSignal.
   VHDLSignal* newCopy();
 
-  void setType(const char* newType) { type = newType; }
-  StringList getType() { return type; }
   void setSource(VHDLPort* newSource) { source = newSource; }
   VHDLPort* getSource() { return source; }
   void disconnect() { source = NULL; }
@@ -77,31 +72,31 @@ class VHDLSignal : public VHDLObj
  private:
 };
 
-class VHDLSignalList : public VHDLObjList
+class VHDLSignalList : public VHDLTypedObjList
 {
   friend class VHDLSignalListIter;
 
  public:
   // Add VHDLSignal to list.
-  void put(VHDLSignal& v) { VHDLObjList::put(v); }
+  void put(VHDLSignal& v) { VHDLTypedObjList::put(v); }
 
   // Return first VHDLSignal on list (const, non-const forms).
-  VHDLSignal* head() { return (VHDLSignal*) VHDLObjList::head(); }
+  VHDLSignal* head() { return (VHDLSignal*) VHDLTypedObjList::head(); }
   const VHDLSignal* head() const {
-    return (const VHDLSignal*) VHDLObjList::head();
+    return (const VHDLSignal*) VHDLTypedObjList::head();
   }
 
   // Remove a VHDLSignal from the list.
   // Note:  the VHDLSignal is not deleted.
-  int remove (VHDLSignal* v) { return VHDLObjList::remove(v); }
+  int remove (VHDLSignal* v) { return VHDLTypedObjList::remove(v); }
 
   // Find VHDLSignal with given name (const, non-const forms).
   VHDLSignal* vhdlSignalWithName(const char* name) {
-    return (VHDLSignal*) vhdlObjWithName(name);
+    return (VHDLSignal*) vhdlTypedObjWithName(name);
   }
 
   const VHDLSignal* vhdlSignalWithName(const char* name) const {
-    return (const VHDLSignal*) vhdlObjWithName(name);
+    return (const VHDLSignal*) vhdlTypedObjWithName(name);
   }
 
   // Return a pointer to a new copy of the list.
@@ -111,12 +106,12 @@ class VHDLSignalList : public VHDLObjList
   void put(StringList, StringList, VHDLPort* =NULL);
 };
 
-class VHDLSignalListIter : public VHDLObjListIter {
+class VHDLSignalListIter : public VHDLTypedObjListIter {
  public:
-  VHDLSignalListIter(VHDLSignalList& l) : VHDLObjListIter(l) {}
-  VHDLSignal* next() { return (VHDLSignal*) VHDLObjListIter::next(); }
+  VHDLSignalListIter(VHDLSignalList& l) : VHDLTypedObjListIter(l) {}
+  VHDLSignal* next() { return (VHDLSignal*) VHDLTypedObjListIter::next(); }
   VHDLSignal* operator++(POSTFIX_OP) { return next(); }
-  VHDLObjListIter::reset;
+  VHDLTypedObjListIter::reset;
 };
 
 #endif

@@ -85,12 +85,7 @@ void VHDLCompDeclList :: put(StringList name, VHDLPortList* portList,
 			     VHDLGenericList* genList,
 			     StringList type, VHDLPortList* portMapList,
 			     VHDLGenericList* genMapList) {
-  VHDLCompDecl* newCompDecl = new VHDLCompDecl;
-  newCompDecl->setName(name);
-  newCompDecl->genList = genList;
-  newCompDecl->portList = portList;
-  newCompDecl->type = type;
-  newCompDecl->genMapList = genMapList;
-  newCompDecl->portMapList = portMapList;
+  VHDLCompDecl* newCompDecl = new VHDLCompDecl(name, portList, genList,
+					       type, portMapList, genMapList);
   this->put(*newCompDecl);
 }

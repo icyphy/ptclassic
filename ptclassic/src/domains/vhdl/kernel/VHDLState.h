@@ -38,14 +38,16 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "VHDLObj.h"
-#include "VHDLObjList.h"
+#include "VHDLTypedObj.h"
 
-class VHDLState : public VHDLObj {
+class VHDLState : public VHDLTypedObj {
  public:
   // Constructors.
   VHDLState();
-//  VHDLState(const char*, Block*, const char*);
+  VHDLState(const char* n, const char* t, const char* lr,
+	    const char* fr, const char* iv, int c)
+    : VHDLTypedObj(n,t), lastRef(lr), firstRef(fr), initVal(iv),
+    constant(c) {}
 
   // Destructor.
   ~VHDLState();
@@ -56,8 +58,6 @@ class VHDLState : public VHDLObj {
   StringList firstRef;
   // Initial value.
   StringList initVal;
-  // Type.
-  StringList type;
   // Is it constant? 1 if TRUE.
   int constant;
 
@@ -76,31 +76,31 @@ class VHDLState : public VHDLObj {
  private:
 };
 
-class VHDLStateList : public VHDLObjList
+class VHDLStateList : public VHDLTypedObjList
 {
   friend class VHDLStateListIter;
 
  public:
   // Add VHDLState to list.
-  void put(VHDLState& v) { VHDLObjList::put(v); }
+  void put(VHDLState& v) { VHDLTypedObjList::put(v); }
 
   // Return first VHDLState on list (const, non-const forms).
-  VHDLState* head() { return (VHDLState*) VHDLObjList::head(); }
+  VHDLState* head() { return (VHDLState*) VHDLTypedObjList::head(); }
   const VHDLState* head() const {
-    return (const VHDLState*) VHDLObjList::head();
+    return (const VHDLState*) VHDLTypedObjList::head();
   }
 
   // Remove a VHDLState from the list.
   // Note:  the VHDLState is not deleted.
-  int remove (VHDLState* v) { return VHDLObjList::remove(v); }
+  int remove (VHDLState* v) { return VHDLTypedObjList::remove(v); }
 
   // Find VHDLState with given name (const, non-const forms).
   VHDLState* vhdlStateWithName(const char* name) {
-    return (VHDLState*) vhdlObjWithName(name);
+    return (VHDLState*) vhdlTypedObjWithName(name);
   }
 
   const VHDLState* vhdlStateWithName(const char* name) const {
-    return (const VHDLState*) vhdlObjWithName(name);
+    return (const VHDLState*) vhdlTypedObjWithName(name);
   }
 
   // Return a pointer to a new copy of the list.
@@ -108,12 +108,12 @@ class VHDLStateList : public VHDLObjList
 
 };
 
-class VHDLStateListIter : public VHDLObjListIter {
+class VHDLStateListIter : public VHDLTypedObjListIter {
  public:
-  VHDLStateListIter(VHDLStateList& l) : VHDLObjListIter(l) {}
-  VHDLState* next() { return (VHDLState*) VHDLObjListIter::next(); }
+  VHDLStateListIter(VHDLStateList& l) : VHDLTypedObjListIter(l) {}
+  VHDLState* next() { return (VHDLState*) VHDLTypedObjListIter::next(); }
   VHDLState* operator++(POSTFIX_OP) { return next(); }
-  VHDLObjListIter::reset;
+  VHDLTypedObjListIter::reset;
 };
 
 #endif

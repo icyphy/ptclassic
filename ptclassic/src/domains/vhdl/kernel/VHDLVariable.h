@@ -38,20 +38,19 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "VHDLObj.h"
-#include "VHDLObjList.h"
+#include "VHDLTypedObj.h"
 
-class VHDLVariable : public VHDLObj
+class VHDLVariable : public VHDLTypedObj
 {
  public:
   // Constructors.
   VHDLVariable();
+  VHDLVariable(const char* n, const char* t, const char* iv)
+    : VHDLTypedObj(n,t), initVal(iv) {}
 
   // Destructor.
   ~VHDLVariable();
 
-  // Data type.
-  StringList type;
   // Initial value.
   StringList initVal;
 
@@ -66,31 +65,31 @@ class VHDLVariable : public VHDLObj
  private:
 };
 
-class VHDLVariableList : public VHDLObjList
+class VHDLVariableList : public VHDLTypedObjList
 {
   friend class VHDLVariableListIter;
 
  public:
   // Add VHDLVariable to list.
-  void put(VHDLVariable& v) { VHDLObjList::put(v); }
+  void put(VHDLVariable& v) { VHDLTypedObjList::put(v); }
 
   // Return first VHDLVariable on list (const, non-const forms).
-  VHDLVariable* head() { return (VHDLVariable*) VHDLObjList::head(); }
+  VHDLVariable* head() { return (VHDLVariable*) VHDLTypedObjList::head(); }
   const VHDLVariable* head() const {
-    return (const VHDLVariable*) VHDLObjList::head();
+    return (const VHDLVariable*) VHDLTypedObjList::head();
   }
 
   // Remove a VHDLVariable from the list.
   // Note:  the VHDLVariable is not deleted.
-  int remove (VHDLVariable* v) { return VHDLObjList::remove(v); }
+  int remove (VHDLVariable* v) { return VHDLTypedObjList::remove(v); }
 
   // Find VHDLVariable with given name (const, non-const forms).
   VHDLVariable* vhdlVariableWithName(const char* name) {
-    return (VHDLVariable*) vhdlObjWithName(name);
+    return (VHDLVariable*) vhdlTypedObjWithName(name);
   }
 
   const VHDLVariable* vhdlVariableWithName(const char* name) const {
-    return (const VHDLVariable*) vhdlObjWithName(name);
+    return (const VHDLVariable*) vhdlTypedObjWithName(name);
   }
 
   // Return a pointer to a new copy of the list.
@@ -100,12 +99,12 @@ class VHDLVariableList : public VHDLObjList
   void put(StringList, StringList, StringList);
 };
 
-class VHDLVariableListIter : public VHDLObjListIter {
+class VHDLVariableListIter : public VHDLTypedObjListIter {
  public:
-  VHDLVariableListIter(VHDLVariableList& l) : VHDLObjListIter(l) {}
-  VHDLVariable* next() { return (VHDLVariable*) VHDLObjListIter::next(); }
+  VHDLVariableListIter(VHDLVariableList& l) : VHDLTypedObjListIter(l) {}
+  VHDLVariable* next() { return (VHDLVariable*) VHDLTypedObjListIter::next(); }
   VHDLVariable* operator++(POSTFIX_OP) { return next(); }
-  VHDLObjListIter::reset;
+  VHDLTypedObjListIter::reset;
 };
 
 #endif

@@ -38,20 +38,20 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "VHDLObj.h"
-#include "VHDLObjList.h"
+#include "VHDLTypedObj.h"
 
-class VHDLArc : public VHDLObj
+class VHDLArc : public VHDLTypedObj
 {
  public:
   // Constructors.
   VHDLArc();
+  VHDLArc(const char* n, const char* t, int lw, int hw, int lr, int hr)
+    : VHDLTypedObj(n,t), lowWrite(lw), highWrite(hw), lowRead(lr),
+    highRead(hr) {}
 
   // Destructor.
   ~VHDLArc();
 
-  // Data Type.
-  StringList type;
   // Low write marker.
   int lowWrite;
   // High write marker.
@@ -68,41 +68,38 @@ class VHDLArc : public VHDLObj
   // Return a pointer to a new copy of the VHDLArc.
   VHDLArc* newCopy();
 
-  void setType(const char* newType) { type = newType; }
-  StringList getType() { return type; }
-
  protected:
  private:
 };
 
-class VHDLArcList : public VHDLObjList
+class VHDLArcList : public VHDLTypedObjList
 {
   friend class VHDLArcListIter;
 
  public:
   // Add VHDLArc to list.
-  void put(VHDLArc& v) { VHDLObjList::put(v); }
+  void put(VHDLArc& v) { VHDLTypedObjList::put(v); }
 
   // Use the name as a key to find the arc.
   VHDLArc* arcWithName(const char*);
 
   const VHDLArc* vhdlArcWithName(const char* name) const {
-    return (const VHDLArc*) vhdlObjWithName(name);
+    return (const VHDLArc*) vhdlTypedObjWithName(name);
   }
 
   // Return first VHDLArc on list (const, non-const forms).
-  VHDLArc* head() { return (VHDLArc*) VHDLObjList::head(); }
+  VHDLArc* head() { return (VHDLArc*) VHDLTypedObjList::head(); }
   const VHDLArc* head() const {
-    return (const VHDLArc*) VHDLObjList::head();
+    return (const VHDLArc*) VHDLTypedObjList::head();
   }
 
   // Remove a VHDLArc from the list.
   // Note:  the VHDLArc is not deleted.
-  int remove (VHDLArc* v) { return VHDLObjList::remove(v); }
+  int remove (VHDLArc* v) { return VHDLTypedObjList::remove(v); }
 
   // Find VHDLArc with given name (const, non-const forms).
   VHDLArc* vhdlArcWithName(const char* name) {
-    return (VHDLArc*) vhdlObjWithName(name);
+    return (VHDLArc*) vhdlTypedObjWithName(name);
   }
 
   // Return a pointer to a new copy of the list.
@@ -110,12 +107,12 @@ class VHDLArcList : public VHDLObjList
 
 };
 
-class VHDLArcListIter : public VHDLObjListIter {
+class VHDLArcListIter : public VHDLTypedObjListIter {
  public:
-  VHDLArcListIter(VHDLArcList& l) : VHDLObjListIter(l) {}
-  VHDLArc* next() { return (VHDLArc*) VHDLObjListIter::next(); }
+  VHDLArcListIter(VHDLArcList& l) : VHDLTypedObjListIter(l) {}
+  VHDLArc* next() { return (VHDLArc*) VHDLTypedObjListIter::next(); }
   VHDLArc* operator++(POSTFIX_OP) { return next(); }
-  VHDLObjListIter::reset;
+  VHDLTypedObjListIter::reset;
 };
 
 #endif

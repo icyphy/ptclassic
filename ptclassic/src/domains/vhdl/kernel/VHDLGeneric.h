@@ -38,23 +38,20 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "VHDLObj.h"
-#include "VHDLObjList.h"
+#include "VHDLTypedObj.h"
 
-class VHDLGeneric : public VHDLObj
+class VHDLGeneric : public VHDLTypedObj
 {
  public:
   // Constructors.
   VHDLGeneric();
   VHDLGeneric(const char* n, const char* t, const char* d,
 	      const char* m)
-    : type(t), defaultVal(d), mapping(m) { setName(n); }
+    : VHDLTypedObj(n,t), defaultVal(d), mapping(m) {}
 
   // Destructor.
   ~VHDLGeneric();
 
-  // Data type.
-  StringList type;
   // Default value.
   StringList defaultVal;
   // Map binding.
@@ -67,7 +64,6 @@ class VHDLGeneric : public VHDLObj
   // Return a pointer to a new copy of the VHDLGeneric.
   VHDLGeneric* newCopy();
 
-  void setType(const char* newType) { type = newType; }
   void setDefaultVal(const char* newDefaultVal) { defaultVal = newDefaultVal; }
   void setMapping(const char* newMapping) { mapping = newMapping; }
 
@@ -75,31 +71,31 @@ class VHDLGeneric : public VHDLObj
  private:
 };
 
-class VHDLGenericList : public VHDLObjList
+class VHDLGenericList : public VHDLTypedObjList
 {
   friend class VHDLGenericListIter;
 
  public:
   // Add VHDLGeneric to list.
-  void put(VHDLGeneric& v) { VHDLObjList::put(v); }
+  void put(VHDLGeneric& v) { VHDLTypedObjList::put(v); }
 
   // Return first VHDLGeneric on list (const, non-const forms).
-  VHDLGeneric* head() { return (VHDLGeneric*) VHDLObjList::head(); }
+  VHDLGeneric* head() { return (VHDLGeneric*) VHDLTypedObjList::head(); }
   const VHDLGeneric* head() const {
-    return (const VHDLGeneric*) VHDLObjList::head();
+    return (const VHDLGeneric*) VHDLTypedObjList::head();
   }
 
   // Remove a VHDLGeneric from the list.
   // Note:  the VHDLGeneric is not deleted.
-  int remove (VHDLGeneric* v) { return VHDLObjList::remove(v); }
+  int remove (VHDLGeneric* v) { return VHDLTypedObjList::remove(v); }
 
   // Find VHDLGeneric with given name (const, non-const forms).
   VHDLGeneric* vhdlGenericWithName(const char* name) {
-    return (VHDLGeneric*) vhdlObjWithName(name);
+    return (VHDLGeneric*) vhdlTypedObjWithName(name);
   }
 
   const VHDLGeneric* vhdlGenericWithName(const char* name) const {
-    return (const VHDLGeneric*) vhdlObjWithName(name);
+    return (const VHDLGeneric*) vhdlTypedObjWithName(name);
   }
 
   // Return a pointer to a new copy of the list.
@@ -109,12 +105,12 @@ class VHDLGenericList : public VHDLObjList
   void put(StringList, StringList, StringList="", StringList="");
 };
 
-class VHDLGenericListIter : public VHDLObjListIter {
+class VHDLGenericListIter : public VHDLTypedObjListIter {
  public:
-  VHDLGenericListIter(VHDLGenericList& l) : VHDLObjListIter(l) {}
-  VHDLGeneric* next() { return (VHDLGeneric*) VHDLObjListIter::next(); }
+  VHDLGenericListIter(VHDLGenericList& l) : VHDLTypedObjListIter(l) {}
+  VHDLGeneric* next() { return (VHDLGeneric*) VHDLTypedObjListIter::next(); }
   VHDLGeneric* operator++(POSTFIX_OP) { return next(); }
-  VHDLObjListIter::reset;
+  VHDLTypedObjListIter::reset;
 };
 
 #endif
