@@ -35,7 +35,8 @@ is no need to give a value to the <i>where_defined</i> parameter.
 <p>
 For all higher-order stars derived from this base class, the replacement
 blocks are substituted for the higher-order star at setup time.
-Thus, the scheduler will never see the higher-order star.
+Thus, the scheduler will never see the higher-order sta; furthermore,
+porthole initialization and type resolution occur after block substitution.
 For this reason, these stars can be used in any Ptolemy domain,
 since their semantics are independent of the model of computation.
 <p>
