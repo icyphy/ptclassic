@@ -118,16 +118,17 @@ proc ptkGantt_DualMove { chartName dir args } {
 }
 
 proc ptkGantt_Zoom { universe num_procs period dir } {
+puts "Hi!"
 
     set chartName .gantt_${universe}
-    if {$dir == "in"} {
-	$chartName.mbar.zoomindex configure -text \
-		[expr 2.0*[lindex [$chartName.mbar.zoomindex configure -text] \
-		4]]
-    } else {
-	$chartName.mbar.zoomindex configure -text \
-		[expr 0.5*[lindex [$chartName.mbar.zoomindex configure -text] \
-		4]]
+
+    #
+    # prevent zoom out if scale is already 1.
+    #
+    set zoomFactor [lindex [$chartName.mbar.zoomindex configure -text] 4]
+
+    if {$dir == "out" && $zoomFactor <= 1.0} {
+	return
     }
 
     set ganttFont -adobe-courier-medium-r-normal--10-100-75-75-m-60-iso8859-1
@@ -137,15 +138,46 @@ proc ptkGantt_Zoom { universe num_procs period dir } {
 	set scale 0.5
     }
 
-    # delete labels and bar then scale boxes and ruler
+    set zoomFactor [expr $scale * $zoomFactor]
+    $chartName.mbar.zoomindex configure -text $zoomFactor
+
+
+    # Figure out the new width of the canvas
+
+    set new_width [expr [expr [lindex [$chartName.mbar.zoomindex configure \
+	    -text] 4] * $period] + 2]
+
+    # delete labels and bar then scale boxes
     ptkClearHighlights
     $chartName.chart.graph delete slabel bar
     $chartName.chart.graph scale box 1c 0 $scale 1.0
-    $chartName.chart.ruler scale all 1c 0 $scale 1.0
+
+    # Delete the tick marks and labels and redraw them
+
+    $chartName.chart.ruler delete tick label
+    set rulerLow   [winfo pixels $chartName 1c]
+    set rulerWidth [winfo pixels $chartName [expr $zoomFactor * $period]c]
+    set rulerHigh [expr $rulerLow + $rulerWidth]
+
+    set labelWidth [gantt_measureLabel $chartName.chart.ruler $period]
+    set increment  [axisIncrement 0 $period $rulerWidth $labelWidth 10]
+    if { $increment < 1 } {
+	set increment 1
+    }
+    set values  [rangeValues 0 $period $increment]
+    set tickPos [mapRange    0 $period $values $rulerLow $rulerHigh]
+
+    foreach* x $tickPos i $values {
+	${chartName}.chart.ruler create line $x 0.5c $x 1c -tags tick
+	${chartName}.chart.ruler create text \
+		[expr $x + [winfo pixels $chartName .15c]] .75c \
+		-text [format {%.0f} $i] \
+		-anchor sw -tags label
+    }
+    ${chartName}.chart.ruler create line 1c 1c $rulerHigh 1c -tags tick
+
 
     # set new scrollregion
-    set new_width [expr [expr [lindex [$chartName.mbar.zoomindex configure \
-	    -text] 4] * $period] + 2]
     $chartName.chart.graph configure -scrollregion \
 	    "0 0 ${new_width}c ${num_procs}i"
     $chartName.chart.ruler configure -scrollregion "0 0 ${new_width}c 1.5c"
@@ -203,15 +235,15 @@ proc ptkGantt_DrawProc { universe num_procs period proc star_name start fin } {
 	pack ${chartName}.chart.ruler -in ${chartName}.chart
 	${chartName}.chart.ruler create line 1c 0.5c 1c 1c  \
 		[expr $period + 1]c 1c [expr $period + 1]c \
-		0.5c
+		0.5c -tags tick
 	for { set i 0 } { $i < $period } { incr i } {
 	    set x [expr $i + 1]
-	    ${chartName}.chart.ruler create line ${x}c 0.5c ${x}c 1c
+	    ${chartName}.chart.ruler create line ${x}c 0.5c ${x}c 1c -tags tick
 	    ${chartName}.chart.ruler create text $x.15c .75c -text $i \
-		    -anchor sw
+		    -anchor sw -tags label
 	}
 	${chartName}.chart.ruler create text [expr $period + 1].15c \
-		.75c -text $period -anchor sw
+		.75c -text $period -anchor sw -tags label
 
 	# Now we create the chart
 
@@ -443,9 +475,12 @@ proc ptkGanttDisplay { universe {inputFile ""} } {
 
     toplevel $ganttChartName
 
-    wm minsize $ganttChartName 100 50
-    wm maxsize $ganttChartName 1000 800
-    # wm geometry $ganttChartName 500x400
+    # wm minsize $ganttChartName 100 50
+    # wm maxsize $ganttChartName 1000 800
+
+    # Super-kludge: take a guess...
+
+    wm geometry $ganttChartName 780x350
 
     # Here we have the menu bar.
 
@@ -502,4 +537,323 @@ proc ptkGanttDisplay { universe {inputFile ""} } {
 	ptkGantt_Bindings $universe $num_procs
     }
 }
+
+
+
+#####
+# New stuff, from John Reekie's tcl libraries. 
+
+proc gantt_measureLabel {canvas value} {
+    set t [$canvas create text 0 0 -text [format {%.0f} $value]]
+    set width [rectWidth [$canvas bbox $t]]
+    $canvas delete $t
+
+    return $width
+}
+
+#
+# rectWidth: return the width of a rectangle
+#
+proc rectWidth {rect} {
+    return [expr [x1 $rect] - [x0 $rect]]
+}
+
+
+
+#
+# x, y
+#
+# Extract coordinates from a 2-list
+#
+proc x {xy} {
+    return [lindex $xy 0]
+}
+
+proc y {xy} {
+    return [lindex $xy 1]
+}
+
+
+#
+# x0, y0, x1, y1
+#
+# Extract coordinates from a 4-list
+#
+proc x0 {xy} {
+    return [lindex $xy 0]
+}
+
+proc y0 {xy} {
+    return [lindex $xy 1]
+}
+
+proc x1 {xy} {
+    return [lindex $xy 2]
+}
+
+proc y1 {xy} {
+    return [lindex $xy 3]
+}
+
+
+
+#
+# mapping.tcl
+#
+# Utility functions for mapping between number ranges, scaling
+# intervals, and so on.
+#
+
+
+#
+# Given a number, round up to the nearest power of ten
+# times 1, 2, or 5.
+#
+proc axisRoundUp {x} {
+    set exp [expr floor (log10($x))]
+    set x [expr $x * pow(10, -$exp)]
+
+    if {$x > 5.0} {
+	set x 10.0
+    } elseif {$x > 2.0} {
+	set x 5.0
+    } elseif {$x > 1.0 } {
+	set x 2.0
+    }
+
+    set x [expr $x * pow(10,$exp)]
+    return $x
+}
+
+
+#
+# Given a range, space, field width, and padding, figure out how
+# the field increment so they will fit.
+#
+proc axisIncrement {low high space width padding} {
+puts "axisIncrement $low $high $space $width $padding"
+
+    set maxnum   [expr $space / ($width+$padding)]
+puts "maxnum = $maxnum"
+
+    set estimate [expr (double($high) - $low) / ($maxnum)]
+puts "estimate = $estimate"
+
+    set estimate [axisRoundUp $estimate]
+
+puts "estimate = $estimate"
+
+    return $estimate
+}
+
+
+#
+# Given a range and an increment, return the list of numbers
+# within that range and on that increment.
+#
+proc rangeValues {low high inc} {
+    set result {}
+    set n      1
+
+    set val [roundUpTo $low $inc]
+    while {$val <= $high} {
+	lappend result $val
+	set val [expr $val + $n * $inc]
+    }
+
+    return $result
+}
+
+
+#
+# Given two ranges and a list of numbers in the first range,
+# produce the mapping of that list to the second range.
+#
+proc mapRange {low high values lowdash highdash} {
+    set result {}
+
+    set scale [expr (double($highdash) - $lowdash) / ($high - $low)]
+    foreach n $values {
+	lappend result [expr $lowdash + ($n-$low) * $scale]
+    }
+
+    return $result
+}
+
+
+#
+# Given two numbers, round the first up or down to the
+# nearest multiple of the second.
+#
+proc roundDownTo {x i} {
+    return [expr $i * (floor($x/$i))]
+}
+
+proc roundUpTo {x i} {
+    return [expr $i * (ceil($x/$i))]
+}
+
+
+
+#
+# foreach*
+#
+# Multi-argument version of foreach. Stops when any one of the
+# argument lists runs out of elements.
+#
+# As for loop{},. "body" cannot contain return commands. As
+# for loop{}, this could be fixed later if necessary.
+#
+# Also as for loop{}, the "-counter" option introduces the name
+# of a variable that counts from 0 to n-1, where n is the length
+# of the shortest argument list.
+#
+# How does it work? I wish you hadn't asked.... For each variable
+# name, it creates a local variable called i0, i1 etc, and binds
+# the local variable to the passed variable with upvar{}. For each
+# argument list, it creates local variable called l0, l1 etc.
+#
+# Then, in a frenzy of list heading and tailing, it sets each i(n)
+# to the head element of the corresponding l(n), and evaluates the
+# body in the caller's context (so that variable names passed to
+# this procedure reference the appropriate i(n)). It takes the tail
+# of the lists and, provided none are empty, does the same thing again.
+#
+# This is very inefficient, of course, and should be one of the
+# first things recoded in C when things need speeding up.
+#
+proc foreach* {args} {
+    set c 0
+
+    set v [readopt counter args]
+    if {$v != ""} {
+	upvar $v counter
+    }
+
+    while {[llength $args] > 2} {
+	upvar   [lindex $args 0] i$c
+	set l$c [lindex $args 1]
+
+	set args [ldrop $args 2]
+	incr c
+    }
+
+    if {[llength $args] != 1} {
+	puts "Wrong number of args to foreach*"
+	return
+    }
+
+    set body [lindex $args 0]
+
+    set done    0
+    set counter 0
+    while { ! $done } {
+	for {set i 0} {$i < $c} {incr i} {
+	    set i$i [lindex [set l$i] 0]
+	}
+
+	uplevel $body
+
+	for {set i 0} {$i < $c} {incr i} {
+	    set l$i [ltail [set l$i]]
+	    if {[lnull [set l$i]]} {
+		set done 1
+	    }
+	}
+
+	incr counter
+    }
+}
+
+
+#
+# readopt
+#
+# Read an option argument, like getopt{}, but instead of setting
+# a variable return the read value of the option.
+#
+# The argument list is modified as for getopt{}.
+#
+# Example:
+#
+#    set thing [readopt fred args]
+#
+# Note that readopt{} does not make getopt{} redundant, since getopt{]
+# does not change the option variable if the option is not present.
+#
+proc readopt {option listname} {
+
+    upvar $listname l
+
+    set t [lsearch -exact $l -$option]
+    if { $t != -1 } {
+	set v [lindex   $l [expr $t+1]]
+	set l [lreplace $l $t [expr $t+1]]
+
+	return $v
+    }
+    return ""
+}
+
+
+#
+# Take or drop list elements
+#
+proc ltake {list n} {
+    return [lrange $list 0 [expr $n - 1]]
+}
+
+proc ldrop {list n} {
+    return [lreplace $list 0 [expr $n-1]]
+}
+
+proc ldropUntil {list item} {
+    set index [lsearch -exact $list $item]
+    if { $index == -1 } {
+	return {}
+    } else {
+	return [ldrop $list $index]
+    }
+}
+
+#
+# list.itcl
+#
+# Utility functions on lists. See also syntax.tcl.
+#
+
+proc lhead {list} {
+    return [lindex $list 0]
+}
+
+#proc lhead {list} {
+#    return [lindex $list 0
+#}
+
+proc ltail {list} {
+    return [lreplace $list 0 0]
+}
+
+proc linit {list} {
+    return [ltake $list [expr [llength $list] - 1]]
+}
+
+proc llast {list} {
+    return [lindex $list [expr [llength $list] - 1]]
+}
+
+
+#
+# Test for a null list (or element). Written the way it is
+# because a) `==' cannot be used if the list starts with a number and b
+# llength is not so good because it traverses the whole list.
+#
+# The second case checks for the list being null but indicated
+# by empty braces. I'm confused as to why I need this...
+#
+proc lnull {list} {
+    return [expr (! [string match "?*" $list]) \
+	         || [string match "{}" $list]]
+}
+
 
