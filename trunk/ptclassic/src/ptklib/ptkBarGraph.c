@@ -29,8 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
                                                         COPYRIGHTENDKEY
 */
 
-#include "tkConfig.h"
-#include "tkInt.h"
+#include "tk.h"
 /*
  * Note that although the following include is in the ptolemy kernel
  * directory, it does not pull in any C++ code.
