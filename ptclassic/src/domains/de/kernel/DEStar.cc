@@ -60,7 +60,7 @@ DERepeatStar :: DERepeatStar() {
 	feedbackOut.connect(feedbackIn, 0);
 }
 
-void DERepeatStar :: repeat(float when) {
+void DERepeatStar :: refireAtTime(float when) {
 	feedbackOut.put(when) << 0.0 ;
 }
 
@@ -139,7 +139,7 @@ int DEPriorityStar :: IsItRunnable()
 	   }
 	   if (arrivalTime < completionTime) {
 		// launch the feedback event.
-	   	if (preNum <= 0) repeat(completionTime);	
+	   	if (preNum <= 0) refireAtTime(completionTime);	
 	   	return FALSE;
 	   }
 	} else if (numEvent == 0) return FALSE;
