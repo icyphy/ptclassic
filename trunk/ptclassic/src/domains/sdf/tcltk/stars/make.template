@@ -31,12 +31,13 @@ LIB=libsdftclstars.a
 STARDOCDIR = ../../doc/stars
 
 # source files for all stars, using preprocessor
+# note that SDFTclScript must be made before stars that depend on it
 PL_SRCS= \
  SDFLMSTkPlot.pl \
  SDFLMSCxTkPlot.pl \
+ SDFTclScript.pl \
  SDFTkBarGraph.pl \
  SDFTkMeter.pl \
- SDFTclScript.pl \
  SDFTkShowValues.pl \
  SDFTkSlider.pl \
  SDFTkText.pl
