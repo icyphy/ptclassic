@@ -142,8 +142,6 @@ $(LIBDIR)/$(CLIB):	$(CLIB) $(EXP)
 		ln $(CLIB) $(LIBDIR)
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
-# Don't place $(STARDOCDIR) here, or the STARDOCDIR directory will be made
-# in non-star related directories.
 sources:	$(PTLANG_IN_OBJ) $(EXTRA_SRCS) $(SRCS) $(HDRS) make.template 
 CRUD=*.o *.so *.sl core *~ *.bak ,* LOG* $(KRUFT) 
 clean:
