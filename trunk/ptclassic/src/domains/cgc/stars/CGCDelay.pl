@@ -34,7 +34,8 @@ limitation of liability, and disclaimer of warranty provisions.
 
     codeblock (declarations)
     {
-	double $starSymbol(buffer)[$val(delay)];
+	/* static so that buffer will be initialized to zero */
+	static double $starSymbol(buffer)[$val(delay)];
 	int $starSymbol(index);
     }
 
