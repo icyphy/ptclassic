@@ -31,7 +31,7 @@
 
 ##########################################################################
 #### autoName 
-# This procedure returns a name constructed by augmenting the provided
+# Return a name constructed by augmenting the provided
 # stem with a number to guarantee that the name is unique. A global
 # (within the tycho namespace) array autoNames is used to keep track of
 # the numbers used for each stem. This procedure should be used for
@@ -56,7 +56,7 @@ namespace ::tycho {
 
 ##########################################################################
 #### exit
-# We redefine the Tcl exit procedure to cleanly exit, querying the user
+# Redefine the Tcl exit procedure to cleanly exit, querying the user
 # to save work.
 #
 rename ::exit ::tclexit
@@ -99,7 +99,7 @@ proc ::tycho::saferUpdate {obj} {
 ##########################################################################
 #### TopLevel
 # This class creates a top-level window with a single frame in it
-# (called $itk_component(childsite). The class provides methods and
+# (called <code>$itk_component(childsite)</code>. The class provides methods and
 # options for controlling the position of the window on the screen, its
 # size, and the focus. It also manages a global list of top-level
 # windows for controlling the switching of the focus from one window to
@@ -118,21 +118,11 @@ class ::tycho::TopLevel {
 
     inherit ::itk::Toplevel
 
-    # Position the window in the list of windows before the given one.
+    # Specify the logical "next window" (C-x o shifts the focus there).
     itk_option define -before before Before {}
 
-    # By default, the geometry option is set to the
-    # null string, deferring to the window manager the control over
-    # position. It can be set alternatively to a string of the
-    # form "+x+y", where x and y give the screen position of
-    # the upper left corner of the window relative to the upper
-    # left corner of the screen.  Using "-" instead of "+" will
-    # define the screen position relative to the right or
-    # bottom of the screen rather than the left or top.
-    # 
-    itk_option define -geometry geometry Geometry "" {
-	wm geometry $itk_component(hull) $itk_option(-geometry)
-    }
+    # Specify the size and/or placement of the window.
+    itk_option define -geometry geometry Geometry "" {}
 
     constructor {args} {}
     destructor {}
@@ -167,11 +157,10 @@ class ::tycho::TopLevel {
     # Exit the program
     public proc exitProgram {{queryUser 1}} {}
 
-    # Return the value of the exitconfirmed variable.
+    # Return 1 if we are in the process of exiting, 0 otherwise.
     public proc returnExitCon {} {}
 
-    # If the argument is zero, disable exiting when the last window
-    # is closed.
+    # Specify whether to exit when the last window is closed.
     public proc exitWhenNoMoreWindows {bool} {}
 
     #################################################################
@@ -215,13 +204,28 @@ class ::tycho::TopLevel {
 # and the new window is placed in the window order before that one.
 #
 configbody ::tycho::TopLevel::before {
-    set tl $itk_option(-before)
+    set tl [winfo toplevel $itk_option(-before)]
     if {$tl != {} &&  \
 	    [uplevel #0 info objects $tl] != {} && \
 	    [$tl isa ::tycho::TopLevel]} {
 	$topLevelWindows remove $prefix
 	$topLevelWindows insert $prefix $tl
     }
+}
+
+#####################################################################
+#### -geometry option
+# By default, the geometry option is set to the
+# null string, deferring to the window manager the control over
+# position. It can be set alternatively to a string of the
+# form "+x+y", where x and y give the screen position of
+# the upper left corner of the window relative to the upper
+# left corner of the screen.  Using "-" instead of "+" will
+# define the screen position relative to the right or
+# bottom of the screen rather than the left or top.
+# 
+configbody ::tycho::TopLevel::geometry {
+    wm geometry $itk_component(hull) $itk_option(-geometry)
 }
 
 #####################################################################
@@ -275,13 +279,15 @@ body ::tycho::TopLevel::constructor {args} {
 #####################################################################
 #### Destructor
 # Destroy the window containing the widget. If there are no remaining
-# top-level windows that are mapped, then exit the program. The latter functionality can be
-# disabled by calling ::tycho::TopLevel::exitWhenNoMoreWindows with the
-# argument "0". Normally, you should call nextWindow before destroying
-# any top-level that has the focus. This puts the focus into the next
-# logical window in the window sequence. Note that if the mouse is not
-# over a window belonging to this application after a window is
-# deleted, the focus will be given up entirely by the application.
+# top-level windows that are mapped, then exit the program. The latter
+# functionality can be disabled by calling
+# <code>::tycho::TopLevel::exitWhenNoMoreWindows</code> with the
+# argument "0". Normally, you should call <code>nextWindow</code>
+# before destroying any top-level that has the focus. This puts the
+# focus into the next logical window in the window sequence. Note that
+# if the mouse is not over a window belonging to this application after
+# a window is deleted, the focus will be given up entirely by the
+# application.
 # <p>
 # NOTE: It would be better if the user were queried for confirmation
 # about exiting the program, but this appears to be impossible with the
@@ -329,7 +335,7 @@ body ::tycho::TopLevel::destructor {} {
 # "watch" cursor (to indicate that the object is busy), execute the
 # arguments as a method invocation for this object, and change the
 # cursor back to whatever it was before. In order for the cursor to
-# actually change, the mryhod calls "update", and therefore the object
+# actually change, the method calls "update", and therefore the object
 # may no longer exist when the procedure returns (it might be deleted
 # during the call to update). If the object does not exist, the
 # procedure returns 0. Otherwise, it returns 1 (or an error). You
@@ -367,11 +373,10 @@ body ::tycho::TopLevel::busy {args} {
 # window, but before any tkwait visibility.
 # <p>
 # FIXME: This procedure doesn't work with widgets that defer mapping
-# (like the iwidget buttonbox). The width of the button box is not
-# taken into account depite the fact that everything has been packed
-# into it already. This is because the widget actually defers the
-# packing using an "after" command. This is allegedly done for speed
-# reasons, but seems like a bit of a hack to me.
+# (like most iwidgets, including the only one we use, the buttonbox).
+# The width of the button box is not taken into account depite the fact
+# that everything has been packed into it already. This is because the
+# widget actually defers the packing using an "after" command.
 #
 body ::tycho::TopLevel::centerOnScreen {} {
     # We used to withdraw the window here, but it appears unnecessary.
@@ -496,6 +501,7 @@ body ::tycho::TopLevel::exitWhenNoMoreWindows {bool} {
 
 #####################################################################
 #### returnExitCon
+# Return 1 if a confirmed exit is in progress, and 0 otherwise.
 #
 body ::tycho::TopLevel::returnExitCon {} {
     return $exitconfirmed
