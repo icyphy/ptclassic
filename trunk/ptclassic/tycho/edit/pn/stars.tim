@@ -36,8 +36,15 @@ group dynamic -label {Dynamic Stars} {
             -class {Interleave} \
             -label {Interleave} \
             -icon {edit/pn/icons.tim#dynamic.interleave} {
-	port input0 -datatype Token
-	port input1 -datatype Token
+        port input0 -datatype Token
+        port input1 -datatype Token
+        port output -datatype Token
+    }
+    star corba \
+            -class {CorbaSquare} \
+            -label {Corba} \
+            -icon {edit/pn/icons.tim#dynamic.corba} {
+	port input -datatype Token
         port output -datatype Token
     }
 }

@@ -36,6 +36,27 @@ termstyle 2-1-east {
             -style arrowout -fill blue -tags output
 }
 
+termstyle 2-1-west {
+    terminal input0 -coords {100 25} -direction e -style circle
+    terminal input1 -coords {100 75} -direction e -style circle
+    terminal output -coords {0 50} -direction w \
+            -style arrowout -fill blue -tags output
+}
+
+termstyle 2-1-north {
+    terminal input0 -coords {25 0} -direction n -style circle
+    terminal input1 -coords {75 0} -direction n -style circle
+    terminal output -coords {50 100} -direction s \
+            -style arrowout -fill blue -tags output
+}
+
+termstyle 2-1-south {
+    terminal input0 -coords {25 100} -direction s -style circle
+    terminal input1 -coords {75 100} -direction s -style circle
+    terminal output -coords {50 0} -direction n \
+            -style arrowout -fill blue -tags output
+}
+
 termstyle 1-0-east {
     terminal input -coords {0 50} -direction w -style circle
 }
@@ -54,6 +75,31 @@ termstyle 1-2-west {
     terminal output1 -coords {100 75} -direction e \
 	    -style arrowout -fill blue2 -tags output
 }
+
+termstyle 1-2-east {
+    terminal input -coords {100 50} -direction e -style circle
+    terminal output0 -coords {0 25} -direction w \
+	    -style arrowout -fill blue2 -tags output
+    terminal output1 -coords {0 75} -direction w \
+	    -style arrowout -fill blue2 -tags output
+}
+
+termstyle 1-2-north {
+    terminal input -coords {50 0} -direction n -style circle
+    terminal output0 -coords {25 100} -direction s \
+	    -style arrowout -fill blue2 -tags output
+    terminal output1 -coords {75 100} -direction s \
+	    -style arrowout -fill blue2 -tags output
+}
+
+termstyle 1-2-south {
+    terminal input -coords {50 100} -direction s -style circle
+    terminal output0 -coords {25 0} -direction n \
+	    -style arrowout -fill blue2 -tags output
+    terminal output1 -coords {75 0} -direction n \
+	    -style arrowout -fill blue2 -tags output
+}
+
 
 termstyle multi_1-0-east {
     terminal input -coords {0 50} -direction w -style circle -slash 1
@@ -95,6 +141,21 @@ termstyle 1-1-east {
     terminal output -coords {100 50} -direction e \
             -style arrowout \
             -tags output
+}
+
+termstyle 1-1-south {
+    terminal input -coords {50 0} -direction n -style circle
+    terminal output -coords {50 100} -direction s \
+            -style arrowout \
+            -tags output
+}
+
+termstyle 1-1-north {
+    terminal output -coords {50 0} -direction n -style arrowout \
+	    -tags output
+       
+    terminal input -coords {50 100} -direction s \
+            -style circle \
 }
 
 termstyle 1-1-west {
@@ -149,7 +210,10 @@ group dynamic -label {Dynamic Icons} {
             -label {Alternate} \
             -text Alternate \
             -color green \
-            -termstyles {1-2-west} \
+            -termstyles {1-2-west
+             1-2-east
+             1-2-south
+             1-2-north} \
             -graphics {
 	oval 85 15 70 30 -fill yellow
         oval 85 70 70 85 -fill yellow
@@ -161,17 +225,42 @@ group dynamic -label {Dynamic Icons} {
             -label {Redirect} \
             -text Redirect \
             -color blue \
-            -termstyles {1-1-east} \
+            -termstyles {
+	         1-1-east
+	         1-1-north
+	         1-1-south
+	         1-1-west
+            } \
             -graphics {
         polygon 30 50 50 15 \
                 70 50 50 85  -fill black -outline yellow
     }
+    icon corba \
+            -slatetype IconFrame \
+            -label {Corba} \
+            -text Corba \
+            -color blue \
+            -termstyles {
+	      1-1-east
+              1-1-west
+              1-1-north
+              1-1-south} \
+            -graphics {
+        polygon 30 50 50 30 \
+                30 50 50 30  -fill black -outline yellow
+    }
+
     icon interleave \
             -slatetype IconFrame \
             -label {Interleave} \
             -text Interleave \
             -color green \
-            -termstyles {2-1-east} \
+            -termstyles {
+	     2-1-east
+             2-1-west
+             2-1-north
+             2-1-south
+    } \
             -graphics {
         oval 15 15 30 30 -fill yellow
         oval 15 70 30 85 -fill yellow
