@@ -10,7 +10,7 @@ All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location	{ SDF image library }
+	location { SDF image library }
 	desc {
 Read three GrayImages that describe a color image in Red-Green-Blue (RGB)
 format and output three GrayImages that describe an image in YUV format.
@@ -67,7 +67,7 @@ Wiley & Sons: New York.  1991.  2nd ed.
 	defstate {
 		name	{ CCIR_601 }
 		type	{ int }
-		default { TRUE }
+		default { "YES" }
 		desc	{
 TRUE means that the RGB space will be converted to shifted-and-scaled YUV
 color space defined by the CCIR 601 standard, which is used in the MPEG
@@ -147,7 +147,7 @@ to the usual YUV definition. }
 				vvalue =  0.5    * rvalue +
 					 -0.4187 * gvalue +
 					 -0.0813 * bvalue;
-				if ( CCIR_601 ) {
+				if ( int(CCIR_601) ) {
 				  yvalue = (219*yvalue)/255 +  16;
 				  uvalue = (224*yvalue)/255 + 128;
 				  vvalue = (224*yvalue)/255 + 128;
