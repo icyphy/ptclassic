@@ -115,6 +115,8 @@ PL_SRCS= \
  CGCMaxMin.pl \
  CGCModulo.pl \
  CGCModuloInt.pl \
+ CGCMonoIn.pl \
+ CGCMonoOut.pl \
  CGCMpy.pl \
  CGCMpyCx.pl \
  CGCMpyFix.pl \
