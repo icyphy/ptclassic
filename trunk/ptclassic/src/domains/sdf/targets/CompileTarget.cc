@@ -19,13 +19,12 @@ a universe.
 
 #include "CompileTarget.h"
 #include "KnownTarget.h"
-#include "UserOutput.h"
 #include "Galaxy.h"
 #include "GalIter.h"
 #include "Geodesic.h"
 #include "ConstIters.h"
 #include <ctype.h>
-
+#include "pt_fstream.h"
 
 int CompileTarget::setup(Galaxy& g) {
 	// This kludge bypasses setup() in CGTarget, which casts
@@ -52,11 +51,8 @@ int CompileTarget::writeGalDef(Galaxy& galaxy, StringList className) {
     StringList galFileName = galaxy.readClassName();
     galFileName += ".h";
     char* codeFileName = writeFileName(galFileName);
-    UserOutput codeFile;
-    if(!codeFile.fileName(codeFileName)) {
-	Error::abortRun("Can't open code file for writing: ",codeFileName);
-	return FALSE;
-    }
+    pt_ofstream codeFile(codeFileName);
+    if (!codeFile) return FALSE;
 
     myCode << "// Galaxy definition file from: " << className << "\n\n";
     myCode << "#ifndef _" << className << "_h\n#define _" << className <<
@@ -136,12 +132,9 @@ int CompileTarget::run() {
 
 void CompileTarget::wrapup() {
     char* codeFileName = writeFileName("code.cc");
-    UserOutput codeFile;
     if(Scheduler::haltRequested()) return;
-    if(!codeFile.fileName(codeFileName)) {
-	Error::abortRun("Can't open code file for writing: ",codeFileName);
-	return;
-    }
+    pt_ofstream codeFile(codeFileName);
+    if (!codeFile) return;
     writeCode(codeFile);
 
     // Invoke the compiler
