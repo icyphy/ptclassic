@@ -101,9 +101,9 @@ will be stored there after the run has completed.
 	wrapup {
 		const char* sf = saveTapsFile;
 		if (sf != NULL && *sf != 0) {
-			addCode(CodeBlock("    {\n"));
+			addCode("    {\n");
 			addCode(save);
-			addCode(CodeBlock("    }\n"));
+			addCode("    }\n");
 		}
 	}
 

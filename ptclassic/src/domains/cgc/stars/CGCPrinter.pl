@@ -58,21 +58,21 @@ codeblock (openfile) {
 	    for (int i = 1; i <= input.numberPorts(); i++) {
 		index = i;
 		if(fileOutput) {
-			addCode(CodeBlock(
-"\tfprintf($starSymbol(fp),\"%f\\t\", $ref(input#index));\n"));
+			addCode(
+"\tfprintf($starSymbol(fp),\"%f\\t\", $ref(input#index));\n");
 		} else {
-			addCode(CodeBlock( 
-"\tprintf(\"%f\\t\", $ref(input#index));\n"));
+			addCode( 
+"\tprintf(\"%f\\t\", $ref(input#index));\n");
 		}
 	    }
 	    if (fileOutput) {
-		addCode(CodeBlock("\tfprintf($starSymbol(fp),\"\\n\");\n"));
+		addCode("\tfprintf($starSymbol(fp),\"\\n\");\n");
 	    } else {
-		addCode(CodeBlock("\tprintf(\"\\n\");\n"));
+		addCode("\tprintf(\"\\n\");\n");
 	   }
 	}
 	wrapup {
 	    if(fileOutput)
-		addCode(CodeBlock("\tfclose($starSymbol(fp));\n"));
+		addCode("\tfclose($starSymbol(fp));\n");
 	}
 }

@@ -22,7 +22,7 @@ This star absorbs all inputs, hence no code needs to be generated!
 		noInternalState();
 	}
 	go {
-		addCode( CodeBlock( "/* BLACK HOLE */" ));
+		addCode("/* BLACK HOLE */" );
 	}
 }
 
