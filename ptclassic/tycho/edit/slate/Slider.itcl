@@ -50,8 +50,18 @@
 # bar to jump to that position; it can then be dragged.
 #
 # Slider uses the following interactor classes:
+#<p>
 # <a href="../../../../slate/interactors/doc/codeDoc/Interactor.html">
-# <i>Interactor</i> (the abstract superclass).
+# <i>Interactor</i></a>: the abstract interactor superclass
+#<br>
+# <a href="../../../../slate/interactors/doc/codeDoc/Alonger.html">
+# <i>Alonger</i></a>: moves the bar vertically
+#<br>
+# <a href="../../../../slate/interactors/doc/codeDoc/Interactor.html">
+# <i>Stepper</i></a>: moves the bar in discrete steps
+#<br>
+# <a href="../../../../slate/interactors/doc/codeDoc/Repeater.html">
+# <i>Repeater</i></a>: moves the bar in increments while the mouse is pressed.
 #
 class ::tycho::Slider {
     inherit itk::Widget
@@ -62,7 +72,7 @@ class ::tycho::Slider {
     ###################################################################
     ####                            options                        ####
 
-    # The command prefix to be used whenever the slider changes.
+    # The command prefix to be called whenever the slider moves.
     itk_option define -command command Command ""
 
     # The number of significant digits to display.
@@ -71,8 +81,8 @@ class ::tycho::Slider {
     # The value when the slider is at the bottom.
     itk_option define -from from From 0
 
-    # The slider's label -- appears underneath it.
-    # FIXME: Can't have an empty label
+    # The slider's label, which appears underneath it.
+    # <i>FIXME</i>: Can't have an empty label
     itk_option define -label label Label "."
 
     # The vertical movement of the slider.
@@ -81,7 +91,7 @@ class ::tycho::Slider {
     # The resolution of the slider. If zero, there is no quantization.
     itk_option define -resolution resolution Resolution 0
 
-    # The type of scale: linear or log. NOT IMPLEMENTED.
+    # The type of scale: linear or log. <i>NOT IMPLEMENTED.</i>
     itk_option define -scale scale Scale "linear"
 
     # The value when the slider is at the top.
@@ -100,29 +110,31 @@ class ::tycho::Slider {
     # Get the current value of the slider
     method get {} {}
 
-    # Jump the slider to a position indicated by coordinates.
-    private method jump {x y} {}
-
     # Set the position of the slider.
     method set {x} {}
 
     # Move the slider up one increment
     method up {} {}
 
-    # Update the slider display. Do not use.
-    private method updatevalue {} {}
-
     # Move the slider down one increment.
     method down {} {}
 
-    # Given hit coordinates, move the slider up or down one increment
-    private method upordown {x y} {}
 
     ###################################################################
     ####                   private methods                         ####
 
+    # Jump the slider to a position indicated by coordinates.
+    private method jump {x y} {}
+
     # Redraw the slider completely
     private method redraw {} {}
+
+    # Update the slider display. Do not use.
+    private method updatevalue {} {}
+
+    # Given hit coordinates, move the slider up or down one increment
+    private method upordown {x y} {}
+
 
     ###################################################################
     ####                   private variables                       ####
@@ -168,8 +180,6 @@ class ::tycho::Slider {
 #######################################################################
 #### -digits configuration
 #
-# The number of significant digits to display.
-#
 configbody ::tycho::Slider::digits {
     if { $initialized } {
 	updatevalue
@@ -180,6 +190,8 @@ configbody ::tycho::Slider::digits {
 #### -from configuration
 #
 # The value when the slider is at the bottom.
+# <br>
+# NOTE: This value must always be greater than the <code>to</code> option.
 #
 configbody ::tycho::Slider::from {
     if { $initialized } {
@@ -189,9 +201,6 @@ configbody ::tycho::Slider::from {
 
 #######################################################################
 #### -label configuration
-#
-# The slider's label -- appears underneath it.
-# FIXME: Can't have an empty label
 #
 configbody ::tycho::Slider::label {
     if { $initialized } {
@@ -209,8 +218,6 @@ configbody ::tycho::Slider::label {
 #######################################################################
 #### -length configuration
 #
-# The vertical movement of the slider.
-#
 configbody ::tycho::Slider::length {
     if { $initialized && $itk_option(-length) != $length } {
 	::set length $itk_option(-length)
@@ -220,11 +227,12 @@ configbody ::tycho::Slider::length {
 
 
 #######################################################################
-#### -Resolution configuration
+#### -resolution configuration
 #
-# Configuration code for the -resolution option. Sets the
-# step size for the interactor, and adjust slider position
-# and the value label.
+# The resolution of the slider. If zero, the resolution is exactly
+# one pixel. The interactors are set up to quantize movement of
+# the bar if resolution is non-zero. When set, the bar is moved to
+# a multiple of the resolution.
 #
 configbody ::tycho::Slider::resolution {
     if { $initialized } {
@@ -279,7 +287,8 @@ configbody ::tycho::Slider::resolution {
 #### -to configuration
 #
 # The value when the slider is at the top.
-# NOTE: This value must always be greater than the -from option.
+# <br>
+# NOTE: This value must always be greater than the <code>from</code> option.
 #
 configbody ::tycho::Slider::to {
     if { $initialized } {
@@ -291,8 +300,6 @@ configbody ::tycho::Slider::to {
 #######################################################################
 #### -totalwidth configuration
 #
-# The total width of the slider widget.
-#
 configbody ::tycho::Slider::totalwidth {
     if { $initialized } {
 	redraw
@@ -301,8 +308,6 @@ configbody ::tycho::Slider::totalwidth {
 
 #######################################################################
 #### -width configuration
-#
-# The width of the slider strip.
 #
 configbody ::tycho::Slider::width {
     if { $initialized && $itk_option(-width) != $width } {
@@ -356,7 +361,7 @@ body ::tycho::Slider::constructor {args} {
 #
 # Move the slider down. If the resolution option is non-zero,
 # move it that far; if it is zero, move it one pixel.
-# In either case, don't move past the end of the trough...
+# In either case, don't move past the end of the trough.
 #
 body ::tycho::Slider::down {} {
     if { $itk_option(-resolution) != 0 } {
@@ -542,7 +547,7 @@ body ::tycho::Slider::set {x} {
 #
 # Move the slider up. If the resolution option is non-zero,
 # move it that far; if it is zero, move it one pixel.
-# In either case, don't move past the end of the trough...
+# In either case, don't move past the end of the trough.
 #
 body ::tycho::Slider::up {} {
     if { $itk_option(-resolution) != 0 } {
