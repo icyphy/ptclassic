@@ -680,6 +680,15 @@ body ::tycho::Edit::constructor {args} {
     bind $itk_component(text) <Button-3> {%Q contextmenu post %X %Y}
 }
 
+###################################################################
+#### destructor
+# Unsubscribe from all preferences
+#
+body ::tycho::Edit::destructor {} {
+    # Unsubscribe from all preferences
+    preference unsubscribe textedit $this
+}
+
 ##########################################################################
 ##########################################################################
 ####                         public methods                           ####
