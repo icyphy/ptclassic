@@ -679,8 +679,8 @@ int MatlabIfc :: MatlabGetVariable(char* name,
 	retval = FALSE;
 	*numrows = 0;
 	*numcols = 0;
-	***realPartStrings = 0;
-	***imagPartStrings = 0;
+	*realPartStrings = 0;
+	*imagPartStrings = 0;
     }
 
     return retval;
