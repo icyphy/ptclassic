@@ -29,14 +29,15 @@ CG56Memory :: CG56Memory(const char* x_map, const char* y_map) :
 {}
 
 CG56Target :: CG56Target(const char* nam, const char* desc) :
-	inProgSection(0), uname(0),
 	AsmTarget(nam,desc,"CG56Star")
 {
 	initStates();
-	mem = 0;
 }
 
 void CG56Target :: initStates() {
+	inProgSection = 0;
+	uname = 0;
+	mem = 0;
 	addState(xMemMap.setState("xMemMap",this,"0-4095","X memory map",
 		A_NONSETTABLE|A_NONCONSTANT));
 	addState(yMemMap.setState("yMemMap",this,"0-4095","Y memory map",
@@ -66,10 +67,11 @@ char* makeLower(const char* name) {
 }
 
 int CG56Target :: setup(Galaxy& g) {
-	LOG_DEL; delete dirFullName;
+	LOG_DEL; delete dirFullName; dirFullName = 0;
+	LOG_DEL; delete mem; mem = 0;
+	LOG_DEL; delete uname; uname = 0;
 	dirFullName = writeDirectoryName(dirName);
 	cmds.initialize();
-	LOG_DEL; delete mem;
 	LOG_NEW; mem = new CG56Memory(xMemMap,yMemMap);
 	uname = makeLower(g.readName());
 	targetNestedSymbol.initialize();
@@ -101,14 +103,14 @@ void CG56Target :: wrapup () {
 }
 
 CG56Target :: ~CG56Target () {
-	LOG_DEL; delete mem;
-//	LOG_DEL; delete dirFullName; dirFullName = 0;
-//	LOG_DEL; delete uname;
+	LOG_DEL; delete mem; mem = 0;
+	LOG_DEL; delete dirFullName; dirFullName = 0;
+	LOG_DEL; delete uname; uname = 0;
 }
 
 // copy constructor
 CG56Target :: CG56Target (const CG56Target& src) :
-AsmTarget(src.readName(),src.readDescriptor(),"CG56Star"), inProgSection(0)
+AsmTarget(src.readName(),src.readDescriptor(),"CG56Star")
 {
 	initStates();
 	copyStates(src);
