@@ -9,6 +9,7 @@ static const char file_id[] = "CGDoWhileScheduler.cc";
 #include "DataStruct.h"
 #include "distributions.h"
 #include "CodeBlock.h"
+#include "CGDDFCode.h"
 #include <math.h>
 
 /**************************************************************************
