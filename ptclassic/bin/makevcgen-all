@@ -17,6 +17,9 @@ dirs="$PTOLEMY/src/kernel \
 	$PTOLEMY/src/utils/libptmatlab \
 	$PTOLEMY/src/domains/de/kernel \
 	$PTOLEMY/src/domains/de/stars \
+	$PTOLEMY/src/domains/sdf/kernel \
+	$PTOLEMY/src/domains/sdf/stars \
+	$PTOLEMY/src/domains/sdf/dsp/stars \
 	$PTOLEMY/src/ptcl"
 for dir in $dirs
 do
