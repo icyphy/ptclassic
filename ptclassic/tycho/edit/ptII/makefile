@@ -40,17 +40,27 @@ VPATH =		$(ROOT)/editors/ptII
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-TCL_SRCS =
+TCL_SRCS = \
+	util.tcl
   
 ITCL_SRCS = \
-	ButtonPanel.itcl \
+	PtButtonPanel.itcl \
+	PtDomainLibrary.itcl \
+	PtDomainPanel.itcl \
+	PtEdgeController.itcl \
 	PtEdit.itcl \
-	RunPanel.itcl \
-	RunWindow.itcl \
-	SampleSliderPanel.itcl \
-	Simulation.itcl \
-	SliderPanel.itcl \
-	TimePanel.itcl
+	PtGraphEditor.itcl \
+	PtIconLibrary.itcl \
+	PtParameterDialog.itcl \
+	PtRunPanel.itcl \
+	PtRunWindow.itcl \
+	PtSchematic.itcl \
+	PtSimulation.itcl \
+	PtSliderPanel.itcl \
+	PtTimePanel.itcl \
+	PtVertexController.itcl \
+	SampleSliderPanel.itcl
+
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	ptII.style \
