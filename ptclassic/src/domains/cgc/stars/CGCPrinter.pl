@@ -43,7 +43,7 @@ the same line, separated by tabs.
 	    if(fileOutput) {
 		StringList s;
 		s << "    FILE* $starSymbol(fp);";
-		addDeclaration(processCode(s));
+		addDeclaration(s);
 		addInclude("<stdio.h>");
 		addCode(openfile);
 	    }
