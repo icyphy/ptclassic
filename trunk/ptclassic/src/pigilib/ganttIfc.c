@@ -60,30 +60,48 @@ static vemSelSet findSets[MAX_DEPTH];
 static int findDepth = 0;
 
 
-/* 
- * Function to detect a name that is extended with a modifier like
- * name.ext1=num.ext2=num.  It returns true if there is at least one
- * "=" character after the first period.
- */
+/*
+Advance s to point after the next significant '.' character in the string
+or else return NULL if there are no more such characters.
+A significant '.' is one that doesn't precede a modifier of the form name=val,
+where the val part can be surrounded by "..." or '...' to protect a . or =.
+NOTE: this syntax had better match what parseClass in kernelCalls.cc does.
 
-static boolean
-specialInstance(s)
-char *s;
+For example, the string "galaxy.star.port=count.state=val.portname"
+should be parsed into the sections
+"galaxy.", "star.port=count.state=val.", "portname"
+*/
+char *
+incr(s)
+const char *s;
 {
-    char *eq, *p2;
-    char *p = strchr(s, '.');
-    if (!p) return 0;		/* No more periods in the string */
-    if ( (eq = strchr(p+1,'=')) ) {
-	/* If the '=' occurs before the next '.', return 1 */
-	p2 = strchr(p+1, '.');
-	if ( !p2 || p2 > eq) return 1;
+    char *p, *eq, *p2;
+
+    p = strchr(s, '.');
+    if (!p) return NULL;	/* No more periods in the string */
+    for (;;) {
+	/* At head of loop, p points at a period */
+	p++;			/* now p points at start of a segment */
+	eq = strchr(p, '=');
+	if (!eq) return p;	/* segment definitely not a modifier */
+	/* If the '=' occurs before the next '.', we have a modifier */
+	p2 = strchr(p, '.');
+	if (!p2) return NULL;	/* modifier is final segment */
+	if (p2 < eq) return p;	/* this segment is not a modifier */
+	/* The '.' could be inside a quoted value, so check it out */
+	if (eq[1] == '"' || eq[1] == '\'') {
+	  p2 = strchr(eq+2, eq[1]); /* find closing quote */
+	  if (!p2) return NULL;
+	  p2 = strchr(p2+1, '.');
+	  if (!p2) return NULL;	/* modifier is final segment */
+	}
+	p = p2;			/* advance over modifier, look again */
     }
-    return 0;
 }
 
 /*
 Copy the first component of s into buf.
-Components are separated by '.' characters.
+Components are separated by significant '.' characters.
 If the buffer is not large enough, copy only what fits.
 */
 static void
@@ -92,32 +110,15 @@ char *s;
 char *buf;
 int buflen;
 {
-    char *end;
-
-    end = strchr(s, '.');
-    if (end == NULL || specialInstance(s)) {
-	strncpy(buf, s, buflen);
-    } else {
-	while (s != end) {
-	    *buf++ = *s++;
-	}
-	*buf = '\0';
+    char *end = incr(s);
+    int maxtocopy = buflen-1;
+    if (end != NULL) {
+	int seglength = end-s-1; /* -1 to discount the ending '.' */
+	if (maxtocopy > seglength)
+	  maxtocopy = seglength;
     }
-}
-
-/*
-Advance s to point after the next '.' character in the string or
-else return NULL if there are no more such characters.
-*/
-char *
-incr(s)
-const char *s;
-{
-    char *end;
-
-    end = strchr(s, '.');
-    if (end && specialInstance(s)) end = NULL;
-    return (end == NULL) ? NULL : ++end;
+    strncpy(buf, s, maxtocopy);
+    buf[maxtocopy] = '\0';
 }
 
 /* 3/28/90
