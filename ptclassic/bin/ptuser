@@ -9,7 +9,7 @@
 # Created:	26 November 1993
 
 # Host where Ptolemy development files live.
-set ptHost=markov
+set ptHost=watson
 set ptUser=ptuser
 
 # Name of current host with domain stripped off.
@@ -17,9 +17,9 @@ set host=`hostname | sed 's/\([^.]*\).*/\1/'`
 
 # If using X, then create a new xterm.
 if ($?DISPLAY) then
-	(xon $ptHost xterm -e rlogin $ptHost -l $ptUser)
+	(xon $ptHost xterm -e /usr/bin/rlogin $ptHost -l $ptUser)
 else if ($host == $ptHost) then
-	exec rlogin -l $ptUser $ptHost
+	exec /usr/bin/rlogin -l $ptUser $ptHost
 else
 	echo You must first login to $ptHost
 endif
