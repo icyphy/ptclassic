@@ -1,14 +1,19 @@
 .\" $Id$
 .ll 6.5i
 .ps 25
-\f6INDEX
+\f(HBINDEX\fP
 .sp
 .hl
-.ps 9
+.\".ps 9
 .sp 0.3i
-.nr sp 9
-.nr pp 9
+.\".nr sp 9
+.\".nr pp 9
 .lp
-.ta 1.8iR 3.8iR 6.0iR
-.tc .
-.2c 6n 3
+.\".ta 1.8iR 3.8iR 6.0iR
+.\".tc .
+.\".2c 6n 3
+.ta 3.0iR
+.2c
+.lp
+.nf
+.sz 9

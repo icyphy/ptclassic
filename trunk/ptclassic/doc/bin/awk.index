@@ -1,8 +1,99 @@
+#!/bin/awk -f
+
 # $Id$
-# Match all lines
-/^/ {
-	printf ".br\n";
-	for (i=2; i<=NF ; ++i) printf "%s ", $i;
-	printf "   \a\t %s", $1;
-	printf "\n";
+
+# Awk processing for Ptolemy Almagest index.
+#
+# This script is responsible for consuming the (sorted and grepped) troff
+# index output and generating troff from it.  It inserts breaks between
+# letters of the alphabet, and automatically switches into constant width
+# courier font for star definitions/references/examples.
+#
+
+BEGIN {
+	FS = "|"
+	last = ""
+	npages = 0
+	lastchar = ""
+	output_cw = 0
+	for (i = 0; i < 26; i++) {
+		lc = sprintf("%c", i + 97);
+		uc = sprintf("%c", i + 65);
+		upconv[lc] = uc;
+		upconv[uc] = uc;
+	}
+	# Formatting commands are inserted in the header file
+	# ~ptolemy/doc/headers/index.
+}
+
+# index|page-number|term with spaces in it
+{
+	if (last != $3) {
+		if (last != "") {
+			if (output_cw) {
+				n = split(last, x, " ")
+				printf("\\f(CB%s\\fP ", x[1]);
+				for (i = 2; i <= n; i++) {
+					printf("%s", x[i]);
+					if (i != n)
+						printf(" ");
+				}
+				output_cw = 0;
+			} else {
+				printf("%s", last);
+			}
+			printf("      ");
+			for (i = 0; i < npages; i++) {
+				if (i != npages - 1)
+					printf("%s, ", pages[i]);
+				else
+					printf("%s", pages[i]);
+			}
+			printf("\n");
+		}
+		last = $3
+		npages = 0
+	}
+	if ($1 == "index_def" || $1 == "index_star_def") {
+		pages[npages++] = sprintf("\\fB%s\\fP", $2);
+	} else if ($1 == "index_exp" || $1 == "index_star_exp") {
+		pages[npages++] = sprintf("\\fI%s\\fP", $2);
+	} else {
+		pages[npages++] = $2
+	}
+	if ($1 == "index_star_def" || $1 == "index_star_exp" || $1 == "index_star_ref") {
+		output_cw = 1;
+	}
+
+	nchar = substr($3, 0, 1);
+	nchar = upconv[nchar];
+	if (lastchar != nchar) {
+		printf(".sp 0.7\n\\s+2\\fB%s\\fP\\s0\n.sp 0.5\n", nchar);
+		lastchar = nchar;
+	}
+}
+
+END {
+	# print last entry stuck in our craw
+
+	if (output_cw) {
+		n = split(last, x, " ")
+		printf("\\f(CB%s\\fP ", x[1]);
+		for (i = 2; i <= n; i++) {
+			printf("%s", x[i]);
+			if (i != n)
+				printf(" ");
+		}
+		output_cw = 0;
+	} else {
+		printf("%s", last);
+	}
+	printf("      ");
+	for (i = 0; i < npages; i++) {
+		if (i != npages - 1)
+			printf("%s, ", pages[i]);
+		else
+			printf("%s", pages[i]);
+	}
+	printf("\n");
 }
