@@ -37,12 +37,21 @@ CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 # this flag. See also config-g++.mk
 CC_STATIC = 	-Wl,-a,archive
 
-# -s strips out debugging information, otherwise we get a 30Mb pigiRpc
-# -x is also useful, it removed local symbols, see the ld man page
+# For some reason, hppa ends up with very large (30Mb) pigiRpc binaries,
+# even if we pass ld the -x option:
+#   -s strips out all debugging information
+#   -x is also useful, it removed local symbols, see the ld man page
+# Note that -s will disable incremental linking
+# As a workaround, we run strip -x after producing the pigiRpc and ptcl
+# binaries.  Note that linking pigiRpc on a 32Mb hp735 can take upwards
+# of 30 minutes 
+STRIP_DEBUG =	strip -x
+
 # We ship statically linked binaries, but other sites might want
 # to remove the -static below
-LINKFLAGS = 	-L$(LIBDIR) -Xlinker -s -static
+LINKFLAGS = 	-L$(LIBDIR) -Xlinker -x -static
 LINKFLAGS_D = 	-L$(LIBDIR) -g -static
+
 
 #
 # Directories to use
