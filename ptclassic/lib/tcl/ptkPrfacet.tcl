@@ -186,6 +186,7 @@ proc ptkPrfacet {name} {
     if {$ptkPrintToFile} {
 	append command " -TOFILE "
 	append command [.print.file get]
+	append command " -L"
     }
 
     global ptkPortrait
