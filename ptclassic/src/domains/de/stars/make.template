@@ -36,6 +36,7 @@ DEBlackHole.pl \
 DEClock.pl \
 DEDelay.pl \
 DEDiscard.pl \
+DEFIFOQueue.pl \
 DEFilter.pl \
 DEFloatDC.pl \
 DEFloatRamp.pl \
@@ -54,10 +55,12 @@ DEPoisson.pl \
 DEPrQueue.pl \
 DEPrinter.pl \
 DEQueue.pl \
+DEQueueBase.pl \
 DERanGen.pl \
 DERouter.pl \
 DESampler.pl \
 DEServer.pl \
+DEStack.pl \
 DEStatistics.pl \
 DEStopTimer.pl \
 DESwitch.pl \
