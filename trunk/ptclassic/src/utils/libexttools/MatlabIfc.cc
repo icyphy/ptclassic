@@ -247,8 +247,13 @@ const char* MatlabIfc :: BuildMatlabCommand(
 // manage the Matlab process (low-level methods)
 
 // start a Matlab process
+// FIXME: This is a hack to workaround problems in the Matlab 4 engine
+// interface that affects System V operating systems like Solaris and HP
 Engine* MatlabIfc :: MatlabEngineOpen(char* unixCommand) {
-    return engOpen(unixCommand);
+    FILE* tempfp = freopen("/dev/null", "w", stderr);
+    Engine* ep = engOpen(unixCommand);
+    fclose(tempfp);
+    return ep;
 }
 
 // send a command to the Matlab Engine for evaluation
