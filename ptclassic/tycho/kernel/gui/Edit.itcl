@@ -1733,6 +1733,8 @@ body ::tycho::Edit::seeFragment {point} {
     } {
         # Third form: a regular expression
         set sidx [$text search -count nc -regexp $point 1.0 end]
+        # Check for no match.
+        if {$sidx == {}} {return}
         set eidx [$text index "$sidx + $nc chars"]
     }
     if {$sidx != {} && $eidx != {}} {
