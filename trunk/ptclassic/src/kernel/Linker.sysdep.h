@@ -11,26 +11,29 @@ $Id$
  This file defines the system-dependent cruft needed for incremental
  linking.
 **************************************************************************/
-// change the following if ld++ and crt1+.o are in non-standard directories
 
-#ifndef LOADER
-#define LOADER "/usr/gnu/lib/gcc-ld"
-#endif
+// The loader should do incremental linking; use a 4.3/Sun-style loader
+// or use the Gnu loader.
+#define LOADER "ld"
 
-// The standard assember "as" may work as well.
-#ifndef ASSEMBLER
-#define ASSEMBLER "/usr/gnu/lib/gcc-as"
-#endif
+// Options to give the loader.  We also give it "-T hex-addr" to specify
+// the starting address and "-A ptolemy-name" to get the symbols for the
+// running executable.
+#define LOADOPTS "-N -S"
+
+// The assembler to use
+#define ASSEMBLER "as"
 
 // This directive should go to the text section
-#ifndef TEXT_DIR
 #define TEXT_DIR ".text"
-#endif
 
 // This directive should declare an address word
-#ifndef ADDR_WORD
+#ifdef mips
+#define ADDR_WORD ".word"
+#else
 #define ADDR_WORD ".long"
 #endif
+
 
 extern "C" {
 #include <a.out.h>
