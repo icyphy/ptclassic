@@ -7,7 +7,7 @@
 <h1><a name="Java editor">User's Guide to the Java Editor</a></h1>
 This class provides a text editor specialized for editing Java source.
 It is automatically invoked whenever you open any file with a
-<A NAME=".java">".java" extension</A>.
+<A NAME=".java"><CODE>.java</CODE> extension</A>.
 Java is an object-oriented language developed by Sun.  Java is similar
 to C++, but Java has a few new features, such as garbage collection. Java
 is also missing a few features C++ has, like multiple inheritance.
@@ -146,7 +146,7 @@ For example, if the file is named <CODE>Elvis.java</CODE>, then
 the class name <CODE>Elvis</CODE> will be substituted everywhere 
 <CODE>ClassName</CODE> appears.
  <P>
-The java <CODE>package</CODE> is updated accordingly if the file is located
+The Java <CODE>package</CODE> is updated accordingly if the file is located
 in a directory below <CODE>$TYCHO/java</CODE>.  For example, if the pathname
 to the file was <CODE>$TYCHO/java/devel/mystuff/Elvis.java</CODE>, then
 the <CODE>package</CODE> line would look like:
@@ -157,7 +157,7 @@ If the file is not below <CODE>$TYCHO/java</CODE>, then the
 <CODE>package</CODE> line is commented out.
  <P>
 The <CODE>@author</CODE> Java doctag is updated to use the
-<I>userName</I> preference which contains the full name of the user.
+<CODE>userName</CODE> preference which contains the full name of the user.
 This preference can be updated by mousing on the Help button on the
 upper right of most Tycho windows and then clicking on
 <CODE>Preferences</CODE>. The <CODE>userName</CODE> preference is under the
@@ -186,7 +186,7 @@ Foo.java Bar.java</CODE>.
 
 <DT> <CODE>@see <I>full.classname</I>#<I>method-name(first.arg.type, second.arg.type)</I> </CODE>
 <DD> White space is significant here, there must be a single space
-between the arguments
+between the arguments.
 
 <DT> <CODE>@see <I>&lt;a href="myfile.html"&gt;My File&lt;/a&gt;</I></CODE>
 <DD>
@@ -194,12 +194,12 @@ between the arguments
 <DT> <CODE>@version <I>text</I></CODE>
 <DD> The <CODE>@version</CODE> tag may only be used before a class
 definition.  Call <CODE>javadoc</CODE> with the <CODE>-version</CODE>
-flag to generate an version listing in the html file.
+flag to generate an version listing in the HTML file.
 
 <DT> <CODE>@author <I>text</I></CODE>
 <DD> The <CODE>@author</CODE> tag may only be used before a class
 definition.  Call <CODE>javadoc</CODE> with the <CODE>-author</CODE>
-flag to generate an author listing in the html file.
+flag to generate an author listing in the HTML file.
 
 <DT> <CODE>@param <I>parameter-name description</I></CODE>
 <DD> May only be used before a method definition.

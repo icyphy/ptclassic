@@ -9,7 +9,7 @@
 This class provides a text editor specialized for editing
 C files.
 It is invoked automatically when opening any file with the
-<a name=".c extension">".c" extension</a> 
+<a name=".c extension"><CODE>.c</CODE> extension</a> 
 in its name.
 The <a name="EditC class">EditC class</a> is derived from the
 <a href="EditProgramHelp.html">EditProgram class</a>, and
@@ -22,11 +22,13 @@ The C Editor has two menu choices to compile the current file:
  <P>The <CODE>Compile</CODE> choice brings up the Monitor widget which 
 will run <CODE>make</CODE> and compile the current file.
 
- <P>The C Editor can compile the current file and load it back
+ <P>The <CODE>Compile and Load</CODE> menu choice
+will compile the current file and load it back
 into Tycho by using the Tcl <A
 HREF="../../../../doc/itclhtml/tcl/load.n.html"><CODE>load</CODE></A>
-command.  Compile a C file can be used to load in Tcl commands
-written in C.
+command.  The <CODE>Compile and Load</CODE> menu choice can be used
+to create new Tcl commands that are written in C.
+
 
  <P>When a C file is compiled and loaded, the following steps occur.
 <OL>
