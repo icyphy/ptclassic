@@ -53,6 +53,11 @@ extern "C" {
 #define PTALPHA
 #endif
   
+#if defined(freebsd)
+/* FreeBSD */
+#define PTFREEBSD
+#endif
+
 #if defined(hpux) || defined(__hpux)
 /* HP PA, cfront or g++ */
 #define PTHPPA
@@ -147,8 +152,8 @@ extern "C" {
 #endif /* PTSUN4_CFRONT or PTHPPA_CFRONT or non-ansi cc*/
 #endif /* ! VOLATILE */
 
-#if !defined(PTLINUX) && !defined(PTNBSD_386)
-#if defined(USG) && ! defined(PTHPPA) && ! defined(PTAIX) && !defined(PTSVR4)
+#if !defined(PTLINUX) && !defined(PTNBSD_386) && !defined(PTFREEBSD)
+#if defined(USG) && ! defined(PTHPPA) && ! defined(PTAIX) && !defined(PTSVR4) && !defined(PTSOL2)
 extern int sprintf();
 #else
 #ifndef PTIRIX5
@@ -175,7 +180,7 @@ extern char *sprintf();
 #endif
 #endif /* PTLINUX */
 
-#if defined(__GNUC__) && !defined(PTNBSD_386)
+#if defined(__GNUC__) && !defined(PTNBSD_386) && !defined(PTFREEBSD)
 
 #include <stdio.h>			/* Get the decl for FILE.  sigh.
 					 * Also get sprintf() for linux. */
@@ -309,9 +314,9 @@ extern int unlink(const char *);
 #endif /* __GNUC__ */
 
 
-
 #ifdef NEED_SYS_ERRLIST
-#ifdef PTNBSD_386
+#if defined(PTNBSD_386) || defined(PTFREEBSD)
+/* See also kernel/State.h */
 extern const char *const sys_errlist[];
 #else
 extern char *sys_errlist[];
@@ -386,23 +391,23 @@ extern int errno;
 
 /* Use SystemV curses?  See octtools/attache/io.c
  */
-#if defined(PTHPPA) || defined(SYSV) || defined(PTLINUX) || defined(PTALPHA)
+#if defined(PTHPPA) || defined(SYSV) || defined(PTLINUX) || defined(PTALPHA) || defined(PTFREEBSD)
 #define USE_SYSV_CURSES
 #endif
 
 /* Do we need to defined stricmp()?  See octtools/installColors/installColors.c
  */
-#if defined(PT_ULTRIX) || defined(PTHPPA) || defined(PTIRIX5) || defined(PTSOL2) || defined(PTLINUX) || defined(PTALPHA) || defined(PTNBSD_386) || defined(PTAIX)
+#if defined(PT_ULTRIX) || defined(PTHPPA) || defined(PTIRIX5) || defined(PTSOL2) || defined(PTLINUX) || defined(PTALPHA) || defined(PTNBSD_386) || defined(PTAIX) || defined(PTFREEBSD)
 #define NEED_STRICMP
 #endif
 
 /* Do we have termios.h?  See octtools/Xpackages/iv/ivGetLine.c */
-#if defined(PTHPPA) || defined(SYSV) || defined(PTIRIX5) || defined(PTLINUX)
+#if defined(PTHPPA) || defined(SYSV) || defined(PTIRIX5) || defined(PTLINUX) || defined(PTFREEBSD)
 #define HAS_TERMIOS
 #endif
 
 /* Is sys_siglist[] present?  See octtools/vem/rpc/vemRPC.c */
-#if defined(PTHPPA) || defined(SYSV) || defined(PTLINUX)
+#if defined(PTHPPA) || defined(SYSV) || defined(PTLINUX) || defined(PTFREEBSD)
 #define NO_SYS_SIGLIST
 #endif 
 
