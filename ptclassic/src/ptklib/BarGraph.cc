@@ -176,8 +176,7 @@ int BarGraph::setup (Block* star,       // The star I am in
 	// stem of the window name.  This means that the window will
 	// be a child window of the control panel, and hence will be
 	// destroyed when the control panel window is destroyed.
-	char ncstring1[] = "global ptkControlPanel;set ptkControlPanel";
-	if(Tcl_GlobalEval(ptkInterp, ncstring1) != TCL_OK) {
+	if(Tcl_GlobalEval(ptkInterp, "global ptkControlPanel;set ptkControlPanel") != TCL_OK) {
 		winName = ".bar";
 		winName += starID;
 	} else {
