@@ -426,10 +426,21 @@ const State* State :: lookup (const char* name, Block* blockIAmIn) {
 // put info.
 StringList State::print(int verbose) const {
     StringList  out;
-    out << "\t" << name() << " type: " << type() << "\n";
-    if (verbose)
-	out << "\t initial value: " << myInitValue
+
+    out << "\t" << name() << " type: " << type();
+    // Print out the attributes.  One problem here is that code gen
+    // domains add more attributes, which we fail to print out here.
+    if (!(attributes() & AB_CONST))
+	    out << " A_CONSTANT";
+    if (!(attributes() & AB_SETTABLE))
+	    out << " A_NONSETTABLE";
+    if (!(attributes() & AB_DYNAMIC))
+	    out << " A_DYNAMIC";
+    out << "\n";
+    if (verbose) {
+        out << "\t initial value: " << myInitValue
 	    << "\n\t current value: " << currentValue() << "\n";
+    }
     return out;
 };
 
