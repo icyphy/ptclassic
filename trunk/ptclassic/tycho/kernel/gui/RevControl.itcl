@@ -179,8 +179,10 @@ body ::tycho::RevControl::constructor {args} {
 body ::tycho::RevControl::checkInAndUpdate {} {
     # Procs are not virtual. Itcl bug?
     [info class]::checkIn $object
-    enableButton checkout
-    updateHistory
+    if {![isCheckedOut]} {
+        enableButton checkout
+        updateHistory
+    }
 }
 
 ###################################################################
@@ -191,8 +193,10 @@ body ::tycho::RevControl::checkInAndUpdate {} {
 body ::tycho::RevControl::checkOutAndUpdate {} {
     # Procs are not virtual. Itcl bug?
     [info class]::checkOut $object
-    enableButton checkin
-    updateHistory
+    if [isCheckedOut] {
+        enableButton checkin
+        updateHistory
+    }
 }
 
 ###################################################################
