@@ -1,40 +1,6 @@
 static const char file_id[] = "DEScheduler.cc";
-/**************************************************************************
-Version identification:
-@(#)DEScheduler.cc	2.25	11/25/92
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the above
-copyright notice and the following two paragraphs appear in all copies
-of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
-
- Programmer:  Soonhoi Ha
- Date of creation: 5/30/90
- Revisions:
-	6/20/90 -- no longer call initialize() and start() on each
-	Star.  Galaxy::initialize does this now.
-
-These are the methods for the discrete event scheduler.
-
-**************************************************************************/
+// FIXME put the copyright back
 
 #ifdef __GNUG__
 #pragma implementation
@@ -158,8 +124,8 @@ int DEScheduler :: computeDepth() {
 // pop the top element (earliest event) from the global queue
 // and fire the destination star. Check all simultaneous events to the star.
 // Run until StopTime.
-int
-DEScheduler :: run () {
+// EWK this is where the biggest changes are made
+int DEScheduler :: run () {
 
 
 	if (haltRequested()) {
@@ -168,115 +134,57 @@ DEScheduler :: run () {
 		return FALSE;
 	}
 
-	while (eventQ.length() > 0) {
+        // FIXME fix bFlag
 
-		int bFlag = FALSE;  // flag = TRUE when the terminal is on the
-		   		    // boundary of a wormhole of DE domain.
+// HERE
 
-		// fetch the earliest event.
-		LevelLink* f   = eventQ.get();
-		double level    = f->level;
+	while (TRUE) {
+	    LevelLink *eventObj = eventQ.get();
+	    if (eventObj == NULL) return FALSE;
 
-		// if level > stopTime, RETURN...
-		if (level > stopTime)	{
-			eventQ.pushBack(f);		// push back
-			// set currentTime = next event time.
-			currentTime = level/relTimeScale;
-			stopBeforeDeadFlag = TRUE;  // there is extra events.
-			return TRUE;
-		// If the event time is less than the global clock,
-		// it is an error...
-		} else if (level < currentTime) {
-		    // The event is in the past!  Argh!
-		    // Try to give a good error message.
-			Event* ent = (Event*) f->e;
-			PortHole* src = ent->dest->far();
-			Error::abortRun(*src, ": event from this porthole",
-					" is in the past!");
-			return FALSE;
-		}
+	    double eventTime = eventObj->level;
+	    double eventDestDepth = eventObj->fineLevel;
+	    double eventThirdLevel = FIXME;
 
-		// set currentTime
-		currentTime = level;
+	    // If everythings ok with all 3 levels, call getFromQueue
+	    if (eventTime > stopTime) {
+		// put event back and return
+		eventQ.put(eventObj);
+		// set currentTime = next event time.
+                currentTime = level/relTimeScale;
+                stopBeforeDeadFlag = TRUE;  // there is extra events.
+                return TRUE;
+	    }
+	    if (eventTime < currentTime) {
+		// The event is in the past!  Argh!
+	        Error::abortRun(*src, ": event from this porthole is in the past!");
+                return FALSE;
+            }
 
-		// check if the normal event is fetched
-		//
-		// For normal events, the fineLevel of the LevelLink
-		// class is negative (which is the minus of the depth of
-		// the destination star)
-		// But, we also put the process-star in the event queue
-		// with zeroed fineLevel --> which will put the process-stars
-		// at the end among simultaneous events as a side-effect.
-		DEStar* ds;
-		Star* s;
-		PortHole* terminal = 0;
-		if (f->fineLevel != 0) {
-			Event* ent = (Event*) f->e;
-			terminal = ent->dest;
-			s = &terminal->parent()->asStar();
-			if (terminal->isItOutput()) {
-				bFlag = TRUE;
-			} else {
-				ds = (DEStar*) s;
-			 	ds->arrivalTime = level;
+	    currentTime = eventTime;
+	    // As a first cut, forget the inter-domain stuff
+/*
+            if (h->level > level)   {
+                if (!bFlag) 
+                    if (!s->run()) return FALSE;
+            }
+*/
+            PortHole* tl = 0;
+            Event* ee = 0;
+            if (eventObj->fineLevel != 0) {
+                ee = (Event*) eventObj->e;
+                tl = ee->dest;
+                dest = &tl->parent()->asStar();
+            } else {
+                dest = (Star*) eventObj->e;
+            }
 
-				// start a new phase.
-				ds->startNewPhase();
-			}
-
-			// Grab the Particle from the queue to the terminal.
-			// Record the arrival time, and flag existence of data.
-			InDEPort* inp = (InDEPort*) terminal;
-			inp->getFromQueue(ent->p);
-		} else {
-		// process star is fetched
-			ds = (DEStar*) f->e;
-			ds->arrivalTime = level;
-			s = ds;
-
-			// start a new phase.
-			ds->startNewPhase();
-		}
-		// put the LinkList into the free pool for memory management.
-		eventQ.putFreeLink(f);
-				
-		// Check if there is another event launching onto the
-		// same star with the same time stamp (not the same port)...
-		int l;
-		eventQ.reset();
-		l = eventQ.length();
-		Star* dest;
-		while (l > 0) {
-			l--;
-			LevelLink* h = eventQ.next();
-			if (h->level > level)	goto L1;
-			PortHole* tl = 0;
-			Event* ee = 0; 
-			if (h->fineLevel != 0) {
-				ee = (Event*) h->e;
-				tl = ee->dest;
-				dest = &tl->parent()->asStar();
-			} else {
-				dest = (Star*) h->e;
-			}
-
-			// if same destination star with same time stamp..
-			if (dest == s) {
-				if (tl) {
-				     int success =
-					((InDEPort*) tl)->getFromQueue(ee->p);
-				     if (success) eventQ.extract(h);
-				} else if (!tl) {
-				     eventQ.extract(h);
-				} 
-			} 
-		} // end of inside while
-
- 		// fire the star.
- L1 :		if (!bFlag) {
-	 		if (!s->run()) return FALSE;
-		}
-
+            // if same destination star with same time stamp..
+            if (dest == s) {
+                if (tl) {
+                     int success = ((InDEPort*) tl)->getFromQueue(ee->p);
+                }
+            } 
 	} // end of while
 
 	if (haltRequested()) return FALSE;
@@ -291,30 +199,8 @@ DEScheduler :: run () {
 	////////////////////////////
 
 // fetch an event on request.
+// EWK FIXME this needs to be changed as well
 int DEScheduler :: fetchEvent(InDEPort* p, double timeVal) {
-
-	eventQ.reset();
-	int l = eventQ.length();
-	while (l > 0) {
-		l--;
-		LevelLink* h = eventQ.next();
-		if (h->level > timeVal)	{
-			Error :: abortRun (*p, " has no more data.");
-			return FALSE;
-		}
-		InDEPort* tl = 0;
-		if (h->fineLevel != 0) {
-			Event* ent = (Event*) h->e;
-			tl = (InDEPort*) ent->dest;
-
-			// if same destination star with same time stamp..
-			if (tl == p) {
-				if (tl->getFromQueue(ent->p)) 
-					eventQ.extract(h);
-				return TRUE;
-			}
-		} 
-	}
 	Error :: abortRun (*p, " has no more data.");
 	return FALSE;
 }
