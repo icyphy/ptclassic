@@ -271,7 +271,7 @@ body ::tycho::EditSpell::recheck {} {
 	if {[::tycho::pathSearch ispell.exe] == {} } {
 	    ::tycho::htmlmessage {Sorry, the <code>ispell</code> binary \
 		    cannot be found.  You can download this binary from \
-		    <a href="http://ptolemy.eecs.berkeley.edu/tycho/tychoTools.html"><code>http://ptolemy.eecs.berkeley.edu/tycho/tychoTools.html</code>. \
+		    <a href="http://ptolemy.eecs.berkeley.edu/tycho/tychoTools/tychoTools.html"><code>http://ptolemy.eecs.berkeley.edu/tycho/tychoTools/tychoTools.html</code>. \
 		}
 	     return
 	}
