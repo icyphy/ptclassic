@@ -100,10 +100,12 @@ body ::tycho::Edit::constructor {args} {
     itk_component add text {
 	[textWidget] $itk_component(childsite).text -top $this
     } {
-	keep -text -readonly -width -height -background \
+	keep -text -readonly \
 		-highlightbackground -highlightcolor -selectforeground \
 		-cursor -insertbackground -textforeground -textfont \
 		-textbackground
+        rename -width -textwidth textWidth TextWidth
+        rename -height -textheight textHeight TextHeight
     }
     pack $itk_component(text) -expand yes -fill both
 
