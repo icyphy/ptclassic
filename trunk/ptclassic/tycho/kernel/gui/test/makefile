@@ -43,13 +43,18 @@ TCL_SRCS = \
 	testDefs.tcl
 
 SIMPLE_TESTS = \
+	testCacheManager.itcl \
 	testCircularList.itcl \
 	testClass.tcl \
+	testDigraph.itcl \
 	testForest.itcl \
 	testLoader.itcl \
 	testGraph.itcl \
-	testDigraph.itcl \
 	testPath.itcl \
+	testResource.itcl \
+	testResourceRemote.itcl \
+	testResourceFTP.itcl \
+	testResourceHTTP.itcl \
 	testStack.itcl \
 	testURLPath.itcl
 
@@ -58,6 +63,7 @@ GRAPHICAL_TESTS = \
 	testIndexBrowser.itcl \
 	testMenuSupport.itcl \
 	testMenuBar.itcl \
+	testMonitor.itcl \
 	testRevControl.itcl \
 	testToolBar.itcl \
 	testWidgets.itcl \
