@@ -149,7 +149,7 @@ char* util_logical_compress( path, var )
     int i = 0;			/* An index in path. */
     char* value;
     static char buffer[8][RESOLVE_MAXPATHLENGTH];
-    static count = 0;
+    static int count = 0;
 
     value = getenv(var);	/* Value of the environment variable. */
 
