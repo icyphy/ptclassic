@@ -20,25 +20,33 @@
  <HR>
 <H2><A NAME="macintosh bugs">Tycho/Macintosh bugs</A></H2>
 
-<B>Note that tycho0.1.1 does not work on the Mac.</B>
-
-<br>We are making Mac Itcl binaries available so that developers can work
-on the port.
+<P>Tycho 0.2 will <B>only work with Itcl2.2p2</B>, which is not yet
+released by Lucent.  When Itcl2.2p2 is released, it will be on <A
+HREF="http://www.tcltk.com"><CODE>www.tcltk.com</CODE></A>.  
 
 <MENU>
-<LI> Starting Tycho may crash your mac.  The bug seems to be caused
-by the lines in <CODE>Tycho.tcl</CODE> that create the TclShell.
 
-<LI> Tycho0.1.1 does not handle spaces in pathnames very well.  Tycho
+<LI> Tycho 0.1.1 did not work under Itcl2.2 apparently because when Tycho
+started up the stack size was so large that it crashed the Mac.  With
+Itcl2.2p2, Tycho 0.1.1 and Tycho 0.2both seem to work.
+
+<LI> Tycho0.2 does not handle spaces in pathnames very well.  Tycho
 will work best if the distribution is installed in a directory that
 has a pathname that contains no spaces.
 
-<LI> There are pathname problems with the FileBrowser.  Currently, it is
-not possible to open a file.  See the Tcl <CODE>filename</CODE> man page
+<LI> Since the Mac has different filename conventions, not all the filename
+ facilities work properly. See the Tcl <CODE>filename</CODE> man page
 for information about pathnames on the mac.
 
-<LI> Starting Tycho requires sourcing the <CODE>tycho-mac</CODE> script
-by hand.  There must be a better way.
+
+<LI> Cascade menus under Itcl2.2p2 and under Tk4.2 on the Mac seem to
+be broken.  It is very difficult to use the mouse on a cascade menu,
+such as <CODE>File</CODE> -&gt; <CODE>Tools</CODE>.  The workaround is
+to use the <CODE>Up</CODE>, <CODE>Down</CODE> and Arrow keys to invoke
+menu choices.
+
+<LI> Starting Tycho requires sourcing the <CODE>tycho-mac</CODE>
+script by hand.  There must be a better way.
 
 <LI> Tycho on the mac should use an installer.
 </MENU>
@@ -55,9 +63,9 @@ binaries for the Mac.
 <LI> Download both the Tycho distribution and the Itcl distribution and
 place them in directories next to each other.  For example,
 <MENU>
-<LI>  The Tycho distribution could be in <CODE>mac:devel:tycho0.1.1</CODE>
+<LI>  The Tycho distributin could be in <CODE>mac:devel:tycho0.2</CODE>
 
-<LI>  The Itcl distribution could be in <CODE>mac:devel:itcl2.2-ppc</CODE>
+<LI>  The Itcl distribution could be in <CODE>mac:devel:Itk2.2p2-ppc</CODE>
 </MENU>
 
 
