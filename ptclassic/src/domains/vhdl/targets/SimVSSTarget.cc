@@ -108,26 +108,18 @@ void SimVSSTarget :: begin() {
 }
 
 void SimVSSTarget :: setup() {
+  // NOTE: Do not init code streams here because doing so will clobber
+  // code generated in the VHDLCSend, VHDLCReceive stars' begin methods.
+
   synopsys.initialize();
   arch.initialize();
   simarch.initialize();
 
-  StringList synopsysString;
-  StringList archString;
-  StringList simarchString;
+  // Test the values of parameters SYNOPSYS, ARCH, and SIM_ARCH.
+  // For each parameter, if it is set, then set it in the environment.
+  // Otherwise, leave the environment unchanged.
 
-  synopsysString = "SYNOPSYS=";
-  synopsysString << synopsys.currentValue();
-  char* saveSynopsysString = savestring(synopsysString);
-
-  archString = "ARCH=";
-  archString << arch.currentValue();
-  char* saveArchString = savestring(archString);
-
-  simarchString = "SIM_ARCH=";
-  simarchString << simarch.currentValue();
-  char* saveSimarchString = savestring(simarchString);
-
+  // putenv() requires us to save the string defining the setting:
   // Under SunOS4.1.3, the man page for putenv() says:
   //    string points to a string of the form `name=value'  putenv()
   //    makes  the  value  of the environment variable name equal to
@@ -138,17 +130,67 @@ void SimVSSTarget :: setup() {
   //    longer used once a new string-defining  name  is  passed  to
   //    putenv().
 
-  putenv(saveSynopsysString);
-  putenv(saveArchString);
-  putenv(saveSimarchString);
+  // char* for test purposes.
+  char* testString = 0;
 
+  printf("\n");
+
+  // Set SYNOPSYS in the environment if the target parameter is set.
+  StringList synopsysValue = synopsys.currentValue();
+  if (synopsysValue.length()) {
+      StringList synopsysSetting = "SYNOPSYS=";
+      synopsysSetting << synopsysValue;
+      char* saveSynopsysString = savestring(synopsysSetting);
+      putenv(saveSynopsysString);
+  }
+
+  // Report the value of SYNOPSYS in the environment.
+  testString = getenv("SYNOPSYS");
+  if (testString) {
+      printf("SYNOPSYS=%s\n", testString);
+  }
+  else {
+      printf("SYNOPSYS is unset\n");
+  }
+
+  // Set ARCH in the environment if the target parameter is set.
+  StringList archValue = arch.currentValue();
+  if (archValue.length()) {
+      StringList archSetting = "ARCH=";
+      archSetting << archValue;
+      char* saveArchString = savestring(archSetting);
+      putenv(saveArchString);
+  }
+
+  // Report the value of ARCH in the environment.
+  testString = getenv("ARCH");
+  if (testString) {
+      printf("ARCH=%s\n", testString);
+  }
+  else {
+      printf("ARCH is unset\n");
+  }
+
+  // Set SIM_ARCH in the environment if the target parameter is set.
+  StringList simarchValue = simarch.currentValue();
+  if (simarchValue.length()) {
+      StringList simarchSetting = "SIM_ARCH=";
+      simarchSetting << simarchValue;
+      char* saveSimarchString = savestring(simarchSetting);
+      putenv(saveSimarchString);
+  }
+
+  // Report the value of SIM_ARCH in the environment.
+  testString = getenv("SIM_ARCH");
+  if (testString) {
+      printf("SIM_ARCH=%s\n", testString);
+  }
+  else {
+      printf("SIM_ARCH is unset\n");
+  }
+
+  // By default, write a command file.
   writeCom = 1;
-
-// Don't init code streams here because it clobbers VHDLCSend,Receive
-// stars' code generated in their begin methods.
-//  VHDLTarget::setup();
-//  initVHDLObjLists();
-//  initCodeStreams();
 }
 
 // Routines to construct CG wormholes, using the
