@@ -453,7 +453,8 @@ class DynDFScheduler;
 class BDFClustSched : public BDFScheduler {
 public:
 	// constructor and destructor
-	BDFClustSched(const char* log = 0, int canDoDyn = TRUE);
+	BDFClustSched(const char* log = 0, int canDoDyn = TRUE,
+		      int constCheck = FALSE);
 	~BDFClustSched();
 
 	// return the schedule
@@ -477,6 +478,11 @@ protected:
 	void runOnce();
 	// handle creation of dynamic scheduler if needed and allowed
 	int handleDynamic (BDFTopGal&);
+	// compute repetitions: skip if no check.
+	int repetitions() {
+		return strongConstCheck ? BDFScheduler::repetitions()
+			: TRUE;
+	}
 private:
 	// The clustered galaxy.
 	BDFClusterGal* cgal;
@@ -485,7 +491,9 @@ private:
 	// The log file name
 	const char* logFile;
 	// True if dynamic scheduling allowed.
-	int dynamicAllowed;
+	short dynamicAllowed;
+	// True if "strongly consistent" check performed.
+	short strongConstCheck;
 };
 
 // standard iterators
