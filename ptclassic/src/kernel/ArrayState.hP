@@ -54,6 +54,9 @@ public:
 				return val[n];
 			}
 
+	// Cast to pointer to data
+	operator <C>* () { return val; }
+
 	// The type
 	const char* type();
 
