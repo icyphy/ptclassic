@@ -6,7 +6,6 @@
 #			All Rights Reserved.
 # Written by: E. Goei
 # Date of creation: 5/23/90
-# Modified by J. Buck to use make depend
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -23,18 +22,18 @@ VPATH         = $(PTOLEMY)/src/pigiRpc
 OCTTOOLS      = /usr/tools/octtools
 
 # C compiler variables
-COPT          = -g
-CFLAGS        = $(COPT) -I$(OCTTOOLS)/include
+CFLAGS        = -g -I$(OCTTOOLS)/include
 
 # C++ compiler variables
 GXX	      = g++
-GPPFLAGS      = -g
+GPPFLAGS      = -g -fminimal-debug -I$(PTOLEMY)/src/kernel
 GNUINCLUDE    = /usr/gnu/lib/g++-include
 
 # Linker variables
 LINKER        = g++
 LDFLAGS	      = -L$(OCTTOOLS)/lib -L$(PTOLEMY)/lib.$(ARCH)
-LIBS	      = -lsdf -lptolemy -lg++ -loh -lrpc -llist -ltr -lutility -lst \
+LIBS	      = -lsdf -lddf -lde \
+		-lptolemy -lg++ -loh -lrpc -llist -ltr -lutility -lst \
 		-lerrtrap -luprintf -lport -lX11 -lm
 
 HDRS	      = compile.h \
@@ -99,6 +98,8 @@ all:	$(TARGET)
 
 $(TARGET): makefile $(OBJS) $(PTOLEMY)/lib.$(ARCH)/libptolemy.a 
 	$(LINKER) $(LDFLAGS) $(OBJS) \
+	    ../domains/ddf/stars/*.o \
+	    ../domains/de/stars/*.o \
 	    ../domains/sdf/stars/*.o \
 	    $(LIBS) -o $(TARGET)
 
@@ -140,7 +141,7 @@ TAGS:	$(SRCS)
 # Rule for compiling with g++
 .SUFFIXES: .cc
 .cc.o:
-	$(GXX) $(GPPFLAGS) -I$(PTOLEMY)/src/kernel -c  $<
+	$(GXX) $(GPPFLAGS) -c  $<
 
 # print out source file names
 printsrcs:;	@echo "$(SRCS)"
