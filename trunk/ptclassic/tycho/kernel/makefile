@@ -58,6 +58,7 @@ ITCL_SRCS = \
 	DialogWindow.itcl \
 	Dismiss.itcl \
 	Edit.itcl \
+	EditText.itcl \
 	EditSearch.itcl \
 	EntryQuery.itcl \
 	ErrorMessage.itcl \
@@ -67,10 +68,6 @@ ITCL_SRCS = \
 	Graphics.itcl \
 	HTML.itcl \
 	HTMLText.itcl \
-	Matlab.itcl \
-	MatlabText.itcl \
-	Mathematica.itcl \
-	MathematicaText.itcl \
 	Message.itcl \
 	Preferences.itcl \
 	RevControl.itcl \
