@@ -4,10 +4,7 @@
 <title>Tydoc Bugs</title>
 </head>
 <body bgcolor="#faf0e6">
-[<a href="introduction.html">        Tydoc </a>]
-<hr>
-<title>Tydoc Bugs</title>
-<H2>Bugs</H2>
+<H1>Bugs</H1>
 <MENU>
 
 	<LI> If we have a series of declarations that are not
@@ -18,13 +15,13 @@
 
 	<LI> The arguments to <CODE>option</CODE> are not
 	handled properly.  We currently print:
-	<LISTING>
+	<PRE>
 	option add {*RevControlSCCS.versionColor}
-	</LISTING>
+	</PRE>
 	Instead of:
-	<LISTING>
+	<PRE>
 	option add *RevControlSCCS.versionColor [ptkColor blue black] widgetDefault
-	</LISTING>
+	</PRE>
 
 	<LI> Links that work from the kernel directory do not
 	necessarily work from the doc/codeDoc directory.
