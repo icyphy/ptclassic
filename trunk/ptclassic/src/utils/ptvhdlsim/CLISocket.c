@@ -42,6 +42,9 @@ int connect_socket(idata)
 
   status = connect(idata->nearsock, &idata->faraddr,
 	  idata->faraddrlen);
+/*
+  delay(1000000000);
+*/
   if(status < 0) {
     /* If file not found, may just need to wait a bit
        so don't signal an error for ENOENT, and don't
@@ -49,7 +52,19 @@ int connect_socket(idata)
     if(errno == ENOENT) {
       return(status);
     }
+    /* If connection refused, need to close down this
+       socket as it may be garbled, and open a new one,
+       waiting to attempt to connect again. */
+    if(errno == ECONNREFUSED) {
+      perror(idata->dummy);
+      (void) close_socket(idata);
+      (void) create_socket(idata);
+      return(status);
+    }
     if(printflag) {
+/*
+PERRNO;
+*/
       perror(idata->dummy);
       printflag = 0;
     }
