@@ -83,7 +83,7 @@ public:
 	/* virtual */ int repetitions();
 
 	// redefine 
-	/* virtual */ scheduleManually();
+	/* virtual */ int scheduleManually();
 
 protected:
         // The aggregate firing that represents the schedule.
