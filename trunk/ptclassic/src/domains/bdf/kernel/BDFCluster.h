@@ -1,5 +1,3 @@
-// for now, this is a modified copy of SDFCluster.h.  We will try
-// to merge the two later.
 #ifndef _BDFCluster_h
 #define _BDFCluster_h 1
 
@@ -12,6 +10,9 @@ $Id$
 
  Programmer:  J. Buck
  Date of creation: 7/6/92
+
+(for now, this is a modified copy of SDFCluster.h.  We will try
+to merge the two later.)
 
 This file defines all the classes for a clustering BDF scheduler.
 
@@ -435,6 +436,7 @@ public:
 	ostream& printOn(ostream&);
 	void runInner();
 	StringList displaySchedule(int depth);
+	int genSched();
 	void genCode(Target&, int depth);
 	void fixBufferSizes(int);
 protected:

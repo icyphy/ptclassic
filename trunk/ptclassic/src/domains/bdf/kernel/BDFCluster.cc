@@ -2171,6 +2171,13 @@ StringList BDFWhileLoop::displaySchedule(int depth) {
 	return sch;
 }
 
+// generate sub-schedules for clusters inside the loop
+// return TRUE iff we succeed in constructing sub-schedules.
+int BDFWhileLoop::genSched() {
+	return a->genSched() && (!b || b->genSched());
+}
+
+// generate code for the while loop.
 void BDFWhileLoop::genCode(Target& t, int depth) {
 	t.beginDoWhile(depth);
 	a->genCode(t,depth+1);
