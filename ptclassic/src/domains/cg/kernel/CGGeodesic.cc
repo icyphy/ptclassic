@@ -62,6 +62,7 @@ F_SRC|F_DEST:
 #include "CGGeodesic.h"
 #include "Error.h"
 #include "Fraction.h"
+#include "SimControl.h"
 
 ISA_FUNC(CGGeodesic,Geodesic);
 
@@ -146,8 +147,10 @@ int CGGeodesic :: internalBufSize() const {
 		CGPortHole* dPort = (CGPortHole*)destinationPort;
 		ListIter next(dPort->forkDests);
 		CGPortHole* p;
-		while ((p = (CGPortHole*)next++) != 0)
+		while ((p = (CGPortHole*)next++) != 0) {
 			bsiz = max(bsiz,p->cgGeo().internalBufSize());
+			if (SimControl::haltRequested()) return FALSE;
+		}
 	}
 // if there are delays or old values are used, it may be better to
 // use a larger size so that compile-time indexing is supportable.

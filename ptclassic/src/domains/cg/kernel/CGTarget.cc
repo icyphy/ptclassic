@@ -186,6 +186,7 @@ void CGTarget::setup() {
 	{
 	    adjustSampleRates();
 	    generateCode();
+	    if (haltRequested()) return;
 	    if (compileCode())
 	    {
 		if (loadCode())
@@ -214,6 +215,7 @@ int CGTarget :: run() {
 // If not in a WormHole, conditionally compile, load, and run code.
 void CGTarget :: wrapup()
 {
+    if (haltRequested()) return;
     if (!inWormHole())
     {
 	if (compileFlag)
