@@ -6,20 +6,29 @@
 <body>
 <h1><a name="file headers">Tycho File Headers</a></h1>
 <p>
+Itcl files written for Tycho should follow a certain style in the headers. 
 <p>
 <OL>
-
-<LI> <A HREF="#example header">Example Header</A>
+	<LI> <A HREF="#example header">Example Header</A>
+	<LI> <A HREF="#doc tags">Doc Tags</A>	
+	<LI> <A HREF="#the order of elements">The Order of Elements</A>
+	<LI> <A HREF="#copyrights">Copyrights</A>	
 </OL>
-<H3><A NAME="example header"></A>Example Header</H3>
-<LISTING>
+	
+<H3><A NAME="example header">Example Header</A></H3>
+	
+Below is a sample header that could be grabbed and put into a new
+file.  (Of course, you would need to adjust the description,
+<CODE>@Author</CODE> and possibly the copyright dates.
+	
+<PRE>
 # A circular list data structure.
 #
 # @Author: Edward A. Lee
 #
-# @Version: $Id$
+# @Version: &#37;W&#37;	&#37;G&#37;
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-&#37;Q&#37; The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -44,9 +53,9 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 ##########################################################################
-</LISTING>
+</PRE>
 
-<H3>Doctags</H3>
+<H3><A NAME="doc tags">Doc Tags</A></H3>
 
 The header contains <I>doc tags</I> to identify different parts of the
 header.  Doc tags are more fully described in the <A
@@ -57,41 +66,61 @@ case-insensitive, and my be pluralized.  The trailing colon
 "<CODE>:</CODE>" is optional, and it is not part of the doc tag.  If
 the trailing colon is present, the tydoc removes it from the comment.
 
-<DL>
-<DT> <CODE>@Author:</CODE>
-<DD> The primary Author(s) of the file.  
+<H3><A NAME="the order of elements">The order of elements</A></H3>
+	
+The file header consists of the following elements, separated by blank
+lines.  Note that the order of tags should strictly followed for
+consistency between files.
+	
+<OL>
+	<LI> A one line description of what the file does
 
-<DT> <CODE>@Contributor:</CODE>
-<DD> People who have contributed to this file.
+	<LI>  <CODE>@Author:</CODE> -
+	The primary Author(s) of the file.  If you have more than one
+	author, use <CODE>@Authors</CODE>.
 
-<DT> <CODE>@Version:</CODE>
+	<LI>  <CODE>@Contributor:</CODE> -
+	(Optional) People who have contributed to this file.  If there
+	are more than one contributor, you can pluralize this.	
+	
+	<LI> <CODE>@Version:</CODE> -
+	The Version control information for this file.  The version
+	control system can automatically update special characters at
+	file check in time, so that the file can contain the date and
+	version number.  Currently, we are using SCCS at UC Berkeley.
+	If you use the string
+	<PRE>
+	# @Version: &#37;W&#37; &#37;G&#37;
+	</PRE>
+	Then SCCS will convert this to the file name, version number
+	and date:
+	<PRE>
+	# @Version: @(#)Tycho.tcl	1.37	6/14/96
+	</PRE>
+	Note that there is a space between &#37;W&#37; &#37;G&#37;, not a tab.
 
-<DD> The Version control information for this file.  The version
-control system can automatically update special characters at file
-check in time, so that the file can contain the date and version
-number.  Currently, we are using SCCS at UC Berkeley.  If you use the
-string
-<LISTING>
-# @Version: $Id$
-</LISTING>
-Then SCCS will convert this to the file name, version number and date:
-<LISTING>
-# @Version: @(#)Tycho.tcl	1.37	6/14/96
-</LISTING>
-Note that there is a space between $Id$, not a tab.
-</DL>
+	<LI>  <CODE>@Copyright</CODE> -
+	The Copyright for this file.  Usually <CODE>@Copyright</CODE>
+	is not followed by a colon.  The issue of copyrights is fairly
+	tricky, if you are an employee of UC Berkeley, you should
+	include the copyright as it is printed above.  Note that the
+	special symbol is expanded at our site at UC Berkeley to be
+	the current year.
+</OL>
+	
+<H3><A NAME="copyrights">Copyrights</A></H3>
 
+If you create a new file, then your copyright should have just
+<CODE>&#37;Q&#37;</CODE> instead of 1991-<CODE>&#37;Q&#37;</CODE>.  If
+your file is a rewrite of a previously copyrighted file from UC
+Berkeley, then you should include the date from that file.  
 
-<DT> <CODE>@Copyright</CODE>
+ <P>If your
+file is based on a file that has non-UC Berkeley copyrights, then you
+should be sure to include the copyrights.
 
-<DD> The Copyright for this file.  Usually <CODE>@Copyright</CODE> is
-not followed by a colon.  The issue of copyrights is fairly tricky, if
-you are an employee of UC Berkeley, you should include the copyright
-as it is printed above.  Note that the special symbol <CODE>%Q%</CODE>
-or <CODE>percentQpercent</CODE> is expanded at our site at UC Berkeley
-to be the current year.
-
-<p>
+<P>
+<P>
 <a href="../index.html">Tycho Home Page</a><br>
 <HR>
 Copyright &#169 %Q%, The Regents of the University of California.
