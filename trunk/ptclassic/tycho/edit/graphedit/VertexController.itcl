@@ -60,8 +60,8 @@ class ::tycho::VertexController {
     # Process a click event
     method click {tag x y args}
 
-    # Initialize the context-sensitive popup menu
-    method contextmenu {item type}
+    # Configure the context-sensitive popup menu
+    method configurePopup {name}
 
     # Delete a vertex
     method delete {name}
@@ -72,6 +72,12 @@ class ::tycho::VertexController {
     # Edit parameters of the given vertices
     method editparameters {tag}
 
+    # Given a vertex, get the icon library
+    method iconlib {vertex}
+
+   # Given a vertex, get the icon item
+    method iconname {vertex}
+
     # Initialize the popup menu
     method initPopup {name}
 
@@ -80,6 +86,9 @@ class ::tycho::VertexController {
 
     # Process a release event
     method release {tag}
+
+    # Set the termstyle of an icon
+    method termstyle {vertex style}
 
     #################################################################
     ####                  protected methods                      ####
@@ -138,38 +147,23 @@ body ::tycho::VertexController::constructor {args} {
 # Add a vertex given the library name and star name
 #
 body ::tycho::VertexController::add {libname starname} {
+puts "VertexController::add $libname $starname"
     set lib [$slateview library access $libname]
 
     # Instantiate the star as a vertex of the graph
-    set starname [$lib instantiate $starname $graph -itemtype vertex]
+    set v [$lib instantiate $starname $graph -itemtype vertex]
+
+    # Remember the library it came from and its name
+    $graph attrset $v \
+            -master [$lib cget -modelname]#[join $starname "."]
 
     # Find the icon of the star
-    if [$graph exists $starname -icon] {
-        set iconpath [$graph attrget $starname -icon]
-        set splat [split $iconpath #]
-        set iconlib [lindex $splat 0]
-        set iconname [lindex $splat 1]
+    set iconmodel [iconlib $v]
+    set iconname [iconname $v]
 
-        # FIXME: Need a shorter way of doing this...
-        set libpath [::tycho::model load $iconlib]
-        # FIXME: key cannot be reused, hence the autoname...
-        set iconmodel [::tycho::model link $libpath [::tycho::autoName $this]]
-
-        # See if the icon has a dot-separated name
-        if ![$iconmodel exists $iconname] {
-            if [$iconmodel exists [split $iconname .]] {
-                set iconname [split $iconname .]
-            } else {
-                error "Unknown icon \"$iconname\" in $iconlib"
-            }
-        }
-        # Place the icon
-        set coords [$slateview place]
-        eval place [list $iconmodel $iconname $starname] $coords
-    } else {
-        # FIXME
-        error "No icon for $starname"
-    }
+    # Place the icon
+    set coords [$slateview place]
+    eval place [list $iconmodel $iconname $v] $coords
 
     # Notify views that the data has been modified
     $layout notify event "modified"
@@ -219,19 +213,39 @@ body ::tycho::VertexController::click {tag x y args} {
 }
 
 #########################################################################
-#### contextmenu
+#### configurePopup
 #
 # Initialize the context-sensitive pop-up menu. 
 #
-body ::tycho::VertexController::contextmenu {slateid type} {
-    set name [itemname $slateid]
+body ::tycho::VertexController::configurePopup {name} {
+    set v [$slateview find withtag current]
 
-    if { $type == "vertex" } {
-        # Show all terminal styles
-        # set termstyle [$graph
-        # contextmenu 
+    # Get the terminal styles
+    # FIXME: Need a shorter way of doing this!
+    set icon [$graph attrget $v -icon]
+    set split [split $icon #]
+    set iconlib [lindex $split 0]
+    set iconname [split [lindex $split 1] .]
+    
+    set proxy [::tycho::model locate $iconlib]
+    set lib [::tycho::model dereference $proxy]
+    set termstyles [$lib attrget $iconname -termstyles]
+
+    # Clear and rebuild the terminal style cascade menu
+    $slateview popup clear $name termstyle
+    foreach s $termstyles {
+        if [$lib exists $s -label] {
+            set label [$lib attrget $s -label]
+	    if { $label == "" } {
+		set label $s
+	    }
+        } else {
+            set label $s
+        }
+	$slateview popup add $name command $s termstyle \
+		-label $label \
+		-command "$this termstyle $v $s"
     }
-    ;
 }
 
 ########################################################################
@@ -336,16 +350,59 @@ body ::tycho::VertexController::editparameters {tag} {
     }
 }
 
+
+########################################################################
+#### iconlib
+#
+# Get the icon library of a vertex.
+#
+body ::tycho::VertexController::iconlib {v} {
+    # Find the icon of the vertex
+    if ![$graph exists $v -icon] {
+        # FIXME
+        error "No icon for $starname"
+    }
+    set iconpath [$graph attrget $v -icon]
+    set iconlib [lindex [split $iconpath #] 0]
+
+    # Get the icon library
+    set lib [::tycho::model locate $iconlib]
+    set iconmodel [::tycho::model dereference $lib]
+
+    return $iconmodel
+}
+
+########################################################################
+#### iconname
+#
+# Get the icon name of a vertex.
+#
+body ::tycho::VertexController::iconname {v} {
+    # Find the icon of the vertex
+    if ![$graph exists $v -icon] {
+        # FIXME
+        error "No icon for $starname"
+    }
+    set iconpath [$graph attrget $v -icon]
+    set iconname [split [lindex [split $iconpath #] 1] "."]
+    return $iconname
+}
+
 ########################################################################
 #### initPopup
 #
 # Initialise popup menu for vertices.
 #
 body ::tycho::VertexController::initPopup {name} {
+    # Command entry for parameter editing
     $slateview popup add $name command editparameters \
 	    -command "$this editparameters current" \
 	    -label "Parameters..."
 
+    # A cascade for selecting the terminal style
+    $slateview popup add $name cascade termstyle \
+	    -label "Terminal style"
+    
     # Add a cascade for debugging type stuff
     $slateview popup add $name separator sepdebug
     $slateview popup add $name cascade debug -label "Debug"
@@ -426,6 +483,57 @@ body ::tycho::VertexController::release {tag} {
     }
 }
 
+########################################################################
+#### termstyle
+#
+# Get or set the terminal style of an icon. If the _style_ argument
+# is not given, return teh current terminal style. Otherwise change
+# the terminal style to the given style, andadjust any connected
+# edges to match.
+#
+body ::tycho::VertexController::termstyle {vertex {style {}}} {
+    if { $style == "" } {
+        return ???
+    }
+    set iconlib [iconlib $vertex]
+    set iconname [iconname $vertex]
+
+    # Iterate through the terminals in the termstyle
+    foreach t [$iconlib match terminal $style] {
+        # If the terminal exists, reconfigure it
+        if [$layout exists [concat $vertex $t]] {
+            eval $layout publish attrset \
+                    [list [concat $vertex $t]] \
+                    [$iconlib attrget [concat $style $t]]
+            # Adjust connected edges
+            foreach edge [$graph edges * [list $vertex $t]] {
+                $edgecontroller redraw $edge -to
+            }
+            foreach edge [$graph edges [list $vertex $t] *] {
+                $edgecontroller redraw $edge -from
+            }
+        } else {
+            # Otherwise create a new one
+            eval $layout publish add item \
+                    [list [concat $vertex $t]] \
+                    [$iconlib attrget [concat $style $t]]
+        }
+    }
+    # If there are any terminals that shouldn't be there, delete them
+    foreach t [::tycho::lsubtract \
+            [$layout match item $vertex] \
+            [$iconlib match terminal $style]] {
+        # Disconnect edges
+        foreach edge [$graph edges * [list $vertex $t]] {
+            $edgecontroller disconnect $edge -to
+        }
+        foreach edge [$graph edges [list $vertex $t] *] {
+            $edgecontroller disconnect $edge -from
+        }
+        # Delete terminal
+        $layout publish delete [concat $vertex $t]
+    }
+}
 
 ###################################################################
 ###################################################################
