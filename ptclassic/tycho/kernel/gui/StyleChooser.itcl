@@ -170,7 +170,7 @@ body ::tycho::PreferenceDialog::destructor {} {
     }
 
     # Save the whole bag of preferences
-    ::tycho::preference model write
+    ::tycho::preference model save
 
     # Also save just the ones the user wants
     # FIXME: Save file in Model?
