@@ -1,4 +1,5 @@
 #include "Fraction.h"
+#include "StringList.h"
 
 /*
 
@@ -14,8 +15,6 @@
  This file contains the member function definitions.
 
 */
-
-# include <stream.h>	// needed only for the print function
 
 Fraction operator + (Fraction i, Fraction j)
 {
@@ -62,9 +61,14 @@ int operator == (Fraction i, Fraction j)
     return ((i.numerator == j.numerator) && (i.denominator == j.denominator));
 }
 
-void Fraction :: print()
+Fraction :: operator char* ()
 {
-	cout << numerator << "/" << denominator << "\n";
+	StringList out;
+	out = numerator;
+	out += "/";
+	out += denominator;
+	out += "\n";
+	return out;
 }
 
 // This routine simplifies a Fraction so that its numerator and denominator
