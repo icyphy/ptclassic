@@ -78,12 +78,24 @@ public:
 	// Method to get inputs from myStar
 	InfString getInputs();
 
+	// Array of flags indicating which inputs are new
+	int *inputNewFlags;
+
 	// Array of values that can be set from Tcl using the "setOutputs"
 	// command.
 	double *outputValues;
 
+	// Array of flags indicating which outputs are new
+	int *outputNewFlags;
+
 	// Method to set one value of the above array with boundary checking
 	void setOneOutput(int outNum, double outValue);
+
+	// Method to set all of the inputNewFlags to either TRUE or FALSE
+	void setAllNewInputFlags(int flag);
+
+	// Method to set all of the outputNewFlags to either TRUE or FALSE
+	void setAllNewOutputFlags(int flag);
 
 	Block* myStar;
 protected:
@@ -92,8 +104,11 @@ protected:
 	// be incremented.
 	static unique;
 
-	// Size of the "outputValues" array.
-	int arraySize;
+	// Size of the "inputNewFlags" array.
+	int inputArraySize;
+
+	// Size of the "outputValues" and "outputNewFlags" arrays.
+	int outputArraySize;
 
 	// A unique string for each instance of this object identifies
 	// the star within which it sits for the benefit of Tcl routines.
