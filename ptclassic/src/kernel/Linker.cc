@@ -293,7 +293,7 @@ Linker::generateSharedObject(int argc, char **argv, char* objName,
   // Create the command to produce the shared object
   command << " " << objName;
 
-#if defined (USE_SHLLOAD) || defined (__linux__) && defined  (USE_DLOPEN)
+#if defined (USE_SHLLOAD)
   // I  don't think we need all this (neal@ctd.comsat.com)
   for (int i = 1; i < argc; i++) {
     char* fullObjName = expandPathName(argv[i]);
@@ -307,8 +307,11 @@ Linker::generateSharedObject(int argc, char **argv, char* objName,
 
     // If this is a permlink, then save the filenames for later
     if ( permlinkFiles.length() == 0 ) {
-      // We have not yet done any permlinks, so we need not check
-      permlinkFiles << " " << fullObjName;
+      if(perm)
+        // We have not yet done any permlinks, so we need not check
+        permlinkFiles << " " << fullObjName;
+      else
+	command << " " << fullObjName;
     } else {
       // Don't add the file if it is already in the list.
       // Parse permlinkFiles with strtok, and use a copy of permlinkFiles
@@ -380,7 +383,7 @@ static void cleanupSharedObjects(int linkSeqNum)
     sprintf(fileName, DLOPEN_TMP_FILE_FORMAT, (int)getpid(), i);
 #ifdef DEBUG    
     {
-      Error::message("Linker cleanup: about to remove: ", fileName);
+      cerr << "Linker cleanup: about to remove: " << fileName <<"\n";
     }
 #endif
     unlink(fileName);
@@ -453,8 +456,8 @@ int Linker::multiLink (int argc, char** argv) {
 	// a temporary .so file.  In this way, we can collect up the permlink
 	// .so files etc.
 
-	if ( argc > 2 ||
-	     (argc == 2 && strncmp(argv[1]+strlen(argv[1])-3, ".so", 3) != 0))
+	//if ( argc > 2 ||
+	//     (argc == 2 && strncmp(argv[1]+strlen(argv[1])-3, ".so", 3) != 0))
 	  if (generateSharedObject(argc, argv, objName, PATHNAME_LENGTH) ==
 	      (char *)NULL)
 	    return FALSE;
