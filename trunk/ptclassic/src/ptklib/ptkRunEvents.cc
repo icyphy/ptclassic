@@ -37,7 +37,6 @@ SimControl object.
 extern "C" {
 #include "ptk.h"
 }
-#include "local.h"
 
 #include "SimAction.h"
 
