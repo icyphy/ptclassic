@@ -57,7 +57,7 @@ public:
         // buffer is allocated, e.g. fork outputs (all destinations
         // of the fork share the same buffer, whose size is returned
         // by bufSize).
-        int localBufSize() const;
+        virtual int localBufSize() const;
 
 	// return the offset position in the buffer.
 	unsigned bufPos() const { return offset;}

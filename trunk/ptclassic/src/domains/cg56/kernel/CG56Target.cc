@@ -20,7 +20,7 @@ $Id$
 #include "CG56Star.h"
 #include <ctype.h>
 
-const Attribute ANY(0,0);
+const Attribute ANY = {0,0};
 
 // a CG56Memory represents the X and Y memories of a 56000.  It is
 // derived from DualMemory.

@@ -17,8 +17,8 @@ $Id$
 
 #include "CG56Connect.h"
 
-extern const Attribute P_XMEM(PB_XMEM,PB_YMEM);
-extern const Attribute P_YMEM(PB_YMEM,PB_XMEM);
+extern const Attribute P_XMEM = {PB_XMEM,PB_YMEM};
+extern const Attribute P_YMEM = {PB_YMEM,PB_XMEM};
 
 // allocate portholes in X memory by default
 // this can be changed by specifying, say, P_YMEM
