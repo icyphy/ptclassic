@@ -311,8 +311,8 @@ int CGStar::processMacro(StringList& list, const char*& t) {
     }
     if (list.length())
     {
-	const char* string = list;
-	if(string[list.length()-1] != '\n') list << '\n';
+	const char* string = list.tail();
+	if(string[strlen(string)-1] != '\n') list << '\n';
     }
     return TRUE;
 }
