@@ -40,3 +40,6 @@ XV_INSTALL=bsdinst
 
 # Used to flush the cache on the hppa.  (source is in the kernel/ directory)
 FLUSH_CACHE = flush_cache.o
+# Destination of flush_cache.  Can't just subsitute $(LIBDIR)/flush_cache.o
+# in pigiRpc/makefile, or the make will fail on other archs.
+LIB_FLUSH_CACHE = $(LIBDIR)/flush_cache.o
