@@ -153,13 +153,11 @@ void S56XTarget::configureCommPair(CommPair& pair) {
     s56xSide->cgcSide = cgcSide;
     s56xSide->commCount = cgcSide->commCount = &pairNumber;
     s56xSide->pairNumber = cgcSide->pairNumber = pairNumber++;
-    char *expandedDirName = expandPathName(destDirectory.currentValue());
 
+    cgcSide->S56XFilePrefix.
+	setInitValue(savestring(filePrefix.currentValue()));
     cgcSide->S56XFilePrefix.initialize();
-    cgcSide->S56XFilePrefix << expandedDirName << "/"
-	       << filePrefix.currentValue();
 
-    delete [] expandedDirName;
 }
 
 CommPair S56XTarget::fromCGC(PortHole&) {
@@ -195,14 +193,10 @@ AsynchCommPair S56XTarget::createPeekPoke(CGTarget& peekTarget,
 	return pair;
     }
 
-    // FIXME - code duplication
-    char *expandedDirName = expandPathName(destDirectory.currentValue());
+    cgcSide->S56XFilePrefix.
+	setInitValue(savestring(filePrefix.currentValue()));
     cgcSide->S56XFilePrefix.initialize();
-    cgcSide->S56XFilePrefix << expandedDirName << "/"
-	       << filePrefix.currentValue();
 
-    delete [] expandedDirName;
-    
     StringList aioVariable;
     aioVariable << symbol("peekPoke");
     setAsynchCommState(pair,"VariableName",aioVariable);

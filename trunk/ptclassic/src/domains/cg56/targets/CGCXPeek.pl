@@ -24,7 +24,7 @@ codeblock(receiveToken,"") {
     fix fixValue;
     char* pValue = (char*) &value;
     pValue++;
-    if ((value = qckPeek(dsp,"$val(VariableName)")) == -1) { 
+    if ((value = qckPeek($val(S56XFilePrefix)_dsp,"$val(VariableName)")) == -1) { 
 	fprintf(stderr, "$val(VariableName): Receive Data Failed\n", qckErrString);
 	exit(1);
     }
@@ -38,7 +38,7 @@ codeblock(receiveBlock,"") {
 	int value[$val(blockSize)+1];
 	int i;
 	int offset;
-	if ( qckGetBlkItem(dsp,$starSymbol(s56xBuffer),value,$val(blockSize)+1) == -1) { 
+	if ( qckGetBlkItem($val(S56XFilePrefix)_dsp,$starSymbol(s56xBuffer),value,$val(blockSize)+1) == -1) { 
 	    fprintf(stderr,"$val(VariableName): Receive Data Failed\n", qckErrString);
 	    exit(1);
 	}

@@ -58,7 +58,7 @@ int $starSymbol(bufStart) = 0;
 }
 
 codeblock(loadDSPSymbols) {
-    if (($starSymbol(s56xBuffer) = qckItem(dsp,"$val(VariableName)")) == 0)
+    if (($starSymbol(s56xBuffer) = qckItem($val(S56XFilePrefix)_dsp,"$val(VariableName)")) == 0)
 	EXIT_CGC("CGCXAsychComm address resolution failed");
     $starSymbol(bufferAddr) = QckAddr($starSymbol(s56xBuffer));
 }
