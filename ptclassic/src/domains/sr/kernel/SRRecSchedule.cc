@@ -62,6 +62,10 @@ SRRecursiveSchedule::~SRRecursiveSchedule()
 }
 
 // Return the cost of the schedule
+//
+// @Description The cost is defined as the total 
+// number of <EM>outputs</EM> evaluated in a single run of the schedule.
+
 int SRRecursiveSchedule::cost() const
 {
   int total = 0;
@@ -75,7 +79,8 @@ int SRRecursiveSchedule::cost() const
 // Return the cost of one partition
 //
 // @Description The index v is updated to point to the next partition
-int SRRecursiveSchedule::partitionCost( int & v ) const
+int
+SRRecursiveSchedule::partitionCost( int & v ) const
 {
 
   if ( partSize[v] == parSize[v] ) {
@@ -108,7 +113,8 @@ int SRRecursiveSchedule::partitionCost( int & v ) const
 }
 
 // Return a compact printed form of the schedule
-StringList SRRecursiveSchedule::print() const
+StringList
+SRRecursiveSchedule::print() const
 {
   StringList out;
 
@@ -180,8 +186,216 @@ SRRecursiveSchedule::printOnePartition(int & v /* partition's first vertex */,
   }
 }
 
+// Return the Tcl list form of this schedule
+//
+// @Description This follows the formatting conventions described in
+// <A HREF="http://ptolemy.eecs.berkeley.edu/~ptdesign/newPtolemyInfrastructure/schedules.html">
+// ``Specifying Schedules''</A>.
+StringList
+SRRecursiveSchedule::printVerbose() const
+{
+  StringList out;
+
+  // Print each partition
+
+  int v = 0;
+  while ( v < mygraph->vertices() ) {
+    printVerbosePartition(v, 2, out );
+  }
+
+  return out;
+}
+
+// Print one partition in the schedule
+void
+SRRecursiveSchedule::printVerbosePartition(
+	int & v /* partition's first vertex */,
+	int indent /* indentation level */,
+	StringList & out) const
+{
+  int i;
+
+  if ( partSize[v] == parSize[v] ) {
+
+    printVerboseBlock( v, indent, out );
+
+  } else {
+    int et = v + partSize[v];
+    if ( headSize[v] > 0 ) {
+
+      // Print a non-separable partition with a head and repetition count
+     
+      for ( i = indent ; --i >= 0 ; ) out << " ";
+      out << "{ repeat " << repCount[v] << "\n";
+
+      // Print the head 
+
+      for ( i = indent + 2; --i >= 0 ; ) out << " ";
+      out << "{ head\n";
+      
+      int eh = v + headSize[v];
+
+      while ( v < eh ) {
+	printVerboseBlock( v, indent + 4, out );
+      }
+
+      for ( i = indent + 2; --i >= 0 ; ) out << " ";
+      out << "}\n";
+
+      // Print the tail
+
+      while ( v < et ) {
+	printVerbosePartition( v, indent + 2, out );
+      }
+
+      for ( i = indent; --i >= 0 ; ) out << " ";
+      out << "}\n";
+
+    } else {
+
+      // Print a separable partition
+
+      while ( v < et ) {
+	printVerbosePartition( v, indent, out );
+      }
+
+    }      
+  }
+}
+
+// Print one block in the schedule
+void
+SRRecursiveSchedule::printVerboseBlock(
+	int & v /* partition's first vertex */,
+	int indent /* indentation level */,
+	StringList & out) const
+{
+  int i;
+
+  SRStar * s;
+
+  for ( i = indent; --i >= 0 ; ) out << " ";
+  s = mygraph->star(vertex[v]);
+  out << "{ fire " << s->name() << "\n";
+
+  for ( int j = parSize[v] ; --j >= 0 ; ) {
+
+    for ( i = indent + 2; --i >= 0 ; ) out << " ";    
+
+    out << "{ output ";
+
+    // All the vertices in this parallel block should be on the same star
+    assert( s == mygraph->star(vertex[v]) );
+   
+    if ( mygraph->port(vertex[v]) ) {
+      out << (mygraph->port(vertex[v]))->name();
+    } else {
+      out << "(fictitious)";
+    }
+
+    out << " }\n";   
+
+    v++;
+  
+  }
+
+  for ( i = indent; --i >= 0 ; ) out << " ";
+  out << "}\n";
+  
+}
+
+// Run the schedule by calling the run method of each star
+//
+// @Description Go through the schedule in order.  For each parallel block,
+// call the run method of its star.  For this to be correct, each parallel
+// block must contain outputs on exactly one star.  Calling splitParallelBlocks
+// can ensure this.
+//
+// @SeeAlso splitParallelBlocks runOnePartition runOneBlock
+void
+SRRecursiveSchedule::runSchedule() const
+{
+
+  int v = 0;
+  while ( v < mygraph->vertices() ) {
+    runOnePartition(v);
+  }
+
+}
+
+// Run a single partition
+void
+SRRecursiveSchedule::runOnePartition(int & v /* partition's first vertex */ )
+const
+{
+  if ( partSize[v] == parSize[v] ) {
+
+    // Parallel block -- run it
+
+    runOneBlock( v );
+
+  } else {
+
+    int et = v + partSize[v];
+
+    if ( headSize[v] > 0 ) {
+
+      // Non-separable partition with a head and a repetition count
+
+      int head = v;
+      int tail = v + headSize[v];
+      int rc = repCount[v];
+
+      // Run the tail once
+
+      for ( v = tail ; v < et ; ) {
+	runOnePartition( v );
+      }
+
+      // Run the head then the tail as many times as the repetition count
+
+      for ( ; --rc >= 0 ; ) {
+
+	// Run the head 
+
+	for ( v = head ; v < tail ; ) {
+	  runOneBlock( v );
+	}
+
+	for ( ; v < et ; ) {
+	  runOnePartition( v );
+	}
+	
+      }
+
+    } else {
+
+      // Separable partition -- run it
+
+      for ( ; v < et ; ) {
+	runOnePartition( v );
+      }
+
+    }
+  }
+}
+
+// Run a parallel block
+//
+// @Description Call the run method of the star at the first index of the block
+// and return
+void
+SRRecursiveSchedule::runOneBlock(int & v /* first index of the block */) const
+{
+  SRStar * s = mygraph->star(vertex[v]);
+  cout << "Firing " << s->name() << "\n";
+  s->run();
+  v += parSize[v];
+}
+
 // Add a single vertex to evaluate at the given index and return the next index
-int SRRecursiveSchedule::addSingleVertex( int i, int v )
+int
+SRRecursiveSchedule::addSingleVertex( int i, int v )
 {
   vertex[i] = v;
   partSize[i] = 1;
@@ -192,6 +406,10 @@ int SRRecursiveSchedule::addSingleVertex( int i, int v )
 }
 
 // Add a partition to evaluate at the given index and return the next index
+//
+// @Description Add a partition of the given size, with a single, fully
+// parallel head containing every member of the partition set s.  The vertices
+// in the new parallel head come in the order given by SetIter.
 int
 SRRecursiveSchedule::addPartition( int i,
 				   int r /* Total partition size */,
@@ -250,8 +468,9 @@ Schedule: ( 6 . ( 4 . 1 0 2 )^1 3 5 )^1
 6                 1*****************7
 </PRE>
 
-**********************************************************************/
+@SeeAlso findRange
 
+**********************************************************************/
 int
 SRRecursiveSchedule::findPushRange( int v /* the vertex to find */,
 				    int & start /* the starting range */,
@@ -288,6 +507,7 @@ SRRecursiveSchedule::findPushRange( int v /* the vertex to find */,
 
 }
 
+// Called by findPushRange
 int
 SRRecursiveSchedule::findRange( int v /* the vertex to find */,
 				int & start /* the starting range */,
@@ -348,7 +568,9 @@ SRRecursiveSchedule::findRange( int v /* the vertex to find */,
 //
 // @Description Find the vertex and its push range using findPushRange,
 // try to push it back as far as possible, then push it towards the best
-// parallel block.
+// parallel block.  Vertices are moved with insertVertexAtIndex.
+//
+// @SeeAlso findPushRange insertVertexAtIndex
 int
 SRRecursiveSchedule::mergeVertex(int v /* the vertex to be merged */)
 {
@@ -437,11 +659,76 @@ SRRecursiveSchedule::mergeVertex(int v /* the vertex to be merged */)
 
     insertVertexAtIndex( v, bestIndex );
 
-    cout << print() << '\n';
+    // cout << print() << '\n';
 
   }
 
   return 1;
+}
+
+// Split all parallel blocks containing different stars
+//
+// @Description Check each parallel block and split those that contain more
+// than one star into multiple, sequential blocks.  In the end, all parallel
+// blocks will be firing outputs on a single star, so a single firing of
+// the star will suffice. <BR>
+//
+// By default, all vertices in the head of a partition are placed into a
+// single parallel block (see addPartition).  This method splits them apart
+// so the scheduler has an easier time. <BR>
+//
+// If a parallel block consists of [5 6 7 8 9], and 5, 6, and 9 are outputs of
+// the same star, and 7 and 8 are outputs of a different star, this splits
+// the schedule into [5 6] [7 8] [9]. <BR>
+//
+// The expectation is that when the schedule is generated, vertices on the
+// same star will remain blocked together and this behavior will not
+// happen.
+void
+SRRecursiveSchedule::splitParallelBlocks()
+{
+  SRStar * s;
+  int v = 0;
+  while ( v < mygraph->vertices() ) {
+
+    int ps = parSize[v];
+    int eb = v + ps;
+
+    // cout << "Considering [";
+    // for ( int k = v ; k < eb ; k++ ) cout << vertex[k] << ' ';
+    // cout << "]\n";
+
+    if ( ps > 1 ) {
+
+      // A non-trivial parallel block -- break into parallel blocks
+      // with identical stars
+
+      while ( v < eb ) {
+	s = mygraph->star(vertex[v]);
+	int j = v + 1;
+
+	// Find the next index with a star that doesn't match, or the
+	// end of the parallel block, whichever comes sooner
+
+	while ( j < eb && mygraph->star(vertex[j]) == s ) {
+	  j++;
+	}
+	parSize[v] = j - v;
+	if ( partSize[v] == 0 ) {
+	  partSize[v] = j - v;
+	}
+	// cout << "Setting parSize[" << v << "] to " << j-v << '\n';
+	v = j;
+      }
+
+      // cout << print() << '\n';
+
+    } else {
+      // A trivial parallel block -- just move on
+      v++;
+    }
+  }
+
 }
 
 // Remove an index from the schedule
