@@ -102,12 +102,12 @@ GMAKE= `if [ -f $(GNU_OBJ)/make/make ]; \
 
 
 bin:
-	(cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC=$(CC) MAKE=$(GMAKE) )
+	(cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC="$(CC)" MAKE=$(GMAKE) )
 
 $(BINDIR):
 	mkdir $(BINDIR)
 install: $(BINDIR) 
-	(cd $(GNU_OBJ); $(MAKE) MAKEINFO="$(MAKEINFO)" install)
+	(cd $(GNU_OBJ); $(MAKE) CC="$(CC)" MAKEINFO="$(MAKEINFO)" install)
 	-(cd $(BINDIR); ln -s $(REL_GNU_BINDIR)/* .)
 	-(cd $(BINDIR); rm -f gperf genclass unprotoize protoize hp* dec* c++ make.old)
 
