@@ -46,8 +46,11 @@ Version identification:
 #include "main.h"
 #include "list.h"
 
-#define dmWidth 40
+/* for ShowFacetNum */
+#include "ptk.h"
+#include "handle.h"
 
+#define dmWidth 40
 
 char* callParseClass();
 
@@ -136,7 +139,8 @@ long userOptionWord;
 }
 
 
-/* ShowFacetNum prints the number of the facet to the standard out.
+/* ShowFacetNum calls a tcl function showfacetnum.  this function
+   is redefinable by the user.
    This is a helping function for the development of the TCL/TK interface
    to Ptolemy - aok */
 int
@@ -146,7 +150,7 @@ lsList cmdList;
 long userOptionWord;
 {
     octObject facet, inst;
-    char FacetName[64], InstanceName[64];
+    char FacetName[15], InstanceName[15];
     vemStatus status;
 
     ViInit("show facet number");
@@ -158,7 +162,8 @@ long userOptionWord;
         PrintErr(octErrorString());
         ViDone();
     }
-    sprintf( FacetName, "OctObj%x", (long)facet.objectId);
+
+    ptkOctObj2Handle ( &facet, FacetName );
 
     /* Get the instance under the cursor */
     status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
@@ -170,12 +175,22 @@ long userOptionWord;
         sprintf (InstanceName, "NIL");
     } else {
         /* cursor is over some type of instance... */
-        sprintf( InstanceName, "OctObj%x", (long)inst.objectId);
+	ptkOctObj2Handle ( &inst, InstanceName );
     }
 
-    printf("Facet_Handle Instance_Handle: %s %s\n", FacetName, InstanceName);
+    Tcl_VarEval( ptkInterp, "info commands ptkShowFacetNum", (char *) NULL);
+
+    /* Create a ptkShowFacetNum if it doesn't exist. */
+    if ( strlen(ptkInterp->result) == 0 ) {
+        Tcl_VarEval( ptkInterp, "proc ptkShowFacetNum { facet instance }",
+        " { puts  \"facet, instance : $facet $instance\"  } ", (char *) NULL );
+    }
+    
+    Tcl_VarEval( ptkInterp, "ptkShowFacetNum ", FacetName, " ", 
+                 InstanceName, (char *) NULL);
 
     ViDone();
+
 }
 
 
