@@ -30,3 +30,23 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 ***********************************************************************/
 
+// The following is defined in CGCDomain.cc -- this forces that module
+// to be included if any CGC stars are linked in.
+extern const char CGCdomainName[];
+
+const char* ACSCorona :: domain () const { return ACSdomainName;}
+
+// isA
+ISA_FUNC(ACSStar, CGStar);
+
+// select Core to be used
+int ACSCorona::setCore(const char *coreName)
+{
+  // iterate through list until Core is found, if not return null
+}
+
+// register Core in the list
+int ACSCorona::registerCore(Core &core, const char* implementationName)
+{
+  // store pointer to core in the CoreList
+}
