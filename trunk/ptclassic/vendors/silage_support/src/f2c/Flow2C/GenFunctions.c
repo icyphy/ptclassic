@@ -234,7 +234,7 @@ to pass the data type to the signal */
 		fprintf(CFD, "float* r_%s_%s, ",Graph->Name,inputList[k].name); 
 	}
 	if(strcmp(inputList[numberIn-1].typ,"bool") == 0) 
-	fprintf(CFD, "int* r_%s_%s, ",Graph->Name,inputList[numberIn-1].name); 
+	fprintf(CFD, "int* r_%s_%s",Graph->Name,inputList[numberIn-1].name); 
 	else if(strcmp(inputList[numberIn-1].typ,"fixArray") == 0)
    	fprintf(CFD,"float r_%s_%s[%d]",Graph->Name,
 		inputList[numberIn-1].name, inputList[numberIn-1].arrSz);
@@ -274,7 +274,7 @@ to pass the data type to the signal */
 	fprintf(CFD,"Sig_Type* r_%s_%s, ",Graph->Name,inputList[k].name); 
 	}
 	if(strcmp(inputList[numberIn-1].typ,"bool") == 0) 
-	fprintf(CFD, "int* r_%s_%s, ",Graph->Name,inputList[numberIn-1].name); 
+	fprintf(CFD, "int* r_%s_%s",Graph->Name,inputList[numberIn-1].name); 
 	else if(strcmp(inputList[numberIn-1].typ,"fixArray") == 0)
    	fprintf(CFD,"Sig_Type r_%s_%s[%d]",Graph->Name,
 		inputList[numberIn-1].name, inputList[numberIn-1].arrSz);
