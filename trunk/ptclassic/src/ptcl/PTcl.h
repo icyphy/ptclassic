@@ -206,11 +206,10 @@ protected:
 	// find blocks for info-showing commands
 	const Block* getBlock(const char*);
 
-	// return a StringList result with proper cleanup as the
-	// result of a Tcl command.
-	int result(StringList&);
+	// return a const char* or a StringList result to Tcl
+	int result(const char* str);
 
-	// return a "static result".  Don't give this one a stringlist!
+	// return a "static result" to Tcl.  Don't give this one a StringList!
 	int staticResult(const char*);
 
 	// append a value to the result, using Tcl_AppendElement.
