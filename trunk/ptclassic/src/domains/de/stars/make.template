@@ -22,9 +22,7 @@ NETWK = $(ROOT)/src/domains/sdf/image/kernel
 INCL = -I$(DEDIR) -I$(KERNDIR) -I$(NETWK)
 
 PL_SRCS= \
-DEAnd.pl \
 DEArbitrate.pl \
-DEBarGraph.pl \
 DEBeep.pl \
 DEBlackHole.pl \
 DECellLoad.pl \
@@ -47,11 +45,10 @@ DEImageToCell.pl \
 DEImpulse.pl \
 DEIntPacketize.pl \
 DEIntUnPacketize.pl \
-DEInvert.pl \
+DELogic.pl \
 DEMeasureDelay.pl \
 DEMerge.pl \
 DENull.pl \
-DEOr.pl \
 DEPassGate.pl \
 DEPCMVoiceRecover.pl \
 DEPSServer.pl \
