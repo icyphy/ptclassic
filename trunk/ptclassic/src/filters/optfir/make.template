@@ -60,6 +60,8 @@ LIB = foo
 
 C_INCL =	$(PTCOMPAT_INCSPEC)
  
+REALCLEAN_STUFF =	optfir
+
 all:	makefile $(LIB) optfir
 
 install: makefile $(BINDIR)/optfir
