@@ -27,30 +27,56 @@ STARDOCDIR = ../../doc/stars
 
 # source files for all stars, using preprocessor
 PL_SRCS= \
- SDFCxMatrix.pl \
- SDFDataSVD.pl \
- SDFDataSVD_M.pl \
- SDFFixMatrix.pl \
- SDFFloatMatrix.pl \
- SDFGeneralSVD.pl \
- SDFIntMatrix.pl \
- SDFKalman1.pl \
- SDFKalman2.pl \
- SDFKalman_M.pl \
- SDFMUSIC.pl \
- SDFMUSIC_M.pl \
- SDFMatrixAdd.pl \
- SDFMatrixInv.pl \
- SDFMatrixMult.pl \
- SDFMatrixTran.pl \
- SDFPackCx_M.pl \
- SDFPackFix_M.pl \
- SDFPackFloat_M.pl \
- SDFPackInt_M.pl \
- SDFUnPkCx_M.pl \
- SDFUnPkFix_M.pl \
- SDFUnPkFloat_M.pl \
- SDFUnPkInt_M.pl
+  SDFAddCx_M.pl \
+  SDFAddFix_M.pl \
+  SDFAddInt_M.pl \
+  SDFAdd_M.pl \
+  SDFConjugate_M.pl \
+  SDFCxMatrix.pl \
+  SDFDataCx_M.pl \
+  SDFDataFix_M.pl \
+  SDFDataInt_M.pl \
+  SDFData_M.pl \
+  SDFFixMatrix.pl \
+  SDFFloatMatrix.pl \
+  SDFGainCx_M.pl \
+  SDFGainFix_M.pl \
+  SDFGainInt_M.pl \
+  SDFGain_M.pl \
+  SDFHermitian_M.pl \
+  SDFIdentityCx_M.pl \
+  SDFIdentityFix_M.pl \
+  SDFIdentityInt_M.pl \
+  SDFIdentity_M.pl \
+  SDFIntMatrix.pl \
+  SDFInverseCx_M.pl \
+  SDFInverseFix_M.pl \
+  SDFInverseInt_M.pl \
+  SDFInverse_M.pl \
+  SDFMatrixAdd.pl \
+  SDFMatrixInv.pl \
+  SDFMatrixMult.pl \
+  SDFMatrixTran.pl \
+  SDFMpyCx_M.pl \
+  SDFMpyFix_M.pl \
+  SDFMpyInt_M.pl \
+  SDFMpy_M.pl \
+  SDFPackCx_M.pl \
+  SDFPackFix_M.pl \
+  SDFPackFloat_M.pl \
+  SDFPackInt_M.pl \
+  SDFSubCx_M.pl \
+  SDFSubFix_M.pl \
+  SDFSubInt_M.pl \
+  SDFSub_M.pl \
+  SDFTransposeCx_M.pl \
+  SDFTransposeFix_M.pl \
+  SDFTransposeInt_M.pl \
+  SDFTranspose_M.pl \
+  SDFUnPkCx_M.pl \
+  SDFUnPkFix_M.pl \
+  SDFUnPkFloat_M.pl \
+  SDFUnPkInt_M.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
