@@ -109,9 +109,6 @@ public:
 	void claimSticky() { stickyFlag = 1; }
 	int sticky() { return stickyFlag; }
 
-	// get the execution time of the invocation
-	int myExecTime() { return myMaster()->myExecTime(); }
-
 private:
 
   	// invocation number is tabulated starting from "1" 
