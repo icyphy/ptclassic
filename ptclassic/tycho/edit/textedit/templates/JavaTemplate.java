@@ -38,7 +38,7 @@ Description of the class
 */
 public class ClassName {
     /** Constructor
-     * @see full-classname/method-name
+     * @see full-classname#method-name()
      * @param parameter-name description
      * @param parameter-name description
      * @return description
@@ -51,7 +51,7 @@ public class ClassName {
     ////                         public methods                           ////
 
     /** Description
-     * @see full-classname/method-name
+     * @see full-classname#method-name()
      * @param parameter-name description
      * @param parameter-name description
      * @return description
@@ -66,7 +66,7 @@ public class ClassName {
     ////                         protected methods                        ////
 
     /** Description
-     * @see full-classname/method-name
+     * @see full-classname#method-name()
      * @param parameter-name description
      * @param parameter-name description
      * @return description
@@ -87,7 +87,7 @@ public class ClassName {
 
     /* Private methods should not have doc comments, they should
      * have regular comments.
-     * @see full-classname/method-name
+     * @see full-classname#method-name()
      * @param parameter-name description
      * @param parameter-name description
      * @return description
