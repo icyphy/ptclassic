@@ -54,7 +54,7 @@ if ( ! $?PIGIRPC ) then
 		setenv PIGIBASE pigiRpc
 		breaksw
      endsw
-     setenv PIGIRPC $PTOLEMY/bin.$ARCH/pigiRpc/$PIGIBASE
+     setenv PIGIRPC $PTOLEMY/bin.$ARCH/$PIGIBASE
 endif
 
 set cell = init.pal
