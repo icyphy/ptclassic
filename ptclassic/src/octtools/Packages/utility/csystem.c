@@ -46,7 +46,11 @@ const char *s;
     int pid, w, retval;
 
     if ((pid = vfork()) == 0) {
+#ifdef PTNT
+	(void) execl("/bin/bash", "bash", "-c", s, 0);
+#else
 	(void) execl("/bin/csh", "csh", "-f", "-c", s, 0);
+#endif
 	(void) _exit(127);
     }
 
