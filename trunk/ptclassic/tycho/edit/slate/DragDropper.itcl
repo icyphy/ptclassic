@@ -179,6 +179,9 @@ class ::tycho::DragDropper {
 
     # A flag that enables movement
     private variable _moving 0
+
+    # The target item
+    private variable _droptarget ""
 }
 
 #######################################################################
@@ -213,13 +216,10 @@ body ::tycho::DragDropper::bind {t args} {
 #######################################################################
 #### click
 #
-# Start the interaction. All this does is clear highlights -- the client
+# Start the interaction. The client
 # usually sets *-activatecommand* to make something useful happen.
 #
 body ::tycho::DragDropper::click {x y args} {
-    # Delete all other highlights
-    $slate delete highlight
-
     # Set state indicating no movement
     set _moving 0
 }
@@ -230,7 +230,8 @@ body ::tycho::DragDropper::click {x y args} {
 # Continue an interaction sequence. If the mouse is still over the
 # source item, do nothing. Otherwise, if the mouse is over a suitable
 # target item, highlight that item and pass it to the *-dragcommand*
-# option. If not, delete all highlights and pass null to *-dragcommand*.
+# option. If not, delete a previous highlight and pass null to
+# *-dragcommand*.
 #
 body ::tycho::DragDropper::drag {x y} {
     # See if we have starting moving yet
@@ -246,14 +247,17 @@ body ::tycho::DragDropper::drag {x y} {
     set item [overtarget $x $y]
 
     # Adjust highlighting
-    $slate delete highlight
-    if { $item != "" } {
-	$slate highlight $item
+    if { $_droptarget != "" && $item == "" } {
+        $slate unhighlight $_droptarget
     }
+    if { $item != "" && $_droptarget == "" } {
+        $slate highlight $item
+    }
+    set _droptarget $item
 
     # Call -dragcommand
     if { $dragcommand != "" } {
-	uplevel \#0 $dragcommand [list $item] $x $y
+	uplevel \#0 $dragcommand [list $_droptarget] $x $y
     }
 }
 
@@ -263,7 +267,7 @@ body ::tycho::DragDropper::drag {x y} {
 # Move over a bound item. If -sourcepredicate is not null, evaluate
 # it and if it returns true, highlight the item and enable the rest
 # of the drag-drop sequence. If -sourcepredicate is null, highlight
-# the item and enable the rest of the drag-drop sequence
+# the item and enable the rest of the drag-drop sequence.
 #
 body ::tycho::DragDropper::enter {} {
     set item [$slate find withtag current]
@@ -293,10 +297,13 @@ body ::tycho::DragDropper::leave {} {
 #######################################################################
 #### release
 #
-# Let go of the mouse. This method just deletes highlights.
+# Let go of the mouse.
 #
 body ::tycho::DragDropper::release {} {
-    $slate delete highlight
+    if { $_droptarget != "" } {
+        $slate unhighlight $_droptarget
+    }
+    set _droptarget ""
 }
 
 #######################################################################
