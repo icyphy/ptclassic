@@ -19,18 +19,18 @@ Code for DDF-type portholes and multiportholes.
 
 **************************************************************************/
 
-int InDDFPort :: isItInput () { return TRUE;}
+int InDDFPort :: isItInput () const { return TRUE;}
 
 void InDDFPort :: grabData () { getParticle();}
 
-int OutDDFPort :: isItOutput () { return TRUE;}
+int OutDDFPort :: isItOutput () const { return TRUE;}
 
 void OutDDFPort :: grabData () { clearParticle();}
 
 void OutDDFPort :: sendData () { putParticle();}
 
-int MultiInDDFPort :: isItInput () { return TRUE;}
-int MultiOutDDFPort :: isItOutput () { return TRUE;}
+int MultiInDDFPort :: isItInput () const { return TRUE;}
+int MultiOutDDFPort :: isItOutput () const { return TRUE;}
 
 PortHole& DDFPortHole :: setPort (
 			     const char* s,
