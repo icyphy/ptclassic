@@ -16,7 +16,6 @@ $Id$
 
 **************************************************************************/
 
-#include <fcntl.h>
 #include <std.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -26,6 +25,9 @@ $Id$
 #include "StringList.h"
 #include "Output.h"
 #include <ctype.h>
+#ifndef O_RDONLY
+#define O_RDONLY 0
+#endif
 
 #ifdef __sun__
 #ifdef __mc68000__
