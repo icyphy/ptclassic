@@ -45,14 +45,14 @@ public:
         // casting to a <C>
         operator <C>() { return val;}
 
-	// Evaluate expression  in string
-	ParseToken evalExpression(Tokenizer& lexer, Block* blockIAmIn);	
-	ParseToken evalTerm(Tokenizer& lexer, Block* blockIAmIn);	
-	ParseToken evalFactor(Tokenizer& lexer, Block* blockIAmIn);	
-
 	State* clone (); //  {return new <T>State;}
 
 private:
+	// Evaluate expression  in string
+	ParseToken evalExpression(Tokenizer& lexer);
+	ParseToken evalTerm(Tokenizer& lexer);
+	ParseToken evalFactor(Tokenizer& lexer);
+
 	friend class <T>ArrayState;
 
 	<C> val;

@@ -33,76 +33,99 @@ StringList <T>State :: currentValue() { StringList s; s = val; return s;}
 // clone
 State* <T>State :: clone () { return new <T>State;}
 
-ParseToken pt;
-
 void <T>State  :: initialize() {
 	const  char* specialChars =  "*+-/()";
 	Tokenizer lexer(initValue,specialChars);
 
-	ParseToken t =evalExpression(lexer, parent()->parent());
-	if(strcmp(t.tok,"ERROR"))
-	if(strcmp(t.tok,"EOF"))
-	val = t.<C>val;
+	ParseToken t = evalExpression(lexer);
+	if (t.tok != T_ERROR && t.tok != T_EOF)
+		val = t.<C>val;
+	ParseToken t2 = getParseToken (lexer, T_<T>);
+	if (t2.tok != T_EOF)
+		parseError ("extra text after valid expression");
 }
 
-ParseToken <T>State :: evalExpression(Tokenizer& lexer, Block*  blockIAmIn) {
-	ParseToken t1 = evalTerm(lexer, blockIAmIn);
-	if(!strcmp(pt.tok,"EOF")) return t1;
-	ParseToken t2 = pt;
-	while((t2.cval == '+')||(t2.cval == '-')){
-	ParseToken t3 = evalTerm(lexer, blockIAmIn);
-
-        if(t2.cval == '+') t1.<C>val += t3.<C>val;
-        else              t1.<C>val -= t3.<C>val;
-	if(!strcmp(pt.tok,"EOF")) return t1;	
-	t2 = pt;}
-	pt = t2;
-	return t1;
+ParseToken <T>State :: evalExpression(Tokenizer& lexer) {
+	ParseToken t1 = evalTerm(lexer);
+	if (t1.tok != T_<T>) return;
+	while (1) {
+		ParseToken t2 = getParseToken(lexer, T_<T>);
+		if (t2.tok == '+' || t2.tok == '-') {
+			ParseToken t3 = evalTerm(lexer);
+			if (t3.tok == T_EOF) {
+				parseError ("unexpected end of string");
+				return t3;
+			}
+			else if (t3.tok == T_ERROR) return t3;
+			else if (t2.tok == '+')
+				t1.<C>val += t3.<C>val;
+			else	
+				t1.<C>val -= t3.<C>val;
+		}
+		else {
+			pushback = t2;
+			return t1;
+		}
+	}
 } 
 
-ParseToken <T>State :: evalTerm(Tokenizer& lexer, Block*  blockIAmIn) {
-	ParseToken t1 = evalFactor(lexer, blockIAmIn);
-	ParseToken t2 = getParseToken(lexer, blockIAmIn, "<T>");
-	ParseToken t3;
-	while(((t2.cval == '*')||(t2.cval == '/'))&& 
-	strcmp((t3 = evalFactor(lexer, blockIAmIn)).tok,"EOF"))
-	{
- 
-	if(t2.cval == '*') t1.<C>val *= t3.<C>val;
-	else		  t1.<C>val /= t3.<C>val;
-	
-	t2 = getParseToken(lexer, blockIAmIn, "<T>"); }
-	pt = t2; 
-	return t1;
+ParseToken <T>State :: evalTerm(Tokenizer& lexer) {
+	ParseToken t1 = evalFactor(lexer);
+	if (t1.tok != T_<T>) return;
+	while (1) {
+		ParseToken t2 = getParseToken(lexer, T_<T>);
+		if (t2.tok == '*' || t2.tok == '/') {
+			ParseToken t3 = evalFactor(lexer);
+			if (t3.tok == T_EOF) {
+				parseError ("unexpected end of string");
+				return t3;
+			}
+			else if (t3.tok == T_ERROR) return t3;
+			else if (t2.tok == '*')
+				t1.<C>val *= t3.<C>val;
+			else	
+				t1.<C>val /= t3.<C>val;
+		}
+		else {
+			pushback = t2;
+			return t1;
+		}
+	}
 } 
 
-ParseToken <T>State :: evalFactor(Tokenizer& lexer, Block*  blockIAmIn) {
+
+ParseToken <T>State :: evalFactor(Tokenizer& lexer) {
 	
 	<C> signflag = 1;
-        ParseToken t = getParseToken(lexer, blockIAmIn,"<T>");
-
-	if(!strcmp(t.tok,"EOF")) return t;
-	if(!strcmp(t.tok,"OP"))
-	{
-	if(t.cval == '(') {
-	ParseToken t1 = evalExpression(lexer, blockIAmIn);	
-	return t1;}
-
-	if(t.cval == '-')
-		{signflag = -1;
-		t = getParseToken(lexer, blockIAmIn,"<T>");
-		if(!strcmp(t.tok,"NULL")) {t.tok = "ERROR"; return t;}	
+        ParseToken t = getParseToken(lexer, T_<T>);
+	while (t.tok == '-') {
+		t = getParseToken(lexer, T_<T>);
+		signflag = -signflag;
+	}
+		
+	switch (t.tok) {
+	case EOF:
+		return t;
+	case '(':
+		ParseToken t1 = evalExpression(lexer);
+		if (t1.tok != T_<T>) return t1;
+		t = getParseToken(lexer, T_<T>);
+		if (t.tok == ')') {
+			t1.<C>val *= signflag;
+			return t1;
 		}
-        }
-	if(!strcmp(t.tok,"<T>")) {
-					t.<C>val = signflag * t.<C>val;
-					return  t;
-				}
-        else if(!strcmp(t.tok,"ID")) {	t.tok = "<T>";
-					t.<C>val = signflag * ((<T>State*)t.s)->val;
-					return t;
-				}
-        else {t.tok = "ERROR"; return t;}
+		else {
+			parseError ("unbalanced parentheses");
+			t.tok = T_ERROR;
+			return t;
+		}
+	case T_<T>:
+		t.<C>val = signflag * t.<C>val;
+		return  t;
+	default:
+		t.tok = T_ERROR;
+		parseError ("syntax error");
+	}
 }
 
 
