@@ -30,7 +30,7 @@
 # 						COPYRIGHTENDKEY
 
 # Pick up ::tycho::expandPath
-source $TYCHO/kernel/Path.tcl
+source [ file join $TYCHO kernel Path.tcl]
 
 #### tychoMkClassGraph
 # Make a class graph of the type displayed by the Tycho EditDAG class.
