@@ -1,0 +1,1040 @@
+.\" $Id$
+.H1 "Using the Interpreter
+.pp
+There are two ways to use \*(PT: an
+.i interpreter
+and a
+.i "graphical user interface" .
+The interpreter conveniently operates on dumb terminals and
+other environments where graphical user interfaces may not be
+available, and is described in this section.
+The graphical user interface is described in a separate section.
+.pp
+The \*(PT interpreter,
+.i ptcl ,
+accepts input from the keyboard, or from a file, or some combination thereof.
+It allows the user to set up a new simulation by creating instances of
+.c Star s,
+connecting them together, setting the initial value of internal
+parameters and states, running the simulation, restarting it, etc.
+.pp
+.i ptcl
+extends the Tcl interpreter language by adding new commands.  The
+underlying grammar and control structure of Tcl are not altered.
+Commands in Tcl have a simple syntax: a verb followed by arguments.
+This document will not explain Tcl; please refer to [REFERENCE]
+for that.  Instead, it will describe only the extensions to Tcl
+made by
+.i ptcl .
+.pp
+The interpreter has a
+.i "known list"
+containing all the classes of
+.c Star s
+and
+.c Galaxy s
+it currently knows about.
+It is possible to add a new
+.c Star
+to the known list at runtime only by using the incremental linking
+facility, but this has restrictions, see the
+.c link
+command below (you can also make your own copy of the
+interpreter with your own
+.c Star s
+linked in).  However, it's
+straightforward to add new classes of
+.c Galaxy s
+to the known list.
+.pp
+The interpreter also has a
+.i "current galaxy" .
+Normally, this is set to be the
+.c mainGalaxy .
+During the execution of a
+.c defgalaxy
+command, however, the 
+.i "current galaxy"
+is set to be the galaxy being defined.
+After the closing curly brace of the
+.c defgalaxy
+command, the 
+.i "current galaxy"
+is reset to be the
+.c mainGalaxy .
+.H2 "Commands for Defining the Simulation"
+.pp
+This section describes commands that build the
+simulation and add
+.c Star s,
+.c Galaxy s,
+.c State s,
+and the connections among them.
+.H3 "Setting the Domain"
+.pp
+.IE "domain command"
+\*(PT supports multiple simulation domains, and so does the \*(PT
+interpreter.  Before creating a simulation environment and running
+it, it is necessary to establish the domain.  Currently, nine domains
+are linked into the standard interpreter:
+synchronous data flow (SDF), discrete event (DE), and
+dynamic data flow (DDF), the Thor digital logic simulator (Thor),
+abstract code generation domains (CG and CG-DDF), and code generation
+domains for Motorola 56000 processors (CG56), Motorola 96000 processors
+(CG96), and C code generation (CGC).  The interpreter has a
+.i "current domain" ;
+this is initially
+.c SDF .
+The command
+.(c
+domain \fIdomain-name\fP
+.)c
+changes the current domain; it is only legal when the current galaxy
+is empty.  The argument must be the name of a known domain.
+The command
+.(c
+domain
+.)c
+returns the current domain.  It is possible to create
+.c Wormhole s
+\- interfaces between domains \- by including a
+.c domain
+command inside a galaxy definition.
+.H3 "Creating Instances of Stars and Galaxys
+.pp
+The first step in any simulation is to define the blocks
+(
+.c Star s
+and
+.c Galaxy s)
+to be used in the simulation.
+The command
+.(c
+star \fIname class\fP
+.)c
+.IE "star command"
+creates a new instance of a
+.c Star
+or
+.c Galaxy
+of class
+.i class ,
+names it
+.i name ,
+and inserts it into the current galaxy.
+Any
+.c State s
+in the
+.c Star
+(or
+.c Galaxy )
+are created with their default values.
+While it is not enforced, the normal naming convention is that
+.i name
+begin with a lower case letter and
+.i class
+begin with an upper case letter
+(this makes it easy to distinguish instances of a
+.c class
+from the
+.c class
+itself).
+The synonym
+.(c
+galaxy \fIname\fP \fIclass\fP
+.)c
+.IE "galaxy command"
+is also provided to create an instance of a
+.c Galaxy .
+.H3 "Connecting Stars and Galaxys
+.pp
+The next step is to connect the blocks so that they can
+pass data among themselves using the
+.c connect
+command.
+.IE "connect command"
+This forms a connection between two 
+.c Star s
+(or
+.c Galaxy s)
+by connecting their portholes.
+A porthole is specified by giving the
+.c Star
+(or
+.c Galaxy )
+name followed by the port name within the
+.c Star .
+The first porthole must be an output
+porthole and the second must be an input porthole.
+Example:
+.(c
+connect mystar output yourstar input
+.)c
+The connect command accepts an optional delay
+parameter:
+.(c
+connect mystar output yourstar input 1
+.)c
+specifies one delay on the connection.  This parameter
+makes sense only for the dataflow and code generation domains; it is
+meaningless for DE.  The delay argument may be an integer expression
+with variables referring to galaxy states as well.
+.pp
+One or both of the portholes may really be a
+.c MultiPortHole .
+If so, the effect of doing the connect is to create a new porthole
+within the
+.c MultiPortHole
+and connect to that
+(see also the
+.c numports
+command).
+.H3 "Netlist-style connections
+.pp
+As an alternative to issuing connect commands (which specify
+point-to-point connections) you may specify connections netlist-style.
+This syntax is used to connect an input to more than one output, for
+example (this is called
+.i auto-forking ).
+Two commands are provided for this purpose.  The
+.c node
+command creates a node:
+.(c
+node \fInodename\fP
+.)c
+The
+.c nodeconnect
+.IE "nodeconnect command"
+command connects a porthole to a node:
+.(c
+nodeconnect \fIstarname portname\fP \fInodename\fP
+.)c
+.H3 "Bus Connections Between MultiPortHoles"
+.pp
+A pair of multiportholes can be connected with a bus connection,
+which means that each multiporthole has \fIN\fP portholes and
+they all connect in parallel to the corresponding port in the
+other multiporthole.  The syntax for creating such connections is
+.(c
+busconnect \fIsrcstar\fP \fIsrcport\fP \fIdststar\fP \fIdstport\fP \fIwidth\fP \fIdelay\fP 
+.)c
+Here 
+.i width
+is an expression specifying the width
+of the bus (how many portholes in the multiportholes);
+and
+.i delay
+is an optional expression giving the delay on each connection.
+.H3 "Connecting Internal Galaxy Stars and Galaxys to the Outside
+.pp
+When you define a new
+.c Galaxy
+there are typically external connections to that
+.c Galaxy
+that need to be connected through to internal blocks.
+The
+.c alias
+.IE "alias command"
+command is used to add a porthole to the current
+galaxy,
+and associate it with an input or output porthole of one of the contained
+.c Star s
+within the
+.c Galaxy .
+An example is:
+.(c
+alias galaxyin mystar starin
+.)c
+This also works if
+.c starin
+is a
+.c MultiPortHole
+(the galaxy will then appear to have a multiporthole as well).
+.H3 "Defining States for a Galaxy
+.pp
+A
+.c State
+is a piece of data that is assigned to a
+.c Galaxy
+and can be used to affect its behavior.
+Typically the value of a
+.c State
+is coupled to the
+.c State
+of blocks within the
+.c Galaxy ,
+allowing you to customize the behavior of blocks within the
+.c Galaxy .
+.pp
+The
+.c newstate
+.IE "newstate command"
+command adds a
+.c State
+of the given
+.c class
+to the current
+.c Galaxy .
+The form of the command is
+.(c
+newstate \fIstate-name\fP \fIstate-class\fP \fIdefault-value\fP
+.)c
+.i state-name
+is the name to be given to the
+.c State .
+.i state-class
+is
+the type of
+.c State ;
+at present, the supported types are
+.c int ,
+.c float ,
+.c complex ,
+.c intarray ,
+.c floatarray ,
+.c complexarray ,
+and
+.c string .
+.i default-value
+is the default value to be given to the
+.c State
+if the user of the galaxy does not change it
+(using the
+.c setstate
+command described shortly).
+The
+.i default-value
+specifies the initial value of the state, and can be an expression.
+Some examples are:
+.(c
+(state count int 3)
+(state level float 1.0)
+(state title string "This is a title")
+(state myfreq float galaxyfreq)
+.)c
+The
+.i default-value
+can also be an arbitrary arithmetic expression involving
+constant values and other
+.c State
+names (enclosed in quotes); this expression is evaluated when the
+simulation starts.  The following state names are predefined:
+YES, NO, TRUE, FALSE, PI.  YES and TRUE have value 1; NO and
+FALSE have value 0; PI has the value 3.14159... .  Example:
+.(c
+(state angularFreq "2*PI*freq")
+.)c
+.pp
+The full syntax of state initial value strings is explained in the
+manual section for the graphical interface (pigi).
+.H3 "Setting the Value of States
+.pp
+The
+.c setstate
+.IE "setstate command"
+command is used to change the value of a
+.c State.
+It can be used in three contexts:
+.BU
+Change the value of a
+.c State
+for a 
+.c Star
+within the current
+galaxy.
+.BU
+Change the value of a
+.c State
+for a
+.c Galaxy
+within the current galaxy.
+.BU
+Change the value of a
+.c State
+within the current galaxy.
+.lp
+The latter would normally be used when you want to perform
+multiple simulations using different parameters.
+.pp
+The syntax of
+.c setstate
+is
+.(c
+setstate \fIblock-name\fP \fIstate-name\fP \fIvalue\fP
+.)c
+Here
+.BU
+.i block-name
+is either the name of a
+.c Star
+or a
+.c Galaxy
+that is inside the current galaxy,
+and it is the block for which the value of the
+.c State
+is to be changed.
+It can also be
+.c this ,
+which says to change a
+.c State
+belonging to the current galaxy itself.
+.BU
+.i state-name
+is the name of a
+.c State
+which you wish to change.
+.BU
+.i value
+is the new value for the
+.c State .
+The syntax for
+.i value
+is the same as described in the
+.c state
+command.
+However, the expression for
+.i value
+may refer to the name of one or more
+.c State s
+in the current galaxy
+or an ancestor of the current galaxy.
+.lp
+An example of the use of
+.c setstate
+is given in the section describing
+.c defgalaxy
+below.
+.H3 "Initializing all states"
+.pp
+The
+.c initstate
+.IE "initstate command"
+command (which takes no arguments) causes all states in the universe
+to be initialized (all the initial-value strings are parsed and interpreted).
+Note that this action is automatically taken whenever a universe is
+run or a schedule is generated; the only reason this command is provided
+is so that the user can check on the effect of provided state values
+with the
+.c show
+or
+.c dump
+commands.
+.H3 "Setting a Descriptor
+.pp
+Every block in \*(PT has a
+.i descriptor ,
+which is a string that briefly describes the purpose of that block.
+The
+.c descriptor
+command changes the descriptor for the current galaxy,
+.IE "descriptor command"
+which is
+by default "An interpreted galaxy".  Example:
+.(c
+descriptor "This galaxy generates a sine wave"
+.)c
+.H3 "Setting the Number of Ports to a Star
+.pp
+Some
+.c Star s
+in \*(PT are defined with multiple-ports.
+These multiple-ports have an arbitrary number of connections,
+the number of connections being defined by the user of the
+.c Star
+rather than the
+.c Star
+itself.
+The
+.c numports
+.IE "numports command"
+command applies to
+.c Star s
+that contain
+.c MultiPortHole s;
+it causes a number of
+.c PortHole s
+to be created within the
+.c MultiPortHole .
+The syntax is
+.(c
+numports \fIstar\fP \fIportname\fP \fIn\fP
+.)c
+where
+.i star
+is the name of a
+.c Star
+within the current galaxy,
+.i portname
+is the name of a
+.c MultiPortHole
+in the
+.c Star ,
+and
+.i n
+is an integer, representing the number of
+.c PortHole s
+to be created.
+After the
+.c PortHole s
+are created, they may be referred to by appending
+.i #n ,
+where
+.i n
+is an integer, to the multiporthole name, and enclosing the
+resulting name in quotes.  The main reason to use this command is
+to allow the portholes to be connected in random order.
+Here is an example:
+.(c
+star summer Add
+numports summer input 2
+input galInput summer "input#1"
+connect foo output summer "input#2"
+.)c
+.H3 "Defining New Galaxys
+.pp
+The
+.c defgalaxy
+.IE "defgalaxy command"
+command allows the user to define a new class of
+.c Galaxy .
+The syntax is
+.(c
+defgalaxy \fIclass-name\fP {
+	\fIcommand\fP
+	\fIcommand\fP
+	...
+}
+.)c
+Here
+.i class-name
+is the name of the
+.c Galaxy
+type you are creating.
+While it is not required, we suggest that you have the name begin
+with a capital letter in accordance with our standard naming convention
+\- class names begin with capital letters. 
+.i command
+may be any of
+the commands described above \-
+.c star ,
+.c galaxy ,
+.c connect ,
+.c node ,
+.c nodeconnect ,
+.c input ,
+.c output ,
+.c numports ,
+.c state ,
+.c setstate ,
+or
+.c descriptor .
+The defined class is added to the known list, and you can then create
+instances of it and add them to other galaxies.
+An example is:
+.(c
+defgalaxy SinGen {
+	descriptor "Generate a sine wave (default frequency 0.05)"
+
+	# The frequency of the sine wave is a state
+	state freq float "0.05"
+
+	star ramp Ramp
+	# The ramp advances by 2*pi each sample
+	setstate ramp step "6.283185307179586"
+
+	# Multiply the ramp by a value, setting the frequency
+	star gain Gain
+	# The multiplier is set to "freq"
+	setstate gain gain "freq"
+
+	# Finally the sine generator
+	star sin Sin
+
+	connect ramp output gain input
+	connect gain output sin input
+	alias output sin output
+}
+.)c
+In this example, note the use of
+.c State s
+to allow the frequency of the sine wave generator to be changed.
+For example, we could now run the sine generator, changing its
+frequency to "0.02", with the interpreter input:
+.(c
+galaxy generator SinGen
+setstate generator freq "0.02"
+star printer Printer
+connect generator output printer input
+run 100
+.)c
+.pp
+You may include a
+.c domain
+command within a
+.c defgalaxy
+command.  This creates an object known as a
+.c Wormhole ,
+which is an interface between two domains.  An example of this
+appears in a later section.
+.H2 "Showing the Current Status
+.pp
+The following commands display information about the current state
+of the interpreter.
+.H3 "Displaying the Known Classes
+.pp
+The
+.c knownlist
+.IE "knownlist command"
+command returns a list of the classes of
+.c Star s
+and
+.c Galaxy s
+on the known list that are usable in the current domain.
+The syntax is
+.(c
+knownlist
+.)c
+.pp
+It is also possible to ask for a list of objects available in
+other domains; the command
+.(c
+knownlist DE
+.)c
+displays objects available in the
+.c DE
+(discrete event)
+domain.
+.H3 "Displaying Information on a the Current Galaxy or a Class
+.pp
+If invoked without an argument, the
+.c print
+.IE "print command"
+command displays information on the current galaxy.
+If invoked with an argument, the argument
+is either the name of a
+.c Star
+(or
+.c Galaxy )
+contained in the current galaxy,
+or the name of a class on the known list, and information
+is shown about that
+.c Star
+(or
+.c Galaxy ).
+The syntax is
+.(c
+print
+print \fIstar-name\fP
+print \fIstar-class\fP
+.)c
+.H2 "Running the Simulation"
+.pp
+Once a simulation has been constructed using the commands previously
+described (also see the
+.c source
+command in section 3.4.2), use the commands in this section to run the
+simulation.
+.H3 "Creating a Schedule
+.pp
+The
+.c schedule
+.IE "schedule command"
+command generates and prints the schedule (the order in
+which
+.c Star s
+are invoked).  For the DE interpreter, this command
+is not implemented (since there is no "compile time"
+DE schedule as there is for SDF).  Syntax:
+.(c
+schedule
+.)c
+.H3 "Running the Simulation
+.pp
+The
+.c run
+.IE "run command"
+command generates the schedule and runs it
+.i n
+times, where
+.i n
+is the argument (the argument may be omitted; its default value is 1).
+For the DE interpreter, this command runs the simulation for
+.i n
+time
+units, and
+.i n
+may be a floating point number (default 1.0).  If this
+command is repeated, the simulation is started from the beginning.
+If animation is enabled, the full name of each star will be
+printed to the standard output when the star fires.
+Syntax:
+.(c
+run
+run \fIn\fP
+.)c
+.H3 "Continuing a Simulation
+.pp
+The
+.c  cont
+.IE "cont command"
+command continues the simulation for
+.i n
+additional steps, or time units.  If the argument is omitted,
+the default value of the argument is
+the value of the last argument given
+to a run or cont command (1.0 if no argument was ever given).
+The syntax is
+.(c
+cont
+cont \fIn\fP
+.)c
+.H3 "Wrapping Up a Simulation
+.pp
+The
+.c wrapup
+.IE "wrapup command"
+command calls the wrapup method of the current target (which, as a rule,
+will call the wrapup method of each
+.c Star ),
+signaling the end of the simulation run.
+The syntax is
+.(c
+wrapup
+.)c
+.H3 "Animating a Simulation"
+.pp
+The
+.c animation
+.IE "animation"
+command can be used to display on the standard output the name
+of each star as it runs.  The syntax
+.(c
+animation on
+.)c
+enables animation, while
+.(c
+animation off
+.)c
+disables it.
+The syntax
+.(c
+animation
+.)c
+simply tells you whether animation is enabled or disabled.
+.H2 "Undoing what you've done"
+.pp
+The commands in this section remove part or all of the structure you
+have built with previous commands.
+.H3 "Resetting the Interpreter
+.pp
+The
+.c reset
+.IE "reset command"
+command replaces
+.c mainGalaxy
+by an empty
+.c Galaxy .
+Any
+.c defgalaxy
+definitions you have made are still remembered.
+The syntax is
+.(c
+reset
+.)c
+.H3 "Removing a Star
+.pp
+The
+.c delstar
+.IE "delstar command"
+command removes the named Star from the current galaxy.
+The syntax is
+.(c
+delstar \fIname\fP
+.)c
+where
+.i name
+is the name of the star.
+.H3 "Removing a connection
+.pp
+The
+.c disconnect
+.IE "disconnect command"
+command reverses the effect of a previous
+.c connect
+or
+.c nodeconnect
+command.  The syntax is
+.(c
+disconnect \fIstarname portname\fP
+.)c
+where
+.i starname
+and
+.i portname ,
+taken together, specify one of the two connected portholes.  Note that
+you can disconnect by specifying either end of a porthole for a point-to-point
+connection.
+.H3 "Removing a node
+.pp
+The
+.c delnode
+.IE "delnode command"
+command removes a node from the current galaxy.  Syntax:
+.(c
+delnode \fInode\fP
+.)c
+.H2 "Targets"
+.IE "targets"
+.pp
+\*(PT uses a structure called a \fItarget\fP to control the execution
+of a simulation, or, in code generation, to specify the target architecture
+for code generation.  There is always a target; by default (if you issue
+no target commands), your target will have the name
+.c default-XXX ,
+where
+.c XXX
+is replaced by the name of the current domain.  Alternate targets for
+simulation can be used to specify different behavior (for example, to
+use a different scheduler).  For code generation, the target contains
+information about the target of compilation, has methods for downloading
+code and starting execution, etc.
+.H3 "What Targets are Available?"
+.pp
+.IE "targets command"
+The command
+.(c
+targets
+.)c
+returns the list of targets available for the current domain.
+.H3 "Changing the Target"
+.pp
+.IE "target command"
+The command
+.(c
+target
+.)c
+displays the target for the universe or current galaxy, together with
+its parameters.  Specifying an argument, e.g.
+.(c
+target \fInew-target-name\fP
+.)c
+changes the target to \fInew-target-name\fP.
+.H3 "Changing Target Parameters"
+.pp
+.IE "targetparam command"
+.IE "target parameters"
+Target parameters may be changed with the
+.c targetparam
+command.  The syntax is
+.(c
+targetparam \fIparam-name\fP "\fInew-value\fP"
+.)c
+.H2 "Miscellaneous Commands
+.pp
+This section describes the remaining interpreter commands.
+.H3 "Loading Commands from a File
+.pp
+For complicated simulations it is best to store your
+interpreter commands \(em at least those defining the simulation
+connectivity \(em in a file rather than typing them into the
+interpreter directly.
+This way you can run you favorite editor in one window,
+and run the interpreter from another window, easily modifying
+the simulation and also keeping a permanent record.
+An exception to this is simply changing
+.c States
+using the
+.c setstate
+command and running and continuing the simulation using
+.c run
+and
+.c cont
+\(em this is normally done interactively with the interpreter.
+.pp
+The
+.c source
+.IE "load command"
+command reads interpreter commands from the named file, until
+end of file or a syntax error occurs.  The # character indicates
+that the rest of the line is a comment.  By convention, files
+meant to be read by the load command end in ".pt".  Example:
+.(c
+source "testfile.pt"
+.)c
+The tilde notation for users' home directories is allowed; for
+example, try
+.(c
+source "~ptolemy/demo/ptcl/sdf/liss.pt"
+.)c
+.pp
+It is also possible to specify a file to be loaded by the interpreter
+on the command line.  If, when you start the interpreter you type
+.(c
+ptcl myCommands.pt
+.)c
+the interpreter will load the named file, execute its commands, and
+then quit.  No commands will be prompted for.
+.pp
+The
+.c source
+command is actually built in to Tcl itself, but it is described here
+nevertheless.
+.H3 "Changing the seed of random number generation
+The
+.c seed
+.IE "seed command"
+command changes the seed of the random number generation.  The default
+value is 1.  The syntax is
+.(c
+seed \fIn\fP
+.)c
+where 
+.i n
+is an unsigned integer.
+.H3 "Changing the current directory"
+.pp
+The
+.c cd
+.IE "cd command"
+command changes the interpreter's idea of the current directory.
+For example,
+.(c
+cd "~ptolemy/demo/ptcl/sdf"
+source "liss.pt"
+.)c
+will load the same file as the example in the previous section.
+To see what the interpreter's current directory is, you can type
+.(c
+pwd
+.)c
+.H3 "Dynamically linking in new stars"
+.pp
+The interpreter has the ability to extend itself by linking in outside
+object files; the object files in question must define single stars
+(they will have the right format if they are produced from preprocessor
+input).  Unlike Pigi, the graphical interface, the interpreter will not
+automatically run the preprocessor and compiler; it expects to be given
+object files that have already been compiled.  The syntax is
+.(c
+link "\fIobject-file-name\fP"
+.)c
+.pp
+Any star object files that are linked in must only call routines that
+are already linked into the interpreter.  For that reason, it is possible
+that a star that can be linked into Pigi, the graphic interface, might
+not be linkable into the interpreter in some rare cases.
+.IE "link command"
+.IE "dynamic linking"
+.H3 "Top Blocks"
+.pp
+The
+.c topblocks
+.IE "topblocks command"
+command, which takes no arguments, returns a list of the top-level
+blocks in the current galaxy.
+.H3 "Examining states"
+The
+.c statevalue
+command takes the form
+.(c
+statevalue \fIblock state\fP
+.)c
+and returns the current value of the state
+.i state
+within the block
+.i block .
+The command takes an optional third argument, which may be either
+.c current
+to specify that the current value should be returned (the default), or
+.c initial
+to specify that the initial value should be returned.
+.H3 "Giving Up
+.pp
+The
+.c exit
+.IE "exit command"
+command exits the interpreter.
+The syntax is
+.(c
+exit
+.)c
+.pp
+.H3 "Getting Help
+.pp
+The
+.c help
+.IE "help command"
+command implements a simple help system describing the commands available
+and their syntax.  It does not provide help with the standard Tcl functions.
+The syntax is
+.(c
+help \fItopic\fP
+.)c
+or
+.(c
+help ?
+.)c
+for a list of topics.  If the argument is omitted, a short "help on help"
+is printed.
+.H2 "Limitations of the Interpreter"
+.pp
+There should be many more commands returning information on the
+simulation, to permit better exploitation of the full power of ptcl.
+.H2 "A Wormhole example"
+.pp
+.IE "wormholes in the interpreter"
+.IE "domains in the interpreter"
+Here is an example of a simulation that contains both an SDF portion
+and a DE portion.  The FloatRamp star generates samples 0, 1, 2, ...
+The CoinFlip star generates either 0 or 1, with equal probability.
+Discard discards or passes its input based on whether its "keep" input
+is 0 or 1.  UniformDelay causes a random delay (from a uniform distribution).
+The Sampler star samples its input at a constant rate.  Xgraph plots
+the result.
+.pp
+A
+.c Wormhole
+has an
+.i "outer domain"
+and an
+.i "inner domain" .
+The outer domain is determined by the current domain at the time the
+user starts the
+.c defgalaxy
+command to create the wormhole.  The inner domain is determined by
+the
+.c domain
+command that appears inside the galaxy definition.
+.pp
+.(c
+domain SDF
+
+defgalaxy WormGuts {
+	domain DE
+	descriptor "A DE in SDF Wormhole to discard samples randomly")
+	star discard Discard
+	star server UniformDelay
+	star sampler Sampler
+
+	connect discard output server input
+	connect server output sampler input
+
+	input keep discard keep
+	input input discard input
+	alias output sampler output
+}
+
+star ramp Ramp
+star worm WormGuts
+star flip CoinFlip
+star graph Xgraph
+setstate graph title "A demo of a DE in SDF Wormhole"
+
+connect ramp output worm input
+connect flip output worm keep
+connect worm output graph input
+
+run 100
+wrapup
+
+.)c

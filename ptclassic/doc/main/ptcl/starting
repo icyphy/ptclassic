@@ -1,0 +1,20 @@
+.\" $Id$
+.H1 "Getting Started
+.pp
+To get started, just make sure
+.i ~ptolemy/bin
+and
+.i ~ptolemy/bin.ARCH
+are in your PATH
+(where
+.i ARCH
+is replaced by ``sun3'' if you are on a Sun-3, ``sun4'' if you are on a Sun-4,
+``vax'' if you are on a Vax, or ``mips'' if you are on a DecStation based
+on the MIPS architecture).
+.IE path
+Now type
+.c ptcl
+to invoke the Ptolemy interpreter.  It is also possible to specify a file
+of interpreter commands as a command line argument; see the section ``Loading
+Commands from a File'' for details.
+

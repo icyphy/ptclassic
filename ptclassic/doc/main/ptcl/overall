@@ -1,0 +1,27 @@
+.\" $Id$
+.\"
+.\" Use printsec in ~ptolemy/doc/bin or Makefiles in ~ptolemy/doc
+.\" to print this out.  To get this section only, as a standalone document,
+.\"     % cd ~ptolemy/doc/sect1/ptlang
+.\"     % make print
+.\"
+.\" Be sure you have properly checked
+.\" out this file with SCCS (the version number should not be a number below):
+.VR 0.2.6 12/3/91
+.TI "ptcl \- The \*(PT Interpreter"
+.AU
+Joseph Buck
+.AE
+The \*(PT interpreter, 
+.i ptcl ,
+provides a textual interface for constructing
+systems and performing simulations.  It is based on John Ousterhout's Tcl,
+which is an extensible interpreter language.  All the commands of Tcl
+are available in
+.i ptcl .
+This interface is more convenient than the graphical interface
+when large complex universes are being created automatically
+by some other program.  It is also more convenient when using
+a symbolic debugger to debug a new piece of code linked to \*(PT.
+.so starting
+.so using
