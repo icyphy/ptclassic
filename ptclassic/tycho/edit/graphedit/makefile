@@ -43,9 +43,9 @@ include $(CONFIG)
 TCL_SRCS = 
   
 ITCL_SRCS =  \
-	DFGConnector.itcl \
+	DFGEdgeController.itcl \
 	DFGEditor.itcl \
-	DFGMover.itcl \
+	DFGVertexController.itcl \
 	IconLibrary.itcl \
 	Junction.itcl \
 	Layout.itcl \
