@@ -44,7 +44,8 @@ EXTRA_SRCS = \
 	CppTemplate.h \
 	HTMLTemplate.html \
 	ItclTemplate.itcl \
-	JavaTemplate.java
+	JavaTemplate.java \
+	testTemplate.itcl
 
 MISC_FILES =
 
