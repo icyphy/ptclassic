@@ -14,7 +14,8 @@
 VPATH = ../../src/kernel
 GPPFLAGS = -g
 GNU = g++
-GNUINCLUDE = /usr/gnu/lib/g++-include
+GNULIB = /usr/gnu/lib
+GNUINCLUDE = $(GNULIB)/g++-include
 # need gcc, not cc, to build gnulib3a
 CC = gcc
 
@@ -59,8 +60,8 @@ HDRS= Architecture.h AutoForkNode.h \
  DataStruct.h Display.h Domain.h Error.h Fraction.h Galaxy.h \
  GalIter.h Geodesic.h InterpGalaxy.h \
  InterpUniverse.h Interpreter.h KnownBlock.h Linker.h Linker.sysdep.h \
- NamedObj.h Output.h Packet.h Particle.h ParticleStack.h Plasma.h \
- PriorityQueue.h Scheduler.h Star.h StringList.h Tokenizer.h \
+ NamedObj.h Output.h Packet.h Particle.h ParticleQueue.h ParticleStack.h \
+ Plasma.h PriorityQueue.h Scheduler.h Star.h StringList.h Tokenizer.h \
  Universe.h UserOutput.h WormConnect.h Wormhole.h \
  dataType.h miscFuncs.h type.h \
  ComplexArrayState.h ComplexState.h FloatState.h FloatArrayState.h \
