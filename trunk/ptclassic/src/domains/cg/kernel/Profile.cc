@@ -92,7 +92,7 @@ void Profile :: sortWithFinishTime() {
 		int x = finishTime[order[i]];
 		int temp = order[i];
 		while (j >= 0) {
-			if (x > finishTime[order[j]]) break;
+			if (x < finishTime[order[j]]) break;
 			order[j+1] = order[j];
 			j--;
 		}
@@ -121,7 +121,7 @@ void Profile :: sortWithStartTime() {
 		int x = startTime[procId[i]];
 		int temp = procId[i];
 		while (j >= 0) {
-			if (x < startTime[procId[j]]) break;
+			if (x > startTime[procId[j]]) break;
 			procId[j+1] = procId[j];
 			j--;
 		}
