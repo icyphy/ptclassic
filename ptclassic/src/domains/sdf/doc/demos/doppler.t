@@ -3,7 +3,6 @@
 .SD
 Doppler shift
 .DE
-.IE phaseShift
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"
 .LO "~ptolemy/src/domains/sdf/demo"
