@@ -93,10 +93,17 @@ void Target::setGalaxy(Galaxy& g) {
 // do Scheduler::setup.
 
 void Target::setup() {
+	if (!galaxySetup()) return;
+	else if (!schedulerSetup()) return;
+	else return;
+}
+
+// setup the galaxy, i.e. check star types and set targets pointers
+int Target::galaxySetup() {
 	if (gal == 0) {
 		Error::abortRun(*this, "Error in Target::setup() -- ",
 				" no galaxy attached to the target");
-		return;
+		return FALSE;
 	}
 	GalStarIter next(*gal);
 	Star* s;
@@ -106,16 +113,22 @@ void Target::setup() {
 			Error::abortRun (*s,
 					 "wrong star type for target ",
 					 name());
-			return;
+			return FALSE;
 		}
 		s->setTarget(this);
 	}
+	return TRUE;
+}
+
+// setup the scheduler
+int Target::schedulerSetup() {
 	if (!sched) {
 		Error::abortRun(*this, "No scheduler!");
-		return;
+		return FALSE;
 	}
 	sched->setGalaxy(*gal);
 	sched->setup();
+	return TRUE;
 }
 
 // default run: run the scheduler
