@@ -58,7 +58,11 @@ extern boolean IsBus();
 extern boolean MyOpenMaster();
 extern boolean OpenFacet();
 extern boolean IsPalFacet();
-
+extern boolean SetTargetParams();
+extern boolean GetTargetParams();
+extern boolean GOCTargetProp();
+extern boolean SetDomainProp();
+extern boolean SetTargetProp();
 
 /* FIXME: These Functions are NOT defined in octIfc.c */
 extern boolean GetGalTerms();

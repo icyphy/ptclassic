@@ -58,6 +58,9 @@ extern "C" {
 #include "paramStructs.h"
 #include "palette.h" /* used by MkSchemIcon */
 #include "util.h"
+#include "exec.h"
+#include "err.h"
+#include "ganttIfc.h"
 #include "icon.h"
 #include "compile.h"
 #include "octMacros.h"    // For GetOrCreatePropStr
@@ -70,6 +73,8 @@ int numberOfDomains();
 char* nthDomainName();
 /* Declare the functions in kernelCalls used by ptkSetSeed */
 void KcEditSeed();
+/* Declare the functions in kernelCalls used by ptkSetRunUniverse */
+boolean KcSetKBDomain();
 #undef Pointer
 }
 #include "miscFuncs.h"

@@ -35,6 +35,8 @@ extern int DestroyFrames();
 extern int GanttMan();
 extern void GanttErr();
 extern void FindAndMarkError();
+/* Called by POct */
+extern boolean FindNameSet();
 
 /* Functions below should only be called by GGI */
 extern boolean GanttRun();

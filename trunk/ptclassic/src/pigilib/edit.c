@@ -440,10 +440,10 @@ long userOptionWord;
     /* At this point, obj is either an instance or the facet */
     ptkOctObj2Handle(&obj,facetHandle);
 
-    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditStrings ",
+    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditText ",
 		   " \"Edit Comment\" ",
                    " \"ptkSetComment ", facetHandle, " %s \" ",
-                   " \"{{Comment} [ptkGetComment ", facetHandle, "]}\" ",
+                   " [lindex [ptkGetComment ", facetHandle, "] 0] ",
                    (char *)NULL) )
 
     ViDone();
