@@ -187,10 +187,38 @@ int MatlabTcl::eval(int argc, char** argv) {
 }
 
 // get a Matlab matrix
-int MatlabTcl::get(int argc, char** /*argv*/) {
+int MatlabTcl::get(int argc, char** argv) {
     if (argc != 3) return usage("matlab get <matrix_name>");
     MATLABTCL_CHECK_MATLAB();
-    return TCL_OK;
+    int numrows = 0, numcols = 0;
+    char **realStrings = 0;
+    char **imagStrings = 0;
+    Matrix* matlabMatrix =
+	matlabInterface->GetVariable(argv[2], &numrows, &numcols,
+				     &realStrings, &imagStrings);
+
+    // return a four-element list: numrows numcols realvalues imagvalues
+    if ( matlabMatrix ) {
+	char tmpbuf[64];			// temp. storage for int string
+	sprintf(tmpbuf, "%d", numrows);
+	Tcl_AppendElement(tclinterp, tmpbuf);
+	sprintf(tmpbuf, "%d", numcols);
+	Tcl_AppendElement(tclinterp, tmpbuf);
+	int numelements = numrows * numcols;
+        char* realList = Tcl_Merge(numelements, realStrings);
+	Tcl_AppendElement(tclinterp, realList);
+	free(realList);
+	if ( imagStrings ) {
+	    char* imagList = Tcl_Merge(numelements, imagStrings);
+	    Tcl_AppendElement(tclinterp, imagList);
+	    free(imagList);
+	}
+	matlabInterface->FreeStringArray(realStrings, numelements);
+	matlabInterface->FreeStringArray(imagStrings, numelements);
+	mxFreeMatrix(matlabMatrix);
+	return TCL_OK;
+    }
+    return TCL_ERROR;
 }
 
 // evaluate a Matlab command
@@ -208,27 +236,44 @@ int MatlabTcl::send(int argc, char** argv) {
 int MatlabTcl::set(int argc, char** argv) {
     char* usagestr = "matlab set <var> <numrows> <numcols> <real_components> ?<imag_components>?";
 
+    // check for the right number of arguments
     if (argc < 6 || argc > 7) return usage(usagestr);
-    int numrows, numcols;
-    if ( sscanf(argv[3], "%d", &numrows) != 1 ) return usage(usagestr);
-    if ( sscanf(argv[4], "%d", &numcols) != 1 ) return usage(usagestr);
+
+    // check to see if Matlab is available
     MATLABTCL_CHECK_MATLAB();
 
-    Matrix* matrix = 0;
-    if ( argc == 6 ) {
-/* Figure out what to do here: we want to parse argv[5] and argv[6]
-   as lists of numbers */
-/*
-       matrix = matlabInterface->SetVariable(argv[2], numrows, numcols,
-					    argv[5], 0);
- */
+    // parse the values given for the number of rows and number of columns
+    int numrows = 0, numcols = 0;
+    if ( Tcl_GetInt(tclinterp, argv[3], &numrows) != TCL_OK || numrows <= 0 ) {
+	return usage(usagestr);
     }
-    else {
-/*
-       matrix = matlabInterface->SetVariable(argv[2], numrows, numcols,
-					    argv[5], arg[6]);
- */
+    if ( Tcl_GetInt(tclinterp, argv[4], &numcols) != TCL_OK || numcols <= 0 ) {
+	return usage(usagestr);
     }
+
+    // parse the values given for the real and imaginary values
+    int numelements = numrows * numcols;
+    int realArgc = 0;
+    char **realArgv = 0;
+    int imagArgc = 0;
+    char **imagArgv = 0;
+    if (Tcl_SplitList(tclinterp, argv[5], &realArgc, &realArgv) != TCL_OK) {
+	return TCL_ERROR;
+    }
+    if (realArgc != numelements) {
+	return error("matlab set: not enough real-valued elements given");
+    }
+    if ( argc == 7 ) {
+	if (Tcl_SplitList(tclinterp, argv[6], &imagArgc, &imagArgv) != TCL_OK) {
+	    return TCL_ERROR;
+	}
+	if (imagArgc != numelements) {
+	    return error("matlab set: not enough imaginary elements given");
+	}
+    }
+    Matrix* matrix =
+    matlabInterface->SetVariable(argv[2], numrows, numcols, realArgv, imagArgv);
+
     if (matrix) return TCL_OK;
     return TCL_ERROR;
 }
