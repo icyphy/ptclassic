@@ -59,7 +59,7 @@ processes DCTImages, not GrayImages.
 		float thresh;
 	}
 
-	start { thresh = float(fabs(double(Thresh))); }
+	setup { thresh = float(fabs(double(Thresh))); }
 
 	method { // Do the run-length coding.
 		name { doRunLen }

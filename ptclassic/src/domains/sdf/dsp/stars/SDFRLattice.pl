@@ -108,7 +108,7 @@ New York, 1989.
 		LOG_DEL; delete w;
 		LOG_DEL; delete y;
 	}
-	start {
+	setup {
 		// reallocate arrays only if size has changed,
 		// or this is the first run.
 		if (M != reflectionCoefs.size()) {

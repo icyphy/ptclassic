@@ -48,7 +48,7 @@ separate pieces.
 
 // CODE.
 	protected { int thresh; }
-	start { thresh = int(Thresh); }
+	setup { thresh = int(Thresh); }
 
 	inline method {
 		name { gt }

@@ -60,7 +60,7 @@ when displaying single frames from a moving sequence.
 		unsigned char* buf;
 	}
 
-	start {
+	setup {
 		size = int(FilterWidth);
 		if (size <= 0) size = 3;
 		size = 1 + 2*(size/2); // an odd number for sure

@@ -71,7 +71,7 @@ the sampling frequency.
 		desc {The time between input samples (T).}
 	}
 	ccinclude { "ComplexSubset.h" }
-	start {
+	setup {
 	    signal.setSDFParams (int(length), int(length) - 1);
 	    dtft.setSDFParams
 		(int(numberOfSamples), int(numberOfSamples) - 1);

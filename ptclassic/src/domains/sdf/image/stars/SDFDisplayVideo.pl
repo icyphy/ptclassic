@@ -109,7 +109,7 @@ in the future.
 				temp1[LINELEN];
 	}
 
-	start {
+	setup {
 		allFileNames[0] = '\000';
 
 		const char* t = ImageName;

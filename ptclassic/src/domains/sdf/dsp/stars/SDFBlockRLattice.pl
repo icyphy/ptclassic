@@ -59,7 +59,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		LOG_DEL; delete y;
 		LOG_DEL; delete reflectionCoefs;
 	}
-	start {
+	setup {
 		// reallocate arrays only if size has changed,
 		// or this is the first run.
 		if (M != int(order)) {

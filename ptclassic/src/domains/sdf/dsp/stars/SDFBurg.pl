@@ -108,7 +108,7 @@ New York, 1989.
 		LOG_DEL; delete aOrig;
 		LOG_DEL; delete aPrime;
 	}
-	start {
+	setup {
 		if (N != int(numInputs)) {
 			LOG_DEL; delete f; LOG_DEL; delete b;
 			N = int(numInputs);

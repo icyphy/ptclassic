@@ -77,7 +77,7 @@ No decimation or interpolation is supported.
 	    LOG_DEL; delete taps;
 	    LOG_DEL; delete fdbkDelayLine;
 	}
-	start {
+	setup {
 	// delete and remake arrays if a different size is being used.
 	    if (int(order) != M) {
 		LOG_DEL; delete taps;

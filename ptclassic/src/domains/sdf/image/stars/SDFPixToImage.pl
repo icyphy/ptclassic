@@ -38,7 +38,7 @@ star produces large sample rate changes, use the loop scheduler!
 	protected {
 		int np, id;
 	}
-	start {
+	setup {
 		np = int(width)*int(height);
 		input.setSDFParams(np,np-1);
 		id = 0;

@@ -36,7 +36,7 @@ characteristics.  The "optfir" program supplied with Ptolemy can do this.
 		// taps are no longer constant or settable
 		taps.clearAttributes(A_CONSTANT|A_SETTABLE);
 	}
-	start {
+	setup {
 		int len = int(N);
 		int len2 = len / 2;
 		int i, n;

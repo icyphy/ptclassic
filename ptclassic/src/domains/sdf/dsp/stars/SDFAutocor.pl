@@ -67,7 +67,7 @@ autocorrelation estimate may have negative components.
 		default {"YES"}
 		desc { If YES, the estimate will be unbiased.}
 	}
-	start {
+	setup {
 	    if ( int(noInputsToAvg) <= int(noLags)) {
 		Error::abortRun(*this,
 			": noLags is larger than noInputsToAvg.");

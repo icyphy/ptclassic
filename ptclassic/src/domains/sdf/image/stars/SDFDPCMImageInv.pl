@@ -39,7 +39,7 @@ directly to the "output". Otherwise, add the "past" to the
 	}
 
 	protected { float leak; }
-	start { leak = float(double(alpha)); }
+	setup { leak = float(double(alpha)); }
 
 	inline method {
 		name { quant }

@@ -113,7 +113,7 @@ For more information about polyphase filters, see F. J. Harris,
 	protected {
 		int phaseLength;
 	}
-	start {
+	setup {
 		int d = decimation;
 		int i = interpolation;
 		int dP = decimationPhase;

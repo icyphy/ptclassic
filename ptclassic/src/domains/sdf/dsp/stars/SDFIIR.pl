@@ -98,7 +98,7 @@ It is often desirable to expand the filter into a parallel or cascade form.
     ccinclude {
 	<minmax.h>	// for max()
     }
-    start {
+    setup {
 	int numNumer = numerator.size();
 	int numDenom = denominator.size();
 	numState = max(numNumer,numDenom); 

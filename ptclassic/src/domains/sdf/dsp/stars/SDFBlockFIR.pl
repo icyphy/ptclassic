@@ -83,7 +83,7 @@ Hence, much of the code here is quite similar to that in the FIR star.
 	destructor {
 		LOG_DEL; delete taps;
 	}
-	start {
+	setup {
 	    int d = decimation;
 	    int i = interpolation;
 	    int dP = decimationPhase;
