@@ -39,11 +39,11 @@ whatToBuild:	all
 # note if there is no doc dir, the command continues despite the error.
 .pl.cc:
 	cd $(VPATH); ptlang $< 
-	-cd $(VPATH); mv $*.t $(STARDOCDIR)/$*.t
+	-cd $(VPATH); mv $*.t $(STARDOCDIR)/.
 
 .pl.h:
 	cd $(VPATH); ptlang $< 
-	-cd $(VPATH); mv $*.t $(STARDOCDIR)/$*.t
+	-cd $(VPATH); mv $*.t $(STARDOCDIR)/.
 
 # Rule for the thor preprocessor
 # Make sure we always run the preprocessor in the source directory
