@@ -62,6 +62,26 @@ uplevel #0 {
     source [file join $env(GUI_LIBRARY) MenuBar.itcl]
 }
 
+### COMPATIBILITY
+
+# Check to see whether the usual exit mechanism (where we exit
+# if there are no more windows) is enabled.
+if {![info exists tychoExitWhenNoMoreWindows]} {
+    set tychoExitWhenNoMoreWindows 1
+}
+# Check to see whether the usual exit mechanism (where we enable 
+# C-x C-c and have the exit command in the File menu) is enabled.
+if {![info exists tychoShouldWeDoRegularExit]} {
+    set tychoShouldWeDoRegularExit 1
+}
+
+# Determine whether we exit when there are no more windows.
+::tycho::TopLevel::exitWhenNoMoreWindows $tychoExitWhenNoMoreWindows
+
+# We could try sourcing Displayer.itcl here, but 'tycho' and 'tycho foo'
+# behave slightly differently, so it is not worthit.
+::tycho::TopLevel::normalExit $tychoShouldWeDoRegularExit
+
 
 ##### This section should be in tycho.kernel.basic
 
