@@ -52,88 +52,69 @@ more intricate control structures.
 	type { int }
     }
 
-    private
+    protected
     {
-	enum STATE { idle, request, grant, release };
-	enum PORT { a, b };
+	InDEPort *request;	// request for current port
+	OutDEPort *grant;	// grant for current port
 
-	STATE state;
-	PORT port;
+	int idle : 1;	// arbitrator is idle
+	int req : 1;	// request is pending
+	int rel : 1;	// release is pending
     }
 
     start
     {
-	state = idle;
-	port = b;
+	idle = TRUE;
+	req = rel = FALSE;
     }
 
 
     go
     {
-	switch(state)
+	if (grantIn.dataNew)	// response to earlier "requestOut" output
 	{
-	case idle:
-	    if ( (requestA.dataNew && int(requestA.get()))
-		|| (requestB.dataNew && int(requestB.get())) )
+	    if (req && int(grantIn.get()))	// grant request
 	    {
-		port = (int(requestA.get())) ? a : b;
-		state = request;
+		req = FALSE;
+		grant->put(arrivalTime) << TRUE;
+	    }
+	    if (rel && !int(grantIn.get()))	// grant release
+	    {
+		rel = FALSE;
+		idle = TRUE;
+		grant->put(arrivalTime) << FALSE;
+		request->dataNew = FALSE;	// give other port a chance
+	    }
+	}
+
+	if ((requestA.dataNew || requestB.dataNew) && idle)	// new request
+	{
+	    if (requestA.dataNew)	// assign port A
+	    {
+		request = &requestA;
+		grant = &grantA;
+	    }
+	    else			// assign port B
+	    {
+		request = &requestB;
+		grant = &grantB;
+	    }
+
+	    if (int(request->get()))	// generate request
+	    {
+		idle = FALSE;
+		req = TRUE;
 		requestOut.put(arrivalTime) << TRUE;
 	    }
-	    break;
+	}
 
-	case request:
-	    if (grantIn.dataNew && int(grantIn.get()))
+	if (request->dataNew && !idle && !req && !rel)	// new release
+	{
+	    if (!int(request->get()))	// generate release
 	    {
-		state = grant;
-		switch(port)
-		{
-		case a:
-		    grantA.put(arrivalTime) << TRUE;
-		    break;
-		case b:
-		    grantB.put(arrivalTime) << TRUE;
-		    break;
-		}
-	    }
-	    break;
-
-	case grant:
-	    if ( ((port == a) && requestA.dataNew && !int(requestA.get()))
-		|| ((port == b) && requestB.dataNew && !int(requestB.get())) )
-	    {
-		state = release;
+		rel = TRUE;
 		requestOut.put(arrivalTime) << FALSE;
 	    }
-	    break;
-
-	case release:
-	    if (grantIn.dataNew && !int(grantIn.get()))
-	    {
-		state = idle;
-		switch(port)
-		{
-		case a:
-		    grantA.put(arrivalTime) << FALSE;
-		    if (requestB.dataNew && int(requestB.get()))
-		    {
-			port = b;
-			state = request;
-			requestOut.put(arrivalTime) << TRUE;
-		    }
-		    break;
-		case b:
-		    grantB.put(arrivalTime) << FALSE;
-		    if (requestA.dataNew && int(requestA.get()))
-		    {
-			port = a;
-			state = request;
-			requestOut.put(arrivalTime) << TRUE;
-		    }
-		    break;
-		}
-	    }
-	    break;
 	}
     }
 }
