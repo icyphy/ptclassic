@@ -29,7 +29,8 @@
 
 
 # This makefile is to be included if we don't need the compiler
-# and we don't need to generate any dependencies
+# and we don't need to generate any dependencies.  Please don't use
+# GNU make extensions in this file, such as 'ifdef'.
 
 all install TAGS: $(EXTRA_SRCS) $(HDRS) $(MISC_FILES)
 	@echo "Nothing to be done in this directory"
@@ -38,44 +39,47 @@ all install TAGS: $(EXTRA_SRCS) $(HDRS) $(MISC_FILES)
 # You probably don't want to add $(SRCS) to this, rather, change
 # the makefile that includes this one to use $(EXTRA_SRCS)
 sources::	$(EXTRA_SRCS) $(HDRS) $(MISC_FILES) makefile
-ifdef DIRS
-	@for x in $(DIRS); do \
-	    if [ -w $$x ] ; then \
-		( cd $$x ; \
-		echo making $@ in $$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
-		) \
-	    fi ; \
-	done
-endif
+	@if [ "x$(DIRS)" != "x" ]; then \
+		set $(DIRS); \
+		for x do \
+		    if [ -w $$x ] ; then \
+			( cd $$x ; \
+			echo making $@ in $$x ; \
+			$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+			) \
+		    fi ; \
+		done ; \
+	fi
 
 depend:
 	@echo "no dependencies in this directory"
 
 sccsinfo:
 	sccs info
-ifdef DIRS
-	@for x in $(DIRS); do \
-	    if [ -w $$x ] ; then \
-		( cd $$x ; \
-		echo making $@ in $$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
-		) \
-	    fi ; \
-	done
-endif
+	@if [ "x$(DIRS)" != "x" ]; then \
+		set $(DIRS); \
+		for x do \
+		    if [ -w $$x ] ; then \
+			( cd $$x ; \
+			echo making $@ in $$x ; \
+			$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+			) \
+		    fi ; \
+		done ; \
+	fi
 
 makefiles: makefile
-ifdef DIRS
-	@for x in $(DIRS); do \
-	    if [ -w $$x ] ; then \
-		( cd $$x ; \
-		echo making $@ in $$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
-		) \
-	    fi ; \
-	done
-endif
+	@if [ "x$(DIRS)" != "x" ]; then \
+		set $(DIRS); \
+		for x do \
+		    if [ -w $$x ] ; then \
+			( cd $$x ; \
+			echo making $@ in $$x ; \
+			$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+			) \
+		    fi ; \
+		done ; \
+	fi
 
 # Generate html files from itcl files, requires itclsh and tycho
 # Note that $(ROOT) here is relative to the tycho directory, not
@@ -94,60 +98,65 @@ itcldocs:
 # that includes this one and have it set $(EXTRA_SRCS)
 checkjunk:
 	@checkextra -v $(HDRS) $(EXTRA_SRCS) $(MISC_FILES) makefile SCCS
-ifdef DIRS
-	@for x in $(DIRS); do \
-	    if [ -w $$x ] ; then \
-		( cd $$x ; \
-		echo making $@ in $$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
-		) \
-	    fi ; \
-	done
-endif
+	@if [ "x$(DIRS)" != "x" ]; then \
+		set $(DIRS); \
+		for x do \
+		    if [ -w $$x ] ; then \
+			( cd $$x ; \
+			echo making $@ in $$x ; \
+			$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+			) \
+		    fi ; \
+		done ; \
+	fi
 
 CRUD=*.o *.so core *~ *.bak ,* LOG* $(KRUFT) 
 
 clean:
 	rm -f $(CRUD)
-ifdef DIRS
-	@for x in $(DIRS); do \
-	    if [ -w $$x ] ; then \
-		( cd $$x ; \
-		echo making $@ in $$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
-		) \
-	    fi ; \
-	done
-endif
+	@if [ "x$(DIRS)" != "x" ]; then \
+		set $(DIRS); \
+		for x do \
+		    if [ -w $$x ] ; then \
+			( cd $$x ; \
+			echo making $@ in $$x ; \
+			$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+			) \
+		    fi ; \
+		done ; \
+	fi
 
 realclean:
 	rm -f $(CRUD) $(REALCLEAN_STUFF)
 	rm -rf doc/codeDoc/*
-ifdef DIRS
-	@for x in $(DIRS); do \
-	    if [ -w $$x ] ; then \
-		( cd $$x ; \
-		echo making $@ in $$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
-		) \
-	    fi ; \
-	done
-endif
+	@if [ "x$(DIRS)" != "x" ]; then \
+		set $(DIRS); \
+		for x do \
+		    if [ -w $$x ] ; then \
+			( cd $$x ; \
+			echo making $@ in $$x ; \
+			$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+			) \
+		    fi ; \
+		done ; \
+	fi
+
 
 
 # Remove the sources too, so that we can get them back from sccs
 extraclean:
 	rm -f $(CRUD) $(REALCLEAN_STUFF) $(EXTRA_SRCS)
-ifdef DIRS
-	@for x in $(DIRS); do \
-	    if [ -w $$x ] ; then \
-		( cd $$x ; \
-		echo making $@ in $$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
-		) \
-	    fi ; \
-	done
-endif
+	@if [ "x$(DIRS)" != "x" ]; then \
+		set $(DIRS); \
+		for x; do \
+		    if [ -w $$x ] ; then \
+			( cd $$x ; \
+			echo making $@ in $$x ; \
+			$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+			) \
+		    fi ; \
+		done ; \
+	if
 
 # Create tclIndex from .tcl and .itcl files
 # This rule must be after the TCL_SRC and ITCL_SRC lines in the makefile
