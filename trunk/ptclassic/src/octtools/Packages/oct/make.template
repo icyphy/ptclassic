@@ -41,7 +41,7 @@ ROOT	      = ../../../..
 VPATH         = $(ROOT)/src/octtools/Packages/oct
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 HDRS		= attach.h \
@@ -169,7 +169,7 @@ tests:: $(DRIVER) tst
 	cd tst; ../$(DRIVER) 
 
 regress.o: regress.c
-	$(CC) $(C_SHAREDFLAGS) $(CFLAGS) -DCADROOT=\"$(PTOLEMY)/obj.$(ARCH)/octtools/Packages\" -g $^ -c $(C_INCL) 
+	$(CC) $(C_SHAREDFLAGS) $(CFLAGS) -DCADROOT=\"$(PTOLEMY)/obj.$(PTARCH)/octtools/Packages\" -g $^ -c $(C_INCL) 
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

@@ -41,7 +41,7 @@ ROOT	      = ../../../..
 VPATH         = $(ROOT)/src/octtools/Packages/port
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 HDRS		= ansi.h \
