@@ -41,7 +41,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Constructors.
 VHDLState :: VHDLState() {
-  VHDLTypedObj::initialize();
+    name = "UNINITIALIZED";
+    type = "UNINITIALIZED";
+    lastRef = "UNINITIALIZED";
+    firstRef = "UNINITIALIZED";
+    initVal = "UNINITIALIZED";
+    constant = -99999;
+    lastFiring = -99999;
+    firstFiringName = "UNINITIALIZED";
+    lastFiringName = "UNINITIALIZED";
+    constRefFiringList.initialize();
+    VHDLTypedObj::initialize();
 }
 
 // Destructor.
