@@ -1,16 +1,33 @@
 defstar {
 	name { FIR }
 	domain { CG56 }
-	desc { A Finite Impulse Response (FIR) filter. }
+	desc {
+Finite Impulse Response (FIR) filter.
+Coefficients are in the "taps" state variable.  Default coefficients
+give an 8th order, linear phase lowpass filter.  To read coefficients
+from a file, replace the default coefficients with "<fileName".
+Decimation parameter > 1 reduces sample rate.  Interpolation parameter
+> 1 increases sample rate.
+	}
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
-Coefficients are in the "taps" state variable.  Default coefficients
-give an 8th order, linear phase lowpass filter. To read coefficients
-from a file, replace the default coefficients with "<fileName".
-Decimation parameters > 1 reduces sample rate.
+The output of the FIR filter is given by:
+.EQ
+        y(n) ~ = ~ sum from { i = 0 } to { N - 1 } { c[i] x[N-i] }
+.EN
+where N is the order of the filter given by the number of coefficients in
+\fItaps\fP.
+c[i], i = 0..N-1 are the tap coefficients; and x[T-i] is the input i samples
+before the current input.
+.PP
+The parameters \fIdecimation\fR and \fIinterpolation\fR enable this star
+to perform downsampling or upsampling.
+.PP
+The default filter is a linear-phase equiripple lowpass filter with its 3dB
+cutoff frequency at about 1/3 of the Nyquist frequency.
 	}
 	input {
 		name {input}
