@@ -185,6 +185,10 @@ protected:
 	StringState linkOptions;
 	StringArrayState resources;
 
+	// combined link options
+	StringList getLinkOptions(int expandEnvironmentVars);
+	StringList getCompileOptions(int expandEnvironmentVars);
+
 	// give a unique name for a galaxy. 
 	int galId;
 	int curId;
