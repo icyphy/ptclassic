@@ -50,6 +50,7 @@ HDRS=Block.h Connect.h DataStruct.h Domain.h FloatState.h \
  Scheduler.h SpaceWalk.h Star.h State.h StringList.h StringState.h \
  FloatArrayState.h IntArrayState.h \
  Tokenizer.h Topology.h Universe.h miscFuncs.h type.h \
+ ComplexSubset.h \
  SDFConnect.h SDFScheduler.h SDFStar.h SDFUniverse.h \
  DEConnect.h DEScheduler.h DEStar.h DEUniverse.h
 
@@ -103,6 +104,18 @@ makefile:	make.template
 # Need to define LIBDIR for the interpreter
 Interpreter.o:	Interpreter.cc
 		$(GNU) $(GPPFLAGS) -DHELPDIR=\"$(HELPDIR)\" -c Interpreter.cc
+
+FloatArrayState.h FloatArrayState.cc : ArrayState.hP ArrayState.ccP
+	genclass -2 Float val double val ArrayState; 
+	mv Float.double.ArrayState.h FloatArrayState.h;
+	sed 's/"Float"/"FLOAT"/' Float.double.ArrayState.cc > FloatArrayState.cc;
+	rm Float.double.ArrayState.cc; 
+
+IntArrayState.h IntArrayState.cc : ArrayState.hP ArrayState.ccP
+	genclass -2 Int val int val ArrayState;
+	mv Int.int.ArrayState.h IntArrayState.h;
+	sed 's/"Int"/"INT"/;s/dval/ival/g' Int.int.ArrayState.cc > IntArrayState.cc;
+	rm Int.int.ArrayState.cc;
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
