@@ -104,7 +104,7 @@ DEST = $(ROOT)/octtools/bin.$(PTARCH)/oct2ps
 $(DEST):	oct2ps
 		@echo Installing oct2ps
 		rm -f $(DEST)
-		ln oct2ps $(DEST)
+		ln oct2ps$(BINARY_EXT) $(DEST)
 
 install: makefile $(DEST) $(ROOT)/lib/oct2ps.pro $(BINDIR)/oct2ps
 

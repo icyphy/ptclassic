@@ -87,7 +87,7 @@ DEST = $(ROOT)/octtools/bin.$(PTARCH)/oct2tim
 $(DEST):	oct2tim
 		@echo Installing oct2tim
 		rm -f $(DEST)
-		ln oct2tim $(DEST)
+		ln oct2tim$(BINARY_EXT) $(DEST)
 
 install: makefile $(DEST) $(BINDIR)/oct2tim
 
