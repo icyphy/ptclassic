@@ -37,25 +37,25 @@ BINDIR=$(ROOT)/bin.$(ARCH)
 # Ptolemy kernel directory
 KERNDIR=$(ROOT)/src/kernel
 
-# where the Gnu library and linker is
-GNULIB=/usr/gnu/lib
-# linker to use for pigi and interpreter.  g++ is not used because we
-# wish to control flags handed to the linker.
-LINKER=$(GNULIB)/gcc-ld -e start -dc -dp
-# startup module
-CRT0=/lib/crt0.o
-# system libraries (libraries from the environment)
-SYSLIBS=-lg++ -lm $(GNULIB)/gcc-gnulib -lc
-# link flags
-LINKFLAGS=-S $(CRT0) -L$(LIBDIR) -L$(GNULIB)
-# link flags if debugging symbols are to be left
-LINKFLAGS_D=$(CRT0) -L$(LIBDIR) -L$(GNULIB)
+# where the Gnu library is
+GNULIB=/usr/tools/gnu/lib
 
-# CONSTRUCTOR_HACK is a substitute "gnulib3" that makes g++ programs
+# linker to use for pigi and interpreter.
+LINKER=g++
+# startup module
+CRT0=
+# system libraries (libraries from the environment)
+SYSLIBS=-lg++ -lm
+# link flags (tell linker to strip out debug symbols)
+LINKFLAGS=-L$(LIBDIR) -Xlinker -S
+# link flags if debugging symbols are to be left
+LINKFLAGS_D=-L$(LIBDIR)
+
+# CONSTRUCTOR_HACK is a substitute "gnulib3" that makes g++1.x programs
 # call constructors in reverse order.  It is not used with the
 # OSF port of g++ to the Mips, or with cfront.
-CONSTRUCTOR_HACK=gnulib3a.c
-# CONSTRUCTOR_HACK=
+# CONSTRUCTOR_HACK=gnulib3a.c
+CONSTRUCTOR_HACK=
 
 # where help files go
 HELPDIR=~ptolemy/lib
