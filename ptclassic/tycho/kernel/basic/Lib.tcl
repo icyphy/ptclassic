@@ -72,66 +72,66 @@ bind Entry <Control-k> {
 
 
 ### USER PROFILE
-::tycho::register profile ~/.Tycho/profile
+::tycho::register profile [file join ~ .Tycho profile]
 
-### STYLESHEETS
+### Stylesheets
 ::tycho::register stylesheet "colors" \
-	{$TYCHO/kernel/styles/colors.style} \
-	{~/.Tycho/styles/colors.style}
+	[file join {$TYCHO} kernel styles colors.style] \
+	[file join ~ .Tycho styles colors.style]
 
 ::tycho::register stylesheet "console" \
-	{$TYCHO/kernel/styles/console.style} \
-	{~/.Tycho/styles/console.style}
+	[file join {$TYCHO} kernel styles console.style] \
+	[file join ~ .Tycho styles console.style]
 
 ::tycho::register stylesheet "fonts" \
-	{$TYCHO/kernel/styles/fonts.style} \
-	{~/.Tycho/styles/fonts.style}
+	[file join {$TYCHO} kernel styles fonts.style] \
+	[file join ~ .Tycho styles fonts.style]
 
 ::tycho::register stylesheet "interaction" \
-	{$TYCHO/kernel/styles/interaction.style} \
-	{~/.Tycho/styles/interaction.style}
+	[file join {$TYCHO} kernel styles interaction.style] \
+	[file join ~ .Tycho styles interaction.style]
 
 ::tycho::register stylesheet "java" \
-	{$TYCHO/kernel/styles/java.style} \
-	{~/.Tycho/styles/java.style}
+	[file join {$TYCHO} kernel styles java.style] \
+	[file join ~ .Tycho styles java.style]
 
 ::tycho::register stylesheet "layout" \
-	{$TYCHO/kernel/styles/layout.style} \
-	{~/.Tycho/styles/layout.style}
+	[file join {$TYCHO} kernel styles layout.style] \
+	[file join ~ .Tycho styles layout.style]
 
 ::tycho::register stylesheet "stacktrace" \
-	{$TYCHO/kernel/styles/stacktrace.style} \
-	{~/.Tycho/styles/stacktrace.style}
+	[file join {$TYCHO} kernel styles stacktrace.style] \
+	[file join ~ .Tycho styles stacktrace.style]
 
 ::tycho::register stylesheet "system" \
-	{$TYCHO/kernel/styles/system.style} \
-	{~/.Tycho/styles/system.style}
+	[file join {$TYCHO} kernel styles system.style] \
+	[file join ~ .Tycho styles system.style]
 
 ::tycho::register stylesheet "text" \
-	{$TYCHO/kernel/styles/text.style} \
-	{~/.Tycho/styles/text.style}
+	[file join {$TYCHO} kernel styles text.style] \
+	[file join ~ .Tycho styles text.style]
 
 
 ::tycho::register stylesheet "editcolors" \
-	{$TYCHO/editors/textedit/editcolors.style} \
-	{~/.Tycho/styles/editcolors.style}
+	[file join {$TYCHO} editors textedit editcolors.style] \
+	[file join ~ .Tycho styles editcolors.style]
 
 ::tycho::register stylesheet "edithtml" \
-	{$TYCHO/editors/textedit/edithtml.style} \
-	{~/.Tycho/styles/edithtml.style}
+	[file join {$TYCHO} editors textedit edithtml.style] \
+	[file join ~ .Tycho styles edithtml.style]
 
 ::tycho::register stylesheet "makefile" \
-	{$TYCHO/editors/textedit/makefile.style} \
-	{~/.Tycho/styles/makefile.style}
+	[file join {$TYCHO} editors textedit makefile.style] \
+	[file join ~ .Tycho styles makefile.style]
 
 ::tycho::register stylesheet "graphics" \
-	{$TYCHO/editors/visedit/graphics.style} \
-	{~/.Tycho/styles/graphics.style}
+	[file join {$TYCHO} editors visedit graphics.style] \
+	[file join ~ .Tycho styles graphics.style]
 
 
 ::tycho::register stylesheet "tydoc" \
-	{$TYCHO/lib/tydoc/tydoc.style} \
-	{~/.Tycho/styles/tydoc.style}
+	[file join {$TYCHO} lib tydoc tydoc.style] \
+	[file join ~ .Tycho styles tydoc.style]
 
 
 ### CATEGORIES
