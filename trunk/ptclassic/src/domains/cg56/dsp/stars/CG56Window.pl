@@ -121,15 +121,15 @@ the window.
 	} else if ( strcasecmp(wn, "Kaiser") == 0){
 	    winType = SDFWinType_Kaiser;
 	} else {
-	    Error::abortRun(*this, ": Unknown window name ", wn);
+	    Error::abortRun(*this, "Unknown window name ", wn);
 	    return;
 	}
 
 	// Don't want to risk divide by zero
 	realLen = int(length);
 	if ( realLen < 4 ) {
-	    Error::abortRun(*this, ": Window length too small",
-			    " (should be greater than 3)");
+	    Error::abortRun(*this, "Window length is too small ",
+			    "(should be greater than 3)");
 	    return;
 	}
 
@@ -164,7 +164,7 @@ the window.
 	    // This is a special case of SteepBlackman
 	    d = -.16;		// scale0 = .42, scale1 = -.5, scale2=.08
 	    // FALLTHROUGH
-	case SDFWinType_SteepBlackman:
+	  case SDFWinType_SteepBlackman:
 	    // See Jackson 2ed, eqns 7.3.6 through 7.3.10
 	    scale0 = (d+1)/2;
 	    scale1 = -.5;
@@ -172,12 +172,12 @@ the window.
 	    scale2 = -d/2;
 	    freq2 = 4*base_w;
 	    break;
-	case SDFWinType_Kaiser:
+	  case SDFWinType_Kaiser:
 	    alpha = double((realLen-1.0)/2.0);
 	    norm = fabs(i0(beta));
 	    break;
-	default:
-	    Error::abortRun(*this, ": Invalid window type");
+	  default:
+	    Error::abortRun(*this, "Invalid window type");
 	    return;
 	}
 
