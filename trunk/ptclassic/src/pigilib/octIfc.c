@@ -48,6 +48,8 @@ static boolean SetParamProp();
 
 /* 8/14/89
 Opens the master of an instance, but allows you to choose which facet.
+i is the instance pointer, f is the facet, and m is the mode.  t points
+to the returned master octObject.
 */
 boolean
 MyOpenMaster(t, i, f, m)
@@ -58,12 +60,15 @@ char *f, *m;
 
     octGetFacet(i, &rfacet);
     t->type = OCT_FACET;
+    t->objectId = 0;		/* though not used, it is sent, so
+				   this is needed to shut up Purify */
     t->contents.facet.cell = i->contents.instance.master;
     t->contents.facet.view = i->contents.instance.view;
     t->contents.facet.facet = f;
     t->contents.facet.version = OCT_CURRENT_VERSION;
     t->contents.facet.mode = m;
     CK_OCT(octOpenRelative(&rfacet, t, OCT_SIBLING));
+    FreeOctMembers(&rfacet);
     return (TRUE);
 }
 
@@ -119,9 +124,13 @@ IsGal(instPtr)
 octObject *instPtr;
 {
     octObject master, prop;
+    int status;
 
     ERR_IF1(!MyOpenMaster(&master, instPtr, "interface", "r"));
-    return (GetByPropName(&master, &prop, "galaxy") != OCT_NOT_FOUND);
+    status = (GetByPropName(&master, &prop, "galaxy") != OCT_NOT_FOUND);
+    FreeOctMembers(&master);
+    if (status) FreeOctMembers(&prop);
+    return status;
 }
 
 boolean 
@@ -129,9 +138,13 @@ IsStar(instPtr)
 octObject *instPtr;
 {
     octObject master, prop;
+    int status;
 
     ERR_IF1(!MyOpenMaster(&master, instPtr, "interface", "r"));
-    return (GetByPropName(&master, &prop, "star") != OCT_NOT_FOUND);
+    status = (GetByPropName(&master, &prop, "star") != OCT_NOT_FOUND);
+    FreeOctMembers(&master);
+    if (status) FreeOctMembers(&prop);
+    return status;
 }
 
 boolean 
@@ -139,9 +152,13 @@ IsUniv(instPtr)
 octObject *instPtr;
 {
     octObject master, prop;
+    int status;
 
     ERR_IF1(!MyOpenMaster(&master, instPtr, "interface", "r"));
-    return (GetByPropName(&master, &prop, "universe") != OCT_NOT_FOUND);
+    status = (GetByPropName(&master, &prop, "universe") != OCT_NOT_FOUND);
+    FreeOctMembers(&master);
+    if (status) FreeOctMembers(&prop);
+    return status;
 }
 
 boolean 
@@ -149,9 +166,13 @@ IsPal(instPtr)
 octObject *instPtr;
 {
     octObject master, prop;
+    int status;
 
     ERR_IF1(!MyOpenMaster(&master, instPtr, "interface", "r"));
-    return (GetByPropName(&master, &prop, "palette") != OCT_NOT_FOUND);
+    status = (GetByPropName(&master, &prop, "palette") != OCT_NOT_FOUND);
+    FreeOctMembers(&master);
+    if (status) FreeOctMembers(&prop);
+    return status;
 }
 
 boolean 
@@ -172,7 +193,7 @@ IsGalFacet(facetPtr)
 octObject *facetPtr;
 {
     octObject fterm;
-
+    fterm.objectId = 0;		/* silence Purify */
     return(octGenFirstContent(facetPtr, OCT_TERM_MASK, &fterm) == OCT_OK);
 }
 
@@ -185,16 +206,15 @@ octObject *facetPtr;
 {
     octObject inst;
     octGenerator gen;
+    int status = FALSE;
 
     octInitGenContents(facetPtr, OCT_INSTANCE_MASK, &gen);
-    while (octGenerate(&gen, &inst) == OCT_OK) {
-	if (IsCursor(&inst)) {
-	    octFreeGenerator(&gen);
-	    return (TRUE);
-	}
+    while (octGenerate(&gen, &inst) == OCT_OK && !status) {
+	status = IsCursor(&inst);
+	FreeOctMembers(&inst);
     }
     octFreeGenerator(&gen);
-    return (FALSE);
+    return status;
 }
 
 /* 8/8/89
@@ -233,15 +253,12 @@ ParamListType *pListPtr;
     octStatus status;
 
     pStr = PListToPStr(pListPtr);
-    prop.type = OCT_PROP;
-    prop.contents.prop.name = "params";
-    prop.contents.prop.type = OCT_STRING;
-    prop.contents.prop.value.string = pStr;
-    status = octCreateOrModify(galFacetPtr, &prop);
+    status = CreateOrModifyPropStr(galFacetPtr, &prop, "params", pStr);
     free(pStr);
     if (status != OCT_OK) {
 	return(FALSE);
     } else {
+	FreeOctMembers(&prop);
 	return(TRUE);
     }
 }
@@ -256,12 +273,13 @@ octObject *galFacetPtr;
 ParamListType *pListPtr;
 {
     octObject prop;
-
+    prop.objectId = 0;		/* silence Purify */
     if (GetByPropName(galFacetPtr, &prop, "params") == OCT_NOT_FOUND) {
 	pListPtr->length = 0;
 	pListPtr->array = (ParamType *) calloc(1, sizeof(ParamType));
     } else {
 	ERR_IF1(!PStrToPList(prop.contents.prop.value.string, pListPtr));
+	FreeOctMembers(&prop);
     }
     return(TRUE);
 }
@@ -301,17 +319,13 @@ char* propname;
     char *pStr;
     octObject prop;
     octStatus status;
-
     pStr = PListToPStr(pListPtr);
-    prop.type = OCT_PROP;
-    prop.contents.prop.name = propname;
-    prop.contents.prop.type = OCT_STRING;
-    prop.contents.prop.value.string = pStr;
-    status = octCreateOrModify(instPtr, &prop);
+    status = CreateOrModifyPropStr(instPtr, &prop, propname, pStr);
     free(pStr);
     if (status != OCT_OK) {
 	return(FALSE);
     } else {
+	FreeOctMembers(&prop);
 	return(TRUE);
     }
 }
@@ -383,6 +397,7 @@ ParamListType *pListPtr;
     }
     if (!PStrToPList(prop.contents.prop.value.string, &tempList))
 	return(FALSE);
+    FreeOctMembers(&prop);
     MergeParams(pListPtr,&tempList);
     return(TRUE);
 }
@@ -415,6 +430,7 @@ ParamListType *pListPtr;
     }
     if (!PStrToPList(prop.contents.prop.value.string, &tempList))
 	return(FALSE);
+    FreeOctMembers(&prop);
     MergeParams(pListPtr,&tempList);
     return(TRUE);
 }
@@ -543,11 +559,15 @@ char *name, *dest;
 int dlen;
 {
     octObject prop;
+    int status;
+
     if (GetByPropName(objPtr, &prop, name) == OCT_NOT_FOUND) {
 	*dest = 0;
 	return FALSE;
     }
-    return StringizeProp(&prop, dest, dlen);
+    status = StringizeProp(&prop, dest, dlen);
+    FreeOctMembers(&prop);
+    return status;
 }
 
 /* given a property, if it is OCT_STRING but its value corresponds to
@@ -627,7 +647,7 @@ char **domainPtr;
 char *defaultDomain;
 {
     octObject prop;
-
+    prop.objectId = 0;		/* silence Purify */
     CK_OCT(ohGetOrCreatePropStr(facetPtr, &prop, "domain", defaultDomain));
     *domainPtr = prop.contents.prop.value.string;
     return (TRUE);
@@ -641,8 +661,8 @@ octObject *facetPtr;
 char *domain;
 {
     octObject prop;
-
-    CK_OCT(ohCreateOrModifyPropStr(facetPtr, &prop, "domain", domain));
+    prop.objectId = 0;		/* silence Purify */
+    CK_OCT(CreateOrModifyPropStr(facetPtr, &prop, "domain", domain));
     return (TRUE);
 }
 
@@ -673,7 +693,7 @@ char *target;
 {
     octObject prop;
 
-    CK_OCT(ohCreateOrModifyPropStr(facetPtr, &prop, "target", target));
+    CK_OCT(CreateOrModifyPropStr(facetPtr, &prop, "target", target));
     return (TRUE);
 }
 
@@ -694,6 +714,7 @@ int *pIterate;
     if ( GetByPropName(facetPtr, &prop, "iterate") == OCT_NOT_FOUND )
 	return -1;
     *pIterate = prop.contents.prop.value.integer;
+    FreeOctMembers(&prop);
     return 0;
 }
 
@@ -705,5 +726,170 @@ int iterate;
     octObject prop;
 
     CreateOrModifyPropInt(facetPtr, &prop, "iterate", iterate);
+    FreeOctMembers(prop);
 }
 /***** End of iterate prop */
+
+/* the following were macros */
+boolean
+CreateOrModifyPropInt(c, t, s, i)
+octObject *c, *t;
+char *s;
+int i;
+{
+    t->type=OCT_PROP;
+    t->objectId = 0;
+    t->contents.prop.name=s;
+    t->contents.prop.type = OCT_INTEGER;
+    t->contents.prop.value.integer = i;
+    return octCreateOrModify(c,t);
+}
+
+boolean
+CreateOrModifyPropStr(c, t, s, s1)
+octObject *c,*t;
+char *s, *s1;
+{
+    t->type=OCT_PROP;
+    t->objectId = 0;
+    t->contents.prop.name=s;
+    t->contents.prop.type = OCT_STRING;
+    t->contents.prop.value.string = s1;
+    return octCreateOrModify(c, t);
+}
+
+boolean
+CreateOrModifyPropReal(c, t, s, d)
+octObject *c, *t;
+char *s;
+double d;
+{
+    t->type=OCT_PROP;
+    t->objectId = 0;
+    t->contents.prop.name=s;
+    t->contents.prop.type = OCT_REAL;
+    t->contents.prop.value.real = d;
+    return octCreateOrModify(c, t);
+}
+
+boolean
+GetOrCreatePropInt(c, t, s, i)
+octObject *c, *t;
+char *s;
+int i;
+{
+    t->type=OCT_PROP;
+    t->objectId = 0;
+    t->contents.prop.name=s;
+    t->contents.prop.type = OCT_INTEGER;
+    t->contents.prop.value.integer = i;
+    return octGetOrCreate(c,t);
+}
+
+boolean
+GetOrCreatePropStr(c, t, s, s1)
+octObject *c,*t;
+char *s, *s1;
+{
+    t->type=OCT_PROP;
+    t->objectId = 0;
+    t->contents.prop.name=s;
+    t->contents.prop.type = OCT_STRING;
+    t->contents.prop.value.string = s1;
+    return octGetOrCreate(c, t);
+}
+
+boolean
+GetOrCreatePropReal(c, t, s, d)
+octObject *c, *t;
+char *s;
+double d;
+{
+    t->type=OCT_PROP;
+    t->objectId = 0;
+    t->contents.prop.name=s;
+    t->contents.prop.type = OCT_REAL;
+    t->contents.prop.value.real = d;
+    return octGetOrCreate(c, t);
+}
+
+boolean
+OpenFacet(t, c, v, f, m)
+octObject *t;
+char *c, *v, *f, *m;
+{
+    t->objectId = 0;
+    t->type = OCT_FACET;
+    t->contents.facet.cell = c;
+    t->contents.facet.view = v;
+    t->contents.facet.facet = f;
+    t->contents.facet.version = OCT_CURRENT_VERSION;
+    t->contents.facet.mode = m;
+    return octOpenFacet(t);
+}
+
+/* fns to free fields in an octObject.  There must be no other refs to
+   them!  Assumed retrieved from one of the oct functions that puts
+   everything on the heap.
+
+   Warning: obj must have been received from the Oct interface, not
+   filled in by the user.
+*/
+
+boolean
+FreeOctMembers(o)
+octObject *o;
+{
+	struct octFacet *f;
+	struct octProp *p;
+	struct octInstance *i;
+	switch (o->type) {
+	case OCT_FACET:
+		f = &(o->contents.facet);
+		free(f->cell);
+		free(f->view);
+		free(f->facet);
+		free(f->version);
+		free(f->mode);
+		break;
+	case OCT_INSTANCE:
+		i = &(o->contents.instance);
+		free(i->name);
+		free(i->master);
+		free(i->view);
+		free(i->facet);
+		free(i->version);
+		break;
+	case OCT_PROP:
+		p = &(o->contents.prop);
+		free (p->name);
+		switch (p->type) {
+		case OCT_STRING:
+			free(p->value.string);
+			break;
+		case OCT_NULL:
+		case OCT_INTEGER:
+		case OCT_REAL:
+		case OCT_ID:
+			/* nothing to free */
+			break;
+		default:
+			fprintf(stderr,
+			   "FreeOctMembers, OCT_PROP type %d not handled\n",
+				p->type);
+			break;
+		}
+		break;
+	case OCT_TERM:
+		free (o->contents.term.name);
+		break;
+	case OCT_NET:
+		free (o->contents.net.name);
+		break;
+	default:
+		fprintf (stderr, "FreeOctMembers, type %d not handled\n",
+			 o->type);
+		break;
+	}
+	return TRUE;
+}
