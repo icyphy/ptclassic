@@ -264,7 +264,7 @@ STREAM receiveStream, sendStream;
     }
 
     /* This is now just in case */
-    (void) _bufFindBuffer(facet.objectId);
+    (void) bufFindBuffer(facet.objectId);
 
 #ifndef OLD_DISPLAY
     vemMsg(MSG_L, "RPC application requested redisplay -- ignored\n");
@@ -1186,7 +1186,7 @@ int application;
     vemSpot.y = 0;
 
     /* This is now just in case */
-    (void) _bufFindBuffer(facet.objectId);
+    (void) bufFindBuffer(facet.objectId);
 
     vemSpot.theFct = facet.objectId;
     vemSpot.thePoint = spot.thePoint;
@@ -1347,7 +1347,7 @@ STREAM readStream, sendStream;
     vemSpot.y = 0;
 
     /* This is now just in case */
-    (void) _bufFindBuffer(facet.objectId);
+    (void) bufFindBuffer(facet.objectId);
 
     vemSpot.theFct = facet.objectId;
     vemSpot.thePoint = spot.thePoint;
