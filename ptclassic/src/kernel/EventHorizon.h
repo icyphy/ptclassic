@@ -137,7 +137,9 @@ public:
 class WormMultiPort : public MultiPortHole {
 	Wormhole* worm;
 public:
-	WormMultiPort(Wormhole* w, GenericPort& a): worm(w) {setAlias(a);}
+	WormMultiPort(Wormhole* w, GenericPort& a): worm(w) {
+		GenericPort::setAlias(a);
+	}
 	int isItInput() const;
 	int isItOutput() const;
 
