@@ -36,7 +36,9 @@ proc ::tycho::preferencedialog {} {
     if { [::info which -command .tychoPreferences] != "" } {
 	raise .tychoPreferences
     } else {
-	::tycho::PreferenceDialog .tychoPreferences
+	::tycho::PreferenceDialog .tychoPreferences \
+		-title {Tycho preferences}
+	wm deiconify .tychoPreferences
     }
 }
 
@@ -47,9 +49,7 @@ proc ::tycho::preferencedialog {} {
 # A window that controls a set of preference editors.
 #
 class ::tycho::PreferenceDialog {
-    # FIXME: this should be a subclass of ::tycho::TopLevel but it
-    # hangs - ?
-    inherit itk::Toplevel
+    inherit ::tycho::Query
 
     constructor {args} {}
     destructor {}
@@ -66,11 +66,14 @@ class ::tycho::PreferenceDialog {
     # Open an editor for the specified preference set
     method edit {set}
 
+    # Update changed preferences
+    method update {}
+
     ###################################################################
     ####                       private variables                   ####
 
-    # The current preferences editor
-    private variable editor {}
+    # Open preferences editors
+    private variable editors {}
 }
 
 
@@ -79,33 +82,30 @@ class ::tycho::PreferenceDialog {
 #
 body ::tycho::PreferenceDialog::constructor {args} {
 
-    foreach set [preference info] {
-	set description [preference cget $set -description]
+    foreach tag [::preference info] {
+	set description [::preference cget $tag -description]
 	if { $description != "" } {
-	    itk_component add $set {
-		button $itk_interior.$set -text $description \
-			-command "$this edit $set" \
+	    itk_component add $tag {
+		button $itk_component(childsite).$tag -text $description \
+			-command "$this edit $tag" \
 			-highlightthickness 0
 	    } {
 		keep -background -cursor
 	    }
-	    grid $itk_interior.$set -sticky "ew"
+	    pack $itk_component(childsite).$tag -fill x -expand on
 	}
     }
 
-    itk_component add space {
-	frame $itk_interior.space -height 6
-    } {
-	keep -background -cursor
-    }
-    grid $itk_component(space)
+    addButton apply -text "Apply <M-a>" -command "$this update"
+    configure -okcommand "$this update"
 
-    itk_component add close {
-	button $itk_interior.close -text Close -command "delete object $this"
-    } {
-	keep -background -cursor
-    }
-    grid $itk_component(close) -sticky e
+    ## FIXME: disabled pending proper implementation of tycho database
+    #
+    # addButton save -text "Save <M-s>" -command "tychoPreferences write"
+
+    # Meta-a performs update
+    bind $itk_component(hull) <Meta-a> \
+	    "$this update; break"
 
     # Initialise options
     eval itk_initialize $args
@@ -113,11 +113,11 @@ body ::tycho::PreferenceDialog::constructor {args} {
 }
 
 #######################################################################
-#### constructor
+#### destructor
 #
 body ::tycho::PreferenceDialog::destructor {} {
-    if { $editor != "" } {
-	delete object $editor
+    foreach e $editors {
+	catch {delete object $e}
     }
 }
 
@@ -125,10 +125,24 @@ body ::tycho::PreferenceDialog::destructor {} {
 #### edit
 #
 body ::tycho::PreferenceDialog::edit {set} {
-    if { $editor != "" } {
-	delete object $editor
-	set editor {}
+    if { [::info which -command .$set] != "" } {
+	raise .$set
+    } else {
+	set ed [uplevel #0 ::tycho::PreferenceEditor .$set -preferences $set]
+	wm deiconify $ed
+	lappend editors $ed
     }
+}
 
-    set editor [::tycho::PreferenceEditor .$set -preferences $set]
+#######################################################################
+#### update
+#
+body ::tycho::PreferenceDialog::update {} {
+    foreach e $editors {
+	if { [::info which -command $e] != "" } {
+	    $e update
+	} else {
+	    set editors [ldelete $editors $e]
+	}
+    }
 }
