@@ -346,7 +346,7 @@ if {![info exists TychoBinaryInfo]} {
 if {![info exists TychoVersionInfo]} {
     set TychoVersionInfo "Version 0.1.1devel,\
 	    running under Itcl ${itcl::version}, Tcl$tcl_patchLevel,\
-	    Tk$tk_version"
+	    Tk$tk_version, \$TYCHO = $TYCHO"
 }
 # To disable the welcome message, set the global variable
 # tychoWelcomeMessage to zero before sourcing this file.
