@@ -326,6 +326,9 @@ configbody ::tycho::Edit::scrollbar {
 	    destroy $itk_component(scroll)
 	}
 	$itk_component(childsite).text configure -yscrollcommand {}
+
+	# Remove scrollbar packing from statusbar
+	statusbar configure -scrollbarpad 0
     } {
 	#
 	# Add a scrollbar if it does not already exist.
@@ -349,6 +352,8 @@ configbody ::tycho::Edit::scrollbar {
 	    $itk_component(childsite).text configure \
 		-yscrollcommand "$itk_component(scroll) set"
 	}
+	# Add scrollbar packing to statusbar
+	statusbar configure -scrollbarpad 1
     }
 }
 
