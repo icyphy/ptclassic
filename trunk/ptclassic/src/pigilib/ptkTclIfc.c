@@ -126,6 +126,7 @@ ptkSetHighlightFacet(dummy, interp, argc, argv)
 	return TCL_ERROR;
     }
 }
+
 /*******************************************************************
 * The global "lastFacet" pointer is used by the highlighting
 * routines to begin the search for the object to be highlighted.
@@ -141,7 +142,7 @@ Tcl_Interp *interp;                 /* Current interpreter. */
 int argc;                           /* Number of arguments. */
 char **argv;                        /* Argument strings. */
 {
-        char handle[16];
+        char handle[POCT_FACET_HANDLE_LEN];
         if(argc != 1) {
                 strcpy(interp->result,
                         "incorrect usage: should be \"ptkGetHighlightFacet \"");
