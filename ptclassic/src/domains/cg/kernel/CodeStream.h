@@ -15,20 +15,13 @@
 #endif
 
 #include "StringList.h"
-
-class UniqueStringList;
-
-const SHARE = TRUE;
+#include "UniqueStringList.h"
 
 class CodeStream : public StringList
 {
 public:
-    // By default, sharing is disabled.
-    CodeStream(int share = FALSE);
-    ~CodeStream();
-
-    // Add code to the stream.  If "name" is not NULL and sharing is
-    // enabled, code is added only if "name" has not appeared before.
+    // Add code to the stream.  If "name" is not NULL code is added
+    // only if "name" has not appeared before.
     // Returns TRUE if code was added to the stream, FALSE otherwise.
     int put(const char* code, const char* name = NULL);
 
@@ -36,8 +29,7 @@ public:
     void initialize();
 
 protected:
-    UniqueStringList* sharedNames;
-    unsigned int share:1;
+    UniqueStringList sharedNames;
 };
 
 #endif
