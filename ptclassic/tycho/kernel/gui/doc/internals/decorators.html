@@ -39,7 +39,7 @@ Displayer-View machinery, see the documentation for the
 HREF="view.html">View</A> classes. Create a top-level window and
 and an empty menubar:
 
-<tcl><pre>
+<tcl quiet><pre>
 set f [::tycho::autoName .dechtml]
 ::tycho::TopLevel $f
 ::tycho::MenuBar $f.mb
@@ -50,14 +50,11 @@ $f centerOnScreen
 (The window will appear as a very small rectangle in the center of
 your screen.) Now, we'll add a couple of menus to the menu bar:
 
-<tcl><pre>
+<tcl quiet><pre>
 $f.mb addMenu File
 $f.mb addMenu Help -side right -underline 0
-set bogus ""
 </pre></tcl>
 
-(Ignore the last line: that is needed to prevent a window with the
-result of the call -- which we don't want to see -- from popping up.)
 Note that the Help menu is packed to the right of the menu bar:
 stretch the window with the mouse to see this. The
 <code>-underline</code> option places an underline under the
@@ -71,7 +68,7 @@ name of the menu to place the entry into, and additional options.
 For example, we'll add a Close entry to the File menu and a Tycho Home
 Page entry to the Help menu:
 
-<tcl><pre>
+<tcl quiet><pre>
 $f.mb add Close File -command {delete object $f}
 $f.mb add {Tycho Home Page} Help &#92
 	-command {::tycho::File::openContext &#92
@@ -106,14 +103,14 @@ key bindings as well as displaying the accelerator string.)
 
  <P> You can add a separator to a menu:
 
-<tcl><pre>
+<tcl quiet><pre>
 $f.mb addSeparator Help
 $f.mb add Foo Help -command {::tycho::inform Foo!}
 </pre></tcl>
 
  <P>Individual menu entries can be disabled and enabled:
 
-<tcl><pre>
+<tcl quiet><pre>
 $f.mb disable {Tycho Home Page}
 </pre></tcl>
 
@@ -121,13 +118,13 @@ $f.mb disable {Tycho Home Page}
 out and cannot be invoked.) Whole menus can be disabled
 in exactly the same way:
 
-<tcl><pre>
+<tcl quiet><pre>
 $f.mb disable File
 </pre></tcl>
 
 To re-enable disabled menus or entries, just call <code>enable</code>:
 
-<tcl><pre>
+<tcl quiet><pre>
 $f.mb enable {Tycho Home Page}
 $f.mb enable File
 </pre></tcl>
@@ -152,7 +149,7 @@ direct commands to its status bar.
 and pack it into a top-level window with a empty frame to give the
 window some size:
 
-<tcl><pre>
+<tcl quiet><pre>
 set fr [::tycho::autoName .dechtml]
 ::tycho::TopLevel $fr
 frame $fr.f -width 300
@@ -167,46 +164,47 @@ The status bar just created has a command given to it via the
 when the close button is pressed.
 The status bar has a number of other options that control its appearance.
 To add a file status display, set the <code>-filestatus</code> to
-"readonly," "writeable," or "modified":
+<CODE>readonly</CODE>, <CODE>writeable</CODE>, or <CODE>modified</CODE>:
 
-<tcl><pre>
+<tcl quiet><pre>
 $fr.sb configure -filestatus readonly
 </pre></tcl>
 
 Another one:
 
-<tcl><pre>
+<tcl quiet><pre>
 $fr.sb configure -filestatus modified
 </pre></tcl>
 
 To change the displayed text in the bar:
 
-<tcl><pre>
+<tcl quiet><pre>
 $fr.sb configure -closetext Quit
 </pre></tcl>
 
 To leave some space at the right side of the close button to match
 a scrollbar (presumably in some other window in the parent window):
 
-<tcl><pre>
+<tcl quiet><pre>
 $fr.sb configure -scrollbarpad 1
 </pre></tcl>
 
 There is really only one method of interest in the status bar:
 <code>puts</code> prints a string to the status region:
 
-<tcl><pre>
+<tcl quiet><pre>
 $fr.sb puts "A brief but informative message"
 </pre></tcl>
 
 To clear the display:
 
-<tcl><pre>
+<tcl quiet><pre>
 $fr.sb puts ""
 </pre></tcl>
 
-Often, printing a string and clearing it are bound to Tk &lt;Enter&gt;
-and &lt;Leave&gt; events -- that way the status bar can be used
+Often, printing a string and clearing it are bound to Tk
+<CODE>&lt;Enter&gt;</CODE> and <CODE>&lt;Leave&gt;</CODE>
+events -- that way the status bar can be used
 as a simple help mechanism. The toolbar, for example, to print
 information about a button when the mouse is moved over that button.
 
@@ -228,7 +226,7 @@ accessed through the <code>toolbar</code> method of the View class.
 We will use the same window as for the status bar -- if you have
 closed it, go bak and create another. Then:
 
-<tcl><pre>
+<tcl quiet><pre>
 ::tycho::ToolBar $fr.tb -statusbar $fr.sb
 pack $fr.tb -fill x -expand on -before $fr.f
 </pre></tcl>
@@ -236,7 +234,7 @@ pack $fr.tb -fill x -expand on -before $fr.f
 At first, the toolbar is blank, so you won't actually see anything.
 Let's add a couple of buttons to it:
 
-<tcl><pre>
+<tcl quiet><pre>
 $fr.tb button foo "The first button" -text "Push Me" &#92
 		-command {::tycho::post Thanks!}
 $fr.tb button bar "The second button"   -text "Push Me Too" &#92
@@ -248,19 +246,19 @@ Notice that the button description is displayed in the
 status bar when the mouse is moved over the button. Buttons
 can be disabled:
 
-<tcl><pre>
+<tcl quiet><pre>
 $fr.tb disable foo
 </pre></tcl>
 
 And enabled:
 
-<tcl><pre>
+<tcl quiet><pre>
 $fr.tb enable foo
 </pre></tcl>
 
 To add entry widgets to the toolbar, do this:
 
-<tcl><pre>
+<tcl quiet><pre>
 $fr.tb entry thing "Enter something here" "Start with" {::tycho::post}
 set bogus ""
 </pre></tcl>
@@ -271,20 +269,20 @@ call) and the command is executed. In this case, a window will
 display the entry widget's contents. To get all of the data
 in a toolbar, you can use <code>get</code>:
 
-<tcl><pre>
+<tcl quiet><pre>
 $fr.tb get
 </pre></tcl>
 
 The entry widgets can be disabled if you need to prevent the user
 from altering the data (why does the appearance not change, though???):
 
-<tcl><pre>
+<tcl quiet><pre>
 $fr.tb disable thing
 </pre></tcl>
 
 And enabled:
 
-<tcl><pre>
+<tcl quiet><pre>
 $fr.tb enable thing
 </pre></tcl>
 
@@ -300,7 +298,7 @@ $fr.tb enable thing
 Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: 96/12/01,
+Last updated: $Date$,
 comments to: <author>johnr@eecs.berkeley.edu</author>
 </body>
 </html>

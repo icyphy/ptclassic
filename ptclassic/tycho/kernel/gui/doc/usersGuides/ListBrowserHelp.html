@@ -14,36 +14,36 @@ and an <a href="IndexBrowserHelp.html">index browser</a>.
 <h2><a name="name completion">Name Completion</a></h2>
 <p>
 If you enter any partial name in the entry box, and
-then type a Tab, all items
+then type a <CODE>Tab</CODE>, all items
 that have the partially entered name as a prefix will be selected.
 If there is exactly one match, then the matching item will replace
 your prefix in the entry box.  If there is more than one match, then
 the matching items are selected in the list box.
 You can scroll through each of the matching names using the up
-and down arrow keys (or Control-p and Control-n) or by repeatedly
-typing Tab.
+and down arrow keys (or <CODE>C-p</CODE> and <CODE>C-n</CODE>) or by repeatedly
+typing <CODE>Tab</CODE>.
 The matching is not case sensitive.
 <p>
-When you type a Tab for name completion, the prefix you have
+When you type a <CODE>Tab</CODE> for name completion, the prefix you have
 entered can have <a name=wildcards>wildcard</a> characters in a fashion similar
 to that used by the C-shell. Your prefix must exactly match
 the prefix of an item except that the
 following special sequences may appear:
 <dl COMPACT>
-<b><dt>*</b><dd>Matches any sequence of characters in the string,
+<dt><CODE>*</CODE><dd>Matches any sequence of characters in the string,
 including a null string.
-<b><dt>?</b><dd>Matches any single character in the string.
-<b><dt>[chars]</b><dd>Matches any character in the set given by
+<dt><CODE>?</CODE><dd>Matches any single character in the string.
+<dt><CODE>[chars]</CODE><dd>Matches any character in the set given by
 chars.  If a sequence of the form x-y appears
 in chars, then any character between x and y,
 inclusive, will match.
-<b><dt>\x</b><dd>Matches the single character x.
+<dt><CODE>\x</CODE><dd>Matches the single character x.
 This provides a way of avoiding the special interpretation
 of the characters *?[]\ in the pattern.
 </dl>
 <p>
 To unselect items that have been selected by name completion,
-type Control-\.
+type <CODE>C-\</CODE>.
 <p>
 <h2>Navigation</h2>
 <p>
@@ -51,12 +51,12 @@ A second unique feature is the ability to scroll through the
 list of items using standard emacs-like bindings.
 The relevant bindings are:
 <dl COMPACT>
-<b><dt>C-n</b><dd>down one item
-<b><dt>C-p</b><dd>up one item
-<b><dt>C-v</b><dd>forward one page
-<b><dt>M-v</b><dd>backward one page
-<b><dt>M-&lt;</b><dd>move to the top of the list
-<b><dt>M-&gt;</b><dd>move to the bottom of the list
+<dt><CODE>C-n</CODE><dd>down one item
+<dt><CODE>C-p</CODE><dd>up one item
+<dt><CODE>C-v</CODE><dd>forward one page
+<dt><CODE>M-v</CODE><dd>backward one page
+<dt><CODE>M-&lt;</CODE><dd>move to the top of the list
+<dt><CODE>M-&gt;</CODE><dd>move to the bottom of the list
 </dl>
 <p>
 The up and down arrow keys similarly move up and down one item,
@@ -66,7 +66,7 @@ The <em>home</em> and <em>end</em> keys move to the top and bottom of the list,
 respectively.  If there is a set of items selected (e.g.
 by the name completion mechanism), then the up and down arrow keys
 commands scroll through the list of selected items only, just like
-repeated Tabs.
+repeated <CODE>Tab</CODE>s.
 <p>
 It is also possible to scroll through the list using the mouse.
 Normally, clicking button 1 on an element selects it and deselects any
@@ -98,15 +98,15 @@ What this means depends on how the list browser is configured.
 For example, with the file browser, it will open the selected file
 or directory.
 An item in the entry box can also be opened by clicking
-on the OK button or typing a Return.
+on the OK button or typing a <CODE>Return</CODE>.
 <p>
 <a href="../../../doc/index.html">Tycho Home Page</a><br>
 <p>
 <HR>
-Copyright &#169 %Q%, The Regents of the University of California.
+Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: %D%,
+Last updated: $Date$,
 comments to: <author>eal@eecs.berkeley.edu</author>
 </body>
 </html>

@@ -37,31 +37,36 @@ the File class itself has no persistent data.
 <p>
 The File class accepts the following options:
 <dl>
-<b><a name="file option"><dt>-file</a> <i>name</i></b><dd>
-This associates
-a file name with the File object and adjusts the
+<dt><a name="file option"><CODE>-file</CODE></a> <CODE><i>name</i></CODE>
+<dd>This associates a file name with the File object and adjusts the
 label in the window header.
 
-<b><a name="readonly option"><dt>-readonly</a> <i>bool</i></b><dd>
-This specifies whether or not the file object accepts commands
+<dt><a name="readonly option"><CODE>-readonly</CODE></a> 
+<CODE><i>bool</i></CODE>
+<dd>This specifies whether or not the file object accepts commands
 to modify its data.  In the base class, the only action is to handle
 the annotation at the bottom of the window that indicates whether the
 file has been modified.
-The "bool" value can be
-"yes", "no", "true", "false", "1", or "0" (it is not case sensitive).
+The <I>bool</I> value can be
+<CODE>yes</CODE>, <CODE>no</CODE>, <CODE>true</CODE>,<CODE>false</CODE>,
+<CODE>1</CODE>, or <CODE>0</CODE> (it is not case sensitive).
 
-<b><a name="autosaveinterval option"><dt>-autosaveinterval</a> <i>value</i></b><dd>
-The value
+<dt><a name="autosaveinterval option"><CODE>-autosaveinterval</CODE>
+<i>value</i></a>
+<dd>The value
 is the time (in minutes) between saves.  In this base class,
 there is no meaningful save operation, so the
 <a name="autosave">autosave</a> operation
 does not do anything.  In derived classes, if the data has been
 modified, then the auto-save operation will create a file called
-#auto#name, where "name" is the associated file name.  This file
+<CODE>#auto#</CODE><I>name</I>, where <I>name</I> is
+the associated file name.  This file
 is automatically deleted when a successful save occurs.
 <a name="crash recovery">
 If the tycho program crashes, the File object will attempt to
-save any modified data into files called #crash#name.  Of course,
+save any modified data into files called 
+<CODE>#crash#</CODE><I>name</I>.
+ Of course,
 the data in these files may have been corrupted by the cause of
 the crash.  This crash recovery mechanism currently only works
 if you are running Tycho with Ptolemy</a>
@@ -71,10 +76,10 @@ if you are running Tycho with Ptolemy</a>
 <a href="../../../doc/index.html">Tycho Home Page</a><br>
 <p>
 <HR>
-Copyright &#169 %Q%, The Regents of the University of California.
+Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: %D%,
+Last updated: $Date$,
 comments to: <author>eal@eecs.berkeley.edu</author>
 </body>
 </html>

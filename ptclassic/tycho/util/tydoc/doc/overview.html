@@ -4,6 +4,7 @@
 <title>Tydoc Overview</title>
 </head>
 <body bgcolor="#faf0e6">
+<H1>Tydoc Overview</H1>
 Tydoc is the Tycho documentation system.  <A HREF="../../../kernel/doc/codeDoc/index.html"><CODE>$TYCHO/kernel/doc/codeDoc/index.html</CODE></A> contains
 sample tydoc output. 
 	
@@ -13,13 +14,15 @@ sample tydoc output.
 	<CODE>DocClass</CODE>, <CODE>ListDocSys</CODE> and 
 	<CODE>HTMLDocSys</CODE>.  These classes are defined in 
 	<A HREF="../TyDoc.itcl"><CODE>$TYCHO/lib/tydoc/TyDoc.itcl</CODE></A>
-	These classes could be used inside tycho for direct runtime
-	conversion of Itcl files to html.
+	The <A HREF="../../../editors/textedit/doc/usersGuides/EditItclHelp.html">Itcl Editor</A> can load these classes to generate html documentation
+	from an Itcl file.
 	
-	<DT>tydoc<DD>A small standalone script that takes file names
+	<DT><CODE>tydoc</CODE>
+	<DD>A small standalone script that takes file names
 	as command line arguments and converts the files to html
-	output.  For example <CODE>tydoc DocSys.html</CODE> would
-	convert DocSys.html into four files, one for each class in the
+	output.  For example <CODE>tydoc TyDoc.itcl</CODE> would
+	convert <CODE>TyDoc.itcl</CODE>
+	into four files, one for each class in the
 	<CODE>doc/codeDoc</CODE> directory.  If the
 	<CODE>doc/codeDoc</CODE> directory does not exist, it is
 	created.  A <A
@@ -51,16 +54,16 @@ HREF="../../../doc/coding/style.html">Tycho coding style guide</A>.
 information.
 <H3>Comment formatting</H3>
 
-In tcl, a comment line is a line that has a <CODE>#</CODE> as the
+In Tcl, a comment line is a line that has a <CODE>#</CODE> as the
 first non-blank character.  The symbol <CODE>#</CODE> is usually
 referred to as a hashmark, a poundsign or an octothorpe.  In this
 document we refer to <CODE>#</CODE> as a hashmark.
 
  <P>Lines that contain more than one hashmark are not copied
-into the tydoc output.
+into the <CODE>tydoc</CODE> output.
 
  <P>A <I>doc comment</I> is a block of comments associated
-with a itcl construct.  For a block of comments to be
+with a Itcl construct.  For a block of comments to be
 associated with a construct, there must be no blank lines
 between the block of comments and the construct.
 
@@ -86,20 +89,21 @@ applies some simple conversion rules to the text:
 
 <ul>
 <LI> Comment lines containing only white space are treated as
-a new paragraph (&lt;P&gt;).
+a new paragraph (<CODE>&lt;P&gt;</CODE>).
 
 <LI> The underscore-as-emphasis convention is used to generate
 italicized text. For example,
-<BLOCKQUOTE>
+<PRE>
     _I_ think this is a _perfectly reasonable convention_!
-</BLOCKQUOTE>
+</PRE>
 
 will be converted into 
 
-<BLOCKQUOTE>
+<PRE>
     &lt;i&gt;I&lt;/i&gt; think this is a &lt;i&gt;perfectly reasonable
 	convention&lt;/i&gt;!
-</BLOCKQUOTE>
+</PRE>
+Which is rendered as
 <BLOCKQUOTE>
     <i>I</i> think this is a <i>perfectly reasonable
 	convention</i>!
@@ -110,16 +114,17 @@ will be converted into
 text for program identifiers and so on. In both of these cases, the
 text can be only a single word:
 
-<BLOCKQUOTE>
+<PRE>
     The method fred{} uses the global variable *rightSaid*.
-</BLOCKQUOTE>
+</PRE>
 
 will be converted into 
 
-<BLOCKQUOTE>
+<PRE>
     The method &lt;code&gt;fred&lt;code&gt; uses the global
     variable &lt;code&gt;rightSaid&lt;/code&gt;.
-</BLOCKQUOTE>
+</PRE>
+Which is rendered as
 <BLOCKQUOTE>
     The method <code>fred</code> uses the global
     variable <code>rightSaid</code>.
@@ -206,7 +211,7 @@ create <CODE>codeDoc.idx</CODE> and then recreate the
 to fix cross references.  The following commands will do this for you:
 <PRE>
 cd $TYCHO
-make itcldocs indices itcldocs
+make install
 </PRE>
 
  <P>
@@ -214,7 +219,7 @@ make itcldocs indices itcldocs
 HREF="../../../doc/index.html">Tycho Home Page</A>.
 
 <HR>
-Copyright &#169 %Q%, The Regents of the University of California.
+Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
 Last updated: $Date$,

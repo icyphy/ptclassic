@@ -50,7 +50,7 @@ objects, the <a name="safeEval method"><code>safeEval</code></a>
 method should be used to evaluate
 any procedure that opens a modal dialog.
 This will prevent the deletion of the calling object during the
-calls to "update".
+calls to <CODE>update</CODE>.
 If a modal dialog is created from the top level or from a
 Tcl procedure that is not itself called from within an Itcl object,
 then there is no cause for worry.
@@ -93,13 +93,10 @@ you can leave the message on the screen as long
 as you like, and proceed with your work.
 Also note that it returns the name of the top-level window created.
 
-
 <h2><a name="question dialogs">Yes-No Questions</a></h2>
-
-
 You can ask the user yes-no questions, getting the response back
 and taking some action accordingly.  The
-<a name="askuser procedure">askuser procedure</a> asks a
+<a name="askuser procedure"><CODE>askuser</CODE> procedure</a> asks a
 <a name="yes-no questions">yes-no question</a>:
 <tcl><pre>
 if [::tycho::askuser "Are you awake?"] {
@@ -184,8 +181,9 @@ each of the five kinds of queries:
          {choice y {y label} {A B C} A} &#92
          {mediated z {z label} red {::tycho::querycolor Choose}}}
 </pre></tcl>
-This will return a list of the form {v <i>value</i>
-w <i>value</i> x <i>value</i> y <i>value</i> z <i>value</i>}.
+This will return a list of the form <CODE>{v</CODE> <i>value</i>
+<CODE>w</CODE> <i>value</i> <CODE>x</CODE> 
+<i>value</i> <CODE>y</CODE> <i>value</i> <CODE>z</CODE> <i>value</i>}.
 The first query is much like the used by the <code>queryinfo</code>
 procedure, requesting a single line of text.
 The second is similar, except that it has multiple lines
@@ -203,11 +201,11 @@ window. The second argument is the queries, which is actually a
 collection of method invocations for the <code>Query</code> class.
 There are currently five relevant methods, shown with their arguments below:
 <menu>
-<li> choice tag label possibilities command
-<li> line tag label default
-<li> lines tag label default height
-<li> radio tag label possibilities default
-<li> mediated tag label default command
+<li> <CODE>choice</CODE> <CODE><I>tag label possibilities command</I></CODE>
+<li> <CODE>line</CODE> <CODE><I>tag label default</I></CODE>
+<li> <CODE>lines</CODE> <CODE><I>tag label default height</I></CODE>
+<li> <CODE>radio</CODE> <CODE><I>tag label possibilities default</I></CODE>
+<li> <CODE>mediated</CODE> <CODE><I>tag label default command</I></CODE>
 </menu>
 In addition, all except choice can accept any number of additional arguments.
 These arguments are passed to the widget that implements the query
@@ -217,25 +215,32 @@ button, respectively).  These additional arguments can be used to
 control the appearance of the query.
 <p>
 The arguments above are explained below:
-<menu>
-<li> tag: a string that uniquely
+<DL>
+<DT><CODE><I>tag</I></CODE>
+<DD> a string that uniquely
      identifies the query. No two queries in the same dialog box
      can have the same tag.
-<li> label: a string that is inserted in the display to the left
+<DT> <CODE><I>label</I></CODE>
+<DD> a string that is inserted in the display to the left
      of the query.
-<li> default: the initial value of the query.
-<li> height: the number of lines in a multi-line text query.
+<DT> <CODE><I>default</I></CODE>
+<DD> the initial value of the query.
+<DT> <CODE><I>height</I></CODE>
+<DD> the number of lines in a multi-line text query.
      An <code>Edit</code> widget is used, providing
      an emacs-like text editor.
-<li> possibilities: a list of options.  These are the labels
+<DT> <CODE><I>possibilities</I></CODE>
+<DD> a list of options.  These are the labels
      that appear on each of the radio buttons, or the menu items in the
      choice pop-up menu.
-<li> command: a command to invoke for a mediated query or when the user
+<DT> <CODE><I>command</I></CODE>
+<DD> a command to invoke for a mediated query or when the user
      changes the selection in a choice query.  Before
      invoking this command, the current (default) value of the
      query will be appended to the command, separated by a space.
      The command should return the new value of the query.
-</menu>
+</DL>
+
 <p>
 A third argument can be given to the <code>query</code> procedure:
 the width of the entry box in characters.
@@ -246,10 +251,10 @@ It is optional and defaults to 40.
 <a href="../../../doc/index.html">Tycho Home Page</a><br>
 <p>
 <HR>
-Copyright &#169 %Q%, The Regents of the University of California.
+Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: %D%,
+Last updated: $Date$,
 comments to: <author>eal@eecs.berkeley.edu</author>
 </body>
 </html>

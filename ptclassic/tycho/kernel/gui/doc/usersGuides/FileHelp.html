@@ -26,30 +26,30 @@ the derived classes are the ones actually used.
 The following commands are available in the File menu as well
 through <a name="bindings, file access">key bindings</a>.
 <dl COMPACT>
-<b><dt>C-x C-f</b><dd>open a file
-<b><dt>C-x C-v</b><dd>switch to a new file in the same window
-<b><dt>C-x i</b><dd>insert a file
-<b><dt>C-x C-s</b><dd>save the current file
-<b><dt>C-x C-w</b><dd>save to some other file name
-<b><dt>C-x p</b><dd>print the contents (not yet implemented)
-<b><dt>C-x C-r</b><dd>evaluate a file (only valid in some derived classes)
-<b><dt>C-x C-q</b><dd>toggle read-only (possibly invoking version control)
-<b><dt>C-x v</b><dd>invoke revision control
-<b><dt>C-x k</b><dd>close the window
-<b><dt>C-x C-c</b><dd>exit the program
+<dt><CODE>C-x C-f</CODE><dd>open a file
+<dt><CODE>C-x C-v</CODE><dd>switch to a new file in the same window
+<dt><CODE>C-x i</CODE><dd>insert a file
+<dt><CODE>C-x C-s</CODE><dd>save the current file
+<dt><CODE>C-x C-w</CODE><dd>save to some other file name
+<dt><CODE>C-x p</CODE><dd>print the contents (not yet implemented)
+<dt><CODE>C-x C-r</CODE><dd>evaluate a file (only valid in some derived classes)
+<dt><CODE>C-x C-q</CODE><dd>toggle read-only (possibly invoking version control)
+<dt><CODE>C-x v</CODE><dd>invoke revision control
+<dt><CODE>C-x k</CODE><dd>close the window
+<dt><CODE>C-x C-c</CODE><dd>exit the program
 </dl>
 <p>
 In addition to the above, the File menu provides the following
 command without any key binding:
 <dl>
-<b><dt>Revert</b>
+<dt><CODE>Revert</CODE>
 <dd> Revert to the previously saved version of this file.
 </dl>
 <p>
 The File class also provides the following binding with no corresponding
 menu entry:
 <dl>
-<b><dt>C-x o</b><dd>move the <a name="focus">focus</a> to another window
+<dt><CODE>C-x o</CODE><dd>move the <a name="focus">focus</a> to another window
 </dl>
 <h3>Version Control</h3>
 <p>
@@ -86,12 +86,12 @@ without the intervention of any revision control system.
 The Tycho development group uses SCCS, and has configured
 the options to follow our style.  In particular, when a file
 is put under the control of SCCS, it is required to have
-"ID keywords", which are strings like &#37W&#37 and/or &#37D&#37.
-When a file is checked in, these get converted into version numbers.
-In addition, in order to support copyright notices, &#37Q&#37
+"ID keywords", which are strings like <CODE>&#37W&#37</CODE> and
+<CODE>&#37G&#37</CODE>.
+When a file is checked in, these get converted into the version number
+and date.
+In addition, in order to support copyright notices, <CODE>&#37Q&#37</CODE>
 gets converted into the current year.
-Another useful ID keyword is &#37G&#37, which gets converted
-into the current date.
 <p>
 <h2><a name="Window menu">Window Menu</a></h2>
 <p>
@@ -113,9 +113,9 @@ it does not appear in the Window menu.  To give it a name, use SaveAs
 A few window control menu commands and associated key bindings
 are provided for convenience.
 <dl>
-<b><dt>C-x 0</b><dd>iconify the window
-<b><dt>C-x 1</b><dd>full size
-<b><dt>C-x 6</b><dd>original size
+<dt><CODE>C-x 0</CODE><dd>iconify the window
+<dt><CODE>C-x 1</CODE><dd>full size
+<dt><CODE>C-x 6</CODE><dd>original size
 </dl>
 <p>
 Eventually, this list will be more complete, but in the current version,
@@ -185,10 +185,10 @@ will be correct, since often the crash occurs due to corrupted data.
 <a href="../../../doc/index.html">Tycho Home Page</a><br>
 <p>
 <HR>
-Copyright &#169 %Q%, The Regents of the University of California.
+Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: %D%,
+Last updated: $Date$,
 comments to: <author>eal@eecs.berkeley.edu</author>
 </body>
 </html>
