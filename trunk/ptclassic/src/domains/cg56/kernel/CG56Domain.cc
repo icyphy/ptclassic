@@ -19,6 +19,7 @@ $Id$
 #include "KnownTarget.h"
 #include "SDFScheduler.h"
 #include "CG56Connect.h"
+#include "CG56WormConnect.h"
 #include "AsmForkNode.h"
 
 // for error messages (temporary, until wormholes exist):
@@ -48,18 +49,12 @@ public:
 
 	// new fromUniversal EventHorizon
 	EventHorizon& newFrom() {
-		// return *new CGfromUniversal;
-		Error::abortRun("No CG56 EventHorizon implemented yet");
-		// Following is a hack
-		LOG_NEW; return *(new EventHorizon);
+		LOG_NEW; return *new CG56fromUniversal;
 	}
 
 	// new toUniversal EventHorizon
 	EventHorizon& newTo() {
-		// return *new CGtoUniversal;
-		Error::abortRun("No CG56 EventHorizon implemented yet");
-		// Following is a hack
-		LOG_NEW; return *(new EventHorizon);
+		LOG_NEW; return *new CG56toUniversal;
 	}
 
 	// new node (geodesic)
