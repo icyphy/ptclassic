@@ -213,11 +213,12 @@ octObject *facetPtr;
 {
     octObject net = {OCT_UNDEFINED_OBJECT, 0};
     octGenerator netGen;
-    octObject prop;		/* most data members are not dynamic */
+    octObject prop;		/* do not free prop: will crash Ptolemy */
 
     (void) octInitGenContentsSpecial(facetPtr, OCT_NET_MASK, &netGen);
     while (octGenerate(&netGen, &net) == OCT_OK) {
 	prop.type = OCT_PROP;
+	prop.objectId = 0;
 	prop.contents.prop.name = "delay";
 	prop.contents.prop.type = OCT_NULL;
 	if (octGetByName(&net, &prop) == OCT_NOT_FOUND) {
@@ -228,7 +229,7 @@ octObject *facetPtr;
 	    }
 	}
 	(void) octDetach(&net, &prop);
-	free(prop.contents.prop.value.string);
+        FreeOctMembers(&prop);
         FreeOctMembers(&net);
     }
     FreeOctMembers(&net);
@@ -435,8 +436,8 @@ boolean *result;
 {
     octObject inst = {OCT_UNDEFINED_OBJECT, 0},
 	      master = {OCT_UNDEFINED_OBJECT, 0},
-	      fTerm  = {OCT_UNDEFINED_OBJECT, 0},
-	      prop  = {OCT_UNDEFINED_OBJECT, 0};
+	      fTerm = {OCT_UNDEFINED_OBJECT, 0},
+	      prop = {OCT_PROP, 0};
     int retval = TRUE;
 
     ERR_IF2(GetById(&inst, aTermPtr->contents.term.instanceId) != OCT_OK,
@@ -448,10 +449,12 @@ boolean *result;
     if (GetByPropName(&fTerm, &prop, "input") != OCT_NOT_FOUND) {
 	*result = TRUE;
 	retval = TRUE;
+	FreeOctMembers(&prop);
     }
     else if (GetByPropName(&fTerm, &prop, "output") != OCT_NOT_FOUND) {
 	*result = FALSE;
 	retval = TRUE;
+	FreeOctMembers(&prop);
     }
     else {
 	*result = FALSE;
@@ -461,7 +464,6 @@ boolean *result;
 	ErrAdd(msg);
 	EssAddObj(aTermPtr);
     }
-    FreeOctMembers(&prop);
     FreeOctMembers(&fTerm);
     FreeOctMembers(&inst);
     FreeOctMembers(&master);
