@@ -92,6 +92,11 @@ class ::tycho::EditSTD {
 
     # Invoked by the "Set Initial State" command in the Edit menu.
     method setInitialState {tag} 
+    
+    # setOptions and setPortNames
+    # OLD codes: for compatible with old format
+    method setOptions {machine evaluation oneWriter}
+    method setPortNames {in out internal}
 
     # Set the input, output and internal ports.
     method setPorts {input output internal}
@@ -741,11 +746,23 @@ body ::tycho::EditSTD::setInitialState {tag} {
 }
 
 #######################################################################
+#### setOptions and setPortNames
+# OLD codes: for compatible with old format
+#
+body ::tycho::EditSTD::setOptions {machine evaluation oneWriter} {
+}
+body ::tycho::EditSTD::setPortNames {in out internal} {
+    set ports(in)       $in
+    set ports(out)      $out
+    set ports(internal) $internal
+}
+
+#######################################################################
 #### setPorts
 #
 body ::tycho::EditSTD::setPorts {input output internal} {
-    set ports(input)       $input
-    set ports(output)      $output
+    set ports(input)    $input
+    set ports(output)   $output
     set ports(internal) $internal
 }
 
