@@ -43,7 +43,7 @@ SDFSchedule :: printVerbose () {
 	out = "SDF SCHEDULE:\n";
 	reset();
 	for (int i = size(); i>0; i--) {
-		out += nextBlock().readFullName();
+		out += nextStar().readFullName();
 		out += "\n";
 	}
 	return out;
@@ -81,7 +81,7 @@ void SDFScheduler :: runOnce () {
 	for (int i = mySchedule.size(); i>0; i--) {
 
 		// Next star in the list
-		SDFStar& currentStar = (SDFStar&)mySchedule.nextBlock();
+		SDFStar& currentStar = mySchedule.nextStar();
 
 		// Now call beforeGo(), go(), and afterGo() for each Star
 		// for each PortHole
@@ -96,11 +96,12 @@ void SDFScheduler :: runOnce () {
 	// wrapup
 	////////////////////////////
 
-int SDFScheduler :: wrapup (Block& galaxy) {
-
+int SDFScheduler :: wrapup (Block& b) {
+	Galaxy& galaxy = b.asGalaxy();
 	// Run the termination routines of all the atomic stars.
-	for (int i = alanShepard.totalSize((Galaxy&)galaxy); i>0; i--)
-		((SDFStar&)alanShepard.nextBlock()).wrapup();
+	for (int i = alanShepard.totalSize(galaxy); i>0; i--)
+		alanShepard.nextStar().wrapup();
+	return 0;
 }
 
 
@@ -110,9 +111,8 @@ int SDFScheduler :: wrapup (Block& galaxy) {
 	////////////////////////////
 
 int SDFScheduler :: setup (Block& block) {
-	if (block.isItAtomic()) return;	// ERROR?
 
-	Galaxy& galaxy = (Galaxy&)block;
+	Galaxy& galaxy = block.asGalaxy();
 	numItersSoFar = 0;
 
 	// initialize the SpaceWalk member
@@ -125,7 +125,7 @@ int SDFScheduler :: setup (Block& block) {
 	// by a star execution may depend on a State (e.g. a downsample star)
 	for (i = alanShepard.totalSize(galaxy); i>0; i--)
 	{
-		SDFStar& s = (SDFStar&)alanShepard.nextBlock();
+		SDFStar& s = (SDFStar&)alanShepard.nextStar();
 
 		// Call system initialization
 		s.initialize();
@@ -160,7 +160,7 @@ int SDFScheduler :: setup (Block& block) {
 		numDeferredBlocks = 0;
 		
 		for (i = alanShepard.totalSize(galaxy); i>0; i--) {
-			SDFStar& atom = (SDFStar&)alanShepard.nextBlock();
+			SDFStar& atom = (SDFStar&)alanShepard.nextStar();
 			int runResult;
 
 			do {
@@ -172,7 +172,7 @@ int SDFScheduler :: setup (Block& block) {
 		// the deferred blocks
 
 		for (i=0; i<numDeferredBlocks; i++) {
-			SDFStar& atom = (SDFStar&)*deferredBlocks[i];
+			SDFStar& atom = (SDFStar&)deferredBlocks[i]->asStar();
 			addIfWeCan (atom);
 		}
 		
@@ -191,7 +191,7 @@ int SDFScheduler :: setup (Block& block) {
 int SDFScheduler::addIfWeCan (SDFStar& star, int defer = FALSE) {
 	int runRes = simRunStar(star,defer);
 	if (runRes == 0) {
-		mySchedule.append(&star);
+		mySchedule.append(star);
 		passValue = 0;
 	}
 	else if (runRes == 1 && passValue != 0) {
@@ -230,7 +230,7 @@ int SDFScheduler :: repetitions (Galaxy& galaxy) {
 	for(int i = alanShepard.totalSize(galaxy); i>0; i--) {
 
 		// Get the next atomic block:
-		SDFStar& star = (SDFStar&) alanShepard.nextBlock();
+		SDFStar& star = (SDFStar&) alanShepard.nextStar();
 
 		// First check to see whether a repetitions property has
 		// been set.  If so, do nothing.  Otherwise, compute the
@@ -255,7 +255,7 @@ int SDFScheduler :: repetitions (Galaxy& galaxy) {
 	// integers, we multiply through by lcm.
 	for(i = alanShepard.totalSize(galaxy); i>0; i--) {
 		// Get the next atomic block:
-		SDFStar& star = (SDFStar&) alanShepard.nextBlock();
+		SDFStar& star = (SDFStar&) alanShepard.nextStar();
 		star.repetitions *= Fraction(lcm);
 		star.repetitions.simplify();
 	}
@@ -292,15 +292,15 @@ int SDFScheduler :: reptConnectedSubgraph (Block& block) {
 	////////////////////////////
 
 // This function sets the repetitions property of two blocks
-// on opposite sides of a connection.  It is assumed that port1
+// on opposite sides of a connection.  It is assumed that nearPort
 // belongs to a block that has already had its repetitions property set.
-// If in addition port2 has had its repetitions property set,
+// If in addition farPort has had its repetitions property set,
 // then consistency is checked, and FALSE is returned.  Otherwise,
 // TRUE is returned.
 
-int SDFScheduler :: reptArc (PortHole& port1, PortHole& port2){
-	SDFStar& nearStar = (SDFStar&)*(port1.parent());
-	SDFStar& farStar = (SDFStar&)*(port2.parent());
+int SDFScheduler :: reptArc (PortHole& nearPort, PortHole& farPort){
+	SDFStar& nearStar = (SDFStar&) nearPort.parent()->asStar();
+	SDFStar& farStar =  (SDFStar&) farPort.parent()->asStar();
 	Fraction& nearStarRepetitions = nearStar.repetitions;
 	Fraction& farStarRepetitions = farStar.repetitions;
 	Fraction farStarShouldBe;
@@ -309,7 +309,7 @@ int SDFScheduler :: reptArc (PortHole& port1, PortHole& port2){
 	// compute what the far star repetitions property should be.
 
 	farStarShouldBe = nearStarRepetitions *
-		Fraction(port1.numberTokens,port2.numberTokens);
+		Fraction(nearPort.numberTokens,farPort.numberTokens);
 
 	// Simplify the fraction
 	farStarShouldBe.simplify();
@@ -411,7 +411,7 @@ int SDFScheduler :: deferIfWeCan (SDFStar& atom) {
 		// Look at the next port in the list
 		port = (SDFPortHole*)&atom.nextPort();
 		bombIfNotConnected(port);
-		SDFStar& dest = (SDFStar&)*(port->far()->parent());
+		SDFStar& dest = (SDFStar&) port->far()->parent()->asStar();
 
 		// If not an output, or destination is not
 		// runnable, skip to the next porthole

@@ -30,11 +30,11 @@ extern Error errorHandler;
 	// wrapup
 	////////////////////////////
 
-int DEScheduler :: wrapup (Block& galaxy) {
-
+int DEScheduler :: wrapup (Block& block) {
+	Galaxy& galaxy = block.asGalaxy();
 	// Run the termination routines of all the atomic stars.
-	for (int i = alanShepard.totalSize((Galaxy&)galaxy); i>0; i--)
-		((DEStar&)alanShepard.nextBlock()).wrapup();
+	for (int i = alanShepard.totalSize(galaxy); i>0; i--)
+		alanShepard.nextStar().wrapup();
 }
 
 	////////////////////////////
@@ -51,20 +51,21 @@ StringList DEScheduler :: displaySchedule (Block& galaxy) {
 	// setup
 	////////////////////////////
 
-int DEScheduler :: setup (Block& galaxy) {
+int DEScheduler :: setup (Block& b) {
+	Galaxy& galaxy = b.asGalaxy();
 
 	// initialize the SpaceWalk member
-	alanShepard.setupSpaceWalk((Galaxy&)galaxy);
+	alanShepard.setupSpaceWalk(galaxy);
 
 	// initialize the global event queue...
 	eventQ.initialize();
 
 	// Notify each star of the global event queue, and fire source
 	// stars to initialize the global event queue.
-	for (int i = alanShepard.totalSize((Galaxy&)galaxy); i>0; i--) {
+	for (int i = alanShepard.totalSize(galaxy); i>0; i--) {
 		// Get the next atomic block
 		// and set its global event queue name.
-		DEStar& star = (DEStar&)alanShepard.nextBlock();
+		DEStar& star = (DEStar&)alanShepard.nextStar();
 
 		star.eventQ = &eventQ;
 		star.initialize();
@@ -92,10 +93,10 @@ DEScheduler :: run (Block& galaxy) {
 		// if level > stopTime, RETURN...
 		if (level > stopTime)	{
 			eventQ.levelput(terminal, level);	// push back
-			return ;
+			return 0;
 		}
 
-		DEStar* s = (DEStar*) terminal->parent();
+		DEStar* s = (DEStar*) &terminal->parent()->asStar();
 
 		// Grab the Particle from the geodesic to the terminal.
 		// Record the arrival time, and flag existence of data.
@@ -114,7 +115,7 @@ DEScheduler :: run (Block& galaxy) {
 			l--;
 			LevelLink* h = eventQ.next();
 			terminal = (DEPortHole*) h->e;
-			dest = (DEStar *) terminal->parent();
+			dest = (DEStar *) &terminal->parent()->asStar();
 
 			// if same destination star with same time stamp..
 			if (level == h->level && dest == s) {
