@@ -6,8 +6,8 @@ Demonstrates the simulation of a blocking strategy in the queueing network.
 .SV 1.1 "October 23, 1990"
 .AL "S. Ha"
 .LD
-.IE BlockAsk
-.IE BlockAccept
+.IE BlockingAsk
+.IE BlockingAccept
 The
 .c Queue
 block in the library is a generic one without any special feature.
@@ -20,37 +20,37 @@ change the module if want to use another blocking starategy.
 .pp
 The implementation of a blocking function is done by a pair of
 blocks :
-.c BlockAsk
+.c BlockingAsk
 block and
-.c BlockAccept
+.c BlockingAccept
 block.
 The
-.c BlockAsk 
+.c BlockingAsk 
 block monitors the size of the Queue. If the Queue is saturated,
 the
-.c BlockAsk
+.c BlockingAsk
 block generates a block-request output to the
-.c BlockAccept
+.c BlockingAccept
 block, which is connected to the Queue
 (\fIthreshold\fR state of the
-.c BlockAsk
+.c BlockingAsk
 block should be matched to the \fIcapacity\fR of the second Queue.)
 Without block-request from the
-.c BlockAsk 
+.c BlockingAsk 
 block, the
-.c BlockAccept
+.c BlockingAccept
 block is a trivial buffer without any latency. If the block-request
 input arrives, it does not send any output (it is blocked).
 Look at the demand input of the first Queue. If the
-.c BlockAccept
+.c BlockingAccept
 block is blocked, then the first server is also blocked since
 no data can be fetched from the first Queue. Therefore, the
 size of the first Queue keeps growing during the blocking period.
 Once the Queue is freed from the saturation, the 
-.c BlockAsk
+.c BlockingAsk
 block generates a block-release
 output to the
-.c BlockAccept
+.c BlockingAccept
 block, which then resumes the normal operation.
 .pp
 Note that if we want to realize the chain of blockage, we have to
