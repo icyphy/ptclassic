@@ -108,19 +108,19 @@ them through the keyboard.  Two mechanisms are provided for doing
 this.
 <p>
 First, note that the menu labels have an underlined character.
-Holding the Alt button in combination with the underlined letter
+Holding the <CODE>Alt</CODE> button in combination with the underlined letter
 causes the corresponding menu to be posted.
 Note further that each menu entry has an underlined letter.
 While the menu is posted, typing the underlined letter causes that
 command to be invoked.  If the menu is hierarchical, it may instead
 cause a submenu to be posted.
 This mechanism can be very quick and easy to learn for frequently
-used commands.  For example, "Alt+F O" invokes "open file" and is
-easier to type than "Ctrl+X Ctrl+F" (the emacs binding for the same
-function).
+used commands.  For example, <CODE>Alt-F O</CODE> invokes "open file" and is
+some feal that it is easier to type than <CODE>Ctrl+X Ctrl+F</CODE>
+(the emacs binding for the same function).
 
 <p> In a second mechanism,
-the function key F10 will post the leftmost menu.
+the function key <CODE>F10</CODE> will post the leftmost menu.
 Arrow keys can be used to switch between menus and between items
 in the menu.  This mechanism is not generally as convenient as using
 the Alt key for users who type well.
@@ -133,8 +133,8 @@ to particular functions.  The functions are explained here.
 <dl COMPACT>
 <dt><code> Arrow keys        </code><dd> move left, right, up, or down </tr>
 <dt><code> Shift+Arrow keys  </code><dd> extend the selection </tr>
-<dt><code> Ctrl+Arrow keys   </code><dd> move by words (left, right) or paragraphs (up,down) </tr>
-<dt><code> Ctrl+Shift+Arrow keys   </code><dd> select by words (left, right) or paragraphs (up,down) </tr>
+<dt><code> Ctrl+Arrow keys   </code><dd> move by words (left, right) or paragraphs (up, down) </tr>
+<dt><code> Ctrl+Shift+Arrow keys   </code><dd> select by words (left, right) or paragraphs (up, down) </tr>
 <dt><code> Backspace         </code><dd> delete one character to the left </tr>
 <dt><code> Ctrl+Backspace    </code><dd> delete one word to the left </tr>
 <dt><code> Delete            </code><dd> delete one character to the right </tr>
@@ -163,9 +163,9 @@ The following shortcuts work in the HTML viewer:
 <dt><code> End </code><dd> go to the bottom of the page </tr>
 <dt><code> Button-2 </code><dd> on a hypertext link, open in a new window </tr>
 <dt><code> Shift+Button-1 </code><dd> on a hypertext link, open in a new window </tr>
-<dt><code> Control+Left arrow </code><dd> back to previous page </tr>
-<dt><code> Control+Right arrow </code><dd> forward to next page </tr>
-<dt><CODE> Control+Tab</CODE><dd> shift the focus to the toolbar and back
+<dt><code> Ctrl+Left arrow </code><dd> back to previous page </tr>
+<dt><code> Ctrl+Right arrow </code><dd> forward to next page </tr>
+<dt><CODE> Ctrl+Tab</CODE><dd> shift the focus to the toolbar and back
 </dl>
 <p>
 In addition, the toolbar buttons in the HTML viewer have underlined
@@ -190,13 +190,13 @@ any of the following mechanisms:
 <p>
 <dl COMPACT>
 <dt><CODE>Tab</CODE><dd>move from one item to another
-<dt><CODE>Control+Tab</CODE><dd>move from one item to another
-<dt><CODE>Control+Shift+Tab</CODE><dd>move from one item to another in the
+<dt><CODE>Ctrl+Tab</CODE><dd>move from one item to another
+<dt><CODE>Ctrl+Shift+Tab</CODE><dd>move from one item to another in the
 reverse direction.
 </dl>
 <p>
 Note that in multi-line text entry boxes, <code>Tab</code> simply inserts
-a tab character, so you must use <CODE>Control+Tab</CODE>.
+a tab character, so you must use <CODE>Ctrl+Tab</CODE>.
 <p>
 Some dialog boxes have checkbuttons.  To change the state of these
 from the keyboard, move the focus to the checkbutton and type
@@ -231,7 +231,7 @@ while emacs uses a very long list of complicated key combinations.
 <dt><code> Alt+Shift+Tab </code><dd> previous window (including other programs) </tr>
 <dt><code> Ctrl+F6  </code><dd> next window (within Tycho) </tr>
 <dt><code> Ctrl+Shift+F6  </code><dd> previous window (within Tycho) </tr>
-<dt><code> Control+Tab </code><dd> next pane (for windows with multiple panes) </tr>
+<dt><code> Ctrl+Tab </code><dd> next pane (for windows with multiple panes) </tr>
 <dt><code> Ctrl+F9  </code><dd> minimize window </tr>
 <dt><code> Ctrl+F10 </code><dd> maximize window </tr>
 <dt><code> Ctrl+F5  </code><dd> restore window to original size </tr>
@@ -449,9 +449,26 @@ This is so that the most important emacs bindings can be respected:
 <p>
 The <a name="right mouse button">right mouse button
 </a> brings up a context-sensitive pop-up
-menu that usually gives access to documentation for the current
-widget.  It often also contains a command that will report
-the name of the widget (an Itcl object name).
+menu that with some of the following choices:
+<menu>
+
+<li> Undo the last editing operation
+
+<li> Cut the selection to the clipboard
+
+<li> Copy the selection to the clipboard
+
+<li> Paste contents of the clipboard
+
+<li> Delete the selection without saving it to the clipboard
+
+<li> Bring up documentation for the current widget.
+<li> Report the name of the widget (an Itcl object name).
+
+</menu>
+Not all of the above right menu choices are available in all of the windows.
+
+
 <p>
 The interaction of the mouse with text is otherwise that
 implemented in the text widget in Tk.  Thus, the following
