@@ -8,6 +8,7 @@
 .sp 0.3i
 .nr sp 9
 .nr pp 9
-.2c 2n 3
 .lp
-.ta 2.0iR
+.ta 1.8iR 3.8iR 6.0iR
+.tc .
+.2c 6n 3
