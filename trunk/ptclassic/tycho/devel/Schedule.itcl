@@ -28,22 +28,84 @@
 
 
 ##########################################################################
-#### DFSchedule
+#### Schedule
 #
-# The _DFSchedule_ class implements a schedule model with the
-# same information as described for the Ptolemy schedule
-# output. This is an experimental class to test the utility
-# of Models. It will have to be moved out of the kernel
-# sooner or later.
+# The _Schedule_ class implements a schedule model. It is general
+# enough to describe all kinds of schedules, including but not
+# limited to multiprocessor dataflow. The model has the following
+# attributes:
+# <ul>
+#   <li><b>-author</b>: Who write the schedule. Default is a null string.
+#   <li><b>-writetime</b>: The time the schedule was written. Default
+#       is a null string.
+#   <li><b>-starttime</b>: The time at which the schedule starts. \
+#	Default is zero.
+#   <li><b>-endtime</b>: The time at which the schedule ends. Default is zero.
+#   <li><b>-duration</b>: The duration of the schedule. Default is zero.
+# </ul>
 #
-# Two problems have shown up right away: i) Models do not order their
-# data! There must be a way of specifying that some data is ordered.
-# ii) Models do not allow duplicate names, which means that a
-# star cannot appear more than once in the schedule. Both of these
-# problems can probably be solved by introducing the notion of
-# a list into TIM.
+# The model has the following entities and associations:
+# <ul>
+# <li><b>task</b> _name_: A task to be performed. The _name_ must be
+# unique at this level of the schedule. Tasks have the following attributes:
+#   <ul>
+#   <li><b>-starttime</b>: The time at which the task starts. Default is zero.
+#   <li><b>-endtime</b>: The time at which the task ends. Default is zero.
+#   <li><b>-duration</b>: The duration of the task. Default is zero.
+#   <li><b>-whattodo</b>: Some description of how to execute the task.
+#        This could even be "idle." Default is a null string.
+#   <li><b>-dependson</b>: A list of tasks which must complete before
+#        this one can start. Default is a null list.
+#   <li><b>-repeatcount</b>: The number of times the task is to be
+#        repeated. If not one, then the start time, end time, and
+#        direction apply to the whole series of tasks. Default is one.
+#   <li><b>-description</b>: An informative HTML description
+#       of the task. Default is a null string.
+#   </ul>
+# A task can contain nested _resource_ entities, in which the task
+# is assumed to use every such resource for its duration. Tasks can
+# also contain task entities -- that is, sub-tasks. Note that task
+# names must be _unique_ at any level of the schedule.
+# <li><b>resource</b> _name_: A resource that can be used by tasks.
+# The resource entity can contain task entities, in which case those
+# tasks are taken to all use that resource. Resources have the
+# following attributes:
+#   <ul>
+#   <li><b>-utilization</b>: The percent utilization of this resource.
+#       Default is 100.
+#   <li><b>-description</b>: An informative HTML description
+#       of the resource. Default is a null string.
+#   </ul>
+# Note that resource names must be unique.
+# <li><b>annotation</b> _name_ _string_: An annotation to whatever contains
+# it. Annotations are completely arbitrary. Note that each annotation
+# must, however, be given a unique name at the elvel of the schedule
+# they are at. They can have these attributes:
+#   <ul>
+#   <li><b>-writtenby</b>: The tool that generated the annotation. Default
+#    is a null string.
+#   <li><b>-writetime</b>: The date and time the annotation was generated.
+#    Default is a null string.
+#   </ul>
+# <li><b>dependency</b> _type_ _a_ _b_: This is an association
+# between tasks, and is a more complex version of the _dependson_
+# attribute of tasks. The _type_ value can have the value:
+#   <ul>
+#   <li><b>startwhenstarted</b>: _b_ starts after _a_ starts.
+#   <li><b>startwhendone</b>: _b_ starts after _a_ completes. This is
+#   the case implied by the _dependson_ attribute of the _task_
+#   entity.
+#   <li><b>completebefore</b>: _b_ completes before after _a_ completes.
+#   </ul>
+# The association can have the following attributes:
+#   <ul>
+#   <li><b>-strict</b>: The dependency is mandatory. Otherwise it
+#   it is just preferable. (OK, OK, this is probably bogus -- would
+#   someone like to do this properly?)
+#   </ul>
+# </ul>
 #
-class ::tycho::DFSchedule {
+class ::tycho::Schedule {
     inherit ::tycho::Model
 
     constructor {args} {}
@@ -52,48 +114,54 @@ class ::tycho::DFSchedule {
     #################################################################
     ####                        options                          ####
 
+    ### Attributes of the model
+    public variable author ""
+    public variable starttime 0
+    public variable writetime 0
+    public variable endtime 0
+    public variable duration 0
+    public variable description ""
 
     #################################################################
     ####                     public methods                      ####
 
-    
-    # Delete a schedule 
-    method deleteschedule {name}
+    #### Access methods for annotations
+    method annotation {name string args}
+    method annotationattrs {name}
+    method annotationcget {name option}
+    method annotationconfigure {name args}
+    method annotationdelete {name}
+    method annotationget {name}
 
-    # Delete a schedulefiring 
-    method deletefiring {name}
+    #### Access methods for dependencies
+    method dependency {name string args}
+    method dependencyattrs {name}
+    method dependencycget {name option}
+    method dependencyconfigure {name args}
+    method dependencydelete {name}
+    method dependencyget {name}
 
-    # Test if a schedule or firing is present
+    #### Access methods for resources
+    method resource {name args}
+    method resourceattrs {name}
+    method resourcecget {name option}
+    method resourceconfigure {name args}
+    method resourcedelete {name}
+
+    #### Access methods for tasks
+    method task {name args}
+    method taskattrs {name}
+    method taskcget {name option}
+    method taskconfigure {name args}
+    method taskdelete {name}
+
+    # Test if an item exists in the schedule
     method exists {name}
 
-    # Add a firing to the array
-    method firing {name value args}
-    
-    # Get the attributes of a firing
-    method firingattrs {name}
+    # Return the items within an item
+    method get {{name{}}}
 
-    # Get an option or options of a firing
-    method firingcget {name option}
-
-    # Configure the firing with one or more options
-    method firingconfigure {name args}
-
-    # Return the firings and sub-schedules in a schedule
-    method get {name}
-
-    # Add a schedule to the array
-    method schedule {name args}
-    
-    # Get the attributes of an schedule
-    method scheduleattrs {name}
-
-    # Get an option or options of an schedule
-    method schedulecget {name option}
-
-    # Configure the schedule with one or more options
-    method scheduleconfigure {name args}
-
-    # Return the type of a schedule or firing
+    # Return the type of an item
     method type {name}
 
     #################################################################
@@ -106,190 +174,200 @@ class ::tycho::DFSchedule {
 ########################################################################
 #### constructor
 #
-body ::tycho::DFSchedule::constructor {args} {
+body ::tycho::Schedule::constructor {args} {
     # Evaluate options
     eval configure $args
 
-    # I have two entity types
-    entity schedule 0 \
-	    -scheduler          "" \
-	    -numberOfProcessors 1 \
-	    -totalIdleTime      0 \
-	    -makespan           0 \
-	    -utilization        0 \
-	    -processor          0 \
-	    -target             Tycho \
-	    -repeat             1  \
-	    -description        "" \
-	    -label              ""
+    # Declare the "task" entity
+    entity task 0 \
+	    -starttime 0 \
+	    -endtime 0 \
+	    -duration 0 \
+	    -whattodo "" \
+	    -dependson {} \
+	    -repeatcount 1 \
+	    -description ""
 
-    entity firing 1 \
-            -exec_time   0  \
-            -label       "" \
-            -description ""
+    # Declare the "resource" entity
+    entity resource 0 \
+	    -utilization 100 \
+	    -description ""
+
+    # Declare the "annotation" entity
+    entity annotation 1  \
+	    -writtenby "" \
+	    -writetime ""
+
+    # Declare the "dependency" association
+    association dependency 1 2 \
+	    -strict yes
 }
 
 ########################################################################
-#### deletefiring
+#### Access methods for annotations
 #
-# Delete an firing. Flag an error if the firing does not exist.
-# Return the inverse command.
-#
-body ::tycho::DFSchedule::deletefiring {name} {
-    _verify firing $name
-    _delete firing $name
+body ::tycho::Schedule::annotationdelete {name} {
+    _verify annotation $name
+    _delete annotation $name
+}
+
+body ::tycho::Schedule::annotation {name value args} {
+    if { [::info exists _type($name)] } {
+	error "Annotation $name already exists in [_dataname]"
+    }
+    eval [list _entity annotation $name $value] $args
+    return [list delete $name]
+}
+
+body ::tycho::Schedule::annotationattrs {name} {
+    _attributes annotation $name
+}
+
+body ::tycho::Schedule::annotationcget {name option} {
+    _verify annotation $name
+    _cget annotation $name $option
+}
+
+body ::tycho::Schedule::annotationconfigure {name args} {
+    _verify annotation $name
+    eval _configure annotation $name $args
+}
+
+body ::tycho::Schedule::annotationget {name} {
+    _verify annotation $name
+    _get annotation $name
 }
 
 ########################################################################
-#### deleteschedule
+#### Access methods for dependencies
 #
-# Delete an schedule. Flag an error if the schedule does not exist.
-# Return the inverse command.
+body ::tycho::Schedule::dependencydelete {name} {
+    _verify dependency $name
+    _delete dependency $name
+}
+
+body ::tycho::Schedule::dependency {name value args} {
+    if { [::info exists _type($name)] } {
+	error "Task $name already exists in [_dataname]"
+    }
+    eval [list _association dependency $name $value] $args
+    return [list delete $name]
+}
+
+body ::tycho::Schedule::dependencyattrs {name} {
+    _attributes dependency $name
+}
+
+body ::tycho::Schedule::dependencycget {name option} {
+    _verify dependency $name
+    _cget dependency $name $option
+}
+
+body ::tycho::Schedule::dependencyconfigure {name args} {
+    _verify dependency $name
+    eval _configure dependency $name $args
+}
+
+body ::tycho::Schedule::dependencyget {name} {
+    _verify dependency $name
+    _get dependency $name
+}
+
+########################################################################
+#### Access methods for resources
 #
-body ::tycho::DFSchedule::deleteschedule {name} {
-    _verify schedule $name
-    _delete schedule $name
+body ::tycho::Schedule::resourcedelete {name} {
+    _verify resource $name
+    _delete resource $name
+}
+
+body ::tycho::Schedule::resource {name args} {
+    if { [::info exists _type($name)] } {
+	error "Resource $name already exists in [_dataname]"
+    }
+    eval [list _entity resource $name] $args
+    return [list delete $name]
+}
+
+body ::tycho::Schedule::resourceattrs {name} {
+    _attributes resource $name
+}
+
+body ::tycho::Schedule::resourcecget {name option} {
+    _verify resource $name
+    _cget resource $name $option
+}
+
+body ::tycho::Schedule::resourceconfigure {name args} {
+    _verify resource $name
+    eval _configure resource $name $args
+}
+
+########################################################################
+#### Access methods for tasks
+#
+body ::tycho::Schedule::taskdelete {name} {
+    _verify task $name
+    _delete task $name
+}
+
+body ::tycho::Schedule::task {name args} {
+    if { [::info exists _type($name)] } {
+	error "Task $name already exists in [_dataname]"
+    }
+    eval [list _entity task $name] $args
+    return [list delete $name]
+}
+
+body ::tycho::Schedule::taskattrs {name} {
+    _attributes task $name
+}
+
+body ::tycho::Schedule::taskcget {name option} {
+    _verify task $name
+    _cget task $name $option
+}
+
+body ::tycho::Schedule::taskconfigure {name args} {
+    _verify task $name
+    eval _configure task $name $args
 }
 
 ########################################################################
 #### exists
 #
-# Returns true if the firing or schedule is in the model, else false.
+# Returns true if an item is in the model, else false.
 #
-body ::tycho::DFSchedule::exists {name} {
-    expr [_exists schedule $name] || [_exists firing $name]
-}
-
-########################################################################
-#### firing
-#
-# Add a new firing to the array. Flag an error if the firing
-# already exists. Additional arguments are the initial values
-# of firing options. Return the inverse command.
-#
-body ::tycho::DFSchedule::firing {name value args} {
-    if { [::info exists _type($name)] } {
-	error "Firing $name already exists in [_dataname]"
-    }
-    eval [list _entity firing $name $value] $args
-    return [list delete $name]
-}
-
-########################################################################
-#### firingattrs
-#
-# Return a list containing the attributes of the firing as a flat
-# option-value list.
-#
-body ::tycho::DFSchedule::firingattrs {name} {
-    _attributes firing $name
-}
-
-########################################################################
-#### firingcget
-#
-# Get an option of a data firing. Flag an error if the firing
-# does not exist or the option does not.
-#
-body ::tycho::DFSchedule::firingcget {name option} {
-    _verify firing $name
-    _cget firing $name $option
-}
-
-########################################################################
-#### firingconfigure
-#
-# Configure the given firing.
-# Flag an error if the firing does not exist, or if an
-# option is invalid.
-# 
-body ::tycho::DFSchedule::firingconfigure {name args} {
-    _verify firing $name
-    eval _configure firing $name $args
+body ::tycho::Schedule::exists {name} {
+    expr [_exists resource $name] || [_exists task $name] \
+	    || [_exists dependency $name] || [_exists annotation $name]
 }
 
 ########################################################################
 #### get
 #
-# Get the names of the firings and sub-schedules within a schedule.
-# The sub-schedules appears simply as "sub-schedule".
+# Get the names of the tasks and resources within an item.
+# The result is a list of type followed by name.
 #
-body ::tycho::DFSchedule::get {name} {
+body ::tycho::Schedule::get {{name {}}} {
     set result {}
-    foreach i [lsort -integer [_children $name]] {
-        # If the item has a label, use that.
-	if { [_type $name$_separator$i] == "schedule" } {
-            set label [_cget schedule $name$_separator$i -label]
-            if { $label != "" } {
-                lappend result [list $label]
-            } else {
-                lappend result "sub-schedule"
-            }
+    foreach i  [_children $name] {
+	if { $name == "" } {
+	    set child $i
 	} else {
-            set label [_cget firing $name$_separator$i -label]
-            if { $label != "" } {
-                lappend result [list $label]
-            } else {
-                lappend result [_get firing $name$_separator$i]
-            }
+	    set child $name$_separator$i
 	}
+	lappend result [_type $child] $child
     }
     return $result
 }
 
 #########################################################################
-#### schedule
-#
-# Add a new schedule to the array. Flag an error if the schedule
-# already exists. Additional arguments are the initial values
-# of schedule options. Return the inverse command.
-#
-body ::tycho::DFSchedule::schedule {name args} {
-    if { [::info exists _type($name)] } {
-	error "Schedule $name already exists in [_dataname]"
-    }
-    eval [list _entity schedule $name] $args
-}
-
-########################################################################
-#### scheduleattrs
-#
-# Return a list containing the attributes of the schedule as a flat
-# option-value list.
-#
-body ::tycho::DFSchedule::scheduleattrs {name} {
-    _attributes schedule $name
-}
-
-########################################################################
-#### schedulecget
-#
-# Get an option of a data schedule. Flag an error if the schedule
-# does not exist or the option does not.
-#
-body ::tycho::DFSchedule::schedulecget {name option} {
-    _verify schedule $name
-    _cget schedule $name $option
-}
-
-########################################################################
-#### scheduleconfigure
-#
-# Configure the given schedule. 
-# Flag an error if the schedule does not exist, or if an
-# option is invalid.
-# 
-body ::tycho::DFSchedule::scheduleconfigure {name args} {
-    _verify schedule $name
-    eval _configure schedule $name $args
-}
-
-#########################################################################
 #### type
 #
-# Return the type: either "schedule" or "firing".
+# Return the type of some item.
 #
-body ::tycho::DFSchedule::type {name} {
+body ::tycho::Schedule::type {name} {
     _type $name
 }
 
