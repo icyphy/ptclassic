@@ -160,7 +160,7 @@ class ::tycho::DataModel {
     method names {{pattern *}}
 
     # Load data from a TIM string
-    method parse {data}
+    method parse {data {context {}}}
     
     # Search for items with regexp or glob-syle matching
     method search {mode args}
@@ -726,14 +726,18 @@ body ::tycho::DataModel::names {{pattern *}} {
 # defined for this model. The item name follows, then attribute-value
 # pairs, and then nested items within curly braces. If any item
 # already exists, then an error is raised. Do not add anything to
-# the history.
+# the history. If _context_ is supplied, then this is the name of an
+# item, and _data_ will be parsed relative to that item.
 #
-body ::tycho::DataModel::parse {data} {
+body ::tycho::DataModel::parse {data {context {}}} {
     global _current_ _context_ _object_
+    set saved $_context_
+
     set _current_ $_dataname
-    set _context_ {}
+    set _context_ $context
     set _object_ $this
     $safeinterp eval [list @scope $scope $data]
+    set _context_ $saved
 }
 
 ########################################################################
