@@ -760,7 +760,7 @@ body ::tycho::DataModel::reorder {type {context {}} {list {}}} {
 # </pre>
 #
 # To find all descendants of <b>X:blue</b> with an integer
-# value of <b>-foo<b>:
+# value of <b>-foo</b>:
 # <pre>
 #     $model search -regexp -foo {^[0-9]+$} {X:blue *}
 # </pre>
