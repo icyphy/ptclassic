@@ -47,6 +47,7 @@ CGGeodesic.h \
 CGStar.h \
 CGTarget.h \
 CGUtilities.h \
+CGBaseWorm.h \
 CGWormhole.h \
 CodeBlock.h \
 CodeStream.h \
