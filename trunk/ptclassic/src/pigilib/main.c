@@ -91,9 +91,9 @@ RPCFunction CommandArray[] = {
     {ERFilterDesign, "Filter", " equirriple FIR", "<", 0},
     {WFilterDesign, "Filter", " window FIR", ">", 0},
     {RpcPlotSignal, "Utilities", "plot signal", "~", 0},
-/*  {RpcPlotCxSignal, "Utilities", "plot Cx signal", "-", 0}, */
+    {RpcPlotCxSignal, "Utilities", "plot Cx signal", "-", 0},
     {RpcDFT, "Utilities", "DFT", "^", 0},
-/*  {RpcDFTCx, "Utilities", "DFT of Cx signal", "_", 0}, */
+    {RpcDFTCx, "Utilities", "DFT of Cx signal", "_", 0},
     {Man, "Other", "man"},
     {Profile, "Other", "profile", ",", 0},
     {PrintFacet, "Other", "print facet"},
