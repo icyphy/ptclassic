@@ -277,7 +277,7 @@ body ::tycho::Dialog::constructor {args} {
 
 #########################################################################
 #### addButton
-# Add a button to the set of buttons at the bottom.
+# Add a button to the right of the existing buttons. 
 # The arguments are options understood by the Tk button command. The
 # most useful options are -command, which specified the command to
 # execute, -text, which specifies the label in the button, and -width,
