@@ -33,6 +33,7 @@ through key bindings.
 <b><dt>C-x C-w</b><dd>save to some other file name
 <b><dt>C-x p</b><dd>print the contents (not yet implemented)
 <b><dt>C-x C-r</b><dd>evaluate a file (only valid in some derived classes)
+<b><dt>C-x C-q</b><dd>toggle read-only (possibly invoking version control)
 <b><dt>C-x v</b><dd>invoke revision control
 <b><dt>C-x k</b><dd>close the window
 <b><dt>C-x C-c</b><dd>exit the program
@@ -75,6 +76,12 @@ the user about whether the file should be placed under revision
 control.  The list of revision control systems presented to the
 user can be set as an option, but currently includes only SCCS
 and RCS, with SCCS being the default.
+<p>
+Revision control is also used by the
+<a name="toggle read-only command">"Toggle read-only"</a>
+command, if the file is already under revision control.
+If it is not, then the read-only permissions are simply changed
+without the intervention of any revision control system.
 <p>
 The Tycho development group uses SCCS, and has configured
 the options to follow our style.  In particular, when a file
