@@ -58,7 +58,7 @@ StringList&
 StringList :: operator = (char c) {
 	char buf[2];
 	buf[0] = c; buf[1] = 0;
-	return *this += buf;
+	return *this = buf;
 }
 
 // Constructors
