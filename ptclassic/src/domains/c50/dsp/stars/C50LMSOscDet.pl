@@ -74,24 +74,6 @@ of the LMS star upon which this star derived.
 	}
 
 
-	// If input is 0 then the error output will be 0 so
-	// to prevent false detections this star will set
-	// the value of tap to 0.70710 when the power level
-	// drops below the "powerThreshold" value.  Doing this
-	// will produce a cos value which corresponds to an invalid
-	// DTMF tone.
-	input {
-		name { powerLevel }
-		type { fix }
-	}
-
-
-	state {
-		name { powerThreshold }
-		type { fix }
-		default { 0.0 }
-	}
-
 	// Since we're not derived from C50LMS, declare an error port
         input {
 		name { error }
@@ -154,23 +136,13 @@ Tap that's being adapted.
 	}
 
 	defstate {
-		name { delayBuf }
-		type { fixarray }
-		default { ""}
-		desc { 
-Buffer to implement delays > 1 
-		}
-		attributes { A_NONSETTABLE|A_NONCONSTANT }
-	}
-
-	defstate {
 		name { delayPtr }
 		type { int }
 		default { 0 }
 		desc {
-Pointer to next element to be stored in delayBuf. Needed only in delay > 1
+Pointer to next element to be stored in lmsOldSamples. needed only in delay > 1
 		}
-		attributes { A_NONSETTABLE|A_NONCONSTANT }
+		attributes { A_NONSETTABLE|A_NONCONSTANT|A_UMEM }
 	}
 
 	initCode {
@@ -198,35 +170,14 @@ Pointer to next element to be stored in delayBuf. Needed only in delay > 1
 	protected{
 		//intMu is a 16 bit representation of stepSize
 		int intMu;
-		// delayMask is used to implement modulo addressing
-		int delayMask;
-		// parameter to keep track of exec time
-		int time;
-		// power threshold parameter as integet
-		int thresholdAsInt;
 	}
 
 	setup {
-		// if delay requested is larger than 1 allocate 
-		// memory for delayBuf and delayPtr
-		
-		time = 23;
-
-		if (int(errorDelay) > 1) {
-			time += 12;
-			delayBuf.setAttributes(A_UMEM|A_CIRC);
-			delayPtr.setAttributes(A_UMEM);
-			int buffSize = 1;
-			int delaySize = errorDelay - 1;
-		//to support modulo 2 addressing delayBuf must be
-		// 2^k words long.
-			for ( int i = 0; i < 8; i++){
-				if ( buffSize >= delaySize) break;
-				buffSize = 2*buffSize;
-			}
-			delayBuf.resize(buffSize);
-			delayMask = buffSize - 1;
-		}
+		int delay = int(errorDelay);
+		if (delay <= 0) Error::abortRun(*this,
+				"Error delay must be greater than one!");
+		delay++;
+		lmsOldSamples.resize(delay);
 
                 // FIXME: Parameters are not always resolved properly
 		// before setup but should be.  For now, check parameters
@@ -235,8 +186,6 @@ Pointer to next element to be stored in delayBuf. Needed only in delay > 1
 	
 		tap = -cos(double(initialOmega));
 		
-		lmsOldSamples.resize(2);
-	
 		double temp = stepSize.asDouble();
 		if (temp >= 0) {
 			intMu = int(32768*temp + 0.5);
@@ -244,73 +193,70 @@ Pointer to next element to be stored in delayBuf. Needed only in delay > 1
 			intMu = int(32768*(2+temp) + 0.5);
 		}
 		
-		temp = powerThreshold.asDouble();
-	
-		if (temp >= 0) {
-			thresholdAsInt = int(32768*temp + 0.5);
-		} else {
-			thresholdAsInt = int(32768*(2+temp) + 0.5);
-		}
-
 	}
 
 	codeblock(initDelayPtr){
 	.ds	$addr(delayPtr)
-	.word	$addr(delayBuf)
+	.word	$addr(lmsOldSamples)
 	.text
 	}
 
 	codeblock(initialCode,"") {
-	lar	ar5,#$addr(powerLevel)
 	lar	ar4,#$addr(signalOut)
-	lar	ar1,#$addr(lmsOldSamples,1)
 	lar	ar2,#$addr(cosOmega)
 	lar	ar3,#$addr(tap)
-	mar	*,ar5
-	lacc	*,0,ar3			; accL = powerLevel
-	sub	#@(thresholdAsInt),0	; accL = powerLevel - powerThreshold
-	bcndd	$starSymbol(skip),leq
-	lacc	#42366,15
 	}
 
-// this star is generally used with the diamond shaped delay symbol
-//attached to the feedback path leading to the error input. Only 
-//delays of 1 are currently supported with this symbol so a value
-//of 1 for the delay means do nothing as far as this star is
-//concerned.  For larger values of delays additional code is requird.
 
-	codeblock(delayOne){
+
+	codeblock(delayGTOne,""){
+	lmmr	ar1,#$addr(delayPtr)
+	lmmr	treg0,#$addr(error)	; treg0 = error[n-errorDelay]
+	splk	#$addr(lmsOldSamples),cbsr1
+	splk	#$addr(lmsOldSamples,@(int(errorDelay))),cber1
+	splk	#9h,cbcr		; set circ buffer to be used with one
 	mar	*,ar1
-	lmmr	treg0,#$addr(error)	; treg0 = error
+	mpy	#@intMu		 ; p = 0.5*error*Mu
+	ltp	*		 
+; acc = 0.5*error*Mu, treg0 = x[n-errorDelay -1]
+	bldd	#$addr(signalIn),*+,ar2	; get new input
+	smmr	ar1,#$addr(delayPtr)
+	splk	#$addr(lmsOldSamples,@(int(errorDelay))),cbsr1
+	splk	#$addr(lmsOldSamples),cber1
 	}
 
-	codeblock(delayStd,""){
-	ldp	#00h
-	mar	*,ar5
-	lacc	#@delayMask
-	samm	dbmr
-	lmmr	ar5,#$addr(delayPtr)
-	bldd	#$addr(error),*+
-	apl	ar5			; the apl/opl thing is there because
-	opl	#$addr(delayBuf),ar4	; the C50 doesn't support modulo
-	smmr	ar5,#$addr(delayPtr)	; addressing directly.
-	sbrk	#$val(errorDelay)	; 0< erroDelay < 256 !!
-	apl	ar5
-	opl	#$addr(delayBuf),ar5
-	lt	*,ar1
-	}
-	
-	codeblock(finalCode,""){
+	codeblock(delayOfOne,""){
+	lar	ar1,#$addr(lmsOldSamples,1)
+	lmmr	treg0,#$addr(error)	; treg0 = error
+	mar	*,ar1
 	mpy	#@intMu		; p = 0.5*error*Mu
 	ltp	*,ar2		; acc = 0.5*error*Mu
+	}
+	
+	codeblock(updateTap,""){
 	sach	*,3		; cosOmega = 4*error*Mu
-	mpy	*,ar3		; p = 2*error*Mu*x[n-1]
+	mpy	*,ar3		; p = 2*error*Mu*x[n-2]
 	lacc	*,15		; acc = 0.5*tap
 	spac			; acc = 0.5(tap-4*error*Mu*x[n-1])
-$starSymbol(skip):
 	sach	*,1,ar2		; tap = tap -4*error*Mu*x[n-1]
 	neg			; acc = -acc
 	sach	*,1,ar1		; cosOmega = -(tap)
+	}
+
+	codeblock(firGTOne,""){
+	mar	*-		; ar1->x[n]
+	lacc	*-,14		; acc = 0.25*x[n]
+	lt	*-,ar3		; treg0 = x[n-1]
+	mpy	*,ar1		; p = x[n-2]*tap*0.5
+	apac			; acc = 0.25*x[n]+0.5*tap*x[n-1]
+	add	*,14,ar4	
+; acc = 0.25*x[n]+0.5*x[n-1]+0.25*x[n-2]
+	sach	*,1		; output = 2*acc
+	splk	#0,cbcr		; disable circ buffers 
+	}
+
+
+	codeblock(firOne,""){
 	lacc	*-,14		; acc = x[n-2]/4, ar1->x[n-1]
 	lt	*		; treg0 = x[n-1]
 	dmov	*,ar3		; x[n-2] = x[n-1] <delay>
@@ -328,13 +274,16 @@ $starSymbol(skip):
 		// Update second tap and compute the output
 
 		addCode(initialCode());
-		if (int(errorDelay) > 1) addCode(delayStd());
-		else addCode(delayOne);
-		addCode(finalCode());
+		if (int(errorDelay) > 1) addCode(delayGTOne());
+		else addCode(delayOfOne());
+		addCode(updateTap());
+		if (int(errorDelay) > 1) addCode(firGTOne());
+		else addCode(firOne());
 	}
 
 	exectime {
-		return time;
+		if (int(errorDelay) > 1) return 30;
+		else return 23;
 	}
 
 }
