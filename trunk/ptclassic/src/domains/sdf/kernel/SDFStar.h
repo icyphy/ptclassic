@@ -20,13 +20,25 @@ $Id$
 #include "SDFConnect.h"
 #include "Particle.h"
 
+class EGMaster;
+
 	////////////////////////////////////
 	// class SDFStar
 	////////////////////////////////////
 
 class SDFStar : public Star  {
+private:
+        // pointer to master of instances for an expanded graph
+	// TEMPORARY: these kinds of things don't belong here.
+        EGMaster *master;
 
 public:
+	// my expanded graph master (temporary)
+	EGMaster *myMaster() { return master;}
+
+        // set the expanded graph master
+        void setMaster(EGMaster *m) {master = m;}
+
 	// my domain
 	const char* domain() const;
 
@@ -51,6 +63,9 @@ public:
 	// so that various SDF-specific initilizations can be performed.
 	// If the parent pointer is not provied, it defaults to NULL
 	Block& setBlock(char* starName, Block* parent = NULL);
+
+	// Execution time, for schedulers that use it
+	virtual int myExecTime();
 };
 
 class SDFStarPortIter : public BlockPortIter {
