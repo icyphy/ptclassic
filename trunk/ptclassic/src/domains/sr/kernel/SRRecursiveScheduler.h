@@ -1,3 +1,8 @@
+/* -*- C++ -*- */
+
+#ifndef _SRRecursiveScheduler_h
+#define _SRRecursiveScheduler_h
+
 /* Version $Id$
 
 Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -34,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Scheduler.h"
 
 class SRDependencyGraph;
+class SRRecursiveSchedule;
 class Set;
 
 /**********************************************************************
@@ -78,14 +84,99 @@ protected:
 
   virtual int computeSchedule( Galaxy & );
 
+  int mincost( Set &, int, SRRecursiveSchedule &, int );
+
 private:
 
   // The dependency graph of the galaxy
   SRDependencyGraph * dgraph;
 
-  SequentialList & SCCsOf(Set &);
+  SequentialList * SCCsOf(Set &);
 
   void fDFSVisit( int, Set &, int &, int * );
   void bDFSVisit( int, Set &, Set &);
 
 };
+
+// The different partitioning routines
+typedef enum SRPartTypeEnum { SRPartOneT } SRPartType;
+
+/**********************************************************************
+
+  The generic SRpart class
+
+**********************************************************************/
+class SRPart {
+public:
+
+  SRPart( Set & s ) { partSet = &s; }
+ 
+  // Restart the partitioner from the beginning
+  virtual void init() = 0;
+
+  // Return the next partition no greater than the given size
+  // @Description Is is the responsibility of the caller to free the
+  // returned set.
+  virtual Set * next( int ) = 0;
+
+protected:
+
+  // The set being partitioned
+  Set * partSet;
+  
+};
+
+/**********************************************************************
+
+  Partitioner that generates all single vertex partitions
+
+  @Description Essentially, another implementation of the SetIter class
+
+**********************************************************************/
+class SRPartOne : public SRPart {
+public:
+  SRPartOne( Set & s ) : SRPart(s) {};
+  void init();
+  Set * next( int );
+
+private:
+  // Index of the most recent member of the set
+  int vertexIndex;
+  
+};
+
+/**********************************************************************
+
+  A wrapper/selector for the partitions class
+
+**********************************************************************/
+class SRParter {
+
+private:
+
+  // The partitioning iteration routine
+  SRPart * mypart;
+
+public:
+
+  SRParter( Set & );
+
+  // Destroy the associated partitioner
+  ~SRParter() { delete mypart; }
+
+  // Restart the iterator
+  void init() { mypart->init(); }
+
+  // Return the next partition no greater than the given size
+  // @Description Is is the responsibility of the caller to free the
+  // returned set.
+  Set * next( int b /* Maximum allowed size of the partition */ ) {
+    return mypart->next(b);
+  }
+
+  // Which part routine to use
+  static SRPartType parter;
+
+};
+
+#endif

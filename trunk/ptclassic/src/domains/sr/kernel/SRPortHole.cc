@@ -66,18 +66,18 @@ void SRPortHole::connect(GenericPort& destination,
 				 int,
 				 const char* = 0)
 {
-  cout << "connect called on "
-       <<  this->parent()->name() << " " << this->name()
-       << " to " << destination.parent()->name() << " " << destination.name()
-       << "\n";
+  // cout << "connect called on "
+       // <<  this->parent()->name() << " " << this->name()
+       // << " to " << destination.parent()->name() << " " << destination.name()
+       // << "\n";
 
   SRPortHole * t = undoAliases();
   SRPortHole * d = ((SRPortHole *) (&destination))->undoAliases();  
 
-  cout << " (actually) "
-       <<  t->parent()->name() << " " << t->name()
-       << " to " << d->parent()->name() << " " << d->name()
-       << "\n";
+  // cout << " (actually) "
+       // <<  t->parent()->name() << " " << t->name()
+       // << " to " << d->parent()->name() << " " << d->name()
+       // << "\n";
 
   t = this;
   d = (SRPortHole *) &destination;
@@ -106,14 +106,14 @@ SRPortHole * SRPortHole::doAliases()
 
 // Set the far port
 void SRPortHole::setFarPort( SRPortHole * ) {
-  cout << "setFarPort called on non-input " << parent()->name() << " "
-       << name() << "\n";
+  // cout << "setFarPort called on non-input " << parent()->name() << " "
+  //     << name() << "\n";
 }
 
 // Set the far port for this input
 void InSRPort::setFarPort( SRPortHole * p ) {
-  cout << "setFarPort called on input " << parent()->name() << " "
-       << name() << "\n";
+  // cout << "setFarPort called on input " << parent()->name() << " "
+       // << name() << "\n";
   farSidePort = (PortHole *) p;
 }
 

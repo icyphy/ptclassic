@@ -36,4 +36,65 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
+class SRDependencyGraph;
+class StringList;
+class Set;
+
+/**********************************************************************
+
+  A scheduler for the SR domain's recursive schedule
+
+  @Description This is a parenthesized permutation of the vertices in
+  the dependency graph where the beginning of each parenthesized group
+  may have zero or more vertices that are to be evaluated directly.
+
+  <P> For example, the schedule
+  <PRE>
+     _ _    _         _
+    (1 2 3 (4 5 6) 7 (8 9))
+  </PRE>
+  corresponds to the sequence
+
+  <PRE>
+  (3 (5 6) 4 (5 6) 7 9 8 9) 1 2
+  (3 (5 6) 4 (5 6) 7 9 8 9) 1 2
+  (3 (5 6) 4 (5 6) 7 9 8 9)
+  </PRE>
+
+**********************************************************************/
+class SRRecursiveSchedule {
+public:
+
+  SRRecursiveSchedule( SRDependencyGraph & );
+  ~SRRecursiveSchedule();
+
+  StringList print() const;
+
+  //  StringList printSchedule() const;
+
+  int addSingleVertex( int, int );
+
+  int addPartition( int, int, Set & );
+
+  void getSection( int, int, SRRecursiveSchedule & );
+
+private:
+  // The dependency graph for which this schedule is computed
+  SRDependencyGraph * mygraph;
+
+  // The array of vertex indices for the sequence
+  int * vertex;
+
+  // The array of partition sizes for each vertex
+  int * partSize;
+
+  // The array of things to be directly evaluated for each vertex
+  int * directSize;
+
+  int printOnePartition(int, StringList & ) const;
+
+  //  void scheduleOnePartition(int, StringList & ) const;
+  
+};
+
 #endif
