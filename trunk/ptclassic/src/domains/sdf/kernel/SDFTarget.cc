@@ -46,7 +46,7 @@ static const char file_id[] = "SDFTarget.cc";
 #include "pt_fstream.h"
 
 SDFTarget::SDFTarget() :
-Target("simulate-SDF","SDFStar",
+Target("default-SDF","SDFStar",
 "Runs SDF systems on the local workstation using either the default\n"
 "one-processor SDF scheduler or Joe's clustering loop scheduler.")
 {
