@@ -225,7 +225,7 @@ net_node_t *node;
   fprintf( fp, "    int nemitevent;\n" );
   fprintf( fp, "    double min_time;\n" );
   fprintf( fp, "    double end_time;\n" );
-/* fprintf( fp, "    double _delay;\n" ); */
+  fprintf( fp, "    static double _delay;\n" ); 
   fprintf( fp, "    FILE *fpfire;\n" );
   fprintf( fp, "    FILE *fpover;\n" );
   
