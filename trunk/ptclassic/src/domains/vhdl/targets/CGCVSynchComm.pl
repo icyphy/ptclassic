@@ -3,16 +3,14 @@ defstar {
   domain { CGC }
   desc { Base class for CGC-VHDL synchronous communication }
   version { $Id$ }
-  author { Michael C. Williamson, Jose Luis Pino }
+  author { Michael C. Williamson and Jose Luis Pino }
   copyright { 
-    Copyright (c) 1993-1996 The Regents of the University of California.
-      All rights reserved.
-      See the file $PTOLEMY/copyright for copyright notice,
-      limitation of liability, and disclaimer of warranty provisions.
-    }
-
+Copyright (c) 1993-1996 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+  }
   location { VHDL Target Directory }
-  explanation { }
   public {
     int numXfer;
   }
@@ -24,7 +22,7 @@ defstar {
   defstate {
     name {destDir}
     type {string}
-    default {"$HOME/PTOLEMY_SYSTEMS/MIXED"}
+    default {""}
   }
   defstate {
     name {filePre}
@@ -47,14 +45,17 @@ defstar {
     default {"%"}
   }
 
-  code {
-/* IMPORTANT:  The following #defines must match
-   the ones in $(ROOT)/src/utils/ptvhdlsim/CLISocket.h
-   in order for the sockets to communicate with one another
-   */
-#define	SOCK_BASE_NAME "/tmp/PTVHDLSIM"
+  // Define prototype for destDirectoryName
+  hinclude { "CGTarget.h" }
+
+  // Define constant SOCK_BASE_NAME
+  ccinclude { "CLIConstants.h" }
+
+  constructor {
+    StringList destDirName = destDirectoryName("MIXED");
+    destDir.setInitValue(destDirName);
   }
-  
+
   setup {
   }
 
@@ -128,12 +129,8 @@ defstar {
   }
 
   initCode {
-    CodeStream *compileOptions, *linkOptions;
-    if ((compileOptions = getStream("compileOptions")) == FALSE)
-      return;
-    if ((linkOptions = getStream("linkOptions")) == FALSE)
-      return;
-    linkOptions->put("-lsocket -lnsl","socket Link");
+    addLinkOption("-lsocket");
+    addLinkOption("-lnsl");
     addInclude("<stdio.h>");
     addInclude("<string.h>");
     addInclude("<unistd.h>");
@@ -144,14 +141,14 @@ defstar {
     addDeclaration(firstDecl);
     addDeclaration(secondDecl);
 
-// This must be the first call to add code to mainInit.
-    StringList command = "";
+    // This must be the first call to add code to mainInit.
+    StringList command;
     command << "cd " << (const char*) destDir;
     command << " ; ";
     command << "ptvhdlsim -nc -i " << filePre << ".com " << filePre
 	    << "_parts";
 
-    StringList startvss = "";
+    StringList startvss;
     startvss << "\n";
     startvss << "  /* Start VSS Simulator */\n";
     startvss << "  system(\"";
@@ -160,9 +157,7 @@ defstar {
     addCode(startvss, "mainInit", filePre);
     addCode(genInit);
     
-    StringList oneLine;
-
-    oneLine = "  $starSymbol(dummy) = \"  ";
+    StringList oneLine = "  $starSymbol(dummy) = \"  ";
     oneLine << classname;
     oneLine << " socket error\";";
     addCode(oneLine);
@@ -179,5 +174,4 @@ defstar {
   wrapup {
     addCode(wrap);
   }
-
 }
