@@ -53,7 +53,7 @@ protected:
 	OutDEPort* feedbackOut;
 
 	// access the feedback arc.
-	void refireAtTime(double when);	// send next event.
+	void refireAtTime(double when, double value = 0.0); // send next event.
 	int canGetFired();		// can it be fired?
 
 public:
