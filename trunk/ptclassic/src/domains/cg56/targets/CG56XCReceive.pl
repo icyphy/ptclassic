@@ -37,6 +37,7 @@ $label(WHL)
 	}
 
 	setup {
+	    numXfer = output.numXfer();
 	    CG56S56XCGCBase::setup();
 	    PortHole* input = cgcSide->portWithName("input");
 	    DataType inputType = input->resolvedType();

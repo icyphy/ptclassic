@@ -37,6 +37,11 @@ $label(WHL)
 	nop
 	}
 
+	setup {
+		numXfer = input.numXfer();
+		CG56S56XCGCBase::setup();
+	}
+
 	go {
 		addCode(wordCntCB);
 		if (input.numXfer()==1)
