@@ -64,17 +64,16 @@ class ::tycho::EditDiff {
     method insertString {index str status} {}
 
     # Compare files
-    method compareFile {} {}
+    method compareFile {{nothing {}}} {}
 
-    # This keeps a list of diffs
-    public variable diffResult {}
-    public variable diffResultLineCount 0
-
+    # This will return the info line entry from the diff program
+    # (ie. 12,32c53,3    3d5,6    etc)
     public method diffReport {} {}
 
     # Open a help window.  This should be redefined in derived classes.
     method help {}
 
+    method test {} 
 
     ####################################################################
     ####           protected methods and variables                  ####
@@ -82,12 +81,19 @@ class ::tycho::EditDiff {
     # Keep track of the type of the diff
     private common difftypeName
 
+    # Instance of the Exec which calls UNIX's diff utility
+    private variable execDiff {}
+
     # Color for old and new text
     protected variable linecolor1 {{} {}}
     protected variable linecolor2 {{} {}}
 
     public variable filename1 {}
     public variable filename2 {}
+
+    # This keeps a list of diffs
+    public variable diffResult {}
+    public variable diffResultLineCount 0
 }
 
 
@@ -101,6 +107,7 @@ body ::tycho::EditDiff::constructor {args} {
     set linecolor1 [list blue {}]
     set linecolor2 [list red {}]
 
+    set execDiff ""
     configure -readonly 1
 
     toolbar button compare {Read in both files, and start parsing} \
@@ -110,13 +117,15 @@ body ::tycho::EditDiff::constructor {args} {
     toolbar button remfile {Remove one more file entry} \
             -text "Remove File" -command {} -state disabled
            
+    #toolbar button test {Kevin's test button} -text "Test" \
+    #        -command "$this test"
 
     toolbar entry filename1 "File 1 name: " {} "puts " \
             -foreground [lindex $linecolor1 0] -command \
             {set filename1 [::tycho::queryfilename {File 1 to compare:}]} \
             -textvariable filename1
            
-    toolbar entry filename2 "File 2 name: " {} "puts " \
+    toolbar entry filename2 "File 2 name: " {} "$this compareFile" \
             -foreground [lindex $linecolor2 0] -command \
             {set filename2 [::tycho::queryfilename {File 2 to compare:}]} \
             -textvariable filename2
@@ -158,10 +167,6 @@ body ::tycho::EditDiff::constructor {args} {
         $myMenubar delete "Upper Case"
         $myMenubar delete "Capitalize"
 
-        #$myMenubar insert "Open Source" "Switch File..." \
-                -underline 1 -accelerator {C-x s} \
-                -command "$this openSource"
-
         $myMenubar delete "Insert..."
         $myMenubar delete "Save"
         $myMenubar delete "SaveAs..."
@@ -182,20 +187,21 @@ body ::tycho::EditDiff::constructor {args} {
     # since the effect of the shift key is to modify the keypress and 
     # it does not seem that I can intercept this any other way.
     bind $itk_component(text) <Control-L> "$this compareFile"
-}
 
-###################################################################
-#
-body ::tycho::EditDiff::insertString {index str {status {common}}} {
+    # Configure text color
     set text $itk_component(text)
-    
     # Tag the text to have different colors
     foreach i {1 2} {
         $text tag configure linecolor$i \
                 -foreground [lindex [eval set linecolor$i] 0] \
                 -background [lindex [eval set linecolor$i] 1]
     }
-    $text tag configure common
+}
+
+###################################################################
+#
+body ::tycho::EditDiff::insertString {index str {status {common}}} {
+    set text $itk_component(text)
     
     if $readOnly {bell; return}
     #prepareInsert $index
@@ -205,9 +211,41 @@ body ::tycho::EditDiff::insertString {index str {status {common}}} {
 }
 
 
+
+
+# TEST TEST TEST
+body ::tycho::EditDiff::test {} {
+    global filename1 filename2
+    puts "Now entering test..."
+    # Create an exec instance
+    if {[info object $execDiff ]==""} {
+        # Doesn't exist yet, create one
+        set execDiff [::tycho::Exec [::tycho::autoName execDiff]]
+    }
+    $execDiff execProcess \
+            "diff $filename1 $filename2 |& grep -v \"^<\" |& grep -v \"^>\""
+
+    # Wait until execution is done
+    $execDiff getStatusWait
+    set diffResult [$execDiff getHistory]
+    set diffResult [split $diffResult \n]
+    puts "There are [llength $diffResult] lines"
+
+    # Reset the line to read from beginning
+    set diffResultLineCount 0
+
+    while {[set tmp [diffReport]]!="done"} {
+        puts "Current line is $tmp"
+    }
+}
+
+
+
 ###################################################################
 #
-body ::tycho::EditDiff::compareFile {} {
+# This is the entry point to comparing files. It first clears up the
+# text buffer, read in UNIX's diff, and then compare.
+body ::tycho::EditDiff::compareFile {{nothing {}}} {
     set text $itk_component(text)
     global filename1 filename2
     global linecolor1 linecolor2
@@ -216,6 +254,7 @@ body ::tycho::EditDiff::compareFile {} {
     #set filename1 "/tmp_mnt/tarsky/tarsky1/kchang/tycho/3.cc"
     #set filename2 "/tmp_mnt/tarsky/tarsky1/kchang/tycho/4.cc"
     
+    # Make sure that all the files are legal to begin with. Otherwise, exit.
     set flag 1
     foreach i {1 2} {
         if {[eval set filename$i]=="" || [eval set filename$i]=="NoName"} {
@@ -234,18 +273,25 @@ body ::tycho::EditDiff::compareFile {} {
         }
     }
 
-    configure -readonly 0
-    clipboard clear
-
     # Create an exec instance
-    set execDiff [::tycho::Exec [::tycho::autoName execDiff]]
-    $execDiff execProcess "diff $filename1 $filename2"
+    if {[info object $execDiff ]==""} {
+        # Doesn't exist yet, create one
+        set execDiff [::tycho::Exec [::tycho::autoName execDiff]]
+    }
+    $execDiff execProcess \
+            "diff $filename1 $filename2 |& grep -v \"^<\" |& grep -v \"^<\""
+    #$execDiff execProcess "diff $filename1 $filename2"
     # Wait until execution is done
     $execDiff getStatusWait
     set diffResult [$execDiff getHistory]
+
+    puts "$diffResult"
+
     set diffResult [split $diffResult \n]
     # Reset the line to read from beginning
-    set diffResuleLineCount 0
+    set diffResultLineCount 0
+    
+    puts "There are [llength $diffResult] lines this time..."
     
     # Open up files 
     set fd1 [open $filename1 r]
@@ -253,7 +299,11 @@ body ::tycho::EditDiff::compareFile {} {
     set fileLineCount1 1
     set fileLineCount2 1
     
+    # Entry point to reading the actual files and outputting to text
+    configure -readonly 0
+    clear
     while {[set diffInfo [diffReport]] != "done"} {
+
         set info [lindex $diffInfo 0]
         set n1 [lindex $diffInfo 1]
         set n2 [lindex $diffInfo 2]
@@ -297,9 +347,10 @@ body ::tycho::EditDiff::compareFile {} {
                 incr fileLineCount2
             }
         }
-        
-        
     }
+
+
+    puts "Now done, reading the rest of the files"
     # Read and output the rest of the common lines until EOF
     while {![eof $fd1]} {
         insertString insert [gets $fd1]\n common
@@ -308,6 +359,7 @@ body ::tycho::EditDiff::compareFile {} {
     close $fd2
 
     configure -readonly 1
+    markUnmodified
     return
 
     #set data [read $fd]
@@ -318,20 +370,27 @@ body ::tycho::EditDiff::compareFile {} {
 #### diffReport
 # parse the output of the UNIX's diff utility
 body ::tycho::EditDiff::diffReport {} {
+    # This is here as an attempt to speed up responce time.
+    ::tycho::safeUpdate $this
+
     #The normal output contains lines of these forms:
     #n1 a n3,n4
     #n1,n2 d n3
     #n1,n2 c n3,n4
-    
+
     # Reinitialize n1 through n4 to 0
-    foreach i {1 2 3 4} {
+    foreach i {3 4} {
         set n$i 0
     }
+    
     # Keep going until we hit the end of line
-    while {$diffResultLineCount != [llength $diffResult]} {
+    while {$diffResultLineCount < [llength $diffResult]} {
         set line [lindex $diffResult $diffResultLineCount]
+        # FIXME:
+        # This is an expensive operation! Regex is the bottleneck if
+        # there are many differences.
         if {[regexp \
-                {([0-9]+)(,[0-9]+)?(c|a|d)([0-9]+)(,[0-9]+)?} $line match \
+                {(^[0-9]+)(,[0-9]+)?(c|a|d)([0-9]+)(,[0-9]+)?$} $line match \
                 n1 n2 command n3 n4]} {
             # Get rid of leading comma for n2 and n4
             regexp {,([0-9]+)} $n2 match n2
@@ -344,8 +403,8 @@ body ::tycho::EditDiff::diffReport {} {
             
             incr diffResultLineCount
             return "$command $n1 $n2 $n3 $n4"
-        }        
-        incr diffResultLineCount
+        }
+	incr diffResultLineCount
     }
     return done
 }
