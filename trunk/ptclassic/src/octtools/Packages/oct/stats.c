@@ -169,7 +169,7 @@ struct stats *stats;
     if (obj_desc->flags&HAS_NAME) {
 	int internal_offset = obj_desc->user_offset + obj_desc->name_offset;
 	char *name = *(char **)((char *)obj + internal_offset);
-	int size = ((STRLEN(name)+4)/4)*4;
+	int size = (((int)STRLEN(name)+4)/4)*4;
 
 	stats->obj_counts[i].namesize += size;
 	stats->obj_counts[i].num_strings++;
