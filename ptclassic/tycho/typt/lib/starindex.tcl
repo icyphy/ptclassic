@@ -1,6 +1,6 @@
 # Generating star-demo cross indices
 # $Id$
-# Author: Brian L. Evans
+# Authors: Brian L. Evans, Christopher Hylands
 #
 # Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
@@ -180,12 +180,17 @@ proc starindex_FindOctFacetDirs { pathname } {
 # use "catch" in case the exec command causes an error
 proc starindex_ReadOctFacetDirs { facetdirlist } {
   set facetpairlist ""
+  puts -nonewline "Directory Count: "
   foreach facetdir $facetdirlist {
+    puts -nonewline "."
+    flush stdout
     set retval [catch "exec octls $facetdir" otherfacets]
+    #puts "dbg: starindex_ReadOctFacetDirs: $otherfacets"
     if { $retval != 0 } continue
     set facetpair [split [starindex_NormalizePathNames $otherfacets] "\n"]
     eval lappend facetpairlist $facetpair
   }
+  puts "Done."
   return $facetpairlist
 }
 
@@ -226,6 +231,7 @@ proc starindex_FacetPairsToTriplets { facetpairs } {
 # d. compress the lists of triplets to return a list of
 #    {star demo1 demo2 demo3 ...}
 proc starindex_MakeStarDemoIndex { pathname } {
+    #puts "dbg: starindex_MakeStarDemoIndex $pathname"
   set tripletlist \
       [lsort [starindex_FacetPairsToTriplets [starindex_ReadAllFacetPairs $pathname]]]
   set numelements [llength $tripletlist]
@@ -234,6 +240,7 @@ proc starindex_MakeStarDemoIndex { pathname } {
   set firsttimeflag 1
 
   for { set i 0 } { $i < $numelements } { incr i } {
+    # puts "dbg: starindex_MakeStarDemoIndex $i"
     set triplet [lindex $tripletlist $i]
     set starname [lindex $triplet 0]
     set demopath [lindex $triplet 2]
@@ -308,6 +315,10 @@ proc starindex_MakeWWWStarDemoIndex { fd domainname } {
   starindex_MakeWWWOctFacetIndex $fd $pathname "in the $ucdomainname domain"
 }
 
+###############################################################
+# The entry points to procs in this file are below this point
+#
+
 # starindex_WriteWWWStarDemoDir
 # create an entire World Wide Web directory, including index.html
 # it will backup "index.html" if it does not exist
@@ -351,3 +362,42 @@ proc starindex_WriteWWWStarDemoDir { domainlist wwwdirectory } {
 
   return 1
 }
+
+# starindex_WriteDemoIndex
+# Create a starDemo.idx file from the demos in the current directory
+# returns 1 if successful, and 0 if failure
+proc starindex_WriteDemoIndex { domainname } {
+    set outfile starDemo.idx
+
+    set fd [open $outfile w]
+
+    global env
+    if { ! [info exists env(PTOLEMY)] } return
+   
+    set lcdomainname [string tolower $domainname]
+    set ucdomainname [string toupper $domainname]
+    set pathname "$env(PTOLEMY)/src/domains/$lcdomainname/demo"
+
+    set header "Stars, galaxies, and universes in the $ucdomainname domain"
+    set starlist [starindex_MakeStarDemoIndex $pathname]
+
+    puts $fd "\{\{$header\}\}\n \{"
+    set numelements [llength $starlist]
+    for { set i 0 } { $i < $numelements } { incr i } {
+	set treelist [lindex $starlist $i]
+	set starname [lindex $treelist 0]
+	
+	if { [llength $treelist ] > 2} {
+	    puts $fd "\{\{$starname\} \{"
+	    puts $fd " \{Users of $starname\} \{"
+	    foreach demo [lrange $treelist 2 end]  {
+		puts $fd "  \{$demo $demo \{\}\} "
+	    }
+	    puts $fd "  \}\n \}\n\}"
+	}
+    }
+    puts $fd "\}"
+    close $fd
+    return 1
+}
+
