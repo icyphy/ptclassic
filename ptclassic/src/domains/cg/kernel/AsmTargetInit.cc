@@ -87,6 +87,6 @@ void AsmTarget::doInitialization(CGStar& cgStar) {
 		}
 	}
 	codeSection();
-	CGTarget::doInitialization(cgStar);
+	cgStar.initCode();
 }
 
