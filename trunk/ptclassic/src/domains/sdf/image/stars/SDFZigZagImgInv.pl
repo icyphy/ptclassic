@@ -21,12 +21,13 @@ This star inverse zig-zag scans a DCTImage.
 	hinclude { "DCTImage.h", "Error.h" }
 
 
-	method { // invert zig-zag scan. "imData" holds output.
+	method {		// invert zig-zag scan. "imData" holds output.
 		name { ziginv }
 		type { "void" }
 		access { protected }
-		arglist { "(float* imData, const float* fData, const int i,
-				const int j, const int width, const int blockSize)" }
+		arglist {	// can't break string across lines in cfront
+"(float* imData, const float* fData, const int i, const int j, const int width, const int blockSize)"
+		}
 		code {
 			int k, l, indx;
 
