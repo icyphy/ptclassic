@@ -46,7 +46,7 @@ OCT_CC =	gcc -fwritable-strings
 GPPFLAGS = -g -Wall -Wcast-qual -Wsynth $(MEMLOG)
 CFLAGS = -g
 # Itcl-2.0 need -fwritable-strings, or tclsh will segv in ItclFollowNamespPath
-WRITABLE_STRINGS_CFLAGS = -fwritable_strings
+WRITABLE_STRINGS_CFLAGS = -fwritable-strings
 
 # $PTOLEMY/src/domains/ipus/kernel uses this.
 NO_IMPLICIT_TEMPLATES = -fno-implicit-templates
