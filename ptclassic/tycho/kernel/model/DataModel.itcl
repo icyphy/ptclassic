@@ -189,6 +189,9 @@ class ::tycho::DataModel {
     # Create a header string
     protected method _header {}
 
+    # Configure the -modelname option
+    protected method _modelname {}
+
     # Update the cache if it's out of date
     protected method _update
 
@@ -287,9 +290,6 @@ body ::tycho::DataModel::constructor {args} {
     # Evaluate options
     eval configure $args
 
-    # Initialize the model attributes
-    @scope $scope set [set modelname]() {}
-    
     # Define the "model" type
     type define model \
     	:leafonly 1 \
@@ -706,7 +706,7 @@ body ::tycho::DataModel::names {{pattern *}} {
 # model. Each non-comment line must start with the name of a type
 # defined for this model. The item name follows, then attribute-value
 # pairs, and then nested items within curly braces. If any item
-# already exists, then an error is raised. Do no add anything to
+# already exists, then an error is raised. Do not add anything to
 # the history.
 #
 body ::tycho::DataModel::parse {data} {
@@ -1091,6 +1091,20 @@ body ::tycho::DataModel::_header {} {
     # append header "version: [modelcget -version] "
     append header "mtime: [clock format [clock seconds]] "
     return $header
+}
+
+########################################################################
+#### _modelname
+#
+# Change the name of the model. In this class, initialize the
+# relevant arrays in the model's namespace. Note: we have to do this
+# here instead of in the constructor, because the model name is
+# an option, and options are not initialized until the most specific
+# constructor executes.
+#
+body ::tycho::DataModel::_modelname {} {
+    # Initialize the model attributes
+    @scope $scope set [set modelname]() {}
 }
 
 ########################################################################
