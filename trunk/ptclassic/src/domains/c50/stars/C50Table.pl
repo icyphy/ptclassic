@@ -31,7 +31,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { fixarray }
 		default { "-1 1" }
 		desc { table of values to output }
-		attributes { A_UMEM|A_NONCONSTANT }
+		attributes { A_SETTABLE|A_NONCONSTANT|A_UMEM }
 	}
 	defstate {
 		name { runTimeCheck }

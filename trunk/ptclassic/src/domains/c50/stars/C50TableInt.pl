@@ -31,7 +31,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { intarray }
 		default { "-1 1" }
 		desc { table of values to output }
-		attributes { A_UMEM|A_CONSEC }
+		attributes { A_UMEM  }
 	}
 	defstate {
 		name { runTimeCheck }

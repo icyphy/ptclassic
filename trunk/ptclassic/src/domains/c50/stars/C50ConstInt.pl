@@ -30,7 +30,7 @@ The output buffer is initialized with the specified DC value.
 		noInternalState();
 	}
 	codeblock (org) {
-	.data
+	.ds	#$addr(output)
 	}
 	codeblock (dc) {
 	.word	 $val(level)
