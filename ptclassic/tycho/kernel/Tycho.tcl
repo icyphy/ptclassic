@@ -353,7 +353,7 @@ if {![info exists TychoBinaryInfo]} {
 # If you change ::tycho_version, then update $TYCHO/lib/mac/tycho-mac
 # and $TYCHO/README.txt.
 global ::tycho_version
-set tycho_version 0.2.1devel
+set tycho_version 0.3devel
 
 if {![info exists TychoVersionInfo]} {
     if [info exists tk_version] {
