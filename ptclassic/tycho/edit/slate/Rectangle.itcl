@@ -92,10 +92,10 @@ class ::tycho::Rectangle {
     proc _reshapeclick {id canvas slate x y args}
 
     # Continue a reshape interaction sequence
-    proc _reshapedrag {id canvas slate x y args}
+    proc _reshapedrag {id canvas slate x y}
 
     # Terminate a reshape interaction sequence
-    proc _reshaperelease {id canvas slate x y args}
+    proc _reshaperelease {id canvas slate x y}
 
     # Get an aspect of a rectangle
     proc aspect {x0 y0 x1 y1 aspect}
@@ -357,7 +357,7 @@ body ::tycho::Rectangle::_reshapeclick {id canvas slate x y args} {
 #######################################################################
 #### _reshapedrag
 #
-body ::tycho::Rectangle::_reshapedrag {id canvas slate x y args} {
+body ::tycho::Rectangle::_reshapedrag {id canvas slate x y} {
     set unique $id.[$slate uniqueid]
 
     # Get delta coordinates
@@ -386,7 +386,7 @@ body ::tycho::Rectangle::_reshapedrag {id canvas slate x y args} {
 #######################################################################
 #### _reshaperelease
 #
-body ::tycho::Rectangle::_reshaperelease {id canvas slate x y args} {
+body ::tycho::Rectangle::_reshaperelease {id canvas slate x y} {
 	set unique $id.[$slate uniqueid]
 
     # If there's a ghost, reshape the item to its shape
