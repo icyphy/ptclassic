@@ -128,4 +128,4 @@ XV_RAND=
 XV_INSTALL=install
 
 # Used for Matlab's external interface; by default, Matlab is not installed
-MATLABDIR= $(ROOT)/vendors/matlab
+MATLABDIR= $(ROOT)/src/compat/matlab
