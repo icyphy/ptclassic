@@ -109,8 +109,22 @@ body ::tycho::RevControlSCCS::createComment {list} {
     if {$list == ""} {
 	return ""
     }
-    set summary [lindex [lindex $list 0] 1]
-    set body [lindex [lindex $list 1] 1]
+    foreach i $list {
+	if {[lindex $i 0] == "summary"} {
+	    set summary [lindex $i 1]
+	}   
+    }
+    if {![info exists summary]} {
+	set summary ""
+    }
+    foreach i $list {
+	if {[lindex $i 0] == "body"} {
+	    set body [lindex $i 1]
+	}   
+    }
+    if {![info exists body]} {
+	set body ""
+    }
     return [format "SUMMARY: %s BODY: %s" $summary $body]
 }
 
@@ -119,8 +133,8 @@ body ::tycho::RevControlSCCS::createComment {list} {
 # 
 body ::tycho::RevControlSCCS::getComments {} {
     set list [DialogWindow::newModal EntryQuery [autoName .getcomment] \
-	    -queries {{first {Comment Summary:} {}} \
-	    {second {Comment Body:} {}}}  \
+	    -queries {{summary {Comment Summary:} {}} \
+	    {body {Comment Body:} {} 4}}  \
 	    -entrywidth 60]
     return [$this createComment $list]
 }
