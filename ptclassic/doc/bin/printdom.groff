@@ -1,12 +1,9 @@
 #! /bin/csh -f
 # $Id$
-
+#
 # Print documentation for a Ptolemy domain.  Assumed to be started in
 # the "doc" subdirectory of a domain.
-
-# Command uses printer defined by environmental variable $PRINTER
-# User .cshrc file must contain "setenv PRINTER whatever"
-
+#
 # Command line options:
 #
 #	-index		Generate an index only, print nothing.
@@ -28,19 +25,24 @@
 #	-iconsnorm	Don't remove the icons when finished.
 #
 # Remaining arguments are taken to be files to print options.
+# Command uses printer defined by environmental variable $PRINTER
+# User .cshrc file must contain "setenv PRINTER whatever"
 #
 # An implicit header file, $PTOLEMY/doc/headers/shared, is prepended.
-
-# The following files are assumed to present in the documentation directory:
-#	overall	  - The main documentation section.
-#		    It may source other files with .so.
-#	startitle - The title page for the stars section.
-#	stars	  - A directory with star documentation
-#	demotitle - The title page for the demo section
-#	demos	  - A directory with demo documentation.
-#	targettitle - The title page for the target section.
-#	targets   - The directory with the target documentation.
-
+#
+# The documentation consists of a concatenation of the following files:
+#
+#   $PTOLEMY/doc/headers/shared - macro definitions
+#   overall - introduction to the domain
+#   targettitle - title page for the target section
+#   targets/*.t - target troff documentation
+#   startitle - title page for the stars section
+#   stars/*.t - star troff documentation files
+#   demotitle - title page for the demo section
+#   demos/*.t- demo troff documentation.
+#
+# Any troff file may include other troff files with the .so command
+#
 # Index information is appended to the file $HOME/Almagest.index,
 # or to whatever ALAMAGEST_INDEX is set to.
 
@@ -56,6 +58,13 @@ set dirheader = $PTOLEMY/doc/headers
 set printcommand = groff
 set printoptions = "-me -t -e"
 set contentscmd = $PTOLEMY/doc/bin/contents.groff
+set troffFileNames = "*.t"
+
+# Temporary files
+set tempdir = /tmp
+set tempTroffFile = $tempdir/pt$$.t
+set tempIndexFile = $tempdir/index$$
+set tempNroffFile = $tempdir/pt$$.n
 
 # Variables
 set indexonly = 0
@@ -113,48 +122,48 @@ endif
 
 
 gsoelim $dirheader/groff-fix $dirheader/shared $dirheader/domain \
-	init overall > /tmp/pt$$
+	init overall > $tempTroffFile
 
 # Set icon printing flag: 0 if not printing icons, 1 if printing them.
 if ($icons) then
-	echo '.nr Ic 1' >> /tmp/pt$$
+	echo '.nr Ic 1' >> $tempTroffFile
 else
-	echo '.nr Ic 0' >> /tmp/pt$$
+	echo '.nr Ic 0' >> $tempTroffFile
 endif
 
 if ( -d targets ) then
         if (-e targettitle) then
                 # set type for this section
-                echo '.ds TY "target' >> /tmp/pt$$
-                cat targettitle >> /tmp/pt$$
+                echo '.ds TY "target"' >> $tempTroffFile
+                cat targettitle >> $tempTroffFile
         endif
         cd targets
         # print all targets
-        cat -s * >> /tmp/pt$$
+        cat -s $troffFileNames >> $tempTroffFile
         cd ..
 endif
 
 if ( -d stars ) then
 	if (-e starstitle) then
 		# set type for this section
-		echo '.ds TY "star' >> /tmp/pt$$
-		cat starstitle >> /tmp/pt$$
+		echo '.ds TY "star"' >> $tempTroffFile
+		cat starstitle >> $tempTroffFile
 	endif
 	cd stars
 	# print all stars
-	cat -s * >> /tmp/pt$$
+	cat -s $troffFileNames >> $tempTroffFile
 	cd ..
 endif
 
 if ( -d demos ) then
 	if (-e demotitle) then
 		# set type for this section
-		echo '.ds TY "demo' >> /tmp/pt$$
-		cat demotitle >> /tmp/pt$$
+		echo '.ds TY "demo"' >> $tempTroffFile
+		cat demotitle >> $tempTroffFile
 	endif
 	cd demos
 	# print all demos
-	cat -s * >> /tmp/pt$$
+	cat -s $troffFileNames >> $tempTroffFile
 	cd ..
 endif
 
@@ -170,25 +179,25 @@ endif
 
 if ($indexonly) then
 	# if only generating index, add -t option and throw away the output
-	($printcommand $printoptions -t /tmp/pt$$ > /dev/null) >& /tmp/index$$
+	($printcommand $printoptions -t $tempTroffFile > /dev/null) >& $tempIndexFile
 else if ($preview) then
 	# if previewing, use either X windows or nroff
 	if ($?DISPLAY) then
-		$printcommand $printoptions -TX75 /tmp/pt$$
+		$printcommand $printoptions -TX75 $tempTroffFile
 	else
-		($printcommand $printoptions -Tascii /tmp/pt$$ > /tmp/ptnr$$) >& /dev/null
-		more /tmp/ptnr$$
+		($printcommand $printoptions -Tascii $tempTroffFile > $tempNroffFile) >& /dev/null
+		more /tmp/$tempNroffFile
 	endif
 else
 	# otherwise just print it out
-	($printcommand $printoptions /tmp/pt$$ | lpr ) >& /tmp/index$$
-	$contentscmd /tmp/index$$
+	($printcommand $printoptions $tempTroffFile | lpr ) >& $tempIndexFile
+	$contentscmd $tempIndexFile
 	if (-r title) $printcommand $printoptions $dirheader/shared title
 else
 endif
 
-if (-r /tmp/index$$) cat /tmp/index$$ >>! $ALMAGEST_INDEX
-/bin/rm -f /tmp/pt$$ /tmp/index$$ /tmp/prnr$$
+if (-r $tempIndexFile) cat $tempIndexFile >>! $ALMAGEST_INDEX
+/bin/rm -f $tempTroffFile $tempIndexFile $tempNroffFile
 # XXX we'll enable this later
 #if (!($icons_norm)) /bin/rm -f ../icons/*.ps ../*/icons/*.ps
 exit 0
@@ -196,7 +205,7 @@ exit 0
 catch:
         # prevent the "no match" error message if there are no temporary files
         set nonomatch
-	/bin/rm -f /tmp/pt$$ /tmp/index$$ /tmp/prnr$$
+	/bin/rm -f $tempTroffFile $tempIndexFile $tempNroffFile
 	# XXX we'll enable this later, too.
 	#if (!($icons_norm)) /bin/rm -f ../icons/*.ps ../*/icons/*.ps
         exit 1
