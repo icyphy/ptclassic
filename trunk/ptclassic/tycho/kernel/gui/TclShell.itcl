@@ -220,6 +220,9 @@ configbody ::tycho::TclShell::stdout {
 #
 body ::tycho::TclShell::constructor {args} {
 
+    # Set the view "type" for the Window menu
+    set viewType "tools"
+
     # Initialize the "promptEnd" mark
     $itk_component(text) mark set promptEnd end
 

@@ -187,7 +187,7 @@ class ::tycho::File {
     method windowMenuAddAll {label}
 
     # Append a file editor to the window menu.
-    method windowMenuAppend {obj label}
+    method windowMenuAppend {obj label {type {}}}
 
     # Remove a filename from the window menus of all open File objects.
     method windowMenuRemoveAll {filename}
@@ -250,6 +250,10 @@ class ::tycho::File {
     # This array stores object names indexed by file names so that
     # if the same file is opened a second time, we can just raise the window.
     protected common filesOpen
+
+    # This array stores the "type" of a file, indexed by file names,
+    # so that the Window submenus can be set up properly.
+    protected common filesOpenTypes
 
     # Indicate whether or not the file has been modified since it was
     # last saved.
@@ -325,7 +329,8 @@ configbody ::tycho::File::file {
     if {$itk_option(-file) != {NoName}} {
         set file [::tycho::expandPath $file]
     }
-    if {[info exists filesOpen($file)] && ![$filesOpen($file) getReadOnly]} {
+    if {[info exists filesOpen($file)] \
+	    && ![$filesOpen($file) getReadOnly]} {
         $filesOpen($file) raiseWindow
         if {![::tycho::askuser \
                 "File $file is already open for writing.  Proceed anyway? \
@@ -457,35 +462,39 @@ body ::tycho::File::constructor {args} {
             set command [format [lindex $entry 0] NoName]
             set desc [lindex $entry 1]
 	    set class [lindex $entry 2]
-	    if { $class == "" } {
-		# Add to the main menu
-		$myMenubar add $desc Window -command $command
-	    } else {
-		# Add to a sub-menu
-		switch -exact $class {
-		    "text" {
-			$myMenubar add $desc {Text editors} -command $command
-		    }
-		    "graphics" {
-			$myMenubar add $desc {Graphics editors} -command $command
-		    }
-		    "tools" {
-			$myMenubar add $desc {Tools} -command $command
-		    }
-		    default {
-			$myMenubar add $desc Window -command $command
-		    }
+	    # Add to a menu
+	    switch -exact $class {
+		"text" {
+		    $myMenubar add $desc {Text editors} -command $command
+		}
+		"graphics" {
+		    $myMenubar add $desc {Graphics editors} -command $command
+		}
+		"tools" {
+		    $myMenubar add $desc {Tools} -command $command
+		}
+		default {
+		    # Add to the end of the main menu
+		    $myMenubar add $desc Window -command $command
 		}
 	    }
         }
         $myMenubar addSeparator Window
-        
+
+	# Create the submenus for open files
+	$myMenubar add {Open HTML viewers} Window -type cascade -state disabled
+	$myMenubar add {Open text editors} Window -type cascade -state disabled
+	$myMenubar add {Open graphics editors} Window -type cascade\
+		-state disabled
+	$myMenubar add {Open tools} Window -type cascade -state disabled
+
         # use the filesOpen variable to construct menu entries for all open
         # files.
         foreach filename [array names filesOpen] {
             # FIXME: Temporary check for Itcl bug.
             if {$filename != {junktychofileforitclbogosity}} {
-                windowMenuAppend $filesOpen($filename) $filename
+                windowMenuAppend $filesOpen($filename) \
+			$filename $filesOpenTypes($filename)
             }
         }
         
@@ -986,24 +995,50 @@ body ::tycho::File::toggleReadOnly {} {
 body ::tycho::File::windowMenuAddAll {label} {
     if {![info exists filesOpen($file)] && $myDisplayer != {}} {
         set filesOpen($label) $this
+	set filesOpenTypes($label) $viewType
         foreach fileobj [array names fileObjects] {
-            catch {$fileobj windowMenuAppend $this $label}
+            catch {$fileobj windowMenuAppend $this $label $viewType}
         }
     }
 }
 
 #####################################################################
 #### windowMenuAppend
-# Append the name of an open file editor to the "Window" menu.
+# Place the name of an open file editor in the "Window" menu.
 # The second argument, normally a filename, gives the menu label.
-# This method really just provides specialized public access to the
-# <code>add</code> method of the MenuBar belonging to this view.
+# If the given file object has a non-null value of its "viewType"
+# variable, then the editor is placed into an appropriate
+# sub-menu of the Window menu, otherwise it is appended to the end.
 #
-body ::tycho::File::windowMenuAppend {obj label} {
+body ::tycho::File::windowMenuAppend {obj label {type {}}} {
     # Avoid entries with empty names or NoName
     if {$label != {NoName} && $label != {}} {
-        menubar add $label Window \
-                -command "$obj raiseWindow"
+	switch -exact $type {
+	    "text" {
+		menubar add $label {Open text editors} \
+			-command "$obj raiseWindow"
+		menubar enable {Open text editors}
+	    }
+	    "html" {
+		menubar add $label {Open HTML viewers} \
+			-command "$obj raiseWindow"
+		menubar enable {Open HTML viewers}
+	    }
+	    "graphics" {
+		menubar add $label {Open graphics editors} \
+			-command "$obj raiseWindow"
+		menubar enable {Open graphics editors}
+	    }
+	    "tools" {
+		menubar add $label {Open tools} \
+			-command "$obj raiseWindow"
+		menubar enable {Open tools}
+	    }
+	    default {
+		# Add to the end of the main menu
+		menubar add $label Window -command "$obj raiseWindow"
+	    }
+	}
     }
 }
 
@@ -1020,10 +1055,16 @@ body ::tycho::File::windowMenuRemoveAll {filename} {
             [info exists filesOpen($filename)] && \
             $filesOpen($filename) == $this} {
 	unset filesOpen($filename)
+	unset filesOpenTypes($filename)
 	foreach fileobj [array names fileObjects] {
-            # NOTE: the catch is in case due to an error $fileobj
+	    set menuname [$fileobj menubar menuname $filename]
+	    # NOTE: the catch is in case due to an error $fileobj
             # doesn't exist.
 	    catch {$fileobj menubar delete $filename}
+	    # Disable the submenu if it's empty
+	    if { [$fileobj menubar empty $menuname] } {
+		$fileobj menubar disable $menuname
+	    }
 	}
     }
 }
