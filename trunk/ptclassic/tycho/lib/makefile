@@ -29,7 +29,7 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-DIRS = html_library idx iwidgets mac windows
+DIRS = html_library idx iwidgets mac tydoc windows
 
 # Root of Tycho directory
 ROOT =		..
