@@ -85,7 +85,7 @@ DIRS =			coding demo
 
 
 
-all: tychoClasses.dag
+all: sources tychoClasses.dag
 
 FORCE:
 
