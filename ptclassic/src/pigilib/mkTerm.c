@@ -230,16 +230,16 @@ int totalNumber;
 	layerPtr = &packetColorLayer;
     } else if (strcmp(type, "fix") == 0 || strcmp(type, "FIX") == 0) {
 	layerPtr = &fixColorLayer;
-    } else if (strcmp(type, "COMPLEX_MATRIX_ENV") == 0) {
+    } else if (strcmp(type, "COMPLEX_MATRIX_ENV") == 0 || strcmp(type, "COMPLEX_MATRIX") == 0) {
 	layerPtr = &complexColorLayer;
         thick = TRUE;
-    } else if (strcmp(type, "FIX_MATRIX_ENV") == 0) {
+    } else if (strcmp(type, "FIX_MATRIX_ENV") == 0 || strcmp(type, "FIX_MATRIX") == 0) {
 	layerPtr = &fixColorLayer;
         thick = TRUE;
-    } else if (strcmp(type, "FLOAT_MATRIX_ENV") == 0) {
+    } else if (strcmp(type, "FLOAT_MATRIX_ENV") == 0 || strcmp(type, "FLOAT_MATRIX") == 0) {
 	layerPtr = &floatColorLayer;
         thick = TRUE;
-    } else if (strcmp(type, "INT_MATRIX_ENV") == 0) {
+    } else if (strcmp(type, "INT_MATRIX_ENV") == 0 || strcmp(type, "INT_MATRIX") == 0) {
 	layerPtr = &intColorLayer;
         thick = TRUE;
     } else {
