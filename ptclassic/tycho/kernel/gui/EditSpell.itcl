@@ -272,7 +272,8 @@ body ::tycho::EditSpell::recheck {} {
     set pattern [join $errs |]
     set tags [$tw spellCheckTags]
 
-    $tw findAll spellmatch 1 -regexp 1 $pattern 1.0 end $tags
+    # Search is case sensitive, regexp, and wholeword.
+    $tw findAll spellmatch 1 1 1 $pattern 1.0 end $tags
     set text [$tw textWinName]
     set result [$text tag nextrange spellmatch 1.0]
     if {$result == {}} {
