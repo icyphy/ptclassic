@@ -110,8 +110,6 @@ body ::tycho::Glimpse::constructor {args} {
 	    -text {Find <Ret>} \
 	    -command "$this execCommand -findcommand"
 
-    $this insert glimpse_index [file join $TYCHO .glimpse_index]
-
     set buttonList {Tycho}
     # If the $PTOLEMY environment variable is set and 
     # $PTOLEMY/src/.glimpse_index exists, then offer two buttons,
@@ -193,13 +191,17 @@ body tycho::Glimpse::glimpseSearch {} {
     # Unix only? exec glimpse and get the output:
     set glimpseIndexDir [file dirname [eval file join $glimpse_index]]
     # glimpse options: -y = don't prompt -n = show line numbers
-    set glimpseOut [exec glimpse -y -n -H $glimpseIndexDir $pattern]
+    set glimpseOut [busy exec glimpse -y -n -H $glimpseIndexDir $pattern]
     set listGlimpseOut [split $glimpseOut '\\\n']
     foreach glimpseItem $listGlimpseOut {
         regsub {^.*/tycho/(.*)} $glimpseItem {$TYCHO/\1} shortGlimpseItem
         regexp {(^[^ :]*): ([0-9]*):(.*)} $shortGlimpseItem dummy \
                 filename linenum patternline
-
+        if ![info exists filename] {
+            error "Internal Glimpse error: regexp `$shortGlimpseItem' failed!\n\
+                    line was: `$glimpseItem'\n\
+                    glimpse command returned: $glimpseOut" 
+        }
         puts $fd "{[list "$filename $patternline"] $filename {line $linenum}}"
     }
     puts $fd "}\n# >"
