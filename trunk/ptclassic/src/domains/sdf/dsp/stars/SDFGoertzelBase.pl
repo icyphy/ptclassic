@@ -21,13 +21,19 @@ limitation of liability, and disclaimer of warranty provisions.
 		name { k }
 		type { int }
 		default { 0 }
-		desc { the DFT coefficient to compute }
+		desc { the DFT coefficient to compute (k < N) }
 	}
 	defstate {
 		name { N }
 		type { int }
 		default { 32 }
 		desc { length of the DFT }
+	}
+	defstate {
+		name { size }
+		type { int }
+		default { 32 }
+		desc { amount of data to read (N <= size) }
 	}
 	defstate {
 		name { d1 }
@@ -60,25 +66,37 @@ first-order feedback coefficient which is a function of k and N }
 	ccinclude { <math.h> }
 	setup {
 		if ( int(k) < 0 ) {
-		  Error::abortRun(*this, "The value for state k ",
-				  "must be nonnegative.");
+		  Error::abortRun(*this,
+			"The value for state k must be nonnegative.");
 		  return;
 		}
 		if ( int(N) <= 0 ) {
-		   Error::abortRun(*this, "The value for state N ",
-				   "must be positive.");
+		   Error::abortRun(*this,
+			"The value for state N must be positive.");
+		   return;
+		}
+		if ( int(size) <= 0 ) {
+		   Error::abortRun(*this,
+			"The value for state size must be positive.");
 		   return;
 		}
 		if ( int(k) >= int(N) ) {
-		   Error::abortRun(*this, "The DFT coefficient must ",
-				   "be less than the DFT length.");
+		   Error::abortRun(*this,
+			"The DFT coefficient k must be less than the ",
+			"DFT length N.");
+		   return;
+		}
+		if ( int(N) > int(size) ) {
+		   Error::abortRun(*this,
+			"The DFT length N must be less than or equal to the ",
+			"number of data samples read, given by state size.");
 		   return;
 		}
 		double kd = int(k);
 		double Nd = int(N);
 		theta = -2.0 * M_PI * kd / Nd;
 		d1 = -2.0 * cos(theta);
-		input.setSDFParams(int(N), int(N)-1);
+		input.setSDFParams(int(size), int(size)-1);
 	}
 	go {
 		// Run all-pole section of Goertzel's algorithm N iterations
