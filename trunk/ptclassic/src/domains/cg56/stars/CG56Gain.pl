@@ -38,14 +38,30 @@ in that case.
 		default {0.5}
 		desc {Gain value}
 	}
-	codeblock (std) {
+	codeblock (cbStd) {
 	move	$ref(input),x1
 	move	#$val(gain),y1
 	mpyr	x1,y1,a
-	rnd	a
+	move	a,$ref(output)
+	}
+	codeblock(cbZero) {
+	clr	a
+	move	a,$ref(output)
+	}
+	codeblock(cbNeg) {
+	move	$ref(input),a
+	neg	a
 	move	a,$ref(output)
 	}
 	go {
-		if (!identity) gencode(std);
+		if (identity) {
+		    ;
+		} else if (double(gain)==0.0) {
+		    gencode(cbZero);
+		} else if (double(gain)==-1.0) {
+		    gencode(cbNeg);
+	 	} else {
+		    gencode(cbStd);
+		}
 	}
 }
