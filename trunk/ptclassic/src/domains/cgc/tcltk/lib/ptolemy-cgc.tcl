@@ -14,6 +14,27 @@ set REPORT_TCL_ERRORS 1
 source [info library]/init.tcl
 source $tk_library/tk.tcl
 
+# Procedure to expand a filename that might begin with
+# an environment variable.  For example, if the value of
+# of the environment variable PTOLEMY is /usr/tools/ptolemy, then 
+# 	expandEnvVars \$PTOLEMY/tmp
+# returns /usr/tools/ptolemy/tmp
+#
+proc expandEnvVars { path } {
+    if {[string first \$ $path] == 0} {
+        global env
+        set slash [string first / $path]
+        set envvar [string range $path 1 [expr {$slash-1}]]
+        set envval $env($envvar)
+        return "$envval[string range $path $slash end]"
+    } else {
+	return $path
+    }
+}
+
+# Read utilities from Ptolemy library
+source [expandEnvVars \$PTOLEMY/tcl/lib/ptkBarGraph.tcl]
+
 message .header -font -Adobe-times-medium-r-normal--*-180* -relief raised \
 	-width 400 -borderwidth 1 -text "Control panel for $applicationName"
 
@@ -40,13 +61,13 @@ pack append .numberIters .numberIters.label left .numberIters.entry right
 .numberIters.entry insert 0 $numIterations
 
 # star entry section, empty by default
-frame .cp_high -bd 10
+frame .high -bd 10
 
 # star button section, empty by default
-frame .cp_middle -bd 10
+frame .middle -bd 10
 
 # star slider section, empty by default
-frame .cp_low -bd 10
+frame .low -bd 10
 
 # quit button
 button .quit -text QUIT -command "stop; destroy ." -fg blue3
@@ -56,9 +77,9 @@ pack append . \
 	.header {top fill} \
 	.control {top expand fill} \
 	.numberIters {top expand fill} \
-	.cp_high {top expand fill} \
-	.cp_middle {top expand fill} \
-	.cp_low {top expand fill} \
+	.high {top expand fill} \
+	.middle {top expand fill} \
+	.low {top expand fill} \
 	.quit {bottom expand fill}
 
 # return causes a run
@@ -130,15 +151,15 @@ proc popupMessage {w text} {
 #	default		the initial value in the entry
 #	callback	the name of the callback procedure to register changes
 proc makeEntry {win name desc default callback} {
-    set s .$win.$name
+    set s $win.$name
     frame $s
     entry $s.entry -relief sunken -width 20 -insertofftime 0 -bg burlywood1
     label $s.label -text "${desc}:"
     pack append $s $s.label left $s.entry right
-    pack append .$win $s {top fill expand}
+    pack append $win $s {top fill expand}
     $s.entry insert 0 $default
     bind $s.entry <Return> \
-	"$callback \[.$win.$name.entry get\]; focus ."
+	"$callback \[$win.$name.entry get\]; focus ."
     bind $s.entry <Escape> "stop"
 }
 
@@ -149,9 +170,9 @@ proc makeEntry {win name desc default callback} {
 #	desc	description of the button
 #	callback	the name of the callback procedure
 proc makeButton {win name desc callback} {
-    set s .$win.$name
+    set s $win.$name
     button $s -text "$desc" -fg tan4 -command $callback
-    pack append .$win $s {top fill expand}
+    pack append $win $s {top fill expand}
     bind $s <ButtonPress-1> "$s configure -relief sunken; $s invoke"
     bind $s <ButtonRelease-1> "$s configure -relief raised"
 }
@@ -169,7 +190,7 @@ proc makeButton {win name desc callback} {
 #	position	the initial value between 0 and 100 (int)
 #	callback	the name of the callback procedure to register changes
 proc makeScale {win name desc position callback} {
-    set s .$win.$name
+    set s $win.$name
     frame $s
     label $s.msg -text "${desc}:"
     label $s.value -width 6
@@ -178,78 +199,6 @@ proc makeScale {win name desc position callback} {
 	-command $callback -showvalue 0
     $s.scale set $position
     pack append $s $s.msg left $s.scale right $s.value right
-    pack append .$win $s {top fill}
+    pack append $win $s {top fill}
 }
 
-
-# Procedure to make an animated bar chart display of an array.
-# Width is in centimeters
-proc makeBarChart {w desc geo numBars barChartWidth barChartHeight} {
-#   catch {destroy .$w}
-    toplevel .$w
-    wm title .$w "$desc"
-    wm iconname .$w "$desc"
-
-    message .$w.msg -font -Adobe-times-medium-r-normal--*-180* -width 5i \
-            -text "$desc"
-    frame .$w.cntr -bd 10
-    label .$w.cntr.label -text "Full scale:"
-    set startScale [${w}verticalScale 1.0]
-    label .$w.cntr.value -width 10 -text $startScale
-    button .$w.cntr.d10 -text "Scale/10" -command "changeBarScale $w 0.1"
-    button .$w.cntr.hv -text "Scale/2" -command "changeBarScale $w 0.5"
-    button .$w.cntr.dbl -text "Scale*2" -command "changeBarScale $w 2.0"
-    button .$w.cntr.t10 -text "Scale*10" -command "changeBarScale $w 10.0"
-    pack append .$w.cntr \
-	.$w.cntr.label left \
-	.$w.cntr.value left \
-	.$w.cntr.d10 left \
-	.$w.cntr.hv left \
-	.$w.cntr.dbl left \
-	.$w.cntr.t10 left
-
-    frame .$w.pf -bd 10
-    canvas .$w.pf.plot -relief sunken -bd 3 -bg AntiqueWhite3 \
-	    -height ${barChartHeight}c -width ${barChartWidth}c
-    pack append .$w.pf .$w.pf.plot {top fill expand}
-
-    # bar entry, button and slider section, empty by default
-    frame .$w.cp_high -bd 10
-    frame .$w.cp_middle -bd 10
-    frame .$w.cp_low -bd 10
-
-    button .$w.quit -text "QUIT" -command "destroy .$w"
-    pack append .$w .$w.msg {top fillx } \
-		.$w.cntr {top fillx} \
-		.$w.pf {top fill expand } \
-		.$w.cp_high {top fillx } \
-		.$w.cp_middle {top fillx } \
-		.$w.cp_low {top fillx } \
-		.$w.quit {top fillx }
-
-    wm geometry .$w $geo
-    wm minsize .$w 400 200
-}
-
-proc changeBarScale {w s} {
-    set newScale [${w}verticalScale $s]
-    .$w.cntr.value configure -text $newScale
-}
-
-# Procedure to expand a filename that might begin with
-# an environment variable.  For example, if the value of
-# of the environment variable PTOLEMY is /usr/tools/ptolemy, then 
-# 	expandEnvVars \$PTOLEMY/tmp
-# returns /usr/tools/ptolemy/tmp
-#
-proc expandEnvVars { path } {
-    if {[string first \$ $path] == 0} {
-        global env
-        set slash [string first / $path]
-        set envvar [string range $path 1 [expr {$slash-1}]]
-        set envval $env($envvar)
-        return "$envval[string range $path $slash end]"
-    } else {
-	return $path
-    }
-}
