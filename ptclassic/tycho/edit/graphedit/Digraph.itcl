@@ -111,9 +111,6 @@ class ::tycho::Digraph {
     # Test if the graph is acyclic
     method acyclic {}
 
-    # Get the children of a vertex
-    method children {vertex}
-
     # Remove a vertex _and_ adjacent edges from the graph
     method delete* {vertex}
 
@@ -132,17 +129,8 @@ class ::tycho::Digraph {
     # Return edges matching a pair of connection patterns
     method edges {{pattern1 *} {pattern2 *}}
 
-    # Get the "leaves" of the graph
-    method leaves {}
-
-    # Get the parents of a vertex
-    method parents {vertex}
-
     # "Repair" a graph by deleting improperly-connected edges
     method repair {}
-
-    # Get the roots of the graph
-    method roots {}
 
     # Get the edges within a subgraph
     method subgraphEdges {args}
@@ -158,6 +146,9 @@ class ::tycho::Digraph {
 
     # Return a description of a single item
     protected method _describeitem {context type tail name {prefix {}}}
+
+    # Update the cache
+    protected method _updatecache
 }
 
 ########################################################################
@@ -181,14 +172,16 @@ body ::tycho::Digraph::constructor {args} {
 # See Sedgewick.
 #
 body ::tycho::Digraph::acyclic {} {
+    _update
+
     # Don't traverse if we don't have to
-    if { [::info exists _cache(acyclic)] } {
-	return $_cache(acyclic)
+    if { [cache exists acyclic] } {
+	return [cache get acyclic]
     }
 
     # The mark for each vertex is initialized to 0
-    foreach v [array names _vertices] {
-	set _cache($v,visited) 0
+    foreach v $_vertices {
+	set _visited($v) 0
     }
 
     # Initialize the traversal stack with the roots of the graph
@@ -198,29 +191,29 @@ body ::tycho::Digraph::acyclic {} {
     set count 0
 
     # A larger number than the counter can reach
-    set N [expr [llength [vertices]] + 1]
+    set N [expr [llength $_vertices] + 1]
 
     # Keep processing vertices until there are none left
     while { $stack != "" } {
 	# Read the vertex on the top of the stack
 	set current [lindex $stack end]
 
-	switch -exact $_cache($current,visited) {
+	switch -exact $_visited($current) {
 	    "0" {
 		# The vertex has not been seen, so mark it but leave
 		# it on the stack
 		incr count
-		set _cache($current,visited) $count
+		set _visited($current) $count
 		
 		# Check the children
 		foreach child [children $current] {
-		    if { ! $_cache($child,visited) } {
+		    if { ! $_visited($child) } {
 			# If not seen, put it on the stack
 			lappend stack $child
 		    } else {
 			# If its index is lower, we have a cycle
-			if { $_cache($child,visited) <= $count } {
-			    set _cache(acyclic) 0
+			if { $_visited($child) <= $count } {
+			    cache set acyclic 0
 			    return 0
 			}
 		    }
@@ -235,24 +228,14 @@ body ::tycho::Digraph::acyclic {} {
 		# This vertex is still on the stack. Remove
 		# it from the stack and mark it as "done."
 		set stack [lreplace $stack end end]
-		set _cache($current,visited) $N
+		set _visited($current) $N
 	    }
 	}
     }
     
     # If we get to here, we have no cycles
-    set _cache(acyclic) 1
+    cache set acyclic 1
     return 1
-}
-
-########################################################################
-#### children
-#
-# Return the children of a vertex. An error will result
-# if the vertex does not exist.
-#
-body ::tycho::Digraph::children {vertex} {
-    return $_adjacency($vertex,children) 
 }
 
 ########################################################################
@@ -292,23 +275,11 @@ body ::tycho::Digraph::delete* {vertex} {
 # two named edges.  Flag an error if the edge
 # already exists, but not if any of the connected vertices do not exist.
 #
-# <b>Note</b>: Call this method to add an edge. Do _not_ call
-# the add{} method directly.
-#
 body ::tycho::Digraph::edge {vertex1 vertex2 args} {
     # Add the edge to the model. We use a slightly weird encoding
     # to get the names of edges -- this is to make it possible
     # to implement methods like edge{} using pattern-matching.
     eval add edge:$vertex1^$vertex2 $args
-
-    # Add links to the adjacency matrix
-    _adjacencyadd $vertex1 $vertex2
-    
-    # Clear any cached structural information
-    catch {unset _cache}
-
-    # Return the undo command
-    list vertexdelete $vertex1 $vertex2
 }
 
 ########################################################################
@@ -338,23 +309,8 @@ body ::tycho::Digraph::edgeconfigure {vertex1 vertex2 args} {
 # Remove an edge from the graph, and return the undo command. This
 # default method works for simple directed graphs.
 #
-# <b>Note</b>: Call this method to delete an edge. Do _not_ call
-# the delete{} method directly.
-#
 body ::tycho::Digraph::edgedelete {vertex1 vertex2} {
-    set data [itemcget edge:$vertex1^$vertex2]
-
-    # Delete the edge
     delete edge:$vertex1^$vertex2
-
-    # Delete it from the adjacency list
-    _adjacencydelete $vertex1 $vertex2
-
-    # Clear any cached structural information
-    catch {unset _cache}
-
-    # Return the undo command
-    concat edge $vertex1 $vertex2 $data
 }
 
 ########################################################################
@@ -368,30 +324,8 @@ body ::tycho::Digraph::edgedelete {vertex1 vertex2} {
 # list.
 #
 body ::tycho::Digraph::edges {{pattern1 *} {pattern2 *}} {
-    set result {}
-    foreach edge [names edge:$pattern1^$pattern2] {
-        eval lappend result [lreplace [split $edge :^] 0 0]
-    }
-    return $result
-}
-
-########################################################################
-#### leaves
-#
-# Return the "leaves" of the graph.
-#
-body ::tycho::Digraph::leaves {} {
-    _graphleaves
-}
-
-########################################################################
-#### parents
-#
-# Return the parents of a vertex. An error will result
-# if the vertex does not exist.
-#
-body ::tycho::Digraph::parents {vertex} {
-    return $_adjacency($vertex,parents) 
+    _update
+    eval concat [array names _edges [list $pattern1 $pattern2]]
 }
 
 ########################################################################
@@ -407,24 +341,14 @@ body ::tycho::Digraph::parents {vertex} {
 # This method cannot be recorded or published.
 #
 body ::tycho::Digraph::repair {} {
-    foreach {src tgt} [$this edges] {
-	if { ! [::info exists _vertices($src)] \
-                || ! [::info exists _vertices($tgt)] } {
+    foreach {src tgt} [edges] {
+	if { ![exists vertex:$src] || ![exists vertex:$tgt] } {
             # Delete a disconnected edge
             edgedelete $src $tgt
 	}
     }
     # Return null so record{} or publish{} will complain.
     return ""
-}
-
-########################################################################
-#### roots
-#
-# Return the roots of the graph.
-#
-body ::tycho::Digraph::roots {} {
-    _graphroots
 }
 
 ########################################################################
@@ -436,11 +360,12 @@ body ::tycho::Digraph::roots {} {
 # editors more generic.
 #
 body ::tycho::Digraph::subgraphEdges {args} {
+    cache update
     set result {}
     foreach u $args {
         foreach v $args {
-            foreach edge [names edge:$u^$v] {
-                lappend result [lreplace [split $edge :^] 0 0]
+            foreach edge [array names _edges [list $u $v]] {
+                lappend result $edge
             }
         }
     }
@@ -457,12 +382,10 @@ body ::tycho::Digraph::subgraphEdges {args} {
 #
 body ::tycho::Digraph::subgraphInputs {args} {
     set result {}
-    set vertices [array names _vertices]
     foreach v $args {
-        foreach edge [names edge:*^$v] {
-            set e [lreplace [split $edge :^] 0 0]
-            if { [lsearch -exact $args [lindex $e 0]] < 0 } {
-                lappend result $e
+        foreach edge [array names _edges [list $v *]] {
+            if { [lsearch -exact $args [lindex $edge 0]] < 0 } {
+                lappend result $edge
             }
         }
     }
@@ -479,12 +402,10 @@ body ::tycho::Digraph::subgraphInputs {args} {
 #
 body ::tycho::Digraph::subgraphOutputs {args} {
     set result {}
-    set vertices [array names _vertices]
     foreach v $args {
-        foreach edge [names edge:*^$v] {
-            set e [lreplace [split $edge :^] 0 0]
+        foreach edge [array names _edges [list * $v]] {
             if { [lsearch -exact $args [lindex $edge 1]] < 0 } {
-                lappend result $e
+                lappend result $edge
             }
         }
     }
@@ -515,4 +436,50 @@ body ::tycho::Digraph::_describeitem {context type tail name {prefix {}}} {
     } else {
         chain $context $type $tail $name $prefix
     }
+}
+
+########################################################################
+#### _updatecache
+#
+# Celar the cache and build updated versions of the _parents,
+# _children, and _vertices arrays. This method functions correctly
+# only if the graph is properly constructed -- if in doubt, call
+# repair{} first.
+#
+body ::tycho::Digraph::_updatecache {} {
+    # Clear all cached data
+    cache delete
+
+    # Clear locally-cached data
+    catch {unset _edges}
+    catch {unset _parents}
+    catch {unset _children}
+    catch {unset _vertices}
+
+    # Regenerate vertex list
+    foreach vertex [names vertex:*] {
+        set vertex [lindex [split $vertex :] 1]
+        lappend _vertices $vertex
+        set _parents($vertex) {}
+        set _children($vertex) {}
+    }
+    foreach edge [names edge:*] {
+        set splat [split $edge :^]
+        set src [lindex $splat 1]
+        set tgt [lindex $splat 2]
+
+        # Regenerate parent-child lists
+        lappend _children($src) $tgt
+        lappend _parents($tgt) $src
+
+        # Regenerate edge array
+        set _edges([list $src $tgt]) [list $src $tgt]
+    }
+    # Chain to validate cache
+    chain
+
+    puts "children: [array get _children]"
+    puts "parents:  [array get _parents]"
+    puts "vertices: $_vertices"
+    puts "edges:    [array get _edges]"
 }
