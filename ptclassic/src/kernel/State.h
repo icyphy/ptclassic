@@ -87,7 +87,7 @@ public:
 	const char* getInitValue () const { return initValue;}
 
         // return the parameter type (for use in GUI, interpreter)
-        virtual char* type();
+        virtual const char* type();
 
         // return the parameter size (redefined for array states)
         virtual int size();
@@ -147,8 +147,6 @@ class StateList : public  SequentialList
 
 	// Return next State on list
 	State& operator ++ () {return *(State*)next();}
-
-	State * next() {return (State*)SequentialList::next();}
 
 	// initialize elements
 	void initElements();
