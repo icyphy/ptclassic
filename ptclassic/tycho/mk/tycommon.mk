@@ -314,7 +314,7 @@ $(JZIP): $(JSRCS) $(JCLASS)
 
 jars: $(JARFILE) 
 $(JARFILE): $(JSRCS) $(JCLASS)
-	if [ "$(JBEANCLASSES)" != "" ]; then \
+	@if [ "$(JBEANCLASSES)" != "" ]; then \
 		echo "Creating manifest.tmp"; \
 		rm -f manifest.tmp; \
 		echo ";$(JPACKAGE) $(JVERSION)" > manifest.tmp; \
