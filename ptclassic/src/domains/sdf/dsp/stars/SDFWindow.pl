@@ -5,7 +5,7 @@ defstar {
 Generate standard window functions or periodic repetitions of standard
 window functions.
 The possible functions are: Rectangle, Bartlett, Hanning, Hamming,
-Blackman, and SteepBlackman.
+Blackman, Kaiser, and SteepBlackman.
 One period of samples is produced at each firing.
     }
     explanation {
@@ -14,7 +14,7 @@ This star produces on its output values that are samples of a standard
 windowing function.
 The windowing function is determined by the \fIname\fR string parameter.
 Possible values are: \fBRectangle\fR, \fBBartlett\fR, \fBHanning\fR,
-\fBHamming\fR, \fBBlackman\fR, and \fBSteepBlackman\fR.
+\fBHamming\fR, \fBBlackman\fR, \fBKaiser\fR and \fBSteepBlackman\fR.
 Upper- and lower-case characters in the names are equivalent.
 .lp
 The parameter \fIlength\fR is the length of the window to produce.
@@ -26,9 +26,14 @@ A negative period will produce only one window, and then output zero
 for all later samples.
 A period of less than the window length will be equivalent to a period of
 the window length (i.e., \fIperiod\fR = 0).
+.UH REFERENCES
+.ip [1]
+Leland Jackson, Digital Filters and Signal Processing, 2nd ed.,
+Kluwer Academic Publishers, ISBN 0-89838-276-9, 1989.
     }
     version { $Id$ }
     author { Kennard White }
+    acknowledge { William Chen }
     copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -39,7 +44,7 @@ limitation of liability, and disclaimer of warranty provisions.
 
     // Include function prototypes from Cephes Math Library
     // Necessary for Kaiser window for i0 (0th-order modified Bessel function)
-    ccinclude { "cephes.h" }
+    ccinclude { <string.h>, <math.h>, "cephes.h" }
 
     output {
         name {output}
@@ -103,11 +108,12 @@ the window.
 	double freq1;
 	double scale2;
 	double freq2;
+	double beta;
+	double alpha;
+	double norm;
     }
+
     code {
-	extern "C" {
-	    extern int strcasecmp(const char*,const char*);
-	}
 #define SDFWinType_Null		(0)
 #define SDFWinType_Rectangle	(1)
 #define SDFWinType_Bartlett	(2)
@@ -117,6 +123,7 @@ the window.
 #define SDFWinType_SteepBlackman	(6)
 #define SDFWinType_Kaiser	(7)
     }
+
     setup {
 	// Extract the string data from the string state data structure name
 	const char *wn = name;
@@ -143,16 +150,18 @@ the window.
 	// Don't want to risk divide by zero
 	realLen = int(length);
 	if ( realLen < 4 ) {
-	    Error::abortRun(*this, ": Window length too small",
+	    Error::abortRun(*this, ": Window length is too small",
 			    " (should be greater than 3)" );
 	    return;
 	}
 	realPeriod = int(period);
 	if ( realPeriod < realLen )
 	    realPeriod = realLen;
-	output.setSDFParams( realPeriod, realPeriod-1);
+	output.setSDFParams(realPeriod, realPeriod-1);
 
-	double base_w = M_PI/(realLen-1);
+        beta = double(WindowParameters[0]);
+
+       	double base_w = M_PI/(realLen-1);
 	double sin_base_w = sin(base_w);
 	double sin_2base_w = sin(2*base_w);
 	double d = - (sin_base_w/sin_2base_w) * (sin_base_w/sin_2base_w);
@@ -163,7 +172,7 @@ the window.
 	//
 	switch ( winType ) {
 	  case SDFWinType_Rectangle:
-	    scale0 = 1;
+	    scale0 = 1.0;
 	    break;
 	  case SDFWinType_Bartlett:
 	    scale1 = 2.0/(realLen - 1);
@@ -191,8 +200,9 @@ the window.
 	    freq2 = 4*base_w;
 	    break;
 	  case SDFWinType_Kaiser:
-	    Error::abortRun(*this, ": Kaiser not implemented yet");
-            return; 
+            alpha = double((realLen-1.0)/2.0);
+	    norm = fabs(i0(beta));
+            break;
           default:
 	    Error::abortRun(*this, ": Invalid window type", wn);
 	    return;
@@ -200,23 +210,30 @@ the window.
     }
 
     go {
-	int i;
-	double val;
+        int i;
 
 	switch ( winType ) {
 	  case SDFWinType_Bartlett:
 	    for ( i=0; i <= (realLen - 1)/2; i++) {
-		val = scale1 * i;
+		double val = scale1 * i;
 		output%(realPeriod-(i+1)) << val;
 	    }
 	    for ( ; i < realLen; i++) {
-		val = scale1 * (realLen-(i+1));
+		double val = scale1 * (realLen-(i+1));
 		output%(realPeriod-(i+1)) << val;
 	    }
 	    break;
+          case SDFWinType_Kaiser:
+            for ( i=0; i < realLen; i++) {
+                double squared = double(pow(((i - alpha)/ alpha),2));
+                double entry = beta* sqrt(1-squared);
+                double val = i0(entry)/norm;
+                output%(realPeriod-(i+1)) << val;
+            }
+            break;
 	  default:
 	    for ( i=0; i < realLen; i++) {
-		val = scale0 + scale1 * cos(freq1*i) + scale2 * cos(freq2*i);
+		double val = scale0 + scale1 * cos(freq1*i) + scale2 * cos(freq2*i);
 		output%(realPeriod-(i+1)) << val;
 	    }
 	}
@@ -227,6 +244,8 @@ the window.
 	    realLen = 0;
     }
 }
+
+
 
 
 
