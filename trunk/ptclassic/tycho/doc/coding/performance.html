@@ -47,6 +47,9 @@ Programming in Tcl and Tk</CITE></A>, by
 is much faster.  When you access an element in a list, the list must
 be reparsed, whereas arrays use a hash table, so access is nearly O(N).
 
+<LI> <CODE>array names foo {* something *}</CODE> is not only
+lineary with the size of the array, but seems to take about 1ms per element
+on a Sparc20/100.
 
 <LI> Iterating through large data structures in Tcl is often slow.
 For each iteration, Tcl reparses the body of the loop or procedure.
@@ -83,8 +86,6 @@ Sun Sep 22 16:10:33 PDT 1996
 See the <A HREF="../../kernel/doc/internals/exec.html">Tycho Exec Internals Guide</A>.
 
 </OL>
-
-
 
 <LI> If your application is taking a long time to start up, try the following
 things.
