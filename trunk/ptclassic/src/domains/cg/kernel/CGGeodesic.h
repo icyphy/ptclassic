@@ -23,6 +23,7 @@ $Id$
 
 #include "CGConnect.h"
 #include "Geodesic.h"
+#include <minmax.h>
 
 const int F_SRC = 1;
 const int F_DEST = 2;
@@ -61,9 +62,26 @@ protected:
 	const CGPortHole* src() const {
 		return ((const CGPortHole*)originatingPort)->forkSrc;
 	}
-	int maxNumParticles;
+	// minimum size needed considering only local information
+	int minNeeded() const {
+		const CGPortHole* dest = (const CGPortHole*)destinationPort;
+		int nOld = max(dest->maxDelay() + 1 - dest->numXfer(),0);
+		return maxNumParticles + nOld;
+	}
+	// this function returns a value giving the maximum fraction of
+	// memory internalBufSize should "waste" to arrange for linear
+	// buffering between stars that do a non-integral rate change
+	// without delay.  Setting it to 1.0 forces the use of the minimum
+	// possible size.  Setting it huge means that, say, a 41->42
+	// connection allocates a buffer length of 41*42.
+	virtual double wasteFactor() const;
+
+	// internal buffer size -- used by bufSize.  Main difference is
+	// that all arcs of a fork have an internal size, but bufSize
+	// returns 0 for all but the source arc.
 	virtual int internalBufSize() const;
 private:
+	int maxNumParticles;
 	SequentialList dests;
 };
 

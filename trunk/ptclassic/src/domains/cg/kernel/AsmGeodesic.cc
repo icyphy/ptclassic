@@ -42,16 +42,51 @@ ProcMemory* AsmGeodesic::memory() const {
 	return p ? p->geo().memory() : mem;
 }
 
+// local functions
+static int gcd(int a, int b) {
+	// swap to make a > b if needed
+	if (a < b) { int t = a; a = b; b = t;}
+	while (1) {
+		if (b <= 1) return b;
+		int rem = a%b;
+		if (rem == 0) return b;
+		a = b;
+		b = rem;
+	}
+}
+
+inline int lcm(int a, int b) { return a * b / gcd(a,b);}
+
+inline int hasCirc(const PortHole* p) {
+	return (p->attributes() & PB_CIRC) != 0;
+}
+
 // recursive function to compute buffer and forkbuf sizes.  Note that
 // buffers are only actually allocated for types 0 and F_SRC.  For others,
 // the return value represents a partial result, since we must compute
 // the LCM of all reader and writer values of numberTokens.
 int AsmGeodesic :: internalBufSize() const {
 	int size = CGGeodesic::internalBufSize();
-	if (maxNumParticles > size) {
-		Error::abortRun(*destinationPort,
-				"number of delay tokens exceeds buffer size",
-				" (not yet supported)");
+	if (size == 0) return 0; // scheduler has not been run, indeterminate.
+	CGPortHole* dest = (CGPortHole*)destinationPort;
+	CGPortHole* src = (CGPortHole*)originatingPort;
+	if ((numInit() > 0 || dest->usesOldValues()) &&
+	    !hasCirc(dest) && !hasCirc(src)) {
+		SDFStar* srcStar = (SDFStar*)src->parent();
+		int total = srcStar->reps() * src->numXfer();
+		if (total < size)
+			Error::abortRun (*destinationPort,
+		 "maximum buffer size exceeds number of particles produced\n",
+			 "in one schedule iteration (not yet supported)");
 	}
 	return size;
+}
+
+// allocation control heuristic.  We prefer the smallest possible
+// memory if each end has P_CIRC; otherwise, we always want linear
+// memory.
+double AsmGeodesic :: wasteFactor() const {
+	if (hasCirc(originatingPort) && hasCirc(destinationPort))
+		return 1.0;
+	else return 1.0e9;
 }
