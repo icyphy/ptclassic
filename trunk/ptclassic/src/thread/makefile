@@ -39,13 +39,8 @@ include $(CONFIG)
 
 DIRS =
 
-# sol2 and sol2.cfront
-ifneq (,$(filter sol%,$(PTARCH)))
-DIRS = posix
-endif
-
-# sun4
-ifneq (,$(filter sun%,$(PTARCH)))
+# Threads are used in the PN domain.
+ifeq ($(INCLUDE_PN_DOMAIN),yes)
 DIRS = posix
 endif
 
@@ -84,17 +79,13 @@ $(THREAD_ROOT) $(THREAD_INCLUDE) $(THREAD_LIB):
 GT_SRC = $(ROOT)/src/thread/gthreads
 GT_OBJ = $(ROOT)/obj.$(PTARCH)/thread/gthreads
 
-# Redefined make variables.
-GT_CFLAGS =	-DASM_SETJMP -DSTACK_CHECK -DC_INTERFACE
-GT_COMP_ASM =	$$(CC) $$(INC1) $$(INC2) $$(CFLAGS) -c $$*.S
-
 # Only the gthreads_install and gthreads_clean rules are externally visible.
 # We build gthreads only on sol2 sol2.cfront and sun4
 
 ifeq ($(INCLUDE_GTHREADS),yes)
 # Install gthreads library and include files.
 gthreads_install: $(THREAD_ROOT) $(THREAD_LIB) $(THREAD_INCLUDE) \
-			gthreads_$(PTARCH)
+			gthreads_uninstall gthreads_$(PTARCH)
 
 # Clean up.
 gthreads_clean: $(GT_OBJ)
@@ -130,48 +121,64 @@ $(GT_OBJ): $(GT_SRC)
 		(cd $(GT_OBJ)/$$mydir; \
 			ln -s ../../../$(GT_SRC)/$$mydir/* .); \
 	done
-	# There is no default Makefile in the distribution.
-	-cd $(GT_OBJ)/src; ln -s Makefile.Solaris Makefile
 
 # Build library for sol2 using Gnu compiler.
 gthreads_sol2: $(GT_OBJ)
+	-cd $(GT_OBJ)/src; ln -s Makefile.Solaris Makefile
 	$(MAKE) -C $(GT_OBJ)/src $(MFLAGS) $(MAKEVARS) \
 		INSTALL_INCLUDE='../../$(THREAD_INCLUDE)' \
 		INSTALL_LIBS='../../$(THREAD_LIB)' \
 		CC=gcc \
-		CFLAGS='$(GT_CFLAGS) -DSOLARIS -DSVR4' \
-		COMP_ASM='$(GT_COMP_ASM) -traditional' \
-		all install;
-
-# Solaris2.5, with gcc
-gthreads_sol2.5: $(GT_OBJ)
-	$(MAKE) -C $(GT_OBJ)/src $(MFLAGS) $(MAKEVARS) \
-		INSTALL_INCLUDE='../../$(THREAD_INCLUDE)' \
-		INSTALL_LIBS='../../$(THREAD_LIB)' \
-		CC=gcc \
-		CFLAGS='$(GT_CFLAGS) -DSOLARIS -DSVR4' \
-		COMP_ASM='$(GT_COMP_ASM) -traditional' \
+		CFLAGS='-DASM_SETJMP -DSTACK_CHECK -DC_INTERFACE -DSOLARIS -DSVR4' \
 		all install;
 
 # Build library for sol2 using Sun's compiler.
 gthreads_sol2.cfront gthreads_sol2.5.cfront: $(GT_OBJ)
+	-cd $(GT_OBJ)/src; ln -s Makefile.Solaris Makefile
 	$(MAKE) -C $(GT_OBJ)/src $(MFLAGS) $(MAKEVARS) \
 		INSTALL_INCLUDE='../../$(THREAD_INCLUDE)' \
 		INSTALL_LIBS='../../$(THREAD_LIB)' \
 		CC=cc \
-		CFLAGS='$(GT_CFLAGS) -DSOLARIS -DSVR4' \
+		CFLAGS='-DASM_SETJMP -DSTACK_CHECK -DC_INTERFACE -DSOLARIS -DSVR4' \
 		CCFLAGS='-xO3 $$(CFLAGS)' \
 		CCFLAGS1='-xO1 $$(CFLAGS)' \
 		CCFLAGS2='-xO2 $$(CFLAGS)' \
-	    COMP_ASM='$$(AS) $$(INC1) $$(INC2) -P $$(CFLAGS) $$*.S -o $$*.o' \
+		COMP_ASM='$$(AS) $$(INC1) $$(INC2) -P $$(CFLAGS) $$*.S -o $$*.o' \
 		all install;
+
+# sol2.5 same as sol2
+gthreads_sol2.5: gthreads_sol2
+
+# sol2.5.cfront same as sol2.cfront
+gthreads_sol2.5.cfront: gthreads_sol2.cfront
 
 # Build library for sun4 using Gnu compiler.
 gthreads_sun4: $(GT_OBJ)
+	-cd $(GT_OBJ)/src; ln -s Makefile.SunOS Makefile
 	$(MAKE) -C $(GT_OBJ)/src $(MFLAGS) $(MAKEVARS) \
 		INSTALL_INCLUDE='../../$(THREAD_INCLUDE)' \
 		INSTALL_LIBS='../../$(THREAD_LIB)' \
 		CC=gcc \
-		CFLAGS='$(GT_CFLAGS)' \
-		COMP_ASM='$(GT_COMP_ASM)' \
+		CFLAGS='-DASM_SETJMP -DSTACK_CHECK -DC_INTERFACE' \
+		COMP_ASM='$$(CC) $$(INC1) $$(INC2) $$(CFLAGS) -c $$*.S' \
+		all install;
+
+# Build library for Linux using Gnu compiler.
+gthreads_linux: $(GT_OBJ)
+	-cd $(GT_OBJ)/src; ln -s Makefile.Linux Makefile
+	$(MAKE) -C $(GT_OBJ)/src $(MFLAGS) $(MAKEVARS) \
+		INSTALL_INCLUDE='../../$(THREAD_INCLUDE)' \
+		INSTALL_LIBS='../../$(THREAD_LIB)' \
+		CC=gcc \
+		CFLAGS='-DC_INTERFACE -DC_CONTEXT_SWITCH -DCLEANUP_HEAP -D_POSIX' \
+		all install;
+
+# Build library for FreeBSD using Gnu compiler.
+gthreads_freebsd: $(GT_OBJ)
+	-cd $(GT_OBJ)/src; ln -s Makefile.FreeBSD Makefile
+	$(MAKE) -C $(GT_OBJ)/src $(MFLAGS) $(MAKEVARS) \
+		INSTALL_INCLUDE='../../$(THREAD_INCLUDE)' \
+		INSTALL_LIBS='../../$(THREAD_LIB)' \
+		CC=gcc \
+		CFLAGS='-DSTACK_CHECK -DC_INTERFACE -DC_CONTEXT_SWITCH -DCLEANUP_HEAP -D_POSIX' \
 		all install;
