@@ -105,13 +105,12 @@ for a complete explanation of the options.
 	}
 
 	initCode {
-                StringList s;
-		s << "    FILE* $starSymbol(fp)[";
+                StringList s = "FILE* $starSymbol(fp)[";
 		s << input.numberPorts() << "];";
                 addDeclaration(s);
                 addInclude("<stdio.h>");
 		for (int i = 0; i < input.numberPorts(); i++) {
-			StringList w = "    if(!($starSymbol(fp)[";
+			StringList w = "if(!($starSymbol(fp)[";
 			w << i <<  "] = fopen(\"";
 			w << target()->name() << "_$starSymbol(temp)";
 			w << i << "\",\"w\")))";
@@ -121,10 +120,10 @@ for a complete explanation of the options.
 	}
 
 codeblock (err) {
-    {
-        fprintf(stderr,"ERROR: cannot open output file for Xgraph star.\n");
-	exit(1);
-    }
+{
+    fprintf(stderr,"ERROR: cannot open output file for Xgraph star.\n");
+    exit(1);
+}
 }
 		
 	// escape any double quotes in a string that is to be inserted into
@@ -196,17 +195,17 @@ codeblock (err) {
 	}
 
 codeblock(closeFile) {
-    for (i = 0; i < $val(numIn); i++) fclose($starSymbol(fp)[i]);
+for (i = 0; i < $val(numIn); i++) fclose($starSymbol(fp)[i]);
 }
 
 	wrapup {
-		addCode("    { int i;\n");
+		addCode("{\n");
+		addCode("int i;\n");
 
 		// close the files
 		addCode(closeFile);
 
-		StringList cmd;
-		cmd << "( ";
+		StringList cmd = "( ";
 
 		// save File
 		const char* sf = saveFile;
@@ -255,8 +254,8 @@ codeblock(closeFile) {
 		}
 
 		cmd << ") &";
-		StringList out = "    system(\"";
-		out << sanitizeString(cmd) << "\");\n    }\n";
+		StringList out = "system(\"";
+		out << sanitizeString(cmd) << "\");\n}\n";
 		addCode(out);
 	}
 	exectime {
