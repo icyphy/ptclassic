@@ -141,9 +141,9 @@ proc infoClasses {{c {}}} {
 proc infoObjects {{o {}}} {
     global tcl_version
     if { $tcl_version >= 8.0 && ${itcl::version} >= 3.0 } {
-	uplevel ::itcl::find objects $c
+	uplevel ::itcl::find objects $o
     } else {
-	uplevel info objects $c
+	uplevel info objects $o
     }
 }
 
