@@ -12,7 +12,7 @@
 #
 
 proc ptcl_init_env {} {
-    global env
+    global env tcl_prompt1 tcl_prompt2
 
     if { ![info exist env(PTOLEMY)] } {
 	set env(PTOLEMY) [glob ~ptolemy]
@@ -20,7 +20,11 @@ proc ptcl_init_env {} {
     if { ![info exist env(TCL_LIBRARY)] } {
 	set env(TCL_LIBRARY) $env(PTOLEMY)/tcl/tcl[info tclversion]/lib
     }
-    source [info library]/init.tcl
+    uplevel #0 source [info library]/init.tcl
+
+    set tcl_prompt1 "puts -nonewline stdout {ptcl> }"
+    set tcl_prompt2 "puts -nonewline stdout {ptcl? }"
+    
 }
 
 ptcl_init_env
