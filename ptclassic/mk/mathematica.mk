@@ -36,10 +36,10 @@
 # Mathematica is installed if the mathRootDir script returns a non-empty string
 # -- If Mathematica is not installed, set MATHEMATICADIR to
 #    $(ROOT)/src/compat/mathematica
-# -- If Matlab is installed, then set MATHEMATICADIR accordingly
+# -- If Mathematica is installed, then set MATHEMATICADIR accordingly
 #
 # The Mathematica include files are in $(MATHEMATICADIR)/Source/Includes.
-# At link time, Ptolemy is linked against libexttools.a (MatlabIfc class)
+# At link time, Ptolemy is linked against libexttools.a (MathematicaIfc class)
 # and either
 # (a) libptmathematica.a if Mathematica is not installed, or
 # (b) libMFelf.a if Mathematica is installed.
@@ -47,11 +47,11 @@
 MATHEMATICADIR := $(shell $(ROOT)/bin/mathRootDir)
 ifeq ("$(MATHEMATICADIR)","")
 MATHEMATICADIR= 	$(ROOT)/src/compat/mathematica
-MATLABEXT_LIB = 	-lptmathematica
+MATHEMATICAEXT_LIB = 	-lptmathematica
 else
-MATLABEXT_LIB = 	-L$(MATHEMATICADIR)/Bin/MathLink -lMFelf.a
+MATHEMATICAEXT_LIB = 	-L$(MATHEMATICADIR)/Bin/MathLink -lMFelf.a
 endif
-MATLAB_INCSPEC =	-I$(MATHEMATICADIR)/Source/Includes
+MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)/Source/Includes
 
 # Ptolemy interface directories
 EXTTOOLSLIB = $(ROOT)/src/utils/libexttools
