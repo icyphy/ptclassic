@@ -69,7 +69,7 @@ limitation of liability, and disclaimer of warranty provisions.
       // Amatrix and Bmatrix both valid
 
       // just check that A's dimensions match the state info.
-      // the operator + on matricies will check that A matches B
+      // the operator + on matrices will check that A matches B
       if((Amatrix.numRows() != int(numRows)) ||
          (Amatrix.numCols() != int(numCols))) {
         Error::abortRun(*this,"Dimension size of ComplexMatrix inputs do ",

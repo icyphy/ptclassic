@@ -28,9 +28,9 @@ limitation of liability, and disclaimer of warranty provisions.
                 type { int }
                 default { "YES" }
                 desc {
-Flag that indicates whether or not to keep the preciion of the
+Flag that indicates whether or not to keep the precision of the
 arriving matrix: YES keeps the same precision, and NO casts
-them to the precision specified by the paramter "InputPrecision". }
+them to the precision specified by the parameter "InputPrecision". }
         }
         defstate {
                 name { InputPrecision }
@@ -124,7 +124,7 @@ overflows.  The options are: "saturate"(default), "zero-saturate",
             // Amatrix and Bmatrix both valid
 
             // just check that A's dimensions match the state info.
-            // the operator + on matricies will check that A matches B
+            // the operator + on matrices will check that A matches B
             if((Amatrix.numRows() != int(numRows)) ||
                (Amatrix.numCols() != int(numCols))) {
               Error::abortRun(*this,"Dimension size of FixMatrix inputs do ",
