@@ -352,7 +352,8 @@ int PTcl::defgalaxy(int argc,char ** argv) {
 	if ((status = Tcl_Eval(interp, argv[2])) != TCL_OK) {
 		LOG_DEL; delete currentGalaxy;
 		LOG_DEL; delete currentTarget;
-		Error::error("Error in defining galaxy ", galname);
+		Tcl_AppendResult(interp, "Error in defining galaxy ", galname,
+	   		(char*) NULL);
 	}
 	else currentGalaxy->addToKnownList(outerDomain,currentTarget);
 	currentGalaxy = universe;
@@ -366,7 +367,8 @@ int PTcl::computeSchedule() {
 	SimControl::clearHalt();
 	universe->initTarget();
 	if (SimControl::flagValues() & SimControl::error) {
-		Error::error("Error setting up the schedule.");
+		Tcl_AppendResult(interp, "Error in setting up the schedule",
+	   		(char*) NULL);
 		return FALSE;
 	}
 	return TRUE;
@@ -607,7 +609,8 @@ int PTcl::curuniverse(int argc,char** argv) {
 			return TCL_OK;
 		}
 		else {
-			Error::error("No such universe: ", argv[1]);
+			Tcl_AppendResult(interp, "No such universe: ", argv[1],
+	   			(char*) NULL);
 			return TCL_ERROR;
 		}
 	}
@@ -628,7 +631,8 @@ int PTcl::renameuniv(int argc,char ** argv) {
 	if (argc == 3) {
 		u = univs.univWithName(argv[1]);
 		if (!u) {
-			Error::error("No such universe: ", argv[1]);
+			Tcl_AppendResult(interp, "No such universe: ", argv[1],
+	   			(char*) NULL);
 			return TCL_ERROR;
 		}
 		// rename with same name has no effect.
@@ -706,8 +710,9 @@ int PTcl::target(int argc,char ** argv) {
 	else {
 		const char* tname = hashstring(argv[1]);
 		if (!legalTarget(curDomain, tname)) {
-		    Error::error(tname,
-		      " is not a legal target for domain ", curDomain);
+		    Tcl_AppendResult(interp, tname,
+			" is not a legal target for domain ", curDomain,
+	   		(char*) NULL);
 		    return TCL_ERROR;
 		}
 		int status;
@@ -741,12 +746,14 @@ int PTcl::targetparam(int argc,char ** argv) {
 	if (argc != 2 && argc != 3)
 		return usage("targetparam <name> ?<value>?");
 	if (!currentTarget) {
-		Error::error("Target has not been created yet.");
+		Tcl_AppendResult(interp, "Target has not been created yet.",
+	   		(char*) NULL);
 		return TCL_ERROR;
 	}
 	State* s = currentTarget->stateWithName(argv[1]);
 	if (!s) {
-		Error::error("No such target parameter: ", argv[1]);
+		Tcl_AppendResult(interp, "No such target parameter: ", argv[1],
+	   		(char*) NULL);
 		return TCL_ERROR;
 	}
 	if (argc == 1) {
