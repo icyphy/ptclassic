@@ -87,10 +87,14 @@ void CGWormTarget::prepareChildren() {
 	Error::abortRun(*child(0)," is not a CGCTargetWH.");
 	return;
     }
+}
+
+void CGWormTarget::wormPrepare() {
+    if(!galaxy()->parent() || !galaxy()->parent()->isItWormhole()) return;
     cgcWorm = (CGCTargetWH*)child(0);
     cgcWorm->convertWormholePorts(*galaxy());
 }
-    
+
 void CGWormTarget::setup() {
     
     GalStarIter nextStar(*galaxy());
@@ -102,12 +106,14 @@ void CGWormTarget::setup() {
 	BlockPortIter nextPort(*star);
 	PortHole* port;
 	while ((port = nextPort++) != NULL) {
+	    if (port->atBoundary()) continue;
 	    Wormhole* farWorm = ((CGStar*)port->far()->parent())->asWormhole();
-	    int farCGCFlag = farWorm?
-		(strcmp(farWorm->insideDomain(),"CGC") == 0)
-		: port->far()->parent()->isA("CGCStar");
-	    if (!farCGCFlag && 
-		strcmp(worm->insideDomain(),"CGC") != 0) {
+	    const char* farDomain = farWorm?
+		farWorm->insideDomain():port->far()->parent()->domain();
+	    const char* wormDomain = worm->insideDomain();
+	    if (strcmp(farDomain,wormDomain) != 0 &&
+		strcmp(farDomain,"CGC") != 0 && 
+		strcmp(wormDomain,"CGC") != 0) {
 		PortHole* farPort = port->far();
 		int numDelays = port->numInitDelays();
 		const char* delayValues = port->initDelayValues();

@@ -56,6 +56,7 @@ public:
     /*virtual*/ DataFlowStar* createReceive(int from, int to, int num);
     /*virtual*/ void pairSendReceive(DataFlowStar* s, DataFlowStar* r);
     /*virtual*/ int runCode();
+    /*virtual*/ void wormPrepare();
 
 protected:
     /*virtual*/ void prepareChildren();
