@@ -35,6 +35,15 @@
 # We don't use the toplevel window called ".", so withdraw it.
 wm withdraw .
 
+# Check for Itcl2.1 first, since Itcl2.0 does not have [file join . . .]
+if {${itcl::version} < 2.1} {
+    error "Tycho must be run under Itcl2.1 or later, as Itcl2.0 does
+    not have the tcl7.6 'file join' command, which is used for portability.
+    If you are running tycho standalone, then you need an Itcl2.1 itkwish
+    binary.  If you are running tycho with Ptolemy, then you need to install
+    Itcl2.1 and recompile tysh."
+    exit 3
+}
 ########################################################################
 # If the environment variable TYCHO is set, use that to determine
 # where the tycho libraries are.  Otherwise, use PTOLEMY.  If neither
