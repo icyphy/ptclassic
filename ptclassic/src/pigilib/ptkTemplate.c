@@ -61,6 +61,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "rpcApp.h"
 
+#ifdef PTKCODE
+/* This is defined in octtools/Xpackages/rpc/appInit.c */
+octStatus vemInitializeApplication(/* char **display, RPCSpot spot, lsList
+			    cmdList, long userOptionWord */);
+
+/* This is defined in octtools/Xpackages/rpc/appInit.c */
+octStatus vemSendMenu(/* RPCFunction array, long count */);
+
+/* This is defined in octtools/Xpackages/rpc/appNet.c */
+int RPCApplicationFunctionComplete();
+#endif
+
 extern long UserMain();
 
 #ifndef PTKCODE
