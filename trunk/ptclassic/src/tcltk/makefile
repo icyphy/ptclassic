@@ -304,6 +304,7 @@ $(ITCL_DEST)/lib/libitcl.a: $(ITCL_OBJ)/libitcl.a $(TCLTK_DEST) \
 	(cd  $(ITCL_OBJ); $(MAKE) \
 		X11_INCLUDES="$(X11_INCSPEC)" \
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
+		INCLUDE_DIR=$(ITCL_INDEPENDENT_DEST)/include \
 		install)
 
 $(ITCL_DEST):
