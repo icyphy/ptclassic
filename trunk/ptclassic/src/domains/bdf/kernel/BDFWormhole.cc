@@ -71,6 +71,8 @@ double BDFWormhole :: getArrivalTime() {
 // Constructor
 BDFWormhole :: BDFWormhole(Galaxy& g,Target* t) : Wormhole(*this,g,t)
 {
+	space = arrivalTime = 0.0;
+	mark = 0;
 	buildEventHorizons ();
 }
 
