@@ -272,6 +272,10 @@ arguments, rename the universe named <oldname> to <newname>.  Any existing
 universe named <newname> is deleted.
 }
 
+add_to_help stoptime {} {
+Returns the stop time of the current run.
+}
+
 add_to_help schedtime {?actual?} {
 Returns the current time from the schedule of the current top-level
 universe.  If the target has a state named "schedulePeriod", the value
