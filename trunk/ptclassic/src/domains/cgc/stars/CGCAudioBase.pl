@@ -35,6 +35,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	standardIO = fileName.null();
     }
 
+    initCode {
+// empty for future use
+    }
+
     codeblock(declarations, "const char* datatype, int size") {
 	int $starSymbol(file);
 	@datatype $starSymbol(buf)[@size];
