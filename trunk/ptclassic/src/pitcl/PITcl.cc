@@ -27,14 +27,16 @@ ENHANCEMENTS, OR MODIFICATIONS.
 PT_COPYRIGHT_VERSION_2
 COPYRIGHTENDKEY
 
-Programmer:  J. T. Buck, Brian Evans, and E. A. Lee
+Programmer:  E. A. Lee
+Based on: PTcl design by Joe Buck
 Date of creation: 2/97
 
-This file implements a class that adds Ptolemy-specific Itcl commands to
-an Itcl interpreter.  Commands are designed to resemble those of the Ptolemy
-kernel, mostly.  These commands are defined in the ::pitcl namespace.
-Normally, these commands should not be used directly.  Use instead the
-class interface defined in the ::ptolemy namespace.
+This file implements a class that adds Ptolemy-specific Itcl
+commands to an Itcl interpreter. The commands are designed to
+resemble those of the Ptolemy kernel, mostly. These commands are
+defined in the ::pitcl namespace. Normally, these commands should
+not be used directly. Use instead the class interface defined in the
+::ptolemy namespace.
 
 **************************************************************************/
 static const char file_id[] = "PITcl.cc";
@@ -160,14 +162,88 @@ int PTcl::addBlock(int argc,char** argv) {
 // This defaults to the current domain.
 //
 int PTcl::addUniverse(int argc,char** argv) {
-    if (argc > 3 || argc < 2)
-    return usage("newuniverse <name> ?<dom>?");
+    if (argc > 3 || argc < 2) {
+        return usage("newuniverse <name> ?<dom>?");
+    }
     if (argc == 3) curDomain = hashstring(argv[2]);
     const char* nm = argv[1];
     if (*nm == '.') nm++;
     const char* name = hashstring(nm);
     newUniv(name, curDomain);
     return TCL_OK;
+}
+
+///////////////////////////////////////////////////////////////////////////
+//// aliasDown
+// Return the full name of the port that is aliased to the specified galaxy
+// port.  If there is none, return an empty string.  If the -deep option
+// is given, then return the bottom-level port, which is always a star port.
+// Otherwise, just return the next level down.
+//
+int PTcl::aliasDown(int argc,char** argv) {
+    int deep=0;
+    char* portname=NULL;
+    for (int i=1; i < argc; i++) {
+        if (strcmp(argv[i],"-deep") == 0) deep = 1;
+        else if (portname != NULL) return usage("aliasDown ?-deep? <portname>");
+        else portname = argv[i];
+    }
+    if (portname == NULL) {
+        return usage("aliasDown ?-deep? <portname>");
+    }
+
+    GenericPort* gp = getPort(portname);
+    if (!gp) return TCL_ERROR;
+
+    // If the port has a downward alias, and -deep was not specified,
+    // then return the alias.
+    if (!deep) {
+        if (gp->alias()) gp = gp->alias();
+        else return TCL_OK;
+    } else {
+        while(gp->alias()) gp = gp->alias();
+    }
+    result(fullName(gp));
+    return TCL_OK;
+}
+
+///////////////////////////////////////////////////////////////////////////
+//// aliasUp
+// If the -deep option is not given, return the full name of the galaxy
+// port that is aliased to the specified port at the next level up in the
+// hierarchy, or an empty string if there is none. If the -deep option
+// is given, then return the top-level galaxy port, which may in fact be
+// the same as the specified port if that port is already at the top level.
+//
+// NOTE: If the specified port is a plain port within a multiport, the
+// returned port may be a plain port within a multiport one level up in
+// the hierarchy.  This port name can be used to disconnect, but not
+// to recreate the topology.
+//
+int PTcl::aliasUp(int argc,char** argv) {
+    int deep=0;
+    char* portname=NULL;
+    for (int i=1; i < argc; i++) {
+        if (strcmp(argv[i],"-deep") == 0) deep = 1;
+        else if (portname != NULL) return usage("aliasUp ?-deep? <portname>");
+        else portname = argv[i];
+    }
+    if (portname == NULL) {
+        return usage("aliasUp ?-deep? <portname>");
+    }
+
+    GenericPort* gp = getPort(portname);
+    if (!gp) return TCL_ERROR;
+
+    // If the port has an upward alias, and -deep was not specified,
+    // then return the alias.
+    if (!deep) {
+        if (gp->aliasFrom()) gp = gp->aliasFrom();
+        else return TCL_OK;
+    } else {
+        while(gp->aliasFrom()) gp = gp->aliasFrom();
+    }
+    return result(fullName(gp));
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -277,27 +353,49 @@ int PTcl::connect(int argc,char** argv) {
 
 /////////////////////////////////////////////////////////////////////////////
 //// connected
-// Return a list of ports to which the given port is connected, or an empty
-// list if it is not connected.  The full name of each port is returned.
-// If the -deep option is given, then a star port is always returned,
-// never a galaxy port.  That is, the port that the galaxy port is aliased
-// to is returned. If the name of a multiport is given, this method returns
-// a list of all the ports connected to the multiport.
+// Return a list of ports to which the given port is connected, or an
+// empty list if it is not connected. The full name of each port is
+// returned. If the given port is the alias of a galaxy port and the
+// -deep option is not given, then the galaxy port name is reported as
+// {*aliasUp* _portname_}. If the -deep option is given, then a star port
+// is always returned, never a galaxy port. That is, the star port to
+// which the given port is ultimately connected to is returned. If the
+// name of a multiport is given, this method returns a list of all the
+// ports connected to the multiport.
+//
+// NOTE: If the far side port is a multiport, then the specific port
+// within that multiport to which we are connected is returned.  This
+// is not exactly the information that would be needed to recreate the
+// topology (by issuing connect commands) since the connect command wants
+// to be given the multiport name, not the specific inside port name.
+// However, it is exactly the information needed to disconnect.
 //
 int PTcl::connected(int argc,char** argv) {
     int deep=0;
     char* portname=NULL;
     for (int i=1; i < argc; i++) {
         if (strcmp(argv[i],"-deep") == 0) deep = 1;
-        else if (portname != NULL)
-               return usage ("connected ?-deep? <portname>");
-        else portname = argv[i];
-    }
-    if (portname == NULL)
+        else if (portname != NULL) {
             return usage ("connected ?-deep? <portname>");
+        } else portname = argv[i];
+    }
+    if (portname == NULL) return usage ("connected ?-deep? <portname>");
 
-    GenericPort* gp = getPort(portname,1);
+    GenericPort* gp = getPort(portname);
     if (!gp) return TCL_ERROR;
+
+    // If the port has an upward alias, and -deep was not specified,
+    // then return the alias.
+    if (!deep && gp->aliasFrom()) {
+        InfString res = "aliasUp ";
+        // FIXME: If the name has a space, this doesn't do the right thing.
+        // Not a proper list element.
+        res << fullName(gp->aliasFrom());
+        addResult(res);
+    }
+    // Translate aliases downward, if any, to get the real port with
+    // a connection
+    while (gp->alias()) gp = gp->alias();
 
     // FIXME: What does this do if we are connected to a node?
     if (gp->isItMulti()) {
@@ -305,31 +403,16 @@ int PTcl::connected(int argc,char** argv) {
         MPHIter next(*((MultiPortHole*) gp));
         PortHole* ph;
         while ((ph = next++) != 0) {
-            const GenericPort* f = ph->far();
-            if (f) {
-                if (!deep) {
-                    const GenericPort* galport = f->aliasFrom();
-                    if (galport) f=galport;
-                }
-                InfString res = fullName(f);
-                addResult(res);
-            }
+            // FIXME: skip if there is an aliasFrom
+            if (getFarPorts(ph,deep) != TCL_OK) return TCL_ERROR;
         }
+        return TCL_OK;
     } else {
         // The port is a simple port.
         // NOTE: The following cast assumes that only PortHole and
         // MultiPortHole are derived from GenericPort.
-        const GenericPort* f = ((PortHole*)gp)->far();
-        if (f) {
-            if (!deep) {
-                const GenericPort* galport = f->aliasFrom();
-                if (galport) f=galport;
-            }
-            InfString res = fullName(f);
-            result(res);
-        }
+        return getFarPorts((PortHole*)gp,deep);
     }
-    return TCL_OK;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -376,6 +459,99 @@ int PTcl::curgalaxy(int argc,char** argv) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+//// defgalaxy
+// Define a master galaxy.  The first argument is the name of the galaxy,
+// i.e. the name that is registered on the knownlist for use by *addBlock*.
+// The optional second argument is a set of galaxy building commands.
+// If it is not given, an empty galaxy is defined.  Otherwise, the
+// commands are executed in the ::pitcl namespace to construct the
+// galaxy.  Note that if errors occur during the execution of these
+// galaxy defining commands, then a partially constructed galaxy
+// will be on the knownlist.
+//
+// FIXME: Change the name.
+//
+int PTcl::defgalaxy(int argc,char ** argv) {
+    if (argc < 2 || argc > 3) {
+        return usage("defgalaxy <galname> ?{<galaxy-building-commands>}?");
+    }
+    // Prevent recursive calls.
+    if (definingGal) {
+        Tcl_SetResult(interp, "already defining a galaxy!", TCL_STATIC);
+        return TCL_ERROR;
+    }
+    const char* galname = hashstring(argv[1]);
+    const char* outerDomain = curDomain;
+    definingGal = TRUE;
+    currentGalaxy = new InterpGalaxy(galname,curDomain);
+    currentGalaxy->setBlock (galname, 0);
+    currentTarget = 0;
+    int status;  // return value
+    currentGalaxy->addToKnownList("ptcl defgalaxy command",
+            outerDomain, currentTarget);
+    InfString cmd = "namespace ::pitcl {";
+    cmd << argv[2] << "}";
+    if ((status = Tcl_Eval(interp, (char*)cmd)) != TCL_OK) {
+        Tcl_AppendResult(interp, 
+                "Error in defining galaxy ", galname, (char*)NULL);
+    }
+    currentGalaxy = universe;
+    currentTarget = universe->myTarget();
+    definingGal = FALSE;
+    curDomain = outerDomain;
+    if (! currentTarget) {
+        Tcl_AppendResult(interp, "Error in restoring outer universe target",
+               (char*) NULL);
+        return TCL_ERROR;
+    }
+    return status;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//// galaxyPort
+// This procedure establishes an "alias" relationship between a galaxy
+// port and a port in a block within the galaxy.  The first argument is
+// the name of the galaxy port.  If no port with that name exists, it is
+// created.  The second argument is the name of a block port within the
+// galaxy.
+//
+// NOTE: This procedure replaces the *alias* command in PTcl.
+// Also note that this procedure could be greatly simplified by
+// bypassing the InterpGalaxy::alias method.  We use that method
+// only because it registers the operation on the "actionList" for
+// later cloning of the galaxy.  If the cloning mechanism is simplified,
+// then this implementation can probably be simplified.
+//
+int PTcl::galaxyPort(int argc,char** argv) {
+    if (argc != 3) {
+        return usage ("galaxyPort <portname> <aliasport>");
+    }
+    const Block* pb = getParentBlock(argv[1]);
+    if (!pb || !pb->isA("InterpGalaxy")) {
+        InfString msg = argv[1];
+        msg << " is not a valid galaxy port name.";
+        result(msg);
+        return TCL_ERROR;
+    }
+    InterpGalaxy* gal = (InterpGalaxy*)pb;
+    GenericPort* gp = getPort(argv[2]);
+    if (!gp) return TCL_ERROR;
+    if (!gp->parent()) {
+        InfString msg = argv[2];
+        msg << " has no parent block!";
+        result(msg);
+        return(TCL_ERROR);
+    }
+
+    // NOTE: this method will use the names to look up the pointers
+    // again.  Room for efficiency improvement here.
+    if (!gal->alias(rootName(argv[1]), gp->parent()->name(), gp->name())) {
+        return TCL_ERROR;
+    }
+    return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
 //// getAnnotation
 // Return the annotation created with the *-note* option for a given port.
 // If no annotation was specified, return an empty string.
@@ -387,10 +563,10 @@ int PTcl::getAnnotation(int argc,char** argv) {
     if (argc != 2) {
         return usage ("getAnnotation <portname>");
     }
-    GenericPort* gp = getPort(argv[1], 1);
+    GenericPort* gp = getPort(argv[1]);
     if (!gp) return TCL_ERROR;
 
-    // FIXME: finish this.
+    // FIXME: finish this.  Have to resolve aliases.
     return TCL_OK;
 }
 
@@ -909,14 +1085,11 @@ InterpGalaxy* PTcl::getParentGalaxy(const char* name) {
 // The name has the form _name1.name2...nameN_ (relative) or
 // _.name1.name2...nameN_ (absolute). If the name is simple (no dots at
 // all), search the ports of the current galaxy. If the name is dotted
-// relative, the name is relative to the current galaxy. If the _deep_
-// argument is non-zero, then return a pointer to a star port, never a
-// galaxy port. In other words, if the port name is that of a galaxy,
-// return the star port that it is aliased to. If the port
+// relative, the name is relative to the current galaxy. If the port
 // is not found, register an error message with Tcl and return a null
 // pointer.
 //
-GenericPort* PTcl::getPort(const char* portname, int deep) {
+GenericPort* PTcl::getPort(const char* portname) {
     const Block* b = getParentBlock(portname);
     if (!b) return NULL;
     // FIXME: in Ptolemy kernel: Block::portWithName is not const (why??)
@@ -927,15 +1100,8 @@ GenericPort* PTcl::getPort(const char* portname, int deep) {
     if (!p) {
         InfString msg = "No such port: ";
         msg << portname;
+        result(msg);
         return NULL;
-    }
-    InfString result;
-    if (deep) {
-        GenericPort* galport = p->alias();
-        if (galport) return galport;
-    } else {
-        GenericPort* galport = p->aliasFrom();
-        if (galport) return galport;
     }
     return p;
 }
@@ -1037,6 +1203,28 @@ int PTcl::usage(const char* msg) {
 ////                         private methods                            ////
 
 /////////////////////////////////////////////////////////////////////////////
+//// getFarPorts
+// Add to the Tcl result a list of ports connected to the given port.
+// This method assumes aliases have been resolved on this port, so we
+// are given a star port, which may have a connection to other star ports.
+// If _deep_ is non-zero, list those other ports. Otherwise, list the name
+// of the top-level port that is aliased to the *far* ports.  If the given
+// port is not connected to anything, add nothing to the Tcl result.
+// Return TCL_OK.
+//
+int PTcl::getFarPorts(PortHole* ph, int deep) {
+    const GenericPort* fp = ph->far();
+    if (fp) {
+        if (!deep) {
+            while (fp->aliasFrom()) fp = fp->aliasFrom();
+        }
+        InfString res = fullName(fp);
+        addResult(res);
+    }
+    return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
 //// getSubBlock
 // Recursively descend inside a galaxy to find a block with dotted name.
 // Return NULL if the block does not exist within the given galaxy.
@@ -1081,26 +1269,6 @@ const Block* PTcl::getSubBlock(const char* name, const Block* gal) {
 }
 
 
-
-
-int PTcl::alias(int argc,char** argv) {
-    if (argc != 4)
-    return usage("alias <galport> <star> <starport>");
-    if (!currentGalaxy->alias(argv[1],argv[2],argv[3]))
-    return TCL_ERROR;
-    return TCL_OK;
-}
-
-int PTcl::numports(int argc,char** argv) {
-    if (argc != 4)
-    return usage("numports <star> <multiport> <how-many>");
-    int num;
-    if (Tcl_GetInt(interp, argv[3], &num) != TCL_OK)
-    return TCL_ERROR;
-    if (!currentGalaxy->numPorts (argv[1], argv[2], num))
-    return TCL_ERROR;
-    return TCL_OK;
-}
 
 // node: create a new node for netlist-style connections
 int PTcl::node(int argc,char ** argv) {
@@ -1212,42 +1380,6 @@ int PTcl::statevalue(int argc,char ** argv) {
     return staticResult(s->initValue());
     else
     return result(s->currentValue());
-}
-
-// defgalaxy: define a galaxy
-int PTcl::defgalaxy(int argc,char ** argv) {
-    if (argc != 3)
-    return usage("defgalaxy <galname> {<galaxy-building-commands>}");
-    if (definingGal) {
-        Tcl_SetResult(interp, "already defining a galaxy!", TCL_STATIC);
-        return TCL_ERROR;
-    }
-    const char* galname = hashstring(argv[1]);
-    const char* outerDomain = curDomain;
-    definingGal = TRUE;	// prevent recursive defgalaxy
-    LOG_NEW; currentGalaxy = new InterpGalaxy(galname,curDomain);
-    currentGalaxy->setBlock (galname, 0);
-    currentTarget = 0;
-    int status;  // return value
-    if ((status = Tcl_Eval(interp, argv[2])) != TCL_OK) {
-        LOG_DEL; delete currentGalaxy;
-        LOG_DEL; delete currentTarget;
-        Tcl_AppendResult(interp, "Error in defining galaxy ", galname,
-        (char*) NULL);
-    }
-    else currentGalaxy->addToKnownList("ptcl defgalaxy command",
-    outerDomain,currentTarget);
-    currentGalaxy = universe;
-    currentTarget = universe->myTarget();
-    definingGal = FALSE;
-    curDomain = outerDomain;
-    if (! currentTarget) {
-        Tcl_AppendResult(interp,
-        "Error in restoring outer universe target",
-        (char*) NULL);
-        return TCL_ERROR;
-    }
-    return status;
 }
 
 int PTcl::computeSchedule() {
@@ -1929,6 +2061,15 @@ int PTcl::cancelAction(int argc, char** argv) {
     return TCL_OK;
 }
 
+// FIXME: Remove this garbage.  Kept only temporarily for the
+// DomainInfo object.
+int PTcl::print(int argc,char** argv) {
+	if (argc > 2) return usage("print ?<block-or-classname>?");
+	const Block* b = getBlock(argv[1]);
+	if (!b) return TCL_ERROR;
+	return result(b->print(0));
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //				Function table
 /////////////////////////////////////////////////////////////////////////////
@@ -1962,7 +2103,8 @@ static InterpTableEntry funcTable[] = {
     ENTRY(abort),
     ENTRY(addBlock),
     ENTRY(addUniverse),
-    ENTRY(alias),
+    ENTRY(aliasDown),
+    ENTRY(aliasUp),
     ENTRY(animation),
     ENTRY(blocks),
     ENTRY(cancelAction),
@@ -1976,6 +2118,7 @@ static InterpTableEntry funcTable[] = {
     ENTRY(domain),
     ENTRY(domains),
     ENTRY(exit),
+    ENTRY(galaxyPort),
     ENTRY(getAnnotation),
     ENTRY(getClassName),
     ENTRY(getDescriptor),
@@ -1995,7 +2138,6 @@ static InterpTableEntry funcTable[] = {
     ENTRY(newstate),
     ENTRY(node),
     ENTRY(nodeconnect),
-    ENTRY(numports),
     ENTRY2(permlink,multilink),
     ENTRY(pragma),
     ENTRY(pragmaDefaults),
