@@ -34,7 +34,7 @@
 # root of source tree
 ROOT	      = ../../../../
 # VPATH points to the real source directory
-VPATH         = $(ROOT)/src/vem/Packages/vulcan
+VPATH         = $(ROOT)/src/octtools/Packages/vulcan
 
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
