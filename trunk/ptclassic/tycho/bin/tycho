@@ -16,7 +16,7 @@ if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 # Set the commonly used environment variables
 source $PTOLEMY/bin/ptsetup.csh
 
-set tyed = ($PTOLEMY/tcltk/itcl.$PTARCH/bin/itkwish -f $PTOLEMY/tycho/kernel/Tycho.tcl)
+set tyed = ($PTOLEMY/tcltk/itcl.$PTARCH/bin/itkwish -f $PTOLEMY/tycho/kernel/Tycho)
 
 switch ($progname) 
 	case tycho.ptiny:
