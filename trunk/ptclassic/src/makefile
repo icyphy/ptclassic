@@ -17,7 +17,7 @@ DIRS = kernel ptlang domains interp ptcl pigilib libgantt pigiRpc pigi56 xgraph 
 MTDIRS = kernel interp pigilib libgantt xgraph ptcl
 
 # "leaf" directories with no make.template
-LDIRS = ptlang pigiRpc pigi56 filters
+LDIRS = ptlang pigiRpc pigi56 pigicgc filters
 
 # directories with subtrees
 SDIRS = domains
