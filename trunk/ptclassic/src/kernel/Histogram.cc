@@ -127,14 +127,16 @@ void XHistogram :: addPoint(float y) {
 }
 
 void XHistogram :: terminate() {
-	int count;
-	double binCtr;
-	int binno = 0;
-	while (hist->getData (binno, count, binCtr)) {
-		display->addPoint (binCtr, float(count));
-		binno++;
+	if (numCounts() > 0) {
+		int count;
+		double binCtr;
+		int binno = 0;
+		while (hist->getData (binno, count, binCtr)) {
+			display->addPoint (binCtr, float(count));
+			binno++;
+		}
+		display->terminate();
 	}
-	display->terminate();
 	LOG_DEL; delete hist;
 	hist = 0;
 	LOG_DEL; delete [] optstring;
