@@ -21,6 +21,7 @@ static Tk_Window w;             /* The main window for the application.  If
                                  * exists. */
 static Tcl_Interp *interp;      /* Interpreter for this application. */
 static char command[COMMANDSIZE];
+char *appClass = "CGC";
 
 
 /* No command line arguments are used, so use default settings */
@@ -316,7 +317,7 @@ verticalScale(fullScale, interp, argc, argv)
 main() {
     Tk_3DBorder border;
     interp = Tcl_CreateInterp();
-    w = Tk_CreateMainWindow(interp, display, name);
+    w = Tk_CreateMainWindow(interp, display, name, appClass);
     if (w == NULL) {
         fprintf(stderr, "%s\n", interp->result);
         exit(1);
@@ -434,7 +435,7 @@ DelayedMap(clientData)
  */
 
 void perror(s)
-char *s;
+const char *s;
 {
     errorReport(s);
 }
