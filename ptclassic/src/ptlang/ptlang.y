@@ -985,8 +985,6 @@ void describePort ()
             /* FIXME: Can't strcat to destHTML, it does not have enough space
 	     strcat(destHTML,str1);
 	     */
-            strcat(dest,str1);
-
 	}
 
 	if (portDesc) {
@@ -998,7 +996,6 @@ void describePort ()
             /* FIXME: Can't strcat to destHTML, it does not have enough space
             strcat(destHTML,str1);
 	    */
-            strcat(dest,str1);
 	} else {
 	    sprintf(str1,"\n");
             strcat(dest,str1);
@@ -1007,8 +1004,6 @@ void describePort ()
         /* FIXME: Can't strcat to destHTML, it does not have enough space
         strcat(destHTML,str1);
         */
-        strcat(dest,str1);
-
 }
 
 /* set up for user-supplied method */
