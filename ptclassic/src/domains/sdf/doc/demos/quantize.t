@@ -1,14 +1,16 @@
 .\" $Id$
 .NA quantize
 .SD
-Demonstrate the use of the Quantizer star.
+Demonstrate the use of the
+.c Quantizer
+star.
 .DE
 .LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"
 .LD
-This trivial system shows how to use the
+This simple system shows how to use the
 .c Quantizer
 star.
 .Se Quantizer

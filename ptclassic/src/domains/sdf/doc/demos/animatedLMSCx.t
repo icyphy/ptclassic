@@ -1,9 +1,10 @@
 .\" $Id$
 .NA animatedLMSCx
 .SD
-A complex LMS adaptive filter is configured as in the adaptFilter demo,
-but in addition, user-controlled noise is added to the feedback loop using
-an on-screen slider to control the amount of noise.
+A complex LMS adaptive filter is configured as in the
+.c adaptFilter
+demo, but in addition, user-controlled noise is added to the feedback
+loop using an on-screen slider to control the amount of noise.
 The filter taps are displayed as they adapt.
 .DE
 .LO "$PTOLEMY/src/domains/sdf/demo"
@@ -30,7 +31,7 @@ star.
 .SA
 adaptFilter,
 animatedLMS,
+FIR,
 IIDGaussian,
-LMS,
-FIR.
+LMS.
 .ES

@@ -37,9 +37,9 @@ The manual page for the SDF
 star tells how to obtain the Utah Raster Toolkit for free.
 .Ir "Utah Raster Toolkit"
 .SA
+DCTImage,
+DCTImageCode,
 DisplayVideo,
 ReadImage,
-MotionCmp,
-DCTImage,
-DCTImageCode.
+MotionCmp.
 .ES

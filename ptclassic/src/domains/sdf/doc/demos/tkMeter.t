@@ -1,7 +1,9 @@
 .\" $Id$
 .NA tkMeter
 .SD
-Demonstrate TkMeter by creating three bar meters.
+Demonstrate the
+.c TkMeter
+star by creating three bar meters.
 The first oscillates sinusoidally.
 The second displays a random number between zero and one.
 The third displays a random walk.

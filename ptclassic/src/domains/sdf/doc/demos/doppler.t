@@ -2,8 +2,11 @@
 .NA doppler
 .SD
 A sine wave is subjected to four successive amounts of Doppler shift.
-The Doppler shift is accomplished by the phaseShift galaxy,
-which forms an analytic signal (using a Hilbert transform)
+The Doppler shift is accomplished by the
+.c phaseShift
+galaxy, which forms an analytic signal (using a
+.c Hilbert
+transform)
 that modulates a complex exponential.
 .DE
 .LO "$PTOLEMY/src/domains/sdf/demo"

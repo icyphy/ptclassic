@@ -10,7 +10,7 @@ autoregressive process.
 .AL "Edward A. Lee"
 .LD
 .Ie "system identification"
-This demo generates an auto-regressive (AR) random process by filtering
+This demo generates an autoregressive (AR) random process by filtering
 Gaussian white noise with an all-pole filter.
 Then it estimates the autocorrelation of the process
 and uses the Levinson Durbin algorithm to estimate the parameters

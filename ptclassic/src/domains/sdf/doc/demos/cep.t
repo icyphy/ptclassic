@@ -1,7 +1,7 @@
 .\" $Id$
 .NA cep
 .SD
-Given the coefficients of any polynomial, this demo uses the cepstrum to
+Given the coefficients of a polynomial, this demo uses the cepstrum to
 find a minimum-phase polynomial.
 Thus, given the coefficients of the denominator polynomial of an unstable
 filter, this demo will compute the coefficients of a stable denominator

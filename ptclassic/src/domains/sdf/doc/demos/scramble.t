@@ -2,7 +2,11 @@
 .NA scramble
 .SD
 This system rearranges the order of samples of signal using
-the Commutator and Distributor stars.
+the
+.c Commutator
+and
+.c Distributor
+stars.
 Note that because these are multirate stars, one iteration involves
 more than one sample.
 .DE

@@ -1,5 +1,5 @@
 .\" $Id$
-.NA DctImage
+.NA dctimage
 .SD
 A universe that performs discrete cosine transform (DCT) coding
 of an image sequence.

@@ -1,8 +1,9 @@
 .\" $Id$
 .NA animatedLMS
 .SD
-An LMS adaptive filter is configured as in the adaptFilter demo,
-but this time the filter taps are displayed as they adapt.
+An LMS adaptive filter is configured as in the
+.c adaptFilter
+demo, but this time the filter taps are displayed as they adapt.
 .DE
 .LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe

@@ -1,8 +1,9 @@
 .\" $Id$
 .NA sinWaves
 .SD
-Demonstrate TkBarGraph by generating and displaying
-a complex exponential.
+Demonstrate
+.c TkBarGraph
+star by generating and displaying a complex exponential.
 .DE
 .LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
