@@ -201,7 +201,7 @@ StringList State::parseNestedExpression(const char* expression) {
 }
 
 // The next token on the lexer is treated as a filename
-int State :: mergeFileContents(Tokenizer& lexer, ParseToken& t, char* token) {
+int State :: mergeFileContents(Tokenizer& lexer, char* token) {
 	char filename[TOKSIZE];
 
 	// disable special characters, e.g. so '/' does not screw us up.
@@ -218,7 +218,6 @@ int State :: mergeFileContents(Tokenizer& lexer, ParseToken& t, char* token) {
 		StringList msg;
 		msg << parsedFileName << ": " << why();
 		parseError("cannot open the file ", msg);
-		t.tok = T_ERROR;
 		return FALSE;
 	}
 
@@ -227,7 +226,7 @@ int State :: mergeFileContents(Tokenizer& lexer, ParseToken& t, char* token) {
 }
 
 // Send the next token on the lexer to be evaluated by an external interpreter
-int State::sendToInterpreter(Tokenizer& lexer, ParseToken& t, char* token) {
+int State::sendToInterpreter(Tokenizer& lexer, char* token) {
 	char shellCommand[TOKSIZE];
 
 	// temporarily disable special characters because we don't
@@ -250,7 +249,6 @@ int State::sendToInterpreter(Tokenizer& lexer, ParseToken& t, char* token) {
 		    << " which was expanded into "
 		    << "'" << parsedCommand << "'";
 		parseError("could not evaluate ", msg);
-		t.tok = T_ERROR;
 		return FALSE;
 	}
 
@@ -281,41 +279,51 @@ int State :: getParameterName(Tokenizer& lexer, char* token) {
 
 // The state tokenizer: return next token when parsing a state
 // initializer string.  Handles references to files and other states.
-// We allow one push back token in State class to support multithreading
 ParseToken
 State :: getParseToken(Tokenizer& lexer, int stateType) {
 	char token[TOKSIZE];
 	ParseToken t = pushback();	
+
+	// allow one push back token in State class to support multithreading
 	if (t.tok) {
 		clearPushback();
 		return t;
 	}
+
+	// read next token
 	lexer >> token;
+
+	// check for a null token
+	if (*token == 0) {
+		t.tok = T_EOF;
+		t.sval = 0;
+		return t;
+	}
 
 	// process single character directives
 	// '<' treat next token as a file name to be read
 	// '!' send next token to an external interpreter for evaluation
 	// '{' look for {parameterName} and replace it with its value
 	if (token[1] == 0) {
+		int err = FALSE;
 		switch ( *token ) {
 		    case '<':
-			if (!mergeFileContents(lexer, t, token)) return t;
+			err = !mergeFileContents(lexer, token);
 			break;
 
 		    case '!':
-			if (!sendToInterpreter(lexer, t, token)) return t;
+			err = !sendToInterpreter(lexer, token);
 			break;
 
 		    case '{':
-			if (!getParameterName(lexer, token)) return t;
+			err = !getParameterName(lexer, token);
 			break;
 		}
-	}
 
-	if (*token == 0) {
-		t.tok = T_EOF;
-		t.sval = 0;
-		return t;
+		if (err) {
+			t.tok = T_ERROR;
+			return t;
+		}
 	}
 
 	if (stateType == T_STRING) {
