@@ -533,10 +533,6 @@ body ::tycho::IDocSys::parseData {data} {
     set firstComment {}
     set lastComment {}
     foreach construct $data {
-        if {$construct == "\n"} {
-            # Ignore empty lines 
-            continue
-        }
         if {$inComment} {
             # This is a comment. Save it.
             # The first comment in a file contains tags that need to be saved.
@@ -546,6 +542,10 @@ body ::tycho::IDocSys::parseData {data} {
                 set lastComment "$construct"
             }
             set inComment 0
+            continue
+        }
+        if {$construct == "\n"} {
+            # Ignore empty lines outside of comments
             continue
         }
         if {$inOutsideProc} {
@@ -918,7 +918,6 @@ body ::tycho::IDocSys::parseClass {class body} {
 #
 body ::tycho::IDocSys::addClassComment {class expl} {
     set classModel $myClass($class)
- 
     # Parse line by line
     set explList [split $expl "\n"]
     set docTag desc
