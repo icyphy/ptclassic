@@ -69,7 +69,7 @@ autocorrelation estimate may have negative components.
 	}
 	go {
 	    for(int i = int(noLags); i>=0; i--) {
-		float sum = 0.0;
+		double sum = 0.0;
 		for(int j = 0; j < (int(noInputsToAvg)-i); j++)
 		   sum += double(input%j) * double(input%(j+i));
 		if (unbiased)

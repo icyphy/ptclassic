@@ -70,7 +70,7 @@ The default is a Butterworth filter with a cutoff 0.1 times sample freq.
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 	go {
-		double t = float(input%0) - double(d1) * double (state1) -
+		double t = double(input%0) - double(d1) * double (state1) -
 			double(d2) * double(state2);
 		double o = t * double(n0) + double(state1) * double(n1) +
 			double(state2) * double(n2);

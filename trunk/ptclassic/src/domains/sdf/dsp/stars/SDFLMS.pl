@@ -83,8 +83,8 @@ will be stored there after the run has completed.
 		int index = int(errorDelay)*int(decimation) + int(decimationPhase);
 
 		for (int i = 0; i < taps.size(); i++) {
-			taps[i] = double(taps[i]) +
-				(e * float(signalIn%(index))) * double(stepSize);
+			taps[i] = taps[i] +
+				e * double(signalIn%(index)) * double(stepSize);
 			index++;
 		}
 		

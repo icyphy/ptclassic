@@ -25,7 +25,7 @@ Output is 0 if input <= threshold, otherwise it is 1.
 		desc { Threshold applied to input. }
 	}
 	go {
-		if( float(input%0) <= double(threshold) )
+		if( double(input%0) <= double(threshold) )
 			output%0 << 0;
 		else output%0 << 1;
 	}

@@ -49,7 +49,7 @@ This Star uses the GNU library <Uniform.h>.
 		LOG_NEW; random = new Uniform(double(lower),double(upper),gen);
 	}
         go {
-		output%0 << (float)(*random)();
+		output%0 << (*random)();
 	}
 }
 

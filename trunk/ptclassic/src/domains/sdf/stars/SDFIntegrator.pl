@@ -77,7 +77,7 @@ is the previous output.
 	    double t;
 	    if (int(reset%0) != 0) t = 0;
 	    else {
-		t = float(data%0) + double(feedbackGain) * double(state);
+		t = double(data%0) + double(feedbackGain) * double(state);
 		if (spread > 0.0) {
 		    // Limiting is in effect
 

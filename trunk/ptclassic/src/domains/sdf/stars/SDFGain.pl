@@ -21,7 +21,7 @@ defstar {
 		desc { Gain of the star. }
 	}
 	go {
-		output%0 << double(gain) * (float)(input%0);
+		output%0 << double(gain) * double(input%0);
 	}
 }
 

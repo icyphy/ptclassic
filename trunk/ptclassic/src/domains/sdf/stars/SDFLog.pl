@@ -20,7 +20,7 @@ If the input is zero or negative, the run is aborted.
 	}
 	ccinclude { <math.h> }
 	go {
-		float t = input%0;
+		double t = input%0;
 		if (t <= 0) {
 			Error::abortRun (*this, ": log of x, x <= 0");
 			output%0 << -100.0;

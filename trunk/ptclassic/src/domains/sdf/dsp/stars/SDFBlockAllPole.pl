@@ -105,7 +105,7 @@ No decimation or interpolation is supported.
 			    * fdbkDelayLine[(writeIndex + i) % M];
 		   }
 		   // Get the input and add to the inner product output
-		   out += float(signalIn%j);
+		   out += double(signalIn%j);
 
 		   // Feed output back to the delay line:
 		   writeIndex--;

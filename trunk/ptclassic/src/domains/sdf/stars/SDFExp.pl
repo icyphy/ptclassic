@@ -19,7 +19,6 @@ defstar {
 	}
 	ccinclude { <math.h> }
 	go {
-		float t = input%0;
-		output%0 << exp(t);
+		output%0 << exp(double(input%0));
 	}
 }
