@@ -367,8 +367,8 @@ body ::tycho::Exec::execProcess { {cmd {}} {dir {}} {maxline {999999}} } {
             ::tycho::inform "$errMsg"
             return
         }
-        # Execution is okay, so register our file event handler
-        fileevent $fd readable "$this readOrClose $fd"
+	# Execution is okay, so register our file event handler
+	fileevent $fd readable "$this readOrClose $fd"
     } else {
 	# There is no NONBLOCK I/O under windows, so we just
 	# run the process and hang the UI while it is running and then
@@ -381,8 +381,13 @@ body ::tycho::Exec::execProcess { {cmd {}} {dir {}} {maxline {999999}} } {
 	#config -cursor $oldCursor
 
         # This might not be an error message, it might just be whatever
-        # exec returned
-        addHistory "$errMsg\n"
+        # exec returned.  We process it one line at a time so we
+	# can create hotlinks to the errors.
+	set historyList [split $errMsg '\n']
+	foreach historyLine $historyList {
+	    addHistory "$historyLine\n"
+	}
+
 	if {$statusVariableName == "abnormal"} {
             addHistory "<<Process exited Abnormally.>>\n"
 	}
