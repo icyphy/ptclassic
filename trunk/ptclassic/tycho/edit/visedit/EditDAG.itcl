@@ -1123,31 +1123,35 @@ body ::tycho::EditDAG::verifycontents {contents} {
 # Initialize the menu bar.  Adds entries specific to this class.
 #
 body ::tycho::EditDAG::_initializeMenubar {menubar} {
-    $menubar separator editsep19 edit
+    if [::tycho::stylesheet get interaction viseditViewOnly] {
+	$menubar delete edit
+    } else {
+        $menubar separator editsep19 edit
 
-    $menubar command newroot edit \
-	    -label "New Root" -underline 4 -accelerator "R" \
-	    -command "$this addRoot"
+	$menubar command newroot edit \
+		-label "New Root" -underline 4 -accelerator "R" \
+		-command "$this addRoot"
 
-    $menubar command newchild edit \
-	    -label "New Child" -underline 4 -accelerator "C" \
-	    -command "$this addChild"
+	$menubar command newchild edit \
+		-label "New Child" -underline 4 -accelerator "C" \
+		-command "$this addChild"
 
-    $menubar command newarc edit \
-	    -label "New Arc" -underline 4 -accelerator "A" \
-	    -command "$this addArc"
+	$menubar command newarc edit \
+		-label "New Arc" -underline 4 -accelerator "A" \
+		-command "$this addArc"
 
-    $menubar command tranpose format \
-	    -label "Transpose" -underline 0 \
-            -command "$this transpose"
+	$menubar command tranpose format \
+		-label "Transpose" -underline 0 \
+		-command "$this transpose"
 
-    $menubar command alternatelayout format \
-	    -label "Alternate Layout" -underline 0 \
-            -command "$this toggleLayout"
+	$menubar command alternatelayout format \
+		-label "Alternate Layout" -underline 0 \
+		-command "$this toggleLayout"
 
-    $menubar command scale edit \
-	    -label "Scale" -underline 1 \
-            -command "$this setSpacing"
+	$menubar command scale edit \
+		-label "Scale" -underline 1 \
+		-command "$this setSpacing"
+    }
 }
 
 #######################################################################
