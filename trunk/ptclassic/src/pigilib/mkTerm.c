@@ -80,6 +80,16 @@ struct octPoint arrowPoints[] = {
 Shape arrowShape = {
     OCT_POLYGON, arrowPoints, sizeof(arrowPoints)/sizeof(struct octPoint)
 };
+
+/* largeArrow{Point,Shape} added by Mike Chen for MatrixMessage particles */
+struct octPoint largeArrowPoints[] = {
+    {0, 0}, {-5, 8}, {5, 0}, {-5, -8}
+};
+
+Shape largeArrowShape = {
+    OCT_POLYGON, largeArrowPoints, sizeof(largeArrowPoints)/sizeof(struct octPoint)
+};
+
 /* end of arrowShape */
 
 /* boxShape defines terminal implementation */
@@ -140,11 +150,13 @@ octObject *CurrentFacetPtr;
 /*
 Caveats: Assumes that Shape has <= SHAPE_MAX points
 */
+/* thickness argument handling added 11/11/93 by Mike Chen */
 boolean
-PutShape(containPtr, objPtr, shapePtr, translatePtr)
+PutShape(containPtr, objPtr, shapePtr, translatePtr, thick)
 octObject *containPtr, *objPtr;
 Shape *shapePtr;
 struct octPoint *translatePtr;
+boolean thick;
 {
     struct octPoint buf[SHAPE_MAX], *dest, *src;
     octCoord tx, ty;
@@ -155,7 +167,8 @@ struct octPoint *translatePtr;
 
     switch (shapePtr->type) {
     case OCT_PATH:
-	objPtr->contents.path.width = (octCoord) 0;
+        if(thick) objPtr->contents.path.width = (octCoord) 5;
+        else objPtr->contents.path.width = (octCoord) 0;
     case OCT_POLYGON:
 	CK_OCT(octCreate(containPtr, objPtr));
 	src = shapePtr->points;
@@ -201,6 +214,7 @@ int totalNumber;
     octObject dummy, box, term;
     struct octPoint arrowTranslate;
     octObject *layerPtr;
+    boolean thick = FALSE;
 
     if (strcmp(type, "float") == 0 || strcmp(type, "FLOAT") == 0) {
 	layerPtr = &floatColorLayer;
@@ -216,17 +230,34 @@ int totalNumber;
 	layerPtr = &packetColorLayer;
     } else if (strcmp(type, "fix") == 0 || strcmp(type, "FIX") == 0) {
 	layerPtr = &fixColorLayer;
+    } else if (strcmp(type, "fix") == 0 || strcmp(type, "COMPLEX_MATRIX_ENV") == 0) {
+	layerPtr = &complexColorLayer;
+        thick = TRUE;
+    } else if (strcmp(type, "fix") == 0 || strcmp(type, "FIX_MATRIX_ENV") == 0) {
+	layerPtr = &fixColorLayer;
+        thick = TRUE;
+    } else if (strcmp(type, "fix") == 0 || strcmp(type, "FLOAT_MATRIX_ENV") == 0) {
+	layerPtr = &floatColorLayer;
+        thick = TRUE;
+    } else if (strcmp(type, "fix") == 0 || strcmp(type, "INT_MATRIX_ENV") == 0) {
+	layerPtr = &intColorLayer;
+        thick = TRUE;
     } else {
 	/* print error message, unknown datatype */
 	ErrAdd("Unknown datatype for terminal");
 	return FALSE;
     }
     path = terminalPath(input,position,&translation,totalNumber);
-    ERR_IF1(!PutShape(layerPtr, &dummy, path, &translation));
-    ERR_IF1(!PutShape(&wiringLayer, &box, &boxShape, &translation));
+    ERR_IF1(!PutShape(layerPtr, &dummy, path, &translation, thick));
+    ERR_IF1(!PutShape(&wiringLayer, &box, &boxShape, &translation, thick));
     CK_OCT(ohGetByTermName(facetPtr, &term, name));
     CK_OCT(octAttach(&term, &box));
-    ERR_IF1(!PutShape(layerPtr, &dummy, &arrowShape, &translation));
+    if(thick) {
+      ERR_IF1(!PutShape(layerPtr,&dummy,&largeArrowShape,&translation,thick));
+    }
+    else {
+      ERR_IF1(!PutShape(layerPtr, &dummy, &arrowShape, &translation, thick));
+    }
     if (multiple) {
 	if (input) {
 	    /* multiple input: add arrow to the right */
@@ -236,7 +267,12 @@ int totalNumber;
 	    arrowTranslate.x = translation.x - (octCoord) 5;
         }
         arrowTranslate.y = translation.y;
-        ERR_IF1(!PutShape(layerPtr, &dummy, &arrowShape, &arrowTranslate));
+        if(thick) {
+          ERR_IF1(!PutShape(layerPtr,&dummy,&largeArrowShape,&translation,thick));
+        }
+        else {
+          ERR_IF1(!PutShape(layerPtr, &dummy, &arrowShape, &translation, thick));
+        }
     }
     if (input) {
 	(void) ohCreatePropStr(&term, &dummy, "input", "");
