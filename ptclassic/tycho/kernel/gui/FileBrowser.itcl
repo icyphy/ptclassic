@@ -148,6 +148,13 @@ class ::tycho::FileBrowser {
 
     # The last file opened.
     protected common fileLastOpened {}
+
+    # The directory separator: platform-dependent
+    protected common directorySeparator
+
+    # The parent directory string: platform-dependent
+    protected common directoryParent
+
     # The directory last visited.
     protected common CWD
 
@@ -160,12 +167,34 @@ class ::tycho::FileBrowser {
     # If tab is hit again with the same entry, the directory will
     # be changed (ala Emacs)
     protected variable lastCompletion
+
+    ##################################################################
+    ####                   initialization code                    ####
+
+    # Set directory separator and parent according to platform
+    switch $tcl_platform(platform) {
+        macintosh {
+            set directorySeparator ":"
+            set directoryParent "::"
+        }
+        unix {
+            set directorySeparator "/"
+            set directoryParent "../"
+        }
+        windows {
+            set directorySeparator "/"
+            set directoryParent "../"
+	    # This is what is used to be -- according to CliffC
+	    # the forward slashes work just as well
+            # set directorySeparator "\\"
+            # set directoryParent "..\\"
+        }
+    }
 }
 
 ######################################################################
 #
 body ::tycho::FileBrowser::constructor {args} {
-    
     # The text to insert at the top of the file browser
     configure -text "Select File:"
     
@@ -205,9 +234,13 @@ body ::tycho::FileBrowser::constructor {args} {
     preference subscribeoptions $this \
 	    -width  fileBrowserWidth \
 	    -height fileBrowserHeight
+
     if [::tycho::preference get dialogs fileBrowserUseLastDirectory] {
 	# If the we prefer to always have the FileBrowser open
 	# the last directory we visted.
+
+	# Load the files into the listbox
+	updateListbox
 
         # In case updateListbox inserts into the entry; to avoid repetition
         clear entry
@@ -225,9 +258,10 @@ body ::tycho::FileBrowser::constructor {args} {
 		set CWD $default 
 		set localCWD $CWD
                 $itk_component(dir) config -text $CWD
-		updateListbox
 	    }
         }
+	# Load the files into the listbox
+	updateListbox
     }
 }
 
@@ -272,25 +306,8 @@ body ::tycho::FileBrowser::complete {{case 0}} {
         return [::tycho::ListBrowser::complete $case]
     }
     
-    global tcl_platform
-
     # not in current ListBrowser. Check if in another directory
-    global tcl_platform
-    # set separator by platform
-    switch $tcl_platform(platform) {
-        macintosh {
-            set sep ":"
-        }
-        unix {
-            set sep "/"
-        }
-        windows {
-            set sep "\\"
-        }
-    }
-
     set pattern "[get entry]"
-
     if [catch {set lastCompletion}] {
         set lastCompletion {#bogusvalue#}
     }
@@ -298,7 +315,7 @@ body ::tycho::FileBrowser::complete {{case 0}} {
     # check if tab has been hit twice. If so, change directory.
     if {$lastCompletion == $pattern} {
         if {[string index $pattern \
-                [expr [string length $pattern] - 1]] == $sep} {
+                [expr [string length $pattern] - 1]] == $directorySeparator} {
             # it's a complete directory
             set localCWD [::tycho::expandPath \
                     [file join $localCWD $pattern]]
@@ -356,7 +373,7 @@ body ::tycho::FileBrowser::complete {{case 0}} {
             set temp [lindex $matches 0]
             if [file isdir [file join $localCWD $dir $temp]] {
                 # it's a directory
-                set lastCompletion [file join $dir $temp]$sep
+                set lastCompletion [file join $dir $temp]$directorySeparator
                 setEntry $lastCompletion
             } else {
                 # just a file
@@ -448,33 +465,18 @@ body ::tycho::FileBrowser::processItem {filename} {
     global tcl_platform
     if {$filename == ""} {return 0}
    
-    if { "$tcl_platform(platform)" == "windows" } {
-	if ![regexp {^[A-Za-z]:} $filename] {
-	    set file [file join $localCWD $filename]
-	} {
-	    set file $filename
-	}
-    } else {
-	# If the name is relative, prepend with current path.
-	if [::tycho::isRelative $filename] {
-	    set file [file join $localCWD $filename]
-	} {
-	    set file $filename
-	}
+    # If the name is relative, prepend with current path.
+    if [::tycho::isRelative $filename] {
+	set file [file join $localCWD $filename]
+    } {
+	set file $filename
     }
-
     # Expand to absolute path.
     set file [::tycho::expandPath $file]
 
     # If expansion failed, trigger an error
-    if { "$tcl_platform(platform)" == "windows" } {
-	if ![regexp {^[A-Za-z]:} $file] {
-	    error "Cannot expand $filename"
-	}
-    } else {
-	if [::tycho::isRelative $file] {
-	    error "Cannot expand $filename"
-	}
+    if [::tycho::isRelative $file] {
+	error "Cannot expand $filename"
     }
     # If the file does not exist, check to see whether the
     # directory exists.  If it does, execute the command given by -command
@@ -527,9 +529,9 @@ body ::tycho::FileBrowser::processItem {filename} {
 # Files are listed next, also alphabetically.
 #
 body ::tycho::FileBrowser::updateListbox {} {
-    global tcl_platform
+
     # clear the list box
-    $itk_component(listbox) delete 0 end
+    clearListbox
     
     # Get a list of filenames in the current working directory
     set files [glob -nocomplain [file join $localCWD *]]
@@ -545,54 +547,33 @@ body ::tycho::FileBrowser::updateListbox {} {
 	    lappend fileList $tail
 	}
     }
-    
     set dirList [lsort $dirList]
     set fileList [lsort $fileList]
     
-    # Insert directories, then files into the listbox
-    switch $tcl_platform(platform) {
-	macintosh {
-	    foreach dir $dirList {
-		$itk_component(listbox) insert end "$dir:"
-	    }
-	    set updir "::"
-	}
-	unix {
-	    foreach dir $dirList {
-		$itk_component(listbox) insert end "$dir/"
-	    }
-	    set updir "../"
-	}
-	windows {
-	    foreach dir $dirList {
-		$itk_component(listbox) insert end "$dir\\"
-	    }
-	    set updir "..\\"
-	}
-    }
+    # Insert directories into the listbox
+    appendItems $dirList $directorySeparator
 
-    foreach fname $fileList {
-	$itk_component(listbox) insert end "$fname"
-    }
-    
+    # Insert the files into the listbox
+    appendItems $fileList
+
+    # Clear the entry widget
     clear entry
     
+    # Choose intelligently which default file or directory
+    # to put in the entry box.
     set dirLength [llength $dirList]
     set fileLength [llength $fileList]
     
     if {$localCWD != [::tycho::rootDir $localCWD] } {
-	$itk_component(listbox) insert 0 $updir
+	$itk_component(listbox) insert 0 $directoryParent
     }
-    
-    # Choose intelligently which default file or directory
-    # to put in the entry box.
     if {($dirLength == 1) && ($fileLength == 0)} {
 	insert entry [lindex $dirList 0]
     } elseif {($dirLength == 0) && ($fileLength == 1)} {
 	insert entry [lindex $fileList 0]
     } elseif {($dirLength == 0) && ($fileLength == 0)} {
 	if {$localCWD != [::tycho::rootDir $localCWD] } {
-	    insert entry "$updir"
+	    insert entry $directoryParent"
 	}
     }
 }
