@@ -5,7 +5,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -65,7 +65,7 @@
 # Load the HTML library, if necessary, and make adjustments.
 if {[info commands HMinit_win] == {}} {
     uplevel #0 {
-	source [file join $TYCHO lib html_library html_library.tcl]
+	source [::tycho::url join $TYCHO lib html_library html_library.tcl]
 
 	# Make format adjustments -- better than the default
 	set HMtag_map(h2) {size 20 weight bold}
@@ -142,18 +142,6 @@ class ::tycho::HTML {
     # Open a help window.
     method help {}
 
-    # Opening an HTTP connection. This returns the file name of the HTTP file.
-    method httpget {url}
-
-    # This is called by file event handler, from httpget.
-    method httpread {fd tmpfd}
-
-    # Set the global http status to "running" or "normal" or "abnormal"
-    method httpsetstatus {status}
-
-    # Wait until httpget is done.
-    method httpwait {}
-
     # Open a file and go to its internal point identified by name.
     method hyperJump {filename {point {}} {push 1}}
 
@@ -183,6 +171,9 @@ class ::tycho::HTML {
 
     # Print the selection or the entire contents.
     method print {}
+
+    # Output the rendering status from 0 (not done) to 1 (complete)
+    method progress {}
 
     # Raise the HTML browser window and the source window (if any).
     method raiseWindow {}
@@ -217,9 +208,6 @@ class ::tycho::HTML {
     # Render the given text for a particular HTML object.
     proc render {obj {html {}}} {}
 
-    # Used with httpget
-    public variable statusVariableName {}
-
     ###################################################################
     ####                     protected methods                     ####
 
@@ -241,6 +229,15 @@ class ::tycho::HTML {
     ###################################################################
     ####                      private methods                      ####
 
+    # Return currentHTMLText if it exists.
+    private method getCurrentHTML {} {
+        if [info exists currentHTMLText] {
+            return $currentHTMLText
+        } {
+            return {}
+        }
+    }
+
     # Initialize the menubar.
     private method initializeMenubar {menubar}
 
@@ -261,6 +258,9 @@ class ::tycho::HTML {
 
     # The current HTML text (saved so re-rendering is possible)
     private variable currentHTMLText
+
+    # The length of the current HTML text
+    private variable currentHTMLLength
     
     # Size modification for quick font changes  
     private variable fontOffset 0
@@ -425,7 +425,7 @@ body ::tycho::HTML::constructor {args} {
 	    -underlinelinks underlineLinks
 
     if {$itk_option(-directory) == {}} {
-        configure -directory [file dirname [filename]]
+        configure -directory [::tycho::url dirname [filename]]
     }
 
     bind $text <space> "$this scroll 1; break"
@@ -493,7 +493,7 @@ body ::tycho::HTML::altFile {} {
 #
 body ::tycho::HTML::appletViewer {} {
      ::tycho::execModal "appletviewer [filename]" \
-             [file dirname [filename]]
+             [tycho::url dirname [filename]]
 }
 
 #####################################################################
@@ -565,9 +565,20 @@ body ::tycho::HTML::downSize {} {
 body ::tycho::HTML::execTcl {x y} {
     set cmd [getTaggedText tcl]
     if {$cmd != {}} {
+        set tags [[textWinName] tag names @$x,$y]
+        # Handle tcl java tags
+        if {[lsearch -exact $tags tcljava] > 0} {
+            global tyjavapresent
+            if {![info exists tyjavapresent]} {
+                ::tycho::htmlmessage {Sorry, this command will only work in a\
+                        Tycho binary that has Java inside. See the \
+                <a href="$TYCHO/java/doc/index.html">Java</a> page for more \
+                information.}
+                return
+            }
+        }
 	set result [uplevel #0 $cmd]
         if {$result != {}} {
-            set tags [[textWinName] tag names @$x,$y]
             if {[lsearch -exact $tags tclq] < 0} {
                 safeEval ::tycho::inform "Returned:\n$result"
             } {
@@ -618,109 +629,7 @@ body ::tycho::HTML::forward {} {
 body ::tycho::HTML::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    [file join $TYCHO kernel doc usersGuides HTMLHelp.html]
-}
-
-#########################################################################
-#### httpget
-# Opening an HTTP connection. This returns the file name of the HTTP file.
-#
-body ::tycho::HTML::httpget {url} {
-    # FIXME: need to find out where to collect protocols that Tycho
-    # understands:
-    set accept {text/*}
-
-    #puts "Going to get url: $url"
-    # 
-    # The following is verbatim from Surfit: vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    if {[regexp -nocase {^http://([^/:]*)(:([^/]+))?(.*)} $url match \
-            host optport port path]} {
-        if {$host == {}} {set host $localhost}	;# Supply reasonable default
-        if {$port == {}} {set port 80}		;# HTTP default service
-        if {$path == {}} {set path /}
-    } else {
-        # Recover from malformed URL
-        if {![string match */* $var(path)]} {
-            # Assume only the hostname:port has been given
-            regexp {([^:]*)(:(.*))?} $var(path) all host optport port
-            if {$host == {}} {set host localhost}
-            if {$port == {}} {set port 80}
-            set path /
-        } else {
-            error "no hostname given in URL \"$url\""
-        }
-    }
-    puts "$host:$port, GET $path HTTP/1.0"
-    if {[catch {socket -async $host $port} fd]} {
-        unset $fd
-        error "Can't open $host, $port"
-    }
-    # Surfit ends here ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-    # Wait until finished reading HTTP file
-    set tmpFile [::tycho::tmpFileName cache].html
-    set tmpfd [open $tmpFile "w"]
-    set statusVariableName [::tycho::autoName httpgetStatus]
-    httpStatus $statusVariableName "running"
-
-    # connect now!
-    fconfigure $fd -blocking no -translation crlf
-    puts $fd "GET $path HTTP/1.0\
-            User-Agent: Tycho Jr. Beta\
-            Accept-Encoding: $accept"
-    puts $fd ""
-    flush $fd
-    fconfigure $fd -translation auto
-
-    ::tycho::safeUpdate $this
-    fileevent $fd w {}
-    fileevent $fd r "$this httpread $fd $tmpfd"
-
-    # Wait until the entire http file is here!
-    httpwait
-
-    return $tmpFile
-}
-
-#########################################################################
-#### httpwait
-# Wait until the variable name has been changed.
-body ::tycho::HTML::httpwait {} {
-    global $statusVariableName
-    puts "status: $statusVariableName"
-    if {[uplevel #0 "set $statusVariableName"]=="running"} {
-        tkwait variable $statusVariableName
-    }
-    return [uplevel #0 "set $statusVariableName"]
-}
-
-#########################################################################
-#### httpsetstatus
-# Helper function to set the global variable
-# This is used so that tkwait can wait for
-# the global variable to change from "running" to either
-# "normal" or "abnormal"
-
-proc httpStatus {name value} {
-    global $name
-    set $name $value
-}
-
-#########################################################################
-#### httpread
-# This is called by file event handler, from httpget.
-#
-body ::tycho::HTML::httpread {fd tmpfd} {
-    if [eof $fd] {
-        httpStatus $statusVariableName "done"
-	catch {close $fd}
-	catch {close $tmpfd}
-	puts "closing $fd $tmpfd"
-    } else {
-	gets $fd line
-	#puts ">$line"
-        puts $tmpfd $line
-    }
+	    [::tycho::url join $TYCHO kernel doc usersGuides HTMLHelp.html]
 }
 
 #####################################################################
@@ -751,37 +660,47 @@ body ::tycho::HTML::httpread {fd tmpfd} {
 
 body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
     if {$filename != {}} {
-        # If this is a http link, make sure to download it to our
-        # "cache" first. FIXME: Right now there's no cache, just temporary
-        # files.
-        if {[regexp -nocase {^http://} $filename]} {
-            # Translate from a http file to a local file (later cache).
-            set filename [httpget $filename]
-            puts "filename:$filename, done:[$this httpwait]"
-
-            hyperJump $filename
-            reload
+        # Mail protocol is an except of a resource, since the only
+        # allowable operations on it are: open, puts, and close.
+        # We need to create a new editor (EditMail).
+        if [regexp -nocase {^mailto:} $filename] {
+            set mailinfo [::tycho::ResourceMail::splitURL $filename]
+            ::tycho::view EditMail -toolbar 1 \
+                    -mailto "[lindex $mailinfo 0]@[lindex $mailinfo 1]" \
+                    -textheight [expr [preference get textHeight] - 8]
             return
         }
-	# Use isRelative, not 'file pathtype' so that we handle paths
-	# that start with ~ and $.
-	if [::tycho::isRelative $filename] {
-            set filename [format "%s/%s" \
-                    [file dirname [filename]] $filename]
-        }
-        set filename [::tycho::expandPath $filename]
 
-        # If the file is a directory, open "index.html" in that directory,
-        # if it exists, otherwise display the contents of the directory.
-        if [file isdirectory $filename] {
-            set newfilename [format "%s/%s" $filename index.html]
-            if [file exists $newfilename] {
+        # Process the image given absolute&&remote path
+        if {$push==0} {
+            # Push 0 means back, so filename is always absolute!
+            set filename $filename
+        } elseif {    [::tycho::url pathtype $filename] == "absolute" && \
+                [::tycho::url protocol $filename] != ""} {
+            # exception2: join /tmp/tarsky http://ptolemy] = http://ptolemy
+            # exception2: join http://weld http://ptolemy] = http://ptolemy
+            # We need this exception because [::tycho::url join] is stupid.
+            set filename $filename
+        } elseif {[string match \$* $filename] || [string match ~* $filename]} {
+            # if it begins $PTOLEMY, $TYCHO, ~eal, etc.
+            set image [::tycho::expandPath $filename]
+        } else {
+            set filename [::tycho::url join \
+                    [::tycho::url dirname [filename]] $filename]
+        }
+
+        # If the file is a local directory, and index.html exists, open it.
+        # Otherwise just display the contents of the local directory.
+        set contenttype [::tycho::resource contenttype $filename]
+        if {$contenttype=="directory"} {
+            set newfilename [::tycho::url join $filename index.html]
+            if [::tycho::resource exists $newfilename] {
                 set filename $newfilename
                 unset newfilename
             } else {
 		global ptolemyfeature
 		if { $ptolemyfeature(octtools) && \
-                        [file exists [file join \
+                        [::tycho::resource exists [::tycho::url join \
                         $filename schematic {contents;}]]} {
 		    # If Ptolemy is present, then open this as a facet
                     ::pvOpenWindow [::ptkOpenFacet \
@@ -794,7 +713,7 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
                 if $push {
                     pushNextHTMLFile
                 }
-                configure -directory [file dirname $filename]
+                configure -directory [::tycho::url dirname $filename]
                 configure -file $filename
                 toolbar clear location
                 toolbar insert location $filename
@@ -814,10 +733,19 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
         # If the filename has the ".html", ".htm", or ".htl" extension, open it
         # in this window (unless it is already open in another window or
         # we are not inside a Displayer).
-        set ext [file extension $filename]
-        if {($ext == ".html" || $ext == ".htm" || $ext == ".htl" || \
-            [isAnImageFileExtension $ext]) && \
+        set ext [::tycho::url extension $filename]
+        if {   ([string match "text/html" $contenttype] || \
+                [isAnImageFileExtension $ext]) && \
                 [displayer] != {}} {
+            # IF this is a html file, make sure that the path name
+            # is augmented to the correct name. For example,
+            #   http://ptolemy/~kchang 
+            # should be augmented to:
+            #   http://ptolemy/~kchang/
+            ::tycho::resource stat $filename tmpstat
+            if {[info exists tmpstat(url)]} {
+                set filename $tmpstat(url)
+            }
 
             # Special care is required here because there might be a
             # source file open for either the old or the new file. If
@@ -834,7 +762,7 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
             }
 
             # If the destination file does not exist, issue a message.
-            if ![file readable $filename] {
+            if ![::tycho::resource readable $filename] {
                 ::tycho::warn \
                         "File does not exist or is not readable:\n$filename"
                 return
@@ -853,7 +781,7 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
 		    -background $var(S_bgcolor) \
 		    -foreground $var(S_fgcolor)
 
-            configure -directory [file dirname $filename]
+            configure -directory [::tycho::url dirname $filename]
             configure -file $filename
             toolbar clear location
             toolbar insert location $filename
@@ -862,12 +790,9 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
             # try to preserve the point in the file.
             $itk_component(text) mark set insert 1.0
 
-            # Handle Image files specially
-	    if [isAnImageFileExtension $ext] {
-		insertData "<img src=\"$filename\" alt=\"$filename\">"
-	    } else {
-                reload
-            }
+            # Reload the file -- images files will be handled specially
+            # in reload{}
+            reload
 
             if {$point != {}} {
                 after 200 [list $this seeFragment $point]
@@ -882,9 +807,26 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
         }
     }
 
+    # Here's a nasty little hack in order to display download
+    # progress: if the file is remote, start a progress display
+    # and then open the file in order to force a download.
+    # FIXME: Should do a read as well, since some protocols
+    # may not download until read. Leave this until Tcl8.0
+    # so it will work with binary data too.
+    # FIXME: This code is repeated from download{} -- can we
+    # be more oganized about this?!
+    if [::tycho::resource isremote $filename] {
+        set obj [::tycho::resource new $filename]
+        statusbar progress \
+                "[string toupper [::tycho::url protocol $filename]] Download" \
+                "$obj progress"
+        $obj open "r"
+        $obj close
+    }
+
     # The file is not an HTML file, or is not specified,
-    # so defer to File.
-    ::tycho::File::hyperJump $filename $point
+    # so defer to the superclass.
+    chain $filename $point
 }
 
 #####################################################################
@@ -893,7 +835,10 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
 #
 body ::tycho::HTML::insertData {data} {
     stopRendering
+
     set currentHTMLText $data
+    set currentHTMLLength [string length $data]
+
     # This is done in the background so that construction completes.
     # The time delays seems to be necessary to ensure that the window
     # gets mapped immediately.
@@ -917,18 +862,18 @@ body ::tycho::HTML::insertDirectoryContents {dirname} {
     # so that we can align the text properly.
     set spaceString "                   "
 
-    set dirFiles [lsort [glob -nocomplain $dirname/*]]
+    set dirFiles [lsort [glob -nocomplain [::tycho::url join $dirname *]]]
     foreach dirFile $dirFiles {
         # If the filename is over 20 chars long, truncate it and add ...
-        set shortName [file tail $dirFile]
-        if [file isdirectory $dirFile] {
+        set shortName [::tycho::url tail $dirFile]
+        if [::tycho::resource isdirectory $dirFile] {
             # FIXME Unixism?  We are adding a / here, what about mac and windows
             set shortName "$shortName/"
         }
         if {[string length $shortName] > 20} {
             set shortName "[string range $shortName 0 16]..."
         }
-        if [catch {file stat $dirFile stat} msg] {
+        if [catch {::tycho::resource stat $dirFile stat} msg] {
             set toc [format \
                     "%s<br><A HREF=\"%s\">%s</A>%s  Couldn`t stat\n" \
                     $toc $dirFile \
@@ -1020,6 +965,24 @@ body ::tycho::HTML::print {} {
 }
 
 #####################################################################
+#### progress
+# output the current progress of rendering. This is more
+# important than the status of a download of a particular
+# file because user cares about the entire HTML progress,
+# not individual files.
+#
+body ::tycho::HTML::progress {} {
+    if !$isrendering {
+        return 1
+    } else {
+        # putStatus [uplevel #0 \[set HMrender_progress([component text])\]]"
+        # after idle "$this progress"
+        expr [uplevel #0 set HMrender_progress([component text])] \
+                / double($currentHTMLLength)
+    }
+}
+
+#####################################################################
 #### raiseWindow
 # Raise this window and also the source window, if it is open.
 #
@@ -1041,13 +1004,29 @@ body ::tycho::HTML::raiseWindow {} {
 # <code>insertData</code>.
 #
 body ::tycho::HTML::reload {} {
-    # Handle Image files specially
-    set ext [file extension [filename]]
+    set filename [filename]
+    
+    # Here's a nasty little hack in order to display download
+    # progress: if the file is remote, start a progress display
+    # and then open the file in order to force a download.
+    # FIXME: Should do a read as well, since some protocols
+    # may not download until read. Leave this until Tcl8.0
+    # so it will work with binary data too.
+    if [::tycho::resource isremote $filename] {
+        set obj [::tycho::resource new $filename]
+        statusbar progress \
+                "[string toupper [::tycho::url protocol $filename]] Download" \
+                "$obj progress"
+        $obj open "r"
+        $obj close
+    }
 
+    # Handle Image files specially
+    set ext [::tycho::url extension $filename]
     if [isAnImageFileExtension $ext] {
         clear
         insertData \
-                "<img src=\"[filename]\" alt=\"[filename]\">"
+                "<img src=\"$filename\" alt=\"$filename\">"
     } else {
         ::tycho::File::reload
     }
@@ -1241,9 +1220,8 @@ body ::tycho::HTML::windowMenuRemoveAll {filename} {
 #
 body ::tycho::HTML::render {obj {html {}}} {
     if {[info objects $obj] == {} || ![$obj isa ::tycho::HTML]} {return}
-
     if {$html == {}} {
-        set html $currentHTMLText
+        set html [$obj getCurrentHTML]
     }
     # Cancel previous rendering if necessary.
     if [$obj isRendering] {
@@ -1265,7 +1243,27 @@ body ::tycho::HTML::render {obj {html {}}} {
     # Put the insertion cursor at the top
     $tktext mark set insert 1.0
     $tktext mark gravity insert left
+
     HMreset_win $tktext
+
+    # Start the progress display. This has to use a global array because
+    # the HMrender is not in the context of this class.
+    uplevel #0 "set HMrender_progress($tktext) 0"
+    $obj statusbar progress "HTML Rendering" "$obj progress"
+
+    # Remove HTML comments. This will barf on nested comments
+    # (are they legal anyway?)
+    set filtered {}
+    while { [regexp -indices {<!--} $html idx] } {
+        append filtered [string range $html 0 [expr [lindex $idx 0] - 1]]
+        set html [string range $html [lindex $idx 1] end]
+        if ![regexp -indices -- {-->} $html idx] {
+            break
+        }
+        set html [string range $html [expr [lindex $idx 1] + 1] end]
+    }
+    append filtered $html
+    set html $filtered
 
     # Note that the following parsing operation results in many
     # calls to update, which can result in the widget $this being destroyed.
@@ -1344,13 +1342,13 @@ body ::tycho::HTML::configureContextMenu {} {
     ::tycho::TWidget::configureContextMenu
 
     if { $itk_option(-file) != "" && $itk_option(-file) != "NoName" } {
-	set link [file split $itk_option(-file)]
+	set link [::tycho::url split $itk_option(-file)]
 	set path [lrange $link 0 [expr [llength $link] - 4]]
 	set fname [join [concat \
 		[lreplace [split [lindex $link end] .] end end] "itcl"] .]
-	set link [eval file join $path $fname]
+	set link [eval ::tycho::url join $path $fname]
 
-	if { [file exists $link] } {
+	if { [::tycho::resource exists $link] } {
 	    contextmenu add "Open source" \
 		    -command "$this hyperJump $link"
 	}
@@ -1425,7 +1423,7 @@ body ::tycho::HTML::initializeToolbar {toolbar} {
     $toolbar button home \
 	    -description {Go to the Tycho home page} \
             -text Home -command "$this hyperJump \
-	    [file join \$TYCHO doc index.html]"
+	    [::tycho::url join \$TYCHO doc index.html]"
     
     $toolbar button reload \
 	    -description {Reload and reparse from the file} \
@@ -1492,12 +1490,17 @@ body ::tycho::HTML::sourcewinIsMine {} {
 # Return 1 if the extension is the extension of an image file.
 #
 body ::tycho::HTML::isAnImageFileExtension {ext} {
-    return [expr {($ext == ".gif" || $ext == ".ppm" || $ext == ".pgm" || \
-		    $ext == ".xbm") && [displayer] != {}}]
+    # Make sure extension is case insensitive
+    return [expr {([regexp -nocase "^.gif" $ext] || \
+            [regexp -nocase "^.ppm" $ext] || \
+            [regexp -nocase "^.pgm" $ext] || \
+            [regexp -nocase "^.xbm" $ext] || \
+            [regexp -nocase "^.jpg" $ext] || \
+            [regexp -nocase "^.jpeg" $ext]) && [displayer]!={} }]
 }
 
 
-    ###################################################################
+    ##################################################################
     ###################################################################
     ####         modifications to the HTML library                 ####
 
@@ -1607,7 +1610,6 @@ proc HMcurrent_tags {win} {
 #   val:    The variable to put the value into (use key as default)
 
 proc HMextract_param {param key {val ""}} {
-
     if {$val == ""} {
         upvar $key result
     } else {
@@ -1626,7 +1628,7 @@ proc HMextract_param {param key {val ""}} {
         set result $value
         return 1
     }
-    
+
     # now look for valueless names
     # I should strip out name=value pairs, so we don't end up with "name"
     # inside the "value" part of some other key word - some day
@@ -1661,7 +1663,7 @@ proc HMgoto {win where {callback HMwent_to}} {
     # so we can't use regexp or string match, we must use lsearch -exact
     if {[lsearch -exact [$win mark names] "N:$where" ] != -1} {
 	catch {$win see "N:$where"}
-	update
+        update
 	eval $callback $win [list $where]
 	return 1
     } else {
@@ -1712,20 +1714,21 @@ proc HMinit_state {win} {
 #######################################################################
 #### HMlink_callback
 # Override the HTML library definition for the hyperlink callback
-# function. This does not at this time support HTTP, but does support
-# files and names within a file. If the window lies within an HTML
+# function. File/Resource now have support for HTTP! However, it
+# still doesn't have ftp and mailto, which will be implemented this
+# week. Files and names within a file work perfectly.
+# If the window lies within an HTML
 # widget, and the link is to another HTML file, then we reuse the same
 # window to display the referenced file. Otherwise, we open a new
 # window.
 #
 proc HMlink_callback {win href} {
-
     if {![winfo exists $win]} {return}
 
     # Get the name of the HTML widget.
     set HTML [uplevel #0 winfo command [winfo megawidget $win]]
 
-    if [regexp {^http:|^ftp:|^gopher:|^news:|^mailto:|^telnet:|^wais:} \
+    if [regexp {^gopher:|^news:|^telnet:|^wais:} \
 	    $href] {
 	if ![::tycho::askuser "OK to invoke netscape to view $href?"] {
             # The user said no, so just return
@@ -1787,6 +1790,13 @@ proc HMlink_callback {win href} {
 # procedure called HMtag_$tag, then that procedure is invoked.
 #
 proc HMrender {win tag not param text} {
+# puts HMrender:$win
+    # Update the count used to track current progress.
+    # This is in a global array because this proc is global...
+    uplevel #0 "set HMrender_progress($win) \
+            \[expr \[set HMrender_progress($win)\] \
+            + [string length "<> $tag $not $param $text"]\]"
+
     upvar #0 HM$win var
     if {$var(stop)} return
     global HMtag_map HMinsert_space_map HMlist_elements
@@ -1887,27 +1897,49 @@ proc HMset_image {win handle src} {
     set HTML [uplevel #0 winfo command [winfo megawidget $win]]
 
     # If the slowNetwork misc preference is set, then don't display images.
-    if {[$HTML isSlowNetwork] == 0} {
-        # if it's an absolute path
-        if {[file pathtype $src] == "absolute"} {
+    if {![$HTML isSlowNetwork]} {
+        # Process the image given absolute&&remote path
+        if {    [::tycho::url pathtype $src] == "absolute" && \
+                [::tycho::url protocol $src] != ""} {
             set image $src
-        } else {     
+        } elseif {[string match \$* $src] || [string match ~* $src]} {
             # if it begins $PTOLEMY, $TYCHO, ~eal, etc.
-            if {[string match \$* $src] || [string match ~* $src]} {
-                set image [::tycho::expandPath $src]
-            } else {
-                set image [file join [uplevel #0 $HTML lastDirectory] $src]
-            }
+            set image [::tycho::expandPath $src]
+        } else {
+            set image [::tycho::url join \
+                    [uplevel #0 $HTML lastDirectory] $src]
         }
 
-        update
+        # For some reason there was an update here. This is REALLY
+        # bad because the widget can get deleted and make the
+        # call to HMgot_image generate an error. So we took it out.
+        # update
         if {[string first " $image " " [image names] "] >= 0} {
             HMgot_image $handle $image
         } else {
             set type photo
-            if {[file extension $image] == ".bmp"} {set type bitmap}
-            catch {image create $type $image -file $image} image
-            HMgot_image $handle $image
+            set ext [string tolower [::tycho::url extension $image]]
+            if {$ext==".bmp" || $ext==".xbm"} {set type bitmap}
+
+            # FIXME: The following is hacked because JPG isn't supported
+            if {$ext==".jpg" || $ext==".jpeg"} {
+                # FIXME: Make sure that if "convert" isn't installed or
+                # when we're not on UNIX, error is caught
+                catch {
+                    set cachefile [::tycho::resource cachefile $image]
+                    eval exec convert -quality 5 $cachefile $cachefile.gif
+                    eval exec rm $cachefile
+                    set image $cachefile.gif
+                }
+            }
+
+            # Put the image creation in a catch in case of 
+            # unknown image type or corrupt image file.
+            if { ! [catch {image create $type $image -file \
+                    [::tycho::resource cachefile $image]} image] } {
+                # If successful, load the image
+                HMgot_image $handle $image
+            }
         }
     }
 }
@@ -2105,6 +2137,9 @@ proc HMtag_dt {win param text} {
 proc HMtag_dd {win param text} {
     upvar #0 HM$win var
     upvar $text data
+    # FIXME: This is a hack since this is crashing on some web sites
+    # Sometimes var(sawdd) doesn't even exist!
+    if {![info exists var(sawdd)]} {set var(sawdd) 0}
     if {$var(sawdd) == 0} {
         # If we have not yet seen a dd, then indent one level.
         set var(sawdd) 1
@@ -2158,7 +2193,7 @@ proc HMtag_/font {win param text} {
 
 #######################################################################
 #### HMtag_img
-# Like the original HMtag_img, but we don't barf on align=right
+# Like the original HMtag_img, but we don't barf on align=right or left
 # 
 #           Inline Images
 # This interface is subject to change
@@ -2180,12 +2215,20 @@ proc HMtag_img {win param text} {
 
 	# get alignment
 	array set align_map {top top    middle center    bottom bottom}
-	set align bottom		;# The spec isn't clear what the default should be
+        # The spec isn't clear what the default should be
+        set align bottom		
 	HMextract_param $param align
-	catch {set align $align_map([string tolower $align])}
+        # Convert to small right now for later comparisons
+        set align [string tolower $align]
+	catch {set align $align_map($align)}
 
-	# FIXME: we can't handle right alignment of images.
-	if {[string tolower $align] == "right" } {
+        # The following are attempts to skip functionalities that
+        # have not been implemented in Tycho yet.
+
+	# FIXME: we can't handle left or right alignment of images.
+        # Actually we can't handle anything that not Tk native
+        if {    $align!="baseline" && $align!="bottom" && \
+                $align!="center" && $align!="top"} {
 	    set align bottom
 	}
 
@@ -2203,20 +2246,27 @@ proc HMtag_img {win param text} {
 	# otherwise just make the label
 	set item $win.$var(tags)
 	# catch {destroy $item}
-	if {[HMextract_param $param width] && [HMextract_param $param height]} {
-		frame $item -width $width -height $height
-		pack propagate $item 0
-		set label $item.label
-		label $label
-		pack $label -expand 1 -fill both
+        if {[HMextract_param $param width] && [HMextract_param $param height]} {
+            # FIXME: we can't specify the width by %
+            if {[regexp {([0-9]+)%$} $width _ new_width]} {
+                set width $new_width
+            }
+            if {[regexp {([0-9]+)%$} $height _ new_height]} {
+                set width $new_height
+            }
+            frame $item -width $width -height $height
+            pack propagate $item 0
+            set label $item.label
+            label $label
+            pack $label -expand 1 -fill both
 	} else {
-		set label $item
-		label $label 
+            set label $item
+            label $label 
 	}
-
 	$label configure -relief ridge -fg orange -text $alt
 	catch {$label configure -bd $border}
-	$win window create $var(S_insert) -align $align -window $item -pady 2 -padx 2
+        $win window create $var(S_insert) \
+                -align $align -window $item -pady 2 -padx 2
 
 	# add in all the current tags (this is overkill)
 	set tags [HMcurrent_tags $win]
@@ -2228,15 +2278,15 @@ proc HMtag_img {win param text} {
         set HTML [uplevel #0 winfo command [winfo megawidget $win]]
         if { [$HTML isa ::tycho::View] == 1} {
             # Add a binding for links to display the destination.
-            bind $label <Enter> "$HTML linkEnter {} {} %W"
+            bind $label <Enter> "$HTML linkEnter {} {} $item"
             
             # If we don't have a <Motion> tag for the link, then if we
             # have several links stacked on top of each other
             # horizontally, the status bar
             # is not updated as we move the mouse from link to link
-            bind $label <Motion> "$HTML linkEnter {} {} %W"
+            bind $label <Motion> "$HTML linkEnter {} {} $item"
             bind $label <Leave> "$HTML statusbar puts {}"
-            bind $label <1> "$HTML linkHitSubWindow %W"
+            bind $label <1> "$HTML linkHitSubWindow $item"
         }
 
 	# set imagemap callbacks
@@ -2247,9 +2297,9 @@ proc HMtag_img {win param text} {
 		global HMevents
 		regsub -all {%} $link {%%} link2
 		foreach i [array names HMevents] {
-			bind $label <$i> "catch \{%W configure $HMevents($i)\}"
+			bind $item <$i> "catch \{%W configure $HMevents($i)\}"
 		}
-		bind $label <1> "+HMlink_callback $win $link2?%x,%y"
+		bind $item <1> "+HMlink_callback $win $link2?%x,%y"
 	} 
 
 	# now callback to the application
@@ -2286,13 +2336,21 @@ proc HMtag_tcl {win param text} {
     set HTML [winfo megawidget $win]
     set HTMLcommand [winfo command $HTML]
 
-    # Set the color
     set color [::tycho::preference get viewhtml tclColor]
     $win tag configure tcl -foreground $color
     $win tag bind tcl <Double-Button-1> \
-            "uplevel #0 $HTMLcommand execTcl %x %y; break"
+		"uplevel #0 $HTMLcommand execTcl %x %y; break"
+
     if {[HMextract_param $param quiet]} {
         set var(Ttclq) tclq
+    }
+
+    # If we have <tcl java> and java is not present in the binary,
+    # then print a better error message if the user mouses on the tag
+    # It would be nice if we could just not color the text, but all
+    # tcl tags have the same color.
+    if {[HMextract_param $param java]} {
+        set var(Ttcljava) tcljava
     }
 
     # We used to reduce the size here to compensate for the
@@ -2306,6 +2364,9 @@ proc HMtag_/tcl {win param text} {
     upvar #0 HM$win var
     if {[info exists var(Ttclq)]} {
         unset var(Ttclq)
+    }
+    if {[info exists var(Ttcljava)]} {
+        unset var(Ttcljava)
     }
     HMstack $win / "Ttcl {} size {}"
 }

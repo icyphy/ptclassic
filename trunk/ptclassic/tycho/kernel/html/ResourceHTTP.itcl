@@ -96,11 +96,11 @@ class ::tycho::ResourceHTTP {
     # Write to the file
     method write {data}
 
+    # Get a cached copy of the dataasdf
+    method cachefile {}
+
     ###################################################################
     ####                           public procs                    ####
-
-    # Get a cached copy of the data
-    method cachefile {}
 
     # Change the permissions of a resource
     proc chmod {permissions path}
@@ -789,8 +789,8 @@ body ::tycho::ResourceHTTP::httpget {url type} {
 
     # Set up the file events for incoming data
     ::fileevent $socketid w {}
-    ::fileevent $socketid readable \
-	    "@scope ::tycho::ResourceHTTP [list $this httpread]"
+    ::fileevent $socketid readable [list catch \
+	    [list @scope ::tycho::ResourceHTTP [list $this httpread]]]
 
     # Request the URL
     # FIXME: Need to figure out how to set the Accept-Encoding field
@@ -885,6 +885,7 @@ body ::tycho::ResourceHTTP::httpread {} {
 	    } elseif { $requestMode == "header" } {
 		# If in header-only mode, we're done!
 		httpdone
+                return
 	    } else {
                 # Going to get body next
                 fconfigure $socketid -translation lf
@@ -918,8 +919,9 @@ body ::tycho::ResourceHTTP::httpread {} {
     if { $notifycommand != "" } {
 	uplevel #0 $notifycommand
     }
-    after idle "catch \[list ::fileevent $socketid readable \
-	    \"@scope ::tycho::ResourceHTTP [list $this httpread]\"\]"
+    after idle [list ::fileevent $socketid readable \
+	    [list catch [list @scope ::tycho::ResourceHTTP \
+            [list $this httpread]]]]
 }
 
 #########################################################################

@@ -3,7 +3,7 @@
 # @Version: $Id$
 # @Author: H. John Reekie
 #
-# @Copyright (c) 1990-%Q% The Regents of the University of California.
+# @Copyright (c) 1990-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -92,7 +92,7 @@ class ::tycho::StatusBar {
     ####                       private variables                   ####
 
     # The delay between updates (in psuedo-milliseconds)
-    private variable updateInterval 100
+    private variable updateInterval 250
 
     # The current file status setting
     private variable filestatus "readwrite"
@@ -304,7 +304,8 @@ body ::tycho::StatusBar::progress {{label {}} {command {}}} {
 		# Redraw the progress bar
 		drawProgress $progress
 		if { $progress < 1.0 } {
-		    after $updateInterval "$this progress"
+                    # Catch, since widget could be deleted before the progress
+		    after $updateInterval [list catch "$this progress"]
 		}
 	    } else {
                 # There's a terrible error! Display the bar fully
@@ -316,7 +317,9 @@ body ::tycho::StatusBar::progress {{label {}} {command {}}} {
 	$itk_component(progressLabel) configure -text $label:
 	set progressCommand $command
 	drawProgress 0
-	after $updateInterval "$this progress"
+        puts "THIS: $this"
+        # Catch, since widget could be deleted before the progress updates
+        after $updateInterval [list catch "$this progress"]
     }
 }
 

@@ -119,6 +119,8 @@ proc ::tycho::resourceClass {path {procname {}} args} {
 # <dd> Test if a resource exists and is a file.
 # <dt><b>isremote</d> _path_
 # <dd> Test if a resource is remote. (It may not exist.)
+# <dt><b>mkdir</d> _path_
+# <dd> Create a new directory at the given path.
 # <dt><b>mtime</d> _path_
 # <dd> Get the last-modified time of the resource (what format?)
 # <dt><b>new</d> _path_ ?_option value_ ...?
@@ -202,6 +204,10 @@ ensemble ::tycho::resource {
     option mtime {path} {
 	::tycho::resource stat $path results
 	return $results(mtime)
+    }
+    # Create a new directory
+    option mkdir {path} {
+	::tycho::resourceClass $path mkdir
     }
     # Get a new resource object
     option new {path args} {
@@ -570,7 +576,7 @@ body ::tycho::Resource::chmod {permissions path} {
 #
 body ::tycho::Resource::contenttype {path} {
     set ext [string tolower [file extension $path]]
-    if       { $ext == ".html" || $string == ".htm" } {
+    if       { $ext == ".html" || $ext == ".htm" } {
         return "text/html"
     } elseif { $ext == ".gif" } {
         return "image/gif"

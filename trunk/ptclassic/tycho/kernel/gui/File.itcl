@@ -5,7 +5,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -116,9 +116,9 @@ class ::tycho::File {
     method autoSave {}
 
     # In derived classes, clear the data being displayed or edited.
-    method clear {} {}
+    method clear {}
 
-    method compareTo {} {}
+    method compareTo {}
 
     # Query the user for a filename, then evaluate its contents as Tcl commands.
     method evaluate {}
@@ -165,11 +165,11 @@ class ::tycho::File {
     # Create a revision control object for the current file.  
     method revisionControl {}
 
-    # Save to a given filename or if none is given, to the current file.
-    method save {{name ""}}
+    # Save to the current file.
+    method save {}
 
     # Open the file browser to save to some other file name.
-    method saveAs {}
+    method saveAs {args}
 
     # Change the associated file to the specified file name and then save.
     method saveAsFile {filename}
@@ -235,17 +235,14 @@ class ::tycho::File {
     # Initialize the menu/status/tool bars
     protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
 
+    # Write the data to the given file
+    protected method saveFile {filename}
+
     # Return the data to be saved. Redefine in derived classes.
     protected method saveText {}
 
     ##########################################################################
     ####                         protected variables                      ####
-
-    # FIXME: This should be removed when Itk is fixed to understand
-    # public variables.
-
-    # The expanded path to the current file.
-    private variable completeFilePath "NoName"
 
     # This array stores object names indexed by file names so that
     # if the same file is opened a second time, we can just raise
@@ -284,10 +281,18 @@ class ::tycho::File {
     private proc checkForAutoSaveFiles {filename} {}
 
     # Given a class name, if it is not fully qualified, qualify it.
-    private proc normalizeClassname {classname}
+    # REMOVED because it's not used anywhere. What's it doing in
+    # this file anyhow??? -- hjr
+    # private proc normalizeClassname {classname}
 
     ##########################################################################
     ####                         private variables                        ####
+
+    # The expanded path to the current file.
+    private variable completeFilePath "NoName"
+
+    # The object representing the current resource.
+    private variable resourceObject ""
 
     # List of registered viewing commands by extension.
     private common editorsExtension
@@ -327,7 +332,7 @@ class ::tycho::File {
 # <code>::tycho::expandPath</code> for details about how this is done.
 # Note that the file is not actually loaded.  Call <code>reload</code>
 # after configuring this option to accomplish that (the constructor does
-# this automatically)
+# this automatically).
 #
 configbody ::tycho::File::file {
     set completeFilePath $itk_option(-file)
@@ -335,6 +340,12 @@ configbody ::tycho::File::file {
         if {$itk_option(-file) != {NoName}} {
             set completeFilePath [::tycho::expandPath $completeFilePath]
         }
+	# Check and delete the old resource object
+	if { $resourceObject != "" \
+		&& [$resourceObject path] != $completeFilePath } {
+	    delete object $resourceObject
+	    set resourceObject ""
+	}
         if {[info exists filesOpen($completeFilePath)] \
                 && ![$filesOpen($completeFilePath) getReadOnly] \
                 && !$readOnly} {
@@ -382,6 +393,13 @@ configbody ::tycho::File::file {
 	    event delete <<Cut>> <Control-Key-x>
 	}
     }
+    # If there's no resource object, create one
+    if { $resourceObject == "" } {
+	if { $completeFilePath != "" && $completeFilePath != "NoName" } {
+	    set resourceObject [::tycho::resource new $completeFilePath]
+	}
+    }
+    # Hocus pocus
     focusin
 }
 
@@ -455,7 +473,7 @@ body ::tycho::File::destructor {} {
 	    saveQuery $useSaveAs
             file delete $copyFilename
 	} else {
-	    saveQuery 
+	    saveQuery
 	}
     }
 
@@ -470,34 +488,6 @@ body ::tycho::File::destructor {} {
     # only on a successful save.
     # removeBackupFiles
 }
-
-#####################################################################
-#### compareTo
-#
-# Compare the current file with another one, using EditDiff
-#
-body ::tycho::File::compareTo {} {
-    global filename1 filename2
-    # FIXME: When global, filenames are constant. Maybe we should
-    # change this to be private instead?
-    
-    if {![winfo exists $diffWidget]} {
-        set diffWidget [::tycho::view EditDiff -toolbar 1 -textheight 32]
-        puts "Created $diffWidget"
-    }
-    $diffWidget configure -filename1 $completeFilePath
-    $diffWidget configureUpdate
-    
-    $diffWidget configure -filename2 \
-            [safeEval ::tycho::queryfilename {File to compare with:}]
-    $diffWidget configureUpdate
-    
-    # Update the second file
-    if {[$diffWidget cget -filename2]!={}} {
-        $diffWidget compareFile
-    }
-}
-
 
 #########################################################################
 #########################################################################
@@ -518,9 +508,14 @@ body ::tycho::File::altFile {} {
     if {$filename != {}} {
 	configure -file $filename
 	windowMenuRemoveAll $prevfile
+
         # Reset the insertion cursor to the origin, or else we will
         # try to preserve the point in the file.
-        $itk_component(text) mark set insert 1.0
+	# NOTE: This is completely bogus -- a File widget
+	# might not have a text component!!!! I removed it and
+	# the method still seems to work fine... -- hjr 5/30/97
+        # $itk_component(text) mark set insert 1.0
+
         markUnmodified
         reload
     }
@@ -536,14 +531,21 @@ body ::tycho::File::altFile {} {
 #
 body ::tycho::File::autoSave {} {
     if !$itk_option(-save) {return}
-    if {$modified && $completeFilePath != ""} {
-	set filename [file tail $completeFilePath]
-        set filename "#auto#$filename"
-	set filename [file join [file dirname $completeFilePath] $filename]
-	if {[catch "save $filename" message] != 0} {
-	    safeEval ::tycho::warn "Auto-save failed: $message"
+    if {$modified && $completeFilePath != "" } {
+	# Only save local files
+	if ![::tycho::resource isremote $completeFilePath] {
+	    set filename [::tycho::url tail $completeFilePath]
+	    set filename "#auto#$filename"
+	    set filename [::tycho::url join \
+		    [::tycho::url dirname $completeFilePath] $filename]
+	    if {[catch "saveFile $filename" message] != 0} {
+		statusbar putStatus "Auto-save failed: $message"
+		# This is what we used to do:
+		# safeEval ::tycho::warn "Auto-save failed: $message"
+	    }
+	    # Commented out -- why would it be necessary??? -- hjr
+	    # markModified
 	}
-	markModified
     }
     set interval [expr int(60000*$itk_option(-autosaveinterval))]
     if {$interval < 0 || $interval > 7200000} {
@@ -555,9 +557,32 @@ body ::tycho::File::autoSave {} {
 }
 
 #####################################################################
-#### compareTo
-# Query the second file name, then compare it with the current file
+#### clear
+# Reset internal data. 
+# In this base class, trigger an error. Subclasses should
+# override.
 #
+body ::tycho::File::clear {} {
+    error "Sorry, clear not implemented yet."
+}
+
+#####################################################################
+#### compareTo
+# Compare the current file with another one, using EditDiff
+#
+body ::tycho::File::compareTo {} {
+    
+    if {![winfo exists $diffWidget]} {
+        set diffWidget [::tycho::view EditDiff -toolbar 1 -textheight 32]
+    }
+    $diffWidget configure -filename1 $completeFilePath
+    
+    set file2 [safeEval ::tycho::queryfilename {File to compare with:}]
+    if { $file2 != "" } {
+        $diffWidget configure -filename2 $file2
+        $diffWidget compareFile
+    }
+}
 
 #####################################################################
 #### evaluate
@@ -567,7 +592,7 @@ body ::tycho::File::evaluate {} {
     set filename [safeEval ::tycho::queryfilename {Tcl file to evaluate:}]
 
     if {$filename != {}} {
-	source $filename
+	::tycho::resource source $filename
     }
 }
 
@@ -602,18 +627,19 @@ body ::tycho::File::help {} {
 #
 body ::tycho::File::hyperJump {filename {point {}}} {
     if {$filename != {}} {
-	if [::tycho::isRelative $filename] {
-            set filename [file join \
-                    [file dirname $completeFilePath] $filename]
+	if { [::tycho::url pathtype $filename] == "relative" } {
+            set filename [::tycho::url join \
+                    [::tycho::url dirname $completeFilePath] $filename]
         }
     }
-    ::tycho::TWidget::hyperJump $filename $point
+    chain $filename $point
 }
 
 #####################################################################
 #### insertData
 # Insert the specified data.
-# In this base class, trigger an error.
+# In this base class, trigger an error. Subclases should
+# override to insert data and call markModified{}.
 #
 body ::tycho::File::insertData {data} {
     error "Sorry, insert data not implemented yet."
@@ -629,12 +655,9 @@ body ::tycho::File::insertFile {} {
     set filename [safeEval ::tycho::queryfilename {File to insert:}]
 
     if {$filename != "" && $filename != "NoName"} {
-	if {[file exists $filename]} {
-	    if {[file readable $filename]} {
-		set fd [open $filename r]
-		set data [read $fd]
-		close $fd
-		insertData $data
+	if {[::tycho::resource exists $filename]} {
+	    if {[::tycho::resource readable $filename]} {
+		insertData [::tycho::resource read $filename]
                 markModified
 	    } {
 		safeEval ::tycho::warn "File is not readable: $filename"
@@ -694,7 +717,7 @@ body ::tycho::File::openItclHTMLPage {} {
 	set itclhtmlpage [::tycho::expandPath $itclhtmlpage]
     }
     
-    if [file exists $itclhtmlpage] {
+    if [::tycho::resource exists $itclhtmlpage] {
         ::tycho::File::openContext "$itclhtmlpage"
     } else {
 	error "Sorry, $itclhtmlpage does not exist. You can\nuse\
@@ -716,7 +739,7 @@ body ::tycho::File::openWinMethod {} {
     ::tycho::Dialog::new FileBrowser [::tycho::autoName .fileBrowser] \
 	    -command "::tycho::File::openContext " \
 	    -text "Open File:" \
-            -default $completeFilePath
+            -initial $completeFilePath
 }
 #####################################################################
 #### print
@@ -752,16 +775,16 @@ body ::tycho::File::reload {} {
     # it won't break anything else. See the method comment.
     # saveQuery
     set saveclipboard [getClipboard]
-    if [file exists $completeFilePath] {
-        if [file readable $completeFilePath] {
+    if [::tycho::resource exists $completeFilePath] {
+        if [::tycho::resource readable $completeFilePath] {
 	    configure -readonly 0
             set point [currentPoint]
             clear
-            set fd [open $completeFilePath r]
-            insertData [read $fd]
-            close $fd
+            $resourceObject open "r"
+            insertData [$resourceObject read]
+            $resourceObject close
             seeFragment $point
-            if {[file writable $completeFilePath]} {
+            if {[::tycho::resource writable $completeFilePath]} {
 		configure -readonly 0
             } else {
 		configure -readonly 1
@@ -793,43 +816,49 @@ body ::tycho::File::revisionControl {} {
 
 #####################################################################
 #### save
-# Save to a file, with an optional filename specified.  If no filename
-# is specified, then the name given in the -file option is used.
-# If no -file option was given, the given name is "NoName", or
-# the name begin with "#auto#" or "#crash#", then saveAs is invoked.
+# Save the widget contents to its current file. If the current filename
+# is null or "NoName," 
+# then invoke saveAs{} so the user can specify the name to save
+# the file as. If it begins with "#auto#" or "#crash#", invoke
+# saveAs{} with arguments to open the file browser in the correct
+# directory and a suitable default file name. Otherwise just
+# save the file, remove backup files, and mark it unmodified.
 # Return 1 if it successfully saves, and 0 (or an error) otherwise.
 #
-body ::tycho::File::save {{name ""}} {
-    if {$name == {}} {
-	set filename $completeFilePath
-    } {
-	set filename $name
-    }
-    set ft [file tail $filename]
-    if {$name == {} && \
-            ([string match {#auto#*} $ft] || [string match {#crash#*} $ft])} {
+body ::tycho::File::save {} {
+    set filename $completeFilePath
+    set ft [::tycho::url tail $filename]
+    if {([string match {#auto#*} $ft] || [string match {#crash#*} $ft])} {
         # The file was automatically created.  Invoke saveAs in the
         # proper directory with the proper default.
-        ::tycho::FileBrowser::setCWD [file dirname $filename]
         regsub {(#auto#)|(#crash#)} $ft {} prefname
-        ::tycho::FileBrowser::setLastFile $prefname
-	if {[saveAs] == 0} {return 0}
-        set filename $completeFilePath
+        if { $prefname == "NoName" } {
+            if { ! [saveAs -initial $filename] } {
+                return 0
+            }
+        } else {
+            if { ! [saveAs -initial $filename -filename $prefname] } {
+                return 0
+            }
+        }
     } elseif {$filename != {} && $filename != "NoName"} {
-        set txt [saveText]
-	set fd [open $filename w+]
-	puts -nonewline $fd $txt
-	close $fd
-    } {	
+	# Only save if it's been modified. NOTE: this used to
+	# always save -- was there a reason for it or was that
+	# an artifact of the earlier implementation of this method?
+	if [isModified] {
+	    saveFile $filename
+	    removeBackupFiles
+	    markUnmodified
+	    putStatus "Saved $filename"
+	} else {
+	    putStatus "No changes to save"
+	}
+    } else {
 	# The file has not been specified.  Invoke saveAs
-	if {[saveAs] == 0} {return 0}
-        set filename $completeFilePath
+	if { ! [saveAs] } {
+            return 0
+        }
     }
-    if {$name == ""} {
-	removeBackupFiles
-    }
-    markUnmodified
-    putStatus "Saved $filename"
     return 1
 }
 
@@ -837,52 +866,70 @@ body ::tycho::File::save {{name ""}} {
 #### saveAs
 # Invoke the file browser to prompt the user for a file name,
 # and then, if the file is writable or creatable, save the contents
-# of the editor to that file.  Note that in the base class, this
-# will eventually fail because we do not know how to save.
+# of the editor to that file.  The user will be queried
+# if the name inserted by the user already exists.
+# Note that in the base class, this will eventually fail
+# because the saveText{} method is not implemented.
+# Optional arguments can be given to this method: the
+# *-initial* option will be passed to the file browser and
+# will cause the file browser to open in that directory
+# if the user has the fileBrowserUseLastDirectory option turned
+# off. If not given, the browser will be opened in the same
+# directory as this widget's file. The *-filename* option will 
+# place a string into the file browser's entry box and force the
+# file browser to change to the directory given by *-initial*
+# (unless it is null). Return 0 or cause a silent error if
+# not successfully saved, otherwise return 1.
 #
-body ::tycho::File::saveAs {} {
-    set filename [safeEval ::tycho::queryfilename {Save As File:}]
-    if {$filename == {NoName}} {
-	error "Cannot use name NoName"
+body ::tycho::File::saveAs {args} {
+    array set opt [concat [list \
+            -initial $completeFilePath -filename {}] $args]
+
+    set filename [safeEval ::tycho::queryfilename \
+	    {Save As File:} \
+	    $opt(-initial) \
+	    $opt(-filename)]
+
+    # Prevent saving files as "NoName"
+    if { [::tycho::url tail $filename] == {NoName}} {
+	::tycho::warn "Cannot use name \"NoName\""
+	return 0
     }
-    # Ignore if the user cancels
-    if {$filename != {}} {
-	return [saveAsFile $filename]
-    } {
-        return 0
+    # Ignore if the user canceled
+    if {$filename == {}} {
+	return 0
     }
+    # Check if file already exists
+    if {[::tycho::resource exists $filename]} {
+	if { ! [safeEval ::tycho::askuser \
+                "File \"$filename\" exists.  Overwrite?"] } {
+	    # File exists and user cancelled, so exit
+            focusin
+            ::tycho::silentError
+	}
+    }
+    # Everything's OK, so save it
+    saveAsFile $filename
+    return 1
 }
 
 #####################################################################
 #### saveAsFile
-# Change the associated file to the specified file name and then save.
+# Change the associated file to the specified file name and then save,
+# remove backup files, and change the title of the window.
 # Return 1 if the save is successful.  Return 0 or trigger an error
-# if the save is not successful.
+# if the save is not successful. Subclasses can override this method
+# to modify the save-as policy (for example, not changing the
+# name of the window title, as in the TclShell class).
 #
 body ::tycho::File::saveAsFile {filename} {
-    if {[file exists $filename]} {
-	if [safeEval ::tycho::askuser \
-                "File \"$filename\" exists.  Overwrite?"] {
-	    removeBackupFiles
-            if [save $filename] {
-                configure -file $filename
-                return 1
-            }
-	} {
-            focusin
-            ::tycho::silentError
-	}
-    } {
-	removeBackupFiles
-	set oldname $itk_option(-file)
-	if [save $filename] {
-            configure -file $filename
-            focusin
-	    return 1
-	}
-    }
+    saveFile $filename
+    markUnmodified
+    configure -file $filename
     focusin
-    return 0
+    putStatus "Saved $filename"
+    removeBackupFiles
+    return 1
 }
 
 #####################################################################
@@ -893,10 +940,13 @@ body ::tycho::File::saveAsFile {filename} {
 #
 body ::tycho::File::saveCrash {} {
     if {$modified && $completeFilePath != ""} {
-	set filename [file tail $completeFilePath]
-        set filename "#crash#$filename"
-	set filename [file join [file dirname $completeFilePath] $filename]
-	save $filename
+	if ![::tycho::resource isremote $completeFilePath] {
+	    set filename [::tycho::url tail $completeFilePath]
+	    set filename "#crash#$filename"
+	    set filename [::tycho::url join \
+		    [::tycho::url dirname $completeFilePath] $filename]
+	    saveFile $filename
+	}
     }    
 }
 
@@ -919,7 +969,7 @@ body ::tycho::File::saveCrash {} {
 #
 body ::tycho::File::saveQuery { {useSaveAs 0}} {
     if {$modified == 1 && $itk_option(-save)} {
-	set title [file tail $completeFilePath]
+	set title [::tycho::url tail $completeFilePath]
         set nm [::tycho::autoName .filedestr]
         uplevel #0 [list ::tycho::YesNoCancel $nm \
 		-text "Save changes to $title?"]
@@ -964,22 +1014,21 @@ body ::tycho::File::toggleReadOnly {} {
         }
     }
 
-
     set revclass [::tycho::RevControl::whichRevClass $this]
     if {$revclass != {}} {
-        if {![file writable [filename]]} {
+        if {![::tycho::resource writable [filename]]} {
             $revclass::checkOut $this
         } {
             $revclass::checkIn $this
         }
     } {
         # NOTE: Unix-only implementation here.
-        if ![file exists [filename]] {
+        if ![::tycho::resource exists [filename]] {
             saveQuery
         }
-        if [file exists [filename]] {
-            if ![file writable [filename]] {
-                catch {exec chmod +w [filename]}
+        if [::tycho::resource exists [filename]] {
+            if ![::tycho::resource writable [filename]] {
+		catch {::tycho::resource chmod [filename] "+w"}
                 configure -readonly 0
             } {
                 if {$modified} {
@@ -990,7 +1039,7 @@ body ::tycho::File::toggleReadOnly {} {
                         save
                     }
                 }
-                catch {exec chmod -w [filename]}
+                catch {::tycho::resource chmod [filename] "-w"}
                 configure -readonly 1
             }
         } {
@@ -1148,7 +1197,7 @@ body ::tycho::File::openWin {{megawidget {}}} {
         ::tycho::Dialog::new FileBrowser [::tycho::autoName .fileBrowser] \
                 -command "::tycho::File::openContext " \
                 -text "Open File:" \
-                -default [$megawidget filename]
+                -initial [$megawidget filename]
     }
 }
 
@@ -1231,7 +1280,8 @@ body ::tycho::File::registerContents \
 	{contents filecommand {description {}} {editorclass {}}} {
     set editorsContents($contents) $filecommand
     if {$description != {}} {
-	lappend windowMenuEntries [list $filecommand $description $editorclass]
+	lappend windowMenuEntries \
+                [list $filecommand $description $editorclass]
     }
 }
 
@@ -1270,7 +1320,8 @@ body ::tycho::File::registerExtensions \
 	set editorsExtension($extension) $filecommand
     }
     if {$description != {}} {
-	lappend windowMenuEntries [list $filecommand $description $editorclass]
+	lappend windowMenuEntries \
+                [list $filecommand $description $editorclass]
     }
 }
 
@@ -1307,7 +1358,8 @@ body ::tycho::File::registerFilenames \
 	set editorsFilename($name) $filecommand
     }
     if {$description != {}} {
-	lappend windowMenuEntries [list $filecommand $description $editorclass]
+	lappend windowMenuEntries \
+                [list $filecommand $description $editorclass]
     }
 }
 
@@ -1318,13 +1370,21 @@ body ::tycho::File::registerFilenames \
 # returned value the registered command for opening a file.
 #
 body ::tycho::File::registeredCommands {name} {
-    if [file isdirectory $name] {
+    if [::tycho::resource isdirectory $name] {
+        # FIXME: For now, do not try and do this test
+        # on remote directories. The test for a VEM
+        # facet (schematic) every time I access a remote
+        # directory is a complete pain...
+        if [::tycho::resource isremote $name] {
+            return ""
+        }
         if {[info exists editorsContents]} {
             set fname [::tycho::expandPath $name]
             foreach cnt [array names editorsContents] {
                 set recognized 1
                 foreach file $cnt {
-                    if ![file exists [file join $fname $file]] {
+                    if ![::tycho::resource exists \
+			    [::tycho::url join $fname $file]] {
                         set recognized 0
                         break
                     }
@@ -1336,8 +1396,8 @@ body ::tycho::File::registeredCommands {name} {
         }
         return {}
     } {
-	set ext [file extension $name]
-	set base [file tail $name]
+	set ext [::tycho::url extension $name]
+	set base [::tycho::url tail $name]
         if {[info exists editorsExtension] && \
                 [info exists editorsExtension($ext)]} {
             return $editorsExtension($ext)
@@ -1389,7 +1449,7 @@ body ::tycho::File::windowMenuRemoveAll {filename} {
 body ::tycho::File::winGetByRootName {rootname} {
     set arrayNm [array names filesOpen]
     foreach filename $arrayNm {
-        set name [file rootname [file tail $filename]]
+        set name [::tycho::url rootname [::tycho::url tail $filename]]
         if {$name == $rootname} {
             return $filesOpen($filename)
         }
@@ -1404,12 +1464,12 @@ body ::tycho::File::winGetByRootName {rootname} {
 #####################################################################
 #### initialize
 # Initialize the menu, status, and toolbars associated with this widget.
-# The root (view) class sets up the menubar methods in it's initialize
+# The root (view) class sets up the menubar methods in its initialize
 # via the chain command, which should always be the first command in
 # this method.
 # 
-# This method is called by it's displayer when attachView is called (usually
-# in ::tycho::view
+# This method is called by its displayer when attachView is called
+# (usually in <code>::tycho::view</code>).
 #
 body ::tycho::File::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
     chain $menubar $statusbar $toolbar
@@ -1425,6 +1485,25 @@ body ::tycho::File::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
 
     if {$completeFilePath != "NoName"} {
         windowMenuAddAll $completeFilePath
+    }
+}
+
+#####################################################################
+#### saveFile
+# Save this widget's data to the given file. In this class, the
+# data is returned by the saveText{} method; subclasses can
+# override this method if the saved data is different.
+#
+body ::tycho::File::saveFile {filename} {
+    set txt [saveText]
+    # If a resource object exists, use it, otherwise call
+    # ::tycho::resource
+    if { $resourceObject != "" && [$resourceObject path] == $filename } {
+	$resourceObject open "w+"
+	$resourceObject write $txt
+	$resourceObject close
+    } else {
+	::tycho::resource write $filename $txt
     }
 }
 
@@ -1611,12 +1690,25 @@ body ::tycho::File::initializeMenubar {menubar} {
 # if it exists.  Also remove the crash-recovery file, if it exists.
 #
 body ::tycho::File::removeBackupFiles {} {
-    set savefile [file join [file dirname $completeFilePath] \
-            "#auto#[file tail $completeFilePath]"]
-    file delete -force $savefile
-    set savefile [file join [file dirname $completeFilePath] \
-            "#crash#[file tail $completeFilePath]"]
-    file delete -force $savefile
+    # If remote, there are no backup files
+    if [::tycho::resource isremote $completeFilePath] {
+	return
+    }
+    set filetail [::tycho::url tail $completeFilePath]
+    set dirname [::tycho::url dirname $completeFilePath]
+
+    set savefile [::tycho::url join $dirname "#auto#$filetail"]
+    # FIXME -- add -force option to ::tycho::resource delete
+    # ::tycho::resource delete -force $savefile
+    if [::tycho::resource exists $savefile] {
+	::tycho::resource delete $savefile
+    }
+    set savefile [::tycho::url join $dirname "#crash#$filetail"]
+    # FIXME -- add -force option to ::tycho::resource delete
+    # ::tycho::resource delete -force $savefile
+    if [::tycho::resource exists $savefile] {
+	::tycho::resource delete $savefile
+    }
 }
 
 
@@ -1634,16 +1726,23 @@ body ::tycho::File::removeBackupFiles {} {
 #
 body ::tycho::File::checkForAutoSaveFiles {filename} {
 
+    # If a remote file, there are no backups
+    if [::tycho::resource isremote $filename] {
+	return $filename
+    }
+
     # Get the names of the backup and crash recovery files.
-    set filetail [file tail $filename]
-    set emerfile [file join [file dirname $filename] "#crash#$filetail"]
-    set backfile [file join [file dirname $filename] "#auto#$filetail"]
+    set filetail [::tycho::url tail $filename]
+    set dirname [::tycho::url dirname $filename]
+    set emerfile [::tycho::url join $dirname "#crash#$filetail"]
+    set backfile [::tycho::url join $dirname "#auto#$filetail"]
 
     # See whether a backup or crash recovery files exists and is
     # newer than the file being opened.
-    if [file exists $emerfile] {
-	if [file exists $filename] {
-	    if {[file mtime $emerfile] > [file mtime $filename]} {
+    if [::tycho::resource exists $emerfile] {
+	if [::tycho::resource exists $filename] {
+	    if {[::tycho::resource mtime $emerfile] > \
+		    [::tycho::resource mtime $filename]} {
 		if [::tycho::askuser "A crash recovery file exists for\
 			$filename. \
 			\nDo you wish to open it instead?"] {
@@ -1651,16 +1750,17 @@ body ::tycho::File::checkForAutoSaveFiles {filename} {
 		}
 	    }
 	} else {
-	    if [::tycho::askuser "A crash recover file exists, but\
+	    if [::tycho::askuser "A crash recovery file exists, but\
 		    $filename does not.\
 		    \nDo you wish to open the crash recovery file instead?"] {
 		return $emerfile
 	    }
 	}
     }
-    if [file exists $backfile] {
-	if [file exists $filename] {
-	    if {[file mtime $backfile] > [file mtime $filename]} {
+    if [::tycho::resource exists $backfile] {
+	if [::tycho::resource exists $filename] {
+	    if {[::tycho::resource mtime $backfile] > \
+		    [::tycho::resource mtime $filename]} {
 		if [::tycho::askuser "A newer auto-save file exists\
 			for $filename. \
 			\nDo you wish to open it instead?"] {
@@ -1668,7 +1768,7 @@ body ::tycho::File::checkForAutoSaveFiles {filename} {
 		}
 	    }
 	} else {
-	    if [::tycho::askuser "A auto-save file exists, but \
+	    if [::tycho::askuser "An auto-save file exists, but \
 		    $filename does not.\
 		    \nDo you wish to open the auto-save file instead?"] {
 		return $backfile
@@ -1686,10 +1786,15 @@ body ::tycho::File::checkForAutoSaveFiles {filename} {
 # That is, if it begins with "::", then return it unchanged.
 # Otherwise, prepend "::tycho::" and return the modified classname.
 #
-body ::tycho::File::normalizeClassname {classname} {
-    if [string match {::*} $classname] {
-        return $classname
-    } {
-        return "::tycho::$classname"
+# Since this private and not called in this file, I guess we can
+# get rid of it... -- hjr 5/27/97
+#
+set bogusjunkstuff {
+    body ::tycho::File::normalizeClassname {classname} {
+	if [string match {::*} $classname] {
+	    return $classname
+	} {
+	    return "::tycho::$classname"
+	}
     }
 }
