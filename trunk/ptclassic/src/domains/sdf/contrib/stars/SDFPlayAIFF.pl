@@ -191,14 +191,14 @@ void
 SDFPlayAIFF::WriteFileHeader()
 {
    // Write the file header
-   Chunk form = {0,0,0};
+   Chunk form = {"",0,""};
    strncpy(form.ckID, "FORM", 4);
    strncpy(form.formType, "AIFF", 4);
    form.ckSize = 0;      // Have to rewrite later
    WriteChunk(form);
 
    // Start the SSND chunk
-   ChunkHeader ssnd = {0.0,0};
+   ChunkHeader ssnd = {"",0};
    strncpy(ssnd.ckID, "SSND", 4);
    ssnd.ckSize = 0;           // Have to rewrite later
    WriteChunkHeader(ssnd);
@@ -366,7 +366,7 @@ SDFPlayAIFF::double_to_extended(unsigned char *ps, double pd)
 void
 SDFPlayAIFF::WriteCommHeader()
 {
-   ChunkHeader comm = {0,0,0};
+   ChunkHeader comm = {"",0};
    strncpy(comm.ckID, "COMM", 4);
    comm.ckSize = 18;
    WriteChunkHeader(comm);
