@@ -67,53 +67,53 @@ proc ::tycho::resourceClass {path {procname {}} args} {
 # which provides syntactic manipulation of URL-style names.) The options
 # are:
 # <dl>
-# <dt><b>cachefile</b> _path_
+# <dt><code>cachefile</code> _path_
 # <dd> Return the name of a cached copy of the file. This is provided
 # solely for the purpose of working around Tk's lack of support
 # for binary data, and should not be used unless absolutely necessary.
 # <i>Do not delete or write to the cache file.</i> An error will be
 # triggered if this is not a streamable resource.
-# <dt><b>contenttype</b> 
+# <dt><code>contenttype</code> 
 # <dd> Return the type of the content (binary, text/*, etc...)
-# <dt><b>chmod</b> _path_ _mode_
+# <dt><code>chmod</code> _path_ _mode_
 # <dd> Change access permissions of a resource. The exact values of
 # _mode_ has not yet been determined but is probably a subset of the
 # first argument to the UNIX *chmod* command.
-# <dt><b>delete</b> _path_
+# <dt><code>delete</code> _path_
 # <dd> Delete the given file. Will trigger an error if the file
 # does not exist or is not writable.
-# <dt><b>dirlist</b> _path_
+# <dt><code>dirlist</code> _path_
 # <dd> Get a listing of a directory. Sub-directories have names
 # ending in a slash; files do not.
-# <dt><b>executable</b> _path_
+# <dt><code>executable</code> _path_
 # <dd> Test if a resource is executable. <b>FIXME</b>: what does this
 # mean for directories -- should be adopt the bogus UNIX convention?
-# <dt><b>exists</b> _path_ ?_timeout_?
+# <dt><code>exists</code> _path_ ?_timeout_?
 # <dd> Test if a resource exists. If the _timeout_ argument is given
 # and the resource is remote, this procedure will return zero when that
 # time expires.
-# <dt><b>isdirectory</b> _path_
+# <dt><code>isdirectory</code> _path_
 # <dd> Test if a resource exists and is a directory.
-# <dt><b>isfile</b> _path_
+# <dt><code>isfile</code> _path_
 # <dd> Test if a resource exists and is a file.
-# <dt><b>isremote</b> _path_
+# <dt><code>isremote</code> _path_
 # <dd> Test if a resource is remote. (It may not exist.)
-# <dt><b>mkdir</b> _path_
+# <dt><code>mkdir</code> _path_
 # <dd> Create a new directory at the given path.
-# <dt><b>mtime</b> _path_
+# <dt><code>mtime</code> _path_
 # <dd> Get the last-modified time of the resource (what format?)
-# <dt><b>new</b> _path_ ?_option value_ ...?
+# <dt><code>new</code> _path_ ?_option value_ ...?
 # <dd> Create a new resource object, passing any options to its constructor.
 # The connect{} method will be called on the new object.
-# <dt><b>read</b> _path_ ?_timeout_?
+# <dt><code>read</code> _path_ ?_timeout_?
 # <dd> Return the contents of a resource. An error is signaled if the
 # resource is not streamable. An error is also signaled if the resource
 # is remote and access times out on the optional _timeout_ argument.
-# <dt><b>readable</b> _path_
+# <dt><code>readable</code> _path_
 # <dd> Test if a resource exists and is readable.
-# <dt><b>size</b> _path_
+# <dt><code>size</code> _path_
 # <dd> Get the size in bytes of a resource.
-# <dt><b>source</b> _path_ ?_timeout_?
+# <dt><code>source</code> _path_ ?_timeout_?
 # <dd> Source the contents of a resource as a Tcl script. An error is
 # signaled if the
 # resource is not streamable. An error is also signaled if the resource
@@ -121,9 +121,9 @@ proc ::tycho::resourceClass {path {procname {}} args} {
 # <dd> Get the status of a resource into the array _varName_. The
 # indexes of the array may vary, but <code>mtime</code> and <code>size</code>
 # are guaranteed.
-# <dt><b>writable</b> _path_
+# <dt><code>writable</code> _path_
 # <dd> Test if a resource exists and is writable.
-# <dt><b>write</b> _path_ _data_ ?_timeout_?
+# <dt><code>write</code> _path_ _data_ ?_timeout_?
 # <dd> Write data to a resource. An error is signaled if the
 # resource is not streamable. An error is also signaled if the resource
 # is remote and access times out on the optional _timeout_ argument.
