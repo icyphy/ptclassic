@@ -283,12 +283,8 @@ The full path and facet name for the definition of blockname.
 	    access { protected }
 	    arglist { "(PortHole* po, GenericPort* source)" }
 	    code {
-		GenericPort *gp = po->aliasFrom();
-		if (gp == 0) {
-		  // Check for a multiporthole alias
-		  MultiPortHole *mph = po->getMyMultiPortHole();
-		  if (mph != 0) gp = mph->aliasFrom();
-		}
+		GenericPort *gp = aliasPointingAt(po);
+
 		const char* initDelayVals;
 		PortHole* farside = po->far();
 		if (!farside) {
@@ -309,17 +305,47 @@ The full path and facet name for the definition of blockname.
 							  farside->parent()->name(),
 							  farside->name());
 		}
+		fixAliases(gp,po,source);
+		return 1;
+	    }
+	}
+	// Find a port (if any) with an alias pointing to po.
+	// If there is none, check to see whether po is a port in
+	// in a MultiPortHole that has an aliase pointing to it.
+	// Return a pointer to the generic port with the alias, or zero.
+	method {
+	  name { aliasPointingAt }
+	  type { "GenericPort*" }
+	  access { protected }
+	  arglist { "(PortHole *po)" }
+	  code {
+	    GenericPort *gp = po->aliasFrom();
+	    if (gp == 0) {
+	      // Check for a multiporthole alias
+	      MultiPortHole *mph = po->getMyMultiPortHole();
+	      if (mph != 0) gp = mph->aliasFrom();
+	    }
+	    return gp;
+	  }
+	}
+	// Given a port gp with an alias to another port po,
+	// change its alias to point to source and clear the aliases in po.
+	method {
+	  name { fixAliases }
+	  type { void }
+	  access { protected }
+	  arglist { "(GenericPort *gp, PortHole* po, GenericPort *source)" }
+	  code {
 		// Fix aliases if any
 		if (gp != 0) {
 		  // The following prevents a later destruction of
 		  // the po porthole from undoing the alias fix below.
-		  po->clearAliases();
+		  if (po) po->clearAliases();
 		  // Note that this can have the effect of making a
 		  // MultiPortHole have a PortHole as an alias
 		  gp->setAlias(*source);
 		}
-		return 1;
-	    }
+	  }
 	}
 	method {
 	    name { setParams }
