@@ -40,7 +40,9 @@ CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # Include path
-INCL = -I$(KERNDIR)
+CGKERNEL = 	$(ROOT)/src/domains/cg/kernel
+
+INCL =		-I$(CGKERNEL) -I$(KERNDIR)
 
 # Library name
 LIB=libacs.$(LIBSUFFIX)
