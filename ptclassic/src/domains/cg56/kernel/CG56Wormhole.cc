@@ -115,7 +115,7 @@ void CG56fromUniversal :: sendData ()
 
 	if (tokenNew) {
 		// 2. put data
-		putData();
+//		putData();
 
 	} 
 
