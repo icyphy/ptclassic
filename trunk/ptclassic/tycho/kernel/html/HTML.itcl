@@ -681,11 +681,14 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
         if {$push==0} {
             # Push 0 means back, so filename is always absolute!
             set filename $filename
-        } elseif {    [::tycho::url pathtype $filename] == "absolute" && \
+        } elseif { [::tycho::url pathtype $filename] == "absolute" && \
                 [::tycho::url protocol $filename] != ""} {
             # exception2: join /tmp/tarsky http://ptolemy] = http://ptolemy
             # exception2: join http://weld http://ptolemy] = http://ptolemy
-            # We need this exception because [::tycho::url join] is stupid.
+            # We need to take care of this case because it's impossible
+            # to make "::tycho::url join" sensibly take care of it
+            # without considerable cost to all other clients, regardless
+            # of what Kevin thinks.
             set filename $filename
         } elseif {[string match \$* $filename] || [string match ~* $filename]} {
             # if it begins $PTOLEMY, $TYCHO, ~eal, etc.
