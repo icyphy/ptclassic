@@ -757,7 +757,7 @@ body ::tycho::Slate::moverelease {id} {
 # then the items are treated as a rectangle.
 #
 body ::tycho::Slate::moveto {tag x y aspect args} {
-    set current [eval aspect $tag $aspect $args]
+    set current [eval [list aspect $tag $aspect] $args]
     set x [expr $x - [lindex $current 0]]
     set y [expr $y - [lindex $current 1]]
     $canvas move $tag $x $y
@@ -1221,8 +1221,8 @@ body ::tycho::Slate::shapecall {tag method args} {
 	}
     }
 
-    # Remember the Shape class
-    set class ::tycho::[::tycho::capitalize [eval shape* $tag $args]]
+    # Get the Shape class
+    set class ::tycho::[::tycho::capitalize [eval [list shape* $tag] $args]]
     # Call the procedure
     eval $class::_$method $tag $canvas $this $args
 }
