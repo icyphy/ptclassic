@@ -44,7 +44,7 @@ proc ::tycho::welcomeMessage {{binary ""} {version ""}} {
 	.welcome raiseWindow
     } {
 	# FIXME: Get version and executable information.
-	uplevel #0 [list WelcomeMessage .welcome \
+	uplevel #0 [list ::tycho::WelcomeMessage .welcome \
 		-version $version \
 		-executable $binary \
 		-persistent 0]
@@ -55,11 +55,11 @@ proc ::tycho::welcomeMessage {{binary ""} {version ""}} {
 # COMPATIBILITY procedures.  The following procedures emulate the behavior
 # of similarly named procedures in pigi, the predecessor to Tycho.
 #
-proc ptkStartupMessage {version executable} {
+proc ::ptkStartupMessage {version executable} {
     if [winfo exists .welcome] {
 	.welcome raiseWindow
     } {
-	WelcomeMessage [autoName .welcome] \
+	::tycho::WelcomeMessage [::tycho::autoName .welcome] \
 		-version $version \
 		-executable $executable \
 		-persistent 0
@@ -97,7 +97,7 @@ class ::tycho::WelcomeMessage {
 #
 body ::tycho::WelcomeMessage::constructor {args} {
 
-    global TYCHO
+    global ::TYCHO
     # An option -palette 3/3/2 below restricts the palette,
     # but it is better to restrict it in the source.
     if {!$tychogifexists} {
@@ -108,25 +108,25 @@ body ::tycho::WelcomeMessage::constructor {args} {
 
     # Pack the copyright button.
     addButton copyright -text "Copyright" -command \
-	    "::File::openContext $TYCHO/copyright"
+	    "::tycho::File::openContext $TYCHO/copyright"
 
     # Pack the introduction button.
-    addButton intro -text "Introduction" -command \
-	    "::File::openContext $TYCHO/kernel/doc/introduction.html"
+    addButton intro -text "Home Page" -command \
+	    "::tycho::File::openContext $TYCHO/doc/index.html"
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
 
     # Arrange for destruction, if appropriate.
     if {!$itk_option(-persistent)} {
-	after 40000 [list catch [list delete object $this]]
+	after 40000 [code [list catch [code delete object $this]]]
     }
 
     # Construct the HTML message that forms the welcome message.
     append html "<center>"
     append html "<color value=firebrick><h1>Welcome to Tycho</h1></color>"
     if {$itk_option(-version) != {}} {
-	append html "Version: $itk_option(-version)"
+	append html "$itk_option(-version)"
     }
     if {$itk_option(-executable) != {}} {
 	append html \
@@ -141,7 +141,7 @@ body ::tycho::WelcomeMessage::constructor {args} {
 	    {limitation of liability,<br>} \
 	    {and disclaimer of warranty provisions</a>}
 
-    append html "<h1><a href=$TYCHO/kernel/doc/introduction.html>" \
+    append html "<h1><a href=$TYCHO/doc/index.html>" \
 	    {Introduction to Tycho</a></h1>}
 
     configure -html $html
