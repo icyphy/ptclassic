@@ -106,8 +106,7 @@ void UniProcessor :: createSubGal() {
 
 	// create data structure
 	LOG_DEL; delete subGal;
-	LOG_NEW; subGal = new Galaxy;
-//	LOG_NEW; subGal = new DynamicGalaxy;
+	LOG_NEW; subGal = new DynamicGalaxy;
 	subGal->setNameParent(targetPtr->name(), 0);
 
 	// maintain the list of the SDF stars which we have considered
