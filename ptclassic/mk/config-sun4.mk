@@ -23,8 +23,13 @@ X11_LIBSPEC = -L/usr/X11/lib -lX11
 CC_STATIC = -Bstatic
 
 # Variables for Pure Inc tools (purify, purelink, quantify)
-COLLECTOR = -collector=/users/ptdesign/vendors/bin/ld-collect-2.4.3 g++
+COLLECTOR = -collector=$(ROOT)/gnu/sun4/lib/gcc-lib/sun4/2.5.8/ld
+OLD_COLLECTOR = -collector=$(ROOT)/vendors/bin/ld-collect-2.4.3
 # cfront users will need a different value here
 #COLLECTOR =
+
+PURELINK = purelink $(COLLECTOR)
+PURIFY = purelink $(OLD_COLLECTOR) purify
+QUANTIFY = purelink $(OLD_COLLECTOR) quantify
 
 S56DIR= $(ROOT)/vendors/s56dsp
