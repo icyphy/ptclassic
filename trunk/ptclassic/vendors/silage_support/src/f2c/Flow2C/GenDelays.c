@@ -314,23 +314,17 @@ GenDelayStructInits(GraphList,pl_flag)
 GraphPointer GraphList;
 bool pl_flag;
 {
-    GraphPointer Graph;
+    GraphPointer Graph,tmp;
 
     fprintf (CFD, "/* Initializing Delay structure */\n\n");
+    if(!pl_flag)
+    {
     for (Graph = GraphList; Graph != NULL; Graph = Graph->Next) {
 	if (IsFunc(Graph) && GE(Graph)->HasDelay) {
-	    if(pl_flag == true) 
-	    {	
-     	    fprintf (CFD, "void Init_%s ( ", Graph->Name);
-            GenDelayStructName(Graph);
-	    fprintf(CFD, "* pST)\n");
-	    }
-	    else
-	    {
 	    fprintf (CFD, "Init_%s (pST)\n    ", Graph->Name);
             GenDelayStructName(Graph);
 	    fprintf(CFD, " *pST;\n");
-	    }
+
      	    fprintf(CFD, "{\n");
             if ((GE(Graph)->ListOfDelays != NULL) || 
 			(GE(Graph)->ListOfFuncApps != NULL)) {
@@ -345,6 +339,36 @@ bool pl_flag;
 	    fprintf(CFD, "}\n\n");
         }
     }
+    } /* if !pl_flag */
+    if(pl_flag)
+    {
+    tmp = (GraphPointer) malloc (sizeof(Graph));
+    tmp = NULL;
+
+    while(tmp != Root)
+    {
+    for (Graph = GraphList; Graph->Next != tmp; Graph = Graph->Next);
+	tmp = Graph;
+	if (IsFunc(Graph) && GE(Graph)->HasDelay) {
+     	    fprintf (CFD, "void Init_%s ( ", Graph->Name);
+            GenDelayStructName(Graph);
+	    fprintf(CFD, "* pST)\n");
+	    
+     	    fprintf(CFD, "{\n");
+            if ((GE(Graph)->ListOfDelays != NULL) || 
+			(GE(Graph)->ListOfFuncApps != NULL)) {
+		Indent();
+		fprintf(CFD, "Sig_Type c0;\n");
+		Indent();
+		fprintf(CFD, "int i;\n\n");
+    	    }
+	    GenInitDelayPointers(GE(Graph)->ListOfDelays);
+            GenInitDelayHierarchy(GE(Graph)->ListOfFuncApps);
+            GenInitDelayValues(GE(Graph)->ListOfDelays);
+	    fprintf(CFD, "}\n\n");
+        }
+    } /* while */
+    } /* if pl_flag */
 }
 
 GenInitDelayVars(Graph)
