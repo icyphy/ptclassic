@@ -1435,16 +1435,17 @@ body ::tycho::File::windowMenuRemoveAll {filename} {
 	unset filesOpen($filename)
 	unset filesOpenTypes($filename)
 	foreach fileobj [array names fileObjects] {
-	    # NOTE: the catch is in case due to an error $fileobj
-            # doesn't exist.
-	    catch {
-		set menuname [$fileobj menubar inmenu $filename]
-		$fileobj menubar delete $filename
-		# Disable the submenu if it's empty
-		if { [$fileobj menubar empty $menuname] } {
-		    $fileobj menubar disable $menuname
-		}
-	    }
+	    # Check that the widget exists
+            if { [::info which -command $fileobj] == "" } {
+                unset fileObjects($fileobj)
+                continue
+            }
+            set menuname [$fileobj menubar inmenu $filename]
+            $fileobj menubar delete $filename
+            # Disable the submenu if it's empty
+            if { [$fileobj menubar entries $menuname] == "" } {
+                $fileobj menubar disable $menuname
+            }
 	}
     }
 }
