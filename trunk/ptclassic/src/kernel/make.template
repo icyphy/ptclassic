@@ -8,7 +8,7 @@
 #	make depend
 # This will add the dependencies to the makefile.
 
-GFLAGS = -g
+GFLAGS = -g -fminimal-debug
 GNU = g++
 GNUINCLUDE = /usr/gnu/lib/g++-include
 
@@ -85,6 +85,12 @@ sources:	$(SRCS)
 
 depend:	
 		makedepend -I$(GNUINCLUDE) $(SRCS)
+
+makefile:	make.template
+		rm -f makefile
+		cp make.template makefile
+		makedepend -I$(GNUINCLUDE) $(SRCS)
+
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
