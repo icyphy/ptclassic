@@ -451,15 +451,18 @@ proc ::tycho::startKernel {args} {
 proc ::tycho::startGui {args} {
     global tychofeatures
 
-    # Load the minimal set of packages needed to run
-    # the GUI, if they are installed. If they aren't
-    # installed, ignore the inessential ones. If
-    # -nopackages is set, don't load any.
-    if !$tychofeatures(-nopackages) {
-	package require TychoKernel
-	# package require TychoGUI
+    # We don't use the toplevel window called ".", so withdraw it.
+    wm withdraw .
+    tk appname tycho
 
-	foreach pkg {TychoHTML TychoTextEdit TychoVisEdit} {
+    # Load the standard set of packages needed to run the GUI,
+    # if they are installed. If they aren't installed, ignore
+    # the inessential ones. If -nopackages is set, don't load any.
+    if !$tychofeatures(-nopackages) {
+	package require tycho.kernel.gui
+	
+	foreach pkg {\
+		tycho.kernel.html tycho.edit.textedit tycho.edit.visedit} {
 	    if { [lsearch -exact [package names] $pkg] != -1 } {
 		uplevel #0 package require $pkg
 	    }
@@ -477,7 +480,6 @@ proc ::tycho::startGui {args} {
     if !$tychofeatures(-nowelcome) {
 	# ::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo
     }
-    # Slate is sort of independent from the rest...
     # package require Graph
 
     # Before creating any windows, load the user's tychorc.tcl
