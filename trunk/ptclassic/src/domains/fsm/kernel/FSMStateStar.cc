@@ -67,8 +67,8 @@ FSMStateStar::FSMStateStar ()
     addState(entryType.setState("entryType",this,"","Specify the entry type for each possible transition out of this state. Available choices are 0 (History) or 1 (Initial). Note that the # of specified types should be equal to the # of outgoing arcs."));
     addState(preemptive.setState("preemptive",this,"","Specify that each possible transition is preemptive or not. Note that the # of YES/NO should be equal to the # of outgoing arcs."));
 
-    parsedCond = NULL;
-    parsedAct = NULL;
+    parsedCond = 0;
+    parsedAct = 0;
 
 }
 
@@ -95,7 +95,7 @@ void FSMStateStar::setup() {
     // Setup the list of internal event names as same as the scheduler.
     internalEventNm = sched->getInternalEventNm();
 
-    if ( (myInterp = sched->interp()) == NULL ) {
+    if ( (myInterp = sched->interp()) == 0 ) {
       Error::abortRun("FSMScheduler does not have a Tcl interpreter!");
       return; 
     }
@@ -113,9 +113,10 @@ void FSMStateStar::setup() {
 
     // Parse the actions.
     int numStrs = 0;
-    char** tmpParsedAct = strParser(actions,numStrs,"curly-brace");
+    char** tmpParsedAct = strParser(actions, numStrs, "curly-brace");
     if (!tmpParsedAct) return;
     if (numStrs != stateOut.numberPorts()) {
+      delete [] tmpParsedAct;
       Error::abortRun(*this,"The number of action values/expressions in ",
 		      "curly-braces doesn't match the number of possible ",
 		      "next transitions.");
@@ -124,8 +125,8 @@ void FSMStateStar::setup() {
 
     delete [] parsedAct;
     parsedAct = new char**[numStrs];
-    for (int indx=0; indx<stateOut.numberPorts(); indx++) {
-      parsedAct[indx] = strParser(tmpParsedAct[indx],numStrs,"double-quote");
+    for (int indx = 0; indx < stateOut.numberPorts(); indx++) {
+      parsedAct[indx] = strParser(tmpParsedAct[indx], numStrs, "double-quote");
       if (!parsedAct[indx]) return;
       if ( numStrs != 
 	   (sched->outPorts()->numberPorts()+internalEventNm->numPieces()) ) {
@@ -134,6 +135,7 @@ void FSMStateStar::setup() {
 	buf << indx;
 	buf << " doesn't match the number of outputs plus internal events ";
 	buf << "in this FSM.";
+        delete [] tmpParsedAct;
 	Error::abortRun(*this,buf);
 	return;
       }
@@ -156,7 +158,7 @@ FSMStateStar * FSMStateStar::nextState (int& condNum, int preemption) {
 	  // If the preemptiveness of the i'th arc is equal to "preemption",
 	  // then evaluate the corresponding condition. 
 	  buf = parsedCond[i];
-	  if(Tcl_ExprBoolean(myInterp, (char*)buf, &(result[i])) != TCL_OK) {
+	  if (Tcl_ExprBoolean(myInterp, (char*)buf, &(result[i])) != TCL_OK) {
 	    buf = "Cannot evaluate the condition #";
 	    buf << i;
 	    buf << " in ";
@@ -165,7 +167,7 @@ FSMStateStar * FSMStateStar::nextState (int& condNum, int preemption) {
 	    buf << myInterp->result;
 	    Error::abortRun(*this,(char*)buf);
 	    delete [] result;
-	    return NULL;
+	    return 0;
 	  }
 	  if (result[i] == 1) checkResult++;
 
@@ -210,7 +212,7 @@ FSMStateStar * FSMStateStar::nextState (int& condNum, int preemption) {
       buf << "are all satisfied at the same time.";
       Error::abortRun(*this, (char*)buf);
       delete [] result;
-      return NULL;
+      return 0;
 }
 
 Star* FSMStateStar::createWormhole(const char *galname,
@@ -227,8 +229,8 @@ Star* FSMStateStar::createWormhole(const char *galname,
     Block *block = KnownBlock::clone(classname, currentDomain);
     if (!block) return 0;
 
-    Galaxy* myGal = NULL;
-    Target* myInTarget = NULL;
+    Galaxy* myGal = 0;
+    Target* myInTarget = 0;
     if (block->isItWormhole()) {
       // Though it's a Wormhole, the outside domian may not be FSM.
       // Therefore, we explode the Wormhole as an Galaxy, and keep
@@ -257,7 +259,7 @@ Star* FSMStateStar::createWormhole(const char *galname,
     Domain* od = Domain::named("FSM");
     if (!od) {
       Error::abortRun(*this,"FSM domain does not exist! Help!");
-      return NULL;
+      return 0;
     }
     Star *newWorm = &(od->newWorm(*myGal,myInTarget));
 
@@ -335,7 +337,7 @@ const char* FSMStateStar::ptkCompile(const char *galname,
 	buf << ". The error message in Tcl : ";
 	buf << myInterp->result;
 	Error::abortRun(*this,(const char*)buf);
-	return NULL;
+	return 0;
       }
       const char* classname = hashstring(ptkInterp->result);
 
@@ -400,7 +402,7 @@ Geodesic** FSMStateStar::setupGeodesic (PortList& pList, MultiPortHole* mph, Sta
 		  "or internal event in this FSM corresponding to the name: ",
 		  pNm);
 	    delete [] myGeoArray;
-	    return NULL;
+	    return 0;
 	  }
 	}
 
@@ -408,7 +410,7 @@ Geodesic** FSMStateStar::setupGeodesic (PortList& pList, MultiPortHole* mph, Sta
 	if (!wp) {
 	  Error::abortRun(*this, "There is no PortHole named \"",pNm,
 			  "\" in the wormhole.");
-	  return NULL;
+	  return 0;
 	}
 	// Create a geodesic to send data to the wormhole.
 	Geodesic* geo = wp->allocateGeodesic();
@@ -416,7 +418,7 @@ Geodesic** FSMStateStar::setupGeodesic (PortList& pList, MultiPortHole* mph, Sta
 	  Error::abortRun(*this, "Failed to allocate geodesic for ",
 			  "the porthole named ", pNm);
 	  delete [] myGeoArray;
-	  return NULL;
+	  return 0;
 	}
 
 	if (mph->isItInput()) {
