@@ -436,17 +436,29 @@ int POct::ptkGetParams (int aC,char** aV) {
 		GetOrInitBusProp(&instance, &property);
 		sprintf(title, "Edit Bus");
 	    }
-	    // Convert "property" into Result string
-	    Tcl_AppendElement (interp, title);
-	    Tcl_AppendResult(interp, " { {", NULL);
-	    Tcl_AppendElement(interp, property.contents.prop.name);
-	    sprintf( tempStr, "INTEGER" );
-	    Tcl_AppendElement(interp, tempStr);
-	    sprintf(size, "%d", property.contents.prop.value.integer);
-	    Tcl_AppendElement(interp, size);
-	    Tcl_AppendResult(interp, "} }", NULL);
-	    return TCL_OK;
-	} else if (IsGal(&instance) || IsStar(&instance)) {
+            // Convert "property" into Result string
+            Tcl_AppendElement (interp, title);
+            Tcl_AppendResult(interp, " { {", NULL);
+            Tcl_AppendElement(interp, property.contents.prop.name);
+            switch(property.contents.prop.type) {
+              case OCT_INTEGER:
+                sprintf( tempStr, "INTEGER" );
+                Tcl_AppendElement(interp, tempStr);
+                sprintf(size, "%d", property.contents.prop.value.integer);
+                Tcl_AppendElement(interp, size);
+                break;
+              case OCT_STRING:
+                sprintf( tempStr, "STRING" );
+                Tcl_AppendElement(interp, tempStr);
+                Tcl_AppendElement(interp, property.contents.prop.value.string);
+                break;
+              default:
+                Error::error("type unknown in editing delay/bus width");
+                return TCL_ERROR;
+            }
+            Tcl_AppendResult(interp, "} }", NULL);
+            return TCL_OK;
+  	} else if (IsGal(&instance) || IsStar(&instance)) {
 	    // Must be a star or Galaxy
 	    // FIXME:  Do I need to check domain here??? - aok
 	    if (!GetOrInitSogParams(&instance, &pList)) {
