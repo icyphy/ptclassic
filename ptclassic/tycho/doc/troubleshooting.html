@@ -10,7 +10,7 @@
 Other sources of information:
 <MENU>
 <LI> <A HREF="help.html">Tycho Help System Overview </A>
-<LI> <A HREF="releasenotes0.1.1.html">Tycho 0.1.1 Release Notes</A>
+<LI> <A HREF="releasenotes0.2.html">Tycho 0.2 Release Notes</A>
 <LI> <A HREF="bugs.html">Tycho Bugs</A>
 <LI> <A HREF="tychoFaq.html">Tycho Frequently Asked Questions (FAQ)</A>
 <LI> <A HREF="itcllinks.html">Tcl and Itcl Internet Resources</A>
@@ -22,8 +22,9 @@ Below is a list of common problems that people have with Tycho.
 <H2><A NAME="Problems Starting Tycho">Problems Starting Tycho</A></H2>
 
 <H3><A NAME="itcl versions">Itcl Versions</A></H3>
-Note that Tycho0.1.1 will <B>not</B> work with Itcl2.0, you must have
-Itcl2.1 or Itcl2.2.  (Itcl2.0 was shipped with Ptolemy0.6)
+Note that Tycho0.2 will <B>not</B> work with Itcl2.0 or Itcl2.1, you must have
+Itcl2.2.  (Itcl2.0 was shipped with Ptolemy0.6, Itcl2.2 was shipped with
+with Ptolemy0.7)
 
 <H3><A NAME="Error Message about error while autoloading tk_setPalette">
 Error Message about "error while autoloading tk_setPalette"
@@ -68,18 +69,20 @@ If you are starting up Tycho0.1.1 or later and you see a message about
 </PRE>
 
 then the problem is that you are running an
-Itcl2.0 <CODE>itkwish</CODE>, and Tycho0.1.1 requires Itcl2.1, which
-includes the tcl7.5 <CODE>file join</CODE> command.  The way to tell
+Itcl2.0 <CODE>itkwish</CODE>, and Tycho0.2 requires Itcl2.2, which
+includes the tcl7.7 <CODE>file join</CODE> command.  The way to tell
 is to start <CODE>itkwish</CODE> by hand and type
 
 <PRE>
 set itcl::version
 </PRE>
-you should get back <CODE>2.0</CODE> if you are running Itcl2.0 and
-<CODE>2.1</CODE> if you are running Itcl2.1.
+you should get back <CODE>2.2</CODE> if you are running Itcl2.2.
 
-<H3><A NAME="Problems creating indexes">Problems creating indexes</A></H3>
-The steps to follow if the indexes start failing on you:
+<H3><A NAME="Problems creating indices">Problems creating indices</A></H3>
+The <A HREF="../kernel/doc/usersGuides/BuilderDialogHelp.html">BuilderDialog</a>
+can be used to create Tycho indices.
+
+<p>Below are the steps to follow if the indices start failing on you:
 
 <OL>
 
