@@ -29,6 +29,7 @@
 
 option add *FontManager.preferredFoundries {adobe b&h *} widgetDefault
 option add *FontManager.preferredResolutions {75 *} widgetDefault
+option add *FontManager.preferredEncodings {iso8859 *} widgetDefault
 option add *FontManager.families \
 	{times courier helvetica lucida lucidatypewriter lucidabright} \
 	widgetDefault
@@ -497,12 +498,16 @@ body ::tycho::FontManager::getFont {family {size 14} {weight medium} {style r}} 
 	    [option get $itk_component(hull) preferredFoundries FontManager]
     set resolutions \
 	    [option get $itk_component(hull) preferredResolutions FontManager]
+    set encodings \
+	    [option get $itk_component(hull) preferredEncodings FontManager]
     foreach res $resolutions {
 	foreach foundry $foundries {
-	    set font \
-	"-$foundry-$family-$weight-$style-normal-*-*-${size}0-$res-$res-*-*-*-*"
-	    if [fontValid $font] {
-		return $font
+	    foreach cod $encodings {
+		set font \
+"-$foundry-$family-$weight-$style-normal-*-*-${size}0-$res-$res-*-*-$cod-*"
+	        if [fontValid $font] {
+		    return $font
+		}
 	    }
 	}
     }
