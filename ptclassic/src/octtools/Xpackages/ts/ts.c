@@ -198,7 +198,7 @@ int *format;			/* Selection format */
 	if (seldata->list != NULL) {
 	    tsGetSelection(w, seldata->list->time, seldata->list->params,
 			   seldata->list->count, seldata->info);
-	    XtFree(seldata->list);
+	    XtFree((char *)seldata->list);
 	}
 	return;
     }
@@ -208,9 +208,9 @@ int *format;			/* Selection format */
 	(*seldata->info->callback)(w, seldata->info->client_data, (caddr_t) &calldata);
 	SelOffSetInsert(w, seldata->info);
     }
-    XtFree(seldata->list);
-    XtFree(seldata);
-    XtFree(value);
+    XtFree((char *)seldata->list);
+    XtFree((char *)seldata);
+    XtFree((char *)value);
 }
 
 
@@ -695,7 +695,7 @@ XtPointer call;
 
     if (st_delete(ts_table, (char **) &wptr, (char **) &info)) {
 	XtFree(info->buf);
-	XtFree(info);
+	XtFree((char *)info);
     }
 }
 
