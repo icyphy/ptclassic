@@ -36,8 +36,8 @@
 
 # The home of the Java Developer's Kit (JDK)
 # Generating Java documentation uses this makefile variable
-# JAVAHOME = 	/opt/SUNWjws/JDK
-JAVAHOME = 	/opt/jdk1.2latest
+JAVAHOME = 	/usr/java
+# JAVAHOME = 	/opt/jdk1.2latest
 
 # The home of the most recent JDK, possibly experimental or prerelease.
 LATEST_JAVAHOME = /opt/jdk1.2latest
