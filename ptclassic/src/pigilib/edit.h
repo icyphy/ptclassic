@@ -7,4 +7,5 @@ extern int EditParams();
 extern int RpcOpenPalette();
 extern boolean OpenPaletteInit();
 extern int RpcEditHardware();
+extern int RpcEditDomain();
 extern int RpcEditComment();
