@@ -70,7 +70,7 @@ public:
 	}
 
 	// constructor
-	CGCDomain() : Domain("CGC") {}
+	CGCDomain() : Domain("CGC") {subDomains += "AnyCG";}
 
 	// require CGCTarget
 	const char* requiredTarget() { return "CGCTarget";}
