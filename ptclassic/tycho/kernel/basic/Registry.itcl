@@ -506,6 +506,9 @@ body ::tycho::Registry::initHelpMenu {menubar {owner {}}} {
 	# and the substitution succeeds, disable the entry.
 	set disable [regsub -all {%Q} $opts(-command) $owner opts(-command)]
 	set disable [expr { $disable && $owner == "" }]
+	# Substitute %Q and do a subst on the label
+	regsub -all {%Q} $opts(-label) $owner opts(-label)
+	set opts(-label) [subst $opts(-label)]
 	eval $menubar command $entry help [array get opts]
 	if $disable {
 	    $menubar disable $entry
@@ -780,7 +783,9 @@ body ::tycho::Registry::registeredFileMode {name} {
 # instead of being appended at the end. Also, the
 # *-command* option will have the name of the widget that
 # owns the menubar
-# substituted for each occurrence of the string *%Q*.
+# substituted for each occurrence of the string *%Q*, and the
+# *-label* option will have the name of the widget substituted
+# for *%Q* and any embedded commands will be evaluated.
 # Note that any existing help menus will not be updated with
 # the new entry -- this procedure is intended for calling before
 # any menubars are registered.
