@@ -54,9 +54,6 @@ delim off
 if (! $?ARCH) setenv ARCH `/bin/arch`
 set path = ( . ~ptolemy/bin ~ptolemy/bin.$ARCH ~octtools/bin $path )
 .)c
-.EQ
-delim $$
-.EN
 The first of these lines sets your environment variable
 .c ARCH
 to the name of the type of machine you are running (e.g. sun3 or
@@ -246,5 +243,6 @@ to the olwm command.  If, for some reason, you must run olwm in the
 click-to-focus mode, you must click the mouse in each window before
 Pigi will accept keyboard commands in that window; it is possible
 but annoying to use Pigi this way.
-
-
+.EQ
+delim $$
+.EN
