@@ -175,10 +175,10 @@ StringList :: newCopy () const {
 const char*
 StringList :: consolidate () {
 	// Handle empty StringList
-	if (totalSize == 0 || size() == 0)
-		return 0;
+	if (size() == 0) return 0;
+
 	// If already one segment, handle it w/o work
-	if (size() <= 1) return head();
+	if (size() == 1) return head();
 	// Allocate new memory
 	char* s = newCopy();
 
