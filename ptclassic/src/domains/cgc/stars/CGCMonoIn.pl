@@ -27,6 +27,7 @@ provisions.
   output {
     name { output }
     type { float }
+    desc { Output ranges from -1.0 to 1.0 }
   }
 
   constructor {
