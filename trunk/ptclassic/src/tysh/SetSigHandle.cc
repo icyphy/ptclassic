@@ -51,11 +51,7 @@ Sets up the signal handlers for Tycho.
 
 // setSignalHandlers
 //
-// This function sets up the signal handlers and, makes sure that 
-// RLIMIT is not 0 (if in development mode) which would prevent a 
-// core file from being generated. The environmental variable     
-// PT_DEVELOP when set to a non-zero value, or not set at all,    
-// will cause the core to be dumped, and the debugger to be run.  
+// This function sets up the signal handlers.
 
 int setSignalHandlers(void) 
 {
@@ -71,7 +67,7 @@ int setSignalHandlers(void)
 #endif
 
     int returnValue = 0;
-    setCoreLimit();
+// setCoreLimit();
     if (setHandlers((SIG_PT) signalHandler) != 0)
 	returnValue = 1;
     setStrings();
