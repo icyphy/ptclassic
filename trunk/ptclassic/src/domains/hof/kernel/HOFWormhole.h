@@ -51,7 +51,7 @@ public:
 	void begin() { Wormhole::begin(); }
 	void wrapup();
 
-	Scheduler* mySched() const { return myTarget()->scheduler(); }
+	Scheduler* scheduler() const { return myTarget()->scheduler(); }
 
 	// clone -- allows interpreter/pigi to make copies
 	Block* clone() const;
