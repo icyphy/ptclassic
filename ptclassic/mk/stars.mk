@@ -198,7 +198,7 @@ ifdef VHDL
 	STARS += $(LIBDIR)/vhdlstars.o
 	LIBS += -lvhdlstars -lvhdl
 	LIBFILES += $(LIBDIR)/libvhdlstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libvhdl.$(LIBSUFFIX)\
+		$(LIBDIR)/libvhdl.$(LIBSUFFIX) 
 	ifeq ($(USE_SHARED_LIBS),yes) 
 		LIBS += -lvhdltargets
 		LIBFILES += $(LIBDIR)/libvhdltargets.$(LIBSUFFIX)
