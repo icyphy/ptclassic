@@ -34,7 +34,7 @@
 ##########################################################################
 #### queryfont
 # Query the user for a font and return it as a three-element list:
-# {_family_ _size_ _style} . This procedure brings up a
+# {_family_ _size_ _style_} . This procedure brings up a
 # font dialog, and returns only when it is dismissed. The
 # returned string is the name of a font. If any arguments are
 # given, then they are taken to be the font family, size, and style
@@ -66,26 +66,6 @@ proc ::tycho::queryfont {args} {
     }
 }
 
-##########################################################################
-#### querysystemfont
-# Query the user for a font and return a system-dependent
-# representation of the font. This procedure brings up a
-# font dialog, and returns only when it is dismissed. The
-# arguments an other comment of ::tycho::queryfont apply here
-# too.
-#
-proc ::tycho::querysystemfont {args} {
-    set name [autoName .font]
-    uplevel #0 ::tycho::FontDialog $name [list -initialfont $args]
-    set fontname [::tycho::Dialog::wait $name 0]
-    if { $fontname != "" } {
-	return [::tycho::font [lindex $fontname 1] \
-		[lindex $fontname 3] [lindex $fontname 5]]
-    } else {
-	return $args
-    }
-}
-
 #########################################################################
 #### FontDialog
 # Manage font selection. Instances of this class are dialog windows
@@ -93,11 +73,6 @@ proc ::tycho::querysystemfont {args} {
 # manager modal using the <code>::tycho::Dialog::wait</code> procedure,
 # then that procedure will return either a valid font name selected by
 # the user or the null string (if the user cancels).
-# <p>
-# Unfortunately, fonts are a major weak point in the X window system,
-# since there is only one font that is guaranteed to be installed on
-# all systems: "fixed". This font is the fallback font of the
-# <code>findFont</code> method, which always returns a valid font.
 #
 class ::tycho::FontDialog {
     inherit ::tycho::Query
