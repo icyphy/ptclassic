@@ -644,7 +644,7 @@ PtMatrix& ComplexMatrix::operator = (const PtMatrix& m) {
   if(compareType(m)) {
     const ComplexMatrix& src = *((const ComplexMatrix*)&m);
     if(totalDataSize != src.totalDataSize) {
-      LOG_DEL; delete[] data;
+      LOG_DEL; delete [] data;
       totalDataSize = src.totalDataSize;
       data = new Complex[totalDataSize];
     }
@@ -855,7 +855,7 @@ ComplexMatrix ComplexMatrix::inverse() const {
 
 ComplexMatrix::~ComplexMatrix() {
   if(data) {
-    LOG_DEL; delete[] data; 
+    LOG_DEL; delete [] data; 
   }
 }
 
@@ -1096,7 +1096,7 @@ PtMatrix& FixMatrix::operator = (const PtMatrix& m) {
   if(compareType(m)) {
     const FixMatrix& src = *((const FixMatrix*)&m);
     if(totalDataSize != src.totalDataSize) {
-      LOG_DEL; delete[] data;
+      LOG_DEL; delete [] data;
       totalDataSize = src.totalDataSize;
       data = new Fix[totalDataSize];
     }
@@ -1287,7 +1287,7 @@ FixMatrix FixMatrix::inverse() const {
 // Destructor
 FixMatrix::~FixMatrix() {
   if(data) {
-    LOG_DEL; delete[] data; 
+    LOG_DEL; delete [] data; 
   }
 }
 
@@ -1436,7 +1436,7 @@ PtMatrix& FloatMatrix::operator = (const PtMatrix& m) {
   if(compareType(m)) {
     const FloatMatrix& src = *((const FloatMatrix*)&m);
     if(totalDataSize != src.totalDataSize) {
-      LOG_DEL; delete[] data;
+      LOG_DEL; delete [] data;
       totalDataSize = src.totalDataSize;
       data = new double[totalDataSize];
     }
@@ -1627,7 +1627,7 @@ FloatMatrix FloatMatrix::inverse() const {
 
 FloatMatrix::~FloatMatrix() {
   if(data) {
-    LOG_DEL; delete[] data; 
+    LOG_DEL; delete [] data; 
   }
 }
 
@@ -1777,7 +1777,7 @@ PtMatrix& IntMatrix::operator = (const PtMatrix& m) {
   if(compareType(m)) {
     const IntMatrix& src = *((const IntMatrix*)&m);
     if(totalDataSize != src.totalDataSize) {
-      LOG_DEL; delete[] data;
+      LOG_DEL; delete [] data;
       totalDataSize = src.totalDataSize;
       data = new int[src.totalDataSize];
     }
@@ -1971,7 +1971,7 @@ IntMatrix IntMatrix::inverse() const {
 // Destructor
 IntMatrix::~IntMatrix() {
   if(data) {
-    LOG_DEL; delete[] data; 
+    LOG_DEL; delete [] data; 
   }
 }
 
