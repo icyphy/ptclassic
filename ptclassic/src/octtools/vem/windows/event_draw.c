@@ -1225,16 +1225,17 @@ int level;			/* Level in the heirarchy                 */
     struct octPoint *retPoints;	/* Points for polygon or path        */
     struct octObject conbag;	/* Connector bag                     */
     struct octObject inst;      /* Instance record                   */
-    octObject newbox;		/* Contact abstraction box           */
-    octGenerator gen;		/* For connectors bag search         */
     struct octBox BB;	        /* General purpose bounding box      */
     regGenerator theGen;	/* For generating geometry           */
     octCoord temp;		/* Temporary for box normalization   */
-    int isContact;		/* Contact flag                      */
     int flags;			/* Various status flags              */
     vemStatus ret_code = VEM_OK;/* Return from routine               */
 #ifdef SUPRESS_SMALL_INSTANCES
     int inst_size;		/* Small instance size check         */
+#else
+    octObject newbox;		/* Contact abstraction box           */
+    int isContact;		/* Contact flag                      */
+    octGenerator gen;		/* For connectors bag search         */
 #endif
 
     flags = 0;
