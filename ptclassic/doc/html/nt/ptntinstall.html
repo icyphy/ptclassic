@@ -5,6 +5,7 @@
 </head>
 <body bgcolor=#faf0e6>
 <H1>Ptolemy NT Installation</H1>
+
 The Ptolemy NT Installation is more tricky than it should be,
 we hope to fix this soon.  
  <p><B>These instructions are in the process of being updated for
@@ -13,8 +14,52 @@ not
 work with Ptolemy 0.7.1.  If you are attempting to install Ptolemy 0.7.1,
 please see the instructions in $PTOLEMY/doc/html/nt.
 </B>
-<H2>nt4 Installation Instructions</H2>
 
+
+<H2>Quick nt4 Installation Instructions</H2>
+This section is for people that don't like to read instructions.
+ <br>If you have problems, see the detailed instructions below.
+<OL> 
+<LI> Download and install
+<a href="http://sourceware.cygnus.com/cygwin/">Cygnus GNU-win32 b20.1</a>
+
+<li> Download and install X11 for Cygwin from
+<a href="http://www.xemacs.freeserve.co.uk/"><CODE>http://www.xemacs.freeserve.co.uk/</CODE></a>
+
+<li> Start up bash, and complete the following steps
+<pre>
+mkdir /tmp /bin /etc
+cp /Cygnus/cygwin-b20/H-i586-cygwin32/bin/bash.exe /bin/sh.exe
+cp /Cygnus/cygwin-b20/H-i586-cygwin32/bin/rm.exe /bin
+mkpasswd -l -g &gt; /etc/passwd
+mkgroup -l &gt; /etc/group
+</pre>
+
+<li> Set the following variables in the System Control Panel
+<pre>
+DISPLAY localhost:0.0
+PTOLEMY /users/ptolemy
+PTARCH nt4
+CC gcc
+</pre>
+Your <CODE>PATH</CODE> should include
+<CODE>%PTOLEMY%\bin:%PTOLEMY%\bin.nt4</CODE>
+
+
+<li> In a bash shell, do
+<pre>
+unset LIB
+cd $PTOLEMY
+make -k ntbuild &gt;&amp; make.out &amp;
+</pre>
+
+</ol>
+
+
+
+ <hr>
+<H2>Detailed nt4 Installation Instructions</H2>
+This section covers the installation in more detail.
 <OL>
 <LI> Download 
 <a href="http://sourceware.cygnus.com/cygwin/">Cygnus GNU-win32 b20.1</a>
@@ -26,7 +71,6 @@ from
 <li> <a href="ftp://go.cygnus.com/pub/sourceware.cygnus.com/cygwin/latest/README"><CODE>README</CODE></a>
 <li> Download <a href="ftp://go.cygnus.com/pub/sourceware.cygnus.com/cygwin/latest/full.exe"><CODE>full.exe</CODE></a> (14Mb)
 </menu>
-
 
 <LI> Install Cygnus GNU-win32 by mousing on the <CODE>full.exe</CODE>
 icon.  It is best if you install Cygnus GNU-win32 in a directory that
@@ -42,7 +86,7 @@ in the Cygnus <CODE>README</CODE> file.
 for use from <CODE>make</CODE>:
 <pre>
 mkdir /bin
-cp /Cygnus/cygwin-b20/H-i386-cygwin32/bin/bash.exe /bin
+cp /Cygnus/cygwin-b20/H-i586-cygwin32/bin/bash.exe /bin
 </pre>
 It is possible to use the vanilla <CODE>sh.exe</CODE> rather than using <CODE>bash.exe</CODE>, but <CODE>make</CODE>
 has subtle problems with the <CODE>sh.exe</CODE>.
