@@ -47,14 +47,14 @@ first-order feedback coefficient which is a function of k and N }
 		name { state1 }
 		type { fix }
 		default { "0.0" }
-		desc { internal state. }
+		desc { internal state. does not persist across invocations. }
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 	defstate {
 		name { state2 }
 		type { fix }
 		default { "0.0" }
-		desc { internal state. }
+		desc { internal state. does not persist across invocations. }
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 	protected {
@@ -98,23 +98,43 @@ first-order feedback coefficient which is a function of k and N }
 		d1 = 2.0 * cos(theta);
 		input.setSDFParams(int(size), int(size)-1);
 	}
+
+	codeblock(init) {
+; move constant d1 into y0 where d1 = 2 cos(theta) such that
+; theta = 2 Pi k / N for the kth coefficient of an N-point DFT
+; r0: base address for the block of input samples
+; x0: value of one-sample delay (state1)
+; x1: value of two-sample delay (state2)
+		clr	a	#<$addr(input),r0	#$val(d1),y0
+		clr	b	a,x1
+	}
+
+	codeblock(loop,"int len") {
+; Run all-pole section of Goertzel's algorithm N iterations.
+		do	#@len,$label(_GoertzelBase)	; begin loop
+		move	x:(r0)+,a	a,x0		; save previous a
+		mac	x0,y0,a
+$label(_GoertzelBase)
+		sub	x1,a		x0,x1		; end loop
+		mac	y0,x1,b		a,x0		; b = d1*state2
+	}
+
 	go {
+		int dftLength = int(N);
+
 		// Run all-pole section of Goertzel's algorithm N iterations.
 		// Only one multiplier (d1) in iteration.
 		// Zero the IIR state for each DFT calculation; otherwise,
 		// the filter output could grow without bound.
 		// state1 and state2 are states and not local variables
 		// ONLY to pass their values to derived stars
-		state1 = 0.0;
-		state2 = 0.0;
-		Fix acc(0.0);
-		Fix d1val(d1);
-		for (int i = int(N)-1; i >= 0; i--) {
-		  acc = Fix(input%i);
-		  acc += d1val * Fix(state1);
-		  acc -= Fix(state2);
-		  state2 = Fix(state1);
-		  state1 = acc;
-		}
+
+		addCode(init);
+		addCode(loop(dftLength));
+	}
+
+	exectime {
+		// The do command takes 6 cycles
+		return (6 + 6*int(N));
 	}
 }
