@@ -40,8 +40,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include <fstream.h>
 #include "DecomGal.h"
-#include "streamCompat.h"
 
 // loop all clusters with repetition counters
 void DecomGal :: loopAll() {

@@ -39,7 +39,7 @@ Date of last revision: 5/92
 #include "GalIter.h"
 #include "DCGraph.h"
 #include "type.h"
-#include "streamCompat.h"
+#include <fstream.h>
 #include "Error.h"
 
 int isMember(DCNodeList&, EGNode*);

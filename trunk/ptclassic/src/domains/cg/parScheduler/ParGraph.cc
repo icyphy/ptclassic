@@ -40,7 +40,7 @@ Date of last revision:
 
 #include "ParGraph.h"
 #include "EGGate.h"
-#include "streamCompat.h"
+#include <fstream.h>
 #include "Error.h"
 
 // redefine the virtual methods
