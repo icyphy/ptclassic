@@ -305,13 +305,12 @@ Block* CGCTarget :: makeNew () const {
 // (5) buffer offset initialization
 
 int CGCTarget :: allocateMemory() {
-	int loop = int(loopingLevel);
 	Galaxy& g = *galaxy();
 	// set up the forkDests members of each Fork inputs.
 	setupForkDests(g);
 	
 	int statBuf = useStaticBuffering();
-	if (loop) statBuf = 0;
+	if (int(loopingLevel)) statBuf = 0;
 
 	// (1) determine the buffer size
 	GalStarIter nextStar(g);
@@ -500,7 +499,9 @@ int CGCTarget::modifyGalaxy() {
 		if (port->resolvedType() == NULL) {
 		    gal.initialize();
 		    if (SimControl::haltRequested()) return FALSE;
-		    if (!needsSpliceStar(port)) continue;
+		    // We must now re-run modifyGalaxy, blocks & ports may
+		    // have been added or deleted in the initialize method.
+		    return CGCTarget::modifyGalaxy();
 		}
 
 		Star* s = 0;
