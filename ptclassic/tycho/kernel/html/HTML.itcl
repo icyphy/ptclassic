@@ -342,11 +342,12 @@ body ::tycho::HTML::constructor {args} {
     }
     bind $prefix <Control-x><Key-s> "$this openSource; break"
     # disable certain bindings
-    bind $prefix <Control-x><Control-s> { }
-    bind $prefix <Control-x><Control-w> { }
-    bind $prefix <Control-x><Key-v> { }
-    bind $prefix <Control-x><Key-i> { }
-    bind $prefix <Control-x><Control-q> { }
+    bind $prefix <Control-x><Control-s> {bell; break}
+    bind $prefix <Control-x><Control-w> {bell; break}
+    bind $prefix <Control-x><Control-v> {bell; break}
+    bind $prefix <Control-x><Control-q> {bell; break}
+    bind $prefix <Control-x><Key-i> {bell; break}
+    bind $prefix <Control-x><Key-v> {bell; break}
 
     configure -readonly 1
     focusin
