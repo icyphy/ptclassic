@@ -25,12 +25,15 @@ INCL=-I$(CGCKERNEL) -I$(CGKERNEL) -I$(BDFKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) \
 	-I$(PARDIR) -I$(CGTARDIR) -I$(CGCSTARS)
 
 PL_SRCS = \
+	CGCSDFBase.pl \
+	CGCSDFSend.pl \
+	CGCSDFReceive.pl \
 	CGCUnixSend.pl \
 	CGCUnixReceive.pl
 
 PLSRC = $(PL_SRCS:.pl=.cc)
 
-SRCS = CGCMultiTarget.cc CGCBDFTarget.cc $(PLSRC) 
+SRCS = CGCTargetWH.cc CGCMultiTarget.cc CGCBDFTarget.cc $(PLSRC) 
 EXTRA_SRCS = $(PL_SRCS)
 
 HDRS=$(SRCS:.cc=.h)
