@@ -87,6 +87,11 @@ TclStarIfc::TclStarIfc () {
 
 // destructor
 TclStarIfc::~TclStarIfc() {
+	// exit immediately if there is no ptk interpreter.  This happens
+	// if there are global TclStarIfc objects in the program but the
+	// interpreter failed to set up.
+	if (!ptkInterp) return;
+
 	InfString buf;
 
 	// First, invoke the Tcl desctructor procedure, if it was defined
