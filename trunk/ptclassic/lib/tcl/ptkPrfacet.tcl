@@ -248,7 +248,7 @@ proc ptkPrfacet {name} {
     global ptkPrVertOffset ptkPrHorOffset
     set ptkPrVertOffset [.print.size.c.voffset get]
     set ptkPrHorOffset [.print.size.d.hoffset get]
-    append command " -O " ${ptkPrHorOffset}x$ptkPrVerOffset
+    append command " -O " ${ptkPrHorOffset}x$ptkPrVertOffset
 
     global ptkPrlabels
     if {$ptkPrlabels} {append command " -x"}
