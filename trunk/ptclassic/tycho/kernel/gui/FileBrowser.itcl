@@ -173,13 +173,16 @@ body ::tycho::FileBrowser::constructor {args} {
     itk_component add dir {
 	label $itk_component(childsite).dir -text $localCWD -width 35 -anchor e
     } {
-	keep -background -cursor -foreground -font
+	keep -background -cursor -foreground
+	rename -font -messagefont messageFont MessageFont
     }
     pack $itk_component(dir) -side top -fill x -after $itk_component(listscroll)
     
     # Create directory button.
-    $itk_component(buttons) add mkdir -text "New Directory" \
-	    -command "$this mkdir"
+    $itk_component(bbox) add mkdir \
+	    -text "New Directory" \
+	    -command "$this mkdir" \
+	    -row 1 -column 0
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
@@ -188,7 +191,8 @@ body ::tycho::FileBrowser::constructor {args} {
     # Subscribe to the preference set
     preference subscribe $this \
 	    -width  fileBrowserWidth \
-	    -height fileBrowserHeight
+	    -height fileBrowserHeight \
+	    -messagefont messageFont
 
     # In case updateListbox inserts into the entry; to avoid repetition
     clear entry
