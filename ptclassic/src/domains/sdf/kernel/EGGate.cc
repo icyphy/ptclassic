@@ -186,50 +186,42 @@ StringList EGGateList::printMe() {
 }
 
 // Insert the argument precedence node into the list.  Return a pointer 
-// to the node after it's inserted.
+// whether or not a node was inserted.
 // Side effect : if there is already a link to the same EGNode, with 
 // the same delay, "pnode" will be deallocated, and the number of samples 
 // it had, will be added to the existing node.
 
-void EGGateList :: insertGate(EGGate* pgate, int update) 
+int EGGateList :: insertGate(EGGate* pgate, int update) 
 {
 	int pos = 0;
 	EGGateLink* p = findInsertPosition(pgate->farEndNode(),
 					   pgate->delay(), pos);
 	EGGateLink* temp = (EGGateLink*)createLink(pgate);
 
-	if (p == 0)  // no entries of this master yet  
+	// no entries of this master yet  
+	if (p == 0)
 		insertLink(temp);
 	else if (pos > 0)
 		insertBehind(temp, p);
 	else if (pos < 0)
 		insertAhead(temp, p);
+	// compare the porthole
+	else if (pgate->aliasedPort() != p->gate()->aliasedPort())
+		insertBehind(temp, p);
+	// If a link to the same EGNode, with the same delay,
+	// already exists, then simply update the number of
+	// samples in the existing node, and delete this one,
+	// because it is redundant. If we're updating now,
+	// save the arc -- we'll use it to insert the other
+	// endpoint (this is our convention).
 	else {
-		// compare the porthole
-		if (pgate->aliasedPort() != p->gate()->aliasedPort()) {
-			insertBehind(temp, p);
-		}
-		// If a link to the same EGNode, with the same delay,
-		// already exists, then simply update the number of
-		// samples in the existing node, and delete this one,
-		// because it is redundant. If we're updating now,
-		// save the arc -- we'll use it to insert the other
-		// endpoint (this is our convention).
-		// FIXME: Memory leak. pgate should be deleted, but it
-		// can't be due to the way EGNode::makeArc is written
-		else if (update) {
-			p->gate()->addSamples(pgate->samples());
-			LOG_DEL; delete temp;
-		}
-		// FIXME: Memory leak. pgate should be deleted, but it
-		// can't be due to the way the makeArc method is written
-		else {
-			LOG_DEL; delete pgate;
-			LOG_DEL; delete temp;
-		}
-		return;
+		if (update) p->gate()->addSamples(pgate->samples());
+		LOG_DEL; delete temp;		// destroy the new link
+		pgate->setLink(0);		// reset pointer to new link
+		return FALSE;
 	}
 	temp->myList = this;
+	return TRUE;
 }
 
 void EGGateList::initialize() {
