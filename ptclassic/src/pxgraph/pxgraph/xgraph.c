@@ -1454,7 +1454,7 @@ LineInfo *result;		/* Returned result */
     char *first;
 
     /* Find first non-space character */
-    while (*line && isspace(*line)) line++;
+    while (*line && isspace((int)*line)) line++;
     if (*line) {
 	if (*line == '#') {
 	    /* comment */
@@ -1468,7 +1468,7 @@ LineInfo *result;		/* Returned result */
 	    if (*line) *line = '\0';
 	} else {
 	    first = line;
-	    while (*line && !isspace(*line)) line++;
+	    while (*line && !isspace((int)*line)) line++;
 	    if (*line) {
 		*line = '\0';
 		if (stricmp(first, "move") == 0) {
@@ -1496,7 +1496,7 @@ LineInfo *result;		/* Returned result */
 		    first[strlen(first)-1] = '\0';
 		    result->val.parm.name = first;
 		    line++;
-		    while (*line && isspace(*line)) line++;
+		    while (*line && isspace((int)*line)) line++;
 		    /* may be a \n at end of it */
 		    if (line[strlen(line)-1] == '\n') {
 			line[strlen(line)-1] = '\0';

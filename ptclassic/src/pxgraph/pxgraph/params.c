@@ -493,8 +493,8 @@ register char *a, *b;
 
     for ( /* nothing */;
 	 ((*a | *b) &&
-	  !(value = ((isupper(*a) ? *a - 'A' + 'a' : *a) -
-		     (isupper(*b) ? *b - 'A' + 'a' : *b))));
+	  !(value = ((isupper((int)*a) ? *a - 'A' + 'a' : *a) -
+		     (isupper((int)*b) ? *b - 'A' + 'a' : *b))));
 	 a++, b++)
       /* Empty Body */;
 
