@@ -169,14 +169,13 @@ XV_INSTALL=install
 # -- If Matlab is not installed, then set MATLABDIR to
 #    $(ROOT)/src/compat/matlab and do not set MATLABLIBDIR
 # -- If Matlab is installed, then set MATLABDIR accordingly
-#    and set MATLABLIBDIR to the external library directory
+#    and set MATLABEXT_LIB to the external library directory
 MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
 ifeq ($MATLABDIR,)
 MATLABDIR= $(ROOT)/src/compat/matlab
 else
 MATARCH := $(shell $(ROOT)/bin/matlabArch $(ARCH))
-MATLABLIBDIR = -L$(MATLABDIR)/extern/lib/$(MATARCH)
-MATLABEXT_LIB= $(MATLABLIBDIR) -lmat
+MATLABEXT_LIB = -L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
 endif
 
 # Directory for general compatiblity include files.  Mainly function
