@@ -52,3 +52,41 @@ proc spaces {n} {
     return [butt [lcopy $n " "]]
 }
 
+
+#
+# Strip an itcl namespace path of all by the last name
+#
+proc nsLastField {nsp} {
+   set index [string last "::" $nsp]
+   if {$index == -1} { 
+       return $nsp
+   } else {
+       return [string range $nsp [expr $index+2] end]
+   }
+}
+
+
+#
+# Subtract one string from another. No change if no match.
+# The -all option causes all such strings to be replaced.
+#
+# (Similar to regsub, but for literals.)
+#
+proc ssubtract {args} {
+    getflag all args
+    assign a b $args
+
+    set index [string first $b $a]
+    if {$index == -1} {
+	return $a
+    } else {
+	set result [string range $a 0 [expr $index-1]]
+	append result [string range $a [expr $index+[string length $b]] end]
+
+	if { $all } {
+	    return [ssubtract -all $result $b]
+	} else {
+	    return $result
+	}
+    }
+}
