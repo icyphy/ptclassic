@@ -188,3 +188,16 @@ proc infoContext {} {
 	uplevel info context
     }
 }
+##########################################################################
+#### winfoCommand
+# 
+# Use this instead of "winfo command win"
+#
+proc winfoCommand {w} {
+    global tcl_version
+    if { $tcl_version >= 8.0 && ${itcl::version} >= 3.0 } {
+	namespace which -command $w
+    } else {
+	winfo command $w
+    }
+}
