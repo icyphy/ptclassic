@@ -48,11 +48,11 @@ LIB=libbdfstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 PL_SRCS=\
+ BDFCondGate.pl \
  BDFFork.pl \
  BDFNot.pl \
  BDFSelect.pl \
- BDFSwitch.pl \
- BDFTrue.pl
+ BDFSwitch.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
