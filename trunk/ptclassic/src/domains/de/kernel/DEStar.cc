@@ -114,7 +114,7 @@ void DEPriorityStar :: start()
 }
 
 // set up priorityList
-int DEPriorityStar :: IsItRunnable()
+int DEPriorityStar :: isItRunnable()
 {
 	priorityList.reset();
 	int preNum = numEvent;
