@@ -141,8 +141,19 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
 //  the mode settings will be copied as well if we are writing to
 //  a external host
     if (mode != -1) {
-	chmod((const char*)(tmpFile?tmpFile:fileName),mode);
+        chmod((const char*)(tmpFile?tmpFile:fileName),mode);
     }
+
+//  rcp the file to another machine if necessary
+    int status = TRUE;
+    if (tmpFile) {
+        StringList rcp;
+        rcp <<"rcp -p "<<tmpFile<<" "<<hname<<":"<<fileName;
+        if(system(rcp)) status = FALSE;
+	// if we display the file, we must delete the tmpfile after
+	// it is displayed, otherwise we delete it here
+        if (!displayFlag) unlink(tmpFile);
+   }
 
 //  display the file on local machine
     if (displayFlag) {
@@ -158,16 +169,7 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
 	system(displayCommand);
     }
 
-//  rcp the file to another machine if necessary
-    int status = TRUE;
-    if (tmpFile) {
-	StringList rcp;
-	rcp <<"rcp -p "<<tmpFile<<" "<<hname<<":"<<fileName;
-	if(!system(rcp)) status = FALSE;
-	unlink(tmpFile);
- 	LOG_DEL; delete [] tmpFile;
-   }
-
+    LOG_DEL; delete [] tmpFile;
     return status;
 }
 
