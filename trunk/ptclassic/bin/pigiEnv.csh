@@ -18,12 +18,7 @@ endif
 
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 if ( ! $?ARCH ) then
-    if ( -x /bin/arch ) 		setenv ARCH `/bin/arch`
-    else if ( -x /bin/machine )		setenv ARCH `/bin/machine`
-    else
-    	echo "${0}: Unknown ARCH."
-	exit 1
-    endif
+    setenv ARCH `$PTOLEMY/bin/arch`
 endif
 
 if ( ! $?PIGIRPC ) setenv PIGIRPC $PTOLEMY/bin.$ARCH/pigiRpc
@@ -37,6 +32,11 @@ endif
 if ( "$1" == "-console" ) then
     shift
     set pigiconsole
+endif
+
+if ( "$1" =~ "-*" ) then
+    echo "${0}: Bad option: $1"
+    exit 1
 endif
 
 # Allow a user-specified starting palette,
