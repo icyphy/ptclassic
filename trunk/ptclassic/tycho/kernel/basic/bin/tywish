@@ -37,6 +37,7 @@ if [info exists tycho] {
 } else {
     error "Tycho failed to start up: set the TYCHO environment variables"
 }
+set TYCHO $tycho
 
 # Make sure the tycho path is in the auto search path
 if { [lsearch -exact $auto_path $tycho] == -1 } {
