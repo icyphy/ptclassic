@@ -456,6 +456,14 @@ int CGCTarget :: codeGenInit() {
 	return FALSE;
     }
 
+// hppa.cfront CC 3.50 has this annoying bug that barfs on the code below
+// > CC: "../../../../src/domains/cgc/kernel/CGCTarget.cc", line 461:
+// > sorry, not implemented: general initializer in initializer list
+// So rather than having a nice clean portable way of doing this, we
+// use an ugly if/else tree below
+
+#define HP_CC_3_50_BUG
+#ifndef HP_CC_3_50_BUG
 struct cnv_tb {
   /*DataType src, dst;*/
   const char *src, *dst, *star;
@@ -469,7 +477,7 @@ static struct cnv_tb cnv_table[7] = {
   {  ANYTYPE, 	COMPLEX,	"FloatToCx"	},
   {  ANYTYPE, 	FIX,		"FloatToFix"	}
 };
-
+#endif // HP_CC_3_50_BUG
 
 
 int CGCTarget::modifyGalaxy() {
@@ -508,18 +516,63 @@ int CGCTarget::modifyGalaxy() {
 
 		PortHole* input = port->far();	// destination input PortHole
 
+#ifdef HP_CC_3_50_BUG
+		if ( port->type() == COMPLEX ) {
+		  if ( port->resolvedType() == FIX ) {
+		    //COMPLEX, 	FIX, 		"CxToFix"
+		    if (!(s = (Star*)spliceStar(input, "CxToFix",
+						TRUE, domain)))
+				return FALSE;
+		  } else {
+		    //COMPLEX, 	ANYTYPE,	"CxToFloat"
+		    if (!(s = (Star*)spliceStar(input, "CxToFloat",
+						TRUE, domain)))
+				return FALSE;
+		  }
+		} else if ( port->type() == FIX ) {
+		  if ( port->resolvedType() == COMPLEX ) {
+		    //FIX,		COMPLEX,	"FixToCx"
+		    if (!(s = (Star*)spliceStar(input, "FixToCx",
+						TRUE, domain)))
+				return FALSE;
+		  } else if ( port->resolvedType() == FIX ) {
+		    //FIX,		FIX,		"FixToFix"
+		    if (!(s = (Star*)spliceStar(input, "FixToFix",
+						TRUE, domain)))
+				return FALSE;
+		  } else {
+		    //FIX,		ANYTYPE,	"FixToFloat"
+		    if (!(s = (Star*)spliceStar(input, "FixToFloat",
+						TRUE, domain)))
+				return FALSE;
+		  }
+		} else {
+		  if ( port->resolvedType() == COMPLEX ) {
+		    //ANYTYPE, 	COMPLEX,	"FloatToCx"
+		    if (!(s = (Star*)spliceStar(input, "FloatToCx",
+						TRUE, domain)))
+				return FALSE;
+		  } else if ( port->resolvedType() == FIX ) {
+		    //ANYTYPE, 	FIX,		"FloatToFix"
+		    if (!(s = (Star*)spliceStar(input, "FloatToFix",
+						TRUE, domain)))
+				return FALSE;
+		  }
+		}
+
+#else // HP_CC_3_50_BUG
 		for (int i=0; i < sizeof(cnv_table)/sizeof(*cnv_table); i++) {
 		    if (((port->type() == cnv_table[i].src) ||
-			 (cnv_table[i].src == ANYTYPE)) &&
+				  (cnv_table[i].src == ANYTYPE)) &&
 		        ((port->resolvedType() == cnv_table[i].dst) ||
-			 (cnv_table[i].dst == ANYTYPE))) {
-			s = (Star*) spliceStar(
-			    input, cnv_table[i].star, TRUE, domain);
-			if (!s ) return FALSE;
-			break;
+				  (cnv_table[i].dst == ANYTYPE))) {
+		      if (!(s = (Star*)spliceStar(input,
+			  cnv_table[i].star, TRUE, domain)))
+				return FALSE;
+			  break;
 		    }
 		}
-		
+#endif // HP_CC_3_50_BUG
 		if (s) s->setTarget(this);
 	    }
 	}
