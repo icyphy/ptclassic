@@ -91,3 +91,18 @@ TAGS:
 	    fi ; \
 	done
 	-cat -s $(TDIRS:%=%/TAGS) > $@
+
+
+# Quick way to build a small fast ptcl
+ptcl/ptcl.ptiny:
+	(cd kernel; $(MAKE) install)
+	(cd domains/de; $(MAKE) install)
+	(cd domains/sdf; $(MAKE) install)
+	(cd ptcl; $(MAKE) ptcl.ptiny)
+
+# Quick way to build a small fast pigiRpc
+pigiRpc/pigiRpc.ptiny: ptcl/ptcl.ptiny
+	(cd pigilib; $(MAKE) install)
+	(cd ptklib; $(MAKE) install)
+	(cd libgantt; $(MAKE) install)
+	(cd pigiRpc; $(MAKE) pigiRpc.ptiny)
