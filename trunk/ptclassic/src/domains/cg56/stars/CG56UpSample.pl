@@ -48,7 +48,6 @@ is to output it first (phase = 0). The maximum phase is "factor" - 1.
 			Error::abortRun(*this, ": phase must be < factor");
 	}
 	codeblock (initfill) {
-; initialization code for star $fullname() - class CG56UpSample
 	move	#$addr(output),r1
 	move	#$val(fill),a
 	}
