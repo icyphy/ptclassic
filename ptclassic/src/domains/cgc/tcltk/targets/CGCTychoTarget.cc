@@ -98,13 +98,18 @@ void CGCTychoTarget :: addStaticDecls
   char *start;
   char *current = (char *)string;
 
+  // If the string is NULL, dont parse through it
+  if (!(string == NULL)) {
   while ( *current != '\0' ) {
     // skip white space
     while ( *current != '\0' 
 	    && ( *current == ' ' || *current == '\n' || *current == '\t' )) {
       current++;
     }
-    if ( *current == '\0' ) break;
+    if ( *current == '\0' ) {
+      result << "\n";
+      break;
+    }
     length = 0;
     start = current;
     // If this is a comment, go to the end of it
@@ -154,6 +159,7 @@ void CGCTychoTarget :: addStaticDecls
       delete [] temp; 
       current++;
     }
+  }
   }
 }
 
