@@ -37,15 +37,16 @@ This file contains definitions of CG-specific PortHole classes.
 #pragma interface
 #endif
 
-#include "PortHole.h"
-#include "SDFPortHole.h"
+#include "DynDFPortHole.h"
 
 class CGGeodesic;
 
 /*****************************************************************
 CG: Code generation
 
-These PortHoles are much like SDF PortHoles, from which they are derived.
+These PortHoles are much like SDF PortHoles; both have the common
+baseclass DFPortHole.
+
 ****************************************************************/
 
         //////////////////////////////////////////
@@ -53,18 +54,19 @@ These PortHoles are much like SDF PortHoles, from which they are derived.
         //////////////////////////////////////////
 
 // Contains all the special features required for
-//   synchronous dataflow (CG)
+//   synchronous dataflow and boolean dataflow (CG)
 
-class CGPortHole : public DFPortHole {
+class CGPortHole : public DynDFPortHole {
 	friend class CGGeodesic;
 public:
 	CGPortHole();
 	~CGPortHole();
 
-	// Services of SDFPortHole that are used often:
+	// Services of DFPortHole and BDFPortHole that are used often:
 	// setPort(char* portName, Block* parent, dataType type,
 	//	unsigned numTokens, unsigned delay)
 	// setSDFParams(unsigned numTokens, unsigned delay);
+	// setBDFParams(...)
 
 	// Allocate a geodesic and give it a name
 	virtual Geodesic* allocateGeodesic();
@@ -167,8 +169,10 @@ public:
         //////////////////////////////////////////
  
 // Synchronous dataflow MultiPortHole for code generation
- 
-class MultiCGPort : public MultiSDFPort {
+// FIXME: by deriving from MultiDFPort we only support
+// setSDFParams, not full set.
+
+class MultiCGPort : public MultiDFPort {
 protected:
 	CGPortHole* forkSrc;
 public:
