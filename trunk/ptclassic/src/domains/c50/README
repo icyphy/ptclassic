@@ -1,0 +1,39 @@
+Version: $Id$
+
+README file for ptolemy/src/domains/c50
+
+The Ptolemy c50 domain generated code for the Texas Instruments C50 chip.
+To make much use of this domain, you will need a PC with a C50.
+
+Installation
+------------
+In August of 1996, the c50 domain was released as a tar file overlay for
+Ptolemy0.6.
+
+To install this tar file, untar it inside your Ptolemy distribution:
+	cd $PTOLEMY/..
+	gunzip /tmp/pt-0.6.c50.src.tar.gz
+	tar -xf /tmp/pt-0.6.c50.src.tar
+
+Window and RaisedCosine star in c50/dsp/stars need the ptdsp library,
+located in $PTOLEMY/src/utils/libptdsp.  This library is not part of
+the Ptolemy0.6 release, but is included with this tar overlay.
+
+The following files need to be modified to use the c50 domain:
+
+$PTOLEMY/MAKEARCH		- Add c50 to EXPDOMAINS
+
+$PTOLEMY/mk/ptbin.mk		- Add 'C50 = 1' to the FULL section so that
+				the c50 domain is in a full pigiRpc	
+
+$PTOLEMY/mk/stars/mk		- Add the c50 domain in several places.
+
+$PTOLEMY/src/domains/makefile 	- Add the c50 domain to EXPDOMAINS
+
+$PTOLEMY/src/utils/makefile 	- Add libptdsp to DIRS
+
+The file ptolemy/src/domains/c50/pt-0.6.c50.patch is a patch that
+makes the above changes.  To patch the vanilla Ptolemy 0.6 sources, do:
+
+cd $PTOLEMY; patch < $PTOLEMY/src/domains/c50/pt-0.6.c50.patch
+ 
