@@ -26,15 +26,14 @@ defstar {
 		name { output }
 		type { float }
 	}
-	start {
-		neg.reset();
-	}
 	go {
 		float diff;
 		diff = float(pos%0);
+		MPHIter nexti(neg);
 		for(int i=neg.numberPorts(); i>0; i--)
-			diff -= float(neg()%0);
+			diff -= float((*nexti++)%0);
 		output%0 << diff;
 	}
 }
+
 
