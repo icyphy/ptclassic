@@ -44,8 +44,8 @@ MDSDFSTARS = $(LIBDIR)/mdsdfstars.o
 PARLIBFILES = $(LIBDIR)/libDC.a $(LIBDIR)/libHu.a  $(LIBDIR)/libDL.a \
 	$(LIBDIR)/libPar.a $(LIBDIR)/libcgstars.a $(LIBDIR)/libcg.a
 
-# if S56DIR is defined compile in the S56X Wormhole target.  This
-# is defined in config-sun4.mk.
+# If S56DIR is defined, then compile in the S56X Wormhole target.
+# This is defined in config-sun4.mk.
 ifdef S56DIR
 S56WH_LIB= -lqckMon
 S56WH_LIBDIR= -L$(S56DIR)/lib
@@ -53,9 +53,8 @@ S56WH_O= $(CG56T)/S56XTargetWH.o
 endif
 
 # if MATLABDIR is defined, then compile with Matlab external interface library
-ifdef MATLABDIR
+ifdef MATLABLIBDIR
 MATLABEXT_LIB= -lmat
-MATLABEXT_LIBDIR= -L$(MATLABDIR)/extern/lib/$(ARCH)
 endif
 
 # Library files reqd by stars.  Note that libptolemy.a is not included.
@@ -103,7 +102,7 @@ $(S56WH_LIBDIR) $(S56WH_LIB) \
 -ldestars -lde \
 -lbdfstars -lbdf \
 -lsdfimagestars -lImage -lsdfdspstars -lsdfstars -lLS -lsdf -lsdfmatrixstars \
-$(MATLABEXT_LIBDIR) $(MATLABEXT_LIB) \
+$(MATLABLIBDIR) $(MATLABEXT_LIB) \
 -lvhdlfstars -lvhdlf \
 -lvhdlbstars -lvhdlb \
 -lmdsdfstars -lmdsdf
