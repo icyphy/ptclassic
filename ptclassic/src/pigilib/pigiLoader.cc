@@ -357,6 +357,7 @@ linkObject (const char* ofile, int permB, const char *linkArgs) {
 	StringList ptclbuf = permB ? "permlink " : "link ";
 	if (ofile) ptclbuf << ofile << " ";
 	if (linkArgs) ptclbuf << linkArgs;
+	ptclbuf << "\n";
 	KcLog (ptclbuf);
 
 	// Dynamically link the file: $ofile $linkArgs
