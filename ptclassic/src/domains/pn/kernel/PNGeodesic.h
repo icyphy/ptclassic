@@ -41,6 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "Geodesic.h"
+#include "PtGate.h"
 
 class PtCondition;
 
@@ -69,12 +70,20 @@ public:
     int capacity() const { return cap; }
     void setCapacity(int c);
 
+    // Number of full geodesics.
+    static int blockedOnFull();
+    static void resetFull();
+
 protected:
     PtCondition* notEmpty;
     PtCondition* notFull;
 
     // capacity limit
     int cap;
+
+    static PtGate* fullGate;
+    static GateKeeper fullKeeper;
+    static int numFull;
 };
 
 #endif
