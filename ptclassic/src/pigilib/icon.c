@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -42,6 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "octMacros.h"
 #include "palette.h"
 #include "main.h"
+#include "ptk.h"
 
 #define DM_WIDTH 80  /* dialog entry width */
 #define EDIT_ICON_SNAP 5 /* snap size of vem window for edit-icon */
@@ -416,6 +417,59 @@ static dmTextItem item = {"Palette", 1, DM_WIDTH, "./user.pal", NULL};
 	    ViDone();
 	}
     }
+    ViDone();
+}
+
+int 
+RpcShowName(spot, cmdList, userOptionWord) /* ARGSUSED */
+RPCSpot *spot;
+lsList cmdList;
+long userOptionWord;
+{
+    octObject inst, facet;
+    vemStatus status;
+    static char buf[512];
+
+    ViInit("look-inside");
+    ErrClear();
+
+    /* get current facet */
+    facet.objectId = spot->facet;
+    if (octGetById(&facet) != OCT_OK) {
+	PrintErr(octErrorString());
+    	ViDone();
+    }
+
+    status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
+    if (status == VEM_NOSELECT)
+	PrintCon("Aborted");
+    else if (status != VEM_OK)
+	PrintErr("Cursor must be over an icon instance");
+    else {
+	switch (inst.type) {
+	case OCT_FACET:
+	    (void) sprintf(buf, "Facet: '%s'", inst.contents.facet.facet);
+	    break;
+	case OCT_TERM:
+	    (void) sprintf(buf, "Terminal named: '%s'",
+		inst.contents.term.name);
+	    break;
+	case OCT_NET:
+	    (void) sprintf(buf, "Net");
+	    break;
+	case OCT_INSTANCE:
+	    (void) sprintf(buf, "Instance named '%s'\nFrom master '%s'",
+		inst.contents.instance.name,
+		inst.contents.instance.master);
+	    break;
+	default:
+	    (void) sprintf(buf, "No name for this object");
+	    break;
+	}
+	Tcl_VarEval(ptkInterp,"ptkMessage {", buf, "}", (char *)NULL);
+	FreeOctMembers(&inst);
+    }
+    FreeOctMembers(&facet);
     ViDone();
 }
 
