@@ -44,10 +44,6 @@ VHDLCluster :: VHDLCluster() {
   VHDLObj::initialize();
 }
 
-VHDLCluster :: VHDLCluster(const char* n, Block* p, const char* d) : VHDLObj(n,p,d) {
-  VHDLObj::initialize();
-}
-
 // Destructor.
 VHDLCluster :: ~VHDLCluster() {}
 

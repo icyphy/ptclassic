@@ -46,13 +46,10 @@ class VHDLPort : public VHDLObj
  public:
   // Constructors.
   VHDLPort();
-  VHDLPort(const char*, Block*, const char*);
 
   // Destructor.
   ~VHDLPort();
 
-  // Name.
-//  StringList name;
   // Data type.
   StringList type;
   // Data direction.

@@ -46,14 +46,11 @@ class VHDLPortVar : public VHDLObj
  public:
   // Constructors.
   VHDLPortVar();
-  VHDLPortVar(const char*, Block*, const char*);
 
   // Destructor.
   ~VHDLPortVar();
 
   // Note - "name" corresponds to the port name.
-  // Name.
-//  StringList name;
   // Map binding.
   StringList variable;
 

@@ -83,10 +83,21 @@ protected:
 	IntState report;
 	IntState interactive;
 	
+	/*virtual*/ void begin();
+
 	/*virtual*/ void setup();
 
 	// Method to write out com file for VSS if needed.
 	void setWriteCom();
+
+	// virtual function to add additional codeStreams.
+	/*virtual*/ void addCodeStreams();
+
+	// Initialize codeStreams.
+	/*virtual*/ void initCodeStreams();
+
+	// Initialize VHDLObjLists.
+	/*virtual*/ void initVHDLObjLists();
 
 private:
 	CodeStream cli_models;
@@ -96,8 +107,6 @@ private:
 	CodeStream top_entity;
 	CodeStream top_architecture;
 	CodeStream top_configuration;
-	CodeStream entity_declaration;
-	CodeStream architecture_body_opener;
 
 	VHDLGenericList mainGenList;
 	VHDLPortList mainPortList;

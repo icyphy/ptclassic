@@ -44,10 +44,6 @@ VHDLPort :: VHDLPort() {
   VHDLObj::initialize();
 }
 
-VHDLPort :: VHDLPort(const char* n, Block* p, const char* d) : VHDLObj(n,p,d) {
-  VHDLObj::initialize();
-}
-
 // Destructor.
 VHDLPort :: ~VHDLPort() {}
 

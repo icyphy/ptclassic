@@ -46,13 +46,10 @@ class VHDLGeneric : public VHDLObj
  public:
   // Constructors.
   VHDLGeneric();
-  VHDLGeneric(const char*, Block*, const char*);
 
   // Destructor.
   ~VHDLGeneric();
 
-  // Name.
-//  StringList name;
   // Data type.
   StringList type;
   // Default value.

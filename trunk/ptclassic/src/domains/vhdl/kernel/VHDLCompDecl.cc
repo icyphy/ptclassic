@@ -44,10 +44,6 @@ VHDLCompDecl :: VHDLCompDecl() {
   VHDLObj::initialize();
 }
 
-VHDLCompDecl :: VHDLCompDecl(const char* n, Block* p, const char* d) : VHDLObj(n,p,d) {
-  VHDLObj::initialize();
-}
-
 // Destructor.
 VHDLCompDecl :: ~VHDLCompDecl() {}
 

@@ -47,13 +47,10 @@ class VHDLCluster : public VHDLObj
  public:
   // Constructors.
   VHDLCluster();
-  VHDLCluster(const char*, Block*, const char*);
 
   // Destructor.
   ~VHDLCluster();
 
-  // Name.
-//  StringList name;
   // Firing list.
   VHDLFiringList* firingList;
 

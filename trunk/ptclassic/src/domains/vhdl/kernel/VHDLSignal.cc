@@ -44,10 +44,6 @@ VHDLSignal :: VHDLSignal() {
   VHDLObj::initialize();
 }
 
-VHDLSignal :: VHDLSignal(const char* n, Block* p, const char* d) : VHDLObj(n,p,d) {
-  VHDLObj::initialize();
-}
-
 // Destructor.
 VHDLSignal :: ~VHDLSignal() {}
 

@@ -45,13 +45,11 @@ class VHDLObj : public NamedObj
  public:
   // Constructors.
   VHDLObj();
-  VHDLObj(const char*, Block*, const char*);
 
   // Destructor.
   ~VHDLObj();
 
   // Name.
-//  StringList name;
   const char* name;
 
   // Initializer.

@@ -45,11 +45,6 @@ VHDLGeneric :: VHDLGeneric() {
   VHDLObj::initialize();
 }
 
-VHDLGeneric :: VHDLGeneric(const char* n, Block* p, const char* d) : VHDLObj(n,p,d) {
-  defaultVal = "";
-  VHDLObj::initialize();
-}
-
 // Destructor.
 VHDLGeneric :: ~VHDLGeneric() {}
 

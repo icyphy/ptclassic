@@ -48,13 +48,10 @@ class VHDLCompDecl : public VHDLObj
  public:
   // Constructors.
   VHDLCompDecl();
-  VHDLCompDecl(const char*, Block*, const char*);
 
   // Destructor.
   ~VHDLCompDecl();
 
-  // Name.
-//  StringList name;
   // Port list.
   VHDLPortList* portList;
   // Generic list.

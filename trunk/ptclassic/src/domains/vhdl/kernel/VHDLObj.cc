@@ -44,16 +44,12 @@ VHDLObj :: VHDLObj() {
   initialize();
 }
 
-VHDLObj :: VHDLObj(const char* n, Block* p, const char* d) : NamedObj(n,p,d) {
-  initialize();
-}
-
 // Destructor.
 VHDLObj :: ~VHDLObj() {}
 
 // Initializer.
 void VHDLObj :: initialize() {
-//  name = hashstring("");
+  name = hashstring("XXX");
 }
 
 // Class identification.

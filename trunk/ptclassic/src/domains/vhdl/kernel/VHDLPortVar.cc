@@ -44,10 +44,6 @@ VHDLPortVar :: VHDLPortVar() {
   VHDLObj::initialize();
 }
 
-VHDLPortVar :: VHDLPortVar(const char* n, Block* p, const char* d) : VHDLObj(n,p,d) {
-  VHDLObj::initialize();
-}
-
 // Destructor.
 VHDLPortVar :: ~VHDLPortVar() {}
 
