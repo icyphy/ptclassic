@@ -128,7 +128,7 @@ public:
 
     inline Block* next() {
 	PortHole* port;
-	Block* parent;
+	Block* parent = 0;
 	while ((port=(*successorPortIter)++)!= NULL && (!port->far()
 	       || (parent=port->far()->parent())==NULL));
 	return port? parent: (Block*)NULL;	
@@ -148,7 +148,7 @@ public:
     // Skips over incorrectly connected ports, should we?
     inline Block* next() {
 	PortHole* port;
-	Block* parent;
+	Block* parent = 0;
 	while ((port=(*predecessorPortIter)++)!= NULL && (!port->far()
 	       || (parent=port->far()->parent())==NULL));
 	return port? parent: (Block*)NULL;
