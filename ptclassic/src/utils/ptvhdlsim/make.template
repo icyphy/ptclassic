@@ -43,7 +43,7 @@ BINDIR = $(ROOT)/bin.$(PTARCH)
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-EXTRA_SRCS = CLISocket.c CLISocket.h \
+EXTRA_SRCS = CLISocket.c CLISocket.h CLIConstants.h \
 	V2Cinteger.c C2Vinteger.c V2Creal.c C2Vreal.c \
 	V2Cinteger.vhdl C2Vinteger.vhdl V2Creal.vhdl C2Vreal.vhdl
 
