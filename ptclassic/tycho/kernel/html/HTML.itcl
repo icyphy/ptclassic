@@ -98,8 +98,8 @@ class ::tycho::HTML {
     # The directory for relative references to images and the like,
     itk_option define -directory directory Directory {}
 
-    # Display an image by wrapping it html and displaying it
-    itk_option define -image image Image {}
+    # Override the slowNetwork preference for this html browswer.
+    itk_option define -image image Image 0
 
     # Offset from the nominal 14 points for the font sizes.
     itk_option define -size size Size 2
@@ -141,7 +141,7 @@ class ::tycho::HTML {
     method isRendering {} {return $isrendering}
 
     # Return 1 if the slowNetwork preference is set.
-    method isSlowNetwork {} {return [preference get slowNetwork]}
+    method isSlowNetwork {}
 
     # Return the reference directory.
     method lastDirectory {}
@@ -232,16 +232,6 @@ class ::tycho::HTML {
 #
 configbody ::tycho::HTML::size {
     HMset_state [textWinName] -size $itk_option(-size)
-}
-
-#########################################################################
-#### -image configuration
-# Generate html that will display the image file.
-#
-configbody ::tycho::HTML::image {
-    set image $itk_option(-image)
-    clear
-    insertData "<img src=\"$image\" alt=\"$image\">"
 }
 
 ###################################################################
@@ -394,6 +384,7 @@ body ::tycho::HTML::constructor {args} {
 
     # Put some space around the text
     $text configure -padx 0.25c -pady 0.25c
+
 }
 
 ###################################################################
@@ -608,7 +599,21 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
             }
             configure -readonly 1
             return
-        }
+        } else {
+	    # Handle Image files specially
+	    if {($ext == ".gif" || $ext == ".ppm" || $ext == ".pgm" || \
+		    $ext == ".xbm") && $myDisplayer != {}} {
+		clear
+
+		configure -directory [file dirname $filename]
+		configure -file $filename
+
+		toolbar clear location
+		toolbar insert location $filename
+
+		insertData "<img src=\"$filename\" alt=\"$filename\">"
+	    }
+	}
     } {
         # For backtracking
         if $push {
@@ -758,7 +763,15 @@ body ::tycho::HTML::raiseWindow {} {
 # <code>insertData</code>.
 #
 body ::tycho::HTML::reload {} {
-    ::tycho::File::reload
+    # Handle Image files specially
+    set ext [file extension $file]
+    if {($ext == ".gif" || $ext == ".ppm" || $ext == ".pgm" || \
+            $ext == ".xbm") && $myDisplayer != {}} {
+        clear
+        insertData "<img src=\"$file\" alt=\"$file\">"
+    } else {
+        ::tycho::File::reload
+    }
     # Mark read-only to prevent modifications.
     configure -readonly 1
 }
@@ -825,6 +838,20 @@ body ::tycho::HTML::seeFragment {point} {
                 selection clear -displayof $text; $text see insert
         after 8000 [list catch \
                [list $text tag delete hypertarget]]
+    }
+}
+
+#####################################################################
+#### isSlowNetwork
+# Return 1 if the slowNetwork preference is set and the -image itk_option
+# is null.  If -image is set, then we assume the user really does want
+# to see the image.
+#
+body ::tycho::HTML::isSlowNetwork {} {
+    if {$itk_option(-image) != 0 } { 
+	return 0
+    } else {
+	return [preference get slowNetwork]
     }
 }
 
