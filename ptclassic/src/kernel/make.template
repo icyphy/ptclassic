@@ -34,7 +34,7 @@ LIB=libptolemy.a
 
 # Library sources
 LIBSRCS=Block.cc Connect.cc ComplexArrayState.cc ComplexState.cc \
- Fraction.cc Galaxy.cc Domain.cc Linker.cc DataStruct.cc \
+ Fraction.cc Galaxy.cc Domain.cc Linker.cc DataStruct.cc checkConnect.cc \
  InterpGalaxy.cc Interpreter.cc KnownBlock.cc NamedObj.cc Output.cc \
  Particle.cc PriorityQueue.cc SpaceWalk.cc Star.cc StringList.cc \
  Tokenizer.cc Universe.cc expandPath.cc Wormhole.cc WormConnect.cc \
@@ -67,6 +67,7 @@ LIBOBJS=Block.o Connect.o ComplexArrayState.o ComplexState.o Fraction.o Galaxy.o
  InterpGalaxy.o Interpreter.o KnownBlock.o NamedObj.o Output.o Particle.o \
  PriorityQueue.o SpaceWalk.o Star.o StringList.o Tokenizer.o Universe.o \
  expandPath.o Wormhole.o WormConnect.o Domain.o Linker.o DataStruct.o \
+ checkConnect.o \
  FloatState.o IntState.o KnownState.o State.o StringState.o \
  FloatArrayState.o IntArrayState.o \
  SDFConnect.o SDFScheduler.o SDFStar.o SDFWormhole.o SDFWormConnect.o \
