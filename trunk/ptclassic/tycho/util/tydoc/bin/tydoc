@@ -1,9 +1,13 @@
 #! /bin/sh
 # Command-line program for the tycho.util.tydoc utility \
-    exec itclsh "$0" "$@"
+    exec tclsh "$0" "$@"
 
 # $Id$
 # Author: John Reekie
+
+# Load up Itcl
+package require Itcl
+namespace import itcl::*
 
 # Create the tycho namespace
 namespace eval ::tycho {}
@@ -66,7 +70,7 @@ if [catch {package require tycho.util.tydoc} err ] {
 }
 
 # Print startup sig
-puts "tycho.util.tydoc, version 2.0"
+puts "tycho.util.tydoc, version 3.0"
 
 # Run the main procedure
 eval tydoc $argv
