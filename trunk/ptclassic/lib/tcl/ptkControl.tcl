@@ -32,6 +32,7 @@
 #	ACTIVE			active run
 #	PAUSED			paused run
 #	FINISHED		finished a run
+#	ERROR			the last run terminated with an error
 #	STOP_PENDING		pending stop requested
 #	ABORT			pending abort requested
 
@@ -61,13 +62,15 @@ proc ptkClearRunFlag { name octHandle } {
 }
 
 #######################################################################
-# Return "1" if the system has has been run at least once, "0" otherwise.
-# This procedure is used by pigilib/compile.c.
+# Return "1" if the system has has been run successfully at least once,
+# "0" otherwise.  This procedure is used by pigilib/compile.c.
 #
 proc ptkHasRun { name } {
     global ptkRunFlag
-    if {![info exists ptkRunFlag($name)] || $ptkRunFlag($name) == {IDLE}} {
-        return 0
+    if {![info exists ptkRunFlag($name)] || \
+	$ptkRunFlag($name) == {IDLE} || \
+	$ptkRunFlag($name) == {ERROR}} {
+            return 0
     } { return 1 }
 }
 
@@ -391,7 +394,7 @@ proc ptkStop { name } {
     halt
     global ptkOctHandles
     if {[info exists ptkOctHandles($name)]} {
-	after 10000 "ptkForceReset STOP_PENDING $name $ptkOctHandles($name)"
+	after 2000 "ptkForceReset STOP_PENDING $name $ptkOctHandles($name)"
     }
 }
 
@@ -411,7 +414,7 @@ proc ptkAbort { name } {
     halt
     global ptkOctHandles
     if {[info exists ptkOctHandles($name)]} {
-	after 10000 "ptkForceReset ABORT $name $ptkOctHandles($name)"
+	after 2000 "ptkForceReset ABORT $name $ptkOctHandles($name)"
     }
 }
 
@@ -489,6 +492,7 @@ proc ptkGo {name octHandle} {
     catch {$ptkControlPanel.panel.pause configure -relief raised}
     # So that error highlighting, etc. works
     if {$univ != $name} {ptkSetHighlightFacet $octHandle}
+    ptkClearHighlights
     if {[info exists ptkRunFlag($name)] && \
     	$ptkRunFlag($name) == {PAUSED}} {
 	    # Setting of ptkRunFlag should
@@ -498,6 +502,8 @@ proc ptkGo {name octHandle} {
 	    return
     }
     set ptkRunFlag($name) ACTIVE
+    # Make sure the button relief gets displayed
+    update
     # catch errors and reset the run flag.
     if {[catch {
         curuniverse $name
@@ -505,10 +511,16 @@ proc ptkGo {name octHandle} {
         set w .run_$octHandle
         set numIter [$w.iter.entry get]
         run $numIter
-	if {$ptkRunFlag($name) != {ABORT}} {wrapup}
+	if {$ptkRunFlag($name) != {ABORT}} { wrapup } {
+	    # Mark an error if the system was aborted
+	    set ptkRunFlag($name) ERROR
+	}
 	ptkClearRunFlag $name $octHandle
     } msg] == 1} {
+	# An error has occurred.
 	ptkClearRunFlag $name $octHandle
+	# Mark an error
+	set ptkRunFlag($name) ERROR
 	error $msg
     }
 }
