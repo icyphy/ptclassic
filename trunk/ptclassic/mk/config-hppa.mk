@@ -37,10 +37,14 @@ include $(ROOT)/mk/config-default.mk
 # Get the g++ definitions; we override some below.
 include $(ROOT)/mk/config-g++.mk
 
+# Get the g++ definitions for shared libraries; we override some below.
+# Comment the next line out if you don't want shared libraries.
+include $(ROOT)/mk/config-g++.shared.mk
+
 # Note that hppa does support shl_load() style dynamic linking, see
 # $(PTOLEMY)/src/kernel/Linker.sysdep.h for more information.
 # You may need to get the latest HP linker patch for shl_load to work.
-# As of 4/95 the linker patch was PHSS_5083*
+# As of 4/95 the linker patch was PHSS_5083* for hpux9.x
 #
 # Programs to use
 #
@@ -53,10 +57,13 @@ OPTIMIZER =	-O2
 #-Wsynth is new in g++-2.6.x
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wsynth #-Wcast-qual 
+# Misc. flags for OS version
+MISCCFLAGS =	-DPTHPUX10
 # Under gcc-2.7.0, you will need to add -fno-for-scope to GPPFLAGS
-GPPFLAGS =	-DUSG -g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) -fno-for-scope
+GPPFLAGS =	-DUSG -g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) -fno-for-scope \
+		$(MISCCFLAGS)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
-CFLAGS =	-g -DUSG $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
+CFLAGS =	-g -DUSG $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MISCCFLAGS)
 
 
 #
@@ -92,6 +99,7 @@ CFLAGS =	-g -DUSG $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 LINKFLAGS = 	-L$(LIBDIR) -Xlinker -x -Xlinker -E
 LINKFLAGS_D = 	-L$(LIBDIR) -g -Xlinker -E
 
+LIBSUFFIX =		sl
 
 #
 # Directories to use
@@ -138,11 +146,9 @@ FLUSH_CACHE =	flush_cache.o
 LIB_FLUSH_CACHE = $(LIBDIR)/flush_cache.o
 
 # If you are trying out the shl_load feature uncomment the lines below.
-USER_CC_SHAREDFLAGS =		-fPIC
-USER_C_SHAREDFLAGS =		-fPIC
-SYSLIBS =			-lg++ -lstdc++ -lm -ldld
+SYSLIBS =	-lg++ -lstdc++ -lm -ldld
 ## system libraries for linking .o files from C files only
-CSYSLIBS = -lm -ldld
+CSYSLIBS = 	-lm -ldld
 
 # Matlab architecture
 MATARCH = hp700
