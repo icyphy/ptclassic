@@ -1016,6 +1016,50 @@ StringList VHDLTarget :: addComponentMappings(VHDLCompDeclList* compDeclList,
   return all;
 }
 
+// Return configuration declarations based on compDeclList.
+StringList VHDLTarget :: addConfigurationDeclarations(VHDLCompDeclList* compDeclList,
+						      int level/*=0*/) {
+  StringList all;
+  // HashTable to keep track of which components already configured.
+  HashTable myTable;
+  myTable.clear();
+
+  all << "configuration " << (const char*) filePrefix
+      << "_parts" << " of " << (const char*) filePrefix
+      << " is\n";
+  all << "for " << "structure" << "\n";
+
+  // FIXME: This was moved from ArchTarget.cc, so still need to handle CLI stuff.
+  //  all << cli_configs;
+
+  VHDLCompDeclListIter nextCompDecl(*compDeclList);
+  VHDLCompDecl* compDecl;
+  while ((compDecl = nextCompDecl++) != 0) {
+    if (!(myTable.hasKey(compDecl->type))) {
+      myTable.insert(compDecl->type, compDecl);
+
+      // Filter out the CLI components C2V,V2C integer, real.
+      if (!strcmp(compDecl->type,"C2Vreal")) continue;
+      if (!strcmp(compDecl->type,"V2Creal")) continue;
+      if (!strcmp(compDecl->type,"C2Vinteger")) continue;
+      if (!strcmp(compDecl->type,"V2Cinteger")) continue;
+
+      level++;
+      all << indent(level) << "for all:"
+	  << compDecl->type
+	  << " use entity " << "work." << compDecl->type
+	  << "(behavior); end for;\n";
+      level--;
+    }
+  }
+
+  all << "end " << "for" << ";\n";
+  all << "end " << (const char*) filePrefix << "_parts"
+      << ";\n";
+
+  return all;
+}
+
 // Return variable declarations based on variableList.
 StringList VHDLTarget :: addVariableDecls(VHDLVariableList* varList,
 					  int level/*=0*/) {

@@ -205,6 +205,9 @@ protected:
 	// Return component mappings based on compDeclList.
 	StringList addComponentMappings(VHDLCompDeclList*, int=0);
 
+	// Return configuration declarations based on compDeclList.
+	StringList addConfigurationDeclarations(VHDLCompDeclList*, int=0);
+
 	// Return variable declarations based on variableList.
 	StringList addVariableDecls(VHDLVariableList*, int=0);
 
