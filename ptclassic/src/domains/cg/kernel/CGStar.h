@@ -160,6 +160,10 @@ protected:
 	// declare that I am a Fork star
 	void isaFork() { forkId = TRUE; }
 
+	// do initialization for fork stars.
+	virtual void forkInit(CGPortHole& input,MultiCGPort& output);
+	virtual void forkInit(CGPortHole& input,CGPortHole& output);
+
 	// lookup a shared symbol by list name & symbol name, if it is 
 	// not found Error::abortRun is called.
 	const char* lookupSharedSymbol(const char* list,const char* name);	
@@ -171,6 +175,11 @@ protected:
 	// same pointer, it is ignored.  This command should be called in 
 	// the defining star's constructor.
 	void addSharedSymbolList(SymbolList* list, const char* name);
+
+	// modify "deferrable": always defer stars that feed into forks,
+	// to keep minimum possible size for fork buffers.
+	int deferrable();
+
 private:
 
 	// List of all shared symbol lists.  To add a shared symbol list
@@ -189,13 +198,11 @@ private:
 	
 };
 
-/*
 class CGStarPortIter : public BlockPortIter {
 public:
 	CGStarPortIter(CGStar& s) : BlockPortIter(s) {}
 	CGPortHole* next() { return (CGPortHole*)BlockPortIter::next();}
 	CGPortHole* operator++() { return next();}
 };
-*/
 
 #endif

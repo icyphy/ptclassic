@@ -16,6 +16,7 @@ $Id$
 #endif
 
 #include "CGStar.h"
+#include "CGGeodesic.h"
 #include "CGWormhole.h"
 #include "CGTarget.h"
 #include "StringList.h"
@@ -378,6 +379,81 @@ int CGStar :: maxComm() {
 
 	// processor 1 to 2, "max" sample, both sending plus receiving.
 	return targetPtr->commTime(1,2,max,2);
+}
+
+// deferrable: never defer a fork; always defer a non-fork star that
+// feeds into a fork.
+// this prevents the resulting fork buffer from being larger than
+// necessary; new tokens are not added until they must be.
+
+int CGStar :: deferrable() {
+	if (isItFork()) return FALSE;
+	CGStarPortIter nextp(*this);
+	CGPortHole *p;
+	while ((p = nextp++) != 0) {
+		if (p->isItOutput() && p->cgGeo().forkType() == F_SRC)
+			return TRUE;
+	}
+	return SDFStar::deferrable();
+}
+
+// Code to shift delays from a fork's input port to its output port,
+// and to make it match the rate of its input.
+
+void CGStar :: forkInit(CGPortHole& input,MultiCGPort& output) {
+	isaFork();
+	int n = input.far()->numXfer();
+	input.setSDFParams(n,n-1);
+	output.setSDFParams(n,n-1);
+	int srcDelay = input.numTokens();
+	MPHIter nextp(output);
+	CGPortHole* p;
+	if (srcDelay > 0) {
+		// move delays from input to outputs
+		PortHole* f = input.far();
+		input.disconnect();
+		input.connect(*f,0);
+		while ((p = (CGPortHole*)nextp++) != 0) {
+			p->setForkSource(&input);
+			int n = p->numTokens();
+			f = p->far();
+			p->disconnect();
+			p->connect(*f,n+srcDelay);
+		}
+		// re-initialize all neighbors.
+		input.far()->parent()->initialize();
+		nextp.reset();
+		while ((p = (CGPortHole*)nextp++) != 0) {
+			p->far()->parent()->initialize();
+		}
+	}
+	else {
+		while ((p = (CGPortHole*)nextp++) != 0)
+			p->setForkSource(&input);
+	}
+}
+
+// similar to the above, but for only one output.  Useful in implementing
+// a star as an "identity".
+void CGStar :: forkInit(CGPortHole& input,CGPortHole& output) {
+	output.setForkSource(&input);
+	isaFork();
+	int n = input.far()->numXfer();
+	input.setSDFParams(n,n-1);
+	output.setSDFParams(n,n-1);
+	int srcDelay = input.numTokens();
+	if (srcDelay > 0) {
+		// move delays from input to outputs
+		PortHole* f = input.far();
+		input.disconnect();
+		input.connect(*f,0);
+		f = output.far();
+		output.disconnect();
+		output.connect(*f,n+srcDelay);
+		// re-initialize all neighbors.
+		input.far()->parent()->initialize();
+		output.far()->parent()->initialize();
+	}
 }
 
 // return NULL
