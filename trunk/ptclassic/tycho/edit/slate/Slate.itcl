@@ -103,9 +103,9 @@ proc ::tycho::slate {pathName args} {
 # according to their function in the slate:
 #
 # <ul>
-# <li><i>Picture</i> and subclasses.
+# <li><i>ComplexItem</i> and subclasses.
 # These classes implement the functionalty needed by the slate to 
-# actually create complex items. Subclasses of Picture includes things
+# actually create complex items. Subclasses of ComplexItem includes things
 # like ``3D'' rectangles and
 # polygons, and ``smart'' objects like self-routing lines.
 #
@@ -538,9 +538,9 @@ body ::tycho::Slate::ghost {tag {tags {}}} {
 	} elseif { [llength $match] == 1 } {
 	    set tag [lindex $match 0]
 	} else {
-	    # If there are multiple items, create a Picture and
+	    # If there are multiple items, create a ComplexItem and
 	    # add the ghost of each item to it.
-	    set ghost [eval create Picture [region $tag]]
+	    set ghost [eval create ComplexItem [region $tag]]
 	    eval lappend tags [gettags $ghost]
 	    foreach item $match {
 		ghost $item $tags
@@ -560,7 +560,7 @@ body ::tycho::Slate::ghost {tag {tags {}}} {
 
     # If we get to here, tag represents a single item
     set shape [shape $tag]
-    set primary [@scope ::tycho::Picture [list set primary($id)]]
+    set primary [@scope ::tycho::ComplexItem [list set primary($id)]]
     switch -exact $shape {
 	"rectangle" -
 	"oval" -

@@ -29,23 +29,23 @@
 
 
 ##########################################################################
-## Picture
+## ComplexItem
 #
 # An "empty" item to which items can be added to create a complex item.
 # Clients can create a complex item directly (by calling the slate's
 # create{} method) and add items into it by manipulating hierarchy tags.
 # often, however, the behavior of a complex item will need to be tailored,
-# and this is done by subclassing Picture (or one of its subclasses)
+# and this is done by subclassing ComplexItem (or one of its subclasses)
 # and adding procedures to override the default implementations
 # in this class.
 #
-# Picture and its subclasses are not classes in the usual sense:
+# ComplexItem and its subclasses are not classes in the usual sense:
 # instead of instantiating these classes, the Slate creates a new item
 # ID that uniquely identifies it; instead of calling methods on an 
 # object, the slate calls procedures in 
 # those classes with the ID of the item as the first argument;
 # instead of instance variables, these classes manipulate common arrays
-# indexed by item ID. The Picture class and its subclasses have
+# indexed by item ID. The ComplexItem class and its subclasses have
 # mechanism to simulate inheritance and to give complex items options
 # just like regular Tk canvas items. This evilness is needed to avoid
 # creating large numbers of objects, which is just too inefficient
@@ -57,9 +57,9 @@
 # following those three are arguments that would be passed to 
 # methods if these classes implemented objects in the normal way.
 #
-# <a href="../internals/howtoread.html">Reading <i>Picture</i> documentation</a>.
+# <a href="../internals/howtoread.html">Reading <i>ComplexItem</i> documentation</a>.
 #
-class ::tycho::Picture {
+class ::tycho::ComplexItem {
     inherit ::tycho::Uninstantiable
 
     # Create a new complex item
@@ -87,7 +87,7 @@ class ::tycho::Picture {
     ####                         picture components                ####
 
     # The "primary" component that defines the item's coordinates. 
-    # Every Picture class must create exactly one primitive canvas item
+    # Every ComplexItem class must create exactly one primitive canvas item
     # and place its ID into this array indexed by the complex item ID.
     # The Slate uses this component to manipulate the coordinates of
     # complex items. Note: subclasses are _not_ to create their own 
@@ -99,10 +99,10 @@ class ::tycho::Picture {
 
     # The virtual "method" table. This is a common array indexed by
     # method name, with contents being the actual procedure to call
-    # to implement the method. Every subclass of Picture must create
+    # to implement the method. Every subclass of ComplexItem must create
     # its own copy of this array, and fill it with methods names and
-    # procedures. For example, the Picture class has an
-    # entry named "coords" which contains "::tycho::Picture::coords".
+    # procedures. For example, the ComplexItem class has an
+    # entry named "coords" which contains "::tycho::ComplexItem::coords".
     # This array implements "inheritance": if a method is not implemented
     # in a given class, then the array contains the name of a procedure
     # in one of its superclasses.
@@ -113,7 +113,7 @@ class ::tycho::Picture {
     # values of the item's options.
     common optiondefault
 
-    # The "shape" of items of this type. Every Picture class must create
+    # The "shape" of items of this type. Every ComplexItem class must create
     # its own copy of this array and set it to a type that indicates
     # what shape the complex item is: point, line, polygon, rectangle,
     # or oval.
@@ -123,10 +123,10 @@ class ::tycho::Picture {
     ####                       class initialization                ####
 
     #### Set method table
-    set methodtable(construct)     ::tycho::Picture::construct
-    set methodtable(coords)        ::tycho::Picture::coords
-    set methodtable(itemcget)      ::tycho::Picture::itemcget
-    set methodtable(itemconfigure) ::tycho::Picture::itemconfigure
+    set methodtable(construct)     ::tycho::ComplexItem::construct
+    set methodtable(coords)        ::tycho::ComplexItem::coords
+    set methodtable(itemcget)      ::tycho::ComplexItem::itemcget
+    set methodtable(itemconfigure) ::tycho::ComplexItem::itemconfigure
 }
 
 
@@ -146,7 +146,7 @@ class ::tycho::Picture {
 # complex item, two or more coordinate values, and
 # zero or more option-value pairs.
 # 
-body ::tycho::Picture::construct {id canvas slate tags x0 y0 x1 y1 args} {
+body ::tycho::ComplexItem::construct {id canvas slate tags x0 y0 x1 y1 args} {
     # Create the primary component for the outline coordinates.
     # Because this item is completely blank, it will actually respond to
     # events inside it -- I don't know if this is good or bad, but that's
@@ -163,7 +163,7 @@ body ::tycho::Picture::construct {id canvas slate tags x0 y0 x1 y1 args} {
 # This procedure does not need to delete component items, as
 # that is done automatically by the Slate.
 #
-# body ::tycho::Picture::destruct {id canvas slate} {}
+# body ::tycho::ComplexItem::destruct {id canvas slate} {}
 #
 
 ##########################################################################
@@ -187,7 +187,7 @@ body ::tycho::Picture::construct {id canvas slate tags x0 y0 x1 y1 args} {
 # (For example, the _Frame_ class scales so that its borders remain
 # the same width.)
 #
-body ::tycho::Picture::coords {id canvas slate args} {
+body ::tycho::ComplexItem::coords {id canvas slate args} {
 
     # Get the current coordinates
     set coords [$canvas coords $primary($id)]
@@ -239,7 +239,7 @@ body ::tycho::Picture::coords {id canvas slate args} {
 ##########################################################################
 #### itemcget
 #
-body ::tycho::Picture::itemcget {id canvas slate scope option} {
+body ::tycho::ComplexItem::itemcget {id canvas slate scope option} {
     # Process -tags specially
     if { ! [string compare $option -tags] } {
 	# Return the tags
@@ -255,7 +255,7 @@ body ::tycho::Picture::itemcget {id canvas slate scope option} {
 #######################################################################
 #### itemconfigure
 #
-body ::tycho::Picture::itemconfigure {id canvas slate scope args} {
+body ::tycho::ComplexItem::itemconfigure {id canvas slate scope args} {
     if { [llength $args] == 0 } {
 	# We've been asked for all configuration values. Use
 	# the defaultoptions array to get the names of all options,

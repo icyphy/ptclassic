@@ -45,6 +45,7 @@ TCL_SRCS =
 ITCL_SRCS = \
 	Axis.itcl \
 	Bounder.itcl \
+	ComplexItem.itcl \
 	Editor.itcl \
 	Follower.itcl \
 	Frame.itcl \
@@ -58,7 +59,6 @@ ITCL_SRCS = \
 	Line.itcl \
 	Node.itcl \
 	Oval.itcl \
-	Picture.itcl \
 	Point.itcl \
 	Polygon.itcl \
 	Rectangle.itcl \

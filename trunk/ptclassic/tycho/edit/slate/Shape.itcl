@@ -31,7 +31,7 @@
 #### Shape
 #
 # The superclass of the shape class hierarchy. The Shape
-# classes are, like the Picture class, really just collections
+# classes are, like the ComplexItem class, really just collections
 # of procedures with shared data that use item IDs to "simulate"
 # real objects.
 #

@@ -30,8 +30,8 @@
 # Explicitly load the superclass. I don't really know why this is
 # needed, but the common arrays get upset otherwise.
 namespace ::tycho {
-    if { [::info classes Picture] == "" } {
-	uplevel #0 {source $tychoslate/Picture.itcl}
+    if { [::info classes ComplexItem] == "" } {
+	uplevel #0 {source $tychoslate/ComplexItem.itcl}
     }
 }
 
@@ -49,12 +49,12 @@ namespace ::tycho {
 # efficient. A more efficient version with hardwired icon and
 # terminal types could be created if this becomes a problem.
 #
-# <a href="../internals/howtoread.html">Reading <i>Picture</i> documentation</a>.
+# <a href="../internals/howtoread.html">Reading <i>ComplexItem</i> documentation</a>.
 #
 # <b>Note</b>: This is an experimental class.
 #
 class ::tycho::Node {
-    inherit ::tycho::Picture
+    inherit ::tycho::ComplexItem
 
 	# Create a new item
     proc construct {id canvas slate tags x0 y0 x1 y1 args}
@@ -159,7 +159,7 @@ class ::tycho::Node {
     ####                       class initialization                ####
 
     #### Set method table
-    array set methodtable [array get ::tycho::Picture::methodtable]
+    array set methodtable [array get ::tycho::ComplexItem::methodtable]
 
     set methodtable(_font)       ::tycho::Node::_font
     set methodtable(_icontype)   ::tycho::Node::_icontype
@@ -176,7 +176,7 @@ class ::tycho::Node {
     set methodtable(update)      ::tycho::Node::update
 
     #### Set option defaults
-    array set optiondefault [array get ::tycho::Picture::optiondefault]
+    array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
 
     set optiondefault(-font)     [::tycho::font Helvetica 12]
     set optiondefault(-icontype) {Frame -color green}

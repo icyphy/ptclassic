@@ -29,8 +29,8 @@
 # Explicitly load the superclass. I don't really know why this is
 # needed, but the common arrays get upset otherwise.
 namespace ::tycho {
-    if { [::info classes Picture] == "" } {
-        uplevel #0 {source $tychoslate/Picture.itcl}
+    if { [::info classes ComplexItem] == "" } {
+        uplevel #0 {source $tychoslate/ComplexItem.itcl}
     }
 }
 
@@ -88,7 +88,7 @@ namespace ::tycho {
 # </ul>
 #
 class ::tycho::LabeledItem {
-    inherit ::tycho::Picture
+    inherit ::tycho::ComplexItem
 
     ###################################################################
     ####                            options                        ####
@@ -130,14 +130,14 @@ class ::tycho::LabeledItem {
     ####                       class initialization                ####
 
     #### Set method table
-    array set methodtable [array get ::tycho::Picture::methodtable]
+    array set methodtable [array get ::tycho::ComplexItem::methodtable]
 
     set methodtable(_anchor)   ::tycho::LabeledItem::_anchor
     set methodtable(_graphics) ::tycho::LabeledItem::_graphics
     set methodtable(_text)     ::tycho::LabeledItem::_text
 
     #### Set option defaults
-    array set optiondefault [array get ::tycho::Picture::optiondefault]
+    array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
 
     set optiondefault(-anchor)		"center"
     set optiondefault(-graphics)	""
