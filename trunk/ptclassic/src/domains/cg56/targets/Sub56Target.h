@@ -23,7 +23,11 @@ $Id$
 #include "IntState.h"
 
 class Sub56Target : public CG56Target {
+private:
+	void initStates();
 public:
+	Sub56Target(const char*,const char*);
+	Sub56Target(const Sub56Target&);
 	void headerCode();
 	int run();
 	Block* clone() const;
