@@ -103,5 +103,5 @@ private:
     StarProfiles starProfiles;
 };
 
-
+extern SDFPTclTarget SDFPTclTargetProto;
 #endif
