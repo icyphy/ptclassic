@@ -44,5 +44,7 @@ include $(CONFIG)
 
 EXTRA_SRCS = pkgIndex.tcl
 
+MISC_FILES = $(DIRS)
+
 # Include rules for directories that don't compile
 include $(ROOT)/mk/no-compile.mk
