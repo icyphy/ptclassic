@@ -190,16 +190,15 @@ body ::tycho::Shape::_grapple {id canvas slate interactor args} {
 #### _moveclick
 #
 body ::tycho::Shape::_moveclick {id canvas slate x y args} {
-    ::tycho::getflag ghost args
-
     # Remember where we started
     set scratch($slate.$id.prevX) $x
     set scratch($slate.$id.prevY) $y
 
     # If the -ghost option is specified, create the ghost
     if { [lsearch -exact $args -ghost] != -1 } {
-		set scratch($slate.$id.ghost) [$slate call $id ghost]
-		set scratch($slate.$id.start) [$slate coords $scratch($slate.$id.ghost)]
+	$slate ghost $id
+	set scratch($slate.$id.ghost) 1
+	set scratch($slate.$id.start) [list $x $y]
     }
 }
 
@@ -209,7 +208,7 @@ body ::tycho::Shape::_moveclick {id canvas slate x y args} {
 body ::tycho::Shape::_movedrag {id canvas slate x y} {
     # If there's a ghost, move it, else move the item.
     if { [::info exists scratch($slate.$id.ghost)] } {
-	set movethis $scratch($slate.$id.ghost)
+	set movethis ghost
     } else {
 	set movethis $id
     }
@@ -231,11 +230,10 @@ body ::tycho::Shape::_moverelease {id canvas slate x y} {
     # If there's a ghost, move the complex item to its
     # position and then delete it
     if { [::info exists scratch($slate.$id.ghost)] } {
-	::tycho::assign x y $scratch($slate.$id.start)
-	::tycho::assign a b [$this coords $scratch($slate.$id.ghost)]
+	::tycho::assign a b $scratch($slate.$id.start)
 
-	$slate move $id [expr $a - $x] [expr $b - $y]
-	$slate delete $scratch($slate.$id.ghost)
+	$slate move $id [expr $x - $a] [expr $y - $b]
+	$slate delete ghost
 
 	unset scratch($slate.$id.ghost)
 	unset scratch($slate.$id.start)
