@@ -16,7 +16,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
         }
-	explanation {
+	htmldoc {
 Binary and bipolar are two kinds of the activation functions.
 The output of the binary is either 1 or 0, and the output of the bipolar
 is either 1 or -1.
