@@ -160,6 +160,17 @@ proc NodeDrag { w x y } {
 
     set dot($w,x) $x
     set dot($w,y) $y
+
+    # Extra steps to set the start, end times of the node.
+    set nodeID $dot($w,nodeID)
+    set inOutCoords [NodeInOutCoords $w $nodeID]
+    set startTime [expr int([lindex $inOutCoords 1])]
+    set endTime [expr int([lindex $inOutCoords 3])]
+
+    puts "startTime: $startTime  endTime: $endTime"
+    set node $dot($nodeID,node)
+    set dot($node,startTime) $startTime
+    set dot($node,endTime) $endTime
 }
 
 # Procedure to return the input and output arc attachment coordinates.
@@ -274,8 +285,10 @@ proc ReadFile { f } {
 	    # Re-parse the line for the node name and add it to
 	    # the node list
 	    set node [lindex $line 1]
+	    set latency [lindex $line 3]
 	    lappend nodeList $node
-#	    puts "node: $node"
+	    set dot($node,latency) $latency
+#	    puts "node: $node  latency: $dot($node,latency)"
 	}
 	# Test if the line is specifies a connection
 	if { [isConn $line] == 1 } {
@@ -414,6 +427,8 @@ proc DisplayGraph {} {
 	set dot($node,inConns) {}
 	set dot($node,outConns) {}
 	set dot($node,level) -1
+	set dot($node,startTime) 0
+	set dot($node,endTime) 0
     }
 
     # Initialize each topToken
@@ -523,7 +538,8 @@ proc DisplayGraph {} {
 	}
 	set level $dot($node,level)
 
-	set y2 [expr $y1 + 25]
+#	set y2 [expr $y1 + 25]
+	set y2 [expr $y1 + $dot($node,latency)]
 
 	set x1 [expr $x1+100]
 	set x2 [expr $x2+100]
@@ -574,6 +590,78 @@ proc Level { node } {
     return $level
 }
 
+# Procedure to recursively move a node and its predecessors to ASAP.
+proc asap { node } {
+    global dot
+
+    set w .view.c
+
+    set maxPredLevel 0
+    # Find the connections leading into it
+    foreach conn $dot($node,inConns) {
+	# Find the nodes which are predecessors
+	set predNode [lindex $conn 0]
+	# If it's a topToken, use predLevel = 60
+	if { [lsearch $dot(topTokenList) $predNode] >= 0 } {
+	    set predLevel 60
+	} else {
+	    asap $predNode
+	    set predLevel $dot($predNode,endTime)
+	}
+	if { $predLevel > $maxPredLevel } {
+	    set maxPredLevel $predLevel
+	}
+    }
+    set level [expr $maxPredLevel]
+
+    set newStart $level
+    set dy [expr $newStart - $dot($node,startTime)]
+
+    set dot($node,startTime) $level
+    set dot($node,endTime) [expr $level + $dot($node,latency)]
+
+    $w move $dot($node,nodeID) 0 $dy
+    MoveArcs $w $node 0 0
+#    puts "StartTime: $node $dot($node,startTime)"
+    return
+}
+
+# Procedure to recursively move a node and its predecessors to ALAP.
+proc alap { node } {
+    global dot
+
+    set w .view.c
+
+    set minSuccLevel 450
+    # Find the connections leading out of it
+    foreach conn $dot($node,outConns) {
+	# Find the nodes which are successors
+	set succNode [lindex $conn 1]
+	# If it's a topToken, use succLevel = 390
+	if { [lsearch $dot(topTokenList) $succNode] >= 0 } {
+	    set succLevel 390
+	} else {
+	    alap $succNode
+	    set succLevel $dot($succNode,startTime)
+	}
+	if { $succLevel < $minSuccLevel } {
+	    set minSuccLevel $succLevel
+	}
+    }
+    set level [expr $minSuccLevel]
+
+    set newEnd $level
+    set dy [expr $newEnd - $dot($node,endTime)]
+
+    set dot($node,endTime) $level
+    set dot($node,startTime) [expr $level - $dot($node,latency)]
+
+    $w move $dot($node,nodeID) 0 $dy
+    MoveArcs $w $node 0 0
+#    puts "EndTime: $node $dot($node,endTime)"
+    return
+}
+
 # Procedure to create and draw a firing node.
 proc DrawNode { node x1 y1 x2 y2 } {
     global dot
@@ -581,18 +669,24 @@ proc DrawNode { node x1 y1 x2 y2 } {
     # Create a rect for the node
     set nodeID [.view.c create rect $x1 $y1 $x2 $y2 -fill green \
 	    -tag "node $node movable"]
-    set textID [.view.c create text [expr $x1+20] [expr $y1+20] \
+    set textID [.view.c create text [expr $x2+5] [expr $y1+5] \
 	    -anchor nw -text $node -tag "node $node"]
 
-    # Associate the rect ID and the node with each other
+    # Associate the rect ID and the node with each other.
     set dot($nodeID,node) $node
     set dot($node,nodeID) $nodeID
     set dot($node,textID) $textID
     set dot($node,type) "node"
 
-    # Set top and bottom to be the same thing
+    # Set top and bottom to be the same thing.
     set dot($node,topNodeID) $nodeID
     set dot($node,bottomNodeID) $nodeID
+
+    # Set the initial start and end times.
+    set startTime [expr int($y1)]
+    set endTime [expr int($y2)]
+    set dot($node,startTime) $startTime
+    set dot($node,endTime) $endTime
 }
 
 # Procedure to create and draw a token.
@@ -686,11 +780,49 @@ proc CreateIterConn { conn } {
 # procedure to handle an exit request
 proc requestExit {} {
     handleExit
+    setAllTimes
+}
+
+# procedure to handle an exit request
+proc setAllTimes {} {
+    global dot
+
+    foreach node $dot(nodeList) {
+	set name $node
+	set startTime $dot($node,startTime)
+	set endTime $dot($node,endTime)
+	set latency $dot($node,latency)
+	setTimes $name $startTime $endTime $latency
+    }
+}
+
+# procedure to move all nodes to ASAP
+proc allASAP {} {
+    global dot
+
+    foreach node $dot(nodeList) {
+	asap $node
+    }
+}
+
+# procedure to move all nodes to ALAP
+proc allALAP {} {
+    global dot
+
+    foreach node $dot(nodeList) {
+	alap $node
+    }
 }
 
 # Top-level script to set up and display the graph.
-button .quit -text Done -command "requestExit"
-pack .quit
+button .asap -text ASAP -command "allASAP"
+pack .asap
+button .alap -text ALAP -command "allALAP"
+pack .alap
+button .setAll -text Times -command "setAllTimes"
+pack .setAll
+button .done -text Done -command "requestExit"
+pack .done
 ReadFile $GRAPH_FILE
 DisplayGraph
 
