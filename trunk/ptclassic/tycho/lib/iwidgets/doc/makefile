@@ -45,6 +45,7 @@ ITCL_SRCS =
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) $(DEMO_SRCS)
 
 MISC_FILES = \
+	html \
 	man.macros \
 	mkhtml \
 	mkitclman \
