@@ -112,11 +112,12 @@ void Block::setScope(Scope* s) { scp = s; }
 
 /*virtual*/ StringList Block :: fullName () const
 {
-	StringList out;
-	if(scope() != NULL)
-		out << scope()->fullName() << ".";
-	out << NamedObj::fullName();
-	return out;
+  StringList out;
+  if(scope() != NULL)
+    out << scope()->fullName() << "." << name();
+  else
+    out << NamedObj::fullName();
+  return out;
 }
 
 StringList
@@ -331,6 +332,8 @@ Block& Block::setBlock(const char* s, Block* parent) {
 int Block::isItAtomic () const { return TRUE;}
 
 int Block::isItWormhole () const { return FALSE;}
+
+int Block::isItCluster () const { return FALSE;}
 
 void Block::initState () { states.initElements();}
 

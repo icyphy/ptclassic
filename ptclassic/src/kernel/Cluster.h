@@ -80,6 +80,7 @@ public:
      ******************************************************************/
     /*virtual*/ int isA(const char*) const;
     /*virtual*/ const char* className() const;
+    /*virtual*/ int isItCluster () const; // {return TRUE;}
 
     /******************************************************************
 			   Make new methods
@@ -92,8 +93,18 @@ public:
     ClusterPort* addNewPort(PortHole&);
     
     /******************************************************************
-			Absorb & Merge methods
+			Group, Absorb, & Merge methods
 			
+Group: This creates a new cluster that contains the two argument clusters
+       as its clusters.
+
+Absorb: This absorbs the argument cluster into itself, increasing the
+        the number of clusters inside itself by 1.
+
+Merge: This merges the clusters inside the argument cluster into itself,
+       increasing the number of clusters inside itself by the number
+       of clusters inside of the argument cluster.
+ 
        These methods can optially delete the absorbed/merged block
        (and do so by default) from the original parent galaxy.
 
@@ -119,6 +130,11 @@ public:
        Be careful, if FALSE is specified, we'll be left with a
        dangling pointer until ListIter::remove is called.
      ******************************************************************/
+
+	// groups the two argument clusters into a newly created empty
+	// cluster and returns the new cluster
+	virtual Cluster* group(Cluster&, Cluster&, int /*removeFlag*/=TRUE);
+
     // absorbs the specified block into this cluster
     virtual int absorb(Cluster&, int /*removeFlag*/= TRUE);    
 

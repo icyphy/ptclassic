@@ -39,6 +39,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Scope.h"
 #include "Wormhole.h"
 
+StringList Scope::fullName() const {
+    StringList fullNm;
+    if (parentScope())
+	fullNm << parentScope()->fullName() << '.';
+    fullNm << name();
+    return fullNm;
+}
+			     
 State* Scope::lookup(const char* name) {
     State* state = stateWithName(name);
     if (!state && parentScope())
@@ -90,13 +98,23 @@ Scope* Scope::createScope(Galaxy& galaxyToScope) {
     Block *block;
     block = nextBlock++;
     if (!block) return NULL;
+
+    /* If the galaxy has clusters, a Scope hierarchy already
+       exists. Shouldn't this return the top most scope of the
+       blocks inside the clusters?  FIXME */
+    if (block->isItCluster()) return NULL;
+
     if (block->scope()) {
 	if (block->scope()->parentScope() &&
 	    block->scope()->parentScope() != galaxyToScope.scope())
-	    Error::warn("createScope: scope ",
-			block->scope()->parentScope()->fullName(),
-			" inconsistant.");
-	block->scope()->setParentScope(galaxyToScope.scope());
+        {
+	    StringList msg;
+	    msg << "createScope: scope "
+		<< block->scope()->parentScope()->fullName() 
+		<< " inconsistant.";
+	    Error::warn(msg);
+	    block->scope()->setParentScope(galaxyToScope.scope());
+	}
 	return block->scope();
     }
     return new Scope(galaxyToScope);
