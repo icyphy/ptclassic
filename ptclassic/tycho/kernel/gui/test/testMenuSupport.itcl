@@ -450,13 +450,14 @@ test MenuSupport-post-2 {Post top-level menu} {
             [winfo ismapped .m.top.menucascade-entry.menucascade-entry-3]
 } {1 1 1}
 
+# Unpost has been changed to unpost all menus in the chain...
 test MenuSupport-unpost-2 {Unpost bottom-level menu} {
     .m unpost cascade-entry-3
     list \
             [winfo ismapped .m.top] \
             [winfo ismapped .m.top.menucascade-entry] \
             [winfo ismapped .m.top.menucascade-entry.menucascade-entry-3]
-} {1 1 0}
+} {0 0 0}
           
 
 ########################################################################
