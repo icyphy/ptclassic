@@ -38,7 +38,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "GalIter.h"
 #include "AsmStar.h"
 #include "ProcMemory.h"
-#include "CGDisplay.h"
 #include "CGUtilities.h"
 #include "KnownBlock.h"
 #include "miscFuncs.h"
@@ -246,67 +245,6 @@ int AsmTarget::modifyGalaxy() {
 	return status;
 }
 
-/*
-void AsmTarget :: outputLineOrientedComment(const char* prefix,
-					    const char* msg,
-					    int lineLen) {
-	int plen = strlen(prefix);
-	LOG_NEW; char* line = new char[lineLen-plen+1];
-	strcpy (line, prefix);
-	char* p = line + plen;
-	int curlen = plen;
-	while (*msg) {
-		char c = *msg++;
-		*p++ = c;
-		if (c == '\t') curlen = ((curlen/8)+1)*8;
-		else curlen++;
-		if (curlen >= lineLen || c == '\n') {
-			*p = 0;
-			addCode(line);
-			curlen = plen;
-			p = line + plen;
-		}
-	}
-	*p++ = '\n';
-	*p = 0;
-	addCode(line);
-	LOG_DEL; delete line;
-}
-*/
-char* AsmTarget :: fullFileName(const char* base, const char* suffix)
-{
-	StringList bname = base;
-	if (suffix != NULL) bname << suffix;
-	char* fullName = writeFileName(bname);
-	return fullName;
-}
-
-int AsmTarget::genDisFile(const char* stuff,const char* base,const char* suffix)
-{
-	char* name = fullFileName(base,suffix);
-	int status = display(stuff,name);
-	LOG_DEL; delete name;
-	return status;
-}
-
-int AsmTarget :: genFile(const char* stuff,const char* base,const char* suffix)
-{
-	int status;
-	if (stuff == NULL) return TRUE;
-	char* fullName = fullFileName(base, suffix);
-	pt_ofstream o(fullName);
-	if (!o) status = FALSE;
-	else {
-		const char* stuff_str = stuff;	// hack
-		o << stuff_str;
-		o.flush();
-		o.close();			// hack
-		status = TRUE;
-	}
-	LOG_DEL; delete fullName;
-	return status;
-}
-
 void AsmTarget::disableInterrupts() {}
 
 void AsmTarget::enableInterrupts() {}
@@ -347,10 +285,6 @@ void AsmTarget :: wormOutputCode(PortHole& p) {
     myCode << comment(memMap);
 }
 
-void AsmTarget :: writeCode(const char* name)
-{
-    if (name == NULL) name = filePrefix;
-    StringList fileName;
-    fileName << name << asmSuffix();
-    CGTarget::writeCode(fileName);
+/*virtual*/ void AsmTarget :: writeCode() {
+    writeFile(myCode,".asm",displayFlag);
 }
