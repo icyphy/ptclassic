@@ -174,15 +174,15 @@ static dmTextItem defaultItem = {NULL, 1, dmIncrement, NULL, NULL};
     paramsN = 0;
     for (i = 0; i < pList.length + 1; i++) {
 	if (strlen(SkipWhite(items[j].value)) != 0) {
-	    /* copy this name-value pair */
+	    /* copy this name-type-value triplet */
 	    place->name = items[j++].value;
 	    place->type = items[j++].value;
 	    place->value = items[j++].value;
 	    place++;
 	    paramsN++;
 	} else {
-	    /* skip this name-value pair */
-	    j += 2;
+	    /* skip this name-type-value triplet */
+	    j += 3;
 	}
     }
     pList.length = paramsN;
