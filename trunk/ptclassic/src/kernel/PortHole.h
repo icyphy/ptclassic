@@ -397,7 +397,7 @@ protected:
         PortList ports;
 
 	// Method for generating names for contained PortHoles
-	char* newName();
+	const char* newName();
 
 	// add a newly created port to the multiporthole
 	PortHole& installPort(PortHole& p);

@@ -472,7 +472,7 @@ MultiPortHole& MultiPortHole :: setPort(const char* s,
 // form "name#num", where name is the MultiPortHole name and num
 // is a sequence number.  The number equals the current number of
 // contained ports.
-char*
+const char*
 MultiPortHole :: newName () {
 	char buf[512];
 	sprintf (buf, "%s#%d", readName(), ports.size());
