@@ -141,6 +141,7 @@ static char *q1 = "Cannot find star definition.  Define a new star?";
  * corresponding class name.
  */
 	char * base = callParseClass(name);
+	if(!base) return FALSE;
 	PrintDebug("Star not known, trying to load it");
 	if (!KcCompileAndLink (base, domain, dir)) return FALSE;
 	PrintDebug("Load complete");
