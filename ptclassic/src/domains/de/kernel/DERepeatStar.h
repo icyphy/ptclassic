@@ -46,6 +46,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 	////////////////////////////////////
 
 class DERepeatStar : public DEStar {
+    friend class Resource;
 
 protected:
 	// specify the feedback links to fire itself.
