@@ -5,6 +5,10 @@
 
 #ifndef _BaseImage_h
 #define _BaseImage_h
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
 
 /*******************************
  This file defines a base class for all image types in Ptolemy.

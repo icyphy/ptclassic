@@ -3,6 +3,9 @@
 // creation date:	7/1/91
 // SCCS info:		$Id$
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
 
 #include "BaseImage.h"
 
