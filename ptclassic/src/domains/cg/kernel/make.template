@@ -36,8 +36,8 @@ AsmForkNode.h \
 AsmGeodesic.h \
 AsmStar.h \
 AsmTarget.h \
-BaseMultiTarget.h \
-BaseCTarget.h \
+MultiTarget.h \
+HLLTarget.h \
 CGPortHole.h \
 CGDisplay.h \
 CGGeodesic.h \
