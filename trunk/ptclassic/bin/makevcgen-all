@@ -20,9 +20,11 @@ dirs="$PTOLEMY/src/kernel \
 	$PTOLEMY/src/domains/sdf/kernel \
 	$PTOLEMY/src/domains/sdf/stars \
 	$PTOLEMY/src/domains/sdf/dsp/stars \
+	$PTOLEMY/src/domains/sdf/loopScheduler \
 	$PTOLEMY/src/ptcl"
 for dir in $dirs
 do
+	echo $dir
 	cd $dir
 	$PTOLEMY/bin/makevcgen makefile
 done
