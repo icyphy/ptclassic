@@ -9,7 +9,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location	{ SDF image palette }
+	location	{ SDF image library }
 	desc {
 For NULL inputs on 'mvIn' (motion-vector-in), copy the 'diffIn' input
 unchanged to the output and discard the 'pastIn' input.

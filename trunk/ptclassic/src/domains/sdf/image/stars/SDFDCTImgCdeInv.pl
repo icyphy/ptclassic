@@ -9,7 +9,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location	{ SDF image palette }
+	location	{ SDF image library }
 	desc {
 This star reads two coded DCTImages (one high priority and one low-priority),
 inverts the run-length encoding, and outputs the resulting DCTImage.

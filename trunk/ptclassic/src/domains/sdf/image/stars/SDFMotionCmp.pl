@@ -9,7 +9,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location	{ SDF image palette }
+	location	{ SDF image library }
 	desc {
 If the ’past’ input is not a GrayImage (e.g. ’dummyMessage’), copy
 the ’input’ image unchanged to the ’diffOut’ output and send a null
