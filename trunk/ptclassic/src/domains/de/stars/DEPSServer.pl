@@ -74,10 +74,15 @@ still in service will be delayed by more than the nominal service time.
 	   // Keep trying as long as the first particle in the list is ready
 	   // to be output.
 	   int outputP = FALSE;
+	   // Number of tokens in service since last update : used to
+	   // determine service time required for a token. Must remain
+	   // constant until the end of the 'while' loop.
+	   int lastUpdatedNumberInService = numberInService;
+
 	   while(numberInService > 0) {
 	      token *t = (token*)(tokensInService.head());
 	      if (t->serviceNeeded
-	              <= (arrivalTime - t->lastUpdate)/numberInService) {
+	              <= (arrivalTime - t->lastUpdate)/lastUpdatedNumberInService) {
 		// This token is ready to be output
 		output.put(completionTime) = *(t->pp);
 		tokensInService.getAndRemove();
@@ -97,7 +102,7 @@ still in service will be delayed by more than the nominal service time.
 	   for(int i = numberInService; i > 0; i--) {
 		token *t = (token*) nextTok++;
 		t->serviceNeeded = t->serviceNeeded -
-			(arrivalTime - t->lastUpdate)/numberInService;
+			(arrivalTime - t->lastUpdate)/lastUpdatedNumberInService;
 		t->lastUpdate = arrivalTime;
 		// Schedule a refiring.
 		// Need to account for number that will be in
