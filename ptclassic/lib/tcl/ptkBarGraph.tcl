@@ -38,6 +38,13 @@
 #	barGraphWidth	width in centimeters
 #	barGraphHeight	height in centimeters
 proc ptkMakeBarGraph {w desc geo numBars barGraphWidth barGraphHeight univ} {
+
+    # Make sure that Tycho has started, and use it to get a decent
+    # button font. This minimizes problems with buttons disappearing
+    # because of Tk using an unnecessarily large font.
+    ptkStartTycho
+    set buttonFont [.tychoFonts getFont Helvetica 12 bold]
+    
     catch {destroy $w}
     toplevel $w
     wm title $w "$desc"
@@ -48,13 +55,15 @@ proc ptkMakeBarGraph {w desc geo numBars barGraphWidth barGraphHeight univ} {
     label $w.cntr.label -text "Scale range:"
     set startScale [${w}rescale 1.0]
     label $w.cntr.value -width 20 -text "$startScale"
-    button $w.cntr.hv -text "Zoom In" -command "changeBarScale $w 0.5"
-    button $w.cntr.dbl -text "Zoom Out" -command "changeBarScale $w 2.0"
+    button $w.cntr.hv -text "Zoom In" -command "changeBarScale $w 0.5" \
+	    -font $buttonFont
+    button $w.cntr.dbl -text "Zoom Out" -command "changeBarScale $w 2.0" \
+	    -font $buttonFont
     pack append $w.cntr \
 	$w.cntr.label left \
 	$w.cntr.value left \
-	$w.cntr.hv left \
-	$w.cntr.dbl left
+	$w.cntr.hv right \
+	$w.cntr.dbl right
 
     frame $w.pf -bd 10
     canvas $w.pf.plot -relief sunken -bd 3 \
@@ -62,18 +71,20 @@ proc ptkMakeBarGraph {w desc geo numBars barGraphWidth barGraphHeight univ} {
     pack append $w.pf $w.pf.plot {top fill expand}
 
     # bar entry, button and slider section, empty by default
-    frame $w.high -bd 10
-    frame $w.middle -bd 10
-    frame $w.low -bd 10
+    frame $w.high -bd 2
+    frame $w.middle -bd 2
+    frame $w.low -bd 2
 
     button $w.quit -text "DISMISS" -command "ptkStop $univ; destroy $w"
-    pack append $w $w.msg {top fillx } \
-		$w.cntr {top fillx} \
-		$w.pf {top fill expand } \
-		$w.high {top fillx } \
-		$w.middle {top fillx } \
-		$w.low {top fillx } \
-		$w.quit {top fillx }
+    pack append $w \
+	    $w.msg {top fillx } \
+	    $w.cntr {top fillx} \
+	    $w.quit {bottom fillx } \
+	    $w.low {bottom fillx } \
+	    $w.middle {bottom fillx } \
+	    $w.high {bottom fillx } \
+	    $w.pf {top fill expand } 
+		
 
     wm geometry $w $geo
     wm minsize $w 400 200

@@ -60,25 +60,47 @@ proc ptkPlotMotion {w x y} {
 }
 
 proc ptkCreateXYPlot {w title geo univ} {
+
+    # Make sure that Tycho has started, and use it to get a decent
+    # button font. This minimizes problems with buttons disappearing
+    # because of Tk using an unnecessarily large font.
+    ptkStartTycho
+    set buttonFont [.tychoFonts getFont Helvetica 12 bold]
+    
+    # Create the top-level window
     catch {destroy $w}
     toplevel $w
+
     wm title $w "TkPlot: $title"
     wm iconname $w "TkPlot"
+
     wm geometry $w $geo
     # The following allows the window to resize
     wm minsize $w 200 200
 
     pack [frame $w.mbar -bd 2 -relief raised] -side top -fill x
-    pack [button $w.mbar.pr -text "  Print  " -command "ptkPrintXYPlot $w \"$title\""] \
+    pack [button $w.mbar.pr -text "  Print  " \
+	    -command "ptkPrintXYPlot $w \"$title\"" -font $buttonFont] \
 	    -side left
-    pack [button $w.mbar.zf -text "zoom fit (f)" -command "ptkXYPlotZoomFit$w"] \
+    pack [button $w.mbar.zf -text "Zoom Fit (f)" \
+	    -command "ptkXYPlotZoomFit$w" -font $buttonFont] \
 	    -side right
-    pack [button $w.mbar.zo -text "zoom out (Z)" -command "ptkXYPlotZoom$w 1.5"] \
+    pack [button $w.mbar.zo -text "Zoom Out (Z)" \
+	    -command "ptkXYPlotZoom$w 1.5" -font $buttonFont] \
 	    -side right
-    pack [button $w.mbar.zi -text "zoom in (z) " -command "ptkXYPlotZoom$w 0.75"] \
+    pack [button $w.mbar.zi -text "Zoom In (z)"\
+	    -command "ptkXYPlotZoom$w 0.75" -font $buttonFont] \
 	    -side right
-    pack [button $w.mbar.zor -text "zoom original (o)" -command "ptkXYPlotZoomOriginal$w"] \
+    pack [button $w.mbar.zor -text "Zoom Original (o)" \
+	    -command "ptkXYPlotZoomOriginal$w" -font $buttonFont] \
 	    -side right
+
+    # The Dismiss button is created and packed _before_ the canvas,
+    # to prevent it from disappearing when the window is resized.
+    pack [button $w.quit -text DISMISS \
+	    -command "ptkStop $univ; destroy $w; proc $w.pf.c args \"\""] \
+	    -side bottom -fill x
+
     pack [frame $w.pf -bd 2m] -side top -fill both -expand yes
     pack [canvas $w.pf.c -relief sunken] -expand yes -fill both
     bind $w.pf <KeyPress-f> "ptkXYPlotZoomFit$w"
@@ -91,10 +113,6 @@ proc ptkCreateXYPlot {w title geo univ} {
 
     bind $w.pf.c <ButtonPress> "ptkPlotPress $w %x %y"
     bind $w.pf.c <Motion> "ptkPlotMotion $w %x %y"
-
-    pack [button $w.quit -text DISMISS \
-	    -command "ptkStop $univ; destroy $w; proc $w.pf.c args \"\""] \
-	    -side bottom -fill x
 
     # To support redrawing when the window is resized.
     update
