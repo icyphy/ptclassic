@@ -105,12 +105,12 @@ EssAddObj(obj)
 octObject *obj;
 {
     octObject facet;
-
     if (!essExist) {
 	octGetFacet(obj, &facet);
 	essSelSet = vemNewSelSet(facet.objectId, 65535, 0, 0, 2, 3, 1, 1, "0");
 	essExist = TRUE;
     }
+    FreeOctMembers(&facet);
     ERR_IF2(vemAddSelSet(essSelSet, obj->objectId) != VEM_OK,
 	"EssAddObj: Cannot put object in error select set");
     return (TRUE);
@@ -163,6 +163,8 @@ octObject *facetPtr;
 	    if (!MyOpenMaster(&galFacet, &inst, "contents", "r")
 	      || !CompileGal(&galFacet)) {
 		octFreeGenerator(&genInst);
+		FreeOctMembers(&galFacet);
+		FreeOctMembers(&inst);
 		return FALSE;
 	    }
 	} else {
@@ -170,11 +172,12 @@ octObject *facetPtr;
 	    if (!AutoLoadCk(&inst)) {
 		EssAddObj(&inst);
 		octFreeGenerator(&genInst);
+		FreeOctMembers(&inst);
 		return (FALSE);
 	    }
 	}
-	FreeOctMembers(&inst);
     }
+    FreeOctMembers(&inst);
     octFreeGenerator(&genInst);
     return(TRUE);
 }
@@ -186,8 +189,9 @@ static void
 DetachDelaysFromNets(facetPtr)
 octObject *facetPtr;
 {
-    octObject net, prop;
+    octObject net;
     octGenerator netGen;
+    octObject prop;		/* most data members are not dynamic */
 
     (void) octInitGenContentsSpecial(facetPtr, OCT_NET_MASK, &netGen);
     while (octGenerate(&netGen, &net) == OCT_OK) {
@@ -202,6 +206,7 @@ octObject *facetPtr;
 	}
 	(void) octDetach(&net, &prop);
     }
+    FreeOctMembers(&net);
     octFreeGenerator(&netGen);
 }
 
@@ -216,7 +221,8 @@ ProcessMarker(facetPtr, instPtr, propname)
 octObject *facetPtr, *instPtr;
 char *propname;
 {
-    octObject path, dummy, net, prop;
+    octObject path, dummy, net;
+    octObject prop;			/* some data members are not dynamic */
     struct octBox box;
     regObjGen rGen;
 
@@ -230,30 +236,41 @@ char *propname;
 	ErrAdd("Dangling delay or bus marker");
 	EssAddObj(instPtr);
 	(void) regObjFinish(rGen);
+	FreeOctMembers(&path);
 	return(FALSE);
     }
     if (regObjNext(rGen, &dummy) != REG_NOMORE) {
 	ErrAdd("Delay or bus marker intersects more than one path");
 	EssAddObj(instPtr);
 	(void) regObjFinish(rGen);
+	FreeOctMembers(&path);
+	FreeOctMembers(&dummy);
 	return(FALSE);
     }
 
     if (octGenFirstContainer(&path, OCT_NET_MASK, &net) != OCT_OK) {
 	ErrAdd("ProcessMarker: Path not contained in a net");
 	EssAddObj(&path);
+	FreeOctMembers(&net);
+	FreeOctMembers(&path);
+	FreeOctMembers(&dummy);
 	return(FALSE);
     }
+
     prop.type = OCT_PROP;
     prop.contents.prop.name = propname;
     if (octGetByName(&net, &prop) != OCT_NOT_FOUND) {
-	char buf[80];
+	char buf[128];
 	sprintf (buf, "Net has more than one %s instance on top of it",
 		 propname);
 	ErrAdd(buf);
 	EssAddObj(&net);
+	FreeOctMembers(&net);
+	FreeOctMembers(&path);
+	FreeOctMembers(&dummy);
 	return(FALSE);
     }
+
     /* fill in default values, and get or create the property. */
     if( IsBus(instPtr) ) {
         prop.contents.prop.type = OCT_INTEGER;
@@ -268,7 +285,10 @@ char *propname;
         prop.contents.prop.type = OCT_STRING;
         prop.contents.prop.value.string = "0";
     }
-    prop.objectId = 0;		/* silence Purify */
+    FreeOctMembers(&net);
+    FreeOctMembers(&path);
+    FreeOctMembers(&dummy);
+    prop.objectId = 0;				/* silence Purify */
     octGetOrCreate (instPtr, &prop);
     ERR_IF2(octAttach(&net, &prop) != OCT_OK, octErrorString());
     return(TRUE);
@@ -364,8 +384,8 @@ boolean *result;
     ERR_IF2(GetById(&inst, aTermPtr->contents.term.instanceId) != OCT_OK,
 	octErrorString());
     ERR_IF1(!MyOpenMaster(&master, &inst, "interface", "r"));
-    ERR_IF2(GetByTermName(&master, &fTerm, aTermPtr->contents.term.name)
-	!= OCT_OK, octErrorString());
+    ERR_IF2(GetByTermName(&master, &fTerm, aTermPtr->contents.term.name) !=
+	OCT_OK, octErrorString());
     FreeOctMembers(&master);
     if (GetByPropName(&fTerm, &prop, "input") != OCT_NOT_FOUND) {
 	*result = TRUE;
@@ -386,6 +406,8 @@ boolean *result;
 	inst.contents.instance.name, aTermPtr->contents.term.name);
     ErrAdd(msg);
     EssAddObj(aTermPtr);
+    FreeOctMembers(&prop);
+    FreeOctMembers(&fTerm);
     FreeOctMembers(&inst);
     return (FALSE);
 }
