@@ -124,16 +124,16 @@ New York, 1989.
 		ORD = 0;
 	}
 	destructor {
-		LOG_DEL; delete aOrig;
-		LOG_DEL; delete aPrime;
-		LOG_DEL; delete r;
+		LOG_DEL; delete [] aOrig;
+		LOG_DEL; delete [] aPrime;
+		LOG_DEL; delete [] r;
 	}
 	setup {
 		// delete and remake arrays if the size has changed.
 		if (int(order) != ORD) {
-			LOG_DEL; delete aOrig;
-			LOG_DEL; delete aPrime;
-			LOG_DEL; delete r;
+			LOG_DEL; delete [] aOrig;
+			LOG_DEL; delete [] aPrime;
+			LOG_DEL; delete [] r;
 			ORD = int(order);
 			LOG_NEW; aOrig = new double[ORD+1];
 			LOG_NEW; aPrime = new double[ORD+1];

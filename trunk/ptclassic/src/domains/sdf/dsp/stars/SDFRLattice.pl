@@ -107,17 +107,17 @@ New York, 1989.
 		w = 0; y = 0; M = -1;
 	}
 	destructor {
-		LOG_DEL; delete w;
-		LOG_DEL; delete y;
+		LOG_DEL; delete [] w;
+		LOG_DEL; delete [] y;
 	}
 	setup {
 		// reallocate arrays only if size has changed,
 		// or this is the first run.
 		if (M != reflectionCoefs.size()) {
 			M = reflectionCoefs.size();
-			LOG_DEL; delete w;
+			LOG_DEL; delete [] w;
 			LOG_NEW; w = new double[M+1];
-			LOG_DEL; delete y;
+			LOG_DEL; delete [] y;
 			LOG_NEW; y = new double[M+1];
 		}
 		for (int i=0; i <= M; i++)  w[i]=0.0 ;

@@ -78,13 +78,13 @@ If \fItrace\fP is "YES", there may not be more than 64 taps in the filter.
 		prevPhase = outPhase = 0;
 	}
 	destructor {
-		LOG_DEL; delete prevPhase;
-		LOG_DEL; delete outPhase;
+		LOG_DEL; delete [] prevPhase;
+		LOG_DEL; delete [] outPhase;
 	}		
 	setup {
 		SDFLMSCx::setup();
-		LOG_DEL; delete prevPhase;
-		LOG_DEL; delete outPhase;
+		LOG_DEL; delete [] prevPhase;
+		LOG_DEL; delete [] outPhase;
 		int nPlots = 1;
 		if (int(trace)) {
 			nPlots = taps.size();

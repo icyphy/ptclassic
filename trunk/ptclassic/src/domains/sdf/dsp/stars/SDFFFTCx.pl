@@ -155,7 +155,7 @@ static void fft_rif(double *data, int nn, int isign)
 		data = 0;
 	}
 	destructor {
-		LOG_DEL; delete data;
+		LOG_DEL; delete [] data;
 	}
 	setup {
 		fftSize = 1 << int(order);
@@ -163,7 +163,7 @@ static void fft_rif(double *data, int nn, int isign)
 			Error::abortRun(*this, "2^order must be >= size");
 			return;
 		}
-		LOG_DEL; delete data;
+		LOG_DEL; delete [] data;
 		LOG_NEW; data = new double[2*fftSize];
 		input.setSDFParams (int(size), int(size)-1);
 		output.setSDFParams (fftSize, fftSize-1);
