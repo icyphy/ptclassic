@@ -38,6 +38,10 @@ option add *EditSearch.entryBackground \
 	[ptkColor antiqueWhite white] widgetDefault
 
 option add *EditSearch.entryfont [.tychoFonts defaultFont fixed]
+option add *EditSearch.findMatchBackgroundColor \
+        [ptkColor forestGreen black] widgetDefault
+option add *EditSearch.findMatchForegroundColor \
+        [ptkColor white white] widgetDefault
 
 ##########################################################################
 #### EditSearch class.
@@ -81,9 +85,9 @@ class ::tycho::EditSearch {
     method changeAndFind {}
 
     # Clear the find-match marks on the associated text window.
-    method clearFindMatch
+    method clearFindMatch {}
 
-    # Find the specified pattern. Return 1 if it is found, 0 otherwise.
+    # Find the specified pattern and mark in the text.
     method find {{start {}}}
 
     ###################################################################
@@ -253,7 +257,7 @@ body ::tycho::EditSearch::change {} {
     if {$changeallsw} {
 	# Change all tagged text.  Note that we have to have done
 	# a search, or we will get an error message.
-	$editWindow replaceAll $changeto
+	$editWindow replaceAll findmatch $changeto
     } {
 	# Change only one
 	if {[$editWindow getSelection] != {}} {
@@ -282,15 +286,15 @@ body ::tycho::EditSearch::changeAndFind {} {
 # 
 body ::tycho::EditSearch::clearFindMatch {} {
     set tw $itk_option(-edittext)
-    $tw clearFindMatch
+    [$tw textWinName] tag remove findmatch 1.0 end
 }
 
 #####################################################################
 #### find
-# Find the specified pattern in the associated EditText object.
-# Return 1 if it is found, 0 otherwise.  The search starts at the insertion
-# cursor, unless the optional argument is given, in which case it starts
-# at the specified point.
+# Find and mark the specified pattern in the associated EditText
+# object. The search starts at the insertion cursor, unless the
+# optional argument is given, in which case it starts at the specified
+# point. The first match found is selected.
 # 
 body ::tycho::EditSearch::find {{start {}}} {
 
@@ -312,38 +316,58 @@ body ::tycho::EditSearch::find {{start {}}} {
     }
     set myLastSearchPattern $pattern
     
-    if {$wordsw} \
-	    {set word "-wholeword"} \
-	    {set word "-any"}
-    if {$casesw} \
-	    {set case "-case"} \
-	    {set case "-nocase"}
-    if {$backwardssw} \
-	    {set direction -backwards} \
-	    {set direction -forwards}
+    if {$backwardssw} {
+        set direction -backwards
+        set stop 1.0
+    } {
+        set direction -forwards
+        set stop end
+    }
     if {$regexpsw} \
 	    {set regexp -regexp} \
 	    {set regexp -exact}
 
-    set result [$tw find $direction $regexp $case $word -- $pattern $start]
+    set result [$tw findOne $casesw $direction $regexp $wordsw $pattern \
+            $start $stop {}]
 
     if {$result == {}} {
 	if {$backwardssw} {
 	    if [::tycho::askuser \
 		    "Not found.  Start search again at the bottom?"] {
 		after idle "$this focusin"
-		return [find end]
+		find end
 	    }
 	} {
 	    if [::tycho::askuser \
 		    "Not found.  Start search again at the top?"] {
 		after idle "$this focusin"
-		return [find 1.0]
+		find 1.0
 	    }
 	}
-	return 0
     } {
-	return 1
+        # Found a match.  Select it.
+        set text [$tw textWinName]
+        selection clear -displayof $text
+        set firstind [lindex $result 0]
+        set numchars [lindex $result 1]
+        if {$firstind != {}} {
+            $text mark set insert $firstind
+            $tw breakUndo
+            $text see $firstind
+            $text tag add sel $firstind "$firstind + $numchars chars"
+        }
+        # Mark the rest of the matches.
+        $tw findAll findmatch $casesw $regexp $wordsw $pattern 1.0 end {}
+
+        # Set up reverse video for the found text. First lower the
+        # priority of the tag so selection is still visible as normal.
+        $text tag raise sel findmatch
+        $text tag configure findmatch \
+                -background [option get $itk_component(hull) \
+                findMatchBackgroundColor EditSearch]
+        $text tag configure findmatch \
+                -foreground [option get $itk_component(hull) \
+                findMatchForegroundColor EditSearch]
     }
 }
 
