@@ -69,6 +69,6 @@ exit 0
 
 catch:
         # prevent the "no match" error message if there are no temporary files
-        set nomatch
+        set nonomatch
         /bin/rm /tmp/pt$$
         exit 1
