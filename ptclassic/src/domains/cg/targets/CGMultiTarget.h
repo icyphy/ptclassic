@@ -40,7 +40,6 @@ public:
 	void generateCode();
 
 	void setStopTime(double);
-	void addCode(const char*);
 
 	// compute profile
 	int computeProfile(int nP, int resWork = 0, IntArray* avail = 0);
