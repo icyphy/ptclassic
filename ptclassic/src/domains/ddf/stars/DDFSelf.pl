@@ -15,10 +15,10 @@ hence realizing recursion.
 At compile time, this star appears to just be an atomic star.
 	}
 	seealso { fibonnacci }
-	hinclude { "InterpGalaxy.h" }
-	ccinclude { "DDFScheduler.h" }
+	hinclude { "InterpGalaxy.h",  "Domain.h", "DDFScheduler.h"}
 	protected {
 		InterpGalaxy* gal;
+		DDFScheduler  sched;
 	}
 	inmulti {
 		name { input }
@@ -43,6 +43,12 @@ At compile time, this star appears to just be an atomic star.
 		type { int }
 		arglist { "()" }
 		code { return TRUE;}
+	}
+	method {
+		name { readClassName }
+		access { public }
+		type { "const char*" }
+		code { return "Self"; }
 	}
 	start {
 		StringList msg = "DDFSelf Star \"";
@@ -93,10 +99,7 @@ At compile time, this star appears to just be an atomic star.
 	go {
 		// clone the recursion galaxy
 		InterpGalaxy* myGal = (InterpGalaxy*) gal->clone();
-		myGal->setNameParent(readName(), this);
-
-		// create its own scheduler
-		DDFScheduler* sched = new DDFScheduler;
+		myGal->setNameParent(gal->readName(), this);
 
 		// make a image connection between DDFSelf and galaxy.
 		BlockPortIter next(*myGal);
@@ -110,7 +113,7 @@ At compile time, this star appears to just be an atomic star.
 		}
 
 		// scheduler setup and run
-		if (!sched->setup(*myGal)) {
+		if (!sched.setup(*myGal)) {
 			Error :: abortRun("error in setup the scheduler in DDFSelf\n");
 			return;
 		}
@@ -124,7 +127,7 @@ At compile time, this star appears to just be an atomic star.
 		}
 
 		// scheduler run
-		sched->run(*myGal);	// default stop condition = 1
+		sched.run(*myGal);	// default stop condition = 1
 
 		// move data out of galaxy
 		MPHIter nexto(output);
@@ -136,7 +139,6 @@ At compile time, this star appears to just be an atomic star.
 
 		// delete all
 		delete myGal;
-		delete sched;
 	}
 }
 

@@ -22,6 +22,12 @@ times to repeat the "input" value on "output".
 		type { ANYTYPE }
 		num { 0 }
 	}
+	method {
+		name { readClassName }
+		access { public }
+		type { "const char *" }
+		code { return "UpSample"; }
+	}
 	constructor {
 		output.inheritTypeFrom(input);
 	}
