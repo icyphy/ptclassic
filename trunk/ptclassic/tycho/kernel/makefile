@@ -59,8 +59,6 @@ ITCL_SRCS = \
 	Dismiss.itcl \
 	Edit.itcl \
 	EditFSM.itcl \
-	EditHTML.itcl \
-	EditHTMLText.itcl \
 	EditProgram.itcl \
 	EditProgramText.itcl \
 	EditSearch.itcl \
