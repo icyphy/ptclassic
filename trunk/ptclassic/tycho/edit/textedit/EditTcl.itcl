@@ -70,6 +70,9 @@ class ::tycho::EditTcl {
     # Return the regular expression used to identify line-oriented comments.
     protected method commentRegexp {}
 
+    # Configure the popup menu depending on the current context
+    protected method configureContextMenu {}
+
     ##########################################################################
     ####                         protected variables                      ####
 
@@ -256,3 +259,32 @@ body ::tycho::EditTcl::tagLinks {} {
 body ::tycho::EditTcl::commentRegexp {} {
     return "(^|;)\[ \t\]*#.*\$"; #line comment
 }
+
+#####################################################################
+#### configureContextMenu
+# Configure the popup menu according to context. For Tcl editors, this
+# looks for an html file and opens that if it finds one. In addition,
+# if there is a selection, it offer to evaluate it.
+#
+body ::tycho::EditTcl::configureContextMenu {} {
+    ::tycho::TWidget::configureContextMenu
+
+    if { [$itk_component(text) tag ranges sel] != "" } {
+	contextmenu add {Evaluate selection} -command "$this evaluate"
+    }
+
+    # FIXME: These must be a better way of doing this
+    if { $itk_option(-file) != "" && $itk_option(-file) != "NoName" } {
+	set link [file split $itk_option(-file)]
+	set path [lrange $link 0 [expr [llength $link] - 2]]
+	set fname [join [concat \
+		[linit [split [lindex $link end] .]] "html"] .]
+	set link [eval file join $path doc codeDoc $fname]
+
+	if { [file exists $link] } {
+	    contextmenu add "Open documentation" \
+		    -command "::tycho::File::openContext $link"
+	}
+    }
+}
+
