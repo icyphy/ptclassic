@@ -4,6 +4,7 @@
 # Copyright (c) 1990 The Regents of the University of California.
 #                       All Rights Reserved.
 # Date of creation: 9/14/90
+# Date of simplification: 7/25/94
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -30,25 +31,14 @@ LIB=libddf.$(LIBSUFFIX)
 
 # .h files with corresponding .cc files
 HDRS = \
- Case.h \
- CaseScheduler.h \
  DDFPortHole.h \
  DDFScheduler.h \
  DDFStar.h \
  DDFTarget.h \
- DDFWormhole.h \
- DoWhile.h \
- DoWhileScheduler.h \
- DyConstruct.h \
- DyConScheduler.h \
- For.h \
- ForScheduler.h \
- Recur.h \
- RecurScheduler.h \
- defConstructs.h
+ DDFWormhole.h
 
 # Library sources
-SRCS= $(HDRS:.h=.cc) DDFDomain.cc DDFAutoWorm.cc
+SRCS= $(HDRS:.h=.cc) DDFDomain.cc
 
 # Library objects
 OBJS= $(SRCS:.cc=.o)
