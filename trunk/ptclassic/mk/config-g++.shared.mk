@@ -54,7 +54,7 @@ SHARED_COMPILERDIR_FLAG = -L$(SHARED_COMPILERDIR)
 # Command to build shared libraries (Not really supported yet)
 SHARED_LIBRARY_COMMAND = g++ -shared $(SHARED_COMPILERDIR_FLAG) -o
 
-# Used by incremental linking (sometimes)
+# Used by cgwork.mk
 INC_LINK_FLAGS =	-shared $(SHARED_COMPILERDIR_FLAG)
 
 # List of libraries to search, obviating the need to set LD_LIBRARY_PATH
