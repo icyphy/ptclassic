@@ -2,9 +2,11 @@ defstar {
   name      { PackInt_M }
   domain    { SDF }
   desc      { 
-This star reads a sequence of integer particles and
-fills a integer matrix with their values, row by row.
-  }
+Produces a matrix with integer value entries. The entries are
+read in from values in a sequence of integer particles
+in rasterized order, e.g. for a MxN matrix, the first row is 
+filled from left to right using the first N values from the
+first N particles. }
   version   { $Id$ }
   author    { Mike J. Chen }
   copyright { 1993 The Regents of the University of California }
