@@ -112,6 +112,7 @@ CCS_WITH_H_FILES=\
  PriorityQueue.cc \
  ProfileTimer.cc \
  PtGate.cc \
+ PtThread.cc \
  Scheduler.cc \
  Scope.cc \
  SimControl.cc \
@@ -155,7 +156,6 @@ HDRS= $(CCS_WITH_H_FILES:.cc=.h) \
  Linker.sysdep.h \
  ParticleStack.h \
  PtCondition.h \
- PtThread.h \
  SimAction.h \
  dataType.h \
  ieee.h \
