@@ -55,20 +55,22 @@ The values of the input ports will be passed as arguments to this function.
 }
 	}
 
-	// Matrix.h is from the Ptolemy kernel
-	hinclude { "dataType.h", "Matrix.h", "StringList.h", "InfString.h" }
+	// Ptolemy kernel includes
+	hinclude { "dataType.h", "Matrix.h", "StringList.h" }
+
+	// Matlab interface includes
 	hinclude { "MatlabIfc.h", "MatlabIfcFuns.h" }
 
-	header { typedef Matrix *MatrixPtr; }
+	header { typedef Matrix* MatrixPtr; }
 
 	protected {
 		// Matlab (C) structures
-		MatrixPtr *matlabInputMatrices;
-		MatrixPtr *matlabOutputMatrices;
+		MatrixPtr* matlabInputMatrices;
+		MatrixPtr* matlabOutputMatrices;
 
 		// Ptolemy (C++) structures for Matlab calls
-		char **matlabInputNames;    // array of Matlab variable names
-		char **matlabOutputNames;   // array of Matlab variable names
+		char** matlabInputNames;    // array of Matlab variable names
+		char** matlabOutputNames;   // array of Matlab variable names
 
 		// Variables for number of inputs and outputs to this star
 		int numInputs;
@@ -87,6 +89,23 @@ The values of the input ports will be passed as arguments to this function.
 	}
 
 	setup {
+		// free any existing memory
+		matlabInterface.FreeMatlabMatrices(matlabInputMatrices,
+						   numInputs);
+		delete [] matlabInputMatrices;
+		matlabInputMatrices = 0;
+		matlabInterface.FreeMatlabMatrices(matlabOutputMatrices,
+						   numOutputs);
+		delete [] matlabOutputMatrices;
+		matlabOutputMatrices = 0;
+
+		freeStringArray(matlabInputNames, numInputs);
+		delete [] matlabInputNames;
+		matlabInputNames = 0;
+		freeStringArray(matlabOutputNames, numOutputs);
+		delete [] matlabOutputNames;
+		matlabOutputNames = 0;
+
 		// set the number of input and output ports
 		numInputs = input.numberPorts();
 		numOutputs = output.numberPorts();
@@ -108,15 +127,10 @@ The values of the input ports will be passed as arguments to this function.
 
 		// allocate Matlab input matrices and generate their names
 		if ( numInputs > 0 ) {
-		  freeMatlabMatrices(matlabInputMatrices, numInputs);
-		  delete [] matlabInputMatrices;
 		  matlabInputMatrices = new MatrixPtr[numInputs];
 		  for ( int k = 0; k < numInputs; k++ ) {
 		    matlabInputMatrices[k] = 0;
 		  }
-
-		  freeStringArray(matlabInputNames, numInputs);
-		  delete [] matlabInputNames;
 		  matlabInputNames = new char*[numInputs];
 		  matlabInterface.NameMatlabMatrices(matlabInputNames,
 		  				     numInputs, "input");
@@ -124,15 +138,10 @@ The values of the input ports will be passed as arguments to this function.
 
 		// allocate Matlab output matrices and generate their names
 		if ( numOutputs > 0 ) {
-		  freeMatlabMatrices(matlabOutputMatrices, numOutputs);
-		  delete [] matlabOutputMatrices;
 		  matlabOutputMatrices = new MatrixPtr[numOutputs];
 		  for ( int k = 0; k < numOutputs; k++ ) {
 		    matlabOutputMatrices[k] = 0;
 		  }
-
-		  freeStringArray(matlabOutputNames, numOutputs);
-		  delete [] matlabOutputNames;
 		  matlabOutputNames = new char*[numOutputs];
 		  matlabInterface.NameMatlabMatrices(matlabOutputNames,
 		  				     numOutputs, "output");
@@ -155,16 +164,20 @@ The values of the input ports will be passed as arguments to this function.
 		// evaluate the Matlab command (non-zero means error)
 		int merror = matlabInterface.EvaluateUserCommand();
 		if ( merror ) {
-		  freeMatlabMatrices(matlabInputMatrices, numInputs);
-		  freeMatlabMatrices(matlabOutputMatrices, numOutputs);
+		  matlabInterface.FreeMatlabMatrices(matlabInputMatrices,
+						     numInputs);
+		  matlabInterface.FreeMatlabMatrices(matlabOutputMatrices,
+						     numOutputs);
 		  Error::abortRun( *this,
 				   "Matlab could not evaluate the command.");
 		}
 		else {
 		  // convert Matlab matrices to Ptolemy matrices
 		  int oerror = processOutputMatrices();
-		  freeMatlabMatrices(matlabInputMatrices, numInputs);
-		  freeMatlabMatrices(matlabOutputMatrices, numOutputs);
+		  matlabInterface.FreeMatlabMatrices(matlabInputMatrices,
+						     numInputs);
+		  matlabInterface.FreeMatlabMatrices(matlabOutputMatrices,
+						     numOutputs);
 		  if ( oerror ) {			// non-zero means error
 		    Error::abortRun( *this, "Could not convert the Matlab ",
 				     "output matrices to Ptolemy matrices" );
@@ -173,9 +186,11 @@ The values of the input ports will be passed as arguments to this function.
 	}
 
 	destructor {
-		freeMatlabMatrices(matlabInputMatrices, numInputs);
+		matlabInterface.FreeMatlabMatrices(matlabInputMatrices,
+						   numInputs);
 		delete [] matlabInputMatrices;
-		freeMatlabMatrices(matlabOutputMatrices, numOutputs);
+		matlabInterface.FreeMatlabMatrices(matlabOutputMatrices,
+						   numOutputs);
 		delete [] matlabOutputMatrices;
 
 		freeStringArray(matlabInputNames, numInputs);
@@ -194,24 +209,6 @@ The values of the input ports will be passed as arguments to this function.
 		if ( strarray ) {
 		  for ( int k = 0; k < numstrings; k++ ) {
 		    delete [] strarray[k];
-		  }
-		}
-	  }
-	}
-
-	method {
-	  name { freeMatlabMatrices }
-	  access { protected }
-	  type { void }
-	  arglist { "(MatrixPtr *matlabMatrices, int numMatrices)" }
-	  code {
-		// do not free the matlabMatrices pointer itself
-		if ( matlabMatrices ) {
-		  for ( int k = 0; k < numMatrices; k++ ) {
-		    if ( matlabMatrices[k] != 0 ) {
-		      mxFreeMatrix(matlabMatrices[k]);
-		      matlabMatrices[k] = 0;
-		    }
 		  }
 		}
 	  }
@@ -247,7 +244,8 @@ The values of the input ports will be passed as arguments to this function.
 		  }
 
 		  // Give the current matrix a name
-		  mxSetName(matlabMatrix, matlabInputNames[i]);
+		  matlabInterface.NameMatlabMatrix(matlabMatrix,
+		  				   matlabInputNames[i]);
 
 		  // let Matlab know about the new Matlab matrix we've defined
 		  // FIXME: Memory Leak
