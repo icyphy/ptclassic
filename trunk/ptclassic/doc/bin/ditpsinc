@@ -1,5 +1,7 @@
 #!/bin/csh -f
 
+# $Id$
+
 # Include postscript (icons) in ditroff output.  This is done by first
 # running the Adobe Transcript "psdit" command to convert our ditroff
 # input to postscript, and then running a custom postscript post-processor
