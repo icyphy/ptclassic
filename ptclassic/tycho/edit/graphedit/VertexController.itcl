@@ -30,13 +30,13 @@
 
 
 ##########################################################################
-#### DFGMover
+#### DFGVertexController
 #
-# _DFGMover_ is an controller object used by the _DFGEditor_ view.
-# It is responsible for managing creation of nets and edges, and
-# connection and disconnecting them.
+# _DFGVertexController_ is a controller object used by the
+# _DFGEditor_ view. It is responsible for managing vertices
+# of the graph.
 #
-class ::tycho::DFGMover {
+class ::tycho::DFGVertexController {
 	inherit ::tycho::ViewController
 	
     constructor {args} {}
@@ -45,17 +45,32 @@ class ::tycho::DFGMover {
     #################################################################
     ####                        options                          ####
 
+    # The corresponding edge controller
+    public variable edgecontroller ""
+	
     #################################################################
     ####                     public methods                      ####
 
     # Get the follower
     method _follower {} {return $_follower}
 
+    # Add a vertex and icon
+    method add {libname starname}
+
+    # Delete a vertex
+    method delete {name}
+
     # Process a click event
     method click {tag x y args}
 
+    # Initialize the context-sensitive popup menu
+    method contextmenu {item type}
+
     # Process a motion event
     method drag {tag x y}
+
+    # Add an icon at the specified location
+    method place {iconlib iconname starname x y}
 
     # Process a release event
     method release {tag}
@@ -89,7 +104,7 @@ class ::tycho::DFGMover {
 ########################################################################
 #### constructor
 #
-body ::tycho::DFGMover::constructor {args} {
+body ::tycho::DFGVertexController::constructor {args} {
     # Evaluate options
     eval configure $args
 
@@ -103,6 +118,46 @@ body ::tycho::DFGMover::constructor {args} {
 }
 
 ########################################################################
+#### add
+#
+# Add a vertex given the library name and star name
+#
+body ::tycho::DFGVertexController::add {libname starname} {
+    set lib [$slateview library access $libname]
+
+    # Instantiate the star as a vertex of the graph
+    set starname [$lib instantiate $starname $graph -itemtype vertex]
+
+    # Find the icon of the star
+    if [$graph exists $starname -icon] {
+        set iconpath [$graph attrget $starname -icon]
+        set splat [split $iconpath #]
+        set iconlib [lindex $splat 0]
+        set iconname [lindex $splat 1]
+
+        # FIXME: Need a shorter way of doing this...
+        set libpath [::tycho::model load $iconlib]
+        # FIXME: key cannot be reused, hence the autoname...
+        set iconmodel [::tycho::model link $libpath [::tycho::autoName $this]]
+
+        # See if the icon has a dot-separated name
+        if ![$iconmodel exists $iconname] {
+            if [$iconmodel exists [split $iconname .]] {
+                set iconname [split $iconname .]
+            } else {
+                error "Unknown icon \"$iconname\" in $iconlib"
+            }
+        }
+        # Place the icon
+        set coords [$slateview place]
+        eval place [list $iconmodel $iconname $starname] $coords
+    } else {
+        # FIXME
+        error "No icon for $starname"
+    }
+}
+
+########################################################################
 #### click
 #
 # Start a move interaction on vertices. The argument is a tag which
@@ -112,11 +167,10 @@ body ::tycho::DFGMover::constructor {args} {
 # that have one end connected to one of these vertices and
 # remember who they are.
 #
-body ::tycho::DFGMover::click {tag x y args} {
+body ::tycho::DFGVertexController::click {tag x y args} {
     # Get the vertices, and start a move sequence on them
     set vertices [$slateview find withtag $tag]
 
-puts "vertexes = $vertices ($graph)"
     # Get the item name or the same tag
     set name [itemname $tag]
     set _movetag $name
@@ -128,7 +182,6 @@ puts "vertexes = $vertices ($graph)"
     set _moveedges [eval $graph subgraphEdges $vertices]
     set _inputedges [eval $graph subgraphInputs $vertices]
     set _outputedges [eval $graph subgraphOutputs $vertices]
-puts [list $_moveedges $_inputedges $_outputedges]
 
     # Start a move or reshape sequence on found edges
     if { $_moveedges != "" } {
@@ -143,13 +196,60 @@ puts [list $_moveedges $_inputedges $_outputedges]
     }
 }
 
+#########################################################################
+#### contextmenu
+#
+# Initialize the context-sensitive pop-up menu. 
+#
+body ::tycho::ViewController::contextmenu {slateid type} {
+    set name [itemname $slateid]
+
+    if { $type == "vertex" } {
+        # Show all terminal styles
+        # set termstyle [$graph
+        # contextmenu 
+    }
+    ;
+}
+
+########################################################################
+#### delete
+#
+# Delete a vertex and icon by name
+#
+body ::tycho::DFGVertexController::delete {vertex} {
+    # Mark the histories
+    $layout mark set vertex
+    $graph mark set vertex
+
+    # Disconnect input edges
+    foreach edge [concat \
+            [$graph edges * [list $vertex *]] \
+            [$graph edges * $vertex]] {
+        $edgecontroller disconnect $edge -to
+    }
+    # Disconnect output edges
+    foreach edge [concat \
+            [$graph edges [list $vertex *] *] \
+            [$graph edges $vertex *]] {
+        $edgecontroller disconnect $edge -from
+    }
+    # Delete the vertex and icon
+    $layout publish delete $vertex
+    $graph publish delete $vertex
+
+    # Compact the histories
+    $layout history compact vertex current
+    $graph history compact vertex current
+}
+
 ########################################################################
 #### drag
 #
 # Continue a move interaction on vertices. The
 # vertices and edges are moved and reshaped as appropriate.
 #
-body ::tycho::DFGMover::drag {tag x y} {
+body ::tycho::DFGVertexController::drag {tag x y} {
     # Move the vertices and fully-connected edges
     $layout publish movedrag $_movetag $x $y
     if { $_moveedges != "" } {
@@ -165,12 +265,34 @@ body ::tycho::DFGMover::drag {tag x y} {
 }
 
 ########################################################################
+#### place
+#
+# Place an icon at the specified location.
+#
+body ::tycho::DFGVertexController::place {iconlib iconname starname x y} {
+    # Place the icon into the layout model, giving it the
+    # same name as the vertex in the graph.
+    $iconlib instantiate $iconname $layout \
+            -itemname $starname \
+            -coords [list $x $y] \
+            -tags vertex
+
+    # Move its nw corner to the right position. Find the position
+    # from my slate, and then move by publishing to the model
+    # $_slate moveto $id $iconx $icony "nw" -shape rectangle
+    set current [$layout forward aspect $starname "nw" -shape "rectangle"]
+    set dx [expr $x - [lindex $current 0]]
+    set dy [expr $y - [lindex $current 1]]
+    $layout publish move $starname $dx $dy
+}
+
+########################################################################
 #### release
 #
 # Terminate a move interaction on vertices and add an undo and
 # redo command to the history of the layout model.
 #
-body ::tycho::DFGMover::release {tag} {
+body ::tycho::DFGVertexController::release {tag} {
     # Mark the history
     $layout mark set vertex
 
@@ -207,6 +329,6 @@ body ::tycho::DFGMover::release {tag} {
 ########################################################################
 #### _cleanup
 #
-body ::tycho::DFGMover::_cleanup {} {
+body ::tycho::DFGVertexController::_cleanup {} {
     ;
 }
