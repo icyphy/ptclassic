@@ -238,8 +238,23 @@ proc ptolemyStarHTMLIndex { {title {Ptolemy Star HTML Index}}} {
 # Also produce a forest that contains a the sub indices
 #
 proc tychoMergeIndices {title outputfilename args} {
-    # Open up each file and stick the contents into
-    # an array.
+    set entries {}
+
+    # Dump out a forest that contains all the sub indices
+    set forestfd [open $outputfilename.fst w]
+
+    # Put in titles and a reasonable default size.
+#    puts $forestfd \
+#	    "\{configure -canvasheight 600\} \{configure -canvaswidth 800\}"
+
+    puts $forestfd \
+	    "\{centeredText \{$title\} title \{\} black \{\{helvetica 24 bold i\} \{times 24 bold i\}\}\}"
+
+    puts $forestfd \
+	    "\{add $outputfilename \{label \{$title\} link \{$outputfilename \{\}\}\} \{\}\}"
+
+    # Open up each file and stick the contents into a list
+    # Update the forest file too.
     foreach file $args {
 	set fd [open $file r]
 	set contents [read $fd]
@@ -250,6 +265,9 @@ proc tychoMergeIndices {title outputfilename args} {
 		    Should contain the form: name { items }"
 	}
 	set subtitle [lindex $contents 0]
+        puts $forestfd \
+		"\{add $file \{label \{$subtitle\} link \{$file \{\}\}\} $outputfilename \}"
+
 	set items {}
 	set count 1
 	foreach item [lindex $contents 1] {
@@ -265,6 +283,7 @@ proc tychoMergeIndices {title outputfilename args} {
 	    lappend entries [list $name "$CWD/$filename" "$CWD/$point"]
 	}
     }
+    close $forestfd
 
     # Dump out the newly merged file
     set fd [open $outputfilename w]
@@ -275,5 +294,4 @@ proc tychoMergeIndices {title outputfilename args} {
     }
     puts $fd \}
     close $fd
-
 }
