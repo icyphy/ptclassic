@@ -1025,19 +1025,36 @@ KcCatchSignals() {
 	SimControl::catchInt(SIGUSR1);
 }
 
-// dummy class to clean up at end
+/* functions for enabling and disabling the run-time Tk event loop */
 
-class KernelCallsOwner {
-public:
-	KernelCallsOwner() {}
-	~KernelCallsOwner() {
-		if (ptcl->currentGalaxy != ptcl->universe) {
-			LOG_DEL; delete ptcl->currentGalaxy;
-		}
-		LOG_DEL; delete universe;
+extern "C" void processEvents(Star*, const char*);
+
+static SimAction* saveAction = 0;
+
+extern "C" int KcEventLoopActive() {
+	return (saveAction != 0);
+}
+
+extern "C" void KcSetEventLoop(int on) {
+	if (on) {
+	    if (!saveAction)
+		saveAction = SimControl::registerAction(processEvents,0);
 	}
-};
+	else if (saveAction) {
+		SimControl::cancel(saveAction);
+		saveAction = 0;
+	}
+}
 
-// constructor for this guy is called before main; destructor at end.
+/* Halt simulation from Tcl/Tk code */
 
-static KernelCallsOwner kco;
+extern "C" int KcRequestHalt(ClientData dummy, Tcl_Interp* ip, 
+                             int aC, char** aV) {
+	SimControl::requestHalt();
+	return TCL_OK;
+}
+
+// interface to hashstring function.
+extern "C" const char* HashString(const char* arg) {
+    return hashstring(arg);
+}
