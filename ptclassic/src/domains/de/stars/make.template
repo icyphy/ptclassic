@@ -73,6 +73,7 @@ DEFilter.pl \
 DEFork.pl \
 DEHandShake.pl \
 DEImageToCell.pl \
+DEImageToMx.pl \
 DEImpulse.pl \
 DEIntPacketize.pl \
 DEIntUnPacketize.pl \
@@ -80,6 +81,7 @@ DELogic.pl \
 DEMeasureDelay.pl \
 DEMeasureInterval.pl \
 DEMerge.pl \
+DEMxToImage.pl \
 DENull.pl \
 DEPassGate.pl \
 DEPCMVoiceRecover.pl \
