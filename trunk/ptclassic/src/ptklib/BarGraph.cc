@@ -79,6 +79,7 @@ BarGraph::BarGraph () {
 	starID += unique++;
 	data = NULL;
 	ids = NULL;
+	winName = "";
 }
 
 // destructor
@@ -198,6 +199,10 @@ int BarGraph::setup (Block* star,       // The star I am in
 	actualHeight = Tk_Height (plotwin);
 	
 	return TRUE;
+}
+
+int BarGraph::windowExists () {
+	return (Tk_NameToWindow(ptkInterp,(char*)winName,ptkW) != 0);
 }
 
 // Update a single bar of the bar graph.

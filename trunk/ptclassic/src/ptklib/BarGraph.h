@@ -85,6 +85,9 @@ public:
 	double top;
 	double bottom;
 
+	// Return true if a window with the name winName already exists.
+	int windowExists();
+
 protected:
 	// A static variable used to create names that are
 	// guaranteed to be unique.  After each use, it should
