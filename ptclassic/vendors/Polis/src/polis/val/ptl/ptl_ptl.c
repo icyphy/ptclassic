@@ -935,6 +935,7 @@ int autotick, unittime;
   } end_foreach_net_node_fanin;
 
   /* Read input values */
+  fprintf( fp, "    // Read the input values \n");
   foreach_net_node_fanin( node, var ) {
       if ( assoc_var = isInputValue( var, node )) {
           pvar = net_var_parent_var( var, node );
@@ -951,19 +952,18 @@ int autotick, unittime;
       }
   } end_foreach_net_node_fanin;
  
-  /* output ecah CFSM to the firing file */
+  /* output eachh CFSM firing to the firing file */
   fprintf( fp, "    if ( fpfire && needResource) {\n" );
-  fprintf( fp, "        sprintf( stemp, \"%%s: %%d %%d start\\n\", " );
+  fprintf( fp, "      sprintf( stemp, \"%%s: %%d %%d start\\n\", " );
   fprintf( fp, "(const char*) name, now, priority);\n" );
-  fprintf( fp, "        Printfiring( stemp );\n" );
+  fprintf( fp, "      Printfiring( stemp );\n" );
   fprintf( fp, "    }\n" );
   
-  /* Initialize event time schedules */
-  /*FIXME: */
+  /* Fire the Star! */
   fprintf( fp, "    min_time = -1;\n" );
   fprintf( fp, "    nemitevent = 0;\n" );
   fprintf( fp, "    _delay = 1.0;\n" );
-  fprintf( fp, "    _t_%s(0,0);\n", util_map_pathname( node_name ));
+  fprintf( fp, "    _t_%s(0,0); // fire the star\n", util_map_pathname( node_name ));
   fprintf( fp, "    emitEvent(0, _delay, 1);   // emit dummy event \n");
   if ( trace ) {
       fprintf( fp, "    if ( debug ) {\n" );
