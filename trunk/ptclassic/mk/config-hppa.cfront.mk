@@ -76,7 +76,8 @@ OCT_DEBUG_FLAGS =
 # but it is unneeded for HPPA CC 3.50.  You can use 'what /usr/bin/CC'
 # to find out what version of HPPA CC you are using.
 # If you are running under HPUX9, then remove -DPTHPUX10
-ARCHFLAGS =	-DUSG $(GPPDEBUGFLAGS) -DPTHPUX10
+# We need -D_CMA_NOWRAPPERS_ to build domains/pn/stars/PNSplice.cc
+ARCHFLAGS =	-DUSG $(GPPDEBUGFLAGS) -DPTHPUX10 -D_CMA_NOWRAPPERS_
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
 
