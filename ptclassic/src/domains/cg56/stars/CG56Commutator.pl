@@ -46,11 +46,9 @@ the next B particles from the next input, etc.
         }
         setup {
                 int n = input.numberPorts();
-                MPHIter nexti(input);
-                PortHole* p;
-                while((p = nexti++) != 0)
- ((SDFPortHole*)p)->setSDFParams(int(blockSize),int(blockSize)-1);
-                output.setSDFParams(n*int(blockSize),n*int(blockSize)-1);
+		int bs = int(blockSize);
+		input.setSDFParams(bs,bs-1);
+		output.setSDFParams(n*bs,n*bs-1);
         }
         codeblock (one) {
         move    $ref(input#1),x0        ; just move data from in to out

@@ -41,11 +41,9 @@ Distributes an input signal among two outputs, alternating samples.
 
 	setup {
                 int n = output.numberPorts();
-                input.setSDFParams(n*int(blockSize),n*int(blockSize)-1);
-                MPHIter nexto(output);
-                PortHole* p;
-                while((p = nexto++) != 0)
-               ((SDFPortHole*)p)->setSDFParams(int(blockSize),int(blockSize)-1);
+		int bs = int(blockSize);
+                input.setSDFParams(n*bs,n*bs-1);
+		output.setSDFParams(bs,bs-1);
         }
 
         codeblock (one) {
