@@ -1455,7 +1455,14 @@ void genDef ()
 		yyerror ("No domain name defined");
 		return;
 	}
-	sprintf (fullClass, "%s%s", galDef ? "" : domain, objName);
+	if ( coreDef == 1 ) {
+		if ( coreCategory != (char *)NULL )
+			sprintf( fullClass, "%s%s%s", galDef ? "" : domain, objName, coreCategory );
+		else
+			yyerror("All cores must have"
+							" a coreCategory directive");
+	} else
+		sprintf (fullClass, "%s%s", galDef ? "" : domain, objName );
 
    if (!htmlOnly) {
 /***************************************************************************
@@ -1492,16 +1499,39 @@ void genDef ()
 	if (derivedFrom) {
 		if (domain &&
 		    strncmp (domain, derivedFrom, strlen (domain)) != 0) {
-			sprintf (baseClass, "%s%s", galDef ? "" : domain,
-				 derivedFrom);
+			if ( coreDef == 1 ) {
+				if ( coreCategory != (char *)NULL )
+					sprintf( baseClass, "%s%s%s", galDef ? 
+					"" : domain, derivedFrom, coreCategory );
+				else
+					yyerror("All cores must have"
+						" a coreCategory directive");
+			} else
+				sprintf (baseClass, "%s%s", galDef ? "" : 
+				domain, derivedFrom);
 		}
 		else
-			(void) strcpy (baseClass, derivedFrom);
+			if ( coreDef == 1 ) {
+				if ( coreCategory != (char *)NULL )
+					sprintf( baseClass, "%s%s", galDef ? 
+					"" : derivedFrom, coreCategory );
+				else
+					yyerror("All cores must have"
+						" a coreCategory directive");
+			} else
+				(void) strcpy (baseClass, derivedFrom);
 	}
 /* Not explicitly specified: baseclass is Galaxy or XXXStar */
 	else if (galDef)
 		(void)strcpy (baseClass, "Galaxy");
-	else
+	else if ( coreDef == 1 ) {
+				if ( coreCategory != (char *)NULL )
+					sprintf( baseClass, "%s%sCore", galDef ? 
+					"" : domain, coreCategory );
+				else
+					yyerror("All cores must have"
+						" a coreCategory directive");
+	} else
 		sprintf (baseClass, "%sStar", domain);
 
 /* Include files */
