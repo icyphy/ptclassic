@@ -50,25 +50,31 @@ char* VHDLGeodesic :: getBufName() const {
 
 // Initialize the geodesic.
 void VHDLGeodesic :: initialize() {
-//  nextIn = numInit();
-//  nextOut = 0;
-  nextIn = numInit()-1;
-  nextOut = -1;
+  // Must call CGGeodesic::initialize() first else numInit() won't work.
   CGGeodesic::initialize();
+
+// Old: - Causes VaryDelay demo to fail
+//  firstIn = numInit();
+//  firstOut = 0;
+
+// New: - Seems to work like it should
+  firstIn = 0;
+  firstOut = -numInit();
+
+//  nextIn = firstIn - 1;
+//  nextOut = firstOut - 1;
+  nextIn = firstIn;
+  nextOut = firstOut;
 }
 
 // Update token put position by specified number of tokens.
 void VHDLGeodesic :: putTokens(int num) {
-//  cout << getBufName() << " nextIn from " << nextIn << " to ";
   nextIn += num;
-//  cout << nextIn << "\n";
 }
 
 // Update token get position by specified number of tokens.
 void VHDLGeodesic :: getTokens(int num) {
-//  cout << getBufName() << " nextOut from " << nextOut << " to ";
   nextOut += num;
-//  cout << nextOut << "\n";
   if (nextOut > nextIn) {
     // Don't worry about it (for now) if over-read from wormhole port.
     if (!(destPort()->atBoundary())) {

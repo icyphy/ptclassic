@@ -39,15 +39,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "CGStar.h"
 #include "VHDLPortHole.h"
-/*
-#include "VHDLPort.h"
-#include "VHDLGeneric.h"
-#include "VHDLVariable.h"
-#include "VHDLSignal.h"
-#include "VHDLState.h"
-#include "VHDLPortMap.h"
-#include "VHDLGenericMap.h"
-*/
+#include "VHDLGeodesic.h"
+#include "Tokenizer.h"
+#include <ctype.h>
 
 class VHDLTarget;
 

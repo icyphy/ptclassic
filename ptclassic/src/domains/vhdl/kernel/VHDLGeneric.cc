@@ -39,10 +39,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Constructors.
 VHDLGeneric :: VHDLGeneric() {
+  defaultVal = "";
   VHDLObj::initialize();
 }
 
 VHDLGeneric :: VHDLGeneric(const char* n, Block* p, const char* d) : VHDLObj(n,p,d) {
+  defaultVal = "";
   VHDLObj::initialize();
 }
 
