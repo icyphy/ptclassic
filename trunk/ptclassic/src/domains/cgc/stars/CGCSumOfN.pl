@@ -41,7 +41,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		code { return "DownSample"; }
 	}
 
-	codeblock (block) {
+	codeblock (nonComplexBlock) {
 	if ($ref(status) == 0) {
 		$ref(output) = 0;
 		$ref(status) = $ref(control);
@@ -49,8 +49,20 @@ limitation of liability, and disclaimer of warranty provisions.
 	$ref(output) += $ref(input);
 	$ref(status)--;
 	}
+	codeblock (complexBlock) {
+	if ($ref(status) == 0) {
+		$ref(output).real = 0;
+		$ref(output).imag = 0;
+		$ref(status) = $ref(control);
+	}
+	$ref(output) += $ref(input);
+	$ref(status)--;
+	}
 	go {
-		addCode(block);
+		if (strcmp(input.resolvedType(), "COMPLEX") == 0) 
+		  addCode(complexBlock);
+		else
+		  addCode(nonComplexBlock);
 	}
 }
 

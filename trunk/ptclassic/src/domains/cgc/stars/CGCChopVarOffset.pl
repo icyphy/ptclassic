@@ -39,10 +39,13 @@ determined at run time through a control input.
         if (inidx < 0) inidx = 0;
         }
 	go {
-		addCode(decl);		// look at CGCChop star
+		addCode(decl);			// look at CGCChop star
 		addCode(init);
 		addCode(range);
-		addCode(out);		// look at CGCChop star
+		if (strcmp(input.resolvedType(), "COMPLEX") == 0) 
+		  addCode(complexOut);		// look at CGCChop star
+		else
+		  addCode(nonComplexOut);	// look at CGCChop star
 	}
 	exectime {
 		return CGCChop::myExecTime() + 8;

@@ -136,10 +136,22 @@ Lower limit on the indexing from the input to the output buffer
 	codeblock(decl) {
 	int i;
 	}
-	codeblock(out) {
+	codeblock(nonComplexOut) {
 	for (i = 0; i < $val(nwrite); i++) {
 	    if (i > hiLim || i < loLim) {
 		$ref(output,i) = 0;
+	    }
+	    else {
+		$ref(output,i) = $ref(input,inputIndex);
+		inputIndex++;
+            }
+        }
+	}
+	codeblock(complexOut) {
+	for (i = 0; i < $val(nwrite); i++) {
+	    if (i > hiLim || i < loLim) {
+		$ref(output,i).real = 0;
+		$ref(output,i).imag = 0;
 	    }
 	    else {
 		$ref(output,i) = $ref(input,inputIndex);
@@ -155,7 +167,10 @@ Lower limit on the indexing from the input to the output buffer
 
 		addCode(decl);
 		addCode(moreDeclarations);
-		addCode(out);
+		if (strcmp(input.resolvedType(), "COMPLEX") == 0) 
+		  addCode(complexOut);
+		else
+		  addCode(nonComplexOut);
 	}
 	exectime {
 		computeRange();
