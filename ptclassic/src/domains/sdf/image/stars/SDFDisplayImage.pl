@@ -55,10 +55,10 @@ complete filename of the displayed image.
 
 	go {
 		// Read data from input.
-		Envelope envp;
-		(inData%0).getMessage(envp);
-		TYPE_CHECK(envp, "GrayImage");
-		const GrayImage* image = (const GrayImage*) envp.myData();
+		Envelope env;
+		(inData%0).getMessage(env);
+		TYPE_CHECK(env, "GrayImage");
+		const GrayImage* image = (const GrayImage*) env.myData();
 		if (image->fragmented() || image->processed()) {
 		  Error::abortRun(*this,
 			"Cannot display fragmented or processed image.");
@@ -88,9 +88,11 @@ complete filename of the displayed image.
 		}
 
 		// Write PGM header and image data (row by row)
-		fprintf(fptr, "P5\n %d %d 255\n", image->retWidth(),
+		fprintf(fptr,
+			"P5\n %d %d 255\n",
+			image->retWidth(),
 			image->retHeight());
-		fwrite( (const char*)image->constData(),
+		fwrite( image->constData(),
 			image->retWidth() * sizeof(unsigned char),
 			image->retHeight(),
 			fptr );
@@ -98,7 +100,7 @@ complete filename of the displayed image.
 
 		// Display the image using an external viewer
 		StringList cmdbuf = "(";
-		cmdbuf << (const char *) command << " " << fileName;
+		cmdbuf << ((const char *) command) << " " << fileName;
 		if (del) {
 		  cmdbuf << "; rm -f " << fileName;
 		}
