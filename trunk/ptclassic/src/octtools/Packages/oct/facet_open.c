@@ -29,6 +29,15 @@ static char SccsId[]="$Id$";
 #include "internal.h"
 #include "fsys.h"
 
+#include "bb.h"
+#include "io.h"
+#include "inst.h"
+#include "facet_info.h"
+#include "oct_files.h"
+#include "mark.h"
+#include "oct_utils.h"
+#include "term_update.h"
+
 #define MASTER 0
 #define FACET 1
 
@@ -45,7 +54,7 @@ struct octObject *obj;
     struct facet *desc;
     struct octFacet *user_facet;
     octStatus retval;
-    int mode;
+    int mode = 0;
 
     octBegin(); /* XXX: just in case, guarenteed to be safe */
     
@@ -109,7 +118,7 @@ struct octObject *fobj;
     struct master *master;
     struct facet *master_desc;
     struct octFacet dummy;
-    int mode;
+    int mode = 0;
     octStatus retval;
 
     inst = (struct instance *) oct_id_to_ptr(iobj->objectId);
@@ -212,7 +221,7 @@ int location;
     struct octFacet *user_facet = &fobj->contents.facet;
     struct facet *rfacet, *facet_desc;
     struct octFacet dummy;
-    int mode;
+    int mode = 0;
     octStatus retval;
 
     rfacet = (struct facet *) oct_id_to_ptr(robj->objectId);
@@ -625,6 +634,7 @@ struct octObject *old;
 
 
 /* debugging function */
+#ifdef NEED_PRINTINTERFACES
 static void printInterfaces( fct )
     struct facet *fct;
 {
@@ -647,6 +657,7 @@ static void printInterfaces( fct )
     }
     printf( "\n" );
 }
+#endif
 
 octStatus 
 compatOctOpenMaster(iobj, fobj)
@@ -658,7 +669,7 @@ struct octObject *fobj;
     struct master *master;
     struct facet *master_desc;
     struct octFacet dummy;
-    int mode;
+    int mode = 0;
     octStatus retval;
 
     inst = (struct instance *) oct_id_to_ptr(iobj->objectId);
