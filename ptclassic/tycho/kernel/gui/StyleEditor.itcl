@@ -488,11 +488,11 @@ body ::tycho::StyleEditor::_update {param} {
     if { $oldvalue != $newvalue } {
         # Update. If the style doesn't exist in the user model, create it.
         if ![$_model exists $itk_option(-style)] {
-            $_model add $itk_option(-style)
+            $_model add style $itk_option(-style)
         }
         if ![$_model exists $name] {
             # FIXME: groups
-            $_model add $name -value $newvalue
+            $_model add parameter $name -value $newvalue
             # Erk... we have to publish with an attrset, otherwise
             # it gets ignored by StyleSheet::_notify...
             $_model publish attrset $name -value $newvalue
