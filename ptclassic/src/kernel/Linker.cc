@@ -1,3 +1,4 @@
+#define DEBUG
 static const char file_id[] = "Linker.cc";
 /**************************************************************************
 Version identification:
@@ -315,9 +316,23 @@ static void debugInvokeConstructors(char *symbol,long addr, const
 
 int
 Linker::invokeConstructors (const char* objName) {
+#ifdef USE_NM_GREP
+// On the hppa a symbol can have the same name in the code and
+// an entry segments.  nm -p cannot differentiate between the
+// two, so we define a separate method of checking for symbols.
+
+// NOTE: If you change the pipe description, remember to modify the
+//       fscanf() format string !
+	StringList grepPattern = "";
+	grepPattern << "'" << CONS_PREFIX << NM_GREP_STRING;
+
+	StringList command = NM_PROGRAM;
+	command << " " << objName << " | grep " << grepPattern;
+#else //USE_NM_GREP
 // Open a pipe to "nm" to get symbol information
 	StringList command = NM_PROGRAM;
 	command << " " << NM_OPTIONS << " " << objName;
+#endif //USE_NM_GREP
 
 #ifdef DEBUG
 	{
@@ -337,10 +352,35 @@ Linker::invokeConstructors (const char* objName) {
 // value > base.
 	int nCalls = 0;
 	long addr;
+#ifdef USE_NM_GREP
+ 	char line[1024], *symbol, *p_addr;
+#else
 	char symbol[256], type[20];
+#endif //USE_NM_GREP
 	size_t memoryEnd = (size_t)memBlock + LINK_MEMORY;
 
+#ifdef USE_NM_GREP
+	while (fscanf(fd, "%s%*s", line) == 1) {
 
+          symbol = strtok( line, "|" );
+          p_addr = strtok( NULL, "|" );
+
+	  addr = atol( p_addr );
+
+#ifdef DEBUG
+	  debugInvokeConstructors(symbol, addr, objName);
+#endif
+
+	  if (addr >= (size_t) availMem && addr <= memoryEnd)
+	  {
+
+	    PointerToVoidFunction fn = (PointerToVoidFunction)addr;
+	    fn();
+	    nCalls++;
+	  }
+	}
+
+#else //USE_NM_GREP
 	while (fscanf(fd, "%lx %s %s", &addr, type, symbol) == 3) {
 		if (addr >= (size_t)availMem && addr <= memoryEnd &&
 		    strncmp(symbol, CONS_PREFIX, CONS_LENGTH) == 0) {
@@ -353,6 +393,7 @@ Linker::invokeConstructors (const char* objName) {
 			nCalls++;
 		}
 	}
+#endif //USE_NM_GREP
 	pclose (fd);
 	return nCalls;
 }
