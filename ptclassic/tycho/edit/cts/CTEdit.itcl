@@ -2,7 +2,7 @@
 # Version: $Id$
 # Author: John Reekie
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -90,7 +90,7 @@ body ::tycho::CTEdit::constructor {args} {
 body ::tycho::CTEdit::openControlPanel {graph} {
     set tl [[displayer] component hull].runwindow
 
-    if { [info which -command $tl] != "" } {
+    if { [infoWhichCommand $tl] != "" } {
 	raise $tl
     } else {
 	# Generate a "random" port number. This is awful!
