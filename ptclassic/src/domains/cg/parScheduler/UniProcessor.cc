@@ -38,7 +38,8 @@ Date of last revision:
 
 #include "UniProcessor.h"
 #include "SDFScheduler.h"
-#include "CGWormhole.h"
+#include "CGWormBase.h"
+#include "CGWormStar.h"
 
 StringList UniProcessor :: display(int makespan)
 {
@@ -345,33 +346,66 @@ int UniProcessor :: getStartTime() {
 }
 
 		/////////////////////////////////////
-		//    Generate code
+		//    Prepare code generation
 		/////////////////////////////////////
 
 void UniProcessor :: prepareCodeGen() {
 	// galaxy initialize
 	subGal->initialize();
 
+	// replace wormStar to original wormholes
+	replaceWorms();
+
 	// convert a processor schedule to a SDF schedule
 	// for child target.
 	targetPtr->setGalaxy(*subGal);
-	convertSchedule();
+	convertSchedule(0);
+	if (SimControl::haltRequested()) return;
 
 	// simulate the schedule
 	simRunSchedule();
+	if (SimControl::haltRequested()) return;
 }
 	
-void UniProcessor :: convertSchedule() {
+// convert the UniProcessor schedule to SDFSchedule. The optional
+// SDFScheduler to be converted into is provided.
+void UniProcessor :: convertSchedule(SDFScheduler* optS) {
+
 	SDFSchedule sched;
 	ProcessorIter schedIter(*this);
 	ParNode* n;
 	while ((n = schedIter.nextNode()) != 0) {
+		DataFlowStar* s;
 		if (n->getType() > 0) continue;
-		DataFlowStar* s = n->getCopyStar();
+		if (n->getType() < 0) {
+			s = n->getCopyStar();
+
+		// If the node is associated with a parallel star, 
+		// first check if it is the syncProc of the star.
+		// If not, schedule CGWormStar to the schedule.
+		// If yes, replace CGWormStar with the original Star.
+		// Be sure that at the end of the code generation, the original
+		// parallel star is switched back to the original graph.
+
+		} else if (n->amIBig() && (n->getProcId() != myId())) {
+			int ix = n->profile()->
+			   profileIx(n->invocationNumber(), myId());
+			LOG_NEW; s = new CGWormStar((CGStar*) n->myMaster(), 
+					ix, n->invocationNumber(), 0);
+			if (SimControl::haltRequested()) return;
+			specialStars.put(*s);
+		} else {
+			s = n->getCopyStar();
+		}
+		s->setTarget(targetPtr);
 		sched.append(*s);
 	}
-	targetPtr->scheduler()->setGalaxy(*subGal);
-	targetPtr->copySchedule(sched);
+	if (optS == 0) {
+		targetPtr->scheduler()->setGalaxy(*subGal);
+		targetPtr->copySchedule(sched);
+	} else {
+		optS->copySchedule(sched);
+	}
 }
 
 // trace the schedule to obtain the right buffer size
@@ -380,8 +414,12 @@ void UniProcessor :: simRunSchedule() {
 	ParNode* n;
 	
 	while ((n = iter.nextNode()) != 0) {
-		if (n->getType() > 0) continue;
+		if ((n->getType() > 0) || (n->getProcId() != myId())) continue;
 		DataFlowStar* copyS = n->getCopyStar();
+		if (n->getType() == 0) {
+			DataFlowStar* s = n->myMaster();
+			if (s->isItWormhole()) copyS = s;
+		}
 
 		DFStarPortIter piter(*copyS);
 		CGPortHole* p;
@@ -402,36 +440,134 @@ void UniProcessor :: simRunSchedule() {
 }
 
 		/////////////////////////////////////
-		//    down-load the code
+		//    Generate code
 		/////////////////////////////////////
 
-void UniProcessor :: run() {
+StringList UniProcessor :: generateCode() {
+	targetPtr->generateCode();
+	
+	// revert wormholes
+	restoreWorms();
+	return (*targetPtr->getStream("code"));
+}
 
-	// iterator for the scheduled node
-	ProcessorIter schedIter(*this);
-	NodeSchedule* obj;
+// Insert the subGalaxy code to the argument target class.
 
-	while((obj = schedIter++) != 0) {
-		ParNode* node = (ParNode*) obj->getNode();
-		if (obj->isIdleTime() == 0) {	// check idle node
-			CGStar* s = node->myStar();
-			if (!s) continue;
-			if (s->isItWormhole()) {
-				CGWormhole* worm = s->myWormhole();
-				int index = obj->getIndex();
-				worm->downLoadCode(index);
+int UniProcessor :: genCodeTo(Target* t) {
+	targetPtr = (CGTarget*) t;
+
+	// galaxy initialize
+	subGal->initialize();
+	replaceWorms();
+
+	// convert a processor schedule to a SDF schedule
+	// for child target.
+	SDFScheduler tempSched;
+	tempSched.setGalaxy(*subGal);
+	convertSchedule(&tempSched);
+	if (SimControl::haltRequested()) return FALSE;
+
+	// simulate the schedule
+	simRunSchedule();
+	if (SimControl::haltRequested()) return FALSE;
+
+	if (!targetPtr->insertGalaxyCode(subGal, &tempSched)) return FALSE;
+	restoreWorms();
+	return TRUE;
+}
+
+		/////////////////////////////////////
+		//    Wormhole placements
+		/////////////////////////////////////
+
+void UniProcessor :: replaceWorms() {
+	specialStars.deleteAll();
+	specialStars.initialize();
+
+	// temporal list of wormstars.
+	BlockList tempStars;
+	tempStars.initialize();
+
+	wormPartners.initialize();
+	GalStarIter nextStar(*subGal);
+	Star* s;
+	while ((s = nextStar++) != 0) {
+		if (s->isItWormhole() == 0) continue;
+		// yes, it is a CGWormStar. Obtain the original wormhole.
+		Star* worm = ((DataFlowStar*) s)->myMaster()->myMaster();
+		// save portholes connected to this wormhole
+		BlockPortIter nextp(*worm);
+		PortHole* p;
+		while ((p = nextp++) != 0) wormPartners.put(*(p->far()));
+
+		// save wormstars
+		tempStars.put(*s);
+		specialStars.put(*s);
+	}
+
+	// now replace it.
+	BlockListIter nextb(tempStars);
+	while ((s = (Star*) nextb++) != 0) {
+		Star* worm = ((DataFlowStar*) s)->myMaster()->myMaster();
+		BlockPortIter nextp(*s);
+		PortHole* p;
+		while ((p = nextp++) != 0) {
+			int delays = p->numInitDelays();
+			PortHole* farP = p->far();
+			PortHole* newP = worm->portWithName(p->name());
+			// do not disconnect newP to keep the original
+			// connection.
+			p->disconnect(1);
+			if (farP->isItOutput()) {
+				farP->connect(*newP, delays);
 			} else {
-				Star* star = (Star*)s;
-				mtarget->writeFiring(*star,1);
-				// s->fire();
+				newP->connect(*farP, delays);
+			}
+		}
+		subGal->removeBlock(*s);
+		subGal->addBlock(*worm, worm->name());
+	}
+}
+
+// restore the original connection of wormholes.
+
+void UniProcessor :: restoreWorms() {
+	PortListIter nextp(wormPartners);
+	PortHole* p;
+	while ((p = nextp++) != 0) {
+		PortHole* farP = p->far();
+		int delays = p->numInitDelays();
+		// remove Geodesics.
+		farP->disconnect(1);
+		p->disconnect(1);
+		if (p->isItInput()) {
+			farP->connect(*p, delays);
+		} else {
+			p->connect(*farP, delays);
+		}
+	}
+
+	if (wormPartners.size() > 0) {
+		GalStarIter nexts(*subGal);
+		Star* s;
+		while ((s = nexts++) != 0) {
+			if (s->isItWormhole()) {
+				subGal->removeBlock(*s);
+				nexts.reset();
 			}
 		}
 	}
 }
+	
+
+		/////////////////////////////////////
+		//    destructor
+		/////////////////////////////////////
 
 // destructor
 UniProcessor :: ~UniProcessor() {
 	LOG_DEL; delete subGal;
+	specialStars.deleteAll();
 	initialize();
 	clearFree();
 }
