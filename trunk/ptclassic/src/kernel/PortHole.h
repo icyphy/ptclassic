@@ -153,6 +153,9 @@ public:
 	// function to connect two portholes
 	virtual void connect(GenericPort& destination,int numberDelays);
 
+	// return my type
+	dataType myType () const { return type;}
+
 	// Constructor
 	GenericPort () : type(ANYTYPE), alias(0), typePort(0) {}
 
