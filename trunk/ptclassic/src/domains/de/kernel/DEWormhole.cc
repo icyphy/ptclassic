@@ -77,17 +77,17 @@ void DEWormhole :: go()
 	// synchronize the two domains
 	myTarget()->setCurrentTime(arrivalTime);
 
-	//Checking if the inner domain requests self-firing. If it does,
-        //then it is setup for the next firing.
+	// run the inner scheduler.
+	Wormhole::run();
+
+	// Checking if the inner domain requests self-firing. If it does,
+        // then it is setup for the next firing.
         if (myTarget()->selfFiringRequested()) {
                 DEBaseSched* sched = (DEBaseSched*) outerSched();
                 DEStar* me = this;
                 sched->queue()->levelput(me, myTarget()->nextFiringTime(), 0);
         }
- 
-	// run the inner scheduler.
-	Wormhole::run();
-}
+ }
 
 void DEWormhole :: wrapup()
 {
