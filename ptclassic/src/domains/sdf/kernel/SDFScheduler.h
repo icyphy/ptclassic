@@ -132,6 +132,8 @@ public:
 	// scheduler Period : used when interfaced with timed domain.
 	float schedulePeriod;
 
+	// declare "untimed"
+	int amITimed();
 private:
 	// This is a kludge to help integrate SDFScheduler and
 	// DEScheduler together.  numIters says how many times
