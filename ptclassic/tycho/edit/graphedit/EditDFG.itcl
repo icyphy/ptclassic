@@ -81,7 +81,7 @@ class ::tycho::EditDFG {
     method connectdrag {id x y}
 
     # Stop moving a new connection
-    method connectrelease {ignore}
+    method connectrelease {args}
 
     # Test if an item can start a new connection
     method connectsource {id}
@@ -106,6 +106,9 @@ class ::tycho::EditDFG {
 
     # Redo the most recent command
     method redo {}
+    
+    # Handle changes to the selection
+    method select {mode args}
     
     # Undo the most recent command
     method undo {}
@@ -142,6 +145,9 @@ class ::tycho::EditDFG {
 
     # The interactor to connect edges
     protected variable dropper
+
+    # The item selector
+    protected variable selector
 
     # The semantic model
     protected variable _graph ""
@@ -194,19 +200,20 @@ body ::tycho::EditDFG::constructor {args} {
     $_slate configure -highlightcolor azure2 -highlightwidth 4
 
     # Enable vertex selection with button 1; shift-click toggles
-    $_slate selector bind vertex -button 1
-    $_slate selector bind vertex -button 1 \
+    set selector [$_slate interactor Selector]
+    $selector bind vertex -button 1
+    $selector bind vertex -button 1 \
             -modifiers shift -toggle 1
 
     # Enable edge selection with button 1; shift-click toggles
-    $_slate selector bind edge -button 1
-    $_slate selector bind edge -button 1 \
+    $selector bind edge -button 1
+    $selector bind edge -button 1 \
             -modifiers shift -toggle 1
 
     # Create the interactor to move selected items
     set follower [$_slate interactor Follower]
-    $_slate selector delegate $follower vertex -button 1
-    $_slate selector delegate $follower vertex -button 1 \
+    $selector delegate $follower vertex -button 1
+    $selector delegate $follower vertex -button 1 \
             -modifiers shift
 
     # Now for some tricky stuff: we want the follower to send
@@ -217,12 +224,11 @@ body ::tycho::EditDFG::constructor {args} {
             -dragprefix "$this vertexdrag" \
             -releaseprefix "$this vertexrelease"
 
-    # More tricky stuff: the selector sends selection events
-    # to the model:
-    #$_slate selector configure \
-	#    -clearprefix "$this selection clear" \
-	#    -deselectprefix "$this selection remove" \
-	#    -selectprefix "$this selection add"
+    # More tricky stuff: the selector sends selection events here
+    $selector configure \
+            -clearprefix "$this select clear" \
+            -deselectprefix "$this selectremove" \
+            -selectprefix "$this select add"
 
     # Create a DragDropper to join terminals
     set dropper [$_slate interactor DragDropper]
@@ -239,7 +245,7 @@ body ::tycho::EditDFG::constructor {args} {
 	    -deactivatecommand "$this connectrelease"
 
     # Is this needed?
-    $_slate configure -exportselection 0
+    # $_slate configure -exportselection 0
 }
 
 ########################################################################
@@ -309,10 +315,11 @@ body ::tycho::EditDFG::connectbegin {x y} {
 body ::tycho::EditDFG::connectclick {id x y} {
     # First we make sure that we clear the selection
     # FIXME: Should this be an event?
-    $_layout notify data selection clear
+    $_layout notify data select clear
 
     # Remember the source item
     set _scratch(source) $id
+    set _scratch(target) ""
     set _scratch(line) ""
 }
 
@@ -363,10 +370,10 @@ body ::tycho::EditDFG::connectdrag {id x y} {
 # make a connection in the graph. If not, just delete the line,
 # since connection failed.
 #
-body ::tycho::EditDFG::connectrelease {ignore} {
+body ::tycho::EditDFG::connectrelease {args} {
     set line $_scratch(line)
     if { $_scratch(target) == "" } {
-	$_slate delete $line
+        $_slate delete $line
     } else {
 	# Get the vertices and ports being connected
 	set source [itemname $_scratch(source)]
@@ -530,6 +537,26 @@ body ::tycho::EditDFG::placeicon {iconlib iconname starname} {
 body ::tycho::EditDFG::redo {} {
     eval $_layout redo
     eval $_graph redo
+}
+
+########################################################################
+#### select
+#
+# Handle changes to the selection.
+#
+body ::tycho::EditDFG::select {mode args} {
+    puts "EditDFG::select $args"
+    switch -exact $mode {
+        "clear" {
+            $_slate select clear
+        }
+        "add" {
+            eval $_slate select add $args
+        }
+        "remove" {
+            eval $_slate select remove $args
+        }
+    }
 }
 
 ########################################################################
