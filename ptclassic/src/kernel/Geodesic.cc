@@ -104,7 +104,9 @@ PortHole* Geodesic :: setSourcePort (GenericPort& sp, int numDelays,
 	originatingPort = &sp.newConnection();
 	portHoleConnect();
 	numInitialParticles = numDelays;
-	initValues = initDelayValues;
+	// Keep a copy of the initDelayValues string, if nonzero,
+	// in case the original copy disappears.
+	initValues = initDelayValues?hashstring(initDelayValues):0;
 	return originatingPort;
 }
 
@@ -112,7 +114,9 @@ PortHole* Geodesic :: setSourcePort (GenericPort& sp, int numDelays,
 // 3/2/94 changed to add initDelayValues
 void Geodesic :: setDelay (int numDelays, const char* initDelayValues) {
 	numInitialParticles = numDelays;
-	initValues = initDelayValues;
+	// Keep a copy of the initDelayValues string, if nonzero,
+	// in case the original copy disappears.
+	initValues = initDelayValues?hashstring(initDelayValues):0;
 }
 
 PortHole* Geodesic :: setDestPort (GenericPort& dp) {
