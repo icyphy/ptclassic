@@ -2,7 +2,7 @@
 #define _SigHandle_h 1
 /****************************************************************************
 Version identification:
-@(#)SigHandle.h
+$Id$
 
 Author: Joel R. King
 
@@ -39,12 +39,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 typedef void (*SIG_PF)(int);
 #endif
 
-/****************************************************************************/
-
+// Function prototypes
 int setHandlers(SIG_PF sigHandler);
 void signalHandlerRelease(void);
 void signalHandlerDebug(int signo);
-
-/****************************************************************************/
+void abortHandling();
 
 #endif
