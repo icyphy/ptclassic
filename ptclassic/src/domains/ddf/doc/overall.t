@@ -123,7 +123,7 @@ routes either \fItrue\fR or \fIfalse\fR input port
 to the output port.  Therefore, the number of 
 .c Particle s
 required for the non-control input ports 
-(\fItrue\fR or \fRfalse\fR input port)
+(\fItrue\fR or \fIfalse\fR input port)
 is dependent on the control value.
 The
 .c Star s
@@ -133,7 +133,7 @@ in the second group has members called \fIwaitPort\fR and \fIwaitNum\fR.
 Then, the scheduler checks whether the input arc
 pointed by the \fIwaitPort\fR has as many
 .c Particle s
-as \fIwaitNum\fR to decide the runnability of the second group
+as \fIwaitNum\fR to decide the runnability of the
 .c Star .
 In the
 .c Select\ Star ,
@@ -590,6 +590,9 @@ from the outside, initiates the
 .c Scheduler
 of the inner domain, and sends the output data packets to the
 outer domain.
+The \fIgetStopTime()\fR method of this class will return the sum of the
+\fIcurrentTime\fR and the \fIschedulePeriod\fR properties of the 
+.c DDF\ Scheduler .
 .H2 "DDFtoUniversal EventHorizon
 .pp
 .IE "DDFtoUniversal"
@@ -599,9 +602,7 @@ to the paired
 of the other domain.  
 Since the \*(DO domain is an untimed domain, it sets the
 \fIcurrentTime\fR of the DDF domain equal to that of the other
-domain.  The \fIgetNextStamp()\fR method of this class
-returns the sum of the \fIcurrentTime\fR and the \fIschedulePeriod\fR
-of the \*(DO domain.
+domain. 
 .H2 "DDFfromUniversal EventHorizon
 .pp
 The
@@ -613,10 +614,5 @@ of the other domain and transfers them to the \*(DO domain.
 Since the \*(DO domain is untimed, the
 .c DDFfromUniversal
 totally ignore the timing information from the other domain. 
-If it is at an input port of a 
-.c Wormhole 
-and it has enough data packets,
-it sets the stopping condition for the inner \*(DO domain (\fIready()\fR 
-method).
-The stopping condition is a single "run" (iteration) of the
-.c DDF\ Scheduler .
+Therefore, it is not necessary to set the time stamps for this
+.c EventHorizon .
