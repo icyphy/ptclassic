@@ -214,7 +214,7 @@ StringList CGCStar::expandRef(const char* name, const char* offset)
     }
 
     // Expand PortHole reference with offset.
-    else if (port = (CGCPortHole*)genPortWithName(portName))
+    else if ( (port = (CGCPortHole*)genPortWithName(portName)) )
     {
 	DataType type = port->resolvedType();
 
