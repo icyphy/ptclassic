@@ -1,0 +1,23 @@
+.\" $Id$
+.H1 "Using the preprocessor"
+.pp
+The language permits many star definitions to be written in one file;
+processing the file results in one .cc file and one .h file for each
+class.  This is not recommended.
+.pp
+The recommended procedure is to write the definition for a star in
+domain XXX with name YYY in file XXXYYY.pl.  Then, running the command
+.(c
+        ptlang XXXYYY.pl
+.)c
+will produce the files XXXYYY.cc and XXXYYY.h, and makefiles can contain
+the default rules
+.(c
+        .pt.cc:
+                ptlang $<
+
+        .pt.h:
+                ptlang $<
+.)c     
+See the makefile in ~ptolemy/src/example or ~ptolemy/src/domains/sdf/stars
+for how this can be made to work "in context".

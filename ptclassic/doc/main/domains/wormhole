@@ -1,0 +1,62 @@
+.\" $Id$
+.H1 "Wormhole
+.pp
+The base
+.c Wormhole\ class
+is derived from 
+.c class\ Runnable 
+that is also the base class of 
+.c class\ Universe .
+.c class\ Runnable
+is characterized by pointers to a component
+.c Galaxy
+and a
+.c Scheduler .
+Like a
+.c Universe ,
+a 
+.c Wormhole
+can perform the scheduling actions on the component
+.c Galaxy.
+A
+.c Wormhole
+is different from a
+.c Universe
+in that it is not a self-contained object. Instead, it is triggered
+by other block to initiate the scheduling.
+.pp
+Each domain has a derived 
+.c Wormhole\ class .
+For example, the SDF domain has 
+.c class\ SDFWormhole .
+This domain-specific
+.c Wormhole
+is derived from not only the base
+.c Wormhole\ class
+but also the domain-specific star class,
+.c SDFStar .
+The multiple inheritance realizes the inherent nature of the
+.c Wormhole .
+First, the
+.c Wormhole
+behaves exactly like a
+.c Star
+from the outer domain (SDF) since it is derived from 
+.c SDFStar .
+Second, internally it can encapsulate an entire foreign domain
+with a separate 
+.c Galaxy
+and a separate
+.c Scheduler 
+since it is derived from the
+.c Wormhole
+base class.
+From the user point of view, a 
+.c Wormhole
+is merely a 
+.c Galaxy
+which contains 
+.c Star s
+of another domain ( refer to the manual, "\*(PT \fBPrimer\fR"
+for more information on programs with
+.c Wormhole s).

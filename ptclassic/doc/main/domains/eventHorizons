@@ -1,0 +1,235 @@
+.\" $Id$
+.H1 "EventHorizons
+.pp
+A
+.c Wormhole
+may have input and output
+.c PortHole s.
+The
+.c PortHole s
+of the
+.c Wormhole
+are called
+.c EventHorizon s
+that are derived from 
+.c class\ PortHole .
+Precisely speaking, one
+.c PortHole
+of a
+.c Wormhole
+consists of a pair of
+.c EventHorizon s
+: one corresponds to the outer domain, and the other corresponds to
+the inner domain.  For example, suppose a SDF domain has a 
+.c Wormhole
+(
+.c SDF\ Wormhole )
+which contains a DE domain.
+Then, an input port of the
+.c Wormhole
+comprises a
+.c SDFtoUniversal\ EventHorizon
+and a
+.c DEfromUniversal\ EventHorizon .
+The former
+.c EventHorizon
+is connected to the outer domain (to some
+.c SDFStar )
+and the latter is connected to the inner domain (to some
+.c DEStar ).
+Similarly, an output port of the
+.c Wormhole
+comprises a
+.c DEtoUniversal\ EventHorizon
+for inner connection and a 
+.c SDFfromUniversal\ EventHorizon
+for outer connection.
+In general, each domain has a pair of derived
+.c EventHorizon
+classes :
+.c (domain-name)toUniversal
+and
+.c (domain-name)fromUniversal .
+The
+.c (domain-name)toUniversal\ class
+receives data packets from its domain and converts them
+to a format compatible with the universal
+.c EventHorizon .
+The
+.c (domain-name)fromUniversal\ class
+converts the universally-formatted data packets to a format
+compatible to its domain.
+Note that the universal
+.c EventHorizon
+is not a physical but a logical object. 
+.pp
+Currently, the universal format of
+data packets are 
+.c Particle s
+of 
+.c int ,
+.c float ,
+and
+.c complex
+type.  For domains using these universal formats, the data conversion
+is not necessary.  Further research is in progress on the data format
+conversion. Now, let's look at what actions are performed in the
+.c EventHorizon s.
+.sp
+.H2 "ToEventHorizon Class
+.pp
+The
+.c ToEventHorizon\ class
+is the base class of all
+.c (domain-name)toUniversal s.
+The main action of this class
+is to get data packets from its domain and send them
+to the
+.c (domain-name)fromUniversal
+of another domain, with data format conversion if necessary.
+Another responsibility of this class is to maintain the timing
+relations between two domains.  If it belongs to an
+input port of a
+.c Wormhole ,
+it copies the global time of the outer domain into the inner
+domain (the timing information of a domain is recorded in the
+.c Scheduler\ class
+of the domain). If it belongs to an output port of a
+.c Wormhole ,
+it gets the time from the inner domain. The time may be referenced
+by the outer domain to check when the data packets from the
+.c Wormhole
+are available.
+.sp
+.H2 "FromEventHorizon Class
+.pp
+The
+.c FromEventHorizon\ class
+is the base class of all
+.c (domain-name)fromUniversal s.
+The main function of this class is reciprocal to the
+.c ToEventHorizon\ class.
+It gets data packets from 
+.c (domain-name)toUniversal
+of another domain and send them to its own domain.
+Data format conversion will take place here if necessary.
+If this class is a part of an input port of the
+.c Wormhole ,
+it takes another responsibility to set up the stopping condition
+of the inner
+.c Scheduler .
+For example, a
+.c DEfromUniversal\ EventHorizon
+has to decide until when the internal
+.c DEScheduler 
+is running.
+.pp
+Besides the main functionality, 
+some domains may require more additional functions from this class.
+In the DE domain, this class puts the data packets into the
+global 
+.c Event\ Queue
+(refer to the "\fBDE Domain\fR in \*(PT" document).
+Also, we had better have a mechanism to check
+whether this port is ready for the inner domain to be fired (\fIready()\fR).
+For example, if the inner domain is SDF and the outer
+domain is DE, the inner domain may not be executed until
+all input ports of the
+.c DEWormhole
+have enough data packets. For that purpose, the \fIgo()\fR method
+of the
+.c Wormhole
+checks up all 
+.c FromEventHorizon s
+of the input ports whether they are ready.
+For other domains, the \fIready()\fR method can be redefined for
+more elaborate synchronization. It is worth noting that it
+is always possible to define a new domain-specific method
+in the
+.c EventHorizon\ class es.
+.sp
+.sh 1 "Timing Relation Between Domains
+.pp
+\*(PT can support an effectively unlimited number of different
+domains since adding a new domain does not affect any existing
+implementation of other domains as well as kernels.
+The domain interface should take care of timing relations between
+the outer and inner domains. It is the most challenging task of the
+design of
+.c Wormhole s
+and their interconnection mechanism.  Our approach is to
+classify the domains\** into two groups : \fItimed\fR, and
+\fIuntimed\fR. The \fItimed\fR domain is such that the scheduler
+of the domain requires the timing relations among data packets
+over the domain.  On the other hand, the \fIuntimed\fR domain
+requires only the local ordering information of data packets.
+.(f
+\**refer to the "\fBPtolemy Primer\fR" for more information on the
+domains supported by \fBPtolemy\fR.
+.)f
+Thus, the resulting taxonomy is :
+.sp
+.nf
+\fItimed\fR : DE, THOR, etc
+\fIuntimed\fR : SDF, DDF, CAPSIM, etc
+.fi
+.sp
+.pp
+One possible solution is to add timing concept to the untimed domains.
+But it should be prohibited simply because it requires a lot of overhead.
+Instead, we make an assumption that the untimed domain takes zero
+time to perform the scheduling action. 
+This assumption is persuading since it seems not only awkward but also
+infeasible to assign the execution delay to the untimed domain.
+The possible counter-argument is that it doesn't fit the real situation.
+Here is our response : the execution delay of the untimed domain
+is modeled with a 
+.c Delay\ Star
+in the timed domain if necessary. The
+.c Delay\ Star
+will be attached to the end of the 
+.c Wormhole
+that contains the untimed domain whenever we need the execution delay
+of the untimed domain.  The biggest advantage of our approach
+is that the implementation is simple.
+.pp
+If a untimed domain contains a timed domain, it is necessary to specify
+the repetition period of the scheduling action in the untimed outer domain.
+By default, the repetition period is set so large that the timed
+domain would not be interrupted before it is deadlocked (or no 
+.c Star
+is runnable).  A user can change the value of the
+repetition period by defining a 
+.c FloatState
+(\fIschedulePeriod\fR) in the outermost galaxy of the untimed domain.
+In the interpreter command, the following line does it :
+.sp
+.(c
+(state schedulePeriod float "10.0")
+.)c
+.sp
+More difficult situation arises when a timed domain contains a untimed
+domain which by turns contains another timed domain.  
+The principle for this situation is that any inner domain
+may not be ahead of the outer domain in time.  Except the very first
+run, the composite system will work correctly.  The proof of this
+is beyond this document.  Further research is in process on this topic.
+.sp
+.sh 1 "Status
+.pp
+Currently, we have four domains in \*(PT : SDF, DE, DDF, CAPSIM.
+These domains can be mixed arbitrarily to compose a complicated
+system.  Any 
+.c Wormhole
+may contain other
+.c Wormhole s
+to make a hierarchical structure.
+Since they use nothing but the universal\**
+.c Particle s
+for now, no example of data-format conversion is apparent.
+.(f
+\**Sure, they may use other types of \fBParticles\fR.
+.)f
+
+
+

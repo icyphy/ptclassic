@@ -1,0 +1,15 @@
+.\" $Id$
+.sz 60
+.(b C
+.sp 0.5i
+.sz 200
+\f61
+.sz 60
+.sp 1i
+\*(PT
+.)b
+.sp 2i
+.sz 14
+.(b C
+\f6This section describes the \*(PT kernel and user interfaces.
+.)b

@@ -1,0 +1,13 @@
+.\" $Id$
+.ll 6.5i
+.ps 25
+\f6INDEX
+.sp
+.hl
+.ps 9
+.sp 0.3i
+.nr sp 9
+.nr pp 9
+.2c 2n 3
+.lp
+.ta 2.0iR

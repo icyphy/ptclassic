@@ -1,0 +1,39 @@
+.\" $Id$
+.H1 "Introduction
+.pp
+One of the key objective of the \*(PT design environment
+is to support coexistence and interaction of diverse
+computational models, called \fIdomains\fR.
+For instance, a dataflow domain can exist within a discrete-event
+domain, so that for example
+a signal processing subsystem can be cleanly incorporated
+within a communication network simulation.
+In the \fBPtolemaic\fR cosmology, elementary operators are called 
+.c Star s,
+higher level functions are called 
+.c Galaxy s,
+and an entire
+application is called a 
+.c Universe .
+A \fBPtolemaic\fR domain is implemented as a C++ object called a
+.c Wormhole .
+A 
+.c Wormhole 
+is derived from the 
+.c class\ Star , 
+and behaves externally like any other
+.c Star .  
+Internally, however, it encapsulates an entire foreign
+domain invisible from the outside domain.
+The internal computational model can be totally different
+from the external model, in that the specification language,
+semantics, and scheduling paradigm can be totally different.
+.pp
+The interface
+between different domains is accomplished by first converting data packets
+to a format compatible with the
+universal 
+.c EventHorizon ,
+and then converting to a format compatible
+with the second domain.
+This document illustrates the detailed mechanism of the domain interface.

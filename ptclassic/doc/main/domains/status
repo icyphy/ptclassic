@@ -1,0 +1,16 @@
+.\" $Id$
+.H1 "Status
+.pp
+Currently, we have four domains in \*(PT : SDF, DE, DDF, CAPSIM.
+These domains can be mixed arbitrarily to compose a complicated
+system.  Any 
+.c Wormhole
+may contain other
+.c Wormhole s
+to make a hierarchical structure.
+Since they use nothing but the universal\**
+.c Particle s
+for now, no example of data-format conversion is apparent.
+.(f
+\**Sure, they may use other types of \fBParticles\fR.
+.)f

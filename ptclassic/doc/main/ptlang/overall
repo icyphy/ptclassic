@@ -1,0 +1,20 @@
+.\" $Id$
+.\"
+.\" Use printsec in ~ptolemy/doc/bin or Makefiles in ~ptolemy/doc
+.\" to print this out.  To get this section only, as a standalone document,
+.\"     % cd ~ptolemy/doc/sect1/ptlang
+.\"     % make print
+.\"
+.\" If you edit this document, PLEASE BE SURE TO MANUALLY CHANGE THE DATE
+.\" BELOW, to indicate a new version.  Be sure you have properly checked
+.\" out this file with SCCS (the version number should not be a number below):
+.VR 0.$Revision$ "October 10, 1990"
+.TI "The \*(PT Preprocessor Language"
+.AU
+Joseph Buck
+.AE
+.so introduction
+.so sogItems
+.so sItems
+.so gItems
+.so using
