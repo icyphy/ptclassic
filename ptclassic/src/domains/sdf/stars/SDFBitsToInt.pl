@@ -3,7 +3,7 @@ defstar {
 	domain { SDF }
 	desc {
 The integer input sequence is interpreted as a bit stream in which any nonzero
-value is interpreted as to mean a ÒoneÓ bit.
+value is interpreted as to mean a "one" bit.
 This star consumes "nBits" successive bits from the input,
 packs them into an integer, and outputs the resulting integer.
 The first received bit becomes the most significant bit of the output.
