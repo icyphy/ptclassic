@@ -42,8 +42,12 @@ update.fmb:
 	chmod g+w $@
 
 # Framemaker files in the manual.
-# Be _sure_ to exclude cgc.doc cp.doc, because these are dummy files
-DOCS=bdf.doc cg.doc cg56.doc cg96.doc ddf.doc de.doc documents.doc domains.doc filter.doc hof.doc installation.doc mq.doc obtainPtolemy.doc overview.doc pigi.doc ptcl.doc ptglossary.doc references.doc sdf.doc silage.doc sproc.doc thor.doc title.doc troubleshooting.doc users_manIX.doc users_manLOM.doc users_manTOC.doc vem.doc x.doc xgraph.doc
+
+DOCS=bdf.doc cg.doc cgc.doc cg56.doc ddf.doc de.doc documents.doc \
+	domains.doc filter.doc hof.doc installation.doc obtainPtolemy.doc \
+	overview.doc pigi.doc pn.doc ptcl.doc ptglossary.doc references.doc \
+	sharedlib.doc sdf.doc title.doc troubleshooting.doc users_manIX.doc \
+	users_manLOM.doc users_manTOC.doc vem.doc vhdl.doc x.doc xgraph.doc
 
 # Script to convert Frame files to Postscript
 FMPRINT2PS =	$(PTOLEMY)/doc/bin/fmprint2ps
@@ -89,7 +93,7 @@ fm2ps: update_book
 	echo "SaveAs t troubleshooting.doc /tmp/troubleshooting.txt" >> $@
 	echo "Quit" >> $@ 
 
-VERSION=0.5.2
+VERSION=0.6
 OBTAINING_PTOLEMY=OBTAINING_PTOLEMY_$(VERSION)
 OBTAINING_PTOLEMY: $(OBTAINING_PTOLEMY) 
 $(OBTAINING_PTOLEMY): /tmp/obtainPtolemy.txt
@@ -225,9 +229,9 @@ obtainPtolemy-fixed.MIF: obtainPtolemy.MIF
 # >
 
 update_local_www:
-	cp wwwtocs/users_man_0.html wmwork/www
+	#cp wwwtocs/users_man_0.html wmwork/www
 	cp wwwtocs/users_man_1.html wmwork/www
-	cp wwwtocs/users_man_2.html wmwork/www
+	#cp wwwtocs/users_man_2.html wmwork/www
 
 
 .PHONY:	obtainPtolemy.html installation.html troubleshooting.html \
@@ -293,6 +297,7 @@ appendixA.html:
 	@echo '<DT><A HREF="obtainPtolemy-fixed_9.html#HEADING8"><B>A.3  </B> - Ptolemy Newsgroup</A><DD>' >> $@
 	@echo '<DT><A HREF="installation_2.html#HEADING2"><B>A.4  </B> - Installation</A><DD>' >> $@
 	@echo '<DT><A HREF="troubleshooting_2.html#HEADING2"><B>A.5  </B> - Troubleshooting </A><DD>' >> $@
+	@echo '<DT><A HREF="troubleshooting_35.html#HEADING2"><B>A.6  </B> - Known Bugs</A><DD>' >> $@
 	@echo '</DL>' >> $@
 	@echo '' >> $@
 	@echo '<HR>' >> $@
@@ -301,14 +306,6 @@ appendixA.html:
 	@echo '</BODY>' >> $@
 	@echo '</HTML>' >> $@
 	@echo "Done creating new $@"
-
-# Remove users_man_3.html -> users_man_485.html
-# Note that if the docs change, then these number will change
-fix_www:
-	csh -c "rm wmwork/www/users_man_[1-9]?.html wmwork/www/users_man_[123]??.html wmwork/www/users_man_4[0-7]?.html wmwork/www/users_man_48[0-5].html"
-
-update_ftp_www:
-	(cd wmwork/www; tar -cf - .) | rsh ptolemy "cd $(USERS_MAN_ARCHIVEDIR); tar -xpf -"
 
 mif_links:
 	for filename in $(MIFS); \
