@@ -86,6 +86,7 @@ RPCFunction CommandArray[] = {
     {RpcRun, "Exec", "run", "R", 0},
     {RpcReRun, "Exec", "re-run", "!", 0},
     {RpcCompileFacet, "Exec", "compile-facet"},
+    {RpcDisplaySchedule, "Exec", "display-schedule"},
     {RpcMkSchemIcon, "Extend", "make-schem-icon","@",0},
     {RpcMkStar, "Extend", "make-star","*",0},
     {RpcLoadStar, "Extend", "load-star", "L", 0},
