@@ -15,7 +15,7 @@ limitation of liability, and disclaimer of warranty provisions.
     explanation {
 .PP
 This star is a generic star to provide input/ouput for the 560001's
-SSI port (Synchronous Serial Interface).
+SSI (Synchronous Serial Interface) port.
 .Ir "SSI port (Motorola DSP56001)"
 .Ir "synchronous serial interface (Motorola DSP56001)"
 .Ir "serial interface, synchronous (Motorola DSP56001)"
@@ -39,7 +39,7 @@ sample rates on input and output.
 .PP
 This star is commonly used as a base class for the Ariel Proport A/D and D/A
 .Ir "Ariel Proport"
-.Ir "Proport"
+.Ir "Proport, Ariel"
 converter and the modified Magnavox CD player.
 .Ir "Magnavox CD player"
 .Ir "CD player, Magnavox"
@@ -65,7 +65,8 @@ and one of the following error codes will be left in register y0:
 An interrupt occurred and the receive buffer was full.
 .IP "\fB123063\fP"
 An interrupt occurred and the transmit buffer was empty.
-.SH INTERUPTS: QUEUES
+.UH "INTERUPTS: QUEUES:"
+.pp
 When using interupt based code, the SSI port generates interupts
 that are handled by an interrupt service routine (ISR).
 .Id "interrupt buffers"
@@ -80,7 +81,8 @@ a valid sample) or is empty.
 If a slot has valid data in it, bit #0 is cleared, otherwise it is set.
 There are two approaches to managing the
 memory and syncronization of these queues; these are described below.
-.SH INTERUPTS: DUAL-BUFFER QUEUEING
+.UH "INTERUPTS: DUAL-BUFFER QUEUEING:"
+.pp
 Two buffers are maintained:
 .Id "dual-buffer queuing"
 .Id "queuing, dual-buffer"
@@ -99,7 +101,8 @@ This star was originally written to use dual buffers, but has never
 (and still doesn't) support differing recv and xmit rates.  The code
 preserves this style for future use, but in general it should not be used,
 because it is less efficient than symmetric queuing, described below.
-.SH SYMETRIC QUEUEING
+.UH "SYMMETRIC QUEUEING:"
+.pp
 .Id "symmetric queuing"
 .Id "queuing, symmetric"
 Symetric buffer queueing may be used only when the recv and xmit samples rates
@@ -118,7 +121,8 @@ the recv and xmit buffers together with an xmit slot following each recv slot.
 The only difficulty would be holding off semaphoring the recv slot in
 the star code: this would require using an extra register to preserve
 the address until after the xmit had been taken care of.
-.SH BUGS
+.UH BUGS:
+.pp
 The bulk of the this star should really be implemented as a
 real-time, memory mapped I/O port star,
 with this star just providing the specific information about the SSI port.

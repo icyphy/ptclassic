@@ -37,11 +37,12 @@ If a real-time violation occurs and the parameter
 \fIabortOnRealtimeError\fP is set to "yes", the star
 will abort execution
 with one of the following hexadecimal error codes in register y0:
-.IP "\fB123052\fP" 0.7i
+.ip "\fB123052\fP"
 An interrupt occurred and the receive buffer was full.
-.IP "\fB123053\fP" 0.7i
+.ip "\fB123053\fP"
 An interrupt occurred and the transmit buffer was empty.
-.SH BUGS
+.UH BUGS:
+.pp
 The \fIabortOnRealtimeError\fP parameter is ignored when
 interrupt-based code is generated.
 	}

@@ -26,7 +26,8 @@ random variables.
 .PP
 The parameters \fIseed\fR and \fImultiplier\fR control the generation of the
 random number. 
-.SH BUGS
+.UH BUGS:
+.pp
 This needs to be filled in.  For now, there is no seed and multiplier
 parameter; the default seed parameter from Gabriel is always used.
 We'd really need to use a 48-bit integer to get the same functionality.
@@ -40,8 +41,8 @@ The loop that calculates the series of uniform variables should really
 be pipelined better and should keep the accum value in register instead
 of flushing and reloading to/from memory every iteration.
 .LP
-I believe incorrect code will be generated if the number of uniform
-vars used is less than 2 or 3.
+Incorrect code will probably be generated generated if the number of uniform
+variables used is less than 2 or 3.
 	}
 
         output {

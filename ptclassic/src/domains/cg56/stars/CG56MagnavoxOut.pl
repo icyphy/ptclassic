@@ -35,7 +35,8 @@ will abort execution
 with one of the following hexadecimal error codes in register y0:
 .IP "\fB123051\fP" 0.7i
 An interrupt occurred and the transmit buffer was empty.
-.SH BUGS
+.UH BUGS:
+.pp
 The \fIabortOnRealtimeError\fP parameter is ignored when
 interrupt-based code is generated.
 	}

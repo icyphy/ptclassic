@@ -22,22 +22,22 @@ limitation of liability, and disclaimer of warranty provisions.
     location { SDF main library }
     explanation {
 .Id "multiplex"
-.SH IMPLEMENTATION
+.UH IMPLEMENTATION:
+.pp
 There are potentially very many special cases that could be handled
 for increased efficiency: looped vs non-looped, circular vs linear,
-and scalors vs vectors (blockSize), 
+and scalars vs vectors (blockSize > 1), 
 uniform inputs vs non-uniform inputs (port.bufSize()).
-.LP
 The current implementation handles only some of these cases.  Use this
 star at your own risk.
 .LP
 At compile time the star constructs a table of pointers to each of the
 input blocks.  The \fIcontrol\fP input is used to index this table,
-yielding a point to the appropriate input block for the firing.  This
+yielding a pointer to the appropriate input block for the firing.  This
 implementation assumes that all of its input ports reside in X memory.
 .LP
 Also, in a non-looped schedule, the location of the inputs will change
-on each schedule-firing.  This requires a different table for each firing.
+on each schedule firing.  This requires a different table for each firing.
     }
     inmulti {
         name {input}

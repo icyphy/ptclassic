@@ -19,7 +19,8 @@ some host-specific interface to this star.
 .LP
 The \fIlabel\fP parameter is not directly used by the star; it is for the
 convenience of derived stars.
-.SH IMPLEMENTATION
+.UH IMPLEMENTATION:
+.pp
 Since we may be followed by an up sampling operation, there may be
 an arbitrary number of memory locations cooresponding to our output.
 Since we can't expect the host to update all of these values, we
