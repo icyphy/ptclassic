@@ -27,8 +27,11 @@
 
 # This file is used by tycho, see $PTOLEMY/mk/topdomain.mk for the file
 # use by ptolemy.
-# Date of creation: 6/15/92.
-# Written by: J. Buck
+
+# Based on topdomain.mk by Joe Buck.  The differences between this file
+# and topdomain.mk:
+# 	The VPATH is different
+#	This file does not use make.template
 
 MAKEVARS = "PTARCH=$(PTARCH)"
 
@@ -37,7 +40,7 @@ makefiles:
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
 		  echo Updating makefile in domains/$(ME)/$$x ; \
-		  $(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
+		  $(MAKE) -f $(MFLAGS) $(MAKEVARS) \
 			VPATH=../../../tycho/domains/$(ME)/$$x $@ ; \
 		) \
 	    fi ; \
