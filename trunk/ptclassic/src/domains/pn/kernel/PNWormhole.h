@@ -67,6 +67,8 @@ public:
     // Scheduler for the inner domain.
     /*virtual*/ Scheduler* scheduler() const;
 
+    /*virtual*/ void begin() { Wormhole::begin(); }
+
     // End of simulation.
     /*virtual*/ void wrapup();
 
