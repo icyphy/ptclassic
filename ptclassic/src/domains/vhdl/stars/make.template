@@ -37,6 +37,8 @@ LIB=libvhdlstars.$(LIBSUFFIX)
 PL_SRCS = \
  VHDLBlackHole.pl \
  VHDLConst.pl \
+ VHDLConstInt.pl \
+ VHDLImpulse.pl \
  VHDLFork.pl \
  VHDLGain.pl \
  VHDLAdd.pl \
