@@ -27,7 +27,7 @@ const Attribute ANY(0,0);
 
 CG56Memory :: CG56Memory(unsigned x_addr, unsigned x_len, unsigned y_addr,
 			 unsigned y_len) :
-	DualMemory("x","y",A_MEMORY,ANY,A_XMEM,x_addr,x_len,y_addr,y_len)
+	DualMemory("x",A_XMEM,ANY,x_addr,x_len,"y",A_YMEM,ANY,y_addr,y_len)
 {}
 
 CG56Target :: CG56Target(const char* nam, const char* desc,
@@ -37,6 +37,14 @@ CG56Target :: CG56Target(const char* nam, const char* desc,
 	AsmTarget(nam,desc,"CG56Star",
 		  *new CG56Memory(x_addr,x_len,y_addr,y_len))
 {
+}
+
+void CG56Target :: headerCode () {
+        StringList code = "; generated code for target ";
+        code += readFullName();
+        code += "\n";
+	code += mem.printMemMap(";","");
+        addCode(code);
 }
 
 CG56Target :: ~CG56Target () {
