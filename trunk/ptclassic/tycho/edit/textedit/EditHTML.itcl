@@ -31,33 +31,82 @@
 #######################################################################
 
 #######################################################################
+#### options
+# Define colors for the HTML context-sensitive editor. These are done
+# as options so that they can be overridden by the user. Other colors
+# that work reasonably well are: forestGreen, chocolate3, DarkOrange,
+# coral, OrangeRed, DeepPink, maroon, magenta, and DarkOrchid.
+#
+# FIXME: Unfortunately, itcl appears to require that all options
+# from the base class be repeated here with the new class name.
+# Otherwise, they are not recognized.
+option add *EditHTML.textWidth 80 widgetDefault
+option add *EditHTML.textHeight 40 widgetDefault
+option add *EditHTML.parenColor [ptkColor lightskyblue white] widgetDefault
+option add *EditHTML.targetColor [ptkColor lightskyblue white] widgetDefault
+option add *EditHTML.fillMaxLineLength 70 widgetDefault
+option add *EditHTML.textBackground \
+	[ptkColor antiqueWhite white] widgetDefault
+option add *EditHTML.textfont [.tychoFonts defaultFont fixed]
+option add *EditHTML.relief raised widgetDefault
+option add *EditHTML.selectColor [ptkColor yellow white] widgetDefault
+
+# new options
+option add *EditHTML.commandColor [ptkColor maroon black] widgetDefault
+option add *EditHTML.pointerColor [ptkColor blue black] widgetDefault
+option add *EditHTML.destColor [ptkColor forestGreen black] widgetDefault
+
+
+#######################################################################
 #### EditHTML
-# This class defines a window containing an EditHTMLText widget, which
-# provides an emacs-like editor specialized for editing HTML files.
+# This class defines a text widget with an emacs-like editor with some
+# context-specific features for editing HTML files. It tags and colors
+# HTML statements enclosed by angle brackets, and makes hyperlinks live.
+# It also provides a command for checking hyperlinks.
 #
 class ::tycho::EditHTML {
     inherit ::tycho::Edit
 
-    # Evaluate the HTML.
+    constructor {args} {}
+    destructor {}
+
+    ##########################################################################
+    ####                         public methods                           ####
+
+    # Check hyperlinks for validity.
+    method checkLinks {}
+
+    # Execute the HTML and display.
     method evaluate {}
 
     # Open a help window.
     method help {}
 
-    constructor {args} {}
-    destructor {}
+    # Jump to the link under the "current" mark, if any.
+    method jump {}
 
-    ###############################################################
-    ####                  protected methods                    ####
+    # Color the HTML statements in a region.
+    method parseNow {start stop}
 
-    # Return the name of the type of text widget to use (EditHTMLText).
-    protected method textWidget {} {return ::tycho::EditHTMLText}
+    # Find a name definition.
+    method seePoint {point}
+
+    # Returns a list of tags to use when checking the spelling.
+    method spellCheckTags {} {return {text}}
+
+    ####################################################################
+    ####                  protected methods and variables           ####
+
+    # Fix the link between start and end, which has error indicated by err.
+    protected method fixLink {link start end err}
+
+    # Given an HTML anchor, return the filename and point within the file.
+    protected method parseLink {dest}
 }
 
 ###################################################################
 #
 body ::tycho::EditHTML::constructor {args} {
-    
     eval itk_initialize $args
 
     # Add to the format menu commands to comment and uncomment
@@ -71,6 +120,83 @@ body ::tycho::EditHTML::constructor {args} {
         
     addMenuItem "Check Links" Edit -underline 6 \
 	    -command "$this component text busy checkLinks"
+
+}
+
+#####################################################################
+#### checkLinks
+# Check hyperlinks for validity.
+#
+body ::tycho::EditHTML::checkLinks {} {
+    # Clear marks from previous checking
+    $itk_component(text) tag delete badlink
+
+    # Have to parse first, since we use the tags.
+    # Note that cannot allow the parsing to be deferred.
+    parseNow 1.0 end
+    set next 1.0
+    set even 0
+    set ok 1
+    while {[set point [$itk_component(text) tag nextrange pointer $next]] \
+	    != {}} {
+	set start [lindex $point 0]
+	set end [lindex $point 1]
+	set next $end
+	set dest [$itk_component(text) get $start $end]
+	set ret [parseLink $dest]
+	if {$ret == {}} {
+	    set ok 0
+	    if {[fixLink $dest $start $end {Malformed hyperlink}] == {}} {
+		break
+	    }
+	} {
+	    set filename [lindex $ret 0]
+	    set name [lindex $ret 1]
+	    set nameexp "<\[ \t\]*a\[ \t\]+name\[ \t\]*=\[ \t\]*\"?$name\"?>"
+	    if {$filename != {}} {
+		if {![file exists $filename]} {
+		    set ok 0
+		    if {[fixLink $dest $start $end {Non-existant file}] == {}} {
+			break
+		    }
+		    continue
+		} elseif {![file readable $filename]} {
+		    set ok 0
+		    if {[fixLink $dest $start $end {Non-readable file}] == {}} {
+			break
+		    }
+		    continue
+		}
+		if {$name != {}} {
+		    # Check that name exists in the remote file.
+		    set fid [open $filename]
+		    set contents [read $fid]
+		    close $fid
+		    if {![regexp -nocase $nameexp $contents]} {
+			set ok 0
+			if {[fixLink $dest $start $end {Bad name after #}] \
+				== {}} {
+			    break
+			}
+		    }
+		}
+	    } elseif {$name != {}} {
+		# Check that name exists in the local file
+		if {[$itk_component(text) search -nocase -regexp $nameexp 1.0] \
+			== {}} {
+		    set ok 0
+		    if {[fixLink $dest $start $end {Bad name after #}] == {}} {
+			break
+		    }
+		}
+	    }
+	}
+    }
+    if {$ok} {
+	::tycho::inform "Hyperlinks appear to be OK"
+    } {
+	::tycho::inform "Done checking hyperlinks"
+    }
 }
 
 #####################################################################
@@ -89,4 +215,197 @@ body ::tycho::EditHTML::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
 	    $TYCHO/editors/textedit/doc/usersGuides/EditHTMLHelp.html
+}
+
+#####################################################################
+#### jump
+# Jump to the link under the "current" mark, if any.
+#
+body ::tycho::EditHTML::jump {} {
+    set dest [getTaggedText pointer]
+    if {$dest != {}} {
+	set ret [parseLink $dest]
+	if {$ret != {}} {
+	    set filename [lindex $ret 0]
+	    set name [lindex $ret 1]
+	    if {$filename == {}} {
+		seePoint $name
+	    } {
+		hyperJump $filename $name
+	    }
+	}
+    }    
+}
+
+#####################################################################
+#### parseNow
+# Tag and color HTML commands in the specified range.
+#
+body ::tycho::EditHTML::parseNow {start stop} {
+
+    set text $itk_component(text)
+
+    # Remove tags first, if necessary
+    $text tag remove command $start $stop
+    $text tag remove text $start $stop
+    $text tag remove pointer $start $stop
+    $text tag remove dest $start $stop
+    
+    # Scan the text for HTML commands.
+    set upto $start
+    while {[set ret \
+	    [$text search -count length -regexp {\<[^>]+\>} \
+	    $upto $stop]] != {}} {
+	$text tag add text $upto $ret
+	$text tag add command $ret "$ret + $length char"
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $upto >= end] {break}
+	set upto [$text index "$ret + $length char"]
+    }
+    $text tag add text $upto $stop
+    
+    # Set the visual characteristics of the tagged commands
+    $text tag configure command -foreground \
+	    [option get $itk_component(hull) commandColor EditHTML]
+
+    # Scan the text for hypertext pointers.
+    set upto $start
+    while {[set upto \
+	    [$text search -count length -nocase \
+	    -regexp {\<a[ \t]+href[ \t]*=[ \t]*[^>]+\>} \
+	    $upto $stop]] != {}} {
+	$text tag add pointer $upto "$upto + $length char"
+	set upto [$text index "$upto + $length char"]
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $upto >= end] {break}
+    }
+    
+    # Set the visual characteristics of the tagged commands
+    $text tag configure pointer -foreground \
+	    [option get $itk_component(hull) pointerColor EditHTML]
+
+    # for testing
+    # $text tag configure text -foreground red
+
+    $text tag bind pointer <Double-Button-1> "$this jump"
+
+    # Scan the text for hypertext destinations.
+    set upto $start
+    while {[set upto \
+	    [$text search -count length -nocase \
+	    -regexp {\<a[ \t]+name[ \t]*=[ \t]*[^>]+\>} \
+	    $upto $stop]] != {}} {
+	$text tag add dest $upto "$upto + $length char"
+	set upto [$text index "$upto + $length char"]
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $upto >= end] {break}
+    }
+    
+    # Set the visual characteristics of the tagged commands
+    $text tag configure dest -foreground \
+	    [option get $itk_component(hull) destColor EditHTML]
+}
+
+#####################################################################
+#### seePoint
+# Find a point within the file, center in the
+# visible part of the text window, and briefly highlight it.
+# The point can have any of three forms:
+# <pre>
+#    {line <i>linenumber</i>}
+#    {range <i>startindex endindex</i>}
+#    <i>name</i>
+# <pre>
+# where in the latter form, <i>name</i> should be a named
+# anchor within the HTML file.
+#
+body ::tycho::EditHTML::seePoint {point} {
+    if {([llength $point] == 2 && [lindex $point 0] == {line}) || \
+            ([llength $point] == 3 && [lindex $point 0] == {range})} {
+        Edit::seePoint $point
+    } {
+        # Edit the pattern to identify the named anchor.
+        Edit::seePoint "name\[ \t\]*=\[ \t\]*\"?$point\"?"
+    }
+}
+
+#####################################################################
+#####################################################################
+#####################################################################
+####                    protected methods                        ####
+
+#####################################################################
+#### fixLink
+# Fix the link between start and end, which has error indicated by err.
+# The user is queried for a replacement.  The first argument is the
+# original text of the bad link.  The second is the start position, the
+# third is the end position, and the final argument is a message indicating
+# what is wrong with the link.  If the user does not cancel, the link
+# will be replaced with an edited value.  Return the replacement string
+# if there is one, or the null string if the user cancels.
+#
+body ::tycho::EditHTML::fixLink {link start end err} {
+
+    $itk_component(text) tag add badlink $start $end
+    $itk_component(text) see $start
+
+    # Set up reverse video for the bad match.
+    # First lower the priority of the tag so the selection is still visible
+    # as normal.
+    $itk_component(text) tag raise sel badlink
+    $itk_component(text) tag configure badlink \
+	    -background [option get $itk_component(hull) \
+	    targetColor EditHTML]
+
+    set replacement [::tycho::DialogWindow::newModal EntryQuery \
+	    [::tycho::autoName .entry] \
+	    -bitmap questhead \
+	    -text "$err: Make corrections." \
+	    -queries [list [list correction {} $link]] \
+	    -entrywidth 80 \
+	    -geometry +0+0]
+
+    set replacement [lindex [lindex $replacement 0] 1]
+
+    if {$replacement != {} && $replacement != $link} {
+	deleteRange $start $end
+	insertString $start $replacement
+	$itk_component(text) tag add pointer $start \
+		"$start +[string length $replacement] chars"
+    }
+    return $replacement
+}
+
+#####################################################################
+#### parseLink
+# Given an HTML anchor, return a two-element list with a fully
+# expanded filename (which could be based on the location of the
+# current file we are displaying) and a point within the file.
+# It is possible for either the filename or the point within the
+# file to be an empty string, meaning that they were not specified.
+# If the parsing fails, an empty string is returned rather than a
+# two-element list.
+# FIXME: This will not work unless the parent widget is created
+# at the global scope.
+#
+body ::tycho::EditHTML::parseLink {dest} {
+    if [regexp -nocase \
+	    {\<a[ \t]+href[ \t]*=[ \t]*\"?(file:)?([^>#\"]*)#?([^>\"]*)\"?\>} \
+	    $dest dummy1 dummy2 filename name] {
+	# If the filename is not absolute, use the directory
+	# of the current file.  This only works if we are inside
+	# a file object.
+	if {$filename != {} && ![string match /* $filename] && \
+            ![string match "\$*" $filename] && ![string match "~*" $filename]} {
+	    set tl [winfo toplevel $itk_component(hull)]
+	    if {[uplevel #0 info objects $tl] != {} && \
+		    [$tl isa ::tycho::File]} {
+		set filename [file dirname [$tl filename]]/$filename
+	    }
+            set filename [::tycho::expandPath $filename]
+	}
+	return [list $filename $name]
+    } {
+	return {}
+    }
 }

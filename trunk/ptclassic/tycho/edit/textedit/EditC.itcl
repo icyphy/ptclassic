@@ -31,11 +31,45 @@
 #######################################################################
 
 #######################################################################
+# FIXME: To do
+#
+# - This editor only handles indenting and comments.  Needs much more.
+# 
+
+#######################################################################
+#### options
+#
+# NOTE: Unfortunately, itcl appears to require that all options
+# from the base class be repeated here with the new class name.
+# Otherwise, they are not recognized.
+option add *EditC.textWidth 80 widgetDefault
+option add *EditC.textHeight 40 widgetDefault
+option add *EditC.parenColor [ptkColor lightskyblue white] widgetDefault
+option add *EditC.targetColor [ptkColor lightskyblue white] widgetDefault
+option add *EditC.fillMaxLineLength 70 widgetDefault
+option add *EditC.textBackground \
+	[ptkColor antiqueWhite white] widgetDefault
+option add *EditC.textfont [.tychoFonts defaultFont fixed]
+option add *EditC.relief raised widgetDefault
+option add *EditC.selectColor [ptkColor yellow white] widgetDefault
+option add *EditC.commentColor [ptkColor firebrick black] widgetDefault
+option add *EditC.fixmeColor [ptkColor red black] widgetDefault
+option add *EditC.stringColor [ptkColor gray50 black] widgetDefault
+
+# new options
+
+option add *EditC.procColor [ptkColor blue black] widgetDefault
+
+
+#######################################################################
 #### EditC
-# This class defines a window that provides an emacs-like editor
-# specialized for editing C files. It colorizes the code, identifying
-# comments and procedure definitions, automatically indents the code,
-# and fills blocks of comments.
+# This class defines a text widget with an emacs-like editor with some
+# context-specific features for editing C files. It editor
+# automatically indents a line in response to a Tab character, and
+# provides a command for indenting a region (the selection). To enter a
+# literal Tab, enter the sequence <Control-q><Tab>. This editor also
+# colors comments and the strings "FIXME" and "NOTE", and provides a
+# method for commenting out a region.
 #
 class ::tycho::EditC {
     inherit ::tycho::EditProgram
@@ -43,20 +77,58 @@ class ::tycho::EditC {
     constructor {args} {}
     destructor {}
 
+    ##########################################################################
+    ####                         public methods                           ####
+
+    # If the selection has no embedded comments, then comment it out.
+    method commentSelection {}
+
     # Open a window with help on the C editor.
     method help {}
 
-    ###################################################################
-    ####                  protected methods                        ####
+    # Tag and color the C code in a region.
+    method parseNow {start stop}
 
-    # Return the name of the type of text widget to use (EditCText).
-    protected method textWidget {} {return ::tycho::EditCText}
+    # Return a list of tags to use when checking the spelling.
+    method spellCheckTags {} {return {ccomment}}
+
+    # If the selection is exactly a comment, remove the comment symbols.
+    method uncommentSelection {}
 }
 
 ###################################################################
 #
 body ::tycho::EditC::constructor {args} {
+
     eval itk_initialize $args
+    
+    # C does not have line-oriented comments, so there is no fill prefix.
+    set fillPrefix ""
+}
+
+#####################################################################
+#### commentSelection
+# Check to see whether the selection has any embedded comments. If it
+# does, issue an error message. If it does not, then comment out the
+# selection.
+#
+body ::tycho::EditC::commentSelection {} {
+    if {[set txt [getSelection]] != {}} {
+
+	if [regexp {\/\*|\*\/} $txt] {
+	    error "Selection contains embedded comment characters"
+	}
+	$itk_component(text) mark set insert \
+		[$itk_component(text) index sel.first]
+	deleteRange sel.first sel.last
+	set start [$itk_component(text) index insert]
+	insertString insert "/*\n"
+	insertString insert $txt
+	insertString insert "*/\n"
+	$itk_component(text) tag add sel $start insert
+	markModified
+	parseRegion sel.first sel.last
+    }
 }
 
 ###################################################################
@@ -67,4 +139,87 @@ body ::tycho::EditC::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
 	    $TYCHO/editors/textedit/doc/usersGuides/EditCHelp.html
+}
+
+#####################################################################
+#### parseNow
+# Tag and color C-style comments in the text plus the strings "NOTE"
+# and "FIXME". Note that if a comment begins in the specified range but
+# ends outside the range, the entire comment is parsed.
+#
+body ::tycho::EditC::parseNow {start stop} {
+
+    set text $itk_component(text)
+
+    $text tag remove ccomment $start $stop
+
+    # The base class identifies line-oriented comments, which do not
+    # exist in C.  Therefore, we need to completely redefine this procedure.
+    set ind $start
+    set count 0
+    while {[set ret [$text search -exact \
+	    {/*} $ind $stop]] != {}} {
+	# Found the start of a comment.  Look for the end.
+	set endcmt [$text search -exact {*/} $ret end]
+	if {$endcmt != {}} {
+
+	    # Found the end of a comment.  Tag it.
+	    $text tag add ccomment $ret "$endcmt + 2 chars"
+	    
+	    set ind $endcmt
+	} else {
+	    set ind [$text index "$ret +2 chars"]
+	}
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $ind >= end] {break}
+    }
+
+    # Now tag all occurrences of "FIXME" and "NOTE" within the range
+    # that got processed.
+    set ind $start
+    while {[set ind [$text search -count cnt -regexp \
+	    {FIXME|NOTE} $ind $stop]] != {}} {
+
+	$text tag add fixme $ind "$ind + $cnt chars"
+	    
+	set ind [$text index "$ind + $cnt chars"]
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $ind >= end] {break}
+    }
+
+    # Set the visual characteristics of the tagged text
+    $text tag configure ccomment -foreground \
+	    [option get $itk_component(hull) commentColor EditC]
+    $text tag configure fixme -foreground \
+	    [option get $itk_component(hull) fixmeColor EditC]
+}
+
+#####################################################################
+#### uncommentSelection
+# Remove comment characters from the two ends of the selection.
+# If the comment characters are by themselves on a line, remove
+# the line altogether.
+#
+body ::tycho::EditC::uncommentSelection {} {
+    if {[set txt [getSelection]] != {}} {
+
+	if {[regexp -indices "^\[ \t\]*\/\\*\n*" $txt leading] && \
+		[regexp -indices "\\*\/\[ \t\]*\n*\[ \t\]*\$" $txt trailing]} {
+	    
+	    set newtxt [string range $txt \
+		    [expr [lindex $leading 1]+1] \
+		    [expr [lindex $trailing 0]-1]]
+	    
+	    $itk_component(text) mark set insert \
+		    [$itk_component(text) index sel.first]
+	    deleteRange sel.first sel.last
+	    set start [$itk_component(text) index insert]
+	    insertString insert $newtxt
+	    $itk_component(text) tag add sel $start insert
+	    markModified
+	    parseRegion sel.first sel.last
+	} {
+	    error "Selection is not a comment"
+	}
+    }
 }
