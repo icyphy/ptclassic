@@ -1,5 +1,5 @@
 defstar {
-name { FFT }
+name { FFTCx }
 domain { CG56 }
 desc {
 }
