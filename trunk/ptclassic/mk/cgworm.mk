@@ -35,7 +35,7 @@ CGCDIR = $(ROOT)/src/domains/cgc/rtlib
 INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(CGCDIR) $(WORM_INCL)
 
 #This definition is needed so that make won't complain w/ common.mk
-LIB=dummy
+LIBR=dummy
 
 include $(ROOT)/mk/common.mk
 
