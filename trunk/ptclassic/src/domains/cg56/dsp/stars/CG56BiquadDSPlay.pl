@@ -114,10 +114,10 @@ The default coefficients implement a low pass filter.
         move    a1,$ref(output)
 	} 
         initCode {
-                gencode(coefinit);
+                addCode(coefinit);
   	}
         go {
-                gencode(std);
+                addCode(std);
 	}
 	execTime { 
 		return 15;

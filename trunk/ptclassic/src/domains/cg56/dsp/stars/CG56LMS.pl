@@ -220,36 +220,36 @@ $label(loop1)
 
         }
         initCode  {
-	        gencode(makeblock);
-                gencode(delaystart);
+	        addCode(makeblock);
+                addCode(delaystart);
         }
         go { 
                 Y=errorDelay-1;
                 Y=coefLen-1+decimation*Y;
 
-	        gencode(std);
+	        addCode(std);
 	
         	if(coefLen>2) {
 	            loopVal=coefLen-1;    
-	            gencode(loop);
+	            addCode(loop);
 		}
-		else gencode(noloop);
+		else addCode(noloop);
 
-	        gencode(cont);
+	        addCode(cont);
       	
 		if(decimation>1)
-	            gencode(decimationGreaterthanOne);
+	            addCode(decimationGreaterthanOne);
 		else
-	            gencode(decimationOne);
+	            addCode(decimationOne);
 	    
-	        gencode(cont1);
+	        addCode(cont1);
 
 		if(coefLen>2)
-        	     gencode(loop1);
+        	     addCode(loop1);
 		else
-        	     gencode(noloop1);
+        	     addCode(noloop1);
 	     
-	        gencode(end);
+	        addCode(end);
         }             
 	execTime { 
               if (int(coefLen)<=2) {

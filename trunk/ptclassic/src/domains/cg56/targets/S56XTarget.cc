@@ -41,47 +41,53 @@ void S56XTarget :: initStates() {
 	runFlag.setValue("YES");
 	runFlag.setAttributes(A_SETTABLE|A_NONCONSTANT);
 	targetHost.setAttributes(A_SETTABLE|A_NONCONSTANT);
+	addStream("aioCmds",&aioCmds);
+	addStream("shellCmds",&shellCmds);
 }
 
 void S56XTarget :: headerCode () {
+	aioCmds.initialize();
+	shellCmds.initialize();
 	CG56Target :: headerCode();
 	const char *path = expandPathName("~ptolemy/lib/cg56/s56x.asm");
-	StringList inc;
-	inc << "\tinclude '" << path << "'\n";
-	addCode(inc);
+	myCode << "\tinclude '" << path << "'\n";
 	interruptFlag = TRUE;
+	shellCmds << headerComment("# ");
 };
 
 Block* S56XTarget::makeNew() const {
 	LOG_NEW; return new S56XTarget(*this);
 }
 
-void S56XTarget :: wrapup () {
-	addCode ("	jmp	ERROR\n");
+void S56XTarget :: trailerCode () {
+	myCode << "	jmp	ERROR\n";
 	inProgSection = TRUE;
-	CG56Target::wrapup();
+	CG56Target::trailerCode();
 }
 
 int S56XTarget :: compileCode() {
-	StringList assembleCmds = "asm56000 -b -l -A -oso ";
-	assembleCmds += uname;
-	if (!genFile(miscCmds , uname,".aio")) return FALSE;
+	StringList assembleCmds;
+	assembleCmds << "asm56000 -b -l -A -oso " << uname;
 	return !systemCall(assembleCmds,"Errors in assembly");
 }
 
-int S56XTarget :: loadCode() {
-	StringList downloadCmds = "load_s56x ";
-	downloadCmds += fullFileName(uname,".lod\n");
-	return !hostSystemCall(downloadCmds,
-		"Problems loading code onto S56X");
+void S56XTarget :: writeCode() {
+	// write aio file
+	genFile(aioCmds , uname,".aio");
+
+	// write shell script file
+	char* file = fullFileName(uname);
+	shellCmds << "load_s56x " << file << ".lod\n";
+	genFile(shellCmds,uname);
+	chmod(file,0755);	//make executable
+	LOG_DEL; delete(file);
+	CG56Target :: writeCode();
 }
 
 int S56XTarget :: runCode() {
-	if (!genFile(runCmds,uname)) return FALSE;
-	chmod(fullFileName(uname),0755);	//make executable
-	StringList runCmd(uname);
-	runCmd << " &";
-	return !hostSystemCall(runCmd,"Problems running code onto S56X");
+	StringList runCmd;
+	runCmd << uname << " &";
+	return !systemCall(runCmd,"Problems running code onto S56X");
 }
 
 

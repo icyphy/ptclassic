@@ -105,11 +105,11 @@ Journal, Vol.  3, No. 2.
                 delayBuf.resize(delay);
         }		
         initCode {
-                gencode(block);
+                addCode(block);
 	}
         go {
                 X=1.0-pole;
-                gencode(std);
+                addCode(std);
         }		
 
 	execTime { 

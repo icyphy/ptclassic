@@ -214,25 +214,25 @@ $label(loop3)
 		delayLineFIR.resize(delayLineFIRSize);
         }
         initCode  {
-	        gencode(init);
+	        addCode(init);
         }
         go { 
-                gencode(first);
-		if (errorDelay>1) gencode(errorDelayGtOne);
-                gencode(main);
+                addCode(first);
+		if (errorDelay>1) addCode(errorDelayGtOne);
+                addCode(main);
 		if (coefLen>2)
-	             gencode(coefLenTwo);
+	             addCode(coefLenTwo);
 		else
-	             gencode(std);
+	             addCode(std);
 // need to adjust r5 if errorDelay is greater than one.
-		if (errorDelay>1) gencode(adjust);
-                gencode(cont);
+		if (errorDelay>1) addCode(adjust);
+                addCode(cont);
 // assume r5 is pointing to the oldest sample in the delay line
 // but if errorDelay is greater than one, we don't want to point
 // to the oldest		
-		if (errorDelay>1) gencode(adjust);
+		if (errorDelay>1) addCode(adjust);
 // make r3 point to the last tap value
-                gencode(cont1);
+                addCode(cont1);
         }             
 
 	execTime { 

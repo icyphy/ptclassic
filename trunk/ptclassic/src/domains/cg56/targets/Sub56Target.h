@@ -25,14 +25,14 @@ $Id$
 class Sub56Target : public CG56Target {
 private:
 	void initStates();
+protected:
+        /*virtual*/ void headerCode();
 public:
 	Sub56Target(const char*,const char*);
 	Sub56Target(const Sub56Target&);
-	void headerCode();
-	int run();
-	Block* makeNew() const;
-	int isA(const char*) const;
-	const char* className() const {return "Sub56Target";}
+	/*virtual*/ void mainLoopCode();
+	/*virtual*/ Block* makeNew() const;
+	/*virtual*/ int isA(const char*) const;
 };
 
 #endif
