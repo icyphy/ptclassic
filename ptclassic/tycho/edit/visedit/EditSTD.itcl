@@ -664,9 +664,7 @@ body ::tycho::EditSTD::ptkCompile {} {
 	    setstate [set star$node] entryType $entryType
 	    setstate [set star$node] actions $actions
 
-	} else {
-	    error "Unrecognized machine type: $machineType. "
-	}
+	} 
 
 	# Do the output connection of each star :
 	foreach node [$slate find withtag node] {
