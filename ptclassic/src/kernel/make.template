@@ -95,6 +95,7 @@ CCS_WITH_H_FILES=\
  InterpGalaxy.cc \
  InterpUniverse.cc \
  IntervalList.cc \
+ InvokeInterp.cc \
  KnownBlock.cc \
  KnownState.cc \
  KnownTarget.cc \
