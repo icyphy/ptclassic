@@ -3,6 +3,8 @@
 % Created:	17 January 1993
 
 \documentstyle[12pt,psfig,elisp,ptinfo,Almagest]{book}
+\pssilent	% Suppress messages from psfig.
+
 \newindex{cp}
 \newindex{pg}
 \newindex{fn}
@@ -17,16 +19,44 @@
 \synindex{tp}{cp}
 \synindex{ky}{cp}
 
+
 \begin{document}
 
+\date{$Date$}
 \alwaysrefill
 \setfilename{userMan.info}
 
 \node Top
 
+\begin{iftex}
+\begin{titlepage}
+\centering
+\Huge\sf
+The Almagest \\
+\psfig{figure=../figures/Ptolemy.ps,width=\textwidth}
+Volume \thevolume :  A User's Guide to Ptolemy 0.5
+\end{titlepage}
+
+\clearpage
+\pagestyle{empty}
+\vspace*{\fill}
+\input{copyright.tex}
+
+\clearpage
+\pagestyle{headings}
+\pagenumbering{roman}
+\tableofcontents
+\listoffigures
+\listoftables
+
+\clearpage
+\pagenumbering{arabic}
+
+\end{iftex}
+
 \begin{ifinfo}
 \title{The Almagest\\
-A User's Guide to \Ptolemy}
+A User's Guide to Ptolemy 0.5}
 \author{}
 \maketitle
 \end{ifinfo}
