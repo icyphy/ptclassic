@@ -55,8 +55,13 @@ const char* BaseSymbolList::append(const char* name)
 
     StringList temp = symbol(name);
     char* sym = savestring(temp);
-    if (NamedList::append(sym, name)) return sym;
-    else return NULL;
+    if (NamedList::append(sym, name)) {
+      return sym;
+    }
+    else {
+      delete [] sym;
+      return NULL;
+    }
 }
 
 // Put a named symbol at the head of the list.
@@ -78,7 +83,7 @@ int BaseSymbolList::remove(const char* name)
     char* sym = (char*)NamedList::get(name);
     if (sym != NULL)
     {
-	LOG_DEL; delete sym;
+	LOG_DEL; delete [] sym;
 	return NamedList::remove(name);
     }
     else return FALSE;
@@ -92,7 +97,7 @@ void BaseSymbolList::deleteSymbols()
 
     while((s = (char*)sym++) != NULL)
     {
-	LOG_DEL; delete s;
+	LOG_DEL; delete [] s;
     }
 }
 
