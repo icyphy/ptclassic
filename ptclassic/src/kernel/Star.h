@@ -58,8 +58,12 @@ public:
 	// set the Target
 	void setTarget(Target* t) { targetPtr = t;}
 
+	// Check whether invocations are parallelizable or not.
+	void noInternalState() { inStateFlag = FALSE; }
+	int hasInternalState() { return inStateFlag; }
+
 	// constructor
-	Star() : targetPtr(0), indexValue(-1) {}
+	Star() : targetPtr(0), indexValue(-1), inStateFlag(TRUE) {}
 
 	// class identification
 	int isA(const char*) const;
@@ -68,6 +72,7 @@ protected:
 	Target* targetPtr;
 private:
 	int indexValue;
+	int inStateFlag; // indicate there are internal states (default)
 	friend setStarIndices(Galaxy&);
 };
 
