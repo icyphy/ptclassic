@@ -518,8 +518,12 @@ int CGCTarget::needsTypeConversionStar(PortHole& port) {
 	// In this case, we assume that we do need a type conversion star.
 	// FIXME
 	if (far_port->parent()->isItWormhole() ||
-	    this_port->parent()->isItWormhole())
-	    return TRUE;
+	    this_port->parent()->isItWormhole()) {
+	    if (far_port->resolvedType() != FIX)
+	    	return TRUE;
+	    else
+		return FALSE;
+	}
 	
 	// if this or the far side is a multiporthole, refer to the
 	// multiport rather than to the normal porthole itself;
