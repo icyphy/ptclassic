@@ -50,19 +50,19 @@
 # bar to jump to that position; it can then be dragged.
 #
 # Slider uses the following interactor classes:
-# <p>
+# <ul><li>
 # <a href="../../../../slate/interactors/doc/codeDoc/Interactor.html">
 # <i>Interactor</i></a>: the abstract interactor superclass
-# <br>
+# <li>
 # <a href="../../../../slate/interactors/doc/codeDoc/Alonger.html">
 # <i>Alonger</i></a>: moves the bar vertically
-# <br>
+# <li>
 # <a href="../../../../slate/interactors/doc/codeDoc/Interactor.html">
 # <i>Stepper</i></a>: moves the bar in discrete steps
-# <br>
+# <li>
 # <a href="../../../../slate/interactors/doc/codeDoc/Repeater.html">
 # <i>Repeater</i></a>: moves the bar in increments while the mouse is pressed.
-#
+# </ul>
 class ::tycho::Slider {
     inherit itk::Widget
 
@@ -378,7 +378,7 @@ body ::tycho::Slider::down {} {
 #######################################################################
 #### get
 #
-# Get the current slider value from slider position.
+# Get the current slider value from its position.
 #
 body ::tycho::Slider::get {} {
     ::set position [expr [lindex [$bar coords] 1] + $barheight/2]
