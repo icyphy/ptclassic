@@ -32,7 +32,7 @@ limitation of liability, and disclaimer	of warranty provisions.
   setup {
   }
 	codeblock (uses) {
-library IEEE;
+library IEEE,PTVHDLSIM;
 use IEEE.STD_LOGIC_1164.all;
 	}
   initCode {
