@@ -307,8 +307,8 @@ TCLBLEND_VERSION = $(TCLBLEND_MAJOR_VERSION)$(TCLBLEND_MINOR_VERSION)
 
 TCLBLEND_SRC =	$(TCLTK_SRC)/tclBlend$(TCLBLEND_VERSION)/unix
 TCLBLEND_OBJ =	$(TCLTK_OBJ)/tclBlend$(TCLBLEND_VERSION)
-TCLBLEND_DEST =	$(TCL8_DEST)
-TCLBLEND_INDEPENDENT_DEST =	$(TCL8_INDEPENDENT_DEST)
+TCLBLEND_DEST =	$(ITCL_DEST)
+TCLBLEND_INDEPENDENT_DEST =	$(ITCL_INDEPENDENT_DEST)
 
 all_tclblend: config_tclblend tclblend install_tclblend
 config_tclblend: $(TCLBLEND_OBJ)
@@ -316,7 +316,7 @@ config_tclblend: $(TCLBLEND_OBJ)
 	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; \
 		$(TCLBLEND_SRC)/configure \
 		--srcdir=$(TCLBLEND_SRC) \
-		--with-tcl=$(TCL8_OBJ) \
+		--with-tcl=$(TCL_OBJ)/unix \
 		--prefix=$(TCLBLEND_INDEPENDENT_DEST) \
 		--exec-prefix=$(TCLBLEND_DEST) \
 		$(ENABLE_SHARED) $(ENABLE_GCC))
