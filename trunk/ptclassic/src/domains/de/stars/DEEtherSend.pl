@@ -74,8 +74,9 @@ is broadcast to all receivers on the medium.
 	}
 	begin {
 	    DEEther::begin();
-	    broadcast = 0;
 	    latestDuration = 0.0;
+	    latestAddress = "";
+	    broadcast = FALSE;
 	}
 	go {
 	    if (duration.dataNew) {
@@ -97,7 +98,7 @@ is broadcast to all receivers on the medium.
 				med->findReceiver(latestAddress);
 			if (receiveStar == 0) {
 			    Error::warn(*this,
-			    "Attempt to transmit to non-existant receiver ",
+			    "Attempt to transmit to non-existent receiver ",
 			    latestAddress);
 			    return;
 			}
