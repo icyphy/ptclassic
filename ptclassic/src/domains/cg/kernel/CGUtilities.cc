@@ -134,7 +134,7 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
 // create the directory if necessary (-p)
     if (access(directory, F_OK) == -1) {
       mkdir << "mkdir -p " << directory;
-    if (rshSystem(hname,mkdir)) return FALSE;
+      if (rshSystem(hname,mkdir)) return FALSE;
     }
 
     cout << "rcpWriteFile: writing file " << file << "\n";
