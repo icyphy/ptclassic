@@ -26,33 +26,40 @@ INCL = -I$(CGCDIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
 PL_SRCS= \
  CGCAdd.pl \
  CGCBlackHole.pl \
+ CGCCollect.pl  \
  CGCConst.pl \
  CGCCos.pl \
  CGCCxToRect.pl \
  CGCDB.pl \
  CGCDownSample.pl \
+ CGCExp.pl \
  CGCFFTCx.pl \
  CGCFIR.pl \
- CGCSub.pl \
- CGCRamp.pl \
  CGCFork.pl \
  CGCGain.pl \
  CGCIIDUniform.pl \
  CGCLMS.pl \
+ CGCLog.pl \
  CGCMpy.pl \
  CGCPCM.pl \
  CGCPCMread.pl \
  CGCPCMwrite.pl \
  CGCPolarToRect.pl \
  CGCPrinter.pl \
+ CGCRamp.pl \
+ CGCReciprocal.pl \
  CGCRectToCx.pl \
  CGCRectToPolar.pl \
  CGCSin.pl \
+ CGCSqrt.pl \
+ CGCSub.pl \
+ CGCSpread.pl \
  CGCUpSample.pl \
  CGCWaveForm.pl \
+ CGCXgraph \
  CGCXMgraph.pl \
- CGCSpread.pl \
- CGCCollect.pl 
+ CGCXscope \
+ CGCXYgraph
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
