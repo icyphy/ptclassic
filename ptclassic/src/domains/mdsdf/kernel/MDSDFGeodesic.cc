@@ -68,7 +68,7 @@ void MDSDFGeodesic::initialize() {
   int dNumRows = ((MDSDFPortHole*)destinationPort)->numRowXfer();
   int dNumCols = ((MDSDFPortHole*)destinationPort)->numColXfer();
   // dimensions of the matrices the originating port produces
-  int oNumRows = ((MDSDFPortHole*)originatingPort)->numRowXfer();
+  /*int oNumRows = ((MDSDFPortHole*)originatingPort)->numRowXfer();*/
   int oNumCols = ((MDSDFPortHole*)originatingPort)->numColXfer();
   mNumRows = destNumRowsPerIter * dNumRows;
   mNumCols = destNumColsPerIter * dNumCols;
