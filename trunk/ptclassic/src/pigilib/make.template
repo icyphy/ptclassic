@@ -47,6 +47,8 @@ include $(CONFIG)
 PTCLHDRS = $(ROOT)/src/ptcl
 
 HDRS	      = compile.h \
+                dmmSupport.h \
+                dmmSupportFunc.h \
 		edit.h \
 		err.h \
 		exec.h \
@@ -105,14 +107,14 @@ LIBCSRCS      = main.c \
 		ptkNet.c \
 		ptkTemplate.c \
 		ptkTclIfc.c \
-		ptkTkSetup.c 
-
+		ptkTkSetup.c \
+		dmmSupport.c \
+                dmmSupportFunc.c
 
 LIBCPPSRCS    = kernelCalls.cc \
 		XError.cc \
 		pigiLoader.cc \
 		ptkConsoleWindow.cc \
-		ptkRegisterCmds.cc \
 		TclObj.cc \
 		POct.cc \
 		PVem.cc \
@@ -124,11 +126,13 @@ SRCS = $(LIBCSRCS) $(LIBCPPSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o) $(LIBCPPSRCS:.cc=.o)
 
+OTHER_OBJS = ptkRegisterCmds.o ptkDMMRegisterCmds.o
+
 LIB=libpigi.$(LIBSUFFIX)
 
-all:	makefile $(LIB)
+all:	$(LIB) $(OTHER_OBJS)
 
-install: makefile $(LIBDIR)/$(LIB)
+install: all $(LIBDIR)/$(LIB)
 
 # Directory containing utilities for BarGraph
 PTKDIR = $(ROOT)/src/ptklib
@@ -137,7 +141,8 @@ PTKDIR = $(ROOT)/src/ptklib
 # Note that some X11 installs have bogus (old versions) of the tcl/tk
 # headers, thus we must search the tcl/tk includes before the X11 includes
 INCL= -I$(KERNDIR) $(PTCOMPAT_INCSPEC) -I$(PTCL_INCDIR) -I$(OCTTOOLS)/include \
- -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC) -I$(PTCLHDRS) -I$(PTKDIR)
+ -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC) -I$(PTCLHDRS) -I$(PTKDIR) \
+ -I$(DMM_KERN_DIR)
 
 C_INCL=-I$(OCTTOOLS)/include \
 	-I$(ITCL_INCDIR) -I$(ITK_INCDIR) -I$(TCL_INCDIR) -I$(TK_INCDIR) \
