@@ -61,6 +61,8 @@ MotorolaMemory :: MotorolaMemory(const char* x_map, const char* y_map) :
 	DualMemory("l","x",A_XMEM,ANY,x_map,"y",A_YMEM,ANY,y_map)
 {}
 
+// Constructor
+// The AsmTarget constructor by default allocates memory for mem
 MotorolaTarget :: MotorolaTarget (const char* nam, const char* desc,
 				  const char* stype,
 				  const char* assocDomain) :
@@ -81,7 +83,7 @@ void MotorolaTarget :: initStates() {
 
 	// Initialize other data members
 	inProgSection = 0;
- 	mem = 0;
+ 	delete mem; mem = 0;			// allocated by AsmTarget
 	assemblerOptions = "-A -B -L";
 	softwareCost = 0;
 	costString.initialize();
@@ -96,8 +98,8 @@ void MotorolaTarget :: setup() {
 	    return;
 	}
 
-	LOG_DEL; delete mem;
-	LOG_NEW; mem = new MotorolaMemory(xMemMap, yMemMap);
+	delete mem;
+	mem = new MotorolaMemory(xMemMap, yMemMap);
 
 	// The Motorola 56000 assembler (Version 3.04) does not allow '.' in
 	// the base file name, so we call ptSanitize to replace them with '_'
@@ -131,7 +133,8 @@ void MotorolaTarget :: setup() {
 }
 
 MotorolaTarget :: ~MotorolaTarget () {
-	LOG_DEL; delete mem; mem = 0;
+	delete mem; mem = 0;
+	delete softwareCost; softwareCost = 0;
 }
 
 // copy constructor
@@ -144,7 +147,7 @@ AsmTarget(src.name(),src.descriptor(),src.starType(),src.getAssociatedDomain())
 
 // makeNew
 Block* MotorolaTarget :: makeNew () const {
-	LOG_NEW; return new MotorolaTarget(*this);
+	return new MotorolaTarget(*this);
 }
 
 void MotorolaTarget::beginIteration(int repetitions, int /*depth*/) {
