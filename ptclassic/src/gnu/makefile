@@ -315,12 +315,10 @@ hp_configure: $(GNU_OBJ)
 		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
 	@echo "Now configure $(GNU_SRC) with -with-gnu-as"
 	-mkdir $(GNU_OBJ)/gcc
-	# We use -disable-threads to avoid linking with -ldce
 	(cd $(GNU_OBJ)/gcc; \
 	$(GCC_SRC)/configure --srcdir=$(GCC_SRC) \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
 		$(SHAREDLIB_CONFIGURE_FLAGS) \
-		--disable-threads \
 		--with-gnu-as $(MACH) )
 
 hp_pregcc_install: $(GNU_DEST)/$(PTARCH)
