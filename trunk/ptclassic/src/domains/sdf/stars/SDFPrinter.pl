@@ -18,13 +18,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
 	explanation {
-This star prints its input, which may be any supported type.
+This star prints its input, which may be any supported data type.
 There may be multiple inputs: all inputs are printed together on
 the same line, separated by tabs.
 .pp
 If output is directed to a file, then flushing does not occur until the
 wrapup method is called.
-Before the first data are flushed, the file will not even exist.
+Before the first data are flushed, the file will not exist.
 This is normal behavior for buffered input/output.
 	}
 	inmulti {
@@ -57,7 +57,11 @@ This is normal behavior for buffered input/output.
 		 	output << ((*p)%0).print() << "\t";
 		output << "\n";
 	}
+	wrapup {
+		LOG_DEL; delete p_out;		// flush output
+		p_out = 0;
+	}
 	destructor {
-		LOG_DEL; delete p_out;
+		LOG_DEL; delete p_out;		// flush output
 	}
 }
