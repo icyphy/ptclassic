@@ -70,7 +70,7 @@ DEST = $(OCTTOOLS)/bin.$(PTARCH)/masters
 $(DEST):	masters
 		@echo Installing masters
 		rm -f $(DEST)
-		ln masters $(DEST)
+		ln masters.$(BINARY_EXT) $(DEST)
 
 install: makefile $(DEST) $(BINDIR)/masters
 
