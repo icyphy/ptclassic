@@ -136,3 +136,5 @@ LIB_FLUSH_CACHE = $(LIBDIR)/flush_cache.o
 #USER_C_SHAREDFLAGS =		-fPIC
 #SYSLIBS =			-lg++ -lm -ldld
 
+# Matlab architecture
+MATARCH = hp700

@@ -134,3 +134,5 @@ XMKMF =		rm -f Makefile; cp Makefile.std Makefile
 # Used by tcltk to build the X pixmap extension
 XPM_DEFINES =	-DZPIPE $(X11_INCSPEC)
 
+# Matlab architecture
+MATARCH = sol2

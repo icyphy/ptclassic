@@ -99,3 +99,6 @@ XV_CC =		cc -traditional
 # use GCC because it was easier to port
 OCT_CC =        gcc  -fwritable-strings
 TERMLIB_LIBSPEC = -ltermcap
+
+# Matlab architecture
+MATARCH = aix

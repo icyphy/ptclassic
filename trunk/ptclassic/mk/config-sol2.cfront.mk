@@ -139,3 +139,6 @@ XV_CC =		cc -Xs -w $(X11_INCSPEC) \
 		-DSVR4 -DSYSV -DDIRENT -DATT -DNO_BCOPY \
 		$(X11_LIBSPEC) -R$(X11_LIBDIR)
 XV_RAND = 	-DNO_RANDOM
+
+# Matlab architecture
+MATARCH = sol2
