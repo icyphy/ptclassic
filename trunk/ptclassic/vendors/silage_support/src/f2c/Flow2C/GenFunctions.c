@@ -58,12 +58,13 @@ bool bittrue;
    FILE *fp;
    FILE *fq;
    char fInName[100], fOutName[100], inputName[100], outputName[100];
-   char inputTyp[10], inputPrec[10];
-   char outputTyp[10], outputPrec[10];
+   char inputTyp[10], inputPrec[10], inArrSz[10];
+   char outputTyp[10], outputPrec[10], outArrSz[10];
    struct listOfIO {
         char name[100];
 	char typ[10];
 	char prec[10];
+	char arrSz[10];
    };
    struct listOfIO inputList[10];       /* max num of inputs */
    struct listOfIO outputList[10];      /* max num of outputs */
@@ -92,12 +93,16 @@ if( pl_flag && (Graph == Root) )
 	{
 		strcpy(inputList[numIn].prec,"2.0"); 
 		strcpy(inputList[numIn].typ,inputTyp); 
+		strcpy(inputList[numIn].arrSz,""); 
 	}
    	else 
 	{
 		fscanf(fp,"%s",inputPrec);
 		strcpy(inputList[numIn].typ,inputTyp); 
 		strcpy(inputList[numIn].prec,inputPrec); 
+		if(strcmp(inputTyp,"fixArray") == 0) fscanf(fp,"%s",inArrSz);
+		else strcpy(inArrSz,"");
+		strcpy(inputList[numIn].arrSz,inArrSz); 
 	}
 	numIn++; 
    }
@@ -111,12 +116,16 @@ if( pl_flag && (Graph == Root) )
 	{
 		strcpy(outputList[numOut].prec,"2.0"); 
 		strcpy(outputList[numOut].typ,outputTyp); 
+		strcpy(outputList[numOut].arrSz,""); 
 	}
    	else 
 	{
 		fscanf(fq,"%s",outputPrec);
 		strcpy(outputList[numOut].typ,outputTyp); 
 		strcpy(outputList[numOut].prec,outputPrec); 
+		if(strcmp(outputTyp,"fixArray") == 0) fscanf(fq,"%s",outArrSz);
+		else strcpy(outArrSz,"");
+		strcpy(outputList[numOut].arrSz,outArrSz); 
 	}
 	numOut++; 
    }
