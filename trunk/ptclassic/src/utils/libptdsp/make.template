@@ -46,15 +46,21 @@ VPATH         = $(ROOT)/src/utils/libptdsp
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
+# Library name
+# Hack to be sure we don't build a shared version of libptdsp.
+# If we do have a shared libptdsp, then we need to be sure to include
+# -lg++ when building cgc binaries.
+LIBNONSHARED = libptdsp.a
+
 C_INCL = $(PTCOMPAT_INCSPEC)
 
 LIB_HDRS = \
-  ptdspfft_rif.h \
-  ptdspNearestNeighbor.h \
-  ptdspPartitionCodebook.h \
-  ptdspRaisedCosine.h \
-  ptdspWindow.h \
-  ptdspMuLaw.h
+ ptdspfft_rif.h \
+ ptdspNearestNeighbor.h \
+ ptdspPartitionCodebook.h \
+ ptdspRaisedCosine.h \
+ ptdspWindow.h \
+ ptdspMuLaw.h
 
 HDRS = ptdsp.h ptdspcephes.h $(LIB_HDRS)
 
@@ -64,17 +70,15 @@ SRCS = $(LIBCSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o)
 
-LIB = libptdsp.$(LIBSUFFIX)
+all: makefile $(LIBNONSHARED)
 
-# include common definitions, rules
-include $(ROOT)/mk/common.mk
-
-all: makefile $(LIB)
-
-install: makefile $(LIBDIR)/$(LIB)
+install: makefile $(LIBNONSHARED) $(LIBDIR)/$(LIBNONSHARED)
 
 lint:	$(LIBCSRCS)
 	lint -u $(INCL) $(LIBCSRCS) > lint
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
