@@ -119,13 +119,12 @@ PTcl::~PTcl() {
 
 ///////////////////////////////////////////////////////////////////////////
 //// addBlock
-// Create a new instance of star, galaxy, or wormhole. The
-// specified block name may be absolute or relative to the current
-// galaxy, unless it is a universe, in which case it must be absolute.
-// I.e., it must begin with a leading period.
-// The galaxy within which the block is to be created must exist or an
-// error is triggered.  An error is also triggered if the block already
-// exists.
+// Create a new instance of star, galaxy, or wormhole. The specified
+// block name may be absolute or relative to the current galaxy, unless
+// it is a universe, in which case it must be absolute. I.e., it must
+// begin with a leading period. The galaxy within which the block is to
+// be created must exist or an error is triggered. An error is also
+// triggered if the block already exists.
 //
 int PTcl::addBlock(int argc,char** argv) {
     if (argc != 3) return usage("addBlock <name> <class>");
@@ -153,12 +152,38 @@ int PTcl::addBlock(int argc,char** argv) {
 }
 
 ///////////////////////////////////////////////////////////////////////////
+//// addState
+// Create a new state for a galaxy or universe. The specified
+// state name may be absolute or relative to the current galaxy.
+//
+// NOTE: Currently this is restricted to adding states to galaxies and
+// universe. It should be generalized to add states to arbitrary blocks.
+//
+int PTcl::addState(int argc,char ** argv) {
+    if (argc != 4) {
+        return usage("addState <statename> <type> <initvalue>");
+    }
+    const Block* b = getParentBlock(argv[1]);
+    if (!b) return TCL_ERROR;
+    if (!b->isA("InterpGalaxy")) {
+        Tcl_AppendResult(interp, "The parent block of state ", argv[1],
+               " is not an InterpGalaxy.", (char*)NULL);
+        return TCL_ERROR;
+    }
+    InterpGalaxy* gal = (InterpGalaxy*)b;
+    // Use interpGalaxy method so that new initial value gets on the action
+    // list (so that it will be reflected when the block is cloned).
+    if (!gal->addState(rootName(argv[1]),argv[2],argv[3])) return TCL_ERROR;
+    return TCL_OK;
+}
+
+///////////////////////////////////////////////////////////////////////////
 //// addUniverse
-// Create a new, empty universe.  The name can begin with
-// a period (as in ".foo") or can omit the period (as in "foo").  In either
-// case, the full name of the resulting universe has a leading period (".foo").
-// If a universe with the given name already exists, it is cleared.
-// The second argument is the domain of the new universe.
+// Create a new, empty universe. The name can begin with a period (as
+// in ".foo") or can omit the period (as in "foo"). In either case, the
+// full name of the resulting universe has a leading period (".foo").
+// If a universe with the given name already exists, it is cleared. The
+// second argument is the domain of the new universe.
 //
 int PTcl::addUniverse(int argc,char** argv) {
     if (argc != 3) {
@@ -191,7 +216,7 @@ int PTcl::aliasDown(int argc,char** argv) {
         return usage("aliasDown ?-deep? <portname>");
     }
 
-    GenericPort* gp = getPort(portname);
+    const GenericPort* gp = getPort(portname);
     if (!gp) return TCL_ERROR;
 
     // If the port has a downward alias, and -deep was not specified,
@@ -231,7 +256,7 @@ int PTcl::aliasUp(int argc,char** argv) {
         return usage("aliasUp ?-deep? <portname>");
     }
 
-    GenericPort* gp = getPort(portname);
+    const GenericPort* gp = getPort(portname);
     if (!gp) return TCL_ERROR;
 
     // If the port has an upward alias, and -deep was not specified,
@@ -385,7 +410,7 @@ int PTcl::connected(int argc,char** argv) {
     }
     if (portname == NULL) return usage ("connected ?-deep? <portname>");
 
-    GenericPort* gp = getPort(portname);
+    const GenericPort* gp = getPort(portname);
     if (!gp) return TCL_ERROR;
 
     // If the port has an upward alias, and -deep was not specified,
@@ -652,7 +677,7 @@ int PTcl::galaxyPort(int argc,char** argv) {
         return TCL_ERROR;
     }
     InterpGalaxy* gal = (InterpGalaxy*)pb;
-    GenericPort* gp = getPort(argv[2]);
+    const GenericPort* gp = getPort(argv[2]);
     if (!gp) return TCL_ERROR;
     if (!gp->parent()) {
         InfString msg = argv[2];
@@ -681,7 +706,7 @@ int PTcl::getAnnotation(int argc,char** argv) {
     if (argc != 2) {
         return usage ("getAnnotation <portname>");
     }
-    GenericPort* gp = getPort(argv[1]);
+    const GenericPort* gp = getPort(argv[1]);
     if (!gp) return TCL_ERROR;
 
     // FIXME: finish this.  Have to resolve aliases.
@@ -794,20 +819,41 @@ int PTcl::getParent(int argc,char** argv) {
     }
 }
 
+// FIXME: Need a way to invoke the begin, go, wrapup methods.
+// FIXME: Also need a method to initialize portholes.
+
 /////////////////////////////////////////////////////////////////////////////
-//// matlab
-// FIXME: Documentation.
-// we make matlabtcl a static instance of the MatlabTcl class instead of
-// a data member of the PTcl class because other libraries, e.g. pigilib,
-// rely on the PTcl class but do not use the "matlab" ptcl command, so
-// false dependencies would otherwise be automatically created by make depend
-#include "MatlabTcl.h"
+//// initBlock
+// Initialize a block.  This causes the states and portholes to be
+// initialized and the setup method to be run.
+//
+int PTcl::initBlock(int argc, char** argv) {
+    if (argc != 2) return usage("initBlock <blockname>");
+    // Cast away the const.
+    Block* s = (Block*) getBlock(argv[1]);
+    if (!s) {
+        Tcl_AppendResult(interp, "No block named ", argv[1], (char*)NULL);
+        return TCL_ERROR;
+    }
+    s->initialize();
+    return TCL_OK;
+}
 
-static MatlabTcl matlabtcl;
-
-int PTcl::matlab(int argc,char** argv) {
-    matlabtcl.SetTclInterpreter(interp);
-    return matlabtcl.matlab(argc, argv);
+/////////////////////////////////////////////////////////////////////////////
+//// initState
+// Initialize a state.  This causes the initial value to be evaluated
+// and the current value set to the initial value.
+//
+int PTcl::initState(int argc, char** argv) {
+    if (argc != 2) return usage("initState <statename>");
+    // Cast away the const.
+    State* s = (State*) getState(argv[1]);
+    if (!s) {
+        Tcl_AppendResult(interp, "No state named ", argv[1], (char*)NULL);
+        return TCL_ERROR;
+    }
+    s->initialize();
+    return TCL_OK;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -837,7 +883,7 @@ int PTcl::isGalaxy (int argc,char ** argv) {
 int PTcl::isMultiPort (int argc,char ** argv) {
     if (argc != 2)
     return usage ("isMultiPort <portname>");
-    GenericPort* b = getPort(argv[1]);
+    const GenericPort* b = getPort(argv[1]);
     if (!b) return TCL_ERROR;
     if (b->isItMulti()) {
         result("1");
@@ -866,6 +912,59 @@ int PTcl::isWormhole (int argc,char ** argv) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+//// knownBlocks
+// Return a list of the available blocks in the specified domain, or (if no
+// domain is given) the current domain.
+//
+int PTcl::knownBlocks (int argc,char** argv) {
+    if (argc > 2)
+    return usage ("knownBlocks ?<domain>?");
+    const char* dom = curdomain;
+    if (argc == 2) {
+        dom = argv[1];
+        if (!KnownBlock::validDomain(dom)) {
+            Tcl_AppendResult(interp, "No such domain: ", dom, (char *) NULL);
+            return TCL_ERROR;
+        }
+    }
+    KnownBlockIter nextB(dom);
+    const Block* b;
+    while ((b = nextB++) != 0) addResult(b->name());
+    return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//// knownDomains
+// Return a list of the available domains.
+//
+int PTcl::knownDomains(int argc,char **) {
+    if (argc > 1)
+    return usage("knownDomains");
+    int n = Domain::number();
+    for (int i = 0; i < n; i++) {
+        const char* domain = Domain::nthName(i);
+        if (KnownBlock::validDomain(domain)) addResult(domain);
+    }
+    return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//// knownUniverses
+// Return a list of the names of the known universes.
+// Each name begins with a dot, and hence is absolute.
+//
+int PTcl::knownUniverses(int argc,char **) {
+    if (argc > 1) return usage("knownUniverses");
+    IUListIter next(univs);
+    InterpUniverse* u;
+    while ((u = next++) != 0) {
+        InfString nm = fullName(u);
+        addResult(nm);
+    }
+    return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
 //// mathematica
 // FIXME: Documentation.
 // we make mathematicatcl a static instance of the MathematicaTcl class
@@ -880,6 +979,22 @@ static MathematicaTcl mathematicatcl;
 int PTcl::mathematica(int argc,char** argv) {
     mathematicatcl.SetTclInterpreter(interp);
     return mathematicatcl.mathematica(argc, argv);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//// matlab
+// FIXME: Documentation.
+// we make matlabtcl a static instance of the MatlabTcl class instead of
+// a data member of the PTcl class because other libraries, e.g. pigilib,
+// rely on the PTcl class but do not use the "matlab" ptcl command, so
+// false dependencies would otherwise be automatically created by make depend
+#include "MatlabTcl.h"
+
+static MatlabTcl matlabtcl;
+
+int PTcl::matlab(int argc,char** argv) {
+    matlabtcl.SetTclInterpreter(interp);
+    return matlabtcl.matlab(argc, argv);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -965,7 +1080,7 @@ int PTcl::portsContained(int argc,char** argv) {
     }
     if (portname == NULL) return usage ("connected ?-deep? <portname>");
 
-    GenericPort* gp = getPort(portname);
+    const GenericPort* gp = getPort(portname);
     if (!gp) return TCL_ERROR;
 
     // Translate aliases downward if necessary.
@@ -1044,20 +1159,71 @@ int PTcl::remove(int argc,char** argv) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-//// univlist
-// Return a list of the names of the known universes.
-// Each name begins with a dot, and hence is absolute.
-// FIXME: rename.
+//// setState
+// Set the initial value of the specified state.  For this to affect the
+// current value you must invoke *initState*.
 //
-int PTcl::univlist(int argc,char **) {
-    if (argc > 1) return usage("univlist");
-    IUListIter next(univs);
-    InterpUniverse* u;
-    while ((u = next++) != 0) {
-        InfString nm = fullName(u);
-        addResult(nm);
+int PTcl::setState(int argc,char ** argv) {
+    if (argc != 3) return usage("setState <statename> <statevalue>");
+    const Block* b = getParentBlock(argv[1]);
+    if (!b) return TCL_ERROR;
+    Block* parent = b->parent();
+    if (!parent || !parent->isA("InterpGalaxy")) {
+        Tcl_AppendResult(interp, "The parent block of state ", argv[1],
+               " is not in an InterpGalaxy.", (char*)NULL);
+        return TCL_ERROR;
     }
+    InterpGalaxy* gal = (InterpGalaxy*)parent;
+    // Use interpGalaxy method so that new initial value gets on the action
+    // list (so that it will be reflected when the block is cloned).
+    if (!gal->setState(b->name(),rootName(argv[1]),argv[2])) return TCL_ERROR;
     return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//// states
+// Return the list of states in the given block. If no argument is
+// given, return a list of the states of the current galaxy.
+//
+int PTcl::states (int argc,char ** argv) {
+    if (argc > 2) {
+        return usage ("states ?<blockname>?");
+    }
+    const Block* b = getBlock(argv[1]);
+    if (!b) return TCL_ERROR;
+    CBlockStateIter nexts(*b);
+    const State* s;
+    while ((s = nexts++) != 0) addResult(fullName(s));
+    return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//// stateValue
+// Return the value of the specified state. If the option is -initial,
+// then return the initial value. Otherwise, return the current value.
+// 
+int PTcl::stateValue(int argc,char ** argv) {
+    const char* statename;
+    int initial = 0;
+    if (argc == 3 && strcmp(argv[1], "-initial") == 0) {
+        statename = argv[2];
+        initial=1;
+    } else if (argc == 2) {
+        statename = argv[1];
+    } else {
+        return usage ("stateValue ?-initial? <statename>");
+    }
+    const State* s = getState(statename);
+    if (!s) {
+        Tcl_AppendResult(interp, "No state named ", argv[2], (char*)NULL);
+        return TCL_ERROR;
+    }
+    // return initial value if asked.
+    if (initial) {
+        return staticResult(s->initValue());
+    } else {
+        return result(s->currentValue());
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1303,14 +1469,10 @@ InterpGalaxy* PTcl::getParentGalaxy(const char* name) {
 // is not found, register an error message with Tcl and return a null
 // pointer.
 //
-GenericPort* PTcl::getPort(const char* portname) {
+const GenericPort* PTcl::getPort(const char* portname) {
     const Block* b = getParentBlock(portname);
     if (!b) return NULL;
-    // FIXME: in Ptolemy kernel: Block::portWithName is not const (why??)
-    // Should probably have a const version of it!  See PortHole::portWithName.
-    // Thus, we need the following cast.
-    Block* bnc = (Block*)b;
-    GenericPort* p = bnc->genPortWithName(rootName(portname));
+    const GenericPort* p = b->genPortWithName(rootName(portname));
     if (!p) {
         InfString msg = "No such port: ";
         msg << portname;
@@ -1321,40 +1483,25 @@ GenericPort* PTcl::getPort(const char* portname) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
-//// knownBlocks
-// Return a list of the available blocks in the specified domain, or (if no
-// domain is given) the current domain.
+//// getState
+// Given a name, find a state with that name and return a pointer to it.
+// The name has the form _name1.name2...nameN_ (relative) or
+// _.name1.name2...nameN_ (absolute). If the name is simple (no dots at
+// all), search the states of the current galaxy. If the name is dotted
+// relative, the name is relative to the current galaxy. If the state
+// is not found, register an error message with Tcl and return a null
+// pointer.
 //
-int PTcl::knownBlocks (int argc,char** argv) {
-    if (argc > 2)
-    return usage ("knownBlocks ?<domain>?");
-    const char* dom = curdomain;
-    if (argc == 2) {
-        dom = argv[1];
-        if (!KnownBlock::validDomain(dom)) {
-            Tcl_AppendResult(interp, "No such domain: ", dom, (char *) NULL);
-            return TCL_ERROR;
-        }
+const State* PTcl::getState(const char* statename) {
+    const Block* b = getParentBlock(statename);
+    if (!b) return NULL;
+    const char* nm = rootName(statename);
+    CBlockStateIter next(*b);
+    const State* s;
+    while ((s = next++)) {
+        if (strcmp(nm, s->name()) == 0) return s;
     }
-    KnownBlockIter nextB(dom);
-    const Block* b;
-    while ((b = nextB++) != 0) addResult(b->name());
-    return TCL_OK;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//// knownDomains
-// Return a list of the available domains.
-//
-int PTcl::knownDomains(int argc,char **) {
-    if (argc > 1)
-    return usage("knownDomains");
-    int n = Domain::number();
-    for (int i = 0; i < n; i++) {
-        const char* domain = Domain::nthName(i);
-        if (KnownBlock::validDomain(domain)) addResult(domain);
-    }
-    return TCL_OK;
+    return 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1557,82 +1704,6 @@ int PTcl::disconnect(int argc,char ** argv) {
     return TCL_OK;
 }
 
-// newstate: create a new instance of state within galaxy
-int PTcl::newstate(int argc,char ** argv) {
-    if (argc != 4)
-    return usage("newstate <name> <type> <defvalue>");
-    if (!curgalaxy->addState(argv[1],argv[2],argv[3]))
-    return TCL_ERROR;
-    return TCL_OK;
-}
-
-// setstate: set (change) a state within galaxy
-int PTcl::setstate(int argc,char ** argv) {
-    if (argc != 4)
-    return usage("setstate <star> <name> <value>\nor setstate this <name> <value>");
-    if (!curgalaxy->setState(argv[1],argv[2],argv[3]))
-    return TCL_ERROR;
-    return TCL_OK;
-}
-
-static const State* findState(const Block* b, const char* nm) {
-    CBlockStateIter next(*b);
-    const State* s;
-    while ((s = next++)) {
-        if (strcmp(nm, s->name()) == 0) return s;
-    }
-    return 0;
-}
-
-// initialize: initialize a block or state (or porthole?)
-int PTcl::initialize(int argc, char** argv) {
-    if (argc == 3) {
-        // Initialize a state.  Cast away the const.
-        Block* blk = (Block*)getBlock(argv[1]);
-        if (!blk) return TCL_ERROR;
-        State* st = (State*)findState(blk, argv[2]);
-        if (!st) {
-            Tcl_AppendResult(interp,"No such state: ", argv[1], ":",
-            argv[2],(char*)NULL);
-            return TCL_ERROR;
-        }
-        st->initialize();
-    } else if (argc == 2) {
-        // Initialize a state.  Cast away the const.
-        Block* blk = (Block*)getBlock(argv[1]);
-        if (!blk) return TCL_ERROR;
-        blk->initialize();
-    } else {
-        return usage("initialize <block> ?<state>?\n"
-        "or initialize this\n"
-        "or initialize target");
-    }
-    return TCL_OK;
-}
-
-// statevalue: return a state value
-// syntax: statevalue <block> <state> ?current|initial?
-// default is current value
-int PTcl::statevalue(int argc,char ** argv) {
-    if (argc < 3 || argc > 4 ||
-    (argc == 4 && strcmp(argv[3], "current") != 0
-    && strcmp(argv[3], "initial") != 0))
-    return usage ("statevalue <block> <state> ?current|initial?");
-    const Block* b = getBlock(argv[1]);
-    if (!b) return TCL_ERROR;
-    const State* s = findState(b, argv[2]);
-    if (!s) {
-        Tcl_AppendResult(interp, "No state named ", argv[2],
-        " in block ", argv[1], (char*)NULL);
-        return TCL_ERROR;
-    }
-    // return initial value if asked.
-    if (argc == 4 && argv[3][0] == 'i')
-    return staticResult(s->initValue());
-    else
-    return result(s->currentValue());
-}
-
 int PTcl::computeSchedule() {
     SimControl::clearHalt();
     universe->initTarget();
@@ -1827,39 +1898,6 @@ int PTcl::animation (int argc,char** argv) {
 }
 
 
-// return the list of states, ports, or multiports in the given block.
-// The first argument, specifying states, ports, or multiports, must
-// be given.  If the second argument is not given, block is current galaxy.
-// FIXME: Obsolete.  Replaced by ports, states.
-int PTcl::listobjs (int argc,char ** argv) {
-    static char use[] =
-    "listobjs states|ports|multiports ?<block-or-classname>?";
-    if (argc > 3 || argc <= 1)
-    return usage (use);
-    const Block* b = getBlock(argv[2]);
-    if (!b) return TCL_ERROR;
-    if (strcmp(argv[1], "states") == 0) {
-        CBlockStateIter nexts(*b);
-        const State* s;
-        while ((s = nexts++) != 0)
-        addResult(s->name());
-    }
-    else if (strcmp(argv[1], "ports") == 0) {
-        CBlockPortIter nexts(*b);
-        const PortHole* s;
-        while ((s = nexts++) != 0)
-        addResult(s->name());
-    }
-    else if (strcmp(argv[1], "multiports") == 0) {
-        CBlockMPHIter nexts(*b);
-        const MultiPortHole* s;
-        while ((s = nexts++) != 0)
-        addResult(s->name());
-    }
-    else return usage(use);
-    return TCL_OK;
-}
-
 // FIXME: This should be renamed "clear", and "reset" should
 // invoke InterpGalaxy->reset(), which re-executes the action list.
 int PTcl::reset(int argc,char** argv) {
@@ -1868,32 +1906,6 @@ int PTcl::reset(int argc,char** argv) {
     const char* nm = "main";
     if (argc == 2) nm = hashstring(argv[1]);
     newUniv(nm, curdomain);
-    return TCL_OK;
-}
-
-// renameuniv <newname>: rename current univ to newname.
-// renameuniv <oldname> <newname>: rename <oldname> to <newname>.
-// Side effect: if there is an existing universe by the new name,
-// it will be destroyed.
-
-int PTcl::renameuniv(int argc,char ** argv) {
-    InterpUniverse* u = universe;
-    const char* newname = argv[1];
-    if (argc < 2 || argc > 3)
-        return usage("renameuniv <newname> or renameuniv <oldname> <newname>");
-    if (argc == 3) {
-        u = univs.univWithName(argv[1]);
-        if (!u) {
-            Tcl_AppendResult(interp, "No such universe: ", argv[1],
-            (char*) NULL);
-            return TCL_ERROR;
-        }
-        // rename with same name has no effect.
-        if (strcmp(argv[1],argv[2]) == 0) return TCL_OK;
-        newname = argv[2];
-    }
-    univs.delUniv(newname);
-    u->setNameParent(hashstring(newname),0);
     return TCL_OK;
 }
 
@@ -2266,6 +2278,7 @@ static InterpTableEntry funcTable[] = {
     ENTRY(monitorOff),
     ENTRY(abort),
     ENTRY(addBlock),
+    ENTRY(addState),
     ENTRY(addUniverse),
     ENTRY(aliasDown),
     ENTRY(aliasUp),
@@ -2289,18 +2302,18 @@ static InterpTableEntry funcTable[] = {
     ENTRY(getFullName),
     ENTRY(getParent),
     ENTRY(halt),
-    ENTRY(initialize),
+    ENTRY(initBlock),
+    ENTRY(initState),
     ENTRY(isGalaxy),
     ENTRY(isMultiPort),
     ENTRY(isWormhole),
     ENTRY(knownBlocks),
     ENTRY(knownDomains),
+    ENTRY(knownUniverses),
     ENTRY(link),
-    ENTRY(listobjs),
     ENTRY(matlab),
     ENTRY(mathematica),
     ENTRY(multilink),
-    ENTRY(newstate),
     ENTRY(node),
     ENTRY(nodeconnect),
     ENTRY2(permlink,multilink),
@@ -2310,7 +2323,6 @@ static InterpTableEntry funcTable[] = {
     ENTRY(portsContained),
     ENTRY(print),
     ENTRY(remove),
-    ENTRY(renameuniv),
     ENTRY(registerAction),
     ENTRY(reset),
     ENTRY(run),
@@ -2318,12 +2330,12 @@ static InterpTableEntry funcTable[] = {
     ENTRY(schedtime),
     ENTRY(schedule),
     ENTRY(seed),
-    ENTRY(setstate),
-    ENTRY(statevalue),
+    ENTRY(setState),
+    ENTRY(states),
+    ENTRY(stateValue),
     ENTRY(target),
     ENTRY(targetparam),
     ENTRY(targets),
-    ENTRY(univlist),
     ENTRY(wrapup),
     { 0, 0 }
 };
