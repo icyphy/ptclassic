@@ -1,5 +1,5 @@
 # Config file to build on sun4 processor (SparcStation) running Solaris2.5x
-# with gcc-2.8.1
+# with FSF gcc-2.8.1
 
 # $Id$
 
@@ -34,6 +34,11 @@ ARCHFLAGS =	-DPTSOL2_5 #-DPT_EGCS
 
 include $(ROOT)/mk/config-sol2.mk
 
-# system libraries (libraries from the environment)
-# No need to include -lg++ under egcs
-#SYSLIBS=$(CSYSLIBS)
+CPLUSPLUS = $(ROOT)/gnu/sol2.5.fsf/bin/g++
+
+# gcc-2.8.1 has a bug that causes it to fail under solaris2.5.1
+# when compiling kernel/Block.cc with -O optimization
+OPTIMIZER=
+
+# Don't include the PN domain
+INCLUDE_PN_DOMAIN =	no
