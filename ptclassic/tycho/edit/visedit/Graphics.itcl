@@ -230,7 +230,7 @@ body ::tycho::Graphics::scrollSet {dialog} {
     }
     if {$option != $prevoption} {
         component graphics configure -scrolling $option
-        component graphics updateDisplay
+        component graphics updateScrollbars
         markModified
     }
 }
