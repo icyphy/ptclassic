@@ -17,7 +17,7 @@ include $(CONFIG)
 
 # SDFDIR is the directory containing SDF domain support
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
-IMAGE = $(ROOT)/src/domains/sdf/image
+IMAGE = $(ROOT)/src/domains/sdf/image/kernel
 INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(IMAGE)
 
 # Library name
@@ -25,33 +25,30 @@ LIB=libsdfstars.a
 
 # source files for all stars, using preprocessor
 PL_SRCS= \
+ SDFAddCx.pl \
  SDFAverage.pl \
+ SDFAverageCx.pl \
  SDFBitsToInt.pl \
  SDFBlackHole.pl \
  SDFBusToNum.pl \
  SDFCommutator.pl \
- SDFAverageCx.pl \
+ SDFConst.pl \
  SDFConstCx.pl \
- SDFMpyCx.pl \
  SDFCxToRect.pl \
- SDFAddCx.pl \
  SDFCos.pl \
  SDFCut.pl \
- SDFSubCx.pl \
- SDFGainCx.pl \
- SDFTableCx.pl \
- SDFWaveFormCx.pl \
+ SDFCutVarOffset.pl \
  SDFDB.pl \
  SDFDeMux.pl \
  SDFDistributor.pl \
  SDFDownSample.pl \
  SDFExp.pl \
- SDFConst.pl \
- SDFSub.pl \
  SDFGain.pl \
+ SDFGainCx.pl \
  SDFImpulse.pl \
- SDFPad.pl \
+ SDFMakeBitArray.pl \
  SDFMpy.pl \
+ SDFPad.pl \
  SDFRamp.pl \
  SDFRect.pl \
  SDFAdd.pl \
@@ -67,6 +64,7 @@ PL_SRCS= \
  SDFIntegrator.pl \
  SDFLimit.pl \
  SDFLog.pl \
+ SDFMpyCx.pl \
  SDFMux.pl \
  SDFLinQuantIdx.pl \
  SDFNumToBus.pl \
@@ -84,10 +82,14 @@ PL_SRCS= \
  SDFSgn.pl \
  SDFSin.pl \
  SDFSqrt.pl \
+ SDFSub.pl \
+ SDFSubCx.pl \
+ SDFTableCx.pl \
  SDFTrainer.pl \
  SDFUpSample.pl \
  SDFWaterfall.pl \
  SDFWaveForm.pl \
+ SDFWaveFormCx.pl \
  SDFXMgraph.pl \
  SDFXYgraph.pl \
  SDFXgraph.pl \
