@@ -11,6 +11,14 @@ wm iconify .
 # Create the tycho namespace
 namespace ::tycho
 
+if [info exist env(PTOLEMY)] {
+    set TYCHO $env(PTOLEMY)/tycho
+}
+ 
+if [info exist env(TYCHO)] {
+    set TYCHO $env(TYCHO)
+}
+
 # Set up the auto_path. WHat we do here is simply append
 # paths to the auto_path in the order that is likely to
 # be most rapid for finding the needed packages. Note that
