@@ -118,6 +118,8 @@ ITCL_SRCS = \
 	RevControlSCCS.itcl \
 	RevControlRCS.itcl \
 	Scheduler.itcl \
+	SimpleModel.itcl \
+	SimpleView.itcl \
 	Stack.itcl \
 	StarLibrary.itcl \
 	StatusBar.itcl \
