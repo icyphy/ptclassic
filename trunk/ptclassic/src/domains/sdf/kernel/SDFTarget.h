@@ -49,11 +49,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "IntState.h"
 #include "FloatState.h"
 
+// Defined in SDFDomain.cc
+extern const char SDFdomainName[];
+
 class SDFTarget : public Target {
 
 public:
 	// constructor
-	SDFTarget(const char* nam, const char* desc);
+	SDFTarget(const char* nam, const char* desc,
+		  const char* assocDomain = SDFdomainName);
 
 	// destructor
 	~SDFTarget();
@@ -63,9 +67,6 @@ public:
 
 	// return a new copy of the target
 	Block* makeNew() const;
-
-	// return the domain of the galaxy or "SDF" otherwise
-	/*virtual*/ const char* domain();
 
 protected:
 	StringState logFile;
