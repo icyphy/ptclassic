@@ -217,7 +217,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		int i;
 		for(i=0; i<$val(numInputs); i++) {
                     sprintf(temp, "%f", $starSymbol(ins)[i]);
-		    Tcl_AppendElement(interp,temp,0);
+		    Tcl_AppendElement(interp,temp);
 		}
                 return TCL_OK;
             }
