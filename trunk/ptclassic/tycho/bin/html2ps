@@ -47,6 +47,9 @@ exec tclsh "$0" "$@"
 # This file can be used as a standalone script, without all of tycho,
 # so it includes ::tycho::expandPath
 
+# Create the tycho namespace
+namespace eval ::tycho {}
+
 #####################################################################
 #### psConcat
 # Concatenate a bunch of PostScript files into one file.
