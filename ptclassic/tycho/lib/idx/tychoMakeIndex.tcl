@@ -30,13 +30,17 @@
 # 						COPYRIGHTENDKEY
 
 ## BOGOSITY alert! This file now generates TIM format files,
-# so we have to load a bunch of needed files:
+# so we have to load a bunch of needed files if we are running this
+# outside of Tycho
+if { [uplevel #0 info namespace all tycho] == {} } {
+    namespace ::tycho
+    source ../../kernel/Object.itcl
+    source ../../kernel/Interchange.itcl
+    source ../../kernel/Model.itcl
+    source ../../kernel/HyperlinkIndex.itcl
+    source ../../kernel/Path.tcl
+}
 namespace ::tycho
-source ../../kernel/Object.itcl
-source ../../kernel/Interchange.itcl
-source ../../kernel/Model.itcl
-source ../../kernel/HyperlinkIndex.itcl
-source ../../kernel/Path.tcl
 
 #### tychoCompareFirst
 # Given two lists, return -1, 0, or 1 depending on whether the first
