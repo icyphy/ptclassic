@@ -136,7 +136,14 @@ hp_gas_configure: $(GNU_OBJ) $(GNU_OBJ)/hp
 	-(cd $(GNU_OBJ)/hp/libiberty; ln -s $(HP_GAS_SRC)/libiberty/*.c* .)
 	-(cd $(GNU_OBJ)/hp/bfd; ln -s $(HP_GAS_SRC)/bfd/*.c .)
 	-(cd $(GNU_OBJ)/hp/bfd; ln -s $(HP_GAS_SRC)/bfd/*.h .)
-
+	-(cd $(GNU_OBJ)/hp/opcode; ln -s $(HP_GAS_SRC)/opcode/*.c .)
+	-(cd $(GNU_OBJ)/hp/opcode; ln -s $(HP_GAS_SRC)/opcode/*.h .)
+	-(cd $(GNU_OBJ)/hp/texinfo/makeinfo; ln -s $(HP_GAS_SRC)/texinfo/makeinfo/*.c .)
+	-(cd $(GNU_OBJ)/hp/texinfo/makeinfo; ln -s $(HP_GAS_SRC)/texinfo/makeinfo/*.h .)
+	-(cd $(GNU_OBJ)/hp/texinfo/info; ln -s $(HP_GAS_SRC)/texinfo/info/*.c .)
+	-(cd $(GNU_OBJ)/hp/texinfo/info; ln -s $(HP_GAS_SRC)/texinfo/info/*.h .)
+	-(cd $(GNU_OBJ)/hp/texinfo/util; ln -s $(HP_GAS_SRC)/texinfo/util/*.c .)
+	-(cd $(GNU_OBJ)/hp/texinfo/util; ln -s $(HP_GAS_SRC)/texinfo/util/*.h .)
 $(GNU_OBJ)/hp:
 	mkdir $(GNU_OBJ)/hp
 
