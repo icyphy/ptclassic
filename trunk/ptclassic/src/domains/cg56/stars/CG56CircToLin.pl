@@ -64,9 +64,11 @@ Data movement is repeated inline so may not be efficient for large N.
 	for (int j = 0; j < n; j++) {
 	    if (input.resolvedType() == COMPLEX)
 		addCode(oneComplex
-			(j,input.bufSize()==1?"$addr(input)":"(r0)+"));
+			(j, (char *) (input.bufSize()==1 ? 
+                                "$addr(input)" : "(r0)+")));
 	    else
-		addCode(oneReal(j,input.bufSize()==1?"$addr(input)":"(r0)+"));
+		addCode(oneReal(j, (char *) (input.bufSize()==1 ?
+                        "$addr(input)" : "(r0)+")) );
 	}
 	if (input.bufSize()>1) addCode(restore);
     }
