@@ -37,6 +37,8 @@ CFLAGS =	-g -DUSG $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 # Note that currently vem is built with cc, not gcc, so vem uses
 # this flag. See also config-g++.mk
 CC_STATIC = 	-Wl,-a,archive
+# If you are trying out the shl_load feature then you want
+# CC_STATIC =	
 
 # For some reason, hppa ends up with very large (30Mb) pigiRpc binaries,
 # even if we pass ld the -x option:
@@ -48,9 +50,12 @@ CC_STATIC = 	-Wl,-a,archive
 # of 30 minutes.  GNU strip (cygnus-2.3.1 version) was reported to have 
 # troubles here, so use HP strip.
 STRIP_DEBUG =	/bin/strip -x
+# If you are trying out the shl_load feature then you want
+# STRIP_DEBUG = true
 
 # We ship statically linked binaries, but other sites might want
 # to remove the -static below
+# If you are trying out the shl_load feature, then remove -static
 LINKFLAGS = 	-L$(LIBDIR) -Xlinker -x -static
 LINKFLAGS_D = 	-L$(LIBDIR) -g -static
 
@@ -101,3 +106,6 @@ FLUSH_CACHE =	flush_cache.o
 # Destination of flush_cache.  Can't just subsitute $(LIBDIR)/flush_cache.o
 # in pigiRpc/makefile, or the make will fail on other archs.
 LIB_FLUSH_CACHE = $(LIBDIR)/flush_cache.o
+
+# If you are trying out the shl_load feature uncomment the line below.
+#SHAREDFLAGS =		-fPIC
