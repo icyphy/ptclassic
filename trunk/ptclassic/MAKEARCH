@@ -214,7 +214,7 @@ dirs="cg/targets sdf/image sdf/targets \
 	cg/macroScheduler cg/ddfScheduler cgc/targets cgc/tcltk cgc/vis \
 	c50/dsp cg56/dsp \
 	sdf/atm sdf/contrib sdf/dsp sdf/dfm sdf/image \
-	sdf/matrix sdf/matlab sdf/vis \
+	sdf/matrix sdf/matlab sdf/vis sdf/wildforce \
 	cgc/contrib cgc/dsp cgc/rtlib \
 	acs/targets \
 	vhdl/targets vhdl/tcltk \
