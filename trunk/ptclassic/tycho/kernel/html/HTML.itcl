@@ -293,7 +293,7 @@ body ::tycho::HTML::currentPoint {} {
 # Hand the focus to the text window.
 #
 body ::tycho::HTML::focusin {} {
-    focus [$itk_component(text) textWinName]
+    $itk_component(text) focusin
 }
 
 #########################################################################
