@@ -65,6 +65,7 @@ defstar {
                 type { int }
                 default { "0" }
                 desc { "count (internal)" }
+		attributes { A_NONSETTABLE|A_NONCONSTANT }
         }
         output {            // the output port
                 name { output }
