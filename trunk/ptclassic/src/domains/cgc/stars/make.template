@@ -136,6 +136,7 @@ PL_SRCS= \
  CGCPolarToRect.pl \
  CGCPrinter.pl \
  CGCQuantIdx.pl \
+ CGCQuantizer.pl \
  CGCRamp.pl \
  CGCRampFix.pl \
  CGCRampInt.pl \
