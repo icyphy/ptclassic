@@ -97,7 +97,10 @@ limitation of liability, and disclaimer of warranty provisions.
 		       outputset[i] = steering[i];
 		   }
 
-		Complex e = Complex(error%0) * double(stepSize);
+		//Complex e = Complex(error%0) * double(stepSize);
+		Complex tmperror = error%0;
+		Complex e = tmperror * double(stepSize);
+
 		int index = int(errorDelay);
 
 		MPHIter nexti(input);
@@ -108,11 +111,16 @@ limitation of liability, and disclaimer of warranty provisions.
 		    // First update the steering vector
 		    // adjustment is the conjugate of e times the input
 		    // this is consistent with the RLSArray Star
-			steering[i] = steering[i] + conj(e) * Complex((*p)%index);
+
+		    // We use a temporary variable to 
+		    // avoid gcc2.7.2/2.8 problems
+		    Complex tmp1 = (*p)%index;
+		    steering[i] = steering[i] + conj(e) * tmp1;
 
 		    // with the updated steering we can calculate the
 		    // output simultaneously
-			sum += (Complex)((*p)%0) * conj(steering[i++]);
+		    Complex tmp2 = (*p)%0;	
+		    sum += tmp2 * conj(steering[i++]);
 		}
 		output%0 << sum;
 	}

@@ -89,8 +89,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	    for (int w = AngRes-1; w >=0 ; w--)
 	    {
 		G=0;
-		for (int element = 0; element < NumberElements; element++)
-		    G+=*(p++) * conj(Complex(steering%(NumberElements-element-1)));
+		for (int element = 0; element < NumberElements; element++) {
+		      // We use a temporary variable to 
+		      // avoid gcc2.7.2/2.8 problems
+		      Complex tmp = steering%(NumberElements-element-1);
+		      G+=*(p++) * conj(Complex(tmp));
+		}
 		output%w << abs(G);		    
 	    }
 	}

@@ -81,7 +81,7 @@ limitation of liability, and disclaimer of warranty provisions.
 #define DEGREES_TO_RADIANS 0.0174532925199432957692
   }
   go {
-    Complex z = Complex(in%0);
+    Complex z = in%0;
     double bo = norm(z);
     double oldphase = arg(z);
     double bodB = 10. * log10(bo) - double(Backoff);

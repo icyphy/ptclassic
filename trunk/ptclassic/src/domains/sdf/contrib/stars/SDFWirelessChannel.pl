@@ -139,7 +139,9 @@ effects of the time variation.
 	}
 
 	go {
-		DataOut%0 << Channel.Input( Complex(DataIn%0) );
+	        // We use a temporary variable to avoid gcc2.7.2/2.8 problems
+		Complex tmp = DataIn%0;
+		DataOut%0 << Channel.Input(tmp);
 	}
 
 }

@@ -149,7 +149,7 @@ defstar {
         go {
             if (start.dataNew) {
                 restart.put(arrivalTime) << 1;
-                Rec= Complex (R_Pos.get());
+		Rec= R_Pos.get();
                 Rx= real (Rec);
                 Ry= imag (Rec);
                 cell_verif ();

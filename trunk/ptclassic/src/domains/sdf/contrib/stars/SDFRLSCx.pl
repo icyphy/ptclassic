@@ -117,8 +117,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		int i1, j;
 
 		for (i=0; i<NumberElements; i++) {
-			x_vector[i] = Complex(input%(index+i));
-			x_vector_new[i] = Complex(input%i);
+			// We use a temporary variable to 
+		        // avoid gcc2.7.2/2.8 problems
+			Complex tmp1 = input%(index+i);
+			x_vector[i] = tmp1;
+			Complex tmp2 = input%i;
+			x_vector_new[i] = tmp2;
 		}
 
 		// k=P*x/(lambda+x'*P*x)
@@ -136,8 +140,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		   k_vector[i]=t1_vector[i]*t2;
 
 		// w=w+k*conj(e)
-		for (i=0; i<NumberElements; i++)
-		   taps[i]+=k_vector[i]*conj(Complex(error%0));
+		for (i=0; i<NumberElements; i++) {
+		   // We use a temporary variable to 
+		   // avoid gcc2.7.2/2.8 problems
+		   Complex tmp = error%0;
+		   taps[i]+=k_vector[i]*conj(tmp);
+		}
 
 		// y=w'*x (calculate the output signal, use the actual input)
 		Complex y = Complex(0.0,0.0);
