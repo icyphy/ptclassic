@@ -64,7 +64,7 @@ Wormhole::Wormhole(Star& s,Galaxy& g,const char* targetName) : gal(g),
         selfStar(s), Runnable(targetName,g.domain(),&g)
 {
 	// set up the parent pointer of inner Galaxy
-	g.setNameParent(g.name(), &s);
+	g.setParent(&s);
 
 	dynamicHorizons = FALSE;
 }
@@ -73,7 +73,7 @@ Wormhole::Wormhole(Star& s,Galaxy& g,Target* innerTarget) : gal(g),
         selfStar(s), Runnable(innerTarget,g.domain(),&g)
 {
 	// set up the parent pointer of inner Galaxy
-	g.setNameParent(g.name(), &s);
+	g.setParent(&s);
 
 	dynamicHorizons = FALSE;
 }
