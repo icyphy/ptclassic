@@ -49,13 +49,14 @@ ITCL_SRCS =  \
 	IconLibrary.itcl \
 	Junction.itcl \
 	Layout.itcl \
+	Net.itcl \
 	SlateView.itcl \
 	StarLibrary.itcl \
 	ViewController.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =		doc test tclIndex 
+MISC_FILES =		doc test tclIndex icons.tim stars.tim
 
 # Sub directories to run make in.
 DIRS =			doc test
