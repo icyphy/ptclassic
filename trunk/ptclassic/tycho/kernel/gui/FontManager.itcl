@@ -250,7 +250,7 @@ body ::tycho::FontManager::checkXFont {font} {
 # fonts to scan through if the font manager fails to satisfy a request
 # for that family.
 #
-# </b>Warning</b>: Use of this procedure with more than one argument
+# <b>Warning</b>: Use of this procedure with more than one argument
 # is not for casual use. The facility is provided to allow customization
 # of the font choices for particular Tycho installations, not to allow
 # users (for example) to arbitrarily mess with the font setup.
