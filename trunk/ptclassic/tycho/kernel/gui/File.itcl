@@ -505,7 +505,7 @@ body ::tycho::File::destructor {} {
     if {[info exists modified] && $modified} {
 	set title [file tail $file]
 
-	set response [::tycho::DialogWindow::newModal YesNoCancel .z \
+	set response [::tycho::DialogWindow::newModal YesNoCancel .filedestr \
 		-text "Save changes to $title before closing?"]
 
 	# If the user hits the cancel button, cancel destruction.
