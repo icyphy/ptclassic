@@ -69,4 +69,11 @@ extern char *getwd ARGS((char *));
 /* buffer length for messages */
 #define MSG_BUF_MAX 512
 
+/* If a star is not in a domain, then we specify NODOMAIN as the domain.
+   This is useful if we are trying to make an icon for a HTML file.
+   MkStar() in icon.c and MkStarIcon() in mkIcon.c use NODOMAIN
+ */
+#define NODOMAIN "NODOMAIN"
+
+
 #endif  /* _LOCAL_H */
