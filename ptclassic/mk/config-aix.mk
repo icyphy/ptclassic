@@ -89,6 +89,10 @@ X11EXT_LIBSPEC=-lXext
 VEM_X11_LIBSPEC = \
 $(SMTLIB) -L/usr/lib -lXaw -lXmu $(X11EXT_LIBSPEC) -lIM -lXt -lX11
 
+MATLABEXT_LIB = -Xlinker \
+		-bI:$(MATLABDIR)/extern/lib/$(MATARCH)/exp.$(MATARCH) \
+		-L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
+
 # system libraries (libraries from the environment)
 # ordering dictates which pow function for ^ in parameter expressions is used
 # and what math functions Tcl/Tk uses: math lib must come before the bsd lib
