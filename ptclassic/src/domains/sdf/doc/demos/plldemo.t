@@ -5,7 +5,13 @@ Simulate a fourth-power optical phase-locked loop
 with laser phase noise and additive Gaussian white noise
 operating on a complex baseband envelope model of the signal.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "John R. Barry"

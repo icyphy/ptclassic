@@ -8,7 +8,13 @@ filter in a feedback path, and the other uses the
 .c BlockAllPole
 star.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .SV $Revision$	"%D%"
 .AL "Edward A. Lee"

@@ -4,7 +4,13 @@
 A simple demo illustrating the different masking options available
 for the fixed-point number format.
 .SE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "A. Khazeni, Asawaree Kalavade"
 .LD

@@ -4,7 +4,13 @@
 This demo shows the effect of filter tap precision on the
 filter response.
 .SE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "A. Khazeni, Asawaree Kalavade"
 .LD

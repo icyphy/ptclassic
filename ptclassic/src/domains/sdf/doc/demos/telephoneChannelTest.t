@@ -5,7 +5,13 @@ Assuming a sampling rate of 8 kHz, a sinusoid at 500 Hz
 is transmitted through a simulation of a telephone channel with
 additive Gaussian noise, nonlinear distortion, and phase jitter.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Edward A. Lee"

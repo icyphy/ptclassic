@@ -10,7 +10,13 @@ The conversion is performed in multiple stages for better performance.
 .EQ
 delim off
 .EN
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .LD
 .EQ
 delim $$

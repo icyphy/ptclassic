@@ -8,7 +8,13 @@ It then reconstructs the signal from the quantized data.
 The original and reconstructed speech are played over the
 workstation speaker.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Tom Parks"

@@ -3,7 +3,13 @@
 .SD
 Modulate a sinusoid my multiplying by another sinusoid.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Edward A. Lee"

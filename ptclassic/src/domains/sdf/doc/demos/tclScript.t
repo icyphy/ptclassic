@@ -6,7 +6,13 @@ Demonstrate the
 star by generating two interactive X window follies that consist of
 circles that move in a playing field.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"

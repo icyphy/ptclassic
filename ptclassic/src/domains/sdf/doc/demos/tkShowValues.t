@@ -7,7 +7,13 @@ and
 .c TkText
 stars by displaying the ASCII form of two ramp sequences.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"

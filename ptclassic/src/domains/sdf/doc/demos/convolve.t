@@ -5,7 +5,13 @@ Convolve two rectangular pulses in order to demonstrate the use of the
 .c Convolve
 block.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Kennard White"

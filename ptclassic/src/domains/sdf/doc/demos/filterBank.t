@@ -4,7 +4,13 @@
 This universe implements an eight-level perfect reconstruction one-dimensional
 filter bank based on the biorthogonal wavelet decomposition.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Alan Peevers"

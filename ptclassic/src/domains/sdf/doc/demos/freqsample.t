@@ -4,7 +4,13 @@
 This system designs FIR filters using the frequency sampling method.
 Samples of the frequency response are converted into FIR filter coefficients.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Joseph T. Buck and Edward A. Lee"

@@ -8,7 +8,13 @@ The first oscillates sinusoidally.
 The second displays a random number between zero and one.
 The third displays a random walk.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"
