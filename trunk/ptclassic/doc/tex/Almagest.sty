@@ -23,12 +23,13 @@
 %
 % Redefine the "headings" page style.
 %
-\newcommand{\Volume}{1}
+\newcounter{volume}
+\setcounter{volume}{1}
 \def\ps@headings{\let\@mkboth\markboth
     \def\@oddfoot{\footnotesize \sf Ptolemy \hfill Last updated: \@date}
     \def\@evenfoot{\footnotesize \sf UC Berkeley \hfill Department of EECS}
-    \def\@oddhead{\footnotesize \sf \leftmark \hfill \Volume-\thepage}
-    \def\@evenhead{\footnotesize \sf \Volume-\thepage \hfill \rightmark}
+    \def\@oddhead{\footnotesize \sf \leftmark \hfill \thepage}
+    \def\@evenhead{\footnotesize \sf \thepage \hfill \rightmark}
     \def\leftmark{The Almagest}
     \def\chaptermark##1{\markright{##1}}
     \def\sectionmark##1{} }
