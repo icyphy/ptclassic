@@ -188,7 +188,6 @@ limitation of liability, and disclaimer of warranty provisions.
                 int argc;                           /* Number of arguments. */
                 char **argv;                        /* Argument strings. */
             {
-		float temp;
 		int i;
 		if(argc != $ref(numOutputs)+1) {
                     errorReport("Invalid number of arguments");
