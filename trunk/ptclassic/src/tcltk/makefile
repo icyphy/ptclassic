@@ -147,7 +147,10 @@ $(TCLTK_OBJ)/$(TCL_VERSION): $(TCL_OBJ)
 tk: $(TK_OBJ)/libtk.a 
 $(TK_OBJ)/libtk.a: $(TK_OBJ) $(TK_OBJ)/xpm/libxpm.a
 	@echo "Making all in tk"
-	(cd  $(TK_OBJ); $(MAKE) all)
+	(cd  $(TK_OBJ); $(MAKE) \
+		X11_INCLUDES=$(X11_INCSPEC) \
+		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
+		all)
 
 # Build libxpm for TkPixMap
 # Pick up the X11 includes on machines like Solaris2
