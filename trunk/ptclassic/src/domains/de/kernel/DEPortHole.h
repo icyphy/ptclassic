@@ -1,8 +1,8 @@
 /**************************************************************************
 Version identification:
-$Id$
+$Id$ $Revision$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -73,6 +73,10 @@ public:
 
 	// The initialize function is redefined to set DE-specific members.
 	void initialize();
+
+	// clean itself before a new phase of firing.
+	// No-op unless overridden by a subclass.
+	virtual void cleanIt() {}
 
 	// DEPortHole has a "timeStamp" attribute.
 	double timeStamp;
@@ -154,7 +158,7 @@ public:
 	}
 
 	// clean itself before a new phase of firing.
-	virtual void cleanIt(); 
+	/* virtual */ void cleanIt(); 
 
 	// constructor and destructor
 	InDEPort() : complete(TRUE), beforeP(0), triggerList(0), inQue(0) {}
