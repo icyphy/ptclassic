@@ -1673,6 +1673,8 @@ int POct::ptkGetStarName(int aC, char** aV) {
     }
 }
 
+// The rest of the code in this file is duplicated from the PTcl class
+// in $PTOLEMY/src/ptcl/PTcl.cc.
 
 // An InterpFuncP is a pointer to an PTcl function that takes an argc-argv
 // argument list and returns TCL_OK or TCL_ERROR.
