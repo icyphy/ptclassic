@@ -96,7 +96,7 @@ GT_OBJ = $(ROOT)/obj.$(PTARCH)/thread/gthreads
 
 # Redefined make variables.
 GT_CFLAGS =	-DASM_SETJMP -DNOERR_CHECK -DSTACK_CHECK -DSIGNAL_STACK \
-		-DSRP -DC_INTERFACE
+		-DC_INTERFACE
 GT_COMP_ASM =	$$(CC) $$(INC1) $$(INC2) $$(CFLAGS) -c $$*.S
 
 # Only the gthreads_install and gthreads_clean rules are externally visible.
@@ -109,13 +109,20 @@ gthreads_install: $(THREAD_ROOT) $(THREAD_LIB) $(THREAD_INCLUDE) \
 
 # Clean up.
 gthreads_clean: $(GT_OBJ)
-	$(MAKE) -C $(GT_OBJ)/src clean;
+	rm -rf $(GT_OBJ)
+
+# Uninstall.
+gthreads_uninstall:
+	rm -rf $(THREAD_INCLUDE)/pthread.h $(THREAD_INCLUDE)/pthread
+	rm -f $(THREAD_LIB)/libgthreads.a
 
 else
 gthreads_install:
 	@echo "gthreads_install need not do anything for this architecture"
 gthreads_clean:
-	@echo "gthreads_install need not do anything for this architecture"
+	@echo "gthreads_clean need not do anything for this architecture"
+gthreads_uninstall:
+	@echo "gthreads_uninstall need not do anything for this architecture"
 endif
 
 # Build a shadow tree to hold object files.
@@ -123,7 +130,7 @@ GT_OBJ_SUBDIRS =	include lib src
 $(GT_OBJ): $(GT_SRC)
 	-mkdir $@
 	# lndir is not available everywhere, so we can't use it.
-	#lndir ../$< $@
+	# lndir ../$< $@
 	-for mydir in $(GT_OBJ_SUBDIRS); \
 	do \
 		if [ ! -d $(GT_OBJ)/$$mydir ]; then \
@@ -133,9 +140,8 @@ $(GT_OBJ): $(GT_SRC)
 				ln -s ../../$(GT_SRC)/$$mydir/* .); \
 		fi; \
 	done
-	#rm -f $(GT_OBJ)/src/Makefile
-# Oops! There is no default Makefile in the distribution.
-	#cd $(GT_OBJ)/src; ln -s Makefile.Solaris Makefile
+	# There is no default Makefile in the distribution.
+	-cd $(GT_OBJ)/src; ln -s Makefile.Solaris Makefile
 
 # Build library for sol2 using Gnu compiler.
 gthreads_sol2: $(GT_OBJ)
