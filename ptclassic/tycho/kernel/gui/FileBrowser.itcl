@@ -436,7 +436,7 @@ body ::tycho::FileBrowser::complete {} {
             # matches. If no common initial string (example: *.itcl), don't
             # complete, leave pattern.
 
-            set compMatch [lsubstring $matches]
+            set compMatch [::tycho::lsubstring $matches]
             if {$compMatch != {}} {
                 set lastCompletion [::tycho::url join $dir $compMatch]
             } else {
