@@ -35,7 +35,6 @@ extern int RunUniverse(char* name, int iterations);
 extern int ptkRun(octObject *facetPtr, boolean now);
 
 extern int RpcRun(RPCSpot *spot, lsList cmdList, long userOptionWord);
-extern int RpcReRun(RPCSpot *spot, lsList cmdList, long userOptionWord);
 extern int RpcDisplaySchedule(RPCSpot *spot, lsList cmdList, long userOptionWord);
 
 /* FIXME:  The following function is not in exec.c */
@@ -44,7 +43,6 @@ extern int ParallelSched();
 extern int RunUniverse();
 extern int ptkRun();
 extern int RpcRun();
-extern int RpcReRun();
 extern int RpcDisplaySchedule();
 extern int ParallelSched();
 #endif /* __cplusplus */
