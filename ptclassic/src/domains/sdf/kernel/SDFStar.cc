@@ -6,9 +6,8 @@ $Id$
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer:  E. A. Lee and D. G. Messerschmitt
+ Programmer:  E. A. Lee, J. Buck, D. G. Messerschmitt
  Date of creation: 5/29/90
- Split off from Star.h by J. Buck
 
 *******************************************************************/
 
@@ -125,6 +124,7 @@ int SDFStar :: notRunnable () {
 int SDFStar :: simRunStar (int deferFiring) {
 
 	int test = notRunnable();
+
 	if(test) return test;	// return if the star cannot be run
 
 	// If we get to this point without returning, then the star can be run.
@@ -175,7 +175,7 @@ int SDFStar :: simRunStar (int deferFiring) {
 
 // return TRUE if we can defer the star, FALSE if we cannot.
 // Postpone any execution of a star feeding data to another
-// star that is runnable.  Also postpone if each output port
+// star that is runnable.  Also postpone if any output port
 // has enough data on it to satisfy destination stars.
 
 int SDFStar :: deferrable () {
@@ -204,9 +204,9 @@ int SDFStar :: deferrable () {
 	// Alternatively, the block might be deferred if its output
 	// ports all have enough data to satisfy destination
 	// stars, even if the destination stars are not runnable.
+	// if deferCondition is 2, we defer if ANY output port has
+	// enough data.
 
-	// We must detect the case that there are no output ports
-	int outputPorts = FALSE;
 	nextp.reset();	// restart iterator
 	for(i = numberPorts(); i>0; i--) {
 
@@ -220,18 +220,12 @@ int SDFStar :: deferrable () {
 
 		// The farside port is an input.  Check Particle supply
 		// if not enough, atom cannot be deferred.
-		if(port->numTokens() < port->numXfer())
-			return FALSE;
-			
-		// Since the farside port is an input, the nearside is
-		// an output
-		outputPorts = TRUE;
+		// (unless minimum-memory case)
+		if (port->numTokens() >= port->numXfer())
+			return TRUE;
 	}
 
-	// If we get here, all destinations have enough data,
-	// and the block can be deferred, assuming there are output ports.
-
-	return outputPorts;
+	return FALSE;
 }
 
 
