@@ -152,12 +152,6 @@ class ::tycho::Terminal {
     proc coords {id canvas slate args}
     
     ###################################################################
-    ####                         protected variables               ####
-
-    # The terminal is a "point" shape
-    protected common shape "point"
-
-    ###################################################################
     ####                         private variables                 ####
 
     # The virtual "method" table
@@ -195,6 +189,7 @@ class ::tycho::Terminal {
     set optiondefault(-direction) {1 0}
     set optiondefault(-fill)      black
     set optiondefault(-length)    25
+    set optiondefault(-shape)     point
     set optiondefault(-style)     arrow
     set optiondefault(-type)      input
     set optiondefault(-width)     1

@@ -116,12 +116,6 @@ class ::tycho::LabeledFrame {
     private common optiondefault
 
     ###################################################################
-    ####                         protected variables               ####
-
-    # Labeled frames are rectangular in shape
-    protected common shape "rectangle"
-
-    ###################################################################
     ####                       class initialization                ####
 
     #### Set method table

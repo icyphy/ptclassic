@@ -162,12 +162,6 @@ class ::tycho::LabeledLine {
     proc coords {id canvas slate args}
 
     ###################################################################
-    ####                         protected variables               ####
-
-    # LabeledLines are shaped like... lines
-    protected common shape "line"
-
-    ###################################################################
     ####                          private variables                ####
 
     # The virtual "method" table
@@ -197,6 +191,7 @@ class ::tycho::LabeledLine {
     set optiondefault(-anchor)	"s"
     set optiondefault(-arrow)   last
     set optiondefault(-fill)	black
+    set optiondefault(-shape)   line
     set optiondefault(-smooth)  off
     set optiondefault(-text)	""
 }
