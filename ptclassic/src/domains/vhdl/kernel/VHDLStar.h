@@ -55,8 +55,8 @@ public:
 	// my domain
 	const char* domain() const;
 
-	// Sanitize a string so that it is usable as a VHDL identifier.
-	const char* sanitize(const char*);
+//	// Sanitize a string so that it is usable as a VHDL identifier.
+//	const char* sanitize(const char*);
 
 	// run this star
 	int run();

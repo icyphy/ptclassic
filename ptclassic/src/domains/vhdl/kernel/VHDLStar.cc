@@ -47,6 +47,7 @@ extern const char VHDLdomainName[];
 // My domain.
 const char* VHDLStar :: domain() const { return VHDLdomainName; }
 
+/*
 // Sanitize a string so that it is usable as a VHDL identifier.
 const char* VHDLStar :: sanitize(const char* string) {
     const int MAX_LENGTH = 64;
@@ -69,6 +70,7 @@ const char* VHDLStar :: sanitize(const char* string) {
 
     return clean;
 }
+*/
 
 // Expand macros.  Return empty StringList on error.  ArgList must be
 // passed by reference so that the StringList is not consolidated.
