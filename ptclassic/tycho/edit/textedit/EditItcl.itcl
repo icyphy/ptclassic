@@ -131,6 +131,9 @@ class ::tycho::EditItcl {
 body ::tycho::EditItcl::constructor {args} {
     eval itk_initialize $args
 
+    # If you add Special Menu choices, be sure to consider deleting them
+    # in EditPTcl, which inherits from EditItcl.
+
     menubar add "Body Template" Special -underline 0 \
 	    -command "$this bodyTemplate"
 
