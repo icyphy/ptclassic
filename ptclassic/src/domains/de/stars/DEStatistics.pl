@@ -13,6 +13,16 @@ an output is produced before the calculations are restarted.
 	author { Soonhoi Ha }
 	copyright { 1991 The Regents of the University of California }
 	location { DE main library }
+	explanation {
+Calculate the time average and variance of the input values that have
+arrived since the last reset.  The execution order of the inputs is
+demand->reset->input.  Multiple simultaneous demand/reset inputs are
+ignore except one.
+.pp
+The computation is performed based on the zero-th order interpolation.
+When an input data enters, we assume that the data value is hold until
+the next input arrives.
+	}
 	input {
 		name { input }
 		type { float }
@@ -44,6 +54,7 @@ an output is produced before the calculations are restarted.
 	constructor {
 		input.triggers();
 		reset.triggers();
+		setMode(PHASE);
 	}
 	start {
 		previous = 0;
@@ -83,7 +94,6 @@ an output is produced before the calculations are restarted.
 			     	squareSum += previous * previous * span;
 			}
 			previous = float(input.get());
-			input.getSimulEvent();
 			// renew the completionTime
 			completionTime = arrivalTime;
 		}

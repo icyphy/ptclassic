@@ -2,11 +2,10 @@ defstar {
 	name { UDCounter }
 	domain { DE }
 	desc {
-Increase or decrease the count upon receiving a "countUp" or "countDown" input.
-When a "reset" input is received, the count is reset to zero.
-An output is generated when a "demand" input is received.
-When "demand" and "reset" particles arrive at the same time,
-the output is generated before the count is reset.
+This is a general counter which can count up or down.
+The processing order of the ports is:
+countUp/Down -> demand -> reset.
+Simultaneous demand and reset events are ignored.
 	}
 	version { $Id$}
 	author { Soonhoi Ha }
@@ -14,8 +13,20 @@ the output is generated before the count is reset.
 	location { DE main library }
 	explanation {
 This is a rather general counter.
+Increase or decrease the count upon receiving a "countUp" or "countDown" input.
 Special cases, such as an up only counter, can be realized by connect
 a Null star to the unneeded inputs.
+.pp
+When a "reset" input is received, the count is reset to zero.
+An output is generated when a "demand" input is received.
+When "demand" and "reset" particles arrive at the same time,
+the output is generated before the count is reset.
+The "countUp(or Down)" input is processed before the "demand" input.
+The simultaneous demand inputs or reset inputs are ignored; if there
+are three "demand" input at the same time, we generate only one output.
+.pp
+This star operates in the phase-based mode, in which all simultaneous
+events in the global event queue are fed into the star at each firing.
 	}
 	input {
 		name { countUp }
@@ -54,6 +65,9 @@ a Null star to the unneeded inputs.
 		countUp.before(demand);
 		countDown.before(demand);
 		reset.before(demand);
+
+		setMode(PHASE);
+
 	}
 	start {
 		content = int(resetValue);
@@ -62,17 +76,17 @@ a Null star to the unneeded inputs.
 		completionTime = arrivalTime;
 
 		// check the countUp/Down input to change the content.
-		while (countUp.dataNew) {
-			content++;
-			countUp.getSimulEvent();
+		if (countUp.dataNew) {
+			content += countUp.numSimulEvents();
+			countUp.dataNew = FALSE;
 		}
-		while (countDown.dataNew) {
-			content--;
-			countDown.getSimulEvent();
+		if (countDown.dataNew) {
+			content -= countDown.numSimulEvents();
+			countDown.dataNew = FALSE;
 		}
-		while (demand.dataNew) {
+		if (demand.dataNew) {
 			output.put(completionTime) << content;
-			demand.getSimulEvent();
+			demand.dataNew = FALSE;
 		}
 		if (reset.dataNew) {
 			reset.dataNew = FALSE;
