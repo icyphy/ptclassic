@@ -6,6 +6,9 @@ defstar {
 	copyright { 1991 The Regents of the University of California }
 	location { DE main library }
 	desc {
+
+*** THIS STAR IS OBSOLETE *** Use PassGate star.
+
 If the gate is open, particles pass from "input" to "output".
 When the gate is closed, "input" particles are ignored.
 If "input" particles arrive while the gate is closed, the most
