@@ -53,7 +53,7 @@ MISC_FILES =		OLD \
 	900ss.gif \
 	australia.gif \
 	bind.tcl \
-	con.tcl \
+	constraint.tcl \
 	demo.itcl \
 	makefile \
 	mantra.gif \
