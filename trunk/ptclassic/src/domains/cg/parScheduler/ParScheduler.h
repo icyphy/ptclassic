@@ -18,7 +18,7 @@ Date of last revision:
 
 #include "pt_fstream.h"
 #include "SDFScheduler.h"
-#include "BaseMultiTarget.h"
+#include "MultiTarget.h"
 #include "ParProcessors.h"
 #include "Profile.h"
 #include "ParGraph.h"
@@ -34,9 +34,12 @@ class ostream;
 class ParScheduler : public SDFScheduler {
 public:
   	// Constructor
-  	ParScheduler(BaseMultiTarget* t, const char* log = 0);
+  	ParScheduler(MultiTarget* t, const char* log = 0);
 
 	virtual ~ParScheduler();
+
+	// redefine "compileRun"
+	void compileRun();
 
 	// reset the flag; to be called inside a wormhole.
 	void ofWorm() { inUniv = FALSE; }
@@ -85,7 +88,7 @@ protected:
 	pt_ofstream logstrm_real;	// for logging.
 	ostream *logstrm;
 
-	BaseMultiTarget* mtarget;
+	MultiTarget* mtarget;
 
 	int numProcs;
 
@@ -115,9 +118,6 @@ protected:
 	int OSOPreq() { return mtarget->getOSOPreq(); }
 	int assignManually() { return mtarget->assignManually(); }
 	int overrideSchedule() { return mtarget->overrideSchedule(); }
-
-	// redefine "compileRun"
-	void compileRun();
 
 	// old version of runOnce();
 	void oldRun();
