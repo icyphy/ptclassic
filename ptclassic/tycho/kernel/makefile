@@ -69,6 +69,7 @@ ITCL_SRCS = \
 	Loader.itcl \
 	MenuBar.itcl \
 	Message.itcl \
+	PrintDialog.itcl \
 	RevControl.itcl \
 	RevControlSCCS.itcl \
 	RevControlRCS.itcl \
