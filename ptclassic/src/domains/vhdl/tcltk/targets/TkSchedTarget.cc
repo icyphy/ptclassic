@@ -107,16 +107,14 @@ int SetTimesCmd(ClientData clientData,
 		int argc, char *argv[]);
 
 void do_main(int argc, char *argv[], VHDLFiringList* theFiringList) {
-  Tcl_Interp *interp;
-  int error; char *trace;
+  Tcl_Interp *interp = Tcl_CreateInterp();
+  int error;
+  char *trace;
 
   ourFiringList = theFiringList;
 
   // To avoid a warning
   if (argc) {}
-  if (interp) {}
-
-  interp = Tcl_CreateInterp();
 
   if (Tcl_Init(interp) == TCL_ERROR) {
     fprintf(stderr,
