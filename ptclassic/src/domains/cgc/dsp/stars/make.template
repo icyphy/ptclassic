@@ -49,7 +49,7 @@ CGCDIR = $(ROOT)/src/domains/cgc/kernel
 CGDIR = $(ROOT)/src/domains/cg/kernel
 
 INCL = -I$(CGCSTARSDIR) -I$(CGCDIR) -I$(CGDIR) -I$(KERNDIR) \
- $(PTCOMPAT_INCSPEC) -I$(ROOT)/src/utils/libcephes
+ $(PTCOMPAT_INCSPEC) -I$(ROOT)/src/utils/libptdsp
 
 # source files for all stars, using preprocessor
 # put base stars first, i.e., those that other stars are derived from
