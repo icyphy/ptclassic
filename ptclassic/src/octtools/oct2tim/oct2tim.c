@@ -1297,7 +1297,7 @@ int level;
      */
 
     if (printClosers==1) {
-	printf("\t}\n",level); 
+	printf("\t}\n"); 
     }
     if ((plotFormals == 1) && (level == 1)) {
 	processTerminals(facet, FORMAL, 0);
