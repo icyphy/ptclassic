@@ -81,6 +81,8 @@ proc tychoStandardIndex {} {
 	    kernel/doc/*.html \
 	    kernel/doc/usersGuides/*.html \
 	    kernel/doc/codeDoc/*.html \
-	    kernel/doc/internals/*.html
+	    kernel/doc/internals/*.html \
+	    editors/textedit/doc/*.html \
+	    editors/textedit/doc/usersGuides/*.html
     cd $olddir
 }
