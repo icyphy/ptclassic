@@ -27,7 +27,9 @@ DOMAIN=C50
 EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS)
 
 # source files for all stars, using preprocessor
+# put the base stars first
 PL_SRCS= \
+ C50WrtFile.pl \
  C50ACos.pl \
  C50AIn.pl \
  C50AOut.pl \
@@ -47,6 +49,7 @@ PL_SRCS= \
  C50Impulse.pl \
  C50Intgrtr.pl \
  C50Limit.pl \
+ C50LookupTbl.pl \
  C50Mpy.pl \
  C50MpyInt.pl \
  C50MpyShift.pl \
@@ -55,19 +58,23 @@ PL_SRCS= \
  C50Pad.pl \
  C50QuantRange.pl \
  C50Ramp.pl \
+ C50ReadFile.pl \
+ C50ReadFileInt.pl \
  C50Rect.pl \
  C50Repeat.pl \
- C50Reverse.pl  \
+ C50Reverse.pl \
  C50Rotate.pl \
  C50Sgn.pl \
  C50Shifter.pl \
  C50Sin.pl \
- C50Sub.pl \
  C50Sqr.pl \
+ C50Sub.pl \
  C50Tone.pl \
  C50UpSample.pl \
- C50WaveForm.pl \
+ C50VarDelay.pl \
  C50WasteCycles.pl \
+ C50WaveForm.pl \
+ C50Xgraph.pl \
  C50Xor.pl
 
 # The .cc files
