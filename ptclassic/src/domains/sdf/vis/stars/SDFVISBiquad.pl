@@ -23,7 +23,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  type { float }
 	  desc { Output float type }
 	}
-        ccinclude {<vis_proto.h>, <math.h>, <stdio.h>}
+        ccinclude {<vis_proto.h>}
 	defstate {
 	  name {numtaps}
 	  type {floatarray}
@@ -60,14 +60,15 @@ limitation of liability, and disclaimer of warranty provisions.
 #define LOWERBOUND (-32768)
 	}
 	protected {
+	  double *inarray;
+	  double *result_filt;
+	  double *split_result;
+	  float *result;
 	  short *dennum;
 	  short *state;
 	  short *outarray;
-	  double *inarray;
-	  double *result_filt;
 	  short n0;
 	  short scaledown;
-	  float *result;
 	}
 	constructor {
 	  dennum = 0;
@@ -78,6 +79,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  result = 0;
 	  scaledown = 0;
 	  n0 = 0;
+	  split_result=0;
 	}
 	destructor {
 	  free(dennum);
@@ -86,11 +88,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	  free(inarray);
 	  free(result_filt);
 	  free(result);
+	  free(split_result);
 	}
 	begin {
 	  int i;
 	  short *indexcount;
-	  double intmp,norm;
 
   	  // allocate tap and state arrays
 	       free(dennum);
@@ -99,12 +101,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	  free(outarray);
 	  free(result_filt);
 	  free(result);
+	  free(split_result);
+	  inarray = (double *) memalign(sizeof(double),sizeof(double));
+	  result_filt = (double *) memalign(sizeof(double),sizeof(double)*2);
+	  split_result = (double *)
+	    memalign(sizeof(double),sizeof(short)*NUMPACK);
 	  result = (float *) memalign(sizeof(float),sizeof(float));
 	  dennum = (short *) memalign(sizeof(double),sizeof(short)*NUMPACK);
 	  state = (short *) memalign(sizeof(float),sizeof(short)*NUMPACK);
-	  inarray = (double *) memalign(sizeof(double),sizeof(double));
 	  outarray = (short *) memalign(sizeof(double),sizeof(short)*NUMPACK);
-	  result_filt = (double *) memalign(sizeof(double),sizeof(double)*2);
 
 	  scaledown = (short) 1 << scalefactor;
 
@@ -125,39 +130,38 @@ limitation of liability, and disclaimer of warranty provisions.
 	  state[3] = 0;
 	}
 	go {	
-	  short *invalue;
-	  short *result_den;
-	  short tmpshort;
-	  int outerloop,innerloop;
-	  float *statetmp,*taps;
 	  double *outvalue;
 	  double *packedfilt;
 	  double upper, lower;
-	  double split_result;
+	  double *allstates,*alltaps;
+	  float *statemem;
+	  float *result_ptr;
+	  int outerloop,innerloop;
+	  short *statetap_prod;
+	  short *invalue;
+	  short *result_den;
 
 	  vis_write_gsr(8);
 	  *inarray = double(signalIn%0);
        	  invalue = (short *) inarray;
-	  taps = (float *) dennum;
-	  statetmp = (float *) state;
+	  statemem = (float *) state;
+	  allstates = (double *) state;
+	  alltaps = (double *) dennum;
 
 	  for(outerloop=3;outerloop>=0;outerloop--){
-	    // find product of state and denominator/numerator
-	    for(innerloop=0;innerloop<2;innerloop++){
-	      upper = vis_fmuld8sux16(statetmp[innerloop],taps[innerloop]);
-	      lower = vis_fmuld8ulx16(statetmp[innerloop],taps[innerloop]);
-	      result_filt[innerloop] = vis_fpadd32(upper,lower);
-	    }
-	    split_result = vis_fpadd32(result_filt[0],result_filt[1]);
+	    // find product of states/taps
+		 upper = vis_fmul8sux16(*allstates,*alltaps);
+	    lower = vis_fmul8ulx16(*allstates,*alltaps);
+	    *split_result = vis_fpadd16(upper,lower);
+	    result_ptr = (float *) split_result;
+	    *result = vis_fpadd16s(result_ptr[0],result_ptr[1]);
+	    statetap_prod = (short *) result;
 	    // find next_state
-		 *result = vis_fpackfix(split_result);
-	    result_den = (short *) result;
-	    statetmp[1] = statetmp[0];
-	    state[0] = (invalue[outerloop] - *result_den) << scalefactor;
+		 statemem[1] = statemem[0];
+	    state[0]=(invalue[outerloop]-(statetap_prod[0]<<1))<<scalefactor;
 	    state[1] = state[0];
-
 	    // find output
-	    outarray[outerloop] = (n0*state[0] >> 15) + *(result_den+1);
+	    outarray[outerloop]=(n0*state[0]>>15)+(statetap_prod[1]<<1);
 	  }
 	  outvalue = (double *) outarray;
 	  signalOut%0 <<  *outvalue;
