@@ -40,23 +40,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #define MAX_NUM_TERMS 85  /* max total # input and output terms */
 
-#ifdef __cplusplus
-
 struct Term_s {
-    const char *name;		/* terminal name */
+    char *name;			/* terminal name, sometimes dynamic memory */
     const char *type;		/* terminal datatype */
     boolean multiple;		/* true if multiporthole */
 };
-
-#else
-
-struct Term_s {
-    char *name;			/* terminal name */
-    char *type;			/* terminal datatype */
-    boolean multiple;		/* true if multiporthole */
-};
-
-#endif
 
 typedef struct Term_s Term;
 
@@ -78,5 +66,6 @@ extern boolean MkGalIcon ARGS((octObject *galFacetPtr,
 			       octObject *iconFacetPtr));
 extern boolean MkStarIcon ARGS((char *name, char *dir, char* domain,
 				octObject *iconFacetPtr));
+extern boolean MkGetTerms ARGS((const char* name, TermList* terms));
 
 #endif  /* _MKICON_H */
