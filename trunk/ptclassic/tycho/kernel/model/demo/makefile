@@ -40,6 +40,9 @@ VPATH =		$(ROOT)/kernel/model/demo
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
+# Sub directories to run make in.
+DIRS =			
+
 TCL_SRCS = 
 
 ITCL_SRCS = \
@@ -49,12 +52,9 @@ ITCL_SRCS = \
 DEMO_SRCS = \
 	simpleview
 
-EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS) $(DEMO_SRCS)
+EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) $(DEMO_SRCS)
 
-MISC_FILES =		tclIndex
-
-# Sub directories to run make in.
-DIRS =			
+MISC_FILES =	doc tclIndex
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex
