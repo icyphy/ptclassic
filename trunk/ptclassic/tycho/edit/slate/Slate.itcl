@@ -329,8 +329,8 @@ body ::tycho::Slate::bind {tagOrID {event 0} {command 0}} {
 	# If the picture is not marked, then mark it and set the event
 	# tags to _$tag. If it is marked but doesn't have that
 	# event tag, then add it.
-	if { [$obj cget -mark] == 0 } {
-	    $obj configure -mark 1
+	if { ! [$obj mark] } {
+	    $obj mark 1
 	    $obj _etag set [list _$tag] -force
 	} elseif { ! [lmember [$obj _etag get] _$tag] } {
 	    $obj _etag add _$tag -force
@@ -353,7 +353,7 @@ body ::tycho::Slate::bind {tagOrID {event 0} {command 0}} {
 	    # If that was the last event tag, then the picture is
 	    # no longer able to respond to events. So unmark it.
 	    if { [$obj _etag get] == "" } {
-		$obj configure -mark ""
+		$obj mark 0
 	    }
 	}
 
@@ -372,8 +372,8 @@ body ::tycho::Slate::bind {tagOrID {event 0} {command 0}} {
 	# marked, then all user tags will already have been propagated
 	# to its active components, so there is no need to do anything.)
 	foreach p $pictures {
-	    if { [$p cget -mark] == "" } {
-		$p configure -mark 1
+	    if { ! [$p mark] } {
+		$p mark 1
 		$p _etag set [$p cget -tags] -force
 	    }
 	}
@@ -407,7 +407,7 @@ body ::tycho::Slate::bind {tagOrID {event 0} {command 0}} {
 		}
 	    }
 	    if { $unmark } {
-		$p configure -mark ""
+		$p mark 0
 		if { [$p parent] != "" } {
 		    eval $p _etag set [[$p parent] _etag get] -force
 		} else {

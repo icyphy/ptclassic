@@ -254,9 +254,6 @@ body ::tycho::Frame::constructor {s c x0 y0 x1 y1 args} {
     trace variable relief      w [code $this _relief]
     trace variable fill        w [code $this _fill]
 
-    # Add some answers.
-    lappend answers [info context]
-
     # Create the primary component for the outline coordinates.
     # Note that this has an outline, but it will be obscured
     # by other components. DO NOT give this rectangle a blank

@@ -109,11 +109,9 @@ body ::tycho::Solid::_fill {args} {
 # Update the -relief configuration option.
 #
 body ::tycho::Solid::_relief {args} {
-    #
     # If the relief has changed to ridge or groove, then we
     # have to create the inside border polygons, and move
     # the surface if it exists.
-    #
     if { ($relief == "ridge" || $relief == "groove") \
 	    && ! [info exists component(notlit)] } {
 
@@ -143,10 +141,8 @@ body ::tycho::Solid::_relief {args} {
 	}
     }
 
-    #
     # If the relief has changed _from_ ridge or groove, then we
     # delete the inside border polygons and move the surface.
-    #
     if { $relief != "ridge" && $relief != "groove" \
 	    && [info exists component(notlit)] } {
 	
@@ -169,18 +165,13 @@ body ::tycho::Solid::_relief {args} {
 # Adjust a list of polygons to a new set of coordinates
 #
 body ::tycho::Solid::adjust {name shade coords} {
-
-    #
     # Move the components to their new locations.
-    #
     foreach p $component($name) c $coords {
 	eval $canvas coords $p $c
     }
 
-    #
     # If there weren't enough polygons, create some more. Lower the
     # new components to the same level as the primary component.
-    #
     if { [llength $coords] > [llength $component($name)] } {
 	set moreneeded [ldrop $coords [llength $component($name)]]
 	foreach c $moreneeded {
@@ -189,14 +180,12 @@ body ::tycho::Solid::adjust {name shade coords} {
 	}
     }
 
-    #
     # If there were too many polygons, delete the leftovers
-    #
     if { [llength $coords] < [llength $component($name)] } {
 	set leftovers [ldrop $component($name) [llength $coords]]
 	set component($name) [ltake $component($name) [llength $coords]]
+	# FIXME: replace with eval $canvas delete $leftovers and TEST
 	foreach p $leftovers {
-	    $slate deregisterItem $p
 	    $canvas delete $p
 	}
     }
@@ -208,62 +197,41 @@ body ::tycho::Solid::adjust {name shade coords} {
 body ::tycho::Solid::constructor {{s {}} {c {}} args} {
     getalloptions options args
 
-    #
     # Set the slate and canvas variables.
-    #
     set slate  $s
     set canvas $c
 
-    #
     # Extract the -color option value if there is one.
     # This is a ``speed'' hack, so that objects are already
     # created with the right color.
-    #
     getopt color options
     set colorObject [::tycho::Shades::new $color]
 
-    #
     # Override defaults: shape is segmented
-    #
     set shape "segmented"
 
-    #
     # Set the traces on configuration options. If borderwidth is
     # changed, update the fill as well to resize the surface item.
-    #
     trace variable borderwidth w [code $this _borderwidth]
     trace variable borderwidth w [code $this _fill]
     trace variable relief      w [code $this _relief]
     trace variable fill        w [code $this _fill]
 
-    #
-    # Add some answers.
-    #
-    lappend answers [info context]
-
-    #
     # Create the primary component for the outline coordinates
-    #
     eval $this component create "primary" polygon $args {-fill ""}
 
-    #
     # Create the surface component with null size
-    #
     $this component create "surface" polygon 0 0 0 0 0 0 \
 	    -fill [$colorObject $fill]
 
-    #
     # Create the borders using the coords{} method. Set the list and
     # shaded components to null to save work in coords{}.
-    #
     set component(lit) {}
     set component(shaded) {}
 
     eval $this coords $args
 
-    #
     # Configure option variables
-    #
     eval configure $options
 }
 
@@ -283,30 +251,22 @@ body ::tycho::Solid::coords {args} {
 	return $coords
     }
 
-    #
     # Move the polygon that marks the solid's coordinates. Read the
     # coords again to make sure that we have the duplicated start/end
     # point.
-    #
     eval $canvas coords $component(primary) $args
     set coords [$canvas coords $component(primary)]
 
-    #
     # Get the coordinates of the borders and the surface component
-    #
     assign inside lit shaded [polyBorders 45 -135 $coords $borderwidth]
 
-    #
     # Adjust the positions of the border polygons, creating and
     # deleting them as necessary.
-    #
     adjust "lit"    [$colorObject light] $lit
     adjust "shaded" [$colorObject dark]  $shaded
 
-    #
     # If the relief is "groove" or "ridge," adjust the inner borders
     # as well. Note that _inside_ is over-written with new values.
-    #
     if { $relief == "ridge" || $relief == "groove" } {
 	assign inside notlit notshaded \
 		[polyBorders 45 -135 $inside $borderwidth]
@@ -315,16 +275,12 @@ body ::tycho::Solid::coords {args} {
 	adjust "notlit"    [$colorObject dark]  $notlit
     }
 
-    #
     # Change the co-ordinates of the surface component, if it exists.
-    #
     if { [info exists component(surface)] } {
 	eval $canvas coords $component(surface) $inside
     }
 
-    #
     # Notify that coordinates have changed
-    #
     # notify "coords"
 }
 
