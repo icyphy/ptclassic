@@ -95,10 +95,12 @@ static void min_connect
   ARGS((octObject *fct, octObject *term_1, octObject *term_2,
 	octObject *lyr, struct octBox *box_1, struct octBox *box_2,
 	symConFunc *confun));
+#ifdef NEED_MAX_CONNECT 
 static void max_connect
   ARGS((octObject *fct, octObject *term_1, octObject *term_2,
 	octObject *lyr, struct octBox *box_1, struct octBox *box_2,
 	symConFunc *confun));
+#endif
 static void no_intersect
   ARGS((octObject *at, struct octBox *impl, octObject *lyr,
 	octObject *seg, int np, struct octPoint *pnts,
