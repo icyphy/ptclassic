@@ -3,8 +3,9 @@ defstar {
 	domain { SDF }
 	desc {
 Multiplexes any number of inputs onto one output stream.
-A particle is consumed on each input, but only one of these is copied
-to the output.  The one copied is determined by the "control" input.
+B particles are consumed on each input, where B is the blockSize.
+But only one of these blocks of particles is copied to the output.
+The one copied is determined by the "control" input.
 Integers from 0 through N-1 are accepted at the "control" input,
 where N is the number of inputs.  If the control input is outside
 this range, an error is signaled.
@@ -25,19 +26,32 @@ this range, an error is signaled.
 		name {output}
 		type {=input}
 	}
+	defstate {
+		name {blockSize}
+		type {int}
+		default {1}
+		desc {Number of particles in a block.}
+	}
+	start {
+		MPHIter nexti(input);
+		PortHole* p;
+		while((p = nexti++) != 0)
+		   ((SDFPortHole*)p)->setSDFParams(int(blockSize),int(blockSize)-1);
+		output.setSDFParams(int(blockSize),int(blockSize)-1);
+	}
 	go {
 	    int n = int(control%0);
-	    if (n < 0) {
-		Error::abortRun (*this, "Negative control to Mux ");
-		return;
-	    }
 	    MPHIter nexti(input);
-	    for (int i = 0; i < input.numberPorts(); i++)
+	    PortHole* p;
+	    for (int i = 0; i < input.numberPorts(); i++) {
+		p = nexti++;
 		if (i == n) {
-		    output%0 = (*nexti++)%0;
+		    for (int j = int(blockSize)-1; j >= 0; j--)
+		        output%j = (*p)%j;
 		    return;
-		} else
-		    nexti++;
-	    Error::abortRun (*this, "Invalid control input to Mux");
+		}
+	    }
+	    Error::abortRun(*this,
+		"Invalid control input to Mux - out of range");
 	}
 }
