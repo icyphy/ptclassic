@@ -172,7 +172,7 @@ class ::tycho::Model {
     #################################################################
     ####                        options                          ####
 
-    # The name of this model
+    # The name of this model, used in messages and the like
     public variable modelname ""
 
     #################################################################
@@ -210,9 +210,6 @@ class ::tycho::Model {
 
     #################################################################
     ####                protected methods                        ####
-
-    # Configure the -modelname option
-    protected method _modelname {} {}
 
     # Execute a sequence of commands in a list
     protected method _compound {cmdlist}
@@ -277,19 +274,6 @@ class ::tycho::Model {
 #########################################################################
 ####                          option configure                       ####
 
-#########################################################################
-#### -modelname configuration
-# Set the name of the model. This name can be used to provide models
-# with meaningful names. If no name is supplied when the model
-# is created, the name will be set to the tail of the object name.
-# Model names must be unique. The name should not be changed after the
-# model has been constructed. Subclasses can change the behaviour when
-# the model name is set by overriding <b>_modelname</b>.
-#
-configbody ::tycho::Model::modelname {
-    _modelname
-}
-
 ########################################################################
 #### constructor
 #
@@ -310,10 +294,8 @@ body ::tycho::Model::constructor {args} {
     # Evaluate options
     eval configure $args
 
-    # If there is no modelname, supply a default
-    if { $modelname == "" } {
-	set modelname [::info namespace tail $this]
-    }
+    # Supply the default model name
+    set modelname [::info namespace tail $this]
 }
 
 ########################################################################
@@ -679,7 +661,6 @@ body ::tycho::Model::notify {mode args} {
         }
         if { $cmd != "" } {
             # Override default notification
-            puts "uplevel \#0 $cmd $args"
             uplevel \#0 $cmd $args
         } else {
             # By default, call the subscriber's notify{} method
