@@ -47,6 +47,13 @@ if [info exists tk_version] {
 #    package require Iwidgets
 #}
 
+# Create the Tycho namespace
+if { $tcl_version >= 8.0 } {
+    namespace eval ::tycho {}
+} else {
+    namespace ::tycho
+}
+
 # Check for Itcl2.1 first, since Itcl2.0 does not have [file join . . .]
 if {${itcl::version} < 2.1} {
     error "Tycho must be run under Itcl2.1 or later, as Itcl2.0 does
@@ -214,9 +221,6 @@ if [file isdirectory [file join $PTOLEMY tcltk itcl lib]] {
     }
 }
 
-# Create the tycho namespace
-namespace ::tycho
-
 # Make the tycho namespace visible at the current scope
 # Note that this greatly weakens namespace protection, but
 # itcl makes it rather awkward without it.  In the body of
@@ -273,12 +277,12 @@ package require tycho.util.tydoc
 package require tycho.util.idoc
 
 # Load ptolemy packages if they are present
-if [file exists [file join $TYCHO typt kernel]] {
-    package require tycho.typt.kernel
-}
-if [file exists [file join $TYCHO typt edit]] {
-    package require tycho.typt.edit
-}
+#if [file exists [file join $TYCHO typt kernel]] {
+#    package require tycho.typt.kernel
+#}
+#if [file exists [file join $TYCHO typt edit]] {
+#    package require tycho.typt.edit
+#}
 
 ::tycho::_announce "Loaded packages"
 
