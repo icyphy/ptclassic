@@ -106,7 +106,7 @@ void PriorityQueue :: clearFreeList() {
 
 // constructor
 PriorityQueue :: PriorityQueue(Pointer a, double v, double fv = 1.0) :
-	freeLinkHead(0), numberNodes(1), numFreeLinks(0)
+	numberNodes(1), freeLinkHead(0), numFreeLinks(0)
 {
 	lastNode = getFreeLink()->setLink(a, v, fv, 0, 0);
 	lastNode->next   = lastNode;
