@@ -418,5 +418,12 @@ FIXME
 .DE
 .SH AUTHOR
 H. John Reekie
+
+.SH ACKNOWLEDGMENTS
+Widgettree is inspired by the SubPanel and MultiPanel widgets written by 
+Farhana Sheikh and Cliff Cordeiro of UC Berkeley.  Widgettree is 
+contributed to [incr Widgets] by the Tycho project at UC Berkeley: 
+http://ptolemy.eecs.berkeley.edu/tycho.
+
 .SH KEYWORDS
 widgettree, hierarchy, widget
