@@ -16,9 +16,8 @@ include $(CONFIG)
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
 EGKERNEL = $(ROOT)/src/domains/sdf/expgraph
 CGKERNEL = $(ROOT)/src/domains/cg/kernel
-CGSTARS = $(ROOT)/src/domains/cg/stars
 
-INCL=-I$(SDFKERNEL) -I$(CGKERNEL) -I$(CGSTARS) -I$(KERNDIR) -I$(EGKERNEL) 
+INCL=-I$(SDFKERNEL) -I$(CGKERNEL) -I$(KERNDIR) -I$(EGKERNEL) 
 
 SRCS =	ParNode.cc ParGraph.cc ParScheduler.cc \
 		UniProcessor.cc CodeGen.cc ParProcessors.cc 
