@@ -8,6 +8,7 @@
 #include "ExpandedGraph.h"
 #include "StringList.h"
 #include "CGStar.h"
+#include "Profile.h"
 
 /*****************************************************************
 Version identification:
@@ -82,8 +83,15 @@ public:
 	void removeDescs(ParNode* n) { tempDescs.remove(n); }
 	void removeAncs(ParNode* n) { tempAncs.remove(n); waitNum--; }
 
-	// Is it correponds to a atomic CG star?
 	CGStar* myStar() { return (CGStar*) myMaster(); }
+
+	// check if myStar() is at the wormhole boundary
+	int atBoundary() { return atBoundaryFlag; }
+
+	// Is it correponds to a atomic CG star?
+	int amIBig() { return myStar()->isParallel(); }
+	Profile* profile() { return pf; }
+	void withProfile(Profile* p) { pf = p; }
 
 	// Functions for assigning and obtaining the StaticLevel.
 	void assignSL( int SL ) { StaticLevel = SL; }
@@ -165,6 +173,15 @@ protected:
 	EGNodeList tempDescs;
 
 private:
+	// If it is a parallel node, it should be associated with
+	// a "Profile" and a processor ids to indicate assignment
+	// assignedId[i] = j means that (i+1)th profile is assigned to the
+	// (j+1)th processor.
+	Profile* pf;
+
+	// If the origin star lies at the boundary of a wormhole
+	int atBoundaryFlag;
+
 	// necessary information for sub universe generation
 	DataFlowStar* clonedStar;
 	ParNode* nextNode;	// next invoc. assigned to the same processor
