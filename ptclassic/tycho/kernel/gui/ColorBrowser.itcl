@@ -35,7 +35,7 @@
 # Query the user for a color and return it.  This procedure brings up
 # a simple color browser, and returns only when that browser is dismissed.
 # The returned string is the name of a color.  This name should be passed
-# to <code>ptkColor</code> before being used, to convert it to a standard
+# to <code>::tycho::color</code> before being used, to convert it to a standard
 # color format recognized by all installations.  One argument is required:
 # a string that labels the query.  If a second argument is given,
 # it is the default color in the entry box.
@@ -166,5 +166,5 @@ body ::tycho::ColorBrowser::setContents {} {
 #
 body ::tycho::ColorBrowser::setEntry {string} {
     ::tycho::ListBrowser::setEntry $string
-    $itk_component(color) configure -background [::ptkColor $string]
+    $itk_component(color) configure -background [::tycho::color $string]
 }
