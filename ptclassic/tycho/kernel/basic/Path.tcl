@@ -692,18 +692,25 @@ ensemble ::tycho::url {
 	    # Network name -- we need to figure out how much
             # if the name also contains server and path parts
 	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
+
+	    # Mess about according to how much was specified in the
+	    # first argument.... there must be an easier way...
             if { $server == "" && $path == "" } {
                 if { [lindex $args 0] != "" } {
-                    set server //[lindex $args 0]
+                    set server //[string trimright [lindex $args 0] /]
                 }
-                set path [join [lreplace $args 0 0] /]
+                if { [llength $args] > 1 } {
+                    set path /[join [lreplace $args 0 0] /]
+                }
             } elseif { $server != "" && $path == "" } {
-                set path [join $args /]
+		set server [string trimright $server /]
+                if { [llength $args] > 0 } {
+		    set path /[join $args /]
+                }
             } elseif { $server != "" && $path != "" } {
+		set server [string trimright $server /]
+                set path [string trimright $path /]
                 set path [join [concat [list $path] $args] /]
-            }
-            if { $path != "" } {
-                set path /$path
             }
             if { $server == "" } {
                 return $protocol$path
@@ -813,5 +820,4 @@ ensemble ::tycho::url {
 	}
     }
 }
-
 
