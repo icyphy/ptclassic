@@ -61,7 +61,14 @@ DEWiNeS_Tcl_Animation.pl \
 DEcell_list.pl \
 DEpos_generator.pl \
 DEpropag_uldl.pl \
-DErrmanager_uldl.pl
+DErrmanager_uldl.pl \
+DEDynBlockBase.pl \
+DEDynBlock.pl \
+DEDynBlockGr.pl \
+DEDynMerge.pl \
+DEDynFork.pl \
+DEDynForkInt.pl
+
 
 # The .cc files
 SRCS =		$(PL_SRCS:.pl=.cc)
@@ -92,6 +99,10 @@ include $(ROOT)/mk/common.mk
 
 # Workaround bug in gcc-2.7.2 optimizer
 ifeq ($(USE_GPLUSPLUS),yes)
+DEDynBlock.o: DEDynBlock.cc
+	$(UNOPTIMIZED_WARNING_MESSAGE)
+	$(UNOPTIMIZED_COMPILE_RULE) $<
+
 DEpropag_uldl.o: DEpropag_uldl.cc
 	$(UNOPTIMIZED_WARNING_MESSAGE)
 	$(UNOPTIMIZED_COMPILE_RULE) $<
