@@ -1,7 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -54,7 +54,7 @@ int *pid;
     int forkpid, waitpid;
     int topipe[2], frompipe[2];
     char buffer[1024];
-#ifdef hpux
+#if defined(hpux) || defined(SYSV)
     int status;
 #else
     union wait status;
