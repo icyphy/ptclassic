@@ -100,23 +100,6 @@ const int linkingNotSupported =
 #endif // __GNUG__
 #endif
 
-#if defined(SOL2) && defined(__GNUG__)
-// Don't call InvokeConstructors if gcc-2.5.8 has Ron Guilmette's SVR4
-// patches.  
-// This is still experimental.  If this works, then there will be no
-// need to call dlsym().
-//
-// Joe Buck's g++ FAQ says:
-// `If you want to build shared libraries from g++ compiled code on any
-// sort of SVr4 system (including Solaris) you should contact Ron Guilmette
-// <rfg@netcom.com>.  He has patches that insure that any file-scope static-
-// storage objects within such libraries will be properly initialized when
-// the libraries are first attached to your running process. (The patches
-// are for g++ 2.5.8.  They *might* be incorporated into the g++ 2.6 standard
-// distribution, but that's not certain yet.)'
-//#define NO_INVOKECONSTRUCTORS
-#endif
-
 // The loader should do incremental linking; use a 4.3/Sun-style loader
 // or use the Gnu loader.
 #if defined(__sgi) || defined (sgi)
@@ -194,6 +177,35 @@ extern "C" size_t getpagesize(void);
 #endif
 #endif
 
+#if defined(SOL2) 
+#if ! defined(__GNUG__)
+// Don't call InvokeConstructors if gcc-2.5.8 has Ron Guilmette's SVR4
+// patches, or if we are using CC.  Right now we only use this code
+// with CC.
+// This is still experimental.  If this works, then there will be no
+// need to call dlsym().
+//
+// Joe Buck's g++ FAQ says:
+// `If you want to build shared libraries from g++ compiled code on any
+// sort of SVr4 system (including Solaris) you should contact Ron Guilmette
+// <rfg@netcom.com>.  He has patches that insure that any file-scope static-
+// storage objects within such libraries will be properly initialized when
+// the libraries are first attached to your running process. (The patches
+// are for g++ 2.5.8.  They *might* be incorporated into the g++ 2.6 standard
+// distribution, but that's not certain yet.)'
+//
+#define NO_INVOKECONSTRUCTORS
+// NO_INVOKECONSTRUCTORS only works with dlopen() style linking
+#define USE_DLOPEN
+// If NO_INVOKECONSTRUCTORS is defined, the USE_NM_GREP is not used
+#undef USE_NM_GREP
+#undef NM_GREP_STRING
+// If NO_INVOKECONSTRUCTORS is defined, then nm is not called
+#undef NM_PROGRAM
+#undef NM_OPTIONS
+#endif
+
+#if ! defined(NO_INVOKECONSTRUCTORS)
 // Prefix for constructor-calling symbols
 // This is an attempt to support both g++ and cfront.
 #if defined(__GNUG__)
@@ -216,13 +228,17 @@ extern "C" size_t getpagesize(void);
 #endif
 #else /* not __GNUG__ (i.e. cfront) */
 #if defined(hpux) || defined(SOL2)
+
+// These definitions also work with Sun Solaris2.3 CC3.0, but not
+// with CC4.0.  Sol2 CC4.0 uses ctv as a constructor suffix
 #define CONS_PREFIX "__sti"
 #define CONS_LENGTH 5
-#else
+#else // hpux || sol2
 #define CONS_PREFIX "___sti"
 #define CONS_LENGTH 6
-#endif /* hpux */
+#endif // hpux || SOL2
 #endif
+#endif // NO_INVOKECONSTRUCTORS
 
 #if defined(hpux) || defined(__sgi) || defined(sgi) || defined(SOL2)
 // -p print easily parsable, terse output
