@@ -15,11 +15,11 @@ Programmer: J. Buck, E. Goei
 #include "InterpUniverse.h"
 #include "StringList.h"
 #include "Scheduler.h"
+#include "SimControl.h"
 #include "miscFuncs.h"
 #include "Domain.h"
 #include "Target.h"
 #include "KnownTarget.h"
-#include "Animate.h"
 #include "ConstIters.h"
 #include "UserOutput.h"
 #include <ACG.h>
@@ -810,29 +810,49 @@ KcDefTarget() {
 	return KnownTarget::defaultName();
 }
 
-/* 7/22/91, by eal
-Set the state of the Animate object to either enable or disable
-animation.
+/*
+Register functions to handle animation.
 */
-extern "C" void
-KcSetAnimationState(int s) {
-	if(s) Animate::enable();
-	else Animate::disable();
+
+static SimAction *animatePre = 0, *animatePost = 0;
+
+static void onHighlight(Star* s, const char*) {
+	Error::mark(*s);
 }
 
-/* 7/22/91, by eal
-Get the state of the Animate object.
+static void offHighlight(Star*, const char*) {
+	FindClear();
+}
+
+extern "C" void
+KcSetAnimationState(int s) {
+	if (s) {
+	    if (!animatePre) {
+		animatePre = SimControl::registerAction(onHighlight,1);
+		animatePost = SimControl::registerAction(offHighlight,0);
+	    }
+        }
+	else {
+	    if (animatePre) {
+		SimControl::cancel(animatePre);
+		SimControl::cancel(animatePost);
+	    }
+	}
+}
+
+/* 
+Get the state of animation.
 */
 extern "C" int
 KcGetAnimationState() {
-	return Animate::enabledFlag;
+	return (animatePre != 0);
 }
 
 // catch signals -- Vem passes the SIGUSR1 signal by default
 
 extern "C" void
 KcCatchSignals() {
-	Scheduler::catchInt(SIGUSR1);
+	SimControl::catchInt(SIGUSR1);
 }
 
 // dummy class to clean up at end
