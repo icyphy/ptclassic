@@ -189,9 +189,6 @@ class ::tycho::DataModel {
     # Create a header string
     protected method _header {}
 
-    # Configure the -modelname option
-    protected method _modelname {}
-
     # Update the cache if it's out of date
     protected method _update
 
@@ -242,6 +239,9 @@ class ::tycho::DataModel {
     #################################################################
     ####                  private variables                    ####
 
+    # The name used to construct the data arrays
+    private variable _dataname
+
     # Default attributes, indexed by type
     private variable _defaults
 
@@ -275,7 +275,13 @@ body ::tycho::DataModel::constructor {args} {
     $safeinterp eval namespace ::tycho
     $safeinterp eval namespace $scope
 
-    # Create a proc to parse the "modelconfigure" syntax
+    # Initialize the array name
+    set _dataname [::info namespace tail $this]
+
+    # Initialize the model attributes
+    @scope $scope set [set _dataname]() {}
+
+   # Create a proc to parse the "modelconfigure" syntax
     @scope $scope eval {
         proc __parse_modelconfigure {args} {
             global _object_
@@ -314,12 +320,12 @@ body ::tycho::DataModel::destructor {} {
 # raise an error. Append to the history if recording.
 #
 body ::tycho::DataModel::add {name args} {
-    if [@scope $scope ::info exists [set modelname]($name)] {
+    if [@scope $scope ::info exists [set _dataname]($name)] {
         error "An item \"$name\" already exists in $modelname"
     }
 
     # Invalidate cache
-    @scope $scope set [set modelname].cachevalid 0
+    @scope $scope set [set _dataname].cachevalid 0
 
     # Add to history
     if $recording {
@@ -339,10 +345,10 @@ body ::tycho::DataModel::add {name args} {
     }
 
     # Store the data of this item
-    @scope $scope set [set modelname]($name) $args
+    @scope $scope set [set _dataname]($name) $args
 
     # Add it to the list of children of its parent
-    @scope $scope lappend [set modelname]:[set type]($context) $tail
+    @scope $scope lappend [set _dataname]:[set type]($context) $tail
 
     # Parse contents
     if { $contents != "" } {
@@ -371,7 +377,7 @@ body ::tycho::DataModel::assign {name args} {
     _verify $name
 
     # Remember the old data
-    set old [@scope $scope set [set modelname]($name)]
+    set old [@scope $scope set [set _dataname]($name)]
 
     if { $args == "" } {
         # Return old value
@@ -389,10 +395,10 @@ body ::tycho::DataModel::assign {name args} {
     }
 
     # Invalidate cache
-    @scope $scope set [set modelname].cachevalid 0
+    @scope $scope set [set _dataname].cachevalid 0
         
     # Write the new data
-    @scope $scope set [set modelname]($name) $data
+    @scope $scope set [set _dataname]($name) $data
 }
 
 ########################################################################
@@ -407,18 +413,18 @@ body ::tycho::DataModel::clear {} {
     cache invalidate
 
     # Remember the top-level attributes
-    set attributes [@scope $scope set [set modelname]()]
+    set attributes [@scope $scope set [set _dataname]()]
 
     # Unset the data of all items and the children of each type
     catch {
-        @scope $scope unset $modelname
-        @scope $scope unset $modelname.cachevalid
+        @scope $scope unset $_dataname
+        @scope $scope unset $_dataname.cachevalid
         foreach type $_types($scope) {
-            @scope $scope unset $modelname:$type
+            @scope $scope unset $_dataname:$type
         }
     }
     # Restore the top-level attributes
-    @scope $scope set [set modelname]() $attributes
+    @scope $scope set [set _dataname]() $attributes
 }
 
 ########################################################################
@@ -436,7 +442,7 @@ body ::tycho::DataModel::delete {name} {
     set context [lreplace $name end end]
 
     # Invalidate cache
-    @scope $scope set [set modelname].cachevalid 0
+    @scope $scope set [set _dataname].cachevalid 0
 
     # Append to the history
     if $recording {
@@ -448,12 +454,12 @@ body ::tycho::DataModel::delete {name} {
         }
     }
     # Remove from the parent list
-    @scope $scope set [set modelname]:[set type]($context) \
+    @scope $scope set [set _dataname]:[set type]($context) \
             [::tycho::ldelete \
-            [@scope $scope set [set modelname]:[set type]($context)] $tail]
+            [@scope $scope set [set _dataname]:[set type]($context)] $tail]
 
     # Delete data
-    @scope $scope unset [set modelname]($name)
+    @scope $scope unset [set _dataname]($name)
 
     # Delete children, making sure that commands are not recorded
     if !$_leafonly($type) {
@@ -507,7 +513,7 @@ body ::tycho::DataModel::describe {{name {}} {prefix {}}} {
 # 1 if it does and 0 if not.
 #
 body ::tycho::DataModel::exists {name} {
-    @scope $scope ::info exists [set modelname]($name)
+    @scope $scope ::info exists [set _dataname]($name)
 }
 
 ########################################################################
@@ -521,7 +527,7 @@ body ::tycho::DataModel::exists {name} {
 # list will not be ordered.
 #
 body ::tycho::DataModel::get {{pattern *}} {
-    @scope $scope array get $modelname $pattern
+    @scope $scope array get $_dataname $pattern
 }
 
 ########################################################################
@@ -538,7 +544,7 @@ body ::tycho::DataModel::itemcget {name attribute} {
     # Merge with defaults
     regexp {(.+):} [lindex $name end] _ type
     array set data $_defaults($type)
-    array set data [@scope $scope set [set modelname]($name)]
+    array set data [@scope $scope set [set _dataname]($name)]
 
     # Get a single attribute
     if { ! [::info exists data($attribute)] } {
@@ -564,22 +570,22 @@ body ::tycho::DataModel::itemconfigure {name args} {
         # Return attributes including defaults
         regexp {(.+):} [lindex $name end] _ type
         array set attrs $_defaults($type)
-        array set attrs [@scope $scope set [set modelname]($name)]
+        array set attrs [@scope $scope set [set _dataname]($name)]
         array get attrs
     } else {
         # Invalidate cache
-        @scope $scope set [set modelname].cachevalid 0
+        @scope $scope set [set _dataname].cachevalid 0
 
         # Append to the history
         if { $recording } {
             history append \
                     "itemconfigure $name $args" \
-                    "assign $name [@scope $scope set [set modelname]($name)]"
+                    "assign $name [@scope $scope set [set _dataname]($name)]"
         }
         # Merge the new data and return result
-        array set attrs [@scope $scope set [set modelname]($name)]
+        array set attrs [@scope $scope set [set _dataname]($name)]
         array set attrs $args
-        @scope $scope set [set modelname]($name) [array get attrs]
+        @scope $scope set [set _dataname]($name) [array get attrs]
     }
 }
 
@@ -611,8 +617,8 @@ body ::tycho::DataModel::match {type {context {}} args} {
         error "Unknown context \"$context\""
     }
     # Get all children in order
-    if [@scope $scope ::info exists [set modelname]:[set type]($context)] {
-        set children [@scope $scope set [set modelname]:[set type]($context)]
+    if [@scope $scope ::info exists [set _dataname]:[set type]($context)] {
+        set children [@scope $scope set [set _dataname]:[set type]($context)]
         if { $args == "" } {
             return $children
         }
@@ -625,7 +631,7 @@ body ::tycho::DataModel::match {type {context {}} args} {
         set name [concat $context $type:$n]
 
         array set attrs $_defaults($type)
-        array set attrs [@scope $scope set [set modelname]($name)]
+        array set attrs [@scope $scope set [set _dataname]($name)]
 
     	set matching 1
     	foreach {attr val} $args {
@@ -648,7 +654,7 @@ body ::tycho::DataModel::match {type {context {}} args} {
 # the the attribute is unknown.
 #
 body ::tycho::DataModel::modelcget {attribute} {
-    array set data [@scope $scope set [set modelname]()]
+    array set data [@scope $scope set [set _dataname]()]
     if { ! [::info exists data($attribute)] } {
         error "Unknown attribute $attribute in $modelname"
     }
@@ -667,21 +673,21 @@ body ::tycho::DataModel::modelcget {attribute} {
 body ::tycho::DataModel::modelconfigure {args} {
     if { $args == "" } {
         # Just return attributes
-        @scope $scope set [set modelname]()
+        @scope $scope set [set _dataname]()
     } else {
         # Invalidate cache
-        @scope $scope set [set modelname].cachevalid 0
+        @scope $scope set [set _dataname].cachevalid 0
 
         # Append to the history
         if { $recording } {
             history append \
                     "modelconfigure $args" \
-                    "assign {} [@scope $scope set [set modelname]($name)]"
+                    "assign {} [@scope $scope set [set _dataname]($name)]"
         }
         # Merge the new data and return result
-        array set attrs [@scope $scope set [set modelname]()]
+        array set attrs [@scope $scope set [set _dataname]()]
         array set attrs $args
-        @scope $scope set [set modelname]() [array get attrs]
+        @scope $scope set [set _dataname]() [array get attrs]
     }
 }
 
@@ -696,7 +702,7 @@ body ::tycho::DataModel::modelconfigure {args} {
 # children. The returned list will not be ordered.
 #
 body ::tycho::DataModel::names {{pattern *}} {
-    @scope $scope array names $modelname $pattern
+    @scope $scope array names $_dataname $pattern
 }
 
 ########################################################################
@@ -711,7 +717,7 @@ body ::tycho::DataModel::names {{pattern *}} {
 #
 body ::tycho::DataModel::parse {data} {
     global _current_ _context_ _object_
-    set _current_ $modelname
+    set _current_ $_dataname
     set _context_ {}
     set _object_ $this
     $safeinterp eval [list @scope $scope $data]
@@ -850,9 +856,9 @@ body ::tycho::DataModel::search {mode args} {
 # not add anything to the history.
 #
 body ::tycho::DataModel::sort {type {context {}} args} {
-    set children [@scope $scope set [set modelname]:[set type]($context)]
+    set children [@scope $scope set [set _dataname]:[set type]($context)]
     set children [eval lsort $args [list $children]]
-    @scope $scope set [set modelname]:[set type]($context) $children
+    @scope $scope set [set _dataname]:[set type]($context) $children
 }
 
 ########################################################################
@@ -1026,10 +1032,10 @@ body ::tycho::DataModel::_describe {name {prefix {}}} {
 
     # Print attributes
     # This is fast:
-    # eval lappend string [@scope $scope set [set modelname]($name)]
+    # eval lappend string [@scope $scope set [set _dataname]($name)]
     #
     # This looks better:
-    array set attrs [@scope $scope set [set modelname]($name)]
+    array set attrs [@scope $scope set [set _dataname]($name)]
     foreach attr [lsort [array names attrs]] {
         append string " \\\n$prefix        "
         lappend string $attr $attrs($attr)
@@ -1094,27 +1100,13 @@ body ::tycho::DataModel::_header {} {
 }
 
 ########################################################################
-#### _modelname
-#
-# Change the name of the model. In this class, initialize the
-# relevant arrays in the model's namespace. Note: we have to do this
-# here instead of in the constructor, because the model name is
-# an option, and options are not initialized until the most specific
-# constructor executes.
-#
-body ::tycho::DataModel::_modelname {} {
-    # Initialize the model attributes
-    @scope $scope set [set modelname]() {}
-}
-
-########################################################################
 #### _update
 #
 # Build an updated version of the cache if it's out of date.
 # This is short-cut version of <b>cache update</b>.
 #
 body ::tycho::DataModel::_update {} {
-    if ![@scope $scope set [set modelname].cachevalid] {
+    if ![@scope $scope set [set _dataname].cachevalid] {
         _updatecache
     }
 }
@@ -1127,7 +1119,7 @@ body ::tycho::DataModel::_update {} {
 # from the loaded data.
 #
 body ::tycho::DataModel::_updatecache {} {
-    ;# Does nothing    @scope $scope set [set modelname].cachevalid 1
+    ;# Does nothing
 }
 
 ########################################################################
@@ -1168,7 +1160,7 @@ body ::tycho::DataModel::cache {mode args} {
 	    if { $args != "" } {
 		error "wrong # args: should be \"cache invalidate\""
 	    }
-	    @scope $scope set [set modelname].cachevalid 0
+	    @scope $scope set [set _dataname].cachevalid 0
         }
         "update" {
  	    if { $args != "" } {
@@ -1180,13 +1172,13 @@ body ::tycho::DataModel::cache {mode args} {
 	    if { $args != "" } {
 		error "wrong # args: should be \"cache valid\""
 	    }
-	    @scope $scope set [set modelname].cachevalid
+	    @scope $scope set [set _dataname].cachevalid
 	}
         "validate" {
 	    if { $args != "" } {
 		error "wrong # args: should be \"cache validate\""
 	    }
-	    @scope $scope set [set modelname].cachevalid 1
+	    @scope $scope set [set _dataname].cachevalid 1
         }
 	default {
 	    error "bad option \"$mode\": should be invalidate, \
@@ -1293,7 +1285,7 @@ body ::tycho::DataModel::_mkparseproc {type} {
 # error if it does not.
 #
 body ::tycho::DataModel::_verify {name} {
-    if ![@scope $scope ::info exists [set modelname]($name)] {
+    if ![@scope $scope ::info exists [set _dataname]($name)] {
     	error "Unknown item \"$name\" in $modelname"
     }
 }
