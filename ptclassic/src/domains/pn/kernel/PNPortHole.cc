@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -35,12 +35,16 @@ static const char file_id[] = "$RCSfile$";
 #pragma implementation
 #endif
 
+#include "MTDFMonitor.h"
 #include "MTDFPortHole.h"
 #include "MTDFGeodesic.h"
 #include "CircularBuffer.h"
 #include "Plasma.h"
 #include "Error.h"
 #include <strstream.h>
+
+// Prototype PtGate.
+static MTDFMonitor prototype;
 
 // Class identification.
 ISA_FUNC(MTDFPortHole,DFPortHole);
@@ -54,19 +58,18 @@ Geodesic* MTDFPortHole::allocateGeodesic()
 
     LOG_NEW; MTDFGeodesic* g = new MTDFGeodesic;
     g->setNameParent(hashstring(nm), parent());
-    g->makeLock(LwpMonitor::prototype);
 
     return g;
 }
 
-int MTDFPortHole::allocatePlasma()
+void MTDFPortHole::initialize()
 {
-    if (DFPortHole::allocatePlasma())
-    {
-	myPlasma->makeLock(LwpMonitor::prototype);
-	return TRUE;
-    }
-    return FALSE;
+    DFPortHole::initialize();
+    // Remove any locks left over from a previous run.
+    // Threads blocked on these locks will be deleted at this point.
+    disableLocking();
+    // Create new locks for the current run.
+    enableLocking(prototype);
 }
 
 // Input/output identification.

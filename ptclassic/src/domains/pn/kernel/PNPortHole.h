@@ -46,10 +46,10 @@ public:
     // Class identification.
     /*virtual*/ int isA(const char* className) const;
 
+    /*virtual*/ void initialize();
+
     // Allocate and return a MTDFGeodesic.
     /*virtual*/ Geodesic* allocateGeodesic();
-
-    /*virtual*/ int allocatePlasma();
 };
 
 class InMTDFPort : public MTDFPortHole
