@@ -1,16 +1,28 @@
-// miscellaneous implementations for kernel classes.
-// inlines for Attribute and the various ConstIters classes go here.
+static const char file_id[] = "miscImpl.cc";
+// miscellaneous functions.
+// Under g++, inline implementationss for Attribute and the various
+// ConstIters classes go here, using the #pragma mechanism.
 // $Id$
 
-// This module has no code under other compilers than g++.
-
 #ifdef __GNUG__
-static const char file_id[] = "miscImpl.cc";
+#pragma implementation
 #pragma implementation "Attribute.h"
 #pragma implementation "ConstIters.h"
-#pragma implementation "miscFuncs.h"
 
 #include "Attribute.h"
 #include "ConstIters.h"
-#include "miscFuncs.h"
 #endif
+
+#include "miscFuncs.h"
+
+// This function returns a new, unique temporary file name.
+// It lives on the heap and may be deleted when no longer needed.
+char* tempFileName() {
+	int pid = getpid();
+	static int count = 1;
+	LOG_NEW; char* buf = new char[17];
+	sprintf (buf, "/tmp/pt%04x.%04d", pid, count);
+	count++;
+	return buf;
+}
+
