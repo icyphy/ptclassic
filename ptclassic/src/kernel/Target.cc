@@ -120,15 +120,15 @@ void Target::setup() {
 
 // setup the galaxy, i.e. check star types and set targets pointers
 int Target::galaxySetup() {
-  if (gal == 0) {
+  if (! gal) {
     Error::abortRun(*this, "Error in Target::setup() -- ",
 		    " no galaxy attached to the target");
     return FALSE;
   }
 
-  return galaxy()->setTarget(this);
+  return gal->setTarget(this);
 }
-	   
+
 // do I support a given star
 int Target :: support(Star* star) {
     // First check for target supported stars
@@ -140,7 +140,7 @@ int Target :: support(Star* star) {
 
     // Now check the sub-domain supported stars
     if (!supportFlag && galaxy()) {
-	supportFlag = (strcmp(galaxy()->domain(),star->domain()) == 0);
+	supportFlag = (strcmp(galaxy()->domain(), star->domain()) == 0);
 	Domain* dom = Domain::of(*galaxy());
 	if(!dom) {
 	    Error::abortRun(*galaxy(),
@@ -159,6 +159,10 @@ int Target :: support(Star* star) {
 int Target::schedulerSetup() {
 	if (!sched) {
 		Error::abortRun(*this, "No scheduler!");
+		return FALSE;
+	}
+	if (!gal) {
+		Error::abortRun(*this, "No galaxy!");
 		return FALSE;
 	}
 	sched->setGalaxy(*gal);
