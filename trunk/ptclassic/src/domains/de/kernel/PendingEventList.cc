@@ -46,7 +46,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <assert.h>
 
 
-PendingEventList::PendingEventList() {}
+PendingEventList::PendingEventList() {
+	LinkedList::LinkedList();
+}
 
 PendingEventList::~PendingEventList() {
 	initialize();
