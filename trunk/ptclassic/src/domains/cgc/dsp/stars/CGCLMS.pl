@@ -98,7 +98,7 @@ will be stored there after the run has completed.
 
 	for (ix = 0; ix < $val(tapSize); ix++) {
 		$ref2(taps,ix) = $ref2(taps,ix) +
-			e * $ref2(signalIn,index) * $val(stepSize);
+			e * $ref2(signalIn,index) * $ref(stepSize);
 		index++;
 	}
    }
