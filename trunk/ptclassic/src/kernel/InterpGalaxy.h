@@ -60,6 +60,8 @@ protected:
 	PortHole* findPortHole(const char* star,const char* port);
 
 	// find a star porthole or multiporthole
+	// The second of these resolves aliases
+	GenericPort* findGenPort(const char* star,const char* port);
 	GenericPort* findGenericPort(const char* star,const char* port);
 
 	// body of destructor
