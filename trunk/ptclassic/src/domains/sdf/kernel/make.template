@@ -41,7 +41,7 @@ VPATH = $(ROOT)/src/domains/sdf/kernel
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
-INCL = -I$(KERNDIR)
+INCL = -I$(KERNDIR) -I$(PTCL_INCDIR)
 
 # Library name
 LIB=libsdf.$(LIBSUFFIX)
@@ -71,7 +71,4 @@ include $(ROOT)/mk/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
-
-
 

@@ -50,7 +50,7 @@ CGDDFDIR = $(ROOT)/src/domains/cg/ddfScheduler
 
 INCL=-I$(CGSTARS) -I$(CGKERNEL) -I$(BDFKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) \
 	-I$(LSKERNEL) -I$(DCDIR)  -I$(DLDIR) -I$(HuDIR) -I$(PARDIR) \
-	-I$(HierDIR) -I$(MACRODIR) -I$(CGDDFDIR)
+	-I$(HierDIR) -I$(MACRODIR) -I$(CGDDFDIR) -I$(PTCL_INCDIR)
 
 SRCS=CGMultiTarget.cc CGSharedBus.cc CGBDFTarget.cc CGCostTarget.cc
 HDRS=$(SRCS:.cc=.h)
