@@ -52,7 +52,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DEScheduler.h"
 #include "CQScheduler.h"
 #include "MutableCQScheduler.h"
-//#include "DERCScheduler.h"
+#include "DERCScheduler.h"
 #include "GalIter.h"
 
 // Defined in DEDomain.cc
@@ -82,9 +82,7 @@ void DETarget :: setup() {
 	DEBaseSched* dSched;
 
         if(int(dercQ)) {
-            //LOG_NEW; dSched = new DERCScheduler;
-            // FIXME: remove the next line when we have DERCScheduler.h
-            LOG_NEW; dSched = new MutableCQScheduler;
+            LOG_NEW; dSched = new DERCScheduler;
         }
         else if (int(mutableQ)) {
                 LOG_NEW; dSched = new MutableCQScheduler;
