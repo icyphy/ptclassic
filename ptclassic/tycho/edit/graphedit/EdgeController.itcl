@@ -241,6 +241,10 @@ body ::tycho::EdgeController::delete {edge} {
     # Delete the edge
     $layout publish delete $edge
     $graph publish delete $edge
+
+    # Notify views that the data has modified
+    $layout notify event "modified"
+    $graph notify event "modified"
 }
 
 ########################################################################
@@ -447,8 +451,16 @@ body ::tycho::EdgeController::release {args} {
             $graph publish attrset $_edgename -from [itemname $_target]
             $layout publish attrset $_edgename -fromaspect $_connectat
         }
+	# The graph has been modified (I think...), so notify any
+	# subscriber to the graph
+	$graph notify event "modified"
     }
     _cleanup
+
+    # Finally, if we get to here then the edge has moved, even
+    # if the graph hasn't changed, so notify any views subscribed
+    # to the layout
+    $layout notify event "modified"
 }
 
 ########################################################################
