@@ -103,6 +103,8 @@ public:
 	// equal to the address.
 	ProcMemory* lookupSharedEntry(State&,unsigned&);
 
+	/*virtual*/ void frameCode();
+
 protected:
 	/*virtual*/ void setup();
 	/*virtual*/ void mailLoopCode();
@@ -133,7 +135,6 @@ protected:
 	// AsmTargets always support "AnyAsmStar" stars.
 	const char* auxStarClass() const;
 
-	/*virtual*/ void frameCode();
 	/*virtual*/ void mainLoopCode();
 
 	CodeStream mainLoop;
