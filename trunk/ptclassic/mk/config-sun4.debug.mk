@@ -69,11 +69,3 @@ COLLECTOR = 	-collector=$(ROOT)/gnu/sun4/lib/gcc-lib/sparc-sun-sunos4.1.3/2.6.2/
 PURELINK =	purelink $(COLLECTOR)
 PURIFY =	purelink $(COLLECTOR) purify
 QUANTIFY =	purelink $(COLLECTOR) quantify
-
-# Variables for local Matlab installation
-# -- If Matlab is installed, then MATLABDIR points to where MATLAB is installed
-#    and MATLABLIBDIR points to the directory containing the Matlab libraries
-# -- If Matlab is not installed, then MATLABDIR equals $ROOT/src/compat/matlab
-#    and MATLABLIBIDR is undefined
-MATLABDIR =	/usr/sww/matlab
-MATLABLIBDIR =	-L$(MATLABDIR)/extern/lib/sun4
