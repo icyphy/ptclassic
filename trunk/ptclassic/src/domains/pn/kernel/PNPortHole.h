@@ -44,50 +44,22 @@ class MTDFPortHole : public DFPortHole
 {
 public:
     // Class identification.
-    virtual int isA(const char* className) const;
-
-    // Constructor.
-    MTDFPortHole()
-	: myGeodesic((MTDFGeodesic*&)DFPortHole::myGeodesic), dynamic(0)
-    {}
+    /*virtual*/ int isA(const char* className) const;
 
     // Allocate and return a MTDFGeodesic.
-    /* virtual */ Geodesic* allocateGeodesic();
+    /*virtual*/ Geodesic* allocateGeodesic();
 
-    /* Redefine PortHole methods because Geodesic lacks certain virtual
-       functions.
-    */
-    void getParticle();
-    void putParticle();
-
-    // Meaningful only for input PortHoles.
-    virtual void wait() {}
-
-    // Indicate whether port is dynamic or synchronous.
-    int isDynamic() { return dynamic; }
-
-    PortHole& setPort(const char* name, Block* parent, DataType type=FLOAT,
-    	int num=1, int delay=0);
-
-protected:
-    // An alias for the inherited myGeodesic member.
-    MTDFGeodesic*& myGeodesic;
-
-    // Flag to indicate whether port is dynamic or synchronous.
-    unsigned int dynamic:1;
+    /*virtual*/ int allocatePlasma();
 };
 
 class InMTDFPort : public MTDFPortHole
 {
 public:
     // Input/output identification.
-    /* virtual */ int isItInput() const;
+    /*virtual*/ int isItInput() const;
 
     // Get data from the Geodesic.
-    /* virtual */ void receiveData();
-
-    // Synonym for receiveData().
-    /* virtual */ void wait();
+    /*virtual*/ void receiveData();
 };
 
 
@@ -95,38 +67,36 @@ class OutMTDFPort : public MTDFPortHole
 {
 public:
     // Input/output identification.
-    /* virtual */ int isItOutput() const;
+    /*virtual*/ int isItOutput() const;
 
     // Update buffer pointer (for % operator) and clear old Particles.
-    /* virtual */ void receiveData();
+    /*virtual*/ void receiveData();
 
     // Put data into the Geodesic.
-    /* virtual */ void sendData();
+    /*virtual*/ void sendData();
 };
 
- 
-class MultiMTDFPort : public MultiPortHole
-{
-};
+// MultiMTDFPort is identical to MultiDFPort.
+typedef MultiDFPort MultiMTDFPort;
 
 class MultiInMTDFPort : public MultiMTDFPort
 {
 public:
     // Input/output identification.
-    /* virtual */ int isItInput() const;
+    /*virtual*/ int isItInput() const;
  
     // Add a new physical port to the MultiPortHole list.
-    /* virtual */ PortHole& newPort();
+    /*virtual*/ PortHole& newPort();
 };
  
 class MultiOutMTDFPort : public MultiMTDFPort
 {     
 public:
     // Input/output identification.
-    /* virtual */ int isItOutput() const;
+    /*virtual*/ int isItOutput() const;
 
     // Add a new physical port to the MultiPortHole list.
-    /* virtual */ PortHole& newPort();
+    /*virtual*/ PortHole& newPort();
 };
 
 #endif
