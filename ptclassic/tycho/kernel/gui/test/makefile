@@ -65,7 +65,7 @@ MISC_FILES =	#rcsdir sccsdir
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
-test:: test_simple test_graphics
+tests:: test_simple test_graphics
 
 # These tests do not require a graphics terminal
 test_simple: $(TCL_SRCS) $(ITCL_SRCS)
