@@ -21,23 +21,26 @@ limitation of liability, and disclaimer of warranty provisions.
     }
     constructor { noInternalState(); }
 
-    go { addCode(doMath); }
+    go { 
+	addCode(startOp);
+	int i;
+	for (i=1;i<=input.numberPorts();i++) 
+	    addCode(doOp(i)); 
+    }
 
-    codeblock(doMath) {
+    codeblock(startOp) {
+	complex temp;
 	$ref(output).real = 1;
 	$ref(output).imag = 1;
-    	{
-	    int i;
-	    for (i=1; i<=$size(input); i++) {
-		complex temp;
-		temp.real = $ref(output).real * $ref(input,i).real -
-		    $ref(output).imag * $ref(input,i).imag;
-		temp.imag = $ref(output).real * $ref(input,i).imag +
-		    $ref(output).imag * $ref(input,i).real;
-		$ref(output).real += temp.real;
-		$ref(output).imag += temp.imag;
-	    }
-	}
+    }
+
+    codeblock(doOp,"int i") {
+	temp.real = $ref(output).real * $ref(input#@i).real -
+		    $ref(output).imag * $ref(input#@i).imag;
+	temp.imag = $ref(output).real * $ref(input#@i).imag +
+		    $ref(output).imag * $ref(input#@i).real;
+	$ref(output).real += temp.real;
+	$ref(output).imag += temp.imag;
     }
 
     exectime {return 4*input.numberPorts();}
