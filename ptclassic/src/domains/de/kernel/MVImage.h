@@ -35,17 +35,17 @@ protected:
 	int		blocksize;
 
 public:
-	MVImage();							// dummy MVImage.
-	MVImage(int, int, int, int, int);	// width, height, frameId,
-										// fullSize, blocksize
-	MVImage(int, int, int, int = 8);	// width, height, frameId,
-										// blocksize
-	MVImage(BaseImage&, int = 8);		// copy params, int = blocksize
-	MVImage(MVImage&, int = 0);			// copy params, maybe data
+	MVImage();		// dummy MVImage.
+	MVImage(int, int, int, int, int); // width, height, frameId,
+					  // fullSize, blocksize
+	MVImage(int, int, int, int = 8);  // width, height, frameId,
+					  // blocksize
+	MVImage(const BaseImage&, int = 8); // copy params, int = blocksize
+	MVImage(const MVImage&, int = 0);   // copy params, maybe data
 	virtual ~MVImage();
 
 	virtual	BaseImage*	fragment(int, int);
-	virtual	void		assemble(BaseImage*);
+	virtual	void		assemble(const BaseImage*);
 
 	inline	char*	retHorz()				{ return horzData; }
 	inline	char*	retVert()				{ return vertData; }
@@ -54,11 +54,10 @@ public:
 			{ return (blocksize == mv->blocksize); }
 
 // PacketData-like stuff
-	virtual const char* dataType() const { return("MVI.BaseI"); }
-	virtual PacketData* clone() const
-			{ return new MVImage(*this); }
-	virtual PacketData* clone(int a) const
-			{ return new MVImage(*this, a); }
+	virtual const char* dataType() const;
+	virtual PacketData* clone() const;
+	virtual PacketData* clone(int a) const;
+	int isA(const char*) const;
 };
 
 #endif // #ifndef _MVImage_h

@@ -5,6 +5,11 @@
 
 #include "GrayImage.h"
 
+const char* GrayImage::dataType() const { return "GrayImage";}
+PacketData* GrayImage::clone() const { return new GrayImage(*this);}
+PacketData* GrayImage::clone(int a) const { return new GrayImage(*this,a);}
+ISA_FUNC(GrayImage,BaseImage);
+
 void GrayImage::init()
 { grayData = new unsigned char[fullSize]; }
 
@@ -17,11 +22,11 @@ GrayImage::GrayImage(int a, int b, int c):
 		BaseImage(a, b, c) { init(); }
 
 
-GrayImage::GrayImage(BaseImage& bi):
+GrayImage::GrayImage(const BaseImage& bi):
 		BaseImage(bi) { init(); }
 
 
-GrayImage::GrayImage(GrayImage& gi, int a):
+GrayImage::GrayImage(const GrayImage& gi, int a):
 		BaseImage(gi)
 {
 	init();
@@ -68,10 +73,10 @@ BaseImage* GrayImage::fragment(int cellSz, int Num)
 } // end GrayImage::fragment()
 
 
-void GrayImage::assemble(BaseImage* bi)
+void GrayImage::assemble(const BaseImage* bi)
 {
 // Do we have an acceptable image to merge?
-	if (!StrStr(bi->dataType(), "GrayI") || (*bi != *this) ) return;
+	if (!bi->isA("GrayImage") || (*bi != *this) ) return;
 
 // Are we set up to merge yet?
 	if (size != fullSize) {

@@ -25,7 +25,7 @@ MVImage::MVImage(int a, int b, int c, int d):
 		blocksize(d), BaseImage(a, b, c) { init(); }
 
 
-MVImage::MVImage(BaseImage& gi, int bs):
+MVImage::MVImage(const BaseImage& gi, int bs):
 		blocksize(bs), BaseImage(gi)
 {
 	width /= blocksize; height /= blocksize;
@@ -35,7 +35,7 @@ MVImage::MVImage(BaseImage& gi, int bs):
 }
 
 
-MVImage::MVImage(MVImage& mi, int a):
+MVImage::MVImage(const MVImage& mi, int a):
 		blocksize(mi.blocksize), BaseImage(mi)
 {
 	init();
@@ -81,10 +81,10 @@ BaseImage* MVImage::fragment(int cellSz, int Num)
 } // end MVImage::fragment()
 
 
-void MVImage::assemble(BaseImage* bi)
+void MVImage::assemble(const BaseImage* bi)
 {
 // Do we have an acceptable image to merge?
-	if (!StrStr(bi->dataType(), "MVI") || (*bi != *this) ) return;
+	if (!bi->isA("MVImage") || (*bi != *this) ) return;
 
 // Are we set up to merge yet?
 	if (size != fullSize) {
@@ -106,3 +106,8 @@ void MVImage::assemble(BaseImage* bi)
 	copy(mi->size, (unsigned char*) vertData+mi->startPos,
 			(unsigned char*) mi->vertData);
 } // end MVImage::assemble()
+
+const char* MVImage::dataType() const { return("MVImage"); }
+PacketData* MVImage::clone() const { return new MVImage(*this); }
+PacketData* MVImage::clone(int a) const { return new MVImage(*this, a); }
+ISA_FUNC(MVImage,BaseImage);

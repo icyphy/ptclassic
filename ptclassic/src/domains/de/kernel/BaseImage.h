@@ -62,15 +62,8 @@ protected:
 	int width, height;
 	int startPos, size, fullSize;
 	int frameId;
-	void copy(int, float*, float*);
-	void copy(int, unsigned char*, unsigned char*);
-
-	inline double	min(double a, double b)	{return (a < b ? a : b);}
-	inline float	min(float a, float b)	{return (a < b ? a : b);}
-	inline int		min(int a, int b)		{return (a < b ? a : b);}
-	inline double	max(double a, double b)	{return (a > b ? a : b);}
-	inline float	max(float a, float b)	{return (a > b ? a : b);}
-	inline int		max(int a, int b)		{return (a > b ? a : b);}
+	void copy(int, float*, const float*);
+	void copy(int, unsigned char*, const unsigned char*);
 
 public:
 	BaseImage(int a, int b, int c, int d):
@@ -81,10 +74,10 @@ public:
 			width(a), height(b), frameId(c)
 			{ startPos = 0; size = fullSize = width*height; }
 
-	BaseImage(BaseImage& bi, int a = 0):
+	BaseImage(const BaseImage& bi, int = 0):
 			width(bi.width), height(bi.height), frameId(bi.frameId),
 			startPos(bi.startPos), size(bi.size), fullSize(bi.fullSize)
-			{ a--; } // To prevent 'a unused' warnings.
+			{ }
 
 	virtual ~BaseImage() { ; }
 
@@ -92,31 +85,27 @@ public:
 	inline int retHeight()	const { return(height); }
 	inline int retSize()	const { return(size); }
 
-	inline int operator==(BaseImage& a) const
+	inline int operator==(const BaseImage& a) const
 			{ return (frameId == a.frameId); }
-	inline int operator!=(BaseImage& a) const
+	inline int operator!=(const BaseImage& a) const
 			{ return (!(*this == a)); }
-	inline int operator<(BaseImage& a) const
+	inline int operator<(const BaseImage& a) const
 			{ return (frameId < a.frameId); }
-	inline int operator>(BaseImage& a) const
+	inline int operator>(const BaseImage& a) const
 			{ return (a < *this); }
-	inline int operator<=(BaseImage& a) const
+	inline int operator<=(const BaseImage& a) const
 			{ return ((*this < a) || (*this == a)); }
-	inline int operator>=(BaseImage& a) const
+	inline int operator>=(const BaseImage& a) const
 			{ return ((*this > a) || (*this == a)); }
 
-	virtual BaseImage* fragment(int, int) { return (BaseImage*) NULL; }
-	virtual void assemble(BaseImage*)	 { ; }
+	virtual BaseImage* fragment(int, int);
+	virtual void assemble(const BaseImage*);
 
 // PacketData-like stuff
-	virtual const char* dataType() const
-			{ return("BaseI"); }
-	virtual PacketData* clone() const
-			{ return new BaseImage(*this); }
-	virtual PacketData* clone(int a) const
-			{ return new BaseImage(*this, a); }
+	virtual const char* dataType() const;
+	virtual PacketData* clone() const;
+	virtual PacketData* clone(int a) const;
+	int isA(const char*) const;
 };
-
-const char* StrStr(const char*, const char*);
 
 #endif // #ifndef _BaseImage_h

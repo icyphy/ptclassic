@@ -31,11 +31,11 @@ DCTImage::DCTImage(int a, int b, int c, int d):
 		blocksize(d), BaseImage(a, b, c) { init(); }
 
 
-DCTImage::DCTImage(BaseImage& bi, int a):
+DCTImage::DCTImage(const BaseImage& bi, int a):
 		blocksize(a), BaseImage(bi) { init(); }
 
 
-DCTImage::DCTImage(DCTImage& di, int a):
+DCTImage::DCTImage(const DCTImage& di, int a):
 		blocksize(di.blocksize), upWidth(di.upWidth),
 		upHeight(di.upHeight), BaseImage(di)
 {
@@ -67,10 +67,10 @@ BaseImage* DCTImage::fragment(int cellSz, int Num)
 } // end DCTImage::fragment()
 
 
-void DCTImage::assemble(BaseImage* bi)
+void DCTImage::assemble(const BaseImage* bi)
 {
 // Do we have an acceptable image to merge?
-	if ( !StrStr(bi->dataType(), "DCTI") || (*bi != *this) ) return;
+	if ( !bi->isA("DCTImage") || (*bi != *this) ) return;
 
 // Are we set up to merge yet?
 	if (size != fullSize) {
@@ -85,3 +85,8 @@ void DCTImage::assemble(BaseImage* bi)
 	DCTImage* di = (DCTImage*) bi;
 	copy(di->size, DCTData+di->startPos, di->DCTData);
 } // end DCTData::assemble()
+
+const char* DCTImage::dataType() const { return("DCTImage"); }
+PacketData* DCTImage::clone() const { return new DCTImage(*this); }
+PacketData* DCTImage::clone(int a) const { return new DCTImage(*this, a); }
+ISA_FUNC(DCTImage,BaseImage);

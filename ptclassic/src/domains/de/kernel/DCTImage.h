@@ -25,16 +25,16 @@ protected:
 	void init();
 
 public:
-	DCTImage(int, int, int, int, int);	// width, height, frameId,
-										// fullSize, blocksize
-	DCTImage(int, int, int, int = 8);	// width, height, frameId,
-										// blocksize
-	DCTImage(DCTImage&, int = 0);		// copy params, maybe data
-	DCTImage(BaseImage&, int = 8); // copy params, int = blocksize
+	DCTImage(int, int, int, int, int); // width, height, frameId,
+					   // fullSize, blocksize
+	DCTImage(int, int, int, int = 8);  // width, height, frameId,
+					   // blocksize
+	DCTImage(const DCTImage&, int = 0); // copy params, maybe data
+	DCTImage(const BaseImage&, int = 8); // copy params, int = blocksize
 	virtual ~DCTImage();
 
 	virtual	BaseImage*	fragment(int, int);
-	virtual	void		assemble(BaseImage*);
+	virtual	void		assemble(const BaseImage*);
 
 	inline	float* retData()		{ return DCTData; }
 	inline	int	retBS()				{ return blocksize; }
@@ -42,11 +42,10 @@ public:
 	inline	int	fullHeight()		{ return upHeight; }
 
 // PacketData-like stuff
-	virtual const char* dataType() const { return("DCTI.BaseI"); }
-	virtual PacketData* clone() const
-			{ return new DCTImage(*this); }
-	virtual PacketData* clone(int a) const
-			{ return new DCTImage(*this, a); }
+	virtual const char* dataType() const;
+	virtual PacketData* clone() const;
+	virtual PacketData* clone(int a) const;
+	int isA(const char*) const;
 };
 
 #endif // #ifndef _DCTImage_h
