@@ -16,7 +16,7 @@ Sound generator using FM modulation that plays on the workstation speaker.
 .Ie "modulation, frequency"
 .Ie "frequency modulation"
 .Ie "FM"
-.Ie "play program"
+.Ie "ptplay program"
 This universe implements the FM-based sound synthesis system
 invented by H. M. Chowning and described in
 "The Synthesis of Complex Audio Spectra by Means of Frequency Modulation",
@@ -28,10 +28,10 @@ A
 .c FloatDC
 star controls the center frequency, relative to $2 pi$,
 the sampling frequency.
-The samples are written to a file; the star then invokes the "play" program
+The samples are written to a file; the star then invokes the "ptplay" program
 on that file.  On a sparcstation equipped with a speaker, this will
 produce sound.  This will also work on any other workstation if
-a compatible "play" program is in the user's path.
+a compatible "ptplay" program is in the user's path.
 .pp
 The galaxy fmGalaxy
 actually computes the waveform.  It has three inputs,
