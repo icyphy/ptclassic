@@ -94,7 +94,7 @@ class ::ptolemy::Block {
     ###################################################################
     ####                   protected variables                     ####
 
-    # The full name, including parent galaxies delimitted by periods.
+    # The full name, including parent galaxies delimited by periods.
     protected variable fullname {.main.noname}
 
     # The block name without the parent galaxies.
