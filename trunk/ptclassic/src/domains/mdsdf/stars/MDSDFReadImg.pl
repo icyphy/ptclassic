@@ -51,7 +51,8 @@ This star does not support frame numbers.  See ReadImg2.
 ////// Read data into an GrayImage object...
   go {
 // Open file containing the image.
-    FILE* fp = fopen(expandPathName(fileName), "r");
+    char* expandedName = expandPathName(fileName);
+    FILE* fp = fopen(expandedName, "r");
     if (fp == (FILE*) NULL) {
       Error::abortRun(*this, "File not opened: ", fileName);
       return;
@@ -99,10 +100,11 @@ This star does not support frame numbers.  See ReadImg2.
     unsigned char *p = buffer;
     fread((char*)buffer, sizeof(unsigned char), size, fp);
     FloatSubMatrix* imgData = (FloatSubMatrix*)imageOutput.getOutput();
-    for(int i = 0; i < size; i++)
+    for(unsigned int i = 0; i < size; i++)
       imgData->entry(i) = double(*p++);
-    delete[] buffer;
+    delete [] buffer;
     delete imgData;
     fclose(fp);
+    delete [] expandedName;
   } // end go{}
 } // end defstar{ ReadImg }
