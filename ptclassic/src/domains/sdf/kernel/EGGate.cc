@@ -188,13 +188,17 @@ void EGGateList :: insertGate(EGGate *pgate, int update)
 		if (pos > 0) insertBehind(temp,p);
 		else if (pos < 0) insertAhead(temp,p);
 		else {
+			// compare the porthole
+			if (pgate->aliasedPort() != p->gate()->aliasedPort()) {
+				insertBehind(temp, p);
+	
 			// If a link to the same EGNode, with the same delay,
 			//  already exists, then simply update the number of
 			// samples in the existing node, and delete this one,
 			// because it is redundant. If we're updating now,
 			// save the arc -- we'll use it to insert the other
 			// endpoint (this is our convention).
-			if (update) {
+			} else if (update) {
 				p->gate()->addSamples(pgate->samples());
 			} else { LOG_DEL; delete pgate; }
 			return;
