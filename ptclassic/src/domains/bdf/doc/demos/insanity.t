@@ -8,7 +8,13 @@ If the "allowDynamic" parameter of the target is set to YES,
 then the scheduler will construct four SDF subschedules, which
 must then be invoked dynamically.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/bdf/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "J. T. Buck"
 .ES

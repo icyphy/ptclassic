@@ -7,7 +7,13 @@ and
 .c Select
 stars to construct an if-then-else statement.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/bdf/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "J. T. Buck"
 .ES
