@@ -80,10 +80,8 @@ namespace ::tycho {
 		{Mathematica console}
     }
     ::tycho::File::registerEditor {.html .htm .htl} ::tycho::HTML {}
-    # ::tycho::File::registerEditor {.cir .sp} ::tycho::EditSpice {Spice editor}
     ::tycho::File::registerEditor {.mk .template} ::tycho::EditMake \
 	    {Makefile editor} {Makefile makefile GNUmakefile}
-    # ::tycho::File::registerEditor {.vhdl .VHDL} ::tycho::EditVHDL {VHDL editor}
     # ::tycho::File::registerEditor {.fsm} ::tycho::EditFSM \
     #   {Finite state machine editor}
     ::tycho::File::registerEditor {.std} ::tycho::EditSTD {State transition diagram editor}
