@@ -114,7 +114,7 @@ body ::tycho::ColorBrowser::constructor {args} {
 	keep -cursor
     }
     pack $itk_component(color) -side top -anchor nw\
-	    -expand yes -fill x -after $itk_component(radiosite)
+	    -expand yes -fill x -after $itk_component(querysite)
 
     # Process any unevaluated arguments.
     eval itk_initialize $args

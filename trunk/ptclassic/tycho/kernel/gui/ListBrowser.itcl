@@ -160,7 +160,7 @@ body ::tycho::ListBrowser::constructor {args} {
 	keep -background -cursor
     }
     pack $itk_component(listscroll) -side top \
-	    -expand yes -fill both -padx 5 -after $itk_component(radiosite)
+	    -expand yes -fill both -padx 5 -after $itk_component(querysite)
     
     # Listbox for items.
     itk_component add listbox {

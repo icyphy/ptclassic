@@ -134,7 +134,7 @@ body ::tycho::EditSearch::constructor {args} {
     } {
 	keep -cursor -background
     }
-    pack $itk_component(switches) -after $itk_component(radiosite)
+    pack $itk_component(switches) -after $itk_component(querysite)
 
     itk_component add word {
 	checkbutton $itk_component(switches).word -text "Whole Word" \
