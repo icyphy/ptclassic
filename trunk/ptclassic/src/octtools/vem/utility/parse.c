@@ -131,7 +131,7 @@ STR *rtn;			/* Remaining portion of string  */
     
     if (!masterSpec) return VEM_FALSE;
 
-    VEM_CHECK(STRLEN(masterSpec) < MAX_SPEC_SIZE, "Instance spec too big");
+    VEM_CHECK((int)STRLEN(masterSpec) < MAX_SPEC_SIZE, "Instance spec too big");
     STRMOVE(ispec, masterSpec);
     p = ispec;
 
