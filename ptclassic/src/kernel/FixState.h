@@ -1,10 +1,18 @@
 #ifndef _FixState_h
 #define _FixState_h 1
+
+#ifdef __GNUG__
+#pragma interface
+#endif
+
+#include "State.h"
+#include "Fix.h"
+
 /**************************************************************************
 Version identification:
 $Id$
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1991, 1992, 1993 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -27,47 +35,55 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer:  J. T. Buck
- Date of creation: 10/17/91
+ Programmer:  A. Khazeni (replaces old version)
  Revisions:
 
- A FixState is conceptually represented as a fixed  point number.
- Its legal values range from -1 to just under 1
- (an exact one is allowed and converted to the largest possible
- fixed point number).
-
- Its initialization expression can have arbitrary floating values,
- as long as the final value is within the [-1,1] range.
-
- bitVal(int nBits) returns the value as an n-bit 2s complement integer.
- nBits can be no more than the number of bits in a long.
+ State with Fix type
 
 **************************************************************************/
-#include "FloatState.h"
-#ifdef __GNUG__
-#pragma interface
-#endif
 
-class FixState : public FloatState {
+///////////////////////////////////////////
+// class  FixState
+///////////////////////////////////////////
+
+class FixState : public State
+{
 public:
+        // constructor
+        FixState() { val = 0.0;}
 
-	void initialize();
+        // parses initValue to set value
+        void initialize();
 
-	const char* type() const; // return "FIX"
+        // the type
+	const char* type() const; // { return "FIX";}
 
-	// value as string is same as for floatstate
+        // the value as a string
+	StringList currentValue() const;
 
-	// return value as an integer, assuming represented by nBits bits
-	long bitVal(int nBits);
+        // assignment from a Fix
+        Fix& operator=(const Fix& rvalue) { return val = rvalue;}
+
+        // casting to a Fix
+        operator Fix() { return val;}
+        operator double() { return double(val);}
+
+	// set init value
+	void setInitValue(const Fix& arg);
+
+	// this redeclaration is required by the "hiding rule".  Yuk!
+	void setInitValue(const char* s) { State::setInitValue(s);}
 
 	// class identification
 	int isA(const char*) const;
 	const char* className() const {return "FixState";}
 
-	State* clone () const; // { return new FixState;}
+	State* clone () const;//  {return new FixState;}
 
-	// assignment: does check and truncation
-	double operator=(double rvalue);
-
+private:
+	// the actual data
+	Fix val;
 };
+
+
 #endif
