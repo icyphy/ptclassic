@@ -75,6 +75,7 @@ include $(ROOT)/mk/matlab.mk
 # Mathematica settings
 include $(ROOT)/mk/mathematica.mk
 
+C50T = $(OBJDIR)/domains/c50/targets
 CG56T = $(OBJDIR)/domains/cg56/targets
 CGCT = $(OBJDIR)/domains/cgc/targets
 CGCTCL = $(OBJDIR)/domains/cgc/tcltk/targets
@@ -86,6 +87,7 @@ BDFDIR = $(CROOT)/src/domains/bdf
 CGDDFDIR = $(CROOT)/src/domains/cg
 CGDIR = $(CROOT)/src/domains/cg
 CGCDIR = $(CROOT)/src/domains/cgc
+C50DIR = $(CROOT)/src/domains/c50
 CG56DIR = $(CROOT)/src/domains/cg56
 DDFDIR = $(CROOT)/src/domains/ddf
 DEDIR = $(CROOT)/src/domains/de
@@ -160,6 +162,32 @@ ifdef CG56
 	CEPHESLIB = 1
 	# CG56 targets need CGCStar
 	CGCLIB = 1
+endif
+
+# Texas Instruments TMS320C50 Code Generation Domain
+
+ifdef C50
+	CUSTOM_DIRS += $(C50DIR)/kernel $(C50DIR)/stars \
+		$(C50DIR)/targets $(C50DIR)/dsp/stars
+	# must bring in the parallel schedulers for multi-c50 targets
+	# CGFULL = 1
+	PALETTES += PTOLEMY/src/domains/c50/icons/main.pal
+	STARS += $(LIBDIR)/c50dspstars.o $(LIBDIR)/c50stars.o
+	LIBS += -lc50dspstars -lc50stars -lc50
+	LIBFILES += $(LIBDIR)/libc50dspstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libc50stars.$(LIBSUFFIX) \
+		$(LIBDIR)/libc50.$(LIBSUFFIX)
+	ifeq ($(USE_SHARED_LIBS),yes) 
+		LIBS += -lc50targets
+		LIBFILES += $(LIBDIR)/libc50targets.$(LIBSUFFIX)
+	else
+		TARGETS += $(CG56T)/DSKC50Target.o \
+			$(CG56T)/SubC50Target.o
+	endif
+	# Window star in c50/dsp/stars needs the Cephes Library
+	# CEPHESLIB = 1
+	# C50 targets need CGCStar
+	# CGCLIB = 1
 endif
 
 ifdef CGDDF

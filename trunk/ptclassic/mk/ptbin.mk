@@ -1,6 +1,6 @@
 # Makefile to build ptcl, tycho and pigiRpc binaries
 # $Id$
-
+#
 # Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
@@ -70,6 +70,7 @@ ifdef FULL
 	PIGI = 		$(BASENAME)
 	VERSION_DESC =	'With All Common Domains'
 	BDF =		1
+	C50 =		1
 	CG56 =		1
 	CGCFULL =	1
 	CGFULL =	1
