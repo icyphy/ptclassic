@@ -20,7 +20,7 @@ They also serve as base classes for more elaborate dialogs.
 <p>
 Many messages require an "OK" button that has the effect of dismissing
 the message.  The Message class is derived from
-<a href="dialogwindow.html">DialogWindow</a> and adds
+<a href="dialog.html">Dialog</a> and adds
 this feature.
 <tcl><pre>
 ::tycho::Message .x -text {A simple message window}
@@ -43,7 +43,7 @@ wm deiconify .xx
 </pre></tcl>
 It rarely (if ever) makes sense to directly create an instance of
 the <code>ErrorMessage</code> class.  Use <code>error</code> instead
-(see <a href=error.html>error handling</a>).
+(see <a href="error.html">error handling</a>).
 <p>
 <a href="../../../doc/index.html">Tycho Home Page</a><br>
 <p>
