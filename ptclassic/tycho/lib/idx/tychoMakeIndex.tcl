@@ -114,6 +114,12 @@ proc tychoMkIndex {name filename prependTYCHO nested args } {
 # else.
 #
 proc tychoFindAllHTML { {dirname .} {depth 0}} {
+    global env
+    if [info exists env(PTARCH)] {
+	set objdir "obj.$env(PTARCH)"
+    } else {
+	set objdir "obj"
+    }
     cd $dirname
     set files [glob -nocomplain {*.htm*}]
     foreach name [exec ls] {
@@ -124,6 +130,8 @@ proc tychoFindAllHTML { {dirname .} {depth 0}} {
 		    $name != {adm} && \
 		    $name != {test} && \
 		    $name != {codeDoc} && \
+		    $name != {java} && \
+		    $name != $objdir && \
 		    $name != {junk} } {
 		set subfiles [tychoFindAllHTML [file join $dirname $name] \
 			[expr $depth + 1]]
@@ -148,6 +156,12 @@ proc tychoFindAllHTML { {dirname .} {depth 0}} {
 # else.
 #
 proc tychoFindCodeDocHTML { {dirname .} {depth 0}} {
+    global env
+    if [info exists env(PTARCH)] {
+	set objdir "obj.$env(PTARCH)"
+    } else {
+	set objdir "obj"
+    }
     cd $dirname
     set files [glob -nocomplain [file join codeDoc *.html]]
     foreach name [exec ls] {
@@ -157,6 +171,8 @@ proc tychoFindCodeDocHTML { {dirname .} {depth 0}} {
 		    $name != {RCS} && \
 		    $name != {adm} && \
 		    $name != {test} && \
+		    $name != {java} && \
+		    $name != $objdir && \
 		    $name != {junk} } {
 		set subfiles [tychoFindCodeDocHTML [file join $dirname $name] \
 			[expr $depth + 1]]
