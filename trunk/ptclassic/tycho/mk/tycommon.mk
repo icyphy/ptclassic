@@ -267,11 +267,13 @@ alltests.itcl: makefile
 	echo "update" >> $@
 	echo "set savedir \"[pwd]\"" >> $@
 	echo "if {\"$(SIMPLE_TESTS)\" != \"\"} {foreach i [list $(SIMPLE_TESTS)] {puts \$$i; cd \"\$$savedir\"; source \$$i}}" >> $@
-	for x in $(GRAPHICAL_TESTS); do \
-		echo "puts stderr $$x" >> $@; \
-		echo "cd \"\$$savedir\"" >> $@; \
-		echo "source $$x" >> $@; \
-	done
+	if [ "x$(GRAPHICAL_TESTS)" != "x" ]; then \
+		for x in $(GRAPHICAL_TESTS); do \
+			echo "puts stderr $$x" >> $@; \
+			echo "cd \"\$$savedir\"" >> $@; \
+			echo "source $$x" >> $@; \
+		done; \
+	fi
 	echo "set reallyExit 1" >> $@
 	echo "doneTests" >> $@
 
@@ -287,8 +289,8 @@ all.itcl: makefile
 	echo '# Set the following to avoid endless calls to exit' >> $@
 	echo 'set reallyExit 0' >> $@
 	echo 'foreach file [glob *.itcl] {' >> $@
-	echo '    if {$file != "all.itcl"} {' >> $@
-	echo '         source $file' >> $@
+	echo '    if {$$file != "all.itcl" && $$file != "alltests.itcl"} {' >> $@
+	echo '         source $$file' >> $@
 	echo '    }' >> $@
 	echo '}' >> $@
 
