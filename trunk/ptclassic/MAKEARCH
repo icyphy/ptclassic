@@ -127,7 +127,7 @@ if ( -d ../src/tst ) then
 	optlink ../../src/tst makefile
 	optlink ../../src/tst makefile.tst
 	optlink ../../src/tst makefile.tst2
-	foreach x ($ALLDOMAINS)
+	foreach x ($ALLDOMAINS pn)
 		optmkdir $x
 		cd $x
 		optlink ../../../src/tst/$x makefile
