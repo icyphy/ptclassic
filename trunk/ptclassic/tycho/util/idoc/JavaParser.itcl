@@ -440,7 +440,7 @@ body ::tycho::JavaParser::addArgs {class context arguments} {
 body ::tycho::JavaParser::addClassComment {class expl} {
     set classModel $_classmodels($class)
     set expl [formatClassComment $expl]
-    $classModel modelconfigure -explanation "$expl"
+    $classModel configure -explanation "$expl"
 }
 
 #####################################################################
@@ -631,11 +631,11 @@ body ::tycho::JavaParser::addVariable \
 #
 body ::tycho::JavaParser::parseClass {class body} {
     set _classmodels($class) [::tycho::ClassModel [::tycho::autoName class]]
-    $_classmodels($class) modelconfigure \
-    	-language $_language \
-		-name $class \
-		-source [file join .. .. $_sourceFile] \
-		-package $_package
+    $_classmodels($class) configure \
+            -language $_language \
+            -classname $class \
+            -sourcefile [file join .. .. $_sourceFile] \
+            -package $_package
 
     set lastComment {}
     set lastProtection {}
@@ -881,16 +881,16 @@ body ::tycho::JavaParser::parseExtends {class extends} {
     if [regexp {^[ ]*extends[ ]+([A-Za-z_]+[A-Za-z0-9_.]*)[ ]+(.*)$} \
             $extends dmy parent other] {
         # Extends a class and more
-        set inherits [$classModel modelcget -inherits]
+        set inherits [$classModel cget -inherits]
         lappend inherits $parent
-        $classModel modelconfigure -inherits $inherits
+        $classModel configure -inherits $inherits
         set extends [string trimleft $other " \t"]
     } elseif [regexp {^[ ]*extends[ ]+([A-Za-z_]+[A-Za-z0-9_.]*)[ 	]*$} \
             $extends dmy parent] {
         # Extends a class and that's it
-        set inherits [$classModel modelcget -inherits]
+        set inherits [$classModel cget -inherits]
         lappend inherits $parent
-        $classModel modelconfigure -inherits $inherits
+        $classModel configure -inherits $inherits
         return
     }
 
@@ -900,18 +900,18 @@ body ::tycho::JavaParser::parseExtends {class extends} {
             if [regexp {^([A-Za-z_]+[A-Za-z0-9_.]*)[ ]*,[ ]*(.*)$} \
                     $parents dmy parent left] {
                 # Pull out a parent interface
-		        set implements [$classModel modelcget -implements]
+		        set implements [$classModel cget -implements]
         		lappend implements $parent
-		        $classModel modelconfigure -implements $implements
+		        $classModel configure -implements $implements
                 set parents [string trimleft $left " \t"]
             } else {
                 # Last interface
                 regexp {^([A-Za-z_]+[A-Za-z0-9_.]*)[ ]*(.*)$} \
                         $parents dmy parent left
                 if {$parent != ""} {
-			        set implements [$classModel modelcget -implements]
+			        set implements [$classModel cget -implements]
 	        		lappend implements $parent
-			        $classModel modelconfigure -implements $implements
+			        $classModel configure -implements $implements
                     set parents $left
                 } 
                 set extends $parents
@@ -940,7 +940,7 @@ body ::tycho::JavaParser::parseExtends {class extends} {
                 set throws ""
             }
         }
-        $classModel modelconfigure -exceptions $exceptions
+        $classModel configure -exceptions $exceptions
     }
 }
 
@@ -953,12 +953,12 @@ body ::tycho::JavaParser::parseExtends {class extends} {
 body ::tycho::JavaParser::parseModifiers {class modifiers} {
     set classModel $_classmodels($class)
     if [regexp {^(.*)[	 ]*public[ 	]*(.*)$} $modifiers dmy other other2] {
-        $classModel modelconfigure -protection public
+        $classModel configure -protection public
         set modifiers [string trimleft "$other $other2" " \t"]
     } {
-        $classModel modelconfigure -protection package
+        $classModel configure -protection package
     }
-    $classModel modelconfigure -modifiers $modifiers
+    $classModel configure -modifiers $modifiers
 }
 
 #####################################################################

@@ -442,9 +442,9 @@ body ::tycho::JavaViewer::_displayVariables {protection} {
 body ::tycho::JavaViewer::_formatExpl {class item type {extern 0}} {
     set classModel $_classmodels($class)
 
-    set expl [$classModel itemcget $type:$item -explanation]
+    set expl [$classModel attrset $type:$item -explanation]
     if { $expl == "" } {
-        set expl [$classModel itemcget $type:$item -description]
+        set expl [$classModel attrset $type:$item -description]
     }
     
     set other {}
@@ -456,15 +456,15 @@ body ::tycho::JavaViewer::_formatExpl {class item type {extern 0}} {
 	# Get method parameters and their types
 	set arglist "("
 	foreach arg [$classModel match argument $type:$item] {
-	    set argtype [$classModel itemcget \
-		    [concat $type:$item argument:$arg] -type]
+	    set argtype [$classModel attrset \
+		    [list $type:$item argument:$arg] -type]
 	    append arglist $argtype " " $arg ", "
 	}
 	# Remove extra comma
 	set other [string trimright $arglist " ,"])
 	
 	# Get exceptions
-	set exceptions [$classModel itemcget $type:$item -exceptions]
+	set exceptions [$classModel attrset $type:$item -exceptions]
 	
 	# Format exceptions
 	if {$exceptions != {}} {
@@ -478,19 +478,19 @@ body ::tycho::JavaViewer::_formatExpl {class item type {extern 0}} {
     } elseif {$type == "variable"} {
 	
 	# Get the default value
-	set default [$classModel itemcget variable:$item -default]
+	set default [$classModel attrset variable:$item -default]
 	if {$default != {}} {
 	    set other "= $default"
 	}
     }
     
     set shortname [_fixName $item]
-    set modifiers [$classModel itemcget $type:$item -modifiers]
+    set modifiers [$classModel attrset $type:$item -modifiers]
     # Constructors don't have an explicit type
     if {$type != "constructor"} {
 	# Remove signature portion of item name
 	set shortname [_fixName $item]
-	set itemtype [$classModel itemcget $type:$item -type]
+	set itemtype [$classModel attrset $type:$item -type]
     } {
 	set shortname "$_currentclass"
 	set itemtype ""
@@ -549,7 +549,7 @@ body ::tycho::JavaViewer::_generateHtmlContents {} {
     }
         
     set html "<HR>"
-    set extends [$classModel modelcget -inherits]
+    set extends [$classModel cget -inherits]
     if {$extends != {}} {
 	append html "Extends: "
 	append html "<a href=\"[::tycho::relativePath\
@@ -558,7 +558,7 @@ body ::tycho::JavaViewer::_generateHtmlContents {} {
 	append html "<code>$extends</code></a> -\n"
     }
     
-    set implements [$classModel modelcget -implements]
+    set implements [$classModel cget -implements]
     if {$implements != {}} {
 	append html "Implements: "
 	foreach parent $implements {
@@ -568,7 +568,7 @@ body ::tycho::JavaViewer::_generateHtmlContents {} {
 	    append html "<code>$parent</code></a> -\n"
 	}
     }
-    append html "<a href=\"[$classModel modelcget -source]\">Source\
+    append html "<a href=\"[$classModel cget -sourcefile]\">Source\
 	    File</a> -\n"
     append html "Contents: "
     
@@ -583,7 +583,7 @@ body ::tycho::JavaViewer::_generateHtmlContents {} {
     # Check for destructor
     set destructor [$classModel match destructor]
     if {$destructor != {}} {
-	if {$verbose || [$classModel itemcget \
+	if {$verbose || [$classModel attrset \
 		destructor:$destructor -description] != { }} {
 	    append html "<a href=\"#finalizer $of_class\"\
 		    >finalizer</a> -\n"
@@ -649,7 +649,7 @@ body ::tycho::JavaViewer::_generateHtmlBody {} {
         set tempprotect [lreplace $_protections end end]
     }
     
-    set html [$classModel modelcget -explanation]
+    set html [$classModel cget -explanation]
     # Remove footer
     regexp {^(.*<hr>)(<br>[^:]+:.*)$} $html dmy html footer
     
@@ -657,8 +657,8 @@ body ::tycho::JavaViewer::_generateHtmlBody {} {
     set of_class "of $_currentclass class"
     # For anchors i.e.: clear method of java.lang.String class
     set of_lclass "of\
-	    [$classModel modelcget -package].[$classModel\
-	    modelcget -name] class"
+	    [$classModel cget -package].[$classModel\
+	    cget -classname] class"
 
     # Check for constructors
     set constructors [$classModel match constructor]
@@ -677,7 +677,7 @@ body ::tycho::JavaViewer::_generateHtmlBody {} {
     # Check for destructors
     set destructors [$classModel match destructor]
     if {$destructor != {}} {
-	if {$verbose || [$classModel itemcget \
+	if {$verbose || [$classModel attrset \
 		destructor:$destructor -description] != { }} {
 	    append html "<h2><a name=\"finalizer $of_class\"\
 		    >Finalizer</a></h2><dl>"
@@ -778,13 +778,13 @@ body ::tycho::JavaViewer::_hyperLink \
     }
 
     # Assume text is the fixed name and item is the full name
-    set protection [$classModel itemcget $type:$item -protection]
+    set protection [$classModel attrset $type:$item -protection]
     if {$protection == "package"} {
 	set protection {}
     } else {
 	set protection "$protection "
     }
-    set modifiers [$classModel itemcget $type:$item -modifiers]
+    set modifiers [$classModel attrset $type:$item -modifiers]
     if {$modifiers != {}} {
 	set modifiers "$modifiers "
     }
@@ -794,14 +794,14 @@ body ::tycho::JavaViewer::_hyperLink \
 
     if {$type != "method" && $type != "constructor"} {
 	set text "<a href = \
-		\"[$classModel modelcget \
-		-source]#$protection$modifiers$itemtype$text\"\
+		\"[$classModel cget \
+		-sourcefile]#$protection$modifiers$itemtype$text\"\
 		>$text</a>"
     } else {
 	# FIXME: Need the arguments to distinguish methods, constructors
 	set text "<a href = \
-		\"[$classModel modelcget \
-		-source]#$protection$modifiers$itemtype$text\"\
+		\"[$classModel cget \
+		-sourcefile]#$protection$modifiers$itemtype$text\"\
 		>$text</a>"
     }
     return $text

@@ -516,7 +516,7 @@ body ::tycho::ItclParser::addBody {name arguments expl} {
         # Insert the explanation
         set expl [formatExpl "$expl"]
         if {$expl != {}} {
-            $classModel itemconfigure $fullname -explanation $expl
+            $classModel attrset $fullname -explanation $expl
         }
     }
 }
@@ -528,7 +528,7 @@ body ::tycho::ItclParser::addBody {name arguments expl} {
 body ::tycho::ItclParser::addClassComment {class expl} {
     set classModel $_classmodels($class)
     set expl [formatClassComment $expl]
-    $classModel modelconfigure -explanation "$expl"
+    $classModel configure -explanation "$expl"
 }
 
 #####################################################################
@@ -571,7 +571,7 @@ body ::tycho::ItclParser::addConfigBody {name expl} {
             if ![$classModel exists variable:$name] {
                 set name -$name
             }
-            $classModel itemconfigure variable:$name -explanation $expl
+            $classModel attrset variable:$name -explanation $expl
         } 
     }
 }
@@ -690,10 +690,10 @@ body ::tycho::ItclParser::addVariable \
 #
 body ::tycho::ItclParser::parseClass {class body} {
     set _classmodels($class) [::tycho::ClassModel [::tycho::autoName class]]
-    $_classmodels($class) modelconfigure \
+    $_classmodels($class) configure \
 	    -language $_language \
-	    -name $class \
-	    -source [file join .. .. $_sourceFile]
+	    -classname $class \
+	    -sourcefile [file join .. .. $_sourceFile]
 
     set lastComment {}
     set lastProtection {}
@@ -863,9 +863,9 @@ body ::tycho::ItclParser::parseClass {class body} {
         }
         if {$inInherit} {
             if {[string range $construct 0 1] == "::"} {
-		set parents [$_classmodels($class) modelcget -inherits]
+		set parents [$_classmodels($class) cget -inherits]
 		lappend parents $construct
-		$_classmodels($class) modelconfigure -inherits $parents
+		$_classmodels($class) configure -inherits $parents
 		continue
             }
             # No more parents, parse this.
