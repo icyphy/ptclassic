@@ -293,6 +293,8 @@ int DEScheduler :: fetchEvent(InDEPort* p, float timeVal) {
 			}
 		} 
 	}
+	Error :: abortRun (*p, " has no more data.");
+	return FALSE;
 }
 
 // detect any delay-free loop which may potentially generate an
@@ -369,8 +371,8 @@ int DEScheduler :: checkLoop(PortHole* p, DEStar* s) {
 				}
 			} else if (inp->triggerList) {
 				ListIter nextp(*(inp->triggerList));
-				const GenericPort* port;
-				while ((port = (const GenericPort*)nextp++)) {
+				GenericPort* port;
+				while ((port = (GenericPort*)nextp++)) {
 				    if (port->isItMulti()) {
 					MultiPortHole* pp = 
 						(MultiPortHole*) port;
@@ -482,8 +484,8 @@ int DEScheduler :: setDepth(PortHole* p, DEStar* s) {
 			// else, it scans through the "triggerList".
 			} else if (inp->triggerList) {
 				ListIter nextp(*(inp->triggerList));
-				const GenericPort* port;
-				while ((port = (const GenericPort*)nextp++)) {
+				GenericPort* port;
+				while ((port = (GenericPort*)nextp++)) {
 				    if (port->isItMulti()) {
 					MultiPortHole* pp = 
 						(MultiPortHole*) port;
