@@ -74,8 +74,11 @@ class ::tycho::ResourceHTTP {
     # Read a string from a streamable resource
     method gets {{varName {}}}
 
+    # Test if the file is currently open
+    method isopen {}
+
     # Open the resource
-    method open {path {mode "r"}}
+    method open {{mode "r"}}
 
     # Write a string to a streamable resource.
     # Can't write into HTTP file! Read permission of off
@@ -228,6 +231,9 @@ class ::tycho::ResourceHTTP {
 
     ###################################################################
     ####                         private variables               ####
+    
+    # True if the file is open
+    private variable fileIsOpen 0
 }
 
 
@@ -301,12 +307,20 @@ body ::tycho::ResourceHTTP::gets {{varName {}}} {
 }
 
 #####################################################################
+#### isopen
+body ::tycho::ResourceHTTP::isopen {} {
+    return $fileIsOpen
+}
+
+#####################################################################
 #### open
 # Open an HTTP file. If it's already been downloaded into
 # a local temporary file, just use that file; otherwise
 # download it into a temporary file and then download it.
 #
-body ::tycho::ResourceHTTP::open {url {mode "r"}} {
+body ::tycho::ResourceHTTP::open {{mode "r"}} {
+    set url [path]
+::puts "open: url = $url"
     if { $mode != "r" } {
 	error "File $url is not writable"
     }
@@ -329,7 +343,6 @@ body ::tycho::ResourceHTTP::open {url {mode "r"}} {
     # Open the cache file
     set fileid [::open $_cachefile($url) "r"]
     set fileIsOpen 1
-    set currentURL $url
 }
 
 #########################################################################
@@ -499,7 +512,11 @@ body ::tycho::ResourceHTTP::query {url option} {
     switch -exact -- $option {
 	"executable" {
 	    # FIXME: Do directories need to be executable to read them?
-	    return 0
+	    if [query $url isdirectory] {
+		return 1
+	    } else {
+		return 0
+	    }
 	}
 	"exists" {
 	    # FIXME: Do directories need to be executable to read them?
@@ -709,11 +726,11 @@ body ::tycho::ResourceHTTP::httpget {url type} {
     # Parse URL into hostname, port, and path
     set currentURL $url
     ::tycho::assign hostname port path [splitURL $url]
-
+::puts "$hostname $port $path"
     # Surfit starts here vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     if {[catch {socket -async $hostname $port} socketid]} {
 	catch {unset $socketid}
-	error "Can't open $host, $port"
+	error "Can't open $hostname, $port"
     }
     # Surfit ends here ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
     debugputs "Connect $hostname:$port on $socketid"
@@ -890,6 +907,7 @@ body ::tycho::ResourceHTTP::httpwait {} {
     }
     return
 }
+
 
 
 
