@@ -518,7 +518,7 @@ proc lreject {list script} {
 proc lreverse {list} {
     set result {}
     foreach i $list {
-	set result [concat [list $i] $result]
+	set result [linsert $result 0 $i]
     }
     return $result
 }
