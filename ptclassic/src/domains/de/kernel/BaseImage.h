@@ -24,36 +24,30 @@
  Assembly always produces a full-sized image from however-small
  fragments.
 
- The 'frameId' variable is used during assembly.  Fragments with the
- same frameId's are assembled into the same image.  So, it is IMPORTANT
- that different frames from the same source have different frameIds.
-
  Use of the 'size', 'fullSize', and 'startPos' variables vary within
- each subclass.  Typically the 'size' variable holds the number of
- pixels that an object is storing.  If an object is NOT produced by
- fragment(), then (size == fullSize).  If the object is produced by a
+ each subclass. Typically the 'size' variable holds the number of
+ pixels that an object is storing. If an object is NOT produced by
+ fragment(), then (size == fullSize). If the object is produced by a
  fragment() call, size may be less than or equal to fullSize.
  An objects's 'fullSize' may be bigger or
- smaller than width*height.  It would be bigger, for example, in
+ smaller than width*height. It would be bigger, for example, in
  DCTImage, where the amount of allocated storage must be rounded up to
- be a multiple of the blocksize.  It would be smaller, for example,
+ be a multiple of the blocksize. It would be smaller, for example,
  for an object that contains runlength coded video.
 
+ The 'frameId' variable is used during assembly. Fragments with the
+ same frameId's are assembled into the same image. So, it is IMPORTANT
+ that different frames from the same source have different frameIds.
+
  The comparison functions {==, !=, <, >, etc.} compare two objects'
- frameId's.  They can be used to resequence images or to sort image
+ frameId's. They can be used to resequence images or to sort image
  fragments.
 
- There is a GNU g++ compiler bug that prevents us from writing
- a function copy(int, char*, char*).  This function would conflict
- (erroneously) with the copy(int, unsigned char*, unsigned char*)
- function.  Until this bug is fixed, just CAST char*'s to unsigned
- char*'s before calling copy().
-
  The copy constructor and clone() functions have an optional integer
- argument.  If a nonzero argument is provided, then all state values
+ argument. If a nonzero argument is provided, then all state values
  of the copied object are copied to the created object, but none
- of the image data is copied.  If no argument or a zero argument
- is provided, then the image data is copied as well.  Classed derived
+ of the image data is copied. If no argument or a zero argument
+ is provided, then the image data is copied as well. Classes derived
  from BaseImage should maintain this policy.
  ******************************/
 
@@ -65,8 +59,10 @@ protected:
 	int width, height;
 	int startPos, size, fullSize;
 	int frameId;
+// The copy() functions should be done with templates...
 	void copy(int, float*, const float*) const;
-	void copy(int, unsigned char*, const unsigned char*) const;
+	void copy(int, char*, const char*) const;
+	void copy(int, unsigned char*, unsigned const char*) const;
 
 public:
 	BaseImage(int a, int b, int c, int d):
@@ -82,7 +78,7 @@ public:
 			startPos(bi.startPos), size(bi.size), fullSize(bi.fullSize)
 			{ }
 
-	virtual ~BaseImage() { ; }
+	virtual ~BaseImage() { }
 
 	inline int retWidth()		const { return(width); }
 	inline int retHeight()		const { return(height); }
