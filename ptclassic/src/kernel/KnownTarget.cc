@@ -26,9 +26,29 @@ class KnownTargetEntry {
 	int onHeap;
 	int dynLinked;
 	KnownTargetEntry *next;
+public:
+	KnownTargetEntry(Target* t,int oh, KnownTargetEntry* n) :
+		targ(t), onHeap(oh), dynLinked(Linker::isActive()), next(n) {}
+	~KnownTargetEntry ();
 };
 
+KnownTargetEntry::~KnownTargetEntry () {
+	if (onHeap) { LOG_DEL; delete targ;}
+	LOG_DEL; delete next;
+}
+
 static KnownTargetEntry* allTargets;
+
+// Special class to clean up at end.
+class KnownTargetOwner {
+public:
+	KnownTargetOwner() {}
+	~KnownTargetOwner() {
+		LOG_DEL; delete allTargets;
+	}
+};
+
+static KnownTargetOwner knownTargetOwner;
 
 // Find a target on the known list (internal form)
 // Find a known list entry
@@ -90,11 +110,8 @@ void KnownTarget::addEntry (Target& target, const char* name, int isOnHeap) {
 
 	// otherwise create a new entry
 	else {
-		LOG_NEW; KnownTargetEntry* nkb = new KnownTargetEntry;
-		nkb->targ = &target;
-		nkb->next = allTargets;
-		nkb->onHeap = isOnHeap;
-		nkb->dynLinked = Linker::isActive();
+		LOG_NEW; KnownTargetEntry* nkb =
+			new KnownTargetEntry(&target,isOnHeap,allTargets);
 		allTargets = nkb;
 	}
 }

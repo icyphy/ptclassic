@@ -32,7 +32,16 @@ class KnownListEntry {
 	int onHeap;
 	int dynLinked;
 	KnownListEntry *next;
+public:
+	KnownListEntry(Block* bl,int oh, KnownListEntry* n) :
+		b(bl), onHeap(oh), dynLinked(Linker::isActive()), next(n) {}
+	~KnownListEntry ();
 };
+
+KnownListEntry::~KnownListEntry () {
+	if (onHeap) { LOG_DEL; delete b;}
+	LOG_DEL; delete next;
+}
 
 // declarations for static variables.  I would rather use class
 // static than file static for the arrays, but g++ has bugs.
@@ -41,6 +50,21 @@ static KnownListEntry* allBlocks[NUMDOMAINS];
 static const char* domainNames[NUMDOMAINS];
 int KnownBlock :: currentDomain = 0;
 int KnownBlock :: numDomains = 0;
+
+// Special class to clean up at end.
+class KnownListOwner {
+public:
+	KnownListOwner() {}
+	~KnownListOwner() {
+		for (int i = 0; i < NUMDOMAINS; i++) {
+			LOG_DEL; delete allBlocks[i];
+		}
+	}
+};
+
+static KnownListOwner knownListOwner;
+
+// KnownBlock methods
 
 const char* KnownBlock::domain()  { return domainNames[currentDomain];}
 
@@ -91,11 +115,8 @@ void KnownBlock::addEntry (Block& block, const char* name, int isOnHeap) {
 
 	// otherwise create a new entry
 	else {
-		LOG_NEW; KnownListEntry* nkb = new KnownListEntry;
-		nkb->b = &block;
-		nkb->next = allBlocks[idx];
-		nkb->onHeap = isOnHeap;
-		nkb->dynLinked = Linker::isActive();
+		LOG_NEW; KnownListEntry* nkb =
+			new KnownListEntry(&block,isOnHeap,allBlocks[idx]);
 		allBlocks[idx] = nkb;
 	}
 }
