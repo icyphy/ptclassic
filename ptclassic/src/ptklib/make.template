@@ -22,9 +22,9 @@ VPATH         = $(ROOT)/src/ptklib
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-HDRS	      = ptkBarGraph.h
+HDRS	      = ptkBarGraph.h ptkPlot.h
 
-LIBCSRCS      = ptkBarGraph.c
+LIBCSRCS      = ptkBarGraph.c ptkPlot.c
 
 LIBCPPSRCS    =
 
