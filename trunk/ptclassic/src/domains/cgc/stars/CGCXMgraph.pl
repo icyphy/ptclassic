@@ -94,19 +94,15 @@ for a complete explanation of the options.
 	initCode {
                 StringList s;
 		s << "    FILE* $starSymbol(fp)[";
-		s += input.numberPorts();
-		s += "];";
+		s << input.numberPorts() << "];";
                 addDeclaration(processCode(s));
                 addInclude("<stdio.h>");
 		for (int i = 0; i < input.numberPorts(); i++) {
 			StringList w = "    if(!($starSymbol(fp)[";
-			w += i;
-			w += "] = fopen(\"";
-			w += targetPtr->name();
-			w += "_$starSymbol(temp)";
-			w += i;
-			w += "\",\"w\")))";
-			addCode(CodeBlock((const char*) w));
+			w << i <<  "] = fopen(\"";
+			w << targetPtr->name() << "_$starSymbol(temp)";
+			w << i << "\",\"w\")))";
+			addCode(w);
 			addCode(err);
 		}
 	}
@@ -124,10 +120,10 @@ codeblock (err) {
 		for (int i = 1; i <= int(numIn); i++) {
 			ix = i;
 			iy = i - 1;
-			addCode(CodeBlock(
-"\tfprintf($starSymbol(fp)[$val(iy)],\"%g %g\\n\",$ref(index),$ref(input#ix));\n"));
+			addCode(
+"\tfprintf($starSymbol(fp)[$val(iy)],\"%g %g\\n\",$ref(index),$ref(input#ix));\n");
 		}
-		addCode(CodeBlock("\t$ref(index) += $val(xUnits);\n"));
+		addCode("\t$ref(index) += $val(xUnits);\n");
 		
 	}
 
@@ -136,13 +132,13 @@ codeblock(closeFile) {
 }
 
 	wrapup {
-		addCode(CodeBlock("    { int i;\n"));
+		addCode("    { int i;\n");
 
 		// close the files
 		addCode(closeFile);
 
 		StringList cmd;
-		cmd += "(xgraph ";
+		cmd << "(xgraph ";
 
 		// put title on command line
 
@@ -150,10 +146,10 @@ codeblock(closeFile) {
 
 		if (ttl && *ttl) {
 			if (strchr(ttl,'\'')) {
-				cmd += "-t \""; cmd += ttl; cmd += "\" ";
+				cmd << "-t \"" << ttl << "\" ";
 			}
 			else {
-				cmd += "-t '"; cmd += ttl; cmd += "' ";
+				cmd << "-t '" << ttl << "' ";
 			}
 		}
 
@@ -161,45 +157,35 @@ codeblock(closeFile) {
 
 		// put options on the command line
 		if (opt && *opt) {
-			cmd += opt;
-			cmd += " ";
+			cmd << opt << " ";
 		}
 
 		// put file names
 		for (int i = 0; i < int(numIn); i++) {
-			cmd += targetPtr->name();
-			cmd += "_$starSymbol(temp)";
-			cmd += i;
-			cmd += " ";
+			cmd << targetPtr->name() << "_$starSymbol(temp)";
+			cmd << i << " ";
 		}
 
 		// save File
 		const char* sf = saveFile;
 		if (sf != NULL && *sf != 0) {
 			for (i = 0; i<int(numIn); i++) {
-				cmd += "; /bin/cat ";
-				cmd += targetPtr->name();
-				cmd += "_$starSymbol(temp)";
-				cmd += i;
-				cmd += " >> ";
-				cmd += sf;
-				cmd += "; /bin/echo \"\" >> ";
-				cmd += sf;
+				cmd << "; /bin/cat ";
+				cmd << targetPtr->name(); 
+				cmd << "_$starSymbol(temp)" << i << " >> ";
+				cmd << sf << "; /bin/echo \"\" >> " << sf;
 			}
 		}
 
 		// remove temporary files
 		for (i = 0; i < int(numIn); i++) {
-			cmd += "; /bin/rm -f ";
-			cmd += targetPtr->name();
-			cmd += "_$starSymbol(temp)";
-			cmd += i;
+			cmd << "; /bin/rm -f " << targetPtr->name();
+			cmd << "_$starSymbol(temp)" << i;
 		}
 
-		cmd += ") &";
+		cmd << ") &";
 		StringList out = "    system(\"";
-		out += cmd;
-		out += "\");\n    }\n";
-		addCode(CodeBlock((const char*)out));
+		out << cmd << "\");\n    }\n";
+		addCode(out);
 	}
 }
