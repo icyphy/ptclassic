@@ -35,15 +35,8 @@
 # an item, dragging selects items in a region, shift-dragging toggles
 # items in a region.
 #
-# Selected items are marked with the tag "sel." Do not use this tag
-# for any other purpose.
-#
 # Currently, selected items are highlights by drawing a rectangle
 # around them -- later this might be made more sophisticated.
-#
-# By default, selected items do not move when the mouse is dragged.
-# To make them move, cascade a proxy that moves items.
-#
 #
 class ::tycho::Selector {
     inherit ::tycho::Interactor
@@ -51,6 +44,7 @@ class ::tycho::Selector {
     constructor {{s {}} {c {}} args} {
 	set slate $s
 	set canvas $c
+	background $background
 
 	eval configure $args
     }
@@ -59,21 +53,37 @@ class ::tycho::Selector {
     ###################################################################
     ####                         public methods                    ####
 
+    # Set the "background" tag or picture
+    method background {b}
+
     # Bind the interactor to a picture or tag
-    method bind {t args} {}
+    method bind {t args}
+
+    # Deselect all tagged items
+    method clear {}
 
     ## Remove the binding of an interactor to a picture or tag
-    method unbind {t} {}
+    method unbind {t}
 
 
     ###################################################################
     ####                        protected methods                  ####
 
     # Attach the interactor to the current picture
-    protected method activate {t x y} {}
+    protected method activate {t x y}
+
+    # Attach the interactor to the current picture
+    protected method altactivate {t x y}
 
     # Remove the interactor from the current picture
-    protected method deactivate {} {}
+    protected method deactivate {}
+
+
+    ###################################################################
+    ####                   protected variables                     ####
+
+    # The tag or picture to use as the "background"
+    protected variable background "background"
 }
 
 
@@ -85,36 +95,49 @@ class ::tycho::Selector {
 #
 body ::tycho::Selector::activate {t x y} {
 
-    # Deselect all currently selected objects, delete highlights
-    $slate dtag sel
-    $slate delete selectionBox
-
     # Get the current object
     set current [$slate find withtag current]
 
-    # Tag it
-    $slate addtag "sel" withtag $current
-
-    # Draw a box around it
-    eval $canvas create rectangle [$slate bbox $current] -width 2 \
-	    -tags [list [concat selectionBox [$slate gettags $current]]]
-
-    # Set the target to "sel"
-    target "sel"
-
-    # Set up the movement bindings on the "sel" tag.
-    foreach b $button {
-	$slate bind "sel" \
-		[::tycho::Interactor::event Motion -button $b] \
-		[list @scope [info class] "$this drag %x %y; update idletasks"]
-	$slate bind "sel" \
-		[::tycho::Interactor::event Release -button $b] \
-		[list @scope [info class] "$this release %x %y"]
+    # If it's a highlight box, just return
+    if { [lmember [$slate gettags $current] box.$this] } {
+	return
     }
 
-    # If there's a proxy, give it the "sel" tag as its target
-    if { $proxy != "" } {
-	$proxy target "sel"
+    # Select it if it isn't already
+    if { ! [lmember [$slate gettags $current] sel.$this] } {
+	# Deselect all currently selected objects, delete highlights
+	$slate dtag   sel.$this
+	$slate dtag   move.$this
+	$slate delete box.$this
+
+	# Tag it for moving
+	$slate addtag "move.$this" withtag $current
+
+	# Draw a box around it
+	set box [eval $canvas create rectangle \
+		[rectStretch [$slate bbox $current] 1]\
+		-width 3 -outline blue \
+		-tags [list [concat \
+	            box.$this \
+		    box.$current \
+		    [ldelete [$slate gettags $current] current]]]]
+	$slate lower $box $current
+
+	# Tag the current object again
+	$slate addtag "sel.$this" withtag $current
+
+	# Set the target
+	set target "move.$this"
+    }
+
+    # Set up the movement bindings
+    foreach b $button {
+	$slate bind $target \
+		[::tycho::Interactor::event Motion -button $b] \
+		[list @scope [info class] "$this drag %x %y; update idletasks"]
+	$slate bind $target \
+		[::tycho::Interactor::event Release -button $b] \
+		[list @scope [info class] "$this release; $this deactivate"]
     }
 
     # Execute the user-specified activation command
@@ -122,6 +145,74 @@ body ::tycho::Selector::activate {t x y} {
 
     # Start the interaction sequence
     eval click $x $y $options
+}
+
+
+#######################################################################
+#### altactivate target x y
+#
+# Toggle a picture object's selection state, without affecting other
+# selected pictures.
+#
+body ::tycho::Selector::altactivate {t x y} {
+    
+    # Get the current picture
+    set current [$slate find withtag current]
+
+    # If it's a highlight box, just ignore
+    if { [lmember [$slate gettags $current] "box.$this"] } {
+	return
+    }
+
+    if { [lmember [$slate gettags $current] "sel.$this"] } {
+	# The item is already selected. Delete its highlight
+	# and deselect it
+	$slate delete box.$current
+	$slate dtag   $current sel.$this
+	$slate dtag   $current move.$this
+
+	# Make sure mouse is updated
+	update idletask
+    } else {
+	# The item is not selected. Select and highlight it
+
+	# Tag it for moving
+	$slate addtag "move.$this" withtag $current
+
+	# Draw a box around it
+	set box [eval $canvas create rectangle \
+		[rectStretch [$slate bbox $current] 1]\
+		-width 3 -outline blue \
+		-tags [list [concat \
+	            box.$this \
+		    box.$current \
+		    [ldelete [$slate gettags $current] current]]]]
+	$slate lower $box $current
+
+	# Tag the current object again
+	$slate addtag "sel.$this" withtag $current
+
+	# Set the target
+	set target "move.$this"
+
+	# Set up the movement bindings
+	foreach b $button {
+	    $slate bind $target \
+		    [::tycho::Interactor::event Motion -button $b] \
+		    [list @scope [info class] \
+		        "$this drag %x %y; update idletasks"]
+	    $slate bind $target \
+		    [::tycho::Interactor::event Release -button $b] \
+		    [list @scope [info class] \
+		        "$this release; $this deactivate"]
+	}
+
+	# Execute the user-specified activation command
+	execute $activatecommand $x $y
+
+	# Start the interaction sequence
+	eval click $x $y $options
+    }
 }
 
 
@@ -146,22 +237,68 @@ body ::tycho::Selector::bind {t args} {
 
 
 #######################################################################
+#### background
+#
+# Set the background tag or picture of this selector. The background
+# is the picture against which clicking to clear a selection and
+# drag-selecting are performed.
+#
+# Although having a background picture seems complicated at first
+# compared to binding to the canvas) it is necessary to make dragging
+# and selecting on hierarchical pictures work.
+#
+body ::tycho::Selector::background {b} {
+    
+    # Remove bindings from the old background
+
+    #
+    $slate dtag   sel.$this
+    $slate dtag   move.$this
+
+    # Delete highlight boxes
+    $slate delete box.$this
+
+    # Set the bindings
+    $slate bind $background <Button-1> "$this clear"
+    $slate bind $background <Shift-Button-1> ""
+}
+
+
+#######################################################################
+#### clear
+#
+body ::tycho::Selector::clear {} {
+    
+    # Remove selection tags
+    $slate dtag   sel.$this
+    $slate dtag   move.$this
+
+    # Delete highlight boxes
+    $slate delete box.$this
+}
+
+#######################################################################
 #### deactivate
 #
 # Deactivate the interactor from the target. This method must be called
 # by the script bound to the release event.
-# 
+#
 body ::tycho::Selector::deactivate {} {
-    # Remove bindings from the selection tag
+    # Remove bindings
     foreach b $button {
-	$slate bind "sel" \
+	$slate bind $target \
 		[::tycho::Interactor::event Motion -button $b] {}
-	$slate bind "sel" \
+	$slate bind $target \
 		[::tycho::Interactor::event Release -button $b] {}
     }
 
     # Execute the user-specified de-activation command
     execute $deactivatecommand
+    
+    # Update the screen. This appears to be necessary to ensure that
+    # the current tag is updated correctly before processing another
+    # event.
+    update idletasks
 }
 
 

@@ -69,6 +69,7 @@ class ::tycho::Interactor {
 
     # A list of modifiers for mouse events. <i>This option cannot
     # be changed once the interactor has been bound.</i>
+    # FIXME: Doesn't do anything.
     public variable modifiers {}
 
     # A list of options passed along to the interactor chain on the
@@ -98,59 +99,54 @@ class ::tycho::Interactor {
     ####                         public methods                    ####
 
     ## ``Bind'' an interactor to a picture.
-    method bind {tagOrID args} {}
+    method bind {tagOrID args}
 
     # Forward actions to a proxy.
-    method cascade {that} {}
+    method cascade {that}
 
     # Set or get the target object
-    method target {args} {}
+    method target {args}
 
     # Remove a binding from the interactor to the target.
-    method unbind {tagOrID} {}
+    method unbind {tagOrID}
 
     # Stop cascading actions to a proxy.
-    method uncascade {} {}
+    method uncascade {}
 
 
     ###################################################################
     ####                      public procs                         ####
 
     # Generate a Tk event code from parameters
-    proc event {type args} {}
+    proc event {type args}
 
 
     ###################################################################
     ####                   protected methods                       ####
 
     # Set up bindings to intercept events that I need from now on.
-    protected method activate {args} {}
+    protected method activate {args}
 
     # Start the interaction sequence on the target.
-    protected method click {x y args} {}
+    protected method click {x y args}
 
     # Continue the interaction sequence: start a new phase.
-    protected method continue {} {}
-
-    # Get the current picture on the slate.
-    protected method current {} {
-	error "Not implemented!"
-    }
+    protected method continue {}
 
     # Remove my bindings
-    protected method deactivate {args} {}
+    protected method deactivate {args}
 
     # Continue the interaction sequence: move the mouse.
-    protected method drag {x y} {}
+    protected method drag {x y}
 
     # Execute a script.
-    protected method execute {script x y} {}
+    protected method execute {script x y}
 
     # Set or get the proxy object.
-    protected method proxy {args} {}
+    protected method proxy {args}
 
     # Terminate the interaction sequence.
-    protected method release {} {}
+    protected method release {}
 
 
     ###################################################################
@@ -288,7 +284,7 @@ body ::tycho::Interactor::drag {x y} {
 # Execute a script, by applying it to the interactor, the target, and
 # the current _x_ and _y_ coordinates.
 #
-body ::tycho::Interactor::execute {script x y} {
+body ::tycho::Interactor::execute {script {x {}} {y {}}} {
     if { $script != "" } {
 	uplevel \#0 apply [list $script] $this $target $x $y
     }
