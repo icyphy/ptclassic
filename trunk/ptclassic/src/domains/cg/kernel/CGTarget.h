@@ -73,7 +73,7 @@ class AsynchCommPair {
 public:
     AsynchCommPair(CGStar* c, CGStar* o):peek(c),poke(o) {};
     AsynchCommPair():peek(0),poke(0) {};
-    void set(CGStar* c, CGStar* o) {peek = c; poke = o; };
+    void set(CGStar* c, CGStar* o) { peek = c; poke = o; };
     CGStar *peek, *poke;
 };
 
@@ -86,7 +86,7 @@ class CGTarget : public Target {
 public:
     // Constructor
     CGTarget(const char* name, const char* starclass, const char* desc,
-             const char* assocDomain = CGdomainName, char sep = '_');
+             const char* assocDomain=CGdomainName, char sep='_');
 
     // Destructor
     ~CGTarget();
@@ -126,14 +126,14 @@ public:
     void writeFiring(Star&,int depth);
 
     // Incrementally add a star.  If flag is FALSE, call the star's go method.
-    virtual int incrementalAdd(CGStar* s, int flag = 1);
+    virtual int incrementalAdd(CGStar* s, int flag=1);
 
     // Add code from a galaxy.  The scheduler s is the galaxy's scheduler.
     virtual int insertGalaxyCode(Galaxy* g, SDFScheduler* s);
 
     // Support methods for loops.
-    /*virtual*/ void beginIteration(int,int);
-    /*virtual*/ void endIteration(int,int);
+    /*virtual*/ void beginIteration(int, int);
+    /*virtual*/ void endIteration(int, int);
 
     // Generate loop initialization code for stars.
     /*virtual*/ void genLoopInit(Star& s, int reps);
@@ -161,7 +161,7 @@ public:
     virtual int receiveWormData(PortHole&);
 
     // Provided for convenience and backward compatibility.
-    static int haltRequested() {return SimControl::haltRequested();}
+    static int haltRequested() { return SimControl::haltRequested(); }
 
     // Return FALSE if the Target is not inside a WormHole.
     int inWormHole();
@@ -170,17 +170,18 @@ public:
     // Multi-line comments are supported if a continuation string is specified.
     // Defaults to shell-style comments.
     virtual StringList comment(const char* cmt, const char* begin=NULL, 
-            const char* end=NULL ,const char* cont=NULL);
+			       const char* end=NULL, const char* cont=NULL);
 
     // Returns a comment detailing the user name, time, date, and target type.
     virtual StringList headerComment(const char* begin=NULL,
-	const char* end="", const char* cont=NULL);
+				     const char* end="",
+				     const char* cont=NULL);
 
     // system call in destination directory.  If error is specified
     // and the system call is unsuccessful display the error message.
     // This will return the error code from system. (0 == successful)
     virtual int systemCall(const char* cmd, const char* error=NULL,
-	const char* host="localhost");
+			   const char* host="localhost");
 
     // Write a file in the 'destDirectory' on the 'targetHost'.  If the
     // directory does not exist, it is created.  The code is optionally
@@ -190,7 +191,7 @@ public:
     // state.  If unsuccessful, the method calls Error::abortRun and 
     // returns FALSE.
     int writeFile(const char* text, const char* suffix="", int display=FALSE,
-		  int mode = -1);
+		  int mode=-1);
 
     // Copy an SDF schedule from the multiprocessor schedule, instead
     // of performing an SDF scheduler for a uni-processor target
@@ -205,7 +206,7 @@ public:
     // stream by name.  This method should be called in the the target's
     // constructor.  If a target tries to add a stream where another stream
     // with the same name already exists, Error::abortRun is called.
-    void addStream(const char* name,CodeStream* slist);
+    void addStream(const char* name, CodeStream* code);
 
     // Create a new CodeStream for the target.
     inline CodeStream* newStream(const char* name) {
@@ -231,8 +232,9 @@ public:
     const char* lookupSharedSymbol(const char* scope, const char* name);
 
     // Return the relative execution time estimate of a star
-    virtual int execTime(DataFlowStar* s, CGTarget* = 0)
-	{ return s->myExecTime(); }
+    virtual int execTime(DataFlowStar* s, CGTarget* =0) {
+	return s->myExecTime();
+    }
 
     // If within a WormHole, generate, compile, load, and run code.
     /*virtual*/ void setup();
@@ -261,7 +263,7 @@ public:
     // Codestream to collect all the files to include in for a make
     // all.  Make sure you add each file name with a space character
     // prepended.  For example: makeAllList << " foo.o";
-    CodeStream  makeAllList;
+    CodeStream makeAllList;
 
     // The following virtual functions do the stages of CGTarget::setup.
     // generally, derived classes should overload these functions rather
@@ -396,10 +398,10 @@ protected:
     // The StringLists should be accessed from the star using the 
     // public member getStream
     CodeStreamList codeStringLists;
-    
+
     // splice in a new star, returning a pointer to the new star.
     Block* spliceStar(PortHole*, const char* name, int delayBefore,
-                             const char* domainName);
+		      const char* domainName);
 
     ConversionTable* typeConversionTable;
     virtual int needsTypeConversionStar(PortHole& port);
@@ -416,7 +418,7 @@ private:
 
     // return non-zero if this target is not a child target
     // Then, generate code in the setup stage if it is inside a wormhole.
-    int alone() { return (parent() == NULL) ; }
+    int alone() { return (parent() == NULL); }
 
     // list of spliced stars
     SequentialList spliceList;
@@ -424,7 +426,7 @@ private:
 
 // A utility function to set a state of a AsynchCommPair to a certain value
 int setAsynchCommState(AsynchCommPair pair, const char* stateName,
-		     const char* value);
+		       const char* value);
 
 // Create the name of the destination directory
 StringList destDirectoryName(const char* subdir);
