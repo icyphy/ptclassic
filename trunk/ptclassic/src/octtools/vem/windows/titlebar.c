@@ -57,7 +57,7 @@ static char SccsId[]="$Id$";
  */
 
 #include "titlebar.h"		/* Self declaration        */
-#include "X11/Xutil.h"		/* Xlib utilities          */
+#include <X11/Xutil.h>		/* Xlib utilities          */
 #include "vemUtil.h"		/* VEM utilities           */
 #include "defaults.h"		/* Default handling        */
 #include "errtrap.h"		/* Error trapping          */

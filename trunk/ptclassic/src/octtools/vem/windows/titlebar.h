@@ -39,7 +39,7 @@
 #define TB_INCLUDE
 
 #include "general.h"
-#include "X11/Xlib.h"
+#include <X11/Xlib.h>
 #include "ansi.h"
 #include "oct.h"
 

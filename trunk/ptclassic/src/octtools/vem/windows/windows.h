@@ -40,7 +40,7 @@
 extern char *wn_pkg_name;
 
 #include "ansi.h"
-#include "X11/Xlib.h"
+#include <X11/Xlib.h>
 #include "general.h"
 #include "st.h"
 #include "oct.h"

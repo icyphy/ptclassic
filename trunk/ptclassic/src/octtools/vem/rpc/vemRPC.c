@@ -40,7 +40,7 @@ static char SccsId[]="$Id$";
  * new windows.
  */
 
-#include "X11/Xlib.h"
+#include <X11/Xlib.h>
 #include "buffer.h"
 #include "windows.h"
 #include "vemUtil.h"

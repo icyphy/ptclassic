@@ -51,7 +51,7 @@ static char SccsId[]="$Id$";
  */
 
 #include "general.h"		/* General definitions       */
-#include "X11/Xlib.h"		/* X library interface       */
+#include <X11/Xlib.h>		/* X library interface       */
 #include "oct.h"		/* OCT interface definitions */
 #include "attributes.h"		/* Attribute handler         */
 #include "buffer.h"		/* Buffer managment          */

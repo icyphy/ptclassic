@@ -38,8 +38,8 @@ static char SccsId[]="$Id$";
  */
 
 #include "general.h"		/* General definitions       */
-#include "X11/Xlib.h"		/* X prototype definitions   */
-#include "X11/Xutil.h"		/* X utilities               */
+#include <X11/Xlib.h>		/* X prototype definitions   */
+#include <X11/Xutil.h>		/* X utilities               */
 #include "xvals.h"		/* X Values                  */
 #include "oct.h"		/* OCT data manager          */
 #include "defaults.h"		/* Defaults package          */
