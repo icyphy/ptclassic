@@ -29,6 +29,7 @@ DDFSTARS = $(LIBDIR)/ddfstars.o
 THORSTARS = $(LIBDIR)/thorstars.o
 DESTARS = $(LIBDIR)/destars.o
 CGDDFSTARS = $(LIBDIR)/cgddfstars.o 
+BDFSTARS = $(LIBDIR)/bdfstars.o
 
 # parallel scheduler libraries.
 PARLIBFILES = $(LIBDIR)/libDC.a $(LIBDIR)/libHu.a  $(LIBDIR)/libDL.a \
@@ -43,12 +44,13 @@ $(LIBDIR)/libcg56dspstars.a \
 $(LIBDIR)/libcg56stars.a $(LIBDIR)/libcg56.a \
 $(LIBDIR)/libcgddfstars.a $(LIBDIR)/libcgddf.a \
 $(LIBDIR)/libcgstars.a $(PARLIBFILES) $(LIBDIR)/libcg.a \
-$(LIBDIR)/libddfstars.a $(LIBDIR)/libddf.a $(LIBDIR)/libdycon.a \
+$(LIBDIR)/libddfstars.a $(LIBDIR)/libddf.a \
 $(LIBDIR)/libthorstars.a $(LIBDIR)/libthor.a \
 $(LIBDIR)/libdestars.a $(LIBDIR)/libde.a \
 $(LIBDIR)/libsdfimagestars.a $(LIBDIR)/libImage.a \
 $(LIBDIR)/libsdfdspstars.a \
-$(LIBDIR)/libsdfstars.a $(LIBDIR)/libLS.a $(LIBDIR)/libEG.a $(LIBDIR)/libsdf.a
+$(LIBDIR)/libbdfstars.a $(LIBDIR)/libbdf.a \
+$(LIBDIR)/libsdfstars.a $(LIBDIR)/libLS.a $(LIBDIR)/libsdf.a
 
 # Library switches reqd by stars.  Note that -lptolemy is not included.
 STAR_LIBS=\
@@ -57,10 +59,11 @@ STAR_LIBS=\
 -lcg56dspstars -lcg56stars -lcg56 \
 -lcgddfstars -lcgddf \
 -lcgstars -lDC -lHu -lDL -lPar -lcg \
--lddfstars -lddf -ldycon \
+-lddfstars -lddf \
 -lthorstars -lthor \
 -ldestars -lde \
--lsdfimagestars -lImage -lsdfdspstars -lsdfstars -lLS -lEG -lsdf
+-lbdfstars -lbdf \
+-lsdfimagestars -lImage -lsdfdspstars -lsdfstars -lLS -lsdf
 
 # Extra targets
 SDFT = $(OBJDIR)/domains/sdf/targets
@@ -76,6 +79,7 @@ CGTARGETS =	$(CGT)/CGMultiTarget.o $(CGT)/CGSharedBus.o \
 CGCTARGETS =	$(CGCT)/CGCUnixSend.o $(CGCT)/CGCUnixReceive.o \
 		$(CGCT)/CGCMultiTarget.o $(CGCT)/CGCDDFTarget.o \
 		$(CGCTCL)/CGCTclTkTarget.o
+BDFTARGETS =	$(CGT)/CGBDFTarget.o $(CGCT)/CGCBDFTarget.o
 CG56TARGETS =	$(CG56T)/Sim56Target.o $(CG56T)/S56XTarget.o \
 		$(CG56T)/Sub56Target.o $(CG56T)/CG56MultiSimTarget.o \
 		$(CG56T)/CG56MultiSimSend.o $(CG56T)/CG56MultiSimReceive.o
