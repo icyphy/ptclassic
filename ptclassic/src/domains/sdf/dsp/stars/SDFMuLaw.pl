@@ -5,10 +5,7 @@ defstar {
 Transform the input using a logarithmic mapping if the "compress" is
 true.  In telephony, applying the mu law to eight-bit sampled data is
 called companding, and it is used to quantize the dynamic range of 
-speech more accurately.  The transformation is defined in terms of
-the non-negative integer parameter mu:
-
-output = log ( 1 + mu | input | ) / log( 1 + mu ).
+speech more accurately.
 	}
 	author { Asawaree Kalavade }
 	copyright {
@@ -23,12 +20,14 @@ limitation of liability, and disclaimer of warranty provisions.
 <a name="compression, Mu law"></a>
 The conversion formula is
 <pre>
-output ~=~ log (1 + mu | input | ) / log( 1 ~+~ mu ) ~.
+y = log(1+m|x|)/log(1+m),
 </pre>
-so this star always produces non-negative output.
+where <i>m</i> is the parameter <i>mu</i>,
+<i>y</i> is the output, and <i>x</i> is the input.
+This star always produces non-negative output.
 <h3>References</h3>
-<p>1  
-Simon Haykin, <i>Communication Systems</i>, John Wiley Sons,
+<p>
+[1] Simon Haykin, <i>Communication Systems</i>, John Wiley Sons,
 3rd ed., 1994, ISBN 0-471-57176-8, page 380.
 	}
 	input {
@@ -43,7 +42,7 @@ Simon Haykin, <i>Communication Systems</i>, John Wiley Sons,
 	defstate {
 		name{compress}
 		type{int}
-		default{"YES"}
+
 		desc{
 NO, FALSE, or 0 turns off compression.
 YES, TRUE, or a non-zero integer enables compression.
