@@ -145,10 +145,16 @@ const char* Linker::myDefaultOpts = "-lm -lc";
 char* Linker::memBlock = 0;
 char* Linker::availMem = 0;
 
+/// This is only used if USE_DLOPEN is defined
+int Linker::linkSeqNum = 0;
+
+StringList Linker::permlinkFiles;
 const size_t LINK_MEMORY = (size_t)(1024L * 1024L);
 
 // This routine creates the memory block if needed, and aligns it
 // to a page boundary.
+
+int Linker::isActive() { return activeFlag;}
 
 void Linker::adjustMemory() {
 #ifdef USE_DLOPEN
@@ -171,6 +177,7 @@ void Linker::adjustMemory() {
 #endif // USE_DLOPEN
 }
 
+
 void Linker::init (const char* myName) {
 // locate the ptolemy binary that is currently running.
 // main should call this with argv[0] as an argument.
@@ -182,7 +189,7 @@ void Linker::init (const char* myName) {
 // initially we use the executable as the symbol table
 	symTableName = ptolemyName;
 	return;
-}
+      }
 
 typedef void (*PointerToVoidFunction) ();
 
@@ -240,60 +247,120 @@ int Linker::multiLink (const char* args, int perm) {
 	return status;
 }
 
+
 #ifdef USE_DLOPEN
+
 #define PATHNAME_LENGTH 1024
-// Create a .so file from a .o file
+// Create a .so file from one or more .o or .so files
+// argv can also contain linker options from the multilink tcl call
 // Really, we should call make here, and have better error messages
-static char *generateSharedObject( char* objName, int maxsize)
+//
+// Here we implement Joe Buck's idea, which is to create .so files
+// with temporary names, where the name is /tmp__ptlink%d_%d.so (The first
+// %d is the pid, the second is a sequence number which is incremented 
+// after each link.  Note that we need to trash these temporary files
+// up deconstruction.
+
+// sprintf format string that will name the temporary file
+#define DLOPEN_TMP_FILE_FORMAT "/tmp/__ptlink%d_%d.so"
+
+char *
+Linker::generateSharedObject(int argc, char **argv, char* objName, int maxsize)
 {
   StringList command = SHARED_OBJECT_COMMAND;
-  char sharedObjName[PATHNAME_LENGTH];
-  struct stat sharedObjstbuf, objstbuf;
+  
+  // flag for permanent-link or not
+  int perm = (argv[0][0] == 'p');	// KLUDGE!
 
-  strcpy(sharedObjName, objName);
-  sharedObjName[strlen(objName) - 1 ] = '\0';
-  strcat(sharedObjName,"so");
-  if (stat (objName, &objstbuf) == -1) {
-    Error::abortRun("Error creating shared object, .o file does not exist.");
-    return (char *) NULL;
-  }
+  // Generate a temporary name
+  sprintf(objName, DLOPEN_TMP_FILE_FORMAT, (int)getpid(), linkSeqNum++); 
 
-  if (stat(sharedObjName, &sharedObjstbuf) == -1 ||
-      objstbuf.st_mtime > sharedObjstbuf.st_mtime) {
-    // Shared object file does not exist, or it is older than the .o
-    // file, attempt to create the shared object.
-    command << " " << sharedObjName << " " << objName;
+
+  // Create the command to produce the shared object
+  command << " " << objName;
+
+  for (int i = 1; i < argc; i++) {
+    const char* fullObjName = expandPathName(argv[i]);
+
+    // If this is a permlink, then save the filenames for later
+    if ( permlinkFiles.length() == 0 ) {
+      // We have not yet done any permlinks, so we need not check
+      permlinkFiles << " " << fullObjName;
+    } else {
+      // Don't add the file if it is already in the list.
+      char *p;
+      char *tmpString = savestring(permlinkFiles);
+      p = strtok(tmpString, " ");
+      while( p) {
+	if( strcmp(p, fullObjName) == 0)
+	  break;
+	p = strtok((char *)NULL, " ");
+      }
+      // If we made it all the way through the list, and p is NULL,
+      // then add our element to the list of files to be permlinked.
+      if (perm && p == (char*)NULL)
+	permlinkFiles << " " << fullObjName;
+
+      // This is not a permlink, and our file is not a permlinked
+      // file, so add it to the command line.
+      if (!perm && p == (char*)NULL)
+	command << " " << fullObjName;
+      delete tmpString;
+    } 
+  } // for loop
+
+  // If we have already done a permlink, then add all of the files
+  // thus far permlinked to the command line.
+
+  if ( permlinkFiles.length() > 0 )
+    command << " " << permlinkFiles;
+
 #ifdef DEBUG
-    {
-      char buf[4*PATHNAME_LENGTH];
-      sprintf(buf, "command to create shared object: %s",
-	      (const char *)command);
-      Error::message(buf);
-    }
+  {
+    char buf[4*PATHNAME_LENGTH];
+    sprintf(buf, "command to create shared object: %s",
+	    (const char *)command);
+    Error::message(buf);
+  }
 #endif // DEBUG
 
-    if (system (command)) {
-      Error::abortRun(
-		      "Error in creating shared object, command failed: ",
-		      command);
-      return (char *) NULL;
-    }
-  }
-
-  if (strlen(sharedObjName) > maxsize) {
-    Error::abortRun("Error in creating shared object, pathname too long.");
+  if (system (command)) {
+    Error::abortRun(
+		    "Error in creating shared object, command failed: ",
+		    command);
     return (char *) NULL;
   }
-  strncpy(objName, sharedObjName, maxsize);
+
   return objName;
 }
 
+
+// Attempt to unlink all the temporary .so files
+static void cleanupSharedObjects(int linkSeqNum)
+{
+  char fileName[PATHNAME_LENGTH];
+  int i;
+  for(i=0;i<linkSeqNum;i++) {
+    sprintf(fileName, DLOPEN_TMP_FILE_FORMAT,(int)getpid(), i);
+#ifdef DEBUG    
+    {
+      char buf[4*PATHNAME_LENGTH];
+      sprintf(buf, "Linker cleanup: about to remove: %s", fileName);
+      Error::message(buf);
+    }
+#endif
+    unlink(fileName);
+  }
+}
+
+#else // USE_DLOPEN
+static char *Linker::generateSharedObject( char* objName, int maxsize)
+{
+}
 #endif
 
 // link in multiple files.  Arglist is char** and not const char**
 // to permit easy interfacing with Tcl.
-
-static         void *dlhandle = (void *)NULL; 
 
 int Linker::multiLink (int argc, char** argv) {
 
@@ -311,28 +378,57 @@ int Linker::multiLink (int argc, char** argv) {
 	TFile tname;
 	
 #ifdef USE_DLOPEN
+	void *dlhandle;
+
 	char objName[PATHNAME_LENGTH];
-	strcpy(objName,argv[1]);
-	// If the file ends in .so, then just load it, otherwise try
-	// to create a .so.  If the file ends in .so, we don't check
-	// to see if it exists or anything.  A user could use a
-	// makefile to generate a .so file, and then call link foo.so
-	if ( strncmp(argv[1]+strlen(argv[1])-3, ".so", 3) != 0 )
-	  if (generateSharedObject(objName, PATHNAME_LENGTH) == (char
-								 *)NULL)
+	// 'permlink foo.o' allows us to load a star (foo.o) to be derived
+	// from later, say with 'link bar.o'.  bar.pl would have the line
+	// derivedfrom {foo} in it, allowing bar.pl to access foo's methods.
+	
+	// Under dlopen() style linking, we need to create a .so file that
+	// has all the permlinked stars in it so that the star we are trying
+	// to link in has access to the permlinked stars.  If we try to
+	// load the permlinked stars in one .so and our new star in another
+	// .so file, we will not see the symbols in the permlinked .so file.
+
+	// We can simulate this behaviour by using multilink to link in
+	// the permlinked star and the new star at once.
+
+	// If we are doing a permlink, we create an extra special
+	// .so file which has all the permlinked stars in it.  Subsequent
+	// links will include the permlink .so file in the creation of
+	// of the temporary .so file.  If we do further permlinking, we will
+	// add to the permlinked .so file.
+
+	// multlink can have one or more .o or .so filenames, combined
+	// with linker options.
+
+	// For our purposes, a filename is a word that does not start with a -
+	// a linker option must start with a -
+
+	// If there is only one arg, and it is a filename that ends in
+	// .so, we assume that the user knows what's going on and we
+	// do a dlopen() on that file.  (Do we copy to a temporary name first?)
+	// The user could be using a makefile to generate a .so file.
+
+	// If there is only one arg, and it ends in .o, we call the linker
+	// .so file
+	// If there is more than one arg, we call the linker to produce
+	// a temporary .so file.  In this way, we can collect up the permlink
+	// .so files etc.
+
+	if ( argc > 2 ||
+	     (argc == 2 && strncmp(argv[1]+strlen(argv[1])-3, ".so", 3) != 0))
+	  if (generateSharedObject(argc, argv, objName, PATHNAME_LENGTH) ==
+	      (char *)NULL)
 	    return FALSE;
-	// Fix me!  This is a really gross hack to work around the
-	// problem of reloading a changed star.  If the star is
-	// dynamically loaded with dlopen, and then changed and reloaded,
-	// the changes will not be present in the running image.
-	// What we really need here is some way of keeping track of     
-	// dlhandles and objnames, so if we see that we are attempting
-	// to reload a star we have already seen, then we do a dlclose
-	// first.
-
-	if ( dlhandle )
-	  dlclose(dlhandle);
-
+	// BTW - Don't do dlclose() to workaround the reloading of stars,
+	// as we could have "block that reference the
+	// old code might be around (if you have multiple universes
+	// built, say) So if the user loads
+	// a definition for star "Foo" and then reloads it, it is possible
+	// to end up with stars that reference both the old and the new code." 
+	
 	// Read in the object now, make the symbols available to all
 	// for access.  Without RTLD_GLOBAL, the symbols from one
 	// dlopen() would not be visible in a subsequent dlopen()
@@ -341,7 +437,7 @@ int Linker::multiLink (int argc, char** argv) {
 	  
 	if ( (dlhandle = DLOPEN(objName, DLOPEN_FLAGS)) == NULL) {
 	  char buf[1024];
-	  sprintf(buf,"Error linking file: dlopen: %s", dlerror());
+	  sprintf(buf,"Error linking file %s: dlopen: %s", objName,dlerror());
 	  Error::abortRun(buf);
 	  return FALSE;
 	}
@@ -453,6 +549,7 @@ void Linker::installTable(const char* newTable) {
 #endif // !USE_DLOPEN
 }
 
+
 // This function scans the symbol table of the code that is to be
 // read into Ptolemy, invoking any constructor functions that are
 // in the section of code just read in (between bottom and top).
@@ -465,7 +562,7 @@ static void debugInvokeConstructors(char *symbol,long addr, const
 				    char* objName) 
 {
   	  char buf[256];
-	  sprintf(buf, "Pipe found: %s at 0x%x", symbol, addr);
+	  sprintf(buf, "Pipe found: %s at 0x%lx", symbol, (unsigned long) addr);
 	  Error::message(buf);
 
 // Here we violate the principal of keeping architecture dependencies
@@ -496,7 +593,7 @@ static void debugInvokeConstructors(char *symbol,long addr, const
 int
 Linker::invokeConstructors (const char* objName, void * dlhandle) {
 #ifdef NO_INVOKECONSTRUCTORS
-  return 1;
+        return 1;
 #else //NO_INVOKECONSTRUCTORS  
 #ifdef USE_NM_GREP
 // On the hppa a symbol can have the same name in the code and
@@ -518,7 +615,7 @@ Linker::invokeConstructors (const char* objName, void * dlhandle) {
 #endif //USE_NM_GREP
 
 #ifdef DEBUG
-	{
+        {
 	  char buf[256];
 	  sprintf(buf, "NM Pipe: %s", (const char *)command);
 	  Error::message(buf);
@@ -541,9 +638,10 @@ Linker::invokeConstructors (const char* objName, void * dlhandle) {
 	char symbol[256], type[20];
 #endif //USE_NM_GREP
 
+
 #ifndef USE_DLOPEN
 	size_t memoryEnd = (size_t)memBlock + LINK_MEMORY;
-#endif //!USE_DLOPEN
+#endif //USE_DLOPEN
 
 #ifdef USE_NM_GREP
 
@@ -568,7 +666,7 @@ Linker::invokeConstructors (const char* objName, void * dlhandle) {
 #else //USE_NM_GREP
 
         while( fgets(instring, BUFSIZ,fd) == instring ) {
-	  D( printf("%s",instring); )
+	  // D( printf("%s",instring); )
 	    /* Optionally skip a few characters */
 	    if (sscanf(instring + NM_ADDR_OFFSET,
 		       "%lx %s %s", &addr, type, symbol) == 3) {
@@ -581,11 +679,12 @@ Linker::invokeConstructors (const char* objName, void * dlhandle) {
 		     (PointerToVoidFunction)dlsym(dlhandle,symbol))
 		    == NULL) {
 		  char buf[1024];
-		  sprintf(buf,"Error linking file: dlsym:%s", dlerror());
+		  sprintf(buf,"Error getting address of symbol %s\n\tdlsym:%s",
+			  symbol,  dlerror());
 		  Error::abortRun(buf);
 		  return 0;
 		}
-		D( printf("debug: InvokeConstructors: fn=0x%x\n",fn); )
+		D( printf("debug: InvokeConstructors: fn=0x%lx\n",(unsigned long) fn); )
 		fn();
 		nCalls++;
 	      }
@@ -678,6 +777,9 @@ public:
 		delete [] Linker::memBlock;
 		if (Linker::ptolemyName != Linker::symTableName)
 			unlink(Linker::symTableName);
+#ifdef USE_DLOPEN
+		cleanupSharedObjects(Linker::linkSeqNum);
+#endif
 	}
 };
 
