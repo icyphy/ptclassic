@@ -19,7 +19,11 @@ $Id$
 // Options to give the loader.  We also give it "-T hex-addr" to specify
 // the starting address and "-A ptolemy-name" to get the symbols for the
 // running executable.
+#ifdef mips
+#define LOADOPTS "-N -S -G 0"
+#else
 #define LOADOPTS "-N -S"
+#endif
 
 // The assembler to use
 #define ASSEMBLER "as"
@@ -34,6 +38,12 @@ $Id$
 #define ADDR_WORD ".long"
 #endif
 
+// Prefix for constructor-calling symbols
+#ifdef mips
+#define CONS_PREFIX "_GLOBAL"
+#else
+#define CONS_PREFIX "__GLOBAL"
+#endif
 
 extern "C" {
 #include <a.out.h>
@@ -50,6 +60,7 @@ struct flock;
 #define exec aouthdr
 #define a_text text_start
 #define a_data data_start
+#define a_bss bss_start
 #endif
 #endif
 
