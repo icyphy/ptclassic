@@ -351,6 +351,8 @@ body ::tycho::Solid::construct {id canvas slate tags args} {
     if { [set t [lsearch -glob $args {-[a-zA-Z]*}]] != -1 } {
 	set options [lrange $args $t end]
 	set args [lreplace $args $t end]
+    } else {
+        set options {}
     }
 
     # Initialize the options
