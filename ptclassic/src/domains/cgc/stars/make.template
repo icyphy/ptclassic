@@ -24,6 +24,7 @@ INCL = -I$(CGCDIR) -I$(CGDIR) -I$(KERNDIR)
 # source files for all stars, using preprocessor
 PL_SRCS= \
  CGCAdd.pl \
+ CGCBitsToInt.pl \
  CGCBlackHole.pl \
  CGCCollect.pl  \
  CGCCommutator.pl \
@@ -50,6 +51,7 @@ PL_SRCS= \
  CGCIntegrator.pl \
  CGCIIDGaussian.pl \
  CGCIIDUniform.pl \
+ CGCIntToBits.pl \
  CGCLimit.pl \
  CGCLMS.pl \
  CGCLog.pl \
