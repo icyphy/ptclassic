@@ -58,6 +58,9 @@ class ::tycho::ProfileTcl {
     ###################################################################
     ####                         public methods                    ####
 
+    # Open a help window.
+    method help {}
+
     # Cancel ongoing profiling.
     method profileCancel {}
 
@@ -69,6 +72,8 @@ class ::tycho::ProfileTcl {
 
     # Update the times displayed at the bottom.
     method updateTimes {}
+
+
 }
 
 #######################################################################
@@ -110,6 +115,14 @@ body ::tycho::ProfileTcl::constructor {args} {
     ###################################################################
     ###################################################################
     ####                      public methods                       ####
+
+#######################################################################
+#### help
+# Open a help window.
+#
+body ::tycho::ProfileTcl::help {} {
+    hyperJump "\$TYCHO/editors/visedit/doc/usersGuides/ProfileTclHelp.html" {}
+}
 
 #######################################################################
 #### profileCancel.
