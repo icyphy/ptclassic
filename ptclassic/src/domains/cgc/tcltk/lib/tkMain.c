@@ -54,7 +54,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #if !defined(PTIRIX5) 
 
 /* PTIRIX5 defines SIG_PF in <signal.h> */
-#if defined(PTSUN4) || defined(PTSOL2)
+#if defined(PTSUN4) || defined(PTSOL2)  || ! defined(__STDC__)
 
 /* sun4, sol2 */
 typedef void (*SIG_PF)();
@@ -151,12 +151,17 @@ static void ptReleaseSig ARGS((int SigNum)) {}
 
 #else 
 #if defined(PTHPPA)
-static void ptSafeSig( int ) {}
+static void ptSafeSig ARGS(( int )) {}
 static long signalmask;
-static void ptBlockSig( int SigNum ) {
+/* Don't use prototypes since the cc distributed with hppa
+ * won't work with them
+ */
+static void ptBlockSig (SigNum) {
+int Signum;
 	signalmask = sigblock(sigmask(SigNum));
 }
-static void ptReleaseSig( int SigNum ) {
+static void ptReleaseSig (SigNum) {
+int Signum;
 	/* remove this signal from the signal mask */
 	signalmask &= !(sigmask(SigNum));
 	sigsetmask(signalmask);
