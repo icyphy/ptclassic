@@ -94,12 +94,15 @@ public:
 private:
 	// destructor body
 	void zap();
+
 	// copy constructor body
 	void copy(const StringArrayState&);
 
 	char** val;
 	int nElements;
-};	
 
+	int repeatItem(Tokenizer& lexer, char** buf, int& i);
+	int expectParameterName(Tokenizer& lexer, char** buf, int& i);
+};	
 
 #endif
