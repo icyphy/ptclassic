@@ -13,7 +13,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF main library }
+	location { SDF Matlab library }
 	explanation {
 .Ir "Matlab interface"
 .Ir "Eddins, S."
