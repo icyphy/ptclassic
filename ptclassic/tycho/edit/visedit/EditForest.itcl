@@ -237,8 +237,10 @@ body ::tycho::EditForest::expand {node} {
 # Open a help window.
 #
 body ::tycho::EditForest::help {} {
-    hyperJump [file join \$TYCHO editors visedit doc \
-	    usersGuides EditForestHelp.html] {}
+    global ::TYCHO
+    ::tycho::File::openContext \
+        [file join $TYCHO edit visedit doc usersGuides \
+	    EditForestHelp.html] html
 }
 
 #######################################################################
