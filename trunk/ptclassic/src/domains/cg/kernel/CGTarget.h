@@ -48,6 +48,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CodeStreamList.h"
 #include "StringList.h"
 #include "DataFlowStar.h"
+#include "ImplementationCost.h"
 
 class CGStar;
 class SDFSchedule;
@@ -157,7 +158,6 @@ public:
     virtual int sendWormData(PortHole&);
     virtual int receiveWormData(PortHole&);
 
-
     // Provided for convenience and backward compatibility.
     static int haltRequested() {return SimControl::haltRequested();}
 
@@ -177,7 +177,7 @@ public:
 	const char* end="", const char* cont=NULL);
 
     // system call in destination directory.  If error is specified
-    // & the system call is unsuccessful display the error message.
+    // and the system call is unsuccessful display the error message.
     // This will return the error code from system. (0 == successful)
     virtual int systemCall(const char*cmd,const char* error=NULL,
 	const char* host="localhost");
@@ -208,7 +208,9 @@ public:
     void addStream(const char* name,CodeStream* slist);
 
     // Create a new CodeStream for the target.
-    inline CodeStream* newStream(const char* name) { return codeStringLists.newStream(name); }
+    inline CodeStream* newStream(const char* name) {
+	return codeStringLists.newStream(name);
+    }
 
     // Change the default stream into which code is generated into.
     // This method first returns a reference to the current defaultStream and
@@ -238,9 +240,9 @@ public:
     // If within a WormHole, generate, compile, load, and run code.
     /*virtual*/ void setup();
 
-   // initilization routine as a child target of a multiprocessor target
-   // initialize State and choose scheduler
-   virtual void childInit();
+    // initilization routine as a child target of a multiprocessor target
+    // initialize State and choose scheduler
+    virtual void childInit();
 
     // Combine all sections of code.
     virtual void frameCode();
@@ -275,6 +277,24 @@ public:
     // if needed to do the start functions.
     virtual int modifyGalaxy();
 
+    // Return implementation cost information
+    const ImplementationCost* implementationCost() { return 0; }
+
+    // Compute implementation cost information
+    int computeImplementationCost() { return FALSE; }
+
+    // Displaying implementation cost information
+    const char* describeImplementationCost() { return "not computed"; }
+
+    // Resetting implementation cost information
+    void resetImplementationCost() {}
+
+    // Indicate whether target can compute memory cost information
+    int canComputeMemoryUsage() { return FALSE; }
+
+    // Indicate whether target can compute execution time
+    int canComputeExecutionTime() { return FALSE; }
+
     /********************************************************************/
     /*  Below, are the states that may need modification if this target */
     /*  is being used as a child target.                                */
@@ -292,8 +312,7 @@ public:
     virtual CommPair fromCGC(PortHole&);
     virtual CommPair toCGC(PortHole&);
     
-    // create a peek/poke communication pair.  This is described in
-    // detail in:
+    // create a peek/poke communication pair.  This is described in detail in
     // J.L. Pino, T.M. Parks and E.A. Lee, "Mapping Multiple Independent
     // Synchronous Dataflow Graphs onto Heterogeneous Multiprocessors," 
     // Proc. of IEEE Asilomar Conf. on Signals, Systems, and Computers, 
@@ -340,7 +359,10 @@ protected:
     IntState loadFlag;
     IntState runFlag;
     IntState writeScheduleFlag;
+    IntState reportMemoryUsage;
+    IntState reportExecutionTime;
 
+    // Name of schedule file
     char *schedFileName;
 
     // scheduling is not needed since the schedule is 
@@ -359,10 +381,9 @@ protected:
     // allow derived target to manage the target code streams.
     virtual void compileRun(SDFScheduler*);
 
-
-     // If a CG domain is inside a wormhole, we may need to change
-     // the sample rate of event horizons after scheduling is performed.
-     void adjustSampleRates();
+    // If a CG domain is inside a wormhole, we may need to change
+    // the sample rate of event horizons after scheduling is performed.
+    void adjustSampleRates();
     
     // codeStringLists is a list of all the code streams that a star 
     // has access to.  These StringLists should be added from the 
