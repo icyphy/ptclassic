@@ -42,8 +42,13 @@ OCT_CC =	gcc -fwritable-strings
 # Compiler flags
 # -Wsynth is new in g++-2.6.x
 # Under gcc-2.7.0, you will need to add -fno-for-scope to GPPFLAGS
+# Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 GPPFLAGS = -g -Wall -Wcast-qual -Wsynth $(MEMLOG)
 CFLAGS = -g
+
+# $PTOLEMY/src/domains/ipus/kernel uses this.
+NO_IMPLICIT_TEMPLATES = -fno-implicit-templates
+
 DEPEND= $(CPLUSPLUS) -MM
 
 # Command to build shared libraries (Not really supported yet)
