@@ -86,6 +86,7 @@ public:
     int StartMathematica(int oargc, char** oargv);
     int MathematicaIsRunning();
     int EvaluateUserCommand(char* command);
+    int CloseMathematicaFigures();
     int KillMathematica();
 
 protected:

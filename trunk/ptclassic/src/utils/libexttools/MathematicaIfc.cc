@@ -416,12 +416,15 @@ int MathematicaIfc::MathematicaIsRunning() {
     return ( env != 0 && gMathLink != 0 );
 }
 
-/*****************************************************************************
- * EvaluateUserCommand:
- *
- ****************************************************************************/
+// EvaluateUserCommand
 int MathematicaIfc::EvaluateUserCommand(char* command) {
     return EvaluateOneCommand(command);
+}
+
+// CloseMathematicaFigures:  Mathematica does not have a mechanism to tag
+// the figures it creates, so we cannot systematically delete them
+int MathematicaIfc::CloseMathematicaFigures() {
+    return FALSE;
 }
 
 // KillMathematica:
