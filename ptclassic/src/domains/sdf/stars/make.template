@@ -106,7 +106,6 @@ PL_SRCS= \
  SDFTableCx.pl \
  SDFTableInt.pl \
  SDFTest.pl \
- SDFThresh.pl \
  SDFTrainer.pl \
  SDFTranspose.pl \
  SDFUpSample.pl \
