@@ -248,6 +248,7 @@ public:
 	int domains(int argc,char** argv);
 	int exit(int argc,char** argv);
 	int halt(int argc,char** argv);
+	int initialize(int argc,char** argv);
 	int knownlist(int argc,char** argv);
 	int link(int argc,char** argv);
 	int listobjs(int argc,char** argv);
