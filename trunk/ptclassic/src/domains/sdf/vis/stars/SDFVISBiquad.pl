@@ -152,11 +152,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	    // find next_state
 		 *result = vis_fpackfix(split_result);
 	    result_den = (short *) result;
-	    state[2] = state[0];
-	    state[3] = state[2];
+	    statetmp[1] = statetmp[0];
 	    state[0] = (invalue[outerloop] - *result_den) << scalefactor;
-	    state[1] = state[0];	    
-	    
+	    state[1] = state[0];
+
 	    // find output
 	    outarray[outerloop] = (n0*state[0] >> 15) + *(result_den+1);
 	  }
