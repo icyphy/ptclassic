@@ -75,63 +75,60 @@ proc ::tycho::stringSubtract {args} {
 # left of the cursor. The behaviour is more useful than "string
 # wordstart" for cursor movement operations.
 #
-proc ::tycho::wordleft {string index} {
+proc ::tycho::wordleft {string index {skip " \[\t\n\]"}} {
+    set length [string length $string]
     if { $index <= 0 } {
 	return 0
+    } elseif {$index > $length} {
+        set index $length
     }
 
-    # Move left one character
-    incr index -1
+    # only interested in stuff to the left
+    set string [string range $string 0 $index]
+  
+    # skip non-word characters
+    set buffer [string trimright $string $skip]
 
-    # Move left until past space
-    while { [string match "\[ \t\n\]" [string index $string $index]] } {
-	if { $index == 0 } {
-	    return 0
-	}
-	incr index -1
+    if {$buffer == {}} {
+        return 0
     }
 
-    # Move left until space is reached
-    while { ! [string match "\[ \t\n\]" [string index $string $index]] } {
-	if { $index == 0 } {
-	    return 0
-	}
-	incr index -1
-    }
-    incr index 1
+    # skip alphanumeric characters
+    set buffer [string trimright $buffer \
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"]
 
-    return $index
+    return [string length $buffer]
 }
 
 ##########################################################################
 #### wordright
 #
-# Return the index of the start of the word immediately to the
-# rightof the cursor. The behaviour is more useful than "string
+# Return the index after the end of the word immediately to the
+# right of the cursor. The behaviour is more useful than "string
 # wordend" for cursor movement operations.
 #
-proc ::tycho::wordright {string index} {
+proc ::tycho::wordright {string index {skip " \[\t\n\]"}} {
     set length [string length $string]
-    if { $index > $length } {
+    if {$index >= $length} {
 	return $length
+    } elseif {$index <= 0} {
+        set index 0
     }
 
-    # Move right until in space
-    while { ! [string match "\[ \t\n\]" [string index $string $index]] } {
-	if { $index == $length } {
-	    return $length
-	}
-	incr index 1
+    # only interested in stuff to the right
+    set string [string range $string $index end]
+
+    # skip non-word characters
+    set buffer [string trimleft $string $skip]
+
+    if {$buffer == {}} {
+        return $length
     }
 
-    # Move right until past space
-    while { [string match "\[ \t\n\]" [string index $string $index]] } {
-	if { $index == $length } {
-	    return $length
-	}
-	incr index 1
-    }
+    # skip alphanumeric characters 
+    set buffer [string trimleft $buffer \
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"]
 
-    return $index
+    return [expr $length - [string length $buffer]]
 }
 
