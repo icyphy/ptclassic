@@ -42,12 +42,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ACSPortHole.h"
 
 // JMS
-#include "HWSchedule.h"
-#include "acs_starconsts.h"
+//#include "HWSchedule.h"
+//#include "acs_starconsts.h"
 #include "ACSCGFPGACore.h"
 
-class Capability;
-class Port_Id;
+//class Capability;
+//class Port_Id;
 
 class ACSWormhole : public Wormhole, public ACSStar {
 public:
