@@ -75,7 +75,7 @@ static void processTerminals();
 static void setTechnology();
 static void drawPath();
 static char *tail();
-
+static int layerGenCompare();
 
 /* transform stack */
 tr_stack *stack;
@@ -91,9 +91,16 @@ struct layerdescription {
     int outlinep;
     int fillp;
     int colorp;
+    int priority;
     double red;
     double green;
     double blue;
+};
+
+
+struct dLayer {
+    octObject layer;
+    struct layerdescription* description;
 };
 
 #ifndef MAX
@@ -241,7 +248,8 @@ char **argv;
     extern char *version;
     
     (void) strcpy(facetType, "contents");
-    (void) sprintf(prologueFile, "%s/lib/oct2ps.pro", "$OCTTOOLS");
+/*    (void) sprintf(prologueFile, "%s/lib/oct2ps.pro", "$OCTTOOLS");*/
+    (void) sprintf(prologueFile, "/users/pino/oct2ps/oct2ps.pro");
     techDirRoot = NIL(char);
 
     (void) strcpy(fontName, FONT);
@@ -782,19 +790,21 @@ processCell(parent, facet, level)
 octObject *parent, *facet;
 int level;
 {
-    octObject poly, box, path, layer, inst, master, label, circle;
+    octObject poly, box, path, inst, master, label, circle;
+    struct dLayer layers[FILLED_LAYER];
     octObject connectors;
     struct octPoint points[1024];
     struct octBox bb;
     struct octTransform transform;
     octGenerator boxgen, polygen, pathgen, labelgen, layergen;
     octGenerator instgen, circlegen;
-    int i;
+    int i,j;
     int32 numpoints;
     st_table *layerTable;
-    struct layerdescription *layerDescription;
     char *bbname;
+    int numLayers;
     
+
     level++;
 
     /* gsave for possible font change */
@@ -818,7 +828,7 @@ int level;
     /*
      * generate over all instances
      *
-     * if the facetType is 'bb', produce an outline of the bounding
+     * if the facetType is 'bb', produce an outline of the boundingo
      * box of the instance with the name of the master centered in it.
      * if level == 1, draw the bounding boxes of the actual terminal
      * implementations and put the terminal name in the upper right
@@ -895,7 +905,6 @@ int level;
 	    master.contents.facet.facet = "interface";
 	    master.contents.facet.mode = "r";
 	    OH_ASSERT_DESCR(octOpenMaster(&inst, &master), "can not open the master");
-	    
 	    tr_push(stack);
 	    tr_add_transform(stack, &inst.contents.instance.transform, 0);
 	    processTerminals(&master, ACTUAL, STREQ(facetType, "bb") ? 1 : 0);
@@ -912,11 +921,16 @@ int level;
      * generate over the layers
      */
 
-    OH_ASSERT_DESCR(octInitGenContents(facet, OCT_LAYER_MASK, &layergen), "layer gen");
+    OH_ASSERT_DESCR(octInitGenContents(facet, OCT_LAYER_MASK, &layergen),"layer gen");
 
-    while (octGenerate(&layergen, &layer) == OCT_OK) {
-
-        if (st_is_member(LayerTable, layer.contents.layer.name)) {
+    /*
+       First make a sorted array of the layers based on there user
+       priority.  We must generate the layers from lowest priority to
+       highest so the postscript will adhere tothe user priorities.
+    */	
+    numLayers = 0;
+    while (octGenerate(&layergen,&layers[numLayers].layer) == OCT_OK) {
+        if (st_is_member(LayerTable, layers[numLayers].layer.contents.layer.name)) {
             continue;
         }
 
@@ -925,11 +939,22 @@ int level;
 	 * value that coresponds to the layer
 	 */
 
-	if (st_lookup(layerTable, layer.contents.layer.name,
-		      (char **) &layerDescription) == 0) {
-	    (void) fprintf(stderr, "%% unknown layer, %s, skipping\n", layer.contents.layer.name);
+	if (st_lookup(layerTable, layers[numLayers].layer.contents.layer.name,
+		      (char **) &layers[numLayers].description) == 0) {
+	    (void) fprintf(stderr, "%% unknown layer, %s, skipping\n", 
+			   layers[numLayers].layer.contents.layer.name);
 	    continue;
 	}
+	numLayers++;
+    }
+    qsort(layers,numLayers,sizeof(struct dLayer),layerGenCompare);
+
+    /* Iterate over all the layers */
+    for (j = 0 ; j < numLayers ; j++) {
+	octObject *layer;
+	struct layerdescription *layerDescription;
+	layer = &layers[j].layer;
+	layerDescription = layers[j].description;
 
 	/*
 	 * if the layer pattern is all zeros or ones, special case it
@@ -964,7 +989,7 @@ int level;
 	 * tile fills a box using an existing clipping region
 	 */
 	
-	OH_ASSERT_DESCR(octInitGenContents(&layer, OCT_POLYGON_MASK, &polygen), "polygon gen");
+	OH_ASSERT_DESCR(octInitGenContents(layer, OCT_POLYGON_MASK, &polygen), "polygon gen");
 
 	while (octGenerate(&polygen, &poly) == OCT_OK) {
 
@@ -1028,7 +1053,7 @@ int level;
 	 * otherwise, use outer radius.....
 	 */
   
-	OH_ASSERT_DESCR(octInitGenContents(&layer, OCT_CIRCLE_MASK, &circlegen),
+	OH_ASSERT_DESCR(octInitGenContents(layer, OCT_CIRCLE_MASK, &circlegen),
 		  "can not start the circle generator");
 	
 	while (octGenerate(&circlegen, &circle) == OCT_OK) {
@@ -1094,7 +1119,7 @@ int level;
 	 * of the box and then tile fills it
 	 */
 	
-	OH_ASSERT_DESCR(octInitGenContents(&layer, OCT_BOX_MASK, &boxgen),
+	OH_ASSERT_DESCR(octInitGenContents(layer, OCT_BOX_MASK, &boxgen),
 		  "can not start the box generator");
 
 	while (octGenerate(&boxgen, &box) == OCT_OK) {
@@ -1140,7 +1165,7 @@ int level;
 	
 	if (plotLabels == 1) {
 
-	    OH_ASSERT_DESCR(octInitGenContents(&layer, OCT_LABEL_MASK, &labelgen),
+	    OH_ASSERT_DESCR(octInitGenContents(layer, OCT_LABEL_MASK, &labelgen),
 		"can not start the label generator");
 
 	    while (octGenerate(&labelgen, &label) == OCT_OK) {
@@ -1157,7 +1182,7 @@ int level;
 	 * see 'drawPath' for more information
 	 */
 	
-	OH_ASSERT_DESCR(octInitGenContents(&layer, OCT_PATH_MASK, &pathgen),
+	OH_ASSERT_DESCR(octInitGenContents(layer, OCT_PATH_MASK, &pathgen),
 	          "can not start the path generator");
 
 	while (octGenerate(&pathgen, &path) == OCT_OK) {
@@ -1443,7 +1468,7 @@ st_table **layerTable;
 		(void) printf("%% %s\n", row[i]);
 	    }
 	}
-	(void) printf("%% %s\n", outline);
+/*	(void) printf("%% %s\n", outline);*/
 #endif
 	
 	layerDescription = (struct layerdescription *) malloc((unsigned) sizeof(struct layerdescription));
@@ -1468,6 +1493,7 @@ st_table **layerTable;
 		 	= ((double) green) / ((double) TAP_MAX_INTENSITY);
 	    layerDescription->blue
 		 	= ((double) blue) / ((double) TAP_MAX_INTENSITY);
+	    layerDescription->priority = pri;
         } else {
 	    layerDescription->colorp = 0;
         }
@@ -1920,4 +1946,11 @@ char *pathname;
     } else {
 	return ++p;
     }
+}
+
+static int 
+layerGenCompare(i,j)
+struct dLayer *i, *j;
+{
+    return(i->description->priority - j->description->priority);
 }
