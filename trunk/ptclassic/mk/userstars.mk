@@ -131,7 +131,8 @@ clean:
 # Make things "even cleaner".  Removes libraries, generated .cc and .h
 # files from preprocessor, etc.
 realclean:
-	rm -f $(CRUD) $(PL_SRCS:.pl=.h) $(PL_SRCS:.pl=.cc) $(PL_SRCS:.pl=.t) \
+	rm -f $(CRUD) $(PL_SRCS:.pl=.h) $(PL_SRCS:.pl=.cc) \
+	$(PL_SRCS:.pl=.htm) $(PL_SRCS:.pl=.t) \
 	$(REALCLEAN_STUFF)
 
 DEPEND_INCL=$(INCL) $(C_INCL) $(SYSTEM_DEPEND_INCL)
