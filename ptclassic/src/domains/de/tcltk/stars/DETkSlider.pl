@@ -52,11 +52,13 @@ limitation of liability, and disclaimer of warranty provisions.
 		Error::abortRun(*this, "Only a single output is supported");
 		return;
 	    }
+	}
+	begin {
 	    // Set parameter values that are not user settable.
 	    tcl_file =
 		"$PTOLEMY/src/domains/sdf/tcltk/stars/tkSlider.tcl";
 
-	    DETclScript::setup();
+	    DETclScript::begin();
 	}
 	constructor {
 	    // Hide irrelevant outputs and states.

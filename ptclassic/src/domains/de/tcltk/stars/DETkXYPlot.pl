@@ -24,7 +24,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { DE tcltk library }
 	hinclude { "ptk.h" }
 	hinclude { "XYPlot.h" }
-
 	defstate {
                 name {label}
                 type{string}
@@ -95,7 +94,18 @@ limitation of liability, and disclaimer of warranty provisions.
 	  InfString labCopy, geoCopy, xtCopy, ytCopy;
 	  double xMin, xMax, yMin, yMax;
 	}
-
+	setup {
+	  // parse the x and y ranges which are
+	  // specified as strings for user convenience
+	  if ((sscanf((const char *)xRange, "%lf %lf", &xMin, &xMax) != 2) ||
+	      (xMax <= xMin)) {
+	    Error::abortRun(*this, "xRange parameter values are invalid");
+	  }
+	  if ((sscanf((const char *)yRange, "%lf %lf", &yMin, &yMax) != 2) ||
+	      (yMax <= yMin)) {
+	    Error::abortRun(*this, "yRange parameter values are invalid");
+	  }
+	}
 	begin {
 	  // Need to make non-const copies of  strings to
 	  // avoid compilation warnings
@@ -104,17 +114,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	  xtCopy = (const char*)xTitle;
 	  ytCopy = (const char*)yTitle;
 
-	  // parse the x and y ranges which are
-	  // specified as strings for user convenience
-	  if ((sscanf((const char *)xRange,"%lf %lf", &xMin, &xMax) != 2) ||
-	      (xMax <= xMin )) {
-	    Error::abortRun(*this, "xRange parameter values are invalid");
-	  }
-	  if ((sscanf((const char *)yRange,"%lf %lf", &yMin, &yMax) != 2) ||
-	      (yMax <= yMin )) {
-	    Error::abortRun(*this, "yRange parameter values are invalid");
-	  }
-
 	  int plotstyle = 0;
 	  if (strcmp(style,"connect") == 0) plotstyle = 1;
 
@@ -122,8 +121,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	  // and ranging as specified by the parameters
 	  xyplot.setup(this,	   
 		       (char*)  labCopy,     // Label for the XY plot
-		       (int)    persistence, // The number of data points to retain
-		       (int)    updateSize,  // The number of data points between refreshes
+		       (int)    persistence, // no. data points to retain
+		       (int)    updateSize,  // no. data points between refreshes
 		       (char*)  geoCopy,     // Geometry for the window
 		       (char*)  xtCopy,      // Title for X-axis
 		                xMin,        // minimum X range value

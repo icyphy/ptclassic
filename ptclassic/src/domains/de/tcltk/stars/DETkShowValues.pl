@@ -48,9 +48,11 @@ Particles that require more space to display may create problems.
             Error::abortRun(*this, "Outputs not supported");
             return;
         }
+    }
+    begin {
         tcl_file = "$PTOLEMY/src/domains/sdf/tcltk/stars/tkShowValues.tcl";
 
-        DETclScript::setup();
+        DETclScript::begin();
     }
     constructor {
         output.setAttributes(P_HIDDEN);

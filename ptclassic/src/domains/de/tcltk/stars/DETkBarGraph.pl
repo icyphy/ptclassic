@@ -76,6 +76,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    if(double(top) <= double(bottom)) {
 		Error::abortRun(*this, "invalid range for the scale");
 	    }
+	}
+	begin {
 	    // Make non-const copies of label and position
 	    InfString labCopy((const char*)label);
 	    InfString posCopy((const char*)position);

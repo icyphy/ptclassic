@@ -36,9 +36,11 @@ complex particles.
             Error::abortRun(*this, "Outputs not supported");
             return;
         }
+    }
+    begin {
         tcl_file = "$PTOLEMY/src/domains/de/tcltk/stars/tkText.tcl";
 
-        DETclScript::setup();
+        DETclScript::begin();
     }
     constructor {
 	put_in_control_panel.clearAttributes(A_SETTABLE);
