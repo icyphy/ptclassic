@@ -56,6 +56,7 @@ Block* CGBDFTarget::makeNew() const {
 
 void CGBDFTarget::setup() {
 	if (!scheduler()) {
+		delete [] schedFileName;
 		schedFileName = writeFileName("schedule.log");
 		LOG_NEW; setSched(new BDFClustSched(schedFileName));
 	}
