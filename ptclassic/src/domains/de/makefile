@@ -1,5 +1,5 @@
 # Makefile for DE domain support
-# Copyright (c) 1990 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
 # Programmer:  J. T. Buck
@@ -12,7 +12,7 @@
 
 include ../../../mk/topdomain.mk
 
-DIRS = atm kernel stars tcltk 
+DIRS = kernel stars tcltk atm
 
 ME = de
 
