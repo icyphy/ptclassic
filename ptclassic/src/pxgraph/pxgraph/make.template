@@ -59,5 +59,13 @@ makefile:	make.template
 		@echo makefile remade -- you must rerun make.
 		exit 1
 
+# Rule for detecting junk files
+
+checkjunk:
+	@checkextra -v $(SRCS) $(HDRS) $(OBJS) \
+		ORIGINAL README.ANNOUNCE README.GENERAL README.HARDCOPY \
+		README.INSTALL TAGS bitmaps examples xgraph.man \
+		makefile make.template SCCS
+
 sccsinfo:
 		sccs info
