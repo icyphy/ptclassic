@@ -56,7 +56,7 @@ FSMBlackHoleCx.pl \
 FSMNull.pl \
 FSMNullInt.pl \
 FSMNullCx.pl \
-FSMStrict.pl
+FSMState.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
