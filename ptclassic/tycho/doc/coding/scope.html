@@ -93,7 +93,7 @@ These can be used as in the following example:
 <tcl><pre>
 namespace foo {
    catch {delete class bar}
-   class bar {
+   class ::foo::bar {
       inherit ::itk::Toplevel
       constructor {args} {
          itk_component add f {
