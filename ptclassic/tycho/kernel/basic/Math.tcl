@@ -188,16 +188,22 @@ proc mapValue {low high value lowdash highdash} {
 }
 
 
+## roundTo     x i
+## roundUpTo   x i
+## roundDownTo x i
 #
-# Given two numbers, round the first up or down to the
-# nearest multiple of the second.
+# Given two numbers, round the first to the nearest, or up or down
+# to the nearest, multiple of the second.
 #
-proc roundDownTo {x i} {
-    return [expr $i * (floor(double($x)/$i))]
+proc roundTo {x i} {
+    return [expr $i * round(double($x)/$i)]
 }
 
 proc roundUpTo {x i} {
-    return [expr $i * (ceil(double($x)/$i))]
+    return [expr $i * int(ceil(double($x)/$i))]
 }
 
+proc roundDownTo {x i} {
+    return [expr $i * int(floor(double($x)/$i))]
+}
 
