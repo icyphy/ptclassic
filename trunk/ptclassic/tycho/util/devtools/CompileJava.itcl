@@ -172,8 +172,6 @@ body ::tycho::CompileJava::compileAndRun {filenames} {
         set retList [::tycho::execModal {} {} $compileWidget]
     }
     set compileWidget [lindex $retList 1]
-    # Make sure we parse the output of the compiler (ie. esp. error msg)
-    parseError $compileWidget
 
     # If necessary, run the appletviewer.
     # If there is already an appletviewer widget, reuse it.
