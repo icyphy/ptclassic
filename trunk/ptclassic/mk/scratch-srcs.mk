@@ -132,16 +132,16 @@ $(OBJARCH)/xv/tiff/Makefile:
 
 xv_bin: $(OBJARCH)/xv
 	(cd $(OBJARCH)/xv; \
-		$(MAKE) $(MFLAGS) \
+		$(MAKE) \
 		EXTRA_LDOPTIONS=$(CC_STATIC) \
 		RAND=$(XV_RAND) \
 		BINDIR=$(XV_DEST)/bin.$(ARCH) all)
 
 xv_install: $(OBJARCH)/xv
 	(cd $(OBJARCH)/xv; \
-		$(MAKE) $(MFLAGS) \
+		$(MAKE) \
 		VPATH=../../src/xv \
-		EXTRA_LDOPTIONS=-Bstatic \
+		EXTRA_LDOPTIONS=$(CC_STATIC) \
 		INSTALL=$(INSTALL) \
 		BINDIR=$(XV_DEST)/bin.$(ARCH)  install)
 	strip $(PTOLEMY)/bin.$(ARCH)/xv
@@ -154,3 +154,5 @@ stats:
 	@echo "========================================================"
 	@date
 	-df $(PTOLEMY)
+
+
