@@ -85,7 +85,7 @@ extern char *sys_errlist[];
 #else
 #ifndef __GNUG__
 // Then we are using cfront
-#define EXTRAOPTS "-I/users/ptdesign/src/compat/cfront -DPOSTFIX_OP="
+#define EXTRAOPTS " -DPOSTFIX_OP="
 #else
 #define EXTRAOPTS ""
 #endif /* ! __GNUG__ */
@@ -176,19 +176,53 @@ static void reportErrors (const char* text) {
 static int compile (const char* name, const char* idomain, const char* srcDir,
 		    const char* objDir)
 {
-	char domain[32], cmd[512];
-	strcpyLC (domain, idomain);
-	sprintf (cmd, "cd %s; %s %s -c -I%s/src/domains/%s/kernel "
-		 "-I%s/src/domains/%s/stars "
-		 "-I%s/src/domains/%s/dsp/stars "
-		 "-I%s/src/domains/%s/image/stars "
-		 "-I%s/src/domains/%s/tcltk/stars "
-		 "-I%s/src/kernel "
-		 "-I%s %s/%s%s.cc >& %s", objDir, CPLUSPLUS,
-		 EXTRAOPTS, ptolemyRoot, domain, ptolemyRoot,
-		 domain, ptolemyRoot, domain, ptolemyRoot, domain,
-		 ptolemyRoot, domain, ptolemyRoot,
-		 srcDir, srcDir, idomain, name, tmpFileName);
+ 	char domain[32], cmd[1024];
+  	strcpyLC (domain, idomain);
+
+#ifndef __GNUG__
+        //if we are running under cfront, then include
+        // -I$PTOLEMY/src/compat/cfront 
+ 	sprintf (cmd, "cd %s; "
+ 		 "%s %s -c "
+ 		 "-I%s/src/compat/cfront "
+ 		 "-I%s/src/domains/%s/kernel "
+  		 "-I%s/src/domains/%s/stars "
+  		 "-I%s/src/domains/%s/dsp/stars "
+  		 "-I%s/src/domains/%s/image/stars "
+  		 "-I%s/src/domains/%s/tcltk/stars "
+  		 "-I%s/src/kernel "
+ 		 "-I%s %s/%s%s.cc >& %s",
+ 		 objDir,
+ 		 CPLUSPLUS, EXTRAOPTS,
+ 		 ptolemyRoot,
+ 		 ptolemyRoot, domain,
+ 		 ptolemyRoot, domain,
+ 		 ptolemyRoot, domain,
+ 		 ptolemyRoot, domain,
+ 		 ptolemyRoot, domain,
+ 		 ptolemyRoot,
+  		 srcDir, srcDir, idomain, name, tmpFileName);
+#else
+	// We are compiling under g++, so we do not include compat/cfront
+	 	sprintf (cmd, "cd %s; "
+ 		 "%s %s -c "
+ 		 "-I%s/src/domains/%s/kernel "
+  		 "-I%s/src/domains/%s/stars "
+  		 "-I%s/src/domains/%s/dsp/stars "
+  		 "-I%s/src/domains/%s/image/stars "
+  		 "-I%s/src/domains/%s/tcltk/stars "
+  		 "-I%s/src/kernel "
+ 		 "-I%s %s/%s%s.cc >& %s",
+ 		 objDir,
+ 		 CPLUSPLUS, EXTRAOPTS,
+ 		 ptolemyRoot, domain,
+ 		 ptolemyRoot, domain,
+ 		 ptolemyRoot, domain,
+ 		 ptolemyRoot, domain,
+ 		 ptolemyRoot, domain,
+ 		 ptolemyRoot,
+  		 srcDir, srcDir, idomain, name, tmpFileName);
+#endif //__GNUG__
 	PrintDebug (cmd);
 	if (util_csystem (cmd)) {
 		reportErrors ("errors in compilation");
