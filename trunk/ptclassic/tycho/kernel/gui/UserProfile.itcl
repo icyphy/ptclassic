@@ -46,25 +46,22 @@
 # error will be raised if this is called more than once,
 # although later on we will allow a user profile to be changed.
 #
-# <dt><b>registerstyle</b> _stylesheet_ _style_ ?_type_? ?_key_?
+# <dt><b>registerstyle</b> _stylesheet_ _style_ ?_class_?
 # <dd>
-# Register a style for a given stylesheet. If _type_ is not
-# provided, register a global preference. Otherwise, _type_
-# can be either <b>class</b> or <b>title</b>. In this case,
-# _key_ is the widget class or title respectively. If a preference
+# Register a style for a given stylesheet. If _class_ is not
+# provided, register a global preference. Otherwise, register
+# a preference for the given widget class. If a preference
 # already exists, overwrite it, else create a new one.
 #
-# <dt><b>getstyle</b> _stylesheet_ ?_widget_? ?_title_?
+# <dt><b>getstyle</b> _stylesheet_ ?_widget_?
 # <dd>
 # Get a preferred style. If _widget_ is not provided, get
 # the preferred global style. Otherwise get the preferred
-# style for a widget. If _title_ is provided and
-# a style has been registered for it, return that style. If a
-# style has been registered for the widget's class or for any
-# of its superclasses, return the first such style found
-# by traversing up the class hierarchy. Otherwise, if a style
-# has been registered with the <b>global</b> type, return
-# that style. Otherwise, return the string "default."
+# style for a widget. This will be the preferred style for its
+# class or for the first superclass with a registered style found
+# by traversing up the class hierarchy. If a global style has
+# been registered for _stylesheet_, that is the preferred globale
+# style; otherwise, the preferred global style is "default."
 #
 # </dl>
 #
@@ -83,12 +80,6 @@ ensemble ::tycho::profile {
 	    set fd [open $filename]
 	    $profile parse [read $fd]
 	    close $fd
-	} else {
-	    # Initialize the maps
-	    $profile add map:title
-	    $profile add map:class
-	    $profile add unmap:title
-	    $profile add unmap:class
 	}
 
 	# Remember the profile object
@@ -96,15 +87,15 @@ ensemble ::tycho::profile {
     }
 
     # Register a style preference
-    option registerstyle {stylesheet style {type {}} {key {}}} {
+    option registerstyle {stylesheet style {class {}}} {
 	[@scope ::tycho::UserProfile set _profile] \
-		registerstyle $stylesheet $style $type $key
+		registerstyle $stylesheet $style $class
     }
 
     # Get the preferred style of a widget
-    option getstyle {stylesheet {widget {}} {title {}}} {
+    option getstyle {stylesheet {widget {}}} {
 	[@scope ::tycho::UserProfile set _profile] \
-		getstyle $stylesheet $widget $title
+		getstyle $stylesheet $widget
     }
 }
 
@@ -122,25 +113,12 @@ ensemble ::tycho::profile {
 #
 # This model has the following types:
 #
-# <dl>
-# <dt><b>map</b> _type_
-# <dd>
-# Since model item names can't reliably contains spaces or
-# colons, this item is used to map from names into unique ids.
-# The _type_ is either <b>class</b> or <b>title</b>.
-#
 # <dt><b>preference</b> _id_:
 # <dd>
 # A style preference. The attributes of the item are
 # the style preferences for each stylesheet. For example,
 # the item representing the class <b>::tycho::Edit</b> might
 # have attributes <b>-fonts small -colors default</b>.
-#
-# <dt><b>unmap</b> _type_
-# <dd>
-# Since model item names can't reliably contains spaces or
-# colons, this item is used to map from unique ids into names.
-# The _type_ is either <b>class</b> or <b>title</b>.
 #
 # </dl>
 #
@@ -160,45 +138,24 @@ class ::tycho::UserProfile {
     ####                     public methods                      ####
 
     # Get the preferred style of a widget
-    method getstyle {stylesheet {widget {}} {title {}}}
+    method getstyle {stylesheet {widget {}}}
 
     # Register a style preference
-    method registerstyle {stylesheet style {type {}} {key {}}}
-
-    #################################################################
-    ####                   protected methods                     ####
-
-    # Update the cache
-    protected method _updatecache {}
-
-    #################################################################
-    ####                    private methods                      ####
-
-    # Map a name into a unique id
-    private method _map {type name}
-
-    # Create a new mapping
-    private method _newmap {type name}
-
-    # Map a unique id into a name
-    private method _unmap {type id}
+    method registerstyle {stylesheet style {class {}}}
 
     #################################################################
     ####                   private variables                     ####
 
-    # Counter for generating widget ids
-    private common _id 0
-
     # The single profile object
     private common _profile
 
-    # The cached class maps
-    private variable _mapclass
-    private variable _unmapclass
+    #################################################################
+    #### TEMPORARY
 
-    # The cached title maps
-    private variable _maptitle
-    private variable _unmaptitle
+    method _addmap {args} {}
+    method _addunmap {args} {}
+    method _describemap {args} {}
+    method _describeunmap {args} {}
 }
 
 
@@ -206,14 +163,13 @@ class ::tycho::UserProfile {
 #### constructor
 #
 body ::tycho::UserProfile::constructor {args} {
-    # Define the "map" type
-    type define map :leafonly 1
-
     # Define the "preference" type
     type define preference :leafonly 1
 
-    # Define the "unmap" type
-    type define unmap :leafonly 1
+    # FIXME: Delete these some time later. They are needed
+    # so that loading existing profiles doesn't barf
+    type define map :override 1
+    type define unmap :override 1
 
     # Evaluate options
     eval configure $args
@@ -225,10 +181,10 @@ body ::tycho::UserProfile::constructor {args} {
 body ::tycho::UserProfile::destructor {} {
     # Save myself to the profile file.
     # For some reason, the destructor is not called when you
-    # exit the program the the value of this code is dubious...
+    # exit the program so the value of this code is dubious...
     if ![catch {set fd [open $filename "w"]}] {
-	puts $fd [describe]
-	close $fd
+		puts $fd [describe]
+		close $fd
     }
 }
 
@@ -241,31 +197,19 @@ body ::tycho::UserProfile::destructor {} {
 #
 # Get the preferred style for a given widget.
 #
-body ::tycho::UserProfile::getstyle {stylesheet {widget {}} {title {}}} {
+body ::tycho::UserProfile::getstyle {stylesheet {widget {}}} {
     if { $widget != "" } {
-        if { $title != "" } {
-            # See if the title matches anything
-            set id [_map title $title]
-            if { $id != "" } {
-                if [exists preference:title.$id -$stylesheet] {
-                    return [attrget preference:title.$id -$stylesheet]
-                }
-            }
-        }
         # See if the widget's class matches anything, going up the hierarchy
         foreach class [$widget info heritage] {
             set class [info which -command $class]
-            set id [_map class $class]
-            if { $id != "" } {
-                if [exists preference:class.$id -$stylesheet] {
-                    return [attrget preference:class.$id -$stylesheet]
-                }
+            if [exists $class -$stylesheet] {
+                return [attrget $class -$stylesheet]
             }
         }
     }
     # See if there's a global preference    
-    if [exists preference:global -$stylesheet] {
-	return [attrget preference:global -$stylesheet]
+    if [exists global -$stylesheet] {
+		return [attrget global -$stylesheet]
     }
     # Nothing found
     return "default"
@@ -276,23 +220,15 @@ body ::tycho::UserProfile::getstyle {stylesheet {widget {}} {title {}}} {
 #
 # Register a style for a given stylesheet.
 #
-body ::tycho::UserProfile::registerstyle \
-	{stylesheet style {type {}} {key {}}} {
-    if { $type == {} } {
-	set name preference:global
+body ::tycho::UserProfile::registerstyle {stylesheet style {class {}}} {
+    if { $class == {} } {
+		set name global
     } else {
-	set id [_map $type $key]
-	
-	# If the item doesn't exist, get a new id
-	if { $id == "" } {
-	    set id [_newmap $type $key]
-	}
-	# Get the item name
-	set name preference:$type.$id
+		set name $class
     }
     # Create the item if it doesn't exist
     if ![exists $name] {
-	add $name
+		add $name
     }
     # Add the preference
     attrset $name -$stylesheet $style
@@ -300,75 +236,7 @@ body ::tycho::UserProfile::registerstyle \
     # Save the profile file. This appears to be necessary because
     # the destructor is not called when we exit.
     if ![catch {set fd [open $filename "w"]}] {
-	puts $fd [describe]
-	close $fd
+		puts $fd [describe]
+		close $fd
     }
 }
-
-#####################################################################
-#####################################################################
-####                     protected methods                       ####
-
-########################################################################
-#### _updatecache
-#
-# Update the name maps.
-#
-body ::tycho::UserProfile::_updatecache {} {
-    array set _mapclass [attrset map:class]
-    array set _unmapclass [attrset unmap:class]
-    array set _maptitle [attrset map:title]
-    array set _unmaptitle [attrset unmap:title]
-    cache validate
-}
-
-#####################################################################
-#####################################################################
-####                       private methods                       ####
-
-########################################################################
-#### _newmap
-#
-# Given an item name, return a new id and it to the appropriate map.
-#
-body ::tycho::UserProfile::_newmap {type name} {
-    # Make sure cache is up to date
-    _update
-
-    # Get ID and remember it
-    while [::info exists _unmap$type:$_id] {
-	incr _id
-    }
-    set _map[set type]($name) $_id
-    set _unmap[set type]($_id) $name
-
-    eval attrset map:$type [array get _map$type]
-    eval attrset unmap:$type [array get _unmap$type]
-
-    return $_id
-}
-
-########################################################################
-#### _map
-#
-# Given an item name, return its id. Null if unknown.
-#
-body ::tycho::UserProfile::_map {type name} {
-    _update
-    if ![::info exists _map[set type]($name)] {
-	return ""
-    } else {
-	return [set _map[set type]($name)]
-    }
-}
-
-########################################################################
-#### _unmap
-#
-# Given an item id, return its name.
-#
-body ::tycho::UserProfile::_unmap {type id} {
-    _update
-    return [set _unmap[set type]($id)]
-}
-

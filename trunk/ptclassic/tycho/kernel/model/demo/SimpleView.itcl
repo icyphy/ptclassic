@@ -45,6 +45,7 @@
 #         # Create some items
 #         item john -email johnr@eecs
 #         item christopher -email cxh@eecs -office "493-Cory"
+#
 #         # This item has items inside it
 #         item edward -email eal@eecs {
 #             item sato -phone 1-800-BIGDOGGY -color "Grey-ish, I think"
@@ -82,21 +83,21 @@
 # this would be done in the view, but we have taken the
 # code out for the sake of this example:
 # <pre><tcl>
-#     $model subscribe data $view1 all
-#     $model subscribe data $view2 all
+#     $model subscribe data $view1
+#     $model subscribe data $view2
 # </tcl></pre>
 #
 # Now, any changes made to the model via the <b>publish</b> command
 # will be reflected in both views. For example, change the <b>-phone</b>
 # attribute of item <b>John</b>:
 # <pre><tcl>
-#     $model publish attrset item:john -phone 3-7683
+#     $model publish attrset john -phone 3-7683
 # </tcl></pre>
 #
 # What this does is cause the model to look for subscribers
 # interested in item <b>john</b>, Since both views have subscribed
 # to "all" data, both will have their <b>notify</b> methods called
-# with (in this case) the arguments <b>item:john attrset -phone 3-7683</b>.
+# with (in this case) the arguments <b>john attrset -phone 3-7683</b>.
 # The notify method of SimpleView must take appropriate action --
 # in this case, changing the displayed value. You can enter data into
 # either window, and clicking on the "Apply" button will
@@ -105,12 +106,12 @@
 # Any other data-modifying command can be recorded. Delete an
 # item:
 # <pre><tcl>
-#     $model publish delete item:john
+#     $model publish delete john
 # </tcl></pre>
 # 
 # Delete an attribute:
 # <pre><tcl>
-#     $model publish attrdel {item:edward item:sato} -phone
+#     $model publish attrdel {edward sato} -phone
 # </tcl></pre>
 # 
 # Use the redo and undo buttons to go forwards and backwards
@@ -137,7 +138,7 @@ class ::tycho::SimpleView {
     method apply {{context {}}}
 
     # Process notification from the model
-    method notify {type command name args}
+    method notify {command args}
     
     # Redo one command
     method redo {}
@@ -198,17 +199,16 @@ body ::tycho::SimpleView::constructor {args} {
 # the model.
 #
 body ::tycho::SimpleView::apply {{context {}}} {
-   # Strip types from the name
-    regsub -all {[^: ]+:} $context {} tails
-    if { $tails != "" } {
-        set path $itk_component([join $tails .])
+   # Figure out the widget path
+    if { $context != "" } {
+        set path $itk_component([join $context .])
     } else {
         set path $itk_component(data)
     }
 
     # Process items
     foreach i [$model match item $context] {
-        set item [concat $context item:$i]
+        set item [concat $context $i]
 
         # Process each attribute
         foreach {attr val} [$model attrget $item] {
@@ -228,19 +228,21 @@ body ::tycho::SimpleView::apply {{context {}}} {
 #### notify
 # Process a notification from the model.
 #
-body ::tycho::SimpleView::notify {command item args} {
+body ::tycho::SimpleView::notify {command args} {
     # Switch on the command
     switch -exact -- $command {
         "add" {
-            # Item was added
-            _additem $item
+            # Item was added: add type item ?attr value...?
+            _additem [lindex $args 1]
         }
         "delete" {
-            # Item was deleted
-            _delitem $item
+            # Item was deleted: delete item
+            _delitem [lindex $args 0]
         }
         "attrset" {
-            # Attributes changed
+            # Attributes changed: attrset item ?attr value...?
+            set item [lindex $args 0]
+            set args [lreplace $args 0 0]
             foreach {attr value} $args {
                 if [_hasattr $item $attr] {
                     _setattr $item $attr $value
@@ -250,9 +252,12 @@ body ::tycho::SimpleView::notify {command item args} {
             }
         }
          "attrdel" {
-            # Attributes deleted. For each, call exists{} (in case
+            # Attributes deleted: attrdel item ?attr...?
+            # For each, call exists{} (in case
             # the attribute has a default, in which case we don't
             # really want to delete it.)
+            set item [lindex $args 0]
+            set args [lreplace $args 0 0]
             foreach attr $args {
                 if [$model exists $item $attr] {
                     _setattr $item $attr [$model attrget $item $attr]
@@ -299,7 +304,7 @@ body ::tycho::SimpleView::redo {} {
 #
 body ::tycho::SimpleView::_initialize {} {
     foreach n [$model match item] {
-        _additem item:$n
+        _additem $n
     }
 }
 
@@ -308,8 +313,7 @@ body ::tycho::SimpleView::_initialize {} {
 #
 body ::tycho::SimpleView::_additem {item} {
     # Strip types from the name.
-    regsub -all {[^: ]+:} $item {} tails
-    set name [join $tails .]
+    set name [join $item .]
     set path $itk_component(data).$name
 
     # Create a frame for this item
@@ -324,7 +328,7 @@ body ::tycho::SimpleView::_additem {item} {
 
     # Create its label
     itk_component add $name.label {
-        label $path.label -text [lindex $tails end]
+        label $path.label -text [lindex $item end]
     }
     grid $path.label -row 0 -column 0
 
@@ -337,7 +341,7 @@ body ::tycho::SimpleView::_additem {item} {
 
     # Process nested items. Repeat after me: I love recursion, I love...
     foreach n [$model match item $item] {
-        _additem [concat $item item:$n]
+        _additem [concat $item $n]
     }
 }
 
@@ -345,21 +349,16 @@ body ::tycho::SimpleView::_additem {item} {
 #### _delitem
 #
 body ::tycho::SimpleView::_delitem {item} {
-    # Strip types from the name.
-    regsub -all {[^: ]+:} $item {} tails
-    set name [join $tails .]
-
+    set name [join $item .]
     destroy $itk_component($name)
-    unset itk_component($name)
+    unset    itk_component($name)
 }
 
 ########################################################################
 #### _addattr
 #
 body ::tycho::SimpleView::_addattr {item attr value {row {}}} {
-   # Strip types from the name.
-    regsub -all {[^: ]+:} $item {} tails
-    set name [join $tails .]
+    set name [join $item .]
     set path $itk_component($name)
 
     # Get the row, if not provided
@@ -385,12 +384,7 @@ body ::tycho::SimpleView::_addattr {item attr value {row {}}} {
 #### _delattr
 #
 body ::tycho::SimpleView::_delattr {item attr} {
-    # Strip types from the name.
-    regsub -all {[^: ]+:} $item {} tails
-    set name [join $tails .]
-    set path $itk_component($name)
-
-    # Delete it
+    set name [join $item .]
     destroy $itk_component($name.label$attr)
     destroy $itk_component($name.entry$attr)
     unset itk_component($name.label$attr)
@@ -401,12 +395,7 @@ body ::tycho::SimpleView::_delattr {item attr} {
 #### _setattr
 #
 body ::tycho::SimpleView::_setattr {item attr value} {
-    # Strip types from the name.
-    regsub -all {[^: ]+:} $item {} tails
-    set name [join $tails .]
-    set path $itk_component($name)
-
-    # Change the value
+    set name [join $item .]
     $itk_component($name.entry$attr) delete 0 end
     $itk_component($name.entry$attr) insert 0 [$model attrget $item $attr]
 }
@@ -415,11 +404,7 @@ body ::tycho::SimpleView::_setattr {item attr value} {
 #### _hasattr
 #
 body ::tycho::SimpleView::_hasattr {item attr} {
-    # Strip types from the name.
-    regsub -all {[^: ]+:} $item {} tails
-    set name [join $tails .]
-
-    # Test if it exists
+    set name [join $item .]
     ::info exists itk_component($name.entry$attr)
 }
 

@@ -300,22 +300,22 @@ configbody ::tycho::StyleEditor::stylesheet {
     if ![::info exists itk_component(style-chooser)] {
         set styles {}
         # Get styles from master
-        foreach s [$_master match style] {
-            if [$_master exists style:$s -label] {
-                set label [$_master attrget style:$s -label]
+        foreach style [$_master match style] {
+            if [$_master exists $style -label] {
+                set label [$_master attrget $style -label]
                 if { $label != "" } {
-                    set _index($label) $s
-                    set _unindex($s) $label
+                    set _index($label) $style
+                    set _unindex($style) $label
                 }
             }
         }
         # Get additional styles from the user model
-        foreach s [$_model match style] {
-            if [$_model exists style:$s -label] {
-                set label [$_model attrget style:$s -label]
+        foreach style [$_model match style] {
+            if [$_model exists $style -label] {
+                set label [$_model attrget $style -label]
                 if { $label != "" } {
-                    set _index($label) $s
-                    set _unindex($s) $label
+                    set _index($label) $style
+                    set _unindex($style) $label
                 }
             }
         }
@@ -347,13 +347,13 @@ configbody ::tycho::StyleEditor::stylesheet {
 configbody ::tycho::StyleEditor::style {
     set style $itk_option(-style)
     $itk_component(items) assign style-chooser $_unindex($style)
-    foreach parameter [$_master match parameter style:$style] {
+    foreach parameter [$_master match parameter $style] {
         # If it's not in the labeled grid, ignore
         if ![$itk_component(items) exists $parameter] {
             continue
         }
-        set type [$_master attrget "style:default parameter:$parameter" -type]
-        set value [$_model dfltcget "style:$style parameter:$parameter" -value]
+        set type [$_master attrget "default $parameter" -type]
+        set value [$_model dfltcget "$style $parameter" -value]
         switch -exact $type {
             "font" {
                 foreach {f x s} $value {}
@@ -467,7 +467,7 @@ body ::tycho::StyleEditor::_updatecolor {param} {
 # Update a style parameter
 #
 body ::tycho::StyleEditor::_update {param} {
-    set name "style:$itk_option(-style) parameter:$param"
+    set name [list $itk_option(-style) $param]
     set oldvalue [$_model dfltcget $name -value]
     set dfltvalue [$_master dfltcget $name -value]
     set itemtype [$_model dfltcget $name -type]
@@ -487,8 +487,8 @@ body ::tycho::StyleEditor::_update {param} {
     
     if { $oldvalue != $newvalue } {
         # Update. If the style doesn't exist in the user model, create it.
-        if ![$_model exists style:$itk_option(-style)] {
-            $_model add style:$itk_option(-style)
+        if ![$_model exists $itk_option(-style)] {
+            $_model add $itk_option(-style)
         }
         if ![$_model exists $name] {
             # FIXME: groups
@@ -520,8 +520,8 @@ body ::tycho::StyleEditor::_loaddata \
 	return
     }
     # Build list of parameters by type
-    foreach parameter [$_master match parameter style:default] {
-	set name "style:default parameter:$parameter"
+    foreach parameter [$_master match parameter default] {
+	set name [list default $parameter]
 	set label [$_master attrget $name -label]
 	set type [$_master attrget $name -type]
 	if { $label != "" } {
@@ -549,7 +549,7 @@ body ::tycho::StyleEditor::_loaddata \
     # Build the parameters queries. Booleans are a checkbox.
     foreach label $sorted(boolean) {
 	set param $_boolean($label)
-	set value [$_model dfltcget "style:$style parameter:$param" -value]
+	set value [$_model dfltcget [list $style $param] -value]
 	$items add checkbutton $param \
 		-label $label \
 		-initial $value \
@@ -558,8 +558,8 @@ body ::tycho::StyleEditor::_loaddata \
     # Choice is a set of radiobuttons
     foreach label $sorted(choice) {
 	set param $_choice($label)
-	set value [$_model dfltcget "style:$style parameter:$param" -value]
-        set entries [$_model dfltcget "style:$style parameter:$param" -values]
+	set value [$_model dfltcget [list $style $param] -value]
+        set entries [$_model dfltcget [list $style $param] -values]
         set rowspan [expr int(ceil([llength $entries]/3.0))]
 	$items group $param \
 		-label $label \
@@ -574,8 +574,8 @@ body ::tycho::StyleEditor::_loaddata \
     # Set is an option menu
     foreach label $sorted(set) {
 	set param $_set($label)
-	set value [$_model dfltcget "style:$style parameter:$param" -value]
-        set entries [$_model dfltcget "style:$style parameter:$param" -values]
+	set value [$_model dfltcget [list $style $param] -value]
+        set entries [$_model dfltcget [list $style $param] -values]
 
 	$items add optionmenu $param \
 		-label $label \
@@ -586,7 +586,7 @@ body ::tycho::StyleEditor::_loaddata \
     # Numbers and strings are entry widgets
     foreach label $sorted(number) {
 	set param $_number($label)
-	set value [$_model dfltcget "style:$style parameter:$param" -value]
+	set value [$_model dfltcget [list $style $param] -value]
 	$items add entry $param \
 		-label $label \
 		-initial $value
@@ -594,7 +594,7 @@ body ::tycho::StyleEditor::_loaddata \
     }
     foreach label $sorted(integer) {
 	set param $_integer($label)
-	set value [$_model dfltcget "style:$style parameter:$param" -value]
+	set value [$_model dfltcget [list $style $param] -value]
 	$items add entry $param \
 		-label $label \
 		-initial $value
@@ -602,7 +602,7 @@ body ::tycho::StyleEditor::_loaddata \
     }
     foreach label $sorted(string) {
 	set param $_string($label)
-	set value [$_model dfltcget "style:$style parameter:$param" -value]
+	set value [$_model dfltcget [list $style $param] -value]
 	$items add entry $param \
 		-label $label \
 		-initial $value
@@ -617,7 +617,7 @@ body ::tycho::StyleEditor::_loaddata \
 
         foreach label $sorted(color) {
             set param $_color($label)
-            set value [$_model dfltcget "style:$style parameter:$param" -value]
+            set value [$_model dfltcget [list $style $param] -value]
             set c [_decolor $value]
             set color [lindex $c 0]
             set shade [lindex $c 1]
@@ -658,7 +658,7 @@ body ::tycho::StyleEditor::_loaddata \
 
         foreach label $sorted(font) {
             set param $_font($label)
-            set value [$_model dfltcget "style:$style parameter:$param" -value]
+            set value [$_model dfltcget [list $style $param] -value]
             # Get current family, size and style
             foreach {f x s} $value {}
             if { $x == "" } {

@@ -81,7 +81,7 @@
 #
 # We can add a new item to the model:
 # <pre><tcl>
-#     $model add item:d -color green -another one {
+#     $model add d -color green -another one {
 #          item x
 #          item y
 #     }
@@ -116,7 +116,7 @@
 #
 # Here are the items within the item <b>c</b>:
 # <pre><tcl>
-#     $model match item item:c
+#     $model match item c
 # </tcl></pre>
 # 
 # Here are the top-level items with the <b>-color</b> attribute
@@ -127,26 +127,26 @@
 #
 # To get the value of an attribute:
 # <pre><tcl>
-#     $model attrget item:d -foo
+#     $model attrget d -foo
 # </tcl></pre>
 #
 # To get the complete attribute list of an item:
 # <pre><tcl>
-#     $model attrget item:d
+#     $model attrget d
 # </tcl></pre>
 #
 # Note that the list includes the default value of the attribute
 # <b>-foo</b>. If you really want only attributes that have
 # been explicitly set, use <b>attrset</b>:
 # <pre><tcl>
-#     $model attrset item:d
+#     $model attrset d
 # </tcl></pre>
 #
 # This method, <b>attrset</b> is actually there so you can change
 # attributes:
 # <pre><tcl>
-#     $model attrset item:d -foo "I am changed!" -color purple
-#     $model attrget item:d
+#     $model attrset d -foo "I am changed!" -color purple
+#     $model attrget d
 # </tcl></pre>
 #
 # SimpleModel is a subclass of <a href="Model.html">Model</a>, and therefore
@@ -155,7 +155,7 @@
 # <a href="SimpleView.html">SimpleView</a>. To record a change to
 # the model data, call it via the <b>record</b> method:
 # <pre><tcl>
-#     $model record add item:e -yogi bear
+#     $model record add e -yogi bear
 #     $model describe
 # </tcl></pre>
 # 

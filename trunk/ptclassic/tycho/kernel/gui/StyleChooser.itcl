@@ -223,7 +223,7 @@ body ::tycho::StyleChooser::_displaystyles {{mode {}}} {
 	# Get styles and their labels, from the stylesheet and its master
         foreach m [list [$model cget -master] $model] {
             foreach s [$m match style] {
-                set label [$m attrget style:$s -label]
+                set label [$m attrget $s -label]
                 if { $label == "" } {
                     continue
                 }
@@ -239,7 +239,7 @@ body ::tycho::StyleChooser::_displaystyles {{mode {}}} {
 	$itk_component(items) add optionmenu $stylesheet \
 		-label $l \
 		-entries [lsort $labels] \
-                -initial [$model dfltcget style:$current -label] \
+                -initial [$model dfltcget $current -label] \
                 -command "$this _changestyle $stylesheet"
         
         # If it has only one entry, disable it
