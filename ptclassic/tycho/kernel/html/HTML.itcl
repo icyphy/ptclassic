@@ -120,7 +120,7 @@ class ::tycho::HTML {
     method clear {}
 
     # Execute Tcl code embedded in the HTML.
-    method execTcl {}
+    method execTcl {x y}
 
     # Open a help window.
     method help {}
@@ -438,14 +438,20 @@ body ::tycho::HTML::clear {} {
 #### execTcl
 # Execute the Tcl code under the "current" mark.
 # The Tcl code is simply the largest contiguous region of text tagged
-# "tcl".  The code is executed in the global scope.
+# "tcl".  The code is executed in the global scope, and the result is
+# displayed.
 #
-body ::tycho::HTML::execTcl {} {
+body ::tycho::HTML::execTcl {x y} {
     set cmd [getTaggedText tcl]
     if {$cmd != {}} {
 	set result [uplevel #0 $cmd]
         if {$result != {}} {
-            safeEval ::tycho::inform "Returned:\n$result"
+            set tags [[textWinName] tag names @$x,$y]
+            if {[lsearch -exact $tags tclq] < 0} {
+                safeEval ::tycho::inform "Returned:\n$result"
+            } {
+                putStatus "Returned: $result"
+            }
         } {
             putStatus "null string returned"
         }
@@ -1430,7 +1436,10 @@ proc HMtag_tcl {win param text} {
     set color [::tycho::preference get viewhtml tclColor]
     $win tag configure tcl -foreground $color
     $win tag bind tcl <Double-Button-1> \
-	    "uplevel #0 $HTMLcommand execTcl; break"
+            "uplevel #0 $HTMLcommand execTcl %x %y; break"
+    if {[HMextract_param $param quiet]} {
+        set var(Ttclq) tclq
+    }
 
     # Reduce the size because courier fonts on X window systems
     # are absurdly large.  Also tag the text "tcl".
@@ -1439,6 +1448,9 @@ proc HMtag_tcl {win param text} {
 
 proc HMtag_/tcl {win param text} {
     upvar #0 HM$win var
+    if {[info exists var(Ttclq)]} {
+        unset var(Ttclq)
+    }
     HMstack $win / "Ttcl {} size {}"
 }
 
