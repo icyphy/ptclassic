@@ -55,8 +55,9 @@ defined below, and are also declared in ptkImage.h.
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
+#include "sol2compat.h"         /* define boolean */
+#include "compat.h"             /* define architecture settings */
 #include "err.h"
-#include "local.h"
 
 /* We must include ptkImage.h last because it pulls in ptk.h.  See ptk.h. */
 #include "ptkImage.h"
