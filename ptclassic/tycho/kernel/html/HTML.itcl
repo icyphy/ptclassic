@@ -1477,14 +1477,40 @@ proc HMlink_callback {win href} {
     # Get the name of the HTML widget.
     set HTML [uplevel #0 winfo command [winfo megawidget $win]]
 
-    if [regexp {^http:|^ftp:|^gopher:|^news:|^mailto:|^telnet:|^wais:} $href] {
+    if [regexp {^http:|^ftp:|^gopher:|^news:|^mailto:|^telnet:|^wais:} \
+	    $href] {
 	if [::tycho::askuser "OK to invoke netscape to view $href?"] {
-	    if [catch {exec netscape -remote openURL($href) &} errMsg] {
-		::tycho::ErrorMessage .netscapeError -text $errMsg
-		wm deiconify .netscapeError
+            global tcl_platform
+	    switch $tcl_platform(platform) {
+                unix {
+                    if [catch \
+		        {::tycho::tyexec netscape -remote openURL($href) &} \
+			    errMsg] {
+			::tycho::ErrorMessage .netscapeError -text $errMsg
+			wm deiconify .netscapeError
+		    }
+		}
+                windows {
+		    # FIXME: It would be nice if we could open up
+		    # a URL in a windows netscape without restarting netscape
+		    # each time, but this requires 
+		    # DDE or OLE.  For more info, search the Netscape
+		    # website for 'openURL', or look at
+		    # http://home.netscape.com/newsref/std/x-remote.html
+                    if [catch {::tycho::tyexec netscape $href &} errMsg] {
+                        ::tycho::ErrorMessage .netscapeError -text $errMsg
+                        wm deiconify .netscapeError
+                    }
+                }
+		default {
+                    ::tycho::ErrorMessage .netscapeError -text \
+                            "Sorry, exec is not supported on the \
+			    $tcl_platform(platform) platform."
+                    wm deiconify .netscapeError
+		}
 	    }
+            return
 	}
-	return
     }
 
     if {![regexp {(file:)?([^#]*)#(.+)} $href dummy noise file fragment]} {
