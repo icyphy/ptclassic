@@ -1,4 +1,5 @@
 #include "DEConnect.h"
+#include "DEScheduler.h"
 #include "Block.h"
 #include "StringList.h"
 #include "Output.h"
@@ -15,7 +16,8 @@ $Id$
 
  Programmer:  Soonhoi Ha
  Date of creation: 5/30/90
- Revisions:
+ Revisions: If the galaxy inside a Wormhole has a output data, stop the
+	DE scheduler if "stopAfterOutput" flag is set to do that(10/24/90).
 
 Code for functions declared in DEConnect.h
 
@@ -85,6 +87,10 @@ void OutDEPort :: sendData ()
 	} else {
 		EventHorizon* p = (EventHorizon *) farSidePort;
 		p->timeStamp = timeStamp;
+		// stop the DE scheduler if "stopAfterOutput" flag
+		// is set.
+		DEScheduler* sr = (DEScheduler*) parent()->mySched();
+		if (sr->stopAfterOutput) sr->setStopTime(timeStamp);
 	}
 	
 	dataNew = FALSE;
@@ -92,10 +98,18 @@ void OutDEPort :: sendData ()
 }	
 
 PortHole& MultiInDEPort :: newPort () {
-	return installPort(*new InDEPort);
+	InDEPort& p = *new InDEPort;
+	// DE-specific
+	p.dataNew = FALSE;
+	p.timeStamp = 0.0;
+	return installPort(p);
 }
  
  
 PortHole& MultiOutDEPort :: newPort () {
-	return installPort(*new OutDEPort);
+	OutDEPort& p = *new OutDEPort;
+	// DE-specific
+	p.dataNew = FALSE;
+	p.timeStamp = 0.0;
+	return installPort(p);
 }
