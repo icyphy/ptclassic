@@ -1150,8 +1150,6 @@ genDef ()
 	if (idBlock)
 		fprintf (fp, "%s\n", idBlock);
 /* include files */
-	if (!pureFlag)
-		fprintf (fp, "#include \"KnownBlock.h\"\n");
 	fprintf (fp, "#include \"%s.h\"\n", fullClass);
 	for (i = 0; i < nCcInclude; i++)
 		fprintf (fp, "#include %s\n", ccInclude[i]);
@@ -1204,7 +1202,7 @@ genDef ()
 	else {
 		fprintf (fp, "\n// prototype instance for known block list\n");
 		fprintf (fp, "static %s proto;\n", fullClass);
-		fprintf (fp, "static KnownBlock entry(proto,\"%s\");\n",
+		fprintf (fp, "static RegisterBlock registerBlock(proto,\"%s\");\n",
 			 objName);
 	}
 	(void) fclose(fp);
