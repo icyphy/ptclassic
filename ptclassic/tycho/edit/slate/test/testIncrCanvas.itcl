@@ -186,31 +186,23 @@ test IncrCanvas-basic.21 {Delete all items} {
 _twoitems
 test IncrCanvas-addtag.1 {Pass simple item by ID} {
     .c addtag new withtag $r
-    list \
-	    [lsort [.c itemcget $r -tags]] \
-	    [string compare [.c find withtag new] $r]
-} {{foo new} 0}
+    list [.c find withtag new] [lsort [.c itemcget $r -tags]] \
+} [list $r {foo new}]
 
 test IncrCanvas-addtag.2 {Pass simple item by tag} {
     .c addtag zoo withtag foo
-    list \
-	    [lsort [.c itemcget $r -tags]] \
-	    [string compare [.c find withtag zoo] $r]
-} {{foo new zoo} 0}
+    list [.c find withtag zoo] [lsort [.c itemcget $r -tags]]
+} [list $r {foo new zoo}]
 
 test IncrCanvas-addtag.11 {Pass complex item by ID} {
     .c addtag moo withtag $f
-    list \
-	    [lsort [.c itemcget $f -tags]] \
-	    [string compare [.c find withtag moo] $f]
-} {{bar moo} 0}
+    list [.c find withtag moo] [lsort [.c itemcget $f -tags]]
+} [list $f {bar moo}]
 
 test IncrCanvas-addtag.12 {Pass complex item by tag} {
     .c addtag roo withtag bar
-    list \
-	    [lsort [.c itemcget $f -tags]] \
-	    [string compare [.c find withtag roo] $f]
-} {{bar moo roo} 0}
+    list [.c find withtag roo] [lsort [.c itemcget $f -tags]]
+} [list $f {bar moo roo}]
 
 # Tests on hierarchical items
 test IncrCanvas-addtag.21 {Add to the actual root} {
