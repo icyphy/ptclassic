@@ -33,8 +33,6 @@ static const char file_id[] = "$RCSfile$";
 #endif
 
 #include "MTDFStar.h"
-#include "MTDFScheduler.h"
-#include "MTDFThread.h"
 
 extern const char MTDFdomainName[];
 
@@ -68,23 +66,4 @@ int MTDFStar::run()
 	if(!port->isDynamic()) port->sendData();
     }
     return status;
-}
-
-
-// Associate a Thread with this Star.
-void MTDFStar::setThread(MTDFThread& t)
-{
-    myThread = &t;
-}
-
-// Thread associated with this Star.
-MTDFThread& MTDFStar::thread()
-{
-    return *myThread;
-}
-
-void MTDFStar::sleepUntil(double wake)
-{
-    MTDFScheduler& sched = *(MTDFScheduler*)scheduler();
-    thread().sleep(sched.delay(wake));
 }

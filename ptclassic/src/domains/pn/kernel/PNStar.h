@@ -38,8 +38,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SDFStar.h"
 #include "MTDFPortHole.h"
 
-class MTDFThread;
-
 class MTDFStar : public DataFlowStar
 {
 public:
@@ -51,21 +49,6 @@ public:
 
     // Execute the Star.
     /* virtual */ int run();
-
-    // Associate a Thread with this Star.
-    void setThread(MTDFThread&);
-
-    // Thread associated with this Star.
-    MTDFThread& thread();
-
-    // Timing constraint specification.
-    double lag;
-    double period;
-
-    void sleepUntil(double);
-
-protected:
-    MTDFThread* myThread;
 };
 
 #endif
