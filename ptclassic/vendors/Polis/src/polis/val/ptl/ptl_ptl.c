@@ -922,7 +922,7 @@ int autotick, unittime;
               fprintf( fp, "        if ( fpover ) {\n" );
               fprintf( fp, "          if ( %s.numSimulEvents() > 0 || %s_flag ) {\n", st, st );
               fprintf( fp, "            sprintf( stemp, \"%%s: %%d %s\\n\", ", st );
-              fprintf( fp, "(const char*) name, now;\n" );       
+              fprintf( fp, "(const char*) name, now);\n" );       
               fprintf( fp, "            Printoverflow( stemp );\n" );
               fprintf( fp, "          }\n" );
               fprintf( fp, "        }\n" );
@@ -954,7 +954,7 @@ int autotick, unittime;
   /* output ecah CFSM to the firing file */
   fprintf( fp, "    if ( fpfire && needResource) {\n" );
   fprintf( fp, "        sprintf( stemp, \"%%s: %%d %%d start\\n\", " );
-  fprintf( fp, "(const char*) name, now, priority );\n" );
+  fprintf( fp, "(const char*) name, now, priority);\n" );
   fprintf( fp, "        Printfiring( stemp );\n" );
   fprintf( fp, "    }\n" );
   
