@@ -97,6 +97,11 @@ public:
 	// explode myself to expose the inside Galaxy.
 	Galaxy* explode();
 
+	// return a reference to the internal galaxy.  This is non-const
+	// function because the galaxy may be modified by the calling function
+        Galaxy& insideGalaxy() { return gal; }
+	
+
 protected :
 	// function to connect inner galaxy ports to outside through
 	// event horizons of proper type
