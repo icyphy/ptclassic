@@ -1,6 +1,6 @@
 defstar
 {
-    name { TkParamBiquad }
+    name { TkParametricEq }
     domain { CGC }
     derivedFrom { ParamBiquad }
     desc {
