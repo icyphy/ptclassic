@@ -202,6 +202,8 @@ int Block::isItAtomic () const { return TRUE;}
 
 void Block::initState () { states.initElements();}
 
+Scheduler* Block :: mySched() { return parent()->mySched() ;}
+
 // destructor isn't really do-nothing because it calls destructors
 // for members
 Block::~Block () {}
