@@ -9,7 +9,6 @@ include $(ROOT)/mk/latexinfo.mk
 
 SRCS =	userMan.tex \
 	other.tex \
-	index.tex \
 	cg.tex \
 	cgc.tex \
 	cp.tex
