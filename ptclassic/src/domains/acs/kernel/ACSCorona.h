@@ -1,3 +1,4 @@
+// This may look like C code, but it is really -*- C++ -*-
 #ifndef _ACSCorona_h
 #define _ACSCorona_h
 
@@ -38,6 +39,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "CGStar.h"
 #include "NamedList.h"
+#include "ACSCore.h"
+
+class ACSCore;
 
 class ACSCorona : public CGStar {
 public:
@@ -48,15 +52,16 @@ public:
         // class identification
         int isA(const char*) const;
 
-	// select Core to be used
+	// select ACSCore to be used
 	int setCore(const char*);
 
-	// register Core in list
-	static int registerCore(Core &, const char*);
+	// register ACSCore in list
+	static int registerCore(ACSCore &, const char*);
 
 protected:
 
-	Core *corelist;
+	ACSCore *corelist;
 
-	Core *currentCore;
-}
+	ACSCore *currentCore;
+};
+#endif //_ACSCorona_h

@@ -1,3 +1,4 @@
+// This may look like C code, but it is really -*- C++ -*-
 #ifndef _ACSCore_h
 #define _ACSCore_h
 
@@ -37,12 +38,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 
 #include "CGStar.h"
+#include "ACSCorona.h"
+
+class ACSCorona;
 
 class ACSCore : public CGStar {
 public:
 
         // constructor takes a reference to a Corona
-        Core(Corona &);
+        ACSCore(ACSCorona &);
 
         // my domain
         const char* domain() const;
@@ -56,10 +60,11 @@ public:
 protected:
 
 	// returns reference to the core's corona
-	inline Corona & corona() const { return corona };
+	inline ACSCorona & corona() const { return _corona; };
 
 private:
 
-        Corona & corona;
+        ACSCorona & _corona;
 
-}
+};
+#endif //_ACSCore_h
