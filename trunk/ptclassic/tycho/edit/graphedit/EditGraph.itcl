@@ -85,7 +85,7 @@ class ::tycho::EditGraph {
     method newdrag {item x y}
 
     # Stop moving a new edge
-    method newrelease {ignore x y}
+    method newrelease {ignore}
 
     # Handle change notification from the graph layout model
     method notify {method args}
@@ -118,7 +118,7 @@ class ::tycho::EditGraph {
     method vertexdrag {tag x y}
 
     # Stop moving a vertex
-    method vertexrelease {tag x y}
+    method vertexrelease {tag}
 
     ##### Pitcl stuff
     ###
@@ -316,9 +316,7 @@ body ::tycho::EditGraph::editparameters {args} {
     # FIXME: The parameter editing window must include the whole
     # path name of the model
     foreach v $args {
-        puts $v
         set item [$itk_option(-graph) vertexcget $v -type]
-        puts $item
         regsub -all {\.} $v "_" nm
         set nm .$nm
         if { [::info which -command $nm] != "" } {
@@ -350,7 +348,7 @@ body ::tycho::EditGraph::iconselect {name} {
     set id [$slateView id $v]
 
     # Move its nw corner to the right position
-    $slate moveto $id $iconx $icony "nw"
+    $slate moveto $id $iconx $icony "nw" -shape rectangle
 
     # Advance place position
     incr iconx 10
@@ -422,7 +420,7 @@ body ::tycho::EditGraph::newdrag {item x y} {
 # make a connection in the graph. If not, just delete the line,
 # since connection failed.
 #
-body ::tycho::EditGraph::newrelease {ignore x y} {
+body ::tycho::EditGraph::newrelease {ignore} {
     set line $_scratch(line)
     if { $_scratch(dest) == "" } {
 	$slate delete $line
@@ -667,7 +665,7 @@ body ::tycho::EditGraph::vertexdrag {tag x y} {
     }
     foreach edge $_scratch(outputedges) {
 	$layout publish reshapedrag $edge $x $y
-    }	
+    }
 }
 
 ########################################################################
@@ -676,7 +674,7 @@ body ::tycho::EditGraph::vertexdrag {tag x y} {
 # Terminate a move interaction on vertices and add an undo and
 # redo command to the history of the layout model.
 #
-body ::tycho::EditGraph::vertexrelease {tag x y} {
+body ::tycho::EditGraph::vertexrelease {tag} {
     set layout $itk_option(-layout)
     
     # Because the following will record a bunch of commands that we
@@ -684,20 +682,20 @@ body ::tycho::EditGraph::vertexrelease {tag x y} {
     $layout mark vertex
 
     # Terminate move of vertices
-    $layout publish moverelease $_scratch(movetag) $x $y
+    $layout publish moverelease $_scratch(movetag)
 
     # Terminate move of fully-connected edges
     if { $_scratch(moveedges) != "" } {
-        $layout publish moverelease $this.edge $x $y
+        $layout publish moverelease $this.edge
         $layout publish dtag $this.edge
     }
 
     # Terminate the reshape of partially-connected edges
     foreach edge $_scratch(inputedges) {
-	$layout publish reshaperelease $edge $x $y
+	$layout publish reshaperelease $edge
     }
     foreach edge $_scratch(outputedges) {
-	$layout publish reshaperelease $edge $x $y
+	$layout publish reshaperelease $edge
     }
 
     # Now merge all those commands into a single one
@@ -1029,7 +1027,6 @@ body ::tycho::EditGraph::loadIcons {file} {
     set icons [uplevel #0 ::tycho::IconIndex \
 	    [::tycho::autoName icons] \
 	    -datafile $file]
-    puts $icons
     $icons load
     set iconLibrary $icons
 }
@@ -1042,7 +1039,6 @@ body ::tycho::EditGraph::loadStars {file} {
     set stars [uplevel #0 ::tycho::Library \
 	    [::tycho::autoName stars] \
 	    -datafile $file]
-    puts $stars
     $stars load
     $stars menu [menubar] stars "$this iconselect"
     set starLibrary $stars
