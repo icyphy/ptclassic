@@ -51,6 +51,12 @@ public:
 	// which may not always be wanted.  It produces a great deal
 	// of data.
 	virtual operator char* ();
+
+	// Add elements to the to the lists
+	// Made public for the benefit of MultiPortHole and
+	// classes derived therefrom.
+	addPort(PortHole& p) {ports.put(p);}
+
 protected:
 	// Database for this block
 
@@ -58,8 +64,10 @@ protected:
 	char* descriptor;
 	PortList ports;
 	
-	// Add elements to the to the lists
-	addPort(PortHole& p) {ports.put(p);}
+	// If given a MultiPortHole, this function does nothing,
+	// because there are no real ports until the connect command.
+	// The dummy expression prevents a compiler warning.
+	addPort(MultiPortHole& p) {p;}
 
 private:
 	// Name is private, because it should be set only by setBlock()
