@@ -76,6 +76,7 @@ Particle& IntSample :: operator = (const Particle& p)
 
 DataType IntSample :: readType() const {return INT;}
 IntSample :: operator int () const {return data;}
+IntSample :: operator double () const {return double(data);}
 IntSample :: operator float () const {return float(data);}
 IntSample :: operator Complex () const {return Complex(data);}
 
@@ -86,8 +87,8 @@ void IntSample :: initialize() {data=0;}
 
 	// Load up with data
 void IntSample :: operator << (int i) {data=i;}
-void IntSample :: operator << (float f) {data=int(f);}
-void IntSample :: operator << (Complex& c) {data=int(abs(c));}
+void IntSample :: operator << (double f) {data=int(f);}
+void IntSample :: operator << (const Complex& c) {data=int(abs(c));}
 
 
 	////////////////////////////////////////
@@ -119,9 +120,10 @@ Particle& FloatSample :: operator = (const Particle& p)
 
 DataType FloatSample :: readType() const {return FLOAT;}
 
-        // Cast to an int, float, and Complex
+        // Cast to an int, double, and Complex
 FloatSample :: operator int () const {return int(data);}
-FloatSample :: operator float () const {return data;}
+FloatSample :: operator double () const {return data;}
+FloatSample :: operator float () const {return float(data);}
 FloatSample :: operator Complex () const {return Complex(data);}
 
 StringList FloatSample :: print () const { return StringList(data);}
@@ -132,8 +134,8 @@ void FloatSample :: initialize() {data=0.0;}
  
         // Load up with data
 void FloatSample :: operator << (int i) {data=i;}
-void FloatSample :: operator << (float f) {data=f;}
-void FloatSample :: operator << (Complex& c) {data=abs(c);}
+void FloatSample :: operator << (double f) {data=f;}
+void FloatSample :: operator << (const Complex& c) {data=abs(c);}
 
         ////////////////////////////////////////
         // class ComplexSample
@@ -162,11 +164,12 @@ Particle& ComplexSample :: operator = (const Particle& p)
 
 DataType ComplexSample :: readType() const {return COMPLEX;}
  
-        // Cast to an int, float, Complex
+        // Cast to an int, double, Complex
 	// when casting to a real, we use the magnitude
 
 ComplexSample :: operator int () const {return int(abs(data));}
-ComplexSample :: operator float () const {return abs(data);}
+ComplexSample :: operator double () const {return abs(data);}
+ComplexSample :: operator float () const {return float(abs(data));}
 ComplexSample :: operator Complex () const {return data;}
 
 StringList ComplexSample :: print () const {
@@ -183,8 +186,8 @@ void ComplexSample :: initialize() {data=0.0;}
 
         // Load up with data
 void ComplexSample :: operator << (int i) {data=Complex(i);}
-void ComplexSample :: operator << (float f) {data=Complex(f);}
-void ComplexSample :: operator << (Complex& c) {data=c;}
+void ComplexSample :: operator << (double f) {data=Complex(f);}
+void ComplexSample :: operator << (const Complex& c) {data=c;}
 
 
 // ParticleStack methods

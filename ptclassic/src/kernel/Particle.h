@@ -40,9 +40,10 @@ public:
 	// Identify what type of Particle this is
 	virtual DataType readType() const = 0;
 
-	// Cast this Particle to an int, float, Complex
+	// Cast this Particle to an int, double, Complex
 	virtual operator int () const = 0;
 	virtual operator float () const = 0;
+	virtual operator double () const = 0;
 	virtual operator Complex () const = 0;
 
 	// print Particle
@@ -53,8 +54,8 @@ public:
 
 	// Load the Particle with data
 	virtual void operator << (int) = 0;
-	virtual void operator << (float) = 0;
-	virtual void operator << (Complex&) = 0;
+	virtual void operator << (double) = 0;
+	virtual void operator << (const Complex&) = 0;
 
 	// Copy a Particle -- since Stars must be able to
 	// assign Particles in type-independent fashion,
@@ -113,8 +114,9 @@ public:
 	// Tell this world this Particle contains an int
 	DataType readType() const;
 
-	// Cast to an int, float, and Complex
+	// Cast to an int, double, and Complex
 	operator int () const;
+	operator double () const;
 	operator float () const;
 	operator Complex () const;
 
@@ -129,8 +131,8 @@ public:
 
 	// Load up with data
 	void operator << (int i);
-	void operator << (float f);
-	void operator << (Complex& c);
+	void operator << (double f);
+	void operator << (const Complex& c);
 
 	// Copy the Particle
 	Particle& operator = (const Particle&);
@@ -151,18 +153,19 @@ private:
 class FloatSample : public Particle
 {
 public:
-        // Tell this world this Particle contains an float
+        // Tell this world this Particle contains an double
         DataType readType() const;
  
-        // Cast to an int, float, and Complex
+        // Cast to an int, double, and Complex
         operator int () const;
-        operator float () const;
+        operator double () const;
+	operator float () const;
 	operator Complex () const;
 
 	StringList print() const;
  
         // Initialize
-        FloatSample(float f) {data=f;}
+        FloatSample(double f) {data=f;}
         FloatSample() {data=0.0;}
  
         // Initialize the Particle
@@ -170,8 +173,8 @@ public:
  
         // Load up with data
         void operator << (int i);
-        void operator << (float f);
-        void operator << (Complex& c);
+        void operator << (double f);
+        void operator << (const Complex& c);
 
         // Copy the Particle
         Particle& operator = (const Particle&);
@@ -182,7 +185,7 @@ public:
 	void die();
 
 private:
-        float data;
+        double data;
 };
 
         /////////////////////////////////////
@@ -195,16 +198,17 @@ public:
         // Tell this world this Particle contains a Complex
         DataType readType() const;
  
-        // Cast to an int, float, Complex
+        // Cast to an int, double, Complex
         operator int () const;
-        operator float () const;
+        operator double () const;
+	operator float () const;
 	operator Complex () const;
 
 	StringList print() const;
  
         // Initialize
         ComplexSample(const Complex& c) {data=c;}
-	ComplexSample(float f) {data=double(f);}
+	ComplexSample(double f) {data= f;}
 	ComplexSample(int i) {data = double(i);}
         ComplexSample() {data=0.0;}
 
@@ -213,8 +217,8 @@ public:
 
         // Load up with data
         void operator << (int i);
-        void operator << (float f);
-	void operator << (Complex& c);
+        void operator << (double f);
+	void operator << (const Complex& c);
 
         // Copy the Particle
         Particle& operator = (const Particle&);
@@ -228,5 +232,8 @@ public:
         Complex data;
 };
 
+// inline functions to handle other types correctly
+
+inline void operator << (Particle& p, float d) { p << double(d);}
 
 #endif
