@@ -1,8 +1,8 @@
 defstar {
-	name { ReadPCM }
+	name { PCMReadInt }
 	domain { SDF }
 	version { $Id$ }
-	author { J. Buck }
+	author { Joseph T. Buck }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -10,7 +10,6 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-
 	desc {
 Read a binary mu-law encoded PCM file.  Return one sample on each firing.
 The file format that is read is the same as the one written by the Play star.
@@ -18,11 +17,12 @@ The simulation can be halted on end-of-file, or the file contents can be
 periodically repeated, or the file contents can be padded with zeros.
 	}
 	hinclude { "pt_fstream.h" }
-	ccinclude { "SimControl.h" }
+	ccinclude { "SimControl.h", "ptdspMuLaw.h" }
 
 	output	{
 		name { output }
 		type { int }
+		descriptor { 16-bit sample }
 	}
 	defstate {
 		name { fileName }
@@ -50,44 +50,12 @@ periodically repeated, or the file contents can be padded with zeros.
 
 	destructor  { input.close(); }
 
-	code {
-		// This routine is by
-		// Craig Reese: IDA/Supercomputing Research Center
-		// 29 September 1989
-		//
-		// References:
-		// 1) CCITT Recommendation G.711  (very difficult to follow)
-		// 2) MIL-STD-188-113,"Interoperability and Performance
-		//	Standards for Analog-to_Digital Conversion Techniques,"
-		//     17 February 1987
-		//
-		// Input: 8 bit ulaw sample
-		// Output: signed 16 bit linear sample
-
-		int ulaw_to_linear(unsigned char ulawbyte)
-		{
-			static int exp_lut[8] =
-			{ 0, 132, 396, 924, 1980, 4092, 8316, 16764 };
-			int sign, exponent, mantissa, sample;
-
-			ulawbyte = ~ ulawbyte;
-			sign = ( ulawbyte & 0x80 );
-			exponent = ( ulawbyte >> 4 ) & 0x07;
-			mantissa = ulawbyte & 0x0F;
-			sample = exp_lut[exponent] +
-				( mantissa << ( exponent + 3 ) );
-			if ( sign != 0 ) sample = -sample;
-			return sample;
-		}
-	}
-
 	setup {
 		input.close();
 		// open input file
 		input.open(fileName);
 		if (!input) {
-			Error::abortRun(*this, "can't open file ",
-			    fileName);
+			Error::abortRun(*this, "can't open file ", fileName);
 		}
 	}
 
@@ -100,7 +68,8 @@ periodically repeated, or the file contents can be padded with zeros.
 			if (haltAtEnd) {	// halt the run
 				SimControl::requestHalt();
 				return;
-			} else if (periodic) {	// close and re-open file
+			}
+			else if (periodic) {	// close and re-open file
 				input.close();
 				input.open(fileName);
 				if (!input) {
@@ -110,12 +79,14 @@ periodically repeated, or the file contents can be padded with zeros.
 					return;
 				}
 				input.get(ch);
-				x = ulaw_to_linear(ch);
+				x = Ptdsp_MuLaw8ToLinear16(ch);
 			}
-		} else if (input) {		// get next value
+		}
+		else if (input) {		// get next value
 			input.get(ch);
-			x = ulaw_to_linear(ch);
-		} else {
+			x = Ptdsp_MuLaw8ToLinear16(ch);
+		}
+		else {
 			Error::abortRun(*this, "error in input file");
 			return;
 		}
