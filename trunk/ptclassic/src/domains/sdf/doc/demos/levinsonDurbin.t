@@ -38,6 +38,8 @@ G(z) ~=~ 1 ~+~ z sup -1 F(z)
 is an estimate of the whitening filter,
 or the filter that will convert the filtered noise sequence into
 white noise.
+.Ie "whitening filter"
+.Ie "filter, whitening"
 .pp
 The reflection coefficients are also plotted, but it is difficult
 in this demo to verify that they are correct.
