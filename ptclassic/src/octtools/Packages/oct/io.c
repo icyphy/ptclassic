@@ -154,7 +154,9 @@ struct facet *desc;
     octId id;
     int bb_flags;
     int val, version_number, type;
+#ifdef FIX_OCT_RESTORE_INFO_WARNINGS
     int32 tmp_object_count, tmp_num_formals;	/* Used to update ints */
+#endif
     extern octId oct_next_id();
 
     oct_facet_file = (IOFILE *) file;
@@ -183,8 +185,18 @@ struct facet *desc;
 	   oct_get_32(&id) &&
 	   oct_get_byte(&bb_flags) &&
 	   oct_get_box(&desc->bbox) &&
+
+#ifdef FIX_OCT_RESTORE_INFO_WARNINGS
 	   oct_get_32(&tmp_object_count) &&
 	   oct_get_32(&tmp_num_formals) &&
+#else
+/* These two lines produce warnings, but if we using oct_get_32 on an
+ *  a temporary, then oct_get_32() returns 0, which produces an error
+ *  message.
+ */
+           oct_get_32(&desc->object_count) &&
+           oct_get_32(&desc->num_formals) &&
+#endif
 	   oct_get_32(&desc->next_xid) &&
 	   oct_get_terms(desc) &&
 	   oct_get_32(&desc->time_stamp) &&
@@ -197,12 +209,20 @@ struct facet *desc;
 	   oct_get_32(&desc->attach_date) &&
 	   oct_get_32(&desc->detach_date);
 
+#ifdef FIX_OCT_RESTORE_INFO_WARNINGS
     /* These two are not int32, they are int, so we use temporaries. */
     desc->object_count = tmp_object_count;
     desc->num_formals = tmp_num_formals;
+#endif
 
     if (!val || id != oct_null_id || type != OCT_FACET) {
-	oct_error("The facet is corrupted");
+      if (!val) 
+	oct_error("The facet is corrupted, one or more oct_get_32() calls returned 0 ");
+      if (id != oct_null_id)
+	oct_error("The facet is corrupted, id != oct_null_id, id was %d",id);
+      if (type != OCT_FACET)
+	oct_error("The facet is corrupted, type != OCT_FACET, type was %d",
+		  type);
 	return 0;
     }
 
