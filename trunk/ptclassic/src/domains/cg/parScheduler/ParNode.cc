@@ -51,7 +51,8 @@ Date of last revision:
                         ///  *Constructor*  ///
                         ///////////////////////
 
-ParNode::ParNode(DataFlowStar* s, int invoc_no) : EGNode(s, invoc_no)
+ParNode::ParNode(DataFlowStar* s, int invoc_no)
+: EGNode(s, invoc_no),clonedStar(0)
 {
 	StaticLevel = 0;	// Initialize to something invalid
 	type = 0;		
