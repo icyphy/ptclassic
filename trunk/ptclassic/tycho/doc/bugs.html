@@ -41,6 +41,19 @@
     and a "\n" are appended to the previous item.
 </ul>
 
+<h3><a href="$TYCHO/kernel/Query.itcl">Query</a></h3>
+<ul>
+<li>-entrywidth should be respected by all types of queries.
+    E.g., it is ignored in the following:
+    <tcl><pre>
+    ::tycho::Query .bb -entrywidth 70
+    .bb mediated color {Color:} red {::tycho::querycolor {Choose color}}
+    .bb mediated font {Font:} fixed ::tycho::queryfont
+    ::tycho::post [::tycho::Dialog::wait .bb]
+    </pre></tcl>
+
+</ul>
+
 <h3><a href="$TYCHO/kernel/RevControl.itcl">RevControl</a></h3>
 <ul>
 <li>After sccs create, bindings don't work in version control dialog.
