@@ -1,3 +1,4 @@
+static const char file_id[] = "Scheduler.cc";
 /**************************************************************************
 Version identification:
 $Id$

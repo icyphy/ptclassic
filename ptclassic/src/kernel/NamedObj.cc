@@ -1,3 +1,4 @@
+static const char file_id[] = "NamedObj.cc";
 /**************************************************************************
 Version identification:
 $Id$

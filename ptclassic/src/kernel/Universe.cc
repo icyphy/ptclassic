@@ -1,3 +1,4 @@
+static const char file_id[] = "Universe.cc";
 /*******************************************************************
 SCCS version identification
 $Id$

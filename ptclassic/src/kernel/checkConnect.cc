@@ -1,3 +1,4 @@
+static const char file_id[] = "checkConnect.cc";
 /**************************************************************************
 Version identification:
 $Id$

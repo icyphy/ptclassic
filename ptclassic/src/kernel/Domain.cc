@@ -1,3 +1,4 @@
+static const char file_id[] = "Domain.cc";
 /*******************************************************************
 SCCS Version identification :
 $Id$

@@ -1,3 +1,4 @@
+static const char file_id[] = "Geodesic.cc";
 /****************************************************************
 Version identification:
 $Id$

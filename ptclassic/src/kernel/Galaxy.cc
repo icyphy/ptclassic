@@ -1,3 +1,4 @@
+static const char file_id[] = "Galaxy.cc";
 /**************************************************************************
 Version identification:
 $Id$

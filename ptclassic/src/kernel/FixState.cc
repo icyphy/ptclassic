@@ -1,3 +1,4 @@
+static const char file_id[] = "FixState.cc";
 /**************************************************************************
 Version identification:
 $Id$

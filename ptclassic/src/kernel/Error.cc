@@ -1,3 +1,4 @@
+static const char file_id[] = "Error.cc";
 /*******************************************************************
 SCCS Version identification :
 $Id$

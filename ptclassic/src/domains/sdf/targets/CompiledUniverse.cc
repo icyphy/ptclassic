@@ -1,3 +1,4 @@
+static const char file_id[] = "CompiledUniverse.cc";
 #ifndef _CompiledUniverse_cc
 #define _CompiledUniverse_cc 1
 
