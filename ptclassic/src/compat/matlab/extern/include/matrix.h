@@ -34,42 +34,58 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #ifndef matrix_h
 #define matrix_h
 
-typedef char Matrix;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#define TEXT    1                       /* mat.type indicating text */
-#define MATRIX  0                       /* mat.type indicating matrix */
+typedef char Matrix;
+typedef double Real;
+
+/* mat.type types for text and matrix */
+#define TEXT    1
+#define MATRIX  0
+
+/* defines for type of matrix */
 #define REAL    0
 #define COMPLEX 1
+ 
+extern Matrix*	mxCreateFull ARGS((int numrows, int numcols, int complexFlag));
+extern void	mxFreeMatrix ARGS((Matrix* matrixPtr));
+extern void*	mxCalloc ARGS((unsigned int numelements, unsigned int size));
+extern void	mxFree ARGS((void* memoryPtr));
+extern const char*	mxGetName ARGS((const Matrix* matrixPtr));
+extern void	mxSetName ARGS((Matrix* matrixPtr, const char* name));
+extern int	mxGetM ARGS((const Matrix* matrixPtr));
+extern void	mxSetM ARGS((Matrix* matrixPtr, int numrows));
+extern int	mxGetN ARGS((const Matrix* matrixPtr));
+extern void	mxSetN ARGS((Matrix* matrixPtr, int numcols));
+extern Real*	mxGetPr ARGS((const Matrix* matrixPtr));
+extern void	mxSetPr ARGS((Matrix* matrixPtr, Real* realMatrixPtr));
+extern Real*	mxGetPi ARGS((const Matrix* matrixPtr));
+extern void	mxSetPi ARGS((Matrix* matrixPtr, Real* imagMatrixPtr));
+extern int	mxGetNzmax ARGS((const Matrix* matrixPtr));;
+extern void	mxSetNzmax ARGS((Matrix* matrixPtr, int numNonZeroElements));
+extern int*	mxGetIr ARGS((const Matrix* matrixPtr));
+extern void	mxSetIr ARGS((Matrix* matrixPtr, int* sparseIndexArray));
+extern int*	mxGetJc ARGS((const Matrix* matrixPtr));
+extern void	mxSetJc ARGS((Matrix* matrixPtr, int* sparseIndexArray));
+extern int	mxGetString ARGS((const Matrix* matrixPtr, char* buffer,
+				  int bufferLength));
+extern Matrix*	mxCreateString ARGS((const char* string));
+extern double	mxGetScalar ARGS((const Matrix* matrixPtr));
+extern int	mxIsFull ARGS((const Matrix* matrixPtr));
+extern int	mxIsSparse ARGS((const Matrix* matrixPtr));
+extern int	mxIsDouble ARGS((const Matrix* matrixPtr));
+extern void	mxSetString ARGS((Matrix* matrixPtr));
+extern int	mxIsString ARGS((const Matrix* matrixPtr));
+extern int	mxIsNumeric ARGS((const Matrix* matrixPtr));
+extern int	mxIsComplex ARGS((const Matrix* matrixPtr));
 
-#define mxCreateFull(m,n,f)	0
-#define mxFreeMatrix(p)
-#define mxCalloc(n,size)
-#define mxFree(p)
-#define mxGetName(p)		0
-#define mxSetName(p,s)
-#define	mxGetM(pm)		0
-#define	mxSetM(pm,m)
-#define	mxGetN(pm)		0
-#define	mxSetN(pm,n)
-#define	mxGetPr(pm)		0
-#define	mxSetPr(pm,p)
-#define mxGetPi(pm)		0
-#define	mxSetPi(pm,p)
-#define	mxGetNzmax(pm)		0
-#define	mxSetNzmax(pm,n)
-#define mxGetIr(pm)		0
-#define mxSetIr(pm,ir)
-#define	mxGetJc(pm)		0
-#define	mxSetJc(pm,jc)
-#define	mxGetString(pm,sp,sl)	1
-#define	mxCreateString(s)	0
-#define	mxGetScalar(pm)		0.0
-#define	mxIsFull(pm)		0
-#define	mxIsSparse(pm)		0
-#define	mxIsDouble(pm)		0
-#define	mxIsString(pm)		0
-#define	mxIsNumeric(pm)		0
-#define	mxIsComplex(pm)		0
-#define	mxCreateSparse(m,n,z,c)	0
+extern Matrix*	mxCreateSparse ARGS((int numrows, int numcols,
+				     int numNonZeroElements, int complexFlag));
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* matrix_h */
