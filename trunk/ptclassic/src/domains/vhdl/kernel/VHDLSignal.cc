@@ -54,7 +54,7 @@ VHDLSignal :: ~VHDLSignal() {}
 // Return a pointer to a new copy of the VHDLSignal.
 VHDLSignal* VHDLSignal :: newCopy() {
   VHDLSignal* newSignal = new VHDLSignal;
-  newSignal->name = this->name;
+  newSignal->name = hashstring(this->name);
   newSignal->type = this->type;
   newSignal->from = this->from;
   newSignal->to = this->to;
@@ -87,7 +87,7 @@ void VHDLSignalList :: put(StringList nname, StringList ntype,
 			   StringList nfrom, StringList nto) {
   if (this->inList(nname)) return;
   VHDLSignal* newSignal = new VHDLSignal;
-  newSignal->name = nname;
+  newSignal->name = hashstring(nname);
   newSignal->type = ntype;
   newSignal->from = nfrom;
   newSignal->to = nto;

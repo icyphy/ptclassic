@@ -54,7 +54,7 @@ VHDLCompDecl :: ~VHDLCompDecl() {}
 // Return a pointer to a new copy of the VHDLCompDecl.
 VHDLCompDecl* VHDLCompDecl :: newCopy() {
   VHDLCompDecl* newCompDecl = new VHDLCompDecl;
-  newCompDecl->name = this->name;
+  newCompDecl->name = hashstring(this->name);
   newCompDecl->portList = this->portList->newCopy();
   newCompDecl->genList = this->genList->newCopy();
 

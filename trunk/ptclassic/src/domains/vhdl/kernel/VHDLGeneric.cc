@@ -56,7 +56,7 @@ VHDLGeneric :: ~VHDLGeneric() {}
 // Return a pointer to a new copy of the VHDLGeneric.
 VHDLGeneric* VHDLGeneric :: newCopy() {
   VHDLGeneric* newGeneric = new VHDLGeneric;
-  newGeneric->name = this->name;
+  newGeneric->name = hashstring(this->name);
   newGeneric->type = this->type;
   newGeneric->defaultVal = this->defaultVal;
 
@@ -87,7 +87,7 @@ VHDLGenericList* VHDLGenericList :: newCopy() {
 void VHDLGenericList :: put(StringList name, StringList type) {
   if (this->inList(name)) return;
   VHDLGeneric* newGeneric = new VHDLGeneric;
-  newGeneric->name = name;
+  newGeneric->name = hashstring(name);
   newGeneric->type = type;
   this->put(*newGeneric);
 }

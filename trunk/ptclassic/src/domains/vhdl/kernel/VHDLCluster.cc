@@ -54,7 +54,7 @@ VHDLCluster :: ~VHDLCluster() {}
 // Return a pointer to a new copy of the VHDLCluster.
 VHDLCluster* VHDLCluster :: newCopy() {
   VHDLCluster* newCluster = new VHDLCluster;
-  newCluster->name = this->name;
+  newCluster->name = hashstring(this->name);
   newCluster->firingList = this->firingList->newCopy();
 
   return newCluster;

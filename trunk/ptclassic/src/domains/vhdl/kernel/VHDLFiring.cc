@@ -54,7 +54,7 @@ VHDLFiring :: ~VHDLFiring() {}
 // Return a pointer to a new copy of the VHDLFiring.
 VHDLFiring* VHDLFiring :: newCopy() {
   VHDLFiring* newFiring = new VHDLFiring;
-  newFiring->name = this->name;
+  newFiring->name = hashstring(this->name);
   newFiring->starClassName = this->starClassName;
   newFiring->genericList = this->genericList->newCopy();
   newFiring->portList = this->portList->newCopy();

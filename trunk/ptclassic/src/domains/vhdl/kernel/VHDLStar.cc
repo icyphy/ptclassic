@@ -205,7 +205,8 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset,
     else {
       // Generate constant for index from string.
       // Must first convert offset from char* to int.
-      if (!strcmp(offset,"")) {
+//      if (!strcmp(offset,"")) {
+      if (hashstring(offset) == hashstring("")) {
 	offsetInt = 0;
       }
       else {
@@ -275,7 +276,8 @@ StringList VHDLStar :: expandInterOp(const char* oper, const char* args,
       MPHIter nextPort(*multiPort);
       VHDLPortHole* port;
       while ((port = (VHDLPortHole*) nextPort++) != 0) {
-	if (!strcmp(part,"")) {
+//	if (!strcmp(part,"")) {
+	if (hashstring(part) == hashstring("")) {
 	  finalList << expandRef(port->name(), "", "");
 	}
 	else {
@@ -284,7 +286,8 @@ StringList VHDLStar :: expandInterOp(const char* oper, const char* args,
       }
     }
     else {
-      if (!strcmp(part,"")) {
+//      if (!strcmp(part,"")) {
+      if (hashstring(part) == hashstring("")) {
 	finalList << expandRef(item, "", "");
       }
       else {
