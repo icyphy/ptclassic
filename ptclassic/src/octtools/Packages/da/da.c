@@ -192,6 +192,7 @@ dary array2;
     pos = array1->space + array1->num * array1->obj_size;
     (void) memcpy(pos, array2->space, array2->num * array2->obj_size);
     array1->num += array2->num;
+
 }
 
 
@@ -211,6 +212,8 @@ int new_size;
     array->space = REALLOC(char, array->space, array->n_size * array->obj_size);
     pos = array->space + old_size * array->obj_size;
     (void) memset(pos, 0, (array->n_size - old_size)*array->obj_size);
+    /* Is this right? formerly, this function did not return anything */
+    return array->n_size;
 }
 
 
