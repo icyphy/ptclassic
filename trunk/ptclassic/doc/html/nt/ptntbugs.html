@@ -311,7 +311,6 @@ colors.
 <h2>Problems Running Ptolemy</h2>
 <MENU>
 
-
 <li> If you have problems with <CODE>pxgraph</CODE>, see
 the <a href="ptntinstall.html#pxgraph">Ptolemy NT Installation page</a>,
 and <a href="../../../src/pxgraph/README.txt"><CODE>$PTOLEMY/src/pxgraph/README.txt</CODE></a>
@@ -425,17 +424,29 @@ try usually works.
 </BLOCKQUOTE>
 
 
-<li> pigi is very slow
- <p>For example, running the SDF butterfly demo within pigi
+<li> Tk demos don't run 
+ <p>Formerly, 
+running the SDF butterfly demo within pigi
 takes roughly 60 seconds, but running it from within ptcl takes roughly
 2 seconds.
  <p>The problem is that early releases of Cygwin32 did not
 have itimers, so pigi's event loop uses a much slower technique.
-<CODE>config-nt4.mk</CODE> defines <CODE>PT_NO_TIMER</CODE>, which 
+<CODE>config-nt4.mk</CODE> defined <CODE>PT_NO_TIMER</CODE>, which 
 is used in <CODE>src/ProfileTimer.cc</CODE> and
-<CODE>src/SimControl.cc</CODE>.  To try recompiling with itimers,
-edit <CODE>config-nt4.mk</CODE> and remove the <CODE>-DPT_NO_TIMER</CODE>.
-remove <CODE>SimControl.o</CODE>, rebuild the kernel library and pigi.
+<CODE>src/SimControl.cc</CODE>.  However, Cygwin20 has itimers
+so we removed the <CODE>-DPT_NO_TIMER</CODE> from 
+<CODE>config-nt4.mk</CODE>, and the butterfly demo is much faster.
+ <p>Now, the problem is that the Tk demos hang. The workaround
+is to either edit <CODE>config-nt4.mk</CODE> and add the 
+<CODE>-DPT_NO_TIMER</CODE> flag and recompile, or to do the following:
+<pre>
+cd $PTOLEMY/obj.nt4
+rm SimControl.o ProfileTimer.o
+make USERFLAGS=-DPT_NO_TIMER install
+cd ../pigiRpc
+make install
+</pre>
+
 
 </MENU>
 
