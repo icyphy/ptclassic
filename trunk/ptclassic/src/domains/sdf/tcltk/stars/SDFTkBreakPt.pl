@@ -3,8 +3,9 @@ defstar {
 	domain {SDF}
 	derivedFrom { TclScript }
 	desc {
-A conditional break point.  Each time this star is executes its conditional 
-expression.  If the expression evaluates to true, it causes the run to pause.
+A conditional break point.  
+Each time this star executes, it evaluates its conditional expression.  
+If the expression evaluates to true, it causes the run to pause.
 	}
 	version { $Id$ }
 	author { Alan Kamas }
@@ -49,14 +50,14 @@ the bus create icon of your choice to the input of the TkBreakPt star.
 Then connect the inputs to the bus create icon.  The top input is 
 input(1), the next is input(2), etc.
 .pp
-The second parameter, Optional_Script_File is the script to source if the 
+The second parameter, Optional_Alternate_Script is the script to source if the 
 condition evaluates to "true".  If this parameter is left blank (the default)
 then the default script is executed which pauses the run and 
 puts up a message in the Run Control block.  This should be fine for
 most applications of this star.
 .pp
-The Optional_Script_File is sourced from the goTcl_$starID proceedure.  It
-was access to the following variables:
+The Optional_Alternate_Script is sourced from the goTcl_$starID proceedure.  It
+has access to the following variables:
 .br
 $starID() : The $starID associative array.  See the programmer's manual for
 details.
@@ -75,7 +76,7 @@ $ptkControlPanel : The current Run Control window.
 	        desc {Condition on which to pause the run}
 	}
 	defstate {
-	        name {Optional_Script_File}
+	        name {Optional_Alternate_Script}
 	        type {string}
 	        default{""}
 	        desc {Script to run instead of the default when the condition is true.  The default script pauses the run.}
