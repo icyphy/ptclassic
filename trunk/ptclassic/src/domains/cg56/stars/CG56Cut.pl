@@ -58,7 +58,7 @@ and the output consists of overlapping blocks input particles.
 	setup {
 		if (int(nwrite) + int(offset) > int(nread)) {
 			Error::abortRun(*this,
-			   ": nwrite + offset cannot be greater than nread");
+			   "nwrite + offset cannot be greater than nread");
 			return;
 		}
 		input.setSDFParams(int(nread),int(nread)-int(offset)-1);
@@ -76,10 +76,10 @@ $label(loop)
         }    
 	go {
                 addCode(main);
-		if(nwrite>0) addCode(write);
+		if(int(nwrite) > 0) addCode(int(write));
 	}
         execTime {
-                return 4+ 2*int(nwrite);
+                return 4 + 2*int(nwrite);
         }
 
 }
