@@ -94,7 +94,7 @@ StringList VHDLBStar::expandRef(const char* name, const char* offset)
 
 void VHDLBStar::registerState(const char* name) {
 	State* state;
-	if(state = stateWithName(name)) {
+	if( (state = stateWithName(name)) ) {
 		// If the state is not already on the list of referenced
 		// states, add it.
 		StateListIter nextState(referencedStates);
