@@ -189,6 +189,10 @@ protected:
 	StringList getLinkOptions(int expandEnvironmentVars);
 	StringList getCompileOptions(int expandEnvironmentVars);
 
+	// if a remote compilation, then copy over dependent files
+	// to the remote machine
+	int processDependentFiles();
+
 	// give a unique name for a galaxy. 
 	int galId;
 	int curId;
