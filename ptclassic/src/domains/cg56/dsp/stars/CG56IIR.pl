@@ -126,9 +126,34 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	coeffs.resize(2*numState);
 	delays.resize(numState+1);
 	for (int i = 0; i < numState; i++) {
+	    double temp;
 	    delays[i] = 0;
-	    coeffs[i*2+1] = i < numNumer ? scaleNumer * double(numerator[i]) : 0;
-	    coeffs[i*2] = i < numDenom ? scaleDenom * -(double(denominator[i])) : 0;
+        if (i < numNumer) {
+			temp = scaleNumer*double(numerator[i]);
+			if (temp > 1 ) {
+				Error::abortRun(*this, "Scaled numerator coefficient ",i,
+							" > 1");
+			} else {
+				coeffs[i*2+1] = temp;
+			}
+	    } else {
+			coeffs[i*2 + 1] = 0;
+	    }
+
+		if ( i < numDenom ) {
+			temp = scaleDenom * -(double(denominator[i]));
+			if (temp > 1 ) {
+				Error::abortRun(*this, "Scaled denominator coefficient ",i,
+							" > 1");
+			} else {
+				coeffs[i*2] = temp;
+			}
+		} else {
+			coeffs[i*2] = 0;
+		}  
+				
+//	    coeffs[i*2+1] = i < numNumer ? scaleNumer * double(numerator[i]) : 0;
+//	    coeffs[i*2] = i < numDenom ? scaleDenom * -(double(denominator[i])) : 0;
 	}
 
     }
@@ -142,33 +167,59 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 		addCode(end);
 	}
     }
+
     codeblock(one){
+; H(z) = 1 so just pass input to output
 	move	$ref(signalIn),x1
 	move	$ref(coeffs,1),x0
 	mpyr	x1,x0,a
 	move	a,$ref(signalOut)
     }
+
     codeblock(init){
+;        b[0] + b[1]z^-1 + ... + b[n]z^-n
+; H(z) = ----------------------------------
+;		   1  + a[1]z^-1 + ... + a[n]z^-n
+; register after executing this block:
+; r0 -> w[1]
+; r4 -> a[2]
+; x0 = w[1]
+; y0 = a[1]
+; (a[0] is never referenced since it is normalized in setup)
+; a  = sample 
+; b  = 0
 	move	#($addr(delays)+1),r0
 	move	#($addr(coeffs)+2),r4
 	move	$ref(signalIn),a
 	clr	b	x:(r0),x0	y:(r4)+,y0
     }
+
     codeblock(doFilter, "int numLoops"){
 	do #@numLoops,$label(end_loops)
+; x0 = w[p]			y0 = a[p]   x1 = w[p-1]
 	mac	y0,x0,a		x1,x:(r0)+	y:(r4)+,y1
-	move	x0,x1						; delay 
+; a += w[p]*a[p]  	w[p]=w[p-1]	y1 = b[p]
+	move	x0,x1						
+; 	x1 = w[p]
 	mac	y1,x1,b		x:(r0),x0	y:(r4)+,y0
+; b += w[p]*b[p]    x0 = w[p+1] y0 = a[p+1]
 $label(end_loops)
     }
+
     codeblock(end){
 	move $ref(coeffs,1),y1
+; 	y1 = b[0]
 	move a,x0
+;   x0 = sample + a[1]w[1] + ... + a[n]w[n]
 	macr x0,y1,b    a,$ref(delays,1)
+;   b  = b[0]*{ sample + a[1]w[1] + ... + a[n]w[n]} = output
+;   w[1] = sample + a[1]w[1] + ... + a[n]w[n]
 	move b,$ref(signalOut)
     }
+
     exectime{
 	if (numState == 1) return 4;
 	return (4 + 3 + 4*numLoops + 4);
     }
+
 }
