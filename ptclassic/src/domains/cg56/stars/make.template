@@ -53,7 +53,6 @@ PL_SRCS= \
  CG56IIDUniform.pl \
  CG56Impulse.pl \
  CG56Intgrtr.pl \
- CG56IntegratorR.pl \
  CG56Limit.pl \
  CG56LinToCirc.pl \
  CG56Log.pl \
@@ -69,7 +68,7 @@ PL_SRCS= \
  CG56MpyShift.pl \
  CG56Neg.pl \
  CG56Pad.pl \
- CG56ProPortAD.pl \
+ CG56PrPrtAD.pl \
  CG56ProPortADDA.pl \
  CG56ProPortDA.pl \
  CG56Pulse.pl \
