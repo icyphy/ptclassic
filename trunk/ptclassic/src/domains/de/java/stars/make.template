@@ -1,4 +1,4 @@
-# Copyright (c) 1990-1997 The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -22,8 +22,8 @@
 # 
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
-# Makefile for Ptolemy DE stars contributed by users
-# @(#)make.template	1.6 06/25/97
+# Makefile for Ptolemy DE Java stars
+# $Id$
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -33,7 +33,7 @@
 # This will add the dependencies to the makefile.
 
 ROOT = 		../../../../..
-VPATH = 	$(ROOT)/src/domains/de/contrib/stars
+VPATH = 	$(ROOT)/src/domains/de/java/stars
 
 # get configuration info
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
@@ -46,22 +46,13 @@ PIGIDIR =	$(ROOT)/src/pigilib
 PTKLIB = 	$(ROOT)/src/ptklib
 INCL =		-I$(DEDIR) -I$(KERNDIR) -I$(PIGIDIR) -I$(PTKLIB) \
 			-I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC) \
-			-I$(ROOT)/src/domains/de/contrib/stars
+			-I$(ROOT)/src/domains/de/java/stars
 
 # Library name
-LIB =		libdecontribstars.$(LIBSUFFIX)
+LIB =		libdejavastars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 PL_SRCS= \
-DECIR_uldl.pl \
-DEMobile_Station.pl \
-DEParallel2Serial.pl \
-DEWeighted_List.pl \
-DEWiNeS_Tcl_Animation.pl \
-DEcell_list.pl \
-DEpos_generator.pl \
-DEpropag_uldl.pl \
-DErrmanager_uldl.pl
 
 # The .cc files
 SRCS =		$(PL_SRCS:.pl=.cc)
@@ -72,10 +63,10 @@ OBJS =		$(SRCS:.cc=.o)
 # header files for all stars
 HDRS =		$(SRCS:.cc=.h)
 
-STAR_MK =	decontribstars
-DOMAIN =	DE_CONTRIB
+STAR_MK =	dejavastars
+DOMAIN =	DE_JAVA
 DOMAIN_2 =	DE
-MISC_FILES =	WiNeS.tcl bs.xbm ms.xbm	topo.dxf
+MISC_FILES =
 
 EXTRA_SRCS =	$(STAR_MK).c $(PL_SRCS) $(MISC_FILES)
 
@@ -89,13 +80,6 @@ install:	stars_install
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
-
-# Workaround bug in gcc-2.7.2 optimizer
-ifeq ($(USE_GPLUSPLUS),yes)
-DEpropag_uldl.o: DEpropag_uldl.cc
-	$(UNOPTIMIZED_WARNING_MESSAGE)
-	$(UNOPTIMIZED_COMPILE_RULE) $<
-endif
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
