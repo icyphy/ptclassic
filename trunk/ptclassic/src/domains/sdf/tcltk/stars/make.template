@@ -1,0 +1,62 @@
+# Makefile for Ptolemy SDF tcl stars
+# $Id$
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	chmod +w makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+ROOT = ../../../../..
+VPATH = $(ROOT)/src/domains/sdf/tcltk/stars
+
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
+
+# SDFDIR is the directory containing SDF domain support
+SDFDIR = $(ROOT)/src/domains/sdf/kernel
+TCLDIR = $(ROOT)/tcl/include
+PTKDIR = $(ROOT)/src/pigilib
+INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(TCLDIR) -I$(PTKDIR)
+
+# Library name
+LIB=libsdftclstars.a
+
+# Where star doc files go
+STARDOCDIR = ../../doc/stars
+
+# source files for all stars, using preprocessor
+PL_SRCS= \
+ SDFTclScript.pl 
+
+# The .cc files
+SRCS=$(PL_SRCS:.pl=.cc)
+
+# object files for all stars
+OBJS= $(SRCS:.cc=.o)
+
+# header files for all stars
+HDRS= $(SRCS:.cc=.h)
+
+# extra source files: tcl/tk script files
+SCRIPTS= 
+
+STAR_MK=sdftclstars
+DOMAIN=SDF_TCL
+DOMAIN_2=SDF
+EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS) $(SCRIPTS)
+
+all:		makefile stars_all
+
+install:	stars_install
+
+
+# include common definitions, rules
+include $(ROOT)/common.mk
+
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
