@@ -498,7 +498,7 @@ endif
 ifdef BDFLIB
 	CUSTOM_DIRS += $(BDFDIR)/kernel
 	LIBS += -lbdf
-	LIBFILES += (LIBDIR)/libbdf.$(LIBSUFFIX)
+	LIBFILES += $(LIBDIR)/libbdf.$(LIBSUFFIX)
 endif
 
 ifdef SDFLIB
