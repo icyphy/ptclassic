@@ -404,6 +404,7 @@ ifdef CGC
 			TARGETS += $(CGCT)/main/CGCUnixSend.o \
 				$(CGCT)/main/CGCUnixReceive.o \
 				$(CGCT)/main/CGCMultiTarget.o \
+				$(CGCT)/main/CGCMakefileTarget.o \
 				$(CGCT)/main/CGCMacroStar.o \
 				$(CGCT)/main/CGCDDFCode.o \
 				$(CGCT)/main/CGCSDFSend.o \
