@@ -62,7 +62,7 @@ Norwood, MA, 1988.
 .ip [2]
 J. Buck, S. Ha, E. A. Lee, and D. G. Messerschmitt,
 "Multirate Signal Processing in Ptolemy",
-to appear, \fIProc. of the Int. Conf. on Acoustics, Speech,
+\fIProc. of the Int. Conf. on Acoustics, Speech,
 and Signal Processing\fR, Toronto, Canada, April, 1991.
 .SA
 Select.
