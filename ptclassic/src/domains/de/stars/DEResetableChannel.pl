@@ -27,11 +27,11 @@ limitation of liability, and disclaimer of warranty provisions.
   }
   go {
     completionTime = arrivalTime;
-    if (input.dataNew && !reset.dataNew) {
-	output.put(completionTime) << double(input.get());
-    } else {
+    if (reset.dataNew) {
         output.put(completionTime) << double(reset.get());
         input.dataNew = FALSE;
+    } else if (input.dataNew) {
+        output.put(completionTime) << double(input.get());
     } 
   }
 }
