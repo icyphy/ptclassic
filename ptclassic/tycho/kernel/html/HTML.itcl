@@ -664,7 +664,6 @@ body ::tycho::HTML::help {} {
 # NOTE: This method really should support the syntax "filename#fragment"
 # in the filename argument.  Someday.
 #
-
 body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
     if {$filename != {}} {
         # Mail protocol is an except of a resource, since the only
@@ -699,6 +698,7 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
         # If the file is a local directory, and index.html exists, open it.
         # Otherwise just display the contents of the local directory.
         set contenttype [::tycho::resource contenttype $filename]
+        set ext [::tycho::url extension $filename]
         if {$contenttype=="directory"} {
             set newfilename [::tycho::url join $filename index.html]
             if [::tycho::resource exists $newfilename] {
@@ -729,18 +729,16 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
                 $itk_component(text) mark set insert 1.0
 
                 if {$point != {}} {
-                    after 200 [list $this seeFragment $point]
+                    after idle [list $this seeFragment $point]
                 }
 		insertDirectoryContents $filename
 		return
             }
         }
 
-
         # If the filename has the ".html", ".htm", or ".htl" extension, open it
         # in this window (unless it is already open in another window or
         # we are not inside a Displayer).
-        set ext [::tycho::url extension $filename]
         if {   ([string match "text/html" $contenttype] || \
                 [isAnImageFileExtension $ext]) && \
                 [displayer] != {}} {
@@ -947,15 +945,16 @@ body ::tycho::HTML::linkHitSubWindow {subwindow} {
 body ::tycho::HTML::openNewBrowser {win x y} {
     set point {}    ;# Take care of case of "#link"
 
+    # Find out the link name based on x and y
     set tags [$win tag names @$x,$y]
     set filename [lindex $tags [lsearch -glob $tags L:*]]
     # regsub -all {[^L]*L:([^ ]*).*}  $tags {\1} filename
     regsub L: $filename {} filename
 
-    
-    
     # The following is needed frequently because johnr refuses to
     # add more intelligence to [tycho::url join]
+    #
+    # This routine is the same as the one in hyperJump
     if {[regexp {^#(.*)} $filename _ point]} {
         # Case of same link using "#link" tag
         set filename [filename]
@@ -970,7 +969,26 @@ body ::tycho::HTML::openNewBrowser {win x y} {
         set filename [::tycho::url join \
                 [::tycho::url dirname [filename]] $filename]
     }
+
+    # Forward routine-- we need to make sure that the filename is correct.
+    # This is due to the fact that openContext doesn't check whether the
+    # file is correct or not. Therefore, we want to make sure we pass
+    # the right filename to openContext.
+    #
+    # This routine is the same as the one in hyperJump
+    set ext [::tycho::url extension $filename]
+    set contenttype [::tycho::resource contenttype $filename]
+    if {   ([string match "text/html" $contenttype] || \
+            [isAnImageFileExtension $ext]) && \
+            [displayer] != {}} {
+        ::tycho::resource stat $filename tmpstat
+        if {[info exists tmpstat(url)]} {
+            set filename $tmpstat(url)
+        }
+    }
+
     set newbrowser [::tycho::File::openContext $filename]
+
     # If we need to jump to the point, jump.
     if {$point!={}} {
         # Need to catch in case the new browser is not HTML browser (ie.
