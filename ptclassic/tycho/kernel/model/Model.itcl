@@ -2,7 +2,7 @@
 # Version: $Id$
 # Author: John Reekie, Edward A. Lee
 #
-# Copyright (c) 1996-1997 The Regents of the University of 'California'.
+# Copyright (c) 1996-1997 The Regents of the University of California.
 #  rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -206,9 +206,6 @@ class ::tycho::Model {
     #################################################################
     ####                     public methods                      ####
 
-    # Add a new type of association to the model
-    method association {type vcount acount args}
-    
     # Clear the undo history
     method clearHistory {args}
     
@@ -218,14 +215,23 @@ class ::tycho::Model {
     # Compare two marks
     method compareMarks {mark1 operator mark2}
 
-    # Describe the data in the model, in the same format as write{}
+    # Add or change default attributes of an entity type
+    method configureEntity {type args}
+    
+    # Add or change default attributes of a link type
+    method configureLink {type args}
+    
+    # Describe the data in the model in TIM
     method describe {{prefix {}}}
 
     # Add a new type of entity to the model
-    method entity {type count args}
+    method defineEntity {type count args}
+    
+    # Add a new type of link to the model
+    method defineLink {type vcount acount args}
     
     # Externalize the model into a state file
-    method externalize {fd {nohistory {}}}
+    method externalize {fd {mode all}}
     
     # Add to the model from a state file or a string
     method internalize {type data}
@@ -263,7 +269,7 @@ class ::tycho::Model {
     # Update the model with a change in data
     method update {subscriber command index args}
 
-    # Write the model to a file
+    # Write the model to a file in TIM format
     method write {fd {prefix {}}}
     
     #################################################################
@@ -273,7 +279,7 @@ class ::tycho::Model {
     protected method notify {subscriber command pattern args}
 
     # Return the "name" to print in error messages
-    method _dataname {}
+    protected method _dataname {}
     
     #################################################################
     ####                  protected variables                    ####
@@ -315,7 +321,7 @@ class ::tycho::Model {
 # options are checked for validity.
 #
 configbody ::tycho::Model::strictoptions {
-	set _strictoptions $strictoptions
+    set _strictoptions $strictoptions
 }
 
 #########################################################################
@@ -323,10 +329,14 @@ configbody ::tycho::Model::strictoptions {
 # This option provides external access to the _separator variable
 # in the _Interchange_ superclass, which specifies the separator
 # character used to separator hierarchy levels. It is null if the
-# model does not support hierarchy.
+# model does not support hierarchy. The separator cannot be changed
+# if the model already contains data.
 #
 configbody ::tycho::Model::separator {
-	set _separator $separator
+    if { [array names _info] != "" } {
+	error "Model $modelname already contains data"
+    }
+    set _separator $separator
 }
 
 ########################################################################
@@ -353,29 +363,6 @@ body ::tycho::Model::constructor {args} {
     if { $modelname == "" } {
 	set modelname [::info namespace tail $this]
     }
-}
-
-########################################################################
-#### destructor
-#
-body ::tycho::Model::destructor {} {
-    # If the model is persistent and modified, save it
-    # FIXME: Need to really work out the logic of persistence and
-    # loading and writing.
-    #    if { $persistent && $modified } {save}
-}
-
-########################################################################
-#### association
-#
-# Add a new type of association to the model. The first argument
-# is the type name of the association; the second argument is
-# zero or one, indicating whether the association has a value;
-# the third argument is the number of entities it links.
-# Following arguments are option names and their default values.
-#
-body ::tycho::Model::association {type vcount acount args} {
-    _declareassociation $type $vcount $acount $args
 }
 
 ########################################################################
@@ -537,6 +524,65 @@ body ::tycho::Model::compareMarks {mark1 operator mark2} {
 }
 
 ########################################################################
+#### configureEntity
+#
+# Add or change default attributes of an entity type. The argument list
+# consists of attribute-value pairs. For each, if a default
+# attribute does not exist, add it; if it does exist, change the
+# default value to the given one. Default attributes cannot be
+# changed once the model contains entities of that type, so the
+# method flags an error if that is the case. The
+# "special" attribute <b>-valued</b> can be used to change the flag
+# that states whether an entity has a value. This method is not
+# undoable or publishable.
+# 
+body ::tycho::Model::configureEntity {type args} {
+    if { [array names _info [list $type * * *]] != "" } {
+	error "Cannot change default attributes of $type: data exists"
+    }
+    array set temp $_typeinfo($type,defaults)
+    array set temp $args
+    if { [::info exists temp(-valued)] } {
+	set _typeinfo($type,valued) temp(-valued)
+	unset temp(-valued)
+    }
+    set _typeinfo($type,defaults) [array get temp]
+    return ""
+}
+
+########################################################################
+#### configureLink
+#
+# Add or change default attributes of a link type. The argument list
+# consists of attribute-value pairs. For each, if a default
+# attribute does not exist, add it; if it does exist, change the
+# default value to the given one. Default attributes cannot be
+# changed once the model contains links of that type, so the
+# method flags an error if that is the case.  The
+# "special" attributes <b>-named</b> can be used to change the flag
+# that states whether an entity has a name, and the special entity
+# <b>-lcount</b> can be used to change the number of entities linked
+# by this link type. This method is not undoable or publishable.
+#
+body ::tycho::Model::configureLink {type vcount acount args} {
+    if { [array names _info([list $type * * *])] != "" } {
+	error "Cannot change default attributes of $type: data exists"
+    }
+    array set temp $_typeinfo($type,defaults)
+    array set temp $args
+    if { [::info exists temp(-named)] } {
+	set _typeinfo($type,named) temp(-named)
+	unset temp(-named)
+    }
+    if { [::info exists temp(-lcount)] } {
+	set _typeinfo($type,lcount) temp(-lcount)
+	unset temp(-lcount)
+    }
+    set _typeinfo($type,defaults) [array get temp]
+    return ""
+}
+
+########################################################################
 #### describe
 #
 # Return a string that describes the model.
@@ -547,15 +593,50 @@ body ::tycho::Model::describe {{prefix {}}} {
 }
 
 ########################################################################
-#### entity
+#### defineEntity
 #
 # Add a new type of entity to the model. The first argument
-# is the type name of the entity; the second argument is
-# zero or one, indicating whether the entity has a value.
-# Following arguments are option names and their default values.
+# is the type name of the entity.
+# Following arguments are attribute names and their default values.
+#  The "special" attribute <b>-valued</b> is a flag that states
+# whether an entity has a value (default is zero). This method is not
+# undoable or publishable. 
+# Flag an error if the given type already exists (either as an
+# entity or a link). This method is not undoable or pubishable.
 #
-body ::tycho::Model::entity {type count args} {
-    _declareentity $type $count $args
+body ::tycho::Model::defineEntity {type args} {
+    array set temp {-valued 0}
+    array set temp $args
+    set valued $temp(-valued)
+    unset temp(-valued)
+    _defineentity $type $valued [array get temp]
+    return ""
+}
+
+########################################################################
+#### defineLink
+#
+# Add a new type of link to the model. The first argument
+# is the type name of the link; the second argument is
+# zero or one, indicating whether the link has a value;
+# the third argument is the number of entities it links.
+# Following arguments are option names and their default values.
+# The "special" attributes <b>-named</b> is a flag
+# that states whether an entity has a name (default is zero),
+# and the special entity
+# <b>-lcount</b> sets the number of entities linked
+# by this link type (default is two).
+# Flag an error if the given type already exists (either as an
+# entity or a link). This method is not undoable or pubishable.
+# 
+body ::tycho::Model::defineLink {type vcount acount args} {
+    array set temp {-named 0 -lcount 2}
+    array set temp $args
+    set named  $temp(-named)
+    set lcount $temp(-lcount)
+    unset temp(-named)
+    unset temp(-lcount)
+    _definelink $type $named $lcount $args
 }
 
 ########################################################################
@@ -565,8 +646,9 @@ body ::tycho::Model::entity {type count args} {
 # The argument is a file descriptor so that this method can be used
 # to write a collection of models to a single file. In the Model class,
 # this method writes the undo/redo history. Subclasses should override
-# this method and use chain to include the undo history. If the second
-# argument is present and true, don't write the history to the file.
+# this method and use chain to include the undo history. The second
+# argument, if present, cen be one of "all," (the default), "nohistory,"
+# or "historyonly."
 #
 # The format of the state file must be such that the object can be
 # reconstructed by the internalize{} method. Usually, this will mean
@@ -574,9 +656,12 @@ body ::tycho::Model::entity {type count args} {
 # object context. In general, the file will be a collection of set{}
 # and *array set* commands.
 #
-body ::tycho::Model::externalize {fd {nohistory {}}} {
-    puts $fd "# Tycho model state file for $modelname\n\n"    
-    if { $nohistory == "" || ! $nohistory } {
+body ::tycho::Model::externalize {fd {mode all}} {
+    puts $fd "# Tycho model state file for $modelname"
+    puts $fd "# This file is automatically generated:"
+    puts $fd "# do not modify it!\n\n"
+    
+    if { $mode != "nohistory" } {
 	puts $fd "# Undo/redo history\n"
 	puts $fd "array set undoCommands [list [array get undoCommands]]\n"
 	puts $fd "array set redoCommands [list [array get redoCommands]]\n"
