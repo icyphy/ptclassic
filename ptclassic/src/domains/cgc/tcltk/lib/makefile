@@ -35,7 +35,6 @@ EXTRA_SRCS = tkMain.c
 MISC_FILES = \
 	README \
 	compat.h \
-	make.template \
 	ptolemy-cgc.tcl \
 	init.tcl
 
