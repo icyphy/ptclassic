@@ -13,6 +13,7 @@ limitation of liability, and disclaimer of warranty provisions.
     }
 
     location { CG56 Target Directory }
+    ccinclude {"CG56S56XCGCReceive.h" }
     explanation {
     }
     output {
@@ -41,10 +42,20 @@ limitation of liability, and disclaimer of warranty provisions.
     }
     }
 
+    setup {
+        CGCS56XBase::setup();
+	PortHole* input = s56xSide->portWithName("input");
+	DataType inputType = input->setResolvedType();
+	if (strcmp(inputType,FIX) == 0) {
+		output.setPort("output",this,FLOAT);
+	}
+    }
+
     go {
+	CGCS56XBase::go();
 	const char* intReceive = "$ref(output,i) = value";
 	const char* fixReceive = "$ref(output,i) = (double)value/(1<<23)";
-	if (output.resolvedType()==INT) 
+	if (strcmp(output.resolvedType(),INT)==0) 
 	    addCode(receiveData(output.numXfer(),intReceive));
 	else
 	    addCode(receiveData(output.numXfer(),fixReceive));
