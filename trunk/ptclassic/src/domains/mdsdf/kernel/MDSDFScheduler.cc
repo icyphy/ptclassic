@@ -151,34 +151,24 @@ int MDSDFScheduler::reptArc (MDSDFPortHole& nearPort, MDSDFPortHole& farPort){
   Fraction farStarRowShouldBe;
   Fraction farStarColShouldBe;
 
-  // ANYSIZE resolution is based on input ports, which will be guranteed
-  // by the order of descending calls to reptArc starting from a source star
-  // if the numRowsXfer() or numColXfer of the farPort is zero, this implies
-  // that the other port can accept ANYSIZE input in that dimension.  
-  // Therefore, we set those dimensions to match the nearPort's dimensions.
-  // Also, set any output portholes of the farStar that have ANYSIZE
-  // dimensions to match the change.
+  // ANYSIZE resolution is based on input ports, ie. if a star has
+  // ANYSIZE outputs, it MUST have an ANYSIZE input (the reverse is
+  // not necessary).  A cascade of ANYSIZE inputs/ouputs is possible, which
+  // necessitates a recursive search for the first ANYSIZE input connected
+  // to a non-ANYSIZE output.
   // A star should not have two inputs with ANYSIZE dimensions because
   // they will be set to the same dimensions, unless this was intended.
   //
   // One example is for fork stars.
   if(farPort.numRowXfer() == ANYSIZE) {
-    if(farPort.isItOutput()) return FALSE;
-    BlockPortIter nextp(farStar);
-    PortHole* p;
-    while((p = nextp++) != 0) {
-      if(((MDSDFPortHole*)p)->numRowXfer() == ANYSIZE)
-	((MDSDFPortHole*)p)->setRowXfer(nearPort.numRowXfer());
-    }
+    // farStar has ANYSIZE rows, resolve it
+    if(farStar.resolveANYSIZErows() == 0) 
+      return FALSE;               // continue only if resolution successful 
   }
   if(farPort.numColXfer() == ANYSIZE) {
-    if(farPort.isItOutput()) return FALSE;
-    BlockPortIter nextp(farStar);
-    PortHole* p;
-    while((p = nextp++) != 0) {
-      if(((MDSDFPortHole*)p)->numColXfer() == ANYSIZE)
-	((MDSDFPortHole*)p)->setColXfer(nearPort.numColXfer());
-    }
+    // farStar has ANYSIZE columns, resolve it
+    if(farStar.resolveANYSIZEcols() == 0)  
+      return FALSE;               // continue only if resolution successful
   }
 
   // compute what the far star repetitions property should be.
