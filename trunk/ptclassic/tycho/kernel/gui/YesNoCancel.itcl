@@ -45,7 +45,7 @@ class ::tycho::YesNoCancel {
 
     # The command to execute on a yes response.
     itk_option define -cancelcommand cancelcommand CancelCommand \
-	    "::tycho::DialogWindow::answer -1"
+	    "DialogWindow::answer -1"
 
     constructor {args} {}
 }

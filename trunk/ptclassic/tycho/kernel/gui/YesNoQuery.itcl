@@ -38,7 +38,7 @@
 # dismissed).
 #
 proc ::tycho::askuser {question} {
-    return [::tycho::DialogWindow::newModal YesNoQuery [autoName .yesno] \
+    return [DialogWindow::newModal YesNoQuery [autoName .yesno] \
 	    -text $question]
 }
 
