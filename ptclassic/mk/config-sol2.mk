@@ -2,9 +2,9 @@
 # Config file to build on sun4 processor (SparcStation) running Solaris2.4
 # with gcc and g++
 
-# @(#)config-sol2.mk	1.25 8/7/95
+# $Id$
 
-# Copyright (c) 1990-1995 The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -37,7 +37,7 @@
 include $(ROOT)/mk/config-default.mk
 
 # Get the g++ definitions; we override some below.
-#include $(ROOT)/mk/config-g++.mk
+include $(ROOT)/mk/config-g++.mk
 
 # Get the g++ definitions for shared libraries; we override some below.
 # Comment the next line out if you don't want shared libraries.
@@ -70,16 +70,17 @@ SYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lsocket -lnsl -ldl -lg++ $(SHARED_SYSLIBS) -
 
 # Ask ld to strip symbolic information, otherwise, expect a 32Mb pigiRpc
 # -s conflicts with purelink, so if you are using purelink comment this out.
-#LINKSTRIPFLAGS=-Wl,-s
+LINKSTRIPFLAGS=-Wl,-s
 
 # Can't use -static here, or we won't be able to find -ldl, and
 # dynamic linking will not work.
 LINKFLAGS=-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST) $(LINKSTRIPFLAGS) 
 # link flags if debugging symbols are to be left
-LINKFLAGS_D=-L$(LIBDIR) -shared $(SHARED_LIBRARY_R_LIST)
+LINKFLAGS_D=-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST)
 
 # These are the additional flags that we need when we are compiling code
-# which is to be dynamically linked into Ptolemy
+# which is to be dynamically linked into Ptolemy.  -shared is necessary
+# with gcc-2.7.0
 INC_LINK_FLAGS = -shared $(SHARED_COMPILERDIR_FLAG)
 
 
@@ -98,10 +99,10 @@ X11_LIBSPEC =	-L$(X11_LIBDIR)  -lX11
 # Variables for Pure Inc tools (purify, purelink, quantify)
 COLLECTOR =
 
-PURELINK =	purelink $(COLLECTOR) -hardlink=yes
-PURIFY =	purelink $(COLLECTOR) purify
-QUANTIFY =	purelink $(COLLECTOR) quantify
-PURECOV = 	purecov $(COLLECTOR)
+PURELINK =	#purelink $(COLLECTOR) -hardlink=yes
+PURIFY =	purify
+QUANTIFY =	quantify
+PURECOV = 	purecov
 
 #
 # Variables for miscellaneous programs
@@ -127,3 +128,7 @@ XPM_DEFINES =	-DZPIPE $(X11_INCSPEC)
 
 # Matlab architecture
 MATARCH = sol2
+
+# Don't include the PN domain for the time being, there is a bug with
+# interrupted system calls
+INCLUDE_PN_DOMAIN = no
