@@ -67,9 +67,6 @@ StringList::StringList (const StringList& s) {
 	put(s.newCopy());
 }
 
-// Destructor
-StringList::~StringList() { deleteAllStrings(); }
-
 // Add another StringList to the StringList
 StringList&
 StringList :: operator += (const StringList& l) {
