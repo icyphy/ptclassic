@@ -47,6 +47,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "IntArrayState.h"
 #include "IntState.h"
 #include "StringState.h"
+#include "Wormhole.h"
 #include "tcl.h"
 
 class FSMStateStar : public FSMStar {
@@ -79,6 +80,13 @@ public:
 
     // Return the next state according the conditions.
     virtual FSMStateStar *nextState(int& condNum, int preemption);
+
+    // Return the slave as a Wormhole
+    Wormhole* slaveAsWorm() {
+        if (slave == NULL) return NULL;
+        else return slave->asWormhole();
+        
+    }
 
 protected:
     IntState isInitState;
