@@ -18,7 +18,6 @@ description.
 
 #include "KnownBlock.h"
 #include "Error.h"
-#include <string.h>
 #include <std.h>
 #include "Scheduler.h"
 #include "Domain.h"
@@ -61,7 +60,7 @@ int KnownBlock::domainIndex (const char* myDomain, int addIfNotFound) {
 			return i;
 	}
 	Error::abortRun("Too many distinct domains");
-	exit (1);
+	return -1;
 }
 
 // Look up the domain index of a block.
