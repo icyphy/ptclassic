@@ -137,6 +137,12 @@ if [ -z "${DISPLAY-}" ]; then
     export DISPLAY
 fi
 
+if [ "${TYCHO+x}" ] && [ "$TYCHO" != "$PTOLEMY/tycho" ]; then
+    echo "Warning: \$TYCHO != \$PTOLEMY/tycho"
+    echo "          '$TYCHO' != $PTOLEMY/tycho"
+    echo "          You may want to do 'unset TYCHO' or 'unsetenv TYCHO'"
+fi
+
 # Try and do some smart error recovery if the pigiRpc binary can't be found.
 # Rules if we can't find a binary:
 # If we can't find $PIGIRPC, try looking in obj.$PTARCH/pigiRpc
