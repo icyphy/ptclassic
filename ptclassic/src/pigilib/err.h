@@ -45,6 +45,25 @@ Header for error handing routines.
 	return(retVal); \
     }
 
+/* The following provides more convenient and consistent access to Tcl
+   with error checking.  */
+#define TCL_CATCH_ERR(tcl_call) \
+    if (tcl_call != TCL_OK) { \
+	Tcl_Eval(ptkInterp,"ptkDisplayErrorInfo", 0, (char **) NULL); \
+    }
+
+#define TCL_CATCH_ERR1(tcl_call) \
+    if (tcl_call != TCL_OK) { \
+	Tcl_Eval(ptkInterp,"ptkDisplayErrorInfo", 0, (char **) NULL); \
+	return FALSE; \
+    }
+
+#define TCL_CATCH_ERR2(tcl_call,retVal) \
+    if (tcl_call != TCL_OK) { \
+	Tcl_Eval(ptkInterp,"ptkDisplayErrorInfo", 0, (char **) NULL); \
+	return retVal; \
+    }
+
 extern void ErrClear();
 extern void ErrAdd();
 extern char *ErrGet();
