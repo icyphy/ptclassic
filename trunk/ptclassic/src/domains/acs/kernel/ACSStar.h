@@ -34,13 +34,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "Star.h"
+#include "CGStar.h"
 
 // The following include is not really required for this file,
 // but any star for this domain will need it, so we include it here.
 #include "ACSPortHole.h"
 
-class ACSStar : public Star
+class ACSStar : public CGStar
 {
 public:
     // Class identification.

@@ -38,7 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 extern const char ACSdomainName[];
 
 // Class identification.
-ISA_FUNC(ACSStar,Star);
+ISA_FUNC(ACSStar,CGStar);
 
 // Domain identification.
 const char* ACSStar::domain() const
