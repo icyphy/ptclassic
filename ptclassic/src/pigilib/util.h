@@ -77,6 +77,7 @@ extern char *DirName();
 
 typedef struct DupSheetNode_s {
     char *info;
+    char *moreinfo;
     struct DupSheetNode_s *next;
 } DupSheetNode;
 typedef DupSheetNode *DupSheet;
@@ -84,16 +85,18 @@ typedef DupSheetNode *DupSheet;
 #ifdef __cplusplus
 #include "rpc.h"     /* needed to define "RPCSpot" */
 
-extern boolean DupSheetInit(DupSheet *ds);
-extern boolean DupSheetClear(DupSheet *ds);
+extern void DupSheetInit(DupSheet *ds);
+extern void DupSheetClear(DupSheet *ds);
 extern boolean DupSheetAdd(DupSheet *ds, char *item);
+extern boolean DupSheetAdd2(DupSheet *ds, char *item, char *item2);
 extern boolean DupSheetIsDup(DupSheet *ds, char *item);
+extern boolean DupSheetIsDup2(DupSheet *ds, char *item, char* item2);
 extern char* setCurDomainS(RPCSpot *spot);
 extern char* setCurDomainF(octObject *facetPtr);
 extern char* setCurDomainInst(octObject *instPtr);
 #else
-extern boolean DupSheetInit();
-extern boolean DupSheetClear();
+extern void DupSheetInit();
+extern void DupSheetClear();
 extern boolean DupSheetAdd();
 extern boolean DupSheetIsDup();
 extern char* getDomainF();
