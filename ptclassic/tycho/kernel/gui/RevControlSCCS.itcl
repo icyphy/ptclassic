@@ -255,6 +255,7 @@ body ::tycho::RevControlSCCS::unedit {} {
     cd $olddir
     $object reload
 
+    enableButton checkout
     updateHistory
 }
 
