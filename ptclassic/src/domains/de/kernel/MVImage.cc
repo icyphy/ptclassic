@@ -52,8 +52,8 @@ MVImage::MVImage(const MVImage& mi, int a):
 
 MVImage::~MVImage()
 {
-	LOG_DEL; delete horzData; horzData = (char*) NULL;
-	LOG_DEL; delete vertData; vertData = (char*) NULL;
+	LOG_DEL; delete [] horzData; horzData = (char*) NULL;
+	LOG_DEL; delete [] vertData; vertData = (char*) NULL;
 }
 
 
@@ -70,7 +70,8 @@ BaseImage* MVImage::fragment(int cellSz, int Num) const
 	MVImage* retval = (MVImage*) clone(1);
 	retval->startPos = startPos + Num*arrSz;
 	retval->size = min(startPos+size-retval->startPos, arrSz);
-	LOG_DEL; delete retval->horzData; LOG_DEL; delete retval->vertData;
+	LOG_DEL; delete [] retval->horzData;
+	LOG_DEL; delete [] retval->vertData;
 	LOG_NEW; retval->horzData = new char[retval->size];
 	LOG_NEW; retval->vertData = new char[retval->size];
 
@@ -97,7 +98,7 @@ void MVImage::assemble(const BaseImage* bi)
 				(unsigned char*) horzData);
 		copy(size, (unsigned char*) tmpV+startPos,
 				(unsigned char*) vertData);
-		LOG_DEL; delete horzData; LOG_DEL; delete vertData;
+		LOG_DEL; delete [] horzData; LOG_DEL; delete [] vertData;
 		horzData = tmpH; vertData = tmpV;
 		size = fullSize;
 	}

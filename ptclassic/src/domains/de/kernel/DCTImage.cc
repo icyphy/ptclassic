@@ -51,14 +51,14 @@ DCTImage::DCTImage(const DCTImage& di, int a):
 
 
 DCTImage::~DCTImage()
-{ LOG_DEL; delete DCTData; DCTData = (float*) NULL; }
+{ LOG_DEL; delete [] DCTData; DCTData = (float*) NULL; }
 
 
 void DCTImage::setSize(const int a)
 {
 	if (size != fullSize) return;
 	if (a == fullSize) return;
-	LOG_DEL; delete DCTData;
+	LOG_DEL; delete [] DCTData;
 	LOG_NEW; DCTData = new float[a];
 	size = fullSize = a;
 } // end DCTImage::setSize()
@@ -78,7 +78,7 @@ BaseImage* DCTImage::fragment(int cellSz, int Num) const
 	DCTImage* retval = (DCTImage*) clone(1);
 	retval->startPos = startPos + Num*arrSz;
 	retval->size = min(startPos+size-retval->startPos, arrSz);
-	LOG_DEL; delete retval->DCTData;
+	LOG_DEL; delete [] retval->DCTData;
 	LOG_NEW; retval->DCTData = new float[retval->size];
 
 	int offset = retval->startPos - startPos;
@@ -97,7 +97,7 @@ void DCTImage::assemble(const BaseImage* bi)
 		LOG_NEW; float* tmpPtr = new float[fullSize];
 		for(int t = 0; t < fullSize; t++) { tmpPtr[t] = 0.0; }
 		copy(size, tmpPtr+startPos, DCTData);
-		LOG_DEL; delete DCTData;
+		LOG_DEL; delete [] DCTData;
 		DCTData = tmpPtr;
 		size = fullSize;
 	}
