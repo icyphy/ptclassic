@@ -38,13 +38,14 @@ static char SccsId[]="$Id$";
 #endif
 #include <sys/time.h>
 #include <sys/resource.h>
-#ifdef SYSV
+#ifdef PTSOL2
 #include <fcntl.h>
-#include <sys/rusage.h>
+/* sys/rusage.h is in Solaris2.3, but not Solaris2.4 */
+/*#include <sys/rusage.h>*/
 #include <sys/procfs.h>
 #endif
 
-#if defined(__sparc) && !defined(__svr4__) && defined(__GNUC__)
+#if defined(PTSUN4) && defined(__GNUC__)
 /* SunOS4.1.3 under gcc */
 extern int getrusage(int who, struct rusage *rusage);
 #endif
@@ -101,7 +102,7 @@ struct timestruct *timer;
 #else
     struct timeval tb;
 #endif
-#ifdef SYSV
+#ifdef PTSOL2
     int             fd;
     char            proc[BUFSIZ];
     prusage_t       rst;
@@ -126,29 +127,28 @@ struct timestruct *timer;
     timer->startElapsedTime.tv_usec = tb.tv_usec;
 #endif
 
-#ifdef SYSV
+#ifdef PTSOL2
     /* For Solaris2, taken from solaris2_porting.faq */
     sprintf(proc,"/proc/%d", (int)getpid());
     if ((fd = open(proc, O_RDONLY)) == -1)
       perror("timerContinue(): open");
     if (ioctl(fd, PIOCUSAGE, &rst) == -1)
       perror("timerContinue(): ioctl");
-#else /* SYSV */
+#else /* PTSOL2 */
     (void) getrusage(0, &rst);
-#endif /*SYSV */
+#endif /* PTSOL2 */
 
-#ifdef SYSV
-#ifdef __GNUC__
+#ifdef PTSOL2
     timer->startUserTime.tv_sec = rst.pr_utime.tv_sec;
     timer->startUserTime.tv_usec = rst.pr_utime.tv_nsec/1000;
     timer->startSystemTime.tv_sec = rst.pr_stime.tv_sec;
     timer->startSystemTime.tv_usec = rst.pr_stime.tv_nsec/1000;
-#else
+/*
     timer->startUserTime.tv_sec = rst.ru_utime.tv_sec;
     timer->startUserTime.tv_usec = rst.ru_utime.tv_usec;
     timer->startSystemTime.tv_sec = rst.ru_stime.tv_sec;
     timer->startSystemTime.tv_usec = rst.ru_stime.tv_usec;
-#endif
+*/
 #else
     timer->startUserTime = rst.ru_utime;
     timer->startSystemTime = rst.ru_stime;
@@ -174,7 +174,7 @@ struct timestruct *timer;
 #else
     struct timeval tb;
 #endif
-#ifdef SYSV
+#ifdef PTSOL2
     int             fd;
     char            proc[BUFSIZ];
     prusage_t       rst;
@@ -215,14 +215,14 @@ struct timestruct *timer;
     }
 #endif /*HAS_TIMEB*/
 
-#if defined(SYSV) && defined (__GNUC__)
+#if defined(PTSOL2)
     /* For Solaris2, taken from solaris2_porting.faq */
     sprintf(proc,"/proc/%d", (int)getpid());
     if ((fd = open(proc,O_RDONLY)) == -1)
       perror("util_cpu_time(): open");
     if (ioctl(fd, PIOCUSAGE, &rst) == -1)
       perror("util_cpu_time(): ioctl");
-#ifdef __GNUC__
+
     timer->currentUserTime.tv_sec
              += (rst.pr_utime.tv_sec - timer->startUserTime.tv_sec);
 
@@ -236,46 +236,7 @@ struct timestruct *timer;
 		 += (rst.pr_utime.tv_nsec*1000 - timer->startUserTime.tv_usec);
     }
 
-#else
-    timer->currentSystemTime.tv_sec
-             += (rst.ru_stime.tv_sec - timer->startSystemTime.tv_sec);
-
-    if ((rst.ru_stime.tv_nsec*1000) < timer->currentSystemTime.tv_usec) {
-	timer->currentSystemTime.tv_sec--;
-	timer->currentSystemTime.tv_usec
-		 += 1000000 
-		    + (rst.ru_stime.tv_nsec*1000 - timer->startSystemTime.tv_usec);
-    } else {
-	timer->currentSystemTime.tv_usec
-		 += (rst.ru_stime.tv_nsec*1000 - timer->startSystemTime.tv_usec);
-    }
-    timer->currentUserTime.tv_sec
-             += (rst.ru_utime.tv_sec - timer->startUserTime.tv_sec);
-
-    if (rst.ru_utime.tv_nsec*1000 < timer->currentUserTime.tv_usec) {
-	timer->currentUserTime.tv_sec --;
-	timer->currentUserTime.tv_usec
-		 += 1000000 + 
-		    (rst.ru_utime.tv_nsec*1000 - timer->startUserTime.tv_usec);
-    } else {
-	timer->currentUserTime.tv_usec
-		 += (rst.ru_utime.tv_nsec*1000 - timer->startUserTime.tv_usec);
-    }
-
-    timer->currentSystemTime.tv_sec
-             += (rst.ru_stime.tv_sec - timer->startSystemTime.tv_sec);
-
-    if ((rst.ru_stime.tv_nsec*1000) < timer->currentSystemTime.tv_usec) {
-	timer->currentSystemTime.tv_sec--;
-	timer->currentSystemTime.tv_usec
-		 += 1000000 
-		    + (rst.ru_stime.tv_nsec*1000 - timer->startSystemTime.tv_usec);
-    } else {
-	timer->currentSystemTime.tv_usec
-		 += (rst.ru_stime.tv_nsec*1000 - timer->startSystemTime.tv_usec);
-    }
-#endif /*__GNUC__*/
-#else /*SYSV*/
+#else /*PTSOL2*/
     (void) getrusage(0, &rst);
 
     timer->currentUserTime.tv_sec
@@ -303,7 +264,7 @@ struct timestruct *timer;
 	timer->currentSystemTime.tv_usec
 		 += (rst.ru_stime.tv_usec - timer->startSystemTime.tv_usec);
     }
-#endif /*SYSV*/
+#endif /*PTSOL2*/
     return;
 }
 
