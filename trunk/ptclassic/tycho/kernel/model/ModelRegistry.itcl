@@ -29,7 +29,17 @@
 ##########################################################################
 
 
-##########################################################################
+######################################################################
+#### model
+# Perform operations on the tycho model database. This procedure is
+# simply a front-end to a single instance of the ModelRegistry
+# class.
+#
+proc ::tycho::model {method args} {
+    eval [::tycho::ModelRegistry::_tycho] $method $args
+}
+
+#########################################################################
 #### ModelRegistry
 #
 # The <i>ModelRegistry</i> model contains run-time information about
@@ -66,18 +76,26 @@
 #   <dd>
 #   A list of keys used to link clients to this model.
 #
+#   <dt><b>-modelmode</b> _mode_
+#   <dd>
+#   The mode obtained from the file header.
+#
+#   <dt><b>-modelpath</b> _path_
+#   <dd>
+#   The absolute path to the file which contains the model.
+#
 #   <dt><b>-object</b> _object_
 #   <dd>
 #   The model object. If null, then the model is no longer loaded.
-#
-#   <dt><b>-path</b> _path_
-#   <dd>
-#   The absolute path to the file which contains the model.
 #
 #   <dt><b>-searchpath</b> _pathlist_
 #   <dd>
 #   A list of paths to search to locate the model. The list of
 #   paths will be prepended to the TIM_PATH variable.
+#
+#   <dt><b>-version</b> _version_
+#   <dd>
+#   The currently loaded version. Default is "".
 #
 # </dl>
 # </dl>
@@ -100,6 +118,9 @@ class ::tycho::ModelRegistry {
     # Find the file containing a model and return its path
     method locate {path args}
 
+    # Register a class name for mode or submode
+    method register {mode class}
+
     # Reload a model from its file
     method reload {path}
 
@@ -107,7 +128,21 @@ class ::tycho::ModelRegistry {
     method unlink {path key}
 
     #################################################################
+    ####                     public procs                      ####
+
+    # Get access to the tycho model databse
+    proc _tycho {} {
+        if { [info which ::tycho::modelRegistry] == "" } {
+            uplevel #0 ::tycho::ModelRegistry ::tycho::modelRegistry
+        }
+        return ::tycho::modelRegistry
+    }
+
+    #################################################################
     ####                   private variables                     ####
+
+    # The mapping from mode to Itcl class
+    private variable _modemap
 
     # The loaded models, indexed by path
     private variable _model
@@ -126,10 +161,12 @@ body ::tycho::ModelRegistry::constructor {args} {
             :leafonly 1 \
             -class "" \
             -extension "" \
-            -linked "" \
+            -keys "" \
+            -modelmode "tcl" \
+            -modelpath "" \
             -object "" \
-            -path "" \
-            -searchpath ""
+            -searchpath "" \
+            -version ""
 
     # Evaluate options
     eval configure $args
@@ -199,8 +236,7 @@ body ::tycho::ModelRegistry::link {path key} {
 #
 body ::tycho::ModelRegistry::load {path args} {
     # Find the file if path is not absolute and canonical
-    if { [::tycho::url isrelative $path] \
-            || ![exists $path] } {
+    if { [::tycho::url pathtype $path] == "relative" || ![exists $path] } {
         set path [eval locate [list $path] $args]
     }
     if { $path == "" } {
@@ -208,8 +244,14 @@ body ::tycho::ModelRegistry::load {path args} {
     }
     # If the model is not loaded, load it
     if { [attrget $path -object] == "" } {
-        set model [uplevel #0 [attrget $path -class]]
+        # Create the model
+        set cls [attrget $path -class]
+        set nm [::tycho::autoName [string tolower [info namespace tail $cls]]]
+        set model [uplevel #0 $cls $nm]
         attrset $path -object $model
+puts "Loading $cls::$nm"
+
+        # Load its data
         set fd [open $path]
         set data [read $fd]
         close $fd
@@ -256,40 +298,69 @@ body ::tycho::ModelRegistry::locate {path args} {
     array set opts $args
     # FIXME: use TIM_PATH from: environment? preferences?
     if [::info exists opts(-searchpath)] {
-        set searchpath [concat $opts(-searchpath) [::tycho::expandPath $TYCHO]]
+        set searchpath [concat $opts(-searchpath) \
+                [::tycho::expandPath {$TYCHO}]]
     } else {
-        set searchpath [::tycho::expandPath $TYCHO]
+        set searchpath [::tycho::expandPath {$TYCHO}]
     }
-    
     # Extension?
     if [::info exists opts(-extension)] {
         set path $path.$opts(-extension)
     }
-    # Find the file, reutrn if not found or unreadable
+    # Find the file, return if not found or unreadable
     set path [::tycho::urlPathSearch $path $searchpath]
     if { $path == "" || ![::tycho::resource readable $path] } {
         return ""
     }
-    # Get the default suffix-based mode and sub-mode
-    ::tycho::Registry::registeredMode $path hdr
-	
-    # Read the actual file header to override defaults
-    ::tycho::readFileHeader $path hdr
+    set opts(-modelpath) $path
 
-    # If not a TIM file, abort
-    if { [string tolower $hdr(mode)] != "tim" } {
-        error "$file is not a TIM file"
+    # Get the default suffix-based mode
+    set filemode [::tycho::registry filemode $path]
+    set opts(-mode) $filemode
+
+    # Read the actual file header
+    ::tycho::readFileHeader $path hdr
+    foreach {o v} [array get hdr] {
+        set opts(-$o) $v
     }
-	
-    # The sub-mode determines what to do with the file
-    if ![::info exists hdr(submode)] {
-        set hdr(submode) {}
+
+    # If there is no class, see if we can get one based on the
+    # file mode
+    if ![::info exists opts(-class)] {
+        if [::info exists _modemap($opts(-mode))] {
+            set opts(-class) $_modemap($opts(-mode))
+        } elseif [::info exists _modemap($filemode)] {
+            set opts(-class) $_modemap($filemode)
+        }
     }
-    if ![::info exists _timMapping($hdr(submode))] {
-        error "Unknown TIM type: $hdr(submode)"
+    if ![::info exists opts(-class)] {
+        error "Could not figure out model class for $path"
     }
-    
-    FIXME: Unfinished
+
+    # If there is no model item, create one
+    if ![exists $path] {
+        add model $path
+    }
+    # Configure it
+    foreach {o _} [attrget $path] {
+        if [::info exists opts($o)] {
+            attrset $path $o $opts($o)
+        }
+    }
+    return $path
+}
+
+########################################################################
+#### register
+#
+# Register a class to be created to open a model file in a given
+# mode.
+#
+body ::tycho::ModelRegistry::register {mode class} {
+    if [::info exists _modemap($mode)] {
+	error "Mode \"$mode\" is already registered"
+    }
+    set _modemap($mode) $class
 }
 
 ########################################################################
