@@ -43,9 +43,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class CGCTarget;
 
 // Attributes.
-const bitWord AB_GLOBAL = 0x20;
-extern const Attribute A_GLOBAL;	// declare State at global scope
-extern const Attribute A_LOCAL;		// declare State at local scope
 const Attribute ANY = {0,0};
 
 class CGCStar : public CGStar {

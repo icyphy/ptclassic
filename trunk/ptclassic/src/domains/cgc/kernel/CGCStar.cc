@@ -41,9 +41,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ComplexState.h"
 #include <ctype.h>
 
-// Attributes.
-extern const Attribute A_GLOBAL = {AB_GLOBAL,0};
-extern const Attribute A_LOCAL = {0,AB_GLOBAL};
 
 // The following is defined in CGCDomain.cc -- this forces that module
 // to be included if any CGC stars are linked in.
