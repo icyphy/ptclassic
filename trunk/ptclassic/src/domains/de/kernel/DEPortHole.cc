@@ -174,16 +174,13 @@ void OutDEPort :: sendData ()
 	// determine the level of the event.
 	int level;
 	// If the port lies on the Wormhole boundary, inform timeStamp.
-	if (farSidePort->isItOutput()) { 
-		EventHorizon* q = (EventHorizon *) farSidePort;
+	if (farSidePort->isItOutput()) {
+		EventHorizon* q = farSidePort->asEH();
 		DEScheduler* sr = (DEScheduler*) parent()->mySched();
-		q->timeStamp = timeStamp / sr->relTimeScale;
+		q->setTimeMark(timeStamp / sr->relTimeScale);
 		level = -1;
 	} else {
-		if (farSidePort->parent()->isItWormhole()) 
-			level = ((DEtoUniversal*) farSidePort)->depth;
-		else
-			level = ((InDEPort*) farSidePort)->depth;
+		level = ((InDEPort*) farSidePort)->depth;
 	}
 
 	if (dp->delayType)
@@ -213,9 +210,6 @@ void MultiInDEPort :: triggers (GenericPort& op)
 PortHole& MultiInDEPort :: newPort () {
 	LOG_NEW; InDEPort& p = *new InDEPort;
 	// DE-specific
-	p.dataNew = FALSE;
-	p.timeStamp = 0.0;
-	p.depth = -1;
 	p.complete = complete;
 	p.triggerList = triggerList;
 	p.beforeP = beforeP;
@@ -225,9 +219,5 @@ PortHole& MultiInDEPort :: newPort () {
  
 PortHole& MultiOutDEPort :: newPort () {
 	LOG_NEW; OutDEPort& p = *new OutDEPort;
-	// DE-specific
-	p.dataNew = FALSE;
-	p.timeStamp = 0.0;
-	p.depth = -1;
 	return installPort(p);
 }

@@ -209,13 +209,8 @@ DEScheduler :: run (Galaxy& g) {
 
 			// Grab the Particle from the queue to the terminal.
 			// Record the arrival time, and flag existence of data.
-			if (!s->isItWormhole()) {
-				InDEPort* inp = (InDEPort*) terminal;
-				inp->getFromQueue(ent->p);
-			} else {
-				DEtoUniversal* ep = (DEtoUniversal*) terminal;
-				ep->fetchData(ent->p);
-			}
+			InDEPort* inp = (InDEPort*) terminal;
+			inp->getFromQueue(ent->p);
 		} else {
 		// process star is fetched
 			ds = (DEStar*) f->e;
@@ -251,12 +246,8 @@ DEScheduler :: run (Galaxy& g) {
 			// if same destination star with same time stamp..
 			if (dest == s) {
 				if (tl) {
-				     int success;
-				     if (dest->isItWormhole()) {
-success = ((DEtoUniversal*) tl)->fetchData(ee->p);
-				     } else {
-success = ((InDEPort*) tl)->getFromQueue(ee->p);
-				     }
+				     int success =
+					((InDEPort*) tl)->getFromQueue(ee->p);
 				     if (success) eventQ.extract(h);
 				} else if (!tl) {
 				     eventQ.extract(h);
@@ -301,7 +292,8 @@ int DEScheduler :: fetchEvent(InDEPort* p, float timeVal) {
 
 			// if same destination star with same time stamp..
 			if (tl == p) {
-				if (tl->getFromQueue(ent->p)) eventQ.extract(h);
+				if (tl->getFromQueue(ent->p)) 
+					eventQ.extract(h);
 				return TRUE;
 			}
 		} 
@@ -319,44 +311,6 @@ int DEScheduler :: fetchEvent(InDEPort* p, float timeVal) {
 // possibilities of an infinite loop.
 
 int DEScheduler :: checkLoop(PortHole* p, DEStar* s) {
-
-   if (s->isItWormhole()) {
-	if (p->isItInput()) {
-		DEtoUniversal* toP = (DEtoUniversal*) p;
-
-		if (!toP->depth)	return TRUE;
-		else if (s->delayType) toP->depth = 0;
-		else if (toP->depth < 0) {
-			BlockPortIter nextp(*s);
-			toP->depth = 1;
-			for (int i = s->numberPorts(); i > 0; i--) {
-				PortHole* port = nextp++;
-		   		if (port->isItOutput()) 
-					if(!checkLoop(port, s)) return FALSE;
-			}
-			toP->depth = 0;
-		}
-		// If depth >0, detect the delay-free loop.
-		else if (toP->depth > 0)  return errorDelayFree(p);
-
-	} else if (!(s->delayType)) {
-		DEfromUniversal* fromP = (DEfromUniversal*) p;
-
-		if (!fromP->depth) 	return TRUE;
-		else if (fromP->depth < 0) {
-			if (fromP->numTokens()) fromP->depth = 0;
-			else if (fromP->far()->isItInput()) {
-			   	fromP->depth = 1;
-				if(!checkLoop(fromP->far(),
-				   (DEStar*) fromP->far()->parent()))
-					return FALSE;
-			   	fromP->depth = 0;
-			}
-		}
-		// If depth >0, detect the delay-free loop.
-		else if (fromP->depth > 0) return errorDelayFree(p);
-	}
-   } else {
 
 	DEPortHole* dp = (DEPortHole*) p;
 
@@ -416,8 +370,7 @@ int DEScheduler :: checkLoop(PortHole* p, DEStar* s) {
 	   } else dp->depth = 0;
 	}
 	// If depth >0, detect the delay-free loop.
-	else if (dp->depth > 0) return errorDelayFree(p);
-   }
+	else return errorDelayFree(p);
    return TRUE;
 }
 
@@ -427,32 +380,6 @@ int DEScheduler :: checkLoop(PortHole* p, DEStar* s) {
 // a non-deterministic loop.
 
 int DEScheduler :: setDepth(PortHole* p, DEStar* s) {
-
-   if (s->isItWormhole()) {
-	DEtoUniversal* toP = (DEtoUniversal*) p;
-	if (toP->depth < 0) return toP->depth;
-	else if (s->delayType) toP->depth = -1;
-	else {
-		BlockPortIter nextp(*s);
-		int min = -1;
-		for (int i = s->numberPorts(); i > 0; i--) {
-			PortHole* port = nextp++;
-
-	   		int val;
-	   		if (port->isItOutput()) {
-			    if (!port->numTokens() 
-				&& port->far()->isItInput()) {
-				val = setDepth(port->far(),
-(DEStar*) port->far()->parent()) - 1;
-	   			if (min >= val) min = val;
-			    }
-			}
-		}
-		toP->depth = min;
-	}
-	return toP->depth;
-
-   } else {
 
 	InDEPort* inp = (InDEPort*) p;
 
@@ -529,7 +456,6 @@ int DEScheduler :: setDepth(PortHole* p, DEStar* s) {
 		}
 	}
         return inp->depth;
-   }
 }
 
 int DEScheduler :: errorDelayFree(PortHole* p) {
