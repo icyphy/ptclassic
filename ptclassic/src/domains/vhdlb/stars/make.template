@@ -33,6 +33,7 @@ LIB=libvhdlbstars.a
 PL_SRCS=\
  VHDLBDC.pl \
  VHDLBBlackHole.pl \
+ VHDLBFork.pl \
  VHDLBClock.pl \
  VHDLBRegister.pl \
  VHDLBPar2Ser.pl \
