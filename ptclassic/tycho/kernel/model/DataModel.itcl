@@ -643,7 +643,6 @@ body ::tycho::DataModel::_deletenorecord {context name type} {
 # prepend the prefix to each line produced.
 #
 body ::tycho::DataModel::describe {{name {}} {prefix {}}} {
-puts Foo
     if { $name!= "" } {
 	# Describe a single item
         _verify $name
