@@ -147,10 +147,10 @@ body ::tycho::Frame::_borderwidth {id canvas slate borderwidth} {
     set x1 [expr [lindex $coords 2] + 1]
     set y1 [expr [lindex $coords 3] + 1]
 
-    set	a0 [expr $x0 + $_borderwidth($id)]
-    set	b0 [expr $y0 + $_borderwidth($id)]
-    set	a1 [expr $x1 - $_borderwidth($id)]
-    set	b1 [expr $y1 - $_borderwidth($id)]
+    set	a0 [expr $x0 + $borderwidth]
+    set	b0 [expr $y0 + $borderwidth]
+    set	a1 [expr $x1 - $borderwidth]
+    set	b1 [expr $y1 - $borderwidth]
 
     $canvas coords $lit($id) \
 	    $x0 $y1 $x0 $y0 $x1 $y0 $a1 $b0 $a0 $b0 $a0 $b1
@@ -163,10 +163,10 @@ body ::tycho::Frame::_borderwidth {id canvas slate borderwidth} {
 	set x1 $a1
 	set y1 $b1
 
-	set a0 [expr $x0 + $_borderwidth($id)]
-	set b0 [expr $y0 + $_borderwidth($id)]
-	set a1 [expr $x1 - $_borderwidth($id)]
-	set b1 [expr $y1 - $_borderwidth($id)]
+	set a0 [expr $x0 + $borderwidth]
+	set b0 [expr $y0 + $borderwidth]
+	set a1 [expr $x1 - $borderwidth]
+	set b1 [expr $y1 - $borderwidth]
 	
 	$canvas coords $notlit($id) \
 		$x0 $y1 $x0 $y0 $x1 $y0 $a1 $b0 $a0 $b0 $a0 $b1
@@ -186,7 +186,7 @@ body ::tycho::Frame::_borderwidth {id canvas slate borderwidth} {
 #
 body ::tycho::Frame::_color {id canvas slate color} {
     set _color($id) $color
-    set colorShadesObject($id) [::tycho::Shades::new $_color($id)]
+    set colorShadesObject($id) [::tycho::Shades::new $color]
 
     # FIXME: quick and dirty
     _relief $id $canvas $slate $_relief($id)
@@ -204,12 +204,12 @@ body ::tycho::Frame::_color {id canvas slate color} {
 #
 body ::tycho::Frame::_relief {id canvas slate relief} {
     set _relief($id) $relief
-    if { $_relief($id) == "ridge" || $_relief($id) == "groove" } {
+    if { $relief == "ridge" || $relief == "groove" } {
 	
 	set light [$colorShadesObject($id) light]
 	set dark  [$colorShadesObject($id) dark]
 
-	if { $_relief($id) == "groove" } {
+	if { $relief == "groove" } {
 	    set light $dark
 	    set dark [$colorShadesObject($id) light]
 	}
@@ -255,10 +255,10 @@ body ::tycho::Frame::_relief {id canvas slate relief} {
 	set light [$colorShadesObject($id) light]
 	set dark  [$colorShadesObject($id) dark]
 
-	if { $_relief($id) == "sunken" } {
+	if { $relief == "sunken" } {
 	    set light $dark
 	    set dark [$colorShadesObject($id) light]
-	} elseif { $_relief($id) == "flat" } {
+	} elseif { $relief == "flat" } {
 	    set light [$colorShadesObject($id) matt]
 	    set dark $light
 	}
