@@ -66,7 +66,7 @@ Wiley & Sons: New York.  1991.  2nd ed.
         defstate {
                 name    { CCIR_601 }
                 type    { int }
-                default { TRUE }
+                default { "YES" }
                 desc    {
 TRUE means that the YUV color space is the shifted-and-scaled YUV space
 defined by the CCIR 601 standard, which is used in the MPEG and H.261
@@ -135,7 +135,7 @@ standards; otherwise, the usual YUV space is meant. }
 				yvalue = rptr[temp2];
 				uvalue = gptr[temp2];
 				vvalue = bptr[temp2];
-				if ( CCIR_601 ) {
+				if ( int(CCIR_601) ) {
 				  yvalue = 255.0*(yvalue -  16)/219.0;
 				  uvalue = 255.0*(uvalue - 128)/224.0;
 				  vvalue = 255.0*(vvalue - 128)/224.0;
