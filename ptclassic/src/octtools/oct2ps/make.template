@@ -71,10 +71,29 @@ oct2ps.debug.purify:	$(OBJS)
 	$(PURIFY) $(LINKER) $(LINKFLAGS_D) $(OBJS) -o $@ $(LIBS) -lm 
 
 TESTBINARY = ./oct2ps
-tests: $(TESTBINARY)
+SCMOS_TECH = /usr/eesww/share/octtools/tech
+
+tests: $(TESTBINARY) sample-tmp sample2-tmp
+	if [ -d $(SCMOS_TECH) ]; then \
+		echo "The next test fails no matter what, so ignore it" ; \
+		echo "Testing sample2-tmp"; \
+		echo "setenv OCTTOOLS $(PTOLEMY); $(TESTBINARY) -=T $(SCMOS_TECH) -f interface -o sample2-out.ps sample2-tmp:symbolic" | csh -s; \
+		cmp $(VPATH)/sample2.ps sample2-out.ps; \
+		echo "Testing sample-tmp"; \
+		echo "setenv OCTTOOLS $(PTOLEMY); $(TESTBINARY) -=T $(SCMOS_TECH) -f interface -o sample-out.ps sample-tmp:physical" | csh -s ; \
+		cmp $(VPATH)/sample.ps sample-out.ps; \
+	else \
+		echo "$(SCMOS_TECH) does not exist, skipping 2 tests"; \
+	fi
 	@echo "Trivial test that produces a postscript file of $(PTOLEMY)/init.pal"
 	echo "setenv OCTTOOLS $(PTOLEMY); $(TESTBINARY) -=T $(PTOLEMY)/lib/colors -f interface -o oct2ps.out $(PTOLEMY)/init.pal:schematic" | csh -s
 	@echo "Use 'ghostview oct2ps.out' to view the test facet"
+
+sample-tmp:
+	cp -r $(VPATH)/sample $@
+
+sample2-tmp:
+	cp -r $(VPATH)/sample2 $@
 
 DEST = $(ROOT)/octtools/bin.$(ARCH)/oct2ps
 
