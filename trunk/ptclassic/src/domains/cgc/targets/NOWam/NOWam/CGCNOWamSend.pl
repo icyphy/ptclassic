@@ -6,8 +6,10 @@ Send star between NOWam processors.
 	}
 	version { $Id$ }
 	author { Patrick O. Warner }
-	copyright { 1994 The Regents of the University of California }
-	location { CGC target library }
+	copyright {
+Copyright(c) 1995-%Q% The Regents of the University of California
+        }
+	location { CGC NOW Active Message target library }
 	explanation {
 Produce code for inter-process communication (send-side)
 	}
