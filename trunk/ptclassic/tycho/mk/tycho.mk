@@ -38,6 +38,11 @@
 # Generating Java documentation uses this makefile variable
 JAVAHOME = 	/opt/SUNWjws/JDK
 
+# Location of the Java html documentation.
+# The file java.lang.Object.html should
+# be at $JAVAHTMLDIR/java.lang.Object.html
+JAVAHTMLDIR = 	/opt/SUNWjws/JWS/lib/html/java/api
+
 ########## You should not have to change anything below this line ######
 
 
