@@ -80,7 +80,7 @@ CodeBlock ipcAcceptHandler (
 "	}\n"
 "\n"
 "	/* Bind local address */\n"
-"	bzero((char*) &addr, sizeof(addr));\n"
+"	memset((char*) &addr, 0, sizeof(addr));\n"
 "	addr.sin_family = AF_INET;\n"
 "	addr.sin_addr.s_addr = htonl(INADDR_ANY);\n"
 "	addr.sin_port = htons(hostPort);\n"
@@ -122,7 +122,7 @@ CodeBlock ipcConnectHandler (
 "\n"
 "		/* Fill in the structure addr with the address of the server\n"
 "	   	   that we want to connect with */\n"
-"		bzero((char*) &addr, sizeof(addr));\n"
+"		memset((char*) &addr, 0, sizeof(addr));\n"
 "		addr.sin_family = AF_INET;\n"
 "		addr.sin_addr.s_addr = inet_addr(hostAddr);\n"
 "		addr.sin_port = htons(hostPort);\n"
@@ -322,6 +322,7 @@ void CGCMultiTarget :: setupSocketConnection(CGCTarget* t, int i) {
 	inc->put("#include <sys/socket.h>\n", "<sys/socket.h>");
 	inc->put("#include <netinet/in.h>\n", "<netinet/in.h>");
 	inc->put("#include <arpa/inet.h>\n", "<arpa/inet.h>");
+	inc->put("#include <string.h>\n", "<string.h>");
 
 	// add socket connection procedure
 	CodeStream* prCode = t->getStream("procedure");
