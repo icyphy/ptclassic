@@ -50,7 +50,8 @@ SIMPLE_TESTS = \
 	testStack.itcl
 
 GRAPHICAL_TESTS = \
-	testWidgets.itcl
+	testRevControl.itcl \
+	testWidgets.itcl \
 
 ITCL_SRCS =	\
 	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) \
@@ -60,7 +61,7 @@ ITCL_SRCS =	\
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =	#rcsdir sccsdir
+MISC_FILES =	rcstst sccstst
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
@@ -74,6 +75,7 @@ test_simple: $(TCL_SRCS) $(ITCL_SRCS)
 
 # These tests require a graphics terminal
 test_graphics: $(TCL_SRCS) $(ITCL_SRCS)
+	test -e testRevControl.itcl
 	tycho -e testWidgets.itcl
 
 # We don't include common.mk since we don't use the compiler here
