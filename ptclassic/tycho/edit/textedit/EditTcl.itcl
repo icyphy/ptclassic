@@ -36,7 +36,8 @@
 # specialized for editing Tcl files. It colorizes the code, identifying
 # comments and procedure definitions, supports hyperlinks to procedures
 # that can be auto-loaded, automatically indents the code, and fills
-# blocks of comments.
+# blocks of comments.  It also provides a command for evaluating
+# a region of Tcl code.
 #
 class ::tycho::EditTcl {
     inherit ::tycho::EditProgram
@@ -95,7 +96,7 @@ body ::tycho::EditTcl::evaluate {} {
 
 ###################################################################
 #### help
-# Open a window with help on the current widget.
+# Open a help window.
 #
 body ::tycho::EditTcl::help {} {
     global ::TYCHO
