@@ -795,7 +795,13 @@ int PTcl::link(int argc,char ** argv) {
 // be permanent.
 
 int PTcl::multilink(int argc,char ** argv) {
-	if (argc == 1) return usage("multilink <file1> ?<file2> ...?");
+	if (argc == 1) {
+	    char msg[128];
+	    // This method is dispatched to handle both multilink
+	    // and permlink.
+	    sprintf(msg, "%s <file1> ?<file2> ...?", argv[0]);
+	    return usage(msg);
+	}
 	return Linker::multiLink(argc,argv) ? TCL_OK : TCL_ERROR;
 }
 
