@@ -29,6 +29,8 @@ static char SccsId[]="$Id$";
 #include "internal.h"
 #include "io.h"
 #include "geo.h"
+#include "change_list.h"
+#include "change_record.h"
 
 extern struct object_desc oct_default_desc;
 
@@ -38,6 +40,8 @@ static octStatus change_list_create();
 static octStatus change_list_modify();
 static struct object_desc *super = &oct_default_desc;
 
+
+void
 oct_change_list_desc_set(object_desc)
 struct object_desc *object_desc;
 {
@@ -108,6 +112,7 @@ int by_user;
 /* a no-op until we save change-lists to disk */
 
 /*ARGSUSED*/
+int
 oct_filter_records(desc)
 struct facet *desc;
 {
