@@ -40,7 +40,7 @@ public:
 	addStar(const char* starname, const char* starclass);
 
 // add a connection
-	Geodesic &
+	void
 	connect(const char* srcstar, const char* srcport, const char* dststar,
 		const char* dstport, int delay = 0);
 // add an alias

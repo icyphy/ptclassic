@@ -18,6 +18,8 @@ $Id$
 #include "InterpGalaxy.h"
 #include "StringList.h"
 #include "Output.h"
+// next is temporary, until SDF dependency is gone
+#include "SDFConnect.h"
 #include "string.h"
 
 extern Error errorHandler;
@@ -55,7 +57,7 @@ InterpGalaxy::findPortHole (const char* star,const char* port) {
 	return ph;
 }
 
-Geodesic &
+void
 InterpGalaxy::connect(const char* srcStar,const char* srcPipe,
 		      const char* dstStar,const char* dstPipe,
 		      int numberDelays=0) {
@@ -76,7 +78,7 @@ InterpGalaxy::connect(const char* srcStar,const char* srcPipe,
 	actionList += dstPipe;
 	actionList += numberDelays;
 // Now it's obvious:
-	return connect (*srcP, *dstP, numberDelays);
+	connect (*srcP, *dstP, numberDelays);
 }
 
 InterpGalaxy::addStar(const char* starname,const char* starclass) {
