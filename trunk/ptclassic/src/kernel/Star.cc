@@ -25,7 +25,7 @@ ACG gen(10,20);
 ********************************************************************/
 
 StringList
-Star :: printVerbose () {
+Star :: printVerbose () const {
 	StringList out;
 	out = "Star: ";
 	out += readFullName();

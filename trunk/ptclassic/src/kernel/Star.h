@@ -40,7 +40,7 @@ public:
 	virtual void fire();
 
 	// Method to print out description
-	StringList printVerbose ();
+	StringList printVerbose () const;
 
 	// Return myself as a Star.  Overrides Block::asStar.
 	Star& asStar() const;
