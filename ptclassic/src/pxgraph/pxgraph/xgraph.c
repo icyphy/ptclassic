@@ -1,20 +1,41 @@
-/*
- * xgraph - A Simple Plotter for X
+/*******************************************************************
+SCCS version identification
+$Id$
+
+Copyright (c) 1989-1994 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+							COPYRIGHTENDKEY
+*/
+/* xgraph - A Simple Plotter for X
  *
- * David Harrison
- * University of California,  Berkeley
- * 1986, 1987, 1988, 1989
+ * David Harrison University of California,  Berkeley
  *
  * Modified by J. Buck to correct geometry argument bugs, handle Inf/Nan
  * on input, and support a special binary format, 1992.
  *
- * @(#)xgraph.c	1.7 1/31/94
+ * Modified by Christopher Hylands to be more ANSI C like
  *
- * Please see copyright.h concerning the formal reproduction rights
- * of this software.
  */
 
-#include "copyright.h"
 #include <stdio.h>
 #include <math.h>
 #include <pwd.h>
@@ -24,7 +45,9 @@
 #include "xtb.h"
 #include "hard_devices.h"
 #include "params.h"
-
+#include "dialog.h"
+
+
 #define ZOOM
 #define TOOLBOX
 #define NEW_READER
@@ -194,6 +217,45 @@ typedef struct local_win {
     int flags;			/* Window flags                         */
 } LocalWin;
 
+/* Forward references */
+void ReadDefaults	();
+void InitSets		();
+void ParseArgs		ARGS((int argc, char *argv[], int do_it));
+int ReadData		ARGS((FILE *stream, char *filename));
+
+void DrawWindow		ARGS((LocalWin *win_info));
+void DelWindow		ARGS((Window win, LocalWin *win_info));
+void PrintWindow	ARGS((Window win, LocalWin *win_info));
+Window NewWindow	ARGS((char *progname, double lowX,
+			       double lowY, double upX, double upY,
+			       double asp));
+
+int HandleZoom		ARGS((char *progname, XButtonPressedEvent *evt,
+			      LocalWin *wi, Cursor cur));
+int ReadAsciiData	ARGS((FILE *stream, char *filename));
+int ReadBinaryData	ARGS((FILE *stream, char *filename));
+
+void DrawTitle		ARGS((LocalWin *wi));
+int TransformCompute	ARGS((LocalWin *wi));
+void DrawGridAndAxis	ARGS((LocalWin *wi));
+
+void WriteValue		ARGS((char *str, double val, int expv, int logFlag));
+void DrawData		ARGS((LocalWin *wi));
+void DrawLegend		ARGS((LocalWin *wi));
+static void set_mark_flags	ARGS((int *markFlag, int *pixelMarks,
+				      int *bigPixel, int *colorMark));
+void do_hardcopy	ARGS((char *prog, char *info, int
+			      (*init_fun)(), char *dev_spec,
+			      char *file_or_dev, double maxdim,
+			      char *ti_fam, double ti_size,
+			      char *ax_fam, double ax_size,
+			      int doc_p));
+
+void WriteValue		ARGS((char *str, double val, int expv, int logFlag));
+static char *tildeExpand	ARGS((char *out, char *in));
+
+static int XErrHandler	ARGS((Display *disp_ptr, XErrorEvent *evt));
+
 #define SCREENX(ws, userX) \
 	(((int) (((userX) - ws->UsrOrgX)/ws->XUnitsPerPixel + 0.5)) + ws->XOrgX)
 #define SCREENY(ws, userY) \
@@ -217,10 +279,7 @@ static int Num_Windows = 0;
 static char *Prog_Name;
 static int binaryInputFormat = 0;
 
-
-
-static int XErrHandler();	/* Handles error messages */
-
+int
 main(argc, argv)
 int argc;
 char *argv[];
@@ -236,7 +295,7 @@ char *argv[];
     FILE *strm;
     XColor fg_color, bg_color;
     char keys[MAXKEYS], *disp_name;
-    int nbytes, idx, maxitems, flags;
+    int nbytes, idx, maxitems = 0, flags;
     int errs = 0;
 
     /* Open up new display */
@@ -255,7 +314,7 @@ char *argv[];
     disp = XOpenDisplay(disp_name);
     if (!disp) {
 	(void) fprintf(stderr, "%s: cannot open display `%s'\n", argv[0], disp_name);
-	abort();
+	return 3;
     }
     XSetErrorHandler(XErrHandler);
 
@@ -539,8 +598,8 @@ char *info;			/* User Information */
     return XTB_HANDLED;
 }
 
+#ifdef NEVER
 static 
-
 /*ARGSUSED*/
 xtb_hret abt_func(win, bval, info)
 Window win;			/* Button window    */
@@ -568,6 +627,7 @@ Send comments or suggestions to:\n\
     return XTB_HANDLED;
 }
 
+#endif
 
 #define NORMSIZE	600
 #define MINDIM		100
@@ -667,7 +727,7 @@ double asp;			/* Aspect ratio       */
 
 
     if (new_window) {
-	xtb_frame cl_frame, hd_frame, ab_frame;
+	xtb_frame cl_frame, hd_frame;
 
 	XStoreName(disp, new_window, progname);
 	XSetIconName(disp, new_window, progname);
@@ -722,7 +782,7 @@ double asp;			/* Aspect ratio       */
 }
 
 
-DelWindow(win, win_info)
+void DelWindow(win, win_info)
 Window win;			/* Window     */
 LocalWin *win_info;		/* Local Info */
 /*
@@ -740,7 +800,7 @@ LocalWin *win_info;		/* Local Info */
     Num_Windows -= 1;
 }
 
-PrintWindow(win, win_info)
+void PrintWindow(win, win_info)
 Window win;			/* Window       */
 LocalWin *win_info;		/* Local Info   */
 /*
@@ -789,7 +849,7 @@ Cursor cur;
     Window win, new_win;
     Window root_rtn, child_rtn;
     XEvent theEvent;
-    int startX, startY, curX, curY, newX, newY, stopFlag, numwin;
+    int startX, startY, curX, curY, newX, newY, stopFlag, numwin = 0;
     int root_x, root_y;
     unsigned int mask_rtn;
     double loX, loY, hiX, hiY, asp;
@@ -873,7 +933,7 @@ Cursor cur;
 }
 
 
-int InitSets()
+void InitSets()
 /*
  * Initializes the data sets with default information.  Sets up
  * original values for parameters in parameters package.
@@ -978,11 +1038,11 @@ int InitSets()
 static char *def_str;
 
 #define DEF(name, type) \
-if (def_str = XGetDefault(disp, Prog_Name, name)) { \
+if ( (def_str = XGetDefault(disp, Prog_Name, name)) ) { \
     param_set(name, type, def_str); \
 }
 
-int ReadDefaults()
+void ReadDefaults()
 /*
  * Reads X default values which override the hard-coded defaults
  * set up by InitSets.
@@ -1087,7 +1147,7 @@ if (strcmp(argv[idx], opt) == 0) { \
 
 #define MAXLO	30
 
-int ParseArgs(argc, argv, do_it)
+void ParseArgs(argc, argv, do_it)
 int argc;
 char *argv[];
 int do_it;
@@ -1140,7 +1200,7 @@ int do_it;
 		    /* Limit the X coordinates */
 		    if (idx+1 >= argc) argerror("missing coordinate(s)",
 						argv[idx]);
-		    if (hi = strchr(argv[idx+1], ',')) {
+		    if ( (hi = strchr(argv[idx+1], ',')) ) {
 			char low[MAXLO];
 		    
 			(void) strncpy(low, argv[idx+1], hi-argv[idx+1]);
@@ -1161,7 +1221,7 @@ int do_it;
 		    /* Limit the Y coordinates */
 		    if (idx+1 >= argc) argerror("missing coordinate(s)",
 						  argv[idx]);
-		    if (hi = strchr(argv[idx+1], ',')) {
+		    if ( (hi = strchr(argv[idx+1], ',')) ) {
 			char low[MAXLO];
 
 			(void) strncpy(low, argv[idx+1], hi-argv[idx+1]);
@@ -1584,7 +1644,7 @@ char *filename;
 
 
 
-int DrawWindow(win_info)
+void DrawWindow(win_info)
 LocalWin *win_info;		/* Window information */
 /*
  * Draws the data in the window.  Does not clear the window.
@@ -1614,7 +1674,7 @@ LocalWin *win_info;		/* Window information */
 
 
 
-DrawTitle(wi)
+void DrawTitle(wi)
 LocalWin *wi;		/* Window information    */
 /*
  * This routine draws the title of the graph centered in
@@ -1719,7 +1779,7 @@ LocalWin *wi;			/* Window information          */
     return 1;
 }
 
-int DrawGridAndAxis(wi)
+void DrawGridAndAxis(wi)
 LocalWin *wi;			/* Window information         */
 /*
  * This routine draws grid line labels in engineering notation,
@@ -2021,7 +2081,7 @@ double val;			/* Value */
     return val;
 }
 
-int WriteValue(str, val, expv, logFlag)
+void WriteValue(str, val, expv, logFlag)
 char *str;			/* String to write into */
 double val;			/* Value to print       */
 int expv;			/* Exponent             */
@@ -2068,14 +2128,14 @@ else if ((xval) > wi->UsrOppX) rtn = RIGHT_CODE; \
 if ((yval) < wi->UsrOrgY) rtn |= BOTTOM_CODE; \
 else if ((yval) > wi->UsrOppY) rtn |= TOP_CODE
 
-int DrawData(wi)
+void DrawData(wi)
 LocalWin *wi;
 /*
  * This routine draws the data sets themselves using the macros
  * for translating coordinates.
  */
 {
-    double sx1, sy1, sx2, sy2, tx, ty;
+    double sx1, sy1, sx2, sy2, tx = 0.0, ty = 0.0;
     int idx, subindex;
     int code1, code2, cd, mark_inside;
     int X_idx;
@@ -2233,7 +2293,7 @@ LocalWin *wi;
 
 
 
-int DrawLegend(wi)
+void DrawLegend(wi)
 LocalWin *wi;
 /*
  * This draws a legend of the data sets displayed.  Only those that
