@@ -25,8 +25,8 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
-    Programmer:		T.M. Parks
-    Date of creation:	5 January 1992
+    Author:	T.M. Parks
+    Created:	5 January 1992
 
 */
 
@@ -40,13 +40,10 @@ class XXXStar : public Star
 {
 public:
     // Class identification.
-    virtual int isA(const char* className) const;
+    /*virtual*/ int isA(const char*) const;
 
     // Domain identification.
-    virtual const char* domain() const;
-
-    // Domain-specific initialization.
-    virtual void prepareForScheduling();
+    /*virtual*/ const char* domain() const;
 };
 
 #endif
