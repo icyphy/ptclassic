@@ -254,7 +254,7 @@ char **argv;
             {
 	        octStatus   status = octOpenFacet(&facet);
 	        if ( status != OCT_OLD_FACET && status != OCT_INCONSISTENT ) {
-	            errRaise( "masters", 1, "Cannot open %s\n%s\n",
+	            errRaise( "masters", 1, "Cannot open %s\n%s for writing\n",
 		             ohFormatName( &facet ), octErrorString);
 	        }
             }
