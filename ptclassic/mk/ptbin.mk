@@ -58,6 +58,14 @@
 
 VERSION =	0.6devel.$(BASENAME)
 
+ifdef ALLBINARIES
+ifndef PTRIM
+ifndef PTINY
+	FULL=1
+endif
+endif
+endif
+
 ifdef FULL
 	PIGI=$(BASENAME)
 	BDF=1
@@ -128,66 +136,48 @@ REALCLEAN_STUFF= $(PIGI_BINARIES) \
 ####################################################################
 # PIGI versions
 
-ifdef ALLBINARIES
-INSTALL = makefile $(BINDIR)/$(BASENAME).ptrim \
-	$(BINDIR)/$(BASENAME).ptiny $(BINDIR)/$(BASENAME)
-install: $(INSTALL)
+INSTALL += makefile $(BINDIR)/$(PIGI)
 
-$(BASENAME).ptrim:
+ifdef ALLBINARIES
+INSTALL += $(BINDIR)/$(BASENAME).ptrim $(BINDIR)/$(BASENAME).ptiny
+
+$(BASENAME).ptrim: $(PT_DEPEND)
 	make PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim
 
-$(BASENAME).ptiny:
+$(BASENAME).ptiny: $(PT_DEPEND)
 	make PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny
 
-$(BASENAME):
-	make FULL=1 BASENAME=$(BASENAME) $(BASENAME)
-
-$(BASENAME).ptrim.debug:
+$(BASENAME).ptrim.debug: $(PT_DEPEND)
 	make PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug
 
-$(BASENAME).ptiny.debug:
+$(BASENAME).ptiny.debug: $(PT_DEPEND)
 	make PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug
 
-$(BASENAME).debug:
-	make FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug
-
-$(BASENAME).ptrim.debug.purify:
+$(BASENAME).ptrim.debug.purify: $(PT_DEPEND)
 	make PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.purify
 
-$(BASENAME).ptiny.debug.purify:
+$(BASENAME).ptiny.debug.purify: $(PT_DEPEND)
 	make PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purify
 
-$(BASENAME).debug.purify:
-	make FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.purify
-
-$(BASENAME).ptrim.debug.quantify:
+$(BASENAME).ptrim.debug.quantify: $(PT_DEPEND)
 	make PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.quantify
 
-$(BASENAME).ptiny.debug.quantify:
+$(BASENAME).ptiny.debug.quantify: $(PT_DEPEND)
 	make PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.quantify
 
-$(BASENAME).debug.quantify:
-	make FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.quantify
-
-$(BASENAME).ptrim.debug.purecov:
+$(BASENAME).ptrim.debug.purecov: $(PT_DEPEND)
 	make PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.purecov
 
-$(BASENAME).ptiny.debug.purecov:
+$(BASENAME).ptiny.debug.purecov: $(PT_DEPEND)
 	make PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purecov
 
-$(BASENAME).debug.purecov:
-	make FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.purecov
+$(BINDIR)/$(BASENAME).ptrim: $(BASENAME).ptrim 
+	make PTRIM=1 BASENAME=$(BASENAME) $(BINDIR)/$(BASENAME).ptrim
 
-$(BINDIR)/$(BASENAME).ptrim: $(BASENAME).ptrim
-	make PTRIM=1 BASENAME=$(BASENAME) install
+$(BINDIR)/$(BASENAME).ptiny: $(BASENAME).ptiny 
+	make PTINY=1 BASENAME=$(BASENAME) $(BINDIR)/$(BASENAME).ptiny
 
-$(BINDIR)/$(BASENAME).ptiny: $(BASENAME).ptiny
-	make PTINY=1 BASENAME=$(BASENAME) install
-
-$(BINDIR)/$(BASENAME): $(BASENAME)
-	make FULL=1 BASENAME=$(BASENAME) install
-
-else #ALLBINARIES
+endif #ALLBINARIES
 
 $(PIGI): $(PT_DEPEND) $(ADD_OBJS)
 	$(PURELINK) $(LINKER) $(LINKFLAGS) $(PIGI_OBJS) $(LIBS) -o $@
@@ -218,7 +208,4 @@ $(BINDIR)/$(PIGI): $(PIGI)
 		rm -f $(BINDIR)/$(PIGI)
 		ln $< $(BINDIR)/$(PIGI)
 
-INSTALL += makefile $(BINDIR)/$(PIGI)
 install: $(INSTALL)
-
-endif #ALLBINARIES
