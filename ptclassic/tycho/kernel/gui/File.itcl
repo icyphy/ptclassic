@@ -191,7 +191,7 @@ class ::tycho::File {
 
     #### displayData
     # Display the data as if it were stored in the file by the given name.
-    proc displayData {data filename}
+    proc displayData {data filename} {}
 
     #### emergencySave
     # Call the saveCrash method for all File objects.
