@@ -48,7 +48,8 @@
 # ::tycho::MultiPanel .y.m
 # pack .y.m
 # .y.m appendlabel x -text Label!
-# .y.m append y -text Panel!
+# .y.m appendlabel z -text Child!
+# .y.m append y {z} -text Panel!
 # pack forget .y.childsite
 # .y centerOnScreen
 # </pre></tcl>
