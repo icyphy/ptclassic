@@ -441,5 +441,4 @@ extern rpcInternalStatus        RPCSendRealArray();
 
 extern rpcStatus                RPCSendVemArgs();
 
-
 #endif /* RPCINTERNAL_H */
