@@ -44,10 +44,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGCDDFTarget.h"
 #include "CGCTarget.h"
 #include "CGCGeodesic.h"
+#include "CGCMultiTarget.h"
 
 // -----------------------------------------------------------------------------	
 CGCDDFTarget::CGCDDFTarget(const char* name,const char* starclass,
-		   const char* desc) : CGDDFTarget(name,starclass,desc) {}
+		   const char* desc) : CGDDFTarget(name,starclass,desc) { }
 
 // -----------------------------------------------------------------------------
 Block* CGCDDFTarget :: makeNew() const {
@@ -132,11 +133,10 @@ void CGCDDFTarget :: middleCode_For(CGStar* rv, CGStar* ds, int k,
 			t->getStream("code")->put(out);
 
 			t->incrementalAdd(rv);
-			if (mo == 1) {
-				t->incrementalAdd(ds);
-			} else {
-				t->writeFiring(*ds, 1);
-			}
+			int zz = 0;
+			if (mo == 1) zz = 1;
+			t->incrementalAdd(ds, zz);
+
 			out = "\t\t continue;\n\t}\n";
 			t->getStream("code")->put(out);
 		}
@@ -145,6 +145,145 @@ void CGCDDFTarget :: middleCode_For(CGStar* rv, CGStar* ds, int k,
 
 void CGCDDFTarget :: endCode_For(CGTarget* t) {
 	t->getStream("code")->put("\t}\n\t}\n");
+}
+
+extern const char* whichType(DataType);
+
+void CGCDDFTarget :: startCode_Recur(Geodesic* arg, PortHole* p,
+	const char* fName, CGTarget* ct) {
+
+	CGCTarget* t = (CGCTarget*) ct;
+
+	// First step.
+	// Switch some code streams of the target and save that code streams.
+	saveGalStruct = t->removeStream("galStruct");
+	CodeStream* temp = new CodeStream;
+	temp->initialize();
+	t->putStream("galStruct", temp);
+
+	saveMainInit = t->removeStream("mainInit");
+	temp = new CodeStream;
+	temp->initialize();
+	t->putStream("mainInit", temp);
+
+	saveMainDecls = t->removeStream("mainDecls");
+	temp = new CodeStream;
+	temp->initialize();
+	t->putStream("mainDecls", temp);
+
+	saveMainClose = t->removeStream("mainClose");
+	temp = new CodeStream;
+	temp->initialize();
+	t->putStream("mainClose", temp);
+
+	saveCode = t->removeStream("code");
+	temp = new CodeStream;
+	temp->initialize();
+	t->putStream("code", temp);
+
+	// function name.
+	funcName.initialize();
+	if (p) {
+		funcName << whichType(p->resolvedType());
+	} else {
+		funcName << "void";
+	}
+	funcName << " " << fName << "(";
+	if (p) {
+		funcName << ((CGCGeodesic*) arg)->getBufName();
+	} 
+	funcName << ")\n";
+	if (p) {
+		funcName << whichType(arg->sourcePort()->resolvedType());
+		funcName << " " << ((CGCGeodesic*) arg)->getBufName(); 
+		funcName << ";\n";
+	}
+	funcName << "{";
+}
+
+void CGCDDFTarget :: middleCode_Recur(Geodesic* selfGeo, Geodesic* gd, 
+					const char* fName, CGTarget* ct) {
+	CGCTarget* t = (CGCTarget*) ct;
+
+	StringList out = "\t";
+	if (selfGeo) {
+		out << ((CGCGeodesic*) selfGeo)->getBufName() << " = ";
+	} 
+	out << fName << "(";
+	if (selfGeo) {
+		out << ((CGCGeodesic*) gd)->getBufName();
+	}
+	out << ");\n";
+	t->getStream("code")->put(out);
+}
+
+void CGCDDFTarget :: endCode_Recur(Geodesic* gd, const char* fName, 
+						CGTarget* ct) {
+	CGCTarget* t = (CGCTarget*) ct;
+
+	StringList out;
+		
+	// Form the function and delete the temporary code streams.
+	CodeStream* temp;
+	
+	// function name first
+	out << funcName;
+
+	// declaration.
+	temp = t->removeStream("galStruct");
+	out << *temp;
+	LOG_DEL; delete temp;
+	temp->initialize();
+
+	temp = t->removeStream("mainDecls");
+	out << *temp;
+	LOG_DEL; delete temp;
+	temp->initialize();
+
+	// initialization.
+	temp = t->removeStream("mainInit");
+	out << *temp;
+	LOG_DEL; delete temp;
+	temp->initialize();
+
+	// body
+	temp = t->removeStream("code");
+	out << *temp;
+	LOG_DEL; delete temp;
+	temp->initialize();
+
+	// closure
+	temp = t->removeStream("mainClose");
+	// do not add wrap code inside the recursion function.
+	// out << *temp;
+	LOG_DEL; delete temp;
+	temp->initialize();
+
+	if (gd) {
+		out << "\t return ";
+		out << ((CGCGeodesic*) gd)->getBufName() << ";\n";
+	}
+	out << "}\n";
+
+	t->getStream("procedure")->put(out, fName);
+
+	// restore the code streams
+	t->putStream("galStruct", saveGalStruct);
+	t->putStream("mainInit", saveMainInit);
+	t->putStream("mainDecls", saveMainDecls);
+	t->putStream("mainClose", saveMainClose);
+	t->putStream("code", saveCode);
+}
+
+void CGCDDFTarget :: prepCode(MultiTarget* refT, Profile* pf,
+			int numP, int numChunk) {
+	CGCMultiTarget* t = (CGCMultiTarget*) refT;
+	t->prepCode(pf, numP, numChunk);
+}
+
+void CGCDDFTarget :: signalCopy(int flag) {
+	CGCMultiTarget* t = (CGCMultiTarget*) inheritFrom();
+	if (t) t->signalCopy(flag);
 }
 
 // -----------------------------------------------------------------------------
