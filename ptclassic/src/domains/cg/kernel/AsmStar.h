@@ -28,6 +28,7 @@ const bitWord AB_SHARED = 0x400; // allocate in two memories
 // note that attributes may combine several attribute bits.
 extern const Attribute A_ROM; // a ROM state
 extern const Attribute A_RAM; // a RAM state
+extern const Attribute A_MEMORY; // either ROM or RAM
 extern const Attribute A_CIRC; // circular buffer
 extern const Attribute A_NOINIT; // no initialization
 extern const Attribute A_REVERSE; // write in reverse order
