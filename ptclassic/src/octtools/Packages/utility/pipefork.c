@@ -61,7 +61,7 @@ int *pid;
     int forkpid, waitPid;
     int topipe[2], frompipe[2];
     char buffer[1024];
-#if defined(hpux) || defined(SYSV) || defined(__sparc)
+#ifdef WAIT_TAKES_INT_STAR
     int status;
 #else
     union wait status;
@@ -94,7 +94,7 @@ int *pid;
 	*pid = forkpid;
     }
 
-#ifdef SYSV
+#ifdef USE_WAITPID
     if ( (waitPid = waitpid((pid_t) -1, &status, WNOHANG)) == -1)
       perror("waitPid");
 #else
