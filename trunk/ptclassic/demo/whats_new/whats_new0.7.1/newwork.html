@@ -79,6 +79,19 @@ included, see
 <a href="../../../src/pxgraph/README.txt"><CODE>$PTOLEMY/src/pxgraph/README.txt</CODE></a> 
 
 
+<dt> C50 domain changes: Professor Brian Evans and his students
+ <dd>
+ <p>  The C50 stars no longer generate assembly code with assembly
+  directives so that different targets that support different
+  assembly directives can be used.  The new stars work for
+  both the C50 DSK target and the new SimC50Target.
+
+ <p>  The new SimC50Target invokes the standard (commercial) C50
+  simulator written by Texas Instruments.  TI will generally
+  donate this simulator to universities.  This new target
+  sets the stage for a C50 Evaluation Module Board target.
+
+
 <dt> Synchronous Reactive C Code Generation Domain -
 Frederic Boulanger, SupÅÈlec 
 <dd> See the
