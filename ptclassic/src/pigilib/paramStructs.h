@@ -32,18 +32,25 @@ Version identification:
 $Id$
 */
 
-#ifndef __cplusplus
-#ifndef const
-#define const /* nothing */
-#endif
-#endif
-
 /* Data Structures */
+#ifdef __cplusplus
+
 struct ParamStruct {
     const char *name;
     const char *type;
     const char *value;
 };
+
+#else
+
+struct ParamStruct {
+    char *name;
+    char *type;
+    char *value;
+};
+
+#endif
+
 typedef struct ParamStruct ParamType;
 
 struct ParamListStruct {
@@ -55,7 +62,7 @@ typedef struct ParamListStruct ParamListType;
 /* Function prototypes */
 
 extern void FreeFlatPList ARGS((ParamListType *pListPtr));
-extern boolean PStrToPList ARGS((char *pStr, ParamListType *pListPtr));
+extern boolean PStrToPList ARGS((const char *pStr, ParamListType *pListPtr));
 extern char* PListToPStr ARGS((ParamListType *pListPtr));
 
 #endif  /* _PARAMSTRUCTS_H */
