@@ -49,6 +49,8 @@ SRCS = $(LIBCSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o)
 
+MISC_FILES =	bus1 busprop cell1 cell2 conn coord.doc disp_prop.doc distfile gc.query.doc graph graph.ps info.out info10.out info2.out info3.out info4.out info5.out vem.1 vem.man.cut
+
 # common makefile file for vem binary
 VEMBINCONFIG=../../vem-bin.mk
 include $(VEMBINCONFIG)

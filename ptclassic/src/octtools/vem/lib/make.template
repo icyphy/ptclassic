@@ -65,7 +65,8 @@ BMS	= $(OCTTOOLS)/lib/vem/checkoff.bm \
 # Applications defaults
 ADS	= Vem
 
-#-------------------------------------------------------------------------
+MISC_FILES =	Vem checkoff.bm checkoffhi.bm checkon.bm checkonhi.bm folder.bm hisetDot hisetMark hiunsetDot hiunsetMark newcell.bm other.bm physical.bm schematic.bm setDot setMark symbolic.bm unsetDot unsetMark vem.bindings
+
 all:
 install:  makefile $(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem.bindings.$(VERSION) $(BMS) $(OCTTOOLS)/lib/$(ADS)
 

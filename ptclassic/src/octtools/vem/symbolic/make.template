@@ -61,6 +61,8 @@ OBJS = $(LIBCSRCS:.c=.o)
 
 LIB =		libsymbolic.$(LIBSUFFIX)
 
+MISC_FILES =	TODO
+
 # common makefile file for vem binary
 VEMBINCONFIG=../../vem-bin.mk
 include $(VEMBINCONFIG)

@@ -68,6 +68,8 @@ LIB_INSTALL =	$(LIB)
 # libdialogs.a
 KRUFT =		$(LIB) 
 
+MISC_FILES =	XtBug vemDMtest.c vemDMtest2.c
+
 all::	$(LIB)
 
 # common makefile file for vem binary
