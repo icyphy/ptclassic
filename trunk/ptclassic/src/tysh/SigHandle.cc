@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /*****************************************************************************
 Version identification:
-@(#)SigHandle.cc	
+$Id$
 
 Author: Joel R. King
 
@@ -44,13 +44,8 @@ Defines the signal handlers for Tycho.
 #include <unistd.h>		
 #include "compat.h"
 #include "tcl.h"
-#include "ptsignals.h"
-
-/****************************************************************************/
-
-#ifdef PTHPPA
-typedef void (*SIG_PF)(int);
-#endif
+#include "StringList.h"
+#include "SigHandle.h"
 
 /****************************************************************************/
 
@@ -62,19 +57,23 @@ extern "C" char **environ;/* An array of pointers to strings containing the */
 
 /****************************************************************************/
 
-int setHandlers(SIG_PF sigHandler);
-void signalHandlerRelease(int);
-void signalHandlerDebug(int);
-void abortHandling();
-static void DoTychoSave(void);
+/**** This function calls the method emergencySave, which attempts to do ****/
+/**** an emergency save of all active files with names. It is a method   ****/
+/**** of the class TyConsole and we invoke it for the object             ****/
+/**** .mainConsole because we know this object is alive as long as the   ****/
+/**** program is.                                                        ****/
+
+static void DoTychoSave(void)
+{
+    Tcl_VarEval(ptkInterp, ".mainConsole emergencySave", NULL);
+}    
 
 /****************************************************************************/
 
 /***** This function sets the signal handler function for each of the   *****/
 /***** signals that we want to intercept.                               *****/
 
-int 
-setHandlers(SIG_PF sigHandler)
+int setHandlers(SIG_PF sigHandler)
 {
     if (ptSignal(SIGBUS, sigHandler) != 0) {
         return 1;
@@ -121,36 +120,34 @@ setHandlers(SIG_PF sigHandler)
 /***** of this function is to issue an error message letting the user   *****/
 /***** know that a fatal error occured, then exit.                      *****/
 
-void 
-signalHandlerRelease(void)
+void signalHandlerRelease(void)
 {
-
-    /*** FIX ME - Should not guess at size of path. ***/
-    char *ptolemy, *arch, path[200], file[200];
+    // We check this in case the call to DoTychoSave bombs 
+    // out and generates another signal. 
     static int times = 0;
-
-    if (times == 0) // We check this in case the call to DoTychoSave bombs 
-    {               // out and generates another signal. 
+    if (times == 0) {               
         times++;
 	DoTychoSave();
     }
 
-    arch = getenv("ARCH");
-    ptolemy = getenv("PTOLEMY");
-    path[0] = '\0';
-    file[0] = '\0';
-    strcat(path, ptolemy);
-    strcat(path, "/bin.");
-    strcat(path, arch);
-    strcat(path, "/itcl_wish");
-    strcat(file, ptolemy);
-    strcat(file, "/tycho/kernel/TyCoreRelease.itcl");
-    
+    // Define path of itcl_wish 
+    const char *ptolemy = getenv("PTOLEMY");
+    const char *arch = getenv("PTARCH");
+    if ( arch == 0 ) arch = getenv("ARCH");
+    StringList path = ptolemy;
+    path << "/bin." << arch << "/itcl_wish";
+    StringList filename = ptolemy;
+    filename << "/tycho/kernel/TyCoreRelease.itcl";
+
+    // Convert filename to const char* because execle takes a variable number
+    // of arguments and cannot cast a StringList
+    const char *file = filename; 
+
     switch(fork()) 
     {
         case -1: // fork() return value for error. 
 	    abortHandling();
-      
+
 	case 0: // fork() return value for child. 
 	    sleep(1); // Allow core file to be generated.   
 	    execle(path, "itcl_wish", file, "-name", "Tycho", (char *)0, \
@@ -171,30 +168,28 @@ signalHandlerRelease(void)
 /***** occured, then call the debugger, if requested, to view the core  *****/
 /***** file.                                                            *****/
 
-void
-signalHandlerDebug(int signo)
+void signalHandlerDebug(int signo)
 {
-
-    /*** FIX ME - Should not guess at size of path. ***/
-    char *ptolemy, *arch, path[200], file[200];
+    // We check this in case the call to DoTychoSave bombs 
+    // out and generates another signal. 
     static int times = 0;
-
-    if (times == 0) // We check this in case the call to DoTychoSave bombs 
-    {               // out and generates another signal. 
+    if (times == 0) {
         times++;
 	DoTychoSave();
     }
 
-    ptolemy = getenv("PTOLEMY");
-    arch = getenv("ARCH");
-    path[0] = '\0';
-    file[0] = '\0';
-    strcat(path, ptolemy);
-    strcat(path, "/bin.");
-    strcat(path, arch);
-    strcat(path, "/itcl_wish");
-    strcat(file, ptolemy);
-    strcat(file, "/tycho/kernel/TyCoreDebug.itcl");
+    // Define path of itcl_wish 
+    const char *ptolemy = getenv("PTOLEMY");
+    const char *arch = getenv("PTARCH");
+    if ( arch == 0 ) arch = getenv("ARCH");
+    StringList path = ptolemy;
+    path << "/bin." << arch << "/itcl_wish";
+    StringList filename = ptolemy;
+    filename << "/tycho/kernel/TyCoreDebug.itcl";
+
+    // Convert filename to const char* because execle takes a variable number
+    // of arguments and cannot cast a StringList
+    const char *file = filename; 
 
     switch(fork()) 
     {
@@ -225,8 +220,7 @@ signalHandlerDebug(int signo)
 /**** This function is called when everything else goes wrong and the    ****/
 /**** program has no choice but to bomb out in an ungraceful manner.     ****/
 
-void
-abortHandling() 
+void abortHandling() 
 {
 
     static char msg[400]="\n\nFatal error occured. Tycho was not able to intercept the error signal and deal with it appropriately.\n";
@@ -236,17 +230,3 @@ abortHandling()
 
 }
 
-/****************************************************************************/
-
-/**** This function calls the method emergencySave, which attempts to do ****/
-/**** an emergency save of all active files with names. It is a method   ****/
-/**** of the class TyConsole and we invoke it for the object             ****/
-/**** .mainConsole because we know this object is alive as long as the   ****/
-/**** program is.                                                        ****/
-
-static void DoTychoSave(void)
-{
-    Tcl_VarEval(ptkInterp, ".mainConsole emergencySave", NULL);
-}    
-
-/****************************************************************************/
