@@ -60,13 +60,11 @@ protected:
 
 	// Add declarations, to be put at the beginning of the main section
 	int addDeclaration(const char* decl, const char* name = NULL) {
-		if (name == NULL) name = decl;
 		return addCode(decl, "mainDecls", name);
 	}
 
 	// Add global declarations, to be put ahead of the main section
 	int addGlobal(const char* decl, const char* name = NULL) {
-		if (name == NULL) name = decl;
 		return addCode(decl, "globalDecls", name);
 	}
 
