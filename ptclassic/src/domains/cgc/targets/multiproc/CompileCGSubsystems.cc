@@ -135,7 +135,8 @@ void CompileCGSubsystems::flattenWorm() {
 	}
 	else {
 	  if (!star->isA("CGCStar") && !farStar->isA("CGCStar") &&
-	      star->getProcId() != farStar->getProcId()) {
+	      star->getProcId() != farStar->getProcId() &&
+	      (star->getProcId() >= 0) && (farStar->getProcId() >=0)) {
 	    int numDelays = port->numInitDelays();
 	    const char* delayValues = port->initDelayValues();
 	    port->disconnect();
