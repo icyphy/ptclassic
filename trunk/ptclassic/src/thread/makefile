@@ -127,18 +127,19 @@ endif
 
 # Build a shadow tree to hold object files.
 GT_OBJ_SUBDIRS =	include lib src
+GT_OBJ_SUBSUBDIRS =	include/pthread
 $(GT_OBJ): $(GT_SRC)
 	-mkdir $@
-	# lndir is not available everywhere, so we can't use it.
-	# lndir ../$< $@
+	-(cd $@; mkdir $(GT_OBJ_SUBDIRS) $(GT_OBJ_SUBSUBDIRS))
 	-for mydir in $(GT_OBJ_SUBDIRS); \
 	do \
-		if [ ! -d $(GT_OBJ)/$$mydir ]; then \
-			echo "Making $(GT_OBJ)/$$mydir"; \
-			mkdir $(GT_OBJ)/$$mydir; \
-			(cd $(GT_OBJ)/$$mydir; \
-				ln -s ../../$(GT_SRC)/$$mydir/* .); \
-		fi; \
+		(cd $(GT_OBJ)/$$mydir; \
+			ln -s ../../$(GT_SRC)/$$mydir/* .); \
+	done
+	-for mydir in $(GT_OBJ_SUBSUBDIRS); \
+	do \
+		(cd $(GT_OBJ)/$$mydir; \
+			ln -s ../../../$(GT_SRC)/$$mydir/* .); \
 	done
 	# There is no default Makefile in the distribution.
 	-cd $(GT_OBJ)/src; ln -s Makefile.Solaris Makefile
