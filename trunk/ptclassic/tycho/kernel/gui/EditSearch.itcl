@@ -367,6 +367,7 @@ body ::tycho::EditSearch::find {{start {}}} {
         # selection is made in a different widget. (SS)
 
         selection clear -displayof $text
+        $text tag remove sel 1.0 end
         $text tag delete currmatch
         set firstind [lindex $result 0]
         set numchars [lindex $result 1]
