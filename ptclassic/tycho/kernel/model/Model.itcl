@@ -1088,7 +1088,7 @@ body ::tycho::Model::save {args} {
 # the subscriber wants to be kept informed about. If not supplied,
 # the subscriber will be notified of all changes in data. Note
 # that some subclasses may not support exact data names, but
-# only the "all" keyword described below. By default, when data
+# only the "all" keyword. By default, when data
 # is updated, the subscriber is notified by calling its notify{}
 # method, with the change command and arguments as its arguments.
 # If, however, a third argument is given to this method, it is
