@@ -66,7 +66,7 @@ If you are on a machine that does not have make, you can try
 <tcl><pre>
 source [file join $TYCHO kernel test alltychotests.tcl]
 </pre></tcl>
-<LI> The tests can also be run by cding into a <CODE>test</CODE>
+<LI> The tests can also be run by changing to a <CODE>test</CODE>
 directory and typing <CODE>make</CODE> from a shell.  To try this out,
 click on the tcl code below:
 <tcl><pre>
@@ -90,7 +90,7 @@ menu.  This menu choice loads the file
 
  <P>The file <A HREF="../../kernel/test/testDefs.tcl"><CODE>$TYCHO/kernel/test/testDefs.tcl</CODE></A> defines the tcl proc <CODE>test</CODE>.
 
- <P><CODE>test</CODE> takes four argument:
+ <P><CODE>test</CODE> takes four arguments:
 <OL>
 <LI> The name of the test: <CODE>foo-1.0</CODE>
   <br> The name of the test should strictly follow the format below.
@@ -243,14 +243,14 @@ Below are some hints about writing code that can be tested.
 	If a largish operation brings up lots of windows, it
 	can help if there is a method that performs the interface
 	operations which then calls a series of smaller methods.
-	It is easier to test a series of small scripts that to
+	It is easier to test a series of small scripts than to
 	test a large monolithic method.
 </MENU>
 
 <HR>
 <H2><A NAME="testing documentation">Testing Documentation</A></H2>
 
-The Tycho documentation is written in html.  There are several tools
+The Tycho documentation is written in HTML.  There are several tools
 that can be used.
 <H3>weblint</H3>
 
@@ -341,7 +341,7 @@ This script is not shipped with Tycho.
 <CODE>tclpre.html</CODE> and mouse on each block of embedded tcl code.
 Note that some blocks depend on the widgets created in earlier blocks.
 If you run into problems, you can follow the hyperlink in
-<CODE>tclpre.html</CODE> to the source html file.
+<CODE>tclpre.html</CODE> to the source HTML file.
 
 
 <H3>Checking for bogus copyright SCCS keywords</H3>
@@ -386,7 +386,7 @@ script.
 combinations of command line arguments.  <CODE>chktycho</CODE> adds a
 line to <A
 HREF="~/.Tycho/tychorc.tcl"><CODE>~/.Tycho/tychorc.tcl</CODE></A> so
-that <CODE>tycho</CODE> is exitted after a few seconds.  This allows
+that <CODE>tycho</CODE> is exited after a few seconds.  This allows
 the script to test many invocations of <CODE>tycho</CODE> without user
 intervention.  However to test the <CODE>-debug</CODE> option, the
 user must type <CODE>cont</CODE> in the gdb window.
