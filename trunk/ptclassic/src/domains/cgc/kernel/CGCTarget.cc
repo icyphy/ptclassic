@@ -105,6 +105,8 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
         	"standard I/O resource"));
 	initCodeStrings();
 
+	destDirectory.setInitValue("~/PTOLEMY_SYSTEMS/CGC");
+
 	targetHost.setAttributes(A_SETTABLE);
 	filePrefix.setAttributes(A_SETTABLE);
 	displayFlag.setAttributes(A_SETTABLE);
