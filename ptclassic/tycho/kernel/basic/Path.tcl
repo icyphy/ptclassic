@@ -154,32 +154,6 @@ proc ::tycho::expandPath { path } {
 proc ::ptkExpandEnvVar { path } {::tycho::expandPath $path}
 
 ##############################################################################
-#### invoke
-# Invoke an external program, passing it the specified arguments.
-# The format of the command is exactly that of the Tcl "exec" command.
-# The main purpose of this procedure is to generate an informative
-# error message if the "exec" fails.
-#
-proc ::tycho::invoke { args } {
-    global tcl_platform
-    if {$tcl_platform(platform) == "macintosh"} {
-	error "Sorry, the tcl \"exec\" command is not supported on the\
-		Macintosh.\nThe command:\n$args\ncannot be executed"
-    }
-    # NOTE: Unix-ism.
-    if [catch {eval exec $args} msg] {
-        # The command failed.  It would be nice to check to see
-        # whether the program exists, and generate a suitable message,
-        # but it's not clear how to do this.
-        error "The following command invocation failed:\n \
-                $args\n \
-                Is the program [lindex $args 0] installed and in your path?\n \
-                $msg"
-    }
-}
-
-
-##############################################################################
 #### isRelative
 # Return true if the the pathname is not an absolute pathname, and
 # it does not start with tilde or a dollar sign
