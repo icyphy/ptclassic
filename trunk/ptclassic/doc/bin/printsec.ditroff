@@ -1,0 +1,35 @@
+#! /bin/csh
+# $Id$
+
+# Command uses printer defined by environmental variable $PRINTER
+# User .cshrc file must contain "set PRINTER = whatever"
+
+# The argument(s) are the files to be printed.
+# An implicit header file, ~ptolemy/doc/headers/shared, is prepended.
+
+if ($#argv == 0) then
+	echo "Usage: printsec files"
+	exit 0
+endif
+
+# On interrupt, remove temporary files
+onintr catch
+
+# File structure information:
+set dirheader = ~ptolemy/doc/headers
+set printcommand = ditroff
+set printoptions = "-me -tbl -eqn -P$PRINTER"
+set contentscmd = ~ptolemy/doc/bin/contents
+
+soelim $dirheader/shared $* > /tmp/pt$$
+$printcommand $printoptions /tmp/pt$$ >& index
+chmod g+w index
+$contentscmd index
+/bin/rm /tmp/pt$$
+exit 0
+
+catch:
+        # prevent the "no match" error message if there are no temporary files
+        set nomatch
+        /bin/rm /tmp/pt$$
+        exit 1
