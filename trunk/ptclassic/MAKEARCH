@@ -49,7 +49,16 @@ foreach x (sdf ddf de capsim thor)
 end
 
 # Thor domain is a bit different
-cd thor/stars
+cd thor
+foreach y (libarp pepp)
+	mkdir $y
+	cd $y
+	ln -s ../../../../src/domains/thor/$y/{make.template,makefile} .
+	cd ..
+end
+
+# thor/stars
+cd stars
 rm make.template
 foreach x (analyzerX11 drvmon generic xxttl)
 	mkdir $x
