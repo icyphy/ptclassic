@@ -140,8 +140,6 @@ protected:
 
 	void setup();
 
-        /*virtual*/ int schedulerSetup();
-    
 	// parameters to set the child targets
 	StringArrayState childType;
 	StringArrayState resources;
