@@ -46,7 +46,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 
 	go {
 		//Discard all but the last sample
-		CG56NewGoertzelBase::go();
+		CG56GoertzelBase::go();
 		//Output the complex result
 		addCode(result);
 	}
