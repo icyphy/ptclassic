@@ -65,8 +65,7 @@ of the intermediate computations remain in the range [-1,1).
                 addCode(exp);
         }
    codeblock(exp) {
-        double rate;
-	rate = $val(learning_rate);
+        double rate = $val(learning_rate);
         $ref(output) = 1.0/(1.0 + exp(- rate * $ref(input)));
    }
         exectime {
