@@ -27,16 +27,19 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
+
 /* paramStructs.h  edg
 Version identification:
 $Id$
 */
 
+#include "compat.h"
+
 /* Data Structures */
 struct ParamStruct {
-    char *name;
-    char *type;
-    char *value;
+    char* name;
+    char* type;
+    char* value;
 };
 
 typedef struct ParamStruct ParamType;
