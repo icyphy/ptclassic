@@ -46,12 +46,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SDFScheduler.h"
 #include "CGTarget.h"
 
-class CGCostTarget : public CGTarget, public Galaxy {
+class CGCostTarget : public CGTarget {
 public:
         // constructor
-        CGCostTarget(const char* nam, const char* startypt, const char* desc);
+        CGCostTarget(const char* nam, const char* startype, const char* desc,
+		     const char* assocDomain = CGdomainName);
 
+	// Return a copy of itself
         /*virtual*/ Block* makeNew() const ;
+
 	/*virtual*/ int run();
 	/*virtual*/ void wrapup();
 
