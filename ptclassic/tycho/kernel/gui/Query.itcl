@@ -816,20 +816,6 @@ body ::tycho::Query::line {tag label default args} {
     
     $itk_component(tag_$tag) insert insert $default
     
-    # Bindings for the Entry box
-    bind $itk_component(tag_$tag) <Control-u> "
-    clipboard clear -displayof %W
-    clipboard append -displayof %W \[%Q get $tag\]
-    %W delete 0 end
-    "
-    
-    bind $itk_component(tag_$tag) <Control-k> "
-    clipboard clear -displayof %W
-    clipboard append -displayof %W \[
-        string range \[%Q get $tag\] \[%W index insert\] \
-            \[%W index end\]]
-    %W delete insert end
-    "
     if {$focuswindow == {}} {
         set focuswindow $itk_component(tag_$tag)
     }

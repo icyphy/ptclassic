@@ -312,21 +312,6 @@ body ::tycho::ToolBar::entry {tag label default command args} {
     bind $itk_component(tag_$tag) <Return> \
             "$command \[$itk_component(tag_$tag) get\]"
     
-    # Bindings for the Entry box
-    bind $itk_component(tag_$tag) <Control-u> "
-    clipboard clear -displayof %W
-    clipboard append -displayof %W \[%Q get $tag\]
-    %W delete 0 end
-    "
-    
-    bind $itk_component(tag_$tag) <Control-k> "
-    clipboard clear -displayof %W
-    clipboard append -displayof %W \[
-        string range \[%Q get $tag\] \[%W index insert\] \
-            \[%W index end\]]
-    %W delete insert end
-    "
-    
     incr numentries
 
     # Record the tag and its access methods
