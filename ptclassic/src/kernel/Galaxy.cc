@@ -120,6 +120,7 @@ StringList Galaxy::print(int verbose) const {
 }
 
 int Galaxy :: setTarget(Target* t) {
+    if (!Block::setTarget(t)) return FALSE;
     GalTopBlockIter next(*this);
     Block* block;
     while((block = next++) != 0)
