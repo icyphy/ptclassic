@@ -502,6 +502,11 @@ extern int gethostname( char * name, int namelen);
 
 #if defined(sun) && !defined(SOL2)
 #include <unistd.h>
+/* gcc-2.5.8 under SunOS4.1.3 with X11R5 prints messages while
+ * compiling Maxport.c. 
+ * message was: warning: cast discards `const' from pointer target type
+ */
+#define XTSTRINGDEFINES
 
 /* Don't include memset, it should be /usr/include/memory.h */
 /*extern char * memset ARGS(( char *, char *, int));*/
