@@ -39,7 +39,7 @@
 # <i>LabeledOval</i> is an oval with a text label and graphics.
 # In all other respects, it can be treated like any other oval item.
 #
-# <p><a name="#options"></a><b>Options</b>
+# <p><a name="#Slate LabeledOval class Options"></a><b>Options</b>
 #
 # <ul>
 # <li><b>-fill</b>:
