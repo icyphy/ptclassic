@@ -57,10 +57,9 @@ LIBCSRCS	= Lbl.c \
 		dds_init.c \
 		dds_item_list.c \
 		dds_number.c \
-		dds_show_text.c \
-		tst.c
+		dds_show_text.c
 
-OTHERSRCS =	tst2.c
+OTHERSRCS =	tst.c tst2.c
 
 SRCS =		$(LIBCSRCS)
 
