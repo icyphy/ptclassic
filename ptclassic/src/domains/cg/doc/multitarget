@@ -67,7 +67,7 @@ By default, it models a fully-connected multiprocessor architecture;
 when a processor wants to communicate with another processor, it can do
 immediately. The
 .c scheduleComm()
-.Id "scheduleComm, method"
+.Ir "scheduleComm, method"
 method returns the time when the required communication is scheduled.
 In the CGMultiTarget class, it returns the same time as the communication
 is required. On the other hand, a CGSharedBus, which is
@@ -79,7 +79,7 @@ method schedules the required communication on the shared-bus member
 object of that class, and returns the scheduled time.
 The communication cost (in time) is modeled by the
 .c commTime()
-.Id "commTime, method"
+.Ir "commTime, method"
 method. Given the information on which processors are involved in this
 communication and how many tokens are transmitted, it returns the
 expected communication time once started. 
@@ -117,11 +117,11 @@ chart. After each child target finishes generating code after the
 scheduling result, it passes the code the parent multiprocessor target
 that arrange the code in an appropriate way (in
 .c addProcessorCode()
-.Id "addProcessorCode, method"
+.Ir "addProcessorCode, method"
 method). By default, it merges all child-processor codes into a single file.
 Since the child targets is named after the
 .c filePrefix
-.Id "filePrefix, state"
+.Ir "filePrefix, state"
 state appended by a unique number starting from 0, one common
 alternative is to write a child-processor code into a separate file
 named after the child target name.
@@ -129,14 +129,14 @@ named after the child target name.
 To generate interprocessor communication codes properly, the multiprocessor
 target creates the send/receive stars (
 .c createSend() ,
-.Id "createSend, method"
+.Ir "createSend, method"
 and
 .c createReceive() )
-.Id "createReceive, method"
+.Ir "createReceive, method"
 for the child targets, and
 establishes the connection between each pair of send/receive stars in
 .c pairSendReceive()
-.Id "pairSendReceive, method"
+.Ir "pairSendReceive, method"
 method.
 .pp
 There is no preprocessor for targets like "ptlang" for stars. 
