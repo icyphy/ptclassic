@@ -52,6 +52,11 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	    gal->addStar(starName, starClass);
 	    DataFlowStar* star = (DataFlowStar*)gal->blockWithName(starName);
+	    if (star == NULL)
+	    {
+		Error::abortRun(*this, "could not splice in ", starClass);
+		return star;
+	    }
 
 	    // The galaxy's port list is used to keep track of the
 	    // original conection.
@@ -72,7 +77,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    // the plasma will exist.
 	    PNMonitor proto;
 	    star->initialize();
-	    port->enableLocking(proto);
+	    alias->enableLocking(proto);
+	    con->enableLocking(proto);
 
 	    return star;
 	}
