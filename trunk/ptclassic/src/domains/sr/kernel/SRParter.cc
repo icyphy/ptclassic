@@ -43,7 +43,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 //SRPartType SRParter::parter = SRPartInOutT;
 //SRPartType SRParter::parter = SRPartOneT;
-SRPartType SRParter::parter = SRPartExactT;
+//SRPartType SRParter::parter = SRPartExactT;
+SRPartType SRParter::parter = SRPartSweepT;
 
 // Empty virtual destructor
 SRPart::~SRPart() {}
@@ -61,6 +62,9 @@ SRParter::SRParter( Set & s, SRDependencyGraph & g )
     break;
   case SRPartExactT:
     mypart = new SRPartExact( s, g );
+    break;
+  case SRPartSweepT:
+    mypart = new SRPartSweep( s, g );
     break;
   default:
     mypart = new SRPartOne( s, g );
@@ -286,3 +290,121 @@ SRPartExact::next( int bound )
   return s;
 
 }
+
+void SRPartSweep::init()
+{
+  sgIter = new SetIter( *partSet );
+  kernel = new Set( partSet->size() );
+
+  // Start growing the kernel from the first vertex in the partSet
+
+  (*kernel) |= (*sgIter)++;
+
+  done = 0;
+}
+
+SRPartSweep::~SRPartSweep()
+{
+  delete sgIter;
+  delete kernel;
+
+}
+
+Set * SRPartSweep::next( int bound )
+{
+  if ( !done ) {
+
+    Set * theBorder = NULL;
+
+    int borderSize;
+
+    do {
+
+      // cout << "With kernel " << kernel->print() << ",\n";
+      delete theBorder;
+      theBorder = border();
+      borderSize = theBorder->cardinality();
+
+      // cout << " the border is " << theBorder->print() << "\n";
+
+      int bestVertex = -1;
+      int bestCost = INT_MAX;
+
+      // Compute the cost of adding each border vertex.
+      // This is the number of distinct vertices leading out of the
+      // vertex that are in the subgraph but not in the kernel.
+
+      int borderv;
+      SetIter nextBorder( *theBorder );
+      while ( (borderv = nextBorder++) >= 0 ) {
+	Set outgoingVertices( partSet->size() );
+	for ( int e = dgraph->forwardEdges(borderv) ; --e >= 0 ; ) {	 
+	  outgoingVertices |= dgraph->destination(borderv,e);
+	}
+	outgoingVertices &= *partSet;
+	outgoingVertices &= *theBorder;
+
+	int c = outgoingVertices.cardinality();
+	if ( c < bestCost ) {
+	  bestCost = c;
+	  bestVertex = borderv;
+	}
+      }
+
+      if ( bestVertex == -1 ) {
+
+	// Clear the kernel set and add the next vertex, if there is one
+
+	(*kernel) -= *kernel;
+
+	int v;
+        v = (*sgIter)++;
+	// cout << "Starting new kernel with " << v << "\n";
+	if ( v >= 0 ) {
+	  (*kernel) |= v;
+	} else {
+	  done = 1;
+	}
+
+      } else {
+
+	(*kernel) |= bestVertex;
+
+      }
+      
+    } while ( !done && borderSize > bound );
+    
+    if ( borderSize > 0 && borderSize <= bound ) {
+      return theBorder;
+    } else {
+      delete theBorder;
+    }
+
+  }
+
+  return NULL;
+
+}
+
+// Return the border of the kernel
+//
+// @Description This is the set of vertices with incoming edges from the
+// kernel that are in the subgraph but not in the kernel.
+Set * SRPartSweep::border()
+{
+  Set * border = new Set( partSet->size() );
+
+  SetIter next(*kernel);
+  int kv;
+  while ( (kv = next++) >= 0 ) {
+    for (int e = dgraph->forwardEdges(kv) ; --e >= 0 ; ) {
+      *border |= dgraph->destination(kv,e);
+    }
+  }
+  *border &= *partSet;
+  *border -= *kernel;
+
+  return border;
+}
+
+
