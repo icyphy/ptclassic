@@ -70,11 +70,12 @@ So most of the numbering and reseting functions operate on the flags member.
 int totalNumberOfStars(Galaxy& g);
 
 // Determines whether the Galaxy is acyclic or not.  The ignoreTaggedArcs
-// parameter works the following way: if certain arcs have been "marked"
+// parameter works the following way: if ignoreTaggedArcs is true, then
+// if certain arcs have been "marked"
 // by setting the flag in the arc at flags[tagLoc] > 0, then
 // those arcs are ignored in the isAcyclic computation. For example,
 // one use might be to ignore arcs that have delays on them in SDF graphs.
-int isAcyclic(Galaxy* g, int ignoreTaggedArcs, int tagLoc);
+int isAcyclic(Galaxy* g, int ignoreTaggedArcs=0, int tagLoc=0);
 
 // Find the source nodes in the galaxy.  See the function definition
 // for more comments.
