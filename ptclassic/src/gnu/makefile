@@ -284,6 +284,7 @@ hp_install_gas:
 hp_bin_flex:
 	# Reconfigure flex so as to avoid alloca problems
 	-mkdir $(GNU_OBJ)/flex
+	rm -f $(GNU_OBJ)/flex/config.cache
 	(cd $(GNU_OBJ)/flex; \
 		CC=$(BINDIR)/gcc; \
 		$(GNU_SRC)/flex/configure --srcdir=$(GNU_SRC)/flex \
