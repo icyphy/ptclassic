@@ -8,12 +8,12 @@
 #	make depend
 # This will add the dependencies to the makefile.
 
-ROOT = ../../..
-VPATH = $(ROOT)/src/stars/sdf
+ROOT = ../../../..
+VPATH = $(ROOT)/src/domains/sdf/stars
 # KERNDIR is the directory containing the Ptolemy kernel source.
 KERNDIR = $(ROOT)/src/kernel
 # SDFDIR is the directory containing SDF domain support
-SDFDIR = $(ROOT)/src/domains/sdf
+SDFDIR = $(ROOT)/src/domains/sdf/kernel
 GPPFLAGS = -g
 GNU = g++
 GNUINCLUDE = /usr/gnu/lib/g++-include
