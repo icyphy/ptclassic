@@ -283,14 +283,14 @@ jdist: $(JDISTS)
 # List of files to exclude
 JDIST_EX =	/tmp/$(JDIST).ex
 $(JDIST_EX): $(ROOT)/mk/tycommon.mk
-	/bin/echo "SCCS\nmakefile\n$(JDIST).tar.gz\n$(JDIST).zip" > $@ 
+	/bin/echo "adm\nSCCS\nmakefile\n$(JDIST).tar.gz\n$(JDIST).zip" > $@ 
 
 $(JDIST).tar.gz:  $(JDIST_EX)
 	(cd ..; gtar -zchf $(JPACKAGE)/$@ -X $(JDIST_EX) $(JPACKAGE))
 	rm -f $(JDIST_EX)
 
 $(JDIST).zip:
-	(cd ..; zip -r $(JPACKAGE)/$@ $(JPACKAGE) -x \*/SCCS/\* -x \*/makefile -x \*/$(JDIST).tar.gz -x \*/$(JDIST).zip)
+	(cd ..; zip -r $(JPACKAGE)/$@ $(JPACKAGE) -x \*/adm/\* -x \*/SCCS/\* -x \*/makefile -x \*/$(JDIST).tar.gz -x \*/$(JDIST).zip)
 
 
 # Build sources in a form suitable for releasing
