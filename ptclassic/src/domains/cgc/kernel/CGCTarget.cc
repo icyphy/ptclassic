@@ -94,6 +94,8 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
 	addStream("mainDecls", &mainDecls);
 	addStream("mainInit", &mainInit);
 	addStream("commInit", &commInit);
+	addStream("compileOptions", &compileOptionsStream);
+	addStream("linkOptions", &linkOptionsStream);	
 	addStream("mainClose", &mainClose);
 }
 
@@ -322,8 +324,10 @@ int CGCTarget::compileCode()
 // return compile command
 StringList CGCTarget :: compileLine(const char* fName) {
 	StringList cmd = (const char*) compileCommand;
-	cmd << " " << (const char*) compileOptions << " ";
-	cmd << fName << " " << (const char*) linkOptions;
+	cmd << " " << (const char*) compileOptions << " "
+	    << compileOptionsStream
+	    << fName << " " << (const char*) linkOptions
+	    << " " << linkOptionsStream;
 	return cmd;
 }
 

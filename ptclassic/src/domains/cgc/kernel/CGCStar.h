@@ -149,6 +149,12 @@ protected:
 	// Add lines to be put at the beginning of the code file
 	int addInclude(const char* decl);
 
+	// Add options to be used when compiling a C program
+	int addCompileOption(const char*);
+
+	// Add options to be used when linking a C program
+	int addLinkOption(const char*);
+
 	// Add declarations, to be put at the beginning of the main section
 	int addDeclaration(const char* decl, const char* name = NULL) {
 		if (!name) name = decl;
