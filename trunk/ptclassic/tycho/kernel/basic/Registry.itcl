@@ -1116,12 +1116,11 @@ body ::tycho::Registry::registerWindow {tag window args} {
     if [::info exists _windows($window#$tag)] {
 	error "View \"$tag\" has already been registered with \"$window\""
     }
-
     # Figure out the label and category
     array set opts [list -label $tag -mode text -category ""]
     array set opts [list -window $window -tag $tag]
     array set opts $args
-    if { $opts(-category) == "" } {
+    if { $opts(-category) == "" && $opts(-mode) != "" } {
 	array set m $_modes($opts(-mode))
 	set opts(-category) $m(-category)
     }
