@@ -52,6 +52,17 @@ PL_SRCS= \
 	SRSynthControl.pl \
 	SRWhen.pl
 
+# Itcl star script files
+SCRIPTS = \
+	SRCounter.itcl \
+	SRDatabase.itcl \
+	SRDisplay.itcl \
+	SREditor.itcl \
+	SRItclStar.itcl \
+	SRKeyboard.itcl \
+	SRLatch.itcl \
+	SRModeSelect.itcl
+
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
 
@@ -63,7 +74,7 @@ HDRS= $(SRCS:.cc=.h)
 
 STAR_MK=srstars
 DOMAIN=SR
-EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS)
+EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS) $(SCRIPTS)
 
 all:		makefile stars_all
 
