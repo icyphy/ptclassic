@@ -52,6 +52,7 @@ Geodesics can be created named or unnamed.
 
 class GenericPort;
 class PortHole;
+class PtGate;
 
 	///////////////////////////////////////////
 	// class Geodesic
@@ -96,17 +97,24 @@ public:
 	// of these initial particles.
 	virtual void initialize();
 
-	// Put a Particle into the Geodesic
-	void put(Particle* p) {pstack.putTail(p); sz++;}
+	// Put a Particle into the Geodesic.  Note that this is not
+	// virtual but slowPut is virtual.
+	void put(Particle* p) {
+		if (gate == 0) { 
+			pstack.putTail(p); sz++;
+		}
+		else slowPut(p);
+	}
 
-	// Get a Particle from the Geodesic
+	// Get a Particle from the Geodesic.  Note that this is not
+	// virtual but slowGet is virtual.
 	Particle* get() {
-		if (sz > 0) { sz--; return pstack.get();}
-		else return 0;
+		return (sz > 0 && gate == 0)
+			? (sz--, pstack.get()) : slowGet();
 	}
 
 	//  Push a Particle back into the Geodesic
-	void pushBack(Particle* p) {pstack.put(p); sz++;}
+	void pushBack(Particle* p);
 
 	// Return the number of Particles on the Geodesic
 	int size() const {return sz;}
@@ -115,8 +123,8 @@ public:
 	int numInit() const {return numInitialParticles;}
 
 	// access head and tail of queue
-	Particle* head() const { return pstack.head();}
-	Particle* tail() const { return pstack.tail();}
+	Particle* head() const;
+	Particle* tail() const;
 
 	// Information printing
 	StringList print(int verbose = 0) const;
@@ -138,8 +146,24 @@ public:
 	// return max # of particles
 	int maxNumParticles() const { return maxBufLength;}
 
+	// locking functions
+
+	// create a lock for the Geodesic, because it crosses
+	// thead boundaries.
+	void makeLock(const PtGate& master);
+
+	// delete lock for the Geodesic.
+	void delLock();
+
+	int isLockEnabled() const { return gate != 0;}
 protected:
+	// connect up the neighbors.
 	void portHoleConnect();
+
+	// the "slow" versions of get and put.
+	virtual Particle* slowGet();
+	virtual void slowPut(Particle*);
+
 	// my neighbors
         PortHole *originatingPort;
         PortHole *destinationPort;
@@ -158,5 +182,7 @@ private:
 	ParticleStack pstack;
 	// number of particles
 	int sz;
+	// lock for the Geodesic
+	PtGate* gate;
 };
 #endif
