@@ -12,7 +12,7 @@ parameter is changed.
 	version { $Id$ }
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
-	location { Joe's private lib }
+	location { SDF dsp library }
 	explanation {
 This star implements an FIR filter with
 a raised cosine frequency response, with the excess bandwidth given
