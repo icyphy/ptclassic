@@ -41,8 +41,9 @@ Programmer: J. T. Buck and E. A. Lee
 #include <ctype.h>
 #include <sys/types.h>
 #include <time.h>
-#include <malloc.h>
-
+/* #include <malloc.h> */ /* Can't include malloc.h here, it conflicts with
+			   * stdlib.h under SunSoft cc 3.x and 4.x
+			   */
 /* Symbols for special characters*/
 #define LPAR '('
 #define RPAR ')'
