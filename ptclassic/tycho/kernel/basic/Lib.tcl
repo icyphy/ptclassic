@@ -78,4 +78,6 @@ namespace ::tycho {
     tycho::File::registerEditor {.vhdl .VHDL} EditVHDL {VHDL editor}
     tycho::File::registerEditor {} EditBubbleAndArc {Base graphical editor}
     tycho::File::registerEditor {.fsm} EditFSM {Finite state machine editor}
+    tycho::File::registerEditor {.tdo} EditMoore {State transition diagram editor}
+
 }
