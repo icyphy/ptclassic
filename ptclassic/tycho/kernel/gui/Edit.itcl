@@ -2210,6 +2210,8 @@ body ::tycho::Edit::initializeMenubar {menubar} {
 	    -label "Unselect" -underline 0 \
 	    -accelerator "C-\\" -command "$this unselectRange 1.0 end"
     
+    $menubar separator editsep3 edit
+    
     $menubar command findchange edit \
 	    -label "Find/Change..." -underline 0 \
 	    -accelerator "C-s" -command "$this search"
