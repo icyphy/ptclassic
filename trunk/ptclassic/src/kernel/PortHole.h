@@ -343,7 +343,7 @@ class PortHole : public GenericPort
 	friend class ClusterPort;
 
 	// the following function may set indices
-	friend setPortIndices(Galaxy&);
+	friend int setPortIndices(Galaxy&);
 
 	// the following function may set myMultiPortHole
 	friend void MultiPortHole::letMeKnownToChild(PortHole&);
