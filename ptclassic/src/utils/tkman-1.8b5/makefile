@@ -42,8 +42,10 @@ KRUFT =
 LIB = foo
 
 
+# We don't include common.mk since we don't use the compiler here
 # include common definitions, rules
 #include $(ROOT)/mk/common.mk
+
 WISH=$(PTOLEMY)/bin.$(PTARCH)/wish4.0
 
 all:	makefile  tkman
@@ -72,7 +74,7 @@ $(ROOT)/man/man1/tkman.1: tkman.1
 	@echo Installing $<
 	rm -f $@
 	ln $< $@
-sources:	$(PTLANG_IN_OBJ) $(EXTRA_SRCS) $(SRCS) $(HDRS) make.template 
+sources:	$(EXTRA_SRCS) $(SRCS) makefile
 clean:
 	rm -f tkman *~
 # Don't add anything after the next line; makedepend will zap it.
