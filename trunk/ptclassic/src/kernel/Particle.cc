@@ -111,10 +111,7 @@ Particle* IntParticle :: useNew () const { LOG_NEW; return new IntParticle;}
 
 Particle& IntParticle :: operator = (const Particle& p)
 {
-	if(compareType(p)) {
-		// Types are compatible, so we can copy
-		data = ((const IntParticle*)&p)->data;
-	}
+	data = int(p);
 	return *this;
 }
 
@@ -184,13 +181,9 @@ Particle* FloatParticle :: clone () const {
 
 void FloatParticle :: die () { floatPlasma.put(this);}
 
-Particle& FloatParticle :: operator = (const Particle& p)
-{
-        if(compareType(p)) {
-                // Types are compatible, so we can copy
-		data = ((const FloatParticle*)&p)->data;
-	}
-	return *this;
+Particle& FloatParticle :: operator = (const Particle& p) {
+	data = double(p);
+  	return *this;
 }
 
 int FloatParticle :: operator == (const Particle& p) {
@@ -267,13 +260,8 @@ Particle* ComplexParticle :: clone () const {
 
 void ComplexParticle :: die () { complexPlasma.put(this);}
 
-Particle& ComplexParticle :: operator = (const Particle& p)
-{
-        if(compareType(p)) {
-                // Types are compatible, so we can copy
-		const ComplexParticle& cs = *(const ComplexParticle*)&p;
-		data = cs.data;
-	}
+Particle& ComplexParticle :: operator = (const Particle& p) {
+	data = Complex(p);
         return *this;
 }
 
@@ -361,13 +349,8 @@ void FixParticle :: die () { fixPlasma.put(this);}
 
 Particle* FixParticle :: useNew () const { LOG_NEW; return new FixParticle;}
 
-Particle& FixParticle :: operator = (const Particle& p)
-{
-        if(compareType(p)) {
-                // Types are compatible, so we can copy
-                const FixParticle& fs = *(const FixParticle*)&p;
-                data = fs.data;
-        }
+Particle& FixParticle :: operator = (const Particle& p) {
+	data = Fix(p);
         return *this;
 }
 
