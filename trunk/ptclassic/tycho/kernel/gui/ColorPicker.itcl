@@ -75,7 +75,7 @@ class ::tycho::ColorPicker {
     # Process a new hsv value from the option menus
     method _newhsv {}
 
-   # Process a new rgb value from the entry widget
+    # Process a new rgb value from the entry widget
     method _newrgb {}
 
     # Process a new symbolic color value from the entry widget
@@ -120,7 +120,7 @@ body ::tycho::ColorPicker::constructor {args} {
             -ipadx 18 -ipady 12
 
     # Add the HSV selectors and the RGB display
-    set hues [concat black white grey [::tycho::ColorManager::hue]]
+    set hues [::tycho::ColorManager::hue]
     set sats [::tycho::ColorManager::saturation]
     set vals [::tycho::ColorManager::value]
     $itk_component(topgrid) add optionmenu hue \
