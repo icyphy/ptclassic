@@ -470,46 +470,45 @@ class ::tycho::Resource {
     ####                           public procs                    ####
 
     # Change the permissions of a resource
-    proc chmod {path permissions} {::tycho::abstractMethod chmod}
+    proc chmod {path permissions} {::tycho::abstractProc chmod}
 
     # Return the content type of the resource
     proc contenttype {path}
 
     # Delete a resource
-    proc delete {path} {::tycho::abstractMethod delete}
+    proc delete {path} {::tycho::abstractProc delete}
 
-    # Get a directory listing
     # Return a list of files at the given _path_. The list should be
     # in a format similar to <code>ls -F</code>, with directories
     # having a "/" appended. The list should also be sorted. If the
     # resource is remote, it should generate a Tcl error{} if the
     # time given by *-timeout* expires. 
-    proc dirlist {pattern} {::tycho::abstractMethod dirlist}
+    proc dirlist {pattern} {::tycho::abstractProc dirlist}
 
     # Test if a resource exists. If the resource is remote, it must
     # return zero if the time given by the *-timeout* option is exceeded
     # when first accessing the resource.
-    proc exists {path} {::tycho::abstractMethod exists}
+    proc exists {path} {::tycho::abstractProc exists}
     
     # Test is a path represents a remote resource. Most subclasses
     # can define this proc to just return zero or one.
-    proc isremote {path} {::tycho::abstractMethod isremote}
+    proc isremote {path} {::tycho::abstractProc isremote}
 
     # Create a new directory
-    proc mkdir {path} {::tycho::abstractMethod mkdir}
+    proc mkdir {path} {::tycho::abstractProc mkdir}
 
     # Create a new resource object
     # Create a new resource object, and connect{} it to the given path.
-    proc new {path args} {::tycho::abstractMethod new}
+    proc new {path args} {::tycho::abstractProc new}
 
     # Query properties of a file
-    proc query {path option} {::tycho::abstractMethod query}
+    proc query {path option} {::tycho::abstractProc query}
 
     # Get the status of a resource
-    proc stat {path varName} {::tycho::abstractMethod stat}
+    proc stat {path varName} {::tycho::abstractProc stat}
 
     # Return the type of a given file
-    proc type {path} {::tycho::abstractMethod type}
+    proc type {path} {::tycho::abstractProc type}
 
     ###################################################################
     ####                         protected methods                 ####
@@ -617,7 +616,7 @@ body ::tycho::Resource::source {} {
 #
 body ::tycho::Resource::contenttype {path} {
     set ext [string tolower [file extension $path]]
-    if       { $ext == ".html" || $ext == ".htm" } {
+    if  { $ext == ".html" || $ext == ".htm" } {
         return "text/html"
     } elseif { $ext == ".gif" } {
         return "image/gif"
