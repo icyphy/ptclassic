@@ -47,7 +47,7 @@ int KnownBlock::domainIndex (const char* myDomain, int addIfNotFound) {
 
 int KnownBlock::domainIndex (Block& block) {
 	// handle galaxy case -- domain of first star found
-	if (!block.isItAtomic) {
+	if (!block.isItAtomic()) {
 		Galaxy& g = block.asGalaxy();
 		if (g.numberBlocks() == 0) {
 			errorHandler.error ("empty galaxy");
