@@ -254,7 +254,6 @@ SimHandlerFunction SimControl::setInterrupt(SimHandlerFunction f) {
 
         // Set the Poll Flag true
 void SimControl::setPollFlag() {
-        CriticalSection region(gate);
         pollflag = 1;
 }
 
@@ -282,20 +281,19 @@ SimHandlerFunction SimControl::setPollAction(SimHandlerFunction f) {
 	// To make this code as portable as possible, only "basic" system
 	// calls are used here.
 void SimControl::setPollTimer( int seconds, int micro_seconds ) {
-        CriticalSection region(gate);
 	// reset the timer - this cancels any current timing in progress
         struct itimerval i;
 	i.it_interval.tv_sec = i.it_interval.tv_usec = 0;
         i.it_value.tv_sec = seconds;
         i.it_value.tv_usec = micro_seconds;
-	// Turn on the poll flag when the timer expires
-	signal(SIGALRM, (SIG_PF)&SimControl::setPollFlag);
+	// Turn off the poll flag until the timer fires
+	pollflag = 0;
 	// Make the signal safe from interrupting system calls
         ptSafeSig(SIGALRM);
 	// Block the signal so that it will not interrupt system calls
 	ptBlockSig(SIGALRM);
-	// Turn off the poll flag until the timer fires
-	pollflag = 0;
+	// Turn on the poll flag when the timer expires
+	signal(SIGALRM, (SIG_PF)&SimControl::setPollFlag);
 	// Start the timer
 	setitimer(ITIMER_REAL, &i, 0);
 }
