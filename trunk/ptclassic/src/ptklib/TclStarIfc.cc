@@ -360,14 +360,20 @@ InfString TclStarIfc::getInputs () {
 	    return result;
 	}
 
+	Tcl_DString tclList;
+	Tcl_DStringInit(&tclList);
+
 	MPHIter nexti(*mph);
 	PortHole *p;
 	while ((p = nexti++) != 0) {
-	    // return a quoted string for Tcl consumption
-	    result += "{";
-	    result += ((*p)%0).print();
-	    result += "} ";
+	    // Append the input particle value as a Tcl list element.
+	    // The InfString "buf" is used to obtain a non-const (char*).
+	    InfString buf = ((*p)%0).print();
+	    Tcl_DStringAppendElement(&tclList, (char*) buf);
 	}
+
+	result = Tcl_DStringValue(&tclList);
+	Tcl_DStringFree(&tclList);
 	return result;
 }
 
