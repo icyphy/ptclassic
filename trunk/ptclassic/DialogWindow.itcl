@@ -483,6 +483,11 @@ body ::tycho::DialogWindow::newModal {class instance args} {
 	# Apparently, it interferes with the Rpc connection
 	# to vem.  Why?  Should we implement our own version of tkwait?
 	tkwait window $instance
+
+	# Because of the above grab, it is not safe to return before
+	# the window actually disappears.  The grab may never be released
+	# if an I/O operation is done before the window is released.
+	update
     }
     set returnVal $commandResult($instance)
     unset commandResult($instance)
