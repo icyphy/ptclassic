@@ -37,6 +37,8 @@ public:
 		    unsigned y_addr, unsigned y_len);
 	Block* clone() const;
 	void headerCode();
+	StringList beginIteration(int repetitions, int depth);
+	StringList endIteration(int repetitions, int depth);
 	~CG56Target();
 
 private:
