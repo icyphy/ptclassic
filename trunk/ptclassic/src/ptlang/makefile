@@ -42,7 +42,7 @@ ifneq (,$(filter hppa%,$(PTARCH)))
 # under hppa or hppa.cfront (alloca problems), so we
 # recreate ptlang.c by hand here.
 ptlang:	ptlang.y
-	cd $(VPATH); yacc ptlang.y; mv y.tab.c ptlang.c
+	cd $(VPATH); $(YACC) ptlang.y; mv y.tab.c ptlang.c
 	rm -f ptlang
 	$(CC) $(VPATH)/ptlang.c -o ptlang $(PTLANGLIB)
 else
