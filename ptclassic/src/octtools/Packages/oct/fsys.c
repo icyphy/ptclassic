@@ -29,7 +29,7 @@ static char SccsId[]="$Id$";
 #include "utility.h"
 
 /* should go into port.h */
-#if defined(POSIX) || defined(aiws) || defined(SYSV)
+#if defined(POSIX) || defined(aiws) || defined(SYSV) || defined(linux)
 #include <unistd.h>
 #else
 #include <sys/file.h>
