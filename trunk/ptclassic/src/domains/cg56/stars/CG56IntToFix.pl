@@ -26,6 +26,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	move	$ref(input),x1
 	move	x1,$ref(output)
     }
+    // FIXME: On the 56000, there is no difference between an integer
+    // and a fixed-point number: both are stored in the same word length.
+    // The interpretation of the bits is dependent upon the instruction.
+    // This star should require NO code, and instead behave as a fork.
+    // However, making it behave as a fork in Ptolemy 0.7 and earlier
+    // cause AsmGeodesic::internalBufSize to flag an error about the
+    // maximum buffer size being too large.
     go {
 	addCode(convert);
     }
