@@ -109,7 +109,7 @@ reset.
 
     setup {
 	sum = initialValue;
-	unityGainB = double(feedbackGain) >= CG56_ONE;
+	unityGainB = (feedbackGain.asDouble() >= CG56_ONE);
     }
     go {
 	addCode(cbSetup);

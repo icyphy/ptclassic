@@ -23,7 +23,7 @@ in that case.
 		short identity;
 	}
 	setup {
-		identity = (double(gain) >= CG56_ONE);
+		identity = (gain.asDouble() >= CG56_ONE);
 		if (identity) forkInit(input,output);
 	}
 	execTime {
@@ -61,9 +61,9 @@ in that case.
 	go {
 		if (identity) {
 		    ;
-		} else if (double(gain)==0.0) {
+		} else if (gain.asDouble()==0.0) {
 		    addCode(cbZero);
-		} else if (double(gain)==-1.0) {
+		} else if (gain.asDouble()==-1.0) {
 		    addCode(cbNeg);
 	 	} else {
 		    addCode(cbStd);
