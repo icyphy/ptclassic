@@ -47,16 +47,16 @@ SDFDIR = $(ROOT)/src/domains/sdf/kernel
 
 INCL = -I$(CGCDIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR) -I$(CGCSTARDIR)
 
-# source files for all stars, using preprocessor
+# source files for all stars, using preprocessor, listing base stars first
 PL_SRCS= \
+ CGCTkPlot.pl \
+ CGCTkSunSound.pl \
  CGCLMSTkPlot.pl \
  CGCTclScript.pl \
  CGCTkBarGraph.pl \
  CGCTkEntry.pl \
  CGCTkImpulse.pl \
- CGCTkPlot.pl \
  CGCTkSlider.pl \
- CGCTkSunSound.pl \
  CGCTkXYPlot.pl
 
 TCL_SRCS= \
