@@ -60,7 +60,7 @@ EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) \
 
 # Files or directories that are present, but that 'make checkjunk' 
 # should not complain about
-MISC_FILES =
+MISC_FILES = README
 
 # make checkjunk will not report OPTIONAL_FILES as trash
 # make realclean removes OPTIONAL_FILES
