@@ -1678,10 +1678,10 @@ void genDef ()
 	/* Not explicitly specified: baseclass is Galaxy or XXXStar */
 	else if (galDef) {
 		(void)strcpy (baseClass, "Galaxy");
-                fprintf (fp, "<b>Derived from:</b> Galaxy");
+                fprintf (fp, "<b>Derived from:</b> Galaxy<br>\n");
         } else {
 		sprintf (baseClass, "%sStar", domain);
-                fprintf (fp, "<b>Derived from:</b> %sStar", domain);
+                fprintf (fp, "<b>Derived from:</b> %sStar<br>\n", domain);
         }
 
 /* location */
