@@ -328,7 +328,7 @@ body ::tycho::TCanvas::export {} {
     set nm [::tycho::autoName $prefix]
     ::tycho::Query $nm \
             -text {Export Graphics} -entrywidth 60 -queries [list \
-            [list line filename {Export to file:} $file] \
+            [list line filename {Export to file:} [filename]] \
             [list radio format {File format} \
                     [array names fileformats] $exportFormat \
                     -command [code updateExportDialog $nm]] \

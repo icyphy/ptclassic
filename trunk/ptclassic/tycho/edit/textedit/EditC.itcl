@@ -184,7 +184,7 @@ body ::tycho::EditC::compileAndLoad {} {
     #set compiler [::tycho::CompileCTcl [::tycho::autoName .editC]]
     #$compiler configure -view $this
     evaluate
-    $compiler compileAndLoad [list $file]
+    $compiler compileAndLoad [list [filename]]
     #delete object $compiler
 }
 
@@ -207,7 +207,7 @@ body ::tycho::EditC::evaluate {} {
     # Make sure we get .widgetname instead of ::.widgetname
     $compiler configure -view [string trimleft $this ":"]
 
-    $compiler compile [list $file]
+    $compiler compile [list [filename]]
     #delete object $compiler
 }
 

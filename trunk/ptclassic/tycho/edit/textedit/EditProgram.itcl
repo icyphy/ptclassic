@@ -624,7 +624,7 @@ body ::tycho::EditProgram::uncommentSelection {} {
 # This procedure will probably be redefined in child classes
 #
 body ::tycho::EditProgram::gendoc {file} {
-    return [::tycho::EditProgram::gendocFileInternal $file \
+    return [::tycho::EditProgram::gendocFileInternal [filename] \
             {set docfile $root.html} \
             {exec cp $tail $docfile}]
 }
@@ -657,8 +657,7 @@ body ::tycho::EditProgram::gendoc {file} {
 # </PRE></TCL>
 #
 
-body ::tycho::EditProgram::gendocFileInternal { file setDocCommand genCommand} {
-    set filename [::tycho::expandPath $file]
+body ::tycho::EditProgram::gendocFileInternal { filename setDocCommand genCommand} {
     set dir [file dirname $filename]
     set tail [file tail $filename]
     set root [file rootname $tail]
@@ -732,7 +731,7 @@ body ::tycho::EditProgram::commentRegexp {} {
 # </PRE></TCL>
 #
 body ::tycho::EditProgram::gendocBufferInternal {setDocCommand genCommand} {
-    set filename [::tycho::expandPath $file]
+    set filename [filename]
     set dir [file dirname $filename]
     set tail [file tail $filename]
     set root [file rootname $tail]

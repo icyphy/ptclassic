@@ -410,7 +410,7 @@ body ::tycho::EditSTD::ioPortNames {} {
 	wm deiconify $w
 	raise $w
     } else {
-	set name [file tail [file rootname $file]]
+	set name [file tail [file rootname $completeFilePath]]
 	set titleLabel "Edit I/O Port Names of $name"
 
 	set inPortQuery [list line inPort {InPort  names:} $portNames(in)]
@@ -503,7 +503,7 @@ body ::tycho::EditSTD::makeIcon {} {
 ##############################################################
 #### makeIconOk
 body ::tycho::EditSTD::makeIconOk {w} {
-    set name [file tail [file rootname $file]]
+    set name [file tail [file rootname $completeFilePath]]
     set makeIconSrcDir [$w get srcdir]
     set makeIconPaletteName [$w get palette]
     # It doesn't matter in which domain this icon is made.
@@ -521,7 +521,7 @@ body ::tycho::EditSTD::modifyOptions {} {
 	wm deiconify $w
 	raise $w
     } else {
-	set name [file tail [file rootname $file]]
+	set name [file tail [file rootname $completeFilePath]]
 	set titleLabel "Modify options of $name"
 
 	set machineTypeQuery [list radio machineType {Machine Type:}\
@@ -589,12 +589,12 @@ body ::tycho::EditSTD::popUpFile {name} {
 # This method can used only when invoked from Ptolemy.
 # FIXME : Should add some code to check if Ptolemy exists.
 body ::tycho::EditSTD::ptkCompile {} {
-    if "![file exists $file]" {
+    if "![file exists $completeFilePath]" {
 	error "The specified STD file doesn't exist. "
     }
 
     # set the name for the FSM galaxy.
-    set name [file tail [file rootname $file]]
+    set name [file tail [file rootname $completeFilePath]]
 
     # Create a galaxy :
     defgalaxy $name {
@@ -865,7 +865,7 @@ body ::tycho::EditSTD::insertData {data} {
 #
 body ::tycho::EditSTD::saveText {} {
     # Identification header comment 
-    set name [file tail $file]
+    set name [file tail $completeFilePath]
     set text "### State transition diagram : $name\n"
 
     # First, save the canvas dimensions

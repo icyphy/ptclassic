@@ -98,7 +98,8 @@ body ::tycho::ItclClassList::constructor {args} {
     eval itk_initialize $args
 
     if {$classDiagramFile == "classDiagram.dag"} {
-	set classDiagramFile [file join [file dirname $file] classDiagram.dag]
+	set classDiagramFile [file join [file dirname [filename]] \
+                classDiagram.dag]
     }
 }
 
@@ -136,7 +137,7 @@ body ::tycho::ItclClassList::help {} {
 # 
 body ::tycho::ItclClassList::includeDirectoryClasses {} {
     set olddir [pwd]
-    cd [file dirname $file]
+    cd [file dirname [filename]]
 
     set itclFileList [glob -nocomplain {{*.itcl,*.itk}}]
     if { [llength $itclFileList] > 0 } {
@@ -264,7 +265,7 @@ body ::tycho::ItclClassList::initialize \
     }
 
     # Add myself to the list of open files. 
-    windowMenuAddAll $file
+    windowMenuAddAll [filename]
 }
     ###################################################################
     ###################################################################
