@@ -13,9 +13,10 @@ $Id$
 
 #include "Universe.h"
 #include "StringList.h"
+#include "GalIter.h"
 
 StringList
-Universe :: print (int recursive) {
+Universe :: print (int recursive) const {
 	StringList out;
 	out = type;
 	out += " UNIVERSE: ";
@@ -40,11 +41,7 @@ void Runnable :: setStopTime (float stamp) {
 
 // complete the simulation
 void Runnable::wrapupGal (Galaxy& g) {
-	g.wrapup();
-	for (int i=g.numberBlocks(); i>0; i--) {
-		Block& b = g.nextBlock();
-		if (b.isItAtomic()) b.wrapup();
-		else wrapupGal (b.asGalaxy());
-	}
+	GalAllBlockIter next(g);
+	Block* b;
+	while ((b = next++) != 0) b->wrapup();
 }
-	
