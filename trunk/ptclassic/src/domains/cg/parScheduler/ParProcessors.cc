@@ -62,6 +62,13 @@ void ParProcessors :: removeCommNodes() {
 
 UniProcessor* ParProcessors :: getProc(int num) { return 0; }
 
+// map targets for each processing element
+void ParProcessors :: mapTargets() {
+	for (int i = 0; i < numProcs; i++) {
+		getProc(i)->targetPtr = (CGTarget*) mtarget->child(i);
+	}
+}
+
 // calculate the makespan...
 int ParProcessors :: getMakespan() {
 	int max = 0;
@@ -206,6 +213,7 @@ void ParProcessors::findCommNodes(ParGraph* graph, EGNodeList& readyNodes) {
 				// if not hidden
 				if(!hidden) snode->connectedTo(rnode);
 
+				snode->setPartner(rnode);
 				SCommNodes.insert(snode);
 				SCommNodes.insert(rnode);
 			}
@@ -361,3 +369,15 @@ StringList ParProcessors :: displaySubUnivs() {
 	}
 	return out;
 }
+
+/*****************************************************************
+		generate code
+ ****************************************************************/
+
+void ParProcessors :: generateCode() {
+	// step 1. targetPtr assignement
+	for (int i = 0; i < numProcs; i++) {
+		mtarget->addProcessorCode(i,
+			(const char*) getProc(i)->generateCode());
+	}
+}		
