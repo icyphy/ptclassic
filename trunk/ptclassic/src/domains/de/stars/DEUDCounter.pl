@@ -2,69 +2,58 @@ defstar {
 	name { UDCounter }
 	domain { DE }
 	desc {
-This is a general counter that can count up or down.
-The processing order of the ports is:
-countUp -> countDown -> demand -> reset.
-If multiple countUp or countDown events with the same time stamp
-are pending, all will be processed.  If multiple demand events with
-the same time stamp are pending, they will be consolidated into a
-single demand, so only one output will be produced.
+This is up/down counter.
+The processing order of the ports is: countUp -> countDown -> demand -> reset.
+Specifically, all simultaneous "countUp" inputs are processed.
+Then all simultaneous "countDown" inputs are processed.
+If there are multiple simultaneous "demand" inputs, all but the first
+are ignored.  Only one output will be produced.
 	}
-	version { $Id$}
+	version { $Id$ }
 	author { Soonhoi Ha }
 	copyright { 1991 The Regents of the University of California }
 	location { DE main library }
 	explanation {
-This is an up/down counter.
-Receiving events on the "countUp" or "countDown" inputs causes the
-internal state of the counter to increment or decrement.
-Special cases, such as an up only counter, can be realized by connect
-a Null star to the unneeded inputs.
-.pp
+Upon receiving a "countUp" or "countDown" input, an internal counter is
+incremented or decremented.
 When a "reset" input is received, the count is reset to "resetValue".
-An output is generated when a "demand" input is received.
-When "demand" and "reset" events arrive with the same time stamp,
-the output is produced before the count is reset.
-The "countUp" and "countDown" inputs are processed before the "demand" input,
-so if the time stamps are identical, the output will reflect the
-pending increment(s) and/or decrement(s).
-Simultaneous "demand" inputs are consolidated; if there
-are multiple "demand" input events with the same time stamp,
-the star generates only one output.
-.pp
-This star operates in the phase-based mode, in which all simultaneous
-events in the global event queue are fed into the star at each firing.
+A "count" output is generated when a "demand" input is received.
+When "demand" and "reset" particles arrive at the same time,
+the output is generated before the count is reset.
+The "countUp(or Down)" input is processed before the "demand" input,
+so if there are identical time stamps on these inputs, the increment
+and/or decrement will occur before the output is produced.
+If successive inputs arrive with the same time stamp on any input path,
+they are all processed.
+Special cases, such as an up only counter, can be realized by connecting
+a Null star to the unneeded inputs.
 	}
 	input {
 		name { countUp }
 		type { anytype }
-		desc { Increment internal state. }
 	}
 	input {
 		name { countDown }
 		type { anytype }
-		desc { Decrement internal state. }
 	}
 	input {
 		name { reset }
 		type { anytype }
-		desc { Reset internal state to resetValue. }
 	}
 	input {
 		name { demand }
 		type { anytype }
-		desc { Read internal state and send to output. }
+		desc { Stimulate an output. }
 	}
 	output {
 		name { output }
 		type { int }
-		desc { Internal count value at the time of the demand input. }
 	}
 	defstate {
 		name { resetValue }
 		type { int }
 		default { "0" }
-		desc {  Initial and reset value for the counter. }
+		desc {  Initial value for the counter. }
 	}
 	private {
 		int content;
@@ -73,12 +62,14 @@ events in the global event queue are fed into the star at each firing.
 		countUp.triggers();
 		countDown.triggers();
 		reset.triggers();
+
+		// The following statements hint to the scheduler that
+		// if given a choice, stars feeding data to the countUp,
+		// countDown, and reset inputs should fire before stars
+		// feeding data to the demand input.
 		countUp.before(demand);
 		countDown.before(demand);
 		reset.before(demand);
-
-		setMode(PHASE);
-
 	}
 	start {
 		content = int(resetValue);
@@ -87,21 +78,23 @@ events in the global event queue are fed into the star at each firing.
 		completionTime = arrivalTime;
 
 		// check the countUp/Down input to change the content.
-		if (countUp.dataNew) {
-			content += countUp.numSimulEvents();
-			countUp.dataNew = FALSE;
+		while (countUp.dataNew) {
+			content++;
+			countUp.getSimulEvent();
 		}
-		if (countDown.dataNew) {
-			content -= countDown.numSimulEvents();
-			countDown.dataNew = FALSE;
+		while (countDown.dataNew) {
+			content--;
+			countDown.getSimulEvent();
 		}
 		if (demand.dataNew) {
 			output.put(completionTime) << content;
-			demand.dataNew = FALSE;
 		}
-		if (reset.dataNew) {
-			reset.dataNew = FALSE;
+		// swallow all demand inputs
+		while (demand.dataNew) demand.getSimulEvent();
+
+		while (reset.dataNew) {
 			content = int(resetValue);
+			reset.getSimulEvent();
 		}
 	}
 }
