@@ -87,9 +87,6 @@ protected:
 	// support blockWithName message to access internal block list
 	Block* blockWithName (const char* name);
 
-	// class identification
-	int isA(const char*) const;
-	const char* readClassName() const {return "Galaxy";}
 public:
 
 	// Constructor
@@ -97,6 +94,10 @@ public:
 
 	// destructor
 	~Galaxy ();
+
+	// class identification
+	int isA(const char*) const;
+	const char* readClassName() const {return "Galaxy";}
 
 	// system initialize method.  Derived Galaxies should not
 	// redefine initialize; they should write a start() method
