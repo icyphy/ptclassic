@@ -56,9 +56,6 @@ public:
 	// new toUniversal EventHorizon
 	EventHorizon& newTo() { return *new BDFtoUniversal;}
 
-	// new Geodesic (Node)
-	Geodesic& newNode() { return *new AutoForkNode;}
-
 	// constructor
 	BDFDomain() : Domain("BDF") {subDomains += "SDF" ;}
 };
