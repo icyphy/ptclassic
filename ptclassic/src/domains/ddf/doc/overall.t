@@ -1,5 +1,5 @@
 .\" $Id$
-.VR 0.$Revision$ "November 16, 1990"
+.VR 0.$Revision$ $Date$
 .TI "DDF Domain"
 .AU
 Soonhoi Ha
@@ -16,42 +16,40 @@ In the SDF domain, a
 .c Star
 consumes and produces a fixed number of
 .c Particle s
-per each execution.  The deterministic information on the
+per each invocation.  The deterministic information on the
 number of particles
 for each star
-makes possible a compile-time scheduling.  In the \*(DO domain, 
+makes possible compile-time scheduling.  In the \*(DO domain, 
 however, a star
-may consume or produce varying number of particles
-for each execution.  Therefore, the efficient compile-time
-scheduling is no longer applicable.  Instead,
-.c DDF\ Scheduler
+may consume or produce a varying number of particles
+for each execution.  Therefore, compile-time
+scheduling is no longer applicable.  Instead, a
+run-time scheduler
 detects which stars
-are runnable at runtime and fires them one by one until no
+are runnable and fires them one by one until no
 star is runnable (the system is deadlocked).
 .pp
 Since the \*(DO domain is a superset of the SDF domain,
-all
-.c SDF\ Star s
-are perfectly reasonable stars
+all SDF stars can be used
 in the \*(DO domain. Besides the
-.c SDF\ Star s,
+SDF stars,
 the \*(DO domain has some \*(DO-specific stars
 which will be discussed in this document.
 The \*(DO-specific stars
-overcome the modeling limitation of
+overcome the main modeling limitation of
 the SDF domain.  They can
 model the dynamic constructs such as
 .IE "dynamic construct"
 \fIconditionals\fR, \fIdata-dependent iterations\fR,
 and \fIrecursions\fR.
-The runtime efficiency of the dynamic scheduling is the cost
+.IE conditionals
+.IE iteration
+.IE recursion
+The lower runtime efficiency of dynamic scheduling is the cost
 that we have to pay for the enhanced modeling power. But,
-\*(PT enables us to sacrifice the efficiency little by grouping
-the 
-.c SDF\ Star s
-as a DDF wormhole
-which contains a SDF domain.
-.sp
+\*(PT enables us to sacrifice little efficiency by grouping
+SDF stars as a DDF wormhole
+which contains an SDF domain.
 .H1 "The \\*(DO Scheduler
 .pp
 The scheduler in \*(PT determines the order of execution of
@@ -63,41 +61,38 @@ In this section, we describe the operation of the \*(DO scheduler.
 The basic operation of the DDF scheduler
 is to repeatedly scan the list of stars
 in the domain and execute the runnable stars
-until no more stars
-are runnable.
+until no more stars are runnable.
 There are three groups of runnable conditions for stars
 in the \*(DO domain.
 The first group of the stars
 require the fixed number of particles
 on all input arcs.  Most
-.c SDF\ Star s
-are included in this group.  The scheduler
+SDF stars are included in this group.  The scheduler
 checks all input
 .c PortHole s
 for this group of stars.
 .pp
 The second group of stars
 are the \*(DO-specific stars
-that requires non-deterministic number of particles
+that require a non-deterministic number of particles
 on the input ports.  An example is the 
 .c EndCase 
 star.  The 
 .c EndCase 
 star has one control input and one multiport input for data.
-The control port receives the control value. 
-Depending the control value, 
-the star
+The control port receives a control value. 
+Depending the control value, the star
 selects one input port and routes it
 to the output port.  Therefore, the number of particles
 required for the non-control input ports 
 is dependent on the control value.
 Such stars
 have members called \fIwaitPort\fR and \fIwaitNum\fR.
-.IE "waitPort, ddf"
-.IE "waitNum, ddf"
+.IE "waitPort, DDF"
+.IE "waitNum, DDF"
 To determine whether a star is runnable,
 the scheduler checks whether the input arc
-pointed by the \fIwaitPort\fR has as many particles
+pointed to by the \fIwaitPort\fR has as many particles
 as \fIwaitNum\fR.
 In the
 .c EndCase 
@@ -106,23 +101,25 @@ the \fIwaitPort\fR points to the \fIcontrol\fR input port at the beginning.
 If the \fIcontrol\fR input has enough data, the star
 is fired. When it is fired, it checks the value of the particle
 in the \fIcontrol\fR port, 
-and change the \fIwaitPort\fR pointer to the input port
-which is supposed to be routed to the output port. 
-Then, the star
-is fired again if it has enough data on the input port pointed
-by the \fIwaitPort\fR.  This time, it actually routes the input
-port to the output port.  Another example will be shown in the section 4.
+and changes the \fIwaitPort\fR pointer to the input port
+on which it needs the next particle.
+The star will be
+fired again when it has enough data on the input port pointed
+by \fIwaitPort\fR.  This time, it collects the input particle
+and sends it to the output port.
+Another example will be shown below.
 .pp
 The third group of stars comprises sources.
 Since sources
-are always runnable, they makes the system
-never deadlocked so that the scheduler will never stop.  
-Therefore, we should limit the number of
-firing of those stars
+are always runnable, they ensure that the system
+is never deadlocked, implying that the scheduler will never stop.  
+Therefore, we need to limit the number of
+firings of those stars
 in some way.  We also regard stars with initial particles
 on all input arcs, as sources.
+.pp
 Recall again that the \*(DO domain is a superset of 
-the SDF domain.  It implies that with a given
+the SDF domain.  This implies that with a given
 system topology which contains only
 .c SDF\ Star s,
 we may run the SDF scheduler
@@ -130,113 +127,107 @@ or the DDF scheduler
 to get the exactly same results.
 In the SDF domain, the number of firings of each source star
 is determined after a fairly complicated analysis of the system
-topology at the compile time.  To make matters worse in the \*(DO
+topology at the compile time.  To make matters worse, in the \*(DO
 domain, the non-deterministic behavior of the \*(DO-specific stars
 excludes the possibility of using similar complicated analysis
 to determine the number of firings of the sources.
-The technique we use is the \fIlazy-evaluation\fR technique.
+The technique we use instead is a \fIlazy-evaluation\fR technique.
 .IE "lazy evaluation"
 .pp
 In the \fIlazy-evaluation\fR technique, we fire a star
-when the successor requires any data from it.
+when the successor requires data from it.
 At the beginning of each run of the DDF scheduler, 
-we fire all source stars only once, and declare them as not runnable
-afterwards.  After that, the scheduler starts scanning the list of stars
+we fire all source stars only once, and declare them as not runnable.
+After that, the scheduler starts scanning the list of stars
 in the domain.  If a star
 has some particles
-on some input arcs, but not runnable yet, then the star
+on some input arcs, but is not runnable yet, then the star
 initiates the lazy-evaluation of its ancestors which are connected
 to the input ports
-expecting more data.  
-The lazy-evaluation technique magically generates the same\**
+requiring more data.
+The lazy-evaluation technique generates the same\**
 .(f
-The result is not exactly same in that the order of execution of stars
+The result is not exactly the same in that the order of execution of stars
 may be different.  But, the number of firings of each star is same
-in one iteration.
+in one iteration, and since the SDF and DDF stars all lack side effects,
+the data computed will be identical.
 .)f
 scheduling result as the SDF scheduler
-for any
-.c Galaxy consisting of only
-.c SDF\ Star s.
-Moreover, it clearly defines a "run" (iteration) of the
-.IE "iteration, ddf"
-DDF scheduler.  Suppose a
+for any application consisting of only
+SDF stars, as desired.
+Moreover, it clearly defines what is meant by one iteration.
+.IE "iteration, DDF"
+Suppose a
 .c Wormhole
 contains the \*(DO domain.  And, the outer domain
 sends the input data into the wormhole
-and waits for the output data from it.  With given inputs,
+and waits for the output data from it.  With the given inputs,
 the DDF scheduler
 would run once on the \*(DO domain.  Then, a single run
 of the DDF scheduler
 should generate the output data requested from the outer domain. 
-A "run" of the DDF scheduler
+An iteration of the DDF scheduler therefore
 means that it fires all source stars once beforehand and repeats scanning
 the list of stars
-with lazy-evaluation technique until no more is runnable.
+with the lazy-evaluation technique until no more stars are runnable.
 Note that one iteration of the DDF scheduler will generate the
 same results as one iteration of the SDF scheduler if a given
 system has only SDF stars.
 .pp
-Up to now, we assume that we are given an error-free programs.
-In the SDF domain, the complicated compile scheduling may detect
-the errors and running the program very efficiently at runtime.
+So far, we have assumed that we are given an error-free program.
+In the SDF domain, the compile-time analysis can detect
+errors due to inconsistent rates of production and consumption of tokens.
 On the other hand, in the DDF domain, the sources of errors are
 more diversified and very difficult to be detected at compile time.
-Instead, we would detect the errors at runtime relatively easily.
+Instead, we should detect the errors at runtime.
 The runtime detection of errors has a couple of disadvantages.
-First, it is a very slow mechanism, which will be explained shortly.
-Second, it is not easy to isolate the sources of errors since we
-are just examining the apparent situation.
+First, it is costly, as will be explained shortly.
+Second, it is not easy to isolate the sources of errors.
 .pp
-We can think of two types of errors.  One is infinite waiting.
-If a program has a delay-free loop, the lazy evaluation stages
+Consider two types of errors.  One is infinite waiting.
+If a program has a delay-free loop, the lazy evaluation protocol
 will be spinning forever.  We can detect this type of error
 rather simply by  limiting the depth of the lazy evaluation.
 .IE "inconsistency"
 .IE "consistent graph"
 The other is inconsistency.  We call a dataflow graph \fIconsistent\fR
-if on each arc, in the long run, the same number of tokens are
-consumed as produced.  If a dataflow graph is not consistent, it
-is called (strongly) inconsistent\**.  
+if on each arc, in the long run, the same number of particles are
+consumed as produced \**.
 .(f
-E. A. Lee, "Consistency in Dataflow Graphs," revised from
+\** E. A. Lee, "Consistency in Dataflow Graphs," revised from
 MEMO UCB/ERL M89/125, November 9, 1989, to appear in
 \fIIEEE Transactions on Parallel & Distributed Computing\fR, 1991.
 .)f
 One source of inconsistency
 is the sample-rate mismatch which is common to the SDF domain.
-The DDF domain has more error-sources due to the dynamic behaviour
-of the 
-.c DDF\ Star s.
-In an inconsistent graph, some arc queues an unbounded number
+The DDF domain has more error-sources due to the dynamic behavior
+of DDF stars.
+In an inconsistent graph, an arc may queue an unbounded number
 of tokens in the long run.  Therefore, we examine the number
 of tokens on each arc to detect whether the number is greater than
 a certain limit (default 1024).  If we find an arc with too many tokens,
-we consider it as an error condition and signal an error.
+we consider it an error and halt the execution.
 We can specify the limit by defining a state
 \fImaxBufferSize\fR to the DDF galaxy.
-.IE maxBufferSize, ddf
+.IE "maxBufferSize, DDF"
+.IE "buffer size, DDF"
+.IE "geodesic size, DDF"
 Since the source of inconsistency is not unique, the isolation of
 the error is also improbable.  We can just point out which
-arc has unbounded number of tokens.  What happens if the
-limit is too high?  Some errors would takes very long to
-build tokens more than the limit on an arc.  Thus, the runtime
-error detection is very slow mechanism.
-The enhanced modeling power of the DDF domain has another cost :
-inefficient error detection.  Therefore, we suggest the user
-to check the program carefully before running it in the DDF domain.
-.sp
-.H2 "COMPILE-TIME SCHEDULING OF DYNAMIC CONSTRUCTS
+arc has a large number of tokens.  Of course, if the limit is set too high,
+some errors will take very long to detect.
+.H2 "Compile-time scheduling of dynamic constructs"
 .pp
-The runtime overhead of dynamic scheduling technique is usually 
-very high.  Also, consistency checking process is too slow.
+The runtime overhead of the dynamic scheduling technique is usually 
+quite high.  Also, the consistency checking process is too slow.
 Fortunately, a compile-time scheduling technique has been proposed\**
 for well-known dynamic constructs such as \fIif-then-else\fR, \fIfor\fR,
 \fIdo-while\fR, and \fIrecursion\fR.
 .(f
+\**
 S. Ha and E. A. Lee, "Compile-time Scheduling and Assignment of Dataflow
 Program Graphs with Data-Dependent Iteration",
-\fIto appeare in IEEE trans. on Computers\fR.
+\fIto appear in IEEE trans. on Computers\fR.
 .sp
 S. Ha and E. A. Lee, "Quasi-Static Scheduling for Multiprocessor DSP",
 \fIISCAS\fR, 1991.
@@ -248,38 +239,42 @@ quasi-static schedule.  For example, the scheduler dedicated to
 \fIif-then-else\fR construct generates two star-lists for "true" branch
 and "false" branch respectively.  The star-lists correspond to the
 compile-time schedules.  At runtime, the scheduler examines the
-control value to the construct, then choose the star-list of the chosen
-branch.  By doing this, the runtime decision (also overhead) is minimized.
-Similarly, a dynamic construct is maximally scheduled at compile-time
-except unavoidable runtime decisions.
+control value to the construct, then chooses the star-list to execute.
+By doing this, the runtime overhead is reduced.
+Similarly, a dynamic construct is scheduled at compile-time
+as much as possible, relegating to runtime only unavoidable decisions.
 .pp
-Currently, a dynamic construct is identified automatically by following
-steps.  First, DDF wormholes of SDF domain are created for connected
-SDF stars.  After this step, the DDF scheduler can see only DDF stars
-and DDF wormholes of SDF domain.  Now, SDF stars can be scheduled
+Currently, a recognized
+dynamic construct is identified automatically by the following
+steps.  First, DDF wormholes are created for connected
+SDF stars.  After this step, the DDF scheduler only sees DDF stars
+and DDF wormholes.  Now, the SDF stars can be scheduled
 statically.  Second, the topology of the DDF system is compared
 with those of predefined dynamic constructs.  
-If a match is found, perform the consistency checking procedure.
-Third, replace the DDF scheduler with the dedicated scheduler.
+If a match is found, consistency is checked.
+Third, the DDF scheduler is replaced with a dedicated scheduler.
 If there is no match, the original dynamic scheduler is invoked.
 Four dynamic constructs have been implemented for now.
-In DDF domain, a galaxy became a wormhole (
+.pp
+In addition, in the DDF domain, any galaxy becomes a wormhole\**.
+.(f
+\** The
 .c DDFDomain
 class redefines a method called \fIisGalWorm()\fR to return TRUE.
-By default, this method returns FALSE : we compare the outer and the
-inner domain if a galaxy, and create a wormhole if they are different.)
-This option is helpful to realize a structure of nested dynamic constucts.
-If a DDF subsystem is defined as a galaxy, the subsystem can
-be identified as a dynamic construct.
+By default, this method returns FALSE: normally, we compare the outer and the
+inner domain if a galaxy, and create a wormhole if they are different.
+In this case, we wish to override this a create a wormhole for DDF galaxies
+within DDF galaxies.
+.)f
+This option helps the recognizer identify recognized constructs.
 .pp
-On this line, more changes are expected on the following issues:
+On this line, more changes are expected regarding the following issues:
 .ip 1
-Flexibility to add new dynamic constructs without changing the kernels
-of the DDF domain.
+flexibility to add new dynamic constructs without changing the kernel
+of the DDF domain, and
 .ip 2
-Systematic method to identify a dynamic construct, rather than crude
+systematic methods to identify a dynamic construct, rather than the simplistic
 topology matching idea.
-.sp
 .H1 "Programming Stars in the \\*(DO Domain
 .pp
 There is an attempt to maintain uniformity across
@@ -289,12 +284,12 @@ for the writers of stars
 in that domain.
 This section describes how \*(DO-specific stars
 are programmed in the \*(DO domain.
-For
-.c SDF\ Star s,
+There is also some information included in the Almagest section on
+the \*(PT preprocessor.
+For SDF stars,
 refer to the SDF section of the manual.
 .pp
-A
-.c DDF\ Star
+A DDF star, as distinct from an SDF star,
 .IE "DDF Star"
 has at least one porthole,
 either input or output, that receives or sends a non-deterministic
@@ -302,19 +297,18 @@ number of particles.
 Such portholes
 are called \fIdynamic\fR.
 .IE "dynamic porthole"
-For the
-.c DDF\ Star ,
+Consequently, for a DDF star,
 how many particles
 to read or write is determined at runtime, in the \fIgo()\fR method.
-Let's look at an example\** :
-.c LastOfN\ 
+Consider an example\**: the
+.c LastOfN
 star.
 .(f
 This is a preprocessor format of the star.  Refer to the ptlang section
 of the manual for the preprocessor language.  Also some lines are omitted
 since they are not relevant to the discussion.
 .)f
-.(c
+.(d
 defstar {
 	name {LastOfN}
 	domain {DDF}
@@ -379,7 +373,7 @@ where N is the control input.
            }
 	}
 }
-.)c
+.)d
 The
 .c LastOfN
 star
@@ -387,53 +381,49 @@ discards the first \fIN-1\fR particles
 from the \fIinput\fR porthole
 and routes the last one to the \fIoutput\fR porthole .
 The value \fIN\fR is read from the \fIcontrol\fR input.
-Since the control data is varying, the number of particles
+Since the control data varies, the number of particles
 to read from the \fIinput\fR porthole
-is non-deterministic, which makes this star a
-.c DDF\ Star .
+is non-deterministic, as expected for a DDF star.
 We can specify that the \fIinput\fR porthole
 is \fIdynamic\fR by setting the 
 .c num
 field of the
 .c input
-declaration to be \fI0\fR in the preprocessor format :
+declaration to be \fI0\fR in the preprocessor format:
 .(c
 num {0}
 .)c
 The firing condition of the star is controlled by the
-\fIwaitPort\fR, and \fIwaitNum\fR members of the
-.c DDF\ Star
-as discussed in section 2.  The \fIwaitFor()\fR method
+\fIwaitPort\fR, and \fIwaitNum\fR members of the star,
+as discussed above.  The \fIwaitFor()\fR method
 sets these members.
-This star
-has also a 
+This star also has a 
 .c private
 member called \fIreadyToGo\fR. The \fIreadyToGo\fR flag
-is set TRUE when the \fIwaitPort\fR points to the \fIinput\fR porthole .
+is set TRUE when the \fIwaitPort\fR points to the \fIinput\fR porthole.
 Initially, the star
 waits for the control data, and sets \fIreadyToGo\fR flag FALSE
 (see the above).  When it is fired, it first checks the flag.
 If the flag is set FALSE, meaning that it waits for the control data,
 it reads the control data from the \fIcontrol\fR input and decides
 how many particles
-it needs from the \fIinput\fR porthole . 
+it needs from the \fIinput\fR porthole. 
 Then, it changes the \fIwaitPort\fR pointer to the \fIinput\fR porthole
-with appropriate value for the \fIwaitNum\fR, and set the
-\fIreadyToGo\fR flag TRUE.  
-If the flag is set TRUE when fired, it means that
-the \fIinput\fR porthole 
-has enough particles.
-Therefore, it discards the first \fIN-1\fR inputs and copies the
-last input to the output port.  Then, it goes into the next round :
-sets the \fIwaitPort\fR pointer to the \fIcontrol\fR porthole
+with appropriate value for the \fIwaitNum\fR, and sets the
+\fIreadyToGo\fR flag TRUE.
+If the flag is set TRUE when the star is fired, this means that
+the \fIinput\fR porthole has enough particles.
+By this mechanism, it discards the first \fIN-1\fR inputs and copies the
+last input to the output port.
+Then, it goes into the next round:
+the star sets the \fIwaitPort\fR pointer to the \fIcontrol\fR porthole
 and set the \fIreadyToGo\fR flag FALSE.
 .pp
-The next example is a 
-.c DDF\ Star
-with a dynamic output porthole:
+The next example is a DDF star
+with a dynamic output porthole: a
 .c DownCounter 
 star.
-.(c
+.(d
 defstar {
 	name {DownCounter}
 	domain {DDF}
@@ -465,24 +455,26 @@ defstar {
            }
 	}
 }
-.)c
+.)d
 The
 .c DownCounter 
 star has a dynamic \fIoutput\fR porthole
 which will generate the down-counter sequence of integer data
-starting from the value read through the \fIinput\fR porthole .
+starting from the value read through the \fIinput\fR porthole.
 The code in the \fIgo()\fR method is self-explanatory.
 .H2 "DDFSelf Star For Recursion
 .pp
 There is a special star
-in the \*(DO domain to realize the recursion construct :
+in the \*(DO domain to realize the recursion construct: the
 .IE "recursion"
 .c DDFSelf 
 star.
+This is an experimental facility, useful primarily for demonstrating that
+recursion is feasible.
 .IE "DDFSelf Star"
 At compile time, it is just an atomic star.
-But, if it is fired at runtime, it creates a galaxy
-dynamically, executes and destroys the galaxy.
+But, when it is fired at runtime, it creates a galaxy
+dynamically, executes, and destroys the galaxy.
 The galaxy
 is a clone of the galaxy named by the \fIrecurGal\fR parameter.
 The
@@ -498,7 +490,7 @@ which is given by the programmer.
 .pp
 At runtime, the
 .c DDFSelf
-star creates a clone galaxy of the recursion-galaxy pointed by the \fIgal\fR
+star creates a clone galaxy pointed to by the \fIgal\fR
 pointer.  The galaxy may be a clone of the one containing the
 .c DDFSelf
 star, achieving recursion.
@@ -508,20 +500,19 @@ The portholes
 of the
 .c DDFSelf
 star are connected not only to the other stars
-but also to the galaxy
-just created.
+but also to the galaxy just created.
 After connections are set up, it receives the input data from
 the outside and pass them in to the galaxy.
 It runs the DDF scheduler
 in the galaxy
-and gather-and-sends the output data from the galaxy 
+and gathers-and-sends the output data from the galaxy 
 to the outside.
 Finally, it destroys the galaxy which it created.
-The runtime efficiency is quite low since a lot of memory
+.pp
+The runtime efficiency of this mechanism is quite low since a lot of memory
 management is involved in the creation and deletion of
-the galaxy
-and the DDF scheduler.
-Further research is in progress to increase the performance.
+the galaxy and the corresponding DDF scheduler.
+Further research is in progress to implement a leaner mechanism.
 .H1 "EventHorizon in the \\*(DO Domain
 .pp
 The mixture of the \*(DO domain with other domains
@@ -538,7 +529,7 @@ or removal of redundant repetitions of identical particles,
 and so forth.
 .pp
 The general mechanism of the domain interface is described in
-the document, "\fBDomains in Ptolemy\fR".
+the Almagest section, "\fBDomains in Ptolemy\fR".
 The standard functions of
 .c EventHorizon s
 are also fully discussed in the document.  Refer to the
@@ -560,13 +551,11 @@ consists of a
 and a
 .c DDFfromUniversal\ EventHorizon .
 The DDF wormhole
-looks exactly like a
-.c DDF\ Star
+looks exactly like a DDF star
 from the \*(DO domain.  But, we require that it be a
-.c DDF\ Star
-without dynamic input portholes.
+DDF star without dynamic input portholes.
 Therefore, it is fired when all input ports
-have enough particles. When it is fired, it receives the data
+have enough particles.  When it is fired, it receives the data
 from the outside, initiates the scheduler
 of the inner domain, and sends the output data packets to the
 outer domain.
@@ -576,9 +565,10 @@ DDF scheduler.
 .H2 "DDFtoUniversal EventHorizon
 .pp
 .IE "DDFtoUniversal"
-DDFtoUniveral EventHorizon
+The
+.c DDFtoUniveral\ EventHorizon
 transfers the incoming data packets from the DDF domain
-to the paired 
+to the paired
 .c FromEventHorizon
 of the other domain.  
 Since the \*(DO domain is an untimed domain, it sets the
