@@ -37,7 +37,7 @@ TYDOC_DESC =
 all install: sources $(MISC_SRCS) tclIndex
 
 # Make the shell script/s executable
-sources::
+sources:: %pkg%
 	chmod a+x %pkg%
 
 # We don't include common.mk since we don't use the compiler here
