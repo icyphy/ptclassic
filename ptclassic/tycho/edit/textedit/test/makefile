@@ -44,6 +44,7 @@ TCL_SRCS =
 GRAPHICAL_TESTS = \
 	testEditC.itcl \
 	testEditHTML.itcl \
+	testEditItcl.itcl \
 	testFiles.itcl \
 	testPtWidgets.itcl \
 	testWidgets.itcl
@@ -61,6 +62,7 @@ MISC_FILES = \
 	DrawTest.java \
 	PtclTestFile.pt \
 	SDFMyRamp.pl \
+	evalTest.itcl \
 	myTclCmd.c \
 	wristwatch.strl \
 	ItclClassListA.itcl \
