@@ -61,7 +61,6 @@ deallocating memory for the objects, etc.
 
 class Link {
 friend class LinkedList;
-friend class ListIter;
 protected:
     Link *next,*previous;
     Pointer e;
@@ -71,7 +70,6 @@ protected:
 
 class LinkedList
 {
-	friend class ListIter;
 public:
 	// destructor
 	~LinkedList()  { initialize(); }
