@@ -253,7 +253,9 @@ body ::tycho::EditHTML::help {} {
 #
 body ::tycho::EditHTML::insertAndMove {text offset} {
     insertString insert $text
-    [textWinName] mark set insert [list insert $offset chars]
+    if { $offset != 0} {
+        [textWinName] mark set insert [list insert $offset chars]
+    }
 }
 
 #####################################################################
@@ -430,13 +432,228 @@ body ::tycho::EditHTML::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
     chain $menubar $statusbar $toolbar
 
     if {$menubar != {}} {
-        # Add to the format menu commands to comment and uncomment
-        # the regions defined by the selection.
+	# Set up bindings
+	set text $itk_component(text)
+
         menubar add separator formatsep3 format
         
         menubar command recolorize format \
 		-label "Recolorize" -underline 0 \
                 -command "$this parseRegion 1.0 end"
+
+        menubar add separator formatsep4 format
+
+	# These keys are special in HTML
+        menubar add cascade chars format -label "Characters"
+
+        menubar command ampersand chars -label "Ampersand (&)" \
+		-accelerator "C-c &" \
+		-command "$this insertString insert {&amp;}"
+	bind $text <Control-c><Key-ampersand> \
+		"$this menubar invoke ampersand; break"
+
+        menubar command greaterthan chars -label "Greater Than (>)" \
+		-accelerator "C-c >" \
+		-command "$this insertString insert {&gt;}"
+	bind $text <Control-c><Key-greater> \
+		"$this menubar invoke greaterthan; break"
+
+        menubar command lessthan chars -label "Less Than (<)" \
+		-accelerator "C-c <" \
+		-command "$this insertString insert {&lt;}"
+	bind $text <Control-c><Key-less> \
+		"$this menubar invoke lessthan; break"
+
+        menubar command backslash chars -label "Backslash(\\)" \
+		-accelerator "C-c \\" \
+		-command "$this insertString insert {&#92;}"
+	bind $text <Control-c><Key-backslash> \
+		"$this menubar invoke backslash; break"
+
+	# HTML blocks
+        menubar add cascade blocks format -label "Blocks"
+
+        menubar command address blocks -label "Address" \
+		-accelerator "C-c a" \
+		-command "$this insertAndMove {\n<address></address>} -10"
+	bind $text <Control-c><Key-a> \
+		"$this menubar invoke address; break"
+
+        menubar command blockquote blocks -label "Blockquote" \
+		-accelerator "C-c b" \
+		-command "$this insertAndMove {\n<blockquote></blockquote>} -13"
+        bind $text <Control-c><Key-b> \
+                "$this menubar invoke blockquote; break"
+
+        menubar command displaylist blocks -label "Description List" \
+		-accelerator "C-c d" \
+		-command "$this insertAndMove {\n<dl>\n<dt>\n<dd>\n</dl>} -6"
+        bind $text <Control-c><Key-d> \
+                "$this menubar invoke displaylist; break"
+
+        menubar command displayitem blocks -label "Description Entry" \
+		-accelerator "C-c e" \
+		-command "$this insertAndMove {\n<dt>\n<dd>} -5"
+        bind $text <Control-c><Key-e> \
+                "$this menubar invoke displayitem; break"
+
+        menubar command image blocks -label "Image" \
+		-accelerator "C-c g" \
+		-command "$this insertAndMove {<img src=\"\">} -2"
+        bind $text <Control-c><Key-g> \
+                "$this menubar invoke image; break"
+
+        menubar command header1 blocks -label "1Header" \
+		-accelerator "C-c h" \
+		-command "$this insertAndMove {\n<h1></h1>\n} -6"
+        bind $text <Control-c><Key-h><Key-1> \
+                "$this menubar invoke header1; break"
+
+        menubar command header2 blocks -label "2Header" \
+		-accelerator "C-c h" \
+		-command "$this insertAndMove {\n<h2></h2>\n} -6"
+        bind $text <Control-c><Key-h><Key-2> \
+                "$this menubar invoke header2; break"
+
+        menubar command header3 blocks -label "3Header" \
+		-accelerator "C-c h" \
+		-command "$this insertAndMove {\n<h3></h3>\n} -6"
+        bind $text <Control-c><Key-h><Key-3> \
+                "$this menubar invoke header3; break"
+
+        menubar command header4 blocks -label "4Header" \
+		-accelerator "C-c h" \
+		-command "$this insertAndMove {\n<h4></h4>\n} -6"
+        bind $text <Control-c><Key-h><Key-4> \
+                "$this menubar invoke header4; break"
+
+
+        menubar command hyperlink blocks -label "Hyperlink" \
+		-accelerator "C-c l" \
+		-command "$this insertAndMove {<a href=\"\"></a>} -6"
+        bind $text <Control-c><Key-l> \
+                "$this menubar invoke hyperlink; break"
+
+        menubar command menu blocks -label "Menu" \
+		-accelerator "C-c m" \
+		-command "$this insertAndMove {\n<menu>\n<li> \n</menu>} -8"
+        bind $text <Control-c><Key-m> \
+                "$this menubar invoke menu; break"
+
+        menubar command numberedlist blocks -label "Numbered List" \
+		-accelerator "C-c n" \
+		-command "$this insertAndMove {\n<ol>\n<li> \n</ol>} -6"
+        bind $text <Control-c><Key-n> \
+                "$this menubar invoke numberedlist; break"
+
+        menubar command unumberedlist blocks -label "Unnumbered List" \
+		-accelerator "C-c s" \
+		-command "$this insertAndMove {\n<ul>\n<li> \n</ul>} -6"
+        bind $text <Control-c><Key-s> \
+                "$this menubar invoke unnumberedlist; break"
+
+        menubar command listitem blocks -label "List Item" \
+		-accelerator "C-c i" \
+		-command "$this insertAndMove {\n<li> } 0"
+        bind $text <Control-c><Key-i> \
+                "$this menubar invoke listitem; break"
+
+
+        menubar command paragraph blocks -label "Paragraph" \
+		-accelerator "C-c p" \
+		-command "$this insertAndMove {\n<p>} 0"
+        bind $text <Control-c><Key-p> \
+                "$this menubar invoke paragraph; break"
+
+        menubar command reference blocks -label "Reference" \
+		-accelerator "C-c r" \
+		-command "$this insertAndMove {<a name=\"\"></a>} -6"
+        bind $text <Control-c><Key-r> \
+                "$this menubar invoke reference; break"
+
+        menubar command preformatted blocks -label "Preformatted" \
+		-accelerator "C-c C-p" \
+		-command "$this insertAndMove {\n<pre>\n</pre>} -7"
+        bind $text <Control-c><Control-p> \
+                "$this menubar invoke preformatted; break"
+
+
+        menubar command title blocks -label "Title" \
+		-accelerator "C-c t" \
+		-command "$this insertAndMove {\n<title></title>} -8"
+        bind $text <Control-c><Key-t> \
+                "$this menubar invoke title; break"
+
+        menubar command plaintext blocks -label "Plaintext" \
+		-accelerator "C-c x" \
+		-command "$this insertAndMove {<xmp>\n</xmp>} -6"
+        bind $text <Control-c><Key-x> \
+                "$this menubar invoke plaintext; break"
+        
+        # Various fonts
+        menubar add cascade fonts format -label "Fonts"
+
+        menubar command bold fonts -label "Bold" \
+		-accelerator "C-c C-b" \
+		-command "$this insertAndMove {<b></b>} -4"
+        bind $text <Control-c><Control-b> \
+                "$this menubar invoke bold; break"
+
+        menubar command code fonts -label "Code" \
+		-accelerator "C-c c" \
+		-command "$this insertAndMove {<code></code>} -7"
+        bind $text <Control-c><Key-c> \
+                "$this menubar invoke code; break"
+
+        menubar command italic fonts -label "Italic" \
+		-accelerator "C-c Tab" \
+		-command "$this insertAndMove {<i></i>} -4"
+        bind $text <Control-c><Tab> \
+                "$this menubar invoke italic; break"
+
+        menubar command sample fonts -label "Sample" \
+		-accelerator "C-c Ret" \
+		-command "$this insertAndMove {<samp></samp>} -7"
+        bind $text <Control-c><Return> \
+                "$this menubar invoke sample; break"
+
+
+        menubar command cite fonts -label "Cite" \
+		-accelerator "C-c C-c" \
+		-command "$this insertAndMove {<cite></cite>} -7"
+        bind $text <Control-c><Control-c> \
+                "$this menubar invoke cite; break"
+
+        menubar command emphasis fonts -label "Emphasis" \
+		-accelerator "C-c C-e" \
+		-command "$this insertAndMove {<em></em>} -5"
+        bind $text <Control-c><Control-e> \
+                "$this menubar invoke emphasis; break"
+
+        menubar command fixed fonts -label "Fixed" \
+		-accelerator "C-c C-f" \
+		-command "$this insertAndMove {<tt></tt>} -5"
+        bind $text <Control-c><Control-f> \
+                "$this menubar invoke fixed; break"
+
+        menubar command keyboard fonts -label "Keyboard" \
+		-accelerator "C-c C-k" \
+		-command "$this insertAndMove {<kbd></kbd>} -6"
+        bind $text <Control-c><Control-k> \
+                "$this menubar invoke keyboard; break"
+
+        menubar command strong fonts -label "Strong" \
+		-accelerator "C-c C-s" \
+		-command "$this insertAndMove {<strong></strong>} -9"
+        bind $text <Control-c><Control-s> \
+                "$this menubar invoke strong; break"
+
+        menubar command variable fonts -label "Variable" \
+		-accelerator "C-c C-v" \
+		-command "$this insertAndMove {<var></var>} -6"
+        bind $text <Control-c><Control-v> \
+                "$this menubar invoke variable; break"
+        
         
         menubar add separator editsep4 edit
         
@@ -447,78 +664,8 @@ body ::tycho::EditHTML::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
         menubar command filetemplate special \
 		-label "File Template" -underline 0 \
                 -command "$this fileTemplate"
+
     }
-
-    # Set up bindings
-    set text $itk_component(text)
-
-    # These keys are special in HTML
-    bind $text <Control-c><Key-ampersand> \
-	    "$this insertString insert {&amp;};break"
-    bind $text <Control-c><Key-greater> \
-	    "$this insertString insert {&gt;}; break"
-    bind $text <Control-c><Key-less> \
-	    "$this insertString insert {&lt;}; break"
-    bind $text <Control-c><Key-backslash> \
-	    "$this insertString insert {&#92;}; break"
-
-    bind $text <Control-c><Key-a> \
-	    "$this insertAndMove {<address></address>} -10; break"
-    bind $text <Control-c><Key-b> \
-	    "$this insertAndMove {<blockquote></blockquote>} -14; break"
-    bind $text <Control-c><Key-c> \
-	    "$this insertAndMove {<code></code>} -8; break"
-    bind $text <Control-c><Key-d> \
-	    "$this insertAndMove {<dl>\n<dt>\n<dd>\n</dl>} -7; break"
-    bind $text <Control-c><Key-e> \
-	    "$this insertAndMove {<dt>\n<dd>} -5; break"
-    bind $text <Control-c><Key-g> \
-	    "$this insertAndMove {<img src=\"\">} -2; break"
-    bind $text <Control-c><Key-h> \
-	    "$this insertAndMove {\n<h2></h2>\n} 6; break"
-    bind $text <Control-c><Key-i> \
-	    "$this insertAndMove {\n<li> } 0; break"
-    bind $text <Control-c><Key-l> \
-	    "$this insertAndMove {<a href=\"\"></a>} -8; break"
-    bind $text <Control-c><Key-m> \
-	    "$this insertAndMove {<menu>\n<li> \n</menu>} -8; break"
-    bind $text <Control-c><Key-n> \
-	    "$this insertAndMove {<ol>\n<li> \n</ol>} -6; break"
-    bind $text <Control-c><Key-p> \
-	    "$this insertAndMove {<p>} 0; break"
-    bind $text <Control-c><Key-r> \
-	    "$this insertAndMove {<a name=\"\"></a>} -6; break"
-    bind $text <Control-c><Key-s> \
-	    "$this insertAndMove {<ul>\n<li> \n</ul>} -6; break"
-    bind $text <Control-c><Key-t> \
-	    "$this insertAndMove {<title></title>} -6; break"
-    bind $text <Control-c><Key-x> \
-	    "$this insertAndMove {<xmp>\n</xmp>} -6; break"
-
-    # Various fonts
-    bind $text <Control-c><Tab> \
-	    "$this insertAndMove {<i></i>} -4; break"
-    bind $text <Control-c><Return> \
-	    "$this insertAndMove {<samp></samp>} -7; break"
-    bind $text <Control-c><Control-b> \
-	    "$this insertAndMove {<b></b>} -4; break"
-    bind $text <Control-c><Control-c> \
-	    "$this insertAndMove {<cite></cite>} -5; break"
-    bind $text <Control-c><Control-e> \
-	    "$this insertAndMove {<em></em>} -5; break"
-    bind $text <Control-c><Control-f> \
-	    "$this insertAndMove {<tt></tt>} -5; break"
-    bind $text <Control-c><Control-k> \
-	    "$this insertAndMove {<kbd></kbd>} -6; break"
-    bind $text <Control-c><Control-l> \
-	    "$this insertAndMove {<pre>\n</pre>} -7; break"
-    bind $text <Control-c><Control-p> \
-	    "$this insertAndMove {<pre>\n</pre>} -7; break"
-    bind $text <Control-c><Control-s> \
-	    "$this insertAndMove {<strong></strong>} -9; break"
-    bind $text <Control-c><Control-v> \
-	    "$this insertAndMove {<var></var>} -6; break"
-
 }
 
 #####################################################################
