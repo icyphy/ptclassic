@@ -85,6 +85,9 @@ if {![info exists ptolemy]} {
 global tychokernel
 set tychokernel $tycho/kernel
 
+global tycholib
+set tycholib $tycho/lib
+
 # Check to see whether the usual exit mechanism (where we exit
 # if there are no more windows) is enabled.
 if {![info exists tychoExitWhenNoMoreWindows]} {
@@ -114,6 +117,10 @@ if [file isdirectory $PTOLEMY/tcltk/itcl/lib] {
 }
 uplevel #0 {
     source $tychokernel/Lib.tcl
+}
+
+uplevel #0 {
+    source $tycholib/lib.tcl
 }
 
 if {![info exists tychoWelcomeWindow]} {
