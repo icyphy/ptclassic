@@ -1,7 +1,7 @@
 # Definition of an itcl context-sensitive editor.
 #
-# @Author: Edward A. Lee
-#
+# @Authors: Edward A. Lee, Christopher Hylands
+# 
 # @Version: $Id$
 #
 # @Copyright (c) 1995-%Q% The Regents of the University of California.
@@ -63,13 +63,15 @@ body ::tycho::EditItcl::constructor {args} {
     addMenu Special left Window -underline 0
 
 
-    addMenuItem "Method Template" Special -underline 0 \
-	    -command "\[$this component text\] methodTemplate"
+    addMenuItem "Body Template" Special -underline 0 \
+	    -command "\[$this component text\] bodyTemplate"
 
     addMenuItem "File Template" Special -underline 0 \
 	    -command "\[$this component text\] fileTemplate"
 
-    addMenuItem "Generate HTML" Special -underline 0 \
+    addMenuSeparator Special
+
+    addMenuItem "Generate doc" Special -underline 0 \
 	    -command "\[$this component text\] tydoc"
 
     eval itk_initialize $args
