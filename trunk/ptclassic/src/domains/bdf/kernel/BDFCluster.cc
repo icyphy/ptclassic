@@ -73,6 +73,7 @@ static const char file_id[] = "BDFCluster.cc";
 #include "DynDFScheduler.h"
 #include "Error.h"
 #include "miscFuncs.h"
+#include <stdio.h>              // sprintf()
 #include <assert.h>
 
 // A BDFClusterGal is a Galaxy, built from another galaxy.
