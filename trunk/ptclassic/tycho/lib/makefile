@@ -42,4 +42,4 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 # Include rules for directories that contain only subdirectories.
-include $(ROOT)/tydir.mk
+include $(ROOT)/mk/tydir.mk
