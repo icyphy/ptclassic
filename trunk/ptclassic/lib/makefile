@@ -38,7 +38,8 @@ SCRIPT_SRCS = pigiDebugRpc pigiRpcConsole \
 	pigiRpcDebug pigiRpcDebug.dbx pigiRpcDebug.ddd pigiRpcDebug.xdb \
 	pigiRpcShell
 
-EXTRA_SRCS = CompileMake.template README \
+EXTRA_SRCS = $(SCRIPT_SRCS) \
+	CompileMake.template README \
 	oct2ps.pro \
 	pigiXRes7 pigiXRes8 pigiXRes8.bw pigiXRes8.cp \
 	pigiXRes9 pigiXRes9.bw pigiXRes9.cp startPigiRpc \
@@ -52,7 +53,7 @@ MISC_FILES = 	Vem Vem-8.1 Vem-8.2 bw_patterns \
 LIBR = dummy
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all: $(SCRIPT_SRCS) $(EXTRA_SRCS) $(MISC_FILES)
+all: sources $(EXTRA_SRCS) $(MISC_FILES)
 	-chmod a+x $(SCRIPT_SRCS)
 
 install: all
