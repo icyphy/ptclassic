@@ -29,7 +29,7 @@ data value from the current input packet is output.
 	}
 	protected {
 		int idx;
-		FloatVecData* currentPacket;
+		const FloatVecData* currentPacket;
 		float lastOutput;
 	}
 	constructor {
@@ -52,7 +52,7 @@ data value from the current input packet is output.
 					pkt.typeError("FloatVecData"));
 				return;
 			}
-			currentPacket = (FloatVecData*)pkt.myData();
+			currentPacket = (const FloatVecData*)pkt.myData();
 		}
 		if (demand.dataNew) {
 			// need to write new output
