@@ -49,6 +49,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGUtilities.h"
 #include "pt_fstream.h"
 #include "SimControl.h"
+#include "KnownBlock.h"
 #include <stream.h>
 #include <time.h>
 #include <string.h>
@@ -89,6 +90,14 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 CGTarget::~CGTarget() {
 	delSched();
 	LOG_DEL; delete schedFileName;
+
+	ListIter next(spliceList);
+	Block* b;
+	while ((b = (Block*)next++) != 0) {
+		// prevent some galaxy types from deleting b twice.
+		galaxy()->removeBlock(*b);
+		LOG_DEL; delete b;
+	}
 }
 
 // dummy functions that perform parts of setup.
@@ -467,5 +476,51 @@ void CGTarget :: switchCodeStream(Block* b, CodeStream* cs) {
 // do I support a given star
 int CGTarget :: support(Star* s) {
 	return (s->isA(starType()) || s->isA(auxStarClass()));
+}
+
+// splice star "name" to the porthole p.
+Block* CGTarget::spliceStar(PortHole* p, const char* name,
+				int delayBefore, const char* dom)
+{
+	PortHole* pfar = p->far();
+	int ndelay = p->numInitDelays();
+	p->disconnect();
+	if (p->isItOutput()) {
+		PortHole* t = p;
+		p = pfar;
+		pfar = t;
+	}
+	
+	// p is now an input port.
+	Block* newb = KnownBlock::clone(name,dom);
+	if (newb == 0) {
+		Error::abortRun("failed to clone a ", name, "!");
+		return 0;
+	}
+	PortHole* ip = newb->portWithName("input");
+	PortHole* op = newb->portWithName("output");
+	if (ip == 0 || op == 0) {
+		Error::abortRun(name, " has the wrong interface for splicing");
+		LOG_DEL; delete newb;
+		return 0;
+	}
+
+	// connect up the new star
+	pfar->connect(*ip,delayBefore ? ndelay : 0);
+	op->connect(*p,delayBefore ? 0 : ndelay);
+
+	// save in the list of spliced stars
+	spliceList.put(newb);
+
+	// initialize the new star.  Name it and add it to the galaxy.
+	// using size of splice list in name forces unique names.
+	StringList newname("splice-");
+	newname << newb->className() << "-" << spliceList.size();
+	galaxy()->addBlock(*newb,hashstring(newname));
+	newb->initialize();
+
+	// check errors in initialization
+	if (Scheduler::haltRequested()) return 0;
+	return newb;
 }
 
