@@ -6,7 +6,6 @@ $Id$
                        All Rights Reserved.
 
  Programmer: J. Pino
-	Modified code from S56XTarget.h
 
  Target for Ariel S-56X DSP board.
 
@@ -18,19 +17,21 @@ $Id$
 #pragma interface
 #endif
 
-#include "Sim56Target.h"
+#include "CG56Target.h"
 #include "StringState.h"
 #include "IntState.h"
 
-class S56XTarget : public Sim56Target {
+class S56XTarget : public CG56Target {
 private:
 	void initStates();
+protected:
+	StringList aio;
+	IntState runCode;
 public:
 	S56XTarget(const char*,const char*);
 	S56XTarget(const S56XTarget&);
 	void headerCode();
-	int setup(Galaxy&);
-	void wrapup();
+ 	void wrapup();
 	Block* clone() const;
 	void addCode(const char*);
 	int isA(const char*) const;

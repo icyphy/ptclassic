@@ -22,29 +22,21 @@ $Id$
 #include "StringState.h"
 #include "IntState.h"
 
-char* makeLower(const char*);
-
 class Sim56Target : public CG56Target {
 private:
-	virtual void initStates();
+	void initStates();
 protected:
-	char* uname;
-	StringList cmds;
-	StringState dirName;
 	StringState plotFile;
 	StringState plotTitle;
 	StringState plotOptions;
-	IntState disCode;
 	IntState simCode;
 public:
 	Sim56Target(const char*,const char*);
 	Sim56Target(const Sim56Target&);
-	~Sim56Target();
 	void headerCode();
 	int setup(Galaxy&);
 	void wrapup();
 	Block* clone() const;
-	void addCode(const char*);
 	int isA(const char*) const;
 };
 
