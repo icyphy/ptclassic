@@ -147,12 +147,12 @@ BDFTARGETS =	$(CGT)/CGBDFTarget.o $(CGCT)/main/CGCBDFTarget.o
 CG56TARGETS =	$(CG56T)/Sim56Target.o $(CG56T)/S56XTarget.o $(S56WH_O)\
 		$(CG56T)/Sub56Target.o $(CG56T)/CG56MultiSimTarget.o \
 		$(CG56T)/CG56MultiSimSend.o $(CG56T)/CG56MultiSimReceive.o \
-		$(CG56T)/CG56XCSReceive.o $(CG56T)/CG56XCSSend.o \
-		$(CG56T)/CG56XCAReceive.o $(CG56T)/CG56XCASend.o \
-		$(CG56T)/CGCXSReceive.o $(CG56T)/CGCXSSend.o \
-		$(CG56T)/CGCXAReceive.o $(CG56T)/CGCXASend.o \
-	 	$(CG56T)/CGCXSBase.o $(CG56T)/CG56XCSBase.o \
-		$(CG56T)/CGCXABase.o $(CG56T)/CG56XCABase.o \
+		$(CG56T)/CG56XCReceive.o $(CG56T)/CG56XCSend.o \
+		$(CG56T)/CG56XCPeek.o $(CG56T)/CG56XCPoke.o \
+		$(CG56T)/CGCXReceive.o $(CG56T)/CGCXSend.o \
+		$(CG56T)/CGCXPeek.o $(CG56T)/CGCXPoke.o \
+	 	$(CG56T)/CGCXSynchComm.o $(CG56T)/CG56XCSynchComm.o \
+		$(CG56T)/CGCXAsynchComm.o $(CG56T)/CG56XCAsynchComm.o \
 		$(CG56T)/CGCXBase.o  $(CG56T)/CGCS56XTarget.o
 CG96TARGETS =	$(CG96T)/Sim96Target.o
 CGCcm5TARGETS =	$(CGCT)/cm5/CGCcm5Send.o $(CGCT)/cm5/CGCcm5Recv.o \
