@@ -436,8 +436,8 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 
     if (!isAcyclic(&gal,0)) {
 	message << "Graph is not acyclic; this loop scheduler cannot be used. "
-		<< "Set the looping level parameter in the target to 0, 1, or "
-		<< "2 and rerun the universe.\n";
+		<< "Set the looping level parameter in the target to DEF, "
+		<< "CLUST, or SJS and rerun the universe.\n";
 	Error::abortRun(message);
 	return FALSE;
     }
