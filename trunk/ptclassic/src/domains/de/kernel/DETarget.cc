@@ -92,3 +92,6 @@ Block* DETarget :: makeNew() const  {
 
 DETarget :: ~DETarget() { delSched();}
 
+const char* DETarget :: domain() {
+	return galaxy() ? galaxy()->domain() : "DE";
+}
