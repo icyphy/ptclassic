@@ -404,13 +404,16 @@ const char* Target::domain() const {
 	else return Block::domain();
 }
 
-//The default implentation of this function for different Targets 
+// For a target within a Wormhole, if this method returns TRUE
+// and the outside domain is timed, then the target will be
+// fired again at the time returned by the nextFiringTime method.
+// In this base class, always return FALSE.
 int Target::selfFiringRequested() {
 return FALSE;
 }
 
-//If self firing is required, then the function should return the time for 
-//next firing. This is the default definition of the function
+// If selfFiringRequested returns TRUE, return the time at which
+// this firing is requested.
 double Target::nextFiringTime() {
 return 0.0;
 }
