@@ -50,7 +50,9 @@ public:
 	// class identification
 	int isA(const char*) const;
 
-	void setBufName(char* n) {delete [] bufName; bufName = savestring(n);}
+	void setBufName(const char* n) {
+		delete [] bufName; bufName = savestring(n);
+	}
 	char* getBufName() const;
 
 	// make large the wasteFactor
