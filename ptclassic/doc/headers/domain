@@ -189,6 +189,26 @@ delim off
 .if \\n(Ic .uh "\\f\\n(SXLOCATION:\\fR \\$1	\\f\\n(SXICON:\\fR"
 .nr Im 0
 .\"
+.if \\n(Ic .if '\\$1'DE main library' \{\
+.Ps /usr/users/ptolemy/src/domains/de/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'DE main palette' \{\
+.Ps /usr/users/ptolemy/src/domains/de/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'DE logic library' \{\
+.Ps /usr/users/ptolemy/src/domains/de/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'~ptolemy/src/domains/de/demo' \{\
+.Ps /usr/users/ptolemy/src/domains/de/demo/\\*(NM.ps 1i
+.nr Im 1 \}
+.\"
+.if \\n(Ic .if '\\$1'DDF library' \{\
+.Ps /usr/users/ptolemy/src/domains/ddf/icons/\\*(NM.ps 1i
+.nr Im 1 \}
+.if \\n(Ic .if '\\$1'~ptolemy/src/domains/ddf/demo' \{\
+.Ps /usr/users/ptolemy/src/domains/ddf/demo/\\*(NM.ps 1i
+.nr Im 1 \}
+.\"
 .if \\n(Ic .if '\\$1'CG56 arithmetic library' \{\
 .Ps /usr/users/ptolemy/src/domains/cg56/icons/\\*(NM.ps 1i
 .nr Im 1 \}
