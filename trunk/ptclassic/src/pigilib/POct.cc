@@ -205,7 +205,7 @@ int POct::SetBusParams( octObject *instPtr, ParamListType *pList) {
     //((const char*)(prop.contents.prop.value.string)) = pList->array->value;
     prop.contents.prop.value.string = (char *)pList->array->value;
 
-    // Save this new delay vaule;
+    // Save this new bus value;
     IntizeProp(&prop);
     (void) octModify(&prop);
     return(TRUE);
@@ -229,8 +229,7 @@ int POct::SetDelayParams( octObject *instPtr, ParamListType *pList) {
     //((const char*)(prop.contents.prop.value.string)) = pList->array->value;
     prop.contents.prop.value.string = (char *)pList->array->value;
 
-    // Save this new delay vaule;
-    IntizeProp(&prop);
+    // Save this new delay value;
     (void) octModify(&prop);
     return(TRUE);
 
@@ -411,12 +410,15 @@ int POct::ptkGetParams (int aC,char** aV) {
  	    return TCL_ERROR;
 	}
     
-	if ( IsDelay(&instance) || IsBus(&instance) ) {
+	if ( IsDelay(&instance) || IsBus(&instance) || IsDelay2(&instance)) {
 	    // Parameters are stored differently for delays and buses.
 	    // can't use the "plist" form as for Stars, Gals, and Formals
 	    if (IsDelay(&instance) ) {
 		GetOrInitDelayProp(&instance, &property);
 		sprintf(title, "Edit Delay");
+	    } else if (IsDelay2(&instance)) {
+		GetOrInitDelayProp(&instance, &property);
+		sprintf(title, "Edit Delay With Initial Values");
 	    } else {
 		GetOrInitBusProp(&instance, &property);
 		sprintf(title, "Edit Bus");
@@ -547,7 +549,7 @@ int POct::ptkSetParams (int aC,char** aV) {
             return TCL_ERROR;
         }
 
-        if ( IsDelay(&instance) ) {
+        if ( IsDelay(&instance) || IsDelay2(&instance)) {
             // Set Delay Parameters from the pList
             if (SetDelayParams(&instance,&pList) == 0) {
                 ErrorFound = 1;
@@ -1501,7 +1503,7 @@ int POct::ptkIsDelay (int aC,char** aV) {
         return TCL_ERROR;
     }
 
-    if (IsDelay(&facet)) return result(1);
+    if (IsDelay(&facet) || IsDelay2(&facet)) return result(1);
     else return result(0);
 }
 

@@ -346,9 +346,9 @@ KcMakeState(char *name, char *type, char *initVal) {
 
 // connect or busconnect
 extern "C" boolean
-KcConnect(char *inst1, char *t1, char *inst2, char *t2, char* delay, char* width) {
+KcConnect(char *inst1, char *t1, char *inst2, char *t2, char* initDelayValues, char* width) {
 	if (width == 0) width = "";
-	if (delay == 0) delay = "";
+	if (initDelayValues == 0) initDelayValues = "";
 	if (*width) {
 		LOG << "\tbusconnect ";
 	}
@@ -359,14 +359,14 @@ KcConnect(char *inst1, char *t1, char *inst2, char *t2, char* delay, char* width
 	    << SafeTcl(inst2) << " " << SafeTcl(t2);
 	if (*width)
 		LOG << " " << SafeTcl(width);
- 	if (*delay)
- 		LOG << " " << SafeTcl(delay);
+ 	if (*initDelayValues)
+ 		LOG << " " << SafeTcl(initDelayValues);
  	LOG << "\n";
 	if (*width)
 		return ptcl->currentGalaxy->busConnect(inst1, t1, inst2, t2,
-						 width, delay);
+						 width, initDelayValues);
 	else
-		return ptcl->currentGalaxy->connect(inst1, t1, inst2, t2, delay);
+		return ptcl->currentGalaxy->connect(inst1, t1, inst2, t2, initDelayValues);
 }
 
 ///////////////////////////////////////////////////////////////////////

@@ -45,6 +45,7 @@ extern boolean IsVemConnector(octObject *instPtr);
 extern boolean IsIoPort(octObject *instPtr);
 extern boolean IsInputPort(octObject *instPtr);
 extern boolean IsDelay(octObject *instPtr);
+extern boolean IsDelay2(octObject *instPtr); // added 3/2/94
 extern boolean IsGal(octObject *instPtr);
 extern boolean IsStar(octObject *instPtr);
 extern boolean IsUniv(octObject *instPtr);

@@ -106,6 +106,13 @@ octObject *instPtr;
     return(strcmp(BaseName(instPtr->contents.instance.master), "%dDelay") == 0);
 }
 
+boolean 
+IsDelay2(instPtr)
+octObject *instPtr;
+{
+    return(strcmp(BaseName(instPtr->contents.instance.master), "%dDelay2") == 0);
+}
+
 boolean
 IsBus(instPtr)
 octObject *instPtr;
@@ -541,9 +548,14 @@ GetOrInitDelayProp(instPtr, propPtr)
 octObject *instPtr, *propPtr;
 {
     propPtr->type = OCT_PROP;
-    propPtr->contents.prop.name = "delay";
-    propPtr->contents.prop.type = OCT_INTEGER;
-    propPtr->contents.prop.value.integer = 1;
+    if( IsDelay(instPtr) ) {
+      propPtr->contents.prop.name = "delay";
+      propPtr->contents.prop.value.string = "1";
+    } else {
+      propPtr->contents.prop.name = "delay2";
+      propPtr->contents.prop.value.string = "0";
+    }
+    propPtr->contents.prop.type = OCT_STRING;
     (void) octGetOrCreate(instPtr, propPtr);
 }
 
