@@ -74,7 +74,11 @@ to produce the full filename of the displayed image.
 		if ((const char*) imageName) {
 			strcpy(fileName, (const char*) imageName);
 		}
-		if (fileName[0] == '\000') { strcpy(fileName, tempFileName()); }
+		if (fileName[0] == '\000') {
+			char* nm = tempFileName();
+			strcpy(fileName, nm);
+			LOG_DEL; delete nm;
+		}
 		char numtmp[16];
 		sprintf(numtmp, ".%d", tempyD->retId());
 		strcat(fileName, numtmp);
@@ -111,6 +115,8 @@ to produce the full filename of the displayed image.
 		fwrite((char*)rgbfp, sizeof(unsigned char), unsigned(3*Width*Height),
 				fp);
 		fclose(fp);
+
+		LOG_DEL; delete rgbfp;
 
 		char buf[256];
 		sprintf (buf, "(%s %s", (const char*) command, fileName);

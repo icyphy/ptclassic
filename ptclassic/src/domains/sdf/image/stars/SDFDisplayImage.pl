@@ -61,7 +61,11 @@ complete filename of the displayed image.
 		if ((const char*) imageName) {
 			strcpy(fileName, (const char*) imageName);
 		}
-		if (fileName[0] == '\000'){ strcpy(fileName, tempFileName()); }
+		if (fileName[0] == '\000') {
+			char* nm = tempFileName();
+			strcpy(fileName, nm);
+			LOG_DEL; delete nm;
+		}
 		char numstr[16];
 		sprintf(numstr, ".%d", imD->retId());
 		strcat(fileName, numstr);
