@@ -282,7 +282,7 @@ private:
     void applyMask(int round);
 
     // treat types of overflow
-    void overflow_handler(int resultSign);
+    void overflow_handler(int resultSign, int shift);
 
     // parse a precision argument.  Return TRUE if valid else FALSE.
     int setPrecision(const char* precision);
