@@ -408,6 +408,12 @@ class ::tycho::Query {
 
     # Keep track of which subwindow should get the focus initially.
     private variable focuswindow {}
+
+    # Common array of text variables for radio and checkbuttons
+    # This array isn't used, but instead an array is accessed directly
+    # using ::tycho::Query::_vars. I don't know why this is
+    # necessary -- hjr
+    # private common _vars
 }
 
 #####################################################################
@@ -516,14 +522,13 @@ body ::tycho::Query::check {tag label default args} {
     # Make the checkbutton
     itk_component add tag_$tag {
         eval checkbutton $itk_component(querysite).tag_$tag \
-		[list -variable [scope $itk_component(hull)_[set tag]sw]] \
-		$args
+		[list -variable ::tycho::Query::_vars($this$tag)] $args
     } {
         keep -background -cursor
     }
     eval grid $itk_component(tag_$tag) $entrygridopts
 
-    set [scope $itk_component(hull)_[set tag]sw] $default
+    set ::tycho::Query::_vars($this$tag) $default
 
     # Do not grab the focus for a checkbutton query, since it generally
     # requires the mouse anyway.
@@ -531,10 +536,9 @@ body ::tycho::Query::check {tag label default args} {
 
     # Record the tag, its get method, and its clear method.
     lappend tags $tag
-    set tagsclear($tag) [list set [scope $itk_component(hull)_[set tag]sw] \
-            $default]
-    set tagsinsert($tag) [list set [scope $itk_component(hull)_[set tag]sw]]
-    set tagsget($tag) [list set [scope $itk_component(hull)_[set tag]sw]]
+    set tagsclear($tag) [list set ::tycho::Query::_vars($this$tag) $default]
+    set tagsinsert($tag) [list set ::tycho::Query::_vars($this$tag)]
+    set tagsget($tag) [list set ::tycho::Query::_vars($this$tag)]
     set tagsenable($tag) "$itk_component(tag_$tag) configure -state normal"
     set tagsdisable($tag) "$itk_component(tag_$tag) configure -state disabled"
 
@@ -588,7 +592,7 @@ body ::tycho::Query::choice {tag label entries default args} {
                 -width $itk_option(-entrywidth) \
 		-indicatoron 1 \
 		-menu $itk_component(querysite).tag_$tag.menu \
-		-textvariable [scope $itk_component(hull)_[set tag]sw] \
+		-textvariable ::tycho::Query::_vars($this$tag) \
 		-relief raised -bd 2 -highlightthickness 2 -anchor c
     } {
         keep -background -cursor
@@ -609,13 +613,13 @@ body ::tycho::Query::choice {tag label entries default args} {
     ::tycho::getopt command args
     foreach e $entries {
 	$itk_component(menu_$tag) add command -label $e \
-		-command [list set [scope $itk_component(hull)_[set tag]sw] $e]
+		-command [list set ::tycho::Query::_vars($this$tag) $e]
 	if {$command != {}} {
 	    $itk_component(menu_$tag) entryconfigure $e -command \
 		"[$itk_component(menu_$tag) entrycget $e -command]; $command"
 	}
     }
-    set [scope $itk_component(hull)_[set tag]sw] $default
+    set ::tycho::Query::_vars($this$tag) $default
     
     # Do not grab the focus for a menu query, since it generally
     # requires the mouse anyway.
@@ -623,10 +627,9 @@ body ::tycho::Query::choice {tag label entries default args} {
 
     # Record the tag, its get method, and its clear method.
     lappend tags $tag
-    set tagsclear($tag) [list set [scope $itk_component(hull)_[set tag]sw] \
-            $default]
-    set tagsinsert($tag) [list set [scope $itk_component(hull)_[set tag]sw]]
-    set tagsget($tag) [list set [scope $itk_component(hull)_[set tag]sw]]
+    set tagsclear($tag) [list set ::tycho::Query::_vars($this$tag) $default]
+    set tagsinsert($tag) [list set ::tycho::Query::_vars($this$tag)]
+    set tagsget($tag) [list set ::tycho::Query::_vars($this$tag)]
     set tagsenable($tag) "$itk_component(tag_$tag) configure -state normal"
     set tagsdisable($tag) "$itk_component(tag_$tag) configure -state disabled"
 
@@ -1083,20 +1086,19 @@ body ::tycho::Query::radio {tag label bttnNames default args} {
     
     # Create and pack buttons
     set count 0
+    set ::tycho::Query::_vars($this$tag) $default
     foreach name $bttnNames {
         itk_component add radio_[set tag]_[incr count] {
             if { "$args" != {}} {
                 set cmd {radiobutton $itk_component(tag_$tag).radio_$count \
                         -text $name\
                         -value $name\
-                        -variable \
-                        [scope $itk_component(hull)_[set tag]sw]}
+                        -variable ::tycho::Query::_vars($this$tag)}
                 eval $cmd $args
             } else {
                 radiobutton $itk_component(tag_$tag).radio_$count -text $name\
                         -value $name\
-                        -variable \
-                        [scope $itk_component(hull)_[set tag]sw]
+                        -variable ::tycho::Query::_vars($this$tag)
             }
         } {
             keep -background -cursor
@@ -1104,7 +1106,6 @@ body ::tycho::Query::radio {tag label bttnNames default args} {
         pack $itk_component(radio_[set tag]_$count) -side left -anchor ne \
                 -fill x -expand yes
     }
-    set [scope $itk_component(hull)_[set tag]sw] $default
     
     # Do not grab the focus for a radio query, since it generally
     # requires the mouse anyway.
@@ -1112,10 +1113,9 @@ body ::tycho::Query::radio {tag label bttnNames default args} {
     
     # Record the tag, its get method, its clear method, enable, and disable.
     lappend tags $tag
-    set tagsclear($tag) [list set [scope $itk_component(hull)_[set tag]sw] \
-            $default]
-    set tagsinsert($tag) [list set [scope $itk_component(hull)_[set tag]sw]]
-    set tagsget($tag) [list set [scope $itk_component(hull)_[set tag]sw]]
+    set tagsclear($tag) [list set ::tycho::Query::_vars($this$tag) $default]
+    set tagsinsert($tag) [list set ::tycho::Query::_vars($this$tag)]
+    set tagsget($tag) [list set ::tycho::Query::_vars($this$tag)]
 
     # Enable and disable are a bit complicated here
     set count 0
