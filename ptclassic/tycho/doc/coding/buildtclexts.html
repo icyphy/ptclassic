@@ -10,15 +10,9 @@ Tycho optionally includes several Tcl extensions that consist of C
 code that is compiled and loaded into a vanilla <CODE>itkwish</CODE>:
 
 <OL>
-<LI> <A HREF="../../java/tycho/doc/internals/index.html">TclJava</A> requires
-	JDK1.1.1.
-
-<LI> <A HREF="../../editors/visedit/doc/usersGuides/ProfileTclHelp.html">Tcl Profiler</A> requires <CODE>tclInt.h</CODE>, which is part of the Tcl sources.
 
 <LI> <A HREF="../../src/tytimer/index.html">Tycho's timer package</A>
 
-<LI> <A HREF="../../src/tksteal/index.html">TkSteal</A> requires
-<CODE>tkPort.h</CODE>, which is part of the Tk Sources.
 </OL>
 
 This page discusses the mechanism behind building and installing Tcl
@@ -57,17 +51,6 @@ and builds the proper directories.
  <P><CODE>configure</CODE> has a number of options, type
 <CODE>$TYCHO/src/configure -help</CODE> to see them.  To pass options to
 <CODE>configure</CODE>, set the <CODE>CONFIGURE_ARGS</CODE> option.
- <P>For example to build without Java, do:
-<PRE>
-make CONFIGURE_ARGS=--without-java tclexts
-</PRE>
-
-To pass multiple <CODE>configure</CODE> arguments, wrap them in
-quotes:
-
-<PRE>
-make CONFIGURE_ARGS="--with-java=/opt/jdk1.1 --with-ptolemy=/users/ptdesign" tclexts
-</PRE>
 
 
 <H3>$TYCHO/makefile Tcl Extension Rules</H3>
@@ -108,12 +91,11 @@ make install
 </PRE>
 
 
-<LI> <CODE>$TYCHO/src/java.mk</CODE> and <CODE>$TYCHO/src/tcl.mk</CODE>
-were configured for our local installation and are unlikely to work
+<LI> <CODE>$TYCHO/src/tcl.mk</CODE>
+was configured for our local installation and are unlikely to work
 for you.  To rebuild these files, run <CODE>configure</CODE>.
 
-<LI> Some parts of Tycho expect <CODE>$TYCHO/obj.$PTARCH/java.mk</CODE>
-and <CODE>$TYCHO/obj.$PTARCH/tcl.mk</CODE> to be present.
+<LI> Some parts of Tycho expect <CODE>$TYCHO/obj.$PTARCH/tcl.mk</CODE> to be present.
 
 </OL>
  <HR>
@@ -208,10 +190,6 @@ create <CODE>src/configure</CODE>.
 <DT> <CODE>src/makefile.in</CODE>
 <DD> The makefile template file from which the <CODE>makefile</CODE>
 is generated.
-
-<DT> <CODE>mk/java.mk.in</CODE>
-<DD> Java template makefile used by configure to create
-<CODE>obj.$PTARCH/java.mk</CODE>.
 
 <DT> <CODE>mk/tcl.mk.in</CODE>
 <DD> Tcl template makefile used by configure to create
