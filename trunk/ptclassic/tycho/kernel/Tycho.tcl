@@ -135,6 +135,7 @@ global ::ptolemyfeature
 # via ::pitcl
 if {[uplevel #0 info namespace all pitcl] == "pitcl"} {
     set ptolemyfeature(pitcl) 1
+    set ptolemyfeature(ptolemy) 1
 } {
     set ptolemyfeature(pitcl) 0
 }
@@ -144,6 +145,7 @@ if {[uplevel #0 info namespace all pitcl] == "pitcl"} {
 # via the older ptcl interface
 if {[uplevel #0 info commands domains] !=  {}} {
     set ptolemyfeature(ptcl) 1
+    set ptolemyfeature(ptolemy) 1
 } {
     set ptolemyfeature(ptcl) 0
 }
@@ -153,6 +155,7 @@ if {[uplevel #0 info commands domains] !=  {}} {
 if {[uplevel #0 info commands ptkOpenFacet] != {} && \
 	[uplevel #0 info commands pvOpenWindow] != {}} {
     set ptolemyfeature(octtools) 1
+    set ptolemyfeature(ptolemy) 1
 } {
     set ptolemyfeature(octtools) 0
 }
