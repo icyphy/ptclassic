@@ -169,7 +169,7 @@
 #     circumstances, such as the _Publisher_ and _WidgetPreferences_ 
 #     classes).
 #   
-# <li>Undo-redo commands: record{}, undo{}, redo{}, markHistory{},
+# <li>Undo-redo commands: record{}, undo{}, redo{}, mark{},
 #     clearHistory{}, and 
 #     compactHistory{}. These commands manipulate the undo history in various
 #     ways. None of these must ever be overridden (except in special
@@ -233,13 +233,16 @@ class ::tycho::Model {
     method load {{description {}}}
 
     # Get or set a mark in the undo history
-    method markHistory {{markname {}} {position current}}
+    method mark {{markname {}} {position current}}
+
+    # Return the index of a mark
+    method markIndex {markname}
 
     # Return a list of index-data pairs based on a pattern
     method match {pattern args}
 
     # Publish a change in data
-    method publish {whoiam command index args}
+    method publish {command index args}
 
     # Record a change in data
     method record {command index args}
@@ -248,13 +251,16 @@ class ::tycho::Model {
     method redo {{distance 1}}
 
     # Subscribe to data changes that match an index pattern
-    method subscribe {whoiam pattern {whattodo {}}}
+    method subscribe {subscriber pattern {whattodo {}}}
 
     # Undo changes to the data
     method undo {{distance 1}}
 
     # Unsubscribe from data changes
-    method unsubscribe {whoiam {pattern {}}}
+    method unsubscribe {subscriber {pattern {}}}
+
+    # Update the model with a change in data
+    method update {subscriber command index args}
 
     # Add data specific to a view
     method viewput {key index data}
@@ -272,7 +278,7 @@ class ::tycho::Model {
     ####                  protected methods                      ####
 
     # Notify the subscribers of a change in data
-    protected method notify {whoiam command pattern args}
+    protected method notify {subscriber command pattern args}
 
     # Write data to a data file and image file.
     protected method writeData {fd id}
@@ -292,8 +298,9 @@ class ::tycho::Model {
     # The array of flags indicating whether an undo/redo command was published
     protected variable publishable
     
-    # The array of subscriptions. Each array index is an index pattern,
-    # and each element is a flat subscriber-script list
+    # The array of subscriptions. Each array index is a pair of
+    # the subscriber and the pattern and the value is the notify
+    # script (if any).
     protected variable subscriptions
     
     # The marks in the redo/undo history
@@ -565,12 +572,27 @@ body ::tycho::Model::load {{description {}}} {
 	# Remember this position
 	set historyMark(opened) $historyMark(current)
 
-	# Load the most recently-written file
-	# FIXME: Figure out which file is newest	
-	source $newestFile
+	# Load the most recently-written file: get non-null files
+	set files [concat $datafile $sourcefile $imagefile]
+	if { $files == "" } {
+	    error "$dataname has no files"
+	}
+	set newestFile [::tycho::expandPath [lindex $files 0]]
+	foreach f [lrange $files 1 end] {
+	    set f [::tycho::expandPath $f]
+	    if { [file exists $f] } {
+		if { [file mtime $f] > [file mtime $newestFile] } {
+		    set newestFile $f
+		}
+	    }
+	}
 
+	# Evaluate the file in the context of the most specific class.
+	set fd [open $newestFile]
+	$this internalize [read $fd]
+	close $fd
     } else {
-	eval [list $description]
+	$this internalize $description
     }
 }
 
@@ -595,12 +617,12 @@ body ::tycho::Model::indexes {pattern args} {
 }
 
 ########################################################################
-#### markHistory
+#### mark
 #
 # Place a mark in the undo history. The first argument is the name of
 # the mark to set. The second is the name of the mark to set it to;
-# if omitted, it defaults to "current." The data classes 
-# maintained the following marks, which can be the second argument to
+# if omitted, it defaults to "current." Models maintain at least 
+# the following marks, which can be the second argument to
 # this method but not the first:
 # <ul>
 # <li>*current*: The most recent command executed.
@@ -616,7 +638,7 @@ body ::tycho::Model::indexes {pattern args} {
 # one: to undo, execute the inverse of that command; to redo,
 # re-execute the following command.)
 #
-# If _position_ is the empty string, clear the mark.
+# If _position_ is the empty string, delete the mark.
 # An error is flagged if _position_ is not empty and not a mark
 # in the history. <b>Note</b>: Do not assume that a value of zero
 # is the position of the first command in the undo history. Note also that
@@ -634,7 +656,7 @@ body ::tycho::Model::indexes {pattern args} {
 # using the marks it has set, or ii) _compact_ the history since that
 # mark into a single command (see the compactHistory{} method).
 #
-body ::tycho::Model::markHistory {{markname {}} {position current}} {
+body ::tycho::Model::mark {{markname {}} {position current}} {
     # Return all mark names
     if { $markname == "" } {
 	return [array names historyMark]
@@ -650,6 +672,22 @@ body ::tycho::Model::markHistory {{markname {}} {position current}} {
 	# Set a mark
 	set historyMark($mark) $historyMark($position)
     }
+}
+
+########################################################################
+#### markIndex
+#
+# Return the index of a mark, which is an integer. Do not assume
+# anything about the absolute value of an index. These can be used
+# to compare the positions of marks -- for example, compare the index
+# of "first" with the index of "current" to see if the current
+# mark is at the beginning of the history.
+#
+body ::tycho::Model::markIndex {markname} {
+    if { ! [::info exists historyMark($markname)] } {
+	error "Unknown mark $mark in $dataname"
+    }
+    return $historyMark($markname)
 }
 
 ########################################################################
@@ -675,22 +713,17 @@ body ::tycho::Model::match {pattern args} {
 #### publish
 #
 # Publish data. This is the same as recording it, except that 
-# the change is forwarded to any subscribers (via their own
-# publish{} method) that have subscribed to the given index
-# (or, in some subclasses, an overlapping index).
+# the change is forwarded to any subscribers (see notify{})
+# that have subscribed to the given index. The change is forwarded
+# by the notify{} method, which can be overridden to change the
+# notification behaviour. This method is designed to be called by
+# entities that are _not_ also subscribers to this model; subscribers
+# must call the update{} method. The first argument
+# is the command to execute on the model; the second the data index,
+# and remaining arguments are additional arguments to the command.
 #
-body ::tycho::Model::publish {whoiam command index args} {
-    # Record the command
-    eval [list record $command $index] $args
-
-    # Mark command as publishable
-    set publishable($historyMark(current)) 1
-
-    # Remember where it happened
-    set historyMark(published) $historyMark(current)
-
-    # Notify subscribers.
-    eval [list notify $whoiam $command $index] $args
+body ::tycho::Model::publish {command index args} {
+    eval [list update {} $command $index] $args
 }
 
 ########################################################################
@@ -705,23 +738,26 @@ body ::tycho::Model::record {command index args} {
 	clearHistory current last
     }
 
-    # Record the command
+    # Execute the command and remember its result (the undo command).
+    # If the command causes an error, this method will abort,
+    # and neither the command nor its undo command will be recorded.
+    set undo [eval [list $this $command $index] $args]
+
+    # If there was no error, proceed to record the command
     incr historyMark(current)
     incr historyMark(last)
     set redoCommands($historyMark(current)) \
 	    [concat [list $command $index] $args]
     set publishable($historyMark(current)) 0
 
-    # Execute the command and record its inverse
-    set undoCommands($historyMark(current)) \
-	    [eval $this $command [list $index] $args]
-    # Mark command as not publishable
+    # Record the undo command
+    set undoCommands($historyMark(current)) $undo
+
+    # Mark the command as not publishable
     set publishable($historyMark(current)) 0
 
     # Mark model as modified
     set modified 1
-
-puts [array get undoCommands]
 }
 
 ########################################################################
@@ -737,7 +773,8 @@ puts [array get undoCommands]
 # As each command is redone, the change is published if the original
 # command was published. 
 #
-# Return the number of steps redone.
+# Return 1 if there are commands left to redo, and zero
+# if there are not.
 #
 body ::tycho::Model::redo {{distance 1}} {
     # If a mark is given, figure out the distance
@@ -748,7 +785,6 @@ body ::tycho::Model::redo {{distance 1}} {
 	}
 	set distance [expr $historyMark($distance) - $historyMark($current)]
     }
-puts "$historyMark(last) - $historyMark(current)"
     # Go forward only as far as the last command
     if { $distance > $historyMark(last) - $historyMark(current) } {
 	set distance [expr $historyMark(last) - $historyMark(current)]
@@ -772,7 +808,9 @@ puts "$historyMark(last) - $historyMark(current)"
 	    eval notify noone $redoCommands($historyMark(current))
 	}
     }
-    return $count
+
+    # Return 1 if there are commands left to redo
+    return [expr ! ($historyMark(current) == $historyMark(last))]
 }
 
 ########################################################################
@@ -797,8 +835,8 @@ puts "$historyMark(last) - $historyMark(current)"
 #
 # To subscribe to all changes, simply use the pattern "*".
 #
-body ::tycho::Model::subscribe {whoiam pattern {whattodo {}}} {
-    lappend subscriptions($pattern) $whoiam $whattodo
+body ::tycho::Model::subscribe {subscriber pattern {whattodo {}}} {
+    set subscriptions($subscriber,$pattern) $whattodo
 }
 
 ########################################################################
@@ -814,7 +852,8 @@ body ::tycho::Model::subscribe {whoiam pattern {whattodo {}}} {
 # As each command is undone, the change is published if the original
 # command was published. 
 #
-# Return the number of steps undone.
+# Return 1 if there are more undo commands in the buffer, and zero
+# if there are not.
 #
 body ::tycho::Model::undo {{distance 1}} {
     # If a mark is given, figure out the distance
@@ -831,14 +870,12 @@ body ::tycho::Model::undo {{distance 1}} {
     if { $distance > $historyMark(current) - $historyMark(first) } {
 	set distance [expr $historyMark(current) - $historyMark(first)]
     }
-puts "distance = $distance"
     # Mark model as modified
     set modified 1
 
     # Undo the commands
     set count 0
     while { $count < $distance } {
-puts [array get undoCommands]
 	# Execute the command
 	eval $this $undoCommands($historyMark(current))
 
@@ -851,7 +888,9 @@ puts [array get undoCommands]
 	incr historyMark(current) -1
 	incr count
     }
-    return $count
+
+    # Return 1 if there are commands left to undo
+    return [expr ! ($historyMark(current) == $historyMark(first))]
 }
 
 ########################################################################
@@ -866,23 +905,47 @@ puts [array get undoCommands]
 # to unsubscribe from all insertions of carriage returns").
 #
 # If the _pattern_ argument is not supplied, the subscriber is
-# unsubscribed from all patterns it has subscribed to. (Note:
-# this operation is slow.)
+# unsubscribed from all patterns it has subscribed to.
 #
-body ::tycho::Model::unsubscribe {whoiam {pattern {}}} {
+body ::tycho::Model::unsubscribe {subscriber {pattern {}}} {
     if { $pattern != "" } {
 	# Unsubscribe from a given pattern
-	array set temp $subscriptions($pattern)
-	unset temp($whoiam)
-	set subscriptions($pattern) [array get temp]
+	catch {unset subscriptions($subscriber,$pattern)}
     } else {
 	# Unsubscribe from all patterns
-	foreach pattern [array names subscriptions] {
-	    array set temp $subscriptions($pattern)
-	    unset temp($whoiam)
-	    set subscriptions($pattern) [array get temp]
+	foreach index [array names subscriptions $subscriber,*] {
+	    unset subscriptions($index)
 	}
     }
+}
+
+########################################################################
+#### update
+#
+# Update data. This is the same as recording it, except that 
+# the change is forwarded to subscribers (other than the caller)
+# that have subscribed to the given index. The change is forwarded
+# by the notify{} method, which can be overridden to change the
+# notification behaviour. This method is designed to be called by
+# subscribers to the model: the first argument is the name of the
+# subscriber that is performing the update, and is used to prevent
+# the model from updating the caller. To cause a data update from
+# a non-subscriber, call the publish{} method. The second argument
+# is the command to execute on the model; the third the data index,
+# and remaining arguments are additional arguments to the command.
+#
+body ::tycho::Model::update {subscriber command index args} {
+    # Record the command
+    eval [list record $command $index] $args
+
+    # Mark command as publishable
+    set publishable($historyMark(current)) 1
+
+    # Remember where it happened
+    set historyMark(published) $historyMark(current)
+
+    # Notify subscribers.
+    eval [list notify $subscriber $command $index] $args
 }
 
 ########################################################################
@@ -949,24 +1012,41 @@ body ::tycho::Model::write {{file {}} {image {}}} {
     if { $file == "" } {
 	set file $datafile
     }
+    if { $file != "" } {
+	set file [tycho::expandPath $file]
+    }
     if { $image == "" } {
 	set image $imagefile
     }
+    if { $image != "" } {
+	set image [tycho::expandPath $image]
+    }
     
     # Open files
-    # FIXME: Check that the file can be opened for writing
-    set id [open $image "w"]
-    set fd [open $file "w"]
+    set id ""
+    if { $image != "" } {
+	if { ! [file exists $image] || [file writable $image] } {
+	    set id [open $image "w"]
+	}
+    }
+    set fd ""
+    if { $file != "" } {
+	if { ! [file exists $file] || [file writable $file] } {
+	    set fd [open $file "w"]
+	}
+    }
 
     # Write signature to the image file
-    puts $id "# This is a Tycho image file for $dataname\n"
-    
+    if { $id != "" } {
+	puts $id "# This is a Tycho image file for $dataname\n"
+    }
+
     # Write data specific to the subclass
     writeData $fd $id
     
     # Close the files
-    close $fd
-    close $id
+    catch {close $fd}
+    catch {close $id}
     
     # Clear modified flag
     set modified 0
@@ -980,7 +1060,7 @@ body ::tycho::Model::write {{file {}} {image {}}} {
 ########################################################################
 #### notify
 #
-# Notify subscribers except _whoiam_ with the given change in data.
+# Notify subscribers except _subscriber_ with the given change in data.
 # Matching is done using glob-style pattern-matching. The
 # default notification method is very direct: if _index_ matches an
 # index pattern to which the subscriber is subscribed, the given command
@@ -994,42 +1074,42 @@ body ::tycho::Model::write {{file {}} {image {}}} {
 # Although subscribers are supposed to
 # unsubscribe themselves before dying, this doesn't always happen
 # (especially when debugging!). So this method checks that the subscriber
-# still exists, and if it doesn't, prints an error message to the console
-# and unsubscribes the offending subscriber.
-# Obviously, this is not something you want to happen very often:
-# if messages are being printed then there is a bug in the client
-# code which should be fixed (instead of complaining about the
-# Model object printing to the console).
+# still exists, and if it doesn't, unsubscribes the offending subscriber.
 #
-body ::tycho::Model::notify {whoiam command index args} {
+body ::tycho::Model::notify {subscriber command index args} {
     # Scan for subscribers with a pattern that matches the index
-    foreach pattern [array names subscriptions] {
+    # FIXME: this is going to be too slow: we will have to
+    # change back to fixed, or maybe to matching on the
+    # first element of the pattern (if a list)
+    foreach subindex [array names subscriptions] {
+	::tycho::assign sub pattern [split $subindex ,]
 	if { ! [string match $pattern $index] } {
 	    continue
 	}
-	foreach {subscriber script} $subscriptions($pattern) {
-	    # Don't notify the caller
-	    if { $subscriber == $whoiam } {
-		continue
-	    }
-	    # Unsubscribe if the subscriber no longer exists!
-	    if { [::info which -command $subscriber] == "" } {
-		puts "Error: subscriber $subscriber to $dataname no longer exists"
-		unsubscribe $subscriber
-		continue
-	    }
-	    if { $script != "" } {
-		# if there's a script supplied by the subscriber, apply it
-		uplevel #0 ::tycho::apply \
-			[list $script $subscriber $command $index] $args
-	    } elseif { $notifyscript != "" } {
-		# Or if there's a global script, apply that
-		uplevel #0 ::tycho::apply \
-			[list $notifyscript $subscriber $command $index] $args
-	    } else {
-		# By default, call the subscriber directly
-		uplevel #0 $subscriber $command [list $index] $args
-	    }
+	# Don't notify the caller
+	if { $sub == $subscriber } {
+	    continue
+	}
+	# Unsubscribe the subscriber if it no longer exists!
+	if { [::info which -command $sub] == "" } {
+	    unsubscribe $sub
+	    continue
+	}
+
+	set script $subscriptions($subindex)
+	if { $script != "" } {
+	    # if there's a script supplied by the subscriber, apply it
+	    # FIXME: should $args be inside the list?
+	    uplevel #0 ::tycho::apply \
+		    [list $script $sub $command $index] $args
+	} elseif { $notifyscript != "" } {
+	    # Or if there's a global script, apply that
+	    # FIXME: should $args be inside the list?
+	    uplevel #0 ::tycho::apply \
+		    [list $notifyscript $sub $command $index] $args
+	} else {
+	    # By default, call the subscriber directly
+	    uplevel #0 $sub $command [list $index] $args
 	}
     }
 }
