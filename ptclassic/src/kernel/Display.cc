@@ -61,6 +61,9 @@ void XGraph :: initialize(Block* parent,
 {
 	StringList msg;
 
+	// just in case initialize is called twice.
+	zapFiles();
+
 	blockIamIn = parent;
 	opt = options;
 	ttl = title;
