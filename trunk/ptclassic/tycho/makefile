@@ -40,7 +40,7 @@ ROOT =		.
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-MISC_FILES =	README README.files copyright .glimpse_exclude
+MISC_FILES =	README.txt README.files copyright .glimpse_exclude
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 # You probably don't want to add $(SRCS) to this, rather, change
