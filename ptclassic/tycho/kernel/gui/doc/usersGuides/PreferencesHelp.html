@@ -8,10 +8,6 @@
 <p>
 The Tycho preferences manager allows you to set a number of preferences
 that control fonts, layout, and colors in the Tycho user interface.
-<i>Note: The preferences manager design and the available
-preferences are changing very rapidly, so we suggest you
-do not spend much time setting or adjusting your own preferences
-at this stage.</i>
 
  <P>To open the preferences manager, choose the "Preferences..."
 entry from the Help menu on the right-hand side of any
@@ -28,43 +24,28 @@ closes the window without changing any preferences.
 bring up a modal dialog box containing a <A
 HREF="FontDialogHelp.html">FontDialog</A> or <A
 HREF="ColorBrowserHelp.html">ColorBrowser</A> selector, which you can use
-to select a new font or color. <I>After closing the modal dialog box,
-you still have to press Apply </I> to make you change take
-effect. (Sorry, we're working on a fix.)
+to select a new font or color. <I>The color browser requires
+that your press apply to make the change take effect -- OK will
+not work.</I> (Sorry, we're working on a fix.)
 
- <P>The buttons on the man preferences selection dialog have the
+ <P>The buttons on the main preferences selection dialog have the
 same effects on all open preference viewers: Apply applies all changed
 preferences; OK applies all changed preferences and closes all
 open preference windows; Cancel closes all open preference windows
 without changing any preferences.
 
- <P>There is, as yet, no way of saving changed preferences. (Again,
-we're working on it.) You can, however, customize your Tycho by adding
-commands to your <code>~/.Tycho/tychorc.tcl</code> file. For example,
-to change the font used in text windows, add this line (you can click
-on the code to execute it now if you want):
-<pre><tcl>
-preference assign fonts textFont  {Screen 12}
-</tcl></pre>
+ <P>Tycho stores your changed preference in two files:
+<code>~/.Tycho/.preferences</code> contains a "snapshot" of your
+current preferences, including the undo
+information. <code>~/.Tycho/preferences</code> contains code that sets
+the preferences that are different to the default preferences.  Both
+of these files are rewritten by Tycho when you close the preferences
+editing dialog box.  If you wish to change preferences without using
+the preference dialog, edit the latter file and restart Tycho.
 
-The available preferences are still evolving, so there is no
-documentation available on what they are. To find out what is available,
-look at the file <code>$tycho/kernel/Defaults.tcl</code>. To
-make some common preference changes easier, we have provided
-two files that you can source:
-
- <ul><li><code><tcl>source $tycho/lib/preferences/small.tcl</tcl></code> changes all fonts
-to a set of "small" sizes.
-
- <li><code><tcl>source $tycho/lib/preferences/large.tcl</tcl></code> changes all fonts
-to a set of "large" sizes.
-
-</ul>
-
-(There's a bug which we haven't fixed yet: the
-HTML viewer font size doesn't change; new HTML viewer
-windows will, however, get the correct font size.)
-
+ <P>For guidelines on how to use preferences in your code, see
+the <A HREF="../codeDoc/WidgetPreferences.html">WidgetPreferences</A>
+class.
 
 <p>
 <a href="../../../doc/index.html">Tycho Home Page</a><br>
