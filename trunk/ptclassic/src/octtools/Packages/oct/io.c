@@ -154,6 +154,7 @@ struct facet *desc;
     octId id;
     int bb_flags;
     int val, version_number, type;
+    int32 tmp_object_count, tmp_num_formals;	/* Used to update ints */
     extern octId oct_next_id();
 
     oct_facet_file = (IOFILE *) file;
@@ -182,8 +183,8 @@ struct facet *desc;
 	   oct_get_32(&id) &&
 	   oct_get_byte(&bb_flags) &&
 	   oct_get_box(&desc->bbox) &&
-	   oct_get_32(&desc->object_count) &&
-	   oct_get_32(&desc->num_formals) &&
+	   oct_get_32(&tmp_object_count) &&
+	   oct_get_32(&tmp_num_formals) &&
 	   oct_get_32(&desc->next_xid) &&
 	   oct_get_terms(desc) &&
 	   oct_get_32(&desc->time_stamp) &&
@@ -195,6 +196,10 @@ struct facet *desc;
 	   oct_get_32(&desc->modify_date) &&
 	   oct_get_32(&desc->attach_date) &&
 	   oct_get_32(&desc->detach_date);
+
+    /* These two are not int32, they are int, so we use temporaries. */
+    desc->object_count = tmp_object_count;
+    desc->num_formals = tmp_num_formals;
 
     if (!val || id != oct_null_id || type != OCT_FACET) {
 	oct_error("The facet is corrupted");
