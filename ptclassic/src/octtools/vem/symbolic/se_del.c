@@ -77,7 +77,7 @@ char *data;			/* Callback function                  */
 #endif
 }
 
-seDelete(spot, cmdList)
+vemStatus seDelete(spot, cmdList)
 vemPoint *spot;			/* Where command was issued */
 lsList cmdList;			/* List of arguments        */
 /*
