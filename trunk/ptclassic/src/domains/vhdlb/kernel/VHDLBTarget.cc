@@ -136,6 +136,28 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
   vhdlCode = "\n";
   vhdlCode << "entity " << blockName << " is\n";
   
+  /* Define the generic interface list, if any */
+  CBlockStateIter galStateIter(galaxy);
+  const State* st;
+  StringList genericList = "";
+
+  while ((st = galStateIter++) != 0) {
+    if(genericList.numPieces() > 1) genericList << "; ";
+    genericList << st.name() << ": ";
+    if(!strcmp(st->type(), "INT")) {
+      genericList << "INTEGER";
+    }
+    else if(!strcmp(st->type(), "FLOAT")) {
+      genericList << "REAL";
+    }
+    else {
+      genericList << sanitize(st->type());
+    }
+  }
+  if(genericList.numPieces() > 1) {
+    vhdlCode << indent(1) << "generic(" << genericList << ");\n";
+  }
+
   /* Make a list of the inputs and outputs by name */
   CBlockPortIter galPortIter(galaxy);
   const PortHole* ph;
