@@ -39,6 +39,16 @@ Tk's existing type "image", but has a very different core
 implementation.   Tk is freely distributable software.  For
 information about the usage and redistribution of Tk, see the
 the file "license.terms" under the Tk distribution in $PTOLEMY/tcltk.
+
+To install in Ptolemy, you must have Tcl register the following:
+
+	* Add tkPtimageImageType and ptimage formats for  *
+	* robust image rendering in Tk, written by X. Mei * 
+	Tk_CreateImageType(&tkPtimageImageType);
+	Tk_CreatePtimageImageFormat(&tkPtImgFmtPPM);
+
+The global variables tkPtimageImageType and tkPtImgFmtPPM are
+defined below, and are also declared in ptkImage.h.
  */
 
 #include <math.h>
