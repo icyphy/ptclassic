@@ -71,7 +71,7 @@ DSP56000 - An input star for the Ariel digital microphone
                 type { intarray }
                 desc { internal }
                 default { "0" }
-                attributes {A_CIRC|A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_CONSEC|A_NOINIT}
+                attributes {A_CIRC|A_NONSETTABLE|A_NONCONSTANT|A_XMEM|A_NOINIT}
         }        
         state {
                 name { intBufferStart }
