@@ -149,8 +149,8 @@ Cluster* Cluster::group(Cluster& c, int removeFlag)
 int Cluster::absorb(Cluster& cluster, int removeFlag) {
     makeNonAtomic();
     Block* clusterParent =  cluster.parent();
-    cout << "Absorbing " << cluster.name() << " into "
-	 << name() << ".\n";
+    // cout << "Absorbing " << cluster.name() << " into "
+    //	 << name() << ".\n";
     
     // Make sure we are not absorbing ourselves
     if (this == &cluster) {
@@ -205,8 +205,8 @@ int Cluster::absorb(Cluster& cluster, int removeFlag) {
 int Cluster::merge(Cluster& clusterToEmpty, int removeFlag) {
     makeNonAtomic();
     clusterToEmpty.makeNonAtomic();
-    cout << "Merging " << clusterToEmpty.name() << " into "
-	 << name() << ".\n";
+    // cout << "Merging " << clusterToEmpty.name() << " into "
+    //	 << name() << ".\n";
 
     // Make sure we are not merging ourselves
     if (this == &clusterToEmpty) {
