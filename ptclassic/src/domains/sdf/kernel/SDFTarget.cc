@@ -46,12 +46,9 @@ static const char file_id[] = "SDFTarget.cc";
 #include "SDFScheduler.h"
 #include "SDFCluster.h"
 #include "pt_fstream.h"
-#include "SDFMultiScheduler.h"
 
-SDFTarget::SDFTarget() :
-Target("default-SDF","SDFStar",
-"Runs SDF systems on the local workstation using either the default\n"
-"one-processor SDF scheduler or Joe's clustering loop scheduler.")
+SDFTarget::SDFTarget(const char* nam, const char* desc) :
+Target(nam,"SDFStar",desc)
 {
 	addState(logFile.setState("logFile",this,"",
 			"Log file to write to (none if empty)"));
@@ -62,7 +59,7 @@ Target("default-SDF","SDFStar",
 }
 
 Block* SDFTarget::makeNew() const {
-	LOG_NEW; return new SDFTarget;
+	LOG_NEW; return new SDFTarget(name(), descriptor());
 }
 
 SDFTarget::~SDFTarget() {
@@ -78,9 +75,6 @@ void SDFTarget::setup() {
 		break;
 	case 1:
 		LOG_NEW; s = new SDFClustSched(logFile);
-		break;
-	case 2:
-		LOG_NEW; s = new SDFMultiScheduler;
 		break;
 	default:
 		Error::abortRun(*this,"Unknown scheduler");

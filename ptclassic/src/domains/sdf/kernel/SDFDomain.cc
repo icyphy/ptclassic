@@ -75,5 +75,8 @@ static SDFDomain proto;
 
 // declare a prototype default target object.
 
-static SDFTarget defaultSDFtarget;
+static SDFTarget defaultSDFtarget("default-SDF",
+"Runs SDF systems on the local workstation using either the default\n"
+"one-processor SDF scheduler or Joe's clustering loop scheduler.");
+
 static KnownTarget entry(defaultSDFtarget,"default-SDF");
