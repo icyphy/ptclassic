@@ -24,19 +24,69 @@ number of columns in A does not match the number of rows in B.
 		name { output }
 		type { FIX_MATRIX_ENV }
 	}
+        defstate {
+                name { KeepArrivingPrecision }
+                type { int }
+                default { "YES" }
+                desc {
+Flag that indicates whether or not to keep the preciion of the
+arriving matrix: YES keeps the same precision, and NO casts
+them to the precision specified by the paramter "InputPrecision". }
+        }
+        defstate {
+                name { InputPrecision }
+                type { string }
+                default { "4.14" }
+                desc {
+Precision of the input in bits.  The input matrix is only cast to
+this precision if the parameter "ArrivingPrecision" is set to NO. }
+        }
+        defstate {
+                name { OutputPrecision }
+                type { string }
+                default { "4.14" }
+                desc { Precision of the output matrix in bits. }
+        }
+        defstate {
+                name { OverflowHandler }
+                type { string }
+                default { "saturate" }
+                desc {
+The type of overflow that happens if the result of any addition
+overflows.  The options are: "saturate"(default), "zero-saturate",
+"wrapped", "warning". }
+        }
 	defstate {
 		name { numRows }
 		type { int }
-		default { 8 }
+		default { 2 }
 		desc { The number of rows in Matrix A and Matrix C.}
 	}
 	defstate {
 		name { numCols }
 		type { int }
-		default { 8 }
+		default { 2 }
 		desc { The number of columns in Matrix B and Matrix C}
 	}
         ccinclude { "Matrix.h" }	
+        protected {
+          const char* IP;
+          const char* OP;
+          const char* OV;
+          int in_IntBits;
+          int in_len;
+          int out_IntBits;
+          int out_len;
+        }
+        setup {
+          IP = InputPrecision;
+          OP = OutputPrecision;
+          OV = OverflowHandler;
+          in_IntBits = Fix::get_intBits(IP);
+          in_len = Fix::get_length(IP);
+          out_IntBits = Fix::get_intBits(OP);
+          out_len = Fix::get_length(OP);
+        }
         go {
           // get inputs
           Envelope Apkt;
@@ -47,21 +97,45 @@ number of columns in A does not match the number of rows in B.
           (Binput%0).getMessage(Bpkt);
           const FixMatrix& Bmatrix = *(const FixMatrix *)Bpkt.myData();
 
-          if((Amatrix.numRows() != int(numRows)) ||
-             (Bmatrix.numCols() != int(numCols))) {
-            Error::abortRun(*this,"Dimension size of FixMatrix inputs do ",
-                                  "not match the given state parameters.");
-            return;
+          // check for "null" matrix inputs, caused by delays
+          if(Apkt.empty() || Bpkt.empty()) {
+            // if either empty, return a zero matrix with the given dimensions
+            FixMatrix& result = *(new FixMatrix(int(numRows),int(numCols),
+                                                out_len,out_IntBits));
+            result = 0.0;
+            output%0 << result;
           }
+          else {
+            // Amatrix and Bmatrix both valid
 
-          // do matrix multiplication
-          FixMatrix *result = new FixMatrix(int(numRows),int(numCols));
-          // we could write 
-          //   *result = Amatrix * Bmatrix;
-          // but the following is faster
-          multiply(Amatrix,Bmatrix,*result);
+            if((Amatrix.numRows() != int(numRows)) ||
+               (Bmatrix.numCols() != int(numCols))) {
+              Error::abortRun(*this,"Dimension size of FixMatrix inputs do ",
+                                    "not match the given state parameters.");
+              return;
+            }
 
-          output%0 << *result;
+            // do matrix multiplication, much more complicated than the normal
+            // case because of all the precision and overflow handling
+            FixMatrix& result = *(new FixMatrix(int(numRows),int(numCols),
+                                                out_len,out_IntBits));
+
+            for(int i = 0; i < int(numRows) * int(numCols); i++)
+              (result.entry(i)).set_ovflow(OV); // set overflow function
+
+            if(int(KeepArrivingPrecision)) 
+              multiply(Amatrix,Bmatrix,result);
+            else {
+              FixMatrix newA = FixMatrix(Amatrix.numRows(),Amatrix.numCols(),
+                                         in_len,in_IntBits);
+              FixMatrix newB = FixMatrix(Bmatrix.numRows(),Bmatrix.numCols(),
+                                         in_len,in_IntBits);
+              newA = Amatrix;
+              newB = Bmatrix;
+              multiply(Amatrix,Bmatrix,result);
+            }
+            output%0 << result;
+          }
 	}
 }
 

@@ -38,14 +38,25 @@ defstar {
     Envelope pkt;
     (input%0).getMessage(pkt);
     const IntMatrix& matrix = *(const IntMatrix *)pkt.myData();
-    if((matrix.numRows() != int(numRows)) ||
-       (matrix.numCols() != int(numCols))) {
-        Error::abortRun(*this,"Dimension size of IntMatrix received does ",
-                              "not match the given state parameters.");
-        return;
+
+    // check for "null" matrix inputs, caused by delays
+    if(pkt.empty()) {
+      // input empty, just send a stream of (numRows*numCols) zeros
+      for(int i = 0; i < int(numRows)*int(numCols); i++)
+        output%i << 0;
     }
-    for(int i = 0; i < size; i++)
-      output%(size - i - 1) << matrix.entry(i);
+    else {
+      // valid input matrix
+
+      if((matrix.numRows() != int(numRows)) ||
+         (matrix.numCols() != int(numCols))) {
+          Error::abortRun(*this,"Dimension size of IntMatrix received does ",
+                                "not match the given state parameters.");
+          return;
+      }
+      for(int i = 0; i < size; i++)
+        output%(size - i - 1) << matrix.entry(i);
+    }
   }
 }
 

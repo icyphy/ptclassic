@@ -55,17 +55,26 @@ number is masked for casting to the fixed-point notation.  The keywords are:
     (input%0).getMessage(inpkt);
     const FloatMatrix& matrix = *(const FloatMatrix *)inpkt.myData();
 
-    // do conversion using copy constructor
-    if(strcmp(Masking, "truncate") == 0) {
-      FixMatrix& result = *(new FixMatrix(matrix,intBits,length,Fix::mask_truncate));
-      output%0 << result;
+    // check for "null" matrix inputs, caused by delays
+    if(inpkt.empty()) {
+      // input empty, just send it back out
+      output%0 << inpkt;
     }
-    else if(strcmp(Masking, "round") == 0) {
-      FixMatrix& result = *(new FixMatrix(matrix,intBits,length,Fix::mask_truncate_round));
-      output%0 << result;
+    else {
+      // valid input matrix
+
+      // do conversion using copy constructor
+      if(strcmp(Masking, "truncate") == 0) {
+        FixMatrix& result = *(new FixMatrix(matrix,intBits,length,Fix::mask_truncate));
+        output%0 << result;
+      }
+      else if(strcmp(Masking, "round") == 0) {
+        FixMatrix& result = *(new FixMatrix(matrix,intBits,length,Fix::mask_truncate_round));
+        output%0 << result;
+      }
+      else 
+        Error::abortRun(*this, ": not a valid function for masking");
     }
-    else 
-      Error::abortRun(*this, ": not a valid function for masking");
   }
 }
 

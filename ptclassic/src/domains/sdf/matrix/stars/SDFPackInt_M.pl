@@ -38,8 +38,8 @@ first N particles.
   }
   go {
     // collect inputs and put into the matrix
-    IntMatrix *matrix = new IntMatrix(int(numRows),int(numCols),input);
-    output%0 << *matrix;
+    IntMatrix& matrix = *(new IntMatrix(int(numRows),int(numCols),input));
+    output%0 << matrix;
   }
 }
 

@@ -17,13 +17,13 @@ defstar {
   defstate {
     name { numRows }
     type { int }
-    default { 8 }
+    default { 2 }
     desc { The number of rows in the input matrix. }
   }
   defstate {
     name { numCols }
     type { int }
-    default { 8 }
+    default { 2 }
     desc { The number of columns in the input matrix.  }
   }
   ccinclude { "Matrix.h" }
@@ -31,14 +31,26 @@ defstar {
     Envelope pkt;
     (input%0).getMessage(pkt);
     const FixMatrix& matrix = *(const FixMatrix *)pkt.myData();
-    if((matrix.numRows() != int(numRows)) ||
-       (matrix.numCols() != int(numCols))) {
-      Error::abortRun(*this,"Dimension size of FixMatrix input does ",
-                            "not match the given state parameters.");
-      return;
+
+    // check for "null" matrix inputs, caused by delays
+    if(pkt.empty()) {
+      // input empty, send out a zero matrix with the dimensions transposed
+      FixMatrix& result = *(new FixMatrix(int(numCols),int(numRows)));
+      result = Fix(double(0));
+      output%0 << result;
     }
-    FixMatrix *result = new FixMatrix(int(numCols),int(numRows));
-    *result = ~matrix;             // equivalent to matrix.transpose()
-    output%0 << *result;
+    else {
+      // valid input matrix
+
+      if((matrix.numRows() != int(numRows)) ||
+         (matrix.numCols() != int(numCols))) {
+        Error::abortRun(*this,"Dimension size of FixMatrix input does ",
+                              "not match the given state parameters.");
+        return;
+      }
+      FixMatrix& result = *(new FixMatrix(int(numCols),int(numRows)));
+      result = ~matrix;             // equivalent to matrix.transpose()
+      output%0 << result;
+    }
   }
 }

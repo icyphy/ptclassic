@@ -133,9 +133,16 @@ Data_M
 	// Get the input matrix and call the svd function.
         Envelope inputPkt;
         (input%0).getMessage(inputPkt);
-        const FloatMatrix& A = *(const FloatMatrix*)inputPkt.myData();
-
-	svd(A,*U,*V,*W,(double)threshold,(int)generate_left,(int)generate_right);
+        // check for empty input, possibly caused by delays
+        if(inputPkt.empty()) {
+          FloatMatrix A(nrows,ncols);
+          A = 0;
+          svd(A,*U,*V,*W,(double)threshold,(int)generate_left,(int)generate_right);
+        }
+        else {
+          const FloatMatrix& A = *(const FloatMatrix*)inputPkt.myData();
+          svd(A,*U,*V,*W,(double)threshold,(int)generate_left,(int)generate_right);
+        }
 
 	// There are ncols singular values, a ncolsx1 matrix
         // Output singular values

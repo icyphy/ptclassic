@@ -50,11 +50,15 @@ defstar {
           }
           else if(Apkt.empty()) {
             // Amatrix is empty but B is not, return just B
-            output%0 << Bmatrix;
+            // NOTE: must resend the Envelope and not an input matrix to keep
+            // the reference count mechanism working
+            output%0 << Bpkt;
           }
           else if(Bpkt.empty()) {
             // Bmatrix is empty but A is not, return just A
-            output%0 << Amatrix;
+            // NOTE: must resend the Envelope and not an input matrix to keep
+            // the reference count mechanism working
+            output%0 << Apkt;
           }
           else {
             // Amatrix and Bmatrix both valid

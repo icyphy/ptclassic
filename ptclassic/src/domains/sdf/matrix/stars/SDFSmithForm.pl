@@ -192,6 +192,12 @@ void intSwapCols( IntMatrix *mat, int col1, int col2 )
 	  }
 
           // initialize the matrices u, d, and v
+          
+          if(Apkt.empty()) { // check for empty inputs, possibly caused by delays
+            IntMatrix& d = *(new IntMatrix(m,n));
+            d = 0;
+            mat = &d;
+          }
           IntMatrix& d = *(new IntMatrix(*mat));
 	  IntMatrix& u = *(new IntMatrix(m, m));
 	  u.identity();

@@ -27,13 +27,13 @@ number of columns in A does not match the number of rows in B.
 	defstate {
 		name { numRows }
 		type { int }
-		default { 8 }
+		default { 2 }
 		desc { The number of rows in Matrix A and Matrix C.}
 	}
 	defstate {
 		name { numCols }
 		type { int }
-		default { 8 }
+		default { 2 }
 		desc { The number of columns in Matrix B and Matrix C}
 	}
         ccinclude { "Matrix.h" }
@@ -47,21 +47,32 @@ number of columns in A does not match the number of rows in B.
           (Binput%0).getMessage(Bpkt);
           const IntMatrix& Bmatrix = *(const IntMatrix *)Bpkt.myData();
 
-          if((Amatrix.numRows() != int(numRows)) ||
-             (Bmatrix.numCols() != int(numCols))) {
-            Error::abortRun(*this,"Dimension size of IntMatrix inputs do ",
-                                  "not match the given state parameters.");
-            return;
+          // check for "null" matrix inputs, caused by delays
+          if(Apkt.empty() || Bpkt.empty()) {
+            // if either empty, return a zero matrix with the given dimensions
+            IntMatrix& result = *(new IntMatrix(int(numRows),int(numCols)));
+            result = 0;
+            output%0 << result;
           }
+          else {
+            // Amatrix and Bmatrix both valid
 
-          // do matrix multiplication
-          IntMatrix *result = new IntMatrix(int(numRows),int(numCols));
-          // we could write 
-          //   *result = Amatrix * Bmatrix;
-          // but the following is faster
-          multiply(Amatrix,Bmatrix,*result);
+            if((Amatrix.numRows() != int(numRows)) ||
+               (Bmatrix.numCols() != int(numCols))) {
+              Error::abortRun(*this,"Dimension size of IntMatrix inputs do ",
+                                    "not match the given state parameters.");
+              return;
+            }
 
-          output%0 << *result;
+            // do matrix multiplication
+            IntMatrix& result = *(new IntMatrix(int(numRows),int(numCols)));
+            // we could write 
+            //   result = Amatrix * Bmatrix;
+            // but the following is faster
+            multiply(Amatrix,Bmatrix,result);
+
+            output%0 << result;
+          }
 	}
 }
 

@@ -27,9 +27,18 @@ I.e. IntMatrix.entry(i) = int(FloatMatrix.entry(i))
     (input%0).getMessage(inpkt);
     const FloatMatrix& matrix = *(const FloatMatrix *)inpkt.myData();
 
-    // do conversion using copy constructor
-    IntMatrix& result = *(new IntMatrix(IntMatrix(matrix)));
-    output%0 << result;
+    // check for "null" matrix inputs, caused by delays
+    if(inpkt.empty()) {
+      // input empty, just send it back out
+      output%0 << inpkt;
+    }
+    else {
+      // valid input matrix
+
+      // do conversion using copy constructor
+      IntMatrix& result = *(new IntMatrix(IntMatrix(matrix)));
+      output%0 << result;
+    }
   }
 }
 

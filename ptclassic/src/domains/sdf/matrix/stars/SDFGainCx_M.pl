@@ -27,10 +27,19 @@ defstar {
     (input%0).getMessage(inpkt);
     const ComplexMatrix& matrix = *(const ComplexMatrix *)inpkt.myData();
 
-    // do scalar * matrix
-    ComplexMatrix *result = new ComplexMatrix(matrix.numRows(),matrix.numCols());
-    *result = Complex(gain) * matrix;
-    output%0 << *result;
+    // check for "null" matrix inputs, caused by delays
+    if(inpkt.empty()) {
+      // input empty, just send it back out
+      output%0 << inpkt;
+    }
+    else {
+      // valid input matrix
+
+      // do scalar * matrix
+      ComplexMatrix& result = *(new ComplexMatrix(matrix.numRows(),matrix.numCols()));
+      result = Complex(gain) * matrix;
+      output%0 << result;
+    }
   }
 }
 

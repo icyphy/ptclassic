@@ -38,8 +38,8 @@ first N particles.
   }
   go {
     // collect inputs and put into the matrix
-    ComplexMatrix *matrix = new ComplexMatrix(int(numRows),int(numCols),input);
-    output%0 << *matrix;
+    ComplexMatrix& matrix = *(new ComplexMatrix(int(numRows),int(numCols),input));
+    output%0 << matrix;
   }
 }
 
