@@ -849,6 +849,7 @@ body ::tycho::Slate::recreate {description args} {
 # primary (IconFrame, for example), will need to do this.
 #
 body ::tycho::Slate::region {tag args} {
+puts $tag
     set rectangular 0
     set single 1
     if { [string match {[0-9]*} $tag] } {
@@ -905,7 +906,7 @@ body ::tycho::Slate::region {tag args} {
     # Change the region of the item
     if { $rectangular } {
 	# If there's one rectangular item, call coords{}
-	eval coords $tag $args
+	eval coords $item $args
     } else {
 	# Otherwise figure out the scaling factors and call scale{}
 	if { $single } {
