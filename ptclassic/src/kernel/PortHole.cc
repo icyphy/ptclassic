@@ -84,7 +84,7 @@ int GenericPort :: isItMulti () const { return FALSE;}
 
 PortHole& GenericPort :: newConnection () {
 	// my apologies for this horrible cast
-	return *(PortHole *)&GenericPort::realPort();
+	return *(PortHole *)&realPort();
 }
 
 // inheritTypeFrom maintains a circular list of typePortPtr pointers.
@@ -477,13 +477,9 @@ Geodesic* PortHole :: allocateGeodesic () {
 	return g;
 }
 
-/*
- * additional methods for PortHoles
- */
+// additional methods for PortHoles
 
-
-/* Particle movement methods */
-
+// Particle movement methods
 
 void PortHole :: getParticle()
 {
@@ -537,28 +533,21 @@ void PortHole :: putParticle()
 
 // This method is called after go(); the buffer now contains numberTokens
 // Particles that are to be send to the output Geodesic
-// We send copies to prevent the Star from modifying Particles in the
-// Geodesic or InPortHole on the other side
 
 	// Back up in the buffer by numberTokens
-	for(int i = numberTokens; i>0; i--)
-        	p = myBuffer->last();
+	myBuffer->backup(numberTokens);
 
 	// Now move forward numberTokens times, sending copy of
 	// Particle to Geodesic
-	for(i = numberTokens; i>0; i--) {
+	for(int i = numberTokens; i>0; i--) {
+		// get next particle from my buffer
 		p = myBuffer->next();
 		
+		// launch it into the geodesic
+		myGeodesic->put(*p);
+
 		// Get Particle from Plasma
-		Particle* pp = myPlasma->get();
-
-		// Copy from the buffer to this Particle
-		*pp = **p;
-
-		// Launch this Particle into the Geodesic
-		myGeodesic->put(pp);
-		}
-
-	// Note that the Particle is left in the buffer to be
-	// accessed as a past Particle
+		// Put it my buffer, replacing the used-up particle.
+		*p = myPlasma->get();
+	}
 }

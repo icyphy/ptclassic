@@ -102,36 +102,30 @@ void ToEventHorizon :: transferData ()
 {
 // It moves a Particle from the Universal EventHorizon to the ghostPort.
 
-	Particle** p;
-
 	// check if data in.
 	if (dataNew == FALSE) return;
 
 	// Back up in the buffer by numberTokens
-	for(int i = numberTokens; i>0; i--)
-		p = myBuffer->last();
+	myBuffer->backup(numberTokens);
 
 	// now, transfer the data.
-	for(i = numberTokens; i>0; i--) {
-	
-		// get the buffer pointer
-		p = myBuffer->next();
+	for(int i = numberTokens; i>0; i--) {
 
-		// Get Particle from Plasma
-		Particle* pp = myPlasma->get();
-
-		// Copy from the buffer to this Particle
-		// since we need previous values sometimes.
-		*pp = **p;
-	
-		// ghostPort :: current pointer
+		// get pointers to each of the CircularBuffer objects.
+		Particle** p = myBuffer->next();
 		Particle** q = ghostPort->myBuffer->next();
 
-		// put the current particle to Plasma
-		ghostPort->myPlasma->put(*q);
+		// In the following code, particles aren't copied, only
+		// pointers to Particles.
+		// get a reference to the old particle from the ghostport.
+		Particle* tmp = *q;
 
-		// Get a new Particle (event) from the Geodesic
-		*q = pp;
+		// Transfer the particle from one buffer to the other
+		*q = *p;
+
+		// zero the old particle and put it in the source buffer.
+		tmp->initialize();
+		*p = tmp;
 	}
 
 	// set DataNew Value to ghostPort
