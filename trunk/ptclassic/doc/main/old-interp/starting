@@ -3,12 +3,12 @@
 .pp
 To get started, just make sure
 .i ~ptolemy/bin
-is in your PATH and type
+and
+.i ~ptolemy/bin.sunX
+(where the X is a 3 if you are on a Sun-3, and 4 if you are on a Sun-4)
+are in your PATH and type
 .c interpreter
-to invoke the SDF interpreter
-or
-.c DEinterpreter
-to invoke the DE interpreter (see the next section for details).
+to invoke the Ptolemy interpreter.
 .pp
 As a more advanced user, you will probably want to
 write some of your own
