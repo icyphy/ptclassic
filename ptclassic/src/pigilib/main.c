@@ -181,7 +181,10 @@ welcome_window ()
 {
 	accum_string ("Ptolemy Interactive Graphics Interface\n");
 	accum_string (pigiVersion);
-	accum_string ("\nCopyright 1990, 1991 Regents of the University of California");
+	accum_string ("\nCopyright 1990, 1991, 1992 Regents of the University of California");
 	accum_string ("\nAll rights reserved.");
+	accum_string ("\nSee the file $PTOLEMY/copyright for copyright notice,");
+	accum_string ("\nlimitation of liability, and disclaimer of warranty provisions,");
+	accum_string ("\nwhere `$PTOLEMY' is the home directory of your Ptolemy installation.");
 	pr_accum_string ();
 }
