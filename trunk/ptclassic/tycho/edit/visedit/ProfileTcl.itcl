@@ -133,7 +133,7 @@ body ::tycho::ProfileTcl::constructor {args} {
     toolbar addButton on {Start collecting profiling data} \
             -text "Start" -command "$this profileStart"
     toolbar addButton off {Display profile as a call tree} \
-            -text Display -command "$this profileDisplay"
+            -text Display -command "$this busy $this profileDisplay"
     toolbar addButton cancel {Cancel profile, discarding collected data} \
             -text Cancel -command "$this profileCancel"
 
@@ -197,14 +197,21 @@ body ::tycho::ProfileTcl::profileDisplay {} {
     profile off results
     set depth 1
     set maxdepth 1
+
+    # If we knew we had TclX, then we could use lassign in the inner loop
+    # However, the user might have installed our standalone
+    # version of profile, in which case lassign is not present.
+
     while {$depth <= $maxdepth} {
         set id [array startsearch results]
         while {[set entry [array nextelement results $id]] != {}} {
             set len [llength $entry]
             if {$len > $maxdepth} {set maxdepth $len}
             if {$len == $depth} {
-                # Since we have to have TclX here anyway, use lassign
-                lassign $results($entry) count real cpu
+		set count [lindex $results($entry) 0]
+		set real [lindex $results($entry) 1] 
+		set cpu [lindex $results($entry) 2] 
+
                 set parent [join [lrange $entry 1 end] +]
                 if {$parent == {}} {
                     set color white
