@@ -44,7 +44,7 @@ EXTRA_SRCS = CompileMake.template README gantt.me \
 
 # Don't include xpole-1.4.6 here, as we don't ship it.
 
-MISC_FILES = 	Vem Vem-8.1 Vem-8.2 app-defaults bw_patterns bw_postscript \
+MISC_FILES = 	Vem Vem-8.1 Vem-8.2 app-defaults bw_patterns \
 		cg56 cg96 cgc cm5 colors defaultContent \
 		gantt.help matlab rename tcl tech technology vem
 
