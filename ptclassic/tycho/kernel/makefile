@@ -94,6 +94,7 @@ ITCL_SRCS = \
 	MenuSupport.itcl \
 	Message.itcl \
 	Model.itcl \
+	ModelRegistry.itcl \
 	ModelViewer.itcl \
 	Monitor.itcl \
 	MultiPanel.itcl \
