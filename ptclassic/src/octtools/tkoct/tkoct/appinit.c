@@ -1,6 +1,6 @@
 /*******************************************************************
 SCCS version identification
-$Id$
+@(#)appinit.c	1.4 11/11/94
 
 Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 ********************************************************************/
 #ifndef lint
-static char SccsId[] = "$Id$";
+static char SccsId[] = "@(#)appinit.c	1.4 11/11/94";
 #endif /* not lint */
 
 #include "topFixup.h"
@@ -132,6 +132,6 @@ Tcl_AppInit(interp)
      * then no user-specific startup file will be run under any conditions.
      */
 
-    tcl_RcFileName = "~/.tkoctrc";
+    Tcl_SetVar(interp, "tcl_rcFileName", "~/.tkoctrc", TCL_GLOBAL_ONLY);
     return TCL_OK;
 }
