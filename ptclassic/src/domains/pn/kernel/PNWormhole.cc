@@ -32,24 +32,24 @@ static const char file_id[] = "$RCSfile$";
 #pragma implementation
 #endif
 
-#include "MTDFWormhole.h"
-#include "MTDFScheduler.h"
+#include "PNWormhole.h"
+#include "PNScheduler.h"
 
 // Constructors.
-MTDFWormhole::MTDFWormhole(Galaxy& galaxy, Target* target)
+PNWormhole::PNWormhole(Galaxy& galaxy, Target* target)
 : Wormhole(*this, galaxy, target)
 {
     buildEventHorizons();
 }
 
-MTDFWormhole::MTDFWormhole(Galaxy& galaxy, const char* targetName)
+PNWormhole::PNWormhole(Galaxy& galaxy, const char* targetName)
 : Wormhole(*this, galaxy, targetName)
 {
     buildEventHorizons();
 }
 
 // Destructor.
-MTDFWormhole::~MTDFWormhole()
+PNWormhole::~PNWormhole()
 {
     freeContents();
 }
@@ -57,66 +57,66 @@ MTDFWormhole::~MTDFWormhole()
 /* --------------------Star methods-------------------- */
 
 // Make an identical copy.
-Block* MTDFWormhole::clone() const
+Block* PNWormhole::clone() const
 {
-    LOG_NEW; return new MTDFWormhole(gal.clone()->asGalaxy(), target->cloneTarget());
+    LOG_NEW; return new PNWormhole(gal.clone()->asGalaxy(), myTarget()->cloneTarget());
 }
 
 // Make a new object of the same type.
-Block* MTDFWormhole::makeNew() const
+Block* PNWormhole::makeNew() const
 {
     // Note that Target does not define a makeNew() method,
     // so it is cloned instead.
-    LOG_NEW; return new MTDFWormhole(gal.makeNew()->asGalaxy(), target->cloneTarget());
+    LOG_NEW; return new PNWormhole(gal.makeNew()->asGalaxy(), myTarget()->cloneTarget());
 }
 
 // Identify self as Wormhole.
-int MTDFWormhole::isItWormhole() const
+int PNWormhole::isItWormhole() const
 {
     return TRUE;
 }
 
 // Print a description of the Wormhole.
-StringList MTDFWormhole::print(int verbose) const
+StringList PNWormhole::print(int verbose) const
 {
     return Wormhole::print(verbose);
 }
 
 // Scheduler for the inner domain.
-Scheduler* MTDFWormhole::scheduler() const
+Scheduler* PNWormhole::scheduler() const
 {
-    return target->scheduler();
+    return myTarget()->scheduler();
 }
 
 // Beginning of simulation.
-void MTDFWormhole::setup()
+void PNWormhole::setup()
 {
     Wormhole::setup();
 }
 
 // Run the simulation.
-void MTDFWormhole::go()
+void PNWormhole::go()
 {
     // Synchronize inner domain with the outer.
-    target->setCurrentTime(outerSched()->now());
+    myTarget()->setCurrentTime(outerSched()->now());
 
     // Run the inner domain.
     Wormhole::run();
 }
 
 // End of simulation.
-void MTDFWormhole::wrapup()
+void PNWormhole::wrapup()
 {
-    target->wrapup();
+    myTarget()->wrapup();
 }
 
 // Bypass Wormhole in parent chain when referring to States.
-void MTDFWormhole::initState()
+void PNWormhole::initState()
 {
     gal.initState();
 }
 
-State* MTDFWormhole::stateWithName(const char* name)
+State* PNWormhole::stateWithName(const char* name)
 {
     return gal.stateWithName(name);
 }
@@ -124,9 +124,9 @@ State* MTDFWormhole::stateWithName(const char* name)
 /* ------------------Wormhole methods------------------ */
 
 // Stopping condition for inner domain.
-double MTDFWormhole::getStopTime()
+double PNWormhole::getStopTime()
 {
     // Set inner domain to stop before next iteration of the outer domain.
-    MTDFScheduler* sched = (MTDFScheduler*)outerSched();
+    PNScheduler* sched = (PNScheduler*)outerSched();
     return sched->now() + sched->schedulePeriod;
 }

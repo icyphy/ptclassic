@@ -32,23 +32,23 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 */
 
-#ifndef _MTDFThreadList_h
-#define _MTDFThreadList_h
+#ifndef _PNThreadList_h
+#define _PNThreadList_h
 
-#include "MTDFThread.h"
+#include "PNThread.h"
 #include "DataStruct.h"
 
-class MTDFThreadList : public SequentialList
+class PNThreadList : public SequentialList
 {
 public:
     // Add Thread to list.
-    void put(MTDFThread* t) { SequentialList::put(t); }
+    void put(PNThread* t) { SequentialList::put(t); }
 
     // Remove Thread from list.
-    int remove(MTDFThread* t) { return SequentialList::remove(t); }
+    int remove(PNThread* t) { return SequentialList::remove(t); }
 
     // First Thread on list.
-    MTDFThread& head() const { return *(MTDFThread*)SequentialList::head(); }
+    PNThread& head() const { return *(PNThread*)SequentialList::head(); }
 
     // Size of list.
     int size() const { return SequentialList::size(); }

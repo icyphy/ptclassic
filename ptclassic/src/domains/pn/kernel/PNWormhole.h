@@ -1,5 +1,5 @@
-#ifndef _MTDFWormhole_h
-#define _MTDFWormhole_h
+#ifndef _PNWormhole_h
+#define _PNWormhole_h
 
 /* 
 Copyright (c) 1990-1993 The Regents of the University of California.
@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
     Author:	T. M. Parks
     Created:	17 January 1992
 
-    Wormhole for the MTDF domain.
+    Wormhole for the PN domain.
 */
 
 #ifdef __GNUG__
@@ -36,19 +36,19 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "Wormhole.h"
-#include "MTDFStar.h"
+#include "PNStar.h"
 
 class Scheduler;
 
-class MTDFWormhole : public Wormhole, public MTDFStar
+class PNWormhole : public Wormhole, public PNStar
 {
 public:
     // Constructors.
-    MTDFWormhole(Galaxy& galaxy, Target* target=0);
-    MTDFWormhole(Galaxy& galaxy, const char* targetName = 0);
+    PNWormhole(Galaxy& galaxy, Target* target=0);
+    PNWormhole(Galaxy& galaxy, const char* targetName = 0);
 
     // Destructor.
-    /*virtual*/ ~MTDFWormhole();
+    /*virtual*/ ~PNWormhole();
 
 // Star methods.
 public:

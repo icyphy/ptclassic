@@ -35,7 +35,7 @@ static const char file_id[] = "$RCSfile$";
 #endif
 
 #include "RTScheduler.h"
-#include "MTDFStar.h"
+#include "PNStar.h"
 
 // Run (or continue) the simulation.
 int RTScheduler::run()
@@ -47,13 +47,13 @@ int RTScheduler::run()
     }
 
     // Lower priority to allow Threads to run.
-    thread->setPriority(MTDFThread::minPriority());
+    thread->setPriority(PNThread::minPriority());
 
     // Wait until enough time has elapsed.
     while( (now() < getStopTime()) && !SimControl::haltRequested());
 
     // Raise priority to prevent Threads from running.
-    thread->setPriority(MTDFThread::maxPriority());
+    thread->setPriority(PNThread::maxPriority());
 
     // Update startTime but keep current time consistent.
     {
@@ -74,7 +74,7 @@ int RTScheduler::run()
 }
 
 // Select thread function for a star.
-void (*RTScheduler::selectThread(MTDFStar* star))(MTDFStar*)
+void (*RTScheduler::selectThread(PNStar* star))(PNStar*)
 {
     if (star->period > 0.0) return periodicThread;
     else if (star->isSource()) return sourceThread;
@@ -82,9 +82,9 @@ void (*RTScheduler::selectThread(MTDFStar* star))(MTDFStar*)
 }
 
 // Thread for periodic Stars.
-void RTScheduler::periodicThread(MTDFStar* star)
+void RTScheduler::periodicThread(PNStar* star)
 {
-    MTDFScheduler& sched = *(MTDFScheduler*)star->scheduler();
+    PNScheduler& sched = *(PNScheduler*)star->scheduler();
     double wake = star->lag;
     
     do
@@ -95,7 +95,7 @@ void RTScheduler::periodicThread(MTDFStar* star)
 }
 
 // Thread for (non-periodic) source Stars.
-void RTScheduler::sourceThread(MTDFStar* star)
+void RTScheduler::sourceThread(PNStar* star)
 {
     RTScheduler& sched = *(RTScheduler*)star->scheduler();
 

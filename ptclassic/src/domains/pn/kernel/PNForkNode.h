@@ -30,27 +30,27 @@ ENHANCEMENTS, OR MODIFICATIONS.
     Programmer:		T.M. Parks
     Date of creation:	28 August 1992
 
-    Auto-forking version of MTDFGeodesic.
+    Auto-forking version of PNGeodesic.
 */
 
-#ifndef _MTDFForkNode_h
-#define _MTDFForkNode_h
+#ifndef _PNForkNode_h
+#define _PNForkNode_h
 
 #ifdef __GNUG__
 #pragma interface
 #endif
 
-#include "MTDFGeodesic.h"
+#include "PNGeodesic.h"
 #include "AutoFork.h"
 
-class MTDFForkNode : public MTDFGeodesic
+class PNForkNode : public PNGeodesic
 {
 public:
     // Class identification.
     virtual int isA(const char*) const;
 
     // Constructor.
-    MTDFForkNode() : autoFork(*this) {}
+    PNForkNode() : autoFork(*this) {}
 
     // Identify node as persistent.
     int isItPersistent () const;
