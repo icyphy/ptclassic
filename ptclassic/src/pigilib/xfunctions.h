@@ -33,7 +33,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
    $Id$
 */
 
-extern void win_msg ARGS((char *omsg));
+extern void win_msg ARGS((const char *omsg));
 extern void accum_string ARGS((const char *string));
 extern void clr_accum_string();
 extern void pr_accum_string();
