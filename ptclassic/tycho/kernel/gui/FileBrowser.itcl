@@ -289,8 +289,8 @@ body ::tycho::FileBrowser::constructor {args} {
 #
 # If there is more than one matching entry, we increase the length of the
 # pattern to consist of all of the initial common characters of the matching
-# string.  For example, if the pattern is "Foo" and we have "FooBarBaz" and
-# "FooBarFrob", then the pattern is increased to "FooBar".
+# string.  For example, if the pattern is "Foo" and we have "FooBar.tcl" and
+# "FooBar.java", then the pattern is increased to "FooBar.".
 #
 # This implementation differs from the parent in that it attempts to complete
 # filenames in directories other than the current one. This does not change
@@ -298,8 +298,7 @@ body ::tycho::FileBrowser::constructor {args} {
 # common characters.
 #
 # Hitting tab again after such a completion WILL change the directory, however.
-# For example: tycho/ke <Tab> tycho/kernel/ <Tab> kernel/ <Tab> kernel/
-# Should the last tab change directories again? Return will do that...
+# For example: tycho/ke <Tab> tycho/kernel/ <Tab> (now in kernel directory).
 #
 body ::tycho::FileBrowser::complete {{case 0}} {
     if {[file dirname [get entry]] == "."} {
@@ -383,37 +382,18 @@ body ::tycho::FileBrowser::complete {{case 0}} {
             return 1
         }
         default {
-            # more than 1 match, send annoying beep, complete partially:
+            # more than 1 match, complete partially:
 
             # Set the entry widget to the longest common string among all the
-            # matches. Start with the first match, and then slowly increase the
-            # length of the pattern until we find another match that's different
-            set firstMatch [lindex $matches 0]
-            set matchFailed 0
-            for {set end [expr [string length $pattern] - 1]} \
-                    { $end <= [string length $firstMatch]} \
-                    { incr end} {
-                if !$case {
-                    set testPattern [string tolower \
-                            [string range $firstMatch 0 $end]]
-                } else {
-                    set testPattern [string range $firstMatch 0 $end]
-                }
-                foreach match $matches {
-                    if !$case {
-                        set match [string tolower $match]
-                    }
-                    if  { "$testPattern" != "[string range $match 0 $end]"} {
-                        set matchFailed 1
-                        break
-                    }
-                }
-                if { $matchFailed == 1 } {
-                    incr end -1
-                    break
-                }
+            # matches. If no common initial string (example: *.itcl), don't
+            # complete, leave pattern.
+
+            set compMatch [lsubstring $matches]
+            if {$compMatch != {}} {
+                set lastCompletion [file join $dir $compMatch]
+            } else {
+                set lastCompletion [file join $dir [string trimright $pattern *]]
             }
-            set lastCompletion [file join $dir [string range $firstMatch 0 $end]]
             setEntry $lastCompletion
             return 2
         }
