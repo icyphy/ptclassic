@@ -1,7 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -675,7 +675,7 @@ struct octLabel *oneLabel;
     printf("gsave\n");
     /* the font is scaled down slightly here */
     printf("/Helvetica findfont %d scalefont setfont\n", 
-	irint(0.8*oneLabel->textHeight));
+	(int) rint(0.8*oneLabel->textHeight));
 
     printf("/maxwidth 0 def\n");
     for (idx = 0;  idx < daLen(lblInfo);  idx++) {
