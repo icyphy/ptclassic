@@ -78,10 +78,12 @@ int AsmGeodesic :: internalBufSize() const {
 	if ((numInit() > 0 || dest->usesOldValues()) &&
 	    !hasCirc(dest) && !hasCirc(src)) {
 		int total = src->parentReps() * src->numXfer();
-		if (total < size)
+		if (total < size) {
 			Error::abortRun (*destinationPort,
 		 "maximum buffer size exceeds number of particles produced\n",
 			 "in one schedule iteration (not yet supported)");
+			return 0;
+		}
 	}
 	return size;
 }
