@@ -394,6 +394,7 @@ body ::tycho::FileBrowser::complete {} {
     }
     # Build list of matching files
     foreach name "$files" {
+        set name [::tycho::url tail $name]
         if $case {
             set nm $name
         } else {
@@ -557,23 +558,15 @@ body ::tycho::FileBrowser::updateListbox {} {
     
     # Get a list of filenames in the current working directory
     set files [::tycho::resource dirlist $localCWD]
-    
     # Split the filename list into directories and plain files
     set dirList ""
     set fileList ""
     foreach file $files {
-	set oldcode {
-	    set tail [::tycho::url tail $file]
-	    if [::tycho::resource isdirectory $file] {
-		lappend dirList $tail
-	    } {
-		lappend fileList $tail
-	    }
-	}
-	if [regexp {/$} $file] {
-	    lappend dirList $file
+        set tail [::tycho::url tail $file]
+	if [::tycho::resource isdirectory $file] {
+	    lappend dirList "$tail/"
 	} else {
-	    lappend fileList $file
+	    lappend fileList $tail
 	}
     }
     set dirList [lsort $dirList]
