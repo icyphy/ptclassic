@@ -314,7 +314,7 @@ body ::tycho::Resource::constructor {args} {
 #### destructor
 #
 body ::tycho::Resource::destructor {} {
-    close
+    # close
 }
 
 #########################################################################
