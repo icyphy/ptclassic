@@ -48,7 +48,8 @@ HDRS	      = compile.h \
 		ptk.h \
 		ptkRegisterCmds.h \
 		ptkNet.h \
-		ptkTkSetup.h
+		ptkTkSetup.h \
+		POct.h
 
 
 LIBCSRCS      = main.c \
@@ -73,14 +74,15 @@ LIBCSRCS      = main.c \
 		ptkGlobals.c \
 		ptkTemplate.c \
 		ptkNet.c \
-		ptkTkSetup.c 
+		ptkTkSetup.c
 
 
 LIBCPPSRCS    = kernelCalls.cc \
 		XError.cc \
 		pigiLoader.cc \
 		ptkConsoleWindow.cc \
-		ptkRegisterCmds.cc
+		ptkRegisterCmds.cc \
+		POct.cc
 
 
 SRCS = $(LIBCSRCS) $(LIBCPPSRCS)
@@ -93,7 +95,9 @@ all:	makefile $(LIB)
 
 install: makefile $(LIBDIR)/$(LIB)
 
-INCL=-I$(KERNDIR) -I$(TCL_H_DIR) -I$(PTCLHDRS)
+# include the X11, oct and tcl headers for C++ as well as C
+INCL=-I$(KERNDIR) -I$(OCTTOOLS)/include $(X11INCL) -I$(TCL_H_DIR) -I$(PTCLHDRS)
+
 C_INCL=-I$(OCTTOOLS)/include $(X11INCL) -I$(TCL_H_DIR)
 
 lint:	$(LIBCSRCS)
