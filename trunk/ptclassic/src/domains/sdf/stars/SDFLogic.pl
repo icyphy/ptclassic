@@ -40,7 +40,10 @@ The other operations are self-explanatory.
 	output {
 		name { output }
 		type { int }
-		desc { Result of the logic test. }
+		desc {
+Result of the logic test, with FALSE equal to zero and TRUE equal to a
+non-zero integer (not necessarily 1).
+		}
 	}
 	defstate {
 		name { logic }
@@ -62,49 +65,49 @@ The other operations are self-explanatory.
 	}
 	setup {
 		const char* cn = logic;
-		if ( strcasecmp ( cn, "NOT") == 0) {
+		if ( strcasecmp(cn, "NOT") == 0) {
 		    test = NOTID;
 		    if (input.numberPorts() > 1)
 			Error::abortRun(*this,
 			    "NOT operation can only have one input");
 		}
-		else if ( strcasecmp ( cn, "AND") == 0) test = ANDID;
-		else if ( strcasecmp ( cn, "NAND") == 0) test = NANDID;
-		else if ( strcasecmp ( cn, "OR") == 0) test = ORID;
-		else if ( strcasecmp ( cn, "NOR") == 0) test = NORID;
-		else if ( strcasecmp ( cn, "XOR") == 0) test = XORID;
-		else if ( strcasecmp ( cn, "XNOR") == 0) test = XNORID;
+		else if ( strcasecmp(cn, "AND") == 0 ) test = ANDID;
+		else if ( strcasecmp(cn, "NAND") == 0 ) test = NANDID;
+		else if ( strcasecmp(cn, "OR") == 0 ) test = ORID;
+		else if ( strcasecmp(cn, "NOR") == 0 ) test = NORID;
+		else if ( strcasecmp(cn, "XOR") == 0 ) test = XORID;
+		else if ( strcasecmp(cn, "XNOR") == 0 ) test = XNORID;
 		else Error::abortRun(*this,"Unrecognized test.");
 	}
 	go {
 	    MPHIter nexti(input);
-	    PortHole *p;
+	    PortHole* p = 0;
 	    int result = 0;
 
 	    switch( test ) {
 		case NOTID:
 		    p = nexti++;
-		    result = !(int)((*p)%0);
+		    result = ! int((*p)%0);
 		    break;
 		case ANDID:
 		case NANDID:
 		    result = 1;
 		    while ((p = nexti++) != 0)
-			result = result && (int)((*p)%0);
+			result = result && int((*p)%0);
 		    if (test == NANDID) result = !result;
 		    break;
 		case ORID:
 		case NORID:
 		    result = 0;
 		    while ((p = nexti++) != 0)
-			result = result || (int)((*p)%0);
+			result = result || int((*p)%0);
 		    if (test == NORID) result = !result;
 		    break;
 		case XORID:
 		case XNORID:
 		    result = 0;
 		    while ((p = nexti++) != 0)
-			if ((int)((*p)%0)) result = !result;
+			if (int((*p)%0)) result = !result;
 		    if (test == XNORID) result = !result;
 		    break;
 	    }
