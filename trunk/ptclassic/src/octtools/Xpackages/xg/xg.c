@@ -64,7 +64,7 @@ static char SccsId[]="$Id$";
  *	static int xgiTransformCompute() - calculate axis scales.
  *	static double RoundUp() - round value up.
  *	static void xgiDrawGridAndAxis() - draw grid and axis.
- *	static int xgiWriteValue() - write value.
+ *	static void xgiWriteValue() - write value.
  *	static HERMITE ComputeCubicHermite() - compute coefficients for
  *		cubic hermite interpolation.
  *	static void DrawHermiteSegment() - generate points for hermite segment.
@@ -72,7 +72,7 @@ static char SccsId[]="$Id$";
  *	static void DrawBSplineSegment() - generate points for b-spline segment.
  *	static int16 ClipCheck() - do clip checking.
  *	static int16 Clipper() - the clipper.
- *	static int xgiDrawData() - draw data.
+ *	static void xgiDrawData() - draw data.
  *	static void xgiDrawPoint() - draw point.
  *	void xgSetFlags() - set flags.
  *	void xgClearFlags() - clear flags.
@@ -96,7 +96,9 @@ static char SccsId[]="$Id$";
 #define MAIN_XG
 #include "xglocal.h"
 
-static int xgiWriteValue();
+static void xgiWriteValue
+	ARGS((char *str, double	val, int exp));
+
 
 /**************************************************************************
  * FREEALLDATA
@@ -281,7 +283,7 @@ static void xgiDrawTitle(xg)
  * Return Value:
  *	The pointer. (char *)
  */
-static char *xgiCheckPtr(p,n)
+char *xgiCheckPtr(p,n)
 	char		*p;
 	unsigned	n;
 {
@@ -744,7 +746,7 @@ static char *defColors[XG_MAXSETS] = {
  * Parameters:
  *	display (Display *) - the display. (Input)
  */
-static int GlobalInitSets(display)
+static void GlobalInitSets(display)
 	Display		*display;
 {		   
 	int16		set;
@@ -851,7 +853,7 @@ static int GlobalInitSets(display)
  * Parameters:
  *	xg (XG *) - the graph structure. (Input)
  */
-static int InitSets(xg)
+static void InitSets(xg)
 	XG	*xg;
 {
 	int index;
@@ -919,11 +921,11 @@ static void ReadDefaults(display,progname)
 	RDINT("xg.BorderSize", bdrSize);
 	RDCLR("xg.Border", bdrPixel);
 #ifdef X11
-	if (value = XGETDEFAULT(display,progname,"xg.GridSize")) {
+	if ( (value = XGETDEFAULT(display,progname,"xg.GridSize")) ) {
 		XSetLineAttributes(display,normGC,atoi(value),LineSolid,
 			CapNotLast,JoinMiter);
 	} /* if... */
-	if (value = XGETDEFAULT(display,progname,"xg.ZeroSize")) {
+	if ( (value = XGETDEFAULT(display,progname,"xg.ZeroSize")) ) {
 		XSetLineAttributes(display,zeroGC,atoi(value),LineSolid,
 			CapNotLast,JoinMiter);
 	} /* if... */
@@ -1979,7 +1981,7 @@ static void xgiDrawGridAndAxis(xg)
  *	val (double) - value to print. (Input)
  *	exp (double) - the exponent of the value. (Input)
  */
-static int xgiWriteValue(str, val, exp)
+static void xgiWriteValue(str, val, exp)
 	char	*str;			/* String to write into */
 	double	val;			/* Value to print       */
 	int		exp;			/* Exponent             */
@@ -2243,7 +2245,7 @@ static int16 Clipper (xg,wi,Xx,Xy,areaWidth,areaHeight,set,subindex,pc,clip)
  * Parameters:
  *	xg (XG *) - the xg structure. (Input)
  */
-static int xgiDrawData(xg)
+static void xgiDrawData(xg)
 	XG			*xg;
 {
 	LocalWin	*wi = xg->win_info;
@@ -2510,7 +2512,7 @@ static void xgiDrawPoint(xg , spot, set)
  * Parameters:
  *	xg (XG *) - the xg structure. (Input)
  */
-static int xgiDrawLegend(xg)
+static void xgiDrawLegend(xg)
 	XG			*xg;
 {
 	LocalWin	*wi = xg->win_info;
