@@ -2,7 +2,7 @@
 	name { MaxMin }
 	domain { C50 }
 	desc { Finds maximum or minimum value }
-	version { @(#)C50MaxMin.pl	1.12	3/27/96 }
+	version { $Id$ }
 	author { Luis Gutierrez }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
