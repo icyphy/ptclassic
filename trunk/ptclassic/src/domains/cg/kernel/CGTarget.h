@@ -79,20 +79,20 @@ public:
 
 extern const char *CODE, *PROCEDURE;
 
+// Defined in CGDomain.cc
+extern const char CGdomainName[];
+
 class CGTarget : public Target {
 public:
     // Constructor
     CGTarget(const char* name, const char* starclass, const char* desc,
-         char sep = '_');
+             const char* assocDomain = CGdomainName, char sep = '_');
 
     // Destructor
     ~CGTarget();
 
     // Generate a new CGTarget.
     /*virtual*/ Block* makeNew() const;
-
-    // Return the domain of the galaxy if it exists or "CG" otherwise
-    /*virtual*/ const char* domain();
 
     // Class identification.
     /*virtual*/ int isA(const char*) const;

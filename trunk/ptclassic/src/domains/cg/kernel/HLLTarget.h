@@ -49,7 +49,10 @@ targets, combining the features they have in common.
 class HLLTarget : public CGTarget {
 public:
 	// constructor
-	HLLTarget(const char* nam, const char* startype, const char* desc);
+	HLLTarget(const char* nam, const char* startype, const char* desc,
+		  const char* assocDomain = CGdomainName);
+
+	// Return a copy of itself
 	/*virtual*/ Block* makeNew() const = 0;
 
 	// Routines for writing code: schedulers may call these
