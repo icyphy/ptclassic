@@ -82,7 +82,20 @@ StringList CGStar::processCode(CodeBlock& cb) {
 			}
 			// get the identifier
 			char id[TOKLEN], arg2[TOKLEN], *p = id;
-			while (isalnum(*t) || *t == '#') *p++ = *t++;
+			while (isalnum(*t)) *p++ = *t++;
+			if (*t == '#') {
+				*p++ = *t++;
+				if (isdigit(*t)) {
+					while (isdigit(*t)) *p++ = *t++;
+				}
+				else {
+					char portNum[TOKLEN], *n = portNum;
+					while (isalnum(*t)) *n++ = *t++;
+					*n = 0;
+					const char *v =lookupVal(portNum);
+					while (*v != 0) *p++ = *v++;
+				}
+			}
 			*p = 0;
 			// skip any whitespace
 			while (isspace(*t)) t++;
