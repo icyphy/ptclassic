@@ -80,6 +80,9 @@ class ::tycho::EditHTML {
     # Open a help window.
     method help {}
 
+    # Insert text and move to a location n chars from the insert cursor
+    method insertAndMove {text offset}
+
     # Jump to the link under the "current" mark, if any.
     method jump {}
 
@@ -242,6 +245,15 @@ body ::tycho::EditHTML::help {} {
     ::tycho::File::openContext \
 	    [file join $TYCHO editors textedit doc usersGuides \
 	    EditHTMLHelp.html]
+}
+
+#####################################################################
+#### insertAndMove
+# Insert text and move to a location n chars from the insert cursor
+#
+body ::tycho::EditHTML::insertAndMove {text offset} {
+    insertString insert $text
+    [textWinName] mark set insert [list insert $offset chars]
 }
 
 #####################################################################
@@ -426,7 +438,7 @@ body ::tycho::EditHTML::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
 		-label "Recolorize" -underline 0 \
                 -command "$this parseRegion 1.0 end"
         
-        menubar add separator editsep3 edit
+        menubar add separator editsep4 edit
         
         menubar command checklinks edit \
 		-label "Check Links" -underline 6 \
@@ -436,6 +448,80 @@ body ::tycho::EditHTML::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
 		-label "File Template" -underline 0 \
                 -command "$this fileTemplate"
     }
+
+    # Set up bindings
+    set text $itk_component(text)
+
+    # These keys are special in HTML
+    bind $text <Key-ampersand> "$this insertString insert {&amp;};break"
+    bind $text <Key-greater> "$this insertString insert {&gt;}; break"
+    bind $text <Key-less> "$this insertString insert {&lt;}; break"
+    bind $text <Key-backslash> "$this insertString insert {&#92}; break"
+
+    # Here's how to create those symbols
+    bind $text <Control-c><Key-ampersand> "$this insertString insert {&};break"
+    bind $text <Control-c><Key-greater> "$this insertString insert {>}; break"
+    bind $text <Control-c><Key-less> "$this insertString insert {<}; break"
+    bind $text <Control-c><Key-backslash> \
+	    "$this insertString insert {\\}; break"
+
+    bind $text <Control-c><Key-a> \
+	    "$this insertAndMove {<address></address>} -10; break"
+    bind $text <Control-c><Key-b> \
+	    "$this insertAndMove {<blockquote></blockquote>} -14; break"
+    bind $text <Control-c><Key-c> \
+	    "$this insertAndMove {<code></code>} -8; break"
+    bind $text <Control-c><Key-d> \
+	    "$this insertAndMove {<dl>\n<dt>\n<dd>\n</dl>} -7; break"
+    bind $text <Control-c><Key-e> \
+	    "$this insertAndMove {<dt>\n<dd>} -5; break"
+    bind $text <Control-c><Key-g> \
+	    "$this insertAndMove {<img src=\"\">} -2; break"
+    bind $text <Control-c><Key-h> \
+	    "$this insertAndMove {\n<h2></h2>\n} 6; break"
+    bind $text <Control-c><Key-i> \
+	    "$this insertAndMove {\n<li> } 0; break"
+    bind $text <Control-c><Key-l> \
+	    "$this insertAndMove {<a href=\"\"></a>} -8; break"
+    bind $text <Control-c><Key-m> \
+	    "$this insertAndMove {<menu>\n<li> \n</menu>} -8; break"
+    bind $text <Control-c><Key-n> \
+	    "$this insertAndMove {<ol>\n<li> \n</ol>} -6; break"
+    bind $text <Control-c><Key-p> \
+	    "$this insertAndMove {<p>} 0; break"
+    bind $text <Control-c><Key-r> \
+	    "$this insertAndMove {<a name=\"\"></a>} -6; break"
+    bind $text <Control-c><Key-s> \
+	    "$this insertAndMove {<ul>\n<li> \n</ul>} -6; break"
+    bind $text <Control-c><Key-t> \
+	    "$this insertAndMove {<title></title>} -6; break"
+    bind $text <Control-c><Key-x> \
+	    "$this insertAndMove {<xmp>\n</xmp>} -6; break"
+
+    # Various fonts
+    bind $text <Control-c><Tab> \
+	    "$this insertAndMove {<i></i>} -4; break"
+    bind $text <Control-c><Return> \
+	    "$this insertAndMove {<samp></samp>} -7; break"
+    bind $text <Control-c><Control-b> \
+	    "$this insertAndMove {<b></b>} -4; break"
+    bind $text <Control-c><Control-c> \
+	    "$this insertAndMove {<cite></cite>} -5; break"
+    bind $text <Control-c><Control-e> \
+	    "$this insertAndMove {<em></em>} -5; break"
+    bind $text <Control-c><Control-f> \
+	    "$this insertAndMove {<tt></tt>} -5; break"
+    bind $text <Control-c><Control-k> \
+	    "$this insertAndMove {<kbd></kbd>} -6; break"
+    bind $text <Control-c><Control-l> \
+	    "$this insertAndMove {<pre>\n</pre>} -7; break"
+    bind $text <Control-c><Control-p> \
+	    "$this insertAndMove {<pre>\n</pre>} -7; break"
+    bind $text <Control-c><Control-s> \
+	    "$this insertAndMove {<strong></strong>} -9; break"
+    bind $text <Control-c><Control-v> \
+	    "$this insertAndMove {<var></var>} -6; break"
+
 }
 
 #####################################################################
