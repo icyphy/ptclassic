@@ -316,8 +316,37 @@ long userOptionWord;
 	    PrintErr(ErrGet());
 	}
     } else {
-	/* delay or palette inst, or universe is under cursor */
-	PrintErr("Cursor must be over a star or galaxy instance");
+	/* other kinds of objects, try to display them all */
+	char propval[80];
+	propval[0] = '?'; propval[1] = 0;
+	clr_accum_string();
+	if (IsDelay(&inst)) {
+	    accum_string ("Delay: value = '");
+	    GetStringizedProp(&inst, "delay", propval, 80);
+	    accum_string (propval);
+	    accum_string ("'");
+	}
+	else if (IsBus(&inst)) {
+	    accum_string ("Bus Marker: width = '");
+	    GetStringizedProp(&inst, "buswidth", propval, 80);
+	    accum_string (propval);
+	    accum_string ("'");
+	}
+	else if (IsIoPort(&inst)) {
+	    accum_string ("Galaxy ");
+	    accum_string (IsInputPort(&inst) ? "In" : "Out");
+	    accum_string ("put port");
+	}
+	else if (IsUniv(&inst)) {
+	    accum_string ("Universe instance\n");
+	}
+	else if (IsPal(&inst)) {
+	    accum_string ("Palette instance\n");
+	}
+	else {
+	    accum_string ("Unknown instance type\n");
+	}
+	pr_accum_string();
     }
     ViDone();
 }
