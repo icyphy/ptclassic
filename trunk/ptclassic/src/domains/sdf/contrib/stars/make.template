@@ -48,6 +48,7 @@ SDFTWTA.pl \
 SDFVDecoder.pl \
 SDFVEncoder.pl \
 SDFVariance.pl \
+SDFWirelessChannel.pl \
 SDFWriteVar.pl
 
 # The .cc files
@@ -62,8 +63,19 @@ HDRS =		$(SRCS:.cc=.h)
 STAR_MK =	sdfcontribstars
 DOMAIN =	SDF_CONTRIB
 DOMAIN_2 =	SDF
-EXTRA_SRCS =	$(STAR_MK).c $(PL_SRCS) fft.cc
 MISC_FILES =	README README.notes
+EXTRA_SRCS = \
+$(STAR_MK).c \
+$(PL_SRCS) \
+Constants.h \
+Decoder.cc \
+Decoder.h \
+Encoder.cc \
+Encoder.h \
+Interp.cc \
+Interp.h \
+fft.cc \
+fft.h
 
 all:		$(SRCS) stars_all
 
