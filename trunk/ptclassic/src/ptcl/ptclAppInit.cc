@@ -62,7 +62,7 @@ the [incr Tcl] (itcl) extension and the Ptolemy/PTcl facilities.
 #endif
 #include "Linker.h"
 
-EXTERN int		Ptcl_Init _ANSI_ARGS_((Tcl_Interp *interp));
+extern "C" int Ptcl_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
 #ifdef PT_PTCL_WITH_TK
 #include "ptk.h"
