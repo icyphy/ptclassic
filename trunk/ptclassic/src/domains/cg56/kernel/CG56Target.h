@@ -7,7 +7,7 @@ $Id$
  Copyright (c) 1992 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: J. Buck
+ Programmer: J. Buck and J. Pino
 
  Base target for Motorola 56000 assembly code generation.
 
@@ -20,6 +20,7 @@ $Id$
 #include "AsmTarget.h"
 #include "ProcMemory.h"
 #include "StringState.h"
+#include "IntState.h"
 
 class CG56Memory : public DualMemory {
 public:
@@ -31,8 +32,20 @@ class CG56Target : public AsmTarget {
 private:
 	void initStates();
 protected:
+	StringList cmds;
 	StringState xMemMap;
 	StringState yMemMap;
+
+	void codeSection();
+	void orgDirective(const char* memName, unsigned addr);
+	void writeInt(int);
+	void writeFix(double);
+	void writeFloat(double);
+
+	char* uname;
+	IntState disCode;
+	int inProgSection;
+	StringState dirName;
 public:
 	CG56Target (const char* nam, const char* desc);
 	// copy constructor
@@ -43,15 +56,8 @@ public:
 	int setup(Galaxy&);
 	StringList beginIteration(int repetitions, int depth);
 	StringList endIteration(int repetitions, int depth);
+	void addCode(const char*);
 	~CG56Target();
-protected:
-	void codeSection();
-	void orgDirective(const char* memName, unsigned addr);
-	void writeInt(int);
-	void writeFix(double);
-	void writeFloat(double);
-
-	int inProgSection;
 };
 
 #endif

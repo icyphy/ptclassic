@@ -7,8 +7,6 @@ $Id$
                        All Rights Reserved.
 
  Programmer: J. Pino
-	Modified code from S56XTarget.cc
-	Ported from gabriel s56x.l
 
  Target for Ariel S-56X DSP board.
  
@@ -21,48 +19,34 @@ $Id$
 #include "S56XTarget.h"
 #include "UserOutput.h"
 #include "CG56Star.h"
-#include "CG56Target.h"
 #include "KnownTarget.h"
-#include <ctype.h>
 
 S56XTarget :: S56XTarget(const char* nam, const char* desc) :
-	Sim56Target(nam,desc)
+	CG56Target(nam,desc)
 {
 	initStates();
 }
 
 S56XTarget::S56XTarget(const S56XTarget& arg) :
-	Sim56Target(arg)
+	CG56Target(arg)
 {
 	initStates();
 	copyStates(arg);
 }
 
 void S56XTarget :: initStates() {
-	xMemMap.setValue("0-255 8192-16383");
+/*	xMemMap.setValue("0-255 8192-16383");
 	yMemMap.setValue("0-16383");
-	xMemMap.setAttributes(A_NONCONSTANT|A_NONSETTABLE);
-	yMemMap.setAttributes(A_NONCONSTANT|A_NONSETTABLE); 
-}
-
-int S56XTarget :: setup (Galaxy& g) {
-	LOG_DEL; delete dirFullName;
-	dirFullName = writeDirectoryName(dirName);
-	cmds.initialize();
-	if (!CG56Target::setup(g)) return FALSE;
-	uname = makeLower(g.readName());
-	return TRUE;
+	xMemMap.setAttributes(A_NONSETTABLE|A_NONCONSTANT);
+	yMemMap.setAttributes(A_NONSETTABLE|A_NONCONSTANT); */
+	xMemMap.setState("xMemMap",this,"0-255 8192-16383","X memory map");
+	yMemMap.setState("yMemMap",this,"0-16383","Y memory map");
+	addState(runCode.setState("Download/Run code?",this,"YES",
+	                          "display code if YES."));
 }
 
 void S56XTarget :: headerCode () {
 	CG56Target :: headerCode();
-	const char* path = expandPathName("~ptolemy/lib/cg56");
-	StringList inc = "\tinclude '";
-	inc += path;
-	inc += "/intequlc.asm'\n\tinclude '";
-	inc += path;
-	inc += "/ioequlc.asm'\n";
-	addCode(inc);
 	addCode(
   		"; Breakpoint/trace interrupt handlers\n"
 		"	org	p:i_swi\n"
@@ -123,9 +107,9 @@ Block* S56XTarget::clone() const {
 }
 
 void S56XTarget :: addCode(const char* code) {
-	if (code[0] == '!')
-		cmds += (code + 1);
-	else CGTarget::addCode(code);
+	if (code[0] == '@')
+		aio += (code + 1);
+	else CG56Target::addCode(code);
 }
 void S56XTarget :: wrapup () {
 	addCode (
@@ -136,17 +120,13 @@ void S56XTarget :: wrapup () {
 		 "	nop\n"
 		 "	stop\n");
 	inProgSection = TRUE;
-	StringList map = mem->printMemMap(";","");
-	addCode (map);
-	if (int(disCode))
-		CGTarget::wrapup();
+	CG56Target::wrapup();
 // put the stuff into the files.
-	if (!genFile(myCode, uname, ".asm")) return;
-//	if (!genFile(cmds, uname,".cmd")) return;
+	if (!genFile(aio, uname,".aio")) return;
 // directive to change to the working directory
 	StringList cd = "cd "; cd += dirFullName; cd += ";";
 // execute the assembler
-	if (int(simCode)) {
+	if (int(runCode)) {
 		StringList assem = cd;
 		assem += "asm56000 -b -l -A -oso ";
 		assem += uname;
@@ -173,7 +153,7 @@ void S56XTarget :: wrapup () {
 	}
 }
 
-ISA_FUNC(S56XTarget,Sim56Target);
+ISA_FUNC(S56XTarget,CG56Target);
 
 // make an instance
 static S56XTarget proto("S-56X","run code on the S-56X card");

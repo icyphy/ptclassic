@@ -6,7 +6,7 @@ $Id$
  Copyright (c) 1992 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: J. Buck
+ Programmer: J. Buck and J. Pino
 
  Base target for Motorola 56000 assembly code generation.
 
@@ -18,6 +18,7 @@ $Id$
 
 #include "CG56Target.h"
 #include "CG56Star.h"
+#include <ctype.h>
 
 const Attribute ANY(0,0);
 
@@ -28,7 +29,7 @@ CG56Memory :: CG56Memory(const char* x_map, const char* y_map) :
 {}
 
 CG56Target :: CG56Target(const char* nam, const char* desc) :
-	inProgSection(0),
+	inProgSection(0), uname(0),
 	AsmTarget(nam,desc,"CG56Star")
 {
 	initStates();
@@ -36,30 +37,70 @@ CG56Target :: CG56Target(const char* nam, const char* desc) :
 }
 
 void CG56Target :: initStates() {
-	addState(xMemMap.setState("xMemMap",this,"0-4095","X memory map"));
-	addState(yMemMap.setState("yMemMap",this,"0-4095","Y memory map"));
+	addState(xMemMap.setState("xMemMap",this,"0-4095","X memory map",
+		A_NONSETTABLE|A_NONCONSTANT));
+	addState(yMemMap.setState("yMemMap",this,"0-4095","Y memory map",
+		A_NONSETTABLE|A_NONCONSTANT));
+	addState(disCode.setState("Display code?",this,"YES",
+	                          "display code if YES."));
+	addState(dirName.setState("dirName",this,"~/DSPcode",
+				  "directory for all output files"));
+}
+
+void CG56Target :: addCode(const char* code) {
+	if (code[0] == '!')
+		cmds += (code + 1);
+	else CGTarget::addCode(code);
+}
+
+char* makeLower(const char* name) {
+	LOG_NEW; char* newp = new char[strlen(name)+1];
+	char *o = newp;
+	while (*name) {
+		char c = *name++;
+		if (isupper(c)) *o++ = tolower(c);
+		else *o++ = c;
+	}
+	*o = 0;
+	return newp;
 }
 
 int CG56Target :: setup(Galaxy& g) {
+	LOG_DEL; delete dirFullName;
+	dirFullName = writeDirectoryName(dirName);
+	cmds.initialize();
 	LOG_DEL; delete mem;
 	LOG_NEW; mem = new CG56Memory(xMemMap,yMemMap);
-	return AsmTarget::setup(g);
+	if (!AsmTarget::setup(g)) return FALSE;
+	uname = makeLower(g.readName());
+	return TRUE;
 }
 
 void CG56Target :: headerCode () {
         StringList code = "generated code for target ";
         code += readFullName();
 	outputComment (code);
+	const char* path = expandPathName("~ptolemy/lib/cg56");
+	StringList inc = "\tinclude '";
+	inc += path;
+	inc += "/intequlc.asm'\n\tinclude '";
+	inc += path;
+	inc += "/ioequlc.asm'\n";
+	addCode(inc);
 }
 
 void CG56Target :: wrapup () {
 	StringList map = mem->printMemMap(";","");
 	addCode (map);
-	CGTarget::wrapup();
+// put the stuff into the files.
+	if (!genFile(myCode, uname, ".asm")) return;
+	if (int(disCode)) CGTarget::wrapup();
 }
 
 CG56Target :: ~CG56Target () {
 	LOG_DEL; delete mem;
+//	LOG_DEL; delete dirFullName; dirFullName = 0;
+	LOG_DEL; delete uname;
 }
 
 // copy constructor
@@ -78,11 +119,11 @@ Block* CG56Target :: clone () const {
 StringList CG56Target::beginIteration(int repetitions, int) {
 	StringList out;
 	if (repetitions == -1)		// iterate infinitely
-		out = "label\n";
+		out = "LOOP\n";
 	else {				// iterate finitely
 		out = "\tdo\t#";
 		out += repetitions;
-		out += ",label\n";
+		out += ",LOOP\n";
 	}
 	return out;
 }
@@ -90,9 +131,9 @@ StringList CG56Target::beginIteration(int repetitions, int) {
 StringList CG56Target::endIteration(int repetitions, int) {
 	StringList out;
 	if (repetitions == -1)		// iterate infinitely
-		out = "\tjmp\tlabel\n";
+		out = "\tjmp\tLOOP\n";
 	else				// iterate finitely
-		out = "label\n";
+		out = "LOOP\n";
 	return out;
 }
 
