@@ -86,6 +86,7 @@ protected:
     IntArrayState preemptive;
     StringState slaveNm;
     StringState where_is_defined;
+    IntState slaveShared;
 
     int numTrans;
     char** parsedEvents;
@@ -106,6 +107,7 @@ protected:
     /* virtual */ void wrapup(); // Redefine.
 
     Star * createWormhole (const char *galname, const char* where_defined);
+    Star * createNewWormhole (const char *galname, const char* where_defined);
     const char* ptkCompile(const char *galname, const char* where_defined);
     int setupGeodesic (Star* worm, Block* parent);
 
