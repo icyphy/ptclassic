@@ -215,7 +215,7 @@ class ::tycho::File {
 
     # Register directory contents and an associated viewing command.
     proc registerContents \
-	    {contents filecommand {description {}}} {}
+	    {contents filecommand {description {}} {editorclass {}}} {}
 
     # Register file extensions and an associated viewing command.
     proc registerExtensions \
@@ -223,7 +223,7 @@ class ::tycho::File {
 
     # Register file names and an associated viewing command.
     proc registerFilenames \
-	    {filename filecommand {description {}}} {}
+	    {filename filecommand {description {}} {editorclass {}}} {}
 
     # Return the registered viewing commands for a file or directory name.
     proc registeredCommands {name} {}
@@ -1193,12 +1193,17 @@ body ::tycho::File::openContext {filename} {
 # objects opened in the future using the value of this description as
 # the menu label. This permits the user to open a new blank editor of
 # the given class.
+# <p>
+# If the <i>editorclass</i> argument is supplied and non-empty, then
+# is selects the sub-menu of the Window menu into which the entry
+# to open a blank editor will be placed. Legal values are
+# "text", "graphics", and "tools".
 #
 body ::tycho::File::registerContents \
-	{contents filecommand {description {}}} {
+	{contents filecommand {description {}} {editorclass {}}} {
     set editorsContents($contents) $filecommand
     if {$description != {}} {
-	lappend windowMenuEntries [list $filecommand $description {}]
+	lappend windowMenuEntries [list $filecommand $description $editorclass]
     }
 }
 
@@ -1260,14 +1265,19 @@ body ::tycho::File::registerExtensions \
 # objects opened in the future using the value of this description as
 # the menu label. This permits the user to open a new blank editor of
 # the given class.
+# <p>
+# If the <i>editorclass</i> argument is supplied and non-empty, then
+# is selects the sub-menu of the Window menu into which the entry
+# to open a blank editor will be placed. Legal values are
+# "text", "graphics", and "tools".
 #
 body ::tycho::File::registerFilenames \
-	{filenames filecommand {description {}}} {
+	{filenames filecommand {description {}} {editorclass {}}} {
     foreach name $filenames {
 	set editorsFilename($name) $filecommand
     }
     if {$description != {}} {
-	lappend windowMenuEntries [list $filecommand $description {}]
+	lappend windowMenuEntries [list $filecommand $description $editorclass]
     }
 }
 
