@@ -1,0 +1,257 @@
+##########################################################################
+# Definition of Axis object for the slate
+#
+# @Author: Farhana Sheikh, John Reekie
+#
+# @Version: $Id$
+#
+# Copyright (c) %Q% The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+#
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+##########################################################################
+
+
+########################################################################
+#### Axis
+#
+# An axis for graphs and stuff.
+#
+# This class defines an axis object that can be used when creating
+# graphs, tables, and other such things.
+# The user must give the x and y coordinates (in pixels) of the 
+# ruler base for positioning on the slate.  Options include specifying 
+# the length of the axis in pixels, the number of significant
+# digits to use in labelling the axis, the labelling style (ie whether
+# every increment should be labelled, or just the end points or no
+# labels), orientation of the axis (horizontal or vertical), and the
+# length of the tick marks in pixels.  The beginning and end of the 
+# axis can also be specified using the -from and -to options. 
+#
+# FIXME: Needs lots more features. (We're working on it...)
+# 
+# <p>
+# Here is an example on how to use it:
+# <tcl><pre>
+# ::tycho::slate .s
+# pack .s
+# # Create the axis
+# set axis [.s create Axis 50 50 -length 100 -from 0.0 -to 100 -digits 1]
+# # Move the axis
+# $axis coords 10 100
+# # Change the length
+# $axis configure -length 50
+#
+class ::tycho::Axis {
+    inherit ::tycho::Primitive
+
+    constructor {x0 y0 args} {}
+    destructor {}
+
+    ###################################################################
+    ####                            options                        ####
+
+    # The number of significant digits to display
+    public variable digits 0 {
+	redraw
+    }
+
+    # The low value on the axis
+    public variable from 0.0 {
+	redraw
+    }
+
+    # The style of labelling: "none", "ends", or "every".
+    # FIXME: Does nothing.
+    public variable labelstyle "every" {
+	;#
+    }
+
+    # The length of the axis in pixels.
+    public variable length 200 {
+	redraw
+    }
+
+    # Vertical or horizontal orientation
+    # FIXME: Doesn't work
+    public variable orient horizontal {
+	;#
+    }
+
+    # The length of the tick marks in pixels
+    public variable ticklength 6 {
+	redraw
+    }
+
+    # The high value on the axis
+    public variable to 1.0 {
+	redraw
+    }
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Get or set the (base) coordinates of the axis.
+    method coords {args} {}
+
+    ###################################################################
+    ####                         protected variables               ####
+
+    # The font to use for the tick labels
+    protected variable tickfont ""
+
+    ###################################################################
+    ####                         private methods                   ####
+  
+    # Redraw myself
+    private method redraw {}
+
+    # Redraw the ticks and labels on the axis. Requires the base coordinate.
+    private method redrawTicks {x0 y0} 
+
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::Axis::constructor {x0 y0 args} {
+
+    # Set the slate and canvas variables.
+    set t [lsearch -exact $args -slate]
+    if { $t != -1 } {
+	set slate [lindex $args [expr $t+1]]
+	set canvas [$slate _canvas]
+	set args [lreplace $args $t [expr $t+1]]
+    }
+
+    # Grab some options now to save redrawing when the options
+    # are initialized.
+    getopt length     args
+    getopt ticklength args
+    getopt orient     args
+    getopt from       args
+    getopt digits     args
+    getopt to         args
+    
+    # Get and remember the font for the ticks
+    set tickfont [.tychoFonts findFont {helvetica 9 medium r}]
+    
+    # Draw the ticks and the labels
+    redrawTicks $x0 $y0
+    
+    # Create ruler line and call it "main"
+    $this component create "main" line $x0 $y0 [expr $x0+$length] $y0
+    
+    # Initialize remaining options
+    eval configure $args
+}
+    
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#######################################################################
+#### coords
+# Get or set the (base) coordinates of the axis.
+#
+body ::tycho::Axis::coords {args} {
+
+    # If no arguments specified then we return the current 
+    # coordinates of the base of the axis otherwise move
+    # the axis to the new coordinates
+    if { $args == "" } {
+	return [lrange [$canvas coords $component(main)] 0 1]
+    } else {
+	assign x y [$canvas coords $component(main)]
+	assign a b $args
+	
+	$this move direct [expr $a - $x] [expr $b - $y]
+    }
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      private methods                      ####
+
+########################################################################
+#### redraw
+# Redraw myself
+#
+body ::tycho::Axis::redraw {} {
+  
+    # Get the base coordinates
+    assign x0 y0 [$canvas coords $component(main)]
+    
+    # Redraw ticks and labels
+    redrawTicks $x0 $y0
+    
+    # Move the ruler line
+    $canvas coords $component(main) $x0 $y0 [expr $x0+$length] $y0
+}
+
+#######################################################################
+#### redrawTicks
+# Redraw the ticks and the labels. Requires the base coordinate.
+#
+body ::tycho::Axis::redrawTicks {x0 y0} {
+
+    # Test the range -- assume that if -from is not less than -to, that
+    # this is temporary and will be fixed by the next option.
+    if { $from >= $to } {
+	return
+    }
+
+    # Delete the ticks and labels (catch in case they don't exist yet)
+    catch {$this component delete ticks}
+    catch {$this component delete labels}
+    
+    # Find label width -- HACK!
+    set t [$canvas create text 0 0 -text [format %.${digits}f $from]]
+    set labelwidth [::rectWidth [$canvas bbox $t]]
+    $canvas delete $t
+    set t [$canvas create text 0 0 -text [format %.${digits}f $to]]
+    set labelwidth [max2 $labelwidth [::rectWidth [$canvas bbox $t]]]
+    $canvas delete $t
+    
+    # Calculate axis increment locations
+    set increment [::axisIncrement $from $to $length $labelwidth 10]
+    
+    set axisValues [::rangeValues $from $to $increment]
+    set axisLocations [::mapRange $from $to $axisValues \
+	    $x0 [expr $x0 + $length]]
+
+    # Create the tick lines: first, make a list of components
+    set itemspecs {}
+    foreach* x $axisLocations v $axisValues {
+	lappend itemspecs [list "ticks" [list line $x $y0 $x \
+		[expr $y0-$ticklength]]]
+	lappend itemspecs [list "labels" \
+		[list text $x [expr $y0-$ticklength] \
+		-font $tickfont -anchor sw \
+		-text [format %.${digits}f $v]]]
+    }
+    
+    # Then, create the items with the multi-component create command
+    $this component create* $itemspecs
+}
+
