@@ -15,8 +15,8 @@ delim off
 delim $$
 .EN
 .DM SDF Universe
-.SV $Date$
-.AL Karim P. Khiar
+.SV $Revision$	($Date$)
+.AL "Karim P. Khiar"
 .LD
 The universe (global) parameters for this demonstration are:
 \fINf\fR number of filters,
