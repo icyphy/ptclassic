@@ -27,12 +27,24 @@ extern const DataType PACKET;
 class PacketData {
 	friend class Packet;
 private:
-	int refCount;
+	// we use indirection for the reference count so it can be
+	// manipulated even for a const PacketData object.
+	int* refCount;
 protected:
 	int errorConvert(const char*) const;
 public:
 	// constructor.  Reference count is zero.
-	PacketData() : refCount(0) {}
+	PacketData() {
+		INC_LOG_NEW; refCount = new int; *refCount = 0;
+	}
+
+	// copy constructor.  Copy always has a zero ref count.
+	// arg is ignored since all objects are the same.  The
+	// default copy constructor cannot be used because we must
+	// have a separate refCount field.
+	PacketData(const PacketData&) {
+		INC_LOG_NEW; refCount = new int; *refCount = 0;
+	}
 
 	// destructor.
 	virtual ~PacketData();
@@ -72,37 +84,44 @@ private:
 	// a pointer to my real data
 	PacketData* d;
 
+	// manipulate the reference count.  These MUST be used
+	// properly.
+	void incCount() const { (*d->refCount)++;}
+	void decCount() const { (*d->refCount)--;}
+
+	int refCount() const { return *d->refCount;}
+
 	// bookkeeping function to zap the PacketData when done
 	void unlinkData();
-public:
-	// "cheater constructor": we allow the refCount field to be
-	// changed even in const PacketData objects.  Ideally, if the
-	// "~const" proposal is accepted by the ANSI C++ committee,
-	// then refCount can be made a ~const field and this will be
-	// possible without casts.
 
-	Packet(const PacketData& dat = dummyPacket) {
-		d = (PacketData*)&dat;
-		d->refCount++;
+public:
+	// constructor: by default, point to dummyPacket.
+	// dummyPacket is special, doesn't bother with ref counts.
+	Packet() : d(&dummyPacket) {}
+
+	Packet(PacketData& dat) : d(&dat) {
+		incCount();
 	}
 
 	// copy constructor
 	Packet(const Packet& p) {
 		d = p.d;
-		d->refCount++;
+		incCount();
 	}
 	// assignment operator
 	Packet& operator=(const Packet& p) {
-		p.d->refCount++;
+		p.incCount();
 		unlinkData();
 		d = p.d;
 		return *this;
 	}
+
 	// destructor.  Wipe out the PacketData when the last
 	// link is removed.
 	~Packet() {
 		unlinkData();
 	}
+
 	// dataType() : pass through
 	const char* dataType() const { return d->dataType();}
 

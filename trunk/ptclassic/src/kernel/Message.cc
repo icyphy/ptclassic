@@ -28,8 +28,10 @@ PacketData Packet::dummyPacket;
 // methods for PacketData.  These are typically overridden; they are
 // all virtual.
 
-// dummy destructor
-PacketData::~PacketData() {}
+// destructor for PacketData: zap storage for reference count.
+PacketData::~PacketData() {
+	LOG_DEL; delete refCount;
+}
 
 // methods for conversion to other types
 int PacketData::asInt() const {
@@ -79,8 +81,9 @@ static Packet dummy;
 // bookkeeping function to zap the PacketData when done
 // have to handle dummyPacket specially (it cannot be deleted)
 void Packet::unlinkData() {
-	d->refCount--;
-	if (d != &dummyPacket && d->refCount == 0) {
+	if (d == &dummyPacket) return;
+	decCount();
+	if (refCount() == 0) {
 		LOG_DEL; delete d;
 	}
 }
@@ -95,15 +98,15 @@ const char* Packet::typeError(const char* expected) const {
 }
 
 // generate a writable copy of the contents of a packet.
-// The writable copy always has reference count 0, in the packet
+// The writable copy always has reference count 0, and the packet
 // itself is modified to point to dummyPacket.
 PacketData* Packet::writableCopy() {
 	PacketData* result = d;
-	d->refCount--;
+	decCount();
 	d = &dummyPacket;
-	if (result->refCount > 0) {
+	if (refCount() > 0) {
 		result = result->clone();
-		result->refCount = 0;
+		*(result->refCount) = 0;
 	}
 	return result;
 }
