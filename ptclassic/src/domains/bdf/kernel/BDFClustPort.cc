@@ -69,6 +69,13 @@ BDFClustPort::BDFClustPort(DFPortHole& port,BDFCluster* parent, int bp)
 
 // destructor
 BDFClustPort::~BDFClustPort() {
+	// For bidirectional connections, zero out the other port's pointer
+	// to us since we're being destroyed, provided that the other guy is
+	// still alive; if the other guy has already been deallocated, then
+	// it would have set our pOutPtr to zero
+	if ( pOutPtr && isBagPort() ) {
+		inPtr()->pOutPtr = 0;
+	}
 	pOutPtr = 0;
 }
 
