@@ -164,7 +164,7 @@ $(BINDIR)/$(BASENAME).ptrim: $(BASENAME).ptrim
 $(BINDIR)/$(BASENAME).ptiny: $(BASENAME).ptiny
 	make PTINY=1 BASENAME=$(BASENAME) install
 
-$(BINDIR)/$(BASENAME): $(BASENAME).debug.purecov
+$(BINDIR)/$(BASENAME): $(BASENAME)
 	make FULL=1 BASENAME=$(BASENAME) install
 
 else #ALLBINARIES
