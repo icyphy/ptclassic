@@ -50,15 +50,28 @@ proc pigilib_init_env {} {
     }
     set ptolemy $env(PTOLEMY)
     set PTOLEMY $env(PTOLEMY)
-    #set env(TCL_LIBRARY) $env(PTOLEMY)/tcl/tcl[info tclversion]/lib
-    #set env(TK_LIBRARY) $env(PTOLEMY)/tcl/tk$tk_version/lib
-    set env(TCL_LIBRARY) $env(PTOLEMY)/tcltk/tcl/lib/tcl
-    set env(TK_LIBRARY) $env(PTOLEMY)/tcltk/tk/lib/tk
-    set tk_library $env(TK_LIBRARY)
-    #uplevel #0 source $env(PTOLEMY)/tcl/tcl[info tclversion]/lib/init.tcl
-    #uplevel #0 source $env(PTOLEMY)/tcl/tk$tk_version/lib/tk.tcl
-    uplevel #0 source $env(PTOLEMY)/tcltk/tcl/lib/tcl/init.tcl
-    uplevel #0 source $env(PTOLEMY)/tcltk/tk/lib/tk/tk.tcl
+    if {$tk_version >= 4.1 } {
+	set env(TCL_LIBRARY) $PTOLEMY/tcltk/itcl/lib/itcl/tcl
+	set env(TK_LIBRARY) $PTOLEMY/tcltk/itcl/lib/itcl/tk
+	set tk_library $env(TK_LIBRARY)
+	uplevel #0 {
+	    source $PTOLEMY/tcltk/itcl/lib/itcl/tcl/init.tcl
+	    source $PTOLEMY/tcltk/itcl/lib/itcl/tk/tk.tcl
+	    source $PTOLEMY/tcltk/itcl/lib/itcl/itcl/itcl.tcl
+	    source $PTOLEMY/tcltk/itcl/lib/itcl/itk/itk.tcl
+	    source $PTOLEMY/tcltk/itcl/lib/itcl/iwidgets/iwidgets.tcl
+	}
+    } else {
+	#set env(TCL_LIBRARY) $env(PTOLEMY)/tcl/tcl[info tclversion]/lib
+	#set env(TK_LIBRARY) $env(PTOLEMY)/tcl/tk$tk_version/lib
+	set env(TCL_LIBRARY) $env(PTOLEMY)/tcltk/tcl/lib/tcl
+	set env(TK_LIBRARY) $env(PTOLEMY)/tcltk/tk/lib/tk
+	set tk_library $env(TK_LIBRARY)
+	#uplevel #0 source $env(PTOLEMY)/tcl/tcl[info tclversion]/lib/init.tcl
+	#uplevel #0 source $env(PTOLEMY)/tcl/tk$tk_version/lib/tk.tcl
+	uplevel #0 source $env(PTOLEMY)/tcltk/tcl/lib/tcl/init.tcl
+	uplevel #0 source $env(PTOLEMY)/tcltk/tk/lib/tk/tk.tcl
+    }
 
     set tcl_prompt1 "puts -nonewline stdout {pigi> }"
     set tcl_prompt2 "puts -nonewline stdout {pigi? }"
