@@ -105,6 +105,9 @@ CGCMakefileTarget::CGCMakefileTarget(const char* name,const char* starclass,
 				     const char* desc)
 : CGCTarget(name,starclass,desc)
 {
+				// Make compileCommand invisible and unsettable
+  compileCommand.clearAttributes(A_SETTABLE);
+
 				// Specify makefile to be used.
   addState(skeletonMakefile.setState("skeletonMakefile",this,
 				     "$PTOLEMY/lib/cgc/makefile_C.mk",
