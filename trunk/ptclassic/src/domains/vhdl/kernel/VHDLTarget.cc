@@ -42,9 +42,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGUtilities.h"
 #include "ConversionTable.h"
 
-// Defined in VHDLDomain.cc
-extern const char VHDLdomainName[];
-
 // HPPA CC under HPUX10.01 cannot deal with arrays, the message is:
 //  'sorry, not implemented: general initializer in initializer lists'
 // if we have an array:
@@ -67,8 +64,8 @@ static VHDLConversionTable vhdlConversionTable;
 
 // Constructor
 VHDLTarget :: VHDLTarget(const char* name, const char* starclass,
-			 const char* desc) :
-HLLTarget(name, starclass, desc) {
+			 const char* desc, const char* assocDomain) :
+HLLTarget(name, starclass, desc, assocDomain) {
   // Add additional codeStreams.
   addCodeStreams();
 
@@ -81,10 +78,6 @@ HLLTarget(name, starclass, desc) {
 
   // Make states defined in CGTarget settable.
   displayFlag.setAttributes(A_SETTABLE);
-
-  // Set the destination directory.
-  destDirName = destDirectoryName(VHDLdomainName);
-  destDirectory.setInitValue(destDirName);
 
   // Set the default to display the code.
   displayFlag.setInitValue("YES");
@@ -111,7 +104,8 @@ HLLTarget(name, starclass, desc) {
 
 // Clone
 Block* VHDLTarget :: makeNew() const {
-  LOG_NEW; return new VHDLTarget(name(), starType(), descriptor());
+  LOG_NEW; return new VHDLTarget(name(), starType(), descriptor(),
+ 				 getAssociatedDomain());
 }
 
 // Keep this at the top of this file to please the compiler.
@@ -934,8 +928,4 @@ StringList VHDLTarget :: addVariableDecls(VHDLVariableList* variableList,
     level--;
   }
   return all;
-}
-
-const char* VHDLTarget :: domain() {
-  return galaxy() ? galaxy()->domain() : VHDLdomainName;
 }

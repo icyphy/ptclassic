@@ -67,12 +67,10 @@ char* inet_ntoa(struct in_addr);
 // stream for logging information.  It is opened by the setup method.
 static pt_ofstream feedback;
 
-// Defined in CGCDomain.cc
-extern const char CGCdomainName[];
-
 // Constructor
-CGCNOWamTarget::CGCNOWamTarget(const char* name,const char* starclass,
-		   const char* desc) : CGMultiTarget (name,starclass,desc) {
+CGCNOWamTarget::CGCNOWamTarget(const char* name, const char* starclass,
+			       const char* desc, const char* assocDomain) :
+CGMultiTarget(name,starclass,desc,assocDomain) {
 
 	// specify machine names
 	addState(machineNames.setState("machineNames", this, "lucky, babbage",
@@ -81,8 +79,6 @@ CGCNOWamTarget::CGCNOWamTarget(const char* name,const char* starclass,
 		"common suffix of machine names such as .berkeley.edu"));
 
         // override target parameter values
-	destDirName = destDirectoryName(CGCdomainName);
-	destDirectory.setInitValue(destDirName);
 	childType.setInitValue("default-CGC");
 	compileFlag.setInitValue("NO");
 	runFlag.setInitValue("NO");
@@ -279,7 +275,8 @@ int CGCNOWamTarget :: identifyMachines() {
 
 // Return a copy of itself
 Block* CGCNOWamTarget :: makeNew() const {
-	LOG_NEW; return new CGCNOWamTarget(name(),starType(),descriptor());
+	LOG_NEW; return new CGCNOWamTarget(name(),starType(),descriptor(),
+					   getAssociatedDomain());
 }
 
 // wormhole interface method

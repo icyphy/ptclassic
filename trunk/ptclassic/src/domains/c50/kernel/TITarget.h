@@ -53,7 +53,8 @@ public:
 class TITarget : public AsmTarget {
 public:
 	// constructor
-	TITarget(const char* nam, const char* desc, const char* stype);
+	TITarget(const char* nam, const char* desc, const char* stype,
+		 const char* assocDomain);
 
 	// copy constructor
 	TITarget(const TITarget&);

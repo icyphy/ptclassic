@@ -45,13 +45,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "IntState.h"
 #include "HashTable.h"		// To pick up the definition of TextTable
 
+// Defined in CGCDomain.cc
+extern const char CGCdomainName[];
+
 class CGCPortHole;
 class CGCStar;
 class SDFScheduler;
 
 class CGCTarget : public HLLTarget {
 public:
-	CGCTarget(const char* name, const char* starclass, const char* desc);
+	CGCTarget(const char* name, const char* starclass, const char* desc,
+		  const char* assocDomain = CGCdomainName);
 
 	/*virtual*/ Block* makeNew() const;
 
@@ -109,9 +113,6 @@ public:
 				   const char* blockname,	
 				   const char* name,		
 				   const char* value);		
-
-	// Return the galaxy's domain if it's defined or "CGC" otherwise
-	/*virtual*/ const char* domain();
 
 protected:
 

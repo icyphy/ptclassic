@@ -55,8 +55,9 @@ TIMemory :: TIMemory(const char* b_map, const char* u_map) :
 {
 }
 
-TITarget :: TITarget (const char* nam, const char* desc, const char* stype):
-	AsmTarget(nam,desc,stype)
+TITarget :: TITarget (const char* nam, const char* desc,
+		      const char* stype, const char* assocDomain):
+AsmTarget(nam,desc,stype,assocDomain)
 {
 	initStates();
 }
@@ -101,7 +102,7 @@ TITarget :: ~TITarget () {
 
 // copy constructor
 TITarget :: TITarget (const TITarget& src) :
-AsmTarget(src.name(),src.descriptor(),src.starType())
+AsmTarget(src.name(),src.descriptor(),src.starType(),src.getAssociatedDomain())
 {
 	initStates();
 	copyStates(src);

@@ -92,8 +92,9 @@ void prepend(StringList code, CodeStream& stream)
 }
 
 // constructor
-CGCTarget::CGCTarget(const char* name,const char* starclass,
-                   const char* desc) : HLLTarget(name,starclass,desc) {
+CGCTarget::CGCTarget(const char* name, const char* starclass,
+                     const char* desc, const char* assocDomain) :
+HLLTarget(name, starclass, desc, assocDomain) {
 	addState(staticBuffering.setState("staticBuffering",this,"YES",
                         "static buffering is enforced between portholes."));
 	addState(funcName.setState("funcName",this,"main",
@@ -107,9 +108,6 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
         addState(resources.setState("resources",this,"STDIO",
         	"standard I/O resource"));
 	initCodeStrings();
-
-	destDirName = destDirectoryName(CGCdomainName);
-	destDirectory.setInitValue(destDirName);
 
 	targetHost.setAttributes(A_SETTABLE);
 	filePrefix.setAttributes(A_SETTABLE);
@@ -542,20 +540,18 @@ void CGCTarget :: endIteration(int repetitions, int depth) {
 
 // clone
 Block* CGCTarget :: makeNew () const {
-	LOG_NEW; return new CGCTarget(name(),starType(),descriptor());
+	LOG_NEW; return new CGCTarget(name(), starType(), descriptor(),
+				      getAssociatedDomain());
 }
 
-/////////////////////////////////////////
 // routines to determine the buffer sizes
-/////////////////////////////////////////
-
+//
 // note that we allow the C compiler to do the actual allocation;
 // this routine (1) determines the buffer sizes, and buffer properties.
 // (2) splice star for copying
 // (3) determine the type of buffers.
 // (4) naming buffers
 // (5) buffer offset initialization
-
 int CGCTarget :: allocateMemory() {
 	if (! galaxy()) return FALSE;
 
@@ -618,11 +614,7 @@ void CGCTarget :: setupForkDests(Galaxy& g) {
 	}
 }
 
-
-/////////////////////////////////////////
 // codeGenInit
-/////////////////////////////////////////
-
 int CGCTarget :: codeGenInit() {
 	if (! galaxy()) return FALSE;
 
@@ -643,9 +635,7 @@ int CGCTarget :: codeGenInit() {
         return TRUE;
 }
 
-// Splice in stars.
-// Return FALSE on error.
-
+// Splice in stars.  Return FALSE on error.
 int CGCTarget::needsTypeConversionStar(PortHole& port) {
     if (HLLTarget::needsTypeConversionStar(port)) return TRUE;
     // check for ports of type FIX;
@@ -733,11 +723,10 @@ static void setupBuffer(CGCStar* s, int dimen, int bufsz) {
 // "Copy" stars are added if an input/output PortHole is a host/embedded
 // PortHole and the buffer size is greater than the number of Particles
 // transferred.
-
+//
 // NOTE:  Because this splicing takes place after the schedule has been
 // constructed, the CGCStar::addSpliceStar() method is used as a hack to
 // ensure that code will be generated for the new spliced stars.
-
 void CGCTarget :: addSpliceStars() {
 	if (! galaxy()) return;
 	const char* dom = galaxy()->domain();
@@ -808,10 +797,7 @@ void CGCTarget :: addSpliceStars() {
 	}
 }
 
-/////////////////////////////////////////
 // incrementalAdd
-/////////////////////////////////////////
-
 int CGCTarget :: incrementalAdd(CGStar* s, int flag) {
 
 	CGCStar* cs = (CGCStar*) s;
@@ -882,13 +868,5 @@ void CGCTarget :: compileRun(SDFScheduler* s) {
 	s->compileRun();
 	defaultStream = &MAINCLOSE;
 }
-
-const char* CGCTarget :: domain() {
-	return galaxy() ? galaxy()->domain() : CGCdomainName;
-}
-
-/////////////////////////////////////////
-// Utilities
-/////////////////////////////////////////
 
 ISA_FUNC(CGCTarget,HLLTarget);

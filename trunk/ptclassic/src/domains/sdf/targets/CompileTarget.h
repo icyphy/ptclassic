@@ -47,10 +47,14 @@ a universe.
 #include "PortHole.h"
 #include "HLLTarget.h"
 
+// Defined in SDFDomain.cc
+extern const char SDFdomainName[];
+
 class CompileTarget : public HLLTarget {
 public:
 	// Constructor
-	CompileTarget(const char* nam, const char* stype, const char* desc);
+	CompileTarget(const char* nam, const char* stype, const char* desc,
+		      const char* assocDomain = SDFdomainName);
 
 	void setup();
 	void begin();
@@ -59,9 +63,6 @@ public:
 
 	// Return a copy of itself
 	/*virtual*/ Block* makeNew() const;
-
-	// Return the domain of the galaxy if it exists and "SDF" otherwise
-	/*virtual*/ const char* domain();
 
 	// Routines for writing code: schedulers may call these
 	void writeFiring(Star& s, int depth);

@@ -64,21 +64,18 @@ a universe.
 // Standard includes
 #include <ctype.h>			// define isalnum macro
 
-// Defined in SDFDomain.cc
-extern const char SDFdomainName[];
-
 // Constructor
-CompileTarget::CompileTarget(const char* nam,
-			     const char* stype,
-			     const char* desc)
-: HLLTarget(nam,stype,desc)
+CompileTarget::CompileTarget(const char* nam, const char* stype,
+			     const char* desc, const char* assocDomain) :
+HLLTarget(nam,stype,desc,assocDomain)
 {
-	destDirName = destDirectoryName(SDFdomainName);
+	destDirName = destDirectoryName(assocDomain);
 	destDirectory.setInitValue(destDirName);
 }
 
 Block* CompileTarget::makeNew() const {
-	LOG_NEW; return new CompileTarget(name(), starType(), descriptor());
+	LOG_NEW; return new CompileTarget(name(), starType(), descriptor(),
+					  getAssociatedDomain());
 }
 
 void CompileTarget::setup() {
@@ -134,9 +131,8 @@ int CompileTarget::writeGalDef(Galaxy& galaxy, StringList className) {
     // -- destructor for pt_ofstream will close the file automatically
     StringList galFileName = galaxy.className();
     galFileName << ".h";
-    char* codeFileName = writeFileName(galFileName);
+    StringList codeFileName = logFilePathName(destDirectory, galFileName);
     pt_ofstream codeFile(codeFileName);
-    delete [] codeFileName;
     if (!codeFile) return FALSE;
 
     myCode.initialize();
@@ -236,9 +232,8 @@ void CompileTarget::wrapup() {
     if (Scheduler::haltRequested()) return;
 
     // Open code.cc
-    char* codeFileName = writeFileName("code.cc");
+    StringList codeFileName = logFilePathName(destDirectory, "code.cc");
     pt_ofstream codeFile(codeFileName);
-    delete [] codeFileName;
     if (!codeFile) return;
 
     // Write code to code.cc
@@ -699,11 +694,6 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
     return myCode;
 }
 
-// Return the domain of the galaxy if it is defined and "SDF" otherwise
-const char* CompileTarget::domain() {
-      return galaxy() ? galaxy()->domain() : SDFdomainName;
-}
-
 static CompileTarget compileTargetProto("compile-SDF", "SDFStar",
 	"Generate and compile standalone C++ code");
-static KnownTarget entry(compileTargetProto,"compile-SDF");
+static KnownTarget entry(compileTargetProto, "compile-SDF");
