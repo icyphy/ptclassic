@@ -70,12 +70,10 @@ int CGTarget::setup(Galaxy& g) {
 
 	targetNestedSymbol.initialize();
 
-	if (!modifyGalaxy(g)) return FALSE;
-
 	if (!noSchedule) {
+		if (!modifyGalaxy(g)) return FALSE;
 		if (!Target::setup(g)) return FALSE;
 	}
-	else g.initialize();
 
 	// choose sizes for buffers and allocate memory, if needed
 	if(!allocateMemory(g)) return FALSE;
