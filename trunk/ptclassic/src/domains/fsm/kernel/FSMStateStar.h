@@ -45,6 +45,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Geodesic.h"
 #include "IntState.h"
 #include "StringState.h"
+#include "IntArrayState.h"
 #include "tcl.h"
 
 class FSMStateStar : public FSMStar
@@ -64,28 +65,31 @@ public:
     int isInit() { return int(isInitState); }
 
     // Return the next state according the conditions.
-    virtual FSMStateStar *nextState(int& condNum, int=0);
+    virtual FSMStateStar *nextState(int& condNum, int preemption);
 
     // Do the action.
-    virtual int doAction(int = 0) = 0;
+    virtual int doAction(int actNum);
 
     // Execute the internal machine.
     virtual int doInMach(int);
 
     // Get the entry type of a possible transition out of this state.
-    virtual int getEntryType(int);
+    int getEntryType(int transNum);
     
-// Print out the information of this state
-void printOut();
-
 protected:
     IntState isInitState;
     StringState conditions;
+    StringState actions;
+    IntArrayState entryType;
+    IntArrayState preemptive;
 
     Tcl_Interp *myInterp;
 
     char** parsedCond;
     int numConds;
+    char*** parsedAct;
+
+    const StringList* internalEventNm;
 
     static int count;
 
