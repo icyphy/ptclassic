@@ -82,7 +82,7 @@ option add *File.autoSaveInterval 5 widgetDefault
 # display, the derived class may also redefine <code>seePoint</code>,
 # and <code>currentPoint</code>. These two should always be redefined
 # as a pair, since <code>currentPoint</code> is assumed to return a
-# syntax undertood by <code>seePoint</code>. Derived classes may wish
+# syntax understood by <code>seePoint</code>. Derived classes may wish
 # to redefine <code>indicateReadOnly</code>, for example to disable menu
 # entries. Finally, most derived classes will want to redefine
 # <code>focusin</code> to give the focus to a key widget.
@@ -214,13 +214,16 @@ class ::tycho::File {
     proc openContext {file} {}
 
     # Register directory contents and an associated viewing command.
-    proc registerContents {contents filecommand {description {}}} {}
+    proc registerContents \
+	    {contents filecommand {description {}} {editorclass {}}} {}
 
     # Register file extensions and an associated viewing command.
-    proc registerExtensions {extensions filecommand {description {}}} {}
+    proc registerExtensions \
+	    {extensions filecommand {description {}} {editorclass {}}} {}
 
     # Register file names and an associated viewing command.
-    proc registerFilenames {filename filecommand {description {}}} {}
+    proc registerFilenames \
+	    {filename filecommand {description {}} {editorclass {}}} {}
 
     # Return the registered viewing commands for a file or directory name.
     proc registeredCommands {name} {}
@@ -395,62 +398,87 @@ body ::tycho::File::constructor {args} {
     # Insert items in the menubar, if there is one.
     # NOTE: For efficiency, avoid "menubar" method.
     if {$myMenubar != {}} {
-        $myMenubar addMenu File left {} -underline 0
-        $myMenubar addMenu Window left {} -underline 0
-        $myMenubar addMenu Help right {} -underline 0
+        $myMenubar addMenu File -underline 0
+        $myMenubar addMenu Window -underline 0
+        $myMenubar addMenu Help -side right -underline 0
 
         # File menu contents
-        $myMenubar addMenuItem {Open...} File -underline 0 \
+        $myMenubar add {Open...} File -underline 0 \
                 -accelerator "C-x C-f" -command "::tycho::File::openWin"
         
-        $myMenubar addMenuItem "Switch File..." File -underline 4 \
+        $myMenubar add "Switch File..." File -underline 4 \
                 -accelerator "C-x C-v" -command "$this altFile"
         
-        $myMenubar addMenuItem {Insert...} File -underline 0 \
+        $myMenubar add {Insert...} File -underline 0 \
                 -accelerator "C-x i" -command "$this insertFile"
         
-        $myMenubar addMenuItem Save File -underline 0 -accelerator "C-x C-s" \
+        $myMenubar add Save File -underline 0 -accelerator "C-x C-s" \
                 -command "$this save"
         
-        $myMenubar addMenuItem {SaveAs...} File -underline 4 \
+        $myMenubar add {SaveAs...} File -underline 4 \
                 -accelerator "C-x C-w" -command "$this saveAs"
         
-        $myMenubar addMenuItem {Print...} File -underline 0 \
+        $myMenubar add {Print...} File -underline 0 \
                 -accelerator "C-x p" -command "$this print"
         
-        $myMenubar addMenuItem Evaluate File -underline 0 \
+        $myMenubar add Evaluate File -underline 0 \
                 -accelerator "C-x C-r" -command "$this evaluate"
         
-        $myMenubar addMenuItem Reload File -underline 0 \
+        $myMenubar add Reload File -underline 0 \
                 -command "$this reload"
         
-        $myMenubar addMenuItem "Toggle Read-Only" File -underline 0 \
+        $myMenubar add "Toggle Read-Only" File -underline 0 \
                 -accelerator "C-x C-q" -command "$this toggleReadOnly"
         
-        $myMenubar addMenuItem "Revision Control..." File -underline 2 \
+        $myMenubar add "Revision Control..." File -underline 2 \
                 -accelerator "C-x v" -command "$this revisionControl"
         
-        $myMenubar addMenuSeparator File
+        $myMenubar addSeparator File
         
-        $myMenubar addMenuItem Close File -underline 0 -accelerator "C-x k" \
+        $myMenubar add Close File -underline 0 -accelerator "C-x k" \
                 -command "$this displayer destroyView $viewName"
         
         if {[::tycho::Displayer::normalExit] == 1} {
-            $myMenubar addMenuItem Quit File -underline 0 \
+            $myMenubar add Quit File -underline 0 \
                     -accelerator "C-x C-c" \
                     -command "::tycho::TopLevel::exitProgram"
         }
             
         # Window menu contents
-            
+	
+	# Create the submenus for blank editors
+	$myMenubar add {Text editors} Window -type cascade
+	$myMenubar add {Graphics editors} Window -type cascade
+	$myMenubar add {Tools} Window -type cascade
+
         # Construct menu entries for registered editors.
         foreach entry $windowMenuEntries {
             # Put NoName in place of the filename
             set command [format [lindex $entry 0] NoName]
             set desc [lindex $entry 1]
-            $myMenubar addMenuItem $desc Window -command $command
+	    set class [lindex $entry 2]
+	    if { $class == "" } {
+		# Add to the main menu
+		$myMenubar add $desc Window -command $command
+	    } else {
+		# Add to a sub-menu
+		switch -exact $class {
+		    "text" {
+			$myMenubar add $desc {Text editors} -command $command
+		    }
+		    "graphics" {
+			$myMenubar add $desc {Graphics editors} -command $command
+		    }
+		    "tools" {
+			$myMenubar add $desc {Tools} -command $command
+		    }
+		    default {
+			$myMenubar add $desc Window -command $command
+		    }
+		}
+	    }
         }
-        $myMenubar addMenuSeparator Window
+        $myMenubar addSeparator Window
         
         # use the filesOpen variable to construct menu entries for all open
         # files.
@@ -463,27 +491,27 @@ body ::tycho::File::constructor {args} {
         
         # Help menu contents
         
-        $myMenubar addMenuItem "About Tycho" Help -underline 0 -command \
+        $myMenubar add "About Tycho" Help -underline 0 -command \
                 {::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo}
         
-        $myMenubar addMenuItem "Guide to $myclass widget" Help -underline 0 \
+        $myMenubar add "Guide to $myclass widget" Help -underline 0 \
                 -command "$this help"
         
-        $myMenubar addMenuItem "Concept Index" Help -underline 0 \
+        $myMenubar add "Concept Index" Help -underline 0 \
                 -command {::tycho::File::openContext \
 		[file join \$TYCHO lib idx tycho.idx]}
         
         set nm [::tycho::autoName .index]
-        $myMenubar addMenuItem "Code Index" Help -underline 0 \
+        $myMenubar add "Code Index" Help -underline 0 \
                 -command "::tycho::IndexBrowser $nm \
                 -file [file join \$TYCHO lib idx codeDoc.idx] \
                 -width 80; $nm centerOnScreen"
         
-        $myMenubar addMenuItem "Class Diagram" Help -underline 0 -command \
+        $myMenubar add "Class Diagram" Help -underline 0 -command \
                 {::tycho::File::openContext \
 		[file join \$TYCHO doc tychoClasses.dag]}
 
-        $myMenubar addMenuItem "Glimpse" Help -underline 0 -command { \
+        $myMenubar add "Glimpse" Help -underline 0 -command { \
                 set w [::tycho::autoName .glimpse]; \
                 ::tycho::Glimpse $w -geometry +0+0;\
                 wm deiconify $w}
@@ -969,12 +997,12 @@ body ::tycho::File::windowMenuAddAll {label} {
 # Append the name of an open file editor to the "Window" menu.
 # The second argument, normally a filename, gives the menu label.
 # This method really just provides specialized public access to the
-# <code>addMenuItem</code> protected method.
+# <code>add</code> method of the MenuBar belonging to this view.
 #
 body ::tycho::File::windowMenuAppend {obj label} {
     # Avoid entries with empty names or NoName
     if {$label != {NoName} && $label != {}} {
-        menubar addMenuItem $label Window \
+        menubar add $label Window \
                 -command "$obj raiseWindow"
     }
 }
@@ -995,7 +1023,7 @@ body ::tycho::File::windowMenuRemoveAll {filename} {
 	foreach fileobj [array names fileObjects] {
             # NOTE: the catch is in case due to an error $fileobj
             # doesn't exist.
-	    catch {$fileobj menubar removeMenuItem $filename Window}
+	    catch {$fileobj menubar delete $filename}
 	}
     }
 }
@@ -1036,11 +1064,11 @@ body ::tycho::File::indicateReadOnly {bool} {
     ::tycho::View::indicateReadOnly $bool
     
     if {$bool} {
-        menubar disableMenuItem {Insert...} File
-        menubar disableMenuItem Save File
+        menubar disable {Insert...}
+        menubar disable Save
     } {
-        menubar enableMenuItem {Insert...} File
-        menubar enableMenuItem Save File
+        menubar enable {Insert...}
+        menubar enable Save
     }
 }
 
@@ -1166,10 +1194,11 @@ body ::tycho::File::openContext {filename} {
 # the menu label. This permits the user to open a new blank editor of
 # the given class.
 #
-body ::tycho::File::registerContents {contents filecommand {description {}}} {
+body ::tycho::File::registerContents \
+	{contents filecommand {description {}} {editorclass {}} } {
     set editorsContents($contents) $filecommand
     if {$description != {}} {
-	lappend windowMenuEntries [list $filecommand $description]
+	lappend windowMenuEntries [list $filecommand $description $editorclass]
     }
 }
 
@@ -1197,12 +1226,12 @@ body ::tycho::File::registerContents {contents filecommand {description {}}} {
 # the given class.
 #
 body ::tycho::File::registerExtensions \
-        {extensions filecommand {description {}}} {
+        {extensions filecommand {description {}} {editorclass {}}} {
     foreach extension $extensions {
 	set editorsExtension($extension) $filecommand
     }
     if {$description != {}} {
-	lappend windowMenuEntries [list $filecommand $description]
+	lappend windowMenuEntries [list $filecommand $description $editorclass]
     }
 }
 
@@ -1226,13 +1255,17 @@ body ::tycho::File::registerExtensions \
 # objects opened in the future using the value of this description as
 # the menu label. This permits the user to open a new blank editor of
 # the given class.
+# <p>
+# If a <i>editorclass</i> argument is given, the command will be added
+# to a submenu of the Window menu named $editorclass.
 #
-body ::tycho::File::registerFilenames {filenames filecommand {description {}}} {
+body ::tycho::File::registerFilenames \
+	{filenames filecommand {description {}} {editorclass {}}} {
     foreach name $filenames {
 	set editorsFilename($name) $filecommand
     }
     if {$description != {}} {
-	lappend windowMenuEntries [list $filecommand $description]
+	lappend windowMenuEntries [list $filecommand $description $editorclass]
     }
 }
 
