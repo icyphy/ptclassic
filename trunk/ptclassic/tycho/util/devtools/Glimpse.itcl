@@ -108,7 +108,7 @@ body ::tycho::Glimpse::constructor {args} {
 
     $itk_component(bbox) buttonconfigure ok \
 	    -text {Find <Ret>} \
-	    -command "$this execCommand -findcommand"
+	    -command "$this glimpseSearch"
 
     set buttonList {Tycho}
     # If the $PTOLEMY environment variable is set and 
