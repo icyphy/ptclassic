@@ -75,27 +75,33 @@ void SDFPTclTarget::setStopTime (double limit) {
 }
 
 // Generate a PTcl description for galaxy without having to execute it
-StringList SDFPTclTarget::ptclDescription(Galaxy* localGalaxy, int addHeader) {
+StringList SDFPTclTarget::ptclDescription(
+		Galaxy* localGalaxy, int addHeader, const char* path) const {
     StringList ptclCode;
     if (localGalaxy) {
 	if (addHeader) {
-	    // Necessary to store returned StringList to ensure that
+	    // FIXME: Necessary to store returned StringList to ensure that
 	    // temporary variables are handled correctly.  GNU 2.7 bug.
     	    StringList headerCode = ptclHeaderCode(localGalaxy);
     	    ptclCode << headerCode;
 	}
-	// Necessary to store returned StringList to ensure that
+	// FIXME: Necessary to store returned StringList to ensure that
 	// temporary variables are handled correctly.  GNU 2.7 bug.
 	StringList galCode = ptclGalaxyCode(localGalaxy);
 	ptclCode << galCode;
     }
+
+    if (path && *path) writePtclCode(ptclCode, path);
+
     return ptclCode;
 }
 
-StringList SDFPTclTarget::ptclHeaderCode(Galaxy* localGalaxy) {
-    StringList ptclCode;
-    ptclCode << "reset\n"
-	     << "newuniverse " << localGalaxy->name() << " SDF\n";
+// Write out the header which resets the state of ptcl and declares the
+// new galaxy name
+StringList SDFPTclTarget::ptclHeaderCode(Galaxy* localGalaxy) const {
+    StringList ptclCode = "reset\n";
+    ptclCode << "newuniverse " << localGalaxy->name() << " "
+			       << localGalaxy->domain() << " \n";
     return ptclCode;
 }
 
@@ -134,7 +140,8 @@ StringList SDFPTclTarget::ptclExecTimeCode() {
     return ptclCode;
 }
 
-StringList SDFPTclTarget::ptclGalaxyCode(Galaxy* localGalaxy) {
+// Generate PTcl code for a galaxy independent of the domain of the galaxy
+StringList SDFPTclTarget::ptclGalaxyCode(Galaxy* localGalaxy) const {
     StringList ptclCode;
 
     // Iterator over the stars in the galaxy
@@ -148,8 +155,8 @@ StringList SDFPTclTarget::ptclGalaxyCode(Galaxy* localGalaxy) {
 	int input = 1;
 	int output = 1;
 	BlockPortIter nextPort(*star);
-	DFPortHole* port;
-	while ((port = (DFPortHole*)nextPort++) != NULL) {
+	PortHole* port;
+	while ((port = (PortHole*)nextPort++) != NULL) {
 	    portNumber[port->index()] = (port->isItInput()?input++:output++);
 	}
     }
@@ -165,13 +172,14 @@ StringList SDFPTclTarget::ptclGalaxyCode(Galaxy* localGalaxy) {
 	PortHole* port;
 	while ((port = nextPort++) != NULL) {
 	    if (port->isItOutput())
-		ptclCode << "\tconnect" <<  starName
+		ptclCode << "\tconnect" << starName
 			 << " \"output#" << portNumber[port->index()]
 			 << "\" \"" << port->far()->parent()->fullName()
 			 << "\" \"input#" << portNumber[port->far()->index()]
 			 << "\"\n";
 	}
     }
+
     delete [] portNumber;
 
     return ptclCode;
@@ -187,22 +195,27 @@ int SDFPTclTarget::run() {
 	return FALSE;
     }
 
+    // Generate run-time estimates by repeatedly running the galaxy
     starProfiles.set(*galaxy());
     int numItersSoFar = 0;
     while (numItersSoFar++ < numIters && !SimControl::haltRequested())
 	scheduler()->compileRun();
 
+    // Generate the PTcl code
     StringList ptclCode = ptclHeaderCode(galaxy());
     ptclCode << ptclExecTimeCode() << ptclGalaxyCode(galaxy());
-
     StringList ptclFileName;
-    char* path = expandPathName(destDirectory);
-    ptclFileName << path << "/" << galaxy()->name() << ".pt";
-    delete [] path;
-    pt_ofstream ptclFile(ptclFileName);
-    ptclFile << ptclCode;
+    ptclFileName << destDirectory << "/" << galaxy()->name() << ".pt";
+    writePtclCode(ptclCode, ptclFileName);
 
     return TRUE;
+}
+
+void SDFPTclTarget::writePtclCode(
+		StringList& ptclCode, const char* path) const {
+    // The pt_ofstream constructor automatically expands environment variables
+    pt_ofstream ptclFile(path);
+    ptclFile << ptclCode;
 }
 
 void SDFPTclTarget::wrapup() {
