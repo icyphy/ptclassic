@@ -23,7 +23,7 @@ limitation of liability, and disclaimer of warranty provisions.
       /* gain from (-10 to 10) to (0 to 100) for makeScale */ 
       {
 	int tkgain;
-	tkgain = 5*$val(gain)+50;
+	tkgain = (int) 5*$val(gain)+50;
 	makeScale(".low",
 		  "$starSymbol(scale2)",
 		  "Gain control",
@@ -31,6 +31,19 @@ limitation of liability, and disclaimer of warranty provisions.
                   $starSymbol(setGain));
 	displaySliderValue(".low", "$starSymbol(scale2)", "  $val(gain)");
       }
+      /* "position" is  a local variable which scales the    */
+      /* bandwidth from (0 to 4) to (0 to 100) for makeScale */ 
+      {
+	int position;
+	position = (int) $val(bandwidth)*25;
+        makeScale(".high",
+		  "$starSymbol(scale1)",
+		  "Bandwidth control",
+		  position,
+                  $starSymbol(setBandwidth));
+	displaySliderValue(".high", "$starSymbol(scale1)",
+			   "$val(bandwidth)");
+      }      
     }
 
     codeblock (setGainDef) {
@@ -40,7 +53,6 @@ limitation of liability, and disclaimer of warranty provisions.
             int argc;                           /* Number of arguments. */
             char **argv;                        /* Argument strings. */
         {
-	    audio_info_t info;
 	    static char buf[20];
 	    int tkgain;
             if(sscanf(argv[1], "%d", &tkgain) != 1) {
@@ -48,10 +60,56 @@ limitation of liability, and disclaimer of warranty provisions.
                 return TCL_ERROR;
             }
 	    /* set the new gain  */
-	    $ref(gain) = ((int)tkgain/5) - 10;
+	    $ref(gain) = tkgain/5.0 - 10.0;
 	    
-	    sprintf(buf, "%d", $ref(gain));
+	    $sharedSymbol(CGCParamBiquad,setparams)(&$starSymbol(parametric));
+	    if ($ref(filtertype) == LOW){
+	      $sharedSymbol(CGCParamBiquad,lowpass)(&$starSymbol(parametric),$starSymbol(filtercoeff));
+	    }
+	    else if ($ref(filtertype) == HI){
+	      $sharedSymbol(CGCParamBiquad,hipass)(&$starSymbol(parametric),$starSymbol(filtercoeff));
+	    }
+	    else if ($ref(filtertype) == BAND){
+	      $sharedSymbol(CGCParamBiquad,bandpass)(&$starSymbol(parametric),$starSymbol(filtercoeff));
+	    }
+	    $sharedSymbol(CGCParamBiquad,setfiltertaps)(&$starSymbol(parametric),$starSymbol(filtercoeff),$starSymbol(filtertaps));
+    
+	    sprintf(buf, "%.2f", $ref(gain));
 	    displaySliderValue(".low", "$starSymbol(scale2)", buf);
+            return TCL_OK;
+        }
+    }
+    
+    codeblock (setBandwidthDef) {
+        static int $starSymbol(setBandwidth)(dummy, interp, argc, argv)
+            ClientData dummy;                   /* Not used. */
+            Tcl_Interp *interp;                 /* Current interpreter. */
+            int argc;                           /* Number of arguments. */
+            char **argv;                        /* Argument strings. */
+        {
+	    static char buf[20];
+	    int position;
+            if(sscanf(argv[1], "%d", &position) != 1) {
+                errorReport("Invalid bandwidth");
+                return TCL_ERROR;
+            }
+	    /* conveying the value changes of bandwidth to audioctl */
+	    $ref(bandwidth) = position/25.0;
+
+	    $sharedSymbol(CGCParamBiquad,setparams)(&$starSymbol(parametric));
+	    if ($ref(filtertype) == LOW){
+	      $sharedSymbol(CGCParamBiquad,lowpass)(&$starSymbol(parametric),$starSymbol(filtercoeff));
+	    }
+	    else if ($ref(filtertype) == HI){
+	      $sharedSymbol(CGCParamBiquad,hipass)(&$starSymbol(parametric),$starSymbol(filtercoeff));
+	    }
+	    else if ($ref(filtertype) == BAND){
+	      $sharedSymbol(CGCParamBiquad,bandpass)(&$starSymbol(parametric),$starSymbol(filtercoeff));
+	    }
+	    $sharedSymbol(CGCParamBiquad,setfiltertaps)(&$starSymbol(parametric),$starSymbol(filtercoeff),$starSymbol(filtertaps));
+
+	    sprintf(buf, "%.2f", $ref(bandwidth));
+	    displaySliderValue(".high", "$starSymbol(scale1)", buf);
             return TCL_OK;
         }
     }
@@ -60,6 +118,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	CGCParamBiquad :: initCode();
 	addCode(tkSetup, "tkSetup");
         addCode(setGainDef, "procedure");
+        addCode(setBandwidthDef, "procedure");
     }
 }
 
