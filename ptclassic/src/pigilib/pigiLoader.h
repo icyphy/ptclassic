@@ -34,6 +34,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
    This is a C include file, and NOT a C++ include file.
 */
 
+/* Define the ARGS macro */
+#include "compat.h"
+
 extern void KcLoadInit ARGS((const char* argv0));
 extern void KcDoStartupLinking();
 extern int FindStarSourceFile ARGS((const char* dir, const char* dom,
