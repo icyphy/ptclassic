@@ -156,7 +156,7 @@ body ::tycho::EditJava::constructor {args} {
 #
 body ::tycho::EditJava::destructor {args} {
     if {$compileWidget != {}} {
-        delete object $compileWidget
+        catch {delete object $compileWidget}
     }
 }
 #####################################################################
@@ -167,11 +167,11 @@ body ::tycho::EditJava::bodyTemplate {} {
 
     set template "
     /** A Public Method
-	@see full-classname#method-name
-	@param parameter-name description
-	@param parameter-name description
-	@return description
-	@exception full-classname description
+     * @see full-classname#method-name
+     * @param parameter-name description
+     * @param parameter-name description
+     * @return description
+     * @exception full-classname description
      */	
     public AMethod() {
     }
@@ -251,8 +251,8 @@ body ::tycho::EditJava::gendocBuffer {} {
 	error "Sorry, the gendoc method is not supported on the Macintosh,\nit\
 		calls the tcl exec command."
     }
-    set docDir [file join doc codeDoc]
-    if {![file exists $docDir]} {
+    set docDir [file join [file dirname [filename]] doc codeDoc]
+    if {![file isdirectory $docDir]} {
         file mkdir $docDir
     }
     # Figure out what file to open
