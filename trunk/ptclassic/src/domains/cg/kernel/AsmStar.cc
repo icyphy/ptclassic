@@ -80,13 +80,13 @@ void AsmStar::gencode(CodeBlock& cb) {
 	if (o > line) {
 		*o++ = '\n';
 		*o = 0;
-		target->addCode(line);
+		addCode(line);
 	}
 }
 
-// postprocessing of code.  Baseclass just does target->addCode.
+// postprocessing of code.  Baseclass just does same as for CGStar::addCode.
 void AsmStar :: addCode(char* line) {
-	target->addCode(line);
+	CGStar::addCode(line);
 }
 
 // data structure used to keep track of memory allocation for states.
