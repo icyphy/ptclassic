@@ -11,6 +11,10 @@
 # not function correctly under cfront at present, due either to non-portable
 # constructs or cfront compiler bugs.
 
+# Full path to the ~ptolemy directory (you may need to change this
+# for your installation)
+PTOLEMY_FULL_PATH = /usr/users/ptolemy
+
 # C++ compiler to use.  I suppose calling this symbol GNU instead of
 # CPLUSPLUS shows our bias?
 GNU = /usr/lang/CC -I$(ROOT)/src/compat/cfront
