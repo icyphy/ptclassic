@@ -46,10 +46,6 @@ CPLUSPLUS_COMPAT =  -I$(ROOT)/src/compat/cfront
 #	 to find sysent.h 
 CPLUSPLUS = g++ $(CPLUSPLUS_COMPAT) -DPT_EGCS
 
-# system libraries (libraries from the environment)
-# No need to include -lg++ under egcs
-SYSLIBS=$(CSYSLIBS)
-
 # The HPUX9/HPUX10 dependencies are below here
 
 # Get the g++ definitions for shared libraries; we override some below.
@@ -248,7 +244,8 @@ FLUSH_CACHE =	flush_cache.o
 LIB_FLUSH_CACHE = $(LIBDIR)/flush_cache.o
 
 # If you are trying out the shl_load feature uncomment the lines below.
-SYSLIBS =	-lg++ -lstdc++ -lm -ldld
+# gcc-2.7 had -lg++ at the start of the line below
+SYSLIBS =	-lstdc++ -lm -ldld
 ## system libraries for linking .o files from C files only
 CSYSLIBS = 	-lm -ldld
 
