@@ -136,7 +136,7 @@ xv_configure: $(OBJARCH)/xv \
 		$(OBJARCH)/xv/tiff $(OBJARCH)/xv/tiff/Makefile	\
 		$(OBJARCH)/xv/Imakefile
 	# xmkmf causes problems under solaris2 with gcc, so we don't use it
-	#(cd $(OBJARCH)/xv; $(XMKMF) )
+	(cd $(OBJARCH)/xv; $(XMKMF) )
 
 $(OBJARCH)/xv:
 	if [ ! -d $(OBJARCH) ]; then mkdir $(OBJARCH); fi
@@ -164,10 +164,15 @@ xv_bin: $(OBJARCH)/xv
 		MKDIRHIER=$(MKDIRHIER) \
 		BINDIR=$(XV_DEST)/bin.$(ARCH) all)
 
-xv_install: $(OBJARCH)/xv
-	(cd $(OBJARCH)/xv; cp $(XV_INSTALL) xv $(XV_DEST)/bin.$(ARCH))
+xv_install: $(OBJARCH)/xv $(XV_DEST)/bin.$(ARCH)
+	(cd $(OBJARCH)/xv; cp xv $(XV_DEST)/bin.$(ARCH))
 	chmod a+rx $(PTOLEMY)/bin.$(ARCH)/xv
 	strip $(PTOLEMY)/bin.$(ARCH)/xv
+
+$(XV_DEST)/bin.$(ARCH):
+	if [ ! -d $(XV_DEST)/bin.$(ARCH) ]; then \
+		mkdir $(XV_DEST)/bin.$(ARCH); \
+	fi
 
 xv_install.man: $(XV_DEST)/man/man1
 	rm -f $(XV_DEST)/man/man1/xv.1
