@@ -17,6 +17,9 @@ $Id$
  Revisions: 5/29/90 -- renamed to SDFScheduler.cc from Scheduler.cc
 		Other schedulers will go in separate files.
 
+	    6/20/90 -- setup() now calls Galaxy::initialize rather
+	    than calling initialize() and start() for all stars.
+
  SDF Scheduler methods
 
 **************************************************************************/
@@ -60,6 +63,10 @@ SDFSchedule :: printVerbose () {
 
 // runs the number of times indicated by numIters.
 int SDFScheduler :: run (Block& galaxy) {
+	if (invalid) {
+		errorHandler.error ("SDF schedule is invalid -- can't run");
+		return;
+	}
 	galaxy;			// dummy statement
 	while (numItersSoFar < numIters) {
 		runOnce();
@@ -93,20 +100,6 @@ void SDFScheduler :: runOnce () {
 
 
 	////////////////////////////
-	// wrapup
-	////////////////////////////
-
-int SDFScheduler :: wrapup (Block& b) {
-	Galaxy& galaxy = b.asGalaxy();
-	// Run the termination routines of all the atomic stars.
-	for (int i = alanShepard.totalSize(galaxy); i>0; i--)
-		alanShepard.nextStar().wrapup();
-	return 0;
-}
-
-
-
-	////////////////////////////
 	// setup
 	////////////////////////////
 
@@ -114,26 +107,21 @@ int SDFScheduler :: setup (Block& block) {
 
 	Galaxy& galaxy = block.asGalaxy();
 	numItersSoFar = 0;
+	invalid = FALSE;
+
+	// initialize galaxy and all contents.
+	galaxy.initialize();
 
 	// initialize the SpaceWalk member
 	alanShepard.setupSpaceWalk(galaxy);
 
 	int i;
 
-	// Run the initialize routines of all the atomic stars.
-	// This must happen first because the number of tokens generated
-	// by a star execution may depend on a State (e.g. a downsample star)
+	// force recomputation of repetitions and noTimes
+
 	for (i = alanShepard.totalSize(galaxy); i>0; i--)
 	{
 		SDFStar& s = (SDFStar&)alanShepard.nextStar();
-
-		// Call system initialization
-		s.initialize();
-		
-		// Call user-provided initialization
-		s.start();
-
-		// force recomputation of repetitions and noTimes
 		s.repetitions = 0;
 		s.noTimes = 0;
 	}
@@ -145,6 +133,8 @@ int SDFScheduler :: setup (Block& block) {
 
 	repetitions(galaxy);
 	
+	if (invalid) return FALSE;
+
 	mySchedule.initialize();
 
 	// MAIN LOOP
@@ -179,10 +169,12 @@ int SDFScheduler :: setup (Block& block) {
 	} while (passValue == 0);
 	// END OF MAIN LOOP
 	
-	if (passValue == 1)
+	if (passValue == 1) {
 		errorHandler.error("DEADLOCK! Not enough delay in a loop containing:",
                                    dead->readFullName());
-	
+		invalid = TRUE;
+	}
+	return !invalid;
 }
 
 // This routine simulates running the star, adding it to the
@@ -246,6 +238,7 @@ int SDFScheduler :: repetitions (Galaxy& galaxy) {
 			// set the repetitions property of all atomic blocks
 			// connected to the currentBlock
 			reptConnectedSubgraph(star);
+			if (invalid) return;
 		}
 	}
 
@@ -275,7 +268,13 @@ int SDFScheduler :: reptConnectedSubgraph (Block& block) {
 	// Step through each portHole
 	for(int i = block.numberPorts(); i>0; i--) {
 		PortHole& nearPort = block.nextPort();
-		if (nearPort.far() == NULL) continue;
+		if (nearPort.far() == NULL) {
+			StringList msg = nearPort.readFullName();
+			msg += " is not connected!";
+			errorHandler.error (msg);
+			invalid = TRUE;
+			return;
+		}
 
 		PortHole& farPort = *(nearPort.far());
 		// recursively call this function on the farSideBlock,
@@ -326,9 +325,12 @@ int SDFScheduler :: reptArc (PortHole& nearPort, PortHole& farPort){
 	else {
 		// farStarRepetitions has been set, so test for equality
 		if (!(farStarRepetitions == farStarShouldBe)) {
-			errorHandler.error("Inconsistent sample rate at:",
-					   nearStar.readFullName());
-			// MUST GIVE MORE INFORMATION HERE
+			StringList msg = "Sample rate problem between ";
+			msg += nearStar.readFullName();
+			msg += " and ";
+			msg += farStar.readFullName();
+			errorHandler.error(msg);
+			invalid = TRUE;
 		}
 		return FALSE;
 	}
@@ -410,7 +412,10 @@ int SDFScheduler :: deferIfWeCan (SDFStar& atom) {
 	for(i = atom.numberPorts(); i>0; i--) {
 		// Look at the next port in the list
 		port = (SDFPortHole*)&atom.nextPort();
-		bombIfNotConnected(port);
+		if (port->far() == NULL) {
+			invalid = TRUE;
+			return 0;
+		}
 		SDFStar& dest = (SDFStar&) port->far()->parent()->asStar();
 
 		// If not an output, or destination is not
