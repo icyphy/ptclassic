@@ -30,12 +30,6 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-#######################################################################
-#### options
-#
-# Add an option for PtLang keywords.
-preference add textedit ptkeywordColor [ptkColor coral black]
-
 
 #######################################################################
 #### EditPtlang
@@ -156,7 +150,7 @@ body ::tycho::EditPtlang::gendoc {} {
 body ::tycho::EditPtlang::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-        [file join $TYCHO editors textedit doc usersGuides \
+        [file join $TYCHO editors ptlangedit doc usersGuides \
 	    EditPtlangHelp.html]
 
 }
@@ -190,7 +184,7 @@ body ::tycho::EditPtlang::parseNow {start stop} {
     }
 
     $text tag configure ptkeyword -foreground \
-	    [preference get textedit ptkeywordColor]
+	    [preference get ptlangedit keywordColor]
 
     # To get C++ parsing
     EditCpp::parseNow $start $stop
