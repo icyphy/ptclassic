@@ -97,8 +97,22 @@ void ComplexArrayState  :: initialize() {
 			}
 			buf[i++] = Complex(realval,imagval);
 			break;
+		case T_ID:
+			// got a state reference.  Must have same type as me.
+			if (strcmp((t.s)->type(), type()) != 0) {
+				parseError ("bad state type in initValue","");
+				return;
+			}
+			int sSiz = t.s->size();
+			if (i + sSiz > MAXLEN) {
+				parseError ("too many elements!");
+				break;
+			}
+			for (int j = 0; j < sSiz; j++)
+				buf[i++] = (*(ComplexArrayState *)(t.s))[j];
+			break;
 		default:
-			parseError ("syntax error");
+			parseError ("syntax error in complex expression");
 			return;
 		}
 	}
