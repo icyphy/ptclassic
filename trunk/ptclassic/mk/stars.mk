@@ -209,6 +209,14 @@ ifdef PN
 	endif
 endif
 
+# We can't include the ipus domain since the non-tk ipus stars need 
+# Blackboard* symbols, which are defined in the tk ipus stars.
+# Set up definitions for stars.mk
+
+ifndef TK
+	IPUS=
+endif
+
 ifdef IPUS
 	PALETTES += PTOLEMY/src/domains/ipus/icons/ipus.pal
 	ifdef TK
