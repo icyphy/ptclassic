@@ -37,9 +37,11 @@ source [file join .. Path.tcl]
 
 
 test Path-1.1 { Check out files in the current dir vs. paths with env vars} {
+    global env
+    set env(MYVAR) [pwd]
     set localfile [::tycho::expandPath foo]
     set envfile [::tycho::expandPath \
-	    [file join \$TYCHO kernel test foo]]
+	    [file join \$MYVAR foo]]
 
     # Verify that expanding a local file results in part
     # of the directory being tycho/kernel/test
