@@ -128,15 +128,13 @@ body ::tycho::EditJava::constructor {args} {
 
     menubar add "Appletviewer" Special -underline 0 \
             -command "$this execProcess appletviewer"
-    if ![::tycho::Exec::execWidgetIsSupported] {
-	menubar disable Appletviewer
-    }
 
     menubar add "Generate doc" Special -underline 0 \
             -command "$this gendocBuffer"
 
     if {$tcl_platform(platform) == "macintosh"} {
 	menubar disable "Generate doc"
+	menubar disable Appletviewer
     }
 }
 
