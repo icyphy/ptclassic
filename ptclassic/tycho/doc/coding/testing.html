@@ -14,8 +14,42 @@ We have included recursion tests for some of the code.  Usually,
 wherever there is a Itcl file, the tests are in the <CODE>test</CODE>
 directory.
 
- <P>The tycho test suite can be run from the Tycho Toplevel directory
+<H3>Running the tests</H3>
+There are several ways to run the tests
+<OL>
+
+<LI> Open a test file such as <A
+HREF="../../kernel/test/testStack.itcl"><CODE>$TYCHO/kernel/test/testStack.itcl</CODE></A>  with Tycho and then evaluate the contents of the file with
+the <CODE>Evaluate</CODE> choice from the <CODE>File</CODE> menu (<CODE>C-x C-r</CODE>.
+
+
+<LI> The <A HREF="../../mk/tycommon.mk"><CODE>$TYCHO/mk/tycommon.mk</CODE></A>
+file automagically generates two itcl files:
+<DL>
+<DT> <CODE>all.itcl</CODE>
+<DD> This file merely sources all of the *.itcl files in the current
+directory.
+<DT> <CODE>alltests.itcl</CODE>
+<DD> This file sources all of the files that are listed as test files
+in the <CODE>makefile</CODE>.
+</DL>
+After running <CODE>make sources</CODE>, you can open up either of these files
+and then evaluate it, which will run all the tests in that directory.
+
+
+<LI> The tests can also be run by cding into a <CODE>test</CODE>
+directory and typing <CODE>make</CODE> from a shell.  To try this out,
+click on the tcl code below:
+<tcl><pre>
+::tycho::execModal {make} "[file join $TYCHO kernel test]"
+</pre></tcl>
+
+<LI> The tycho test suite can be run from the Tycho Toplevel directory
 with the command: <CODE>make tests</CODE>
+
+</OL>
+
+
 <H3>Writing your own tests</H3>
 
 The test suite infrastruction is based on the Itcl test suite code,
@@ -94,15 +128,6 @@ file format standard:
 test Foo-1.1 {Test out Foo} {
 
 } {}
-</PRE>
-
-
-<LI> The last line should run the test suite <CODE>doneTests</CODE>
-proc, which will optionally exit Tycho.  This line is necessary if
-the tests will be run from the makefile outside of Tycho.
-
-<PRE>
-doneTests
 </PRE>
 
 </OL>
