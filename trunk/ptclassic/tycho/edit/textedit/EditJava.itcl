@@ -99,7 +99,7 @@ body ::tycho::EditJava::constructor {args} {
     menubar add "Generate doc" Special -underline 0 \
             -command "$this gendoc"
 
-    if {$tcl_platform(platform) == macintosh} {
+    if {$tcl_platform(platform) == "macintosh"} {
 	menubar disable "Generate doc"
     }
 }
@@ -140,6 +140,11 @@ body ::tycho::EditJava::evaluate {} {
 # to invoke "ptlang".
 #
 body ::tycho::EditJava::gendoc {} {
+    global tcl_platform
+    if {$tcl_platform(platform) == "macintosh"} {
+	error "Sorry, the gendoc method is not supported on the Macintosh,\nit\
+		calls the tcl exec command."
+    }
     return [::tycho::EditProgram::gendoc {set docfile $root.htm} \
             { exec javadoc $tail}] 
 
