@@ -182,9 +182,7 @@ POct::POct(Tcl_Interp* i)
 	MkStarDomain = (char *)DEFAULT_DOMAIN;
 	MkStarDir = "NIL";
 	MkStarPalette = "./user.pal";
-#if POCT_MKSCHEMPALETTE_MEMBER
 	MkSchemPalette = "./user.pal";
-#endif
 }
 
 // destructor
@@ -629,7 +627,7 @@ int POct::ptkSetParams (int aC, char** aV) {
                 Tcl_AppendResult(interp,"Invalid Domain Found.",(char *) NULL);
             }
             // Set Star or Galaxy params from the pList
-            if (SetSogParams(instance, &pList) == 0) {
+            else if (SetSogParams(instance, &pList) == 0) {
                 ErrorFound = TRUE;
 		Tcl_AppendResult(interp, aV[0],
                                  " Could not save parameters to Oct. ",
@@ -806,13 +804,7 @@ int POct::ptkGetMkSchemIcon (int aC, char** /*aV*/)
 {
     // Error checking: number of arguments
     if (aC != 1) return  usage ("ptkGetMkSchemIcon");
-
-#if POCT_MKSCHEMPALETTE_MEMBER
     Tcl_AppendResult(interp, (char *)MkSchemPalette, (char *) NULL);
-#else
-    Tcl_AppendResult(interp, "./user.pal", (char *) NULL);
-#endif
-
     return TCL_OK;
 }
 
@@ -838,9 +830,7 @@ int POct::ptkSetMkSchemIcon (int aC, char** aV) {
         return TCL_ERROR;
     }
 
-#if POCT_MKSCHEMPALETTE_MEMBER
     MkSchemPalette = aV[2];
-#endif
     int retval = TCL_OK;
     char *palette = aV[2];
     char buf[512];
@@ -863,8 +853,8 @@ int POct::ptkSetMkSchemIcon (int aC, char** aV) {
 	    }
 	}
 	else if (!MkUnivIconInPal(facet, buf, palette)) {
-		Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
-		retval = TCL_ERROR;
+	    Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
+	    retval = TCL_ERROR;
 	}
     }
 

@@ -51,6 +51,7 @@ extern "C" {
 
 #include "TclObj.h"
 #include "StringList.h"
+#include "InfString.h"
 
 #if defined(hppa)
 /* Include math.h outside of extern "C" */
@@ -69,10 +70,6 @@ extern "C" {
 #ifdef __GNUG__
 #pragma interface
 #endif
-
-// FIXME: Decide which setting is right -BLE
-// Set to a non-zero value to include MkSchemPalette state
-#define POCT_MKSCHEMPALETTE_MEMBER 0
 
 class POct : public TclObj {
 
@@ -144,10 +141,8 @@ private:
 	StringList MkStarDir; 
 	StringList MkStarPalette;
 
-	// For ptkSetMkSchemIcon and ptkGetMkSchemIcon
-#if POCT_MKSCHEMPALETTE_MEMBER
-	StringList MkSchemPalette;
-#endif
+	// For ptkSetMkSchemIcon and ptkGetMkSchemIcon to remember past values
+	InfString MkSchemPalette;
 
 	// Helper Functions that are not TCL callable directly
 
