@@ -25,4 +25,4 @@ if [ -z "$PTARCH" ]; then
 	PTARCH=`$PTOLEMY/bin/ptarch`
 fi
 
-echo "source $PTOLEMY/tycho/edit/textedit/genVCMakefile.tcl; genVCMakefile $1;exit" | $PTOLEMY/tcltk/tcl.$PTARCH/bin/tclsh
+echo "source $PTOLEMY/tycho/edit/textedit/genVCMakefile.tcl; genVCMakefile $1;exit" | $PTOLEMY/tcltk/tcl.$PTARCH/bin/tclsh80
