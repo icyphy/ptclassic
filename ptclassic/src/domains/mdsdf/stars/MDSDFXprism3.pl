@@ -54,6 +54,7 @@ describing xprism3 for a complete explanation of the options.
 		default {"tmpFile"}
 		desc {File to save the input to the xgraph program.}
 	}
+	ccinclude { <stdio.h> }
 	setup {
                 input.setMDSDFParams(int(numRows),int(numCols));
 	}
