@@ -26,12 +26,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
-/* $Id$
-   Copyright 1993 The Regents of the University of California
-   All rights reserved.
-
-   Author:	Jose L. Pino
-   Date:	October 15,1993
+/*
+   Author:	Jose Luis Pino
+   Date:	October 15, 1993
+   Version:	$Id$
 */
 
 #ifdef __GNUG__
@@ -44,22 +42,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
         int status = NamedList::remove(name);
  	CodeStream* code = myStreams.get(name);
 	if (code) {
+		status = status && myStreams.remove(name);
 		LOG_DEL; delete code;
-		return myStreams.remove(name);
 	}
-	else {
-		return status;
-	}
+	return status;
 }
 
 CodeStream* CodeStreamList::newStream(const char* name) {
-	CodeStream* code = get(name);
+	CodeStream* code = myStreams.get(name);
 	if (!code) {
 		LOG_NEW; code = new CodeStream;
-		if (code) {
-			append(code,name);
-			myStreams.append(code,name);
-		}
+		NamedList::append(code, name);
+		myStreams.append(code, name);
 	}
 	return code;
 }
@@ -68,15 +62,18 @@ void CodeStreamList::deleteStreams() {
 	ListIter nextNode(myStreams);
 	NamedNode* node;
 	while((node = (NamedNode*)nextNode++) != 0) {
-	    delete node->object();
+		CodeStream* csptr = (CodeStream*)node->object();
+		delete csptr;
 	}
 	myStreams.initialize();
+	NamedList::initialize();
 }
 
 void CodeStreamList::initialize() {
 	ListIter nextNode(myStreams);
 	NamedNode* node;
 	while((node = (NamedNode*)nextNode++) != 0) {
-		((CodeStream*)(node->object()))->initialize();
+		CodeStream* csptr = (CodeStream*)node->object();
+		csptr->initialize();
 	}
 }
