@@ -13,6 +13,14 @@ set temp1=a.$$	# temporary file
 set temp2=b.$$	# another temporary file
 set temp3=c.$$	# yet another temporary file
 
+# Marker types.
+set IndexReference = 11
+set IndexExample = 12
+set IndexDefinition = 13
+set IndexStarRef = 14
+set IndexStarEx = 15
+set IndexStarDef = 16
+
 # Create a file with the following format:
 # <entry-type> <page> <item>
 # Where <entry-type> is chapter, section, subsection, etc.
@@ -123,18 +131,18 @@ BEGIN { OFS=""; ORS=""; page=1; }
 \$1 ~ /chapter/ || \$1 ~ /section/ || \$1 ~ /paragraph/ { print \$3;
 	for ( i = 4; i <= NF; i++ ) { print " ", \$i; } print "\n"; }
 # Process index entries.
-/^concept_ref/ { print "<Marker <MType 11>"; }
-/^concept_def/ { print "<Marker <MType 13>"; }
-/^program_ref/ { print "<Marker <MType 11>"; }
-/^program_def/ { print "<Marker <MType 13>"; }
-/^function_ref/ { print "<Marker <MType 11>"; }
-/^function_def/ { print "<Marker <MType 13>"; }
-/^variable_ref/ { print "<Marker <MType 11>"; }
-/^variable_def/ { print "<Marker <MType 13>"; }
-/^type_ref/ { print "<Marker <MType 14>"; }
-/^type_def/ { print "<Marker <MType 16>"; }
-/^key_ref/ { print "<Marker <MType 11>"; }
-/^key_def/ { print "<Marker <MType 13>"; }
+/^concept_ref/ { print "<Marker <MType $IndexReference>"; }
+/^concept_def/ { print "<Marker <MType $IndexDefinition>"; }
+/^program_ref/ { print "<Marker <MType $IndexReference>"; }
+/^program_def/ { print "<Marker <MType $IndexDefinition>"; }
+/^function_ref/ { print "<Marker <MType $IndexReference>"; }
+/^function_def/ { print "<Marker <MType $IndexDefinition>"; }
+/^variable_ref/ { print "<Marker <MType $IndexReference>"; }
+/^variable_def/ { print "<Marker <MType $IndexDefinition>"; }
+/^type_ref/ { print "<Marker <MType $IndexStarRef>"; }
+/^type_def/ { print "<Marker <MType $IndexStarDef>"; }
+/^key_ref/ { print "<Marker <MType $IndexReference>"; }
+/^key_def/ { print "<Marker <MType $IndexDefinition>"; }
 \$1 ~ /_def/ || \$1 ~ /_ref/ { print " <MText \`", \$3;
 	for ( i = 4; i <= NF; i++ ) { print " ", \$i; } print "'> >\n"; }
 END { print "<EndOfInput>\n"; }
