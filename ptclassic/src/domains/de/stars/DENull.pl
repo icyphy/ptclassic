@@ -17,8 +17,4 @@ This star does nothing. It is useful for connecting to any unused input ports.
 		name { output }
 		type { int }
 	}
-	go {
-		// do nothing.
-	}
 }
-
