@@ -2,7 +2,7 @@ defstar {
 	name { Fix }	
 	domain {SDF}
 	desc {
-Based star for the fixed-point stars in the SDF domain.
+Base star for the fixed-point stars in the SDF domain.
 	}
 	version { $Id$ }
         author { Brian L. Evans }
