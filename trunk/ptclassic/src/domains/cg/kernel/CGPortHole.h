@@ -35,7 +35,7 @@ These PortHoles are much like SDF PortHoles, from which they are derived.
 // Contains all the special features required for
 //   synchronous dataflow (CG)
 
-class CGPortHole : public SDFPortHole {
+class CGPortHole : public DFPortHole {
 	friend class CGGeodesic;
 public:
 	CGPortHole();
