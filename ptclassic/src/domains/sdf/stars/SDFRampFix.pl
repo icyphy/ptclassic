@@ -60,7 +60,7 @@ parameter.  The keywords for overflow handling methods are :
                 Fix t = Fix(value);
                 t.set_ovflow(OV);
                 output%0 << t;
-                t += step;
+                t += Fix(step);
                 value = t;
 	}
 }
