@@ -1,6 +1,3 @@
-ident {
-#define NUMINPUTS 10
-}
 defstar {
 	name {PrQueue}
 	domain {DE}
@@ -65,10 +62,12 @@ after processing the input is sent to the \fIsize\fR output.
 		desc { The current number of particles stored. }
 	}
 	ccinclude {
-		"DataStruct.h"
+		"ParticleQueue.h"
 	}
 	protected {
-		Queue* queue[NUMINPUTS];	// maximum of NUMINPUTS inputs
+		class ParticleQueue;
+		const int NUMINPUTS = 10; // max # of inputs
+		ParticleQueue* queue[NUMINPUTS];
 	}
 	defstate {
 		name {curSize}
@@ -93,7 +92,7 @@ after processing the input is sent to the \fIsize\fR output.
 		// Create or initialize the Queues
 		for(int i=(inData.numberPorts()-1); i>=0; i--) {
 		    if (queue[i]) queue[i]->initialize();
-		    else queue[i] = new Queue;
+		    else queue[i] = new ParticleQueue(capacity);
 		}
 	   }
 	   demand.dataNew = TRUE;
@@ -108,10 +107,8 @@ after processing the input is sent to the \fIsize\fR output.
 		InDEPort* p = nextp++;
 		if (p->dataNew) {
 		    if (int(curSize) < int(capacity)) {
-			curSize += 1;
-			Particle& pp = p->get();
-			Particle* newp = pp.clone();
-			queue[i]->put(newp);
+			curSize = int(curSize) + 1;
+			queue[i]->putq(p->get());
 		    }
 		}
 	   }
@@ -121,14 +118,13 @@ after processing the input is sent to the \fIsize\fR output.
 		if ((int)curSize > 0) {
 		   // ...figure out which one
 		   int qNum = 0;
-		   while ((qNum < inData.numberPorts()) &
-			(queue[qNum]->length() <= 0)) {
+		   while (qNum < inData.numberPorts() &&
+				queue[qNum]->empty()) {
 		      qNum += 1;
 		   }
-		   Particle* pp = (Particle*) queue[qNum]->get();
-		   outData.put(completionTime) = *pp;
+		   queue[qNum]->getq(outData.put(completionTime));
 		   demand.dataNew = FALSE;
-		   curSize -= 1;
+		   curSize = int(curSize) - 1;
 		}
 	   }
 	   // output the queue size
