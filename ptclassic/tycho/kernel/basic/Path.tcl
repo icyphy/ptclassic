@@ -393,13 +393,19 @@ proc ::tycho::simplifyPath {pathName {envVarList {}}} {
     }
     set lastMatch $expandedPathName
     foreach envVar $envVarList {
-	if [info exists env($envVar)] {
+	# Does the variable exist, is it non-empty and does it specify a 
+	# non-relative pathname?
+	if {[info exists env($envVar)] == 1 && \
+		"$env($envVar)" != "" && \
+		[file pathtype $env($envVar)] != "relative" } {
 	    set expandedEnvVar [::tycho::expandPath $env($envVar)]
 	    if { [string first $expandedEnvVar $expandedPathName] != -1} {
 		set goodMatch [file join \$$envVar \
 			[string range $expandedPathName \
 			[expr {[string length $expandedEnvVar] +1 }] \
 			end]]
+		#puts "$expandedPathName $goodMatch $envVar \
+		#	$env($envVar) $expandedEnvVar"
 		if {$returnOnFirstMatch == 1} {
 		    return $goodMatch
 		}
