@@ -30,6 +30,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 
 #include "tk.h"
+
+/* Number of colors defined in the ptkOptions database */
+#define NUMBER_OF_COLORS 12
 /*
  * Note that although the following include is in the ptolemy kernel
  * directory, it does not pull in any C++ code.
@@ -61,11 +64,16 @@ void ptkFigureBarEdges(x0,x1,y0,y1,
     int *x0, *x1, *y0, *y1, i, j, numTraces, numBars, width, height;
     double top, bottom, data;
 {
-	    *x0 = ((i+0.125-j*0.25/numTraces)*width)/numBars;
+	if (numTraces > 1) {
+	    *x0 = ((i+0.25-j*0.5/numTraces)*width)/numBars;
+	    *x1 = ((i+0.75-j*0.5/numTraces)*width)/numBars;
+	} else {
+	    *x0 = ((i+0.125)*width)/numBars;
+	    *x1 = ((i+0.875)*width)/numBars;
+	}
 	    *y0 = height*top/(top - bottom);
 	    if (*y0 > height) *y0 = height;
 	    if (*y0 < 0) *y0 = 0;
-	    *x1 = ((i+0.875-j*0.25/numTraces)*width)/numBars;
 	    if(IsNANorINF(data) || data > top) *y1 = 0;
 	    else if(data < bottom) *y1 = height;
 	    else *y1 = height*(top-data)/(top-bottom);
@@ -103,7 +111,7 @@ id, geo, deswidth, desheight)
     char *geo;
     double deswidth, desheight;
 {
-    int i,j;
+    int i,j,color;
     int width, height;
     int x0, y0, x1, y1;
     Tk_Window plotwin;
@@ -127,16 +135,17 @@ id, geo, deswidth, desheight)
                 numTraces, numBars, width, height,
                 top, bottom, data[j][i]);
 
-            sprintf(command, "%s.pf.plot coords %d %d %d %d %d",
-		name, id[j][i], x0, y0, x1, y1);
-
+	    color = j%NUMBER_OF_COLORS + 1;
             sprintf(command,
-		"%s.pf.plot create rect %fc %fc %fc %fc -fill red3",
-		name, x0, y0, x1, y1);
+		"%s.pf.plot create rect %d %d %d %d -fill [option get . plotColor%d PlotColor%d]",
+		name, x0, y0, x1, y1, color, color);
             if(Tcl_Eval(interp, command, 0, (char**)NULL) != TCL_OK)
                 return 0;
             else
                 sscanf(interp->result,"%d",&id[j][i]);
+
+            sprintf(command, "%s.pf.plot coords %d %d %d %d %d",
+		name, id[j][i], x0, y0, x1, y1);
 	}
     }
     return 1;
