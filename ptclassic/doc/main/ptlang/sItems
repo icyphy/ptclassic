@@ -408,12 +408,12 @@ start method, not the constructor.
 .pp
 .IE "conscalls { }"
 You may want to have members in your star or galaxy that have constructors
-that require arguments (these members would be added with the
+that require arguments.  These members would be added by using the 
 .c public ,
 .c private ,
 or
 .c protected
-keyword).  If you have such members, the
+keywords.  If you have such members, the
 .c conscalls
 keyword provides a mechanism for passing arguments to the constructors.
 Simply list the names of the members followed by the list of constructor
@@ -422,6 +422,13 @@ Syntax:
 .(c
 conscalls { \fImember1(arglist), member2(arglist) \fP}
 .)c
+Note that \fImember1, \fRand \fImember2 should have been previously defined
+in a
+.c public ,
+.c private ,
+or
+.c protected
+section.
 .UH destructor
 .pp
 .IE "destructor { }"
@@ -626,14 +633,21 @@ inline virtual
 .)c
 The
 .c virtual
-keyword makes a virtual member function; if
+keyword makes a virtual member function.  If the 
 .c pure
-is given, a pure virtual member function is declared and there must
+.c virtual
+keyword is given, a pure virtual member function is declared and there must
 be no
 .c code
 item in this case.
+The function type
+.c pure
+is a synonym for
+.c pure
+.c virtual .
+The 
 .c inline
-declares the function to be inline.
+function type declares the function to be inline.
 .pp
 Here are the
 .c method
