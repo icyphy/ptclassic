@@ -11,6 +11,7 @@ MAINSEC	      = overall
 TMPFILE	      = tmp_print
 STARDIRS      = stars
 DEMODIRS      = demos
+OPTIONS       =
 
 MAKEVARS =	\
 		"PTOLEMY=$(PTOLEMY)" \
@@ -19,4 +20,4 @@ MAKEVARS =	\
 		"HEADER=$(HEADER)"
 
 print:
-	$(PTOLEMY)/doc/bin/printdom
+	$(PTOLEMY)/doc/bin/printdom $(OPTIONS)

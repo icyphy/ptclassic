@@ -17,10 +17,6 @@
 #	demotitle - The title page for the demo section
 #	demos	  - A directory with demo documentation.
 
-if ($#argv == 1) then
-	cd $1
-endif
-
 # On interrupt, remove temporary files
 onintr catch
 
@@ -29,6 +25,19 @@ set dirheader = ~ptolemy/doc/headers
 set printcommand = ditroff
 set printoptions = "-me -tbl -eqn -P$PRINTER"
 set contentscmd = ~ptolemy/doc/bin/contents
+
+while ($#argv)
+	switch ($argv[1])
+		case -*:
+			set printoptions = ($printoptions $argv[1])
+			shift
+			breaksw
+		default:
+			cd $1
+			shift
+			breaksw
+	endsw
+end
 
 soelim $dirheader/shared $dirheader/domain \
 	init overall > /tmp/pt$$
