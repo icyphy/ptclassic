@@ -5,7 +5,7 @@ $Id$
 Ptolemy kernel calls.
 Some code borrowed from Interpreter.cc, see this file for more info.
 
-Programmer: E. Goei, J. Buck
+Programmer: J. Buck, E. Goei
 
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
@@ -24,6 +24,7 @@ Programmer: E. Goei, J. Buck
 #include "UserOutput.h"
 #include <ACG.h>
 #include <signal.h>
+#include <ctype.h>
 
 extern ACG* gen;
 
@@ -45,9 +46,38 @@ KcInitLog(const char* file) {
 	return TRUE;
 }
 
-// Write a string to the log file
+// a SafeTcl is just a const char* with a different way of printing.
+class SafeTcl {
+	friend UserOutput& operator<<(UserOutput&,const SafeTcl&);
+private:
+	const char* str;
+public:
+	SafeTcl(const char* s) : str(s) {}
+};
+
+// Write a string to the log file so it remains as "one thing"
+UserOutput& operator<<(UserOutput& o,const SafeTcl& stcl) {
+	const char* str = stcl.str;
+	if (!str || *str == 0) { return o << "\"\"";}
+	// check if we need {} or "".
+	const char* s = str;
+	char c;
+	int special = 0;
+	while ((c = *s++) != 0) {
+		if (isalnum(c) || c == '.' || c == '_') continue;
+		if (strchr("\\[$\n", c) != 0) {
+			return o << "{" << str << "}";
+		}
+		special++;
+	}
+	if (special) return o << "\"" << str << "\"";
+	return o << str;
+}
+
 extern "C" void KcLog(const char* str) { LOG << str; }
 
+// Write a value (such as a parameter value) to the LOG file
+// in a way that is safe for
 // Parse a classname
 // We allow classnames to be specified as, say
 // Printer.input=2
@@ -148,7 +178,7 @@ static void logDomain() {
 	static const char* oldDom = "";
 	const char* dom = KnownBlock::domain();
 	if (strcmp(dom, oldDom) == 0) return;
-	LOG << "(domain " << dom << ")\n";
+	LOG << "domain " << dom << "\n";
 }
 
 // Return the domain of an object: note, it may not be the current
@@ -169,7 +199,7 @@ KcClearUniverse(const char* name) {
 	LOG_DEL; delete universe;
 	LOG_NEW; universe = new InterpUniverse(name);
 	currentGalaxy = universe;
-	LOG << "(reset)\n";
+	LOG << "reset\n";
 	LOG << "# Creating universe '" << name << "'\n";
 	logDomain();
 }
@@ -182,19 +212,19 @@ KcInstance(char *name, char *ako, ParamListType* pListPtr) {
 	const char* cname = parseClass (ako, mph, nP);
 	if (!cname || !currentGalaxy->addStar(name, cname))
 		return FALSE;
- 	LOG << "\t(star " << name << " " << cname << ")\n";
+ 	LOG << "\tstar " << name << " " << cname << "\n";
 	for(int j = 0; j < MAX_NUM_MULTS; j++ ) {
 	    if (nP[j] && !currentGalaxy->numPorts (name, mph[j], nP[j]))
 		return FALSE;
 	    if (nP[j])
-		LOG << "\t(numports " << name << " " << mph[j] << " "
-			<< nP[j] << ")\n";
+		LOG << "\tnumports " << name << " " << mph[j] << " "
+			<< nP[j] << "\n";
 	}
 	if (!pListPtr || pListPtr->length == 0) return TRUE;
 	for (int i = 0; i < pListPtr->length; i++) {
-		LOG << "\t(setstate " << name << " " <<
-			pListPtr->array[i].name << " \"" <<
-			pListPtr->array[i].value << "\")\n";
+		LOG << "\tsetstate " << name << " " <<
+			pListPtr->array[i].name << " " <<
+			SafeTcl(pListPtr->array[i].value) << "\n";
 		if(!currentGalaxy->setState(name, pListPtr->array[i].name,
 			pListPtr->array[i].value)) return FALSE;
 	}
@@ -215,8 +245,8 @@ KcMakeState(char *name, char *type, char *initVal) {
 		Error::abortRun(*currentGalaxy, msg);
 		return FALSE;
 	}
-	LOG << "\t(state " << name << " " << type << " \"" <<
-		initVal << "\")\n";
+	LOG << "\tnewstate " << name << " " << type << " " << 
+		SafeTcl(initVal) << "\n";
 	return currentGalaxy->addState(name, type, initVal);
 }
 
@@ -226,18 +256,17 @@ KcConnect(char *inst1, char *t1, char *inst2, char *t2, char* delay, char* width
 	if (width == 0) width = "";
 	if (delay == 0) delay = "";
 	if (*width) {
-		LOG << "\t(busconnect (";
+		LOG << "\tbusconnect ";
 	}
 	else {
-		LOG << "\t(connect (";
+		LOG << "\tconnect ";
 	}
-	LOG << inst1 << " \"" << t1 << "\") (" <<
- 		inst2 << " \"" << t2 << "\")";
+	LOG << inst1 << " " << t1 << " " << inst2 << " " << t2;
 	if (*width)
-		LOG << " " << width;
+		LOG << " " << SafeTcl(width);
  	if (*delay)
- 		LOG << " " << delay;
- 	LOG << ")\n";
+ 		LOG << " " << SafeTcl(delay);
+ 	LOG << "\n";
 	if (*width)
 		return currentGalaxy->busConnect(inst1, t1, inst2, t2,
 						 width, delay);
@@ -248,7 +277,7 @@ KcConnect(char *inst1, char *t1, char *inst2, char *t2, char* delay, char* width
 // create a galaxy formal terminal
 extern "C" boolean
 KcAlias(char *fterm, char *inst, char *aterm) {
-	LOG << "\t(alias " << fterm << " " << inst << " \"" << aterm << "\")\n";
+	LOG << "\talias " << fterm << " " << inst << " " << aterm << "\n";
 	return currentGalaxy->alias(fterm, inst, aterm);
 }
 
@@ -278,9 +307,9 @@ curDomainName() {
 extern "C" boolean
 KcDefgalaxy(const char *galname, const char *domain, const char* innerTarget) {
 	logDomain();
-	LOG << "(defgalaxy " << galname << "\n\t(domain " << domain << ")\n";
+	LOG << "defgalaxy " << galname << " {\n\tdomain " << domain << "\n";
 	if (innerTarget && strcmp(innerTarget, "<parent>") != 0) {
-		LOG << "(target " << innerTarget << ")\n";
+		LOG << "target " << innerTarget << "\n";
 		galTarget = KnownTarget::clone(innerTarget);
 	}
 	else galTarget = 0;
@@ -298,7 +327,7 @@ KcEndDefgalaxy(const char* outerDomain) {
 	// wormhole if that is different from current domain.
 	// note that this call also restores the KnownBlock::currentDomain
 	// to equal the outerDomain.
-	LOG << ")\n";
+	LOG << "}\n";
 	currentGalaxy->addToKnownList(outerDomain,galTarget);
 
 	currentGalaxy = saveGalaxy;
@@ -320,7 +349,7 @@ KcSetDesc(const char* desc) {
 // Run the universe
 extern "C" boolean
 KcRun(int n) {
- 	LOG << "(run " << n << ")\n(wrapup)\n";
+ 	LOG << "run " << n << "\nwrapup\n";
 	if (!universe->initSched())
 		return FALSE;
 	universe->setStopTime(n);
@@ -332,7 +361,7 @@ KcRun(int n) {
 // Set the seed for the random number generation.
 extern "C" void
 KcEditSeed(int n) {
- 	LOG << "(seed " << n << ")\n";
+ 	LOG << "seed " << n << "\n";
 	LOG_DEL; if (gen) delete gen;
 	LOG_NEW; gen = new ACG(n);
 }
@@ -566,7 +595,7 @@ KcModTargetParams(ParamListType* pListPtr) {
 	for (int i = 0; i < pListPtr->length; i++) {
 		const char* n = pListPtr->array[i].name;
 		const char* v = pListPtr->array[i].value;
-		LOG << "\t(targetparam " << n << " \"" << v << "\")\n";
+		LOG << "\ttargetparam " << n << " " << SafeTcl(v) << "\n";
 		State* s = galTarget->stateWithName(n);
 		if (s == 0) {
 			Error::abortRun (*galTarget, "no target-state named ", n);
@@ -717,8 +746,8 @@ static void displayStates(const Block *b) {
  */
 extern "C" boolean
 KcNumPorts (char* starname, char* portname, int numP) {
-	LOG << "\t(numports " << starname << " " << portname << " "
-		<< numP << ")\n";
+	LOG << "\tnumports " << starname << " " << portname << " "
+		<< numP << "\n";
 	return currentGalaxy->numPorts(starname, portname, numP);
 }
 
@@ -741,15 +770,15 @@ nthDomainName(int n) {
 // add a node with the given name
 extern "C" int
 KcNode (const char* name) {
-	LOG << "\t(node " << name << ")\n";
+	LOG << "\tnode " << name << "\n";
 	return currentGalaxy->addNode(name);
 }
 
 // connect a porthole to a node
 extern "C" int
 KcNodeConnect (const char* inst, const char* term, const char* node) {
- 	LOG << "\t(nodeconnect (" << inst << " \"" << term << "\") " <<
-		node << ")\n";
+ 	LOG << "\tnodeconnect " << inst << " " << term << " " <<
+		node << "\n";
 	return currentGalaxy->nodeConnect(inst, term, node);
 }
 
@@ -766,7 +795,7 @@ Set the target for the universe
 */
 extern "C" int
 KcSetTarget(const char* targetName) {
-	LOG << "(target " << targetName << ")\n";
+	LOG << "target " << targetName << "\n";
 	int temp = universe->newTarget (savestring(targetName));
 	galTarget = universe->myTarget();
 	return temp;
