@@ -35,12 +35,46 @@
 # --------------------------------------------------------------------
 include $(ROOT)/mk/config-default.mk
 
+# common.mk looks at this variable to decide how to build shared libraries
+USE_SHARED_LIBS = yes
+
+#
+#ifeq ($(USE_SHARED_LIBS),yes) 
+# Use Position Independent Code to build shared libraries
+C_SHAREDFLAGS =         
+CC_SHAREDFLAGS =        
+# mk/userstars.mk uses these vars
+USER_C_SHAREDFLAGS =    $(C_SHAREDFLAGS)
+USER_CC_SHAREDFLAGS =   $(CC_SHAREDFLAGS)
+LIBSUFFIX =             so
+
+
+
+# Location of SGI C++ shared libraries
+SHARED_COMPILERDIR = 
+SHARED_COMPILERDIR_FLAG = 
+#SHARED_COMPILERDIR_FLAG = -L$(SHARED_COMPILERDIR)
+
+# Command to build C++ shared libraries
+SHARED_LIBRARY_COMMAND = CC -32 -shared -set_version 'vanillaUCB\#sgi7.0' $(SHARED_COMPILERDIR_FLAG) -o
+
+# Command to build C shared libraries
+CSHARED_LIBRARY_COMMAND = cc -32 -shared -set_version 'vanillaUCB\#sgi7.0' $(SHARED_COMPILERDIR_FLAG) -o
+
+# List of libraries to search, obviating the need to set LD_LIBRARY_PATH
+# See the ld man page for more information.  These path names must
+# be absolute pathnames, not relative pathnames.
+SHARED_LIBRARY_PATH = $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(X11_LIBDIR):$(SHARED_COMPILERDIR):$(PTOLEMY)/tcltk/itcl.$(PTARCH)/lib/itcl
+SHARED_LIBRARY_R_LIST = -Wl,-R,$(SHARED_LIBRARY_PATH)
+
+#endif
+
 #
 # Programs to use
 #
 
 # Define the C++ compiler - always have compat/cfront includes as 1st choice
-CPLUSPLUS = 	NCC -I$(ROOT)/src/compat/cfront
+CPLUSPLUS =     CC -32 -I$(ROOT)/src/compat/cfront
 
 # IRIX6.x does not have a ranlib
 RANLIB = 	true
@@ -80,24 +114,25 @@ ARCHFLAGS =	-DIRIX5 -DIRIX6
 # unless -nonshared is also specified, it is ignored anyway.)
 ## -xgot is the SGI hack to avoid overflows in the GOT by allowing 
 # 32 bit offsets, or something.
-GOTFLAG = 	-G 0 -xgot
-LOCALCCFLAGS =	$(GOTFLAG) -D_BSD_SIGNALS -D_BSD_TIME
-GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
-			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
-LOCALCFLAGS =	$(GOTFLAG) #-cckr
-CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
-			$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
+GOTFLAG =       -G 0 -xgot
+LOCALCCFLAGS =  $(GOTFLAG) -D_BSD_SIGNALS -D_BSD_TIME
+GPPFLAGS =      $(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
+LOCALCFLAGS =   $(GOTFLAG) #-cckr
+CFLAGS =        $(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
+$(ARCHFLAGS) $(LOCALCFLAGS) $(USERFLAGS)
+
 
 # command to generate dependencies (cfront users can try CC -M)
 ##DEPEND=g++ -MM
-DEPEND=NCC -M
+DEPEND=CC -32 -M
 
 #
 # Variables for the linker
 #
 
 # linker to use for pigi and interpreter.
-LINKER = NCC -quickstart_info
+LINKER = CC -32 -quickstart_info
 # C linker
 CLINKER = cc -32
 # system libraries for linking .o files from C files only
