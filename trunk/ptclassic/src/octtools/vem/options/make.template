@@ -40,7 +40,8 @@ VPATH         = $(ROOT)/src/octtools/vem/options
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-HDRS		= internal.h
+HDRS		= internal.h \
+		  opts.h
 
 LIBCSRCS	= layers.c \
 		opts.c \
