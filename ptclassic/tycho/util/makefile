@@ -41,7 +41,7 @@ VPATH =		$(ROOT)/$(ME)
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-DIRS =		notmake pakman devtools tydoc ptsim #obstcl
+DIRS =		notmake pakman devtools tydoc ptsim tytest #obstcl
 
 EXTRA_SRCS = 	pkgIndex.tcl
 
