@@ -105,3 +105,11 @@ int SingleLinkList::remove (Pointer x) {
 	} while (f != lastNode->next);
 	return 0;
 }
+
+Pointer ListIter::next() {
+	if (!ref) return 0;
+	ref = ref->next;
+	Pointer p = ref->e;
+	if (ref == list->lastNode) ref = 0;
+	return p;
+}
