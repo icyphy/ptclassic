@@ -375,8 +375,6 @@ body ::tycho::Displayer::destructor {} {
 # the display. Call <code>showView</code> to do this.
 #
 body ::tycho::Displayer::attachView {window viewName} {
-puts "attachView $window $viewName"
-
     if [::info exists viewWindow($viewName)] {
         error "View $viewName already exists in Displayer $this"
     }
