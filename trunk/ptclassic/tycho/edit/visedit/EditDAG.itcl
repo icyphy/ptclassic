@@ -30,6 +30,8 @@
 #                                        COPYRIGHTENDKEY
 #######################################################################
 
+# FIXME: Known bugs
+# -orientation and -layout options are not stored in the file.
 
 #######################################################################
 #### EditDAG
@@ -121,6 +123,9 @@ class ::tycho::EditDAG {
     # Specify the graph object to display and edit.
     itk_option define -graph graph Graph {}
 
+    # Specify normal or alternate layout.  Must redraw after changing.
+    itk_option define -layout layout Layout {normal}
+    
     # Specify vertical or horizontal orientation.  Must redraw after changing.
     itk_option define -orientation orientation Orientation {horizontal}
 
@@ -200,6 +205,9 @@ class ::tycho::EditDAG {
     # Query the user for x and y spacing.
     method setSpacing {}
 
+    # Toggle between layout algorithms.
+    method toggleLayout {}
+
     # Change layout from horizontal to vertical or vice versa.
     method transpose {}
 
@@ -254,6 +262,9 @@ class ::tycho::EditDAG {
     # Set the "widthpos" attribute of nodes in the subgraph.
     private method widthPos {roots ymin {parent {}}}
 
+    # Alternative to widthPos that gives a different layout.
+    private method widthPosAlt {roots ymin {parent {}}}
+
     ###################################################################
     ####                   private variables                       ####
 
@@ -265,6 +276,9 @@ class ::tycho::EditDAG {
 
     # If non-zero, then I created the graph and will delete it on exit.
     private variable graphmine 0
+
+    # An array that indicates whether a position in the grid is taken.
+    private variable taken
 }
 
 #######################################################################
@@ -320,6 +334,9 @@ body ::tycho::EditDAG::constructor {args} {
 
     menubar add {Transpose} Format -underline 0 \
             -command "$this transpose"
+
+    menubar add {Alternate Layout} Format -underline 0 \
+            -command "$this toggleLayout"
 
     menubar add {Scale} Format -underline 1 \
             -command "$this setSpacing"
@@ -489,13 +506,11 @@ body ::tycho::EditDAG::copy {{ids {}}} {
         if [info exists nametable($id)] {
             set nodes [$mygraph topologicalSort [list $nametable($id)]]
             foreach node $nodes {
-                lappend cmds [list add \
-                        [lindex $node 0] \
-                        [lindex $node 1] \
-                        [lindex $node 2]]
+                lappend cmds [list add $node \
+                        [$mygraph contents $node] \
+                        [$mygraph parents $node]]
             }
         } {
-            setClipboard {}
             ::tycho::Graphics::copy $ids
             lappend cmds [lindex [getClipboard] 0]
         }
@@ -526,6 +541,8 @@ body ::tycho::EditDAG::current {} {
 #
 body ::tycho::EditDAG::deleteSubgraph {name} {
     if $readOnly {bell; return}
+    # FIXME: The following fails if a given node has two children,
+    # and one is a child of the other.
     foreach child [$mygraph children $name] {
         deleteSubgraph $child
     }        
@@ -654,7 +671,9 @@ body ::tycho::EditDAG::reload {} {
     undoBoundary
     ::tycho::File::reload
     verify repair
-    redrawGraph
+    # Not sure why the time delay is needed here... but window doesn't
+    # map otherwise.
+    after 1 ::tycho::TWidget::evalIfExists $this redrawGraph
 }
 
 #######################################################################
@@ -664,6 +683,9 @@ body ::tycho::EditDAG::reload {} {
 # the width of the nodes.  The rationale for this is that for textual
 # node displays, it is more appealing to have the vertical spacing
 # be uniform than to have it vary with font changes.
+# This method calls <code>::tycho::safeUpdate</code>, so that even
+# for large graphs, the system will remain interactive while the graph
+# is being drawn.
 #
 body ::tycho::EditDAG::redrawGraph {} {
     # Disable the undo system.
@@ -682,7 +704,14 @@ body ::tycho::EditDAG::redrawGraph {} {
     $mygraph attributeInit widthpos {}
     catch {unset firstfree}
     catch {unset bywidth}
-    widthPos [$mygraph roots] 0
+    catch {unset taken}
+    # Initialize depth position so that it only happens once.
+    $mygraph attributeInit depth -1
+    if {$itk_option(-layout) != {normal}} {
+        widthPosAlt [$mygraph roots] 0
+    } {
+        widthPos [$mygraph roots] 0
+    }
     
     # Calculate the horizontal and vertical position of each node.
     set ypos [expr [eval bottomOf $titleTypes]+$itk_option(-starty)]
@@ -696,6 +725,9 @@ body ::tycho::EditDAG::redrawGraph {} {
                 $mygraph attributeSet ypos $node $ypos
             }
             incr ypos $yincr
+            # FIXME: Check to see whether modifying the graph during
+            # this update causes problems.
+            ::tycho::safeUpdate $this
         }
         # xpos depends on widthpos and the width of the items.
         set wpos 0
@@ -732,6 +764,7 @@ body ::tycho::EditDAG::redrawGraph {} {
                 }
             }
             set xpos [expr $max+$xincr]
+            ::tycho::safeUpdate $this
         }
     }
     # Draw the lines.
@@ -739,6 +772,7 @@ body ::tycho::EditDAG::redrawGraph {} {
         foreach node $level {
             drawParentLines $node
         }
+        ::tycho::safeUpdate $this
     }
     # Lower lines beneath nodes. Check that nodes exist.
     if { [$slate find withtag node] != "" } {
@@ -798,6 +832,19 @@ body ::tycho::EditDAG::setSpacing {} {
     array set vals $result
     configure -spacingx $vals(x)
     configure -spacingy $vals(y)
+    redrawGraph
+}
+
+#####################################################################
+#### toggleLayout
+# Toggle between layout algorithms.
+#
+body ::tycho::EditDAG::toggleLayout {} {
+    if {[cget -layout] != {normal}} {
+        configure -layout normal
+    } {
+        configure -layout alternate
+    }
     redrawGraph
 }
 
@@ -1059,6 +1106,77 @@ body ::tycho::EditDAG::verifycontents {contents} {
 # roots. The position is an index, assuming a gridded layout. The first
 # position has index 0. The method ensures that no two of the given
 # roots are given the same position, even if some of them have been
+# previously assigned positions. It returns the first and last
+# positions assigned to the roots, as a list with two elements. As a
+# side effect, update firstfree, which indicates the position of the
+# first free slot at any depth, bywidth, which lists the nodes by
+# their width position (as an array), and taken, which keeps track
+# of positions that are taken. The "widthpos" is used as the
+# vertical position when the graph is rendered in horizontal mode, and
+# as the horizontal position otherwise.
+#
+body ::tycho::EditDAG::widthPos {roots ymin {parent {}}} {
+    ::tycho::safeUpdate $this
+    # NOTE: Assume no graph with more than a million nodes.
+    set firstpos 1000000
+    set lastpos 0
+
+    foreach node $roots {
+        # Get the depth of the current node.
+        # Make sure "depth" doesn't reset cached values by passing 0 arg
+        set depth [$mygraph depth $node 0]
+        # If the node does not already have a position, give it one.
+        set wpos [$mygraph attribute widthpos $node]
+        if {$wpos == {}} {
+            # Node does not have a position.  Set a minimum position (ff)
+            if ![info exists firstfree($depth)] {
+                set firstfree($depth) 0
+                set ff 0
+            } {
+                set ff $firstfree($depth)
+            }
+            # Make sure the minimum position is not less than ymin.
+            if {$ymin > $ff} {
+                set ff $ymin
+            }
+            set children [$mygraph children $node]
+            if {$children != {}} {
+                # Get the top and bottom positions of the children
+                set range [widthPos $children $ff $node]
+                # Choose the average as the preferred position
+                set desired [expr ([lindex $range 0]+[lindex $range 1])/2]
+                # If desired position is greater than minimum, use it.
+                if {$desired > $ymin} {
+                    set wpos $desired
+                } {
+                    set wpos $ymin
+                }
+            } {
+                set wpos $ff
+            }
+            # Avoid levels that are already taken.
+            # NOTE: Using info below fails (info in Itcl is broken)
+            while {[array names taken "$depth,$wpos"] != {}} {
+                incr wpos
+            }
+            $mygraph attributeSet widthpos $node $wpos
+            # Mark the position taken.
+            set taken($depth,$wpos) 1
+            lappend bywidth($wpos) $node
+            set firstfree($depth) [expr $wpos+1]
+        }
+        if {$wpos < $firstpos} {set firstpos $wpos}
+        if {$wpos > $lastpos} {set lastpos $wpos}
+    }
+    return [list $firstpos $lastpos]
+}
+
+#######################################################################
+#### widthPosAlt
+# Set the "widthpos" attribute of nodes in the subgraph with the given
+# roots. The position is an index, assuming a gridded layout. The first
+# position has index 0. The method ensures that no two of the given
+# roots are given the same position, even if some of them have been
 # previously assigned positions. It returns the first position of any
 # of the roots that have not been previously given a position. As a
 # side effect, update firstfree, which indicates the position of the
@@ -1067,7 +1185,7 @@ body ::tycho::EditDAG::verifycontents {contents} {
 # vertical position when the graph is rendered in horizontal mode, and
 # as the vertical position otherwise.
 #
-body ::tycho::EditDAG::widthPos {roots ymin {parent {}}} {
+body ::tycho::EditDAG::widthPosAlt {roots ymin {parent {}}} {
     # NOTE: Assume no graph with more than a million nodes.
     set result 1000000
     # Pre-scan for any previously assigned positions.
@@ -1080,7 +1198,8 @@ body ::tycho::EditDAG::widthPos {roots ymin {parent {}}} {
     }
 
     foreach node $roots {
-        set depth [$mygraph depth $node]
+        # Make sure "depth" doesn't reset cached values by passing 0 arg
+        set depth [$mygraph depth $node 0]
         if ![info exists firstfree($depth)] {
             set firstfree($depth) 0
         }
@@ -1093,7 +1212,7 @@ body ::tycho::EditDAG::widthPos {roots ymin {parent {}}} {
             }
             # Make sure the path to the parent is clear.
             if {$parent != {}} {
-                set pdepth [$mygraph depth $parent]
+                set pdepth [$mygraph depth $parent 0]
                 while {[incr pdepth] < $depth} {
                     if ![info exists firstfree($pdepth)] {
                         set firstfree($pdepth) 0
@@ -1107,7 +1226,7 @@ body ::tycho::EditDAG::widthPos {roots ymin {parent {}}} {
 
             set children [lsort [$mygraph children $node]]
             if {$children != {}} {
-                set top [widthPos $children $ff $node]
+                set top [widthPosAlt $children $ff $node]
                 if {$top > $ff && $top != 1000000} {
                     # Top child is below first free position. Move down.
                     set ff $top
