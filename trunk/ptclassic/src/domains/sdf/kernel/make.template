@@ -22,8 +22,6 @@ DESTDIR=$(ROOT)/lib.$(ARCH)
 
 GPPFLAGS = -g
 GNU = g++
-GNULIB = /usr/gnu/lib
-GNUINCLUDE = $(GNULIB)/g++-include
 
 # Rule for compiling with g++
 .SUFFIXES: .cc

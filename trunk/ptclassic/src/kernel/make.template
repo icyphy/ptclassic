@@ -14,8 +14,7 @@
 VPATH = ../../src/kernel
 GPPFLAGS = -g
 GNU = g++
-GNULIB = /usr/gnu/lib
-GNUINCLUDE = $(GNULIB)/g++-include
+
 # need gcc, not cc, to build gnulib3a
 CC = gcc
 

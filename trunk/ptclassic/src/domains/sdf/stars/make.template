@@ -17,8 +17,6 @@ SDFDIR = $(ROOT)/src/domains/sdf/kernel
 IMAGE = $(ROOT)/src/domains/sdf/image
 GPPFLAGS = -g
 GNU = g++
-GNULIB = /usr/gnu/lib
-GNUINCLUDE = $(GNULIB)/g++-include
 
 .SUFFIXES: .o .cc .h .pl
 .cc.o:
