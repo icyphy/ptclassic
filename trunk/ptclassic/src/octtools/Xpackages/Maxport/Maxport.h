@@ -72,7 +72,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 */
 
+#ifdef XtNmaxHeight
+#undef XtNmaxHeight
+#endif
 #define XtNmaxHeight	"maxHeight"
+
+#ifdef XtNmaxWidth
+#undef XtNmaxWidth
+#endif
 #define XtNmaxWidth	"maxWidth"
 
 extern WidgetClass maxportWidgetClass;
