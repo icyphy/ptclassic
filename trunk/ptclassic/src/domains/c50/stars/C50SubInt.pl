@@ -2,7 +2,7 @@ defstar {
     name {SubInt}
     domain {C50}
     desc { Output the "pos" input minus all "neg" inputs. }
-    version { @(#)C50SubInt.pl	1.2	3/10/96 }
+    version { $Id$ }
     author { Luis Gutierrez }
     copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -71,8 +71,8 @@ limitation of liability, and disclaimer of warranty provisions.
 		int time = 0;
 		if ( int(saturation)) time++;
 		time += 7;
-		if ( int(neg.numberPorts() > 2)
-			time += 2*(int(neg.numberPorts) - 2);
+		if ( int(neg.numberPorts() > 2))
+			time += (2*(int(neg.numberPorts) - 2));
 		return time;
 	}
 }

@@ -63,6 +63,7 @@ Also, the index of the output is provided (count starts at 0).
 		input.setSDFParams(int(N),int(N)-1);
 	}		
 
+
 	codeblock(compare,"int numSamplesMinus1, int max" ){
 	ldp	#00h		; data page pointer == 0
 	splk	#@numSamplesMinus1,brcr
@@ -83,11 +84,14 @@ $starSymbol(lp):
 	mar	*+		; point to next sample
 	}
 
-	codeblock(out){
+	codeblock(outIndex){
 	lamm	ar1		; ar1 = address of max/min input
 	sub	#$addr(input),0 ; acc = index
 	samm	ar2		; ar2 = index
 	bldd	ar2,#$addr(index)	; output index
+	}
+	
+	codeblock(out){
 	bldd	ar1,#$addr(output)	; output value
 	}
 
@@ -116,28 +120,28 @@ $starSymbol(lp):
 	}
 
 	codeblock(calcMag){
-	lar	ar3,#$addr(output)
-	mar	*,ar1
-	lacc	*,0,ar3
+	lamm	ar1
 	abs
-	sacl	*
+	samm	ar1
 	}
 
 	codeblock(one){
-	lar	ar0,#$addr(input)
-	lar	ar1,#$addr(output)
-	mar	*,ar0
-	bldd	*,#$addr(output),ar1
-	splk	#0000h,*
+	lmmr	ar0,#$addr(input)
+	smmr	ar0,#$addr(output)
+	lar	ar0,#0000h
+	smmr	ar0,#$addr(output)
 	}
 
 	codeblock(oneMag){
+	zap	
 	lar	ar0,#$addr(input)
 	lar	ar1,#$addr(output)
-	mar	*,ar0
+	lar	ar2,#$addr(index)
+	mar	*,ar2
+	sach	*,0,ar0
 	lacc	*,0,ar1
 	abs
-	sacl	*
+	sach	*
 	}
 
  	go {
@@ -147,6 +151,7 @@ $starSymbol(lp):
 			} else {
 				addCode(compare((int(N) - 1), int(MAX)));
 			}
+			addCode(outIndex);
 			if (int(outputMagnitude))
 				addCode(calcMag);
 			addCode(out);				
@@ -161,9 +166,13 @@ $starSymbol(lp):
 	}
 
 	exectime {
-		if (int(N) > 10)
-			return (6*(int(N)-1))+7;
-		else
-			return 3;
+		int time=0;
+		if ((int(N) == 1) & int(outputMagnitude)) return 9;
+		else return 4;
+		if (int(compareMagnitude)) time += 6 + 10*int(N);
+		else time += 6 + 6*int(N);
+		if (int(outputMagnitude)) time += 3;
+		time += 5;
+		return time;
  	}
 }

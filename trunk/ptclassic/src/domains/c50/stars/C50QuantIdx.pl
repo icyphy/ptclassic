@@ -7,7 +7,7 @@ The star quantizes the input to one of N+1 possible output levels
 using N thresholds.  It also outputs the index of the quantization
 level used.  See the Quant star for more information.
 	} 
-	version { @(#)C50QuantIdx.pl	1.3	2/15/96 }
+	version { $Id$ }
 	author { Luis Gutierrez, based on CG56 version }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -23,7 +23,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 
 	codeblock(outputStepNumber){
-	smmr	ar1,#$addr(level)
+	smmr	ar1,#$addr(outputStepNumber)
 	}
 
 	// Inherit the setup method
