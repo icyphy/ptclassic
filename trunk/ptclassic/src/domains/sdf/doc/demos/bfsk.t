@@ -15,27 +15,26 @@ delim $$
 .EN
 .LD
 .IE "frequency shift keying"
-This demo comprised of a
+This demo comprised of
 .c xmit2fsk
 ,
 .c telephoneChannel
 and 
 .c rec2fsk 
-galaxies illustrates a BFSK system.
-This is a discontinuous-phase implementation of the BFSK system,
+galaxies illustrates a Binary Frequency Shift Keying (BFSK) system.
+This is a discontinuous-phase implementation of a BFSK system,
 in which the synchronization of transmitter and receiver is required.
 The power spectrum of the input and output of the 
 .c telephoneChannel 
-is 
-provided.
-The core of the channel is the
+is plotted.
+In the
 .c telephoneChannel 
-galaxy, where various channel parameters can be varied.
+galaxy, various channel parameters can be varied.
 FSK signaling consists of conveying information by shifting the
 frequency of the carrier wave. In the discontinuous-phase FSK signaling,
-the binary symbols (1,0) are represented by two separate frequencies, f1
-and f2. By switching between these two frequencies the FSK transmitter 
-indicates which of two symbols is being sent.
+the binary symbols 0 and 1 are represented by two separate frequencies, f1
+and f2. By switching between these two frequencies, the FSK transmitter 
+indicates which of the two symbols is being sent.
 .UH REFERENCES
 .ip [1]
 Simon Haykin, \fICommunication Systems\fR,
