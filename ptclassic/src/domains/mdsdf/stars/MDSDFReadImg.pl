@@ -52,7 +52,7 @@ This star does not support frame numbers.  See ReadImg2.
 
   go {
     // Open file containing the image.
-    const char* nm = expandPathName(fileName);
+    char* nm = expandPathName(fileName);
     StringList expandedName = nm;
     delete [] nm;
     FILE* fp = fopen(expandedName, "r");
