@@ -186,6 +186,9 @@ class ::tycho::Model {
     #################################################################
     ####                     public methods                      ####
 
+    # Provide standard access to entities and links
+    method access {mode name args}
+    
     # Append a command to the undo history
     method appendHistory {redo undo {publishable 1}}
     
@@ -382,6 +385,32 @@ body ::tycho::Model::constructor {args} {
     defineModelAttributes -title {} -author {} -version {}
 }
 
+########################################################################
+#### access
+#
+# Provide a standard access mechanism to entities and links.
+# Because subclasses of Model can provide methods that access
+# their data in any form they please, it is difficult to write
+# editors and viewers that will operate on any model. This method
+# provides a way for this kind of editor and viewer to access
+# a model. The method is not required to be fast, but just
+# to work correctly.
+#
+# The default implementation here is correct for subclasses
+# that provide, for an entity or link type *foo*, the access
+# methods fooassign{}, fooattrs{}, foocget{}, fooconfigure{}.
+# (Currently creating and deleting is not supported. It may be
+# in future.)
+#
+# The first argument is the kind of access, and can be one of
+# assign{}, attrs{}, cget{}, or configure{}. The second is
+# the entity type, and the third its name. Following arguments
+# depend on the particular access mode.
+#
+body ::tycho::Model::access {mode type name args} {
+    eval $this [list $type$mode $name] $args
+}
+    
 ########################################################################
 #### appendHistory
 #
