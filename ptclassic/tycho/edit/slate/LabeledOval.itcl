@@ -48,23 +48,23 @@ class ::tycho::LabelledOval {
     ###################################################################
     ####                            options                        ####
 
-    # The text in the label
-    common text
+    # The fill color of the oval
+    common fill
 
     # The outline color of the oval
     common outline
 
-    # The fill color of the oval
-    common fill
+    # The text in the label
+    common text
 
     ###################################################################
     ####                         public procs                      ####
 
-    proc text    {id canvas tx}
-    proc outline {id canvas ot}
-    proc fill    {id canvas fi}
     proc coords  {id canvas args}
-
+    proc fill    {id canvas fi}
+    proc outline {id canvas ot}
+    proc text    {id canvas tx}
+    proc width   {id canvas wd}
 
     ###################################################################
     ####                         protected variables               ####
@@ -87,29 +87,21 @@ class ::tycho::LabelledOval {
     #### Set method table
     array set methodtable [array get ::tycho::Picture::methodtable]
 
-    set methodtable(text)      ::tycho::LabelledOval::text
-    set methodtable(outline)   ::tycho::LabelledOval::outline
-    set methodtable(fill)      ::tycho::LabelledOval::fill
     set methodtable(construct) ::tycho::LabelledOval::construct
     set methodtable(coords)    ::tycho::LabelledOval::coords
+    set methodtable(fill)      ::tycho::LabelledOval::fill
+    set methodtable(outline)   ::tycho::LabelledOval::outline
+    set methodtable(text)      ::tycho::LabelledOval::text
+    set methodtable(width)     ::tycho::LabelledOval::width
 
     #### Set option defaults
     array set optiondefault [array get ::tycho::Picture::optiondefault]
 
-    set optiondefault(-text) ""
     set optiondefault(-fill) ""
     set optiondefault(-outline) "black"
-}
+    set optiondefault(-text) ""
+    set optiondefault(-width) "1"
 
-
-##########################################################################
-## text
-#
-# Set the text configuration option.
-#
-body ::tycho::LabelledOval::text {id canvas tx} {
-    set text($id) $tx
-    $canvas itemconfigure $textitem($id) -text $text($id)
 }
 
 ##########################################################################
@@ -132,6 +124,26 @@ body ::tycho::LabelledOval::outline {id canvas ot} {
     $canvas itemconfigure $primary($id) -outline $outline($id)
     $canvas itemconfigure $textitem($id) -fill $outline($id)
 }
+
+##########################################################################
+## text
+#
+# Set the text configuration option.
+#
+body ::tycho::LabelledOval::text {id canvas tx} {
+    set text($id) $tx
+    $canvas itemconfigure $textitem($id) -text $text($id)
+}
+
+##########################################################################
+## width
+#
+# Set the width configuration option.
+#
+body ::tycho::LabelledOval::width {id canvas wd} {
+    $canvas itemconfigure $primary($id) -width $wd
+}
+
 
 ##########################################################################
 #### construct
