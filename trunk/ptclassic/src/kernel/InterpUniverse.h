@@ -35,7 +35,7 @@ private:
 	const char* targName;
 public:
         InterpUniverse (const char* name = "mainGalaxy") :
-		Runnable(0, KnownBlock::domain(),this), targName(0)
+		Runnable((Target*)0, KnownBlock::domain(),this), targName(0)
         { setBlock(name,NULL);}
         int newTarget(const char* newTargName = 0);
 	const char* targetName() const;
