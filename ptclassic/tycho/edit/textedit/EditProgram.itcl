@@ -82,6 +82,7 @@ body ::tycho::EditProgram::constructor {args} {
     
     $itk_component(formatMenu) add command \
 	    -label "Recolorize" \
+	    -accelerator "S-C-l" \
 	    -underline 0 \
 	    -command "$itk_component(text) parse"
     
