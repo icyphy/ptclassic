@@ -451,7 +451,7 @@ int Resource :: canAccessResource(DERCEvent* newEvent) {
     
     //newPriority > oldPriority ?
     if (getDERCStar(newEvent)->priority > topCell->priority) {
-        printf("preempting!!\n");
+        //printf("preempting!!\n");
         return 1;
     } else {
         return 0;
