@@ -62,6 +62,8 @@ extern RAW_PTR malloc ARGS((size_t));
 
 #include <sys/param.h>
 
+/* All of this stuff should go to compat.h */
+
 #ifdef PTHPPA
 #ifndef PTHPUX10
 /* gcc-2.7.2 seems not to require this on the hppa anymore*/
@@ -69,7 +71,7 @@ extern RAW_PTR malloc ARGS((size_t));
 #endif /* PTHPUX10 */
 #define getwd(foo) getcwd(foo,MAXPATHLEN-1)
 #else /* PTHPPA */
-#ifndef PTALPHA 
+#if !defined(PTALPHA) && !defined(PTLINUX)
 extern char *getwd ARGS((char *));
 #endif /* PTALPHA */
 #endif /* PTHPPA */
