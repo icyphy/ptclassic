@@ -48,11 +48,13 @@ TCL_SRCS = \
 	tychoMakeClassDAG.tcl
 
 ITCL_SRCS = \
+	AbstractGraph.itcl \
 	ButtonBox.itcl \
 	CircularList.itcl \
 	ColorBrowser.itcl \
 	ColorManager.itcl \
 	Dialog.itcl \
+	Digraph.itcl \
 	Displayer.itcl \
 	DirectedAcyclicGraph.itcl \
 	Edit.itcl \
@@ -75,6 +77,7 @@ ITCL_SRCS = \
 	MenuBar.itcl \
 	MenuSupport.itcl \
 	Message.itcl \
+	Model.itcl \
 	Object.itcl \
 	Parameters.itcl \
 	Preferences.itcl \
