@@ -281,3 +281,7 @@ all: makefile $(LIB) $(PIGI) $(PIGI).ptiny $(PIGI).ptrim
 
 # Build as many as 12 binaries
 everything: $(REALCLEAN_STUFF)
+
+# Print the names of all the binaries that can be produced
+echo_every_binary:
+	@echo $(EVERY_BINARY)
