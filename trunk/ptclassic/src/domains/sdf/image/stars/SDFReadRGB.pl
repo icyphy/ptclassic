@@ -12,20 +12,21 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location	{ SDF image library }
 	desc {
-Read a PPM-format image from a file and
+Read an image in Portable Pixmap (PPM) format from a file and
 separate the colors into three different images\(em
 a red, green, and blue image.
 Each image is of type GrayImage.
 
 If present, the character '#' in the 'fileName' state is replaced with
-the frame number to be read next. For example, if the 'frameId' state is
-set to 2 and if the 'fileName' state is 'dir.#/pic#' then the files that
+the frame number to be read next.
+For example, if the 'frameId' state is set to 2 and
+if the 'fileName' state is 'dir.#/pic#', then the files that
 are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 	}
 	explanation {
 .Id "image reading"
 .Ir "PPM image format"
-.Ir "image format, PPM"
+.Ir "image format, portable pixmap (PPM)"
 }
 
 	ccinclude { "GrayImage.h", <std.h>, <stdio.h>, "Error.h" }

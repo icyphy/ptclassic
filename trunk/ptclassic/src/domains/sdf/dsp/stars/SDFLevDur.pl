@@ -3,9 +3,10 @@ defstar {
 	domain {SDF}
 	desc {
 This star uses the Levinson-Durbin algorithm to compute the linear predictor
-coefficients of a random process, given its autocorrelation function as an input.
-These  coefficients are produced both in autoregressive
-form (on the "lp" output) and in lattice filter form (on the "refl" output).
+coefficients of a random process, given its autocorrelation function as an
+input.
+These coefficients are produced both in autoregressive form
+(on the "lp" output) and in lattice filter form (on the "refl" output).
 The "errPower" output is the power of the prediction error as a function
 of the predictor order.
 	}
@@ -79,7 +80,7 @@ coefficients in the statistics literature.
 .UH REFERENCES
 .ip [1]
 J. Makhoul, "Linear Prediction: A Tutorial Review",
-\fIProc. IEEE\fR, Vol. 63, pp. 561-580, Apr. 1975.
+\fIProc. IEEE\fR, vol. 63, pp. 561-580, Apr. 1975.
 .ip [2]
 S. M. Kay, \fIModern Spectral Estimation: Theory & Application\fR,
 Prentice-Hall, Englewood Cliffs, NJ, 1988.
