@@ -68,6 +68,9 @@ public:
 	DEPortHole();
 	~DEPortHole();
 
+	// class identification
+	int isA(const char*) const;
+
 	// The initialize function is redefined to set DE-specific members.
 	void initialize();
 

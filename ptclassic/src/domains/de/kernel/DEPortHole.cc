@@ -247,3 +247,6 @@ int MultiInDEPort :: removePort(PortHole * del_port_p) {
 int MultiOutDEPort :: removePort(PortHole * del_port_p) {
       return ports.remove(del_port_p);
 }
+
+// isA
+ISA_FUNC(DEPortHole,PortHole);
