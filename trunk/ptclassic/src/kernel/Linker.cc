@@ -354,7 +354,8 @@ static void cleanupSharedObjects(int linkSeqNum)
 }
 
 #else // USE_DLOPEN
-static char *Linker::generateSharedObject( char* objName, int maxsize)
+static char *
+Linker::generateSharedObject(int argc, char **argv, char* objName, int maxsize)
 {
 }
 #endif
@@ -505,7 +506,7 @@ int Linker::multiLink (int argc, char** argv) {
 	// if a Block was dynamically linked in, or if it was compiled-in.
 	if (!perm) activeFlag = TRUE;	
 				// Call with tname, not objName
-	int nCalls = invokeConstructors(tname, (void *)NULL;
+	int nCalls = invokeConstructors(tname, (void *)NULL);
 #endif //USE_DLOPEN
 
 
