@@ -618,8 +618,9 @@ ifdef ATM
 endif
 
 ifdef CEPHESLIB
-	LIBS += -lcephes
-	LIBFILES += $(LIBDIR)/libcephes.$(LIBSUFFIX)
+	CUSTOM_DIRS += $(CROOT)/src/utils/libptdsp
+	LIBS += -lptdsp
+	LIBFILES += $(LIBDIR)/libptdsp.$(LIBSUFFIX)
 endif
 
 ifdef BDFLIB
