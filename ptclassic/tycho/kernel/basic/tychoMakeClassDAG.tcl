@@ -110,6 +110,7 @@ proc tychoStandardDAG {} {
             [file join slate kernel ] \
             [file join slate pictures ] \
             [file join slate interactors ] \
+            [file join lib tydoc ] \
     ]
 
     foreach dir $dirs {
