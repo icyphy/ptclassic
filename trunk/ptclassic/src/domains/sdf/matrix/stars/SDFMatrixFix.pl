@@ -55,9 +55,9 @@ Precision of all entries in the matrix.
 
     // collect inputs and put into the matrix
 
-    FixMatrix *matrix = new FixMatrix(int(numRows), int(numCols),
-                                      length, intbits, FixMatrixContents);
-    output%0 << *matrix;
+    FixMatrix& matrix = *(new FixMatrix(int(numRows), int(numCols),
+                                        length, intbits, FixMatrixContents));
+    output%0 << matrix;
   }
 }
 

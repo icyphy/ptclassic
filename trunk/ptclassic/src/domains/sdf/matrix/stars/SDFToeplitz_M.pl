@@ -34,9 +34,6 @@ among others.
 	type	{ FLOAT_MATRIX_ENV }
 	desc	{ The data matrix X. }
     }
-    protected	{
-        FloatMatrix *X;
-    }
     setup {
 	input.setSDFParams(int(numRows)+int(numCols)-1);
     }
@@ -44,16 +41,16 @@ among others.
     go {
         int i,j,k;
         // collect inputs and put into the matrix
-        LOG_NEW; X = new FloatMatrix(int(numRows),int(numCols));
+        FloatMatrix& X = *(new FloatMatrix(int(numRows),int(numCols)));
 
 	for(i = 0; i < int(numRows); i++) {
             k = int(numCols) - i - 1;
 	    for(j = 0; j < int(numCols); j++,k++)
-		(*X)[i][j] = input%k;
+		X[i][j] = input%k;
         }
 
 	// Output X
-        output%0 << *X;
+        output%0 << X;
     }		
 }
 

@@ -36,9 +36,9 @@ using the first N values from the array.
   ccinclude { "Matrix.h" } 
   go {
     // collect inputs and put into the matrix
-    FloatMatrix *matrix = new FloatMatrix(int(numRows),int(numCols),
-                                          FloatMatrixContents);
-    output%0 << *matrix;
+    FloatMatrix& matrix = *(new FloatMatrix(int(numRows),int(numCols),
+                                            FloatMatrixContents));
+    output%0 << matrix;
   }
 }
 

@@ -36,9 +36,9 @@ using the first N values from the array.
   ccinclude { "Matrix.h" } 
   go {
     // collect inputs and put into the matrix
-    IntMatrix *matrix = new IntMatrix(int(numRows),int(numCols),
-                                      IntMatrixContents);
-    output%0 << *matrix;
+    IntMatrix& matrix = *(new IntMatrix(int(numRows),int(numCols),
+                                        IntMatrixContents));
+    output%0 << matrix;
   }
 }
 
