@@ -85,12 +85,6 @@ proc pigilib_init_env {} {
 
 pigilib_init_env
 
-# Change color scheme to bisque
-tk_bisque
-# FIXME: If we comment out the tk_bisque line above, then pigi 
-# fails to start.
-#option add Pigi*highlightBackground #ffe4c4
-
 # Load the help system for ptcl
 source $ptolemy/lib/tcl/ptcl_help.tcl
 
