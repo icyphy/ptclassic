@@ -61,9 +61,9 @@ extern char **environ; /* An array of pointers to strings containing the    */
 extern "C" {
 int setReleaseHandlers(void);
 int setDebugHandlers(void);
-static void signalHandlerRelease(int);
-static void signalHandlerDebug(int);
-void abortHandling(int at = 0);
+void signalHandlerRelease(int);
+void signalHandlerDebug(int);
+void abortHandling(int at);
 }
 
 /****************************************************************************/
