@@ -32,13 +32,13 @@ $Id$
 There are two representations of a design: the Oct one and the internal
 kernel one.  The compile routines keep these representations
 consistent.  There are two lists: traverse and xfered.  The traverse
-list is used to traverse the heirarchical design in Oct which can be
+list is used to traverse the hierarchical design in Oct which can be
 represented as a directed acyclic graph (DAG), with each node in the
 DAG corresponding to a facet in the design.  (traverse prevents
 visiting a node twice.)
 
 The xfered list keeps track of which nodes in the DAG have been
-transfered to the kernel so far.  Change lists in each facet keep track of
+transferred to the kernel so far.  Change lists in each facet keep track of
 any changes.  A facet (node in the DAG) is recompiled if it is not on
 the xfered list or if it has been changed since the last transfer.
 
@@ -71,17 +71,20 @@ extern void KcFlushLog();
 extern void KcSetDesc();
 static boolean RunAll();
 
-#define TERMS_MAX 50  /* maximum number of actual terms allowed on a net */
+/* maximum number of actual terms allowed on a net */
+#define TERMS_MAX 50
 
 /* Scratch string for constructing error messages */
 static char msg[1024];
 
-static DupSheet traverse;  /* used to traverse design heriarchy which is a DAG */
-    /* DAG = directed acyclic graph */
-static DupSheet xfered;  /* list of galaxies that have been transfered to the kernel */
+/* used to traverse design hierarchy which is a DAG (directed acyclic graph) */
+static DupSheet traverse;
+
+/* list of galaxies that have been transferred to the kernel */
+static DupSheet xfered; 
 
 
-/***** Begin Ess routines (Error Select Set) */
+/***** Begin Error Select Set (Ess) routines */
 /* 8/20/89
 Caveat: Ess routines create a select set in only one facet, so all
 objects added to the select set must be in the same facet!
@@ -164,21 +167,18 @@ octObject *facetPtr;
 	    if (!MyOpenMaster(&galFacet, &inst, "contents", "r")
 	      || !CompileGal(&galFacet)) {
 		octFreeGenerator(&genInst);
-		FreeOctMembers(&inst);
-		FreeOctMembers(&galFacet);
-		return FALSE;
+		return (FALSE);
 	    }
 	} else {
 	    /* assume inst is a star... */
 	    if (!AutoLoadCk(&inst)) {
 		EssAddObj(&inst);
 		octFreeGenerator(&genInst);
-		FreeOctMembers(&inst);
 		return (FALSE);
 	    }
 	}
+        FreeOctMembers(&inst);
     }
-    FreeOctMembers(&inst);
     octFreeGenerator(&genInst);
     return(TRUE);
 }
@@ -206,9 +206,9 @@ octObject *facetPtr;
 	    }
 	}
 	(void) octDetach(&net, &prop);
+        FreeOctMembers(&net);
     }
     octFreeGenerator(&netGen);
-    FreeOctMembers(&net);
 }
 
 /* ProcessMarker  5/28/88
@@ -306,9 +306,9 @@ octObject *facetPtr;
     char *name, *parentname;
     ParamListType pList;
     char *akoName, *oldInstName;
-    char instanceHandle[16];
-    char facetHandle[16];
-    
+    char instanceHandle[POCT_FACET_HANDLE_LEN];
+    char facetHandle[POCT_FACET_HANDLE_LEN];
+
     DetachDelaysFromNets(facetPtr);
     (void) octInitGenContentsSpecial(facetPtr, OCT_INSTANCE_MASK, &genInst);
     while (octGenerate(&genInst, &inst) == OCT_OK) {
@@ -357,8 +357,8 @@ octObject *facetPtr;
 		return FALSE;
 	    }
 	    /* Process the pragmas list, if any */
-	    ptkOctObj2Handle(&inst,instanceHandle);
-	    ptkOctObj2Handle(facetPtr,facetHandle);
+	    ptkOctObj2Handle(&inst, instanceHandle);
+	    ptkOctObj2Handle(facetPtr, facetHandle);
 	    parentname = BaseName(facetPtr->contents.facet.cell);
 	    Tcl_VarEval(ptkInterp, "ptkProcessPragmas ",
 			facetHandle, " ",
@@ -542,7 +542,7 @@ char *nodename;
 	return (FALSE);
     }
     ERR_IF1(!KcNodeConnect(inst.contents.instance.name,
-			       termPtr->contents.term.name, nodename));
+			   termPtr->contents.term.name, nodename));
     FreeOctMembers(&inst);
     return (TRUE);
 }
@@ -661,15 +661,18 @@ octObject *facetPtr;
 	    }
 	    free(nodename);
 	}
+	FreeOctMembers(&net);
     }
     if (errMsg) {
 	if (*errMsg) ErrAdd (errMsg);
 	EssAddObj(&net);
     }
     octFreeGenerator(&netGen);
+
     /* free up the terms */
     for (i = 0; i < inN; i++) FreeOctMembers(&in[i]);
     for (i = 0; i < outN; i++) FreeOctMembers(&out[i]);
+
     return errMsg ? FALSE : TRUE;
 }
 
@@ -853,7 +856,7 @@ octObject *galFacetPtr;
     if (DupSheetIsDup2(&traverse, name, oldDomain)) {
       /*
        * Detect recursion here by checking to see whether the
-       * objct is on the knownlist of the oldDomain.
+       * object is on the knownlist of the oldDomain.
        */
       if (!KcIsKnown(name)) {
 	PrintErr("Sorry, graphical recursion is not supported at this time");
@@ -1079,7 +1082,7 @@ long userOptionWord;
 {
     octObject facet = {OCT_UNDEFINED_OBJECT};
     char* name;
-    char octHandle[16];
+    char octHandle[POCT_FACET_HANDLE_LEN];
 
     ViInit("run-all-demos");
     ErrClear();
@@ -1114,12 +1117,14 @@ RunAll(facetPtr)
 octObject *facetPtr;
 {
     octGenerator genInst;
-    octObject inst = {OCT_UNDEFINED_OBJECT};
+    octObject inst = {OCT_UNDEFINED_OBJECT},
+	      univFacet = {OCT_UNDEFINED_OBJECT};
+
     octInitGenContentsSpecial(facetPtr, OCT_INSTANCE_MASK, &genInst);
     while (octGenerate(&genInst, &inst) == OCT_OK) {
-	octObject univFacet = {OCT_UNDEFINED_OBJECT};
+	univFacet.type = OCT_UNDEFINED_OBJECT;
 
-	if (!MyOpenMaster(&univFacet,&inst, "contents", "r")) {
+	if (!MyOpenMaster(&univFacet, &inst, "contents", "r")) {
 	    octFreeGenerator(&genInst);
 	    PrintErr(octErrorString());
 	    return FALSE;

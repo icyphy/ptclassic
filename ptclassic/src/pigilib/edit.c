@@ -119,7 +119,7 @@ lsList cmdList;
 long userOptionWord;
 {
     octObject facet = {OCT_UNDEFINED_OBJECT};
-    char facetHandle[16]; 
+    char facetHandle[POCT_FACET_HANDLE_LEN]; 
 
     ViInit("find-name");
     ErrClear();
@@ -182,7 +182,8 @@ long userOptionWord;
     octObject facet = {OCT_UNDEFINED_OBJECT},
 	      inst = {OCT_UNDEFINED_OBJECT};
     vemStatus status;
-    char facetHandle[16], instanceHandle[16];
+    char facetHandle[POCT_FACET_HANDLE_LEN],
+	 instanceHandle[POCT_FACET_HANDLE_LEN];
 
     ViInit("edit-params");
     ErrClear();
@@ -229,7 +230,8 @@ long userOptionWord;
     octObject facet = {OCT_UNDEFINED_OBJECT},
 	      inst = {OCT_UNDEFINED_OBJECT};
     vemStatus status;
-    char facetHandle[16], instanceHandle[16];
+    char facetHandle[POCT_FACET_HANDLE_LEN],
+	 instanceHandle[POCT_FACET_HANDLE_LEN];
 
     ViInit("edit-pragmas");
     ErrClear();
@@ -387,7 +389,7 @@ long userOptionWord;
     octObject facet = {OCT_UNDEFINED_OBJECT},
 	      obj = {OCT_UNDEFINED_OBJECT};
     vemStatus status;
-    char facetHandle[16];
+    char facetHandle[POCT_FACET_HANDLE_LEN];
 
     ViInit("edit-comment");
     ErrClear();
@@ -429,7 +431,7 @@ lsList cmdList;
 long userOptionWord;
 {
     octObject facet = {OCT_UNDEFINED_OBJECT};
-    char facetHandle[16];
+    char facetHandle[POCT_FACET_HANDLE_LEN];
 
     ViInit("edit-domain");
     ErrClear();
@@ -475,7 +477,7 @@ lsList cmdList;
 long userOptionWord;
 {
     octObject facet = {OCT_UNDEFINED_OBJECT};
-    char facetHandle[16];
+    char facetHandle[POCT_FACET_HANDLE_LEN];
 
     ViInit("edit-target");
     ErrClear();
@@ -485,7 +487,7 @@ long userOptionWord;
         PrintErr(octErrorString());
         ViDone();
     }
-    ptkOctObj2Handle(&facet,facetHandle);
+    ptkOctObj2Handle(&facet, facetHandle);
 
     TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkChooseOne ", 
                    "[ptkGetTargetNames ", facetHandle, "]  ", 
