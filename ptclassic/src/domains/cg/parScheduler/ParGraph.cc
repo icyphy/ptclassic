@@ -286,3 +286,13 @@ ParGraph :: ~ParGraph() {
 		LOG_DEL; delete p;
 	}
 }
+
+void ParGraph::replaceCopyStar (DataFlowStar& newStar, DataFlowStar& oldStar) {
+    EGIter nextNode(*this);
+    ParNode* node;
+    while ((node = (ParNode*)nextNode++) != NULL) {
+	if (node->getCopyStar() == &oldStar)
+	    node->replaceCopyStar(newStar);
+    }
+}
+    
