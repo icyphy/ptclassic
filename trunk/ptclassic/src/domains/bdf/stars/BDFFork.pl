@@ -29,7 +29,7 @@ interface, or when the "nodeconnect" command is used in the interpreter.
 		name{output}
 		type{= input}
 	}
-	start {
+	setup {
 		MPHIter nextp(output);
 		BDFPortHole* p;
 		while ((p = (BDFPortHole*)nextp++) != 0)
