@@ -24,8 +24,7 @@ if {![winfo exists $s]} {
         wm iconname $win "Text Display"
 
         frame $win.f
-        message $win.msg -font -Adobe-times-medium-r-normal--*-180* -width 12c \
-	    -text $label
+        message $win.msg -width 12c -text $label
 
 	# The following flag is used if the waitBetweenOutputs parameter is set
 	global $starID
