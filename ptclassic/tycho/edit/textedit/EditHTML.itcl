@@ -32,29 +32,12 @@
 
 #######################################################################
 #### options
-# Define colors for the HTML context-sensitive editor. These are done
-# as options so that they can be overridden by the user. Other colors
-# that work reasonably well are: forestGreen, chocolate3, DarkOrange,
-# coral, OrangeRed, DeepPink, maroon, magenta, and DarkOrchid.
+# Define colors for the HTML context-sensitive editor. The HTML
+# editor uses its own preference set.
 #
-# FIXME: Unfortunately, itcl appears to require that all options
-# from the base class be repeated here with the new class name.
-# Otherwise, they are not recognized.
-option add *EditHTML.textWidth 80 widgetDefault
-option add *EditHTML.textHeight 40 widgetDefault
-option add *EditHTML.parenColor [ptkColor lightskyblue white] widgetDefault
-option add *EditHTML.targetColor [ptkColor lightskyblue white] widgetDefault
-option add *EditHTML.fillMaxLineLength 70 widgetDefault
-option add *EditHTML.textBackground \
-	[ptkColor antiqueWhite white] widgetDefault
-option add *EditHTML.textfont [.tychoFonts defaultFont fixed]
-option add *EditHTML.relief raised widgetDefault
-option add *EditHTML.selectColor [ptkColor yellow white] widgetDefault
-
-# new options
-option add *EditHTML.commandColor [ptkColor maroon black] widgetDefault
-option add *EditHTML.pointerColor [ptkColor blue black] widgetDefault
-option add *EditHTML.destColor [ptkColor forestGreen black] widgetDefault
+preference add textedit html.commandColor [ptkColor maroon black]
+preference add textedit html.pointerColor [ptkColor blue black]
+preference add textedit html.destColor    [ptkColor forestGreen black]
 
 
 #######################################################################
@@ -267,7 +250,7 @@ body ::tycho::EditHTML::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged commands
     $text tag configure command -foreground \
-	    [option get $itk_component(hull) commandColor EditHTML]
+	    [preference get textedit html.commandColor]
 
     # Scan the text for hypertext pointers.
     set upto $start
@@ -283,7 +266,7 @@ body ::tycho::EditHTML::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged commands
     $text tag configure pointer -foreground \
-	    [option get $itk_component(hull) pointerColor EditHTML]
+	    [preference get textedit html.pointerColor]
 
     # for testing
     # $text tag configure text -foreground red
@@ -304,7 +287,7 @@ body ::tycho::EditHTML::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged commands
     $text tag configure dest -foreground \
-	    [option get $itk_component(hull) destColor EditHTML]
+	    [preference get textedit html.destColor]
 }
 
 #####################################################################
@@ -355,8 +338,7 @@ body ::tycho::EditHTML::fixLink {link start end err} {
     # as normal.
     $itk_component(text) tag raise sel badlink
     $itk_component(text) tag configure badlink \
-	    -background [option get $itk_component(hull) \
-	    targetColor EditHTML]
+	    -background [preference get textedit html.targetColor]
 
     set replacement [::tycho::DialogWindow::newModal EntryQuery \
 	    [::tycho::autoName .entry] \

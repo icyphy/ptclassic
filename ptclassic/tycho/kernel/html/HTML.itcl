@@ -80,22 +80,32 @@ if {[info commands HMinit_win] == {}} {
 #######################################################################
 #### options
 #
-option add *HTML.fontSize medium widgetDefault
-option add *HTML.textWidth 100 widgetDefault
-option add *HTML.textHeight 40 widgetDefault
+# option add *HTML.fontSize medium widgetDefault
+# option add *HTML.textWidth 100 widgetDefault
+# option add *HTML.textHeight 40 widgetDefault
 
-option add *HTML.textBackground \
-	[ptkColor linen white] widgetDefault
-option add *HTML.textForeground \
-	[ptkColor black black] widgetDefault
+# option add *HTML.textBackground \
+# 	[ptkColor linen white] widgetDefault
+# option add *HTML.textForeground \
+# 	[ptkColor black black] widgetDefault
 
-option add *HTML.relief raised widgetDefault
-option add *HTML.targetColor [ptkColor lightskyblue white] widgetDefault
-option add *HTML.findMatchColor [ptkColor forestGreen black] widgetDefault
-option add *HTML.selectColor [ptkColor yellow white] widgetDefault
+# option add *HTML.relief raised widgetDefault
+# option add *HTML.targetColor [ptkColor lightskyblue white] widgetDefault
+# option add *HTML.findMatchColor [ptkColor forestGreen black] widgetDefault
+# option add *HTML.selectColor [ptkColor yellow white] widgetDefault
+
+# # Define the color for embedded Tcl code in the HTML document.
+# option add *HTML.tclColor [ptkColor purple black] widgetDefault
+
+preference add htmlview fontSize medium
+preference add htmlview textWidth 100
+preference add htmlview textBackground [ptkColor linen white]
+preference add htmlview targetColor [ptkColor lightskyblue white]
+preference add htmlview findMatchColor [ptkColor forestGreen white]
+preference add htmlview selectColor [ptkColor yellow white]
 
 # Define the color for embedded Tcl code in the HTML document.
-option add *HTML.tclColor [ptkColor purple black] widgetDefault
+preference add htmlview tclColor [ptkColor purple black]
 
 #######################################################################
 #### HTML
@@ -273,6 +283,15 @@ body ::tycho::HTML::constructor {args} {
 
     eval itk_initialize $args
 
+    # Subscribe to the preference set
+    preference subscribe htmlview $this \
+	    -textfont textfont \
+	    -textforeground textForeground \
+	    -textbackground textBackground \
+	    -relief textrelief \
+	    -textwidth textWidth \
+	    -textheight textHeight
+
     # Setup Special menu
     menubar addMenu Special -underline 0
 
@@ -303,7 +322,7 @@ body ::tycho::HTML::constructor {args} {
         }
     }
 
-    set sizeName($this) [option get $itk_component(hull) fontSize HTML]
+    set sizeName($this) [preference get htmlview fontSize]
     configure -size $sizes($sizeName($this))
 
     # Modify the menu commands appropriately.
@@ -594,8 +613,7 @@ body ::tycho::HTML::seePoint {point} {
     if {$sidx != {} && $eidx != {}} {
 	$text tag add hypertarget $sidx $eidx
 	$text tag configure hypertarget \
-		-background [option get $itk_component(hull) \
-		targetColor HTML]
+		-background [preference get htmlview targetColor]
 	$text tag configure hypertarget \
 		-foreground black
         # A delay seems to be needed here to ensure that the target is seen.
@@ -1187,7 +1205,7 @@ proc HMtag_tcl {win param text} {
     set HTMLcommand [winfo command $HTML]
 
     # Set the color
-    set color [option get $HTML tclColor HTML]
+    set color [preference get htmlview tclColor]
     $win tag configure tcl -foreground $color
     $win tag bind tcl <Double-Button-1> \
 	    "uplevel #0 $HTMLcommand execTcl; break"
@@ -1308,7 +1326,7 @@ proc HMwent_to {win where {count 0} {color {}}} {
     }
 
     if {$color == {}} {
-        set color [option get [winfo megawidget $win] targetColor HTML]
+        set color [preference get htmlview targetColor]
     }
 
     # Temporarily change the background color

@@ -30,35 +30,6 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-#######################################################################
-# Define colors for the itcl context-sensitive editor. These are done
-# as options so that they can be overridden by the user. Other colors
-# that work reasonably well are: forestGreen, chocolate3, DarkOrange,
-# coral, OrangeRed, DeepPink, maroon, magenta, and DarkOrchid.
-# NOTE: Unfortunately, itcl appears to require that all options
-# from the base class be repeated here with the new class name.
-# Otherwise, they are not recognized.
-option add *EditItcl.commentColor [ptkColor firebrick black] widgetDefault
-option add *EditItcl.procColor [ptkColor blue black] widgetDefault
-option add *EditItcl.fixmeColor [ptkColor red black] widgetDefault
-option add *EditItcl.parenColor [ptkColor lightskyblue white] widgetDefault
-option add *EditItcl.targetColor [ptkColor lightskyblue white] widgetDefault
-option add *EditItcl.selectColor [ptkColor yellow white] widgetDefault
-option add *EditItcl.textWidth 80 widgetDefault
-option add *EditItcl.textHeight 40 widgetDefault
-option add *EditItcl.fillMaxLineLength 70 widgetDefault
-option add *EditItcl.textBackground \
-	[ptkColor antiqueWhite white] widgetDefault
-option add *EditItcl.textfont [.tychoFonts defaultFont fixed]
-option add *EditItcl.relief raised widgetDefault
-option add *EditItcl.stringColor [ptkColor gray50 black] widgetDefault
-
-# New options for this class:
-
-option add *EditItcl.classColor [ptkColor blue black] startupFile
-option add *EditItcl.methodColor [ptkColor purple black] startupFile
-option add *EditItcl.variableColor [ptkColor forestGreen black] startupFile
-option add *EditItcl.optionColor [ptkColor DeepPink black] startupFile
 
 #######################################################################
 #### EditItcl
@@ -435,11 +406,11 @@ body ::tycho::EditItcl::parseNow {start stop} {
     # Set the visual characteristics of the tagged text
     set hull $itk_component(hull)
     $text tag configure classname -foreground \
-	    [option get $hull classColor EditItcl]
+	    [preference get textedit classColor]
     $text tag configure methodname -foreground \
-	    [option get $hull methodColor EditItcl]
+	    [preference get textedit methodColor]
     $text tag configure varname -foreground \
-	    [option get $hull variableColor EditItcl]
+	    [preference get textedit variableColor]
     $text tag configure optionname -foreground \
-	    [option get $hull optionColor EditItcl]
+	    [preference get textedit optionColor]
 }

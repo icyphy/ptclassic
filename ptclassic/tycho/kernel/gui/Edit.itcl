@@ -48,20 +48,15 @@ catch {delete class ::tycho::Edit}
 #######################################################################
 # options
 #
-option add *Edit.textWidth 80 widgetDefault
-option add *Edit.textHeight 40 widgetDefault
-option add *Edit.parenColor [ptkColor lightskyblue white] widgetDefault
-option add *Edit.targetColor [ptkColor lightskyblue white] widgetDefault
-option add *Edit.selectColor [ptkColor yellow white] widgetDefault
-option add *Edit.textForeground \
-	[ptkColor black black] widgetDefault
-option add *Edit.textBackground \
-	[ptkColor antiqueWhite white] widgetDefault
-option add *Edit.textfont [.tychoFonts defaultFont fixed]
-option add *Edit.relief raised widgetDefault
+preference add textedit textWidth  80
+preference add textedit textHeight 40
+preference add textedit textrelief "raised"
+preference add textedit parenColor  [ptkColor lightskyblue white]
+preference add textedit targetColor [ptkColor lightskyblue white] 
+preference add textedit selectColor [ptkColor yellow white]
 
 # The maximum length of the lines for the purposes of filling text.
-option add *Edit.fillMaxLineLength 70 widgetDefault
+preference add textedit fillMaxLineLength 70
 
 #######################################################################
 #### Edit
@@ -390,13 +385,12 @@ body ::tycho::Edit::constructor {args} {
     } {
 	keep -background -highlightbackground \
 		-highlightcolor -selectforeground -cursor \
-		-insertbackground -foreground -relief
+		-insertbackground -relief
         rename -width -textwidth textWidth TextWidth
         rename -height -textheight textHeight TextHeight
 	rename -font -textfont textfont TextFont
 	rename -foreground -textforeground textForeground TextForeground
 	rename -background -textbackground textBackground TextBackground
-
     }
     pack $itk_component(text) -side left -expand yes -fill both
 
@@ -655,12 +649,20 @@ body ::tycho::Edit::constructor {args} {
 
     eval itk_initialize $args
 
+    # Subscribe to the preference set
+    preference subscribe textedit $this \
+	    -textfont textfont \
+	    -textforeground textForeground \
+	    -textbackground textBackground \
+	    -relief textrelief \
+	    -textwidth textWidth \
+	    -textheight textHeight
+
     $itk_component(text) tag configure sel \
-	    -background [option get $itk_component(hull) \
-	    selectColor Edit]
+	    -background [preference get textedit selectColor]
 
     set maxLineLength \
-            [option get $itk_component(hull) fillMaxLineLength Edit]
+            [preference get textedit fillMaxLineLength]
 
     # Create and configure the context-sensitive popup menu
     # FIXME: Is this the right place for this code?
@@ -745,8 +747,7 @@ body ::tycho::Edit::closeParen {closeparen} {
     if {$start != ""} {
 	$itk_component(text) tag add paren $start $end
 	$itk_component(text) tag configure paren \
-		-background [option get $itk_component(hull) \
-		parenColor Edit]
+		-background [preference get textedit parenColor]
 	after 1000 "catch {$itk_component(text) tag delete paren}"
     }
 }
@@ -1488,7 +1489,7 @@ body ::tycho::Edit::paste {} {
 body ::tycho::Edit::queryFillColumn {} {
     set maxLineLength \
             [::tycho::queryinfo "Right column for text fill:" \
-            [option get $itk_component(hull) fillMaxLineLength Edit] \
+            [preference get textedit fillMaxLineLength] \
             15]
 }
 
@@ -1653,7 +1654,7 @@ body ::tycho::Edit::seePoint {point} {
     if {$sidx != {} && $eidx != {}} {
 	$text tag add hypertarget $sidx $eidx
 	$text tag configure hypertarget -background \
-                [option get $itk_component(hull) targetColor Edit]
+                [preference get textedit targetColor]
 	$text tag configure hypertarget -foreground black
 
         # The moving of the insertion index is also delayed in case the

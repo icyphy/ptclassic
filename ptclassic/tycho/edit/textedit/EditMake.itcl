@@ -35,31 +35,10 @@
 #######################################################################
 #### options
 #
-# NOTE: Unfortunately, itcl appears to require that all options
-# from the base class be repeated here with the new class name.
-# Otherwise, they are not recognized.
-option add *EditMake.textWidth 80 widgetDefault
-option add *EditMake.textHeight 40 widgetDefault
-option add *EditMake.parenColor [ptkColor lightskyblue white] widgetDefault
-option add *EditMake.targetColor [ptkColor lightskyblue white] widgetDefault
-option add *EditMake.fillMaxLineLength 70 widgetDefault
-option add *EditMake.textBackground \
-	[ptkColor antiqueWhite white] widgetDefault
-option add *EditMake.textfont [.tychoFonts defaultFont fixed]
-option add *EditMake.relief raised widgetDefault
-option add *EditMake.selectColor [ptkColor yellow white] widgetDefault
-option add *EditMake.commentColor [ptkColor firebrick black] \
-	widgetDefault
-option add *EditMake.fixmeColor [ptkColor red black] widgetDefault
-option add *EditMake.stringColor [ptkColor gray50 black] widgetDefault
-
-# new options
-
-option add *EditMake.includeColor [ptkColor blue black] widgetDefault
-option add *EditMake.variableColor [ptkColor DeepPink black] \
-	widgetDefault
-option add *EditMake.ruleColor [ptkColor forestGreen black] widgetDefault
-option add *EditMake.refvarColor [ptkColor purple black] widgetDefault
+preference add textedit make.includeColor  [ptkColor blue black]
+preference add textedit make.variableColor [ptkColor DeepPink black]
+preference add textedit make.ruleColor     [ptkColor forestGreen black]
+preference add textedit make.refvarColor   [ptkColor purple black]
 
 #######################################################################
 #### EditMake
@@ -190,13 +169,13 @@ body ::tycho::EditMake::parseNow {start stop} {
     
     # Set the visual characteristics of the tagged text
     $text tag configure rule -foreground \
-	    [option get $itk_component(hull) ruleColor EditMake]
+	    [preference get textedit make.ruleColor]
     $text tag configure include -foreground \
-	    [option get $itk_component(hull) includeColor EditMake]
+	    [preference get textedit make.includeColor]
     $text tag configure variable -foreground \
-	    [option get $itk_component(hull) variableColor EditMake]
+	    [preference get textedit make.variableColor]
     $text tag configure refvar -foreground \
-	    [option get $itk_component(hull) refvarColor EditMake]
+	    [preference get textedit make.refvarColor]
 
     $text tag lower rule comment
     $text tag lower include comment
