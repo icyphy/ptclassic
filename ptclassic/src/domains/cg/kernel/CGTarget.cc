@@ -105,9 +105,12 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 	    "Enable loading of code."));
 	addState(runFlag.setState("run?", this, "YES",
 	    "Enable running of code."));
-	addState(writeScheduleFlag.setState
-		 ("write schedule?", this,"NO",
-		  "Write the resultant schedule to a file."));
+	addState(writeScheduleFlag.setState("write schedule?", this,"NO",
+	    "Write the resultant schedule to a file."));
+        addState(reportMemoryUsage.setState("show memory usage?", this, "NO",
+	    "Report memory usage"));
+	addState(reportExecutionTime.setState("show run time?", this, "NO",
+	    "Report execution time"));
 
 	// Hide parameters by making them nonsettable.
 	// Derived Targets can re-enable those that are appropriate.
@@ -117,6 +120,8 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 	compileFlag.clearAttributes(A_SETTABLE);
 	loadFlag.clearAttributes(A_SETTABLE);
 	runFlag.clearAttributes(A_SETTABLE);
+	reportMemoryUsage.clearAttributes(A_SETTABLE);
+	reportExecutionTime.clearAttributes(A_SETTABLE);
 
 	// Initialize code streams and the code string list
 	procedures.initialize();
@@ -292,8 +297,12 @@ void CGTarget::wormPrepare() { }
 
 int CGTarget :: run() {
     // avoid core dumps from incorrect operation
-    if (!scheduler() || !galaxy()) {
-	Error::abortRun(*this, "Target has not been setup correctly");
+    if (!scheduler()) {
+	Error::abortRun(*this, "Target has no scheduler");
+	return FALSE;
+    }
+    if (!galaxy()) {
+	Error::abortRun(*this, "Target has no galaxy");
 	return FALSE;
     }
     // if a wormhole, we must do the transfer of data to and from the target.
