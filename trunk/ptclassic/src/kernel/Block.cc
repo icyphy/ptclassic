@@ -292,7 +292,7 @@ Block::stateWithName(const char* name) {
 int Block :: setState(const char* stateName, const char* expression) {
 	State* s = stateWithName(stateName);
 	if (!s) return FALSE;
-	s->setInitValue(expression);
+	s->setInitValue(hashstring(expression));
 	return TRUE;
 }
 
