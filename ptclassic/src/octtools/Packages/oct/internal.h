@@ -246,7 +246,13 @@ struct object_desc {
     octStatus (*write_func)();
 };
 
+#ifdef PT_ERRNO_IS_A_FUNCTION
+#include <errno.h>
+/* Under Cygnus Cygwin-32, errno is a function, not a variable. */
+#define sys_msg() (*__errno() < sys_nerr ? sys_errlist[*__errno()] : "Unknown error")
+#else
 #define sys_msg() (errno < sys_nerr ? sys_errlist[errno] : "Unknown error")
+#endif
 
 extern struct object_desc oct_object_descs[];
 
