@@ -138,6 +138,12 @@ X11_LIBSPEC =	-L/usr/X11/lib -lX11
 # Variable for the Ariel DSP56000 board--- only used on sun4.
 S56DIR =
 
+# Don't include Mathematica
+INCLUDE_MATHEMATICA = no
+
+# Don't include Matlab
+INCLUDE_MATLAB = no
+
 # Matlab architecture
 MATARCH = alpha
 
