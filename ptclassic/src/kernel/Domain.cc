@@ -83,8 +83,8 @@ Geodesic& Domain :: newGeo(int multi) {
 Star& Domain :: newWorm(Galaxy&,Target*)  {
 	// return *new XXXWormhole(innerGal,innerTarget);
 	Error::abortRun("No wormhole implemented for domain ",name());
-		// Following is a hack
-		LOG_NEW; return *(new Star);
+	// FIXME: Following is a hack and memory leak
+	LOG_NEW; return *(new Star);
 }
 
 // "fake" eventhorizon to use if there are none.
@@ -100,7 +100,7 @@ public:
 
 EventHorizon& Domain :: newFrom() {
 	Error::abortRun("No wormhole implemented for domain ",name());
-	// hack
+	// FIXME: Following is a hack and memory leak
 	LOG_NEW; return *new JunkHorizon;
 }
 
