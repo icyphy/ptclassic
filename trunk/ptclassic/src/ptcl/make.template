@@ -61,8 +61,9 @@ INCL = 		-I$(KERNDIR) -I$(ITCL_INCDIR) -I$(TCL_INCDIR) \
 
 # Sources: LIB_SRCS contains the files that make up libptcl.so.
 # NON_LIB_SRCS contains the files that do not go into libptcl.so.
-LIB_SRCS =	PTcl.cc ptclError.cc ptclGantt.cc ptclInvokeInterp.cc
-NON_LIB_SRCS =	ptclMain.cc ptclAppInit.cc
+LIB_SRCS =	PTcl.cc ptclInit.cc ptclError.cc ptclGantt.cc \
+		ptclInvokeInterp.cc
+NON_LIB_SRCS =	ptclAppInit.cc
 SRCS =		$(LIB_SRCS) $(NON_LIB_SRCS)
 
 # Header files
