@@ -375,7 +375,7 @@ where XXX is again the location of the domain source directory.
 In both cases, the syntax of the document source files is as follows:
 .(c
 	.\\\\\&" %\&W\&%	%\&G\&%
-	.NA "Name of galaxy or demo"
+	.NA "Name of demo universe"
 	.SD
 	Short descriptor
 	.SE
@@ -438,6 +438,38 @@ the
 star, and the name of the demo is not something like
 .c LMSdemo,
 so an explicit entry is advised.
+.pp
+For galaxies, additional entries are required to document the
+inputs, outputs, and states.
+The list of inputs is surrounded by the delimitters
+.(c
+	.IH
+	...
+	.PE
+.)c
+while the list of outputs is inside
+.(c
+	.OH
+	...
+	.PE
+.)c
+Each input or output is listed as follows
+.(c
+	.NE
+	\\\\fIname\\\\fR (type): descriptor
+.)c
+States are delimitted by
+.(c
+	.SH
+	...
+	.ET
+.)c
+with each entry reading
+.(c
+	.NE
+	\\\\fIname\\\\fR (type): descriptor
+	.DF "default value"
+.)c
 .pp
 A single star, galaxy, or demo document page can be printed
 using the command ``printpage filename''.
