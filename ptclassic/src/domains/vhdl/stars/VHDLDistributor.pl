@@ -39,20 +39,42 @@ limitation of liability, and disclaimer of warranty provisions.
 	go {
 	  StringList out;
 
-	  for (int i = output.numberPorts() -1 ; i >= 0 ; i--) {
-	    for (int j = int(blockSize)-1 ; j >= 0 ; j--) {
-	      out << "$ref(output#";
-	      out << i+1;
-	      out << ", ";
-	      out << -j;
-	      out << ") $assign(output) $ref(input, ";
-	      out << -(j+i*int(blockSize));
-	      out << ");\n";
+	  if (strcmp(input.resolvedType(), "COMPLEX") == 0) {
+	    for (int i = output.numberPorts() -1 ; i >= 0 ; i--) {
+	      for (int j = int(blockSize)-1 ; j >= 0 ; j--) {
+		out << "$refCx(output#";
+		out << i+1;
+		out << ", ";
+		out << -j;
+		out << ", real) $assign(output) $refCx(input, ";
+		out << -(j+i*int(blockSize));
+		out << ", real);\n";
+
+		out << "$refCx(output#";
+		out << i+1;
+		out << ", ";
+		out << -j;
+		out << ", imag) $assign(output) ";
+		out << double(0.0);
+		out << ";\n";
+	      }
+	    }
 	  }
+	  else {
+	    for (int i = output.numberPorts() -1 ; i >= 0 ; i--) {
+	      for (int j = int(blockSize)-1 ; j >= 0 ; j--) {
+		out << "$ref(output#";
+		out << i+1;
+		out << ", ";
+		out << -j;
+		out << ") $assign(output) $ref(input, ";
+		out << -(j+i*int(blockSize));
+		out << ");\n";
+	      }
+	    }
+	  }
+
+	  addCode(out);
+	  out.initialize();
 	}
-
-	addCode(out);
-	out.initialize();
-      }
 }
-
