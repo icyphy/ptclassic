@@ -21,7 +21,7 @@ places to go</A> </H2>
 <li> The only testing of this port was done under NT4.0,
 so Windows3.1 and Windows95 users may have other problems.
 
-<LI> Tycho0.3 does not handle spaces in pathnames very well.  Tycho
+<LI> Tycho0.3devel does not handle spaces in pathnames very well.  Tycho
 will work best if the distribution is installed in a directory that
 has a pathname that contains no spaces.
 
@@ -42,50 +42,23 @@ will be lost.
 
 <H2>Installing Tycho Under NT</H2>
 <OL>
+
 <LI> The Tycho home page at <A
 HREF="http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html"><CODE>http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html</CODE></A> has a
 link to the downloads page that contains Tycho sources and Itcl
 binaries for Windows.
 
-<li> Ptolemy II requires Tcl Blend, the Tcl/Java interface.  Because
-of a compatibility issue in Tcl Blend, to install Tcl Blend 1.0, you
-must install Tcl8.0 and then install Tcl8.0.3.
-
-
-
-
 <li> Uninstall Itcl2.2 before proceeding with the Itcl3.0 installation.
 
-<li> Download JDK1.1.x from
- <a href="http://www.javasoft.com"><CODE>www.javasoft.comm</CODE></a>
-and install it in <CODE>c:\jdk1.1.<I>x</I></CODE>
-Note that Tcl Blend will only work with the Sun JDK1.1 and later,
-it will not work with the Microsoft JDK.
-
-<li> Download Tcl8.0 from
-<a href="ftp://ftp.scriptics.com/pub/tcl/tcl8_0/tcl80p2.exe"><CODE>ftp://ftp.scriptics.com/pub/tcl/tcl8_0/tcl80p2.exe</CODE></a>.
-Install Tcl8.0 in <CODE>c:\Program Files\Tcl</CODE>
-
-<li> Remove the contents of <CODE>c:\Program Files\Tcl</CODE> so that
-we can install Tcl Blend 1.0 after installing Tcl 8.0.3.
-Note that you should remove the directory, not uninstall Tcl8.0.
-
- <br>Hopefully, a future release of Tcl Blend will fix this problem, in
-which case installing Tcl8.0 and removing the directory will not be
-necessary.
-
-
-<li> Tycho0.3 requires Itcl3.0/Tcl8.0.3/Tk8.0.3.
+<li> Tycho requires Itcl3.0.
 The Tcl Blast CD includes Itcl3.0.
 Eventually Itcl3.0 binaries will be available on
 <a href="http://www.tcltk.com/itcl"><CODE>http://www.tcltk.com/itcl</CODE></a>
+(Ptolemy group users can dowload the Tcl Blast binary from
+<a href="http://ptolemy.eecs.berkeley.edu/~cxh/sa/nt/dists/tcl/itcl3_0.exe"><CODE>itcl3_0.exe</CODE></a>)
 
-Download the Tcl Blast Windows binary and install it in 
+ <br>Download the Tcl Blast Windows binary and install it in 
 <CODE>C:\Program Files\Tcl</CODE>
-
-<li> Download Tcl Blend 1.0 from
-<a href="http://www.scriptics.com/software/java.html"><CODE>http://www.scriptics.com/software/java.html</CODE></a> and
-install it in <CODE>c:\Program Files\TclBlend1.0</CODE>
 
 <LI> There are two ways to start up Tycho:
 <DL>
@@ -122,18 +95,18 @@ In the <CODE>System Properties</CODE> window that comes up, select
 <CODE>Environment</CODE>.  There, you can add <CODE>TYCHO</CODE> as a
 User Variable.  Incidentally, this is where you set your path.
 
- <P> If your Tycho distribution is at <CODE>c:\tycho0.3</CODE>, then
+ <P> If your Tycho distribution is at <CODE>c:\tycho0.3devel</CODE>, then
 you need not set the <CODE>TYCHO</CODE> environment variable, it will
 be set for you, by the <CODE>tycho-windows</CODE> script.  If your
 distribution is elsewhere, then you must either set the
 <CODE>TYCHO</CODE> variable, or edit
-<CODE>tycho0.3/lib/windows/tycho-windows</CODE>.
+<CODE>tycho0.3devel/lib/windows/tycho-windows</CODE>.
 
-<LI> <CODE>tycho0.3/lib/windows/tycho-windows</CODE>
+<LI> <CODE>tycho0.3devel/lib/windows/tycho-windows</CODE>
 and <CODE>tycho.bat</CODE>
 first check the <CODE>TYCHO</CODE> variable, and if
 <CODE>TYCHO</CODE> is not set, then the script expects that the Tycho
-distribution will be at <CODE>c:\tycho0.3</CODE>.
+distribution will be at <CODE>c:\tycho0.3devel</CODE>.
 
 <LI> Associate the <CODE>itk</CODE> extension with 
 <CODE>C:\Program Files\Tcl\bin\wish80.exe</CODE>.
@@ -179,33 +152,24 @@ the variables in the <CODE>User Variables</CODE> section
 <MENU>
 <LI> Add the following to the <CODE>Path</CODE>:
 <PRE>
-C:\Program Files\Tcl\bin;C:\JDK1.1.6\bin;C:\tycho0.3devel\bin
+C:\Program Files\Tcl\bin;C:\tycho0.3devel\bin
 </PRE>
 
 <LI> Create a <CODE>TYCHO</CODE> variable and set it to 
-<CODE>C:/tycho0.3</CODE>.  Note that the slash is a Unix style
+<CODE>C:/tycho0.3devel</CODE>.  Note that the slash is a Unix style
 forward slash, not a DOS style backslash.
-
-<LI> Create a <CODE>JAVA_HOME</CODE> variable and set it to
-<CODE>C:/jdk1.1.6</CODE>.  Again, this is a Unix style forward slash
-
-
-<LI> To run Tycho, you may need to set <CODE>TCL_LIBRARY</CODE> to
-<PRE>
-C:/Program Files/Tcl/lib/tcl8.0.3
-</PRE>
-and <CODE>TK_LIBRARY</CODE> to
-C:/Program Files/Tcl/lib/tk8.0.3
-</MENU>
 
 
 <P> To start Tycho, click on the
-<CODE>tycho0.3/lib/windows/tycho-windows.itk</CODE> script
+<CODE>tycho0.3devel/lib/windows/tycho-windows.itk</CODE> script
 or add <CODE>%tycho%\bin</CODE> to your path and run <CODE>tycho</CODE>
-from the DOS prompt.
+from the DOS prompt.  
+ <p>To add Tycho to your start menu, drag the 
+<CODE>tycho0.3devel/lib/windows/tycho-windows.itk</CODE> icon
+to the Start button.
 
 <LI> Tycho includes HTML documentation of the Itcl classes that make up
-Tycho.  In Tycho0.3, these files are shipped with the Tycho distribution.
+Tycho.  In Tycho0.3devel, these files are shipped with the Tycho distribution.
 
 
 </OL>
