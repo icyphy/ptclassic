@@ -180,16 +180,14 @@ StringList DecomScheduler::displaySchedule(int depth) {
 	return sch;
 }
 
-StringList DecomScheduler::genCode(Target& t, int depth) {
-	StringList code;
+void DecomScheduler::genCode(Target& t, int depth) {
 	SDFSchedIter next(mySchedule);
 	SDFStar* c;
 	while ((c = next++) != 0) {
 		if (c->isA("LSCluster")) {
-			code += ((LSCluster*) c)->genCode(t,depth);
+			((LSCluster*) c)->genCode(t,depth);
 		} else {
-			code += ((SDFCluster*) c)->genCode(t,depth);
+			((SDFCluster*) c)->genCode(t,depth);
 		}
 	}
-	return code;
 }

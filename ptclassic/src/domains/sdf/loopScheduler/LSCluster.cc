@@ -150,24 +150,23 @@ StringList LSCluster :: displaySchedule(int depth) {
 }
 	
 // generate Code
-StringList LSCluster :: genCode(Target& t, int depth) {
+void LSCluster :: genCode(Target& t, int depth) {
 
-	StringList code;
 	SDFFiring* f = firing;
 	while (f) {
 		if (f->count > 1) {
-			code += t.beginIteration(f->count, depth);
+			t.beginIteration(f->count, depth);
 		}
 		SDFStar* temp = f->s;
 		if (temp->isA("LSCluster")) {
-			code += ((LSCluster*) temp)->genCode(t, depth+1);
+			((LSCluster*) temp)->genCode(t, depth+1);
 		} else {
-			code += ((SDFCluster*) temp)->genCode(t, depth);
+			((SDFCluster*) temp)->genCode(t, depth);
 		}
 		if (f->count > 1) {
-			code += t.endIteration(f->count, depth);
+			t.endIteration(f->count, depth);
 		}
 		f = f->next;
 	}
-	return code;
+	return;
 }

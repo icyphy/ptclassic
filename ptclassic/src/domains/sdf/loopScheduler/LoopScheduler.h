@@ -44,7 +44,7 @@ public:
 	StringList displaySchedule();
 
 	// Generate code using the Target to produce the right language.
-	StringList compileRun();
+	void compileRun();
 };
 
 #endif
