@@ -44,6 +44,7 @@ CGStar.h \
 CGSymbol.h \
 CGTarget.h \
 CGUtilities.h \
+CGWormConnect.h \
 CGWormhole.h \
 IntArray.h \
 MReq.h \
@@ -53,7 +54,7 @@ Profile.h \
 StringStack.h \
 
 # Header files
-HDRS= $(H_WITH_MATCH) CGWormConnect.h
+HDRS= $(H_WITH_MATCH) 
 
 # Library objects
 OBJS= $(H_WITH_MATCH:.h=.o) CGDomain.o AsmTargetInit.o
