@@ -51,7 +51,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		bufferSemaphore.resize(commCount/24+1);
 	}
 
-codeblock(interruptHost,"int pairNumber") {
+codeblock(processPendingInterrupts,"int pairNumber") {
 ; Trigger Host Interrupt
 ; make sure no interrupts pending
 $label(pending)
@@ -63,7 +63,10 @@ $label(pending)
 ; set host interrupt pending flag to current pair number
 	move	#@(pairNumber+1),a0
 	move	a0,$ref(currentBuffer)
+}
 
+
+codeblock(triggerInterrupt) {
 ; trigger interrupt
 	move    P:$$8000,a0              ; trigger host SIGUSR1 interrupt
 }

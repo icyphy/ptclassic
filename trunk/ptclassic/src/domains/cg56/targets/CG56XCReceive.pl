@@ -47,9 +47,10 @@ go {
 		}
 	} */
 	addCode(receiveData(pairNumber,numXfer));
-	addCode(interruptHost(pairNumber));
+	addCode(processPendingInterrupts(pairNumber));
 @	bclr	#@(pairNumber%24),$ref(bufferSemaphore,@(pairNumber/24))
 @
+	addCode(triggerInterrupt);
 }
 
 	execTime {
