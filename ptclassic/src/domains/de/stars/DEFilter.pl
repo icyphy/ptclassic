@@ -21,7 +21,7 @@ triggers the star at time <i>T</i>, the output is:
 <pre>
 <i>y</i>( <i>T</i> ) = <i>d</i><sup>( <i>T - tau</i> )</sup><i>s</i>( <i>tau</i> )
 </pre>
-where <i>tau</i> is the time of the latest data input event, <i>s</i>(<i> tau </i>)<i></i> is the
+where <i>tau</i> is the time of the latest data input event, <i>s</i>(<i> tau </i>) is the
 state of the filter at time <i>tau</i>,
 and <i>d</i> is the exponential decay parameter.
 Each time a data input arrives, the state is updated
@@ -30,7 +30,7 @@ as follows:
 <i>s</i>( <i>tau</i> ) = <i>i</i>( <i>tau</i> ) + <i>d</i><sup>( <i>tau - tau prime</i> )</sup><i>s</i>( <i>tau prime</i> )
 </pre>
 where <i>tau prime</i> is the time of the previous data input event,
-and <i>i</i>(<i> tau </i>)<i></i> is the data input.
+and <i>i</i>(<i> tau </i>) is the data input.
 	}
 	input {
 		name {clock}
