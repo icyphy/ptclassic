@@ -377,6 +377,47 @@ proc ::tycho::mkdir { args } {
 }
 
 ##############################################################################
+#### noCase
+# Turn a filename into a case insensitive format suitable for passing to glob.
+# Example:
+# <tcl><pre>
+# ::tycho::noCase temp/file.txt
+# </pre></tcl>
+# 
+proc ::tycho::noCase {filename} {
+    global tcl_platform
+
+    set depth 0
+    set retval {}
+    set length [string length $filename]
+    for {set i 0} {$i < $length} {incr i} {
+        set char [string index $filename $i]
+        if {$char == "\["} {
+            incr depth
+            append retval $char
+        } elseif {$char == "\]"} {
+            incr depth -1
+            append retval $char
+        } elseif {($char == ":") && ($tcl_platform(platform) == "windows")} {
+            # fix for Windoze drive letters (glob {[Cc]:} doesn't work)
+            set retval [string range $filename 0 $i] 
+        } elseif {$depth == 0} {
+            # if it's a letter, replace with [lower UPPER]
+            if [regexp {^[a-z]$} $char] {
+                append retval "\[$char[string toupper $char]\]"
+            } elseif [regexp {^[A-Z]$} $char] {
+                append retval "\[$char[string tolower $char]\]"
+            } else {
+                append retval $char
+            }
+        } else {
+            append retval $char
+        }   
+    }
+    return $retval
+}
+
+##############################################################################
 #### pathEnvSearch
 # Search the user's PATH environment variable for filename
 # 
