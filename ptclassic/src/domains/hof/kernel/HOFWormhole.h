@@ -48,9 +48,7 @@ public:
 	// Destructor
 	~HOFWormhole();
 
-	void setup();
 	void begin() { Wormhole::begin(); }
-	void go();
 	void wrapup();
 
 	Scheduler* mySched() const { return myTarget()->scheduler(); }
@@ -75,6 +73,10 @@ public:
 
 	StringList printVerbose() const;
 	StringList printRecursive() const;
+
+protected:
+	void setup();
+	void go();
 };
 
 class HOFtoUniversal : public ToEventHorizon, public InHOFPort
