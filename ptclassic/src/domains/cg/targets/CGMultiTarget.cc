@@ -271,7 +271,7 @@ void CGMultiTarget :: prepareChildren() {
 	else {
 	  Error::warn(*t, "No state with given name: ", "display?");
 	}
-	if ((s = t->stateWithName("Looping Level(DEF,CLUST,SJS,ACYLOOP)"))
+	if ((s = t->stateWithName("Looping Level"))
 	    != NULL) {
 	  s->setInitValue(hashstring("0"));
 	}
