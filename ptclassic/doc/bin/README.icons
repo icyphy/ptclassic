@@ -1,0 +1,109 @@
+$Id$
+
+Printing Ptolemy stars Almagest pages with icons		Phil Lapsley
+
+It is possible, through some amazingly gross hackery, to generate postscript
+versions of Almagest star entries with pictures of their icons.  Unfortunately,
+it requires ditroff and the Adobe Transcript software, specifically the
+"psdit" program.  If you don't have these, don't even think of trying the
+stuff below.
+
+1. Generate postscript for the icons you want to print.
+
+Before you can print star manual pages with icons, you have to generate
+a postscript file for each icon.  This can be done with the shell
+script $PTOLEMY/doc/bin/makepsicons.  The usage is:
+
+	$PTOLEMY/doc/bin/makepsicons domain
+
+where domain is a domain in $PTOLEMY/src/domains.  This will run oct2ps
+(via a shell script front end, $PTOLEMY/doc/bin/psicon) for all the icons
+it can find in the given domain.  It looks for icons in the directories:
+
+	$PTOLEMY/src/domains/icons
+	$PTOLEMY/src/domains/*/icons
+
+This latter catches things like $PTOLEMY/src/domains/sdf/image/icons, etc.
+
+This command results in a ".ps" file for each icon in the above-named
+directories.
+
+2. To print a single star man page with the icon:
+
+Give the command:
+
+	$PTOLEMY/doc/bin/printstar -icons file
+
+where "file" should be the troff source file for the star's Almagest
+description.  E.g.,
+
+	cd $PTOLEMY/src/domains/sdf/doc/stars
+	$PTOLMEY/doc/bin/printstar -icons SDFLMS.t
+
+This will generate postscript and sent it to the printer named in your
+PRINTER environment variable.  If you just want to get postscript output
+directly, you can say:
+
+	$PTOLMEY/doc/bin/printstar -icons -ps file
+
+which will send the postscript to standard out.
+
+3. To print an entire domain with icons:
+
+Give the commands:
+
+	cd $PTOLEMY/src/domains/XXX/doc
+	$PTOLEMY/doc/bin/printdom -icons
+
+This will generate a postscript file for the domain in a file named something
+like /tmp/pt.#####.ps, where ##### is a unique number.  (It will tell you
+the name of the file).  You can then lpr this or whatever.
+
+HOW IT WORKS:
+-------------
+I said it was a hack, so buckle your seatbelt and grab your barf bag:
+
+Unfortunately, Berkeley ditroff doesn't allow you to directly include
+postscript in troff files.  So I came up with a workaround based on the
+following:
+
+The -t option to ditroff causes it to generate "ditroff output", which is
+device independent ascii text.  This is then fed in to Adobe's "psdit"
+program, which converts ditroff to postscript.  It turns out that if
+you have the string "FOOBAR" in a troff input file, you'll also get that
+string in the postscript output of psdit.
+
+So I wrote a macro, ".Ps filename size", that generates a string like
+
+	PSINCLUDE:filename:size
+
+in the troff input.  When you run ditroff -t and psdit, you wind up with
+the same string in the postscript output.  I then wrote a small C program
+post-processor called "psi" ($PTOLEMY/src/utils/psi) that searches a
+postscript file for PSINCLUDE lines and includes the named files as
+encapsulated postscript.  The result is a postscript file that has
+everything you want in it.
+
+There were a few modifications necessary to the Ptolemy troff macros
+to get be able to use this with them.  First, I defined a new numeric
+troff variable, "Ic", that should be set to 1 if we're trying to print
+icons.  If it is zero, we ignore icons entirely.  If it's 1, the ".LO"
+(Ptolemy star location) macro tries to generate a ".Ps" statement
+based on the location given as its argument.  Unfortunately, this argument
+varies widely.  As a result, the .LO macro tries to match a *bunch* of
+different strings and does different things for different arguments.
+(See $PTOLEMY/doc/headers/domain for the gory details).
+
+Like I said, it's a hack.  Hope you reached the barf bag in time.
+
+PROBLEMS:
+---------
+
+1. It's only been tested on the SDF domains to date.  The other domains
+will probably require more AI to be added to the .LO macro.
+
+2. Icon names with "fi" or "fl" in them don't print properly, because the
+postscript output has \256 and \257 for these ligatures.
+
+3. The icon .ps files could be greatly reduced by telling oct2ps to use
+a null prolog file, and just include the prolog file once at the beginning.

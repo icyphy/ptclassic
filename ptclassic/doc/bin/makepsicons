@@ -1,0 +1,22 @@
+#! /bin/csh -f
+# $Id$
+
+# Generate postscript icons for a domain.
+# Usage: makepsicons domain [...]
+
+if (!($?PTOLEMY)) then
+	setenv PTOLEMY ~ptolemy
+endif
+
+set cwd = `pwd`
+foreach domain ($argv)
+	echo "makepsicons: generating icons for domain $domain"
+	cd $PTOLEMY/src/domains/$domain
+	foreach star ( icons/* */icons/* )
+		if (-d $star) then 
+			echo "makepsicons: generate icon for $star"
+			#$PTOLEMY/doc/bin/psicon $star > $star.ps
+		endif
+	end
+	echo "makepsicons: done with domain $domain"
+endif

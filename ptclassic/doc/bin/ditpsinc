@@ -1,0 +1,23 @@
+#!/bin/csh -f
+
+# Include postscript (icons) in ditroff output.  This is done by first
+# running the Adobe Transcript "psdit" command to convert our ditroff
+# input to postscript, and then running a custom postscript post-processor
+# on the postscript to include other files.
+#
+# To do this, we need a custom prolog file for "psdit", which is typically
+# in ~ptolemy/lib/psdit.pro.
+
+if (!($?PTOLEMY)) then
+	setenv PTOLEMY ~ptolemy
+endif
+
+# File structure information:
+set psprolog = $PTOLEMY/doc/lib/psdit.pro
+set psicommand = $PTOLEMY/doc/bin/psi
+set psditcommand = /usr/local/lib/ps/psdit
+
+# The ../../.. crap below is because psdit doesn't allow us to specify
+# an absolute path name, sigh.
+$psditcommand -p/../../../../../../../../../../../../$psprolog | \
+	$psicommand

@@ -1,0 +1,16 @@
+#!/bin/csh -f
+
+# $Id$
+
+# Generate a postscript version of an icon to stdout.  Uses the interface
+# facet and the bw_patterns technology file.
+
+if (!($?PTOLEMY)) then
+	setenv PTOLEMY ~ptolemy
+endif
+if (!($?OCTTOOLS)) then
+	setenv OCTTOOLS $PTOLEMY
+endif
+
+set path = ( ~ptolemy/octtools/bin.$ARCH $path )
+oct2ps -p -=T ~ptolemy/lib/bw_patterns -f interface $*\:schematic:interface
