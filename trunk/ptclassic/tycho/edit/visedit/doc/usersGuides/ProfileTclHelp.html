@@ -7,7 +7,7 @@
 <h1><a name="profile tcl tool">User's Guide to the Profile Tcl Tool</a></h1>
 <p>
 This class provides a visual editor specialized for profiling
-the execution of tcl and tcl code.
+the execution of Tcl and Tcl code.
 The profiler is derived from the
 <a href="EditForestHelp.html">EditForest class</a> and
 therefore inherits all of its features.
@@ -29,19 +29,17 @@ will look for the TclX shared library that contains the
 <CODE>profile</CODE> command and attempt to load it.
 
  <P>To use the Profiler, you must have the <CODE>profile</CODE> command.
-There are several different scenarios. Pick the scenario that fits
+There are two different scenarios. Pick the scenario that fits
 your situation best and follow the instructions below. 
 <MENU>
-<LI> <A HREF="#profile command, default TclX">1. Use the default TclX
-	profile command</A>
-<LI> <A HREF="#profile command, TclX patch">2. Patch the TclX profile
+<LI> <A HREF="#profile command, TclX patch">1. Patch the TclX profile
 	command and Reinstall TclX</A>
-<LI> <A HREF="#profile command, standalone version">3. Compile a
+<LI> <A HREF="#profile command, standalone version">2. Compile a
 	standalone profile command</A>
 </MENU>
 
-<H3><A NAME="profile command, default TclX">1. Use the default TclX
-profile command</A></H3>
+
+<H3><A NAME="profile command, TclX patch">1. Patch the TclX profile command and Reinstall TclX</A></H3>
 
  <P>The <CODE>profile</CODE> command shipped with TclX7.6.0 has
 a bug that causes coredumps if used with Itcl.
@@ -50,8 +48,6 @@ HREF="tclXprofile.c.patch"><CODE>tclXprofile.c.patch</CODE></A> is a
 patch to <CODE>tclX7.6.0/tcl/generic/tclXprofile.c</CODE> that
 fixes the bug.  
 	
-<H3><A NAME="profile command, TclX patch">2. Patch the TclX profile command and Reinstall TclX</A>
-</H3>
 
  <P>To install this patch, you will need Larry Wall's
 <CODE>patch</CODE> program.  (You can get <CODE>patch</CODE> from <A
@@ -72,8 +68,7 @@ $TYCHO/editors/visedit/doc/usersGuides/tclXprofile.c.patch</CODE>.
 
 </OL>
 
-<H3><A NAME="profile command, standalone version">3. Compile a standalone profile command</A>
-</H3>
+<H3><A NAME="profile command, standalone version">2. Compile a standalone profile command</A></H3>
 
 The directory <CODE>$TYCHO/src/profile</CODE> contains a standalone
 version of <CODE>tclXprofile.c</CODE> that can be configured and
@@ -91,7 +86,7 @@ See the <A HREF="../../../../doc/coding/buildtclexts.html">Building Tcl Extensio
 documentation for further information.
 
 The <CODE>tclXprofile</CODE> shared object will be in
-<CODE>$TYCHO/obj.$PTARCH</CODE>.  Under Solaris, the file will
+<CODE>$TYCHO/lib.$PTARCH</CODE>.  Under Solaris, the file will
 be named <CODE>tclXprofile.so</CODE>.
 
  <HR>
@@ -145,8 +140,8 @@ CPU time is not available and is reported as zero.
 <H2>Profiler Description</H2>
 
 <p>
-The profiler consists of the usual tycho menu bar with a few buttons,
-a graphical forest editor, a few counters and a the tycho status bar.
+The profiler consists of the usual Tycho menu bar with a few buttons,
+a graphical forest editor, a few counters and a the Tycho status bar.
 We describe each in turn.
 
 <HR>
@@ -173,7 +168,7 @@ moment, Tcl is traversing large arrays.
 
 The central area of the Profiler is a <a
 href="EditForestHelp.html">Forest editor</a>.  After generating a
-profile, the user can follow the execution of the tcl code by clicking
+profile, the user can follow the execution of the Tcl code by clicking
 on nodes in the graph.  As the mouse moves over nodes in the graph,
 the counters at the bottom of the screen display statistics about that
 node.
