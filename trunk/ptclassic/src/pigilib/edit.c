@@ -126,6 +126,7 @@ long userOptionWord;
     facet.objectId = spot->facet;
     if (octGetById(&facet) != OCT_OK) {
 	PrintErr(octErrorString());
+	ViDone();
     }
     else {
 	ptkOctObj2Handle(&facet, facetHandle);
@@ -136,6 +137,7 @@ long userOptionWord;
 				   (char *)NULL) );
     }
 
+    FreeOctMembers(&facet);
     ViDone();
 }
 
@@ -150,19 +152,26 @@ int
 EditFormalParams(galFacetPtr)
 octObject *galFacetPtr;
 {
-    int i;
-    ParamListType pList = {0, 0, 0};
+    int i = 1;
+    ParamListType pList = {0, 0, 0, FALSE};
 
-    ERR_IF1(!GetFormalParams(galFacetPtr, &pList));
-
-    if (pList.length == 0) {
-        PrintErr("Galaxy or Universe has no parameters");
-        return(1);
+    if (!GetFormalParams(galFacetPtr, &pList)) {
+	i = 0;
     }
-    i = EditParamList(&pList, "Edit Formal Parameters");
-    if (i != 1) return i;
-    ERR_IF1(!SetFormalParams(galFacetPtr, &pList));
-    return(1);
+    else if (pList.length == 0) {
+        PrintErr("Galaxy or Universe has no parameters");
+        i = 1;
+    }
+    else {
+	i = EditParamList(&pList, "Edit Formal Parameters");
+	if (i == 1) {
+	    if (!SetFormalParams(galFacetPtr, &pList)) {
+		i = 0;
+	    }
+	}
+    }
+    FreeFlatPList(&pList);
+    return(i);
 }
 
 /* EditParams  5/27/88 4/24/88
@@ -195,19 +204,23 @@ long userOptionWord;
     status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
     if (status == VEM_NOSELECT) {
 	PrintCon("Aborted");
-        ViDone();
-    } else if (status != VEM_OK) {
-	/* cursor not over an instance... */
-	strcpy (instanceHandle, "NIL");
-    } else {
-	/* cursor is over some type of instance... */
-	ptkOctObj2Handle(&inst, instanceHandle);
+	FreeOctMembers(&facet);
+	ViDone();
+    }
+    else {
+	if (status != VEM_OK) {		 /* cursor not over an instance... */
+	    strcpy (instanceHandle, "NIL");
+	}
+	else {			/* cursor is over some type of instance... */
+	    ptkOctObj2Handle(&inst, instanceHandle);
+	}
+	TCL_CATCH_ERR( Tcl_VarEval(ptkInterp, "ptkEditParams ",
+				   facetHandle, " ",
+				   instanceHandle, (char *)NULL) );
     }
 
-    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp, "ptkEditParams ",
-			       facetHandle, " ",
-			       instanceHandle, (char *)NULL) )
-
+    FreeOctMembers(&facet);
+    FreeOctMembers(&inst);
     ViDone();
 }
 
@@ -257,6 +270,8 @@ long userOptionWord;
 				   "Pragmas", (char *)NULL) );
     }
 
+    FreeOctMembers(&facet);
+    FreeOctMembers(&inst);
     ViDone();
 }
 
@@ -368,6 +383,7 @@ long userOptionWord;
 	    }
 	}
     }
+    FreeOctMembers(&facet);
     ViDone();
 }
 
@@ -396,6 +412,7 @@ long userOptionWord;
 
     status = vuFindSpot(spot, &obj, OCT_INSTANCE_MASK);
     if (status == VEM_NOSELECT) {
+	FreeOctMembers(&facet);
 	PrintCon("Aborted");
         ViDone();
     } else if (status == VEM_CANTFIND) {
@@ -411,8 +428,9 @@ long userOptionWord;
 		   "\"Edit Comment\" ",
                    "\"ptkSetStringProp ", facetHandle, " comment %s\" ",
                    "[ptkGetStringProp ", facetHandle, " comment]",
-                   (char *)NULL) )
+                   (char *)NULL) );
 
+    FreeOctMembers(&facet);		/* don't free obj */
     ViDone();
 
 }
@@ -433,6 +451,7 @@ long userOptionWord;
     facet.objectId = spot->facet;
     if (octGetById(&facet) != OCT_OK) {
         PrintErr(octErrorString());
+	ViDone();
     }
     else {
 	ptkOctObj2Handle(&facet, facetHandle);
@@ -442,6 +461,7 @@ long userOptionWord;
 				   (char *)NULL) );
     }
 
+    FreeOctMembers(&facet);
     ViDone();
 }
 
@@ -491,5 +511,6 @@ long userOptionWord;
 				   " \"ptkEditParams ", facetHandle,
 				   " %s Target \" ", (char *)NULL) );
     }
+    FreeOctMembers(&facet);
     ViDone();
 }
