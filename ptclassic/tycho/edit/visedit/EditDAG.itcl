@@ -134,6 +134,8 @@ option add *EditDAG.spacingx 1.0 widgetDefault
 # "{range <i>start end</i>}" for text files, or any other destination
 # that is understood by the <code>seeFragment</code> method of the
 # widget that will display the hyperlink.
+# <dt><b>altlink</b><dd>This field is the same as <i>link</i>, except
+# that the hyperlink is invoked by shift-double-clicking.
 # <dt><b>html</b><dd>The <i>value</i> field gives HTML source code that
 # will be rendered and displayed in a message window in response to a
 # double click on the node.  If both this field and the "link" field are
@@ -885,6 +887,7 @@ body ::tycho::EditDAG::drawNode {node xcoord ycoord} {
             fontspec $defaultfont \
             label $node \
             link {} \
+            altlink {} \
             html {} \
 	    tcl {} \
             open 1]
@@ -912,6 +915,15 @@ body ::tycho::EditDAG::drawNode {node xcoord ycoord} {
     set nametable($id) $node
     if {$cnt(link) != {}} {
         $slate bind $id <Double-Button-1> "$this hyperJump $cnt(link)"
+	$slate bind $id <Enter> "$this putStatus [lindex $cnt(link) 0]"
+	$slate bind $id <Leave> "$this putStatus {}"
+	$slate bind $id <Shift-Enter> {}
+	$slate bind $id <Shift-Leave> "$this putStatus {}"
+    }
+    if {$cnt(altlink) != {}} {
+        $slate bind $id <Shift-Double-Button-1> "$this hyperJump $cnt(altlink)"
+	$slate bind $id <Shift-Enter> "$this putStatus [lindex $cnt(altlink) 0]"
+	$slate bind $id <Shift-Leave> "$this putStatus {}"
     }
     if {$cnt(html) != {}} {
         $slate bind $id <Double-Button-1> \
