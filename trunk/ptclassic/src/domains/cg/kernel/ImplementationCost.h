@@ -52,8 +52,12 @@ class ImplementationCost {
 
 	// return values of data members
 	inline int executionTime() { return exectime; }
-	inline const int* programMemory() { return progMemoryVector; }
-	inline const int* dataMemory() { return dataMemoryVector; }
+	inline int progMemoryCost(int i) {
+		return progMemoryVector[i];
+	}
+	inline int dataMemoryCost(int i) {
+		return dataMemoryVector[i];
+	}
 
 	// set values of data members
 	inline void setExecutionTime(int etime) {
