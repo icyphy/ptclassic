@@ -93,6 +93,7 @@ char* domain;			/* domain of object (if star) */
 char* derivedFrom;		/* class obj is derived from */
 char* portName;			/* name of porthole */
 char* portType;			/* dataType of porthole */
+char* portNum;			/* expr giving # of tokens */
 int   portOut;			/* true if porthole is output */
 int   portMulti;		/* true if porthole is multiporthole */
 char* stateName;		/* name of state */
@@ -127,8 +128,7 @@ typedef char * STRINGVAL;
 
 %}
 
-
-%token DEFSTAR GALAXY NAME DESC DEFSTATE DOMAIN NUMPORTS
+%token DEFSTAR GALAXY NAME DESC DEFSTATE DOMAIN NUMPORTS NUM
 %token DERIVED CONSTRUCTOR DESTRUCTOR STAR ALIAS OUTPUT INPUT ACCESS
 %token OUTMULTI INMULTI TYPE DEFAULT CLASS START GO WRAPUP CONNECT ID
 %token CCINCLUDE HINCLUDE PROTECTED PUBLIC PRIVATE METHOD ARGLIST CODE
@@ -181,7 +181,6 @@ sgitem:
 		'{' methlist '}'	{ genMethod();}
 |	CCINCLUDE '{' cclist '}'	{ }
 |	HINCLUDE '{' hlist '}'
-|	IDENTIFIER '{' ident '}'	{ yyerr2 ("unknown keyword: ", $1);}
 |	error '}'			{ yyerror ("bad sgitem");}
 ;
 
@@ -275,6 +274,7 @@ portlist:
 portitem:
 	NAME '{' ident '}'		{ portName = $3;}
 |	TYPE '{' ident '}'		{ portType = portDataType($3);}
+|	NUM '{' expval '}'		{ portNum = $3;}
 ;
 
 /* state info (for defining) */
@@ -300,6 +300,16 @@ defval:	STRING				{ $$ = $1;}
 					  $$ = save(b);
 					}
 ;
+
+/* inverse of defval: we strip the quotes */
+expval:	IDENTIFIER			{ $$ = $1;}
+|	STRING				{ char b[SMALLBUFSIZE];
+					  strcpy (b, $1+1);
+					  b[strlen($1)-2] = 0;
+					  $$ = save(b);
+					}
+;
+
 desc:	descstart desclist		{ $$ = combineStrings();}
 ;
 
@@ -460,7 +470,7 @@ int out, multi;
 {
 	portOut = out;
 	portMulti = multi;
-	portName = portType = NULL;
+	portName = portType = portNum = NULL;
 }
 
 char* portDataType (name)
@@ -479,8 +489,12 @@ genPort ()
 	char* port = galDef ? "PortHole" : "Port";
 
 	sprintf (str1,"\t%s%s%s%s %s;\n", m, dir, d, port, portName);
-	sprintf (str2, "\taddPort(%s.setPort(\"%s\",this,%s));\n", portName,
-			portName, cvtToUpper(portType));
+	if (portNum)
+		sprintf (str2, "\taddPort(%s.setPort(\"%s\",this,%s,%s));\n",
+			portName, portName, cvtToUpper(portType), portNum);
+	else
+		sprintf (str2, "\taddPort(%s.setPort(\"%s\",this,%s));\n",
+			portName, portName, cvtToUpper(portType));
 	strcat (publicMembers, str1);
 	strcat (consStuff, str2);
 }
@@ -716,7 +730,10 @@ struct tentry keyTable[] = {
 	"input", INPUT,
 	"method", METHOD,
 	"name", NAME,
+	"num", NUM,
 	"numports", NUMPORTS,
+	"numTokens", NUM,
+	"numtokens", NUM,
 	"outmulti", OUTMULTI,
 	"output", OUTPUT,
 	"private", PRIVATE,
