@@ -627,14 +627,7 @@ body ::tycho::FileBrowser::updateListbox {} {
 	insert entry [lindex $fileList 0]
     } elseif {($dirLength == 0) && ($fileLength == 0)} {
 	if {$localCWD != [::tycho::rootDir $localCWD] } {
-	    insert entry $directoryParent"
+	    insert entry $directoryParent
 	}
     }
 }
-
-
-
-
-
-
-
