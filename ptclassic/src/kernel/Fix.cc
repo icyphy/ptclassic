@@ -68,14 +68,16 @@ static double twoRaisedTo[FIX_MAX_LENGTH+1];
 
 // this class just initializes the table
 struct FixInit {
-    FixInit() {
-	double p2 = 1.0;
-	for (int i = 0; i <= FIX_MAX_LENGTH; i++) {
-	    twoRaisedTo[i] = p2;
-	    p2 *= 2.0;
-	}
-    }
+    FixInit();
 };
+
+FixInit::FixInit() {
+    double p2 = 1.0;
+    for (int i = 0; i <= FIX_MAX_LENGTH; i++) {
+	twoRaisedTo[i] = p2;
+	p2 *= 2.0;
+    }
+}
 
 // here is the dummy member to call the constructor.
 static FixInit dummy;
@@ -93,7 +95,7 @@ inline double find_max(int ln, int ib)
     return twoRaisedTo[ib-1] - 1.0 / twoRaisedTo[ln - ib];
 }
 
-inline double find_min(int ln, int ib)
+inline double find_min(int, int ib)
 {
     return -twoRaisedTo[ib-1];
 }
@@ -122,7 +124,7 @@ static int find_intBits(int num)
 //////////////////////////////////////////////////////////
 // replace bit array by its negative.  src and dest may be the same.
 
-static void gen_complement(int nw, uint16* srcbits, uint16* dstbits) {
+static void gen_complement(int nw, const uint16* srcbits, uint16* dstbits) {
     uint32 carry = 1;
     for (int i = nw-1; i >= 0; i--)
     {
@@ -263,8 +265,8 @@ int Fix::is_zero() const {
 	if (Bits[i] != 0) return FALSE;
     // need to mask the last word.
     int m = length & 0x0f;
-    uint16 mask = ( (m == 0) ? 0xffff : ((uint16)(0xffff0000L >> m)) );
-    return ((Bits[nwords-1] & mask) == 0);
+    uint16 bitmask = (m == 0 ? 0xffff : (uint16)(0xffff0000L >> m));
+    return (Bits[nwords-1] & bitmask) == 0;
 }
 
 // max legal value
@@ -283,7 +285,7 @@ double Fix::value() const
 {
     double d = 0.0;
     uint16 bitbuf[WORDS_PER_FIX];
-    uint16* bits = Bits;
+    const uint16* bits = Bits;
     if (signBit()) {
 	gen_complement(4, Bits, bitbuf);
 	bits = bitbuf;
@@ -592,7 +594,7 @@ Fix operator * (const Fix& x, const Fix& y)
   if (post_scale != 0) {
       // here we effectively scale down X and Y.
       // we will scale up later.
-      if (x.intBits > post_scale) X.intBits = x.intBits - post_scale;
+      if (x.intBits > (uint16)post_scale) X.intBits = x.intBits - post_scale;
       else {
 	  X.intBits = 1;
 	  Y.intBits = new_intBits - 2;
@@ -644,8 +646,10 @@ Fix operator * (const Fix& x, int n)
      z.Bits[i] = (uint16)a;
      carry = a >> FIX_BITS_PER_WORD;
   }
-  if ((x.value()*n) > x.max() || (x.value()*n) < x.min())
-      z.overflow_handler(x.signBit() ^ (n < 0));
+  if ((x.value()*n) > x.max() || (x.value()*n) < x.min()) {
+      int nsign = (n < 0);
+      z.overflow_handler(x.signBit() ^ nsign);
+  }
   z.errors = x.errors;
   return z;
 }
@@ -801,7 +805,7 @@ void Fix::applyMask (int round)
 	    Bits[i] = (uint16)sum;
 	}
     }
-    Bits[nwords-1] &= ( 0xffff0000L >> m );
+    Bits[nwords-1] &= (uint16) ( 0xffff0000L >> m );
 }
  
 ////////////////////
@@ -817,10 +821,11 @@ void Fix::applyMask (int round)
 void Fix:: overflow_handler (int rsign)
 {
     errors |= err_ovf;
+    int i;
     switch (overflow()) {
 
     case ovf_zero_saturate:		// zero saturate
-	for (int i=0; i < WORDS_PER_FIX; i++)
+	for (i=0; i < WORDS_PER_FIX; i++)
 	    Bits[i] = 0;
 	break;
 
