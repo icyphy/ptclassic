@@ -333,7 +333,7 @@ topTclMainLoop( Tcl_Interp *ip_in, char *prompt, char *appname, int initB) {
 	if (fgets(line, sizeof(line)-10, stdin) == NULL) {
 	    if (ferror(stdin)) {
 		if (errno == EINTR) {
-		     if (tcl_AsyncReady) {
+		     if (Tcl_AsyncReady()) {
 			 (void) Tcl_AsyncInvoke(NULL, 0);
 		     }
 		     clearerr(stdin);
