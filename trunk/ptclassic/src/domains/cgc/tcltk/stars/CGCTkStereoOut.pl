@@ -17,6 +17,13 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
 
+    defstate {
+      name { starName }
+      type { string }
+      default { "output" }
+      desc { The user-friendly name of this star.}
+    }
+
     codeblock (tkSetup) {
       /* Establish the Tk window for setting the value    */
       /* "position" is  a local variable which scales the */
@@ -44,6 +51,15 @@ limitation of liability, and disclaimer of warranty provisions.
                   $starSymbol(setBalance));
 	displaySliderValue(".low", "$starSymbol(scale2)", "  $val(balance)");
       }
+      
+      /* Test code for the new custom control panels */
+      connectControl("$val(starName)",
+		     "gain",
+		     $starSymbol(setVolume));
+
+      connectControl("$val(starName)",
+		     "balance",
+		     $starSymbol(setBalance));
     }
     codeblock (setVolumeDef) {
         static int $starSymbol(setVolume)(dummy, interp, argc, argv)
@@ -68,6 +84,10 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	    sprintf(buf, "%d", $ref(volume));
 	    displaySliderValue(".high", "$starSymbol(scale1)", buf);
+
+	    /* Hack stuff */
+	    printf("$val(starName)::volume changed to %d\n", $ref(volume));
+
             return TCL_OK;
         }
     }
@@ -95,6 +115,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	    
 	    sprintf(buf, "%d", $ref(balance));
 	    displaySliderValue(".low", "$starSymbol(scale2)", buf);
+
+	    /* Hack stuff */
+	    printf("$val(starName)::balance changed to %d\n", $ref(balance));
+
             return TCL_OK;
         }
     }
