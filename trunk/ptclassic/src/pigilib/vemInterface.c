@@ -103,7 +103,9 @@ char *s;
 #else
     char buf[1024];
 #endif //OLDNEVER
+#if REPORT_TCL_ERRORS
     char *msg;
+#endif
     if (*s == 0) return;        /* ignore blank message */
     if (!VemReady()) {
 	fprintf (stderr, "Error: %s\n", s);
