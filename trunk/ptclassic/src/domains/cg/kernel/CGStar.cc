@@ -56,6 +56,16 @@ CGStar :: CGStar() : forkId(0), dataParallel(0), profile(0) {
                 "assigned processor id. If -1, not assigned manually."));
 }
 
+// illegal to try to execute CGStars dynamically
+int CGStar :: setDynamicExecution(int dyn) {
+	if (dyn) {
+		Error::abortRun(*this,
+			"this star cannot run under a dynamic scheduler");
+		return FALSE;
+	}
+	else return TRUE;
+}
+
 // firing CG star : generate code.
 int CGStar :: run() {
 	// No need to grab data, so just use Star::run, not DataFlowStar::run.
@@ -460,8 +470,10 @@ void CGStar :: forkInit(CGPortHole& input,MultiCGPort& output) {
 	if (isItFork() == FALSE) {
 		cascadeForks.initialize();
 		isaFork();
-		while ((p = (CGPortHole*)nextp++) != 0)
+		while ((p = (CGPortHole*)nextp++) != 0) {
 			p->setForkSource(&input);
+			p->setRelation(DF_SAME,&input);
+		}
 	}
 	isaFork();
 	int n = input.far()->numXfer();
@@ -500,6 +512,7 @@ void CGStar :: forkInit(CGPortHole& input,CGPortHole& output) {
 	int n = input.far()->numXfer();
 	input.setSDFParams(n,n-1);
 	output.setSDFParams(n,n-1);
+	output.setRelation(DF_SAME,&input);
 	int srcDelay = input.numInitDelays();
 	if (srcDelay > 0) {
 		// move delays from input to outputs
@@ -530,6 +543,6 @@ const char* CGStar :: domain () const { return CGdomainName;}
 
 // isa
 
-ISA_FUNC(CGStar, DataFlowStar);
+ISA_FUNC(CGStar, DynDFStar);
 
-int CGStar :: isSDF() const { return TRUE;}
+
