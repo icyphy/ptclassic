@@ -182,6 +182,8 @@ $label(l28)
 			period = valueLen;
 		if (!(int (haltAtEnd)) &&!(int (periodic)))
 			period = 0;
+		if (period == 1) 
+			output.setAttributes(P_NOINIT);
 		if ((period > valueLen) || (period == 0))
 			value.resize(int (valueLen));
 		else
