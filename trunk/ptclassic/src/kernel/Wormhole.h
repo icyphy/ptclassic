@@ -6,8 +6,6 @@
 #include "Galaxy.h"
 #include "StringList.h"
 #include "WormConnect.h"
-#include "FloatState.h"
-#include "IntState.h"
 
 
 /*******************************************************************
@@ -70,11 +68,13 @@ public:
 	// for DEWormhole : simulated delay
 	// for SDFWormhole : sampling delay (period)
 	double messageProcessingTime;
+
 	// When it starts execution
 	double currentTime;
 
-	// Method to  print out description.
-	StringList printVerbose();
+	// Methods to  print out description.
+	StringList printVerbose() { return print(0);}
+	StringList printRecursive() { return print(1);}
 
 	// virtual star functions
 	// "start" may be redefined if we want to adjust the state values
@@ -83,14 +83,30 @@ public:
 	void setup() { initSched();} 
 	//	       checkSDF(); }
 
-	// constructor
-	Wormhole(Scheduler* s, const char* typeDesc, Galaxy* g)
-		: Runnable(s, typeDesc, g) {
-		messageProcessingTime = 10.0; 		// default delay	
-		currentTime = 0.0;			// default 
-		}	
+	// constructor.  We never use plain Wormholes, we always have
+	// class SDFWormhole : public Wormhole, public SDFStar
+	// here we do
+	// SDFWormhole::SDFWormhole(Galaxy& g) : Wormhole(this,g) {...}
+
+	Wormhole(Star& self, Galaxy& g);
+
+	// function to connect inner galaxy ports to outside through
+	// event horizons of proper type
+	void buildEventHorizons ();
+
+	// Destructor
+	~Wormhole ();
+
+protected :
+	StringList print (int recursive);
 
 private :
+	// reference to myself as a Star
+	Star& selfStar;
+
+	// flag saying whether to zap event horizons in destructor
+	int dynamicHorizons;
+
 	// Restriction 1 : SDFDomain should consume one token/arc and
 	//		   generate one token/arc as an inside Domain.
 	// void checkSDF(); 
