@@ -52,6 +52,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringState.h"
 #include "IntState.h"
 #include "FloatState.h"
+#include "HashTable.h"
 
 class DDFTarget : public Target {
 protected:
@@ -83,5 +84,17 @@ public:
 	// class identification
 	int isA(const char*) const;
 	const char* className() const;
+
+	// Support hints that are used to define the number of
+	// firings in one iteration. A value of zero is interpreted
+	// as "don't care".
+	StringList hint () { return "firingsPerIteration INT 0"; }
+	StringList hint (const char* blockname);
+	StringList hint (const char* blockname, const char* hintname);
+	StringList hint (const char* blockname,
+			 const char* name,
+			 const char* value);
+private:
+	TextTable firings;
 };
 #endif
