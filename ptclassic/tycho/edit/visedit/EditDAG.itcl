@@ -220,7 +220,7 @@ class ::tycho::EditDAG {
     protected method preference {mode args}
 
     # Show information about the current node, if any
-    protected method showCurrentNodeInfo {state {invert 0}}
+    protected method showCurrentNodeInfo {state {press 2}}
 
     # Return the name of the data structure class being edited.
     protected method structClass {} {return ::tycho::DirectedAcyclicGraph}
@@ -349,11 +349,11 @@ body ::tycho::EditDAG::constructor {args} {
     bind $slate <KeyPress-Shift_L> "@scope ::tycho::EditDAG \
 	    [list $this showCurrentNodeInfo %s 1]"
     bind $slate <KeyRelease-Shift_L> "@scope ::tycho::EditDAG \
-	    [list $this showCurrentNodeInfo %s 1]"
+	    [list $this showCurrentNodeInfo %s 0]"
     bind $slate <KeyPress-Shift_R> "@scope ::tycho::EditDAG \
 	    [list $this showCurrentNodeInfo %s 1]"
     bind $slate <KeyRelease-Shift_R> "@scope ::tycho::EditDAG \
-	    [list $this showCurrentNodeInfo %s 1]"
+	    [list $this showCurrentNodeInfo %s 0]"
 
     # Create the context-sensitive popup menu
     contextmenu create $itk_component(slate)
@@ -1066,15 +1066,18 @@ body ::tycho::EditDAG::preference {mode args} {
 #### showCurrentNodeInfo
 # Show information about the current node. The argument must be the
 # state field from a Tk event. If the second argument is supplied
-# and is true, then the shift value of the state field is taken to
-# from before an event that swapped it.
+# it is used in place of the state field.
 #
-body ::tycho::EditDAG::showCurrentNodeInfo {state {invert 0}} {
+body ::tycho::EditDAG::showCurrentNodeInfo {state {press 2}} {
     putStatus ""
     set item [$slate find withtag current]
     if { $item != "" } {
 	if { [::tycho::lmember [$slate gettags $item] node] } {
-	    set shift [expr ($state & 1) ^ $invert]
+            if {$press == 2} {
+                set shift $state
+            } else {
+                set shift $press
+            }
 	    set node $nametable($item)
 	    set contents [$mygraph contents $node]
 
