@@ -44,8 +44,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 SimVSSTarget :: SimVSSTarget(const char* name,const char* starclass,
 			     const char* desc) :
 VHDLTarget(name,starclass,desc) {
-  addState(simarch.setState("simarch",this,"sparcOS5",
-			    "value for SIM_ARCH environment variable."));
   addState(analyze.setState("analyze",this,"YES",
 			    "switch for analyzing code."));
   addState(startup.setState("startup",this,"YES",
@@ -469,10 +467,16 @@ int SimVSSTarget :: runCode() {
       error << "Could not simulate " << filePrefix << ".vhdl";
       (void) systemCall(command, error, targetHost);
     }
+    sysCommand << "cd " << (const char*) destDirectory;
+    sysCommand << " ; ";
     sysCommand << sysWrapup;
-    StringList sysError = "";
-    sysError << "Error performing sysWrapup, " << filePrefix << ".vhdl";
-    (void) systemCall(sysCommand, sysError, targetHost);
+    (void) system(sysCommand);
+    
+//    sysCommand << sysWrapup;
+//    StringList sysError = "";
+//    sysError << "Error performing sysWrapup, " << filePrefix << ".vhdl";
+// systemCall puts too much noise on the std output, esp. for xgraphs
+//    (void) systemCall(sysCommand, sysError, targetHost);
   }  
   // Return TRUE indicating success.
   return TRUE;
