@@ -23,7 +23,7 @@ int	checkmasters = 0;
 int	printfull = 0;
 
 
-printFacetPath( pntname, kid)
+void printFacetPath( pntname, kid)
 char *pntname;
 struct octInstance *kid;
 {
@@ -34,7 +34,7 @@ struct octInstance *kid;
 	}
 }
 
-main(argc, argv)
+int main(argc, argv)
 int argc;
 char **argv;
 {
@@ -87,7 +87,7 @@ char **argv;
     octFreeGenerator(&gen);
     OH_ASSERT(octCloseFacet(&facet));
     
-    exit(0);
+    return(0);
 }
 
 /*
