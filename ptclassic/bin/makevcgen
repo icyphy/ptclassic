@@ -62,22 +62,20 @@ sed -e '
  s/^[    ]*else/!else/
  s/^[    ]*endif/!endif/
 
- # Deal with $(strip).  Change
- #  !if "$(strip $(MATLABEXT_LIB))" != "" #ifneq
- # to
- #  !if "$(MATLABEXT_LIB)" != "" #ifneq
- # This is not perfect, since we can't count closing parens
+ # Deal with $(strip). 
+ # This is not perfect, since we cannot count closing parens
  s/\$(strip \([^)]*\))/\1/
 
  # Rather than setting a variable to nothing, undefine it
- s/^[    ]*\([A-Za-z0-9_]*\)[]*=[   ]*$/!undef \1/
+ # This seems excessive, but it seems like + is broken inside \( \)
+ # under NT 4.0 and Cygwin b20.1, so getting variable names is hard
+ s/^[    ]*\([A-Za-z0-9_][A-Za-z0-9_]*\)[]*=[   ]*$/!undef \1/
 
  # Globally convert dependency rules that refer to .o to .obj
  s/\.o/.obj/g
 
  # Strip out leading whitespace in makefile variable assignments
- s/^[    ]+\([A-Za-z0-9_]+\)[]*=/\1 =/
- s/^[ ]+\([A-Za-z0-9_]+\)[   ]*=/\1 =/
+ s/^[ 	]\([A-Za-z0-9_][A-Za-z0-9_]*\)[ 	]*=/\1 =/
 
  # Deal with +=
  # Getting the variable name seems to be difficult here, not sure why
