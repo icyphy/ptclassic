@@ -37,7 +37,8 @@ option add *RevControlSCCS.commentColor [ptkColor firebrick black] widgetDefault
 #### RevControlSCCS
 # This class defines how revision control will be handled when using 
 # SCCS, and is intended to be contained within objects that use such 
-# facilities.
+# facilities.  Note that this is a UNIX-specific interface to SCCS.
+#
 class ::tycho::RevControlSCCS {
     inherit ::tycho::RevControl
 
