@@ -22,6 +22,9 @@ set printoptions = "-me -tbl -eqn -P$PRINTER"
 set contentscmd = ~ptolemy/doc/bin/contents
 set files = ""
 
+#make sure permissions are OK
+umask 2
+
 while ($#argv)
 	switch ($argv[1])
 		case -*:
