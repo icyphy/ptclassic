@@ -42,8 +42,9 @@ include $(CONFIG)
 
 ITCL_SRCS = \
 	labeledgrid.itk \
-	widgettree.itk \
-	notebook.itk
+	labeledcolumn.itk \
+	notebook.itk \
+	widgettree.itk
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
