@@ -58,7 +58,7 @@ class ::tycho::PtVertexController {
     method _follower {} {return $_follower}
 
     # Add a vertex and icon
-    method add {libname starname}
+    method add {libname starname {uniqueName {}} {coords {}}}
 
     # Process a click event
     method click {tag x y args}
@@ -149,7 +149,7 @@ body ::tycho::PtVertexController::constructor {args} {
 #
 # Add a vertex given the library name and star name
 #
-body ::tycho::PtVertexController::add {libname iconname} {
+body ::tycho::PtVertexController::add {libname iconname {uniqueName {}} {coords {}}} {
     # puts "PtVertexController::add $libname $iconname"
     set iconlib [::tycho::PtIconLibrary::getLibrary $libname]
 
@@ -159,7 +159,9 @@ body ::tycho::PtVertexController::add {libname iconname} {
     set type [$icon getChildElement entitytype]
     set realname [$type getAttribute "name"]
 
-    set uniqueName [::tycho::autoName $realname]
+    if { $uniqueName == "" } {
+	set uniqueName [::tycho::autoName $realname]
+    }
     $simulation addActor $realname $uniqueName
 
     # Mess with the history
@@ -170,9 +172,11 @@ body ::tycho::PtVertexController::add {libname iconname} {
 	    -icon $libname.$iconname
 
     # Place the icon
-    set coords [$slateview place]
+    if { $coords == "" } {
+	set coords [$slateview place]
+    }
     eval place [list $iconlib $iconname $uniqueName] $coords
-	
+
     # Notify views that the data has been modified
     $layout notify event "modified"
     $graph notify event "modified"

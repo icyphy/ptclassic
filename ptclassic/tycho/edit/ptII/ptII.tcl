@@ -79,13 +79,13 @@ if [info exists tk_version] {
 	    [file join ~ .Tycho styles ptII.style]
 
     ### MODE MAPPINGS
-    ::tycho::register extensions "ptII" .ptII
+    ::tycho::register extensions "ptml" .ptml
 
     ### MODES
     ########### graphical editors (alphabetical)
 
     # Basic graph viewer
-    ::tycho::register mode "ptII" \
+    ::tycho::register mode "ptml" \
 	    -command {::tycho::view PtGraphEditor -file {%s}} \
 	    -viewclass ::tycho::PtGraphEditor \
 	    -label {Ptolemy II}  \

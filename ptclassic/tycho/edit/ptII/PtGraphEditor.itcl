@@ -353,6 +353,8 @@ body ::tycho::PtGraphEditor::constructor {args} {
     set domainList [$_domainLibrary domains]
     # puts "Domains are: $domainList"
 
+    # Reload because of weird initialization problems
+    reload
 }
 
 ########################################################################
@@ -658,26 +660,34 @@ body ::tycho::PtGraphEditor::clear {} {
         $_graph notify event clear
     }
     layout clear
+    puts "Simulation is \"$_simulation\""
+    if { $_simulation != "" } {
+        $_simulation clear
+    }
 }
 
 #####################################################################
 #### insertData
-# Insert the specified data. This is a PortedGraph model that
-# must contain a "layout" annotation.
+# Insert the specified data.
 #
 body ::tycho::PtGraphEditor::insertData {data} {
+    puts insertData
+    
+    if { $_simulation == "" } {
+	return
+    }
+
     # Delete all data
     clear
 
-    # Load the data into the models
-    $_graph parse $data
-    $_layout parse [$_graph attrget layout -data]
-    $_graph attrset layout -data {}
-
-    # Load the new data into this view
-    layout load
-
-    # FIXME FIXME FIXME: the above has to motify other views.
+    # Load the data
+    set schematic [::tycho::PtSchematic #auto]
+    puts "$schematic"
+    $schematic parse $data
+    $schematic construct $_simulation $_graph $_layout "MyName" \
+	    [$itk_component(runWindow) component domain] \
+	    $vertexcontroller \
+	    $edgecontroller
 }
 
 #####################################################################
@@ -687,7 +697,7 @@ body ::tycho::PtGraphEditor::insertData {data} {
 #
 body ::tycho::PtGraphEditor::saveText {} {
     set schematic [::tycho::PtSchematic #auto]
-    $schematic load $_simulation $_graph $_layout
+    $schematic load $_simulation $_graph $_layout "WhoAmI?"
     $schematic getText
 }
 

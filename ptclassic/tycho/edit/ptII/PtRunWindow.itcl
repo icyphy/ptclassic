@@ -92,8 +92,8 @@ class ::tycho::PtRunWindow {
     # Callback for director changed
     method _directorChanged {} {
 	$itk_component(time) setDirector \
-		[$itk_component(execution) getDomain] \
-                [$itk_component(execution) getDirector]
+		[$itk_component(domain) getDomain] \
+                [$itk_component(domain) getDirector]
     }
 
     # Callback for time changed
@@ -206,15 +206,15 @@ body ::tycho::PtRunWindow::constructor {args} {
     # FIXME ????
     set cmd ::tycho::$_simulationName
 
-    # Create the execution panel
-    itk_component add execution {
-	::tycho::PtDomainPanel $itk_interior.execution \
+    # Create the domain panel
+    itk_component add domain {
+	::tycho::PtDomainPanel $itk_interior.domain \
 		-domainLibrary $domainLibrary \
 		-simulation $simulation
     } {
 	keep -background -cursor -font
     }
-    pack $itk_component(execution) -side left -expand no \
+    pack $itk_component(domain) -side left -expand no \
 	    -padx 2 -pady 4 \
 	    -anchor n
 
@@ -231,7 +231,7 @@ body ::tycho::PtRunWindow::constructor {args} {
 	    -padx 2 -pady 4 \
 	    -anchor n
 
-    $itk_component(execution) configure \
+    $itk_component(domain) configure \
 		-directorCallback "$this _directorChanged"
 
     # Do this to force correct parameter display
