@@ -47,7 +47,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // constructor
 MultiTarget::MultiTarget(const char* name,const char* starclass,
 		   const char* desc) : CGTarget(name,starclass,desc),
-	nChildrenAlloc(0), curChild(0), iters(0)
+	nChildrenAlloc(0)
 {
 	// loop scheduler makes no sense for a multitarget
 	loopingLevel.setAttributes(A_NONSETTABLE);
