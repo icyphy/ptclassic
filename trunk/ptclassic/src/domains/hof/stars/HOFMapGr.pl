@@ -140,6 +140,9 @@ Example of a connection to the replacement block
 				"Unable to create instance of block: ",
 				myblock->name());
 	      }
+	      // Set the target
+	      if (target()) block->setTarget(target());
+
 	      // Choose a name for the block
 	      StringList instancename = "Map_";
 	      instancename += (const char*)myblock->name();
