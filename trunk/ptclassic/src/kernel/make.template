@@ -74,6 +74,7 @@ CCS_WITH_H_FILES=\
  SimControl.cc \
  Star.cc \
  State.cc \
+ StringArrayState.cc \
  StringList.cc \
  StringState.cc \
  Target.cc \
