@@ -52,8 +52,12 @@ static const char file_id[] = "miscImpl.cc";
 char* tempFileName() {
 	int pid = (int) getpid();
 	static int count = 1;
-	LOG_NEW; char* buf = new char[17];
+	LOG_NEW; char* buf = new char[255];
+#ifdef PT_NT4VC
+	sprintf (buf, "%s\\pt%04x.%04d", getenv("TEMP"), pid, count);
+#else
 	sprintf (buf, "/tmp/pt%04x.%04d", pid, count);
+#endif
 	count++;
 	return buf;
 }
