@@ -39,11 +39,17 @@ public:
 
 	// don't redefine type(), baseclass version returns "STRING"
 
-        // the value as a string
+        // get the value as a string
 	StringList currentValue() const;
 
 	// for use as a string in stars
 	operator const char* () { return val;}
+
+	// various ways to initialize the current value
+	// The StringList form is nonconst because it calls consolidate()
+	StringState& operator=(const char* newStr);
+	StringState& operator=(StringList& newStrList);
+	StringState& operator=(const State& newState);
 
 	// class identification
 	int isA(const char*) const;
