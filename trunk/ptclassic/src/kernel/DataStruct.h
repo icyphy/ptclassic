@@ -1,9 +1,15 @@
-#ifndef _DataStruct_h
-#define _DataStruct_h 1
 
-#include "type.h"
+/**************************************************************************
+Version identification:
+$Id$
 
-/**************************************************************
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  D. G. Messerschmitt
+ Date of creation: 1/17/89
+ Revisions:
+
 This header file contains basic container class data structures
 used widely. Each container class stores a set of void*'s,
 with different ways of accessing them. Normally, a data structure
@@ -11,10 +17,12 @@ is derived from one of these classes by adding conversion from
 the type of interest to and from the void*, allocating and
 deallocating memory for the objects, etc.
 
-Programmer: D.G. Messerschmitt
-	    U.C. Berkeley
-Date: Jan 10, 1990
-**************************************************************/
+**************************************************************************/
+#ifndef _DataStruct_h
+#define _DataStruct_h 1
+
+#include "type.h"
+
 
 	//////////////////////////////////////
 	// class SingleLink
@@ -164,6 +172,9 @@ protected:
 	// Return and element of the vector, given index
 	Pointer elem (int index);
 
+	// Clear out the data structure
+	void clear() {SingleLinkList::clear(); dimen=0;}
+
 	Vector() {dimen = 0;}
 
 private:
@@ -199,7 +210,7 @@ public:
 	int length() {return numberNodes;}
 
 	// Clear the queue
-        void clear() {SingleLinkList::clear();}
+        void clear() {SingleLinkList::clear(); numberNodes=0;}
 
 	Queue() {numberNodes = 0;}
 };
@@ -235,6 +246,9 @@ protected:
 	// first element that was added to the list
 	void reset() {SingleLinkList::reset();}
 
+	// Clear the data structure
+	void clear() {SingleLinkList::clear(); dimen=0;}
+
 	SequentialList() {dimen=0;}
 
 private:
@@ -266,6 +280,9 @@ protected:
 
 	// Access but do not remove element from top of stack
 	Pointer accessTop() {return getNotRemove();}
+
+	// Clear the data structure
+	void clear() {SingleLinkList::clear(); dimen=0;}
 
 	int size() {return dimen;}
 
