@@ -207,7 +207,6 @@ hp_configure: $(GNU_OBJ)
 	-(cd $(GNU_OBJ)/bfd; ln -s $(HP_GNU_SRC)/bfd/*.c .)
 	-(cd $(GNU_OBJ)/opcodes; ln -s $(HP_GNU_SRC)/opcodes/*.c .)
 	-(cd $(GNU_OBJ)/binutils; ln -s $(HP_GNU_SRC)/binutils/*.c .)
-	-(cd $(GNU_OBJ)/gas; ln -s $(HP_GNU_SRC)/gas/*.c .)
 	-(cd $(GNU_OBJ)/make; ln -s $(HP_GNU_SRC)/make/*.c .)
 	-(cd $(GNU_OBJ)/make/glob; ln -s $(HP_GNU_SRC)/make/glob/*.h .)
 	-(cd $(GNU_OBJ)/make/glob; ln -s $(HP_GNU_SRC)/make/glob/*.c .)
@@ -242,6 +241,7 @@ hp_configure: $(GNU_OBJ)
 # Set up links for GNU as.
 hp_pregcc_install: $(GNU_DEST)/$(PTARCH)
 	(cd $(GNU_OBJ)/gcc; $(MAKE)  install-dir)
+	if [ ! -d $(GNU_OBJ)/gas; ] then mkdir $(GNU_OBJ)/gas; fi
 	-ln -s $(GNU_OBJ)/gas/as.new $(GNU_OBJ)/gas/as
 	-chmod a+x $(GNU_OBJ)/gas/as.new
 	-ln -s $(GNU_EXEC_PREFIX)/bin/as  $(GNU_EXEC_PREFIX)/lib/gcc-lib/$(HP_MACH)/$(GCC_VERSION)/as
