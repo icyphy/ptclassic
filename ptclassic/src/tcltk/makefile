@@ -189,11 +189,23 @@ fixlinks:
 	#@echo "Create links for the itcl2.1 lib files in the directory"
 	#@echo " where itcl2.0 lib files were"
 	#-(cd $(ITCL_DEST)/lib; ln -s itcl/* .)
+	@echo "Create links for systems that require shared lib versioning"
+	@echo " such as sun4 and freebsd"
 	-(cd $(ITCL_DEST)/lib/itcl; \
-		ln -s libtcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)i.$(LIBSUFFIX) libtcl.$(LIBSUFFIX); \
-		ln -s libtk$(ITCL_TK_MAJOR_VERSION_NUMBER)i.$(LIBSUFFIX) libtk.$(LIBSUFFIX); \
-		ln -s libitcl$(ITCL_MAJOR_VERSION_NUMBER).$(LIBSUFFIX) libitcl.$(LIBSUFFIX); \
-		ln -s libitk$(ITCL_MAJOR_VERSION_NUMBER).$(LIBSUFFIX) libitk.$(LIBSUFFIX))
+		if [ -f $(ITCL_DEST)/lib/itcl/libtcl$(TCL_VERSION_NUM).so.1.0 ]; then \
+			echo "Hack for sun4 versioned shared libs"; \
+			LIBVERSION=.1.0; \
+			LIBSUFFIX=so; \
+		else \
+			LIBVERSION=""; \
+			LIBSUFFIX=$(LIBSUFFIX); \
+		fi; \
+		rm -f libtcl.$$LIBSUFFIX libtk.$$LIBSUFFIX libitcl.$$LIBSUFFIX libitk.$$LIBSUFFIX; \
+		ln -s libtcl$(TCL_VERSION_NUM).$$LIBSUFFIX$$LIBVERSION libtcl.$$LIBSUFFIX; \
+		ln -s libtk$(TK_VERSION_NUM).$$LIBSUFFIX$$LIBVERSION libtk.$$LIBSUFFIX; \
+		ln -s libitcl$(ITCL_VERSION_NUM).$$LIBSUFFIX$$LIBVERSION libitcl.$$LIBVERSION; \
+		ln -s libitk$(ITCL_VERSION_NUM).$$LIBSUFFIX$$LIBVERSION libitk.$$LIBVERSION; \
+	)
 	@echo "Create a links for itclsh to ish"
 	-(cd $(ITCL_DEST)/bin; rm -f tclsh itkwish itclsh)
 	-(cd $(ITCL_DEST)/bin; ln -s ish$(ITCL_TCL_MAJOR_VERSION_NUMBER) tclsh)
