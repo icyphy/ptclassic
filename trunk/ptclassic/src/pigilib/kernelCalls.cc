@@ -529,6 +529,7 @@ KcProfile (char* name) {
 	if (desc[strlen(desc)-1] != '\n')
 		accum_string ("\n");
 // get termlist
+	if (!tFlag) {
 	TermList terms;
 	KcGetTerms (name, &terms);
 	if (terms.in_n) accum_string ("Inputs:\n");
@@ -548,7 +549,8 @@ KcProfile (char* name) {
 		accum_string (": ");
 		accum_string (terms.out[i].type);
 		accum_string ("\n");
-	}
+	} // end forloop
+	} // end if (!tFlag)
 // now do states
 	displayStates(b);
 	pr_accum_string ();
@@ -633,6 +635,7 @@ Set the target for the universe
 */
 extern "C" int
 KcSetTarget(const char* targetName) {
+	LOG << "(target " << targetName << ")\n";
 	return universe->newTarget (savestring(targetName));
 }
 
