@@ -71,6 +71,10 @@ public:
 	// code generation
 	void generateCode();
 
+	// Match comm. nodes with the comm. stars created during subGalaxy
+	// generation.
+	ParNode* matchCommNodes(SDFStar*, EGGate*, PortHole*);
+
 protected:
 	// number of processors.
 	int numProcs;

@@ -43,7 +43,7 @@ void ParProcessors :: initialize()
 	// initialize parallel schedules.
 	for (i = 0; i < numProcs; i++) {
 		UniProcessor* p = getProc(i);
-		p->setTarget(mtarget);
+		p->setTarget(mtarget, this);
 		p->initialize();
 	}
 
@@ -200,11 +200,6 @@ void ParProcessors::findCommNodes(ParGraph* graph, EGNodeList& readyNodes) {
 				if (hidden) {
 					// can be done later
 					rnode->assignSL(1);
-					// disable to fire rnode again.
-					if (desc->root()) {
-						desc->incWaitNum();
-						rnode->setFinishTime(0);
-					}
 				} else {
 					rnode->assignSL(desc->getLevel());
 				}
@@ -212,7 +207,7 @@ void ParProcessors::findCommNodes(ParGraph* graph, EGNodeList& readyNodes) {
 
 				// 3. insert them into the graph.
 				pg->connectedTo(snode);
-				rnode->connectedTo(desc);
+				if (!hidden) rnode->connectedTo(desc);
 				snode->connectedTo(rnode);
 
 				snode->setPartner(rnode);
@@ -230,6 +225,32 @@ void ParProcessors::findCommNodes(ParGraph* graph, EGNodeList& readyNodes) {
 
 ParNode*  ParProcessors :: createCommNode(int i) {
 	LOG_NEW; return new ParNode(i);
+}
+
+/*****************************************************************
+		Match comm. nodes with given comm. star
+ ****************************************************************/
+
+ParNode* ParProcessors :: matchCommNodes(SDFStar* s, EGGate* g, PortHole* p) {
+	// set the cloned star pointer of the comm. node
+	EGNodeListIter iter(SCommNodes);
+	ParNode* pn;
+	ParNode* saven = 0;
+	while ((pn = (ParNode*) iter++) != 0) {
+		if (g) {
+			if (pn->getOrigin() == g) {
+				pn->setCopyStar(s,0);
+				s->setMaster(pn);
+				return pn;
+			}
+		} else {
+			if (pn->getOrigin()->aliasedPort() == p) {
+				pn->setCopyStar(s,0);
+				saven = pn;
+			}
+		}
+	}
+	return saven;
 }
 
 /*****************************************************************
