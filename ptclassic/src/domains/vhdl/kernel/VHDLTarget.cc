@@ -755,7 +755,7 @@ StringList VHDLTarget :: addGenericRefs(VHDLGenericList* genList, int level/*=0*
 	body << ";\n";
       }
       body << indent(level) << ngen->name << ": " << ngen->type;
-      if (strlen(ngen->defaultVal) > 0) {
+      if (ngen->defaultVal.length() > 0) {
 	body << " := " << ngen->defaultVal;
       }
       genCount++;
