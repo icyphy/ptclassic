@@ -61,6 +61,7 @@ char* expandPathName(const char* name) {
     const char* whitespace = "\r";	// allow TABS and SPACES in file name
     Tokenizer lexer(name, specialChars, whitespace);
     lexer.setCommentChar('\n');		// override default comment char '#'
+    lexer.setQuoteChar('\002');		// unprintable quote character CTRL-B
 
     while(!lexer.eof()) {
 	char tokbuf[MAXSTRINGLEN];
@@ -68,7 +69,7 @@ char* expandPathName(const char* name) {
 	char c = tokbuf[0];
 	if (c != 0 && tokbuf[1]) c = 0;
 	switch (c) {
-	case '~' : {
+	  case '~' : {
 	    // we only expand the first tilda
 	    if (expandedPath.numPieces() != 0) {
 		expandedPath << '~';
@@ -94,12 +95,12 @@ char* expandPathName(const char* name) {
 		    expandedPath << pwd->pw_dir;
 	    }
 	    break;
-	}    
-	case '/' : {
+	  }    
+	  case '/' : {
 	    expandedPath << '/';
 	    break;
-	}
-	case '$' : {
+	  }
+	  case '$' : {
 	    // next token might be an environment variable
 	    lexer >> tokbuf;
 	    const char* value = getenv (tokbuf);
@@ -108,10 +109,10 @@ char* expandPathName(const char* name) {
 	    else
 		expandedPath << value;
 	    break;
-	}
-	default: {
+	  }
+	  default: {
 	    expandedPath << tokbuf;
-	}
+	  }
 	}
     }
     return savestring(expandedPath);
