@@ -26,11 +26,22 @@ $Id$
 
 extern "C" double pow(double,double);
 
+// return an expanded version of the filename argument, which may
+// start with "~", "~user", or "$var".  The returned value points
+// to static storage and is wiped out by the next call.
 const char* expandPathName(const char*);
+
+// return a new, unique temporary file name.  It lives on the heap
+// and may be deleted when no longer needed.
+char* tempFileName();
 
 inline char* savestring (const char* txt) {
 	INC_LOG_NEW; return strcpy (new char[strlen(txt)+1], txt);
 }
+
+// Save the string in a systemwide hash table, if it is not there
+// already, and return a pointer to the saved copy.  Subsequent
+// hashstrings with the same string return the same address.
 
 const char* hashstring(const char*);
 
@@ -39,42 +50,5 @@ const char* hashstring(const char*);
 
 int power(int base,int exp);
 inline double power(double base,double exp) { return pow(base,exp);}
-
-#ifdef ADD_BUILTIN_INLINES
-// these functions are needed to build with libg++ versions older
-// than 1.39.0.
-
-inline signed char min(signed char a, signed char b) { return (a < b)?a:b;}
-inline unsigned char min(unsigned char a, unsigned char b) {return (a < b)?a:b;}
-
-inline signed short min(signed short a, signed short b) {return (a < b) ?a:b;}
-inline unsigned short min(unsigned short a, unsigned short b) {return (a < b)?a:b;}
-
-inline signed int min(signed int a, signed int b) {return (a < b)?a:b;}
-inline unsigned int min(unsigned int a, unsigned int b) {return (a < b)?a:b;}
-
-inline signed long min(signed long a, signed long b) {return (a < b)?a:b;}
-inline unsigned long min(unsigned long a, unsigned long b) {return (a < b)?a:b;}
-
-inline float min(float a, float b) {return (a < b)?a:b;}
-
-inline double min(double a, double b) {return (a < b)?a:b;}
-
-inline signed char max(signed char a, signed char b) { return (a > b)?a:b;}
-inline unsigned char max(unsigned char a, unsigned char b) {return (a > b)?a:b;}
-
-inline signed short max(signed short a, signed short b) {return (a > b) ?a:b;}
-inline unsigned short max(unsigned short a, unsigned short b) {return (a > b)?a:b;}
-
-inline signed int max(signed int a, signed int b) {return (a > b)?a:b;}
-inline unsigned int max(unsigned int a, unsigned int b) {return (a > b)?a:b;}
-
-inline signed long max(signed long a, signed long b) {return (a > b)?a:b;}
-inline unsigned long max(unsigned long a, unsigned long b) {return (a > b)?a:b;}
-
-inline float max(float a, float b) {return (a > b)?a:b;}
-
-inline double max(double a, double b) {return (a > b)?a:b;}
-#endif
 
 #endif
