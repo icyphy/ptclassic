@@ -98,6 +98,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "port.h"
 #define MAIN_XG
 #include "xglocal.h"
+#ifdef PTSVR4
+#include "utility.h"
+#endif
 
 static void xgiWriteValue
 	ARGS((char *str, double	val, int exp));
