@@ -21,27 +21,28 @@ $Id$
 #include "StringList.h"
 #include "Block.h"
 #include "Output.h"
+#include "GalIter.h"
 
 StringList checkConnect (Galaxy& g) {
+	GalStarIter next(g);
 	StringList msg;
 
-	for (int n = g.numberBlocks(); n > 0; n--) {
-		Block& b = g.nextBlock();
-		if (!b.isItAtomic()) {
-			msg += checkConnect (b.asGalaxy());
+	Star* s;
+	// iterate over every star
+	while ((s = next++) != 0) {
+		// error if no portholes
+		if (s->numberPorts() == 0) {
+			msg += s->readFullName();
+			msg += " has no portholes\n";
+			break;
 		}
-		else {
-			int nPorts = b.numberPorts();
-			if (nPorts == 0) {
-				msg += b.readFullName();
-				msg += " has no portholes\n";
-			}
-			else for (int m = nPorts; m > 0; m--) {
-				PortHole& p = b.nextPort ();
-				if (!p.far()) {
-					msg += b.readFullName();
-					msg += " is not connected\n";
-				}
+		// error if any porthole is disconnected
+		BlockPortIter nextp(*s);
+		PortHole* p;
+		while ((p = nextp++) != 0) {
+			if (!p->far()) {
+				msg += p->readFullName();
+				msg += " is not connected\n";
 			}
 		}
 	}
@@ -50,8 +51,10 @@ StringList checkConnect (Galaxy& g) {
 
 int warnIfNotConnected (Galaxy& g) {
 	StringList msg = checkConnect (g);
-	if (msg.size() > 0) {
-		errorHandler.error (msg);
+	char* str = msg;	// cast to char*
+	// check for non-zero-length message
+	if (str) {
+		errorHandler.error (str);
 		return 1;
 	}
 	else return 0;
