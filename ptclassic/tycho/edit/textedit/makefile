@@ -49,6 +49,7 @@ ITCL_SRCS = \
 	EditEsterel.itcl \
 	EditHTML.itcl \
 	EditItcl.itcl \
+	EditJava.itcl \
 	EditMake.itcl \
 	EditProgram.itcl \
 	EditPtcl.itcl \
