@@ -72,17 +72,16 @@ and $i( tau )$ is the data input.
 	go {
 	   // If the data input is new, update the state.
 	   if (data.dataNew) {
-		state = double(data%0) + double(state) *
+		state = double(data.get()) + double(state) *
 		   pow(double(decay),(arrivalTime-double(tau)));
 		tau = arrivalTime;
-		data.dataNew = FALSE;
 	   }
 	   // Produce an output only if the clock input is new.
 	   if (clock.dataNew) {
-		double t = double(state) *
+		float t = double(state) *
 			pow(double(decay),(arrivalTime-double(tau)));
 		completionTime = arrivalTime;
-		output.put(completionTime) << float(t);
+		output.put(completionTime) << t;
 		clock.dataNew = FALSE;
 	   }
 	}
