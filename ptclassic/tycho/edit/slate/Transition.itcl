@@ -126,7 +126,7 @@ body ::tycho::Transition::_entry {id canvas slate entry} {
     set endx   [lindex $coords [expr $len-2]]
     set endy   [lindex $coords [expr $len-1]]
 
-    if {$option(entry$id) == "default"} {
+    if {$option(entry$id) == "history"} {
         set radius 7.0
         set angle  $option(iangle$id)
 
@@ -141,16 +141,29 @@ body ::tycho::Transition::_entry {id canvas slate entry} {
         if {[info exists component(entry$id)]} {
             # Move the small circle and label
             eval $canvas coords $component(entry$id) $pCoords
-            $canvas coords $component(entryLabel$id) \
-                    $centx [expr $centy-2] $centx [expr $centy+3]
-
+            $canvas coords $component(entryLabel1$id) \
+                    [expr $centx-1] [expr $centy-2] \
+                    [expr $centx-1] [expr $centy+3]
+            $canvas coords $component(entryLabel2$id) \
+                    [expr $centx-1] $centy [expr $centx+1] $centy
+            $canvas coords $component(entryLabel3$id) \
+                    [expr $centx+1] [expr $centy-2] \
+                    [expr $centx+1] [expr $centy+3]
         } else {
             # Create a small circle and label
             set component(entry$id) [eval $canvas create oval $pCoords \
                     [list -fill white -tags [$canvas gettags $primary($id)]]]
-            set component(entryLabel$id) [$canvas create line \
-                    $centx [expr $centy-2] $centx [expr $centy+3] \
-                    -width 2 -tags [$canvas gettags $primary($id)]]
+            set component(entryLabel1$id) [$canvas create line \
+                    [expr $centx-1] [expr $centy-2] \
+                    [expr $centx-1] [expr $centy+3] \
+                    -tags [$canvas gettags $primary($id)]]
+            set component(entryLabel2$id) [$canvas create line \
+                    [expr $centx-1] $centy [expr $centx+1] $centy \
+                    -tags [$canvas gettags $primary($id)]]
+            set component(entryLabel3$id) [$canvas create line \
+                    [expr $centx+1] [expr $centy-2] \
+                    [expr $centx+1] [expr $centy+3] \
+                    -tags [$canvas gettags $primary($id)]]
             
         }
 
@@ -178,11 +191,15 @@ body ::tycho::Transition::_entry {id canvas slate entry} {
         if {[info exists component(entry$id)]} {
             # delete the small circle and label
             $canvas delete $component(entry$id)
-            $canvas delete $component(entryLabel$id)
+            $canvas delete $component(entryLabel1$id)
+            $canvas delete $component(entryLabel2$id)
+            $canvas delete $component(entryLabel3$id)
 
             # unset the info
             unset component(entry$id)
-            unset component(entryLabel$id)
+            unset component(entryLabel1$id)
+            unset component(entryLabel2$id)
+            unset component(entryLabel3$id)
         }
 
         # Adjust the real line:
@@ -205,7 +222,9 @@ body ::tycho::Transition::_fill {id canvas slate fill} {
     }
     if {[info exists component(entry$id)]} {
         $canvas itemconfigure $component(entry$id) -outline $fill
-        $canvas itemconfigure $component(entryLabel$id) -fill $fill
+        $canvas itemconfigure $component(entryLabel1$id) -fill $fill
+        $canvas itemconfigure $component(entryLabel2$id) -fill $fill
+        $canvas itemconfigure $component(entryLabel3$id) -fill $fill
     }
 }
 
