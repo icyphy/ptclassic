@@ -82,6 +82,8 @@ void Block :: initialize()
 		nextPort().initialize();
         // initialize States
         initState();
+	// call user-specified initialization
+	start();
 }
 
 // This method returns a PortHole corresponding to the given name.
