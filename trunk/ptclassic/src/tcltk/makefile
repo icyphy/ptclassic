@@ -151,25 +151,25 @@ config_itcl: $(TCLTK_OBJ) $(ITCL_OBJ)  $(TCL_OBJ) $(TK_OBJ) $(ITCL_OBJ)/itcl $(I
 		$(ENABLE_SHARED) $(ENABLE_GCC))
 
 $(TCLTK_OBJ): 
-	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
 
 $(ITCL_OBJ): $(TCLTK_OBJ)
-	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
 
 $(TCL_OBJ): $(ITCL_OBJ)
-	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
 
 $(TK_OBJ): $(ITCL_OBJ)
-	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
 
 $(ITCL_OBJ)/itcl: $(ITCL_OBJ)
-	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
 
 $(ITCL_OBJ)/itk: $(ITCL_OBJ)
-	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
 
 $(IWIDGETS_OBJ): $(ITCL_OBJ)
-	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
 
 itcl: $(ITCL_OBJ) $(ITCL_OBJ)/libitcl.a 
 $(ITCL_OBJ)/libitcl.a: $(ITCL_OBJ) 
@@ -198,7 +198,17 @@ $(ITCL_INDEPENDENT_DEST)/include/tclRegexp.h:
 		cp $(ITCL_SRC)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)/generic/tclRegexp.h $@; \
 	fi
 
-$(ITCL_DEST_LIB)/libitcl.a:
+
+$(ITCL_INDEPENDENT_DEST):
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
+
+$(ITCL_DEST):
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
+
+$(ITCL_DEST_LIB): $(ITCL_DEST)
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
+
+$(ITCL_DEST_LIB)/libitcl.a: $(ITCL_DEST_LIB) $(ITCL_INDEPENDENT_DEST)
 	@echo "Making install in itcl"
 	(cd  $(ITCL_OBJ); $(MAKE) \
 		CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS)" \
@@ -216,8 +226,8 @@ fixlinks:
 		ln -s iwidgets$(IWIDGETS_MAJOR_VERSION_NUMBER) iwidgets )
 	@echo "Create links for systems that require shared lib versioning"
 	@echo " such as sun4 and freebsd"
-	-(cd $(ITCL_DEST)/lib; \
-		if [ -f $(ITCL_DEST)/lib/itcl/libtcl$(TCL_VERSION_NUM).so.1.0 ]; then \
+	-(cd $(ITCL_DEST_LIB); \
+		if [ -f $(ITCL_DEST_LIB)/itcl/libtcl$(TCL_VERSION_NUM).so.1.0 ]; then \
 			echo "Hack for sun4 versioned shared libs"; \
 			LIBVERSION=.1.0; \
 			LIBSUFFIX=so; \
@@ -289,13 +299,13 @@ install_tcltk8: $(TCL8_DEST) $(TCL8_INDEPENDENT_DEST)
 	(cd $(TK8_OBJ); PWD=$(TK8_OBJ); export PWD; $(MAKE) install)
 
 $(TCL8_OBJ): $(TCLTK_OBJ)
-	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
 $(TK8_OBJ): $(TCLTK_OBJ)
-	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
 $(TCL8_DEST): $(TCLTK_DEST)
-	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
 $(TCL8_INDEPENDENT_DEST): $(TCLTK_DEST)
-	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
 
 
 ######################################################
@@ -357,7 +367,7 @@ time_tclblend:
 	time jtclsh)
 
 $(TCLBLEND_OBJ): $(TCLTK_OBJ)
-	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
 
 ######################################################
 # Jacl
@@ -398,7 +408,7 @@ time_jacl:
 	time java tcl.lang.Shell)
 
 $(JACL_OBJ): $(TCLTK_OBJ)
-	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
 
 ######################################################
 # Tcldp
@@ -448,9 +458,9 @@ $(TCLDP_DEST)/init.tcl: $(TCLDP_DEST)
 	echo "source [file join \$$dir rpc.tcl]" >> $@
 
 $(TCLDP_OBJ): $(TCLTK_OBJ)
-	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
 $(TCLDP_DEST): $(TCLTK_DEST)
-	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
 
 ######################################################
 # Tcl8dp
@@ -500,9 +510,9 @@ $(TCL8DP_DEST)/init.tcl: $(TCL8DP_DEST)
 	echo "source [file join \$$dir rpc.tcl]" >> $@
 
 $(TCL8DP_OBJ): $(TCLTK_OBJ)
-	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
 $(TCL8DP_DEST): $(TCLTK_DEST)
-	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
 
 
 ######################################################
