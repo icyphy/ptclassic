@@ -35,6 +35,11 @@
 # reasonable behaviour for arbitrary preference sets. If more
 # complex layout is needed, you may need to write your own widget.
 #
+# Currently, this widget assumes that it is editing a preference
+# group. This needs to be generalized so that it can items in any
+# NamedData or TypedData class, with an optional prefix (or pattern?)
+# to select the items to be edited.
+#
 class ::tycho::PreferenceEditor {
     inherit ::tycho::Query
 
@@ -48,15 +53,52 @@ class ::tycho::PreferenceEditor {
     # The name of the preference set I am editing
     itk_option define -preferences preference Preferences {}
 
+    # The name of the preference dialog who started me
+    itk_option define -parentdialog parentDialog ParentDialog {}
+
     ###################################################################
     ####                         public methods                    ####
+
+    # Build a non-modal color browser
+    method editcolor {preference description current}
+
+    # Build a non-modal font browser
+    method editfont {preference description current}
 
     # Update specified or changed preferences
     method update {args}
 
+    # Update a color field from a non-modal color browser
+    method updatecolor {preference dialog}
+
+    # Update a color field display from a non-modal color browser
+    method updatecolorbutton {preference dialog}
+
+    # Update a color dialog box with the current preference
+    method updatecolordialog {preference dialog}
+
+    # Update a font field from a non-modal font browser
+    method updatefont {preference dialog}
+
+    # Update a font field display from a non-modal font browser
+    method updatefontbutton {preference dialog}
+
+    # Update a font dialog box with the current preference
+    method updatefontdialog {preference dialog}
+
+    ###################################################################
+    ####                         private procs                     ####
+
+    # Compare two lists by element 1
+    private proc cmp {a b} {
+	string compare [lindex $a 1] [lindex $b 1]
+    }
+
     ###################################################################
     ####                       private variables                   ####
-    private common variables
+
+    # List of editors opened by this editor
+    private variable editors {}
 }
 
 
@@ -71,36 +113,63 @@ configbody ::tycho::PreferenceEditor::preferences {
     configure -title [::tycho::preference cget $group -description]
     configure -labelcolor [::tycho::color blue black]
 
-    foreach preference [::tycho::preference names $group] {
-	set description [::tycho::preference description $group $preference]
+    # Initialize lists of preferences by type
+    foreach type {boolean choice font color integer string number} {
+	set _$type {}
+    }
+    # Build list of preferences by type
+    foreach preference [::tycho::preference preferences $group] {
+	set description \
+		[::tycho::preference cget $group $preference -description]
+	set type \
+		[::tycho::preference cget $group $preference -type]
 	if { $description != "" } {
-	    switch -exact [::tycho::preference cget $group $preference -type] {
-		"integer" -
-		"number" -
-		"string" {
-		    line $preference $description \
-			    [::tycho::preference get $group $preference]
-		}
-		"choice" {
-		    radio $preference $description \
-			    [::tycho::preference cget $group $preference -values] \
-			    [::tycho::preference get $group $preference]
-		}
-		"boolean" {
-		    check $preference $description \
-			    [::tycho::preference get $group $preference]
-		}
-		"custom" {
-		    mediated $preference $description \
-			    [::tycho::preference get $group $preference] \
-			    [::tycho::preference cget $group $preference -edit]
-		}
-		default {
-		    line $preference $description \
-			    [::tycho::preference get $group $preference]
-		}
-	    }
+	    lappend _$type [list $preference $description]
 	}
+
+	# Subscribe to the preference so undo and redo update the display
+	::tycho::preference subscribe $this $group $preference \
+		"$this clear $preference; $this insert $preference \
+		\[::tycho::preference get $group $preference\]"
+    }
+
+    # Sort the lists of preferences by description
+    foreach type {boolean choice font color integer string number} {
+	set _$type [eval concat \
+		[lsort -command ::tycho::PreferenceEditor::cmp [set _$type]]]
+    }
+
+    # Build the preferences queries. Booleans are a checkbox.
+    foreach {p d} $_boolean {
+	check $p $d [::tycho::preference get $group $p]
+    }
+    # Choice is a set of radiobuttons
+    foreach {p d} $_choice {
+	radio $p $d \
+		[::tycho::preference cget $group $p -values] \
+		[::tycho::preference get $group $p]
+    }
+    # Numbers and strings are entry widgets
+    foreach {p d} $_integer {
+	line $p $d [::tycho::preference get $group $p]
+    }
+    foreach {p d} $_number {
+	line $p $d [::tycho::preference get $group $p]
+    }
+    foreach {p d} $_string {
+	line $p $d [::tycho::preference get $group $p]
+    }
+    # Fonts are a non-modal font browser
+    foreach {p d} $_font {
+	mediated $p $d \
+		[::tycho::preference get $group $p] \
+		[list $this editfont $p $d]
+    }
+    # Colors are a non-modal color browser
+    foreach {p d} $_color {
+	mediated $p $d \
+		[::tycho::preference get $group $p] \
+		[list $this editcolor $p $d]
     }
 }
 
@@ -121,24 +190,250 @@ body ::tycho::PreferenceEditor::constructor {args} {
 }
 
 #######################################################################
+#### destructor
+#
+# Unsubscribe from preferences and delete sub-editors
+#
+body ::tycho::PreferenceEditor::destructor {} {
+    ::tycho::preference unsubscribe $this
+    foreach e $editors {
+	catch {delete object $e}
+    }
+}
+
+#######################################################################
+#### editcolor
+#
+body ::tycho::PreferenceEditor::editcolor {preference description current} {
+    set group $itk_option(-preferences)
+    set dialog .$preference
+
+    # If there's already one of these, just raise it
+    if { [::info which -command $dialog] != "" } {
+	raise $dialog
+	return $current
+    }
+
+    # Make a color browser
+    uplevel #0 [list ::tycho::ColorBrowser $dialog \
+	    -title $description \
+	    -default $current]
+    wm deiconify $dialog
+
+    # Remember it
+    lappend editors $dialog
+
+    # Give it an apply button. Pressing it applies the change.
+    $dialog addButton apply -row 1 -column 0 \
+	    -text "Apply" \
+	    -command "$this updatecolor $preference $dialog"
+
+    # Subscribe to the preference so undo and redo update the dialog
+    ::tycho::preference subscribe $dialog $group $preference \
+	    "$this updatecolordialog $preference $dialog"
+
+    # We have to modify the buttons to update the color
+    $dialog configure -okcommand "$this updatecolor $preference $dialog"
+
+    # Return the same value, to fool Query into thinking
+    # that nothing happened. The problem is that the "mediated"
+    # query in Query assumes that the returned result is
+    # the new value of the query.
+    return $current
+}
+
+#######################################################################
+#### editfont
+#
+body ::tycho::PreferenceEditor::editfont {preference description current} {
+    set group $itk_option(-preferences)
+    set dialog .$preference
+
+    # If there's already one of these, just raise it
+    if { [::info which -command $dialog] != "" } {
+	raise $dialog
+	return $current
+    }
+
+    # Make a font browser but don't map it to the screen yet
+    uplevel #0 [list ::tycho::FontDialog $dialog \
+	    -title $description \
+ 	    -initialfont $current]
+
+    # Remember it
+    lappend editors $dialog
+
+    # Give it an apply button. Pressing it applies the change.
+    $dialog addButton apply -row 0 -column 2 \
+	    -text "Apply" \
+	    -command "$this updatefont $preference $dialog"
+
+    # Give it a help button.
+    $dialog addButton help -row 0 -column 3 \
+	    -text "Help" \
+	    -command {::tycho::File::openContext \
+	    [file join $TYCHO kernel doc usersGuides FontDialogHelp.html]}
+
+    # Now that it has all its buttons, map it to the screen
+    # and tell it not to change size anymore.
+    wm deiconify $dialog
+    after idle [list catch [list $dialog freeze]]
+
+    # Subscribe to the preference so undo and redo update the dialog
+    ::tycho::preference subscribe $dialog $group $preference \
+	    "$this updatefontdialog $preference $dialog"
+
+    # We have to modify the buttons to update the font
+    $dialog configure -okcommand "$this updatefont $preference $dialog"
+
+    # Return the same value, to fool Query into thinking
+    # that nothing happened. The problem is that the "mediated"
+    # query in Query assumes that the returned result is
+    # the new value of the query.
+    return $current
+}
+
+#######################################################################
+#### updatecolor
+#
+body ::tycho::PreferenceEditor::updatecolor {preference dialog} {
+    set group $itk_option(-preferences)
+
+    # Get the current color from the dialog
+    set color [$dialog get entry]
+    
+    # If it's different to the current preference, update it. This
+    # is needed only so that the undo history does not have entries
+    # that make no real change
+    if { $color != [::tycho::preference get $group $preference] } {
+	::tycho::preference assign $group $preference $color
+
+	# Notify the main preference dialog that there has been an update
+	if { $itk_option(-parentdialog) != "" } {
+	    $itk_option(-parentdialog) notify $group $preference
+	}
+    }
+}
+
+#######################################################################
+#### updatecolorbutton
+#
+body ::tycho::PreferenceEditor::updatecolorbutton {preference dialog} {
+    set group $itk_option(-preferences)
+
+    # Get the current color from the dialog
+    set color [lindex [$dialog get] 1]
+    
+    # Update the display
+    insert $preference $color
+}
+
+#######################################################################
+#### updatecolordialog
+#
+body ::tycho::PreferenceEditor::updatecolordialog {preference dialog} {
+    set group $itk_option(-preferences)
+
+    # Get the current color from the preferences
+    set color [::tycho::preference get $group $preference]
+    
+    # Modify the color dialog
+    # FIXME: Need to a method to ListBrowser to do this
+    # $dialog setItem $color
+
+    # Update the display
+    insert $preference $color
+}
+
+#######################################################################
 #### update
 #
 # With no args, update any changed preferences. With args, always
 # update specified preferences.
 #
 body ::tycho::PreferenceEditor::update {args} {
+    set updated {}
     if { $args == "" } {
 	# See if any entries have changed, and if so, update the preference
 	set group $itk_option(-preferences)
 	foreach {tag val} [$this get] {
-	    if { $val != [::tycho::preference current $group $tag] } {
-		::tycho::preference assign $group $tag $val
+	    if { $val != [::tycho::preference get $group $tag] } {
+		::tycho::preference model publish assign $group.$tag $val
+		lappend updated $group $tag
 	    }
 	}
     } else {
 	# Update all specified entries
 	foreach tag $args {
-	    ::tycho::preference assign $group $tag [get $tag]
+	    ::tycho::preference model publish assign $group.$tag [get $tag]
+	    lappend updated $group $tag
 	}
     }
+    # Notify the main preference dialog that there has been an update
+    if { $itk_option(-parentdialog) != "" && $updated != "" } {
+	eval $itk_option(-parentdialog) notify $group $updated
+    }
+}
+
+#######################################################################
+#### updatefont
+#
+body ::tycho::PreferenceEditor::updatefont {preference dialog} {
+    set group $itk_option(-preferences)
+
+    # Get the current font from the dialog
+    set font [$dialog get]
+    set font [list [lindex $font 1] [lindex $font 3] [lindex $font 5]]
+    
+    # If it's different to the current preference, update it. This
+    # is needed only so that the undo history does not have entries
+    # that make no real change
+    if { $font != [::tycho::preference get $group $preference] } {
+	::tycho::preference assign $group $preference $font
+
+	# Notify the main preference dialog that there has been an update
+	if { $itk_option(-parentdialog) != "" } {
+	    $itk_option(-parentdialog) notify $group $preference
+	}
+    }
+}
+
+#######################################################################
+#### updatefontbutton
+#
+body ::tycho::PreferenceEditor::updatefontbutton {preference dialog} {
+    set group $itk_option(-preferences)
+
+    # Get the current font from the dialog
+    set font [$dialog get]
+    set font [list [lindex $font 1] [lindex $font 3] [lindex $font 5]]
+    
+    # Update the display
+    insert $preference $font
+}
+
+#######################################################################
+#### updatefontdialog
+#
+body ::tycho::PreferenceEditor::updatefontdialog {preference dialog} {
+    set group $itk_option(-preferences)
+
+    # Get the current font from the preferences
+    set font [::tycho::preference get $group $preference]
+    
+    # Modify the font dialog
+    # FIXME: Add a method to FontDialog to do this.
+    if { [lindex $font 0] != "" } {
+	$dialog insert family [lindex $font 0]
+    }
+    if { [lindex $font 1] != "" } {
+	$dialog insert size [lindex $font 1]
+    }
+    if { [lindex $font 2] != "" } {
+	$dialog insert style [lindex $font 2]
+    }
+    $dialog updateDisplay
+
+    # Update the display
+    insert $preference $font
 }
