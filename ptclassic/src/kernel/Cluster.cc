@@ -48,9 +48,16 @@ ENHANCEMENTS, OR MODIFICATIONS.
 extern int setPortIndices(Galaxy&);
 
 // Constructors.
-Nebula::Nebula(Star& self, Block* m) : selfStar(self) {
+Nebula::Nebula(Star& self) : selfStar(self), master(NULL) {};
+
+void Nebula::setMasterBlock(Block* m) {
+	if (master) {
+		Error::abortRun("Can not run setMaster twice on same Nebula");
+		return;
+	}
+	master = m;
+	selfStar.setNameParent(master->name(),selfStar.parent());
 	if (master->isItAtomic()) {
-		master = m;
 		// Add the star's ports to the internal galaxy,
 		// but do not change their parents.
 		BlockPortIter starPorts(*master);
@@ -68,15 +75,14 @@ Nebula::Nebula(Star& self, Block* m) : selfStar(self) {
 			else {
 				PortHole* clonedPort = clonePort(port);
 				selfStar.addPort(*clonedPort);
-				clonedPort->
-					setNameParent(port.name(),&selfStar);
+				clonedPort->setNameParent(port->name(),
+							  &selfStar);
 			}
 		}
 	}
 	else {
 		Galaxy* g = (Galaxy*) m;
 		int nports = setPortIndices(*g);
-		master = NULL;
 		LOG_NEW; PortHole** newPorts = new PortHole*[nports];
 		for (int i = 0; i < nports; i++)
 			newPorts[i] = 0;
@@ -88,7 +94,7 @@ Nebula::Nebula(Star& self, Block* m) : selfStar(self) {
 			BlockPortIter nextPort(c->selfStar);
 			PortHole *p;
 			while ((p = nextPort++) != 0) {
-				newPorts[((NebulaPort*)p)->real().index()]=p;
+				newPorts[nebulaPort(p)->real().index()]=p;
 			}
 		}
 		// now connect up the Nebula ports to match the real ports.
@@ -96,7 +102,8 @@ Nebula::Nebula(Star& self, Block* m) : selfStar(self) {
 		// are self-loops, for such cases, ptable[i] will be null.
 		for (i = 0; i < nports; i++) {
 			PortHole* out = newPorts[i];
-			PortHole& outReal = ((NebulaPort*)out)->real();
+			NebulaPort* outNeb = nebulaPort(out);
+			const PortHole& outReal = outNeb->real();
 			if (!out || out->isItInput()) continue;
 			PortHole* in = newPorts[outReal.far()->index()];
 			int numDelays = outReal.numInitDelays();
@@ -108,12 +115,20 @@ Nebula::Nebula(Star& self, Block* m) : selfStar(self) {
 	}
 }
 
+inline void Nebula::initMaster() {
+	if (master) master->initialize();
+	return;
+}
+
 int Nebula::run() {
-	if (master)
+	if (!gal.numberBlocks())
+		// Atomic Nebula
 		return master->run();
 	else if (sched)
+		// Nebula contains a scheduled galaxy
 		return sched->run();
 	else
+		// Nebula contains a un-scheduled galaxy
 		return FALSE;
 }
 	
@@ -131,16 +146,11 @@ int Nebula::generateSchedule() {
 	}
 }
 	
-void Nebula::absorb(Nebula* victum) {
-};
-
-NebulaPort::NebulaPort(PortHole& self, const PortHole& master,const Nebula* parent)
+NebulaPort::NebulaPort(PortHole& self, const PortHole& master,Nebula* parentN)
 :selfPort(self),pPort(master) {
-	selfPort.setPort(real().name(),&parent->star(),INT);
+	selfPort.setPort(real().name(),&(parentN->star()),INT);
 	selfPort.myPlasma = Plasma::getPlasma(INT);
 	selfPort.numberTokens = real().numXfer();
 	selfPort.indexValue = real().index();
 }
-
-
 
