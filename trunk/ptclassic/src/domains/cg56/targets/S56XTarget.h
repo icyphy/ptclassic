@@ -23,7 +23,7 @@ $Id$
 #include "IntState.h"
 
 class S56XTarget : public Sim56Target {
-protected:
+private:
 	void initStates();
 public:
 	S56XTarget(const char*,const char*);

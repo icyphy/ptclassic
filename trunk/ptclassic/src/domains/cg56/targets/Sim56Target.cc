@@ -56,7 +56,7 @@ Sim56Target::Sim56Target(const Sim56Target& arg) :
 	copyStates(arg);
 }
 
-static char* makeLower(const char* name) {
+char* makeLower(const char* name) {
 	LOG_NEW; char* newp = new char[strlen(name)+1];
 	char *o = newp;
 	while (*name) {

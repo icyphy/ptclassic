@@ -47,7 +47,7 @@ Output data from DSP to host via host port.
         }
 
         codeblock(begin) {
-!output $val(command)
+!$val(command)
         }
         codeblock(yeshostBlock) {
 $label(l)

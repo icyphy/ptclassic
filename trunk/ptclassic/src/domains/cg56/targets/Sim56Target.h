@@ -22,12 +22,14 @@ $Id$
 #include "StringState.h"
 #include "IntState.h"
 
+char* makeLower(const char*);
+
 class Sim56Target : public CG56Target {
 private:
-	void initStates();
-	StringList cmds;
-	char* uname;
+	virtual void initStates();
 protected:
+	char* uname;
+	StringList cmds;
 	StringState dirName;
 	StringState plotFile;
 	StringState plotTitle;
