@@ -43,7 +43,9 @@ proc ::tycho::_announce { msg } {
 }
 
 ##########################################################################
-# ::tycho::processCommandLine
+#### ::tycho::processCommandLine
+#
+# <B>Preliminary</b> -- do not use.
 #
 # This procedure converts command-line arguments into
 # entries in the <b>tychofeatures</b> global array.
@@ -258,7 +260,9 @@ proc ::tycho::processCommandLine {args} {
 }
 
 ##########################################################################
-# ::tycho::start
+##### ::tycho::start
+#
+# <B>Preliminary</b> -- do not use.
 #
 # Start the Tycho graphical user interface. This procedure
 # accepts a number of arguments that specify the startup
@@ -326,7 +330,9 @@ proc ::tycho::start {args} {
 }
 
 ##########################################################################
-# ::tycho::loadTychorc
+##### ::tycho::loadTychorc
+#
+# <B>Preliminary</b> -- do not use.
 #
 # Load the user's tychorc file, if there is one and <b>-notychorc</b>
 # was not specified. The file is located in either
@@ -361,7 +367,9 @@ proc ::tycho::loadTychorc {} {
 
 
 ##########################################################################
-# ::tycho::runShell
+##### ::tycho::runShell
+#
+# <B>Preliminary</b> -- do not use.
 #
 # Run a simple interactive command shell in the startup window.
 #
@@ -430,7 +438,9 @@ proc ::tycho::runShell {} {
 }
 
 ##########################################################################
-# ::tycho::startKernel
+##### ::tycho::startKernel
+#
+# <B>Preliminary</b> -- do not use.
 #
 # Start the Tycho non-graphical kernel. This procedure
 # looks at the parameters <b>tychofeatures</b> to decide
@@ -442,7 +452,9 @@ proc ::tycho::startKernel {args} {
 }
 
 ##########################################################################
-# ::tycho::startGui
+##### ::tycho::startGui
+#
+# <B>Preliminary</b> -- do not use.
 #
 # Start the Tycho graphical kernel. This procedure
 # looks at the parameters <b>tychofeatures</b> to decide
