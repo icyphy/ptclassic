@@ -46,6 +46,7 @@ source $TYCHO/kernel/Path.tcl
 #
 proc tychoMkClassGraph {name filename args} {
     set entries {}
+    set retval {}
     foreach file $args {
 	if {$file == {} } {
 	    continue
@@ -55,27 +56,75 @@ proc tychoMkClassGraph {name filename args} {
             error "Error while reading $file:\n$errMsg"
         }
 	close $fd
-        set nm {}
+
 	set classexp "\n\[ \t\]*class\[ \t\]+(\[^\{ \t\n\]*)"
-	if {[regexp $classexp $contents matchvar nm] != 0} {
-            set classfile($nm) $file
-	}
 	set inheritexp "\n\[ \t\]*inherit\[ \t\]+(\[^ \t\n\]*)"
-	set multiinheritexp "\n\[ \t\]*inherit\[ \t\]+(\[^ \t\n\]*)\[ \t\]+(\[^ \t\n\]*)"
-        # Look for inheritance only if a class definition was found.
-        if {$nm != {}} {
-            if {[regexp $inheritexp $contents matchvar pnm] != 0} {
-                set parent($nm) $pnm
-		if {[regexp $multiinheritexp $contents matchvar pnm] != 0} {
-		    puts stderr "Warning: $classfile($nm) has multiple\
-			    inheritance,\nwhich\
-			    cannot currently be displayed by\
-			    Tycho.\nOnly the inheritance link from the\
-			    child to the\nfirst parent will be shown."
+	set multiinheritexp "\n\[ \t\]*inherit\[ \t\]+(\[^ \t\n\]*)\[ \t\]+(\[^ \t\n\]+)"
+
+        set nm {}
+	set classEnd 0
+
+	# Read through the file, looking for the start of classes.
+	# Each time we find the start of a class, we save the location
+	# and then the next time through, start the search after
+	# the start of the last class so that we pick up the next class
+	
+	while {[regexp -indices $classexp \
+		[string range $contents $classEnd end] \
+		classStartIndices nm] != 0} {
+	    # FIXME: it is just easier to get the name by running regexp
+	    # again.
+	    regexp $classexp [string range $contents \
+		    $classEnd end] \
+		    matchvar nm
+	    set classEnd [expr {[lindex $classStartIndices 1] + \
+		    $classEnd}]
+            set classfile($nm) $file
+
+	    #puts "$nm $classStartIndices $classEnd\
+	    #    [string range $contents $classEnd [expr {$classEnd+20}]]"
+
+	    # Look for inheritance only if a class definition was found.
+	    if {$nm != {}} {
+		if {[regexp -indices $inheritexp \
+			$contents matchvar inheritIndices] != 0} {
+		    # Check for the case where we have multiple classes
+		    # in a file, but the first class has no parents.
+		    # If the indices of the inherits clause are greater
+		    # than the indices of the next class clause, then
+		    # the current class has no parents, as the inherit
+		    # clause we found belongs to the next class clause.
+		    
+		    if {[regexp -indices $classexp \
+			    [string range $contents $classEnd end] \
+			    classStartIndices tnm] != 0 } {
+			if {[lindex $classEnd 0] < \
+				[lindex $inheritIndices 0]} {
+			    set parent($nm) {}
+			    continue
+			}
+		    }
+
+		    # FIXME: it is just easier to get the name by running
+		    # regexp again.
+		    regexp $inheritexp $contents matchvar pnm
+		    if {$nm == $pnm} {
+			error "In $file, $nm cannot be its own parent"
+		    } else {
+			set parent($nm) $pnm
+		    }
+		    if {[regexp $multiinheritexp $contents matchvar pnm] != 0} {
+			set retval "$retval\nWarning: \
+				$classfile($nm)\nhas multiple\
+				inheritance, which\
+				cannot currently\ be displayed by\
+				Tycho. Only the\ninheritance link from the\
+				child to the\nfirst parent will be shown."
+		    }
+		} {
+		    set parent($nm) {}
 		}
-            } {
-                set parent($nm) {}
-            }
+	    }
         }
     }
         
@@ -84,8 +133,8 @@ proc tychoMkClassGraph {name filename args} {
     # Put in titles and a reasonable default size.
     puts $fd "\{configure -canvasheight 600\} \{configure -canvaswidth 800\}"
     puts $fd "\{titleSet title \{Tycho Class Hierarchy\}\}"
-    # NOTE: Unix-only implementation:
-    puts $fd "\{titleSet subtitle \{created: [exec date]\}\}"
+    puts $fd "\{titleSet subtitle \{created:\
+	    [clock format [clock seconds]]\}\}"
     foreach nm [array names classfile] {
         set pnt $parent($nm)
         set rxp "\[ \t\]*class\[ \t\]+$nm"
@@ -103,6 +152,7 @@ proc tychoMkClassGraph {name filename args} {
         puts $fd "\{add $nm \{label \{$sname\} altlink \{$classfile($nm) \{$rxp\}\} link \{$htmlfile \{\}\}\} \{$pnt\}\}"
     }
     close $fd
+    return $retval
 }
 
 #### tychoStandardClasses
@@ -129,6 +179,7 @@ proc tychoStandardDAG {} {
     foreach file $files {
         lappend filesenv [file join "\$TYCHO" $file]
     }
-    eval tychoMkClassGraph {{Tycho Class Hierarchy}} doc/tychoClasses.dag $filesenv
+    set retval [eval tychoMkClassGraph {{Tycho Class Hierarchy}} doc/tychoClasses.dag $ filesenv ]
     cd $olddir
+    return $retval
 }
