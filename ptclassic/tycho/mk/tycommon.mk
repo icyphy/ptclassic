@@ -84,6 +84,7 @@
 # JZIP		Zip file of classes to be produced.
 # JDIST		The name and version of the tar.gz and zip files of the sources
 # JTESTHTML	Test html file for a java class.
+# JTCLSH	TclBlend Tcl/Java interface shell.
 
 ##############
 # Under no circumstances should this makefile include 'all', 'install'
