@@ -3,7 +3,11 @@ and timing VIS code.
 
 NOTE: these files will only compile under Sun CC.
 
-To run the simulator, create or open a test universe (try the
+Run eg
+
+	timingptolemyiir -v
+
+To run the VIS simulator, create or open a test universe (try the
 universe "test" in this directory):
 
   To run, hit on Go. The simulator will pop up. Type in
@@ -12,6 +16,3 @@ universe "test" in this directory):
   units are.
 
   The simulator documentation is at /opt/SUNWincas/manuals/INCASuserguide.ps
-
-
-
