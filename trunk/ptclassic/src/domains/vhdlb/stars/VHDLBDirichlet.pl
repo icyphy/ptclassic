@@ -20,7 +20,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 The Dirichlet kernel is the discrete-time Fourier transform (DTFT) of a
 sampled pulse function.  The "N" parameter is the length of the pulse.
 

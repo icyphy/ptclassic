@@ -15,16 +15,16 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { MDSDF library }
-	explanation {
-The input signal is plotted using the \fIxprism3\fR program which is
-provided with the Ptolemy distribution.  The \fItitle\fR parameter specifies
-a title for the plot.  The \fIsaveFile\fR parameter optionally specifies a
+	htmldoc {
+The input signal is plotted using the <i>xprism3</i></b> program which is
+provided with the Ptolemy distribution.  The <i>title</i></b> parameter specifies
+a title for the plot.  The <i>saveFile</i></b> parameter optionally specifies a
 file for storing the data in a syntax acceptable to xprism3.  A null string
-prevents any such storage.  The \fIoptions\fR string is passed directly to
+prevents any such storage.  The <i>options</i></b> string is passed directly to
 the xprism3 program as command-line options.  See the manual section
 describing xprism3 for a complete explanation of the options.
-.Ir "xprism program"
-.Id "graph, X window"
+<a name="xprism program"></a>
+<a name="graph, X window"></a>
 	}
 	input {
 		name { input }

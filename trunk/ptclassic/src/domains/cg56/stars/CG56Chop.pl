@@ -22,7 +22,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, an disclaimer of warranty provisions.
 	}
 	location { CG56 main library }
-	explanation {
+	htmldoc {
 See the explanation of the SDFChop star.
 	}
 	

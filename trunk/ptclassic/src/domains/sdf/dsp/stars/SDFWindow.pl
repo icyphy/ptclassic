@@ -7,26 +7,26 @@ window functions.  The possible windows are Rectangle, Bartlett,
 Hanning, Hamming, Blackman, SteepBlackman, and Kaiser.  One period of
 samples is produced at each firing.
 	}
-	explanation {
-.lp
+	htmldoc {
+<p>
 This star produces on its output values that are samples of a standard
 windowing function.
-The windowing function is determined by the \fIname\fR string parameter.
-Possible values are: \fBRectangle\fR, \fBBartlett\fR, \fBHanning\fR,
-\fBHamming\fR, \fBBlackman\fR, \fBKaiser\fR and \fBSteepBlackman\fR.
+The windowing function is determined by the <i>name</i></b> string parameter.
+Possible values are: <b>Rectangle</i></b>, <b>Bartlett</i></b>, <b>Hanning</i></b>,
+<b>Hamming</i></b>, <b>Blackman</i></b>, <b>Kaiser</i></b> and <b>SteepBlackman</i></b>.
 Upper- and lower-case characters in the names are equivalent.
-.lp
-The parameter \fIlength\fR is the length of the window to produce.
+<p>
+The parameter <i>length</i></b> is the length of the window to produce.
 Note that most window functions have a zero value at the first and last sample.
-The parameter \fIperiod\fR specifies the period of the output signal:
+The parameter <i>period</i></b> specifies the period of the output signal:
 the window will be zero-padded if required.
-A \fIperiod\fR of 0 means a period equal to \fIlength\fR.
+A <i>period</i></b> of 0 means a period equal to <i>length</i></b>.
 A negative period will produce only one window, and then output zero
 for all later samples.
 A period of less than the window length will be equivalent to a period of
-the window length (i.e., \fIperiod\fR = 0).
-.UH REFERENCES
-.ip [1]
+the window length (i.e., <i>period</i></b> = 0).
+<h3>References</h3>
+<p>[1]  
 Leland Jackson, Digital Filters and Signal Processing, 2nd ed.,
 Kluwer Academic Publishers, ISBN 0-89838-276-9, 1989.
 	}

@@ -20,33 +20,33 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF dsp library }
-	explanation {
+	htmldoc {
 When used correctly, this LMS adaptive filter will adapt to try to minimize
-the mean-squared error of the signal at its \fIerror\fR input [1].
-.Id "adaptive filter"
-.Id "filter, adaptive"
-.Id "filter, LMS"
-.Id "LMS adaptive filter"
+the mean-squared error of the signal at its <i>error</i></b> input [1].
+<a name="adaptive filter"></a>
+<a name="filter, adaptive"></a>
+<a name="filter, LMS"></a>
+<a name="LMS adaptive filter"></a>
 In order for this to be possible, the output of the filter should
 be compared (subtracted from) some reference signal to produce
 an error signal.
-That error signal should be fed back to the \fIerror\fR input.
-The \fIdelay\fR parameter must equal the total number of delays
+That error signal should be fed back to the <i>error</i></b> input.
+The <i>delay</i></b> parameter must equal the total number of delays
 in the path from the output of the filter back to the error input.
 This ensures correct alignment of the adaptation algorithm.
 The number of delays must be greater than zero or the dataflow
 graph will deadlock.
 The adaptation algorithm used is the well-known LMS, or
 stochastic-gradient algorithm.
-.Ir "stochastic gradient algorithm"
-.lp
-If the \fIsaveTapsFile\fR string is non-null, a file will
+<a name="stochastic gradient algorithm"></a>
+<p>
+If the <i>saveTapsFile</i></b> string is non-null, a file will
 be created by the name given by that string, and the final tap values
 will be stored there after the run has completed.
-.Id "Haykin, S."
-.UH REFERENCES
-.ip [1]
-S. Haykin, \fIAdaptive Filter Theory\fR,
+<a name="Haykin, S."></a>
+<h3>References</h3>
+<p>[1]  
+S. Haykin, <i>Adaptive Filter Theory</i></b>,
 Prentice Hall: Englewood Cliffs, NJ.  1991.  2nd ed.
 	}
 	seealso {FIR, adaptFilter, LMSCx, LMSPlot, LMSTkPlot, LMSPlotCx}

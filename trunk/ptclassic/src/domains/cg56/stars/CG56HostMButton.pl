@@ -12,16 +12,16 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
     location { CG56 io library }
-    explanation {
-.Ir "button"
+	htmldoc {
+<a name="button"></a>
 This is an asynchronous source star (like the
-.c Const
+<tt>Const</tt>
 star) with a particular graphical user interface.
 The star always outputs one of a finite number of values: the output is
 controlled by the user selecting one of several buttons.
 Exactly one button in the group is on.
-.LP
-The \fIpairs\fR parameter defines a set of pairs.
+<p>
+The <i>pairs</i></b> parameter defines a set of pairs.
 Each pair should be enclosed in double quotes.
 Each pair consists of two words: a one word label and a value.
 The value most be either a FIX or INT.

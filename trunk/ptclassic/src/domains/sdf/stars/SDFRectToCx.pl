@@ -11,9 +11,9 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
-.Id "real to complex format conversion"
-.Id "format conversion, real to complex"
+	htmldoc {
+<a name="real to complex format conversion"></a>
+<a name="format conversion, real to complex"></a>
 	}
 	input {
 		name { real }

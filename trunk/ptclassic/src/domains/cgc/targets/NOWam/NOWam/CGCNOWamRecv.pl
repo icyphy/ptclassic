@@ -13,7 +13,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
 	location { CGC NOW Active Message target library }
-	explanation {
+	htmldoc {
 Produce code for inter-process communication (receive-side).
 	}
 	private {

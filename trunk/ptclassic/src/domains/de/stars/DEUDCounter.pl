@@ -18,7 +18,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
-	explanation {
+	htmldoc {
 Upon receiving a "countUp" or "countDown" input, an internal counter is
 incremented or decremented.
 When a "reset" input is received, the count is reset to "resetValue".

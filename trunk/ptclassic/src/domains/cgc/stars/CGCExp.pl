@@ -11,9 +11,9 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC nonlinear library }
-	explanation {
-\fBBugs:\fR Overflow is not handled well.
-.Id "exponential"
+	htmldoc {
+<b>Bugs:</i></b> Overflow is not handled well.
+<a name="exponential"></a>
 	}
 	input {
 		name{input}

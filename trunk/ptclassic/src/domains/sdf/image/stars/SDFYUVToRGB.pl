@@ -14,7 +14,7 @@ limitation of liability, and disclaimer of warranty provisions.
 Read three float matrices that describe a color image in YUV format and
 output three float matrices that describe an image in RGB format.
 	}
-	explanation {
+	htmldoc {
 The YUV format, which is an affine mapping (linear mapping plus offset)
 of the RGB format, is used in broadcast television to maintain compatibility
 between color and black-and-white televisions [1].
@@ -26,7 +26,7 @@ whereas the V axis has turquoise at its minimum point and red at its
 maximum point.
 In this implementation, each of the RGB values and each of the YUV values
 are integer values in the range from 0 to 255 (inclusive).
-.pp
+<p>
 This star supports two YUV formats--- the usual one [1] and
 the CCIR 601 standard.
 The usual YUV definition shifts the U and V values so that they fall in
@@ -39,17 +39,17 @@ the RGB space.
 All RGB values, however, map into both YUV standards, so RGB to YUV conversion
 followed by YUV to RGB conversion is nearly lossless.
 The CCIR 601 standard is used in the MPEG and H.261 compression standards.
-.Id "format conversion, YUV to RGB"
-.Id "image format conversion, YUV to RGB"
-.Ir "image format, red-green-blue (RGB)"
-.Ir "image format, luminance-chrominance (YUV)"
-.Id "CCIR 601 standard"
-.Id "MPEG"
-.Id "H.261"
-.Id "Pratt, W."
-.UH REFERENCES
-.ip [1]
-W. Pratt, \fIDigital Image Processing\fR,
+<a name="format conversion, YUV to RGB"></a>
+<a name="image format conversion, YUV to RGB"></a>
+<a name="image format, red-green-blue (RGB)"></a>
+<a name="image format, luminance-chrominance (YUV)"></a>
+<a name="CCIR 601 standard"></a>
+<a name="MPEG"></a>
+<a name="H.261"></a>
+<a name="Pratt, W."></a>
+<h3>References</h3>
+<p>[1]  
+W. Pratt, <i>Digital Image Processing</i></b>,
 Wiley & Sons: New York.  1991.  2nd ed.
 	}
 

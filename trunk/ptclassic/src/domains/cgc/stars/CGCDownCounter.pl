@@ -15,7 +15,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
+	htmldoc {
 This star generates (int-1), (int-2), ... 1,0 samples for (int) input.
 Input should be a positive integer (can not be zero).
 	}

@@ -15,10 +15,10 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
-This Star uses the GNU library <Normal.h>
-.Id "Gaussian noise"
-.Id "noise, Gaussian"
+	htmldoc {
+This Star uses the GNU library &lt;Normal.h&gt;
+<a name="Gaussian noise"></a>
+<a name="noise, Gaussian"></a>
 	}
 	output {
 		name { output }

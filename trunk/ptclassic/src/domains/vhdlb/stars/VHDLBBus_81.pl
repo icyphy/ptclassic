@@ -10,7 +10,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 Since ptolemy doesn't allow the user to explicitly merge several wires into a
 bus, this star is written to allow the user to explicitly create an 8-bit-wide
 bus from 8 input wires.  If the input bus is not 8 bits wide, an error message

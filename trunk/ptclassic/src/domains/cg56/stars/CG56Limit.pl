@@ -11,10 +11,10 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 main library }
-	explanation {
-.Id "hard limiter"
+	htmldoc {
+<a name="hard limiter"></a>
 The star hard limits input samples to keep the range of 
-(\fIbottom, top\fR).
+(<i>bottom, top</i></b>).
 	}
 	input {
 		name {input}

@@ -17,10 +17,10 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
-.Id "DFE training"
-.Id "decision feedback equalizer training"
-.Id "equalizer, decision feedback, training"
+	htmldoc {
+<a name="DFE training"></a>
+<a name="decision feedback equalizer training"></a>
+<a name="equalizer, decision feedback, training"></a>
 	}
 	defstate {
 		name { trainLength }

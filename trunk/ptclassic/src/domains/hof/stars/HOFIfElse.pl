@@ -19,28 +19,28 @@ Otherwise, the "false_block" is used.
 This can be used to parameterize the use of a given block, or, more
 interestingly, for statically evaluated recursion.
 	}
-	explanation {
+	htmldoc {
 This star is derived from the
-.c Map
+<tt>Map</tt>
 star.
 It is also a higher-order function mechanism.
-.IE "higher-order functions"
+<a name="higher-order functions"></a>
 See the
-.c Map
+<tt>Map</tt>
 documentation for background information.
 The only difference is that instead of one named replacement block,
 there are two.
-The choice between them is determined by the \fIcondition\fR parameter.
-.pp
+The choice between them is determined by the <i>condition</i></b> parameter.
+<p>
 An application for this block is in recursion.
-A galaxy \fIX\fR can be created that has somewhere within it an
-.c IfElse
-block with \fIX\fR given as the replacement block.
-To ensure that the recursion terminates, the parameter \fIuse_alt\fR
+A galaxy <i>X</i></b> can be created that has somewhere within it an
+<tt>IfElse</tt>
+block with <i>X</i></b> given as the replacement block.
+To ensure that the recursion terminates, the parameter <i>use_alt</i></b>
 is computed from galaxy parameters, for example by subtracting one
 from an initial integer value.
 When this parameter reaches zero, an alternative block is used instead
-of \fIX\fR, terminating the recursion.
+of <i>X</i></b>, terminating the recursion.
 	}
 	constructor {
 	    // Change the datatype of the output to be derived from the input

@@ -8,7 +8,7 @@ Send star between UNIX processors.
 	author { Soonhoi Ha }
 	copyright { 1991 The Regents of the University of California }
 	location { CGC target library }
-	explanation {
+	htmldoc {
 Produce code for inter-process communication (send-side)
 	}
 	private {

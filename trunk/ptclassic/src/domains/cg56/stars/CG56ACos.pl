@@ -11,21 +11,21 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 main library }
-	explanation {
-.PP
-.Id "arccosine"
-.Id "cosine, inverse"
-.Id "inverse cosine"
-.Ir "power series"
+	htmldoc {
+<p>
+<a name="arccosine"></a>
+<a name="cosine, inverse"></a>
+<a name="inverse cosine"></a>
+<a name="power series"></a>
 A power series expansion is used to compute the arc cosine of the input,
 which is in the range -1.0 to 1.0.  The output is in the principle range of
 0 to pi, scaled down by a factor of pi for the fixed point device.
-.PP
+<p>
 The power series is factorized carefully so that intermediate factors never
 exceed 1.0 in magnitude.  This is essential because these intermediate results
-have to be moved from the accumulator back to the \fIx\fR or \fIy\fR
+have to be moved from the accumulator back to the <i>x</i></b> or <i>y</i></b>
 data registers for subsequent multiplication.
-.PP
+<p>
 The runtime of this star can vary from a few instruction cycles, if
 the input is close to certain values such as +/-0.5 and +/-1.0, to some 55
 instructions.  This is because the input value is first tested against certain
@@ -34,7 +34,7 @@ the power series expansion is used.  This approach speeds up the runtime
 execution for a small number of cases but may have serious impact on parallel
 scheduling.  It may thus be desirable to remove the initial boundary value
 checks.
-.PP
+<p>
 The runtime can be improved by reducing the order of the power series
 expansion, at the expense of precision.
 	}

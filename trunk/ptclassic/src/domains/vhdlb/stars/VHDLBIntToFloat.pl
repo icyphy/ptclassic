@@ -10,7 +10,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-	explanation {
+	htmldoc {
 Since there is no automatic data type conversions in the VHDL domains of
 ptolemy, this star is written to explicitly convert an integer input to a
 real-valued output.

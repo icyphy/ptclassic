@@ -13,19 +13,19 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
-The input signal is plotted using the \fIpxgraph\fR program which
+	htmldoc {
+The input signal is plotted using the <i>pxgraph</i></b> program which
 is provided with the Ptolemy distribution.
 Note that pxgraph is a specially modified version of xgraph.
-The \fItitle\fR parameter specifies a title for the plot.
-The \fIsaveFile\fR parameter optionally specifies a file for
+The <i>title</i></b> parameter specifies a title for the plot.
+The <i>saveFile</i></b> parameter optionally specifies a file for
 storing the data in a syntax acceptable to xgraph.
 A null string prevents any such storage.
-The \fIoptions\fR string is passed directly to the xgraph program
+The <i>options</i></b> string is passed directly to the xgraph program
 as command-line options.  See the manual section describing xgraph
 for a complete explanation of the options.
-.Ir "xgraph program"
-.Id "graph, X window"
+<a name="xgraph program"></a>
+<a name="graph, X window"></a>
 	}
 	input {
 		name { input }

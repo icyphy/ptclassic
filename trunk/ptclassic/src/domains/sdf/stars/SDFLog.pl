@@ -11,11 +11,11 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
+	htmldoc {
 Outputs natural logarithm of the input.
 If the input is zero or negative, then the run of the universe that
 contains this star will be aborted.
-.Id "logarithm"
+<a name="logarithm"></a>
 	}
 	input {
 		name { input }

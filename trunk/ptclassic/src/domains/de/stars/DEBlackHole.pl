@@ -11,7 +11,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 	desc { Discard all input particles. }
-	explanation {
+	htmldoc {
 A BlackHole accepts input Particles, but doesn't do anything with
 them \(em it is
 typically used to discard unwanted signals from other blocks.

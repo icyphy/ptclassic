@@ -23,12 +23,12 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	explanation {
-Assume that the \fIthresholds\fR parameter is set to $(8.1, 9.2, 10.3)$,
-and that the \fIlevels\fR parameter is not set so that the default values
-of $(0.0, 1.0, 2.0, 3.0)$ are used.  Then, an input of $-1.5$ would give
-an output of $0.0$, an input of $8.2$ would give an output of $1.0$, and
-an input of $15.5$ would give an output of $3.0$.
+	htmldoc {
+Assume that the <i>thresholds</i></b> parameter is set to <i></i>(<i></i>8<i>.</i>1<i>, </i>9<i>.</i>2<i>, </i>10<i>.</i>3<i></i>)<i></i>,
+and that the <i>levels</i></b> parameter is not set so that the default values
+of <i></i>(<i></i>0<i>.</i>0<i>, </i>1<i>.</i>0<i>, </i>2<i>.</i>0<i>, </i>3<i>.</i>0<i></i>)<i></i> are used.  Then, an input of <i>-</i>1<i>.</i>5<i></i> would give
+an output of <i></i>0<i>.</i>0<i></i>, an input of <i></i>8<i>.</i>2<i></i> would give an output of <i></i>1<i>.</i>0<i></i>, and
+an input of <i></i>15<i>.</i>5<i></i> would give an output of <i></i>3<i>.</i>0<i></i>.
 	}
 	location { SDF main library }
 	input {

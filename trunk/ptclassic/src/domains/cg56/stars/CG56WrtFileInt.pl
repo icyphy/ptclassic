@@ -13,10 +13,10 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 io library }
-	explanation {
-.Ir "simulator, Motorola DSP56000"
-.Ir "Motorola DSP56000 simulator"
-.Id "file output"
+	htmldoc {
+<a name="simulator, Motorola DSP56000"></a>
+<a name="Motorola DSP56000 simulator"></a>
+<a name="file output"></a>
 Writes data to a file, for use with the Motorola DSP56000 simulator.
 	}
 	execTime {

@@ -20,28 +20,28 @@ limitation of liability, and disclaimer of warranty provisions.
 }
 	location { DE ATM library }
 
-	explanation {
+	htmldoc {
 Receives 
-.c VoiceData
+<tt>VoiceData</tt>
 type SendData and StopSendData packets from an 
-.c MQTelephone
+<tt>MQTelephone</tt>
 star to control possibly multiple 
-.c DEVoiceSrc
+<tt>DEVoiceSrc</tt>
 star instances.  When idle, it accepts SendData packets containing info which
 should be mapped onto
 the headers of generated source packets, incoming VPI and destination
 VCI numbers.  (Also, headers will have a source VCI number field.)  It will
 send to the 
-.c DEVoiceSrc 
+<tt>DEVoiceSrc </tt>
 stars Transmit packets to ask them to begin 
 transmitting with this necessary information.  When transmission is complete
 as specified by the call duration field of the original SendData packet, it
 sends back to its associated
-.c MQTelephone
+<tt>MQTelephone</tt>
 star an Acknowledgement (ACK) packet. 
 Also, while active, a StopSendData packet will terminate call activity which is
 replied to with an ACK. In both cases, StopTransmit packets are sent to the
-.c DEVoiceSrc
+<tt>DEVoiceSrc</tt>
 stars.
        }
 

@@ -17,15 +17,15 @@ limitation of liability, and disclaimer of warranty provisions.
 
        location { DE ATM library }
 
-       explanation {
+	htmldoc {
 See comments on
-.c DEInputSynch
+<tt>DEInputSynch</tt>
 star.  This star would be used after an
 SDF-in-DE wormhole to perform inverse operation of
-.c DEInputSynch
+<tt>DEInputSynch</tt>
 , that
 is, to filter out null
-.c VoiceData
+<tt>VoiceData</tt>
 messages but to allow others to pass through unchanged.
        }
 

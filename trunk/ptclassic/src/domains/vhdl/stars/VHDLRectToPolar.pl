@@ -12,7 +12,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	acknowledge { C. Sheers, IMEC }
 	location { VHDL main library }
-	explanation {
+	htmldoc {
 The CORDIC algorithm is an efficient implementation for Cartesian to
 polar coordinate conversion.
 	}

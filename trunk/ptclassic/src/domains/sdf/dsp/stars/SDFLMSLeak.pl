@@ -17,7 +17,7 @@ An LMS adaptive filter in which the step size is input
 the "mu" parameter specifies a leakage factor in the
 updates of the filter coefficients.
 	}
-	explanation {
+	htmldoc {
 If two identical "LMSLeak" filters are used as an adaptive predictive
 coder and decoder, then with "mu" nearly equal to but greater than 0.0,
 the effects of channel errors between the coder and decoder will decay
@@ -25,10 +25,10 @@ away rather than accumulate. As "mu" increases, the effects of channel
 errors decay away more quickly, but the size of the "error" input
 increases also.
 See pg 54 of [1].
-.UH References
-.ip [1]
+<h3>References</h3>
+<p>[1]  
 W. Honig and D. G. Messerschmitt,
-\fIAdaptive_Filters\fR, Kluwer Academic Publishers, Norwood MA, 1985.
+<i>Adaptive_Filters</i></b>, Kluwer Academic Publishers, Norwood MA, 1985.
 	}
 
 	seealso { LMS }

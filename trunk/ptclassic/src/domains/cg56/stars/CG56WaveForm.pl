@@ -16,28 +16,28 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 signal sources library }
-        explanation {
+	htmldoc {
 You can get periodic signals with any period, and can halt a simulation
 at the end of the given waveform.
 The following table summarizes the capabilities:
-.TS
+<pre>
 center, box;
 l l l l.
 haltAtEnd	periodic	period	operation
 _
 NO	YES	0	Period is the length of the waveform.
-NO	YES	N > 0	Period is N.
+NO	YES	N &gt; 0	Period is N.
 NO	NO	anything	Output the waveform once, then zeros.
-.TE
+</pre>
 The first line of the table gives the default settings.
-.PP
+<p>
 This star may be used to read a file by simply setting "value" to
-something of the form "< filename".
+something of the form "&lt; filename".
 The file will be read completely and its contents stored in an array.
 The size of the array is currently limited to 20,000 samples.
-.IE "waveform from file"
-.IE "reading from a file"
-.IE "halting a simulation"
+<a name="waveform from file"></a>
+<a name="reading from a file"></a>
+<a name="halting a simulation"></a>
         }
 
         ccinclude { "Scheduler.h" }

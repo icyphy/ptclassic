@@ -12,21 +12,21 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 io library }
-	explanation {
+	htmldoc {
 Output data from DSP to host via host port synchronously.
-.UH IMPLEMENTATION:
-.pp
+<h3>IMPLEMENTATION:</h3>
+<p>
 We distinguish between single word transfers and multiword transfers.
-The single word case is simpler in that we can use the \fIref\fR macro to
+The single word case is simpler in that we can use the <i>ref</i></b> macro to
 access the value.
 The multiple word case requires a loop.
-Currently, we distinguish the two cases by \fIsamplesConsumed\fR, but
-I think it should be \fIsamplesOuput\fR.
-.LP
+Currently, we distinguish the two cases by <i>samplesConsumed</i></b>, but
+I think it should be <i>samplesOuput</i></b>.
+<p>
 In blocking mode we wait until the host is ready to read our samples.
 In non-blocking mode, we completely skip the transfer if the host
 is not ready.
-.LP
+<p>
 This implementation currently uses the "unsafe" START/STOP host port DMA
 flow control.
 	}

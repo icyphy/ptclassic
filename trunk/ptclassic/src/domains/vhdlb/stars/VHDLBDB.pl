@@ -15,7 +15,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 Converts the input value into a decibel number.  This star is useful for cer-
 tain signal processing systems.  Note that the conversion formula is
 20 * log( input ) unless the input is a power measurement, in which case the

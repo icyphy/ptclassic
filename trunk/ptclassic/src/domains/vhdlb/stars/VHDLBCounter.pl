@@ -10,7 +10,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-	explanation {
+	htmldoc {
 This is a simple up-down, 8-bit, resettable counter.
 
 If the "up-down" bit is 1, this is an up-counter, otherwise this is a

@@ -14,7 +14,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 The real-valued output is sent to the output port at the rising
 edges of the synchronization clock.
         }

@@ -20,10 +20,10 @@ For example, if the 'frameId' state is set to 2 and
 if the 'fileName' state is 'dir.#/pic#', then the files that
 are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 	}
-	explanation {
-.Ir "PGM image format"
-.Ir "image format, portable graymap (PGM)"
-.Ir "image reading"
+	htmldoc {
+<a name="PGM image format"></a>
+<a name="image format, portable graymap (PGM)"></a>
+<a name="image reading"></a>
 	}
 
 	ccinclude { "Matrix.h", <std.h>, <stdio.h>, "miscFuncs.h", "StringList.h", "Error.h" }

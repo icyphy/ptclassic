@@ -16,18 +16,16 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 dsp library }
-	explanation {
-.lp
+	htmldoc {
+<p>
 This one-pole IIR filter has a transfer function of
-.EQ
+<pre>
 {1} over
 {1 ~-~ {W sub N} sup {-k} z sup -1} ~.
-.EN
-.ID "Oppenheim, A. V."
-.ID "Schafer, R. W."
-.UH REFERENCES
-.ip [1]
-A. V. Oppenheim and R. W. Schafer, \fIDiscrete-Time Signal Processing\fR,
+</pre>
+<h3>References</h3>
+<p>[1]  
+A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i></b>,
 Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	}
 	output {

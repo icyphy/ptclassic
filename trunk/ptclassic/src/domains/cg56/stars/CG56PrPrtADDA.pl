@@ -12,31 +12,31 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 io library }
-	explanation {
-.PP
+	htmldoc {
+<p>
 This star is an interrupt driven A/D and D/A star
 for the Ariel Proport board.
 The star inputs one sample from each of the two input channels
 and outputs one sample to each of the two output channels each
 time it fires.
-.PP
+<p>
 If the star is repeated in a schedule (for example, if it is
 connected to a star that consumes more than one sample each time
 it fires), interrupt-based code will be generated.
 If the star is not repeated, it will generate code
 that polls the Proport and busy waits if samples are not available.
 Interrupt-based code can be forced by setting the string
-parameter \fIforceInterrupts\fR to "yes".
+parameter <i>forceInterrupts</i></b> to "yes".
 The interrupt buffer will be the minimum required size if the
-parameter \fIinterruptBufferSize\fR is "default=4".
+parameter <i>interruptBufferSize</i></b> is "default=4".
 If this parameter is a number, it will be used for the length
 (in words) of the interrupt buffer.
-.PP
+<p>
 In the event of a real-time violation, execution will abort
 and one of the following error codes will be left in register y0:
-.ip "\fB123062\fR"
+<p><b>123062</i></b>  
 An interrupt occurred and the input buffer was full.
-.ip "\fB123063\fR"
+<p><b>123063</i></b>  
 An interrupt occurred and the output buffer was empty.
 	}
         seealso { PrPrtAD, PrPrtDA }

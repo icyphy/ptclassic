@@ -11,7 +11,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG demo library }
-	explanation {
+	htmldoc {
 An abstract baseclass for stars whose execution times can be set, for use in
 scheduling experiments.  You cannot create a CGVartime star, only inherit
 from it.

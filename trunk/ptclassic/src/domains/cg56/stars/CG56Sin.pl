@@ -15,11 +15,11 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 main library }
-	explanation {
+	htmldoc {
 This star computes the sine of the input, which must be in the range
-[-1.0, 1.0).  The output equals sin($~pi~cdot~$\fIin\fR$+\fIphase\fR$),
-so the input range is effectively (-$~pi$, $pi~$).  The output is in
-the range (-1.0, 1.0).  The parameter \fIphase\fR is in degrees
+[-1.0, 1.0).  The output equals sin(<i> pi cdot </i><i>in</i></b><i>+<i>phase</i></b></i>),
+so the input range is effectively (-<i> pi</i>, <i>pi </i>).  The output is in
+the range (-1.0, 1.0).  The parameter <i>phase</i></b> is in degrees
 (e.g., cosine would use a phase of 90).
 	}
 	input {

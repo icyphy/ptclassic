@@ -11,10 +11,10 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
-.Ir "TI DSK320C5x simulator"
-.Ir "simulator, TI DSK320C5x"
-.Id "file input"
+	htmldoc {
+<a name="TI DSK320C5x simulator"></a>
+<a name="simulator, TI DSK320C5x"></a>
+<a name="file input"></a>
 Reads data from file for use by TI DSK320C5x simulator.
 	}
 	output {

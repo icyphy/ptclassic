@@ -18,18 +18,18 @@ limitation of liability, and disclaimer of warranty provisions.
 }
 	location { DE ATM library }
 
-	explanation {
+	htmldoc {
 This star produces dummy voice packet outputs modeling a voice process
 where silence periods are exponentially distributed in length
-with mean \fIsilenceExpMean\fR.  The talkspurts are geometrically
+with mean <i>silenceExpMean</i></b>.  The talkspurts are geometrically
 distributed with the mean number of packets per talkspurt set by the
-state \fImeanPacketsSpurt\fR.  Then there is a state for the packetization
-period called \fIpackPeriod\fR. Naturally, one can figure the mean duration
-of a talkspurt from the \fImeanPacketsSpurt\fR and \fIpackPeriod\fR states.
+state <i>meanPacketsSpurt</i></b>.  Then there is a state for the packetization
+period called <i>packPeriod</i></b>. Naturally, one can figure the mean duration
+of a talkspurt from the <i>meanPacketsSpurt</i></b> and <i>packPeriod</i></b> states.
 Also, the packet is time-stamped and identified by connection.
 
 It recognizes
-.c VoiceData 
+<tt>VoiceData </tt>
 type input prompts: Transmit Packets
 and StopTransmitPackets. Transmit packets send as info. incoming VPI,
 source VCI number, and destination VCI number.  Preceding a transmission

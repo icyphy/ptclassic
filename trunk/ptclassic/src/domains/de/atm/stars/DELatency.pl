@@ -21,14 +21,14 @@ Measures packet traversal-time statistics for a set of traffic-
 loaded trunk lines.
        }
 
-       explanation {
+	htmldoc {
 Produces several statistics: on a per-packet basis, it passes through
-.c VoiceData
-type packets received on \fIinput\fR to \fIoutput\fR and also
-each packet's individual traversal time on the \fIlatency\fR port.
-When a \fIdemand\fR is detected, it produces average latency statistics
-for each individual trunk line on \fIavgLatencyIndiv\fR port and over all
-trunk lines on \fIavgLatencyAll\fR port.
+<tt>VoiceData</tt>
+type packets received on <i>input</i></b> to <i>output</i></b> and also
+each packet's individual traversal time on the <i>latency</i></b> port.
+When a <i>demand</i></b> is detected, it produces average latency statistics
+for each individual trunk line on <i>avgLatencyIndiv</i></b> port and over all
+trunk lines on <i>avgLatencyAll</i></b> port.
        }
 
        hinclude {"VoiceData.h"}

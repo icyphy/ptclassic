@@ -10,7 +10,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	desc { Output the logical inverse of the Boolean input }
 	version { $Id$ }
 	location { BDF main library }
-	explanation {
+	htmldoc {
 This star is a logical inverter; it converts TRUE (non-zero) values on
 input to FALSE (zero) values on output and vice versa.  Furthermore,
 the scheduler can use this information to deduce properties of boolean

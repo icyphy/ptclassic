@@ -16,10 +16,10 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	location { DE ATM library }
 
-        explanation {
+	htmldoc {
 Star is to be placed at switch output and feeds into "graphing" star,
 to plot destination VCI field of incoming
-.c VoiceData 
+<tt>VoiceData </tt>
 packets
         }
 

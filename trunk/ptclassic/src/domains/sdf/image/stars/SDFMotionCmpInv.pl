@@ -19,9 +19,9 @@ first frame of a sequence.)
 For non-NULL 'mvHorzIn' and 'mvVertIn' inputs, perform inverse motion
 compensation and write the result to 'output'.
   }
-  explanation {
-.Id "motion compensation, inverse"
-.Id "inverse motion compensation"
+	htmldoc {
+<a name="motion compensation, inverse"></a>
+<a name="inverse motion compensation"></a>
   }
 
   //////// I/O AND STATES.

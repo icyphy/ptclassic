@@ -11,10 +11,10 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { CG56 main library }
-    explanation {
-.Id "bit shifter"
-Scale by shifting left \fIleftShifts\fR bits.
-Negative values of $N$ implies right shifting.
+	htmldoc {
+<a name="bit shifter"></a>
+Scale by shifting left <i>leftShifts</i></b> bits.
+Negative values of <i>N</i> implies right shifting.
 Arithmetic shifts are used.
     }
     input {

@@ -15,10 +15,10 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF Matlab library }
-	explanation {
+	htmldoc {
 See the explanation for Matlab_M star.
 The only difference is that this star forces the outputs to be complex matrices.
-.Ir "Matlab interface"
+<a name="Matlab interface"></a>
 	}
 	constructor {
 output.setPort("output", this, COMPLEX_MATRIX_ENV);

@@ -15,10 +15,10 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
-This Star uses the GNU library <Uniform.h>.
-.Id "uniform noise"
-.Id "noise, uniform"
+	htmldoc {
+This Star uses the GNU library &lt;Uniform.h&gt;.
+<a name="uniform noise"></a>
+<a name="noise, uniform"></a>
 	}
 	output {
 		name { output }

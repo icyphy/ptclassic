@@ -13,7 +13,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 Since ptolemy doesn't allow a bus (a multi-port) to be routed to several
 different destination stars, this star is written to allow the user to
 create two copies of the same bus.  The user can then route the two identical

@@ -13,10 +13,10 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
-We handle the special cases for values of \fIgain\fR equal to
+	htmldoc {
+We handle the special cases for values of <i>gain</i></b> equal to
 -1, 0, 1, 2, 3, 4, and 5.
-In the case that the \fIgain\fR is one, we eliminate ourselves from
+In the case that the <i>gain</i></b> is one, we eliminate ourselves from
 the circuit.
 	}
 	protected {

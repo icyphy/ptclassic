@@ -13,7 +13,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { VHDL main library }
-	explanation {
+	htmldoc {
 A BlackHole accepts input Particles, but doesn't do anything with
 them.  It is typically used to discard unwanted outputs from other blocks.
 	}

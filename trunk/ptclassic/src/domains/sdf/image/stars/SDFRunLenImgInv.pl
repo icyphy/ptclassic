@@ -14,11 +14,11 @@ limitation of liability, and disclaimer of warranty provisions.
 Accept a Float Matrix and inverse run-length encode it.
 Check to make sure we don't write past unallocated memory.
   }
-  explanation {
-.Id "decompression, run length"
-.Id "decoding, run length"
-.Id "run length decoding"
-.Id "image, run length decoding"
+	htmldoc {
+<a name="decompression, run length"></a>
+<a name="decoding, run length"></a>
+<a name="run length decoding"></a>
+<a name="image, run length decoding"></a>
   }
   seealso { RunLenImg }
 

@@ -12,10 +12,10 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
+	htmldoc {
 This star hard limits input samples to keep the in the range
-of (\fIbottom, top\fR).
-.Id "hard limiter"
+of (<i>bottom, top</i></b>).
+<a name="hard limiter"></a>
 	}
 	input {
 		name{input}

@@ -10,7 +10,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 Uses a predefined SQRT() function in a VHDL package (IEEE.math_real) to
 calculate the square root of the input number.
         }

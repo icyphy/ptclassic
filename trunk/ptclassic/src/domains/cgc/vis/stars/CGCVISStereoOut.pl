@@ -8,7 +8,7 @@ can be the audio port /dev/audio, if supported by the workstation.  The
 star writes "blockSize" 16-bit samples at each invocation.  The block
 size should be a multiple of 4.
     }
-    explanation {
+	htmldoc {
 This code is based on the description of the audio driver which can be
 obtained by looking at the man page of audio.
     }

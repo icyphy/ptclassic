@@ -13,7 +13,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 The sinc function ( sin x / x ) of the input is calculated, using the SIN()
 function defined in a VHDL package (IEEE.math_real)
 

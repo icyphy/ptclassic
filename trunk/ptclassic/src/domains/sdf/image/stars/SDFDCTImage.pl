@@ -15,9 +15,9 @@ This star takes a float matrix input particle,
 computes the discrete cosine transform (DCT),
 and outputs a float matrix.
 	}
-	explanation {
-.Id "discrete cosine transform"
-.Id "image, discrete cosine transform"
+	htmldoc {
+<a name="discrete cosine transform"></a>
+<a name="image, discrete cosine transform"></a>
 }
 
 	input { name { input } type { FLOAT_MATRIX_ENV } }

@@ -20,13 +20,13 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC Tcl/Tk library }
-	explanation {
-The \fIpersistence\fR parameter specifies the number
+	htmldoc {
+The <i>persistence</i></b> parameter specifies the number
 of points that are buffered, and hence the number that will
 be shown on a plot.  In line-drawing mode, however, where style = "connect",
-some points are plotted twice if the \fIrepeat_border_points\fR
+some points are plotted twice if the <i>repeat_border_points</i></b>
 parameter is true.
-The \fIrepeat_border_points\fR parameter specifies whether the rightmost point
+The <i>repeat_border_points</i></b> parameter specifies whether the rightmost point
 (those on the right boundary of the plot)
 should be repeated on the left boundary when a new trace is started.
 These points occupy two positions in the buffer, and hence take two slots of persistence.

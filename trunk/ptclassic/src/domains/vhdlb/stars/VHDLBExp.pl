@@ -10,7 +10,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 The exponential function of the input value is calculated, using a separately
 defined function in a VHDL package (IEEE.math_real).
         }

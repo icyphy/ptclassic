@@ -10,8 +10,8 @@ Phase = 0 is the default.  Note that "phase" has the opposite
 sense of the phase parameter in the UpSample star, but the
 same sense as the phase parameter in the FIR star.
 	}
-	explanation {
-.Ir "decimation"
+	htmldoc {
+<a name="decimation"></a>
 	}
 	version { $Id$ }
 	author { J. Pino, ported from Gabriel }

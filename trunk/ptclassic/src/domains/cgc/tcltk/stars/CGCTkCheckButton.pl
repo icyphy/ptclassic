@@ -12,10 +12,10 @@ limitation of liability, and disclaimer of warranty provisions.
     }
     derivedFrom { TclScript }
     location { CGC Tcl/Tk library }
-    explanation {
+	htmldoc {
 This is an asynchronous source star
 with a tk graphical user interface.  The star outputs one of two
-values as specified by the \fIonValue\fR and \fIoffValue\fR parameters.
+values as specified by the <i>onValue</i></b> and <i>offValue</i></b> parameters.
     }
     state {
 	name {identifier}

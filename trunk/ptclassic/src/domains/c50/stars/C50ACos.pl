@@ -11,11 +11,11 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
-.PP
-.Id "arccosine"
-.Id "cosine, inverse"
-.Id "inverse cosine"
+	htmldoc {
+<p>
+<a name="arccosine"></a>
+<a name="cosine, inverse"></a>
+<a name="inverse cosine"></a>
 The input is in the range -1.0 to 1.0.  The output is in the principle range of
 0 to pi, scaled down by a factor of pi for the fixed point device.
 

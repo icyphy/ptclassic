@@ -17,8 +17,8 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
-.Id "table lookup, integer"
+	htmldoc {
+<a name="table lookup, integer"></a>
 	}
 	input {
 		name { input }

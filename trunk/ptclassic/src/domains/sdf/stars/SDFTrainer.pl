@@ -17,12 +17,12 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
+	htmldoc {
 During the startup phase, the "decision" inputs are discarded.  After the
 startup phase, the "train" inputs are discarded.
-.Id "DFE training"
-.Id "decision feedback equalizer training"
-.Id "equalizer, decision feedback, training"
+<a name="DFE training"></a>
+<a name="decision feedback equalizer training"></a>
+<a name="equalizer, decision feedback, training"></a>
 	}
 	defstate {
 		name { trainLength }

@@ -15,7 +15,7 @@ most significant bit first.
 	limitation of liability, and disclaimer of warranty provisions.
     }
     location { CGC main library }
-    explanation {
+	htmldoc {
     }
     input {
 	name {input}

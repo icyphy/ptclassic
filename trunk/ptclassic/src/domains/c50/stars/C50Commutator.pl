@@ -13,9 +13,9 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
-.Ir "interleaving data streams"
-.Ir "combining data streams"
+	htmldoc {
+<a name="interleaving data streams"></a>
+<a name="combining data streams"></a>
 Takes N input streams and synchronously combines them into one output stream,
 where N is the number of inputs.  It consumes B input particles from each
 input, and produces N*B particles on the output, where B = blockSize.

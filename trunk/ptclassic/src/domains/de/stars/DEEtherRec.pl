@@ -16,30 +16,30 @@ This star receives floating-point particles transmitted to it by
 an EtherSend star.  The particle is produced at the output after
 some duration of transmission specified at the transmitter.
 	}
-	explanation {
+	htmldoc {
 This star is derived from
-.c Ether.
+<tt>Ether.</tt>
 Please see the manual entry for that star for a basic introduction.
-.pp
+<p>
 This star implements a receiver for a shared medium when the received
 particle is a simple floating point number.
 A similar star could be made for other
-.c Particle
+<tt>Particle</tt>
 types, so this should be viewed as a concept demonstration only.
-.pp
+<p>
 The star will produce an output only if some transmitter
 (which must be also derived from
-.c EtherSend )
+<tt>EtherSend )</tt>
 uses the same medium and transmits to this receivers address.
 The time at which the output is produced is specified by the transmitter
 when it transfers the particle by calling the public
 method
-.c schedReception
+<tt>schedReception</tt>
 defined in this star.
 That method takes two arguments, a
-.c Particle
+<tt>Particle</tt>
 reference, and a
-.c double
+<tt>double</tt>
 giving the time at which the particle should be sent to the output.
 	}
 	output {

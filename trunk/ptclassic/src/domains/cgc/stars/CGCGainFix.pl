@@ -16,7 +16,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	version { $Id$ }
 	location { CGC main library }
-        explanation { 
+	htmldoc {
 The value of the "gain" parameter and its precision in bits can currently 
 be specified using two different notations.
 Specifying only a value by itself in the dialog box would create a

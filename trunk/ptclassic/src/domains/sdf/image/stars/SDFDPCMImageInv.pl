@@ -16,12 +16,12 @@ If the "past" input is not a GrayImage or has size 0, pass the "diff"
 directly to the "output". Otherwise, add the "past" to the "diff"
 (with leakage factor alpha) and send the result to "output".
   }
-  explanation {
-.Id "image decompression"
-.Id "image DPCM, inverse"
-.Id "DPCM, inverse"
-.Id "inverse DPCM"
-.Id "decompression, image"
+	htmldoc {
+<a name="image decompression"></a>
+<a name="image DPCM, inverse"></a>
+<a name="DPCM, inverse"></a>
+<a name="inverse DPCM"></a>
+<a name="decompression, image"></a>
   }
   seealso { DPCMImage }
 

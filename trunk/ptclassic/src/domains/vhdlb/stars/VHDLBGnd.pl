@@ -10,7 +10,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 Outputs a zero value every "interval" nanoseconds.  Mimics a logical low
 (ground) in a logic circuit.
         }

@@ -11,53 +11,53 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 nonlinear functions library }
-        explanation {
-.PP
+	htmldoc {
+<p>
 The input accesses a lookup table.  More generally, this star defines
 a function which maps input values between -1 and +1-2^-23 into
 user-specified output values.
-.Id "table lookup"
-.Id "lookup table"
-.PP
+<a name="table lookup"></a>
+<a name="lookup table"></a>
+<p>
 The basic function is given by a table of constants which specify
 values of the function at certain fixed points; the constants are
-taken from a file or given by the list \fIcoef\fR.
+taken from a file or given by the list <i>coef</i></b>.
 For a table with n constants, the
 first constant specifies the output for an input of -1.  The second
 constant specifies the output for an input of -1 + 2/n, and so on,
 the last constant handling an input of 1 - 2/n.  In essence, the
 table is scaled to fit in the interval from -1 to 1, and the input
 acts as an index into the table.
-.PP
-The \fIinterpolation\fR parameter determines the output for input
-values between table-entry points.  If \fIinterpolation\fR is
+<p>
+The <i>interpolation</i></b> parameter determines the output for input
+values between table-entry points.  If <i>interpolation</i></b> is
 "linear", the star will interpolate between table entries; if
-\fIinterpolation\fR is "none", it will use the next lowest entry.
+<i>interpolation</i></b> is "none", it will use the next lowest entry.
 With a two-element table, for instance, the first constant
 specifies the output for an input of -1, while the second handles
 an input of 0.  With no interpolation, all inputs less than 0 will
 result in an output of the first constant.
-.PP
+<p>
 Since the table specifies outputs only for inputs up to +1 - 2/n,
 special provisions must be made for inputs between that point and +1.
-With \fIinterpolation\fR set to "none", inputs in that range result
-in an output of the last table constant.  If  \fIinterpolation\fR
+With <i>interpolation</i></b> set to "none", inputs in that range result
+in an output of the last table constant.  If  <i>interpolation</i></b>
 is "linear", the behavior of the function is specified by
-\fItableType\fR, which determines the effective table entry for an
+<i>tableType</i></b>, which determines the effective table entry for an
 input of 1.0.  "periodic" sets the entry equal to the entry for -1,
 allowing smoothly wrapping periodic functions.  For "limited", it
 is equal to the last constant.  "linear" sets it to twice
 the last constant minus the previous one, linearly extending the
 table.  Any other value results in a value of 0 for an input of 1.
-.PP
+<p>
 As an example, the table [1 2 3 5] with linear interpolation returns
-the following input-output pairs: -1=>1; -.75=>1.5; -.5=> 2; -.25=>2.5;
-0=>3; .25=>4; .5=>5.  An input of .75 gives an output of 3 for periodic
+the following input-output pairs: -1=&gt;1; -.75=&gt;1.5; -.5=&gt; 2; -.25=&gt;2.5;
+0=&gt;3; .25=&gt;4; .5=&gt;5.  An input of .75 gives an output of 3 for periodic
 table type, 5 for limited, 6 for linear, and 2.5 for any other type.
-.PP
-The \fItableType\fR feature is in fact implemented by tacking an extra
+<p>
+The <i>tableType</i></b> feature is in fact implemented by tacking an extra
 value onto the end of the table.  Thus, the coefficient table will require
-one more memory location if \fIinterpolation\fR is "linear".
+one more memory location if <i>interpolation</i></b> is "linear".
 	}                  
        	input {
 		name { input }

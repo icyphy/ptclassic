@@ -12,8 +12,8 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-        explanation {
-.Id "quantizer"
+	htmldoc {
+<a name="quantizer"></a>
 Normally, the output is just the two's complement number
 given by the top noBits of the input, but
 an optional offset can be added to shift the output levels up or down.

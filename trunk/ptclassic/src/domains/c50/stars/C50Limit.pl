@@ -11,10 +11,10 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
-.Id "hard limiter"
+	htmldoc {
+<a name="hard limiter"></a>
 The star hard limits the values of input samples to be in the range
-(\fIbottom\fR, \fItop\fR).
+(<i>bottom</i></b>, <i>top</i></b>).
 	}
 	input {
 		name {input}

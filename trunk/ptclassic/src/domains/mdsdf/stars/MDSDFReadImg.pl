@@ -16,10 +16,10 @@ different files and send them out as a FloatMatrix.
 
 This star does not support frame numbers.  See ReadImg2.
   }
-  explanation {
-.Ir "PGM image format"
-.Ir "image format, portable graymap (PGM)"
-.Ir "image reading"
+	htmldoc {
+<a name="PGM image format"></a>
+<a name="image format, portable graymap (PGM)"></a>
+<a name="image reading"></a>
   }
   output {
     name { imageOutput } 

@@ -11,9 +11,9 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
-.PP
-Output the \fIpos\fR minus all \fIneg\fR inputs.
+	htmldoc {
+<p>
+Output the <i>pos</i></b> minus all <i>neg</i></b> inputs.
         }    
 	input {
 		name { pos }

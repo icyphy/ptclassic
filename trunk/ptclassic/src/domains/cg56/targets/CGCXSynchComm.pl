@@ -13,7 +13,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { CG56 Target Directory }
-    explanation {
+	htmldoc {
 This star is the base star for all synchronous interprocessor communication
 between the Sparc and S-56X board.
 }

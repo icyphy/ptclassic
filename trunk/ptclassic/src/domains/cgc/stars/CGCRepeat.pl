@@ -11,9 +11,9 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
+	htmldoc {
 Repeat repeats each input Particle the specified number of times
-(\fInumTimes\fR) on the output.  Note that this is a sample rate
+(<i>numTimes</i></b>) on the output.  Note that this is a sample rate
 change, and hence affects the number of invocations of downstream
 stars.
 	}

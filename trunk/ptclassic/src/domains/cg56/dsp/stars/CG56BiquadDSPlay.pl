@@ -11,26 +11,26 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 dsp library }
-        explanation {
+	htmldoc {
 This second-order biquad IIR filter is tailored to use the coefficients
 from the DSPlay filter design tool.
 If DSPlay gives the coefficients A B C D E, then define the parameters
 as follows:
-.sp 0.5
-.(l
-a = A
-b = B
-c = C
-d = -(D+1)
-e = -E
-.)l
-.sp 0.5
-This only works if a, b, c, d, and e are in the range $(-1, +1)$.
+<p>
+<ul>
+<li> a = A
+<li> b = B
+<li> c = C
+<li> d = -(D+1)
+<li> e = -E
+</ul>
+<p>
+This only works if a, b, c, d, and e are in the range <i></i>(<i>-</i>1<i>, +</i>1<i></i>)<i></i>.
 The transfer function realized by the filter is:
-.EQ
+<pre>
 H(z) ~ = ~ { { a ~ + ~ b z sup { -1 } ~ + ~ c z sup { -2 } } over
 { 1 ~ - ~ (d ~ + ~ 1) z sup { -1 } ~ - ~ e z sup { -2 } }  }
-.EN
+</pre>
 The default coefficients implement a low pass filter.
         }
         input {

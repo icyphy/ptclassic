@@ -26,11 +26,11 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
-.Id "table lookup"
-.Id "piecewise linear map"
-.Id "tent map"
-.Id "linear map"
+	htmldoc {
+<a name="table lookup"></a>
+<a name="piecewise linear map"></a>
+<a name="tent map"></a>
+<a name="linear map"></a>
 	}
 	input {
 		name { input }

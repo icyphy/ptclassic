@@ -11,11 +11,11 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 main library }
-	explanation {
-.Id "arcsine"
-.Id "sine, inverse"
-.Id "inverse sine"
-.Ir "power series"
+	htmldoc {
+<a name="arcsine"></a>
+<a name="sine, inverse"></a>
+<a name="inverse sine"></a>
+<a name="power series"></a>
 Arc sine function using power series approximation.  
 The output, in principal range -pi/2 to pi/2, is scaled down by pi.
 }

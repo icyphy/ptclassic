@@ -15,11 +15,11 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
-The input signal is plotted using the \fIpxgraph\fR program, with one
+	htmldoc {
+The input signal is plotted using the <i>pxgraph</i></b> program, with one
 input interpreted as the x-axis data, and the other input as y-axis data.
-.Id "graph, X-Y"
-.Ir "pxgraph program"
+<a name="graph, X-Y"></a>
+<a name="pxgraph program"></a>
 	}
 	seealso {Xgraph XMgraph pxgraph Xhistogram}
 	input {

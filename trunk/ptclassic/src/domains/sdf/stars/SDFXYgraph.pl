@@ -15,11 +15,11 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
-The input signal is plotted using the \fIxgraph\fR program, with one
+	htmldoc {
+The input signal is plotted using the <i>xgraph</i></b> program, with one
 input interpreted as the x-axis data, and the other input as y-axis data.
-.Id "graph, X-Y"
-.Ir "xgraph program"
+<a name="graph, X-Y"></a>
+<a name="xgraph program"></a>
 	}
 	seealso {Xgraph XMgraph xgraph Xhistogram}
 	input {

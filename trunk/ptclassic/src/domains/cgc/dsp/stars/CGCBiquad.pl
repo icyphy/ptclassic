@@ -13,7 +13,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC dsp library }
-	explanation {
+	htmldoc {
 A two-pole, two-zero IIR filter.
 	}
 	input {

@@ -15,16 +15,16 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF dsp library }
-	explanation {
-.pp
-.Id "filter, FIR, block"
-.Id "FIR filter, block"
-The \fIblockSize\fR parameter tells how often
+	htmldoc {
+<p>
+<a name="filter, FIR, block"></a>
+<a name="FIR filter, block"></a>
+The <i>blockSize</i></b> parameter tells how often
 the updates occur.  It is an integer specifying how may input samples
-should be processed using each set of coefficients.  The \fIorder\fR
+should be processed using each set of coefficients.  The <i>order</i></b>
 parameter tells how many coefficients there are.
 The same interpolation and decimation of the FIR star is supported.
-.pp
+<p>
 Unfortunately, it proves not too convenient to derive this star from FIR
 because of the changes in the way the inputs and outputs are handled.
 Hence, much of the code here is quite similar to that in the FIR star.

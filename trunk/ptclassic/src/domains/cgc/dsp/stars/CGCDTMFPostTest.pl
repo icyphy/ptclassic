@@ -6,21 +6,21 @@ defstar {
 Returns whether or not a valid dual-tone modulated-frequency has
 been correctly detected based on the last three detection results.
 	}
-	explanation {
+	htmldoc {
 The assumption is that the 100 msec DTMF interval has been split into
 roughly four parts.  This star looks at the last three detection results,
 which are represented as integers.  A new digit has been detected
 if two consecutive detected digits are the same followed by a third
 detected digit that is different.
-.PP
+<p>
 This test is useful for two reasons.
 First, it filters redundant hits so that only one is reported.
 Second, it improves robustness against noisy DTMF signals and speech input.
-.UH REFERENCES
-.IP [1]
+<h3>References</h3>
+<p>[1]  
 Pat Mock, "Add DTMF Generation and Decoding to DSP-uP Designs,"
 Electronic Data News, March 21, 1985.  Reprinted in
-\fIDigital Signal Processing Applications with the TMS320 Family\fR,
+<i>Digital Signal Processing Applications with the TMS320 Family</i></b>,
 Texas Instruments, 1986.
 	}
 	author { Brian L. Evans }

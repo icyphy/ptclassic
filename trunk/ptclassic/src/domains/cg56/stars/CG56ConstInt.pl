@@ -11,7 +11,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 main library }
-	explanation {
+	htmldoc {
 There are no runtime instructions associated with this star.
 The output buffer is initialized with the specified DC value.
 	}

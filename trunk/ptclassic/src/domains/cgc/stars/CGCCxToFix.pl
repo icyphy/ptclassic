@@ -12,7 +12,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
 	desc { Convert a complex input to a fixed-point output. }
-	explanation {
+	htmldoc {
 This star converts a complex value to a fix value with the specified precision
 by computing the absolute value.
 If the output precision is not specified, the precision is determined at

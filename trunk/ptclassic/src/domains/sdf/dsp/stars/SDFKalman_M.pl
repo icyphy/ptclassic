@@ -11,7 +11,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
   location  { SDF dsp library }
-  explanation {
+	htmldoc {
 Initial values for the state transition matrix, state vector, correlation
 matrix, and process noise correlation matrix are parameters to the star.
 Also parameters are the number of elements in the observation vector and
@@ -20,12 +20,12 @@ Inputs are the current values of the state transition matrix, process
 noise correlation matrix, measurement noise correlation matrix, 
 measurement matrix, and the observation vector.
 The single output is the state vector.
-.UH REFERENCES
-.ip [1]
+<h3>References</h3>
+<p>[1]  
 R.E. Kalman, "A new approach to linear filtering and prediction problems",
-\fITrans. ASME, J. Basic Eng., Ser 82D, pp. 35-45, March 1960.
-.ip [2]
-S. Haykin, \fIAdaptive Filter Theory\fR, Prentice-Hall, Inc., Englewood Cliffs,
+<i>Trans. ASME, J. Basic Eng., Ser 82D, pp. 35-45, March 1960.
+<p>[2]  
+S. Haykin, <i>Adaptive Filter Theory</i></b>, Prentice-Hall, Inc., Englewood Cliffs,
 N.J., 1986.
   }
   input {

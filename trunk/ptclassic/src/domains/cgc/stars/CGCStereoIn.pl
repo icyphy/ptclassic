@@ -7,7 +7,7 @@ Reads Compact Disc audio format from a file given by "fileName". The file
 can be the audio port /dev/audio, if supported by the workstation.  
 The data read is linear 16 bit encoded and stereo(2 channel) format.
   }
-  explanation {
+	htmldoc {
 This code is based on the description of the audio driver which can
 be obtained by looking at the man page for audio.
   }

@@ -14,7 +14,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	version { $Id$ }
 	location { SDF main library }
-        explanation {
+	htmldoc {
 The "OutputPrecision" is specified using an "l.r" format, where
 "l" is the number of bits to the left of the decimal place
 (including the sign bit) and "r" is the number of bits to the

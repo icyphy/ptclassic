@@ -13,7 +13,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 Target Directory }
 	ccinclude { "CGCXReceive.h" }
-	explanation {
+	htmldoc {
 	}
 protected {
 	friend class S56XTargetWH;

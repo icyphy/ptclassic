@@ -20,20 +20,20 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
+	htmldoc {
 Generate a file for the SparcStation speaker and play it.  The "ptplay"
 program must be on the user's path.
 This star may be used on a different device provided that a "ptplay"
 program is written with the following specifications:
-.lp
+<p>
 When invoked as "ptplay filename", where filename is a sequence of
 bytes representing mu-law PCM samples, the program should play
 the file at 8000 samples per second.  Perhaps later this rate can
 be a parameter.
-.Ir "Mu law"
-.Ir "ptplay program"
-.Ir "audio, Sparcstation"
-.Ir "Sparcstation audio"
+<a name="Mu law"></a>
+<a name="ptplay program"></a>
+<a name="audio, Sparcstation"></a>
+<a name="Sparcstation audio"></a>
 	}
 	input {
 		name { input }

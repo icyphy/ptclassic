@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	explanation {
+	htmldoc {
 To keep the implementation simple, this star does not attempt the
 fancy tricks performed by the regular fork star to avoid runtime overhead.
 The data values are simply copied at runtime.

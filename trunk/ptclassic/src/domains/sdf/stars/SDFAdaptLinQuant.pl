@@ -11,19 +11,19 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	explanation {
-The input is quantized to the number of levels given by 2^\fIbits\fR.
+	htmldoc {
+The input is quantized to the number of levels given by 2^<i>bits</i></b>.
 The quantization levels are uniformly spaced at the step size given by
-the \fIinStep\fR input value and are odd symmetric about zero.
-Therefore, the "high" threshold is (2^\fIbits\fR - 1)*\fIinStep\fR/2, and
+the <i>inStep</i></b> input value and are odd symmetric about zero.
+Therefore, the "high" threshold is (2^<i>bits</i></b> - 1)*<i>inStep</i></b>/2, and
 the "low" threshold is the negative of the "high" threshold.
 Rounding to nearest level is performed. Output level will equal "high" only
 if the input level equals or exceeds "high".
 If the input is below "low", then the quantized output will equal "low".
-The quantized value is output on the \fIamplitude\fR port as a floating-point
-value, the step size is output on the \fIoutStep\fR port as a floating-point
-value, and the index of the quantization level on the \fIstepLevel\fR port
-as a non-negative integer between 0 and 2^\fIbits\fR - 1, inclusive.
+The quantized value is output on the <i>amplitude</i></b> port as a floating-point
+value, the step size is output on the <i>outStep</i></b> port as a floating-point
+value, and the index of the quantization level on the <i>stepLevel</i></b> port
+as a non-negative integer between 0 and 2^<i>bits</i></b> - 1, inclusive.
 	}
 	version { $Id$ }
 	input {

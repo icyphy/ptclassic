@@ -15,13 +15,13 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
-.Id "rectangular to polar format conversion"
-.Id "format conversion, rectangular to polar"
-.Ir "magnitude"
-.Ir "phase"
-.Ir "Cartesian coordinates"
-.Ir "polar coordinates"
+	htmldoc {
+<a name="rectangular to polar format conversion"></a>
+<a name="format conversion, rectangular to polar"></a>
+<a name="magnitude"></a>
+<a name="phase"></a>
+<a name="Cartesian coordinates"></a>
+<a name="polar coordinates"></a>
 	}
 	input {
 		name { x }

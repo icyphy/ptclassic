@@ -16,55 +16,54 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF Tcl/Tk library }
-	explanation {
-.EQ
-delim off
-.EN
+	htmldoc {
+<pre>
+</pre>
 This star evaluates a tcl expression each time it is fired.  If the expression
 returns a value of "true" then the run is paused.
 The expression can be any valid tcl expression.  For details of valid tcl
 expressions, see the tcl command "expr."
-.pp
+<p>
 This star takes multiple inputs.  To make it easier to write a conditional
 expression, the inputs are numbered: input(1), input(2), input(3), etc.
 Thus if you only had one input connected to a TkBreakPt star, you would
 use input(1) to refer to it.
-.pp
+<p>
 Remember that Tcl uses a dollar sign ($) to reference the value of a 
 variable.  Thus, the expression
-.br
-$input(1) < 0
-.br
+<br>
+$input(1) &lt; 0
+<br>
 will be true if the value
 of the first input is negative.  Similarly, the expression
-.br
-$input(1) < $input(2)
-.br
+<br>
+$input(1) &lt; $input(2)
+<br>
 will be true whenever the value of the first input is less than the value 
 of the second input.
-.pp
+<p>
 It may be difficult to distinguish which input is which if they are
 all connected directly to the multiport input.  One solution is to
 use the "Bus create" icons in the HOF functions palette.  Connect
 the bus create icon of your choice to the input of the TkBreakPt star.
 Then connect the inputs to the bus create icon.  The top input is 
 input(1), the next is input(2), etc.
-.pp
+<p>
 The second parameter, Optional_Alternate_Script is the script to source if the 
 condition evaluates to "true".  If this parameter is left blank (the default)
 then the default script is executed which pauses the run and 
 puts up a message in the Run Control block.  This should be fine for
 most applications of this star.
-.pp
+<p>
 The Optional_Alternate_Script is sourced from the goTcl_$starID proceedure.  It
 has access to the following variables:
-.br
+<br>
 $starID() : The $starID associative array.  See the programmer's manual for
 details.
-.br
+<br>
 input(1), input(2), etc. : The inputs to this star.  See above for the details
 of the numbering.
-.br
+<br>
 $ptkControlPanel : The current Run Control window.
 } 
 

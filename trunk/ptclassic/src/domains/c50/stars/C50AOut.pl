@@ -11,26 +11,26 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
-.PP
+	htmldoc {
+<p>
 This star is an interrupt driven D/A star for the DSK320 board.
 The output voltage at the RCA connector is scaled to maximum 3V.
 The sampling rate is approximated as 285.7KHz/N where N is a
 positive integer.  Thus, setting the sampleRate parameter to
 8000 Hz will yield a sample rate of 7936 Hz(N = 36).
-.PP
+<p>
 If "interruptBufferSize" is left as -1 the star will automatically allocate
 an interrupt buffer of size rep where rep is the number of times the
 star is repeated on the schedule except when rep is 1, in which case no
 buffer will be allocated.   If "interruptBufferSize" is set to 0 or 1 no 
 buffer will be allocated;  otherwise the size of the buffer is set to the 
 value of "interruptBufferSize".
-.PP
+<p>
 On each firing this star will copy its input into the interrupt  buffer
 if it is not full.  If the interrupt buffer is full it will wait until
 it is empty once again. If no buffer is allocated, the star will wait
 until it can send its input to the A\D converter.
-.PP
+<p>
 	}
 
 	seealso { AIn }

@@ -17,15 +17,15 @@ limitation of liability, and disclaimer of warranty provisions.
 }
 	location { DE ATM library }
 
-	explanation {
+	htmldoc {
 This block generates an output at the stopTime of the
-.c DEScheduler
+<tt>DEScheduler</tt>
 controlling the block.  It is useful for clocking the input of the
-.c Sampler
+<tt>Sampler</tt>
 or statistical Blocks in order to observe their final outputs at the end
 of the simulation. It generates a float output instead of an int output
 like the 
-.c DEStopTimer
+<tt>DEStopTimer</tt>
 in the standard DE star library.
 	}
 	input {

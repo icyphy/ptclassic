@@ -20,14 +20,13 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { HOF main library }
-	explanation {
+	htmldoc {
 See the explanation for the
-.c MapGr
+<tt>MapGr</tt>
 star, from which this is derived.
 The only difference is that this star forces the number of inputs to zero
 and output datatype to fix matrix.
-It also hides the input ports and the \fIinput_map\fR parameter.
-.Sr "MapGr"
+It also hides the input ports and the <i>input_map</i></b> parameter.
 	}
 	ccinclude { "Matrix.h" } 
 	constructor {

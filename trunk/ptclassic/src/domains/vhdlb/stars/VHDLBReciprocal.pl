@@ -14,7 +14,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 This star computes the reciprocal of the input value x.  If the "magLimit"
 parameter is not zero, then the output is bound by +/- magLimit.  In this case
 even if the input is zero, no divide-by-zero exception will be caused.

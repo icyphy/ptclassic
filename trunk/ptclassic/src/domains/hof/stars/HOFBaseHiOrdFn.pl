@@ -6,10 +6,10 @@ defstar {
 This is a base class containing utility methods shared by HOF stars,
 and defining their common functionality.
 	}
-	explanation {
-This star provides the base class for a family of \fIhigher-order functions\fR
+	htmldoc {
+This star provides the base class for a family of <i>higher-order functions</i></b>
 in Ptolemy.
-.IE "higher-order functions"
+<a name="higher-order functions"></a>
 A higher-order function is a function that takes a function as
 an argument and/or returns a function.
 Stars and galaxies in Ptolemy have two kinds of arguments:
@@ -19,49 +19,47 @@ take functions as parameters, not signals.
 The basic mechanism is that a star or galaxy is statically
 specified, and the higher-order star replaces itself with
 one or more instances of the specified replacement block.
-.pp
-The name of the replacement block is given by the \fIblockname\fR parameter.
-If the replacement block is a galaxy, then the \fIwhere_defined\fR parameter
+<p>
+The name of the replacement block is given by the <i>blockname</i></b> parameter.
+If the replacement block is a galaxy, then the <i>where_defined</i></b> parameter
 gives the full name (including the full path) of the definition of the galaxy.
 This path name may (and probably should) begin with the environment
-.EQ
-delim off
-.EN
+<pre>
+</pre>
 variable $PTOLEMY or ~username.
-.EQ
-delim $$
-.EN
+<pre>
+</pre>
 Currently, this must be an oct facet, although in the future, other
 specifications (like ptcl files) may be allowed.
 The oct facet should contain the replacement galaxy,
 or it could simply be the facet that defines the replacement galaxy.
 If the replacement block is a built-in star, then there
-is no need to give a value to the \fIwhere_defined\fR parameter.
-.pp
+is no need to give a value to the <i>where_defined</i></b> parameter.
+<p>
 For all higher-order stars derived from this base class, the replacement
 blocks are substituted for the higher-order star at setup time.
 Thus, the scheduler will never see the higher-order star.
 For this reason, these stars can be used in any Ptolemy domain,
 since their semantics are independent of the model of computation.
-.pp
+<p>
 The stars derived from this base class differ mostly in the way
 that replacement blocks get wired into the graph.
 They share a common mechanism for specifying the value
 of parameters in the replacement block.
-.UH "Setting parameter values"
-.pp
-The \fIparameter_map\fR parameter can be used to set parameter values
+<h3>Setting parameter values</h3>
+<p>
+The <i>parameter_map</i></b> parameter can be used to set parameter values
 for the replacement blocks.
 There are four acceptable forms:
-.(c
+<pre>
 name value
 name(number) value
 name = value
 name(number) = value
-.)c
+</pre>
 There should be no spaces between "name" and "(number)", and the name
 cannot contain spaces, "=", or "(".
-In all cases, \fIname\fR is the name of a parameter in the
+In all cases, <i>name</i></b> is the name of a parameter in the
 replacement block.
 In the first case, the value is applied to all instances
 of the replacement block.
@@ -69,7 +67,7 @@ In the second case, it is applied only to the specified instance
 number (which starts with 1).  The third and fourth cases just
 introduce an optional equal sign, for readability.
 If the "=" is used, there must be spaces around it.
-.pp
+<p>
 The value can be any usual Ptolemy expression for giving the value
 of a parameter.
 However, if the string "instance_number" appears anywhere in the

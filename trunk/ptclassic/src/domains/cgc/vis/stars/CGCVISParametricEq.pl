@@ -14,7 +14,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC dsp library }
-	explanation {
+	htmldoc {
 The user supplies the parameters such as Bandwidth, Center Frequency,
 and Gain.  The digital biquad coefficients are quickly calculated
 based on the procedure defined by Shpak.

@@ -25,7 +25,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 	seealso {QueueBase, FIFOQueue, PriorityQueue}
-	explanation {
+	htmldoc {
 This star stacks inputs in a finite or infinite length LIFO queue.
 After the stack has grown to capacity,
 it sends any further "inData" inputs to the "overflow" output.
@@ -33,12 +33,12 @@ If the "capacity" parameter is a negative number,
 then the capacity is taken to be infinite.
 Note that storage is allocated dynamically, so a large capacity
 does not necessarily imply a large storage usage.
-.pp
+<p>
 If "consolidateDemands" is set to FALSE, then every "demand" input
 will eventually stimulate an output, even if successive demands arrive
 when the queue is empty, and even if successive demands arrive with the
 same time stamp.
-.pp
+<p>
 If "consolidateDemands" is set to TRUE (the default), then "numDemandsPending"
 is not permitted to rise above unity.
 This means that
@@ -51,13 +51,13 @@ the next "inData" particle to pass immediately to the output by
 setting the state "numDemandsPending" to unity.
 But if more than one "demand" event arrives in this time period, the
 effect is the same as if only one such event had arrived.
-.pp
+<p>
 When "demand" inputs and "inData" inputs have the same time
 stamp, then they will be pushed and popped without regard to capacity
 limitations (since they spend zero time in the stack).
 Hence, a collection of simultaneous "inData" particles will be output
 in reverse order.
-.pp
+<p>
 Consider the following example.  The Stack has capacity 3 and size 2.
 Three "inData" particles are waiting
 at the input, and all three have the same time stamp.  Two "demand"
@@ -70,7 +70,7 @@ third will be sent to "overflow".  The Stack has reached capacity.
 If "consolidateDemands" had been FALSE, two outputs would have been
 produced first, reducing the stack size to 0, and making room
 for all three pending "inData" particles.
-.pp
+<p>
 Consider the next example.  A Stack star is wired up with the "outData"
 fed back to the "demand" input, with no delay, and "numDemandsPending"
 is initialized to unity (the default).  The first "inData" particle
@@ -81,12 +81,12 @@ this way is a no-op, passing input particles directly to the output.
 Even if two "inData" particles arrive with the
 same time stamp, they will both be passed to the output with the same
 time stamp, even though it takes two successive firings to accomplish this.
-\fIHowever, they will pass to the output in reverse order.\fR
-.pp
+<i>However, they will pass to the output in reverse order.</i></b>
+<p>
 As a third example, a Stack with capacity zero will pass
 "inData" particles to the output only if there is a pending demand.
 Otherwise, the inData particle will be sent to "overflow".
-.pp
+<p>
 Each time a data or demand input arrives, the size of the stack
 after processing all inputs is sent to the "size" output.
 	}

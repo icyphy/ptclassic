@@ -11,12 +11,12 @@ see the documentation for the SDF Scrambler star and Lee and Messerschmitt,
 Digital Communication, Second Edition, Kluwer Academic Publishers, 1994,
 pp. 595-603.
 	}
-	explanation {
-.IE "feedback shift register"
-.IE "pseudo-random sequence"
-.IE "pseudo-noise sequence"
-.IE "primitive polynomial"
-.IE "maximal length feedback shift register"
+	htmldoc {
+<a name="feedback shift register"></a>
+<a name="pseudo-random sequence"></a>
+<a name="pseudo-noise sequence"></a>
+<a name="primitive polynomial"></a>
+<a name="maximal length feedback shift register"></a>
 	}
 	version { $Id$ }
 	author { E. A. Lee }

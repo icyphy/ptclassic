@@ -16,7 +16,7 @@ This star receives message particles transmitted to it by
 an EtherSend star.  The particle is produced at the output after
 some duration of transmission specified at the transmitter.
 	}
-	explanation {
+	htmldoc {
 See the explanation for the DEEtherRec stars.
 The only difference is that this stars forces the output to be a message.
 	}

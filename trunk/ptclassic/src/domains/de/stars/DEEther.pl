@@ -21,27 +21,27 @@ and the communication topology can be continually changing.
 This base class implements the data structures that are shared
 between the transmitters and receivers.
 	}
-	explanation {
+	htmldoc {
 This star, and its derivatives
-.c EtherRec
+<tt>EtherRec</tt>
 and
-.c EtherSend,
+<tt>EtherSend,</tt>
 demonstrate the use of shared data structures
-.Ie "shared data structures"
+<a name="shared data structures"></a>
 to simulate one or more shared physical media.
 Each instance of the star specifies the medium it uses by name;
 all stars that use that name will share that medium.
 Any ASCII string can be used as a name.
-.pp
+<p>
 The
-.c EtherSend
+<tt>EtherSend</tt>
 star is given a Particle, an address, and a duration.
 It checks to see whether the medium is currently occupied by another
 transmitter using the same medium.  If not, it occupies
 the medium for the specified duration, and delivers a copy of
 the particle to a receiver that matches the specified address.
 The
-.c EtherRec
+<tt>EtherRec</tt>
 star, after the "duration" time has elapsed, outputs the particle.
 In this implementation, receiver addresses are arbitrary non-negative integers.
 They need not be contiguous, but they must be unique.
@@ -50,7 +50,7 @@ than one receiver to have the same address.
 If a negative integer is specified as the address at the transmitter,
 then the transmitter broadcasts a copy of the data particle to
 all receivers.
-.pp
+<p>
 When the transmitter receives a new data particle, the medium
 could be occupied (by the same transmitter or a different one using
 the same medium).
@@ -60,9 +60,9 @@ output port.
 This is a pretty simple-minded implementation, and may not be rich
 enough to implement practical collision detection protocols.
 So it should be viewed as a concept demonstration only.
-.pp
+<p>
 The way these stars work is to define, in the base class
-.c DEEther,
+<tt>DEEther,</tt>
 a static hash table that contains an entry for each medium.
 By making this hash table static, it is made available to
 all derived stars.
@@ -72,20 +72,20 @@ The index into the hash table is the receiver address.
 In this implementation, only one receiver can occupy
 a given address, but it would be easy to change the hash table
 entry to a
-.c SequentialList
+<tt>SequentialList</tt>
 of receivers.
 This would allow any number of receivers to share the same address.
-.pp
+<p>
 The receiver addresses are interpreted as strings.  Thus,
 anything can be used.  The particular implementation of
 the derived star
-.c EtherSend
+<tt>EtherSend</tt>
 assumes the receivers will have non-negative integers for addresses.
 But another implementation might use arbitrary ASCII strings.
-.pp
+<p>
 The medium is reset in the
-.c wrapup() method of the star.
-.Ie wrapup
+<tt>wrapup() method of the star.</tt>
+<a name="wrapup"></a>
 Note that this does not get invoked if an error occurs during the run.
 Thus, if an error occurs, the star should be destroyed
 and recreated.  Pigi takes care of this automatically,

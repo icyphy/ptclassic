@@ -40,12 +40,12 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DDF library }
-	explanation {
+	htmldoc {
 Each input must have exactly one token for the star to fire.
 The number of outputs produced can depend on the internal galaxy.
-.pp
+<p>
 Creating a new instance of the galaxy is quite an expensive operation,
-so setting \fIreinitialize\fR to TRUE will cause dramatically slower
+so setting <i>reinitialize</i></b> to TRUE will cause dramatically slower
 execution.  Thus this should not be used unless it is absolutely necessary.
 	}
 	seealso { fibonnacci, HOFChain, HOFMap, HOFMapGr }

@@ -11,7 +11,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
+	htmldoc {
 This star is generally used to connect a single output port
 to multiple input ports.  It will be automatically inserted
 when multiple inputs are connected to the same output using the graphical

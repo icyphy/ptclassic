@@ -10,13 +10,13 @@ replacement block.
 The HOFNop stars are the only exception: they may be used in addition to the
 one replacement block in order to control the order of connection.
 	}
-	explanation {
+	htmldoc {
 See the documentation for the
-.c Map
+<tt>Map</tt>
 star, from which this is derived, for background information.
 The parameter values of the graphically connected replacement block
 serve as default parameter values for all replacement blocks.
-These values will be overridden with the \fIparameter_map\fR parameter,
+These values will be overridden with the <i>parameter_map</i></b> parameter,
 where the format is the same as in other higher-order stars.
         }
 	version { $Id$ }

@@ -15,7 +15,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
+	htmldoc {
 This star produces a complex DC output (default zero)
 Even though we have ComplexState, the real and imaginary parts
 are separate states.  (Should this change?)

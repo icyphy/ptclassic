@@ -11,11 +11,11 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 main library }
-        explanation {
+	htmldoc {
 This star computes the base two logarithm of its input divided by 32,
 using polynomial approximation with eight bits of accuracy.
-The coefficients of the polynomial are given by \fId\fR.
-.Id "logarithm"
+The coefficients of the polynomial are given by <i>d</i></b>.
+<a name="logarithm"></a>
         }
         input {
                 name { input }

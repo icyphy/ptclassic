@@ -11,10 +11,10 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC nonlinear library }
-	explanation {
+	htmldoc {
 Outputs natural log of input.
 If the input is zero or negative, the constant -100.0 is produced.
-.Id "logarithm"
+<a name="logarithm"></a>
 	}
 	input {
 		name{input}

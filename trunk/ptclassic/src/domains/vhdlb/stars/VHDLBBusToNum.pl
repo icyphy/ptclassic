@@ -15,7 +15,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 Sometimes it is necessary to convert the data representation in a digital
 circuit (a value on a bus) to a number that can be used by components at
 a more abstract level.  This star allows the user to convert a bus value

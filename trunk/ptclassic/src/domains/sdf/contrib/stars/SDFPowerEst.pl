@@ -5,7 +5,7 @@ defstar {
   version { $Id$ }
   location { SDF user contribution library }
   author { N. Becker }
-  explanation {
+	htmldoc {
 Power is estimated by computing magnitude squared and then filtering with a
 simple 1-pole filter.
   }

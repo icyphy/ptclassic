@@ -12,7 +12,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 dsp library }
-        explanation {
+	htmldoc {
 An allpass filter with one pole and one zero.
 The location of these is given by the polezero input.
 This is from fig. 1a of J.A. Moore, `About this 

@@ -16,28 +16,28 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF dsp library }
-	explanation {
+	htmldoc {
 This star implements an all-pole filter with coefficients that
 are periodically updated
-.Id "all-pole filter, block"
-.Id "filter, all-pole, block"
-.Id "filter, IIR, block"
-from the outside.  The \fIblockSize\fR parameter tells how often the
+<a name="all-pole filter, block"></a>
+<a name="filter, all-pole, block"></a>
+<a name="filter, IIR, block"></a>
+from the outside.  The <i>blockSize</i></b> parameter tells how often the
 updates occur.  This integer parameter specifies how may input samples
-should be processed using each set of coefficients.  The \fIorder\fR
+should be processed using each set of coefficients.  The <i>order</i></b>
 parameter tells how many coefficients there are.
 The transfer function of the filter is
-.EQ
+<pre>
 H(z) ~=~ 1 over { 1 ~-~ z sup -1 D(z) }
-.EN
-where $D(z)$ is specified by the externally supplied coefficients.
+</pre>
+where <i>D</i>(<i>z</i>)<i></i> is specified by the externally supplied coefficients.
 Let
-.EQ
+<pre>
 D(z) ~=~ d sub 1 ~+~ d sub 2 z sup -1 ~+~ ... ~+~ d sub M z sup M-1 ~.
-.EN
-Then $d sub i$ is the $i sup th$ coefficient supplied on the
-\fIcoefs\fR input.
-.pp
+</pre>
+Then <i>d <sub>i</sub></i> is the <i>i <sup>th</sup></i> coefficient supplied on the
+<i>coefs</i></b> input.
+<p>
 No decimation or interpolation is supported.
 	}
 	seealso { FIR BlockFIR }

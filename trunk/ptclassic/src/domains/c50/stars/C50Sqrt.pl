@@ -11,7 +11,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
+	htmldoc {
 Output is the square root of input. 
 Negative values are equated to zero.
 	}

@@ -13,7 +13,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
 	location { DE ATM library }
-	explanation {
+	htmldoc {
 Merely produces a DC output (default zero offset) when stimulated
 by an input.  The time stamp of the output is the same as
 that of the input.  Output is a constant offset from input.

@@ -22,11 +22,11 @@ can choose whether or not the image file is saved or deleted.
 The frameId of the received image is appended to the root filename
 to produce the full filename of the displayed image.
 	}
-	explanation {
-.Id "image display, red-green-blue (RGB)"
-.Id "RGB image display"
-.Ir "PPM image format"
-.Ir "image format, portable pixmap (PPM)"
+	htmldoc {
+<a name="image display, red-green-blue (RGB)"></a>
+<a name="RGB image display"></a>
+<a name="PPM image format"></a>
+<a name="image format, portable pixmap (PPM)"></a>
 	}
 
 	ccinclude {

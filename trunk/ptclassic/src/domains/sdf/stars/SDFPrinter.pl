@@ -17,11 +17,11 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
+	htmldoc {
 This star prints its input, which may be any supported data type.
 There may be multiple inputs: all inputs are printed together on
 the same line, separated by tabs.
-.pp
+<p>
 If output is directed to a file, then flushing does not occur until the
 wrapup method is called.
 Before the first data are flushed, the file will not exist.

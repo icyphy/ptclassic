@@ -17,10 +17,10 @@ example of a rank filter is the median filter, e.g. SDFMedianImage,
 which is derived from this star. Pixels at the image boundaries 
 are copied and not rank filtered.
 	}
-	explanation {
-.Id "filter, rank"
-.Id "image, rank filter"
-.Id "rank filtering"
+	htmldoc {
+<a name="filter, rank"></a>
+<a name="image, rank filter"></a>
+<a name="rank filtering"></a>
 	}
 
 	input { name { inData } type { FLOAT_MATRIX_ENV } }

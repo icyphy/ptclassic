@@ -11,8 +11,8 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 control library }
-	explanation {
-Delay will vary between 0 and \fImaxDelay\fR as the control varies
+	htmldoc {
+Delay will vary between 0 and <i>maxDelay</i></b> as the control varies
 between -1.0 and 1.0.
 	}
 	input  {

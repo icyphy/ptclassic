@@ -15,22 +15,22 @@ This star filters the input signal with a first-order, AR impulse response.
 The data input is interpreted as weighted impulses (Dirac delta functions).
 An output is triggered by a clock input.
 	}
-	explanation {
+	htmldoc {
 Assuming a clock input event
-triggers the star at time $T$, the output is:
-.EQ
+triggers the star at time <i>T</i>, the output is:
+<pre>
 y(T) ~=~ d sup {(T ~-~ tau )} s( tau )
-.EN
-where $tau$ is the time of the latest data input event, $s( tau )$ is the
-state of the filter at time $tau$,
-and $d$ is the exponential decay parameter.
+</pre>
+where <i>tau</i> is the time of the latest data input event, <i>s</i>(<i> tau </i>)<i></i> is the
+state of the filter at time <i>tau</i>,
+and <i>d</i> is the exponential decay parameter.
 Each time a data input arrives, the state is updated
 as follows:
-.EQ
+<pre>
 s( tau ) ~=~ i( tau ) ~+~ d sup {( tau ~-~ tau prime )} s( tau prime )
-.EN
-where $tau prime$ is the time of the previous data input event,
-and $i( tau )$ is the data input.
+</pre>
+where <i>tau prime</i> is the time of the previous data input event,
+and <i>i</i>(<i> tau </i>)<i></i> is the data input.
 	}
 	input {
 		name {clock}

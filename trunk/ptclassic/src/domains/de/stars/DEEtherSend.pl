@@ -23,14 +23,14 @@ A collision occurs if the medium is occupied when a transmission is
 requested.  In this case,
 the data to be transmitted is sent to the "collision" output.
 	}
-	explanation {
+	htmldoc {
 This star is derived from
-.c Ether.
+<tt>Ether.</tt>
 Please see the manual entry for that star for a basic introduction.
-.pp
+<p>
 This star implements a transmitter for a shared medium.
 Any type of
-.c Particle
+<tt>Particle</tt>
 can be transmitted.
 If the "address" input is a non-negative integer, then the transmitter
 looks for a receiver that shares the medium that has a matching address.

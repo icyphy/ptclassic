@@ -17,12 +17,12 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { DE main library }
-    explanation {
-The \fIset\fP method resets and starts a timer.
-Invoking \fIset\fP again will reset the timer and restart it.
-Invoking \fIclear\fP stops the timer.
-The \fIexpired\fP method indicates whether or not the timer
-has reached \fItime-out\fR.
+	htmldoc {
+The <i>set\fP method resets and starts a timer.
+Invoking <i>set\fP again will reset the timer and restart it.
+Invoking <i>clear\fP stops the timer.
+The <i>expired\fP method indicates whether or not the timer
+has reached <i>time-out</i></b>.
     }
 
     state {

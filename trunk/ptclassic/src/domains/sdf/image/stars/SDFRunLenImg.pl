@@ -18,11 +18,11 @@ Run lengths are coded with a start symbol of "meanVal" and then a
 run-length between 1 and 255. Runs longer than 255 must be coded in
 separate pieces.
   }
-  explanation {
-.Id "compression, run length"
-.Id "encoding, run length"
-.Id "run length encoding"
-.Id "image, run length encoding"
+	htmldoc {
+<a name="compression, run length"></a>
+<a name="encoding, run length"></a>
+<a name="run length encoding"></a>
+<a name="image, run length encoding"></a>
   }
 
   hinclude { "Matrix.h", "Error.h" }

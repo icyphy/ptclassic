@@ -19,9 +19,9 @@ capabilities:
 
 The first line of the table gives the default settings.
 	}
-	explanation {
+	htmldoc {
 This star may be used to read a file by simply setting "value" to
-something of the form "< filename".
+something of the form "&lt; filename".
 	}
 	version { $Id$ }
 	author { Michael C. Williamson, S. Ha }

@@ -11,7 +11,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { CGC target library }
-    explanation {
+	htmldoc {
     }
     public {
 	DataType sdfPortType;

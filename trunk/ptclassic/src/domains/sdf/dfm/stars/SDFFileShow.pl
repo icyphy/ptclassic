@@ -16,7 +16,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { SDF dfm library }
-    explanation {
+	htmldoc {
 This star checks to see whether Tycho has been loaded.
 If not, it loads it and invokes ::tycho::File::openContext on the input
 files.

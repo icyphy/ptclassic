@@ -12,22 +12,22 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
     location { CG56 io library }
-    explanation {
-.Ir "button"
+	htmldoc {
+<a name="button"></a>
 This is an asynchronous source star (like the Const star) with a particular
 graphical user interface.
 The star always outputs one of two values; which value is output is
 controlled by a button.
-There are two types of buttons: \fBpushbutton\fRs and \fBcheckbutton\fRs.
+There are two types of buttons: <b>pushbutton</i></b>s and <b>checkbutton</i></b>s.
 Both presents a single button to the user that may be "pressed" with the mouse.
 The buttons differ in the semantics of the push.
-When the \fBpushbutton\fR is pressed, the \fIonVal\fR state
-is output, otherwise \fIoffVal\fR.
-The \fBcheckbutton\fR widget is either on or off; pressing it toggles
+When the <b>pushbutton</i></b> is pressed, the <i>onVal</i></b> state
+is output, otherwise <i>offVal</i></b>.
+The <b>checkbutton</i></b> widget is either on or off; pressing it toggles
 between on and off.
-When on, the \fIonVal\fR state is output; otherwise \fIoffVal\fR is output.
-.LP
-The \fIoffVal\fR and \fIonVal\fR should be either FIX or INT type.
+When on, the <i>onVal</i></b> state is output; otherwise <i>offVal</i></b> is output.
+<p>
+The <i>offVal</i></b> and <i>onVal</i></b> should be either FIX or INT type.
 They are not examined at compile-time: they are passed literally to qdm
 (via the aio file) and to the assembler (via the initial value).
 Note that there is a big difference between "1" and "1.0".
