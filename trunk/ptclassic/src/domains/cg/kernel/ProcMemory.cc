@@ -164,17 +164,29 @@ int LinProcMemory::allocReq(AsmPortHole& p) {
 int LinProcMemory::allocReq(const State& s) {
 	if (!match(s)) return FALSE;
 
+	// request for consecutive allocation: add this state to a
+	// MConsecStateReq and do not request memory yet.
 	if (s.attributes() & AB_CONSEC) {
 		if (!consec) { LOG_NEW; consec = new MConsecStateReq; }
 		consec->append(s);
 		return TRUE;
 	}
+
+	// Test for the last state in a consecutive block (consec is
+	// set but this state has no AB_CONSEC).  If it matches, we
+	// then complete a request.
 	if (consec && consec->size() > 0) {
-		lin.appendSorted(*consec);
+		consec->append(s);
+		if (s.attributes() & AB_CIRC)
+			circ.appendSorted(*consec);
+		else lin.appendSorted(*consec);
 		consec = 0;
+		return TRUE;
 	}
+
+	// The following is the normal case.
 	LOG_NEW; MStateReq* r = new MStateReq(s);
-	if (s.attributes() | AB_CIRC)
+	if (s.attributes() & AB_CIRC)
 		circ.appendSorted(*r);
 	else lin.appendSorted(*r);
 	return TRUE;
