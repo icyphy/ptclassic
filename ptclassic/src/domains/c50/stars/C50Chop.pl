@@ -185,7 +185,7 @@ if offset > 0, specify whether to use previously read inputs
 		if (temp >= 0) {
 			fillAsInt = int(32768*temp + 0.5);
 		} else {
-			fillAsInt = int(32768*(1-temp) + 0.5);
+			fillAsInt = int(32768*(2+temp) + 0.5);
 		}
 	}
 

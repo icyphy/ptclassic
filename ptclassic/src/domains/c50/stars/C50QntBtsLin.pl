@@ -51,7 +51,7 @@ an optional offset can be added to shift the output levels up or down.
 		if ( temp >= 0) {
 			off = int(32768*temp + 0.5);
 		} else {
-			off = int(32768*(1-temp) + 0.5);
+			off = int(32768*(2+temp) + 0.5);
 		}
 	}
  
