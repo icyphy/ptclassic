@@ -58,6 +58,9 @@ public:
 	// print all info at all levels.  Same as printVerbose
 	// unless redefined
 	virtual StringList printRecursive () { return printVerbose ();}
+
+	// make destructors for all NamedObjs virtual
+	virtual ~NamedObj() {}
 };
 
 #endif
