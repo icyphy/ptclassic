@@ -59,22 +59,42 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define bool int
 #endif
 
+/* Use the constant REAL to check for Matlab 4 */
+#ifdef REAL
+#undef REAL
+#endif
+
 #include <matrix.h>
 #include <engine.h>
 
-/* Give Matlab's definition of COMPLEX and REAL different names */
+#define MXCONST const
+
+/* Backward compatibility with interface to Matlab 4.2 */
+
+#ifdef REAL
+
+/* Constants */
 #undef  COMPLEX
 #undef  REAL
 #undef  TEXT
 #undef  MATRIX
+#define mxREAL     0
+#define mxCOMPLEX  1
 
-/* Check to see if we are using Matlab 5.0 */
-#ifdef mxMAXNAM
-#define MXREAL     mxREAL
-#define MXCOMPLEX  mxCOMPLEX
-#else
-#define MXREAL     0
-#define MXCOMPLEX  1
+/* Datatypes */
+#undef  MXCONST
+#define MXCONST
+#ifndef bool
+#define bool int
+#endif
+typedef Matrix mxArray;
+typedef int mxComplexity;
+
+/* Functions */
+#define mxDestroyArray mxFreeMatrix
+#define engGetArray engGetMatrix
+#define engPutArray engPutMatrix
+#define mxCreateDoubleMatrix mxCreateFull
 #endif
 
 #define MXMATRIX   0
