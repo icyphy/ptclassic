@@ -511,7 +511,10 @@ void PortHole :: initialize()
 		Particle** p = myBuffer->next();
 		// Initialize particles on the buffer, so when we
 		// restart they do not contain old data
-		(*p)->initialize();
+		// fill in any empty holes (which could be caused by
+		// errors of some kinds in previous runs).
+		if (*p)	(*p)->initialize();
+		else *p = myPlasma->get();
 	}
 	// If this is an output PortHole (or connected to an
 	// input porthole), initialize myGeodesic
