@@ -156,7 +156,10 @@ delim $$
 	}
 	go {
 	   completionTime = arrivalTime;
-
+	   InfString time = arrivalTime;
+	   Tcl_SetVar2(ptkInterp,tcl.id(),"arrivalTime",
+		       (char*)time,TCL_GLOBAL_ONLY);
+	   
 	   // Process the inputs to see which ones are new
 	   processInputs();
 
