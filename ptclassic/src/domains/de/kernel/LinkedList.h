@@ -113,7 +113,7 @@ public:
 	int searchAndRemove(Pointer a);  
 
 	// Return and remove head of list
-	Pointer getAndRemove();	
+	Pointer getHeadAndRemove();	
 
 	// Return and remove tail of list
         Pointer getTailAndRemove();     
