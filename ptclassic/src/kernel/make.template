@@ -29,36 +29,38 @@ HELPDIR=$(ROOT)/help
 LIB=libptolemy.a
 
 # Library sources
-LIBSRCS=Star.cc Connect.cc Block.cc Galaxy.cc SpaceWalk.cc \
- Output.cc Fraction.cc StringList.cc Particle.cc Help.cc \
- Command.cc KnownBlock.cc Tokenizer.cc InterpGalaxy.cc Interpreter.cc \
- NamedObj.cc PriorityQueue.cc \
- State.cc KnownState.cc FloatState.cc IntState.cc StringState.cc \
- SDFConnect.cc SDFScheduler.cc SDFStar.cc SDFUniverse.cc \
- DEConnect.cc DEScheduler.cc DEStar.cc DEUniverse.cc
+LIBSRCS=Block.cc Command.cc Connect.cc FloatState.cc Fraction.cc Galaxy.cc \
+ Help.cc IntState.cc InterpGalaxy.cc Interpreter.cc KnownBlock.cc \
+ KnownState.cc NamedObj.cc Output.cc Particle.cc PriorityQueue.cc \
+ SpaceWalk.cc Star.cc State.cc StringList.cc StringState.cc Tokenizer.cc \
+ Universe.cc \
+ SDFConnect.cc SDFScheduler.cc SDFStar.cc \
+ DEConnect.cc DEScheduler.cc DEStar.cc
 
-# All sources
-SRCS=$(LIBSRCS) interpmain.cc 
+# All sources.
+# (do not try to put SDFDomain and DEDomain in the library -- they
+# conflict with each other and you can only link in one)
+SRCS=$(LIBSRCS) interpmain.cc SDFDomain.cc DEDomain.cc
 
 # Header files
-HDRS=Block.h Command.h Connect.h DataStruct.h FloatState.h Fraction.h \
- Galaxy.h Help.h IntState.h InterpGalaxy.h Interpreter.h KnownBlock.h \
- KnownState.h NamedObj.h Output.h Particle.h Scheduler.h SpaceWalk.h Star.h \
- State.h StringList.h StringState.h Tokenizer.h Topology.h type.h \
- PriorityQueue.h \
+HDRS=Block.h Command.h Connect.h DataStruct.h Domain.h FloatState.h \
+ Fraction.h Galaxy.h Help.h IntState.h InterpGalaxy.h Interpreter.h \
+ KnownBlock.h KnownState.h NamedObj.h Output.h Particle.h PriorityQueue.h \
+ Scheduler.h SpaceWalk.h Star.h State.h StringList.h StringState.h \
+ Tokenizer.h Topology.h Universe.h type.h \
  SDFConnect.h SDFScheduler.h SDFStar.h SDFUniverse.h \
  DEConnect.h DEScheduler.h DEStar.h DEUniverse.h
 
 # Library objects
-LIBOBJS=Star.o Connect.o Block.o Galaxy.o SpaceWalk.o  Output.o \
-	Fraction.o StringList.o Particle.o Help.o Command.o PriorityQueue.o \
-	KnownBlock.o Tokenizer.o InterpGalaxy.o Interpreter.o NamedObj.o \
-	State.o KnownState.o FloatState.o IntState.o StringState.o \
-	SDFConnect.o SDFScheduler.o SDFStar.o SDFUniverse.o \
-	DEConnect.o DEScheduler.o DEStar.o DEUniverse.o
+LIBOBJS=Block.o Command.o Connect.o Fraction.o Galaxy.o Help.o \
+ InterpGalaxy.o Interpreter.o KnownBlock.o NamedObj.o Output.o Particle.o \
+ PriorityQueue.o SpaceWalk.o Star.o StringList.o Tokenizer.o Universe.o \
+ FloatState.o IntState.o KnownState.o State.o StringState.o \
+ SDFConnect.o SDFScheduler.o SDFStar.o  \
+ DEConnect.o DEScheduler.o DEStar.o
 
 # Things to make
-TOMAKE=$(LIB) interpmain.o 
+TOMAKE=$(LIB) interpmain.o SDFDomain.o DEDomain.o
 
 all:	makefile $(TOMAKE)
 
@@ -96,7 +98,7 @@ makefile:	make.template
 
 # Need to define LIBDIR for the interpreter
 Interpreter.o:	Interpreter.cc
-		$(GNU) $(GFLAGS) -DHELPDIR=\"$(HELPDIR)\" -c Interpreter.cc
+		$(GNU) $(GPPFLAGS) -DHELPDIR=\"$(HELPDIR)\" -c Interpreter.cc
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
