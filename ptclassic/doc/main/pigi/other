@@ -3,6 +3,42 @@
 .pp
 In this section we cover additional information which may be useful.
 More advanced topics will be covered in following sections.
+.H2 "Plotting Signals and Fourier Transforms"
+.pp
+The \*(PT menu has a submenu called \fIUtilities\fR that invokes
+some useful, frequently used, predefined universes.
+For example, the \fIplot signal\fR (``~'') command will plot a signal.
+The signal can be read from a file, or specified using the
+syntax for specifying the value of a \fIfloatarray\fR parameter
+in pigi.
+For example, if the value of the \fIsignal\fR parameter is:
+.(c
+1 [10] -1 [10]
+.)c
+then the \fIplot signal\fR command will plot ten points with value 1.0
+and ten points with value -1.0.
+.IE "plot signal"
+The \fIoptions\fR parameter can accept any options understood by the
+xgraph program.
+To plot a signal stored in a file, simply use the following syntax
+for the \fIsignal\fR parameter:
+.(c
+< filename
+.)c
+.pp
+Another useful \fIUtilities\fR command is \fIDFT\fR (``^''), which
+reads a signal just as above and plots the magnitude and phase of the
+discrete-time Fourier transform of the signal.
+.IE "Fourier transform"
+.IE "spectrum plot"
+These are plotted as a function of frequency normalized
+to the sampling rate, from $- pi$ to $pi$.
+The sampling frequency is assumed to be $2 pi$.
+A simple phase unwrapping algorithm is used to give more meaningful
+phase plots.
+A radix-2 FFT is used, so the order of the Fourier transform
+must be a power of two.  The order can be longer than the signal,
+in which case, zero-padding will occur.
 .H2 "Particle Types"
 .pp
 The packets of data that pass from one star to another
