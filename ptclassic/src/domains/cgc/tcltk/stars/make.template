@@ -63,8 +63,7 @@ PL_SRCS= \
  CGCTkPlot.pl \
  CGCTkSlider.pl \
  CGCTkStereoIn.pl \
- CGCTkStereoOut.pl \
- CGCTkSunSound.pl
+ CGCTkStereoOut.pl
 
 TCL_SRCS= \
  tkBall.tcl \
