@@ -33,6 +33,9 @@ DECellUnload.pl \
 DEClock.pl \
 DEDelay.pl \
 DEDiscard.pl \
+DEEther.pl \
+DEEtherRec.pl \
+DEEtherSend.pl \
 DEFIFOQueue.pl \
 DEFilter.pl \
 DEFloatDC.pl \
@@ -81,6 +84,7 @@ DEUnPacketize.pl \
 DEVarDelay.pl \
 DEVarServer.pl \
 DEVirtClock.pl \
+DEWaveForm.pl \
 DEXMgraph.pl \
 DEXgraph.pl \
 DEXhistogram.pl
