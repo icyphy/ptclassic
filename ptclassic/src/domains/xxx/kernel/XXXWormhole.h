@@ -48,9 +48,7 @@ public:
 	// Destructor
 	~XXXWormhole();
 
-	void setup();
 	void begin() { Wormhole::begin(); }
-	void go();
 	void wrapup();
 
 	Scheduler* mySched() const { return myTarget()->scheduler(); }
@@ -75,6 +73,10 @@ public:
 
 	StringList printVerbose() const;
 	StringList printRecursive() const;
+
+protected:
+	void setup();
+	void go();
 };
 
 class XXXtoUniversal : public ToEventHorizon, public InXXXPort
