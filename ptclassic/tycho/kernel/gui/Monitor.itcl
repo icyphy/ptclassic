@@ -48,7 +48,7 @@
 #
 #
 # In the following example, we bring up the Monitor window and then wait  
-# until the user closes it. Note that this is set on auto destroy.
+# until the user closes it. Try manually executing (press Enter) or force kill.
 # <tcl><pre>
 #   set win [::tycho::view Monitor -toolbar 1 -command {ls -al}]
 #   set retStatus [$win getStatusWait]
@@ -238,7 +238,6 @@ body ::tycho::Monitor::constructor {args} {
 
     # Original Tk stuff here
     eval itk_initialize $args
-
             
     if {![info exists itk_component(history)] || \
             ![winfo exists $itk_component(history)]} {
@@ -251,8 +250,11 @@ body ::tycho::Monitor::constructor {args} {
                     -cursor -insertbackground -textforeground -textfont \
                     -textbackground
         }
+        # Redefine to not focus on Edit automatically, so that we
+        # can focus on the command entry bar.
+        bind $itk_component(history) <Map> "break"
         pack $itk_component(history) -expand yes -fill both
-        #-after $itk_component(querysite)
+        #-after $toolbar
         $itk_component(history) configure -readonly 1 -save 0
         # FIXME: add key binding for C-x C-r
     }
@@ -276,8 +278,11 @@ body ::tycho::Monitor::constructor {args} {
 #### destructor
 #
 body ::tycho::Monitor::destructor {} {
+    global $statusVariableName
+    # Make sure the variable is "done"
+    set $statusVariableName "killed"
+
     # Adding this close seems to hang the window manager
-    #close $fd
     # Unregister our fileevent handler
     catch {fileevent $fd readable {}}
 
@@ -285,8 +290,6 @@ body ::tycho::Monitor::destructor {} {
     # to whether we want to save it.
     if {[info exists itk_component(text)] && \
             [winfo exists $itk_component(text)]} {
-        #$itk_component(text) configure -readonly 0
-        #$itk_component(text) clear
         $itk_component(text) markUnmodified
     }
     catch {unset ::tycho::Monitor::$statusVariableName}
@@ -447,6 +450,9 @@ body ::tycho::Monitor::setErrorCount {count} {
 # automatically exit upon successful execution.
 #
 body ::tycho::Monitor::execProcess { {type {}} {line {}} } {
+    # By default we see message "Press ENTER ..."
+    putStatus ""
+
     # Need to keep track of internal line number so that user can
     # concurrently click at text while text is being updated.
     set monitorLine 0
@@ -539,13 +545,12 @@ body ::tycho::Monitor::initialize \
     # Don't raise the window here, or we will see the window resize itself
     #$this raiseWindow
     
-    toolbar focusin commandtoexec
+    after idle "$this toolbar focusin commandtoexec"
     if {$itk_option(-autostart) == 1} {
         # If autostart, no need to invoke focus on the user's command
         after idle $this execProcess
     } else {
         # If not autostart, default is to focus in on the user command
-        after 750 $this toolbar focusin commandtoexec
         putStatus "Press ENTER to start execute"
     }
 }
