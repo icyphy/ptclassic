@@ -88,7 +88,32 @@ public:
 
   int known() const;
   int absent() const;
-  int present() const;    
+  int present() const;
+
+  // Return TRUE if this input has been marked as independent
+  int isItIndependent() const { return isIndependent; }
+
+  void initialize();
+
+  // Mark this input as not instantaneously affecting any output
+  //
+  // @Description This should be called in a star's setup method
+  // on any input that does not instanenously affect any outputs on the
+  // star, e.g., the input of a delay element. <P>
+  //
+  // Calling this on an output that <em>does</em> instantaneously
+  // affect the output may cause the system to behave
+  // nondeterministically.  Not calling this on an input that does
+  // not affect any output may slow the schedule, but will not affect
+  // the result.
+  void independent() { isIndependent = TRUE; }
+
+protected:
+  // Flag indicating whether this input is independent
+  //
+  // @Description TRUE when no output instantaneously depends on this
+  // input, e.g., the input of a delay element.  Set by independent().
+  int isIndependent;
 };
 
 /**********************************************************************
