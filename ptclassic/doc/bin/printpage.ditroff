@@ -18,4 +18,4 @@ set printcommand = ditroff
 set printoptions = "-me -tbl -eqn -P$PRINTER"
 
 soelim $dirheader/shared $dirheader/domain $* | \
-$printcommand $printoptions >& /dev/null
+$printcommand $printoptions
