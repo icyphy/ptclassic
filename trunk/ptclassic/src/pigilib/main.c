@@ -84,6 +84,8 @@ RPCFunction CommandArray[] = {
     {RpcMkStar, "Extend", "make-star"},
     {RpcLoadStars, "Extend", "load-stars"},
     {RpcLoad, "Extend", "load"},
+    {ERFilterDesign, "Filter", " equirriple FIR", "d", 0},
+    {WFilterDesign, "Filter", " window FIR", "w", 0},
     {Man, "Other", "man"},
     {Profile, "Other", "profile"},
     {Options, "Other", "options"},
