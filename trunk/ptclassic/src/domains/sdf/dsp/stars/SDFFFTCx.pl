@@ -169,11 +169,12 @@ static void fft_rif(double *data, int nn, int isign)
 		output.setSDFParams (fftSize, fftSize-1);
 	}
 	go {
-// load up the array
+		// load up the array
 		double* p = data;
-// note: particle at maximum delay is the first one
+
+		// note: particle at maximum delay is the first one
 		for (int i = int(size)-1; i >= 0; i--) {
-			Complex& t = Complex(input%i);
+			Complex t = Complex(input%i);
 			*p++ = t.real();
 			*p++ = t.imag();
 		}
@@ -182,15 +183,16 @@ static void fft_rif(double *data, int nn, int isign)
 			*p++ = 0.0;
 		}
 		fft_rif (data, fftSize, int(direction));
-	// generate output data.  If inverse, we must scale the result.
+		// generate output data.  If inverse, we scale the result.
 		if (int(direction) != 1)
 			for (i = 0; i < 2*fftSize; i++)
 				data[i] /= fftSize;
-	// write 'em out
+
+		// send the data through the output port
 		p = data;
 		for (i = fftSize-1; i >= 0; i--) {
 			output%i << Complex(p[0], p[1]);
 			p += 2;
 		}
 	}
-}	
+}

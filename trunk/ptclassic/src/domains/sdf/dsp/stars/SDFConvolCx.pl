@@ -52,7 +52,7 @@ samples.
 		inB.setSDFParams(1, int(truncationDepth));
 	}
 	go {
-	    Complex &sum =  Complex(0.0);
+	    Complex sum =  Complex(0.0);
 	    int c = int(iterationCount);
 	    for (int k = 0; k < int(truncationDepth); k++) {
 		int index = c-k;
