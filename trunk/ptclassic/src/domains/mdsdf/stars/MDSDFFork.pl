@@ -41,8 +41,8 @@ explicitly.
   go {
     MPHIter nextp(output);
     MDSDFPortHole* p;
-    PMatrix* inputData = (PMatrix*)(input.getInput());
-    PMatrix* outputData;
+    PtMatrix* inputData = (PtMatrix*)(input.getInput());
+    PtMatrix* outputData;
 
     while ((p = (MDSDFPortHole*)nextp++) != 0) {
       outputData = p->getOutput();
