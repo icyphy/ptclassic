@@ -53,6 +53,7 @@ static char SccsId[]="$Id$";
 #include "vemDM.h"
 #include "vemUtil.h"
 #include "commands.h"
+#include "cursors.h"
 #include "da.h"
 #include "message.h"
 #include "browser.h"
