@@ -99,8 +99,13 @@ class ::tycho::CompileJava {
     protected method checkSourceFiles {}
 
     ###################################################################
-    ####                   protected methods                       ####
+    ####                   protected variables                     ####
 
+    # Name of the Exec widget used to compile
+    protected variable compileWidget {}
+
+    # Name of the Exec widget used to run appletviewer.
+    protected variable appletviewerWidget {}
 }
 
 #######################################################################
@@ -114,6 +119,14 @@ body ::tycho::CompileJava::constructor {args} {
 #### destructor
 #
 body ::tycho::CompileJava::destructor {} {
+    if {$compileWidget != {} && \
+            [info object ::tycho::$compileWidget] != {}} {
+        delete object $compileWidget
+    }
+    if {$appletviewerWidget != {} && \
+            [info object ::tycho::$appletviewerWidget] !op= {}} {
+        delete object $appletviewerWidget
+    }
 }
 
     ###################################################################
@@ -140,18 +153,41 @@ body ::tycho::CompileJava::compileAndRun {filenames} {
         lappend classNameList [file tail [file rootname $javaFile]]
     }
     if [checkSourceFiles] {
-        # We have a main()
-        putStatus "about to exec java -cs -v $classNameList"
-        ::tycho::execModal "java -cs -v $classNameList" $dirname
+        # We have a main(), so we don't run appletviewer
+        set compileString "java -cs -v $classNameList"
+        set runAppletViewer 0
     } else {
-        # We don't have a main
-        ::tycho::execModal "javac -verbose $filenameList" $dirname
+        # There was no main, so run the appletviewer.
+        # FIXME: we should be checking that we are extending Applet here.
+	set compileString "javac -verbose $filenameList"
+        set runAppletViewer 1
+    }
+
+    # Compile.  If we already have a compileWidget, reuse it. 
+    if {$compileWidget == {} || \
+        [info object ::tycho::$compileWidget] == {} } {
+        set retList [::tycho::execModal $compileString $dirname]
+    } else {
+        set retList [::tycho::execModal {} {} $compileWidget]
+    }
+    set compileWidget [lindex $retList 1]
+
+    # If necessary, run the appletviewer.
+    # If there is already an appletviewer widget, reuse it.
+    set execStatus [lindex $retList 0]
+    if {$runAppletViewer == 1 && $execStatus == "normal"} {
         set appletFile [file rootname $firstFile]
         if [file exists $appletFile.html] {
-            ::tycho::execModal "appletviewer $appletFile.html" $dirname
+            if {$appletviewerWidget == {} || \
+                    [info object ::tycho::$appletviewerWidget] == {}} {
+                set retList [::tycho::execModal \
+                        "appletviewer $appletFile.html" $dirname]
+            } else {
+                set retList [::tycho::execModal {} {} $appletviewerWidget]
+            }
+            set appletviewerWidget [lindex $retList 1]
         }
     }
-    
 }
     ###################################################################
     ###################################################################
