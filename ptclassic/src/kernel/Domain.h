@@ -7,6 +7,8 @@ $Id$
 
  Programmer: J. T. Buck
  Date of creation: 6/29/90
+ Modified: 9/22/90, by EAL, to add mechanism for reading all known
+		domain names.
 
  The Domain class.  We declare one instance of each derived domain.
  This class provides a way to get the proper types of various objects
@@ -26,7 +28,7 @@ class Galaxy;
 class PortHole;
 class EventHorizon;
 
-const int NUMDOMAINS = 10;	// maximum # of domains
+const int NUMDOMAINS = 10;		// maximum # of domains
 
 class Domain {
 public:
@@ -44,6 +46,8 @@ public:
 	const char* domainName() { return name;}
 	static Domain* named(const char* name);
 	static Domain* domainOf(Block&);
+	static int numberOfDomains() {return numDomains;}
+	static const char* nthDomainName(int n) {return (allDomains[n])->name;}
 	StringList subDomains;
 private:
 	static int numDomains;
