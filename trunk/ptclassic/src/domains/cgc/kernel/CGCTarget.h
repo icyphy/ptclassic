@@ -51,8 +51,6 @@ class CGCTarget : public HLLTarget {
 public:
 	CGCTarget(const char* name, const char* starclass, const char* desc);
 
-        ~CGCTarget();
-
 	/*virtual*/ Block* makeNew() const;
 
 	// Class identification.
@@ -196,7 +194,7 @@ private:
 	void setupForkDests(Galaxy&);
 
 	// Use this to store the pragmas set for the target.
-	TextTable* mappings;
+	TextTable mappings;
 };
 
 #endif
