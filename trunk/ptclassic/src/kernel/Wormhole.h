@@ -44,10 +44,6 @@ public:
 		from.ghostConnect(to);
 	}
 
-	// Methods to  print out description.
-	StringList printVerbose() { return print(0);}
-	StringList printRecursive() { return print(1);}
-
 	void setup() { initSched(); 
 		       scheduler->stopBeforeDeadlocked = FALSE ;}
 
@@ -81,7 +77,7 @@ protected :
 	// arrange things after run if necessary
 	virtual void sumUp();
 
-	StringList print (int recursive);
+	StringList print (int recursive) const;
 
 private :
 	// reference to myself as a Star
@@ -91,7 +87,7 @@ private :
 	int dynamicHorizons;
 
 	// check ready
-	int checkReady();
+	int checkReady() const;
 
 };
 
