@@ -1,0 +1,290 @@
+##########################################################################
+# Version: $Id$
+# Author: Edward A. Lee, John Reekie
+#
+# Copyright (c) 1996 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+#                                                         COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+#### Digraph
+#
+# The _Digraph_ model is a directed graph that explicitly 
+# represents both edges and vertices. Vertices can have an arbitrary
+# value and a set of annotations; edges can have an arbitrary set of
+# annotations.
+#
+# The methods inherited from the superclass apply to the vertices
+# of the graph: add{}, for example, adds a vertex, while delete{}
+# deletes it. Additional methods are provided to create and access
+# the edges of the graph. (Note: I considered providing a more
+# exposed representation, such as simply using say *vertex1.0->vertex2.0*
+# to denote an edge. In this case, no additional methods are needed to
+# create or access edges. I decided against it in the interests of
+# making the difference between vertices and edges more explicit.)
+#
+# FIXME: Add useful algorithms: SCCs, transitive closure, topological 
+# sort etc.
+#
+class ::tycho::Digraph {
+	inherit ::tycho::NamedData
+	
+	constructor {args} {}
+	destructor {}
+
+	####################################################################
+	
+	# The default options of each edge
+	public variable defaultedgeoptions {}
+
+	# A flag that indicates that the graph is supposed to be acyclic
+	# FIXME: Why do we need this? Why not just provide a test for cycles?
+	public variable acyclic 0
+
+	####################################################################
+
+	# Get the children of a vertex
+	method children {vertex}
+
+	# Add an edge to the graph
+	method connect {src dst args}
+
+	# Remove an edge from the graph
+	method disconnect {src dst}
+
+	# Get an option or options of an edge
+	method edgecget {src dst {option {}}}
+
+	# Configure the edge with one or more options
+	method edgeconfigure {src dst args}
+
+	# Return all options of an edge
+	method edgeoptions {src dst}
+
+	# Get the parents of a vertex
+	method parents {vertex}
+
+	# Get an option or options of a vertex
+	method vertexcget {vertex {option {}}}
+
+	# Configure the vertex with one or more options
+	method vertexconfigure {vertex args}
+
+	# Return all options of a vertex
+	method vertexoptions {vertex}
+
+	####################################################################
+
+	# The children of each vertex, for improved efficiency
+	protected variable _children
+	
+	# The edges associated with each vertex
+	protected variable _edges
+	
+	# The parents of each vertex, for improved efficiency
+	protected variable _parents
+}
+
+########################################################################
+#### constructor
+#
+body ::tycho::Digraph::constructor {args} {
+	# Evaluate options
+	eval configure $args
+}
+
+########################################################################
+#### children
+#
+# Return the children of _vertex_.
+#
+body ::tycho::Digraph::children {vertex} {
+	if { ! [::info exists _value($vertex)] } {
+		error "Vertex $vertex unknown in $dataname"
+	}
+	return _children($vertex)
+}
+
+########################################################################
+#### connect
+#
+# Add a new edge to the graph.
+#
+body ::tycho::Digraph::connect {src dst args} {
+	if { [::info exists _edge($src->$dst)] } {
+		error "Edge $src->$dst already exists in $dataname"
+	}
+	if { ! [::info exists _value($src)] } {
+		error "Vertex $src unknown in $dataname"
+	}
+	if { ! [::info exists _value($dst)] } {
+		error "Vertex $dst unknown in $dataname"
+	}
+
+	# Record the edge and its options
+	array set temp [concat $defaultedgeoptions $args]
+	set _edges($src->$dst) [array get temp]
+	
+	# Record the parent-child relation
+	lappend _parents($dst) $src
+	lappend _children($src) $dst
+
+	# Return the inverse command
+	return [list disconnect $src $dst]
+}
+
+########################################################################
+#### disconnect
+#
+# Remove an edge from the graph. The source and destination are as
+# for connect{}; an error is flagged if the edge does not exist.
+#
+body ::tycho::Digraph::disconnect {src dst} {
+	if { ! [::info exists _edge($src->$dst)] } {
+		error "Edge $src->$dst does not exist in $dataname"
+	}
+
+	# Remember the inverse command
+	set inverse [list eval connect $src $dst $_edges($src->$dst)]
+
+	# Remove the edge and its options
+	unset _edges($src->$dst)
+
+	# Delete the parent-child relation
+	set _parents($dst) [ldelete $_parents($dst) $src]
+	set _children($src) [ldelete $_children($src) $dst]
+
+	# Return the inverse command
+	return $inverse
+}
+
+########################################################################
+#### edgecget
+#
+# Get an option of an edge.
+#
+# If the second argument is absent, return a list of option-value pairs,
+# where options are in the list only if they are different from
+# the default.
+#
+body ::tycho::Digraph::edgecget {src dst {option {}}} {
+	if { $option == "" } {
+		# Get all options that differ from the defaults
+		set result
+		array set temp $_edges($src->$dst)
+		foreach {opt dflt} $defaultedgeoptions
+			if { $temp($opt) != $dflt } {
+				lappend result $opt $temp($opt)
+			}
+		}
+		return $result
+	} else {
+		# Just get one option
+		array set temp $_edges($src->$dst)
+		return $temp($option)
+	}
+}
+
+########################################################################
+#### edgeconfigure
+#
+# Configure the edge and return the inverse command. The argument list
+# is a flat list of option-value pairs.
+#
+body ::tycho::Digraph::edgeconfigure {src dst args} {
+	set inverse [list dataconfigure $src->$dst]
+	array set temp $_edges($src->$dst)
+	foreach {option value} $args {
+		lappend inverse $option $temp($option)
+		set temp($option) $value
+	}
+	set _edges($src->$dst) [array get temp]
+	return $inverse
+}
+
+########################################################################
+#### edgeoptions
+#
+# Return a list containing the options of the edge as a flat
+# option-default-value list.
+#
+body ::tycho::Digraph::edgeoptions {src dst} {
+	set result {}
+	array set temp $_edges($src->$dst)
+	foreach {opt dflt} $defaultedgeoptions {
+		lappend result [list $opt $dflt $temp($opt)]
+	}
+	return $result
+}
+
+########################################################################
+#### parents
+#
+# Return the parents of _vertex_.
+#
+body ::tycho::Digraph::parents {vertex} {
+	if { ! [::info exists _value($vertex)] } {
+		error "Vertex $vertex unknown in $dataname"
+	}
+	return $_parents($vertex)
+}
+
+########################################################################
+#### vertexcget
+#
+# Get an option of a vertex.
+#
+# If the second argument is absent, return a list of option-value pairs,
+# where options are in the list only if they are different from
+# the default.
+#
+# This method is simply a renaming of entrycget{}.
+#
+body ::tycho::Digraph::vertexcget {vertex {option {}}} {
+	entrycget $vertex $option
+}
+
+########################################################################
+#### vertexconfigure
+#
+# Configure the vertex and return the inverse command. The argument list
+# is a flat list of option-value pairs.
+#
+# This method is simply a renaming of entryconfigure{}.
+#
+body ::tycho::Digraph::vertexconfigure {vertex args} {
+	eval entryconfigure [list $vertex] $args
+}
+
+########################################################################
+#### vertexoptions
+#
+# Return a list containing the options of the vertex as a flat
+# option-default-value list.
+#
+# This method is simply a renaming of entryoptions{}.
+#
+body ::tycho::Digraph::vertexoptions {vertex} {
+	entryoptions $vertex
+}

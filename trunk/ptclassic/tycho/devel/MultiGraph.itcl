@@ -1,0 +1,324 @@
+##########################################################################
+# Version: $Id$
+# Author: John Reekie, Edward A. Lee
+#
+# Copyright (c) 1996 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+#                                                         COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+#### KeyedDigraph
+#
+# The _KeyedDigraph_ model is a directed graph that associates
+# a "key" with each edge connected to a vertex. This is needed for 
+# applications such as dataflow, in which the order of edges
+# is significant. Keys are completely arbitrary strings, and
+# a _connection_ to a vertex at a particular key is denoted by
+# _vertex_._key_. Each connection (as well each vertex and each edge)
+# can have a set of options. <b>Note</b>: Keys must be unique at each vertex.
+#
+# All methods in the superclass for findings SCCs, transitive closures,
+# and so on still work perfectly well with this class.
+#
+class ::tycho::KeyedDigraph {
+	inherit ::tycho::Digraph
+	
+	constructor {args} {}
+	destructor {}
+
+	####################################################################
+
+	# The default options of each connection
+	public variable defaultkeyoptions {}
+
+	####################################################################
+
+	# Get a single child of a vertex
+	method child {vertex key}
+
+	# Get the children of a vertex
+	method children {vertex {pattern {}}}
+
+	# Add an edge to the graph
+	method connect {src dst args}
+
+	# Remove an edge from the graph
+	method disconnect {src dst}
+
+	# Get an option or options of a connection
+	method connectcget {connection {option {}}}
+
+	# Configure a connection with one or more options
+	method connectconfigure {connection args}
+
+	# Return all options of a connection
+	method connectoptions {connection}
+
+	# Get a single parent of a vertex
+	method parent {connection}
+
+	# Get the parents of a vertex
+	method parents {vertex {pattern {}}}
+
+	####################################################################
+
+	# The parent or child of each vertex indexed by key
+	protected variable _connection
+	
+	# The options (if any) associated with each key
+	protected variable _connectoptns
+}
+
+########################################################################
+#### constructor
+#
+body ::tycho::KeyedDigraph::constructor {args} {
+	# Evaluate options
+	eval configure $args
+}
+
+########################################################################
+#### child
+#
+# Get the child of _vertex_ with key _key_.
+#
+body ::tycho::KeyedDigraph::child {vertex key} {
+	if { ! [::info exists _value($vertex)] } {
+		error "Vertex $vertex unknown in $dataname"
+	}
+	return $_connection($vertex.$key)
+}
+
+########################################################################
+#### children
+#
+# With one argument, return the children of _vertex_. If a second 
+# argument is given, return the children with keys that match 
+# (glob-style) that pattern as a flat list of key-child pairs.
+# To get all children as a key-child list, supply the pattern "*".
+#
+body ::tycho::KeyedDigraph::children {vertex {pattern {}}} {
+	if { ! [::info exists _value($vertex)] } {
+		error "Vertex $vertex unknown in $dataname"
+	}
+
+	if { $pattern == {} } {
+		# Case 1: just get children
+		return $_children($vertex)
+	} else {
+		# Case 2: get children with matching keys
+		set result {}
+		foreach {childedge child} [array get _connection $vertex.$pattern] {
+			lappend result [lindex [split $childedge "."] 1] $child
+		}
+		return $result
+	}
+}
+
+########################################################################
+#### connect
+#
+# Add a new edge to the graph. For the source and destination vertices
+# there is also an arbitrary "key" representing the
+# position of the edge in that vertexes "inputs" or "outputs." For
+# example, ``_fred.0_'' or ``_fred.control_''. Keys
+# must be unique for the inputs of the vertex and the outputs
+# of the vertex (but can occur in both inputs and outputs).
+#
+# Note: the _src_ and _dst_ combine the key with the vertex name
+# rather than having separate arguments in order to be consistent
+# with the inherited edgecget{} and edgeconfigure{}. Plus, I
+# think it will be easier on client programmers anyway.
+#
+body ::tycho::KeyedDigraph::connect {src dst args} {
+	set srcvertex [lindex [split $src "."] 0]
+	set dstvertex [lindex [split $dst "."] 0]
+
+	if { [::info exists _edge($src->$dst)] } {
+		error "Edge $src->$dst already exists in $dataname"
+	}
+	if { ! [::info exists _value($srcvertex)] } {
+		error "Vertex $src vertex unknown in $dataname"
+	}
+	if { ! [::info exists _value($dst)] } {
+		error "Vertex $dst vertex unknown in $dataname"
+	}
+
+	# Record the edge and its options
+	array set temp [concat $defaultedgeoptions $args]
+	set _edges($src->$dst) [array get temp]
+
+	# Record the parent-child relation for the superclass
+	lappend _parents($dstvertex) $srcvertex
+	lappend _children($srcvertex) $dstvertex
+
+	# Record the parent-child relation for myself
+	set _connection($dst) $srcvertex
+	set _connection($src) $dstvertex
+
+	# Return the inverse command
+	return [list disconnect $src $dst]
+}
+
+########################################################################
+#### disconnect
+#
+# Remove an edge from the graph. The source and destination are as
+# for connect{}; an error is flagged if the edge does not exist.
+#
+body ::tycho::KeyedDigraph::disconnect {src dst} {
+	if { ! [::info exists _edge($src->$dst)] } {
+		error "Edge $src->$dst does not exist in $dataname"
+	}
+
+	# Remember the inverse command
+	set inverse [list eval connect $src $dst $_edges($src->$dst)]
+
+	# Remove the edge and its options
+	unset _edges($src->$dst)
+
+	# Delete the parent-child relation in the superclass
+	set _parents($dst) [ldelete $_parents($dst) $src]
+	set _children($src) [ldelete $_children($src) $dst]
+
+	# Delete the parent-child relation for myself
+	unset _connection($dst)
+	unset _connection($src)
+
+	# Return the inverse command
+	return $inverse
+}
+
+########################################################################
+#### connectcget
+#
+# Get an option of a connection.
+#
+# If the second argument is absent, return a list of option-value pairs,
+# where options are in the list only if they are different from
+# the default.
+#
+body ::tycho::KeyedDigraph::connectcget {connection {option {}}} {
+	# Initialize the options on first access
+	if { ! [::info exists _connectoptns($connection)] } {
+		set _connectoptns($connection) $defaultkeyoptions
+	}
+		
+	if { $option == "" } {
+		# Get all options that differ from the defaults
+		set result
+		array set temp $_connectoptns($connection)
+		foreach {opt dflt} $defaultedgeoptions
+			if { $temp($opt) != $dflt } {
+				lappend result $opt $temp($opt)
+			}
+		}
+		return $result
+	} else {
+		# Just get one option
+		array set temp $_connectoptns($connection)
+		return $temp($option)
+	}
+}
+
+########################################################################
+#### connectconfigure
+#
+# Configure the connection and return the inverse command. The argument list
+# is a flat list of option-value pairs.
+#
+body ::tycho::KeyedDigraph::connectconfigure {connection args} {
+	# Initialize the options on first access
+	if { ! [::info exists _connectoptns($connection)] } {
+		set _connectoptns($connection) $defaultkeyoptions
+	}
+		
+	set inverse [list dataconfigure $connection]
+	array set temp $_connectoptns($connection)
+	foreach {option value} $args {
+		lappend inverse $option $temp($option)
+		set temp($option) $value
+	}
+	set _connectoptns($connection) [array get temp]
+	return $inverse
+}
+
+########################################################################
+#### connectoptions
+#
+# Return a list containing the options of a connection as a flat
+# option-default-value list.
+#
+body ::tycho::KeyedDigraph::connectoptions {connection} {
+	# Initialize the options on first access
+	if { ! [::info exists _connectoptns($connection)] } {
+		set _connectoptns($connection) $defaultkeyoptions
+	}
+		
+	set result {}
+	array set temp $_connectoptns($connection)
+	foreach {opt dflt} $defaultedgeoptions {
+		lappend result [list $opt $dflt $temp($opt)]
+	}
+	return $result
+}
+
+########################################################################
+#### parent
+#
+# Get the parent of _vertex_ with key _key_.
+#
+body ::tycho::KeyedDigraph::parent {vertex key} {
+	if { ! [::info exists _value($vertex)] } {
+		error "Vertex $vertex unknown in $dataname"
+	}
+
+	return $_connection($vertex.$key)
+}
+
+########################################################################
+#### parents
+#
+# With one argument, return the parents of _vertex_. If a second 
+# argument is given, return the parents with keys that match 
+# (glob-style) that pattern as a flat list of key-parent pairs.
+# (To get all parents as a key-parent list, supply the pattern "*".)
+#
+body ::tycho::KeyedDigraph::parents {vertex {pattern {}}} {
+	if { ! [::info exists _value($vertex)] } {
+		error "Vertex $vertex unknown in $dataname"
+	}
+
+	if { $pattern == {} } {
+		# Case 1: just get parents
+		return _parents($vertex)
+	} else {
+		# Case 2: get parents with matching keys
+		set result {}
+		foreach {parentedge parent} [array get _connection $vertex.$pattern] {
+			lappend result [lindex [split $parentedge "."] 1] $parent
+		}
+		return $result
+	}
+}
