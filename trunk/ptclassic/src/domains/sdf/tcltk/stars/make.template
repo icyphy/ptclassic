@@ -33,6 +33,7 @@ STARDOCDIR = ../../doc/stars
 # source files for all stars, using preprocessor
 PL_SRCS= \
  SDFLMSTkPlot.pl \
+ SDFLMSCxTkPlot.pl \
  SDFTkBarGraph.pl \
  SDFTkMeter.pl \
  SDFTclScript.pl \
