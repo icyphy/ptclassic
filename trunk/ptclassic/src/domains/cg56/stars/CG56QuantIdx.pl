@@ -24,7 +24,7 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	codeblock(outputStepNumber) {
 ; The quantization level is r4 - r5 - 1
-	move	r5,y0	(r4)-
+	move	(r4)-	r5,y0
 	move	r4,a
 	sub	y0,a
 	move	a,$ref(stepNumber)
