@@ -30,6 +30,22 @@
 
 
 ##########################################################################
+#### editgraph
+#
+# Procedure to create graph editor
+#
+proc ::tycho::editgraph {file} {
+    set nm [::tycho::view EditGraph -file $file]
+
+    # FIXME FIXME
+    # Load stars and icons
+    $nm loadStars [::tycho::expandPath {$TYCHO/editors/visedit/stars.tim}]
+    $nm loadIcons [::tycho::expandPath {$TYCHO/editors/visedit/icons.tim}]
+
+    return $nm
+}
+
+##########################################################################
 #### EditGraph
 #
 # _EditGraph_ is an editor for the _GraphLayout_ model. It edits
@@ -49,9 +65,6 @@ class ::tycho::EditGraph {
     
     # The graph model
     itk_option define -graph graph Graph {}
-    
-    # The icon index
-    itk_option define -icons icons Icons {}
     
     #################################################################
     ####                     public methods                      ####
@@ -226,6 +239,18 @@ class ::tycho::EditGraph {
     # Return the data to be saved
     protected method saveText {}
 
+    # Load a star library
+    method loadStars {file}
+
+    # Load an icon library
+    method loadIcons {file}
+
+    # The icon library
+    private variable iconLibrary
+
+    # The star library
+    private variable starLibrary
+
     # The current number of iterations
     private variable iterationCount 100
 
@@ -275,15 +300,6 @@ body ::tycho::EditGraph::constructor {args} {
                 [uplevel #0 ::tycho::Layout \
                 [::tycho::autoName layout] \
                 -primaryview $this]
-    }
-
-    # If there is not already an icon index, create one
-    if { $itk_option(-icons) == "" } {
-	set icons [uplevel #0 ::tycho::IconIndex \
-                [::tycho::autoName icons] \
-                -datafile {$TYCHO/editors/visedit/icons.tim}]
-	$icons load
-	configure -icons $icons
     }
 
     # Key bindings
@@ -693,22 +709,30 @@ body ::tycho::EditGraph::updateLayout {} {
 ########################################################################
 #### vertex
 #
-body ::tycho::EditGraph::vertex {icon x y} {
+body ::tycho::EditGraph::vertex {star x y} {
     set name [::tycho::autoName vertex]
     set graph $itk_option(-graph)
     set layout $itk_option(-layout)
-    set icons $itk_option(-icons)
+    set stars $starLibrary
+    set icons $iconLibrary
 
     # Mark the graph and the layout
     $graph mark vertex
     $layout mark vertex
 
     # Add a vertex to the graph
-    $graph publish vertex $name -type $icon
+    $graph publish vertex $name -type $star
+
+    # Get its parameters and add them too
+    foreach parm [$stars names parameter $star] \
+	    parm2 [$stars names* parameter $star] {
+	puts "$parm $parm2"
+	$graph vertexconfigure $name -$parm [$stars get parameter $parm2]
+    }
 
     # Add a vertex to the layout model
-    set type  [$icons type $icon]
-    set attrs [$icons attributes icon $icon]
+    set type  [$icons type $star]
+    set attrs [$icons attributes star $star]
     set undo [eval [list $layout publish item \
 	    $name [list $type $x $y]] $attrs \
 	    -tags vertex]
@@ -718,14 +742,14 @@ body ::tycho::EditGraph::vertex {icon x y} {
     set undolayout [$layout getUndo current]
 
     # Add ports to the graph.
-    foreach port [$icons names port $icon] {
+    foreach port [$icons names port $star] {
         $graph publish key $name $port
     }
 
     # Add the ports to the layout model
-    foreach port [$icons names port $icon] {
-        set type  [$icons type $icon.$port]
-        set attrs [$icons attributes port $icon.$port]
+    foreach port [$icons names port $star] {
+        set type  [$icons type $star.$port]
+        set attrs [$icons attributes port $star.$port]
 		
         # When creating the port item, give it a tag which is the same
         # as its type -- that is, "input" or "output". Give it a
@@ -737,7 +761,7 @@ body ::tycho::EditGraph::vertex {icon x y} {
         #eval $layout notify $cmd
 	eval [list $layout publish itemin $name $port [list $type 0 0]] \
 		$attrs \
-                -tags [list [$icons itemcget port $icon.$port -type]] \
+                -tags [list [$icons itemcget port $star.$port -type]] \
 		-name $port
     }
 
@@ -1126,11 +1150,8 @@ body ::tycho::EditGraph::initializeMenubar {menubar} {
     $menubar command "Unselect" Edit -underline 0 \
 	    -accelerator "C-\\" -command "$this unselectRange 1.0 end"
 
-    # Build a menu if icons from the icon index
-    if { $itk_option(-icons) != "" } {
-	$menubar addMenu Icons -underline 0
-	$itk_option(-icons) menu $menubar Icons "$this iconselect"
-    }
+    # Build a menu for stars
+    $menubar addMenu Stars -underline 0
 
     # Add a Devel menu for development use
     $menubar addMenu Devel -underline 0
@@ -1220,4 +1241,29 @@ body ::tycho::EditGraph::saveText {} {
     append result [$itk_option(-layout) describe]
     append result "\}\n"
     return $result
+}
+
+#####################################################################
+#### loadIcons
+# Load an icon library.
+#
+body ::tycho::EditGraph::loadIcons {file} {
+    set icons [uplevel #0 ::tycho::IconIndex \
+	    [::tycho::autoName icons] \
+	    -datafile $file]
+    $icons load
+    set iconLibrary $icons
+}
+    
+#####################################################################
+#### loadStars
+# Load a star library.
+#
+body ::tycho::EditGraph::loadStars {file} {
+    set stars [uplevel #0 ::tycho::Library \
+	    [::tycho::autoName stars] \
+	    -datafile $file]
+    $stars load
+    $stars menu [menubar] Stars "$this iconselect"
+    set starLibrary $stars
 }
