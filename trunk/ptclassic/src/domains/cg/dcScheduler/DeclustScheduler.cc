@@ -413,7 +413,7 @@ int DeclustScheduler::findBreakpaths(DCNodeList &slpsect, int &Proc) {
 				// upper bounds, not to overload destination
 				// processor
 				int ubound = bestM - 
-				   bestSchedule->getSchedule(ix)->getLoad();
+				   bestSchedule->getProc(ix)->getLoad();
 
 				if (direction < 0) {
 					z = node->getSamples(nextN);
@@ -557,7 +557,7 @@ int DeclustScheduler::loadShift(DCClusterList &, DCClusterList *slpC) {
 	DCCluster *clust;
 	while ((clust = iter++) != 0) {
 		int pix = clust->getProc();
-		DCUniProc* myProc = bestSchedule->getSchedule(pix);
+		UniProcessor* myProc = bestSchedule->getProc(pix);
 
 		// Pick out the slp clusters which are on heavily loaded procs 
 		// 	and take less than 80% load of the processor
@@ -578,7 +578,7 @@ int DeclustScheduler::loadShift(DCClusterList &, DCClusterList *slpC) {
 		// Go through the lightly loaded processors
 		for (i = 0; i < numProcs; i++) {
 			if (procs[i] >= 0) continue;
-			int pload = bestSchedule->getSchedule(i)->getLoad();
+			int pload = bestSchedule->getProc(i)->getLoad();
 
 			// Make sure there is the possibility of a faster sched
 			if (clust->getExecTime() < (bestM - pload)) {
@@ -808,7 +808,7 @@ int DeclustScheduler::pulldown(DCClusterList *combDCClusts, DCClusterList *Cleft
 		DCCluster* pullDCCluster = cl->pullWhich();
 
 		// candidate processors.
-		IntArray* canProcs = mtarget->candidateProcs(bestSchedule, 0);
+		IntArray* canProcs = bestSchedule->candidateProcs(0);
 
 		// Shift onto each of these processors and listSchedule
 		int myProc = pullDCCluster->getProc();
