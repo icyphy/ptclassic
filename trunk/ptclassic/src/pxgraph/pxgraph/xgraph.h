@@ -37,9 +37,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <X11/cursorfont.h>
 #include <X11/Xresource.h>	/* Pick up XrmUniqueQuark() for sol2 */
 
+#include <stdio.h>              /* Pick up sprintf() */
 #include <malloc.h>
 
-#define VERSION_STRING	"11.3.4 April 1999"
+#define VERSION_STRING	"Release: 11.3.4 Build: $Id$"
 
 #define MAXKEYS		50
 #define MAXATTR 	8
