@@ -75,7 +75,11 @@ proc ltake {list n} {
 }
 
 proc ldrop {list n} {
-    return [lreplace $list 0 [expr $n-1]]
+    if { $n == 0 } {
+	return $list
+    } else {
+	return [lreplace $list 0 [expr $n-1]]
+    }
 }
 
 proc ldropUntil {list item} {
