@@ -58,14 +58,18 @@ void CG56Target :: headerCode () {
 
 void CG56Target :: setup() {
 	Galaxy* g = galaxy();
+	addCG56One(this,g);
+	MotorolaTarget :: setup();
+}
+
+void addCG56One(Target* target,Galaxy* g) {
 	if (g && (g->stateWithName("ONE") == 0)) {
 		LOG_NEW; FixState& ONE = *new FixState;
-		g->addState(ONE.setState("ONE",this,"",
+		g->addState(ONE.setState("ONE",target,"",
 					"Max Fix point value",
 					A_NONSETTABLE|A_CONSTANT));
 		ONE.setInitValue(CG56_ONE);
 	}
-	MotorolaTarget :: setup();
 }
 
 // makeNew

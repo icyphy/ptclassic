@@ -61,4 +61,8 @@ public:
 	int compileCode();
 };
 
+// Adds the galaxy parameter ONE.  This should be called by any multiprocessor
+// target that contains a CG56 child target.
+void addCG56One(Target *target, Galaxy *g);
+
 #endif
