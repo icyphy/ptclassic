@@ -255,8 +255,13 @@ extern int vfprintf(FILE *, const char *, char *);
 
 #if !defined(PTIRIX5) && !defined(PTHPPA) && ! defined(PTALPHA)
 				/* thor/kernel/rpc.c use bind2(), listen(). */
+#if defined(PTFREEBSD) || defined(PTLINUX)
+/* Under linux and libc-5.2.18, bind() takes a const second arg */
+extern int bind(int, const struct sockaddr *, int);
+#else /* PTFREEBSD || PTLINUX */
 extern int bind(int, struct sockaddr *, int);
-#endif /* ! PTIRIX5 && ! PTHPPA */
+#endif  /* PTFREEBSD || PTLINUX */
+#endif /* ! PTIRIX5 && ! PTHPPA && ! PTALPHA */
 
 extern void endpwent();		/* octtools/Packages/fc/fc.c and
 				   octtools/Packages/utility/texpand.c */
@@ -272,11 +277,11 @@ extern double hypot(double, double); /* kernel/ComplexSubset.h */
 
 extern int listen(int, int);
 
-#ifdef PTNBSD_386
+#if defined(PTNBSD_386) || defined(PTFREEBSD)
 extern off_t lseek();		/* octtools/vem/serverVem.c uses lseek(). */
 #else
 extern long lseek();
-#endif /* PTNBSD_386 */
+#endif /* PTNBSD_386 || PTFREEBSD */
 
 extern int pclose(FILE *);
 extern void perror (const char *);
