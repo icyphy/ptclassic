@@ -1,5 +1,5 @@
-#ifndef _PTDSPRaisedCosine_h
-#define _PTDSPRaisedCosine_h 1
+#ifndef _ptdspRaisedCosine_h
+#define _ptdspRaisedCosine_h 1
 
 /*
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -35,8 +35,8 @@ Version: $Id$
 extern "C" {
 #endif
 
-extern double PTDSPRaisedCosine(int t, int T, double excess);
-extern double PTDSPSqrtRaisedCosine(int t, int T, double excess);
+extern double Ptdsp_RaisedCosine(int t, int T, double excess);
+extern double Ptdsp_SqrtRaisedCosine(int t, int T, double excess);
 
 #ifdef __cplusplus
 }

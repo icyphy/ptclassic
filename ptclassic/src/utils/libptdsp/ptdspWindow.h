@@ -1,5 +1,5 @@
-#ifndef _PTDSPWindow_h
-#define _PTDSPWindow_h 1
+#ifndef _ptdspWindow_h
+#define _ptdspWindow_h 1
 
 /*
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -44,8 +44,8 @@ extern "C" {
 #define PTDSP_WINDOW_TYPE_STEEPBLACKMAN		6
 #define PTDSP_WINDOW_TYPE_KAISER		7
 
-extern int PTDSPWindowNumber(const char* windowstr);
-extern int PTDSPWindow(double* windowTaps, int length,
+extern int Ptdsp_WindowNumber(const char* windowstr);
+extern int Ptdsp_Window(double* windowTaps, int length,
 		       int windowNumber, double* parameters);
 
 #ifdef __cplusplus

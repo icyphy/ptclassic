@@ -29,13 +29,13 @@ Version: $Id$
 */
 
 #include <math.h>
-#include "PTDSPRaisedCosine.h"
+#include "ptdspRaisedCosine.h"
 
 /*
 The code is written with integer arguments so that it can reliably
 detect the 0/0 condition, avoiding roundoff problems.
  */
-double PTDSPRaisedCosine(int t, int T, double excess) {
+double Ptdsp_RaisedCosine(int t, int T, double excess) {
 	const double DELTA = 1.0e-7;
 	double den, s, x;
 	if (t == 0) return 1.0;
@@ -51,7 +51,7 @@ double PTDSPRaisedCosine(int t, int T, double excess) {
 The code is written with integer arguments so that it can reliably
 detect the 0/0 condition, avoiding roundoff problems.
  */
-double PTDSPSqrtRaisedCosine(int t, int T, double excess) {
+double Ptdsp_SqrtRaisedCosine(int t, int T, double excess) {
 	double den, oneminus, oneplus, x;
 	double sqrtT = sqrt((double)T);
 

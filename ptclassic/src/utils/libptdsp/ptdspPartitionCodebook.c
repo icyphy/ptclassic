@@ -28,7 +28,7 @@ Programmer: Biling Lee and Brian Evans
 Version: $Id$
 */
 
-#include "PTDSPPartitionCodebook.h"
+#include "ptdspPartitionCodebook.h"
 
 /*
 Find the optimum partition of the training vector for fixed gain
@@ -41,7 +41,7 @@ Let X=input vector, and Si=i_th shape codeword:
 3. Squared error (squared distance) is ||X||^2+(gj-X'*Si)^2-(X'*Si)^2. 
  */
 
-void PTDSPPartitionCodebook(int* theindexShape, int* theindexGain, 
+void Ptdsp_PartitionCodebook(int* theindexShape, int* theindexGain, 
 	double* thedistance, const double* trnVector, 
 	const double* shapeCodebook, int sizeShapeCodebook,
 	int dimension, const double* gainCodebook,

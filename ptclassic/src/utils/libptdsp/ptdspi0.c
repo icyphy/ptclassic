@@ -33,7 +33,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  *
  * SYNOPSIS:
  *
- * double x, y, PTDSPi0();
+ * double x, y, Ptdsp_i0();
  *
  * y = i0( x );
  *
@@ -89,7 +89,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 */
 
-#include "PTDSPcephes.h"
+#include "ptdspcephes.h"
 
 /* Chebyshev coefficients for exp(-x) I0(x)
  * in the interval [0,8].
@@ -166,14 +166,14 @@ static double B[] =
  8.04490411014108831608E-1
 };
  
-double PTDSPi0(double x)
+double Ptdsp_i0(double x)
 {
 if( x < 0 ) x = -x;
 
 if( x <= 8.0 ) {
 	double y = (x/2.0) - 2.0;
-	return( exp(x) * PTDSPchbevl(y, A, 30) );
+	return( exp(x) * Ptdsp_chbevl(y, A, 30) );
 }
 
-return( exp(x) * PTDSPchbevl( 32.0/x - 2.0, B, 25 ) / sqrt(x) );
+return( exp(x) * Ptdsp_chbevl( 32.0/x - 2.0, B, 25 ) / sqrt(x) );
 }

@@ -29,7 +29,7 @@ Version: $Id$
 */
 
 #include <math.h>
-#include "PTDSPfft_rif.h"
+#include "ptdspfft_rif.h"
 
 /*
  * This fft routine is from ~gabriel/src/filters/fft/fft.c;
@@ -49,7 +49,7 @@ Version: $Id$
  * power of 2 (this is not checked for!?)
  */
 
-void PTDSPfft_rif(double *data, int nn, int isign)
+void Ptdsp_fft_rif(double *data, int nn, int isign)
 {
 	int	n;
 	int	mmax;

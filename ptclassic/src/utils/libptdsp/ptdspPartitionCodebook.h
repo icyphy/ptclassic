@@ -1,5 +1,5 @@
-#ifndef _PTDSPPartitionCodebook_h
-#define _PTDSPPartitionCodebook_h 1
+#ifndef _ptdspPartitionCodebook_h
+#define _ptdspPartitionCodebook_h 1
 
 /*
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -35,7 +35,7 @@ Version: $Id$
 extern "C" {
 #endif
 
-extern void PTDSPPartitionCodebook(int* theindexShape, int* theindexGain,
+extern void Ptdsp_PartitionCodebook(int* theindexShape, int* theindexGain,
 	double* thedistance, const double* trnVector,
 	const double* shapeCodebook, int sizeShapeCodebook,
 	int dimension, const double* gainCodebook, int sizeGainCodebook);
