@@ -77,8 +77,8 @@ class KnownTargetIter {
 private:
 	KnownTargetEntry* pos;
 public:
-	KnownTargetEntry() { reset();}
-	void reset();;
+	KnownTargetIter() { reset();}
+	void reset();
 	const Target* next();
 	const Target* operator++() { return next();}
 };
