@@ -48,7 +48,7 @@
 catch {delete class ::tycho::DomainInfo}
 source ../../kernel/DomainInfo.itcl
 
-catch {delete class ::tycho::EditRetarg}
-source ../EditRetarg.itcl
-::tycho::EditRetarg .t
+catch {delete class ::tycho::Retarget}
+source ../Retarget.itcl
+::tycho::Retarget .t
 .t centerOnScreen
