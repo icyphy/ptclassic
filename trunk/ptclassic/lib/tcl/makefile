@@ -45,7 +45,6 @@ ptkBarGraph.tcl \
 ptkBind.tcl \
 ptkColor.tcl \
 ptkControl.tcl \
-ptkDialog.tcl \
 ptkGantt.tcl \
 ptkLogicAnalyzer.itcl \
 ptkOptions.tcl \
