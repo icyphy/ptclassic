@@ -162,6 +162,9 @@ public:
 	// generate code using target methods
 	virtual void genCode(Target&, int depth) = 0;
 
+	// hook for doing simulated execution of the real stars.
+	virtual void simRunRealStars() = 0;
+
 	// run/go
 	int run() = 0;
 	void go() { run();}
@@ -214,9 +217,6 @@ public:
 
 	// optionally do additional clustering on internal cluster
 	virtual int internalClustering() { return FALSE;}
-
-	// hook for doing simulated execution of the real stars.
-	virtual void simRunRealStars() = 0;
 
 	// print me
 	virtual ostream& printOn(ostream&) = 0;
