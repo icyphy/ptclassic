@@ -268,7 +268,6 @@ int ExpandedGraph::SelfLoop(SDFStar& s)
 
 int ExpandedGraph::createMe(Galaxy& galaxy)
 {
-  	int source_out, dest_in, delays;
 	SDFStar *dest, *source;
 	SDFPortHole *dest_port, *source_port;
 	GalStarIter nextStar(galaxy);
