@@ -258,6 +258,9 @@ class ::tycho::Query {
     # Remove the query identified by the specified tag.
     method remove {tag}
 
+    # If this is an entry, run select on it with the given args.
+    method select {tag args}
+
     ##################################################################
     ####             protected and private variables              ####
 
@@ -925,4 +928,20 @@ body ::tycho::Query::remove {tag} {
         set tags [lreplace $tags $idx $idx]
     }
     return {}
+}
+
+#####################################################################
+#### select
+# Call select on a single or multi-line entry.
+#
+body ::tycho::Query::select {tag args} {
+    if [winfo exists $itk_component(querysite).tag_$tag] {
+        set entry $itk_component(querysite).tag_$tag
+        # Does not matter that multi-lines are ::tycho::Edit
+        # and single lines are entries, leave that to the
+        # caller and the error handler.
+        eval $entry select $args
+    } else {
+        error "tag $tag does not exist in $this"
+    }
 }
