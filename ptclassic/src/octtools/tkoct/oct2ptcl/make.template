@@ -46,6 +46,9 @@ HDRS = 		oct2ptcl.h
 
 MISC_FILES =	Policy README
 
+# common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
+LIB = foo
+
 all:		makefile oct2ptcl
 
 # Include tk stuff because under sol2.cfront  ../top/libtop has undefined
