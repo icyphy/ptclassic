@@ -21,9 +21,9 @@ The input is moved into accumlator "a", where the "abs" instruction is applied.
 		type {FLOAT}
 	}
 	codeblock (absblock) {
-	move	$loc(in),a
+	move	$ref(in),a
 	abs	a
-	move	a,$loc(out)
+	move	a,$ref(out)
 	}
 	go {
 		gencode(absblock);
