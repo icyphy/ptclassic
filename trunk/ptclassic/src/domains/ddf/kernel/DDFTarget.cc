@@ -46,7 +46,7 @@ DDFTarget::DDFTarget() :
 Target("default-DDF","DataFlowStar","default DDF target")
 {
 	LOG_NEW; setSched(new DDFScheduler);
-	addState(restructure.setState("restructure",this,"YES",
+	addState(restructure.setState("restructure",this,"NO",
 		"perform auto-wormholization?"));
 	addState(maxBufferSize.setState("maxBufferSize",this,"1024",
 	    "capacity of arc. For the runtime detection of unbounded arc."));
