@@ -80,7 +80,9 @@ void VHDLPort :: connect(VHDLSignal* newSignal) {
       newSignal->setSource(this);
     }
     else {
-      Error::error(this->name, ": Attempt to drive newSignal that already has a source: ", newSignal->name);
+      Error::error(this->name,
+		   ": VHDLPort::connect(): Attempt to drive newSignal that already has a source: ",
+		   newSignal->name);
     }
   }
 }
