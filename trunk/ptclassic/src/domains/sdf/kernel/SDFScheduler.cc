@@ -96,22 +96,7 @@ void SDFScheduler :: runOnce () {
 		// Next star in the list
 		SDFStar& currentStar = mySchedule.nextStar();
 
-		// Now call beforeGo(), go(), and afterGo() for each Star
-		// for each PortHole
-		for (int j = currentStar.numberPorts(); j > 0; j--) {
-			PortHole& port = currentStar.nextPort();
-			port.beforeGo();
-		}
-
-		if (!haltRequestFlag)
-			currentStar.go();
-
-		if (haltRequestFlag) { invalid = TRUE; return;}
-
-		for (j = currentStar.numberPorts(); j > 0; j--) {
-			PortHole& port = currentStar.nextPort();
-			port.afterGo();
-		}
+		currentStar.fire();
 
 		if (haltRequestFlag) { invalid = TRUE; return;}
 	}
@@ -171,9 +156,7 @@ int SDFScheduler :: setup (Block& block) {
 			invalid = TRUE;
 			return FALSE;
 		}
-		SDFStar* p = (SDFStar*)&s;
-		p->repetitions = 0;
-		p->noTimes = 0;
+		s.prepareForScheduling();
 	}
 	
 	alanShepard.setupSpaceWalk(galaxy);

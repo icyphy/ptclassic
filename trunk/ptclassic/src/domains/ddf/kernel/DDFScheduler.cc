@@ -26,7 +26,6 @@ extern const char DDFdomainName[];
 extern const char SDFdomainName[];
 
 void fireSource(Star&, int);
-void fireStar(Star&);
 
 /*******************************************************************
 		Main DDF scheduler routines
@@ -77,35 +76,19 @@ int DDFScheduler :: setup (Block& b) {
 	// star initialize
 	for (int i = alanShepard.totalSize(galaxy); i>0; i--) {
 		Star& s = alanShepard.nextStar();
-		if (strcmp (s.domain(), DDFdomainName) == 0) {
-			// DDFStar member initialization
-			DDFStar* p = (DDFStar*) &s;
-			p->waitPort = NULL;
-			p->waitNum = 0;
-			// special care for DDFSelf star (recursion)
-			// adjust numberTokens.
-			if (p->isItSelf()) {
-				p->start();	// will do it again.
-				for (int i = p->numberPorts(); i > 0; i--) {
-				   DDFPortHole& dp = 
-					(DDFPortHole&) p->nextPort();
-				   int nTok = dp.imagePort->numberTokens;
-				   if (nTok > 1)
-					dp.setDDFParams(nTok);
-				}
-			}
-		} else if (strcmp (s.domain(), SDFdomainName) == 0) {
-			// SDFStar member initialization
-			SDFStar* p = (SDFStar*) &s;
-			p->repetitions = 0;
-			p->noTimes = 0;
-		} else {
+		char* dom = s.domain();
+		int l = strlen(dom) - 2;
+		char* tail = &(dom[l]);
+		if (strcmp(tail, "DF") != 0) {
 			StringList msg = s.readFullName();
 			msg += " is not a DDF star: domain = ";
 			msg += s.domain();
 		 	errorHandler.error(msg);
 			return FALSE;
 		}
+		// member initialization.
+		s.prepareForScheduling();
+
 		// put the source block into the sourceBlocks list.
 		if (isSource(s))
 			sourceBlocks.put(&s);
@@ -186,7 +169,7 @@ DDFScheduler :: run (Block& block) {
 		if (isRunnable(s)) {
 			// run the star
 			do {
-				fireStar(s);
+				s.fire();
 				if (haltRequestFlag) exit(1);
 			} while (isRunnable(s));
 
@@ -268,14 +251,14 @@ int DDFScheduler :: lazyEval(Star* s) {
 					return FALSE;
 			   req = p->waitNum - p->waitPort->myGeodesic->size();
 			}
-			fireStar(*s);
+			s->fire();
 			return TRUE;
 		}
 	}
 
 	if (checkLazyEval(s)) {
 		// fire the star
-		fireStar(*s);
+		s->fire();
 		return TRUE;
 	} else
 		return FALSE;
@@ -335,24 +318,7 @@ void fireSource(Star& s, int k) {
 	// fire sources "k-min" times.
 
 	for (int i = min; i < k; i++) 
-		fireStar(s);
-}
-
-void fireStar(Star& s) {
-	if (strcmp (s.domain(), SDFdomainName) == 0) {
-		for (int j = s.numberPorts(); j > 0; j--) {
-			PortHole& port = s.nextPort();
-			port.grabData();
-		}
-		s.go();
-		for (j = s.numberPorts(); j > 0; j--) {
-			PortHole& port = s.nextPort();
-			port.sendData();
-		}
-	} else {
-		s.go();		// DDFStar calls grabData,
-				// sendData inside go().
-	}
+		s.fire();
 }
 
 // my domain
