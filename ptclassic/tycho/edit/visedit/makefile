@@ -45,16 +45,12 @@ TCL_SRCS =
 ITCL_SRCS = \
 	EditBubbleAndArc.itcl \
 	EditDAG.itcl \
-	EditDAGWidget.itcl \
 	EditForest.itcl \
-	EditForestWidget.itcl \
 	EditPalette.itcl \
-	EditPaletteWidget.itcl \
 	EditSTD.itcl \
 	GanttView.itcl \
 	GanttDF.itcl \
 	Graphics.itcl \
-	GraphicsWidget.itcl \
 	ProfileTcl.itcl \
 	SlateView.itcl 
 

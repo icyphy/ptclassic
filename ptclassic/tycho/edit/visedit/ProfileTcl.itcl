@@ -80,12 +80,15 @@ class ::tycho::ProfileTcl {
 #### constructor
 #
 body ::tycho::ProfileTcl::constructor {args} {
-    addTool on -text {Start Profiling} -command "$this profileStart"
-    addTool off -text {Display Profile} -command "$this profileDisplay"
-    addTool cancel -text {Cancel Profile} -command "$this profileCancel"
+    toolbar addButton on {Start collecting profiling data} \
+            -text "Start" -command "$this profileStart"
+    toolbar addButton off {Display profile as a call tree} \
+            -text Display -command "$this profileDisplay"
+    toolbar addButton cancel {Cancel profile, discarding collected data} \
+            -text Cancel -command "$this profileCancel"
 
-    disableTool off
-    disableTool cancel
+    toolbar disableButton off
+    toolbar disableButton cancel
 
     # Add a display at the bottom for the profile stats.
     addInfo count {Call count} 0 10 \
@@ -130,9 +133,9 @@ body ::tycho::ProfileTcl::help {} {
 #
 body ::tycho::ProfileTcl::profileCancel {} {
     profile off results
-    disableTool off
-    disableTool cancel
-    enableTool on
+    toolbar disableButton off
+    toolbar disableButton cancel
+    toolbar enableButton on
 }
 
 #######################################################################
@@ -186,9 +189,9 @@ body ::tycho::ProfileTcl::profileDisplay {} {
         array donesearch results $id
         incr depth
     }
-    disableTool off
-    disableTool cancel
-    enableTool on
+    toolbar disableButton off
+    toolbar disableButton cancel
+    toolbar enableButton on
     component graphics redrawGraph
 }
 
@@ -197,9 +200,9 @@ body ::tycho::ProfileTcl::profileDisplay {} {
 # Turn profiling on.
 #
 body ::tycho::ProfileTcl::profileStart {} {
-    enableTool off
-    enableTool cancel
-    disableTool on
+    toolbar enableButton off
+    toolbar enableButton cancel
+    toolbar disableButton on
     profile -commands on
 }
 
