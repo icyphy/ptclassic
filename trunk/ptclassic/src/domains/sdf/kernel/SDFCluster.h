@@ -377,8 +377,6 @@ protected:
 	SDFBagScheduler* sched;
 	SDFClusterGal* gal;
 	int exCount;
-private:
-	int owner;
 };
 
 class SDFClustPort : public SDFPortHole {
