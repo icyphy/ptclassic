@@ -46,13 +46,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	defstate {
 		name {xRange}
-		type{string}
+		type{floatarray}
 		default {"-1.5 1.5"}
 		desc { The range of x-coordinate values }
 	}
 	defstate {
 		name {yRange}
-		type{string} 
+		type{floatarray} 
 		default {"-1.5 1.5"}
 		desc { The range of x-coordinate values }
 	}
@@ -89,17 +89,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	    Error::abortRun(*this, "invalid persistence");
 	    return;
 	  }
-	  double xMin, xMax, yMin, yMax;
 	  // Store xMin and xMax for the benefit of the line style in TkPlot
 	  addGlobal("double $starSymbol(xMin);");
 	  addGlobal("double $starSymbol(xMax);");
 
-	  if ((sscanf((const char*)xRange,"%lf %lf", &xMin, &xMax) != 2) ||
-	      (xMin >= xMax)) {
+	  
+	  if ((xRange.size() != 2) || (xRange[0] >= xRange[1])) {
 	    Error::abortRun(*this,"xRange parameter values are invalid");
 	  }
-	  if ((sscanf((const char*)yRange,"%lf %lf", &yMin, &yMax) != 2) ||
-	      (yMin >= yMax)) {
+	  if ((yRange.size() != 2) || (yRange[0] >= yRange[1])) {
 	    Error::abortRun(*this,"yRange parameter values are invalid");
 	  }
 	  addInclude("\"ptkPlot_defs.h\"");
@@ -112,7 +110,8 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	  int plotstyle = 0;
 	  if (strcmp(style,"connect") == 0) plotstyle = 1;
-	  addCode(createPlot(xMin,xMax,yMin,yMax,Y.numberPorts(),plotstyle),
+	  addCode(createPlot(xRange[0],xRange[1],yRange[0],yRange[1],
+			     Y.numberPorts(),plotstyle),
 		  "tkSetup");
 	}
 	go {
