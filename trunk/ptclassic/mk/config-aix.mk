@@ -72,7 +72,7 @@ CC_STATIC = #  -static
 
 # We ship statically linked binaries, but other sites might want
 # to remove the -static below
-LINKFLAGS =    -L$(LIBDIR) -Xlinker -x -static -liconv $(EXP_OPTS)
+LINKFLAGS =    -L$(LIBDIR) -static -liconv $(EXP_OPTS)
 LINKFLAGS_D =  -L$(LIBDIR) -g -static -liconv $(EXP_OPTS)
 
 # uncomment the following line if you have the SMT ptf installed
@@ -82,12 +82,12 @@ SMTLIB        = -Xlinker -bI:/usr/lpp/X11/bin/smt.exp
 # Directories to use
 #
 X11_INCSPEC =  -I/usr/lpp/X11/include
-# Some AIX X11 installations need to use the pthreads library
-X11_LIBSPEC =  $(SMTLIB) -L/usr/lib -lIM -L/usr/lpp/X11/lib -lX11 # -lpthreads
+# Some AIX X11 installations need to use the pthread library
+X11_LIBSPEC =  $(SMTLIB) -L/usr/lib -lIM -L/usr/lpp/X11/lib -lX11 # -lpthread
 X11EXT_LIBSPEC=-lXext
 
 VEM_X11_LIBSPEC = \
-$(SMTLIB) -L/usr/lib -lXaw -lXmu $(X11EXT_LIBSPEC) -lIM -lXt -lX11 #-lpthreads
+$(SMTLIB) -L/usr/lib -lXaw -lXmu $(X11EXT_LIBSPEC) -lIM -lXt -lX11
 
 # system libraries (libraries from the environment)
 SYSLIBS= -lbsd -lm
