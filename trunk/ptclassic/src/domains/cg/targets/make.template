@@ -19,14 +19,14 @@ CGSTARS = $(ROOT)/src/domains/cg/stars
 EGKERNEL = $(ROOT)/src/domains/sdf/expgraph
 DCDIR = $(ROOT)/src/domains/cg/dcScheduler
 DLDIR = $(ROOT)/src/domains/cg/dlScheduler
-QSDIR = $(ROOT)/src/domains/cg/quasiScheduler
+HuDIR = $(ROOT)/src/domains/cg/HuScheduler
 PARDIR = $(ROOT)/src/domains/cg/parScheduler
 
 INCL=-I$(CGSTARS) -I$(CGKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) -I$(EGKERNEL) \
-	-I$(DCDIR)  -I$(DLDIR) -I$(QSDIR) -I$(PARDIR)
+	-I$(DCDIR)  -I$(DLDIR) -I$(HuDIR) -I$(PARDIR)
 
-SRCS=CGFullConnect.cc CGSharedBus.cc 
-HDRS=CGFullConnect.h CGSharedBus.h 
+SRCS=CGMultiTarget.cc CGSharedBus.cc 
+HDRS=CGMultiTarget.h CGSharedBus.h 
 
 OBJS = $(SRCS:.cc=.o)
 
