@@ -34,6 +34,8 @@ Updates:
     4/14/89 = returns a ParamList which has 1 extra empty slot at
 	the end for EditFormalParams().  (Kludgy fix, but it works.)
 */
+#define CTLA 1			/* control-A */
+
 boolean
 PStrToPList(pStr, pListPtr)
 char *pStr;
@@ -42,6 +44,7 @@ ParamListType *pListPtr;
     int i, param_n;
     char *from, *to, *copy;
     ParamType *place;
+    int sep, err = 0;
 
     /* return a pList length of 0 by default */
     pListPtr->length = 0;
@@ -60,10 +63,17 @@ ParamListType *pListPtr;
     	pListPtr->array = (ParamType *) calloc(1, sizeof(ParamType));
 	return(TRUE);
     }
-
-    if ((from = index(pStr, '|')) == NULL) {
-	/* can't find '|' between length and first param! */
-	return(FALSE);
+/* We support old-style parameters (with '|' as the separator and no
+ * type information) and new-style (with ^A as the separator).
+ */
+    sep = '|';
+    from = index(pStr, sep);
+    if (!from) {
+	sep = CTLA;
+	if ((from = index(pStr, sep)) == NULL) {
+	    /* can't find separator between length and first param! */
+	    return(FALSE);
+        }
     }
     /* Dupicate Lisp param string, skiping the # of params, so we can chop 
         it up into smaller strings.
@@ -75,29 +85,40 @@ ParamListType *pListPtr;
 
     from = copy; /* from points to first param name of copy */
     place = pListPtr->array; /* points to first pList param slot */
+		    
     for (i = 0; i < param_n; i++) {
 	/* set param name at current place */
-	if ((to = index(from, '|')) == NULL) {
-	    free(copy);
-	    free(pListPtr->array);
-	    return(FALSE);
+	if ((to = index(from, sep)) == NULL) {
+	    err++; break;
 	}
 	*to = '\0';
 	place->name = from;
-	place->type = 0;	/* for now */
 	from = ++to;
-
+	if (sep == '|') place->type = 0;
+	else {
+	    /* set param type at current place */
+	    if ((to = index(from, sep)) == NULL) {
+		err++; break;
+	    }
+	    *to = '\0';
+	    place->type = from;
+	    from = ++to;
+	}
 	/* set param value at current place */
-	if ((to = index(from, '|')) == NULL) {
-	    free(copy);
-	    free(pListPtr->array);
-	    return(FALSE);
+	if ((to = index(from, sep)) == NULL) {
+	    err++; break;
 	}
 	*to = '\0';
 	place->value = from;
 	from = ++to;
 
 	place++;
+    }
+    if (err) {
+	ErrAdd("PStrToPList: format error in param from facet");
+	free(copy);
+	free(pListPtr->array);
+	return(FALSE);
     }
     pListPtr->length = param_n;
     return(TRUE);
@@ -122,11 +143,13 @@ ParamListType *pListPtr;
     int i;
     ParamType *place;
 
-    sprintf(strBuf, "%d|", pListPtr->length);
+    sprintf(strBuf, "%d%c", pListPtr->length, CTLA);
 
     place = pListPtr->array;
     for (i = 0; i < pListPtr->length; i++) {
-	sprintf(paramBuf, "%s|%s|", place->name, place->value);
+	if (!place->type) place->type = "";
+	sprintf(paramBuf, "%s%c%s%c%s%c", place->name, CTLA,
+		place->type, CTLA, place->value, CTLA);
 	strcat(strBuf, paramBuf);
 	place++;
     }
