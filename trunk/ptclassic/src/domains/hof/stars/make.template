@@ -44,8 +44,8 @@ OPTIMIZER  =
 
 # HOFDIR is the directory containing HOF domain support
 HOFDIR = $(ROOT)/src/domains/hof/kernel
-PIGIDIR = $(ROOT)/src/pigilib
-INCL = -I$(HOFDIR) -I$(KERNDIR) -I$(PIGIDIR) -I$(TCL_INCDIR) \
+PTKLIB = $(ROOT)/src/ptklib
+INCL = -I$(HOFDIR) -I$(KERNDIR) -I$(PTKLIB) -I$(TCL_INCDIR) \
  -I$(TK_INCDIR) $(X11_INCSPEC)
 
 # Library name

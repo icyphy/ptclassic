@@ -42,8 +42,8 @@ VPATH = $(ROOT)/src/domains/fsm/kernel
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-PIGILIBDIR = $(ROOT)/src/pigilib
-INCL = -I$(KERNDIR) $(PTCOMPAT_INCSPEC) -I$(PIGILIBDIR) \
+PTKLIB = $(ROOT)/src/ptklib
+INCL = -I$(KERNDIR) $(PTCOMPAT_INCSPEC) -I$(PTKLIB) \
        -I$(PTCL_INCDIR) -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC) 
 
 # Library name
