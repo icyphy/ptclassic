@@ -153,8 +153,8 @@ int Recur :: checkStars(CGMacroCluster* s, Galaxy* /*galaxy*/) {
 		// if (st && strcmp(st->initValue(), galaxy->name()))
 		// return FALSE;
 
-	   	CGClustPort* p;
-	   	CGClustPortIter nextp(*s);
+	   	CGMacroClustPort* p;
+	   	CGMacroClustPortIter nextp(*s);
 		int errorFlag = 0;
 	
 		while ((p = nextp++) != 0) {
@@ -192,8 +192,8 @@ int Recur :: checkStars(CGMacroCluster* s, Galaxy* /*galaxy*/) {
 int Recur :: checkCluster(CGMacroCluster* s) {
 
 	// check connections of the Clusters.
-	CGClustPort* p;
-	CGClustPortIter nextp(*s);
+	CGMacroClustPort* p;
+	CGMacroClustPortIter nextp(*s);
 	int inNum = 0;
 	int type = 0;
 	int errorFlag = 0;

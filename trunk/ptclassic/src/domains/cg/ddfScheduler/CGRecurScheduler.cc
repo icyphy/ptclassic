@@ -644,8 +644,8 @@ int CGRecurScheduler :: recursiveDownLoad(int invoc, int pix,
 	Geodesic* dataG = 0;
 	if (syncId == 0) {
 		if (!addDataSend(invoc, pix, pgId, t)) return FALSE;
-		CGClustPortIter nextp(*cbagC);
-		CGClustPort* tempP;
+		CGMacroClustPortIter nextp(*cbagC);
+		CGMacroClustPort* tempP;
 		while ((tempP = nextp++) != 0) {
 			if (tempP->isItOutput()) break;
 		}
@@ -668,7 +668,7 @@ int CGRecurScheduler :: recursiveDownLoad(int invoc, int pix,
 	if (syncId == 0) {
 		CGStar* ds = cloneStar("BlackHole");
 		if (!ds) return FALSE;
-		ds->setNameParent("dummy", galaxy());
+		//ds->setNameParent("dummy", galaxy());
 		dummyStars.put(*ds);
 		ds->repetitions = 1;
 		if (!addDataReceive(outG, invoc, pix, pgId, t, ds)) 
@@ -711,7 +711,7 @@ int CGRecurScheduler :: recursionProcedure(int invoc, int pix,
 	StringList funcName = "recur_";
 	funcName << galaxy()->name();
 
-	CGClustPort* p = 0;
+	CGMacroClustPort* p = 0;
 	if (createFunc) {
 		// call the function
 		if (newPG <= saveK) 
@@ -720,7 +720,7 @@ int CGRecurScheduler :: recursionProcedure(int invoc, int pix,
 
 		// return type
 		if (syncId == 0) {
-			CGClustPortIter nextp(*cbagD);
+			CGMacroClustPortIter nextp(*cbagD);
 			while ((p = nextp++) != 0) {
 				if (p->isItInput()) break;
 			}
@@ -751,7 +751,7 @@ int CGRecurScheduler :: recursionProcedure(int invoc, int pix,
 	BlockList selfStarList;
 	selfStarList.initialize();
 
-	CGClustPortIter nextCp(*cbagC);
+	CGMacroClustPortIter nextCp(*cbagC);
 	while ((p = nextCp++) != 0) {
 		if (p->isItInput()) continue;
 		PortHole* farP = copyPortHole(p);
@@ -761,7 +761,7 @@ int CGRecurScheduler :: recursionProcedure(int invoc, int pix,
 			CGMacroCluster* tb = p->far()->parentClust();
 			selfS = cloneStar("Self");
 			if (!selfS) return FALSE;
-			selfS->setNameParent(tb->realName(), galaxy());
+			selfS->setNameParent(tb->realName(), 0);
 			selfStarList.put(*selfS);
 			DFPortHole* srcP = 
 				(DFPortHole*) selfS->portWithName("output");
@@ -774,8 +774,8 @@ int CGRecurScheduler :: recursionProcedure(int invoc, int pix,
 			selfGeo = srcP->geo();
 
 			// alias this geodesic to cbagD input.
-			CGClustPortIter nextDp(*cbagD);
-			CGClustPort* dp;
+			CGMacroClustPortIter nextDp(*cbagD);
+			CGMacroClustPort* dp;
 			while ((dp = nextDp++) != 0) {
 				if (dp->far()->parentClust() == tb) break;
 			}
@@ -899,8 +899,8 @@ int CGRecurScheduler :: initRecurCode(int invoc, int pix, int pId,
         ///////////////////////////////////
 
 int CGRecurScheduler :: addDataSend(int invoc,int pix, int pgId, CGTarget* t) {
-	CGClustPortIter nextCp(*cbagC);
-	CGClustPort* p;
+	CGMacroClustPortIter nextCp(*cbagC);
+	CGMacroClustPort* p;
 
 	int count = 0;
 	while ((p = nextCp++) != 0) {
@@ -924,8 +924,8 @@ int CGRecurScheduler :: addDataSend(int invoc,int pix, int pgId, CGTarget* t) {
 
 int CGRecurScheduler :: addDataReceive(Geodesic* gd, int invoc, int pix, 
 					int pgId, CGTarget* t, CGStar* ds) {
-	CGClustPortIter nextCp(*cbagC);
-	CGClustPort* p;
+	CGMacroClustPortIter nextCp(*cbagC);
+	CGMacroClustPort* p;
 
 	int count = 0;
 	int stride = int(pow(numSelf, pgId)) * optNum;
@@ -933,8 +933,8 @@ int CGRecurScheduler :: addDataReceive(Geodesic* gd, int invoc, int pix,
 		if (p->isItInput()) continue;
 
 		CGMacroCluster* temps = p->far()->parentClust();
-		CGClustPortIter nextDp(*cbagD);
-		CGClustPort* dp;
+		CGMacroClustPortIter nextDp(*cbagD);
+		CGMacroClustPort* dp;
 		while ((dp = nextDp++) != 0) {
 			if (dp->far()->parentClust() == temps) break;
 		}
@@ -996,12 +996,11 @@ CGStar* CGRecurScheduler :: dummyConnect(CGStar* s, int direction) {
 		ds = cloneStar("BlackHole");
 	} else {
 		ds = cloneStar("Const");
+		StringList temp = "Const_auto";
+		temp << localId++;
+		ds->setNameParent(hashstring(temp), 0);
 	}
 	if (!ds) return FALSE;
-
-	StringList temp = "dummy";
-	temp << localId++;
-	ds->setNameParent(hashstring(temp), 0);
 
 	DFPortHole* srcP, *destP;
 	if (!direction) {
