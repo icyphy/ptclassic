@@ -93,7 +93,7 @@ int Recur :: checkTopology (CGMacroClusterGal* galaxy) {
 	return TRUE;
 }
 
-int Recur :: checkStars(CGMacroCluster* s, Galaxy* galaxy) {
+int Recur :: checkStars(CGMacroCluster* s, Galaxy* /*galaxy*/) {
 
 	CGAtomCluster* as = (CGAtomCluster*) s;
 	CGStar& ds = as->real();

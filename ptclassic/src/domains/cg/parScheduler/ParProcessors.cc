@@ -214,7 +214,7 @@ int ParProcessors :: listSchedule(ParGraph* graph) {
 			///  scheduleParNode ///
 			////////////////////////
 
-int ParProcessors :: scheduleParNode(ParNode* node) {
+int ParProcessors :: scheduleParNode(ParNode* /*node*/) {
 	Error :: abortRun("this scheduler does not support parallel tasks.",
 		"\n Try macroScheduler instead.");
 	return FALSE;

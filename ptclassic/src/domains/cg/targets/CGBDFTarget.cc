@@ -63,13 +63,13 @@ void CGBDFTarget::setup() {
 }
 
 void CGBDFTarget :: beginIf(PortHole& cond,int truthdir,
-			    int depth,int haveElsePart) {
+			    int depth, int /*haveElsePart*/) {
 	const char* tflag = truthdir ? "" : "!";
 	myCode << "if (" << tflag << cond.fullName() << ") { /* depth = "
 	       << depth << " */\n";
 }
 
-void CGBDFTarget :: beginElse(int depth) {
+void CGBDFTarget :: beginElse(int /*depth*/) {
 	myCode << "} else {\n";
 }
 
