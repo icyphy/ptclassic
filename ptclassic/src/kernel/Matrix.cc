@@ -205,14 +205,14 @@ FixMatrix operator - (const FixMatrix& src1, const FixMatrix& src2) {
 // Pre-subtract matrix with a scalar
 // Note this takes scalar by value because unary operator - on Fix is
 // destructive (i.e. replaces the Fix with its complement).
-FixMatrix operator- (Fix scalar,const FixMatrix& matrix) {
+FixMatrix operator- (const Fix& scalar,const FixMatrix& matrix) {
   return ((-scalar) + matrix);
 }
 
 // Post-subtract matrix with a scalar
 // Note this takes scalar by value because unary operator - on Fix is
 // destructive (i.e. replaces the Fix with its complement).
-FixMatrix operator- (const FixMatrix& matrix,Fix scalar) {
+FixMatrix operator- (const FixMatrix& matrix,const Fix& scalar) {
   return ((-scalar) + matrix);
 }
 
