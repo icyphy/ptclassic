@@ -2,8 +2,9 @@ defstar {
 	name { DivByInt }
 	domain { CGC }
 	desc {
-This is an amplifier; the integer output is the integer input
-multiplied by the integer "gain" (default 1).
+This is an amplifier.  The integer output is the integer input
+divided by the integer "divisor" (default 1).  Truncated integer
+division is used.
 	}
 	version { $Id$ }
 	author { Brian L. Evans }
@@ -25,7 +26,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	defstate {
 		name { divisor }
 		type { int }
-		default { "1" }
+		default { "2" }
 		desc { Inverse of the gain of the amplifier. }
 	}
 	constructor {
