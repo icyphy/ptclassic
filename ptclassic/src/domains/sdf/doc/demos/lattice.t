@@ -4,10 +4,10 @@
 Demonstrate the use of lattice filters to synthesize an
 auto-regressive (AR) random process.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
 .SV $Revision$	$Date$
-.AL "E. A. Lee"
+.AL "Edward A. Lee"
 .LD
 .Ie "whitening filter"
 .Ie "filter, whitening"

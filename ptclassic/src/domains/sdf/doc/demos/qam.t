@@ -5,7 +5,7 @@ This universe produces a 16-point quadrature amplitude modulated (QAM) signal
 and displays the eye diagram for the in-phase part, the constellation,
 and the modulated transmit signal.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Joseph T. Buck"

@@ -4,10 +4,10 @@
 Upsample a sinusoidal signal by a ratio of 5/2 using a
 polyphase lowpass interpolating FIR filter.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
-.SV $Revision$ "October 15, 1990"
-.AL "E. A. Lee"
+.SV $Revision$	$Date$
+.AL "Edward A. Lee"
 .LD
 This universe generates a sine wave using the
 .c singen

@@ -4,10 +4,10 @@
 This system designs FIR filters using the frequency sampling method.
 Samples of the frequency response are converted into FIR filter coefficients.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
-.SV $Revision$ "October 20, 1990"
-.AL "J. Buck and E. A. Lee"
+.SV $Revision$	$Date$
+.AL "Joe T. Buck and Edward A. Lee"
 .LD
 The frequency domain specification is given using the
 .c WaveForm

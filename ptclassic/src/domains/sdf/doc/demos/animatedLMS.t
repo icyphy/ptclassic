@@ -4,7 +4,7 @@
 An LMS adaptive filter is configured as in the adaptFilter demo,
 but this time the filter taps are displayed as they adapt.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"

@@ -4,10 +4,10 @@
 A universe that median filters an image to reduce artifacts
 due to interleaved scanning of video sequences.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
-.SV $Revision$ "August 19, 1991"
-.AL "P. E. Haskell"
+.SV $Revision$	$Date$
+.AL "Paul E. Haskell"
 .LD
 This universe reads an image from a file and median filters the
 image.

@@ -3,9 +3,9 @@
 .SD
 Modulate a sinusoid my multiplying by another sinusoid.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
-.SV $Revision$ "October 15, 1990"
+.SV $Revision$	$Date$
 .AL "Edward A. Lee"
 .LD
 This system uses galaxy to produce a sinusoid, and

@@ -5,7 +5,7 @@ This system rearranges the order of samples of signal using
 the Commutator and Distributor stars. Note that because these
 are multirate stars, one iteration involves more than one sample.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
 .Se Commutator
 .Se Distributor

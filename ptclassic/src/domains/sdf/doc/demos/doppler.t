@@ -6,7 +6,7 @@ The doppler shift is accomplished by the phaseShift galaxy,
 which forms an analytic signal (using a Hilbert transform)
 that modulates a complex exponential.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"

@@ -3,7 +3,7 @@
 .SD
  Simulation of plucked string sounds using the Karplus-Strong algorithm
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Joseph T. Buck"

@@ -4,10 +4,10 @@
 Demonstrate the DTFT star, showing how it is different from the FFTCx star.
 Specifically, the range, number, and spacing of frequency samples is arbitrary.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
-.SV $Revision$ "October 28, 1990"
-.AL "E. A. Lee"
+.SV $Revision$	$Date$
+.AL "Edward A. Lee"
 .LD
 .pp
 .Ie "spectral estimation"

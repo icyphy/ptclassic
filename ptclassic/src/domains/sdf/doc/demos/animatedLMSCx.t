@@ -6,7 +6,7 @@ but in addition, user-controlled noise is added to the feedback loop using
 an on-screen slider to control the amount of noise.  The filter taps are
 displayed as they adapt.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"

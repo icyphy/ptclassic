@@ -1,12 +1,13 @@
 .\" $Id$
 .NA levinsonDurbin
 .SD
-Use the Levinson-Durbin algorithm to estimate the parameters of an AR process.
+Use the Levinson-Durbin algorithm to estimate the parameters of an
+autoregressive process.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
-.SV $Revision$ "October 31, 1990"
-.AL "E. A. Lee"
+.SV $Revision$	$Date$
+.AL "Edward A. Lee"
 .LD
 .Ie "system identification"
 This demo generates an auto-regressive (AR) random process by filtering

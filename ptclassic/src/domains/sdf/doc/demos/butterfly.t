@@ -5,10 +5,10 @@ This system uses sines and cosines to compute a curve
 known as the butterfly curve, invented by T. Fay.
 The curve is plotted in polar form.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
 .SV $Revision$ $Date$
-.AL "E. A. Lee"
+.AL "Edward A. Lee"
 .LD
 .Ir "butterfly curve"
 The butterfly curve was described in [1].

@@ -3,11 +3,11 @@
 .SD
 Compare two sinusoidal signals using the Test star.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
 .IE comparison
 .SV $Revision$	$Date$
-.AL "E. A. Lee"
+.AL "Edward A. Lee"
 .LD
 .Ir "Zero crossing"
 .Ir "Signal crossing"

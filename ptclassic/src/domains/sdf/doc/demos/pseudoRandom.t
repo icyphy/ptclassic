@@ -3,11 +3,11 @@
 .SD
 Generate a pseudoRandom sequence of zeros and ones using a maximal-length shift register.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
 .IE psuedoRandom
 .SV $Revision$	$Date$
-.AL "E. A. Lee"
+.AL "Edward A. Lee"
 .LD
 .Ir "Pseudo-random sequences"
 A maximal-length shift register is a delay line whose input is computed as the
