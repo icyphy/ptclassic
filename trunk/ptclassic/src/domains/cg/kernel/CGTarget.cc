@@ -50,9 +50,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "pt_fstream.h"
 #include "SimControl.h"
 #include "KnownBlock.h"
-#include <stream.h>
+#include "Tokenizer.h"
 #include <time.h>
-#include <string.h>
 
 extern const char* CODE = "code";
 extern const char* PROCEDURE = "procedure";
@@ -181,6 +180,18 @@ void CGTarget::setup() {
 	}
 }
 
+int CGTarget :: run() {
+    // if a wormhole, we must do the transfer of data to and from the target.
+    if(inWormHole()) {
+	if(!allSendWormData()) return FALSE;
+	if(!allReceiveWormData()) return FALSE;
+    }
+    else 	
+	generateCode();
+	
+    return !haltRequested();
+}
+
 // If not in a WormHole, conditionally display, compile, load, and run code.
 void CGTarget :: wrapup()
 {
@@ -280,17 +291,6 @@ CodeStream* CGTarget :: getStream(const char* name)
 	return codeStringLists.get(name);
 }
 
-int CGTarget :: run() {
-    // if a wormhole, we must do the transfer of data to and from the target.
-    if(inWormHole()) {
-	if(!allSendWormData()) return FALSE;
-	if(!allReceiveWormData()) return FALSE;
-    }
-    else 	
-	generateCode();
-	
-    return !haltRequested();
-}
 
 void CGTarget :: frameCode() {}
 
@@ -434,34 +434,47 @@ void CGTarget :: writeCode(const char* name) {
 
 ISA_FUNC(CGTarget,Target);
 
-StringList CGTarget::comment(const char* msg, const char* b, 
-const char* e, const char* cont) {
-    StringList cmt;
-    if (msg==NULL) return cmt;
-    char begin;
-    if (b==NULL) begin ='#';
-    else begin = *b;
-    char end;
-    if (e==NULL) end =' ';
-    else end = *e;
-    if (cont==NULL) {	/*multiline comments unsupported*/
-	char* c = savestring(msg);
-	for (char* line=strtok(c,"\n"); line; line=strtok(NULL,"\n"))
-	    cmt << begin << line << end << "\n";
-	LOG_DEL; delete c;
+StringList CGTarget::comment(const char* text, const char* b, 
+    const char* e, const char* cont)
+{
+    StringList cmnt;
+    const char* begin = "# ";
+    const char* end = "";
+    const char* special = "";
+    const char* white = "\n";
+    Tokenizer lexer(text, special, white);
+    char line[1024];
+
+    if (text==NULL) return cmnt;
+    if (b!=NULL) begin = b;
+    if (e!=NULL) end = e;
+
+    if (cont==NULL)	// generate multiple single-line comments
+    {
+	lexer >> line;
+	while (*line != '\0')
+	{
+	    cmnt << begin << line << end << '\n';
+	    lexer >> line;
+	}
     }
-    else if (*cont=='\0') /*multiline comments supported, no cont char*/
-	cmt << begin << msg << end << "\n";
-    else { /*multiline comments supported, continue char desired*/
-	char* c = savestring(msg);
-	char* line = strtok(c,"/n");
-	cmt << begin << line << "\n";
-	while(line = strtok(NULL,"\n"))
-	    cmt << cont << line << '\n';
-	cmt << end << '\n';
-	LOG_DEL; delete c;
+    else if (*cont == '\0')	// no special continuation string required
+    {
+	cmnt << begin << text << end << '\n';
     }
-    return cmt;
+    else	// special continuation required for multi-line comments
+    {
+	lexer >> line;
+	cmnt << begin << line;
+	lexer >> line;
+	while (*line != '\0')
+	{
+	    cmnt << '\n' << cont << line;
+	    lexer >> line;
+	}
+	cmnt << end << '\n';
+    }
+    return cmnt;
 }
 
 StringList CGTarget::headerComment(const char* begin, const char* end, 
