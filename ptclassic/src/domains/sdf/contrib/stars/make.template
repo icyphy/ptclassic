@@ -58,9 +58,7 @@ SDFCIIDGaussian.pl \
 SDFCfft.pl \
 SDFErrCnt.pl \
 SDFExpGen.pl \
-SDFIntDiv.pl \
 SDFMagSqr.pl \
-SDFModulus.pl \
 SDFPipeOut.pl \
 SDFPnGen.pl \
 SDFPowerEst.pl \
