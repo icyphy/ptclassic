@@ -597,7 +597,7 @@ body ::tycho::RevControl::whichRevClass {obj} {
     # Step through possible revision control systems and determine
     # whether they control the file.
     foreach type $pref {
-	if [::tycho::RevControl$type::isUnderRevControl $filename] {
+	if [::tycho::RevControl${type}::isUnderRevControl $filename] {
 	    set revclass "::tycho::RevControl$type"
 	    break
 	}
