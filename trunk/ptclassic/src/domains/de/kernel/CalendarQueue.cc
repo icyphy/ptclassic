@@ -3,7 +3,7 @@ static const char file_id[] = "CalendarQueue.cc";
 Version identification:
  $Id$
 
-WANRNING experimental version
+WARNING experimental version
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
@@ -28,6 +28,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
+
+ Modified: John Davis
+ Date: 5/19/97
+        Modifications were made to allow for mutability within
+        the DE domain. The primary modifications is the addition
+        of the member  
+           Link * destinedLink
+        to the class CqLevelLink. This allows CqLevelLink to be
+        directly accessed by the DestinedEventList.
 
 **************************************************************************/
 
