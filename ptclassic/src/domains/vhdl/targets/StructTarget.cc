@@ -409,10 +409,11 @@ void StructTarget :: registerCompMap(StringList label, StringList name,
 }
 
 // Register the State reference.
-void StructTarget :: registerState(State* state, int thisFiring/*=-1*/,
-				   int pos/*=-1*/) {
-  StringList temp = sanitizedFullName(*state);
-  StringList ref = sanitize(temp);
+void StructTarget :: registerState(State* state, const char* varName,
+				   int thisFiring/*=-1*/, int pos/*=-1*/) {
+//  StringList temp = sanitizedFullName(*state);
+//  StringList ref = sanitize(temp);
+  StringList ref = varName;
   StringList stType = stateType(state);
   StringList root;
   StringList initVal;
