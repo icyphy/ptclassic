@@ -51,7 +51,7 @@ int CGCPortHole :: initOffset() {
 		return TRUE;
 	}
 	int del = cgGeo().forkDelay();
-	if (!del) del = numTokens();
+	if (!del) del = numInitDelays();
 	if (!del) offset = numXfer() - 1;
 	else {
 		offset = numXfer() - del - 1;
@@ -122,13 +122,13 @@ void CGCPortHole :: finalBufSize(int statBuf) {
 			inp->setFlags();
 			// access to the past Particles
 			if (inp->usesOldValues() ||
-				(inp->numTokens() % inp->numXfer() != 0))
+				(inp->numInitDelays() % inp->numXfer() != 0))
 				inp->asLinearBuf = FALSE;
 		}
 	} else {
 		p->setFlags();
 		if (p->usesOldValues() ||
-			(p->numTokens() % p->numXfer() != 0)) {
+			(p->numInitDelays() % p->numXfer() != 0)) {
 			p->asLinearBuf = FALSE;
 		}
 	}
