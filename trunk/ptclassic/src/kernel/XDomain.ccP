@@ -57,7 +57,7 @@ static <T>Domain proto;
 
 class <T>Target : public Target {
 public:
-	<T>Target() : Target("default-<T>","<T>Star",0,"default <T> target"){}
+	<T>Target() : Target("default-<T>","<T>Star","default <T> target"){}
 	void start() { if (!sched) sched = new <T>Scheduler;}
 	Block* clone() const { return new <T>Target;}
 	~<T>Target() { delete sched;}
