@@ -1,0 +1,57 @@
+# Makefile for Ptolemy FSM stars
+# $Id$
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	chmod +w makefile
+#	make depend
+# This will add the dependencies to the makefile.
+
+ROOT = ../../../..
+VPATH = $(ROOT)/src/domains/fsm/stars
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
+# FSMDIR is the directory containing FSM domain support
+FSMDIR = $(ROOT)/src/domains/fsm/kernel
+INCL = -I$(FSMDIR) -I$(KERNDIR) \
+       -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
+
+# Library name
+LIB=libfsmstars.$(LIBSUFFIX)
+
+# source files for all stars, using preprocessor
+# base classes/stars go in the front of the list
+PL_SRCS= \
+FSMDataIn.pl \
+FSMDataOut.pl \
+FSMMoore.pl \
+FSMMealy.pl
+
+# The .cc files
+SRCS=$(PL_SRCS:.pl=.cc)
+
+# object files for all stars
+OBJS= $(SRCS:.cc=.o)
+
+# header files for all stars
+HDRS= $(SRCS:.cc=.h)
+
+STAR_MK=fsmstars
+DOMAIN=FSM
+EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS)
+
+all:		makefile stars_all
+
+install:	stars_install
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
