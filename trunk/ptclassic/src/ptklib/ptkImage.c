@@ -62,20 +62,22 @@ defined below, and are also declared in ptkImage.h.
 /* We must include ptkImage.h last because it pulls in ptk.h.  See ptk.h. */
 #include "ptkImage.h"
 
+#if (TK_MAJOR_VERSION == 4 && TK_MINOR_VERSION >= 1) || TK_MAJOR_VERSION > 4
+
 /* From Tk's generic/tkInt.h */
-/*
 #ifndef TkPutImage
 extern void             TkPutImage _ANSI_ARGS_((unsigned long *colors,
                             int ncolors, Display* display, Drawable d,
                             GC gc, XImage* image, int src_x, int src_y,
                             int dest_x, int dest_y, unsigned int width,
                             unsigned int height));
-#endif */
+#endif /* TkPutImage */
 
 /* From Tk's generic/tkVisual.c */
-/* Comment the following out until we upgrade to tk4.1 or higher
-   extern void Tk_PreserveColormap _ANSI_ARGS_((Display *display,
-					     Colormap colormap)); */
+extern void		Tk_PreserveColormap _ANSI_ARGS_((Display *display,
+			    Colormap colormap));
+
+#endif
 
 /* UCHAR is a conditional cast from integer to unsigned char in Tcl/Tk */
 #ifndef UCHAR
@@ -941,15 +943,16 @@ UpdatePixmap(instancePtr)
      * it to TkPutImage() until Tk gets upgraded to 4.1 or higher.  
      */
 
-    /*
+#if (TK_MAJOR_VERSION == 4 && TK_MINOR_VERSION >= 1) || TK_MAJOR_VERSION > 4
     TkPutImage(colorPtr->freeColors, colorPtr->nFreeColors,
                instancePtr->display, instancePtr->pixmap,
 	       instancePtr->gc, ximage, 0, 0, 0, 0,
-	       (unsigned) width, (unsigned) height); */
-
+	       (unsigned) width, (unsigned) height);
+#else
     XPutImage(instancePtr->display, instancePtr->pixmap,
 	       instancePtr->gc, ximage, 0, 0, 0, 0,
 	       (unsigned) width, (unsigned) height);
+#endif
 } 
 
 /*
@@ -1036,8 +1039,9 @@ ImgPtimageGet(tkwin, masterData)
     instancePtr->masterPtr = masterPtr;
     instancePtr->display = Tk_Display(tkwin);
     instancePtr->colormap = Tk_Colormap(tkwin);
-    /* Comment this out until we upgrade to tk4.1 or higher 
-    Tk_PreserveColormap(instancePtr->display, instancePtr->colormap); */
+#if (TK_MAJOR_VERSION == 4 && TK_MINOR_VERSION >= 1) || TK_MAJOR_VERSION > 4
+    Tk_PreserveColormap(instancePtr->display, instancePtr->colormap);
+#endif
     instancePtr->refCount = 1;
     instancePtr->width = masterPtr->width;
     instancePtr->height = masterPtr->height;
@@ -1372,8 +1376,9 @@ GetColorTable(instancePtr)
 
 	memset((VOID *) &colorPtr->id, 0, sizeof(ColorTableId));
 	colorPtr->id = id;
-	/* Comment this out until we upgrade to tk4.1 or higher
+#if (TK_MAJOR_VERSION == 4 && TK_MINOR_VERSION >= 1) || TK_MAJOR_VERSION > 4
 	Tk_PreserveColormap(colorPtr->id.display, colorPtr->id.colormap); */
+#endif
 	colorPtr->flags = 0;
 	colorPtr->refCount = 0;
         colorPtr->liveRefCount = 0;
@@ -1683,7 +1688,8 @@ AllocateColors(colorPtr)
      * the pixelMap on colormap displays.  However, if the display
      * is on Windows, then we actually want to store the index not
      * the value since we will be passing the color table into the
-     * TkPutImage call.                                           */
+     * TkPutImage call.
+     */
 
     if ((colorPtr->visualInfo.class != DirectColor)
                 && (colorPtr->visualInfo.class != TrueColor)) {
