@@ -31,57 +31,115 @@
 #######################################################################
 
 #######################################################################
+#### options
+# Define colors for the Tcl context-sensitive editor. These are done
+# as options so that they can be overridden by the user. Other colors
+# that work reasonably well are: forestGreen, chocolate3, DarkOrange,
+# coral, OrangeRed, DeepPink, maroon, magenta, and DarkOrchid.
+#
+# NOTE: Unfortunately, itcl appears to require that all options
+# from the base class be repeated here with the new class name.
+# Otherwise, they are not recognized.
+option add *EditTcl.textWidth 80 widgetDefault
+option add *EditTcl.textHeight 40 widgetDefault
+option add *EditTcl.parenColor [ptkColor lightskyblue white] widgetDefault
+option add *EditTcl.targetColor [ptkColor lightskyblue white] widgetDefault
+option add *EditTcl.fillMaxLineLength 70 widgetDefault
+option add *EditTcl.textBackground \
+	[ptkColor antiqueWhite white] widgetDefault
+option add *EditTcl.textfont [.tychoFonts defaultFont fixed]
+option add *EditTcl.relief raised widgetDefault
+option add *EditTcl.selectColor [ptkColor yellow white] widgetDefault
+option add *EditTcl.commentColor [ptkColor firebrick black] widgetDefault
+option add *EditTcl.fixmeColor [ptkColor red black] widgetDefault
+option add *EditTcl.stringColor [ptkColor gray50 black] widgetDefault
+
+# new options
+
+option add *EditTcl.procColor [ptkColor blue black] widgetDefault
+
+
+#######################################################################
 #### EditTcl
-# This class defines a window that provides an emacs-like editor
-# specialized for editing Tcl files. It colorizes the code, identifying
-# comments and procedure definitions, supports hyperlinks to procedures
-# that can be auto-loaded, automatically indents the code, and fills
-# blocks of comments.  It also provides a command for evaluating
-# a region of Tcl code.
+# This class defines a text widget with an emacs-like editor with some
+# context-specific features for editing Tcl files. Tcl is an
+# interpreted language developed by John Ousterhout of Berkeley. This
+# editor automatically indents a line in response to a Tab character,
+# and provides a command for indenting a region (the selection). To
+# enter a literal Tab, enter the sequence <Control-q><Tab>. This editor
+# also colors comments, procedure names, and the strings "FIXME" and
+# "NOTE", and provides a method for commenting out a region. It also
+# provides a command for evaluating a region of code.
 #
 class ::tycho::EditTcl {
     inherit ::tycho::EditProgram
 
-    ###################################################################
-    ####                     public methods                        ####
+    constructor {args} {}
+    destructor {}
 
-    # Evaluate a region in the global context.
+    ##########################################################################
+    ####                         public methods                           ####
+
+    # Execute the Tcl code in the selection (or the entire text widget).
     method evaluate {}
 
     # Open a help window.
     method help {}
 
-    constructor {args} {}
-    destructor {}
+    # Color the Tcl code in a region.
+    method parseNow {start stop} {}
 
-    ###################################################################
-    ####                  protected methods                        ####
+    # Tag identifiers in the file that are defined elsewhere.
+    method tagLinks {}
 
-    # Return the name of the type of text widget to use (EditTclText).
-    protected method textWidget {} {return ::tycho::EditTclText}
+    ####################################################################
+    ####                    protected methods                       ####
+
+    # Return the regular expression used to identify line-oriented comments.
+    protected method commentRegexp {}
+
+    ##########################################################################
+    ####                         protected variables                      ####
+
+    # Counter for hyperlinks.
+    protected variable hypcount 0
 }
 
 ###################################################################
 #
 body ::tycho::EditTcl::constructor {args} {
-    
+
     eval itk_initialize $args
     
-    # Add to the format menu a command to recolorize.
-    addMenuSeparator Format
-        
-    addMenuItem "Show Links" Format -underline 1 \
-	    -command "$this component text busy tagLinks"
+    # Set the fill prefix to be the comment character for Tcl.
+    set fillPrefix "#"
 }
 
 #####################################################################
 #### evaluate
 # Evaluate the contents of the text window as Tcl commands
-# in the global context.  Return the result of the evaluation.
+# in the global context.  Display and return the result of the evaluation.
 #
 body ::tycho::EditTcl::evaluate {} {
-    return [$itk_component(text) evaluate]
+    set code [getSelection]
+    if { $code == {} } {
+	set code [get 1.0 end]
+	set type "File"
+    } else {
+	set type "String"
+    }
+
+    set ret [uplevel #0 $code]
+    if {$ret != {}} {
+	puts $ret
+	putStatus "$type evaluated"
+	::tycho::inform "$type evaluation returned:\n$ret"
+	putStatus ""
+    } {
+        putStatus "$type evaluated (empty result)"
+    }
     focusin
+    return $ret
 }
 
 ###################################################################
@@ -92,4 +150,141 @@ body ::tycho::EditTcl::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
 	    $TYCHO/editors/textedit/doc/usersGuides/EditTclHelp.html
+}
+
+#####################################################################
+#### parseNow
+# Invoke the base class parser to color comments and the strings
+# "NOTE" and "FIXME".  Then tag and color procedure names.
+#
+body ::tycho::EditTcl::parseNow {start stop} {
+
+    EditProgram::parseNow $start $stop
+    set text $itk_component(text)
+
+    # Remove tags first, if necessary
+    $text tag remove procname $start $stop
+
+    # Search for procedure definitions.
+    set ind $start
+    set endc $stop
+    set spaces "\[ \t\]"
+    set procregexp "^$spaces*(public$spaces+|protected$spaces+|private$spaces+)?proc$spaces+(\[^ \t\]*)"
+    while {[set ind [$text search -count len -regexp $procregexp \
+	    $ind $stop]] != {}} {
+
+	set endc [$text index "$ind + $len chars"]
+	set line [$text get $ind $endc]
+	
+	# Procedures
+	if [regexp -indices $procregexp $line match access procName] {
+	    # Procedure definitions. Tag the procedure name.
+	    # Note that we support Itcl qualifiers here.
+	    # Should they be colored too?
+	    set first [lindex $procName 0]
+	    set last [lindex $procName 1]
+	    $text tag add procname "$ind + $first chars" \
+		    "$ind + $last chars +1 char"
+	}
+        set ind $endc
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $ind >= end] {break}
+    }
+    
+    # Set the visual characteristics of the tagged text
+    $text tag configure procname -foreground \
+	    [option get $itk_component(hull) procColor EditTcl]
+}
+
+#### tagLinks
+# This method tags identifiers in the file that are defined elsewhere
+# and are registered for auto-loading in the global array "auto_index".
+# A binding is attached to the tag to perform a hyper jump to the file
+# given in the auto_index array, annotated with the name of the identifier.
+#
+body ::tycho::EditTcl::tagLinks {} {
+
+    global ::auto_index
+    
+    # Construct regular expressions for all identifiers in the
+    # auto_index array. Delimiters that might be found before or after
+    # a classname invocation or procedure call.  Some care is required
+    # here because there may be many items in the array, and the size
+    # of a regular expression is limited.  Thus, we construct a set
+    # of regular expressions.  The size is limited to 100 entries.
+
+    set count 0
+    set delim "\[\] \t\[\(\)\{\}\:\;\]"
+    foreach entry [array names auto_index] {
+	if {$count >= 100} {
+	    set count 0
+	    append ids "\)\(\$\|$delim\)"
+	    lappend regexps $ids
+	}
+	if {$count == 0} {
+	    set ids "\(\^\|$delim\)\($entry"
+	} {
+	    append ids "|$entry"
+	}
+	incr count
+    }
+    append ids "\)\(\$\|$delim\)"
+    lappend regexps $ids
+
+    set text $itk_component(text)
+
+    # The following finds the line number of the line beyond the end
+    set end [$text index end]
+    regexp {[0-9]+} $end endline
+    
+    # We now step through each line, one at a time, for each regexp.
+    foreach ids $regexps {
+
+	set next 1.0
+	while {[set next [$text search -regexp $ids $next end]] \
+		!= {}} {
+	    set line [$text get $next "$next lineend"]
+	    if [regexp -indices $ids $line match p1 key p2] {
+		set start "$next +[lindex $key 0] char"
+		set stop "$next +[lindex $key 1] char +1 char"
+		$text tag add hyperlink$hypcount $start $stop
+		$text tag configure hyperlink$hypcount \
+			-foreground \
+			[option get $itk_component(hull) procColor EditTcl]
+		$text tag configure hyperlink$hypcount \
+			-underline 1
+		
+		set word [$text get $start $stop]
+		
+		# Remove the "source " from the auto_index word
+		set filename [string range $auto_index($word) 7 end]
+		
+		# FIXME: Despite the "break" here, some other binding kicks
+		# in after this one, causing text to be selected.  Tk bug?
+		$text tag bind hyperlink$hypcount \
+			<Double-Button-1> \
+			"$this hyperJump $filename $word; break"
+		
+		incr hypcount
+		set next [$text index \
+			"$next +[string length $word] char"]
+	    } else {
+		set next [$text "$next lineend"]
+	    }
+	    # The following appears to be needed to prevent infinite loops.
+	    if [$text compare $next >= end] {break}
+	}
+    }
+}
+
+####################################################################
+####################################################################
+####                    protected methods                       ####
+
+#####################################################################
+#### commentRegexp
+# Return the regular expression used to identify line-oriented comments.
+#
+body ::tycho::EditTcl::commentRegexp {} {
+    return "(^|;)\[ \t\]*#.*\$"; #line comment
 }

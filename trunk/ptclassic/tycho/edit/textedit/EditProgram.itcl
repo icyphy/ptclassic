@@ -1,4 +1,5 @@
-# Definition of an editor for editing source code in various languages.
+# Definition of a text editor with facilities for editing programs
+# in various languages.
 #
 # @Author: Edward A. Lee
 #
@@ -31,8 +32,55 @@
 #######################################################################
 
 #######################################################################
+# FIXME: Known bugs
+#
+# - The commentSelection and indentSelection command cannot be undone
+#   by the undo command.  To change this, they should be rewritten to
+#   delete the region of text using deleteRegion and insert modified
+#   text using insertString.
+#
+# - The "indent region" command does not recognize close braces
+#   on a line that is a "backslash continuation" line.
+#   Example:
+# 
+# 		btt {
+# 		    set family \
+# 			    [option get . fixedFontFamily $topLevelClass] }
+# 		    set weight bold
+# 		}
+# 
+#   Note the extra close brace at the end of the third line.
+# 
+
+#######################################################################
+#### options
+# NOTE: Unfortunately, itcl appears to require that all options
+# from the base class be repeated here with the new class name.
+# Otherwise, they are not recognized.
+option add *EditProgram.textWidth 80 widgetDefault
+option add *EditProgram.textHeight 40 widgetDefault
+option add *EditProgram.parenColor [ptkColor lightskyblue white] widgetDefault
+option add *EditProgram.targetColor [ptkColor lightskyblue white] widgetDefault
+option add *EditProgram.fillMaxLineLength 70 widgetDefault
+option add *EditProgram.textBackground \
+	[ptkColor antiqueWhite white] widgetDefault
+option add *EditProgram.textfont [.tychoFonts defaultFont fixed]
+option add *EditProgram.relief raised widgetDefault
+option add *EditProgram.selectColor [ptkColor yellow white] widgetDefault
+
+# new options
+
+option add *EditProgram.commentColor \
+	[ptkColor firebrick black] widgetDefault
+option add *EditProgram.commentColor \
+	[ptkColor blue black] widgetDefault
+option add *EditProgram.fixmeColor [ptkColor red black] widgetDefault
+option add *EditProgram.stringColor [ptkColor gray50 black] widgetDefault
+
+
+#######################################################################
 #### EditProgram
-# This class defines a window that provides an emacs-like editor
+# This class defines a widget that provides an emacs-like editor
 # specialized for editing program files. It colorizes the code,
 # identifying comments, automatically indents the code, and fills
 # blocks of comments. Derived classes are specialized to particular
@@ -46,23 +94,53 @@
 class ::tycho::EditProgram {
     inherit ::tycho::Edit
 
-    ###################################################################
-    ####                     public methods                        ####
-
     constructor {args} {}
     destructor {}
+
+    ##########################################################################
+    ####                         public methods                           ####
+
+    # Match an open paranthesis and also indent the line, if appropriate.
+    method closeParen {paren}
+
+    # Insert the fill prefix at the beginning of every line in the selection.
+    method commentSelection {}
+
+    # Fill the set of lines identified by the selection, make comments.
+    method fillSelection {}
 
     # Open a help window.  This should be redefined in derived classes.
     method help {}
 
+    # Indent the line with the insertion cursor.
+    method indentLine {}
+
+    # Indent the set of lines identified by the selection.
+    method indentSelection {}
+
+    # In derived classes, returns a string with keywords separated by "|".
+    method keywords {} {return {}}
+
+    # Color the code in a region.
+    method parseNow {start stop}
+
     # Specify whether or not modifications are allowed in the displayed text.
     method setReadOnly {bool}
 
-    ###################################################################
-    ####                  protected methods                        ####
+    # Returns a list of tags to use when checking the spelling.
+    method spellCheckTags {} {return {comment}}
 
-    # Return the name of the type of text widget to use (EditProgramText).
-    protected method textWidget {} {return ::tycho::EditProgramText}
+    # Remove the fill prefix in a range of lines.
+    method uncommentSelection {}
+
+    ####################################################################
+    ####           protected methods and variables                  ####
+
+    # Return the regular expression used to find line-oriented comments.
+    protected method commentRegexp {}
+
+    # Change this to 0 in derived classes if keywords are not case sensitive.
+    protected variable caseSensitiveKeywords 1
 }
 
 ###################################################################
@@ -70,30 +148,101 @@ class ::tycho::EditProgram {
 body ::tycho::EditProgram::constructor {args} {
     
     eval itk_initialize $args
-
+    
     # Add to the format menu commands to comment and uncomment
     # the regions defined by the selection.
-    addMenuSeparator Format
+    menubar addMenuSeparator Format
     
-    addMenuItem "Comment Out Region" Format -underline 0 \
-	    -command "$this component text commentSelection"
+    menubar addMenuItem "Comment Out Region" Format -underline 0 \
+	    -command "$this commentSelection"
     
-    addMenuItem "Uncomment Region" Format -underline 0 \
-	    -command "$this component text uncommentSelection"
+    menubar addMenuItem "Uncomment Region" Format -underline 0 \
+	    -command "$this uncommentSelection"
     
-    addMenuSeparator Format
+    menubar addMenuSeparator Format
     
-    addMenuItem "Recolorize" Format -underline 0 -accelerator "S-C-l" \
-	    -command "$this component text parseRegion 1.0 end"
+    menubar addMenuItem "Recolorize" Format -underline 0 -accelerator "S-C-l" \
+	    -command "$this parseRegion 1.0 end"
     
-    addMenuItem "Indent Line" Format -underline 0 -accelerator "Tab" \
-	    -command "$this component text indentLine"
+    menubar addMenuItem "Indent Line" Format -underline 0 -accelerator "Tab" \
+	    -command "$this indentLine"
 
-    addMenuItem "Indent Region" Format -underline 1 -accelerator "Esc C-\\" \
-	    -command "$this component text busy indentSelection"
+    menubar addMenuItem "Indent Region" Format -underline 1 \
+            -accelerator "Esc C-\\" \
+	    -command "$this busy indentSelection"
     
-    addMenuItem "Tab" Format -underline 0 -accelerator "C-q Tab" \
-	    -command "$this component text insertString insert {\t}"
+    menubar addMenuItem "Tab" Format -underline 0 -accelerator "C-q Tab" \
+	    -command "$this insertString insert {\t}"
+
+    # The default fill prefix works for Tcl and shell scripts.
+    set fillPrefix "#"
+    
+    # Bind the Tab character to automatically indent the line.
+    bind $itk_component(text) <Tab> "$this indentLine; break"
+    bind $itk_component(text) <Control-q><Tab> \
+            "$this insertString insert {\t}; break"
+    
+    # Bind S-C-l to recolorize the file. Note that C-L is the equivalent
+    # since the effect of the shift key is to modify the keypress and 
+    # it does not seem that I can intercept this any other way.
+    bind $itk_component(text) <Control-L> "$this parseRegion 1.0 end"
+    
+    # Indent region binding
+    bind $itk_component(text) <Escape><Control-backslash> \
+            "$this busy indentSelection"
+}
+
+#####################################################################
+#### closeParen
+# Override the base-class closeParen to also perform indentLine
+# if the closeParen is the first character on the line.
+#
+body ::tycho::EditProgram::closeParen {paren} {
+    Edit::closeParen $paren
+
+    # Indent the line if the closeParen is the first non-space character.
+    if [regexp {^[ 	]*[]\}\)]} \
+	    [$itk_component(text) get "insert linestart" "insert lineend"]] {
+	indentLine
+    }
+}
+
+#####################################################################
+#### commentSelection
+# Insert the fill prefix at the beginning of every line contained
+# in the selection. Note that this command is undone (more or less)
+# by "uncommentSelection", and not by the usual undo mechanism.  If the
+# first line is partially contained in the selection, then it is
+# treated as if it were fully contained in the selection.
+#
+body ::tycho::EditProgram::commentSelection {} {
+    if {[getSelection] != {}} {
+	
+	# Get the line numbers touched by the selection
+	set firstind [$itk_component(text) index sel.first]
+	regexp {([0-9]+)\.([0-9]+)} $firstind match startline startch
+	set lastind [$itk_component(text) index sel.last]
+	regexp {([0-9]+)\.([0-9]+)} $lastind match endline endch
+	
+	for {set lineno $startline} {$lineno < $endline} {incr lineno} {
+	    $itk_component(text) insert $lineno.0 "$fillPrefix "
+	}
+	
+	markModified
+	parseRegion sel.first sel.last
+    }
+}
+
+#####################################################################
+#### fillSelection
+# Fill the set of lines identified by the selection so that they
+# are roughly the same length. Put the comment prefix on each, and
+# mark the region as a comment.
+#
+body ::tycho::EditProgram::fillSelection {} {
+    if $readOnly {bell; return}
+    Edit::fillSelection
+    parseRegion $fillStart insert
 }
 
 ###################################################################
@@ -107,6 +256,206 @@ body ::tycho::EditProgram::help {} {
 }
 
 #####################################################################
+#### indentLine
+# Indent the line with the insert mark based on the indentation of
+# of the previous non-blank line.  If that line contains any unmatched
+# parentheses, brackets, or braces, then the line will be indented
+# an extra four spaces for each such unmatched.  If the previous line
+# ends in a slash, then this line will be indented an extra 8 spaces.
+#
+body ::tycho::EditProgram::indentLine {} {
+    if $readOnly {bell; return}
+    resetUndo
+    
+    # To be able to sensibly place the insertion cursor, we
+    # we record the current status.
+    set ins [$itk_component(text) index insert]
+    set atEnd [$itk_component(text) compare insert == "insert lineend"]
+    set atStart [$itk_component(text) compare insert == "insert linestart"]
+    
+    regexp {([0-9]+)\.([0-9]+)} $ins match lineno charno
+    $itk_component(text) mark set insert $lineno.0
+    set indent 0
+    while {[incr lineno -1] >= 0} {
+	
+	set line [$itk_component(text) get $lineno.0 "$lineno.0 lineend"]
+	if {[regexp {^[ 	]*$} $line] == 0} {
+	    
+	    # Found a non-blank line to use as a reference.
+	    # Determine the position of the first non-space character
+	    # on the reference line. First
+	    # replace all tabs with 8 spaces in the reference line
+	    regsub -all {[	]} $line "        " modline
+	    regexp -indices {([^ 	])} $modline match fc
+	    set indent [lindex $fc 0]
+	    
+	    # If the line before it ends a backslash, then adjust for
+	    # the expected indentation due to the backslash
+	    if {$lineno > 0 } {
+		set prevline [expr $lineno-1]
+		if {[$itk_component(text) get "$prevline.0 lineend -1 char"] \
+			== "\\"} {
+		    set indent [expr $indent-8]
+		}
+	    }
+	    
+	    # Check for open or close parentheses
+	    # and lines ending in \ (this should be an immediately
+	    # preceeding line.  This is a pretty simple algorithm,
+	    # and would be easy to fool.
+	    if [regexp "\[\[\(\{\]\[ 	\]\*\$" $line] {
+		set indent [expr $indent+4]
+	    } elseif [regexp {\\$} $line] {
+		set indent [expr $indent+8]
+	    }
+	    
+	    # The line being edited:
+	    set line [$itk_component(text) get insert "insert lineend"]
+	    
+	    # If the first character is a close parenthesis, adjust
+	    if [regexp {^[ 	]*[]\}\)]} $line] {
+		if {$indent >= 4} {incr indent -4}
+	    }
+	    
+	    # Clear the leading space characters on the insertion line.
+	    if [regexp -indices {^([ 	]+)} $line match fc] {
+		set lastspace [lindex $fc 1]
+		deleteRange "insert linestart" \
+			"insert + $lastspace chars +1 char"
+	    }
+	    
+	    # Do not use tabs for indenting.
+	    set str ""
+	    while {$indent > 0} {
+		append str " "
+		incr indent -1
+	    }
+	    insertString insert $str
+	    break
+	}
+    }
+    # Put the insertion cursor back where it was or at the end of
+    # of the line, if it was before at the end.
+    if {$atEnd} {
+	$itk_component(text) mark set insert "$ins lineend"
+    } elseif {!$atStart} {
+	$itk_component(text) mark set insert $ins
+    }
+    
+    # Recolorize - no point in deferring.
+    parseNow {insert linestart} {insert lineend}
+}
+
+#####################################################################
+#### indentSelection
+# Indent the set of lines identified by the selection, if there is
+# a selection.  If there is no selection, ignore.
+#
+body ::tycho::EditProgram::indentSelection {} {
+    if $readOnly {bell; return}
+    if {[getSelection] !=  {}} {
+	if [::tycho::askuser "No Undo. Ok to proceed?"] {
+	    set prevInsert [$itk_component(text) index insert]
+	    $itk_component(text) mark set insert sel.first
+	    while {[$itk_component(text) compare insert < sel.last] == 1} {
+		indentLine
+		# To handle the case where the selection goes to the end
+		# of the text, verify that the insertion pointer is truly
+		# incremented.
+		set oldinsert [$itk_component(text) index insert]
+		$itk_component(text) mark set insert "insert +1 line"
+		if [$itk_component(text) compare insert <= $oldinsert] {
+		    break
+		}
+	    }
+	    $itk_component(text) mark set insert $prevInsert
+	    selection clear -displayof $itk_component(text)
+	    resetUndo
+	}
+    }
+}
+
+#####################################################################
+#### parseNow
+# Tag and color line-oriented comments, strings that are entirely on
+# one line, the strings "NOTE" and "FIXME", and keywords in the
+# specified range of text. What constitutes a comment is determined by
+# the protected method "commentRegexp", which returns a regular
+# expression that identifies a comment. Keywords are specified by the
+# method "keywords". If that method returns a null string, no keywords
+# are highlighted. Note that highlighting keywords is a fairly
+# expensive operation, so it may not be desirable to always highlight
+# keywords.
+#
+body ::tycho::EditProgram::parseNow {start stop} {
+
+    # Remove tags first, if necessary
+    set text $itk_component(text)
+    $text tag remove comment $start $stop
+    $text tag remove notcomment $start $stop
+    $text tag remove fixme $start $stop
+    $text tag remove string $start $stop
+    
+    set comregexp [commentRegexp]
+
+    set ind $start
+    set endc $stop
+    while {[set res [$text search -count len -regexp $comregexp \
+	    $ind $stop]] != {}} {
+	$text tag add notcomment $ind $res
+	set endc [$text index "$res + $len chars +1 char"]
+	$text tag add comment $res $endc
+	set ind $endc
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $ind >= end] {break}
+    }
+    $text tag add notcomment $ind $stop
+    
+    # Now tag all occurrences of "FIXME" and "NOTE" within the range.
+    set ind $start
+    while {[set ind [$text search -count cnt -regexp \
+	    {FIXME|NOTE} $ind $stop]] != {}} {
+
+	set endf [$text index "$ind + $cnt chars"]
+	$text tag add fixme $ind $endf
+	set ind $endf
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $ind >= end] {break}
+    }
+
+    # Now tag all single line strings.
+    set ind $start
+    while {[set ind [$text search -count cnt -regexp \
+	    {"[^"]*"} $ind $stop]] != {}} {
+
+	set endf [$text index "$ind + $cnt chars"]
+	$text tag add string $ind $endf
+	set ind $endf
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $ind >= end] {break}
+    }
+
+    # Finally, tag keywords.
+    set kw [keywords]
+    if {$kw != {}} {
+        # Search case sensitive (by default), regexp, and wholeword.
+        findAll keyword $caseSensitiveKeywords 1 1 $kw $start $stop {notcomment}
+    }
+
+    # Set the visual characteristics of the tagged text
+    $text tag configure string -foreground \
+	[option get $itk_component(hull) stringColor EditProgram]
+    $text tag lower string comment
+    $text tag configure comment -foreground \
+	[option get $itk_component(hull) commentColor EditProgram]
+    $text tag lower comment fixme
+    $text tag configure fixme -foreground \
+            [option get $itk_component(hull) fixmeColor EditProgram]
+    $text tag configure keyword -foreground \
+            [option get $itk_component(hull) keywordColor EditProgram]
+}
+
+#####################################################################
 #### setReadOnly
 # Specify whether or not modifications are allowed in the displayed text.
 # Note that this is independent of whether the associated file is readonly.
@@ -117,17 +466,74 @@ body ::tycho::EditProgram::setReadOnly {bool} {
     ::tycho::Edit::setReadOnly $bool
     if [winfo exists $prefix] {
 	if {$bool} {
-            disableMenuItem {Comment Out Region} Format
-            disableMenuItem {Uncomment Region} Format
-            disableMenuItem {Indent Line} Format
-            disableMenuItem {Indent Region} Format
-            disableMenuItem {Tab} Format
+            menubar disableMenuItem {Comment Out Region} Format
+            menubar disableMenuItem {Uncomment Region} Format
+            menubar disableMenuItem {Indent Line} Format
+            menubar disableMenuItem {Indent Region} Format
+            menubar disableMenuItem {Tab} Format
 	} {
-            enableMenuItem {Comment Out Region} Format
-            enableMenuItem {Uncomment Region} Format
-            enableMenuItem {Indent Line} Format
-            enableMenuItem {Indent Region} Format
-            enableMenuItem {Tab} Format
+            menubar enableMenuItem {Comment Out Region} Format
+            menubar enableMenuItem {Uncomment Region} Format
+            menubar enableMenuItem {Indent Line} Format
+            menubar enableMenuItem {Indent Region} Format
+            menubar enableMenuItem {Tab} Format
 	}
     }
+}
+
+#####################################################################
+#### uncommentSelection
+# Remove the fill prefix at the beginning of every line contained
+# in the selection. Note that this command is (more or less) undone
+# by "commentSelection", and not by the usual undo mechanism. If the
+# first line is partially contained in the selection, then it is
+# treated as if it were fully contained in the selection.  
+#
+body ::tycho::EditProgram::uncommentSelection {} {
+    if {[getSelection] != {}} {
+	
+	# Get the line numbers touched by the selection
+	set firstind [$itk_component(text) index sel.first]
+	regexp {([0-9]+)\.([0-9]+)} $firstind match startline startch
+	set lastind [$itk_component(text) index sel.last]
+	regexp {([0-9]+)\.([0-9]+)} $lastind match endline endch
+	
+	# In case the fillPrefix contains any characters
+	# used in regular expressions, escape each character.
+	append safeFillPrefix "\(\\" \
+		[join [split $fillPrefix {}] "\\"] "\[ \t\]\*\)"
+	
+	append matchpat "\^\[ \t\]*" $safeFillPrefix "\[ \t\]*"
+	
+	for {set lineno $startline} {$lineno < $endline} {incr lineno} {
+	    if [regexp -indices $matchpat \
+		    [$itk_component(text) get $lineno.0 "$lineno.0 lineend"] \
+		    junkmatch toremove] {
+		$itk_component(text) delete $lineno.[lindex $toremove 0] \
+			"$lineno.[lindex $toremove 1] +1 char"
+	    }
+	}
+	
+	markModified
+	parseRegion sel.first sel.last
+    }
+}
+
+####################################################################
+####################################################################
+####                    protected methods                       ####
+
+#####################################################################
+#### commentRegexp
+# Return the regular expression used to identify line-oriented 
+# comments.  Here, comments are lines that contain the fillPrefix.
+#
+body ::tycho::EditProgram::commentRegexp {} {
+
+    # In case the fillPrefix contains any characters
+    # used in regular expressions, escape each character.
+    append safeFillPrefix "\(\\" \
+	    [join [split $fillPrefix {}] "\\"] "\[ \t\]\*\)"
+
+    return "$safeFillPrefix\.*\$"
 }

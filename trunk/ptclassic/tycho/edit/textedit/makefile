@@ -45,29 +45,17 @@ TCL_SRCS =
   
 ITCL_SRCS = \
 	EditC.itcl \
-	EditCText.itcl \
 	EditCpp.itcl \
-	EditCppText.itcl \
 	EditEsterel.itcl \
-	EditEsterelText.itcl \
 	EditHTML.itcl \
-	EditHTMLText.itcl \
 	EditItcl.itcl \
-	EditItclText.itcl \
 	EditMake.itcl \
-	EditMakeText.itcl \
 	EditProgram.itcl \
-	EditProgramText.itcl \
 	EditPtcl.itcl \
-	EditPtclText.itcl \
 	EditPtlang.itcl \
-	EditPtlangText.itcl \
 	EditTcl.itcl \
-	EditTclText.itcl \
 	Matlab.itcl \
-	MatlabText.itcl \
-	Mathematica.itcl \
-	MathematicaText.itcl
+	Mathematica.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
