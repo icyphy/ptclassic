@@ -55,6 +55,8 @@ class ::tycho::StatusBar {
     # Flag to indicate whether to leave space for a scroll bar
     itk_option define -scrollbarpad scrollbarPad ScrollbarPad 0
 
+    # The font to use for the close button
+    itk_option define -font font Font 8x13
 
     ###################################################################
     ####                         public methods                    ####
@@ -122,7 +124,7 @@ configbody ::tycho::StatusBar::filestatus {
 			-borderwidth 1 \
 			-relief raised
 	    } {
-		keep -background -cursor
+		keep -background -cursor -font
 	    }
 	    pack $itk_component(fileStatus) \
 		    -side left -fill y \
@@ -192,23 +194,6 @@ body ::tycho::StatusBar::constructor {args} {
     }
     pack $itk_component(leftpacking) -side left
 
-#     # Create the file status display
-#     itk_component add fileStatus {
-# 	label $itk_interior.fileStatus -width 3 \
-# 		-borderwidth 1 \
-# 		-relief raised
-#     } {
-# 	keep -background -cursor
-#     }
-#     pack $itk_component(fileStatus) \
-# 	    -side left -fill y \
-# 	    -padx 0 -pady 2 \
-# 	    -side left
-#
-#    # Bind help to the file status display
-#    bind $itk_component(fileStatus) <Enter> [code "%Q helpFileStatus"]
-#    bind $itk_component(fileStatus) <Leave> [code "%Q puts {}"]
-
     # Create the close button
     itk_component add closeButton {
 	button $itk_interior.closeButton -text Close -pady 2
@@ -220,6 +205,7 @@ body ::tycho::StatusBar::constructor {args} {
     pack $itk_component(closeButton) -side right
 
     # Create the status output display
+    # FIXME: Use a preference for the font
     itk_component add mainStatus {
 	label $itk_interior.mainStatus \
 		-anchor w -justify left \
@@ -238,7 +224,6 @@ body ::tycho::StatusBar::constructor {args} {
     eval itk_initialize $args
     eval preference exclude $this $args
 }
-
 
 
 #######################################################################
