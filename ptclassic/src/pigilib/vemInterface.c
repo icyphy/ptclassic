@@ -65,7 +65,7 @@ PrintErr(s)
 char *s;
 {
     char buf[MSG_BUF_MAX];
-
+    if (*s == 0) return;	/* ignore blank message */
     (void) sprintf(buf, "\0062Error: %s\n\0060", s);
     (void) vemMessage(buf, MSG_DISP);
     if (errorWindows) {
