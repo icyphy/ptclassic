@@ -46,6 +46,10 @@ proc ::tycho::font {family {size 12} {style roman} {shift 0}} {
 # is simply an interface to the class proc ::tycho::FontManager::getXFont,
 # and is provided for convenience.
 #
+# <b>Warning</b>: This procedure is available publicly only because
+# not all files have been updated to use *getFont*. Do not
+# call it directly.
+#
 proc ::tycho::xfont {family {size 12} {weight medium} {style r} {shift 0}} {
     ::tycho::FontManager::getXFont $family $size $weight $style $shift
 }
@@ -334,7 +338,7 @@ body ::tycho::FontManager::family {{type {}} {family {}} args} {
 # <li>Try the same thing with the next size up.
 # <li>Try the same thing with the next size down.
 # <li>Give up and return "fixed."
-# <ul>
+# </ol>
 #
 body ::tycho::FontManager::getFont {family {size 12} {style roman} {shift 0}} {
     # Figure out X weight/style specs
@@ -376,17 +380,9 @@ body ::tycho::FontManager::getFont {family {size 12} {style roman} {shift 0}} {
 # and weight are omitted, they default to "14", "medium", and "r". The
 # family is not optional.
 #
-# All arguments are case-insensitive.
-#
-# In addition to the real font families, there is the psuedo-family
-# "Screen," which is mapped to constant-width X screen fonts. Also, the
-# font family can be one of "Serif," "Sans-serif," or "Constant-width,"
-# in which case the preferred font of the specified type is chosen.
-#
-# The algorithm for finding a legal font is the same as the get{} method.
-# This routine is provided for backwards compatibility with the
-# earlier font manager. It has an additional argument: the "shift"
-# argument shifts the font by that many positions (_not_ points).
+# <b>Warning</b>: This procedure is available publicly only because
+# not all files have been updated to use *getFont*. Do not
+# call it directly.
 #
 body ::tycho::FontManager::getXFont {family {size 12} {weight medium} \
 	{style r} {shift 0}} {
