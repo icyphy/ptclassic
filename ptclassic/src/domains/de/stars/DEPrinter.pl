@@ -1,27 +1,26 @@
+ident {
+/**************************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  Soonhoi Ha
+ Date of creation: 11/30/90
+
+ Printer prints out its input, which may be any supported type.
+ There may be multiple inputs: all inputs are printed together on
+ the same line (separated by tab).
+
+**************************************************************************/
+}
 defstar {
 	name { Printer }
 	domain { DE }
-	desc {
-Print the value of each arriving event, together with its time of arrival.
-The "fileName" parameter specifies the file to be written;
-the special names <stdout> and <cout> (specifying the standard output stream),
-and <stderr> and <cerr> specifying the standard error stream, are also supported.
-	}
-	version { $Id$}
-	author { Soonhoi Ha and J. Buck}
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { DE main library }
-	explanation {
-The input may be a particle of any type.  The print() method
-of the particle is used to generate the output.
-If output is directed to a file, flushing does not occur until the
-wrapup method is called.  Before the first data are flushed, the file
-will not even exist.  This is normal.
+	desc {	"Prints out one sample from each input port per line\n"
+		"If 'fileName' is not equal to 'cout' (the default), it\n"
+		"specifies the filename to print to.\n"
 	}
 	inmulti {
 		name { input }
@@ -30,32 +29,24 @@ will not even exist.  This is normal.
 	defstate {
 		name { fileName }
 		type { string }
-		default { "<stdout>" }
-		desc { Filename for output }
+		default { "cout" }
+		desc { "filename for output" }
 	}
-	hinclude { "pt_fstream.h" }
 	protected {
-		pt_ofstream *p_out;
+		UserOutput output;
 	}
-	constructor {
-		p_out = 0;
+	start {
+		output.fileName(fileName);
+		input.reset();
 	}
-	destructor {
-		LOG_DEL; delete p_out;
-	}
-	setup {
-		// in case file was open from previous run w/o wrapup call
-		LOG_DEL; delete p_out;
-		LOG_NEW; p_out = new pt_ofstream(fileName);
-	}
+
 	go {
-		pt_ofstream& output = *p_out;
 		// detect which input has an event and print out the
 		// value and arrivalTime.
-		InDEMPHIter nextp(input);
+		input.reset();
 		int j = input.numberPorts();
 		for(int i=1; i <= j; i++) {
-			InDEPort& p = *nextp++;
+			InDEPort& p = (InDEPort&) input();
 			if (p.dataNew) {
 				output << "(port#" << i << ") " <<
 				"at time " << arrivalTime << " : value > "
@@ -64,3 +55,4 @@ will not even exist.  This is normal.
 		}
 	}
 }
+

@@ -1,17 +1,11 @@
 defstar
 {
     name { RealTimeStar }
-    derivedFrom { RepeatStar }
     domain { DE }
     descriptor { Synchronize the scheduler's clock with a real-time clock. }
     version { $Id$ }
     author { T.M. Parks }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+    copyright { 1991 The Regents of the University of California. }
     location { DE main library }
 
     hinclude { "Clock.h" }
@@ -35,18 +29,20 @@ limitation of liability, and disclaimer of warranty provisions.
 	Clock DERealTimeStar::clock;
     }
 
+    start
+    {
+	clock.reset();
+    }
+
     virtual method
     {
-	name { run }
+	name { fire }
 	access { public }
 	type { int }
 	code
-	{
-	    if (canGetFired())	// reset clock at time 0.0
-		clock.reset();
-	    else		// wait until the real time equals arrivalTime
-		late = !clock.sleepUntil(arrivalTime * (double)timeScale);
-	    return DEStar::run();
+	{   // wait until the real time equals arrivalTime
+	    late = !clock.sleepUntil(arrivalTime * (double)timeScale);
+	    return DEStar::fire();
 	}
     }
 }

@@ -2,77 +2,37 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
 
  Programmer:  Soonhoi Ha
  Date of creation: 5/30/90
 
- Revised 10/2/90 -- DERepeatStar now have its own .h files.
+ Definition of DEStar and DERepeatStar (which fires itself repeatedly).
 
 *******************************************************************/
 #ifndef _DEStar_h
 #define _DEStar_h 1
-#ifdef __GNUG__
-#pragma interface
-#endif
 
 #include "type.h"
-#include "DEPortHole.h"
-#include "Particle.h"
+#include "DEConnect.h"
+#include "Block.h"
+#include "Output.h"
 #include "Star.h"
 
-enum FiringMode {SIMPLE, PHASE};
-class BasePrioQueue;
+class PriorityQueue;
 
 	////////////////////////////////////
 	// class DEStar
 	////////////////////////////////////
 
 class DEStar : public Star {
+
 public:
-	// initialize domain-specific members (+ std initialize)
-	/* virtual */ void initialize();
-
-	// define firing
-	/* virtual */ int run();
-
-	// send output events to the global event queue.
-	void sendOutput();
-
-	// class identification
-	/* virtual */ int isA(const char*) const;
-
-	// my domain
-	/* virtual */ const char* domain() const;
-
-	// prepare a new phase of firing.
-	virtual void startNewPhase();
-
-	// constructor
-	DEStar();
+	// Redefine method setting internal data in the Block
+	// so that various DE-specific initilizations can be performed.
+	// If the parent pointer is not provied, it defaults to NULL
+	Block& setBlock(char* starName, Block* parent = NULL);
 
 	// Store the completion time of the current execution, which in turn
 	// the next free time. But, it may not be the start time of the next
@@ -81,34 +41,37 @@ public:
 	// either event-arriveTime or MAX { availTime, event-arriveTime },
 	// which is user's choice
 	// It will be set by go() method in each  star definition.
-	double completionTime;
-	double arrivalTime;
+	float completionTime;
+	float arrivalTime;
 
 	// Pointer to the event queue of the universe or warmhole
 	// in which the DEstar is. It is set by the Scheduler :
 	// initialize().
-	BasePrioQueue *eventQ;
+	PriorityQueue *eventQ;
 
-        // Flag to indicate whether it is a delay-type star or not.
-        // If a star simulates the latency, it is called delay-type.
-        // Examples : Delay, UniDelay, Server, etc...
-        // The proper place to set this flag will be "constructor".
-        // For wormhole case, it is set in the start() method depending on
-        // whether the inside domain is timed or untimed.
-        int delayType;
+};
+
+	////////////////////////////////////
+	// class DERepeatStar
+	////////////////////////////////////
+
+class DERepeatStar : public DEStar {
+
 protected:
-	FiringMode mode;
+	// specify the feedback links to fire itself.
+	InDEPort feedbackIn;
+	OutDEPort feedbackOut;
 
-	// set mode. If mode = PHASE, create inQue for its input portholes.
-	// PHASE mode:
-	// Get all simultaneous events in its input portholes at one time.
-	// Then, the number of firing will be reduced as many as the number of
-	// simultaneous input events on a porthole.
-	// SIMPLE mode:
-	// A special case of PHASE mode where the size of InQue of input
-	// portholes is one, so unneccesary.
-	void setMode(FiringMode m) { mode = m; }
+public:
+	// define the common start function for this class
+	// completionTime should be setup beforehand.
+	void start() {
+		feedbackOut.put(completionTime) << 0.0;
+		feedbackOut.sendData();
+	}
 
+	// constructor
+	DERepeatStar();
 };
 
 #endif

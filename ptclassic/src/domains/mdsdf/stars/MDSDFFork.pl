@@ -5,9 +5,8 @@ defstar {
   version { $Id$ }
   author { Mike J. Chen }
   copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+1993  The Regents of the University of California.  All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
   }
   location { MDSDF main library }
@@ -42,8 +41,8 @@ explicitly.
   go {
     MPHIter nextp(output);
     MDSDFPortHole* p;
-    PtMatrix* inputData = (PtMatrix*)(input.getInput());
-    PtMatrix* outputData;
+    Matrix* inputData = (Matrix*)(input.getInput());
+    Matrix* outputData;
 
     while ((p = (MDSDFPortHole*)nextp++) != 0) {
       outputData = p->getOutput();

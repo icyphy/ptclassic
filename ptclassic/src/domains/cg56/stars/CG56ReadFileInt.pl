@@ -1,24 +1,16 @@
 defstar {
-	name { ReadFileInt }
+	name { IntReadFile }
 	domain { CG56 }
 	desc { Reads data from file for use by simulator.}
 	version { $Id$ }
 	author { Chih-Tsung Huang }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 signal sources library }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
 	explanation {
-.Ir "Motorola DSP56000 simulator"
-.Ir "simulator, Motorola DSP56000"
-.Id "file input"
-Reads data from file for use by Motorola DSP56000 simulator.
+Reads data from file for use by simulator.
 	}
 	execTime {
-		return 2;
+		return (output.bufSize() >= 1) ? 2 : 0;
 	}
 	output {
 		name {output}
@@ -33,18 +25,23 @@ Reads data from file for use by Motorola DSP56000 simulator.
 	state {
 		name { inVal}
 		type { INT }
-		attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_NOINIT }
+		attributes { A_NONCONSTANT|A_NONSETTABLE }
 		default { "0"}
 	}
-
-	// this codeblock causes the simulator to read from a file into
-	// a memory location each time it is referenced.
+	start {
+		if (output.bufSize() >= 1) {
+			// these attributes allocate memory
+			inVal.setAttributes(A_YMEM|A_NOINIT);
+		}
+	}
+	// this codeblock tells the simulator to log writes to the
+	// outVal state, which works when the buffersize is >= 1.
 
 	codeblock (logIn) {
 input $ref(inVal) $val(fileName).sim -RD
 }
 	initCode {
-                addCode(logIn,"simulatorCmds");
+                genMiscCmd(logIn);
 	}
 
 	// this codeblock produces code
@@ -53,7 +50,7 @@ input $ref(inVal) $val(fileName).sim -RD
 	move	a,$ref(output)
 	}
 	go {
-		addCode(copy);
+		if (output.bufSize() >= 1) gencode(copy);
 	}
 }
 

@@ -1,25 +1,20 @@
 defstar {
 	name { XMgraph }
 	domain { CGC }
-	desc { Generate a multi-signal plot with the pxgraph program. }
-	version { $Id$ }
+	desc { Generate a multi-signal plot with the xgraph program. }
+	version {$Id$}
 	author { Soonhoi Ha }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { CGC main library }
 	explanation {
-The input signal is plotted using the \fIpxgraph\fR program.
+The input signal is plotted using the \fIxgraph\fR program.
 This program must be in your path, or this star will not work!
 The \fItitle\fR parameter specifies a title for the plot.
 The \fIsaveFile\fR parameter optionally specifies a file for
-storing the data in a syntax acceptable to pxgraph.
+storing the data in a syntax acceptable to xgraph.
 A null string prevents any such storage.
-The \fIoptions\fR string is passed directly to the pxgraph program
-as command-line options.  See the manual section describing pxgraph
+The \fIoptions\fR string is passed directly to the xgraph program
+as command-line options.  See the manual section describing xgraph
 for a complete explanation of the options.
 	}
 	inmulti {
@@ -41,8 +36,8 @@ for a complete explanation of the options.
 	defstate {
 		name {options}
 		type {string}
-		default {"-bb -tk =800x400"}
-		desc {Command line options for the pxgraph program.}
+		default {""}
+		desc {Command line options for the xgraph program.}
 	}
 	defstate {
 		name {ignore}
@@ -80,147 +75,66 @@ for a complete explanation of the options.
 		default { 0 }
 		attributes {A_NONCONSTANT|A_NONSETTABLE}
 	}
-	defstate {
-		name {iy}
-		type {int}
-		default { 0 }
-		attributes {A_NONCONSTANT|A_NONSETTABLE}
+	private {
+		int count;
 	}
-	defstate {
-		name {resources}
-		type {stringarray}
-		default { "STDIO" }
-	}
-	defstate {
-		name {count}
-		type {int}
-		default { 0 }
-		desc {Samplecounter}
-		attributes {A_NONSETTABLE|A_NONCONSTANT}
-	}
-	ccinclude { "Target.h" }
-	setup {
+	start {
 		index = xInit;
 		numIn = input.numberPorts();
+		count = 0;
 	}
 
 	initCode {
-                StringList s;
-		s << "    FILE* $starSymbol(fp)[";
-		s << input.numberPorts() << "];";
-                addDeclaration(s);
+                StringList s = "FILE (*$starSymbol(fp))[";
+		s += input.numberPorts();
+		s += "]\n";
+		StringList ss = processCode(CodeBlock((const char*)s));
+                addDeclaration(ss);
                 addInclude("<stdio.h>");
 		for (int i = 0; i < input.numberPorts(); i++) {
 			StringList w = "    if(!($starSymbol(fp)[";
-			w << i <<  "] = fopen(\"";
-			w << target()->name() << "_$starSymbol(temp)";
-			w << i << "\",\"w\")))";
-			addCode(w);
-			addCode(err);
+			w += i;
+			w += "] = fopen(\"$starSymbol(temp)";
+			w += i;
+			w += "\",\"w\")))";
+			gencode(CodeBlock((const char*) w));
+			gencode(err);
+			StringList z = "    if(!$starSymbol(fp)[";
+			z += i;
+			z += "]) exit(1);\n";
+			gencode(CodeBlock((const char*)z));
 		}
 	}
 
 codeblock (err) {
-    {
         fprintf(stderr,"ERROR: cannot open output file for Xgraph star.\n");
-	exit(1);
-    }
 }
 		
-	// escape any double quotes in a string that is to be inserted into
-	// a constant C string in the generated code;
-	// the returned value resides in a static buffer and is whiped out
-	// on each invocation
-	method {
-		// I prefer declaring this as a static function, but there
-		// seems to be no way to achieve this with ptlang.
-		name { sanitizeString }
-		type { "const char*" }
-		arglist { "(StringList s)" }
-		access { protected }
-		code {
-			// quick implementation of a string buffer
-			static class Buffer {
-			   public:
-				Buffer()  { buf = NULL; vsize = psize = 0; }
-			// omitting the destructor since GCC 2.5.8 reports an internal
-			// compiler error
-			//	~Buffer() { if (buf)  free(buf); }
-
-				void initialize() {
-				    if (buf)  free(buf), buf = NULL;
-				    vsize = psize = 0;
-				}
-
-				void append(char c) {
-				    if (vsize >= psize)
-					    buf = (char*) (buf ? realloc(buf, psize += 1024)
-							       : malloc(psize += 1024));
-				    buf[vsize++] = c;
-				}
-
-				operator const char* ()
-				{
-				    if (vsize == 0 || buf[vsize-1])
-					append('\0');
-				    return buf;
-				}
-			   private:
-				// the string buffer
-				char* buf;
-				// virtual/physical buffer size
-				int vsize, psize;
-			} buffer;
-
-			buffer.initialize();
-				
-			for (const char* sp=s; *sp; sp++) {
-			    if (*sp == '\"')
-				    buffer.append('\\');
-			    buffer.append(*sp);
-			}
-			return (const char*) buffer;
-		}
-	}
-
 	go {
-
-@	if (++$ref(count) >= $val(ignore)) {
+		count++;
+		if (count <= int(ignore)) return;
 		for (int i = 1; i <= int(numIn); i++) {
 			ix = i;
-			iy = i - 1;
-@		fprintf($starSymbol(fp)[$val(iy)],"%g %g\n",$ref(index),$ref(input#ix));
+			gencode(CodeBlock(
+"\tfprintf($starSymbol(fp)[i],\"%g %g\\n\",$ref(index),$ref(input#ix));\n"));
 		}
-@	}
-@	$ref(index) += $val(xUnits);
+		gencode(CodeBlock("\t$ref(index) += $val(xUnits);\n"));
+		
 	}
 
 codeblock(closeFile) {
-    for (i = 0; i < $val(numIn); i++) fclose($starSymbol(fp)[i]);
+	for (i = 0; i < $val(numIn); i++)
+	    fclose($starSymbol(fp)[i]);
 }
 
 	wrapup {
-		addCode("    { int i;\n");
+		gencode(CodeBlock("    { int i;\n"));
 
 		// close the files
-		addCode(closeFile);
+		gencode(closeFile);
 
 		StringList cmd;
-		cmd << "( ";
-
-		// save File
-		const char* sf = saveFile;
-		if (sf != NULL && *sf != 0) {
-			for (int i = 0; i<int(numIn); i++) {
-				cmd << "/bin/cat ";
-				cmd << target()->name(); 
-				cmd << "_$starSymbol(temp)" << i << " >> ";
-				cmd << sf << "; /bin/echo \"\" >> " << sf;
-				cmd << "; ";
-			}
-		}
-
-		cmd << "pxgraph ";
+		cmd += "(xgraph ";
 
 		// put title on command line
 
@@ -228,10 +142,10 @@ codeblock(closeFile) {
 
 		if (ttl && *ttl) {
 			if (strchr(ttl,'\'')) {
-				cmd << "-t \"" << ttl << "\" ";
+				cmd += "-t \""; cmd += ttl; cmd += "\" ";
 			}
 			else {
-				cmd << "-t '" << ttl << "' ";
+				cmd += "-t '"; cmd += ttl; cmd += "' ";
 			}
 		}
 
@@ -239,27 +153,42 @@ codeblock(closeFile) {
 
 		// put options on the command line
 		if (opt && *opt) {
-			cmd << opt << " ";
+			cmd += opt;
+			cmd += " ";
 		}
 
 		// put file names
 		for (int i = 0; i < int(numIn); i++) {
-			cmd << target()->name() << "_$starSymbol(temp)";
-			cmd << i << " ";
+			cmd += "$starSymbol(temp) ";
+			cmd += i;
+			cmd += " ";
+		}
+
+		// save File
+		const char* sf = saveFile;
+		if (sf != NULL && *sf != 0) {
+			for (i = 0; i<int(numIn); i++) {
+				cmd += "; /bin/cat ";
+				cmd += "$starSymbol(temp)";
+				cmd += i;
+				cmd += " >> ";
+				cmd += sf;
+				cmd += "; /bin/echo \"\" >> ";
+				cmd += sf;
+			}
 		}
 
 		// remove temporary files
 		for (i = 0; i < int(numIn); i++) {
-			cmd << "; /bin/rm -f " << target()->name();
-			cmd << "_$starSymbol(temp)" << i;
+			cmd += "; /bin/rm -f ";
+			cmd += "$starSymbol(temp)";
+			cmd += i;
 		}
 
-		cmd << ") &";
-		StringList out = "    system(\"";
-		out << sanitizeString(cmd) << "\");\n    }\n";
-		addCode(out);
-	}
-	exectime {
-		return 6 * int(numIn) + 1;
+		cmd += ") &";
+		StringList out = "    system(";
+		out += cmd;
+		out += ");\n";
+		gencode(CodeBlock((const char*)out));
 	}
 }

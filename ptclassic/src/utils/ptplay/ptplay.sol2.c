@@ -36,10 +36,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <fcntl.h>
 #include <sys/ioctl.h>
 
-#if defined(PTSOL2)
-#include <sys/audioio.h>
-#else
+#ifdef PTSUN4
 #include <sun/audioio.h>
+#else
+#include <sys/audioio.h>
 #endif
 
 int main (int argc, char *argv[])

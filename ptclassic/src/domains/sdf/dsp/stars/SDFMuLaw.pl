@@ -1,26 +1,11 @@
 defstar {
-	name {MuLaw}
+	name {Compress}
 	domain {SDF}
-	desc {
-This star encodes its input into an 8 bit representation
-using the non-linear companding Mu law. 
-	}
-	author { Asawaree Kalavade }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	version {$Id$}
-	explanation {
-.Id "Mu law compression"
-.Id "compression, Mu law"
-The conversion formula is
-.EQ
-| v sub 2 | ~=~ log (1+ mu | v sub 1 | ) / log( 1 ~+~ mu ) ~.
-.EN
-	}
+	desc { This star compresses its input as per the Mu Law . 
+		using the conversion formula
+	|v2| = log (1+ mu*|v1|) / log( 1+mu)  }
+	author { Asawaree}
+	copyright { 1991 The Regents of the University of California }
 	input {
 		name{input}
 		type{float}
@@ -34,7 +19,8 @@ The conversion formula is
 		name{ compress}
 		type{ int}
 		default{ 1}
-		desc{ 0 to turn off compression, otherwises compresses with Mu law. }
+		desc{ if you dont want compression, type 0 else by default
+	it will get compressed by the Mu law-code. }
 		}
 
 	defstate{

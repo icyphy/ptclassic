@@ -1,17 +1,25 @@
+ident {
+/**************************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  E. A. Lee
+ Date of creation: 10/9/90
+
+ This star generates a single event at the time origin.
+
+**************************************************************************/
+}
 defstar {
 	name {Impulse}
 	derivedFrom { RepeatStar }
 	domain {DE}
-	desc { Generate a single event at time zero. }
-	version { $Id$}
-	author { Soonhoi Ha }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
+	desc {
+	   "Generates a single event at time zero."
 	}
-	location { DE main library }
 	output {
 		name {output}
 		type {float}
@@ -20,12 +28,13 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {magnitude}
 		type {float}
 		default {"1.0"}
-		desc { The value of sample generated. }
+		desc { "The magnitude of sample generated" }
 	}
 	go {
 	   // Generate the output event
 	   // (Recall that the first event comes out at time 0).
-	   output.put(completionTime) << double(magnitude);
+	   // (The double cast is because of a gnu compiler bug)
+	   output.put(completionTime) << float(double(magnitude));
 
 	   // and don't schedule any further firings.
 	}

@@ -1,16 +1,16 @@
 defstar {
 	name { FloatToFix }
 	domain { CGC }
-	derivedFrom { Fix }
+	derivedFrom { CGCFix }
 	version { $Id$ }
 	author { J.Weiss }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC main library }
+	location { CGC conversion palette }
 	desc { Convert a floating-point input to an fixed-point output. }
 	explanation {
 This star converts a float value to a fix value with the specified precision.

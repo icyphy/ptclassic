@@ -4,8 +4,8 @@ defstar {
 	derivedfrom {Base}
 	desc {
 Bridge inputs to outputs and then self-destruct.
-This star deinterleaves a bus, producing two output busses of equal width.
-The input bus must have even width.
+This star deinterleaves a bus, producing two output busses
+of equal width.  The input bus must have even width.
 The even numbered input signals are connected to the
 first output bus, while the odd numbered input signals
 are connected to the second output bus.
@@ -13,7 +13,7 @@ are connected to the second output bus.
 	version {$Id$}
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -50,7 +50,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    if ((po = (*nexto)++) == 0) {
 	      // Out of outputs, flag error
 	      Error::abortRun(*this,
-                "Not enough outputs for the given number of inputs");
+                "Not enough outputs for the given number of intpus");
 	      return;
 	    }
 	    if((source = pi->far()) == 0 ||

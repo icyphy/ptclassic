@@ -2,30 +2,8 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+ Copyright (c) 1991 The Regents of the University of California.
+                       All Rights Reserved.
 
  Programmer:  Soonhoi Ha, based on S.  Bhattacharyya's code.
  
@@ -48,61 +26,70 @@ class DoubleLink
 	friend class DoubleLinkList;
 	friend class DoubleLinkIter;
 
-public:
-	DoubleLink(Pointer a, DoubleLink* n, DoubleLink* p): 
-		next(n), prev(p), e(a) {}
-	DoubleLink(Pointer a): next(0), prev(0), e(a) {}
-
-	inline Pointer content() { return e; }
-
-	// virtual destructor
-	virtual ~DoubleLink();
-
-	void unlinkMe();
-
 protected:
 	DoubleLink *next;    // next node in the DL list
 	DoubleLink *prev;    // previous node in the list
 	Pointer e;
+
+public:
+	DoubleLink(Pointer a, DoubleLink* n, DoubleLink* p): 
+		e(a), next(n), prev(p) {}
+	DoubleLink(Pointer a): e(a), next(0), prev(0) {}
+
+	Pointer content() { return e; }
+
+	// virtual destructor
+	virtual ~DoubleLink() {}
+
+	void unlinkMe();
+	void removeMe() { unlinkMe(); INC_LOG_DEL; delete this; }
 };
 
 class DoubleLinkList
 {
         friend class DoubleLinkIter;
+
+        int size;
+
+	// add the first node into the list
+	void firstNode(DoubleLink*);
+
+protected: 
+        DoubleLink *head;
+        DoubleLink *tail;
+       
 public:
 	// virtual destructor
-	virtual ~DoubleLinkList();
+	virtual ~DoubleLinkList() { initialize(); }
+
+	// constructor
+	DoubleLinkList() : head(0), tail(0), size(0) {}
+	DoubleLinkList(Pointer* e) { firstNode(createLink(e)); }
 
 	// create link
-	inline DoubleLink* createLink(Pointer e) {
+	DoubleLink* createLink(Pointer e) {
 		INC_LOG_NEW; return new DoubleLink(e, 0, 0);
 	}
 
-	// constructor
-	DoubleLinkList() : myHead(0), myTail(0), mySize(0) {}
-	DoubleLinkList(Pointer* e) { firstNode(createLink(e)); }
-
         // Insert at the head of the list
         void insertLink(DoubleLink *x);  
-	inline void insert(Pointer e) { insertLink(createLink(e)); }
+	void insert(Pointer e) { insertLink(createLink(e)); }
 
         // Insert at the end of the list
         void appendLink(DoubleLink *x);
-	inline void append(Pointer e) { appendLink(createLink(e)); }
+	void append(Pointer e) { appendLink(createLink(e)); }
 
         // insert y immediately ahead of x
 	void insertAhead(DoubleLink *y, DoubleLink *x);
         	
-        // insert y immediately behind x
+        // insert y immediately behind of x
 	void insertBehind(DoubleLink *y, DoubleLink *x);	
 
         // Unlink a link from the list & return ptr to it.
-	// Alert! make sure that x is in the list before calling this method!
 	DoubleLink* unlink(DoubleLink *x);	
 
         // Remove a link from the list.
-	// Alert! make sure that x is in the list before calling this method!
-	inline void removeLink(DoubleLink *x) { unlink(x);	
+	void removeLink(DoubleLink *x) { unlink(x);	
 					 INC_LOG_DEL; delete x; }
 	void remove(Pointer e);
         
@@ -117,35 +104,25 @@ public:
         void reset(); 
 
         // get the number of elements in the list
-        inline int size() { return mySize;}
+        int mySize() { return size;}
 
         // get a pointer to the head of the list
-        inline DoubleLink *head() {return myHead;}
+        DoubleLink *myHead() {return head;}
         
         // get a pointer to the tail of the list
-        inline DoubleLink *tail() {return myTail;}
+        DoubleLink *myTail() {return tail;}
 
         // pop the head node
-        inline DoubleLink *getHeadLink() 
-		{ if (mySize==0) return 0;
-           	  else return unlink(myHead); }
+        DoubleLink *getHeadLink() 
+		{ if (size==0) return 0;
+           	  else return unlink(head); }
 	Pointer takeFromFront();
         
         // get the tail node & unlink it from the list
-        inline DoubleLink *getTailLink() 
-		{ if (mySize==0) return 0;
-		  else return unlink(myTail); }
+        DoubleLink *getTailLink() 
+		{ if (size==0) return 0;
+		  else return unlink(tail); }
 	Pointer takeFromBack();
-
-protected: 
-        DoubleLink *myHead;
-        DoubleLink *myTail;
-       
-private:
-        int mySize;
-
-	// add the first node into the list
-	void firstNode(DoubleLink*);
 };
 
 
@@ -157,16 +134,16 @@ private:
 class DoubleLinkIter 
 {
 public:
-	DoubleLinkIter(const DoubleLinkList& l) : list(&l), ref(l.myHead) {}
-	inline void reset() { ref = list->myHead;}
-        inline void reset(DoubleLink *start) {ref=start;}
+	DoubleLinkIter(const DoubleLinkList& l) : list(&l), ref(l.head) {}
+	void reset() { ref = list->head;}
+        void reset(DoubleLink *start) {ref=start;}
 	DoubleLink* nextLink();
 	Pointer	next(); 
-	inline Pointer operator++ (POSTFIX_OP) { return next();}
+	Pointer operator++ () { return next();}
 
 	// attach the DoubleLinkIter to a different object
-	inline void reconnect(const DoubleLinkList& l) {
-		list = &l; ref = l.myHead;
+	void reconnect(const DoubleLinkList& l) {
+		list = &l; ref = l.head;
 	}
 private:
 	const DoubleLinkList* list;

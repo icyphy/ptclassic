@@ -1,21 +1,14 @@
 defstar {
 	name { Log }
 	domain { CG56 }
-	desc { Base two logarithm }
+	desc { Logorithm }
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 nonlinear functions library }
+	copyright { 1992s The Regents of the University of California }
+	location { CG56 demo library }
         explanation {
 This star computes the base two logarithm of its input divided by 32,
 using polynomial approximation with eight bits of accuracy.
-The coefficients of the polynomial are given by \fId\fR.
-.Id "logarithm"
         }
         input {
                 name { input }
@@ -26,16 +19,27 @@ The coefficients of the polynomial are given by \fId\fR.
 		type { fix }
 	}
         state {
-                name { d }
-                type { FIXARRAY }
-                default { "0.9981958 -0.3372223 -0.6626105" }
-                attributes { A_ROM|A_YMEM|A_NONSETTABLE }
+                name { d1 }
+                type { fix }
+                default { 0.9981958 }
+                attributes { A_ROM|A_YMEM|A_CONSEC }
         }
-
+        state {
+                name { d2 }
+                type { fix }
+                default { "-0.3372223" }
+                attributes { A_ROM|A_YMEM|A_CONSEC }
+        }
+        state {
+                name { d3 }
+                type { fix }
+                default { "-0.6626105" }
+                attributes { A_ROM|A_YMEM }
+        }
 	codeblock(std) {
         move            m7,r7
         move            $ref(input),a
-        move            #>$addr(d),r1
+        move            #$addr(d1),r1
         rep   #23
         norm  r7,a
         move            a,x0
@@ -54,7 +58,7 @@ The coefficients of the polynomial are given by \fId\fR.
 	} 
 
         go {
-        addCode(std);
+        gencode(std);
 	}
 	execTime { 
 		return 49;

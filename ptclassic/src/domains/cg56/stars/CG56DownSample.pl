@@ -9,20 +9,18 @@ default.
 	}
 	version { $Id$ }
 	author { J. Pino, ported from Gabriel }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
+	explanation {
+
 	}
-	location { CG56 control library }
 	input {
 		name {input}
-		type {ANYTYPE}
+		type {FIX}
 	}
 	output {
 		name {output}
-		type {=input}
+		type {FIX}
 	}
 	state {
 		name {factor}
@@ -32,23 +30,24 @@ limitation of liability, and disclaimer of warranty provisions.
 		attributes { A_SETTABLE }
 	}
 	state {
+	// Not Supported Yet
 		name {phase}
 		type {int}
 		default {0}
 		desc { Downsample phase. }
 		attributes { A_SETTABLE }
 	}
- setup {
+ start {
 		input.setSDFParams(int(factor),int(factor)-1);
 		if (int(phase) >= int(factor))
 			Error::abortRun(*this, ": phase must be < factor");
 	}
 	codeblock (sendsample) {
-	move	$ref2(input,phase),a
-	move	a,$ref(output)
+	move	$ref(input),x0
+	move	x0,$ref(output)
 	}
 	go {
-		addCode(sendsample);
+		gencode(sendsample);
 	}
 	execTime {
 		return 2;

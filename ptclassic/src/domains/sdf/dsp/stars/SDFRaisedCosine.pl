@@ -3,7 +3,7 @@ defstar {
 	domain { SDF }
 	derivedFrom { FIR }
 	desc {
-An FIR filter with a magnitude frequency response that is shaped
+An FIR filter with a magnitude frequency response shaped
 like the standard raised cosine or square-root raised cosine
 used in digital communications.  By default, the star upsamples
 by a factor of 16, so 16 outputs will be produced for each input
@@ -12,9 +12,9 @@ unless the "interpolation" parameter is changed.
 	version { $Id$ }
 	author { J. T. Buck and E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF dsp library }
@@ -34,7 +34,7 @@ left ( { cos ( alpha pi n / T ) } over { 1 ~-~ (2 alpha n / T) sup 2 } right )
 .EN
 where $alpha$ is \fIexcessBW\fR and $T$ is the \fIsymbol_interval\fR.
 However, this pulse is centered at zero, and we can only implement causal
-filters in the SDF domain in Ptolemy.  Hence, the impulse response is
+filters in the SDF domain in Ptolemy.  Hence, the inpulse response is
 actually
 .EQ
 g(n) ~=~ h(n - M)
@@ -42,42 +42,42 @@ g(n) ~=~ h(n - M)
 where $M ~=~ length/2$ if $length$ is even, and $M ~=~ (length+1)/2$ if
 $length$ is odd.
 The impulse response is simply truncated outside this range, so
-the impulse response will generally not be symmetric if $length$ is even
-because it will have one more sample to the left than to the right of center.
+note that if $length$ is even the impulse response will not be symmetric.
+It will have one more sample to the left than to the right of center.
 Unless this extra sample is zero, the filter will not have linear phase
 if $length$ is even.
 .pp
 For some applications, you may wish to apply a window function to
 this impulse response.  To do this, feed an impulse into this star,
 multiply the output by the output of the \fBWindow\fR star, and
-store the resulting windowed impulse response in a file. Then, use
+store the resulting windowed impulse response in a file. Then use
 the \fBFIR\fR star to implement the filter.
 .pp
 For the ordinary raised cosine response, the
-distance (in number of samples) from the center
-to the first zero crossing is given by \fIsymbol_interval\fP.
+distance (in number of samples) from center
+to first zero crossing is given by \fIsymbol_interval\fP.
 For the square-root raised cosine response, a cascade of two identical
-square-root raised cosine filters would be equivalent to a single
+square-root raised cosine filters will be equivalent to a single
 ordinary raised cosine filter.
 .pp
 The impulse response of the square-root raised cosine pulse is given by
 .EQ
 h(n) ~=~ {4 alpha} over {pi sqrt T} cdot
 { cos ( (1 ~+~ alpha ) pi n / T ) ~+~
-{ T sin ((1 ~-~ alpha ) pi n/T) } over {4 alpha n/T}} over
-{1 ~-~ (4 alpha n/T) sup 2 } ~.
+{ T sin ((1 ~-~ alpha ) pi t/T) } over {4 alpha t}} over
+{1 ~-~ (4 alpha t/T) sup 2 } ~.
 .EN
-This impulse response convolved with itself will, in principle, be equal
-to a raised cosine pulse.  However, because of the abrupt rectangular
-windowing of the pulse, with low excess bandwidth, this ideal is not
-closely approximated except for very long filters.
+This impulse response convolved with itself will, in principle, equal a raised
+cosine pulse.  However, due to the abrupt rectangular windowing of the pulse,
+with low excess bandwidth, this ideal is not closely approximated except
+for very long filters.
 .pp
 The output sample rate is \fIupsample\fP times the input.
-This is set by default to 16 because in digital communication systems
-this pulse is used for the line coding of symbols, and upsampling is necessary.
-Typically, the value of \fIupsample\fP is the same as that of
+This is set by default to 16 becuase in digital communication systems
+this pulse is used for line coding of symbols, and upsampling is necessary.
+Typically the value of \fIupsample\fP is the same as that of
 \fIsymbol_interval\fR.
-The star is derived from the FIR star.
+The star is implemented by deriving from the FIR star.
 .Id "raised cosine pulse"
 .Id "square-root raised cosine pulse"
 .Id "Nyquist pulse"
@@ -88,7 +88,7 @@ E. A. Lee and D. G. Messerchmitt,
 .ip [2]
 I. Korn, \fIDigital Communications\fR, Van Nostrand Reinhold, New York, 1985.
 	}
-	seealso {FIR, Window, pulses}
+	seealso {FIR, Window, raisedCosine}
 	code {
 		// The code is written with integer arguments so that it
 		// can reliably detect the 0/0 condition, avoiding
@@ -156,6 +156,9 @@ I. Korn, \fIDigital Communications\fR, Van Nostrand Reinhold, New York, 1985.
 		taps.clearAttributes(A_CONSTANT|A_SETTABLE);
 		// fix interpolation default
 		interpolation.setInitValue("16");
+		// make decimation parameters invisible
+		decimation.clearAttributes(A_SETTABLE);
+		decimationPhase.clearAttributes(A_SETTABLE);
 	}
 	setup {
 		if(double(excessBW) < 0.0)

@@ -2,30 +2,8 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
 
  Programmer:  Shuvra Bhattacharyya, Soonhoi Ha (4/92)
  Date of creation: 5/9/91
@@ -54,10 +32,21 @@ class LSCluster;
 //
 
 class LSNode : public EGNode {
+private:
+	// flag for cluster formation -- this marks whether or not this
+	// node is in the current cluster being considered
+	unsigned active_flag : 1;
+
+	// Indicates whether or not this node has been fired.
+	unsigned fired_flag : 1;
+
+	// index into connection matrix
+	int rm_index;
+
 public:
 
 	// constructor with master and invocation number arguments
-	LSNode(DataFlowStar* master, int no) : EGNode(master,no) {
+	LSNode(SDFStar* master, int no) : EGNode(master,no) {
 		fired_flag = 0; }
 
 	// set, get, and reset the active flag
@@ -81,10 +70,10 @@ public:
 	void setRMIndex(int x) {rm_index=x;}
 
 	// return FALSE if it is an isolated (unconnected) node.
-	int connected() { return ancestors.size() + descendants.size(); }
+	int connected() { return ancestors.mySize() + descendants.mySize(); }
 
 	// get this node's connection-matrix index
-	int RMIndex() {return rm_index;}
+	int myRMIndex() {return rm_index;}
 
 	// fire it.
 	void fireMe() {fired_flag = 1; }
@@ -97,24 +86,14 @@ public:
 
 	// redefine
 	LSNode* getNextInvoc() { return (LSNode*) EGNode :: getNextInvoc(); }
-
-private:
-	// flag for cluster formation -- this marks whether or not this
-	// node is in the current cluster being considered
-	unsigned active_flag : 1;
-
-	// Indicates whether or not this node has been fired.
-	unsigned fired_flag : 1;
-
-	// index into connection matrix
-	int rm_index;
 };
 
 class LSNodeLink : public EGNodeLink
 {
 public:
-	LSNode* node()	{ return (LSNode*) e; }
+	LSNode* myNode()	{ return (LSNode*) e; }
 
+	// constructor
 	LSNodeLink(LSNode* e) : EGNodeLink(e) {}
 };
 
@@ -138,7 +117,7 @@ public:
 	LSNodeLink* nextLink()
 		{ return (LSNodeLink*) DoubleLinkIter::nextLink(); }
 	LSNode* next() { return (LSNode*) DoubleLinkIter::next(); }
-	LSNode* operator++(POSTFIX_OP) { return next(); }
+	LSNode* operator++() { return next(); }
 };
 
 

@@ -1,32 +1,10 @@
-static const char file_id[] = "DCCluster.cc";
+static const char file_id[] = "Cluster.cc";
 /*****************************************************************
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+Copyright (c) 1991 The Regents of the University of California.
+			All Rights Reserved.
 
 Programmer: Soonhoi Ha based on G.C. Sih's code.
 Date of last revision: 5/92 
@@ -36,10 +14,10 @@ Date of last revision: 5/92
 #pragma implementation
 #endif
 
-#include "DCCluster.h"
+#include "Cluster.h"
 
 // Constructor for elementary cluster
-DCCluster::DCCluster(DCNodeList* nds) : name("") {
+Cluster::Cluster(DCNodeList* nds) : name("") {
 
 	// InOutArcs are set in DeclustScheduler
 	InOutArcs.initialize();
@@ -56,8 +34,8 @@ DCCluster::DCCluster(DCNodeList* nds) : name("") {
 	while ((n = iter++) != 0) {
 		total += n->getExTime();
 
-		// Set the elemDCCluster data member of each node
-  		n->elemDCCluster = this;
+		// Set the elemCluster data member of each node
+  		n->elemCluster = this;
 	}
 	nodes = nds;
 	ExecTime = total;
@@ -65,7 +43,7 @@ DCCluster::DCCluster(DCNodeList* nds) : name("") {
 
 
 // Constructor for higher level cluster which is union of two sub-clusters
-DCCluster::DCCluster(DCCluster *clus1, DCCluster *clus2) : name("") {
+Cluster::Cluster(Cluster *clus1, Cluster *clus2) : name("") {
 	intact = 1;	// Initialize to unbroken cluster
 	score = 0;
 	nodes = 0;
@@ -80,7 +58,7 @@ DCCluster::DCCluster(DCCluster *clus1, DCCluster *clus2) : name("") {
 }
 
 // destructor
-DCCluster :: ~DCCluster() {
+Cluster :: ~Cluster() {
 	if (nodes) {
 		// delete nodes
 		LOG_DEL; delete nodes;
@@ -92,23 +70,23 @@ DCCluster :: ~DCCluster() {
 				////////////////
 				///  addArc  ///
 				////////////////
-void DCCluster :: addArc(DCCluster* adj, int numSample) {
+void Cluster :: addArc(Cluster* adj, int numSample) {
 
-	DCClustArc* carc;
+	ClustArc* carc;
 
 	if ((carc = InOutArcs.contain(adj))) {
 		carc->addSamples(numSample);
 	} else {
-		LOG_NEW; carc = new DCClustArc(adj, numSample);
-		InOutArcs.prepend(carc);
+		LOG_NEW; carc = new ClustArc(adj, numSample);
+		InOutArcs.insert(carc);
 	}
 }
 
 				////////////////////
-				///  setDCCluster  ///
+				///  setCluster  ///
 				////////////////////
 // Sets the node cluster property to point to the cluster
-void DCCluster::setDCCluster(DCCluster* par) {
+void Cluster::setCluster(Cluster* par) {
 	if (par == 0) par = this;
 	if (nodes) {
         	DCNodeListIter iter(*nodes);
@@ -117,8 +95,8 @@ void DCCluster::setDCCluster(DCCluster* par) {
                 	n->cluster = par;
         	}
 	} else {
-		component1->setDCCluster(par);
-		component2->setDCCluster(par);
+		component1->setCluster(par);
+		component2->setCluster(par);
 	}
 }
 
@@ -128,24 +106,24 @@ void DCCluster::setDCCluster(DCCluster* par) {
 // Returns the best cluster to combine it with, looking at communication cost.
 // It checks InOutArcs to find which cluster passes the most samples and 
 // breaks ties by returning the smallest ExecTime cluster.
-DCCluster *DCCluster::findCombiner() {
+Cluster *Cluster::findCombiner() {
 
-	DCClustArc *bestArc = 0;
+	ClustArc *bestArc = 0;
 	int mostSamps = 0, smallestExec = 999999;
-	DCClustArcListIter iter(InOutArcs);
-	DCClustArc *carc;
+	ClustArcListIter iter(InOutArcs);
+	ClustArc *carc;
 
 	while ((carc = iter++) != 0) {
-		DCCluster* DCClust = carc->getNeighbor();   // The cluster
+		Cluster* Clust = carc->getNeighbor();   // The cluster
 
 		if (carc->getSamples() > mostSamps) {
 			mostSamps = carc->getSamples();
 			bestArc = carc;
-			smallestExec = DCClust->getExecTime();
+			smallestExec = Clust->getExecTime();
 		} else if ((carc->getSamples() == mostSamps) &&
-			(DCClust->getExecTime() < smallestExec)) {
+			(Clust->getExecTime() < smallestExec)) {
 			bestArc = carc;
-			smallestExec = DCClust->getExecTime();
+			smallestExec = Clust->getExecTime();
 		}
 	}
 
@@ -158,16 +136,16 @@ DCCluster *DCCluster::findCombiner() {
 				/////////////////
 				///  fixArcs  ///
 				/////////////////
-void DCCluster::fixArcs(DCCluster *c1, DCCluster *c2) {
+void Cluster::fixArcs(Cluster *c1, Cluster *c2) {
 
-	DCClustArcListIter iter(c1->InOutArcs);
-	DCClustArc *arc;
-	DCCluster *cl;
+	ClustArcListIter iter(c1->InOutArcs);
+	ClustArc *arc;
+	Cluster *cl;
 
 	while ((arc = iter++) != 0) {
 		if ((cl = arc->getNeighbor()) != c2) {
 			if (!InOutArcs.contain(c1))
-				InOutArcs.put(arc);
+				InOutArcs.append(arc);
 
 			// Change other guys to show this cluster
 			cl->InOutArcs.changeArc(c1, this);
@@ -179,7 +157,7 @@ void DCCluster::fixArcs(DCCluster *c1, DCCluster *c2) {
 				///  assignP  ///
 				/////////////////
 // Assigns every node in the cluster to the given processor
-void DCCluster::assignP(int procNum) {
+void Cluster::assignP(int procNum) {
 	// Assign the cluster to this processor
 	Proc = procNum;
 
@@ -187,7 +165,7 @@ void DCCluster::assignP(int procNum) {
 		DCNodeListIter iter(*nodes);
 		DCNode *n;
 		while ((n = iter++) != 0) {
-			n->setProcId(procNum);
+			n->assignProc(procNum);
 		}
 	} else {
 		component1->assignP(procNum);
@@ -198,7 +176,7 @@ void DCCluster::assignP(int procNum) {
 				///////////////
 				///  print  ///
 				///////////////
-StringList DCCluster::print() {
+StringList Cluster::print() {
 	StringList out;
 	out += "name:  ";
 	out += name;

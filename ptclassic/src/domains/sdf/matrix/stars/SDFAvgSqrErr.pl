@@ -2,16 +2,11 @@ defstar {
   name { AvgSqrErr }
   domain { SDF }
   desc { 
-Find the average squared error between two input sequences of matrices. 
+Find the average squared error between two input sequences of matrix. 
   }
   version { $Id$ }
   author { Bilung Lee }
-  copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-  }
+  copyright { 1993 The Regents of the University of California }
   location  { SDF matrix library }
   input {
     name { input1 }
@@ -50,65 +45,50 @@ limitation of liability, and disclaimer of warranty provisions.
   }
   go {
     Envelope inpkt1;
+    FloatMatrix& matrix1 = *(new FloatMatrix);
     Envelope inpkt2;
-    FloatMatrix& tempmatrix = *(new FloatMatrix(int(numRows), int(numCols)));
-    double sqrErr = 0.0;
-    int maxi = int(numRows) * int(numCols);
-    for (int i = 0; i < int(numInputs); i++) {
+    FloatMatrix& matrix2 = *(new FloatMatrix);
+
+    FloatMatrix& result  = *(new FloatMatrix(int(numRows),int(numCols)));
+    double sqrErr = 0;
+    for (int i=0; i<int(numInputs); i++) {
       // get input
       (input1%(int(numInputs)-1-i)).getMessage(inpkt1);
+      matrix1 = *(const FloatMatrix *)inpkt1.myData();
       (input2%(int(numInputs)-1-i)).getMessage(inpkt2);
- 
+      matrix2 = *(const FloatMatrix *)inpkt2.myData();
+
       // check for "null" matrix inputs, caused by delays
-      // if input1 is empty, treat it as a zero matrix
-      const FloatMatrix& matrix1 = *(const FloatMatrix *)inpkt1.myData();
-      int empty1 = inpkt1.empty();
-      if ( ! empty1 ) {
-        if ((matrix1.numRows() != int(numRows)) ||
-            (matrix1.numCols() != int(numCols))) {
-	  delete &tempmatrix;
-          Error::abortRun(*this,
-		  "Input1 matrix doesn't match the specified dimension");
-          return;
-        }
+      if(inpkt1.empty()) {
+        // input1 empty, just think it as a zero matrix
+	result  = 0;
+        matrix1 = result;
+      } 
+      if (inpkt2.empty()) {
+        // input2 empty, just think it as a zero matrix
+	result  = 0;
+        matrix2 = result;
+      }  
+
+      // valid input matrix
+      if((matrix1.numRows() != int(numRows)) ||
+         (matrix1.numCols() != int(numCols))) {
+        Error::abortRun(*this,"Input1 matrix does't match the specified ",
+                              "dimension");
+        return;
+      } else if ((matrix2.numRows() != int(numRows)) ||
+                 (matrix2.numCols() != int(numCols))) {
+        Error::abortRun(*this,"Input2 matrix does't match the specified ",
+                              "dimension");
+        return;
       }
 
-      // if input2 is empty, treat it as a zero matrix
-      const FloatMatrix& matrix2 = *(const FloatMatrix *)inpkt2.myData();
-      int empty2 = inpkt2.empty();
-      if ( ! empty2 ) {
-        if ((matrix2.numRows() != int(numRows)) ||
-            (matrix2.numCols() != int(numCols))) {
-	  delete &tempmatrix;
-          Error::abortRun(*this,
-			"Input2 matrix doesn't match the specified dimension");
-          return;
-        }
-      }
-
-      // If at least one matrix is not empty, then adjust squared error
-      if ( !empty1 || !empty2 ) {
-        if ( empty1 && !empty2 ) {
-          for (int i = 0; i < maxi; i++) {
-	    sqrErr += matrix2.entry(i) * matrix2.entry(i);
-	  }
-        }
-        else if ( !empty1 && empty2 ) {
-          for (int i=0; i < maxi; i++) {
-	    sqrErr += matrix1.entry(i) * matrix1.entry(i);
-	  }
-        }
-        else {
-          tempmatrix = matrix1;
-	  tempmatrix -= matrix2;
-          for (int i = 0; i < maxi; i++) {
-	    sqrErr += tempmatrix.entry(i) * tempmatrix.entry(i);
-	  }
-        }
-      }
-    }
-    delete &tempmatrix;
+      result = matrix1 - matrix2;
+      for (int i=0; i<int(numRows)*int(numCols); i++) 
+	sqrErr += result.entry(i)*result.entry(i);
+    }  // end of for
     sqrErr /= int(numInputs);
     output%0 << sqrErr;
   }    // end of go method
 }
+

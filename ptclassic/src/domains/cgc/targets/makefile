@@ -1,19 +1,17 @@
-# Makefile for cgc/targets
-# Copyright (c) %Q% The Regents of the University of California.
+# Makefile for sdf/dsp
+# Copyright (c) 1990 The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
-# $Id$
+# @(#)makefile	1.3 11/22/93
 #
-# Important!  Do not run this makefile while in 
-# $PTOLEMY/src/domains/cgc/targets.
-# Instead run in from $PTOLEMY/obj.$PTARCH/domains/cgc/targets
-# (through the symbolic link) --
-# that way a separate directory containing, say, Sun-3 and Sun-4
+# Important!  Do not run this makefile while in ~ptolemy/src/domains/cg.
+# Instead run in from ~ptolemy/obj.$ARCH/domains/cg (through the symbolic
+# link) -- that way a separate directory containing, say, Sun-3 and Sun-4
 # objects can be maintained.
 
 include ../../../../mk/subdomain.mk
 
-DIRS = main cm5 NOWam
+DIRS = stars
 
-ME = cgc/targets
+ME = sdf/dsp
 

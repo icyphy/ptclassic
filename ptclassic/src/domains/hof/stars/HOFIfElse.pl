@@ -1,11 +1,11 @@
 defstar {
-	name {IfElse}
+	name {IfThenElse}
 	domain {HOF}
 	derivedFrom {Map}
 	version { $Id$ }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -13,34 +13,30 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { HOF main library }
 	desc {
 This star is just like Map, except that it creates one of two named blocks
-to replace itself, instead of just one.
-If the "condition" parameter is TRUE, then the "true_block" is used.
-Otherwise, the "false_block" is used.
-This can be used to parameterize the use of a given block, or, more
-interestingly, for statically evaluated recursion.
+to replace itself, instead of just one.  If the "condition" parameter is TRUE,
+then the "true_block" is used.  Otherwise, the "false_block" is used.
+This can be used to parameterize the use of a given block, or, more interestingly,
+for statically evaluated recursion.
 	}
 	explanation {
-This star is derived from the
-.c Map
-star.
+This star is derived from
+.c Map .
 It is also a higher-order function mechanism.
 .IE "higher-order functions"
 See the
 .c Map
-documentation for background information.
-The only difference is that instead of one named replacement block,
-there are two.
+documentation for background information. The only difference is
+that instead of one named replacement block, there are two.
 The choice between them is determined by the \fIcondition\fR parameter.
 .pp
 An application for this block is in recursion.
 A galaxy \fIX\fR can be created that has somewhere within it an
-.c IfElse
+.c IfThenElse
 block with \fIX\fR given as the replacement block.
 To ensure that the recursion terminates, the parameter \fIuse_alt\fR
 is computed from galaxy parameters, for example by subtracting one
-from an initial integer value.
-When this parameter reaches zero, an alternative block is used instead
-of \fIX\fR, terminating the recursion.
+from an initial integer value.  When this parameter reaches zero,
+an alternative block is used instead of \fIX\fR, terminating the recursion.
 	}
 	constructor {
 	    // Change the datatype of the output to be derived from the input

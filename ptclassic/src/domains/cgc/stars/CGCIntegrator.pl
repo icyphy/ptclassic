@@ -22,12 +22,7 @@ is the previous output.
 	}
 	version { $Id$ }
 	author { E. A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1992 The Regents of the University of California }
 	location { CGC main library }
 	explanation {
 .Id "filter, integrator"
@@ -78,7 +73,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	protected {
 		double spread;
 	}
-	setup {
+	start {
 		spread = double(top) - double(bottom);
 	}
 	codeblock (declarations) {
@@ -125,13 +120,5 @@ limitation of liability, and disclaimer of warranty provisions.
 		else
 		    addCode(limitWithoutSat);
 	    addCode(write);
-	}
-	exectime {
-		int x = 0;
-		if (spread > 0.0) {
-			if (int(saturate)) x = 3;
-			else x = 5;
-		}
-		return 3 + x + 2;
 	}
 }

@@ -2,53 +2,23 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
 
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
-
- Programmer:  J. Buck, E. A. Lee
+ Programmer:  E. A. Lee
 
 This file contains definitions of CG-specific PortHole classes.
 
 ******************************************************************/
-#ifndef _CGPortHole_h
-#define _CGPortHole_h 1
-
-#ifdef __GNUG__
-#pragma interface
-#endif
-
-#include "DynDFPortHole.h"
-
-class CGGeodesic;
+#ifndef _CGConnect_h
+#define _CGConnect_h 1
+#include "Connect.h"
+#include "SDFConnect.h"
 
 /*****************************************************************
 CG: Code generation
 
-These PortHoles are much like SDF PortHoles; both have the common
-baseclass DFPortHole.
-
+These PortHoles are much like SDF PortHoles, from which they are derived.
 ****************************************************************/
 
         //////////////////////////////////////////
@@ -56,91 +26,18 @@ baseclass DFPortHole.
         //////////////////////////////////////////
 
 // Contains all the special features required for
-//   synchronous dataflow and boolean dataflow (CG)
+//   synchronous dataflow (CG)
 
-class CGPortHole : public DynDFPortHole {
-	friend class CGGeodesic;
+class CGPortHole : public SDFPortHole
+{
+	char* regClass;	// identifies the register class of the portHole
 public:
-	CGPortHole();
-	~CGPortHole();
+	void setRegClass(char* className) {regClass = className; }
 
-	// Services of DFPortHole and BDFPortHole that are used often:
+	// Services of SDFPortHole that are used often:
 	// setPort(char* portName, Block* parent, dataType type,
 	//	unsigned numTokens, unsigned delay)
 	// setSDFParams(unsigned numTokens, unsigned delay);
-	// setBDFParams(...)
-
-	// Return the geodesic connected to this PortHole.
-        // This is typesafe because allocateGeodesic
-        // makes myGeodesic of this type.
-        CGGeodesic& cgGeo() const { return *(CGGeodesic*)myGeodesic;}
-
-	// switch myGeodesic pointer to the argument Geodesic
-	// If the geodesic is switched, no longer need to allocate the
-	// memory for this port -> that means the argument geodesic should
-	// be allocated beforehand.
-	// This method is virtual since we may need to save the original
-	// geodesic in other domains.
-	virtual void switchGeo(Geodesic* g) { switchFlag = TRUE;
-				      myGeodesic = g; }
-	virtual void revertGeo(Geodesic* g) { switchFlag = FALSE;
-					myGeodesic = g; }
-	int switched() const { return switchFlag; }
-
-        // Return the size of the buffer connected to this PortHole.
-        virtual int bufSize() const;
-
-        // Return the size of the "local buffer" connected to this
-        // PortHole.  This returns zero for cases where no separate
-        // buffer is allocated, e.g. fork outputs (all destinations
-        // of the fork share the same buffer, whose size is returned
-        // by bufSize).
-        virtual int localBufSize() const;
-
-	// return the offset position in the buffer.
-	unsigned bufPos() const { return offset;}
-
-        // Advance the offset by the number of tokens produced or
-        // consumed in this PortHole when the Star fires.
-        virtual void advance();
-
-	// The buffer assigned to this porthole is embedded in a buffer:
-	// ex) input.embed(output) means that the buffer of the input
-	// porthole contains the buffer of the output porthole.
-	void embed(CGPortHole& p, int i = -1) { p.embeddedPort = this; 
-			embeddingFlag = TRUE; p.embeddedLoc = i; }
-	CGPortHole* embedded() { return embeddedPort; }
-	int embedding() { return embeddingFlag; }
-
-	// return where embedded. return -1 if not decided yet.
-	int whereEmbedded() { return embeddedLoc; }
-	void embedHere(int i) { embeddedLoc = i; }
-
-	// return true if I am a fork input
-	int fork() const { return forkDests.size();}
-
-	// set a fork source
-        void setForkSource(CGPortHole* p);
-
-	// functions for moving data across wormhole boundaries
-	void forceSendData() { putParticle();}
-	void forceGrabData() { getParticle();}
-
-protected:
-	int offset;
-	// Stuff to support fork buffers
-	SequentialList forkDests;
-	CGPortHole* forkSrc;
-	
-	// Where I am embedded.
-	CGPortHole* embeddedPort;
-	int embeddedLoc;
-	// Am I embedding ports?
-	int embeddingFlag;
-
-private:
-	// If the geodesic is switched, return TRUE;
-	int switchFlag;
 };
 
 	///////////////////////////////////////////
@@ -151,6 +48,10 @@ class InCGPort : public CGPortHole
 {
 public:
 	int isItInput () const ; // {return TRUE; }
+
+	// Get Particles from input Geodesic
+	// *****  CG has no data on the portholes
+	// void grabData();
 };
 
 	////////////////////////////////////////////
@@ -161,6 +62,17 @@ class OutCGPort : public CGPortHole
 {
 public:
         int isItOutput () const; // {return TRUE; }
+
+	void increment();
+
+	// Move the current Particle in the input buffer -- this
+	// method is invoked by the CGScheduler before go()
+	// void grabData();
+
+	// Put the Particles that were generated into the
+	// output Geodesic -- this method is invoked by the
+	// CGScheduler after go()
+	// void sendData();
 };
 
         //////////////////////////////////////////
@@ -168,21 +80,11 @@ public:
         //////////////////////////////////////////
  
 // Synchronous dataflow MultiPortHole for code generation
-// FIXME: by deriving from MultiDFPort we only support
-// setSDFParams, not full set.
-
-class MultiCGPort : public MultiDFPort {
-protected:
-	CGPortHole* forkSrc;
+ 
+class MultiCGPort : public MultiSDFPort {
+	int memLoc;
 public:
-	MultiCGPort() : forkSrc(0) {}
-	~MultiCGPort();
-
-	void setForkBuf(CGPortHole& p) { forkSrc = &p;}
-
-	// this function should be called by installPort for
-	// all derived output multiporthole classes.
-	void forkProcessing(CGPortHole&);
+	void setMemLoc(int i) { memLoc = 1;}
 
 	// Services of MultiSDFPort that are used often:
 	// setPort(const char* portName, Block* parent, dataType type,
@@ -198,9 +100,9 @@ public:
 class MultiInCGPort : public MultiCGPort {
 public:
         int isItInput () const; // {return TRUE; }
-
-	// Add a new physical port to the MultiPortHole list
-	PortHole& newPort();
+ 
+        // Add a new physical port to the MultiPortHole list
+        PortHole& newPort();
 };
  
  
@@ -214,8 +116,8 @@ class MultiOutCGPort : public MultiCGPort {
 public:
         int isItOutput () const; // {return TRUE; }
 
-	// Add a new physical port to the MultiPortHole list
-	PortHole& newPort();
+        // Add a new physical port to the MultiPortHole list
+        PortHole& newPort();
 };
 
 #endif

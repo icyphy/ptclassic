@@ -1,111 +1,60 @@
-/* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
-*/
-/*  Version $Id$
-    Author:	T.M. Parks
-    Created:	6 February 1992
-
-    Geodesic which blocks if accessed when full or empty.
-*/
-
 static const char file_id[] = "$RCSfile$";
+
+/*  Version $Id$
+
+    Copyright 1992 The Regents of the University of California.
+			All Rights Reserved.
+
+    Programmer:		T.M. Parks
+    Date of creation:	6 February 1992
+
+*/
 
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
-#include "PNThread.h"
-#include "PNGeodesic.h"
-#include "Error.h"
+#include "MTDFGeodesic.h"
+#include "CriticalSection.h"
 
 // Class identification.
-ISA_FUNC(PNGeodesic, Geodesic);
+ISA_FUNC(MTDFGeodesic,AutoForkNode);
 
 // Constructor.
-PNGeodesic::PNGeodesic() : notEmpty(0), notFull(0), cap(1)
-{ }
-
-void PNGeodesic::makeLock(const PtGate& master)
+MTDFGeodesic::MTDFGeodesic() : geoMon(), notEmpty(geoMon)
 {
-    LOG_DEL; delete notEmpty; delete notFull;
-    notEmpty = notFull = 0;
-    Geodesic::makeLock(master);
-    if (!isLockEnabled())
-    {
-	Error::abortRun(*this, "makeLock failed!");
-    }
-    else
-    {
-	LOG_NEW; notEmpty = new PNCondition(*(PNMonitor*)gate);
-	LOG_NEW; notFull = new PNCondition(*(PNMonitor*)gate);
-    }
 }
 
-void PNGeodesic::delLock()
+// put with mutual exclusion.
+void MTDFGeodesic::put(Particle* p)
 {
-    LOG_DEL; delete notEmpty; delete notFull;
-    notEmpty = notFull = 0;
-    Geodesic::delLock();
+    CriticalSection x(geoMon);
+    Geodesic::put(p);
+    if (size() == 1) notEmpty.notifyAll();	// just became not empty
 }
 
-// Block when full.
-// Notify when not empty.
-void PNGeodesic::slowPut(Particle* p)
+// get with mutual exclusion.
+Particle* MTDFGeodesic::get()
 {
-    // Avoid entering the gate more than once.
-    CriticalSection region(gate);
-    while (sz >= cap && notFull) notFull->wait();
-    pstack.putTail(p); sz++;
-    if (notEmpty) notEmpty->notifyAll();
+    CriticalSection x(geoMon);
+    while (size() == 0) notEmpty.wait();	// wait for another Particle
+    return Geodesic::get();
 }
 
-// Block when empty.
-// Notify when not full.
-Particle* PNGeodesic::slowGet()
+
+// pushBack with mutual exclusion.
+void MTDFGeodesic::pushBack(Particle* p)
 {
-    // Avoid entering the gate more than once.
-    CriticalSection region(gate);
-    while (sz < 1 && notEmpty) notEmpty->wait();
-    sz--; Particle* p = pstack.get();
-    if (sz < cap && notFull) notFull->notifyAll();
-    return p;
+    CriticalSection x(geoMon);
+    Geodesic::pushBack(p);
+    if (size() == 1) notEmpty.notifyAll();	// just became not empty
 }
 
-// Notify when not empty.
-// Don't block when full.
-void PNGeodesic::pushBack(Particle* p)
+// size with mutual exclusion.
+int MTDFGeodesic::size()
 {
-    // Avoid entering the gate more than once.
-    CriticalSection region(gate);
-    pstack.put(p); sz++;
-    if (isLockEnabled() && notEmpty) notEmpty->notifyAll();
+    CriticalSection x(geoMon);
+    return Geodesic::size();
 }
 
-void PNGeodesic::setCapacity(int c)
-{
-    cap = c;
-    if (sz < cap && notFull) notFull->notifyAll();
-}
+

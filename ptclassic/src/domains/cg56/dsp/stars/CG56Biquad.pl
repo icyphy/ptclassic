@@ -1,5 +1,5 @@
 defstar {
-	name {Biquad}
+	name {BiQuad}
 	domain { CG56 }
 	desc {
 This star generates code for a second order IIR filter (a "biquad").
@@ -8,54 +8,49 @@ With the default parameters, there is a pole at z=0.5 +/- j0.5, and no zero.
 	}
 	version { $Id$}
 	author { J. Buck, ported from Gabriel }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 dsp library }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
 	input {
 		name { input }
-		type { fix }
+		type { float }
 	}
 	output {
 		name { output }
-		type { fix }
+		type { float }
 	}
 // Note: order of state declarations is important!  d1, d2, n1, n2
 // must be allocated in the order indicated.  The A_CONSEC attribute
 // tells the memory allocator to do this right.
 	state {
 		name { d1 }
-		type { fix }
+		type { float }
 		default { "-1.0" }
 		attributes { A_ROM|A_XMEM|A_CONSEC }
 	}
 	state {
 		name { d2 }
-		type { fix }
+		type { float }
 		default { "-0.5" }
 		attributes { A_ROM|A_XMEM|A_CONSEC }
 	}
 	state {
 		name { n1 }
-		type { fix }
+		type { float }
 		default { 0.0 }
 		attributes { A_ROM|A_XMEM|A_CONSEC }
 	}
 	state {
 		name { n2 }
-		type { fix }
+		type { float }
 		default { 0.0 }
 		attributes { A_ROM|A_XMEM }
 	}
 	state {
 		name { state }
-		type { fixarray }
+		type { floatarray }
 		default { "0.0[2]" }
 		desc { Filter states }
-		attributes { A_RAM|A_YMEM|A_NONSETTABLE|A_NONCONSTANT }
+		attributes { A_RAM|A_YMEM }
 	}
 // code copied from Gabriel 56biquad star
 	codeblock (std) {
@@ -71,7 +66,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	exectime { return 9;}
 	go {
-		addCode(std);
+		gencode(std);
 	}
 }
 

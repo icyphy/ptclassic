@@ -1,6 +1,7 @@
 #ifndef _Profile_h
 #define _Profile_h
 #ifdef __GNUG__
+#pragma once
 #pragma interface
 #endif
 
@@ -8,30 +9,8 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+Copyright (c) 1991 The Regents of the University of California.
+			All Rights Reserved.
 
 Programmer: Soonhoi Ha
 Date of last revision: 
@@ -48,11 +27,44 @@ Date of last revision:
 
 class Profile {
 
+private:
+	int effP;		// number of actually-used processors.
+
+	// Start and finish time on each processor
+	IntArray	startTime;
+	IntArray	finishTime;
+
+	// processor id.
+	// Mapping between virtual processors represented by Profile and
+	// actual processors.
+	// procId[i] = j means that the (i+1)th virtual processor is
+	// assigned to the (j+1)th actual processor.
+	IntArray	procId;
+
+	// makespan: schedule length assuming the blocked scheduling.
+	//         = latest finishTime.
+	int makespan;
+
+	// minimum displacement of parallel schedules.
+	// If we want to overlap many instances of this profile,
+	// this value gives the minimum displacement.
+	int minDisplacement;
+
+	// maxPeriod: maximum schedule length on a processor.
+	//	    = max over i (finishTime[i] - startTime[i])
+	int maxPeriod;
+	
+	// Total cost of the profile
+	double totalCost;
+
+	// processor id of syncronization point.
+	int syncPoint;
+
 public:
 	// Constructor
-	Profile() :  assignedId(0), makespan(0), maxPeriod(0) {}
+	Profile() : makespan(0), maxPeriod(0), syncPoint(0) {}
 	Profile(int n);
-	~Profile();
+	~Profile() {}
 
 	// Dynamic creation
 	void create(int n);
@@ -60,14 +72,11 @@ public:
 	// initialize
 	void initialize();
 
-	// sort with finish time, and change the procId accordingly.
-	// The argument indicates the starting index of sorting.
-	// For example, if 1 is given, the first index is excluded in the
-	// sorting.
-	void sortWithFinishTime(int start = 0);
+	// sort with finish time.
+	void sortWithFinishTime();
 
 	// sort with start time, and update the procId accordingly.
-	void sortWithStartTime(int start = 0);
+	void sortWithStartTime();
 
 	// Set start and finish time on processor k.
 	void setStartTime(int k, int t) { startTime[k] = t; }
@@ -77,17 +86,13 @@ public:
 	int getStartTime(int k) { return startTime[k]; }
 	int getFinishTime(int k) { return finishTime[k]; }
 
-	// procId for the inner schedule
+	// procId
 	void setProcId(int k, int t) { procId[k] = t; }
 	int getProcId(int k) { return procId[k]; }
 
-	// create "assignedId" array
-	void createAssignArray(int);
-	IntArray* assignArray(int i) { return &assignedId[i-1]; }
-	void assign(int i, int k, int t) { assignedId[i-1][k] = t; }
-	int assignedTo(int i, int k) { return assignedId[i-1][k]; }
-	int profileIx(int i, int t);
-	int numInstance() { return numAssignArray; }
+	// syncId
+	void setSyncPoint(int k) { syncPoint = k; }
+	int syncProc()		 { return syncPoint; }
 
 	// The number of effectively-used processors.
 	void setEffP(int i) { effP = i; }
@@ -126,48 +131,6 @@ public:
 	// and at the end.
 	// Return the sum of those idle times.
 	int totalIdleTime(IntArray& avail, int numProcs);
-
-private:
-	int effP;		// number of actually-used processors.
-
-	// Start and finish time on each processor
-	IntArray	startTime;
-	IntArray	finishTime;
-
-	// processor id of the local schedule.
-	// Mapping between virtual processors represented by Profile and
-	// actual processors inside.
-	// procId[i] = j means that the (i+1)th virtual processor is
-	// assigned to the (j+1)th actual processor.
-	IntArray	procId;
-
-	// processor id for outer processors.
-	// assignedId[k][i] = j means that (i+1)th profile  of the (k+1)th
-	// invocation is assigned to the (j+1)th outer processor.
-	// The number of arrays is "numInstance" of the star containing this
-	// profile.
-	IntArray* 	assignedId;
-	int		numAssignArray;
-
-	// makespan: schedule length assuming the blocked scheduling.
-	//         = latest finishTime.
-	int makespan;
-
-	// minimum displacement of parallel schedules.
-	// If we want to overlap many instances of this profile,
-	// this value gives the minimum displacement.
-	int minDisplacement;
-
-	// maxPeriod: maximum schedule length on a processor.
-	//	    = max over i (finishTime[i] - startTime[i])
-	int maxPeriod;
-	
-	// Total cost of the profile
-	double totalCost;
-
-	// processor id of synchronization point.
-	// Synchronization point is hardwired to 0 for program simplicity.
-	// no more need of "int syncPoint;"
 }; 
 	
 #endif

@@ -1,6 +1,5 @@
 #! /bin/sh
 # usage: pigiRpcDebug <vem-args>
-# Version: $Id$
 #
 # This is typically invoked from wtih pigiRpcShell as the $COMMAND.
 # It brings up the debugger running PIGIRPC.
@@ -11,6 +10,5 @@ break main
 run $*
 EOF
 
-DEBUG='xterm -title pigiRpc_debug_window -bg black -fg green -e gdb'
-
-${PT_DEBUG-$DEBUG} -command=$dbgcmdfile $PIGIRPC &
+xterm -display $DISPLAY -title "pigiRpc debug window" -bg black -fg green \
+	-e gdb $PIGIRPC -x $dbgcmdfile &

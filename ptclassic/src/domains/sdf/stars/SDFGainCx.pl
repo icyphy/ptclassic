@@ -1,18 +1,13 @@
 defstar {
-	name { GainCx }
+	name { CxGain }
 	domain { SDF }
 	desc {
-This is an amplifier; the complex output is the complex input
-multiplied by the complex "gain" (default 1.0).
+Amplifier: output is input times "gain" (default 1.0).  Input, output,
+and gain factor are all complex numbers.
 	}
 	version {$Id$}
 	author { J. T. Buck }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
 	input {
 		name { input }

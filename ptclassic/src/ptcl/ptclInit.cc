@@ -59,22 +59,26 @@ extern int		isatty _ANSI_ARGS_((int fd));
 // Load in the PTcl startup file ptcl.tcl.
 static int loadStartup(Tcl_Interp* interp) {
     char *pt = getenv("PTOLEMY");
-    StringList startup = pt ? pt : "~ptolemy";
+    int newmemory = FALSE;
+    if (!pt) {
+        pt = expandPathName("~ptolemy");
+	newmemory = TRUE;
+    }
+    StringList startup = pt;
+    if ( newmemory ) {
+	delete [] pt;
+    }
+
     startup << "/lib/tcl/ptcl.tcl";
     if (Tcl_EvalFile(interp, startup.chars()) != TCL_OK) {
-	fprintf(stderr, "ptcl: error in sourcing startup file '%s'.\n",
+	fprintf(stderr, "ptcl: error in startup file '%s'.\n",
                 interp->result);
 	return TCL_ERROR;
     } else
 	return TCL_OK;
 }
 
-// Delete a PTcl object.
-static void PTclDeleteProc(ClientData clientData, Tcl_Interp */* interp */)
-{
-    PTcl *ptcl = (PTcl *) clientData;
-    delete ptcl;
-}
+static PTcl *ptcl;
 
 /*
  *----------------------------------------------------------------------
@@ -106,9 +110,7 @@ extern "C" int Ptcl_Init(Tcl_Interp *interp)
     __setfpucw(_FPU_DEFAULT | _FPU_MASK_IM);
 #endif
 
-    PTcl *ptcl = new PTcl(interp);
-    Tcl_CallWhenDeleted(interp, PTclDeleteProc, (ClientData) ptcl);
-
+    ptcl = new PTcl(interp);
     if (isatty(0)) {		// set up interrupt handler
 	SimControl::catchInt();
     }

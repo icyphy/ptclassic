@@ -1,33 +1,18 @@
 defstar{
        name { NullRemove }
        domain {DE}
-       desc {
-Removes null
-.c VoiceData
-messages }
+       desc { Remove null VoiceData packets and only output non-null packet data. }
        version {$Id$}
        author { John Loh }
 
        copyright { 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
 
-       location { DE ATM library }
-
-       explanation {
-See comments on
-.c DEInputSynch
-star.  This star would be used after an
-SDF-in-DE wormhole to perform inverse operation of
-.c DEInputSynch
-, that
-is, to filter out null
-.c VoiceData
-messages but to allow others to pass through unchanged.
-       }
+       location {ATM demo library}
 
        ccinclude {"VoiceData.h"}
 
@@ -68,7 +53,7 @@ messages but to allow others to pass through unchanged.
                   if (iport->dataNew)  {
                     iport->get().getMessage(inEnv);
 		    if (!voiceCheck(inEnv,*this)) return;
-                    const VoiceData*  v = (const VoiceData*) inEnv.myData();
+                    VoiceData*  v = (VoiceData*) inEnv.myData();
                     if (! v->nulltestMessage())
                        oport->put(completionTime) << inEnv;
                   }

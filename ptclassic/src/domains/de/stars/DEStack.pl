@@ -16,13 +16,8 @@ or "demand" event is processed.  Input data that doesn't fit on the stack
 is sent to the "overflow" output.
 	}
 	version { $Id$}
-	author { Soonhoi Ha and E. A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	author { Soonhoi Ha, E. A. Lee, and Philip Bitar }
+	copyright { 1991 The Regents of the University of California }
 	location { DE main library }
 	seealso {QueueBase, FIFOQueue, PriorityQueue}
 	explanation {
@@ -149,21 +144,8 @@ after processing all inputs is sent to the "size" output.
 		    return stack.size();
 		}
 	}
-	method {
-		name { zapStack }
-		code {
-			while (Qsize() > 0) {
-				Particle* pp = (Particle*) stack.popTop();
-				pp->die();
-			}
-			stack.initialize();
-		}
-	}
-	setup {
-		DEQueueBase::setup();
-		zapStack();
-	}
-	destructor {
-		zapStack();
+	start {
+		DEQueueBase::start();
+		stack.initialize();
 	}
 }

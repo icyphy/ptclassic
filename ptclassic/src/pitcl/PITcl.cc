@@ -2,30 +2,8 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+ Copyright (c) 1992 The Regents of the University of California.
+                       All Rights Reserved.
 		       
  Programmer:  J. T. Buck
  Date of creation: 3/4/92
@@ -47,91 +25,53 @@ static const char file_id[] = "PTcl.cc";
 #include "KnownBlock.h"
 #include "Domain.h"
 #include <ACG.h>
-#include <stream.h>
 #include "Linker.h"
-#include "textAnimate.h"
-#include "SimControl.h"
-#include "ConstIters.h"
-#include "Scheduler.h"
-#include "InfString.h"
-
-// "matlab" ptcl command -BLE
-// we make matlabtcl a static instance of the MatlabTcl class instead of
-// a data member of the PTcl class because other libraries, e.g. pigilib,
-// rely on the PTcl class but do not use the "matlab" ptcl command, so
-// false dependencies would otherwise be automatically created by make depend
-#include "MatlabTcl.h"
-
-static MatlabTcl matlabtcl;
-
-int PTcl::matlab(int argc,char** argv) {
-	matlabtcl.SetTclInterpreter(interp);
-	return matlabtcl.matlab(argc, argv);
-}
-
-
-// "mathematica" ptcl command -BLE
-// we make mathematicatcl a static instance of the MathematicaTcl class
-// instead of a data member of the PTcl class because other libraries,
-// e.g. pigilib, rely on the PTcl class but do not use the "mathematica"
-// ptcl command, so false dependencies would otherwise be automatically
-// created by make depend
-#include "MathematicaTcl.h"
-
-static MathematicaTcl mathematicatcl;
-
-int PTcl::mathematica(int argc,char** argv) {
-	mathematicatcl.SetTclInterpreter(interp);
-	return mathematicatcl.mathematica(argc, argv);
-}
-
 
 // we want to be able to map Tcl_interp pointers to PTcl objects.
-// this is done with a table storing all the PTcl objects.
+// this is done with a mapping table.
 
 // for now, we allow up to MAX_PTCL PTcl objects at a time.
 const int MAX_PTCL = 10;
 
-static PTcl* ptable[MAX_PTCL];
+struct PMap {
+	Tcl_Interp* interp;
+	PTcl* pobj;
+};
+
+static PMap ptable[MAX_PTCL];
 
 /////////////////////////////////////////////////////////////////////
 
 // this is a static function.
 PTcl* PTcl::findPTcl(Tcl_Interp* arg) {
 	for (int i = 0; i < MAX_PTCL; i++)
-		if (ptable[i]->interp == arg) return ptable[i];
+		if (ptable[i].interp == arg) return ptable[i].pobj;
 	return 0;
 }
 
 void PTcl::makeEntry() {
 	int i = 0;
-	while (ptable[i] != 0 && i < MAX_PTCL) i++;
+	while (ptable[i].interp != 0 && i < MAX_PTCL) i++;
 	if (i >= MAX_PTCL) return;
-	ptable[i] = this;
+	ptable[i].interp = interp;
+	ptable[i].pobj = this;
 }
 
 void PTcl::removeEntry() {
 	for (int i = 0; i < MAX_PTCL; i++) {
-		if (ptable[i] == this) {
-			ptable[i] = 0;
+		if (ptable[i].pobj == this) {
+			ptable[i].interp = 0;
+			ptable[i].pobj = 0;
 		}
 	}
 }
-
 /////////////////////////////////////////////////////////////////////
 
-// The default domain.  This must be defined somewhere else.
-
-extern char DEFAULT_DOMAIN[];
-
 // constructor
-PTcl::PTcl(Tcl_Interp* i) : universe(0), currentGalaxy(0),
-currentTarget(0), interp(i), stopTime(0.0), lastTime(1.0), definingGal(0)
+PTcl::PTcl(Tcl_Interp* i) : interp(i), universe(0), currentGalaxy(0),
+currentTarget(0), definingGal(0)
 {
-	KnownBlock::setDefaultDomain(DEFAULT_DOMAIN);
-	// Start up in the default domain.
-	curDomain = KnownBlock::defaultDomain();
-	reset(1,0);
+	newUniverse();
 	if (!interp) {
 		interp = Tcl_CreateInterp();
 		myInterp = TRUE;
@@ -143,38 +83,27 @@ currentTarget(0), interp(i), stopTime(0.0), lastTime(1.0), definingGal(0)
 
 // destructor
 PTcl::~PTcl() {
+	LOG_DEL; delete universe;
 	removeEntry();
-	if (myInterp) {
-		Tcl_DeleteInterp(interp);
-		interp = 0;
-	}
+	if (myInterp) { LOG_DEL; delete interp;}
 }
 
-// Create a new universe with name name and domain dom and make it the
-// current universe.  Whatever universe was previously the current universe
-// is not affected, unless it was named <name>.
-
-void PTcl::newUniv(const char* name, const char* dom) {
-	univs.delUniv(name);
-	LOG_NEW; universe = new InterpUniverse(name, dom);
+// Attach the PTcl to a new universe
+void PTcl::newUniverse () {
+	LOG_NEW; universe = new InterpUniverse;
 	currentGalaxy = universe;
-	curDomain = universe->domain();
-	currentTarget = universe->myTarget();
-	univs.put(*universe);
 }
 
 // Delete the universe and make another
-int PTcl::delUniv (const char* nm) {
-	int remake = (strcmp(nm,universe->name()) == 0);
-	if (!univs.delUniv(nm)) return FALSE;
-	if (remake) newUniv("main", curDomain);
-	return TRUE;
+void PTcl::resetUniverse () {
+	LOG_DEL; delete universe;
+	newUniverse ();
 }
 
 // Return a "usage" error
 int PTcl::usage(const char* msg) {
-	Tcl_AppendResult(interp, "incorrect usage: should be \"",msg,"\"",
-			 (char*)NULL);
+	strcpy(interp->result,"Usage: ");
+	strcat(interp->result,msg);
 	return TCL_ERROR;
 }
 
@@ -184,57 +113,53 @@ int PTcl::staticResult(const char* value) {
 	return TCL_OK;
 }
 
-// Return a const char* or StringList result to Tcl.
-// We arrange for Tcl to copy the value in case a literal string or a
-// StringList is passed (because the StringList might be deleted afterwards)
-int PTcl::result(const char *str) {
+// Return a StringList result.
+// We arrange for Tcl to copy the value.
+int PTcl::result(StringList& value) {
+	const char* str = value;
 	// VOLATILE will tell Tcl to copy the value, so it is safe
 	// if the StringList is deleted soon.
-	Tcl_SetResult(interp, (char*)str, TCL_VOLATILE);
+	Tcl_SetResult(interp, (char*)str,TCL_VOLATILE);
 	return TCL_OK;
 }
 
-void PTcl::addResult(const char* value) {
-	// cast-away-const needed to interface with Tcl.
-	Tcl_AppendElement(interp, (char*)value);
-}
-
-// If name is blank or "this", return current galaxy.  "target"
-// matches current target.  Otherwise, first search the current galaxy,
-// then the known list, finally known targets.  Return null pointer
-// if block not found.
 const Block* PTcl::getBlock(const char* name) {
+// if name is blank or "this", return current galaxy.  "target"
+// matches current target.  Otherwise, first search top-blocks,
+// then the known list, finally known targets.
 
 	if (!name || *name == 0 || strcmp(name,"this") == 0)
 		return currentGalaxy;
 	if (strcmp(name,"target") == 0)
-		return currentTarget;
+		return definingGal ? currentTarget : universe->myTarget();
 	const Block* b = currentGalaxy->blockWithDottedName(name);
-	if (!b) b = KnownBlock::find(name, curDomain);
+	if (!b) b = KnownBlock::find(name);
 	if (!b) b = KnownTarget::find(name);
-	if (!b) Tcl_AppendResult(interp,"No such block: ",name,(char*)NULL);
+	if (!b) {
+		strcpy(interp->result,"No such block: ");
+		strcat(interp->result,name);
+	}
 	return b;
 }
 
 // descriptor: print the descriptor of the current galaxy, or of
-// a block in the galaxy or on the known list, or of the current
-// target or any known target.
+// a block in the galaxy or on the known list.
+
 int PTcl::descriptor(int argc,char** argv) {
-	if (argc > 2) return usage("descriptor ?<block-or-classname>?");
+	if (argc > 2) return usage("descriptor [<block-or-classname]");
 	const Block* b = getBlock(argv[1]);
 	if (!b) return TCL_ERROR;
-	return staticResult(b->descriptor());
+	return staticResult(b->readDescriptor());
 }
 
-int PTcl::print(int argc,char** argv) {
-	if (argc > 2) return usage("print ?<block-or-classname>?");
+int PTcl::printVerbose(int argc,char** argv) {
+	if (argc > 2) return usage("printVerbose [<block-or-classname>]");
 	const Block* b = getBlock(argv[1]);
 	if (!b) return TCL_ERROR;
-	return result(b->print(0));
+	return result(b->printVerbose());
 }
 
-// star: create a new instance of star/galaxy/wormhole within the
-// current galaxy.
+// star: create a new instance of star within galaxy
 int PTcl::star(int argc,char** argv) {
 	if (argc != 3) return usage("star <name> <class>");
 	if (!currentGalaxy->addStar(argv[1], argv[2]))
@@ -242,7 +167,7 @@ int PTcl::star(int argc,char** argv) {
 	return TCL_OK;
 }
 
-// delstar: delete a star/galaxy/wormhole from the current galaxy.
+// delstar: delete a star from the galaxy
 int PTcl::delstar(int argc,char** argv) {
 	if (argc != 2) return usage("delstar <name>");
 	if (! currentGalaxy->delStar(argv[1]))
@@ -253,7 +178,7 @@ int PTcl::delstar(int argc,char** argv) {
 // connect:
 int PTcl::connect(int argc,char** argv) {
 	if (argc != 5 && argc != 6)
-		return usage("connect <src> <port> <dst> <port> ?<delay>?");
+		return usage("connect <src> <port> <dst> <port> [<delay>]");
 	if (!currentGalaxy->connect(argv[1],argv[2],argv[3],argv[4],argv[5]))
 		return TCL_ERROR;
 	return TCL_OK;
@@ -262,7 +187,7 @@ int PTcl::connect(int argc,char** argv) {
 // busconnect
 int PTcl::busconnect(int argc,char** argv) {
 	if (argc != 6 && argc != 7)
-		return usage("busconnect <src> <port> <dst> <port> <width> ?<delay>?");
+		return usage("busconnect <src> <port> <dst> <port> <width> [<delay>]");
 	if (!currentGalaxy->busConnect(argv[1],argv[2],argv[3],
 				       argv[4],argv[5],argv[6]))
 		return TCL_ERROR;
@@ -280,9 +205,7 @@ int PTcl::alias(int argc,char** argv) {
 int PTcl::numports(int argc,char** argv) {
 	if (argc != 4)
 		return usage("numports <star> <multiport> <how-many>");
-	int num;
-	if (Tcl_GetInt(interp, argv[3], &num) != TCL_OK)
-		return TCL_ERROR;
+	int num = atoi(argv[3]);
 	if (!currentGalaxy->numPorts (argv[1], argv[2], num))
 		return TCL_ERROR;
 	return TCL_OK;
@@ -309,7 +232,7 @@ int PTcl::delnode(int argc,char ** argv) {
 // nodeconnect: connect a porthole to a node
 int PTcl::nodeconnect(int argc,char ** argv) {
 	if (argc != 4 && argc != 5)
-		return usage("nodeconnect <star> <port> <node> ?<delay>?");
+		return usage("nodeconnect <star> <port> <node> [<delay>]");
 	if (!currentGalaxy->nodeConnect(argv[1],argv[2],argv[3],argv[4]))
 		return TCL_ERROR;
 	return TCL_OK;
@@ -324,7 +247,7 @@ int PTcl::disconnect(int argc,char ** argv) {
 	return TCL_OK;
 }
 
-// newstate: create a new instance of state within galaxy
+// state: create a new instance of state within galaxy
 int PTcl::newstate(int argc,char ** argv) {
 	if (argc != 4)
 		return usage("newstate <name> <type> <defvalue>");
@@ -336,482 +259,182 @@ int PTcl::newstate(int argc,char ** argv) {
 // setstate: set (change) a state within galaxy
 int PTcl::setstate(int argc,char ** argv) {
 	if (argc != 4)
-		return usage("setstate <star> <name> <value>\nor setstate this <name> <value>");
+		return usage("state <star> <name> <value>\nor state this <name> <value>");
 	if (!currentGalaxy->setState(argv[1],argv[2],argv[3]))
 		return TCL_ERROR;
 	return TCL_OK;
 }
 
-static const State* findState(const Block* b, const char* nm) {
-	CBlockStateIter next(*b);
-	const State* s;
-	while ((s = next++)) {
-		if (strcmp(nm, s->name()) == 0) return s;
-	}
-	return 0;
-}
-
 // statevalue: return a state value
-// syntax: statevalue <block> <state> ?current|initial?
+// syntax: statevalue block state [current/initial]
 // default is current value
 int PTcl::statevalue(int argc,char ** argv) {
 	if (argc < 3 || argc > 4 ||
-	    (argc == 4 && strcmp(argv[3], "current") != 0
-	     && strcmp(argv[3], "initial") != 0))
-		return usage ("statevalue <block> <state> ?current|initial?");
-	const Block* b = getBlock(argv[1]);
+	    (argc == 4 &&argv[3][0] != 'c' && argv[3][0] != 'i'))
+		return usage ("statevalue block state [current/initial]");
+	Block* b = (Block*)getBlock(argv[1]);
 	if (!b) return TCL_ERROR;
-	const State* s = findState(b, argv[2]);
+	const State* s = b->stateWithName(argv[2]);
 	if (!s) {
-		Tcl_AppendResult(interp, "No state named ", argv[2],
-					 " in block ", argv[1], (char*)NULL);
+		Tcl_AppendResult(interp, "No state named '", argv[2],
+				 "' in block '", argv[1], "'");
 		return TCL_ERROR;
 	}
 	// return initial value if asked.
 	if (argc == 4 && argv[3][0] == 'i')
-		return staticResult(s->initValue());
+		return staticResult(s->getInitValue());
 	else
 		return result(s->currentValue());
 }
 
 // defgalaxy: define a galaxy
+// syntax: defgalaxy <galname> { <galaxy-building-commands> }
 int PTcl::defgalaxy(int argc,char ** argv) {
 	if (argc != 3)
-		return usage("defgalaxy <galname> {<galaxy-building-commands>}");
+		return usage("defgalaxy <galname> {galaxy-building-stuff}");
 	if (definingGal) {
 		Tcl_SetResult(interp, "already defining a galaxy!", TCL_STATIC);
 		return TCL_ERROR;
 	}
 	const char* galname = hashstring(argv[1]);
-	const char* outerDomain = curDomain;
+	const char* outerDomain = KnownBlock::domain();
 	definingGal = TRUE;	// prevent recursive defgalaxy
-	LOG_NEW; currentGalaxy = new InterpGalaxy(galname,curDomain);
-	currentGalaxy->setBlock (galname, 0);
+	LOG_NEW; currentGalaxy = new InterpGalaxy(galname);
+	currentGalaxy->setBlock (galname, universe);
 	currentTarget = 0;
-	int status;  // return value
-	if ((status = Tcl_Eval(interp, argv[2])) != TCL_OK) {
+	if (Tcl_Eval(interp, argv[2], 0, 0) != TCL_OK) {
 		LOG_DEL; delete currentGalaxy;
-		LOG_DEL; delete currentTarget;
-		Tcl_AppendResult(interp, "Error in defining galaxy ", galname,
-	   		(char*) NULL);
 	}
 	else currentGalaxy->addToKnownList(outerDomain,currentTarget);
 	currentGalaxy = universe;
-	currentTarget = universe->myTarget();
 	definingGal = FALSE;
-	curDomain = outerDomain;
-	return currentTarget?status:TCL_ERROR;
-}
-
-int PTcl::computeSchedule() {
-	SimControl::clearHalt();
-	universe->initTarget();
-	if (SimControl::flagValues() & SimControl::error) {
-		Tcl_AppendResult(interp, "Error in setting up the schedule",
-	   		(char*) NULL);
-		return FALSE;
-	}
-	if (SimControl::flagValues() & SimControl::halt) {
-		return FALSE;
-	}
-	return TRUE;
-}
-
-int PTcl::schedule(int argc,char **) {
-	if (argc > 1)
-		return usage("schedule");
-	SimControl::clearHalt();
-	// Here we call Runnable::initTarget rather than Universe::initTarget,
-	// because Universe::initTarget invokes the begin methods of the 
-	// stars.  We just want to generate the schedule.
-	if (! (universe->myTarget() && universe->myTarget()->scheduler()) )
-	    universe->Runnable::initTarget();
-	if (SimControl::flagValues() & SimControl::error) {
-		Tcl_AppendResult(interp, "Error in setting up the schedule",
-			(char*) NULL);
-		return TCL_ERROR;
-	} else
-		return result(universe->displaySchedule());
-}
-
-// return the stop time of the current run
-int PTcl::stoptime(int argc, char ** /*argv*/) {
-	if (argc > 1) return usage("stoptime");
-	sprintf(interp->result, "%g", stopTime);
 	return TCL_OK;
 }
 
-// return the current time from the top-level scheduler of the current
-// universe.  If the target has a state named "schedulePeriod", the
-// returned time is divided by this value, unless a second argument
-// with the value "actual" appears.  Return 0 if there is no scheduler.
-
-int PTcl::schedtime(int argc,char **argv) {
-	int actualFlag = (argc == 2 && strcmp(argv[1], "actual") == 0);
-	if (argc > 2 || argc == 2 && !actualFlag)
-		return usage("schedtime ?actual?");
-	Scheduler *sch = universe->scheduler();
-	if (sch) {
-		double time = sch->now();
-		if (!actualFlag) {
-			State* s = universe->myTarget()->stateWithName
-				("schedulePeriod");
-			if (s) {
-				StringList value = s->currentValue();
-				time /= atof(value);
-			}
-		}
-		sprintf (interp->result, "%g", time);
-		return TCL_OK;
-	}
-	else {
-		Tcl_AppendResult(interp,"0",(char*)NULL);
-		return TCL_OK;
-	}
+int PTcl::schedule(int argc,char ** argv) {
+	if (argc > 1)
+		return usage("schedule");
+	return result(universe->displaySchedule());
 }
 
 int PTcl::run(int argc,char ** argv) {
 	if (argc > 2)
-		return usage("run ?<stoptime>?");
+		return usage("run <stoptime>");
 
-	// We need to set stopTime first, so that the
-	// "stoptime" command can work in the setup,
-	// begin, and go methods of the stars.
-	stopTime = 1.0;  // default value of the stop time
-	lastTime = 1.0;
-	if (argc == 2) {
-		double d;
-		if (Tcl_GetDouble(interp, argv[1], &d) != TCL_OK)
-			return TCL_ERROR;
-		stopTime = d;
-		lastTime = d;
-	}
-
-	if (!computeSchedule())
+	if (!universe->initSched()) {
+		Tcl_SetResult(interp, "Error setting up the schedule.", 
+			      TCL_STATIC);
 		return TCL_ERROR;
-	// universe->setStopTime has to be called after computeSchedule
-	// because computeSchedule resets the stop time.
-	universe->setStopTime(stopTime);
-	universe->run();
-	return (SimControl::flagValues() & SimControl::error) ?
-		TCL_ERROR : TCL_OK;
+	}
+	stopTime = 0.0;
+	lastTime = 1.0;
+	return cont(argc,argv);
 }
 
 int PTcl::cont(int argc,char ** argv) {
 	if (argc > 2)
-		return usage("cont ?<lasttime>?");
-	if (argc == 2) {
-		double d;
-		if (Tcl_GetDouble(interp, argv[1], &d) != TCL_OK)
-			return TCL_ERROR;
-		lastTime = d;
-	}
+		return usage("cont <stoptime>");
+	if (*argv[1])
+		lastTime = atof (argv[1]);
 	stopTime += lastTime;
 	universe->setStopTime(stopTime);
 	universe->run();
-	return (SimControl::flagValues() & SimControl::error) ?
-		TCL_ERROR : TCL_OK;
+	return TCL_OK;
 }
 
-int PTcl::wrapup(int argc,char **) {
+int PTcl::wrapup(int argc,char ** argv) {
 	if (argc > 1)
 		return usage("wrapup");
-
-	// If an error has occurred, do not proceed.
-	if (SimControl::flagValues() & SimControl::error)
-		return TCL_ERROR;
-
-	// Clear the halt bit, because the run may have been terminated
-	// prematurely by a halt request, and we still want to wrap up.
-	SimControl::clearHalt();
-	universe->wrapup();
-	return (SimControl::flagValues() & SimControl::error) ?
-		TCL_ERROR : TCL_OK;
+	universe->endSimulation();
+	return TCL_OK;
 }
 
 // domains: list domains
-int PTcl::domains(int argc,char **) {
-	if (argc > 1)
-		return usage("domains");
-	int n = Domain::number();
+int PTcl::domains(int argc,char ** argv) {
+	int n = Domain::numberOfDomains();
 	for (int i = 0; i < n; i++) {
-	    const char* domain = Domain::nthName(i);
-	    if (KnownBlock::validDomain(domain))
-		addResult(domain);
+		// cast needed because of lack of "const" in tcl.h
+		Tcl_AppendElement(interp,(char*)Domain::nthDomainName(i),0);
 	}
 	return TCL_OK;
 }
 
-// set (change) the seed of the random number generation
+// read the seed of the random number generation
 int PTcl::seed(int argc,char ** argv) {
 	extern ACG* gen;
 	if (argc > 2)
-		return usage ("seed ?<seed>?");
-	int val = 1;  // default seed
-	if (argc == 2 && Tcl_GetInt(interp, argv[1], &val) != TCL_OK) {
-		return TCL_ERROR;
-	}
+		return usage ("seed [<seed>]");
+	int val = 1;
+	if (argc == 2) val = atoi(argv[1]);
 	LOG_DEL; delete gen;
 	LOG_NEW; gen = new ACG(val);
-	return TCL_OK;
-}
-
-// animation control
-int PTcl::animation (int argc,char** argv) {
-	const char* t = "";
-	int c = 1;
-	if (argc == 2) t = argv[1];
-	if (argc > 2 ||
-	    (argc == 2 && (c=strcmp(t,"on"))!=0 && strcmp(t,"off")!=0))
-		return usage ("animation ?on|off?");
-	if (argc != 2) {
-		Tcl_SetResult(interp,
-			textAnimationState() ? "on" : "off",
-			TCL_STATIC);
-	}
-	else if (c == 0)
-		textAnimationOn();
-	else
-		textAnimationOff();
 	return TCL_OK;
 }
 
 // knownlist shows the available blocks in the current domain, or (if an
 // argument is given) the supplied domain.
 int PTcl::knownlist (int argc,char** argv) {
-	if (argc > 2)
-		return usage ("knownlist ?<domain>?");
-	const char* dom = curDomain;
-	if (argc == 2) {
-	    dom = argv[1];
-	    if (!KnownBlock::validDomain(dom)) {
-		Tcl_AppendResult(interp, "No such domain: ", dom,
-		  (char *) NULL);
-		return TCL_ERROR;
-	    }
-	}
-	KnownBlockIter nextB(dom);
+	if (argc > 3)
+		return usage ("knownlist [<domain>]");
+	KnownBlockIter nextB(argv[1]);
 	const Block* b;
 	while ((b = nextB++) != 0)
-		addResult(b->name());
+		// cast needed because no const in tcl.h
+		Tcl_AppendElement(interp,(char*)b->readName(),0);
 	return TCL_OK;
 }
 
 int PTcl::topblocks (int argc,char ** argv) {
-	if (argc > 2)
-		return usage ("topblocks ?<block-or-classname>?");
-	const Block* b = getBlock(argv[1]);
-	if (!b) return TCL_ERROR;
-	if (!b->isItAtomic()) {
-		CGalTopBlockIter nextb(b->asGalaxy());
-		const Block* b;
-		while ((b = nextb++) != 0)
-			addResult(b->name());
-	}
-	// empty value returned for atomic blocks
-	return TCL_OK;
-}
-
-// return the list of states, ports, or multiports in the given block.
-// The first argument, specifying states, ports, or multiports, must
-// be given.  If the second argument is not given, block is current galaxy.
-int PTcl::listobjs (int argc,char ** argv) {
-	static char use[] =
-		"listobjs states|ports|multiports ?<block-or-classname>?";
-	if (argc > 3 || argc <= 1)
-		return usage (use);
-	const Block* b = getBlock(argv[2]);
-	if (!b) return TCL_ERROR;
-	if (strcmp(argv[1], "states") == 0) {
-		CBlockStateIter nexts(*b);
-		const State* s;
-		while ((s = nexts++) != 0)
-			addResult(s->name());
-	}
-	else if (strcmp(argv[1], "ports") == 0) {
-		CBlockPortIter nexts(*b);
-		const PortHole* s;
-		while ((s = nexts++) != 0)
-			addResult(s->name());
-	}
-	else if (strcmp(argv[1], "multiports") == 0) {
-		CBlockMPHIter nexts(*b);
-		const MultiPortHole* s;
-		while ((s = nexts++) != 0)
-			addResult(s->name());
-	}
-	else return usage(use);
+	if (argc > 1)
+		return usage ("topblocks");
+	GalTopBlockIter nextb(*currentGalaxy);
+	Block* b;
+	while ((b = nextb++) != 0)
+		// cast needed because no const in tcl.h
+		Tcl_AppendElement(interp,(char*)b->readName(),0);
 	return TCL_OK;
 }
 
 int PTcl::reset(int argc,char** argv) {
-	if (argc > 2)
-		return usage ("reset ?<name>?");
-	const char* nm = "main";
-	if (argc == 2) nm = hashstring(argv[1]);
-	newUniv(nm, curDomain);
+	if (argc > 1)
+		return usage ("reset");
+	resetUniverse();
 	return TCL_OK;
 }
 
-// Create a new, empty universe named <name> (default main) and make it
-// the current  universe with domain <dom> (default current domain).  If
-// there was previously a universe with this name, it is deleted.
-// Whatever universe was previously the current universe is not affected,
-// unless it was named <name>. 
-
-int PTcl::newuniverse(int argc,char** argv) {
-	if (argc > 3)
-		return usage("newuniverse ?<name>? ?<dom>?");
-	if (argc == 3) curDomain = hashstring(argv[2]);
-	const char* nm = "main";
-	if (argc > 1) nm = hashstring(argv[1]);
-	newUniv(nm, curDomain);
-	return TCL_OK;
-}
-
-// deluniverse ?<name>?
-// Delete the named universe.  If argument is not given, delete the
-// current universe.
-
-int PTcl::deluniverse(int argc,char** argv) {
-	if (argc > 2)
-		return usage("deluniverse ?<name>?");
-	const char* nm = argv[1];
-	if (argc == 1) nm = universe->name();
-	delUniv(nm);
-	return TCL_OK;
-}
-
-// Return name of current universe if no argument is given.
-// If one argument (name of a universe) is given, set current
-// universe to this universe.
-int PTcl::curuniverse(int argc,char** argv) {
-	if (argc == 1) {
-		Tcl_AppendResult(interp,universe->name(),(char*)NULL);
-		return TCL_OK;
-	}
-	else if (argc == 2) {
-		InterpUniverse* u = univs.univWithName(argv[1]);
-		if (u) {
-			universe = u;
-			currentGalaxy = u;
-			curDomain = u->domain();
-			currentTarget = u->myTarget();
-			return TCL_OK;
-		}
-		else {
-			Tcl_AppendResult(interp, "No such universe: ", argv[1],
-	   			(char*) NULL);
-			return TCL_ERROR;
-		}
-	}
-	else return usage("curuniverse ?<name>?");
-}
-
-// renameuniv <newname>: rename current univ to newname.
-// renameuniv <oldname> <newname>: rename <oldname> to <newname>.
-// Side effect: if there is an existing universe by the new name,
-// it will be destroyed.
-
-int PTcl::renameuniv(int argc,char ** argv) {
-	InterpUniverse* u = universe;
-	const char* newname = argv[1];
-	if (argc < 2 || argc > 3)
-		return usage(
-		  "renameuniv <newname> or renameuniv <oldname> <newname>");
-	if (argc == 3) {
-		u = univs.univWithName(argv[1]);
-		if (!u) {
-			Tcl_AppendResult(interp, "No such universe: ", argv[1],
-	   			(char*) NULL);
-			return TCL_ERROR;
-		}
-		// rename with same name has no effect.
-		if (strcmp(argv[1],argv[2]) == 0) return TCL_OK;
-		newname = argv[2];
-	}
-	univs.delUniv(newname);
-	u->setNameParent(hashstring(newname),0);
-	return TCL_OK;
-}
-
-int PTcl::univlist(int argc,char **) {
-	if (argc > 1) return usage("univlist");
-	IUListIter next(univs);
-	InterpUniverse* u;
-	while ((u = next++) != 0) {
-		addResult(u->name());
-	}
-	return TCL_OK;
-}
-
-// Return true if the target targetName is a legal target for
-// the domain domName.
-
-static int legalTarget(const char* domName, const char* targetName) {
-	const int MAX_NAMES = 40;
-	const char *names[MAX_NAMES];
-	int n = KnownTarget::getList (domName, names, MAX_NAMES);
-	for (int i = 0; i < n; i++)
-		if (strcmp(names[i], targetName) == 0) return TRUE;
-	return FALSE;
-}
-
-// display or change the domain.  If on top level, the existing target
-// is not legal for the new domain, it reverts to to the default for the
-// new domain.
-
+// display or change the domain.  If on top level, target always changes
+// to the default for that domain.  Thus, if both a domain and a target
+// are specified, domain must be first.
 int PTcl::domain(int argc,char ** argv) {
 	if (argc > 2)
-		return usage ("domain ?<newdomain>?");
+		return usage ("domain [newdomain]");
 	if (argc == 1) {
-		Tcl_AppendResult(interp,curDomain,(char*)NULL);
+		strcpy(interp->result,KnownBlock::domain());
 		return TCL_OK;
 	}
-
-	// check to see if domain already matches.  If so do nothing.
-	if (strcmp(currentGalaxy->domain(), argv[1]) == 0) return TCL_OK;
-
-	// change the domain.
 	if (! currentGalaxy->setDomain (argv[1]))
 		return TCL_ERROR;
-	curDomain = currentGalaxy->domain();
-
-	// check to see if existing target is legal for the new domain,
-	// if not, revert to default target.
-	if (!definingGal) {
-	    if (!legalTarget(curDomain, universe->myTarget()->name())) {
-		universe->newTarget ();
-		currentTarget = universe->myTarget();
-	    }
-	}
+	if (!definingGal) universe->newTarget ();
 	return TCL_OK;
 }
 
 // display or change the target
 int PTcl::target(int argc,char ** argv) {
 	if (argc == 1) {
-		const char *targName = "No target";
-		if (currentTarget) targName = currentTarget->name();
-		return staticResult(targName);
+		Target* tp = definingGal ? currentTarget : universe->myTarget();
+		return staticResult(tp->readName());
 	}
 	else if (argc > 2) {
-		return usage("target ?<targetname>?");
+		return usage("target [<targetname>]");
 	}
 	else {
 		const char* tname = hashstring(argv[1]);
-		if (!legalTarget(curDomain, tname)) {
-		    Tcl_AppendResult(interp, tname,
-			" is not a legal target for domain ", curDomain,
-	   		(char*) NULL);
-		    return TCL_ERROR;
-		}
 		int status;
-		if (!definingGal) {
+		if (!definingGal)
 			status = universe->newTarget(tname);
-			currentTarget = universe->myTarget();
-		} else {
-			LOG_DEL; delete currentTarget;
+		else {
+		// shouldn't need this test. Compiler bug?
+			if (currentTarget) { LOG_DEL; delete currentTarget; }
 			currentTarget = KnownTarget::clone(tname);
 			status = (currentTarget != 0);
 		}
@@ -820,101 +443,34 @@ int PTcl::target(int argc,char ** argv) {
 }
 
 int PTcl::targets(int argc,char** argv) {
-	if (argc > 2) return usage("targets ?<domain>?");
+	if (argc > 2) return usage("targets [<domain>]");
 	const char* domain;
-	if (argc == 2) {
-	    domain = argv[1];
-	    if (!KnownBlock::validDomain(domain)) {
-		Tcl_AppendResult(interp, "No such domain: ", domain,
-		  (char *) NULL);
-		return TCL_ERROR;
-	    }
-	} else
-	    domain = curDomain;
+	if (argc == 2) domain = argv[1];
+	else domain = KnownBlock::domain();
 	const int MAX_NAMES = 40;
 	const char *names[MAX_NAMES];
-	int n = KnownTarget::getList (domain, names, MAX_NAMES);
+	int n = KnownTarget::getList (KnownBlock::domain(), names, MAX_NAMES);
 	for (int i = 0; i < n; i++)
-		addResult(names[i]);
+		Tcl_AppendElement(interp,(char*)names[i],0);
 	return TCL_OK;
 }
 
-// set (change) or return value of target parameter
+// change target states
 int PTcl::targetparam(int argc,char ** argv) {
 	if (argc != 2 && argc != 3)
-		return usage("targetparam <name> ?<value>?");
-	if (!currentTarget) {
-		Tcl_AppendResult(interp, "Target has not been created yet.",
-	   		(char*) NULL);
-		return TCL_ERROR;
-	}
-	State* s = currentTarget->stateWithName(argv[1]);
+		return usage("targetparam <name> [<value>]");
+	Target* t = universe->myTarget();
+	if (definingGal && currentTarget) t = currentTarget;
+	State* s = t->stateWithName(argv[1]);
 	if (!s) {
-		Tcl_AppendResult(interp, "No such target parameter: ", argv[1],
-	   		(char*) NULL);
+		Tcl_AppendResult(interp,"No such target parameter: ", argv[1]);
 		return TCL_ERROR;
 	}
-	if (argc == 2) {
-		return staticResult(s->initValue());
+	if (argc == 1) {
+		return staticResult(s->getInitValue());
 	}
-	s->setInitValue(hashstring(argv[2]));
+	s->setValue(hashstring(argv[2]));
 	return TCL_OK;
-}
-
-// Set or examine pragmas registered with the current target.
-// This procedure can take between 1 and 4 arguments, all optional.
-// They must be given in the order:
-//	parentname
-//	blockname
-//	pragmaname
-//	pragmavalue
-// If two arguments are given, assume the second is a block name,
-// and the first is the name of the galaxy or universe within which the block
-// sits, and return the names and values of all pragmas that have been set for
-// that block for the current target.  If three arguments
-// are given (blockname, parentname, pragmaname), return
-// the value of the particular pragma.  If four arguments are given,
-// use the fourth argument to set the value of the pragma.
-//
-int PTcl::pragma(int argc,char ** argv) {
-    if (!currentTarget) {
-	Tcl_AppendResult(interp,"No current target!",(char*) NULL);
-	return TCL_ERROR;
-    }
-    if (argc == 3) {
-	return staticResult(currentTarget->pragma(argv[1],argv[2]));
-    } else if (argc == 4) {
-	return staticResult(currentTarget->pragma(argv[1],argv[2],argv[3]));
-    } else if (argc == 5) {
-	return staticResult(currentTarget->pragma(argv[1],argv[2],argv[3],argv[4]));
-    } else {
-	return usage("pragma ?<parentname>? ?<blockname>? ?<pragmaname>? ?<pragmavalue>?");
-    }
-}
-
-// Return the names, types, and default values of the pragmas supported
-// by targets with the given name.
-// If the target name is "<parent>", issue an error message.
-//
-int PTcl::pragmaDefaults(int argc,char ** argv) {
-    if (argc < 2 || strcmp(argv[1],"<parent>") == 0) {
-	Tcl_AppendResult(interp,
-			 "You must specify a Target to access pragmas.\n",
-			 "It cannot be <parent>.",
-			 (char*) NULL);
-	return TCL_ERROR;
-    }
-    const Target* t = KnownTarget::find(argv[1]);
-    if (!t) {
-      Tcl_AppendResult(interp,"Unrecognized target: ", argv[1], (char*) NULL);
-      return TCL_ERROR;
-    }
-    if (argc == 2) {
-	addResult(t->pragma());
-	return TCL_OK;
-    } else {
-	return usage("pragmaDefaults <targetname>");
-    }
 }
 
 // Run dynamic linker to load a file
@@ -924,180 +480,6 @@ int PTcl::link(int argc,char ** argv) {
 		return TCL_ERROR;
 	return TCL_OK;
 }
-
-// Link multiple files.  If invoked as "permlink", the link will
-// be permanent.
-
-int PTcl::multilink(int argc,char ** argv) {
-	if (argc == 1) {
-	    char msg[128];
-	    // This method is dispatched to handle both multilink
-	    // and permlink.
-	    sprintf(msg, "%s <file1> ?<file2> ...?", argv[0]);
-	    return usage(msg);
-	}
-	return Linker::multiLink(argc,argv) ? TCL_OK : TCL_ERROR;
-}
-
-// Override tcl exit function with one that does cleanup of the universe(s).
-int PTcl::exit(int argc,char ** argv) {
-	int estatus = 0;
-	if (argc > 2) return usage("exit ?<returnCode>?");
-	if (argc == 2 && Tcl_GetInt(interp, argv[1], &estatus) != TCL_OK) {
-		return TCL_ERROR;
-	}
-	univs.deleteAll();
-	::exit (estatus);
-	return TCL_ERROR;	// should not get here
-}
-
-// Request a halt of a running universe
-int PTcl::halt(int /*argc*/, char ** /*argv*/) {
-	SimControl::requestHalt();
-	return TCL_OK;
-}
-
-// Added to support tycho - eal
-// Monitor commands to ptcl.  The third, monitorPtcl can be redefined.
-// The default method prints the command to the standard output using cout.
-
-// static member -- tells whether monitoring is on or off
-int PTcl::monitor = 0;
-
-int PTcl::monitorOn(int /*argc*/, char ** /*argv*/) {
-  monitor = 1;
-  return TCL_OK;
-}
-
-int PTcl::monitorOff(int /*argc*/, char ** /*argv*/) {
-  monitor = 0;
-  return TCL_OK;
-}
-
-int PTcl::monitorPtcl(int argc,char **argv) {
-  for (int i = 1; i < argc; i++) {
-    cout << argv[i];
-    cout << " ";
-  }
-  cout << "\n";
-  return TCL_OK;
-}
-
-
-/////////////////////////////////////////////////////////////////////////////
-//			Register actions with SimControl
-/////////////////////////////////////////////////////////////////////////////
-
-// First, define the action function that will be called by the Ptolemy kernel.
-// The string tclAction passed will be executed as a Tcl command.
-void ptkAction(Star* s, const char* tclCommand) {
-    if (tclCommand == NULL || *tclCommand == '\0') {
-    	Tcl_Eval(PTcl::activeInterp,
-		 "error {null pre or post action requested}");
-	return;
-    }
-
-    if (s == 0) {
-    	Tcl_Eval(PTcl::activeInterp,
-		 "error {no star passed to pre or post action}");
-	return;
-    }
-
-    InfString temp = s->fullName();
-    Tcl_VarEval(PTcl::activeInterp, tclCommand, " \"",
-		    (char*)temp, "\"", (char*)NULL);
-}
-
-// Destructor cancels an action and frees memory allocated for a TclAction
-TclAction::~TclAction() {
-    // remove action and delete its memory
-    SimControl::cancel(action);
-
-    // delete dynamic strings
-    delete [] tclCommand;
-    delete [] name;
-}
-
-// constructor out-of-line to save code (esp. with cfront)
-TclActionList::TclActionList() {}
-// ditto for these.
-TclActionListIter :: TclActionListIter(TclActionList& sl) : ListIter (sl) {}
-
-
-// Return a pointer to the TclAction with the given name, if it exists.
-// Otherwise, return 0.
-TclAction* TclActionList::objWithName(const char* name) {
-    TclAction* obj;
-    ListIter next(*this);
-    while ((obj = (TclAction*)next++) != 0) {
-	if (strcmp(name, obj->name) == 0) return obj;
-    }
-    return 0;
-}
-
-static TclActionList tclActionList;
-
-// Register a tcl command to be executed before or after the firing of any star.
-// The function takes two arguments, the first of which must be "pre" or "post".
-// This argument indicates whether the action should occur before or after
-// the firing of a star.  The second argument is a string giving a tcl command.
-// Before this command is invoked, however, the name of the star that triggered
-// the action will be appended as an argument.  For example:
-// 	registerAction pre puts
-// will result in the name of a star being printed on the standard output
-// before it is fired.  The value returned by registerAction is an
-// "action_handle", which must be used to cancel the action using cancelAction.
-//
-int PTcl::registerAction(int argc,char ** argv) {
-    if(argc != 3) return usage("registerAction pre|post <command>");
-
-    // if "pre" is TRUE, then it is a pre-action
-    int pre = FALSE;
-    if (strcmp("pre", argv[1]) == 0) pre = TRUE;
-    else if (strcmp("post", argv[1]) == 0) pre = FALSE;
-    else return usage("registerAction pre|post <command>");
-
-    // Define a new Tcl action
-    TclAction* tclAction = new TclAction;
-    tclAction->tclCommand = savestring(argv[2]);
-    tclAction->action =
-	SimControl::registerAction(ptkAction, pre, tclAction->tclCommand);
-
-    // Create a unique name for the action
-    char buf[32];
-    sprintf(buf, "an%u", (unsigned int)tclAction);
-    tclAction->name = savestring(buf);
-
-    // Register the action with the action list
-    tclActionList.put(*tclAction);
-
-    // The following guarantees to Tcl that the name will not be deleted
-    // at least until the next call to Tcl_Eval.  This is safe because only
-    // the cancelAction command below can delete this name.
-    // I'm not sure about this. -BLE
-    Tcl_SetResult(interp, tclAction->name, TCL_VOLATILE);
-    return TCL_OK;
-}
-
-// Cancel a registered action
-// The single argument is the action_handle returned by registerAction
-//
-int PTcl::cancelAction(int argc, char** argv) {
-    if (argc != 2) return usage("cancelAction <action_handle>");
-    TclAction* tclAction = tclActionList.objWithName(argv[1]);
-    if (tclAction == 0) {
-	Tcl_AppendResult(interp,
-	   "cancelAction: Failed to convert action handle", (char*) NULL);
-	return TCL_ERROR;
-    }
-    tclActionList.remove(tclAction);
-    delete tclAction;
-    return TCL_OK;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//				Function table
-/////////////////////////////////////////////////////////////////////////////
 
 // An InterpFuncP is a pointer to an PTcl function that takes an argc-argv
 // argument list and returns TCL_OK or TCL_ERROR.
@@ -1114,54 +496,28 @@ struct InterpTableEntry {
 
 #define ENTRY(verb) { quote(verb), PTcl::verb }
 
-// synonyms or overloads on argv[0]
-#define ENTRY2(verb,action) { quote(verb), PTcl::action }
-
 // Here is the table.  Make sure it ends with "0,0"
-// Also, the first entry should be "monitorPtcl", because the
-// dispatcher treats it specially.
 static InterpTableEntry funcTable[] = {
-        ENTRY(monitorPtcl),
-        ENTRY(monitorOn),
-        ENTRY(monitorOff),
 	ENTRY(alias),
-	ENTRY(animation),
 	ENTRY(busconnect),
-	ENTRY(cancelAction),
 	ENTRY(connect),
 	ENTRY(cont),
-	ENTRY(curuniverse),
 	ENTRY(defgalaxy),
 	ENTRY(delnode),
 	ENTRY(delstar),
-	ENTRY(deluniverse),
 	ENTRY(descriptor),
 	ENTRY(disconnect),
 	ENTRY(domain),
 	ENTRY(domains),
-	ENTRY(exit),
-	ENTRY(halt),
 	ENTRY(knownlist),
 	ENTRY(link),
-	ENTRY(listobjs),
-	ENTRY(matlab),
-	ENTRY(mathematica),
-	ENTRY(multilink),
 	ENTRY(newstate),
-	ENTRY(newuniverse),
 	ENTRY(node),
 	ENTRY(nodeconnect),
 	ENTRY(numports),
-	ENTRY2(permlink,multilink),
-	ENTRY(pragma),
-	ENTRY(pragmaDefaults),
-	ENTRY(print),
-	ENTRY(renameuniv),
-	ENTRY(registerAction),
+	ENTRY(printVerbose),
 	ENTRY(reset),
 	ENTRY(run),
-	ENTRY(stoptime),
-	ENTRY(schedtime),
 	ENTRY(schedule),
 	ENTRY(seed),
 	ENTRY(setstate),
@@ -1171,9 +527,8 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(targetparam),
 	ENTRY(targets),
 	ENTRY(topblocks),
-	ENTRY(univlist),
 	ENTRY(wrapup),
-	{ 0, 0 }
+	0, 0
 };
 
 // register all the functions.
@@ -1186,52 +541,15 @@ void PTcl::registerFuncs() {
 	}
 }
 
-// static member: tells which Tcl interpreter is "innermost"
-Tcl_Interp* PTcl::activeInterp = 0;
-
 // dispatch the functions.
-int PTcl::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char* argv[])
+int PTcl::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char** argv)
 			   {
 	PTcl* obj = findPTcl(interp);
 	if (obj == 0) {
-		Tcl_SetResult(interp,
-		       "Internal error in PTcl::dispatcher!",TCL_STATIC);
+		strcpy(interp->result,
+		       "Internal error in PTcl::dispatcher!");
 		return TCL_ERROR;
 	}
 	int i = int(which);
-	// this code makes an effective stack of active Tcl interpreters.
-	Tcl_Interp* save = activeInterp;
-	activeInterp = interp;
-
-	// Added to support tycho - eal
-	// If the flag monitor is set, call monitorPtcl to monitor commands.
-	// Avoid the call if the command is "monitorPtcl", "monitorOn",
-	// or "monitorOff".
-	if (monitor && i>2) {
-	  // Call monitorPtcl with the arguments being the
-	  // Ptcl command that we are executing and its arguments
-	  InfString cmd = "monitorPtcl ";
-	  for(int j = 0; j < argc; j++) {
-	    cmd += argv[j];
-	    cmd += " ";
-	  }
-	  Tcl_Eval(interp, (char*)cmd);
-	}
-
-	int status = (obj->*(funcTable[i].func))(argc,argv);
-	activeInterp = save;
-	return status;
-}
-
-// IUList methods.
-
-void IUList::put(InterpUniverse& u) {NamedObjList::put(u);}
-
-int IUList::delUniv(const char* name) {
-	InterpUniverse* z = univWithName(name);
-	if (z) {
-		remove(z);
-		LOG_DEL; delete z;
-	}
-	return (z != 0);
+	return (obj->*(funcTable[i].func))(argc,argv);
 }

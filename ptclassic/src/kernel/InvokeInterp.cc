@@ -47,12 +47,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // METHODS
 
-// constructor
-InvokeInterp :: InvokeInterp() {}
-
-// destructor
-InvokeInterp :: ~InvokeInterp() {}
-
 // send a string to an external interpreter for evaluation
 const char*
 InvokeInterp :: interpreter(const char* expression) {

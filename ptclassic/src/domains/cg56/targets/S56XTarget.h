@@ -2,34 +2,13 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
+ Copyright (c) 1992 The Regents of the University of California.
+                       All Rights Reserved.
 
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
+ Programmer: J. Pino
+	Modified code from S56XTarget.h
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
-
-Programmer: Jose L. Pino
-
-Target for Ariel S-56X DSP board.
+ Target for Ariel S-56X DSP board.
 
 *******************************************************************/
 #ifndef _S56XTarget_h
@@ -39,38 +18,22 @@ Target for Ariel S-56X DSP board.
 #pragma interface
 #endif
 
-#include "CG56Target.h"
+#include "Sim56Target.h"
 #include "StringState.h"
 #include "IntState.h"
 
-class S56XTarget : public CG56Target {
-public:
-    S56XTarget(const char*,const char*);
-    S56XTarget(const S56XTarget&);
-    /*virtual*/ void writeCode();
-    /*virtual*/ int runCode();
-    /*virtual*/ Block* makeNew() const;
-    /*virtual*/ int isA(const char*) const;
-    
-    // Routines to construct CG wormholes, using the
-    // $PTOLEMY/src/domains/cgc/targets/main/CGWormTarget
-    /*virtual*/ CommPair fromCGC(PortHole&);
-    /*virtual*/ CommPair toCGC(PortHole&);
-
-    /*virtual*/ AsynchCommPair createPeekPoke(CGTarget& peekTarget,
-					      CGTarget& pokeTarget);
-    
+class S56XTarget : public Sim56Target {
 protected:
-    /*virtual*/ void headerCode();
-    /*virtual*/ void trailerCode();
-    /*virtual*/ void setup();
-private:
-    int pairNumber;
-    inline void configureCommPair(CommPair&);
-    void initStates();
-    CodeStream aioCmds;
-    CodeStream shellCmds;
-    StringState monitorProg;
+	void initStates();
+public:
+	S56XTarget(const char*,const char*);
+	S56XTarget(const S56XTarget&);
+	void headerCode();
+	int setup(Galaxy&);
+	void wrapup();
+	Block* clone() const;
+	void addCode(const char*);
+	int isA(const char*) const;
 };
 
 #endif

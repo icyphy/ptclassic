@@ -18,7 +18,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	input {
 		name{ xInput }
-		type{ float }
+		type{ ANYTYPE }
 	}
 	constructor {
 		noInternalState();

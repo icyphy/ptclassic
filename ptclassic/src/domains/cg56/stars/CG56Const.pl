@@ -1,44 +1,39 @@
 defstar {
-	name { Const }
+	name { FixDC }
 	domain { CG56 }
 	desc { Constant source }
 	version { $Id$ }
 	author { E. A. Lee,  J. Pino, J. Buck }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 signal sources library }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
 	explanation {
-There are no runtime instructions associated with this star.
-The output buffer is initialized with the specified DC value.
+There are no runtime instructions associated with this star.  The
+output buffer is initialized with the specified DC value.
 	}
 	output {
 		name {output}
 		type {FIX}
-		attributes{P_NOINIT}
 	}
 	state {
-		name {level}
+		name {value}
 		type {FIX}
 		default {0.001}
 		descriptor { Constant value to go to the output. }
 	}
 	codeblock (org) {
+; initialization code for star $fullname() - class CG56DC	
 	org	$ref(output)
 	}
 	codeblock (dc) {
-	dc	$val(level)
+	dc	$val(value)
 	}
 	codeblock (orgp) {
 	org	p:
 	}
 	initCode {
-		addCode(org);
-		for (int i=0 ; i<output.bufSize() ; i++) addCode(dc);
-		addCode(orgp);
+		gencode(org);
+		for (int i=0 ; i<output.bufSize() ; i++) gencode(dc);
+		gencode(orgp);
 	}
 	execTime {
 		return 0;

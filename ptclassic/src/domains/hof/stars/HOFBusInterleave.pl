@@ -5,14 +5,15 @@ defstar {
 	desc {
 Bridge inputs to outputs and then self-destruct.
 This star interleaves two input busses onto a single bus.
-The two input busses must have the same width, which must
-be half the width of the output bus.
-The input signals are connected to the output in an alternating fashion.
+	}
+	explanation {
+The two multi-input ports must have the same number of connections,
+half the number of output connections.
 	}
 	version {$Id$ }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

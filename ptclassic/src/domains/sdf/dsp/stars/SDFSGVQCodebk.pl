@@ -11,30 +11,12 @@ codeword of the gain codebook.
   version { $Id$ }
   author { Bilung Lee }
   copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
   }
   location  { SDF dsp library }
-  input {
-    name { input }
-    type { FLOAT_MATRIX_ENV }
-    desc{ 
-Input matrix will be viewed as a row vector in row major ordering to
-represent a training vector.
-    }
-  }
-  output {
-    name { output }
-    type { FLOAT_MATRIX_ENV }
-    desc{ Output shape codebook, ie, (sizeShapeCodebook)*(dimension) matrix. }
-  }
-  output {
-    name { outGain }
-    type { FLOAT_MATRIX_ENV }
-    desc{ Output gain codebook, ie, (sizeGainCodebook)*1 matrix. }
-  }
   defstate {
     name { dimension }
     type { int }
@@ -83,61 +65,76 @@ represent a training vector.
     default { "" }
     desc { File to save final gain codebook values. }
   }
+  input {
+    name { input }
+    type { FLOAT_MATRIX_ENV }
+    desc{ 
+Input matrix will be viewed as a row vector in row major ordering to
+represent a training vector.
+    }
+  }
+  output {
+    name { output }
+    type { FLOAT_MATRIX_ENV }
+    desc{ Output shape codebook, ie, (sizeShapeCodebook)*(dimension) matrix. }
+  }
+  output {
+    name { outGain }
+    type { FLOAT_MATRIX_ENV }
+    desc{ Output gain codebook, ie, (sizeGainCodebook)*1 matrix. }
+  }
   ccinclude { "Matrix.h" }
   code {
-
-     // Code for partition function which is to find the optimum partition
-     // of the training vector for fixed gain and shape codebooks, and find
-     // the squared error (squared distance) of this training vector. 
-
+// Code for partition function which is to find the optimum partition
+// of the training vector for fixed gain and shape codebooks, and find
+// the squared error (squared distance) of this training vector. 
      static void partition(int& indexShape, int& indexGain, 
 			   double& distance, const double* trnVector, 
 			   const double* shapeCodebook, int sizeShapeCodebook,
 			   int dimension, const double* gainCodebook, 
 			   int sizeGainCodebook) {
 
-	// If X=input vector, and Si=i_th shape codeword.
-	// First find shape codeword Si to maximize X'*Si ( ' means transpose ),
+// If X=input vector, and Si=i_th shape codeword.
+// First find the shape codeword Si to maximize X'*Si ( ' means transpose ),
 	indexShape = 0;
 	double shapeDistance = 0;
-	for ( int j = 0; j<dimension; j++ )
-	    shapeDistance += trnVector[j] * shapeCodebook[j];
+	for ( int j=0; j<dimension; j++ )
+	    shapeDistance += trnVector[j]*shapeCodebook[j];
 
-	double sum = 0.0;
-	for ( int i = 1; i < sizeShapeCodebook; i++ ) {
-	    for ( j = 0; j < dimension; j++ )
+	double sum = 0;
+	for ( int i = 1; i<sizeShapeCodebook; i++ ) {
+	    for ( j=0; j<dimension; j++ )
 	        sum += trnVector[j]*shapeCodebook[i*dimension+j];
 	    if ( sum > shapeDistance ) {
 	       shapeDistance = sum;
 	       indexShape = i;
 	    }
-	    sum = 0.0;
+	    sum = 0;
 	}
+// now shapeDistance store the maximun X'*Si
 
-	// Now shapeDistance stores the maximum X'*Si
-	// Then find the j_th gain codeword gj to minimize (gj-X'*Si)^2
+// Then find the j_th gain codeword gj to minimize (gj-X'*Si)^2
 	indexGain = 0;
 	distance = gainCodebook[0]-shapeDistance;
 	distance *= distance;
 
 	for (i=1; i<sizeGainCodebook; i++) {
-	  sum = gainCodebook[i] - shapeDistance;
+	  sum = gainCodebook[i]-shapeDistance;
 	  sum *= sum;
           if ( sum < distance ) {
             distance = sum;
             indexGain = i;
           }
 	}
+// now distance store the minimun (gj-X'*Si)^2
 
-	// Now distance stores the minimun (gj-X'*Si)^2
-	// Squared error (squared distance) is ||X||^2+(gj-X'*Si)^2-(X'*Si)^2. 
-	distance -= shapeDistance * shapeDistance;
-	for (j = 0; j < dimension; j++) {
-	  distance += trnVector[j] * trnVector[j];
-	}
+// The squared error (squared distance) is ||X||^2+(gj-X'*Si)^2-(X'*Si)^2. 
+	distance -= shapeDistance*shapeDistance;
+	for (j=0; j<dimension;j++)
+	  distance += trnVector[j]*trnVector[j];
+
      }  // end of partition function
   } 	 // end of code
-
   protected {
     double* shapeCodebook;
     double* gainCodebook;
@@ -155,12 +152,12 @@ represent a training vector.
     numGainPart = 0;
   }
   destructor {
-    delete [] shapeCodebook;
-    delete [] gainCodebook;
-    delete [] trnSet;
-    delete [] shapeCentroid;
-    delete [] gainCentroid;
-    delete [] numGainPart;
+    LOG_DEL; delete [] shapeCodebook;
+    LOG_DEL; delete [] gainCodebook;
+    LOG_DEL; delete [] trnSet;
+    LOG_DEL; delete [] shapeCentroid;
+    LOG_DEL; delete [] gainCentroid;
+    LOG_DEL; delete [] numGainPart;
   }
   setup {
     if ( int(sizeShapeCodebook) > int(sizeTrnSet) ||
@@ -169,252 +166,204 @@ represent a training vector.
 			      "the size of training set");
 	return;
     }
-
     input.setSDFParams(int(sizeTrnSet), int(sizeTrnSet)-1);
-
-    //  Define an array for storing input training vectors
-    delete [] trnSet;
-    trnSet = new double[int(sizeTrnSet)*int(dimension)];
-
-    // Allocate arrays for storing the generated codebooks
-    delete [] shapeCodebook;
-    shapeCodebook = new double[int(sizeShapeCodebook)*int(dimension)];
-    delete [] gainCodebook;
-    gainCodebook = new double[int(sizeGainCodebook)];
-
-    // Allocate arrays to store the centroids for the codebooks
-    delete [] shapeCentroid;
-    shapeCentroid = new double[int(sizeShapeCodebook)*int(dimension)];
-    delete [] gainCentroid;
-    gainCentroid  = new double[int(sizeGainCodebook)];
-
-    // Allocate an array to store number of training vectors for each codeword
-    delete [] numGainPart;
-    numGainPart = new int[int(sizeGainCodebook)];
   }
-
   go {
+//  Define an array for storing input training vectors
+    LOG_NEW; trnSet = new double[int(sizeTrnSet)*int(dimension)];
+
 //  Get the input training vectors and store them in the 2-dimension array
     Envelope inpkt;
-    FloatMatrix zerovector(1, int(dimension));
-    zerovector = 0;
+    FloatMatrix& vector = *(new FloatMatrix);
     for (int i=0; i<int(sizeTrnSet); i++) {
-      const FloatMatrix* vectorp;
       (input%(int(sizeTrnSet)-1-i)).getMessage(inpkt);
-      vectorp = (const FloatMatrix *)inpkt.myData();
-      // check for "null" matrix inputs, caused by delays: treat as zero matrix
-      if (inpkt.empty()) {
-        vectorp = &zerovector;
-      }
-      if ( vectorp->numRows()*vectorp->numCols() != int(dimension) ) {
-	Error::message(*this,
-		       "The number of elements in input vector(matrix) ",
-		       "must equal to the parameter 'dimension'.");
+      vector = *(const FloatMatrix *)inpkt.myData();
+      if ( vector.numRows()*vector.numCols() != int(dimension) ) {
+	Error::message(*this,"The number of elements in input vector(matrix) ",
+			     "must equal to the parameter 'dimension'.");
 	return;
       }
-      int rowloc = i * int(dimension);
       for (int j=0; j<int(dimension); j++) 
-	trnSet[rowloc + j] = vectorp->entry(j);
+	trnSet[i*int(dimension)+j]=vector.entry(j);
     }
+    
+//  Allocate a array for storing the generated codebooks
+    LOG_NEW; shapeCodebook = new double[int(sizeShapeCodebook)*int(dimension)];
+    LOG_NEW; gainCodebook = new double[int(sizeGainCodebook)];
 
-    // Initialize the initial codebooks using random code, ie, we take 
-    // every Kth training vector among the input traing vectors, where
-    // K = sizeTrnSet/sizeCodebook.
+/*
+ *  Initialize the initial codebooks using random code, ie, we take 
+ *  every Kth training vector among the input traing vectors, where
+ *  K = sizeTrnSet/sizeCodebook.
+*/
     const int K1 = int(sizeTrnSet)/int(sizeShapeCodebook);
-    for (i = 0; i < int(sizeShapeCodebook); i++) {
-      double gain = 0.0;
-      int t_rowloc = i * K1 * int(dimension);
-      for (int j = 0; j < int(dimension); j++) {
-        gain += trnSet[t_rowloc + j] * trnSet[t_rowloc + j];
-      }
+    double gain = 0;
+    for (i=0; i<int(sizeShapeCodebook); i++) {
+      for (int j=0; j<int(dimension); j++)
+        gain += trnSet[i*K1*int(dimension)+j]*trnSet[i*K1*int(dimension)+j];
       gain = sqrt(gain);
-      int s_rowloc = i * int(dimension);
-      for (j = 0; j < int(dimension); j++) {
-	shapeCodebook[s_rowloc + j] = trnSet[t_rowloc + j] / gain;
-      }
+      for (j=0; j<int(dimension); j++)
+	shapeCodebook[i*int(dimension)+j] = trnSet[i*K1*int(dimension)+j]/gain;
+      gain = 0;
     }
     const int K2 = int(sizeTrnSet)/int(sizeGainCodebook);
-    for (i = 0; i < int(sizeGainCodebook); i++) {
-      double gain = 0.0;
-      int rowloc = i * K2 * int(dimension);
-      for (int j = 0; j < int(dimension); j++) {
-        gain += trnSet[rowloc + j] * trnSet[rowloc + j];
-      }
-      gainCodebook[i] = sqrt(gain);
+    for (i=0; i<int(sizeGainCodebook); i++) {
+      gainCodebook[i] = 0;
+      for (int j=0; j<int(dimension); j++)
+        gainCodebook[i] += trnSet[i*K2*int(dimension)+j]*trnSet[i*K2*int(dimension)+j];
+      gainCodebook[i] = sqrt(gainCodebook[i]);
     }
 
-    // Store the centroid of each partitioned cluster of training set
-    for (i = 0; i < int(sizeShapeCodebook); i++) {
-      int rowloc = i * int(dimension);
-      for (int j = 0; j < int(dimension); j++) {
-        shapeCentroid[rowloc + j] = 0;
-      }
-    }
+/*
+ *  The array store the centroid of each partitioned cluster 
+ *  of training set.
+ */
+    LOG_NEW; shapeCentroid = new double[int(sizeShapeCodebook)*int(dimension)];
+    for (i=0; i<int(sizeShapeCodebook); i++)
+      for (int j=0; j<int(dimension); j++)
+        shapeCentroid[i*int(dimension)+j]  = 0;
 
-    for (i = 0; i < int(sizeGainCodebook); i++) {
+    LOG_NEW; gainCentroid  = new double[int(sizeGainCodebook)];
+    for (i=0; i<int(sizeGainCodebook); i++)
       gainCentroid[i] = 0;
-    }
 
-    // numGainPart[i] store the number of how many input training vectors
-    // are partitioned into the region of i_th gain codeword. 
-    for (i = 0; i < int(sizeGainCodebook); i++) {
+/*
+ *  The numGainPart[i] store the number of how many input training vectors
+ *  are partitioned into the region of i_th gain codeword. 
+ */
+    LOG_NEW; numGainPart = new int[int(sizeGainCodebook)];
+    for (i=0; i<int(sizeGainCodebook); i++)
       numGainPart[i] = 0;
-    }
 
-    //  Compute the optimum partition for the initial codebooks.
     int count = 0;
     int indexShape = 0;
     int indexGain = 0;
     double distance = 0;
     double oldDistortion = 0;
     double distortion = 0;
-
-    for (i = 0; i < int(sizeTrnSet); i++) {
+//  Compute the optimum partition for the initial codebooks.
+    for (i=0; i<int(sizeTrnSet); i++) {
       partition(indexShape,indexGain,distance,&(trnSet[i*int(dimension)]),
                 shapeCodebook,int(sizeShapeCodebook),int(dimension),
 		gainCodebook,int(sizeGainCodebook));
       distortion += distance;
-      for (int j = 0; j < int(dimension); j++) {
-        shapeCentroid[indexShape*int(dimension) + j] +=
-		gainCodebook[indexGain] * trnSet[i*int(dimension) + j];
-      }
+      for (int j=0; j<int(dimension); j++)
+        shapeCentroid[indexShape*int(dimension)+j] += gainCodebook[indexGain]*trnSet[i*int(dimension)+j];
     }
     count++;
 
     do {
-      int i;
-      //  compute optimum shape codebook Cs(m+1) in partition R(Cs(m),Cg(m)).
-      for (i = 0; i < int(sizeShapeCodebook); i++) {
-	double gain = 0.0;
-	int rowloc = i * int(dimension);
-        for (int j = 0; j < int(dimension); j++) {
-          gain += shapeCentroid[rowloc + j] * shapeCentroid[rowloc + j];
-        }
+//  compute the optimum shape codebook Cs(m+1) in partition R(Cs(m),Cg(m)).
+      for (i=0; i<int(sizeShapeCodebook); i++) {
+	gain = 0;
+        for (int j=0; j<int(dimension); j++)
+          gain += shapeCentroid[i*int(dimension)+j]*shapeCentroid[i*int(dimension)+j];
         gain = sqrt(gain);
-	//  update codeword if gain != 0; otherwise, we'll get division-by-zero
-	if (gain != 0.0) {
-          for (j = 0; j < int(dimension); j++) {
-            shapeCodebook[rowloc + j] = shapeCentroid[rowloc + j] / gain;
-	  }
+	if (gain != 0) {
+          for (j=0; j<int(dimension); j++)
+            shapeCodebook[i*int(dimension)+j] = shapeCentroid[i*int(dimension)+j]/gain;
+        } else {
+        //  If gain=0, then just keep the i_th original codeword.
         }
       }
 
-      //  Reset the contents of array gainCentroid to 0.
-      for (i = 0; i < int(sizeGainCodebook); i++) {
+//  Reset the contents of array gainCentroid to 0.
+      for (i=0; i<int(sizeGainCodebook); i++)
         gainCentroid[i] = 0;
-      }
 
-      //  Reset the contents of array numGainPart to 0.
-      for (i = 0; i < int(sizeGainCodebook); i++) {
+//  Reset the contents of array numGainPart to 0.
+      for (i=0; i<int(sizeGainCodebook); i++)
 	numGainPart[i] = 0;
-      }
 
-      //  Compute the optimum partition R(Cs(m+1),Cg(m)).
+//  Compute the optimum partition R(Cs(m+1),Cg(m)).
       for (i=0; i<int(sizeTrnSet); i++) {
-        partition(indexShape, indexGain, distance, &(trnSet[i*int(dimension)]),
-                  shapeCodebook, int(sizeShapeCodebook), int(dimension),
-                  gainCodebook, int(sizeGainCodebook));
+        partition(indexShape,indexGain,distance,&(trnSet[i*int(dimension)]),
+                  shapeCodebook,int(sizeShapeCodebook),int(dimension),
+                  gainCodebook,int(sizeGainCodebook));
         (numGainPart[indexGain])++;
-	int s_rowloc = indexShape * int(dimension);
-	int t_rowloc = i * int(dimension);
-        for (int j = 0; j < int(dimension); j++) {
-          gainCentroid[indexGain] +=
-		shapeCodebook[s_rowloc + j] * trnSet[t_rowloc + j];
-	}
+        for (int j=0; j<int(dimension); j++)
+          gainCentroid[indexGain] += shapeCodebook[indexShape*int(dimension)+j]*trnSet[i*int(dimension)+j];
       }
 
-      //  Compute optimum gain codebook Cg(m+1) in partition R(Cs(m+1),Cg(m+1))
-      for (i = 0; i < sizeGainCodebook; i++) {
-        //  Update if numGainPart[i] != 0; otherwise, get division-by-zero
+//  Compute the optimum gain codebook Cg(m+1) in partition R(Cs(m+1),Cg(m+1)).
+      for (i=0; i<sizeGainCodebook; i++) {
 	if (numGainPart[i] != 0 ) {
-	  if (gainCentroid[i] < 0) 
+	  if (gainCentroid[i]<0) 
 	    gainCodebook[i] = 0;
 	  else
-	    gainCodebook[i] = gainCentroid[i] / double(numGainPart[i]);       
+	    gainCodebook[i] = gainCentroid[i]/double(numGainPart[i]);       
+	} else {
+        //  If numGainPart[i]=0, then just keep the i_th original codeword.
 	}
       }
 
-      //  Reset the contents of array shapeCentroid to 0.
-      for (i = 0; i < int(sizeShapeCodebook); i++) {
-	int rowloc = i * int(dimension);
-        for (int j = 0; j < int(dimension); j++) {
-          shapeCentroid[rowloc + j] = 0;
-	}
-      }
+//  Reset the contents of array shapeCentroid to 0.
+      for (i=0; i<int(sizeShapeCodebook); i++)
+        for (int j=0; j<int(dimension); j++)
+          shapeCentroid[i*int(dimension)+j] = 0;
 
-      //  Reset the value of oldDistortion and Distortion.
+//  Reset the value of oldDistortion and Distortion.
       oldDistortion = distortion;
       distortion = 0;
 	
-      //  Compute the optimum partition R(Cs(m+1),Cg(m+1)).
-      for (i = 0; i < int(sizeTrnSet); i++) {
-        partition(indexShape, indexGain, distance, &(trnSet[i*int(dimension)]),
-                  shapeCodebook, int(sizeShapeCodebook), int(dimension),
-                  gainCodebook, int(sizeGainCodebook));
+//  Compute the optimum partition R(Cs(m+1),Cg(m+1)).
+      for (i=0; i<int(sizeTrnSet); i++) {
+        partition(indexShape,indexGain,distance,&(trnSet[i*int(dimension)]),
+                  shapeCodebook,int(sizeShapeCodebook),int(dimension),
+                  gainCodebook,int(sizeGainCodebook));
         distortion += distance;
-	int s_rowloc = indexShape * int(dimension);
-	int t_rowloc = i * int(dimension);
-        for (int j = 0; j < int(dimension); j++) {
-          shapeCentroid[s_rowloc + j] +=
-		gainCodebook[indexGain] * trnSet[t_rowloc + j];
-	}
+        for (int j=0; j<int(dimension); j++)
+          shapeCentroid[indexShape*int(dimension)+j] += gainCodebook[indexGain]*trnSet[i*int(dimension)+j];
       }
     } while ( (oldDistortion-distortion)/oldDistortion>double(thresholdRatio)
 	      && (++count)<int(maxIteration) );
 
-    // allocate memory for first output which will be deleted automatically
-    FloatMatrix& result1 =
-		*(new FloatMatrix(int(sizeShapeCodebook),int(dimension)));
+    FloatMatrix& result1 = *(new FloatMatrix(int(sizeShapeCodebook),int(dimension)));
     for (i=0; i<int(sizeShapeCodebook)*int(dimension); i++)
       result1.entry(i) = shapeCodebook[i];
     output%0 << result1;
 
-    // allocate memory for second output which will be deleted automatically
     FloatMatrix& result2 = *(new FloatMatrix(int(sizeGainCodebook),1));
     for (i=0; i<int(sizeGainCodebook); i++)
       result2.entry(i) = gainCodebook[i];
     outGain%0 << result2;
-  }
-
+  }	// end of go method
   wrapup {
     const char* sf1 = saveShapeCodebook;
     if (sf1 != NULL && *sf1 != 0) {
-      char* saveFileName = expandPathName(sf1);
+      char* saveFileName = savestring (expandPathName(sf1));
       // open the file for writing
-      FILE* fp = fopen(saveFileName, "w");
-      if ( fp == 0 ) {
-         Error::warn(*this, "Cannot open '", sf1,
-		     "' for writing: shape codebook not saved.");
-      }
-      else {
-         for (int i = 0; i < int(sizeShapeCodebook); i++) {
-	   int rowloc = i * int(dimension);
-           for (int j = 0; j < int(dimension); j++) {
-             fprintf(fp, "%e ", shapeCodebook[rowloc +j]);
-	   }
+      FILE* fp;
+      if (!(fp = fopen(saveFileName,"w"))) {
+      // File cannot be opened
+         Error::warn(*this,"Cannot open saveTapsFile for writing: ",
+                           saveFileName, ". Taps not saved.");
+      } else
+         for (int i=0; i<int(sizeShapeCodebook); i++) {
+           for (int j=0; j<int(dimension); j++)
+             fprintf(fp,"%e ",shapeCodebook[i*int(dimension)+j]);
            fprintf(fp,"\n");
          }
-      }
       fclose(fp);
-      delete [] saveFileName;
+      LOG_DEL; delete saveFileName;
     }
-
     const char* sf2 = saveGainCodebook;
     if (sf2 != NULL && *sf2 != 0) {
-      char* saveFileName = expandPathName(sf2);
+      char* saveFileName = savestring (expandPathName(sf2));
       // open the file for writing
-      FILE* fp = fopen(saveFileName, "w");
-      if ( fp == 0 ) {
-         Error::warn(*this, "Cannot open '", sf2,
-		     "' for writing: gain codebook not saved.");
+      FILE* fp;
+      if (!(fp = fopen(saveFileName,"w"))) {
+      // File cannot be opened
+         Error::warn(*this,"Cannot open saveTapsFile for writing: ",
+                           saveFileName, ". Taps not saved.");
       } else {
-         for (int i = 0; i < int(sizeGainCodebook); i++) {
-           fprintf(fp, "%e ",gainCodebook[i]);
+         for (int i=0; i<int(sizeGainCodebook); i++) {
+             fprintf(fp,"%e ",gainCodebook[i]);
            fprintf(fp,"\n");
          }
       }
       fclose(fp);
-      delete [] saveFileName;
+      LOG_DEL; delete saveFileName;
     }
-  }
+  }	//end of wrapup method
 }

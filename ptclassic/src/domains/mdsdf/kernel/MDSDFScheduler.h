@@ -95,6 +95,7 @@ class MDSDFScheduler : public SDFScheduler
     // Display the schedule
     /*virtual*/ StringList displaySchedule();
 
+    // ***** functions used from the SDFScheduler class *****
     /*virtual*/ int run();
 
 protected:
@@ -109,6 +110,7 @@ protected:
     
     // ***** These functions replace those for the 1-D SDFScheduler *****
     /* virtual */ void setup();  
+//    /* virtual */ int addIfWeCan(DataFlowStar& star, int defer = FALSE);
 
     // Schedule the multidimensional synchronous dataflow graph
     /*virtual*/ int computeSchedule(Galaxy& g);

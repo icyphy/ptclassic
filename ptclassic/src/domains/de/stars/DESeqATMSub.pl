@@ -1,42 +1,36 @@
 defstar {
-	name { SeqATMSub }
+	name { PrevPacketSub }
 	domain { DE }
 	author { GSWalter }
-	derivedFrom { SeqATMZero }
+	derivedFrom { ZeroSubstitution }
 	version { $Id$ }
-        copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-        }
-	location { DE main library }
+	copyright { 1992 (c) U. C. Regents }
+	location { DE main palette }
 	desc {
-This star reads in a sequence of SeqATMCells. It will
-check sequence numbers, and if a SeqATMCell is found
-missing, the information bits of the previously arrived
-SeqATMCell will be output in its place.
-
-The information bits from each correctly received
-SeqATMCell are unloaded and sent to the output port.
+This star reads in a sequence of BitArrays. It will
+check sequence numbers and if a BitArray is found
+missing, the bits of the previously arrived BitArray
+will be used in its place. The bits from each
+BitArray are unloaded before being sent through
+the output port.
 	}
 
 	protected { int* reserve; }
 
-	setup {
+	start {
 		LOG_NEW; reserve = new int[ int( numInfoBits ) ];
 		for ( int i = 0; i < numInfoBits; i++ )
 			reserve[ i ] = 0;
-		DESeqATMZero::setup();
+		DEZeroSubstitution :: setup();
 	}
 
 	go {
 		if ( input.dataNew ) {
 			Envelope inPkt;
 			input.get().getMessage( inPkt );
-			TYPE_CHECK( inPkt, "SeqATMCell" );
+			TYPE_CHECK( inPkt, "BitArray" );
 			count %= 8;
-			const SeqATMCell* voiceCell = ( const SeqATMCell* )
+			const BitArray* voiceCell = ( const BitArray* )
 					inPkt.myData();
 
 			// if packet missing, output previous packet
@@ -48,15 +42,14 @@ SeqATMCell are unloaded and sent to the output port.
 			}
 
 			// output current packet and store in reserver
-			for ( int j = headerLength;
-					j < int( headerLength + numInfoBits ); j++ ) {
+			for ( int j = 40; j < int( 40 + numInfoBits ); j++ ) {
 				if ( voiceCell->isON( j ) ) {
 					output.put( arrivalTime ) << 1;
-					reserve[ j - headerLength ] = 1;
+					reserve[ j - 40 ] = 1;
 				}
 				else {
 					output.put( arrivalTime ) << 0;
-					reserve[ j - headerLength ] = 0;
+					reserve[ j - 40 ] = 0;
 				} // end else
 			} // end for
 

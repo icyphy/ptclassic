@@ -7,12 +7,12 @@ defstar{
        name {Latency}
        domain {DE}
        version {$Id$}
-       location { DE ATM library }
+       location {ATM demo library}
        author { Allen Lao }
        copyright { 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
 
@@ -23,12 +23,11 @@ loaded trunk lines.
 
        explanation {
 Produces several statistics: on a per-packet basis, it passes through
-.c VoiceData
-type packets received on \fIinput\fR to \fIoutput\fR and also
-each packet's individual traversal time on the \fIlatency\fR port.
-When a \fIdemand\fR is detected, it produces average latency statistics
-for each individual trunk line on \fIavgLatencyIndiv\fR port and over all
-trunk lines on \fIavgLatencyAll\fR port.
+VoiceData type packets received on "input" to "output" and also
+each packet's individual traversal time on the "latency" port.
+When a "demand" is detected, it produces average latency statistics
+for each individual trunk line on "avgLatencyIndiv" port and over all
+trunk lines on "avgLatencyAll" port.
        }
 
        hinclude {"VoiceData.h"}
@@ -123,7 +122,7 @@ trunk lines on \fIavgLatencyAll\fR port.
 	     OutDEPort *avgport;
 
 	     Envelope  inEnv;
-	     const VoiceData*  v;
+	     VoiceData*  v;
       
 	     float  del, delayTotal;
 	     int  count, countTotal;
@@ -141,7 +140,7 @@ trunk lines on \fIavgLatencyAll\fR port.
 		    // get input packet
 	            iport->get().getMessage(inEnv);
 		    if (!voiceCheck(inEnv,*this)) return;
-		    v = (const VoiceData*) inEnv.myData();
+		    v = (VoiceData*) inEnv.myData();
 
 		    // calculate latency for this packet
 		    del = arrivalTime - (v->retStamp());

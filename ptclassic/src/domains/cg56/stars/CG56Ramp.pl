@@ -1,20 +1,14 @@
 defstar {
-	name { Ramp }
+	name { FixRamp }
 	domain { CG56 }
-	desc {Ramp generator}
+	desc {
+Generates a ramp signal, starting at "value" (default 0.0)
+with step size "step" (default 0.001).
+	}
 	version {$Id$}
 	author { Chih-Tsung Huang }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 signal sources library }
-	explanation {
-Generates a ramp signal, starting at \fIvalue\fR (default 0.0)
-with step size \fIstep\fR (default 0.001).
-	}
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 main library }
 	output {
 		name { output }
 		type { fix }
@@ -43,16 +37,16 @@ with step size \fIstep\fR (default 0.001).
         codeblock (main) {
 	move	$ref(sum),a
 	move	#$val(step),x0
-        move    a1,$ref(output)
+        move    a,$ref(output)
 	add	x0,a
-        move    a1,$ref(sum)
+        move    a,$ref(sum)
 	}
 	
-	setup {
+	start {
 		sum=value;
 	}
 	go {
-		addCode(main);
+		gencode(main);
 	}
         execTime {
 		return 5;

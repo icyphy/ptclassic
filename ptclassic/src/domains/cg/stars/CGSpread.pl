@@ -7,12 +7,7 @@ Takes one input and produces multiple outputs.
 	}
 	version {$Id$}
 	author { S. Ha }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { CG demo library }
 	explanation {
 This star does not generate any code. In multiprocessor code generation
@@ -27,15 +22,6 @@ one Send star, more than one Send stars, and so on.)
 	outmulti {
 		name {output}
 		type {=input}
-	}
-	setup {
-		MPHIter iter(output);
-		CGPortHole* p;
-		int loc = 0;
-		while ((p = (CGPortHole*) iter++) != 0) {
-			input.embed(*p, loc);
-			loc += p->numXfer();
-		}
 	}
 	go {
 	}

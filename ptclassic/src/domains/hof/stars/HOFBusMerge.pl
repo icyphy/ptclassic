@@ -1,19 +1,19 @@
 defstar {
 	name {BusMerge}
 	domain {HOF}
-	derivedfrom {Base}
+	derivedfrom {BaseHiOrdFn}
 	desc {
 Bridge inputs to outputs and then self-destruct.
-This star merges two input busses into a single bus.
-If the input bus widths are M1 and M2, and the output
-bus width is N, then we require that N = M1 + M2.
-The first M1 outputs come from the first input bus,
-while the next M2 outputs come from the second input bus.
+This star is used to merge two input busses into a single bus.
 	}
-	version {$Id$ }
+	explanation {
+The total number of input connections (the sum of the
+two input bus widths) must equal the number of output connections.
+	}
+	version {$Id$}
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -64,11 +64,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	    sinkDelayVals = po->initDelayValues();
 	    numInDelays = pi->numInitDelays();
 	    numOutDelays = po->numInitDelays();
-
-	    // Get alias pointers before disconnecting
-	    GenericPort *gpo = aliasPointingAt(po);
-	    GenericPort *gpi = aliasPointingAt(pi);
-
 	    source->disconnect();
 	    sink->disconnect();
 
@@ -98,8 +93,16 @@ limitation of liability, and disclaimer of warranty provisions.
 						      sink->parent()->name(),
 						      sink->name());
 	    }
-	    fixAliases(gpi,pi,sink);
-	    fixAliases(gpo,po,source);
+	    // Fix aliases
+	    GenericPort *gp;
+	    if (pi) {
+	      gp = pi->aliasFrom();
+	      if(gp) gp->setAlias(*sink);
+	    }
+	    if (po) {
+	      gp = po->aliasFrom();
+	      if(gp) gp->setAlias(*source);
+	    }
 
 	    source->initialize();
 	    sink->initialize();

@@ -2,26 +2,14 @@ defstar {
 	name { BusToNum }
 	domain { SDF }
 	desc {
-This star accepts a number of input bit streams, where this number should not
-exceed the wordsize of an integer.  Each bit stream has integer particles with
-values 0, 3, or anything else.  These are interpreted as binary 0, tri-state,
-or 1, respectively.  When the star fires, it reads one input bit from each 
-input.
-If any of the input bits is tri-stated, the output will be the previous output
-(or the initial value of the "previous" parameter if the firing is the first 
-one).
-Otherwise, the bits are assembled into an integer word, assuming two's 
-complement encoding, and sign extended.  The resulting signed integer is sent 
-to the output.
+This will receive as its input,bus (with 'bits' no of lines ) 
+and then convert it to an integer corresponding to the
+value of this binary number and output that as a particle.
+it is translating 7bits only
+it disregards the lsb from the codec that is lost at ThorSerToPar
 	}
-	author { Asawaree Kalavade }
-	version { $Id$ }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	author { Asawaree }
+	copyright { 1991 The Regents of the University of California }
 	inmulti {
 		name {input}
 		type {int}
@@ -31,57 +19,94 @@ limitation of liability, and disclaimer of warranty provisions.
 		type {int}
 	}
 	defstate {
+		name {bits}
+		type {int}
+		default {"7"}
+		desc {number of bits to output}
+	}
+	defstate {
 		name {previous}
 		type {int}
 		default {"0"}
 		desc {previous value of output}
 	}
-	protected {
-		int bits;
-		int *binary;
-	}
-	constructor {
-		binary = 0;
-	}
-	destructor {
-		LOG_DEL; delete [] binary;
-	}
-	setup {
-		bits = input.numberPorts();	
-		LOG_DEL; delete [] binary;
-		LOG_NEW; binary = new int[bits];
-	}	
+	start {
+	      }
+	
 	go {
+		int b;
+		int number =0 ;
+		int binary[8];
+		int change=0;
+//fprintf(stderr,"input bus: msb..lsb\t");		
 		MPHIter nexti(input);
-		int number;
-
-		for( int i=0; i< bits; i++){
-			binary[i]= (*nexti++)%0;
+// fetch the bus contents
+		for( int i=0; i< int (bits); i++){
+		binary[i]= (*nexti++)%0;
+		//fprintf(stderr,"%d",binary[i]);
 		}
-
-		for(i=0; i< bits; i++)
+//for(int l=6;l>=0;l--)
+//fprintf(stderr,"%d",binary[l]);
+//		fprintf(stderr,"\n");	
+/*	This is necessary as a temporary solution to a Thor limitation.
+	The star receives the input from ThorSerToPar that outputs a '3'
+	between two successful outputs of valid bits so that the
+	sdf star detects a new particle being created for firing purposes.
+	If the value received is a '3' however, we dont want it to be
+	converted to an integer. So we put this check to exit under 
+	such a case and thenn output the previous integer again.
+	(precisely why we use a skipOne star in the demo following this
+	to avoid duplicate samples being used).
+*/
+		for(i =0; i<7; i++)
 		{
-	// The following is a Thor-specific condition check where we do not
-	// want the number to be latched in if the bus is tristate (value 3)
-			if(binary[i] ==3)
-			{
-				output%0 << int(previous); 
-				return; 
-			}
+		if(binary[i] ==3){
+		change=1;
+	output%0 << previous; 
+//		printf("returning\n");
+		return; }
 		}
+/* this is being added for the sake of negative number conversion
+   this looks at the msb and if one, then it will convert
+*/
 
-		number = binary[bits-1] ? -1 : 0;
+        if(binary[6]==1){
+                for(int j=0;j<6;j++){
+                b=binary[j];
+                        if(b==0) b=1;
+                        else b=0;
+                binary[j]= b;}
+                        for(i=0;i<6;i++) {
+                            switch( binary[5-i]) {
+                                case    0:
+                                        number <<=1;
+                                        break;
+                                case    1:
+                                        number <<=1;
+                                        number +=1;
+                                        break;
+                                                }
+                                        }
+                number +=1;
+                number = number * (-1);
+                        }
+        else {
+                        for(i=0;i<6;i++) {
+                            switch( binary[5-i]) {
+                                case    0:
+                                        number <<=1;
+                                        break;
+                                case    1:
+                                        number <<=1;
+                                        number +=1;
+                                        break;
+                                                }
+                                        }
+                       }
 
-		for( i=(bits-2); i>=0; i--)
-		{
-			number <<= 1;
-			int d = binary[i] ? 1 : 0;
-			number += d;
-		}
-
+//printf("after : %d \n",number);
+//fprintf(stderr,"converted number is : %d\n ", number);
 		previous= number;
 		output%0 << number;	
-
-	} // go
 }
-
+}

@@ -16,18 +16,18 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { VHDL main library }
 	output {
 		name { output }
-		type { float }
+		type { int }
 	}
 	defstate {
 		name { step }
-		type { float }
-		default { 1.0 }
+		type { int }
+		default { 1 }
 		desc { Increment from one sample to the next. }
 	}
 	defstate {
 		name { value }
-		type { float }
-		default { 0.0 }
+		type { int }
+		default { 0 }
 		desc { Initial (or latest) value output by Ramp. }
 		attributes { A_SETTABLE | A_NONCONSTANT }
 	}

@@ -5,9 +5,9 @@ defstar {
     version { $Id$ }
     author { Kennard White (ported from Gabriel) }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { CG56 arithmetic library }
@@ -54,7 +54,7 @@ The inputs are multiplied and the result is written on the output.
     protected {
 	int	runtime;
     }
-    setup {
+    start {
 	int n = input_r.numberPorts();
 	if ( n != input_i.numberPorts() ) {
 	    Error::abortRun(*this,"must have same number of real & imag input ports");
@@ -65,7 +65,6 @@ The inputs are multiplied and the result is written on the output.
 	    runtime = 2;
 	    break;
 	case 1:
-            {    
 	    char buf[256];
 	    sprintf( buf, "input_r#%d", 1); // this is absurd
 	    CGPortHole *pr = (CGPortHole*) genPortWithName( buf);
@@ -75,7 +74,6 @@ The inputs are multiplied and the result is written on the output.
 	    forkInit( *pi, output_i);
 	    runtime = 0;
 	    break;
-	    }
 	case 2:
 	    runtime = 7;
 	    break;

@@ -1,10 +1,10 @@
 defstar {
-  name  	{ ReadImg }
+  name  	{ ReadImage }
   domain	{ MDSDF }
   version	{ $Id$ }
   author	{ Mike J. Chen, derived from SDFReadImage by Paul Haskell }
   copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -14,7 +14,7 @@ limitation of liability, and disclaimer of warranty provisions.
 Read a sequence of images in Portable GrayMap (PGM) format from
 different files and send them out as a FloatMatrix.
 
-This star does not support frame numbers.  See ReadImg2.
+This star does not support frame numbers.  See ReadImage2.
   }
   explanation {
 .Ir "PGM image format"
@@ -44,24 +44,20 @@ This star does not support frame numbers.  See ReadImg2.
     desc    { Name of file containing PGM-format image. }
   }
   ccinclude { "SubMatrix.h", <std.h>, <stdio.h> }
-
   setup {
     // set the dimensions of the output
     imageOutput.setMDSDFParams(int(height),int(width));
   }
-
+////// Read data into an GrayImage object...
   go {
-    // Open file containing the image.
-    char* nm = expandPathName(fileName);
-    StringList expandedName = nm;
-    delete [] nm;
-    FILE* fp = fopen(expandedName, "r");
+// Open file containing the image.
+    FILE* fp = fopen(expandPathName(fileName), "r");
     if (fp == (FILE*) NULL) {
-      Error::abortRun(*this, "cannot open '", expandedName, "' for reading.");
+      Error::abortRun(*this, "File not opened: ", fileName);
       return;
     }
 
-    // Read header, skipping 1 whitespace character at end.
+// Read header, skipping 1 whitespace character at end.
     char word[80];
     int fileImageWidth, fileImageHeight, maxval;
     fscanf(fp, "%s", word);
@@ -90,29 +86,23 @@ This star does not support frame numbers.  See ReadImg2.
     }
     fscanf(fp, "%*c"); // skip one whitespace char.
 
-    // Create a FloatMatrix object and fill it with data.
-    // We use a hack for faster file reading: create a buffer to read in
-    // the data as unsigned char's and then convert that in memory.
+// Create a FloatMatrix object and fill it with data.
+// We use a hack for faster file reading: create a buffer to read in
+// the data as unsigned char's and then convert that in memory.
     if(fileImageWidth != int(width) ||
        fileImageHeight != int(height)) {
-      Error::abortRun(*this,
-		      "the width and height states do not ",
-		      "match those of the file image read from ",
-		      fileName);
+      Error::abortRun("the width and height states of the star do not match those of the file image");
       return;
     }
     unsigned int size = fileImageWidth * fileImageHeight;
     unsigned char *buffer = new unsigned char[size];
     unsigned char *p = buffer;
-    fread( (char*)buffer,
-    	   int(width) * sizeof(unsigned char),
-	   int(height),
-	   fp );
+    fread((char*)buffer, sizeof(unsigned char), size, fp);
     FloatSubMatrix* imgData = (FloatSubMatrix*)imageOutput.getOutput();
-    for(unsigned int i = 0; i < size; i++)
+    for(int i = 0; i < size; i++)
       imgData->entry(i) = double(*p++);
-    delete [] buffer;
+    delete[] buffer;
     delete imgData;
     fclose(fp);
   } // end go{}
-} // end defstar{ ReadImg }
+} // end defstar{ ReadImage }

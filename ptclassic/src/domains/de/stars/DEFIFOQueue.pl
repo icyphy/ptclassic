@@ -3,25 +3,21 @@ defstar {
 	domain {DE}
 	derivedFrom { QueueBase }
 	desc {
-This star is a first-in first-out (FIFO) queue with finite or infinite length.
-Events on the "demand" input trigger a dequeue on the "outData"  port
-if the queue is not empty. If the queue is empty, then a "demand" event
-enables the next future "inData" particle to pass immediately to "outData".
+FIFO queue with finite or infinite length.
+Events on the "demand" input trigger "outData" if the queue is not empty.
+If the queue is empty, then a "demand" event enables the next future
+"inData" particle to pass immediately to "outData".
 The first particle to arrive at "inData" is always passed directly
 to the output, unless "numDemandsPending" is initialized to 0.
 If "consolidateDemands" is set to TRUE (the default), then "numDemandsPending"
-is not permitted to rise above unity. The size of the queue is sent to the
-"size" output whenever an "inData" or "demand" event is processed.
+is not permitted to rise above unity.
+The size of the queue is sent to the "size" output whenever an "inData"
+or "demand" event is processed.
 Input data that doesn't fit in the queue is sent to the "overflow" output.
 	}
 	version { $Id$}
-	author { Soonhoi Ha and E. A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	author { Soonhoi Ha, E. A. Lee, and Philip Bitar }
+	copyright { 1991 The Regents of the University of California }
 	location { DE main library }
 	seealso {QueueBase, Stack, PriorityQueue}
 	explanation {
@@ -132,6 +128,7 @@ after processing all inputs is sent to the "size" output.
 		arglist { "()" }
 		type { void }
 		code {
+		    NULL;
 		    // Nothing to do
 		}
 	}
@@ -144,21 +141,8 @@ after processing all inputs is sent to the "size" output.
 		    return queue.length();
 		}
 	}
-	method {
-		name { zapQueue }
-		code {
-			while (Qsize() > 0) {
-				Particle* pp = (Particle*) queue.get();
-				pp->die();
-			}
-			queue.initialize();
-		}
-	}
-	setup {
-		DEQueueBase::setup();
-		zapQueue();
-	}
-	destructor {
-		zapQueue();
+	start {
+		DEQueueBase::start();
+		queue.initialize();
 	}
 }

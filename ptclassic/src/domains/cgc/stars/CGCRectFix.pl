@@ -1,16 +1,16 @@
 defstar {
 	name { RectFix }
 	domain { CGC }
-	derivedFrom { Fix }
+	derivedFrom { CGCFix }
 	desc {
 Generate a fixed-point rectangular pulse of height "height" 
 (default 1.0) and width "width" (default 8).
 If "period" is greater than zero, then the pulse is repeated with the
 given period.
 	}
-        author { Juergen Weiss }
+        author { J.Weiss }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -69,7 +69,7 @@ the output is set to its maximum value (or minimum for negative magnitudes).
 	go {
 @	FIX_SetToZero($ref(output));
 
-@	if ($ref(count) < $ref(width)) {
+@	if ($ref(count) < $ref(width) {
 		CGCFix::clearOverflow();
 @		FIX_Assign($ref(output),$ref(height));
 		CGCFix::checkOverflow();

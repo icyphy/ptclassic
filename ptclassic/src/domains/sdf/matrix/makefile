@@ -6,11 +6,11 @@
 #
 # Important!  Do not run this makefile while in 
 # ~ptolemy/src/domains/sdf/matrix.  Instead run it from 
-# ~ptolemy/obj.$PTARCH/domains/sdf/matrix (through the symbolic
+# ~ptolemy/obj.$ARCH/domains/sdf/matrix (through the symbolic
 # link) -- that way a separate directory containing, say, Sun-3 and Sun-4
 # objects can be maintained.
 
-include ../../../../mk/subdomain.mk
+include ../../../../subdomain.mk
 
 DIRS = stars
 

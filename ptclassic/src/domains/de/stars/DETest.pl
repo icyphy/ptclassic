@@ -3,12 +3,7 @@ defstar {
 	domain { DE }
 	version { $Id$ }
 	author { Rolando Diesta and Edward Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { DE logic library }
 	desc {
 This star compares two inputs.  The test condition can be any of
@@ -77,7 +72,7 @@ on either input.
 		double right;
 		int test;
 	}
-	setup {
+	start {
 		// Initial value indicates that flag has not yet gotten the result of a test.
 		// This ensures that the first test result will always be output.
 		flag = -1;

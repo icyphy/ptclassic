@@ -4,12 +4,7 @@ defstar {
 	desc { Output the product of the inputs, as a float value. }
 	version { $Id$ }
 	author { S. Ha }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { CGC main library }
 	inmulti {
 		name {input}
@@ -40,8 +35,5 @@ limitation of liability, and disclaimer of warranty provisions.
 			addCode((const char*)out);
 			out.initialize();
 		}
-	}
-	exectime {
-		return input.numberPorts();
 	}
 }

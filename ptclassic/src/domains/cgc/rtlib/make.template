@@ -38,15 +38,11 @@ ROOT=../../../..
 VPATH = $(ROOT)/src/domains/cgc/rtlib
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 # Library name
-# Hack to be sure we don't build a shared version of libCGCrtlib.a
-# If we do have a shared libCGCrtlib, then we need to be sure to include
-# -lg++ when building cgc binaries.
-#LIB=libCGCrtlib.$(LIBSUFFIX)
-LIBNONSHARED=libCGCrtlib.a
+LIB=libCGCrtlib.$(LIBSUFFIX)
 
 # Header files
 HDRS=CGCrtlib.h
@@ -57,9 +53,9 @@ SRCS= $(HDRS:.h=.c)
 # Library objects
 OBJS= $(SRCS:.c=.o)
 
-all:	makefile $(LIBNONSHARED)
+all:	makefile $(LIB)
 
-install:	makefile $(LIBNONSHARED) $(LIBDIR)/$(LIBNONSHARED)
+install:	makefile $(LIBDIR)/$(LIB)
 
 include $(ROOT)/mk/common.mk
 

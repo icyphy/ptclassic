@@ -31,7 +31,7 @@ ROOT = ../../..
 VPATH = $(ROOT)/src/compat/cfront
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 HDRS = 	ACG.h NegExp.h Normal.h Random.h Uniform.h builtin.h minmax.h \

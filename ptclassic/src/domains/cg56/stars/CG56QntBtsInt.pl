@@ -1,20 +1,15 @@
 defstar {
-	name { QntBtsInt }
+	name { QuantBitsInt }
 	domain { CG56 }
 	desc { Integer quantizer with adjustable offset. }
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 nonlinear functions library }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
         explanation {
 .Id "quantizer"
-Normally, the \fIoutput\fR is just the two's complement number
-given by the top \fInoBits\fR of the \fIinput\fR (for integer output).
+Normally, the output is just the two's complement number
+given by the top noBits of the input (for integer output)
         }
 	input	{
 		name { input }

@@ -4,15 +4,9 @@ defstar {
     desc { Multiply and shift }
     version { $Id$ }
     author { Kennard White (ported from Gabriel) }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-    location { CG56 arithmetic library }
+    copyright { 1992 The Regents of the University of California }
+    location { CG56 library }
     explanation {
-.Id "multiplication with shifting"
 Multiply inputs \fIfactor1\fP and \fIfactor2\fP together, and shift the
 result left by \fIshift\fP bits.  The \fIshift\fP input must be zero
 or positive; right (negative) shifts are not supported.
@@ -34,7 +28,7 @@ or positive; right (negative) shifts are not supported.
 	type {FIX}
     }
     go {
-	addCode(cbMulShift);
+	gencode(cbMulShift);
     }
     codeblock (cbMulShift) {
 	move	$ref(factor1),x0

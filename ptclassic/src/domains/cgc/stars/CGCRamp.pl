@@ -1,5 +1,5 @@
 defstar {
-	name { Ramp }
+	name { FloatRamp }
 	domain { CGC }
 	desc {
 Generates a ramp signal, starting at "value" (default 0)
@@ -7,12 +7,7 @@ with step size "step" (default 1).
 	}
 	version {$Id$}
 	author { E. A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1992 The Regents of the University of California }
 	location { CGC main library }
 	output {
 		name { output }
@@ -31,12 +26,9 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { Initial (or latest) value output by Ramp. }
 		attributes { A_SETTABLE|A_NONCONSTANT }
 	}
-	go { addCode(std); }
+	go { gencode(std); }
 	codeblock (std) {
-	$ref(output) = $ref(value);
-	$ref(value) += $val(step);
-	}
-	exectime {
-		return 2;
+		$ref(output) = $ref(value);
+		$ref(value) += $val(step);
 	}
 }

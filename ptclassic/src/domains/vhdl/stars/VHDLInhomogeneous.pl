@@ -13,11 +13,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { VHDL main library }
 	input {
 		name { input }
-		type { ANYTYPE }
+		type { int }
 	}
 	output {
 		name { output }
-		type { =input }
+		type { int }
 	}
 	defstate {
 	        name { transfer }
@@ -30,11 +30,11 @@ limitation of liability, and disclaimer of warranty provisions.
         }
 	go {
 	  StringList out;
-	  for (int i = 0; i < int(transfer); i++) {
+	  for (int i=0; i<int(transfer); i++) {
 	    out << "$ref(output, ";
-	    out << -i;
+	    out << i;
 	    out << ") $assign(output) $ref(input, ";
-	    out << -i;
+	    out << i;
 	    out << ");\n";
 	  }
 	  addCode(out);

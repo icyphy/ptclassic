@@ -43,8 +43,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 **************************************************************************/
 #include "Message.h"
 
-extern const DataType FILEMSG;
-
 // FIXME: Want to be able to specify filename extensions so that tycho
 // editors will understand.
 

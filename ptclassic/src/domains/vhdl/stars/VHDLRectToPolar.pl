@@ -2,7 +2,7 @@ defstar {
 	name { RectToPolar }
 	domain { VHDL }
 	desc { CORDIC algorithm performs Cartesian to polar conversion }
-	version { $Id$ }
+	version { %W $Date$ }
 	author { M. C. Williamson, A. P. Kalavade }
 	copyright {
 Copyright (c) 1990-1995 The Regents of the University of California.

@@ -3,7 +3,7 @@
 # Version identification:
 # $Id$
 #
-# Copyright (c) 1991-%Q% The Regents of the University of California.
+# Copyright (c) 1991 The Regents of the University of California.
 #				All Rights Reserved.
 #
 # If this file's name is "make.template" and there is no makefile in
@@ -12,81 +12,42 @@
 #	make depend
 # This will add the dependencies to the makefile.
 
-ROOT =	../../../..
-VPATH = $(ROOT)/src/domains/vhdl/stars
-
-# do this for Synopsys
-ARCH =	$(PTARCH)
+ROOT = ../../../..
+VPATH = $(ROOT)/src/domains/X/stars
 
 # get configuration info
-CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 # VHDLDIR is the directory containing VHDL domain support
-VHDLDIR = 	$(ROOT)/src/domains/vhdl/kernel
-CGDIR = 	$(ROOT)/src/domains/cg/kernel
-CGCDIR = 	$(ROOT)/src/domains/cgc/kernel
-SDFDIR = 	$(ROOT)/src/domains/sdf/kernel
+VHDLDIR = $(ROOT)/src/domains/X/kernel
+CGDIR = $(ROOT)/src/domains/cg/kernel
+SDFDIR = $(ROOT)/src/domains/sdf/kernel
 
-INCL = -I$(VHDLDIR) -I$(CGDIR) -I$(CGCDIR) -I$(SDFDIR) -I$(KERNDIR)
+INCL = -I$(VHDLDIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
 
 # stars library
-LIB=libvhdlstars.$(LIBSUFFIX)
+LIB=libvhdlstars.a
 
 # source files for all stars, using preprocessor
-PL_SRCS = \
- VHDLBlackHole.pl \
- VHDLConst.pl \
- VHDLConstInt.pl \
- VHDLImpulse.pl \
- VHDLRect.pl \
- VHDLWaveForm.pl \
- VHDLWaveFormCx.pl \
- VHDLFork.pl \
- VHDLGain.pl \
- VHDLGainInt.pl \
+PL_SRCS=\
  VHDLAdd.pl \
- VHDLAddInt.pl \
- VHDLSub.pl \
- VHDLSubInt.pl \
- VHDLMpy.pl \
- VHDLMpyInt.pl \
+ VHDLBlackHole.pl \
  VHDLRamp.pl \
- VHDLRampInt.pl \
- VHDLAverage.pl \
- VHDLIntegrator.pl \
- VHDLFIR.pl \
- VHDLFIRInt.pl \
  VHDLInhomogeneous.pl \
- VHDLDistributor.pl \
- VHDLLMS.pl \
- VHDLCos.pl \
- VHDLSin.pl \
- VHDLExp.pl \
- VHDLRectToPolar.pl \
- VHDLPolarToRect.pl \
- VHDLQuant.pl \
- VHDLUpSample.pl \
- VHDLDownSample.pl \
- VHDLXgraph.pl \
- VHDLXMgraph.pl \
- VHDLXYgraph.pl \
- VHDLConstCx.pl \
- VHDLCxToFloat.pl \
- VHDLFloatToCx.pl \
 
 # The .cc files
-SRCS =	$(PL_SRCS:.pl=.cc)
+SRCS=$(PL_SRCS:.pl=.cc)
 
 # object files for all stars
-OBJS =	$(SRCS:.cc=.o)
+OBJS= $(SRCS:.cc=.o)
 
 # header files for all stars
-HDRS =	$(SRCS:.cc=.h)
+HDRS= $(SRCS:.cc=.h)
 
-STAR_MK =	vhdlstars
-DOMAIN =	VHDL
-EXTRA_SRCS =	$(STAR_MK).c $(PL_SRCS)
+STAR_MK=vhdlstars
+DOMAIN=VHDL
+EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS)
 
 all:		makefile stars_all
 

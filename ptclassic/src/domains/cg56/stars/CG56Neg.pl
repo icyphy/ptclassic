@@ -4,16 +4,10 @@ defstar {
 	desc { Negates input }
 	version { $Id$ }
 	author { Chih-Tsung, ported from Gabriel }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 arithmetic library }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
 	explanation {
-.Id "negation"
-The input is moved into accumulator "a", where the "neg" instruction is applied.
+The input is moved into accumlator "a", where the "abs" instruction is applied.
 	}
 	execTime {
 		return 3;
@@ -32,6 +26,6 @@ The input is moved into accumulator "a", where the "neg" instruction is applied.
 	move	a,$ref(output)
 	}
 	go {
-		addCode(negblock);
+		gencode(negblock);
 	}
 }

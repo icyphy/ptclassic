@@ -1,64 +1,60 @@
 # $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
-# All rights reserved.
-# 
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that the
-# above copyright notice and the following two paragraphs appear in all
-# copies of this software.
-# 
-# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-# SUCH DAMAGE.
-# 
-# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-# ENHANCEMENTS, OR MODIFICATIONS.
-# 
-# 						PT_COPYRIGHT_VERSION_2
-# 						COPYRIGHTENDKEY
-# Special SDF targets.
+# Copyright (c) 1991 The Regents of the University of California.
+#				All Rights Reserved.
+# For creating an SDF loop scheduler.
 
-LIBSRCS =	CompiledUniverse.cc CompiledError.cc
-SRCS =	$(LIBSRCS) CompileTarget.cc
-HDRS =	CompileTarget.h
+LIBSOURCES =	
+SOURCES =	$(LIBSOURCES) CompileTarget.cc
+HEADERS =	
  
 # Root of Ptolemy directory
 ROOT=../../../..
 # True source directory
-VPATH = $(ROOT)/src/domains/sdf/targets
+VPATH = $(ROOT)/src/domains/sdf/compiler
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG=$(ROOT)/config-$(ARCH).mk
 include $(CONFIG)
 
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
-LOOPKERNEL = $(ROOT)/src/domains/sdf/loopScheduler
+EGKERNEL = $(ROOT)/src/domains/sdf/expgraph
+LSKERNEL = $(ROOT)/src/domains/sdf/loopScheduler
 CGKERNEL = $(ROOT)/src/domains/cg/kernel
 
-INCL =-I$(SDFKERNEL) -I$(LOOPKERNEL) -I$(KERNDIR) -I$(CGKERNEL)
 
-OBJS = $(LIBSRCS:.cc=.o)
-LIB = libcompileSDF.$(LIBSUFFIX)
-EXTRA_DESTS = CompileTarget.o
+INC =-I$(SDFKERNEL) -I$(KERNDIR) -I$(EGKERNEL) -I$(LSKERNEL) -I$(CGKERNEL)
+.SUFFIXES: .cc 
+.cc.o:
+	$(GNU) $(GPPFLAGS) $(INC) -c $<
 
-all:	makefile $(LIB) $(EXTRA_DESTS)
+OBJS = $(SOURCES:.cc=.o)
+LIBOBJS = $(LIBSOURCES:.cc=.o)
+LIB = 
+
+all:	makefile $(OBJS)
 
 # "make install" does nothing extraordinary
 install:	all $(LIBDIR)/$(LIB)
-		@echo Installation complete.
 
+$(LIBDIR)/$(LIB):       $(LIB)
+		rm -f $(LIBDIR)/$(LIB)
+		cp $(LIB) $(LIBDIR)
+		ranlib $(LIBDIR)/$(LIB)
 
-# include common definitions, rules
-include $(ROOT)/mk/common.mk
+clean:
+		rm -f *.o core *~ *#
 
+sources:	$(SOURCES) make.template
 
-# Don't add anything after the next line; makedepend will zap it.
+depend:		$(SOURCES)
+		cd $(VPATH); \
+		$(DEPEND) $(INC) $(SOURCES) |\
+		 cat make.template - > makefile.n; mv -f makefile.n makefile
+
+makefile:	make.template
+		cd $(VPATH); make -f make.template sources depend
+		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
+		@echo makefile remade -- you must rerun make.
+		exit 1
+
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-

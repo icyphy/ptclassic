@@ -4,12 +4,7 @@ defstar {
 	desc { This star computes the sine of its input, in radians.  }
 	version { $Id$ }
 	author { Soonhoi Ha }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { CGC main library }
 	input {
 		name{input}
@@ -19,21 +14,15 @@ limitation of liability, and disclaimer of warranty provisions.
 		name{output}
 		type{float}
 	}
-	constructor {
-		noInternalState();
-	}
 	initCode {
 		addInclude("<math.h>");
 	}
 	go {
-		addCode(singen);
+		gencode(singen);
 	}
    codeblock(singen) {
 	$ref(output) = sin($ref(input));
    }
-	exectime {
-		return 23;	/* value taken from CG96Sin */
-	}
 }
 
 		

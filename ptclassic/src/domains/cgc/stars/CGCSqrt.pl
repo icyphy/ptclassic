@@ -4,12 +4,7 @@ defstar {
 	desc { This star computes the square root of its input.  }
 	version { $Id$ }
 	author { E. A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1992 The Regents of the University of California }
 	location { CGC nonlinear library }
 	explanation {
 .Id "square root"
@@ -34,7 +29,4 @@ limitation of liability, and disclaimer of warranty provisions.
    codeblock(ln) {
 	$ref(output) = sqrt($ref(input));
    }
-	exectime {
-		return 165;	/* value taken from CG96Sqrt */
-	}
 }

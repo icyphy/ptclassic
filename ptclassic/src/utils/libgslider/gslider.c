@@ -1,48 +1,23 @@
-/*
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
-*/
 #if !defined(lint) && !defined(SABER)
-static	char	SccsId[] = "$Id$";
-#endif /* not lint and not saber */
+static	char	sccsid[] = "$Id$";
+static	char	copyright[] =
+"Copyright 1990 Regents of the University of California.  All rights reserved.";
+#endif /* not defined lint and not defined SABER */
 
 #include <stdio.h>
-#include <malloc.h>
-#include "compat.h"
 #include "gslider.h"
 
+extern	char	*malloc();
 extern	char	*index();
 extern	double	atof();
 
 static	char	*strdup();
 static	Gslider	*gsl_parse();
-static  int	gsl_field();
+
 /*
- * Read in the async i/o configuration file.  Format:
+ * Read in the a slider configuration file.  Format:
  *
- * label name slider hostmin hostmax hostinit dspmin dspmax dspinit rep descriptor
+ * label hostmin hostmax hostinit dspmin dspmax dspinit rep descriptor
  */
 
 Gslider *
@@ -96,7 +71,6 @@ gsl_parse(line)
 	int	ret;
 	char	*next;
 	char	*rep;
-	char	*type;
 
 	sp = (Gslider *)malloc(sizeof (*sp));
 	if (sp == NULL) {
@@ -104,23 +78,9 @@ gsl_parse(line)
 		return (NULL);
 	}
 
-	ret = gsl_field(line, &next, &type, STRING);
-	if (ret < 0) {
-		ERROR("gsl_parse: missing type\n");
-	}
-	/* ignore ones that aren't sliders */
-	if (strcmp(type, "slider") != 0) {
-		(void) free(type);
-		(void) free(sp);
-		return (NULL);
-	}
-	ret = gsl_field(next, &next, &sp->dsplabel, STRING);
+	ret = gsl_field(line, &next, &sp->dsplabel, STRING);
 	if (ret < 0) {
 		ERROR("gsl_parse: missing DSP label\n");
-	}
-	ret = gsl_field(next, &next, &sp->name, STRING);
-	if (ret < 0) {
-		ERROR("gsl_parse: missing name\n");
 	}
 	ret = gsl_field(next, &next, &sp->hostmin, DOUBLE);
 	if (ret < 0) {
@@ -142,6 +102,10 @@ gsl_parse(line)
 	if (ret < 0) {
 		ERROR("gsl_parse: bad dsp maximum value\n");
 	}
+	ret = gsl_field(next, &next, &sp->dspinit, DOUBLE);
+	if (ret < 0) {
+		ERROR("gsl_parse: bad dsp initial value\n");
+	}
 	ret = gsl_field(next, &next, &rep, STRING);
 	if (ret < 0) {
 		ERROR("gsl_parse: missing representation field\n");
@@ -154,10 +118,8 @@ gsl_parse(line)
 		ERROR("gsl_parse: unknown representation field\n");
 	}
 	free(rep);
-	ret = gsl_field(next, &next, &sp->descr, STRING);
-	if (ret < 0) {
-		ERROR("gsl_parse: missing description field\n");
-	}
+
+	sp->descr = strdup(next);
 	sp->user = NULL;
 
 	return (sp);
@@ -168,11 +130,7 @@ gsl_parse(line)
 		;
 
 #define	SKIP_NWS(line, cp) \
-	for (cp = line; *cp && *cp != ' ' && *cp != '\t'; cp++) \
-		;
-
-#define	SKIP_TOQUOTE(line, cp) \
-	for (cp = line; *cp && *cp != '"'; cp++) \
+	for (cp = start; *cp && *cp != ' ' && *cp != '\t'; cp++) \
 		;
 
 /*
@@ -193,12 +151,7 @@ gsl_field(start, next, vp, type)
 	SKIP_WS(start, s);
 	if (*s == '\0')
 		return (-1);
-	if (*s == '"')  {
-		s++;
-		SKIP_TOQUOTE(s, e);
-	} else {
-		SKIP_NWS(s, e);
-	}
+	SKIP_NWS(s, e);
 	if (*e == '\0')
 		eol++;
 	*e++ = '\0';

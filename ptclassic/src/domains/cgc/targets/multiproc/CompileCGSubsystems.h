@@ -29,44 +29,16 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 *******************************************************************/
 
-#ifndef _CompileCGSubsystems_h
-#define _CompileCGSubsystems_h 1
-
-#ifdef __GNUG__
-#pragma interface
-#endif
-
 #include "CGSharedBus.h"
-#include "StringState.h"
 
-class CreateSDFStar;
-
-class CompileCGSubsystems: public CGSharedBus {
+#endif
+class CGWormTarget: public CGSharedBus {
 public:	
-    CompileCGSubsystems(const char* name,const char* starType,const char* desc);
+    CGWormTarget(const char* name,const char* starType,const char* desc);
     
     // Add dummy CGC stars - set StringArrayState childType based on
     // wormholes.
-    /*virtual*/ int modifyGalaxy();
-    /*virtual*/ int isA(const char*) const;
-    /*virtual*/ const char* className() const;
-    /*virtual*/ int childIsA(const char*) const;
-    /*virtual*/ Block* makeNew() const {
-	 return new CompileCGSubsystems(name(),starType(),descriptor());
-     }
-    /*virtual*/ DataFlowStar* createSend(int from, int to, int num);
-    /*virtual*/ DataFlowStar* createReceive(int from, int to, int num);
-    /*virtual*/ void pairSendReceive(DataFlowStar* s, DataFlowStar* r);
-    /*virtual*/ int runCode();
-    /*virtual*/ void wormPrepare();
-    /*virtual*/ void generateCode();
-protected:
-    /*virtual*/ void prepareChildren();
-private:
-    int replaceCommBlock(DataFlowStar& /*newStar*/,
-			 DataFlowStar& /*oldStar*/);
-    CreateSDFStar *cgcWorm;
+    /*virtual*/ setup();
 };
 
-#endif
     

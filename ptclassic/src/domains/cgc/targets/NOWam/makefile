@@ -1,4 +1,4 @@
-# Makefile for cgc/targets/NOWam (Network Of Workstations with active messages)
+# Makefile for cgc/targets/NOWam (Network Of Workstations)
 # Copyright (c) %Q% The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
@@ -9,9 +9,6 @@
 # Instead run in from ~$PTOLEMY/obj.$PTARCH/domains/cgc/targets/NOWam
 # (through the symbolic link) -- that way a separate directory containing,
 # say, Sun-3 and Sun-4 objects can be maintained.
-
-# subdomain.mk reads MYVPATH
-MYVPATH = ../../../../../../
 
 include ../../../../../mk/subdomain.mk
 

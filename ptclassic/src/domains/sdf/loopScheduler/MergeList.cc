@@ -3,30 +3,8 @@ static const char file_id[] = "MergeList.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
 
  Programmer:  Soonhoi Ha based on Shuvra Bhattacharyya's work.
  Date of creation: 4/92
@@ -346,7 +324,7 @@ int MergeLink :: postClustering(LSGraph& g) {
 // the master of this adjacent_node.
 void MergeLink :: initialPhase() {
 
-	DataFlowStar* org = adjacent_node->myMaster();
+	SDFStar* org = adjacent_node->myMaster();
 	org->repetitions = adj_ix - 1;
 
 	// break the invocation links.
@@ -450,7 +428,7 @@ void MergeLink :: createClusters(LSGraph& g) {
 // the par_node
 void MergeLink :: finalPhase(LSGraph& g) {
 
-	DataFlowStar* master = par_node->myMaster();
+	SDFStar* master = par_node->myMaster();
 	master->setMaster(par_node);
 	int total = master->repetitions;
 	master->repetitions = total - par_node->invocationNumber() + 1;

@@ -2,45 +2,32 @@ defstar {
     name {IIR}
     domain {SDF}
     desc {
-An infinite impulse response (IIR) filter implemented in a direct form II
-realization.
-The transfer function is of the form H(z) = G*N(1/z)/D(1/z),
-where N() and D() are polynomials.
-The parameter "gain" specifies G, and the floating-point arrays
-"numerator" and "denominator" specify N() and D(), respectively.
-Both arrays start with the constant terms of the polynomial
-and decrease in powers of z (increase in powers of 1/z).
-Note that the constant term of D is not omitted, as is common in
-other programs that assume that it has been normalized to unity.
+A Infinite Impulse Response (IIR) filter.
+Coefficients are in the "numerator" and "denominator", both start
+with z^0 terms and decrease in powers of z.
+Default coefficients give an 8th order Butterworth lowpass
+filter (XXX: or they will, when I get around to it).
     }
-    version { $Id$ }
+    version {@(#)SDFFIR.pl	1.4 7/25/91}
     author { Kennard White }
-    copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-    }
+    copyright { 1991 The Regents of the University of California }
     location { SDF dsp library }
     explanation {
 .PP
-This star implements an infinite impulse response filter of arbitrary order
-in a direct form II [1] realization.
-The parameters of the star specify $H(z)$, the $Z$-transform of an
-impulse response $h(n)$.
-The output of the star is the convolution of the input with $h(n)$.
+This star implements a infinite-impulse response filter of arbirary order.
+The default coefficients give XXX.  The star does not yet have multirate
+functionality.
+.PP
+The transfer function implemented is of the form H(z)=G*N(1/z)/D(1/z),
+where N() and D() are polynomials.  The state "gain" specifies G, and
+the state arrays "numerator" and "denominator" specify N and D, respectively.
+Both arrays start with z^0 terms and decrease in powers of z (increase in
+powers of 1/z).  Note that the leading term of D is *not* ommitted.
 .PP
 Note that the numerical finite precision noise increases with the filter order.
-To minimize this distortion, it is often desirable to expand the filter
-into a parallel or cascade form.
-.ID "Schafer, R. W."
-.ID "Oppenheim, A. V."
-.UH REFERENCES
-.ip [1]
-A. V. Oppenheim and R. W. Schafer, \fIDiscrete-Time Signal Processing\fR,
-Prentice-Hall: Englewood Cliffs, NJ, 1989.
+It is often desirable to expand the filter into a parallel or cascade form.
     }
-    seealso { FIR, Biquad }
+    seealso { FIR, BiQuad }
     input {
 	name {signalIn}
 	type {float}
@@ -94,16 +81,16 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	type {floatarray}
 	default { "0" }
 	desc {State.}
-	attributes { A_NONCONSTANT|A_NONSETTABLE }
+	attributes { A_NONCONSTANT|A_SETTABLE }
     }
     protected {
 	int numState;
 	double* stateEnd;
     }
     ccinclude {
-	<minmax.h>	// for max()
+	<builtin.h>	// for max()
     }
-    setup {
+    start {
 	int numNumer = numerator.size();
 	int numDenom = denominator.size();
 	numState = max(numNumer,numDenom); 
@@ -116,7 +103,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	} else {
 	    if ( (b0 = denominator[0]) == 0.0 ) {
 		// XXX: should sanity-check b0 more thoroughly
-		// (e.g., shouldn't even be close to zero)
+		// (e.g., shouldnt even be close to zero)
 		Error::abortRun(*this, 
 		  "Must have non-zero leading denominator");
 		return;
@@ -126,7 +113,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	scaleNumer = scaleDenom * double(gain);
 
 	// Set up the state vector.  The state vector includes
-	// both the delay states and the coefficients in the appropriate
+	// both the delay states and the cooeficients in the appropriate
 	// order:
 	// S(0) A(0) -1 S(1) A(1) -B(1) ... S(n-1) A(n-1) -B(n-1) Sn An -Bn
 	// state[0] and state[2] are never referenced

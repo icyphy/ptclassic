@@ -1,16 +1,16 @@
 defstar {
 	name { RampFix }
 	domain { CGC }
-	derivedFrom { Fix }
+	derivedFrom { CGCFix }
 	desc {
 Generate a fixed-point ramp signal, starting at "value" (default 0.0)
 with step size "step" (default 1.0).
 A precision and an initial value can be specified for a parameter by using
 the notation ( <initial_value>, <precision> ).
 	}
-        author { Juergen Weiss }
+        author { J.Weiss }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -66,27 +66,12 @@ The precision of this state is the precision of the accumulation.
 		attributes { A_SETTABLE|A_NONCONSTANT }
 	}
 
-        defstate {
-                name { StepPrecision }
-                type { precision }
-                default { 2.14 }
-                desc { Precision of the step in bits. }
-        }
-        defstate {
-                name { ValuePrecision }
-                type { precision }
-                default { 2.14 }
-                desc { Precision of the value in bits. }
-        }
-
         setup {
 		CGCFix::setup();
 		// if the user specified an invalid precision string, the error
 		// will be automatically reported in the initialize method of
 		// class PrecisionState
 		output.setPrecision(OutputPrecision);
-		value.setPrecision(ValuePrecision);
-		step.setPrecision(StepPrecision);
         }
 
 	go {

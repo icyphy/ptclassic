@@ -1,10 +1,14 @@
 defstar {
-	name { WaveFormCx }
+	name { CxWaveForm }
 	domain { SDF }
 	desc {
 Output a complex waveform as specified by the array state "value"
 (default "(1,0) (-1,0)").
-The parameters work the same way as in the WaveForm star.
+To halt the simulation after exhausing the data, set "haltAtEnd" to YES.
+Otherwise, to get a periodic waveform, set "periodic" to YES.
+Then the value list will be cyclically repeated.
+If "periodic" is not YES, and "haltAtEnd" is NO, then the value list is
+output only once, and (0,0) values are output subsequently.
 This star may be used to read a file by simply setting "value" to
 something of the form "< filename".
 	}
@@ -16,16 +20,11 @@ there is no other star dedicated to this purpose.
 .IE "reading from a file"
 .IE "halting a simulation"
 	}
-	version {$Id$ }
+	version {$Id$}
 	author { J. T. Buck and E. A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
-	ccinclude { "SimControl.h" }
+	ccinclude { "Scheduler.h" }
 	output {
 		name { output }
 		type { complex }
@@ -51,12 +50,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	protected {
 		int pos;
 	}
-	setup {
+	start {
 		pos = 0;
 	}
 	go {
-		if (int(haltAtEnd) && (pos >= value.size()))
-			SimControl::requestHalt();
+		if (int(haltAtEnd) && (pos >= value.size() - 1))
+			Scheduler::requestHalt();
 		if (pos >= value.size())
 			output%0 << Complex(0.0,0.0);
 		else

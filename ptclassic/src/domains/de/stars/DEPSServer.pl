@@ -1,21 +1,29 @@
+ident {
+/**************************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  E. A. Lee
+ Date of creation: 10/21/90
+
+ This star emulates a deterministic, processor-sharing server.
+ If input events arrive when it is not busy,
+ it delays them by the nominal service time.
+ If they arrive when it is busy, the server is shared.
+ Hence prior arrivals that are still in service
+ will be delayed by more than the nominal service time.
+
+**************************************************************************/
+}
 defstar {
 	name {PSServer}
 	derivedFrom { RepeatStar }
 	domain {DE}
-	version { $Id$}
-	author { E. A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { DE main library }
 	desc {
-This star emulates a deterministic, processor-sharing server.
-If input events arrive when it is not busy, it delays them by the nominal service time.
-If they arrive when it is busy, the server is shared. Hence prior arrivals that are
-still in service will be delayed by more than the nominal service time.
+	   "This star emulates a processor-sharing server"
 	}
 	input {
 		name {input}
@@ -23,7 +31,7 @@ still in service will be delayed by more than the nominal service time.
 	}
 	output {
 		name {output}
-		type {=input}
+		type {anytype}
 	}
 	defstate {
 		name {nomServiceTime}
@@ -31,42 +39,28 @@ still in service will be delayed by more than the nominal service time.
 		default {"1.0"}
 		desc { "Nominal service time" }
 	}
+	constructor {
+		input.inheritTypeFrom(output);
+	}
 	code {
 		struct token {
 		   Particle* pp;
-		   double serviceNeeded;
-		   double lastUpdate;
-		    token() : pp(0) {}
-		   ~token() { if (pp) pp->die();}
+		   float serviceNeeded;
+		   float lastUpdate;
 		};
 	}
 	protected {
 		// structure to store tokens in service
-		SequentialList tokensInService;
+		SingleLinkList tokensInService;
 		int numberInService;
 	}
-	constructor {
-		delayType = TRUE;
+	start {
 		numberInService = 0;
-	}
-	setup {
-		// Remove any remaining tokens
-		while (numberInService > 0) {
-			token* t = (token*)tokensInService.getAndRemove();
-			LOG_DEL; delete t;
-			numberInService--;
-		}
 		tokensInService.initialize();
 	}
-	destructor {
-		// Remove any remaining tokens
-		while (numberInService > 0) {
-			token* t = (token*)tokensInService.getAndRemove();
-			LOG_DEL; delete t;
-			numberInService--;
-		}
-	}
 	go {
+	   token* t;
+
 	   completionTime = arrivalTime;
 
 	   // Check to see whether the serviceNeeded of the first token
@@ -75,13 +69,13 @@ still in service will be delayed by more than the nominal service time.
 	   // to be output.
 	   int outputP = FALSE;
 	   while(numberInService > 0) {
-	      token *t = (token*)(tokensInService.head());
+	      t = (token*)(tokensInService.getNotRemove());
 	      if (t->serviceNeeded
 	              <= (arrivalTime - t->lastUpdate)/numberInService) {
 		// This token is ready to be output
 		output.put(completionTime) = *(t->pp);
 		tokensInService.getAndRemove();
-		LOG_DEL; delete t;
+		delete t;
 		numberInService--;
 		outputP = TRUE;
 	      } else {
@@ -93,9 +87,9 @@ still in service will be delayed by more than the nominal service time.
 	   if((!input.dataNew) & (!outputP)) return;
 
 	   // Modify the serviceNeeded for all tokensInService.
-	   ListIter nextTok(tokensInService);
+	   tokensInService.reset();
 	   for(int i = numberInService; i > 0; i--) {
-		token *t = (token*) nextTok++;
+		t = (token*) tokensInService.next();
 		t->serviceNeeded = t->serviceNeeded -
 			(arrivalTime - t->lastUpdate)/numberInService;
 		t->lastUpdate = arrivalTime;
@@ -114,18 +108,21 @@ still in service will be delayed by more than the nominal service time.
 		// Create a token.
 		Particle& pp = input.get();
 		Particle* newp = pp.clone();
-		LOG_NEW; token *t = new token;
+		*newp = pp;
+		t = new token;
 		t->pp = newp;
 		t->serviceNeeded = double(nomServiceTime);
 		t->lastUpdate = arrivalTime;
 
 		// Append new token to the list of tokensInService
 		tokensInService.append(t);
-		numberInService++;
+		numberInService += 1;
 
 		// Schedule a firing at the current estimate of
 		// the completion time of the service.
 		refireAtTime(arrivalTime + (t->serviceNeeded)*numberInService);
+
+		input.dataNew = FALSE;
 	   }
 
 	}

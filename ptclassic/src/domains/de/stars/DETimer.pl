@@ -2,22 +2,10 @@ defstar
 {
     name { Timer }
     domain { DE }
-    descriptor {
-Upon receiving a "trigger" input, output the elapsed real time
-in seconds, divided by "timeScale", since the last reset input,
-or since the start of the simulation if no reset has
-been received.  The time stamp on the output is the same as
-that of the "trigger" input. The time in seconds is related to the
-scheduler time through the scaling factor "timeScale".
-    }
+    descriptor { Measure real elapsed time between events. }
     version { $Id$ }
     author { T.M. Parks }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+    copyright { 1991 The Regents of the University of California. }
     location { DE main library }
 
     hinclude { "Clock.h" }
@@ -27,7 +15,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	name { timeScale }
 	type { float }
 	default { 1.0 }
-	desc { Duration of a scheduler time unit in seconds. }
+	desc { Duration of a time unit in seconds. }
     }
 
     input
@@ -53,7 +41,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	Clock clock;
     }
 
-	setup
+    start
     {
 	clock.reset();
     }
@@ -71,7 +59,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    }
 	    else
 	    {
-		elapsedTime.put(arrivalTime) << (now / timeScale);
+		elapsedTime.put(arrivalTime) << (double)now / timeScale;
 	    }
 	}
 	if (reset.dataNew)

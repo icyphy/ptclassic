@@ -3,19 +3,19 @@ static const char file_id[] = "PrecisionState.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -24,9 +24,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+							COPYRIGHTENDKEY
 
  Programmer: J.Weiss
  Date of creation: 10/24/94 
@@ -45,9 +43,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownState.h"
 #include "Tokenizer.h"
 #include <ctype.h>
-#include <stdlib.h>		// strtol()
-
-inline unsigned char max(unsigned char a, unsigned char b) {return (a>b)?a:b;}
+#include <minmax.h>
 
 #define TOKSIZE 256
 
@@ -67,8 +63,8 @@ Precision::Precision(const Fix& f,
 {
 	length = f.len(),  intBits = f.intb();
 
-	symbolic_length  = symbolic_len  ? savestring(symbolic_len)  : (char*)NULL;
-	symbolic_intBits = symbolic_intb ? savestring(symbolic_intb) : (char*)NULL;
+	symbolic_length  = symbolic_len  ? savestring(symbolic_len)  : NULL;
+	symbolic_intBits = symbolic_intb ? savestring(symbolic_intb) : NULL;
 }
 
 Precision::Precision(int len, int intb,
@@ -76,16 +72,16 @@ Precision::Precision(int len, int intb,
 {
 	length = len,      intBits = intb;
 
-	symbolic_length  = symbolic_len  ? savestring(symbolic_len)  : (char*)NULL;
-	symbolic_intBits = symbolic_intb ? savestring(symbolic_intb) : (char*)NULL;
+	symbolic_length  = symbolic_len  ? savestring(symbolic_len)  : NULL;
+	symbolic_intBits = symbolic_intb ? savestring(symbolic_intb) : NULL;
 }
 
 Precision::Precision(const Precision& p)
 {
 	length = p.len(),  intBits = p.intb();
 
-	symbolic_length  = p.symbolic_len()  ? savestring(p.symbolic_len())  : (char*)NULL;
-	symbolic_intBits = p.symbolic_intb() ? savestring(p.symbolic_intb()) : (char*)NULL;
+	symbolic_length  = p.symbolic_len()  ? savestring(p.symbolic_len())  : NULL;
+	symbolic_intBits = p.symbolic_intb() ? savestring(p.symbolic_intb()) : NULL;
 }
 
 // destructor
@@ -204,9 +200,9 @@ Precision& Precision::operator = (const Precision& p)
 	length = p.len(),  intBits = p.intb();
 
 	if (symbolic_length)  { LOG_DEL; delete [] symbolic_length;  }
-	symbolic_length  = p.symbolic_len()  ? savestring(p.symbolic_len())  : (char*)NULL;
+	symbolic_length  = p.symbolic_len()  ? savestring(p.symbolic_len())  : NULL;
 	if (symbolic_intBits) { LOG_DEL; delete [] symbolic_intBits; }
-	symbolic_intBits = p.symbolic_intb() ? savestring(p.symbolic_intb()) : (char*)NULL;
+	symbolic_intBits = p.symbolic_intb() ? savestring(p.symbolic_intb()) : NULL;
 	return *this;
 }
 
@@ -273,19 +269,13 @@ PrecisionState& PrecisionState :: operator = (const char* arg)
 
 	Tokenizer lexer(arg, "");
 
-	//(Precision&)*this = parsePrecisionString(lexer);
-	//Precision foo = Precision(6,3,NULL,NULL);
-	Precision foo = parsePrecisionString(lexer);
-	(Precision&)*this = foo;
-
-	//*this = foo;
-	//*this = Precision( foo.len(), foo.intb(), foo.symbolic_len(), foo.symbolic_intb());
+	(Precision&)*this = parsePrecisionString(lexer);
 
 	if (!this->isValid())
 		;  // parse error already reported in parser routine
 	else {
 		// check for extra cruft (this also eats up any pushback token)
-	  	if (getParseToken(lexer).tok != T_EOF) {
+		if (getParseToken(lexer).tok != T_EOF) {
 			parseError ("extra text after valid expression");
 			return *this;
 		}
@@ -300,36 +290,18 @@ PrecisionState& PrecisionState :: operator = (const char* arg)
 PrecisionState& PrecisionState :: operator = (const PrecisionState& p)
 {
 	(Precision&)*this = p;
-	delete [] val;
-	val = p.val ? savestring(p.val) : (char*)NULL;
+	val = savestring(p.val);
 	return *this;
 }
 
-#ifdef NEVER
-// copy from a Precision
-PrecisionState& PrecisionState :: operator = (const Precision& p)
-{
-  StringList sl(p);
-  delete [] val;
-  val = savestring(sl);
-  return *this;
-}
-#endif
 // the type
 const char* PrecisionState :: type() const { return "PRECISION";}
-
-// Return the current value
-StringList PrecisionState :: currentValue() const {
-	StringList res;
-	if (val) res = val;
-	return res;
-}
 
 // clone
 State* PrecisionState :: clone () const
 {
 	LOG_NEW; PrecisionState *s = new PrecisionState;
-	if (val) s->val = savestring(val);
+	if (val)  s->val = savestring(val);
 	(Precision&)*s = *this;
 	return s;
 }
@@ -396,12 +368,12 @@ Precision PrecisionState :: parsePrecisionString(Tokenizer& lexer)
 
 		// looks like a "n/m" expression,
 		// replace slash by colon
-		while ( (tp = (char*)titer++) ) {
+		while (tp = (char*)titer++) {
 			lexer.pushBack(!!strcmp("/", tp) ? tp : ":");
 			LOG_DEL; delete [] tp;
 		}
 	} else
-		while ( (tp = (char*)titer++) ) {
+		while (tp = (char*)titer++) {
 			lexer.pushBack(tp);
 			LOG_DEL; delete [] tp;
 		}

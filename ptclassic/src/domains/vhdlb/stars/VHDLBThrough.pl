@@ -7,9 +7,9 @@ Output the input value.
         version { $Id$ }
 	author { Edward A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { VHDLB main library }
@@ -20,12 +20,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	output {
 		name { output }
 		type { int }
-	}
-        defstate {
-                name { delay }
-                type { int }
-                default { 1 }
-                desc { The propagation delay, in nsec }
 	}
 	go {
 	}

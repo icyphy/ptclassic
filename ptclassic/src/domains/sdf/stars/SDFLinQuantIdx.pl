@@ -1,23 +1,21 @@
 defstar {
-	name { LinQuantIdx }
+	name { NewQuant }
 	domain { SDF }
 	desc {
-The input is quantized to the number of levels given by the "levels" parameter.
-The quantization levels are uniformly spaced between "low" and "high" inclusive.
-Rounding down is performed, so that output level will equal "high" only if the input
-level equals or exceeds "high". If the input is below "low", then the quantized
-output will equal "low". The quantized value is output to the "amplitude" port,
-while the index of the quantization level is output to the "stepNumber" port.
-This integer output is useful for stars that need an integer input, such as Thor stars.
+Quantizes input to one of N+1 possible output values using N thresholds.
+For an input less than or equal to the n-th threshold, but larger than 
+all previous thresholds, the output will be the n-th level.  
+If the input is greater than all thresholds, the output is the N+1-th level.
+There must be one more level than thresholds.
+It asks for the number f values to be quantized to (255) and also
+the range of values to quantize within. It will compute the step of
+the quantizer.
+Besides the quantized value being output, it will also output the level
+number that it corresponds to for the purpose of converison to an
+integer and then output serially to the Thor domain stars.
 	}
-	author { Asawaree Kalavade }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	version { $Id$ }
+	author { Asawaree }
+	copyright { 1991 The Regents of the University of California }
 	input {
 		name {input}
 		type {float}
@@ -49,35 +47,45 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc {upper limit of signal excursion }
 	}
 	protected {
-		double height;
+		float height;
+		float thresholds[255];
+		float values[255];
 		int number;
 	}
-	setup {
-		if (double(high) > double(low)) {
-		    height = (double(high) - double(low))/(int(levels)-0);
-		}
-		else {
-		    Error::abortRun(*this,
-				    "quantization range incorrectly specified");
-		}
-	}
-	go {
-	    	double in = input%0;
-		double highvalue = double(high);
-		double lowvalue = double(low);
+	start {
+		int i;
+		
+		height= (double(high)-double(low)) /(int(levels)-1);
+		thresholds[0]=double(low)+double(height);
+		values[0]=double(low);
 
-	    	if ( in >= highvalue ) {
-		    amplitude%0 << highvalue;
-                    stepNumber%0 << int(levels) - 1;
+	for(i=1;i<int(levels);i++) {
+	values[i]=values[i-1]+double(height);
+	thresholds[i]=thresholds[i-1]+double(height);
+			      }
+
+	number= int ((-1)*( int(levels))* (0.5));
 		}
-		else if ( in <= lowvalue ) {
-		    amplitude%0 << lowvalue;
-                    stepNumber%0 << 0;
+	
+	go {
+		int i;
+		
+
+	    number= int ((-1)*( int(levels))* (0.5));
+
+	    float in = float(input%0);
+	    for(i = 0; i < int (levels); i++) {
+		// if( in <= thresholds[i] ) 
+		if( in < thresholds[i] ) {
+		    amplitude%0 << values[i];
+		    // stepNumber%0 << i;
+		    stepNumber%0 << int(number);
+		    return;
 		}
-		else {
-		    int step = int((in - lowvalue)/height);
-		    stepNumber%0 << step;
-        	    amplitude%0 << double(lowvalue + step*height);
-		}
+		number++;
+	//	output%0 << values[levels-1];
+	//	output%0 << values[thresholds.size()];
+        //	output%0 = values[levels-1];
+	    }
 	}
 }

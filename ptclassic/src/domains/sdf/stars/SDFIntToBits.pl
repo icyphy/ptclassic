@@ -2,18 +2,12 @@ defstar {
 	name { IntToBits }
 	domain { SDF }
 	desc {
-Read the least significant nBits bits from an integer input,
-and output the bits as integers serially on the output,
-most significant bit first.
+Reads the least significant "nBits" bits from an integer input, and
+outputs the bits serially on the output, most significant bit first.
 	}
 	version { $Id$ }
 	author { J. T Buck }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
 	input {
 		name { input }
@@ -29,7 +23,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		default { 4 }
 		desc { number of bits read per execution }
 	}
-	setup {
+	start {
 		output.setSDFParams(int(nBits),int(nBits)-1);
 	}
 	go {

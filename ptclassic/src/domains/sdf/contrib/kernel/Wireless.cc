@@ -4,7 +4,7 @@ static const char file_id[] = "Wireless.cc";
 Version identification:
 $Id$ 
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -80,7 +80,7 @@ void WirelessChannel::Setup( const ChannelParameters channelparams )
 
 	// Define Pointer To Uniform Distribution
 	delete random;
-	random = new Uniform( -0.5 * M_PI, 0.5 * M_PI, gen );
+	random = new Uniform( -0.5 * PI, 0.5 * PI, gen );
 }
 
 
@@ -102,11 +102,11 @@ Complex WirelessChannel::Input( Complex input )
 	ShiftData( input );
 
 	sample_cnt =+ 1;
-	if( params.channel_type == 'i' || params.channel_type == 'I' )
+	if( params.channel_type == 'i' | params.channel_type == 'I' )
 	{
 	     CorruptData();
 	}
-	else if( params.channel_type == 'o' || params.channel_type == 'O' )
+	else if( params.channel_type == 'o' | params.channel_type == 'O' )
 	{
 	     if( sample_cnt * params.Ts > params.wc )
 	     {
@@ -138,17 +138,17 @@ void WirelessChannel::CorruptData()
 	     // Distance Between Tx and Rx Antennas.
 	     new_phase += (*random)();
 
-	     // Is There A Modulo 2 PI Function?
-	     if( new_phase > (M_PI/2.0) ) {
-		new_phase = ( new_phase/(M_PI/2.0) -
-			      floor(new_phase/(M_PI/2.0)) ) * M_PI - M_PI/2.0;
+	     // Is There A Modulo 2*PI Function?
+	     if( new_phase > PI/2.0 )
+	     {
+		  new_phase = ( new_phase/(PI/2.0) - floor(new_phase/(PI/2.0)) ) 
+			* PI - PI/2.0;
 	     }
 
-	     corrupt_symbols[ path ] =
-	        PhasorToRectangular( new_phase, abs( orig_symbols[ path ] ) );
+	     corrupt_symbols[ path ] 
+		= PhasorToRectangular( new_phase, abs( orig_symbols[ path ] ) );
 
-	     corrupt_symbols[ path ] =
-	        SetPathLoss( path, corrupt_symbols[ path ] );
+	     corrupt_symbols[ path ] = SetPathLoss( path, corrupt_symbols[ path ] );
 	}
 }
 

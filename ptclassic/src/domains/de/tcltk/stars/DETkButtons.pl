@@ -13,12 +13,12 @@ when the buttons are pushed, is used.
 	version { $Id$ }
 	author { Edward A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { DE Tcl/Tk library }
+	location { DE tcltk library }
 	hinclude { "ptk.h" }
 	defstate {
 	        name {label}
@@ -59,13 +59,11 @@ limitation of liability, and disclaimer of warranty provisions.
 		Error::abortRun(*this, "Need as many identifiers as outputs");
 		return;
 	    }
-	}
-	begin {
 	    // Set parameter values that are not user settable.
 	    tcl_file =
 		"$PTOLEMY/src/domains/de/tcltk/stars/tkButtons.tcl";
 
-	    DETclScript::begin();
+	    DETclScript::setup();
 	}
 	constructor {
 	    // Hide irrelevant outputs and states.

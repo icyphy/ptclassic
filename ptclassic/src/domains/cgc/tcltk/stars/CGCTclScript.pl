@@ -6,20 +6,14 @@ Sends input values to a Tcl script.  Gets output values from a Tcl script.
 The star can communicate with Tcl either synchronously or asynchronously.
 	}
 	explanation {
-.EQ
-delim off
-.EN
-This star reads a file containing Tcl commands and communicates with Tcl
-via procedures defined in that file.  Those procedures can read the inputs
-to the star and set its outputs.
+The star reads a file containing Tcl commands.  This file can bind Tk events
+to Tcl commands that affect the star.  In addition, it may define a procedure
+that will be called by Ptolemy that can execute Tcl code.
 It can be used in a huge
-variety of ways, including using Tk to animate or control a simulation.
-The Tcl file must define three Tcl procedures to communicate
+variety of ways, all of which use three Tcl procedures to communicate
 between the star and the Tcl code.  One of these reads the values of the
 inputs to the star (if any), another writes new values to the outputs (if
-any), and the third is called by Ptolemy either on every firing of
-the star (if \fIsynchronous\fR is TRUE) or on starting the simulation
-(if \fIsynchronous\fR is FALSE).
+any), and the third tells Tcl when to perform its functions.
 .pp
 The names of the three procedures are different for each instance of this star.
 This allows sharing of Tcl code without name conflicts.
@@ -29,8 +23,8 @@ above are "setOutputs", "grabInputs", and "callTcl".
 The first thing the star does is to define the Tcl variable "uniqueSymbol"
 to equal the unique string.  This string specifies the prefix that makes
 the name unique.  Thus the full name for the three procedures
-is "${uniqueSymbol}setOutputs", "${uniqueSymbol}grabInputs", and
-"${uniqueSymbol}callTcl".  The first two of these are defined internally
+is "${uniqueName}setOutputs", "${uniqueName}grabInputs", and
+"${uniqueName}callTcl".  The first two of these are defined internally
 by the star.  The third should be defined by the user in the Tcl file
 that the star reads.
 .pp
@@ -59,19 +53,16 @@ set up periodic calls to poll the inputs and set the outputs.
 .pp
 If the procedure "${uniqueSymbol}callTcl" is not defined in the given
 tcl_file, an error message results.
-.EQ
-delim $$
-.EN
 	}
 	version { $Id$ }
 	author { E. A. Lee and D. Niehaus }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1993 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC Tcl/Tk library }
+	location { CGC tcltk library }
 	outmulti {
 		name {output}
 		type {float}
@@ -96,7 +87,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {numOutputs}
 		type {int}
 		default {0}
-		attributes { A_NONCONSTANT|A_NONSETTABLE|A_GLOBAL }
+		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 	defstate {
 		name {numInputs}
@@ -156,8 +147,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    }
 	}
 	codeblock (setup1) {
-	    if(Tcl_Eval(interp, "set uniqueSymbol $starSymbol(tkScript)")
-		!= TCL_OK)
+	    if(Tcl_Eval(interp, "set uniqueSymbol $starSymbol(tkScript)", 0,
+		(char **) NULL) != TCL_OK)
 		errorReport("Error accessing tcl");
 	}
 	codeblock (setup2) {
@@ -169,17 +160,18 @@ limitation of liability, and disclaimer of warranty provisions.
 		$starSymbol(grabInputs), (ClientData) 0, NULL);
 	}
 	codeblock (sourceTclwEnv) {
-	    if(Tcl_Eval(interp, "source [expandEnvVars \\$val(tcl_file)]")
-		!= TCL_OK)
-		errorReport("Cannot source tcl script for TclScript star");
+	    if(Tcl_Eval(interp, "source [expandEnvVar \\$val(tcl_file)]", 0,
+		(char **) NULL) != TCL_OK)
+		errorReport("Cannot source tcl script for TkScript star");
 	}
 	codeblock (sourceTclwoEnv) {
-	    if(Tcl_Eval(interp, "source [expandEnvVars $val(tcl_file)]")
-		!= TCL_OK)
-		errorReport("Cannot source tcl script for TclScript star");
+	    if(Tcl_Eval(interp, "source [expandEnvVar $val(tcl_file)]", 0,
+		(char **) NULL) != TCL_OK)
+		errorReport("Cannot source tcl script for TkScript star");
 	}
 	codeblock (callTcl) {
-	    if(Tcl_Eval(interp, "$starSymbol(tkScript)callTcl") != TCL_OK)
+	    if(Tcl_Eval(interp, "$starSymbol(tkScript)callTcl",
+		0, (char **) NULL) != TCL_OK)
 		errorReport("Error invoking callTcl");
 	}
 
@@ -193,10 +185,11 @@ limitation of liability, and disclaimer of warranty provisions.
                 int argc;                           /* Number of arguments. */
                 char **argv;                        /* Argument strings. */
             {
+		float temp;
 		int i;
 		if(argc != $ref(numOutputs)+1) {
-                    /* Ignore -- probably premature */
-                    return TCL_OK;
+                    errorReport("Invalid number of arguments");
+                    return TCL_ERROR;
 		}
 		for(i=0; i<$ref(numOutputs); i++) {
                     if(sscanf(argv[i+1], "%f", &$starSymbol(outs)[i]) != 1) {
@@ -219,11 +212,11 @@ limitation of liability, and disclaimer of warranty provisions.
                 char **argv;                        /* Argument strings. */
             {
 		/* FIX ME: Is 32 always enough? */
-		static char temp[32];
+		static char* temp[32];
 		int i;
-		for(i=0; i<$val(numInputs); i++) {
-                    sprintf(temp, "%f", $starSymbol(ins)[i]);
-		    Tcl_AppendElement(interp,temp);
+		for(i=0; i<$ref(numInputs); i++) {
+                    sprintf(temp, "%f", $ref(input)[i]);
+		    Tcl_AppendElement(interp,temp,0);
 		}
                 return TCL_OK;
             }

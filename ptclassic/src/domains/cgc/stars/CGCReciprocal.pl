@@ -4,12 +4,7 @@ defstar {
 	desc {  1/x, with an optional magnitude limit. }
 	version { $Id$ }
 	author { E. A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1992 The Regents of the University of California }
 	location { CGC nonlinear library }
 	explanation {
 This star computes $1/x$, where $x$ is the input.
@@ -60,9 +55,4 @@ The sign of the output is determined by the sign of the input.
 		$ref(output) = t;
 	}
    }
-	exectime {
-		/* based on CG96Reciprocal */
-		if (double(magLimit) == 0.0) return 8;
-		else return 12;
-	}
 }

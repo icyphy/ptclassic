@@ -7,7 +7,7 @@ Generate a plot of a single signal with the xgraph program.
 	version {$Id$}
 	author { Jose Luis Pino }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -25,7 +25,7 @@ for a complete explanation of the options.
 .Ir "xgraph program, CG56"
 .Id "graph, X window, CG56"
 	}
-	derivedFrom { WrtFile }
+	derivedFrom { WriteFile }
 	defstate {
 		name {title}
 		type {string}
@@ -78,17 +78,15 @@ constructor { fileName.setAttributes(A_NONSETTABLE); }
 
 initCode {
 	StringList outfile;
-	if ( saveFile.null() ) {
+	if (saveFile.null())
 		outfile << "$starSymbol(/tmp/cgxgraph)";
-	}
-	else {
-		char *expandedName = expandPathName(saveFile);
-		outfile << expandedName;
-		delete [] expandedName;
-	}
-	addCode(xgraph(outfile), "shellCmds");
-	CG56WrtFile::initCode();
+	else
+		outfile << expandPathName(saveFile);
+	addCode(xgraph(outfile),"shellCmds");
+	CG56WriteFile::initCode();
 }
 
 
 }
+
+

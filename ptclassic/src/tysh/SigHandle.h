@@ -2,13 +2,13 @@
 #define _SigHandle_h 1
 /****************************************************************************
 Version identification:
-$Id$
+@(#)SigHandle.h
 
 Author: Joel R. King
 
 Defines the signal handlers for Tycho in both release and debug modes.
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -35,17 +35,30 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 **************************************************************************/
 
-// Define SIG_PT
-#include "ptsignals.h"
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <sys/time.h>
+#include <sys/resource.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <stdio.h>
 
-#if !defined(PTSOL2) && !defined(PTSUN4) && !defined(PTIRIX5)
-typedef void (*SIG_PT)(int);
-#endif
+/****************************************************************************/
 
-// Function prototypes
-int setHandlers(SIG_PT sigHandler);
-void signalHandler(int signo);
-void abortHandling();
-void setStrings(void) ;
+extern char **environ; /* An array of pointers to strings containing the    */
+                       /* environmental variables. This is needed by the    */
+                       /* execle() function, as an argument to setup the    */
+                       /* environment for the process that its launching.   */
+
+/****************************************************************************/
+
+int setReleaseHandlers(void);
+int setDebugHandlers(void);
+static void signalHandlerRelease(int);
+static void signalHandlerDebug(int);
+static void abortHandling(void);
+
+/****************************************************************************/
 
 #endif

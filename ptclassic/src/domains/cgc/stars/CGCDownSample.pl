@@ -9,12 +9,7 @@ default.
 	}
 	version { $Id$ }
 	author { Soonhoi Ha }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1992 The Regents of the University of California }
 	location { CGC main library }
 	input {
 		name {input}
@@ -38,10 +33,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { Downsample phase. }
 		attributes { A_SETTABLE }
 	}
-	constructor {
-		noInternalState();
-	}
-	setup {
+	start {
 		input.setSDFParams(int(factor),int(factor)-1);
 		if (int(phase) >= int(factor))
 			Error::abortRun(*this, ": phase must be < factor");
@@ -50,9 +42,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	$ref(output) = $ref2(input,phase);
 	}
 	go {
-		addCode(sendsample);
-	}
-	exectime {
-		return 1;
+		gencode(sendsample);
 	}
 }

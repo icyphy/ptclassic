@@ -5,17 +5,10 @@ defstar {
 Interleaves the two input signals.
  }
 	version { $Id$ }
-	author { Jose Luis Pino & Chih-Tsung Huang, ported from Gabriel }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 control library }
+	author { Chih-Tsung Huang, ported from Gabriel }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
 	explanation {
-.Ir "interleaving data streams"
-.Ir "combining data streams"
 Takes N input streams and synchronously combines them into one output stream,
 where N is the number of inputs.  It consumes N input particles from each
 input, and produces N*B particles on the output, where B = blockSize.
@@ -25,11 +18,11 @@ the next B particles from the next input, etc.
 	}
 	inmulti {
 		name {input}
-		type {anytype}
+		type {FIX}
 	}
 	output {
 		name {output}
-		type {=input}
+		type {FIX}
 	}
         state {
                 name {blockSize}
@@ -37,29 +30,27 @@ the next B particles from the next input, etc.
                 default {1}
                 desc {Number of particles in a block.}
 	}
-        setup {
+        start {
                 int n = input.numberPorts();
-		int bs = int(blockSize);
-		input.setSDFParams(bs,bs-1);
-		output.setSDFParams(n*bs,n*bs-1);
+                MPHIter nexti(input);
+                PortHole* p;
+                while((p = nexti++) != 0)
+ ((SDFPortHole*)p)->setSDFParams(int(blockSize),int(blockSize)-1);
+                output.setSDFParams(n*int(blockSize),n*int(blockSize)-1);
         }
- 	codeblock(loadOutputAddress) {
-        move    #>$addr(output),r1
-        }
-        codeblock(moveBlock,"int inputNum") {
-@(int(blockSize)!= 1 ? "\tdo\t#$val(blockSize),$label(txBlock)\n":"")\
-        move    $ref(input#@inputNum),a
-        move    a,$mem(output):(r1)+\
-@(int(blockSize)!= 1 ? "\n$label(txBlock)":"")
+ 	codeblock(main) {
+        move    #$addr(output),r1
+	nop
+        move    $ref(input#1),x0
+        clr     a               x0,x:(r1)+
+        move    $ref(input#2),x0
+        clr     a               x0,x:(r1)+
 	}
 
 	go {
-                addCode(loadOutputAddress);
-                for (int i = 1; i <= input.numberPorts(); i++) {
-                        addCode(moveBlock(i));
-                }
+		gencode(main);
 	}
 	exectime {
-		return (2*(int(input.numberPorts()))+1) ;
+		return 5;
 	}
 }

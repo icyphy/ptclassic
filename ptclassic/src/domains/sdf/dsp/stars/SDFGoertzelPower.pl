@@ -52,26 +52,21 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	}
 	// Inherit setup method
 	go {
-		// Run the Goertzel second-order IIR filter
 		SDFGoertzelBase::go();
 
-		// Compute the power of the kth DFT coefficient.
-		// The output of the Goertzel filter is
+		// For the last sample, compute the power.  The output is
 		//   state1 - Wn*state2 =
-		//       state1 - [state2*cos(theta) - j*state2*sin(theta)]
+		//       state1 - [state2*cos(theta) + j*state2*sin(theta)]
 		// where Wn is the twiddle factor Wn = exp(-j theta), such
-		// that theta = 2 pi k / N.
-		// Power is complex number times its conjugate, z z*:
-		//   z = state1 - [state2*cos(theta) - j*state2*sin(theta)]
-		//   z = [state1 - state2*cos(theta)] - j [state2*sin(theta)]
-		//   z z* = state1*state1 - 2*state1*state2*cos(theta) +
-		//     state2*state2*cos^2(theta) + state2*state2*sin^2(theta)
-		//   z z* = state1*state1 - state1*state2*2*cos(theta) +
-		//          state2*state2
-		// where 2*cos(theta) = d1, by definition in SDFGoertzelBase.
-		double acc = double(state1)*double(state1) -
-			     double(state1)*double(state2)*double(d1) +
-		             double(state2)*double(state2);
+		// that theta = 2 pi k / N.  Magnitude squared of the output:
+		//   [state1 - state2*cos(-theta)]^2 + [state2*sin(-theta)]^2 =
+		//       state1 + [-2*cos(theta)]*state1*state2 + state2^2
+		// which is a quadratic in state2, so use Horner's form:
+		//   state1 + state2 * ( d1val * state1 + state2 )
+		double acc = double(state2);
+		acc += double(d1) * double(state1);
+		acc *= double(state2);
+		acc += double(state1);
 		output%0 << acc;
 	}
 }

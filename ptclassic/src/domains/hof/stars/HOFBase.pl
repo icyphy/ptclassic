@@ -7,23 +7,21 @@ and defining their common functionality.
 	}
 	explanation {
 This star provides the base class for a family of \fIhigher-order
-functions\fR in Ptolemy.
-This star should not be used on its own.
+functions\fR in Ptolemy.  This star should not be used on its own.
 .IE "higher-order functions"
 A higher-order function is a function that takes a function as
-an argument and/or returns a function.
-Stars and galaxies in Ptolemy have two kinds of arguments:
-signals and parameters.
+an argument and/or returns a function.  Stars and galaxies in
+Ptolemy have two kinds of arguments: signals and parameters.
 The higher-order functions supported by this base class
 take functions as parameters, not signals.
 The basic mechanism is that a star or galaxy is statically
 specified, and the higher-order star replaces itself with
 one or more instances of the specified replacement block.
 	}
-	version { $Id$ }
+	version {$Id$ }
 	author { E. A. Lee  }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -85,7 +83,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	      MPHIter next(mph);
 	      PortHole *p, *farsideport;
 	      Block *farstar;
-	      while ( (p = next++) ) {
+	      while (p = next++) {
 		if ((farsideport = p->far()) &&
 		    (farstar = farsideport->parent()) &&
 		    (farstar->isA("HOFNop"))) {
@@ -130,8 +128,6 @@ limitation of liability, and disclaimer of warranty provisions.
 			blockname);
 		    return NULL;
 		}
-		// Set the target
-		if (target()) block->setTarget(target());
 
 		// Choose a name for the block
 	        StringList instancename = "HOF_";
@@ -147,7 +143,7 @@ limitation of liability, and disclaimer of warranty provisions.
         // method finds the source port connected to that input
         // porthole and reconnects it to the specified destination.
         // If the destination porthole is a multiporthole, then a
-        // new porthole will be instantiated.
+        // new porthole will be instatiated.
 	method {
 	    name { connectInput }
 	    type { int }
@@ -188,7 +184,7 @@ limitation of liability, and disclaimer of warranty provisions.
         // method finds the destination port connected to that output
         // porthole and reconnects it to the specified source porthole.
         // If the source porthole is a multiporthole, then a
-        // new porthole will be instantiated.
+        // new porthole will be instatiated.
 	method {
 	    name { connectOutput }
 	    type { int }
@@ -223,7 +219,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	// Find a port (if any) with an alias pointing to po.
 	// If there is none, check to see whether po is a port in
-	// in a MultiPortHole that has an alias pointing to it.
+	// in a MultiPortHole that has an aliase pointing to it.
 	// Return a pointer to the generic port with the alias, or zero.
 	method {
 	  name { aliasPointingAt }
@@ -291,7 +287,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		int givenInstNo = 0;
 		command = "instance_index";
 		char* instance_index =
-		  Tcl_GetVar(ptkInterp,command,(int)NULL);
+		  Tcl_GetVar(ptkInterp,command,NULL);
 		Tcl_GetInt(ptkInterp, instance_index, &givenInstNo);
 
 		// If the instance numbers don't match,
@@ -301,10 +297,10 @@ limitation of liability, and disclaimer of warranty provisions.
 		// If the instance numbers match, then reset
 		// parameter_name and proceed with substitutions
 		command = "parameter_name";
-		parameter_name = Tcl_GetVar(ptkInterp,command,(int)NULL);
+		parameter_name = Tcl_GetVar(ptkInterp,command,NULL);
 		if (!parameter_name) {
 		  Error::abortRun(*this,
-				  "Unexpected error setting parameter_name!");
+				  "Unxpected error setting parameter_name!");
 		  return 0;
 		}
 		
@@ -315,7 +311,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	      // parameter value. Use Tcl to do this, since it has
 	      // such convenient string manipulation functions.
 
-	      command = "regsub -all instance_number {";
+	      command = "regsub instance_number {";
 	      command += parameter_value;
 	      command += "} ";
 	      command += instanceno;
@@ -333,7 +329,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	      // The call to hashstring makes this string persistent
 	      // Hack alert: This is really a small memory leak.
 	      if(!block->setState(parameter_name,
-				  hashstring(Tcl_GetVar(ptkInterp,command,(int)NULL)))) { 
+				  hashstring(Tcl_GetVar(ptkInterp,command,NULL)))) {
 		Error::abortRun(*this,
 				"Bad name in parameter map: ", parameter_name);
 		return 0;
@@ -351,7 +347,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  code {
 	    BlockPortIter bpi(*block);
 	    PortHole *p;
-	    while ( (p = bpi++) ) {
+	    while (p = bpi++) {
 	      PortHole *far = p->far();
 	      if (!far) {
 		// This might be a galaxy porthole, which should return something,
@@ -383,27 +379,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	  code {
 	    MultiPortHole *mph;
 	    GenericPort *gp, *gpt;
-	    if ( (mph = ph->getMyMultiPortHole()) ) {
+	    if (mph = ph->getMyMultiPortHole()) {
 	      gp = mph;
 	    } else {
 	      gp = ph;
 	    }
 	    // Get the top-level port that we are connected to
-
-	    while ( (gpt = gp->aliasFrom()) ) {
+	    while (gpt = gp->aliasFrom()) {
 	      gp = gpt;
-	    }
-	    // If the multiporthole did not have an aliasFrom
-	    // porthole, it could still be that the original
-	    // porthole did.
-	    if (gp == mph) {
-	      gp = ph;
-	      while ( (gpt = gp->aliasFrom()) ) {
-		gp = gpt;
-	      }
-	      // If the original porthole also did not have an aliasFrom,
-	      // then make sure to return a pointer to its mph.
-	      if (gp == ph) gp = mph;
 	    }
 	    return gp;
 	  }

@@ -27,20 +27,18 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 
-# Important!  Do not run this makefile while in ~ptolemy/src/compat.  Instead
-# run in from ~ptolemy/obj.$PTARCH (through the symbolic link) -- that
+# Important!  Do not run this makefile while in ~ptolemy/src/utils.  Instead
+# run in from ~ptolemy/obj.$ARCH (through the symbolic link) -- that
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
 
-DIRS = X11R4 X11R5 cfront freebsd ptolemy
-DEEPDIRS = matlab/extern/include mathematica/Source/Includes
-
+DIRS = X11R4 X11R5 cfront freebsd matlab/extern/include ptolemy
 # Need to have $PTOLEMY as an absolute pathname for wish
 #PTOLEMY = ../..
 
 MAKEVARS =	\
-		"PTARCH=$(PTARCH)" 
+		"ARCH=$(ARCH)" 
 
 all install clean realclean sources depend checkjunk sccsinfo:
 	@for x in $(DIRS); do \
@@ -49,13 +47,5 @@ all install clean realclean sources depend checkjunk sccsinfo:
 		echo making $@ in utils/$$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/utils/$$x $@ ;\
 	 	cd .. ; \
-	    fi ; \
-	done
-	@for x in $(DEEPDIRS); do \
-	    if [ -w $$x ] ; then \
-		cd $$x ; \
-		echo making $@ in utils/$$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../../../src/utils/$$x $@ ;\
-	 	cd ../../.. ; \
 	    fi ; \
 	done

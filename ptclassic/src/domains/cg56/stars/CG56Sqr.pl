@@ -1,17 +1,16 @@
 defstar {
 	name { Sqr }
 	domain { CG56 }
-	desc { Square function.}
+	desc {
+The Output is Squared.
+}
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
+	explanation {
+The input is squared.
 	}
-	location { CG56 nonlinear functions library }
-	explanation {The output is the square of the input.}
 	execTime {
 		return 3;
 	}
@@ -29,6 +28,6 @@ limitation of liability, and disclaimer of warranty provisions.
  	move	a,$ref(output)
 	}
  	go {
-	 	 addCode(std);
+	 	 gencode(std);
 	}
 }

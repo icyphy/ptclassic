@@ -151,24 +151,34 @@ int MDSDFScheduler::reptArc (MDSDFPortHole& nearPort, MDSDFPortHole& farPort){
   Fraction farStarRowShouldBe;
   Fraction farStarColShouldBe;
 
-  // ANYSIZE resolution is based on input ports, ie. if a star has
-  // ANYSIZE outputs, it MUST have an ANYSIZE input (the reverse is
-  // not necessary).  A cascade of ANYSIZE inputs/ouputs is possible, which
-  // necessitates a recursive search for the first ANYSIZE input connected
-  // to a non-ANYSIZE output.
+  // ANYSIZE resolution is based on input ports, which will be guranteed
+  // by the order of descending calls to reptArc starting from a source star
+  // if the numRowsXfer() or numColXfer of the farPort is zero, this implies
+  // that the other port can accept ANYSIZE input in that dimension.  
+  // Therefore, we set those dimensions to match the nearPort's dimensions.
+  // Also, set any output portholes of the farStar that have ANYSIZE
+  // dimensions to match the change.
   // A star should not have two inputs with ANYSIZE dimensions because
   // they will be set to the same dimensions, unless this was intended.
   //
   // One example is for fork stars.
   if(farPort.numRowXfer() == ANYSIZE) {
-    // farStar has ANYSIZE rows, resolve it
-    if(farStar.resolveANYSIZErows() == 0) 
-      return FALSE;               // continue only if resolution successful 
+    if(farPort.isItOutput()) return FALSE;
+    BlockPortIter nextp(farStar);
+    PortHole* p;
+    while((p = nextp++) != 0) {
+      if(((MDSDFPortHole*)p)->numRowXfer() == ANYSIZE)
+	((MDSDFPortHole*)p)->setRowXfer(nearPort.numRowXfer());
+    }
   }
   if(farPort.numColXfer() == ANYSIZE) {
-    // farStar has ANYSIZE columns, resolve it
-    if(farStar.resolveANYSIZEcols() == 0)  
-      return FALSE;               // continue only if resolution successful
+    if(farPort.isItOutput()) return FALSE;
+    BlockPortIter nextp(farStar);
+    PortHole* p;
+    while((p = nextp++) != 0) {
+      if(((MDSDFPortHole*)p)->numColXfer() == ANYSIZE)
+	((MDSDFPortHole*)p)->setColXfer(nearPort.numColXfer());
+    }
   }
 
   // compute what the far star repetitions property should be.
@@ -342,8 +352,8 @@ int MDSDFScheduler::computeSchedule(Galaxy& g) {
       MDSDFStar& ms = *((MDSDFStar*)s);
       int startRow = ms.rowIndex;
       int startCol = ms.colIndex;
-      int endRow = 0;
-      int endCol = 0;
+      int endRow;
+      int endCol;
       int numTimesThisStar = 0;
 
       do {
@@ -355,12 +365,11 @@ int MDSDFScheduler::computeSchedule(Galaxy& g) {
 	  endRow = ms.rowIndex;
 	  endCol = ms.colIndex;
 	  // update the index for the next firing
-          // Need (int) cast on lhs to eliminate gcc warning
-	  if((int)(++ms.colIndex) >= (int)((double)ms.startColIndex + 
-					   (double)ms.colRepetitions)) {
+	  if(++ms.colIndex >= (int)((double)ms.startColIndex + 
+				    (double)ms.colRepetitions)) {
 	    // end of column repetitions, goto next row
-	    if((int)(++ms.rowIndex) >= (int)((double)ms.startRowIndex + 
-					     (double)ms.rowRepetitions)) {
+	    if(++ms.rowIndex >= (int)((double)ms.startRowIndex + 
+				      (double)ms.rowRepetitions)) {
 	      // end of row repetitions, finished all reps for this iteration
 	      ms.startColIndex += (int)((double)ms.colRepetitions);
 	      ms.startRowIndex = 0;  // is this always zero?!

@@ -6,13 +6,8 @@ Output parameters are reciprocal of the inputs.
 }
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 nonlinear functions library }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
 	explanation {
 Find the reciprocal of a fraction in terms of a fraction and some left shifts.
 	}
@@ -23,13 +18,9 @@ Find the reciprocal of a fraction in terms of a fraction and some left shifts.
 		name {input}
 		type {FIX}
 	}
-	output {
-		name { f }
-		type { fix }
-	}
-	output {
-		name { s }
-		type { int }
+	outmulti {
+		name {output}
+		type {FIX}
 	}
 	state {
 		name {Nf}
@@ -41,15 +32,14 @@ Find the reciprocal of a fraction in terms of a fraction and some left shifts.
                 name {X}
 	        type {int}
 	        default {15}
-	        attributes { A_NONCONSTANT|A_NONSETTABLE }
+	        attributes { A_NONSETTABLE }
         }
 	codeblock (Rblock) {
         move    $ref(input),a
         move    #0,r7
-	tst	a			; must setup flags before norm
-$label(normalize)
+$label(start)
         norm    r7,a
-        jnn     $label(normalize)                   ;normalize data
+        jnn     $label(start)                   ;normalize data
         move    r7,y0
         move    #$$010001,b
         sub     y0,b    a,x0            ;number of left shifts in LSBs of b
@@ -57,13 +47,13 @@ $label(normalize)
         and     #$$fe,ccr
         rep     #$val(Nf)
         div     x0,a                    ;quotient (f) in Nf LSBs of a
-        asl     a	b,$ref(s)
+        asl     a	b,$ref(output#2)
         rep     #$val(X)
         asl     a
-        move    a0,$ref(f)
+        move    a0,$ref(output#1)
  	}
  	go {
                  X=23-int(Nf);
-	 	 addCode(Rblock);
+	 	 gencode(Rblock);
 	}
 }

@@ -1,10 +1,10 @@
 defstar {
-  name  	{ ReadImg2 }
+  name  	{ ReadImage2 }
   domain	{ MDSDF }
   version	{ $Id$ }
   author	{ Mike J. Chen, derived from SDFReadImage by Paul Haskell }
   copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -57,7 +57,7 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
     default { 0 }
     desc    { Starting frame ID value. }
   }
-  ccinclude { "SubMatrix.h", <std.h>, <stdio.h>, "miscFuncs.h", "StringList.h" }
+  ccinclude { "SubMatrix.h", <std.h>, <stdio.h> }
   setup {
     // set the dimensions of the output
     imageOutput.setMDSDFParams(int(height),int(width));
@@ -65,36 +65,45 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
   }
   method {
     name { genFileName }
-    type { "char *" }
-    arglist { "(const char* str, const int d)" }
+    type { "void" }
+    arglist { "(char* outstr, const char* str, const int d)" }
     access { protected }
     code {
-      char *filename = expandPathName(str);
+      char* p = outstr;
+      const char* q = expandPathName(str);
       char num[16];
+
       sprintf(num, "%d", d);
-      char *newname = subCharByString(filename, '#', num);
-      delete [] filename;
-      return newname;
+      int len = strlen(num);
+      while (*q != '\000') { // Replace '#' with 'num's value.
+	if (*q == '#') {
+	  strcpy(p, num);
+	  p += len;
+	  q++;
+	} else {
+	  *p = *q; p++; q++;
+	}
+      }
+      *p = '\000';
     } // end genFileName()
   }
 
+////// Read data into an GrayImage object...
   go {
-    // Open file containing the image.
-    char *expandedName = genFileName(fileName, int(frameId));
-    StringList fullName = expandedName;
-    delete [] expandedName;
+// Open file containing the image.
+    char fullName[256];
+    genFileName(fullName, fileName, int(frameId));
     FILE* fp = fopen(fullName, "r");
-    if (fp == 0) {
-      Error::abortRun(*this, "cannot open '", fullName, "' for reading.");
+    if (fp == (FILE*) NULL) {
+      Error::abortRun(*this, "File not opened: ", fullName);
       return;
     }
 
-    // Read header, skipping 1 whitespace character at end.
+// Read header, skipping 1 whitespace character at end.
     char word[80];
     int fileImageWidth, fileImageHeight, maxval;
     fscanf(fp, "%s", word);
     if (strcmp(word, "P5")) { // "P5" is PGM magic number.
-      fclose(fp);
       Error::abortRun(*this, fullName, ": not in PGM format");
       return;
     }
@@ -114,42 +123,32 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
     }
     sscanf(word, "%d", &maxval);
     if (maxval > 255) {
-      fclose(fp);
-      Error::abortRun(*this, fullName, ": not in 8-bit format.");
+      Error::abortRun(*this, fullName,": not in 8-bit format.");
       return;
     }
     fscanf(fp, "%*c"); // skip one whitespace char.
 
-    // Create a FloatMatrix object and fill it with data.
-    // We use a hack for faster file reading: create a buffer to read in
-    // the data as unsigned char's and then convert that in memory.
-    if (fileImageWidth != int(width) ||
-        fileImageHeight != int(height)) {
-      fclose(fp);
-      Error::abortRun(*this,
-		      "the width and height states of the star do ",
-		      "not match those of the image file ",
-		      fullName);
+// Create a FloatMatrix object and fill it with data.
+// We use a hack for faster file reading: create a buffer to read in
+// the data as unsigned char's and then convert that in memory.
+    if(fileImageWidth != int(width) ||
+       fileImageHeight != int(height)) {
+      Error::abortRun("the width and height states of the star do not match those of the file image");
       return;
     }
     unsigned int size = fileImageWidth * fileImageHeight;
     unsigned char *buffer = new unsigned char[size];
     unsigned char *p = buffer;
-    fread( (char*)buffer,
-    	   fileImageWidth * sizeof(unsigned char),
-	   fileImageHeight,
-	   fp );
+    fread((char*)buffer, sizeof(unsigned char), size, fp);
     FloatSubMatrix* imgData = (FloatSubMatrix*)imageOutput.getOutput();
-    for (unsigned int i = 0; i < size; i++) {
+    for(int i = 0; i < size; i++)
       imgData->entry(i) = double(*p++);
-    }
     delete[] buffer;
     delete imgData;
     fclose(fp);
-
     IntSubMatrix* floatIdOut = (IntSubMatrix*)frameIdOutput.getOutput();
     floatIdOut->entry(0) = frameId;
-    frameId = int(frameId) + 1;			// increment frame id
+    frameId = int(frameId) + 1; // increment frame id
     delete floatIdOut;
   } // end go{}
-} // end defstar{ ReadImg2 }
+} // end defstar{ ReadImage2 }

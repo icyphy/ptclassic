@@ -4,14 +4,9 @@ defstar {
 	version		{ $Id$ }
 	author		{ Paul Haskell }
 	location	{ DE main library }
-        copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-        }
+	copyright	{ (c) 1992 U.C. Regents }
 	desc {
-This star reads in input NetworkCells from multiple input
+This star reads in input "NetworkCell"s from multiple input
 sources and routes them to the appropriate output.
 	}
 
@@ -21,7 +16,7 @@ sources and routes them to the appropriate output.
 		name { RoutingTable }
 		type { intarray }
 		default { "0 1 2 3" }
-		desc { Cell destination address to output port number map. }
+		desc { Cell destinaton address to output port number map. }
 	}
 
 	hinclude { "NetworkCell.h" }
@@ -44,7 +39,7 @@ sources and routes them to the appropriate output.
 		InDEMPHIter inIter(input);
 		InDEPort* inPtr;
 		while ((inPtr = inIter++) != 0) {
-			while (inPtr->dataNew) {
+			if (inPtr->dataNew) {
 				Envelope theEnvp;
 				inPtr->get().getMessage(theEnvp);
 				TYPE_CHECK(theEnvp, "NetworkCell");
@@ -63,9 +58,7 @@ sources and routes them to the appropriate output.
 				OutDEPort* outPtr = outIter++;
 				for(int i = port; i > 0; i--) { outPtr = outIter++; }
 
-				outPtr->put(completionTime) << theEnvp;
-
-				inPtr->getSimulEvent();
+				outPtr->put(arrivalTime) << theEnvp;
 		}	}
 	} // end go{}
 } //end defstar { CellRoute }

@@ -27,44 +27,49 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 
+# Important!  Do not run this makefile while in ~ptolemy/lib/tcltk.  Instead
+# run in from ~ptolemy/obj.$ARCH (through the symbolic link) -- that
+# way a separate directory containing, say, Sun-3 and Sun-4 objects can be
+# maintained.
+
 ROOT = ../..
 VPATH = $(ROOT)/lib/tcl
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-EXTRA_SRCS = \
-esterel2pl.tcl \
-gantt.tcl \
-mathexpr.tcl \
-message.tcl \
-starindex.tcl \
-pigilib.tcl \
-ptcl.tcl \
-ptcl_help.tcl \
-ptkBarGraph.tcl \
-ptkBind.tcl \
-ptkColor.tcl \
-ptkControl.tcl \
-ptkDialog.tcl \
-ptkGantt.tcl \
-ptkLogicAnalyzer.itcl \
-ptkOptions.tcl \
-ptkParams.tcl \
-ptkPrfacet.tcl \
-ptkRunAllDemos.tcl \
-tkMathematica.tcl \
-tkoct.tcl \
-topgetopt.tcl \
-utilities.tcl
+EXTRA_SRCS = esterel2pl.tcl \
+	mathexpr.tcl message.tcl pigilib.tcl ptcl.tcl ptcl_help.tcl \
+	ptkBarGraph.tcl ptkBind.tcl ptkColor.tcl ptkControl.tcl \
+	ptkDialog.tcl ptkGantt.tcl ptkLogicAnalyzer.itcl \
+	ptkOptions.tcl ptkParams.tcl \
+	ptkPrfacet.tcl ptkRunAllDemos.tcl ptkRunDesignMaker.tcl \
+	ptkStarIndex.tcl tkoct.tcl topgetopt.tcl utilities.tcl
 
-MISC_FILES = \
-Ptolemy.xbm \
-left.xbm \
-ptolemySmall.gif \
-ptolemyWelcome.gif \
-right.xbm
+MISC_FILES = Ptolemy.xbm left.xbm ptolemySmall.gif ptolemyWelcome.gif \
+	right.xbm
+
+# common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
+LIB = foo
+
 
 # We don't include common.mk since we don't use the compiler here
-include $(ROOT)/mk/no-compile.mk
+# include common definitions, rules
+#include $(ROOT)/mk/common.mk
+
+all install:
+	@echo "nothing to be done in this directory"
+
+sources:	$(EXTRA_SRCS) $(MISC_FILES) makefile
+
+depend:
+	@echo "no dependencies in tkman directory (contributed code)"
+
+sccsinfo:
+	sccs info
+checkjunk:
+	@checkextra -v $(EXTRA_SRCS) $(MISC_FILES) makefile SCCS
+
+clean:
+	rm -f *~

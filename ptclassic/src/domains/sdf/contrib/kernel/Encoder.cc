@@ -1,8 +1,6 @@
-static const char file_id[] = "Encoder.cc";
+static const char file_id[] = "Decoder.cc";
 
 /*
-Viterbi Encoder
-
 Version identification:
 $Id$
 
@@ -32,6 +30,7 @@ int Encoder::G1( int Input ) {
 int Encoder::G2( int Input ) {
   return Input ^ State[ 0 ] ^ State[ 1 ] ^ State[ 2 ] ^ State[ 5 ];
 }
+
 
 void Encoder::operator() ( int Input, int Output[ 2 ] ) {
   Output[ 0 ] = G1( Input );

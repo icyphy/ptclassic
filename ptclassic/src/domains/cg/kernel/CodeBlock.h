@@ -1,62 +1,83 @@
-#ifndef _CodeBlock_h
-#define _CodeBlock_h 1
+#ifndef _Code_h
+#define _Code_h 1
 /******************************************************************
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
 
  Programmer:  E. A. Lee
 
 *******************************************************************/
 
-#ifdef __GNUG__
-#pragma interface
-#endif
-
 #include "DataStruct.h"
 #include "type.h"
 
 	////////////////////////////////////
-	// class CodeBlock
+	// class LineOfCode
 	////////////////////////////////////
-// NOTE:  When text is sent to a CodeBlock, the text pointer is stored.
-// Make sure the text that the pointer points to lives as long as the
-// codeblock is to be used.
-class CodeBlock {
+
+// This class should be replaced with a derived class for each specific
+// code generator.  The method XXXCGStar::codeLine() should create
+// an instance of this class, and store it in the codeBlock.
+
+class LineOfCode {
 public:
-	// Constructor for the default case just stores the code
-	CodeBlock(const char* b) { text = b; }
+	LineOfCode(char* line) { text = line; }
 	// Is the following needed also?
 	void setText(char* line) {text = line;}
-	const char* getText() {return text;}
-	void printCode ();
-	operator const char*() {return text;}
+	char* getText() {return text;}
 private:
-	const char* text;
+	char* text;
+};
+
+
+	////////////////////////////////////
+	// class BlockOfCode
+	////////////////////////////////////
+
+class BlockOfCode : public SequentialList {
+public:
+	// For many code generators, this method will parse the code lines
+	void put(LineOfCode* line) {
+		SequentialList::put(line);
+	}
+
+	void printCode ();
+};
+
+	////////////////////////////////////
+	// class CodeBlockIter
+	////////////////////////////////////
+
+// For now, this is identical with ListIter, except for a cast
+class CodeBlockIter : private ListIter {
+public:
+	CodeBlockIter(const BlockOfCode& c) : ListIter (c) {}
+	LineOfCode* next() { return (LineOfCode*)ListIter::next();}
+	LineOfCode* operator++() { return next();}
+	ListIter::reset;
+};
+
+	////////////////////////////////////
+	// class CodeVector
+	////////////////////////////////////
+
+// The following class stores a vector of BlockOfCode*'s.
+// It is different from vector primarily in that the "elem" method
+// creates new vector entries if the index is larger than the number
+// of entries already allocated.
+
+class CodeVector : public Vector {
+public:
+	// Add an indexed element
+	const BlockOfCode* elem (int index) {
+		while (dimension() <= index) {
+			put(new BlockOfCode);
+		}
+		return(Vector::elem(index));
+	}
 };
 
 #endif

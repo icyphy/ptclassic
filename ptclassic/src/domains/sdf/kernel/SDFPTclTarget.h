@@ -40,66 +40,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "SDFTarget.h"
-#include "GalIter.h"
-
-class StarProfile {
-public:
-    StarProfile() : star(0), time(0), iterations(0) {};
-
-    inline void addTime(double iterationTime) {
-	iterations++;
-	time += iterationTime;
-    }
-    
-    inline double avgTime() { return time*1000.0/double(iterations); }
-    
-    Star* star;
-private:
-    double time;
-    int iterations;
-};
-
-class StarProfiles {
-public:
-    StarProfiles() : starProfiles(0) {};
-
-    void set (Galaxy& gal){
-	delete [] starProfiles;
-	numProfiles = 0;
-	GalStarIter nextStar(gal);
-	Star* star;
-	while ((star = nextStar++) != NULL) numProfiles++;
-	starProfiles = new StarProfile[numProfiles];
-	nextStar.reset();
-	int i = 0;
-	while ((star = nextStar++) != NULL) starProfiles[i++].star = star;
-    }
-    
-    StarProfile* lookup(Star& star) {
-	int i = 0;
-	while (i < numProfiles && &star != starProfiles[i++].star);
-	i--;
-	if (&star == starProfiles[i].star) return &starProfiles[i];
-	return NULL;
-    }
-
-    ~StarProfiles() { delete [] starProfiles; }
-    
-private:
-    StarProfile* starProfiles;
-    int numProfiles;
-};
 
 class SDFPTclTarget : public SDFTarget {
 public:
-    /*virtual*/ int run();
-    /*virtual*/ void wrapup ();
-    /*virtual*/ SDFPTclTarget(const char*, const char*);
-    /*virtual*/ Block* makeNew() const;
-    /*virtual*/ void writeFiring(Star&,int);
-    /*virtual*/ void setStopTime(double);
+	void begin();
+	int run();
+	void wrapup ();
+	SDFPTclTarget(const char*, const char*);
+	Block* makeNew() const;
+
+protected:
 private:
-    int numIters;
-    StarProfiles starProfiles;
 };
+
 #endif

@@ -44,12 +44,10 @@ static const char file_id[] = "MathematicaTcl.cc";
 #include "MathematicaIfc.h"
 #include "MathematicaTcl.h"
 
-#define MATHEMATICATCL_NOT_START "Could not start Mathematica"
-
 #define MATHEMATICATCL_CHECK_MATHEMATICA() \
-        if (! init()) return error(MATHEMATICATCL_NOT_START)
+        if (! init()) return error("Could not start Mathematica")
 
-// Constructor
+// Consturctor
 MathematicaTcl::MathematicaTcl() {
     tclinterp = 0;
     mathematicaInterface = 0;
@@ -100,15 +98,15 @@ int MathematicaTcl::init() {
 
 // Evaluate a Mathematica command
 int MathematicaTcl::evaluate(char* command, int outputBufferFlag) {
-    int retval = mathematicaInterface->EvaluateOneCommand(command);
-    if (outputBufferFlag || ! retval) {
+    int merror = mathematicaInterface->EvaluateOneCommand(command);
+    if (outputBufferFlag || merror) {
 	Tcl_AppendResult(tclinterp, 
 			 mathematicaInterface->GetOutputBuffer(), 
 			 0);
     }
 
-    if (retval) return TCL_OK;
-    return TCL_ERROR;
+    if (merror) return TCL_ERROR;
+    return TCL_OK;
 }
 
 // Evaluate the Tcl command "mathematica"
@@ -171,14 +169,14 @@ int MathematicaTcl::end(int argc, char** /*argv*/) {
 
 // Evaluate a Mathematica command
 int MathematicaTcl::eval(int argc, char** argv) {
-    if (argc != 3) return usage("mathematica eval <mathematica_command>");
+    if (argc != 3) return usage("mathematica eval <mathematica_commad>");
     MATHEMATICATCL_CHECK_MATHEMATICA();
     return evaluate(argv[2], TRUE);
 }
 
 // Evaluate a Mathematica command
 int MathematicaTcl::send(int argc, char** argv) {
-    if (argc != 3) return usage("mathematica send <mathematica_command>");
+    if (argc != 3) return usage("mathematica send <mathematica_commad>");
     MATHEMATICATCL_CHECK_MATHEMATICA();
     return evaluate(argv[2], FALSE);
 }
@@ -187,7 +185,7 @@ int MathematicaTcl::send(int argc, char** argv) {
 int MathematicaTcl::start(int argc, char** /*argv*/){
     if (argc != 2) return usage("mathematica start");
     if (init()) return TCL_OK;
-    return error(mathematicaInterface->GetErrorString());
+    return error("Could not start mathematica");
 }
 
 // Return the status of the Tcl/Mathematica interface

@@ -5,33 +5,31 @@ defstar
     version { $Id$ }
     desc { Base class for stars that splice in other stars. }
     author { T. M. Parks }
-    copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+    copyright
+    {
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { PN library }
 
-    hinclude { "PNThread.h", "InterpGalaxy.h" }
-    ccinclude { "Geodesic.h" }
+    hinclude { "InterpGalaxy.h" }
+    ccinclude { "Geodesic.h", "PNThread.h", "PNMonitor.h" }
 
     protected
     {
 	InterpGalaxy* gal;	// Container for dynamically created stars.
 	int spliceCount;	// Number of spliced stars.
-	PNThreadScheduler* threads;	// Container for dynamically
-					// created threads.
     }
 
     conscalls
     {
-	gal(0), spliceCount(0), threads(0)
+	gal(0), spliceCount(0)
     }
 
     destructor
     {
-	LOG_DEL; delete threads;
 	LOG_DEL; delete gal;
     }
 
@@ -54,11 +52,6 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	    gal->addStar(starName, starClass);
 	    DataFlowStar* star = (DataFlowStar*)gal->blockWithName(starName);
-	    if (star == NULL)
-	    {
-		Error::abortRun(*this, "could not splice in ", starClass);
-		return star;
-	    }
 
 	    // The galaxy's port list is used to keep track of the
 	    // original conection.
@@ -79,8 +72,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    // the plasma will exist.
 	    PNMonitor proto;
 	    star->initialize();
-	    alias->enableLocking(proto);
-	    con->enableLocking(proto);
+	    port->enableLocking(proto);
 
 	    return star;
 	}
@@ -91,9 +83,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	name { unsplice }
 	code
 	{
-	    // Delete any processes that were created.
-	    LOG_DEL; delete threads; threads = NULL;
-
 	    // Step through the ports to reestablish the
 	    // original connections.
 	    BlockPortIter nextPort(*this);
@@ -133,13 +122,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	arglist { "(DataFlowStar* star)" }
 	code
 	{
-	    if (!threads)
-	    {
-		LOG_NEW; threads = new PNThreadScheduler;
-	    }
-	    LOG_NEW; DataFlowProcess* p = new DataFlowProcess(*star);
-	    threads->add(p);
-	    p->initialize();
+	    LOG_NEW; new DataFlowProcess(*star);
 	}
     }
 

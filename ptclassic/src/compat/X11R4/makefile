@@ -28,13 +28,13 @@
 # 						COPYRIGHTENDKEY
 
 ROOT = ../../..
-VPATH = $(ROOT)/src/compat/X11R4
+VPATH = $(ROOT)/src/compat/cfront
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-HDRS = 	X.h Xlib.h Xos.h Xutil.h cursorfont.h
+HDRS = 	X.h Xlib.h Xos.h Xutil.h curosrfont.h
 
 MISC_FILES = README
 

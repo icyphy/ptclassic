@@ -4,18 +4,17 @@ defstar {
 	version		{ $Id$ }
 	author		{ Brian Evans and Paul Haskell }
 	copyright {
-Copyright (c) 1990- The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location	{ SDF image library }
 	desc {
-Accept an input grayimage represented by a float matrix, rank 
-filter the image, and send the result to the output.  A common 
-example of a rank filter is the median filter, e.g. SDFMedianImage, 
-which is derived from this star. Pixels at the image boundaries 
-are copied and not rank filtered.
+Accept an input GrayImage, rank filter the image, and send the result
+to the output.  A common example of a rank filter is the median
+filter, e.g. SDFMedianImage, which is derived from this star.
+Pixels at the image boundaries are copied and not rank filtered.
 	}
 	explanation {
 .Id "filter, rank"
@@ -23,17 +22,17 @@ are copied and not rank filtered.
 .Id "rank filtering"
 	}
 
-	input { name { inData } type { FLOAT_MATRIX_ENV } }
+	input { name { inData } type { message } }
 
-	output { name { outData } type { FLOAT_MATRIX_ENV } }
+	output { name { outData } type { message } }
 
 	defstate {
 		name	{ FilterWidth }
 		type	{ int }
 		default { 3 }
 		desc	{
-Size of the rank filter window in each dimension,
-which must be odd.
+Size of the rank filter window in each dimension.
+For a median filter, this value must be odd.
 		}
 	}
 
@@ -47,16 +46,16 @@ Which ordered sample is chosen from each neighborhood of pixels,
 		}
 	}
 
-	hinclude { <std.h>, "Matrix.h" }
+	ccinclude { <std.h>, "GrayImage.h" }
 
 	code {
-	    // Function to sort float's.
+	    // Function to sort unsigned char's.
 	    // These types and casts are required to satisfy cfront's
 	    // ridiculously strict rules.
 	    extern "C" {
 		static int sortUC(const void* aV, const void* bV) {
-		    float* a = (float*) aV;
-		    float* b = (float*) bV;
+		    unsigned const char* a = (unsigned const char*) aV;
+		    unsigned const char* b = (unsigned const char*) bV;
 		    if (*a < *b) return -1;
 		    else if (*a == *b) return 0;
 		    else return 1;
@@ -66,7 +65,7 @@ Which ordered sample is chosen from each neighborhood of pixels,
 
 	protected {
 		int halfsize, height, neighborhoodSize, rankIndex, size, width;
-		float* buf;
+		unsigned char* buf;
 	}
 
 	constructor {
@@ -79,12 +78,7 @@ Which ordered sample is chosen from each neighborhood of pixels,
 		    Error::error(*this, "FilterWidth must be positive.");
 		    return;
 		}
-		int oddsize = 1 + 2*(size/2);
-		if ( size != oddsize ) {
-		    Error::error(*this, "FilterWidth must be odd.");
-		    return;
-		}
-		halfsize = (size - 1)/2;
+		halfsize = size/2;
 		neighborhoodSize = size * size;
 
 		rankIndex = int(RankOrder);
@@ -98,7 +92,7 @@ Which ordered sample is chosen from each neighborhood of pixels,
 		}
 
 		delete [] buf;
-		buf = (float *) new float[neighborhoodSize];
+		buf = new unsigned char[neighborhoodSize];
 
 		width = height = 0;
 	}
@@ -108,21 +102,28 @@ Which ordered sample is chosen from each neighborhood of pixels,
 	method {
 		name	{ retRankedElement }
 		access	{ protected }
-		type	{ "float" }
-		arglist { "(const FloatMatrix& image, int i, int j)" }
+		type	{ "unsigned char" }
+		arglist { "(unsigned const char* p, int pi, int pj)" }
 		code {
-		    // Select size x size neighbor around pixel at [i][j]
-		    // and write 2-D data to 1-D buffer buf by copying
-		    // pixel values at [i+k][j+l] where
-		    //   k = -halfsize ... 0 ... halfsize
-		    //   l = -halfsize ... 0 ... halfsize
-		    float *bufptr = buf;
-		    for (int k = -halfsize; k <= halfsize; k++)
-			for (int l = -halfsize; l <= halfsize; l++)
-			    *bufptr++ = image[i+k][j+l];
+		    // Select size x size neighbor around pixel (pi, pj)
+		    // and write data to one-dimensional buffer
+		    // We want to copy pixel values at p[i][j] where
+		    //   i = (pi - halfsize) ... pi ... (pi + halfsize)
+		    //   j = (pj - halfsize) ... pj ... (pj + halfsize)
+		    int maxi = pi + halfsize;
+		    int pjstart = pj - halfsize;
+		    unsigned char *bufp = buf;
+		    unsigned const char *pijptr;
+		    for (int i = pi - halfsize; i <= maxi; i++) {
+			// pijptr begins at p[i][pj - halfsize]
+			pijptr = &p[i * width + pjstart];
+			for (int k = 0; k < size; k++) {
+			    *bufp++ = *pijptr++;
+			}
+		    }
 
 		    // Sort data
-		    qsort(buf, neighborhoodSize, sizeof(float), sortUC);
+		    qsort(buf, neighborhoodSize, sizeof(unsigned char), sortUC);
 
 		    // Return ranked data elemented 
 		    return buf[ rankIndex ];
@@ -130,40 +131,47 @@ Which ordered sample is chosen from each neighborhood of pixels,
 	}
 
 	go {
-		// Read data from input.
-                Envelope pkt;
-                (inData%0).getMessage(pkt);
-                const FloatMatrix& inImage = *(const FloatMatrix*)pkt.myData();
-
-		width = inImage.numCols();
-		height = inImage.numRows();
+		// Read data from input and initialize.
+		Envelope inEnvp;
+		(inData%0).getMessage(inEnvp);
+		TYPE_CHECK(inEnvp, "GrayImage");
+		const GrayImage* inImage = (const GrayImage*) inEnvp.myData();
+		if (inImage->fragmented() || inImage->processed()) {
+		    Error::abortRun(*this,
+				    "Need a full-sized input image.");
+		    return;
+		}
 
 		// Median filtering -- don't filter boundary pixels for now
-		LOG_NEW;
-		FloatMatrix& outImage = *(new FloatMatrix(height,width));
-
+		width = inImage->retWidth();
+		height = inImage->retHeight();
+		GrayImage* outImage = (GrayImage*) inImage->clone(1);
+		unsigned char* outptr = outImage->retData();
+		unsigned const char* inptr = inImage->constData();
 		for (int i = 0; i < height; i++) {
 		    if ( (halfsize <= i) && (i < height - halfsize) ) {
 		        int j = 0;
 			for ( ; j < halfsize; j++) {	// copy boundary pixels
-			    outImage[i][j] = inImage[i][j];
+			    *outptr++ = *inptr++;
 			}
 			for ( ; j < width - halfsize; j++) {	// med. filter
-			    outImage[i][j] = retRankedElement(inImage,i,j);
+			    *outptr++ = retRankedElement(inptr, i, j);
+			    inptr++;
 			}
 			for ( ; j < width; j++) {	// copy boundary pixels
-			    outImage[i][j] = inImage[i][j];
+			    *outptr++ = *inptr++;
 			}
 		    }
 		    else {
 		        int j = 0;
 			for ( ; j < width; j++) {	// copy boundary pixels
-			    outImage[i][j] = inImage[i][j];
+			    *outptr++ = *inptr++;
 			}
 		    }
 		}
 
 		// Send the output on its way.
-		outData%0 << outImage;
+		Envelope outEnvp(*outImage);
+		outData%0 << outEnvp;
 	} // end go{}
 } // end defstar { RankImage }

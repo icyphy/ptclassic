@@ -1,262 +1,176 @@
-/* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
-*/
-/*  Version $Id$
-    Author:	T.M. Parks
-    Created:	7 February 1992
-*/
-
 static const char file_id[] = "$RCSfile$";
+
+/*  Version $Id$
+
+    Copyright 1992 The Regents of the University of California.
+			All Rights Reserved.
+
+    Programmer:		T.M. Parks
+    Date of creation:	7 February 1992
+
+*/
 
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
-#include "PNThread.h"
-#include "PNScheduler.h"
-#include "DataFlowStar.h"
+#include "MTDFScheduler.h"
+#include "MTDFStar.h"
+#include "MTDFThreadIter.h"
 #include "GalIter.h"
-#include "PNGeodesic.h"
+#include "CriticalSection.h"
 
-extern const char PNdomainName[];
+extern const char MTDFdomainName[];
+
+const int stackSize = 0x4000;
+const int minPriority = MINPRIO;
+const int maxPriority = MINPRIO+1;
+
+// Create static Thread for main().
+MTDFThread& MTDFScheduler::main = (MTDFThread&)Thread::init(maxPriority, stackSize);
 
 // Constructor.
-PNScheduler::PNScheduler()
+MTDFScheduler::MTDFScheduler() : starThreads(), monitor(), start(monitor)
 {
-    monitor = NULL;
-    start = NULL;
-    threads = NULL;
-
+    numIterations = 0;
+    stopTime = 1;
     schedulePeriod = 1.0;
-    setStopTime(0.0);
-    setCurrentTime(0.0);
-    iteration = 0;
 }
-
 
 // Destructor.
-PNScheduler::~PNScheduler()
+MTDFScheduler::~MTDFScheduler()
 {
     deleteThreads();
-    disableLocking();
 }
-
 
 // Domain identification.
-const char* PNScheduler::domain() const
+const char* MTDFScheduler::domain() const
 {
-    return PNdomainName;
+    return MTDFdomainName;
 }
 
-
-// Initialization.
-void PNScheduler::setup()
+// Set up the schedule.  Returns TRUE upon success.
+int MTDFScheduler::setup(Galaxy& galaxy)
 {
-    if (galaxy() == NULL)
-    {
-	Error::abortRun(domain(), "Scheduler has no galaxy.");
-	return;
-    }
-   
+    GalStarIter starIter(galaxy);
+    MTDFStar* star;
+
+    // Prepare Stars for scheduling.
+    prepareForScheduling(galaxy);
+
+    // Initialize Galaxy and all Stars by recursively invoking Star::start().
+    galaxy.initialize();
+
+    // Delete any previous Threads.
     deleteThreads();
-    galaxy()->initialize();
-    disableLocking();
-
-    setCurrentTime(0.0);
-    iteration = 0;
-
-    enableLocking();
-    createThreads();
-}
-
-
-// Run (or continue) the simulation.
-int PNScheduler::run()
-{
-    if (SimControl::haltRequested())
-    {
-	Error::abortRun(*galaxy(), " cannot continue.");
-	return FALSE;
-    }
-
-    while((currentTime < stopTime) && !SimControl::haltRequested())
-    {
-	// Notify all threads to continue.
-	{
-	    CriticalSection region(start->monitor());
-	    iteration++;
-	    start->notifyAll();
-	}
-	threads->run();
-	while (increaseBuffers() && !SimControl::haltRequested())
-	{
-	    threads->run();
-	}
-	currentTime += schedulePeriod;
-    }
-
-    return !SimControl::haltRequested();
-}
-
-// Increase buffer capacities.
-// Return number of full buffers encountered.
-int PNScheduler::increaseBuffers()
-{
-    int fullBuffers = 0;
-    PNGeodesic* smallest = NULL;
-    
-    // Increase the capacity of the smallest full geodesic.
-    GalStarIter nextStar(*galaxy());
-    Star* star;
-    while ((star = nextStar++) != NULL)
-    {
-        BlockPortIter nextPort(*star);
-        PortHole* port;
-        while ((port = nextPort++) != NULL)
-        {
-	    PNGeodesic* geo = NULL;
-	    if (port->isItOutput() && (geo = (PNGeodesic*)port->geo()) != NULL)
-	    {
-		if (geo->size() >= geo->capacity())
-		{
-		    fullBuffers++;
-		    if (smallest == NULL
-			|| geo->capacity() < smallest->capacity())
-			smallest = geo;
-		}
-	    }
-        }
-    }
-    if (smallest != NULL)
-	smallest->setCapacity(smallest->capacity() + 1);
-
-    return fullBuffers;
-}
-
-
-// Create threads (dataflow pocesses).
-void PNScheduler::createThreads()
-{
-    GalStarIter nextStar(*galaxy());
-    DataFlowStar* star;
-
-    LOG_NEW; threads = new PNThreadScheduler;
 
     // Create Threads for all the Stars.
-    while((star = (DataFlowStar*)nextStar++) != NULL)
+    createThreads(galaxy);
+
+    return !haltRequested();
+}
+
+// Run the simulation.
+int MTDFScheduler::run(Galaxy& galaxy)
+{
+    numIterations = 0;
+
+    // Lower the priority so that the Threads can run.
+    main.setPriority(minPriority);
+
+    while((numIterations++ < stopTime) && !haltRequested())
     {
-	LOG_NEW; SyncDataFlowProcess* p
-	    = new SyncDataFlowProcess(*star,*start,iteration);
-	threads->add(p);
-	p->initialize();
+	// Notify all source Threads to start.
+	{
+	    CriticalSection x(monitor);
+	    start.notifyAll();
+	}
+    }
+
+    // Raise priority again to prevent Threads from running.
+    main.setPriority(maxPriority);
+
+    return !haltRequested();
+}
+
+// Prepare stars for scheduling.
+void MTDFScheduler::prepareForScheduling(Galaxy& galaxy)
+{
+    GalStarIter starIter(galaxy);
+    MTDFStar* star;
+
+    while((star = (MTDFStar*)starIter++) != NULL)
+    {
+	star->prepareForScheduling();
     }
 }
 
-
-// Delete threads.
-void PNScheduler::deleteThreads()
+// Create threads and build ThreadList.
+void MTDFScheduler::createThreads(Galaxy& galaxy)
 {
-    LOG_DEL; delete threads; threads = NULL;
-}
+    GalStarIter starIter(galaxy);
+    MTDFStar* star;
 
-
-// Enable locking.
-void PNScheduler::enableLocking()
-{
-    // Create new lock for this scheduler.
-    LOG_NEW; monitor = new PNMonitor;
-    LOG_NEW; start = new PNCondition(*monitor);
-
-    // Enable all registered PtGates.
-    GateKeeper::enableAll(*monitor);
-
-    // Enable locking on all portholes.
-    GalStarIter nextStar(*galaxy());
-    Star* star;
-    while ((star = nextStar++) != NULL)
+    // Create Threads for all the Stars.
+    while((star = (MTDFStar*)starIter++) != NULL)
     {
-        BlockPortIter nextPort(*star);
-        PortHole* port;
-        while ((port = nextPort++) != NULL)
-        {
-            port->enableLocking(*monitor);
-        }
+	MTDFThread* t;
+	if(star->isItSource())
+	{
+	    LOG_NEW; t = new MTDFThread(maxPriority, (void(*)(void*,void*))sourceThread, this, star);
+	    starThreads.put(t);
+	}
+	else
+	{
+	    LOG_NEW; t = new MTDFThread(maxPriority, (void(*)(void*))starThread, star);
+	    starThreads.put(t);
+	}
     }
 }
 
-
-// Disable locking.
-void PNScheduler::disableLocking()
+// Delete Threads and clear the ThreadList.
+void MTDFScheduler::deleteThreads()
 {
-    // Disable locking on all portholes.
-    GalStarIter nextStar(*galaxy());
-    Star* star;
-    while ((star = nextStar++) != NULL)
+    // Delete all Threads in the list.
+    MTDFThreadIter threadIter(starThreads);
+    MTDFThread* t;
+    while((t = threadIter++) != NULL)
     {
-        BlockPortIter nextPort(*star);
-        PortHole* port;
-        while ((port = nextPort++) != NULL)
-        {
-            port->disableLocking();
-        }
+	LOG_DEL; delete t;
     }
 
-    // Disable all registered PtGates.
-    GateKeeper::disableAll();
-
-    // Delete the lock for this scheduler.
-    LOG_DEL; delete start; start = NULL;
-    LOG_DEL; delete monitor; monitor = NULL;
+    // Remove everything from the list.
+    starThreads.initialize();
 }
-
-
-// Get the stopping time.
-double PNScheduler::getStopTime()
-{
-    return stopTime;
-}
-
 
 // Set the stopping time.
-void PNScheduler::setStopTime(double limit)
+void MTDFScheduler::setStopTime(float limit)
 {
-    stopTime = limit;
+    stopTime = (unsigned int)(limit / schedulePeriod);
 }
 
-
-// Set the stopping time when inside a Wormhole.
-void PNScheduler::resetStopTime(double limit)
+float MTDFScheduler::getStopTime()
 {
-    // Allow Scheduler to run for one schedule period.
-    stopTime = limit;
-    currentTime = stopTime - schedulePeriod;
+    return stopTime * schedulePeriod;
 }
 
-
-double PNScheduler::delay(double /*when*/)
+// Thread for normal Stars.
+void MTDFScheduler::starThread(MTDFStar* star)
 {
-    return 0.0;
+    // Fire the Star ad infinitum.
+    while(TRUE)	star->fire();
+}
+
+// Thread for source Stars.
+void MTDFScheduler::sourceThread(MTDFScheduler* sched, MTDFStar* star)
+{
+    // Wait for notification from the Scheduler, then fire the Star.
+    while(TRUE)
+    {
+	{
+	    CriticalSection x(sched->monitor);
+	    sched->start.wait();
+	}
+	star->fire();
+    }
 }

@@ -1,18 +1,12 @@
 defstar {
 	name { Sink }
 	domain { CG }
-	derivedFrom { CGVarTime }
 	desc {
 Swallows an input sample
 	}
 	version {$Revision$ $Date$}
 	author { E. A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { CG demo library }
 	explanation {
 This star exists only for demoing the generic CG domain.
@@ -22,21 +16,12 @@ It outputs lines of comments, instead of code.
 		name {input}
 		type {FLOAT}
 	}
-	defstate {
-		name {n}
-		type {int}
-		desc {number of samples to write}
-		default {1}
-	}
-	setup {
-		input.setSDFParams(n,int(n)-1);
-	}
 	codeblock (blockname) {
-// CGSink star: read $val(n) samples.
+// Line 1 code from CGSink
 // Line 2 code from CGSink
 	}
 	go {
-		addCode(blockname);
+		gencode(blockname);
 	}
 }
 

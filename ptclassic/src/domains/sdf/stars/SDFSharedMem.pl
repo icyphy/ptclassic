@@ -1,27 +1,21 @@
 defstar {
   name { SharedMem }
   domain {SDF}
-  version { $Id$ }
-  author { Stefan De Troch (IMEC) }
-  copyright{ 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-
-}
-  desc { Base class for shared memory }
+  version { $Revision$ %Z% }
+  author { Stefan De Troch }
+  copyright{ }
+  desc { base class for shared memory }
   header {
 
     class VarReg {
     public:
       VarReg(): contents(0) {}
 
-      double GetContents() { return contents; }
-      void SetContents(double value) { contents= value; }
+      float GetContents() { return contents; }
+      void SetContents(float value) { contents= value; }
 
     private:
-      double contents;
+      float contents;
     };
 
   }
@@ -35,26 +29,28 @@ limitation of liability, and disclaimer of warranty provisions.
   protected {
     static HashTable regList;
   }
-
-  method {
+  method
+  {
     name {ReadVar}
-    arglist { "(const char* name, double* value)" }
+    arglist { "(const char *name, float& value)" }
     type { int }
     code
     {
       VarReg* reg;
 
-      if (regList.hasKey(name)) {
+      if (regList.hasKey(name))
+      {
 	reg = (VarReg *) regList.lookup(name);
 
-	*value = reg->GetContents();
+	value = reg->GetContents();
 	return 1;
       }
       else
 	return 0;
     }
   }
-  method {
+  method
+  {
     name { RemoveVar }
     arglist { "(const char *name)" }
     type { void }
@@ -62,7 +58,8 @@ limitation of liability, and disclaimer of warranty provisions.
     {
       VarReg* reg;
 
-      if (regList.hasKey(name)) {
+      if (regList.hasKey(name))
+      {
         reg = (VarReg *) regList.lookup(name);
 	regList.remove(name);
 	LOG_DEL; delete reg;
@@ -72,20 +69,24 @@ limitation of liability, and disclaimer of warranty provisions.
   method
   {
     name{ WriteVar }
-    arglist { "(const char *name, double value)" }
+    arglist { "(const char *name, float value)" }
     type { void }
     code
     {
       VarReg* reg;
 
-      if (regList.hasKey(name)) {
+      if (regList.hasKey(name))
+      {
         reg = (VarReg *) regList.lookup(name);
       }
-      else {
+      else
+      {
 	LOG_NEW; reg = new VarReg;
 	regList.insert(name,reg);
       }
       reg->SetContents(value);
     }
+  }
+  destructor {
   }
 }

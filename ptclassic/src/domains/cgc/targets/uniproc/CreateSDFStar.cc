@@ -1,9 +1,9 @@
-static const char file_id[] = "CreateSDFStar.cc";
+static const char file_id[] = "CGCTargetWH.cc";
 /******************************************************************
 Version identification:
 $Id$
 
-Copyright (c) 1991-%Q%  The Regents of the University of California.
+Copyright (c) 1995  The Regents of the University of California.
 All Rights Reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: Jose Luis Pino
+ Programmer: Jose Luis Pino, initial version based on SIlageSimTarget
 
 *******************************************************************/
 
@@ -34,153 +34,80 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
-#include "CGUtilities.h"
-#include "Domain.h"
 #include "CGCPortHole.h"
-#include "CreateSDFStar.h"
+#include "CGCTargetWH.h"
 #include "KnownTarget.h"
-#include "KnownBlock.h"
 #include "Linker.h"
 #include "InterpGalaxy.h"
-#include "PortHole.h"
 #include "miscFuncs.h"
-#include "CGCSDFReceive.h"
-#include "CGCSDFSend.h"
-#include "DynamicGalaxy.h"
-#include "Geodesic.h"
 
-
-// A simple class to compute the repetitions on a SDF graph - we need
-// this because a lot of the SDFScheduler methods are protected.
-// This class duplicates some of the functionality of
-// SDFScheduler::setup  FIXME
-
-class Repetitions:public SDFScheduler {
-public:
-    Repetitions(Galaxy& gal) {
-	invalid = FALSE;
-	setGalaxy(gal);
-        if (!checkConnectivity()) return;
-	if(!prepareGalaxy()) return;
-	if (!checkConnectivity()) return;
-	if (!checkStars()) return;
-	if(!repetitions()) return;
-	adjustSampleRates();
-    }
-};
-	
-CreateSDFStar::CreateSDFStar(const char* name,const char* starclass, const
-			 char* desc) : CGCTarget(name,starclass,desc) {
+CGCTargetWH::CGCTargetWH(const char* name,const char* starclass, const
+			 char* desc) : CGCTarget(name,starclass,desc) { 
 			     addStream("starPorts",&starPorts);
-			     addStream("starSetup",&starSetup);
 }
 
-void CreateSDFStar::setup () {
-    // Create the base name for the SDF star to be generated
-    StringList plPrefix;
-    plPrefix << "SDF" << filePrefix; 
-    filePrefix = hashstring(plPrefix);
+void CGCTargetWH :: setup () {
+    if(galaxy()->parent() == NULL) {
+	Error::abortRun("CGCTargetWH runs only inside of SDF");
+	return;
+    }
 
+    StringList plPrefix;
+    plPrefix << "SDF" << galaxy()->name(); 
+    filePrefix = savestring(plPrefix);
     CGCTarget::setup();
 
     if(Scheduler::haltRequested()) return ;
 
 }
 
-inline void commStarInit(CGCSDFBase& s,PortHole& p,int numXfer,int maxDelay) {
-    s.sdfPortName = hashstring(ptSanitize(p.name()));
-    s.numXfer = numXfer;
-    s.maxDelay = maxDelay;
-    DataType type = p.newConnection().resolvedType();
-    s.sdfPortType = type;
+int CGCTargetWH::compileCode() {
+    // compile the pl to a cc file
+    fprintf(stderr,"Compiling the .pl file to a .cc file\n");
+    if(!makeCCFile())
+	{Error::message("ptlang failed"); return FALSE;}
+
+    // compile the cc code 
+    fprintf(stderr,"Compiling the .cc file to a .o file\n");
+    if(!compileCCCode())
+	{Error::message("compile failed"); return FALSE;}
+
+    return TRUE; 
 }
 
-void CreateSDFStar::wormPrepare() {
-    StringList plPrefix;
-    plPrefix << "SDF" << galaxy()->name(); 
-    filePrefix = hashstring(plPrefix);    
-    convertWormholePorts(*galaxy());
-}
-int CreateSDFStar::convertWormholePorts(Galaxy& gal) {
-    // FIXME - Won't work unless CGC is at top level
-    if(!gal.parent()->isItWormhole()) return FALSE;
-    
-    Repetitions computeReps(gal);
-    if (SimControl::haltRequested()) return FALSE;
-
-    topLevelGalaxy = &gal;
-
-    // Iterate on all of the galaxy ports
-    BlockPortIter nextPort(gal);
-    DFPortHole *p;
-    while ((p = (DFPortHole*)nextPort++) != 0) {
-	// Must save type *before* disconnecting port
-	CGPortHole &cgPort = (CGPortHole&)p->newConnection();
-	int numXfer =
-	    ((DataFlowStar*)cgPort.parent())->reps()*cgPort.numXfer(); 
-	int maxDelay= numXfer + cgPort.maxDelay()-cgPort.numXfer();
-	cgPort.disconnect();
-	DFPortHole *source,*destination,*newPort;
-	CGCSDFBase *newStar;
-	StringList nm;
-	if (p->isItInput()) {
-	    newStar = new CGCSDFReceive;
-	    commStarInit(*newStar,*p,numXfer,maxDelay);
-	    newPort = source = &((CGCSDFReceive*)newStar)->output;
-	    destination = &cgPort;
-	    nm << symbol("CGCSDFReceive");
-	}
-	else {
-	    newStar = new CGCSDFSend;
-	    commStarInit(*newStar,*p,numXfer,maxDelay);
-	    source = &cgPort;
-	    newPort = destination = &((CGCSDFSend*)newStar)->input;
-	    nm << symbol("CGCSDFSend");
-	}
-
-	// Add the star to the inner galaxy
-	gal.addBlock(*newStar,hashstring(nm));
-	newStar->setTarget(this);
-	
-	source->connect(*destination,0);
-	newPort->setSDFParams(numXfer,maxDelay);
-    }
-    return !SimControl::haltRequested();
-}
-		
-int CreateSDFStar::compileCode() {
-    StringList command;
-    command << "cd " << (const char*)destDirectory << "; "
-	    << "make -f " << (const char*) filePrefix << ".mk all";
-    if(systemCall(command,"Compilation error")) return FALSE;
-    return TRUE;
-}
-
-int CreateSDFStar::loadCode() {
+int CGCTargetWH::loadCode() {
+    fprintf(stderr,"Linking in the new .o file\n");
     if(!linkFiles()) {
 	Error::abortRun("Failed to link in new star, aborting");
-	return FALSE;
+	return 0;
     }
     fprintf(stderr,"replacing CGC wormhole by the new star\n");
-    if(!connectStar()) {
+    if(!connectStar(*galaxy())) {
 	Error::abortRun("Failed to connect new star, aborting");
-	return FALSE;
+	return 0;
     }
-    return TRUE;
+    return 1;
 }
+// CODE DUPLICATION FROM CGCTarget
 
-void CreateSDFStar::frameCode() {
+static char* complexDecl =
+"\n#if !defined(COMPLEX_DATA)\n#define COMPLEX_DATA 1"
+"\n typedef struct complex_data { double real; double imag; } complex; \n"
+"#endif\n";
+static char* fixDecl =
+"\n#if !defined(NO_FIX_SUPPORT)"
+"\n/* include definitions for the fix runtime library */"
+"\n#include \"CGCrtlib.h\""
+"\n#endif\n";
+
+void CGCTargetWH::frameCode() {
     StringList code;
-    const char* wormStarName = filePrefix;
-    wormStarName += 3;
-    code << "defstar{\n\tname{ "<< wormStarName
+    code << "defstar{\n\tname{ "<< galaxy()->name() 
 	 <<"}\n\tdomain{SDF}\n\tdesc{\n"
 	 << headerComment() <<"\t}\n\tlocation{ "<<(const char*)destDirectory 
-	 << "}\nhinclude {\"Error.h\",\"SimControl.h\"}\n" 
-	 <<starPorts<< "\n\theader{\nextern \"C\" {\n" << include 
-	 << "}\n" << globalDecls << procedures << "\t}\nprivate{\n"
+	 << "}\n"<<starPorts<< "\n\theader{\n" << include << fixDecl 
+	 << complexDecl << globalDecls << procedures << "\t}\nprivate{\n"
 	 << mainDecls << "\t}\n\tbegin{\n" << commInit << mainInit 
-	 << "\t}\n\tsetup{\n" << starSetup
 	 << "\t}\n\tgo{\n" << myCode
 	 << "\t}\n\twrapup{\n" << mainClose << "\t}\n}";
     myCode.initialize();
@@ -188,138 +115,236 @@ void CreateSDFStar::frameCode() {
     initCodeStrings();
 }
 
-void CreateSDFStar::writeCode() {
+void CGCTargetWH::writeCode() {
     writeFile(myCode,".pl",displayFlag);
-    // Construct makefile
-    StringList makefile;
-    makefile << headerComment("# ") << "# To make the star, do: " 
-	     << "make -f " << (const char*) filePrefix << ".mk all\n"
-	     << "ROOT = " << getenv("PTOLEMY") << "\n"
-	     << "WORM_INCL = " << (const char *) compileOptions << " ";
-    if (compileOptionsStream.numPieces()) {
-	const char* expandedCompileOptionsStream =
-	    expandPathName(compileOptionsStream);
-	makefile << expandedCompileOptionsStream;
-	delete [] expandedCompileOptionsStream;
-    }
-    makefile << starIncludeDirs << "\n" 
-	     << "all: " << (const char*) filePrefix << ".o\n"
-	     << "include $(ROOT)/mk/cgworm.mk\n\n";
-    writeFile(makefile,".mk");
 }
 
-void CreateSDFStar::initCodeStrings() {
+void CGCTargetWH::initCodeStrings() {
     CGCTarget::initCodeStrings();
     starPorts.initialize();
 }
 
-int CreateSDFStar::run () {
+int CGCTargetWH :: run () {
+//    Galaxy* newGal = galaxy();
+//    GalTopBlockIter newIter(*newGal);
+//    Block* star;
+//    const char* onm = galaxy()->name();
+
+// run the star added that replaces the galaxy. This star is called wormName.
+
+/*    while ((star = newIter++) != 0)
+   	{
+	    const char* snm = star->name();
+	    if( strcmp(snm,onm) == 0) break;
+   	}
+
+    SilageStar* silStar;
+    silStar = (SilageStar*)star;
+    SilageStarPortIter nextStarPort(*silStar);
+    SilagePortHole* silPh;
+    for(int i = star->numberPorts(); i > 0; i--)
+	{
+	    silPh = nextStarPort++;
+	    silPh->receiveData();
+	}
+    if( !silStar->runSim() ) return FALSE;
+    nextStarPort.reset();
+    for(i = star->numberPorts(); i > 0; i--)
+	{
+	    silPh = nextStarPort++;
+	    silPh->sendData();
+	} */
     return TRUE;
 }
 
-// Redefine main loop so that we do not iterate.  The iteration will be
-// controlled by calling the go method of the new SDF star
-void CreateSDFStar::mainLoopCode() {
-    defaultStream = &myCode;
-    allWormInputCode();
-    compileRun((SDFScheduler*) scheduler());
-    CodeStream* crStream = defaultStream;
-    defaultStream = &myCode;
-    allWormOutputCode();
-    defaultStream = crStream;
-}
-
-Block* CreateSDFStar::makeNew () const {
-    LOG_NEW; return new CreateSDFStar(name(),starType(),descriptor());
-}
-
-ISA_FUNC(CreateSDFStar,CGCTarget);
-static CreateSDFStar targ("CreateSDFStar","CGCStar","Wormhole target for CGC.");
-static KnownTarget entry(targ,"CreateSDFStar");
-
-int CreateSDFStar::linkFiles () {
-    StringList dir, linkCmd;
-
-    char* expandedDirName = expandPathName((const char*) destDirectory); 
-    dir << expandedDirName;
-    linkCmd << dir << "/" << (const char*) filePrefix << ".o " 
-	    << "-L" << getenv("PTOLEMY") << "/lib." <<getenv("PTARCH")
-	    << " -lCGCrtlib " << starLinkOptions << " ";
-    if (linkOptionsStream.numPieces()) {
-	const char* expandedLinkOptionsStream =
-	    expandPathName(linkOptionsStream);
-	linkCmd << expandedLinkOptionsStream;
-	delete [] expandedLinkOptionsStream;
+/* virtual */ void CGCTargetWH::wormInputCode(PortHole& p) {
+    CGCPortHole& cp = (CGCPortHole&)p;
+    starPorts << "\tinput {\n\t\tname{" << cp.name() << "}\n\t\ttype{";
+    if (strcmp(cp.resolvedType(),INT)==0) {
+	starPorts << "int";
     }
+    else if (strcmp(cp.resolvedType(),FLOAT)==0) {
+	starPorts << "float";
+    }
+    else {
+	StringList message;
+	message << "WormInputCode: Port" << cp.parent()->name() << "." 
+		<< cp.name() << " uses unsupported wormhole type of "
+		<< cp. resolvedType();
+	Error::abortRun(*this,message);
+	return;
+    }
+    starPorts <<"}\n\t}\n";
+    myCode << "for (int i = " << cp.numXfer() - 1 << "; i >=0 ; i--) {\n"
+	   << "\tint j = 0;\n\t" << cp.getGeoName();
+    if (cp.bufSize() > 1 || cp.bufType() == EMBEDDED) {
+	myCode << '[';
+	if (cp.staticBuf()) myCode << cp.bufPos();
+	else {
+	    StringList bufPtr;
+	    bufPtr << sanitize(cp.name()) << "Counter";
+	    mainDecls << "int " << bufPtr << " = 0;\n";
+	    myCode << "bufPtr";
+	}
+	myCode << " + j++]";
+    }
+    myCode << " = " << cp.name() << "%i;\n}\n";
+}
 
-    const char* argv[2];
-    const char* multiLink = "multilink";
+/* virtual */ void CGCTargetWH::wormOutputCode(PortHole& p) {
+    CGCPortHole& cp = (CGCPortHole&)p;
+    starPorts << "\tinput {\n\t\tname{" << cp.name() << "}\n\t\ttype{";
+    if (strcmp(cp.resolvedType(),INT)==0) {
+	starPorts << "int";
+    }
+    else if (strcmp(cp.resolvedType(),FLOAT)==0) {
+	starPorts << "float";
+    }
+    else {
+	StringList message;
+	message << "WormOutputCode: Port" << cp.parent()->name() << "." 
+		<< cp.name() << " uses unsupported wormhole type of "
+		<< cp. resolvedType();
+	Error::abortRun(*this,message);
+	return;
+    }
+    starPorts <<"}\n\t}\n";
+    myCode << "for (int i = " << cp.numXfer() - 1 << "; i >=0 ; i--) {\n"
+	   << "\tint j = 0;\n\t" << cp.name() << "%i = " << cp.getGeoName();
+    if (cp.bufSize() > 1 || cp.bufType() == EMBEDDED) {
+	myCode << '[';
+	if (cp.staticBuf()) myCode << cp.bufPos();
+	else {
+	    StringList bufPtr;
+	    bufPtr << sanitize(cp.name()) << "Counter";
+	    mainDecls << "int " << bufPtr << " = 0;\n";
+	    myCode << "bufPtr";
+	}
+	myCode<< "+ j++]";
+    }
+    myCode << ";\n}\n";
+}
 
-    // The link commands must be in the second argv location
-    argv[0] = multiLink;
-    argv[1] = hashstring(linkCmd);
-    fprintf(stderr,"multiLink: %s\n",argv[1]);
-    int status = Linker::multiLink(2,(char**) argv); 
-    fprintf(stderr,"multiLink completed\n");
-    delete [] expandedDirName;
+void CGCTargetWH :: wrapup () {
+    // delete galaxy();
+}
+
+Block* CGCTargetWH :: makeNew () const {
+    LOG_NEW; return new CGCTargetWH(name(),starType(),descriptor());
+}
+
+ISA_FUNC(CGCTargetWH,CGCTarget);
+static CGCTargetWH targ("CGCTargetWH","CGCStar","Wormhole target for CGC.");
+static KnownTarget entry(targ,"CGCTargetWH");
+
+int CGCTargetWH :: makeCCFile () {
+    // this compiles <>.pl to a SDF<>.{h,cc}
+    StringList ptlangOptions = "";
+    ptlangOptions << "cd " << (const char*)destDirectory << ";" ;
+    ptlangOptions << "ptlang " << (const char*) filePrefix << ".pl;"  ;
+    if(system(ptlangOptions)) {Error::abortRun("errors in ptlang");
+    return FALSE; }
+    return TRUE;
+}
+
+int CGCTargetWH :: compileCCCode () {
+    // compile the .pl file 
+    const char* ptolemyRoot;
+    ptolemyRoot = getenv ("PTOLEMY");
+    if (ptolemyRoot == 0) ptolemyRoot = expandPathName("~ptolemy");
+
+    StringList ccOptions = "";
+    ccOptions << "cd " << (const char*)destDirectory << ";" ;
+    ccOptions << "g++ -g -w ";
+
+    ccOptions << "-DBITTRUE -DDETOV ";
+    ccOptions << "-I" << ptolemyRoot << "/src/domains/cgc/stars";
+    ccOptions << " -I" << ptolemyRoot << "/src/domains/cgc/kernel";
+    ccOptions << " -I" << ptolemyRoot << "/src/domains/cg/kernel";
+    ccOptions << " -I" << ptolemyRoot << "/src/domains/sdf/kernel";
+    ccOptions << " -I" << ptolemyRoot << "/src/kernel";
+    ccOptions << " -I" << ptolemyRoot << "/vendors/silage_support/include";
+    ccOptions << " -c " << (const char*) filePrefix << ".cc";
+
+    if(system(ccOptions)) 
+	{Error::abortRun("Compilation error"); return FALSE; }
+    return TRUE;
+}
+
+int CGCTargetWH :: linkFiles ()
+{
+    // link the object file into a ptolemy simulation
+    StringList silPlFname,ss;
+    silPlFname << (const char*)destDirectory;
+    silPlFname << "/" << (const char*) filePrefix << ".o" ;
+    ss = expandPathName(silPlFname);
+    int status = Linker::linkObj(ss); 
     return status;
 }
 
-int CreateSDFStar::connectStar() {
-    Galaxy* parentGal = (Galaxy*)topLevelGalaxy->parent()->parent();
-    StringList	starname;
-    starname << topLevelGalaxy->name() << "Worm";
-    const char* sname = hashstring((const char*)starname);
+int CGCTargetWH :: connectStar(Galaxy& ggal) {
+    const char*	sname;
+    const char*	sclass;
 
-    const char* wormStarName = filePrefix;
-    wormStarName += 3;
+    sclass = sname = (const char*) filePrefix; 
 
-    Block *newWormStar = KnownBlock::clone(wormStarName,"SDF");
-    if (newWormStar == 0) {
-	StringList message;
-	message << "Can not clone the newly linked SDF worm star: " 
-		<< topLevelGalaxy->name();
-	Error::abortRun((const char*)message);
-	return FALSE;
+    int status = ((InterpGalaxy*)&ggal)->addStar(sname, sclass);
+    if(!status) return FALSE;
+
+    Block* bs3;
+    GalTopBlockIter BSnext(ggal);
+    // get the name of the star to connect to wormhole boundary 
+    while ((bs3 = BSnext++) != 0) { 
+	const char* snm3 = bs3->name();
+	if( strcmp(snm3,sname) == 0) break;
     }
-    parentGal->addBlock(*newWormStar,sname);
-
-    PortHole* wormPort;
-    BlockPortIter wpNext(*topLevelGalaxy->parent());
-    while ((wormPort = wpNext++) != 0 ) {
-	PortHole* farPort = wormPort->far();
-	int delays = wormPort->numInitDelays();
-	PortHole* newPort =
-	    newWormStar->portWithName(ptSanitize(wormPort->name()));
-	farPort->disconnect();
-	newPort->connect(*farPort,delays);
+	
+    Block* bb;
+    GalTopBlockIter BBnext(ggal);
+    while ((bb = BBnext++) != 0) { 
+	const char* snm3 = bb->name();
+	if( strcmp(snm3,sname) == 0) break;
     }
-    
-    // We must initialize this new star, the star is created during
-    // the initialize method of the parent galaxy, thus the initilize
-    // method is run on the original wormhole, and not this
-    // dynamically linked in star.
-    newWormStar->initialize();
 
-    // Tell the parent galaxy to delete the original wormhole.
-    parentGal->removeBlock(*topLevelGalaxy->parent());
+    const char* galPhName;
+    const char* starPhName;
 
+    BlockPortIter galPortIter(ggal);
+    BlockPortIter gIter(ggal);
+    PortHole* ph;
+    while ((ph = galPortIter++) != 0) {
+	// connect galaxy portholes to the star portholes
+	PortHole& tph = *gIter++;
+	PortHole& rph = (PortHole&) tph.realPort();
+	
+	galPhName = ph->name();	
+	PortHole* wormPh;
+	PortHole* aliasPh;
+	aliasPh = (PortHole*)&(rph);
+	wormPh = (PortHole*)aliasPh->far();
+	aliasPh->far()->disconnect();
+	BlockPortIter phIter(*bs3);
+	CGCPortHole* bsph; 
+	while ((bsph =(CGCPortHole*)phIter++) != 0) {
+	    starPhName = bsph->name();
+	    if( strcmp(galPhName,starPhName) == 0) {
+		ph->setAlias(*bsph);
+		bsph->connect(*wormPh,0);
+	    } // if
+	} // while
+    } // while
+
+    GalTopBlockIter next(ggal);
+    Block* b;
+    const char* blkName;
+    while ((b = next++) != 0 ) {
+	blkName = b->name();
+	if(b->isItAtomic()) {
+	    if ( strcmp(blkName,sname) == 0) {
+		b->initialize();
+		break;		
+	    } // initialized added star
+	} // if atomic
+    } // while
     return TRUE;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

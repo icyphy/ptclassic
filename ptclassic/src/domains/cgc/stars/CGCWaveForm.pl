@@ -7,12 +7,12 @@ You can get periodic signals with any period, and can halt a simulation
 at the end of the given waveform.  The following table summarizes the
 capabilities:
 
- haltAtEnd   periodic   period    operation
- ------------------------------------------------------------------------
- NO          YES        0         The period is the length of the waveform
- NO          YES        N>0       The period is N
- NO          NO         anything  Output the waveform once, then zeros
- YES         anything   anything  Stop after outputting the waveform once
+haltAtEnd   periodic   period    operation
+-----------------------------------------------------------------------
+NO          YES        0         The period is the length of the waveform
+NO          YES        N>0       The period is N
+NO          NO         anything  Output the waveform once, then zeros
+YES         anything   anything  Stop after outputting the waveform once
 
 The first line of the table gives the default settings.
 	}
@@ -32,12 +32,7 @@ uses less storage.
 	}
 	version { $Id$ }
 	author { S. Ha }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { CGC main library }
 	output {
 		name { output }
@@ -79,7 +74,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		default { 0 }
 		attributes { A_NONSETTABLE }
 	}
-	setup {
+	start {
 		pos = 0;
 		size = value.size();
 	}
@@ -100,8 +95,5 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	go {
 		addCode(body);
-	}
-	exectime {
-		return 11;  /* worst case number */
 	}
 }

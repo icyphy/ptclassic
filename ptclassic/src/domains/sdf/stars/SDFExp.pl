@@ -1,20 +1,23 @@
+ident {
+/**************************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  J. T. Buck
+ Date of creation: 10/8/90
+
+ Output is exp of input.
+ Overflow should be handled better.
+
+**************************************************************************/
+}
 defstar {
 	name { Exp }
 	domain { SDF } 
-	desc { 	Compute the exponential function of the input. }
-	version {$Id$}
-	author { J. T. Buck }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { SDF main library }
-	explanation {
-\fBBugs:\fR Overflow is not handled well.
-.Id "exponential"
-	}
+	desc { 	"Outputs exp of input" }
 	input {
 		name { input }
 		type { float }
@@ -25,6 +28,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	ccinclude { <math.h> }
 	go {
-		output%0 << exp(double(input%0));
+		float t = input%0;
+		output%0 << exp(t);
 	}
 }

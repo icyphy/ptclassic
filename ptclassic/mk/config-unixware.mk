@@ -34,27 +34,6 @@
 
 # Author: Steven Kimball, skimball@sanders.com
 
-# You may find in helpful to have the text below in your .profile, or
-# the equivalent in your .cshrc if you use csh.
-#---start---
-#ARCH=unixware
-#export ARCH
-#
-#PTOLEMY=/home/ptolemy
-#export PTOLEMY
-#
-#PATH=/usr/X/bin:$PTOLEMY/bin.$ARCH:$PTOLEMY/bin:/tools/gccs/bin:/tools/gnu/bin:$PATH
-#export PATH
-#
-#LD_LIBRARY_PATH=$PTOLEMY/lib.$ARCH:/usr/X/lib
-#export LD_LIBRARY_PATH
-#---end---
-
-# Note that if you are using gcc-2.7.0, you will need a patch, see the
-# ptolemy-hackers archives, or 
-# ftp://ptolemy.eecs.berkeley.edu/pub/ptolemy/ptolemy0.5.2/patches/README
-
-
 #
 #
 HAVE_ELF=yes
@@ -139,8 +118,6 @@ SYSLIBS=-lsocket -lnsl -ldl -lm -liberty -lg++ -lcurses
 else
 SYSLIBS=-lsocket -lnsl -ldl -lm -liberty -lg++ -lcurses
 endif
-# system libraries for linking .o files from C files only
-CSYSLIBS =	-lsocket -lnsl -ldl -lm
 
 PTLANGLIB= -L/tools/gccs/lib -liberty
 

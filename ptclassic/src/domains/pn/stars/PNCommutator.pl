@@ -13,8 +13,9 @@ input.  The first B particles on the output come from the first input,
 the next B particles from the next input, etc.
     }
     author { T. M. Parks }
-    copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+    copyright
+    {
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -54,9 +55,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	MPHIter nextPort(input);
 	for (int i = input.numberPorts(); i > 0; i--)
 	{
-	    PortHole& port = *nextPort++;
+	    PortHole& port = *nexti++;
 	    port.receiveData();
-	    output.receiveData();
 	    for (int j = int(blockSize)-1; j >= 0; j--)
 		output%j = port%j;
 	    output.sendData();

@@ -3,30 +3,8 @@ static const char file_id[] = "DecomScheduler.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
 
  Programmer:  Soonhoi Ha 
  Date of creation: 5/92
@@ -45,6 +23,7 @@ Loop scheduler
 #include "Target.h"
 #include "MergeList.h"
 #include "Error.h"
+#include "streamCompat.h"
 
 
 ////////////////////////////
@@ -55,7 +34,7 @@ void DecomScheduler::attemptMerge(LSNode &p, LSGraph &g)
 {
 	EGGateLinkIter nextGate(p.descendants);
 	EGGate *d;
-	DataFlowStar *currentmaster = p.myMaster();
+	SDFStar *currentmaster = p.myMaster();
 	MergeList ml; 
 	while ((d=nextGate.nextMaster(currentmaster)) != 0) {
 		ml.insertMerge(&p,(LSNode*) d->farEndNode(), 1); 
@@ -71,7 +50,7 @@ void DecomScheduler::attemptMerge(LSNode &p, LSGraph &g)
 	// which is not isolated. Then, attempt merge from that node.
 	// If there is none, we do form a isolated cluster.
 
-	if (!ml.size()) {
+	if (!ml.mySize()) {
 		LSNode* tmp = (LSNode*) p.getNextInvoc();
 		while (tmp && (tmp->connected() == 0))
 			tmp = (LSNode*) tmp->getNextInvoc();
@@ -95,7 +74,7 @@ void DecomScheduler::buildClusters(LSGraph &g)
 	g.initializeCandidates();
 	while ((p=g.candidateFromFront())!=0) {
 		// when all masters have only one instances, stop clustering.
-		if (p->myMaster()->repetitions == Fraction(1)) {
+		if (p->myMaster()->repetitions == 1) {
 			// push back the current node
 			g.candidatePushBack(p);
 			return;
@@ -118,9 +97,18 @@ int DecomScheduler::genSched(DecomGal* cgal)
 	}
 
 	// Step 2. Joe's clustering algorithm.
-	//         We no longer need to call this twice, or call genSubScheds.
+	//         After removing all feed-forward delays, apply his 
+	//         clustering again.
+	if(!cgal->cluster())
+		// remove forward delays in "cgal", and do more 
+		// clustering if possible.
+		if (cgal->removeDelay()) cgal->cluster();
 
-	cgal->cluster();
+	// recursive application of the decomposition.
+	if (!cgal->genSubScheds()) {
+		invalid = TRUE;
+		return FALSE;
+	}
 
 	// Now, cgal is a compact form to be expanded for more looping.
 	//
@@ -169,31 +157,42 @@ int DecomScheduler::topLevelSchedule(LSGraph &g)
 		while ((n = nextNode++ ) != 0) {
 			if (n->fireable()) {
 				n->fireMe();
-				mySchedule.append(*n->myMaster());
+				mySchedule.append(n->myMaster());
 				g.removeCandidate(n);
 				flag = TRUE;
 			}
 		}
 	} while (flag);
 
-	if (g.candidates.size() > 0) return FALSE;
+	if (g.candidates.mySize() > 0) return FALSE;
 	return TRUE;
 }
 
 StringList DecomScheduler::displaySchedule(int depth) {
 	StringList sch;
 	SDFSchedIter next(mySchedule);
-	SDFBaseCluster* c;
-	while ((c = (SDFBaseCluster*)next++) != 0) {
-		sch += c->displaySchedule(depth);
+	SDFStar* c;
+	while ((c = next++) != 0) {
+		if (c->isA("LSCluster")) {
+			LSCluster* ls = (LSCluster*) c;
+			sch += ls->displaySchedule(depth);
+		} else {
+			sch += ((SDFCluster*) c)->displaySchedule(depth);
+		}
 	}
 	return sch;
 }
 
-void DecomScheduler::genCode(Target& t, int depth) {
+StringList DecomScheduler::genCode(Target& t, int depth) {
+	StringList code;
 	SDFSchedIter next(mySchedule);
-	SDFBaseCluster* c;
-	while ((c = (SDFBaseCluster*)next++) != 0) {
-		c->genCode(t,depth);
+	SDFStar* c;
+	while ((c = next++) != 0) {
+		if (c->isA("LSCluster")) {
+			code += ((LSCluster*) c)->genCode(t,depth);
+		} else {
+			code += ((SDFCluster*) c)->genCode(t,depth);
+		}
 	}
+	return code;
 }

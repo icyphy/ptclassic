@@ -2,21 +2,17 @@ defstar {
 	name {BlockRLattice}
 	domain {SDF}
 	desc {
-A block recursive (IIR) lattice filter.
-It is identical to the RLattice star, except that the reflection
-coefficients are updated each time the star fires by reading the
-"coefs" input. The "order" parameter indicates how many coefficient
-should be read. The "blockSize" parameter specifies how many data
-samples should be processed for each set of coefficients.
+A block Recursive (Backward) (IIR) Lattice filter.
+The reflection coefficients are updated each time the star fires
+by reading the "coefs" input.
+The "order" parameter indicates how many coefficient
+should be read.  The "blockSize" parameter specifies how many
+signalIn samples should be processed for each set of coefficients.
+Otherwise, the star is identical to the RLattice star.
 	}
 	version {$Id$}
 	author { Alan Kamas and Edward Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1992 The Regents of the University of California }
 	location { SDF dsp library }
 	seealso { IIR, Lattice, RLattice, BlockLattice }
 	input {
@@ -54,26 +50,23 @@ limitation of liability, and disclaimer of warranty provisions.
 		reflectionCoefs = 0;
 	}
 	destructor {
-		LOG_DEL; delete [] w;
-		LOG_DEL; delete [] y;
-		LOG_DEL; delete [] reflectionCoefs;
+		LOG_DEL; delete w;
+		LOG_DEL; delete y;
+		LOG_DEL; delete reflectionCoefs;
 	}
-	setup {
+	start {
 		// reallocate arrays only if size has changed,
 		// or this is the first run.
 		if (M != int(order)) {
 			M = int(order);
-			LOG_DEL; delete [] w;
+			LOG_DEL; delete w;
 			LOG_NEW; w = new double[M+1];
-			LOG_DEL; delete [] y;
+			LOG_DEL; delete y;
 			LOG_NEW; y = new double[M+1];
-			LOG_DEL; delete [] reflectionCoefs;
+			LOG_DEL; delete reflectionCoefs;
 			LOG_NEW; reflectionCoefs = new double[M];
 		}
 		for (int i=0; i <= M; i++)  w[i]=0.0 ;
-		signalIn.setSDFParams(int(blockSize), int(blockSize)-1);
-		coefs.setSDFParams(int(order), int(order)-1);
-		signalOut.setSDFParams(int(blockSize), int(blockSize)-1);
 	}
 	go {
 	    // first read in new tap values
@@ -91,7 +84,7 @@ limitation of liability, and disclaimer of warranty provisions.
 			k = reflectionCoefs[M-i];
 			y[i] = k * w[i] + y[i-1];
 		}
-		signalOut%j << y[M];
+		signalOut%0 << y[M];
 
 		// Backward:  Compute the w's for the next round
 		for (i = 1; i < M ; i++) {

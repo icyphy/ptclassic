@@ -13,19 +13,19 @@ static const char file_id[] = "Recur.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -34,9 +34,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+							COPYRIGHTENDKEY
 
  Programmer:  Soonhoi Ha
  Date of creation: 7/8/91
@@ -95,7 +93,7 @@ int Recur :: checkTopology (CGMacroClusterGal* galaxy) {
 	return TRUE;
 }
 
-int Recur :: checkStars(CGMacroCluster* s, Galaxy* /*galaxy*/) {
+int Recur :: checkStars(CGMacroCluster* s, Galaxy* galaxy) {
 
 	CGAtomCluster* as = (CGAtomCluster*) s;
 	CGStar& ds = as->real();
@@ -153,8 +151,8 @@ int Recur :: checkStars(CGMacroCluster* s, Galaxy* /*galaxy*/) {
 		// if (st && strcmp(st->initValue(), galaxy->name()))
 		// return FALSE;
 
-	   	CGMacroClustPort* p;
-	   	CGMacroClustPortIter nextp(*s);
+	   	CGClustPort* p;
+	   	CGClustPortIter nextp(*s);
 		int errorFlag = 0;
 	
 		while ((p = nextp++) != 0) {
@@ -192,8 +190,8 @@ int Recur :: checkStars(CGMacroCluster* s, Galaxy* /*galaxy*/) {
 int Recur :: checkCluster(CGMacroCluster* s) {
 
 	// check connections of the Clusters.
-	CGMacroClustPort* p;
-	CGMacroClustPortIter nextp(*s);
+	CGClustPort* p;
+	CGClustPortIter nextp(*s);
 	int inNum = 0;
 	int type = 0;
 	int errorFlag = 0;

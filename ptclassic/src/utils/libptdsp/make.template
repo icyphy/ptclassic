@@ -43,7 +43,7 @@ ROOT	      = ../../..
 VPATH         = $(ROOT)/src/utils/libcephes
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 C_INCL = $(PTCOMPAT_INCSPEC)
@@ -67,7 +67,4 @@ install: makefile $(LIBDIR)/$(LIB)
 
 lint:	$(LIBCSRCS)
 	lint -u $(INCL) $(LIBCSRCS) > lint
-
-# Don't add anything after the next line; makedepend will zap it.
-# DO NOT DELETE THIS LINE -- make depend depends on it.
 

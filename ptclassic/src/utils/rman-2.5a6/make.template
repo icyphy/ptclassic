@@ -1,7 +1,7 @@
 # Ptolemy Makefile for Rosetta Man, use by tkman
 # Version identification:
-# $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @(#)make.template	1.15 8/15/95
+# Copyright (c) 1990-1995 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -28,10 +28,10 @@
 RMAN_VERSION = 2.4
 ROOT = ../../..
 VPATH = $(ROOT)/src/utils/rman-$(RMAN_VERSION)
-BINDIR = $(ROOT)/bin.$(PTARCH)
+BINDIR = $(ROOT)/bin.$(ARCH)
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 SRCS = 	rman.c
@@ -41,10 +41,7 @@ KRUFT =
 # common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
 LIB = foo
 
-KRUFT = rman
 
-MISC_FILES =	Copyright MANIFEST Makefile.dist README-rman contrib \
-		rman.1 rman.html
 
 # Special to rman
 MANTITLEPRINTF = "%s(%s) manual page"
@@ -68,7 +65,7 @@ $(BINDIR)/rman:	rman
 $(ROOT)/man/man1/rman.1: rman.1
 	@echo Installing $<
 	rm -f $@
-	cp $< $@
+	ln $< $@
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.

@@ -2,30 +2,8 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
 
  Programmer:  Shuvra Bhattacharyya, Soonhoi Ha (4/92)
  Date of creation: 5/9/91
@@ -65,6 +43,7 @@ class LSGraph : public ExpandedGraph
 friend class DecomScheduler;
 
 public:
+	// constructor, destructor
 	LSGraph() : RM(0) {}
 	~LSGraph();
 
@@ -74,7 +53,7 @@ public:
 	// Constructor for creating the expanded graph from a galaxy.
 	// The resulting graph will depict the dataflow relationships
 	// among the different invocations of the stars in the galaxy.
-	int createMe(Galaxy& galaxy, int selfLoopFlag = 0);
+	int createMe(Galaxy& galaxy);
 
 	// Set up an invocation of a cluster whose master is given as 
 	// the first argument. The second argument contains the nodes
@@ -116,7 +95,7 @@ public:
 
 protected:
 	// redefine these virtual allocators to allocate LS  nodes.
-	EGNode *newNode(DataFlowStar*,int);
+	EGNode *newNode(SDFStar*,int);
 
 private:
 	// make the reachability matrix
@@ -143,7 +122,7 @@ class LSIter : public EGIter {
 public:
 	LSIter(LSGraph& g) : EGIter(g) {}
 	LSNode* next() { return (LSNode*) EGIter :: next(); }
-	LSNode* operator++(POSTFIX_OP) { return next(); }
+	LSNode* operator++() { return next(); }
 };
 
 #endif

@@ -28,28 +28,22 @@
 TKMAN_VERSION = 1.7.3
 ROOT = ../../..
 VPATH = $(ROOT)/src/utils/tkman-$(TKMAN_VERSION)
-BINDIR = $(ROOT)/bin.$(PTARCH)
+BINDIR = $(ROOT)/bin.$(ARCH)
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 SRCS =
 
-KRUFT = 
-
-MISC_FILES = 	Copyright MANIFEST Makefile.dist README-tkman contrib \
-		searchbox.tcl taputils.tcl tkman-help.html tkman-help.tcl \
-		tkman.1 tkman.tcl
+KRUFT =
 
 # common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
 LIB = foo
 
 
-# We don't include common.mk since we don't use the compiler here
 # include common definitions, rules
 #include $(ROOT)/mk/common.mk
-
 WISH=$(PTOLEMY)/bin.$(PTARCH)/wish4.0
 
 all:	makefile  tkman
@@ -62,7 +56,6 @@ tkman:
 		all
 
 install:	#tkman $(BINDIR)/tkman $(ROOT)/man/man1/tkman.1
-	rm -f $(BINDIR)/tkman
 	$(MAKE) -f $(VPATH)/Makefile.dist \
 		VPATH=$(VPATH) \
 		WISH=$(WISH) \
@@ -79,16 +72,6 @@ $(ROOT)/man/man1/tkman.1: tkman.1
 	@echo Installing $<
 	rm -f $@
 	ln $< $@
-sources:	$(EXTRA_SRCS) $(SRCS) makefile
-
-depend:
-	@echo "no dependencies in tkman directory (contributed code)"
-
-sccsinfo:
-	sccs info
-checkjunk:
-	@checkextra -v $(SRCS) $(OBJS) $(MISC_FILES) makefile SCCS
-
 clean:
 	rm -f tkman *~
 # Don't add anything after the next line; makedepend will zap it.

@@ -4,12 +4,7 @@ defstar {
 	desc { Copy input to all outputs }
 	version { $Id$ }
 	author { E. A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1992 The Regents of the University of California }
 	location { CGC demo library }
 	explanation {
 Each input is copied to every output.  This is done by the way the buffers
@@ -23,11 +18,9 @@ are laid out; no code is required.
 		name {output}
 		type {=input}
 	}
+	ccinclude { "CGCGeodesic.h" }
 	constructor {
-		noInternalState();
-	}
-	setup {
-		forkInit(input,output);
+		output.setForkBuf(input);
 	}
 	exectime {
 		return 0;

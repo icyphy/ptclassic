@@ -24,8 +24,6 @@
 # 						COPYRIGHTENDKEY
 #
 #
-# Programmer:  Brian L. Evans
-#
 # matlab.mk :: Common definitions for the Ptolemy interface to Matlab
 # Version: $Id$
 #
@@ -38,33 +36,27 @@
 # -- If Matlab is installed, then set MATLABDIR accordingly
 #
 # The Matlab include files are located in $(MATLABDIR)/extern/include
-# At compile time, sdfmatlabstars.o and libsdfmatlabstars.a are created
-# At link time, Ptolemy is linked against libexttools.a (MatlabIfc class)
-# and either
-# (a) libptmatlab.a if Matlab is not installed, or
-# (b) libmat.a if Matlab is installed.
+# At compile time, either
+# (a) sdfnomatlabstars.o and libsdfnomatlabstars.a are created if
+#     Matlab is not installed, or
+# (b) sdfmatlabstars.o and libsdfmatlabstars.a are created if
+#     Matlab is installed
 #
-# If Matlab is installed, the old way to determine the Matlab architecture is
-# MATARCH := $(shell $(ROOT)/bin/matlabArch $(PTARCH))
-# Now, MATARCH is set by the config makefiles.
+# At link time, either
+# (a) libsdfnomatlabstars.a is linked if Matlab is not installed, or
+# (b) libmat.a is linked if Matlab is installed.
 #
-
-# matlabRootDir traverses the user's path, so we only run it when
-# we really need it.
-ifdef NEED_MATLABDIR
-	MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
-
-	ifeq ("$(MATLABDIR)","")
-	MATLABDIR= 		$(ROOT)/src/compat/matlab
-	MATLABEXT_LIB = 	-lptmatlab
-	else
-	MATLABEXT_LIB = 	-L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
-	endif
-	MATLAB_INCSPEC =	-I$(MATLABDIR)/extern/include
+MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
+ifeq ("$(MATLABDIR)","")
+MATLABDIR= 		$(ROOT)/src/compat/matlab
+MATLABSTAR_LIBFILE=	$(LIBDIR)/libsdfnomatlabstars.$(LIBSUFFIX) 
+MATLABSTAR_LIB=		-lsdfnomatlabstars
+MATLABSTARS_DOT_O=	$(LIBDIR)/sdfnomatlabstars.o
+else
+MATARCH := $(shell $(ROOT)/bin/matlabArch $(ARCH))
+MATLABEXT_LIB = 	-L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
+MATLABSTAR_LIBFILE=	$(LIBDIR)/libsdfmatlabstars.$(LIBSUFFIX) 
+MATLABSTAR_LIB=		-lsdfmatlabstars
+MATLABSTARS_DOT_O=	$(LIBDIR)/sdfmatlabstars.o
 endif
-
-# Ptolemy interface directories
-EXTTOOLSLIB = $(ROOT)/src/utils/libexttools
-PTMATLABLIB = $(ROOT)/src/utils/libptmatlab
-MATLABIFC_INCSPEC = -I$(EXTTOOLSLIB) -I$(PTMATLABLIB)
 

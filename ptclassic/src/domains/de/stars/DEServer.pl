@@ -1,38 +1,47 @@
+ident {
+/**************************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  E. A. Lee
+ Date of creation: 9/29/90
+
+ This star emulates a server.  If input events arrive when it is not busy,
+ it delays them by the service time.  If they arrive when it is busy,
+ it delays them by more.  It must become free, and then serve them.
+
+**************************************************************************/
+}
 defstar {
 	name {Server}
 	domain {DE}
 	desc {
-This star emulates a server.
-If input events arrive when it is not busy,
-it delays them by the service time (a constant parameter).
-If they arrive when it is busy, it delays them by more.
-It must become free, and then serve them.
+	   "This star emulates a server."
+	   "If input events arrive when it is not busy,"
+ 	   "it delays them by the service time."
+	   "If they arrive when it is busy,"
+ 	   "it delays them by more."
+	   "It must become free, and then serve them."
 	}
-	version { $Id$}
-	author { E. A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { DE main library }
 	input {
 		name {input}
 		type {anytype}
 	}
 	output {
 		name {output}
-		type {=input}
+		type {anytype}
 	}
 	defstate {
 		name {serviceTime}
 		type {float}
 		default {"1.0"}
-		desc { Service time. }
+		desc { "Service time" }
 	}
 	constructor {
-		delayType = TRUE;
+		input.inheritTypeFrom(output);
 	}
 	go {
 	   // No overlapped execution. set the time.

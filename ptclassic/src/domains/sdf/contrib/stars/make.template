@@ -12,15 +12,12 @@ ROOT = 		../../../../..
 VPATH = 	$(ROOT)/src/domains/sdf/contrib/stars
 
 # get configuration info
-CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG =	$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 # SDFDIR is the directory containing SDF domain support
 SDFDIR = 	$(ROOT)/src/domains/sdf/kernel
-INCL = 		-I$(SDFDIR) \
-		-I$(KERNDIR) \
-		-I$(ROOT)/src/domains/sdf/contrib/kernel \
-		-I$(ROOT)/src/domains/sdf/contrib/stars
+INCL = 		-I$(SDFDIR) -I$(KERNDIR) -I$(ROOT)/src/domains/contrib/stars
 
 # Library name
 LIB =		libsdfcontribstars.$(LIBSUFFIX)
@@ -43,13 +40,15 @@ SDFPowerEst.pl \
 SDFPowerEstCx.pl \
 SDFQPSK.pl \
 SDFQPSK2.pl \
+SDFReadVar.pl \
 SDFRfft.pl \
+SDFSharedMem.pl \
 SDFSineGen.pl \
 SDFTWTA.pl \
 SDFVDecoder.pl \
 SDFVEncoder.pl \
 SDFVariance.pl \
-SDFWirelessChannel.pl
+SDFWriteVar.pl
 
 # The .cc files
 SRCS =		$(PL_SRCS:.pl=.cc)
@@ -63,28 +62,17 @@ HDRS =		$(SRCS:.cc=.h)
 STAR_MK =	sdfcontribstars
 DOMAIN =	SDF_CONTRIB
 DOMAIN_2 =	SDF
+EXTRA_SRCS =	$(STAR_MK).c $(PL_SRCS) fft.c
 MISC_FILES =	README README.notes
-
-EXTRA_SRCS =	$(STAR_MK).c $(PL_SRCS) $(MISC_FILES) override.mk
 
 all:		$(SRCS) stars_all
 
 install:	stars_install
 
-# allow CC_SHAREDFLAGS to be overridden (neal@ctd.comsat.com (Neal Becker))
--include $(VPATH)/override.mk
-
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
 
-# This is a GNU make conditional
-ifeq ($(PTARCH),hppa)
-SDFWirelessChannel.o: SDFWirelessChannel.cc
-	@echo "  On the hppa, gcc-2.7.0/libg++-2.7.0 fails to compile"
-	@echo "  SDFWirelessChannel.o with optimization, so"
-	@echo "  we compile without it"
-	$(CPLUSPLUS) $(CC_SHAREDFLAGS) -DUSG -g $(WARNINGS) -I$(VPATH) $(INCL) -c $< 
-endif
+
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 

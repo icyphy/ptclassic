@@ -1,18 +1,12 @@
 defstar {
-	name { Mpy }
+	name { FixProduct }
 	domain { CG56 }
-	desc { Multiply any number of inputs, producing an output. }
+	desc { Multipy any number of inputs, producing an output. }
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 arithmetic library }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
 	explanation {
-.Id "multiplication"
 The inputs are multiplied and the result is written on the output.
 	}
 	inmulti {
@@ -49,15 +43,15 @@ The inputs are multiplied and the result is written on the output.
 
 	go {
 		if (input.numberPorts() == 1) {
-			addCode(one);
+			gencode(one);
 			return;
 		}
-		addCode(std);
+		gencode(std);
 		for (int i = 3; i <= input.numberPorts(); i++) {
 	                inputNum=i;
-			addCode(loop);
+			gencode(loop);
 		}
-	        addCode(sat);
+	        gencode(sat);
 	}
 	exectime {
 		if (input.numberPorts() == 1) return 2;

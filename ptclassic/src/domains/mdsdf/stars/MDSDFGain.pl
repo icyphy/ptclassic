@@ -4,12 +4,7 @@ defstar {
   desc { Multiply a floating-point matrix by a scalar gain value. }
   version { $Id$ }
   author { Mike J. Chen }
-  copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-  }
+  copyright { 1994 The Regents of the University of California }
   location  { MDSDF library }
   input {
     name { input }

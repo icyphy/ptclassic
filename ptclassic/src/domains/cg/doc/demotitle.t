@@ -1,2 +1,0 @@
-.\" $Id$
-.TI "CG Demos"

@@ -4,30 +4,8 @@
 Version identification:
 %w%	$Date$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+ Copyright (c) 1991 The Regents of the University of California.
+                       All Rights Reserved.
 
  Programmer: E. A. Lee
 
@@ -35,11 +13,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 *******************************************************************/
 
-#ifdef __GNUG__
-#pragma interface
-#endif
-
-#include "MReq.h"
+#include "AsmStar.h"
+#include "AsmConnect.h"
+#include "dataType.h"
 
 class ProcMemory;
 
@@ -49,16 +25,26 @@ class MemAssignment {
 	friend class MemMap;
 	friend class MemMapIter;
 	MemAssignment* next;
-	unsigned start;
-	MReq& req;
 public:
-	unsigned addr() { return start;}
-	int length() { return req.size();}
-	int circ() { return req.circ();}
+	unsigned start;
+	unsigned length;
 
-	StringList print() { return req.print();}
-	MemAssignment(unsigned addr, MReq& mreq, MemAssignment* link = 0)
-		: next(link), start(addr), req(mreq) {}
+	// A memory allocation is for either a State or a PortHole.
+	// Hence, after the allocation is done, one of the following
+	// two pointers will be non-null.
+	const State* state;
+	AsmPortHole* port;
+
+	// The following Boolean indicates whether a block of memory
+	// will be accessed as a circular buffer.
+	int circular;
+
+	// The type is registered here, for the convenience of symbolic
+	// debuggers.
+	DataType type;
+
+	MemAssignment() : next(0), start(0), length(0), state(0), port(0),
+			  circular(FALSE), type(INT) {}
 	~MemAssignment() {}
 };
 
@@ -66,28 +52,31 @@ public:
 class MemMap {
 	friend class MemMapIter;
 	MemAssignment* first;
+	MemAssignment* last;
 public:
-	MemMap() : first(0) {}
+	MemMap() : first(0), last(0) {}
 	// Clear the memory map.
 	// Warning! does delete on all the MemAssignment objects!
 	void zero();
 	~MemMap() {zero();}
 	int empty() const { return first == 0;}
-	void appendSorted(unsigned start, MReq& mreq);
+	void appendSorted(unsigned start, unsigned length,
+			  const State* state, AsmPortHole* port,
+			  int circular, DataType type);
 };
 
 class MemMapIter {
 	MemAssignment* ptr;
 	MemMap& ref;
 public:
-	MemMapIter(MemMap& l) :  ptr(l.first), ref(l) {}
+	MemMapIter(MemMap& l) : ref(l), ptr(l.first) {}
 	void reset() { ptr = ref.first;}
 	MemAssignment* next() {
 		MemAssignment* res = ptr;
 		if (ptr) ptr = ptr->next;
 		return res;
 	}
-	MemAssignment* operator++(POSTFIX_OP) { return next();}
+	MemAssignment* operator++() { return next();}
 };
 
 #endif

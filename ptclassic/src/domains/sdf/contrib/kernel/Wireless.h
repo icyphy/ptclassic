@@ -5,7 +5,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -45,6 +45,7 @@ Programmer: John S. Davis, II
 #include <ACG.h>
 #include <Uniform.h>
 
+#define PI 3.141592654
 #define LIGHT 3e8
 
 class ChannelParameters

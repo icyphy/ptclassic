@@ -3,32 +3,10 @@ static const char file_id[] = "MotorolaTarget.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
+ Copyright (c) 1992 The Regents of the University of California.
+                       All Rights Reserved.
 
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
-
- Programmer: J. Buck, J. Pino, T. M. Parks
+ Programmer: J. Buck and J. Pino
 
  Base target for Motorola DSP assembly code generation.
 
@@ -39,14 +17,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "MotorolaTarget.h"
-#include "MotorolaAttributes.h"
 
 const Attribute ANY = {0,0};
 
 // a MotorolaMemory represents the X and Y memories of a 56000 or 96000.  
 // It is derived from DualMemory.
 MotorolaMemory :: MotorolaMemory(const char* x_map, const char* y_map) :
-	DualMemory("l","x",A_XMEM,ANY,x_map,"y",A_YMEM,ANY,y_map)
+	DualMemory("x",A_XMEM,ANY,x_map,"y",A_YMEM,ANY,y_map)
 {}
 
 MotorolaTarget :: MotorolaTarget (const char* nam, const char* desc,
@@ -60,14 +37,18 @@ void MotorolaTarget :: initStates() {
  	mem = 0;
 	addState(xMemMap.setState("xMemMap",this,"0-4095","X memory map"));
 	addState(yMemMap.setState("yMemMap",this,"0-4095","Y memory map"));
-	addState(subFire.setState("subroutines?",this,"-1",
-	    "Write star firings as subroutine calls."));
 }
 
-void MotorolaTarget :: setup() {
-	LOG_DEL; delete mem;
+int MotorolaTarget :: setup(Galaxy& g) {
+	LOG_DEL; delete mem; mem = 0;
 	LOG_NEW; mem = new MotorolaMemory(xMemMap,yMemMap);
-	AsmTarget::setup();
+	return AsmTarget::setup(g);
+}
+
+void MotorolaTarget :: wrapup () {
+	StringList map = mem->printMemMap(";","");
+	addCode (map);
+	AsmTarget::wrapup();
 }
 
 MotorolaTarget :: ~MotorolaTarget () {
@@ -76,146 +57,110 @@ MotorolaTarget :: ~MotorolaTarget () {
 
 // copy constructor
 MotorolaTarget :: MotorolaTarget (const MotorolaTarget& src) :
-AsmTarget(src.name(),src.descriptor(),src.starType())
+AsmTarget(src.readName(),src.readDescriptor(),src.starType())
 {
 	initStates();
 	copyStates(src);
 }
 
-// makeNew
-Block* MotorolaTarget :: makeNew () const {
+// clone
+Block* MotorolaTarget :: clone () const {
 	LOG_NEW; return new MotorolaTarget(*this);
 }
 
 void MotorolaTarget::beginIteration(int repetitions, int) {
-    if (repetitions == -1)		// iterate infinitely
-	*defaultStream << targetNestedSymbol.push("LOOP") << "\n";
-    else				// iterate finitely
-	*defaultStream << "\tdo\t#" << repetitions << "," 
-	       << targetNestedSymbol.push("LOOP") << "\n";
+	StringList out;
+	if (repetitions == -1) {	// iterate infinitely
+		out = targetNestedSymbol.push("LOOP");
+		out += "\n";
+	}
+	else {				// iterate finitely
+		out = "\tdo\t#";
+		out += repetitions;
+		out += ",";
+		out += targetNestedSymbol.push("LOOP");
+		out += "\n";
+	}
+	addCode(out);
 }
 
 void MotorolaTarget::endIteration(int repetitions, int) {
-	if (repetitions == -1)		// iterate infinitely
-		*defaultStream << "\tjmp\t"<< targetNestedSymbol.pop() << "\n";
-	else 				// iterate finitely
-		*defaultStream << "\tnop\n; prevent two endloops in a row\n"
-		       << targetNestedSymbol.pop() << "\n";
+	StringList out;
+	if (repetitions == -1)	{	// iterate infinitely
+		out = "\tjmp\t";
+		out += targetNestedSymbol.pop();
+		out += "\n";
+	}
+	else {				// iterate finitely
+		out = targetNestedSymbol.pop();
+		out += "\n\tnop\t\t; prevent two endloops in a row\n";
+	}
+	addCode(out);
 }
 
 void MotorolaTarget::codeSection() {
 	if (!inProgSection) {
-		*defaultStream << "\torg p:\n";
+		addCode("\torg p:\n");
 		inProgSection = 1;
 	}
 }
 
 void MotorolaTarget::disableInterrupts() {
 	codeSection();
-	*defaultStream << "	ori	#03,mr	;disable interrupts\n";
+	addCode("	ori	#03,mr	;disable interrupts\n");
 }
 
 void MotorolaTarget::enableInterrupts() {
 	codeSection();
-	*defaultStream << "	andi	#$fc,mr	;enable interrupts\n";
+	addCode("	andi	#$fc,mr	;enable interrupts\n");
 }
 
 void MotorolaTarget::saveProgramCounter() {
 	codeSection();
-	*defaultStream << targetNestedSymbol.push("SAVEPC") << "\tequ	*\n";
+	StringList spc;
+	spc = targetNestedSymbol.push("SAVEPC");
+	spc += "\tequ	*\n";
+	addCode(spc);
 }
 
 void MotorolaTarget::restoreProgramCounter() {
 	codeSection();
-	*defaultStream << "\torg	p:" << targetNestedSymbol.pop() << "\n";
+	StringList spc;
+	spc = "\torg	p:";
+	spc += targetNestedSymbol.pop();
+	spc += "\n";
+	addCode(spc);
 }
 
 void MotorolaTarget::orgDirective(const char* memName, unsigned addr) {
-	*defaultStream << "\torg\t" << memName << ":" << int(addr) << "\n";
+	StringList out = "\torg\t";
+	out += memName;
+	out += ":";
+	out += int(addr);
+	out += "\n";
+	addCode(out);
 	inProgSection = 0;
 }
 
 void MotorolaTarget::writeInt(int val) {
-	*defaultStream << "\tdc\t" << val << "\n";
+	StringList out = "\tdc\t";
+	out += val;
+	out += "\n";
+	addCode(out);
 }
 
 void MotorolaTarget::writeFix(double val) {
-	*defaultStream << "\tdc\t" << limitFix(val) << "\n";
+	StringList out = "\tdc\t";
+	out += limitFix(val);
+	out += "\n";
+	addCode(out);
 }
 
 void MotorolaTarget::writeFloat(double val) {
-	*defaultStream << "\tdc\t" << val << "\n";
+	StringList out = "\tdc\t";
+	out += val;
+	out += "\n";
+	addCode(out);
 }
 
-double MotorolaTarget::limitFix(double val) { 
-	const double limit = 1.0 - 1.0/double(1<<23);
-	if (val >= limit) return limit;
-	else if (val <= -1.0) return -1.0;
-	else return val;
-}
 
-StringList MotorolaTarget::comment(const char* msg, const char* begin,
-const char* end, const char* cont) {
-	if (begin==NULL) return CGTarget::comment(msg,"; ");
-	else return CGTarget::comment(msg,begin,end,cont);
-}
-
-/* Determine whether or not the star firing can be implemented with
-   static code which could be enclosed in a loop or subroutine.
-*/
-int staticCode(CGStar& star)
-{
-    BlockPortIter nextPort(star);
-    CGPortHole* port;
-
-    // Test the parameters of all ports.
-    while ( (port = (CGPortHole*)nextPort++) != NULL)
-    {
-	/* If the buffer size is not the same as the number of
-	   particles transferred in one firing, then each firing must
-	   read from a different location.
-	*/
-	if (port->numXfer() != port->bufSize())
-	{
-	    if ((port->attributes() & PB_CIRC) == 0) return FALSE;
-	}
-    }
-    return TRUE;
-}
-
-void MotorolaTarget::writeFiring(Star& s, int level)
-{
-    CGStar& star = (CGStar&)s;
-    int threshold = (int)subFire;
-
-    if (threshold >= 0 && star.reps() > threshold && staticCode(star))
-    {
-	if (star.index() < 0) setStarIndices(*galaxy());
-
-	StringList label;
-	label << star.className() << separator << star.index();
-
-	// Generate procedure definition.
-	if (procedures.put("",label))
-	{
-	    procedures << label << '\n';
-
-	    CodeStream* previous = defaultStream;
-	    defaultStream = &procedures;
-	    AsmTarget::writeFiring(star, level);
-	    defaultStream = previous;
-
-	    // Some instructions are not allowed to preceed rts
-	    // so insert a nop to be safe.
-	    procedures << "	nop\n";
-	    procedures << "	rts\n";
-	}
-
-	// Invoke procedure.
-	mainLoop << "	jsr " << label << '\n';
-    }
-    else
-    {
-	AsmTarget::writeFiring(s,level);
-    }
-}

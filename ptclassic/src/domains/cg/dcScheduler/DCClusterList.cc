@@ -1,32 +1,10 @@
-static const char file_id[] = "DCClusterList.cc";
+static const char file_id[] = "ClusterList.cc";
 /*****************************************************************
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+Copyright (c) 1991 The Regents of the University of California.
+			All Rights Reserved.
 
 Programmer: Soonhoi Ha based on G.C. Sih's code
 Date of last revision: 5/92 
@@ -36,25 +14,25 @@ Date of last revision: 5/92
 #pragma implementation
 #endif
 
-#include "DCClusterList.h"
+#include "ClusterList.h"
 
-// Constructor to initialize one DCClusterList with another
-DCClusterList::DCClusterList(DCClusterList &list) {
+// Constructor to initialize one ClusterList with another
+ClusterList::ClusterList(ClusterList &list) {
 
         initialize();
 
-        DCClusterListIter iter(list);
-        DCCluster *cl;
+        ClusterListIter iter(list);
+        Cluster *cl;
         while ((cl = iter++) != 0) {
                 append(cl);
         }
 }
 
 // destroy clusters
-void DCClusterList :: removeDCClusters() {
-	DCClusterListIter iter(*this);
-	DCCluster* cl;
-	DCCluster* prev = 0;
+void ClusterList :: removeClusters() {
+	ClusterListIter iter(*this);
+	Cluster* cl;
+	Cluster* prev = 0;
 
 	while ((cl = iter++) != 0) {
 		LOG_DEL; delete prev;
@@ -68,16 +46,16 @@ void DCClusterList :: removeDCClusters() {
 				//////////////////////
 // Insert a cluster into the list sorted smallest ExecTime first.
 
-void DCClusterList::insertSorted(DCCluster *c) {
+void ClusterList::insertSorted(Cluster *c) {
 
-        DCClusterLink *copy = createLink(c);
+        ClusterLink *copy = createLink(c);
 
 	int cExec = c->getExecTime(); // The execution time of cluster c
 
-        DCClusterListIter iter(*this);
-        DCClusterLink *clink;
-        while ((clink = (DCClusterLink*)iter.nextLink()) != 0) {
-                if (cExec <= (clink->getDCClustp()->getExecTime()))
+        ClusterListIter iter(*this);
+        ClusterLink *clink;
+        while ((clink = (ClusterLink*)iter.nextLink()) != 0) {
+                if (cExec <= (clink->getClustp()->getExecTime()))
                         break;
         }
 
@@ -94,9 +72,9 @@ void DCClusterList::insertSorted(DCCluster *c) {
 			///  resetList  ///
 			///////////////////
 // reset the members of clusters in the list.
-void DCClusterList :: resetList() {
-	DCClusterListIter citer(*this);
-	DCCluster* cl;
+void ClusterList :: resetList() {
+	ClusterListIter citer(*this);
+	Cluster* cl;
 	
 	while ((cl = citer++) != 0) {
 		cl->resetMember();
@@ -107,9 +85,9 @@ void DCClusterList :: resetList() {
 			///  member  ///
 			////////////////
 // Returns 1 if the list contains clust, otherwise it returns 0.
-int DCClusterList::member(DCCluster *clust) {
-	DCClusterListIter iter(*this);
-	DCCluster *cl;
+int ClusterList::member(Cluster *clust) {
+	ClusterListIter iter(*this);
+	Cluster *cl;
 	while ((cl = iter++) != 0) {
 		if (cl == clust) return TRUE;
 	}
@@ -117,52 +95,52 @@ int DCClusterList::member(DCCluster *clust) {
 }
 
 			/////////////////////
-			///  setDCClusters  ///
+			///  setClusters  ///
 			/////////////////////
-void DCClusterList::setDCClusters() {
-	DCClusterListIter iter(*this);
-	DCCluster *cl;
+void ClusterList::setClusters() {
+	ClusterListIter iter(*this);
+	Cluster *cl;
 	while ((cl = iter++) != 0) {
-		cl->setDCCluster(0);
+		cl->setCluster(0);
 	}
 }
 
-void DCClusterList::resetScore() {
-	DCClusterListIter iter(*this);
-	DCCluster *cl;
+void ClusterList::resetScore() {
+	ClusterListIter iter(*this);
+	Cluster *cl;
 	while ((cl = iter++) != 0) {
 		cl->setScore(0);
 	}
 }
 
 // find clusts and insert them into the list from a node list
-void DCClusterList :: findDCClusts(DCNodeList& nlist) {
+void ClusterList :: findClusts(DCNodeList& nlist) {
 
 	initialize();
 	DCNodeListIter niter(nlist);
 	DCNode* n;
 	while ((n = niter++) != 0) {
 		if (n->getType() == 0) {
-			DCCluster* cl = n->cluster;
+			Cluster* cl = n->cluster;
 			if (member(cl) == 0) insert(cl);
 		}
 	}
 
 	if (listSize() < 2) { // Only one slp clust, split into comps
-		DCCluster* cl = popHead();
-		DCCluster *comp1 = cl->getComp1();
-		DCCluster *comp2 = cl->getComp2();
-		if (comp1 == 0) return; // DCCluster cl is elementary
+		Cluster* cl = popHead();
+		Cluster *comp1 = cl->getComp1();
+		Cluster *comp2 = cl->getComp2();
+		if (comp1 == 0) return; // Cluster cl is elementary
 		insert(comp1);
 		insert(comp2);
 	}
 }
 
 // print
-StringList DCClusterList :: print() {
+StringList ClusterList :: print() {
 	StringList out;
-	DCClusterListIter citer(*this);
-	DCCluster* cl;
+	ClusterListIter citer(*this);
+	Cluster* cl;
 
 	out += "** cluster lists **\n";
 	while ((cl = citer++) != 0) {

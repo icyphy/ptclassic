@@ -17,7 +17,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	inmulti {
 	  name{ input }
-	  type{ float }
+	  type{ ANYTYPE }
 	}
 	defstate {
 	  name { title }

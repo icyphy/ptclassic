@@ -8,18 +8,11 @@ like the standard raised cosine used in digital communications.
 See the SDFRaisdCos star for more information.
 	}
 	version { $Id$ }
-	author { J. T. Buck, Kennard White }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	author { J. T. Buck, Kennard }
+	copyright { 1991 The Regents of the University of California }
 	location { CG56 dsp library }
 	explanation {
-See the
-.c SDFRaisedCos
-star.
+See the SDFRaisedCos star.
 	}
 	seealso {FIR}
 	hinclude { <stream.h> }
@@ -57,17 +50,17 @@ star.
 		// taps are no longer constant or settable
 		taps.clearAttributes(A_CONSTANT|A_SETTABLE);
 		// fix interpolation default
-		interpolation.setInitValue("16");
+		interpolation.setValue("16");
 		// make decimation parameters invisible
 		decimation.clearAttributes(A_SETTABLE);
 
 		// XXX: DONT do this...not implemented in CG56FIR
 		// XXX: decimationPhase.clearAttributes(A_SETTABLE);
 	}
-	setup {
+	start {
 		taps.resize (N);
 		int center = int(N)/2;
-		double maxval = CG56_ONE;
+		double maxval = double(ONE);
 		for (int i = 0; i < int(N); i++) {
 			double coef = rcos(i - center, P, excessBW);
 			if ( coef > maxval )	coef = maxval;
@@ -75,7 +68,7 @@ star.
 			taps[i] = coef;
 			// cerr << "Tap %d" << coef << "\n";
 		}
-		CG56FIR :: setup();
+		CG56FIR :: start();
 	}
 }
 

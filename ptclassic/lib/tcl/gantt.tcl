@@ -31,7 +31,7 @@
 # Hide the default wish window
 wm withdraw .
 
-# These procedures have no meaning without pigi running
+# These procedures have no meaning without Ptolemy running
 proc ptkClearHighlights {args} {} 
 proc ptkHighlight {args} {} 
 
@@ -43,11 +43,6 @@ source $PTOLEMY/lib/tcl/ptkColor.tcl
 source $PTOLEMY/lib/tcl/ptkOptions.tcl
 source $PTOLEMY/lib/tcl/message.tcl
 source $PTOLEMY/lib/tcl/ptkGantt.tcl
-
-# Exit procedure
-proc ptkGanttExit {} {
-  destroy .
-}
 
 # Parse arguments
 if { $argc != 1 } {

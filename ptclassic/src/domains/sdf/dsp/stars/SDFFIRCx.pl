@@ -1,43 +1,30 @@
-defstar {
-	name {FIRCx}
-	domain {SDF}
-	desc {
-A complex finite impulse response (FIR) filter.
-Coefficients are specified by the "taps" parameter.
-Default coefficients give an 8th order, linear phase, lowpass filter.
-To read coefficients from a file, use the syntax: "< fileName",
-preferably specifying a complete path.
-Real and imaginary parts should be paired with parentheses, e.g. (1.0, 0.0).
-Polyphase multirate filtering is also supported.
-	}
-	location { SDF dsp library }
-	version {$Id$}
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	author { E. A. Lee }
-	explanation {
-.pp
+ident {
+/**************************************************************************
+Version identification:
+$Id$
+
+Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+Programmer:  D. G. Messerschmitt and E. A. Lee
+Date of creation: 1/16/90
+Modifications: 8/4/90: added multirate capability and documentation: EAL
+
 ComplexFIR implements a finite-impulse response filter with multirate
 capability.  The default coefficients correspond to a real eighth order,
 equiripple, linear-phase, lowpass filter.
-.Id "FIR filter, complex"
-.Id "filter, FIR, complex"
 The 3dB cutoff frequency at about 1/3
 of the Nyquist frequency.  To load filter coefficients from a file,
 simply replace the default coefficients with the string "<filename".
 The real and imaginary parts should be enclosed in parenthesis,
 as follows: (0.1,0.3).
-.pp
+
 It is advisable to use an absolute path name as part of the file name,
 especially if you are using the graphical interface.
 This will allow the filter to work as expected regardless of
-the directory in which the Ptolemy process actually runs.
-It is best to use tildes in the filename.
-.pp
+the directory in which the ptolemy process actually runs.
+It is best to use tilde's in the filename.
+
 When the \fIdecimation\fP (\fIinterpolation\fP)
 state is different from unity, the filter behaves exactly
 as it were followed (preceded) by a DownSample (UpSample) star.
@@ -47,19 +34,22 @@ a polyphase structure is used internally, avoiding unnecessary use
 of memory and unnecessary multiplication by zero.
 Arbitrary sample-rate conversions by rational factors can
 be accomplished this way.
-.pp
+
+####### NOTE THAT IF THESE STATES ARE CHANGED, THE SCHEDULER MUST
+####### BE RE-RUN.  THERE IS NO MECHANISM NOW FOR ENFORCING THIS.
+
 To design a filter for a multirate system, simply assume the
 sample rate is the product of the interpolation parameter and
 the input sample rate, or equivalently, the product of the decimation
 parameter and the output sample rate.
-.Ir "multirate filter design"
-.Ir "filter, multirate"
 In particular, considerable care must be taken to avoid aliasing.
 Specifically, if the input sample rate is f,
 then the filter stopband should begin before f/2.
 If the interpolation ratio is i, then f/2 is a fraction 1/2i
 of the sample rate at which you must design your filter.
-.pp
+
+####### POINT TO DEMO EXAMPLES
+
 The \fIdecimationPhase\fP parameter is somewhat subtle.
 It is exactly equivalent the phase parameter of the DownSample star.
 Its interpretation is as follows; when decimating,
@@ -71,12 +61,30 @@ When decimationPhase is zero (the default),
 the latest (most recent) samples are the ones selected.
 The decimationPhase must be strictly less than
 the decimation ratio.
-.pp
+
 For more information about polyphase filters, see F. J. Harris,
 "Multirate FIR Filters for Interpolating and Desampling", in
 \fIHandbook of Digital Signal Processing\fR, Academic Press, 1987.
+
+SEE ALSO
+
+FIR(X), BiQuad(X), UpSample(X), DownSample(X)
+
+**************************************************************************/
+}
+
+defstar {
+	name {ComplexFIR}
+	domain {SDF}
+	desc {
+	   "A complex Finite Impulse Response (FIR) filter.\n"
+	   "Coefficients are in the 'taps' state variable.\n"
+	   "Default coefficients give an 8th order, linear phase lowpass\n"
+	   "filter. To read coefficients from a file, replace the default\n"
+	   "coefficients with \"<fileName\".  Real and imaginary parts\n"
+	   "should be paired with parentheses, e.g. (1.0, 0.0).\n"
 	}
-	seealso { FIR, Biquad, UpSample, DownSample, analytic }
+
 	input {
 		name {signalIn}
 		type {complex}
@@ -89,33 +97,33 @@ For more information about polyphase filters, see F. J. Harris,
 		name {taps}
 		type {complexarray}
 		default {
-		"(-.040609,0.0) (-.001628,0.0) (.17853,0.0) (.37665,0.0)"
-		"(.37665,0.0) (.17853,0.0) (-.001628,0.0) (-.040609,0.0)"
+		"(-.040609,0.0) (-.001628,0.0) (.17853,0.0) (.37665,0.0)
+		    (.37665,0.0) (.17853,0.0) (-.001628,0.0) (-.040609,0.0)"
 		}
-		desc { Filter tap values. }
+		desc { "filter tap values" }
 	}
 	defstate {
 		name {decimation}
 		type {int}
 		default {1}
-		desc {Decimation ratio.}
+		desc {"decimation ratio"}
 	}
 	defstate {
 		name {decimationPhase}
 		type {int}
 		default {0}
-		desc {Downsampler phase.}
+		desc {"downsampler phase"}
 	}
 	defstate {
 		name {interpolation}
 		type {int}
 		default {1}
-		desc {Interpolation ratio.}
+		desc {"interpolation ratio"}
 	}
 	protected {
 		int phaseLength;
 	}
-	setup {
+	start {
 		int d = decimation;
 		int i = interpolation;
 		int dP = decimationPhase;

@@ -1,96 +1,80 @@
 defstar {
-    name { XBase }
+    name { S56XBase }
     domain { CGC }
-    desc { Base star from  CGC <-> S56X IPC }
+    desc { Base star from  CGC to S56X Send Receive}
     version { $Id$ }
-    author { Jose Luis Pino }
+    author { Jose L. Pino }
     copyright { 
-Copyright (c) 1993-%Q% The Regents of the University of California.
+Copyright (c) 1993 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { CG56 Target Directory }
     explanation {
     }
 
-ccinclude { <stdio.h>,"compat.h" }
+    codeblock(downloadCode,"const char* filePrefix,const char* s56path") {
+    {
+	Params p;
 
-state {
-    name {S56XFilePrefix}
-    type {string}
-}
+	// open the DSP
+	if ((dsp = qckAttach("/dev/s56dsp", NULL, 0)) == NULL) {
+		fprintf(stderr,"Could not access the S-56X Card");
+		exit(1);
+	}
 
-public {
-    friend class S56XTarget;
-}
+	// boot the moniter
+	if (qckBoot(dsp,"@s56path/lib/qckMon.lod","@filePrefix.lod")==-1) {
+		fprintf(stderr,qckErrString);
+		exit(1);
+	}
 
-codeblock(downloadCode,"const char* s56path") {
-    /* open the DSP */
-    if (($val(S56XFilePrefix)_dsp = qckAttach("/dev/s56dsp", NULL, 0)) == NULL) {
-	perror("Could not access the S-56X Card");
-	EXIT_CGC(0);
+	// load the application
+	if (qckLoad(dsp,"@filePrefix.lod") == -1) {
+		fprintf(stderr,qckErrString);
+		exit(1);
+	}
+
+	// get the DSP parameters
+	if (ioctl(dsp->fd,DspGetParams, &p) == -1) {
+		fprintf(stderr,"Read failed on S-56X parameters");
+		exit(1);
+	}
+
+	p.dmaPageSize = 65536;
+	p.writeMode = DspWordCnt | DspPack24;
+	p.readMode = p.writeMode;
+	p.topFill = 0;
+	p.midFill = 0;
+	p.dmaTimeout = 1000;
+	p.startRead = qckLodGetIntr(dsp->prog,"STARTR");
+	p.startWrite = qckLodGetIntr(dsp->prog,"STARTW");
+	if (p.startRead == -1) {
+		fprintf(stderr,"No STARTR label in @filePrefix.lod");
+		exit(1);
+	}
+	if(p.startWrite == -1) {
+		fprintf(stderr,"NO STARTW label in @filePrefix.lod");
+		exit(1);
+	}
+	// set the DSP parameters
+	if (ioctl(dsp->fd,DspSetParams, &p) == -1) {
+		fprintf(stderr,"Write failed on S-56X parameters");
+		exit(1);
+	}
+    }
     }
 
-    /* boot the moniter */
-    if (qckBoot($val(S56XFilePrefix)_dsp,"@s56path/lib/qckMon.lod")==-1) {
-	perror(qckErrString);
-	EXIT_CGC(0);
-    }
-
-    /* load the application */
-    if (qckLoad($val(S56XFilePrefix)_dsp,"@(cgTarget()->destDirectory)/$val(S56XFilePrefix).lod") == -1) {
-	perror(qckErrString);
-	EXIT_CGC(0);
-    }
-}
-
-codeblock(signalSOL2){
-{
-    int sig = SIGUSR1;
-    if (ioctl($val(S56XFilePrefix)_dsp->fd,DspSetAsyncSig, &sig) == -1) {
-	perror("Setting of interrupt process pointer to S56X driver failed");
-	EXIT_CGC(0);
-    }
-}
-}
-
-codeblock(startDSP) {    
-    if (qckJsr($val(S56XFilePrefix)_dsp,"START") == -1) {
-	perror(qckErrString);
-	EXIT_CGC(0);
-    }
-}
-
-initCode {
-        addCompileOption("-I$S56DSP/include");
-        addLinkOption("-L$S56DSP/lib -l$QCKMON");
+    initCode {
 	addInclude("<sys/types.h>");
 	addInclude("<sys/uio.h>");
-	addInclude("<signal.h>");
-	addInclude("<s56dspUser.h>");
-	addInclude("<qckMon.h>");
-	addInclude("<stdio.h>");
-	addGlobal("    QckMon* $val(S56XFilePrefix)_dsp;","dsp");
-	// We do this here so that all the stars can do there initialization
-	// before starting the DSP
-       	char *s56path = getenv("S56DSP");
-	int newmemory = FALSE;
-	if (s56path == NULL) {
-	    s56path = expandPathName("$PTOLEMY/vendors/s56dsp");
-	    newmemory = TRUE;
-	}
-	addMainInit(downloadCode(s56path),"s56load");
-	addMainInit(signalSOL2,"s56signal");
-	if ( newmemory) delete [] s56path;
+	addInclude("\"s56dspUser.h\"");
+	const char *s56path = getenv("S56DSP");
+	if (s56path == NULL)
+		s56path = expandPathName("$PTOLEMY/vendors/s56dsp");
+	addCode(downloadCode(myTarget()->stateWithName("file"),s56path);
+    }
+    
 }
-
-wrapup {
-	addMainInit(startDSP,"s56start");
-	addCode("qckDetach($val(S56XFilePrefix)_dsp);$val(S56XFilePrefix)_dsp=0;\n","mainClose","qckDetach");
-}
-
-}
-
-
 

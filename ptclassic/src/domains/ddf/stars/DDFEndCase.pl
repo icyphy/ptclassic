@@ -2,19 +2,12 @@ defstar {
 	name { EndCase }
 	domain { DDF }
 	desc {
-Depending on the "control" particle, consume a particle from one of
-the data inputs and send it to the output.  The control particle
-should have value between zero and N-1, inclusive, where N is the
-number of data inputs.
+Depending on the "control" input, route an "input" to
+the "output".
 	}
 	version { $Id$ }
 	author { Soonhoi Ha }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { DDF library }
 
 	inmulti {
@@ -28,48 +21,47 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	output {
 		name { output }
-		type { ANYTYPE }
+		type { anytype }
 	}
 	protected {
 		int readyToGo;
 	}
+	method {
+		name { readClassName }
+		access { public }
+		type { "const char *"}
+		code { return "EndCase";}
+	}
+
 	constructor {
 		input.inheritTypeFrom(output);
 	}
-	setup {
+	start {
 		waitFor(control);
 		readyToGo = FALSE;
 	}
 	go {
-		// get control Particles from Geodesic
-		if (!readyToGo) control.receiveData();	
+	// get control Particles from Geodesic
+		if (!readyToGo)
+			control.grabData();	
+		
+		MPHIter nexti(input);
+		PortHole* p;
+		for (int i = int(control%0); i >= 0; i--)
+			p = nexti++;
 
-		// test value of control string
-		int inputNum = int(control%0);
-		if ( inputNum < 0 ) {
-			Error::abortRun(*this, "control value is negative");
-			return;
-		}
-		else if ( inputNum >= input.numberPorts() ) {
-			Error::abortRun(*this, "control value is too large");
-			return;
-		}
-
-		InDDFMPHIter nexti(input);
-		for (int i = 0; i < inputNum; i++) {
-			nexti++;
-		}
-		InDDFPort& iport = *(InDDFPort *)nexti++;
-		if (iport.numTokens() >= iport.numXfer()) {
-			iport.receiveData();
-			output%0 = iport%0;
+		if (p->numTokens() >= p->numberTokens) {
+			p->grabData();
+			output%0 = (*p)%0;
 			output.sendData();
 			waitFor(control);
 			readyToGo = FALSE;
 		} else {
-			waitFor(iport);
+			waitFor(*p);
 			readyToGo = TRUE;
 			return;
 		}
 	}
 }
+
+

@@ -3,20 +3,15 @@ defstar {
 	derivedFrom { Xgraph }
 	domain { SDF }
 	desc {
-Plot a series of traces in the style of a "waterfall" plot.
-This is three-dimensional plot used to show the evolution
+Plots a series of traces in the style of a "waterfall" plot.
+This is a type of three-dimensional plot used to show the evolution
 of signals or spectra.  Optionally, each plot can be made opaque, so
 that lines that would appear behind the plot are eliminated.
 The star is derived from Xgraph.
 	}
-	version { $Id$ }
+	version {$Id$}
 	author { E. A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
 	seealso {Xgraph XMgraph XYgraph xgraph Xhistogram timeVarSpec}
 	defstate {
@@ -24,6 +19,18 @@ limitation of liability, and disclaimer of warranty provisions.
 		type {int}
 		default {"128"}
 		desc { Number of samples per trace. }
+	}
+	defstate {
+		name {xUnits}
+		type {float}
+		default {"1.0"}
+		desc { Number of horizontal units per input sample. }
+	}
+	defstate {
+		name {xInit}
+		type {float}
+		default {"0.0"}
+		desc { Horizontal value of the first input sample. }
 	}
 	defstate {
 		name {xOffset}
@@ -46,7 +53,7 @@ Amount of upward shift of each successive trace, in vertical units.
 		type {int}
 		default {NO}
 		desc {
-Flag that turns on or off hidden-line elimination.
+Turns on or off hidden-line elimination.
 		}
 	}
 	defstate {
@@ -54,7 +61,7 @@ Flag that turns on or off hidden-line elimination.
 		type {int}
 		default {YES}
 		desc {
-Flag that turns on or off the display of the plane where y=0.
+Turns on or off display of the plane where y=0.
 		}
 	}
 	protected {
@@ -64,9 +71,7 @@ Flag that turns on or off the display of the plane where y=0.
 		double* highestValue;
 		int inBreak;
 	}
-	constructor { highestValue = 0;}
-	destructor { LOG_DEL; delete [] highestValue;}
-	setup {
+	start {
 		graph.initialize(this, 2, options, title, saveFile, ignore);
 		// allow access to one past sample
 		input.setSDFParams(1,1);
@@ -74,8 +79,7 @@ Flag that turns on or off the display of the plane where y=0.
 		nTracesSoFar = 0;
 		graph.setIgnore(0);
 		xval = double(xInit);
-		LOG_DEL; delete [] highestValue;
-		LOG_NEW; highestValue = new double [int(traceLength)];
+		highestValue = new double [int(traceLength)];
 		inBreak = FALSE;
 	}
 	method {

@@ -4,7 +4,7 @@ defstar {
 	version { $Id$ }
 	author { E. A. Lee, modified for MDSDF by Mike Chen }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -110,16 +110,16 @@ delim $$
 		TclStarIfc tcl;
 	}
 	setup {
+	    tcl.setup(this,input.numberPorts(),
+			output.numberPorts(), (const char*)tcl_file);
+
             // set the dimensions of the porthole
             //  temporary, would prefer to define some kind of ANY_SIZE
             //  dimensionality
 	    input.setMDSDFParams(int(numRows), int(numCols));
             output.setMDSDFParams(int(numRows), int(numCols));
 	}
-	begin {
-	    tcl.setup(this,input.numberPorts(),
-			output.numberPorts(), (const char*)tcl_file);
-	}
+
 	go {
 	    tcl.go();
 

@@ -43,16 +43,15 @@ ROOT = ../../../../..
 VPATH = $(ROOT)/src/domains/sdf/matlab/stars
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 # SDFDIR is the directory containing SDF domain support
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
-INCL = $(PTCOMPAT_INCSPEC) -I$(SDFDIR) -I$(KERNDIR) \
-       $(MATLAB_INCSPEC) $(MATLABIFC_INCSPEC)
+INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(MATLABDIR)/extern/include
 
 # Library name
-LIB=libsdfmatlabstars.$(LIBSUFFIX)
+LIB=libsdfmatlab.$(LIBSUFFIX)
 
 # Where star doc files go
 STARDOCDIR = ../../doc/stars
@@ -62,6 +61,10 @@ PL_SRCS= \
   SDFMatlab.pl \
   SDFMatlab_M.pl \
   SDFMatlabCx_M.pl
+
+MATLAB_SRCS= \
+  PtCloseStarFigures.m \
+  PtSetStarFigures.m
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
@@ -79,24 +82,15 @@ HDRS= $(SRCS:.cc=.h)
 STAR_MK=sdfmatlabstars
 DOMAIN=SDF_MATRIX
 DOMAIN_2=SDF
-EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS)
+EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS) $(MATLAB_SRCS)
 
 all:		$(SRCS) stars_all
 
 install:	stars_install
 
-# matlab.mk checks this var before traversing the path
-NEED_MATLABDIR =	1
-
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
 
-# Workaround bug in gcc-2.7.2 optimizer
-ifeq ($(USE_GPLUSPLUS),yes)
-SDFMatlabCx_M.o: SDFMatlabCx_M.cc
-	$(UNOPTIMIZED_WARNING_MESSAGE)
-	$(UNOPTIMIZED_COMPILE_RULE) $<
-endif
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.

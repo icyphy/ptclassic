@@ -1,6 +1,6 @@
 defstar {
 	name {UpSample}
-	domain {VHDL}
+	domain {SDF}
 	desc { 
 Upsample by a given "factor" (default 2), filling with "fill" (default 0.0).
 The "phase" parameter tells where to put the sample in an output block.
@@ -9,15 +9,15 @@ Although the "fill" parameter is a floating-point number, if the input is of
 some other type, such as complex, the fill particle will be obtained by casting
 "fill" to the appropriate type.
 	}
-	version { $Id$ }
-	author { Michael C. Williamson, J. T. Buck }
+	version {@(#)SDFUpSample.pl	2.9 3/2/95}
+	author { J. T. Buck }
 	copyright {
 Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { VHDL main library }
+	location { SDF main library }
 	input {
 		name{input}
 		type{ANYTYPE}
@@ -50,25 +50,14 @@ limitation of liability, and disclaimer of warranty provisions.
 			Error::abortRun(*this, ": phase must be < factor");
 	}
 	go {
-	  StringList out;
-	  for (int i = 0; i < int(factor); i++) {
-	    out << "$ref(output, ";
-	    out << -i;
-	    out << ") $assign(output) ";
-	    if (i == int(phase)) {
-	      out << "$ref(input, 0)";
-	    }
-	    else {
-	      out << (strcmp(input.resolvedType(),INT)==0?
-		      int(fill):double(fill));
-	      // yes, the previous statement really does work correctly
-	      // even if the type of the output is resolved to COMPLEX
-	      // or INT.  The appropriate conversion is performed.
-	    }
-	    out << ";\n";
-	  }
-	  addCode(out);
+		int i, match = int(factor)-int(phase)-1;
+		for (i = 0; i < int(factor); i++)
+			if (i == match)
+				output%i = input%0;
+			else
+				output%i << double(fill);
+		// yes, the previous statement really does work correctly
+		// even if the type of the output is resolved to COMPLEX
+		// or INT.  The appropriate conversion is performed.
 	}
 }
-
-

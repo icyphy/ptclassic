@@ -4,12 +4,12 @@ defstar {
 	version { $Id$ }
 	author { J.Weiss }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC main library }
+	location { CGC conversion palette }
 	desc { Convert a fixed-point input to a complex output. }
 	input {
 		name { input }
@@ -41,10 +41,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 
    codeblock (body) {
-	int i = 0;
-	for (; i < $val(numSample); i++) {
-		$ref(output,i).real = FIX_Fix2Double($ref(input,i));
-		$ref(output,i).imag = 0;
+	int i;
+	double p,q;
+	for (i = 0; i < $val(numSample); i++) {
+		$ref(output, i).real = FIX_Fix2Double($ref(input, i));
+		$ref(output, i).imag = 0;
 	}
    }
 	go {

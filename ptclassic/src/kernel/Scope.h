@@ -1,5 +1,5 @@
-#ifndef _Scope_h
-#define _Scope_h 1
+#ifndef _StateScope_h
+#define _StateScope_h 1
 
 #ifdef __GNUG__
 #pragma interface
@@ -43,45 +43,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DynamicGalaxy.h"
 #include "StringList.h"
 
-class Scope:private Galaxy {
+class StateScope:private Galaxy {
 public:
-    // the main routine - to set up state and name scoping on a galaxy
-    // hierarchy, call the childScope method.  This method will create
-    // a scoping hierarchy if one does not exist.  This new hierarchy
-    // will be automatically deleted after the corresponding galaxy is
-    // deleted
-    static Scope* createScope(Galaxy&);
+    StateScope(Galaxy&,StateScope* = NULL);
+    ~StateScope();
     
-    // remove a block that is using this scoping hierarchy, this
-    // should only be called in Block::~Block
+    // remove a block that is using this scoping hierarchy
     void remove(Block& b);
 
-    // return the fullName using the scoping hierarchy
     Galaxy::fullName;
-    
-    // return the name of just this galaxy
+    Galaxy::stateWithName;
+    Galaxy::parent;
     Galaxy::name;
-
-    // lookup a state
-    State* lookup(const char*);
-    
-protected:
-    Scope(Galaxy&);
-    ~Scope();
-    
-    // return the parent of this scope
-    Scope* parentScope() const { return prntScope; }
-
-    // set the parentScope
-    void setParentScope(Scope* scope) { prntScope = scope; }
-
 private:
-    // Parent scope
-    Scope* prntScope;
-
-    void removeChild(Scope&);
-    void optionalDestructor();
     BlockList childScopes;
+    StateScope* prntScope;
 };
 
 #endif

@@ -1,7 +1,7 @@
 defstar {
-        name { FIRFix }
-        domain { CGC }
-	derivedFrom { Fix }
+        name {FIRFix}
+        domain {CGC}
+	derivedFrom { CGCFix }
         desc {
 A finite impulse response (FIR) filter with fixed-point capabilities.
 The fixed-point coefficients are specified by the "taps" parameter.
@@ -13,7 +13,7 @@ Polyphase multirate filtering is also supported.
         version { $Id$ }
         author { Edward A. Lee, Alireza Khazeni, J.Weiss }
         copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

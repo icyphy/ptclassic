@@ -4,15 +4,10 @@ defstar {
 	desc { Exclusive or -- 2 inputs. }
 	version { $Id$ }
 	author { Chih-Tsung Huang }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
-This star outputs the bitwise exclusive-or of \fIinput1\fR and \fIinput2\fR.
+This star outputs the bit-wise exclusive-or of input1 and input2.
 	}
 	execTime {
 		return 4;

@@ -37,31 +37,31 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /* needed to avoid interp calls in cg domain */
 
 void
-GanttChart :: beginGantt(ostream& /* out */, char * /* argstring */) {
+GanttChart :: beginGantt(ostream& out, char *argstring) {
 
 	Error::abortRun("No gantt chart support under ptcl", 0, 0);
 }
 
 void
-GanttChart :: writeGanttLabel(ostream& /* out */, char * /* argstring */) {
+GanttChart :: writeGanttLabel(ostream& out, char *argstring) {
 
 	Error::abortRun("No gantt chart support under ptcl", 0, 0);
 }
 
 void
-GanttChart :: writeGanttBindings(ostream& /* out */, char * /* argstring */) {
+GanttChart :: writeGanttBindings(ostream& out, char *argstring) {
 
 	Error::abortRun("No gantt chart support under ptcl", 0, 0);
 }
 
 void
-GanttChart :: endGantt(ostream& /* out */) {
+GanttChart :: endGantt(ostream& out) {
 
 	Error::abortRun("No gantt chart support under ptcl", 0, 0);
 }
 
 void
-GanttChart :: writeGanttProc(ostream& /* out */, char * /* argstring */) {
+GanttChart :: writeGanttProc(ostream& out, char *argstring) {
   
 	Error::abortRun("No gantt chart support under ptcl", 0, 0);
 }

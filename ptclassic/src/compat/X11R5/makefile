@@ -31,12 +31,12 @@ ROOT = ../../..
 VPATH = $(ROOT)/src/compat/X11R5
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 HDRS = 	X.h Xfuncproto.h Xlib.h Xos.h Xosdefs.h Xutil.h cursorfont.h
 
-MISC_FILES =
+MISC_FILES = README
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk

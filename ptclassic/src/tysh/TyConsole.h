@@ -43,12 +43,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "PTcl.h"
 #include "TyTcl.h"
 #include "SimAction.h"
-#ifdef PTUSE_EXPECT
-#include "expect_tcl.h"
-#endif
-
-// This is used by SetVersionInfo
-extern char *gVersion;
 
 class TyConsole {
 

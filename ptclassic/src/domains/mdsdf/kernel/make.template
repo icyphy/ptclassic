@@ -36,7 +36,7 @@ ROOT=../../../..
 VPATH = $(ROOT)/src/domains/mdsdf/kernel
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 #SDF kernel
@@ -44,7 +44,7 @@ SDFKERNDIR=$(ROOT)/src/domains/sdf/kernel
 INCL = -I$(SDFKERNDIR) -I$(KERNDIR)
 
 # Library name
-LIB=libmdsdf.$(LIBSUFFIX)
+LIB=libmdsdf.a
 
 # Library sources
 SRCS= \
@@ -65,6 +65,12 @@ install:	makefile $(LIBDIR)/$(LIB)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
+
+# Commands to make some sources from templates
+
+MDSDFDomain.cc :	$(KERNDIR)/XDomain.ccP
+	cd $(VPATH); rm -f MDSDFDomain.cc; \
+	sed 's/<T>/MDSDF/g' $(KERNDIR)/XDomain.ccP > MDSDFDomain.cc
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.

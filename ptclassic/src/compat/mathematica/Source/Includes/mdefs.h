@@ -2,33 +2,18 @@
 Version identification:
 $Id$
 
-Copyright (c) 1986-1993 Wolfram Research, Inc. All Rights Reserved.
+Copyright (c) 1990-1995 The Regents of the University of California.
+All rights reserved.
 
-IN NO EVENT SHALL WOLFRAM RESEARCH INC. BE LIABLE TO ANY PARTY FOR
-DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN
-IF WOLFRAM RESEARCH INC. HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
+Stub file for mdefs.h provided for inclusion when Mathematica is
+not installed on the local machine.
 
-WOLFRAM RESEARCH INC. SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING,
-BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS
-ON AN "AS IS" BASIS, AND WOLFRAM RESEARCH INC. HAS NO OBLIGATION TO
-PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+The commercial version of mdefs.h is a Mathematica source file,
+Copyright 1986 through 1993 by Wolfram Research Inc.
 
-This version of "mdefs.h" has been stripped of non-Unix declarations,
-and is provided so that a MathLink interface to Mathematica will compile
-if Mathematica is not installed on the local machine.  This stripped file
-does not represent the actual implementation of the MathLink interface,
-and should not be confused with the true version of "mdefs.h" that
-comes with the Mathematica distribution.
-
-This file is based on the MathLink source file "mdefs.h" (for
-Mathematica 2.2) which defines the C language interface between
-Mathematica and other programs through the MathLink protocol.
-
-This stripped version is freely distributable by the permission of
-Wolfram Research, Inc., 100 Trade Center Drive, Champaign, IL 61820-7237.
+The file defines several C language definitions for use with
+Mathematica output as empty expressions for compatibility when
+Mathematica is not installed on the local machine.
 
 *************************************************************************/
 

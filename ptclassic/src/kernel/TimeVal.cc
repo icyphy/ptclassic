@@ -1,51 +1,23 @@
-/* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
-*/
 /* Version $Id$
-   Author:	T. M. Parks
-   Created:	8 Nov 91
+   Copyright 1991 The Regents of the University of California.
+   All Rights Reserved.
+
+   Programmer:  T. M. Parks
+   Date of creation:  8 Nov 91
 */
 
-static const char file_id[] = "TimeVal.cc";
+static const char file_id[] = "$RCSfile$";
 
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
 #include "TimeVal.h"
+#include "type.h"
+#include <signal.h>
 
-/* TV_USEC_TYPE and TV_SEC_TYPE are defined in compat.h, but we
- * include these defs for robustness
- */
-#ifndef TV_USEC_TYPE
-#define TV_USEC_TYPE	long int
-#endif
-
-#ifndef TV_SEC_TYPE
-#define TV_SEC_TYPE	long int
+#ifdef __GNUG__
+typedef void (*SIG_PF)(int);
 #endif
 
 TimeVal::TimeVal()
@@ -53,17 +25,18 @@ TimeVal::TimeVal()
     tv_sec = tv_usec = 0;
 }
 
-TimeVal::TimeVal(double seconds)
+TimeVal::TimeVal(long sec, long usec)
 {
-    tv_sec = (TV_SEC_TYPE)seconds;
-    tv_usec = (TV_USEC_TYPE)(1.0e6 * (seconds - (double)tv_sec));
+    tv_sec = sec;
+    tv_usec = usec;
     normalize();
 }
 
-TimeVal::TimeVal(timeval value)
+TimeVal::TimeVal(double seconds)
 {
-    tv_sec = value.tv_sec;
-    tv_usec = value.tv_usec;
+    tv_sec = long(seconds);
+    tv_usec = long(1.0e6 * (seconds - (double)tv_sec));
+    normalize();
 }
 
 void TimeVal::normalize()
@@ -73,7 +46,7 @@ void TimeVal::normalize()
 	tv_sec--;
 	tv_usec += 1000000;
     }
-    while (tv_usec >= 1000000)
+    while (tv_usec > 1000000)
     {
 	tv_sec++;
 	tv_usec -= 1000000;
@@ -87,11 +60,9 @@ TimeVal::operator double() const
 
 TimeVal TimeVal::operator+(const TimeVal& t) const
 {
-    TimeVal x;
-    x.tv_sec = tv_sec + t.tv_sec;
-    x.tv_usec = tv_usec + t.tv_usec;
-    x.normalize();
-    return x;
+    long sec = tv_sec + t.tv_sec;
+    long usec = tv_usec + t.tv_usec;
+    return TimeVal(sec,usec);
 }
 
 TimeVal& TimeVal::operator+=(const TimeVal& t)
@@ -104,11 +75,9 @@ TimeVal& TimeVal::operator+=(const TimeVal& t)
 
 TimeVal TimeVal::operator-(const TimeVal& t) const
 {
-    TimeVal x;
-    x.tv_sec = tv_sec - t.tv_sec;
-    x.tv_usec = tv_usec - t.tv_usec;
-    x.normalize();
-    return x;
+    long sec = tv_sec - t.tv_sec;
+    long usec = tv_usec - t.tv_usec;
+    return TimeVal(sec, usec);
 }
 
 TimeVal& TimeVal::operator-=(const TimeVal& t)
@@ -119,12 +88,34 @@ TimeVal& TimeVal::operator-=(const TimeVal& t)
     return *this;
 }
 
-int TimeVal::operator>(const TimeVal& t) const
+// Signal handler used by sleep().
+static int gotcha = FALSE;
+void alarmHandler(int notUsed)
 {
-    return timercmp(this, &t, >);
+    gotcha = TRUE;
 }
 
-int TimeVal::operator<(const TimeVal& t) const
+/* This sleep function makes exclusive use of the real interval timer.
+   No effort is made to save or restore its previous state.
+   Return TRUE if a pause was required (non-negative delay).
+*/
+int TimeVal::sleep() const
 {
-    return timercmp(this, &t, <);
+    // sleep only if the delay is non-negative.
+    if (tv_sec >= 0 && tv_usec >= 0)
+    {
+	itimerval i;
+	i.it_interval.tv_sec = i.it_interval.tv_usec = 0;
+	i.it_value.tv_sec = tv_sec;
+	i.it_value.tv_usec = tv_usec;
+	SIG_PF act = signal(SIGALRM, (SIG_PF)alarmHandler);
+	setitimer(ITIMER_REAL, &i, 0);
+	while(!gotcha) sigpause(0);
+#	ifndef hpux
+	signal(SIGALRM, act);	// restore previous action
+#	endif
+	gotcha = FALSE;
+	return TRUE;
+    }
+    else return FALSE;
 }

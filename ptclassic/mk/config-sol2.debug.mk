@@ -2,32 +2,10 @@
 # Config file to build on sun4 processor (SparcStation) running Solaris2.3
 # with gcc and g++
 
-# $Id$
+# @(#)config-sol2.mk	1.10 2/2/95
 
-# Copyright (c) 1990-%Q% The Regents of the University of California.
-# All rights reserved.
-# 
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that the
-# above copyright notice and the following two paragraphs appear in all
-# copies of this software.
-# 
-# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-# SUCH DAMAGE.
-# 
-# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-# ENHANCEMENTS, OR MODIFICATIONS.
-# 
-# 						PT_COPYRIGHT_VERSION_2
-# 						COPYRIGHTENDKEY
+# Copyright (c) 1994 The Regents of the University of California.
+#                       All Rights Reserved.
 #		       
 # Programmer:  Christopher Hylands
 
@@ -67,29 +45,24 @@ OPTIMIZER =
 #-Wsynth is new in g++-2.6.x
 WARNINGS =	-Wall -Wcast-qual -Wsynth
 MULTITHREAD =	-D_REENTRANT
-# Define PTSOL2_4 if you are on Solaris2_4
-LOCALFLAGS =    -DPTSOL2_4
-# Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
-GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAGS)
+GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
-CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAGS)
+CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD)
 
 #
 # Variables for the linker
 #
 # system libraries (libraries from the environment)
 SYSLIBS=-lsocket -lnsl -ldl -lg++ -lm
-# system libraries for linking .o files from C files only
-CSYSLIBS=-lsocket -lnsl -ldl -lm
 
 # Ask ld to strip symbolic information, otherwise, expect a 32Mb pigiRpc
 LINKSTRIPFLAGS=-Wl,-s
 
 # Can't use -static here, or we won't be able to find -ldl, and
 # dynamic linking will not work.
-LINKFLAGS=-L$(LIBDIR) -Wl,-R,$(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(X11_LIBDIR) $(LINKSTRIPFLAGS)
+LINKFLAGS=-L$(LIBDIR) -Wl,-R,$(PTOLEMY)/lib.$(ARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR) $(LINKSTRIPFLAGS)
 # link flags if debugging symbols are to be left
-LINKFLAGS_D=-L$(LIBDIR) -Wl,-R,$(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(X11_LIBDIR)
+LINKFLAGS_D=-L$(LIBDIR) -Wl,-R,$(PTOLEMY)/lib.$(ARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR)
 
 # Flag that gcc expects to create statically linked binaries.
 # Binaries that are shipped should be statically linked.
@@ -113,6 +86,16 @@ QUANTIFY = 	quantify
 # Variable for the Ariel DSP56000 board
 S56DIR =
 
+# Variables for local Matlab installation
+# -- If Matlab is installed, then MATLABDIR points to where MATLAB is installed
+#    and MATLABLIBDIR points to the directory containing the Matlab libraries
+# -- If Matlab is not installed, then MATLABDIR equals $ROOT/src/compat/matlab
+#    and MATLABLIBIDR is undefined
+#MATLABDIR =	/usr/sww/matlab
+#MATLABLIBDIR =	-L$(MATLABDIR)/extern/lib/$(ARCH)
+MATLABDIR =	$(ROOT)/src/compat/matlab
+MATLABLIBDIR =
+
 #
 # Variables for miscellaneous programs
 #
@@ -135,5 +118,3 @@ XMKMF =		rm -f Makefile; cp Makefile.std Makefile
 # Used by tcltk to build the X pixmap extension
 XPM_DEFINES =	-DZPIPE $(X11_INCSPEC)
 
-# Matlab architecture
-MATARCH = sol2

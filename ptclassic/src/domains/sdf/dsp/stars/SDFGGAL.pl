@@ -6,12 +6,6 @@ defstar
     desc { Ganged Gradient Adaptive Lattice filters. }
     version { $Id$ }
     author { T. M. Parks }
-    copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-    }
     location { SDF dsp library }
 
     input
@@ -38,7 +32,7 @@ limitation of liability, and disclaimer of warranty provisions.
 
     destructor
     {
-	LOG_DEL; delete [] b;
+	LOG_DEL; delete b;
     }
 
     setup
@@ -46,7 +40,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	// Reallocate array only if size has changed.
 	if (previousOrder != order)
 	{
-	    LOG_DEL; delete [] b;
+	    LOG_DEL; delete b;
 	    LOG_NEW; b = new double[order+1];
 	}
 

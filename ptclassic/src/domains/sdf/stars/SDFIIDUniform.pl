@@ -1,24 +1,29 @@
+ident {
+/**************************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  D. G. Messerschmitt
+ Date of creation: 1/1/90
+ Converted to preprocessor, and common AGC object used, by JTB 10/3/90
+
+ Uniform generates a sequence of IID pseudo-independent Uniform
+ variables represented as type FLOAT
+
+ This Star uses the GNU library <Uniform.h>
+
+**************************************************************************/
+}
 defstar {
 	name { IIDUniform }
 	domain { SDF }
 	desc {
-Generate an i.i.d. uniformly distributed pseudo-random process.
-Output is uniformly distributed between "lower" (default 0)
-and "upper" (default 1).
-	}
-	version {$Id$}
-	author { D. G. Messerschmitt }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { SDF main library }
-	explanation {
-This Star uses the GNU library <Uniform.h>.
-.Id "uniform noise"
-.Id "noise, uniform"
+	    "Generates an i.i.d. uniformly distributed pseudo-random process.\n"
+	    "Output is uniformly distributed between 'lower' (default 0)\n"
+	    "and 'upper' (default 1)."
 	}
 	output {
 		name { output }
@@ -28,35 +33,35 @@ This Star uses the GNU library <Uniform.h>.
 		name { lower }
 		type { float }
 		default { "0.0" }
-		desc { Lower limit. }
+		desc { "lower limit" }
 	}
 	defstate {
 		name { upper }
 		type { float }
 		default { "1.0" }
-		desc { Upper limit. }
+		desc { "upper limit" }
 	}
-	hinclude { <Uniform.h> }
-	ccinclude { <ACG.h> }
+	hinclude { <ACG.h>, <Uniform.h> }
 	protected {
+		static ACG gen;
 		Uniform *random;
 	}
 // declare the static random-number generator in the .cc file
 	code {
-		extern ACG* gen;
+		ACG SDFIIDUniform::gen(10,20);
 	}
 	constructor {
-		random = NULL;
+		random = new Uniform(lower,upper,&gen);
 	}
 	destructor {
-		LOG_DEL; delete random;
+		delete random;
 	}
-	setup {
-		LOG_DEL; delete random;
-		LOG_NEW; random = new Uniform(double(lower),double(upper),gen);
+	start {
+		random->low(double(lower));
+		random->high(double(upper));
 	}
         go {
-		output%0 << (*random)();
+		output%0 << (float)(*random)();
 	}
 }
 

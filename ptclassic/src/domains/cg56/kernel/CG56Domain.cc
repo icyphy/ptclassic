@@ -1,32 +1,9 @@
-static const char file_id[] = "CG56Domain.cc";
 /**********************************************************************
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+ Copyright (c) 1992 The Regents of the University of California.
+                       All Rights Reserved.
 
  Programmer:  J. T. Buck
  Date of creation: 1/2/92
@@ -40,39 +17,56 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CG56Target.h"
 #include "KnownTarget.h"
 #include "SDFScheduler.h"
-#include "CG56PortHole.h"
-#include "CG56Wormhole.h"
-#include "AsmForkNode.h"
+#include "CG56Connect.h"
+#include "CG56Geodesic.h"
+#include "ProcMemory.h"
 
-extern const char CG56domainName[] = "CG56"; 
+// for error messages (temporary, until wormholes exist):
+#include "Error.h"
+
+// For the hacks below to avoid doing wormholes:
+
+#include "WormConnect.h"
+
+extern const char CG56domainName[] = "CG56";
+
 class CG56Domain : public Domain {
 public:
-	// no fn to build a CG56-on-outside wormhole yet.
+	// new wormhole
+	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
+		// return *new CG56Wormhole(innerGal,innerTarget);
+		Error::abortRun("No CG56 wormhole implemented yet");
+		// Following is a hack
+		return *(new SDFStar);
+	}
+
+	// new input porthole
+	PortHole& newInPort() { return *new InCG56Port;}
+
+	// new output porthole
+	PortHole& newOutPort() { return *new OutCG56Port;}
 
 	// new fromUniversal EventHorizon
 	EventHorizon& newFrom() {
-		LOG_NEW; return *new CG56fromUniversal;
+		// return *new CGfromUniversal;
+		Error::abortRun("No CG56 EventHorizon implemented yet");
+		// Following is a hack
+		return *(new EventHorizon);
 	}
 
 	// new toUniversal EventHorizon
 	EventHorizon& newTo() {
-		LOG_NEW; return *new CG56toUniversal;
+		// return *new CGtoUniversal;
+		Error::abortRun("No CG56 EventHorizon implemented yet");
+		// Following is a hack
+		return *(new EventHorizon);
 	}
 
-	// new geodesic
-	Geodesic& newGeo(int multi) {
-		if (multi) { LOG_NEW; return *new AsmForkNode;}
-		else { LOG_NEW; return *new AsmGeodesic;}
-	}
+	// new node (geodesic)
+	Geodesic& newNode() { return *new CG56Geodesic;}
 
-	// constructor (also allow AnyAsm stars)
-	CG56Domain() : Domain("CG56") {subDomains += "AnyAsm";subDomains += "AnyCG";}
-
-	Star& newWorm(Galaxy& innerGal,Target* innerTarget) {
-		return *new CG56Wormhole(innerGal,innerTarget);
-	}
-	// require CG56Target
-	const char* requiredTarget() { return "CG56Target";}
+	// constructor
+	CG56Domain() : Domain("CG56") {}
 };
 
 // declare a prototype
@@ -80,6 +74,6 @@ static CG56Domain proto;
 
 // declare the default Target object
 
-static CG56Target defaultCG56target("default-CG56","vanilla Motorola 56000 processor");
-
+static CG56Target defaultCG56target("default-CG56","vanilla Mot 56k proc",
+				    0,4096,0,4096);
 static KnownTarget entry(defaultCG56target,"default-CG56");

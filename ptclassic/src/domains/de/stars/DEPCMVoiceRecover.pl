@@ -1,47 +1,29 @@
 defstar {
-	name { PCMVoiceRecover }
+	name { InsertPacket }
 	domain { DE }
 	author { GSWalter }
 	version { $Id$ }
-        copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-        }
-	location { DE main library }
+	copyright { 1992 (c) U. C. Regents }
+	location { DE main palette }
 
 	desc {
-This star inputs a stream of
-.c SeqATMCell
-objects.  All of the
-information bits in the objects received with correct sequence
-numbers are sent to 'output'.
-
-If a missing
-.c SeqATMCell
-object is detected, then this star sends the most
-recent 8 * 'tempSize' received bits to the 'temp' output, and the
-most recent (8 * 'searchWindowSize' + 'numInfoBits') received bits
-to the 'window' output.
-
-The bits output on the 'window' and 'temp' outputs can be used by
-the 'PatternMatch' galaxy to implement lost-speech recovery.
+Checks packet sequence and will prompt SDF galaxy to
+create a new packet using a pattern-matching method
+if a packet is found to be missing.
 	}
-
 	explanation {
 .pp
 This star performs a specific function related to a
 voice-packet interpolation technique for PCM encoded
 data.  On its \fIinput\fR port, this star reads in
-.c SeqATMCell
+.c BitArray
 types which have a field containing a packet sequence
-number.  The sequence number is read and the star determines
+number.  The sequence number is read and it is determined
 whether or not a packet has been dropped during network
 transmission.  If the missing packet is one of the
 first five
-.c SeqATMCell
-s to be sent over the network, then this star will substitute
+.c BitArray
+s to be sent over the network, this star will substitutue
 all zero bits for the bits which were lost during
 transmission.  These bits are sent through the \fIoutput\fR
 port.  If the dropped packet was not one of the first
@@ -51,47 +33,47 @@ performed as follows:
 .pp
 Say the packet six was found to be missing by this
 star after it sees a
-.c SeqATMCell
+.c BitArray
 numbered seven immediately following a
-.c SeqATMCell
+.c BitArray
 numbered five.  This star will then output a string
 of bits on its \fItemp\fR port of size \fItempSize\fR
 * 8.  These bits describe the first \fItempSize\fR
-samples immediately preceding the missing packet.  Likewise,
+samples immediately preceeding the missing packet.  Likewise,
 \fIsearchWindowSize\fR * 8 + \fInumInfoBits\fR bits
 are sent through the \fIwindow\fR port.  These bits describe
 the
-.c SeqATMCell
-immediately preceding the lost packet as well as the
-previous \fIsearchWindowSize\fR samples before the lost packet.
-In this context of this example of a missing sixth packet, this means
+.c BitArray
+immediately preceeding the lost packet as well as the
+previous \fIsearchWindowSize\fR samples before that.
+In this example of a missing sixth packet, this means
 that the \fItemp\fR bits will come from the end of
 packet five and the \fIwindow\fR bits will include
 all of packets 5, 4, 3, 2, and a portion of the
-end of packet 1 (note the restriction on \fIsearchWindowSize\fR).
+end of packet 1 (Note restriction on \fIsearchWindowSize\fR).
 These bits are converted to samples in an SDF domain
-wormhole and a cross-correlation is performed between the
-\fItemp\fR and the \fIwindow\fR to determine the best
-match, i.e., the one with largest cross-correlation value.  This SDF
+wormhole and a cross correlation is performed between the
+\fItemp\fR and the \fIwindow\fR determining the best
+match i.e., largest cross correlation value.  This SDF
 galaxy will take the \fInumInfoBits\fR / 8 samples
 from the \fIwindow\fR samples following the \fIwindow\fR's
 best match with the \fItemp\fR samples. These samples
 are then encoded, loaded into a
-.c SeqATMCell
+.BitArray
 and sent back to the DE domain where they enter the
 \fIsubIn\fR port of this star.  This star unloads
 the bits from this
-.c SeqATMCell
+.c BitArray
 and outputs them in their proper order on the \fIoutput\fR
 port.  If more than one packet was missing, this star
 will repeat the derived packet enough times to fill the
 void.
 .UH REFERENCES
-J. Goodman, G. LockHart, O. Wasem, and W. Wong,
+Goodman, J., LockHart, G., Wasem, O., and Wong, W.,
 "Waveform Substitution Techniques for Recovering
 Missing Speech Segments in Packet Voice Communications,"
-\fIIEEE Trans. on Acoustics, Speech, and Signal Processing\fR,
-vol ASSP-34, no. 6, pp. 1440-1448, December 1986.
+\fIIEEE Trans. on ASSP\fR, vol ASSP-34, no. 6, pp. 1440-
+1448, December 1986.
 	}
 
 	defstate {
@@ -122,23 +104,19 @@ vol ASSP-34, no. 6, pp. 1440-1448, December 1986.
 	output { name { window } type { int } }
 	output { name { output } type { int } }
 
-	hinclude { "SeqATMCell.h" }
+	hinclude { "BitArray.h" }
 
 	protected {
 		int startTemp, stopTemp, startPkt5, stopPkt5;
 		int count, missingPkt;
 		//pkt1 more recently arrived than pkt5
-		SeqATMCell *pkt1, *pkt2, *pkt3, *pkt4, *pkt5, *currentPkt,
+		BitArray *pkt1, *pkt2, *pkt3, *pkt4, *pkt5, *currentPkt,
 				*created;
 	}
 
-	constructor {
-		pkt1 = pkt2 = pkt3 = pkt4 = pkt5 = currentPkt = created = 0;
-	}
-
-	setup {
+	start {
 		if ( numInfoBits > 384 )
-			Error::abortRun( *this, "illegal SeqATMCell size" );
+			Error::abortRun( *this, "illegal BitArray size" );
 		if ( searchWindowSize > 4*int(numInfoBits)/8 ||
 				searchWindowSize < 3*int(numInfoBits)/8 )
 			Error::abortRun( *this, "illegal searchWindowSize" );
@@ -161,8 +139,8 @@ vol ASSP-34, no. 6, pp. 1440-1448, December 1986.
 			int i, j;
 			Envelope inPkt;
 			input.get().getMessage( inPkt );
-			TYPE_CHECK( inPkt, "SeqATMCell" );
-			currentPkt = ( SeqATMCell* ) inPkt.writableCopy();
+			TYPE_CHECK( inPkt, "BitArray" );
+			currentPkt = ( BitArray* ) inPkt.writableCopy();
 
 			// if proper order, output packet
 			if ( ( currentPkt->readSeq() ) == count ) {
@@ -174,9 +152,7 @@ vol ASSP-34, no. 6, pp. 1440-1448, December 1986.
 				}
 				count++;
 				count %= 8;
-				if ( pkt5 != pkt4 ) {
-					LOG_DEL; delete pkt5;
-				}
+				if ( pkt5 != pkt4 ) { LOG_DEL; delete pkt5; }
 				pkt5 = pkt4;
 				pkt4 = pkt3;
 				pkt3 = pkt2;
@@ -192,15 +168,12 @@ vol ASSP-34, no. 6, pp. 1440-1448, December 1986.
 						output.put( arrivalTime ) << 0;
 					count++;
 					count %= 8;
-					if ( pkt5 != pkt4 ) {
-						delete pkt5;
-					}
 					pkt5 = pkt4;
 					pkt4 = pkt3;
 					pkt3 = pkt2;
 					pkt2 = pkt1;
 					pkt1 = 0;
-					LOG_NEW; pkt1 = new SeqATMCell;
+					LOG_NEW; pkt1 = new BitArray;
 				} // end while
 
 				// at this point there may still be missing packets
@@ -224,9 +197,7 @@ vol ASSP-34, no. 6, pp. 1440-1448, December 1986.
 					}
 					count++;
 					count %= 8;
-					if ( pkt5 != pkt4 ) {
-						LOG_DEL; delete pkt5;
-					}
+					if ( pkt5 != pkt4 ) { LOG_DEL; delete pkt5; }
 					pkt5 = pkt4;
 					pkt4 = pkt3;
 					pkt3 = pkt2;
@@ -282,8 +253,8 @@ vol ASSP-34, no. 6, pp. 1440-1448, December 1986.
 			int k, n;
 			Envelope subPkt;
 			subIn.get().getMessage( subPkt );
-			TYPE_CHECK( subPkt, "SeqATMCell" );
-			created = ( SeqATMCell* ) subPkt.writableCopy();
+			TYPE_CHECK( subPkt, "BitArray" );
+			created = ( BitArray* ) subPkt.writableCopy();
 			// output packet missingPkt times
 			for ( n = 1; n <= missingPkt; n++ ) {
 				for ( k = 40; k < int ( 40 + numInfoBits ); k++ ) {
@@ -292,9 +263,7 @@ vol ASSP-34, no. 6, pp. 1440-1448, December 1986.
 					else
 						output.put( arrivalTime ) << 0;
 				}
-				if ( pkt5 != pkt4 ) {
-					LOG_DEL; delete pkt5;
-				}
+				if ( pkt5 != pkt4 ) { LOG_DEL; delete pkt5; }
 				pkt5 = pkt4;
 				pkt4 = pkt3;
 				pkt3 = pkt2;
@@ -313,9 +282,7 @@ vol ASSP-34, no. 6, pp. 1440-1448, December 1986.
 			count++;
 			count %= 8;
 			missingPkt = 0;
-			if ( pkt5 != pkt4 ) {
-				LOG_DEL; delete pkt5;
-			}
+			if ( pkt5 != pkt4 ) { LOG_DEL; delete pkt5; }
 			pkt5 = pkt4;
 			pkt4 = pkt3;
 			pkt3 = pkt2;

@@ -4,12 +4,7 @@ defstar {
   desc      { Produces ComplexMatrix data from state information. }
   version   { $Id$ }
   author    { Mike J. Chen }
-  copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-  }
+  copyright { 1993 The Regents of the University of California }
   location  { MDSDF library }
   output {
 	name { output }
@@ -30,7 +25,7 @@ limitation of liability, and disclaimer of warranty provisions.
   defstate {
 	name { ComplexMatrixContents }
 	type { complexarray }
-	default { "(1.0,-2.0) (-2.0,0.5) (2.0,0.0) (-2.0,-0.1)" }
+	default { "(1.0,-2.0) (-2.0, 0.5) (2.0, 0.0) (-2.0,-0.1)" }
 	desc { The complex contents of the matrix. }
   }
   ccinclude { "SubMatrix.h" } 

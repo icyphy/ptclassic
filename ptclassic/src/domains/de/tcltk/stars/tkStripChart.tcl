@@ -1,27 +1,3 @@
-# Copyright (c) 1990-%Q% The Regents of the University of California.
-# All rights reserved.
-# 
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that the
-# above copyright notice and the following two paragraphs appear in all
-# copies of this software.
-# 
-# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-# SUCH DAMAGE.
-# 
-# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-# ENHANCEMENTS, OR MODIFICATIONS.
-# 
-# 						PT_COPYRIGHT_VERSION_2
-# 						COPYRIGHTENDKEY
 # Tcl/Tk source for StripChart for DE domain
 #
 # Author: Eduardo N. Spring and Edward A. Lee
@@ -224,8 +200,7 @@ proc tkStripChartMkWindow { top stopTime starID univ} {
 	set ${starID}(unitDistance) [expr $curWidth/[set ${starID}(TimeWindow)]]
 	$top.d$m.c configure -xscrollcommand "$top.pf.scroll set"
 	$top.d$m.c configure -scrollregion "0 0 $scrollWidth ${ht}c"
-	# The following no longer works as of Tk4.0
-	# $top.d$m.c configure -scrollincrement 40
+	$top.d$m.c configure -scrollincrement 40
 
 	tkwait visibility $top.d$m.yBar
 	tkStripChartMkYScale $top.d$m.yBar $m $starID
@@ -256,13 +231,9 @@ proc tkStripChartMkWindow { top stopTime starID univ} {
 ###########################################################################
 # tkStripChartScroll
 #
-proc tkStripChartScroll { top numPlots args} {
+proc tkStripChartScroll { top numPlots position } {
     for {set m 0} {$m < $numPlots} {incr m} {
-	if {[llength $args] == 2} {
-		$top.d$m.c xview moveto [lindex $args 1]
-	} else {
-		$top.d$m.c xview scroll [lindex $args 1] units
-	}
+	$top.d$m.c xview $position
     }
 }
 
@@ -474,7 +445,7 @@ proc tkStripChartPlotPoint { canv x y plotNum starID} {
     # scroll each canvas based when time has advanced by timeWindow or more
     set timeWindow [set ${starID}(TimeWindow)]
     if {[expr $x/$timeWindow] >= [set ${starID}(scrollCount,$plotNum)]} {
-	$canv xview moveto [expr round([expr $scaledTime/40])]
+	$canv xview [expr round([expr $scaledTime/40])]
 	incr ${starID}(scrollCount,$plotNum)
     }
     incr ${starID}(count,$plotNum)
@@ -621,6 +592,8 @@ tkStripChartInit $starID
 # Second argument is the stopTime of the current control panel.
 #
 tkStripChartMkWindow $ptkControlPanel.stripChart_${starID} \
-    [stoptime] $starID [curuniverse]
+    [$ptkControlPanel.iter.entry get] \
+    $starID \
+    [curuniverse]
 
 focus $ptkControlPanel.stripChart_${starID}.pf

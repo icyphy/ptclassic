@@ -46,10 +46,8 @@ public:
     // Reset startTime.
     void reset();
 
-    // Elapsed CPU time in seconds since the last reset.  The time is equal
-    // to the time the Ptolemy process is executing plus the time 
-    // of the UNIX system calls run on behalf of Ptolemy.
-    TimeVal elapsedCPUTime() const;
+    // Elapsed time since last reset.
+    TimeVal elapsedTime() const;
 
 private:
     // When the ProfileTimer was started.

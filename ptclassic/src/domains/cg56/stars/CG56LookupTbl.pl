@@ -4,20 +4,13 @@ defstar {
 	desc { Table Lookup }
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 nonlinear functions library }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
         explanation {
 .PP
 The input accesses a lookup table.  More generally, this star defines
 a function which maps input values between -1 and +1-2^-23 into
 user-specified output values.
-.Id "table lookup"
-.Id "lookup table"
 .PP
 The basic function is given by a table of constants which specify
 values of the function at certain fixed points; the constants are
@@ -100,7 +93,7 @@ one more memory location if \fIinterpolation\fR is "linear".
 		default { 2 }
                 attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
-        setup {
+        start {
                 coefNum=coef.size();
         }		
         initCode {
@@ -118,17 +111,17 @@ one more memory location if \fIinterpolation\fR is "linear".
                                addedVal=2*coef[coefNum-1]-coef[coefNum-2];
                                break;
             	          }
-                          addCode(addblockinit);
+                          gencode(addblockinit);
 		}               
         }		
 	go {
         const char* q = interpolation;
 		switch (q[0]) {
 		case 'n': case 'N':    	// none
-			addCode(none);
+			gencode(none);
 			break;
 		default:
-			addCode(other);
+			gencode(other);
 			return;
 	        }
 	}

@@ -1,33 +1,15 @@
 defstar {
   name      { Kalman_M }
   domain    { SDF }
-  desc      { Implements the Kalman filter. }
+  desc      { 
+Kalman filter using one-step prediction algorithm, outputs
+only the state vector using the Matrix message class.  
+This star uses the Matrix classs.
+  }
   version   { $Id$ }
   author    { Mike J. Chen }
-  copyright {
-Copyright (c) 1990-1995 The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-}
+  copyright { 1993 The Regents of the University of California }
   location  { SDF dsp library }
-  explanation {
-Initial values for the state transition matrix, state vector, correlation
-matrix, and process noise correlation matrix are parameters to the star.
-Also parameters are the number of elements in the observation vector and
-the number of elements in the state vector.
-Inputs are the current values of the state transition matrix, process
-noise correlation matrix, measurement noise correlation matrix, 
-measurement matrix, and the observation vector.
-The single output is the state vector.
-.UH REFERENCES
-.ip [1]
-R.E. Kalman, "A new approach to linear filtering and prediction problems",
-\fITrans. ASME, J. Basic Eng., Ser 82D, pp. 35-45, March 1960.
-.ip [2]
-S. Haykin, \fIAdaptive Filter Theory\fR, Prentice-Hall, Inc., Englewood Cliffs,
-N.J., 1986.
-  }
   input {
     name { input }
     type { FLOAT_MATRIX_ENV }
@@ -92,6 +74,12 @@ N.J., 1986.
   protected {
     int stateDim;
     int inputDim;
+    // inputs to the system
+    const FloatMatrix *inputVector;                        // y(n)
+    const FloatMatrix *stateTransitionMatrix;              // PHI(n+1,n)
+    const FloatMatrix *processNoiseCorrMatrix;             // Q(n)
+    const FloatMatrix *measurementNoiseCorrMatrix;         // R(n)
+    const FloatMatrix *measurementMatrix;                  // C(n)
 
     // intermediate variables, part of the state
     FloatMatrix *stateVector;                        // x(n|y(n));
@@ -101,15 +89,7 @@ N.J., 1986.
     FloatMatrix *predStateVector;                    // x(n+1|y(n));
     FloatMatrix *predStateErrCorrMatrix;             // K(n+1,n)
     FloatMatrix *presentErrCorrMatrix;               // K(n)
-  }
-  constructor {
-    stateVector = 0;
-    gainMatrix = 0;
-    innovationsVector = 0;
-    innovationsCorrMatrix = 0;
-    predStateVector = 0;
-    predStateErrCorrMatrix = 0;
-    presentErrCorrMatrix = 0;
+
   }
   destructor {
     delete stateVector;
@@ -123,15 +103,6 @@ N.J., 1986.
   setup {
     stateDim = int(stateDimension);
     inputDim = int(inputDimension);
-
-    // delete previously allocation arrays
-    delete stateVector;
-    delete gainMatrix;
-    delete innovationsVector;
-    delete innovationsCorrMatrix;
-    delete predStateVector;
-    delete predStateErrCorrMatrix;
-    delete presentErrCorrMatrix;
 
     // initialize storage for intermediate and state variables
     stateVector = new FloatMatrix(stateDim,1,InitialState);  // x(n|y(n))
@@ -164,63 +135,58 @@ N.J., 1986.
     Envelope pkt3;
     Envelope pkt4;
     Envelope pkt5;
-    // inputs to the system
-    //    const FloatMatrix& inputVector;                        // y(n)
-    //    const FloatMatrix& stateTransitionMatrix;              // PHI(n+1,n)
-    //    const FloatMatrix& processNoiseCorrMatrix;             // Q(n)
-    //    const FloatMatrix& measurementNoiseCorrMatrix;         // R(n)
-    //    const FloatMatrix& measurementMatrix;                  // C(n)
 
     (input%0).getMessage(pkt1);
-    const FloatMatrix& inputVector = *(const FloatMatrix *)pkt1.myData();
+    inputVector = (const FloatMatrix *)pkt1.myData();
 
     (StateTransitionMatrixAtTimeN%0).getMessage(pkt2);
-    const FloatMatrix& stateTransitionMatrix = *(const FloatMatrix *)pkt2.myData();
+    stateTransitionMatrix = (const FloatMatrix *)pkt2.myData();
 
     (ProcessNoiseCorrMatrixAtTimeN%0).getMessage(pkt3);
-    const FloatMatrix& processNoiseCorrMatrix = *(const FloatMatrix *)pkt3.myData();
+    processNoiseCorrMatrix = (const FloatMatrix *)pkt3.myData();
 
     (MeasurementNoiseCorrMatrixAtTimeN%0).getMessage(pkt4);
-    const FloatMatrix& measurementNoiseCorrMatrix = *(const FloatMatrix *)pkt4.myData();
+    measurementNoiseCorrMatrix = (const FloatMatrix *)pkt4.myData();
 
     (MeasurementMatrixAtTimeN%0).getMessage(pkt5);
-    const FloatMatrix& measurementMatrix = *(const FloatMatrix *)pkt5.myData();
+    measurementMatrix = (const FloatMatrix *)pkt5.myData();
 
     // calculate sigma(n) = C(n)*K(n,n-1)*(C(n)->transpose)  +  R(n)
-    *innovationsCorrMatrix=(measurementMatrix * (*predStateErrCorrMatrix) *
-                            (~measurementMatrix)) + 
-                           measurementNoiseCorrMatrix;
+    *innovationsCorrMatrix=((*measurementMatrix) * (*predStateErrCorrMatrix) *
+                            (measurementMatrix->transpose())) + 
+                           (*measurementNoiseCorrMatrix);
 
     // calculate G(n)=PHI(n+1,n)*K(n,n-1)*(C(n)->transpose)*(sigma(n)->inverse)
-    *gainMatrix = stateTransitionMatrix * (*predStateErrCorrMatrix) *
-                  (~measurementMatrix) * (innovationsCorrMatrix->inverse());
+    *gainMatrix = (*stateTransitionMatrix) * (*predStateErrCorrMatrix) *
+                  (measurementMatrix->transpose()) * 
+                  (innovationsCorrMatrix->inverse());
 
     // calculate innovations vector: alpha(n) = y(n) - C(n)*x(n|y(n-1))
-    *innovationsVector = inputVector - 
-                         (measurementMatrix * (*predStateVector));
+    *innovationsVector = (*inputVector) - 
+                         ((*measurementMatrix) * (*predStateVector));
 
     // calculate one step prediction
     //  x(n+1|y(n)) = PHI(n+1,n)*x(n|y(n-1)) + G(n)*alpha(n)
-    *predStateVector = (stateTransitionMatrix * (*predStateVector)) +
+    *predStateVector = ((*stateTransitionMatrix) * (*predStateVector)) +
                        ((*gainMatrix) * (*innovationsVector));
 
     // calculate new state: x(n|y(n)) = PHI(n,n+1)*x(n+1|y(n))
     // makes the assumption that PHI(n,n+1) = PHI(n+1,n)
-    multiply(stateTransitionMatrix,*predStateVector,*stateVector);
+    multiply(*stateTransitionMatrix,*predStateVector,*stateVector);
 
     // calculate correlation matrix of error in new state: K(n)
     // K(n) = K(n,n-1) - PHI(n,n+1)
     // makes the assumption that PHI(n,n+1) = PHI(n+1,n)
     *presentErrCorrMatrix = (*predStateErrCorrMatrix) -
-                            (stateTransitionMatrix * (*gainMatrix) * 
-                             measurementMatrix * (*predStateErrCorrMatrix));
+                            ((*stateTransitionMatrix) * (*gainMatrix) * 
+                             (*measurementMatrix) * (*predStateErrCorrMatrix));
 
     // calculate predStateErrCorrMatrix: K(n+1,n) 
     // K(n+1,n) = PHI(n+1,n)*K(n)*(PHI(n+1,n)->transpose)  + Q(n)
-    *predStateErrCorrMatrix = (stateTransitionMatrix * 
+    *predStateErrCorrMatrix = ((*stateTransitionMatrix) * 
                                (*presentErrCorrMatrix) *
-                               (~stateTransitionMatrix)) +
-                              processNoiseCorrMatrix;
+                               (stateTransitionMatrix->transpose())) +
+                              (*processNoiseCorrMatrix);
 
     FloatMatrix* outMatrix = new FloatMatrix(*stateVector);
     output%0 << *outMatrix;

@@ -3,18 +3,12 @@ defstar {
   domain    { SDF }
   desc      {
 Produces a matrix with complex entries. The entries are
-read from the array parameter "ComplexMatrixContents" in rasterized order:
+read from the array state ComplexMatrixContents in rasterized order:
 i.e. for a MxN matrix, the first row is filled from left to right
-using the first N values from the array.
-  }
+using the first N values from the array. }
   version   { $Id$ }
   author    { Mike J. Chen }
-  copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-  }
+  copyright { 1993 The Regents of the University of California }
   location  { SDF matrix library }
   output {
 	name { output }
@@ -41,9 +35,9 @@ limitation of liability, and disclaimer of warranty provisions.
   ccinclude { "Matrix.h" } 
   go {
     // collect inputs and put into the matrix
-    ComplexMatrix& matrix = *(new ComplexMatrix(int(numRows),int(numCols),
-                                                ComplexMatrixContents));
-    output%0 << matrix;
+    ComplexMatrix *matrix = new ComplexMatrix(int(numRows),int(numCols),
+                                              ComplexMatrixContents);
+    output%0 << *matrix;
   }
 }
 

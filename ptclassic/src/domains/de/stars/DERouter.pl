@@ -1,55 +1,45 @@
+ident {
+/************************************************************************
+Version identification:
+$Id$
+
+Copyright (c) 1990 The Regents of the University of California.
+                        All Rights Reserved.
+
+Programmer: S. Ha and E. A. Lee
+Date of creation: 9/29/90
+
+ Randomly routes an input event to one of its outputs.
+ Probability is equal for each output.
+
+************************************************************************/
+}
 defstar {
 	name {Router}
 	domain {DE}
 	desc {
-Randomly route an input event to one of its outputs.
-The probability is equal for each output. The time delay is zero.
+	   "Randomly routes an input event to one of its outputs."
+	   "Probability is equal for each output. Delay is zero."
 	}
-	version { $Id$}
-	author { Soonhoi Ha and E. A. Lee}
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { DE main library }
 	input {
 		name{input}
 		type{ANYTYPE}
 	}
 	outmulti {
 		name{output}
-		type{=input}
-	}
-	hinclude { <Uniform.h> }
-	ccinclude { <ACG.h> }
-	protected {
-		Uniform *random;
-	}
-// declare the extern random-number generator in the .cc file
-	code {
-		extern ACG* gen;
+		type{ANYTYPE}
 	}
 	constructor {
-		random = NULL;
+		input.inheritTypeFrom(output);
 	}
-	destructor {
-		LOG_DEL; delete random;
-	}
-	setup {
-		LOG_DEL; delete random;
-		LOG_NEW; random = new Uniform(0,double(output.numberPorts()),gen);
-	}
-
 	go {
            completionTime = arrivalTime;
 	   // choose a output port randomly
-	   double p = (*random)();
-	   OutDEMPHIter nextp(output);
-	   OutDEPort* pp = nextp++;
+	   double p = drand48() * double(output.numberPorts()) + 1.0;
+	   output.reset();
+	   OutDEPort* pp;
 	   for (int i = int(p); i > 0 ; i--) {
-		pp = nextp++;
+		pp = (OutDEPort*) &(output());
 	   }
 
 	   // route the data to the chosen port

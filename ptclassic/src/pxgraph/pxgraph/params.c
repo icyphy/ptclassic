@@ -1,32 +1,3 @@
-/*******************************************************************
-SCCS version identification
-$Id$
-
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
-*/
 /*
  * Xgraph Parameters
  *
@@ -36,7 +7,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include <ctype.h>
 #include <stdio.h>
-#include <stdlib.h>		/* Pick up atoi() for sol2. */
 #include "st.h"
 #include "params.h"
 
@@ -61,11 +31,6 @@ static int param_scrn;
 static void free_resource();
 static params *resolve_entry();
 static int strihash();
-
-static int do_color();
-static int do_font();
-static int do_style();
-static int do_bool();
 
 #define DEF_INT		"0"
 #define DEF_STR		""
@@ -329,7 +294,7 @@ XFontStruct **font_info;	/* Returned font information */
 
     /* First attempt to interpret as font family/size */
     (void) strcpy(name_copy, name);
-    if ( (font_size = strchr(name_copy, '-')) ) {
+    if (font_size = index(name_copy, '-')) {
 	*font_size = '\0';
 	font_family = name_copy;
 	font_size++;
@@ -344,8 +309,7 @@ XFontStruct **font_info;	/* Returned font information */
 	    
 	    /* Load first one that you can */
 	    for (i = 0;  i < font_count;  i++) {
-		if ( (*font_info = XLoadQueryFont(param_disp,
-						  font_list[i])) ) {
+		if (*font_info = XLoadQueryFont(param_disp, font_list[i])) {
 		    break;
 		}
 	    }
@@ -477,19 +441,14 @@ void param_dump()
 }
 
 
-/* Sun has this in its standard library in a file that also defines
- * other functions that X uses!  Yuk!
- * Define stricmp if we are under solaris2 (PTSOL2 is defined in compat.h)
- */
-#if defined(sun)  &&  !defined(PTSOL2)
-#else
+
 int stricmp(a, b)
 register char *a, *b;
 /*
  * This routine compares two strings disregarding case.
  */
 {
-    register int value = 0;
+    register int value;
 
     if ((a == (char *) 0) || (b == (char *) 0)) {
 	return a - b;
@@ -504,7 +463,6 @@ register char *a, *b;
 
     return value;
 }
-#endif
 
 static int strihash(string, modulus)
 register char *string;

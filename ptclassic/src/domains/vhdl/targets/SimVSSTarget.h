@@ -41,10 +41,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLCompDecl.h"
 #include "VHDLCompMap.h"
 #include "VHDLSignal.h"
-#include "VHDLCSend.h"
-#include "VHDLCReceive.h"
-#include "CGCVSend.h"
-#include "CGCVReceive.h"
+//#include "VHDLState.h"
+//#include "VHDLPortVar.h"
+//#include "VHDLCluster.h"
+//#include "VHDLFiring.h"
+//#include "Attribute.h"
 
 class SimVSSTarget : public VHDLTarget {
 public:
@@ -85,12 +86,9 @@ protected:
 	
 	/*virtual*/ void setup();
 
-	// Method to write out com file for VSS if needed.
-	void setWriteCom();
-
 private:
-//	CodeStream preSynch;
-//	CodeStream postSynch;
+	CodeStream preSynch;
+	CodeStream postSynch;
 	CodeStream top_uses;
 	CodeStream top_entity;
 	CodeStream top_architecture;
@@ -123,21 +121,13 @@ private:
 				     VHDLGenericMapList* genMapList);
 
 	// Method called by C2V star to place important code into structure.
-	void registerC2V(int pairid, int numxfer, const char* dtype);
+	void registerC2V(int pairid, int numxfer);
 
 	// Method called by V2C star to place important code into structure.
-	void registerV2C(int pairid, int numxfer, const char* dtype);
+	void registerV2C(int pairid, int numxfer);
 
-	int needC2Vinteger;
-	int needV2Cinteger;
-	int needC2Vreal;
-	int needV2Creal;
 	int pairNumber;
-	int writeCom;
 	void configureCommPair(CommPair&);
-
-	// Method to write out com file for VSS if needed.
-	void writeComFile();
 };
 
 #endif

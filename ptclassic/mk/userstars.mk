@@ -1,29 +1,7 @@
 # Version identification:
 # $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
-# All rights reserved.
-# 
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that the
-# above copyright notice and the following two paragraphs appear in all
-# copies of this software.
-# 
-# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-# SUCH DAMAGE.
-# 
-# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-# ENHANCEMENTS, OR MODIFICATIONS.
-# 
-# 						PT_COPYRIGHT_VERSION_2
-# 						COPYRIGHTENDKEY
+# Copyright (c) 1992-1994 The Regents of the University of California.
+#                       All Rights Reserved.
 # Date of creation: 10/21/94
 # Written by: E. A. Lee
 #
@@ -41,7 +19,7 @@
 #	---------------------------------------------------------
 #	| ROOT = $(PTOLEMY)					|
 #	| VPATH = .						|
-#	| include $(ROOT)/mk/config-$(PTARCH).mk			|
+#	| include $(ROOT)/mk/config-$(ARCH).mk			|
 #	| INCL = -I$(ROOT)/src/domains/de/kernel -I$(KERNDIR)	|
 #	| PL_SRCS = DEMyFirstStar.pl DEMySecondStar.pl		|
 #	| DOMAIN = DE						|
@@ -51,13 +29,13 @@
 # The above file assumes the PTOLEMY environment variable is set to point
 # to the home directory of the Ptolemy installation (e.g. /users/ptolemy).
 #
-# It also assumes the PTARCH environment variable is set to specify the target
+# It also assumes the ARCH environment variable is set to specify the target
 # architecture (such as "sun4").
 #
 # The VPATH variable specifies where the sources are.  If the directory name
 # in which your stars are stored includes the string "/src/", then the
 # object files will be put in a corresponding directory with "src" replaced
-# by $(PTARCH).  This allows your stars to have several object files for
+# by $(ARCH).  This allows your stars to have several object files for
 # different architectures simultaneously.
 #
 # The include statement includes a standard Ptolemy makefile for the
@@ -102,20 +80,20 @@ all:	makefile $(OBJS)
 
 # Rule for compiling C++ files
 .cc.o:
-	$(CPLUSPLUS) $(USER_CC_SHAREDFLAGS) $(GPPFLAGS) -I$(VPATH) $(INCL) -c $<
+	$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(GPPFLAGS) -I$(VPATH) $(INCL) -c $<
 
 # Rule for compiling with cc
 .c.o:
-	$(CC) $(USER_C_SHAREDFLAGS) $(CFLAGS) $(C_INCL) -c $<
+	$(CC) $(C_SHAREDFLAGS) $(CFLAGS) $(C_INCL) -c $<
 
 # Note that forcing the installation of ptlang might not be the best
 # thing to do, it would be best if 'make sources' did not touch the
-# bin.$(PTARCH) directory, so we check to see if there is a ptlang in the
-# obj.$(PTARCH)/ptlang directory and use it.  This is awkward, but the
+# bin.$(ARCH) directory, so we check to see if there is a ptlang in the
+# obj.$(ARCH)/ptlang directory and use it.  This is awkward, but the
 # GNU tools do something similar
 
 # ptlang binary in the obj directory
-PTLANG_IN_OBJ=$(PTOLEMY)/obj.$(PTARCH)/ptlang/ptlang
+PTLANG_IN_OBJ=$(PTOLEMY)/obj.$(ARCH)/ptlang/ptlang
 
 # Use either the ptlang binary in the obj directory or just use ptlang
 PTLANG= `if [ -f $(PTLANG_IN_OBJ) ]; \
@@ -142,7 +120,7 @@ realclean:
 	rm -f $(CRUD) $(PL_SRCS:.pl=.h) $(PL_SRCS:.pl=.cc) $(PL_SRCS:.pl=.t) \
 	$(REALCLEAN_STUFF)
 
-DEPEND_INCL=$(INCL) $(C_INCL) $(SYSTEM_DEPEND_INCL)
+DEPEND_INCL=$(INCL) $(C_INCL)
 
 depend:		$(SRCS) $(HDRS)
 		cd $(VPATH); \

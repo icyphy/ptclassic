@@ -4,73 +4,53 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+ Copyright (c) 1991 The Regents of the University of California.
+                       All Rights Reserved.
 
  Programmer: J. Buck
- Modified by: E. A. Lee
 
- geodesics for AsmCode stars.  In addition to the functions of CG
- geodesics, they manage memory allocation for buffers.
+ geodesics for AsmCode stars.  Their main role is to figure out how
+ big a buffer must be allocated in code generation.
+
+ There is also support for fork buffers -- an attempt to allow all
+ the buffers of a fork star to be allocated as only a single buffer.
 
 *******************************************************************/
-#ifdef __GNUG__
-#pragma interface
-#endif
 
-#include "AsmPortHole.h"
-#include "CGGeodesic.h"
+
+#include "Geodesic.h"
+
+const int F_SRC = 1;
+const int F_DEST = 2;
 
 class ProcMemory;
 
-class AsmGeodesic : public CGGeodesic {
+class AsmGeodesic : public Geodesic {
 public:
-	AsmGeodesic () : mem(0), addr(0) {}
-
+	void initialize();
+	void incCount(int);
 	// class identification
 	int isA(const char*) const;
-
-	// Assign a memory and address to the geodesic
-	void assignAddr(ProcMemory& m, unsigned a);
-
-	// Return the address assigned to the geodesic.
-	// if I am a fork destination, my address is that of my source.
-	unsigned address() const;
-
-	// Return a pointer to the memory assigned to the geodesic
-	// if I am a fork destination, my memory is that of my source.
-
-	ProcMemory* memory() const;
-protected:
-	// determine whether extra memory should be used to obtain
-	// linear access with no wraparound.
-	double wasteFactor() const;
+	int bufSize() const;
+	void initDestList() { forkType |= F_SRC; dests.initialize(); }
+	void addDest(AsmGeodesic *d) {
+		d->forkType |= F_DEST;
+		d->src = this;
+		dests.append(d);
+	}
+	AsmGeodesic() : maxNumParticles(0), forkType(0), src(0), mem(0) {}
+	void assignAddr(ProcMemory& m, unsigned a) {
+		mem = &m; address = a;
+	}
+	unsigned addr() const { return address;}
 private:
 	int internalBufSize() const;
+	int maxNumParticles;
+	SequentialList dests;
+	AsmGeodesic *src;
+	int forkType;
 	ProcMemory* mem;
-	unsigned addr;
+	unsigned address;
 };
 
 #endif

@@ -7,21 +7,20 @@ Upsample by a factor (default 2), filling with fill (default 0.0).  The
 is to output it first (phase = 0). The maximum phase is "factor" - 1.
 	}
 	version { $Id$ }
-	author { Jose Luis Pino Pino, ported from Gabriel }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
+	author { J. Pino, ported from Gabriel }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
+	explanation {
+
 	}
-	location { CG56 control library }
 	input {
 		name {input}
-		type {anytype}
+		type {FIX}
 	}
 	output {
 		name {output}
-		type {=input}
+		type {FIX}
+		attributes { P_CIRC }
 	}
 	state {
 		name {factor}
@@ -31,6 +30,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		attributes { A_SETTABLE }
 	}
 	state {
+	// Not Supported Yet
 		name {phase}
 		type {int}
 		default {0}
@@ -40,38 +40,30 @@ limitation of liability, and disclaimer of warranty provisions.
 	state {
 		name {fill}
 		type {FIX}
-		default {0.0}
+		default {0}
 		desc { Value to fill the output block. }
 		attributes { A_SETTABLE }
 	}
-	setup {
-		output.setSDFParams(int(factor),int(factor)-1);
-		if (int(phase) >= int(factor))
-			Error::abortRun(*this, ": phase must be < factor");
-	}
-	codeblock (initfill) {
-	move	#$addr(output),r1
-	move	#$val(fill),a
+	codeblock (sendsample) {
+	move	$ref(output),r1
+	move	$size(output),m1
+	move	$ref(input),x0
+	move	$val(fill),a		x0,x:(r1)+
 	}
 	codeblock (repeatcode) {
-	rep	#$size(output)
+	rep	#($val(factor)-1)
 	}
 	codeblock (fillcode) {
-	move	a,$mem(output):(r1)+
-	}
-	initCode {
-		addCode (initfill);
-		if (factor > 1) addCode(repeatcode);
-		addCode(fillcode);
-	}
-	codeblock (sendsample) {
-	move	$ref(input),a
-	move	a,$ref2(output,phase)
+	move	a,x:(r1)+
 	}
 	go {
-		addCode(sendsample);
+		gencode(sendsample);
+		if (factor > 1) {
+			if (factor > 2) gencode(repeatcode);
+			gencode(fillcode);
+		}
 	}
 	execTime {
-		return 1;
+		return factor + 2;
 	}
 }

@@ -1,16 +1,16 @@
 defstar {
 	name { CxToFix }
 	domain { CGC }
-	derivedFrom { Fix }
+	derivedFrom { CGCFix }
 	version { $Id$ }
-	author { Juergen Weiss }
+	author { J.Weiss }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC main library }
+	location { CGC conversion palette }
 	desc { Convert a complex input to a fixed-point output. }
 	explanation {
 This star converts a complex value to a fix value with the specified precision
@@ -76,9 +76,9 @@ minimum for negative magnitudes).
 		// insert code to clear overflow flag
 		CGCFix::clearOverflow();
 
-@     {	int i = 0;
-@	double p, q;
-@	for (; i < $val(numSample); i++) {
+@     {	int i;
+@	double p,q;
+@	for (i = 0; i < $val(numSample); i++) {
 @		p = $ref(input, i).real;
 @		q = $ref(input, i).imag;
 @		p = sqrt(p*p+q*q);

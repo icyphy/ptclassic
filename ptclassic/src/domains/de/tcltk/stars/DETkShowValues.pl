@@ -11,12 +11,12 @@ allocated on the screen may need to be adjusted.
     version { $Id$ }
     author { Brian Evans and Edward Lee }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1993 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { DE Tcl/Tk library }
+    location { DE tcltk library }
     explanation {
 This star uses the "print()" method of the input particles to create
 the display.
@@ -48,11 +48,9 @@ Particles that require more space to display may create problems.
             Error::abortRun(*this, "Outputs not supported");
             return;
         }
-    }
-    begin {
         tcl_file = "$PTOLEMY/src/domains/sdf/tcltk/stars/tkShowValues.tcl";
 
-        DETclScript::begin();
+        DETclScript::setup();
     }
     constructor {
         output.setAttributes(P_HIDDEN);

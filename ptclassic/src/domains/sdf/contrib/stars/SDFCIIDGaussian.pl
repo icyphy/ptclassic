@@ -2,7 +2,6 @@ defstar {
 	name { CIIDGaussian }
 	domain { SDF } 
 	version { $Id$ }
-	location { SDF user contribution library }
 	desc { Complex IID Gaussian generator. }
 	author { N. Becker }
         copyright {
@@ -11,6 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
         }
+	location { SDF dsp library }
 	output {
 		name { output }
 		type { complex }
@@ -22,25 +22,23 @@ limitation of liability, and disclaimer of warranty provisions.
 	  desc{ Variance of distribution. }
 	}
 	hinclude { <Normal.h> }
-	header {
-#include <ACG.h>
-extern ACG* gen;
-	}
+	ccinclude { <ACG.h> }
 	protected {
 	  Normal *random;
 	}
+	ccinclude{ "SharedRNG.h" }
+	
 	constructor {
-	  random = 0;
+	  random = NULL;
 	}
 	destructor {
 	  LOG_DEL; delete random;
 	}
 	setup {
 	  LOG_DEL; delete random;
-	  LOG_NEW; random = new Normal(0., double(variance), gen);
+	  LOG_NEW; random = new Normal(0.,double(variance),gen);
 	}
         go {
-	  Complex randomValue( (*random)(), (*random)() );
-	  output%0 << randomValue;
+	  output%0 << (Complex)( (*random)(),(*random)() );
 	}
 }

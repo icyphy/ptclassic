@@ -1,26 +1,15 @@
 defstar {
-	name { Table }
+	name { FloatTable }
 	domain { SDF }
 	desc {
-This star implements a real-valued lookup table indexed by an
-integer-valued input.  The input must lie between 0 and N-1,
-inclusive, where N is the size of the table.  The "values"
-parameter (an array) specifies the entries in the table.  Its
-first element is indexed by a zero-valued input.  An error occurs
-if the input value is out of bounds.
+Implements a real-valued lookup table.  The "values" state contains the
+values to output; its first element is element zero.  An error occurs if
+an out of bounds value is received.
 	}
 	version {$Id$}
 	author { J. T. Buck }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
-	explanation {
-.Id "table lookup"
-	}
 	input {
 		name { input }
 		type { int }
@@ -37,9 +26,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	go {
 		int i = int(input%0);
-		if (i < 0 || i >= values.size())
-			Error::abortRun(*this, ": input index is out of bounds for the table");
-		else
-			output%0 << values[i];
+		if (i < 0 || i > values.size())
+			Error::abortRun(*this, ": out of bounds input value");
+		else output%0 << float(values[i]);
 	}
 }

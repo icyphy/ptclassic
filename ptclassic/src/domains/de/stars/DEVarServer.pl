@@ -2,20 +2,19 @@ ident
 {
 /**************************************************************************
 Version identification:
-$Id$
+$Id$ 
 
- Copyright (c) 1990-%Q% The Regents of the University of California.
+ Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer:  T. M. Parks
+ Programmer:  Tom Parks
  Date of creation: 1/14/91
 
- This star emulates a server with a variable service time.
- If input events arrive when it is idle, they will be serviced
- immediately and will be delayed only by the service time.
- If input events arrive while another event is being serviced,
- they will be queued.  When the server becomes free, it will
- service any events waiting in its queue.
+ This star emulates a server.  If input events arrive when it is not busy,
+ it delays them by the service time.  If they arrive when it is busy,
+ it delays them by more.  It must become free, and then serve them.
+
+ The service time can be changed using an addtional input.
 
 **************************************************************************/
 }
@@ -24,24 +23,19 @@ defstar
 {
     name { VarServer }
     domain { DE }
-    derivedFrom { Server }
     desc
     {
-This star emulates a server with a variable service time.
-If input events arrive when it is idle, they will be serviced
-immediately and will be delayed only by the service time.
-If input events arrive while another event is being serviced,
-they will be queued.  When the server becomes free, it will
-service any events waiting in its queue.
+This star emulates a server.  If input events arrive when it is not
+busy, it delays them by the service time (variable).  If they arrive
+when it is busy, it delays them by more.  It must become free, and then
+serve them. The service time can be changed using an additional input.
     }
-    version { $Id$ }
-    author { T. M. Parks }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+
+    input
+    {
+	name { input }
+	type { anytype }
+    }
 
     input
     {
@@ -49,18 +43,43 @@ limitation of liability, and disclaimer of warranty provisions.
 	type { float }
     }
 
+    output
+    {
+	name { output }
+	type { = input }
+    }
+
+    defstate
+    {
+	name { serviceTime }
+	type { float }
+	default { 1.0 }
+	desc { Initial service time. }
+	attributes { A_NONCONSTANT | A_SETTABLE }
+    }
+
     constructor
     {
-	// state is no longer constant
-	serviceTime.clearAttributes(A_CONSTANT|A_SETTABLE);
+	delayType = TRUE;
     }
 
     go
     {
 	if (newServiceTime.dataNew)
-	    serviceTime = newServiceTime.get();
+	{
+	    serviceTime = float(newServiceTime.get());
+	}
 
 	if (input.dataNew)
-	    DEServer::go();
+	{
+	   // No overlapped execution. set the time.
+	   if (arrivalTime > completionTime)
+		completionTime = arrivalTime + double(serviceTime);
+	   else
+		completionTime += double(serviceTime);
+
+	   Particle& pp = input.get();
+           output.put(completionTime) = pp;
+	}
     }
 }

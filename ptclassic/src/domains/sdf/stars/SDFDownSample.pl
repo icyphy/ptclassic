@@ -1,26 +1,29 @@
+ident {
+/************************************************************************
+Version identification:
+$Id$
+
+Copyright (c) 1990 The Regents of the University of California.
+                        All Rights Reserved.
+
+Programmer:  J. Buck
+Date of creation: 6/4/90
+Modified to use preprocessor: 10/3/90, by J. Buck
+
+DownSample decimates its input.  It's a port of the Gabriel downsample
+star.
+
+************************************************************************/
+}
 defstar {
 	name {DownSample}
 	domain {SDF}
 	desc { 
-A decimator by a given "factor" (default 2).
-The "phase" tells which sample to output.
-If phase = 0, the most recent sample is the output,
-while if phase = factor-1 the oldest sample is the output.
-Phase = 0 is the default.  Note that "phase" has the opposite
-sense of the phase parameter in the UpSample star, but the
-same sense as the phase parameter in the FIR star.
-	}
-	version {$Id$}
-	author { J. T. Buck }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { SDF main library }
-	explanation {
-.Ir "decimation"
+		"A decimator by factor (default 2).\n"
+		"The phase tells which sample to output.\n"
+		"phase = 0 outputs the most recent sample,\n"
+		"while phase = factor-1 outputs the oldest sample.\n"
+		"Phase = 0 is the default."
 	}
 	input {
 		name{input}
@@ -28,21 +31,24 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	output {
 		name{output}
-		type{=input}
+		type{ANYTYPE}
 	}
 	defstate {
 		name {factor}
 		type {int}
 		default {2}
-		desc { Downsample factor. }
+		desc { "Downsample factor" }
 	}
 	defstate {
 		name {phase}
 		type {int}
 		default {0}
-		desc { Downsample phase. }
+		desc { "Downsample phase" }
 	}
-	setup {
+	constructor {
+		input.inheritTypeFrom(output);
+	}
+	start {
 		input.setSDFParams(int(factor),int(factor)-1);
 		if (int(phase) >= int(factor))
 			Error::abortRun(*this, ": phase must be < factor");

@@ -4,15 +4,10 @@ defstar {
 	desc { Cause a beep on the terminal when fired. }
 	version { $Id$ }
 	author { T. M. Parks }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1992 The Regents of the University of California }
 	location { DE main library }
 
-	ccinclude { <iostream.h> }
+	hinclude { "pt_fstream.h" }
 
 	input
 	{
@@ -20,8 +15,24 @@ limitation of liability, and disclaimer of warranty provisions.
 	    type { anyType }
 	}
 
+	protected
+	{
+	    pt_ofstream output;
+	}
+
+	start
+	{
+	    // abortRun is called on open failure
+	    output.open("<cerr>");
+	}
+
 	go
 	{
-	    cerr << '\007';	// ASCII BEL character.
+	    output << '\007';	// ASCII BEL character.
+	}
+
+	wrapup
+	{
+		output.flush();
 	}
 }

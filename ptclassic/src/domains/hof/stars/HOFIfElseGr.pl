@@ -1,18 +1,17 @@
 defstar {
-	name { IfElseGr }
+	name { IfThenElseGr }
 	domain { HOF }
-	derivedFrom { IfElse }
+	derivedFrom { IfThenElse }
 	desc {
-A variant of the IfElse star where the two possible replacement
-blocks are specified by graphically rather than textually.
-There must be exactly two blocks connected in the positions of the
-replacement blocks.
+A variant of the IfThenElse star where the two possible replacement
+blocks are specified by graphically rather than textually.  There must
+be exactly two blocks connected in the positions of the replacement blocks.
 The HOFNop stars are the only exception: they may be used in addition to the
 two replacement blocks in order to control the order of connection.
 	}
 	explanation {
 See the documentation for the
-.c IfElse
+.c IfThenElse
 star, from which this is derived, for background information.
 The parameter values for the replacement blocks are set directly
 by editing the parameters of the block.
@@ -20,7 +19,7 @@ by editing the parameters of the block.
 	version { $Id$ }
 	author { Edward A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -37,7 +36,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	inmulti {
 	  name {truein}
-	  type {ANYTYPE}
+	  type {=input}
 	  desc {input from the true block}
 	}
 	outmulti {
@@ -47,14 +46,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	inmulti {
 	  name {falsein}
-	  type {ANYTYPE}
+	  type {=input}
 	  desc {input from the false block}
 	}
 	constructor {
-	  // Note that both branches must have the same output type.
-	  output.inheritTypeFrom(truein);
-
-	  // The constructor for IfElse hides blockname, where_defined,
+	  // The constructor for IfThenElse hides blockname, where_defined,
 	  // input_map, output_map, and parameter_map.  Here, we need to hide
 	  // the rest.
 	  true_block.clearAttributes(A_SETTABLE);
@@ -111,7 +107,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    LOG_NEW; nextnui = new MPHIter(truein);
 	  }
 
-	  PortHole *pi, *po, *pei, *peo, *dest;
+	  PortHole *pi, *po, *pei, *peo, *dest, *source;
 	  GenericPort *sourcegp, *destgp;
 
 	  // Now that we know which substitution block will be used, it
@@ -121,11 +117,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	  // out a cleaner way to support graphical recursion.
 	  if ((peo = (*nextexo)++) &&
 	      (dest = peo->far()) &&
-	      (myblock = dest->parent()) &&
+	      (destgp = findTopGenericPort(dest)) &&
+	      (myblock = destgp->parent()) &&
 	      (myblock->isA("HOFDelayedMap"))) {
-	    destgp = findTopGenericPort(dest);
-	    destgp->parent()->setTarget(target());
-	    destgp->parent()->initialize();
 	    ((HOFDelayedMap*)myblock)->substitute();
 	  }
 	  myblock = 0;
@@ -163,16 +157,45 @@ limitation of liability, and disclaimer of warranty provisions.
 	    return;
 	  }
 
-	  myblock->setTarget(target());
 	  myblock->initialize();
 	  myblock = 0;
 
 	  // Disconnect the block that we will not use
 	  while ((peo = (*nextnuo)++) != 0) {
-	    breakConnection(peo);
+	    dest = peo->far();
+	    if (dest != 0) {
+	      destgp = findTopGenericPort(dest);
+	      dest->disconnect();
+	      if (!myblock) {
+		myblock = destgp->parent();
+		if (!restrictConnectivity(myblock,this)) return;
+	      } else {
+		if (myblock != destgp->parent()) {
+		  Error::abortRun(*this,
+				  "Sorry, only a single replacement block"
+				  " is supported at this time.");
+		  return;
+		}
+	      }
+	    }
           }
 	  while ((pei = (*nextnui)++) != 0) {
-	    breakConnection(pei);
+	    source = pei->far();
+	    if (source != 0) {
+	      sourcegp = findTopGenericPort(source);
+	      source->disconnect();
+	      if (!myblock) {
+		myblock = sourcegp->parent();
+		if (!restrictConnectivity(myblock,this)) return;
+	      } else {
+		if (myblock != sourcegp->parent()) {
+		  Error::abortRun(*this,
+				  "Sorry, only a single replacement block"
+				  " is supported at this time.");
+		  return;
+		}
+	      }
+	    }
           }
 
 	  LOG_DEL; delete nextexo;

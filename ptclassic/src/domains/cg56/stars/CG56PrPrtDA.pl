@@ -1,17 +1,11 @@
 defstar {
-	name { PrPrtDA }
+	name { ProPortDA }
 	domain { CG56 }
 	desc { An input/output star for the Ariel ProPort }
 	version { $Id$ }
-	acknowledge { Gabriel version by Phil Lapsley }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 io library }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
 	explanation {
 .PP
 This star is an interrupt driven D/A star for the Ariel Proport board.
@@ -24,18 +18,18 @@ it fires), interrupt-based code will be generated.
 If the star is not repeated, it will generate code
 that polls the Proport and busy waits if samples are not available.
 Interrupt-based code can be forced by setting the string
-parameter \fIforceInterrupts\fR to "yes".
+parameter \fIforceInterrupts\fP to "yes".
 The interrupt buffer will be the minimum required size if the
-parameter \fIinterruptBufferSize\fR is "default=4".
+parameter \fIinterruptBufferSize\fP is "default=4".
 If this parameter is a number, it will be used for the length
 (in words) of the interrupt buffer.
 .PP
 In the event of a real-time violation, execution will abort
 and the following error code will be left in register y0:
-.ip "\fB123061\fR"
+.IP "\fB123061\fP"
 An interrupt occurred and the output buffer was empty.
 	}
-        seealso { PrPrtAD, PrPrtADDA }
+        seealso { ProPortAD, ProPortADDA }
 	input {
 		name {input1}
 		type {FIX}
@@ -224,7 +218,7 @@ $label(empty)
         move    x:$starSymbol(proportda)_savereg+2,m0
         rti
         }        
-	setup {
+	start {
 		bufLen = interruptBufferSize;
 		saveReg.resize(3);
 		outIntBuffer.resize(bufLen);
@@ -232,12 +226,12 @@ $label(empty)
 	initCode {
 		const char     *f = forceInterrupts;
 		if (f[0] == 'n' || f[0] == 'N')
-			addCode(pollingInit);
+			gencode(pollingInit);
 		else {
-			addCode(interruptInit);
+			gencode(interruptInit);
 			genInterruptCode(interrupt);
 			genInterruptCode(interrupt1);
-			addCode(interruptCont);
+			gencode(interruptCont);
 		}
 	}
 	go {
@@ -246,10 +240,10 @@ $label(empty)
 		if (p[0] == 'n' || p[0] == 'N') {
 			//polling
 				if (q[0] == 'y' || q[0] == 'Y')
-				addCode(abortyes);
-			addCode(polling);
+				gencode(abortyes);
+			gencode(polling);
 		} else {
-			addCode(interruptIn);
+			gencode(interruptIn);
 		}
 	}
 	execTime {
@@ -262,7 +256,7 @@ $label(empty)
 	wrapup {
 		const char     *i = forceInterrupts;
 		if (i[0] == 'y' || i[0] == 'Y') {
-			addCode(interruptTerminate);
+			gencode(interruptTerminate);
 		}
 	}
 }    

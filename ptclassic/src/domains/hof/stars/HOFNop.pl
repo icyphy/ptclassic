@@ -1,7 +1,7 @@
 defstar {
 	name {Nop}
 	domain {HOF}
-	derivedfrom {Base}
+	derivedfrom {BaseHiOrdFn}
 	desc {
 Bridge inputs to outputs and then self-destruct.
 This star is used to split a bus into individual
@@ -10,19 +10,19 @@ It is also used to break out multi-inputs
 and multi-outputs into individual ports.
 	}
 	explanation {
-Normally, the number of input connections must equal the number of
-output connections.
-But, a special feature of this star supports a particularly convenient
-graphical programming device.
-If either the input or the output is connected to a multi-porthole on
-the far side, but there too few connections that have been realized,
-then the star will increase the number of connections automatically
+Normally, the number of input connections must equal the
+number of output connections.  But, a special feature of
+this star supports a particularly convenient graphical
+programming device.  If either the input or the output
+is connected to a multi-porthole on the far side, but there
+too few connections that have been realized, then the star
+will increase the number of connections automatically
 to the correct number.
 	}
 	version {$Id$}
 	author { E. A. Lee and D. Niehaus }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -85,7 +85,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	      PortHole *prevpifar = 0;
 	      PortHole *pi = nexti++;
 	      PortHole *po = nexto++;
-	      GenericPort *gpo, *gpi;
 	      while ((pi != 0) ||
 		     (po != 0)) {
 		if (pi == 0) {
@@ -111,8 +110,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		  numOutDelays = po->numInitDelays();
 		  sinkDelayVals = po->initDelayValues();
 		  sourceDelayVals = prevpifar->initDelayValues();
-		  gpo = aliasPointingAt(po);
-		  gpi = 0;
 		  sink->disconnect();
 		} else if (po == 0) {
 		  // Out of outputs.
@@ -137,8 +134,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		  numOutDelays = prevpofar->numInitDelays();
 		  sourceDelayVals = pi->initDelayValues();
 		  sinkDelayVals = prevpofar->initDelayValues();
-		  gpi = aliasPointingAt(pi);
-		  gpo = 0;
 		  source->disconnect();
 		} else {
 		  if((source = pi->far()) == 0 ||
@@ -152,8 +147,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		  prevpifar = pi->far();
 		  numInDelays = pi->numInitDelays();
 		  numOutDelays = po->numInitDelays();
-		  gpo = aliasPointingAt(po);
-		  gpi = aliasPointingAt(pi);
 		  source->disconnect();
 		  sink->disconnect();
 		}
@@ -184,9 +177,17 @@ limitation of liability, and disclaimer of warranty provisions.
 							  sink->parent()->name(),
 							  sink->name());
 		}
-
-		fixAliases(gpi,pi,sink);
-		fixAliases(gpo,po,source);
+		
+		// Fix aliases
+		GenericPort *gp;
+		if (pi) {
+		  gp = pi->aliasFrom();
+		  if(gp) gp->setAlias(*sink);
+		}
+		if (po) {
+		  gp = po->aliasFrom();
+		  if(gp) gp->setAlias(*source);
+		}
 
 		// If the farside porthole belongs to a HOFStar, we can assume it
 		// has not been initialized (since it would have self-destructed).

@@ -34,7 +34,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Revisions:
 
  Base class for the Ptolemy interface to Matlab.
- Only once Matlab process is run and is shared by all of Ptolemy.
 
 **************************************************************************/
 
@@ -42,14 +41,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include <string.h>
 #include "StringList.h"
-#include "InfString.h"
-#include "Particle.h"
-#include "Matrix.h"
-#include "MatlabIfcFuns.h"
 
+#define MATLAB_BUFFER_LEN        1023
 #define MATLAB_ERR_STR           "\x07???"
+
+#define MXCOMPLEX 1
+#define MXREAL 0
 
 // Matlab limits filenames to 20 characters (base name + ".m")
 // Therefore, Matlab functions must have 18 or fewer characters
@@ -66,45 +64,38 @@ public:
 	// destructor
 	~MatlabIfc();
 
-	// Methods to Access Data Members
-
-	// set protected data members
+	// set data members
 	int SetDeleteFigures(int flag);
 	const char* SetScriptDirectory(const char* dir);
 	const char* SetFigureHandle(const char* handle);
 	const char* SetMatlabCommand(const char* command);
-	char* SetOutputBuffer(char *buffer, int bufferlen);
-	const char* SetErrorString(const char* string);
-	const char* SetWarningString(const char* string);
 
-	// get protected data members
+	// get data members
 	int GetDeleteFigures();
-	const char* GetScriptDirectory();
-	const char* GetFigureHandle();
-	const char* GetMatlabCommand();
-	char* GetOutputBuffer();
-	int GetOutputBufferLength();
-	char* GetErrorString();
-	char* GetWarningString();
+	const char *GetScriptDirectory();
+	const char *GetFigureHandle();
+	const char *GetMatlabCommand();
 
-	// get static members
-	Engine* GetCurrentEngine();
-	int GetMatlabIfcInstanceCount();
+	// setup functions
+	void NameMatlabMatrices(char *matNames[], int numMatrices,
+				const char *baseName);
+	const char *BuildMatlabCommand(const char *matlabFunction,
+				char *matlabInputNames[], int numInputs,
+				char *matlabOutputNames[], int numOutputs);
 
-	// Methods to interface to the Matlab process via the Matlab engine
-
-	// A. low-level interfaces
-	Engine* MatlabEngineOpen(char* unixCommand);
+	// manage Matlab process (low-level methods)
+	// derived class must override these methods
+	char* MatlabEngineOpen(char* unixCommand);
 	int MatlabEngineSend(char* command);
-	int MatlabEngineOutputBuffer(char* buffer, int buferLength);
-	Matrix* MatlabEngineGetMatrix(char* name);
-	int MatlabEnginePutMatrix(Matrix* matrixPtr);
+	int MatlabEngineOutputBuffer();
+	char* MatlabEngineGetMatrix(char* name);
+	char* MatlabEnginePutMatrix(char* matrix);
 	int MatlabEngineClose();
 
-        // B. higher-level interfaces to the Matlab process
+        // higher-level interfaces to the Matlab process
 	int EvaluateOneCommand(char* command);
 
-	// C. highest-level interface to the Matlab process
+	// highest-level interface to the Matlab process
 	int StartMatlab();
 	int MatlabIsRunning();
 	int EvaluateUserCommand();
@@ -114,79 +105,27 @@ public:
 	int CloseMatlabFigures();
 	int KillMatlab();
 
-	// Methods not using any data members but serve at C++ wrappers
-
-	// A. not specific to Ptolemy
-	//    1. generate a list of names for Matlab matrices
-	//       use FreeStringArray to deallocate matNames
-	void NameMatlabMatrices(char *matNames[],
-				int numMatrices,
-				const char* baseName);
-
-	//    2. build up a complete Matlab command
-	const char* BuildMatlabCommand(
-				char* matlabInputNames[], int numInputs,
-				const char* matlabFunction,
-				char* matlabOutputNames[], int numOutputs);
-
-	//    3. free an array of Matlab matrices
-	void FreeMatlabMatrices(Matrix *matlabMatrices[], int numMatrices);
-
-	//    4. name a Matlab matrix in memory
-	void NameMatlabMatrix(Matrix* matrixPtr, const char *name);
-
-	// B. specific to Ptolemy
-	//    1. convert Ptolemy particles to Matlab matrices
-	Matrix* PtolemyToMatlab(Particle& particle, DataType portType,
-				int* errflag);
-
-	//    2. convert Matlab matrices to Ptolemy particles
-	int MatlabToPtolemy(Particle& particle, DataType portType,
-			    Matrix* matlabMatrix, int* warnflag,
-			    int* errflag);
-
-	// Methods for interface to/from another scripting language (e.g. Tcl)
-	// Use FreeStringArray to deallocate realPartStrings/imagPartStrings
-	int SetMatlabVariable(const char* name,
-			      int numrows, int numcols,
-			      char** realPartStrings,
-			      char** imagPartStrings);
-	int GetMatlabVariable(char* name,
-			    int* numrows, int* numcols,
-			    char*** realPartStrings,
-			    char*** imagPartStrings);
-	int UnsetMatlabVariable(char* name);
-	int UnsetMatlabVariable(char* name[], int numMatrices);
-	void FreeStringArray(char** strarray, int numstrings);
-
 protected:
+	// counts how many instances of this class have been created
+	static int matlabStarsCount;
+
+	// keeps track of the lone Ptolemy-controlled Matlab process running
+	static char* matlabEnginePtr;
+
 	// indicate whether or not to delete created figures upon destruction
 	int deleteFigures;
 
 	// script directory containing user scripts
-	char* scriptDirectory;
+	char *scriptDirectory;
 
 	// place to put the first N output characters from Matlab
-	char* outputBuffer;
-	int outputBufferLen;
+	char matlabOutputBuffer[MATLAB_BUFFER_LEN + 1];
 
 	// name attached to Matlab figures
-	StringList figureHandle;
-
-	// Matlab command to execute to tag Matlab figures
-	InfString figureHandleCommand;
-
-	// set figureHandleCommand to Matlab command to attach tags to figures
-	const char* MakeFigureHandleCommand();
+	StringList matlabFigureHandle;
 
 	// Matlab command to execute
-	InfString commandString;
-
-	// Matlab error string
-	InfString errorString;
-
-	// Matlab warning string
-	InfString warningString;
-};
+	StringList commandString;
+}
 
 #endif

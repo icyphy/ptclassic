@@ -4,32 +4,10 @@ static const char file_id[] = "EGNode.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
+ Copyright (c) 1991 The Regents of the University of California.
+                       All Rights Reserved.
 
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
-
- Programmer:  Soonhoi Ha, based on S.  Bhattacharyya's code. '
+ Programmer:  Soonhoi Ha, based on S.  Bhattacharyya's code.
  
 *******************************************************************/
 
@@ -43,18 +21,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // EGNode methods //
 ////////////////////
 
-EGNode :: EGNode(DataFlowStar* s, int n) : invocation(n), pStar(s), next(0) {
-	stickyFlag = 0;
+EGNode :: EGNode(SDFStar* s, int n = 1) : pStar(s), invocation(n), next(0) {
 	if (n == 1) s->setMaster(this);
-}
-
-EGNode :: ~EGNode() {}
-
-void EGNode :: deleteInvocChain() {
-	if (next) {
-		next->deleteInvocChain();
-		LOG_DEL; delete next;
-	}
 }
 
 StringList EGNode :: printMe() {
@@ -71,7 +39,7 @@ StringList EGNode :: printShort() {
 	StringList out;
 	out += "Star: name = ";
 	if (pStar)
-		out += pStar->name();
+		out += pStar->readName();
 	else
 		out += "noName";
 	out += " (invocation # ";
@@ -124,7 +92,7 @@ int EGNode::root() {
 	EGGateLinkIter nextAncestor(ancestors);
 	EGGate *p;
 	while((p=nextAncestor++)!=0) {
-		if ((p->delay() < p->samples()) || (p->samples() == 0))
+		if (p->delay() < p->samples())
 			return FALSE;
 	}
 	return TRUE;    

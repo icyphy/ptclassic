@@ -4,10 +4,9 @@ defstar {
 	derivedFrom { Map }
 	desc {
 A variant of the Map star where the replacement block is specified
-by graphically connecting it.
-There must be exactly one block connected in the position of the
-replacement block.
-The HOFNop stars are the only exception: they may be used in addition to the
+by graphically connecting it.  There must be exactly one block
+connected in the position of the replacement block.  The HOFNop
+stars are the only exception: they may be used in addition to the
 one replacement block in order to control the order of connection.
 	}
 	explanation {
@@ -22,7 +21,7 @@ where the format is the same as in other higher-order stars.
 	version { $Id$ }
 	author { Edward A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -40,13 +39,12 @@ Example of a connection to the replacement block
 	}
 	inmulti {
 	  name {exin}
-	  type {ANYTYPE}
+	  type {=input}
 	  desc {
 Example of a connection to the replacement block
           }
 	}
 	constructor {
-	  output.inheritTypeFrom(exin);
 	  input_map.clearAttributes(A_SETTABLE);
 	  output_map.clearAttributes(A_SETTABLE);
 	  blockname.clearAttributes(A_SETTABLE);
@@ -89,7 +87,7 @@ Example of a connection to the replacement block
 	      return;
 	    }
 	    if (!(destgp = breakConnection(peo))) return;
-	    if (inputMap.numPieces() > 0) inputMap += " ";
+	    if (inputMap.size() > 0) inputMap += " ";
 	    inputMap += destgp->name();
 	    if (!connectInput(pi,destgp)) return;
 	  }
@@ -103,7 +101,7 @@ Example of a connection to the replacement block
 	      return;
 	    }
 	    if (!(sourcegp = breakConnection(pei))) return;
-	    if (outputMap.numPieces() > 0) outputMap += " ";
+	    if (outputMap.size() > 0) outputMap += " ";
 	    outputMap += sourcegp->name();
 	    if (!connectOutput(po, sourcegp)) return;
 	  }
@@ -123,7 +121,6 @@ Example of a connection to the replacement block
 	  // Set the parameter values after all the clones have been created
 	  // so that cloning takes the right default values.
 	  if(!setParams(myblock, 1)) return;
-	  myblock->setTarget(target());
 	  myblock->initialize();
 
 	  mom->deleteBlockAfterInit(*this);
@@ -133,7 +130,7 @@ Example of a connection to the replacement block
 	    name { createBlock }
 	    type { "Block*" }
 	    access { protected }
-	    arglist { "(Galaxy& mom, const char* /*blockname*/, const char* /*where_defined*/)" }
+	    arglist { "(Galaxy& mom)" }
 	    code {
               Block *block = myblock->clone();
 	      if (!block) {
@@ -141,9 +138,6 @@ Example of a connection to the replacement block
 				"Unable to create instance of block: ",
 				myblock->name());
 	      }
-	      // Set the target
-	      if (target()) block->setTarget(target());
-
 	      // Choose a name for the block
 	      StringList instancename = "Map_";
 	      instancename += (const char*)myblock->name();

@@ -1,25 +1,19 @@
 defstar {
-	name { LMSCx }
+	name { CxLMS }
 	domain { SDF }
-	derivedFrom { FIRCx }
+	derivedFrom { ComplexFIR }
 	desc {
-A complex adaptive filter using the LMS adaptation algorithm.
-The initial coefficients are given by the "taps" parameter.
-The default initial coefficients give an 8th order, linear phase
+Complex adaptive filter using LMS adaptation algorithm.
+Initial coefficients are in the "taps" state variable.
+Default initial coefficients give an 8th order, linear phase
 lowpass filter.  To read initial coefficients from a file,
-replace the default coefficients with "< fileName",
-preferably specifying a complete path.
-This star supports decimation, but not interpolation.
+replace the default coefficients with "<fileName".
+Supports decimation, but not interpolation.
 	}
 	version { $Id$ }
 	author { J. T Buck, E. A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { SDF dsp library }
+	copyright { 1991 The Regents of the University of California }
+	location { SDF main library }
 	explanation {
 When correctly used, this filter will adapt to try to minimize
 the mean-squared error of the signal at its \fIerror\fR input.
@@ -34,17 +28,13 @@ The number of delays must be greater than zero or the dataflow
 graph will deadlock.
 The adaptation algorithm used is the well-known LMS, or stochastic-gradient
 algorithm, generalized to use complex signals and filter taps.
-.Id "adaptive filter, complex"
-.Id "filter, adaptive, complex"
-.Id "filter, LMS, complex"
-.Id "LMS adaptive filter, complex"
-.Ir "stochastic gradient algorithm"
+.IE "stochastic gradient algorithm"
 .lp
 If the \fIsaveTapsFile\fR string is non-null, a file will
 be created by the name given by that string, and the final tap values
 will be stored there after the run has completed.
 	}
-	seealso {FIRCx, LMS, adaptFilter, LMSPlotCx, LMSTkPlotCx }
+	seealso {ComplexFIR, LMS, adaptFilter}
 	input {
 		name { error }
 		type { complex }
@@ -74,11 +64,11 @@ will be stored there after the run has completed.
 		// taps are no longer constant
 		taps.clearAttributes(A_CONSTANT);
 	}
-	setup {
+	start {
 		// force interpolation to 1
 		interpolation = 1;
 		// Next run the ComplexFIR start routine
-		SDFFIRCx :: setup();
+		SDFComplexFIR :: start();
 
 		// Then reset the signalIn number of samples in the past
 		// to account for the error delay.
@@ -97,12 +87,12 @@ will be stored there after the run has completed.
 		}
 		
 		// Then run FIR filter
-		SDFFIRCx :: go();
+		SDFComplexFIR :: go();
 	}
 	wrapup {
 		const char* sf = saveTapsFile;
 		if (sf != NULL && *sf != 0) {
-			char* saveFileName = expandPathName(sf);
+			const char* saveFileName = expandPathName(sf);
 			// open the file for writing
 			FILE* fp = fopen(saveFileName,"w");
 			if (!fp) {
@@ -116,7 +106,6 @@ will be stored there after the run has completed.
 							taps[i].imag());
 			}
 			fclose(fp);
-			delete [] saveFileName;
 		}
 	}
 }

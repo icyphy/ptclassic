@@ -8,19 +8,19 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -29,9 +29,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+							COPYRIGHTENDKEY
 
  Programmer:  J. Buck, E. A. Lee and D. G. Messerschmitt
 
@@ -53,12 +51,10 @@ domains.
 
 class DFPortHole : public PortHole
 {
+protected:
+	int maxBackValue;	// maximum % argument allowed
 public:
 	DFPortHole();
-
-        // redefine setPort
-	PortHole& setPort(const char* portName, Block* parent,
-		DataType type = FLOAT, unsigned numTokens = 1);
 
 	// farSidePort is always DFPortHole or derived.  This
 	// overrides PortHole::far.
@@ -96,15 +92,21 @@ public:
 
 	// is the port dynamic? (default: return 0)
 	virtual int isDynamic() const;
-	int isVarying() { return varying; }
+
+        // The setPort function is redefined to take one more optional
+        // argument, the number of Particles consumed/generated
+        PortHole& setPort(const char* portName,
+                          Block* parent,
+                          DataType type = FLOAT,
+			  // Number Particles consumed/generated
+                          unsigned numTokens = 1,
+			  // Maximum delay the Particles are accessed
+			  unsigned maxPctValue = 0);
 
 	// The number of repetitions of the parent star, valid only
 	// after the schedule is computed.
 	int parentReps() const;
-protected:
-	int maxBackValue;	// maximum % argument allowed
-	/* virtual */ int allocatePlasma(); // use local plasma
-	int varying;		// flag to be set if varying
+
 };
 
 class MultiDFPort : public MultiPortHole {
@@ -123,10 +125,6 @@ public:
                           Block* parent,
                           DataType type = FLOAT,        // defaults to FLOAT
                           unsigned numTokens = 1);      // defaults to 1
-
-	// redefine
-	/* virtual */ PortHole& installPort(PortHole& p);
-
 protected:
         // The number of Particles consumed
         unsigned numberTokens;

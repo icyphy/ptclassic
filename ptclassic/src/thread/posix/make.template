@@ -12,14 +12,14 @@ ROOT= ../../..
 VPATH= $(ROOT)/src/thread/posix
 
 # Configuration info.
-CONFIG= $(ROOT)/mk/config-$(PTARCH).mk
+CONFIG= $(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 # Library name
 LIB= libposixthread.$(LIBSUFFIX)
 
 # Extra directories to include
-INCL= -I$(KERNDIR) -I$(ROOT)/thread/include.$(PTARCH)
+INCL= -I$(KERNDIR) -I$(ROOT)/thread/include.$(ARCH)
 
 # Library sources.  CC_WITH_H includes all .cc files with a
 # corresponding .h file with the same root.

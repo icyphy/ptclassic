@@ -8,19 +8,17 @@ Reads in voice packet and sends out its destination VCI number
 	version {$Id$}
 	author { Allen Y. Lao }
 	copyright { 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
 
-	location { DE ATM library }
+	location { ATM demo library }
 
         explanation {
-Star is to be placed at switch output and feeds into "graphing" star,
-to plot destination VCI field of incoming
-.c VoiceData 
-packets
+Star is to be placed at switch output and feeds into graph,
+to plot destination VCI field of incoming VoiceData packets
         }
 
         input {
@@ -37,10 +35,7 @@ packets
                 name {field}
                 type {int}
                 default {"2"}
-                desc {
-Field of
-.c VoiceData
-packets to output }
+                desc { Field of VoiceData packets to output }
         }
 
 	ccinclude { "VoiceData.h" }
@@ -53,7 +48,7 @@ packets to output }
                 Envelope  inEnv;
                 input.get().getMessage(inEnv);
                 if (!voiceCheck (inEnv, *this)) return;
-                const VoiceData*  v = (const VoiceData*) inEnv.myData();
+                VoiceData*  v = (VoiceData*) inEnv.myData();
                 completionTime = arrivalTime;
 
 		// Send out data if not start-of-transmission nor end-of-

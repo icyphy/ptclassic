@@ -1,16 +1,11 @@
 defstar {
-	name { Add }
+	name { FixSum }
 	domain { CG56 }
 	desc { Add any number of inputs, producing an output. }
 	version { $Id$ }
 	author { J. Buck }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 arithmetic library }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
 	explanation {
 The inputs are added and the result is written on the output.
 	}
@@ -46,18 +41,18 @@ The inputs are added and the result is written on the output.
 	}
 	go {
 		if (input.numberPorts() == 1) {
-			addCode(one);
+			gencode(one);
 			return;
 		}
-		addCode(std);
+		gencode(std);
 		for (int i = 3; i <= input.numberPorts(); i++) {
 			char buf[80];
 			sprintf (buf, "\tadd\tx0,a\t$ref(input#%d),x0",i);
-			addCode(CodeBlock(buf));
+			gencode(CodeBlock(buf));
 		}
 		if (int(saturation))
-			addCode(sat);
-		else addCode(nosat);
+			gencode(sat);
+		else gencode(nosat);
 	}
 	exectime {
 		if (input.numberPorts() == 1) return 2;

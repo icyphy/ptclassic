@@ -5,7 +5,7 @@ defstar {
 	version {$Id$}
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -15,7 +15,7 @@ To keep the implementation simple, this star does not attempt the
 fancy tricks performed by the regular fork star to avoid runtime overhead.
 The data values are simply copied at runtime.
         }
-	location { CGC main library }
+	location { SDF main library }
 	inmulti {
 	  name{input}
 	  type{ANYTYPE}

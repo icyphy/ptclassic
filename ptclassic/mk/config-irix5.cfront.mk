@@ -1,5 +1,5 @@
 # Configuration makefile to build on SGI Indigo running Irix5.3 with
-# SGI's `Delta-C++' compiler (This compiler is not cfront, but we call 
+# SGI's C++ compiler (This compiler probably is not cfront, but we call 
 # all non-g++ compilers 'cfront' for historical reasons)
 #
 # $Id$
@@ -27,67 +27,27 @@
 # 						COPYRIGHTENDKEY
 #
 #	Programmers: Dan Ellis (MIT Media Lab), Christopher Hylands
-#
-# NOTES on installing Ptolemy 0.5.2 beta under SGI IRIX 5.3 using the 
-# vendor's compilers ($PTARCH=irix5.cfront)
-# 
-# I believe this is working well.  To install, you need only grab the
-# archives pt-0.5.2beta.src.tar.gz and pt-0.5.2beta.other.src.tar.gz .
-# Then proceed as ususal
-# 
-# (a) You have to make sure that the default $PTARCH is irix5.cfront 
-#     rather than the plain irix5.  I did this by putting a patch 
-#     into ~/.cshrc, which is where PTARCH is set from ~ptolemy/bin/ptarch. 
-#     Thus, lines 12-16 .cshrc become:
-#
-#	# The arch script figures out what type of machine we are on.
-#	if (! $?PTARCH) setenv PTARCH ` $PTOLEMY/bin/ptarch`
-#	
-#	# We want to use cfront - append .cfront suffix if not already there
-#	setenv PTARCH `echo $PTARCH | sed -e "s/\..*//"`.cfront
-#
-#     You have to have the test because .cshrc is run many times with PTARCH 
-#     already set, and you end up with ~/bin.irix5.cfront.cfront.cfront ...
-#
-# (b) Gnu make - must be the first `make' in $path.  I tried putting an 
-#     alias in my .cshrc, but the make build invokes make under sh, which 
-#     won't know the alias.
-#
-# (c) MATLAB - the install will automatically find your matlab libraries 
-#     if it is installed on your system.  If you don't have matlab, you're 
-#     OK (I assume).  However, if you do have matlab, the shipped libmat.a 
-#     is not compiled with the special GOT-usage reducing flags, and it 
-#     messes up the link of pigi.  The work around is to convert it into 
-#     a shared object (linked at runtime) which works fine.  This is what 
-#     I did (as root):
-# 
-#     cd /usr/tmp		# build here to avoid file locking problems
-#     cp /usr/local/matlab/extern/lib/sgi/libmat.a .
-#     ld -elf -shared -o libmat.so -all libmat.a           # creates libmat.so
-#     cp libmat.so /usr/local/matlab/extern/lib/sgi/
-#     ln -s /usr/local/matlab/extern/lib/sgi/libmat.so /usr/lib
-#	# create symlink from /usr/lib so rld can find it - dumb of me
-#
-#    Then the pigi link automatically refers to the libmat.so in preference to 
-#    linking in the libmat.a, and you're happy.
 
 # --------------------------------------------------------------------
 # |  Please see the file ``config-default.mk'' in this directory!    |
 # --------------------------------------------------------------------
 include $(ROOT)/mk/config-default.mk
 
+# Get the g++ definitions; we override some below.
+##include $(ROOT)/mk/config-g++.mk
+include $(ROOT)/mk/config-cfront.mk
+
 #
 # Programs to use
 #
-
-# Define the C++ compiler - always have compat/cfront includes as 1st choice
-CPLUSPLUS = 	CC -I$(ROOT)/src/compat/cfront
-
-# Plain C compiler
-CC = cc
+# C++ compiler to use
+GPPFLAGS =	$(GPPDEBUGFLAGS) $(MEMLOG)
 # C compiler flags.  Defined by the arch-config mk.
 CFLAGS =
 
+# IRIX5.x does not have a ranlib
+RANLIB = 	true
+CC = cc
 # OCT_CC is used in src/octtools/vem-{lib,bin}.mk
 OCT_CC = cc -D_BSD_SIGNALS
 # BSD_SIGNALS needed *only* for src/octtools/Xpackages/iv/timer.c, 
@@ -97,15 +57,10 @@ OCT_CC = cc -D_BSD_SIGNALS
 ##DEPEND=g++ -MM
 DEPEND=CC -M
 
-# IRIX5.x does not have a ranlib
-RANLIB = 	true
-
 # linker to use for pigi and interpreter.
 LINKER=CC
 # system libraries (libraries from the environment)
 SYSLIBS=-lm
-# system libraries for linking .o files from C files only
-CSYSLIBS = $(SYSLIBS)
 
 OPTIMIZER =
 # -g
@@ -121,18 +76,20 @@ MISC_DEFINES =	-D_BSD_SIGNALS -D_BSD_TIME
 
 # dpwe: -G 0 is to disable accessing data off 'the global pointer' 
 # (according to man CC); this is known to result in global space 
-# overflow in large programs;  (man CC also suggests that 
-# unless -nonshared is also specified, it is ignored anyway.)
+# overflow in large programs;  However, man CC also suggests that 
+# unless -nonshared is also specified, it is ignored anyway.
 #GOTFLAG = -G 0
 # -xgot is the SGI hack to avoid overflows in the GOT by allowing 
 # 32 bit offsets, or something.
 GOTFLAG = -G 0 -xgot
 
+#  Under gcc-2.5.8 on Irix5.2, -g is not supported
 GPPFLAGS =	$(GOTFLAG) $(MEMLOG) $(WARNINGS) $(MISC_DEFINES) $(OPTIMIZER)
 
 #     -cckr   The traditional K&R/Version7 C with SGI extensions
+# Note that -cckr will not work with gcc
 CFLAGS =	$(GOTFLAG) -cckr $(OPTIMIZER)
-
+##CFLAGS =	$(GOTFLAG) $(MEMLOG) $(WARNINGS) $(MISC_DEFINES) $(OPTIMIZER)
 #
 # Variables for the linker
 #
@@ -159,6 +116,16 @@ LINKFLAGS_D =	-L$(LIBDIR) $(GOTFLAG)
 # S56 directory is only used on sun4.
 S56DIR =
 
+# Variables for local Matlab installation
+# -- If Matlab is installed, then MATLABDIR points to where MATLAB is installed
+#    and MATLABLIBDIR points to the directory containing the Matlab libraries
+# -- If Matlab is not installed, then MATLABDIR equals $ROOT/src/compat/matlab
+#    and MATLABLIBIDR is undefined
+#MATLABDIR =	/usr/local/matlab
+#MATLABLIBDIR =	-L$(MATLABDIR)/extern/lib/$(ARCH)
+MATLABDIR =	$(ROOT)/src/compat/matlab
+MATLABLIBDIR =
+
 #
 # Variables for miscellaneous programs
 #
@@ -170,5 +137,3 @@ XV_CC =		cc -cckr -DSVR4 -DXLIB_ILLEGAL_ACCESS
 # Used by tcltk to build the X pixmap extension
 XPM_DEFINES =	-DZPIPE
 
-# Matlab architecture
-MATARCH = sgi

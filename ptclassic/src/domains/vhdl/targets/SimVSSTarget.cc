@@ -55,26 +55,8 @@ VHDLTarget(name,starclass,desc) {
   addState(interactive.setState("interactive",this,"NO",
 			    "switch for simulating interactively."));
 
-//  addStream("preSynch", &preSynch);
-//  addStream("postSynch", &postSynch);
-
-  needC2Vinteger = 0;
-  needV2Cinteger = 0;
-  needC2Vreal = 0;
-  needV2Creal = 0;
-
-  // Use the process id to uniquely name the sockets.
-  int pid = (int) getpid();
-  // Because of the naming style we use and because the
-  // address name (path name) is limited to 14 characters
-  // by socket.h, and because process ids are up to 5 digits,
-  // anything more than an additional character in length will
-  // fail (e.g., multiplying by 100 instead of 10).
-// Maybe even mult. by 10 is too much.  :(
-//  pairNumber = pid * 10;
-// Note: removing *10 didn't seem to help on edison.
-// Still works on hubble.
-  pairNumber = pid;
+  addStream("preSynch", &preSynch);
+  addStream("postSynch", &postSynch);
 }
 
 // Clone the Target.
@@ -82,15 +64,14 @@ Block* SimVSSTarget :: makeNew() const {
   LOG_NEW; return new SimVSSTarget(name(), starType(), descriptor());
 }
 
-static SimVSSTarget proto("SimVSS-VHDL", "VHDLStar",
-  "VHDL code generation target for Synopsys simulation");
-static KnownTarget entry(proto,"SimVSS-VHDL");
-
 void SimVSSTarget :: setup() {
-  writeCom = 1;
-
+  pairNumber = 0;
   VHDLTarget :: setup();
 }
+
+static SimVSSTarget proto("SimVSS-VHDL", "CGStar",
+			 "VHDL code generation target for Synopsys simulation");
+static KnownTarget entry(proto,"SimVSS-VHDL");
 
 // Routines to construct CG wormholes, using the
 // $PTOLEMY/src/domains/cgc/targets/main/CGWormTarget
@@ -107,13 +88,9 @@ CommPair SimVSSTarget :: toCGC(PortHole&) {
 }
 
 void SimVSSTarget :: configureCommPair(CommPair& pair) {
-  pair.cgcStar->setState("destDir", hashstring(destDirectory));
-  pair.cgcStar->setState("filePre", hashstring(filePrefix));
-
   StringList prNum = pairNumber;
-
-  pair.cgcStar->setState("pairNumber", hashstring(prNum));
-  pair.cgStar->setState("pairNumber", hashstring(prNum));
+  pair.cgcStar->setState("pairNumber", prNum);
+  pair.cgStar->setState("pairNumber", prNum);
   pairNumber++;
 }
 
@@ -133,8 +110,7 @@ void SimVSSTarget :: frameCode() {
   CodeStream code;
   code << headerComment();
 
-//  StringList galName = galaxy()->name();
-  StringList galName = (const char *)filePrefix;
+  StringList galName = galaxy()->name();
   StringList topName = galName;
   topName << "_top";
 
@@ -142,7 +118,6 @@ void SimVSSTarget :: frameCode() {
   top_uses << "library SYNOPSYS,IEEE;\n";
   top_uses << "use SYNOPSYS.ATTRIBUTES.all;\n";
   top_uses << "use IEEE.STD_LOGIC_1164.all;\n";
-  top_uses << "use std.textio.all;\n";
 
   top_entity << "-- top-level entity\n";
   top_entity << "entity ";
@@ -158,7 +133,7 @@ void SimVSSTarget :: frameCode() {
   top_architecture << " of ";
   top_architecture << topName;
   top_architecture << " is\n";
-  top_architecture << "component C2Vinteger\n";
+  top_architecture << "component C2V\n";
   top_architecture << indent(1) << "generic ( pairid  : INTEGER ;\n";
   top_architecture << indent(1) << "          numxfer : INTEGER );\n";
   top_architecture << indent(1) << "port ( go   : in  STD_LOGIC ;\n";
@@ -166,27 +141,11 @@ void SimVSSTarget :: frameCode() {
   top_architecture << indent(1) << "       done : out STD_LOGIC );\n";
   top_architecture << "end component;\n";
   top_architecture << "\n";
-  top_architecture << "component V2Cinteger\n";
+  top_architecture << "component V2C\n";
   top_architecture << indent(1) << "generic ( pairid  : INTEGER ;\n";
   top_architecture << indent(1) << "          numxfer : INTEGER );\n";
   top_architecture << indent(1) << "port ( go   : in  STD_LOGIC ;\n";
   top_architecture << indent(1) << "       data : in  INTEGER   ;\n";
-  top_architecture << indent(1) << "       done : out STD_LOGIC );\n";
-  top_architecture << "end component;\n";
-  top_architecture << "\n";
-  top_architecture << "component C2Vreal\n";
-  top_architecture << indent(1) << "generic ( pairid  : INTEGER ;\n";
-  top_architecture << indent(1) << "          numxfer : INTEGER );\n";
-  top_architecture << indent(1) << "port ( go   : in  STD_LOGIC ;\n";
-  top_architecture << indent(1) << "       data : out REAL      ;\n";
-  top_architecture << indent(1) << "       done : out STD_LOGIC );\n";
-  top_architecture << "end component;\n";
-  top_architecture << "\n";
-  top_architecture << "component V2Creal\n";
-  top_architecture << indent(1) << "generic ( pairid  : INTEGER ;\n";
-  top_architecture << indent(1) << "          numxfer : INTEGER );\n";
-  top_architecture << indent(1) << "port ( go   : in  STD_LOGIC ;\n";
-  top_architecture << indent(1) << "       data : in  REAL      ;\n";
   top_architecture << indent(1) << "       done : out STD_LOGIC );\n";
   top_architecture << "end component;\n";
   top_architecture << "\n";
@@ -222,22 +181,10 @@ void SimVSSTarget :: frameCode() {
   top_configuration << indent(1) << "for all:" << galName;
   top_configuration << " use entity work." << galName;
   top_configuration << "(behavior); end for;\n";
-  if (needC2Vinteger) {
-    top_configuration << indent(1) << "for all:C2Vinteger use entity work.C2Vinteger";
-    top_configuration << "(CLI); end for;\n";
-  }
-  if (needV2Cinteger) {
-    top_configuration << indent(1) << "for all:V2Cinteger use entity work.V2Cinteger";
-    top_configuration << "(CLI); end for;\n";
-  }
-  if (needC2Vreal) {
-    top_configuration << indent(1) << "for all:C2Vreal use entity work.C2Vreal";
-    top_configuration << "(CLI); end for;\n";
-  }
-  if (needV2Creal) {
-    top_configuration << indent(1) << "for all:V2Creal use entity work.V2Creal";
-    top_configuration << "(CLI); end for;\n";
-  }
+  top_configuration << indent(1) << "for all:C2V use entity work.C2V";
+  top_configuration << "(CLI); end for;\n";
+  top_configuration << indent(1) << "for all:V2C use entity work.V2C";
+  top_configuration << "(CLI); end for;\n";
   top_configuration << "end for;\n";
   top_configuration << "end parts;\n";
 
@@ -263,136 +210,70 @@ void SimVSSTarget :: frameCode() {
 
 /////////////////////////////////////////////
   
-  if (needC2Vinteger) {
-    code << "\n
---C2Vinteger.vhdl
+  code << "\n
+--C2V.vhdl
 
 library SYNOPSYS,IEEE;
 use SYNOPSYS.ATTRIBUTES.all;
 use IEEE.STD_LOGIC_1164.all;
 
-entity C2Vinteger is
+entity C2V is
 	generic ( pairid	: INTEGER	;
 		  numxfer	: INTEGER	);
 	port	( go		: in STD_LOGIC	;
 		  data		: out INTEGER	;
 		  done		: out STD_LOGIC	);
-end C2Vinteger;
+end C2V;
 
-architecture CLI of C2Vinteger is
+architecture CLI of C2V is
 
 	attribute FOREIGN of CLI : architecture is \"Synopsys:CLI\";
 
-	attribute CLI_ELABORATE	of CLI	: architecture is \"c2vinteger_open\";
-	attribute CLI_EVALUATE	of CLI	: architecture is \"c2vinteger_eval\";
-	attribute CLI_ERROR	of CLI	: architecture is \"c2vinteger_error\";
-	attribute CLI_CLOSE	of CLI	: architecture is \"c2vinteger_close\";
+	attribute CLI_ELABORATE	of CLI	: architecture is \"c2v_open\";
+	attribute CLI_EVALUATE	of CLI	: architecture is \"c2v_eval\";
+	attribute CLI_ERROR	of CLI	: architecture is \"c2v_error\";
+	attribute CLI_CLOSE	of CLI	: architecture is \"c2v_close\";
 
 	attribute CLI_PIN	of go	: signal is CLI_ACTIVE;
+	attribute CLI_PIN	of data	: signal is CLI_PASSIVE;
+	attribute CLI_PIN	of done	: signal is CLI_PASSIVE;
 
 begin
 end;
 ";
-  }
 
-  if (needV2Cinteger) {
-    code << "\n
---V2Cinteger.vhdl
+  code << "\n
+--V2C.vhdl
 
 library SYNOPSYS,IEEE;
 use SYNOPSYS.ATTRIBUTES.all;
 use IEEE.STD_LOGIC_1164.all;
 
-entity V2Cinteger is
+entity V2C is
 	generic ( pairid	: INTEGER	;
 		  numxfer	: INTEGER	);
 	port	( go		: in STD_LOGIC	;
 		  data		: in INTEGER	;
 		  done		: out STD_LOGIC	);
-end V2Cinteger;
+end V2C;
 
-architecture CLI of V2Cinteger is
+architecture CLI of V2C is
 
 	attribute FOREIGN of CLI : architecture is \"Synopsys:CLI\";
 
-	attribute CLI_ELABORATE	of CLI	: architecture is \"v2cinteger_open\";
-	attribute CLI_EVALUATE	of CLI	: architecture is \"v2cinteger_eval\";
-	attribute CLI_ERROR	of CLI	: architecture is \"v2cinteger_error\";
-	attribute CLI_CLOSE	of CLI	: architecture is \"v2cinteger_close\";
+	attribute CLI_ELABORATE	of CLI	: architecture is \"v2c_open\";
+	attribute CLI_EVALUATE	of CLI	: architecture is \"v2c_eval\";
+	attribute CLI_ERROR	of CLI	: architecture is \"v2c_error\";
+	attribute CLI_CLOSE	of CLI	: architecture is \"v2c_close\";
 
 	attribute CLI_PIN	of go	: signal is CLI_ACTIVE;
+	attribute CLI_PIN	of done	: signal is CLI_PASSIVE;
 	attribute CLI_PIN	of data	: signal is CLI_PASSIVE;
 
 begin
 end;
 ";
-  }
-  
-  if (needC2Vreal) {
-    code << "\n
---C2Vreal.vhdl
 
-library SYNOPSYS,IEEE;
-use SYNOPSYS.ATTRIBUTES.all;
-use IEEE.STD_LOGIC_1164.all;
-
-entity C2Vreal is
-	generic ( pairid	: INTEGER	;
-		  numxfer	: INTEGER	);
-	port	( go		: in STD_LOGIC	;
-		  data		: out REAL	;
-		  done		: out STD_LOGIC	);
-end C2Vreal;
-
-architecture CLI of C2Vreal is
-
-	attribute FOREIGN of CLI : architecture is \"Synopsys:CLI\";
-
-	attribute CLI_ELABORATE	of CLI	: architecture is \"c2vreal_open\";
-	attribute CLI_EVALUATE	of CLI	: architecture is \"c2vreal_eval\";
-	attribute CLI_ERROR	of CLI	: architecture is \"c2vreal_error\";
-	attribute CLI_CLOSE	of CLI	: architecture is \"c2vreal_close\";
-
-	attribute CLI_PIN	of go	: signal is CLI_ACTIVE;
-
-begin
-end;
-";
-  }
-  
-  if (needV2Creal) {
-    code << "\n
---V2Creal.vhdl
-
-library SYNOPSYS,IEEE;
-use SYNOPSYS.ATTRIBUTES.all;
-use IEEE.STD_LOGIC_1164.all;
-
-entity V2Creal is
-	generic ( pairid	: INTEGER	;
-		  numxfer	: INTEGER	);
-	port	( go		: in STD_LOGIC	;
-		  data		: in REAL	;
-		  done		: out STD_LOGIC	);
-end V2Creal;
-
-architecture CLI of V2Creal is
-
-	attribute FOREIGN of CLI : architecture is \"Synopsys:CLI\";
-
-	attribute CLI_ELABORATE	of CLI	: architecture is \"v2creal_open\";
-	attribute CLI_EVALUATE	of CLI	: architecture is \"v2creal_eval\";
-	attribute CLI_ERROR	of CLI	: architecture is \"v2creal_error\";
-	attribute CLI_CLOSE	of CLI	: architecture is \"v2creal_close\";
-
-	attribute CLI_PIN	of go	: signal is CLI_ACTIVE;
-	attribute CLI_PIN	of data	: signal is CLI_PASSIVE;
-
-begin
-end;
-";
-  }
-  
   code << "\n" << top_uses;
   code << "\n" << entity_declaration;
   code << "\n" << architecture_body_opener;
@@ -404,9 +285,9 @@ end;
   code << "\n" << loopOpener;
   
   // myCode contains the main action of the main process
-//  code << preSynch;
+  code << preSynch;
   code << myCode;
-//  code << postSynch;
+  code << postSynch;
   
   code << "\n" << loopCloser;
   code << "\n" << architecture_body_closer;
@@ -426,9 +307,6 @@ end;
 // Write the code to a file.
 void SimVSSTarget :: writeCode() {
   writeFile(myCode,".vhdl",displayFlag);
-  if (writeCom) {
-    writeComFile();
-  }
 }
 
 // Write the command log to a file.
@@ -436,10 +314,10 @@ int SimVSSTarget :: compileCode() {
   if (int(analyze)) {
     // Generate the command to analyze the VHDL code here.
     StringList command = "";
-    command << "gvan -nc " << filePrefix << ".vhdl";
-    StringList error = "";
-    error << "Could not compile " << filePrefix << ".vhdl";
-    return (systemCall(command, error, targetHost) == 0);
+    command << "cd " << (const char*) destDirectory;
+    command << " ; ";
+    command << "gvan " << filePrefix << ".vhdl";
+    system(command);
   }
   // Return TRUE indicating success.
   return TRUE;
@@ -452,31 +330,25 @@ int SimVSSTarget :: runCode() {
     StringList command = "";
     StringList sysCommand = "";
     if (int(interactive)) {
-      command << "vhdldbx -nc " << filePrefix;
-      StringList error = "";
-      error << "Could not compile " << filePrefix << ".vhdl";
-      (void) systemCall(command, error, targetHost);
+      command << "cd " << (const char*) destDirectory;
+      command << " ; ";
+      command << "vhdldbx " << filePrefix;
+      system(command);
     }
     else {
       StringList comCode = "";
       comCode << "run\n";
       comCode << "quit\n";
       writeFile(comCode, ".com", 0);
-      command << "vhdlsim -nc -i " << filePrefix << ".com " << filePrefix;
-      StringList error = "";
-      error << "Could not simulate " << filePrefix << ".vhdl";
-      (void) systemCall(command, error, targetHost);
+      command << "cd " << (const char*) destDirectory;
+      command << " ; ";
+      command << "vhdlsim -i " << filePrefix << ".com " << filePrefix;
+      system(command);
     }
     sysCommand << "cd " << (const char*) destDirectory;
     sysCommand << " ; ";
     sysCommand << sysWrapup;
-    (void) system(sysCommand);
-    
-//    sysCommand << sysWrapup;
-//    StringList sysError = "";
-//    sysError << "Error performing sysWrapup, " << filePrefix << ".vhdl";
-// systemCall puts too much noise on the std output, esp. for xgraphs
-//    (void) systemCall(sysCommand, sysError, targetHost);
+    system(sysCommand);
   }  
   // Return TRUE indicating success.
   return TRUE;
@@ -640,26 +512,12 @@ void SimVSSTarget :: registerCompMap(StringList label, StringList name,
 }
 
 // Method called by C2V star to place important code into structure.
-void SimVSSTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
-  // Create a string with the right VHDL data type
-  StringList vtype = "";
-  StringList name = "";
-  if (strcmp(dtype, "INT") == 0) {
-    vtype = "INTEGER";
-    name = "C2Vinteger";
-    needC2Vinteger = 1;
-  }
-  else if (strcmp(dtype, "FLOAT") == 0) {
-    vtype = "REAL";
-    name = "C2Vreal";
-    needC2Vreal = 1;
-  }
-  else
-    Error::abortRun(*this, dtype, ": type not supported");
-  
+void SimVSSTarget :: registerC2V(int pairid, int numxfer) {
   // Construct unique label and signal names and put comp map in main list
   StringList label;
+  StringList name;
   StringList goName, dataName, doneName;
+  name = "C2V";
   StringList rootName = name;
   rootName << pairid;
 
@@ -682,7 +540,7 @@ void SimVSSTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
 
   // Also add to port list of main.
   mainPortList.put(goName, "OUT", "STD_LOGIC");
-  mainPortList.put(dataName, "IN", vtype);
+  mainPortList.put(dataName, "IN", "INTEGER");
   mainPortList.put(doneName, "IN", "STD_LOGIC");
   // Also add to port map list of main.
   mainPortMapList.put(goName, goName);
@@ -690,31 +548,17 @@ void SimVSSTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
   mainPortMapList.put(doneName, doneName);
   // Also add to signal list of top.
   topSignalList.put(goName, "STD_LOGIC", goName, goName);
-  topSignalList.put(dataName, vtype, dataName, dataName);
+  topSignalList.put(dataName, "INTEGER", dataName, dataName);
   topSignalList.put(doneName, "STD_LOGIC", doneName, doneName);
 }
 
 // Method called by V2C star to place important code into structure.
-void SimVSSTarget :: registerV2C(int pairid, int numxfer, const char* dtype) {
-  // Create a string with the right VHDL data type
-  StringList vtype = "";
-  StringList name = "";
-  if (strcmp(dtype, "INT") == 0) {
-    vtype = "INTEGER";
-    name = "V2Cinteger";
-    needV2Cinteger = 1;
-  }
-  else if (strcmp(dtype, "FLOAT") == 0) {
-    vtype = "REAL";
-    name = "V2Creal";
-    needV2Creal = 1;
-  }
-  else
-    Error::abortRun(*this, dtype, ": type not supported");
-  
+void SimVSSTarget :: registerV2C(int pairid, int numxfer) {
   // Construct unique label and signal names and put comp map in main list
   StringList label;
+  StringList name;
   StringList goName, dataName, doneName;
+  name = "V2C";
   StringList rootName = name;
   rootName << pairid;
 
@@ -737,7 +581,7 @@ void SimVSSTarget :: registerV2C(int pairid, int numxfer, const char* dtype) {
 
   // Also add to port list of main.
   mainPortList.put(goName, "OUT", "STD_LOGIC");
-  mainPortList.put(dataName, "OUT", vtype);
+  mainPortList.put(dataName, "OUT", "INTEGER");
   mainPortList.put(doneName, "IN", "STD_LOGIC");
   // Also add to port map list of main.
   mainPortMapList.put(goName, goName);
@@ -745,20 +589,6 @@ void SimVSSTarget :: registerV2C(int pairid, int numxfer, const char* dtype) {
   mainPortMapList.put(doneName, doneName);
   // Also add to signal list of top.
   topSignalList.put(goName, "STD_LOGIC", goName, goName);
-  topSignalList.put(dataName, vtype, dataName, dataName);
+  topSignalList.put(dataName, "INTEGER", dataName, dataName);
   topSignalList.put(doneName, "STD_LOGIC", doneName, doneName);
-}
-
-// Method to write out com file for VSS if needed.
-void SimVSSTarget :: setWriteCom() {
-  writeCom = 1;
-}
-
-// Method to write out com file for VSS if needed.
-void SimVSSTarget :: writeComFile() {
-  // Make sure to do the com file uniquely too!!!
-  StringList comCode = "";
-  comCode << "run\n";
-  comCode << "quit\n";
-  writeFile(comCode, ".com", 0);
 }

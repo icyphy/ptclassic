@@ -10,12 +10,7 @@ coefficients with "<fileName".
 	}
 	version {$Id$}
 	author { Soonhoi Ha }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { CGC main library }
 	explanation {
 .pp
@@ -115,7 +110,7 @@ For more information about polyphase filters, see F. J. Harris,
 		default {0}
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
-	setup {
+	start {
 		int d = decimation;
 		int i = interpolation;
 		int dP = decimationPhase;
@@ -135,53 +130,69 @@ For more information about polyphase filters, see F. J. Harris,
 
    codeblock(bodyDecl) {
 	int phase, tapsIndex, inC, i;
-	int outCount = $val(interpolation) - 1;
+	int outCount = 0;
 	int inPos;
 	double out, tap;
    }
-   codeblock(body) {
+   codeblock(outForInit) {
 	/* phase keeps track of which phase of the filter coefficients is used.
 	   Starting phase depends on the decimationPhase state. */
 	phase = $val(decimation) - $val(decimationPhase) - 1;   
 	
 	/* Iterate once for each input consumed */
-	for (inC = 1; inC <= $val(decimation) ; inC++) {
-
+	for (inC = 0; inC < $val(decimation); inC++) 
+   }
+   codeblock(whileInit) {
 		/* Produce however many outputs are required for each 
 		   input consumed */
-		while (phase < $val(interpolation)) {
+		while (phase < $val(interpolation)) 
+   }
+   codeblock(inForInit) {
 			out = 0.0;
-
 			/* Compute the inner product. */
-			for (i = 0; i < $val(phaseLength); i++) {
+			for (i = 0; i < $val(phaseLength); i++) 
+   }
+   codeblock(inForBody) {
 				tapsIndex = i * $val(interpolation) + phase;
 				if (tapsIndex >= $val(tapSize))
 			    		tap = 0.0;
 				else
 			 		tap = $ref2(taps,tapsIndex);
-				inPos = $val(decimation) - inC + i;
+				inPos = inC + i;
 				out += tap * $ref2(signalIn,inPos);
-			}
+   }
+  codeblock(whileBody) {
 			$ref2(signalOut,outCount) = out;
-			outCount--;;
+			outCount++;;
 			phase += $val(decimation);
-		}
+   }
+   codeblock(outForBody) {
 		phase -= $val(interpolation);
-	}
    }
 	go {
-		addCode(bodyDecl);
-		addCode(body);
+		gencode(bodyDecl);
+		// hackery since the code block does not allow curse brace.
+		filterBody();
 	}
-	exectime {
-		int x = taps.size();
-		int i = interpolation;
-		int d = decimation;
-		if (x % i != 0) x = x/i + 1;
-		else x = x/i;
-		int y = i/d;
-		if (i % d != 0) y++;
-		/* count of elementary operations */
-		return 1 + y * (6 + x * 6);	
+
+	method {
+		name { filterBody }
+		access { protected }
+		arglist { "()" }
+		type { void }
+		code {
+			gencode(outForInit);
+			gencode(CodeBlock("\t{\n"));
+			gencode(whileInit);
+			gencode(CodeBlock("\t\t{\n"));
+			gencode(inForInit);
+			gencode(CodeBlock("\t\t\t{\n"));
+			gencode(inForBody);
+			gencode(CodeBlock("\t\t\t}\n"));
+			gencode(whileBody);
+			gencode(CodeBlock("\t\t}\n"));
+			gencode(outForBody);
+			gencode(CodeBlock("\t}\n"));
+		}
 	}
 }

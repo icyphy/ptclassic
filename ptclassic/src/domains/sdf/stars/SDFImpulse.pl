@@ -1,20 +1,22 @@
+ident {
+// $Id$
+// This star produces an impulse or impulse train.
+// From the gabriel "impulse" star.
+// Programmer: J. Buck
+// Date of creation: 5/31
+// Converted to use preprocessor: 10/3/90
+
+// Copyright (c) 1990 The Regents of the University of California.
+//			All Rights Reserved.
+}
 defstar {
-	name { Impulse }
+	name { FloatImpulse }
 	domain { SDF }
 	desc {
-Generate a stream of impulses of size "level" (default 1.0).
-The period is given by "period" (default 0).
-If period = 0 then only one impulse is generated.
+		"Generates an impulse stream of size 'level' (default 1.0).\n"
+		"with period 'period' (default 0).\n"
+		"If period=0 then only one impulse is generated."
 	}
-	version {$Id$}
-	author { J. T. Buck }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { SDF main library }
 	output {
 		name { output }
 		type { float }
@@ -23,20 +25,19 @@ limitation of liability, and disclaimer of warranty provisions.
 		name { level }
 		type { float }
 		default { 1.0 }
-		desc { The height of the impulse. }
+		desc { "height of impulse" }
 	}
 	defstate {
 		name { period }
 		type { int }
 		default { 0 }
-		desc { The period of the impulse train, 0 = aperiodic. }
+		desc { "period of impulse train, 0 = aperiodic" }
 	}
 	defstate {
 		name { count }
 		type { int }
 		default { 0 }
-		desc { An internal state. }
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
+		desc { "internal" }
 	}
 	go {
 		double t = 0.0;

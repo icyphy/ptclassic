@@ -1,5 +1,5 @@
-#ifndef _HierScheduler_h
-#define _HierScheduler_h
+#ifndef _MultiScheduler_h
+#define _MultiScheduler_h
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -9,19 +9,19 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -30,50 +30,48 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+				ov			COPYRIGHTENDKEY
 
 Programmer: Jose Luis Pino
 
 *****************************************************************/
 
 #include "ParScheduler.h"
-#include "DynamicGalaxy.h"
+#include "CGCluster.h"
 
-class HierScheduler : public ParScheduler {
+class MultiScheduler : public ParScheduler {
 public:
-    HierScheduler(MultiTarget* t, const char* log, ParScheduler& top):
-    ParScheduler(t, log), topScheduler(top){};
+    MultiScheduler(MultiTarget* t, const char* log, ParScheduler& top):
+    ParScheduler(t, log), topScheduler(top) {};
 
-    ~HierScheduler();
+    ~MultiScheduler() { LOG_DEL; delete topCluster; }
 
     /*virtual*/ void setup();
 
     // Pass through functions
     
-    /*virtual*/ int run();
+    /*virtual*/ int run() { return topCluster->run(); }
 
-    /*virtual*/ ParProcessors* setUpProcs(int);
-
-    /*virtual*/ void setStopTime(double);
+    /*virtual*/ void setUpProcs(int num) { topScheduler.setUpProcs(num); }
+    /*virtual*/ void setStopTime(double limit) {
+	topCluster->setStopTime(limit);
+    }
     
-    /*virtual*/ double getStopTime();
+    /*virtual*/ double getStopTime() {
+	return topCluster->getStopTime();
+    }
 
-    /*virtual*/ StringList displaySchedule();
+    /*virtual*/ StringList displaySchedule() {
+	StringList schedule;
+	if (topCluster) schedule << topCluster->displaySchedule();
+	return schedule;
+    }
 
-    /*virtual*/ void compileRun();
-
-    /*virtual*/ int dagNodes() const;
-
-    /*virtual*/ void writeGantt(ostream& o) { topScheduler.writeGantt(o); }
-
-    /*virtual*/ ParGraph* myEG() {return topScheduler.myEG();}
+    /*virtual*/ void compileRun() { /*topCluster->compileRun();*/ }
 
 private:
-    DynamicGalaxy wormholes;
+    CGCluster* topCluster;
     ParScheduler& topScheduler;
-    int sdfStars;
 };
 
 #endif

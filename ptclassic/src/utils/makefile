@@ -1,20 +1,20 @@
-# Makefile for Ptolemy utilities.
+# Makefile for utils
 
 # Version Identification:
-# @(#)$Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# $Id$
+# Copyright (c) 1994 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that the
-# above copyright notice and the following two paragraphs appear in all
-# copies of this software.
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
 # 
-# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
 # SUCH DAMAGE.
 # 
 # THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -23,31 +23,26 @@
 # PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 # CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 # ENHANCEMENTS, OR MODIFICATIONS.
-# 
-# 						PT_COPYRIGHT_VERSION_2
-# 						COPYRIGHTENDKEY
 
 # Important!  Do not run this makefile while in ~ptolemy/src/utils.  Instead
-# run in from ~ptolemy/obj.$PTARCH (through the symbolic link) -- that
+# run in from ~ptolemy/obj.$ARCH (through the symbolic link) -- that
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
 
-DIRS = libcephes libexttools libgslider libptmatlab libptmathematica \
-       ptplay rman-2.4 tkman-1.7.3
-
-# Need to have $PTOLEMY as an absolute pathname for wish
-#PTOLEMY = ../..
+DIRS = libgslider
+PTOLEMY = ../..
 
 MAKEVARS =	\
-		"PTARCH=$(PTARCH)" 
+		"ARCH=$(ARCH)" 
 
-all install clean realclean sources depend checkjunk sccsinfo:
-	@for x in $(DIRS); do \
-	    if [ -w $$x ] ; then \
-		cd $$x ; \
-		echo making $@ in utils/$$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/utils/$$x $@ ;\
-	 	cd .. ; \
-	    fi ; \
-	done
+all install clean realclean check sources:
+	 @for x in $(DIRS); do \
+	 	cd $$x ; \
+		echo making $@ in filters/$$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) PTOLEMY=../../.. VPATH=../../../src/utils/$$x $@ ;\
+	  	cd .. ; \
+	 done
+
+sccsinfo:
+		sccs info

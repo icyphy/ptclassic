@@ -1,8 +1,6 @@
 static const char file_id[] = "Decoder.cc";
 
 /*
-Viterbi Decoder
-
 Version identification:
 $Id$
 
@@ -64,8 +62,7 @@ float Decoder::BM( int xsym, int I, int Q ) {
   float Dist = sqdist( XmitI, NormI ) + sqdist( XmitQ, NormQ );
   return Dist;
 }
-
-/* Do ACS */
+				/* Do ACS */
 void Decoder::DoACS( int I, int Q ) {
   int state;
   float* NewState;
@@ -100,7 +97,7 @@ void Decoder::DoACS( int I, int Q ) {
   }
 }
 
-/* Do traceback.  Also update PathIndex */
+				/* Do traceback.  Also update PathIndex */
 int Decoder::TraceBack() {
   int pi = PathIndex;
   int step;
@@ -111,17 +108,20 @@ int Decoder::TraceBack() {
   for( step = 0; step < 64; step++ ) {
     pi &= 0x3f;			/* ring buffer size 64 */
     state = Path[ pi-- ][ state ]; 
-  }
-  return state & 1;		/* LSB of state is info bit */
+ }
+
+				/* LSB of state is info bit */
+  return state & 1;
 }
 
-/* Find the minimum state metric.  Subtract this from all */
-/* the metrics.  This is *not* the most efficient way to */
-/* normalize, it's the most basic. */
-/* StateMetricIndex is flipped here also. */
+				/* Find the minimum state metric.  Subtract this from all */
+				/* the metrics.  This is *not* the most efficient way to */
+				/* normalize, it's the most basic. */
+				/* StateMetricIndex is flipped here also. */
 void Decoder::Normalize() {
-  float* NewState;
   int state;
+  float* NewState;
+  float MinMetric;
 
   if( StateMetricIndex == 0 ) {
     NewState = StateMetric[ 0 ];
@@ -132,15 +132,19 @@ void Decoder::Normalize() {
     StateMetricIndex = 0;
   }
 
-  float MinMetric = NewState[0];
-  for( state = 1; state < 64; state++ ) {
-    MinMetric = ( NewState[ state ] < MinMetric ) ?
-		NewState[ state ] : MinMetric;
+  for( state = 0; state < 64; state++ ) {
+    if( state == 0 )
+      MinMetric = NewState[ state ];
+    else {
+      MinMetric = ( NewState[ state ] < MinMetric ) ? 
+	NewState[ state ] : MinMetric;
+    }
   }
 
   for( state = 0; state < 64; state++ )
     NewState[ state ] -= MinMetric;
 }
+
 
 int Decoder::operator() ( int I, int Q ) {
   DoACS( I, Q );
@@ -148,3 +152,4 @@ int Decoder::operator() ( int I, int Q ) {
   Normalize();
   return out;
 }
+

@@ -3,20 +3,10 @@ defstar
     name { Synchronize }
     derivedFrom { RealTimeStar }
     domain { DE }
-    descriptor {
-Input events are held until the time elapsed on the
-system clock since the start of the simulation
-is greater than or equal to their time stamp.
-Then they are passed to the output.
-    }
+    descriptor { Synchronize clocks before passing data. }
     version { $Id$ }
     author { T.M. Parks }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+    copyright { 1991 The Regents of the University of California. }
     location { DE main library }
 
     input
@@ -33,6 +23,6 @@ limitation of liability, and disclaimer of warranty provisions.
 
     go
     {
-	if (input.dataNew) output.put(arrivalTime) = input.get();
+	output.put(arrivalTime) = input.get();
     }
 }

@@ -1,12 +1,7 @@
-defstar {
+ defstar {
 	name { MaxMin }
 	domain { SDF }
-	desc {
-Finds maximum or minimum, value or magnitude, of a fixed number of data
-values on the input.  If you want to use this star to operate over
-multiple data streams, then preceed this star with a Commutator and
-set the state N accordingly.
-	}
+	desc { Finds maximum or minimum, value or magnitude. }
 	version { $Id$ }
 	author { Brian L. Evans }
 	acknowledge { Chih-Tsung Huang }
@@ -68,7 +63,7 @@ This star is based on the MaxMin star in the CG56 domain.
 	}    
 
 	code {
-#define FABS(a)	( ((a) > 0.0) ? (a) : -(a) )
+#define FABS(a)	( (a > 0.0) ? (a) : -(a) )
 	}
 
 	setup {
@@ -92,7 +87,7 @@ This star is based on the MaxMin star in the CG56 domain.
 		while ( i-- ) {
 		    double current = double(input%i);
 		    double currentCmp = cmpMagFlag ? FABS(current) : current;
-		    int minChangeFlag = ( currentCmp < valueCmp );
+		    int minChangeFlag = ( currentCmp > valueCmp );
 		    // Logical exclusive OR between maxflag and minChangeFlag
 		    // but we cannot use the bitwise xor ^
 		    if ( (maxflag && !minChangeFlag) ||
@@ -108,10 +103,7 @@ This star is based on the MaxMin star in the CG56 domain.
 		    value = FABS(value);
 		}
 
-		// Send the maximum/minimum value to the output port
 		output%0 << value;
-
-		// Adjust the index due to the LIFO nature of input data
-		index%0 << ( int(N) - valueIndex - 1);
+		index%0 << valueIndex;
 	}
 }

@@ -1,118 +1,57 @@
-static const char file_id[] = "expandPath.cc";
 /**************************************************************************
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
 
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
-
- Programmer:  J. T. Buck, Jose Luis Pino
+ Programmer:  J. T. Buck
  Date of creation: 6/10/90
 
-Routine to expand a pathname.  It returns the result of savestring applied
-to the expanded path name.  The savestring routine allocates a new dynamic
-string via the new operator.
+Routine to expand a pathname
+warning: may return a pointer to a static buffer; a second
+call may over-write this buffer.
 
-The prototype declaration of the expandPathName function is defined in
-miscFuncs.h.  The expandPathName function should return the same data
-type as savestring does, char*, but it does not.
-
-The pathname may begin with ~, ~user, or $var where var is an environment
-variable.  Variables are expanded only at the beginning of the string.
+This is almost plain C except for calling errorHandler.error
 
 **************************************************************************/
 
 #include <pwd.h>
-#include "Error.h"
-#include "Tokenizer.h"
-#include "StringList.h"
-#define MAXSTRINGLEN 4096
+#include <std.h>
+#include "Output.h"
+#define MAXLEN 256
 
-char* expandPathName(const char* name) {
-    // Allow file name to expand to an arbitrary length
-    StringList expandedPath;
-    expandedPath.initialize();
+extern Error errorHandler;
 
-    // Parse file name using Tokenizer class
-    // '#' is default Tokenizer comment char which is a valid file name char
-    const char* specialChars = "~/$";	// separators
-    const char* whitespace = "\r";	// allow TABS and SPACES in file name
-    Tokenizer lexer(name, specialChars, whitespace);
-    lexer.setCommentChar('\n');		// override default comment char '#'
+const char*
+expandPathName(const char* name) {
+	static char buf[MAXLEN];
+	if (*name != '~') return name;
 
-    while(!lexer.eof()) {
-	char tokbuf[MAXSTRINGLEN];
-	lexer >> tokbuf;
-	char c = tokbuf[0];
-	if (c != 0 && tokbuf[1]) c = 0;
-	switch (c) {
-	case '~' : {
-	    // we only expand the first tilda
-	    if (expandedPath.numPieces() != 0) {
-		expandedPath << '~';
-		break;
-	    }
-
-	    // next token might be user name or /.
-	    lexer >> tokbuf;
-	    passwd* pwd;
-	    if (tokbuf[0] == '/') {
+	const char* pslash = index (name, '/');
+	if (pslash == NULL) pslash = name + strlen(name);
+	passwd* pwd;
+	if (pslash == name + 1) {
 		pwd = getpwuid(getuid());
 		if (pwd == 0) {
-		    Error::abortRun ("getpwuid doesn't know you!");
-		    exit (1);
+			errorHandler.error ("getpwuid doesn't know you!");
+			exit (1);
 		}
-		expandedPath << pwd->pw_dir << '/';
-	    }
-	    else {
-		pwd = getpwnam(tokbuf);
-		if (pwd == 0)
-		    expandedPath << tokbuf;
-		else
-		    expandedPath << pwd->pw_dir;
-	    }
-	    break;
-	}    
-	case '/' : {
-	    expandedPath << '/';
-	    break;
 	}
-	case '$' : {
-	    // next token might be an environment variable
-	    lexer >> tokbuf;
-	    const char* value = getenv (tokbuf);
-	    if (!value)
-		expandedPath << '$' << tokbuf;
-	    else
-		expandedPath << value;
-	    break;
+	else {
+		int l = pslash - name - 1;
+		strncpy (buf, name + 1, l);
+		buf[l] = 0;
+		pwd = getpwnam(buf);
+		if (pwd == 0) return name;
 	}
-	default: {
-	    expandedPath << tokbuf;
-	}
-	}
-    }
-    return savestring(expandedPath);
+	// Put in the home directory
+	strcpy (buf, pwd->pw_dir);
+
+	// add the rest of the name
+	strcat (buf, pslash);
+	return buf;
 }
+
+
+	

@@ -2,52 +2,32 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+ Copyright (c) 1991 The Regents of the University of California.
+                       All Rights Reserved.
 
  Programmer:  Soonhoi Ha, based on S.  Bhattacharyya's code.
  
 *******************************************************************/
 
-#ifndef _EGGate_h
-#define _EGGate_h
+#ifndef _EGConnect_h
+#define _EGConnect_h
 #ifdef __GNUG__
 #pragma interface
 #endif
 
 #include "DoubleLink.h"
 #include "StringList.h"
-#include "PortHole.h"
+#include "Connect.h"
+
+#define EGNode EGMaster
 
 class EGGateLink;
 class EGNode;
-class DataFlowStar;
+class SDFStar;
 
 ///////////////////////////////////////////////////////////////
 //
-// EGGate.h
+// EGConnect.h
 //
 // Dataflow is maintained by Gate's and Arc's. Each ExpandedGraph 
 // node has a list of ancestors and descendants -- these are lists 
@@ -66,6 +46,13 @@ class DataFlowStar;
 // reside in ancestor and descendant lists of  EGNode's.
 
 class EGArc {
+private :
+	// The number of samples passed along the arc.
+	int arc_samples;
+
+	// The delay on the arc.
+	int arc_delay;
+
 public :
 	// Constructor with the number of samples and delay
 	// to be placed on the arc.
@@ -79,13 +66,6 @@ public :
 
 	// Add x samples to the arc.
 	void addSamples(int x) { arc_samples+=x; }
-
-private :
-	// The number of samples passed along the arc.
-	int arc_samples;
-
-	// The delay on the arc.
-	int arc_delay;
 };
 
 ////////////////////////
@@ -97,20 +77,37 @@ private :
 //
 
 class EGGate {
+private:
+	// the EG node for which this is a gate.
+	EGNode *parent;
+
+	// the arc which connects this gate to a gate in another node
+	EGArc *arc;
+
+	// a pointer to the far end gate, accross the arc
+	EGGate *far;
+
+	// pointer to my link
+	EGGateLink* myLink;
+
+	// pointer to the original porthole aliased from.
+	PortHole* pPort;
+
+	// Since a PortHole in the original block may need multiple
+	// Gates in the corresponding EGNode, we maintain the index
+	// of each Gate, which represents the order of the Gates 
+	// associated with the same PortHole
+	int index;
+
 public:
 	EGGate(EGNode* n, PortHole* p = 0) : 
-		parent(n), arc(0), far(0), pPort(p){}
+		parent(n), pPort(p), arc(0), far(0) {}
  
-	virtual ~EGGate();
+	// disconnect this node & it's far end node, and deallocate them.
+	void removeMyArc();
 
-	// input or output?
-	int isItInput() { return pPort->isItInput(); }
-
-	// readName
-	const char* name() const { return pPort->name(); }
-
-	// hide me from the node
-	void hideMe(int flag = 0);
+	// remove myself
+	void removeMe();
 
 	//  a pointer to the far end node
 	EGNode* farEndNode() 
@@ -124,14 +121,11 @@ public:
 	void setProperty(PortHole* p, int i) 
 		{ pPort = p; index = i; }
 
-	// return the aliased porthole
-	const PortHole* aliasedPort() { return pPort; }
-
 	// print the information associated with this arc
 	StringList printMe();
 
 	// the master on the far end of this arc
-	DataFlowStar *farEndMaster();
+	SDFStar *farEndMaster();
 
 	// set link pointer
 	void setLink(EGGateLink* p) { myLink = p; }
@@ -154,28 +148,6 @@ public:
 
 	// allocate & set up an arc between this gate and "dest"
 	void allocateArc(EGGate *dest,int no_samples,int no_delays);
-
-private:
-	// the EG node for which this is a gate.
-	EGNode *parent;
-
-	// the arc which connects this gate to a gate in another node
-	EGArc *arc;
-
-	// a pointer to the far end gate, accross the arc
-	EGGate *far;
-
-	// pointer to my link
-	EGGateLink* myLink;
-
-	// pointer to the original porthole aliased from.
-	PortHole* pPort;
-
-	// Since a PortHole in the original block may need multiple
-	// Gates in the corresponding EGNode, we maintain the index
-	// of each Gate, which represents the order of the Gates 
-	// associated with the same PortHole
-	int index;
 };   
 
 class EGGateList;
@@ -187,16 +159,16 @@ class EGGateList;
 class EGGateLink : public DoubleLink
 {
 friend class EGGateList;
+
+private:
+	EGGateList* myList;
 public:
-	EGGate* gate() { return (EGGate*) e; }
+	EGGate* myNode() { return (EGGate*) e; }
 	EGGateLink* nextLink() { return (EGGateLink*) next; }
 
 	EGGateLink(EGGate* e) : DoubleLink(e), myList(0) {}
 
 	void removeMeFromList();
-
-private:
-	EGGateList* myList;
 };
 
 //////////////////////////
@@ -208,13 +180,21 @@ private:
 // graph.
 //
 // The following ordering is maintained in precedence lists : entries for the
-// same EGNode occur together (one after another), and they occur in
+// same EGMaster occur together (one after another), and they occur in
 // order of increasing invocation number. Entries for the same invocation 
 // occur in increasing order of the number of delays on the arc.
 //
 
 class EGGateList : public DoubleLinkList
 {
+private:
+	// Search the list for the first entry pointing to "master"   
+	EGGate* findMaster(SDFStar *master);
+
+	// Search the list for the point where "node" should be inserted
+	// into the list.
+	EGGateLink* findInsertPosition(EGNode *n, int delay, int& ret);
+
 public:
 	DoubleLink* createLink(EGGate* e)
 		{ INC_LOG_NEW; EGGateLink* tmp = new EGGateLink(e);
@@ -241,14 +221,6 @@ public:
 
 	// print out the list
 	StringList printMe();
-
-private:
-	// Search the list for the first entry pointing to "master"   
-	EGGate* findMaster(DataFlowStar *master);
-
-	// Search the list for the point where "node" should be inserted
-	// into the list.
-	EGGateLink* findInsertPosition(EGNode *n, int delay, int& ret);
 };
 
 /////////////////////////////////////
@@ -259,20 +231,20 @@ private:
 //
 
 class EGGateLinkIter : public DoubleLinkIter {
+private:
+	SDFStar* refMaster;
+	
 public:
 	EGGateLinkIter(const EGGateList& l) : 
 		DoubleLinkIter(l), refMaster(0) {}
 	EGGate *next() {return (EGGate*) DoubleLinkIter::next();}
  
-	EGGate *operator++ (POSTFIX_OP) {return next();}
+	EGGate *operator++ () {return next();}
 	void reset() { DoubleLinkIter :: reset(); refMaster = 0; }
 
 	// return the next gate connected to a new master that is not
 	// the same as the argument master.
-	EGGate* nextMaster(DataFlowStar*);
-
-private:
-	DataFlowStar* refMaster;
+	EGGate* nextMaster(SDFStar*);
 };
 
 #endif

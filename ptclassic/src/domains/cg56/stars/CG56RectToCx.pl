@@ -5,9 +5,9 @@ defstar {
 	version {$Id$}
 	author { Jose Luis Pino }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1993 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 main library }
@@ -28,9 +28,9 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { COMPLEX }
 	}
 	codeblock (convert) {
-	move 	$ref(real),x1
-	move 	$ref(imag),x0
-	move 	x,L:$addr(output)
+	move $ref(real),a1
+	move $ref(imag),a0
+	move a,L:$addr(output)
 	}
 	go {
 		addCode(convert);

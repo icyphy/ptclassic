@@ -4,12 +4,7 @@ defstar {
 	desc { Outputs the exponential function of the input. }
 	version { $Id$ }
 	author { E. A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1992 The Regents of the University of California }
 	location { CGC nonlinear library }
 	explanation {
 \fBBugs:\fR Overflow is not handled well.
@@ -35,7 +30,4 @@ limitation of liability, and disclaimer of warranty provisions.
    codeblock(exp) {
 	$ref(output) = exp($ref(input));
    }
-	exectime {
-		return 33;  /* use the same value as log */
-	}
 }

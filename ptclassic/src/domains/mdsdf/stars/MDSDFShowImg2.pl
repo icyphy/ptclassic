@@ -1,10 +1,10 @@
 defstar {
-  name		{ ShowImg2 }
+  name		{ DisplayImage2 }
   domain	{ MDSDF }
   version	{ $Id$ }
   author	{ J. Buck & Paul Haskell, modified for MDSDF by Mike J. Chen }
   copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -17,7 +17,7 @@ output in PGM format. Send the output to a user-specified command
 .EQ
 delim off
 .EN
-"xv"
+"$PTOLEMY/bin.$ARCH/xv"
 .EQ
 delim $$
 .EN
@@ -62,7 +62,7 @@ complete filename of the displayed image.
   defstate {
     name { command }
     type { string }
-    default { "xv" }
+    default { "$PTOLEMY/bin.$ARCH/xv" }
     desc { Program to run on PGM data }
   }
   defstate {
@@ -94,35 +94,36 @@ complete filename of the displayed image.
     const char* saveMe = saveImage;
     int del = !((saveMe[0] == 'y') || (saveMe[0] == 'Y'));
 
-    const char* iname = imageName;
-    char* nm = 0;
-    if (iname && *iname) {
-      nm = expandPathName(iname);
+    char fileName[256]; fileName[0] = '\000';
+    if ((const char*) imageName) {
+      strcpy(fileName, (const char*) imageName);
     }
-    else {
-      nm = tempFileName();
+    if (fileName[0] == '\000') {
+      char* nm = tempFileName();
+      strcpy(fileName, nm);
+      LOG_DEL; delete nm;
     }
-    StringList fileName = nm;
-    fileName << "." << frame;
-    delete [] nm;
+    char numstr[16];
+    sprintf(numstr, ".%d", frame);
+    strcat(fileName, numstr);
 
-    FILE* fp = fopen(fileName, "w");
-    if (fp == 0) {
-      Error::abortRun(*this, "cannot open '", fileName, "' for writing.");
+    FILE* fptr = fopen(fileName, "w");
+    if (fptr == (FILE*) NULL) {
+      Error::abortRun(*this, "can not create: ", fileName);
       delete image;
       delete frameId;
       return;
     }
 
     // Write the PGM header and the data, and then run.
-    fprintf(fp, "P5\n %d %d 255\n", int(width), int(height));
+    fprintf (fptr, "P5\n %d %d 255\n", int(width), int(height));
 
     // Reverse of the hack used in ReadImage, first copy the data to
     // a buffer of the unsigned char's, then do a block fwrite
     unsigned int size = int(width) * int(height);
     unsigned char* buffer = new unsigned char[size];
     unsigned char* p = buffer;
-    for(unsigned int i = 0; i < size; i++) {
+    for(int i = 0; i < size; i++) {
       // limit range to be between 0 and 255
       double tmp = image->entry(i);
       if(tmp < 0)
@@ -132,22 +133,20 @@ complete filename of the displayed image.
       else
         *p++ = (unsigned char)tmp;
     }
-    fwrite( (const char*) buffer,
-    	    sizeof(unsigned char) * int(width),
-	    int(height),
-	    fp );
-    fclose(fp);
-    delete [] buffer;
 
-    StringList cmdbuf = "(";
-    cmdbuf << (const char*) command << " " << fileName;
+    fwrite((const char*)buffer, sizeof(unsigned char), size, fptr);
+    fclose(fptr);
+    delete[] buffer;
+
+    char cmdbuf[256];
+    sprintf (cmdbuf, "(%s %s", (const char*) command, fileName);
     if (del) {
-      cmdbuf << "; rm -f " << fileName;
+      strcat (cmdbuf, "; rm -f ");
+      strcat (cmdbuf, fileName);
     }
-    cmdbuf << ")&"; 			// Run command in the background
-    system(cmdbuf);
-
+    strcat (cmdbuf, ")&");		// Run command in the background
+    system (cmdbuf);
     delete image;
     delete frameId;
   } // end go{}
-} // end defstar { ShowImg2 }
+} // end defstar { DisplayImage2 }

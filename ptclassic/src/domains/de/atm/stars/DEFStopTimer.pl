@@ -3,30 +3,25 @@ defstar {
 	domain { DE }
 	desc {
 Generates an output at the stopTime of the
-.c DEScheduler
-under which this block is running.
+DEScheduler under which this block is running.
 	}
 
 	version {$Id$}
 	author { Allen Lao }
 	copyright { 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
-	location { DE ATM library }
+	location { ATM demo library }
 
 	explanation {
-This block generates an output at the stopTime of the
-.c DEScheduler
-controlling the block.  It is useful for clocking the input of the
-.c Sampler
+This block generates an output at the stopTime of the DEScheduler controlling 
+the block.  It is useful for clocking the input of the Sampler
 or statistical Blocks in order to observe their final outputs at the end
 of the simulation. It generates a float output instead of an int output
-like the 
-.c DEStopTimer
-in the standard DE star library.
+like the DEStopTimer in the standard DE star library.
 	}
 	input {
 		name { input }

@@ -7,12 +7,7 @@ Set truncationDepth larger than the number of output samples of interest.
 	}
 	version {$Id$}
 	author { E. A. Lee and K. White}
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { SDF dsp library }
 	explanation {
 This star convolves two causal finite input sequences.
@@ -21,7 +16,7 @@ depth larger than the number of output samples of interest.
 If it is smaller, you will get unexpected results after truncationDepth
 samples.
 	}
-	seealso { FIR, FIRCx, blockFIR, firDemo }
+	seealso { FIR, ComplexFIR, blockFIR, firDemo }
 	input {
 		name {inA}
 		type {float}
@@ -47,7 +42,7 @@ samples.
 		desc {Count current iteration. }
 		attributes { A_NONCONSTANT | A_NONSETTABLE }
 	}
-	setup {
+	start {
 		inA.setSDFParams(1, int(truncationDepth));
 		inB.setSDFParams(1, int(truncationDepth));
 	}
@@ -57,7 +52,7 @@ samples.
 	    for (int k = 0; k < int(truncationDepth); k++) {
 		int index = c-k;
 		if (index < 0) index += int(truncationDepth);
-		sum += double(inA%(index))*double(inB%(k));
+		sum += float(inA%(index))*float(inB%(k));
 	    }
 	    out%(0) << sum;
 	    if (c >= int(truncationDepth) - 1) iterationCount = 0;

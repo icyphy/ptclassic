@@ -3,20 +3,18 @@ defstar {
     domain {SDF}
     derivedFrom { TkShowValues }
     desc {
-Display the values of the inputs in a separate window,
+Displays the values of the inputs in a separate window,
 keeping a specified number of past values in view.
-The print method of the input particles is used, so any data
-type can be handled.
     }
     version { $Id$ }
     author { E. A. Lee }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1993 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { SDF Tcl/Tk library }
+    location { SDF tcltk library }
     explanation {
 This star uses the "print()" method of the input particles to create
 the display.
@@ -36,11 +34,34 @@ complex particles.
             Error::abortRun(*this, "Outputs not supported");
             return;
         }
-    }
-    begin {
         tcl_file = "$PTOLEMY/src/domains/sdf/tcltk/stars/tkText.tcl";
 
-        SDFTclScript::begin();
+        // For now, we pass the relevant parameter values to tcl
+        // by setting global variables.  We need a better way.
+        sprintf(buf,"%d",input.numberPorts());
+        if((Tcl_SetVar(ptkInterp,"numInputs",buf,TCL_GLOBAL_ONLY) == NULL)
+        || (Tcl_SetVar(ptkInterp,"label",label,TCL_GLOBAL_ONLY) == NULL)) {
+            Error::abortRun(*this,"Failed to set parameter values for tcl");
+            return;
+        }
+        if(int(put_in_control_panel)) {
+           Tcl_SetVar(ptkInterp,"putInCntrPan","1",TCL_GLOBAL_ONLY);
+        } else {
+           Tcl_SetVar(ptkInterp,"putInCntrPan","0",TCL_GLOBAL_ONLY);
+        }
+        if(int(wait_between_outputs)) {
+           Tcl_SetVar(ptkInterp,"waitBetweenOutputs","1",TCL_GLOBAL_ONLY);
+        } else {
+           Tcl_SetVar(ptkInterp,"waitBetweenOutputs","0",TCL_GLOBAL_ONLY);
+        }
+
+
+        if(Tcl_SetVar(ptkInterp,"numberOfValues",number_of_past_values,
+			TCL_GLOBAL_ONLY) == NULL) {
+            Error::abortRun(*this,"Failed to set parameter values for tcl");
+            return;
+        }
+        SDFTclScript::setup();
     }
     constructor {
 	put_in_control_panel.clearAttributes(A_SETTABLE);

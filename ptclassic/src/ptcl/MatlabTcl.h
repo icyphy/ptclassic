@@ -64,11 +64,8 @@ public:
 	int end(int argc, char** argv);
 	int eval(int argc, char** argv);
 	int get(int argc, char** argv);
-	int getpairs(int argc, char** argv);
-	int send(int argc, char** argv);
 	int set(int argc, char** argv);
 	int start(int argc, char** argv);
-	int status(int argc, char** argv);
 	int unset(int argc, char** argv);
 
 	// set data members
@@ -84,20 +81,11 @@ protected:
 	// display an error message in the Tcl interpreter
 	int error(const char* msg);
 
-	// set Matlab figure handle
-	void sethandle();
-
-	// start a Matlab process if one is not running
-	int init();
-
-	// evaluate a Matlab command
-	int evaluate(char* command, int outputBufferFlag);
-
 	// the current Tcl interpeter
 	Tcl_Interp* tclinterp;
 
 	// the interface to the Matlab engine
-	MatlabIfc* matlabInterface;
+	MatlabIfc matlabInterface;
 
 };
 

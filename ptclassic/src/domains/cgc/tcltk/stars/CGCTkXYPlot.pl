@@ -2,24 +2,17 @@ defstar {
 	name {TkXYPlot}
 	domain {CGC}
 	desc {
-Plot Y input(s) vs. X input(s) with dynamic updating.
-Two styles are currently supported: "dot" causes
-points to be plotted, whereas "connect" causes connected
-lines to be plotted. Drawing a box in the plot will
-reset the plot area to that outlined by the box.
-There are also buttons for zooming in and out, and for
-resizing the box to just fit the data in view.
 Generate an animated X-Y plot in a Tk window.
 	}
 	version { $Id$ }
-	author { W.-J. Huang, E. A. Lee, D. Niehaus }
+	author { W. Huang, E. A. Lee, D. Niehaus }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC Tcl/Tk library }
+	location { CGC tcltk library }
 	defstate {
                 name {label}
                 type{string}
@@ -29,7 +22,7 @@ limitation of liability, and disclaimer of warranty provisions.
         defstate {
 		name {geometry}
 		type{string}
-                default { "600x400+0+0" }
+                default { "600x600+100+100" }
                 desc { Specified the location and/or size of the window }
 	}
 	defstate {
@@ -46,13 +39,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	defstate {
 		name {xRange}
-		type{floatarray}
+		type{string}
 		default {"-1.5 1.5"}
 		desc { The range of x-coordinate values }
 	}
 	defstate {
 		name {yRange}
-		type{floatarray} 
+		type{string} 
 		default {"-1.5 1.5"}
 		desc { The range of x-coordinate values }
 	}
@@ -63,23 +56,17 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc {The number of points displayed at any one time }
 	}
 	defstate {
-	        name {style}
-		type {string}
-		default {"dot"}
-		desc {Plot style is dot or connect}
-	}
-	defstate {
 	        name {updateSize}
 		type{int}
 		default {10}
 		desc { The number of points drawn simulataneously. Higher numbers make the response faster.  }
 	}
-	inmulti {
+	input {
 		name {X}
 		type{float}	
 		desc { horizontal coordinate }
 	}
-	inmulti {
+	input {
 		name {Y}
 		type{float}
 		desc { vertical coordinate }
@@ -89,70 +76,63 @@ limitation of liability, and disclaimer of warranty provisions.
 	    Error::abortRun(*this, "invalid persistence");
 	    return;
 	  }
-	  // Store xMin and xMax for the benefit of the line style in TkPlot
-	  addGlobal("double $starSymbol(xMin);");
-	  addGlobal("double $starSymbol(xMax);");
-
-	  
-	  if ((xRange.size() != 2) || (xRange[0] >= xRange[1])) {
+	  double xMin, xMax, yMin, yMax;
+	  if ((sscanf((const char*)xRange,"%lf %lf", &xMin, &xMax) != 2) ||
+	      (xMin >= xMax)) {
 	    Error::abortRun(*this,"xRange parameter values are invalid");
 	  }
-	  if ((yRange.size() != 2) || (yRange[0] >= yRange[1])) {
+	  if ((sscanf((const char*)yRange,"%lf %lf", &yMin, &yMax) != 2) ||
+	      (yMin >= yMax)) {
 	    Error::abortRun(*this,"yRange parameter values are invalid");
 	  }
 	  addInclude("\"ptkPlot_defs.h\"");
-	  addGlobal("ptkPlotWin $starSymbol(plotwin);");
-	  addGlobal("ptkPlotDataset $starSymbol(plotdataset);");
+	  addGlobal("Tcl_HashTable $starSymbol(hashTable);");
+	  addGlobal("plotWin $starSymbol(plotwin);");
+	  addGlobal("plotDataset $starSymbol(plotdataset);");
+	  addCode(createHashTable,"tkSetup");
 
 	  // This is sourced multiple times if there are multiple
 	  // instances of the star.  Should this be fixed?
 	  addCode(srcTclFile,"tkSetup");
-
-	  int plotstyle = 0;
-	  if (strcmp(style,"connect") == 0) plotstyle = 1;
-	  addCode(createPlot(xRange[0],xRange[1],yRange[0],yRange[1],
-			     Y.numberPorts(),plotstyle),
-		  "tkSetup");
+	  addCode(createPlot(xMin,xMax,yMin,yMax),"tkSetup");
 	}
 	go {
-	  for (int i = 0; i < X.numberPorts(); i++) {
-	    addCode(updateDisplay(i+1));
-	  }
+	    addCode(updateDisplay);
+	}
+	codeblock(createHashTable) {
+	    Tcl_InitHashTable(&$starSymbol(hashTable),TCL_STRING_KEYS);
 	}
 	codeblock(srcTclFile) {
 	  {
-	    /* This ridiculosity is required because Tcl scribbles on strings */
-	    static char temp[100];
-	    sprintf(temp,"source $$env(PTOLEMY)/src/ptklib/ptkPlot.tcl");
+	    char temp[] = "source $$env(PTOLEMY)/src/ptklib/ptkPlot.tcl";
 	    if(Tcl_Eval(interp, temp) != TCL_OK)
 		 errorReport("Cannot source tcl script for TkXYPlot star");
 	  }
 	}
-	codeblock (createPlot,
-		   "double xMin, double xMax, double yMin, double yMax, int numsets, int plotstyle") {
-	  ptkInitPlot(&$starSymbol(plotwin));
-	  $starSymbol(xMin) = @xMin;
-	  $starSymbol(xMax) = @xMax;
-	  if(ptkCreatePlot(interp,
-			   &$starSymbol(plotwin),
-			   &w,
-			   ".$starSymbol(win)",
-			   "$val(label)",
-			   "$val(geometry)",
-			   "$val(xTitle)",
-			   "$val(yTitle)",
-			   @xMin,@xMax, @yMin,@yMax,
-			   @numsets,
-			   $val(updateSize),
-			   @plotstyle,
-			   $val(persistence)) == 0) {
-	    errorReport(ptkPlotErrorMsg());
+	codeblock (createPlot,"double xMin, double xMax, double yMin, double yMax") {
+	  if(createPlot(interp,
+			&$starSymbol(plotwin),
+			&w,
+			".$starSymbol(win)",
+			"$val(label)",
+			"$val(geometry)",
+			"$val(xTitle)",
+			"$val(yTitle)",
+			@xMin,@xMax, @yMin,@yMax) == 0) {
+	    errorReport("In TkXYPlot, error creating plot");
 	  }
+	  if(createDataset(interp,
+			   &$starSymbol(plotdataset),
+			   &w,
+			   $val(persistence),
+			   $val(updateSize)) == 0) {
+	    errorReport("In TkXYPlot, error creating data set");
+	  }
+	  assocData(interp,&$starSymbol(plotdataset),&$starSymbol(plotwin),"dataset 1");
 	}
-        codeblock (updateDisplay,"int setnum") {
-	  if (ptkPlotPoint(interp, &$starSymbol(plotwin), @setnum,
-			   $ref(X#@setnum), $ref(Y#@setnum)) == 0) {
-	    errorReport(ptkPlotErrorMsg());
+        codeblock (updateDisplay) {
+	  if (plotPoint(interp, &$starSymbol(plotdataset), $ref(X), $ref(Y)) == 0) {
+	    errorReport("in TkXYPlot, error plotting data point");
 	  }
 	}
 }

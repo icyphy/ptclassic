@@ -61,7 +61,6 @@ EXTRA_OPTIMIZER=-O2
 #OPTIMIZER=	-O2 -m486 -fomit-frame-pointer -pipe
 
 WARNINGS =	-Wall -Wcast-qual -Wcast-align
-# Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
 GPPFLAGS =	$(SYSTEMDEF) $(WARNINGS) $(EXTRA_OPTIMIZER) $(OPTIMIZER) $(MEMLOG)
 CFLAGS =	$(SYSTEMDEF) $(WARNINGS) $(EXTRA_OPTIMIZER) $(OPTIMIZER) $(MEMLOG) \
 		-fwritable-strings
@@ -76,11 +75,7 @@ GNULIB =	/usr/lib
 # Note that cc uses -Bstatic
 CC_STATIC = 	-static
 
-# system libraries for linking .o files from C files only
-CSYSLIBS =	-lm
-
-# system libraries (libraries from the environment)
-SYSLIBS=	-lg++ $(CSYSLIBS)
+SYSLIBS=-lg++ -lm
 
 LINKFLAGS=-L$(LIBDIR) -Xlinker -S -Xlinker -x -static
 LINKFLAGS_D=-L$(LIBDIR) -g -static
@@ -120,7 +115,16 @@ QUANTIFY =
 #S56DIR =	$(ROOT)/vendors/s56dsp
 S56DIR =
 
+# Variables for local Matlab installation
+# -- If Matlab is installed, then MATLABDIR points to where MATLAB is installed
+#    and MATLABLIBDIR points to the directory containing the Matlab libraries
+# -- If Matlab is not installed, then MATLABDIR equals $ROOT/src/compat/matlab
+#    and MATLABLIBIDR is undefined
+#MATLABDIR =	/usr/sww/matlab
+#MATLABLIBDIR =	-L$(MATLABDIR)/extern/lib/$(ARCH)
+MATLABDIR =	$(ROOT)/src/compat/matlab
+MATLABLIBDIR =
+
+
 # Used to compile xv.  Use -traditional to avoid varargs problems
 XV_CC =		gcc -traditional
-
-# Unknown Matlab architecture - No NetBSD port of Matlab as of 5/27/95

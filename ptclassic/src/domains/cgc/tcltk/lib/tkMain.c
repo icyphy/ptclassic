@@ -1,30 +1,4 @@
 /*
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
-*/
-/*
  * File to include in generated C code to use a Tk control panel.
  * Assumes the variable "name" is the name of the application,
  * and "numIterations" is the default number of iterations.
@@ -33,38 +7,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
  * Version: $Id$
  */
 
-#include "tk.h"
-#include "tcl.h"
-#define COMMANDSIZE 1024
+#include "tkConfig.h"
+#include "tkInt.h"
+#define COMMANDSIZE 512
 #define REPORT_TCL_ERRORS 1
-
-/* 
- * Include files for signal handling (a timer is used to trigger a signal
- * which in turn causes the tk event loop to be called at the next oportune
- * moment. Note, SIG_PF should be the same type as SIG_IGN and the same type
- * as the second parameter to signal().
- * FIXME: I have only included the sun4, sol2 versions.  See SimControl.cc.
- */
-#include "compat.h"
-
-/*
- * Note, SIG_PF should be the same type as SIG_IGN and the same type
- * as the second parameter to signal()
- */
-#if !defined(PTIRIX5) 
-
-/* PTIRIX5 defines SIG_PF in <signal.h> */
-#if defined(PTSUN4) || defined(PTSOL2)  || ! defined(__STDC__)
-
-/* sun4, sol2 */
-typedef void (*SIG_PF)();
-#else
-typedef void (*SIG_PF)(int);
-#endif /* defined sun4, sol2 */
-#endif /* !defined PTIRIX5 */
-
-#include <sys/time.h>
-#include <signal.h>
 
 /*
  * Global variables used by the main program:
@@ -74,8 +20,9 @@ static Tk_Window w;             /* The main window for the application.  If
                                  * NULL then the application no longer
                                  * exists. */
 static Tcl_Interp *interp;      /* Interpreter for this application. */
+static Tcl_CmdBuf buffer;       /* Used to assemble lines of terminal input
+                                 * into Tcl commands. */
 static char command[COMMANDSIZE];
-char *appClass = "CGC";
 
 
 /* No command line arguments are used, so use default settings */
@@ -106,198 +53,18 @@ void tkSetup();
 void errorReport(message)
 char *message;
 {
-    char *msg, *cmd;
-    sprintf(command, "popupMessage .error { %s }", message);
-    Tcl_Eval(interp, command);
+    char *msg;
+    sprintf(command, "popupMessage .error {%s}", message);
+    Tcl_Eval(interp, command, 0, (char**)NULL);
 #if REPORT_TCL_ERRORS
     msg = Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY);
     if (msg == NULL) {
         msg = interp->result;
     }
-    /* Have to be careful here to backquote curly braces in the string */
-    strcpy(command, "popupMessage .error { ");
-    cmd = command;
-    cmd += strlen(command);
-    if (msg != NULL)
-      while (*msg != '\0') {
-          if (cmd - command > COMMANDSIZE - 5) break;
-          if ((*msg == '{') || (*msg == '}')) *cmd++ = '\\';
-          *cmd++ = *msg++;
-      }
-    *cmd++ = ' ';
-    *cmd++ = '}';
-    *cmd = '\0';
-
-    if(Tcl_Eval(interp, command) != TCL_OK)
+    sprintf(command, "popupMessage .error {%s}", msg);
+    if(Tcl_Eval(interp, command, 0, (char **)NULL) != TCL_OK)
         fprintf(stderr, "%s\n", msg);
 #endif
-}
-
-/*
- *----------------------------------------------------------------------
- * Following is a set of procedures drawn from SimControl and ptsignals
- * to handle the tk event loop during a run using a timer and signals.
- *----------------------------------------------------------------------
- */
-#if defined(PTSOL2) || defined(PTIRIX5) || defined(PTLINUX) || defined(PTALPHA)
-static void ptSafeSig( int SigNum ) {
-	struct sigaction pt_alarm_action;
-	sigaction( SigNum, NULL, &pt_alarm_action);
-        pt_alarm_action.sa_flags |= SA_RESTART;
-        sigaction( SigNum, &pt_alarm_action, NULL);
-}
-static void ptBlockSig ARGS((int SigNum)) {}
-static void ptReleaseSig ARGS((int SigNum)) {}
-
-#else 
-#if defined(PTHPPA)
-static void ptSafeSig ARGS(( int foo )) {}
-static long signalmask;
-/* Don't use prototypes since the cc distributed with hppa
- * won't work with them
- */
-static void ptBlockSig (SigNum) {
-int Signum;
-	signalmask = sigblock(sigmask(SigNum));
-}
-static void ptReleaseSig (SigNum) {
-int Signum;
-	/* remove this signal from the signal mask */
-	signalmask &= !(sigmask(SigNum));
-	sigsetmask(signalmask);
-}
-
-#else
-#if defined(PTSUN4)
-static void ptBlockSig ARGS((int SigNum)) {};
-static void ptReleaseSig ARGS((int SigNum)) {};
-static void ptSafeSig ARGS((int SigNum)) {};
-
-#else
-/*default is no assignment*/
-static void ptBlockSig (int SigNum) {};
-static void ptReleaseSig (int SigNum) {};
-static void ptSafeSig( int SigNum ) {};
-
-#endif /* PTSUN4 */
-#endif /* PTHPPA */
-#endif /* PTSOL2  PTIRIX5  PTLINUX PTALPHA */
-
-/* The following conditional is needed because cc on Sun */
-/* does not understand VOLATILE. */
-
-static VOLATILE int pollflag = 0;
-
-static void setPollFlag() {
-        pollflag = 1;
-}
-
-/*
- *----------------------------------------------------------------------
- * Procedure to set the timer.
- * Based on a similar procedure in SimControl.
- *----------------------------------------------------------------------
- */
-static void setPollTimer( seconds, micro_seconds )
-int seconds;
-int micro_seconds;
-{
-
-	/* reset the timer - this cancels any current timing in progress */
-        struct itimerval i;
-	i.it_interval.tv_sec = i.it_interval.tv_usec = 0;
-        i.it_value.tv_sec = seconds;
-        i.it_value.tv_usec = micro_seconds;
-
-	/* Turn on the poll flag when the timer expires */
-	signal(SIGALRM, (SIG_PF)setPollFlag);
-
-	/* Make the signal safe from interrupting system calls */
-        ptSafeSig(SIGALRM);
-
-	/* Block the signal so that it will not interrupt system calls */
-	ptBlockSig(SIGALRM);
-
-	/* Turn off the poll flag until the timer fires */
-	pollflag = 0;
-
-	/* Start the timer */
-	setitimer(ITIMER_REAL, &i, 0);
-}
-
-/*
- *----------------------------------------------------------------------
- * Procedure that processes Tk events during a run.
- * Based on a similar procedure in pigi.
- *----------------------------------------------------------------------
- */
-static int runEventsOnTimer ()
-{
-	int sec, usec;
-	sec = 0; 
-	/* every 50,000 micro seconds = 20 times/sec */
-	usec = 50000;
-	/* Process all pending events */
-        while (Tk_DoOneEvent(TK_DONT_WAIT|TK_ALL_EVENTS));
-	/* Reset the Timer so that it will fire again */
-	setPollTimer( sec, usec);
-	return 1;
-}
-
-typedef int (*SimHandlerFunction)();
-
-static SimHandlerFunction onPoll = 0;
-
-/*
- *----------------------------------------------------------------------
- * Register a function to be called if the poll flag is set.
- * Returns old handler if any.
- *----------------------------------------------------------------------
- */
-SimHandlerFunction setPollAction(f)
-SimHandlerFunction f;
-{
-	SimHandlerFunction ret;
-	ret = onPoll;
-	onPoll = f;
-	pollflag = 1;	/* Makes sure onPoll can get called */
-	return ret;
-}
-
-/*
- *----------------------------------------------------------------------
- * Get the value of the pollflag.  Turn off signal blocking briefly
- * to allow a blocked signal to get through.
- *----------------------------------------------------------------------
- */
-static int getPollFlag() {
-	ptReleaseSig(SIGALRM);
-        ptBlockSig(SIGALRM);
-        return pollflag;
-}
-
-/*
- *----------------------------------------------------------------------
- * React according to how the pollflag is set
- *----------------------------------------------------------------------
- */
-static void processFlags() {
-	if (pollflag != 0) {
-		/* check to see if a polling function is defined */
-		if (onPoll) {
-		    /*
-		     * polling function defined.  Reset the polling
-		     * flag only if the polling function has failed
-		     * otherwise it is assumed that the polling function
-		     * will handle resetting the flag.
-		     */
-		    if (!onPoll()) 
-			pollflag = 0;
-		} else {
-		    /* There is no polling function defined.  Reset the flag. */
-		     pollflag = 0;
-		}
-	}
 }
 
 
@@ -323,7 +90,7 @@ goCmd(dummy, interp, argc, argv)
 
 	/* First make sure Tcl grabs the latest number */
 	/* of iterations from the control panel        */
-	if(Tcl_Eval(interp,"updateIterations") != TCL_OK) {
+	if(Tcl_Eval(interp,"updateIterations", 0, (char*)NULL) != TCL_OK) {
 		runFlag = 0;
 		return TCL_ERROR;
 	}
@@ -335,13 +102,8 @@ goCmd(dummy, interp, argc, argv)
 		return TCL_OK;
 	}
 
-	setPollAction(runEventsOnTimer);
-
 	go();
-
-	setPollAction(NULL);
-
-	Tcl_Eval(interp,".go configure -relief raised");
+	Tcl_Eval(interp,".go configure -relief raised", 0, (char*)NULL);
 	runFlag = 0;
 	return TCL_OK;
 }
@@ -418,7 +180,7 @@ void makeEntry (win, name, desc, initValue, callback)
 	    (ClientData) 0, (void (*)()) NULL);
     sprintf(command, "makeEntry %s %s \"%s\" \"%s\" %sCallback",
 		win, name, desc, initValue, name);
-    if(Tcl_Eval(interp, command) != TCL_OK) {
+    if(Tcl_Eval(interp, command, 0, (char*)NULL) != TCL_OK) {
         errorReport("Cannot make entry box in control panel.");
     }
 }
@@ -451,7 +213,7 @@ void makeButton (win, name, desc, callback)
     Tcl_CreateCommand(interp, command, callback, (ClientData) 0, NULL);
     sprintf(command, "makeButton %s %s \"%s\" %sCallback",
 	win, name, desc, name);
-    if(Tcl_Eval(interp, command) != TCL_OK) {
+    if(Tcl_Eval(interp, command, 0, (char*)NULL) != TCL_OK) {
         errorReport("Cannot make button in control panel.");
     }
 }
@@ -502,7 +264,7 @@ void makeScale (win, name, desc, position, callback)
     sprintf(command,
 	"makeScale %s %s \"%s\" %d %sCallback",
 	win, name, desc, position, name);
-    if(Tcl_Eval(interp, command) != TCL_OK)
+    if(Tcl_Eval(interp, command, 0, (char**)NULL) != TCL_OK)
         errorReport("Cannot make slider scale in control panel");
 }
 
@@ -514,9 +276,9 @@ void makeScale (win, name, desc, position, callback)
 void displaySliderValue (win, name, value)
     char *win, *name, *value;
 {
-    sprintf(command, "%s.%s.value configure -text \"%.6s \"",
+    sprintf(command, ".%s.%s.value configure -text \"%.6s \"",
 	win, name, value);
-    if(Tcl_Eval(interp, command) != TCL_OK)
+    if(Tcl_Eval(interp, command, 0, (char**)NULL) != TCL_OK)
         errorReport("Cannot update slider display");
 }
 
@@ -546,6 +308,102 @@ verticalScale(fullScale, interp, argc, argv)
     return TCL_OK;
 }
 
+/*
+ *----------------------------------------------------------------------
+ * Create a bar chart in its own window
+ *----------------------------------------------------------------------
+ *     name: name of the top level window
+ *     desc: description to be put in the window
+ *     data: an array of data to be plotted
+ *     numBars: number of bars in the bar chart
+ *     fullScale: pointer to value of the full scale on the bar chart
+ *     id: an array to fill with item IDs
+ *     geo: geometry of the overall window, in the form =AxB+C+D
+ *     width: width of the bar chart itself
+ *     height: height of the bar chart itself
+ */
+
+void makeBarChart (name, desc, data, numBars, fullScale, id, geo, width, height)
+    char *name, *desc;
+    double *data, *fullScale;
+    int numBars;
+    int *id;
+    char *geo;
+    double width, height;
+{
+    int i;
+    int test;
+
+    /* Register the function to reset fullScale with Tcl */
+    sprintf(command, "%sverticalScale", name);
+    Tcl_CreateCommand (interp, command, verticalScale,
+            (ClientData) fullScale, (void (*)()) NULL);
+
+    /* Make the bar chart */
+    sprintf(command, "makeBarChart %s \"%s\" \"%s\" %d %f %f",
+	name, desc, geo, numBars, width, height);
+    if(Tcl_Eval(interp, command, 0, (char**)NULL) != TCL_OK)
+        errorReport("Cannot make bar chart");
+    test = 0;
+    for (i=0;i<numBars;i++) {
+        sprintf(command,
+		".%s.pf.plot create rect %fc %fc %fc %fc -fill firebrick4",
+		name, (i+0.1)*10/numBars, height/2, (i+0.9)*width/numBars,
+		(1-data[i]/(*fullScale))*height/2);
+        if(Tcl_Eval(interp, command, 0, (char**)NULL) != TCL_OK)
+            test = 1;
+        else
+            sscanf(interp->result,"%d",&id[i]);
+    }
+    if (test) errorReport("Cannot make bar in bar chart");
+}
+
+/*
+ *----------------------------------------------------------------------
+ * Set the bars in a bar chart
+ *----------------------------------------------------------------------
+ *     name: name of the top level window
+ *     data: an array of data to be plotted
+ *     numBars: number of bars in the bar chart
+ *     fullScale: pointer to value of the full scale on the bar chart
+ *     id: an array of item IDs filled by makeBarChart
+ */
+
+void setBarChart (name, data, numBars, fullScale, id)
+    char *name;
+    double *data;
+    int numBars;
+    double *fullScale;
+    int *id;
+{
+    int i;
+    int test=0;
+    int width, height;
+    int x0, y0, x1, y1;
+    Tk_Window plotwin;
+
+    /* Get the current plot window size */
+    sprintf(command, ".%s.pf.plot", name);
+    plotwin = Tk_NameToWindow(interp,command,w);
+    width = Tk_Width (plotwin);
+    height = Tk_Height (plotwin);
+
+    for (i=0;i<numBars;i++) {
+	x0 = (i+0.1)*width/numBars;
+	y0 = height/2.0;
+	x1 = (i+0.9)*width/numBars;
+	y1 = (1-data[i]/(*fullScale))*height/2;
+        sprintf(command, ".%s.pf.plot coords %d %d %d %d %d",
+		name, id[i], x0, y0, x1, y1);
+        if(Tcl_Eval(interp, command, 0, (char**)NULL) != TCL_OK)
+            test = 1;
+    }
+    if (test) {
+	runFlag = 0;
+	errorReport("Cannot update bar chart");
+    }
+}
+
 
 /*
  *----------------------------------------------------------------------
@@ -556,21 +414,17 @@ verticalScale(fullScale, interp, argc, argv)
 main() {
     Tk_3DBorder border;
     interp = Tcl_CreateInterp();
-    w = Tk_CreateMainWindow(interp, display, name, appClass);
+    w = Tk_CreateMainWindow(interp, display, name);
     if (w == NULL) {
         fprintf(stderr, "%s\n", interp->result);
         exit(1);
     }
-    Tk_SetClass(w, "CGC");
+    Tk_SetClass(w, "Tk");
     Tk_CreateEventHandler(w, StructureNotifyMask, StructureProc,
             (ClientData) NULL);
     Tk_DoWhenIdle(DelayedMap, (ClientData) NULL);
     Tk_GeometryRequest(w, 200, 200);
-#if TK_MAJOR_VERSION < 4
     border = Tk_Get3DBorder(interp, w, None, "#ffe4c4");
-#else
-    border = Tk_Get3DBorder(interp, w, "#ffe4c4");
-#endif
     if (border == NULL) {
         Tcl_SetResult(interp, (char *) NULL, TCL_STATIC);
         Tk_SetWindowBackground(w, WhitePixelOfScreen(Tk_Screen(w)));
@@ -586,21 +440,23 @@ main() {
     Tcl_CreateCommand(interp, "pauseCmd", pauseCmd, (ClientData) w,
             (void (*)()) NULL);
     sprintf(command,"set applicationName \"%s\"", name);
-    if(Tcl_Eval(interp, command) != TCL_OK) goto error;
+    if(Tcl_Eval(interp, command, 0, (char **) NULL) != TCL_OK) goto error;
     sprintf(command, "set numIterations %d", numIterations);
-    if(Tcl_Eval(interp, command) != TCL_OK) goto error;
-    if(Tcl_Eval(interp, initCmd) != TCL_OK) goto error;
-    (void) Tcl_Eval(interp, "update");
+    if(Tcl_Eval(interp, command, 0, (char **) NULL) != TCL_OK) goto error;
+    if(Tcl_Eval(interp, initCmd, 0, (char **) NULL) != TCL_OK) goto error;
+    buffer = Tcl_CreateCmdBuf();
+    (void) Tcl_Eval(interp, "update", 0, (char **) NULL);
     tkSetup();
 
     Tk_MainLoop();
 
     Tcl_DeleteInterp(interp);
+    Tcl_DeleteCmdBuf(buffer);
     exit(0);
 
 error:
     errorReport("Error in main loop");
-    Tcl_Eval(interp, "destroy .");
+    Tcl_Eval(interp, "destroy .", 0, (char **) NULL);
     exit(1);
     return 0;                   /* Needed only to prevent compiler warnings. */
 }
@@ -677,10 +533,9 @@ DelayedMap(clientData)
  *----------------------------------------------------------------------
  */
 
-/* Removed due to Ultrix incompatibility
 void perror(s)
 char *s;
 {
     errorReport(s);
 }
-*/
+

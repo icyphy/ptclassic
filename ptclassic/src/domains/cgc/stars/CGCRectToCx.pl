@@ -4,12 +4,7 @@ defstar {
 	desc {Convert real and imaginary parts to a complex output.}
 	version { $Id$ }
 	author { S. Ha }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { CGC main library }
 	input {
 		name { real }
@@ -33,8 +28,5 @@ limitation of liability, and disclaimer of warranty provisions.
 	
 	go {
 		addCode(body);
-	}
-	exectime {
-		return 2;
 	}
 }

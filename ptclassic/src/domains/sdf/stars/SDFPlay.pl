@@ -1,39 +1,38 @@
+ident {
+/**************************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  J. T. Buck
+ Date of creation: 10/8/90
+
+ Generate a file for the SparcStation speaker and play it.  The "play"
+ program must be on the user's path.		'
+
+ This star may be used on a different device provided that a "play"
+ program is written with the following specifications:
+ 
+ When invoked as "play filename", where filename is a sequence of
+ bytes representing mu-law PCM samples, the program should play
+ the file at 8000 samples per second.  Perhaps later this rate can
+ be a parameter.
+
+**************************************************************************/
+}
+
 defstar {
 	name { Play }
 	domain { SDF }
-	desc {
-Play an input stream on the SparcStation speaker.
-The "gain" state (default 1.0) multiplies the input stream
-before it is mu-law compressed and written.
-The inputs should be in the range of -32000.0 to 32000.0.
-The file is played at a fixed sampling rate of 8000 samples/second.
-When the wrapup method is called, a file of 8-bit mu-law
-samples is handed to a program named "ptplay" which plays the file.
-The "ptplay" program must be in your path.
-	}
-	version {$Id$}
-	author { J. T. Buck }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { SDF main library }
-	explanation {
-Generate a file for the SparcStation speaker and play it.  The "ptplay"
-program must be on the user's path.
-This star may be used on a different device provided that a "ptplay"
-program is written with the following specifications:
-.lp
-When invoked as "ptplay filename", where filename is a sequence of
-bytes representing mu-law PCM samples, the program should play
-the file at 8000 samples per second.  Perhaps later this rate can
-be a parameter.
-.Ir "Mu law"
-.Ir "ptplay program"
-.Ir "audio, Sparcstation"
-.Ir "Sparcstation audio"
+	desc {	"Play an input stream on the SparcStation speaker.  The\n"
+		"'gain' state (default 1.0) multiplies the input stream\n"
+		"before it is mu-law compressed and written.\n"
+		"The file is played at 8000 samples/second (sorry, fixed)\n"
+		"When the wrapup method is called, a file of 8-bit mu-law\n"
+		"samples is handed to a program named 'play' which plays\n"
+		"the file."
 	}
 	input {
 		name { input }
@@ -43,46 +42,37 @@ be a parameter.
 		name { gain }
 		type { float }
 		default { "1.0" }
-		desc { Output gain. }
+		desc { "gain factor" }
 	}
 	defstate {
 		name {saveFile}
 		type {string}
 		default {""}
-		desc {File to save the output mu-law samples.}
+		desc {"file to save xgraph input"}
 	}
 	protected {
-		FILE *strm;		// for writing the file
-		int delFile;		// if true, file needs deletion at end
-		char* fileName;		// name of file to use (on heap)
+		FILE *strm;
+		int delFile;
+		const char* fileName;
 	}
-	hinclude { <stdio.h> }
-	ccinclude { "miscFuncs.h", "paths.h", <std.h> }
+	ccinclude { "miscFuncs.h" }
 	constructor {
 		strm = NULL;
 		delFile = FALSE;
-		fileName = 0;
 	}
-	setup {
-		// check for required program.
-		if (progNotFound("ptplay",
-				 "Sound files cannot be played without it."))
-			return;
-
-		// if name is empty, use a temp file.
-		const char* sf = saveFile;
-		delete [] fileName;
-		if (sf == NULL || *sf == 0) {
+	start {
+		fileName = saveFile;
+		if (fileName == NULL || *fileName == 0) {
 			fileName = tempFileName();
 			delFile = TRUE;
 		}
-		else {
-			fileName = expandPathName(sf);
-		}
-
+		else fileName = savestring (expandPathName(fileName));
 		// should check if file already exists here
-		if ((strm = fopen(fileName, "w")) == NULL) {
-			Error::abortRun (*this, "Can't open file ", fileName);
+		if ((strm = fopen (fileName, "w")) == NULL) {
+			StringList msg = readFullName();
+			msg += "Can't open file ";
+			msg += fileName;
+			Error::abortRun (msg);
 		}
 	}
 // mulaw compression routine
@@ -112,8 +102,7 @@ be a parameter.
 		unsigned char ulawbyte;
 
 		/* Get the sample into sign-magnitude. */
-		/* this code assumes a twos complement representation */
-		sign = (sample >> 8) & 0x80;
+		sign = (sample < 0);
 		if ( sign != 0 ) sample = -sample;
 		if ( sample > CLIP ) sample = CLIP;
 
@@ -129,7 +118,7 @@ be a parameter.
 	go {
 		if (!strm) return;
 		// add gain, cvt to integer
-		int data = int(double(input%0) * double(gain));
+		int data = int(float(input%0) * double(gain));
 		putc (ulaw(data), strm);
 	}
 // wrapup.  Does nothing if open failed, or 2nd wrapup call.
@@ -141,7 +130,7 @@ be a parameter.
 		StringList cmd;
 
 		if (delFile) cmd += "( ";
-		cmd += "ptplay ";
+		cmd += "play ";
 
 		cmd += fileName;
 		if (delFile) {
@@ -157,7 +146,6 @@ be a parameter.
 	destructor {
 		if (strm) fclose (strm);
 		if (delFile) unlink (fileName);
-		LOG_DEL; delete [] fileName;
-		fileName = 0;
+		delete fileName;
 	}
 }

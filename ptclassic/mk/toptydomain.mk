@@ -27,15 +27,23 @@
 
 # This file is used by tycho, see $PTOLEMY/mk/topdomain.mk for the file
 # use by ptolemy.
-
-# Based on topdomain.mk by Joe Buck.  The differences between this file
-# and topdomain.mk:
-# 	The VPATH is different
-#	This file does not use make.template
+# Date of creation: 6/15/92.
+# Written by: J. Buck
 
 MAKEVARS = "PTARCH=$(PTARCH)"
 
-makefiles depend all install clean sources realclean checkjunk sccsinfo:
+makefiles:
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		  echo Updating makefile in domains/$(ME)/$$x ; \
+		  $(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
+			VPATH=../../../tycho/domains/$(ME)/$$x $@ ; \
+		) \
+	    fi ; \
+	done
+
+all install clean sources realclean checkjunk sccsinfo:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
@@ -58,3 +66,14 @@ TAGS:
 	    fi ; \
 	done
 	-cat -s $(DIRS:%=%/TAGS) > $@
+
+depend:
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		  echo making $@ in domains/$(ME)/$$x ; \
+		  $(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
+			VPATH=../../../tycho/domains/$(ME)/$$x $@ ; \
+		) \
+	    fi ; \
+	done

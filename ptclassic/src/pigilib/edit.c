@@ -1,194 +1,180 @@
-/* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
-*/
 /* edit.c  edg
 Version identification:
 $Id$
 */
 
 
-/* Standard includes */
-#include "local.h"		/* include compat.h, sol2compat.h, ansi.h */
+/* Includes */
+#include <stdio.h>
 #include <string.h>
 #include <sys/file.h>
-
-/* Octtools includes */
-#include "oct.h"		/* define octObject */
-#include "list.h"		/* define lsList */
-#include "rpc.h"		/* define RPC data structures */
+#include "local.h"
+#include "rpc.h"
 #include "oh.h"
-
-/* Pigilib includes */
-#include "edit.h"
-#include "util.h"
 #include "paramStructs.h"
 #include "vemInterface.h"
+#include "util.h"
 #include "err.h"
 #include "octIfc.h"
-#include "exec.h"
 
-#include "ptk.h"		/* Interpreter name, window name, etc.  aok */
-#include "handle.h"
 
-#include "kernelCalls.h"	/* Define KcDomainTargets and KcDefTarget */
-#include "ganttIfc.h"		/* Define FindClear */
-
-#define dmWidth 40
-#define dmIncrement 20
-
-/* body of parameter-edit code.
-Returns 0 if there is an error.
-Returns 1 if the parameters were changed or if the user clicked OK.
-Returns 2 if the command was aborted by the user.
+/* EditDelayParams  5/27/88
+Edit the delay value associated with a delay instance.
+Inputs: instPtr = delay instance pointer.
+Outputs: return = TRUE if no error.
 */
-
 static boolean
-EditParamList(pListPtr, dmTitle)
-ParamListType *pListPtr;
-char* dmTitle;
+EditDelayParams(facetPtr, instPtr)
+octObject *facetPtr, *instPtr;
 {
-    ParamType *place;
-    dmTextItem *items;
-    int i, width, maxwidth;
+    octObject delayProp;
+    static dmTextItem item = {"Number of delays", 1, 10, NULL, NULL};
+    int n;
+    char buf[100];
 
-    items = (dmTextItem *) calloc(pListPtr->length, sizeof(dmTextItem));
-    place = pListPtr->array;
-    width = 0;
-    maxwidth = 0;
-    for (i = 0; i < pListPtr->length; i++) {
-	items[i].itemPrompt = place->name;
-	items[i].rows = 1;
-	items[i].value = place->value;
-	width = strlen(place->value);
-	if(maxwidth < width) maxwidth = width;
-	items[i].userData = NULL;
-	place++;
-    }
-    for (i = 0; i < pListPtr->length; i++) {
-	items[i].cols = maxwidth + dmIncrement;
-    }
-    if (dmMultiText(dmTitle, pListPtr->length, items) != VEM_OK) {
+    GetOrInitDelayProp(instPtr, &delayProp);
+    item.value = sprintf(buf, "%ld", delayProp.contents.prop.value.integer);
+    if (dmMultiText("Edit Delay", 1, &item) != VEM_OK) {
 	PrintCon("Aborted entry");
-	return 2;
+        return(TRUE);
     }
-    /* should free place->value string before assignment */
-    place = pListPtr->array;
-    for (i = 0; i < pListPtr->length; i++) {
-	place->value = items[i].value;
-	place++;
+    if ((n = atoi(item.value)) <= 0) {
+	ErrAdd("Invalid entry: number must be > 0");
+        return(FALSE);
     }
-    free((char *)items);
+    delayProp.contents.prop.value.integer = (long) n;
+    (void) octModify(&delayProp);
     return(TRUE);
 }
 
-/* 3/28/90
-Find a name starting at facet under cursor.  Name can have '.' between
-components and all components in heirarchy will be marked.
+/* EditSogParams  5/27/88
+Outputs: return = TRUE if no error.
 */
-/* Rewritten for Tcl/Tk by Alan Kamas, 1/94 */
-/* moved here 8/95, by Matt Tavis */
-int 
-RpcFindName(spot, cmdList, userOptionWord) /* ARGSUSED */
-RPCSpot *spot;
-lsList cmdList;
-long userOptionWord;
+static boolean
+EditSogParams(facetPtr, instPtr)
+octObject *facetPtr, *instPtr;
 {
-    octObject facet = {OCT_UNDEFINED_OBJECT, 0};
-    char facetHandle[POCT_FACET_HANDLE_LEN]; 
+    int i;
+    ParamListType pList;
+    ParamType *place;
+    dmTextItem *items;
 
-    ViInit("find-name");
-    ErrClear();
+    ERR_IF1(!GetOrInitSogParams(instPtr, &pList));
 
-    /* get current facet */
-    facet.objectId = spot->facet;
-    if (octGetById(&facet) != OCT_OK) {
-	PrintErr(octErrorString());
-	ViDone();
+    if (pList.length == 0) {
+	PrintCon("Star or galaxy has no parameters");
+	return(TRUE);
     }
-    else {
-	ptkOctObj2Handle(&facet, facetHandle);
-
-	TCL_CATCH_ERR( Tcl_VarEval(ptkInterp, "ptkEditStrings ",
-				   " \"Find Name\" ", " \"ptkSetFindName ",
-				   facetHandle, " %s \" ", " \"{{Name} {}}\" ",
-				   (char *)NULL) );
+    items = (dmTextItem *) calloc(pList.length, sizeof(dmTextItem));
+    place = pList.array;
+    for (i = 0; i < pList.length; i++) {
+	items[i].itemPrompt = place->name;
+	items[i].rows = 1;
+	items[i].cols = 100;
+	items[i].value = place->value;
+	items[i].userData = NULL;
+	place++;
     }
+    if (dmMultiText("Edit Actual Parameters", pList.length, items) != VEM_OK) {
+	PrintCon("Aborted entry");
+	return(TRUE);
+    }
+    /* should free place->value string before assignment */
+    place = pList.array;
+    for (i = 0; i < pList.length; i++) {
+	if (!IsBalancedParen(items[i].value)) {
+	    char buf[512];
+	    sprintf(buf, "Unbalanced parentheses in parameter `%s`",
+		place->name);
+	    ErrAdd(buf);
+	    return (FALSE);
+	}
+	place->value = items[i].value;
+	place++;
+    }
+    free(items);
 
-    FreeOctMembers(&facet);
-    ViDone();
+    SetSogParams(instPtr, &pList);
+    return(TRUE);
 }
 
-/* EditFormalParameters is still needed for the RunUniverse command.  -aok */
 /* 4/14/89 3/19/89
-Edit the formal parameters of a galaxy schematic facet.
-Returns 0 if there is an error.
-Returns 1 if the parameters were changed or if the user clicked OK.
-Returns 2 if the command was aborted by the user.
+Edit the formal param list of a galaxy schematic facet.
 */
-int
+static boolean
 EditFormalParams(galFacetPtr)
 octObject *galFacetPtr;
 {
-    int i = 1;
-    ParamListType pList = {0, 0, 0, FALSE};
+static dmTextItem defaultItem = {NULL, 1, 80, NULL, NULL};
+    int i, j, itemsN, paramsN;
+    ParamListType pList;
+    ParamType *place;
+    dmTextItem *items;
 
-    if (!GetFormalParams(galFacetPtr, &pList)) {
-	i = 0;
+    ERR_IF1(!GetFormalParams(galFacetPtr, &pList));
+
+    /* put formal params (if any) into item list */
+    itemsN = (pList.length + 1) * 2;
+    items = (dmTextItem *) calloc(itemsN, sizeof(dmTextItem));
+    place = pList.array;
+    j = 0;
+    for (i = 0 ; i < pList.length; i++) {
+	items[j] = defaultItem;
+	items[j].itemPrompt = "Name";
+	items[j++].value = place->name;
+	items[j] = defaultItem;
+	items[j].itemPrompt = "Value";
+	items[j++].value = place->value;
+	place++;
     }
-    else if (pList.length == 0) {
-        PrintErr("Galaxy or Universe has no parameters");
-        i = 1;
+    items[j] = defaultItem;
+    items[j].itemPrompt = "New name";
+    items[j++].value = "";
+    items[j] = defaultItem;
+    items[j].itemPrompt = "New value";
+    items[j++].value = "";
+    if (dmMultiText("Edit Formal Parameters", itemsN, items) != VEM_OK) {
+	PrintCon("Aborted entry");
+	return(TRUE);
     }
-    else {
-	i = EditParamList(&pList, "Edit Formal Parameters");
-	if (i == 1) {
-	    if (!SetFormalParams(galFacetPtr, &pList)) {
-		i = 0;
-	    }
+    /* Tranfer params from item list to pList, deleting blank entries.
+	Assumes there is an extra empty slot in pList.array (kludgy).
+	See paramStructs.c.
+    */
+    place = pList.array;
+    j = 0;
+    paramsN = 0;
+    for (i = 0; i < pList.length + 1; i++) {
+	if (strlen(SkipWhite(items[j].value)) != 0) {
+	    /* copy this name-value pair */
+	    place->name = items[j++].value;
+	    place->value = items[j++].value;
+	    place++;
+	    paramsN++;
+	} else {
+	    /* skip this name-value pair */
+	    j += 2;
 	}
     }
-    FreeFlatPList(&pList);
-    return(i);
+    pList.length = paramsN;
+    free(items);
+
+    ERR_IF1(!SetFormalParams(galFacetPtr, &pList));
+    return(TRUE);
 }
 
 /* EditParams  5/27/88 4/24/88
 Edit parameters.
-Changed 9/93 to use the POct code and the TCL/Tk tools - aok
 */
 int 
-EditParams(spot, cmdList, userOptionWord) /* ARGSUSED */
+EditParams(spot, cmdList, userOptionWord)
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet = {OCT_UNDEFINED_OBJECT, 0},
-	      inst = {OCT_UNDEFINED_OBJECT, 0};
+    octObject facet, inst;
     vemStatus status;
-    char facetHandle[POCT_FACET_HANDLE_LEN],
-	 instanceHandle[POCT_FACET_HANDLE_LEN];
+    boolean status2;
 
     ViInit("edit-params");
     ErrClear();
@@ -198,80 +184,36 @@ long userOptionWord;
 	PrintErr(octErrorString());
     	ViDone();
     }
-    ptkOctObj2Handle(&facet, facetHandle);
 
     /* get name of instance under cursor */
     status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
     if (status == VEM_NOSELECT) {
 	PrintCon("Aborted");
-	FreeOctMembers(&facet);
-	ViDone();
-    }
-    else {
-	if (status != VEM_OK) {		 /* cursor not over an instance... */
-	    strcpy (instanceHandle, "NIL");
-	}
-	else {			/* cursor is over some type of instance... */
-	    ptkOctObj2Handle(&inst, instanceHandle);
-	}
-	TCL_CATCH_ERR( Tcl_VarEval(ptkInterp, "ptkEditParams ",
-				   facetHandle, " ",
-				   instanceHandle, (char *)NULL) );
-    }
-
-    FreeOctMembers(&facet);
-    FreeOctMembers(&inst);
-    ViDone();
-}
-
-/* EditDDFiter
-Set the number of firings of a DDF star that correspond
-to one iteration of the DDF scheduler.
-FIXME: This is so domain specific, that it should appear
-only when the domain is DDF. Maybe in tycho.
-*/
-int 
-EditPragmas(spot, cmdList, userOptionWord) /* ARGSUSED */
-RPCSpot *spot;
-lsList cmdList;
-long userOptionWord;
-{
-    octObject facet = {OCT_UNDEFINED_OBJECT, 0},
-	      inst = {OCT_UNDEFINED_OBJECT, 0};
-    vemStatus status;
-    char facetHandle[POCT_FACET_HANDLE_LEN],
-	 instanceHandle[POCT_FACET_HANDLE_LEN];
-
-    ViInit("edit-pragmas");
-    ErrClear();
-    /* get current facet */
-    facet.objectId = spot->facet;
-    if (octGetById(&facet) != OCT_OK) {
-	PrintErr(octErrorString());
-    	ViDone();
-    }
-    ptkOctObj2Handle(&facet, facetHandle);
-
-    /* get name of instance under cursor */
-    status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
-    if (status == VEM_NOSELECT) {
-	PrintCon("Aborted");
+        ViDone();
     } else if (status != VEM_OK) {
 	/* cursor not over an instance... */
-        PrintErr("Cursor must be over an icon instance");
-    } else if (IsUniv(&inst) || IsPal(&inst)) {
-        PrintErr("Pragmas can only be set for stars or galaxies");
+	if (IsGalFacet(&facet)) {
+	    status2 = EditFormalParams(&facet);
+	} else {
+	    PrintCon("Cursor must be over an instance or a galaxy schematic");
+	    ViDone();
+	}
     } else {
 	/* cursor is over some type of instance... */
-	ptkOctObj2Handle(&inst, instanceHandle);
-	TCL_CATCH_ERR( Tcl_VarEval(ptkInterp, "ptkEditParams ",
-				   facetHandle, " ",
-				   instanceHandle, " ",
-				   "Pragmas", (char *)NULL) );
+	if (IsDelay(&inst)) {
+	    status2 = EditDelayParams(&facet, &inst);
+	} else if (IsGal(&inst) || IsStar(&inst)) {
+	    /* inst is a sog... */
+	    status2 = EditSogParams(&facet, &inst);
+	} else {
+	    PrintCon("Cursor must be over a star, galaxy, or delay instance");
+	    ViDone();
+	}
     }
-
-    FreeOctMembers(&facet);
-    FreeOctMembers(&inst);
+    if (!status2) {
+	PrintErr(ErrGet());
+	ViDone();
+    }
     ViDone();
 }
 
@@ -280,10 +222,7 @@ long userOptionWord;
 /* Structures to store palette list and dialog box */
 static char **palettes;
 static int palettes_n;
-
-/* function to determine default palettes */
-char *defaultPalettes();
-
+static char *defaultPalettes = "~ptolemy/lib/sdf/sdf.pal:./user:./init";
 static dmWhichItem *items;
 
 /* ListLength  4/28/88
@@ -314,14 +253,12 @@ Caveats: Should only be called once at the beginning of the program.
 boolean
 OpenPaletteInit()
 {
-    char *a, *b, *copy, *techDir, buf[MAXPATHLEN];
+    char *a, *b, *copy, *techDir, buf[FILENAME_MAX];
     int i;
 
-/* dots in resource names no longer work??? */
-/*    sprintf(buf, "%s.palettes", UAppName); */
-    sprintf(buf, "%sPalettes", UAppName);
+    sprintf(buf, "%s.palettes", UAppName);
     if ((b = RPCXGetDefault("vem", buf)) == NULL) {
-	b = defaultPalettes();
+	b = defaultPalettes;
     }
     palettes_n = ListLength(b) + 1;
     palettes = (char **) malloc(palettes_n * sizeof(char *));
@@ -358,30 +295,28 @@ OpenPaletteInit()
 Uses global palettes variable.
 */
 int 
-RpcOpenPalette(spot, cmdList, userOptionWord) /* ARGSUSED */
+RpcOpenPalette(spot, cmdList, userOptionWord)
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
     int i;
-    octObject facet = {OCT_UNDEFINED_OBJECT, 0};
+    octObject facet;
 
     ViInit("open-palette");
     ErrClear();
     if (dmMultiWhich("Palettes", palettes_n, items, NULL, NULL) != VEM_OK) {
 	PrintCon("Aborted entry");
+	ViDone();
     }
-    else {
-	for (i = 0; i < palettes_n; i++) {
-	    if (items[i].flag != 0) {
-		if (ohOpenFacet(&facet, palettes[i],
-				"schematic", "contents", "r") < 0) {
-		    PrintErr(octErrorString());
-		    continue;
-		}
-		vemOpenWindow(&facet, NULL);
-		FreeOctMembers(&facet);
+    for (i = 0; i < palettes_n; i++) {
+	if (items[i].flag != 0) {
+	    if (ohOpenFacet(&facet, palettes[i], "schematic", "contents", "r")
+		< 0) {
+		PrintErr(octErrorString());
+		ViDone();
 	    }
+	    vemOpenWindow(&facet, NULL);
 	}
     }
     ViDone();
@@ -389,20 +324,20 @@ long userOptionWord;
 
 /***** End of RpcOpenPalette routines */
 
+
 int 
-RpcEditComment(spot, cmdList, userOptionWord) /* ARGSUSED */
+RpcEditComment(spot, cmdList, userOptionWord)
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet = {OCT_UNDEFINED_OBJECT, 0},
-	      obj = {OCT_UNDEFINED_OBJECT, 0};
+    static dmTextItem item = {"Comment", 1, 100, NULL, NULL};
+    char *comment;
+    octObject facet, obj;
     vemStatus status;
-    char facetHandle[POCT_FACET_HANDLE_LEN];
 
     ViInit("edit-comment");
     ErrClear();
-
     /* get current facet */
     facet.objectId = spot->facet;
     if (octGetById(&facet) != OCT_OK) {
@@ -412,7 +347,6 @@ long userOptionWord;
 
     status = vuFindSpot(spot, &obj, OCT_INSTANCE_MASK);
     if (status == VEM_NOSELECT) {
-	FreeOctMembers(&facet);
 	PrintCon("Aborted");
         ViDone();
     } else if (status == VEM_CANTFIND) {
@@ -421,96 +355,20 @@ long userOptionWord;
 	*/
 	obj = facet;
     }
+
     /* At this point, obj is either an instance or the facet */
-    ptkOctObj2Handle(&obj, facetHandle);
-
-    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp, "ptkEditText ",
-		   "\"Edit Comment\" ",
-                   "\"ptkSetStringProp ", facetHandle, " comment %s\" ",
-                   "[ptkGetStringProp ", facetHandle, " comment]",
-                   (char *)NULL) );
-
-    FreeOctMembers(&facet);		/* don't free obj */
-    ViDone();
-
-}
-
-int
-RpcEditDomain(spot, cmdList, userOptionWord) /* ARGSUSED */
-RPCSpot *spot;
-lsList cmdList;
-long userOptionWord;
-{
-    octObject facet = {OCT_UNDEFINED_OBJECT, 0};
-    char facetHandle[POCT_FACET_HANDLE_LEN];
-
-    ViInit("edit-domain");
-    ErrClear();
-
-    /* get current facet */
-    facet.objectId = spot->facet;
-    if (octGetById(&facet) != OCT_OK) {
-        PrintErr(octErrorString());
-	ViDone();
-    }
-    else {
-	ptkOctObj2Handle(&facet, facetHandle);
-	TCL_CATCH_ERR( Tcl_VarEval(ptkInterp, "ptkChooseOne ",
-				   "[ptkGetDomainNames ", facetHandle, "]  ",
-				   " \"ptkSetDomain ", facetHandle, " %s \" ",
-				   (char *)NULL) );
-    }
-
-    FreeOctMembers(&facet);
-    ViDone();
-}
-
-/* Rewritten for Tcl/Tk 1/94 by Alan Kamas */
-int
-RpcEditSeed(spot, cmdList, userOptionWord) /* ARGSUSED */
-RPCSpot *spot;
-lsList cmdList;
-long userOptionWord;
-{
-    ViInit("edit-seed");
-    ErrClear();
-    FindClear();
-
-    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp, "ptkEditStrings ",
-			       " \"Set Seed\" ",
-			       " \"ptkSetSeed %s \" ",
-			       " \"{{Seed for Random Number} [ptkGetSeed]}\" ",
-			       (char *)NULL) );
-
-    ViDone();
-}
-
-/* Rewritten 12/17/93 for Tk/Tcl by Alan Kamas */
-int
-RpcEditTarget(spot, cmdList, userOptionWord) /* ARGSUSED */
-RPCSpot *spot;
-lsList cmdList;
-long userOptionWord;
-{
-    octObject facet = {OCT_UNDEFINED_OBJECT, 0};
-    char facetHandle[POCT_FACET_HANDLE_LEN];
-
-    ViInit("edit-target");
-    ErrClear();
-
-    /* get current facet */
-    facet.objectId = spot->facet;
-    if (octGetById(&facet) != OCT_OK) {
-        PrintErr(octErrorString());
+    if (!GetCommentProp(&obj, &comment)) {
+	PrintErr(ErrGet());
         ViDone();
     }
-    else {
-	ptkOctObj2Handle(&facet, facetHandle);
-	TCL_CATCH_ERR( Tcl_VarEval(ptkInterp, "ptkChooseOne ", 
-				   "[ptkGetTargetNames ", facetHandle, "]  ", 
-				   " \"ptkEditParams ", facetHandle,
-				   " %s Target \" ", (char *)NULL) );
+    item.value = (comment == NULL) ? "" : comment;
+    if (dmMultiText("Edit Comment", 1, &item) != VEM_OK) {
+	PrintCon("Aborted entry");
+        ViDone();
     }
-    FreeOctMembers(&facet);
+    if (!SetCommentProp(&obj, item.value)) {
+	PrintErr(ErrGet());
+        ViDone();
+    }
     ViDone();
 }

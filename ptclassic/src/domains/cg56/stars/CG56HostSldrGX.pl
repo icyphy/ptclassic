@@ -7,7 +7,7 @@ defstar {
 	author { Chih-Tsung Huang, ported from Gabriel }
 	ccinclude { "StringState.h" "CGTarget.h" "StringList.h"}
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -16,12 +16,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	explanation {
 .Ir "slider bar"
 .Ir "gxslider program"
-Host port slider.
-The parameters \fIhostMin\fR, \fIhostMax\fR, and \fIhostInitialValue\fR
-control the values that the slider is labeled with under X windows.
-They are mapped in a linear or decibel fashion into the range
-of the parameters \fIdspMin\fR and \fIdspMax\fR on the DSP,
-depending on whether \fIscale\fR is linear or log.
+Host port slider.  The parameters hostMin
+hostMax, and hostInitialValue control the values
+that the slider is labelled with under X windows.  They
+are mapped in a linear or decibel fashion into the range
+of the parameters dspMin and dspMax on the DSP,
+depending on whether scale is linear or log.
 	}
 	output {
 		name {output}

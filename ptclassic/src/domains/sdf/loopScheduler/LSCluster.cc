@@ -3,36 +3,13 @@ static const char file_id[] = "LSCluster.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
 
  Programmer: Soonhoi Ha, Based on Shuvra's work.
  Date of creation: 4/92
 
  LSCluster class
- '
 
 *******************************************************************/
 #ifdef __GNUG__
@@ -44,8 +21,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SDFCluster.h"
 #include "ClusterNodeList.h"
 #include "Target.h"
-
-SDFFiring :: ~SDFFiring() { LOG_DEL; delete next;}
 
 // constructor
 LSCluster :: LSCluster (LSGraph& g, ClusterNodeList* clist) {
@@ -66,11 +41,11 @@ void LSCluster :: determineOrder(LSGraph& g, ClusterNodeList* clist) {
 
 	ClusterNodeListIter firstType(*clist);
 	LSNode* nodePar = firstType++;
-	DataFlowStar* first = clist->first;
+	SDFStar* first = clist->first;
 
 	ClusterNodeListIter secondType(*clist);
 	LSNode* nodeSon = secondType++;
-	DataFlowStar* second = clist->second;
+	SDFStar* second = clist->second;
 	while (nodeSon->myMaster() == first) {
 		nodeSon = secondType++;
 	}
@@ -109,7 +84,7 @@ void LSCluster :: determineOrder(LSGraph& g, ClusterNodeList* clist) {
 	} while (nodeSon);
 }		
 
-void LSCluster :: addFiring(DataFlowStar* s, int cnt) {
+void LSCluster :: addFiring(SDFStar* s, int cnt) {
 
 	LOG_NEW; SDFFiring* newF = new SDFFiring(s, cnt);
 	if (!firing) { 
@@ -121,32 +96,19 @@ void LSCluster :: addFiring(DataFlowStar* s, int cnt) {
 	}
 }
 
-// run the cluster
-int LSCluster :: run() {
+// fire the cluster
+void LSCluster :: go() {
 
 	SDFFiring* f = firing;
 	while (f) {
-		for (int i = f->count; i > 0; i--) {
-			if (!f->s->run()) return FALSE;
-		}
+		for (int i = f->count; i > 0; i--)
+			f->s->fire();
 		f = f->next;
 	}
-	return TRUE;
 }
 	
-static const int FORCE = 2;
-// simulate the execution of the cluster
-// FIXME: probably not right.
-void LSCluster :: fixBufferSizes(int) {
-
-	SDFFiring* f = firing;
-	while (f) {
-		for (int i = f->count; i > 0; i--) {
-			f->s->simRunStar(FORCE);
-		}
-		f = f->next;
-	}
-}
+// isA functions
+ISA_FUNC(LSCluster,SDFStar);
 
 // indent by depth tabs.
 static const char* tab_2(int depth) {
@@ -169,10 +131,11 @@ StringList LSCluster :: displaySchedule(int depth) {
 			depth++;
 		}
 
-		
-		SDFBaseCluster* temp = (SDFBaseCluster*)(f->s);
-		sch += temp->displaySchedule(depth);
-
+		if (f->s->isA("LSCluster") == 1) {
+			sch += ((LSCluster*) f->s)->displaySchedule(depth);
+		} else {
+			sch += ((SDFCluster*) f->s)->displaySchedule(depth);
+		}
 		if (f->count > 1) {
 			depth--;
 			sch += tab_2(depth);
@@ -184,24 +147,24 @@ StringList LSCluster :: displaySchedule(int depth) {
 }
 	
 // generate Code
-void LSCluster :: genCode(Target& t, int depth) {
+StringList LSCluster :: genCode(Target& t, int depth) {
 
+	StringList code;
 	SDFFiring* f = firing;
 	while (f) {
 		if (f->count > 1) {
-			t.beginIteration(f->count, depth);
-			depth++;
+			code += t.beginIteration(f->count, depth);
 		}
-		SDFBaseCluster* temp = (SDFBaseCluster*)(f->s);
-
-		temp->genCode(t, depth);
-
+		SDFStar* temp = f->s;
+		if (temp->isA("LSCluster")) {
+			code += ((LSCluster*) temp)->genCode(t, depth+1);
+		} else {
+			code += ((SDFCluster*) temp)->genCode(t, depth);
+		}
 		if (f->count > 1) {
-			depth--;
-			t.endIteration(f->count, depth);
+			code += t.endIteration(f->count, depth);
 		}
 		f = f->next;
 	}
-	return;
+	return code;
 }
-

@@ -1,33 +1,25 @@
 defstar {
-	name {BlackHole}
-	domain {CGC}
-	version {$Id$}
-	desc {
-Discards all inputs.
+	name   { BlackHole }
+	domain { CGC }
+	desc   {
+Swallows an input sample
 	}
-	author { J. T. Buck }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CGC main library }
+	version     { $Id$ }
+	author      { E. Ammicht }
+	copyright   { 1992 AT&T Bell Laboratories }
+	location    { CGC main library }
+
 	explanation {
-A BlackHole accepts input Particles, but doesn't do anything with
-them.  It is typically used to discard unwanted outputs from other blocks.
+This star absorbs all inputs, hence no code needs to be generated!
 	}
-	inmulti {
-		name{input}
-		type{ANYTYPE}
+
+	input {
+		name { input }
+		type { ANYTYPE }
 	}
-	constructor {
-		noInternalState();
-	}
+
 	go {
-		addCode("/* This star generates no code */");
-	}
-	exectime {
-		return 0;
+		gencode( CodeBlock( "/* BLACK HOLE FOR $ref(input) */" ));
 	}
 }
+

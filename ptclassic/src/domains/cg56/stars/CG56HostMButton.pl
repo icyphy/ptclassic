@@ -1,43 +1,30 @@
 defstar {
-    name { HostMButton }
+    name { HostMultiButton }
     derivedFrom { HostASrc }
     domain { CG56 }
     desc { Graphical one-of-many input source. }
     version { $Id$ }
     author { Kennard White }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-    location { CG56 io library }
+    copyright { 1992 The Regents of the University of California }
+    location { CG56 library }
     explanation {
 .Ir "button"
-This is an asynchronous source star (like the
-.c Const
-star) with a particular graphical user interface.
-The star always outputs one of a finite number of values: the output is
-controlled by the user selecting one of several buttons.
-Exactly one button in the group is on.
-.LP
-The \fIpairs\fR parameter defines a set of pairs.
-Each pair should be enclosed in double quotes.
-Each pair consists of two words: a one word label and a value.
-The value most be either a FIX or INT.
-The value is not checked at compile time: it is literally passed to qdm.
+This is an asynchronous source star (like the Const star) with a particular
+graphical user interface.  The star always outputs one of a finite number
+of values: the output is controled by the user selecting one of several
+buttons.  Exactly one button in the group is on.
     }
     state {
-	name { pairs }
-	type { STRING }
-	desc { Name and value pairs. }
-	default { "" }
+	    name { pairs }
+	    type { STRING }
+	    desc { Name and value pairs. }
+	    default { "" }
     }
     codeblock(cbMultiButtonAio) {
-aio_multibutton $ref(value) $fullname() {$val(label)} {$val(pairs)}
+aio_multibutton $ref(value) $fullname() "$val(label)" $val(pairs)
     }
-    setup {
-	// For now, we don't do any checking of the pairs
+    start {
+	// For now, we dont do anycheck of the pairs
     }
     initCode {
     	addCode(cbMultiButtonAio,"aioCmds");

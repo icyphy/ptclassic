@@ -1,10 +1,11 @@
 defstar	{
-name { XCPoke }
+
+name { XCASend }
 domain { CG56 }
 desc { S56X to CGC synchronous send star }
 version	{ $Id$ }
 author { Jose Luis Pino }
-derivedFrom { XCAsynchComm }
+derivedFrom { XCABase }
 
 copyright {
 Copyright (c) 1994, 1993 The Regents of the University of California.
@@ -20,14 +21,8 @@ location { CG56	Target Directory }
 explanation {}
 
 input {
-    name {input}
-    type {ANYTYPE}
-}
-
-setup {
-    CG56XCAsynchComm::setup();
-    int farXfer = input.far()->numXfer();
-    if (!(int)blockSize%farXfer) input.setSDFParams(farXfer,farXfer-1);
+	name {input}
+	type {ANYTYPE}
 }
 
 codeblock(sendData) {
@@ -35,25 +30,12 @@ codeblock(sendData) {
 	move x0,$ref(buffer)
 }
 
-codeblock(sendBuffer,"int numXfer") {
-	movec	#($val(blockSize)-1),m0
-	move	$ref(bufStart),r0
-	move	$ref(input),x0
-	rep	#@numXfer
-	move	x0,$mem(buffer):(r0)+
-	move	r0,$ref(bufStart)
-	movec	m1,m0			;restore m0
-}
-
 go {
-	if (blockSize > 1)
-		addCode(sendBuffer(input.numXfer()));
-	else
-		addCode(sendData);
+	addCode(sendData);
 }
 
 execTime {
-	return (input.numXfer() > 1? input.numXfer() + 5: 2);
+	return 2;
 }
 
 }

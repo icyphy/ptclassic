@@ -1,36 +1,15 @@
-static const char file_id[] = "CompiledUniverse.cc";
+#ifndef _CompiledUniverse_cc
+#define _CompiledUniverse_cc 1
 
 #ifdef __GNUG__
-#pragma implementation
+#pragma once
 #endif
 /**************************************************************************
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
 
  Programmer:  E. A. Lee
  Date of creation: 12/14/91
@@ -42,33 +21,44 @@ and the universe state values.
 
 **************************************************************************/
 
-#include "CompiledUniverse.h"
+#include "Galaxy.h"
 
-// function to parse the command line.
+class CompiledUniverse : public Galaxy {
+public:
+	// This method returns 0 if command line was invalid, 1 otherwise.
+	// It sets Galaxy states given on the command line and updates
+	// numIters if the number of iterations is given on the command
+	// line.
+	int parseCommandLine(int argc, char** argv, int* numIters);
+};
 
 int CompiledUniverse::parseCommandLine(int argc, char** argv, int* numIters) {
 	int i = 1;
 	while (i < argc) {
-		if(stateWithName(argv[i])) {
-			// argument is recognized as a state name
-			char* value = (++i < argc) ? argv[i] : "";
-			setState(argv[(i++)-1],value);
-		} else {
-			// assume that the argument is the number of iterations
-			// check to be sure it's the last argument
-			if((i<argc-1) || !sscanf(argv[i], "%d", numIters)) {
-				BlockStateIter nextState(*this);
-				State* s;
-				StringList st;
-				st << "Usage: " << name();
-				while( (s = nextState++) ) {
-					st << " [" << s->name() << " <value>]";
-				}
-				st << " [iterations]";
-				Error::abortRun(st);
-				return FALSE;
-			} else { break; }
-		}
+	    if(stateWithName(argv[i])) {
+		// argument is recognized as a state name
+		char* value = (++i < argc) ? argv[i] : "";
+		setState(argv[(i++)-1],value);
+	    } else {
+		// assume that the argument is the number of iterations
+		// check to be sure it's the last argument
+		if((i<argc-1) || !sscanf(argv[i], "%d", numIters)) {
+			StateListIter nextState(states);
+			State* s;
+			StringList st = "Usage: ";
+			st += readName();
+			while(s = nextState++) {
+			    st += " [";
+			    st += s->readName();
+			    st += " value]";
+			}
+			st += " [iterations]";
+			Error::abortRun(st);
+		} else { break; }
+	    }
 	}
-	return TRUE;
 }
+
+#include "isa.h"
+
+#endif

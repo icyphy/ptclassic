@@ -1,26 +1,16 @@
 defstar {
 	name { ReadFile }
 	domain { CG56 }
-	desc { Reads data from file for use with simulator.}
+	desc { Reads data from file for use by simulator.}
 	version { $Id$ }
 	author { Chih-Tsung Huang }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 signal sources library }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
 	explanation {
-.Ir "Motorola DSP56000 simulator"
-.Ir "simulator, Motorola DSP56000"
-.Id "file input"
-Reads one data value from the \fIfileName\fR for use with the
-Motorola DSP56000 simulator.
-The \fIinVal\fR is used as the storage location of the read data value.
+Reads data from file for use by simulator.
 	}
 	execTime {
-		return 2;
+		return (output.bufSize() >= 1) ? 2 : 0;
 	}
 	output {
 		name {output}
@@ -35,17 +25,23 @@ The \fIinVal\fR is used as the storage location of the read data value.
 	state {
 		name { inVal}
 		type { fix }
-		attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_NOINIT }
+		attributes { A_NONCONSTANT|A_NONSETTABLE }
 		default { "0"}
 	}
+	start {
+		if (output.bufSize() >= 1) {
+			// these attributes allocate memory
+			inVal.setAttributes(A_YMEM|A_NOINIT);
+		}
+	}
+	// this codeblock tells the simulator to log writes to the
+	// outVal state, which works when the buffersize is >= 1.
 
-	// this codeblock causes the simulator to read from a file into
-	// a memory location each time it is referenced.
 	codeblock (logIn) {
 input $ref(inVal) $val(fileName).sim -RF
 }
 	initCode {
-                addCode(logIn,"simulatorCmds");
+                genMiscCmd(logIn);
 	}
 
 	// this codeblock produces code
@@ -54,7 +50,7 @@ input $ref(inVal) $val(fileName).sim -RF
 	move	a,$ref(output)
 	}
 	go {
-		addCode(copy);
+		if (output.bufSize() >= 1) gencode(copy);
 	}
 }
 

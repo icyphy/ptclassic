@@ -6,12 +6,7 @@ Takes one input and produces multiple outputs.
 	}
 	version {$Id$}
 	author { S. Ha }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { CGC main library }
 	explanation {
 This star does not generate any code. In multiprocessor code generation
@@ -27,16 +22,7 @@ one Send star, more than one Send stars, and so on.)
 		name {output}
 		type {=input}
 	}
-	method {
-		name { amISpreadCollect }
-		access { protected }
-		arglist { "()" }
-		type { int }
-		code {
-			return -1;
-		}
-	}
-	setup {
+	start {
 		MPHIter iter(output);
 		CGCPortHole* p;
 		int loc = 0;

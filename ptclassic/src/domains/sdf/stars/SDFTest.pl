@@ -4,23 +4,21 @@ defstar {
 	version { $Id$ }
 	author { Rolando Diesta and Edward A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF main library }
+	location { SDF logic library }
 	desc {
-This star compares its two inputs "upper" and "lower".
-The test "condition" can be any one of {EQ NE GT GE},
-or equivalently any one of {== != > >=},
-whose elements represent the binary operations of equals, not equals,
-greater than, and greater than or equals, respectively.
+This star compares two inputs.  The test condition can be any of
+{EQ NE GT GE} or {== != > >=}, resulting in equals,
+not equals, greater-than, or greater-than or equals.
 
-If the "crossingsOnly" parameter is TRUE, then the output is TRUE only
+If "crossingsOnly" is TRUE, then the output is TRUE only
 when the outcome of the test changes from TRUE to FALSE
-or FALSE to TRUE.
-In this case, the first output is always TRUE.
+or FALSE to TRUE.  In this case, the first output is always
+TRUE.
 	}
 	explanation {
 To implement the tests "<" or "<=", simply reverse the inputs.
@@ -36,23 +34,23 @@ To implement the tests "<" or "<=", simply reverse the inputs.
 	input {
 		name { upper }
 		type { float }
-		desc { Left-hand side of the test. }
+		desc { Left hand side of the test. }
 	}
 	input {
 		name { lower }
 		type { float }
-		desc { Right-hand side of the test. }
+		desc { Right hand side of the test. }
 	}
 	output {
 		name { output }
 		type { int }
-		desc { Result of the test. }
+		desc { Indicates the result of the test.}
 	}
 	defstate {
 		name { condition }
 		type { string }
 		default { "EQ" }
-		desc { The test condition, i.e, one of EQ, NE, LT, or LE. }
+		desc { The test condition: one of EQ NE LT or LE }
 	}
 	defstate {
 		name { crossingsOnly }
@@ -89,7 +87,7 @@ To implement the tests "<" or "<=", simply reverse the inputs.
 		else Error::abortRun(*this,"Unrecognized test.");
 	}
 	go {
-		int result = 0;
+		int result;
 		double left = double(upper%0);
 		double right = double(lower%0);
 

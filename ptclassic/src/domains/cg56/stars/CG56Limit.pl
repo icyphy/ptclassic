@@ -4,15 +4,9 @@ defstar {
 	desc { Hard Limiter }
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 nonlinear functions library }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
 	explanation {
-.Id "hard limiter"
 The star hard limits input samples to keep the range of 
 (\fIbottom, top\fR).
 	}
@@ -25,18 +19,17 @@ The star hard limits input samples to keep the range of
 		type {FIX}
 	}
 	state {
-		name {bottom}
-		type {FIX}
-		default {0}
-		desc {Lower limit of the output.}
-	}
-	state {
 		name {top}
 		type {FIX}
-		default {ONE}
-		desc {Upper limit of the output.}
+		default {0.1}
+		desc {sets top limit.}
 	}
-
+	state {
+		name {bottom}
+		type {FIX}
+		default {"-0.1"}
+		desc {sets bottom limit}
+	}
 
 	codeblock(limitblock) {
 	move	#$val(top),x0
@@ -52,7 +45,7 @@ $label(end)
         }
 
  	go {
- 		addCode(limitblock);
+ 		gencode(limitblock);
  	}
 
 	exectime {

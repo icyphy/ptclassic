@@ -1,36 +1,27 @@
+ident {
+/**************************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  Soonhoi Ha
+ Date of creation: 10/23/90
+
+ It measures the time difference of the first and second arrival of the
+ same data. If a data arrives at the first time, it is stored into the
+ queue. If it is a second arrival of a data, it is matched to the
+ first arrival in the queue and generates an output of time difference.
+ The data itself is also generated at the second arrival.
+**************************************************************************/
+}
 defstar {
 	name { MeasureDelay }
 	domain { DE }
-	version { $Id$}
-	author { Soonhoi Ha }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { DE main library }
-	desc {
-Measure the time difference between the first arrival
-and the second arrival of an event with the same value.
-The second arrival and the time difference are each sent to outputs.
-	}
-	explanation {
-This star measures the time difference of the first and second arrival of
-particles with the same value on the same input.
-When the first particle with a particular data value
-arrives, it is stored.
-When the second particle with a particular data value arrives,
-it is matched to the first arrival in storage, and
-a \fItimeDiff\fR
-output is generated with value equal to the arrival time difference.
-The data value itself is also
-sent to the \fIoutput\fR port upon the second arrival.
-.pp
-Packets are only considered to have the "same value" if they are copied
-from a common source (so that each packet shares the same common PacketData
-structure).  This suffices for common uses of MeasureDelay where the
-same packet is routed through a delay-free path and also a path with delay.
+	desc {	"Measure the time difference between the first arrival\n"
+		"and the second arrival of an event.\n"
+		"Output event is generated on the second arrival.\n"
 	}
 	input {
 		name { input }
@@ -42,16 +33,19 @@ same packet is routed through a delay-free path and also a path with delay.
 	}
 	output {
 		name { output }
-		type { =input }
+		type { ANYTYPE }
 	}
 	hinclude { "PriorityQueue.h" }
+	defstate {
+		name { queueSize }
+		type { int }
+		default { "100" }
+		desc { "size of the queue" }
+	}
 	protected {
 		PriorityQueue firstArrivalQ;
 	}
-	constructor {
-		input.triggers(output);
-	}
-	setup {
+	start {
 		firstArrivalQ.initialize();
 	}
 
@@ -65,7 +59,7 @@ same packet is routed through a delay-free path and also a path with delay.
 		firstArrivalQ.reset();
 		while (len > 0) {
 			LevelLink* h = firstArrivalQ.next();
-			if (value == *(Particle*)(h->e)) {
+			if (!strcmp(value.print(),((Particle*)h->e)->print())){
 			   // yes, match! --> output
 			   timeDiff.put(completionTime) <<
 				   completionTime - h->level;
@@ -79,18 +73,9 @@ same packet is routed through a delay-free path and also a path with delay.
 		}
 		// no match, register the event into the queue
 		Particle* newp = value.clone();
+		*newp = value;
 		firstArrivalQ.levelput(newp, arrivalTime);
-
-	}
-	// remove leftover particles from queue
-	wrapup {
-		while (firstArrivalQ.length() > 0) {
-			Particle* p = (Particle*)firstArrivalQ.getFirstElem();
-			p->die();
-		}
-	}
-	destructor {
-		wrapup();	// in case it was not called before
+				
 	}
 }
 

@@ -1,6 +1,7 @@
 /*******************************************************************
 Define a main window object.  This object has a Tcl interpreter
 with PTcl extensions associated with it, created by the constructor.
+This main window will be converted to a console window by Lib.tcl.
 
 $Id$
 Programmer: E. A. Lee
@@ -34,19 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "TyConsole.h"
 #include "InfString.h"
-#if ITCL_MAJOR_VERSION == 2
-#include <itk.h>
-#endif
 #include <stdio.h>
-
-static void SetVersionInfo (Tcl_Interp *ptkInterp, char *Filename)
-{
-    InfString pid = (int)getpid();
-    Tcl_VarEval(ptkInterp, "set TychoVersionInfo {", gVersion, \
-	    " (proc. id. ", (char*)pid, ")}", (char *) NULL);
-    Tcl_VarEval(ptkInterp, "set TychoBinaryInfo {", Filename, "}", \
-	    (char *) NULL);
-}
 
 TyConsole::TyConsole(int argc, char **argv) {
 
@@ -71,22 +60,33 @@ TyConsole::TyConsole(int argc, char **argv) {
   // Define Tcl and Tk extensions
   tytcl = new TyTcl(interp, ptkw);
 
-  // Command line arguments are made available in the Tcl variables "argc"
-  // and "argv".
-  InfString argcstring = argc-1;
-  Tcl_SetVar(interp, "argc", (char*)argcstring, TCL_GLOBAL_ONLY);
+  // Process command line arguments.
+  // Main function is to just make them available in the Tcl variables "argc"
+  // and "argv".  However, in addition, if the first argument does not start
+  // with a "-", then strip it off and use it as the name of a script file to
+  // process.
+  char *fileName = NULL;
+  if ((argc > 1) && (argv[1][0] != '-')) {
+    fileName = argv[1];
+    argc--;
+    argv++;
+  }
+
   char *args = Tcl_Merge(argc-1, argv+1);
   Tcl_SetVar(interp, "argv", args, TCL_GLOBAL_ONLY);
   ckfree(args);
+  InfString buf = argc-1;
+  Tcl_SetVar(interp, "argc", (char*)buf, TCL_GLOBAL_ONLY);
+  Tcl_SetVar(interp, "argv0", (fileName != NULL) ? fileName : argv[0],
+	     TCL_GLOBAL_ONLY);
 
   // Set the "tcl_interactive" variable.
   int tty = isatty(0);
   if (tty) {		// set up interrupt handler
-    // SimControl::catchInt(); 
-    // I removed this to allow for killing of Tycho with ^C. - jking -
+    SimControl::catchInt();
   }
   Tcl_SetVar(interp, "tcl_interactive",
-	     (tty) ? "1" : "0", TCL_GLOBAL_ONLY);
+	     ((fileName == NULL) && tty) ? "1" : "0", TCL_GLOBAL_ONLY);
 
   // our vers of Tk_AppInit
   if (appInit(interp, ptkw) != TCL_OK) {
@@ -96,26 +96,44 @@ TyConsole::TyConsole(int argc, char **argv) {
     tyExit(1);
   }
 
-  // Set version/binary info variables
-  SetVersionInfo(interp, argv[0]);
-
-  // Load the startup file Tycho.tcl
-  char *ty = getenv("TYCHO");
+  // Load the startup file Lib.tcl
   char *pt = getenv("PTOLEMY");
-  InfString command;
-  if (ty) {
-    command << ty << "/kernel/Tycho.tcl";
-  } else {
-    if (pt) {
-      command << pt << "/tycho/kernel/Tycho.tcl";
-    } else {
-      command << "~ptolemy/tycho/kernel/Tycho.tcl";
-    }
-  }	
+  InfString command = pt ? pt : "~ptolemy";
+  command << "/tycho/kernel/Lib.tcl";
   if (Tcl_EvalFile(interp, (char*)command) != TCL_OK) {
     fprintf(stderr,
-	"Unable to load Tycho.tcl startup file: %s\n ", interp->result);
+	"Unable to load Lib.tcl startup file: %s\n ", interp->result);
     tyExit(1);
+  }
+
+  // Source a user-specific startup file if Tcl_AppInit specified
+  // one and if the file exists.
+  if (tcl_RcFileName != NULL) {
+    Tcl_DString buffer;
+
+    char *fullName = Tcl_TildeSubst(interp, tcl_RcFileName, &buffer);
+    if (fullName == NULL) {
+      fprintf(stderr,
+	"Tilde substition failed in ~/.tycho: %s\n", interp->result);
+    } else {
+      if (access(fullName, R_OK) == 0) {
+	if (Tcl_EvalFile(interp, fullName) != TCL_OK) {
+	  fprintf(stderr,
+		"Failed to source ~/.tycho: %s\n", interp->result);
+	}
+      }
+    }
+    Tcl_DStringFree(&buffer);
+  }
+
+  // If a script file was specified then just source that file and quit.
+  if (fileName != NULL) {
+    if (Tcl_EvalFile(interp, fileName) != TCL_OK) {
+      fprintf(stderr, "Script file fails: %s\n", interp->result);
+      tyExit(1);
+    } else {
+      tyExit(0);
+    }
   }
 }
 
@@ -130,15 +148,6 @@ void TyConsole::tyExit(int code) {
   // users can replace "exit" with some other command to do additional
   // cleanup on exit.  The Tcl_Eval call should never return.
   // In case it does, we call exit anyway.
-
-  // If ptkVerboseErrors is set, print out errorInfo on the way out
-  int ptkVerboseErrors = 0;
-  Tcl_GetBoolean(interp, "ptkVerboseErrors", &ptkVerboseErrors);
-  if (ptkVerboseErrors) {
-    fprintf(stderr, "%s\n", Tcl_GetVar(interp, "errorInfo",TCL_GLOBAL_ONLY));
-    fflush(stderr);
-  }
-
   InfString cmd = "exit ";
   cmd << code;
   Tcl_Eval(interp, (char*)cmd);
@@ -149,26 +158,17 @@ void TyConsole::tyExit(int code) {
   exit(1);
 }
 
-int TyConsole::appInit(Tcl_Interp *ip, Tk_Window) {
+int TyConsole::appInit(Tcl_Interp *ip, Tk_Window win) {
   if (Tcl_Init(ip) == TCL_ERROR)
     return TCL_ERROR;
   if (Tk_Init(ip) == TCL_ERROR)
     return TCL_ERROR;
+  tcl_RcFileName = "~/.tycho";
+  
   // Add [incr Tcl] (itcl) facilities
   if (Itcl_Init(ip) == TCL_ERROR) {
     return TCL_ERROR;
   }
-#if ITCL_MAJOR_VERSION == 2
-  if (Itk_Init(ip) == TCL_ERROR) {
-    return TCL_ERROR;
-  }
-#endif
-#if PTUSE_EXPECT
-  // Add expect facilities
-  if (Exp_Init(ip) == TCL_ERROR) {
-    return TCL_ERROR;
-  }
-#endif 
   return TCL_OK;
 }
 

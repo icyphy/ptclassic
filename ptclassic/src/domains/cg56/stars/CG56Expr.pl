@@ -6,7 +6,7 @@ defstar
     version { $Id$ }
     author { Jose Luis Pino }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -30,7 +30,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	name { expr }
 	type { string }
 	default { "\tmove\t$ref(in#1),a\n\tmove\ta,$ref(out)" }
-	desc { Expression to evaluate. }
+	desc { Expression to evaulate. }
     }
 
     state
@@ -43,8 +43,6 @@ limitation of liability, and disclaimer of warranty provisions.
 
     go
     {
-	StringList code;
-	code << expr << '\n';
 	addCode(expr);
     }
 

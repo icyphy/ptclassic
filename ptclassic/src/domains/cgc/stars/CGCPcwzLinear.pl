@@ -20,12 +20,12 @@ will be -1.0.  If the input is +2.0, the output will again be -1.0.
 	version { $Id$ }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC main library }
+	location { SDF main library }
 	explanation {
 .Id "table lookup"
 .Id "piecewise linear map"

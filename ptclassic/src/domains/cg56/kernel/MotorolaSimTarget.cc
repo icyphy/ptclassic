@@ -3,123 +3,76 @@ static const char file_id[] = "MotorolaSimTarget.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
+ Copyright (c) 1992 The Regents of the University of California.
+                       All Rights Reserved.
 
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
-
- Programmer: J. Buck, J. Pino
-
- Target for Motorola assembly code generation that runs its
- output on the simulator.
+ Programmer: J. Pino and J. Buck
 
 *******************************************************************/
-
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
-#include "MotorolaSimTarget.h"
+#include "MotorolaAttributes.h"
+#include "AsmStar.h"
 
-void MotorolaSimTarget :: initStates(const char* dsp,const char* start, 
-	const char* end) {
-	dspType = dsp;
-	startAddress = start;
-	endAddress = end;
-	addState(interactiveFlag.setState(
-		"Interactive Simulation",this,"YES",""));
-	addStream("simulatorCmds",&simulatorCmds);
-	addStream("shellCmds",&shellCmds);
+class MotorolaSimTarget :: initStates() {
+	addState(plotFile.setState("plotFile",this,"outfile.sim",
+		"file to plot with xgraph after run"));
+	addState(plotTitle.setState("plotTitle",this,"Simulator output", 
+		"graph title (if any)"));
+	addState(plotOptions.setState("plotOptions",this,"",
+		"xgraph options"));
+	addState(intSim.setState("Interactive Simulation?",this,"YES"));
+	runCode.setValue("YES");
+	runCode.setAttributes(A_SETTABLE|A_NONCONSTANT);
 }
 
-int MotorolaSimTarget::compileCode() {
-	StringList assembleCmds;
-	assembleCmds << "asm" << dspType << " -A -b -l " << filePrefix << ".asm";
-	return !systemCall(assembleCmds,"Errors in assembly");
-}
-
-int MotorolaSimTarget::loadCode() {
-	StringList cmdFile;
-	cmdFile << "load " << filePrefix << ".lod\n" << simulatorCmds
-		<< "break pc>=$" << endAddress << "\ngo $" << startAddress
-		<< "\n";
-	if (!interactiveFlag) cmdFile << "quit\n";
-	return writeFile(cmdFile,".cmd");
-}
-
-void MotorolaSimTarget::writeCode() {
-    /*
-     * generate shell-cmd file (/bin/sh)
-     */
-    if (!parent()) {
-	StringList realcmds = "#!/bin/sh\n";
-	realcmds << headerComment("# ");
-	realcmds << "# Remove all of the CG56WriteFile outputs\n";
-	realcmds << "/bin/rm -f /tmp/cgwritefile*\n";
-	realcmds << "# Run the simulator\n";
-	if (interactiveFlag) 
-		realcmds << "(xterm -e sim";
-	else 
-		realcmds << "(sim";
-	realcmds << dspType << " " << filePrefix << ".cmd" << ">/dev/null)\n";
-	realcmds << "\n# Display the results\n";
-	realcmds << shellCmds;
-	if (!writeFile(realcmds,"",FALSE,0755)) {
-	    Error::abortRun(*this,"Shell command file write failed");
-	    return;
+class MotorolaSimTarget :: initializeCmds(const char* dspType) {
+	StringList outfile = dirFullName;
+	outfile += "/";
+	outfile += plotFile.currentValue();
+	unlink(outfile);
+	CG96Target::initializeCmds();
+	assembleCmds += "asm";
+	assembleCmds += dspType;
+	assembleCmds += "000 -A -b -l ";
+	assembleCmds += fileName(uname,".asm");
+	assembleCmds += "\n";
+	miscCmds += "load ";
+	miscCmds += uname;
+	miscCmds += "\n";
+	if (int(intSim) == TRUE) 
+		downloadCmds += "xterm -e sim96000 ";
+	else
+		downloadCmds += "sim96000 ";
+	downloadCmds += fileName(uname,".cmd\n");
+	const char* file = plotFile;
+	if (*file != 0) {
+		downloadCmds += "awk '{print ++n, $1}' ";
+		downloadCmds += file;
+		downloadCmds += " | xgraph -t '";
+		downloadCmds += (const char*)plotTitle;
+		downloadCmds += "' ";
+		downloadCmds += (const char*)plotOptions;
+		downloadCmds += "&\n";
 	}
-    }
-    /*
-     * generate the .asm file (and optionally display it)
-     */
-    MotorolaTarget:: writeCode();
 }
 
-int MotorolaSimTarget::runCode() {
-	StringList runCmd;
-	runCmd << "./" << filePrefix << " &";
-	if (systemCall(runCmd,"Problems running code onto simulator")!=0)
-	    return FALSE;
-	return TRUE;
-}
-
-void MotorolaSimTarget :: headerCode () {
-	simulatorCmds.initialize();
-	shellCmds.initialize();
-	myCode << "	org	p:$" << startAddress << "\nSTART\n";
-};
-
-void MotorolaSimTarget :: trailerCode () {
-	trailer << "ERROR	jmp	$" << endAddress << "\n";
+int MotorolaSimTarget :: wrapup(const char* startAddress, const char* finalJumpLocation) {
+	StringList wrapupCode = "	jmp	";
+	wrapupCode += finalJumpLocation;
+	wrapupCode += "\nERROR	jmp	";
+	wrapupCode += finalJumpLocation;
+	wrapupCode += "\n	org	p:";
+	wrapupCode += finalJumpLocation;
+	wrapupCode += "\n	nop\n	stop\n";
+	miscCmds += "break pc>=";
+	miscCmds += finalJumpLocation;
+	miscCmds += "\ngo ";
+	miscCmds += startAddress;
+	miscCmds += "\n";
+	if (!int(intSim)) miscCmds += "quit\n";
 	inProgSection = TRUE;
-}
-
-void MotorolaSimTarget::frameCode()
-{
-    MotorolaTarget::frameCode();
-
-    // Put a STOP instruction at the end of program memory.
-    myCode << "	org	p:$" << endAddress << "\n"
-	   << "	nop\n"
-	   << "	stop\n";
+	return genFile(miscCmds, uname,".cmd"));
 }

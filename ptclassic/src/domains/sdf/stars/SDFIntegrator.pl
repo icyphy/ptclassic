@@ -1,36 +1,30 @@
+ident {
+/************************************************************************
+Version identification:
+$Id$
+
+Copyright (c) 1990 The Regents of the University of California.
+                        All Rights Reserved.
+
+Programmer: E. A. Lee
+Date of creation: 9/19/90
+Modified to use preprocessor: 10/3/90, by JTB
+
+Integrator Star, with leakage, limiting, and reset.
+
+************************************************************************/
+}
 defstar {
 	name { Integrator }
 	domain { SDF }
 	desc {
-This is an integrator with leakage, limits, and reset.
-With the default parameters, input samples are simply accumulated,
-and the running sum is the output.  To prevent any resetting in the
-middle of a run, connect a Const source with value 0 to the "reset"
-input.  Otherwise, whenever a non-zero is received on this input,
-the accumulated sum is reset to the current input (i.e. no feedback).
-
-Limits are controlled by the "top" and "bottom" parameters.
-If top <= bottom, no limiting is performed (this is the default).
-Otherwise, the output is kept between "bottom" and "top".
-If "saturate" = YES, saturation is performed.  If "saturate" = NO,
-wrap-around is performed (this is the default).
-Limiting is performed before output.
-
-Leakage is controlled by the "feedbackGain" state (default 1.0).
-The output is the data input plus feedbackGain*state, where state
-is the previous output.
-	}
-	version {$Id$}
-	author { E. A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { SDF main library }
-	explanation {
-.Id "filter, integrator"
+	  "Integrator with leakage, limits, and reset.\n"
+	  "Leakage is controlled by the feedbackGain state (default 1.0).\n"
+	  "Limits are controlled by top and bottom.\n"
+	  "If top <= bottom, no limiting is performed (default).\n"
+	  "If saturate = 1, saturation is performed.\n"
+	  "If saturate = 0, wrap-around is performed (default).\n"
+	  "When the reset input is non-zero, the Integrator is reset to 0.0."
 	}
 	input {
 		name { data }
@@ -38,7 +32,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	input {
 		name { reset }
-		type { int }
+		type { float }
 	}
 	output {
 		name { output }
@@ -48,58 +42,58 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {feedbackGain}
 		type {float}
 		default {"1.0"}
-		desc { The gain on the feedback path.}
+		desc {"gain on the feedback path"}
 	}
 	defstate {
 		name {top}
 		type {float}
 		default {"0.0"}
-		desc { The upper limit.}
+		desc {"upper limit"}
 	}
 	defstate {
 		name {bottom}
 		type {float}
 		default {"0.0"}
-		desc { The lower limit.}
+		desc {"lower limit"}
 	}
 	defstate {
 		name {saturate}
 		type {int}
-		default {"YES"}
-		desc { Saturate if YES, wrap around otherwise.}
+		default {"0"}
+		desc {"saturate if 1, wrap around if 0"}
 	}
 	defstate {
 		name {state}
 		type {float}
 		default {"0.0"}
-		desc { An internal state.}
-		attributes { A_NONCONSTANT|A_SETTABLE }
+		desc {"internal state"}
 	}
 	protected {
 		double spread;
 	}
-	setup {
+	start {
 		spread = double(top) - double(bottom);
 	}
 	go {
 	    double t;
-	    if (int(reset%0) != 0) {
-		t = double(data%0);
-	    } else {
-		t = double(data%0) + double(feedbackGain) * double(state);
-	    }
-	    if (spread > 0.0) {
+	    if (int(reset%0) != 0) t = 0;
+	    else {
+		t = float(data%0) + double(feedbackGain) * double(state);
+		if (spread > 0.0) {
 		    // Limiting is in effect
 
 		    // Take care of the top
-		if (t > double(top))
-		    if (int(saturate)) t = double(top);
-		    else do t -= spread; while (t > double(top));
+		    if (t > double(top))
+			if (int(saturate) == 1) t = double(top);
+			else do t -= spread;
+			     while (t > double(top));
 
 		    // Take care of the bottom
-		if (t < double(bottom))
-		    if (int(saturate)) t = double(bottom);
-		    else do t += spread; while (t < double(bottom));
+		    if (t < double(bottom))
+			if (int(saturate) == 1) t = double(bottom);
+			else do t += spread;
+			     while (t < double(bottom));
+		}
 	    }
 	    output%0 << t;
 	    state = t;

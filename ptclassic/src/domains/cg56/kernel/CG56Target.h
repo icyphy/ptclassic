@@ -4,68 +4,42 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
+ Copyright (c) 1992 The Regents of the University of California.
+                       All Rights Reserved.
 
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
-
- Programmer: J. Buck and J. Pino
+ Programmer: J. Buck
 
  Base target for Motorola 56000 assembly code generation.
 
 *******************************************************************/
 
 #ifdef __GNUG__
+#pragma once
 #pragma interface
 #endif
 
-#include "MotorolaTarget.h"
+#include "AsmTarget.h"
 #include "ProcMemory.h"
-#include "StringState.h"
-#include "IntState.h"
 
-extern StringList CG56ONE;
-
-class CG56Target : public virtual MotorolaTarget {
-protected:
-    void writeFloat(double);
+class CG56Memory : public DualMemory {
 public:
-    CG56Target (const char* nam, const char* desc);
-
-    // copy constructor
-    CG56Target(const CG56Target& src);
-
-    /*virtual*/ Block* makeNew() const;
-
-    /*virtual*/ int isA(const char*) const;
-    /*virtual*/ void headerCode();
-    /*virtual*/ const char* className() const;
-    /*virtual*/ void setup();
-    /*virtual*/ int compileCode();
+	CG56Memory(unsigned x_addr,	// start of x memory
+		   unsigned x_len,	// length of x memory
+		   unsigned y_addr,	// start of y memory
+		   unsigned y_len	// length of y memory
+		   );
 };
 
-// Adds the galaxy parameter ONE.  This should be called by any multiprocessor
-// target that contains a CG56 child target.
-void addCG56One(Target *target, Galaxy *g);
+class CG56Target : public AsmTarget {
+public:
+	CG56Target (const char* nam, const char* desc,
+		    unsigned x_addr, unsigned x_len,
+		    unsigned y_addr, unsigned y_len);
+	Block* clone() const;
+	~CG56Target();
+
+private:
+	unsigned xa, xl, ya, yl;
+};
 
 #endif

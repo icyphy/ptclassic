@@ -1,15 +1,10 @@
 defstar {
-	name { SubCx }
+	name { CxDiff }
 	domain { SDF }
 	desc { Output the "pos" input minus the "neg" input, a complex value. }
 	version {$Id$}
 	author { J. Buck }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
 	input {
 		name { pos }

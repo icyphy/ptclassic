@@ -9,8 +9,8 @@
 #
 
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
-if ( ! $?PTARCH ) then
-    setenv PTARCH `$PTOLEMY/bin/ptarch`
+if ( ! $?ARCH ) then
+    setenv ARCH `$PTOLEMY/bin/arch`
 endif
 
-exec $PTOLEMY/bin.$PTARCH/installColors $*
+$PTOLEMY/bin.$ARCH/installColors $*

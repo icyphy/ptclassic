@@ -7,12 +7,7 @@ Generate pseudo-IID-uniform random variables.  The values range from
 	}
 	version { $Id$ }
 	author { Soonhoi Ha }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1992 The Regents of the University of California }
 	location { CGC main library }
 	explanation {
 Use two library functions drand48() and srand48(long) in Sun machines.
@@ -24,16 +19,10 @@ part. The code should be modified for portability.
 		type { float }
 	}
 	defstate {
-		name { lower }
-		type { float }
-		default { 0.0 }
-		desc { lower limit of uniform random number generator }
-	}
-	defstate {
-		name { upper }
+		name { range }
 		type { float }
 		default { 1.0 }
-		desc { upper limit of uniform random number generator }
+		desc { range of random number generator is [-range,+range] }
 	}
 	defstate {
 		name { seed }
@@ -41,23 +30,19 @@ part. The code should be modified for portability.
 		default { 1 }
 	}
 	initCode {
-		addGlobal("double drand48();\n", "drand48");
-		addCode(initSeed);
+		addGlobal("double drand48();\n");
+		gencode(initSeed);
 	}
 	go {
-		addCode(randomGen);
+		gencode(random);
 	}
 	// "code" to initialize the seed
 	codeblock(initSeed) {
     srand48($val(seed));
 	}
 	// "common" part of random number generation
-	codeblock(randomGen) {
-		float scale = $val(upper) - ($val(lower));
-		float center = ($val(upper) + ($val(lower)))/2.0;
-		$ref(output) = scale * (drand48() - 0.5) + center;
-	}
-	exectime {
-		return 10 + 5;	/* based on CG96IIDUniform */
+	codeblock(random) {
+		float scale = $val(range) * 2.0;
+		$ref(output) = scale * (drand48() - 0.5);
 	}
 }

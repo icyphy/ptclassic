@@ -11,7 +11,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC main library }
+	location { SDF main library }
 	explanation {
 If \fIcmpareMagnitude\fR is "no", the star finds from among
 the \fIinput\fR inputs the one with the maximum or minimum value;
@@ -67,7 +67,7 @@ This star is based on the MaxMin star in the CG56 domain.
 
 	codeblock(decl) {
 	double current, currentCmp, value, valueCmp;
-	int i, minChangeFlag, valueIndex;
+	int i, minChangeFlag, valueIndex = i;
 	int cmpMagFlag, maxflag;
 	}
 
@@ -76,15 +76,15 @@ This star is based on the MaxMin star in the CG56 domain.
 	maxflag = $val(MAX);
 	i = $val(N) - 1;
 	value = $ref(input,i);
-	valueCmp = cmpMagFlag ? FABS(value) : value;
+	valueCmp = $val(cmpMagFlag) ? FABS(value) : value;
 	valueIndex = i;
 	}
 
 	codeblock(compareData) {
-	while ( i-- > 0 ) {
+	while ( i-- >= 0 ) {
 		current = $ref(input,i);
 		currentCmp = cmpMagFlag ? FABS(current) : current;
-		minChangeFlag = ( currentCmp < valueCmp );
+		minChangeFlag = ( currentCmp < valueCmp )
 
 		/* Logical exclusive OR between maxflag and minChangeFlag
 		   but we cannot use the bitwise xor ^ */
@@ -100,14 +100,18 @@ This star is based on the MaxMin star in the CG56 domain.
 	codeblock(outputValue) {
 	/* Output the value or the magnitude of the value */
 	if ( $val(outputMagnitude) ) {
-		if ( value < 0.0 ) value = -value;
+		value = FABS(value);
 	}
 
 	/* Send the maximum/minimum value to the output port */
 	$ref(output) = value;
 
-	/* Adjust the index due to the LIFO nature of input data */
+	// Adjust the index due to the LIFO nature of input data
 	$ref(index) = $val(N) - valueIndex - 1;
+	}
+
+	initCode {
+		addCode(macros);
 	}
 
 	setup {
@@ -120,7 +124,6 @@ This star is based on the MaxMin star in the CG56 domain.
 	}
 
  	go {
-		addCode(macros);
 		addCode(decl);
 		addCode(initData);
 		addCode(compareData);

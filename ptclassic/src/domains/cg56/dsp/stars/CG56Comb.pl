@@ -1,27 +1,19 @@
 defstar {
 	name { Comb }
 	domain { CG56 }
-	desc { Comb filter }
+	desc { Comb Filter }
 	version { $Id$ }
-	acknowledge { Gabriel version by E. A. Lee }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 dsp library }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
         explanation {
-.pp
-A comb filter with a one-pole lowpass filter in the delay loop.
-The pole location is given by the pole parameter.
-The reverberation time is given by the time input [1, fig. 5].
-.UH REFERENCES
-.ip [1]
-J.A. Moore, "About this reverberation business",
-\fIComputer Music Journal\fR,
-vol. 3, no. 2, pp. 13-28, June, 1979.
+DSP56000 - A comb filter with a one-pole lowpass filter
+           in the delay loop.  The pole location is given
+           by the pole parameter.  The reverberation time
+           is given by the time input.  This filter is
+           from fig. 5 of J. A. Moore, `About this
+           reverberation business', Computer Music
+           Journal, Vol.  3, No. 2.
 	}
 
         input  {
@@ -72,8 +64,8 @@ vol. 3, no. 2, pp. 13-28, June, 1979.
         state  {
                 name { X }
 	        type { fix }
-	        default { ONE }
-	        desc { internal state }
+	        default { 1.0 }
+	        desc { value of pole }
                 attributes { A_NONCONSTANT|A_NONSETTABLE }
          }
 
@@ -107,15 +99,15 @@ vol. 3, no. 2, pp. 13-28, June, 1979.
         move    m1,m0
 
         }
-        setup {
+        start {
                 delayBuf.resize(delay);
         }		
         initCode {
-                addCode(block);
+                gencode(block);
 	}
         go {
-                X=1.0-pole.asDouble();
-                addCode(std);
+                X=1.0-pole;
+                gencode(std);
         }		
 
 	execTime { 

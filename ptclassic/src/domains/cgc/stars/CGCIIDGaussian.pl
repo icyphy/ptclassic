@@ -6,7 +6,7 @@ Generate pseudo-IID-Gaussian random variables.
 	}
 	version { $Id$ }
 	author { Soonhoi Ha }
-	copyright { 1990-%Q% The Regents of the University of California }
+	copyright { 1992 The Regents of the University of California }
 	location { CGC main library }
 	explanation {
 Use two library functions drand48() and srand48(long) in Sun machines.
@@ -40,14 +40,14 @@ part. The code should be modified for portability.
 		addInclude("<math.h>");
 	}
 	go {
-		addCode(randomGen);
+		addCode(random);
 	}
 	// "code" to initialize the seed
 	codeblock(initSeed) {
     srand48($val(seed));
 	}
 	// "common" part of random number generation
-	codeblock(randomGen) {
+	codeblock(random) {
 		int i;
 		double sum = 0;
 		for (i = 0; i < 27; i++) {

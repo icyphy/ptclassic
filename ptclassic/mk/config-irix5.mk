@@ -1,30 +1,8 @@
 # Configuration makefile to build on SGI Indigo running Irix5.x
 #
 # $Id$
-# Copyright (c) 1990-%Q% The Regents of the University of California.
-# All rights reserved.
-# 
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that the
-# above copyright notice and the following two paragraphs appear in all
-# copies of this software.
-# 
-# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-# SUCH DAMAGE.
-# 
-# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-# ENHANCEMENTS, OR MODIFICATIONS.
-# 
-# 						PT_COPYRIGHT_VERSION_2
-# 						COPYRIGHTENDKEY
+# Copyright (c) 1994 The Regents of the University of California.
+#                       All Rights Reserved.
 #	Programmer: Christopher Hylands
 
 # --------------------------------------------------------------------
@@ -40,41 +18,31 @@ include $(ROOT)/mk/config-g++.mk
 #
 # IRIX5.x does not have a ranlib
 RANLIB = 	true
+# Use gcc everywhere _except_ in octtools
 CC =		gcc
-# OCT_CC is used in src/octtools/vem-{lib,bin}.mk
-OCT_CC =	gcc -fwritable-strings
-
 OPTIMIZER =	-O2
-#-Wsynth is new in g++-2.6.x
-# Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
-WARNINGS =	-Wall -Wsynth #-Wcast-qual 
+WARNINGS =	-Wall -Wcast-qual -Wcast-align
 
 # Use -D_BSD_SIGNALS for src/kernel/SimControl.cc
 #  see /usr/include/sys/signals.h for more info.
 # Use -D_BSD_TIME for src/kernel/Clock.cc, see /usr/include/sys/time.h
 MISC_DEFINES =	-D_BSD_SIGNALS -D_BSD_TIME
 
-# Under gcc-2.5.8 on Irix5.2, -g is not supported unless you have gas-2.5
-# Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
-GPPFLAGS =	-G 0 $(MEMLOG) $(WARNINGS) $(MISC_DEFINES) $(OPTIMIZER) -fno-for-scope
+#  Under gcc-2.5.8 on Irix5.2, -g is not supported
+GPPFLAGS =	-G 0 $(MEMLOG) $(WARNINGS) $(MISC_DEFINES) $(OPTIMIZER)
 
-#     -cckr  The traditional K&R/Version7 C with SGI extensions
-# Note that -cckr will not work with gcc
-#CFLAGS =	-G 0 -cckr $(OPTIMIZER)
-CFLAGS =	-G 0 $(MEMLOG) $(WARNINGS) $(MISC_DEFINES) $(OPTIMIZER)
+#     -cckr   The traditional K&R/Version7 C with SGI extensions
+CFLAGS =	-G 0 -cckr $(OPTIMIZER)
+
 #
 # Variables for the linker
 #
+SYSLIBS =	-lg++ -lm -lmld
 
-
-# system libraries for linking .o files from C files only
-CSYSLIBS = 	-lm -lmld
-# system libraries (libraries from the environment) for c++ files
-SYSLIBS =	-lg++ $(CSYSLIBS)
-
-# -s strips out debugging information, otherwise we get a 30Mb pigiRpc
-# -x is also useful, it removed local symbols, see the ld man page
-LINKFLAGS =	-L$(LIBDIR) -G 0 -Xlinker -s
+# -N flags causes 'syntax errors' at runtime under irix4
+#	./ptcl: syntax error at line 2: `(' unexpected
+# Without the -N flag, it is doubtful if dynamic linking will work
+LINKFLAGS =	-L$(LIBDIR) -G 0 -Xlinker -x
 LINKFLAGS_D =	-L$(LIBDIR) -G 0
 
 #
@@ -83,16 +51,16 @@ LINKFLAGS_D =	-L$(LIBDIR) -G 0
 X11_INCSPEC = -I/usr/X11/include
 X11_LIBSPEC = -L/usr/X11/lib -lX11
 
+# S56 directory is only used on sun4.
+S56DIR =
+
 #
 # Variables for miscellaneous programs
 #
 # Used by xv
 #XV_RAND= RAND="-DNO_RANDOM -Drandom=rand"
 XV_INSTALL =	/usr/bin/X11/bsdinst
-XV_CC =		cc -cckr -DSVR4 -DXLIB_ILLEGAL_ACCESS
+XV_CC =		"cc -cckr -DSVR4 -DXLIB_ILLEGAL_ACCESS"
 
 # Used by tcltk to build the X pixmap extension
 XPM_DEFINES =	-DZPIPE
-
-# Matlab architecture
-MATARCH = sgi

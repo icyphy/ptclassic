@@ -1,16 +1,19 @@
+ident {
+// Output = pos input minus all neg inputs
+// Version identification:
+// $Id$
+
+// Copyright (c) 1990 The Regents of the University of California.
+//                       All Rights Reserved.
+
+// Programmer: E. A. Lee
+// Date of creation: 9/19/90
+// Converted to use preprocessor: 10/3/90 by JTB
+}
 defstar {
-	name { Sub }
+	name { FloatDiff }
 	domain { SDF }
-	desc { Output the "pos" input minus all "neg" inputs. }
-	version {$Id$}
-	author { E. A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { SDF main library }
+	desc { "Output the pos input minus all neg inputs" }
 	input {
 		name { pos }
 		type { float }
@@ -23,14 +26,15 @@ limitation of liability, and disclaimer of warranty provisions.
 		name { output }
 		type { float }
 	}
+	start {
+		neg.reset();
+	}
 	go {
-		double diff;
-		diff = double(pos%0);
-		MPHIter nexti(neg);
+		float diff;
+		diff = float(pos%0);
 		for(int i=neg.numberPorts(); i>0; i--)
-			diff -= double((*nexti++)%0);
+			diff -= float(neg()%0);
 		output%0 << diff;
 	}
 }
-
 

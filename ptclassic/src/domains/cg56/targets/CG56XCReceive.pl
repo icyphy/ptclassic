@@ -1,53 +1,61 @@
 defstar {
-	name { XCReceive }
+	name { S56XCGCReceive }
 	domain { CG56 }
 	desc { CGC to S56X Receive star }
 	version { $Id$ }
 	author { Jose L. Pino }
-	derivedFrom {XCSynchComm}
 	copyright {
-Copyright (c) 1993-%Q% The Regents of the University of California.
+Copyright (c) 1993 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 Target Directory }
-	ccinclude { "CGCXReceive.h" }
 	explanation {
 	}
-protected {
-	friend class S56XTargetWH;
-}
 	output {
 		name {output}
 		type {ANYTYPE}
 	}
 
-codeblock(receiveData,"int pairNumber,int numXfer") {
-$label(bufferEmpty)
-	btst	#@(pairNumber%24),$ref(bufferSemaphore,@(pairNumber/24))
-	jcc		$label(bufferEmpty)
-	move	#$addr(output),r0	;read starting input geodesic address
-	move	#$addr(buffer),r1	;read starting buffer address
-	do		#@numXfer,$label(XFR)
-			move	$mem(buffer):(r1)+,a
-			move	a,$mem(output):(r0)+
-$label(XFR)
-}
+	codeblock(wordCnt) {
+$label(initial_wait)
+	move	y:WordCnt,a	; get word count
+	tst 	a
+	jeq	$label(initial_wait)
+	jclr	#m_dma,x:m_hsr,$label(initial_wait)
+	}
 
-setup {
-    resolvedType = output.setResolvedType();
-    numXfer = output.numXfer();     
-    CG56XCSynchComm::setup();      
-}
+	codeblock(receiveOne) {
+$label(wait)
+	jclr	#m_hrdf,x:m_hsr,$label(wait) ;wait for host port available
+	movep	x:m_hrx,$ref(output)
+	}
 
-go {
-	addCode(receiveData(pairNumber,numXfer));
-	addCode(processPendingInterrupts(pairNumber));
-@	bclr	#@(pairNumber%24),$ref(bufferSemaphore,@(pairNumber/24))
-@
-	addCode(triggerInterrupt);
-}
+	codeblock(receiveMany) {
+	move #$addr(output),r0	;read starting location address
+	do	a,$label(WHL)
+$label(wait)
+	jclr	#m_hrdf,x:m_hsr,$label(wait) ;wait for host port available
+	movep	x:m_hrx,$mem(output):(r0)+
+$label(WHL)
+	nop
+	}
+
+	codeblock(resetWordCnt) {
+	move	#0,a
+	move	a,y:WordCnt
+	nop
+	}
+
+	go {
+		addCode(wordCnt);
+		if (output.numXfer()==1)
+			addCode(receiveOne);
+		else
+			addCode(receiveMany);
+		addCode(resetWordCnt);
+	}
 
 	execTime {
 		if (output.numXfer()==1) return 9;

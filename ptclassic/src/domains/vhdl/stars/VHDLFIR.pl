@@ -8,7 +8,7 @@ Default coefficients give an 8th order, linear phase lowpass
 filter. To read coefficients from a file, replace the default
 coefficients with "<fileName".
 	}
-	version { $Id$ }
+	version {$Id$}
 	author { Soonhoi Ha, Mike Williamson }
 	copyright {
 Copyright (c) 1990-1994 The Regents of the University of California.
@@ -85,41 +85,37 @@ For more information about polyphase filters, see F. J. Harris,
 		}
 		desc { Filter tap values. }
 	}
+	defstate {
+		name {delays}
+		type {floatarray}
+		default {0}
+		attributes { A_NONCONSTANT|A_NONSETTABLE }
+	}
 	go {
 	  StringList out;
 	  int tapSize = taps.size();
 	  // Perform calculation.
-	  for (int i=0; i<int(tapSize); i++) {
-	      if (i%10 == 0) {
-		 if (i!=0) out << ";\n";
-		 out <<  "$ref(signalOut) $assign(signalOut) "
-		     << (i != 0 ? "$ref(signalOut) + " : "") 
-		     << "$ref(signalIn," << i << ")*$ref(taps," << i << ")";
-	     }
-	      else {
-		  out << "+ $ref(signalIn," << i << ")*$ref(taps," 
-		      << i << ")";
-	      }
-	  }
-	  out << ";\n";
-	  addCode(out);
-	  out.initialize();
-/*
-  	  StringList out;
-	  int tapSize = taps.size();
-	  // Perform calculation.
 	  out << "$ref(signalOut) $assign(signalOut) ";
-	  out << "$ref(signalIn,0)*$ref(taps,0)";
+	  out << "$ref(signalIn)*$ref(taps,0)";
 	  for (int i=1; i<int(tapSize); i++) {
-	    out << " + $ref(signalIn,";
+	    out << " + $ref(delays,";
 	    out << i;
 	    out << ")*$ref(taps,";
 	    out << i;
 	    out << ")";
 	  }
 	  out << ";\n";
+	  // State update.
+	  out << "$ref(delays,1) $assign(delays) ";
+	  out << "$ref(signalIn);\n";
+	  for (int j=2; j<int(tapSize); j++) {
+	    out << "$ref(delays,";
+	    out << j;
+	    out << ") $assign(delays) $ref(delays,";
+            out << j-1;
+            out << ");\n";
+	  }
 	  addCode(out);
 	  out.initialize();
-	  */
 	}
 }

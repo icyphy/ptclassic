@@ -1,43 +1,27 @@
+ident {
+/************************************************************************
+Version identification:
+$Id$
+
+Copyright (c) 1990 The Regents of the University of California.
+			All Rights Reserved.
+
+Programmer: J. T. Buck
+Date of creation: 7/23/90
+
+This star is a two-pole, two-zero IIR filter (a biquad).
+
+************************************************************************/
+}
+
 defstar {
-	name {Biquad}
+	name {BiQuad}
 	domain {SDF}
-	version {$Id$}
 	desc {
-A two-pole, two-zero digital IIR filter (a biquad).
-The default is a Butterworth filter with a cutoff 0.1 times sampling frequency.
-	}
-	author { J. T. Buck }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { SDF dsp library }
-	explanation {
-.lp
-This two-pole, two-zero IIR filter has a transfer function of
-.EQ
-{n sub 0 ~+~ n sub 1 z sup -1 ~+~ n sub 2 z sup -2} over
-{1 ~+~ d sub 1 z sup -1 ~+~ d sub 2 z sup -2} ~.
-.EN
-.Id "filter, biquad"
-.Id "biquad filter"
-.Id "filter, IIR"
-.Id "IIR filter"
-It is implemented in direct form II [1].
-The default coefficients give a Butterworth filter with a
-cutoff of 0.1 times sampling frequency.
-.Ir "filter, Butterworth"
-.Ir "Butterworth filter"
-.lp
-\fBThis star will eventually be replaced by a general IIR star.\fR
-.ID "Oppenheim, A. V."
-.ID "Schafer, R. W."
-.UH REFERENCES
-.ip [1]
-A. V. Oppenheim and R. W. Schafer, \fIDiscrete-Time Signal Processing\fR,
-Prentice-Hall: Englewood Cliffs, NJ, 1989.
+		"Second order IIR filter\n"
+		"Default is Butterworth with cutoff 0.1 times sample freq.\n"
+		"Transfer function is (n0+n1*z1+n2*z2)/(1+d1*z1+d2*z2)\n"
+		"where z1 = {z sup -1}, z2 = {z sup -2}."
 	}
 	input {
 		name{input}
@@ -76,18 +60,16 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 		name {state1}
 		type { float }
 		default { "0.0" }
-		desc { internal state. }
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
+		desc { "state1 (internal)"}
 	}
 	defstate {
 		name {state2}
 		type { float }
 		default { "0.0" }
-		desc {internal state. }
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
+		desc {"state2 (internal)"}
 	}
 	go {
-		double t = double(input%0) - double(d1) * double (state1) -
+		double t = float(input%0) - double(d1) * double (state1) -
 			double(d2) * double(state2);
 		double o = t * double(n0) + double(state1) * double(n1) +
 			double(state2) * double(n2);

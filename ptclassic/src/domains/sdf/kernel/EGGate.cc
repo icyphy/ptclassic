@@ -1,33 +1,11 @@
-static const char file_id[] = "EGGate.cc";
+static const char file_id[] = "EGConnect.cc";
 
 /******************************************************************
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+ Copyright (c) 1991 The Regents of the University of California.
+                       All Rights Reserved.
 
  Programmer:  Soonhoi Ha, based on S.  Bhattacharyya's code.
  
@@ -37,7 +15,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
-#include "EGGate.h"
+#include "EGConnect.h"
 #include "EGNode.h"
 #include "SDFStar.h"
 
@@ -59,28 +37,28 @@ void EGGate::allocateArc(EGGate *dest, int no_samples, int no_delays)
 	dest->arc = arc; 
 }
 
-// disconnect this node & it's far end node, fix the gate pointers and
-// deallocate this gate.  The far gate will be deallocated by the far EGNode
-EGGate::~EGGate() 
+// disconnect this node & it's far end node, and deallocate
+// them.
+void EGGate::removeMyArc() 
 {
-  myLink->removeMeFromList();
-  if (far) { 
-    far->far = 0;
-    far->arc = 0;
-    far = 0;
-  }
-  if (arc) {
-    LOG_DEL; delete arc; 
-  }
+#if ARCTRACE
+  printf("Removing arc between ");
+  parent->print();
+  printf(" and ");
+  print();
+  printf(".\n");
+#endif
+	LOG_DEL; delete arc; 
+	far->removeMe(); 
+	removeMe();
 }
 
-void EGGate::hideMe(int flag) {
-	if (!flag) far->hideMe(1);
+void EGGate::removeMe() {
 	myLink->removeMeFromList();
-	parent->hiddenGates.insertGate(this, 0);
+	LOG_DEL; delete this;
 }
-	
-DataFlowStar* EGGate :: farEndMaster() {
+
+SDFStar* EGGate :: farEndMaster() {
 	if (far == 0) return 0;
 	return farEndNode()->myMaster(); }
 
@@ -98,7 +76,7 @@ void EGGateLink :: removeMeFromList() {
 // gate belonging to "master". A pointer to the first
 // prec gate for "master" is returned; null is returned if
 // master does not exist in the list.
-EGGate* EGGateList::findMaster(DataFlowStar *master) {
+EGGate* EGGateList::findMaster(SDFStar *master) {
 	EGGateLinkIter iter(*this);  
 	EGGate *q;
 	while ((q=iter++)!=0) {
@@ -120,7 +98,7 @@ EGGate* EGGateList::findMaster(DataFlowStar *master) {
 EGGateLink* EGGateList::findInsertPosition (EGNode *node, int delay, int& ret)
 {
 
-	DataFlowStar *master = node->myMaster();
+	SDFStar *master = node->myMaster();
 	int invocation = node->invocationNumber();
 
 	EGGate *p = findMaster(master);
@@ -131,7 +109,7 @@ EGGateLink* EGGateList::findInsertPosition (EGNode *node, int delay, int& ret)
 	EGGateLink *prev = 0;
 	EGGateLink *cur = p->getLink();
 	while (cur != 0) {
-		p = cur->gate();
+		p = cur->myNode();
 		if (p->farEndMaster() != master) {
 			ret = 1;
 			return prev;
@@ -139,7 +117,7 @@ EGGateLink* EGGateList::findInsertPosition (EGNode *node, int delay, int& ret)
 
 		if (p->farEndInvocation() == invocation) {
 			while (cur != 0) {
-				p = cur->gate();
+				p = cur->myNode();
 				if (p->farEndInvocation() != invocation) {
 					ret=1;
 					return prev;
@@ -212,19 +190,14 @@ void EGGateList :: insertGate(EGGate *pgate, int update)
 		if (pos > 0) insertBehind(temp,p);
 		else if (pos < 0) insertAhead(temp,p);
 		else {
-			// compare the porthole
-			if (pgate->aliasedPort() != p->gate()->aliasedPort()) {
-				insertBehind(temp, p);
-	
 			// If a link to the same EGNode, with the same delay,
 			//  already exists, then simply update the number of
 			// samples in the existing node, and delete this one,
 			// because it is redundant. If we're updating now,
 			// save the arc -- we'll use it to insert the other
 			// endpoint (this is our convention).
-			} else if (update) {
-				p->gate()->addSamples(pgate->samples());
-			} else { LOG_DEL; delete pgate; }
+			if (update) p->myNode()->addSamples(pgate->samples());
+			else pgate->removeMyArc();
 			return;
 		}
 	}  
@@ -234,16 +207,13 @@ void EGGateList :: insertGate(EGGate *pgate, int update)
 void EGGateList::initialize() {
 	EGGateLinkIter iter(*this);
 	EGGate *p;
-	while ((p=iter++)!=0) {
-		LOG_DEL; delete p;
-	}
-	DoubleLinkList :: initialize();
+	while ((p=iter++)!=0) p->removeMyArc();
 }
 
-EGGate* EGGateLinkIter :: nextMaster(DataFlowStar* m) {
+EGGate* EGGateLinkIter :: nextMaster(SDFStar* m) {
 	EGGate* tmp = next();
 	if (tmp == 0) return 0;
-	DataFlowStar* s = tmp->farEndMaster();
+	SDFStar* s = tmp->farEndMaster();
 	if (s == m || s == refMaster) return nextMaster(m);
 	refMaster = s;
 	return tmp;

@@ -42,7 +42,6 @@ static const char file_id[] = "TyMain.cc";
 #include "Linker.h"
 #include "SimControl.h"
 #include "Error.h"
-#include "SetSigHandle.h"
 #include "InfString.h"
 #include "TyConsole.h"
 #include <stdio.h>
@@ -72,15 +71,17 @@ extern int		isatty _ANSI_ARGS_((int fd));
 extern char *		strcpy _ANSI_ARGS_((char *dst, CONST char *src));
 };
 
+char *tyFilename = NULL;
+
 /* This defines the default domain for Tycho */
 
-extern char DEFAULT_DOMAIN[];
+char DEFAULT_DOMAIN[] = "SDF";
 
-static void PrintSigErrorMessage ()
+static void PrintVersion ()
 {
-    Tcl_VarEval(ptkInterp, "::tycho::inform {Unable to set the \
-signal handlers, the program will continue but if a serious error occurs it \
-may not be handled appropriately.}", NULL);
+    InfString pid = (int)getpid();
+    Tcl_VarEval(ptkInterp, "ptkStartupMessage {", gVersion, "(proc. id. ",
+		(char*)pid, ")} {", tyFilename, "}", NULL);
 }
 
 /*
@@ -94,6 +95,8 @@ may not be handled appropriately.}", NULL);
 int
 main(int argc, char **argv) {
 
+    tyFilename = argv[0];
+
     // The following creates a Tcl interpreter, adds the ptcl and itcl 
     // extensions, and creates a top-level Tk window.
     TyConsole console(argc, argv);
@@ -106,11 +109,18 @@ main(int argc, char **argv) {
     // Initialize the incremental linking module
     Linker::init(argv[0]);
 
-    if (setSignalHandlers())
-        PrintSigErrorMessage();
+    PrintVersion();
 
     Tk_MainLoop();
     console.tyExit(0);
-    return 0;
 }
 
+// the following stub is here until we support the Gantt chart
+// under Tycho.
+
+extern "C" int displayGanttChart(const char* file) {
+	InfString cmd;
+	cmd << "gantt " << file;
+	system(cmd);
+	return 0;
+}

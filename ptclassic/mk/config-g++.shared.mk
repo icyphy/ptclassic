@@ -29,7 +29,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #		       
-# Programmers:  Christopher Hylands, Jose Pino
+# Programmer:  Christopher Hylands
 
 # Using GNU make conditionals causes havoc while bootstrapping gcc,
 # so we don't use them here, however, this is what the code would look like
@@ -48,30 +48,15 @@ LIBSUFFIX =		so
 #endif
 
 # Location of GNU libg++ shared libraries
-SHARED_COMPILERDIR =	$(PTOLEMY)/gnu/$(PTARCH)/lib
+SHARED_COMPILERDIR =	$(PTOLEMY)/gnu/$(PTARCH)/lib/shared
 SHARED_COMPILERDIR_FLAG = -L$(SHARED_COMPILERDIR)
 
-# Command to build C++ shared libraries
+# Command to build shared libraries (Not really supported yet)
 SHARED_LIBRARY_COMMAND = g++ -shared $(SHARED_COMPILERDIR_FLAG) -o
 
-# Command to build C shared libraries
-CSHARED_LIBRARY_COMMAND = gcc -shared $(SHARED_COMPILERDIR_FLAG) -o
-
-# linker for C utilities.  If we are using shared libraries, then
-# we want to avoid involving libg++.so, so we use gcc to link.
-CLINKER	=	gcc
-
-# Used by cgwork.mk
-INC_LINK_FLAGS =	-shared $(SHARED_COMPILERDIR_FLAG)
-
-TCL_LIBSPEC =	$(TCL_SHARED_LIBSPEC)
-TK_LIBSPEC =	$(TK_SHARED_LIBSPEC)
-#ITCL_LIBSPEC =	$(ITCL_SHARED_LIBSPEC)
 # List of libraries to search, obviating the need to set LD_LIBRARY_PATH
-# See the ld man page for more information.  These path names must
-# be absolute pathnames, not relative pathnames.
-SHARED_LIBRARY_PATH = $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(X11_LIBDIR):$(SHARED_COMPILERDIR):$(PTOLEMY)/tcltk/tcl.$(PTARCH)/lib/shared:$(PTOLEMY)/tcltk/tk.$(PTARCH)/lib/shared/:$(PTOLEMY)/tcltk/itcl.$(PTARCH)/lib/shared:$(PTOLEMY)/gnu/$(PTARCH)/lib
-SHARED_LIBRARY_R_LIST = -Wl,-R,$(SHARED_LIBRARY_PATH)
+# See the ld man page for more information.
+SHARED_LIBRARY_R_LIST = -Wl,-R,$(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR):$(SHARED_COMPILERDIR):$(PTOLEMY)/tcltk/tcl.$(PTARCH)/lib:$(PTOLEMY)/tcltk/tk.$(PTARCH)/lib
 
-# libg++-2.7.0 needs this.
-#SHARED_SYSLIBS =	-lio -lcurses -lrx 
+# Shared libraries that libg++.so needs
+SHARED_SYSLIBS =	-lio -lcurses -lrx 

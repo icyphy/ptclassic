@@ -1,16 +1,11 @@
 defstar {
-	name { Rect }
+	name { FixRect }
 	domain { CG56 }
 	desc { Rectangular Pulse Generator }
 	version { $Id$ }
 	author { Chih-Tsung Huang }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 signal sources library }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
 	explanation {
 Rectangular Pulse generator.
 	}
@@ -92,7 +87,7 @@ $label(zero)
 $label(end)
         }
 
-        setup {
+        start {
 		 int w=width;
 		 int p=period;
 		 amp=height;
@@ -102,11 +97,11 @@ $label(end)
 		 if(p<1)    
 		     Error::abortRun(*this, ": Invalid period value.");
 		 if(p<=w)
-		     Error::abortRun(*this,
-		              "Period must be greater than width");
+		     Error::abortRun(*this, ":
+		              Period must be greater than width");
         }			      
 	go {
-                addCode(main);
+                gencode(main);
 	}
 	execTime {
 		return 26;

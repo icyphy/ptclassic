@@ -40,15 +40,6 @@ Implementation of the InvokeInterp class that calls the Tcl interpreter.
 #include "InvokeInterp.h"
 #include "StringList.h"
 
-// METHODS
-
-// constructor
-InvokeInterp :: InvokeInterp() {}
-
-// destructor
-InvokeInterp :: ~InvokeInterp() {}
-
-// interpreter
 const char*
 InvokeInterp :: interpreter (const char* expression) {
   const char* result = 0;
@@ -57,7 +48,7 @@ InvokeInterp :: interpreter (const char* expression) {
     Error::error("The Tcl interpreter is not initialized");
   }
   else {
-    if ( Tcl_Eval(PTcl::activeInterp, (char *) expression) == TCL_OK ) {
+    if ( Tcl_Eval(PTcl::activeInterp, expression) == TCL_OK ) {
       result = PTcl::activeInterp->result;
     }
     else {

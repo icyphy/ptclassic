@@ -2,14 +2,14 @@ defstar {
 	name { Fix }	
 	domain {SDF}
 	desc {
-Base star for the fixed-point stars in the SDF domain.
+Based star for the fixed-point stars in the SDF domain.
 	}
 	version { $Id$ }
         author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1993, 1994 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
         location { SDF main library }
@@ -32,25 +32,15 @@ The "warning" option will generate a warning message whenever overflow occurs.
                 type { int }
                 default { "YES" }
                 desc {
-If non-zero, e.g. YES or TRUE, then after a simulation has finished,
-the star will report the number of overflow errors if any occurred
-during the simulation.
-                }
-        }
-        defstate {
-                name { RoundFix }
-                type { int }
-                default { "YES" }
-                desc {
-If YES or TRUE, then all fixed-point computations, assignments, and
-data type conversions will be rounded.
-Otherwise, truncation will be used.
+If non-zero, i.e. YES or TRUE, then report any errors (if any) that
+occurred during the fixed-point computations in this star, after
+the simulation is over.
                 }
         }
         protected {
 		int overflows, totalChecks;
         }
-	method {
+	inline method {
 		name { checkOverflow }
 		type { "int" }
 		arglist { "(Fix& fix)" }
@@ -65,25 +55,28 @@ Otherwise, truncation will be used.
 			return overflag;
 		}
 	}
-        setup {
-		overflows = 0;
-		totalChecks = 0;
+        method {
+		name { initialize }
+		type { "void" }
+		arglist { "()" }
+		access { public }
+		code {
+			overflows = 0;
+			totalChecks = 0;
+		}
 	}
 	// derived stars should call this method if they defined their 
 	// own wrapup method
 	wrapup {
 		if ( int(ReportOverflow) && ( overflows > 0 ) ) {
 		  StringList msg;
-		  char percentageStr[24];      // must be at least 6 chars
-		  double percentage = 0.0;
+		  double percentage = 0;
 		  if ( totalChecks > 0 )
 		    percentage = (100.0*overflows)/totalChecks;
-		  // truncate percentage to one decimal place
-		  sprintf(percentageStr, "%.1f", percentage);
 		  msg << " experienced overflow in " << overflows 
 		      << " out of " << totalChecks
 		      << " fixed-point calculations checked ("
-		      << percentageStr << "%)";
+		      << percentage << "%)";
 		  Error::warn( *this, msg );
 		}
 	}

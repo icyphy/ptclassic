@@ -1,10 +1,10 @@
-#ifndef _CreateSDFStar_h
-#define _CreateSDFStar_h 1
+#ifndef _CGCTargetWH_h
+#define _CGCTargetWH_h 1
 /******************************************************************
 Version identification:
 $Id$
 
-Copyright (c) 1994-%Q%  The Regents of the University of California.
+Copyright (c) 1995  The Regents of the University of California.
 All Rights Reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -27,7 +27,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: Jose Luis Pino
+ Programmer: Jose Luis Pino, initial version based on SilageSimTarget
 
 
 *******************************************************************/
@@ -38,89 +38,32 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "CGCTarget.h"
 
-// This target allows for the creation of target specific code generation
-// wormholes to simulation.  It can be used stand-alone, for CGC inside of
-// simulation wormholes, or as a helper target such as 
-
-/* The ideas behind the implementation of CG wormholes is document in:
-      J.L. Pino, T.M. Parks and E.A. Lee, "Automatic Code Generation for 
-      Heterogeneous Multiprocessors," Proceedings of the IEEE International
-      Conference on Acoustics, Speech, and Signal Processing, vol. 2, 
-      pp. 445-448, Adelaide, Australia, April 1994.
-
-   available on-line: 
-http://ptolemy.eecs.berkeley.edu/papers/autoMultiCodeGen/www/proceedings_1.html
-*/
-
-// This structure represents a communication star pair.  This target
-// can function as a helper target to allow for simulation wormholes.  The
-// outer star is optional --  if specified, it is target specific CGC 
-// communication star which receives the communication from an inner CGStar.
-// This outer star is NULL iff the inner star is a CGC star.  
-// In other words, the outer star is optional when this target is used 
-// standalone, not as a helper target.
-//
-//             Wormhole
-//          |-------------|
-//          |             |
-//        X-|-O I-...-I O-|-X 
-//          |             |
-//          |     ...-I O-|-X     KEY: X stars external to the wormhole
-//          |             |            O 'outer' stars, optional, must be CGC
-//          |-------------|            I 'inner' stars, may be any CG
-//
-
-class CreateSDFStar : public CGCTarget {
+class CGCTargetWH : public CGCTarget {
 public:
-    CreateSDFStar(const char* name, const char* starclass, const char* desc);
+    CGCTargetWH(const char* name, const char* starclass, const char* desc);
 
     int isA(const char*) const;
-
     /*virtual*/ void setup();
     /*virtual*/ int run();
     /*virtual*/ Block* makeNew() const;
+    /*virtual*/ void wrapup();
 	
     /*virtual*/ int compileCode();
     /*virtual*/ int loadCode();
-    /*virtual*/ int runCode() {return TRUE;}
     /*virtual*/ void frameCode();
     /*virtual*/ void writeCode();
     /*virtual*/ void initCodeStrings();
 
+    /*virtual*/ void wormInputCode(PortHole&);
+    /*virtual*/ void wormOutputCode(PortHole&);
+
+    int makeCCFile();
+    int compileCCCode();
     int linkFiles();
-    
-    // This method allows CreateSDFStar to be used as a helper target to
-    // the cg wormhole target.  
-    int convertWormholePorts(Galaxy&);
-
-
-    // This method allows CreateSDFStar to be used as a stand-alone target
-    /*virtual*/ void wormPrepare();
-    
-    // This string list collects the include directory locations (in
-    // the form of "-I<directory name >"
-    StringList starIncludeDirs;
-
-    // This string list collects the libraries needed at link time to link
-    // in the replacement SDF worm star
-    StringList starLinkOptions;
-
-    // method to connect the new SDF star
-    int connectStar();
-
+	
 protected:
-    /*virtual*/ void mainLoopCode();
-
-private:
-    
-    Galaxy* topLevelGalaxy;
-    
-    // Codestream that collects all of the SDF porthole definitions
+    int connectStar(Galaxy& galaxy);
     CodeStream starPorts;
-
-    // Codestream that collects the setSDFParams instructions
-    CodeStream starSetup;
-
 };
 
 #endif

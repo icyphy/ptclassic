@@ -4,23 +4,22 @@ defstar {
 	version { $Id$ }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF main library }
+	location { SDF logic library }
 	desc {
 This star applies a logical operation to any number of inputs.
-The inputs are integers interpreted as Boolean values,
-where zero means FALSE and a nonzero value means TRUE.
+The inputs are integers interpreted as Booleans,
+where zero is a FALSE and nonzero is a TRUE.
 The logical operations supported are {NOT AND NAND OR NOR XOR XNOR}.
 	}
 	explanation {
 The NOT operation requires that there be only one input.
 The XOR operation with multiple inputs tests for an odd number
-of TRUE values among the inputs.
-The other operations are self-explanatory.
+of TRUEs among the inputs.  The other operations are self explanatory.
 .ir "logic"
 .ir "Boolean logic"
 .ir "not (logical operation)"
@@ -35,21 +34,18 @@ The other operations are self-explanatory.
 	inmulti {
 		name { input }
 		type { int }
-		desc { Input logic values. }
+		desc { Input logic values }
 	}
 	output {
 		name { output }
 		type { int }
-		desc {
-Result of the logic test, with FALSE equal to zero and TRUE equal to a
-non-zero integer (not necessarily 1).
-		}
+		desc { Result of the logic test }
 	}
 	defstate {
 		name { logic }
 		type { string }
 		default { "AND" }
-		desc { The test logic: one of NOT AND NAND OR NOR XOR or XNOR. }
+		desc { The test logic: one of NOT AND NAND OR NOR XOR or XNOR }
 	}
 	code {
 #define NOTID 0
@@ -65,29 +61,29 @@ non-zero integer (not necessarily 1).
 	}
 	setup {
 		const char* cn = logic;
-		if ( strcasecmp(cn, "NOT") == 0) {
+		if ( strcasecmp ( cn, "NOT") == 0) {
 		    test = NOTID;
 		    if (input.numberPorts() > 1)
 			Error::abortRun(*this,
 			    "NOT operation can only have one input");
 		}
-		else if ( strcasecmp(cn, "AND") == 0 ) test = ANDID;
-		else if ( strcasecmp(cn, "NAND") == 0 ) test = NANDID;
-		else if ( strcasecmp(cn, "OR") == 0 ) test = ORID;
-		else if ( strcasecmp(cn, "NOR") == 0 ) test = NORID;
-		else if ( strcasecmp(cn, "XOR") == 0 ) test = XORID;
-		else if ( strcasecmp(cn, "XNOR") == 0 ) test = XNORID;
+		else if ( strcasecmp ( cn, "AND") == 0) test = ANDID;
+		else if ( strcasecmp ( cn, "NAND") == 0) test = NANDID;
+		else if ( strcasecmp ( cn, "OR") == 0) test = ORID;
+		else if ( strcasecmp ( cn, "NOR") == 0) test = NORID;
+		else if ( strcasecmp ( cn, "XOR") == 0) test = XORID;
+		else if ( strcasecmp ( cn, "XNOR") == 0) test = XNORID;
 		else Error::abortRun(*this,"Unrecognized test.");
 	}
 	go {
 	    MPHIter nexti(input);
-	    PortHole* p = 0;
-	    int result = 0;
+	    PortHole *p;
+	    int result;
 
 	    switch( test ) {
 		case NOTID:
 		    p = nexti++;
-		    result = ! int((*p)%0);
+		    result = !int((*p)%0);
 		    break;
 		case ANDID:
 		case NANDID:

@@ -2,24 +2,18 @@ defstar {
 	name {BlockLattice}
 	domain {SDF}
 	desc {
-A block forward lattice filter.
-It is identical to the Lattice star except that
-the reflection coefficients are updated each time the star fires
+A Block Forward Lattice filter.
+The reflection coefficients are updated each time the star fires
 by reading the "coefs" input.
 The "order" parameter indicates how many coefficient
 should be read.  The "blockSize" parameter specifies how many
-data samples should be processed for each set of coefficients.
+signalIn samples should be processed for each set of coefficients.
 	}
 	version {$Id$}
 	author { Alan Kamas and Edward Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1992 The Regents of the University of California }
 	location { SDF dsp library }
-	seealso { Lattice, RLattice, BlockRLattice, FIR, FIRCx, Biquad}
+	seealso { Lattice, RLattice, BlockRLattice, FIR, ComplexFIR, BiQuad}
 	input {
 		name {signalIn}
 		type {float}
@@ -55,20 +49,20 @@ limitation of liability, and disclaimer of warranty provisions.
 		reflectionCoefs = 0;
 	}
 	destructor {
-		LOG_DEL; delete [] b;
-		LOG_DEL; delete [] f;
-		LOG_DEL; delete [] reflectionCoefs;
+		LOG_DEL; delete b;
+		LOG_DEL; delete f;
+		LOG_DEL; delete reflectionCoefs;
 	}
-	setup {
+	start {
 		// reallocate arrays only if size has changed,
 		// or this is the first run.
 		if (lastM != int(order)) {
 			lastM = int(order);
-			LOG_DEL; delete [] b;
+			LOG_DEL; delete b;
 			LOG_NEW; b = new double[lastM];
-			LOG_DEL; delete [] f;
-			LOG_NEW; f = new double[lastM+1];
-			LOG_DEL; delete [] reflectionCoefs;
+			LOG_DEL; delete f;
+			LOG_NEW; f = new double[lastM];
+			LOG_DEL; delete reflectionCoefs;
 			LOG_NEW; reflectionCoefs = new double[lastM];
 		}
 		for (int i=0; i < lastM; i++)  b[i]=0.0 ;
@@ -90,14 +84,14 @@ limitation of liability, and disclaimer of warranty provisions.
 		// Forward prediction error
 		f[0] = double (signalIn%j);   // f(0)=x(n)
 		for (int i=1; i <= lastM; i++) {
-			k = - reflectionCoefs[i-1];
+			k = reflectionCoefs[i-1];
 			f[i] = k * b[i-1] + f[i-1];
 		}
 		signalOut%j << f[lastM];
 
 		// Backward:  Compute the w's for the next round
 		for (i = lastM-1; i >0 ; i--) {
-			k = - reflectionCoefs[i-1];
+			k = reflectionCoefs[i-1];
 			b[i] = k * f[i-1] + b[i-1];	
 		}
 		b[0] = double (signalIn%j);   // b[0]=x[n] 

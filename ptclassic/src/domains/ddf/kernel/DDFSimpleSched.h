@@ -17,14 +17,14 @@ All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -33,9 +33,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+							COPYRIGHTENDKEY
 
  Programmer:  E. A. Lee
  (Based on DDFClustSched, by Soonhoi Ha)
@@ -67,11 +65,11 @@ public:
 	// iteration until it deadlocks.
 	void deadlockIteration(int flag) {runUntilDeadlock = flag;}
 
-	DDFSimpleSched ();
+	DDFSimpleSched () : runUntilDeadlock(0) {};
 
 protected:
 	// We nullify this routine to avoid the overhead.
-	/* virtual */ void initStructures() {};
+	void initStructures() {};
 
 	// A source is a star with no inputs.
 	/* virtual */ int isSource(Star&); 
@@ -99,19 +97,14 @@ private:
 	// the value of the pragma is non-zero.
 	int pragmaRegistered(DataFlowStar* as);
 
-	// Fire stars from the sequential list that is passed at most once each.
-	// Note that there may be repeated entries in these lists.
-	// Return FALSE if an error occurs or a halt is requested.
-	// Set the "firedOne" member if any star actually fires.
-	int fireStarsFrom (SequentialList& list);
-
 	// List used to store pointers to the stars that have pragmas
 	// registered.  This allows for efficient access at runtime.
 	// Note that every element appended to this list must be a
 	// DataFlowStar*.
 	SequentialList pragmaStars;
 
-	// Lists of enabled stars, by category.
+	// Lists of enabled stars, by category, carried from one iteration
+	// to the next.
         SequentialList enabledNonDef, enabledDefNonSources, defSources;
 
 	// Method to put in a star into one of the above lists.
@@ -121,25 +114,6 @@ private:
 	// This flag indicates whether an iteration should consist
 	// of running until deadlock.  By default, it is FALSE.
 	int runUntilDeadlock;
-
-	// Keep track of whether an actor has fired in the current
-	// iteration.
-	int firedOne;
-	
-	// In order to allow for easy profiling (to count the number
-	// of stars actually fired by this scheduler, even when there
-	// are wormholes), we run the stars through this method.
-	inline int runStar (DataFlowStar *s)  {
-	  (s->flags[firings])++;
-	  return s->run();
-	}
-	
-	// Flags associated with blocks.
-	enum {
-	  enabled = 0,
-	  firings = 1,
-	  iter =2
-	};
 };
 
 #endif

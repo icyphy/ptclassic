@@ -3,20 +3,13 @@ defstar {
 	domain {CG56}
 	desc {
 Generate pseudo-IID-uniform random variables.  The values range from
--range to range where "range" is a parameter.
+-range to range where range is a parameter.
 	}
 	version { $Id$ }
-	author { J. Buck, ported from Gabriel }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 signal sources library }
+	author { ported from Gabriel by J. Buck }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
 	explanation {
-.Id "uniform noise"
-.Id "noise, uniform"
 This needs to be filled in.  For now, there is no seed parameter; the
 default seed parameter from Gabriel is always used.  We'd really need
 to use a 48-bit integer to get the same functionality.  This can be
@@ -29,7 +22,7 @@ done with g++ (type "long long"), but it isn't portable.
 	defstate {
 		name { range }
 		type { fix }
-		default { ONE }
+		default { 1.0 }
 		desc { range of random number generator is [-range,+range] }
 	}
 	defstate {
@@ -45,18 +38,18 @@ done with g++ (type "long long"), but it isn't portable.
 		attributes { A_NONSETTABLE|A_NONCONSTANT }
 	}
 	initCode {
-		addCode(initSeed);
+		gencode(initSeed);
 	}
-	setup {
-		scaledRange = int(range.asDouble() * 8388608);
+	start {
+		scaledRange = int(double(range) * 8388608);
 	}
 	go {
-		addCode(randomGen);
-		if (range.asDouble() < CG56_ONE) addCode(rangeScale);
-		else addCode (range1);
+		gencode(random);
+		if (double(range) < 1.0) gencode(rangeScale);
+		else gencode (range1);
 	}
 	execTime {
-		return (range.asDouble() < CG56_ONE) ? 17 : 15;
+		return (double(range) < 1.0) ? 17 : 15;
 	}
 	// "code" to initialize the seed
 	codeblock(initSeed) {
@@ -67,10 +60,9 @@ done with g++ (type "long long"), but it isn't portable.
 	org	p:
 	}
 	// "common" part of random number generation
-	codeblock(randomGen) {
-	move	#$addr(accum),r1
+	codeblock(random) {
         move	#>10916575,y1
-        move    l:(r1),x
+        move    l:$addr(accum),x
         mpy   	x0,y1,a		#>12648789,y0
         mac  	+x1,y0,a	y1,b1
         asr   	a         	y0,b0
@@ -80,14 +72,14 @@ done with g++ (type "long long"), but it isn't portable.
 	// case where range=1: write state and output
 	codeblock(range1) {
         add	x1,a
-        move    a10,l:(r1)
+        move    a10,l:$addr(accum)
         move    a1,$ref(output)
 	}
 	// case where range < 1: write state and scale output
 	codeblock(rangeScale) {
 	add	x1,a		#>$val(scaledRange),x0
 	move	a1,y0
-	mpy	x0,y0,a		a10,l:(r1)
+	mpy	x0,y0,a		a10,l:$addr(accum)
 	move	a,$ref(output)
 	}
 }

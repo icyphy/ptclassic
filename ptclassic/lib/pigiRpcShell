@@ -1,8 +1,5 @@
 #! /bin/sh
 # usage: pigiRpcShell <vem-rpc-args>
-# Version: $Id$
-# Copyright (c) 1990,1991,1992 The Regents of the University of California.
-# All Rights Reserved.
 #
 # This shell is invoked by vem via vem's rpc mechanism.  It is our
 # job to recover our environment from the other side of the link,
@@ -13,29 +10,23 @@
 #    a csh script, use the "-f" option so that the user's .cshrc
 #    doesnt clobber the environment.
 
+# Version: $Id$
+# Copyright (c) 1990,1991,1992 The Regents of the University of California.
+# All Rights Reserved.
 
 #
 # check if we have an environment-passing file
 #
-# SysV uses LOGNAME instead of USER
-USER=${USER-$LOGNAME}
 cmdfile=/tmp/pigiCmds.$USER
 if [ -r $cmdfile ] ; then
     . $cmdfile
 fi
 libdir=`dirname $0`
 PTOLEMY=${PTOLEMY-`dirname $libdir`}
-HOME=${HOME-.}
-ARCH=${PTARCH-`(/bin/arch || /bin/machine || $PTOLEMY/bin/arch ) 2> /dev/null`}
-PIGIRPC=${PIGIRPC-$PTOLEMY/bin.$PTARCH/pigiRpc}
+ARCH=${ARCH-`(/bin/arch || /bin/machine) 2> /dev/null`}
+PIGIRPC=${PIGIRPC-$PTOLEMY/bin.$ARCH/pigiRpc}
 COMMAND=${COMMAND-$PIGIRPC}
 DISPLAY=${DISPLAY-'unix:0'}
 TAILARGS=${TAILARGS-''}
-TCL_LIBRARY=${TCL_LIBRARY-$PTOLEMY/tcltk/tcl/lib/tcl}
-TK_LIBRARY=${TK_LIBRARY-$PTOLEMY/tcltk/tk/lib/tk}
-PTPWD=${PTPWD-.}
-PTX11DIR=${PTX11DIR-/usr/X11}
-LD_LIBRARY_PATH=${LD_LIBRARY_PATH-/usr/lib:/usr/X11/lib}
-export PTOLEMY HOME PTARCH PIGIRPC DISPLAY PATH TCL_LIBRARY TK_LIBRARY PTPWD PTX11DIR LD_LIBRARY_PATH
-cd $HOME
+export PTOLEMY ARCH PIGIRPC DISPLAY
 exec $COMMAND $* $TAILARGS

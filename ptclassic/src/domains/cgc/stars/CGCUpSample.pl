@@ -8,12 +8,7 @@ is to output it first (phase = 0). The maximum phase is "factor" - 1.
 	}
 	version { $Id$ }
 	author { E. A. Lee and S. Ha }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1992 The Regents of the University of California }
 	location { CGC main library }
 	input {
 		name {input}
@@ -37,42 +32,25 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	state {
 		name {fill}
-		type {float}
+		type {FLOAT}
 		default {0.0}
 		desc { Value to fill the output block. }
 	}
-	state {
-		name {ix}
-		type {int}
-		default {0}
-		attributes { A_NONSETTABLE }
-	}
-	setup {
+	start {
 		output.setSDFParams(int(factor),int(factor)-1);
 		if (int(phase) >= int(factor))
 			Error::abortRun(*this, ": phase must be < factor");
 	}
-	constructor {
-		noInternalState();
+	codeblock (initfill) {
+; initialization code for star $fullname() - class CG56UpSample
 	}
-	codeblock (sendOne) {
-	$ref2(output,ix) = $ref(input);
-	}
-	codeblock (sendAll) {
-	int i;
-	for (i = 0; i < $val(factor); i++) {
-		$ref2(output,i) = $val(fill);
-	}
-	$ref2(output,ix) = $ref(input);
+	codeblock (sendsample) {
+	$ref2(output,phase) = $ref(input);
 	}
 	go {
-		ix = int(factor) - int(phase) - 1;
-		if (output.staticBuf() && output.linearBuf())
-			addCode(sendOne);
-		else
-			addCode(sendAll);
+		gencode(sendsample);
 	}
-	exectime {
-		return 1 + int(factor);
+	execTime {
+		return 1;
 	}
 }

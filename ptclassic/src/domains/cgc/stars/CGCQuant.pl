@@ -11,12 +11,7 @@ value for level is 0, 1, 2, ... N.
 	}
 	version { $Id$ }
 	author { E. A. Lee and J. Buck }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1992 The Regents of the University of California }
 	location { CGC main library }
 	input {
 		name {input}
@@ -26,7 +21,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {output}
 		type {float}
 	}
-	ccinclude { <math.h> }
 	defstate {
 		name { thresholds }
 		type { floatarray }
@@ -39,7 +33,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		default {""}
 		desc { Output levels.  If empty, use 0, 1, 2, ...}
 	}
-	setup {
+	start {
 		int n = thresholds.size();
 		if (levels.size() == 0) {
 			// default: 0, 1, 2...
@@ -89,9 +83,5 @@ limitation of liability, and disclaimer of warranty provisions.
 	    st << ";\n";
 	    addCode((const char*)st);
 	    addCode (main);
-	}
-	exectime {
-		double x = log(thresholds.size()) / log(2.0);
-		return 8 + 5 * int(x-0.01);
 	}
 }

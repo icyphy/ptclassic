@@ -1,34 +1,9 @@
-#ifndef _SDFCluster_h
-#define _SDFCluster_h 1
-
 /**************************************************************************
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+ Copyright (c) 1992 The Regents of the University of California.
+                       All Rights Reserved.
 
  Programmer:  J. Buck
  Date of creation: 3/17/92
@@ -78,29 +53,24 @@ class ostream;
 // hierarchy, using the merge/loop clustering algorithm.
 
 class SDFClusterGal : public DynamicGalaxy {
+private:
+	int bagNumber;
+	ostream* logstrm;
 public:
 	// constructor creates flat galaxy of atomic clusters
 	SDFClusterGal(Galaxy&,ostream* log = 0);
-	SDFClusterGal(ostream* log = 0) : logstrm(log), bagNumber(-1) {}
 
 	// destructor zaps all the member clusters (inherited)
 	~SDFClusterGal() {}
 
-	// remove blocks from this galaxy without deallocating the blocks
-	void orphanBlocks();
-
 	// how many?
 	int numberClusts() const { return numberBlocks();}
 
-	// this is it!  The main clustering routine Returns TRUE
-	// if any clustering is performed.
+	// this is it!  Return TRUE for success
 	int cluster();
 
 	// return TRUE if all member clusters have the same rate
 	int uniformRate();
-
-	// I would prefer for these to be protected rather than
-	// public.
 
 	// do a loop pass.  Return TRUE if a change was made
 	int loopPass();
@@ -108,136 +78,47 @@ public:
 	// do a merge pass.  Return TRUE if a change was made
 	int mergePass();
 
-	// merge any "parallel loops".  Return TRUE if a change was made
-	int parallelLoopMergePass();
-
-	// set log stream member to match that of another (parent)
-	// galaxy
-	void dupStream(SDFClusterGal *pgal) { logstrm = pgal->logstrm;}
-
-	// generate schedules for interior clusters
-	void genSubScheds();
-
-	// Note: The remaining public methods are not in BDFClusterGal
-
-	// virtual method to create a cluster-bag
-	virtual SDFClusterBag* createBag();
-
-protected:
-	ostream* logstrm;	// for logging errors
-
-	// core of clustering routine; returns TRUE if any clustering
-	// is performed and sets uniformRate if all clusters/actors have
-	// the same rate.
-	int clusterCore(int& uniformRate);
-
-	// function to do an "expensive merge" -- it does the full
-	// search for indirect paths.  If it finds a mergeable pair
-	// it merges it and returns the result; otherwise it returns 0.
-	SDFCluster* fullSearchMerge();
-
 	// merge two clusters, returning the result.
 	SDFCluster* merge(SDFCluster* c1,SDFCluster* c2);
 
 	// generate a name for a new member ClusterBag
 	const char* genBagName();
 
-	// return true if there is an indirect path between two
-	// member clusters
-	int indirectPath(SDFCluster* src,SDFCluster* dst);
-
-	// function used in finding paths by indirectPath.
-	int findPath(SDFCluster* src,SDFCluster* dst);
-
-	// mark feed-forward delays
-	int markFeedForwardDelayArcs();
-
-	// Note: The remaining protected methods are not in BDFClusterGal
-
-	// There might be more restrictions for merging two clusters.
-	// In this base class, just ignore.
-	virtual int canMerge(SDFCluster*, SDFCluster*) { return TRUE; }
-
-	// interior portions of loop pass
-	int integralLoopPass(int doAnyLoop);
-	int loopTwoClusts();
-
-	// pass to do non-integral rate changes if structure is a tree.
-	int tryTreeLoop();
-
-	// predicate to determine whether cluster has a tree topology
-	int isTree();
-
-private:
-	int bagNumber;		// number for generating bag names
-	SequentialList stopList;// this list is used by fullSearchMerge.
-};
-
-// This is an "even baser" baseclass for all kinds of SDF clusters.
-class SDFBaseCluster : public SDFStar {
-public:
-	// return the schedule
-	virtual StringList displaySchedule(int depth) = 0;
-
-	// generate code using target methods
-	virtual void genCode(Target&, int depth) = 0;
-
-	// generate internal schedule, if any.  Default is do-nothing.
-	virtual int genSched() { return TRUE;}
-
-	// fix internal buffer sizes.  Arg is #times cluster is executed.
-	virtual void fixBufferSizes(int) = 0;
-
-	// run/go
-	int run() = 0;
-	void go() { run();}
+	// generate schedules for clusters
+	int genSubScheds();
 };
 
 // This is the baseclass for SDF cluster objects.  A cluster may have
 // an internal galaxy (if it is an SDFClusterBag); it always has a loop
 // count, indicating how many times it is to be looped.
 
-class SDFCluster : public SDFBaseCluster {
+class SDFCluster : public SDFStar {
 protected:
 	int pLoop;		// loop count
-	int visitFlag;		// visit flag
-
 public:
 	// constructor: looping is 1 by default
-	SDFCluster() : pLoop(1), visitFlag(0) {}
+	SDFCluster() : pLoop(1) {}
 
 	// make destructor virtual
 	virtual ~SDFCluster() {}
 
-	void setVisit(int i) { visitFlag = i; }
-	int  visited() { return visitFlag; }
+	// repetitions value
+	int reps() const { return repetitions.numerator;}
 
 	// return loop count
 	int loop() const { return pLoop;}
 
 	// cast to a bag (return null if not a bag)
 	virtual SDFClusterBag* asBag() { return 0;}
-	// cast to a special bag (return null even in the base bag class)
-	virtual SDFClusterBag* asSpecialBag() { return 0;}
 
 	// return some other cluster that can merge with me
 	SDFCluster* mergeCandidate();
 
-	// return an appropriate loop factor.  If doAnyLoop is 0,
-	// it will apply heuristics to avoid large loop factors so
-	// that loops will nest better.  If doAnyLoop is 1, it
-	// will perform any legal looping.
-	int loopFactor(int doAnyLoop);
+	// return an appropriate loop factor
+	int loopFactor();
 
-	// change the loop value of the cluster, changing repetitions,
-	// token numbers
+	// change the loop value of the cluster
 	void loopBy(int);
-
-	// undo looping of a cluster, changing repetitions, token numbers
-	int unloop();
-
-	// optionally do additional clustering on internal cluster
-	virtual int internalClustering() { return FALSE;}
 
 	// print me
 	virtual ostream& printOn(ostream&) = 0;
@@ -248,79 +129,56 @@ public:
 	// print ports
 	ostream& printPorts(ostream&);
 
+	// generate the schedule (does nothing except for bags)
+	virtual int genSched() { return TRUE;}
+
 	// return the schedule
-	virtual StringList displaySchedule(int depth) = 0;
-
-	// generate code using target methods
-	virtual void genCode(Target&, int depth) = 0;
-
-	// generate code for loop beginning and ending
-	// by default, no code.
-	virtual void genLoopInit(Target&, int) {}
-	virtual void genLoopEnd(Target&) {}
+	virtual StringList displaySchedule() = 0;
 };
 
 // define << operator to use virt fn.
-inline ostream& operator<<(ostream& o, SDFCluster& cl) {
+ostream& operator<<(ostream& o, SDFCluster& cl) {
 	return cl.printOn(o);
 }
 
 // An atomic cluster surrounds an SDFStar, allowing a parallel hierarchy
 // to be built up.
 class SDFAtomCluster : public SDFCluster {
+private:
+	SDFStar& pStar;
 public:
 	// The constructor turns the SDFStar into an atomic cluster.
-	SDFAtomCluster(DataFlowStar& s,Galaxy* parent = 0);
+	SDFAtomCluster(SDFStar& s,Galaxy* parent = 0);
 	// destructor
 	~SDFAtomCluster();
 
 	// return my insides
-	DataFlowStar& real() { return pStar;}
-
-	// redefine
-	/* virtual */ int isSDF() const;
+	SDFStar& real() { return pStar;}
 
 	// "pass-along" functions
-	int run();
-	void go() { run();}
+	void fire() { go();}
+	void go();
 	int myExecTime();
-
-	// set buffer sizes of the real star.
-	void fixBufferSizes(int);
 
 	// print me
 	ostream& printOn(ostream&);
 
 	// print my schedule
-	StringList displaySchedule(int depth);
-
-	// code generation
-	void genCode(Target&, int depth);
-
-	// code generation for loop beginning and end.
-	void genLoopInit(Target&,int reps);
-	void genLoopEnd(Target&);
-private:
-	DataFlowStar& pStar;
+	StringList displaySchedule();
 };
 
 // An SDFBagScheduler is a modified SDFScheduler that lives in
 // a SDFClusterBag.
 
 class SDFBagScheduler : public SDFScheduler {
-public:
-	// return the schedule
-	virtual StringList displaySchedule(int depth);
-
-	// default version (since SDFScheduler has a no-argument version)
-	StringList displaySchedule() { return displaySchedule(0);}
-
-	// code generation
-	virtual void genCode(Target&, int depth);
 protected:
 	// we permit disconnected galaxies.
-	int checkConnectivity() { return TRUE;}
-
+	int checkConnectivity(Galaxy&) { return TRUE;}
+	// galaxy is already "prepared".
+	int prepareGalaxy(Galaxy&) { return TRUE;}
+public:
+	// return the schedule
+	StringList displaySchedule();
 };
 
 // An SDFClusterBag is a composite object.  In some senses it is like
@@ -328,160 +186,100 @@ protected:
 // Its Galaxy member contains a list of member SDFCluster objects.
 class SDFClusterBag : public SDFCluster {
 	friend class SDFClusterBagIter;
+private:
+	Galaxy gal;
+	SDFBagScheduler sched;
+	int owner;
+	int exCount;
 public:
 	// constructor: makes an empty bag
-	SDFClusterBag();
+	SDFClusterBag() : owner(TRUE), exCount(0) {}
 	// destructor deletes contents if owner is set
 	~SDFClusterBag();
 
-	// how many clusters
-	int size() const { return gal ? gal->numberBlocks() : 0;}
-
-	// set info on maximum # of tokens on each arc.
-	void fixBufferSizes(int);
-
 	// absorb adds the SDFCluster argument to the bag
-	void absorb(SDFCluster*,SDFClusterGal*);
+	void absorb(SDFCluster*,Galaxy*);
 
 	// merge merges the argument bag with me and then deletes the
 	// shell of the argument.
-	void merge(SDFClusterBag*,SDFClusterGal*);
+	void merge(SDFClusterBag*,Galaxy*);
 
 	// asBag returns myself, since I am a bag
 	SDFClusterBag* asBag() { return this;}
 
-	// return my galaxy.
-	SDFClusterGal& myGal() { return *gal; }
-
 	// print me
 	ostream& printOn(ostream&);
 
-	// print my schedule
-	StringList displaySchedule(int depth);
+	// generate my schedule
+	int genSched();
 
-	// code generation
-	void genCode(Target&, int depth);
+	// print my schedule
+	StringList displaySchedule();
 
 	// run the cluster, the number of times indicated by the loop
 	// factor.
-	int run();
+	void go();
 
 	// a synonym
-	void go() { run();}
-
-	// do additional clustering on internal cluster (merge parallel
-	// loops, for example)
-	int internalClustering();
-
-protected:
-	virtual int genSched();
-
-	// createInnerGal
-	virtual void createInnerGal();
-
-	SDFBagScheduler* sched;
-	SDFClusterGal* gal;
-	int exCount;
+	void fire() { go();}
 };
 
 class SDFClustPort : public SDFPortHole {
-	friend class SDFCluster;
+private:
+	SDFPortHole& pPort;
+	SDFClustPort* pOutPtr;
+	short bagPortFlag;
 public:
-	SDFClustPort(DFPortHole& p,SDFCluster* parent = 0,int bagp = 0);
+	SDFClustPort(SDFPortHole& p,SDFCluster* parent = 0,int bagp = 0);
 	~SDFClustPort() {}
-	DFPortHole& real() { return pPort;}
+	SDFPortHole& real() { return pPort;}
 	int isItInput() const { return pPort.isItInput();}
 	int isItOutput() const { return pPort.isItOutput();}
 	void initGeo();
 	SDFCluster* parentClust() { return (SDFCluster*)parent();}
 	SDFClustPort* far() { return (SDFClustPort*)PortHole::far();}
-	int numIO() const { return numberTokens;}
+	int numIO();
 	SDFClustPort* outPtr() {
 		return far() ? 0 : pOutPtr;
 	}
-	int feedForward() const { return feedForwardFlag;}
-
-	// indicate that this is a feedforward arc.  Mark both
-	// ends of the connection.
-	void markFeedForward() {
-		feedForwardFlag = 1;
-		SDFClustPort* pFar = far();
-		if (pFar) pFar->feedForwardFlag = 1;
-	}
-
-	// return TRUE if there is delay on the arc that may be a
-	// problem for merging, and FALSE otherwise.
-	int fbDelay() const { return (numTokens() > 0 && !feedForward());}
-
-	// return the real far port alised to bagPorts.
-	// If the bagPort is a port of the outsideCluster, return zero.
-	SDFClustPort* realFarPort(SDFCluster* outsideCluster);
 
 	void makeExternLink(SDFClustPort* val);
 
 	SDFClustPort* inPtr() {
 		return bagPortFlag ? (SDFClustPort*)&pPort : 0;
 	}
-	// set arc count ... go inside until one with a geo is found
-	void setMaxArcCount(int n);
-	// get arc count .. go outside until one with a geo is found
-	int maxArcCount();
-
-	void loopBy(int fac) { numberTokens *= fac;}
-	void unloopBy(int fac) { numberTokens /= fac;}
-	// don't like this being public, but...
-	void setNumXfer(int v) { numberTokens = v;}
-private:
-	DFPortHole& pPort;
-	SDFClustPort* pOutPtr;
-	unsigned char bagPortFlag;
-	unsigned char feedForwardFlag;
 };
 
-class SDFClustSched : public SDFBagScheduler {
-public:
-	// constructor and destructor
-	SDFClustSched(const char* log = 0) : cgal(0),logFile(log) {}
-	~SDFClustSched();
-
-	// SDFBagScheduler allows disconnections, we do not.
-	int checkConnectivity() {
-		return SDFScheduler::checkConnectivity();
-	}
-
-	// Generate code using the Target to produce the right language.
-	void compileRun();
-
-    StringList displaySchedule();
-
+class SDFClustSched : public SDFScheduler {
 protected:
 	SDFClusterGal* cgal;
 	const char* logFile;
-	// this one does the main work.
-	int computeSchedule (Galaxy& g);
+	int computeSchedule (Galaxy&);
+public:
+	SDFClustSched(const char* log = 0) : cgal(0),logFile(log) {}
+	~SDFClustSched();
+	StringList displaySchedule();
 };
 
 class SDFClustPortIter : public BlockPortIter {
 public:
 	SDFClustPortIter(SDFCluster& s) : BlockPortIter(s) {}
 	SDFClustPort* next() { return (SDFClustPort*)BlockPortIter::next();}
-	SDFClustPort* operator++(POSTFIX_OP) { return next();}
+	SDFClustPort* operator++() { return next();}
 };
 
 class SDFClusterGalIter : public GalTopBlockIter {
 public:
 	SDFClusterGalIter(SDFClusterGal& g) : GalTopBlockIter(g) {}
-	SDFCluster* next() { return (SDFCluster*)GalTopBlockIter::next();}
-	SDFCluster* operator++(POSTFIX_OP) { return next();}
-	GalTopBlockIter::reset;
+	SDFCluster* next() { return (SDFCluster*)ListIter::next();}
+	SDFCluster* operator++() { return next();}
+	ListIter::reset;
 };
 
 class SDFClusterBagIter : public GalTopBlockIter {
 public:
-	SDFClusterBagIter(SDFClusterBag& b) : GalTopBlockIter(*(b.gal)) {}
-	SDFCluster* next() { return (SDFCluster*)GalTopBlockIter::next();}
-	SDFCluster* operator++(POSTFIX_OP) { return next();}
-	GalTopBlockIter::reset;
+	SDFClusterBagIter(SDFClusterBag& b) : GalTopBlockIter(b.gal) {}
+	SDFCluster* next() { return (SDFCluster*)ListIter::next();}
+	SDFCluster* operator++() { return next();}
+	ListIter::reset;
 };
-
-#endif

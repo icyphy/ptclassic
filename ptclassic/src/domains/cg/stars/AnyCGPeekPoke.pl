@@ -5,7 +5,7 @@ desc { Asynchronous communication star, splices in a peek/poke pair }
 version { $Id$ }
 author { Jose Luis Pino }
 copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -30,14 +30,7 @@ input {
 
 output {
     name {output}
-    type {=input}
-}
-
-state {
-    name { Poke_procId }
-    type { int }
-    default { 1 }
-    desc { assigned processor id for poke - must be manually assigned. }
+    type {ANYTYPE}
 }
 
 state {
@@ -101,12 +94,31 @@ method {
     }
 }
 
-constructor {
-    procId.setState("Peek_procId",this, "0",
-		    "assigned processor id for peek - must be manually "
-		    "assigned.");
+method {
+    name { setState }
+    type { int }
+    access { private }
+    arglist {"(CGStar& peek, CGStar& poke, State& state)"}
+    code {
+	State* peekState = peek.stateWithName(state.name());
+	State* pokeState = poke.stateWithName(state.name());
+	if (!(peekState && pokeState)) {
+	    Error::warn (*this,
+	      "Sorry, the peek/poke actors do not support ",state.name());
+	    return FALSE;
+	}
+	
+	StringList currentValue;
+	currentValue << state.currentValue();	
+	const char* value = hashstring(currentValue);
+	peekState->setInitValue(value);
+	pokeState->setInitValue(value);
+	peekState->initialize();
+	pokeState->initialize();
+	return TRUE;
+    }
 }
-
+	
 setup {
     Target* target = cgTarget();
     while (target && ! target->isA("MultiTarget"))
@@ -115,90 +127,16 @@ setup {
 	Error::abortRun(*this,"is not inside of a multitarget");
 	return;
     }
-
-    if (target->nProcs() <= (int)procId || procId < 0 ) {
-	StringList message;
-	message << "The Peek_ProcId is invalid, it is set to "
-		<< procId << " but the number of child targets is "
-		<< target->nProcs();
-	Error::abortRun(*this,message);
-	return;
-    }
-
-    if (target->nProcs() <= Poke_procId || Poke_procId < 0) {
-	StringList message;
-	message << "The Poke_ProcId is invalid, it is set to "
-		<< Poke_procId << " but the number of child targets is "
-		<< target->nProcs();
-	Error::abortRun(*this,message);
-	return;
-    }
-
     PortHole* peekPort = findPort(output);
     PortHole* pokePort = findPort(input);
     if (!(peekPort && pokePort)) return;
-
-    AsynchCommPair 
-	pair = ((MultiTarget*)target)
-	    ->createPeekPokeProcId(procId,Poke_procId);
-
-    CGStar *peek = pair.peek, *poke = pair.poke;
-
-    if (peek == NULL || poke == NULL) return;
-
-    PortHole* input = poke->portWithName("input");
-    if (!input) {
-	Error::abortRun(*this,poke->name(),
-			": Poke star does not have a porthole named 'input'");
-	return;
-    }	
-
-    PortHole* output = peek->portWithName("output");
-    if (!output) {
-	Error::abortRun(*this,peek->name(),
-			": Peek star does not have a porthole named 'output'");
-	return;
-    }
-
-    if (output->type() == ANYTYPE) input->inheritTypeFrom(*output);
-
-    int numInitDelays;
-    Galaxy* parentGal;
-    StringList starName, linkName;
-    linkName << starSymbol.lookup("Link");
-    // FIXME - we do not support initial delays on peek/poke arcs
-    // The peekPort and pokePort are in a disconnected state here.
-    // numInitDelays = peekPort->numInitDelays();
-    numInitDelays = 0;
-    peekPort->disconnect();
-    output->connect(*peekPort,numInitDelays);
-    parentGal = (Galaxy*) peekPort->parent()->parent();
-    starName.initialize();
-    starName << "Peek_" << linkName ;
-    parentGal->addBlock(*peek,hashstring(starName));
-    peek->setTarget(target->child(procId));
-
-    // FIXME - we do not support initial delays on peek/poke arcs
-    // The peekPort and pokePort are in a disconnected state here.
-    // numInitDelays = pokePort->numInitDelays();
-    numInitDelays = 0;
-    pokePort->disconnect();
-    pokePort->connect(*input,numInitDelays);
-    parentGal = (Galaxy*) pokePort->parent()->parent();
-    starName.initialize();
-    starName << "Poke_" << linkName;
-    parentGal->addBlock(*poke,hashstring(starName));
-    poke->setTarget(target->child(Poke_procId));
-
-    if ((int) blockSize > 1) 
-	setAsynchCommState(pair,"blockSize",blockSize.currentValue());
-    if ((int) updateRate > 1)
-	setAsynchCommState(pair,"updateRate",updateRate.currentValue());
+    CGStar *peek, *poke;
+    int status = 
+	((MultiTarget*)target)->createPeekPoke(*peekPort,*pokePort,peek,poke);
+    if (!status) return;
+    if ((int) blockSize > 1) setState(*peek,*poke,blockSize);
+    if ((int) updateRate > 1) setState(*peek,*poke,blockSize);
     ((Galaxy*) parent())->deleteBlockAfterInit(*this);
-
-    peek->setProcId(procId);
-    poke->setProcId(Poke_procId);
-    
 }
 
 }

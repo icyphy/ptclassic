@@ -6,8 +6,10 @@ Receive star between NOW processors.
 	}
 	version { $Id$ }
 	author { Patrick Warner }
-	copyright { 1995 The Regents of the University of California }
-	location { CGC local library }
+	copyright {
+Copyright (c) 1990-%Q% The Regents of the University of California
+        }
+	location { CGC NOW target library }
 	explanation {
 Produce code for inter-process communication (receive-side)
 	}
@@ -38,48 +40,13 @@ Produce code for inter-process communication (receive-side)
 		numData = output.numXfer();
 	}
 
-	codeblock (timeincludes) {
-#ifdef TIME_INFO
-#include <sys/fcntl.h>
-#include <sys/resource.h>
-#include <sys/procfs.h>
-#endif
-	}
 	codeblock (ipcHandler) {
 void $val(IPCHandlerName)(int src, double arg, int dum1, int dum2)
 {
         $starSymbol(RecvData) = arg;
 }
 	}
-	codeblock (timedecls) {
-#ifdef TIME_INFO
-int fd;
-char proc[BUFSIZ];
-double timeRun;
-prusage_t beginRun;
-prusage_t endRun;
-#endif
-	}
-	codeblock (stardecls) {
-#ifdef TIME_INFO
-double $starSymbol(timeRecv);
-prusage_t $starSymbol(beginRecv);
-prusage_t $starSymbol(endRecv);
-#endif
-	}
-	codeblock (timeinit) {
-#ifdef TIME_INFO
-timeRun = 0.0;
-#endif
-	}
-	codeblock (starinit) {
-#ifdef TIME_INFO
-$starSymbol(timeRecv) = 0.0;
-$starSymbol(RecvData) = -0.001;
-#endif
-	}
 	codeblock (openfd) {
-#ifdef TIME_INFO
 sprintf(proc,"/proc/%d", (int)getpid());
 if ((fd = open(proc, O_RDONLY)) == -1)
 	printf("error opening proc\n");
@@ -87,17 +54,25 @@ if (fd == -1)
        	printf("couldn't open proc\n");
 else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
        	printf("error getting time\n");
-#endif
 	}
 	initCode {
 		addGlobal("double $starSymbol(RecvData);\n");
 		addInclude("<stdio.h>");
 		addInclude("<am.h>");
-		addCode(timeincludes, "include", "timeIncludes");
-		addCode(timedecls, "mainDecls", "timeDecls");
-		addCode(stardecls, "mainDecls");
-                addCode(timeinit, "mainInit", "timeInit");
-                addCode(starinit, "mainInit");
+                addInclude("<sys/fcntl.h>");
+                addInclude("<sys/resource.h>");
+                addInclude("<sys/procfs.h>");
+                addDeclaration("int fd;\n");
+                addDeclaration("char proc[BUFSIZ];\n");
+                addDeclaration("double timeRun;\n");
+                addDeclaration("prusage_t beginRun;\n");
+                addDeclaration("prusage_t endRun;\n");
+                addDeclaration("double $starSymbol(timeRecv);\n");
+                addDeclaration("prusage_t $starSymbol(beginRecv);\n");
+                addDeclaration("prusage_t $starSymbol(endRecv);\n");
+                addCode("timeRun = 0.0;\n", "mainInit", "timeRun");
+                addCode("$starSymbol(timeRecv) = 0.0;\n");
+                addCode("$starSymbol(RecvData) = -0.001;\n");
 		addCode(openfd, "mainInit", "openFd");
 		addCode("am_enable();\n", "mainInit", "amEnable");
 	}
@@ -106,14 +81,12 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 	int i, pos;
 
 
-	#ifdef TIME_INFO
         if (fd == -1) {
                 printf("couldn't open proc\n");
         }
         else if (ioctl(fd, PIOCUSAGE, &$starSymbol(beginRecv)) == -1) {
                 printf("error getting time\n");
         }
-	#endif
 
 	for (i = 0; i < $val(numData); i++) {
 		while ($starSymbol(RecvData) == -0.001) {
@@ -124,7 +97,6 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
                 $starSymbol(RecvData) = -0.001;
 	}
 
-	#ifdef TIME_INFO
         if (fd == -1) {
                 printf("couldn't open proc\n");
         }
@@ -137,7 +109,6 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
                              $starSymbol(beginRecv).pr_rtime.tv_nsec)) /
                              1000000000.0;
         printf("Cumulative time to receive %lf seconds\n", $starSymbol(timeRecv));
-	#endif
 
 	}
 
@@ -146,7 +117,6 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 		addCode(block);
 	}
 	codeblock (runtime) {
-#ifdef TIME_INFO
 if (fd == -1)
        printf("couldn't open proc\n");
 else if (ioctl(fd, PIOCUSAGE, &endRun) == -1)
@@ -155,7 +125,6 @@ timeRun = (double)(endRun.pr_rtime.tv_sec - beginRun.pr_rtime.tv_sec) +
            ((double)(endRun.pr_rtime.tv_nsec -
                      beginRun.pr_rtime.tv_nsec)) / 1000000000.0;
 printf("Time to run %lf seconds\n", timeRun);
-#endif
 	}
 	wrapup {
 		addCode(runtime, "mainClose", "runTime");

@@ -1,15 +1,15 @@
 defstar {
 	name { GainFix }
 	domain { CGC }
-	derivedFrom { Fix }
+	derivedFrom { CGCFix }
 	desc { 
 This is an amplifier; the fixed-point output is the fixed-point input
 multiplied by the "gain" (default 1.0).
 The precision of "gain", the input, and the output can be specified in bits.
 	}
-	author { Juergen Weiss }
+	author { J.Weiss }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.

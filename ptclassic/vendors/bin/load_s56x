@@ -1,3 +1,0 @@
-#!/bin/sh
-#%w%	$Date$
-exec `dirname $0`/vendorexec.s56dsp s56dsp/bin/load56 -q -e START $*

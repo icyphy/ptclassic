@@ -1,21 +1,23 @@
 static const char file_id[] = "BarGraph.cc";
-/* 
-SCCS Version identification :
+
+/**************************************************************************
+Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
+Author: Edward A. Lee
+
+Defines and maintains a Tcl bar graph.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -24,24 +26,13 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
+							COPYRIGHTENDKEY
 
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
-
- Programmer: Edward A. Lee
- Created:    11/21/93
-
-Defines and maintains a Tcl bar graph.
-*/
-
-#ifdef __GNUG__
-#pragma implementation
-#endif
+**************************************************************************/
 
 #include "BarGraph.h"
 #include "ptkBarGraph.h"
 #include "ieee.h"
-#include "ptkTclCommands.h"
 
 /////////////////////////////////////////////////////////////////////////
 //			Tcl Callable Procedures
@@ -49,9 +40,9 @@ Defines and maintains a Tcl bar graph.
 // Define the callback procedure used by Tcl to redraw the bar graph
 static int redraw(
     ClientData bargraph,	// Pointer to the BarGraph object
-    Tcl_Interp*, 		// Current interpreter
-    int,           		// Number of arguments
-    char *[]         		// Argument strings
+    Tcl_Interp *interp, 	// Current interpreter
+    int argc,           	// Number of arguments
+    char **argv         	// Argument strings
 ) {
     ((BarGraph*)bargraph)->redrawBars();
     return TCL_OK;
@@ -62,8 +53,8 @@ static int redraw(
 static int rescale(
     ClientData bargraph,	// Pointer to the BarGraph object
     Tcl_Interp *interp, 	// Current interpreter
-    int,           		// Number of arguments
-    char *argv[]         	// Argument strings
+    int argc,           	// Number of arguments
+    char **argv         	// Argument strings
 ) {
     float scaleFactor;
     if(sscanf(argv[1], "%4f", &scaleFactor) != 1) {
@@ -72,10 +63,10 @@ static int rescale(
 	return TCL_ERROR;
     }
     ((BarGraph*)bargraph)->rescaleGraph(scaleFactor);
-    InfString buf = ((BarGraph*)bargraph)->top;
+    StringList buf = ((BarGraph*)bargraph)->top;
     buf += " ";
     buf += ((BarGraph*)bargraph)->bottom;
-    Tcl_SetResult(interp,(char*)buf, TCL_VOLATILE);
+    Tcl_SetResult(ptkInterp,(char*)buf, TCL_VOLATILE);
     return TCL_OK;
 }
 
@@ -86,18 +77,16 @@ static int rescale(
 BarGraph::BarGraph () {
 	starID = "ptkBarGraph";
 	starID += unique++;
-	data = 0;
-	ids = 0;
-	winName = "";
+	data = NULL;
+	ids = NULL;
 }
 
 // destructor
 BarGraph::~BarGraph() {
-	// avoid core dump if interpreter did not set up right
-	if (!ptkInterp) return;
+	StringList buf;
 
 	// Delete Tcl commands created by this object
-	InfString buf = winName;
+	buf = winName;
 	buf += "redraw";
 	Tcl_DeleteCommand(ptkInterp, (char*)buf);
 
@@ -124,7 +113,7 @@ int BarGraph::setup (Block* star,       // The star I am in
                    double width,        // Desired width of the window (cm)
                    double height)  	// Desired height of the window (cm)
 {
-	if (!ptkInterp) return FALSE;
+	int i;		// Loop counter repeatedly used
 
 	// Store the parameters
 	top = initTop;
@@ -132,9 +121,6 @@ int BarGraph::setup (Block* star,       // The star I am in
 	myStar = star;
 	noBars = numBars;
 	noInputs = numInputs;
-
-	// Loop counter repeatedly used
-	int i;
 
 	// Allocate the memory for storing the data
 	// First, delete previous versions
@@ -162,9 +148,8 @@ int BarGraph::setup (Block* star,       // The star I am in
 	// stem of the window name.  This means that the window will
 	// be a child window of the control panel, and hence will be
 	// destroyed when the control panel window is destroyed.
-	char initControlPanelCmd[ sizeof(PTK_CONTROL_PANEL_INIT) ];
-	strcpy(initControlPanelCmd, PTK_CONTROL_PANEL_INIT);
-	if(Tcl_GlobalEval(ptkInterp, initControlPanelCmd) != TCL_OK) {
+	char ncstring1[] = "global ptkControlPanel;set ptkControlPanel";
+	if(Tcl_GlobalEval(ptkInterp, ncstring1) != TCL_OK) {
 		winName = ".bar";
 		winName += starID;
 	} else {
@@ -174,7 +159,7 @@ int BarGraph::setup (Block* star,       // The star I am in
 	}
 
 	// Define the Tcl procedure to redraw the bar graph
-	InfString buf;
+	StringList buf;
 	buf = winName;
 	buf += "redraw";
 	Tcl_CreateCommand(ptkInterp, (char*)buf, redraw,
@@ -188,7 +173,7 @@ int BarGraph::setup (Block* star,       // The star I am in
 
 	// Create the window
 	if(ptkMakeBarGraph(ptkInterp,
-		&ptkW,
+		ptkW,
 		(char*)winName,
 		desc,
 		data,
@@ -215,18 +200,12 @@ int BarGraph::setup (Block* star,       // The star I am in
 	return TRUE;
 }
 
-int BarGraph::windowExists () {
-	return (Tk_NameToWindow(ptkInterp,(char*)winName,ptkW) != 0);
-}
-
 // Update a single bar of the bar graph.
 // The "input" argument should be in the range from 0 to noInputs-1.
 int BarGraph::update (int input,          // Identifies the data set
                       int bar,            // Identifies the bar within the set
                       double newVal)
 {
-	if (!ptkInterp) return FALSE;
-
 	data[input][bar] = newVal;
 
 	// Update the one bar that is affected
@@ -235,7 +214,7 @@ int BarGraph::update (int input,          // Identifies the data set
 		noInputs, noBars, actualWidth, actualHeight,
 		top, bottom, newVal);
 
-	InfString buf = winName;
+	StringList buf = winName;
 	buf += ".pf.plot coords ";
 	buf += ids[input][bar];
 	buf += " "; buf += x0;
@@ -248,9 +227,8 @@ int BarGraph::update (int input,          // Identifies the data set
 }
 
 void BarGraph::redrawBars () {
-	if (!ptkInterp) return;
 	ptkSetBarGraph (ptkInterp,
-		&ptkW,
+		ptkW,
 		(char*)winName,
 		data,
 		noInputs,
@@ -260,7 +238,7 @@ void BarGraph::redrawBars () {
 		ids);
 	// Update the size parameters, in case they have changed
 	// Set plotwin member
-	InfString buf = winName;
+	StringList buf = winName;
 	buf += ".pf.plot";
 	Tk_Window plotwin = Tk_NameToWindow(ptkInterp,(char*)buf,ptkW);
 	if (plotwin == 0) return;

@@ -7,19 +7,19 @@ static const char file_id[] = "DFPortHole.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1993 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -28,9 +28,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+							COPYRIGHTENDKEY
 
  Programmer:  E. A. Lee, J. Buck, D. G. Messerschmitt
  Date of creation: 5/29/90
@@ -53,7 +51,7 @@ int DFPortHole :: assocRelation() const { return -1;}
 int DFPortHole :: isDynamic() const { return FALSE;}
 
 // constructor for DFPortHole ... default maxBackValue is 0
-DFPortHole :: DFPortHole() : maxBackValue(0), varying(0) {}
+DFPortHole :: DFPortHole() : maxBackValue(0) {}
 
 // number of repetitions of parent
 int DFPortHole :: parentReps() const {
@@ -61,15 +59,27 @@ int DFPortHole :: parentReps() const {
 	return parStar->reps();
 }
 
-PortHole& DFPortHole :: setPort(const char* portName, Block* parent,
-				DataType type, unsigned numTokens) {
-	if (numTokens == 0) {
-		varying = 1;
-		numberTokens = 1;
-	} else {
-		numberTokens = numTokens;
-	}
-	return PortHole :: setPort(portName, parent, type, numberTokens);
+PortHole& DFPortHole :: setPort (
+			     const char* s,
+                             Block* parent,
+                             DataType t,
+                             unsigned numTokens,
+			     unsigned delay)
+{
+	// Initialize PortHole
+        PortHole::setPort(s,parent,t);
+
+	// Based on the delay, we allocate a Buffer assuming no
+	// past Particles are allocated
+        numberTokens = numTokens;
+	maxBackValue = delay;
+	// The number of Particles the buffer has to hold is:
+	//		numberTokens current and future Particles
+	//		delay past Particles
+	if ( numberTokens > int(delay)) bufferSize = numberTokens;
+	else bufferSize = delay + 1;
+
+        return *this;
 }
 
 // Function to alter only numTokens and delay.
@@ -83,10 +93,6 @@ PortHole& DFPortHole :: setSDFParams(unsigned numTokens, unsigned delay) {
 		initialize();
 	return *this;
 }
-
-// DFPortHoles use local Plasmas.
-int DFPortHole :: allocatePlasma() { return allocateLocalPlasma();}
-
 
 // functions to manipulate the count of maximum buffer size.
 void DFPortHole :: incCount(int n) { myGeodesic->incCount(n);}
@@ -109,24 +115,6 @@ MultiPortHole& MultiDFPort :: setPort (const char* s,
         MultiPortHole::setPort(s,parent,t);
         numberTokens = numTokens;
         return *this;
-}
-
-PortHole& MultiDFPort :: installPort(PortHole& p) {
-        // We need this cast or else ddf demos give bogus results
-        // This problems is probably a results of the virtualization of
-        // installPort().  The real fix would probably be to have
-        // both version of setPort have the same args and then make
-        // it virtual.
-        DFPortHole &dp = (DFPortHole &)p;
-	ports.put(dp);
-	parent()->addPort(dp.setPort(newName(), parent(),
-				     type(), numberTokens));
- // for ANYTYPE multiportholes, all ports are resolved to be the same type.
-	if (type() == ANYTYPE)
-		dp.inheritTypeFrom(*this);
-	// we can do the following as a friend function
-	letMeKnownToChild(dp);
-	return dp;
 }
 
 // Function to alter only numTokens and delay.

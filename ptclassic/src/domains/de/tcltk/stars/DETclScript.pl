@@ -4,19 +4,19 @@ defstar {
 	version { $Id$ }
 	author { Brian Evans and Edward Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1993 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { DE Tcl/Tk library }
+	location { DE tcltk library }
 	desc {
 Invoke a Tcl script that can optionally define a procedure that is
 invoked every time the star fires.
 	}
 	explanation {
 .EQ
-delim off
+nodelim
 .EN
 The star reads a file containing Tcl commands.
 It can be used in a large variety of ways, including using Tk to animate
@@ -32,17 +32,15 @@ names for each instance of the star.
 These unique names are constructed using a unique string defined by the star.
 That string is made available to the Tcl script in the form of a global
 Tcl variable \fIstarID\fR.
-To set all output values at once from Tcl, use
-"setOutputs_$starID" with one argument for each output port (giving the new value).
-To set one output only, use "setOutput_$starID" with two arguments,
-the port number (starting with one) and the new output value.
-To read input values use "grabInputs_$starID".
-This procedure returns a string with as many values as there are
+The procedure used by the Tcl script to set output values is called
+"setOutputs_$starID", while the procedure used to read input values is
+called "grabInputs_$starID".
+The setOutputs procedure takes as many arguments as there are output ports.
+The grabInputs procedure returns a string with as many values as there are
 inputs, separated by spaces.
-The Tcl script is sourced in the begin method of the star execution,
+The Tcl script is sourced during the startup phase of the star execution,
 so it does not make sense at this time to read inputs.
-However, you might want to set outputs at this time.
-These outputs will have timestamp zero.
+However, it may make sense to set output values (in order to initialize them).
 .pp
 The Tcl script can optionally define a Tcl procedure called "goTcl_$starID".
 If this procedure is defined in the script, then it will be invoked every
@@ -56,12 +54,13 @@ up procedures that will interact with the star only when Tcl invokes them).
 For asynchronous operation, typically X events are bound to Tcl/Tk commands
 that read or write data to the star.
 These Tcl commands use grabInputs_$starID, which returns a list containing
-the current value of each of the inputs, and setOutputs_$starID or
-setOutput_$starID, which sets
+the current value of each of the inputs, and setOutputs_$starID, which sets
 the value of the outputs.
-The inputs can be of any type;
-the print() method of the particle is used to construct a string passed to Tcl.
-This mechanism is entirely asynchronous, in that the Tcl/Tk script
+The argument list for setOutputs_$starID should contain a floating-point
+value for each output of the star.
+The inputs can be of any type.
+The print() method of the particle is used to construct a string passed to Tcl.
+This mechanism is entirely asychronous, in that the Tcl/Tk script
 decides when these actions should be performed on the basis of X events.
 .pp
 In synchronous operation, the Tcl procedure goTcl_$starID will be called
@@ -69,28 +68,11 @@ by the star every time it fires.
 The procedure could, for example, grab input values and compute output values,
 although it can do anything the designer wishes, even ignoring the input
 and output values.
-.pp
-For the DE domain, this star checks to see which inputs are new and
-sets flags accordingly.  The Tcl script can read these flags by calling
-grabInputsState_$starID; this procedure returns a list of zeros and ones,
-as many as there are inputs, indicating whether the corresponding input
-value is new.
-The Tcl script can write to the outputs either all at once using
-setOutputs_$starID, or one by one, using setOutput_$starID.
-The timestamp on the affected output ports will be the current time
-of the scheduler.
-If writing to the outputs occurs in goTcl_$starID
-procedure, then the timestamp on the outputs will be the same as
-the invocation time of the star.
-If it occurs asynchronously, then the timestamp is somewhat arbitrary,
-in that the current time of the scheduler, whenever the procedure happens
-to be invoked, will be used.
 .EQ
 delim $$
 .EN
 	}
 	hinclude { "TclStarIfc.h" }
-	ccinclude { "ptk.h" }
 	outmulti {
 		name {output}
 		type {float}
@@ -104,90 +86,84 @@ delim $$
 	defstate {
 		name {tcl_file}
 		type {string}
-		default {"$PTOLEMY/src/domains/sdf/tcltk/stars/tkScript.tcl"}
+		default {"$PTOLEMY/src/domains/de/tcltk/stars/tkScript.tcl"}
 		desc {The file from which to read the Tcl script}
-	}
-	ccinclude { "Scheduler.h" }
-	header {
-	  class DETclScript;
-
-	  // Overload TclStarIfc for DE-specific functions
-	  class TclStarIfcDE : public TclStarIfc {
-	  public:
-	    /* virtual */ void setOneOutput(int outNum, double outValue);
-	    void setParent(DETclScript* p) {parent = p;}
-	  private:
-	     DETclScript *parent;
-	  };
-	}
-	code {
-	  void TclStarIfcDE::setOneOutput (int outNum, double outValue) {
-	    if ( outNum >= outputArraySize ) {
-	      Error::warn(*myStar, "Too many outputs supplied by Tcl");
-	    } else if ( outNum < 0 ) {
-	      Error::warn(*myStar, "Negative output port number");
-	      return;
-	    } else {
-	      // Is there a procedure to get the port by number?
-	      OutDEMPHIter nextp(parent->output);
-	      OutDEPort *oportp = nextp++;
-	      for (int portnum=0; portnum < outNum; portnum++) oportp = nextp++;
-	      oportp->put(parent->scheduler()->now()) << outValue;
-	      oportp->sendData();
-	    }
-	  }
 	}
 	protected {
 		// Standardized interface to Tcl
-		TclStarIfcDE tcl;
+		TclStarIfc tcl;
 	}
-	constructor {
-	  tcl.setParent(this);
-	}
-	begin {
+	setup {
 		tcl.setup( this,
 			   input.numberPorts(),
 			   output.numberPorts(),
-			   (const char*) tcl_file );
+			   (const char*)tcl_file );
 	}
 	method {
 		name{ processInputs }
 		type{ void }
 		access{ public }
-		arglist{ "()" }
-		code {
+		arglist{ "(TclStarIfc *tclp, MultiInDEPort *inputp)" }
+		code{
 		  // Reset newInputFlags and newOutputFlags in the Tcl object
-		  tcl.setAllNewInputFlags(FALSE);
+		  tclp->setAllNewInputFlags(FALSE);
+		  tclp->setAllNewOutputFlags(FALSE);
 
 		  // Check the input values to see which ones are new
 		  // and set the flags for the affected output ports
-		  InDEMPHIter nextp(input);
+		  InDEMPHIter nextp(*inputp);
 		  InDEPort* iportp;
+		  int alloutflag = FALSE;
 		  int portnum = 0;
 		  while ((iportp = nextp++) != 0) {
-		    if (iportp->isItOutput()) continue;
 		    if ( iportp->dataNew ) {
 		      // set proper entry of newInputFlags of the Tcl object
-			tcl.setOneNewInputFlag(portnum, TRUE);
-			iportp->dataNew = FALSE;
+		      tclp->inputNewFlags[portnum] = TRUE;
+
+		      // see which outputs are affected by the new input
+		      if ( ! alloutflag ) {
+		        if ( iportp->complete ) {
+			  tclp->setAllNewOutputFlags(TRUE);
+			  alloutflag = TRUE;
+			} else {
+			// walk down triggerList to find the affected output ??
+
+			}
+		      }
 		    }
+		    portnum++;
+		  }
+		  // output.put(completionTime) = iportp->get(); ??
+		}
+	}
+	method {
+		name{ processOutputs }
+		type{ void }
+		access{ public }
+		arglist{ "(TclStarIfc *tclp, MultiOutDEPort *outputp)" }
+		code {
+		  // Output values (computed by Tcl) from the local tcl buffer
+		  OutDEMPHIter nextp(*outputp);
+		  OutDEPort *oportp;
+		  int portnum = 0;
+		  while ((oportp = nextp++) != 0) {
+		    if ( tclp->outputNewFlags[portnum] ) 
+		      oportp->put(completionTime) = tclp->outputValues[portnum];
 		    portnum++;
 		  }
 		}
 	}
 	go {
 	   completionTime = arrivalTime;
-	   InfString time = arrivalTime;
-	   Tcl_SetVar2(ptkInterp,tcl.id(),"arrivalTime",
-		       (char*)time,TCL_GLOBAL_ONLY);
-	   
+
 	   // Process the inputs to see which ones are new
-	   processInputs();
+	   processInputs( &tcl, &input );
 
 	   // Invoke the Tcl script (Tcl will call back to get input values)
 	   tcl.go();
+
+	   // Send the outputs which are new through the output portholes
+	   processOutputs( &tcl, &output );
+
 	}
-	wrapup {
-	   tcl.wrapup();
-        }
 }

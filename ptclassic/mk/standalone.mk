@@ -27,60 +27,32 @@
 #		       
 # Programmer:  Jose Luis Pino
 #
-# This makefile is to be used to create small, stand-alone programs
-# that use parts of Ptolemy kernel or just the pure mk rule definitions
+# This makefile is to be used to create small, stand-alone testing programs
+# for the Ptolemy kernel.
 #
-# To use this, you need to construct a single <filename>.cc file 
-# that defines a main function. The usage of this mk file is:
-#
+# To use this, you need to construct a <filename>.cc file that has a main 
+# function and accomplishes the test.  This file should be located in the 
+# src directory of the library to test.  Then, just cd into the obj directory 
+# and execute the make command:
 # make -f $(ROOT)/mk/standalone.mk <stars.mk variable defs> <filename>.<suffix>
 #
 # where the suffix is one of: .bin, .debug, .purify, .quantify, .purecov
 #
+include makefile
 
-ROOT=$(PTOLEMY)
-
-ifndef NOPTOLEMY
-	include $(ROOT)/mk/stars.mk
-	INCL= $(foreach dir,$(CUSTOM_DIRS),-I$(ROOT)$(dir))
-endif
-
-include $(ROOT)/mk/config-$(PTARCH).mk
-
-#if we define NOPTOLEMY variable, we just want to use the pure make commands &
-#none of the PTOLEMY libs
-
-ifdef NOPTOLEMY
-	#Remove rpath which may have been defined
-	SHARED_LIBRARY_R_LIST=
-endif
-	
-VPATH=.
-
-ifndef LIB
-	#This definition is needed so that make won't complain w/ common.mk
-	LIB=dummy
-endif
-
-include $(ROOT)/mk/common.mk
+include $(ROOT)/mk/stars.mk
 
 %.bin: %.o $(PT_DEPEND)
 	$(PURELINK) $(LINKER) $(LINKFLAGS) $< $(LIBS) -o $(@F)
 
-%.debug: %.o  $(PT_DEPEND)
+%.debug: %.o 
 	$(PURELINK) $(LINKER) $(LINKFLAGS_D) $< $(LIBS) -o $(@F)
 
-%.purify: %.o $(PT_DEPEND)
+%.purify: %.o
 	$(PURIFY) $(LINKER) $(LINKFLAGS_D)  $< $(LIBS) -o $(@F)
 
-%.quantify: %.o $(PT_DEPEND)
+%.quantify: %.o
 	$(QUANTIFY) $(LINKER) $(LINKFLAGS) $< $(LIBS) -o $(@F)
 
-$.purecov: %.o $(PT_DEPEND)
+$.purecov: %.o
 	$(PURECOV) $(LINKER) $(LINKFLAGS) $< $(LIBS) -o $(@F)
-
-
-
-
-
-

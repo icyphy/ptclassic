@@ -2,19 +2,13 @@ defstar {
 	name {QueueBase}
 	domain {DE}
 	desc {
-This is the  base class for FIFO and LIFO queues.
-This star is not intended to be used except to derive useful stars.
+Base class for FIFO and LIFO queues.
+This star is not intended to be used except to derive useful stars from.
 All inputs are simply routed to the "overflow" output.  None are stored.
 	}
 	version { $Id$}
-	author { Soonhoi Ha and E. A. Lee }
-	acknowledge { Incorporates design ideas from Philip Bitar. }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	author { Soonhoi Ha, E. A. Lee, and Philip Bitar }
+	copyright { 1991 The Regents of the University of California }
 	input {
 		name {demand}
 		type {anytype}
@@ -38,7 +32,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {overflow}
 		type {=inData}
 		desc {
-Arrival data that cannot be queued due to capacity limit.
+Arrival data that can not be queued due to capacity limit.
 		}
 	}
 	protected {
@@ -67,18 +61,13 @@ Arrival data that cannot be queued due to capacity limit.
 		// by inData or demand inputs.
 		inData.triggers(size);
 		demand.triggers(size);
-		inData.triggers(overflow);
-
-		// simultaneous inData events should be available in the
-		// same firing with demand events
-		inData.before(demand);
 
 		// Following the general rule that if an input can trigger
 		// an output with the same time stamp, we should identify
 		// a trigger relationship:
 		demand.triggers(outData);
 	}
-	setup {
+	start {
 		infinite = (int(capacity) < 0);
 	}
 

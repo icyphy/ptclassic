@@ -2,7 +2,6 @@
 # Author: Matthew T. Tavis
 # Version: $Id$
 
-if {[itcl_info class LogicAnalyzerStar] == ""} {
 itcl_class LogicAnalyzerStar {
 
     inherit TyItclScript
@@ -31,10 +30,6 @@ itcl_class LogicAnalyzerStar {
 
 	# set number of inputs
 	set numInputs [$this numInputs]
-
-	# set binding to destroy this instance when windows disappears
-	bind $ptkControlPanel.logicAnalyzer_$starID <Destroy> \
-		"$this delete"
     }
 
     destructor { 
@@ -53,7 +48,9 @@ itcl_class LogicAnalyzerStar {
 
 	# read values
 	set ParticleVals [grabInputs]
+	puts "Values: $ParticleVals"
 	set ParticleState [grabInputsState_$starIdent]
+	puts "State: $ParticleState"
 	set arrivalTime [set ${starIdent}(arrivalTime)]
 
 	# Iterate over the portholes
@@ -72,5 +69,5 @@ itcl_class LogicAnalyzerStar {
 	myChart_$starIdent LARefresh
     }
 }
-}
+
 LogicAnalyzerStar #auto $starID

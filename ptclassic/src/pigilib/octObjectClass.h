@@ -39,7 +39,6 @@ of oct objects.
 #define _octObjectClass_h 1
 
 extern "C" {
-#include "oct.h"
 #include "octIfc.h"
 }
 
@@ -47,10 +46,7 @@ class octObjectClass {
 
 public:
 	// constructor
-        octObjectClass() {
-		facet.type = OCT_UNDEFINED_OBJECT;
-		facet.objectId = 0;
-	}
+        octObjectClass() { facet.objectId = OCT_UNDEFINED_OBJECT; }
 
 	// destructor
         ~octObjectClass() { FreeOctMembers(&facet); }

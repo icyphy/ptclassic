@@ -3,15 +3,10 @@ defstar {
 	domain { DE }
 	author { GSWalter }
 	version { $Id$ }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-		}
-	location { DE main library }
+	copyright { 1992 (c) U. C. Regents }
+	location { DE main palette }
 	desc {
-Remove a Message from a NetworkCell.
+Removes Message from NetworkCell in DE domain.
 	}
 
 	input { name { input } type { message } }
@@ -20,22 +15,16 @@ Remove a Message from a NetworkCell.
 	hinclude { "NetworkCell.h" }
 
 	go {
-		while (input.dataNew) {
+		if ( input.dataNew ) {
 			Envelope inEnvlp;
-			input.get().getMessage(inEnvlp);
-			TYPE_CHECK(inEnvlp, "NetworkCell");
-
-// Need "writableCopy()" and "writableData()" below because the Envelope
-// constructor below cannot take a const Message as input.
-			NetworkCell* cellPtr = (NetworkCell*)
-					inEnvlp.writableCopy();
-			Message* outMssg = cellPtr->writableData();
-			LOG_DEL; delete cellPtr;
-
-			Envelope outEnvlp(*outMssg);
-			output.put(arrivalTime) << outEnvlp;
-
-			input.getSimulEvent();
-		} // end while()
-	} // end go{}
-} // end defstar{}
+			input.get().getMessage( inEnvlp );
+			TYPE_CHECK( inEnvlp, "NetworkCell" );
+			const NetworkCell* cellPtr = ( const NetworkCell* )
+							inEnvlp.myData();
+			const Message* outMssg = ( const Message* )
+							( cellPtr->data() );
+			Envelope outEnvlp( *outMssg );
+			output.put( arrivalTime ) << outEnvlp;
+		} // end if
+	} // end go
+} // end defstar

@@ -9,14 +9,14 @@ All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -25,9 +25,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+							COPYRIGHTENDKEY
 
 Programmer: Jose Luis Pino
 
@@ -39,8 +37,29 @@ Programmer: Jose Luis Pino
 
 #include "GraphUtils.h"
 #include "InfString.h"
-#include "GalIter.h"
 #include <string.h>
+
+GalGalaxyIter::GalGalaxyIter(Galaxy& g) : GalAllBlockIter(g) {}
+
+// This method returns the next star.
+Galaxy* GalGalaxyIter::next() {
+    while (1) {
+	Block* b = GalAllBlockIter::next();
+	if (!b) return 0;
+	if (!b->isItAtomic()) return &(b->asGalaxy());
+    }
+}
+
+CGalGalaxyIter::CGalGalaxyIter(const Galaxy& g) : CGalAllBlockIter(g) {}
+
+// This method returns the next star.
+const Galaxy* CGalGalaxyIter::next() {
+    while (1) {
+	const Block* b = CGalAllBlockIter::next();
+	if (!b) return 0;
+	if (!b->isItAtomic()) return &(b->asGalaxy());
+    }
+}
 
 // function to count stars in a galaxy
 int totalNumberOfStars(Galaxy& g) {
@@ -50,19 +69,25 @@ int totalNumberOfStars(Galaxy& g) {
     return n;
 }
 
+BlockParentIter::BlockParentIter(Block&b) : first(b) {
+    reset();
+}
+
 Block* BlockParentIter::next() {
     Block* current = nextParent;
     nextParent = nextParent? nextParent->parent() : (Block*) NULL;
     return current;
 }
 
+
 StringList printTopBlockDot(Galaxy& galaxy, const char* depth) {
     StringList dot;
     GalTopBlockIter nextBlock(galaxy);
     Block* block;
     while ((block = nextBlock++) != NULL) {
-	InfString blockName;
-	blockName << dotName(*block);
+	InfString blockName = block->name();
+	replaceString(blockName,"=","_");
+	replaceString(blockName,".","_");
 	if (! block->isItAtomic()) {
 	    StringList clusterDepth = depth;
 	    clusterDepth << "  ";
@@ -70,40 +95,29 @@ StringList printTopBlockDot(Galaxy& galaxy, const char* depth) {
 		<< printTopBlockDot(block->asGalaxy(),clusterDepth)
 		<< depth << "}\n";
 	}
-	else
-	    dot << depth << blockName << ";\n";
+	else {
+	    BlockPortIter nextPort(*block);
+	    PortHole *port;
+	    while ((port = nextPort++) != NULL) {
+		if (port->isItInput()) {
+		    InfString sinkName =
+			port->far()->realPort().parent()->name();
+		    replaceString(sinkName,"=","_");
+		    replaceString(sinkName,".","_");    
+		    dot << depth << blockName << " -> " << sinkName << ";\n";
+		}
+	    }
+	}
     }
     return dot;
 }
 
 StringList printDot(Galaxy& galaxy) {
-    numberAllBlocks(galaxy);
     StringList dot;
     dot << "digraph " << galaxy.name() << " {\n"
 	<< "  node [shape=record,width=.1,height=.1];\n"
-	<< printTopBlockDot(galaxy,"  ");
-    GalStarIter nextStar(galaxy);
-    Star* source;
-    while ((source = nextStar++) != NULL) {
-	InfString sourceName;
-	sourceName << dotName(*source);
-	SuccessorIter nextSuccessor(*source);
-	Block* successor;
-	while ((successor = nextSuccessor++) != NULL)
-	    dot << "  " << sourceName << " -> " << dotName(*successor) << ";\n";
-    }
-    dot << "}\n";
+	<< printTopBlockDot(galaxy,"  ") << "}\n";
     return dot;
-}
-
-StringList dotName(Block& b){
-    InfString name;
-    name << b.name() << "_" << b.flags[0];
-    replaceString(name,"=","_");
-    replaceString(name,".","_");
-    replaceString(name,"-","_");
-    StringList out = name;
-    return out;
 }
 
 void replaceString(char* master, const char* match, const char* insert) {
@@ -114,44 +128,3 @@ void replaceString(char* master, const char* match, const char* insert) {
 	for (i=0; i<length; i++) *master++ = insert[i];
     }
 }
-
-void numberAllBlocks(Galaxy& galaxy, int flagLocation) {
-    GalAllBlockIter nextBlock(galaxy);
-    Block* block;
-    int number=0;
-    while ((block = nextBlock++) != NULL)
-	block->flags[flagLocation] = number++;
-}
-
-void numberBlocks(Galaxy& galaxy, int flagLocation) {
-    GalTopBlockIter nextBlock(galaxy);
-    Block* block;
-    int number=0;
-    while ((block = nextBlock++) != NULL)
-	block->flags[flagLocation] = number++;
-}
-
-void resetAllFlags(Galaxy& galaxy,int flagLocation) {
-    GalAllBlockIter nextBlock(galaxy);
-    Block* block;
-    while ((block = nextBlock++) != NULL)
-	block->flags[flagLocation] = 0;
-}
-
-void resetFlags(Galaxy& galaxy,int flagLocation) {
-    GalTopBlockIter nextBlock(galaxy);
-    Block* block;
-    while ((block = nextBlock++) != NULL)
-	block->flags[flagLocation] = 0;
-}
-
-void deleteGalaxy(Galaxy&g) {
-    BlockPortIter nextPort(g);
-    PortHole* port;
-    while ((port = nextPort++) != NULL)
-	delete port;
-    delete &g;
-}
-
-
-

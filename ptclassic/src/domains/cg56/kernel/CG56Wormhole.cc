@@ -3,19 +3,19 @@ static const char file_id[] = "CG56Wormhole.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -24,9 +24,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+							COPYRIGHTENDKEY
 
  Programmer: Soonhoi Ha 
  Date of creation: 12/1/92
@@ -41,27 +39,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringList.h"
 #include "Error.h"
 
-/*******************************************************************
-
-	class CG56Wormhole methods
-
-********************************************************************/
-// Constructor
-CG56Wormhole :: CG56Wormhole(Galaxy& g, Target* t) : CGWormBase(*this,g,t)
-	{ buildEventHorizons(); }
-
-CG56Wormhole :: ~CG56Wormhole() { freeContents(); }
-
-// cloner -- clone the inside and make a new wormhole from that.
-Block* CG56Wormhole :: clone() const {
-	LOG_NEW; return new CG56Wormhole(gal.clone()->asGalaxy(), myTarget()->cloneTarget());
-}
-
-Wormhole* CG56Wormhole :: asWormhole() { return this; }
-
-void CG56Wormhole :: go() {
-    scheduler()->compileRun();
-}
 
 /**************************************************************************
 
@@ -110,7 +87,7 @@ void CG56fromUniversal :: sendData ()
 
 	if (tokenNew) {
 		// 2. put data
-//		putData();
+		putData();
 
 	} 
 

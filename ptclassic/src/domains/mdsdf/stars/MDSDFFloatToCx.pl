@@ -11,12 +11,7 @@ I.e. ComplexMatrix.entry(i) = FloatMatrix.entry(i).
   }
   version { $Id$ }
   author { Mike J. Chen }
-  copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-  }
+  copyright { 1993 The Regents of the University of California }
   location  { MDSDF library }
   input {
     name { input }
@@ -51,7 +46,7 @@ limitation of liability, and disclaimer of warranty provisions.
     // do conversion using copy constructor
     for(int row = 0; row < int(numRows); row++)
       for(int col = 0; col < int(numCols); col++)
-        (*result)[row][col] = (Complex)((*data)[row][col]);
+        (*result)[row][col] = Complex((*data)[row][col]);
  
     // delete i/o access structures
     delete data;

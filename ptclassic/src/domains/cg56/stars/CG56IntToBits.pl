@@ -9,12 +9,14 @@ most significant bit first.
     version { $Id$ }
     author { Jose Luis Pino }
     copyright {
-	Copyright (c) 1990-%Q% The Regents of the University of California.
+	Copyright (c) 1994 The Regents of the University of California.
 	All rights reserved.
 	See the file $PTOLEMY/copyright for copyright notice,
 	limitation of liability, and disclaimer of warranty provisions.
     }
     location { CG56 demo library }
+    explanation {
+    }
     input {
 	name {input}
 	type {int}
@@ -40,14 +42,17 @@ most significant bit first.
 	output.setSDFParams(int(nBits),int(nBits)-1);
     }
     codeblock(readNwrite) {
-	move    #>($addr(output)+$val(nBits)-1),r0
+	move    #$addr(output)+$val(nBits)-1,r0
 	move    $ref(input),a1
-	move	#>1,x0
         do      #$val(nBits),$label(decompress)
-	clr	b
-        lsr     a
-	tcs     x0,b
-	move	b,x:(r0)-
+        ror     a
+	jcc     $label(clear)
+        bset    #0,x:(r0)-
+        jmp     $label(continue)      
+$label(clear)
+	bclr    #0,x:(r0)-
+$label(continue)
+	nop
 $label(decompress)
     }
     go {

@@ -3,56 +3,16 @@ defstar {
     domain 	{ SDF }
     version	{ $Id$ }
     author	{ Mike J. Chen }
-    copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-    }
     location    { SDF dsp library }
     descriptor	{
-Compute the singular-value decomposition (SVD) of a Toeplitz data matrix A
-by decomposing A into A = UWV', where U and V are orthogonal matrices
-and V' represents the transpose of V.
-W is a diagonal matrix composed of the singular values of A, and
-the columns of U and V are the left and right singular vectors of A.
+Computes the singular-value decomposition of a matrix A
+by finding A = U*W*V', where U and V are orthogonal matrices, and V' represents
+the transpose of V.  W is a diagonal matrix composed of the singular values
+of A, and the columns of U and V are the left and right singular vectors of
+A. 
+
+This star uses the Matrix class.
     } 
-    explanation {
-.pp
-The singular-value decomposition is performed on a data matrix, which
-is usually provided by the
-.c
-Data_M
-star.
-The dimensions of the input data matrix is given by the
-\fIrows\fR and \fIcols\fR parameters to the star.
-The outputs are the three matrices: the vector of singular values,
-the matrix of right singular vectors, and the matrix of left singular vectors.
-The terminals for each output is labeled on the star's icon as
-S, R, and L respectively.
-.pp
-The \fIthreshold\fR parameter gives the smallest floating point number
-that the algorithm will represent.
-Anything smaller is considered zero.
-The \fImax_iterations\fR parameter allows the user to control the number of
-iterations that the SVD algorithm will be allowed to run before stopping.
-Normally, the SVD algorithm should converge before this value but this
-parameter is provided to prevent non-convergent matrices from causing
-the star from running too long.
-.pp
-The user can also speed up the execution of the star by optionally
-specifying that the matrices of the left and/or right singular vectors 
-should not be generated.
-Not generating those matrices will speed up the execution.
-The vector of singular values is always generated.
-.Id "Haykin, S."
-.UH "References"
-.ip [1]
-S. Haykin, \fIModern Filters\fR, pp. 333-335,
-Macmillan Publishing Company, New York, 1989.
-.SA
-Data_M
-    }
     defstate {
 	name 	{ rows }
 	type 	{ int }
@@ -76,24 +36,24 @@ Data_M
 	name	{ max_iterations }
 	type	{ int }
 	default	{ 30 }
-	desc    { Maximum number of iterations for the SVD routine to converge. }
+	desc    { Maximum number of iterations for the SVD routine to converge}
     }
     defstate {
 	name	{ generate_left }
 	type	{ int }
 	default	{ "YES" }
-	desc    { Specify whether to generate U, the matrix of left singular vectors. }
+	desc    { Specify whether to generate U, the matrix of left singular vectors}
     }
     defstate {
 	name	{ generate_right }
 	type	{ int }
 	default	{ "YES" }
-	desc    { Specify whether to generate V, the matrix of right singular vectors. }
+	desc    { Specify whether to generate V, the matrix of right singular vectors}
     }
     input {
 	name	{ input }
 	type	{ FLOAT_MATRIX_ENV }
-	desc	{ Input stream. }
+	desc	{ Input stream.}
     }
     output {
 	name 	{ svals }
@@ -110,7 +70,11 @@ Data_M
 	type	{ FLOAT_MATRIX_ENV }
 	desc	{ Left singular vectors of X. }
     }
-    ccinclude { <minmax.h> }
+    header {
+       // some macros
+       #define MAX(a,b)  (a > b ? a : b)
+       #define MIN(a,b)  (a < b ? a : b)
+    }
     protected	{
 	int N,nrows,ncols;
         FloatMatrix *U, *W, *V;
@@ -118,9 +82,7 @@ Data_M
     setup {
 	nrows = (int)rows;
 	ncols = (int)cols;
-    }
-    hinclude 	{ <math.h>, "Matrix.h" }
-    go {
+
 	// These matricies will hold the results.
         // Don't delete these, let envelope class handle that
 
@@ -131,20 +93,15 @@ Data_M
         LOG_NEW; W = new FloatMatrix(ncols,1);    
         // matrix of right singular vectors
         LOG_NEW; V = new FloatMatrix(ncols,ncols);
-
+    }
+    hinclude 	{ <math.h>, "Matrix.h" }
+    go {
 	// Get the input matrix and call the svd function.
         Envelope inputPkt;
         (input%0).getMessage(inputPkt);
-        // check for empty input, possibly caused by delays
-        if(inputPkt.empty()) {
-          FloatMatrix A(nrows,ncols);
-          A = 0;
-          svd(A,*U,*V,*W,(double)threshold,(int)generate_left,(int)generate_right);
-        }
-        else {
-          const FloatMatrix& A = *(const FloatMatrix*)inputPkt.myData();
-          svd(A,*U,*V,*W,(double)threshold,(int)generate_left,(int)generate_right);
-        }
+        const FloatMatrix *A = (const FloatMatrix*)inputPkt.myData();
+
+	svd(*A,*U,*V,*W,(double)threshold,(int)generate_left,(int)generate_right);
 
 	// There are ncols singular values, a ncolsx1 matrix
         // Output singular values
@@ -226,18 +183,18 @@ Data_M
 *   kat3@ihlpe.att.com.
 */
 
-        int i, j, k, l = 0;             // Mostly loop variables
-        double tol = 1.0e-22;           // tells about machine tolerance
-        double c, f, g, h, s, x, y, z;  // Temporaries
+        int i,j,k,l,its;        /* Mostly loop variables */
+        double tol = 1.0e-22;   /* tells about machine tolerance */
+        double c,f,g,h,s,x,y,z; /* Temporaries */
 
         int numRows = A.numRows();
         int numCols = A.numCols();
 
-        // Create a temporary working array
-        double *temp = new double[numCols];
-
         // Copy A to U
         U = A;
+
+        // Create a temporary working array
+        double *temp = new double[numCols];
 
         // Reduce the U matrix to bidiagonal form with Householder transforms.
 
@@ -314,7 +271,7 @@ Data_M
         }
 
         if(withU) {         // Now accumulate the left-hand transforms.
-          for (i = min(numRows,numCols) - 1; i >= 0; i--) {
+          for (i = MIN(numRows,numCols) - 1; i >= 0; i--) {
             l = i + 1;
             g = W.entry(i);
             for (j = l; j < numCols; j++)
@@ -344,7 +301,7 @@ Data_M
 
         threshhold = threshhold * x;
         for (k = numCols - 1; k >= 0; k--) {
-          for( int its = 0; its < (int)max_iterations; its++) {
+          for( its = 0; its < (int)max_iterations; its++) {
             // test splitting 
             for (l = k; l >= 0; l--) {
               if (fabs(temp[l]) <= threshhold) 
@@ -391,12 +348,10 @@ Data_M
                     V[j][k] = -V[j][k];
                 }
               }
-              break; // break out of test splitting 
+              break; // break out of testsplitting 
             }
-
             if( its == (int)max_iterations - 1) {
-	      delete [] temp;
-              Error::abortRun(*this, "no convergence in SVD routine");
+              Error::abortRun(*this,"no convergence in SVD routine");
               return;
             }
     
@@ -451,9 +406,10 @@ Data_M
             temp[l] = 0.0;
             temp[k] = f;
             W.entry(k) = x;
-          } // end test splitting iteration loop
-        }  // end k loop
-	delete [] temp;
-      } // close code
+          } // end testsplittng iteration loop
+       }  // end k loop
+       delete[] temp;
+       } // close code
     } // end method
 } // end defstar
+

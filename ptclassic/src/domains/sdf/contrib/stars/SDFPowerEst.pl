@@ -2,19 +2,16 @@ defstar {
   name { PowerEst }
   domain { SDF }
   desc { Power Estimator }
-  version { $Id$ }
-  location { SDF user contribution library }
   author { N. Becker }
   explanation {
 Power is estimated by computing magnitude squared and then filtering with a
-simple 1-pole filter.
-  }
-  copyright {
+  simple 1-pole filter. }
+        copyright {
 Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-  }
+        }
   state {
     name { TimeConstant }
     type { float }
@@ -52,8 +49,7 @@ limitation of liability, and disclaimer of warranty provisions.
   }
   ccinclude { <math.h> }
   code {
-    /* hppa.cfront has a sqr(double x) in math.h, so use mySqr */
-    inline double mySqr( double x ) {
+    inline double sqr( double x ) {
       return x * x;
     }
     inline double TodB( double x ) {
@@ -62,7 +58,7 @@ limitation of liability, and disclaimer of warranty provisions.
   }
   go {
     for( int i = int(BlockSize) - 1; i >= 0; i-- )
-      Sum = Sum * FeedbackGain + mySqr(double(in%i));
+      Sum = Sum * FeedbackGain + sqr(double(in%i));
     double output = Sum / double( TimeConstant );
     out%0 << ( int( dB ) ? TodB( output ) : output );
   }

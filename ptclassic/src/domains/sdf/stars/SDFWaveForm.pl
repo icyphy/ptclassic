@@ -1,47 +1,20 @@
+ident {
+// This star produces a waveform on the output, as specified by
+// a FloatArrayState.
+// J. Buck
+// $Id$
+// Copyright (c) 1990 The Regents of the University of California.
+//			All Rights Reserved.
+}
 defstar {
 	name { WaveForm }
 	domain { SDF }
 	desc {
-Output a waveform as specified by the array state "value" (default "1 -1").
-You can get periodic signals with any period, and can halt a simulation
-at the end of the given waveform.  The following table summarizes the
-capabilities:
-.nf
-haltAtEnd   periodic   period    operation
------------------------------------------------------------------------
-NO          YES        0         The period is the length of the waveform
-NO          YES        N>0       The period is N
-NO          NO         anything  Output the waveform once, then zeros
-YES         anything   anything  Stop after outputting the waveform once
-.fi
-The first line of the table gives the default settings.
-This star may be used to read a file by simply setting
-"value" to something of the form "< filename".
+		"Output a waveform as specified by the array state\n"
+		"'value' (default '1 -1').  Note that a file may be\n"
+		"specified for the state value.  If 'periodic' is 'yes' the\n"
+		"waveform is periodic; otherwise zeros come after the end.\n"
 	}
-	explanation {
-This star may be used to read a file by simply setting "value" to
-something of the form "< filename".  The file will be read completely
-and its contents stored in an array.  The size of the array is currently
-limited to 20,000 samples.  To read longer files, use the 
-.c ReadFile
-star.  This latter star reads one sample at a time, and hence also
-uses less storage.
-.Id "file read"
-.Id "waveform from file"
-.Id "reading from a file"
-.Ir "halting a simulation"
-.Ir "simulation, halting"
-	}
-	version { $Id$ }
-	author { J. T. Buck }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { SDF main library }
-	ccinclude { "SimControl.h" }
 	output {
 		name { output }
 		type { float }
@@ -50,42 +23,27 @@ limitation of liability, and disclaimer of warranty provisions.
 		name { value }
 		type { floatarray }
 		default { "1 -1" }
-		desc { One period of the output waveform. }
-	}
-	defstate {
-		name { haltAtEnd }
-		type { int }
-		default { "NO" }
-		desc { Halt the run at the end of the given data. }
+		desc { "One period of the output waveform" }
 	}
 	defstate {
 		name { periodic }
-		type { int }
-		default { "YES" }
-		desc { Output is periodic if "YES" (nonzero). }
-	}
-	defstate {
-		name { period }
-		type { int }
-		default { 0 }
-		desc { If greater than zero, gives the period of the waveform. }
+		type { string }
+		default { "yes" }
+		desc { "Output is periodic if 'yes'" }
 	}
 	protected {
-		int pos;
+		int pos, pflag;
 	}
-	setup {
+	start {
+		char first = *(const char*)periodic;
+		pflag = (first == 'y' || first == 'Y');
 		pos = 0;
 	}
 	go {
-		if (int(haltAtEnd) && (pos >= value.size()))
-			SimControl::requestHalt();
-		if (pos >= value.size()) {
+		if (pos >= value.size())
 			output%0 << 0.0;
-			pos++;
-		} else
+		else
 			output%0 << value[pos++];
-		if (int(periodic))
-		    if(int(period) <= 0 && pos >= value.size()) pos = 0;
-		    else if (int(period) > 0 && pos >= int(period)) pos = 0;
+		if (pflag && pos >= value.size()) pos = 0;
 	}
 }

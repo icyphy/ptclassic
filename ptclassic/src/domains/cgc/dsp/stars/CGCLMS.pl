@@ -12,12 +12,7 @@ Supports decimation, but not interpolation.
 	}
 	version {$Id$}
 	author { Soonhoi Ha }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { cgc main library }
 	explanation {
 When correctly used, this filter will adapt to try to minimize
@@ -68,12 +63,12 @@ will be stored there after the run has completed.
 		// taps are no longer constant
 		taps.clearAttributes(A_CONSTANT);
 	}
-	setup {
+	start {
 	// First check to be sure that interpolation is 1.
 		interpolation = 1;
 
-		// Next run the FIR setup routine
-		CGCFIR :: setup();
+		// Next run the FIR start routine
+		CGCFIR :: start();
 
 		// Then reset the signalIn number of samples in the past
 		// to account for the error delay.
@@ -85,43 +80,46 @@ will be stored there after the run has completed.
 		addInclude("<stdio.h>");
 	}
 	go {
-		addCode(bodyDecl);	// from FIR
-		addCode(update);
-		addCode(body);		// from FIR
+		gencode(bodyDecl);
+		gencode(update1);
+		gencode(CodeBlock("\t{\n"));
+		gencode(update2);
+		gencode(CodeBlock("\t}\n"));
+		filterBody();		// from FIR
 	}
 
-   codeblock(update) {
+   codeblock(update1) {
 	int ix;
 	/* First update the taps */
 	double e = $ref(error);
 	int index = $val(errorDelay)*$val(decimation) + $val(decimationPhase);
 
-	for (ix = 0; ix < $val(tapSize); ix++) {
+	for (ix = 0; ix < $val(tapSize); ix++) 
+   }
+   codeblock(update2) {
 		$ref2(taps,ix) = $ref2(taps,ix) +
-			e * $ref2(signalIn,index) * $ref(stepSize);
+			e * $ref2(signalIn,index) * $val(stepSize);
 		index++;
-	}
    }
 
 	wrapup {
 		const char* sf = saveTapsFile;
 		if (sf != NULL && *sf != 0) {
-			addCode("    {\n");
-			addCode(save);
-			addCode("    }\n");
+			gencode(CodeBlock("    {\n"));
+			gencode(save);
+			gencode(CodeBlock("    }\n"));
 		}
 	}
 
    codeblock(save) {
     FILE* fp;
     int i;
-    if (!(fp = fopen(saveFileName,"w"))) {
+    if (!(fp = fopen(saveFileName,"w"))) 
 	/* File cannot be opened */
 	fprintf(stderr,"ERROR: Cannot open saveTapsFile for writing:\n");
-    	exit(1);
-    }
+    if (!fp) exit(1);
     for (i = 0; i < $val(tapSize); i++)
 	fprintf(fp, "%d %g\n", i, $ref2(taps,i));
     fclose(fp);
-   }
+    }
 }

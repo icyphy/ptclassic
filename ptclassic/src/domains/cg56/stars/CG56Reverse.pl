@@ -4,14 +4,9 @@ defstar {
 	desc { Reverse a block of input data of length N }
 	version { $Id$ }
 	author { Chih-Tsung Huang }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 control library }
-	explanation { Reverse a block of input data of length \fIN\fR. }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
+	explanation { Reverse a block of input data of length N }
 
         input {
 		name {input}
@@ -27,7 +22,7 @@ limitation of liability, and disclaimer of warranty provisions.
                 default {64}
 		desc {Number of particles read and written.}
 	}
-	setup {
+	start {
                 input.setSDFParams(int(N),int(N)-1);
                 output.setSDFParams(int(N),int(N)-1);
         }
@@ -36,8 +31,8 @@ limitation of liability, and disclaimer of warranty provisions.
         move    #<$addr(in)+$val(N),r0
         move    #<$addr(out),r1
         do      #$val(N),$label(loop)
-        move    $mem(in):-(r0),a
-        move    $mem(out),x:(r1)+
+        move    x:-(r0),a
+        move    a,x:(r1)+
 $label(loop)
         }
         codeblock(one) {
@@ -47,9 +42,9 @@ $label(loop)
 
         go {
                 if(N>1)
-	            addCode(main);
+	            gencode(main);
 		else
-	            addCode(one);
+	            gencode(one);
         }
         exectime {
                 if(int(N)>1)

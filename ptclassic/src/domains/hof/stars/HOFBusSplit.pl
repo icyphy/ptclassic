@@ -1,19 +1,19 @@
 defstar {
 	name {BusSplit}
 	domain {HOF}
-	derivedfrom {Base}
+	derivedfrom {BaseHiOrdFn}
 	desc {
 Bridge inputs to outputs and then self-destruct.
-This star splits an input bus into two.
-If the input bus width is N, and the output bus widths
-are M1 and M2, then we require that N = M1 + M2.
-The first M1 inputs go the first output bus, while
-the next M2 inputs go to the second output bus.
+This star is used to split and input bus into two.
+	}
+	explanation {
+The total number of output connections (the sum of the
+two output bus widths) must equal the number of input connections.
 	}
 	version {$Id$}
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -64,11 +64,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	    sinkDelayVals = po->initDelayValues();
 	    numInDelays = pi->numInitDelays();
 	    numOutDelays = po->numInitDelays();
-
-	    // Get alias pointers before disconnecting
-	    GenericPort *gpo = aliasPointingAt(po);
-	    GenericPort *gpi = aliasPointingAt(pi);
-
 	    source->disconnect();
 	    sink->disconnect();
 
@@ -98,8 +93,16 @@ limitation of liability, and disclaimer of warranty provisions.
 						      sink->parent()->name(),
 						      sink->name());
 	    }
-	    fixAliases(gpi,pi,sink);
-	    fixAliases(gpo,po,source);
+	    // Fix aliases
+	    GenericPort *gp;
+	    if (pi) {
+	      gp = pi->aliasFrom();
+	      if(gp) gp->setAlias(*sink);
+	    }
+	    if (po) {
+	      gp = po->aliasFrom();
+	      if(gp) gp->setAlias(*source);
+	    }
 
 	    source->initialize();
 	    sink->initialize();

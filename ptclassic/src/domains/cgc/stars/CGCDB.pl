@@ -7,12 +7,7 @@ converted to "min" (default -100).
 	}
 	version { $Id$ }
 	author { Soonhoi Ha }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { CGC main library }
 	explanation {
 For inputs that are greater than zero, the output either
@@ -53,27 +48,19 @@ TRUE if input is a power measurement, FALSE if it's an amplitude measurement.
 	constructor {
 		noInternalState();
 	}
-	setup {
+	start {
 		if (int(inputIsPower)) gain=10.0;
-	}
-
-	initCode {
 		addInclude("<math.h>");
 	}
-
 	codeblock(body) {
 	double f = $ref(input);
 	if (f <= 0.0) $ref(output) = $val(min);
 	else {
 		f = $val(gain) * log10 (f);
 		if (f < $val(min)) f = $val(min);
-		$ref(output) = f;
 	}
 	}
 	go {
 		addCode(body);
-	}
-	exectime {
-		return 37;   /* approximate value from LOG */
 	}
 }

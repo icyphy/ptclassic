@@ -3,28 +3,19 @@ defstar {
 	domain { DE }
 	version { $Id$ }
 	author { Soonhoi Ha and Edward Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { DE main library }
 	desc {
-.pp
 This star detects threshold crossings if "crossingsOnly" is TRUE.
 Otherwise, it simply compares the input against the "threshold".
-.lp
+
 If "crossingsOnly" is TRUE, then: 
-.ip 1)
-A TRUE is sent to "output" when the "input" particle exceeds or
-equals the "threshold" value, having been previously smaller.
-.ip 2)
- A FALSE is sent when the "input" particle is smaller than
-"threshold" having been previously larger.
-.lp
+(1) A TRUE is sent to "output" when the "input" particle exceeds or
+    equals the "threshold" value, having been previously smaller.
+(2) A FALSE is sent when the "input" particle is smaller than
+    "threshold" having been previously larger.
 Otherwise, no output is produced.
-.pp
+
 If "crossingsOnly" is FALSE, then a TRUE is sent to "output"
 whenever any "input" particle greater than or equal to "threshold"
 is received, and a FALSE is sent otherwise.
@@ -62,7 +53,7 @@ the input exceeds the threshold.
 	private {
 		int flag;
 	}
-	setup {
+	start {
 		flag = FALSE;
 	}
 
@@ -70,14 +61,14 @@ the input exceeds the threshold.
 		completionTime = arrivalTime;
 
 		// compare the input value with the "threshold"
-		if (double(input%0) < double(threshold)) {
-		   if (int(crossingsOnly)) {
+		if (int(input%0) < int(threshold)) {
+		   if (int(crossingsOnly))
 			if (flag == TRUE) {
 				flag = FALSE;
 				// Indicate downward level crossing
 				output.put(completionTime) << flag;
 			} 
-		   } else output.put(completionTime) << FALSE;
+		   else output.put(completionTime) << FALSE;
 		} else {
 		   if (int(crossingsOnly)) {
 			if (flag == FALSE) {

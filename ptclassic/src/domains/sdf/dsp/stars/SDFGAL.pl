@@ -2,16 +2,9 @@ defstar
 {
     name { GAL }
     domain { SDF } 
-    desc { Gradient adaptive lattice filter. }
+    desc { Gradient Adaptive Lattice filter. }
     version { $Id$ }
     author { T. M. Parks }
-    copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-    }
-
     location { SDF dsp library }
 
     input
@@ -55,16 +48,16 @@ limitation of liability, and disclaimer of warranty provisions.
 
     constructor
     {
-	f = b = k = sigma = 0;
+	f = b = k = sigma = NULL;
 	previousOrder = -1;
     }
 
     destructor
     {
-	LOG_DEL; delete [] f;
-	LOG_DEL; delete [] b;
-	LOG_DEL; delete [] k;
-	LOG_DEL; delete [] sigma;
+	LOG_DEL; delete f;
+	LOG_DEL; delete b;
+	LOG_DEL; delete k;
+	LOG_DEL; delete sigma;
     }
 
     setup
@@ -73,10 +66,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	if (previousOrder != order)
 	{
 	    // Delete left-over arrays.
-	    LOG_DEL; delete [] f;
-	    LOG_DEL; delete [] b;
-	    LOG_DEL; delete [] k;
-	    LOG_DEL; delete [] sigma;
+	    LOG_DEL; delete f;
+	    LOG_DEL; delete b;
+	    LOG_DEL; delete k;
+	    LOG_DEL; delete sigma;
 
 	    // Allocate new arrays.
 	    LOG_NEW; f = new double[order+1];
@@ -93,14 +86,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	    f[m] = b[m] = k[m] = sigma[m] = 0.0;
 	}
 
-	double tc = timeConstant;
-	beta = (tc - 1.0) / (tc + 1.0);
+	beta = (timeConstant - 1.0) / (timeConstant + 1.0);
 	alpha = 1.0 - beta;
     }
 
     go
     {
-	// update forward errors
+        // update forward errors
         f[0] = input%0;
         for(int m = 1; m <= order; m++)
         {

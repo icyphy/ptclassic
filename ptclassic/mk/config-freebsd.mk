@@ -69,10 +69,7 @@ GNULIB =	/usr/lib
 # Binaries that are shipped should be statically linked.
 CC_STATIC = 	-static
 
-# system libraries for linking .o files from C files only
-CSYSLIBS=-lm -lc -lcompat
-# system libraries (libraries from the environment)
-SYSLIBS=-lg++ $(CSYSLIBS)
+SYSLIBS=-lg++ -lm -lc -lcompat
 
 LINKFLAGS=-L$(LIBDIR) -Xlinker -S -Xlinker -x -static
 LINKFLAGS_D=-L$(LIBDIR) -g -static

@@ -1,17 +1,22 @@
+ident {
+/**************************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  Soonhoi Ha
+ Date of creation: 11/8/90
+
+ It does nothing. Just connect it to any unused ports.
+
+**************************************************************************/
+}
 defstar {
 	name { Null }
 	domain { DE }
-	version { $Id$}
-	author { Soonhoi Ha }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { DE main library }
-	desc {
-This star does nothing. It is useful for connecting to any unused input ports.
+	desc {	"It does nothing. Just connect it to any unused ports.\n"
 	}
 	outmulti {
 		name { output }

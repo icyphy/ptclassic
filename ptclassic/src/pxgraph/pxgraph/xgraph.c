@@ -1,45 +1,15 @@
-/*******************************************************************
-SCCS version identification
-$Id$
-
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
-*/
-/* xgraph - A Simple Plotter for X
+/*
+ * xgraph - A Simple Plotter for X
  *
- * David Harrison University of California,  Berkeley
+ * David Harrison
+ * University of California,  Berkeley
+ * 1986, 1987, 1988, 1989
  *
- * Modified by J. Buck to correct geometry argument bugs, handle Inf/Nan
- * on input, and support a special binary format, 1992.
- *
- * Modified by Christopher Hylands to be more ANSI C like 12/94
- *
- * Fixed bug with empty input files, tgl, 2/14/95.
- *
+ * Please see copyright.h concerning the formal reproduction rights
+ * of this software.
  */
 
+#include "copyright.h"
 #include <stdio.h>
 #include <math.h>
 #include <pwd.h>
@@ -49,9 +19,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "xtb.h"
 #include "hard_devices.h"
 #include "params.h"
-#include "dialog.h"
-
-
+
 #define ZOOM
 #define TOOLBOX
 #define NEW_READER
@@ -86,7 +54,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /* To get around an inaccurate log */
 #define nlog10(x)	(x == 0.0 ? 0.0 : log10(x) + 1e-15)
 
-#define ISCOLOR		((wi->dev_info.dev_flags & D_COLOR) != 0 && getenv("PIGIBW") == 0)
+#define ISCOLOR		(wi->dev_info.dev_flags & D_COLOR)
 
 #define PIXVALUE(set) 	((set) % MAXATTR)
 
@@ -112,7 +80,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #define DEF_BORDER_WIDTH	"2"
 #define DEF_BORDER_COLOR	"Black"
-#define DEF_TITLE_TEXT		"Ptolemy Xgraph"
+#define DEF_TITLE_TEXT		"X Graph"
 #define DEF_XUNIT_TEXT		"X"
 #define DEF_YUNIT_TEXT		"Y"
 #define DEF_TICK_FLAG		"off"
@@ -127,7 +95,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define DEF_BAR_FLAG		"off"
 #define DEF_BAR_BASE		"0.0"
 #define DEF_BAR_WIDTH		"-1.0"
-#define DEF_LINE_WIDTH		"2"
+#define DEF_LINE_WIDTH		"0"
 #define DEF_GRID_SIZE		"0"
 #define DEF_GRID_STYLE		"10"
 #define DEF_LABEL_FONT		"helvetica-12"
@@ -135,7 +103,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define DEF_GEOMETRY		""
 #define DEF_REVERSE		"off"
 #define DEF_DEVICE		""
-#define DEF_DISPOSITION		"To File"
+#define DEF_DISPOSITION		"To Device"
 #define DEF_FILEORDEV		""
 
 #define DEF_MARKER_FLAG		"off"
@@ -172,14 +140,13 @@ static char *defStyle[MAXATTR] = {
 
 /* Default color names */
 static char *defColors[MAXATTR] = {
-    "red", "#a4ffa4", "blue", "yellow",
+    "red", "SpringGreen", "blue", "yellow",
     "cyan", "sienna", "orange", "coral"
 };
 
 
 extern void init_X();
 extern void do_error();
-extern char* getenv();
 
 static char *tildeExpand();
 static void ReverseIt();
@@ -218,47 +185,9 @@ typedef struct local_win {
     double YUnitsPerPixel;	/* Y Axis scale factor                  */
     xgOut dev_info;		/* Device information                   */
     Window close, hardcopy;	/* Buttons for closing and hardcopy     */
+    Window about;		/* Version information                  */
     int flags;			/* Window flags                         */
 } LocalWin;
-
-/* Forward references */
-void ReadDefaults	();
-void InitSets		();
-void ParseArgs		ARGS((int argc, char *argv[], int do_it));
-int ReadData		ARGS((FILE *stream, char *filename));
-
-void DrawWindow		ARGS((LocalWin *win_info));
-void DelWindow		ARGS((Window win, LocalWin *win_info));
-void PrintWindow	ARGS((Window win, LocalWin *win_info));
-Window NewWindow	ARGS((char *progname, double lowX,
-			       double lowY, double upX, double upY,
-			       double asp));
-
-int HandleZoom		ARGS((char *progname, XButtonPressedEvent *evt,
-			      LocalWin *wi, Cursor cur));
-int ReadAsciiData	ARGS((FILE *stream, char *filename));
-int ReadBinaryData	ARGS((FILE *stream, char *filename));
-
-void DrawTitle		ARGS((LocalWin *wi));
-int TransformCompute	ARGS((LocalWin *wi));
-void DrawGridAndAxis	ARGS((LocalWin *wi));
-
-void WriteValue		ARGS((char *str, double val, int expv, int logFlag));
-void DrawData		ARGS((LocalWin *wi));
-void DrawLegend		ARGS((LocalWin *wi));
-static void set_mark_flags	ARGS((int *markFlag, int *pixelMarks,
-				      int *bigPixel, int *colorMark));
-void do_hardcopy	ARGS((char *prog, char *info, int
-			      (*init_fun)(), char *dev_spec,
-			      char *file_or_dev, double maxdim,
-			      char *ti_fam, double ti_size,
-			      char *ax_fam, double ax_size,
-			      int doc_p));
-
-void WriteValue		ARGS((char *str, double val, int expv, int logFlag));
-static char *tildeExpand	ARGS((char *out, char *in));
-
-static int XErrHandler	ARGS((Display *disp_ptr, XErrorEvent *evt));
 
 #define SCREENX(ws, userX) \
 	(((int) (((userX) - ws->UsrOrgX)/ws->XUnitsPerPixel + 0.5)) + ws->XOrgX)
@@ -281,9 +210,11 @@ static char *inFileNames[MAXSETS]; 	/* File names              */
 /* Total number of active windows */
 static int Num_Windows = 0;
 static char *Prog_Name;
-static int binaryInputFormat = 0;
 
-int
+
+
+static int XErrHandler();	/* Handles error messages */
+
 main(argc, argv)
 int argc;
 char *argv[];
@@ -299,15 +230,11 @@ char *argv[];
     FILE *strm;
     XColor fg_color, bg_color;
     char keys[MAXKEYS], *disp_name;
-    int nbytes, idx, maxitems = 0, flags;
+    int nbytes, idx, maxitems, flags;
     int errs = 0;
 
     /* Open up new display */
     Prog_Name = argv[0];
-    /* "binxgraph" means input is in binary format */
-    if (strcmp (Prog_Name, "binxgraph") == 0)
-	binaryInputFormat = 1;
-
     disp_name = "";
     for (idx = 1;  idx < argc-1;  idx++) {
 	if (strcmp(argv[idx], "-display") == 0) {
@@ -318,7 +245,7 @@ char *argv[];
     disp = XOpenDisplay(disp_name);
     if (!disp) {
 	(void) fprintf(stderr, "%s: cannot open display `%s'\n", argv[0], disp_name);
-	return 3;
+	abort();
     }
     XSetErrorHandler(XErrHandler);
 
@@ -354,10 +281,6 @@ char *argv[];
     if (errs) {
 	(void) fprintf(stderr, "Problems found with input data.\n");
 	exit(1);
-    }
-    if (maxitems <= 0) {
-        (void) fprintf(stderr, "No data to plot.\n");
-        exit(1);
     }
 
     /* Parse the argument list to set options */
@@ -606,8 +529,8 @@ char *info;			/* User Information */
     return XTB_HANDLED;
 }
 
-#ifdef NEVER
 static 
+
 /*ARGSUSED*/
 xtb_hret abt_func(win, bval, info)
 Window win;			/* Button window    */
@@ -635,7 +558,6 @@ Send comments or suggestions to:\n\
     return XTB_HANDLED;
 }
 
-#endif
 
 #define NORMSIZE	600
 #define MINDIM		100
@@ -721,10 +643,6 @@ double asp;			/* Aspect ratio       */
     sizehints.width = width;
     sizehints.height = height;
 
-    geo_mask = XParseGeometry(PM_STR("Geometry"), &sizehints.x, &sizehints.y,
-				  (unsigned int *) &sizehints.width,
-				  (unsigned int *) &sizehints.height);
-
     new_window = XCreateWindow(disp, RootWindow(disp, screen),
 			       sizehints.x, sizehints.y,
 			       (unsigned int) sizehints.width,
@@ -735,7 +653,7 @@ double asp;			/* Aspect ratio       */
 
 
     if (new_window) {
-	xtb_frame cl_frame, hd_frame;
+	xtb_frame cl_frame, hd_frame, ab_frame;
 
 	XStoreName(disp, new_window, progname);
 	XSetIconName(disp, new_window, progname);
@@ -745,6 +663,9 @@ double asp;			/* Aspect ratio       */
 	wmhints.initial_state = NormalState;
 	XSetWMHints(disp, new_window, &wmhints);
 
+	geo_mask = XParseGeometry(PM_STR("Geometry"), &sizehints.x, &sizehints.y,
+				  (unsigned int *) &sizehints.width,
+				  (unsigned int *) &sizehints.height);
 	if (geo_mask & (XValue | YValue)) {
 	    sizehints.flags = (sizehints.flags & ~PPosition) | USPosition;
 	}
@@ -767,6 +688,12 @@ double asp;			/* Aspect ratio       */
 	XMoveWindow(disp, new_info->hardcopy,
 		    (int) (BTNPAD + cl_frame.width + BTNINTER),
 		    BTNPAD);
+	xtb_bt_new(new_window, "About", abt_func,
+		   (xtb_data) new_window, &ab_frame);
+	new_info->about = ab_frame.win;
+	XMoveWindow(disp, new_info->about,
+		    (int) (BTNPAD + cl_frame.width + BTNINTER +
+			   hd_frame.width + BTNINTER), BTNPAD);
 
 	new_info->flags = 0;
 	XSelectInput(disp, new_window,
@@ -790,7 +717,7 @@ double asp;			/* Aspect ratio       */
 }
 
 
-void DelWindow(win, win_info)
+DelWindow(win, win_info)
 Window win;			/* Window     */
 LocalWin *win_info;		/* Local Info */
 /*
@@ -803,12 +730,13 @@ LocalWin *win_info;		/* Local Info */
     XDeleteContext(disp, win, win_context);
     xtb_bt_del(win_info->close, &info);
     xtb_bt_del(win_info->hardcopy, &info);
+    xtb_bt_del(win_info->about, &info);
     free((char *) win_info);
     XDestroyWindow(disp, win);
     Num_Windows -= 1;
 }
 
-void PrintWindow(win, win_info)
+PrintWindow(win, win_info)
 Window win;			/* Window       */
 LocalWin *win_info;		/* Local Info   */
 /*
@@ -857,7 +785,7 @@ Cursor cur;
     Window win, new_win;
     Window root_rtn, child_rtn;
     XEvent theEvent;
-    int startX, startY, curX, curY, newX, newY, stopFlag, numwin = 0;
+    int startX, startY, curX, curY, newX, newY, stopFlag, numwin;
     int root_x, root_y;
     unsigned int mask_rtn;
     double loX, loY, hiX, hiY, asp;
@@ -941,7 +869,7 @@ Cursor cur;
 }
 
 
-void InitSets()
+int InitSets()
 /*
  * Initializes the data sets with default information.  Sets up
  * original values for parameters in parameters package.
@@ -998,7 +926,7 @@ void InitSets()
     param_set("YHighLimit", DBL, DEF_HIGH_LIMIT);
 
     /* Depends critically on whether the display has color */
-    if (depth < 4 || getenv("PIGIBW") != 0) {
+    if (depth < 4) {
 	/* Its black and white */
 	param_set("Background", PIXEL, DEF_BW_BACKGROUND);
 	param_set("Border", PIXEL, DEF_BW_BORDER);
@@ -1046,11 +974,11 @@ void InitSets()
 static char *def_str;
 
 #define DEF(name, type) \
-if ( (def_str = XGetDefault(disp, Prog_Name, name)) ) { \
+if (def_str = XGetDefault(disp, Prog_Name, name)) { \
     param_set(name, type, def_str); \
 }
 
-void ReadDefaults()
+int ReadDefaults()
 /*
  * Reads X default values which override the hard-coded defaults
  * set up by InitSets.
@@ -1155,7 +1083,7 @@ if (strcmp(argv[idx], opt) == 0) { \
 
 #define MAXLO	30
 
-void ParseArgs(argc, argv, do_it)
+int ParseArgs(argc, argv, do_it)
 int argc;
 char *argv[];
 int do_it;
@@ -1174,12 +1102,6 @@ int do_it;
     idx = 1;
     while (idx < argc) {
 	if (argv[idx][0] == '-') {
-	    /* Flag to say whether input is in binary format */
-	    if (strcmp(argv[idx], "-binary") == 0) {
-		binaryInputFormat = 1;
-		idx++;
-		continue;
-	    }
 	    /* Check to see if its a data set name */
 	    if (sscanf(argv[idx], "-%d", &set) == 1) {
 		/* The next string is a set name */
@@ -1208,7 +1130,7 @@ int do_it;
 		    /* Limit the X coordinates */
 		    if (idx+1 >= argc) argerror("missing coordinate(s)",
 						argv[idx]);
-		    if ( (hi = strchr(argv[idx+1], ',')) ) {
+		    if (hi = index(argv[idx+1], ',')) {
 			char low[MAXLO];
 		    
 			(void) strncpy(low, argv[idx+1], hi-argv[idx+1]);
@@ -1229,7 +1151,7 @@ int do_it;
 		    /* Limit the Y coordinates */
 		    if (idx+1 >= argc) argerror("missing coordinate(s)",
 						  argv[idx]);
-		    if ( (hi = strchr(argv[idx+1], ',')) ) {
+		    if (hi = index(argv[idx+1], ',')) {
 			char low[MAXLO];
 
 			(void) strncpy(low, argv[idx+1], hi-argv[idx+1]);
@@ -1273,7 +1195,7 @@ int do_it;
 	    idx++;
 	} else {
 	    /* It might be the host:display string */
-	    if (strrchr(argv[idx], ':') == (char *) 0) {
+	    if (rindex(argv[idx], ':') == (char *) 0) {
 		/* Should be an input file */
 		inFileNames[numFiles] = argv[idx];
 		numFiles++;
@@ -1304,12 +1226,9 @@ char *fn;			/* Reading from file `fn' */
     if (!redundant_set) {
 	if (setNumber < MAXSETS) {
 	    (void) sprintf(setname, "Set %d", setNumber);
-            /*************
-		 Remove this feature make the set name equal to the filename:
 	    if ((strcmp(PlotData[setNumber].setName, setname) == 0) && fn) {
 		PlotData[setNumber].setName = fn;
 	    }
-            *************/
 	    curSpot = &(PlotData[setNumber].list);
 	    PlotData[setNumber].list = (PointList *) 0;
 	    newGroup = 1;
@@ -1384,7 +1303,7 @@ static int rdFindMax()
 {
     int i;
     PointList *list;
-    int max = 0;
+    int max = -1;
 
     for (i = 0;  i < setNumber;  i++) {
 	for (list = PlotData[i].list;  list;  list = list->next) {
@@ -1488,18 +1407,7 @@ LineInfo *result;		/* Returned result */
 		    result->type = SETPARAM;
 		} else if (sscanf(first, "%lf", &result->val.pnt.xval) == 1) {
 		    /* DRAWPNT */
-		    if ((line[1] == 'I' || line[1] == '-') &&
-			(strncmp(line+1, "Inf", sizeof ("Inf")-1) == 0 ||
-			 strncmp(line+1, "-Inf", sizeof ("-Inf")-1) == 0)) {
-				result->type = ERROR;
-				result->val.str = "Inf/-Inf in input data";
-		    } else if ((line[1] == 'N' || line[1] == '-') &&
-			(strncmp(line+1, "NaN", sizeof ("NaN")-1) == 0 ||
-			 strncmp(line+1, "-NaN", sizeof ("-NaN")-1) == 0)) {
-				result->type = ERROR;
-				result->val.str = "NaN/-NaN in input data";
-		    } else if (sscanf(line+1, "%lf", &result->val.pnt.yval)
-				== 1) {
+		    if (sscanf(line+1, "%lf", &result->val.pnt.yval) == 1) {
 			result->type = DRAWPNT;
 		    } else {
 			result->type = ERROR;
@@ -1522,17 +1430,9 @@ LineInfo *result;		/* Returned result */
     }
     return result->type;
 }
+
 
 int ReadData(stream, filename)
-FILE *stream;
-char *filename;
-{
-	/* we support two data formats */
-    return binaryInputFormat  ? ReadBinaryData(stream, filename)
-			      : ReadAsciiData(stream, filename);
-}
-
-int ReadAsciiData(stream, filename)
 FILE *stream;
 char *filename;
 /*
@@ -1552,7 +1452,7 @@ char *filename;
 		       "Too many data sets - extra data ignored");
 	return -1;
     }
-    while (!errors && fgets(buffer, MAXBUFSIZE, stream)) {
+    while (fgets(buffer, MAXBUFSIZE, stream)) {
 	line_count++;
 	switch (parse_line(buffer, &info)) {
 	case EMPTY:
@@ -1590,69 +1490,11 @@ char *filename;
     }
     if (errors) return -1; else return rdFindMax();
 }
-
-int ReadBinaryData(stream, filename)
-FILE *stream;
-char *filename;
-/*
- * Reads in the data sets in binary form from the supplied stream.
- * If the format
- * is correct,  it returns the current maximum number of points across
- * all data sets.  If there is an error,  it returns -1.
- */
-{
-    char buffer[MAXBUFSIZE];
-    float pointPair[2];
-    int line_count = 0;
-    int errors = 0;
-    int cmd;
-    
-    if (!rdSet(filename)) {
-	(void) fprintf(stderr, "Error in file `%s' at line %d:\n  %s\n",
-		       filename, line_count,
-		       "Too many data sets - extra data ignored");
-	return -1;
-    }
-    while (!errors && (cmd = getc(stream)) != EOF) {
-	line_count++;
-	switch (cmd) {
-	case 'e':		/* end of set, start new one */
-	    if (!rdSet(filename)) {
-		(void) fprintf(stderr, "Error in file `%s' at line %d:\n  %s\n",
-			       filename, line_count,
-			       "Too many data sets - extra data ignored");
-		return -1;
-	    }
-	    break;
-	case 'n':		/* new set name: ends in \n */
-	    fgets (buffer, MAXBUFSIZE, stream);
-	    rdSetName(buffer);
-	    break;
-	case 'm':		/* move to point */
-	    rdGroup();
-	    getc(stream);	/* skip next character */
-	    /* the actual text is "md x y" */
-	    /* fall through */
-	case 'd':		/* draw point */
-	    fread((char*)pointPair,sizeof (float), 2, stream);
-	    rdPoint(pointPair[0],pointPair[1]);
-	    break;
-	default:
-	    if (filename) {
-		(void) fprintf(stderr, "Error in file `%s' at line %d: '%c'\n",
-			       filename, line_count, cmd);
-		errors++;
-	    }
-	    break;
-	}
-    }
-    if (errors) return -1; else return rdFindMax();
-}
 
 
 
 
-void DrawWindow(win_info)
+int DrawWindow(win_info)
 LocalWin *win_info;		/* Window information */
 /*
  * Draws the data in the window.  Does not clear the window.
@@ -1682,7 +1524,7 @@ LocalWin *win_info;		/* Window information */
 
 
 
-void DrawTitle(wi)
+DrawTitle(wi)
 LocalWin *wi;		/* Window information    */
 /*
  * This routine draws the title of the graph centered in
@@ -1787,7 +1629,7 @@ LocalWin *wi;			/* Window information          */
     return 1;
 }
 
-void DrawGridAndAxis(wi)
+int DrawGridAndAxis(wi)
 LocalWin *wi;			/* Window information         */
 /*
  * This routine draws grid line labels in engineering notation,
@@ -2089,7 +1931,7 @@ double val;			/* Value */
     return val;
 }
 
-void WriteValue(str, val, expv, logFlag)
+int WriteValue(str, val, expv, logFlag)
 char *str;			/* String to write into */
 double val;			/* Value to print       */
 int expv;			/* Exponent             */
@@ -2136,14 +1978,14 @@ else if ((xval) > wi->UsrOppX) rtn = RIGHT_CODE; \
 if ((yval) < wi->UsrOrgY) rtn |= BOTTOM_CODE; \
 else if ((yval) > wi->UsrOppY) rtn |= TOP_CODE
 
-void DrawData(wi)
+int DrawData(wi)
 LocalWin *wi;
 /*
  * This routine draws the data sets themselves using the macros
  * for translating coordinates.
  */
 {
-    double sx1, sy1, sx2, sy2, tx = 0.0, ty = 0.0;
+    double sx1, sy1, sx2, sy2, tx, ty;
     int idx, subindex;
     int code1, code2, cd, mark_inside;
     int X_idx;
@@ -2301,7 +2143,7 @@ LocalWin *wi;
 
 
 
-void DrawLegend(wi)
+int DrawLegend(wi)
 LocalWin *wi;
 /*
  * This draws a legend of the data sets displayed.  Only those that

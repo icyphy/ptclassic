@@ -108,7 +108,7 @@ above only up to order 30.
         version { $Id$ }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -143,17 +143,23 @@ limitation of liability, and disclaimer of warranty provisions.
 	    Error::abortRun(*this,"Sorry, the polynomial must be a positive integer.");
 	    return;
 	  }
+          addGlobal("int ffs();");
 	}
 	codeblock(scramble) {
-	  int reg, masked, parity;
+	  int reg, masked, parity, lob;
 	  reg = $ref(shiftReg) << 1;
 	  masked = $val(polynomial) & reg;
 	  /* Now we need to find the parity of "masked". */
 	  parity = 0;
-	  /* Calculate the parity of the masked word */
-	  while (masked > 0) {
-	    parity = parity ^ (masked & 1);
-	    masked = masked >> 1;
+	  /*
+	   * Find the lowest order bit that is set and shift it out
+	   * "ffs" is a c library function does this. It returns zero when
+	   * there are no more bits set.
+	   */
+	  while (lob = ffs(masked)) {
+	    masked = masked >> lob;
+	    /* toggle the parity bit */
+	    parity = parity ^ 1;
 	  }
 	  /* Exclusive-or with the input */
 	  parity = parity ^ ($ref(input) != 0);

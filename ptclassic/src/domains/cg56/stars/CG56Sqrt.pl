@@ -4,13 +4,8 @@ defstar {
 	desc { Square Root. }
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 nonlinear functions library }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
 	explanation {
 Output is the square root of input. 
 Negative values are equated to zero.
@@ -39,7 +34,7 @@ $label(sqrtend)
         move    b,$ref(output)
   	}
  	go {
- 		addCode(sqrtblock);
+ 		gencode(sqrtblock);
  	}
 
 	exectime {

@@ -3,14 +3,14 @@ static const char file_id[] = "MatrixParticle.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1991-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
 
 IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
 FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
@@ -24,9 +24,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+                                                        COPYRIGHTENDKEY
 
  Programmer:  Mike J. Chen
  Date of creation: 9/27/93
@@ -122,7 +120,7 @@ void ComplexMatrixParticle::initMatrix(int nRows, int nCols, int rowDelays,
 }
 
 // Set the data field to the given SubMatrix
-void ComplexMatrixParticle::initialize(PtMatrix *m, MatrixParticle *p) {
+void ComplexMatrixParticle::initialize(Matrix *m, MatrixParticle *p) {
   // should we check the type?
   if(data) {
     LOG_DEL; delete data;
@@ -165,7 +163,7 @@ void ComplexMatrixParticle::operator << (const ComplexMatrix& m) {
 
 // Create a subMatrix using the data as the parent.  Takes
 // the starting row and col, and the size of the submatrix desired.
-PtMatrix* ComplexMatrixParticle::subMatrix(int startRow, int startCol,
+Matrix* ComplexMatrixParticle::subMatrix(int startRow, int startCol,
 					 int numRows, int numCols) {
   return (new ComplexSubMatrix(*data,startRow,startCol,numRows,numCols));
 }
@@ -246,7 +244,7 @@ void FixMatrixParticle::initMatrix(int nRows, int nCols, int rowDelays,
 
 // Set the data field to the given SubMatrix and the pointer to the
 // MatrixParticle containing the parent matrix
-void FixMatrixParticle::initialize(PtMatrix *m, MatrixParticle* p) {
+void FixMatrixParticle::initialize(Matrix *m, MatrixParticle* p) {
   // should we check the type?
   if(data) {
     parent->die();
@@ -295,7 +293,7 @@ void FixMatrixParticle::operator << (const FixMatrix& m) {
 // Create a subMatrix using the data as the parent.  Takes
 // the starting row and col, and the size of the submatrix desired.
 // Assumes the data for this is of type Matrix and not SubMatrix.
-PtMatrix* FixMatrixParticle::subMatrix(int startRow, int startCol,
+Matrix* FixMatrixParticle::subMatrix(int startRow, int startCol,
 				     int numRows, int numCols) {
   return (new FixSubMatrix(*data,startRow,startCol,numRows,numCols));
 }
@@ -374,7 +372,7 @@ void FloatMatrixParticle::initMatrix(int nRows, int nCols, int rowDelays,
 }
 
 // Set the data field to the given SubMatrix
-void FloatMatrixParticle::initialize(PtMatrix *m, MatrixParticle *p) {
+void FloatMatrixParticle::initialize(Matrix *m, MatrixParticle *p) {
   // should we check the type?
   if(data) {
     parent->die();
@@ -420,7 +418,7 @@ void FloatMatrixParticle::operator << (const FloatMatrix& m) {
 
 // Create a subMatrix using the data as the parent.  Takes
 // the starting row and col, and the size of the submatrix desired.
-PtMatrix* FloatMatrixParticle::subMatrix(int startRow, int startCol,
+Matrix* FloatMatrixParticle::subMatrix(int startRow, int startCol,
 				       int numRows, int numCols) {
   return (new FloatSubMatrix(*data,startRow,startCol,numRows,numCols));
 }
@@ -501,7 +499,7 @@ void IntMatrixParticle::initMatrix(int nRows, int nCols, int rowDelays,
 
 // Set the data field to the given SubMatrix and the pointer to the
 // MatrixParticle containing the parent matrix
-void IntMatrixParticle::initialize(PtMatrix *m, MatrixParticle* p) {
+void IntMatrixParticle::initialize(Matrix *m, MatrixParticle* p) {
   // should we check the type?
   if(data) {
     parent->die();
@@ -548,7 +546,7 @@ void IntMatrixParticle::operator << (const IntMatrix& m) {
 // Create a subMatrix using the data as the parent.  Takes
 // the starting row and col, and the size of the submatrix desired.
 // Assumes the data for this is of type Matrix and not SubMatrix.
-PtMatrix* IntMatrixParticle::subMatrix(int startRow, int startCol,
+Matrix* IntMatrixParticle::subMatrix(int startRow, int startCol,
 				     int numRows, int numCols) {
   return (new IntSubMatrix(*data,startRow,startCol,numRows,numCols));
 }

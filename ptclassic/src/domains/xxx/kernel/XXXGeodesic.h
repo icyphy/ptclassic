@@ -1,4 +1,3 @@
 // $Id$
-#define XXXGeodesic Geodesic
-#define XXXForkNode AutoForkNode
+#define XXXGeodesic AutoForkNode
 #include "AutoForkNode.h"

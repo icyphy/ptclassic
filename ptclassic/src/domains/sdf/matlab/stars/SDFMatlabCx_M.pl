@@ -9,18 +9,19 @@ evaluate a Matlab command if no inputs are given.
 	version { $Id$ }
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF Matlab library }
+	location { SDF main library }
 	explanation {
-See the explanation for Matlab_M star.
+See the explanation for SDFMatlab_M star.
 The only difference is that this star forces the outputs to be complex matrices.
 .Ir "Matlab interface"
 	}
-	constructor {
-output.setPort("output", this, COMPLEX_MATRIX_ENV);
+	outmulti {
+		name { output }
+		type { COMPLEX_MATRIX_ENV }
 	}
 }

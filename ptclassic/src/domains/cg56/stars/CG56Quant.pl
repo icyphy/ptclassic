@@ -1,104 +1,92 @@
+
 defstar {
-	name { Quant }
+	name { Quantizer }
 	domain { CG56 }
-	desc { The star quantizes the input to one of N+1 possible output levels
-using N thresholds.
-	}
+	desc { Linear fractional or integer quantizer with adjustable offset. }
 	version { $Id$ }
-	author { Chih-Tsung Huang }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 nonlinear functions library }
-	explanation {
-The star quantizes the input to one of $N+1$ possible output levels
-using $N$ thresholds.
-For an input less than or equal to the $N$th threshold,
-but larger than all previous thresholds,
-the output will be the $N$th level.
-If the input is greater than all thresholds,
-the output is the $(N+1)$th level.
-The \fIlevels\fR parameter must be one greater than the number
-of \fIthresholds\fR.
-	}
-	input {
-		name {input}
-		type {fix}
-	}
-	output {
-		name {output}
-		type {fix}
-	}
-        state  {
-                name { thresholds }
-                type { fixarray }
-                default { "0.1 0.2 0.3 0.4" }
-                desc { threshold file }
-                attributes { A_NONCONSTANT|A_XMEM }
+	author { Chih-Tsung Huang, ported from Gabriel }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
+        explanation {
+Normally, the output is just the two's complement number
+given by the top no_bits of the input, but
+an optional offset can be added to shift the output levels up or down.
         }
-        state  {
-                name { levels }
-                type { fixarray }
-                default { "0.05 0.15 0.25 0.35 0.45" }
-                desc { levels file }
-                attributes { A_NONCONSTANT|A_YMEM }
-        }
-        state  {
-                name { X }
-                type { int }
-                default { 4 }
-                desc { internal }
-                attributes { A_NONCONSTANT|A_NONSETTABLE }
-        }
-
-	codeblock (main) {
-        move    #<$addr(thresholds),r0
-        move    #>$addr(levels),r4
-        move    $ref(input),x0
-        move    x:(r0)+,a    y:(r4)+,b
-        do      #$val(X)-1,$label(lab)
-        cmp	x0,a
-        jlt	$label(again)
-        enddo
-        jmp     $label(term)
-$label(again)
-        move    x:(r0)+,a    y:(r4)+,b
-$label(lab)
-        cmp	x0,a
-        jge	$label(term)
-        move    y:(r4),b
-$label(term)
-        move    b,$ref(output)
+	input	{
+		name { input }
+		type { fix }
+		}
+        output {
+		name { output }
+		type { fix }
 	}
-
-        codeblock(other) {
-        move    #<$addr(thresholds),r0
-        move    #>$addr(levels),r4
-        move    $ref(input),x0
-        move    x:(r0),a     y:(r4)+,b
-        cmp	x0,a
-        jge	$label(term)
-        move    y:(r4),b
-$label(term)
-        move    b,$ref(output)
-        }
-        setup {
-             if(levels.size() != thresholds.size()+1)
-                 Error::abortRun (*this,
-		 ": Must have 1 more level than threshold to quantize.");
-        }
-	go {
-                 X=thresholds.size();
-
-                 if(thresholds.size()>1) 
-                     addCode(main);
-		 else
-	             addCode(other);
+	state {
+		name { no_bits }
+		type { int }
+		desc {   }
+		default { 4.0 }
 	}
-	exectime {
-	        return 7+4*int(thresholds.size());
+	state {
+		name { offset }
+		type { int }
+		desc {    .  }
+		default { 0 }
 	}
-}
+    	state {
+		name { integer_out }
+		type {   }
+		desc {    . }
+		default { "no" }
+	}
+	state  {
+		name { X }
+		type { FIX }
+		desc { internal }
+		default { 0 }
+		attributes { A_NONCONSTANT|A_NONSETTABLE }
+	}
+	state  {
+		name { Y }
+		type { FIX }
+		desc { internal }
+		default { 0 }
+		attributes { A_NONCONSTANT|A_NONSETTABLE }
+	}
+        codeblock(std) {
+	move	$ref(input),x0
+	} 
+	ccinclude { <math.h> }
+        go { 
+		const double X = pow(2,(1.0-double(no_bits)));
+		const double Y; 
+		const *p=integer_out;
+                char buf[80];
+                char buf1[80];
+		if (p[0]=='y' || p[0]=='Y') {
+                            sprintf (buf, "\tmove\t$val(X),a");
+                            gencode(CodeBlock(buf));
+			    if (offset !=0) {
+                            sprintf (buf1, "\tmove\t$val(offset),x1");
+                            gencode(CodeBlock(buf1));			     
+			    }
+			    sprintf (buf2, "\tand\tx0,a");
+			    gencode(CodeBlock(buf2));
+			    if (offset !=0) {
+                            sprintf (buf3, "\tadd\tx1,a");
+                            gencode(CodeBlock(buf3));
+			    }
+                            sprintf (buf4, "\tmove\ta1,$ref(output)");
+                            gencode(CodeBlock(buf4));
+                }
+	        else {
+	        if (no_bits!=24) {
+	                    if (no_bits<9)
+			         { Y=pow(2,(double(no_bits)-1));
+			    
+					
+		gencode(std);
+	   }
+	execTime { 
+		return 3;
+	}
+ }

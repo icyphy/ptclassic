@@ -5,8 +5,9 @@ defstar
     version { $Id$ }
     desc { Merge two increasing sequences, eliminating duplicates. }
     author { T. M. Parks }
-    copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+    copyright
+    {
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -51,12 +52,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	if (getB) b.receiveData();
 	getA = getB = FALSE;
 
-	if (int(a%0) < int(b%0))
+	if (a%0 < b%0)
 	{
 	    output%0 = a%0;
 	    getA = TRUE;
 	}
-	else if (int(a%0) > int(b%0))
+	else if (a%0 > b%0)
 	{
 	    output%0 = b%0;
 	    getB = TRUE;

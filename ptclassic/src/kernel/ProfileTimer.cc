@@ -53,9 +53,7 @@ ProfileTimer::ProfileTimer() {
 	// this ptolemy process has been running for a year....  
 	// then we will crash.
 	year.it_value.tv_sec = 3600 * 24 * 355;
-	year.it_interval.tv_usec = 
-	    year.it_interval.tv_sec = 
-	    year.it_value.tv_usec = 0;
+	year.it_value.tv_usec = 0;
 	setitimer(ITIMER_PROF,&year,0);
 	setupFlag = 0xABCDEF;
     }
@@ -67,8 +65,8 @@ void ProfileTimer::reset() {
     startTime = timeOfProfile();
 }
 
-// Elapsed time in seconds since last reset.
-TimeVal ProfileTimer::elapsedCPUTime() const {
+// Elapsed time since last reset.
+TimeVal ProfileTimer::elapsedTime() const {
     // time is counting down
     return startTime - timeOfProfile();
 }

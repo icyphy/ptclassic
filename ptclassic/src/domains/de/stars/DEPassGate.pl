@@ -3,12 +3,7 @@ defstar {
 	domain { DE }
 	version { $Id$ }
 	author { Soonhoi Ha and Edward Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { DE main library }
 	desc {
 If the gate is open, particles pass from "input" to "output".

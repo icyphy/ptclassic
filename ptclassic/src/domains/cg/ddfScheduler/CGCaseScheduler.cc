@@ -10,26 +10,25 @@ static const char file_id[] = "CGCaseScheduler.cc";
 #include "CGMacroCluster.h"
 #include "distributions.h"
 #include "Domain.h"
-#include "CGDDFCode.h"
 #include <math.h>
 
 /**************************************************************************
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -38,21 +37,30 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+							COPYRIGHTENDKEY
 
  Programmer:  Soonhoi Ha
 
  Methods for CGCaseScheduler class.
 **************************************************************************/
 
+// the old g++ requires the obsolete "delete [size] ptr" form
+// and new compilers use "delete [] ptr".  Handle with an ifdef.
+
+#if defined(__GNUG__) && __GNUG__ == 1
+#define SAVENUM saveNum
+#define PREVNUM prevNum
+#else
+#define SAVENUM /* nothing */
+#define PREVNUM /* nothing */
+#endif
+
 CGCaseScheduler :: ~CGCaseScheduler() {
-	LOG_DEL; delete [] pis;
-	LOG_DEL; delete [] touched;
-	LOG_DEL; delete [] arcProfile;
-	LOG_DEL; delete [] deltas;
-	LOG_DEL; delete [] taus;
+	LOG_DEL; delete [SAVENUM] pis;
+	LOG_DEL; delete [SAVENUM] touched;
+	LOG_DEL; delete [SAVENUM] arcProfile;
+	LOG_DEL; delete [SAVENUM] deltas;
+	LOG_DEL; delete [PREVNUM] taus;
 }
 
 int CGCaseScheduler :: getStatistics() {
@@ -104,10 +112,14 @@ int CGCaseScheduler :: closerExamine() {
 void CGCaseScheduler :: initMembers() {
 
 	int n = numArc - 2;
-	if ( saveNum == 0 || saveNum != n) {
-		LOG_DEL; delete [] arcProfile;
-		LOG_DEL; delete [] pis;
-		LOG_DEL; delete [] touched;
+	if (!saveNum) {	// execute first.
+		LOG_NEW; arcProfile = (Profile**) new Profile* [n];
+		LOG_NEW; pis = new double[n];
+		LOG_NEW; touched = new int[n];
+	} else if (saveNum != n) {
+		LOG_DEL; delete [SAVENUM] arcProfile;
+		LOG_DEL; delete [SAVENUM] pis;
+		LOG_DEL; delete [SAVENUM] touched;
 		LOG_NEW; arcProfile = (Profile**) new Profile* [n];
 		LOG_NEW; pis = new double[n];
 		LOG_NEW; touched = new int[n];
@@ -115,7 +127,7 @@ void CGCaseScheduler :: initMembers() {
 	saveNum = n;
 
 	// build the "deltas"
-	LOG_DEL; delete [] deltas;
+	LOG_DEL; delete [SAVENUM] deltas;
 	LOG_NEW; deltas = new int [saveNum];
 
 	// read pis.
@@ -185,7 +197,7 @@ int CGCaseScheduler :: assumeExecTime() {
 void CGCaseScheduler :: adjustMembers() {
 
 	// adjust taus
-	LOG_DEL; delete [] taus;
+	LOG_DEL; if (taus) delete [PREVNUM] taus;
 	LOG_NEW; taus = new Taus[numProcs];
 	prevNum = numProcs;
 

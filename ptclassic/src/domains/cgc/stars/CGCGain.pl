@@ -4,12 +4,7 @@ defstar {
 	desc { Amplifier: output is input times "gain" (default 1.0). }
 	version { $Id$ }
 	author { S. Ha }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { CGC main library }
 	input {
 		name { input }
@@ -30,9 +25,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	go {
 		addCode("$ref(output) = $val(gain) * $ref(input);\n");
-	}
-	exectime {
-		return 1;
 	}
 }
 

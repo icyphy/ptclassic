@@ -12,7 +12,7 @@ ROOT = ../../../..
 VPATH = $(ROOT)/src/domains/xxx/stars
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 # XXXDIR is the directory containing XXX domain support
@@ -20,7 +20,7 @@ XXXDIR = $(ROOT)/src/domains/xxx/kernel
 INCL = -I$(XXXDIR) -I$(KERNDIR)
 
 # Library name
-LIB=libxxxstars.$(LIBSUFFIX)
+LIB=libxxxstars.a
 
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list

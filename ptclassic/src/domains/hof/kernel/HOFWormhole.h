@@ -42,23 +42,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class HOFWormhole : public Wormhole, public HOFStar
 {
 public:
-	// Constructor
+	// Constructor.
 	HOFWormhole(Galaxy& g, Target* t=0);
-
 	// Destructor
 	~HOFWormhole();
 
-	void begin() { Wormhole::begin(); }
+	void setup();
+	void go();
 	void wrapup();
-
-	Scheduler* scheduler() const { return myTarget()->scheduler(); }
-
+	Scheduler* mySched() const { return target->scheduler();}
 	// clone -- allows interpreter/pigi to make copies
 	Block* clone() const;
 	Block* makeNew() const;
 
 	// identify myself as a wormhole
-	int isItWormhole() const { return TRUE; }
+	int isItWormhole() const { return TRUE;}
 
 	// use statelist for inner galaxy for stateWithName
 	State* stateWithName (const char* name) {
@@ -69,14 +67,10 @@ public:
 	double getStopTime();
 
 	// state initialize
-	void initState() { gal.initState(); }
+	void initState() { gal.initState() ;}
 
 	StringList printVerbose() const;
 	StringList printRecursive() const;
-
-protected:
-	void setup();
-	void go();
 };
 
 class HOFtoUniversal : public ToEventHorizon, public InHOFPort
@@ -95,9 +89,6 @@ public:
 
 	// as EventHorizon
 	EventHorizon* asEH();
-
-	/*virtual*/ Geodesic* allocateGeodesic()
-	{ return ToEventHorizon::allocateGeodesic(); }
 };
 
 class HOFfromUniversal : public FromEventHorizon, public OutHOFPort
@@ -116,9 +107,6 @@ public:
 
 	// as EventHorizon
 	EventHorizon* asEH();
-
-	/*virtual*/ Geodesic* allocateGeodesic()
-	{ return FromEventHorizon::allocateGeodesic(); }
 };
 
 #endif

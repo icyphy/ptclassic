@@ -8,30 +8,8 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+Copyright (c) 1991 The Regents of the University of California.
+			All Rights Reserved.
 
 Programmer: Soonhoi Ha based on G.C. Sih's code
 
@@ -44,12 +22,13 @@ The multiprocessor scheduling routines.
 #include "DCGraph.h"
 #include "DCNode.h"
 #include "DCParProcs.h"
-#include "DCCluster.h"
-#include "DCClusterList.h"
+#include "Cluster.h"
+#include "ClusterList.h"
 #include "ParScheduler.h"
 #include "StringList.h"
-#include "MultiTarget.h"
+#include "BaseMultiTarget.h"
 
+class UserOutput;
 
 		//////////////////////////////
 		//  class DeclustScheduler  //
@@ -61,26 +40,6 @@ The multiprocessor scheduling routines.
 //	UCB/ERL Memo M90/119 (December, 1990)   
 
 class DeclustScheduler : public ParScheduler {
-public:
-	DeclustScheduler(MultiTarget *t, const char* logFile = 0) :
-		ParScheduler(t,logFile), schedA(0), schedB(0) {
-		INC_LOG_NEW; myGraph = new DCGraph; exGraph = myGraph; }
-	~DeclustScheduler();
-
-	// redefine
-	ParProcessors* setUpProcs(int);
-
-	// display schedule
-	StringList displaySchedule();
-
-	// main body of the schedule.
-	int scheduleIt();
-
-protected:
-	// redefine preSchedule(): clustering and hierarchical cluster
-	// grouping.
-	int preSchedule();
-
 private:
 	DCGraph* myGraph;
 
@@ -90,10 +49,10 @@ private:
 	DCParProcs* workSchedule;	// point the work schedule btw A & B.
 
 	// The elementary clusters
-	DCClusterList EClusts;
+	ClusterList EClusts;
 
 	// cluster hierarchy
-	DCClusterList combinations;
+	ClusterList combinations;
 
 	// Returns the communication cost from the topology dependent section
 	int CommCost(int sP, int dP, int smps, int ty);
@@ -101,7 +60,7 @@ private:
 // **************  ELEMENTARY CLUSTER FORMATION FUNCTIONS  ***************
 
 	// Finds cutArcs and makes elementary clusters 
-	void FindElemDCClusters();
+	void FindElemClusters();
 
 	// parallelism detection
 	int ParallelismDetection(DCNode *bnode, int direction);
@@ -124,23 +83,23 @@ private:
 // **************  HIERARCHICAL CLUSTER GROUPING FUNCTIONS  **************
 
 	// Does hierarchical clustering to establish hierarchy
-	int DCClusterUp(DCClusterList&);
+	int ClusterUp(ClusterList&);
 
 // **************  CLUSTER HIERARCHY DECOMPOSITION FUNCTIONS  **************
 
 	// Start breaking cluster hierarchy
-	int pulldown(DCClusterList *combDCClusts, DCClusterList *Cleft);
+	int pulldown(ClusterList *combClusts, ClusterList *Cleft);
 
 // ******************  SCHEDULE ANALYSIS FUNCTIONS  ******************
 
 	// Does schedule analysis on BestSchedule
-	void scheduleAnalysis(DCClusterList &remDCClusts);
+	void scheduleAnalysis(ClusterList &remClusts);
 
 	// Communication reduction cluster shifting routines
-	int commReduction(DCClusterList &remC, DCClusterList *slpC);
+	int commReduction(ClusterList &remC, ClusterList *slpC);
 
 	// Tries shifting clusters from heavily loaded to lightly loaded procs
-	int loadShift(DCClusterList &remC, DCClusterList *slpC);
+	int loadShift(ClusterList &remC, ClusterList *slpC);
 
 // ******************  CLUSTER BREAKDOWN FUNCTIONS  ******************
 
@@ -149,6 +108,29 @@ private:
 
 	// Handles SLP section on a single processor
 	int findBreakpaths(DCNodeList &slpsect, int &Proc);
+
+protected:
+	// redefine preSchedule(): clustering and hierarchical cluster
+	// grouping.
+	int preSchedule();
+
+public:
+	// Constructor
+	DeclustScheduler(BaseMultiTarget *t, const char* logFile = 0) :
+		ParScheduler(t,logFile), schedA(0), schedB(0) {
+		INC_LOG_NEW; myGraph = new DCGraph; exGraph = myGraph; }
+
+	// Destructor
+	~DeclustScheduler();
+
+	// redefine
+	void setUpProcs(int);
+
+	// display schedule
+	StringList displaySchedule();
+
+	// main body of the schedule.
+	int scheduleIt();
 };
 
 #endif

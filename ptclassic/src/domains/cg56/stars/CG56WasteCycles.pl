@@ -6,13 +6,8 @@ A star to stall the flow of data for parameter cycles to waste cycles.
         }
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 control library }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
         explanation {
 A star to stall the flow of data for parameter cycles to waste cycles.
         }
@@ -35,7 +30,6 @@ A star to stall the flow of data for parameter cycles to waste cycles.
 		type { int }
 		desc { internal }
 		default { 0 }
-		attributes {A_NONSETTABLE|A_NONCONSTANT}
 	}
 	codeblock(std) {
 	move	$ref(input),x1
@@ -45,7 +39,7 @@ A star to stall the flow of data for parameter cycles to waste cycles.
 	} 
         go {
                 X=cyclesToWaste-4;
-                addCode(std);
+                gencode(std);
 	}
 	execTime { 
 		return int(cyclesToWaste);

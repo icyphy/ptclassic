@@ -3,19 +3,19 @@ Rountines for blocking interrupts caused by the arrival of signals
    $Id$
 */
 /*
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -24,9 +24,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+                                                        COPYRIGHTENDKEY
 */
 /*
  Programmer: Alan Kamas
@@ -60,72 +58,23 @@ ptReleaseSig:
 
 */
 
-/*
 
-How to add a new architecture to this file
-------------------------------------------
-First check if signals calls on your architecture will interrupt and
-stop system calls.  One way to test this is to build Ptolemy with the
-default (do nothing) functions below.  If Ptolemy runs without problems,
-then you're done.  If you get errors like: 
-     RPC Error: fread of long failed
-     RPC Error: application: ../../../../src/octtools/Xpackages/rpc/rpc.c 
-                (line 76): function_and_args: Interrupted system call
-Then you sould do one of the following below.
-
-If you are running a POSIX machine, then it is quite likely that the
-default will not work for you.  And if you get errors like the above
-then the default is definitely not working for you.  If this is the
-case, check the man page for sigaction.  If the flag SA_RESTART is
-defined, then define ptSafeSig as below, and define ptBlockSig
-and ptReleaseSig as blank funcitons.
-
-If SA_RESTART is not defined on your system, then define ptSafeSig
-as a blank function and define ptBlockSig and ptReleaseSig as below.
-
-    - Alan Kamas 3/95
- 
-*/
-
-
-#include <stdio.h>		// Pick up NULL?  freebsd wants this.
 #include <signal.h>
 #include "compat.h" 
-#include "ptsignals.h"
 
-// When the POSIX thread library libgthreads is used,
-//  sigaction() must be used instead of signal() to register handlers.
-#if defined(PTSOL2) || defined(PTSUN4)
-
-extern "C" SIG_PT ptSignal(int sig, SIG_PT handler)
-{
-    struct sigaction action;
-
-    sigaction(sig, NULL, &action);
-
-    // These two casts are UGLY, but what else are you going to do?!
-    SIG_PT old = (SIG_PT)action.sa_handler;
-    action.sa_handler = (void (*)())handler;
-
-    sigaction(sig, &action, NULL);
-    return old;
-}
-
-#endif /*PTSOL2 PTSUN4*/
-
-#if defined(PTSOL2) || defined(PTIRIX5) || defined(PTLINUX) || defined(PTALPHA) || defined(PTAIX) || defined(SA_RESTART)
+#if defined(PTSOL2) || defined(PTIRIX5) || defined(PTLINUX)
 void ptSafeSig( int SigNum ) {
 	struct sigaction pt_alarm_action;
 	sigaction( SigNum, NULL, &pt_alarm_action);
         pt_alarm_action.sa_flags |= SA_RESTART;
         sigaction( SigNum, &pt_alarm_action, NULL);
 }
-void ptBlockSig (int) {};
-void ptReleaseSig (int) {};
+void ptBlockSig (int SigNum) {};
+void ptReleaseSig (int SigNum) {};
 
 #else 
 #if defined(PTHPPA)
-void ptSafeSig( int ) {}
+void ptSafeSig( int SigNum ) { /* to avoid warning */ int a = SigNum;};
 long signalmask;
 void ptBlockSig( int SigNum ) {
 	signalmask = sigblock(sigmask(SigNum));
@@ -138,9 +87,9 @@ void ptReleaseSig( int SigNum ) {
 
 #else
 #if defined(PTSUN4)
-void ptBlockSig(int) {};
-void ptReleaseSig(int) {};
-void ptSafeSig(int) {};
+void ptBlockSig (int SigNum) {};
+void ptReleaseSig (int SigNum) {};
+void ptSafeSig( int SigNum ) {};
 
 #else
 /*default is no assignment*/
@@ -150,4 +99,4 @@ void ptSafeSig( int SigNum ) {};
 
 #endif /* PTSUN4 */
 #endif /* PTHPPA */
-#endif /* PTSOL2  PTIRIX5  PTLINUX PTALPHA PTAIX SA_RESTART */
+#endif /* PTSOL2  PTIRIX5  PTLINUX */

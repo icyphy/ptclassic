@@ -2,30 +2,15 @@ defstar
 {
     name { PCM }
     domain { CGC }
-    desc { Base class for reading and writing mu-law encoded PCM data. }
+    desc { Base class for reading and writing PCM data. }
     version { $Id$ }
     author { T. M. Parks }
-    copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-    }
 
     state
     {
 	name { fileName }
 	type { string }
 	default { "/dev/audio" }
-	desc { File for PCM data.  If blank, use standard IO. }
-    }
-
-    state
-    {
-	name { blockSize }
-	type { int }
-	default { 128 }
-	desc { Number of samples to read or write. }
     }
 
     protected
@@ -33,27 +18,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	int standardIO:1;
     }
 
-    setup
+    codeblock (globalDeclarations)
     {
-	standardIO = strcmp(fileName,"") == 0;
+	int pcmOffset[8];
     }
 
-    codeblock (sharedDeclarations)
+    codeblock (globalInit)
     {
-	int $sharedSymbol(PCM,offset)[8];
 
-	/* Convert from linear to mu-law */
-	int $sharedSymbol(PCM,mulaw)(x)
-	double x;
-	{
-	    double m;
-	    m = (pow(256.0,fabs(x)) - 1.0) / 255.0;
-	    return 4080.0 * m;
-	}
-    }
-
-    codeblock (sharedInit)
-    {
 	/* Initialize PCM offset table. */
 	{
 	    int i;
@@ -62,21 +34,21 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	    for(i = 0; i < 8; i++, x += dx)
 	    {
-		$sharedSymbol(PCM,offset)[i] = $sharedSymbol(PCM,mulaw)(x);
+		pcmOffset[i] = 4080.0 * (pow(256.0,fabs(x)) - 1.0) / 255.0;
 	    }
 	}
     }
 
     codeblock (declarations)
     {
-	int $starSymbol(file);
-	unsigned char $starSymbol(buf)[$val(blockSize)];
+	FILE* $starSymbol(stream);
+	unsigned char $starSymbol(byte);
     }
 
     codeblock (closeFile)
     {
 	/* Close file. */
-	if (close($starSymbol(file)) != 0)
+	if (fclose($starSymbol(stream)) != 0)
 	{
 	    perror("$val(fileName)");
 	    exit(1);
@@ -85,9 +57,10 @@ limitation of liability, and disclaimer of warranty provisions.
 
     initCode
     {
-	addInclude("<math.h>");
-	addDeclaration(declarations);
-	if (addGlobal(sharedDeclarations, "$sharedSymbol(PCM,PCM)"))
-	    addCode(sharedInit);
+	addInclude("<mp.h>");
+	addInclude("<stdio.h>");
+	addGlobal(globalDeclarations);
+	addGlobal(declarations);
+	addCode(globalInit);
     }
 }

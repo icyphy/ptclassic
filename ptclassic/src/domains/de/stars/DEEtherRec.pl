@@ -1,20 +1,18 @@
 defstar {
-	name { EtherRec }
-	domain { DE }
-	derivedfrom { Ether }
+	name {EtherRec}
+	domain {DE}
+	derivedfrom { DEEther }
 	version { $Id$ }
-	author { Edward A. Lee  and Tom M. Parks }
+	author { E. A. Lee  and T. Parks }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1994 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 	desc {
-This star receives floating-point particles transmitted to it by
-an EtherSend star.  The particle is produced at the output after
-some duration of transmission specified at the transmitter.
+Receiver for a shared medium when received type is float.
 	}
 	explanation {
 This star is derived from
@@ -74,12 +72,12 @@ giving the time at which the particle should be sent to the output.
 		    Error::warn(*this,"Overwriting previously received data");
 		recdData = data.clone();
 		refireAtTime(firingTime);
-		feedbackOut->sendData();
+		feedbackOut.sendData();
 		dataValid = 1;
 	    }
 	}
-	begin {
-	    DEEther::begin();
+	setup {
+	    DEEther::setup();
 
 	    firstFiring = 1;
 
@@ -94,6 +92,13 @@ giving the time at which the particle should be sent to the output.
 	    dataValid = 0;
 	}
 	go {
+	    // Ignore the time zero event that is automatically scheduled
+	    // by the base class, RepeatStar
+	    if (firstFiring) {
+		firstFiring = 0;
+		return;
+	    }
+
 	    if (dataValid) {
 		// Output the stored data
 		recData.put(arrivalTime) = *recdData;

@@ -32,21 +32,19 @@ defstar {
 	type { FIX }
     }
     explanation {
-For this complex LMS filter star,
-the number of initial coefficients specify the order.
-.EQ
-y = c' * x
-c[n+1] = c[n] + (step_size)(x)(e')
-.EN
-where $x$ = input, $c$ = coefficients, $y$ = output, $e$ = error
-(desired output - actual output), and ' represents the complex conjugate.
-Default \fIstep_size\fR is 0.01
-The parameter \fIerror_delay\fR must specify the total delay between
-the filter output and the error input, and
-\fIlast_tap_min\fR constrains the minimum magnitude of both
-the real and imaginary parts of the last tap.
-Default coefficients give a 7th-order filter, with the middle real
-tap equal to 0.5 and all other taps zero.
+	DSP56000 - complex lms filter star.
+        The number of initial coefficients specify the order.
+        	y = c' * x	c[n+1] = c[n] + (step_size)(x)(e')
+	where x = input, c = coefficients, y = output,
+	      e = error (desired output - actual output,
+        and ' represents the complex conjugate.
+	Default step size 0.01
+        Error_delay must specify the total delay between
+           	the filter output and the error input.
+	 Last_tap_min constrains the minimum magnitude of both
+		the real & imaginary parts of the last tap.
+        Default coefficients give a 7th order filter, with the
+        		middle real tap = 0.5 and all others zero.
     }
     state {
 	name { init_taps_r }
@@ -108,7 +106,7 @@ tap equal to 0.5 and all other taps zero.
 	default { 0 }
 	attributes { A_YMEM|A_NONCONSTANT|A_NONSETTABLE|A_NOINIT }
     }
-    setup {
+    start {
 	int d = int(decimation);
 	input_r.setSDFParams( d, d-1);
 	input_i.setSDFParams( d, d-1);
@@ -127,13 +125,13 @@ tap equal to 0.5 and all other taps zero.
 	addCode("	org	x:$addr(coef_table)");
 	for ( k=0; k < numTaps; k++) {
 	    char	buf[100];
-	    sprintf(buf, "	dc	%.15f", double(init_taps_r[k]));
+	    sprintf(buf, "	dc	%.15f", init_taps_r[k]);
 	    addCode(buf);
 	}
 	addCode("	org	y:$addr(coef_table)");
 	for ( k=0; k < numTaps; k++) {
 	    char	buf[100];
-	    sprintf(buf, "	dc	%.15f", double(init_taps_i[k]));
+	    sprintf(buf, "	dc	%.15f", init_taps_i[k]);
 	    addCode(buf);
 	}
 	addCode("	org	p:");
@@ -143,7 +141,7 @@ tap equal to 0.5 and all other taps zero.
 	addCode(cbSetup);
 	addCode(cbUpdateTaps);
 
-	if (last_tap_min.asDouble() > 0.0) {
+	if ( double(last_tap_min) > 0 ) {
     	    addCode(cbLastTapConstrait);
 	} else {
     	    addCode(cbStoreLastTap);
@@ -155,7 +153,7 @@ tap equal to 0.5 and all other taps zero.
 
     execTime {
 	int coretime = 8 * int(numTaps) + 3 * int(decimation) + 28;
-	if ( last_tap_min.asDouble() > 0.0 )
+	if ( double(last_tap_min) > 0.0 )
 	    coretime += 14;
 	if ( int(numTaps) <= 2 ) {
 	    coretime += int(decimation) <= 1 ? 0 : 3;

@@ -1,20 +1,23 @@
+ident {
+/**************************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  E. A. Lee
+ Date of creation: 9/19/90
+ Converted to use preprocessor, 10/3/90, JTB
+
+Convert real and imaginary parts to a complex value
+
+**************************************************************************/
+}
 defstar {
-	name { RectToCx }
+	name { RealComplex }
 	domain { SDF }
-	desc { Convert "real" and "imag" inputs to a complex output. }
-	version {$Id$}
-	author { E. A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { SDF main library }
-	explanation {
-.Id "real to complex format conversion"
-.Id "format conversion, real to complex"
-	}
+	desc {"Convert real and imaginary parts to a complex output"}
 	input {
 		name { real }
 		type { float }

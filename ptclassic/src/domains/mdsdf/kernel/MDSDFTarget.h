@@ -47,6 +47,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class MDSDFTarget : public Target {
 protected:
 	StringState logFile;
+	IntState loopScheduler;
 
 	// schedulePeriod for interface with a timed domain.
 	FloatState schedulePeriod;

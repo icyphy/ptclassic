@@ -1,21 +1,21 @@
-static const char file_id[] = "Cluster.cc";
+static const char file_id[] = "Nebula.cc";
 /******************************************************************
 Version identification:
  $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -24,13 +24,12 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
+							COPYRIGHTENDKEY
 
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+ Programmers: J. L. Pino & T. M. Parks
+ Date of creation: 6/10/94
 
- Programmers: J. L. Pino
- Date of creation: 11/9/95
-
+ A Nebula is an executable Star, a sort of light-weight Wormhole.
 
 *******************************************************************/
 
@@ -38,368 +37,110 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
-#include "Cluster.h"
+#include "Star.h"
+#include "Galaxy.h"
+#include "Nebula.h"
+#include "SimControl.h"
 #include "Scheduler.h"
-#include "GraphUtils.h"
-#include "Scope.h"
-#include <iostream.h>
-#include "InfString.h"
+#include "Geodesic.h"
+#include "Plasma.h"
 
-/**********************************************************************
-			 ClusterPort Methods
- **********************************************************************/
-ClusterPort::~ClusterPort() {
-    if (farSidePort) {
-	if (alias() && alias()->parent() && !alias()->parent()->isItAtomic()) {
-	    ((PortHole*)alias())->farSidePort = farSidePort;
-	    farSidePort->farSidePort = (PortHole*)alias();
+extern int setPortIndices(Galaxy&);
+
+// Constructors.
+Nebula::Nebula(Star& self, Block* m) : selfStar(self) {
+	if (master->isItAtomic()) {
+		master = m;
+		// Add the star's ports to the internal galaxy,
+		// but do not change their parents.
+		BlockPortIter starPorts(*master);
+		PortHole* port;
+		while ((port = starPorts++) != NULL)
+		{
+			if (port->far()->parent() == (Block*)&master)
+				// Exclude self-loop connections.
+				continue;
+			
+			else if (port->atBoundary())
+				// Exclude wormhole connections.
+				continue;
+	       
+			else {
+				PortHole* clonedPort = clonePort(port);
+				selfStar.addPort(*clonedPort);
+				clonedPort->
+					setNameParent(port.name(),&selfStar);
+			}
+		}
 	}
+	else {
+		Galaxy* g = (Galaxy*) m;
+		int nports = setPortIndices(*g);
+		master = NULL;
+		LOG_NEW; PortHole** newPorts = new PortHole*[nports];
+		for (int i = 0; i < nports; i++)
+			newPorts[i] = 0;
+		GalStarIter nextStar(*g);
+		Star* s;
+		while ((s = nextStar++) != 0) {
+			Nebula* c = newNebula(s);
+			gal.addBlock(c->selfStar,c->selfStar.name());
+			BlockPortIter nextPort(c->selfStar);
+			PortHole *p;
+			while ((p = nextPort++) != 0) {
+				newPorts[((NebulaPort*)p)->real().index()]=p;
+			}
+		}
+		// now connect up the Nebula ports to match the real ports.
+		// There may be fewer Nebula  ports than real ports if there
+		// are self-loops, for such cases, ptable[i] will be null.
+		for (i = 0; i < nports; i++) {
+			PortHole* out = newPorts[i];
+			PortHole& outReal = ((NebulaPort*)out)->real();
+			if (!out || out->isItInput()) continue;
+			PortHole* in = newPorts[outReal.far()->index()];
+			int numDelays = outReal.numInitDelays();
+			const char* initDelays = outReal.initDelayValues();
+			out->connect(*in,numDelays,initDelays);
+			out->geo()->initialize();
+		}
+		LOG_DEL; delete newPorts;
+	}
+}
+
+int Nebula::run() {
+	if (master)
+		return master->run();
+	else if (sched)
+		return sched->run();
 	else
-	    farSidePort->farSidePort = 0;
-	farSidePort = 0;
-    }
-}    
-
-void ClusterPort::initializeClusterPort() {
-    if (!aliasFrom() && !far()) {
-	farSidePort = &(PortHole&)aliasedPort(*((PortHole&)realPort()).far());
-	farSidePort->farSidePort = this;
-    }
+		return FALSE;
 }
-
-void ClusterPort::update() {
-    if (alias()->parent()->isItAtomic()) {
-	GenericPort& farAliasPort =
-	    aliasedPort(*((PortHole&)realPort()).far());
-	if (!farAliasPort.parent()->isItAtomic()) {
-	    farSidePort = (PortHole*)&farAliasPort;
-	    farSidePort->farSidePort = this;
-	}
-    }
-    else {
-	farSidePort = ((PortHole*)alias())->farSidePort;
-	farSidePort->farSidePort = this;
-	if (!alias()->parent()->isItAtomic())
-	    ((PortHole*)alias())->farSidePort = 0;
-    }
-}
-
-ClusterPort::ClusterPort(GenericPort&p):GalPort(p) {
-    setName(p.name());
-}
-
-/**********************************************************************
-		     Cluster Class Identification
- **********************************************************************/
-const char* Cluster::className() const {return "Cluster";}
-ISA_FUNC(Cluster,Galaxy);
-
-/**********************************************************************
-		      Create and add a new port
- **********************************************************************/
-ClusterPort* Cluster::addNewPort(PortHole& p) {
-    ClusterPort* newPort = makeNewPort(p);
-    addPort(*newPort);
-    newPort->setParent(this);
-    return newPort;
-}
-
-/**********************************************************************
-		    Cluster Absorb & Merge Methods
- **********************************************************************/
-int Cluster::absorb(Cluster& cluster, int removeFlag) {
-    makeNonAtomic();
-    Block* clusterParent =  cluster.parent();
-    cout << "Absorbing " << cluster.name() << " into "
-	 << name() << ".\n";
-    
-    // First we must make sure that both clusters share the
-    // same parent
-    if (clusterParent != parent()) {
-	StringList message;
-	message << "Can't absorb " << cluster.name() << " into " << name()
-		<< " because the clusters don't have the same parent.";
-	Error::abortRun(*this,message);
-	return FALSE;
-    }
-
-    // Now, remove the cluster from the parent galaxy
-    if (removeFlag && clusterParent)
-	clusterParent->asGalaxy().removeBlock(cluster);
-
-    // Add the cluster to this cluster
-    addBlock(cluster,cluster.name());
-
-    // Now generate cluster ports & setup aliases
-    BlockPortIter myPorts(*this);
-    BlockPortIter otherPorts(cluster);
-    PortHole *myPort, *otherPort;
-    while ((otherPort = otherPorts++) != NULL) {
-	myPorts.reset();
-	while ((myPort = myPorts++) != NULL
-	       && myPort->far() != otherPort);
-	if (myPort && myPort->far() == otherPort) {
-	    // This cluster and block connect via myPort/otherPort.
-	    // Remove myPort - no need to create a new cluster port
-	    myPorts.remove();
-	    delete myPort;
-	}
-	else {
-	    // This cluster and cluster do not connect via myPort/otherPort.
-	    // We must create a new cluster port and setup the aliases.
-	    ClusterPort* newPort = addNewPort(*otherPort);
-	    newPort->update();
-	}
 	
-    }
-
-    return TRUE;
-}    
-
-int Cluster::merge(Cluster& clusterToEmpty, int removeFlag) {
-    makeNonAtomic();
-    clusterToEmpty.makeNonAtomic();
-    cout << "Merging " << clusterToEmpty.name() << " into "
-	 << name() << ".\n";
-
-    // First make sure that both clusters share the same parent
-    if (parent() != clusterToEmpty.parent()) return FALSE;
-
-    // Ports should be moved from the clusterToEmpty to this cluster
-    // if the port is not part of a direct connection between the
-    // two galaxies.  If there is a direct connection, we remove
-    // the corresponding port from this cluster.
-
-    // First we move the ports to the new galaxy or remove them,
-    // as necessary
-    BlockPortIter myPorts(*this);
-    BlockPortIter otherPorts(clusterToEmpty);
-    PortHole *myPort, *otherPort;
-    while ((otherPort = otherPorts++) != NULL) {
-	myPorts.reset();
-	while ((myPort = myPorts++) != NULL
-	       && myPort->far() != otherPort);
-	if (myPort && myPort->far()==otherPort) {
-	    // The galaxies do connect using this port, remove it
-	    myPorts.remove();
-	    delete myPort;
+int Nebula::generateSchedule() {
+	if (master) {
+		return TRUE;
 	}
 	else {
-	    // The galaxies do not connect using this port, move it
-	    addPort(*otherPort);
-	    otherPort->setParent(this);
- 	    otherPorts.remove();
+		NebulaIter nebula(*this);
+		Nebula* n;
+		while ((n = nebula++) !=0)
+			n->generateSchedule();
+		sched->setup();
+		return ! SimControl::haltRequested();
 	}
-    }
-
-    // Now remove the clusterToEmpty from its parent galaxy
-    if (removeFlag && clusterToEmpty.parent())
-	clusterToEmpty.parent()->asGalaxy().removeBlock(clusterToEmpty);
-
-    clusterToEmpty.flatten(this,FALSE);
-    return TRUE;
-}		
-
-void Cluster::makeNonAtomic(){
-    if (numberBlocks() == 1) {
-	GalTopBlockIter clusterBlocks(*this);
-	Block* block = clusterBlocks++;
-	if (block->isItAtomic()) {
-	    clusterBlocks.remove();
-	    Cluster* cluster = convertStar(block->asStar());
-	    addBlock(*cluster,cluster->name());
-	    ClusterPortIter nextPort(*cluster);
-	    ClusterPort* port;
-	    while ((port = nextPort++) != NULL) {		
-		port->initializeClusterPort();
-	    }
-	}
-    }
-}	
-
-/**********************************************************************
-		      Cluster scheduler methods
- **********************************************************************/
-void Cluster::setScheduler(Scheduler* scheduler) {
-    delete sched;
-    sched = scheduler;
 }
-
-int Cluster::setTarget(Target*t) {
-    if (sched && t) sched->setTarget(*t);
-    return Galaxy::setTarget(t);
-}
-
-/**********************************************************************
-		 Methods to convert a user-specified
-	       galaxy hierarchy to a cluster hierarchy
- **********************************************************************/
-void Cluster::initTopBlocksForClustering(Galaxy& list, Galaxy& g) {
-    GalTopBlockIter nextBlock(g);
-    Block* b;
-    while ((b = nextBlock++) != NULL) {
-	if (b->isItAtomic()) {
-	    Cluster* cluster = convertStar(b->asStar());
-	    list.addBlock(*cluster,b->name());
-	}
-	else if (flattenTest(b->asGalaxy())) { 
-	    initTopBlocksForClustering(list,b->asGalaxy());
-	    b->asGalaxy().empty();
-	    delete b;
-	}
-	else {
-	    Cluster* cluster = convertGalaxy(b->asGalaxy());
-	    list.addBlock(*cluster,b->name());
-	    b->asGalaxy().empty();
-	    delete b;
-	}
-    }
-}
-
-void Cluster::initializeForClustering(Galaxy& galaxy) {
-    // Create the scoping hierarchy.  This scheduler destroys the user
-    // specified hierarchy by doing clustering.  The scoping hierarchy
-    // allows us to do this without losing inherited states.
-    Scope::createScope(galaxy);
-
-    Galaxy blocksToMove;
-
-    initTopBlocksForClustering(blocksToMove,galaxy);
-
-    galaxy.empty();
-    
-    blocksToMove.flatten(&galaxy);
-    
-    // Fix far ports, we only need to do this here - from now on,
-    // merge and absorb will update this
-    GalStarIter nextStar(galaxy);
-    Star* star;
-    while ((star = nextStar++) != NULL) {
-	BlockPortIter nextPort(*star);
-	PortHole* starPort;
-	while ((starPort = nextPort++) != NULL) {
-	    ClusterPort* port = (ClusterPort*)starPort->aliasFrom();
-	    while (port != NULL) {
-		port->initializeClusterPort();
-		port = (ClusterPort*)port->aliasFrom();
-	    }
-	}
-    }
-}
-
-Cluster* Cluster::convertStar(Star& s) {
-    Cluster* cluster = (Cluster*) makeNew();
-    cluster->setName(s.name());
-    cluster->addBlock(s,s.name());
-    BlockPortIter nextPort(s);
-    PortHole* port;
-    while ((port = nextPort++) != NULL) {
-	cluster->addNewPort(*port);
-    }
-    return cluster;	
-}
-
-Cluster* Cluster::convertGalaxy(Galaxy& g) {
-    Cluster* cluster = (Cluster*) makeNew();
-    cluster->setName(g.name());
-
-    BlockPortIter nextPort(g);
-    PortHole* galPort;
-    while ((galPort = nextPort++) != NULL) {
-	GenericPort* portToAlias = galPort->alias();
-	galPort->clearAliases();
-	cluster->addNewPort((PortHole&)*portToAlias);
-    }
-
-    Galaxy dummy;
-    initTopBlocksForClustering(dummy,g);
-    dummy.flatten(cluster);
-    return cluster;
-}
-
-/**********************************************************************
-		    Cluster Iterator Next Methods
-
-   It would be nice to automatically cleanup the Galaxy that we are
-   iterating over - but it would be dangerous.  This could cause a
-   core dump if given a nested Cluster Iterator inside of another -
-   where both are iterating over the same galaxy and one iterator
-   removes a bogus entry which the other is currently pointing to.
- **********************************************************************/
-Cluster* ClusterIter::next() {
-    Block* b;
-    while ((b = GalTopBlockIter::next()) != NULL) {
-	if (!b->isItAtomic() && isValidCluster(*(Cluster*)b,&prnt)) break;
-    }
-    return (Cluster*)b;
-}
-
-Cluster* SuccessorClusterIter::next() {
-    Cluster* cluster;
-    while ((cluster = (Cluster*)SuccessorIter::next()) != NULL &&
-	   !isValidCluster(*cluster,prnt));
-    return cluster;
-}
-
-Cluster* PredecessorClusterIter::next() {
-    Cluster* cluster;
-    while ((cluster = (Cluster*)PredecessorIter::next()) != NULL &&
-	   !isValidCluster(*cluster,prnt));
-    return cluster;
-}
-
-/**********************************************************************
-		   Miscellaneous Cluster Functions
- **********************************************************************/
-
-// A cluster is defined as valid if is both nonempty and the cluster's
-// parent is equal to that specified in this function's prnt argument.
-int isValidCluster(Cluster& b, Block* prnt) {
-    return b.parent()==prnt && b.numberBlocks();
-}
-
-// Remove all bogus clusters - optionally do this recursively
-void cleanupAfterCluster(Galaxy& g, int recursive) {
-    GalTopBlockIter nextBlock(g);
-    Block* block;
 	
-    while ((block = nextBlock++) != NULL) {
-	if (recursive && !block->isItAtomic())
-	    cleanupAfterCluster(block->asGalaxy(),TRUE);
-	if (! block->isItAtomic() &&
-	    ! block->asGalaxy().numberBlocks()) {
-	    delete block;
-	    nextBlock.remove();
-	}
-	else if (block->parent() != &g)
-	    nextBlock.remove();
-    }
+void Nebula::absorb(Nebula* victum) {
+};
+
+NebulaPort::NebulaPort(PortHole& self, const PortHole& master,const Nebula* parent)
+:selfPort(self),pPort(master) {
+	selfPort.setPort(real().name(),&parent->star(),INT);
+	selfPort.myPlasma = Plasma::getPlasma(INT);
+	selfPort.numberTokens = real().numXfer();
+	selfPort.indexValue = real().index();
 }
 
-// Return a dotty cluster interconnect representation
-StringList printClusterDot(Galaxy& galaxy) {
-    numberAllBlocks(galaxy);
-    StringList dot;
-    dot << "digraph " << galaxy.name() << " {\n"
-	<< "  node [shape=record,width=.1,height=.1];\n";
-    ClusterIter nextCluster(galaxy);
-    Cluster* cluster;
-    while ((cluster = nextCluster++) != NULL) {	
-	InfString sourceName;
-	sourceName << dotName(*cluster);
-	dot << "  " << sourceName << " [label=\""
-	    << cluster->name() << "\\nBlocks:"
-	    << cluster->numberBlocks() << "\"];\n";
-    }
-    nextCluster.reset();
-    while ((cluster = nextCluster++) != NULL) {	
-	InfString sourceName;
-	sourceName << dotName(*cluster);
- 	SuccessorIter nextSuccessor(*cluster);
-	Block* successor;
-	while ((successor = nextSuccessor++) != NULL)
-	    dot << "  " << sourceName << " -> " << dotName(*successor) <<";\n";
-    }
-    dot << "}\n";
-    return dot;
-}
+
+

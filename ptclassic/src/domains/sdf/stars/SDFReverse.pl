@@ -2,17 +2,12 @@ defstar {
 	name { Reverse }
 	domain { SDF }
 	desc {
-On each execution, read a block of "N" samples (default 64)
-and write them out backwards.
+On each execution, reads a block of "N" samples (default 64)
+and writes them out backwards.
 	}
 	version {$Id$}
 	author { J. T. Buck }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
 	input {
 		name{input}
@@ -28,7 +23,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		default {64}
 		desc {Number of particles read and written.}
 	}
-	setup {
+	start {
 		input.setSDFParams(int(N),int(N)-1);
 		output.setSDFParams(int(N),int(N)-1);
 	}

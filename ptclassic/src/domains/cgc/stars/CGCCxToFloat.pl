@@ -5,9 +5,9 @@ defstar {
 	version { $Id$ }
 	author { S. Ha }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
@@ -39,9 +39,9 @@ limitation of liability, and disclaimer of warranty provisions.
 		addInclude("<math.h>");
 	}
 	codeblock (body) {
-	int i = 0;
-	double p, q;
-	for ( ; i < $val(numSample); i++) {
+	int i;
+	double p,q;
+	for (i = 0; i < $val(numSample); i++) {
 		p = $ref(input, i).real;
 		q = $ref(input, i).imag;
 		$ref(output, i) = sqrt(p*p + q*q);

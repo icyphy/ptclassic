@@ -1,18 +1,23 @@
+ident {
+/**************************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  E. A. Lee
+ Date of creation: 9/29/90
+
+ This star delays its input by an amount given by the delay parameter.
+
+**************************************************************************/
+}
 defstar {
 	name {Delay}
 	domain {DE}
-	version { $Id$}
-	author { E. A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { DE main library }
 	desc {
-Each input event is sent to the output with its time stamp
-incremented by an amount given by the "delay" parameter.
+	   "Delays its input by an amount given by the delay parameter."
 	}
 	input {
 		name {input}
@@ -20,16 +25,16 @@ incremented by an amount given by the "delay" parameter.
 	}
 	output {
 		name {output}
-		type {=input}
+		type {anytype}
 	}
 	defstate {
 		name {delay}
 		type {float}
 		default {"1.0"}
-		desc { Amount of time delay. }
+		desc { "Amount of time delay" }
 	}
 	constructor {
-		delayType = TRUE;
+		input.inheritTypeFrom(output);
 	}
 	go {
 	   completionTime = arrivalTime + double(delay);

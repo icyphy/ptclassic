@@ -4,26 +4,24 @@ defstar {
 	desc {
 Scramble the input bit sequence using a feedback shift register.
 The taps of the feedback shift register are given by the "polynomial"
-parameter, which should be a positive integer.
-The n-th bit of this integer indicates whether the n-th tap of the
-delay line is fed back.
+parameter, which should be a positive integer.  The n-th bit of this
+integer indicates whether the n-th tap of the delay line is fed back.
 The low-order bit is called the 0-th bit, and should always be set.
 The next low-order bit indicates whether the output of the first delay
-should be fed back, etc.
-The default "polynomial" is an octal number defining the V.22bis scrambler.
-For an explanation of scramblers, see
+should be fed back, etc.  The default "polynomial" is an octal number
+defining the V.22bis scrambler. For an explanation of scramblers, see
 Lee and Messerschmitt, Digital Communication, Second Edition,
-Kluwer Academic Publishers, 1994, pp. 595-603.
+Kluwer Academic Publishers, 1994, pp 595-603.
 	}
 	explanation {
 .IE "feedback shift register"
 .IE "pseudo-random sequence"
-.IE "pseudo-noise sequence"
+.IE "PN sequence"
 In scramblers based on feedback shift registers,
 all the bits to be fed back are exclusive-ored
 together (i.e., their parity is computed), and the result is exclusive-ored
-with the input bit.
-This result is produced at the output and shifted into the delay line.
+with the input bit.  This result is produced at the output and shifted
+into the delay line.
 With proper choice of polynomial, the resulting output appears highly random
 even if the input is highly non-random (e.g., all zeros or all ones).
 .pp
@@ -33,8 +31,7 @@ register is a so-called \fImaximal length feedback shift register\fR.
 .IE "maximal length feedback shift register"
 This means that with a constant input, the output will be sequence
 with period $2 sup N ~-~ 1$, where \fIN\fR is the order of the polynomial
-(the length of the shift register).
-This is the longest possible sequence.
+(the length of the shift register).  This is the longest possible sequence.
 Moreover, within this period, the sequence will appear to be white,
 in that a computed autocorrelation will be very nearly an impulse.
 Thus, the scrambler with a constant input can be very effectively used
@@ -49,7 +46,6 @@ cease to produce random-looking output, and will output a constant.
 For example, if the input is all zeros, and the initial state of the
 scrambler is zero, then the outputs will be all zero, hardly random.
 This is easily avoided by initializing the scrambler to some non-zero state.
-That is why the default value for the \fIshiftReg\fR is set to $1$.
 .pp
 The \fIpolynomial\fR must be carefully chosen. It must represent a
 \fIprimitive polynomial\fR, which is one that cannot be factored into two
@@ -91,37 +87,28 @@ order    polynomial
 30       010040000007
 .fi
 .pp
-The leading zero in the polynomial indicates an octal number.
-Note also that reversing the order of the bits in any of these numbers
-will also result in a primitive polynomial.
-Thus, the default value for the polynomial parameter
-is 0440001 in octal, or "100 100 000 000 000 001" in binary.
-Reversing these bits we get "100 000 000 000 001 001" in binary, or
-0400011 in octal.
-This latter number is the one listed above as the primitive polynomial
-of order 17.
-The order is simply the index the highest-order non-zero in the polynomial,
+The leading zero in the polynomial indicates an octal number.  Note also
+that reversing the order of the bits in any of these numbers will also result
+in a primitive polynomial.  Thus, the default value for the polynomial parameter
+is 0440001 in octal, or "100 100 000 000 000 001" in binary.  Reversing these bits
+we get "100 000 000 000 001 001" in binary, or 0400011 in octal.  This latter number
+is the one listed above as the primitive polynomial of order 17.
+The order is simply the index the highest order non-zero in the polynomial,
 where the low-order bit has index zero.
 .pp
 Since the polynomial and the feedback shift register are both implemented
-using type "int", the order of the polynomial is limited by the size of
-the "int" data type. 
-For simplicity and portability, the polynomial is also not allowed
-to be interpreted as a negative integer, so the sign bit cannot be used.
-Thus, if "int" is a 32-bit word, then the highest order polynomial allowed is
-30 (recall that indexing for the order starts at zero, and we cannot use
-the sign bit).
-Since many machines today have 32-bit integers, we give the primitive
-polynomials above only up to order 30.
-.UH REFERENCES
-.ip [1]
-Edward Lee and David Messerschmitt, \fIDigital Communication\fR,
-Second Edition, Kluwer Academic Publishers, 1994, pp. 595-603.
+using type "int", the order of the polynomial is limited by the size of the "int"
+data type.  For simplicity and portability, the polynomial is also not allowed
+to be interpretable as a negative integer, so the sign bit cannot be used.
+Thus, if "int" is a 32 bit word, then the highest order polynomial allowed is
+30 (recall that indexing for the order starts at zero, and we cannot use the sign bit).
+Since many machines today have 32-bit integers, we give the primitive polynomials
+above only up to order 30.
 	}
 	version { $Id$ }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -146,47 +133,44 @@ limitation of liability, and disclaimer of warranty provisions.
 	defstate {
 	  name { shiftReg }
 	  type { int }
-	  default { 1 }
+	  default { 0 }
 	  desc { the shift register }
 	}
 	protected {
 	  int mask;
 	}
-	setup {
-	  // The user interface should check that generator polynomial
-	  // specification does not exceed the integer precision of the machine
-	  mask = int(polynomial);
-	  // To avoid sign extension problems, the high-order bit must be zero
-	  if (mask < 0) {
-	    Error::abortRun(*this,
-			"Sorry, the polynomial must be a positive integer.");
-	    return;
+	code {
+	  extern "C" {
+	    int ffs(int i);
 	  }
-	  if (!(mask & 1)) {
-	    Error::warn(*this,
-			"The low-order bit of the polynomial is not set.",
-			"Input will have no effect on the shift register.");
+	}
+	setup {
+	  // Should check that generator polynomial does not exceed 31 bits. How?
+	  mask = int(polynomial);
+	  // To avoid sign extension problems, the hob must be zero
+	  if (mask < 0) {
+	    Error::abortRun(*this,"Sorry, the polynomial must be a positive integer.");
+	    return;
 	  }
 	}
 	go {
 	  int reg = int(shiftReg) << 1;
 	  int masked = mask & reg;
-	  // Now we need to find the parity of "masked"
+	  // Now we need to find the parity of "masked".
 	  int parity = 0;
-	  // Calculate the parity of the masked word
-	  while (masked > 0) {
-	    // toggle parity if the low-order bit is one
-	    parity = parity ^ (masked & 1);
-	    masked = masked >> 1;
+	  int lob;
+	  // Find the lowest order bit that is set and shift it out
+	  // "ffs" is a c library function does this. It returns zero when
+	  // there are no more bits set.
+	  while (lob = ffs(masked)) {
+	    masked = masked >> lob;
+	    // toggle the parity bit
+	    parity = parity ^ 1;
 	  }
 	  // Exclusive-or with the input
-	  //   nonzero input: exclusive or with 0x01
-	  //   zero input: no exclusive or
-	  if ( int(input%0) ) {
-	    parity = parity ^ 0x01;
-	  }
+	  parity = parity ^ (int(input%0) != 0);
 	  output%0 << parity;
 	  // Put the parity bit into the shift register
-	  shiftReg = reg | parity;
+	  shiftReg = reg + parity;
 	}
 }

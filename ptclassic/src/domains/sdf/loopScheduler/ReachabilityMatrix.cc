@@ -3,37 +3,15 @@ static const char file_id[] = "ReachabilityMatrix.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+ Copyright (c) 1991 The Regents of the University of California.
+                       All Rights Reserved.
 
  Programmer:  S.  Bhattacharyya, Soonhoi Ha
 
 *******************************************************************/
 #include "ReachabilityMatrix.h"
 #include "BooleanMatrix.h"
-#include "EGGate.h"
+#include "EGConnect.h"
 #include "Error.h"
 #include "LSNode.h"
 #include "LSGraph.h"
@@ -64,7 +42,7 @@ ReachabilityMatrix::~ReachabilityMatrix() {
 
 inline void ReachabilityMatrix::connect(LSNode *parent, LSNode *child)
 {
-	matrix->setElem(parent->RMIndex(), child->RMIndex(), 1);
+	matrix->setElem(parent->myRMIndex(), child->myRMIndex(), 1);
 }
 
 
@@ -90,7 +68,7 @@ void ReachabilityMatrix::initialize(LSNode *p) {
 	while ((q = nextKid++)!=0) {
 		n = (LSNode*) q->farEndNode();
 		connect(p,n);
-		addPaths(p->RMIndex(),n->RMIndex());
+		addPaths(p->myRMIndex(),n->myRMIndex());
 	} 
 }
 
@@ -115,9 +93,9 @@ int ReachabilityMatrix::formCluster(ClusterNodeList &nl, EGGateList &gl)
 	LSNode *p;
 
 	if ((firstnode = nextNode++) == 0) return 0;
-	int clusterindex = firstnode->RMIndex();
+	int clusterindex = firstnode->myRMIndex();
 	while ((p = nextNode++) != 0) {
-		int j = p->RMIndex();
+		int j = p->myRMIndex();
 		addPaths(clusterindex, j); 
 	}
 
@@ -127,7 +105,7 @@ int ReachabilityMatrix::formCluster(ClusterNodeList &nl, EGGateList &gl)
 	EGGate* d;
 	while ((d = nextAncestor++) != 0 ) {
 		LSNode* temp = (LSNode*) d->farEndNode();
-    		addPaths(temp->RMIndex(), clusterindex); 
+    		addPaths(temp->myRMIndex(), clusterindex); 
 		connect(temp, firstnode);
 	}
 
@@ -136,7 +114,7 @@ int ReachabilityMatrix::formCluster(ClusterNodeList &nl, EGGateList &gl)
 
 int ReachabilityMatrix::pathExists(LSNode &src, LSNode &dest)
 { 
-	return matrix->getElem(src.RMIndex(), dest.RMIndex());
+	return matrix->getElem(src.myRMIndex(), dest.myRMIndex());
 }
 
 // Check whether any descendant of the cluster, which is outside the 

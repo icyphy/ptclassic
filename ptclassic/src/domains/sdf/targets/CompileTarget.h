@@ -4,30 +4,8 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+ Copyright (c) 1991 The Regents of the University of California.
+                       All Rights Reserved.
 
  Programmer:  E. A. Lee and J. Buck
  Date of creation: 7/14/92 (formerly there was only a .cc file)
@@ -40,47 +18,32 @@ a universe.
 #pragma interface
 #endif
 
-#include "StringList.h"
-#include "IntState.h"
-#include "Block.h"
-#include "Star.h"
-#include "PortHole.h"
-#include "HLLTarget.h"
+#include "BaseCTarget.h"
 
-class CompileTarget : public HLLTarget {
+class CompileTarget : public BaseCTarget {
 public:
-	void setup();
-	void begin();
+	int setup(Galaxy& g);
 	int run();
 	void wrapup ();
-	CompileTarget(const char* nam, const char* stype, const char* desc);
-	Block* makeNew() const;
+	CompileTarget(const char* nam,const char* stype,const char* desc) :
+		BaseCTarget(nam,stype,desc) {}
+	Block* clone() const
+		{ LOG_NEW; CompileTarget* t = new CompileTarget(readName(),
+						starType(), readDescriptor());
+		  return &t->copyStates(*this); }
 
 	// Routines for writing code: schedulers may call these
 	void writeFiring(Star& s, int depth);
-
-protected:
-	IntState includeTclTkFlag;
 
 private:
 	// Method to return a pointer to the MultiPortHole that spawned a
 	// given PortHole, if there is such a thing.  If not, the pointer
 	// to the PortHole is returned as pointer to a GenericPort.
-	const GenericPort* findMasterPort(const PortHole* p) const;
+	GenericPort* findMasterPort(const PortHole* p) const;
 
 	// Returns the name of an ordinary porthole, or
 	// "name.newPort()" for a MultiPortHole.
 	StringList expandedName(const GenericPort* p) const;
-
-	// Create a sanitized C++ identifier for a star
-	StringList sanitizedStarName(const Star& c) const; 
-
-	// Replaces quotation marks with quoted quotation marks
-	// in a string (i.e. " => \")
-	StringList quoteQuotationMarks(const char* str);
-
-	StringList tcltkSetup();
-	StringList tcltkInitialize(StringList& universeName);
 
 	StringList galDef(Galaxy* galaxy, StringList className, int level);
 

@@ -14,25 +14,22 @@ Measures throughput of a set of traffic-loaded trunk lines.
        author { Allen Lao }
 
        copyright { 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
-       location { DE ATM library }
+       location {ATM demo library}
 
        explanation {
 To be placed after an SDF compiled galaxy switch and before a
-.c DENullRemove
-star.  The SDF switch, for each time slot, issues an
+NullRemove star.  The SDF switch, for each time slot, issues an
 actual packet for a line if it is active, and a "null" packet if
-idle.  This star passes the packets received on its \fIinput\fR MPH
-through to its \fIoutput\fR MPH, and when triggered on \fIdemand\fR
-port, produces a figure corresponding to the avg. throughput over
-each line as well as one for the avg. throughput over all
-lines considered as a whole.  (Packets are of type
-.c VoiceData
-)
+idle.  This star passes the packets received on its "input" MPH
+through to its "output" MPH, and when triggered on "demand" port,
+produces a figure corresponding to the avg. throughput over each
+line on a MPH, as well as one for the avg. throughput over all
+lines considered as a whole.
        }
 
        ccinclude { "VoiceData.h" }
@@ -107,7 +104,7 @@ lines considered as a whole.  (Packets are of type
 	     OutDEPort *rport;
 
 	     Envelope  inEnv;
-	     const VoiceData*  v;
+	     VoiceData*  v;
       
 	     int  countReal, countNull, count;
 	     countReal = countNull = count = 0;
@@ -117,9 +114,9 @@ lines considered as a whole.  (Packets are of type
 
 		if (iport->dataNew) {
 		    iport->get().getMessage(inEnv);
-		    v = (const VoiceData*) inEnv.myData();
+		    v = (VoiceData*) inEnv.myData();
 
-		    // update totals as appropriate depending on whether this
+		    // update totals as appropiate depending on whether this
 		    // packet is null or not
 			
 		    if (v -> nulltestMessage()) {

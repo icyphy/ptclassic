@@ -21,7 +21,17 @@ The first line of the table gives the default settings.
 	}
 	explanation {
 This star may be used to read a file by simply setting "value" to
-something of the form "< filename".
+something of the form "< filename".  The file will be read completely
+and its contents stored in an array.  The size of the array is currently
+limited to 20,000 samples.  To read longer files, use the 
+.c ReadFile
+star.  This latter star reads one sample at a time, and hence also
+uses less storage.
+.Id "file read"
+.Id "waveform from file"
+.Id "reading from a file"
+.Ir "halting a simulation"
+.Ir "simulation, halting"
 	}
 	version { $Id$ }
 	author { Michael C. Williamson, S. Ha }

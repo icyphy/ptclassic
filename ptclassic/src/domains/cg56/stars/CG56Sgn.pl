@@ -5,20 +5,13 @@ defstar {
    	Signum.
 	}
 	version {$Id$}
-	acknowledge { Gabriel version by E. A. Lee }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-       	location { CG56 nonlinear functions library }
+	copyright { 1992 The Regents of the University of California }
+       	location { CG56 Demo Library }
 	explanation { 
-This star outputs the signum of its input.
-.Id "signum"
-The output is either -1.0 or +0.99999999, since 1.0 is not
-a valid fixed point number on the DSP56001.
+This star computes the signum of its input.
+The output is +- 1 because 1 is not allowed 
+for fix input, .99999999 is used instead.
 	}
 	execTime {
 		return 6;
@@ -41,7 +34,7 @@ a valid fixed point number on the DSP56001.
 	}	
 
 	go {
-		addCode(sgnblock);
+		gencode(sgnblock);
  
 	}
 }

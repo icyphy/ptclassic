@@ -3,33 +3,22 @@
 Version identification:
 $Id$
 
-Copyright (c) 1986-1993 Wolfram Research, Inc. All Rights Reserved.
+Copyright (c) 1990-%Q% The Regents of the University of California.
+All rights reserved.
 
-IN NO EVENT SHALL WOLFRAM RESEARCH INC. BE LIABLE TO ANY PARTY FOR
-DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN
-IF WOLFRAM RESEARCH INC. HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
+Stub file for mathlink.h provided for inclusion when Mathematica is
+not installed on the local machine.
 
-WOLFRAM RESEARCH INC. SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING,
-BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS
-ON AN "AS IS" BASIS, AND WOLFRAM RESEARCH INC. HAS NO OBLIGATION TO
-PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+The commercial version of mathlink.h is a Mathematica source file,
+Copyright 1986 through 1993 by Wolfram Research Inc.
 
-This version of "mathlink.h" has been stripped of non-Unix declarations,
-and is provided so that a MathLink interface to Mathematica will compile
-if Mathematica is not installed on the local machine.  This stripped file
-does not represent the actual implementation of the MathLink interface,
-and should not be confused with the true version of "mathlink.h" that
-comes with the Mathematica distribution.
-
-This file is based on the MathLink source file "mathlink.h" (for
-Mathematica 2.2) which defines the C language interface between
-Mathematica and other programs through the MathLink protocol.
-
-This stripped version is freely distributable by the permission of
-Wolfram Research, Inc., 100 Trade Center Drive, Champaign, IL 61820-7237.
+The file defines several C language definitions to define the
+interface between Mathematica and other programs.  These definitions
+are "dummy" definitions and do not reflect the actual implementation
+of the MathLink interface.  Instead, these definitions are provided
+only to prevent compilation errors when the true version of this
+file is not available.  Definitions for non-Unix machines have been
+removed.
 
 *************************************************************************/
 
@@ -88,10 +77,10 @@ typedef struct MLParameters {
 typedef MLParameters *MLParametersPointer;
 
 extern MLEnvironment MLInitialize ARGS((MLParametersPointer));
-extern void MLDeinitialize ARGS((MLEnvironment));
+extern void MLDeinitialize ARGS((MLEnvironment env));
 
 extern MLEnvironment MLBegin ARGS((MLParametersPointer));
-extern void MLEnd ARGS((MLEnvironment));
+extern void MLEnd ARGS((MLEnvironment env));
 
 
 /*************** Connection interface ***************/
@@ -259,7 +248,7 @@ extern void  MLDisownIntegerArray
 	     ARGS((MLINK, ml_intp, ml_longp, ml_charpp, long));
 
 extern int   MLGetShortIntegerArray
-	     ARGS((MLINK, ml_shortpp, ml_longpp, ml_charppp, ml_longp));
+	     ARGS((MLINK, ml_shortpp, ml_longpp, ml_charppp, ml_longp depth));
 extern void  MLDisownShortIntegerArray
 	     ARGS((MLINK, ml_shortp, ml_longp, ml_charpp, long));
 
@@ -278,8 +267,8 @@ extern int   MLGetFloatArray
 extern void  MLDisownFloatArray
 	     ARGS((MLINK, ml_floatp, ml_longp, ml_charpp, long));
 
-extern int   MLGetLongDouble  ARGS((MLINK, ml_extendedp));
-extern int   MLPutLongDouble  ARGS((MLINK, ml_extended));
+extern int   MLGetLongDouble  ARGS((MLINK mlp, ml_extendedp));
+extern int   MLPutLongDouble  ARGS((MLINK mlp, ml_extended));
 extern int   MLPutLongDoubleArray
 	     ARGS((MLINK, ml_extendedp, ml_longp, ml_charpp, long));
 extern int   MLGetLongDoubleArray
@@ -291,7 +280,7 @@ extern void  MLDisownLongDoubleArray
 #define MLEchoExpression MLTransferExpression
 #endif
 
-extern int MLTransferExpression ARGS((MLINK, MLINK));
+extern int MLTransferExpression ARGS(( MLINK dmlp, MLINK smlp));
 
 /*************** Message interface ***************/
 typedef void (*MLMessageHandlerType) ARGS((MLINK, unsigned long, unsigned long));

@@ -11,11 +11,11 @@ output.
 The first B particles on the output come from the first input,
 the next B particles from the next input, etc.
 	}
-	author { E. A. Lee }
+	author { E. A. Lee}
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
@@ -40,7 +40,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { index for multiple output trace }
 		attributes { A_NONSETTABLE|A_NONCONSTANT }
 	}
-	setup {
+	start {
 		int n = input.numberPorts();
 		input.setSDFParams(int(blockSize),int(blockSize)-1);
 		output.setSDFParams(n*int(blockSize),n*int(blockSize)-1);
@@ -66,9 +66,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		   addCode(out);
 		   out.initialize();
 		}
-	}
-	exectime {
-		return int(blockSize)*2*input.numberPorts();
 	}
 }
 

@@ -30,9 +30,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
  Programmer: Christopher Hylands
+ Based on the MultiTarget by Soonhoi Ha
 
- This is a Makefile target class for CGCdomain.  Multiprocessor targets
- can use this as a child target.
+ This is a Makefile target class for CGCdomain.
 
 *******************************************************************/
 
@@ -43,7 +43,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringState.h"
 #include "CGCTarget.h"
 
+class EventHorizon;
 class CGCTarget;
+
 
 class CGCMakefileTarget : public CGCTarget {
 public:

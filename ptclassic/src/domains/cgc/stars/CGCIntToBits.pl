@@ -9,7 +9,7 @@ most significant bit first.
     version { $Id$ }
     author { Jose Luis Pino }
     copyright {
-	Copyright (c) 1990-%Q% The Regents of the University of California.
+	Copyright (c) 1994 The Regents of the University of California.
 	All rights reserved.
 	See the file $PTOLEMY/copyright for copyright notice,
 	limitation of liability, and disclaimer of warranty provisions.
@@ -35,11 +35,10 @@ most significant bit first.
 	noInternalState();
     }
     setup {
-        /* Need (int) cast on sizeof to eliminate gcc warning */
-	if (int(nBits) > int(sizeof(int)*8)) {
-	    StringList message = "nBits needs to be less than ";
-	    message << (unsigned int)(sizeof(int)*8);
-	    Error::abortRun(*this, message);
+	if (int(nBits) > sizeof(int)*8) {
+	    StringList message = "nBits needs to be less than";
+	    message << sizeof(int)*8;
+	    Error::abortRun(*this,message);
 	    return;
 	}
 	if (int(nBits) < 0) {
@@ -49,10 +48,9 @@ most significant bit first.
 	output.setSDFParams(int(nBits),int(nBits)-1);
     }
     codeblock(readNwrite) {
-	int word;
-	int i = 0;
-	word = $ref(input);
-	for(; i < $val(nBits); i++) {
+	int word = $ref(input);
+	int i;
+	for(i=0 ; i < $val(nBits) ; i++) {
  	    $ref(output,i) = (word & 1);
 	    word >>= 1;
 	}

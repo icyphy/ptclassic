@@ -1,18 +1,12 @@
 defstar {
-	name { AverageCx }
+	name { ComplexAverage }
 	domain { SDF }
 	desc {
-Average some number of complex input samples or blocks of complex
-input samples. Blocks of successive input samples are treated as vectors.
+Averages some number of input samples or blocks of input samples.
 	}
 	version {$Id$}
 	author { E. A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
 	input {
 		name { input }
@@ -36,7 +30,7 @@ limitation of liability, and disclaimer of warranty provisions.
 Input blocks of this size will be averaged to produce an output block.
 		}
 	}
-	setup {
+	start {
 		input.setSDFParams(int(blockSize)*int(numInputsToAverage),
 			int(blockSize)*int(numInputsToAverage)-1);
 		output.setSDFParams(int(blockSize), int(blockSize)-1);

@@ -1,16 +1,39 @@
 defstar {
-	name { WaveFormCx }
+	name { WaveForm }
 	domain { VHDL }
 	desc {
-This star works the same way as the VHDLWaveForm star,
-only using complex types instead of float types.
+Output a waveform as specified by the array state "value" (default "1 -1").
+You can get periodic signals with any period, and can halt a simulation
+at the end of the given waveform.  The following table summarizes the
+capabilities:
+
+ haltAtEnd   periodic   period    operation
+ ------------------------------------------------------------------------
+ NO          YES        0         The period is the length of the waveform
+ NO          YES        N>0       The period is N
+ NO          NO         anything  Output the waveform once, then zeros
+
+*** NOTE:
+ The following behavior is not implemented in the VHDL version of this star:
+ YES         anything   anything  Stop after outputting the waveform once
+
+The first line of the table gives the default settings.
 	}
 	explanation {
 This star may be used to read a file by simply setting "value" to
 something of the form "< filename".  The file will be read completely
-and its contents stored in an array.
+and its contents stored in an array.  The size of the array is currently
+limited to 20,000 samples.  To read longer files, use the 
+.c ReadFile
+star.  This latter star reads one sample at a time, and hence also
+uses less storage.
+.Id "file read"
+.Id "waveform from file"
+.Id "reading from a file"
+.Ir "halting a simulation"
+.Ir "simulation, halting"
 	}
-	version { $Id$ }
+	version { @(#)VHDLWaveForm.pl	1.1 1/26/96 }
 	author { Michael C. Williamson, S. Ha }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -21,12 +44,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { VHDL main library }
 	output {
 		name { output }
-		type { complex }
+		type { float }
 	}
 	state {
 		name { value }
-		type { complexarray }
-		default { "(1.0,0.0) (-1.0,0.0)" }
+		type { floatarray }
+		default { "1 -1" }
 		desc { One period of the output waveform. }
 	}
 	state {
@@ -66,12 +89,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	codeblock(body) {
 if ($ref(pos) >= $val(size))
-  $refCx(output,real) $assign(output) 0.0;
-  $refCx(output,imag) $assign(output) 0.0;
+  $ref(output) $assign(output) 0.0;
   $ref(pos) $assign(pos) $ref(pos) + 1;
 else
-  $refCx(output,real) = $refCx(value,pos,real);
-  $refCx(output,real) = $refCx(value,pos,real);
+  $ref(output) = $ref(value,pos);
   $ref(pos) $assign(pos) + 1;
 end if;
 if ($val(periodic) /= 0)

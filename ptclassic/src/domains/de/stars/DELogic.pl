@@ -4,7 +4,7 @@ defstar {
 	version { $Id$ }
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -78,7 +78,7 @@ of TRUEs among the inputs.  The other operations are self explanatory.
 	go {
 	    InDEMPHIter nexti(input);
 	    InDEPort *p;
-	    int result = 0;
+	    int result;
 
 	    switch( test ) {
 		case NOTID:

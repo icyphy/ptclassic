@@ -1,15 +1,14 @@
 defstar {
   name { IdentityCx_M }
   domain { SDF }
-  desc { Output a complex identity matrix. }
+  desc {
+Make and identity matrix of the given size.  An indentity matrix is square
+with all diagonal entries equal to 1 and the rest equal to 0.
+The output matrix has dimensions (rowsCols,rowsCols).
+  }
   version { $Id$ }
   author { Mike J. Chen }
-  copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-  }
+  copyright { 1993 The Regents of the University of California }
   location  { SDF matrix library }
   output {
     name { output }
@@ -18,13 +17,14 @@ limitation of liability, and disclaimer of warranty provisions.
   defstate {
     name { rowsCols }
     type { int }
-    default { 2 }
-    desc { Number of rows and columns of the output square matrix. }
+    default { 8 }
+    desc { Number of rows/columns of the output square matrix. }
   }
+
   ccinclude { "Matrix.h" }
   go {
-    ComplexMatrix& result = *(new ComplexMatrix(int(rowsCols),int(rowsCols)));
-    result.identity();
-    output%0 << result;
+    ComplexMatrix *result = new ComplexMatrix(int(rowsCols),int(rowsCols));
+    result->identity();
+    output%0 << *result;
   }
 }

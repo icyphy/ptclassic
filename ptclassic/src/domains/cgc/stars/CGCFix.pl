@@ -5,9 +5,9 @@ defstar {
 Based star for the fixed-point stars in the CGC domain.
 	}
 	version { $Id$ }
-        author { Juergen Weiss }
+        author { J.Weiss }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -84,7 +84,7 @@ experienced overflow in %d out of %d fixed-point calculations checked (%.1lf%%)\
 	// wrapup method
 	wrapup {
 		if (int(ReportOverflow)) {
-			StringList s = this->fullName();
+			StringList& s = this->fullName();
 			addCode(report_overflow((const char*)s));
 		}
 	}

@@ -1,193 +1,117 @@
-/* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
-*/
-
 /* exec.c  edg
 Version identification:
 $Id$
 */
 
-/* Standard includes */
-#include "local.h"		/* include compat.h, sol2compat.h, ansi.h */
+
+/* Includes */
 #include <stdio.h>
-#include <string.h>
-
-/* Octtools includes */
-#include "oct.h"		/* define octObject data & octXXX functions */
-#include "list.h"		/* define lsList */
-#include "rpc.h"		/* define RPC data structures */
-#include "oh.h"
-
-/* Pigilib includes */
-#include "exec.h"
+#include <strings.h>
+#include "local.h"
+#include "rpc.h"
 #include "vemInterface.h"
 #include "compile.h"
 #include "octIfc.h"
-#include "edit.h"
 #include "err.h"
-#include "util.h"
-#include "ganttIfc.h"
-#include "kernelCalls.h"	/* define KcDisplaySchedule */
-
-#include "ptk.h"		/* Interpreter name, window name, etc.  aok */
-#include "handle.h"
 
 /* The vars below store the state of the last run command for re-runs */
-octObject lastFacet = {OCT_UNDEFINED_OBJECT, 0};
+static int lastIterate;
+static octObject lastFacet = {OCT_UNDEFINED_OBJECT};
 
-/* Run a universe given only the full name of the facet.
-   The number of iterations is gotten from the oct facet.  */
-int
-RunUniverse(name)
-char* name;
-{
-	octObject facet = {OCT_UNDEFINED_OBJECT, 0};
-	char facetHandle[POCT_FACET_HANDLE_LEN];
-
-	ViInit(name);
-	ErrClear();
-
-	if( ohOpenFacet(&facet, name, "schematic", "contents", "r") <= 0) {
-		PrintErr(octErrorString());
-	}
-	else if (!IsUnivFacet(&facet)) {
-		PrintErr("Schematic is not a universe");
-	}
-	else {
-	    /* Create a Tk window to handle editing and then do run command */
-	    ptkOctObj2Handle(&facet, facetHandle);
-	    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp, "ptkEditStrings ",
-	           " \"Run universe with the following parameters\" ",
-	           " \"ptkSetRunUniverse ", facetHandle, " {%s} \" ",
-	           " \"[lindex [ptkGetParams ", facetHandle, " NIL] 1]\" ",
-	           " Params ",
-	           (char *)NULL) );
-	}
-
-	ViDone();
-}
-
-/*
- * Basic interface to ptcl.
- * If now == TRUE, the universe is run right away.
- * Otherwise, we wait for the user to press the GO button.
- */
-/* used externally by SetRunUniverse */
-boolean
-ptkRun(facetPtr,now)
+static boolean
+AskIterate(facetPtr, nPtr)
 octObject *facetPtr;
-boolean now;
+int *nPtr;
 {
-    char* name;
-    char octHandle[POCT_FACET_HANDLE_LEN];
+    static dmTextItem item = {"Number of iterations", 1, 20, NULL, NULL};
+    char buf[64];
+    int oldN;
 
-    /* Reset lastFacet to the current facet */
-    if ( lastFacet.objectId != facetPtr->objectId ) FreeOctMembers(&lastFacet);
-    lastFacet = *facetPtr;
-    ptkOctObj2Handle(facetPtr, octHandle);
-    name = BaseName(facetPtr->contents.facet.cell);
-
-    TCL_CATCH_ERR1(
-	Tcl_VarEval(ptkInterp, "ptkRunControl ", name, " ", octHandle,
-	(char *)NULL));
-
-    if (now) {				/* Run the universe right away */
-	TCL_CATCH_ERR1(
-	    Tcl_VarEval(ptkInterp, "ptkGo ", name, " ", octHandle,
-	    (char *)NULL));
+    if ((oldN = GetIterateProp(facetPtr)) == -1) {
+	oldN = 10;
     }
-
+    item.value = sprintf(buf, "%d", oldN);
+    ERR_IF2(dmMultiText("Iterations", 1, &item) != VEM_OK, "Aborted entry");
+    ERR_IF2((*nPtr = atoi(item.value)) <= 0,
+	"Invalid entry, number must be > 0");
+    if (*nPtr != oldN) {
+	/* set prop only if it changes, to avoid creation of OctChangeRecord */
+	SetIterateProp(facetPtr, *nPtr);
+    }
+    lastIterate = *nPtr;
     return (TRUE);
 }
 
+static boolean
+Run(facetPtr)
+octObject *facetPtr;
+{
+    int n;
+
+    lastFacet = *facetPtr;
+    ERR_IF1(!AskIterate(facetPtr, &n));
+    ERR_IF1(!CompileFacet(facetPtr));
+    ERR_IF1(!KcRun(n));
+    return (TRUE);
+}
+    
 /* 11/7/89 4/24/88
 */
 int 
-RpcRun(spot, cmdList, userOptionWord) /* ARGSUSED */
+RpcRun(spot, cmdList, userOptionWord)
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet = {OCT_UNDEFINED_OBJECT, 0};
+    int n;
+    octObject facet;
 
-    ViInit("open run window");
+    ViInit("run");
     ErrClear();
-    FindClear();
-
     /* get current facet */
     facet.objectId = spot->facet;
     if (octGetById(&facet) != OCT_OK) {
 	PrintErr(octErrorString());
+    	ViDone();
     }
-    else if (!IsUnivFacet(&facet)) {
+    if (!IsUnivFacet(&facet)) {
 	PrintErr("Schematic is not a universe");
-	FreeOctMembers(&facet);
+        ViDone();
     }
-    else {
-	/* Do not free facet: it will be saved as lastFacet */
-	ptkRun(&facet, FALSE);
+    if (!Run(&facet)) {
+	PrintErr(ErrGet());
+        ViDone();
     }
-
     ViDone();
 }
 
+static boolean
+ReRun()
+{
+    ERR_IF1(!CompileFacet(&lastFacet));
+    ERR_IF1(!KcRun(lastIterate));
+    return (TRUE);
+}
+
+/* 12/29/89
+*/
 int 
-RpcDisplaySchedule(spot, cmdList, userOptionWord) /* ARGSUSED */
+RpcReRun(spot, cmdList, userOptionWord)
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    ViInit("display-schedule");
+    ViInit("re-run");
     ErrClear();
-    FindClear();
-    KcDisplaySchedule();
+
+    if (lastFacet.type == OCT_UNDEFINED_OBJECT
+	|| spot->facet != lastFacet.objectId) {
+	PrintErr("Cannot re-run this facet, use 'run'");
+        ViDone();
+    }
+    if (!ReRun()) {
+	PrintErr(ErrGet());
+        ViDone();
+    }
     ViDone();
-}
-
-/* mark stars involved in errors detected by kernel */
-void
-PigiErrorMark(objName)
-const char* objName;
-{
-    FindAndMark(&lastFacet, objName, 0);
-}
-
-/* mark stars with a pattern given the full name */
-void
-PigiMark(objName)
-const char* objName;
-{
-    FindAndMark(&lastFacet, objName, 1);
-}
-
-/* mark stars with a pattern given the full name and the color to mark */
-void
-PigiMarkColor(objName,color)
-const char* objName;
-const char* color;
-{
-    FindAndMarkColor(&lastFacet, objName, 1, color);
 }

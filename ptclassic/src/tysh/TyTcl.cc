@@ -41,7 +41,7 @@ static const char file_id[] = "TyTcl.cc";
 
 #include "TyTcl.h"
 #include "tk.h"
-#include <string.h>		// sol2.cfront wants this for strcpy()
+
 // FIXME: This include is only needed for the "quote" macro
 //        Seems silly to include so much extra baggage - aok
 #include "isa.h"
@@ -158,6 +158,9 @@ void TyTcl::registerFuncs() {
 	}
 }
 
+// static member: tells which Tcl interpreter is "innermost"
+Tcl_Interp* TyTcl::activeInterp = 0;
+
 // dispatch the functions.
 int TyTcl::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char* argv[])
 			   {
@@ -169,6 +172,10 @@ int TyTcl::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char* argv[])
 	}
 	int i = int(which);
 	// this code makes an effective stack of active Tcl interpreters.
-	return (obj->*(funcTable[i].func))(argc,argv);
+	Tcl_Interp* save = activeInterp;
+	activeInterp = interp;
+	int status = (obj->*(funcTable[i].func))(argc,argv);
+	activeInterp = save;
+	return status;
 }
 

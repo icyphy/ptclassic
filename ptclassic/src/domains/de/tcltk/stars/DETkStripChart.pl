@@ -11,7 +11,7 @@ An interactive help window describes other options for the plot.
     version { $Id$ }
     author { Eduardo N. Spring, Jose Luis Pino, and Edward A. Lee }
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1995 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -44,7 +44,7 @@ string "default", then it uses the name of the porthole connected to the
 corresponding input.  Alternatively, it can specify one label for each 
 input, with the labels separated by spaces.
     }
-    location { DE Tcl/Tk library }
+    location { DE tcltk library }
     defstate {
 	name { title }
 	type { string }
@@ -100,26 +100,18 @@ input, with the labels separated by spaces.
 	default { "5" }
 	desc { Height of each plot in centimeters }
     }
-    setup {
-	if (output.numberPorts() > 0) {
-	    Error::abortRun(*this, "Outputs are not supported");
-	    return;
-	}
-        for (int i = 0; i < style.size(); i++ ) {
-            if (strcmp(style[i],"hold") &&
-                strcmp(style[i],"dot")  &&
-                strcmp(style[i],"connect")) {
-                Error::abortRun(*this,
-				"style must be one of hold, dot, or connect");
-                return;
-            }
-        }
-    }
     // The following must be "begin" not "setup" so that the number
     // of portholes has been fixed (in case there is a HOF star on the input).
     begin {
         int i; 
-	tcl_file = "$PTOLEMY/src/domains/de/tcltk/stars/tkStripChart.tcl";
+	if (output.numberPorts() > 0) {
+	    Error::abortRun(*this, "Outputs are not supported");
+	    return;
+	}
+// FIXME: The following path is TEMPORARY for testing
+
+//	tcl_file = "$PTOLEMY/src/domains/de/tcltk/stars/tkStripChart.tcl";
+	tcl_file = "/users/eal/StripChart/tkStripChart.tcl";
 
 	if (signalLabels.size() < 1 ||
 	    (strcmp(signalLabels[0],"default") ==0)) {
@@ -133,9 +125,17 @@ input, with the labels separated by spaces.
             }
 	    signalLabels.setCurrentValue(names);
 	} else if (signalLabels.size() != input.numberPorts()) {
-	    Error::abortRun(*this, "Number of signalLabels is not equal to the number of input ports");
+	    Error::abortRun(*this,"Number of signalLabels is not equal to the number of input ports");
 	    return;
 	}
+        for (i = 0 ; i < style.size() ; i++ ) {
+            if (strcmp(style[i],"hold") &&
+                strcmp(style[i],"dot")  &&
+                strcmp(style[i],"connect")) {
+                Error::abortRun(*this,"style must be one of hold, dot, or connect");
+                return;
+            }
+        }
 	if (style.size() != input.numberPorts()) {
 	    if (style.size() != 1) {
 		Error::abortRun(*this,"Number of styles is not equal to the number of input ports");
@@ -169,3 +169,8 @@ input, with the labels separated by spaces.
 	tcl_file.clearAttributes(A_SETTABLE);
     }
 }
+
+
+
+
+

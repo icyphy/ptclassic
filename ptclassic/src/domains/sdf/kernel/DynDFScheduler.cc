@@ -11,19 +11,19 @@ static const char file_id[] = "DynDFScheduler.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990,1991,1992,1993 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -32,22 +32,13 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
+							COPYRIGHTENDKEY
 
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
-
- Programmers:	Joseph Buck, Soonhoi Ha, E. A. Lee,
-		Thomas Parks, R. S. Stevens
-
-Richard Stevens is an employee of the U.S. Government whose contributions
-to this computer program fall within the scope of 17 U.S.C. A7 105
+ Programmer:  Soonhoi Ha, Joseph Buck
 
 These are the methods for the basic dynamic dataflow scheduler.  It
-can handle any type of DataFlowStar.  When given an SDF system,
-this scheduler attempts to match the notion of an iteration that
-the SDF scheduler uses.  However, when delays are present, it often
-fails to do so.  Thus, it may be hard to determine, except experimentally,
-how many firings of each star constitute one iteration.
+can handle any type of DataFlowStar.  It does not do any kind of
+restructuring of the universe (as is done by DDFScheduler).
 
 **************************************************************************/
 
@@ -55,7 +46,7 @@ how many firings of each star constitute one iteration.
 #include <iostream.h>
 
 // default max # of tokens on an arc.
-const int DEFAULT_MAX_TOKEN = 100000;
+const int DEFAULT_MAX_TOKEN = 1024;
 
 static int fireSource(Star&, int);
 
@@ -63,14 +54,14 @@ static int fireSource(Star&, int);
 		Main DDF scheduler routines
 *******************************************************************/
 
-int DynDFScheduler :: isSource(Star& s) {
+static int isSource(Star& s) {
 	BlockPortIter nextp(s);
 	PortHole* p;
 
 	while ((p = nextp++) != 0) {
 		if (p->isItInput()) {
 			int numP = p->numInitDelays();
-			if (p->numXfer() > numP)
+			if (!numP || p->numTokens() > numP)
 				return FALSE;
 		}
 	}
@@ -115,19 +106,6 @@ void DynDFScheduler :: setup () {
 
 	galaxy()->initialize();
 
-	// If an error occured while initializing the galaxy,
-	// then it is not safe to continue.
-	if (SimControl::haltRequested()) return;
-
-	// The galaxy may have changed after galaxy()->initialize() due
-	// to e.g. hof stars performing block replacement, so we have to
-	// do the checks again.
-	if (warnIfNotConnected (*galaxy())) {
-		return;
-	}
-
-	if (!checkBlocks()) return;
-
 	currentTime = schedulePeriod;
 	overFlowArc = 0;
 	initStructures();
@@ -140,7 +118,7 @@ int DynDFScheduler::checkBlocks() {
 	// (for example, SDF, DDF).  Also compute the size.
 	DataFlowStar* s;
 	while ((s = nextStar++) != 0) {
-		if (!s->isA("DataFlowStar") && !s->isA("HOFStar")) {
+		if (!s->isA("DataFlowStar")) {
 			Error::abortRun (*s, " is not a dataflow star");
 			return FALSE;
 		}
@@ -156,21 +134,19 @@ int DynDFScheduler::checkBlocks() {
 
 void DynDFScheduler::initStructures() {
 	GalStarIter nextStar(*galaxy());
-	// initialize lists of sourceBlocks and nonSourceBlocks
+	// initialize sourceBlocks list
 	sourceBlocks.initialize();
-	nonSourceBlocks.initialize();
 	Star* sW;
 	galSize = 0;
 	while ((sW = nextStar++) != 0) {
 		// put the source block into the sourceBlocks list.
 		if (isSource(*sW))
 			sourceBlocks.put(sW);
-		else nonSourceBlocks.put(sW);
 		galSize++;
 	}
 }
 		
-void DynDFScheduler :: reportArcOverflow(PortHole* p, int maxToken) {
+static void reportArcOverflow(PortHole* p, int maxToken) {
 	StringList msg =
 	"Dynamic scheduler error: maximum buffer size exceeded (limit = ";
 	msg << maxToken << ")\n";
@@ -194,31 +170,15 @@ void DynDFScheduler :: reportArcOverflow(PortHole* p, int maxToken) {
 int
 DynDFScheduler :: run () {
 
-	if (!galaxy()) {
-	    Error::abortRun("No galaxy to run");
-	    return FALSE;
-        }
-
 	if (haltRequested()) {
-	    Error::abortRun(*galaxy(), ": Can't continue after run-time error");
-	    return FALSE;
+		Error::abortRun(*galaxy(), ": Can't continue after run-time error");
+		return FALSE;
 	}
 
-	ListIter nextStar (nonSourceBlocks);
+	DFGalStarIter nextStar(*galaxy());
 
+	int scanSize = galSize;		// how many not-runnable stars scanned
 	int deadlock = TRUE;		// deadlock detection.
-
-	// Each pass through this while loop contitutes one iteration.
-	// Each pass has two phases:
-	//	Fire all "source" blocks once
-	//	Fire all non-source blocks as many times as possible.
-	// In firing the non-source blocks, source blocks may also
-	// be invoked using the lazy evaluation mechanism.  For
-	// SDF stars, the scheduler attempts to return the buffers
-	// to their original state (numTokens == numInitialDelays).
-	// A block with enough initial delays at its inputs to be fired
-	// initially is considered a source block, as are, of course,
-	// blocks with no input ports.
 
 	while (numFiring < stopTime && !haltRequested()) {
 
@@ -239,17 +199,15 @@ DynDFScheduler :: run () {
 			deadlock = FALSE;
 		}
 
-		// how many not-runnable stars scanned
-		int scanSize = nonSourceBlocks.size();
+		scanSize = galSize;
    
-		// execute stars as much as possible
 		while (scanSize) {
 
 			// look at the next star in the block-list
-		        DataFlowStar* s = (DataFlowStar*)nextStar++;
+			DataFlowStar* s = nextStar++;
 			if (!s) {
 				nextStar.reset();
-				s = (DataFlowStar*)nextStar++;
+				s = nextStar++;
 			}
 		
 			// check the star is runnable
@@ -259,10 +217,10 @@ DynDFScheduler :: run () {
 				do {
 					if (!s->run()) return FALSE;
 					deadlock = FALSE;
-				} while (isRunnable(*s, FALSE));
+				} while (isRunnable(*s));
 
 				// reset scanSize
-				scanSize = nonSourceBlocks.size();
+				scanSize = galSize;
 			} else {
 				scanSize--;
 			}
@@ -272,11 +230,11 @@ DynDFScheduler :: run () {
 				return FALSE;
 			}
 			// there is a deadlock condition.
-			if (lazyDepth > nonSourceBlocks.size()) {
+			if (lazyDepth > galSize) {
 				deadlock = TRUE;
 				break;
-			}
-		} /* inside while */
+			} /* inside while */
+		}
 		if (deadlock == TRUE) {
 			Error::abortRun("deadlock detected: check for a ",
 					"delay-free loop");
@@ -292,7 +250,7 @@ DynDFScheduler :: run () {
 // check arc overflow on input arcs to s.  Return a porthole that has
 // overflowed if one exists.
 
-PortHole* DynDFScheduler :: checkInputOverflow(Star& s, int maxToken) {
+static PortHole* checkInputOverflow(Star& s, int maxToken) {
 
 	BlockPortIter nextp(s);
 	PortHole* p;
@@ -305,12 +263,10 @@ PortHole* DynDFScheduler :: checkInputOverflow(Star& s, int maxToken) {
 	return 0;
 }
 
-int DynDFScheduler :: isRunnable(DataFlowStar& s, 
-				 int enableLazyEvalForDynPorts) {
+int DynDFScheduler :: isRunnable(DataFlowStar& s) {
 
-	// Before, this routine would check to see if s is a
-	// source star, in which case it would return FALSE.
-	// Now, we don't call this for source stars.
+	// if source, return FALSE
+	if (isSource(s)) return FALSE;
 
 	lazyDepth = 1;		 // initialize lazyDepth
 
@@ -331,10 +287,8 @@ int DynDFScheduler :: isRunnable(DataFlowStar& s,
 
 		// if # tokens are static, return FALSE.
 		// if on wormhole boundary, return FALSE.
-		// if lazy evaluation turned off for dynamic ports,
-		//	return FALSE
-		if (!wp->isDynamic() || wp->atBoundary()
-		                     || !enableLazyEvalForDynPorts)
+		
+		if (!wp->isDynamic() || wp->atBoundary())
 			return FALSE;
 
 		// OK, try to get some tokens by evaluating the source star.
@@ -343,7 +297,7 @@ int DynDFScheduler :: isRunnable(DataFlowStar& s,
 
 		// if dynamic, enable lazy evaluation.
 		lazyDepth++;
-		int lzStatus = 0;
+		int lzStatus;
 		while (wp->numTokens() < nwait &&
 		       (lzStatus = lazyEval(srcStar) != 0))
 			;	// empty loop body, go until enough tokens
@@ -385,7 +339,7 @@ int DynDFScheduler :: lazyEval(DataFlowStar* s) {
 		DataFlowStar* srcStar = peerStar(*wp);
 		// if dynamic, enable lazy evaluation.
 		lazyDepth++;
-		int lzStatus = TRUE;
+		int lzStatus;
 		while (wp->numTokens() < nwait &&
 		       (lzStatus = lazyEval(srcStar) != 0))
 			;	// empty loop body
@@ -393,13 +347,13 @@ int DynDFScheduler :: lazyEval(DataFlowStar* s) {
 		// execute star if lazy evaluation succeeded in
 		// producing enough tokens.
 		if (lzStatus) {
-			if(!s->run()) return FALSE;
+			s->run();
 		}
 		return lzStatus;
 	}
 	else if (checkLazyEval(s)) {
 		// fire the star
-		if(!s->run()) return FALSE;
+		s->run();
 		return TRUE;
 	}
 	else
@@ -447,36 +401,35 @@ int DynDFScheduler :: checkLazyEval(DataFlowStar* s) {
 }
 
 static int fireSource(Star& s, int k) {
-    int min = -1;
-    int minIn = -1;
-    BlockPortIter nextp(s);
-    for (int j = s.numberPorts(); j > 0; j--) {
-	PortHole& port = *nextp++;
+			
+	// check how many unused tokens are on output arcs.
+	int min = 1000000;		// large enough number
+	int minIn = 1000;
+	BlockPortIter nextp(s);
+	for (int j = s.numberPorts(); j > 0; j--) {
+		PortHole& port = *nextp++;
 
-	if (port.numXfer() == 0) {
-	    Error::abortRun(port, " requires undefined number of tokens");
-	    return FALSE;
+	  	if (port.numXfer() == 0) {
+			Error::abortRun(s,
+			      ": output port requires undefined number of tokens");
+			return FALSE;
+		}
+		int r = port.numTokens()/port.numXfer();
+		if (port.isItOutput()) {
+			if (r < min) min = r;
+		} else {
+			if (minIn > r) minIn = r;
+		}
 	}
 
-	// For inputs, r = number of firings enabled.
-	// For outputs, r = effective number of firings already complete.
-	// Find the minimum over all inputs (minIn) and outputs (min).
-	int r = port.numTokens()/port.numXfer();
-	if (port.isItOutput()) {
-	    if (min < 0 || r < min) min = r;
-	}
-	else {
-	    if (minIn < 0 || r < minIn) minIn = r;
-	}
-    }
+	if (s.numberPorts() == 0) min = 0;
 
-    // fire sources "k-min" times.
-    if (min < 0) min = 0;
-    if (minIn < 0 || minIn > k - min) minIn = k - min;
-    for (int i = 0; i < minIn; i++) {
-	if (!s.run()) return FALSE;
-    }
-    return TRUE;
+	// fire sources "k-min" times.
+	if (minIn > k - min) minIn = k - min;
+	for (int i = 0; i < minIn; i++) {
+		if (!s.run()) return FALSE;
+	}
+	return TRUE;
 }
 
 // constructor: set default options
@@ -484,7 +437,7 @@ static int fireSource(Star& s, int k) {
 DynDFScheduler::DynDFScheduler () {
 	stopTime = 1;
 	numOverlapped = 1; 
-	schedulePeriod = 0.0;
+	schedulePeriod = 10000.0;
 	maxToken = DEFAULT_MAX_TOKEN;
 	overFlowArc = 0;
 	lazyDepth = 0;

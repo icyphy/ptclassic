@@ -1,17 +1,11 @@
 defstar {
 	name { Tone }
 	domain { CG56 }
-	acknowledge { Method from Motorola's "DSP News", Vol. 1., No. 3, 1988 }
 	desc { Sine or cosine function using second order oscillator }
 	version { $Id$ }
-	author { J. Buck, ported from Gabriel }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 signal sources library }
+	author { ported from Gabriel by J. Buck }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
 	output {
 		name { output }
 		type { fix }
@@ -55,26 +49,28 @@ limitation of liability, and disclaimer of warranty provisions.
 		default { 0 }
 		attributes { A_NONCONSTANT|A_NONSETTABLE}
 	}
-	setup {
+	start {
 		// maximum fixed point value
-		double twoPiF = 2.0 * M_PI * frequency.asDouble();
+		const double maxFix = 1.0 - 1.0/double(1 << 23);
+		double twoPiF = 2.0 * PI * double(frequency);
 		X = cos(twoPiF);
+		if (double(X) > maxFix) X = maxFix;
 		const char* p = calcType;
 		switch (*p) {
 		case 's':	// sine
 			state1 = 0.0;
-			state2 = amplitude.asDouble() * sin(twoPiF);
+			state2 = double(amplitude) * sin(twoPiF);
 			break;
 		case 'c':	// cosine
-			state1 = amplitude;
-			state2 = amplitude.asDouble() * cos(twoPiF);
+			state1 = double(amplitude);
+			state2 = double(amplitude) * cos(twoPiF);
 			break;
 		default:
 			Error::abortRun(*this, "calcType must be sin or cos");
 			return;
 		}
 	}
-	go { addCode(std); }
+	go { gencode(std); }
 	execTime { return 7;}
 	codeblock (std) {
 	move	$ref(state2),x1

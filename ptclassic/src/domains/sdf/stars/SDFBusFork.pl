@@ -5,7 +5,7 @@ defstar {
 	version {$Id$}
 	author { E. A. Lee }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -34,7 +34,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	go {
 	  MPHIter nextin(input), nextoutA(outputA), nextoutB(outputB);
-	  PortHole *in, *outA = (PortHole *)NULL, *outB = (PortHole *)NULL;
+	  PortHole *in, *outA, *outB;
 	  while (((in = nextin++) != 0) &&
 		 ((outA = nextoutA++) != 0) &&
 		 ((outB = nextoutB++) != 0)) {

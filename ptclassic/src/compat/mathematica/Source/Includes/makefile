@@ -32,7 +32,7 @@ ROOT = ../../../../..
 VPATH = $(ROOT)/src/compat/mathematica/Source/Includes
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 HDRS = 	mathlink.h mdefs.h

@@ -4,34 +4,28 @@ defstar {
 	desc { Absolute value }
 	version { $Id$ }
 	author { E. A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 nonlinear functions library }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
 	explanation {
-.Id "absolute value"
-The input is moved into accumulator "a", where the "abs" instruction is applied.
+The input is moved into accumlator "a", where the "abs" instruction is applied.
 	}
 	execTime {
 		return 3;
 	}
 	input {
-		name {input}
-		type {FIX}
+		name {in}
+		type {FLOAT}
 	}
 	output {
-		name {output}
-		type {FIX}
+		name {out}
+		type {FLOAT}
 	}
 	codeblock (absblock) {
-	move	$ref(input),a
+	move	$loc(in),a
 	abs	a
-	move	a,$ref(output)
+	move	a,$loc(out)
 	}
 	go {
-		addCode(absblock);
+		gencode(absblock);
 	}
 }

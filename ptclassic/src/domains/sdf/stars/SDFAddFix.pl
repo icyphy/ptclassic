@@ -1,19 +1,11 @@
 defstar {
 	name { AddFix }	
 	domain {SDF}
-	derivedFrom{ SDFFix }
-	desc {
-Output the sum of the fixed-point inputs as a fixed-point value.
-	}
+	desc { Output the sum of the inputs, as a fixed-point value. }
 	version { $Id$ }
         author { A. Khazeni }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
         location { SDF main library }
+	hinclude { "Fix.h" }
 	inmulti {
 		name { input }
 		type { fix }
@@ -27,68 +19,70 @@ limitation of liability, and disclaimer of warranty provisions.
                 type {int}
                 default {"YES"}
                 desc { 
-Flag that indicates whether or not to keep the precision of the arriving
-particles as is:  YES keeps the same precision, and NO casts them to the
-precision specified by the parameter "InputPrecision". } 
+Use the arriving particles as they are if YES.  Cast them to the
+precision specified by the parameter "InputPrecision" otherwise. } 
         }
         defstate {
                 name { InputPrecision }
-                type { precision }
-                default { 2.14 }
+                type { string }
+                default { "2.14" }
                 desc { 
-Precision of the input in bits.
-The input particles are only cast to this precision if the
-parameter "ArrivingPrecision" is set to NO.
-		}
+Precision of the input in bits.  The input particles are only casted 
+to this precision if the parameter "ArrivingPrecision" is set to NO.}
         }
         defstate {
                 name { OutputPrecision }
-                type { precision }
-                default { 2.14 }
-                desc {
-Precision of the output in bits and precision of the accumulation.
-When the value of the accumulation extends outside of the precision,
-the OverflowHandler will be called.
-                }
+                type { string }
+                default { "2.14" }
+                desc { 
+Precision of the output in bits.  This is the precision that will hold
+the result of the sum of the inputs.}
+        }
+        defstate {
+                name { OverflowHandler }
+                type { string }
+                default { "saturate" }
+                desc { 
+Set the overflow characteristic for the output.  If the result
+of the sum can not be fit into the precision of the output, overflow 
+occurs and the overflow is taken care of by the method specified by this 
+parameter.  The keywords for overflow handling methods are : 
+"saturate"(default), "zero_saturate", "wrapped", "warning". }     
         }
         protected {
-		Fix fixIn, sum;
+                const char* IP;
+                const char* OP;
+                const char* OV;
+                int in_IntBits;
+                int in_len;
+                int out_IntBits;
+                int out_len;
         }
         setup {
-		SDFFix::setup();
-
-                if ( ! int(ArrivingPrecision) ) {
-		  fixIn = Fix( ((const char *) InputPrecision) );
-		  if ( fixIn.invalid() )
-		    Error::abortRun( *this, "Invalid InputPrecision" );
-		}
-		fixIn.set_rounding( ((int) RoundFix) );
-
-		sum = Fix( ((const char *) OutputPrecision) );
-		if ( sum.invalid() )
-		  Error::abortRun( *this, "Invalid OutputPrecision" );
-		sum.set_ovflow( ((const char *) OverflowHandler) );
-		if ( sum.invalid() )
-		  Error::abortRun( *this, "Invalid OverflowHandler" );
-		sum.set_rounding( ((int) RoundFix) );
+                IP = InputPrecision;
+                OP = OutputPrecision;
+                OV = OverflowHandler;
+                in_IntBits = Fix::get_intBits (IP);
+                in_len = Fix::get_length (IP);
+                out_IntBits = Fix::get_intBits (OP);
+                out_len = Fix::get_length (OP);
         }
         go {
                 MPHIter nexti(input);
                 PortHole *p;
+                Fix sum(out_len, out_IntBits);
+                sum.set_ovflow(OV);  //Set the overflow characteristic of sum
+                Fix fixIn;
 
-		// Fixed-point class in Ptolemy 0.5 can always represent 0.0
-		sum.setToZero();	// set to zero and clear error bits
                 while ((p = nexti++) != 0) {
-                  if ( int(ArrivingPrecision) )
-                    sum += (Fix)((*p)%0);
-		  else {
-                    fixIn = (Fix)((*p)%0);
-                    sum += fixIn;
-		  }
-		  checkOverflow(sum);
-		}
+
+                   if(int(ArrivingPrecision))
+                      fixIn = Fix((*p)%0);
+                   else
+                      fixIn = Fix(in_len, in_IntBits, Fix((*p)%0));
+
+                   sum += fixIn; }
                 output%0 << sum;
         }
-	// a wrap-up method is inherited from SDFFix
-	// if you defined your own, you should call SDFFix::wrapup()
+
 }

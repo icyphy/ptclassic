@@ -1,17 +1,17 @@
 /* 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1993 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -20,9 +20,7 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+                                                        COPYRIGHTENDKEY
 */
 
 /*
@@ -56,42 +54,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /* kludge - due to moving target, handled in -I on compile */
 /* KERNEL define to stop recursive inclusion of time.h in BSD and SUN */
-#if defined(sun) || defined(vax)
 #define KERNEL
-#include <time.h>
+#include "time.h"
 #undef KERNEL
-#else
-#include <time.h>
-#endif
 
-/* mips Ultrix4.3A requires this otherwise we get conflicts with compat.h */
-#ifndef SYS_SOCKET_H
-#define SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
-
 #include <netinet/in.h>
 #include <netdb.h>
 #include <errno.h>
 
 extern int errno;
 
-#include "list.h"		/* define lsList */
-#include "rpc.h"		/* define remote procedure calls */
-
-#include "oh.h"			/* define ohGetById */
-
+/* #include "list.h"    */
+/* #include "message.h" */
 #include "rpcApp.h"
-#include "ptkNet.h"
-
-#ifdef PTKCODE
-/* This is defined in octtools/Xpackages/rpc/rpc.c */
-extern rpcInternalStatus RPCReceiveFunctionToken
-			 ARGS((long *value, STREAM stream));
-
-/* This is defined in octtools/Xpackages/rpc/appNet.c */
-extern rpcStatus RPCApplicationFunctionComplete();
-#endif
+#include "oh.h"
 
 /* ptk code change
    huge block of functions removed 
@@ -160,7 +137,7 @@ loop:
 
             /* special case demon functions */
             if (functionNumber == RPC_DEMON_FUNCTION) {
-                octObject changeList = {OCT_UNDEFINED_OBJECT, 0};
+                octObject changeList;
                 long id;
                 void (*ptr)();                /* was char *ptr */
                 void (*func)();
@@ -180,7 +157,7 @@ loop:
 /* fprintf(stderr, "client here: finished the demon\n"); */
 
                     /* clean up */
-                    st_delete(RPCDemonTable, (char **) &id, (char **)&ptr);
+                    st_delete(RPCDemonTable, (char **) &id, &ptr);
                 } 
 /*
                 else {
@@ -193,9 +170,7 @@ fprintf(stderr, "client here: could not find the demon\n");
 /* fprintf(stderr, "client here: sent application complete message\n"); */
             } else if (functionNumber <= size) {
 
-                /* user RPC functions */
-		/* FIXME: Memory Leak: should deallocate argList somewhere */
-		/* See $PTOLEMY/src/octtools/Xpackages/rpc/appVem.c */
+                /* user rpc functions */
                 if (RPCReceiveVemArgs(&spot, &argList, &userOptionWord,
                                       RPCReceiveStream) != RPC_OK) {
                     (void) fprintf(stderr,

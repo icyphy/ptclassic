@@ -1,58 +1,62 @@
 defstar {
-	name { WrtFile }
+	name { WriteFile }
 	domain { CG56 }
 	desc {
 When run on the simulator, arranges for its input to be logged to a file.
 	}
 	version { $Id$ }
-	author { J. Buck, Chih-Tsung Huang, Jose L. Pino }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 io library }
+	author { J. Buck }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
 	explanation {
-.Ir "simulator, Motorola DSP56000"
-.Ir "Motorola DSP56000 simulator"
-.Id "file output"
-Writes data to a file, for use with the Motorola DSP56000 simulator.
+This star relies on a feature of the Sim56Target, which captures code lines
+beginning with "!" and uses them as commands for the simulator.
 	}
 	execTime {
-		return 2;
+		return (input.bufSize() > 1) ? 2 : 0;
 	}
 	input {
 		name {input}
-		type {ANYTYPE}
+		type {FIX}
 	}
 	state {
 		name { fileName }
 		type { STRING }
-		default { "" }
-		desc { 'Root' of filename that gets the data.}
+		default { "outfile" }
+		desc { 'Root' of filename that gets the data. '.sim' is appended.}
 	}
 	state {
 		name { outVal}
 		type { FIX }
-		attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_NOINIT }
+		attributes { A_NONCONSTANT|A_NONSETTABLE }
 		default { "0"}
+	}
+	start {
+		if (input.bufSize() > 1) {
+			// these attributes allocate memory
+			outVal.setAttributes(A_YMEM|A_NOINIT);
+		}
+	}
+	// this codeblock tells the simulator to log writes to the
+	// input, which works when the buffersize is 1.
+	codeblock (logIn) {
+!output $ref(input) $val(fileName).sim -RF
+}
+	// this codeblock tells the simulator to log writes to the
+	// outVal state, which works when the buffersize is > 1.
+	codeblock (logOut) {
+!output $ref(outVal) $val(fileName).sim -RF
+}
+	initCode {
+		if (input.bufSize() == 1) gencode(logIn);
+		else gencode(logOut);
 	}
 	// this codeblock produces code
 	codeblock (copy) {
 	move	$ref(input),a
 	move	a,$ref(outVal)
 	}
-        initCode {
-		StringList logOut = "output $ref(outVal) ";
-		if (fileName.null()) 
-			logOut << "$starSymbol(/tmp/cgwritefile) ";
-		else
-			logOut << "$val(fileName) ";
-		logOut << (strcmp(input.resolvedType(),INT)?"-RF":"-RD");
-		addCode(logOut,"simulatorCmds");
-	}
 	go {
-		addCode(copy);
+		if (input.bufSize() > 1) gencode(copy);
 	}
 }

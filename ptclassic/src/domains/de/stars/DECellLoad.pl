@@ -3,17 +3,12 @@ defstar {
 	domain { DE }
 	author { GSWalter }
 	version { $Id$ }
-        copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-        }
-	location { DE main library }
+	copyright { 1992 (c) U. C. Regents }
+	location { DE main palette }
 
 	desc {
-Read in an Envelope, extract its Message, and
-output that Message in a NetworkCell.
+Reads in an Envelope, extracts its Message, and
+outputs that Message in a NetworkCell.
 	}
 
 	input {
@@ -46,17 +41,17 @@ output that Message in a NetworkCell.
 	hinclude { "NetworkCell.h" }
 
 	go {
-		if (input.dataNew) {
-			completionTime = arrivalTime;
+		if ( input.dataNew ) {
 			Envelope inEnvlp;
-			input.get().getMessage(inEnvlp);
-			Message* toLoad = inEnvlp.writableCopy();
+			input.get().getMessage( inEnvlp );
+			const Message* toLoad = ( const Message* ) inEnvlp.myData();
+			completionTime = arrivalTime;
 			LOG_NEW; NetworkCell* shipItOut = new NetworkCell(
-					*toLoad, int( priority ), int( destination ),
-					int( mssgSize ), 0,
+					*toLoad, int( priority ), int(
+					destination ), int( mssgSize ), 0,
 					float( completionTime), 0 );
 			Envelope outEnvlp( *shipItOut );
 			output.put( completionTime ) << outEnvlp;
-		} // end if
+		} // endif
 	} // end go
 } // end defstar

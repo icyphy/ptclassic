@@ -102,10 +102,10 @@ already exists in the interpreter, then it is assumed that the file
 need not be sourced again.  If the procedure does not exist, then
 the name of the file to source is given by the second argument.
     }
-    ccinclude { "FileMessage.h" <iostream.h> }
+    ccinclude { "FileMessage.h" }
     outmulti {
 	name {out}
-	type {filemsg}
+	type {message}
 	desc {Output files for the results}
     }
     defstate {

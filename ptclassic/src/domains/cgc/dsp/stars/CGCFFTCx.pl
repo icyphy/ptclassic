@@ -9,12 +9,7 @@ Parameter "direction" (default 1) is 1 for forward, -1 for inverse FFT.
 	}
 	version { $Id$ }
 	author { S. Ha }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
+	copyright { 1991 The Regents of the University of California }
 	location { CGC dsp library }
 	explanation {
 A number of input samples given by the parameter \fIsize\fR will
@@ -170,23 +165,17 @@ int nn, isign;
 		input.setSDFParams (int(size), int(size)-1);
 		output.setSDFParams (temp, temp-1);
 		fftSize = temp;
-	}
 
-	initCode {
 		// add fft routine
-		addProcedure(fftRoutine, "fft_rif");
+		addProcedure(fftRoutine);
 	}
 
 	codeblock(loadCode) {
 	int i, j = 0;
-	for (i = $val(size) - 1; i >= 0; i--) {
+	for (i = $val(size) - 1; i > 0; i--) {
 		$ref(localData,j++) = $ref(input,i).real;
 		$ref(localData,j++) = $ref(input,i).imag;
 	}
-        for (i = $val(size) ; i < $val(fftSize) ; i ++) {
-		$ref(localData)[j++] = 0.0;
-		$ref(localData)[j++] = 0.0;
-	}		
 	fft_rif ($ref(localData),$val(fftSize), $val(direction));
 	}
 
@@ -211,8 +200,5 @@ int nn, isign;
 			addCode(scaleOut);
 
 		addCode(outData);
-	}
-	exectime {
-		return  1000; 	/* just say large number for now */
 	}
 }	

@@ -1,3 +1,4 @@
+static const char file_id[] = "CGCBDFTarget.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -30,11 +31,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 BDF C code generation!
 
 *******************************************************************/
-static const char file_id[] = "CGCBDFTarget.cc";
-
-#ifdef __GNUG__
-#pragma implementation
-#endif
 
 #include "CGCBDFTarget.h"
 #include "BDFCluster.h"
@@ -59,15 +55,14 @@ void CGCBDFTarget::setup() {
 		StringList fname;
 		fname << galaxy()->name() << ".bdf-sched";
 		writeDirectoryName(destDirectory);
-		delete [] schedFileName;
 		schedFileName = writeFileName(fname);
 		LOG_NEW; setSched(new BDFClustSched(schedFileName));
 	}
 	CGCTarget::setup();
 }
 
-void CGCBDFTarget :: beginIf(PortHole& cond, int truthdir,
-			    int depth, int /*haveElsePart*/) {
+void CGCBDFTarget :: beginIf(PortHole& cond,int truthdir,
+			    int depth,int haveElsePart) {
 	CGCPortHole* realCond = (CGCPortHole*)&cond;
 	myCode << indent(depth);
 	const char* tflag = truthdir ? "" : "!";

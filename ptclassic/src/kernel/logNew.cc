@@ -1,32 +1,9 @@
-static const char file_id[] = "logNew.cc";
 /**************************************************************************
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-
-Permission is hereby granted, without written agreement and without
-license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
-
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-SUCH DAMAGE.
-
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
+ Copyright (c) 1992 The Regents of the University of California.
+                       All Rights Reserved.
 
  Programmer:  J. T. Buck
  Date of creation: 1/7/92
@@ -38,12 +15,6 @@ and INC_LOG_DEL should be used to provide source lines where the
 calls to new and delete occurred.
 
 **************************************************************************/
-
-// if the symbol MEMORYLOG is not defined, this whole source unit is
-// "commented out".
-
-#ifdef MEMORYLOG
-
 #include "logNew.h"
 #include <stdio.h>
 #include <sys/types.h>
@@ -104,22 +75,13 @@ static void openLog () {
 		return;
 	}
 	// buffer it by lines.
-	setvbuf(logfd, NULL, _IOLBF, 0);
+	setlinebuf (logfd);
 }
 
-static const char noMemMsg[] =
-"FATAL: operator new failed: virtual memory exhausted\n";
-
-// operator new -- allocate memory.  Bomb on malloc failure.
+// operator new -- allocate memory
 void* operator new(size_t sz) {
 	if (firstCall) openLog();
 	void* p = malloc(sz);
-	if (p == 0) {
-		// use write rather than fprintf because fprintf may
-		// try doing a malloc.
-		write(2, noMemMsg, sizeof(noMemMsg)-1);
-		exit(1);
-	}
 	if (logfd) {
 		if (mode == 0) {
 			ccfile = "Unknown";
@@ -147,8 +109,7 @@ void operator delete(void *p) {
 			 ccfile, hfile, sLine, p);
 		mode = 0;
 	}
-	// cast to char* needed for Sun port of cfront.  Gack.
-	free((char *)p);
+	free(p);
 }
 
-#endif
+		

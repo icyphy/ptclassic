@@ -2,9 +2,8 @@ defstar {
 	name { Transpose }
 	domain { SDF }
 	desc {
-Transpose a rasterized matrix (one that is read as a sequence
-of particles, row by row, and written in the same form).
-The number of particles produced and consumed equals the product
+Transposes a rasterized matrix.
+Number of samples produced and consumed equals the product
 of "samplesInaRow" and "numberOfRows".
 	}
 	version {$Id$}
@@ -34,7 +33,7 @@ of "samplesInaRow" and "numberOfRows".
 	protected {
 		int size;
 	}
-	setup {
+	start {
 		size = int(samplesInaRow)*int(numberOfRows);
 		input.setSDFParams(size, size-1);
 		output.setSDFParams(size, size-1);

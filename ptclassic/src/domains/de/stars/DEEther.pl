@@ -5,21 +5,15 @@ defstar {
 	version { $Id$ }
 	author { E. A. Lee  and T. Parks }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1994 The Regents of the University of California.
 All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
+See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 	desc {
-This is the base class for transmitter and receiver
-stars that communicate over a shared medium.
-Each transmitter can communicate with any or all receivers
-that have the same value for the "medium" parameter.
-The communication is accomplished without graphical connections,
-and the communication topology can be continually changing.
-This base class implements the data structures that are shared
-between the transmitters and receivers.
+Base class for transmitter and receiver
+stars that communication over a shared medium.
 	}
 	explanation {
 This star, and its derivatives
@@ -36,7 +30,7 @@ Any ASCII string can be used as a name.
 The
 .c EtherSend
 star is given a Particle, an address, and a duration.
-It checks to see whether the medium is currently occupied by another
+It checks to see if the medium is currently occupied by another
 transmitter using the same medium.  If not, it occupies
 the medium for the specified duration, and delivers a copy of
 the particle to a receiver that matches the specified address.
@@ -82,15 +76,6 @@ the derived star
 .c EtherSend
 assumes the receivers will have non-negative integers for addresses.
 But another implementation might use arbitrary ASCII strings.
-.pp
-The medium is reset in the
-.c wrapup() method of the star.
-.Ie wrapup
-Note that this does not get invoked if an error occurs during the run.
-Thus, if an error occurs, the star should be destroyed
-and recreated.  Pigi takes care of this automatically,
-but if the star is run under ptcl, then it is up to the
-user to do this.
 	}
 	defstate {
 		name {medium}
@@ -171,7 +156,7 @@ user to do this.
 		}
 	    }
 	}
-	begin {
+	setup {
 	    if (medList.hasKey(medium)) {
 		// Medium already exists
 		med = (Medium*)medList.lookup(medium);
@@ -187,8 +172,6 @@ user to do this.
 		med->occupyUntil(0.0);
 		med->receiversInitialized = 1;
 	    }
-	}
-	setup {
 	    DERepeatStar :: setup ();
 
 	    // This initialization is required by the base class RepeatStar
@@ -197,20 +180,14 @@ user to do this.
 	wrapup {
 	    // Indicate that receivers should be reinitialized on the
 	    // next run.
-	    // Note that this does not get invoked if an error occurs.
-	    // Thus, if an error occurs, the star should be destroyed
-	    // and recreated.  Pigi takes care of this automatically,
-	    // but if the star is run under ptcl, then it is up to the
-	    // user to do this.
+	    // FIXME: this does not get invoked if an error occurs.
 	    med->receiversInitialized = 0;
 	}
 	destructor {
-	    if (med) {
-		med->starCount--;
-		if (med->starCount == 0) {
-		   medList.remove(medium);
-		   LOG_DEL; delete med;
-		}
+	    med->starCount--;
+	    if (med->starCount == 0) {
+		medList.remove(medium);
+		LOG_DEL; delete med;
 	    }
 	}
 }

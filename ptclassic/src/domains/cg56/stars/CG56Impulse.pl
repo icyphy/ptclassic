@@ -1,22 +1,17 @@
 defstar {
-	name { Impulse }
+	name { FixImpulse }
 	domain { CG56 }
 	desc { Impulse generator }
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { CG56 signal sources library }
+	copyright { 1992 The Regents of the University of California }
+	location { CG56 demo library }
         explanation {
 The star produces at its output an impulse with height given by the parameter
-\fIimpulseSize\fR.
+\fIimpulse_size\fR.
 .PP
 A state variable is maintained to keep around the next output value.
-At initialization, the state is set to \fIimpulseSize\fR.
+At initialization, the state is set to \fIimpulse_size\fR.
 During each subsequent invocation, the output value is taken from the state,
 which is then set to zero.
         }
@@ -29,7 +24,7 @@ which is then set to zero.
 		name { impulseSize }
 		type { fix }
 		desc { impulse size }
-		default { ONE }
+		default { 1.0 }
 	}
  	state {
 		name { pulse }
@@ -38,7 +33,7 @@ which is then set to zero.
 		default { 0 }
 		attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM }
 	}
- 	setup {
+ 	start {
 	           pulse=impulseSize;
 	      }
 
@@ -48,7 +43,7 @@ which is then set to zero.
 	move	b,$ref(pulse)
 	} 
 
-        go { addCode(std); }
+        go { gencode(std); }
 	execTime { 
 		return 3;
 	}
