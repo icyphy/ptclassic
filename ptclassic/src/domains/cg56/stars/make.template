@@ -38,6 +38,7 @@ PL_SRCS= \
  CG56Cut.pl \
  CG56Delay.pl \
  CG56Distributor.pl \
+ CG56DownSample.pl \
  CG56DSPlayBQ.pl \
  CG56FIR.pl \
  CG56FixDC.pl \
@@ -46,12 +47,13 @@ PL_SRCS= \
  CG56FixImpulse.pl \
  CG56FixPad.pl \
  CG56FixProduct.pl \
+ CG56FixRamp.pl \
  CG56FixRect.pl \
  CG56FixSum.pl \
  CG56FixTable.pl \
  CG56FixThresh.pl \
  CG56Fork.pl \
- CG56DownSample.pl \
+ CG56GetFile.pl \
  CG56HostAIN.pl \
  CG56HostIn.pl \
  CG56HostOut.pl \
@@ -60,6 +62,7 @@ PL_SRCS= \
  CG56IIDUniform.pl \
  CG56Integrator.pl \
  CG56Interpolator.pl \
+ CG56IntGetFile.pl \
  CG56IntMult.pl \
  CG56IntProduct.pl \
  CG56IntQuantizer.pl \
