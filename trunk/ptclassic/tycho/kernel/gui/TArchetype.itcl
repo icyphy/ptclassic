@@ -394,7 +394,7 @@ body ::tycho::TArchetype::hyperJump {file {point {}}} {
 # user. This is used by the preferences manager so that these
 # options "override" any option subscriptions.
 #
-# Ths last action taken by this method is to see if this is the
+# The last action taken by this method is to see if this is the
 # most specific constructor, and, if it is, to execute any
 # pending code given to the whenConstructed{} method.
 #
