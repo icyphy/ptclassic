@@ -1053,7 +1053,7 @@ long userOptionWord;
     }
     RunAll(&facet);
     TCL_CATCH_ERR(Tcl_VarEval(ptkInterp, "ptkRunAllDemosDel ", name,
-      " $ptkControlPanel ", octHandle, (char *) NULL));
+      " ", octHandle, (char *) NULL));
     FreeOctMembers(&facet);
     ViDone();
 }
