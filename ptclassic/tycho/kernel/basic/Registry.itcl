@@ -29,6 +29,33 @@
 ##########################################################################
 
 
+
+#####################################################################
+#### deregister
+# Deregister a registered entity.
+#
+# <ul>
+# <li><b>menubar</b> _menubar_:
+# Deregister a menubar. See
+# See <a href="Registry.html#deregisterMenubar proc of ::tycho::Registry class">
+# ::tycho::Registry::deregisterMenubar</a>.
+#
+# <li><b>window</b> _tag_ ?_window_?:
+# Deregister a window or windows. See
+# See <a href="Registry.html#deregisterWindow proc of ::tycho::Registry class">
+# ::tycho::Registry::deregisterWindow</a>.
+#
+# </ul>
+#
+ensemble ::tycho::deregister {
+    option menubar {menubar} {
+	::tycho::Registry::deregisterMenubar $menubar
+    }
+    option window {tag {window *}} {
+	::tycho::Registry::deregisterWindow $tag $window
+    }
+}
+
 #####################################################################
 #### register
 # Register information. This is the primary interface to the
@@ -90,6 +117,11 @@
 # See <a href="Registry.html#registerMode proc of ::tycho::Registry class">
 # ::tycho::Registry::registerMode</a>.
 #
+# <li><b>protocol</b> _protocol_ ?_option value_ ...?:
+# Register a new protocol.
+# See <a href="Registry.html#registerProtocol proc of ::tycho::Registry class">
+# ::tycho::Registry::registerProtocol</a>.
+#
 # <li><b>window</b> _window_ _tag_ ?_option value_ ...?:
 # Register a viewer widget.
 # See <a href="Registry.html#registerWindow proc of ::tycho::Registry class">
@@ -124,34 +156,33 @@ ensemble ::tycho::register {
     option mode {modename args} {
 	eval ::tycho::Registry::registerMode $modename $args
     }
+    option protocol {protocol args} {
+	eval ::tycho::Registry::registerProtocol $protocol $args
+    }
     option window {window tag args } {
 	eval [list ::tycho::Registry::registerWindow $window $tag] $args
     }
 }
 
 #####################################################################
-#### deregister
-# De-register an item. Options are:
+#### registered
+# Test if an entity of some type is registered. Options are:
 #
 # <ul>
-# <li><b>window</b> _tag_ ?_window_?:
-# Deregister a window.
-# See <a href="Registry.html#deregisterWindow proc of ::tycho::Registry class">
-# ::tycho::Registry::deregisterWindow</a>.
+# <li><b>mode</b> _mode_:
+# Test if the given mode is registered.
 #
-# <li><b>menubar</b> _menubar_:
-# Deregister a menu bar.
-# See <a href="Registry.html#deregisterMenubar proc of ::tycho::Registry class">
-# ::tycho::Registry::deregisterMenubar</a>.
+# <li><b>protocol</b> _protocol_:
+# Test if the given protocol is registered.
 #
 # </ul>
 #
-ensemble ::tycho::deregister {
-    option window {tag {window *}} {
-	::tycho::Registry::deregisterWindow $tag $window
+ensemble ::tycho::registered {
+    option mode {mode} {
+	@scope ::tycho::Registry ::info exists _modes($mode)
     }
-    option menubar {menubar} {
-	::tycho::Registry::deregisterMenubar $menubar
+    option protocol {protocol} {
+	regexp ^([@scope ::tycho::Registry set _protocols()])\$ $protocol
     }
 }
 
@@ -176,13 +207,15 @@ ensemble ::tycho::deregister {
 # Get an option of a mode, as passed to
 # <code>::tycho::register mode</code>.
 #
-# <li><b>modecconfigure</b> _mode_ ?_option_ _value_...?:
+# <li><b>modeconfigure</b> _mode_ ?_option_ _value_...?:
 # Configure options of a mode.
 #
-# <li><b>registered</b> _type_ _name_:
-# Test if the entity of the given type is registered. The _type_ selects
-# what we're testing for. Currently it can take the values:
-# <code>mode</code>.
+# <li><b>protocolcget</b> _protocol_ _option_:
+# Get an option of a protocol, as passed to
+# <code>::tycho::register protocol</code>.
+#
+# <li><b>protocolconfigure</b> _protocol_ ?_option_ _value_...?:
+# Configure options of a protocol.
 #
 # <li><b>viewmode</b> _class_:
 # Given a class, as passed as the *-class* option to
@@ -206,17 +239,6 @@ ensemble ::tycho::registry {
     option filemode {filename} {
 	::tycho::Registry::registeredFileMode $filename
     }
-    # FIXME: Support different types
-    option registered {type name} {
-	switch -exact $type {
-            "mode" {
-                @scope ::tycho::Registry ::info exists _modeinfo($mode)
-            }
-            default {
-                error "Unsupported type \"$type\""
-            }
-        }
-    }
     option isopen {tag {window {}}} {
 	if { $window != {} } {
 	    @scope ::tycho::Registry ::info exists _windows($window#$tag)
@@ -225,27 +247,47 @@ ensemble ::tycho::registry {
 	}
     }
     option modecget {mode prop} {
-	if ![@scope ::tycho::Registry ::info exists _modeinfo($mode)] {
+	if ![@scope ::tycho::Registry ::info exists _modes($mode)] {
 	    error "Unregistered mode \"$mode\""
 	}
-	array set props [@scope ::tycho::Registry set _modeinfo($mode)]
+	array set props [@scope ::tycho::Registry set _modes($mode)]
 	if ![::info exists props($prop)] {
 	    error "Unknown property \"$prop\""
 	}
 	return $props($prop)
     }
     option modeconfigure {mode args} {
-	if ![@scope ::tycho::Registry ::info exists _modeinfo($mode)] {
+	if ![@scope ::tycho::Registry ::info exists _modes($mode)] {
 	    error "Unregistered mode \"$mode\""
 	}
-	array set opts [@scope ::tycho::Registry set _modeinfo($mode)]
+	array set opts [@scope ::tycho::Registry set _modes($mode)]
 	foreach {opt val} $args {
 	    set opts($opt) $val
 	}
-	@scope ::tycho::Registry array set _modeinfo($mode) [array get opts]
+	@scope ::tycho::Registry array set _modes($mode) [array get opts]
+    }
+    option protocolcget {protocol prop} {
+	if ![@scope ::tycho::Registry ::info exists _protocols($protocol)] {
+	    error "Unregistered protocol \"$protocol\""
+	}
+	array set props [@scope ::tycho::Registry set _protocols($protocol)]
+	if ![::info exists props($prop)] {
+	    error "Unknown property \"$prop\""
+	}
+	return $props($prop)
+    }
+    option protocolconfigure {protocol args} {
+	if ![@scope ::tycho::Registry ::info exists _protocols($protocol)] {
+	    error "Unregistered protocol \"$protocol\""
+	}
+	array set opts [@scope ::tycho::Registry set _protocols(protocol)]
+	foreach {opt val} $args {
+	    set opts($opt) $val
+	}
+	@scope ::tycho::Registry array set _protocols($protocol) [array get opts]
     }
     option viewmode {viewclass} {
-	foreach {mode options} [@scope ::tycho::Registry array get _modeinfo] {
+	foreach {mode options} [@scope ::tycho::Registry array get _modes] {
 	    array set opts $options
 	    if { $opts(-viewclass) == $viewclass } {
 		return $mode
@@ -305,9 +347,6 @@ class ::tycho::Registry {
     ###################################################################
     ####                            public procs                   ####
 
-    # Return the default mode of a file or directory name.
-    proc registeredFileMode {name}
-
     # Deregister a menubar
     proc deregisterMenubar {menubar}
 
@@ -323,6 +362,9 @@ class ::tycho::Registry {
     # Raise a widget, testing for various nasty conditions
     proc raiseWindow {tag window}
 
+    # Return the default mode of a file or directory name.
+    proc registeredFileMode {name}
+
     # Register a help entry
     proc registerHelp {name args}
 
@@ -331,6 +373,9 @@ class ::tycho::Registry {
 
     # Register a mode
     proc registerMode {modename args}
+
+    # Register a protocol
+    proc registerProtocol {protocol args}
 
     # Register a viewer widget
     proc registerWindow {tag window args}
@@ -350,14 +395,17 @@ class ::tycho::Registry {
     ###################################################################
     ####                          private variables                ####
 
-    # The mapping from TIM submode to Model class 
-    private common _timMapping
-    array set _timMapping {
-    	{} text
-    }
+    # The mapping from contents to modes
+    private common _contentsmap
 
-    # The array of open models 
-    private common _openModels
+    # The mapping from filenames to modes
+    private common _filenamemap
+
+    # The mapping from extensions to modes
+    private common _extensionmap
+
+    # The help entry info
+    private common _helpentries
 
     # The array of linked clients 
     private common _linkedClients
@@ -366,19 +414,19 @@ class ::tycho::Registry {
     private common _menubars
 
     # The array of registered modes
-    private common _modeinfo
+    private common _modes
 
-    # The help entry info
-    private common _helpentries
+    # The array of open models 
+    private common _openModels
 
-    # The mapping from extensions to modes
-    private common _extensionmap
+    # The array of registered protocols 
+    private common _protocols
 
-    # The mapping from contents to modes
-    private common _contentsmap
-
-    # The mapping from filenames to modes
-    private common _filenamemap
+    # The mapping from TIM submode to Model class 
+    private common _timMapping
+    array set _timMapping {
+    	{} text
+    }
 
     # An array of tag-optionlist pairs for the Window menu submenus
     private common _windowmenus
@@ -387,86 +435,6 @@ class ::tycho::Registry {
     # if the same file is opened a second time, we can just raise
     # the window.
     private common _windows
-}
-
-#####################################################################
-#### registeredFileMode
-# Given a file or directory name, return its default mode.
-# Note that the returned mode is based solely upon the
-# file name (or contents if a directory), and does not
-# attempt to read a header string from the file.
-# The search for a mode proceeds as follows:
-# <ol>
-# <li>If the filename is a directory and the contents of the
-# directory exactly matches a mode registered with
-# <code>::tycho::register contents</code>, return that mode.
-# <li>If the file extension matches an extension registered with
-# <code>::tycho::register extensions</code>, return the
-# corresponding mode.
-# <li>If the file name, without leading directory path, matches a
-# file name registered with
-# <code>::tycho::register filenames</code>, return the
-# corresponding mode.
-# </ol>
-#
-# If none is found, return null.
-#
-# <b>Note</b>: Do not call this procedure directly. Use
-# <a href="Registry_rel.html#registry Ensemble associated with ::tycho::Registry class">
-# <code>::tycho::registry</code></a>.
-#
-body ::tycho::Registry::registeredFileMode {name} {
-    set ITHINKTHISISWRONG {
-	if {[::tycho::url protocol $name]=="http"} {
-	    # EXCEPTION: If something's on HTTP, it is ***ALWAYS*** a HTML file.
-	    set ext ".html"
-	    if {[info exists editorsExtension] && \
-		    [info exists editorsExtension($ext)]} {
-		return $editorsExtension($ext)
-	    } else {
-		error "HTML protocol is gone! Assertion failed."
-	    }
-	} elseif {}
-    }
-    if [::tycho::resource isdirectory $name] {
-        # FIXME: For now, do not try and do this test
-        # on remote directories. The test for a VEM
-        # facet (schematic) every time I access a remote
-        # directory is a complete pain...
-        if [::tycho::resource isremote $name] {
-            return ""
-        }
-        # Try and match a directory against the contents list
-        if {[info exists _contentsmap]} {
-            set fname [::tycho::expandPath $name]
-            foreach f [array names _contentsmap] {
-                set recognized 1
-                foreach file $f {
-                    if ![::tycho::resource exists \
-			    [::tycho::url join $fname $file]] {
-                        set recognized 0
-                        break
-                    }
-                }
-                if $recognized {
-                    return $_contentsmap($f)
-                }
-            }
-        }
-        return {}
-    } {
-	set ext [::tycho::url extension $name]
-	set base [::tycho::url tail $name]
-        if {[info exists _extensionmap] && \
-                [info exists _extensionmap($ext)]} {
-            return $_extensionmap($ext)
-	} elseif {[info exists _filenamemap] && \
-                [info exists _filenamemap($base)]} {
-            return $_filenamemap($base)
-	} else {
-            return ""
-        }
-    }
 }
 
 #####################################################################
@@ -568,7 +536,7 @@ body ::tycho::Registry::initWindowMenu {menubar} {
     # We include a little hack here to make the plain text appear
     # first in the list.
     # Do the text mode, assuming it exists OK
-    array set opts $_modeinfo(text)
+    array set opts $_modes(text)
     # Put NoName in place of the filename
     set command [format $opts(-command) NoName]
     if { $opts(-label) != "" } {
@@ -581,8 +549,8 @@ body ::tycho::Registry::initWindowMenu {menubar} {
 	}
     }
     # Do all other modes...
-    foreach index [lsort [::tycho::ldelete [array names _modeinfo] text]] {
-	array set opts $_modeinfo($index)
+    foreach index [lsort [::tycho::ldelete [array names _modes] text]] {
+	array set opts $_modes($index)
 	# Put NoName in place of the filename
 	set command [format $opts(-command) NoName]
 	if { $opts(-label) != "" } {
@@ -728,6 +696,86 @@ body ::tycho::Registry::raiseWindow {tag window} {
 }
 
 #####################################################################
+#### registeredFileMode
+# Given a file or directory name, return its default mode.
+# Note that the returned mode is based solely upon the
+# file name (or contents if a directory), and does not
+# attempt to read a header string from the file.
+# The search for a mode proceeds as follows:
+# <ol>
+# <li>If the filename is a directory and the contents of the
+# directory exactly matches a mode registered with
+# <code>::tycho::register contents</code>, return that mode.
+# <li>If the file extension matches an extension registered with
+# <code>::tycho::register extensions</code>, return the
+# corresponding mode.
+# <li>If the file name, without leading directory path, matches a
+# file name registered with
+# <code>::tycho::register filenames</code>, return the
+# corresponding mode.
+# </ol>
+#
+# If none is found, return null.
+#
+# <b>Note</b>: Do not call this procedure directly. Use
+# <a href="Registry_rel.html#registry Ensemble associated with ::tycho::Registry class">
+# <code>::tycho::registry</code></a>.
+#
+body ::tycho::Registry::registeredFileMode {name} {
+    set ITHINKTHISISWRONG {
+	if {[::tycho::url protocol $name]=="http"} {
+	    # EXCEPTION: If something's on HTTP, it is ***ALWAYS*** a HTML file.
+	    set ext ".html"
+	    if {[info exists editorsExtension] && \
+		    [info exists editorsExtension($ext)]} {
+		return $editorsExtension($ext)
+	    } else {
+		error "HTML protocol is gone! Assertion failed."
+	    }
+	} elseif {}
+    }
+    if [::tycho::resource isdirectory $name] {
+        # FIXME: For now, do not try and do this test
+        # on remote directories. The test for a VEM
+        # facet (schematic) every time I access a remote
+        # directory is a complete pain...
+        if [::tycho::resource isremote $name] {
+            return ""
+        }
+        # Try and match a directory against the contents list
+        if {[info exists _contentsmap]} {
+            set fname [::tycho::expandPath $name]
+            foreach f [array names _contentsmap] {
+                set recognized 1
+                foreach file $f {
+                    if ![::tycho::resource exists \
+			    [::tycho::url join $fname $file]] {
+                        set recognized 0
+                        break
+                    }
+                }
+                if $recognized {
+                    return $_contentsmap($f)
+                }
+            }
+        }
+        return {}
+    } {
+	set ext [::tycho::url extension $name]
+	set base [::tycho::url tail $name]
+        if {[info exists _extensionmap] && \
+                [info exists _extensionmap($ext)]} {
+            return $_extensionmap($ext)
+	} elseif {[info exists _filenamemap] && \
+                [info exists _filenamemap($base)]} {
+            return $_filenamemap($base)
+	} else {
+            return ""
+        }
+    }
+}
+
+#####################################################################
 #### registerHelp
 # Register an entry for the Help menus. The _name_ is a tag that
 # will be used to construct an entry in the Help menu. The
@@ -744,7 +792,7 @@ body ::tycho::Registry::raiseWindow {tag window} {
 # any menubars are registered.
 # 
 # <b>Note</b>: Do not call this procedure directly. Use
-# <a href="Registry_rel.html#registry Ensemble associated with ::tycho::Registry class">
+# <a href="Registry_rel.html#register Ensemble associated with ::tycho::Registry class">
 # <code>::tycho::register</code></a>.
 #
 body ::tycho::Registry::registerHelp {name args} {
@@ -781,7 +829,7 @@ body ::tycho::Registry::registerHelp {name args} {
 # registered with the <code>::tycho::register helpentry</code>.
 #
 # <b>Note</b>: Do not call this procedure directly. Use
-# <a href="Registry_rel.html#registry Ensemble associated with ::tycho::Registry class">
+# <a href="Registry_rel.html#register Ensemble associated with ::tycho::Registry class">
 # <code>::tycho::register</code></a>.
 #
 body ::tycho::Registry::registerMenubar {menubar {owner {}}} {
@@ -805,8 +853,8 @@ body ::tycho::Registry::registerMenubar {menubar {owner {}}} {
 # string in the file or the content type as returned by
 # a remote server.
 # If only the mode is supplied, return the options
-# attached to this mode. Otherwise set the parameters of this
-# mode as given by the arguments. Parameters allowed are:
+# attached to this mode. Otherwise set the options of this
+# mode as given by the arguments. Options allowed are:
 # <ul>
 #
 # <li><b>-command</b> _script_: The script to execute when a file of
@@ -820,7 +868,7 @@ body ::tycho::Registry::registerMenubar {menubar {owner {}}} {
 # the file name to have spaces.
 #
 # <li><b>-viewclass</b> _classname_: If supplied, this mode will be
-# returned by <code>::tycho::registry classmode</code>. This
+# returned by <code>::tycho::register classmode</code>. This
 # argument is thuis used to give a mapping from class names
 # to the mode they implement. Be careful not to pass the same
 # class name to more than one mode or result will be unpredictable.
@@ -843,31 +891,80 @@ body ::tycho::Registry::registerMenubar {menubar {owner {}}} {
 # </ul>
 #
 # If the mode is already registered, flag an error. (Or
-# should it just overwrite the parameters?) Note that a mode
+# should it just overwrite the options?) Note that a mode
 # can be registered even the command does not operate on a file.
 # The *%s* substitution will still be performed, but as long
 # as the command does not contain a mode, it doesn't matter.
 #
 # <b>Note</b>: Do not call this procedure directly. Use
-# <a href="Registry_rel.html#registry Ensemble associated with ::tycho::Registry class">
+# <a href="Registry_rel.html#register Ensemble associated with ::tycho::Registry class">
 # <code>::tycho::register</code></a>.
 #
 body ::tycho::Registry::registerMode {mode args} {
     if { $args == "" } {
-	if [::info exists _modeinfo($mode)] {
-	    return $_modeinfo($mode)
+	if [::info exists _modes($mode)] {
+	    return $_modes($mode)
 	} else {
 	    return ""
 	}
     }
 
-    if [::info exists _modeinfo($mode)] {
+    if [::info exists _modes($mode)] {
 	# Do we want an error here?
 	error "Mode \"$mode\" is already registered"
     }
     array set opts {-command "" -label "" -viewclass text -category ""}
     array set opts $args
-    set _modeinfo($mode) [array get opts]
+    set _modes($mode) [array get opts]
+}
+
+#####################################################################
+#### registerProtocol
+# Register a new protocol. Protocols are supported by Tycho in
+# url-style names only if registered.  With no arguments,
+# return a list of all registered protocols. With arguments,
+# register the protocol with the given options. Options allowed are:
+# <ul>
+#
+# <li><b>-class</b> _class_: The class that implements the protocol.
+# The class must be a subclass of the <code>::tycho::Resource</code>
+# class. (The class name msust include the <code>::tycho</code>
+# namespace.) Although an "option," this option must
+# currently always be supplied.
+#
+# <li><b>-label</b> _string_: A label that can used to refer to a
+# protocol by name. This label will be used by tools that
+# need to provide a user interface to protocol support.
+# </ul>
+#
+# If the protocol is already registered, flag an error. (Or
+# should it just overwrite the options?)
+#
+# <b>Note</b>: Do not call this procedure directly. Use
+# <a href="Registry_rel.html#register Ensemble associated with ::tycho::Registry class">
+# <code>::tycho::register</code></a>.
+#
+body ::tycho::Registry::registerProtocol {protocol args} {
+    if { $args == "" } {
+	if [::info exists _protocols($protocol)] {
+	    return $_protocols($mode)
+	} else {
+	    return ""
+	}
+    }
+
+    if [::info exists _protocols($protocol)] {
+	# Do we want an error here?
+	error "Protocol \"$protocol\" is already registered"
+    }
+    # Remember the protocol
+    array set opts {-label "Anonymous protocol" -class "Unknown class"}
+    array set opts $args
+    set _protocols($protocol) [array get opts]
+    
+    # Construct a string to make it fast to test if a protocol
+    # exists
+    set _protocols() [join [array names _protocols] "|"]
 }
 
 #####################################################################
@@ -890,7 +987,7 @@ body ::tycho::Registry::registerMode {mode args} {
 # </ul>
 #
 # <b>Note</b>: Do not call this procedure directly. Use
-# <a href="Registry_rel.html#registry Ensemble associated with ::tycho::Registry class">
+# <a href="Registry_rel.html#register Ensemble associated with ::tycho::Registry class">
 # <code>::tycho::register</code></a>.
 #
 body ::tycho::Registry::registerWindow {tag window args} {
@@ -905,7 +1002,7 @@ body ::tycho::Registry::registerWindow {tag window args} {
     array set opts [list -window $window -tag $tag]
     array set opts $args
     if { $opts(-category) == "" } {
-	array set m [concat {-category text} $_modeinfo($opts(-mode))]
+	array set m [concat {-category text} $_modes($opts(-mode))]
 	set opts(-category) $m(-category)
     }
     # Remember the window and its options
