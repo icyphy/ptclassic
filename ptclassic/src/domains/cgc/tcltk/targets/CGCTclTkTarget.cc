@@ -89,7 +89,7 @@ int CGCTclTkTarget :: codeGenInit() {
 	globalDecls += ";\n";
 	globalDecls += "#include \"tkMain.c\"\n\n";
 
-	mainLoopInit += "Tk_DoOneEvent(1);\n";
+	mainLoopInit += "while(Tk_DoOneEvent(TK_DONT_WAIT)) {};\n";
 	mainLoopInit += "while (runFlag == -1) Tk_DoOneEvent(0);\n";
 	mainLoopInit += "if (runFlag == 0) break;\n";
 
