@@ -85,6 +85,14 @@ TclStarIfc::TclStarIfc () {
 // destructor
 TclStarIfc::~TclStarIfc() {
 	InfString buf;
+
+	// First, invoke the Tcl desctructor procedure, if it was defined
+	buf = "info procs destructorTcl_";
+	buf += starID;
+	if(Tcl_GlobalEval(ptkInterp, (char*)buf) == TCL_OK &&
+	    strlen(ptkInterp->result) != 0)
+	    	callTclProc("destructorTcl");
+
 	// Delete Tcl commands created for this star
 	buf = "grabInputs_";
 	buf += starID;
@@ -92,7 +100,13 @@ TclStarIfc::~TclStarIfc() {
 	buf = "setOutputs_";
 	buf += starID;
 	Tcl_DeleteCommand(ptkInterp, (char*)buf);
-	buf = "callTcl_";
+	buf = "goTcl_";
+	buf += starID;
+	Tcl_DeleteCommand(ptkInterp, (char*)buf);
+	buf = "wrapupTcl_";
+	buf += starID;
+	Tcl_DeleteCommand(ptkInterp, (char*)buf);
+	buf = "destructorTcl_";
 	buf += starID;
 	Tcl_DeleteCommand(ptkInterp, (char*)buf);
 	Tcl_UnsetVar(ptkInterp,(char*)starID,TCL_GLOBAL_ONLY);
@@ -179,9 +193,9 @@ int TclStarIfc::setup (Block* star,
 	}
 
 	// Determine whether the star is synchronous by checking to
-	// see whether the callTcl procedure has been defined by the
+	// see whether the goTcl procedure has been defined by the
 	// Tcl script.
-	buf = "info procs callTcl_";
+	buf = "info procs goTcl_";
 	buf += starID;
 	if(Tcl_GlobalEval(ptkInterp, (char*)buf) != TCL_OK ||
 	strlen(ptkInterp->result) == 0)
@@ -191,30 +205,52 @@ int TclStarIfc::setup (Block* star,
 	return TRUE;
 }
 
-int TclStarIfc::go () {
+int TclStarIfc::callTclProc(const char* name) {
 	InfString buf;
-
-	// If synchronous == TRUE, callTcl
-	if(synchronous) {
+	buf = "info procs ";
+	buf += name;
+	buf += "_";
+	buf += starID;
+	if(Tcl_GlobalEval(ptkInterp, (char*)buf) == TCL_OK &&
+	    strlen(ptkInterp->result) != 0) {
+		// A name_starID procedure is defined.  Invoke it.
 		char ncstring5[] = "starID";
 	        if(Tcl_SetVar(ptkInterp, ncstring5, (char*)starID,
 			TCL_GLOBAL_ONLY) == NULL) {
 		    Error::abortRun(*myStar, "Failed to set starID");
 		    return FALSE;
 	        }
-		buf = "callTcl_";
+		buf = name;
+		buf += "_";
 		buf += starID;
 		buf += " ";
 		buf += starID;
 	        if(Tcl_GlobalEval(ptkInterp, (char*)buf) != TCL_OK) {
 		    char ncstring6[] = "ptkDisplayErrorInfo";
 		    Tcl_GlobalEval(ptkInterp, ncstring6);
-		    Error::abortRun(*myStar, "Failed to run callTcl procedure");
+		    Error::abortRun(*myStar, "Failed to run Tcl procedure");
 		    return FALSE;
-	        }
-	}
+		}
+	    }
 	return TRUE;
 }
+
+int TclStarIfc::go () {
+    if(synchronous) return callTclProc("goTcl");
+    else return TRUE;
+}
+
+int TclStarIfc::wrapup() {
+    InfString buf;
+    buf = "info procs wrapupTcl_";
+    buf += starID;
+    if(Tcl_GlobalEval(ptkInterp, (char*)buf) == TCL_OK &&
+	strlen(ptkInterp->result) != 0)
+	    // A name_starID procedure is defined.  Invoke it.
+	    return callTclProc("wrapupTcl");
+    else return TRUE;
+}
+
 
 InfString TclStarIfc::getInputs () {
 	BlockPortIter nexti(*myStar);
