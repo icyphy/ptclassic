@@ -156,7 +156,7 @@ int PTcl::result(StringList& value) {
 
 void PTcl::addResult(const char* value) {
 	// cast-away-const needed to interface with Tcl.
-	Tcl_AppendElement(interp,(char*)value,0);
+	Tcl_AppendElement(interp,(char*)value);
 }
 
 const Block* PTcl::getBlock(const char* name) {
@@ -346,7 +346,7 @@ int PTcl::defgalaxy(int argc,char ** argv) {
 	currentGalaxy->setBlock (galname, 0);
 	currentTarget = 0;
 	int status;  // return value
-	if ((status = Tcl_Eval(interp, argv[2], 0, 0)) != TCL_OK) {
+	if ((status = Tcl_Eval(interp, argv[2])) != TCL_OK) {
 		LOG_DEL; delete currentGalaxy;
 		Error::error("Error in defining galaxy ", galname);
 	}
@@ -776,11 +776,10 @@ int PTcl::halt(int argc,char ** argv) {
 
 // First, define the action function that will be called by the Ptolemy kernel.
 // The string tclAction passed will be executed as a Tcl command.
-static void ptkAction(Star* s, char *tclCommand)
-{
-    if(!tclCommand || *tclCommand == NULL) {
+static void ptkAction(Star* s, char *tclCommand) {
+    if(tclCommand==NULL || *tclCommand == '\0') {
     	Tcl_Eval(PTcl::activeInterp,
-	    "error {null pre or post action requested}",0, (char **) NULL);
+	  "error {null pre or post action requested}");
 	return;
     }
     StringList temp = s->fullName();

@@ -43,7 +43,7 @@ ALLTARGETS =	$(SDFTARGETS) $(CGTARGETS) $(CGCTARGETS) \
 PTCL_MODS = $(OBJS) $(ALLSTARS) $(ALLTARGETS) $(LIBS)
 
 # Sources
-SRCS= PTcl.cc ptclMain.cc ptclError.cc
+SRCS= PTcl.cc ptclMain.cc ptclError.cc ptclAppInit.cc
 
 # Header files
 HDRS= PTcl.h

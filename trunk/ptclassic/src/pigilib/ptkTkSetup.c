@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /*
     ptkTkSetup.c  aok
-    Version: $Id$
+    Version: @(#)ptkTkSetup.c	1.5	7/16/93
 */
 
 
@@ -56,6 +56,19 @@ long size;                      /* number of items in the array */
 
 void PrintVersion();
 
+static int
+_ptkAppInit( ip, win)
+    Tcl_Interp *ip;
+    Tk_Window	win;
+{
+    if (Tcl_Init(ip) == TCL_ERROR)
+	return TCL_ERROR;
+    if (Tk_Init(ip) == TCL_ERROR)
+	return TCL_ERROR;
+    ptkRegisterCmds( ip, win);
+    return TCL_OK;
+}
+
 int
 ptkTkSetup(funcArray, size)
     RPCFunction *funcArray;
@@ -63,7 +76,9 @@ ptkTkSetup(funcArray, size)
 {
     static RPCClientData RPCdata;
     static char buf[256];
-
+    char *appName = "pigi";
+    char *appClass = "Pigi";
+    char *pt;
     int result;
 
     RPCdata.funcArray = funcArray;
@@ -71,24 +86,27 @@ ptkTkSetup(funcArray, size)
 
     /* Create Tk Window */
     ptkInterp = Tcl_CreateInterp();
-    ptkW = Tk_CreateMainWindow(ptkInterp, NULL, "pigi");
+    ptkW = Tk_CreateMainWindow(ptkInterp, NULL, appName, appClass);
     if (ptkW == NULL) {
 	ErrAdd("FATAL ERROR");
 	ErrAdd(ptkInterp->result);
 	PrintErr(ErrGet());
         exit(1);
     }
-    Tk_SetClass(ptkW, "Pigi");
+    /* no argc&argv to transfer */
+    Tcl_SetVar(ptkInterp, "argv0", "pigi", TCL_GLOBAL_ONLY);
 
-    /* Register all Tk Functions here */
-    ptkRegisterCmds( ptkInterp, ptkW);
+    Tcl_SetVar(ptkInterp, "tcl_interactive", "1", TCL_GLOBAL_ONLY);
+
+    _ptkAppInit( ptkInterp, ptkW);	/* our vers of Tk_AppInit */
 
     Tk_CreateFileHandler(fileno(RPCReceiveStream), TK_READABLE,
        ptkRPCFileProc, (ClientData) &RPCdata);
 
-    sprintf(buf, "source %s/tcl/lib/ptkInit.tcl",getenv("PTOLEMY"));
-    if (Tcl_Eval(ptkInterp, buf, 0, (char **)NULL) != TCL_OK) {
-        ErrAdd("Unable to load $PTOLEMY/tcl/lib/ptkInit.tcl file: ");
+    pt = getenv("PTOLEMY");
+    sprintf(buf, "%s/lib/tcl/pigilib.tcl", pt ? pt : "~ptolemy");
+    if (Tcl_EvalFile(ptkInterp, buf) != TCL_OK) {
+        ErrAdd("Unable to load ptk startup file: ");
         ErrAdd(ptkInterp->result);
         PrintErr(ErrGet());
 	exit(1);
@@ -115,8 +133,7 @@ processEvents (s,c)
 struct Star* s;
 char *c;
 {
-	/* FIXME: use TK_DONT_WAIT */
-	Tk_DoOneEvent(1);
+	Tk_DoOneEvent(TK_DONT_WAIT|TK_ALL_EVENTS);
 }
 
 
