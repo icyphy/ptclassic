@@ -124,6 +124,9 @@ install:	all
 
 LIB=none	# required by common.mk
 
+STAR_MK=cg56stars.mk
+DOMAIN=CG56
+
 # include common definitions, rules
 include $(ROOT)/common.mk
 
