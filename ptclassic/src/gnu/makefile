@@ -129,6 +129,10 @@ bin: bin_make bin_gcc
 
 bin_make:
 	(cd $(GNU_OBJ)/make; $(MAKE) )
+	# Work around a problem with GNU make-3.77 under Solaris 2.7 
+	# with the wildcard makefile directive
+	(cd $(GNU_OBJ)/make; rm -f glob/*.o; \
+	 $(MAKE) CFLAGS='-g -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64')
 
 # Build gcc with itself.  See src/gnu/src/gcc/INSTALL for more info.
 # Use the gcc '-v ' flag to see whether your gcc was compiled with cc or gcc
