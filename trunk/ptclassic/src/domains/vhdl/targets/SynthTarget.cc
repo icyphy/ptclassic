@@ -76,13 +76,13 @@ void SynthTarget :: writeCode() {
   command << " ; ";
   command << "rm -f " << "temp" << filePrefix << ".vhdl";
   command << " ; ";
-  command << "sed s/\"INTEGER\"/\"INTEGER range 0 to 15\"/g ";
+  command << "sed s/\" INTEGER\"/\" INTEGER range 0 to 15\"/g ";
   command << filePrefix << ".vhdl" << " > " << "temp" << filePrefix << ".vhdl";
   command << " ; ";
   command << "mv -f " << "temp" << filePrefix << ".vhdl" << " "
 	  << filePrefix << ".vhdl";
   command << " ; ";
-  command << "sed s/\"integer\"/\"INTEGER range 0 to 15\"/g ";
+  command << "sed s/\" integer\"/\" INTEGER range 0 to 15\"/g ";
   command << filePrefix << ".vhdl" << " > " << "temp" << filePrefix << ".vhdl";
   command << " ; ";
   command << "mv -f " << "temp" << filePrefix << ".vhdl" << " "
@@ -110,7 +110,8 @@ int SynthTarget :: compileCode() {
   comCode << "target_library = \"class.db\"" << "\n";
   comCode << "symbol_library = \"class.sdb\"" << "\n";
   comCode << "default_schematic_options = \"-size infinite\"" << "\n";
-  comCode << "hdlin_source_to_gates_mode = \"high\"" << "\n";
+  // This is obsolete with v3.3a.
+  //  comCode << "hdlin_source_to_gates_mode = \"high\"" << "\n";
 
   comCode << "\n";
   comCode << "/* Move to the working directory. */\n";
