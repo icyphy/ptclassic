@@ -158,6 +158,7 @@ EXTRA_SRCS=sdfstars.mk $(PL_SRCS)
 # rule for making star list for makefile inclusion.
 # The definition is extracted from the PL_SRCS definition above.
 sdfstars.mk:	make.template
+		rm -f sdfstars.mk
 		genStarList SDF > sdfstars.mk
 
 # include common definitions, rules
