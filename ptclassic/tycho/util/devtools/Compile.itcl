@@ -130,9 +130,6 @@ class ::tycho::Compile {
     # Determine the name of the makefile.
     protected method makefileName {}
 
-    # Access the "misc" preferences
-    protected method preference {mode args}
-
     # Print status messages to the controlling widget, if any.
     protected method putStatus {msg}
 
@@ -355,16 +352,6 @@ body ::tycho::Compile::makefileName {} {
     } else {
 	set makefile $basename.mk
     }
-}
-
-#####################################################################
-#### preference
-# Access the preferences associated with this widget. This method
-# overrides the default method in ::tycho::TWidget to access the
-# "misc" preferences.
-#
-body ::tycho::Compile::preference {mode args} {
-    eval ::tycho::preference $mode "misc" $args
 }
 
 #######################################################################

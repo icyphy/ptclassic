@@ -295,9 +295,6 @@ class ::tycho::Edit {
     # Initialize the menu/status/tool bars
     protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
 
-    # Access the "edittext" preferences
-    protected method preference {mode args}
-
     # Reset the undo buffer.
     protected method resetUndo {} {}
 
@@ -673,25 +670,22 @@ body ::tycho::Edit::constructor {args} {
     # Initialize options and tell preferences manager to ignore them
     eval itk_initialize $args
 
-    # Subscribe to the preference set. Note that the foreground
-    # color of selected text is made the same as the unselected
-    # color.
-    preference subscribeoptions $this \
-            -insertbackground insertBackground \
-            -basefont textFont \
-            -textforeground textForeground \
-            -textbackground textBackground \
-            -selectforeground textForeground \
-            -selectbackground selectColor \
- 	    -relief textRelief \
-	    -textwidth textWidth \
-	    -textheight textHeight
+    # Subscribe to the style-sheets
+    stylesheet subscribe \
+            -basefont         fonts textFont \
+            -insertbackground text insertBackground \
+            -textforeground   text foreground \
+            -textbackground   text background \
+            -selectforeground text selectForeground \
+            -selectbackground text selectBackground \
+ 	    -relief           layout textRelief \
+	    -textwidth        layout textWidth \
+	    -textheight       layout textHeight
 
     # Set this to zero because it's completely bogus
     $itk_component(text) configure -selectborderwidth 0
 
-    set maxLineLength \
-            [preference get fillColumn]
+    set maxLineLength [stylesheet get layout fillColumn]
 
     # Create the context-sensitive popup menu
     contextmenu create $itk_component(text) 
@@ -794,7 +788,7 @@ body ::tycho::Edit::closeParen {closeparen} {
     if {$start != ""} {
 	$itk_component(text) tag add paren $start $end
 	$itk_component(text) tag configure paren \
-		-background [preference get parenColor]
+		-background [stylesheet get text parenColor]
 	after 1000 "catch {$itk_component(text) tag delete paren}"
     }
 }
@@ -1625,7 +1619,7 @@ body ::tycho::Edit::print {} {
 body ::tycho::Edit::queryFillColumn {} {
     set maxLineLength \
             [safeEval ::tycho::queryinfo "Right column for text fill:" \
-            [preference get fillColumn] \
+            [stylesheet get text fillColumn] \
             15]
 }
 
@@ -1793,7 +1787,7 @@ body ::tycho::Edit::seeFragment {point} {
     if {$sidx != {} && $eidx != {}} {
 	$text tag add hypertarget $sidx $eidx
 	$text tag configure hypertarget -background \
-                [preference get targetColor]
+                [stylesheet get text targetColor]
 	$text tag configure hypertarget -foreground black
 
         # The moving of the insertion index is also delayed in case the
@@ -2119,17 +2113,6 @@ body ::tycho::Edit::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
     }
     # Set the statusbarpadding according to the -scrollbar option
     statusbar configure -scrollbarpad $itk_option(-scrollbar)
-}
-
-
-#####################################################################
-#### preference
-# Access the preferences associated with this widget. This method
-# overrides the default method in ::tycho::TWidget to access the
-# "edittext" preferences.
-#
-body ::tycho::Edit::preference {mode args} {
-    eval ::tycho::preference $mode "edittext" $args
 }
 
 #####################################################################

@@ -88,7 +88,7 @@ ensemble ::tycho::model {
 	    # Find the file
 	    set file [::tycho::urlPathSearch $name \
 		    [concat $path [::tycho::splitPath \
-		    [::tycho::preference get config TIM_PATH]]]]
+		    [stylesheet get system timpath]]]]
 
 	    # Read the actual file header to override defaults
 	    ::tycho::readFileHeader $file hdr
@@ -601,7 +601,7 @@ body ::tycho::Model::norecord {method args} {
 # doesn't, unsubscribes it.
 #
 body ::tycho::Model::notify {mode args} {
-   # Extract the -except option
+    # Extract the -except option
     if ![regexp "^-except (\[^ \t\n\]+) (.*)$" $args _ except args] {
         set except {}
     }

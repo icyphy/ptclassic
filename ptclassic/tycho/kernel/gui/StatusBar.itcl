@@ -276,9 +276,6 @@ body ::tycho::StatusBar::constructor {args} {
 
     # Initialise options
     eval itk_initialize $args
-
-    ::tycho::preference subscribeoptions fonts $this \
-	    -messagefont messageFont
 }
 
 #######################################################################

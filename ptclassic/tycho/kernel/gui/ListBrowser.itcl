@@ -255,7 +255,7 @@ body ::tycho::ListBrowser::constructor {args} {
 
     # Get preferences. No real need to subscribe for dialogs.
     set caseSensitiveCompletion \
-            [::tycho::preference get dialogs caseSensitiveCompletion]
+            [stylesheet get interaction caseSensitiveCompletion]
 
     # Process any unevaluated arguments.
     eval itk_initialize $args

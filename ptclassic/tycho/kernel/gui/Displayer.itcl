@@ -370,19 +370,22 @@ body ::tycho::Displayer::constructor {args} {
     } {
 	keep -background -font -activebackground -cursor \
 		-highlightthickness -activeforeground \
-		-foreground -highlightcolor -highlightbackground
+		-foreground -highlightcolor -highlightbackground \
+                -messagefont
 	rename -padx -buttonpadx buttonPadX ButtonPadX
 	rename -pady -buttonpady buttonPadY ButtonPadY
     }
     
     eval itk_initialize $args
-    eval preference excludeoptions $this $args
-    preference subscribeoptions $this \
-	    -font menuFont \
-	    -buttonpadx buttonPadX \
-	    -buttonpady buttonPadY \
-	    -menupadx menuPadX \
-	    -menupady menuPadY
+
+    # Subscribe to style-sheets
+    stylesheet subscribe \
+	    -font        fonts menuFont \
+	    -messagefont fonts messageFont \
+	    -buttonpadx  layout buttonPadX \
+	    -buttonpady  layout buttonPadY \
+	    -menupadx    layout menuPadX \
+	    -menupady    layout menuPadY
 
     if $itk_option(-master) {
         $itk_component(status) configure -closetext "Quit"
@@ -496,7 +499,8 @@ body ::tycho::Displayer::attachView {view args} {
         } {
             keep -background -font -activebackground -cursor \
                     -highlightthickness -activeforeground \
-                    -foreground -highlightcolor -highlightbackground
+                    -foreground -highlightcolor -highlightbackground \
+                    -messagefont
             rename -padx -buttonpadx buttonPadX ButtonPadX
             rename -pady -buttonpady buttonPadY ButtonPadY
         }

@@ -166,9 +166,6 @@ class ::tycho::TclShell {
     # Insert text and apply one or more tags to that text.
     protected method insertWithTags {text args}
 
-    # Access the "console" preferences
-    protected method preference {mode args}
-
     ##########################################################################
     ####                         protected variables                      ####
 
@@ -227,10 +224,15 @@ body ::tycho::TclShell::constructor {args} {
 
     eval itk_initialize $args
 
-    # Subscribe to the preference set
-    preference subscribeoptions $this \
-	    -answerforeground answerForeground \
-	    -promptforeground promptForeground
+    # Subscribe to the stylesheet parameters. These
+    # will override subscriptions made in the Edit superclass.
+    # Note that the console will take other parameters
+    # from the "text" stylesheet.
+    stylesheet subscribe \
+	    -answerforeground console answerForeground \
+	    -promptforeground console promptForeground \
+	    -textheight console height \
+	    -textwidth  console width
 
     # Modify Button-1 clicks so that the insertion cursor does not end up
     # before the prompt.  In all three cases below, the default Text binding
@@ -890,14 +892,3 @@ body ::tycho::TclShell::insertWithTags {text args} {
 	$itk_component(text) tag add $i $start insert
     }
 }
-
-#####################################################################
-#### preference
-# Access the preferences associated with this widget. This method
-# overrides the default method in ::tycho::TWidget to access the
-# "console" preferences.
-#
-body ::tycho::TclShell::preference {mode args} {
-    eval ::tycho::preference $mode "console" $args
-}
-

@@ -103,12 +103,6 @@ class ::tycho::ToolBar {
     # Insert the specified string into the specified entry box.
     method insert {tag str}
 
-    ###################################################################
-    ####                         protected methods                 ####
-
-    # Access the "dialogs" preference set.
-    protected method preference {mode args}
-
     ##################################################################
     ####             protected and private variables              ####
 
@@ -155,11 +149,11 @@ body ::tycho::ToolBar::constructor {args} {
     configure -ringwidth 0 -buttonwidth 0
     eval itk_initialize $args
     
-    # Subscribe to the preference set
-    preference subscribeoptions $this \
-            -entryforeground entryForeground \
-            -entrybackground entryBackground \
-            -entryfont entryFont
+    # Subscribe to the style parameters
+    stylesheet subscribe \
+            -entryforeground colors entryForeground \
+            -entrybackground colors entryBackground \
+            -entryfont       fonts entryFont
 }
 
 #########################################################################
@@ -410,20 +404,4 @@ body ::tycho::ToolBar::insert {tag str} {
     if {$cmd != {}} {
         eval $cmd [list $str]
     }
-}
-
-#########################################################################
-#########################################################################
-####                     protected methods                           ####
-
-#####################################################################
-#### preference
-# Access the preferences associated with this widget. By default,
-# all widgets access the "global" preference set; many widgets will,
-# however, need to access a different preference set, and they
-# must indicate so by overriding this method.  Here, we are overriding
-# it to subscribe to the "dialogs" preference set.
-#
-body ::tycho::ToolBar::preference {mode args} {
-    eval ::tycho::preference $mode "dialogs" $args
 }

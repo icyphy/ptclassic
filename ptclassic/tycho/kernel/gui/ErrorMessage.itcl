@@ -38,8 +38,8 @@
 # handle all background errors in Tk.  Therefore, within the tycho
 # namespace and within classes it should be sufficient to simply
 # call the Tcl command <code>error</code>, rather than calling this
-# directly. If the *oneWindow* preference in the *stacktrace*
-# preference group is true, then only one stack trace window will
+# directly. If the *singleStackTrace* preference in the *interaction*
+# stylesheet is true, then only one stack trace window will
 # be used; otherwise, a new stack trace window will be created
 # for each error.
 #
@@ -47,7 +47,7 @@ proc ::tkerror {msg} {
     # Handle the blank message case
     if {$msg == ""} {set msg "Tcl reports an error"}
     set nm [::tycho::autoName .error]
-    if [::tycho::preference get stacktrace oneWindow] {
+    if [::tycho::stylesheet get interaction singleStackTrace] {
         uplevel #0 [list ::tycho::ErrorMessage $nm \
                 -text $msg -bitmap error \
                 -stackwindow .stacktrace]

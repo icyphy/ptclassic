@@ -130,9 +130,6 @@ class ::tycho::RevControl {
     # should be enabled.
     protected method isWritable {} {return [file writable [$object filename]]}
 
-    # Access the "revcontrol" preferences
-    protected method preference {mode args}
-
     # Update the history information, if it is on display.
     protected method updateHistory {}
 
@@ -368,7 +365,7 @@ body ::tycho::RevControl::compareVersion {} {
     # FIXME: the text height should be a "set" preference, so this is
     # just a hack.
     set diffWidget [::tycho::view EditDiff -toolbar 1 \
-            -textheight [expr [preference get textHeight] - 7] \
+            -textheight [expr [stylesheet get layout textHeight] - 7] \
             -filename1 $tmpFile1 -filename2 $tmpFile2]
     $diffWidget compareFile
 
@@ -537,7 +534,7 @@ body ::tycho::RevControl::setup {editorWin editorObj} {
 	return
     }
 
-    set pref [::tycho::preference get revcontrol revisionControlTypes]
+    set pref [::tycho::stylesheet get system revisionControlTypes]
     set revclass [whichRevClass $editorObj]
 
     # If the file is not under revision control, query the user
@@ -581,7 +578,7 @@ body ::tycho::RevControl::whichRevClass {obj} {
     if {![$obj isa ::tycho::File]} {
         error "Cannot check revision control for $obj: Not a ::tycho::File."
     }
-    set pref [::tycho::preference get revcontrol revisionControlTypes]
+    set pref [::tycho::stylesheet get system revisionControlTypes]
     set filename [$obj filename]
     set revclass {}
 
@@ -618,16 +615,6 @@ body ::tycho::RevControl::enableButton {button} {
 	$itk_component(bbox) buttonconfigure checkin -state disabled
         $itk_component(bbox) buttonconfigure unedit -state disabled
     }
-}
-
-#####################################################################
-#### preference
-# Access the preferences associated with this widget. This method
-# overrides the default method in ::tycho::TWidget to access the
-# "revcontrol" preferences.
-#
-body ::tycho::RevControl::preference {mode args} {
-    eval ::tycho::preference $mode "revcontrol" $args
 }
 
 #####################################################################
@@ -694,8 +681,9 @@ body ::tycho::RevControl::parseHistory {history text} {
 	return
     }
 
-    set commentColor [preference get commentColor]
-    set versionColor [preference get versionColor]
+    # FIXME: The editcolors style is not in ther kernel!
+    set commentColor [stylesheet get editcolors commentColor]
+    set versionColor [stylesheet get editcolors versionColor]
     
     # Diff list is currently empty (nothing in revision control yet)
     set filelist {}

@@ -127,10 +127,10 @@ body ::tycho::ColorBrowser::constructor {args} {
     # Process any unevaluated arguments.
     eval itk_initialize $args
 
-    # Subscribe to the same preferences as an index browser
-    preference subscribeoptions $this \
-	    -width  indexBrowserWidth \
-	    -height indexBrowserHeight
+    # Subscribe to the same style parameters as an index browser
+    stylesheet subscribe \
+	    -width  layout browsers.indexBrowserWidth \
+	    -height layout browsers.indexBrowserHeight
 
     # Load the colors
     updateListbox

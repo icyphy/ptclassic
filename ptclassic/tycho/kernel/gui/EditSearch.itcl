@@ -185,10 +185,6 @@ body ::tycho::EditSearch::constructor {args} {
         }
     }
 
-    # Subscribe to the preference set
-    preference subscribeoptions $this \
-	    -entrywidth entryWidth
-
     bind $itk_component(hull) <Control-s> \
 	    "$this configure -backwards 0; $this find"
     bind $itk_component(hull) <Control-r> \
@@ -363,9 +359,9 @@ body ::tycho::EditSearch::find {{start {}}} {
         # priority of the tag so selection is still visible as normal.
         $text tag raise sel findmatch
         $text tag configure findmatch \
-                -background [preference get searchBackgroundColor]
+                -background [stylesheet get text search.background]
         $text tag configure findmatch \
-                -foreground [preference get searchForegroundColor]
+                -foreground [stylesheet get text search.foreground]
     }
 }
 

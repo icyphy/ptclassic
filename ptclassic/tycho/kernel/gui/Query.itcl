@@ -443,13 +443,13 @@ body ::tycho::Query::constructor {args} {
 
     eval itk_initialize $args
 
-    # Subscribe to the preference set
-    preference subscribeoptions $this \
-	    -entrywidth entryWidth \
-	    -entryforeground entryForeground \
-	    -entrybackground entryBackground \
-	    -entryfont entryFont
-     
+    # Subscribe to style-sheets
+    stylesheet subscribe \
+  	    -entrywidth      layout entryWidth \
+  	    -entryforeground colors entryForeground \
+  	    -entrybackground colors entryBackground \
+  	    -entryfont       fonts  entryFont
+
     # If the -okcommand option is still not set, set a default
     if {$itk_option(-okcommand) == ""} {
 	configure -okcommand "$this get"

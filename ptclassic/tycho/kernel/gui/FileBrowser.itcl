@@ -44,14 +44,15 @@
 # a file browser, and returns only when that file browser is dismissed.
 # The first argument is a text string used as a label in the file browser.
 # The optional second argument is an absolute file path that gives the
-# directory in which the file browser is opened if the
-# fileBrowserUseLastDirectory preference is not set. The optional third
+# directory in which the file browser is opened if the <b>interaction</b>
+# style-sheet has the <b>fileBrowserUseLastDirectory</b> parameter not
+# set. The optional third
 # argument is the string to insert into the file browser when
 # opened; if it is blank, then the file browser inserts text only
 # if there are zero or one entries in the file list. If it is not
 # blank and the second argument is not null, then the file browser
 # will change to that directory regardless of the setting
-# of the fileBrowserUseLastDirectory preference.
+# of the <b>fileBrowserUseLastDirectory</b> style parameter.
 # <p>
 # This procedure indirectly calls <code>update</code>, a Tk utility
 # that processes pending events, including mouse events. If this
@@ -231,12 +232,12 @@ body ::tycho::FileBrowser::constructor {args} {
     # Process any unevaluated arguments.
     eval itk_initialize $args
 
-    # Subscribe to the preference set
-    preference subscribeoptions $this \
-	    -width  fileBrowserWidth \
-	    -height fileBrowserHeight
+    # Subscribe to the style-sheets
+    stylesheet subscribe \
+	    -width  layout browsers.fileBrowserWidth \
+	    -height layout browsers.fileBrowserHeight
 
-    # The fileBrowserUseLastDirectory preference controls which directory
+    # The fileBrowserUseLastDirectory parameter controls which directory
     # the browser opens in. By the time we get to here, the localCWD
     # directory is set to the most recently-accessed directory,
     # so we don't have to do anything if that's the directory we
@@ -246,7 +247,7 @@ body ::tycho::FileBrowser::constructor {args} {
     # option will be set to the path of the file from which the
     # browser was opened -- if the option is not set, then the
     # most recent directory is used anyway.
-    if { [::tycho::preference get dialogs fileBrowserUseLastDirectory] } {
+    if { [::tycho::stylesheet get interaction fileBrowserUseLastDirectory] } {
 	# Load the files into the listbox
 	updateListbox
 
