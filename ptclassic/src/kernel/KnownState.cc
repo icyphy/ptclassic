@@ -16,7 +16,7 @@ description.
 #include "Output.h"
 #include "string.h"
 #include "std.h"
-
+#include <ctype.h>
 extern Error errorHandler;
 
 StateList *KnownState::allStates;       // the list of state types
@@ -49,7 +49,14 @@ KnownState::KnownState (State& state, const char* name, const char* value) {
 
 const State*
 KnownState::find(const char* type) {
-        return numStates == 0 ? NULL : allStates->stateWithName(type);
+/* convert specified type to uppercase */
+	char upcaseType[32], *t = upcaseType, c;
+	while ((c = *type++) != 0) {
+		if (islower(c)) *t++ = toupper(c);
+		else *t++ = c;
+	}
+	*t = 0;
+        return numStates == 0 ? NULL : allStates->stateWithName(upcaseType);
 }
 
 const State*
