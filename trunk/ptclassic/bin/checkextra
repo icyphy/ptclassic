@@ -27,9 +27,27 @@ if ($status == 1) then
 	set res = 1
 endif
 
-# If this is a stars directory check for empty ../icons
+# If this is the stars directory, look for ~ in demos
 set curdir = `pwd`
 set thisdir = `basename $curdir`
+
+set baddemo = 0
+if ( "$thisdir" == "stars" ) then
+	if ( -d ../demo ) then
+		echo "Checking for tilde in ../demo/*/* facets"
+		foreach demo ( ../demo/* ../icons/* )
+			if ( -d  $demo/schematic ) then
+				strings $demo/schematic/* |& egrep '~[A-Za-z]|users' >& /dev/null
+				if ( $status == 0 ) then
+					echo "$demo         `strings $demo/schematic/* | egrep '~[A-Za-z]|users'`"
+					set baddemo = 1
+				endif
+			endif
+		end
+	endif
+endif
+
+# If this is a stars directory check for empty ../icons
 set iconretval = 0
 if ( "$thisdir" == "stars" ) then
 	if ( -d ../icons ) then
@@ -56,6 +74,7 @@ if ( "$thisdir" == "stars" ) then
 endif
 
 
+
 ls . > /tmp/cj1$$
 
 ls -d $files > /tmp/cj2$$
@@ -70,6 +89,10 @@ rm -f /tmp/cj[12]$$
 
 if ( $iconretval != 0 ) then
 	exit $iconretval
+endif
+
+if ( $baddemo != 0 ) then
+	exit $baddemo
 endif
 
 exit $res
