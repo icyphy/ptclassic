@@ -14,8 +14,5 @@ CG56STARS = \
  $(CG56)/CG56Fork.o \
  $(CG56)/CG56Gain.o \
  $(CG56)/CG56DummySource.o \
- $(CG56)/CG56DummySink.o
-
-
-
-
+ $(CG56)/CG56DummySink.o \
+ $(CG56)/CG56UpSample.o
