@@ -150,8 +150,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    }
 	}
 	codeblock (setup1) {
-	    if(Tcl_Eval(interp, "set uniqueSymbol $starSymbol(tkScript)", 0,
-		(char **) NULL) != TCL_OK)
+	    if(Tcl_Eval(interp, "set uniqueSymbol $starSymbol(tkScript)")
+		!= TCL_OK)
 		errorReport("Error accessing tcl");
 	}
 	codeblock (setup2) {
@@ -163,18 +163,17 @@ limitation of liability, and disclaimer of warranty provisions.
 		$starSymbol(grabInputs), (ClientData) 0, NULL);
 	}
 	codeblock (sourceTclwEnv) {
-	    if(Tcl_Eval(interp, "source [expandEnvVar \\$val(tcl_file)]", 0,
-		(char **) NULL) != TCL_OK)
+	    if(Tcl_Eval(interp, "source [expandEnvVars \\$val(tcl_file)]")
+		!= TCL_OK)
 		errorReport("Cannot source tcl script for TclScript star");
 	}
 	codeblock (sourceTclwoEnv) {
-	    if(Tcl_Eval(interp, "source [expandEnvVar $val(tcl_file)]", 0,
-		(char **) NULL) != TCL_OK)
+	    if(Tcl_Eval(interp, "source [expandEnvVars $val(tcl_file)]")
+		!= TCL_OK)
 		errorReport("Cannot source tcl script for TclScript star");
 	}
 	codeblock (callTcl) {
-	    if(Tcl_Eval(interp, "$starSymbol(tkScript)callTcl",
-		0, (char **) NULL) != TCL_OK)
+	    if(Tcl_Eval(interp, "$starSymbol(tkScript)callTcl") != TCL_OK)
 		errorReport("Error invoking callTcl");
 	}
 
