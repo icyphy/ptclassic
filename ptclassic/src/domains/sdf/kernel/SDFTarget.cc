@@ -23,7 +23,7 @@ static const char file_id[] = "SDFTarget.cc";
 #include "SDFTarget.h"
 #include "SDFScheduler.h"
 #include "SDFCluster.h"
-#include "UserOutput.h"
+#include "pt_fstream.h"
 
 SDFTarget::SDFTarget() :
 Target("simulate-SDF","SDFStar",
@@ -64,13 +64,10 @@ int SDFTarget::setup(Galaxy& g) {
 	// with the default scheduler.
 	if (int(loopScheduler) || !status || *file == 0)
 		return status;
-	UserOutput o;
-	if (!o.fileName(logFile)) {
-		Error::warn(*this, "can't open log file ", logFile);
-	}
-	else {
-		o << mySched()->displaySchedule();
-		o << "\n";
-	}
-	return status;
+	// create a file with the schedule in it
+	pt_ofstream o(logFile);
+	if (!o) return FALSE;
+	o << mySched()->displaySchedule();
+	o << "\n";
+	return TRUE;
 }
