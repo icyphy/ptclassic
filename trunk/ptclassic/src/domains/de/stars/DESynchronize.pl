@@ -3,7 +3,12 @@ defstar
     name { Synchronize }
     derivedFrom { RealTimeStar }
     domain { DE }
-    descriptor { Synchronize clocks before passing data. }
+    descriptor {
+Input events are held until the time elapsed on the
+system clock since the start of the simulation
+is greater than or equal to their time stamp.
+Then are passed to the output.
+    }
     version { $Id$ }
     author { T.M. Parks }
 	copyright {
