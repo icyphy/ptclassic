@@ -64,7 +64,7 @@ internal state to store the last valid integer
 	}
 	defstate {
 		name { secondToLast }
-		type { float }
+		type { int }
 		default { "-1" }
 		desc {
 internal state to store the second-to-last valid integer
