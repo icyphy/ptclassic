@@ -9,7 +9,7 @@
 # Created:	26 November 1993
 
 # Host where Ptolemy development files live.
-set ptHost=cooley
+set ptHost=babbage
 set ptUser=ptuser
 
 # Name of current host with domain stripped off.
