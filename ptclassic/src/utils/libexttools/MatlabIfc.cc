@@ -47,12 +47,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringList.h"
 #include "InfString.h"
 #include "miscFuncs.h"
-#include "MatlabIfc.h"
 #include "Error.h"
+#include "MatlabIfc.h"
+#include "MatlabIfcFuns.h"
 
-// initialize static members
-// MatlabIfc :: matlabStarsCount = 0;
-// MatlabIfc :: matlabEnginePtr = 0;
+// counts how many instances of this class have been created
+static int matlabStarsCount = 0;
+
+// keeps track of the lone Ptolemy-controlled Matlab process running
+static Engine* matlabEnginePtr = 0;
 
 // constructor
 MatlabIfc :: MatlabIfc() {
@@ -62,7 +65,6 @@ MatlabIfc :: MatlabIfc() {
     matlabOutputBuffer[0] = 0;
     matlabFigureHandle = "PtolemyMatlabIfc";
     matlabFigureHandle << matlabStarsCount;
-    matlabEnginePtr = 0;
 }
 
 // destructor
@@ -195,44 +197,35 @@ const char* MatlabIfc :: BuildMatlabCommand(
 // manage the Matlab process (low-level methods)
 
 // start a Matlab process
-char* MatlabIfc :: MatlabEngineOpen(char* /*unixCommand*/) {
-    Error::abortRun("The Matlab Engine routines have not been linked in, ",
-		    "so the interface to Matlab cannot be started.");
-    // return engOpen(unixCommand);
-    return 0;
+Engine* MatlabIfc :: MatlabEngineOpen(char* unixCommand) {
+    return engOpen(unixCommand);
 }
 
 // send a command to the Matlab Engine for evaluation
-int MatlabIfc :: MatlabEngineSend(char* /*enginePtr*/, char* /*command*/) {
-    // return engEvalString(enginePtr, command);
-    return FALSE;
+int MatlabIfc :: MatlabEngineSend(Engine* enginePtr, char* command) {
+    return engEvalString(enginePtr, command);
 }
 
 // tell Matlab where to put the output of computations
-int MatlabIfc :: MatlabEngineOutputBuffer(char* /*enginePtr*/,
-					  char* /*buffer*/,
-					  int /*buferLength*/) {
-    // return engOutputBuffer(enginePtr, buffer, buferLength);
-    return FALSE;
+int MatlabIfc :: MatlabEngineOutputBuffer(Engine* enginePtr,
+					  char* buffer,
+					  int buferLength) {
+    return engOutputBuffer(enginePtr, buffer, buferLength);
 }
 
 // get pointer to a copy of a Matlab matrix
-char* MatlabIfc :: MatlabEngineGetMatrix(char* /*enginePtr*/, char* /*name*/) {
-    // return engGetMatrix(enginePtr, name);
-    return 0;
+Matrix* MatlabIfc :: MatlabEngineGetMatrix(Engine* enginePtr, char* name) {
+    return engGetMatrix(enginePtr, name);
 }
 
 // put a matrix in the Matlab environment (Matlab will copy the matrix)
-char* MatlabIfc :: MatlabEnginePutMatrix(char* /*enginePtr*/,
-					 char* /*matrix*/) {
-    // return engPutMatrix(enginePtr, matlabMatrix);
-    return 0;
+int MatlabIfc :: MatlabEnginePutMatrix(Engine* enginePtr, Matrix* matrixPtr) {
+    return engPutMatrix(enginePtr, matrixPtr);
 }
 
 // kill the Matlab connection
-int MatlabIfc :: MatlabEngineClose(char* /*enginePtr*/) {
-    // return engClose(enginePtr);
-    return FALSE;
+int MatlabIfc :: MatlabEngineClose(Engine* enginePtr) {
+    return engClose(enginePtr);
 }
 
 // higher-level interface to the Matlab process
