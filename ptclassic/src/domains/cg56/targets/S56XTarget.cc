@@ -34,6 +34,9 @@ S56XTarget::S56XTarget(const S56XTarget& arg) :
 }
 
 void S56XTarget :: initStates() {
+	addState(monitorProg.setState("monitor",this,"","Loader/Monitor/Debugger"));
+	monitorProg.setAttributes(A_SETTABLE|A_NONCONSTANT);
+
 	xMemMap.setValue("0-255,8192-16383");
 	yMemMap.setValue("0-16383");
 	xMemMap.setAttributes(A_NONSETTABLE|A_NONCONSTANT);
@@ -66,28 +69,53 @@ void S56XTarget :: trailerCode () {
 }
 
 int S56XTarget :: compileCode() {
-	StringList assembleCmds;
-	assembleCmds << "asm56000 -b -l -A -oso " << uname;
-	return !systemCall(assembleCmds,"Errors in assembly");
+	StringList assembleCmds = "asm56000 -b -l -A -oso ";
+	assembleCmds += uname;
+	if (systemCall(assembleCmds,"Errors in assembly")!=0)
+		return FALSE;
+	return TRUE;
 }
 
 void S56XTarget :: writeCode() {
-	// write aio file
-	genFile(aioCmds , uname,".aio");
+	/*
+	 * generate .aio data file
+	 */
+	if (!genFile(aioCmds, uname, ".aio")) {
+	    Error::abortRun(*this,"Aio data file write failed");
+	    return;
+	}
 
-	// write shell script file
-	char* file = fullFileName(uname);
-	shellCmds << "load_s56x " << file << ".lod\n";
-	genFile(shellCmds,uname);
-	chmod(file,0755);	//make executable
-	LOG_DEL; delete(file);
+	/*
+	 * generate shell-cmd file (/bin/sh)
+	 */
+	const char *monprog = monitorProg;
+	StringList realcmds = "#!/bin/sh\n";
+	if ( monprog==NULL || *monprog=='\0' ) {
+	    realcmds << "load_s56x" << " '" << uname << ".lod'\n" << shellCmds;
+	} else {
+	    realcmds << monprog << " '" << uname << ".lod'\n" << shellCmds;
+	}
+	if (!genFile(realcmds,uname)) {
+	    Error::abortRun(*this,"Shell command file write failed");
+	    return;
+	}
+	// make script executable
+	// The chmod is bogus.  Should pass a mode to genFile when creating
+	chmod(fullFileName(uname),0755);
+
+	/*
+	 * generate the .asm file (and optionally display it)
+	 */
 	CG56Target :: writeCode();
+
 }
 
 int S56XTarget :: runCode() {
 	StringList runCmd;
 	runCmd << uname << " &";
-	return !systemCall(runCmd,"Problems running code onto S56X");
+	if (systemCall(runCmd,"Problems running code onto S56X")!=0)
+	    return FALSE;
+	return TRUE;
 }
 
 
@@ -97,4 +125,3 @@ ISA_FUNC(S56XTarget,CG56Target);
 static S56XTarget proto("S-56X","run code on the S-56X card");
 
 static KnownTarget entry(proto, "S-56X");
-
