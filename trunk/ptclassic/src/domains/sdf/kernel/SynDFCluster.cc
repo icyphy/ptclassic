@@ -93,7 +93,7 @@ void SynDFClusterPort :: update()
 	    message << "This SynDFCluster has a loopFac of 0.  This could";
 	    message << "mean that it does not contain a valid DataFlowStar";
 	    message << "inside.";
-	    Error::abortRun(parent(), message);
+	    Error::abortRun(*(parent()), message);
 	    return;
 	}
 	numberTokens = farSidePort->numXfer() * farClustLoopFac/myClustLoopFac;
