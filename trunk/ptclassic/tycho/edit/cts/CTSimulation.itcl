@@ -114,6 +114,7 @@ body ::tycho::CTSimulation::_construct {} {
             set type ptolemy.domains.ct.lib.CT[$_graph attrget $v -class]
 
             # Create the star
+	    global $v
             debug "set $v \[java::new $type \$system $type\]"
             set result [set $v [java::new $type $system $v]]
             debug " -> $result"
