@@ -76,7 +76,7 @@ body ::tycho::BuilderDialog::constructor {args} {
             -title "Tycho Build Manager"
     radio builderchoice {Build Operation: } \
             { {Full (10 Minutes)}\
-	    {Itcl HTML Only (9 Minutes)} \
+	    {Itcl HTML Only (4 Minutes)} \
             {Indices Only} \
             {Class Diagram Only} \
         } {Full (10 Minutes)}
@@ -105,7 +105,7 @@ body ::tycho::BuilderDialog::constructor {args} {
 body ::tycho::BuilderDialog::_runBuilder {} {
     switch [get builderchoice] {
 	{Full (10 Minutes)} { ::tycho::Builder::build }
-	{Itcl HTML Only (9 min)} { ::tycho::Builder::itcldocs }
+	{Itcl HTML Only (4 Minutes)} { ::tycho::Builder::itcldocs }
 	{Indices Only} { ::tycho::Builder::indices }
 	{Class Diagram Only} { ::tycho::Builder::classDiagram }
     }
