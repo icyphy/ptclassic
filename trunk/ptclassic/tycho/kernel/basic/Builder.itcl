@@ -76,6 +76,9 @@ class ::tycho::Builder {
     # Create glimpse files.
     proc glimpse {}
 
+    # Create idocs in the subdirectories.
+    proc idocs {}
+
     # Create the concept and code indices.
     proc indices {}
 
@@ -146,6 +149,7 @@ body ::tycho::Builder::build {} {
     #buildSubDirectories
     classDiagram
     itcldocs
+    idocs
     indices
     puts "Running itcldocs again so we get the cross refs"
     itcldocs
@@ -206,6 +210,34 @@ body ::tycho::Builder::distFull {} {
 #
 body ::tycho::Builder::glimpse {} {
     ::tycho::Glimpse::updateTychoDatabase
+}
+
+#######################################################################
+#### idocs
+# Create idocs in the subdirectories.
+# See $TYCHO/lib/tydoc/idoc for more information.
+#
+body ::tycho::Builder::idocs {} {
+    global TYCHO
+    puts "Running idocs"
+    set generateIndex 1
+    set debug 1
+
+    set savedir [pwd]
+    foreach idir $itcldirs {
+	puts "Running idocs in $idir"
+        update
+
+	eval cd $idir
+	set title "Index of classes in $idir"
+	set retval [::tycho::IDocSys::generateIDoc $debug \
+		$generateIndex $title \
+		[glob -nocomplain *.itcl *.tcl]]
+	if {$retval != ""} {
+	    puts $retval
+	}
+    }
+    cd $savedir
 }
 
 #######################################################################
