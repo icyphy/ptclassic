@@ -13,7 +13,15 @@ $Id$
 
 #ifndef _CGTarget_h
 #define  _CGTarget_h 1
+
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+
 #include "Target.h"
+
+class UserOutput;
 
 class CGTarget : public Target {
 protected:
@@ -26,6 +34,7 @@ public:
 	Block* clone() const;
 	void addCode(const char*);
 	virtual void headerCode();
+	virtual void writeCode(UserOutput&);
 	~CGTarget();
 };
 #endif
