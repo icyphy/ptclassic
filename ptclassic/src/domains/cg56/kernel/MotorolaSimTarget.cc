@@ -106,7 +106,7 @@ void MotorolaSimTarget :: headerCode () {
 };
 
 void MotorolaSimTarget :: trailerCode () {
-	myCode << "	jmp	$" << endAddress << "\n"
+       trailer << "	jmp	$" << endAddress << "\n"
                <<"ERROR	jmp	$" << endAddress << "\n"
 	       << "	org	p:$" << endAddress << "\n"
 	       << "	nop\n"
