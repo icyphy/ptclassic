@@ -39,6 +39,7 @@ of oct objects.
 #define _octObjectClass_h 1
 
 extern "C" {
+#include "oct.h"
 #include "octIfc.h"
 }
 
