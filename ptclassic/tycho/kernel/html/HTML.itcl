@@ -60,6 +60,10 @@ class ::tycho::HTML {
     # Call this to give the text subwindow the focus.
     method focusin {}
 
+    #### help
+    # Open a help window.
+    method help {}
+
     #### openSource
     # Open the HTML source
     method openSource {}
@@ -249,6 +253,15 @@ body ::tycho::HTML::altFile {} {
 #
 body ::tycho::HTML::focusin {} {
     focus [$itk_component(text) textWinName]
+}
+
+#########################################################################
+#### help
+# Open a window with help on the current widget.
+#
+body ::tycho::HTML::help {} {
+    global TYCHO
+    ::tycho::File::openContext $TYCHO/kernel/doc/usersGuides/HTMLHelp.html
 }
 
 #####################################################################
