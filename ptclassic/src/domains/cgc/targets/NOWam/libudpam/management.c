@@ -86,11 +86,17 @@ static void BindAndSetSocket(int sd)
     perror("malloc error\n");
     exit(-1);
   }
+#ifdef SOLARIS
+  if (sysinfo(SI_HOSTNAME, hostname, sizeof(hostname)) < 0) {
+    perror("sysinfo(SI_HOSTNAME,...) error\n");
+    exit(-1);
+  }
+#else
   if (gethostname(hostname, 256*sizeof(char)) < 0) {
     perror("gethostbyname error\n");
     exit(-1);
   }
-
+#endif
 /* 
  * If we're using Myrinet, fiddle w/ the hostname so UDPAM chooses the
  * right interface.
