@@ -178,7 +178,7 @@ public:
 
 protected:
 	// get Token  from  string 
-	ParseToken getParseToken(Tokenizer&, int = T_Float);
+	virtual ParseToken getParseToken(Tokenizer&, int = T_Float);
 
 	// lookup state from name
 	const State* lookup(const char*, Block*);
