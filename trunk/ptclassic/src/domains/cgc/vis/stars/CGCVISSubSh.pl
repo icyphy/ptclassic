@@ -38,16 +38,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	initCode{
 	  addInclude("<vis_proto.h>");
+	  addInclude("<vis_types.h>");
 	}
-	codeblock(localDecl){
-          double diff=0.0;
-        }
 	codeblock(subfour){
-	  diff = vis_fpsub16((double)$ref(inA),(double)$ref(inB));
+	  vis_d64 diff = vis_fpsub16((double)$ref(inA),(double)$ref(inB));
 	  $ref(out) = diff;
 	}
 	go {
-	  addCode(localDecl);
 	  addCode(subfour);
       	}
 }
