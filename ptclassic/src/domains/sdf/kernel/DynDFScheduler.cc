@@ -106,9 +106,9 @@ void DynDFScheduler :: setup () {
 
 	galaxy()->initialize();
 
-        // If an error occured while initializing the galaxy,
-        // then it is not safe to continue.
-        if (SimControl::haltRequested()) return;
+	// If an error occured while initializing the galaxy,
+	// then it is not safe to continue.
+	if (SimControl::haltRequested()) return;
 
 	currentTime = schedulePeriod;
 	overFlowArc = 0;
@@ -175,8 +175,8 @@ int
 DynDFScheduler :: run () {
 
 	if (haltRequested()) {
-		Error::abortRun(*galaxy(), ": Can't continue after run-time error");
-		return FALSE;
+	    Error::abortRun(*galaxy(), ": Can't continue after run-time error");
+	    return FALSE;
 	}
 
 	DFGalStarIter nextStar(*galaxy());
@@ -237,8 +237,8 @@ DynDFScheduler :: run () {
 			if (lazyDepth > galSize) {
 				deadlock = TRUE;
 				break;
-			} /* inside while */
-		}
+			}
+		} /* inside while */
 		if (deadlock == TRUE) {
 			Error::abortRun("deadlock detected: check for a ",
 					"delay-free loop");
@@ -351,13 +351,13 @@ int DynDFScheduler :: lazyEval(DataFlowStar* s) {
 		// execute star if lazy evaluation succeeded in
 		// producing enough tokens.
 		if (lzStatus) {
-			s->run();
+			if(!s->run()) return FALSE;
 		}
 		return lzStatus;
 	}
 	else if (checkLazyEval(s)) {
 		// fire the star
-		s->run();
+		if(!s->run()) return FALSE;
 		return TRUE;
 	}
 	else
@@ -414,9 +414,9 @@ static int fireSource(Star& s, int k) {
 		PortHole& port = *nextp++;
 
 	  	if (port.numXfer() == 0) {
-			Error::abortRun(s,
-			      ": output port requires undefined number of tokens");
-			return FALSE;
+		    Error::abortRun(s,
+		          ": output port requires undefined number of tokens");
+		    return FALSE;
 		}
 		int r = port.numTokens()/port.numXfer();
 		if (port.isItOutput()) {
