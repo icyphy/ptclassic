@@ -427,10 +427,10 @@ buildjdist:
 	$(MAKE) realclean
 	@echo "Compile any classes that require JDK1.1"
 	$(MAKE) JFLAGS=-O jclass1_1 
+	$(MAKE) jhtml
 	@echo "We must use JDK1.0.2 to compile for use with Netscape"
 	$(MAKE) JAVAHOME=/usr/sww/lang/java-1.0.2 JFLAGS=-O
 	$(MAKE) install
-	$(MAKE) jhtml
 	$(MAKE) dists
 
 # Create a distribution and install it.
