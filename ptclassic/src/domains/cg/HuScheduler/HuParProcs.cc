@@ -140,7 +140,7 @@ void QSParProcs :: advanceClock(int ix)
 			if (temp->alreadyAssigned()) {
 				EGGateLinkIter nextKid(temp->descendants);
 				EGGate* d;
-				while ((d = nextKid.nextMaster(0)) != 0) {
+				while ((d = nextKid++) != 0) {
 					QSNode* pd = (QSNode*) d->farEndNode();
 					if (pd->fireable()) {
 						pd->setAssignedFlag();
