@@ -125,7 +125,7 @@ long userOptionWord;
 {
     octObject facet;
 
-    ViInit("run");
+    ViInit("open run window");
     ErrClear();
     FindClear();
     /* get current facet */
