@@ -22,5 +22,5 @@ else
     sox -v $SCALE -t ul $1 -t ul $SOUNDFILE
     player $SOUNDFILE -u -pri urgent
     rm -f $SOUNDFILE
-else
+fi
 
