@@ -324,7 +324,6 @@ TAGS:		$(HDRS) $(SRCS)
 			$(SRCS:%=$(VPATH:$(ROOT)%=$(PTOLEMY)%)/%)
 
 # Rule for detecting junk files
-
 checkjunk:
 	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) $(OTHERSRCS) \
 		$(OBJS) $(LIB) \
