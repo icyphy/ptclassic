@@ -41,7 +41,11 @@ include $(CONFIG)
 
 TCL_SRCS =
 
-SIMPLE_TESTS =
+SIMPLE_TESTS = \
+	testBlock.itcl \
+	testMisc.itcl \
+	testPorts.itcl \
+	testRemove.itcl
 
 GRAPHICAL_TESTS =
 
