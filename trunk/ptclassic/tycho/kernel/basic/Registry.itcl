@@ -522,7 +522,7 @@ body ::tycho::Registry::deregisterWindow {tag {window *}} {
 		continue
 	    }
 	    # Disable the binding to its parent menu
-	    bind [$mb path $cat] <Alt-Key-$_menus($cat,$v,accelerator)> {}
+	    bind [$mb path $cat] <Key-$_menus($cat,$v,accelerator)> {}
 
 	    # Delete the entry
 	    $mb delete $v
@@ -601,11 +601,13 @@ body ::tycho::Registry::initWindowMenu {menubar} {
     
      # Construct menu entries for registered files
       set toplevel [winfo toplevel $menubar]
+      set windowmenu [$menubar path window]
       foreach cat $_menus(open) {
 	  # Make the short-cut binding: if the sub-menu is empty
 	  # the main menu will be posted anyway
 	  set acc $_menus($cat,accelerator)
 	  bind $toplevel <Alt-Key-$acc> "$menubar post $cat"
+	  bind $windowmenu <Alt-Key-$acc> "$menubar post $cat"
           if { $_menus($cat,tags) != "" } {
               # Enable menu
               $menubar enable $cat
@@ -616,7 +618,7 @@ body ::tycho::Registry::initWindowMenu {menubar} {
                   eval [list $menubar command $tag $cat] \
 			  $_menus($cat,$tag,options)
                   set a $_menus($cat,$tag,accelerator)
-                  bind $menu <Alt-Key-$a> \
+                  bind $menu <Key-$a> \
 			  "$menubar unpost $cat; $menubar invoke [list $tag]"
               }
           }
@@ -1109,7 +1111,7 @@ body ::tycho::Registry::registerWindow {tag window args} {
 	    set accelerator [lindex $_menus($cat,counter) 0]
 	    set _menus($cat,counter) \
 		    [lreplace $_menus($cat,counter) 0 0]
-	    set accstring "A-$tlacc A-$accelerator"
+	    set accstring "A-$tlacc $accelerator"
 	}
 	# Record data
 	set _menus($cat,$window#$tag,accelerator) $accelerator
@@ -1129,7 +1131,7 @@ body ::tycho::Registry::registerWindow {tag window args} {
 	    # Check for window menu
 	    if [$mb exists window] {
 		if { $accelerator != "" } {
-		    bind [$mb path $cat] <Alt-Key-$accelerator> \
+		    bind [$mb path $cat] <Key-$accelerator> \
 			    "$mb unpost $cat; $mb invoke [list $window#$tag]"
 		}
 		$mb command $window#$tag $cat \
