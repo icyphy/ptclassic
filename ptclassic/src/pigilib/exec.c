@@ -24,17 +24,22 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
+
 /* exec.c  edg
 Version identification:
 $Id$
 */
 
-
 /* Includes */
+
 #include "local.h"
 #include <stdio.h>
 #include <string.h>
-#include "rpc.h"
+
+/* Include sol2compat.h, oct.h, list.h, and rpc.h */
+/* Defines boolean, octObject, lsList, and RPC data structures, respectively */
+#include "exec.h"
+
 #include "vemInterface.h"
 #include "compile.h"
 #include "octIfc.h"
@@ -43,12 +48,10 @@ $Id$
 #include "err.h"
 #include "util.h"
 #include "ganttIfc.h"
-#include "kernelCalls.h"
+#include "kernelCalls.h"	/* define KcDisplaySchedule */
 
-#include "ptk.h"  /* Interpreter name, window name, etc.  aok */
+#include "ptk.h"		/* Interpreter name, window name, etc.  aok */
 #include "handle.h"
-
-#include "exec.h"
 
 /* The vars below store the state of the last run command for re-runs */
 octObject lastFacet = {OCT_UNDEFINED_OBJECT};

@@ -39,13 +39,16 @@ $Id$
 #include "local.h"
 #include <stdio.h>
 #include <string.h>
-#include "rpc.h"
+
+/* Include list.h and rpc.h */
+/* Defines lsList and RPC data structures, respectively */
+#include "misc.h"
+
 #include "vemInterface.h"
 #include "util.h"
 #include "octIfc.h"
 #include "err.h"
 #include "main.h"
-#include "list.h"
 #include "compile.h"
 #include "kernelCalls.h"
 #include "icon.h"
@@ -57,8 +60,6 @@ $Id$
 #include "handle.h"
 
 #define dmWidth 40
-
-char* callParseClass();
 
 /* uses the ptman script to print it out the man page for the given
    star or galaxy */

@@ -64,9 +64,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <time.h>
 #endif
 
+/* mips Ultrix4.3A requires this otherwise we get conflicts with compat.h */
 #ifndef SYS_SOCKET_H
-#define SYS_SOCKET_H		/* mips Ultrix4.3A requires this
-				   otherwise we get conflicts with compat.h */
+#define SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
 
@@ -76,16 +76,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 extern int errno;
 
-/* #include "list.h"    */
-/* #include "message.h" */
+#include "list.h"		/* define lsList */
+#include "rpc.h"		/* define remote procedure calls */
+
+#include "oh.h"			/* define ohGetById */
+
 #include "rpcApp.h"
-#include "oh.h"
+#include "ptkNet.h"
 
 #ifdef PTKCODE
 /* This is defined in octtools/Xpackages/rpc/rpc.c */
-int RPCReceiveFunctionToken(/* long *value, FILE *stream */);
+extern rpcInternalStatus RPCReceiveFunctionToken
+			 ARGS((long *value, STREAM stream));
+
 /* This is defined in octtools/Xpackages/rpc/appNet.c */
-int RPCApplicationFunctionComplete();
+extern rpcStatus RPCApplicationFunctionComplete();
 #endif
 
 /* ptk code change

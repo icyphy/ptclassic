@@ -32,13 +32,18 @@ This file defines functions that are called from Tcl.
 They are registered with Tcl calling registerTclFns().
 */
 
-#include "ptk.h"
 #include "local.h"
+#include "ptkTclIfc.h"
+
+/* Oct Includes */
+#include "oct.h"
 #include "rpc.h"
+
+/* Pigilib Includes */
+#include "ptk.h"
 #include "exec.h"
 #include "ganttIfc.h"
 #include "handle.h"
-#include "vemInterface.h"
 #include "octIfc.h"
 
 /*******************************************************************

@@ -38,7 +38,11 @@ $Id$
 #include <string.h>
 #include <sys/file.h>
 #include "local.h"
-#include "rpc.h"
+
+/* Include sol2compat.h, oct.h, list.h, and rpc.h */
+/* Defines boolean, octObject, lsList, and RPC data structures, respectively */
+#include "edit.h"
+
 #include "oh.h"
 #include "paramStructs.h"
 #include "vemInterface.h"
@@ -47,16 +51,11 @@ $Id$
 #include "octIfc.h"
 #include "exec.h"
 
-#include "pigidefine.h"    /* defs of Constants */
-#include "ptk.h"  /* Interpreter name, window name, etc.  aok */
+#include "ptk.h"		/* Interpreter name, window name, etc.  aok */
 #include "handle.h"
 
-/* Declare the functions in kernelCalls for editTarget */
-int KcDomainTargets();
-char* KcDefTarget();
-
-
-void FindClear();
+#include "kernelCalls.h"	/* Define KcDomainTargets and KcDefTarget */
+#include "ganttIfc.h"		/* Define FindClear */
 
 #define dmWidth 40
 #define dmIncrement 20

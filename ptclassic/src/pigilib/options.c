@@ -32,7 +32,11 @@ $Id$
 /* Includes */
 #include "local.h"
 #include <stdio.h>
-#include "rpc.h"
+
+/* Include sol2compat.h, oct.h, list.h, and rpc.h */
+/* Defines boolean, octObject, lsList, and RPC data structures, respectively */
+#include "options.h"
+
 #include "vemInterface.h"
 #include "edit.h"
 #include "exec.h"

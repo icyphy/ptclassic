@@ -34,6 +34,8 @@ Error handling functions.
 #include "local.h"
 #include <stdio.h>
 
+#include "err.h"
+
 #define ERR_BUF_N 1000
 
 static char errBuf[ERR_BUF_N] = "";
