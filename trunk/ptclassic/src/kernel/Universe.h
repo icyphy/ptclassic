@@ -4,6 +4,7 @@
 #include "type.h"
 #include "Star.h"
 #include "Scheduler.h"
+#include "Galaxy.h"
 
 
 // SCCS version identification
@@ -13,8 +14,8 @@
 
 	Universes are defined in this file.
 	A Universe is a Star with a pointer to a component Galaxy,
-	and a scheduler to fire the blocks in the Galaxy.
-	From the outside, it looks like a star with no PortHoles.
+	and a Scheduler to fire the blocks in the Galaxy.
+	From the outside, it looks like a Star with no PortHoles.
 
 	Currently, only an SDFUniverse is defined here.
 
