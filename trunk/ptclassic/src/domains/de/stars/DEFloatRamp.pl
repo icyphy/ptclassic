@@ -11,6 +11,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 	desc {
+THIS STAR IS OBSOLETE.  USE Ramp.
 Produce an output event with a monotic value when stimulated
 by an input event. The value of the output event starts at "value" and
 increases by "step" each time the star fires. The value of the input is ignored.
