@@ -43,6 +43,7 @@ proc ::tycho::htmlmessage {source} {
     ::tycho::HTMLMessage $name -data $source \
             -textwidth 70 -textheight 15
     $name centerOnScreen
+    return $name
 }
 
 
