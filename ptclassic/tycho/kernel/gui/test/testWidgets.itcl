@@ -33,6 +33,8 @@ source FileBrowser.itcl
 source File.itcl
 source EditText.itcl
 source Edit.itcl
+source HTMLTclText.itcl
+source HTMLTcl.itcl
 
 ############################################################################
 #### removeobj
@@ -111,7 +113,7 @@ YesNoCancel .yesnocancel \
 .yesnocancel centerOnScreen
 update
 
-############################################################################
+###########################################################################
 # Test FileBrowser
 after $duration .file invoke cancel
 FileBrowser .file
@@ -123,16 +125,25 @@ update
 set win [Dismiss [autoName .dismiss] -geometry +0+0]
 wm deiconify $win
 after $duration removeobj $win
+update
 
 ############################################################################
 # Test File
 set win [File [autoName .file] -geometry +0+0]
 wm deiconify $win
 after $duration removeobj $win
+update
 
 ############################################################################
 # Test Edit
 set win [Edit [autoName .file] -geometry +0+0]
 wm deiconify $win
 after $duration removeobj $win
+update
 
+############################################################################
+# Test HTLMTcl
+set win [HTMLTcl [autoName .file] -geometry +0+0]
+wm deiconify $win
+after $duration removeobj $win
+update
