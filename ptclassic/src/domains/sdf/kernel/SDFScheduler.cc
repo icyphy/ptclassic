@@ -136,10 +136,18 @@ void SDFScheduler :: setup () {
 	clearHalt();
 	invalid = FALSE;
 
+	// Check to see if the original user galaxy is connected
         checkConnectivity();
         if (invalid) return;
 
         prepareGalaxy();
+
+	// Check connectivity again, blocks could have been deleted
+	// with galaxy()->deleteBlockAfterInit.  This can happen with
+	// hof stars and the CGC wormhole target
+
+        checkConnectivity();
+        if (invalid) return;
 
 	currentTime = 0;
 
