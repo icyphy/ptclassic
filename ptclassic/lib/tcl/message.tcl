@@ -159,7 +159,7 @@ proc ptkStartupMessage {pigiVersion pigiFilename} {
     wm title . "Ptolemy Welcome Window"
     wm iconname . "Ptolemy Welcome Window"
 
-    pack [button .mainok -text "OK <Return>" -command "wm iconify ."] \
+    pack [button .mainok -text "DISMISS" -command "wm iconify ."] \
 	-side bottom -fill x -expand 1
     pack [frame .version -relief raised -bd 5] \
 	-side top -fill both -expand 1
