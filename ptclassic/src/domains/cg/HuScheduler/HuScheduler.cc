@@ -42,6 +42,7 @@ QuasiScheduler :: ~QuasiScheduler() {
 
 int QuasiScheduler :: scheduleIt()
 {
+	wormFlag = FALSE;
 	parSched->initialize((QSGraph*) myGraph);
 
 	// reset the graph for the new parallel schedule
@@ -58,6 +59,7 @@ int QuasiScheduler :: scheduleIt()
 
 		// check the atomicity of the star
 		if (obj->isItWormhole()) {
+			wormFlag = TRUE;
 			CGWormhole* worm = obj->myWormhole();
 
 			// determine the pattern of processor availability.
@@ -95,6 +97,16 @@ int QuasiScheduler :: scheduleIt()
 	   }
 	}
 
+  // Hu's level scheduling algorithm produces node assignments.
+  // Based on that assignment, we proceed list scheduling including
+  // communication.
+  // Currently, we do not allow wormholes for this
+  if (!wormFlag) {
+	mtarget->clearCommPattern();
+	myGraph->resetGraph();
+	parSched->initialize(myGraph);
+	parSched->listSchedule(myGraph);
+  }
   return TRUE;
 }
 
@@ -113,3 +125,6 @@ StringList QuasiScheduler :: displaySchedule() {
 	return out;
 }
 
+void QuasiScheduler :: createSubGals() {
+	if (!wormFlag) ParScheduler :: createSubGals();
+}
