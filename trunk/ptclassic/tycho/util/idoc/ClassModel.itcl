@@ -45,6 +45,14 @@
 #
 # The model has the following entities:
 # <ul>
+# <li><b>parent</b> _name_: A parent of the current class. Parents can
+# appear only at the top level. FIXME: implement that. Parents have the 
+# following attributes:
+#   <ul>
+#   <li><b>-scope</b>: FIXME: John, what did you mean by this?
+#   <li><b>-source</b>: The file in which the parent class resides.
+#   <li><b>-docfile</b>: The file with the parents documentation (.tim).
+# 
 # <li><b>method</b> _name_: A method. Methods can appear only
 # at the top level. Methods have the following attributes:
 #   <ul>
@@ -61,6 +69,10 @@
 #        on the shared class data. (These are called "class methods"
 #        in Smalltalk and "procs" in [Incr Tcl]). Default is
 #        "instance."
+#   <li><b>-sourcefile</b>: Source file which defines this method. Default is 
+#        "", which signifies $source. Useful when the model is flattened.
+#   <li><b>-sourceline</b>: Line in source which defines this method. Default 
+#        is 0.
 #   </ul>
 # Methods typically contain nested _parameter_ entities, which lists
 # the parameters of the method, and nested _annotation_ entities
@@ -82,7 +94,13 @@
 #        on the shared class data. (These are called "class variables"
 #        in Smalltalk and "common variables" in [Incr Tcl]). Default is
 #        "instance."
-#   </ul>
+#   <li><b>-default</b>: The initial/default value of the variable. The defualt 
+#        is null. This attribute does not apply to certain languages and
+#        should then be ignored.
+#   <li><b>-sourcefile</b>: Source file which defines this variable. Default is 
+#        "", which signifies $source. Useful when the model is flattened.
+#   <li><b>-sourceline</b>: Line in source which defines this variable. Default 
+#        is 0.</ul>
 # A variable often contains nested _annotation_ entities
 # which document its purpose.
 #
@@ -191,7 +209,7 @@ class ::tycho::Class {
     # Remove an annotation to the class
     method annotationdelete {name}
 
-	# Get the value of an annotation
+    # Get the value of an annotation
     method annotationget {name}
     
     # Add a nested annotation with attributes to the class
@@ -273,26 +291,37 @@ body ::tycho::Class::constructor {args} {
     eval configure $args
 
     # Define the "annotation" entity
-    defineEntity annotation \
+    defineEntityType annotation \
 	    -valued 1  \
 	    -format HTML
 
+    # Define the "parent" entity
+    defineEntityType parent \
+            -scope "" \
+            -classfile "" \
+            -docfile ""
+
     # Define the "method" entity
-    defineEntity method \
+    defineEntityType method \
 	    -protection public \
 	    -modifiers "" \
 	    -type "" \
-	    -scope instance
+	    -scope instance \
+            -sourcefile "" \
+            -sourceline 0
 
     # Define the "variable" entity
-    defineEntity variable \
+    defineEntityType variable \
 	    -protection protected \
 	    -modifiers "" \
 	    -type "" \
-	    -scope instance
+	    -scope instance \
+            -default "" \
+            -sourcefile "" \
+            -sourceline 0
 
     # Define the "parameter" entity
-    defineEntity parameter \
+    defineEntityType parameter \
 	    -ordered 1 \
 	    -type "" \
 	    -optional 0 \
