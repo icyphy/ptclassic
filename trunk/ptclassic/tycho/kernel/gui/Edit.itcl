@@ -449,6 +449,14 @@ body ::tycho::Edit::constructor {args} {
     bind $itk_component(text) <Control-Key> [code "%Q undoBoundary"]
     bind $itk_component(text) <Meta-Key> [code "%Q undoBoundary"]
     bind $itk_component(text) <Meta-Shift-Key> [code "%Q undoBoundary"]
+
+    # Stop Tycho from beeping when pressing Alt on read-only files
+    bind $itk_component(text) <Alt_L> { }
+    bind $itk_component(text) <Alt_R> { }
+
+    # Don't break on Alt-key combinations: the top-level window needs
+    # it for menu traversal
+    bind $itk_component(text) <Alt-Key> { }
     
     # Bindings to highlight parenthesized regions
     bind $itk_component(text) <Key-parenright> \
