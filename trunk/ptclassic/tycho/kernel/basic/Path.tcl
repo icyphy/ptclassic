@@ -98,12 +98,27 @@ proc ::tycho::evalIfNewer {sourceFile targetFile args} {
 # could be used in scripts that use itclsh, which does not have windows.#
 #
 proc ::tycho::expandPath { path } {
+    global tcl_platform
     set path [string trim $path]
+    
+    switch $tcl_platform(platform) {
+	macinitosh {
+	    # On the mac, 'file join {$tycho:foo}' results in :$tycho:foo
+	    # So we may need to pull the leading : off.
+	    if [string match {:$*} $path] {
+		set path [string rang $path 1 end]
+	    }
+	    set directorySeparator ":"
+	}
+	default {
+	    set directorySeparator "/"
+	}
+    }
     if {[string first \$ $path] == 0} {
         global ::env
 
 
-	set slash [string first / $path]
+	set slash [string first $directorySeparator  $path]
 	if {$slash > 0} {
 	    set envvar [string range $path 1 [expr {$slash-1}]]
 	} {
@@ -112,6 +127,9 @@ proc ::tycho::expandPath { path } {
 
 	set envvar [string range [lindex [file split $path] 0] 1 end]
 
+	if {$tcl_platform(platform) == "macintosh" } {
+	    set envvar [string trimright $envvar :] 
+	}
 
         if [info exists env($envvar)] {
             set envval $env($envvar)
