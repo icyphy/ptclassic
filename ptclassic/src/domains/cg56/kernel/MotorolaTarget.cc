@@ -384,3 +384,7 @@ const char* MotorolaTarget::describeImplementationCost() {
 	}
 	return costString;
 }
+
+const char* MotorolaTarget::domain() {
+	return galaxy() ? galaxy()->domain() : "CG56";
+}
