@@ -568,12 +568,6 @@ class ComplexMatrixEnvParticle : public MatrixEnvParticle {
   ComplexMatrixEnvParticle(const Envelope& p);
   ComplexMatrixEnvParticle();
 
-  // Initialize a given ParticleStack with the values in the delay string,
-  // obtaining other Particles from the given Plasma.  Returns the
-  // number of total Particles initialized, including this one.
-  /*virtual*/ int initParticleStack(Block* parent, ParticleStack& pstack,
-                                    Plasma* myPlasma, const char* delay = 0);
-
   // load with data
   void operator << (ComplexMatrix& m);
   void operator << (const Envelope& p);
@@ -597,12 +591,6 @@ class FixMatrixEnvParticle : public MatrixEnvParticle {
 
   FixMatrixEnvParticle(const Envelope& p);
   FixMatrixEnvParticle();
-
-  // Initialize a given ParticleStack with the values in the delay string,
-  // obtaining other Particles from the given Pplasma.  Returns then
-  // number of total Particles initialized, including this one.
-  /*virtual*/ int initParticleStack(Block* parent, ParticleStack& pstack,
-                                    Plasma* myPlasma, const char* delay = 0);
 
   // load with data
   void operator << (FixMatrix& m);
@@ -629,13 +617,6 @@ class FloatMatrixEnvParticle : public MatrixEnvParticle {
   FloatMatrixEnvParticle(const Envelope& p);
   FloatMatrixEnvParticle();
 
-  // Initialize a given ParticleStack with the values in the delay string,
-  // obtaining other Particles from the given Plasma.  Returns the
-  // number of total Particles initialized, including this one.
-  /*virtual*/ int initParticleStack(Block* parent, ParticleStack& pstack,
-                                    Plasma* myPlasma, const char* delay = 0);
-                                    
-
   // load with data
   void operator << (FloatMatrix& m);
   void operator << (const Envelope& p);
@@ -659,13 +640,6 @@ class IntMatrixEnvParticle : public MatrixEnvParticle {
 
   IntMatrixEnvParticle(const Envelope& p);
   IntMatrixEnvParticle();
-
-  // Initialize a given ParticleStack with the values in the delay string,
-  // obtaining other Particles from the given Plasma.  Returns the
-  // number of total Particles initialized, including this one.
-  /*virtual*/ int initParticleStack(Block* parent, ParticleStack& pstack,
-                                    Plasma* myPlasma, const char* delay = 0);
-                                    
 
   // load with data
   void operator << (IntMatrix& m);
