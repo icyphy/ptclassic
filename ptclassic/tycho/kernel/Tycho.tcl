@@ -181,7 +181,7 @@ if {![info exists TychoBinaryInfo]} {
     set TychoBinaryInfo itkwish
 }
 if {![info exists TychoVersionInfo]} {
-    set TychoVersionInfo "Version 0.01"
+    set TychoVersionInfo "Version 0.1devel"
 }
 # To disable the welcome message, set the global variable
 # tychoWelcomeMessage to zero before sourcing this file.
