@@ -1278,22 +1278,23 @@ proc HMset_image {win handle src} {
     # Get the name of the HTML widget.
     set HTML [uplevel #0 winfo command [winfo megawidget $win]]
 
+    # If the slowNetwork misc preference is set, then don't display images.
     if {[$HTML isSlowNetwork] == 0} {
-    if {[string match /* $src]} {
-	set image $src
-    } else {
-	set image [uplevel #0 $HTML lastDirectory]/$src
-    }
+        if {[string match /* $src]} {
+            set image $src
+        } else {
+            set image [uplevel #0 $HTML lastDirectory]/$src
+        }
 
-    update
-    if {[string first " $image " " [image names] "] >= 0} {
-	HMgot_image $handle $image
-    } else {
-	set type photo
-	if {[file extension $image] == ".bmp"} {set type bitmap}
-	catch {image create $type $image -file $image} image
-	HMgot_image $handle $image
-    }
+        update
+        if {[string first " $image " " [image names] "] >= 0} {
+            HMgot_image $handle $image
+        } else {
+            set type photo
+            if {[file extension $image] == ".bmp"} {set type bitmap}
+            catch {image create $type $image -file $image} image
+            HMgot_image $handle $image
+        }
     }
 }
 
