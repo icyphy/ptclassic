@@ -28,11 +28,11 @@ INCL = -I$(DEKERNDIR) -I$(KERNDIR)
 #Library name
 LIB = libatm.a
 
-HDRS= VoiceData.h NewQueue.h
+HDRS= VoiceData.h NewQueue.h Converse.h Tree.h
 
-SRCS= $(HDRS:.h=.cc)
+SRCS= $(HDRS:.h=.cc) helpFuncs.cc
 
-OBJS= $(HDRS:.h=.o)
+OBJS= $(SRCS:.cc=.o)
 
 
 all:	makefile $(LIB)
