@@ -1,7 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -30,7 +30,7 @@ static char SccsId[]="$Id$";
 #include "fa_internal.h"
 
 /*LINTLIBRARY*/
-static do_print_region();
+static void do_print_region();
 
 void fa_dump_vertices(vertices)
 fa_vertex *vertices;
@@ -119,7 +119,7 @@ FILE *stream;
     do_print_region(region, stream, 0);
 }
 
-static print_indent(indent, stream)
+static void print_indent(indent, stream)
 int indent;
 FILE *stream;
 {
@@ -128,7 +128,7 @@ FILE *stream;
     }
 }
 
-static do_print_region(region, stream, indent)
+static void do_print_region(region, stream, indent)
 fa_region *region;
 FILE *stream;
 int indent;
@@ -182,7 +182,7 @@ int indent;
  * Extra fang diagnostic routines.
  */
 
-fa_print_vertices(vertices, stream)
+int fa_print_vertices(vertices, stream)
 fa_vertex *vertices;
 FILE *stream;
 {
@@ -198,10 +198,11 @@ FILE *stream;
 
     fprintf(stream, "%d vertices in all\n\n", count);
     (void) fflush(stream);
+    return 0;
 }
 
 
-fa_print_geo(geo, stream)
+int fa_print_geo(geo, stream)
 fa_geometry *geo;
 FILE *stream;
 {
@@ -209,5 +210,6 @@ FILE *stream;
 		(geo->status & FA_SORTED) ? "" : "un",
 		(geo->status & FA_MERGED) ? "" : "un");
     fa_print_vertices(geo->head, stream);
+    return 0;
 }
 
