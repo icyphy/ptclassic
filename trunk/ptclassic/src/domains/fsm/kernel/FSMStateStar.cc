@@ -66,7 +66,7 @@ FSMStateStar::FSMStateStar ()
     addState(isInitState.setState("isInitState",this,"FALSE","Is this an initial state?"));
     addState(conditions.setState("conditions",this,"","The conditions to determine the next transition state. Each condition must be embraced in a pair of double-quotes."));
 
-    parsedCond = NULL;
+    parsedCond = 0;
 }
 
 FSMStateStar::~FSMStateStar() {
@@ -80,14 +80,13 @@ void FSMStateStar::setup() {
       return;
     if (numConds != stateOut.numberPorts()) {
       InfString buf  = "The number of specified conditions ";
-      buf += "doesn't match the number of possible next ";
-      buf += "transition states.";
-      Error::abortRun(*this,(char *)buf);
+      buf << "do not match the number of possible next transition states.";
+      Error::abortRun(*this, buf);
       return;
     }
 
     if (!(myInterp = ((FSMScheduler *)scheduler())->interp())) {
-      Error::abortRun("No Tcl interpreter created in FSMScheduler!");
+      Error::abortRun("FSMScheduler does not have a Tcl interpreter!");
       return; 
     }
 }
@@ -101,7 +100,7 @@ FSMStateStar * FSMStateStar::nextState (int& condNum) {
 
     int* result = new int[numConds];
     int checkResult = 0;
-    for (int i=0; i<numConds; i++) {
+    for (int i = 0; i < numConds; i++) {
       buf = parsedCond[i];
       if(Tcl_ExprBoolean(myInterp, (char*)buf, &(result[i])) != TCL_OK) {
 	buf  = "Cannot evaluate the condition #";
@@ -112,7 +111,7 @@ FSMStateStar * FSMStateStar::nextState (int& condNum) {
 	buf += myInterp->result;
 	Error::abortRun(*this,(char*)buf);
 	delete [] result;
-	return NULL;
+	return 0;
       }
       if (result[i] == 1) checkResult++;
     }
@@ -126,7 +125,7 @@ FSMStateStar * FSMStateStar::nextState (int& condNum) {
 
       // Return the next state.
       MPHIter nextp(stateOut);
-      PortHole* oport = NULL;
+      PortHole* oport = 0;
       for (int i=0; i<=condNum; i++)  {
 	oport=nextp++;
       }
@@ -144,59 +143,51 @@ FSMStateStar * FSMStateStar::nextState (int& condNum) {
     }  
 
     // checkResult > 1, this means "Transition Conflict".
-    buf  = "Transition conflict. ";
-    buf += "Conditions ";
-    for (i=0; i<numConds; i++) {
+    buf = "Transition conflict. Conditions ";
+    for (i = 0; i < numConds; i++) {
       if (result[i] == 1) {
-	buf += i+1;
-	buf += ", ";
+	buf << i+1 << ", ";
       }
     }
-    buf += "are all satisfying at the same time.";
-    Error::abortRun(*this,(char*)buf);
+    buf << "are all satisfied at the same time.";
+    Error::abortRun(*this, (char*)buf);
     delete [] result;
-    return NULL;
+    return 0;
 }
 
-Star * FSMStateStar::createWormhole (const char *galname, const char* where_defined) {
+Star* FSMStateStar::createWormhole(const char *galname,
+				   const char* where_defined) {
     // Compile the specified galaxy into kernel.
     const char* classname = ptkCompile(galname, where_defined);
-    if (!classname) return NULL;
+    if (!classname) return 0;
 
     // Should now have a master of the block -- clone it in "FSM".
     Block *block = KnownBlock::clone(classname, this->domain());
-    if (!block) return NULL;
+    if (!block) return 0;
 
-printf("galname = %s\n",galname);
-printf("block name = %s\n",block->name());
-printf("block domain = %s\n",block->domain());
-
-    Star *newWorm = NULL;
+    Star *newWorm = 0;
     if (block->isItWormhole()) {
       // We already made a Wormhole.
       // Note : if inner FSM galaxy is specified its own Target,
       // "ptkCompile" will also make a wormhole for it.
-printf("Wormhole ALREADY created.\n");
-printf("\n--------------------------------------\n");
       newWorm = &(block->asStar());
-    } else {
+    }
+    else {
       // To create a wormhole for the FSM domain that 
       // will encapsulate this inner FSM galaxy.
       if (!block->isA("Galaxy")) {
 	Error::abortRun(*this,"Can only use galaxies for ",
 			"replacement blocks");
-	return NULL;
+	return 0;
       }
 
-printf("Galaxy created.\n");
-printf("\n--------------------------------------\n");
       Galaxy& mygal = block->asGalaxy();
 
       // Use "FSM" as the outer domain to encapsulate the inner FSM galaxy.
       Domain* od = Domain::named("FSM");
       if (!od) {
 	Error::abortRun(*this,"FSM domain does not exist! Help!");
-	return NULL;
+	return 0;
       }
       
       // For the moment, no Target is specified.  This means
@@ -219,7 +210,6 @@ printf("\n--------------------------------------\n");
     // Set the parent of the wormhole to be the parent of this star.
     newWorm->setBlock(instance,parent());
 
-//printf("newWorm full name = %s\n",(const char*)newWorm->fullName());
     return newWorm;
 }
 
@@ -240,7 +230,7 @@ const char* FSMStateStar::ptkCompile(const char *galname,
     if (strcmp(ptkInterp->result,"0") == 0) {
       Error::abortRun(*this,"Specified file name for the block (Galaxy) ",
 		      "doesn't exist.");
-      return NULL;
+      return 0;
     }
 
     command = "file isdirectory ";
@@ -255,7 +245,7 @@ const char* FSMStateStar::ptkCompile(const char *galname,
       command += fullName;
       if(Tcl_GlobalEval(ptkInterp, (char*)command) == TCL_ERROR) {
 	Error::abortRun(*this,"Can't open the block (Galaxy) facet.");
-	return NULL;
+	return 0;
       }
       const char* facetHandle = hashstring(ptkInterp->result);
 
@@ -267,7 +257,7 @@ const char* FSMStateStar::ptkCompile(const char *galname,
 	buf += "/";
 	buf += galname;
 	Error::abortRun(*this,(const char*)buf);
-	return NULL;
+	return 0;
       }
 
       // Restore the original domain name.
@@ -284,7 +274,7 @@ const char* FSMStateStar::ptkCompile(const char *galname,
       const char* classname = hashstring(ptkInterp->result);
 
       if (!TychoLoadFSM(classname, expandPathName(where_defined)))
-	return NULL;
+	return 0;
 
       // Restore the original domain name.
       ptcl->curDomain = currentDomain;
@@ -293,58 +283,56 @@ const char* FSMStateStar::ptkCompile(const char *galname,
     }
 }
 
-
 Geodesic** FSMStateStar::setupGeodesic (Star* worm, MultiPortHole& mph) {
-    Geodesic* geo;
-
-    // Dummy output port used to fool the geodesic into thinking it
-    // is fully connected.
-    PortHole* dummyPort;
-
-    LOG_NEW; Geodesic** mygeo = new (Geodesic*)[mph.numberPorts()];
+    Geodesic** myGeoArray = (Geodesic**) new (Geodesic*) [mph.numberPorts()];
 
     MPHIter nextp(mph);
     PortHole* p;
-    PortHole* ph;
     int index = 0;
     while ((p = nextp++) != 0) {
-      ph = worm->portWithName(p->name());
+      PortHole* ph = worm->portWithName(p->name());
       if (!ph) {
 	Error::abortRun(*this, "Cannot find porthole named ", p->name(),
 			" in the replacement block.");
-	return NULL;
+	delete [] myGeoArray;
+	return 0;
       }
 
       // Create a geodesic to send data to the wormhole.
-      geo = ph->allocateGeodesic();
+      Geodesic* geo = ph->allocateGeodesic();
       if (!geo) {
 	Error::abortRun(*this, "Failed to allocate geodesic for ",
-			"the porthole named ",ph->name());
-	return NULL;
+			"the porthole named ", ph->name());
+	delete [] myGeoArray;
+	return 0;
       }
+
+      // Dummy output port used to fool the geodesic into thinking it
+      // is fully connected.
+      PortHole* dummyPort = new PortHole;
+
       // Set the desination port for the geodesic.
       // We also have to set a source port, although we don't use it.
-      dummyPort = new PortHole;
-      dummyPort->setPort("dummyPort",(Block*)NULL,FLOAT);
+      dummyPort->setPort("dummyPort",(Block*)0,FLOAT);
       if (mph.isItInput()) {
-	geo->setSourcePort(*dummyPort,0,"");
+	geo->setSourcePort(*dummyPort, 0, "");
 	geo->setDestPort(*ph);
 	geo->initialize();
-      } else {
+      }
+      else {
 	geo->setSourcePort(*ph,0,"");
 	geo->setDestPort(*dummyPort);
 	geo->initialize();
       }
 
-      mygeo[index] = geo;
+      myGeoArray[index] = geo;
       index++;
     }
 
-//printf("Geodesics in %s created.\n",worm->name());
-    return mygeo;
+    return myGeoArray;
 }
 
-char** FSMStateStar::strParser (const char* strings,int& numStr) {
+char** FSMStateStar::strParser(const char* strings,int& numStr) {
     InfString buf;
 
     char** parsedStr = 0;
@@ -360,7 +348,7 @@ char** FSMStateStar::strParser (const char* strings,int& numStr) {
       buf  = "Cannot parse the strings. ";
       buf += "Unmatched double-quote.";
       Error::abortRun(*this,(char*)buf);
-      return NULL;	      
+      return 0;	      
     }
     parsedStr = (char **) new (char *)[numQuote/2];
     
@@ -379,7 +367,7 @@ char** FSMStateStar::strParser (const char* strings,int& numStr) {
 	buf += "Each string must be embraced in ";
 	buf += "a pair of double-quotes.";
 	Error::abortRun(*this,(char*)buf);
-	return NULL;
+	return 0;
       }
       start++;
       end = start;
@@ -403,6 +391,7 @@ char** FSMStateStar::strParser (const char* strings,int& numStr) {
 double* FSMStateStar::str2values (const char* string,int& numValues) {
     InfString buf;
     int start = 0;
+    int index;
 
     numValues = 0;
     while (1) {
@@ -417,7 +406,7 @@ double* FSMStateStar::str2values (const char* string,int& numValues) {
     double* values = new double[numValues];
 
     start = 0;
-    for (int index=0; index<numValues; index++) {
+    for (index=0; index<numValues; index++) {
       while (string[start] == ' ') start++;
 
       buf ="";
@@ -426,10 +415,10 @@ double* FSMStateStar::str2values (const char* string,int& numValues) {
 	start++;
       }
 
-      if(Tcl_ExprDouble(myInterp, (char*)buf, &(values[index])) != TCL_OK) {
+      if (Tcl_ExprDouble(myInterp, (char*)buf, &(values[index])) != TCL_OK) {
 	Error::abortRun(*this,"Cannot convert the string into a float array.");
 	delete [] values;
-	return NULL;
+	return 0;
       }
     }
 
@@ -437,15 +426,16 @@ double* FSMStateStar::str2values (const char* string,int& numValues) {
 }
 
 int FSMStateStar::doAction (int) {
-    Error::abortRun(*this,"doAction() is virtual and needs to be ",
+    Error::abortRun(*this, "doAction() is virtual and needs to be ",
 		    "redefined in derived class.");
     return FALSE;
 }
 
 void FSMStateStar::printOut () {
+    int indx;
     printf("state with name : %s\n",this->name());
     printf("numConds = %d\n",numConds);
-    for (int indx=0; indx<numConds; indx++) { 
-      printf("condition %d : %s\n",indx,parsedCond[indx]);
+    for (indx = 0; indx < numConds; indx++) { 
+      printf("condition %d : %s\n", indx, parsedCond[indx]);
     }
 }
