@@ -82,12 +82,6 @@ initCode {
 	addGlobal(s56xSemaphores,"s56xSemaphores");
         addGlobal("#define S56X_MAX_POLL 10000000","S56X_MAX_POLL");
 	addMainInit(s56xSemaphoresInit(commCount/24 + 1),"s56xSemaphoresInit");
-#ifdef PTSOL2
-	addMainInit("	sigset(SIGUSR1,s56xSignal);","s56x_sigset");
-	addMainInit("	dsp->intr=sbusMemHostIntr;","s56x_dspintr");
-#else
-	addMainInit("   signal(SIGUSR1,s56xSignal);");
-#endif
 	CGCXBase::initCode();
 	s56xSide->lookupEntry("buffer",bufferPtr);
 	s56xSide->lookupEntry("bufferSemaphore",semaphorePtr);
@@ -97,6 +91,12 @@ initCode {
 }
 wrapup {
     CGCXBase::wrapup();
+#ifdef PTSOL2
+	addMainInit("	sigset(SIGUSR1,s56xSignal);","s56x_sigset");
+	addMainInit("	dsp->intr=sbusMemHostIntr;","s56x_dspintr");
+#else
+	addMainInit("   signal(SIGUSR1,s56xSignal);");
+#endif
     addMainInit(loadDSPSymbols(s56xSide->bufferName()));
 }
 
