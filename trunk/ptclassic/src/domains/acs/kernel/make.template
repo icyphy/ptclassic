@@ -41,8 +41,9 @@ include $(CONFIG)
 
 # Include path
 CGKERNEL = 	$(ROOT)/src/domains/cg/kernel
+SDFKERNEL = 	$(ROOT)/src/domains/sdf/kernel
 
-INCL =		-I$(CGKERNEL) -I$(KERNDIR)
+INCL =		-I$(CGKERNEL) -I$(SDFKERNEL) -I$(KERNDIR)
 
 # Library name
 LIB=libacs.$(LIBSUFFIX)
@@ -54,6 +55,7 @@ HDRS= \
 	ACSPortHole.h \
 	ACSScheduler.h \
 	ACSStar.h \
+	ACSTarget.h \
 	ACSWormhole.h \
 	# ACSGeodesic.h
 
