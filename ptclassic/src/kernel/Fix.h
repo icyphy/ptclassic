@@ -1,10 +1,6 @@
 #ifndef _Fix_h
 #define _Fix_h 1
 
-#ifdef __GNUG__
-#pragma interface
-#endif
-
 /**************************************************************************
 Version identification:
 $Id$
@@ -82,13 +78,18 @@ access to the flag.
 
 **************************************************************************/
 
+#ifdef __GNUG__
+#pragma interface
+#endif
+
 class ostream;
 class Precision;
 typedef unsigned short uint16;
 
+// Define uint32 and int32 data types
 #if defined(PTALPHA)
 typedef unsigned int uint32;
-typedef int int32;
+typedef long int32;		// used to be defined as int; see port.h
 #else
 typedef unsigned long  uint32;
 typedef long int32;
