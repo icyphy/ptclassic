@@ -59,7 +59,11 @@ extern "C" {
 
 class Random {
 protected:
-	double unif01() { return double(rand())/2147483648.0;}
+#ifdef PT_NT4VC
+    double unif01() { return double(rand())/RAND_MAX;}
+#else
+    double unif01() { return double(rand())/2147483648.0;}
+#endif
 public:
 	virtual double operator()() = 0;
 };
