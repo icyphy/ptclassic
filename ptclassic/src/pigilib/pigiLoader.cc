@@ -156,8 +156,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif /* ! __GNUG__ */
 #endif /* mips */
 
-
-
 // root of Ptolemy source/lib directory
 static const char* ptolemyRoot = 0;
 // a temporary file name for compiler errors
@@ -191,9 +189,7 @@ static void strcpyLC (char* out, const char* in) {
 
 static int noPermission (const char* msg, const char* file) {
 	StringList sl = msg;
-        sl += file;
-	sl += ": ";
-	sl += sys_errlist[errno];
+	sl << file << ": " << sys_errlist[errno];
 	ErrAdd (sl);
 	return FALSE;
 }
@@ -290,22 +286,33 @@ static int compile (const char* name, const char* idomain, const char* srcDir,
 	return TRUE;
 }
 
-static char* genObjDir (const char* src) {
-	char buf[512];
-	char* p = buf;
+// Replace the last occurrence of the "src" sub-directory with "obj.$ARCH"
+static char* genObjDir (const char* srcDirStr) {
+	char* srccopy = new char[ strlen(srcDirStr) + 1 ];
+	strcpy(srccopy, srcDirStr);
+	char* objDirStr = 0;
 
-	while (*src) {
-		if (*src == '/' && strncmp (src, "/src/", 5) == 0) {
-			strcpy (p, "/obj.");
-			strcpy (p + 5, ARCH);
-			strcat (p, "/");
-			p += 6 + strlen (ARCH);
-			src += 5;
-		}
-		else *p++ = *src++;
+	// Search for src sub-directory
+	char* srcloc = strstr(srccopy, "/src/");
+	// If found, substitute last occurrence of "/src/" with "/obj.$ARCH/"
+	if ( srcloc ) {
+	  char* nextsrcloc;
+	  while ( (nextsrcloc = strstr(srcloc, "/src/")) ) {
+	    srcloc = nextsrcloc;
+	  }
+	  *srcloc = 0;
+	  StringList temp = srccopy;
+	  temp << "/obj." << ARCH << "/"; // replace "/src/" with "/obj.$ARCH/"
+	  temp << &srcloc[5];		  // copy rest of source directory
+	  objDirStr = savestring(temp);
+	  delete [] srccopy;
 	}
-	*p = 0;
-	return savestring (buf);
+	// Otherwise, return the copy of the source directory
+	else {
+	  objDirStr = srccopy;
+	}
+
+	return objDirStr;
 }
 
 // Function to initialize the loader
@@ -332,12 +339,12 @@ extern "C" void
 KcDoStartupLinking() {
 	ifstream lstream(".pigilink");
 	if (lstream) {
-		const int bufsize = 1024;
-		char buf[bufsize], *p;
+		const int BUFLEN = 2048;
+		char buf[BUFLEN], *p;
 		strcpy(buf, "permlink ");
 		p = buf + strlen(buf);
 		PrintDebug("processing .pigilink file");
-		lstream.getline(p, bufsize-10);
+		lstream.getline(p, BUFLEN-10);
 		PrintDebug(buf);
 		if (Linker::multiLink(p, 1))
 			PrintDebug("link successful");
@@ -372,7 +379,7 @@ static const char *preprocProg[] = { "", "ptlang", "pepp", "islang" };
 // Here is the function that loads in a star!
 // name = username of the star
 // idomain = domain of the star
-// srcDir = star source directory
+// srcDirStr = star source directory
 static int
 compileAndLink (const char* name, const char* idomain, const char* srcDirStr,
 		int preproc, int permB, const char* linkArgs) {
