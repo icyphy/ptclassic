@@ -136,8 +136,8 @@ void SDFTarget::setup() {
 }
 
 
-//This function is to be called only from a wormhole, and would return TRUE 
-//only if the wormhole has no inputs in which case it should trigger itself
+// This function is called from a wormhole, and returns TRUE if the
+// wormhole has no inputs
 int SDFTarget :: selfFiringRequested(){
 if (noOfInputs() == 0) return TRUE;
 else return FALSE; 
