@@ -10,6 +10,9 @@ defstar {
 .pp
 This star implements an all pole filter with coefficients that
 are periodically updated
+.Id "allpole filter"
+.Id "filter, allpole"
+.Id "filter, IIR"
 from the outside.  The \fIblockSize\fR parameter tells how often
 the updates occur.  It is an integer specifying how may input samples
 should be processed using each set of coefficients.  The \fIorder\fR

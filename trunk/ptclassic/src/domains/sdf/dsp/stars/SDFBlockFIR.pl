@@ -10,7 +10,10 @@ defstar {
 .pp
 This star implements an FIR filter with coefficients that
 are periodically updated
-from the outside.  The \fIblockSize\fR parameter tells how often
+from the outside.
+.Id "filter, FIR, block"
+.Id "FIR filter, block"
+The \fIblockSize\fR parameter tells how often
 the updates occur.  It is an integer specifying how may input samples
 should be processed using each set of coefficients.  The \fIorder\fR
 parameter tells how many coefficients there are.

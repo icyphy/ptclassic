@@ -8,6 +8,10 @@ D. G. Messerschmitt
 .H1 "Introduction"
 .pp
 Synchronous dataflow (SDF)
+.Id "synchronous dataflow"
+.Id "SDF"
+.Id "SDF domain"
+.Id "domain, SDF"
 is a data-driven, statically scheduled domain in \*(PT.
 It is a direct implementation of the techniques given in [1] and [2].
 "Data-driven" means that the availability of
@@ -15,11 +19,14 @@ It is a direct implementation of the techniques given in [1] and [2].
 at the inputs of a star enables it.
 Stars with no input ports are always enabled.
 "Statically scheduled" means that the firing order of the stars
+.Id "statically scheduled"
 is determined once, during the startup phase.
 The firing order will be periodic.
 .H2 "Delays"
 .pp
 In the SDF domain, a unit delay is simply an initial particle on an arc.
+.Id "delays, SDF"
+.Id "SDF delays"
 This initial particle may enable a star, assuming the star requires
 one particle in order to fire.
 Hence, to avoid deadlock, all feedback loops much have delays.
@@ -30,6 +37,8 @@ For most particle types, the initial value will be zero.
 .H2 "Number of iterations"
 .pp
 When running an SDF universe or wormhole, the number of iterations
+.Id "iterations (SDF)"
+.Id "SDF iterations"
 may not be the same as the number of times a star in the system is fired.
 The number of invocations of each star depends
 on all the stars in the universe or wormhole.
@@ -46,6 +55,7 @@ Consider for example a universe A-->FFT-->B,
 where FFT is the
 .c ComplexFFT
 star.
+.Ie "FFT"
 This star consumes some number of particles (given by its \fIsize\fR parameter)
 and produces some number of tokens ($2 sup n$, where
 $n$ is its \fIorder\fR parameter).
@@ -59,6 +69,8 @@ then this system should be run through just one iteration.
 It is not always possible to find a consistent number of firings
 for all stars in the system that returns the geodesics to their
 original state.
+.Id "inconsistences, SDF"
+.Id "SDF inconsistences"
 For instance, suppose that the input and output of the ComplexFFT
 are added together using a ComplexAdd star.
 Also suppose that $2 sup n ~!=$ \fIsize\fR.
@@ -69,6 +81,8 @@ and refuses to run the system.
 It is sometimes possible to run the system under the DDF domain.
 .H1 "Writing SDF stars"
 .pp
+.Id "writing SDF stars"
+.Id "SDF, writing stars"
 All stars in the SDF domain
 must follow the basic SDF principle:
 the number of
@@ -94,8 +108,8 @@ is used to make this information available to the scheduler:
 .(b
 	input.setSDFParams (int(size), int(size)-1);
 .)b
-.IE "SDF parameters"
-.IE "setSDFParams"
+.Id "SDF parameters"
+.Id "setSDFParams"
 .IE "past particles"
 .IE "consumed particles"
 .IE "produced particles"
@@ -127,6 +141,8 @@ section of the Almagest on the \*(PT preprocessor language.
 .pp
 The SDF scheduler determines the order of execution of stars
 in a system at start time.
+.Id "SDF scheduler"
+.Id "scheduler, SDF"
 It performs most of its computation during its setup() phase.
 It exactly implements the method described in [1] for sequential schedules.
 .UH "References"
