@@ -105,6 +105,7 @@ void SDFScheduler :: runOnce () {
 	}
 }
 
+extern StringList checkConnect (Galaxy&);
 
 	////////////////////////////
 	// setup
@@ -116,6 +117,14 @@ int SDFScheduler :: setup (Block& block) {
 	numItersSoFar = 0;
 	numIters = 1;			// reset the member "numIters"
 	invalid = FALSE;
+
+// check connectivity
+	StringList msg = checkConnect (galaxy);
+	if (msg.size() > 0) {
+		errorHandler.error (msg);
+		invalid = TRUE;
+		return FALSE;
+	}
 
 	// initialize galaxy and all contents.
 	galaxy.initialize();
