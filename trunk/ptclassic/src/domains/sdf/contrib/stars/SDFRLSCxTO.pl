@@ -69,6 +69,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	        name {TO}
 		type {complex}
 	}
+	ccinclude { <stdio.h> }
 	protected {
 	        int cyclecounter;
 		int NumberElements;

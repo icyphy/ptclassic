@@ -10,7 +10,7 @@ account for that in the initialization and the wrapup file saving.
 	version { $Id$ }
 	author { U. Trautwein and A. Richter }
 	copyright {
-Copyright (c) 1996-1997 Technical University of Ilmenau.
+Copyright (c) 1996-%Q% Technical University of Ilmenau.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -61,6 +61,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {output}
 		type {complex}
 	}
+	ccinclude { <stdio.h> }
 	protected {
 		int NumberElements;
 		Complex *p_matrix;
