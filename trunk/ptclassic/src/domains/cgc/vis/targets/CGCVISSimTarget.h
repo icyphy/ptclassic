@@ -1,3 +1,5 @@
+#ifndef _CGCVISSimTarget_h
+#define _CGCVISSimTarget_h 1
 /******************************************************************
 Version identification:
 $Id$
@@ -47,7 +49,7 @@ protected:
 	int compileCode();
 };
 
-
+#endif
 
 
 
