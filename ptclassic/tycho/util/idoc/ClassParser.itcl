@@ -920,7 +920,7 @@ body ::tycho::IDocSys::addClassComment {class expl} {
     set explList [split $expl "\n"]
     set docTag desc
     foreach explLine $explList {
-        if [regexp {^ @([A-Za-z]+):*[ 	]+(.*)} \
+        if [regexp {^[ 	]*@([A-Za-z]+):*[ 	]+(.*)} \
 		$explLine dummy docTag docValue] {
 	    set explLine $docValue
             set docTag [formatTag $docTag]
