@@ -72,15 +72,6 @@ int MDSDFPortHole::colFiringsPerIteration() {
   return int(((MDSDFStar*)parent())->colRepetitions);
 }
 
-Geodesic* MDSDFPortHole::allocateGeodesic() {
-  char buf[80];
-  strcpy(buf, "Node_");
-  strcat(buf, name());
-  LOG_NEW; MDSDFGeodesic *g = new MDSDFGeodesic;
-  g->setNameParent(hashstring(buf),parent());
-  return (Geodesic*)g;
-}
-
 PtMatrix* MDSDFPortHole::getInput(int, int) {
   Error::abortRun("getInput() called on a porthole which is not an InMDSDFPort");
   return (PtMatrix*)0;
