@@ -113,9 +113,9 @@ extern "C" {
 	  code {
 		// generate names for Matlab versions of input matrix names
 		for ( int i = 0; i < numMatrices; i++ ) {
-		    char numstr[16];
+		    char numstr[32];
 		    matNames[i] = baseName;
-		    sprintf(numstr, "%d", i+1);
+		    sprintf(numstr, "_%d", i+1);
 		    matNames[i] << numstr;
 		}
 	  }
@@ -127,24 +127,46 @@ extern "C" {
 	  type { void }
 	  arglist { "(InfString& commandString, InfString matlabInputNames[], int numInputs, const char *matlabFunction, InfString matlabOutputNames[], int numOutputs)" }
 	  code {
+		// replace pound signs in matlabFunction with underscores
+		int length = strlen(matlabFunction);
+		char *matlabFragment = new char[length + 1];
+		strcpy(matlabFragment, matlabFunction);
+		for (int i = 0; i < length; i++ ) {
+		  if ( matlabFragment[i] == '#' ) {
+		    matlabFragment[i] = '_';
+		  }
+		}
+
 		// create the command to be sent to the Matlab interpreter
 		commandString = "";
-		if ( numOutputs > 0 ) {
-		  commandString << "[" << matlabOutputNames[0];
-		  for ( int i = 1; i < numOutputs; i++ ) {
-		    commandString << ", " << matlabOutputNames[i];
-		  }
-		  commandString << "] = ";
+		if ( strchr(matlabFragment, '=') != 0 ) {
+		  commandString << matlabFragment;
 		}
-		commandString << matlabFunction;
-		if ( numInputs > 0 ) {
-		  commandString << "(" << matlabInputNames[0];
-		  for ( int i = 1; i < numInputs; i++ ) {
-		    commandString << ", " << matlabInputNames[i];
+		else {
+		  if ( numOutputs > 0 ) {
+		    commandString << "[" << matlabOutputNames[0];
+		    for ( int i = 1; i < numOutputs; i++ ) {
+		      commandString << ", " << matlabOutputNames[i];
+		    }
+		    commandString << "] = ";
 		  }
-		  commandString << ")";
+		  commandString << matlabFragment;
+		  if ( ( strchr(matlabFragment, '(') == 0 ) &&
+		       ( numInputs > 0 ) ) {
+		    commandString << "(" << matlabInputNames[0];
+		    for ( int i = 1; i < numInputs; i++ ) {
+		      commandString << ", " << matlabInputNames[i];
+		    }
+		    commandString << ")";
+		  }
 		}
-		commandString << ";";		// suppress textual output
+
+		// suppress textual output by adding a semicolon at the end
+		if ( strchr(matlabFragment, ';') == 0 ) {
+		  commandString << ";";
+		}
+
+		delete [] matlabFragment;
 	  }
 	}
 
