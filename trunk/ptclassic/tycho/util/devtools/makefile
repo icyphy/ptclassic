@@ -42,7 +42,7 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 # Sub directories to run make in.
-DIRS =	
+DIRS =	adm bin demos doc test
 
 TCL_SRCS = \
 	JRPCServer.tcl
@@ -76,5 +76,3 @@ all install: sources $(MISC_SRCS) tclIndex
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
-
-
