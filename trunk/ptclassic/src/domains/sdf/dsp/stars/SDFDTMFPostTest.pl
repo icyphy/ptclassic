@@ -81,15 +81,16 @@ internal state to store the second-to-last valid integer
 		// otherwise, return FALSE
 		int retval = FALSE;
 		int inputValue = int(initialLastInput);
+		int lastValue = int(last);
 		if ( int(valid%0) ) {
 		  inputValue = int(input%0);
-		  retval = ( inputValue == int(last) &&
-		             int(last) != int(secondToLast) );
+		  retval = ( inputValue == lastValue &&
+		             lastValue != int(secondToLast) );
 		}
 		output%0 << retval;
 
 		// Update the last and second-to-last input storage
-		secondToLast = int(last);
+		secondToLast = lastValue;
 		last = inputValue;
 	}
 }
