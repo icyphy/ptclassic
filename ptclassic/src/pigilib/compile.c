@@ -178,7 +178,7 @@ ParamListType *pListPtr;
     }
     strcat(commandBuf, ")\n");
     ERR_IF1(!Emit(commandBuf));
-    ERR_IF1(!KcInstance(name, ako));
+    ERR_IF1(!KcInstance(name, ako, pListPtr));
     return(TRUE);
 }
 #undef COMMANDLEN
@@ -229,7 +229,7 @@ ParamListType *pListPtr;
     }
     strcat(commandBuf, ")\n");
     ERR_IF1(!Emit(commandBuf));
-    ERR_IF1(!KcInstance(name, ako));
+    ERR_IF1(!KcInstance(name, ako, pListPtr));
     return(TRUE);
 }
 #undef COMMANDLEN
