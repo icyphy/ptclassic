@@ -25,6 +25,14 @@ LIB =		libsdfcontribstars.$(LIBSUFFIX)
 # Where star doc files go
 STARDOCDIR = 	../../doc/stars
 
+# supporting C++ files for stars
+LIB_SRCS= \
+Decoder.cc \
+Encoder.cc \
+Interp.cc \
+Wireless.cc \
+nb_fft.cc
+
 # source files for all stars, using preprocessor
 PL_SRCS= \
 SDFCIIDGaussian.pl \
@@ -40,24 +48,16 @@ SDFPowerEst.pl \
 SDFPowerEstCx.pl \
 SDFQPSK.pl \
 SDFQPSK2.pl \
-SDFReadVar.pl \
 SDFRfft.pl \
-SDFSharedMem.pl \
 SDFSineGen.pl \
 SDFTWTA.pl \
 SDFVDecoder.pl \
 SDFVEncoder.pl \
 SDFVariance.pl \
 SDFWirelessChannel.pl \
+SDFSharedMem.pl \
+SDFReadVar.pl \
 SDFWriteVar.pl
-
-# supporting C++ files
-LIB_SRCS= \
-Decoder.cc \
-Encoder.cc \
-Interp.cc \
-Wireless.cc \
-nb_fft.cc
 
 # The .cc files
 SRCS =		$(LIB_SRCS) $(PL_SRCS:.pl=.cc)
