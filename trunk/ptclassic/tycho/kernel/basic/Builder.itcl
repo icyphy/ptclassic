@@ -177,7 +177,7 @@ body ::tycho::Builder::buildSubDirectories {} {
 # Create the Tycho class diagram.
 #
 body ::tycho::Builder::classDiagram {} {
-    global TYCHO
+    global TYCHO errorInfo
     puts "Creating [file join $TYCHO doc tychoClasses.dag]"
     update
     if { [info command tychoStandardDAG] == {} } {
@@ -186,9 +186,9 @@ body ::tycho::Builder::classDiagram {} {
     set savedir [pwd]
     cd [file join $TYCHO doc]
 
-    if [ catch {tychoStandardDAG} errmsg] {
+    if [ catch {::tychoStandardDAG} errmsg] {
         cd $savedir
-        error "errmsg"
+        error "$errmsg $errorInfo"
     }
     cd $savedir
 }
