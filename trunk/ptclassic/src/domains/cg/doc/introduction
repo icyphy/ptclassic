@@ -1,0 +1,39 @@
+.H1 "Introduction"
+.pp
+The
+.c CG
+domain and derivative domains are used to generate code rather
+than run simulations.
+Only the derivative domains are of practical use for generating
+code (and none are included in this release).
+The stars in the
+.c CG
+domain itself can be thought of as ``comment generators''; they
+are useful for testing and debugging schedulers and for little else.
+The
+.c CG
+domain is intended as a model and a collection of base classes
+for derivative domains.
+This section, therefore, documents the common features and general
+structure of all code generation domains.
+.pp
+The principle mechanism is to define
+.c codeblock s
+that are processed and written to a code file, which can then
+be compiled or assembled.
+These code blocks can be parsed and edited in ways that depend
+on the target processor.  In the generic
+.c CG
+domain, no such editing occurs.
+.pp
+A key feature of code generation domains is the notion of a target
+architecture.
+Every application must have a user-specified target
+architecture, selected from a set of targets supported
+by the user-selected domain.
+Every target architecture is derived from the base class
+.c Target ,
+and controls such operations as scheduling, compiling, assembling,
+and downloading code.
+Since it controls scheduling, multiprocessor architectures can be
+supported with automated task partitioning and synchronization.
