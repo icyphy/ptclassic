@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1996-1997 The Regents of the University of California.
+# @Copyright (c) 1996-%Q% The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -272,6 +272,13 @@ body ::tycho::Monitor::constructor {args} {
 	set itk_option(-autodestroy) 1
 	configure -autodestroy 1
     }
+
+    # Register this window so it appears on the menus
+    # FIXME: This should check that the "monitor" mode actually exists
+    ::tycho::register window Monitor $this \
+            -label [tycho::autoName "Monitor "] \
+            -mode monitor
+
 }
 
 #######################################################################
@@ -293,6 +300,9 @@ body ::tycho::Monitor::destructor {} {
         $itk_component(text) markUnmodified
     }
     catch {unset ::tycho::Monitor::$statusVariableName}
+b
+    # Deregister this window
+    ::tycho::deregister window Monitor $this
 }
 
 
@@ -317,6 +327,130 @@ body ::tycho::Monitor::autoDestroy { {time 0} } {
     putStatus "Closing..."
     catch "safeEval [$this statusbar cget -closecommand]"
     #catch "destroy [winfo toplevel $this]"
+}
+
+#######################################################################
+#### execProcess
+# This simply calls the non-graphical Exec's execProcess. Also, it
+# reads the autoDestroy flag and determins whether this widget should
+# automatically exit upon successful execution.
+#
+body ::tycho::Monitor::execProcess { {type {}} {line {}} } {
+    # By default we see message "Press ENTER ..."
+    putStatus ""
+    puts "errorCount=$errorCount errorList=$errorList"
+    set errorList {}
+    set errorCount -1
+    set previousErrorLine -1
+
+    # Need to keep track of internal line number so that user can
+    # concurrently click at text while text is being updated.
+    set monitorLine 0
+    # Change cursor to busy
+    set oldCursor [lindex [config -cursor] end]
+    config -cursor {watch}
+
+    # clear text widget
+    $itk_component(history) configure -readonly 0
+    $itk_component(history) clear
+    $itk_component(history) configure -readonly 1
+    # clear text variable
+    $this clearHistory
+
+    toolbar enable stop
+    toolbar disable start
+    toolbar disable commandtoexec
+    toolbar disable dirtoexecfrom
+
+    ::tycho::Exec::execProcess \
+            [toolbar get commandtoexec] [toolbar get dirtoexecfrom]
+    set retstatus [$this getStatusWait]
+
+    toolbar disable stop
+    toolbar enable start
+    toolbar enable commandtoexec
+    toolbar enable dirtoexecfrom
+    if {[llength $errorList]!=0} {toolbar enable next}
+
+    config -cursor $oldCursor
+    if {$itk_option(-autodestroy) > 0} {
+        if {$retstatus=="normal"} {
+            updateStatus
+            # If returned correctly, it's okay to exit this window
+	    # Wrap this in a catch in case we already destroyed the
+	    # parent window, which will cause this window to be destroyed.
+	    # see tycho/editors/textedit/test/testEditC.itcl
+            toolbar disable commandtoexec
+            toolbar disable dirtoexecfrom
+            autoDestroy
+        } else {
+            putStatus "<<NOTE: exit status is $retstatus,\
+                    will not autodestroy.>>"
+        }
+    }
+    # Make sure everything's done, then reset the error count
+    set errorCount -1
+    return
+}
+
+#######################################################################
+#### insertLine
+# In the constructor, doEachLine is set as "$this insertLine $line" so that
+# during each input, this method will be called. This method is responsible
+# for updating the history.text widget interactively, as well as colorization
+# of the error and warning messages. Later on, this functionaility will
+# be moved to MonitorC and MonitorJava to handle different coloring and
+# interaction.
+#
+body ::tycho::Monitor::insertLine {line} {
+    set history $itk_component(history)
+    set text $history.text
+    #set monitorLine [lindex [split [$text index insert] .] 0]
+    incr monitorLine
+
+    # Need to lock up the output of the executable
+    $history configure -readonly 0
+    # The following line causes trouble when the user changes the
+    # cursor position!
+    #$itk_component(text) insertData "$line"
+    $text insert $monitorLine.0 $line
+    $history center
+    $history configure -readonly 1
+
+    # Now, if we have to, modify the line (ie. change color, etc)
+    # The first regexp is for GNU make,the second for MS VC++ nmake.
+    if {([regexp {^([^:]+):([0-9]+): (.+)$} $line tmp fname editorLine msg] \
+            || [regexp {^([^(]+)\(([0-9]+)\) : (.+)$} $line \
+            tmp fname editorLine msg] ) \
+            && $previousErrorLine!=$editorLine} {
+        set previousErrorLine $editorLine
+
+
+
+        # (windows)Deal with pathnames that have backslashes as file separators 
+        set fname [join [file split $fname] /]
+
+        incr errorCount
+        # This ensures only one line per many lines of error output
+        if {[regexp {(warning):* (.+)} $msg]} {
+            #FIXME: Change me to preference
+            set color {purple}
+        } else {
+            #FIXME: Change me to preference
+            set color {red}
+            lappend errorList [list $monitorLine $editorLine $fname]
+        }
+        $text tag add error$errorCount \
+                $monitorLine.0 $monitorLine.[expr [string length $line]-1]
+        $text tag configure error$errorCount -foreground $color -underline 1
+        # Two actions to the error binding:
+        # 1) jump to the lines (and highlight)
+        # 2) update internal count, so Next button will know where to jump
+        $text tag bind error$errorCount <Double-Button-1> \
+                "$this setErrorCount $errorCount;\
+                $this jumpToLine $monitorLine $editorLine $fname"
+
+    }
 }
 
 #######################################################################
@@ -380,60 +514,6 @@ body ::tycho::Monitor::jumpToLine {monitorLine editorLine fname} {
 }
 
 
-#######################################################################
-#### insertLine
-# In the constructor, doEachLine is set as "$this insertLine $line" so that
-# during each input, this method will be called. This method is responsible
-# for updating the history.text widget interactively, as well as colorization
-# of the error and warning messages. Later on, this functionaility will
-# be moved to MonitorC and MonitorJava to handle different coloring and
-# interaction.
-#
-body ::tycho::Monitor::insertLine {line} {
-    set history $itk_component(history)
-    set text $history.text
-    #set monitorLine [lindex [split [$text index insert] .] 0]
-    incr monitorLine
-
-    # Need to lock up the output of the executable
-    $history configure -readonly 0
-    # The following line causes trouble when the user changes the
-    # cursor position!
-    #$itk_component(text) insertData "$line"
-    $text insert $monitorLine.0 $line
-    $history center
-    $history configure -readonly 1
-
-    # Now, if we have to, modify the line (ie. change color, etc)
-    # The first regexp is for GNU make,the second for MS VC++ nmake.
-    if {([regexp {^([^:]+):([0-9]+): (.+)$} $line tmp fname editorLine msg] \
-            || [regexp {^([^(]+)\(([0-9]+)\) : (.+)$} $line \
-            tmp fname editorLine msg] ) \
-            && $previousErrorLine!=$editorLine} {
-        set previousErrorLine $editorLine
-
-        incr errorCount
-        # This ensures only one line per many lines of error output
-        if {[regexp {(warning): (.+)} $msg]} {
-            #FIXME: Change me to preference
-            set color {purple}
-        } else {
-            #FIXME: Change me to preference
-            set color {red}
-            lappend errorList [list $monitorLine $editorLine $fname]
-        }
-        $text tag add error$errorCount \
-                $monitorLine.0 $monitorLine.[expr [string length $line]-1]
-        $text tag configure error$errorCount -foreground $color -underline 1
-        # Two actions to the error binding:
-        # 1) jump to the lines (and highlight)
-        # 2) update internal count, so Next button will know where to jump
-        $text tag bind error$errorCount <Double-Button-1> \
-                "$this setErrorCount $errorCount;\
-                $this jumpToLine $monitorLine $editorLine $fname"
-
-    }
-}
 
 #######################################################################
 #### setErrorCount
@@ -446,63 +526,6 @@ body ::tycho::Monitor::setErrorCount {count} {
 }
 
 
-#######################################################################
-#### execProcess
-# This simply calls the non-graphical Exec's execProcess. Also, it
-# reads the autoDestroy flag and determins whether this widget should
-# automatically exit upon successful execution.
-#
-body ::tycho::Monitor::execProcess { {type {}} {line {}} } {
-    # By default we see message "Press ENTER ..."
-    putStatus ""
-
-    # Need to keep track of internal line number so that user can
-    # concurrently click at text while text is being updated.
-    set monitorLine 0
-    # Change cursor to busy
-    set oldCursor [lindex [config -cursor] end]
-    config -cursor {watch}
-
-    # clear text widget
-    $itk_component(history) configure -readonly 0
-    $itk_component(history) clear
-    $itk_component(history) configure -readonly 1
-    # clear text variable
-    $this clearHistory
-
-    toolbar enable stop
-    toolbar disable commandtoexec
-    toolbar disable dirtoexecfrom
-
-    ::tycho::Exec::execProcess \
-            [toolbar get commandtoexec] [toolbar get dirtoexecfrom]
-    set retstatus [$this getStatusWait]
-
-    toolbar disable stop
-    toolbar enable commandtoexec
-    toolbar enable dirtoexecfrom
-    if {[llength $errorList]!=0} {toolbar enable next}
-
-    config -cursor $oldCursor
-    if {$itk_option(-autodestroy) > 0} {
-        if {$retstatus=="normal"} {
-            updateStatus
-            # If returned correctly, it's okay to exit this window
-	    # Wrap this in a catch in case we already destroyed the
-	    # parent window, which will cause this window to be destroyed.
-	    # see tycho/editors/textedit/test/testEditC.itcl
-            toolbar disable commandtoexec
-            toolbar disable dirtoexecfrom
-            autoDestroy
-        } else {
-            putStatus "<<NOTE: exit status is $retstatus,\
-                    will not autodestroy.>>"
-        }
-    }
-    # Make sure everything's done, then reset the error count
-    set errorCount -1
-    return
-}
 
 #######################################################################
 #### updateStatus
@@ -581,6 +604,9 @@ body ::tycho::Monitor::initializeToolbar {toolbar} {
     $toolbar button stop -text {Stop <Esc>} \
             -description {Stop execution} \
             -command "$this killProcess" -state disabled
+    $toolbar button start -text {Start <Ret>} \
+            -description {Start execution} \
+            -command "$this execProcess" -state normal
     $toolbar button help -text {Help <h>} \
             -description {Help on Monitor} \
             -command "$this help"
