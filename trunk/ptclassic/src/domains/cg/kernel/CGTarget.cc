@@ -93,24 +93,29 @@ int CGTarget::setup(Galaxy& g) {
 
 	// if inside a wormhole, proceed to generate and download
 	// code now.
-	if(g.parent()) {
-		BlockPortIter nextPort(g);
-		PortHole* p;
-		beginIteration(-1,0);
-		// generate wormhole inputs
-		while ((p = nextPort++) != 0) {
-			if (p->isItInput()) wormInputCode(p->newConnection());
-		}
-		mySched()->compileRun();
-		nextPort.reset();
-		// generate wormhole outputs
-		while ((p = nextPort++) != 0) {
-			if (p->isItOutput()) wormOutputCode(p->newConnection());
-		}
-		endIteration(-1,0);
-		return wormLoadCode();
+	if(g.parent()) return wormCodeGenerate(g);
+	else return TRUE;
+}
+
+// default code generation for a wormhole.  This produces an infinite
+// loop that reads from the inputs, processes the schedule, and generates
+// the outputs.
+int CGTarget :: wormCodeGenerate(Galaxy&g) {
+	BlockPortIter nextPort(g);
+	PortHole* p;
+	beginIteration(-1,0);
+	// generate wormhole inputs
+	while ((p = nextPort++) != 0) {
+		if (p->isItInput()) wormInputCode(p->newConnection());
 	}
-	return TRUE;
+	mySched()->compileRun();
+	nextPort.reset();
+	// generate wormhole outputs
+	while ((p = nextPort++) != 0) {
+		if (p->isItOutput()) wormOutputCode(p->newConnection());
+	}
+	endIteration(-1,0);
+	return wormLoadCode();
 }
 
 void CGTarget :: start() {
