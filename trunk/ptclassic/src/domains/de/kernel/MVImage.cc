@@ -1,3 +1,4 @@
+static const char file_id[] = "MVImage.cc";
 // filename:		MVImage.cc
 // author:			Paul Haskell
 // creation date:	7/10/91
@@ -8,8 +9,8 @@
 void MVImage::init()
 {
 	if (blocksize <= 0) blocksize = 8;
-	horzData = new char[fullSize];
-	vertData = new char[fullSize];
+	LOG_NEW; horzData = new char[fullSize];
+	LOG_NEW; vertData = new char[fullSize];
 } // end MVImage::init()
 
 
@@ -69,8 +70,8 @@ BaseImage* MVImage::fragment(int cellSz, int Num) const
 	retval->startPos = startPos + Num*arrSz;
 	retval->size = min(startPos+size-retval->startPos, arrSz);
 	delete retval->horzData; delete retval->vertData;
-	retval->horzData = new char[retval->size];
-	retval->vertData = new char[retval->size];
+	LOG_NEW; retval->horzData = new char[retval->size];
+	LOG_NEW; retval->vertData = new char[retval->size];
 
 	int offset = retval->startPos - startPos;
 	copy(retval->size, (unsigned char*) retval->horzData,
@@ -88,8 +89,8 @@ void MVImage::assemble(const BaseImage* bi)
 
 // Are we set up to merge yet?
 	if (size != fullSize) {
-		char* tmpH = new char[fullSize];
-		char* tmpV = new char[fullSize];
+		LOG_NEW; char* tmpH = new char[fullSize];
+		LOG_NEW; char* tmpV = new char[fullSize];
 		for(int t = 0; t < fullSize; t++) {tmpH[t] = tmpV[t] = (char)0;}
 		copy(size, (unsigned char*) tmpH+startPos,
 				(unsigned char*) horzData);
@@ -109,6 +110,6 @@ void MVImage::assemble(const BaseImage* bi)
 } // end MVImage::assemble()
 
 const char* MVImage::dataType() const { return("MVImage"); }
-PacketData* MVImage::clone() const { return new MVImage(*this); }
-PacketData* MVImage::clone(int a) const { return new MVImage(*this, a); }
+PacketData* MVImage::clone() const { LOG_NEW; return new MVImage(*this); }
+PacketData* MVImage::clone(int a) const { LOG_NEW; return new MVImage(*this, a); }
 ISA_FUNC(MVImage,BaseImage);
