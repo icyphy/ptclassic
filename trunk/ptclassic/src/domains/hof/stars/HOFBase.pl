@@ -85,7 +85,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	      MPHIter next(mph);
 	      PortHole *p, *farsideport;
 	      Block *farstar;
-	      while (p = next++) {
+	      while ( (p = next++) ) {
 		if ((farsideport = p->far()) &&
 		    (farstar = farsideport->parent()) &&
 		    (farstar->isA("HOFNop"))) {
@@ -351,7 +351,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  code {
 	    BlockPortIter bpi(*block);
 	    PortHole *p;
-	    while (p = bpi++) {
+	    while ( (p = bpi++) ) {
 	      PortHole *far = p->far();
 	      if (!far) {
 		// This might be a galaxy porthole, which should return something,
@@ -383,13 +383,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	  code {
 	    MultiPortHole *mph;
 	    GenericPort *gp, *gpt;
-	    if (mph = ph->getMyMultiPortHole()) {
+	    if ( (mph = ph->getMyMultiPortHole()) ) {
 	      gp = mph;
 	    } else {
 	      gp = ph;
 	    }
 	    // Get the top-level port that we are connected to
-	    while (gpt = gp->aliasFrom()) {
+
+	    while ( (gpt = gp->aliasFrom()) ) {
 	      gp = gpt;
 	    }
 	    // If the multiporthole did not have an aliasFrom
@@ -397,7 +398,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    // porthole did.
 	    if (gp == mph) {
 	      gp = ph;
-	      while (gpt = gp->aliasFrom()) {
+	      while ( (gpt = gp->aliasFrom()) ) {
 		gp = gpt;
 	      }
 	      // If the original porthole also did not have an aliasFrom,
