@@ -12,13 +12,15 @@ length(steering) invocations you have one complete set of weights
 which can be used e.g. for beam pattern calculation.
 
         }
-	version {@(#)SDFRLSArrayStO.pl	1.0 9/24/96}
-	author { U. Trautwein , A. Richter}
+	version { $Id$ }
+	author { U. Trautwein and A. Richter }
 	copyright {
-Copyright (c) 1996 Technical University of Ilmenau.
+Copyright (c) 1996-1997 Technical University of Ilmenau.
 All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF main library }
+	location { SDF contribution library }
 	inmulti {
 		name {input}
 		type {complex}

@@ -1,17 +1,19 @@
 defstar {
 	name {ConstCx1ofN}
 	domain {SDF}
-	version {@(#)SDFConstCx1ofN.pl	1.0 9/1/96}
+	version { $Id$ }
 	desc {
 Outputs a constant complex value from the array of ComplexValues selected by
 the given ValueIndex.
 	}
-	author { A. Richter, U. Trautwein }
+	author { A. Richter and U. Trautwein }
 	copyright {
-Copyright (c) 1996 Technical University of Ilmenau.
+Copyright (c) 1996-1997 Technical University of Ilmenau.
 All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF main library }
+	location { SDF contribution library }
 	explanation {
 	}
 	ccinclude { "ComplexSubset.h" }

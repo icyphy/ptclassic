@@ -5,14 +5,16 @@ defstar {
 An adaptive antenna array processor using the LMS algorithm.
 The output signals of the antenna elements are taken
 from a bus connected to the input.
-}
-	version {@(#)SDFLMSArray.pl	1.0 9/19/96}
+	}
+	version { $Id$ }
 	author { U. Trautwein }
 	copyright {
-Copyright (c) 1996 Technical University of Ilmenau.
+Copyright (c) 1996-1997 Technical University of Ilmenau.
 All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF main library }
+	location { SDF contribution library }
 	inmulti {
 		name {input}
 		type {complex}
