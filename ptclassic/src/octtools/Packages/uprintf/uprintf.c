@@ -25,6 +25,8 @@ static char SccsId[]="$Id$";
  * 
  */
 /*LINTLIBRARY*/
+
+#ifdef NEED_OLD_USER_FUNCTION
 /*
  * Uprintf - user controllable printf
  *
@@ -34,25 +36,23 @@ static char SccsId[]="$Id$";
  *
  * This file contains an implementation of a portable mechanism for
  * user-definable printf() like functions.  The usage is as follows:
- *
- * #include <varargs.h>
- *
- * user_function(va_alist)
- * va_dcl
- * {
- *    va_list ap;
- *    char *fmt;
- *    char buf[1024];
- *
- *    va_start(ap);
- *    /* Process any interesting prefix parameters */
-/*    fmt = va_arg(ap, char *);
- *    uprintf(buf, fmt, &ap);
- *    /* Do something with `buf' */
-/*    /* Process any remaining parameters */
-/*    va_end(ap);
- * }
  */
+#include <varargs.h>
+user_function(va_alist)
+va_dcl
+{
+   va_list ap;
+   char *fmt;
+   char buf[1024];
+   va_start(ap);
+   /* Process any interesting prefix parameters */
+   fmt = va_arg(ap, char *);
+   uprintf(buf, fmt, &ap);
+   /* Do something with `buf' */
+   /* Process any remaining parameters */
+   va_end(ap);
+}
+#endif /*NEED_OLD_USER_FUNCTION*/
 
 #include "copyright.h"
 #include "port.h"
@@ -262,7 +262,7 @@ va_list *ap;			/* Argument list to parse */
     int upf_f1;			/* First field width         */
     int upf_f2;			/* Second field width        */
     int upf_int;		/* Integer return type       */
-    long upf_long;		/* Long return type          */
+    long upf_long = 0;		/* Long return type          */
     unsigned int upf_uint;	/* Unsigned return type      */
     unsigned long upf_ulong;	/* Unsigned long return type */
     float upf_float;		/* Float return type         */
@@ -272,7 +272,8 @@ va_list *ap;			/* Argument list to parse */
 
     /* Start special processing */
     buf[0] = '\0';
-    while (upf_fmt = upf_parse(upf_fmt, buf, upf_spec, &upf_type, &upf_fnums)) {
+    while ( (upf_fmt = upf_parse(upf_fmt, buf, upf_spec,
+				 &upf_type, &upf_fnums) )) {
 	switch (upf_type) {
 	case UPF_INT:
 	    if (upf_fnums != 1) {
