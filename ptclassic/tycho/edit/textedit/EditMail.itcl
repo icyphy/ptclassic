@@ -64,10 +64,10 @@ class ::tycho::EditMail {
     ####                         public methods                           ####
 
     # Check if sendmail is complete. If so, close this window
-    method autoDestroy { timetowait }
+    method autoDestroy { {timetowait 1000} }
     
     # the command to execute after pressing enter on the entry
-    method entryCommand {entryname _} {}
+    method entryCommand {{entryname {}} {_ {}} }
 
     # Open a help window.  This should be redefined in derived classes.
     method help {}
