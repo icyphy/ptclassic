@@ -1,17 +1,28 @@
 defstar {
     name { SSI }
     domain { CG56 }
-    desc { A generic input/output star the 560001 SSI port. }
+    desc { A generic input/output star the DSP56001 SSI port. }
     version { $Id$ }
     author { Kennard White, Chih-Tsung Huang (ported from Gabriel) }
-    acknowledge { Gabriel author Phil Lapsley. }
+    acknowledge { Gabriel version by Jeff Bier, Phil Lapsley, Eric Guntvedt. }
     copyright { 1992 The Regents of the University of California }
     location { CG56 library }
     explanation {
 .PP
 This star is a generic star to provide input/ouput for the 560001's
-SSI port (Synchronous Serial Interface).  It can implement both a
-synchronous, in-line interface and an interupt-driven interface.
+SSI port (Synchronous Serial Interface).
+.Ir "SSI port (Motorola DSP56001)"
+.Ir "synchronous serial interface (Motorola DSP56001)"
+.Ir "serial interface, synchronous (Motorola DSP56001)"
+.Ir "DSP56001 SSI port"
+.Ir "Motorola DSP56001 SSI port"
+.Ir "real-time I/O"
+.Ir "I/O, real-time"
+It can implement both a
+synchronous, in-line interface based on polling,
+and an interupt-driven interface.
+.Ir "interrupt-driven I/O"
+.Ir "polling I/O"
 The star inputs one sample from each of the two input channels
 and outputs one sample to each of the two output channels each
 time it fires.  The samples from the star's two input ports
@@ -22,7 +33,11 @@ The star could be modified to support different
 sample rates on input and output.
 .PP
 This star is commonly used as a base class for the Ariel Proport A/D and D/A
+.Ir "Ariel Proport"
+.Ir "Proport"
 converter and the modified Magnavox CD player.
+.Ir "Magnavox CD player"
+.Ir "CD player, Magnavox"
 .PP
 If the star is repeated in a schedule (for example, if it is
 connected to a star that consumes more than one sample each time
@@ -34,6 +49,7 @@ The interrupt buffer holds at least \fIqueueSize\fP samples; the length
 of the queue will be adjusted upward according to the number of schedule
 repetitions of the star.
 .PP
+.Ir "real-time violation"
 If a real-time violation occurs and the parameter
 \fIabortOnRealtimeError\fP is TRUE, execution will abort
 and one of the following error codes will be left in register y0:
@@ -43,8 +59,12 @@ An interrupt occurred and the receive buffer was full.
 An interrupt occurred and the transmit buffer was empty.
 .SH INTERUPTS: QUEUES
 When using interupt based code, the SSI port generates interupts
-which are handled by an procedure.  This procedure transmits samples
-out of a xmit queue, and writes received samples to a recv queue.
+that are handled by an interrupt service routine (ISR).
+.Id "interrupt buffers"
+.Id "buffers, interrupt"
+.Id "queues, interrupt"
+The ISR transmits samples
+out of a xmit queue, and stores received samples in a recv queue.
 The syncronous star code transfers data between these queues
 and the star portholes.  The data words in each buffer are called
 "slots", and at any given moment in time, a is either full (has
@@ -53,35 +73,40 @@ There are two approaches to managing the
 memory and syncronization of these queues; these are described below.
 .SH INTERUPTS: DUAL-BUFFER QUEUEING
 Two buffers are maintained:
+.Id "dual-buffer queuing"
+.Id "queuing, dual-buffer"
 a recv buffer and an xmit buffer.  The data words in a buffer are called
 "slots".  If a slot has valid data in it, bit #0 is cleared, otherwise
-it is set.  The interrupt handler reads from the SSI placing
+it is set.  The interrupt handler reads from the SSI port, placing
 the word in the recv buffer and clears the bit; it then takes a word
 from the xmit buffer, sets bit #0 in the slot, and writes it to the SSI.
 .PP
-The only reason to use dual-buffering is to support different recv&xmit
+The only reason to use dual-buffering is to support different recv and xmit
 rates.  In this case two independent buffers are required with
 independent pointers for each stream.  Note also
-that the SDF parameters of the star must coorespond to the relative
-recv&xmit rates, or buffer overflow/underrun will occur.
+that the SDF parameters of the star must correspond to the relative
+recv and xmit rates, or buffer overflow/underrun will occur.
 .PP
 This star was originally written to use dual buffers, but has never
-(and still doesn't) support differing recv&xmit rates.  The code
-preserves this style for future use, but in general it should not be used.
+(and still doesn't) support differing recv and xmit rates.  The code
+preserves this style for future use, but in general it should not be used,
+because it is less efficient than symmetric queuing, described below.
 .SH SYMETRIC QUEUEING
-Symetric buffer queueing may be used only when the recv&xmit samples rates
-are the same.  In this case, we can always access the recv&xmit samples
-in pairs.  We align the two differs symetrically in X: and Y: memory.
+.Id "symmetric queuing"
+.Id "queuing, symmetric"
+Symetric buffer queueing may be used only when the recv and xmit samples rates
+are the same.  In this case, we can always access the recv and xmit samples
+in pairs.  We align the two differs symmetrically in X and Y memory.
 This has the advantage that a single pointer can be used to walk through
 the queues instead of two paraell pointers.  Semaphoring of slots
 filled/empty status is easier: only one slot of the (recv/xmit)
 pair need be marked.  If bit #0 is set in the recv sample, the slot
 is empty and next slot is full.
 .PP
-To implement syncronized recv&xmit on the 56001, we used symetric memory,
+To implement synchronized recv and xmit on the 56001, we used symmetric memory,
 taking advantage of the fact that we have independent X: and Y: memory.
 This is not an intrinsic requirement: instead, we could have interleaved
-the recv&xmit buffers together with an xmit slot following each recv slot.
+the recv and xmit buffers together with an xmit slot following each recv slot.
 The only difficulty would be holding off semaphoring the recv slot in
 the star code: this would require using an extra register to preserve
 the address until after the xmit had been taken care of.
@@ -113,7 +138,7 @@ the address until after the xmit had been taken care of.
     state {
 	    name { symmetricBuffers }
 	    type { int }
-	    desc { If TRUE use symetric queuing, else use dual buffering. }
+	    desc { If TRUE use symmetric queuing, else use dual buffering. }
 	    default { "YES" }		
     }
     state {
