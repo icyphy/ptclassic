@@ -371,10 +371,16 @@ foreach _name {
     {file: {} users ptolemy foo.bar}
     {http: ptolemy.eecs}
     http://ptolemy.eecs
+    http://ptolemy.eecs/
     {http: ptolemy.eecs ~ptdesign}
     {http://ptolemy.eecs ~ptdesign}
+    {http://ptolemy.eecs ~ptdesign/}
     {http: ptolemy.eecs ~ptdesign index.html}
+    {http: ptolemy.eecs/ ~ptdesign index.html}
     {http://ptolemy.eecs ~ptdesign/index.html}
+    {http://ptolemy.eecs/ ~ptdesign/index.html}
+    {http://ptolemy.eecs/~ptdesign index.html}
+    {http://ptolemy.eecs/~ptdesign/ index.html}
 } _result {
     foo.bar
     ptolemy/foo/bar
@@ -383,8 +389,14 @@ foreach _name {
     file:/users/ptolemy/foo.bar
     http://ptolemy.eecs
     http://ptolemy.eecs
+    http://ptolemy.eecs
     http://ptolemy.eecs/~ptdesign
     http://ptolemy.eecs/~ptdesign
+    http://ptolemy.eecs/~ptdesign/
+    http://ptolemy.eecs/~ptdesign/index.html
+    http://ptolemy.eecs/~ptdesign/index.html
+    http://ptolemy.eecs/~ptdesign/index.html
+    http://ptolemy.eecs/~ptdesign/index.html
     http://ptolemy.eecs/~ptdesign/index.html
     http://ptolemy.eecs/~ptdesign/index.html
 } {
@@ -411,5 +423,7 @@ foreach _name {
         eval ::tycho::url aslocal $_result
     } $_result
 }
+
+
 
 
