@@ -169,7 +169,7 @@ class ::tycho::Compile {
 #
 body ::tycho::Compile::constructor {args} {
     # monitorWidget is the execModal widget
-    # NOTE: editor name is $editorName"
+    # NOTE: editor name is $editorName
     set editorName [$this cget -view]
     set editorWidget $editorName.history.text
 }
@@ -280,7 +280,7 @@ body ::tycho::Compile::compileFiles {{args {}}} {
 
         $monitorWidget raiseWindow
 	# Make sure the window appears now
-	update idletasks
+	::tycho::safeUpdate $this
 
         if {$option(-autostart)} {
             $monitorWidget getStatusWait
