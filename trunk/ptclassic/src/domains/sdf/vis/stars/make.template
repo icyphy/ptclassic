@@ -46,7 +46,7 @@ SDFDIR = $(ROOT)/src/domains/sdf/kernel
 INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(VSDKHOME)/include
 
 # Library name
-LIB=libsdfvisstars.$(LIBSUFFIX)
+PTLIB=libsdfvisstars.$(LIBSUFFIX)
 
 # Turn off generation of symbol table because it conflicts with -O4 option
 GPPDEBUGFLAGS =
