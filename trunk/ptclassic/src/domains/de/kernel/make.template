@@ -25,7 +25,8 @@ SDFKERNDIR=$(ROOT)/src/domains/sdf/kernel
 
 INCL = -I$(SDFKERNDIR) -I$(KERNDIR)
 
-HDRS =	BaseImage.h DCTImage.h GrayImage.h MVImage.h NetworkCell.h
+HDRS =	BitArray.h BaseImage.h DCTImage.h GrayImage.h MVImage.h \
+	NetworkCell.h
 SRCS = $(HDRS:.h=.cc)
 
 #Library name
