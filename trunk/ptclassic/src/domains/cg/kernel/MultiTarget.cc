@@ -207,7 +207,7 @@ void MultiTarget :: restoreChildOrder() {
  
 // virtual function
 Target* MultiTarget :: child(int n) {
-    if ( n < 0 || n >= nProcs()) return (Target*) NULL;
+    if ( n < 0 || n >= nProcs() || nChildrenAlloc == 0) return (Target*) NULL;
     int ix = reorder[n];
     return Target::child(ix);
 }
