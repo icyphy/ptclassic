@@ -1,8 +1,8 @@
-# Package load file for the Slate package
+# Package load file for the Tycho tycho.edit.slate package
 #
 # @Author: John Reekie
 #
-# @Version: @(#)%%.tcl	1.1 02/10/98
+# @Version: $Id$
 #
 # @Copyright (c)  The Regents of the University of California.
 # All rights reserved.
@@ -34,10 +34,9 @@
 # Based on pp 344-346 of Harrison and McClellan's "Effective Tcl/Tk
 # Programming" book
 
-package provide Slate 1.0
+package provide tycho.edit.slate 2.0
 global env auto_path
 set env(SLATE_LIBRARY) [file dirname [info script]]
 if { [lsearch -exact $auto_path $env(SLATE_LIBRARY)] == -1 } {
     lappend auto_path $env(SLATE_LIBRARY)
 }
-

@@ -1,8 +1,8 @@
-# Package index for the Slate package
+# Package index for the Tycho tycho.edit.slate package
 #
 # @Author: John Reekie
 #
-# @Version: @(#)%pkgIndex.tcl	1.1 02/10/98
+# @Version: $Id$
 #
 # @Copyright (c)  The Regents of the University of California.
 # All rights reserved.
@@ -31,7 +31,7 @@
 ##########################################################################
 
 
-package ifneeded Slate 1.0 \
+package ifneeded tycho.edit.slate 2.0 \
 	[list source [file join $dir slate.tcl]]
 
 

@@ -1,4 +1,4 @@
-# Makefile for Ptolemy Tycho system, editors/slate directory.
+# Makefile for Ptolemy Tycho system, edit/slate directory.
 #
 # @Author: Christopher Hylands
 #
@@ -34,7 +34,7 @@
 ROOT =		../..
 
 # True source directory
-VPATH =		$(ROOT)/editors/slate
+VPATH =		$(ROOT)/edit/slate
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
@@ -80,11 +80,9 @@ ITCL_SRCS = \
 	Stepper.itcl \
 	Terminal.itcl
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS)
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) slate.tcl pkgIndex.tcl
 
 MISC_FILES = tclIndex doc img test
-	pkgIndex.tcl \
-	slate.tcl
 
 # Sub directories to run make in.
 DIRS =			test doc
