@@ -59,7 +59,7 @@ class SequentialList;
 
 class AcyCluster: public SynDFCluster {
 public:
-	AcyCluster() {};
+	AcyCluster() {SynDFCluster();}
 
 	/* virtual */ Block* makeNew() const { return new AcyCluster; }
 	int legalCutIntoBddSets(int K);
@@ -84,8 +84,8 @@ public:
 	AcyCluster* next(int flagValue, int index) {
 	    return (AcyCluster*)(SynDFClusterIter::next(flagValue, index));
 	}
-	ClusterIter::reset;
-	ClusterIter::remove;
+	SynDFClusterIter::reset;
+	SynDFClusterIter::remove;
 };
 
 
