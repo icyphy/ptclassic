@@ -230,7 +230,12 @@ The full path and facet name for the definition of blockname.
 	    access { protected }
 	    arglist { "(PortHole* pi, GenericPort* dest)" }
 	    code {
-		GenericPort *gp;
+		GenericPort *gp = pi->aliasFrom();
+		if (gp == 0) {
+		  // Check for a multiporthole alias
+		  MultiPortHole *mph = pi->getMyMultiPortHole();
+		  if (mph != 0) gp = mph->aliasFrom();
+		}
 		const char* initDelayVals;
 		PortHole* farside = pi->far();
 		if (!farside) {
@@ -251,9 +256,14 @@ The full path and facet name for the definition of blockname.
 							  dest->parent()->name(),
 							  dest->name());
 		}
-		// Fix aliases if any
-		if ((gp = pi->aliasFrom()) != 0) {
-		    gp->setAlias(*dest);
+		// Fix aliases if any.
+		if (gp != 0) {
+		  // The following prevents a later destruction of
+		  // the po porthole from undoing the alias fix below.
+		  pi->clearAliases();
+		  // Note that this can have the effect of making a
+		  // MultiPortHole have a PortHole as an alias
+		  gp->setAlias(*dest);
 		}
 
 		// Since output portholes are responsible for initializing
@@ -273,7 +283,12 @@ The full path and facet name for the definition of blockname.
 	    access { protected }
 	    arglist { "(PortHole* po, GenericPort* source)" }
 	    code {
-		GenericPort *gp;
+		GenericPort *gp = po->aliasFrom();
+		if (gp == 0) {
+		  // Check for a multiporthole alias
+		  MultiPortHole *mph = po->getMyMultiPortHole();
+		  if (mph != 0) gp = mph->aliasFrom();
+		}
 		const char* initDelayVals;
 		PortHole* farside = po->far();
 		if (!farside) {
@@ -295,8 +310,13 @@ The full path and facet name for the definition of blockname.
 							  farside->name());
 		}
 		// Fix aliases if any
-		if ((gp = po->aliasFrom()) != 0) {
-		    gp->setAlias(*source);
+		if (gp != 0) {
+		  // The following prevents a later destruction of
+		  // the po porthole from undoing the alias fix below.
+		  po->clearAliases();
+		  // Note that this can have the effect of making a
+		  // MultiPortHole have a PortHole as an alias
+		  gp->setAlias(*source);
 		}
 		return 1;
 	    }
