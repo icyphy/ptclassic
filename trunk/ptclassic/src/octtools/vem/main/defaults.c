@@ -808,11 +808,16 @@ char *programName;
 
 	/* Now,  the color vs. B/W defaults */
 	depth = xv_depth();
+	/* Black and white display */
 	if (depth < 4) {
-	    /* Black and white display */
+
 	    NEWDEFAULT("window.options", "gtedabcrfAD-imG", DEF_INTEGER, toWnOption);
 	    NEWDEFAULT("select.color", "black", DEF_COLOR, toColor);
+
+	    /* (6/95) Note that if depth ==1, we don't do xor on the select
+	       lines, see drawing/attributes.c:atrSelect()*/
 	    NEWDEFAULT("select.style", "1,8,00001111", DEF_FILL, toFill);
+
 	    NEWDEFAULT("select.fill", "4,4,0000011001100000",
 		       DEF_FILL, toFill);
 	    NEWDEFAULT("console.bngd", "white", DEF_COLOR, toColor);
