@@ -309,16 +309,21 @@ Linker::generateSharedObject(int argc, char **argv, char* objName,
       permlinkFiles << " " << fullObjName;
     } else {
       // Don't add the file if it is already in the list.
-      // -- Parse permlinkFiles w/ strtok_r, multithread-safe version of strtok
-      // -- Use a copy of permlinkFiles because strtok_r alters string
+      // Parse permlinkFiles with strtok, and use a copy of permlinkFiles
+      // since strtok will alters it
+      // FIXME: strtok is not multithreaded-safe, use strtok_r when portable
       char* tmpString = savestring(permlinkFiles);
-      char* lasts = 0;
-      char* p = strtok_r(tmpString, " ", &lasts);
+      char *p = strtok(tmpString, " ");
+      // Multithreaded safe version of previous statement:
+      // char* lasts = 0;
+      // char* p = strtok_r(tmpString, " ", &lasts);
       while (p) {
 	if ( strcmp(p, fullObjName) == 0 ) {
 	  break;
 	}
-	p = strtok_r((char *)NULL, " ", &lasts);
+	p = strtok(0, " ");
+        // Multithreaded safe version of previous statement:
+	// p = strtok_r(0, " ", &lasts);
       }
       // If we made it all the way through the list, and p is NULL,
       // then add our element to the list of files to be permlinked.
@@ -735,26 +740,27 @@ Linker::invokeConstructors (const char* objName, void * dlhandle) {
 	char symbol[256], type[20];
 #endif //USE_NM_GREP
 
-
 #ifndef USE_DLOPEN
 	size_t memoryEnd = (size_t)memBlock + LINK_MEMORY;
 #endif //USE_DLOPEN
 
 #ifdef USE_NM_GREP
-	char* lasts = 0;
 	while (fscanf(fd, "%s%*s", line) == 1) {
 
-          // Parse line with strtok_r, multithread-safe version of strtok
-          symbol = strtok_r(line, "|", &lasts);
-          p_addr = strtok_r(NULL, "|", &lasts);
-
+          // Parse line
+          // FIXME: strtok not multithreaded-safe, use strtok_r when portable
+          symbol = strtok(line, "|");
+          p_addr = strtok(0, "|");
+	  // Multithreaded safe version of previous two statements:
+	  // char* lasts = 0;
+          // symbol = strtok_r(line, "|", &lasts);
+          // p_addr = strtok_r(0, "|", &lasts);
 	  addr = atol(p_addr);
 
 	  D( debugInvokeConstructors(symbol, addr, objName); )
 
 	  if (addr >= (size_t) availMem && addr <= memoryEnd)
 	  {
-
 	    PointerToVoidFunction fn = (PointerToVoidFunction)addr;
 	    fn();
 	    nCalls++;
