@@ -142,8 +142,8 @@ Precision Precision::operator * (const Precision& p) const
    else if (!p.isValid())
 		return *this;
 
-	int intB = length + p.length -1;
-	int leng = intBits+ p.intBits-1;
+	int leng = length + p.length -1;
+	int intB = intBits+ p.intBits-1;
 
 	StringList sym_len, sym_intB;
 
