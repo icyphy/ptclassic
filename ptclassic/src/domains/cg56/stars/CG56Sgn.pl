@@ -10,9 +10,10 @@ defstar {
 	copyright { 1992 The Regents of the University of California }
        	location { CG56 Demo Library }
 	explanation { 
-This star computes the signum of its input.
-The output is +- 1 because 1 is not allowed 
-for fix input, .99999999 is used instead.
+This star outputs the signum of its input.
+.Id "signum"
+The output is either -1.0 or +0.99999999, since 1.0 is not
+a valid fixed point number on the DSP56001.
 	}
 	execTime {
 		return 6;
