@@ -33,7 +33,7 @@ star to allow the
 .c powerEst
 star to stabilize.  The plot shows that both filters generate the same
 error power initially.
-.c
+.pp
 The demo runs through a large number of iterations, about a third of
 which is the delay time to allow the error to stabilize.  If the
 \fItrainLength\fR parameter of the
