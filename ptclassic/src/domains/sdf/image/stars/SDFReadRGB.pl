@@ -83,26 +83,46 @@ are read and output are 'dir.2/pic2', 'dir.3/pic3', etc.
 		}
 
 // Read header, skipping 1 whitespace character at end.
-		char magic[80];
+		char word[80];
 		int width, height, maxval;
-		fscanf(fp, "%s %d %d %d%*c", magic, &width, &height,
-				&maxval);
-		if (strcmp(magic, "P6")) { // "P6" is PPM magic number.
+		fscanf(fp, "%s", word);
+		if (strcmp(word, "P6")) { // "P6" is PPM magic number.
 			Error::abortRun(*this, fullName, ": not in PPM format");
 			return;
 		}
+		fscanf(fp, "%s", word);
+		while (word[0] == '#') {
+			fscanf(fp, "%*[^\n]%s", word);
+		}
+		sscanf(word, "%d", &width);
+		fscanf(fp, "%s", word);
+		while (word[0] == '#') {
+			fscanf(fp, "%*[^\n]%s", word);
+		}
+		sscanf(word, "%d", &height);
+		fscanf(fp, "%s", word);
+		while (word[0] == '#') {
+			fscanf(fp, "%*[^\n]%s", word);
+		}
+		sscanf(word, "%d", &maxval);
 		if (maxval > 255) {
 			Error::abortRun(*this, fullName, ": not in 8-bit format");
 			return;
 		}
+		fscanf(fp, "%*c"); // skip one whitespace char.
 
-		LOG_NEW; unsigned char* rgbfp = new unsigned char[3*width*height];
+// Create new images and fill them with data.
+		LOG_NEW;
+		unsigned char* rgbfp = new unsigned char[3*width*height];
 		fread((char*)rgbfp, sizeof(unsigned char), 3*width*height, fp);
 		fclose(fp);
 
-		LOG_NEW; GrayImage* rColor = new GrayImage(width, height, int(frameId));
-		LOG_NEW; GrayImage* gColor = new GrayImage(width, height, int(frameId));
-		LOG_NEW; GrayImage* bColor = new GrayImage(width, height, int(frameId));
+		LOG_NEW;
+		GrayImage* rColor = new GrayImage(width, height, int(frameId));
+		LOG_NEW;
+		GrayImage* gColor = new GrayImage(width, height, int(frameId));
+		LOG_NEW;
+		GrayImage* bColor = new GrayImage(width, height, int(frameId));
 
 
 		unsigned char* rfp = rColor->retData();
