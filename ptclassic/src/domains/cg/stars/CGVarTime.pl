@@ -39,6 +39,28 @@ from it.
 			return CGStar::run();
 		}
 	}
+	method {
+		name { beginLoop }
+		type { void }
+		arglist { "(int reps)" }
+		code {
+			StringList msg = "/* beginLoop code for ";
+			msg << fullName() << ": " << reps
+			    << " iterations */\n";
+			addCode(msg);
+		}
+	}
+	method {
+		name { endLoop }
+		type { void }
+		arglist { "()" }
+		code {
+			StringList msg = "/* endLoop code for ";
+			msg << fullName() << " */\n";
+			addCode(msg);
+		}
+	}
+		
 	execTime {
 		return int(runTime);
 	}
