@@ -39,24 +39,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer:  Praveen K. Murthy
  Date of creation: Feb/9/96
 
-SynDFCLuster is analogous to the SDFStar class.
-We call it SynDFCluster because there is already an SDFCluster class here.
-However, the SDFCluster class suffers from being poorly written and
-being fairly un-modular; hence, the alternate hierarchy starting from Cluster
-has been established.  Unlike SDFCluster, the methods in SynDFCluster do
-not contain any scheduler-specific functions; they merely contain very
-generic functions to absorb and group clusters together.  SynDFCluster is
-a fairly lightweight class, as is Cluster.
-
-Mainly, SynDFCluster assumes that the atomic blocks inside the clusters
-are SDFStars;hence, they produce and consume fixed numbers of tokens per firing.
-It maintains a loopFac parameter that represents the gcd of all of the
-repetitions of the SDFCLusters inside itself.
-
-
-
 *******************************************************************/
 
+/****
+
+SynDFClusterPort is the SDF version of ClusterPort
+
+@Description
+This class maintains the number of tokens transferred on the ports.
+
+@Author Praveen K. Murthy
+
+****/
 class SynDFClusterPort : public ClusterPort {
 public:
 	SynDFClusterPort(GenericPort& gp) : ClusterPort(gp) {};
@@ -64,6 +58,12 @@ public:
 	/* virtual */ void update();
 };
 
+/**** 
+Iterator class for SynDFClusterPorts; steps through each port in a Block.
+
+@Author Praveen K. Murthy
+
+****/
 class SynDFClusterPortIter : private ClusterPortIter {
 public:
     inline SynDFClusterPortIter(Block& b): ClusterPortIter(b) {};
@@ -78,6 +78,28 @@ public:
 
 class SequentialList;
 
+/****
+<code>SynDFCLuster</code> is the SDF version of <code>Cluster</code>; analogous to what <code>SDFStar</code> is to <code>Star</code>.
+
+@Description
+We call it SynDFCluster because there is already an SDFCluster class here.
+However, the SDFCluster class suffers from being poorly written and
+being fairly un-modular; hence, the alternate hierarchy starting from Cluster
+has been established.  Unlike SDFCluster, the methods in SynDFCluster do
+not contain any scheduler-specific functions; they merely contain very
+generic functions to absorb and group clusters together.  SynDFCluster is
+a fairly lightweight class, as is Cluster.
+<p>
+Mainly, SynDFCluster assumes that the atomic blocks inside the clusters
+are SDFStars;hence, they produce and consume fixed numbers of tokens per
+firing.
+<p>
+It maintains a <code>loopFac</code> parameter that represents the gcd
+of all of the repetitions of the SynDFCLusters inside itself.
+
+@Author Praveen K. Murthy
+
+****/
 class SynDFCluster: public Cluster {
 private:
         // maintains the gcd of all the loopFacs of constituent clusters
@@ -105,6 +127,12 @@ public:
 	void setLoopFac(int r) {loopFac = r;}
 };
 
+/****
+Iterator class for SynDFClusters; steps through each SynDFCluster in a Galaxy.
+
+@Author Praveen K. Murthy
+
+****/
 class SynDFClusterIter : private ClusterIter {
 public:
 	inline SynDFClusterIter(Galaxy& g):ClusterIter(g) {};
@@ -117,6 +145,12 @@ public:
 	ClusterIter::remove;
 };
 
+/****
+Iterator class that returns the SynDFClusterPorts that are outputs of a SynDFCluster.
+
+@Author Praveen K. Murthy
+
+****/
 class SynDFClusterOutputIter : private ClusterOutputIter {
 public:
 	inline SynDFClusterOutputIter(Block& b):ClusterOutputIter(b) {};
@@ -133,6 +167,12 @@ public:
 	ClusterOutputIter::remove;
 };
 
+/****
+Iterator class that returns the SynDFClusterPorts that are inputs of a particular SynDFCluster.
+
+@Author Praveen K. Murthy
+
+****/
 class SynDFClusterInputIter : private ClusterInputIter {
 public:
 	inline SynDFClusterInputIter(Block& b):ClusterInputIter(b) {};
