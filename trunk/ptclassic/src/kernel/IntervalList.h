@@ -18,6 +18,7 @@ represented by the origin and the length of the interval.
 #define _IntervalList_h 1
 
 #include "type.h"
+#include "StringList.h"
  
 
 	//////////////////////////////////////
@@ -30,7 +31,10 @@ class Interval {
 	Interval* next;
 	Interval(unsigned o=0, unsigned l=0, Interval* nxt = NULL) :
 		origin(o), length(l), next(nxt) {};
-	
+	Interval(Interval* i1) : origin(i1->origin), length(i1->length), 
+		next(i1->next) {};
+	Interval(Interval& i1) : origin(i1.origin), length(i1.length), 
+		next(i1.next) {};
 	// isAfter returns true if current interval begins after
 	// interval i1.
 	int isAfter(Interval* i1);
@@ -54,10 +58,10 @@ class Interval {
 	int extendsAfter(Interval *i1);
 
 	// contains returns true if the current interval contains i1.
-	int contains(Interval *i1);
+	int contains(Interval*);
 	
 	// doesIntersect returns true if the current interval intersects i1.
-	int doesIntersect(Interval *i1);
+	int doesIntersect(Interval*);
 
 	// return the end location of the interval + 1.
 	unsigned end();
@@ -65,9 +69,9 @@ class Interval {
 	// return pointer to next interval, if no more intervals return NULL
 	Interval* operator++ ();
 
-	Interval& operator=(Interval *i1);
-	Interval& operator&=(Interval *il);
-	Interval& operator&(Interval *i1);
+	Interval& operator=(Interval*);
+	Interval& operator&=(Interval*);
+	friend Interval operator&(Interval&, Interval&);
 
 	~Interval();
 };
@@ -92,7 +96,7 @@ public:
 	}
 
 	// copy constructor
-	IntervalList(const IntervalList& src) { copy(src);}
+	IntervalList(IntervalList& src) { copy(src);}
 
 	// assignment operator
 	IntervalList& operator=(const IntervalList& src) {
@@ -104,28 +108,20 @@ public:
 	// destructor
 	~IntervalList() { zero();}
 
-	// Add a new interval to the interval list.
-	int operator|=(unsigned origin, unsigned length);
-	int operator|=(Interval *i1) {operator|=(i1->origin,i1->length);}
-
-	// Set current IntervalList to the union of itself and src 
-	int operator|=(IntervalList& src)
-
 	// Take the union of two interval lists.
-	IntervalList& operator|(IntervalList& src1,IntervalList& src2);
+	friend IntervalList operator|(IntervalList&,IntervalList&);
 
 	// Add a new interval to the interval list.
-	int operator|=(unsigned origin, unsigned length);
-	int operator|=(Interval *i1) {operator|=(i1->origin,i1->length);}
+	IntervalList& operator|=(Interval *i1);
 
 	// Set current IntervalList to the union of itself and src 
-	int operator|=(IntervalList& src)
-
-	// Take the union of two interval lists.
-	IntervalList operator|(IntervalList& src1,IntervalList& src2);
+	IntervalList& operator|=(IntervalList& src);
 
 	// print (debug)
 	StringList print();
 };
- 
+
+#define MAX(A, B)	((A) > (B) ? (A) : (B))
+#define MIN(A, B)	((A) < (B) ? (A) : (B))
+
 #endif
