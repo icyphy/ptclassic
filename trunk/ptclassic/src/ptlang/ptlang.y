@@ -132,6 +132,7 @@ char* methodArgs;		/* arglist of user method */
 char* methodAccess;		/* protection of user method */
 char* methodType;		/* return type of user method */
 char* methodCode;		/* body of user method */
+int   methodVirtual;		/* if true, make method virtual */
 char* galPortName;		/* name of galaxy port */
 char* consCode;			/* extra constructor code */
 char* destCode;			/* destructor */
@@ -155,7 +156,7 @@ typedef char * STRINGVAL;
 
 %}
 
-%token DEFSTAR GALAXY NAME DESC DEFSTATE DOMAIN NUMPORTS NUM
+%token DEFSTAR GALAXY NAME DESC DEFSTATE DOMAIN NUMPORTS NUM VIRTUAL
 %token DERIVED CONSTRUCTOR DESTRUCTOR STAR ALIAS OUTPUT INPUT ACCESS
 %token OUTMULTI INMULTI TYPE DEFAULT CLASS START GO WRAPUP CONNECT ID
 %token CCINCLUDE HINCLUDE PROTECTED PUBLIC PRIVATE METHOD ARGLIST CODE
@@ -227,6 +228,8 @@ sgitem:
 					  bodyMode = 0;
 					}
 |	METHOD { clearMethodDefs();}
+		'{' methlist '}'	{ genMethod();}
+|	VIRTUAL METHOD { clearMethodDefs(); methodVirtual = 1; }
 		'{' methlist '}'	{ genMethod();}
 |	CCINCLUDE '{' cclist '}'	{ }
 |	HINCLUDE '{' hlist '}'
@@ -700,6 +703,7 @@ clearMethodDefs ()
 	methodAccess = "protected";
 	methodCode = NULL;
 	methodType = "void";
+	methodVirtual = 0;
 }
 
 /* generate code for user-defined method */
@@ -707,7 +711,8 @@ genMethod ()
 {
 	char * p = whichMembers (methodAccess);
 /* add decl to class body */
-	sprintf (str1, "\t%s %s %s;\n", methodType, methodName, methodArgs);
+	sprintf (str1, "\t%s%s %s %s;\n", methodVirtual ? "virtual " : "",
+		 methodType, methodName, methodArgs);
 	strcat (p, str1);
 	sprintf (str2, "\n\n%s %s%s::%s %s\n{\n", methodType,
 		 galDef ? "" : domain, objName,
@@ -1078,6 +1083,7 @@ struct tentry keyTable[] = {
 	"state", DEFSTATE,
 	"type", TYPE,
 	"version", VERSION,
+	"virtual", VIRTUAL,
 	"wrapup", WRAPUP,
 	0, 0,
 };
