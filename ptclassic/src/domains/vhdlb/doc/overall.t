@@ -146,6 +146,15 @@ Additional parameters, if any, can be modified and will be reflected
 in the "generic" clauses of the generated VHDL code.
 
 .pp
+.H1 "Warnings"
+
+When creating your own galaxies, you should avoid using names for terminals
+such as "in" and "out" because these are reserved words in the VHDL language.
+Generated VHDL code which uses these names for signals will likely cause errors
+if compiling or running it is attempted.  A complete list of VHDL reserved
+words can be found in [1] and in [2].
+
+.pp
 .H1 "Bugs"
 
 Because of the way the scheduler interprets signal flow graphs,
