@@ -13,8 +13,11 @@ This Target produces and compiles a standalone C++ program for
 a universe.
 
 *******************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
 
-#include "BaseCTarget.h"
+#include "CompileTarget.h"
 #include "KnownTarget.h"
 #include "UserOutput.h"
 #include "Galaxy.h"
@@ -23,36 +26,6 @@ a universe.
 #include "ConstIters.h"
 #include <ctype.h>
 
-class CompileTarget : public BaseCTarget {
-public:
-	int setup(Galaxy& g);
-	int run();
-	void wrapup ();
-	CompileTarget(const char* nam,const char* stype,const char* desc) :
-		BaseCTarget(nam,stype,desc) {}
-	Block* clone() const
-		{ LOG_NEW; CompileTarget* t = new CompileTarget(readName(),
-						starType(), readDescriptor());
-		  return &t->copyStates(*this); }
-
-	// Routines for writing code: schedulers may call these
-	StringList writeFiring(Star& s, int depth);
-
-private:
-	// Method to return a pointer to the MultiPortHole that spawned a
-	// given PortHole, if there is such a thing.  If not, the pointer
-	// to the PortHole is returned as pointer to a GenericPort.
-	GenericPort* findMasterPort(const PortHole* p) const;
-
-	// Returns the name of an ordinary porthole, or
-	// "name.newPort()" for a MultiPortHole.
-	StringList expandedName(const GenericPort* p) const;
-
-	StringList galDef(Galaxy* galaxy, StringList className, int level);
-
-	int writeGalDef(Galaxy& galaxy, const StringList className);
-
-};
 
 int CompileTarget::setup(Galaxy& g) {
 	// This kludge bypasses setup() in CGTarget, which casts
@@ -61,7 +34,7 @@ int CompileTarget::setup(Galaxy& g) {
 	return Target::setup(g);
 }
 
-int CompileTarget::writeGalDef(Galaxy& galaxy, const StringList className) {
+int CompileTarget::writeGalDef(Galaxy& galaxy, StringList className) {
     // First generate the files that define the galaxies
     GalTopBlockIter next(galaxy);
     Block* b;
@@ -85,18 +58,12 @@ int CompileTarget::writeGalDef(Galaxy& galaxy, const StringList className) {
 	return FALSE;
     }
 
-    StringList runCode = "// Galaxy definition file from: ";
-    runCode += className;
-    runCode += "\n";
-    runCode += "\n";
-    runCode += "#ifndef _";
-    runCode += className;
-    runCode += "_h\n#define _";
-    runCode += className;
-    runCode += "_h 1\n";
-    runCode += galDef(&galaxy, className, 1);
-    runCode += "\n#endif\n";
-    codeFile << runCode;
+    myCode << "// Galaxy definition file from: " << className << "\n\n";
+    myCode << "#ifndef _" << className << "_h\n#define _" << className <<
+	    "_h 1\n";
+    myCode << galDef(&galaxy, className, 1);
+    myCode << "\n#endif\n";
+    codeFile << myCode;
     codeFile.flush();
     return TRUE;
 }
@@ -115,55 +82,55 @@ int CompileTarget::run() {
     }
 
     // Generate the C++ code file
-    StringList runCode = "// C++ code file generated from universe: ";
-    runCode += gal->readFullName();
+    StringList myCode = "// C++ code file generated from universe: ";
+    myCode += gal->readFullName();
 
-    runCode += "\n\nstatic const char file_id[] = \"code.cc\";\n\n";
+    myCode += "\n\nstatic const char file_id[] = \"code.cc\";\n\n";
 
-    runCode += "// INCLUDE FILES\n";
-    runCode += "#include \"CompiledUniverse.h\"\n";
-    runCode += galDef(gal, universeClassName, 0);
+    myCode += "// INCLUDE FILES\n";
+    myCode += "#include \"CompiledUniverse.h\"\n";
+    myCode += galDef(gal, universeClassName, 0);
 
-    runCode += "\n";
-    runCode += "// MAIN FUNCTION\n";
-    runCode += "main(int argc, char** argv) {\n";
-    runCode += "int iterations;\n";
-    runCode += universeClassName;
-    runCode += " ";
-    runCode += universeName;
-    runCode += ";\n";
-    runCode += universeName;
-    runCode += ".setBlock(\"";
-    runCode += universeName;
-    runCode += "\");\n";
-    runCode += "\n";
-    // Note that the following will only work for SDF schedulers
-    // It will crash ungracefully for anything else
-    runCode += "// set default value for number of iterations\n";
-    runCode += "iterations = ";
-    runCode += ((SDFScheduler*)mySched())->getStopTime();
-    runCode += ";\n";
+    myCode += "\n";
+    myCode += "// MAIN FUNCTION\n";
+    myCode += "main(int argc, char** argv) {\n";
+    myCode += "int iterations;\n";
+    myCode += universeClassName;
+    myCode += " ";
+    myCode += universeName;
+    myCode += ";\n";
+    myCode += universeName;
+    myCode += ".setBlock(\"";
+    myCode += universeName;
+    myCode += "\");\n";
+    myCode += "\n";
+    myCode += "// set default value for number of iterations\n";
+    myCode += "iterations = ";
+    myCode += mySched()->getStopTime();
+    myCode += ";\n";
 
-    runCode += universeName;
-    runCode += ".parseCommandLine(argc, argv, &iterations);\n";
+    myCode += universeName;
+    myCode += ".parseCommandLine(argc, argv, &iterations);\n";
 
-    runCode += "\n// INITIALIZE CODE\n";
-    runCode += universeName;
-    runCode += ".initialize();\n";
+    myCode += "\n// INITIALIZE CODE\n";
+    myCode += universeName;
+    myCode += ".initialize();\n";
 
-    runCode += "\n";
-    runCode += "// MAIN LOOP\n";
-    runCode += "while(iterations-- > 0) {\n";
-    runCode += mySched()->compileRun();
-    runCode += "}\n";
+    myCode += "\n";
+    myCode += "// MAIN LOOP\n";
+    myCode += "while(iterations-- > 0) {\n";
+    addCode(myCode);
+    mySched()->compileRun();
+    myCode.initialize();
+    myCode += "}\n";
 
-    runCode += "// WRAPUP CODE\n";
-    runCode += universeName;
-    runCode += ".wrapup();\n";
+    myCode += "// WRAPUP CODE\n";
+    myCode += universeName;
+    myCode += ".wrapup();\n";
 
-    runCode += "exit(0);\n";
-    runCode += "}\n";
-    addCode(runCode);
+    myCode += "exit(0);\n";
+    myCode += "}\n";
+    addCode(myCode);
     return 1;
 }
 
@@ -223,12 +190,8 @@ void CompileTarget::wrapup() {
 }
 
 
-StringList CompileTarget::writeFiring(Star& s, int depth) {
-	StringList out;
-	out = indent(depth);
-	out += sanitizedFullName(s);
-	out += ".fire();\n";
-	return out;
+void CompileTarget::writeFiring(Star& s, int depth) {
+	myCode << indent(depth) << sanitizedFullName(s) << ".fire();\n";
 }
 
 GenericPort* CompileTarget::findMasterPort(const PortHole* p) const {
@@ -257,7 +220,7 @@ StringList CompileTarget::expandedName(const GenericPort* p) const {
 // Define a galaxy
 StringList CompileTarget::galDef(Galaxy* galaxy,
 			StringList className, int level) {
-    StringList runCode = "";
+    StringList myCode = "";
     // The following iterator looks only at the current level of the graph
     GalTopBlockIter next(*galaxy);
     Block* b;
@@ -265,46 +228,46 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 	// An include file is generated for every block.  This means some
 	// classes will have their definitions included more than once.
 	// This is harmless.
-	runCode += "#include \"";
-	runCode += b->readClassName();
-	runCode += ".h\"\n";
+	myCode += "#include \"";
+	myCode += b->readClassName();
+	myCode += ".h\"\n";
     }
     // Generate include statements for galaxy states
     BlockStateIter galStateIter(*galaxy);
     State* galState;
     while ((galState = galStateIter++) != 0) {
-	runCode += "#include \"";
-	runCode += galState->readClassName();
-	runCode += ".h\"\n";
+	myCode += "#include \"";
+	myCode += galState->readClassName();
+	myCode += ".h\"\n";
     }
 
-    runCode += "\n";
-    runCode += "// GALAXY DECLARATION\n";
-    runCode += "class ";
-    runCode += className;
-    if(level==0) runCode += " : public CompiledUniverse {\npublic:\n";
-    else runCode += " : public Galaxy {\npublic:\n";
+    myCode += "\n";
+    myCode += "// GALAXY DECLARATION\n";
+    myCode += "class ";
+    myCode += className;
+    if(level==0) myCode += " : public CompiledUniverse {\npublic:\n";
+    else myCode += " : public Galaxy {\npublic:\n";
     next.reset();
     while ((b = next++) != 0) {
 	// Declare the stars and galaxies used
-	runCode += indent(1);
+	myCode += indent(1);
 	// Have to sanitize below because the class may be an InterpGalaxy
-	runCode += sanitize(b->readClassName());
-	runCode += " ";
-	runCode += sanitizedName(*b);
-	runCode += ";\n";
+	myCode += sanitize(b->readClassName());
+	myCode += " ";
+	myCode += sanitizedName(*b);
+	myCode += ";\n";
     }
     // Generate galaxy port declarations, MultiPortHoles first
-    runCode += "\n// PortHole declarations\n";
+    myCode += "\n// PortHole declarations\n";
     StringList galSetPorts = "";
     StringList portAliases = "";
     CBlockMPHIter galMPHIter(*galaxy);
     const MultiPortHole* mph;
     while ((mph = galMPHIter++) != 0) {
-	runCode += indent(1);
-	runCode += "GalMultiPort ";
-	runCode += sanitizedName(*mph);
-	runCode += ";\n";
+	myCode += indent(1);
+	myCode += "GalMultiPort ";
+	myCode += sanitizedName(*mph);
+	myCode += ";\n";
 	galSetPorts += indent(1);
 	galSetPorts += sanitizedName(*mph);
 	galSetPorts += ".setPort(\"";
@@ -329,10 +292,10 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
     while ((ph = galPortIter++) != 0) {
 	// Check to see whether it's an instance of a MPH
 	if(!ph->getMyMultiPortHole()) {
-	    runCode += indent(1);
-	    runCode += "GalPort ";
-	    runCode += sanitizedName(*ph);
-	    runCode += ";\n";
+	    myCode += indent(1);
+	    myCode += "GalPort ";
+	    myCode += sanitizedName(*ph);
+	    myCode += ";\n";
 	    galSetPorts += indent(1);
 	    galSetPorts += sanitizedName(*ph);
 	    galSetPorts += ".setPort(\"";
@@ -355,73 +318,73 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 	}
     }
     // Generate galaxy states declarations
-    runCode += "\n// state declarations\n";
+    myCode += "\n// state declarations\n";
     galStateIter.reset();
     while ((galState = galStateIter++) != 0) {
-	runCode += indent(1);
-	runCode += galState->readClassName();
-	runCode += " ";
-	runCode += sanitizedName(*galState);
-	runCode += ";\n";
+	myCode += indent(1);
+	myCode += galState->readClassName();
+	myCode += " ";
+	myCode += sanitizedName(*galState);
+	myCode += ";\n";
     }
-    runCode += "\n// constructor\n";
-    runCode += indent(1);
-    runCode += className;
-    runCode += " ();\n";
-    runCode += "};\n";
-    runCode += "\n// TOPOLOGY DEFINITION\n";
-    runCode += className;
-    runCode += " :: ";
-    runCode += className;
-    runCode += " () {\n";
+    myCode += "\n// constructor\n";
+    myCode += indent(1);
+    myCode += className;
+    myCode += " ();\n";
+    myCode += "};\n";
+    myCode += "\n// TOPOLOGY DEFINITION\n";
+    myCode += className;
+    myCode += " :: ";
+    myCode += className;
+    myCode += " () {\n";
     // Set universe states
     galStateIter.reset();
     while ((galState = galStateIter++) != 0) {
-	runCode += indent(1);
-	runCode += "addState(";
-	runCode += sanitizedName(*galState);
-	runCode += ".setState(\"";
-	runCode += galState->readName();
-	runCode += "\", this, \"";
-	runCode += galState->getInitValue();
-	runCode += "\"));\n";
+	myCode += indent(1);
+	myCode += "addState(";
+	myCode += sanitizedName(*galState);
+	myCode += ".setState(\"";
+	myCode += galState->readName();
+	myCode += "\", this, \"";
+	myCode += galState->getInitValue();
+	myCode += "\"));\n";
     }
     next.reset();
     while ((b = next++) != 0) {
 	// Add the stars and galaxies used to the knownblock list
-	runCode += indent(1);
-	runCode += "addBlock(";
-	runCode += sanitizedName(*b);
-	runCode += ",\"";
-	runCode += sanitizedName(*b);
-	runCode += "\");\n";
+	myCode += indent(1);
+	myCode += "addBlock(";
+	myCode += sanitizedName(*b);
+	myCode += ",\"";
+	myCode += sanitizedName(*b);
+	myCode += "\");\n";
     }
-    runCode += galSetPorts;
-    runCode += "\n";
-    runCode += indent(1);
-    runCode += "// set states\n";
+    myCode += galSetPorts;
+    myCode += "\n";
+    myCode += indent(1);
+    myCode += "// set states\n";
     next.reset();
     while ((b = next++) != 0) {
 	BlockStateIter nextState(*b);
 	const State* s;
 	while ((s = nextState++) != 0) {
-	    runCode += indent(1);
-	    runCode += sanitizedName(*b);
-	    runCode += ".setState(\"";
-	    runCode += s->readName();
-	    runCode += "\",\"";
+	    myCode += indent(1);
+	    myCode += sanitizedName(*b);
+	    myCode += ".setState(\"";
+	    myCode += s->readName();
+	    myCode += "\",\"";
 	    // Want to get initial value here -- before processing
-	    runCode += s->getInitValue();
-	    runCode += "\");\n";
+	    myCode += s->getInitValue();
+	    myCode += "\");\n";
 	}
     }
 
-    runCode += "\n";
-    runCode += indent(1);
-    runCode += "// make connections\n";
+    myCode += "\n";
+    myCode += indent(1);
+    myCode += "// make connections\n";
 
     // Start with the aliases to galaxy input ports
-    runCode += portAliases;
+    myCode += portAliases;
 
     next.reset();
     while ((b = next++) != 0) {
@@ -438,12 +401,12 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 		g = findMasterPort(p);
 		// Check to see whether the port is aliased to a galaxy port
 		if(!g->aliasFrom()) {
-		    runCode += indent(1);
-		    runCode += "connect(";
-		    runCode += sanitizedName(*b);
-		    runCode += ".";
-		    runCode += expandedName(p);
-		    runCode += ", ";
+		    myCode += indent(1);
+		    myCode += "connect(";
+		    myCode += sanitizedName(*b);
+		    myCode += ".";
+		    myCode += expandedName(p);
+		    myCode += ", ";
 		    if (!(farPort = p->far())) {
 			// What we have is the output port of a galaxy, meaning
 			// there is an extra step to find its destination
@@ -454,24 +417,24 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 		    if (!farPort) {
 			Error::abortRun(b->readFullName(),
 				" Disconnected Universe.");
-			addCode(runCode);
+			addCode(myCode);
 			return 0;
 		    }
 		    // Work up to top level of aliases
 		    GenericPort* gp = farPort;
 		    while(gp->aliasFrom()) { gp = gp->aliasFrom(); }
-		    runCode += sanitizedName(*(gp->parent()));
-		    runCode += ".";
-		    runCode += expandedName(gp);
-		    runCode += ", ";
-		    runCode += ((PortHole&)p->realPort()).myGeodesic->numInit();
-		    runCode += ");\n";
+		    myCode += sanitizedName(*(gp->parent()));
+		    myCode += ".";
+		    myCode += expandedName(gp);
+		    myCode += ", ";
+		    myCode += ((PortHole&)p->realPort()).myGeodesic->numInit();
+		    myCode += ");\n";
 		}
 	    }
 	}
     }
-    runCode += "}\n";
-    return runCode;
+    myCode += "}\n";
+    return myCode;
 }
 
 static CompileTarget compileTargetProto("compile-SDF", "SDFStar",
