@@ -96,22 +96,6 @@ octObject *galFacetPtr;
     return(TRUE);
 }
 
-/* 7/25/90
-Add new fork star names here for auto-fork.
-This code depends on the Fork class name being "Fork" and the
-output MultiPortHole name being "output".
-*/
-static boolean
-EmitDefstarFork(name, outputsN)
-char *name;
-int outputsN;
-{
-    ERR_IF1(!KcInstance (name, "Fork", (ParamListType *)0));
-    ERR_IF1(!KcNumPorts (name, "output", outputsN));
-    return (TRUE);
-}
-
-
 static boolean
 ProcessSubGals(facetPtr)
 octObject *facetPtr;
@@ -322,93 +306,43 @@ int *inN, *outN;
     return (TRUE);
 }    
 
-/* 6/13/89
-Go thru nets and create fork instances for auto-fork nets.
-*/
+/* 7/31/90
+   Insert a fork star and use it to connect things up.
+   This function requires a star class in the current domain named
+   Fork with terminals "input" and "output".
+ */
+
 static boolean
-DefAutoForkPass(facetPtr)
-octObject *facetPtr;
+JoinWithFork(inTermPtr, outTermPtr, n)
+octObject *inTermPtr, *outTermPtr;
+int n;
 {
-    octObject net, in[TERMS_MAX], out[TERMS_MAX];
-    octObject autoForkProp;
-    octGenerator netGen;
-    int inN, outN;
-    char *name;
+    octObject inInst, outInst;
+    char* forkname = UniqNameGet("!af");
+    boolean outIsConn;
+    int i;
 
-    (void) octInitGenContents(facetPtr, OCT_NET_MASK, &netGen);
-    while (octGenerate(&netGen, &net) == OCT_OK) {
-	ERR_IF1(!CollectTerms(&net, in, &inN, out, &outN));
-	if (inN + outN > 2) {
-	    /* assume it's an auto-fork connect, check later in ConnectPass */
-	    ERR_IF1((name = UniqNameGet("!af")) == NULL);
-	    ERR_IF1(!EmitDefstarFork(name, inN));
-	    ERR_IF2(CreateOrModifyPropStr(&net, &autoForkProp, "autoFork",
-		name) != OCT_OK, octErrorString());
-	}
-    }
-    return (TRUE);
-}
-
-/* 6/14/89
-Inputs: name = fork name
-    outTermPtr = output terminal to connect to
-*/
-static boolean
-JoinForkIn(name, outTermPtr)
-char *name;
-octObject *outTermPtr;
-{
-    static char *forkInName = "in";
-    octObject outInst, fTerm;
-
+    PrintDebug ("JoinWithFork: inserting a Fork star");
+    ERR_IF1(!KcInstance (forkname, "Fork", (ParamListType *)0));
     ERR_IF2(GetById(&outInst, outTermPtr->contents.term.instanceId) != OCT_OK,
 	octErrorString());
-    if (IsIoPort(&outInst)) {
-	if (octGenFirstContainer(outTermPtr, OCT_TERM_MASK, &fTerm) 
-	    != OCT_OK) {
-	    ErrAdd("JoinForkIn: input port has no name");
-	    EssAddObj(&outInst);
-	    return (FALSE);
-	}
-	ERR_IF1(!KcAlias(fTerm.contents.term.name, name, forkInName));
-    } else {
-	ERR_IF1(!KcConnect(
-	    outInst.contents.instance.name, outTermPtr->contents.term.name, 
-	    name, forkInName, 0)
-	);
+    outIsConn = IsIoPort(&outInst);
+    if (outIsConn) {
+	ErrAdd ("JoinWithFork: output as alias not supported");
+	return FALSE;
     }
-    return (TRUE);
-}
-
-/* 6/14/89
-Inputs: name = fork name
-    i = number of output
-    inTermPtr = input terminal to connect to
-*/
-static boolean
-JoinForkOut(name, i, inTermPtr)
-char *name;
-int i;
-octObject *inTermPtr;
-{
-    octObject inInst, fTerm;
-    char buf[100];
-
-    ERR_IF2(GetById(&inInst, inTermPtr->contents.term.instanceId) != OCT_OK,
-	octErrorString());
-    sprintf(buf, "out %d", i);  /* format name of fork output */
-    if (IsIoPort(&inInst)) {
-	if (octGenFirstContainer(inTermPtr, OCT_TERM_MASK, &fTerm) !=OCT_OK) {
-	    ErrAdd("JoinForkOut: output port has no name");
-	    EssAddObj(&inInst);
-	    return (FALSE);
+    ERR_IF1(!KcConnect(outInst.contents.instance.name,
+		       outTermPtr->contents.term.name,forkname,"input", 0));
+    for (i = 0; i < n; i++) {
+	ERR_IF2(GetById(&inInst, inTermPtr->contents.term.instanceId) != OCT_OK,
+	    octErrorString());
+	if (IsIoPort(&inInst)) {
+	    ErrAdd ("JoinWithFork: input as alias not supported");
+	    return FALSE;
 	}
-	ERR_IF1(!KcAlias(fTerm.contents.term.name, name, buf));
-    } else {
-	ERR_IF1(!KcConnect(
-	    name, buf, 
-	    inInst.contents.instance.name, inTermPtr->contents.term.name, 0)
-	);
+	ERR_IF1(!KcConnect(forkname,"output",inInst.contents.instance.name,
+			   inTermPtr->contents.term.name, 0));
+	inTermPtr++;
     }
     return (TRUE);
 }
@@ -462,16 +396,16 @@ int delay;
     return (TRUE);
 }
 
-/* 6/14/89
+/* 6/14/89 7/31/90
 Emits connect, input, and output statements.  Also handles connects to
-auto-forks.
+multiportholes and auto-forks.
 */
 static boolean
 ConnectPass(facetPtr)
 octObject *facetPtr;
 {
     octObject net, in[TERMS_MAX], out[TERMS_MAX];
-    octObject delayProp, autoForkProp;
+    octObject delayProp;
     octGenerator netGen;
     int inN, outN, totalN, i, delay;
 
@@ -479,6 +413,8 @@ octObject *facetPtr;
     while (octGenerate(&netGen, &net) == OCT_OK) {
 	ERR_IF1(!CollectTerms(&net, in, &inN, out, &outN));
 	totalN = inN + outN;
+        delay = (GetByPropName(&net, &delayProp, "delay") == OCT_NOT_FOUND)
+		? 0 : (int) delayProp.contents.prop.value.integer;
 	if (totalN == 2) {
 	    /* possible ordinary connection */
 	    if (inN != 1 && outN != 1) {
@@ -486,41 +422,64 @@ octObject *facetPtr;
 		EssAddObj(&net);
 		return (FALSE);
 	    }
-	    delay = (GetByPropName(&net, &delayProp, "delay") == OCT_NOT_FOUND)
-		? 0 : (int) delayProp.contents.prop.value.integer;
 	    ERR_IF1(!JoinOrdinary(&in[0], &out[0], delay));
-	} else if (totalN < 2) {
+	}
+	else if (totalN < 2) {
 	    /* bad net, delete it */
 	    ERR_IF2(octDelete(&net) != OCT_OK, octErrorString());
 	    PrintDebug("Warning: bad net deleted");
-	} else {
-	    /* totalN > 2: possible auto-fork connection */
-	    if (outN != 1) {
-	        ErrAdd("ConnectPass: net has more than 1 output");
+	}
+    /* totalN > 2: possible auto-fork or multiport connection */
+	else if (inN == 1 && outN > 1) {
+	    if (TermIsMulti(&in[0])) {
+		for (i = 0; i < outN; i++) {
+		    ERR_IF1(!JoinOrdinary(&in[0], &out[i], delay));
+		}
+	    }
+	    else {
+	        ErrAdd("ConnectPass: single input porthole has more than 1 output");
 		EssAddObj(&net);
 		return (FALSE);
 	    }
+	}
+	else if (outN == 1 && inN > 1) {
+	    if (TermIsMulti(&out[0])) {
+		for (i = 0; i < inN; i++) {
+		    ERR_IF1(!JoinOrdinary(&in[i], &out[0], delay));
+		}
+		return (TRUE);
+	    }
 	    /* auto-fork connection... */
-	    if (GetByPropName(&net, &delayProp, "delay") != OCT_NOT_FOUND) {
+	    if (delay > 0) {
 		ErrAdd("ConnectPass: illegal delay on auto-fork net");
 		EssAddObj(&net);
 		return (FALSE);
 	    }
-	    if (GetByPropName(&net, &autoForkProp, "autoFork")
-		== OCT_NOT_FOUND) {
-		ErrAdd("ConnectPass: bug!, cannot find fork name on net");
-		EssAddObj(&net);
-		return (FALSE);
-	    }
-	    ERR_IF1(!JoinForkIn(autoForkProp.contents.prop.value.string,
-		&out[0]));
-	    for (i = 0; i < inN; i++) {
-		ERR_IF1(!JoinForkOut(autoForkProp.contents.prop.value.string, i,
-		    &in[i]));
-	    }
+	    /* create a fork star and add it */
+	    ERR_IF1(!JoinWithFork(in,out,inN));
+	}
+	else {
+	    ErrAdd("ConnectPass: multiple inputs and outputs");
+	    EssAddObj(&net);
+	    return (FALSE);
 	}
     }
     return (TRUE);
+}
+
+/* 7/31/90
+Checks to see if octObject is a MultiPortHole.
+*/
+static boolean
+TermIsMulti(termPtr)
+octObject *termPtr;
+{
+    octObject inst;
+
+    ERR_IF2(GetById(&inst, termPtr->contents.term.instanceId) != OCT_OK,
+	octErrorString());
+    return KcIsMulti(inst.contents.instance.name,
+		     termPtr->contents.term.name);
 }
 
 /*
@@ -570,7 +529,7 @@ static boolean
 CompileGal(galFacetPtr)
 octObject *galFacetPtr;
 {
-    char buf[1000], msg[1000], *name;
+    char msg[1000], *name;
     boolean xferedBool;
 
     name = BaseName(galFacetPtr->contents.facet.cell);
@@ -588,7 +547,6 @@ octObject *galFacetPtr;
     ERR_IF1(!KcDefgalaxy(name));
     ERR_IF2(!ProcessFormalParams(galFacetPtr), msg);
     ERR_IF2(!ProcessInsts(galFacetPtr), msg);
-    ERR_IF2(!DefAutoForkPass(galFacetPtr), msg);
     ERR_IF2(!ConnectPass(galFacetPtr), msg);
     ERR_IF1(!KcEndDefgalaxy());
     ERR_IF2(!DupSheetAdd(&traverse, name), msg);
@@ -603,7 +561,7 @@ static boolean
 CompileUniv(facetPtr)
 octObject *facetPtr;
 {
-    char buf[500], *name;
+    char *name;
     boolean xferedBool;
 
     name = BaseName(facetPtr->contents.facet.cell);
@@ -616,7 +574,6 @@ octObject *facetPtr;
     PrintDebug("CompileUniv");
     KcClearUniverse();
     ERR_IF1(!ProcessInsts(facetPtr));
-    ERR_IF1(!DefAutoForkPass(facetPtr));
     ERR_IF1(!ConnectPass(facetPtr));
     ERR_IF1(!ClearDirty(facetPtr));
     if (!xferedBool) {
