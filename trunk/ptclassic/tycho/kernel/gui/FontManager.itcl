@@ -83,23 +83,26 @@ class ::tycho::FontManager {
     ##########################################################################
     ####                        public procedures                         ####
 
-    # Return a valid font size
-    proc size {{proposed {}} {shift 0}}
- 
     # Check whether a system-dependent font description is valid
     proc checkXFont {font}
-
-    # Given a partial font specification, return a legal system-specific font
-    proc getFont {family {size 12} {style roman} {shift 0}}
 
     # Set or return "preferred"  font families
     proc family {{type {}} {family {}} args}
 
-    ##########################################################################
-    ####                       private procedures                         ####
+    # Given a partial font specification, return a legal system-specific font
+    proc getFont {family {size 12} {style roman} {shift 0}}
 
     # Given a symbolic X font specification, return a legal X font name.
     proc getXFont {family {size 12} {weight medium} {style r} {shift 0}}
+
+    # Given an X font specification, parse it and return a symbolic font name
+    proc parseFont {font}
+
+    # Return a valid font size
+    proc size {{proposed {}} {shift 0}}
+ 
+    ##########################################################################
+    ####                       private procedures                         ####
 
     # Given a complete font specification, return a font name or
     # an empty string.
@@ -185,15 +188,15 @@ class ::tycho::FontManager {
     set relatedFamilies(itcavantgarde) {lucida helvetica}
 
     # The special screen fonts
-    private common screenFontManager
-    set screenFontManager(8)  5x8
-    set screenFontManager(10) 6x12
-    set screenFontManager(12) 8x13
-    set screenFontManager(14) 9x15
-    set screenFontManager(16) 9x15
-    set screenFontManager(18) 8x16
-    set screenFontManager(24) 10x20
-    set screenFontManager(32) 12x24  
+    private common screenFont
+    set screenFont(8)  5x8
+    set screenFont(10) 6x12
+    set screenFont(12) 8x13
+    set screenFont(14) 9x15
+    set screenFont(16) 9x15
+    set screenFont(18) 8x16
+    set screenFont(24) 10x20
+    set screenFont(32) 12x24  
 }
 
 
@@ -201,46 +204,6 @@ class ::tycho::FontManager {
 #########################################################################
 ####                      public procedures    
 ####
-
-
-########################################################################
-#### size
-# Return a legal font size or sizes. If no arguments are given, return
-# a list of legal font sizes. If the first argument is given, return that
-# size if it is legal or a similar size if it is not. If the second argument
-# is also given, return the size shifted by that many legal font sizes.
-#
-body ::tycho::FontManager::size {{proposed {}} {shift 0}} {
-    if { $proposed == "" } {
-	# No size given, so return legal sizes
-	return $legalSizes
-    }
-
-    # Get a legal size
-    set index [lsearch $legalSizes $proposed]
-    if { $index < 0 } {
-	foreach size $legalSizes {
-	    if {$proposed <= $size} {
-		break
-	    }
-	}
-    } else {
-	set size $proposed
-    }
-
-    # Shift the size is requested
-    if { $shift != 0 } {
-	set index [lsearch $legalSizes $size]
-	set index [expr $index + ($shift)]
-	if { $index < 0 } {
-	    set index 0
-	} elseif { $index >= [llength $legalSizes] } {
-	    set index [expr [llength $legalSizes] - 1]
-	}
-	set size [lindex $legalSizes $index]
-    }
-    return $size
-}
 
 
 #########################################################################
@@ -435,6 +398,91 @@ body ::tycho::FontManager::getXFont {family {size 12} {weight medium} \
     return $font
 }
 
+########################################################################
+#### parseFont
+# Given an X font name, parse it to return a symbolic font name. This
+# is useful for getting an initial font from an X font, changing the
+# size of a widget font without changing type, and so on.
+#
+body ::tycho::FontManager::parseFont {font} {
+    # This expression may need to be changed to cope with
+    # un-anticipated foundries etc. For example, I just added
+    # the "&" to the foundry expression so it gets "b&h".
+    set exp "^-(\[a-z&\]*|\\*)-(\[a-zA-Z\ \]*)-(medium|bold)-(r|i)-(\[a-z\]*|\\*)-(\[a-z\]*|\\*)-(\[a-z\]*|\\*)-(\[0-9\]+)0-"
+    if [regexp -- $exp $font \
+	    match foundry family weight style junk1 junk2 junk3 size] {
+	# Parse succeeded -- get non-X style
+	switch -exact $weight-$style {
+	    "medium-r" {
+		set style Roman
+	    }
+	    "bold-r" {
+		set style Bold
+	    }
+	    "medium-i" {
+		set style Italic
+	    }
+	    "bold-i" {
+		set style BoldItalic
+	    }
+	}
+	return [list $family $size $style]
+
+    } else {
+	# Parse failed: try for a "screen" font
+	set found 0
+	foreach {size f} [array get screenFont] {
+	    if { $f == $font } {
+		set found 1
+		break
+	    }
+	}
+	if { $found } {
+	    return [list Screen $size Roman]
+	} else {
+	    return {Screen 12 Roman}
+	}
+    }
+}
+
+########################################################################
+#### size
+# Return a legal font size or sizes. If no arguments are given, return
+# a list of legal font sizes. If the first argument is given, return that
+# size if it is legal or a similar size if it is not. If the second argument
+# is also given, return the size shifted by that many legal font sizes.
+#
+body ::tycho::FontManager::size {{proposed {}} {shift 0}} {
+    if { $proposed == "" } {
+	# No size given, so return legal sizes
+	return $legalSizes
+    }
+
+    # Get a legal size
+    set index [lsearch $legalSizes $proposed]
+    if { $index < 0 } {
+	foreach size $legalSizes {
+	    if {$proposed <= $size} {
+		break
+	    }
+	}
+    } else {
+	set size $proposed
+    }
+
+    # Shift the size is requested
+    if { $shift != 0 } {
+	set index [lsearch $legalSizes $size]
+	set index [expr $index + ($shift)]
+	if { $index < 0 } {
+	    set index 0
+	} elseif { $index >= [llength $legalSizes] } {
+	    set index [expr [llength $legalSizes] - 1]
+	}
+	set size [lindex $legalSizes $index]
+    }
+    return $size
+}
 
 #########################################################################
 #########################################################################
@@ -468,8 +516,8 @@ body ::tycho::FontManager::tryFont {family size weight style} {
 	    # No italics available
 	    return {}
 	}
-	if { [::info exists screenFontManager($size)] } {
-	    set font $screenFontManager($size)
+	if { [::info exists screenFont($size)] } {
+	    set font $screenFont($size)
 	    if { $weight == "bold" } {
 		set font ${font}bold
 	    }
