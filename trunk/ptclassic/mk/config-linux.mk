@@ -79,6 +79,13 @@ TERMLIB_LIBSPEC = -ltermcap
 #X11INCL     = -I/usr/X386/include/X11
 #X11_LIBSPEC = -L/usr/X386/lib/X11 -lX11
 #
+# X11R6
+#
+#X11_INCSPEC =	-I$(ROOT)/src/compat -I/usr/sww/X11R6/include
+#X11_LIBSPEC =	-L/usr/sww/X11R6/lib -lX11
+# Use -lSM -lICE for X11R6, don't use then for X11R5
+#X11EXT_LIBSPEC=-lXext -lSM -lICE
+#
 # Slackware >=1.2 locations
 #
 X11_INCSPEC = -I/usr/X11/include
