@@ -1,5 +1,5 @@
 # Version Identification:
-# @(#)makefile	1.14	8/29/94
+# $Id$
 # Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
@@ -35,14 +35,18 @@ LIBDIRS = Packages Xpackages
 # "leaf" directories with a make.template
 MTDIRS = attache installColors masters oct2ps octfix octls
 
+
 # "leaf" directories with no make.template
 LDIRS =
 
 # All directories
 ALLDIRS = $(DIRS) $(MTDIRS) 
 
+# Directories other than vem
+OTHERDIRS = tkoct $(MTDIRS)
+
 # directories with subtrees
-SDIRS = Packages Xpackages vem
+SDIRS = Packages Xpackages vem tkoct
 
 MAKEVARS = "ARCH=$(ARCH)"
 
@@ -53,38 +57,46 @@ all vem: header liball libinstall otherall vemall
 install: header liball libinstall vemall installvem otherinstall
 
 otherall:
-	for x in $(MTDIRS); do \
-		cd $$x ; \
+	for x in $(OTHERDIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
 		echo make all in $$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) \
 			VPATH=../../../src/octtools/$$x all ;\
-		cd .. ; \
+		) \
+	    fi ; \
 	done
 
 otherinstall: $(OCTTOOLS) $(OCTTOOLS)/lib.$(ARCH) $(OCTTOOLS)/include
-	for x in $(MTDIRS); do \
-		cd $$x ; \
+	for x in $(OTHERDIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
 		echo make install in $$x  ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) \
 			VPATH=../../../src/octtools/$$x install ;\
-		cd .. ; \
+		) \
+	    fi ; \
 	done
 
 # This target makes sure all the makefiles are current
 makefiles:
 	@for x in $(MTDIRS); do \
-		cd $$x ; \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
 		echo making makefile in $$x ; \
 		$(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
 			VPATH=../../../src/octtools/$$x makefile ;\
-		cd .. ; \
+		) \
+	    fi ; \
 	done
 
 	@for x in $(SDIRS); do \
-		cd $$x ; \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
 		echo making $@ in $$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/octtools/$$x $@; \
-		cd .. ; \
+		) \
+	    fi ; \
 	done
 
 header: $(OCTTOOLS) include $(OCTTOOLS)/include
