@@ -1,9 +1,9 @@
 #
 # $Id$
 #
-# The "tydoc" master style-sheet
+# The "idoc" master style-sheet
 #
-configure -title "Tycho documentation system"
+configure -title "Tycho IDoc documentation system"
 configure -description {
     This style contains settings for the Tycho
     documentation system.
