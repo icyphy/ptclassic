@@ -53,6 +53,7 @@ SIMPLE_TESTS = \
 GRAPHICAL_TESTS = \
 	testExec.itcl \
 	testRevControl.itcl \
+	testToolBar.itcl \
 	testWidgets.itcl \
 
 ITCL_SRCS =	\
