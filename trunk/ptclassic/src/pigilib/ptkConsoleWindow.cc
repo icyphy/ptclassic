@@ -122,7 +122,7 @@ static Tcl_DString _ptkStdinCmdStr;
 
     /* ARGSUSED */
 static void
-_ptkStdinProc(ClientData clientData, int mask) {
+_ptkStdinProc(ClientData /*clientData*/, int mask) {
 #define BUFFER_SIZE 4000
     char input[BUFFER_SIZE+1];
     static int gotPartial = 0;
