@@ -90,3 +90,8 @@ $(DRVRDIR):
 		echo "Creating $@"; \
 		mkdir $@; (cd $(VPATH); tar -chf - $@) | tar -xpf -; \
 	fi
+
+# Fake out rules in common.mk for $(LIBDIR)/$(LIB) and 
+# $(LIBDIR)/$(LIBNONSHARED)
+LIB = 	dummylib
+LIBNONSHARED =	dummylibnonshared

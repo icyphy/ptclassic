@@ -47,3 +47,7 @@ lint:	$(LIBCSRCS)
 $(OBJS):
 	$(CC) $(C_SHAREDFLAGS) $(CFLAGS) $(OTHERCFLAGS) $(C_INCL) -c $<
 
+# Fake out rules in common.mk for $(LIBDIR)/$(LIB) and 
+# $(LIBDIR)/$(LIBNONSHARED)
+LIB = 	dummylib
+LIBNONSHARED =	dummylibnonshared
