@@ -214,6 +214,7 @@ install_tclx:
 		X11_INCLUDES="$(X11_INCSPEC)" \
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		install)
+	-(cd $(BINDIR); ln -s $(REL_ITCL_BINDIR)/* .)
 
 $(TCLX_OBJ):
 	mkdir -p $@
@@ -249,7 +250,7 @@ install_blt:
 		X11_INCLUDES="$(X11_INCSPEC)" \
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		install)
-
+	-(cd $(BINDIR); ln -s $(REL_ITCL_BINDIR)/* .)
 $(BLT_OBJ):
 	mkdir -p $@
 
