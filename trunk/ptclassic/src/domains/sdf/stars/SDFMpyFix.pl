@@ -55,13 +55,18 @@ the OverflowHandler will be called.
 		Fix fixIn, product;
 	}
 	setup {
-		if ( ! int(ArrivingPrecision) )
+		if ( ! int(ArrivingPrecision) ) {
 		  fixIn = Fix( ((const char *) InputPrecision) );
+		  if ( fixIn.invalid() )
+		    Error::abortRun( *this, "Invalid InputPrecision" );
+		}
 
 	        product = Fix( ((const char *) OutputPrecision) );
+		if ( product.invalid() )
+		  Error::abortRun( *this, "Invalid OutputPrecision" );
 	        product.set_ovflow( ((const char *) OverflowHandler) );
 		if ( product.invalid() )
-		  Error::abortRun( *this, "Invalid overflow handler" );
+		  Error::abortRun( *this, "Invalid OverflowHandler" );
 	}
 	go {
 	        MPHIter nexti(input);
@@ -84,9 +89,9 @@ the OverflowHandler will be called.
 		    checkOverflow(product);
 		  }
 		}
-		else {			// 1.0 will overflow if the fixed-
-		  product = 1.0;	// representation has 0 integer bits
-		  checkOverflow(product);
+		else {
+		  product = 1.0;	   // 1.0 will overflow if the fixed-
+		  checkOverflow(product);  // representation has 0 integer bits
 		}
 	        output%0 << product;
 	}

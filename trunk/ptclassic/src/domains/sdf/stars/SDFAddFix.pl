@@ -55,13 +55,18 @@ the OverflowHandler will be called.
 		Fix fixIn, sum;
         }
         setup {
-                if ( ! int(ArrivingPrecision) )
+                if ( ! int(ArrivingPrecision) ) {
 		  fixIn = Fix( ((const char *) InputPrecision) );
+		  if ( fixIn.invalid() )
+		    Error::abortRun( *this, "Invalid InputPrecision" );
+		}
 
 		sum = Fix( ((const char *) OutputPrecision) );
+		if ( sum.invalid() )
+		  Error::abortRun( *this, "Invalid OutputPrecision" );
 		sum.set_ovflow( ((const char *) OverflowHandler) );
 		if ( sum.invalid() )
-		  Error::abortRun( *this, "Invalid overflow handler" );
+		  Error::abortRun( *this, "Invalid OverflowHandler" );
         }
         go {
                 MPHIter nexti(input);
