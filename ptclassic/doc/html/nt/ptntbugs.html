@@ -11,21 +11,77 @@ If you have problems, try searching the Cygwin32 mailing list archives
 via <a href="http://www.cygnus.com/misc/gnu-win32/">Cygnus Cygwin32 page</a>.
 The FAQ is also useful.
 <h3>Setup</h3>
-
+<MENU>
 <li> If your tree is located on a Unix file system, use Samba.
 See the <a href="ptntinstall.html">Ptolemy NT Installation page</a>
 for details
 
 <li> If you install the Cygwin X11R6 binaries and Exceed, then
 you can telnet to a PC, start up <CODE>bash</CODE>, and then start
-up an xterm with <CODE>xterm -sb -e bash &amp;</CODE>
+up an xterm with 
+<pre>
+xterm -sb -e bash &amp;
+</pre>
 
 <li> The NT Resource kit includes a <CODE>shutdown.exe</CODE> binary
 that can be executed from a bash shell.  The following command should reboot:
-<CODE>shutdown /L /R /Y /C</CODE>
+<pre>
+shutdown /L /R /Y /C
+</pre>
 
 <li> To use <CODE>gdb</CODE> remotely without the Tcl interface, 
-start it with <CODE>gdb -nw </CODE>
+start it with
+<pre>
+gdb -nw
+</pre>
+
+</MENU>
+
+<h3><a name="Cygwin32 Pathnames">Cygwin32 pathnames</a></h3>
+The way that Cygwin32 handles pathnames can cause a lot of problems.
+<menu>
+<li> The FAQ on the
+<a href="http://www.cygnus.com/misc/gnu-win32/">Cygnus Cygwin32 page</a>
+has some information about pathnames.
+
+<li> Cygwin32 automatically converts backslashes in Windows
+environment variables to forward slashes.  This causes no end of
+problems with <CODE>/bin/sh</CODE> scripts that are calling
+<CODE>java</CODE>, which expects Windows style backslashed pathnames
+in command line arguments
+
+<li> Cygwin32 has the <CODE>mount</CODE> command, which allows the user
+to mount local and remote file systems in the Cygwin32 file space.
+The downside of this is that applications that do not use the Cygwin32
+api will not be able to see the Cygwin32 mount points.   For example:
+
+<menu>
+<li> <CODE>java</CODE> will not be able to access files
+mounted via the Cygwin32 mount point.
+
+<li> Tycho can have similar problems.  Note that if you install
+Ptolemy under NT, there are now two distinct ways to run Tycho under
+NT:
+	<ol>
+	<li> Using the prebuilt native Windows <CODE>itkwish.exe</CODE>.
+	This binary is available on the
+	<a href="http://www.tcltk.com">Itcl website</a>.
+	This binary uses the native Windows pathnames, so it will
+	not understand Cygwin32 mount points.
+	<li> Using the Cygwin32
+	<CODE>$PTOLEMY/tcltk/itcl.nt4/bin/itkwish2.2.exe</CODE> binary.
+	This binary is built during the Ptolemy Tcl/Tk installation process.
+	This binary understands Cygwin32 mount points.
+	</ol>
+</menu>
+
+<li> When Cygwin32 is converting environment variables to forward
+slashes, it may also attempt to substitute in any mount points it
+knows about.  This can cause problems as well.
+
+
+</menu>
+
 
 <h2>Compilation bugs</h2>
 <MENU>
@@ -66,6 +122,25 @@ not being able to find <CODE>xrdb</CODE>.  This is because
 <CODE>/bin/sh.exe</CODE> does not have a working <CODE>type</CODE>
 command.  One workaround would be to copy <CODE>bash.exe</CODE>
 to <CODE>/bin/sh.exe</CODE>, though this will result in slower compiles.
+
+
+<li> Starting up <CODE>pigi</CODE> results in messages like:
+<pre>
+Error: Unable to load ptk startup file: : 
+  can't find package tycho.kernel.basic: can't find
+  package tycho.kernel.basic
+    while executing
+"package require tycho.kernel.basic"
+    (file "C:\tycho0.3devel/kernel/Tycho.tcl" line 255)
+    invoked from within
+"source $path/kernel/Tycho.tcl"
+</pre>
+This message can occur if you have a standalone installation of 
+Tycho installed.  The workaround is to unset TYCHO before starting pigi:
+<pre>
+unset TYCHO
+pigi
+</pre>
 
 <li> If you see the following message, then you may need to 
 upgrade to Cygwinb19.1.
