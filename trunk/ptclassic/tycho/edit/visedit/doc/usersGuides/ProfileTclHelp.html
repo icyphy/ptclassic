@@ -32,15 +32,15 @@ will look for the TclX shared library that contains the
 There are several different scenarios. Pick the scenario that fits
 your situation best and follow the instructions below. 
 <MENU>
-<LI> <A HREF="#profile command, default TclX">Use the default TclX
+<LI> <A HREF="#profile command, default TclX">1. Use the default TclX
 	profile command</A>
-<LI> <A HREF="#profile command, TclX patch">Patch the TclX profile
+<LI> <A HREF="#profile command, TclX patch">2. Patch the TclX profile
 	command and Reinstall TclX</A>
-<LI> <A HREF="#profile command, standalone version">Compile a
+<LI> <A HREF="#profile command, standalone version">3. Compile a
 	standalone profile command</A>
 </MENU>
 
-<H3><A NAME="profile command, default TclX">Use the default TclX
+<H3><A NAME="profile command, default TclX">1. Use the default TclX
 profile command</A></H3>
 
  <P>The <CODE>profile</CODE> command shipped with TclX7.6.0 has
@@ -50,7 +50,7 @@ HREF="tclXprofile.c.patch"><CODE>tclXprofile.c.patch</CODE></A> is a
 patch to <CODE>tclX7.6.0/tcl/generic/tclXprofile.c</CODE> that
 fixes the bug.  
 	
-<H3><A NAME="profile command, TclX patch">Patch the TclX profile command and Reinstall TclX</A>
+<H3><A NAME="profile command, TclX patch">2. Patch the TclX profile command and Reinstall TclX</A>
 </H3>
 
  <P>To install this patch, you will need Larry Wall's
@@ -72,53 +72,74 @@ $TYCHO/editors/visedit/doc/usersGuides/tclXprofile.c.patch</CODE>.
 
 </OL>
 
-<H3><A NAME="profile command, standalone version">Compile a standalone profile command</A>
+<H3><A NAME="profile command, standalone version">3. Compile a standalone profile command</A>
 </H3>
 
-The directory <CODE>$TYCHO/lib/profile</CODE> contains a standalone
+The directory <CODE>$TYCHO/src/profile</CODE> contains a standalone
 version of <CODE>tclXprofile.c</CODE> that can be configured and
 compiled to produce a shared object that can be loaded into Tycho
 when profiling starts.  The Tycho Loader facility will bring up a file
 browser if TclX cannot be found, and you can enter the pathname of the
 <CODE>tclXprofile</CODE> object.
  <P>
-
-Compiling <CODE>tclXprofile.c</CODE> requires the tcl sources, since
-the .c file uses <CODE>tclInt.h</CODE>, which is not usually
-installed.  If you are compiling <CODE>tclXprofile.c</CODE> from
-within Ptolemy, then you can use the default settings in
-<CODE>$TYCHO/lib/profile/makefile</CODE>.  If you are not compiling
-from within Ptolemy, you will have to set the
-<CODE>TCL_SRC_INCLUDE_DIR</CODE> makefile variable.
- <P>
-
-Compiling <CODE>tclXprofile.c</CODE> also requires
-<CODE>tclConfig.sh</CODE>, which is usually in the architecture-
-dependent tcl <CODE>lib</CODE> directory.  Again, if you are
-installing from within Ptolemy, then the makefile is probably fine.
-Otherwise you will have to adjust the <CODE>TCLCONFIGSH</CODE>
-makefile variable.
- <P>
-There are two ways to adjust these variables:
-<OL>
-<LI> Edit <CODE>$TYCHO/lib/profile/makefile</CODE>.
-After you have adjusted the makefile accordingly, configure and build
-the shared object:
+ <P>To configure and build the profiler, do the following:
 <PRE>
- <CODE>cd $TYCHO/lib/profile; make</CODE>
+cd $TYCHO
+make tclexts
 </PRE>
-<LI> Or, pass the new values as command line options:
-<PRE>
-cd $TYCHO/lib/profile
-make TCL_SRC_INCLUDE_DIR=$PTOLEMY/src/tcltk/itcl2.1/tcl7.5/generic/ \
-	$PTOLEMY/tcltk/itcl.$PTARCH/lib/itcl/tclConfig.sh
-</PRE>
-</OL>
-
+See the <A HREF="../../../../doc/coding/buildtclexts.html">Building Tcl Extensions</A>
+documentation for further information.
 
 The <CODE>tclXprofile</CODE> shared object will be in
-<CODE>$TYCHO/lib/profile/$PTARCH</CODE>.  Under Solaris, the file will
+<CODE>$TYCHO/obj.$PTARCH</CODE>.  Under Solaris, the file will
 be named <CODE>tclXprofile.so</CODE>.
+
+ <HR>
+<H3>The <CODE>profile</CODE> command</H3>
+Below is the TclX manual page description of the <CODE>profile</CODE>
+command
+
+<BLOCKQUOTE>
+<CODE>profile ?-commands? ?-eval? on</CODE>
+ <P>
+<CODE>profile off <I>arrayVar</I></CODE>
+ <P>
+This command is used to collect a performance profile of a Tcl script.  It
+collects data at the Tcl procedure level. The number of calls to a procedure,
+and the amount of real and CPU time is collected. Time is also collected for
+the global context.  The procedure data is collected by bucketing it based on
+the procedure call stack, this allows determination of how much time is spent
+in a particular procedure in each of it's calling contexts.
+.sp
+The <CODE>-on</CODE> option enables profile data collection.
+If the <CODE>-commands</CODE>
+option is specified, data on all commands within a procedure is collected
+as well a procedures.  Multiple occurrences of a command within a procedure
+are not distinguished, but this data may still be useful for analysis.
+ <P>
+
+The <CODE>off</CODE> option turns off profiling and moves the data
+collected to the array <CODE><I>arrayVar</I></CODE>.  The array is
+address by a list containing the procedure call stack.  Element zero
+is the top of the stack, the procedure that the data is for.  The data
+in each entry is a list consisting of the procedure call count and the
+real time and CPU time in milliseconds spent in the procedure (but not
+any procedures it calls). The list is in the form <CODE>{<I>count real
+cpu</I>}</CODE>.
+ <P>
+Normally, the variable scope stack is used in reporting where time is
+spent.
+Thus upleveled code is reported in the context that it was executed in, not
+the context that the uplevel was called in.
+If the <CODE>-eval</CODE> option is specified, the procedure evaluation (call) stack
+is used instead of the procedure scope stack.  Upleveled code is reported in
+the context of the procedure that did the uplevel.
+[...]
+ <P>On <B>Windows 95/NT</B>, profile command only reports elasped real time,
+CPU time is not available and is reported as zero.
+
+</BLOCKQUOTE>
+
 
 <HR>
 <H2>Profiler Description</H2>
