@@ -14,7 +14,7 @@
 CPLUSPLUS = g++
 GPPFLAGS = -g -Wall -Wcast-qual $(MEMLOG)
 CFLAGS = -g
-DEPEND=g++ -MM
+DEPEND= $(CPLUSPLUS) -MM
 
 # where the Gnu library is
 GNULIB=/usr/tools/gnu/lib
