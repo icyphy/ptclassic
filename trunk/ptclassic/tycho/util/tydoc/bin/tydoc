@@ -6,7 +6,7 @@
 # Author: John Reekie
 
 # Create the tycho namespace
-namespace ::tycho
+namespace eval ::tycho {}
 
 # Set up the auto_path. WHat we do here is simply append
 # paths to the auto_path in the order that is likely to
