@@ -96,6 +96,9 @@ public:
 		Wormhole* parentWormhole, Star* parentStar,
 		DataType type = FLOAT, unsigned numTokens = 1 );
 
+	// change the parameters (numberTokens)
+	void setParams(int numTok);
+
 	// return the timeMark
 	double getTimeMark() { return timeMark; }
 	void setTimeMark(double d) { timeMark = d; }
