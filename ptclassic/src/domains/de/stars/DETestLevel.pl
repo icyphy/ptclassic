@@ -11,31 +11,32 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 	desc {
-.pp
-This star detects threshold crossings if "crossingsOnly" is TRUE.
+When "crossingsOnly" is TRUE, this star internally remembers its
+previous outputs so that successive identical outputs are not produced.
+The output will always be an alternating TRUE/FALSE stream.  In this case,
+the first output will always be TRUE, and will occur the first time
+the input exceeds the threshold.  When "crossingsOnly" is FALSE,
+then this star outputs TRUE if the input exceeds the "threshold"
+and FALSE otherwise.  Output values are 1 for TRUE and 0 for FALSE.
+	}
+	explanation {
+This star detects threshold crossings if \fIcrossingsOnly\fR is TRUE.
 Otherwise, it simply compares the input against the "threshold".
 .lp
 If "crossingsOnly" is TRUE, then: 
 .ip 1)
-A TRUE is sent to "output" when the "input" particle exceeds or
-equals the "threshold" value, having been previously smaller.
+A TRUE is output when the input particle exceeds or
+equals the \fIthreshold\fR value, having been previously smaller.
 .ip 2)
- A FALSE is sent when the "input" particle is smaller than
-"threshold" having been previously larger.
+A FALSE is output when the input particle is smaller than
+\fIthreshold\fR having been previously larger.
 .lp
 Otherwise, no output is produced.
 .pp
-If "crossingsOnly" is FALSE, then a TRUE is sent to "output"
-whenever any "input" particle greater than or equal to "threshold"
-is received, and a FALSE is sent otherwise.
-	}
-	explanation {
-When "crossingsOnly" is TRUE,
-this star internally remembers its previous outputs so that successive
-identical outputs are not produced.  The output will always be an
-alternating TRUE/FALSE stream.  In this case,
-The first output will always be TRUE, and will occur the first time
-the input exceeds the threshold.
+If \fIcrossingsOnly\fR is FALSE, then a TRUE is output whenever any
+input particle greater than or equal to \fIthreshold\fR is received,
+and a FALSE is sent otherwise.
+Output values are always 1 for TRUE and 0 for FALSE.
 	}
 	input {
 		name { input }
@@ -61,6 +62,10 @@ the input exceeds the threshold.
 	}
 	private {
 		int flag;
+	}
+	code {
+#define TRUE 1
+#define FALSE 0
 	}
 	setup {
 		flag = FALSE;
