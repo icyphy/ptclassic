@@ -37,6 +37,7 @@ BDFSTARS = $(LIBDIR)/bdfstars.o
 VHDLFSTARS = $(LIBDIR)/vhdlfstars.o
 VHDLBSTARS = $(LIBDIR)/vhdlbstars.o
 CPSTARS = $(LIBDIR)/cpstars.o $(LIBDIR)/cpipstars.o
+ATMSTARS = $(LIBDIR)/mqstars.o $(LIBDIR)/deatmstars.o $(LIBDIR)/sdfatmstars.o
 
 # parallel scheduler libraries.
 PARLIBFILES = $(LIBDIR)/libDC.a $(LIBDIR)/libHu.a  $(LIBDIR)/libDL.a \
@@ -76,6 +77,10 @@ CP_LIBFILES= $(LIBDIR)/libcpstars.a $(LIBDIR)/libcpipstars.a \
 	$(LIBDIR)/libcp.a
 LWP_LIBFILES= $(LIBDIR)/liblwpthread.a
 
+ATM_LIBFILES = $(LIBDIR)/libmq.a $(LIBDIR)/libmqstars.a \
+	$(LIBDIR)/libdeatmstars.a $(LIBDIR)/libsdfatmstars.a \
+	$(LIBDIR)/libatm.a
+
 
 # CG-DDF no longer supported
 #$(LIBDIR)/libcgddfstars.a $(LIBDIR)/libcgddf.a \
@@ -98,6 +103,8 @@ STAR_LIBS=\
 # -laudio is for the Infopad stars in the CP domain
 CP_LIBS= -lcpstars -lcpipstars -lcp -laudio
 LWP_LIBS= -llwpthread -llwp
+
+ATM_LIBS= -lmqstars -lmq -ldeatmstars -lsdfatmstars -latm
 
 # Extra targets
 SDFT = $(OBJDIR)/domains/sdf/targets
