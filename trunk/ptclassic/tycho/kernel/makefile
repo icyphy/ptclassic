@@ -41,7 +41,6 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 TCL_SRCS = \
-	Defaults.tcl \
 	List.tcl \
 	Loader.tcl \
 	Lib.tcl \
@@ -77,6 +76,7 @@ ITCL_SRCS = \
 	Forest.itcl \
 	Glimpse.itcl \
 	Graph.itcl \
+	HierarchicalData.itcl \
 	History.itcl \
 	HTML.itcl \
 	HTMLMessage.itcl \
@@ -118,7 +118,7 @@ ITCL_SRCS = \
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =		doc img test tclIndex 
+MISC_FILES =		doc img test tclIndex Preferences
 
 # Sub directories to run make in.
 DIRS =			doc test
