@@ -94,6 +94,9 @@ public:
 	// Remove a Block from the list.  Note: block is not deleted
 	inline int remove (Block* b) { return NamedObjList::remove(b);}
 
+	// See if Block is present in list
+	int isInList (const Block& b) const;
+
 	// find Block with given name (const and non-const forms)
 	inline Block* blockWithName(const char* name) {
 		return (Block*)objWithName(name);
@@ -143,9 +146,13 @@ public:
 	/* virtual */ const char* className() const;
 
 	// system initialize method.  Derived Galaxies should not
-	// redefine initialize; they should write a start() method
+        // redefine initialize; they should write a setup() method
 	// to do any class-specific startup.
 	void initialize();
+
+	// system preinitialize method.
+	// Recursively calls preinitialize in subsystems
+	void preinitialize();
 
 	// system wrapup method.  Recursively calls wrapup in subsystems
 	void wrapup();
@@ -212,6 +219,10 @@ public:
         // possible to use ListIter::remove.   Be careful, if FALSE is
         // specified, we'll be left with a dangling pointer.
 	virtual int flatten(Galaxy* = NULL, int = TRUE);
+
+	// Return the largest KnownBlock serial number found within
+	// the galaxy.  Optionally scan subgalaxies.
+	long maxContainedSerialNumber (int recurse = TRUE);
 
 protected:
 
