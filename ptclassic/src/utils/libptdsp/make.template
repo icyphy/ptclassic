@@ -55,12 +55,14 @@ LIBNONSHARED = libptdsp.a
 C_INCL = $(PTCOMPAT_INCSPEC)
 
 LIB_HDRS = \
+ Ptdsp_FloatMatrix.h \
  ptdspfft_rif.h \
  ptdspNearestNeighbor.h \
  ptdspPartitionCodebook.h \
  ptdspRaisedCosine.h \
  ptdspWindow.h \
- ptdspMuLaw.h
+ ptdspMuLaw.h \
+ ptdspRunLength.h
 
 HDRS = ptdsp.h ptdspcephes.h $(LIB_HDRS)
 
