@@ -167,7 +167,9 @@ int MatlabTcl::matlab(int argc, char** argv) {
 // close a Matlab connection: don't do anything except close figures
 int MatlabTcl::end(int argc, char** /*argv*/) {
     if (argc != 2) return usage("matlab end");
-    if (matlabInterface == 0) return error("the Tcl/Matlab interface has not been initialized");
+    if (matlabInterface == 0) {
+	return error("the Tcl/Matlab interface has not been initialized");
+    }
     matlabInterface->CloseMatlabFigures();
     delete matlabInterface;
     matlabInterface = 0;
@@ -218,7 +220,10 @@ int MatlabTcl::get(int argc, char** argv) {
 	}
 	return TCL_OK;
     }
-    return TCL_ERROR;
+
+    StringList msg = "Matlab matrix '";
+    msg << argv[2] << "' is not defined";
+    return error(msg);
 }
 
 // evaluate a Matlab command
