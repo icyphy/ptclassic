@@ -43,6 +43,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGCTychoTarget.h"
 #include "CGCStar.h"
 #include "KnownTarget.h"
+#include "miscFuncs.h"
 
 // constructor
 CGCTychoTarget::CGCTychoTarget(const char* name,const char* starclass,
@@ -50,16 +51,21 @@ CGCTychoTarget::CGCTychoTarget(const char* name,const char* starclass,
 
 	addState(skeletonMakefile.setState("skeletonMakefile",this,
 					   "$PTOLEMY/lib/cgc/TclTk_Target.mk",
-					   "makefile to use as a base for copying to remote machine"));
+                                           "makefile to use as a base for copying to remote machine"));
 
 	loopingLevel.setInitValue("1");
 	addStream("mainLoopTerm", &mainLoopTerm);
-
+        addStream("tychoSetup",&tychoSetup);
+        addStream("tkSetup",&tkSetup);
+        addState(scriptFile.setState("scriptFile",this,"Enter the Custom Script path here"));
 }
 
 void CGCTychoTarget :: initCodeStrings() {
 	CGCTarget::initCodeStrings();
 	mainLoopTerm.initialize();
+        tychoSetup.initialize();
+        tkSetup.initialize();
+
 }
 
 // clone
@@ -164,17 +170,22 @@ void CGCTychoTarget :: addStaticDecls
 }
 
 void CGCTychoTarget :: frameCode() {
-  // This frameCode is lifted from the CGCTarget
+  char* tycgcpath = expandPathName("$PTOLEMY/tycho/src/tycgc/tycgc.h");
 
   // Add the comment, and include files
   myCode << headerComment() << "\n\n"
-	 << include
-	 << "#include \"/users/johnr/ptdesign/tycho/src/tycgc/tycgc.h\"\n\n";
+  << include
+  << "#include \""
+  << tycgcpath
+  << "\"\n\n";
 
     // Add static variables used by all modules
   myCode << comment("Name of this CGC module")
     << "static char *moduleName = \"" 
-    << galaxy()->name() << "\";\n\n"
+    << galaxy()->name() << "\";\n"
+    << comment("The name of the script file that creates the user interface")
+    << "static char *scriptFile = \""
+    << (const char *)scriptFile << "\";\n\n"
     << comment("Loop counters")
       << "int numIterations = "
       << int(scheduler()->getStopTime()) << ";\n"
@@ -189,7 +200,8 @@ void CGCTychoTarget :: frameCode() {
   addStaticDecls(myCode, (const char *)globalDecls);
   addStaticDecls(myCode, (const char *)mainDecls);
 
-
+  // Add tychoSetup to the procedures string
+  procedures << "static void tychoSetup() {\n" << tychoSetup << "}\n";
   // Add the procedures
   myCode << procedures;
 
@@ -222,11 +234,17 @@ void CGCTychoTarget :: frameCode() {
 	<<"\""
 	<< galaxy()->name()
 	<<"\", tclinterface, (ClientData) NULL, (Tcl_CmdDeleteProc *) NULL);\n"
+        << comment("Call tychoSetup to initialize control connections")
+        << "tychoSetup();\n"
 	<<"return TCL_OK;\n}\n";
 
+  char* tclifpath = expandPathName("$PTOLEMY/tycho/src/tycgc/tclif.c");
+
   myCode << setupDecl << wrapupDecl << executeDecl 
-	 << "#include \"/users/johnr/ptdesign/tycho/src/tycgc/tclif.c\"\n\n"
-	 << initProcedure;
+  << "#include \""
+  << tclifpath
+  << "\"\n"
+  << initProcedure;
 
   // after generating code, initialize code strings again.
   initCodeStrings();
