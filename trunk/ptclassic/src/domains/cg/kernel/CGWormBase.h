@@ -61,7 +61,7 @@ public:
     	int isCGinside() { 
 	    return myTarget()->isA("CGTarget");
 	}
-protected:
+
         // execution time
         int execTime;
 };
