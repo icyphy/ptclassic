@@ -219,6 +219,15 @@
 #     $class parameters bar
 # </tcl></pre>
 #
+# Programmers' NOTE: Many of the methods inherited from HierModel and above
+# are overridden here. This is in order to allow the user to create non-unique
+# names as long as the type/name pair is unique. Internally, Class appends 
+# a type-dependent prefix (see ::fullName and ::shortName) when it is storing
+# an entity, and removes that when it returns the name to the user. This
+# requires the user to be more aware of the types of items she is requesting,
+# and limits the nesting done, but it solves the problem of allowing non-unique
+# names.
+#
 class ::tycho::Class {
     inherit ::tycho::HierModel
 
