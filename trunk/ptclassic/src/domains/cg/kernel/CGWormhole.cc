@@ -59,6 +59,10 @@ Block* CGWormhole :: clone() const {
 	LOG_NEW; return new CGWormhole(gal.clone()->asGalaxy(), myTarget()->cloneTarget());
 }
 
+void CGWormhole::go() {
+    scheduler()->compileRun();
+}
+
 /**************************************************************************
 
 	methods for CGtoUniversal
