@@ -59,6 +59,8 @@
 #       this includes "public" and "package". The default is "public".
 #   <li><b>-modifiers</b>: Other class modifiers. Possible values depend
 #       on the languages. The default is null.
+#   <li><b>-exceptions</b>: Exceptions thrown by this class. An attribute
+#       because exceptions don't have attributes. The default is null.
 #   <li><b>-source</b>: The file in which the class resides.
 #   <li><b>-interface</b>: The file in which the class' interface resides.
 # </ul>
@@ -82,6 +84,8 @@
 #        The default is "public."
 #   <li><b>-modifiers</b>: Other modifiers. Possible values depend
 #        on the languages. The default is null.
+#   <li><b>-exceptions</b>: Exceptions thrown by this Constructor. Default
+#        is null.
 #   </ul>
 # Constructors typically contain nested _parameter_ entitiers, which list
 # the parameters of the constructor, and may contain nested _annotation_ 
@@ -97,6 +101,8 @@
 #        The default is "public."
 #   <li><b>-modifiers</b>: Other modifiers. Possible values depend
 #        on the languages. The default is null.
+#   <li><b>-exceptions</b>: Exceptions thrown by this Destructor. Default
+#        is null.
 #   </ul>
 # Destructors may contain nested _parameter_ entitiers, which list
 # any parameters, and may contain nested _annotation_ entities
@@ -118,6 +124,8 @@
 #        on the shared class data. (These are called "class methods"
 #        in Smalltalk and "procs" in [Incr Tcl]). Default is
 #        "instance."
+#   <li><b>-exceptions</b>: Exceptions thrown by this method. Default
+#        is null.
 #   </ul>
 # Methods typically contain nested _parameter_ entities, which lists
 # the parameters of the method, and nested _annotation_ entities
@@ -322,7 +330,8 @@ body ::tycho::Class::constructor {args} {
             -package "" \
             -source "" \
             -protection "public" \
-            -modifiers ""
+            -modifiers "" \
+            -exceptions ""
 
     # Define the "annotation" entity
     defineEntityType annotation \
@@ -338,13 +347,15 @@ body ::tycho::Class::constructor {args} {
     defineEntityType Constructor \
             -ordered 1 \
 	    -protection public \
-	    -modifiers "" 
+	    -modifiers "" \
+            -exceptions ""
 
     # Define the "Destructor" entity
     defineEntityType Destructor \
             -ordered 1 \
 	    -protection public \
-	    -modifiers "" 
+	    -modifiers "" \
+            -exceptions ""
 
     # Define the "method" entity
     defineEntityType method \
@@ -353,6 +364,7 @@ body ::tycho::Class::constructor {args} {
 	    -modifiers "" \
 	    -type "" \
 	    -scope instance \
+            -exceptions ""
 
     # Define the "variable" entity
     defineEntityType variable \
