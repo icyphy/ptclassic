@@ -54,7 +54,6 @@ public:
     // initialize myself and sharedNameds if exists.
     void initialize();
 
-protected:
     UniqueStringList sharedNames;
 };
 
