@@ -194,6 +194,8 @@ if {$tychoOpenFiles == 0} {
     }
 }
 
+tk appname tycho
+
 unset tychoWelcomeWindow
 unset tychoConsoleWindow
 unset tychoOpenFiles
