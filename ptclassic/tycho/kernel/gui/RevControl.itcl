@@ -147,15 +147,16 @@ configbody ::tycho::RevControl::object {
     }
     set file [$object cget -file]
     configure -title "Revision control for $file"
-    set retval [isUnderRevControl $file]
-    initializeRevControl
+    if { [whichRevClass $object] == "" } {
+	initializeRevControl
+    }
     if [isCheckedOut] {
 	enableButton checkin
     } {
 	enableButton checkout
     }
 }
-    
+
 ###################################################################
 #### constructor
 #
@@ -182,7 +183,10 @@ body ::tycho::RevControl::constructor {args} {
 # and update the history information, if it is being viewed.
 #
 body ::tycho::RevControl::checkInAndUpdate {} {
-    $object saveQuery
+    # This saveQuery has been removed, since saying No would
+    # just get you another query (in checkIn{}).
+    # $object saveQuery
+
     # Procs are not virtual. Itcl bug?
     [info class]::checkIn $object
     if {![isCheckedOut]} {
