@@ -93,7 +93,7 @@ public:
 	// setup Galaxy
 	void setUpGalaxy();
 
-	DecomClusterBag() : cgal(0), loopSched(0), idFlag(1) {}
+	DecomClusterBag() : loopSched(0), cgal(0), idFlag(1) {}
 	~DecomClusterBag();
 
 	SDFClusterGal* clusterGal() { return cgal; }
