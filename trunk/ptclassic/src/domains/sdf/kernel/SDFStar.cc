@@ -38,7 +38,7 @@ unsigned DataFlowStar::runCost() { return 0;}
 int DataFlowStar :: myExecTime() { return 5;}
 
 int DataFlowStar::isSDF() const { return FALSE;}
-int DataFlowStar::isSDFinContext() const { return FALSE;}
+int DataFlowStar::isSDFinContext() const { return isSDF();}
 
 int SDFStar::isSDF() const { return TRUE;}
 int SDFStar::isSDFinContext() const { return TRUE;}
@@ -211,7 +211,7 @@ int DataFlowStar :: deferrable () {
 		if (!port->isItOutput())
 			continue;
 		
-		port = (SDFPortHole*)(port->far());
+		port = port->far();
 
 		// The farside port is an input.  Check Particle supply
 		// if not enough, atom cannot be deferred.
