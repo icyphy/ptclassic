@@ -1,6 +1,6 @@
 # Test suite for toolbars
 #
-# @Authors: Christopher Hylands
+# @Author: Christopher Hylands
 #
 # @Version: $Id$
 #
@@ -68,9 +68,12 @@ test ToolBar-1.1 {Test out buttons} {
    # Try running entry methods on buttons
    set retval4 [list [.t clear foo] [.t get bar]]
 
-   set retval5 [catch {.t insert foo "This is a foo"}]
+   # This should not be an error, we should be able to change a button
+   catch {.t insert foo "This is a foo"} retval5
+
    list $retval1 $retval2 $retval3 $retval4 $retval5
-} {{Foo! Bar!} {Foo! Bar!} {Foo! Bar! Bif!} {{} {}} 1}
+} {{Foo! Bar!} {Foo! Bar!} {Foo! Bar! Bif!} {{} {}} {can't read "tagsinsert(foo)": no such element in array}}
+
 
 test ToolBar-2.1 {Test out entries} {
    catch {delete object .t}
@@ -97,3 +100,20 @@ test ToolBar-2.1 {Test out entries} {
 
    list $retval1 $retval2 $retval3 $retval4
 } {{{The location entry contains this text} {The other location entry contains this text}} {{} {The other location entry contains this text}} {{} {}} {{New text for the location entry} {}}}
+
+test ToolBar-3.1 {Test out entryforeground, entrybackground} {
+   catch {delete object .t}
+   ::tycho::ToolBar .t \
+	   -entryforeground red \
+	   -entrybackground blue \
+	   -entryfont fixed
+   .t entry location Location {The location entry contains this text} {puts}
+   pack .t
+   wm deiconify .
+   list [.t cget -entryforeground] \
+           [.t cget -entrybackground] \
+           [.t cget -entryfont]
+} {red blue fixed}
+
+# Delete the last ToolBar
+catch {delete object .t}
