@@ -46,14 +46,6 @@ VPATH =		$(ROOT)/src/tycho/kernel
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-# To use Tcl 7.4p1 and tk4.0p1, set the following
-# FIXME: The version should not be hardwired in this way, once we update
-#	 ptolemy to tk4.x, this should go away
-TCL_INCDIR=$(TCL_ROOT)/tcl7.4p1/include
-TCL_LIBSPEC=-L$(TCL_ROOT)/tcl7.4p1.$(PTARCH)/lib -ltcl
-TK_INCDIR=$(TCL_ROOT)/tk4.0p1/include
-TK_LIBSPEC=-L$(TCL_ROOT)/tk4.0p1.$(PTARCH)/lib -ltk #-lXpm
-
 # Directory containing the [incr Tcl] extensions to Tcl
 # FIXME: This should be in the Ptolemy tree
 ITCL_INCDIR = $(ROOT)/tcltk/itcl/include
