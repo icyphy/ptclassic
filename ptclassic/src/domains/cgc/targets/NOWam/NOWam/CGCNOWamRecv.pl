@@ -6,8 +6,10 @@ Receive star between NOW processors.
 	}
 	version { $Id$ }
 	author { Patrick Warner }
-	copyright { 1995 The Regents of the University of California }
-	location { CGC local library }
+	copyright {
+Copyright(c) 1995-%Q% The Regents of the University of California
+}
+	location { CGC NOW Active Message target library }
 	explanation {
 Produce code for inter-process communication (receive-side)
 	}
