@@ -67,16 +67,16 @@ include $(ROOT)/mk/common.mk
 %.bin: %.o $(PT_DEPEND)
 	$(PURELINK) $(LINKER) $(LINKFLAGS) $< $(LIBS) -o $(@F)
 
-%.debug: %.o 
+%.debug: %.o  $(PT_DEPEND)
 	$(PURELINK) $(LINKER) $(LINKFLAGS_D) $< $(LIBS) -o $(@F)
 
-%.purify: %.o
+%.purify: %.o $(PT_DEPEND)
 	$(PURIFY) $(LINKER) $(LINKFLAGS_D)  $< $(LIBS) -o $(@F)
 
-%.quantify: %.o
+%.quantify: %.o $(PT_DEPEND)
 	$(QUANTIFY) $(LINKER) $(LINKFLAGS) $< $(LIBS) -o $(@F)
 
-$.purecov: %.o
+$.purecov: %.o $(PT_DEPEND)
 	$(PURECOV) $(LINKER) $(LINKFLAGS) $< $(LIBS) -o $(@F)
 
 
