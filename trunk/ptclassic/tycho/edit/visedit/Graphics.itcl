@@ -357,6 +357,8 @@ configbody ::tycho::Graphics::scrolling {
 #### constructor
 #
 body ::tycho::Graphics::constructor {args} {
+    global tcl_platform
+
     interactiveEnable 0
 
     # Set the view "type" for the Window menu
@@ -580,11 +582,18 @@ body ::tycho::Graphics::constructor {args} {
     # Using the drag-selector deactivates the text editor
     $dragselector configure -activatecommand "$lineeditor stop"
 
-    # Set up export commands
-    array set fileformats {
-        eps exportEps
-        gif exportGif
-        xwd exportXwd
+    # Set up export commands.  The mac does not have exec, so we 
+    # can't do everything.
+    if {$tcl_platform(platform) == macintosh} {
+	array set fileformats {
+	    eps exportEps
+	}
+    } else {
+	array set fileformats {
+	    eps exportEps
+	    gif exportGif
+	    xwd exportXwd
+	}
     }
 }
 
@@ -1157,6 +1166,13 @@ body ::tycho::Graphics::exportEps \
 # NOTE: Unix-only implementation.
 #
 body ::tycho::Graphics::exportXwd {filename} {
+    global tcl_platform
+    if {$tcl_platform(platform) === macintosh} {
+	error "Sorry, the Graphics exportXwd method is not supported on\
+		the mac.\n  This method uses the tcl \"exec\" command\
+		which is not available on the mac."
+    }
+
     set id [winfo id $slate]
     raiseWindow
     # NOTE: Temporarily pass $prefix rather than $this until "info"
