@@ -67,8 +67,6 @@ still in service will be delayed by more than the nominal service time.
 		}
 	}
 	go {
-	   token* t;
-
 	   completionTime = arrivalTime;
 
 	   // Check to see whether the serviceNeeded of the first token
@@ -77,7 +75,7 @@ still in service will be delayed by more than the nominal service time.
 	   // to be output.
 	   int outputP = FALSE;
 	   while(numberInService > 0) {
-	      t = (token*)(tokensInService.head());
+	      token *t = (token*)(tokensInService.head());
 	      if (t->serviceNeeded
 	              <= (arrivalTime - t->lastUpdate)/numberInService) {
 		// This token is ready to be output
@@ -97,7 +95,7 @@ still in service will be delayed by more than the nominal service time.
 	   // Modify the serviceNeeded for all tokensInService.
 	   ListIter nextTok(tokensInService);
 	   for(int i = numberInService; i > 0; i--) {
-		t = (token*) nextTok++;
+		token *t = (token*) nextTok++;
 		t->serviceNeeded = t->serviceNeeded -
 			(arrivalTime - t->lastUpdate)/numberInService;
 		t->lastUpdate = arrivalTime;
@@ -116,19 +114,18 @@ still in service will be delayed by more than the nominal service time.
 		// Create a token.
 		Particle& pp = input.get();
 		Particle* newp = pp.clone();
-		LOG_NEW; t = new token;
+		LOG_NEW; token *t = new token;
 		t->pp = newp;
 		t->serviceNeeded = double(nomServiceTime);
 		t->lastUpdate = arrivalTime;
 
 		// Append new token to the list of tokensInService
 		tokensInService.append(t);
-		numberInService += 1;
+		numberInService++;
 
 		// Schedule a firing at the current estimate of
 		// the completion time of the service.
 		refireAtTime(arrivalTime + (t->serviceNeeded)*numberInService);
-
 	   }
 
 	}
