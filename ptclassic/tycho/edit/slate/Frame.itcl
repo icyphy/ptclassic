@@ -290,7 +290,7 @@ body ::tycho::Frame::constructor {x0 y0 x1 y1 args} {
     # its inside (even though invisible), which makes see-through
     # frames impossible.
     #
-    lappend itemspecs [list "primary" [list rectangle $x0 $y0 $x1 $y1]]
+    lappend itemspecs [list "primary" rectangle $x0 $y0 $x1 $y1]
 
     #
     # The way that the polygon co-ordinates is set up in the Tk
