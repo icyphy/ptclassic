@@ -151,6 +151,12 @@ int TyConsole::appInit(Tcl_Interp *ip, Tk_Window) {
     return TCL_ERROR;
   }
 #endif
+#if PTUSE_EXPECT
+  // Add expect facilities
+  if (Exp_Init(ip) == TCL_ERROR) {
+    return TCL_ERROR;
+  }
+#endif 
   return TCL_OK;
 }
 
