@@ -90,16 +90,16 @@ how many executions we pretend to have performed at startup
     }
     numExecs = int(initialExec);
 
-    addcode(reset);   
+    addCode(reset);   
 
   }
   codeblock( generate_freq_energy ){
 	splk #@( numSamples - 1 ),BRCR   ;loop counter = number of samples
 	lar AR2, #($addr(stateHistory)+1);AR2 -> stateHistory(1)
-	lta $addr( coeffIn )            ;T = coeffIn
+	lta $addr( coeffIn )             ;T = coeffIn
 	mar AR2                          ;ARP -> AR2
 	rptb block_end                   ;repeat block
-	lacc $addr( sampleIn )          ;ACC = sampleIn(0)
+	lacc $addr( sampleIn )           ;ACC = sampleIn(0)
 	mpy *+                           ;P = coeffIn * stateHistory(1), AR2++
 	apac                             ;ACC = ACC + P
 	sub *                            ;ACC = ACC - stateHistory(2)
@@ -114,9 +114,9 @@ block_end: dmov *+                       ;stateHistory(1)=stateHistory(0)
 	lacc #0                          ;ACC = 0
 	sqra *                           ;ACC = sateHistory(1)^2, P = stateHist(2)^2
 	lt *                             ;T = stateHistory(1)
-	mpy $addr(dummy)                      ;P = stateHistory(1)*coeffIn*stateHist(2)
+	mpy $addr(dummy)                 ;P = stateHistory(1)*coeffIn*stateHist(2)
 	mpys *                           ;ACC = ACC - P (needless mult)
-	sach $addr( ilterFreqOut )      ;Output = ACC		 		
+	sach $addr( ilterFreqOut )       ;Output = ACC		 		
   }
   codeblock( reset ){
       mar *,AR0
@@ -129,10 +129,10 @@ block_end: dmov *+                       ;stateHistory(1)=stateHistory(0)
       numExecs = 0;
     }
     if (int(numExecs) == 0) {
-      addcode(reset); 
+      addCode(reset); 
       stateHistory[0] = stateHistory[1] = stateHistory[2] = 0.0;
     }
-    addcode(generate_freq_energy);
+    addCode(generate_freq_energy);
   }
   execTime {
     return (25+numSamples*14);
