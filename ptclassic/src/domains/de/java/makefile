@@ -37,4 +37,4 @@ include ../../../../mk/subdomain.mk
 
 DIRS = stars java
 
-ME = de/contrib
+ME = de/java
