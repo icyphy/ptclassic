@@ -162,8 +162,8 @@ Block* Block::clone() const {
 		b->setDescriptor(hashstring(descriptor()));
 		b->copyStates(*this);
 		if (numberMPHs() > 0) {
-			BlockMPHIter piter(*this);
-			MultiPortHole* p;
+			CBlockMPHIter piter(*this);
+			const MultiPortHole* p;
 			while ((p = piter++) != 0) {
 				MultiPortHole* cP = b->multiPortWithName(p->name());
 				for (int i = p->numberPorts(); i > 0; i--) {
