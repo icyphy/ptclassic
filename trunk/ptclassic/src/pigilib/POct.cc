@@ -630,26 +630,22 @@ int POct::ptkSetParams (int aC,char** aV) {
 
 }
 
-// ptkSetFindName <facet-id> <NameList> 
+// ptkSetFindName <facet-id> <Name> 
 //
 // Does the Find Name Command given the passed name
-// The name must first be extracted from the List
-// The Name List is of the form {Name NameString}
-// This procedure was written to work with ptkEditValues
+// This procedure was written to work with ptkEditStrings
 //
 // Written by Alan Kamas  1/94
 // based on original code by Edwin Goei
 //
 int POct::ptkSetFindName (int aC,char** aV) {
     octObject facet;
-    char* nameList;
     char* name;
-    int nameC;
-    char **nameV;
 
     if (aC != 3) return 
-        usage ("ptkSetFindName <OctObjectHandle> <NameList>");
-    nameList = aV[2];
+        usage ("ptkSetFindName <OctObjectHandle> <Name>");
+
+    name= aV[2];
 
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
@@ -657,31 +653,11 @@ int POct::ptkSetFindName (int aC,char** aV) {
         return TCL_ERROR;
     }
 
-    // Get the Name String out of the Name List
-    if (Tcl_SplitList( interp, nameList, &nameC, &nameV ) != TCL_OK){
-        Tcl_AppendResult(interp, "Cannot parse name list: ", nameList,
-                         (char *) NULL);
-        return TCL_ERROR;
-    }
-
-    if (nameC != 2) {
-        Tcl_AppendResult(interp, "Find Name list does not have 2 elements.", 
-                         (char *) NULL);
-        return TCL_ERROR;
-    }
-
-    name = nameV[1];
-
     // Perform the Find Name function:
     if (!FindNameSet(&facet, name)) {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
-        // Free the memory used by commentV as it is no longer needed
-        free((char *) nameV);
         return TCL_ERROR;
     }
-
-    // Free the memory used by commentV as it is no longer needed
-    free((char *) nameV);
 
     return TCL_OK;
 }
@@ -723,26 +699,22 @@ int POct::ptkGetComment (int aC,char** aV) {
     return TCL_OK;
 }
 
-// ptkSetComment <facet-id> <commentList> 
+// ptkSetComment <facet-id> <comment> 
 //
 // saves the comment into the passed facet/instance
-// The Comment List is of the form {CommentName CommentValue}
-//   it is the CommentValue that is stored into the facet
-// This procedure was written to work with ptkEditValues
+// This procedure was written to work with ptkEditStrings
 //
 // Written by Alan Kamas  1/94
 // based on original code by Edwin Goei
 //
 int POct::ptkSetComment (int aC,char** aV) {
     octObject facet;
-    char* commentList;
     char* comment;
-    int commentC;
-    char **commentV;
 
     if (aC != 3) return 
-        usage ("ptkSetComment <OctObjectHandle> <CommentList>");
-    commentList = aV[2];
+        usage ("ptkSetComment <OctObjectHandle> <Comment>");
+
+    comment = aV[2];
 
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
@@ -750,29 +722,11 @@ int POct::ptkSetComment (int aC,char** aV) {
         return TCL_ERROR;
     }
 
-    // Get the Comment Value out of the Comment List
-    if (Tcl_SplitList( interp, commentList, &commentC, &commentV ) != TCL_OK){
-        Tcl_AppendResult(interp, "Cannot parse comment list: ", commentList,
-                         (char *) NULL);
-        return TCL_ERROR;
-    }
-
-    if (commentC != 2) {
-        Tcl_AppendResult(interp, "Comment list does not have 2 elements.", 
-                         (char *) NULL);
-        return TCL_ERROR;
-    }
-
-    comment = commentV[1];
-
     // Set the comment into the passed facet
     if (!SetCommentProp(&facet, comment)) {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
     }
-
-    // Free the memory used by commentV as it is no longer needed
-    free((char *) commentV);
 
     return TCL_OK;
 
@@ -883,10 +837,10 @@ int POct::ptkGetMkStar (int aC,char** aV) {
     return TCL_OK;
 }
 
-// ptkSetMkStar <StarNameList> <DomainList> <SrcDirList> <PaleteDirList>
+// ptkSetMkStar <StarName> <Domain> <SrcDir> <PaleteDir>
 //
 // Makes a new star 
-// This procedure was written to work with ptkEditValues
+// This procedure was written to work with ptkEditStrings
 // Each "List" entry is of the form "Title Value" as in "Domain SDF"
 //    The titles are used to determine which entry is which.
 //
@@ -947,52 +901,28 @@ int POct::ptkGetSeed (int aC,char** aV) {
     return TCL_OK;
 }
 
-// ptkSetSeed <SeedList> 
+// ptkSetSeed <Seed> 
 //
 // saves the random number seed into ptolemy.
-// The Seed List is of the form {SeedName SeedValue}
-//   it is the SeedValue that is stored into ptolemy
-// This procedure was written to work with ptkEditValues
+// This procedure was written to work with ptkEditStrings
 //
 // Written by Alan Kamas  1/94
 //
 int POct::ptkSetSeed (int aC,char** aV) {
-    char* seedList;
     char* seedString;
     int seed;
-    int seedC;
-    char **seedV;
 
     if (aC != 2) return 
-        usage ("ptkSetSeed <SeedList>");
-    seedList = aV[1];
+        usage ("ptkSetSeed <Seed>");
 
-    // Get the Seed String out of the Seed List
-    if (Tcl_SplitList( interp, seedList, &seedC, &seedV ) != TCL_OK){
-        Tcl_AppendResult(interp, "Cannot parse seed list: ", seedList,
-                         (char *) NULL);
-        return TCL_ERROR;
-    }
-
-    if (seedC != 2) {
-        Tcl_AppendResult(interp, "Seed list does not have 2 elements.", 
-                         (char *) NULL);
-        return TCL_ERROR;
-    }
-
-    seedString = seedV[1];
+    seedString = aV[1];
 
     // Convert the string into an integer
     if (Tcl_GetInt (interp, seedString, &seed) != TCL_OK) { 
         Tcl_AppendResult(interp, "Seed must be an integer", 
                          (char *) NULL);
-        // Free the memory used by seedV as it is no longer needed
-        free((char *) seedV);
         return TCL_ERROR;
     }
-
-    // Free the memory used by seedV as it is no longer needed
-    free((char *) seedV);
 
     if (seed <= 0) {
         Tcl_AppendResult(interp, "Seed must be greater than zero", 
