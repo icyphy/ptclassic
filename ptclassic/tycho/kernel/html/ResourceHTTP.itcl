@@ -303,7 +303,7 @@ body ::tycho::ResourceHTTP::open {{mode "r"}} {
 # Get the current progress of a non-blocking read. Won't make sense
 # if not called during a non-blocking read.
 #
-body ::tycho::ResourceRemote::progress {} {
+body ::tycho::ResourceHTTP::progress {} {
     if {$contentlength==0} {
         return 0
     }
