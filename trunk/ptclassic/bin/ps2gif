@@ -1,0 +1,46 @@
+#!/bin/csh -f
+# Convert PostScript to GIF with a transparent background.
+# Version $Id$
+# Author:	T. M. Parks
+# Created:	3 October 1994
+
+set file=$argv[1]
+set temp=/tmp/ps2gif$$.ps
+
+onintr clean
+
+# Set the background color for every page.
+cat > $temp << END-CAT
+%!PS
+/_showpage /showpage load def
+/_colorBackground { save clippath 0.99 setgray fill restore } def
+/showpage { _showpage _colorBackground } def
+_colorBackground
+END-CAT
+cat $file >> $temp
+
+# Convert from PostScript to full-color PPM.
+gs -q -dNODISPLAY pstoppm.ps << END-GS >& /dev/null
+(${temp:r}) ppm24run
+END-GS
+
+@ p = 1
+set ppmFiles
+if ( -e ${temp:r}.ppm ) then
+	set ppmFiles = ( ${temp:r}.ppm )
+else if ( -e ${temp:r}.1ppm ) then
+	set ppmFiles = ( ${temp:r}.?*ppm )
+endif
+
+foreach page ( $ppmFiles )
+	pnmcrop $page | \
+	ppmquant -floyd 256 | \
+	ppmtogif -transparent gray99 > ${file:r}-$p.gif
+	@ p++
+end
+
+if ($#ppmFiles == 1) mv -f ${file:r}-1.gif ${file:r}.gif
+
+clean:
+
+rm -f $temp ${temp:r}.*ppm
