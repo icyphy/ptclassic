@@ -303,8 +303,8 @@ NodeSchedule* UniProcessor :: getFree() {
 	NodeSchedule *temp; 
 	if (freeNodeSched) {
 		temp = freeNodeSched;
-		temp->resetMembers();
 		freeNodeSched = temp->nextFree;
+		temp->resetMembers();
 		numFree--;
 	} else {
 		LOG_NEW; temp = new NodeSchedule();
