@@ -51,10 +51,10 @@ public:
 	void wrapup() { endSimulation();}
 
 	// Constructor
-	SDFWormhole(Galaxy& g);
+	SDFWormhole(Galaxy& g,Target* t = 0);
 
 	// return my scheduler
-	Scheduler* mySched() const { return scheduler ;}
+	Scheduler* mySched() const { return target->mySched();}
 
 	// print methods
 	StringList printVerbose() const;
