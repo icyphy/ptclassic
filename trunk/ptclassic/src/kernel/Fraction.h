@@ -1,3 +1,4 @@
+
 #ifndef _Fraction_h
 #define _Fraction_h 1
 
@@ -6,6 +7,9 @@
 // $Id$
 
 /*
+
+ Copyright (c) 1990 The Regents of the University of California.
+			All Rights Reserved.
  Programmer:  Edward A. Lee
  Date: 12/7/89
 
