@@ -1,6 +1,6 @@
 # Package load file for the tycho.typt.kernel package
 #
-# @Author: John Reekie
+# @Authors: John Reekie, Christopher Hylands
 #
 # @Version: $Id$
 #
@@ -135,6 +135,19 @@ if {$ptolemyfeature(ptolemy) == 1 && $ptolemyfeature(ptolemyinstalled) == 0} {
     set ptolemyfeature(ptolemyinstalled) 1
 }
 
+if { $ptolemyfeature(ptolemy) == 1 } {
+    # pigi_version and pigi_filename are set in pigilib/xfunctions.c
+    ::tycho::register help aboutptolemy \
+	    -label "About Ptolemy" \
+	    -underline 0 \
+	    -command {ptkStartupMessageAlways $pigi_version $pigi_filename}
+
+    ::tycho::register help ptolemyhomepage \
+	    -label "Ptolemy Homepage" \
+	    -underline 0 \
+	    -command {::tycho::File::openContext \
+	    [file join $PTOLEMY doc html index.html]}
+}
 
 ### CATEGORIES
 global ::ptolemyfeature
