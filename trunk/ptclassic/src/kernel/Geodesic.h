@@ -100,7 +100,7 @@ public:
 	int numInit() const {return numInitialParticles;}
 
 	// Information printing
-	StringList printVerbose() const;
+	StringList print(int verbose = 0) const;
 
 	// These methods are available for schedulers such as the
 	// SDF scheduler to simulate a run and keep track of the

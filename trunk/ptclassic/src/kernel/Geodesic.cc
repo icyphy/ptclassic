@@ -31,7 +31,7 @@ Geodesics can be created named or unnamed.
 #include "Plasma.h"
 #include "StringList.h"
 
-StringList Geodesic :: printVerbose () const {
+StringList Geodesic :: print (int) const {
 	StringList out;
 	if (isItPersistent()) out += "Persistent ";
 	out += "Geodesic: ";
