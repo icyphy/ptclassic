@@ -74,12 +74,12 @@ const char* C50Target :: memoryMapInitCode() {
 static const char startCodeString[] =
 "START	setc	SXM		; set sign extension mode\n"
 "	ldp	#0		; set data page pointer\n"
-"	splk	#830h,PMST	; 9K on.chip RAM as Data, no ROM\n"
+"	splk	#0834h,PMST	; 9K on.chip RAM as Data, no ROM\n"
 "	lacl	#0\n"
 "	samm	CWSR		; set Wait State Control Register\n"
 "	samm	PDWSR		; for 0 waits in pgm & data memory\n"
-"	clrc	OVM\n";
-
+"	clrc	OVM\n"
+"	splk	#02h,IMR	; enables only interrupt 2\n";
 const char* C50Target :: startCode() {
 	return startCodeString;
 }
@@ -124,3 +124,9 @@ void C50Target::writeFloat(double val) {
 const char* C50Target::className() const { return "C50Target"; }
 
 ISA_FUNC(C50Target,TITarget);
+
+
+
+
+
+

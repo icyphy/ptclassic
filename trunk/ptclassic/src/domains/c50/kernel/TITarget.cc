@@ -71,6 +71,19 @@ void TITarget :: initStates() {
 	    "Write star firings as subroutine calls."));
 	maxFixedPointValue = 1.0 - 1.0 / double(1 << (C50_BITS_IN_WORD - 1));
 	minFixedPointValue = -1.0;
+	bMemMap.setAttributes(A_SETTABLE|A_NONCONSTANT);
+	uMemMap.setAttributes(A_SETTABLE|A_NONCONSTANT);
+	runFlag.setInitValue("YES");
+	runFlag.setAttributes(A_SETTABLE|A_NONCONSTANT);
+	compileFlag.setInitValue("YES");
+	compileFlag.setAttributes(A_SETTABLE|A_NONCONSTANT);
+	targetHost.setAttributes(A_SETTABLE|A_NONCONSTANT);
+
+	// use TISubProcs to store code for interrupt service routines,
+	// procedures or coefficient tables 
+
+	addStream("TISubProcs", & TISubProcs);
+	
 }
 
 // complex numbers will be allocated in 2 consecutive words of memory.
@@ -94,6 +107,7 @@ void TITarget :: setup() {
 		}
 	    }
 	}
+
 }
 
 TITarget :: ~TITarget () {
@@ -153,6 +167,10 @@ void TITarget::disableInterrupts() {
 }
 
 void TITarget::headerCode() {
+  
+     // initialize TISubProcs stream
+        TISubProcs.initialize();
+   
 	CGTarget::headerCode();
 }
 
@@ -192,24 +210,9 @@ void TITarget::trailerCode() {
 // Put a STOP instruction at the end of program memory.
 void TITarget::frameCode() {
     AsmTarget::frameCode();
-    *defaultStream << "\t.ps 	02b00h\n"
-	   << "AIC_2ND sach    DXR\n"
-	   << "\tclrc    INTM\n"
-	   << "\tidle\n"
-	   << "\tadd     #6h,15\n"
-	   << "\tsach    DXR\n"
-	   << "\tidle\n"
-	   << "\tsacl    DXR\n"
-	   << "\tidle\n"
-	   << "\tlacl    #0\n"
-	   << "\tsacl    DXR\n"
-	   << "\tidle\n"
-	   << "\tsetc    INTM\n"
-	   << "\tret\n"
-	   << "TINT	RETE\n"
-	   << "RINT	RETE\n"
-	   << "XINT	RETE\n"
-	   << "ENDE\n\t.end\n";	
+    *defaultStream << "\t.text\n";
+    *defaultStream << TISubProcs;
+    *defaultStream << "ENDE\n\t.end\n";	
 }
 
 // Ensure that the value val is in the interval [-1,1)
@@ -278,7 +281,21 @@ void TITarget::writeFiring(Star& s, int level) {
     }
 }
 
+int  TITarget::testFlag(const char * flag){
+	const char * flagStream = (const char *) TIFlags;
+	if (flagStream ){
+		if (strstr(flagStream,flag)) {
+			return TRUE;
+		} else  return FALSE;
+	} else return FALSE;
+    }
 
+void TITarget::setFlag(const char * flag){
+	TIFlags << flag;
+    }
 
+void TITarget::clearFlags(void){
+        TIFlags.initialize();
+    }
 
 

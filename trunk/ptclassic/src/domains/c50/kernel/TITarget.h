@@ -73,6 +73,12 @@ public:
 	/*virtual*/ StringList comment(const char*,const char*,const char*,const char*);
 	/*virtual*/ void writeFiring(Star&,int);
 
+	// functions to set/test flags used by targets derived from this
+
+	void  setFlag(const char * flag);
+	int  testFlag(const char * flag);
+	void  clearFlags(void);
+
 protected:
 	StringState bMemMap;
 	StringState uMemMap;
@@ -106,8 +112,19 @@ protected:
 	// minimum value in fixed-point format 
 	double minFixedPointValue;
 
+
 private:
 	void initStates();
+
+        // string list to store flags used by targets derived
+        // from TITarget
+
+        StringList TIFlags;
+	
+	// code stream to store procedures, interrupt routines, coeff. tables
+	
+	CodeStream TISubProcs;
+
 };
 
 #endif
