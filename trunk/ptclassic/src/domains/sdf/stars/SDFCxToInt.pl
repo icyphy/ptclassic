@@ -22,6 +22,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { Output int type }
 	}
 	go {
-                output%0 << (int)(input%0);
+                output%0 << int(input%0);
 	}
 }

@@ -44,10 +44,10 @@ specified in the precision parameter, then a error message is given.
 		out.set_ovflow( ((const char *) OverflowHandler) );
 		if ( out.invalid() )
 		  Error::abortRun( *this, "Invalid OverflowHandler" );
-		out.set_rounding( ((int) RoundFix) );
+		out.set_rounding( int(RoundFix) );
         }
 	go {
-		out = (double) (input%0);
+		out = double(input%0);
 		checkOverflow(out);
                 output%0 << out;
 	}

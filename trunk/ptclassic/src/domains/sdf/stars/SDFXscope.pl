@@ -58,7 +58,7 @@ edge of the plot.
 	setup {
 		SDFXgraph::setup();
 		nTracesSoFar = 0;
-		traceCount = (int)initCount;
+		traceCount = int(initCount);
 	}
 
 	go {
