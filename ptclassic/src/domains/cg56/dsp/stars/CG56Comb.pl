@@ -113,7 +113,7 @@ Journal, Vol.  3, No. 2.
                 addCode(block);
 	}
         go {
-                X=1.0-pole;
+                X=1.0-pole.asDouble();
                 addCode(std);
         }		
 
