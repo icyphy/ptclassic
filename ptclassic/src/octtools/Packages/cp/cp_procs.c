@@ -74,13 +74,16 @@ cp_point *point;
 
     flush(SEP);
 
-    if (!cp_get_sinteger(&point->x)) {
+    int temp;
+    /* point->x and point->y is a int32, which could be a long, and
+       cp_get_sinteger takes a *int arg, so we use a temp variable */
+    if (!cp_get_sinteger(&temp))
 	return 0;
-    }
+    point->x=temp;
 
-    if (!cp_get_sinteger(&point->y)) {
+    if (!cp_get_sinteger(&temp))
 	error ("missing second coordinate in point");
-    }
+    point->y=temp
 
     return 1;
 }
