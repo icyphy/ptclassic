@@ -94,7 +94,7 @@ void PortHole :: allocateBuffer(int bufferSize)
                 }
 }
 
-PortHole& PortHole :: setPort(char* s,
+PortHole& PortHole :: setPort(const char* s,
                               Block* parent,
                               dataType t = FLOAT) {
 	GenericPort::setPort (s, parent, t);
@@ -108,7 +108,7 @@ PortHole& PortHole :: setPort(char* s,
 }
 
 PortHole& SDFPortHole :: setPort (
-			     char* s,
+			     const char* s,
                              Block* parent,
                              dataType t = FLOAT,
                              unsigned numTokens = 1,
@@ -129,7 +129,7 @@ PortHole& SDFPortHole :: setPort (
 }
 
 // Print a Generic Port
-GenericPort :: operator char* () {
+GenericPort :: operator StringList () {
         StringList out;
  
         if(isItInput())
@@ -150,9 +150,9 @@ GenericPort :: operator char* () {
 	return out;
 }
 
-PortHole :: operator char* () {
+PortHole :: operator StringList () {
 	StringList out;
-	out = GenericPort:: operator char* ();
+	out = GenericPort:: operator StringList ();
 	if (alias == NULL) {
            if (farSidePort != NULL) {
               out += "    Connected to port: ";
@@ -165,10 +165,10 @@ PortHole :: operator char* () {
         return out;
 }
 
-MultiPortHole :: operator char* () {
+MultiPortHole :: operator StringList () {
 	StringList out;
 	out = "Multi ";
-	out += GenericPort:: operator char* ();
+	out += GenericPort:: operator StringList ();
 	out += "This MultiPortHole contains ";
 	out += numberPorts();
 	out += " PortHoles.\n";
@@ -323,7 +323,7 @@ Particle& OutOtherPort :: operator ++ ()
 	return *(Particle*)*p;
 }
 
-MultiPortHole& MultiPortHole :: setPort(char* s,
+MultiPortHole& MultiPortHole :: setPort(const char* s,
                               Block* parent,
                               dataType t = FLOAT) {
 	GenericPort::setPort (s, parent, t);
@@ -338,7 +338,7 @@ PortHole& MultiPortHole :: newPort() {
 }
  
  
-MultiPortHole& MultiSDFPort :: setPort (char* s,
+MultiPortHole& MultiSDFPort :: setPort (const char* s,
                              Block* parent,
                              dataType t = FLOAT,
                              unsigned numTokens = 1) {

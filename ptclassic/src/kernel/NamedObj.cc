@@ -18,15 +18,15 @@ where the parent is a Block (a specific type of NamedObj).
 #include "StringList.h"
 #include "Block.h"
 
-char* NamedObj :: readFullName ()
+StringList NamedObj :: readFullName () const
 {
 	StringList out;
 	if(blockIamIn != NULL) {
-	   out = blockIamIn->readFullName();
-	   out += ".";
-	   out += name;
-	   return out;
+		out = blockIamIn->readFullName();
+		out += ".";
+		out += name;
 	} else {
-	   return name;
+		out = name;
 	}
+	return out;
 }
