@@ -74,7 +74,7 @@ protected:
 	void badCopy(const Particle& p) const;
 	Particle* link;
 
-	friend class Plasma;
+	friend class ParticleStack;
 };
 
 /***************************************************************
@@ -216,54 +216,5 @@ public:
         Complex data;
 };
 
-/****************************************************************
-* Plasma
-*
-* A Plasma is a collection of currently unused Particles
-*
-* Particles no longer needed are added to the Plasma; any
-* OutPortHoles needing a Particle gets it from the Plasma
-*
-* There is precisely one instance of Plasma for each
-* Particle type needed -- this common pool makes more
-* efficient use of memory.  The static member plasmaList
-* is a list of all Plasmas.
-****************************************************************/
 
-	////////////////////////////////////////
-	// class Plasma
-	////////////////////////////////////////
-
-class Plasma {
-public:
-	// Put a Particle into the Plasma
-	void put(Particle* p) {p->link = head; head = p;}
-
-	// Get a Particle from the Plasma, creating a
-	// new one if necessary.  Never give away last Particle
-	Particle* get() { 
-		if (head->link) {
-			Particle* p = head;
-			head = p->link;
-			p->initialize();
-			return p;
-		}
-		return head->useNew();
-	}
-	dataType type() { return head->readType();}
-
-// constructor -- all objs built are added to the static linked list.
-	Plasma(Particle& p) : head(&p), nextPlasma(plasmaList) {
-		plasmaList = this;
-	}
-// destructor
-	~Plasma();
-
-	static Plasma* getPlasma (dataType t);
-private:
-	static Plasma* plasmaList;
-	Particle* head;
-	Plasma* nextPlasma;
-
-};
 #endif
