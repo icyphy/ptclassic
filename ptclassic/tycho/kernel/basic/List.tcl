@@ -245,6 +245,23 @@ proc lfoldr {init list script} {
 }
 
 
+## lgenerate init length script
+#
+# Generate a list by repeated applying a function to its previous
+# result.
+#
+proc lgenerate {init length script} {
+    set result [list $init]
+    set count 1
+    while { $count < $length } {
+	set init [uplevel apply [list $script] [list $init]]
+	lappend result $init
+	incr count
+    }
+    return $result
+}
+
+
 ## lhead list
 #
 # Return the first item in the list, or the item itself if it is not a 
@@ -303,17 +320,19 @@ proc llast {list} {
 # script is evaluated in the caller's context, so "free" variables
 # are evaluated correctly.
 #
-proc lmap {list script} {
-    set result {}
+# OBSOLETE: The multi-argument lmap is nearly as fast anyway.
+#
+# proc lmap {list script} {
+#     set result {}
+#
+#     foreach x $list {
+# 	lappend result [uplevel apply [list $script] [list $x]]
+#     }
+#     return $result
+# }
 
-    foreach x $list {
-	lappend result [uplevel apply [list $script] [list $x]]
-    }
-    return $result
-}
 
-
-## lmap*
+## lmap
 #
 # Apply a function-script to every element of a list. The function-
 # script is evaluated in the caller's context, so "free" variables
@@ -325,7 +344,7 @@ proc lmap {list script} {
 # glad the damn thing works! (If you know a better way, please
 # tell me!)
 #
-proc lmap* {args} {
+proc lmap {args} {
     set result {}
     set script [lindex $args end]
 
