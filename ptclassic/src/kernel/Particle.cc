@@ -20,7 +20,6 @@ $Id$
 #include "Particle.h"
 #include "Plasma.h"
 #include "Error.h"
-#include <builtin.h>		// for gnu form(...) function
 
 // Here are the plasmas!
 // Create instances of each particle and plasma
@@ -38,13 +37,16 @@ static Plasma complexPlasma(cproto);
 	// class Particle
 	///////////////////////////////////////
 
-void Particle :: badCopy (const Particle& src) const {
+// return true if types are equal; return false and print error if not.
+int Particle :: compareType (const Particle& src) const {
+	if (typesEqual(src)) return 1;
 	StringList msg = "Attempt to copy ";
 	msg += src.readType();
 	msg += " Particle to ";
 	msg += readType();
 	msg += " Particle";
 	Error::abortRun (msg);
+	return 0;
 }
 
 extern const DataType ANYTYPE = "ANYTYPE";
@@ -153,6 +155,10 @@ void FloatSample :: operator << (const Complex& c) {data=abs(c);}
         ////////////////////////////////////////
 
 extern const DataType COMPLEX = "COMPLEX";
+
+ComplexSample :: ComplexSample(double f) {data= f;}
+ComplexSample :: ComplexSample(int i) {data = double(i);}
+ComplexSample :: ComplexSample() {data=0.0;}
 
 Particle* ComplexSample :: useNew () { return new ComplexSample;}
 
