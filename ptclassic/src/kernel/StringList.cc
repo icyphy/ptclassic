@@ -24,16 +24,16 @@ $Id$
 // and are deleted by the StringList destructor
 
 // Assignment operator
+// The resulting StringList always has 0 or 1 chunk.
 StringList&
 StringList :: operator = (const StringList& sl) {
 	// check for assignment to self and do nothing
 	if (this != &sl) {
 		if (size()) {
-			deleteAllStrings();
 			initialize ();
 		}
 		totalSize = sl.totalSize;
-		put(sl.newCopy());
+		if (sl.size()) put(sl.newCopy());
 	}
 	return *this;
 }
@@ -42,7 +42,6 @@ StringList :: operator = (const StringList& sl) {
 StringList&
 StringList :: operator = (const char* s) {
 	if (size()) {
-		deleteAllStrings();
 		initialize ();
 	}
 	totalSize = strlen(s);
@@ -64,7 +63,7 @@ StringList::StringList(double d) {totalSize=0; *this += d;}
 // Copy constructor
 StringList::StringList (const StringList& s) {
 	totalSize = s.totalSize;
-	put(s.newCopy());
+	if (s.size()) put(s.newCopy());
 }
 
 // Add another StringList to the StringList
@@ -132,14 +131,13 @@ StringList :: consolidate () {
 	if (size() <= 1) return head();
 	// Allocate new memory
 	char* s = newCopy();
-	deleteAllStrings();
 	initialize();
 	put(s);
 	return s;
 }
 
 // for use in destructor: delete all substrings
-// we don't delete the nodes because the base class destructor does that.
+// this is also "initialize", in effect.
 
 void StringList::deleteAllStrings() {
 	totalSize = 0;
@@ -149,6 +147,7 @@ void StringList::deleteAllStrings() {
 	for (int i=size(); i > 0; i--) {
 		delete next++;
 	}
+	SequentialList::initialize();
 }
 
 // print a StringList on a UserOutput
