@@ -118,7 +118,7 @@ cd $PTOLEMY/obj.$PTARCH
 # Experimental domains not included: capsim cgdsp3
 
 set EXPDOMAINS=(c50 cg56 cgc fsm vhdlb vhdl mdsdf hof sr)
-set EXPEXTRAS=(c50/targets cg56/targets vhdl/targets )
+set EXPEXTRAS=(c50/targets cg56/targets)
 
 set ALLDOMAINS=(sdf ddf de bdf cg $EXPDOMAINS)
 
@@ -184,6 +184,7 @@ foreach x (cg/targets sdf/image sdf/targets \
 	sdf/atm sdf/contrib sdf/dsp sdf/dfm sdf/image \
 	sdf/matrix sdf/matlab sdf/vis \
 	cgc/dsp cgc/rtlib \
+	vhdl/targets vhdl/tcltk \
 	mdsdf/tcltk de/atm cg/hierScheduler $EXPEXTRAS )
 	optmkdir $x
 	cd $x
@@ -204,6 +205,7 @@ foreach x ( c50/dsp/stars cg56/dsp/stars \
 	mdsdf/tcltk/stars \
 	de/atm/stars \
 	de/tcltk/stars \
+	vhdl/tcltk/targets \
 	cgc/dsp/stars \
 	cgc/targets/uniproc cgc/targets/multiproc cgc/targets/NOWam \
 	cgc/tcltk/stars cgc/tcltk/targets cgc/vis/stars cgc/vis/targets \
