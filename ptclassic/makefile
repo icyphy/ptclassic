@@ -49,22 +49,25 @@ sources depend TAGS: obj.$(ARCH)
 obj.$(ARCH) obj.$(ARCH)/octtools: MAKEARCH
 	csh -f MAKEARCH
 
-# This rule builds and installs everything but the gnu tools
-# tcltk and octtools source are distributed as a separate tar file
-everything: obj.$(ARCH) install_tcltk install_octtools install_xv install
+# This rule builds and installs everything but the gnu tools.
+# tcltk, octtools, and gthreads source are distributed
+# as a separate tar file.
+everything: obj.$(ARCH) install_tcltk install_octtools install_xv \
+	install_gthreads install
 
-everything_clean: clean_tcltk clean_octtools clean_xv clean
+everything_clean: clean_tcltk clean_octtools clean_xv clean_gthreads clean
 
 # This rule builds and installs gcc and tcl/tk from scratch, then octtools,
 # then everything else.
 # gcc source is distributed as a separate tar file
 # tcltk and octtools source are distributed as a separate tar file
 bootstrap: obj.$(ARCH) install_gnu install_tcltk install_octtools install_xv \
-			install
+	install_gthreads install
 
-bootstrap_clean: clean_gnu clean_tcltk clean_octtools clean_xv clean
+bootstrap_clean: clean_gnu clean_tcltk clean_octtools clean_xv \
+	clean_gthreads clean
 
-.PHONY:	install_gnu install_tcltk install_octtools install
+.PHONY:	install_gnu install_tcltk install_octtools install_gthreads install
 
 # The gcc INSTALL file says:
 #     If you are building with a previous GNU C compiler, do not use
@@ -121,3 +124,9 @@ install_xv:
 	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) xv_all
 clean_xv:
 	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) xv_clean
+
+install_gthreads:
+	cd obj.$(ARCH)/thread; $(MAKE) $(MFLAGS) gthreads_install
+
+clean_gthreads:
+	cd obj.$(ARCH)/thread; $(MAKE) $(MFLAGS) gthreads_clean
