@@ -75,9 +75,15 @@ LINKFLAGS_D =	-L$(LIBDIR)
 #
 # Directories to use
 #
-X11_INCSPEC =	-I$(ROOT)/src/compat
-X11_LIBSPEC =	-L/usr/lib/X11R5 -lX11
-X11EXT_LIBSPEC = -L/usr/lib/X11R5 -lXext
+X11_INCSPEC =	-I$(ROOT)/src/compat -I/usr/sww/X11R6/include
+X11_LIBSPEC =	-L/usr/sww/X11R6/lib -lX11
+#X11_INCSPEC =	-I$(ROOT)/src/compat
+#X11_LIBSPEC =	-L/usr/lib/X11R5 -lX11
+
+# Use -lSM -lICE for X11R6, don't use then for X11R5
+X11EXT_LIBSPEC=-lXext -lSM -lICE
+#X11EXT_LIBSPEC=-lXext
+
 
 # Ptolemy will not build the s56dsp files under sun cfront or on the hppa
 S56DIR =
