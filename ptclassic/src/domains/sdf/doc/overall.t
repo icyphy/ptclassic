@@ -55,9 +55,9 @@ of a star in an iteration.
 .pp
 Consider for example a universe A-->FFT-->B,
 where FFT is the
-.c ComplexFFT
+.c FFTCx
 star.
-.Sr ComplexFFT
+.Sr FFTCx
 This star consumes some number of particles (given by its \fIsize\fR parameter)
 and produces some number of tokens ($2 sup n$, where
 $n$ is its \fIorder\fR parameter).
@@ -73,8 +73,8 @@ for all stars in the system that returns the geodesics to their
 original state.
 .Id "inconsistent SDF system"
 .Id "SDF system, inconsistent"
-For instance, suppose that the input and output of the ComplexFFT
-are added together using a ComplexAdd star.
+For instance, suppose that the input and output of the FFTCx
+are added together using a AddCx star.
 Also suppose that $2 sup n ~!=$ \fIsize\fR.
 Then no periodic schedule is possible.
 One interpretation is that we have tried to add two signals with
@@ -100,7 +100,7 @@ SDF properties will be set to unity by default.
 However, if the numbers differ from unity, the star definition
 must reflect this.
 For example, the
-.c ComplexFFT
+.c FFTCx
 star has a \fIsize\fR state (parameter) that
 specifies how many input samples to read.
 The value of that state specifies the number of samples
