@@ -35,7 +35,7 @@ was first created, and create it again.
 Please send email to eal@eecs.berkeley.edu if you find problems.
 <p>
 <color value=red>
-To be able to execute the embedded tcl code, you must be viewing
+To be able to execute the embedded Tcl code, you must be viewing
 this document from within tycho.  See
 <a href="../running.html">Running Tycho</a>.
 </color>
@@ -51,9 +51,15 @@ all classes and most procedures are defined in a
 Such commands can be executed from any
 namespace by prefixing the command with "::tycho::".
 Namespaces are a concept introduced by the Itcl extension to Tcl.
-As the name implies, they provide seperable collections of names
+As the name implies, they provide separable collections of names
 for procedures and variables, with the intention of isolating
 applications and program modules that share a common infrastructure.
+The "tycho" namespace is imported to all objects in Tycho derived
+from "::tycho::TopLevel" or ":;tycho::TychoWidget", which is all Tycho
+objects.  Thus, the namespace qualifier "::tycho::" may be omitted
+in methods and procedures of classes in Tycho.  Nonetheless, including
+the qualifier is good practice.  For one thing, the "Show Links"
+command will not identify the reference without a fully qualified name.
 <p>
 <HR>
 Copyright &#169 %Q%, The Regents of the University of California.
