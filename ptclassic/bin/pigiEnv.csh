@@ -131,7 +131,7 @@ if ( ! -e $PIGIRPC ) then
 		setenv PIGIRPC $PTOLEMY/obj.$ARCH/pigiRpc/$PIGIBASE
 		echo "Using $PIGIRPC instead"
 	else
-		echo "${program}: exiting"
+		echo "${progname}: exiting"
 		exit 4
 	endif
 endif
