@@ -1,0 +1,178 @@
+.\" $Id$
+.H1 "Targets" 
+.pp
+A code generation
+.c Domain
+is specific to the language generated,
+such as C, DSP56000 assembly code, and Sproc assembly code.
+A
+.c Target ,
+by contrast, is specific to the hardware that will run the code.
+A given language, particularly a generic language such as C,
+may run on many target architectures.
+Code generation functions are therefore cleanly divided
+between the domain and the architecture.
+.pp
+All target architectures are derived from the base class
+.c Target .
+The special class
+.c KnownTarget
+is used to add targets to the known list of targets much as
+.c KnownBlock
+is used to add stars (and other blocks) to the known block list and
+to assign names to them.
+.pp
+A
+.c Target
+object has methods for generating a schedule, adding code, running
+(which may involve downloading code to target hardware and beginning
+its execution).  There also may be child targets (for representing
+multiprocessor targets) together with methods for scheduling communication
+between them.  Targets have parameters that may be set by the user.
+In this section, we explain the base target classes for code generation
+domains.
+.H2 "Single-Processor Target"
+.pp
+The base target for all code generation domains is the
+.c CGTarget ,
+.Ir "CGTarget, class"
+which represents a single processor by default.
+As the generic code generation target, the CGTarget class defines
+all common features for code generation targets. 
+Methods defined here include virtual methods to
+generate, display, compile, and run the code. The derivative targets
+can redefine these virtual methods if necessary.
+.H3 "Code Streams"
+.Id "code streams"
+.Id "CodeStream, class"
+.pp
+A code generation target manages code streams that are basically
+segments of codes. The CGTarget class has two code streams: 
+.c myCode
+.Ir "myCode, code stream"
+and 
+.c procedures .
+.Ir "procedures, code stream"
+The 
+.c addCode
+method of a CG star appends the code strings to the 
+.c myCode
+streams by default. The
+.c addProcedure 
+method appends the code strings to the
+.c procedures
+stream. The code streams can be accessed by
+.c getStream(stream-name)
+.Ir "getStream, method"
+method in the target class. To add some code strings to the 
+code stream, for example to the myCode, we can use 
+.c getStream("myCode")->put(code-string) .
+In the derivative target classes, we can add more code streams.
+For example, in the CGC domain, the target contains 6 more code
+streams (look at the CGC documents for details).
+To add code strings to other code streams than myCode stream from
+a CG star, we can specify the optional second argument with the
+.c addCode
+method:
+.c addCode(code-string,stream-name) .
+.pp
+Multiple definitions of a global variable is not allowed in most languages.
+Thus, we may need to avoid multiple inclusions of the same code strings
+to a certain code stream. It can be done by giving the unique name for
+the code string. For example, we can regard the name of the variable as
+the unique name of the global variable definition. For that purpose,
+we specify an optional argument like
+.c addCode(code-string,stream-name,unique-name) ,
+or 
+.c getStream(stream-name)->put(code-string,unique-name) .
+Since the code strings are blindly appended to the specified code stream
+if no unique name for the strings is given, a user
+has to assign a name to the code strings whenever necessary.
+.H3 "Code Generation Procedure"
+.pp
+Once the program graph is scheduled, the target generates the code in
+.c generateCode()
+.Ir "generateCode, method"
+method. Code streams are initialized before generation codes.
+The first step is to allocate the resources (
+.c allocateMemory()
+). After resources are allocated, the initCode method of stars are
+called (
+.c codeGenInit()
+). The next step is to form the main loop body. The number of iteration
+cycles are determined by the argument of the "run" directive which a user
+specifies in 
+.c pigi
+or in
+.c ptcl .
+To complete the body of the main loop, 
+.c go()
+ methods of stars are called in the scheduled order.
+After forming the main loop, the
+.c wrapup()
+methods of stars are called. Up to this point, code strings are
+added to some code streams defined in the target. Here, the
+.c frameCode()
+.Ir "frameCode, method"
+arranges all code streams to make the final code and put the code
+to the 
+.c myCode
+stream. The final code can be written to a file in the
+.c writeCode()
+method as the final stage of code generation procedure.
+The default file name is
+.c "code.output" ,
+and that file will be located in the directory specified by a target
+parameter,
+.c destDirectory .
+.Ir "destDirectory, target parameter"
+The methods described above need be redefined in the derivative target
+classes in a target specific way.
+.pp
+The code generation procedure is executed in the run time stage unless
+the code generation domain resides in a wormhole. If it is inside a wormhole,
+the code should be generated at the set-up stage of the target. And, the
+generated code should be compiled and run in the target machine at the
+set-up stage. Otherwise, the generated code is compiled and run at the
+wrap-up stage (
+.c compileCode ,
+.c loadCode ,
+and
+.c runCode
+methods ). At run-time, if it is inside a wormhole, the target
+machine receives data from the \*(PT host machine, does computation, and
+sends output data to the host machine. The data communication between
+the target machine and the \*(PT host machines is executed in the
+.c sendWormData
+.Ir "sendWormData, method"
+and the
+.c receiveWormData
+.Ir "receiveWormData, method"
+methods in the host machine. On the other hand, to communicate
+data with the host machine, some interface codes should be executed in
+the target machine. Those interface codes are programmed by the
+target class in the
+.c wormInputCode
+.Ir "wormInputCode, method"
+and the
+.c wormOutputCode
+.Ir "wormOutputCode, method"
+methods.
+.pp
+As disclosed in this section, there are quite a few virtual methods in
+the generic target class. They may need to be redefined in 
+derivative target classes. If a user want to create a customized
+target, the best way is to look at any existing target, CGCTarget class
+for example.
+.pp
+Derived from the CGTarget class, the 
+.c AsmTarget
+.Ir "AsmTarget, class"
+class serves as the base target for all assembler code generation
+single processor targets, and the
+.c HLLTarget
+.Ir "HLLTarget, class"
+class serves as the base target for all high-level language, such as
+C or Silage, generation single processor targets.
+
+[jose, do you want to have a sub-section for AsmTarget here?]
