@@ -87,17 +87,20 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
         }
 
         initCode {
+		char buf[32];
+		double temp;
 		tapInit.initialize();
 		tapInit<<"$starSymbol(cfs):\n";
 		for (int i = (tapsNum - 1); i >= 0 ; i--){
-			tapInit << "\t.q15\t" << double(taps[i]) << '\n';
+			temp = double(taps[i]);
+			sprintf(buf,"%.15f",temp);	
+			tapInit << "\t.q15\t"<<buf<<"\n";
 		}
-		tapInit<<"$starSymbol(cfe):\n";
+		addCode(tapInit,"TISubProcs");
         }
 
 	go {
 		addCode(std());
-		addCode(tapInit);
 	}
 
 	codeblock(block,"int space"){
@@ -121,7 +124,6 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 	lta	*,ar1
 	sacb
 	addb				; saturate on overflow
-	BCNDD	$starSymbol(cfe),UNC	; will branch after SACH instruction
 	clrc	ovm			; unset overflow mode
 	SACH	*			; save output
 	}
