@@ -25,6 +25,8 @@ if ( ! $?DISPLAY ) then
 	exit 1
 endif
 
+set tclscript = ""
+
 while ($#argv)
 	switch ($argv[1])
 		case -help:
@@ -233,7 +235,7 @@ endif
 # Add in options that are passed directly to Tycho.
 if ( $?nowelcome ) set prog = ($prog -nowelcome)
 if ( $?noconsole ) set prog = ($prog -noconsole)
-if ( $?tclscript ) set prog = ($prog -e $tclscript)
+if ( $tclscript != "") set prog = ($prog -e $tclscript)
 
 # If neither tyedit or selectPtolemy are set then we are just running itkwish
 if (! -x $prog[1] && ($?tyedit || $?selectPtolemy)) then
