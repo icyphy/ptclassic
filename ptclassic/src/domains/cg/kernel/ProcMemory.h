@@ -21,6 +21,7 @@ $Id$
 // called.
 ******************************************************************/
 #include "MReq.h"
+#include "MemMap.h"
 
 inline int consistent(bitWord t,const Attribute& a) {
 	return t == a.eval(t);
@@ -61,14 +62,11 @@ public:
 		return consistent(p.attributes(), reqdPortAttributes());
 	}
 
-	// Returns TRUE if the attributes of the state match the required
-	// attributes for states of the memory, and hence the request was
-	// registered.
+	// Log a request for memory, to be allocated later.
+	// Returns TRUE if the attributes of the state or port match the
+	// required attributes of the memory, and hence return TRUE if the
+	// request was successfully logged.
 	virtual int allocReq(const State& s) = 0;
-
-	// Returns TRUE if the attributes of the PortHole match the required
-	// attributes for PortHoles of the memory, and hence the request was
-	// registered.
 	virtual int allocReq(AsmPortHole& p) = 0;
 
 	// Perform all registered allocation requests
@@ -76,6 +74,17 @@ public:
 
 	// Reset the memory, clearing all previous allocations
 	virtual void reset() = 0;
+
+	// Return a string describing the memory map.
+	// The string consists of multiple lines, with each line beginning
+	// with the startString and ending with the endString.
+	// In this base class, just return a comment.
+	virtual StringList printMemMap(char* startString, char* endString) {
+		StringList l = startString;
+		l += " don't know how to print memory map ";
+		l += endString;
+		return l;
+	}
 };
 
 // An interval of memory
@@ -141,6 +150,9 @@ protected:
 	MReqList circ;
 	MemoryList mem;
 	MConsecStateReq *consec;
+	MemMap	map;
+	// Record a memory allocation in the memory map.
+	void record(MReq* request, unsigned addr);
 
 public:
 	// Constructor with name, required State attributes, required PortHole
@@ -154,20 +166,22 @@ public:
 	// Reset the memory, clearing all previous allocations
 	void reset();
 
-	// Returns TRUE if the attributes of the state match the required
-	// attributes for states of the memory, and hence the request was
-	// registered.
+	// Log a request for memory, to be allocated later.
+	// Returns TRUE if the attributes of the state or port match the
+	// required attributes of the memory, and hence return TRUE if the
+	// request was successfully logged.
 	int allocReq(const State& s);
-
-	// Returns TRUE if the attributes of the PortHole match the required
-	// attributes for PortHoles of the memory, and hence the request was
-	// registered.
 	int allocReq(AsmPortHole& p);
 
 	// Perform all registered allocation requests
 	int performAllocation();
 
 	void copyMem(MemoryList& src) { mem = src;}
+
+	// Return a string describing the memory map.
+	// The string consists of multiple lines, with each line beginning
+	// with the startString and ending with the endString.
+	virtual StringList printMemMap(char* startString, char* endString);
 };
 
 // this models a two-address-space chip such as the Motorola 56000
@@ -201,18 +215,20 @@ public:
 	// Destructor
 	~DualMemory() { reset();}
 
-	// Returns TRUE if the attributes of the state match the required
-	// attributes for states of the memory, and hence the request was
-	// registered.
+	// Log a request for memory, to be allocated later.
+	// Returns TRUE if the attributes of the state or port match the
+	// required attributes of the memory, and hence return TRUE if the
+	// request was successfully logged.
 	int allocReq(const State&);
-
-	// Returns TRUE if the attributes of the PortHole match the required
-	// attributes for PortHoles of the memory, and hence the request was
-	// registered.
 	int allocReq(AsmPortHole&);
 
 	// Perform all registered allocation requests
 	int performAllocation();
+
+	// Return a string describing the memory map.
+	// The string consists of multiple lines, with each line beginning
+	// with the startString and ending with the endString.
+	virtual StringList printMemMap(char* startString, char* endString);
 };
 	
 #endif

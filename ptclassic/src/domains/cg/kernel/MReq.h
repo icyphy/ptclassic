@@ -29,6 +29,14 @@ public:
 	virtual int size() = 0;
 	MReq() : next(0) {}
 	virtual ~MReq() {}
+
+	// Return a pointer to the AsmPortHole using the requested memory.
+	// If it is not an AsmPortHole, return NULL.
+	virtual AsmPortHole* port() { return NULL; }
+
+	// Return a pointer to the State using the requested memory.
+	// If it is not a State, return NULL.
+	virtual const State* state() { return NULL; }
 };
 
 // a list of requests.
@@ -47,23 +55,29 @@ public:
 };
 
 class MPortReq : public MReq {
-	AsmPortHole& port;
+	AsmPortHole& myport;
 public:
-	MPortReq(AsmPortHole& p) : port(p) {}
+	MPortReq(AsmPortHole& p) : myport(p) {}
 	void assign(ProcMemory& proc, unsigned addr) {
-		port.assignAddr(proc,addr);
+		myport.assignAddr(proc,addr);
 	}
-	int size() { return port.bufSize();}
+	int size() { return myport.bufSize();}
+
+	// Return a pointer to the AsmPortHole using the requested memory.
+	AsmPortHole* port() { return &myport; }
 };
 
 class MStateReq : public MReq {
-	const State& state;
+	const State& mystate;
 public:
-	MStateReq(const State& s) : state(s) {}
+	MStateReq(const State& s) : mystate(s) {}
 	void assign(ProcMemory& proc, unsigned addr) {
-		((AsmStar*)(state.parent()))->addEntry(state,proc,addr);
+		((AsmStar*)(mystate.parent()))->addEntry(mystate,proc,addr);
 	}
-	int size() { return state.size();}
+	int size() { return mystate.size();}
+
+	// Return a pointer to the State using the requested memory.
+	const State* state() { return &mystate; }
 };
 
 class MConsecStateReq : public MReq {

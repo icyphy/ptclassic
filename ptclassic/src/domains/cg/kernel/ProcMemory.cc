@@ -23,6 +23,7 @@ $Id$
 #include "AsmStar.h"
 #include "miscFuncs.h"
 #include "isa.h"
+#include "dataType.h"
 #include <builtin.h>
 
 int MemoryList::firstFitAlloc(unsigned reqSize, unsigned &reqAddr) {
@@ -116,17 +117,38 @@ int MemoryList::addChunk(unsigned addr,unsigned len) {
 
 void MemoryList::reset() {
 	zero();
-	if(l) {
-		LOG_DEL; delete l;
-	}
+	if(l) { LOG_DEL; delete l; }
 	LOG_NEW; l = new MemInterval(min, max-min+1);
 }
 
 
 // stuff for LinProcMemory
+
+void LinProcMemory::record(MReq* request, unsigned addr) {
+	AsmPortHole* p = request->port();
+
+	// Determine the type
+	DataType type;
+	if(p) type = p->myType();
+	else type = FLOAT;	// Temporary HACK.  The type of a state
+				// seems to need work for code generation.
+
+	// Determine whether the access is circular
+	int circular;
+	if(p) circular = p->circAccess();
+	else circular = FALSE;	// Temporary HACK.  Want to be able to allow
+				// circular buffers for state.
+
+	// Append the allocation to the memory map
+	map.appendSorted(addr,request->size(),
+			 request->state(), p,
+			 circular, type);
+}
+
 void LinProcMemory::reset() {
 	lin.zero();
 	circ.zero();
+	map.zero();
 	mem.reset();
 	LOG_DEL; delete consec;
 }
@@ -144,9 +166,7 @@ int LinProcMemory::allocReq(const State& s) {
 	if (!match(s)) return FALSE;
 
 	if (s.attributes() & AB_CONSEC) {
-		if (!consec) {
-			LOG_NEW; consec = new MConsecStateReq;
-		}
+		if (!consec) { LOG_NEW; consec = new MConsecStateReq; }
 		consec->append(s);
 		return TRUE;
 	}
@@ -172,6 +192,7 @@ int LinProcMemory::performAllocation() {
 			return FALSE;
 		}
 		r->assign(*this,addr);
+		record(r,addr);
 	}
 	MReqListIter nextLin(lin);
 	while ((r = nextLin++) != 0) {
@@ -181,6 +202,7 @@ int LinProcMemory::performAllocation() {
 			return FALSE;
 		}
 		r->assign(*this,addr);
+		record(r,addr);
 	}
 	return TRUE;
 }
@@ -189,6 +211,65 @@ static unsigned share_len(unsigned xa,unsigned ya,unsigned xl,unsigned yl) {
 	unsigned s = max(xa,ya);
 	unsigned end = min(xa+xl,ya+yl);
 	return max(end,s) - s;
+}
+
+StringList LinProcMemory::printMemMap(char* startString, char* endString) {
+	StringList l = "";
+	MemMapIter nextItem(map);
+	MemAssignment *mem;
+	while((mem = nextItem++) != 0) {
+	    l += startString;
+	    l += " Loc ";
+	    l += mem->start;
+	    l += ", length ";
+	    l += mem->length;
+	    if(mem->port) {
+		l += ", ";
+		l += mem->port->parent()->readFullName();
+		l += "(";
+		l += mem->port->readName();
+		l += ")";
+	    }
+	    if(mem->state) {
+		l += ", ";
+		l += mem->state->parent()->readFullName();
+		l += "(";
+		l += mem->state->readName();
+		l += ")";
+	    }
+	    // Should print out the type here, but I don't know how.
+	    if(mem->circular)
+		l += " (circular)";
+	    l += endString;
+	    l += "\n";
+	}
+	return l;
+}
+
+StringList DualMemory::printMemMap(char* startString, char* endString) {
+	StringList l = startString;
+	l += " --------------------- Shared memory map: ";
+	l += endString;
+	l += "\n";
+	l += LinProcMemory::printMemMap(startString, endString);
+
+	l += startString;
+	l += " --------------------- ";
+	l += x.readName();
+	l += " memory map: ";
+	l += endString;
+	l += "\n";
+	l += x.printMemMap(startString, endString);
+
+	l += startString;
+	l += " --------------------- ";
+	l += y.readName();
+	l += " memory map: ";
+	l += endString;
+	l += "\n";
+	l += y.printMemMap(startString, endString);
+
+	return l;
 }
 
 DualMemory:: DualMemory(const char* n_x,     // name of the first memory space
@@ -205,12 +286,8 @@ DualMemory:: DualMemory(const char* n_x,     // name of the first memory space
 	sAddr(max(x_addr,y_addr)),
 	sLen(share_len(x_addr,y_addr,x_len,y_len)),
 	// The shared portion of the memory is arbitrarily given name n_x.
-
-// should be something like the following:
-//	LinProcMemory(n_x,(st_x&st_y)|A_SHARED,(p_x&p_y)|A_SHARED,sAddr,sLen),
-// but it is temporarily:
-	LinProcMemory(n_x,st_x|A_SHARED,p_x|A_SHARED,sAddr,sLen),
-
+	LinProcMemory("shared",(st_x&st_y)|A_SHARED,
+			(p_x&p_y)|A_SHARED,sAddr,sLen),
 	x(n_x,st_x,p_x,0,0),
 	y(n_y,st_y,p_y,0,0), 
 	xAddr(x_addr),xLen(x_len),
