@@ -64,9 +64,14 @@ endif
 ifdef PTCL
 # To build ptcl with Tk, create the following 
 # $PTOLEMY/obj.$PTARCH/ptcl/override.mk file
-#   GPP_FLAGS += -DPT_PTCL_WITH_TK
-#   PTCL_WITH_TK = 1
-#   TK = 1
+#     GPP_FLAGS += -DPT_PTCL_WITH_TK -I../../src/ptklib -I$PTOLEMY/tcltk/tcl/include -I/usr/openwin/include"
+#     PTCL_WITH_TK = 1
+#     TK = 1
+#     # If you are building under Unix,
+#     # copy src/tcltk/tk8.0.5pt/generic/tkConsole.c to src/ptcl and then
+#     # uncomment the next two lines:
+#     #LIBS += tkConsole.o
+#     #LIBFILES += tkConsole.o
 ifndef PTCL_WITH_TK
 	TK =
 endif
