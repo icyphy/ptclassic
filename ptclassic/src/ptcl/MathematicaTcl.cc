@@ -159,13 +159,24 @@ int MathematicaTcl::mathematica(int argc, char** argv)
 }
 
 // Close a Mathematica connection
-int MathematicaTcl::end(int argc, char** /*argv*/) {
-    if (argc != 2) return usage("mathematica end");
+int MathematicaTcl::end(int argc, char** argv) {
+    if (argc < 2 || argc > 3) return usage("mathematica end ?<identifier>?");
     if (mathematicaInterface == 0) {
 	return error("the Tcl/Mathematica interface has not been initialized");
     }
-    delete mathematicaInterface;
-    mathematicaInterface = 0;
+    char* id = (argc == 3) ? argv[2] : 0;
+    Pointer key = manager.makeInstanceName(tclinterp, id);
+    if (! manager.exists(key) ) {
+        StringList msg = "the Tcl/Mathematica interface has not been initialized";
+        if (id) msg << " for " << id;
+        return error(msg);
+    }
+    manager.remove(key);
+    if ( manager.noMoreInstances() ) {
+	mathematicaInterface->CloseMathematicaFigures();
+        delete mathematicaInterface;
+        mathematicaInterface = 0;
+    }
     return TCL_OK;
 }
 
@@ -184,10 +195,12 @@ int MathematicaTcl::send(int argc, char** argv) {
 }
 
 // Start a Mathematica process if one is not running already
-int MathematicaTcl::start(int argc, char** /*argv*/){
-    if (argc != 2) return usage("mathematica start");
-    if (init()) return TCL_OK;
-    return error(mathematicaInterface->GetErrorString());
+int MathematicaTcl::start(int argc, char** argv){
+    if (argc < 2 || argc > 3) return usage("mathematica start ?<identifier>?");
+    if (! init()) error(mathematicaInterface->GetErrorString());
+    char* id = (argc == 3) ? argv[2] : 0;
+    manager.add(tclinterp, id);
+    return TCL_OK;
 }
 
 // Return the status of the Tcl/Mathematica interface
