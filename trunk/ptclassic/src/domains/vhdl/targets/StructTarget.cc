@@ -375,7 +375,9 @@ void StructTarget :: trailerCode() {
   VHDLCluster* cl;
   while ((cl = nextCluster++) != 0) {
     // Begin constructing the cluster's code in myCode.
-    myCode << "\n\t-- Cluster " << cl->name << "\n";
+    myCode << "\n-- Cluster " << cl->name << "\n";
+    myCode << addFiringComments(cl->firingList, level);
+
     myCode << "\n";
     myCode << useLibs;
     myCode << "\n";
