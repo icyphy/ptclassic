@@ -60,75 +60,30 @@ class ::tycho::EditDiff {
     ##########################################################################
     ####                         public methods                           ####
 
-    # This insertString will add attribute to all of the test.
-    # The attribute for each text could be either "common",
-    # "new", or "old".
-    method insertString {index str status} {}
-
     # Compare files
     method compareFile {{nothing {}}} {}
 
-    # This will return the info line entry from the diff program
+    # Keep the concurrency between filename and listentry file
+    method configureUpdate {} {}
+
+    # This will return the info line entry from the UNIX diff program
     # (ie. 12,32c53,3    3d5,6    etc)
-    public method diffReport {} {}
+    method diffReport {} {}
 
     # Open a help window.  This should be redefined in derived classes.
     method help {}
 
-    method test {} 
-
     # Put in the file name in the list entry
-    method insertFileName {num nameAndPath} {
-        $this toolbar clear filename$num
-        $this toolbar insert filename$num $nameAndPath
-        set filename$num $nameAndPath
-    }
+    method insertFileName {num nameAndPath} {}
 
     # insert filename into $numth line
-    method insertSelectedFileName {num} {
-        set nameAndPath [::tycho::queryfilename {File to compare:}]
-        # Only change when user explicitly changed. Otherwise, leave as default
-        if {$nameAndPath != {}} {
-            insertFileName $num $nameAndPath
-        }
-    }
+    method insertSelectedFileName {num} {}
 
-    method configureUpdate {} {
-        # Sort the file names. This is to ensure that in SCCS, the
-        # most recent file is always on top.
-        set files [lsort [list $filename1 $filename2]]
-        set filename1 [lindex $files 0]
-        set filename2 [lindex $files 1]
-        insertFileName 1 $filename1
-        insertFileName 2 $filename2
-    }
+    # The attribute for each text could be either "common", "new", or "old".
+    method insertString {index str status} {}
 
     # Jump to the next difference
-    method jumpDifference {{incrdecr 1}} {
-        # No error, return
-        if {[llength $differenceList]==0} {return}
-
-        incr differenceListCount $incrdecr
-        # Overflow! Warning:
-        if {$differenceListCount==[llength $differenceList]} {
-            incr differenceListCount -1
-        }
-        if {$differenceListCount==-1} {
-            incr differenceListCount 1
-        }
-
-        # Extract begin and ending block numbers
-        set differenceBlock [lindex $differenceList $differenceListCount]
-        regexp {([0-9]+).0 ([0-9]+).0} $differenceBlock match \
-                differenceBegin differenceEnd
-
-        # Highlight from end to beginning to be sure that we always see
-        # the beginning of a difference block.
-        for {set i $differenceBegin} {$i != $differenceEnd} {incr i} {
-            # Indexing is different for seeFragment
-            $this seeFragment "line $i"
-        }
-    }
+    method jumpDifference {{incrdecr 1}} {}
 
     ####################################################################
     ####           protected methods and variables                  ####
@@ -143,15 +98,20 @@ class ::tycho::EditDiff {
     protected variable linecolor1 {{} {}}
     protected variable linecolor2 {{} {}}
 
-    # This keeps a list of diffs
+    # This keeps a list of diffs, output from UNIX's diff
     public variable diffResult {}
+
     public variable diffResultLineCount 0
     
-    # Keep track of where exactly error occured.
+    # Keep track of where exactly differences occured.
     public variable differenceList {}
 
-    # Keep track of where in the < we are now.
+    # Keep track of where in the error we are now.
     public variable differenceListCount -1
+
+    # Keep track where we can insert in the text. This is added for
+    # concurency with seeFragment during insertion.
+    public variable textLineCount 1
 
     # File names that are being diffed.
     public variable filename1
@@ -196,9 +156,6 @@ body ::tycho::EditDiff::constructor {args} {
             -description {Remove one more file entry} \
             -command {} -state disabled
            
-    #toolbar button test -description {Kevin's test button} -text "Test" \
-    #        -command "$this test"
-
     toolbar entry filename1 "File 1 name: " {} "puts " \
             -foreground [lindex $linecolor1 0] \
             -command "$this insertSelectedFileName 1"
@@ -268,62 +225,22 @@ body ::tycho::EditDiff::constructor {args} {
     if {$filename2 != {}} {insertFileName 2 $filename2}
 }
 
-###################################################################
-#
-body ::tycho::EditDiff::insertString {index str {status {common}}} {
-    set text $itk_component(text)
-    
-    if $readOnly {bell; return}
-    #prepareInsert $index
-    
-    $text insert insert $str $status
-    #parseRegion $start [$itk_component(text) index insert]
-}
-
-
-
-
-# TEST TEST TEST
-body ::tycho::EditDiff::test {} {
-    #global filename1 filename2
-    incr filename1
-    incr filename2
-
-
-    return
-
-
-    # Create an exec instance
-    if {[info object $execDiff ]==""} {
-        # Doesn't exist yet, create one
-        set execDiff [::tycho::Exec [::tycho::autoName execDiff]]
-    }
-    $execDiff execProcess \
-            "diff $filename1 $filename2 |& grep -v \"^<\" |& grep -v \"^>\""
-
-    # Wait until execution is done
-    $execDiff getStatusWait
-    set diffResult [$execDiff getHistory]
-    set diffResult [split $diffResult \n]
-
-    # Reset the line to read from beginning
-    set diffResultLineCount 0
-}
-
-
 
 ###################################################################
 #
 # This is the entry point to comparing files. It first clears up the
 # text buffer, read in UNIX's diff, and then compare.
 body ::tycho::EditDiff::compareFile {{nothing {}}} {
+    markUnmodified
+
     set text $itk_component(text)
+    $text delete 0.0 end    ;# This replaces clear
+    set differenceList {}
+    set differenceListCount -1
+    set textLineCount 1
+
     #global filename1 filename2
     global linecolor1 linecolor2
-    #set filename1 [safeEval ::tycho::queryfilename {File 1 to compare:}]
-    #set filename2 [safeEval ::tycho::queryfilename {File 2 to compare:}]
-    #set filename1 "/tmp_mnt/tarsky/tarsky1/kchang/tycho/3.cc"
-    #set filename2 "/tmp_mnt/tarsky/tarsky1/kchang/tycho/4.cc"
     
     # Make sure that all the files are legal to begin with. Otherwise, exit.
     set flag 1
@@ -351,7 +268,6 @@ body ::tycho::EditDiff::compareFile {{nothing {}}} {
     }
     $execDiff execProcess \
             "diff $filename1 $filename2 |& grep -v \"^<\" |& grep -v \"^<\""
-    #$execDiff execProcess "diff $filename1 $filename2"
     # Wait until execution is done
     $execDiff getStatusWait
     set diffResult [$execDiff getHistory]
@@ -368,7 +284,6 @@ body ::tycho::EditDiff::compareFile {{nothing {}}} {
     set fileLineCount2 1
     
     # Entry point to reading the actual files and outputting to text
-    configure -readonly 0
     clear
     while {[set diffInfo [diffReport]] != "done"} {
 
@@ -432,19 +347,25 @@ body ::tycho::EditDiff::compareFile {{nothing {}}} {
     close $fd1
     close $fd2
 
-    configure -readonly 1
-    markUnmodified
-
     return
 }
+
+#####################################################################
+#### configureUpdate
+# when the file names are changed (from outer interface), change the
+# internal listentry.
+#
+body ::tycho::EditDiff::configureUpdate {} {
+    # most recent file should always in filename1.
+    insertFileName 1 $filename1
+    insertFileName 2 $filename2
+}
+
 
 #####################################################################
 #### diffReport
 # parse the output of the UNIX's diff utility
 body ::tycho::EditDiff::diffReport {} {
-    # This is here as an attempt to speed up responce time.
-    ::tycho::safeUpdate $this
-
     #The normal output contains lines of these forms:
     #n1 a n3,n4
     #n1,n2 d n3
@@ -495,6 +416,67 @@ body ::tycho::EditDiff::help {} {
 	    EditDiffHelp.html]
 }
 
+###################################################################
+####
+body ::tycho::EditDiff::insertString {index str {status {common}}} {
+    #configure -readonly 0
+    $itk_component(text) insert $textLineCount.0 $str $status
+    incr textLineCount
+    #configure -readonly 1
+
+    # This is here as an attempt to speed up responce time.
+    ::tycho::safeUpdate $this
+}
+
+###################################################################
+####
+# Put in the file name in the list entry
+body ::tycho::EditDiff::insertFileName {num nameAndPath} {
+    $this toolbar clear filename$num
+    $this toolbar insert filename$num $nameAndPath
+    set filename$num $nameAndPath
+}
+
+###################################################################
+####
+# insert filename into $numth line
+body ::tycho::EditDiff::insertSelectedFileName {num} {
+    set nameAndPath [::tycho::queryfilename {File to compare:}]
+    # Only change when user explicitly changed. Otherwise, leave as default
+    if {$nameAndPath != {}} {
+        insertFileName $num $nameAndPath
+    }
+}
+
+
+###################################################################
+####
+# Jump to the next difference
+body ::tycho::EditDiff::jumpDifference {{incrdecr 1}} {
+    # No difference, return
+    if {[llength $differenceList]==0} {return}
+    
+    incr differenceListCount $incrdecr
+    # Overflow! Warning:
+    if {$differenceListCount==[llength $differenceList]} {
+        incr differenceListCount -1
+    }
+    if {$differenceListCount==-1} {
+        incr differenceListCount 1
+    }
+    
+    # Extract begin and ending block numbers
+    set differenceBlock [lindex $differenceList $differenceListCount]
+    regexp {([0-9]+).0 ([0-9]+).0} $differenceBlock match \
+            differenceBegin differenceEnd
+    
+    # Highlight from end to beginning to be sure that we always see
+    # the beginning of a difference block.
+    for {set i $differenceBegin} {$i != $differenceEnd} {incr i} {
+        # Indexing is different for seeFragment
+        $this seeFragment "line $i"
+    }
+}
 
 
 ####################################################################
