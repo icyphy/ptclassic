@@ -120,8 +120,8 @@ private:
 
 	VHDLGenericList mainGenList;
 	VHDLPortList mainPortList;
-	VHDLGenericMapList mainGenMapList;
-	VHDLPortMapList mainPortMapList;
+	VHDLGenericList mainGenMapList;
+	VHDLPortList mainPortMapList;
 	VHDLSignalList topSignalList;
 	VHDLCompMapList topCompMapList;
 

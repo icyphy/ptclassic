@@ -361,20 +361,20 @@ void StructTarget :: trailerCode() {
 	if (!strcmp((po->direction),"OUT")) {
 	  StringList oldMapping = "";
 	  StringList newMapping = "";
-	  VHDLPortMap* poMap;
+	  VHDLPort* poMap;
 	  const char* poName = po->name;
 	  /*
 	  {
 	    printf("poName is:  %s\n", poName);
-	    VHDLPortMapListIter pomNext(*(fi->portMapList));
-	    VHDLPortMap* pom;
+	    VHDLPortListIter pomNext(*(fi->portMapList));
+	    VHDLPort* pom;
 	    while ((pom = pomNext++) != 0) {
 	      const char* nameo = pom->name;
 	      printf("Port Map Name:  %s\n", nameo);
 	    }
 	  }
 	  */
-	  poMap = fi->portMapList->vhdlPortMapWithName(poName);
+	  poMap = fi->portMapList->vhdlPortWithName(poName);
 	  if (!poMap) {
 	    Error::abortRun("poMap is null.");
 	    return;
@@ -681,12 +681,12 @@ void StructTarget :: registerState(State* state, const char* varName,
     if (isFirstStateRef) {
       if (constState) {
 	firingSignalList.put(root, stType, "", root);
-	firingPortMapList.put(refIn, root);
+	firingPortMapList.put(refIn, "", "", root);
       }
       if (!(constState)) {
 	firingSignalList.put(refIn, stType, "", refIn);
-	firingPortMapList.put(refIn, refIn);
-	firingPortMapList.put(refOut, temp_out);
+	firingPortMapList.put(refIn, "", "", refIn);
+	firingPortMapList.put(refOut, "", "", temp_out);
       }
     }
     
@@ -694,12 +694,12 @@ void StructTarget :: registerState(State* state, const char* varName,
     if (!isFirstStateRef) {
       if (constState) {
 	firingSignalList.put(root, stType, root, root);
-	firingPortMapList.put(refIn, root);
+	firingPortMapList.put(refIn, "", "", root);
       }
       if (!(constState)) {
 	firingSignalList.put(temp_state, stType, temp_state, refIn);
-	firingPortMapList.put(refIn, temp_state);
-	firingPortMapList.put(refOut, temp_out);
+	firingPortMapList.put(refIn, "", "", temp_state);
+	firingPortMapList.put(refOut, "", "", temp_out);
       }
     }
 
@@ -742,13 +742,13 @@ void StructTarget :: connectSource(StringList initVal, StringList initName,
       StringList name = "Source";
       name << "_" << type;
 
-      VHDLGenericMapList* genMapList = new VHDLGenericMapList;
-      VHDLPortMapList* portMapList = new VHDLPortMapList;
+      VHDLGenericList* genMapList = new VHDLGenericList;
+      VHDLPortList* portMapList = new VHDLPortList;
       genMapList->initialize();
       portMapList->initialize();
       
-      genMapList->put("value", initVal);
-      portMapList->put("output", initName);
+      genMapList->put("value", "", initVal);
+      portMapList->put("output", "", "", initName);
       mainCompMapList.put(label, name, portMapList, genMapList);
 }
 
@@ -787,21 +787,21 @@ void StructTarget :: connectMultiplexor(StringList inName, StringList outName,
   StringList name = "Mux";
   name << "_" << type;
 
-  VHDLGenericMapList* genMapList = new VHDLGenericMapList;
-  VHDLPortMapList* portMapList = new VHDLPortMapList;
+  VHDLGenericList* genMapList = new VHDLGenericList;
+  VHDLPortList* portMapList = new VHDLPortList;
   genMapList->initialize();
   portMapList->initialize();
       
-  portMapList->put("input", inName);
-  portMapList->put("output", outName);
-  portMapList->put("init_val", initVal);
-  portMapList->put("control", "control");
+  portMapList->put("input", "", "", inName);
+  portMapList->put("output", "", "", outName);
+  portMapList->put("init_val", "", "", initVal);
+  portMapList->put("control", "", "", "control");
   //  systemPortList.put("control", "IN", "boolean");
   ctlerPortList.put("control", "OUT", "boolean");
-  ctlerPortMapList.put("control", "control");
+  ctlerPortMapList.put("control", "", "", "control");
   ctlerSignalList.put("control", "boolean", "", "");
   ctlerPortList.put("system_clock", "IN", "boolean");
-  ctlerPortMapList.put("system_clock", "system_clock");
+  ctlerPortMapList.put("system_clock", "", "", "system_clock");
   // If using a system clock generator, then need a signal.
   if (systemClock()) {
     mainSignalList.put("system_clock", "boolean", "", "");
@@ -848,20 +848,20 @@ void StructTarget :: connectRegister(StringList inName, StringList outName,
   StringList name = "Reg";
   name << "_" << type;
 
-  VHDLGenericMapList* genMapList = new VHDLGenericMapList;
-  VHDLPortMapList* portMapList = new VHDLPortMapList;
+  VHDLGenericList* genMapList = new VHDLGenericList;
+  VHDLPortList* portMapList = new VHDLPortList;
   genMapList->initialize();
   portMapList->initialize();
       
-  portMapList->put("D", inName);
-  portMapList->put("Q", outName);
-  portMapList->put("C", clkName);
+  portMapList->put("D", "", "", inName);
+  portMapList->put("Q", "", "", outName);
+  portMapList->put("C", "", "", clkName);
   //  systemPortList.put(clkName, "IN", "boolean");
   ctlerPortList.put(clkName, "OUT", "boolean");
-  ctlerPortMapList.put(clkName, clkName);
+  ctlerPortMapList.put(clkName, "", "", clkName);
   ctlerSignalList.put(clkName, "boolean", "", "");
   ctlerPortList.put("system_clock", "IN", "boolean");
-  ctlerPortMapList.put("system_clock", "system_clock");
+  ctlerPortMapList.put("system_clock", "", "", "system_clock");
   // If using a system clock generator, then need a signal.
   if (systemClock()) {
     mainSignalList.put("system_clock", "boolean", "", "");
@@ -880,13 +880,13 @@ void StructTarget :: connectClockGen(StringList clkName) {
       label << "_Clock";
       StringList name = "ClockGen";
 
-      VHDLGenericMapList* genMapList = new VHDLGenericMapList;
-      VHDLPortMapList* portMapList = new VHDLPortMapList;
+      VHDLGenericList* genMapList = new VHDLGenericList;
+      VHDLPortList* portMapList = new VHDLPortList;
       genMapList->initialize();
       portMapList->initialize();
       
-      portMapList->put("system_clock", clkName);
-      portMapList->put("iter_clock", "iter_clock");
+      portMapList->put("system_clock", "", "", clkName);
+      portMapList->put("iter_clock", "", "", "iter_clock");
       mainCompMapList.put(label, name, portMapList, genMapList);
 }
 
@@ -962,7 +962,7 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
 
   // Create a port and a port mapping for this firing entity.
   firingPortList.put(ref, port->direction(), port->dataType());
-  firingPortMapList.put(ref, sinkName);
+  firingPortMapList.put(ref, "", "", sinkName);
 
   // Only provide a toggled clock for firing if data is output.
   if (port->isItOutput()) {
@@ -1040,16 +1040,16 @@ void StructTarget :: registerComm(int direction, int pairid, int numxfer, const 
   doneName << rootName << "_done";
   endName << rootName << "_end";
   
-  VHDLGenericMapList* genMapList = new VHDLGenericMapList;
-  VHDLPortMapList* portMapList = new VHDLPortMapList;
+  VHDLGenericList* genMapList = new VHDLGenericList;
+  VHDLPortList* portMapList = new VHDLPortList;
   genMapList->initialize();
   portMapList->initialize();
   
-  genMapList->put("pairid", pairid);
-  genMapList->put("numxfer", numxfer);
-  portMapList->put("go", goName);
-  portMapList->put("data", dataName);
-  portMapList->put("done", doneName);
+  genMapList->put("pairid", "", pairid);
+  genMapList->put("numxfer", "", numxfer);
+  portMapList->put("go", "", "", goName);
+  portMapList->put("data", "", "", dataName);
+  portMapList->put("done", "", "", doneName);
   mainCompMapList.put(label, name, portMapList, genMapList);
 
   ctlerPortList.put(startName, "OUT", "STD_LOGIC");
@@ -1065,13 +1065,13 @@ void StructTarget :: registerComm(int direction, int pairid, int numxfer, const 
   firingPortList.put(endName, "OUT", "STD_LOGIC");
   ctlerPortList.put(endName, "IN", "STD_LOGIC");
 
-  ctlerPortMapList.put(startName, startName);
-  firingPortMapList.put(startName, startName);
-  firingPortMapList.put(goName, goName);
-  firingPortMapList.put(dataName, dataName);
-  firingPortMapList.put(doneName, doneName);
-  firingPortMapList.put(endName, endName);
-  ctlerPortMapList.put(endName, endName);
+  ctlerPortMapList.put(startName, "", "", startName);
+  firingPortMapList.put(startName, "", "", startName);
+  firingPortMapList.put(goName, "", "", goName);
+  firingPortMapList.put(dataName, "", "", dataName);
+  firingPortMapList.put(doneName, "", "", doneName);
+  firingPortMapList.put(endName, "", "", endName);
+  ctlerPortMapList.put(endName, "", "", endName);
 
   ctlerSignalList.put(startName, "STD_LOGIC", startName, startName);
   firingSignalList.put(startName, "STD_LOGIC", startName, startName);
@@ -1322,8 +1322,8 @@ void StructTarget :: registerAndMerge(VHDLCluster* cl) {
   VHDLPortList* masterPortList = new VHDLPortList;
   VHDLGenericList* masterGenericList = new VHDLGenericList;
   VHDLSignalList* masterSignalList = new VHDLSignalList;
-  VHDLPortMapList* masterPortMapList = new VHDLPortMapList;
-  VHDLGenericMapList* masterGenericMapList = new VHDLGenericMapList;
+  VHDLPortList* masterPortMapList = new VHDLPortList;
+  VHDLGenericList* masterGenericMapList = new VHDLGenericList;
 
   VHDLFiringListIter nextFiring(*(cl->firingList));
   VHDLFiring* fi;
@@ -1349,17 +1349,17 @@ void StructTarget :: registerAndMerge(VHDLCluster* cl) {
       newSignal = si->newCopy();
       masterSignalList->put(*newSignal);
     }
-    VHDLPortMapListIter nextPortMap(*(fi->portMapList));
-    VHDLPortMap* pm;
+    VHDLPortListIter nextPortMap(*(fi->portMapList));
+    VHDLPort* pm;
     while ((pm = nextPortMap++) != 0) {
-      VHDLPortMap* newPortMap = new VHDLPortMap;
+      VHDLPort* newPortMap = new VHDLPort;
       newPortMap = pm->newCopy();
       masterPortMapList->put(*newPortMap);
     }
-    VHDLGenericMapListIter nextGenericMap(*(fi->genericMapList));
-    VHDLGenericMap* gm;
+    VHDLGenericListIter nextGenericMap(*(fi->genericMapList));
+    VHDLGeneric* gm;
     while ((gm = nextGenericMap++) != 0) {
-      VHDLGenericMap* newGenericMap = new VHDLGenericMap;
+      VHDLGeneric* newGenericMap = new VHDLGeneric;
       newGenericMap = gm->newCopy();
       masterGenericMapList->put(*newGenericMap);
     }
@@ -1649,7 +1649,7 @@ void StructTarget :: toggleClock(const char* clock) {
 		<< "system_clock'event and system_clock = TRUE;\n";
     ctlerAction << clock << " <= FALSE;\n";
     ctlerPortList.put(clock, "OUT", "boolean");
-    ctlerPortMapList.put(clock, clock);
+    ctlerPortMapList.put(clock, "", "", clock);
     ctlerSignalList.put(clock, "boolean", "", "");
   }
 }
@@ -1664,7 +1664,7 @@ void StructTarget :: assertClock(const char* clock) {
 		<< "system_clock'event and system_clock = TRUE;\n";
     ctlerAction << clock << " <= TRUE;\n";
     ctlerPortList.put(clock, "OUT", "boolean");
-    ctlerPortMapList.put(clock, clock);
+    ctlerPortMapList.put(clock, "", "", clock);
     ctlerSignalList.put(clock, "boolean", "", "");
   }
 }
