@@ -28,7 +28,7 @@
 
 
 #######################################################################
-#### AsRectangle
+#### Rectangle
 #
 # The shape of rectangular items. An item with this shape has
 # four coordinates, being the left, top, right, and bottom
@@ -69,7 +69,7 @@
 # <li><a href="../internals/shapes.html">Shape classes</a>.
 # </ul>
 #
-class ::tycho::AsRectangle {
+class ::tycho::Rectangle {
     inherit ::tycho::Shape
 
     ###################################################################
@@ -130,7 +130,7 @@ class ::tycho::AsRectangle {
 # Return the value of an aspect. Valid aspects are any
 # of the eight compass points and "c" or "center."
 #
-body ::tycho::AsRectangle::aspect {id canvas slate args} {
+body ::tycho::Rectangle::aspect {id canvas slate args} {
     if { $args == "" } {
 	return {c n s e w ne nw se sw}
     } else {
@@ -148,7 +148,7 @@ body ::tycho::AsRectangle::aspect {id canvas slate args} {
 # FIXME: This is _very_ slow. Try caching grapples and composites
 # somewhere and using cached objects.
 #
-body ::tycho::AsRectangle::grapple {id canvas slate interactor args} {
+body ::tycho::Rectangle::grapple {id canvas slate interactor args} {
     getflag ghost args
 
     # If the interactor argument is null, remove an existing
@@ -248,7 +248,7 @@ body ::tycho::AsRectangle::grapple {id canvas slate interactor args} {
 # value -- for example, if the "e" (east) aspect is specified, it
 # is moved only by the _x_ amount.
 #
-body ::tycho::AsRectangle::reshape {id canvas slate x y args} {
+body ::tycho::Rectangle::reshape {id canvas slate x y args} {
 
     # Get the current values of the four main aspects
     assign w n e s [$slate region $id]
@@ -281,7 +281,7 @@ body ::tycho::AsRectangle::reshape {id canvas slate x y args} {
 # make the drag as fast as possible. If and when the Tcl compiler
 # runs, this strategy may no longer be necessary.
 #
-body ::tycho::AsRectangle::reshapeclick {id canvas slate x y args} {
+body ::tycho::Rectangle::reshapeclick {id canvas slate x y args} {
     getflag ghost args
 
     # Remember how I am now.
@@ -319,7 +319,7 @@ body ::tycho::AsRectangle::reshapeclick {id canvas slate x y args} {
 #######################################################################
 #### reshapedrag
 #
-body ::tycho::AsRectangle::reshapedrag {id canvas slate x y} {
+body ::tycho::Rectangle::reshapedrag {id canvas slate x y} {
     # Get delta coordinates
     set deltaX [expr $x - $scratch($id.prevX)]
     set deltaY [expr $y - $scratch($id.prevY)]
@@ -344,7 +344,7 @@ body ::tycho::AsRectangle::reshapedrag {id canvas slate x y} {
 #######################################################################
 #### reshaperelease
 #
-body ::tycho::AsRectangle::reshaperelease {id canvas slate x y} {
+body ::tycho::Rectangle::reshaperelease {id canvas slate x y} {
     # If there's a ghost, reshape the picture to its shape
     # and then delete the ghost.
     if { [::info exists scratch($id.ghost)] } {
