@@ -62,6 +62,8 @@ DEStopTimer.pl \
 DESwitch.pl \
 DESynchronize.pl \
 DETestLevel.pl \
+DETimeout.pl \
+DETimeoutStar.pl \
 DETimer.pl \
 DEUDCounter.pl \
 DEUnPacketize.pl \
