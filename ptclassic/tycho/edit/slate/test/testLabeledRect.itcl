@@ -122,8 +122,7 @@ foreach {opt val} {-fill green -outline yellow -width 2} {
 	.s itemconfigure $f $opt $val
         .s itemcget [.s primary $f] $opt
     } $val
-    update idletasks
-    after $SHORTTIME
+    _update
 }
  
 #######################################################################

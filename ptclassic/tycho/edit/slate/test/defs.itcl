@@ -31,6 +31,17 @@
 #######################################################################
 
 ############################################################################
+#### Define a proc that can be used to create a new canvas
+#
+proc _icanvas {} {
+    catch {delete object .s}
+    ::tycho::icanvas .s
+    pack .s
+    wm deiconify .
+    raise .
+}
+
+############################################################################
 #### Define a proc that can be used to create a new slate
 #
 proc _slate {} {

@@ -84,8 +84,7 @@ foreach a {n s e w nw sw ne se c} p {n s e w nw sw ne se center} {
         .s itemconfigure $f -textanchor $a
         .s component $f label itemcget -anchor
     } $p
-    update
-    after $SHORTTIME
+    _update
 }
 
 _item -text Bar
@@ -95,8 +94,7 @@ foreach a {n s e w nw sw ne se c} p {s n w e sw nw se ne n} {
         .s itemconfigure $f -textanchor $a
         .s component $f label itemcget -anchor
     } $p
-    update
-    after $SHORTTIME
+    _update
 }
 
 #######################################################################
