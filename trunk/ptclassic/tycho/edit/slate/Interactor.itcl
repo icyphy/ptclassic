@@ -33,211 +33,280 @@
 #
 class ::tycho::Interactor {
 
-    ## button
-    #
+    constructor {} {}
+    destructor {}
+
+
+    ###################################################################
+    ####                            options                        ####
+
     # The button number to switch on events. DO NOT change after
     # the interactor has been bound.
     #
     # FIXME: Check that the interactor is not bound (how?).
-    #
     public variable button 1
 
-
-    ## modifiers
-    #
     # A list of event modifiers. DO NOT change after
     # the interactor has been bound.
     #
     # FIXME: Check that the interactor is not bound (how?).
-    #
     public variable modifiers {}
 
-
-    ## target
-    #
-    # The picture that this interactor is currently operating on.
-    # This is a public variable to make it easier to set up scripts
-    # to chain interactors together.
-    #
-    public variable target "" {
-	if { $target == "" } {
-	    if { $sameproxy } {
-		set targetproxy "" ;# should this always be done?
-	    }
-	} else {
-	    if { $sameproxy } {
-		set targetproxy $target
-	    } else {
-		$targetproxy configure -target $target
-	    }
-	}
-    }
-
-
-    ## targetproxy
-    #
-    # The interactor to which behavior oeprations are cascadeed.
-    # If there is only one interactor, then this variable must be
-    # the same as _target_.
-    #
-    # The _sameproxy_ flag indicates whether this variable is the
-    # is the same as _target_.
-    #
-    private variable sameproxy 1
-    public  variable targetproxy "" {
-	if { $targetproxy == "" } {
-	    set sameproxy 1
-	} else {
-	    set sameproxy 0
-	}
-    }
-
-
-    ## activatecommand
-    #
-    # A script used to customise the interaction sequence. If not null,
-    # it is executed at the beginning of the interaction sequence. It
+    # A script executed at the beginning of the interaction sequence. It
     # is typically used to set target parameters or to chain interactors.
-    #
-    # NOTE: The activate{} method of each interactor _must_ check this
-    # variable and execute it if it is not NULL.
-    #
     public variable activatecommand {}
 
-
-    ## deactivatecommand
-    #
-    # A script used to customise the interaction sequence. If not null,
-    # it is executed at the end of the interaction sequence. It is useful
-    # for assigning objects created during an interaction to variables,
-    # and other clean-up stuff.
-    #
-    # NOTE: The deactivate{} method of each interactor _must_ check this
-    # variable and execute it if it is not NULL.
-    #
+    # A script executed at the end of the interaction sequence. It is
+    # useful for assigning objects created during an interaction to
+    # variables, and other clean-up stuff.
     public variable deactivatecommand {}
 
-
-    ## dragcommand
-    #
-    # A script used to customise the interaction sequence. If not null,
-    # it is executed at the completion of the interactor's drag
+    # A script executed at the completion of the interactor's drag
     # method. This is useful for performing some actions on
     # an object when it is moved, etc.
-    #
-    # NOTE: The drag{} method of each interactor _must_ check this
-    # variable and execute it if it is not NULL.
-    #
     public variable dragcommand {}
 
 
     ###################################################################
-    ## Constructor and destuctor
+    ####                         public methods                    ####
+
+    ## ``Bind'' an interactor to a picture.
+    method bind {t args} {}
+
+    # Forward interaction commands to a proxy.
+    method cascade {that} {}
+
+    # Set or get the target object
+    method target {args} {}
+
+    # Remove a binding from the interactor to the target.
+    method unbind {t} {}
+
+    # Stop cascading interaction commands to a delegate object.
+    method uncascade {} {}
 
 
-    ## constructor
-    #
-    # (None.)
-    #
+    ###################################################################
+    ####                   protected methods                       ####
 
-    ## destructor
-    #
-    # (None.)
-    ##
+    # Set up bindings to intercept events that I need from now on.
+    protected method activate {args} {}
+
+    # Start the interaction sequence on the target
+    protected method click {x y} {}
+
+    # Continue the interaction sequence: start a new phase
+    protected method continue {} {}
+
+    # Get the current picture on the slate.
+    protected method current {} {}
+
+    # Remove my bindings
+    protected method deactivate {args} {}
+
+    # Continue the interaction sequence: move the mouse
+    protected method drag {x y} {}
+
+    # Terminate the interaction sequence
+    protected method release {} {}
+
+    # Execute a script
+    protected method execute {script x y} {}
+
+    # Set or get the proxy object
+    protected method proxy {args} {}
 
 
-    ## slate, canvas
-    #
-    # The slate on which this interactor resides and operates.
-    #
-    protected variable slate  ""
+    ###################################################################
+    ####                   protected variables                     ####
+
+    # The canvas on which this interactor resides
     protected variable canvas ""
 
+    # Set if the proxy and the target are the same
+    private variable chained 0
 
-    ## bind [-button button] [-modifier modifier] target
-    #
-    # Procedure to ``bind'' an interactor class to a picture.
-    # This creates a binding on the specified picture so that,
-    # when the appropriate event occurs, the interactor is
-    # is ``activated'' on the target.
-    #
-    proc bind {args} {abstractProc Interactor bind}
+    # The slate on which this interactor resides
+    protected variable slate ""
 
+    # The tag to which this interactor is currently bound
+    protected variable tag ""
 
-    ## unbind target
-    #
-    # Remove a binding from the interactor to the target. In other
-    # disable potential interactions. This is partciularly needed
-    # when using interactors that bind to a slate rather to an
-    # individual picture: all picture-specific interactions should be
-    # unbound to prevent bizarre interactions in case of clicks that
-    # match both a picture and the slate.
-    #
-    proc unbind {t} {abstractProc Interactor unbind}
+    # The picture to operate on
+    protected variable target ""
+
+    # The picture to forward interaction commands to
+    protected variable proxy ""
+}
 
 
-    ## cascade proxy
-    #
-    # Forward interaction commands to a delegate object.
-    #
-    method cascade {proxy} {
-	$this configure -targetproxy $proxy
-	$proxy configure -target $target
-    }
+#######################################################################
+#### activate
+#
+# Make myself active. In other words, set up bindings to intercept
+# events that I need from now on. One of the bindings is obliged to
+# call deactivate to remove the bindings.
+#
+body ::tycho::Interactor::activate {args} {
+    abstractMethod Interactor activate
+}
 
 
-    ## uncascade
-    #
-    # Stop cascading interaction commands to a delegate object.
-    #
-    method uncascade {} {
-	$this configure -targetproxy ""
-    }
+#######################################################################
+#### bind target
+#
+# ``Bind'' an interactor to a picture.
+# This creates a binding on the specified picture so that,
+# when the appropriate event occurs, the interactor is
+# is ``activated'' on the target.
+#
+body ::tycho::Interactor::bind {t args} {
+    abstractMethod Interactor bind
+}
 
 
-    ## activate
-    #
-    # Make myself active. In other words, set up bindings to intercept
-    # events that I need from now on. One of the bindings is obliged to
-    # call deactivate to remove the bindings.
-    #
-    method activate {args} {abstractMethod Interactor activate}
+#######################################################################
+#### cascade proxy
+#
+# Forward interaction commands to a proxy.
+#
+body ::tycho::Interactor::cascade {that} {
+    $this proxy  $that
+    $that target $target
+}
 
 
-    ## deactivate
-    #
-    # Make myself inactive. In other words, remove my bindings.
-    #
-    method deactivate {args} {abstractMethod Interactor deactivate}
-
-
-    ## click, drag, continue, release
-    #
-    # The behavior interface. By default, interaction commands are
-    # just forwarded on to the target proxy.
-    #
-    method click {x y} {
-	$targetproxy click $x $y
-    }
-
-    method drag {x y} {
-	$targetproxy drag $x $y
-	if { $dragcommand != "" } {
-	    uplevel #0 $dragcommand
-	}
-    }
-
-    method continue {} {
-	$targetproxy continue
-    }
-
-    method release {} {
-	$targetproxy release
+#######################################################################
+#### click
+#
+body ::tycho::Interactor::click {x y} {
+    if { $proxy != "" } {
+	@scope [$proxy info class] "$proxy click $x $y"
+    } else {
+	$target click $x $y
     }
 }
 
 
-## eventcode type [-button button] [-key key] [-modifiers modifiers]
+#######################################################################
+#### continue
+#
+body ::tycho::Interactor::continue {} {
+    if { $proxy != "" } {
+	@scope [$proxy info class] "$proxy continue"
+    } else {
+	$target continue
+    }
+}
+
+
+#######################################################################
+#### deactivate
+#
+# Make myself inactive. In other words, remove my bindings.
+#
+body ::tycho::Interactor::deactivate {args} {
+    abstractMethod Interactor deactivate
+}
+
+
+#######################################################################
+#### drag
+#
+body ::tycho::Interactor::drag {x y} {
+    if { $proxy != "" } {
+	@scope [$proxy info class] "$proxy drag $x $y"
+    } else {
+	$target drag $x $y
+    }
+    execute $dragcommand $x $y
+}
+
+
+#######################################################################
+#### execute
+# Execute a script, by applying it to the interactor, the target, and
+# the current x and y coordinates.
+#
+body ::tycho::Interactor::execute {script x y} {
+    if { $script != "" } {
+	uplevel \#0 apply [list $script] $this $target $x $y
+    }
+}
+
+
+#######################################################################
+#### proxy
+#
+# Set or get the interactor to which interaction commands
+# are forwarded. If null, commands are sent straight to the target.
+#
+body ::tycho::Interactor::proxy {args} {
+    if { $args == "" } {
+	return $proxy
+    } else {
+	set proxy [lindex $args 0]
+    }
+}
+
+
+#######################################################################
+#### release
+#
+body ::tycho::Interactor::release {} {
+    if { $proxy != "" } {
+	@scope [$proxy info class] "$proxy release"
+    } else {
+	$target release
+    }
+}
+
+#######################################################################
+#### target
+#
+# Set or get the picture that this interactor is currently
+# operating on.
+#
+body ::tycho::Interactor::target {args} {
+    if { $args == "" } {
+	return $target
+    } else {
+	set target [lindex $args 0]
+	if { $proxy != "" } {
+	    $proxy target $target
+	}
+    }
+}
+
+
+#######################################################################
+#### unbind target
+#
+# Remove a binding from the interactor to the target. In other
+# disable potential interactions. This is partciularly needed
+# when using interactors that bind to a slate rather to an
+# individual picture: all picture-specific interactions should be
+# unbound to prevent bizarre interactions in case of clicks that
+# match both a picture and the slate.
+#
+body ::tycho::Interactor::unbind {t} {
+    abstractMethod Interactor unbind
+}
+
+
+#######################################################################
+#### uncascade
+#
+# Stop cascading interaction commands to a delegate object.
+#
+body ::tycho::Interactor::uncascade {} {
+    $this proxy {}
+}
+
+
+
+#######################################################################
+#### eventcode type [-button button] [-key key] [-modifiers modifiers]
 #
 # Translate an event specification into a Tk event code
 #

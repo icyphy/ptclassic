@@ -29,15 +29,10 @@
 
 ## Follower
 #
-# The simplest interactor: behaviour follow the mouse.
+# The simplest interactor: follow the mouse.
 #
 class ::tycho::Follower {
     inherit ::tycho::Interactor
-
-    #####
-    #
-    public variable tag ""
-
 
     ## constructor
     #
@@ -49,93 +44,111 @@ class ::tycho::Follower {
     }
 
 
-    ## bind target
-    #
-    method bind {t args} {
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Bind the interactor to a picture or tag
+    method bind {t args} {}
+
+    ## Remove the binding of an interactor to a picture or tag
+    method unbind {t} {}
+
+
+    ###################################################################
+    ####                        protected methods                  ####
+
+    # Attach the interactor to the current picture
+    protected method activate {t x y} {}
+
+    # Remove the interactor from the current picture
+    protected method deactivate {} {}
+}
+
+
+## activate target x y
+#
+body ::tycho::Follower::activate {t x y} {
+
+    # Remember the tag/object, for use in deactivate
+    set tag $t
+
+    # Set the target. The client can modify its options later
+    # with -activatecommand if desired. If the target argument is
+    # in fact a tag, get the current picture from the slate.
+    if { [isObject $t] } {
+	target $t
+    } else {
+	target [current]
+
+	#
+	# It is possible with the Tk canvas (version 4.0 to click on
+	# an item, and, by the time the canvas is asked for the current
+	# item, for that to become void. (Don't ask me why this happens,
+	# I just know that it does.) To work around this, check whether
+	# the target is null, and if it is, just return.
+	#
+	# if { $target == "" } {
+	#		return
+	# }
+    }
+
+    # Set up the bindings. Note: the bindings are set to the tag,
+    # not to the current object.
+    foreach b $button {
+	$slate bind $tag \
+		[eventcode Motion -button $b ] \
+		[list @scope [info class] "$this drag %x %y; update idletasks"]
+	$slate bind $tag \
+		[eventcode Release -button $b ] \
+		[list @scope [info class] "$this release; $this deactivate"]
+    }
+
+    # If there's a proxy, tell it about the current target
+    if { $proxy != "" } {
+	$proxy target $target
+    }
+
+    # Execute the user-specified activation command
+    execute $activatecommand $x $y
+
+    # Start the interaction sequence
+    click $x $y
+}
+
+
+## bind target
+#
+body ::tycho::Follower::bind {t args} {
+    foreach b $button {
 	$slate bind $t \
-		[eventcode Press -button $button ] \
-		"$this activate $t %x %y"
+		[eventcode Press -button $b ] \
+		[list @scope [info class] "$this activate $t %x %y"]
+    }
+}
+
+
+## deactivate
+#
+body ::tycho::Follower::deactivate {} {
+    # Remove bindings from the current tag
+    foreach b $button {
+	$slate bind $tag \
+		[eventcode Motion -button $b] {}
+	$slate bind $tag \
+		[eventcode Release -button $b] {}
     }
 
+    # Execute the user-specified de-activation command
+    if { $deactivatecommand != "" } {
+	uplevel #0 apply [list $deactivatecommand] $target
+    }
+}
 
-    ## unbind target
-    #
-    method unbind {t} {
+## unbind target
+#
+body ::tycho::Follower::unbind {t} {
+    foreach b $button {
 	$slate bind $t \
-		[eventcode Press -button $button ] {}
-    }
-
-
-    ## activate target x y
-    #
-    method activate {t x y} {
-
-	#
-	# Set the target. The client can modify its options later
-	# with -activatecommand if desired. If the target argument is
-	# in fact a tag, get the current picture from the slate.
-	#
-	if { [isObject $t] } {
-	    set tag $t
-	    configure -target $t
-	} else {
-	    set tag $t
-	    configure -target [$slate find withtag current]
-
-	    #
-	    # It is possible with the Tk canvas (version 4.0 to click on
-	    # an item, and, by the time the canvas is asked for the current
-	    # item, for that to become void. (Don't ask me why this happens,
-	    # I just know that it does.) To work around this, check whether
-	    # the target is null, and if it is, just return.
-	    #
-	    if { $target == "" } {
-		return
-	    }
-	}
-
-	#
-	# Set up the bindings. Note: the bindings are set to the tag,
-	# not to the target object.
-	# 
-	$slate bind $tag \
-		[eventcode Motion -button $button ] \
-		"$this drag %x %y; update idletasks"
-
-	$slate bind $tag \
-		[eventcode Release -button $button ] \
-		"$this release; $this deactivate"
-
-	#
-	# Execute the user-specified activation command
-	#
-	if { $activatecommand != "" } {
-	    uplevel #0 $activatecommand
-	}
-
-	#
-	# Start the interaction sequence
-	#
-	click $x $y
-    }
-
-
-    ## deactivate
-    #
-    method deactivate {} {
-	$slate bind $tag \
-		[eventcode Motion  -button $button ] {}
-	$slate bind $tag \
-		[eventcode Release -button $button ] {}
-
-	set tag ""
-	set target ""
-
-	#
-	# Execute the user-specified de-activation command
-	#
-	if { $deactivatecommand != "" } {
-	    uplevel #0 $deactivatecommand
-	}
+		[eventcode Press -button $b] {}
     }
 }
