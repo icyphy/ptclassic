@@ -2,17 +2,28 @@
 .H1 "Writing Code Generation Stars" 
 .pp
 Code generation stars are very similar to the C++ simulation stars.
-The main differences is that the initialization (\fBsetup()\fR), run
-time (\fBgo()\fR ), and termination (\fBwrapup()\fR) methods generate
+The main differences is that the initialization (\c
+.c setup() ),
+run time (\c
+.c go() ),
+and termination (\c
+.c wrapup() )
+methods generate
 code to be compiled and executed later.  Additionally, code generation
-stars have two more methods, called \fBinitCode()\fR and \fBexecTime()\fR.
+stars have two more methods, called
+.c initCode() and
+.c execTime() .
 .Id "initCode, method"
 .Id "execTime, method"
 .pp
-The setup() method is called before the schedule is generated and
+The
+.c setup()
+method is called before the schedule is generated and
 before any memory is allocated.  In this method, a star writer can
 alter a array state buffer size which can then be properly allocated
-and automatically initialized.  The initCode() method of a star is called
+and automatically initialized.  The
+.c initCode()
+method of a star is called
 after the the static schedule has been generate and before the schedule is
 fired. This method is used to generate the code outside of the main
 loop such as initialization code and procedure declaration code. 
@@ -20,13 +31,16 @@ To generate startup code, use the initCode method, NOT the setup method,
 since setup is called before scheduling and memory allocation.  The
 main use of the setup method, as in SDF, is to tell the scheduler
 if more than one sample is to be accessed from a porthole with the
-setSDFParams call.
+.c setSDFParams
+call.
 .pp
 The go function is used to generate the main loop code for the star.
 Finally, the wrapup function is used to generate the code after the
 main loop.
 .pp
-The execTime() method returns an integer specifying the relative time
+The
+.c execTime()
+method returns an integer specifying the relative time
 to execute the main loop code of a code generation star.  These numbers
 have meaning relative to one another and are used by the parallel
 schedulers.  In the assembly code generation domains, the integer
@@ -35,33 +49,36 @@ cycles. The better the execTime estimates are for each star, the more
 efficient the parallel schedule becomes.
 .pp
 .Id "CGStar, class"
-The \fBCGStar\fR class is the base class for all code generation stars,
+The
+.c CGStar
+class is the base class for all code generation stars,
 such as C-code generation stars and assembly code generation stars. In
 this section, we will explain the common features  that the CGStar
 class provides for all derivative code generation stars.
 .pp
 As a simple example to see how code generation stars are written, let's
-write a adder star for the C code generation domain.  The \fBdefstar\fP
-is almost identical as for a simulation star:
+write a adder star for the C code generation domain.  The
+.c defstar
+is almost the same as for a simulation star:
 .(c
 defstar {
-	name {Add}
-	domain {CGC}
-	desc { Output the sum of the inputs, as a floating value.  }
-	author { J. Pino }
-	input {
-		name {input1}
-		type {float}
-	}
-	input {
-		name {input2}
-		type {float}
-	}
-	output {
-		name {output}
-		type {float}
-	}
-	...
+    name {Add}
+    domain {CGC}
+    desc { Output the sum of the inputs, as a floating value.  }
+    author { J. Pino }
+    input {
+        name {input1}
+        type {float}
+    }
+    input {
+        name {input2}
+        type {float}
+    }
+    output {
+        name {output}
+        type {float}
+    }
+    ...
 .)c
 .H2 "Codeblocks"
 .Id "Codeblock"
@@ -77,13 +94,15 @@ the CGC chapter.
 Codeblocks are implemented as protected static class members (e.g. there
 is one instance of a codeblock for the entire class).  Since they are
 protected, codeblocks from one star class can be used from a derived
-star.  The \fBcodeblock\fR directive defines a block of code
+star.  The
+.c codeblock
+directive defines a block of code
 with an associated identifying name ("addCB" in this case).
 .(c
-	codeblock (addCB) {
-	/* output = input1 + input2 */
-	$ref(output) = $ref(input1) + $ref(input2);
-	}
+    codeblock (addCB) {
+    /* output = input1 + input2 */
+    $ref(output) = $ref(input1) + $ref(input2);
+    }
 .)c
 .pp
 Special care should be given to codeblock specification.  Within each
@@ -91,14 +110,17 @@ line, spaces, tabs, and new line characters are important because they
 are preserved.  For this reason, the brackets "{ }" should not be on
 the same lines with the code.  Had "addCB" been defined as follows:
 .(c
-	codeblock (addCB) {	/* output = input1 + input2 */
-	$ref(output) = $ref(input1) + $ref(input2); }
+    codeblock (addCB) {    /* output = input1 + input2 */
+    $ref(output) = $ref(input1) + $ref(input2); }
 .)c
-The line \fB$ref(output) = $ref(input1) + $ref(input2);\fR
-would be lost! This is because anything preceding the closing "}" on
-the same line is discarded by the preprocessor (ptlang).  Secondly, the
-spaces and tabs between the opening "{" and the first non-space
-character will be ignored.
+the line
+.(c
+ref(output) = $ref(input1) + $ref(input2);
+.)c
+would be lost! This is because anything preceding the closing "}" on the
+same line is discarded by the preprocessor (\fIptlang\fR).  Secondly, the
+spaces and tabs between the opening "{" and the first non-space character
+will be ignored.
 .pp
 The first definition of the "addCB" codeblock is translated by the
 preprocessor (ptlang) into a definition of a static public member in
@@ -106,25 +128,25 @@ the ".h" file:
 .(c
 class CGCAdd : public CGCStar
 {
-	...
-	static CodeBlock addCB;
-	...
+    ...
+    static CodeBlock addCB;
+    ...
 }
 .)c
 An associated constructor call will be generated in the ".cc" file:
 .(c
 CodeBlock CGCAdd :: addCB (
-"	/* output = input1 + input2 */\en"
-"	$ref(output) = $ref(input1) + $ref(input2);\en"
+"    /* output = input1 + input2 */\en"
+"    $ref(output) = $ref(input1) + $ref(input2);\en"
 );
 .)c
 The argument is a single string, divided into lines for convenience.
 .pp
 The following will complete our definition of the add star:
 .(c
-	go {
-		addCode(addCB);
-	}
+    go {
+        addCode(addCB);
+    }
 }
 .)c
 .pp
@@ -135,19 +157,23 @@ The star just defined is a very simple star.  Typical code
 generation stars will define many codeblocks.  Conditional code
 generation is easily accomplished, as is done in the following example:
 .(c
-	go {
-		if (parameter == YES)
-			addCode(yesblock);
-		else
-			addCode(noblock);
-	}
+    go {
+        if (parameter == YES)
+            addCode(yesblock);
+        else
+            addCode(noblock);
+    }
 .)c
 .pp
-So far, we have used the \fBaddCode()\fR method to generate the code
+So far, we have used the
+.c addCode()
+method to generate the code
 inside the main loop body. In the assembly language domains, addCode
 can be called in the initCode and wrapup methods, to place code before
 or after the main loop respectively.  In all of the code generation
-domains, we can use the \fBaddProcedure()\fR method to generate
+domains, we can use the
+.c addProcedure()
+method to generate
 declarations outside of the main body.  Refer to the Target:Code Streams
 section for documentation on the addCode and addProcedure methods.
 .Ir "addCode, method"
@@ -167,20 +193,30 @@ already been defined in the generated code.  For star writers, a set of
 macros to access the global resources is provided. The macros are
 expanded in a language or target specific manner after the target has
 allocated the resources properly.  In this section, we discuss the
-macros defined in the CGStar class.
+macros defined in the
+.c CGStar
+class.
 .UH "$ref(name):"
 .Id "macro, ref"
 Returns a reference to a state or a port. If the argument, name, refers
-to a port, it is functionally equivalent to \fBname%0\fR operator in
+to a port, it is functionally equivalent to the
+.c "name%0"
+operator in
 the SDF simulation stars.  If a star has a multi-porthole, say
-\fBinput\fR, the first real porthole is \fBinput#1\fR.  To access the
-first porthole, we use \fB$ref(input#1)\fR or
-\fB$ref(input#internal_state)\fR where \fBinternal_state\fR has the
-current value, 1.
+\fIinput\fR, the first real porthole is \fIinput#1\fR.  To access the
+first porthole, we use
+.c "$ref(input#1)"
+or
+.c "$ref(input#internal_state)"
+where
+.c internal_state
+is the
+name of a state that has the current value, 1.
 .UH "$ref(name,offset):"
 Returns a reference to an array state or a port with an offset that is
-not negative.  For a port, it is functionally equivalent to \fBname%offset\fR
-operator in SDF simulation stars. 
+not negative.  For a port, it is functionally equivalent to
+.c name%offset
+in SDF simulation stars. 
 .UH "$val(state-name):"
 .Ir "macro, val"
 Returns the current value of the state. If the state is an array state,
@@ -205,21 +241,21 @@ scopes.  As an example, we show some parts of ptlang file of the
 .c CGCPrinter
 star.
 .(c
-	initCode {
-		...
-		StringList s;
+    initCode {
+        ...
+        StringList s;
                 s << "    FILE* $starSymbol(fp);";
                 addDeclaration(s);
                 addInclude("<stdio.h>");
                 addCode(openfile);
-           	... 
+               ... 
         }
-	codeblock (openfile) {
+    codeblock (openfile) {
     if(!($starSymbol(fp)=fopen("$val(fileName)","w"))) {
         fprintf(stderr,"ERROR: cannot open output file for Printer star.\n");
         exit(1);
     }
-	}
+    }
 .)c
 The file pointer \fBfp\fR for a star instance should be unique
 globally, and the $starSymbol macro guarantees the uniqueness. Within
@@ -235,7 +271,9 @@ created and initialized once in the generated code. The macro
 sharedSymbol does not provide the method to generate the code, but does
 provide the method to create a label for the code.  To generate the
 code only once, refer to Target:Code Streams section.  A example where
-a shared symbol is used is in \fBCGCPCM\fR star.
+a shared symbol is used is in
+.c CGCPCM
+star.
 .(c
     codeblock (sharedDeclarations)
     {
@@ -265,7 +303,7 @@ a shared symbol is used is in \fBCGCPCM\fR star.
         }
     }
     initCode {
-	...
+    ...
         if (addGlobal(sharedDeclarations, "$sharedSymbol(PCM,PCM)"))
             addCode(sharedInit);
     }
@@ -275,12 +313,16 @@ from linear to mu-law PCM encoder. The conversion table is named
 \fBoffset\fR , and belongs to the \fBPCM\fR class. The conversion
 function is named \fBmulaw\fR, and belongs to the same PCM class. Other
 stars can access that table or function by saying
-\fB$sharedSymbol(PCM,offset)\fR or \fB$sharedSymbol(PCM,mulaw)\fR.  The
-initCode method, tries to put the sharedDeclarations codeblock into the
+.c "$sharedSymbol(PCM,offset)"
+or
+.c $sharedSymbol(PCM,mulaw) .
+The
+.c initCode
+method tries to put the sharedDeclarations codeblock into the
 global scope (by addGlobal() method in the CGC domain). That code block
 is given a unique label by \fB$sharedSymbol(PCM,PCM)\fR.  If the
 codeblock has not been previously defined, addGlobal returns true, thus
-allowing addCode(sharedInit). If there are more than one instances of
+allowing addCode(sharedInit). If there is more than one instance of
 the PCM star, only one instance will succeed in adding the code.
 .UH "$label(name), $codeblockSymbol(name):"
 .Id "macro, label"
@@ -337,43 +379,46 @@ In principle, blocks communicate with each other through porthole
 connections. In code generation domains, we allocate a buffer for each
 input-output connection by default. There are some stars, however, that
 do not modify data at all. A good, and also ubiquitous, example is a
-\fBFork\fR star. When a Fork star has \fIN\fR outputs, the default
+.c Fork
+star. When a Fork star has \fIN\fR outputs, the default
 behavior is to create \fIN\fR buffers for output connections and copy
 data from input buffer to \fIN\fR output buffers, which is a very
 expensive and silly approach. Therefore, we pay special attention to stars
 displaying this type of behavior.  In the setup method of these stars,
 the \fBforkInit()\fR method is invoked to indicate that the star is a
-Fork-type star.  For example, the \fBCGCFork\fR star is defined as
+Fork-type star.  For example, the
+.c CGCFork
+star is defined as
 .(c
 defstar {
-	name { Fork }
-	domain { CGC }
-	desc { Copy input to all outputs }
-	version { @(#)CGCFork.pl	1.6	11/11/92 }
-	author { E. A. Lee }
-	copyright { 1992 The Regents of the University of California }
-	location { CGC demo library }
-	explanation {
+    name { Fork }
+    domain { CGC }
+    desc { Copy input to all outputs }
+    version { @(#)CGCFork.pl    1.6    11/11/92 }
+    author { E. A. Lee }
+    copyright { 1992 The Regents of the University of California }
+    location { CGC demo library }
+    explanation {
 Each input is copied to every output.  This is done by the way the buffers
 are laid out; no code is required.
-	}
-	input {
-		name {input}
-		type {ANYTYPE}
-	}
-	outmulti {
-		name {output}
-		type {=input}
-	}
-	constructor {
-		noInternalState();
-	}
-	start {
-		forkInit(input,output);
-	}
-	exectime {
-		return 0;
-	}
+    }
+    input {
+        name {input}
+        type {ANYTYPE}
+    }
+    outmulti {
+        name {output}
+        type {=input}
+    }
+    constructor {
+        noInternalState();
+    }
+    start {
+        forkInit(input,output);
+    }
+    exectime {
+        return 0;
+    }
 }
 .)c
 Where possible, code generation domains take advantage of Fork-type
@@ -386,48 +431,55 @@ during the entire execution of the schedule).  Here, forks or delay stars
 that copy inputs to outputs must be used.
 .pp
 .Id "Spread, star"
-Another example of a Fork-Type star is the \fBSpread\fR star. The star
+Another example of a Fork-Type star is the
+.c Spread
+star. The star
 receives \fIN\fR tokens and spreads them to more than one destination.
 Thus, each output buffer may share a subset of its input buffer. We
 call this relationship \fIembedding\fR: the outputs are embedded in the
 input. For example, in the \fBCGCSpread\fR star:
 .Sr Spread CGC
 .(c
-        setup {
-                MPHIter iter(output);
-                CGCPortHole* p;
-                int loc = 0;
-                while ((p = (CGCPortHole*) iter++) != 0) {
-                        input.embed(*p, loc);
-                        loc += p->numXfer();
-                }
+    setup {
+        MPHIter iter(output);
+        CGCPortHole* p;
+        int loc = 0;
+        while ((p = (CGCPortHole*) iter++) != 0) {
+            input.embed(*p, loc);
+            loc += p->numXfer();
         }
+    }
 .)c
 Notice that the output is a multi-porthole. During setup, we express
-how each output is embedded in the input starting at \fIloc\fR
-location.  At the buffer allocation stage, we do not allocate buffers for
+how each output is embedded in the input starting at location \fIloc\fR.
+At the buffer allocation stage, we do not allocate buffers for
 the outputs, but instead reuse the input buffer for all outputs. This
 feature, however, has not yet been implemented in the assembly
 language generation domains. 
 .pp
 .Id "Collect, star"
 .Sr Collect CGC
-A \fBCollect\fR star embeds its inputs in its output buffer:
+A
+.c Collect
+star embeds its inputs in its output buffer:
 .(c
-        setup {
-                MPHIter iter(input);
-                CGCPortHole* p;
-                int loc = 0;
-                while ((p = (CGCPortHole*) iter++) != 0) {
-                        output.embed(*p, loc);
-                        loc += p->numXfer();
-                }
+    setup {
+        MPHIter iter(input);
+        CGCPortHole* p;
+        int loc = 0;
+        while ((p = (CGCPortHole*) iter++) != 0) {
+            output.embed(*p, loc);
+            loc += p->numXfer();
         }
+    }
 .)c
 .pp
 .Id "static buffering"
-Other examples of embedded relationships are \fBUpSample\fR and
-\fBDownSample\fR stars. One restriction of embedding, however, is that the
+Other examples of embedded relationships are
+.c UpSample
+and
+.c DownSample
+stars. One restriction of embedding, however, is that the
 embedded buffer must be static. Automatic insertion of Spread and Collect
 stars in multi-processor targets (refer to the target section) guarantees
 static buffering. If there is no delay (ie, no initial token) in the
