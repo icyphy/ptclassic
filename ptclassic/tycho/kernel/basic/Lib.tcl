@@ -102,7 +102,7 @@ namespace ::tycho {
             {::tycho::view TclShell  {-file {%s}}} \
             {Tcl shell}
     ::tycho::File::registerExtensions {} \
-            {::tycho::view ProfileTcl {-file {%s}}} \
+            {::tycho::view ProfileTcl {-file {%s}} Displayer {-toolbar 1}} \
             {Tcl profiler}
 
     if {[uplevel #0 info commands matlab] != {}} {
