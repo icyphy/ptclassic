@@ -91,6 +91,16 @@ but through the global queue in the DE domain.  Since the geodesic
 is a FIFO queue, we can not implement the un-chronological arrival
 of the incoming events if we put the particles into the geodesics.
 Instead, the particles are managed globally in the event queue.
+.pp
+There is a pitfall in managing time stamps. If a float number can
+not be represented by a binary representation, the actaul value used
+inside the computer is non-deterministic. Suppose, two stars generate
+events at time 0.2. Even though the user assumes that these two
+events are simulataneous, sometimes they might not. If simultaneity is
+critical in a given application, it is recommended to 
+use binary-representable numbers
+for time stamps, such as integers. In the future, we may want to restrict the
+precision of numbers to cover this pitfall.
 .H2 "Wormholes"
 .pp
 \fBTime\fR in the \*(DO
