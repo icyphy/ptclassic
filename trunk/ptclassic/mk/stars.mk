@@ -520,7 +520,7 @@ ifdef SDF
 		MATLABENGINE = 1
 	endif
 	ifdef SDFCONTRIB
-		CUSTOM_DIRS += $(SDFDIR)/contrib/stars
+		CUSTOM_DIRS += $(SDFDIR)/contrib/kernel $(SDFDIR)/contrib/stars
 		STARS += $(LIBDIR)/sdfcontribstars.o
 		LIBFILES += $(LIBDIR)/libsdfcontrib.$(LIBSUFFIX)
 		LIBFILES += $(LIBDIR)/libsdfcontribstars.$(LIBSUFFIX)
