@@ -41,9 +41,11 @@ void ivBufClear
 	ARGS((ivBuf* buf));
 void ivBufAddString
 	ARGS((ivBuf* buf, char* s));
+/* Don't provide a prototype for ivBufAddChar, as hppa.cfront can't
+   deal 
 void ivBufAddChar
-	ARGS((ivBuf* buf, char c));
-
+        ARGS((ivBuf* buf, char c));
+*/
 void ivBufDelChar
 	ARGS((ivBuf* buf));
 void ivBufDelWord
