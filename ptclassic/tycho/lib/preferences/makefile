@@ -3,7 +3,7 @@
 # $Id$
 # Makefile Author: Christopher Hylands
 #
-# Copyright (c) 1996-%Q% The Regents of the University of California.
+# Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -45,15 +45,12 @@ ITCL_SRCS =
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =	tclIndex
+MISC_FILES =	tclIndex doc test
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =
+REALCLEAN_STUFF =	tclIndex
 
-DIRS =		
-
-# make checkjunk will not report OPTIONAL_FILES as trash
-OPTIONAL_FILES = doc
+DIRS =		test
 
 all install: tclIndex $(MISC_SRCS)
 

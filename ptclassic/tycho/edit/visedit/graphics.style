@@ -1,11 +1,10 @@
-# -*- mode: tcl -*-
 #
 # $Id$
 #
 # The "graphics" master style-sheet
 #
-configure -title "Graphics settings"
-configure -description {
+modelconfigure -label "Graphics settings"
+modelconfigure -description {
     Settings for the Graphics class.
 }
 

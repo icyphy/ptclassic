@@ -34,32 +34,29 @@
 #######################################################################
 #### Forest
 # A forest is a data structure that includes any number of trees. A
-# tree is a directed acyclic graph with nodes that are either a root or
-# have exactly one parent, and that have any number of children. This
-# class provides methods to build, browse, and edit such a data
-# structure. Data stored on the nodes of the trees are as in the base
-# class <code>Graph</code>. A method is provided to encode the data
-# structure as a list, which can, for example, be written to a file. A
-# method is also provided to convert this list back into a forest.
+# tree is a data structure with nodes that are either a root or have
+# exactly one parent, and that have any number of children. This class
+# provides methods to build, browse, and edit such a data structure.
+# Data stored on the nodes of the trees are arbitrary Tcl strings. A
+# method is provided to encode the data structure as a list, which can,
+# for example, be written to a file. A method is also provided to
+# convert this list back into a forest.
+#
 # <p>
 # Here is an example of how to use the Forest:
 # <tcl><pre>
-#    catch {delete object foo}
-#    ::tycho::Forest foo
-#    foo add a {}
-#    foo add c {} a
-#    foo add d {} a
-#    foo describe
+#     catch {delete object f}
+#     ::tycho::Forest f
+#     f add a aa
+#     f add c cc a
+#     f add d dd a
+#     ::tycho::post [f describe]
 # </pre></tcl>
 # The description that is posted in the last line will be:
-# {{a {} {}} {c {} a} {d {} a}}, which is a list of nodes
-# in the forest.  Each node is a list of three items, the name,
-# contents, and parent of the node.
-# All contents in this case are empty strings.
+# {{a {} {c d} aa} {c a {} cc} {d a {} dd}}.
 # Notice that in this example there is only one tree in the forest.
 #
 class ::tycho::Forest {
-    inherit ::tycho::DirectedAcyclicGraph
 
     constructor {args} {}
     destructor {}
@@ -67,14 +64,59 @@ class ::tycho::Forest {
     ###################################################################
     ####                         public methods                    ####
 
-    # Add a node to the forest.
-    method add {nodename contents {parents {}}}
+    # Add a leaf node to a tree in the forest.
+    method add {nodename contents {parent {}}}
 
-    # Trigger an error (disabling base class methods).
-    method addArc {parent child}
+    # Return the list of children of a node.
+    method children {nodename}
 
-    # Return a list of node names in depth-first sort order.
-    method depthFirstSort {{roots {}}}
+    # Remove all nodes from the forest.
+    method clear {}
+
+    # Return the contents of a cell of the forest.
+    method contents {nodename}
+
+    # Delete a node from the forest.
+    method delete {nodename}
+
+    # Return a list that describes the forest.
+    method describe {}
+
+    # Initialize the forest from a description
+    method init {description}
+
+    # Return the parent of a node.
+    method parent {nodename}
+
+    # Return a list of names of the roots of the trees in the forest.
+    method roots {}
+
+    ###################################################################
+    ####                   protected methods                       ####
+
+    # Verify that nodename is in the forest; flag an error if not.
+    protected method verify {nodename}
+
+    ###################################################################
+    ####                   private methods                         ####
+
+    # Return a list describing the subtree with the given root.
+    private method describetree {root}
+
+    ###################################################################
+    ####                   private variables                       ####
+
+    # List of the names of the roots of the trees in the forest.
+    private variable rootnames {}
+
+    # Array storing the contents of each node of the tree.
+    private variable contentsstring
+
+    # Array storing the parent name for each node of the tree.
+    private variable parentname
+
+    # Array storing the list of children for each node.
+    private variable childrennames
 }
 
     ###################################################################
@@ -83,40 +125,180 @@ class ::tycho::Forest {
 
 #######################################################################
 #### add
-# Add a node to a tree in the forest.  Only one parent can be specified.
+# Add a leaf node to a tree in the forest.
+# A leaf node is simply one with no children.
 #
-body ::tycho::Forest::add {nodename contents {parents {}}} {
-    if {[llength $parents] > 1} {
-        error "Specified multiple parents when only one is allowed: $parents"
+body ::tycho::Forest::add {nodename contents {parent {}}} {
+    if {$parent == {}} {
+        lappend rootnames $nodename
+    } {
+        verify $parent
+        lappend childrennames($parent) $nodename
     }
-    ::tycho::Graph::add $nodename $contents $parents
+    set parentname($nodename) $parent
+    set childrennames($nodename) {}
+    set contentsstring($nodename) $contents
 }
 
 #######################################################################
-#### addArc
-# Trigger an error (disabling base class methods).
+#### children
+# Return the list of children of a node.
 #
-body ::tycho::Forest::addArc {parent child} {
-    error "Cannot add arcs to a forest."
+body ::tycho::Forest::children {nodename} {
+    verify $nodename
+    return $childrennames($nodename)
 }
 
 #######################################################################
-#### depthFirstSearch
-# Return a list of node names in the subgraph with the given roots. This
-# includes the roots themselves and all descendants. The returned list
-# contains one element for each node in the subgraph, beginning with
-# the first root, then, in depth-first order, all descendants. Parents
-# are always listed before their children.  If no arguments are given,
-# then the entire graph is sorted.
+#### clear
+# Remove all nodes from the forest.
 #
-body ::tycho::Forest::depthFirstSort {{roots {}}} {
-    if {$roots == {}} {set roots $rootnames}
-    set result {}
-    foreach node $roots {
-        lappend result $node
-        foreach child $childrennames($node) {
-            set result [concat $result [depthFirstSort [list $child]]]
+body ::tycho::Forest::clear {} {
+    set rootnames {}
+    # The catch is in case the forest is already clear
+    catch {
+        unset contentsstring
+        unset parentname
+        unset childrennames
+    }
+}
+
+#######################################################################
+#### contents
+# Return the contents of a cell of the forest.
+# The contents can be any arbirary Tcl string or list.
+#
+body ::tycho::Forest::contents {nodename} {
+    verify $nodename
+    return $contentsstring($nodename)
+}
+
+#######################################################################
+#### delete
+# Delete a node from the forest.  If the node has children, then
+# the parent of the node becomes the parent of the children.
+# If the node is a root of a tree, then the children become roots.
+#
+body ::tycho::Forest::delete {nodename} {
+    verify $nodename
+    set parent $parentname($nodename)
+    if {$parent == {}} {
+        # Remove from the root list
+        set ind [lsearch -exact $rootnames $nodename]
+        set rootnames [lreplace $rootnames $ind $ind]
+    } {
+        # Remove node from the list of children in the parent
+        set ind [lsearch -exact $nodename $childrennames($parent)]
+        set childrennames($parent) [lreplace $childrennames($parent) $ind $ind]
+    }
+    # Redirect the parent point of each child
+    foreach child $childrennames($nodename) {
+        set parentname($child) $parent
+        if {$parent == {}} {
+            lappend rootnames $child
         }
+    }
+    # Finally, remove from the database.
+    unset parentname($nodename)
+    unset contentsstring($nodename)
+    unset childrennames($nodename)
+}
+
+#######################################################################
+#### describe
+# Return a list that describes the forest. The list contains one
+# element for each tree in the forest. Each tree is described by a list
+# with one element for each node. Each node is described itself as a
+# list, with its name first, then its parent (or a null string), then a
+# list of its children, and finally its contents.
+#
+body ::tycho::Forest::describe {} {
+    set result {}
+    foreach root $rootnames {
+        lappend result [describetree $root]
+    }
+    return $result
+}
+
+#######################################################################
+#### init
+# Initialize the forest from a description.
+# The format of the description should be that produced by the
+# <code>describe</code> method.
+#
+body ::tycho::Forest::init {description} {
+    clear
+    foreach tree $description {
+        foreach node $tree {
+            set nodename [lindex $node 0]
+            set parentname($nodename) [lindex $node 1]
+            set childrennames($nodename) [lindex $node 2]
+            set contentsstring($nodename) [lindex $node 3]
+            if {$parentname($nodename) == {}} {
+                lappend rootnames $nodename
+            }
+        }
+    }
+}
+
+#######################################################################
+#### parent
+# Return the parent of a node.
+# If the node is a root, return an empty string.
+#
+body ::tycho::Forest::parent {nodename} {
+    verify $nodename
+    return $parentname($nodename)
+}
+
+#####################################################################
+#### roots
+# Return a list the names of the roots of the trees in the forest.
+# A root is a node with no parents.
+#
+body ::tycho::Forest::roots {} {
+    return $rootnames
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      protected methods                    ####
+
+#######################################################################
+#### verify
+# Verify that nodename is in the forest, flagging an error if not.
+# In other words, if this method returns, the nodename is valid.
+#
+body ::tycho::Forest::verify {nodename} {
+    if {![info exists contentsstring($nodename)]} {
+        error "No node in forest $this with name $nodename"
+    }
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      private methods                      ####
+
+#######################################################################
+#### describetree
+# Returns a list describing the subtree with the given root.
+# The root need not be a root of a tree (it may have parents, although
+# its parents will be ignored).  The list returned has one element for
+# each node in the tree.  Each element is described itself as a list,
+# with its name first, then its parent (or a null string), then a list
+# of its children, and finally its contents.
+#
+body ::tycho::Forest::describetree {root} {
+    verify $root
+    set result [list [list \
+            $root \
+            $parentname($root) \
+            $childrennames($root) \
+            $contentsstring($root)]]
+    foreach child $childrennames($root) {
+        set result [concat $result [describetree $child]]
     }
     return $result
 }

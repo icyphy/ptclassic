@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1997-%Q% The Regents of the University of California.
+# @Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -34,7 +34,7 @@
 catch {delete class ::ptolemy::Galaxy}
 
 # Create the namespace if it doesn't exist
-namespaceEval ::ptolemy {}
+namespace ::ptolemy {}
 
 #######################################################################
 #### Galaxy
@@ -205,7 +205,7 @@ body ::ptolemy::Galaxy::addBlock {newblockname blockclass} {
     set newname $fullname.$newblockname
     if {$cloneblocks} {
         catch [list uplevel #0 delete object $newname]
-        if {[namespaceEval ::ptolemy "info classes $blockclass"] != {}} {
+        if {[namespace ::ptolemy "info classes $blockclass"] != {}} {
             return [uplevel #0 $blockclass $newname $blockclass]
         }
         if {[info which -command $blockclass] != {} && \
@@ -238,9 +238,7 @@ body ::ptolemy::Galaxy::addParam {statename stateclass statevalue} {
 # Create a galaxy port and connect it to the port of an inside block.
 #
 body ::ptolemy::Galaxy::addPort {galport block blockport} {
-    # FIXME: Is this right??????
-    #localEval ::pitcl::alias $galport $block $blockport
-    localEval ::pitcl::galaxyPort $galport $block.$blockport 
+    localEval ::pitcl::alias $galport $block $blockport
 }
 
 #####################################################################
@@ -324,10 +322,10 @@ body ::ptolemy::Galaxy::createBlock {ptblockname master} {
         # No master is specified.  Create an new empty galaxy, then
         # fill it in if commands to do so have been supplied.
         # Can't use localeval here because the galaxy doesn't exist yet.
-        set savegal [::pitcl::currentGalaxy]
+        set savegal [::pitcl::curgalaxy]
 
-        # Create an empty galaxy in the current domain
-        ::pitcl::defGalaxy $ptblockname [::pitcl::getDomain]
+        # Create an empty galaxy
+        ::pitcl::defgalaxy $ptblockname {}
 
         # Fill it in.
         if {$master != {}} {
@@ -335,7 +333,7 @@ body ::ptolemy::Galaxy::createBlock {ptblockname master} {
         }
 
         # Restore the current galaxy
-        ::pitcl::currentGalaxy $savegal
+        ::pitcl::curgalaxy $savegal
     }
 }
 
@@ -346,16 +344,16 @@ body ::ptolemy::Galaxy::createBlock {ptblockname master} {
 #
 body ::ptolemy::Galaxy::localEval {args} {
     # The current galaxy and current universe may not be the same.
-    set savegal [::pitcl::currentGalaxy]
-    ::pitcl::currentGalaxy $fullname
-    # puts "executing $args, with curgalaxy [::pitcl::currentGalaxy]"
+    set savegal [::pitcl::curgalaxy]
+    ::pitcl::curgalaxy $fullname
+puts "executing $args, with curgalaxy [::pitcl::curgalaxy]"
     if {[catch {set result [uplevel #0 $args]} msg] != 0} {
         global ::errorInfo
         set saveInfo $errorInfo
-        ::pitcl::currentGalaxy $savegal
+        ::pitcl::curgalaxy $savegal
         error $msg $saveInfo
     }
-    ::pitcl::currentGalaxy $savegal
+    ::pitcl::curgalaxy $savegal
     return $result
 }
 

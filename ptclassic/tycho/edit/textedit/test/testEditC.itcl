@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)testEditC.itcl	1.4 05/19/97
 #
-# @Copyright (c) 1997-%Q% The Regents of the University of California.
+# @Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -44,33 +44,32 @@
 # The modal dialogs are adequately tested by the demo script.
 
 
-# Make sure that the required packages are loaded
-package require tycho.util.tytest
-package require tycho.edit.textedit
+if {[string compare test [info procs test]] == 1} then { 
+    source $TYCHO/kernel/test/testDefs.tcl
+} {}
+
+set tychoExitWhenNoMoreWindows 0
 
 #set VERBOSE 1
 
 ############################################################################
 #### 
-# This test requires the devtools package
-if ![catch {package require tycho.util.devtools}] {
-    test CEvaluate-1.1 {test out evaluate under the C editor} {
-	set olddir [eval exec pwd]
-	cd [file join $env(TEXTEDIT_LIBRARY) test]
-	# The following's needed
-	catch {eval rm -rf cedit}
-	catch {file delete -force cedit}
-	file mkdir cedit
-	file copy myTclCmd.c cedit
-	set view [::tycho::File::openContext cedit/myTclCmd.c]
-	set win [$view displayer windowName]
-	wm deiconify $win
-	update
-	$view compileAndLoad
-	after $duration removeobj $win
-	cd $olddir
-	myTclCmd
-    } {mytclcmd: foo}
-}
+test CEvaluate-1.1 {test out evaluate under the C editor} {
+    set olddir [eval exec pwd]
+    cd [file join $TYCHO editors textedit test]
+    # The following's needed
+    catch {eval rm -rf cedit}
+    catch {file delete -force cedit}
+    file mkdir cedit
+    file copy myTclCmd.c cedit
+    set view [::tycho::File::openContext cedit/myTclCmd.c]
+    set win [$view displayer windowName]
+    wm deiconify $win
+    update
+    $view compileAndLoad
+    after $duration removeobj $win
+    cd $olddir
+    myTclCmd
+} {mytclcmd: foo}
 
 

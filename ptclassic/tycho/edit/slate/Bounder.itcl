@@ -1,15 +1,15 @@
 ##########################################################################
-# @Version: $Id$
-# @Author: H. John Reekie
+# Version: $Id$
+# Author: H. John Reekie
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# Copyright (c) %Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that the
-# above copyright notice and the following two paragraphs appear in all
-# copies of this software.
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
 # 
 # IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
 # FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
@@ -23,190 +23,121 @@
 # PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 # CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 # ENHANCEMENTS, OR MODIFICATIONS.
-# 
-# 						PT_COPYRIGHT_VERSION_2
-# 						COPYRIGHTENDKEY
+#                                                         COPYRIGHTENDKEY
 ##########################################################################
 
 
-#######################################################################
-#### Bounder
+## Bounder
 #
 # An interactor that keeps the target object within a given region.
-# The region can either be specified by an option, by the target
-# item, or defaults to the size of the slate. The *-constrain*
-# option that restricts movement along certain axes.  Bounder inherits from
-# <a href="Follower.html">Follower</a>, which provides non-constrained
-# movement, and is related to <a href="Stepper.html">Stepper</a>,
-# which quantizes mouse movement.
-#
-# Note that the bounds enforced by this interactor apply to the target 
-# item, not to the cursor. That is, the interactor keeps the target 
-# within the specified region, which usually means that the cursor is
-# restricted to any even smaller region. If the target item is outside 
-# the bounds when the interactor is activated, the first movement will 
-# move it inside the bounds.
-#
-# <p><b>Options</b>
-#
-# <dl>
-# <dt><dd>
-#
-# See also: <a href="Interactor.html">Interactor</a>.
-#
-# <dl>
-# <dt><b>-bounds</b>
-# <dd>A four-list giving the rectangular coordinates in 
-# which to keep the target item.  If it is the empty list, then the 
-# Bounder keeps the target item within the coordinates of the slate.  By 
-# default, it is the empty list.  (Note that bounds do not have to be 
-# constant: the <code>-activatemandcommand</code> script can be used to 
-# dynamically choose the bounds.)
-#
-# <dt><b>-constrain</b>
-# <dd> This option further restricts
-# movement along certain axes. The default is "none." It can
-# have the following values:
-# <ul>
-# <li><b>none</b>: Move anywhere within the bounds
-# <li><b>x</b>: Move only along the horizontal axis
-# <li><b>y</b>: Move only along the vertical axis
-# </ul>
-#
-# </dl></dl>
-#
-# <p><b>Bugs</b> This interactor may not work correctly in the
-# presence of scrollbars.
-#
-# <p><b>Enhancements</b> (none)
-#
-# <p><b>Links</b>
-# 
-# <ul>
-# <li><a href="../internals/interactors.html">How interactors work</a>.
-# <li><a href="../internals/index.html">Programmer's guide</a>
-# <li><a href="index.html">Class documentation index</a>
-# </ul>
 #
 class ::tycho::Bounder {
     inherit ::tycho::Follower
 
-    constructor {{s {}} {c {}} args} {
-	set slate $s
-	set canvas $c
-	eval $this configure $args
-    }
-    destructor {}
-
-    ###################################################################
-    ####                            options                        ####
-
-    # The bounds to move the object between. Note that these bounds
-    # are for the object being moved, not for the cursor.
-    # If null, the bounds are the width and height of the slate.
+    ## bounds
+    #
+    # The region in which to move. If null, use whole canvas, the Bounder
+    # looks at the target object to see if it has a parent, and, if it has,
+    # restricts the object to move only within the confines of the parents
+    # bounds. If the object has no parent, then bounder uses the whole
+    # canvas.
+    #
     public variable bounds ""
 
-    # Constrain movement along a particular axis.
-    public variable constrain "none"
 
-    ###################################################################
-    ####                         public methods                    ####
+    ## constructor
+    #
+    constructor {args} {
+	eval configure $args
+    }
 
-    # Start interaction sequence
-    method click {x y args}
 
-    # Continue interaction sequence
-    method drag {x y}
-
-    ###################################################################
-    ####                    private variables                      ####
-
+    ## x0, y0 , x1, y1
+    #
     # Individual values of bounds
+    #
     private variable x0
     private variable y0
     private variable x1
     private variable y1
     
-    # The position to which the cursor has been moved
     private variable actualX
     private variable actualY
- }
 
 
-#######################################################################
-#### click
-#
-# Start the interaction. To find the bounds within which to move
-# the item, the interactor first examines its -bounds option.
-# If that it is null, then it tries to see if the item responds
-# to " query bounds"; if that doesn't work, then use the size of the
-# slate.
-#
-body ::tycho::Bounder::click {x y args} {
-    # Get the bounds to move between.
-    if { [llength $bounds] == 4 } {
-	# Use the configuration option (rectangle)
-	set b $bounds
-    } else {
-	# Didn't get bounds: try for a query
-	# FIXME: Need a mechanism for having an item be asked what its
-	# bounds are, in case the item itself "knows"
-	# set b [$target query bounds]
-	set b {}
-	if { [llength $b] != 4 } {
-	    # That didn't work either: use the size of the slate
-	    set b [list 0 0 \
-		    [winfo width $slate]  \
-		    [winfo height $slate]]
+    ## click, drag, continue, release
+    #
+    # Similar to the methods in the parent class, Follower, except that
+    # movement is prevented outside _bounds_.
+    #
+    method click {x y} {
+	#
+	# Get individual coordinates of the bounding region.
+	# If there are no bounds specified, use the parent's bounds,
+	# of the whole canvas if it has no parent.
+	#
+	if { $bounds != "" } {
+	    assign x0 y0 x1 y1 $bounds
+	} elseif { [$target parent] != "" } {
+	    assign x0 y0 x1 y1 [[$target parent] query bounds]
+	} else {
+	    set x0 1
+	    set y0 1
+	    set x1 [expr [winfo width  $slate] - 1]
+	    set y1 [expr [winfo height $slate] - 1]
 	}
+
+	#
+	# Make the bounds smaller to allow for the size of the target
+	# object. Use the coords if possible, else use the bounding
+	# box.
+	#
+	set box [$target coords]
+	if { [llength $box] != 4 } {
+	    set box [$target query bbox]
+	}
+	assign a0 b0 a1 b1 $box
+
+	set x0 [expr $x0 + ($x - $a0)]
+	set y0 [expr $y0 + ($y - $b0)]
+	set x1 [expr $x1 + ($x - $a1)]
+	set y1 [expr $y1 + ($y - $b1)]
+
+	#
+	# Initialise other variables, and click on target
+	#
+	$targetproxy click $x $y
+
+	set actualX $x
+	set actualY $y
     }
-    # Remember the bounds
-    ::tycho::assign x0 y0 x1 y1 $b
 
-    # Get the coordinates of the item
-    ::tycho::assign a0 b0 a1 b1 [$slate region $target]
-
-    # Adjust the bounds for the size of the item
-    set x0 [expr $x0 + ($x - $a0)]
-    set y0 [expr $y0 + ($y - $b0)]
-    set x1 [expr $x1 + ($x - $a1)]
-    set y1 [expr $y1 + ($y - $b1)]
-
-    # Click on target
-    eval chain $x $y $args
-
-    # Remember where we are
-    set actualX $x
-    set actualY $y
-}
-
-#######################################################################
-#### drag
-#
-# Test if the new point is outside the bounds. If it is,
-# then move to the boundary. Otherwise, move to the
-# new point, constraining movement if specified.
-#
-body ::tycho::Bounder::drag {x y} {
-   # Keep x in bounds
-    if { $constrain != "y" } {
+    method drag {x y} {
+	#
+	# Test if the new point is outside the bounds. If it is,
+	# then move to the boundary. Otherwise, move to the
+	# new point.
+	#
 	if { $x < $x0 } {
 	    set actualX $x0
 	} elseif { $x > $x1  } {
 	    set actualX $x1
 	} else {
 	    set actualX $x
-    	}
-    }
-    # Keep y in bounds
-    if { $constrain != "x" } {
+	}
+
 	if { $y < $y0 } {
 	    set actualY $y0
-    	} elseif { $y > $y1  } {
+	} elseif { $y > $y1  } {
 	    set actualY $y1
-    	} else {
+	} else {
 	    set actualY $y
-    	}
+	}
+
+	$targetproxy drag $actualX $actualY
+
+	if { $dragcommand != "" } {
+	    uplevel #0 $dragcommand
+	}
     }
-    chain $actualX $actualY
 }

@@ -30,86 +30,16 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# Make sure that the require packages are loaded
-package require tycho.util.tytest
-package require tycho.kernel.html
+if {[string compare test [info procs test]] == 1} then { 
+    source [file join $TYCHO kernel test testDefs.tcl]
+} {}
 
-#NOTE: You cannot test the functionality without using ResourceFTP
-#      or ResourceHTTP's open in order to open up a cachefile.
-#The following tests will only test the "interface" to the method,
-#to make sure that the behavior of the methods/procs are what they
-#are suppose to be (ie. return error, return okay, etc...
-#
-test remote-method {Make sure that the interface to methods are intact!} {
-    set remoteobj [::tycho::autoName .remote]
-    ::tycho::ResourceRemote $remoteobj
-    set status {}
+test ftp-error1 {Make sure that any HTTP write returns error.} {
 
-    # Exception: source
-    set methods {\
-            {cachefile {(is abstract)}}\
-            {close {(is not open)}}\
-            {{connect non} {non}}\
-            {eof {(is not open)}}\
-            {gets {(is not open)}}\
-            {isopen {(0)}}\
-            {open {(is abstract)}}\
-            {path {non}}\
-            {progress {}}\
-            {{puts HELLO} {(is abstract)}}\
-            {read {(is not open)}}\
-            {streamable {(1)}} \
-            {{write HELLO} {(is abstract)}}}
 
-    foreach method $methods {
-        catch "$remoteobj [lindex $method 0]" msg
-        # Match the regular expression to check the output of message
-        set reg {}
-        regexp -nocase [lindex $method 1] $msg _ reg
-        if {$reg=={}} {
-            lappend status $msg
-        } else {
-            lappend status $reg
-        }
-    }
-    delete object $remoteobj
-    list $status
-} {{{is abstract} {is not open} non {is not open} {is not open} 0 {is abstract} non 1.0 {is abstract} {is not open} 1 {is abstract}}}
+}
 
-test remote-procs {Make sure that the interface to procs are intact!} {
-    set status {}
 
-    # The exceptions are "initialize" and "new"
-    set procs {\
-            {{contenttype non} {(is abstract)}} \
-            {{forward non} {non}} \
-            {{isremote non} {(1)}}}
-            
-    foreach procname $procs {
-        catch "::tycho::ResourceRemote::[lindex $procname 0]" msg
-        # Match the regular expression to check the output of message
-        set reg {}
-        regexp -nocase [lindex $procname 1] $msg _ reg
-        if {$reg=={}} {
-            lappend status $msg
-        } else {
-            lappend status $reg
-        }
-    }
-    list $status
-} {{{is abstract} non 1}}
 
-# The assumption here is that HTTP works. Now see if the base
-# method "forward" works or not.
-test remote-forward1 {Connect to the ptolemy site, see if it forwards} {
-    # forward http://ptolemy --> http://ptolemy/
-    # NOTE: This is HTTP server dependent!
-    set site "http://ptolemy.EECS.berkeley.edu/~kchang"
-    set httpobj [::tycho::autoName httptest]
-    ::tycho::ResourceHTTP $httpobj
-    $httpobj connect $site
-    $httpobj open r
-    catch {delete object $httpobj}
-    ::tycho::ResourceRemote::forward $site
-} {http://ptolemy.eecs.berkeley.edu/~kchang/}
+
 

@@ -40,33 +40,17 @@ VPATH =		$(ROOT)/typt/demo
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-ITCL_SRCS =
-
-TCL_SRCS =	audioio.tcl \
-		graphic.tcl \
-		parametric.tcl \
-		tonecontrol.tcl
+ITCL_SRCS =     audioio.tcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
-# Files or directories that are present, but that 'make checkjunk' 
-# should not complain about
-MISC_FILES =	tclIndex \
-		audioio.html \
-		graphic.html \
-		parametric.html \
-		tonecontrol.html \
-		doc
-
-# make checkjunk will not report OPTIONAL_FILES as trash
-# make realclean removes OPTIONAL_FILES
-OPTIONAL_FILES =
+MISC_FILES =	tclIndex audioio.html
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex
 
 # Title for the tydoc index page
-TYDOC_DESC =	Index of classes in tycho/typt/demo
+TYDOC_DESC =	Index of classes in tycho/typt/editors
 
 DIRS =		
 

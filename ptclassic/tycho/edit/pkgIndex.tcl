@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1998 The Regents of the University of California.
+# @Copyright (c)  The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -48,7 +48,7 @@ catch {
     foreach file [glob -nocomplain [file join $dir * pkgIndex.tcl]] {
 	set dir [file dirname $file]
 	if [catch {source $file} msg] {
-	    catch {puts stderr "error reading package index file $file: $msg"}
+	    tclLog "error reading package index file $file: $msg"
 	}
     }
 }

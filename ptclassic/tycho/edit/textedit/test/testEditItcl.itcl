@@ -32,7 +32,7 @@
 
 # Make sure that the required packages are loaded
 package require tycho.util.tytest
-package require tycho.edit.textedit
+package require tycho.kernel.gui
 
 # We also have to load this helper file
 source [file join $env(GUI_LIBRARY) test FileTester.itcl]
@@ -54,11 +54,6 @@ test EditItcl-1.2 {Evaluate an Itcl method} {
     # Copy the file, evaluate it and run the testProc method
     set tmpFile [::tycho::tmpFileName evalTest .itcl]
     file copy evalTest.itcl $tmpFile
-    global tcl_platform
-    if {$tcl_platform(platform) == "unix"} {
-        catch {exec chmod u+w $tmpFile}
-    }
-
     set view [::tycho::openContext $tmpFile]
     set win [$view displayer windowName]
     ::tycho::stylesheet set interaction itclClassRedefinitionWarning 0 

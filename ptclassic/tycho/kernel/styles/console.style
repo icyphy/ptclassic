@@ -1,11 +1,10 @@
-# -*- mode: tcl -*-
 #
 # $Id$
 #
 # The "console" master style-sheet
 #
-configure -title "Console parameters"
-configure -description {
+modelconfigure -label "Console parameters"
+modelconfigure -description {
     Additional settings for console windows.
 }
 
@@ -21,18 +20,6 @@ style default \
 	    -label "Color of prompt text"
 
     parameter width 60 \
-	    -type integer \
-	    -label "Default console width"
-
-    parameter height 8 \
-	    -type integer \
-	    -label "Default console height"
-}
-
-style alternate \
-	-label "Alternate"  {
-    
-    parameter width 72 \
 	    -type integer \
 	    -label "Default console width"
 

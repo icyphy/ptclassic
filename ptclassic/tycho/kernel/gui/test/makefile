@@ -3,7 +3,7 @@
 # $Id$
 # Author: Christopher Hylands
 #
-# Copyright (c) 1996-%Q% The Regents of the University of California.
+# Copyright (c) %Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -33,70 +33,25 @@
 ROOT =		../../..
 
 # True source directory
-VPATH =		$(ROOT)/kernel/gui/test
+VPATH =		$(ROOT)/lib/tydoc/test
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-TCL_SRCS =
+TCL_SRCS = 	coredump.tcl demo.tcl options.tcl test.tcl \
+		weirdness.tcl
 
-SIMPLE_TESTS =
+ITCL_SRCS =	internals.tyc
 
-# Removed testBuilderDialog.itcl until test levels are implemented
-GRAPHICAL_TESTS = \
-	testExec.itcl \
-	testIndexBrowser.itcl \
-	testMenuSupport.itcl \
-	testMenuBar.itcl \
-	testMonitor.itcl \
-	testRevControl.itcl \
-	testToolBar.itcl \
-	testWidgets.itcl \
-	testFile.itcl
+EXTRA_SRCS =	$(ITCL_SRCS)
 
-ITCL_SRCS =	\
-	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) \
-	alltychotests.tcl \
-	FileTester.itcl \
-	MenuSupportTester.itcl \
-	alltests.itcl all.itcl
-
-EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) \
-	chktycho
-
-# Files or directories that are present, but that 'make checkjunk' 
-# should not complain about
-MISC_FILES = 		chktycho testBuilderDialog.itcl
-
-# make checkjunk will not report OPTIONAL_FILES as trash
-# make realclean removes OPTIONAL_FILES
-OPTIONAL_FILES = \
-	IndexBrowser.idx \
-	doc \
-	rcstst \
-	sccstst \
-	Path-5.1a \
-	Path-5.1b \
-	RCS.itcl l \
+MISC_FILES =	results
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF = Path-5.1a Path-5.1b  RCS.itcl
+REALCLEAN_STUFF =
 
-tests:: test_graphics
-
-# These tests do not require a graphics terminal
-test_simple: $(TCL_SRCS) $(ITCL_SRCS)
-	tytestsh $(SIMPLE_TESTS)
-
-# These tests require a graphics terminal
-test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
-	tytest $(GRAPHICAL_TESTS)
-
-FORCE:
-
-test_exec_msg:
-	@echo "This message is used to test the Exec class"
+test:: $(ITCL_SRCS)
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk

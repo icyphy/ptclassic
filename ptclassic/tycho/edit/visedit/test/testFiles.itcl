@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -44,18 +44,33 @@
 # The modal dialogs are adequately tested by the demo script.
 
 
-# Make sure that the required packages are loaded
-package require tycho.util.tytest
-package require tycho.edit.visedit
+if {[string compare test [info procs test]] == 1} then { 
+    source $TYCHO/kernel/test/testDefs.tcl
+} {}
+
+set tychoExitWhenNoMoreWindows 0
 
 #set VERBOSE 1
 
 ############################################################################
 #### openContext
-# Open up a bunch of graphical editors
 test openContext-1.1 {openContext} {
-    openAllFiles \
+    global VERBOSE
+    set testfiles [list \
 	    sample.fst \
-	    sample.gfk \
-	    \$TYCHO/doc/tychoClasses.dag
+	    sample.gst \
+	    ]
+    foreach testfile $testfiles {
+	if {$VERBOSE == 1} {
+	    puts "$testfile"
+	}
+	set win [::tycho::File::openContext $testfile]
+#	wm deiconify $win
+	puts $win
+	after $duration removeobj $win 
+	update
+    }
 } {}
+
+doneTests
+

@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 # 
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1996 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -30,6 +30,10 @@
 #                                        COPYRIGHTENDKEY
 #######################################################################
 
+# FIXME: The buttons are not evenly spaced. I thought the grid
+# geometry manager would do this but apparently it doesn't.
+# We might have to kludge something up.
+
 #######################################################################
 #### ButtonBox
 # This class implements a reasonably useful button box widget. It is
@@ -40,25 +44,6 @@
 # options should not be changed once any buttons have been created:
 # -statusbar, -columns.
 #
-# The buttons are not necessarily evenly spaced. I thought the grid
-# geometry manager would do this but apparently it doesn't.
-# It would be nice if there were an automatic way of getting
-# all buttons the right width, but right now there just isn't...
-#
-# Examples:
-# <pre><tcl>
-#    catch {delete object .b}
-#    ::tycho::ButtonBox .b
-#    .b add foo -text Foo -command {puts Foo!}
-#    .b add bar -text Bar -command {puts Bar!}
-#    pack .b
-#    wm deiconify .
-# </tcl></pre>
-#
-# Note: Figure out if it's possible to bind to a window mapping
-# event and adjust the column -minsize option based on the measured
-# button widths.
-#
 class ::tycho::ButtonBox {
     inherit ::tycho::TWidget
 
@@ -68,17 +53,11 @@ class ::tycho::ButtonBox {
     #####################################################################
     ####                          options                            ####
 
-    # The width of the buttons.
-    itk_option define -buttonwidth buttonWidth ButtonWidth 8
-
     # The number of columns in the grid. Zero means a horizontal layout,
     # gives a vertical layout, any other number gives a rectangular
     # layout.
     # Note: Cannot be reliably changed once buttons have been added
     itk_option define -columns columns Columns 0
-
-    # The font to use for the buttons
-    itk_option define -font font Font [::tycho::font helvetica]
 
     # The horizontal padding of buttons
     itk_option define -padx padX Pad 11
@@ -86,14 +65,11 @@ class ::tycho::ButtonBox {
     # The vertical padding of buttons
     itk_option define -pady padY Pad 4
 
+    # The font to use for the buttons
+    itk_option define -font font Font [::tycho::font helvetica]
+
     # The width of the default ring
     itk_option define -ringwidth ringWidth RingWidth 4
-
-    # The horizontal padding between buttons
-    itk_option define -spacingx spacingX SpacingX 0
-
-    # The vertical padding between buttons
-    itk_option define -spacingy spacingY SpacingY 0
 
     # The status bar to print help info to
     itk_option define -statusbar statusBar StatusBar ""
@@ -111,99 +87,43 @@ class ::tycho::ButtonBox {
     method buttonconfigure {tag {option {}} args}
 
     # Set the "default" button
-    method default {args}
+    method default {tag}
 
     # Delete a button
     method delete {tag}
 
-    # Disable a button.
-    method disable {tag}
-
-    # Enable a button.
-    method enable {tag}
-
-    # Test if a button exists
-    method exists {tag}
-
     # Execute the command of a specified button
     method invoke {tag}
 
-    # Reset the location of the next button
-    method reset {{row 0} {column 0}}
+    # Return the location of the given button as row.column
+    method location {tag}
 
     ###################################################################
-    ####                         protected methods                 ####
-
-    # Print a message to the status bar.
-    protected method putStatus {string}
-
-    ###################################################################
-    ####                         private variables               ####
+    ####                         protected variables               ####
 
     # The current column
-    private variable currentColumn 0
+    protected variable currentColumn 0
 
     # The current row
-    private variable currentRow 0
+    protected variable currentRow 0
 
     # The default button
-    private variable defaultButton ""
-
-    # The names of the locally-stored options
-    private common localoptions {-row -column -description}
+    protected variable defaultButton ""
 
     # The row of each button
-    private variable _row
+    protected variable _row
 
     # The column of each button
-    private variable _column
+    protected variable _column
 
     # The description of each button
-    private variable _description
-}
+    protected variable _description
 
-#########################################################################
-#### -buttonwidth option configuration
-# Force the buttons to be a given width in characters. If zero, buttons
-# assume their natural size.
-# 
-configbody ::tycho::ButtonBox::buttonwidth {
-    foreach tag [array names _row] {
-	$itk_component(button$tag) configure -width $itk_option(-buttonwidth)
-    }
-}
+    ###################################################################
+    ####                       private variables                   ####
 
-#########################################################################
-#### -ringwidth option configuration
-# Alter the width of the default ring. This has to change the padding of
-# _all_ buttons.
-# 
-configbody ::tycho::ButtonBox::ringwidth {
-    foreach tag [array names _row] {
-	pack $itk_component(button$tag) \
-		-padx $itk_option(-ringwidth) \
-		-pady $itk_option(-ringwidth)
-    }
-}
-
-#########################################################################
-#### -spacingx option configuration
-# Alter the horizontal spacing between buttons.
-# 
-configbody ::tycho::ButtonBox::spacingx {
-    foreach tag [array names _row] {
-	grid $itk_component(frame$tag) -padx $itk_option(-spacingx)
-    }
-}
-
-#########################################################################
-#### -spacingy option configuration
-# Alter the vertical spacing between buttons.
-# 
-configbody ::tycho::ButtonBox::spacingy {
-    foreach tag [array names _row] {
-	grid $itk_component(frame$tag) -pady $itk_option(-spacingy)
-    }
+    # The names of the locally-stored options
+    protected common localoptions {-row -column -description}
 }
 
 #######################################################################
@@ -211,34 +131,8 @@ configbody ::tycho::ButtonBox::spacingy {
 #
 body ::tycho::ButtonBox::constructor {args} {
 
-    # The following are added to support keyboard traversal to button boxes.
-    # They cause the button box to visibly show that it has the focus.
-    itk_option add hull.highlightthickness
-    itk_option add hull.highlightcolor
-
-    # Create the button site. This is needed for subclasses that
-    # add other things around the button box
-    itk_component add buttonsite {
- 	frame $itk_interior.buttonsite
-    } {
- 	keep -background -cursor
-    }
-    # Another one is needed to make the buttons stay to the left!!!
-    itk_component add inside {
- 	frame $itk_interior.buttonsite.inside
-    } {
- 	keep -background -cursor
-    }
-    # Pack the main button frame, leaving 2 pixels on either side
-    # to improve appearance. Subclasses will need to put in
-    # the extra padding too...
-    pack $itk_component(buttonsite) -side top \
-            -expand yes -fill x \
-            -padx 2
-    grid $itk_component(inside)
-    grid columnconfigure $itk_component(buttonsite) 1 -weight 1
-
     eval itk_initialize $args
+    eval preference exclude $this $args
 }
 
 #########################################################################
@@ -247,33 +141,23 @@ body ::tycho::ButtonBox::constructor {args} {
 
 #####################################################################
 #### add
-# Add a button to the button box. The first argument is the tag
-# to be used to refer to this button, following arguments are
-# options to be given to the button. Any legal options for the 
-# Tk button widget are allowed, except for the ones overridden by
-# the button-box: *-font*, *-padx*, *-pady*. In addition,
-# the following options are allowed:
+# Add a button to the button box. Any legal option for regular Tk
+# buttons are allowed, except for the ones overridden by this
+# widget: -font, -padx, -pady. In addition, the following options
+# are allowed:
 #
 # <ul>
-# <li>*-row*: Specify the row into which the button is placed. If this
-#  option is given, then so must *-column*.
+# <li>*-row*: Specify the row into which the button is placed.
 # <li>*-column*: Specify the column into which the button is placed.
-#  If this option is given, then so must *-row*.
-# <li>*-description*: If the *-statusbar* option of the button box
-# is not null, then this string is printed to the
-# status bar when the mouse moves over the button.
-# <li>*-underline <i>num</i>*: If this option is given, and <i>num</i>
-# is a nonnegative integer, then <i>num</i> specifies a character in
-# the button label to be underlined (starting with 0).  Also, a binding
-# is made so that typing that character when the buttonbox has the focus
-# will cause the corresponding button to be invoked.
+# <li>*-description*: If specified, this string is printed to the
+# status bar widget when the mouse moves over the button.
 # </ul>
 #
-# If neither *-row* nor *-column* is given, the button box
-# fills up from left to right and top to bottom.
+# If either is given, then both of the row and column buttonopts
+# must be given. If neither is given (what you would usually do),
+# then the grid fills up from left to right and top to bottom.
 #
 body ::tycho::ButtonBox::add {tag args} {
-    # Set options
     array set buttopts [concat [list -row $currentRow \
 	    -column $currentColumn -description {}] $args]
 
@@ -310,53 +194,33 @@ body ::tycho::ButtonBox::add {tag args} {
 
     # Create a frame for the button: this gives the default ring
     itk_component add frame$tag {
-	frame $itk_component(inside).frame$tag -borderwidth 2
+	frame $itk_component(childsite).frame$tag -borderwidth 2
     } {
 	keep -background -cursor
     }
 
     # Create the button
-    # FIXME: This needs to be in a catch in case button options
-    # are invalid: if they are, then we need to clean up so
-    # adding further buttons still works correctly.
-    itk_component add button$tag {
-	eval button $itk_component(inside).button$tag \
+    itk_component add $tag {
+	eval button $itk_component(childsite).$tag \
 		-highlightthickness 0 \
-		-width $itk_option(-buttonwidth) \
-		[array get buttopts] \
-		-takefocus 0
+		[array get buttopts]
     } {
         keep -font -padx -pady
     }
 
     # Pack the button inside the frame and grid the frame
-    pack $itk_component(button$tag) -in $itk_component(frame$tag) \
-	    -padx $itk_option(-ringwidth) \
-	    -pady $itk_option(-ringwidth) \
+    pack $itk_component($tag) -in $itk_component(frame$tag) \
+	    -padx $itk_option(-ringwidth) -pady $itk_option(-ringwidth) \
 	    -fill x -expand on
-
-    grid $itk_component(frame$tag) \
-	    -row $_row($tag) \
-	    -column $_column($tag) \
-	    -padx $itk_option(-spacingx) \
-	    -pady $itk_option(-spacingy) \
-	    -sticky ew
+    grid $itk_component(frame$tag) -row $_row($tag) \
+	    -column $_column($tag) -sticky ew
 
     # Bind description output.
-    bind $itk_component(button$tag) <Enter> \
-	    [list @scope [info class] $this putStatus $_description($tag)]
-    bind $itk_component(button$tag) <Leave> \
-	    [list @scope [info class] $this putStatus {}]
-
-    # If a character was underlined, bind the hull to invoke the button.
-    if {[::info exists buttopts(-underline)]} {
-        if {[::info exists buttopts(-text)]} {
-            set char [string index $buttopts(-text) $buttopts(-underline)]
-            if {$char != {}} {
-                bind $itk_component(hull) <Key-[string tolower $char]> \
-                        [code [list $itk_component(button$tag) invoke]]
-            }
-        }
+    if { $itk_option(-statusbar) != "" && $_description($tag) != "" } {
+	bind $itk_component($tag) <Enter> \
+		[list $itk_option(-statusbar) puts $_description($tag)]
+	bind $itk_component($tag) <Leave> \
+		"$itk_option(-statusbar) puts {}"
     }
 }
 
@@ -370,12 +234,12 @@ body ::tycho::ButtonBox::buttoncget {tag option} {
     }
 
     # Get the option locally
-    if { [::tycho::lmember $localoptions $option] } {
-	return [set _[string range $option 1 end]($tag)]
+    if { [lmember $localoptions $option] } {
+	return [set _[string range $opt 1 end]($tag)]
     }
 
     # Get the option from the button
-    return [$itk_component(button$tag) cget $option]
+    return [$itk_component cget $option]
 }
  
 ####################################################################
@@ -397,15 +261,12 @@ body ::tycho::ButtonBox::buttonconfigure {tag {option {}} args} {
 	foreach opt $localoptions {
 	    lappend result $opt [set _[string range $opt 1 end]($tag)]
 	}
-	foreach list [$itk_component(button$tag) configure] {
-	    foreach {opt bogus hocus pocus val} $list {
-		lappend result $opt $val
-	    }
+	foreach {opt bogus hocus pocus val} [$itk_component($tag) configure] {
+	    lappend result $opt $val
 	}
-	return $result
     } elseif { $args == "" } {
 	# We have been asked for just one option
-	return [list $option [buttoncget $tag $option]]
+	return [list $opt [cget $tag $opt]]
     } else {
 	# We have been asked to set options
 	# First process each option individually
@@ -413,7 +274,7 @@ body ::tycho::ButtonBox::buttonconfigure {tag {option {}} args} {
 	set column $_column($tag)
 	set move 0
 	foreach {opt val} [concat $option $args] {
-	    if { [::tycho::lmember $localoptions $opt] } {
+	    if { [lmember $localoptions $opt] } {
 		switch /$opt {
 		    "/-row" {
 			set row $val
@@ -428,12 +289,12 @@ body ::tycho::ButtonBox::buttonconfigure {tag {option {}} args} {
 		    }
 		}
 	    } else {
-		$itk_component(button$tag) configure $opt $val
+		$itk_component($tag) configure $opt $val
 	    }
 	}
 
 	# If a button is being moved, check that no-one already has
-	# this posiion it's being moved to
+	# ths posiion it's being moved to
 	if { $move } {
 	    foreach {t r} [array get _row] {q c} [array get _column] {
 		if { $r == $row && $c == $column } {
@@ -451,25 +312,15 @@ body ::tycho::ButtonBox::buttonconfigure {tag {option {}} args} {
 # Set the default ring around the specified button and bind the
 # return key to its command.
 #
-# With no arguments, this method returns the current default
-# button. If the argument is the null string, then the default
-# ring is removed.
-#
-body ::tycho::ButtonBox::default {args} {
-    if { $args == "" } {
-	return $defaultButton
+body ::tycho::ButtonBox::default {tag} {
+    if { ! [::info exists _row($tag)] } {
+	error "Button $tag does not exist"
     }
+
     if { $defaultButton != "" } {
 	$itk_component(frame$defaultButton) configure -relief flat
     }
-
-    set tag [lindex $args 0]
-    if { $tag != "" } {
-	if { ! [::info exists _row($tag)] } {
-	    error "Button $tag does not exist"
-	}
-	$itk_component(frame$tag) configure -relief sunken
-    }
+    $itk_component(frame$tag) configure -relief sunken
     set defaultButton $tag
 }
  
@@ -479,9 +330,9 @@ body ::tycho::ButtonBox::default {args} {
 #
 body ::tycho::ButtonBox::delete {tag} {
     if { [::info exists _row($tag)] } {
-	pack forget $itk_component(button$tag)
-	destroy $itk_component(button$tag)
-	unset itk_component(button$tag)
+	pack forget $itk_component($tag)
+	destroy $itk_component($tag)
+	unset itk_component($tag)
  
 	grid forget $itk_component(frame$tag)
 	destroy $itk_component(frame$tag)
@@ -493,40 +344,6 @@ body ::tycho::ButtonBox::delete {tag} {
     }
 }
 
-#####################################################################
-#### disable
-# Disable a button. This is just a short-cut for configuring the
-# button's *-state* option to *disabled*. An error will occur
-# if the button does not exist.
-#
-body ::tycho::ButtonBox::disable {tag} {
-    if { ! [::info exists _row($tag)] } {
-	error "Button $tag does not exist"
-    }
-    buttonconfigure $tag -state disabled
-}
-
-#####################################################################
-#### enable
-# Enable a button. This is just a short-cut for configuring the
-# button's *-state* option to *disabled*. An error will occur
-# if the button does not exist.
-#
-body ::tycho::ButtonBox::enable {tag} {
-    if { ! [::info exists _row($tag)] } {
-	error "Button $tag does not exist"
-    }
-    buttonconfigure $tag -state normal
-}
-
-#####################################################################
-#### exists
-# Test if a button with the given tag exists.
-#
-body ::tycho::ButtonBox::exists {tag} {
-    ::info exists _row($tag)
-}
-
 ####################################################################
 #### invoke
 # Invoke the command of a specified button.
@@ -535,31 +352,19 @@ body ::tycho::ButtonBox::invoke {tag} {
     if { ! [::info exists _row($tag)] } {
 	error "Button $tag does not exist"
     }
-    uplevel #0 [$itk_component(button$tag) cget -command]
+
+    uplevel #0 [$itk_component($tag) cget -command]
 }
 
 ####################################################################
-#### reset
-# Reset the location at which the next button will be placed.
-# If no arguments are supplied, the position is reset to 
-# zero and zero; if supplied, the position is that row and
-# column.
+#### location
+# Get the location of the specified button.
 #
-body ::tycho::ButtonBox::reset {{row 0} {column 0}} {
-    set currentRow $row
-    set currentColumn $column
-}
-
-#########################################################################
-#########################################################################
-####                     protected methods                           ####
-
-#######################################################################
-#### putStatus
-# Put an arbitrary string to the status bar.
-#
-body ::tycho::ButtonBox::putStatus {string} {
-    if {$itk_option(-statusbar) != {}} {
-        $itk_option(-statusbar) putMessage $string
+body ::tycho::ButtonBox::location {tag} {
+    if { ! [::info exists _row($tag)] } {
+	error "Button $tag does not exist"
     }
+
+    set opts [array set [grid info $itk_component(childsite)]]
+    return [join $opts(-row) $opts(-column) "."]
 }

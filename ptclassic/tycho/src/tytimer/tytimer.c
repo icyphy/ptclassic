@@ -1,12 +1,12 @@
 /* 
-   Support for timing tasks in Tycho. Adapted from Ptolemy's
-   SimControl.cc and cgc/tcltk/lib/tkMain.c.
+   Artificial Tcl event loop using timers. Taken from Ptolemy's
+   CGC/Tk library file, tkMain.c.
 
 Authors: Edward A. Lee, John Reekie.
 
 Version: $Id$
 
-Copyright (c) 1997-%Q% The Regents of the University of California.
+Copyright (c) 1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -31,119 +31,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
-#include "tytimer.h"
+#include "tySched.h"
 
-/* The section below is copied from $PTOLEMY/src/compat/ptolemy/compat.h
- * Users might not have Ptolemy, so we can't just include that here.
- * FIXME: the real fix would be to modify configure.in so that it
- * figures out the architecture.
- */
-/***************************************************************************/
-/* Define #defines for each Ptolemy architecture. (Alphabetical, please) */
-
-#if defined(_AIX)
-/* IBM rs6000 and powerpc running AIX */
-#define PTAIX
-#endif
-
-#if defined(_AIX) && ! defined(__GNUC__)
-/* AIX with IBM xlc and xlC */
-#define PTAIX_XLC
-#endif
-
-#if defined(__alpha)
-/* DEC Alpha */
-#define PTALPHA
-#endif
-  
-#if defined(freebsd)
-/* FreeBSD */
-#define PTFREEBSD
-#endif
-
-#if defined(hpux) || defined(__hpux)
-/* HP PA, cfront or g++ */
-#define PTHPPA
-#endif
-
-#if defined(PTHPPA) && ! defined(__GNUC__)
-/* HP PA, cfront only, not g++ */
-#define PTHPPA_CFRONT
-#endif
-
-#if defined(__sgi) && defined(IRIX5)
-/* SGI running IRIX5.x */
-#define PTIRIX5
-#endif
-
-#if defined(__sgi) && ! defined(__GNUC__)
-/* SGI running IRIX5.x with native SGI CC*/
-#define PTIRIX5_CFRONT
-#endif
-
-#if defined(__sgi) && ! defined(__GNUC__) && defined(IRIX6) && defined (_ABIO32)
-/* SGI running IRIX6.x , native SGI CC in 32 bits mode */
-#define PTIRIX5			/* SGI says it is 100% compatible with IRIX5 */
-#define PTIRIX6
-#define PTIRIX6_32_CFRONT
-#endif
-
-#if defined(__sgi) && ! defined(__GNUC__) && defined(IRIX6) && defined (_ABI64)
-/* SGI running IRIX6.x , native SGI CC in 64 bit mode */
-#define PTIRIX6
-#define PTIRIX6_64_CFRONT
-#endif
-
-#if defined(linux)
-#define PTLINUX
-#endif
-
-#if defined(PTLINUX) && defined(__ELF__)
-/* Shorthand for Linux and ELF */
-#define PTLINUX_ELF
-#endif
-
-#if defined(netbsd_i386)
-#define PTNBSD_386
-#endif
-
-#if defined(sparc) && (defined(__svr4__) || defined(__SVR4))
-/* Sun SPARC running Solaris2.x, SunC++ or g++ */
-#ifndef SOL2
-#define SOL2
-#endif
-
-#define PTSOL2
-#endif
-
-#if defined(sparc) && (defined(__svr4__) || defined(__SVR4)) && !defined(__GNUC__)
-/* Sun SPARC running Solaris2.x, with something other than gcc/g++ */
-#define PTSOL2_CFRONT
-#endif
-
-#if defined(sparc) && !(defined(__svr4__) || defined(PTSOL2_CFRONT))
-/* Really, we mean sun4 running SunOs4.1.x, Sun C++ or g++ */
-#define SUN4
-#define PTSUN4
-#endif
-
-#if defined(sparc) && !defined(__svr4__) && !defined(__GNUC__)
-/* Really, we mean sun4 running SunOs4.1.x with something other than gcc/g++ */
-#define SUN4
-#define PTSUN4_CFRONT
-#endif
-
-/* Unixware1.1
-*#define PTSVR4
-*/
-
-#if defined(ultrix)
-/* DEC MIPS running Ultrix4.x */
-#define PTULTRIX
-#define PTMIPS
-#endif
-
-/* End of text copied from compat.h */
 
 /***************************************************************
  * This section of code is taken from the original code used for
@@ -187,8 +76,8 @@ static void ptSafeSig( int SigNum ) {
   pt_alarm_action.sa_flags |= SA_RESTART;
   sigaction( SigNum, &pt_alarm_action, NULL);
 }
-static void ptBlockSig (int SigNum) {}
-static void ptReleaseSig (int SigNum) {}
+static void ptBlockSig ARGS((int SigNum)) {}
+static void ptReleaseSig ARGS((int SigNum)) {}
 
 #else 
 #if defined(PTHPPA)
@@ -224,23 +113,20 @@ static void ptSafeSig( int SigNum ) {};
 
 
 /*
- * timerElapsed
+ * Ty_TimerElapsed
  *
  * This flag is set when the timer elapses
  */
 static volatile int
-timerElapsed = 1;
+Ty_TimerElapsed = 1;
 
 /*
- * timerSeconds, timerMicroSeconds
+ * Ty_TickPeriod
  *
- * The period of the timer, in seconds and microseconds.
+ * The period of the timer, in microseconds.
  */
 static int
-timerSeconds = 0;
-
-static int
-timerMicroSeconds = 20000;
+Ty_TimerPeriod = 20000;
 
 
 /*
@@ -250,7 +136,7 @@ timerMicroSeconds = 20000;
  */
 static void
 Ty_TimerDone() {
-  timerElapsed = 1;
+  Ty_TimerElapsed = 1;
 }
 
 /*
@@ -259,15 +145,15 @@ Ty_TimerDone() {
  * Set the period of the scheduler timer.
 */
 void
-Ty_TimerPeriod( int period ) {
-  /* Minimum time is 1 ms, no maximum */
-  if (period < 1) {
-    period = 1;
+Ty_TimerPeriod( int ms ) {
+  /* Maximum time allowed is 999 ms, minimum is 1 ms */
+  if (ms > 999) {
+    ms = 999;
+  } else if (ms < 1) {
+    ms = 1;
   }
 
-  period = period * 1000;
-  timerSeconds = period / 1000000;
-  timerMicroSeconds = period % 1000000;
+  Ty_TimerPeriod = ms * 1000;
 }
 
 /*
@@ -277,15 +163,14 @@ Ty_TimerPeriod( int period ) {
 */
 void
 Ty_TimerStart( ) {
-  struct itimerval i;
-
   /* Reset the elapsed flag */
-  timerElapsed = 0;
+  Ty_TimerElapsed = 0;
 
   /* reset the timer - this cancels any current timing in progress */
+  struct itimerval i;
   i.it_interval.tv_sec = i.it_interval.tv_usec = 0;
-  i.it_value.tv_sec = timerSeconds;
-  i.it_value.tv_usec = timerMicroSeconds;
+  i.it_value.tv_sec = 0;
+  i.it_value.tv_usec = Ty_TimerPeriod;
 
   /* Call the handler function when the timer expires */
   signal(SIGALRM, Ty_TimerDone);
@@ -320,8 +205,8 @@ Ty_TimerStop()
   ptReleaseSig(SIGALRM);
   ptBlockSig(SIGALRM);
 
-  /* Set the timer elapsed flag */
-  timerElapsed = 1;
+  /* Reset the timer elapsed flag */
+  Ty_TimerElapsed = 0;
 }
 
 /*
@@ -342,7 +227,7 @@ Ty_TimerElapsed() {
   ptBlockSig(SIGALRM);
 
   /* Return the flag */
-  return timerElapsed;
+  return Ty_TimerElapsed;
 }
 
 /*
@@ -362,13 +247,13 @@ Ty_DoAllEvents() {
   ptBlockSig(SIGALRM);
 
   /* Process events only if the timer has elapsed */
-  if (timerElapsed) {
+  if (Ty_TimerElapsed) {
 
     /* Process all pending Tk events */
     while (Tcl_DoOneEvent(TK_DONT_WAIT | TK_ALL_EVENTS));
 
     /* Reset the timer elapsed flag */
-    timerElapsed = 0;
+    tyevent_TimerElapsed = 0;
 
     /* Restart the timer */
     Ty_TimerStart();
@@ -377,15 +262,15 @@ Ty_DoAllEvents() {
 
 
 /*
- * Ty_Timer
+ * Ty_Scheduler
  *
  * The Tcl interface to the functions in this package.
  */
 int
-Ty_Timer (ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
+Ty_Scheduler (ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
 
   /* Check number of arguments */
-  if (argc < 2) {
+  if (argc < 3) {
     sprintf(interp->result, "Expected arguments: mode ?value?");
     return TCL_ERROR;
   }
@@ -393,11 +278,11 @@ Ty_Timer (ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
   /* Switch on the first argument */
   if ( ! strcmp(argv[1], "start") ) {
     /* Start the timer */
-    int tempsecs, tempusecs;
+    int periodcopy;
     int period;
 
     /* If the timer is already running, generate an error */
-    if ( ! timerElapsed ) {
+    if ( ! Ty_TimerElapsed ) {
       interp->result = "Timer is already running";
       return TCL_ERROR;
     }
@@ -408,12 +293,10 @@ Ty_Timer (ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
 	sprintf(interp->result, "Integer period expected: %s", argv[2]);
 	return TCL_ERROR;
       }
-      tempsecs = timerSeconds;
-      tempusecs = timerMicroSeconds;
-      Ty_TimerPeriod(period);
+      periodcopy = Ty_TimerPeriod;
+      Ty_TimerPeriod = period;
       Ty_TimerStart();
-      timerSeconds = tempsecs;
-      timerMicroSeconds = tempusecs;
+      Ty_TimerPeriod = periodcopy;
     } else {
       Ty_TimerStart();
     }
@@ -421,14 +304,14 @@ Ty_Timer (ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
 
   } else if ( ! strcmp(argv[1], "stop") ) {
     /* Stop the timer */
-    if ( ! timerElapsed ) {
+    if ( ! Ty_TimerElapsed ) {
       Ty_TimerStop();
     }
     return TCL_OK;
 
   } else if ( ! strcmp(argv[1], "elapsed") ) {
     /* Test if the timer has elapsed */
-    interp->result = timerElapsed ? "1" : "0";
+    interp->result = Ty_TimerElapsed() ? 1 : 0;
     return TCL_OK;
 
   } else if ( ! strcmp(argv[1], "period") ) {
@@ -441,7 +324,7 @@ Ty_Timer (ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
       }
       Ty_TimerPeriod(period);
     }
-    sprintf(interp->result, "%d", timerSeconds*1000 + timerMicroSeconds/1000);
+    sprintf(interp->result, "%d", Ty_TimerPeriod / 1000);
     return TCL_OK;
 
   } else {
@@ -452,14 +335,14 @@ Ty_Timer (ClientData dummy, Tcl_Interp *interp, int argc, char **argv) {
 
 
 /*
- * Tytimer_Init
+ * Tysched_Init
  *
  * Initialize the package. This adds the interface proc to Tcl.
  */
 int
-Tytimer_Init(Tcl_Interp *interp) {
+Tyevent_Init(Tcl_Interp *interp) {
   
-  Tcl_CreateCommand(interp, "timer", Ty_Timer,
+  Tcl_CreateCommand(interp, "scheduler", Ty_Scheduler,
 		    (ClientData) NULL, (Tcl_CmdDeleteProc *) NULL);
 
   return TCL_OK;

@@ -1,9 +1,0 @@
-~ptdesign/vendors/README: Notes about vendor files, such as which driver to use
-
-Version: $Id$
-
-On 11/12/96, Jose said:
-
-> The s56x driver that we should be using on all our machines with the
-> 56k is in /users/ptdesign/vendors/s56dsp (sim link to the beta
-> version).  The release version unfortunately seems to have bugs.

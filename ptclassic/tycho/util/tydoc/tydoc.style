@@ -3,8 +3,8 @@
 #
 # The "tydoc" master style-sheet
 #
-configure -title "Tycho documentation system"
-configure -description {
+modelconfigure -label "Tycho documentation system"
+modelconfigure -description {
     This style contains settings for the Tycho
     documentation system.
 }

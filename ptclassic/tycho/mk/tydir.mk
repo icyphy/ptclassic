@@ -3,7 +3,7 @@
 # Version identification:
 # $Id$
 #
-# Copyright (c) 1996-%Q% The Regents of the University of California.
+# Copyright (c) %Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,13 +30,12 @@
 # Date of creation: 10/13/96
 # Author: Christopher Hylands
 
-all makefiles install clean sources depend realclean checkjunk sccsinfo \
-sccsclean itcldocs javadocs extraclean tests weblint idocs dists jsall \
-jsrestore:
+makefiles all install clean sources depend realclean checkjunk sccsinfo \
+itcldocs extraclean:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
-		echo making $@ in $(ME)/$$x ; \
+		echo making $@ in tycho/lib/$$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
 		) \
 	    fi ; \

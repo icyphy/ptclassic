@@ -1,9 +1,9 @@
 # Makefile for Ptolemy Tycho system, editors/visedit/test directory.
 #
-# $Id$
+# @(#)$Id$
 # Author: Christopher Hylands
 #
-# Copyright (c) 1996-%Q% The Regents of the University of California.
+# Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -41,41 +41,16 @@ include $(CONFIG)
 
 TCL_SRCS = 	
 
-SIMPLE_TESTS = \
-	testDAG.itcl \
-	testForest.itcl \
-	testGraph.itcl
-
-GRAPHICAL_TESTS = \
-	testEditForest.itcl \
-	testEditSTD.itcl \
-	testFiles.itcl
-
-ITCL_SRCS = $(SIMPLE_TESTS) $(GRAPHICAL_TESTS) \
-	DirectedAcyclicGraph.itcl \
-	alltests.itcl all.itcl
+ITCL_SRCS =	EditForest.itcl createForest.itcl
 
 EXTRA_SRCS =	$(ITCL_SRCS)
 
-MISC_FILES =	sample.fst \
-	sample.std
-
-# Sources that may or may not be present, but if they are present, we don't
-# want make checkjunk to barf on them.
-OPTIONAL_FILES =
+MISC_FILES =	EsTest.fsm sample.fst sample.gfk
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
-tests:: test_simple test_graphics
-
-# These tests do not require a graphics terminal
-test_simple: $(TCL_SRCS) $(ITCL_SRCS)
-	tytestsh $(SIMPLE_TESTS)
-
-# These tests require a graphics terminal
-test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
-	tytest $(GRAPHICAL_TESTS)
+test:: $(ITCL_SRCS) $(MISC_FILES)
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk

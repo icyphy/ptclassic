@@ -35,7 +35,7 @@
 ROOT =		../../..
 
 # True source directory
-VPATH =		$(ROOT)/edit/slate/demo
+VPATH =		$(ROOT)/edit/slate/demos
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
@@ -44,35 +44,24 @@ include $(CONFIG)
 # Sub directories to run make in.
 DIRS =	
 
-TCL_SRCS = \
-	defs.tcl \
-	demoAnimator.tcl \
-	demoBinding.tcl \
-	demoGrapple.tcl \
-	demoLabeledLine.tcl \
-	demoPaper1.tcl \
-	demoPaper2.tcl \
-	demoSelection1.tcl \
-	demoSelection2.tcl \
-	demoSmartLine.tcl \
-	demoWidget.tcl
+TCL_SRCS = 
 
-ITCL_SRCS =
+ITCL_SRCS = 
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
-	demo.tcl \
-	demo \
-	pkgIndex.tcl
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES = tclIndex
+MISC_FILES = 
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF = tclIndex
+REALCLEAN_STUFF =
 
 # Title for the tydoc index page
 TYDOC_DESC =
 
+# Do make sources so that we ensure that the subdirectories are checked out
+all install: sources $(MISC_SRCS)
+
 # We don't include common.mk since we don't use the compiler here
-include $(ROOT)/mk/tycommon.mk
+include $(ROOT)/mk/no-compile.mk
 
 

@@ -2,7 +2,7 @@
 # Version: $Id$
 # Author: John Reekie
 #
-# @Copyright (c) 1996-1998 The Regents of the University of California.
+# @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -56,20 +56,12 @@ class ::tycho::SliderPanel {
 
     # Add a slider
     method add {tag args}
-
-    # Set a slider value
-    method assign {tag value}
 }
 
 # Make the slider type known to the LabeledGrid
-::tycho::LabeledGrid::newtype slider \
+Labeledgrid::newtype slider \
         -create {eval ::tycho::Slider %w %a} \
-	-assign {%w set %x} \
-	-sticky "w" \
-        -options {
-            keep -font -background
-        }
-
+        -sticky "w"
 
 ########################################################################
 #### constructor
@@ -81,7 +73,7 @@ body ::tycho::SliderPanel::constructor {args} {
 
     # Create the widget containing the sliders
     itk_component add main {
-	tycho::LabeledGrid $itk_interior.main \
+	iwidgets::Labeledgrid $itk_interior.main \
 		-labelforeground blue
     } {
 	keep -background -cursor -font
@@ -117,12 +109,4 @@ body ::tycho::SliderPanel::add {tag args} {
     if [info exists opts(-label)] {
 	$itk_component(main) component main.$tag configure -label $opts(-label)
     }
-}
-
-#####################################################################
-#### assign
-# Set the value/position of a slider.
-#
-body ::tycho::SliderPanel::assign {tag value} {
-    $itk_component(main) component main.$tag set $value
 }

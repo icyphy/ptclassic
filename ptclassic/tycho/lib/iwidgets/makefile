@@ -29,7 +29,7 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-DIRS = generic demos doc
+DIRS = generic demos doc tests
 
 # Root of Tycho directory
 ROOT =		../..

@@ -4,7 +4,7 @@
 # 
 # @Version: $Id$
 #
-# @Copyright (c) 1997-1998 The Regents of the University of California.
+# @Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,9 +30,18 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# Make sure that the test package is loaded
-package require slate.test
+if {[string compare test [info procs test]] == 1} then { 
+    source [file join $TYCHO kernel test testDefs.tcl]
+} {}
 
+if {[string compare test [info procs _slate]] == 1} then { 
+    source [file join $TYCHO editors slate test defs.itcl]
+} {}
+
+if { ! [::info exists SHORTTIME] } {
+    set SHORTTIME 100
+}
+#set VERBOSE 1
 
 ############################################################################
 #### Define a proc that creates a single LabeledRect on the slate
@@ -113,7 +122,8 @@ foreach {opt val} {-fill green -outline yellow -width 2} {
 	.s itemconfigure $f $opt $val
         .s itemcget [.s primary $f] $opt
     } $val
-    _update
+    update idletasks
+    after $SHORTTIME
 }
  
 #######################################################################
@@ -129,7 +139,7 @@ set i 0
 # Test that internal graphics are being rescaled properly
 _emptyrect -graphics {rectangle 25 25 75 75}
 test LabeledRect-reshape-1 {Reshape a corner} {
-    _interactslate reshape $f 1 1 40 -features se
+    _interactslate reshape $f 1 1 40 -aspects se
     set result {}
     # Need to remove rounding errors here
     foreach c [.s coords [.s find withtag graphics.$f]] {
@@ -141,7 +151,7 @@ test LabeledRect-reshape-1 {Reshape a corner} {
 # Test that text label is being moved correctly
 _rect -textanchor ne
 test LabeledRect-reshape-2 {Reshape a corner} {
-    _interactslate reshape $f 1 1 40 -features e
+    _interactslate reshape $f 1 1 40 -aspects e
     .s component $f label coords
 } {120.0 40.0}
 

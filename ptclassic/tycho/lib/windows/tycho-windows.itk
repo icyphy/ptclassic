@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -29,12 +29,6 @@
 #                                        PT_COPYRIGHT_VERSION_2
 #                                        COPYRIGHTENDKEY
 
-package require Itcl
-namespace import itcl::*
-package require Itk
-namespace import itk::*
-package require Iwidgets 3.0
-
 # See $TYCHO/doc/tynt.html for instructions
 
 #    1. Tycho refers to the directory where the Tycho distribution is with
@@ -50,12 +44,7 @@ package require Iwidgets 3.0
 
 # Set the TYCHO variable
 if ![info exists env(TYCHO)] {
-	set env(TYCHO) "c:/tycho0.3devel"
+	set env(TYCHO) "c:/Program Files/tycho0.1.1"
 }
-
-# If you are having problems, uncomment the next line
-# set tyDebug 1
-
-# package require java
-
 source $env(TYCHO)/kernel/Tycho.tcl
+

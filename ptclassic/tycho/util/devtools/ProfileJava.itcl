@@ -127,10 +127,8 @@ body ::tycho::ProfileJava::constructor {args} {
 # Open a help window.
 #
 body ::tycho::ProfileJava::help {} {
-    global ::TYCHO
-    ::tycho::File::openContext \
-	    [file join $TYCHO util devtools doc \
-	    usersGuides ProfileJavaHelp.html] html
+    hyperJump [file join \$TYCHO editors visedit doc \
+	    usersGuides ProfileJavaHelp.html] {}
 }
 
 #######################################################################

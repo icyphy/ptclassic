@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -54,7 +54,7 @@ OTHERCFLAGS =
 # 'configure' creates these in the directory above.
 include ../tcl.mk
 
-LIBR =		libtytest$(TCL_SHLIB_SUFFIX)
+LIB =		libtytest$(TCL_SHLIB_SUFFIX)
 
 INCLUDE = \
 	-I./ \
@@ -64,9 +64,9 @@ INCLUDE = \
 SRCS = 		tyTest.c tyTimerTest.c
 HDRS =		tyTest.h
 
-EXTRA_SRCS =	makefile.in test.tcl index.html
+EXTRA_SRCS =	makefile.in test.tcl
 
-OBJS =		tyTest.o tyTimerTest.o
+OBJS =		tyTest.o
 
 # `make realclean` removes these files
 REALCLEAN_STUFF = makefile
@@ -75,11 +75,11 @@ LIBPATH = \
 	-L$(TCL_LIB_DIR) \
 	-L$(TK_LIB_DIR)
 
-all: $(LIBR) $(MISC_SRCS) 
+all: $(LIB) $(MISC_SRCS) 
 
-install: $(LIBDIR)/$(LIBR)
+install: $(LIBDIR)/$(LIB)
 
-$(LIBR) : $(OBJS)
+$(LIB) : $(OBJS)
 	$(TCL_SHLIB_LD) $(OBJS) -o $@ $(TCL_LD_SEARCH_FLAGS) $(LIBS)
 
 depend:

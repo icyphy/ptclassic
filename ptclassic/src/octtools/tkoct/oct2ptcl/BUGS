@@ -1,9 +1,0 @@
-$Id$
-List of known bugs in oct2ptcl:
-
-1) oct2ptcl is too picky about some facets.  It thinks facets are
-corrupt, but the facet will work fine in Ptolemy.  oct2ptcl is
-technically correct here, but by not processing semi-corrupt facets,
-oct2ptcl is not very useful
-
-

@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,9 +30,15 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# Make sure that the require packages are loaded
-package require tycho.util.tytest
-package require tycho.kernel.basic
+if {[string compare test [info procs test]] == 1} then { 
+    source testDefs.tcl
+} {}
+
+# If necessary load up the class definitions
+if {[namespace tycho {info classes CircularList}] == {} } {
+    namespace tycho
+    source ../CircularList.itcl
+}
 
 test CircularList-1.1 {Build a CircularList} {
     catch {delete object foo}
@@ -85,3 +91,5 @@ test CircularList-1.4 {Check out append} {
     foo append c b
     foo elements c
 } {c a b}
+
+doneTests

@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1998 The Regents of the University of California.
+# @Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -36,17 +36,16 @@
 #
 
 #######################################################################
-#### ClassName
+#### Classname
 # Description of class.
 #
 # <p>
-# Here is an example of how to use the ClassName:
+# Here is an example of how to use the Classname:
 # <tcl><pre>
-#     ::tycho::ClassName .x ...
+#     ::tycho::Classname .x ...
 # </pre></tcl>
 #
 class ::tycho::ClassName {
-    inherit ::tycho::ParentClassName
 
     constructor {args} {}
     destructor {}
@@ -61,47 +60,46 @@ class ::tycho::ClassName {
     ####                         public methods                    ####
 
     # One line description of the method; listed in alphabetical order
-    method publicMethodA {}
+    method NameA {}
 
     # One line description of the method
-    method publicMethodB {}
+    method NameB {}
 
     ###################################################################
     ####                      public procs                         ####
 
     # One line description procedure; listed in alphabetical order
-    proc publicProcA {anyargs} {}
+    proc NameA {anyargs} {}
 
     ###################################################################
     ####                   protected methods                       ####
 
     # One line description of the method; listed in alphabetical order
-    protected method _protectedMethodA {}
+    protected method methodName {}
 
     ###################################################################
     ####                   protected variables                     ####
 
     # Comments come before the variable declaration; variables listed
     # in alphabetical order
-    protected variable _protectedVariableA
+    protected variable variableName
 
-    protected common _protectedCommonA
+    protected common variableName
 
     ###################################################################
     ####                   private methods                         ####
 
     # One line description; listed in alphabetical order
-    private method __privateMethodA {}
+    private method NameA {}
 
     ###################################################################
     ####                   private variables                       ####
 
-    # A comment before one or a group of private variables;
-    # alphabetical order unimportant
-    private variable __privateVariableA
-    private variable __privateVariableB
+    # Comments come before the variable declaration; variables listed
+    # in alphabetical order
+    private variable variableName
 
-    private common __privateCommonA
+    private common variableName
 }
 
 #######################################################################
@@ -134,14 +132,14 @@ body ::tycho::ClassName::destructor {} {
 #### NameA
 # Description.
 #
-body ::tycho::ClassName::publicMethodA {} {
+body ::tycho::ClassName::NameA {} {
 }
 
 #####################################################################
 #### NameB
 # Description.
 #
-body ::tycho::ClassName::publicMethodB {} {
+body ::tycho::ClassName::NameB {} {
 }
 
     ###################################################################
@@ -152,7 +150,7 @@ body ::tycho::ClassName::publicMethodB {} {
 #### NameA
 # Description.
 #
-body ::tycho::ClassName::publicProcA {anyargs} {
+body ::tycho::ClassName::NameA {anyargs} {
 }
 
 
@@ -164,7 +162,7 @@ body ::tycho::ClassName::publicProcA {anyargs} {
 #### MethodName
 # Description.
 #
-body ::tycho::ClassName::_protectedMethodA {} {
+body ::tycho::ClassName::methodName {} {
 }
 
     ###################################################################
@@ -175,5 +173,5 @@ body ::tycho::ClassName::_protectedMethodA {} {
 #### NameA
 # Description.
 #
-body ::tycho::ClassName::__privateMethodA {} {
+body ::tycho::ClassName::NameA {} {
 }

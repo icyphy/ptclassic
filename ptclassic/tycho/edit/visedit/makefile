@@ -1,10 +1,9 @@
-# Makefile for Tycho tycho.edit.visedit package
+# Makefile for Ptolemy Tycho system, editors/textedit directory.
 #
-# @Author: Christopher Hylands
+# $Id$
+# Makefile Author: Christopher Hylands
 #
-# @Version: $Id$
-#
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# Copyright (c) %Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,47 +29,50 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# Root of Tycho directory
-ROOT =		../..
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	make depend
+# This will add the dependencies to the makefile.
 
+# Root of Ptolemy directory
+ROOT =		../../..
+# Path (absolute or relative) to the object directory root
+OBJDIR =	../../..
 # True source directory
-VPATH =		$(ROOT)/edit/visedit
+VPATH =		$(ROOT)/tycho/editors/visedit
 
-# Get configuration info
-CONFIG =	$(ROOT)/mk/tycho.mk
+# get configuration info
+CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-TCL_SRCS =
+TCL_SRCS = 
   
-ITCL_SRCS = \
-	DirectedAcyclicGraph.itcl \
-	EditBubbleAndArc.itcl \
-	EditDAG.itcl \
-	EditForest.itcl \
-	EditSTD.itcl \
-	Forest.itcl \
-	Graph.itcl \
-	Graphics.itcl \
-	HTMLExport.itcl
+ITCL_SRCS =
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
-	graphics.style \
-	pkgIndex.tcl \
-	visedit.tcl
+EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES = doc img test tclIndex 
+MISC_FILES =		doc img test tclIndex 
 
 # Sub directories to run make in.
-DIRS =			doc test
+DIRS =			doc
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =	tclIndex
+REALCLEAN_STUFF =			tclIndex
 
-# Title for the tydoc index page
-TYDOC_DESC =		Index of classes in tycho/edit/visedit
+# Include information on all stars and targets.
+include $(ROOT)/mk/stars.mk
 
-all install: $(MISC_SRCS) tclIndex 
+all install: tclIndex $(MISC_SRCS)
+
+tclIndex: $(TCL_SRCS) $(ITCL_SRCS)
+	@echo "Updating tclIndex"
+	rm -f $@
+	echo 'set auto_path [linsert $$auto_path 0 $(ITCL_LIBDIR)]; auto_mkindex . $(TCL_SRCS) $(ITCL_SRCS)' | $(ITCL2_0_SH)
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
 

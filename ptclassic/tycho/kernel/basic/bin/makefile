@@ -48,13 +48,9 @@ TCL_SRCS =
 
 ITCL_SRCS = 
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
-	basic \
-	pttycho \
-	tywish \
-	tyshell
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) basic
 
-MISC_FILES = README.txt
+MISC_FILES = 
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
@@ -63,13 +59,13 @@ REALCLEAN_STUFF =
 TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all:  sources $(MISC_SRCS)
-	chmod a+x pttycho tyshell tywish
+all install: sources $(MISC_SRCS) tclIndex
 
-install: all tybin_install
-
-.PHONY: all install tybin_install
+# Make the shell script/s executable
+sources::
+	chmod a+x basic
 
 # We don't include common.mk since we don't use the compiler here
-include $(ROOT)/mk/tycommon.mk
+include $(ROOT)/mk/no-compile.mk
+
 

@@ -2,37 +2,42 @@
 # @Version: $Id$
 # @Author: John Reekie
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
+#  
+# Permission is	hereby granted,	without	written	agreement and without
+# license or royalty fees, to use, copy, modify, and distribute	this
+# software and its documentation for any purpose, provided that	the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
 # 
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that the
-# above copyright notice and the following two paragraphs appear in all
-# copies of this software.
-# 
-# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# IN NO	EVENT SHALL THE	UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT,	SPECIAL, INCIDENTAL, OR	CONSEQUENTIAL DAMAGES
 # ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN	ADVISED	OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 # 
 # THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-# ENHANCEMENTS, OR MODIFICATIONS.
-# 
-# 						PT_COPYRIGHT_VERSION_2
-# 						COPYRIGHTENDKEY
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES	OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.	THE SOFTWARE
+# PROVIDED HEREUNDER IS	ON AN "AS IS" BASIS, AND THE UNIVERSITY	OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT,	UPDATES,
+# ENHANCEMENTS,	OR MODIFICATIONS.
+#							  COPYRIGHTENDKEY
 ##########################################################################
 
+# Explicitly load the superclass. I don't really know why this is
+# needed, but the common arrays get upset otherwise.
+namespace ::tycho {
+    if { [::info classes Picture] == "" } {
+        uplevel #0 {source $tychoslate/Picture.itcl}
+    }
+}
 
 ##########################################################################
-## LabeledLine
+## LabelledLine
 #
-# <i>LabeledLine</i> is a line with a text label attached to it.
+# <i>LabelledLine</i> is a line with a text label attached to it.
 # The text label ia automatically placed near the center of the line,
 # and an optional offset can be used to allow manual repositioning
 # of the line. In all other respects. it behaves just like a regular
@@ -41,40 +46,35 @@
 #
 # <p><b>Options</b>
 #
-# <ul>
-# <li><b>-anchor</b>:
-# The anchor position of the text label relative to the "center"
+# <dl>
+# <dt><dd>
+# <dl>
+# <dt><b>-anchor</b>
+# <dd>The anchor position of the text label relative to the "center"
 # of the line. This is the anchoring that will first be tried by the
 # item; if however, this anchoring cause the text item to overlap
 # the line, then the anchor will be changed (if possible) to an
 # anchor that causes it to _not_ overlap the line. By default, it
 # is "s".
 #
-# <li><b>-arrow</b>:
-# The location of the arrow-head on the line: can be
+# <dt><b>-arrow</b>
+# <dd>The location of the arrow-head on the line: can be
 # one of <i>none</i>, <i>first</i>, <i>last</i>, or <i>both</i>. 
 # <i>none</i> by default.
 #
-# <li><b>-fill</b>:
-# The color of the line. Black by default.
+# <dt><b>-fill</b>
+# <dd>The color of the line. Black by default.
 #
-# <li><b>-smooth</b>:
-# The flag controlling whether the line is
+# <dt><b>-smooth</b>
+# <dd>The flag controlling whether the line is
 # drawn with curves instead of straight segments. Off by default.
 #
-# <li><b>-text</b>:
-# The label of the item. If the line has an odd number of vertices,
+# <dt><b>-text</b>
+# <dd>The label of the item. If the line has an odd number of vertices,
 # the label is placed near the center vertex; if it has an even number of
 # vertices, the label is placed near the center of the center segment.
 # 
-# </ul>
-#
-# <p><b>Components</b>
-#
-# <ul>
-# <li><b>label</b>:
-# The editable text label.
-# </ul>
+# </dl></dl>
 #
 # <p><b>Bugs</b>: (none)
 #
@@ -90,16 +90,45 @@
 #
 #  <P><b>Example</b>
 #
+#  <P>Create a labelled line and an object for moving it around:
 # <tcl quiet><pre>
-#   package require slate.demo
-#   ::demo::demoLabeledLine
+#   source $tycho/editors/slate/doc/internals/newslate.itcl
+#   set l [$slate create LabelledLine 100 50 160 100 160 200 &#92
+#               -arrow last -text FooBar]
+#   set d [$slate create Solid 150 210 160 200 170 210 160 220 150 210 &#92
+#   		-color green -tags moveable]
+#   $slate constraint $d "move" {lambda id x y -> &#92
+# 		$slate reshape $l $x $y "end"}
 # </pre></tcl>
 #
-class ::tycho::LabeledLine {
-    inherit ::tycho::ComplexItem
+# Move the diamond around to see how the label moves.
+#
+class ::tycho::LabelledLine {
+    inherit ::tycho::Picture
+
+    # Create a new item
+    proc construct {id canvas slate tags args}
 
     ###################################################################
-    ####                         public procs                      ####
+    ####                            options                        ####
+
+    # The anchor position of the label. Defaults to center
+    common _anchor
+
+    # The position of the arrow: none, first, last, both
+    common _arrow
+
+    # The color of the line
+    common _fill
+
+    # Enable "smooth"
+    common _smooth
+
+    # The text in the label
+    common _text
+
+    ###################################################################
+    ####                     option update procs                   ####
 
     # Update the *-anchor* option
     proc _anchor {id canvas slate anchor}
@@ -116,106 +145,107 @@ class ::tycho::LabeledLine {
     # Update the *-text* option
     proc _text {id canvas slate text}
 
-    # Create a new item
-    proc construct {id canvas slate tags args}
+    ###################################################################
+    ####                         public procs                      ####
 
     # Set or get the lines's coordinates
     proc coords {id canvas slate args}
 
     ###################################################################
-    ####                          private variables                ####
+    ####                         protected variables               ####
+
+    # The item with the text label
+    common textitem
 
     # The virtual "method" table
-    private common methodtable
+    common methodtable
 
     # Default values of this item's options
-    private common optiondefault
-}
+    common optiondefault
 
-###################################################################
-####                       class initialization                ####
+    # LabelledLines are shaped like... lines
+    common shape "line"
 
-namespace eval ::tycho::LabeledLine {
+    ###################################################################
+    ####                       class initialization                ####
+
     #### Set method table
-    array set methodtable [array get ::tycho::ComplexItem::methodtable]
+    array set methodtable [array get ::tycho::Picture::methodtable]
 
-    set methodtable(_anchor)   ::tycho::LabeledLine::_anchor
-    set methodtable(_arrow)    ::tycho::LabeledLine::_arrow
-    set methodtable(_fill)     ::tycho::LabeledLine::_fill
-    set methodtable(_smooth)   ::tycho::LabeledLine::_smooth
-    set methodtable(_text)     ::tycho::LabeledLine::_text
+    set methodtable(_anchor)   ::tycho::LabelledLine::_anchor
+    set methodtable(_arrow)    ::tycho::LabelledLine::_arrow
+    set methodtable(_fill)     ::tycho::LabelledLine::_fill
+    set methodtable(_smooth)   ::tycho::LabelledLine::_smooth
+    set methodtable(_text)     ::tycho::LabelledLine::_text
 
-    set methodtable(construct)  ::tycho::LabeledLine::construct
-    set methodtable(coords)     ::tycho::LabeledLine::coords
+    set methodtable(construct)  ::tycho::LabelledLine::construct
+    set methodtable(coords)     ::tycho::LabelledLine::coords
 
     #### Set option defaults
-    array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
+    array set optiondefault [array get ::tycho::Picture::optiondefault]
 
     set optiondefault(-anchor)	"s"
     set optiondefault(-arrow)   last
     set optiondefault(-fill)	black
-    set optiondefault(-shape)   line
     set optiondefault(-smooth)  off
     set optiondefault(-text)	""
 }
-
 
 ##########################################################################
 ## -anchor option configuration
 #
 # Move the item if necessary to avoid overlapping the line.
 #
-body ::tycho::LabeledLine::_anchor {id canvas slate anchor} {
-    set option(anchor$id) $anchor
-    if { ! [::info exists component(label$id)] } {
+body ::tycho::LabelledLine::_anchor {id canvas slate anchor} {
+    set _anchor($id) $anchor
+    if { ! [::info exists textitem($id)] } {
 	return
     }
-    $canvas itemconfigure $component(label$id) -anchor $anchor
-    
+    $canvas itemconfigure $textitem($id) -anchor $anchor
+
     # Check if the text anchor needs to be changed
-    if { [::tycho::lmember [eval $canvas find overlapping \
-	    [eval ::tycho::Rectangle::shrink \
-	    [$canvas bbox $component(label$id)] 2]] $primary($id)] } {
+    if { [lmember [eval $canvas find overlapping \
+	    [rectShrink [$canvas bbox $textitem($id)] 2]] $primary($id)] } {
 	# Build the list of anchor points
 	set anchors {s n e w se sw ne nw}
 
 	# For each, move the text and test for overlap again
 	foreach a $anchors {
-	    $canvas itemconfigure $component(label$id) -anchor $a
-	    if { ! [::tycho::lmember [eval $canvas find overlapping \
-		    [eval ::tycho::Rectangle::shrink \
-		    [$canvas bbox $component(label$id)] 2]] $primary($id)] } {
+	    $canvas itemconfigure $textitem($id) -anchor $a
+	    if { ! [lmember [eval $canvas find overlapping \
+		    [rectShrink [$canvas bbox $textitem($id)] 2]] \
+		    $primary($id)] } {
 		# Success!
 		break
 	    }
 	}
 	# Remember the anchor we ended up with. (It may be that we didn't
 	# find a good anchor. Too bad, there's nothing we can do about it...)
-	set option(anchor$id) $a
+	set _anchor($id) $a
     }
 }
 
 ##########################################################################
 ## -arrow option configuration
 #
-body ::tycho::LabeledLine::_arrow {id canvas slate arrow} {
-    set option(arrow$id) $arrow
+body ::tycho::LabelledLine::_arrow {id canvas slate arrow} {
+    set _arrow($id) $arrow
     $canvas itemconfigure $primary($id) -arrow $arrow
 }
 
 ##########################################################################
 ## -fill option configuration
 #
-body ::tycho::LabeledLine::_fill {id canvas slate fill} {
-    set option(fill$id) $fill
+body ::tycho::LabelledLine::_fill {id canvas slate fill} {
+    set _fill($id) $fill
     $canvas itemconfigure $primary($id) -fill $fill
 }
 
 ##########################################################################
 ## -smooth option configuration
 #
-body ::tycho::LabeledLine::_smooth {id canvas slate smooth} {
-    set option(smooth$id) $smooth
+body ::tycho::LabelledLine::_smooth {id canvas slate smooth} {
+    set _smooth($id) $smooth
     $canvas itemconfigure $primary($id) -smooth $smooth
 }
 
@@ -226,57 +256,53 @@ body ::tycho::LabeledLine::_smooth {id canvas slate smooth} {
 # line at the current *-anchor* position, and moved if necessary to
 # as not to collide with the line.
 #
-body ::tycho::LabeledLine::_text {id canvas slate text} {
+body ::tycho::LabelledLine::_text {id canvas slate text} {
     if { $text != "" } {
-        if { ! [::info exists component(label$id)] } {
+        if { ! [::info exists textitem($id)] } {
 	    # Create the item near the center of the line
-            set component(label$id) [eval $canvas create text \
-                    [::tycho::Line::center [$canvas coords $primary($id)]] \
+            set textitem($id) [eval $canvas create text \
+                    [lineCenter [$canvas coords $primary($id)]] \
                     [list -text $text \
 		    -tags [$canvas gettags $primary($id)]]]
         } else {
-	    $canvas itemconfigure $component(label$id) -text $text
+	    $canvas itemconfigure $textitem($id) -text $text
 	}
-	_anchor $id $canvas $slate $option(anchor$id)
+	_anchor $id $canvas $slate $_anchor($id)
 
     } else {
-        catch {$canvas delete $component(label$id)}
+        catch {$canvas delete $textitem($id)}
     }
-    set option(text$id) $text
+    set _text($id) $text
 }
 
 ##########################################################################
 #### construct
 #
-body ::tycho::LabeledLine::construct {id canvas slate tags args} {
-    # Split coordinates and options
-    if { [set t [lsearch -glob $args {-[a-zA-Z]*}]] != -1 } {
-	set options [lrange $args $t end]
-	set args [lreplace $args $t end]
-    }
+body ::tycho::LabelledLine::construct {id canvas slate tags args} {
+    getalloptions options args
 
     # Initialize the options
-    foreach {opt val} [concat [array get optiondefault] $options] {
-	set option([string trimleft $opt -]$id) $val
+    foreach {option value} [concat [array get optiondefault] $options] {
+	set _[string trimleft $option -]($id) $value
     }
 
     # Create the primary component -- the line
     set primary($id) [eval $canvas create line $args [list \
-	    -arrow   $option(arrow$id) \
-	    -fill    $option(fill$id) \
-	    -smooth  $option(smooth$id) \
+	    -arrow   $_arrow($id) \
+	    -fill    $_fill($id) \
+	    -smooth  $_smooth($id) \
 	    -tags $tags]]
 
     # Create the text label
-    _text $id $canvas $slate $option(text$id)
+    _text $id $canvas $slate $_text($id)
 }
 
 ##########################################################################
 #### coords
 #
-# Set or read the LabeledLine's coordinates
+# Set or read the LabelledLine's coordinates
 #
-body ::tycho::LabeledLine::coords {id canvas slate args} {
+body ::tycho::LabelledLine::coords {id canvas slate args} {
     # No args: just return coordinates
     if { $args == "" } {
 	return [$canvas coords $primary($id)]
@@ -285,9 +311,12 @@ body ::tycho::LabeledLine::coords {id canvas slate args} {
     # Move the line
     eval $canvas coords $primary($id) $args
 
-    # Make sure the text is in the center of the line
-    eval $canvas coords $component(label$id) [::tycho::Line::center $args] 
+    # Configure the anchor to move the label
+    _anchor $id $canvas $slate $_anchor($id)
+}
 
-    # Configure the anchor so the label dodges the line
-    _anchor $id $canvas $slate $option(anchor$id)
+
+### TEMPORARY
+proc lineCenter {line} {
+    lineAspect $line vertex-1
 }

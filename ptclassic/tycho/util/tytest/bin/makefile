@@ -48,7 +48,7 @@ TCL_SRCS =
 
 ITCL_SRCS = 
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) tytest tytestsh
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) tytest
 
 MISC_FILES = README.txt
 
@@ -59,12 +59,12 @@ REALCLEAN_STUFF =
 TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all: sources $(MISC_SRCS)
-	-chmod a+x tytest
-	-chmod a+x tytestsh
+all: sources $(MISC_SRCS) tclIndex
+	chmod a+x tytest
 
-install: all tybin_install
+install: all
 
-include $(ROOT)/mk/tycommon.mk
+# We don't include common.mk since we don't use the compiler here
+include $(ROOT)/mk/no-compile.mk
 
 

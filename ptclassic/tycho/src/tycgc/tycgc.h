@@ -5,7 +5,7 @@ Authors: John Reekie.
 
 Version: $Id$
 
-Copyright (c) 1997-%Q% The Regents of the University of California.
+Copyright (c) 1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -31,15 +31,3 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 */
 #include "../tytimer/tytimer.h"
-
-void
-connectControl (char *galaxyname, char *starname, char *ctrlname,
-      Tcl_CmdProc *callback);
-
- 
-void
-displaySliderValue (char *win, char *name, char *value);
-
-void
-errorReport(char *message);
-

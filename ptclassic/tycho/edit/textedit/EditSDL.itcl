@@ -110,8 +110,8 @@ body ::tycho::EditSDL::keywords {} {
 body ::tycho::EditSDL::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    [file join $TYCHO edit textedit doc usersGuides \
-	    EditSDLHelp.html] html
+	    [file join $TYCHO editors textedit doc usersGuides \
+	    EditSDLHelp.html]
 }
 
 ####################################################################

@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)testFiles.itcl	1.10 04/16/97
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -44,9 +44,11 @@
 # The modal dialogs are adequately tested by the demo script.
 
 
-# Make sure that the required packages are loaded
-package require tycho.util.tytest
-package require tycho.edit.textedit
+if {[string compare test [info procs test]] == 1} then { 
+    source [file join $TYCHO kernel test testDefs.tcl]
+} {}
+
+set tychoExitWhenNoMoreWindows 0
 
 #set VERBOSE 1
 

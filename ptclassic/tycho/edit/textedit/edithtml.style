@@ -1,11 +1,10 @@
-# -*- model: tcl -*-
 #
 # $Id$
 #
 # The "edithtml" master style-sheet
 #
-configure -title "HTML editor colors"
-configure -description {
+modelconfigure -label "HTML editor colors"
+modelconfigure -description {
     Additional color settings for HTML editors.
 }
 
@@ -24,8 +23,4 @@ style default \
     parameter destColor forestGreen \
 	    -type color \
 	    -label "?destColor?"
-
-    parameter targetColor lightskyblue \
-	-type color \
-	-label "?Target color?"
 }

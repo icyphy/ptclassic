@@ -1,4 +1,4 @@
-# Package index for the tycho.typt.edit package
+# Package index for the tycho.typt.editors package
 #
 # @Author: John Reekie
 #
@@ -31,7 +31,7 @@
 ##########################################################################
 
 
-package ifneeded tycho.typt.edit 0.2.1 \
-	[list source [file join $dir edit.tcl]]
+package ifneeded tycho.typt.editors 0.2.1 \
+	[list source [file join $dir editors.tcl]]
 
 

@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)testEditHTML.itcl	1.3 08/15/97
 #
-# @Copyright (c) 1997-%Q% The Regents of the University of California.
+# @Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,12 +30,27 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# Make sure that the required packages are loaded
-package require tycho.util.tytest
-package require tycho.edit.textedit
+# Tycho test bed, see $TYCHO/doc/coding/testing.html for more information.
+
+# Load up the test definitions.
+if {[string compare test [info procs test]] == 1} then { 
+    source [file join $TYCHO kernel test testDefs.tcl]
+} {}
 
 # Uncomment this to get a full report, or set in your Tcl shell window.
 # set VERBOSE 1
+
+# If a file contains non-graphical tests, then it should be named .tcl
+# If a file contains graphical tests, then it should be called .itcl
+# 
+# It would be nice if the tests would work in a vanilla itkwish binary.
+# Check for necessary classes and adjust the auto_path accordingly.
+#
+if {[namespace ptolemy {info classes File}] == {} } {
+    uplevel #0 {
+	set ::auto_path [linsert $auto_path 0 [file join $TYCHO kernel]] 
+    }
+}
 
 ######################################################################
 #### Test various special bindings
@@ -134,7 +149,6 @@ plaintext</xmp>
 # This is not really a test, just a quick way to generate documentation.
 #
 test EditHTML-1.2 {Generate HTML documentation for EditHTML bindings} {
-    # FIXME: this will probably break with windows bindings.
     set view [tycho::view EditHTML]
     set win [$view displayer windowName]
     wm deiconify $win
@@ -167,101 +181,101 @@ test EditHTML-1.2 {Generate HTML documentation for EditHTML bindings} {
     $view get 1.0 end
 } {<h2>Bindings for EditHTML chars, fonts and blocks menus</h2>
 <h3>chars</h3>
-<dl><dt><code></code>
-<dd>ampersand<dt><code></code>
-<dd>greaterthan<dt><code></code>
-<dd>lessthan<dt><code></code>
+<dl><dt><code>C-c &</code>
+<dd>ampersand<dt><code>C-c ></code>
+<dd>greaterthan<dt><code>C-c <</code>
+<dd>lessthan<dt><code>C-c \</code>
 <dd>backslash</dl>
 <h3>fonts</h3>
-<dl><dt><code></code>
+<dl><dt><code>C-c C-b</code>
 <dd>bold <code>&lt;b&gt;&lt;/b&gt;</code>
-<dt><code></code>
+<dt><code>C-c c</code>
 <dd>code <code>&lt;code&gt;&lt;/code&gt;</code>
-<dt><code></code>
+<dt><code>C-c Tab</code>
 <dd>italic <code>&lt;i&gt;&lt;/i&gt;</code>
-<dt><code></code>
+<dt><code>C-c Ret</code>
 <dd>sample <code>&lt;samp&gt;&lt;/samp&gt;</code>
-<dt><code></code>
+<dt><code>C-c C-c</code>
 <dd>cite <code>&lt;cite&gt;&lt;/cite&gt;</code>
-<dt><code></code>
+<dt><code>C-c C-e</code>
 <dd>emphasis <code>&lt;em&gt;&lt;/em&gt;</code>
-<dt><code></code>
+<dt><code>C-c C-f</code>
 <dd>fixed <code>&lt;tt&gt;&lt;/tt&gt;</code>
-<dt><code></code>
+<dt><code>C-c C-k</code>
 <dd>keyboard <code>&lt;kbd&gt;&lt;/kbd&gt;</code>
-<dt><code></code>
+<dt><code>C-c C-s</code>
 <dd>strong <code>&lt;strong&gt;&lt;/strong&gt;</code>
-<dt><code></code>
+<dt><code>C-c C-v</code>
 <dd>variable <code>&lt;var&gt;&lt;/var&gt;</code>
 </dl>
 <h3>blocks</h3>
-<dl><dt><code></code>
+<dl><dt><code>C-c a</code>
 <dd>address <code>
 &lt;address&gt;&lt;/address&gt;</code>
-<dt><code></code>
+<dt><code>C-c b</code>
 <dd>blockquote <code>
 &lt;blockquote&gt;&lt;/blockquote&gt;</code>
-<dt><code></code>
+<dt><code>C-c d</code>
 <dd>displaylist <code>
 &lt;dl&gt;
 &lt;dt&gt;
 &lt;dd&gt;
 &lt;/dl&gt;</code>
-<dt><code></code>
+<dt><code>C-c e</code>
 <dd>displayitem <code>
 &lt;dt&gt;
 &lt;dd&gt;</code>
-<dt><code></code>
+<dt><code>C-c g</code>
 <dd>image <code>&lt;img src=""&gt;</code>
-<dt><code></code>
+<dt><code>C-c h 1</code>
 <dd>header1 <code>
 &lt;h1&gt;&lt;/h1&gt;
 </code>
-<dt><code></code>
+<dt><code>C-c h 2</code>
 <dd>header2 <code>
 &lt;h2&gt;&lt;/h2&gt;
 </code>
-<dt><code></code>
+<dt><code>C-c h 3</code>
 <dd>header3 <code>
 &lt;h3&gt;&lt;/h3&gt;
 </code>
-<dt><code></code>
+<dt><code>C-c h 4</code>
 <dd>header4 <code>
 &lt;h4&gt;&lt;/h4&gt;
 </code>
-<dt><code></code>
+<dt><code>C-c l</code>
 <dd>hyperlink <code>&lt;a href=""&gt;&lt;/a&gt;</code>
-<dt><code></code>
+<dt><code>C-c m</code>
 <dd>menu <code>
 &lt;menu&gt;
 &lt;li&gt; 
 &lt;/menu&gt;</code>
-<dt><code></code>
+<dt><code>C-c n</code>
 <dd>numberedlist <code>
 &lt;ol&gt;
 &lt;li&gt; 
 &lt;/ol&gt;</code>
-<dt><code></code>
+<dt><code>C-c s</code>
 <dd>unumberedlist <code>
 &lt;ul&gt;
 &lt;li&gt; 
 &lt;/ul&gt;</code>
-<dt><code></code>
+<dt><code>C-c i</code>
 <dd>listitem <code>
 &lt;li&gt; </code>
-<dt><code></code>
+<dt><code>C-c p</code>
 <dd>paragraph <code>
 &lt;p&gt;</code>
-<dt><code></code>
+<dt><code>C-c r</code>
 <dd>reference <code>&lt;a name=""&gt;&lt;/a&gt;</code>
-<dt><code></code>
+<dt><code>C-c C-p</code>
 <dd>preformatted <code>
 &lt;pre&gt;
 &lt;/pre&gt;</code>
-<dt><code></code>
+<dt><code>C-c t</code>
 <dd>title <code>
 &lt;title&gt;&lt;/title&gt;</code>
-<dt><code></code>
+<dt><code>C-c x</code>
 <dd>plaintext <code>&lt;xmp&gt;
 &lt;/xmp&gt;</code>
 </dl>

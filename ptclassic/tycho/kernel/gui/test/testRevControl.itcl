@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,93 +30,75 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# Make sure that the required packages are loaded
-package require tycho.util.tytest
-package require tycho.kernel.gui
+if {[string compare test [info procs test]] == 1} then { 
+    source testDefs.tcl
+} {}
+
+set TestSuite 1
+
 
 proc testRevControl {versionControlSystem} {
     if { "$versionControlSystem" == "SCCS" } {
 	set testdir sccstst
 	set testfile [file join $testdir sccs.itcl]
     } else {
-	set testdir rcstst
+	set testdir rcsstst
 	set testfile [file join $testdir rcs.itcl]
     }
-    file delete -force $testdir
-    file mkdir $testdir
+    # FIXME: Unixism
+    exec rm -rf $testdir
+    exec mkdir $testdir
     set fd [open $testfile w]
     puts $fd "# This is a test file for the Tycho $versionControlSystem system"
-    # Generate percentWpercent so that SCCS does not munge this for us
-    # when we check in the file.
-    puts $fd [format "# Version: %sW%s %sG%s" % % % %]
-    puts $fd [format "# Copyright: %sQ%s" % %]
-
+    puts $fd "# Version: $Id$"
+    puts $fd "# copyright %Q%"
     close $fd
 
-    #set wname [::tycho::autoName .view]
-    #::tycho::Displayer $wname
-    set myEditView [::tycho::view Edit -file $testfile]
-    #$wname centerOnScreen
-    set myRevControl [::tycho::RevControl::setup $myEditView $myEditView]
-    #puts "myEditView: $myEditView myRevControl$myRevControl"
-    ::tycho::safeUpdate $myEditView
+    set wname [::tycho::autoName .view]
+    ::tycho::Displayer $wname
+    set myEdit [::tycho::Edit $wname.v -file $testfile]
+    $wname centerOnScreen
+    set myRevControl [::tycho::RevControl::setup $wname $myEdit]
+    ::tycho::safeUpdate $wname
 
     if {"$versionControlSystem" == "SCCS" } {
 	# Press the Yes(SCCS) button
-	$myRevControl invoke sccs
+	$myRevControl invoke 0
     } else {
 	# Press the Yes(RCS) button
-	$myRevControl invoke rcs
+	$myRevControl invoke 1
     }
 
     # Press the 'Checkout' button
-    $myEditView.revcontrol invoke checkout
-    ::tycho::safeUpdate $myEditView.revcontrol
-
-    # This is a proc, not a test body, so it is not executed in the global
-    # scope, so we need to declare TY_TEST_MODAL as global
-    global TY_TEST_MODAL
-    # This script is executed inside Dialog::wait by getComment
-    set TY_TEST_MODAL {
-	{
-	    %0 insert body "This is a message"
-	    update idletasks
-	    after 500
-	    %0 ok
-	}
-    }
+    $wname.revcontrol invoke 1
+    ::tycho::safeUpdate $wname.revcontrol
 
     # Press the 'Checkin' button
-    $myEditView.revcontrol invoke checkin
-    ::tycho::safeUpdate $myEditView.revcontrol
+    $wname.revcontrol invoke 0
+    ::tycho::safeUpdate $wname.revcontrol
 
     # Press the 'Checkout' button
-    $myEditView.revcontrol invoke checkout
-    ::tycho::safeUpdate $myEditView.revcontrol
+    $wname.revcontrol invoke 1
+    ::tycho::safeUpdate $wname.revcontrol
 
     # Press the 'History' button
-    # $myEditView.revcontrol invoke history
-    $myEditView.revcontrol component historypanel open
-    ::tycho::safeUpdate $myEditView.revcontrol
+    $wname.revcontrol invoke 2
+    ::tycho::safeUpdate $wname.revcontrol
 
     # Press the 'unedit' button
-    $myEditView.revcontrol invoke unedit
-    ::tycho::safeUpdate $myEditView.revcontrol
+    $wname.revcontrol invoke 3
+    ::tycho::safeUpdate $wname.revcontrol
 
     # Press the 'esc' button
-    $myEditView.revcontrol invoke cancel
-
-    # Remove the test file windows when we are done
-    global duration
-    after $duration delete object [$myEditView displayer]
+    $wname.revcontrol invoke 4
 }
 
 test SCCS-1.1 {test out sccs} {
     testRevControl SCCS
-    list {Done}
-} {Done}
+} {}
 
 test RCS-1.1 {test out sccs} {
     testRevControl RCS
-    list {Done}
-} {Done}
+} {}
+
+doneTests

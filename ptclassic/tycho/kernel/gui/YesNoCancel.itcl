@@ -1,10 +1,9 @@
-# Yes-no query box with a cancel button.
+# Yes-no query box.
 #
-# @Author: Edward A. Lee
+# $Id$
+# Author: Edward A. Lee
 #
-# @Version: $Id$
-#
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -33,34 +32,20 @@
 
 ##########################################################################
 #### YesNoCancel
-# Query the user for a yes/no/cancel response to a question. 
-# This class is now somewhat redundant, since YesNoQuery can be used
-# (the Escape key serves to Cancel, usually, in that it dismisses
-# the window without invoking any of the buttons). The
+# Query the user for a yes/no/cancel response to a question. The
 # command to execute in response to the user's answer can be specified
 # using the options "-yescommand", "-nocommand", and "-cancelcommand".
-# The value returned by whichever command is executed will be that
-# returned by the procedure <code>wait</code>, if that is
-# used. By default, the value returned by the cancel button is -1,
-# while yes is 1 and no is 0.  If the window is dismissed with Escape,
-# then a null string is returned.
+# The value returned by whichever command is executed can be obtained
+# by creating the dialog box using the procedure newModal rather than
+# directly creating an instance.  The value returned by the cancel button
+# is -1, while yes is 1 and no is 0.
 #
-# Below is a simple example
-# <tcl><pre>
-# set nm [::tycho::autoName .tYNC]
-# ::tycho::YesNoCancel $nm &#92
-#     -text "Are you awake?"
-# ::tycho::Dialog::wait $nm
-# </pre></tcl>
-# The value returned will be -1, 0 or 1, depending on which button is hit,
-# or an empty string if the user dismisses the window with Escape.
-#
-class ::tycho::YesNoCancel {
-    inherit ::tycho::YesNoQuery
+class tycho::YesNoCancel {
+    inherit YesNoQuery
 
-    # The command to execute on a cancel response.
+    # The command to execute on a yes response.
     itk_option define -cancelcommand cancelcommand CancelCommand \
-	    "::tycho::Dialog::answer -1"
+	    "DialogWindow::answer -1"
 
     constructor {args} {}
 }
@@ -68,20 +53,17 @@ class ::tycho::YesNoCancel {
 ##########################################################################
 #### constructor
 #
-body ::tycho::YesNoCancel::constructor {args} {
+body tycho::YesNoCancel::constructor {args} {
 
     # Pack the cancel button
-    addButton cancel -text "Cancel" -underline 0 \
-	    -command "$this execCommand -cancelcommand; \
-	    $this prevWindow;
-	    delete object $this"
+    addButton cancel -text "Cancel <Esc>" \
+	    -command "$this execCommand -cancelcommand; delete object $this"
 
     # Change the keyboard accelerator for the No button.
-    # No longer necessary.
-    # $itk_component(bbox) buttonconfigure no -text "No <Del>"
+    $itk_component(bbox) buttonconfigure no -text "No <Del>"
 
-    # bind $prefix <Delete> "$this invoke no"
-    # bind $prefix <Escape> "$this invoke cancel"
+    bind $prefix <Delete> "$this invoke no"
+    bind $prefix <Escape> "$this invoke cancel"
 
     # Explicitly handle configs that may have been ignored earlier.
     eval itk_initialize $args

@@ -41,43 +41,12 @@ VPATH =		$(ROOT)/kernel/basic
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-# The variables below are used to create distributions
-TYPACKAGE =     tycho.kernel.basic
-TYPACKAGE_ROOTDIR = $(ROOT)/kernel
-TYPACKAGE_DIR = basic
-# If you change JVERSION, modify the version numbers in basic.tcl
-TYVERSION =     2.0
-TYDIST =        $(TYPACKAGE)$(TYVERSION)
-TYZIP =         $(TYPACKAGE_DIR)/$(TYPACKAGE).zip
-TYJARFILE =
-
 # Sub directories to run make in.
-DIRS =	 bin demo doc test
+DIRS =	
 
-TCL_SRCS = \
-	Compat.tcl \
-	List.tcl \
-	Loader.tcl \
-	Lib.tcl \
-	Math.tcl \
-	Misc.tcl \
-	Path.tcl \
-	Startup.tcl \
-	String.tcl \
-	Tyexec.tcl \
-	URLPath.tcl\
-	tychoMakeClassDAG.tcl
+TCL_SRCS = 
 
-
-ITCL_SRCS = \
-	Builder.itcl \
-	CircularList.itcl \
-	Object.itcl \
-	Registry.itcl \
-	Resource.itcl \
-	ResourceFile.itcl \
-	Stack.itcl \
-	Uninstantiable.itcl
+ITCL_SRCS = 
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	basic.tcl \
@@ -85,10 +54,7 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	makefile \
 	pkgIndex.tcl
 
-MISC_FILES =  $(DIRS) tclIndex
-
-# make checkjunk will not report OPTIONAL_FILES as trash
-OPTIONAL_FILES = adm
+MISC_FILES = adm bin demo doc test
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
@@ -97,11 +63,7 @@ REALCLEAN_STUFF =
 TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all: sources $(MISC_SRCS)
-
-install: all subinstall
-
-.PHONY: all install subinstall
+all install: sources $(MISC_SRCS)
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk

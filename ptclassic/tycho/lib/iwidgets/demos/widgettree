@@ -1,17 +1,12 @@
 #!/bin/sh
 # ----------------------------------------------------------------------
 #  DEMO: Widget tree in [incr Widgets]
-# @(#)widgettree	1.1 07/30/97
+# $Id$
 # ----------------------------------------------------------------------
 #\
-	exec itkwish -f "$0" ${1+"$@"}
+exec itkwish -f "$0" ${1+"$@"}
 
-catch {source ../generic/labeledwidget.itk}
-catch {source ../generic/scrolledwidget.itk}
-catch {source ../generic/scrolledframe.itk}
-
-catch {delete class iwidgets::Widgettree}
-source ../generic/widgettree.itk
+source widgettree.itk
 
 # The first widget is a simple expanding widget that doesn't
 # do anything other than demonstrate how the Widgettree
@@ -30,42 +25,48 @@ iwidgets::scrolledframe .f \
         -hscrollmode dynamic -vscrollmode dynamic \
         -height 200 -width 150
 
-set w [.f childsite].w
+set w [.f childsite].
 iwidgets::widgettree $w -createcommand "expand $w"
 $w add node foo -text foo
 $w add node bar -text bar
-# grid $w -sticky nw
-pack $w -fill both -expand on
+grid $w -sticky nw
 
 pack .f -fill both -expand on
 
 # The second widget illustrates how arbitrary widgets
-# can be included as leaves of the tree. The create command
-# is set to call a proc that creates the appropriate
-# preference setting panel.
+# can be included as leaves of the tree. The expand
+# command is set to call a proc that creates a preference
+# setting panel.
 
-proc createPanel {win tag} {
+proc mkPref {win tag} {
+    set path [$win path $tag]
+
     switch -exact $tag {
 	"size" {
-	    $win add radiobox size.s
-	    set r [$win component size.s]
+	    radiobox $path
+
+	    $path add small -text "Small"
+	    $path add med -text "Medium"
+	    $path add large -text "Large"
+	    $path add xlarge -text "Biggie"
+
+	    $path select med
 	    
-	    $r add small -text "Small"
-	    $r add med -text "Medium"
-	    $r add large -text "Large"
-	    $r add xlarge -text "Biggie"
-	    $r select med
+	    $win place size $path
 	}
 	"address" {
-	    $win add frame address.a
-	    set f [$win component address.a]
-	    
-	    foreach {name text} {
-		name "Name" addr "Street" city "City, State" email "E-mail"
-	    } {
-		entryfield $f.$name -labeltext $text
-		grid $f.$name -sticky e
-	    }
+	    frame $path
+
+	    entryfield $path.name -labeltext "Name"
+	    grid $path.name -sticky e
+	    entryfield $path.addr -labeltext "Street"
+	    grid $path.addr -sticky e
+	    entryfield $path.addr2 -labeltext "City, State"
+	    grid $path.addr2 -sticky e
+	    entryfield $path.email -labeltext "E-mail"
+	    grid $path.email -sticky e
+
+	    $win place address $path
 	}
     }
 }
@@ -75,67 +76,15 @@ iwidgets::scrolledframe .g \
         -hscrollmode dynamic -vscrollmode dynamic \
         -height 200 -width 150
 
-set v [.g childsite].w
-iwidgets::widgettree $v -createcommand "createPanel $v"
-
-$v add node size -text Size
-$v add node address -text Address
+set v [.g childsite].
+iwidgets::widgettree $v -createcommand "mkPref $v"
+$v add node size -text Size:
+$v add node address -text Address:
 grid $v -sticky nw
 
 pack .g -fill both -expand on
 
 
-# The third example is exactly the same, except that the tree
-# contents are created statically.
-
-set junk {
-    catch {delete object .g}
-    iwidgets::scrolledframe .g \
-	    -hscrollmode dynamic -vscrollmode dynamic \
-	    -height 200 -width 150
-
-    set v [.g childsite].w
-
-    iwidgets::widgettree $v {
-	node size -text Size {
-	    radiobox s
-	    with s {
-		add small -text "Small"
-		add med -text "Medium"
-		add large -text "Large"
-		add xlarge -text "Biggie"
-		select med
-	    }
-	}
-	node font -text Font {
-	    query f {
-		group family -initial times -label "Font Family" {
-		    radiobutton times -text "Times"
-		    radiobutton courier -text "Courier"
-		    radiobutton helvetica -text "Helvetica"
-		}
-		group style -initial roman -label "Font Style" {
-		    radiobutton roman -text "Roman"
-		    radiobutton italic -text "Italic"
-		    radiobutton bold -text "Bold"
-		}
-	    }
-	}
-	node address -text Address {
-	    query a {
-		entry name -label "Name"
-		entry street -label "Street"
-		entry city -label "City, State"
-		entry email -label "E-mail"
-	    }
-	}
-    }
-
-    grid $v -sticky nw
-
-    pack .g -fill both -expand on
-}
 
 wm deiconify .
-
 

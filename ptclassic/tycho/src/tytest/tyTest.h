@@ -1,11 +1,11 @@
 /* 
-   Test functions for Tycho packages.
+   Test functions fo Tycho packages.
 
 Authors: John Reekie.
 
 Version: $Id$
 
-Copyright (c) 1996-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -30,13 +30,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
-#include "../tytimer/tytimer.h"
+#include "tyTimer.h"
 
 /*
  * Tytest_TimerTask
  *
  * A procedure that starts and stop a C "task" of the kind required by
- * the Tycho scheduler. 
+ * tha Tycho scheduler. 
  */
 int
 Tytest_TestTask(ClientData dummy, Tcl_Interp *interp, int argc, char **argv);

@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -50,7 +50,7 @@ ITCL_SRCS =
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) tydoc
 
-MISC_FILES =	README.txt
+MISC_FILES = 
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
@@ -59,12 +59,13 @@ REALCLEAN_STUFF =
 TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all:  sources $(MISC_SRCS)
-	-chmod a+x tydoc
+all install: sources $(MISC_SRCS) tclIndex
 
-install: all tybin_install
+# Make the shell script/s executable
+sources::
+	chmod a+x tydoc
 
-# We have an all rule, so include tycommon.mk.
-include $(ROOT)/mk/tycommon.mk
+# We don't include common.mk since we don't use the compiler here
+include $(ROOT)/mk/no-compile.mk
 
 

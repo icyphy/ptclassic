@@ -3,7 +3,7 @@
 # @Author: John Reekie
 # @Version: $Id$
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright Copyright (c) 1995-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -31,26 +31,17 @@
 
 
 #########################################################################
-#### Uninstantiable
-# This is the superclass for classes that cannot be instantiated.
-# There are a number of these in Tycho, mainly for "managers" of
-# things like colors and fonts. Inheriting from this class indicates
-# that such a class cannot be instantiated and places the classes neatly
-# into the Tycho class hierarchy. All the class contains is a constructor
-# that returns an error, thus preventing the class from being
-# instantiated.
-# 
-# Subclasses of this class thus are a collection of procs and common
-# variables.
+#### Singleton
+# A "singleton" is a class that can have only one instance. This is
+# the superclass for all such classes in Tycho. Rather than actually
+# create an instance, it is simpler and more efficient in itcl to
+# use create a class with a collection of procs and to keep
+# their data in common variables.
 #
-# It may be that this function would be better served by [incr Tcl]
-# namespaces -- this issue needs to be examined again when the
-# Tycho documentation system supports namespaces better.
-#
-class ::tycho::Uninstantiable {
+class ::tycho::Singleton {
 
     constructor {args} {
-	error "The [$this info class] class cannot be instantiated"
+	error "The [info class] class cannot be instantiated"
     }
     destructor {}
 }

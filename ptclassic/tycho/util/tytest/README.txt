@@ -4,21 +4,7 @@ $Id$
 This is the README.txt file for the Tycho
 package tycho.util.tytest.
 
-tycho.util.tytest contains the script definitions
-for the test scripts in every package, and a shell
-script for running individual test scripts.
-
-Every test script in a packages test directory should
-starts with
-
-  package require tycho.util.tytest
-  package require <mypackage>
-
-This will ensure that the script can be run by the
-automated tools. To run a single test script,
-change to the test directory and type
-
-  tytest <scriptname>
+[Insert brief description of tycho.util.tytest here]
 
 
 This package contains the following directories:

@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -35,21 +35,15 @@
 # A palette is an octtools facet that contains other sub-facets.
 # In Ptolemy, a facet is a directory with a .pal suffix.
 # <p>
-# Here is an example of how to use the EditPalette, this example
-# requires Ptolemy be installed locally, and could take a few minutes
-# to bring up an editor
+# Here is an example of how to use the EditPalette:
 # <tcl><pre>
-#     ::tycho::view EditPalette -facet $PTOLEMY/src/domains/cgc/demo/sounds.pal
+#     catch {delete object .f}
+#     ::tycho::EditPalette .f -file $PTOLEMY/init.pal
+#     .f centerOnScreen
 # </pre></tcl>
 #
 class ::tycho::EditPalette {
     inherit ::tycho::EditForest
-
-    ###################################################################
-    ####                            options                        ####
-
-    # Specify the name of the Oct facet associated with the data being edited.
-    itk_option define -facet facet File ""
 
     constructor {args} {}
     destructor {}
@@ -65,27 +59,6 @@ class ::tycho::EditPalette {
 
     # Return the name of the class of graphics widget to use.
     protected method graphicsWidget {} {return ::tycho::EditPaletteWidget}
-
-    # Initialize the menu/status/tool bars
-    protected method _initializeBars {menubar statusbar toolbar}
-}
-
-#######################################################################
-#### -facet configuration
-# Use oct2ptcl to convert a facet from Oct to Ptcl format.
-# If you configure this option after construction, you must invoke
-# <code>reload</code> to view the new facet.
-#
-configbody ::tycho::EditPalette::facet {
-    set facet $itk_option(-facet)
-    if {$facet != "" } {
-	set facet [::tycho::expandPath $facet]
-	set facetTmpFile [::tycho::tmpFileName [file tail $facet] .fst]
-        set recurse 0
-	ptolemyMkFacetGraph [list [list $facet]] $facetTmpFile $recurse $facet
-
-	configure -file $facetTmpFile
-    }
 }
 
 #######################################################################
@@ -104,33 +77,5 @@ body ::tycho::EditPalette::constructor {args} {
 # Open a help window.
 #
 body ::tycho::EditPalette::help {} {
-    global ::TYCHO
-    ::tycho::File::openContext \
-        [file join $TYCHO typt edit doc usersGuides EditPaletteHelp.html] html
-}
-
-####################################################################
-####################################################################
-####                    protected methods                       ####
-
-#####################################################################
-#### _initializeBars
-# Initialize the menu, status, and toolbars associated with this widget.
-# If any of these arguments is null, the associated bar does not
-# exist and must be ignored. This method is called from within
-# the attachDisplayer{} method.
-#
-body ::tycho::EditPalette::_initializeBars {menubar statusbar toolbar} {
-    chain $menubar $statusbar $toolbar
-
-    if {$menubar != {}} {
-        $menubar addMenu special -label Special -underline 0
-        $menubar command showptcl special \
-		-label "Show Ptcl" -underline 0 \
-                -command "::tycho::view EditPtcl -facet $itk_option(-facet)"
-
-        #menubar add "Retarget" Special -underline 0 \
-        #        -command "::tycho::view Retarget -edit $this -toolbar 1"
-    }
-
+    hyperJump "\$TYCHO/editors/visedit/doc/usersGuides/EditPaletteHelp.html" {}
 }

@@ -1,21 +1,20 @@
-# -*- mode: tcl -*-
 #
 # $Id$
 #
 # The "interaction" master style-sheet
 #
-configure -title "Interaction"
-configure -description {
+modelconfigure -label "Interaction"
+modelconfigure -description [
 	This style contains settings for key user-interaction
 	parameters.
 }
 
 style default \
-	-label "Normal" \
+	-label "Default" \
 	-description {
     The default style for user interaction.
 } {
-    parameter confirmOnExit 0 \
+    parameter confirmOnExit 1 \
 	    -type boolean \
 	    -label "Confirm on program exit" \
 	    -description {
@@ -50,35 +49,7 @@ style default \
 	    -type boolean \
 	    -label "Case-sensitive name completion"
 
-    parameter viewHTMLSourceUponOpen 0 \
-	    -type boolean \
-	    -label "When opening a .html file, view the HTML source."
-
-    parameter singleStackTrace 0 \
+    parameter oneWindow 0 \
 	    -type boolean \
 	    -label "Only create a single stack trace window"
-
-    parameter shortcuts automatic \
-            -type choice \
-            -values {automatic windows unix compromise} \
-            -value automatic \
-            -label "Keyboard shortcuts"
-
-    parameter viseditViewOnly 1 \
-	    -type boolean \
-	    -label "visedit classes are view-only"
-}
-
-style quiet \
-	-label "Quieter" \
-	-description {
-    Fewer dialogs.
-} {
-    parameter confirmOnExit 0
-    parameter welcomeWindow 0
-    parameter itclClassRedefinitionWarning 0
-    parameter fileBrowserUseLastDirectory 0
-    parameter caseSensitiveCompletion 1
-    parameter singleStackTrace 1
-    parameter shortcuts automatic
 }

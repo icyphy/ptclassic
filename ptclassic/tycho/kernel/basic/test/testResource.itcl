@@ -1,10 +1,10 @@
 # Test suite for Exec class, this uses graphics, so it must be run with tycho -e
 #
-# @Authors: Kevin Chang
+# @Authors: Christopher Hylands
 #
 # @Version: $Id$ 
 #
-# @Copyright (c) %Q% The Regents of the University of California.
+# @Copyright (c) 1996-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,77 +30,22 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# Make sure that the required packages are loaded
-package require tycho.util.tytest
-package require tycho.kernel.basic
+if {[string compare test [info procs test]] == 1} then { 
+    source [file join $TYCHO kernel test testDefs.tcl]
+} {}
 
-# NOTE: The base class Resource has very little functionality. It
-# is provided as a guideline for other classes to inherit from as
-# a template. The following tests will only check whether the interfaces
-# to the children class are correct or not by checking for correct error
-# flag, correct error message, and other behaviors.
-#
-test Resource-method {Make sure that the interface to methods are intact!} {
-    set resourceobj [::tycho::autoName .resource]
-    ::tycho::Resource $resourceobj
-    set status {}
+test Resource-1.1 {} {
 
-    set methods {\
-            {cachefile {}}\
-            {close {(is abstract)}}\
-            {{connect non} {(is abstract)}}\
-            {eof {(is abstract)}}\
-            {gets {(is abstract)}}\
-            {isopen {(is abstract)}}\
-            {{puts HELLO} {(is abstract)}}\
-            {read {(is abstract)}}\
-            {streamable {(is abstract)}} \
-            {progress {(is abstract)}}\
-            {{write HELLO} {(is abstract)}}}
+} {normal {}}
 
-    foreach method $methods {
-        catch "$resourceobj [lindex $method 0]" msg
-        # Match the regular expression to check the output of message
-        set reg {}
-        regexp -nocase [lindex $method 1] $msg _ reg
-        if {$reg=={}} {
-            lappend status $msg
-        } else {
-            lappend status $reg
-        }
-    }
-    delete object $resourceobj
-    list $status
-} {{{} {is abstract} {is abstract} {is abstract} {is abstract} {is abstract} {is abstract} {is abstract} {is abstract} 1.0 {is abstract}}}
 
-test Resource-proc {Make sure that the interface to procs are intact!} {
-    set status {}
 
-    # The exceptions are "initialize" and "new"
-    set procs {\
-            {{chmod non non} {(is abstract)}} \
-            {{contenttype non.gif} {(aa)}} \
-            {{contenttype non.jpg} {(aa)}} \
-            {{contenttype non.txt} {(aa)}} \
-            {{delete non} {(is abstract)}} \
-            {{dirlist non} {(is abstract)}} \
-            {{exists non} {(is abstract)}} \
-            {{isremote non} {(is abstract)}} \
-            {{mkdir non} {(is abstract)}} \
-            {{new non non} {(is abstract)}} \
-            {{query non non} {(is abstract)}} \
-            {{stat non non} {(is abstract)}}}
-            
-    foreach procname $procs {
-        catch "::tycho::Resource::[lindex $procname 0]" msg
-        # Match the regular expression to check the output of message
-        set reg {}
-        regexp -nocase [lindex $procname 1] $msg _ reg
-        if {$reg=={}} {
-            lappend status $msg
-        } else {
-            lappend status $reg
-        }
-    }
-    list $status
-} {{{is abstract} image/gif image/jpg text/plain {is abstract} {is abstract} {is abstract} {is abstract} {is abstract} {is abstract} {is abstract} {is abstract}}}
+
+
+
+
+
+
+
+
+

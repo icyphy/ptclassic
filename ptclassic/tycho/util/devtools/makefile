@@ -42,41 +42,30 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 # Sub directories to run make in.
-DIRS =	 bin demo doc test
+DIRS =	
 
-TCL_SRCS =
+TCL_SRCS = 
 
-ITCL_SRCS = \
-	Compile.itcl \
-	CompileCTcl.itcl \
-	CompileJava.itcl \
-	EditDiff.itcl \
-	Glimpse.itcl \
-	ItclClassList.itcl \
-	ProfileJava.itcl
-
+ITCL_SRCS = 
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	devtools.tcl \
 	README.txt \
+	makefile \
 	pkgIndex.tcl
 
-MISC_FILES =  $(DIRS) tclIndex
-
-# make checkjunk will not report OPTIONAL_FILES as trash
-# make realclean removes OPTIONAL_FILES
-OPTIONAL_FILES = 	adm
+MISC_FILES = adm bin demo doc test
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF = tclIndex
+REALCLEAN_STUFF =
 
 # Title for the tydoc index page
 TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all: sources $(MISC_SRCS) tclIndex
-
-install: all subinstall
+all install: sources $(MISC_SRCS)
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
+
+

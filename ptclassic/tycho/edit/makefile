@@ -1,9 +1,9 @@
-# Makefile for Tycho's editors package directory
+# Makefile for Ptolemy Tycho system, lib directory.
 #
 # $Id$
 # Author: Christopher Hylands
 #
-# Copyright (c) 1998 The Regents of the University of California.
+# Copyright (c) %Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -29,22 +29,28 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-DIRS = ptII textedit visedit slate graphedit cts pn
+DIRS = textedit visedit vltoolkit
 
-# Root of Tycho directory
-ROOT =		..
+makefiles all install clean sources depend realclean checkjunk sccsinfo:
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making $@ in tycho/lib/$$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+		) \
+	    fi ; \
+	done
 
-ME = 		edit
-# True source directory
-VPATH =		$(ROOT)/$(ME)
+.PHONY:	TAGS
+TAGS:
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making $@ in tycho/lib/$$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ; \
+		) \
+	    fi ; \
+	done
+	-cat -s $(DOMAINS:%=%/TAGS) > $@
 
-# Get configuration info
-CONFIG =	$(ROOT)/mk/tycho.mk
-include $(CONFIG)
 
-EXTRA_SRCS = pkgIndex.tcl
-
-MISC_FILES = $(DIRS)
-
-# Include rules for directories that contain only subdirectories.
-include $(ROOT)/mk/no-compile.mk

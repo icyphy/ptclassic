@@ -33,13 +33,10 @@
 # Turn on debugging
 # controlPanel debug 1
 
-# Add a help button
-controlPanel configure -helpfile {$tycho/typt/demo/graphic.html}
-
 # Create the AudioIO control sub-panel and add to the main panel
 ::tycho::AudioIO controlPanel.io
 controlPanel add controlPanel.io -side left
 
 # Create the ten-band graphic eq sub-panel and add to the main panel
-::tycho::GraphicEq controlPanel.eq
+::tycho::GraphicEQ controlPanel.eq
 controlPanel add controlPanel.eq -side left

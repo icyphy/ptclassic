@@ -1,10 +1,10 @@
 # Definition of the class which handles revision control using RCS.
 #
-# @Authors: Joel King and Edward A. Lee
+# Authors: Joel King and Edward A. Lee
 #
-# @Version: $Id$
+# Version: $Id$
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,13 +30,14 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
+option add *RevControlRCS.versionColor [ptkColor blue black] widgetDefault
+option add *RevControlRCS.commentColor [ptkColor firebrick black] widgetDefault
 
 #######################################################################
 #### RevControlRCS
 # This class defines how revision control will be handled when using 
 # RCS, and is intended to be contained within objects that use such 
-# facilities.  Note that this is a UNIX-specific interface to RCS.
-#
+# facilities.
 class ::tycho::RevControlRCS {
     inherit ::tycho::RevControl
 
@@ -46,52 +47,60 @@ class ::tycho::RevControlRCS {
     ###################################################################
     ####                      public methods                       ####
 
+    #### checkIn
+    # Checkin the file associated with this class.
+    method checkIn {}
+
+    #### checkOut
+    # Checkout the file associated with this class.
+    method checkOut {}
+
+    #### getRlog
+    # Get rlog information about the current file and check for the 
+    # existance of the locks field.
+    method getRlog {}
+
+    #### initializeRevControl
     # Put the file under revision control.
     method initializeRevControl {}
 
+    #### retrieveVersion
     # Get the specified version and open the file.
     method retrieveVersion {version}
 
+    #### unedit
     # Unedit the file associated with this class.
     method unedit {}
 
-    # View or close the version control history. Translate from RCS->SCCS
-    # format
+    #### viewHistory
+    # View or close the version control history.
     method viewHistory {}
-
-    ###################################################################
-    ####                      public procs                         ####
-
-    # Check in the file associated with a File object.
-    proc checkIn {object} {}
-
-    # Check out the file associated with a File object.
-    proc checkOut {object} {}
-
-    # Check out the previous checked in file, and remove from history
-    # FIXME: Need to add in the following:
-    proc fixRecent {object version} {::tycho::inform "Not yet implemented"}
-
-    # Return 1 if the given file is under revision control, 0 otherwise.
-    proc isUnderRevControl {file} {}
 
     ###################################################################
     ####                   protected methods                       ####
 
+    #### getComments
+    # Get the users comments.
+    protected method getComments {} 
+
+    #### isCheckedOut
     # Return 1 if the file is checked out, 0 otherwise.
     protected method isCheckedOut {}
 
-    # Return the name of the person who checked this file out
-    protected method isCheckedOutBy {}
-
-    # Update the history information, if it is on display.
-    protected method updateHistory {}
+    #### isUnderRevControl
+    # Return 1 if the file is under revision control, 0 otherwise.
+    protected method isUnderRevControl {}
 
     ###################################################################
-    ####             private methods and procs                     ####
+    ####                   private methods                         ####
 
-    # Get rlog information about a file and check for the  "locks" field.
-    private proc getRlog {file} {}
+    #### parseHistory
+    # Parse the history information and insert a synopsis into the text window.
+    private method parseHistory {history text}
+
+    #### updateHistory
+    # Update the history information, if it is on display.
+    private method updateHistory {}
 }
 
 ###################################################################
@@ -99,7 +108,93 @@ class ::tycho::RevControlRCS {
 #
 body ::tycho::RevControlRCS::constructor {args} {
     eval itk_initialize $args 
-    configure -text "RCS revision control for: $file"
+    configure -text "RCS revision control for:\n\n$file"
+}
+
+#####################################################################
+#### checkIn
+# Check in the file associated with this class.
+# 
+body ::tycho::RevControlRCS::checkIn {} {
+    ::tycho::RevControl::checkIn 
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+    set scanout [getRlog]
+    regexp -nocase {([a-z]+):} $scanout garbage lockowner
+    if {[info exists lockowner]} {
+        catch {exec whoami} currentuser
+        if {$currentuser != $lockowner} {
+	    error "The file \"$basefile\" is checked out by: $lockowner."
+        }
+    } else {
+        error "The file \"$basefile\" is not checked out."
+    }
+    cdDir $dir
+    set comment [$this getComments]
+    if {$comment == ""} {
+	# cancelled
+	return
+    }
+    set comment [format "%s\n.\n" $comment]
+    catch {exec echo $comment | ci -u $basefile} output
+    set scanout [getRlog]
+    if {[regexp -nocase {([a-z]+):} $scanout]} {
+	error "Checkin failed: $output"
+    }
+    cd $olddir
+    $object reload
+    enableButton checkout
+
+    updateHistory
+}
+
+#####################################################################
+#### getRlog
+# Get rlog information about the current file and check for the 
+# existance of the locks field.
+# 
+body ::tycho::RevControlRCS::getRlog {} {
+    catch {exec rlog $file} results
+    set ind1 [string first "locks:" $results]
+    set ind2 [string first "access list:" $results]
+    set ind1 [expr $ind1 + 6]
+    set ind2 [expr $ind2 - 1]
+    if {$ind1 == -1 || $ind2 == -1} {
+	error "An error occurred while obtaining file information with rlog: $results."
+	return ""
+    } else {
+        return [string range $results $ind1 $ind2]
+    }
+}
+
+#####################################################################
+#### checkOut
+# Check out the file associated with this class.
+# 
+body ::tycho::RevControlRCS::checkOut {} {
+    ::tycho::RevControl::checkOut    
+    set dir [file dirname $file]
+    set basefile [file tail $file]
+    set olddir [eval pwd]
+    set scanout [getRlog]
+    regexp -nocase {([a-z]+):} $scanout garbage lockowner
+    if {[info exists lockowner]} {
+        catch {exec whoami} currentuser
+	error "The file \"$basefile\" is checked out by: $lockowner."
+    } 
+    cdDir $dir
+    catch {exec co -l $basefile} output
+    set scanout [getRlog]
+    regexp -nocase {([a-z]+):} $scanout garbage lockowner
+    if {![info exists lockowner]} {
+	error "Checkout failed: $output."
+    }
+    cd $olddir
+    $object reload
+    enableButton checkin
+
+    updateHistory
 }
 
 #####################################################################
@@ -109,11 +204,8 @@ body ::tycho::RevControlRCS::constructor {args} {
 body ::tycho::RevControlRCS::initializeRevControl {} {
     ::tycho::RevControl::initializeRevControl
     set dir [file dirname $file]
-    set revdir [file join $dir RCS]
+    set revdir [format "%s/RCS" $dir]
     set basefile [file tail $file]
-    if [file exists [file join $revdir $basefile,v]] {
-	return
-    }
     set olddir [eval pwd]
     if {![file exists $revdir]} {
 	if {![file writable $dir]} {
@@ -135,7 +227,7 @@ body ::tycho::RevControlRCS::initializeRevControl {} {
 
 #####################################################################
 #### retrieveVersion
-# Get the specified version and open the file.
+# Retrieve the specified version and display.
 # 
 body ::tycho::RevControlRCS::retrieveVersion {version} {
     set dir [file dirname $file]
@@ -143,19 +235,13 @@ body ::tycho::RevControlRCS::retrieveVersion {version} {
     set olddir [eval pwd]
     cdDir $dir
 
-    # Generate a temporary file name that has the same extension as the file
-    # we are working on.
-    set tmpFile [::tycho::tmpFileName \
-            [file rootname $basefile] \
-            [file extension $basefile]]
-    # In co, -q means be quite, -p determines which version
-    if [catch {exec co -q -p$version $basefile > $tmpFile} output ] {
-        error "Problem executing:\n\
-                `cp -q -p$version $basefile > $tmpFile':\n\ $output"
-    }
-
+    catch {exec co -p$version $file > #tycho#rcsrevcontroltempfile} output
+    set fd [open #tycho#rcsrevcontroltempfile r]
+    set text [read $fd]
+    close $fd
+    catch {exec rm -f #tycho#rcsrevcontroltempfile}
+    ::tycho::File::displayData $text $file 
     cd $olddir
-    return $tmpFile
 }
 
 #####################################################################
@@ -167,13 +253,13 @@ body ::tycho::RevControlRCS::unedit {} {
     set dir [file dirname $file]
     set basefile [file tail $file]
     set olddir [eval pwd]
-    set scanout [getRlog $file]
+    set scanout [getRlog]
     if {![regexp -nocase {([a-z]+):} $scanout]} {
         error "The file \"$basefile\" is not checked out."
     }
     cdDir $dir
     catch {exec rcs -u $basefile} output 
-    set scanout [getRlog $basefile]
+    set scanout [getRlog]
     if {[regexp -nocase {([a-z]+):} $scanout]} {
 	error "Unedit failed: $output"
     }    
@@ -181,7 +267,6 @@ body ::tycho::RevControlRCS::unedit {} {
     catch {exec co -u $basefile} output
     cd $olddir
     $object reload
-    focusin
     enableButton checkout
 
     updateHistory
@@ -189,227 +274,71 @@ body ::tycho::RevControlRCS::unedit {} {
 
 #####################################################################
 #### viewHistory
-# View or close the version control history. Read in from UNIX's
-# rlog command, then translate from RCS format  to SCCS format.
+# View or close the version control history.
 # 
 body ::tycho::RevControlRCS::viewHistory {} {
     if {$file == {}} {
 	error "Revision control: no file specified"
     }
-
-    set dir [file dirname $file]
-    set basefile [file tail $file]
-    set olddir [eval pwd]
-    
-    if {![file exists [file join $dir RCS ${basefile},v]]} {
-        error "The file \"$file\" is not under RCS control."
-    }
-    cdDir $dir
-
-    if [catch {exec rlog $basefile} results] {
-        error "`rlog $basefile' failed:\n$results"
-    }
-
-
-    # Start translating here. First, skip the header file until "----"
-    set ind1 [string first "----------------------------" $results]
-    if {$ind1 == -1} {
-        # No logs yet.
-        set history ""
-    } else {
-        set history [string range $results $ind1 end]
-    }
-
-    # Translate the RCS format to SCCS format:
-    set version ERROR
-    set history2 "\n\n"
-    foreach line [split $history \n] {
-        if {[regexp {^date:} $line] && [regexp {^revision } $prevline]} {
-            regexp -nocase \
-                    {^date: ([0-9/]+) ([0-9:]+);  author: ([a-z]*);} \
-                    $line match date time user
-            append history2 "\n"
-            append history2 "D $version $date $time $user ? ? ?\n"
-            append history2 "MRs:\n"
-            append history2 "COMMENTS:\n"
-            set prevline $line
-        } elseif {[regexp {^revision} $line] && \
-                $prevline == "----------------------------"} {
-            regexp {^revision ([0-9.]*)} $line match version
-            set prevline $line
-        } elseif {[regexp {^----------------------------} $line] \
-                || [regexp {^============================} $line]} {
-            set prevline $line	    
-        } else {
-            # Comment lines here
-            append history2 "$line\n"
-            set prevline $line	    
-        }
-    }
-    
-    # Parse the history
-    $itk_component(history) clear
-    parseHistory $history2 [$itk_component(history) textWinName]
-    $itk_component(history) markUnmodified
-    
-    # FIXME: Delay or the focus command is ignored.  Tk bug?
-    #after 500 "focus [$itk_component(history) textWinName]"
-    cd $olddir
-}
-
-    ###################################################################
-    ###################################################################
-    ####                   public procs                            ####
-
-#####################################################################
-#### checkIn
-# Check in the file associated with a File object
-# 
-body ::tycho::RevControlRCS::checkIn {object} {
-    ::tycho::RevControl::checkIn $object
-    set file [$object filename]
-    set dir [file dirname $file]
-    set basefile [file tail $file]
-    set olddir [eval pwd]
-    set scanout [getRlog $file]
-    regexp -nocase {([a-z]+):} $scanout garbage lockowner
-    if {[info exists lockowner]} {
-        catch {exec whoami} currentuser
-        if {$currentuser != $lockowner} {
-	    error "The file \"$basefile\" is checked out by: $lockowner."
-        }
-    } else {
-        error "The file \"$basefile\" is not checked out."
-    }
-    cdDir $dir
-    set comment [getComments]
-    if {$comment == ""} {
-	# cancelled
+    if {[info exists itk_component(history)] && \
+	    [winfo exists $itk_component(history)]} {
+	delete object $itk_component(history)
 	return
-    }
-    set comment [format "%s\n.\n" $comment]
-    if [catch {exec echo $comment | ci -u -q -f $basefile} output] {
-	if [regexp "file is unchanged; reverting to previous revision" \
-		$output] {
-	    ::tycho::warn "Check in command:\n\
-		    `echo $comment | ci -u -q -f $basefile'\
-		    produced a warning:\n\
-		    $output"
-	} else {
-	    error "Checkin command:\n\
-		    `echo $comment | ci -u -q -f $basefile' failed:\n$output"
-	}
-    }
-    set scanout [getRlog $file]
-    if {[regexp -nocase {([a-z]+):} $scanout]} {
-	error "Checkin failed: $output"
-    }
-    cd $olddir
-    $object reload
-}
-
-#####################################################################
-#### checkOut
-# Check out the file associated with a File object.
-# 
-body ::tycho::RevControlRCS::checkOut {object} {
-    ::tycho::RevControl::checkOut $object
-    set file [$object filename]
-    set dir [file dirname $file]
-    set basefile [file tail $file]
-    set olddir [eval pwd]
-    set scanout [getRlog $file]
-    regexp -nocase {([a-z]+):} $scanout garbage lockowner
-    if {[info exists lockowner]} {
-        catch {exec whoami} currentuser
-	error "The file \"$basefile\" is checked out by: $lockowner."
-    } 
-    cdDir $dir
-    # -l argument locks, -q argument does not print diagnostics
-    if [catch {exec co -l -q $basefile} output] {
+    } {
+	set dir [file dirname $file]
+	set basefile [file tail $file]
+	set olddir [eval pwd]
 	
-	error "Checkout command `co -l $basefile' failed:\n$output"
+	if {![file exists [format "%s/RCS/$basefile,v" $dir]]} {
+	    error "The file \"$file\" is not under RCS control."
+	}
+	cdDir $dir
+	catch {exec sccs prs $basefile} history
+
+	catch {exec rlog $file} results
+	set ind1 [string first "----------------------------" $results]
+	if {$ind1 == -1} {
+	    # No logs yet.
+	    set history ""
+	} else {
+            set history [string range $results $ind1 end]
+	}
+	# Create the display
+	itk_component add history {
+	    ::tycho::EditText $itk_component(hull).history -height 30
+	} {
+	    keep -readonly -width -background \
+		    -highlightbackground -highlightcolor -selectforeground \
+		    -cursor -insertbackground -textforeground -textfont \
+		    -textbackground
+	}
+	pack $itk_component(history) -expand yes -fill both
+	$itk_component(history) configure -readonly 1
+
+	# Parse the history
+	parseHistory $history [$itk_component(history) textWinName]
+
+	# Delay or the focus command is ignored.  Tk bug?
+	after 500 "focus [$itk_component(history) textWinName]"
+
+	cd $olddir
     }
-    set scanout [getRlog $file]
-    regexp -nocase {([a-z]+):} $scanout garbage lockowner
-    if {![info exists lockowner]} {
-	error "Checkout failed: $output."
-    }
-    cd $olddir
-    $object reload
 }
 
-#####################################################################
-#### fixRecent
-# Check out the most recent file, then remove it from history.
-# In SCCS, the command is simply "sccs fix <filename>",
-# but in RCS, this is:
-# 1) co <i>file</i>
-# 2) cp <i>file</i> <i>tmp</i>
-# 3) rcs -u <i>file</i>
-#    rm -f <i>file</i>
-# 4) rcs -o[recent_version] <i>file</i>
-# 5) co <i>file</i>
-# 6) cp <i>tmp</i> <i>file</i>
-#
-body ::tycho::RevControlRCS::fixRecent {object version} {
-    ::tycho::RevControl::checkOut $object
-    set file [$object filename]
-    set dir [file dirname $file]
-    set basefile [file tail $file]
-    set olddir [eval pwd]
-    set tmpFile [::tycho::tmpFileName $basefile]
-    
-    # At this point, successful check out, now delete from the history
-    cdDir $dir
-
-    # -l argument locks, -q argument does not print diagnostics
-    if [catch {exec co -l -q $basefile} output] {
-	error "1) Cmd failed:\n$output"
-    }
-    if [catch {exec cp $basefile $tmpFile} output] {
-	error "2) Cmd failed:\n$output"
-    }
-    catch {exec rcs -u $basefile} output
-    set scanout [getRlog $basefile]
-    if {[regexp -nocase {([a-z]+):} $scanout]} {
-	error "Unedit failed: $output"
-    }    
-    catch {exec rm -f $basefile} output
-    #catch {exec co -u $basefile} output
-
-    if [catch {exec rcs -o$version -q $basefile} output] {
-	error "4) Cmd failed:\n$output"
-    }
-    if [catch {exec co -l -q $basefile} output] {
-	error "5) Cmd failed:\n$output"
-    }
-    if [catch {exec cp $tmpFile $basefile} output] {
-	error "6) Cmd failed:\n$output"
-    }
-
-    cd $olddir
-    $object reload
-}
-
-#####################################################################
-#### isUnderRevControl
-# Check whether the given file is under revision control, and return a
-# 1 if it is or a 0 otherwise.
-# 
-body ::tycho::RevControlRCS::isUnderRevControl {file} {
-    set dir [file dirname $file]
-    set revdir [file join $dir RCS]
-    set basefile [file tail $file]
-    if {![file exists [file join $revdir $basefile,v]]} {
-	return 0
-    }
-    return 1
-}
-
-    ###################################################################
     ###################################################################
     ####                   protected methods                       ####
+
+#####################################################################
+#### getComments
+# Open a dialog box to query the user for comments.
+# 
+body ::tycho::RevControlRCS::getComments {} {
+    set list [DialogWindow::newModal EntryQuery [autoName .getcomment] \
+	    -queries {{body {Comment:} {} 5}}  \
+	    -entrywidth 60]
+    set comments [lindex [lindex $list 0] 1]
+    return [join [split $comments "\n"] "\\\n"]
+}
 
 #####################################################################
 #### isCheckedOut
@@ -417,48 +346,86 @@ body ::tycho::RevControlRCS::isUnderRevControl {file} {
 # Here we assume that if the file is read-only, then it is not checked out.
 # 
 body ::tycho::RevControlRCS::isCheckedOut {} {
-    #if [file writable [$object filename]] {}
-    if {[isCheckedOutBy]!={}} {
-	return 1
-    } {
+    if [$object getReadonly] {
 	return 0
+    } {
+	return 1
     }
 }
 
 #####################################################################
-#### isCheckedOutBy
-# Later we will get rid of isCheckedOut, and replace it with this function
-#
-body ::tycho::RevControlRCS::isCheckedOutBy {} {
-    set file [$object filename]
+#### isUnderRevControl
+# Check whether the file associated with this class is under revision 
+# control, and return a 1 if it is or a 0 otherwise.
+# 
+body ::tycho::RevControlRCS::isUnderRevControl {} {
+    if {$file == {}} {
+	error "Revision control: no file specified"
+    }
     set dir [file dirname $file]
+    set revdir [format "%s/RCS" $dir]
     set basefile [file tail $file]
-    set olddir [eval pwd]
-
-    cdDir $dir
-    # Read in information list (who checked this file?)
-    catch {exec rcsinfo} infolist
-    set info {}
-    foreach i [split $infolist \n] {
-        # Need to match the format:
-        # "1.cc                 kchang      1.5    Fri May  2 13:12:04 1997
-        # "4.cc                 kchang      1.6    Wed Apr 23 13:48:59 1997
-        if [regexp "$basefile.*" $i] {
-            # Format is:
-            set info $i
-        }
+    if {![file exists [format "%s/%s,v" $revdir $basefile]]} {
+	return 0
     }
-    cdDir $olddir
-
-    if {$info!={}} {
-        return " [lindex $i 4] [lindex $i 5] [lindex $i 6]\
-                <checked out by [lindex $i 1]>"
-    } else {
-        return {}
-    }
+    return 1
 }
 
+    ###################################################################
+    ####                   private methods                         ####
 
+#####################################################################
+#### parseHistory
+# Parse the history information and insert a synopsis into the text window.
+# 
+body ::tycho::RevControlRCS::parseHistory {history text} {
+    set lines [split $history "\n"]
+
+    if {$history == ""} {
+	$text insert insert "This file does not yet have any log messages."
+	return
+    }
+
+    if [isCheckedOut] {
+	$text insert insert "The file is currently checked out\n\n"
+    }
+
+    set commentColor \
+	    [option get $itk_component(hull) commentColor RevControlRCS]
+    set versionColor \
+	    [option get $itk_component(hull) versionColor RevControlRCS]
+
+    foreach line [lrange $lines 0 end] {
+	if {[regexp {^date:} $line] && [regexp {^revision } $prevline]} {
+	    regexp -nocase {^date: ([0-9/]+) ([0-9:]+);  author: ([a-z]*);} \
+		$line junk date time user
+	    set start [$text index insert]
+	    $text insert insert "$version $date, checked in by $user\n"
+	    $text tag add v$version $start insert
+	    $text tag configure v$version -foreground \
+		    $versionColor -underline 1
+	    $text tag bind v$version <Double-Button-1> \
+		    [code "$this retrieveVersion $version"]
+	    set prevline $line
+	} elseif {[regexp {^revision} $line] && 
+	    $prevline == "----------------------------"} {
+	    regexp {^revision ([0-9.]*)} $line junk version
+	    set prevline $line
+	} elseif [regexp {^----------------------------} $line] {
+	    set prevline $line	    
+	} elseif [regexp {^=============================================================================} $line] {
+	    # we are done parsing
+	} else {
+	    set start [$text index insert]
+	    $text insert insert "$line\n"
+	    $text tag add comment $start insert
+	    $text tag configure comment -foreground $commentColor
+	    $text tag configure comment -lmargin1 0.5c
+	    $text tag configure comment -lmargin2 0.5c
+	    set prevline $line	    
+	}
+    }
+}
 
 #####################################################################
 #### updateHistory
@@ -467,33 +434,7 @@ body ::tycho::RevControlRCS::isCheckedOutBy {} {
 body ::tycho::RevControlRCS::updateHistory {} {
     if {[info exists itk_component(history)] && \
 	    [winfo exists $itk_component(history)]} {
+	delete object $itk_component(history)
 	viewHistory
     }
 }
-
-
-    ###################################################################
-    ###################################################################
-    ####               private methods and procs                   ####
-
-
-#####################################################################
-#### getRlog
-# Get rlog information about a file and check for the "locks" field.
-#
-body ::tycho::RevControlRCS::getRlog {file} {
-    if [catch {exec rlog $file} results] {
-	error "`rlog $file' failed:\n$results"
-    }
-    set ind1 [string first "locks:" $results]
-    set ind2 [string first "access list:" $results]
-    set ind1 [expr $ind1 + 6]
-    set ind2 [expr $ind2 - 1]
-    if {$ind1 == -1 || $ind2 == -1} {
-	error "rlog reports an error: $results."
-	return ""
-    } else {
-        return [string range $results $ind1 $ind2]
-    }
-}
-

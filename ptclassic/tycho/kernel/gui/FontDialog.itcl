@@ -1,9 +1,11 @@
 # A Dialog box for selecting a font.
+# Note: this file used to be called "FontManager.itcl": see that
+# file for the complete SCCS history.
 #
 # @Author: Edward A. Lee
 # @Version: $Id$
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# Copyright (c) 1995-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -32,7 +34,7 @@
 ##########################################################################
 #### queryfont
 # Query the user for a font and return it as a three-element list:
-# {_family_ _size_ _style_} . This procedure brings up a
+# {_family_ _size_ _style} . This procedure brings up a
 # font dialog, and returns only when it is dismissed. The
 # returned string is the name of a font. If any arguments are
 # given, then they are taken to be the font family, size, and style
@@ -64,6 +66,26 @@ proc ::tycho::queryfont {args} {
     }
 }
 
+##########################################################################
+#### querysystemfont
+# Query the user for a font and return a system-dependent
+# representation of the font. This procedure brings up a
+# font dialog, and returns only when it is dismissed. The
+# arguments an other comment of ::tycho::queryfont apply here
+# too.
+#
+proc ::tycho::querysystemfont {args} {
+    set name [autoName .font]
+    uplevel #0 ::tycho::FontDialog $name [list -initialfont $args]
+    set fontname [::tycho::Dialog::wait $name 0]
+    if { $fontname != "" } {
+	return [::tycho::font [lindex $fontname 1] \
+		[lindex $fontname 3] [lindex $fontname 5]]
+    } else {
+	return $args
+    }
+}
+
 #########################################################################
 #### FontDialog
 # Manage font selection. Instances of this class are dialog windows
@@ -71,9 +93,11 @@ proc ::tycho::queryfont {args} {
 # manager modal using the <code>::tycho::Dialog::wait</code> procedure,
 # then that procedure will return either a valid font name selected by
 # the user or the null string (if the user cancels).
-#
-# <i>Do not instantiate the class directly, but call the
-# *::tycho::fontdialog* procedure instead.</i>
+# <p>
+# Unfortunately, fonts are a major weak point in the X window system,
+# since there is only one font that is guaranteed to be installed on
+# all systems: "fixed". This font is the fallback font of the
+# <code>findFont</code> method, which always returns a valid font.
 #
 class ::tycho::FontDialog {
     inherit ::tycho::Query
@@ -93,9 +117,6 @@ class ::tycho::FontDialog {
 
     # Update the font display
     method updateDisplay {}
-
-    # Disable some pack propagation to prevent size changes
-    method freeze {}
 }
 
 #########################################################################
@@ -129,94 +150,75 @@ body ::tycho::FontDialog::constructor {args} {
     # The font family menu
     choice family {Font family:} [lsort [::tycho::FontManager::family]] \
 	    Helvetica \
-            -command "$this updateDisplay"
+	    "$this updateDisplay"
 
     # The font size menu
     choice size {Font size:} [::tycho::FontManager::size] 12 \
-            -command "$this updateDisplay"
+	    "$this updateDisplay"
 
     # The font style menu
     choice style {Font style:} {Roman Italic Bold {Bold Italic}} Roman \
-            -command "$this updateDisplay"
+	    "$this updateDisplay"
+
 
     # Here we add a sample of the font.
+    # FIXME: This should a separate window: the size changes
+    # you get with the embedded text is extremely disconcerting
+    # because the option menus move!
 
-    set sample \
-"
+    set sample "
 ABCDEFGHIJKLMNOPQRSTUVWXYZ
 abcdefghijklmnopqrstuvwxyz
 0123456789
 !@#$%^&*()_+-=[]{};:'\"`~,.<>/?\\|
 "
-
-    # The font sample frame
-    itk_component add sampleframe {
-	frame $itk_component(childsite).sampleframe
+    itk_component add samplerframe {
+	frame $itk_component(childsite).sampleframe \
+		-relief raised -bd 2
     } {
-	keep -background
+	keep -background -cursor
     }
-    pack $itk_component(sampleframe) -fill x -expand on \
+    pack $itk_component(samplerframe) -fill both -expand yes \
 	    -after $itk_component(top)
 
-    # Make the sample frame (as a grid) expand to fill its container
-    grid columnconfigure $itk_component(sampleframe) 0 -weight 1
-    grid rowconfigure $itk_component(sampleframe) 0 -weight 1
-
-    # The font sample
     itk_component add sampler {
 	label $itk_component(childsite).sampler -text $sample \
 		-relief raised -bd 2
     } {
 	keep -highlightthickness -background \
 		-foreground -highlightbackground
+	rename -font -displayfont displayFont DisplayFont
     }
-    grid $itk_component(sampler) -sticky nsew \
-	    -in $itk_component(sampleframe)
+    pack $itk_component(sampler) -fill both -expand yes \
+	    -after $itk_component(top) \
+	    -in $itk_component(samplerframe)
 
-    # The font name
     itk_component add fontname {
 	label $itk_component(childsite).label \
-		-font $itk_option(-messagefont) -relief raised -bd 2
+		-font $itk_option(-messagefont)
     } {
 	keep -highlightthickness -background \
 		-foreground -highlightbackground
     }
-    grid $itk_component(fontname) -sticky ew \
-	    -in $itk_component(sampleframe)
+    pack $itk_component(fontname) -fill both -expand yes \
+	    -after $itk_component(sampler) \
+	    -in $itk_component(samplerframe)
 
     $itk_component(fontname) configure -text \
 	    [$itk_component(fontname) cget -font]
 
     eval itk_initialize $args
+    eval preference exclude $this $args
 
     # If no -okcommand option is specified, use a reasonable default.
     if {$itk_option(-okcommand) == {}} {
 	configure -okcommand "$this get"
     }
-
-    # Wait until the window is mapped (thus allowing it to be
-    # the right size for the initial font), then freeze its size
-    whenMapped sampler "$this freeze"
 }
 
 #########################################################################
 #########################################################################
 ####                       public methods                            ####
-
-
-########################################################################
-#### freeze
-# Prevent the window from changing size when different fonts are selected.
-# This should be called after the window has been deiconified. Note that
-# it is _not_ done automatically because a) it must be done after
-# the window is mapped to the screen and b) you may wish to add
-# extra buttons to the window after creating it. For the same reason,
-# you should not use <code>::tycho::Dialog::new</code> to create the
-# window, but just instantiate it.
-#
-body ::tycho::FontDialog::freeze {} {
-    grid propagate $itk_component(sampleframe) 0
-}
 
 ########################################################################
 #### updateDisplay

@@ -48,7 +48,7 @@ if [info exists ::TYCHO] {
 if [info exists ::TYCHO] {
     package require tycho.util.tytest
 } else {
-    source [file join $env(SLATE_LIBRARY) test defs2.tcl]
+    source [file join $env(SLATE_LIBRARY) test testDefs.tcl]
 }
 
 # We also have to load this helper file

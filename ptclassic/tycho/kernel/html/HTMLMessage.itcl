@@ -40,10 +40,9 @@
 #
 proc ::tycho::htmlmessage {source} {
     set name [::tycho::autoName .m]
-    ::tycho::HTMLMessage $name -textwidth 70 -textheight 15
-    $name insertData $source
+    ::tycho::HTMLMessage $name -html $source \
+            -htmlwidth 70 -htmlheight 15
     $name centerOnScreen
-    return $name
 }
 
 
@@ -54,16 +53,12 @@ proc ::tycho::htmlmessage {source} {
 # an optional bitmap and/or image.  It contains one button to dismiss the
 # window.  Here is an example:
 # <tcl><pre>
-# catch {delete object .m}
-# ::tycho::HTMLMessage .m
-# .m insertData {&lt;h1&gt;Header&lt;/h1&gt;}
+# FIXME
 # .m centerOnScreen
 # </pre></tcl>
-# <p>
-# The insertData{} method specifies the HTML source to render.
-# The -textwidth and -textheight options
-# specify the size of the resulting HTML window in "average" characters.
-# Regrettably, it seems to be system dependent what this means.
+# FIXME:
+# The -width and -height option of the parent HTMLMessage
+# specify the size of the resulting HTML window in characters.
 # The -directory option specifies the directory with respect to which
 # relative hypertext or image references should be interpreted.
 # The -scrollbar option specifies whether a scrollbar is used.
@@ -72,25 +67,43 @@ class ::tycho::HTMLMessage {
     inherit ::tycho::Message
     constructor {args} {}
 
-    # Insert HTML data
-    method insertData {data} {
-	$itk_component(html) insertData $data
-    }
+    #####################################################################
+    ####                          options                            ####
+
+    #####################################################################
+    ####                        public methods                       ####
+
+    #####################################################################
+    ####                        public procedures                    ####
+
+    #####################################################################
+    ####                       protected variables                   ####
 }
+
 
 #####################################################################
 #
 body ::tycho::HTMLMessage::constructor {args} {
 
     itk_component add html {
-        ::tycho::HTML $itk_component(top).html
+        ::tycho::HTMLText $itk_component(top).html
     } {
         keep -background -cursor -textforeground \
-                -scrollbar -directory \
-                -textwidth -textheight
+                -scrollbar -directory -html
+        rename -width -htmlwidth htmlWidth HTMLWidth
+        rename -height -htmlheight htmlHeight HTMLHeight
     }
     pack $itk_component(html) -side right -fill both
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
 }
+
+######################################################################
+######################################################################
+####                         public methods                       ####
+
+
+######################################################################
+######################################################################
+####                         public procedures                    ####

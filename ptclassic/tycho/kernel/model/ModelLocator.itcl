@@ -151,7 +151,7 @@ class ::tycho::ModelLocator {
 
     # Get access to the unique instance
     proc instance {} {
-        if { [infoWhich ::tycho::modelLocator] == "" } {
+        if { [info which ::tycho::modelLocator] == "" } {
             uplevel #0 ::tycho::ModelLocator ::tycho::modelLocator
         }
         return ::tycho::modelLocator
@@ -169,14 +169,14 @@ class ::tycho::ModelLocator {
 #
 body ::tycho::ModelLocator::constructor {args} {
     # Define the "reference" type
-    define reference \
+    type define reference \
             :leafonly 1 \
 	    -path "" \
 	    -proxy "" \
 	    -workdir ""
 
     # Define the "proxy" type
-    define proxy \
+    type define proxy \
             :leafonly 1 \
             -class "" \
             -extension "" \
@@ -267,7 +267,7 @@ body ::tycho::ModelLocator::load {proxy} {
 
     # Create the model
     set cls [attrget $proxy -class]
-    set nm [::tycho::autoName [string tolower [namespaceTail $cls]]]
+    set nm [::tycho::autoName [string tolower [info namespace tail $cls]]]
     set model [uplevel #0 $cls $nm]
  
     puts "Loading $cls $nm"

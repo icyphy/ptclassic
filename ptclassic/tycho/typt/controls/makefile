@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -40,30 +40,17 @@ VPATH =		$(ROOT)/typt/controls
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-ITCL_SRCS = \
-	AudioIO.itcl \
-	ControlPanel.itcl \
-	ControlSubpanel.itcl \
-	GraphicEq.itcl \
-	ParametricEq.itcl \
-	Scheduler.itcl \
-	ToneControl.itcl
+ITCL_SRCS =     AudioIO.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
-# Files or directories that are present, but that 'make checkjunk' 
-# should not complain about
-MISC_FILES =	tclIndex doc
-
-# make checkjunk will not report OPTIONAL_FILES as trash
-# make realclean removes OPTIONAL_FILES
-OPTIONAL_FILES =
+MISC_FILES =	tclIndex
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex
 
 # Title for the tydoc index page
-TYDOC_DESC =	Index of classes in tycho/typt/controls
+TYDOC_DESC =	Index of classes in tycho/typt/control
 
 DIRS =		
 

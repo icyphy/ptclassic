@@ -1,10 +1,9 @@
 # Makefile for Ptolemy Tycho system, kernel directory.
 #
-# @Author: Christopher Hylands
+# $Id$
+# Author: Christopher Hylands
 #
-# @Version: $Id$
-#
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# Copyright (c) 1991-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,39 +29,64 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# Root of Tycho directory
-ROOT =		..
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	make depend
+# This will add the dependencies to the makefile.
 
+# Root of Ptolemy directory
+ROOT =		../..
+# Path (absolute or relative) to the object directory root
+OBJDIR =	../..
 # True source directory
-VPATH =		$(ROOT)/kernel
+VPATH =		$(ROOT)/tycho/kernel_itk
 
-# Get configuration info
-CONFIG =	$(ROOT)/mk/tycho.mk
+# get configuration info
+CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-# Sub directories to run make in.
-DIRS = test styles html basic gui model
+TCL_SRCS = \
+	Color.tcl \
+	Lib.tcl \
+	Options.tcl
+  
+ITCL_SRCS = \
+	Console.itcl \
+	DialogWindow.itcl \
+	Dismiss.itcl \
+	Edit.itcl \
+	EditText.itcl \
+	ErrorMessage.itcl \
+	File.itcl \
+	FileBrowser.itcl \
+	Font.itcl \
+	Message.itcl \
+	Preferences.itcl \
+	TopLevel.itcl \
+	YesNoCancel.itcl \
+	YesNoQuery.itcl
 
-TCL_SRCS = 
+EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
-ITCL_SRCS =
+MISC_FILES =		Ptolemy.xbm tclIndex
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) pkgIndex.tcl Tycho.tcl
+# Include information on all stars and targets.
+include $(ROOT)/mk/stars.mk
 
-MISC_FILES =  $(DIRS) tclIndex img
+all: tclIndex
 
-# 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =	tclIndex
+tclIndex: $(TCL_SRCS) $(ITCL_SRCS)
+	@echo "Updating tclIndex"
+	rm -f $@
+	echo 'set auto_path [linsert $$auto_path 0 $(ITCL_LIBDIR)]; itcl_mkindex . $(TCL_SRCS) $(ITCL_SRCS)' | $(ITCL_SH)
 
-# Title for the tydoc index page
-TYDOC_DESC =	Index of classes in tycho/kernel
+install: tclIndex
 
-# Do make sources so that we ensure that the subdirectories are checked out
-all: sources $(MISC_SRCS) tclIndex
+LIB=dummy		# required since no LIB
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
 
-install: subinstall
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
 
-.PHONY: all install subinstall
-
-# We don't include common.mk since we don't use the compiler here
-include $(ROOT)/mk/no-compile.mk

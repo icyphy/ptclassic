@@ -1,4 +1,4 @@
-<!-- $Id$ -->
+<!-- -->
 <html>
 <head>
 <title>Test package for Tycho packages
@@ -9,66 +9,78 @@
 </a></h1>
 <HR>
 
- <P>TyTest is a Tycho package that contains C code for testing other
-Tycho C packages.
+ <P>TyEvent is a simple extension that adds a facility for processing
+Tk events from within a computation-intensive C program. A Tk program
+repeatedly calls <A
+HREF="../../../src/tcltk/itcl2.2/html/tcl7.6/DoOneEvent.3.html"><code>Tcl_DoOneEvent</code></A>
+repeatedly, which processes any pending events from the user
+interface, and these events in turn "make things happen." (In a simple
+Tk program, <code>Tcl_DoOneEvent</code> is called from within <A
+HREF="../../../src/tcltk/itcl2.2/html/tk4.2/MainLoop.3.html"><code>Tk_MainLoop</code></A>.)
+If, however, one of those events causes a long-running piece of C code
+to execute, the user interface will "freeze," because Tk events are
+not being processed.  One solution is to have the C program call
+<code>Tcl_DoOneEvent</code> at every opportune moment, but this could
+be very expensive of the C program is in a tight loop.
 
- <P><B>Contents</B>
-<ul>
-<li><A HREF="#::tycho::testtask">Example Tycho "task" in C</A>
-</ul>
+ <P>TyEvent provides a simple mechanism for reducing the overhead of
+calling <code>Tcl_DoOneEvent</code>. The Tcl procedure <A
+HREF="#eventLoop"><code>eventLoop</code></A> starts and stops a timer
+interrupt, which triggers at regular intervals. Instead of calling
+<code>Tcl_DoOneEvent</code>, the C program calls the C function <A
+HREF="#processEvents"><code>tyevent_ProcessEvents</code></A> each time
+through its loop. This function checks whether the timer has elapsed,
+and, if it has, processes all pending Tk events.
 
-<h2><a name="::tycho::testtask">::tycho::testtask</a></h2>
+ <P>Note that this event loop is not pre-emptive. The timer interrupt
+merely sets a flag which is tested by
+<code>tyevent_ProcessEvents</code> -- the C program must poll the
+timer by calling <code>tyevent_ProcessEvents</code>.
 
-<P><code>::tycho::testtask</code> is a Tcl procedure that implements a
-C "task" in the structure required by the Tycho 
-<A HREF="../../typt/controls/doc/codeDoc/Scheduler.html"><code>Scheduler</code></A>.
-All it does is count furiously until its time slice is up, and then
-sets a Tcl variable to the value of the counter. Although this
-functionality is rather useless, it does provide an interesting
-comparison of the relative execution speed of C and Tcl! It has three
-argument formats:
-
-<dl>
- <P><dt><code>::tycho::testtask setup <I>countername</I></code>
-
-<dd>Initialize the task: The counter is set to
-zero. <CODE><I>countername</I></CODE> is the name of the Tcl variable
-that will be updated at the end of its time slice.
-
- <P><dt><code>::tycho::testtask execute</code>
-
-<dd>Count for one timeslice -- the time is as set by the Tycho
-scheduler, and defaults to 20 ms.
-
- <P><dt><code>::tycho::testtask wrapup</code> 
-
-<dd>Stop and clean up the task. In this case, nothing needs to be done.
-
-</dl>
-
- <P>To run a demonstration of the C task:
+ <P>To run a demonstration of the event loop:
 <tcl quiet><pre>
-    source $tycho/src/tytest/testtask.tcl
-</pre></tcl>
-
-The top number is the counter incremented by the C task; the bottom
-one is the counter incremented in Tcl.  To more clearly see the
-interleaving of these two tasks:
-
-<tcl quiet><pre>
-    ::tycho::timer period 200
+    source $tycho/src/tyevent/test.tcl
 </pre></tcl>
 
  <P>Source files:
 <ul>
-<li><A HREF="../tytest/testtask.tcl">Test file</A>
-<li><A HREF="tyTimerTest.c">C source file</A>
+<li><A HREF="test.tcl">Test file</A>
+<li><A HREF="tyTimerTest.c">tyTimerTest.c</A>
+<li>
 </ul>
+
+
+<h2>::tycho::testtask</h2>
+
+<P><code>::tycho::eventLoop</code> is a Tcl procedure that starts and
+stops the event loop. To ensure that it is in the <code>::tycho</code>
+namespace, always load the tyEvent package with <a
+href="../../kernel/doc/codeDoc/Loader.html"><code>::tycho::loadIfNotPresent</code></a>. It accepts the following argument formats:
+
+<dl>
+ <P><dt><b>::tycho::eventLoop</b>
+<dd>Return one if the event loop is currently running, and zero if not.
+
+ <P><dt><b>::tycho::eventLoop start</b> <I>?period?</I>
+
+<dd>Start the event loop. If <I>period</I> is given, the timer
+interval is set to <I>period</I> milli-seconds; if not, the timer
+period is set to 20 ms. If the loop is already running and
+<I>period</I> is given, the timer period is changed to the new value.
+
+ <P><dt><b>::tycho::eventLoop stop</b>
+
+<dd>Stop the event loop. If the event loop is not running, nothing happens.
+<br><B>Warning</B>: be very careful not to stop the event
+loop before the C function using it has stopped and returned
+control to the Tk main loop, or Tycho will freeze.
+
+</dl>
 
 
  <P>
 <HR>
-Copyright &#169 1996-%Q%, The Regents of the University of California.
+Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
 Last updated: $Date$,

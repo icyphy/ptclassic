@@ -29,28 +29,31 @@
 
 
 # This makefile is to be included if we don't need the compiler
-# and we don't need to generate any dependencies.  Please don't use
-# GNU make extensions in this file, such as 'ifdef'.
-#
-# The primary difference between a makefile that uses compile.mk and one
-# that uses no-compile.mk is that in a directory that uses
-# no-compile.mk, all the 'work' is done by make sources, and the make
-# all command usually does nothing.
-# 
-# Another difference is that no-compile.mk should probably never appear
-# in a make.template, since if there is a make.template, then we are
-# calculating dependencies on the fly and creating a makefile, which
-# probably means that we are compiling.
+# and we don't need to generate any dependencies
 
-# Provide an initial value for LIB_DEBUG so we don't get messages about
-# multiply defined rules for $(LIB)/$(LIB_DEBUG) if LIB_DEBUG is empty.
-LIBR_DEBUG =	libdummy_g
-
-all install TAGS: $(EXTRA_SRCS) $(HDRS) $(MISC_FILES)
+all install TAGS:
 	@echo "Nothing to be done in this directory"
+
+# "make sources" will do SCCS get on anything where SCCS file is newer.
+sources:	$(EXTRA_SRCS) $(SRCS) $(HDRS) makefile
+
+CRUD=*.o *.so core *~ *.bak ,* LOG* $(KRUFT) 
+
+clean:
+	rm -f $(CRUD)
 
 depend:
 	@echo "no dependencies in this directory"
 
-# Get the rest of the rules
-include $(ROOT)/mk/tycommon.mk
+sccsinfo:
+	sccs info
+
+makefiles: makefile
+
+
+# You probably don't want to add $(SRCS) here, since really $(SRCS)
+# get compiled and have dependencies.  Instead, modify the makefile
+# that includes this one and have it set $(EXTRA_SRCS)
+checkjunk:
+	@checkextra -v $(HDRS) $(EXTRA_SRCS) $(MISC_FILES) makefile SCCS
+

@@ -1,15 +1,15 @@
 ##########################################################################
-# @Version: $Id$
-# @Author: John Reekie
+# Version: $Id$
+# Author: John Reekie
 #
-# @Copyright (c) 1997-%Q% The Regents of the University of California.
+# Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that the
-# above copyright notice and the following two paragraphs appear in all
-# copies of this software.
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
 # 
 # IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
 # FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
@@ -23,371 +23,556 @@
 # PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 # CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 # ENHANCEMENTS, OR MODIFICATIONS.
-# 
-# 						PT_COPYRIGHT_VERSION_2
-# 						COPYRIGHTENDKEY
+#                                                         COPYRIGHTENDKEY
 ##########################################################################
 
 
 ##########################################################################
-#### ClassModel
+#### Class
 #
-# The _ClassModel_ class implements a model of a object-oriented class. It
+# The _Class_ class implements a model of a object-oriented class. It
 # is general enough to represent classes in most OO languages, although
 # there may be reason to subclass it to provide access methods 
 # more suitable to particular languages. It is designed to be
 # usable both for documenting classes and for use in 
-# object models. The names of methods (including constructors and
-# destructors) should, in languages that support multiple
-# methods per operation, contain the full signature. For example:
-# <code>add(int,int):int</code> and <code>add(int,float):float</code>.
+# object models. The model has the following attributes:
+# <ul>
+#   <li><b>-language</b>: The language in which the class was written.
+#       Default is a null string.
+#   <li><b>-source</b>: The file in which the class resides.
+#   <li><b>-interface</b>: The file in which the class' interface resides.
+# </ul>
 #
-# The model has the following public variables:
-#
-# <dl>
-# <dt><b>-classname</b>
-# <dd>
-# The class name of the class. (i.e. ::tycho::ClassModel)
-#
-# <dt><b>-description</b>
-# <dd>
-# A short description of the class.
-#
-# <dt><b>-exceptions</b>
-# <dd>
-# Exceptions thrown by this class. An attribute
-# because exceptions don't have attributes. The default is null.
-#
-# <dt><b>-explanation</b>
-# <dd>
-# An HTML description of the class.
-#
-# <dt><b>-inherits</b>
-# <dd>
-# A list of classes from which this class inherits.
-#
-# <dt><b>-implements</b>
-# <dd>
-# A list of interfaces that this class implements.
-#
-# <dt><b>-interfacefile</b>
-# <dd>
-# The file in which the class' interface resides.
-#
-# <dt><b>-language</b>
-# <dd>
-# The language in which the class was written.
-# Default is a null string.
-#
-# <dt><b>-modifiers</b>
-# <dd>
-# Other class modifiers. Possible values depend
-# on the languages. The default is null.
-#
-# <dt><b>-package</b>
-# <dd>
-# The name of the package this class belongs to. 
-# Default is null.
-#
-# <dt><b>-protection</b>
-# <dd>
-# The protection level of the class. Usually,
-# this includes "public" and "package". The default is "public".
-#
-# <dt><b>-sourcefile</b>
-# <dd>
-# The file in which the class resides.
-#
-# </dl>
-#
-# The model has the following types:
-# <p>
-# <dl>
-# <dt><b>constructor</b> _name_
-# <dd>
-# A constructor. Constructors typically contain nested
-# _argument_ entitiers, which represent the arguments of the constructor.
-# Constructors have the following attributes:
-#   <dl>
-#   <dt><b>-description</b>
-#   <dd> A short description of the constructor, in plain text.
-#   <dt><b>-exceptions</b>
-#   <dd> Exceptions thrown by this constructor. Default
-#        is null.
-#   <dt><b>-explanation</b>
-#   <dd> An explanatory description of the constructor, in HTML.
-#   <dt><b>-modifiers</b>
-#   <dd> Other modifiers. Possible values depend
-#        on the languages. The default is null.
-#   <dt><b>-protection</b>
-#   <dd> The protection level of the method. Usually,
+# The model has the following entities:
+# <ul>
+# <li><b>method</b> _name_: A method. Methods can appear only
+# at the top level. Methods have the following attributes:
+#   <ul>
+#   <li><b>-protection</b>: The protection level of the method. Usually,
 #        this includes at least "private", "protected", and "public".
 #        The default is "public."
-#   </dl>
-#
-# <dt><b>destructor</b> _name_
-# <dd>
-# A destructor. Destructors typically contain nested
-# _argument_ entitiers, which represent the arguments of the destructor.
-# Destructors have the following attributes:
-#   <dl>
-#   <dt><b>-description</b>
-#   <dd> A short description of the destructor, in plain text.
-#   <dt><b>-exceptions</b>
-#   <dd> Exceptions thrown by this destructor. Default
-#        is null.
-#   <dt><b>-explanation</b>
-#   <dd> An explanatory description of the destructor, in HTML.
-#   <dt><b>-modifiers</b>
-#   <dd> Other modifiers. Possible values depend
-#        on the languages. The default is null.
-#   <dt><b>-protection</b>
-#   <dd> The protection level of the method. Usually,
-#        this includes at least "private", "protected", and "public".
-#        The default is "public."
-#   </dl>
-#
-# <dt><b>method</b> _name_
-# <dd>
-# A method. Methods typically contain nested _argument_ entities, which 
-# represent the arguments of the method. Methods have the following
-# attributes:
-#   <dl>
-#   <dt><b>-description</b>
-#   <dd> A short description of the method, in plain text.
-#   <dt><b>-exceptions</b>
-#   <dd> Exceptions thrown by this method. Default
-#        is null.
-#   <dt><b>-explanation</b>
-#   <dd> An explanatory description of the method, in HTML.
-#   <dt><b>-modifiers</b>
-#   <dd> Other modifiers. Possible values depend
+#   <li><b>-modifiers</b>: Other modifiers. Possible values depend
 #        on the languages, but will include "virtual" for C++ and
 #        "synchronized" for Java. The default is null.
-#   <dt><b>-protection</b>
-#   <dd> The protection level of the method. Usually,
-#        this includes at least "private", "protected", and "public".
-#        The default is "public."
-#   <dt><b>-scope</b>
-#   <dd> The scope of the method. This can be either
+#   <li><b>-type</b>: The return type of the method. The default is null.
+#   <li><b>-scope</b>: The scope of the method. This can be either
 #        "instance," meaning that the method operates on an instance
 #        of this class, or "class," meaning that the method operates
 #        on the shared class data. (These are called "class methods"
 #        in Smalltalk and "procs" in [Incr Tcl]). Default is
 #        "instance."
-#   <dt><b>-type</b>
-#   <dd> The return type of the method. The default is null.
-#   </dl>
+#   </ul>
+# Methods typically contain nested _parameter_ entities, which lists
+# the parameters of the method, and nested _annotation_ entities
+# which document its purpose.
 #
-# <dt><b>variable</b> _name_
-# <dd>
-# A variable of the class. Variables have the following attributes:
-#   <dl>
-#   <dt><b>-default</b>
-#   <dd> The initial/default value of the variable. The default 
-#        is null. This attribute does not apply to certain languages and
-#        should then be ignored.
-#   <dt><b>-description</b>
-#   <dd> A short description of the variable, in plain text.
-#   <dt><b>-explanation</b>
-#   <dd> An explanatory description of the variable, in HTML.
-#   <dt><b>-modifiers</b>
-#   <dd> Other modifiers. Possible values depend
-#        on the languages, but will include "static" for C++ and
-#        "synchronized" for Java. The default is null.
-#   <dt><b>-protection</b>
-#   <dd> The protection level of the variable. Usually,
+# <li><b>variable</b> _name_: A variable. Variables can appear only
+# at the top level. Variables have the following attributes:
+#   <ul>
+#   <li><b>-protection</b>: The protection level of the variable. Usually,
 #        this includes at least "private", "protected", and "public".
 #        The default is "protected."
-#   <dt><b>-scope</b>
-#   <dd> The scope of the variable. This can be either
+#   <li><b>-modifiers</b>: Other modifiers. Possible values depend
+#        on the languages, but will include "static" for C++ and
+#        "synchronized" for Java. The default is null.
+#   <li><b>-type</b>: The type of the variable. The default is null.
+#   <li><b>-scope</b>: The scope of the variable. This can be either
 #        "instance," meaning that the method operates on an instance
 #        of this class, or "class," meaning that the method operates
 #        on the shared class data. (These are called "class variables"
 #        in Smalltalk and "common variables" in [Incr Tcl]). Default is
 #        "instance."
-#   <dt><b>-type</b>
-#   <dd> The type of the variable. The default is null.
-# </dl>
+#   </ul>
+# A variable often contains nested _annotation_ entities
+# which document its purpose.
 #
-# <dt><b>argument</b> _name_
-# <dd>
-# An argument. At the top level, this is a class argument, which
-# probably only makes sense if the language supports generics
-# ("templates" in C++). Inside a method, it represents an argument
-# to the method. It has the following attributes:
-#   <dl>
-#   <dt><b>-default</b>
-#   <dd> The default value of the argument. This makes
-#       sense only if the argument is optional. Default is a null string.
-#   <dt><b>-description</b>
-#   <dd> A short description of the argument, in plain text.
-#   <dt><b>-explanation</b>
-#   <dd> An explanatory description of the argument, in HTML.
-#   <dt><b>-optional</b>
-#   <dd> True is the argument is optional. Default
+# <li><b>annotation</b> _name_ _value_: A documentation annotation.
+# Annotations can appear at any level -- by convention, an annotation
+# named "description" is a short description while one named "explanation"
+# is a long description. Both are generally in HTML format.
+# Annotations have the following attributes:
+#   <ul>
+#   <li><b>-format</b>: The formatting of the annotation. This may
+#        include "plain" or "HTML". Default is HTML.
+#   </ul>
+#
+# <li><b>parameter</b> _name_: A parameter. At the top level,
+# this is a class parameter, which probably only makes sense if the
+# languages supports generics ("templates" in C++). Inside a
+# method, it represents an argument to the method. It has the
+# following attributes:
+#   <ul>
+#   <li><b>-type</b>: The type of the parameter. Default is null.
+#   <li><b>-optional</b>: True is the parameter is optional. Default
 #       is zero (false).
-#   <dt><b>-type</b>
-#   <dd> The type of the argument. Default is null.
-#   </dl>
-# </dl>
+#   <li><b>-default</b>: The default value of the parameter. This makes
+#       sense only if the parameter is optional. Default is a null string.
+#   </ul>
 #
-# Here is an example of a class model. This creates
-# a model and loads it with a string in TIM format. After
-# creating it, we call the describe{} method to confirm its
-# contents:
-# <pre><tcl>
+# Here is an example of a class model:
+# For more general information on models, see <a href="Model.html">Model</a>.
+# <pre><tcl quiet>
 #     catch {delete object $class}
-#     set class [::tycho::ClassModel [::tycho::autoName class]]
-#     $class parse {
-#        configure -language Itcl -classname ::tycho::exampleclass
-#        configure -description {An example class.}
-#        configure -explanation {This is a <i>silly</i> class.}
-#        configure -inherits ::tycho::Mommy
-#        variable foo \
-#            -protection public \
-#            -explanation "This is a public variable."
-#        method bar \
-#            -explanation "This is a public method." {
-#            argument x
-#            argument y
+#     set class [::tycho::Class [::tycho::autoName class]]
+# </tcl></pre>
+#
+# Now load the class with some data. In this example, give it a string
+# in TIM format -- usually, you would set the *-datafile* option and
+# call load{} (see <a href="Model.html">Model</a>):
+# <pre><tcl quiet>
+#     $class read string {
+#        configure -language Itcl
+#        annotation description {An example class.}
+#        annotation explanation {This is a <i>silly</i> class.}
+#        variable foo {
+#            -protection public
+#            annotation explanation "This is a public variable."
+#        }
+#        method bar {
+#            annotation explanation "This is a public method."
+#            parameter x
+#            parameter y
 #        }
 #     }
+# </tcl></pre>
+#
+# Display a TIM representation of the class:
+# <pre><tcl>
 #     $class describe
 # </tcl></pre>
 #
 # Return the public methods of the class:
 # <pre><tcl>
-#     $class match method -protection public
+#     $class methods -protection public
 # </tcl></pre>
 #
 # Return the explanation of a method:
 # <pre><tcl>
-#     $class attrget method:bar -explanation
+#     $class annotationget bar.explanation
 # </tcl></pre>
 #
-# Return the arguments of a method:
+# Return the parameters of a method (<b>FIXME</b>: add ordering
+# to TIM):
 # <pre><tcl>
-#     $class match argument method:bar
+#     $class parameters bar
 # </tcl></pre>
 #
-class ::tycho::ClassModel {
-    inherit ::tycho::DataModel
+class ::tycho::Class {
+    inherit ::tycho::Model
 
     constructor {args} {}
     destructor {}
     
     #################################################################
     ####                        options                          ####
+
+    # The file containing the source code of this class 
+    public variable source ""
+
+    # The file containing the interface of this class 
+    public variable interface ""
     
-    # The class name of the class. (i.e. ::tycho::ClassModel)
-    public variable classname ""
-
-    # Contributor
-    public variable contributor {}
-
-    # Copyright notice
-    public variable copyright {}
-
-    # Exceptions thrown by this class
-    public variable exceptions {}
-
-    # The HTML description of the class.
-    public variable explanation ""
-
-    # A list of classes from which this class inherits.
-    public variable inherits {}
-
-    # A list of interfaces that this class implements.
-    public variable implements {}
-
-    # The file in which the class' interface resides.
-    public variable interfacefile ""
-
-    # The language in which the class was written.
+    # The language this class is written in 
     public variable language ""
-
-    # Other class modifiers.
-    public variable modifiers {}
-
-    # The name of the package this class belongs to. 
-    public variable package ""
-
-    # The protection level of the class.
-    public variable protection "public"
-
-    # The file in which the class resides.
-    public variable sourcefile
-
+    
     #################################################################
     ####                     public methods                      ####
 
+    # Add a top-level annotation with attributes to the class
+    method annotation {name string args}
+
+    # Get an attribute or attributes of an annotation
+    method annotationcget {name option}
+
+    # Configure the annotation with one or more attributes
+    method annotationconfigure {name args}
+
+    # Remove an annotation to the class
+    method annotationdelete {name}
+
+	# Get the value of an annotation
+    method annotationget {name}
+    
+    # Add a nested annotation with attributes to the class
+    method annotationin {context name string args}
+
+    # Add a method with attributes to the class
+    method method {name args}
+
+    # Get an attribute or attributes of a method
+    method methodcget {name option}
+
+    # Configure the method with one or more attributes
+    method methodconfigure {name args}
+
+    # Remove a method from the class
+    method methoddelete {name}
+
+    # Get the methods with matching attributes
+    method methods {args}
+
+    # Add a top-level parameter with attributes to the class
+    method parameter {name args}
+
+    # Get an attribute or attributes of an parameter
+    method parametercget {name option}
+
+    # Configure the parameter with one or more attributes
+    method parameterconfigure {name args}
+
+    # Remove an parameter from the class
+    method parameterdelete {name}
+
+    # Add a nested parameter with attributes to the class
+    method parameterin {context name string args}
+
+    # Get the parameters of a method
+    method parameters {method}
+
+    # Add a top-level variable with attributes to the class
+    method variable {name args}
+
+    # Get an attribute or attributes of a variable
+    method variablecget {name option}
+
+    # Configure the variable with one or more attributes
+    method variableconfigure {name args}
+
+    # Remove a variable from the class
+    method variabledelete {name}
+     
+    # Get the variables with matching attributes
+    method variables {args}
+
+    #################################################################
+    ####                  protected methods                      ####
+    
+    # Methods cannot be nested
+    method methodin {context name args} {
+    	_nesterror method $context $name
+    }
+
+    # Variables cannot be nested
+    method variablein {context name args} {
+    	_nesterror variable $context $name
+    }
+
+    #################################################################
+    ####                   private methods                       ####
+    
+    # Evaluate code in this object's context
+    private method evalInSpecificContext {args} {eval $args}
 }
 
 ########################################################################
 #### constructor
 #
-body ::tycho::ClassModel::constructor {args} {
+body ::tycho::Class::constructor {args} {
     # Evaluate options
     eval configure $args
 
-    # Add the new options to the "printable" list
-    lappend printable \
-            -classname \
-            -contributor \
-            -copyright \
-            -exceptions \
-	    -explanation \
-            -implements \
-	    -inherits \
-            -interfacefile \
-            -language \
-            -modifiers \
-            -package \
-            -protection \
-            -sourcefile
-
-    # Define the "argument" entity
-    define argument \
-	    -type "" \
-	    -optional 0 \
-	    -default "" \
-	    -description "" \
-	    -explanation ""
-
-    # Define the "constructor" entity
-    define constructor \
-	    -protection public \
-	    -modifiers "" \
-            -exceptions "" \
-	    -description "" \
-	    -explanation ""
-
-    # Define the "destructor" entity
-    define destructor \
-	    -protection public \
-	    -modifiers "" \
-            -exceptions "" \
-	    -description "" \
-	    -explanation ""
+    # Define the "annotation" entity
+    defineEntity annotation \
+	    -valued 1  \
+	    -format HTML
 
     # Define the "method" entity
-    define method \
+    defineEntity method \
 	    -protection public \
 	    -modifiers "" \
 	    -type "" \
-	    -scope instance \
-            -exceptions "" \
-	    -description "" \
-	    -explanation ""
+	    -scope instance
 
     # Define the "variable" entity
-    define variable \
+    defineEntity variable \
 	    -protection protected \
 	    -modifiers "" \
 	    -type "" \
-	    -scope instance \
-            -default "" \
-	    -description "" \
-	    -explanation ""
+	    -scope instance
+
+    # Define the "parameter" entity
+    defineEntity resource \
+	    -ordered 1 \  ;# FIXME!!!
+    -type "" \
+	    -optional 0 \
+	    -default ""
 }
+
+########################################################################
+#### annotation
+#
+# Add a new annotation and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# annotation. Flag an error if the annotation already exists. 
+#
+body ::tycho::Class::annotation {name value args} {
+    _verifynot annotation name
+    _entity annotation {} $name [concat [list $value] $args]
+}
+
+########################################################################
+#### annotationcget
+#
+# Get an attribute of an annotation. Flag an error if the annotation does
+# not exist.
+#
+body ::tycho::Class::annotationcget {name option} {
+    _verify annotation $name
+    _cget annotation $name $option
+}
+
+########################################################################
+#### annotationconfigure
+#
+# Configure the annotation and return the inverse command. The argument list
+# is a flat list of attribute-value pairs. Flag an error if the
+# annotation does not exist.
+#
+body ::tycho::Class::annotationconfigure {name args} {
+    _verify annotation $name
+    _configure annotation $name $args
+}
+
+########################################################################
+#### annotationdelete
+#
+# Delete a annotation and return the inverse command. Flag an error if
+# the annotation does not exist.
+#
+body ::tycho::Class::annotationdelete {name} {
+    _verify annotation $name
+    _delete annotation $name
+}
+
+########################################################################
+#### annotationget
+#
+# Return the value of a annotation. Flag an error if
+# the annotation does not exist.
+#
+body ::tycho::Class::annotationget {name} {
+    _verify annotation $name
+    _get annotation $name
+}
+
+########################################################################
+#### annotationin
+#
+# Add a nested annotation and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# annotation. Flag an error if the annotation already exists. 
+#
+body ::tycho::Class::annotationin {context name value args} {
+    _verifynotin annotation $context name
+    _entity annotation $context $name [concat [list $value] $args]
+}
+
+########################################################################
+#### method
+#
+# Add a new method and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# method. Flag an error if the method already exists. 
+#
+body ::tycho::Class::method {name value args} {
+    _verifynot method $name
+    _link method $name [concat [list $value] $args]
+}
+
+########################################################################
+#### methodcget
+#
+# Get an attribute of a method. Flag an error if the method does
+# not exist.
+#
+body ::tycho::Class::methodcget {name option} {
+    _verify method $name
+    _cget method $name $option
+}
+
+########################################################################
+#### methodconfigure
+#
+# Configure the method and return the inverse command. The argument list
+# is a flat list of attribute-value pairs. Flag an error if the
+# method does not exist.
+#
+body ::tycho::Class::methodconfigure {name args} {
+    _verify method $name
+    _configure method $name $args
+}
+
+########################################################################
+#### methoddelete
+#
+# Delete a method and return the inverse command. Flag an error if
+# the method does not exist.
+#
+body ::tycho::Class::methoddelete {name} {
+    _verify method $name
+    _delete method $name
+}
+
+########################################################################
+#### methods
+#
+# Get the methods of the class with attributes that match the
+# given attributes and values. This can be used to get methods
+# with a given protection level, scope, and so on.
+#
+body ::tycho::Class::methods {args} {
+    set result {}
+    foreach method [_roots method] {
+    	array set temp $_attrs($method)
+    	set matching 1
+    	foreach {attr val} $args {
+	    if { $temp($attr) != $val } {
+		set matching 0
+		break
+	    }
+    	}
+    	if { ! $matching } {
+	    lappend result $method
+    	}
+    }
+    return $result
+}
+
+########################################################################
+#### parameter
+#
+# Add a new parameter and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# parameter. Flag an error if the parameter already exists. 
+#
+body ::tycho::Class::parameter {name args} {
+    _verifynot parameter $name
+    _entity parameter {} $name $args
+}
+
+########################################################################
+#### parametercget
+#
+# Get an attribute of an parameter. Flag an error if the parameter does
+# not exist.
+#
+body ::tycho::Class::parametercget {name option} {
+    _verify parameter $name
+    _cget parameter $name $option
+}
+
+########################################################################
+#### parameterconfigure
+#
+# Configure the parameter and return the inverse command. The argument list
+# is a flat list of attribute-value pairs. Flag an error if the
+# parameter does not exist.
+#
+body ::tycho::Class::parameterconfigure {name args} {
+    _verify parameter $name
+    _configure parameter $name $args
+}
+
+########################################################################
+#### parameterdelete
+#
+# Delete a parameter and return the inverse command. Flag an error if
+# the parameter does not exist.
+#
+body ::tycho::Class::parameterdelete {name} {
+    _verify parameter $name
+    _delete parameter $name
+}
+
+########################################################################
+#### parameterin
+#
+# Add a nested parameter and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# parameter. Flag an error if the parameter already exists. 
+#
+body ::tycho::Class::parameterin {context name args} {
+    _verifynotin parameter $context $name
+    _entity parameter $context $name $args
+}
+
+########################################################################
+#### parameters
+#
+# Get the parameters of a method.
+#
+body ::tycho::Class::parameters {method} {
+    _children parameter $method
+}
+
+########################################################################
+#### variable
+#
+# Add a new variable and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# variable. Flag an error if the variable already exists. 
+#
+body ::tycho::Class::variable {name args} {
+    _verifynot variable $name
+    _entity variable {} $name $args
+}
+
+########################################################################
+#### variablecget
+#
+# Get an attribute of an variable. Flag an error if the variable does
+# not exist.
+#
+body ::tycho::Class::variablecget {name option} {
+    _verify variable $name
+    _cget variable $name $option
+}
+
+########################################################################
+#### variableconfigure
+#
+# Configure the variable and return the inverse command. The argument list
+# is a flat list of attribute-value pairs. Flag an error if the
+# variable does not exist.
+#
+body ::tycho::Class::variableconfigure {name args} {
+    _verify variable $name
+    _configure variable $name $args
+}
+
+########################################################################
+#### variabledelete
+#
+# Delete a variable and return the inverse command. Flag an error if
+# the variable does not exist.
+#
+body ::tycho::Class::variabledelete {name} {
+    _verify variable $name
+    _delete variable $name
+}
+
+########################################################################
+#### variables
+#
+# Get the variables of the class with attributes that match the
+# given attributes and values. This can be used to get variables
+# with a given protection level, scope, and so on.
+#
+body ::tycho::Class::variables {args} {
+    set result {}
+    foreach variable [_roots variable] {
+    	array set temp $_attrs($variable)
+    	set matching 1
+    	foreach {attr val} $args {
+	    if { $temp($attr) != $val } {
+		set matching 0
+		break
+	    }
+    	}
+    	if { ! $matching } {
+	    lappend result $variable
+    	}
+    }
+    return $result
+}
+

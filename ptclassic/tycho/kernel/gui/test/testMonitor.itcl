@@ -1,11 +1,10 @@
-# Test suite for Monitor class. 
-# This uses graphics, so it must be run with tycho -e
+# Test suite for Exec class, this uses graphics, so it must be run with tycho -e
 #
-# @Author: Kevin Chang
+# @Authors: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)testExec.itcl	1.8 4/17/97
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -31,111 +30,56 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# Make sure that the required packages are loaded
-package require tycho.util.tytest
-package require tycho.kernel.gui
+if {[string compare test [info procs test]] == 1} then { 
+    source [file join $TYCHO kernel test testDefs.tcl]
+} {}
 
-############################################################################
-#### Define a proc that can be used to create a test Monitor widget
-#
-# Create a monitor widget, wait for the $timewait, and then
-# return the name of the monitor widget
-proc _createMonitor {timewait args} {
-    set monitor [eval ::tycho::view Monitor $args]
-    _blockwait $timewait
-    return $monitor
-}
-
-proc _blockwait {timewait} {
-    set ok $timewait
-    after $timewait "set ok 1"
-    tkwait variable ok
-}
-
-
-# NOTE: All of the Monitor tests are very dependent on the machine
-# that is being run. Currently, we are assuming to be on UNIX system
-# where common commands like "ls" exists.
-test Monitor-1.1 {Example on creating monitor, make sure closing is correct} {
-    set monitor [_createMonitor 2000 -toolbar 1 -command {} -autostart 0]
-
-    after 2000 [$monitor statusbar cget -closecommand]
-
-    _blockwait 2500
-    update idletasks
-
-    # This should be killed!
-    winfo exists $monitor
-} {0}
-
-
-# Test if autodestroy works
-test Monitor-1.2 {Example on auto closing monitor} {
-    set monitor [_createMonitor 500 \
-            -toolbar 1 -command {ls} -autostart 1 -autodestroy 1]
-
-    # Set blocking wait until execution is done
-    $monitor getStatusWait
-
-    # Wait, and this thing is destroys itself
-    _blockwait 2000
-
-    update idletasks
-    winfo exists $monitor
-} {0}
-
-
-# Test if it exists normally
-test Monitor-1.3 {Autostart on ls, make sure output of monitor=history} {
-    set monitor [_createMonitor 500 -toolbar 1 -command {ls} -autostart 1]
-
-    # set blocking wait
-    $monitor getStatusWait
-
-    update idletasks
-    # << Exited Normally... >>
-    # This is equivalent to [$monitor getHistory], in the Exec class
-    regexp -nocase {(Normally)} [$monitor.history get 0.0 end] ret
-
-    after 500 [$monitor statusbar cget -closecommand]
-    set ret
-} {Normally}
-
-
-# Test manual start, but close automatically if status is normal
-test Monitor-1.4 {Manual start, but close automatically} {
-    set monitor [_createMonitor 500 \
-            -toolbar 1 -command {ls} -autostart 0 -autodestroy 2]
+test Exec-1.1 {run make} {
+    catch {destroy .exec}
+    catch {delete object .exec}
+    ::tycho::Exec .exec
     
-    update idletasks
-    $monitor execProcess
-    $monitor getStatusWait
+    .exec execProcess {make test_exec_msg} [file join $TYCHO kernel test]
 
-    # Wait for automatic closing
-    _blockwait 2500
+    # Wait for return
+    set status [.exec getStatusWait]
+    set history [.exec getHistory]
+    set results {}
+    regexp {>>([^<]+)<<} $history match results
 
-    winfo exists $monitor
-} {0}
+    # Strip out lines like 'make[1] entering directory foo'
+    set removemake "make\[^\n\]*\n"
+    regsub -all $removemake $results {} newresults
+
+    list $status $newresults
+} {normal {
+This message is used to test the Exec class
+
+}}
+
+test Exec-1.2 {If we kill fast enough, then we'll get a result "Killed"} {
+    catch {destroy .exec}
+    catch {delete object .exec}
+    ::tycho::Exec .exec
+    .exec execProcess {ls -al} {}
+    .exec killProcess
+    set results [.exec getHistory]
+    regexp {(killed)} $results match results
+    list $results
+} {killed}
 
 
-# Test auto start and auto close, but execute illegal instruction.
-# The monitor should not exit automatically.
-test Monitor-1.5 {Auto close, but illegal command to halt auto close.} {
-    set monitor [_createMonitor 500 \
-            -toolbar 1 -command {make NO_WAY_MAN} -autostart 1 -autodestroy 1]
-    
-    update idletasks
-    $monitor getStatusWait
-
-    # After this time, monitor should still not exit
-    _blockwait 1500
-
-    set ret [winfo exists $monitor]
-    catch [$monitor statusbar cget -closecommand]
-    set ret
-} {1}
-
-
+test Exec-1.3 {Make sure that clear history really clears up everything} {
+    catch {destroy .exec}
+    catch {delete object .exec}
+    ::tycho::Exec .exec
+    .exec execProcess {ls -al} {}
+    .exec getStatusWait
+    .exec clearHistory
+    # This should be empty
+    set results [.exec getHistory]
+    list $results
+} {{}}
 
 
 

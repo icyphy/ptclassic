@@ -4,7 +4,7 @@
 # 
 # @Version: $Id$
 #
-# @Copyright (c) 1997-1998 The Regents of the University of California.
+# @Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,9 +30,18 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# Make sure that the test package is loaded
-package require slate.test
+if {[string compare test [info procs test]] == 1} then { 
+    source [file join $TYCHO kernel test testDefs.tcl]
+} {}
 
+if {[string compare test [info procs _slate]] == 1} then { 
+    source [file join $TYCHO editors slate test defs.itcl]
+} {}
+
+if { ! [::info exists SHORTTIME] } {
+    set SHORTTIME 50
+}
+#set VERBOSE 1
 
 ############################################################################
 #### Define a proc that creates a single Frame on the slate
@@ -52,6 +61,17 @@ test Frame-construct-1 {Create a Frame item and check coords} {
     .s coords [.s primary $f]
 } {40.0 40.0 80.0 80.0}
 
+_slate
+test Frame-construct-2 {Create a Frame item and check default options} {
+    set f [.s create Frame 40 40 80 80]
+    .s itemconfigure $f
+} {{-relief {} {} raised raised} {-color {} {} background background} {-shape {} {} rectangle rectangle} {-borderwidth {} {} 2 2} {-tags {} {} {} {}}}
+
+test Frame-construct-3 {Create a Frame item with non-default options} {
+    set f [.s create Frame 140 140 180 180 -relief sunken \
+	    -color green -borderwidth 4 -tags foo]
+    .s itemconfigure $f
+} {{-relief {} {} raised sunken} {-color {} {} background green} {-shape {} {} rectangle rectangle} {-borderwidth {} {} 2 4} {-tags {} {} {} foo}}
 
 #######################################################################
 #### Options
@@ -59,59 +79,20 @@ test Frame-construct-1 {Create a Frame item and check coords} {
 _slate
 set i 0
 
-#### Defaults
-
-set f [.s create Frame 40 40 80 80]
-update
-foreach {opt val} {\
-        -relief raised \
-        -color background \
-        -shape rectangle \
-        -borderwidth 2 \
-        -tags {}} {
-    incr i
-    test Frame-options-$i "Check default option $opt" {
-        .s itemcget $f $opt
-    } $val
-}
-_clean
-
-#### Non-defaults
-
-set f [.s create Frame 140 140 180 180 \
-        -relief sunken \
-        -color green \
-        -borderwidth 4 \
-        -tags foo]
-update
-foreach {opt val} {\
-        -relief sunken \
-        -color green \
-        -borderwidth 4 \
-        -tags foo} {
-    incr i
-    test Frame-options-$i "Check non-default option $opt" {
-        .s itemcget $f $opt
-    } $val
-}
-_clean
-
-#### -relief
-
-set i 0
 _frame
 foreach r {flat raised sunken} \
 	c {{green3 green3 green3} {green1 green3 green4} \
 	{green4 green3 green1}} {
     incr i
-    test Frame-relief-$i "Check coloring for relief $r" {
+    test Frame-options-$i "Check coloring for relief $r" {
 	.s itemconfigure $f -relief $r
 	list \
 		[.s component $f lit itemcget -fill] \
 		[.s component $f surface itemcget -fill] \
 		[.s component $f shaded itemcget -fill]
     } $c
-    _update
+    update idletasks
+    after $SHORTTIME
 }
     
 _frame
@@ -128,34 +109,31 @@ foreach r {ridge groove} \
 		[.s component $f notlit itemcget -fill] \
 		[.s component $f notshaded itemcget -fill]
     } $c
-    _update
+    update idletasks
+    after $SHORTTIME
 }
     
-#### -borderwidth
-
-set i 0
 _frame
 foreach b {0 1 2} \
 	c {{40.0 40.0 81.0 81.0} {41.0 41.0 80.0 80.0} {42.0 42.0 79.0 79.0}} {
     incr i
-    test Frame-borderwidth-$i "Check border width $b" {
+    test Frame-options-$i "Check border width $b" {
 	.s itemconfigure $f -borderwidth $b
 	.s component $f surface coords
     } $c
-    _update
+    update idletasks
+    after $SHORTTIME
 }
     
-#### -color
-
-set i 0
 _frame
 foreach c {red blue yellow} {
     incr i
-    test Frame-color-$i "Check coloring change to $c" {
+    test Frame-options-$i "Check coloring change to $c" {
 	.s itemconfigure $f -color $c
 	.s component $f surface itemcget -fill
     } ${c}3
-    _update
+    update idletasks
+    after $SHORTTIME
 }
     
 #######################################################################
@@ -170,13 +148,13 @@ set i 0
 
 _frame
 test Frame-reshape-1 {Reshape a corner} {
-    _interactslate reshape $f 1 1 40 -features se
+    _interactslate reshape $f 1 1 40 -aspects se
     .s coords $f
 } [_finally ::tycho::Rectangle::reshape $f 1 1 40 se]
 
 _frame
 test Frame-reshape-2 {Reshape a corner} {
-    _interactslate reshape $f 1 1 40 -features e
+    _interactslate reshape $f 1 1 40 -aspects e
     .s coords $f
 } [_finally ::tycho::Rectangle::reshape $f 1 1 40 e]
 

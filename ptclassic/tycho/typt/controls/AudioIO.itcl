@@ -1,10 +1,10 @@
-# A control sub-panel for audio I/O.
+# One line description of file.
 #
 # @Author: John Reekie and Sunil Bhave
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -50,6 +50,13 @@ class ::tycho::AudioIO {
     method requestConnect {}
 
     ###################################################################
+    ####                   protected methods                       ####
+
+    ###################################################################
+    ####                   protected variables                     ####
+
+
+    ###################################################################
     ####                   private variables                       ####
 
     ## sourceVar, destVar
@@ -69,10 +76,8 @@ body ::tycho::AudioIO::constructor {args} {
     itk_component add select {
         frame $itk_interior.select
     } {}
-    # FIXME: For now, these are not packed because the
-    # Tycho-CGC interface does not yet support controls
-    # other than simple scales.
-    # pack $itk_component(select) -side left -anchor nw
+    pack $itk_component(select) -side left -anchor nw
+    
     
     itk_component add source {
         label $itk_component(select).source \
@@ -170,14 +175,28 @@ body ::tycho::AudioIO::constructor {args} {
     eval itk_initialize $args
 }
 
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
 ######################################################################
 #### requestConnect
 #
-# Connect all controls to the main control panel.
+# Connect all controls to the control panel. Subclasses must
+# override.
 #
-body ::tycho::AudioIO::requestConnect {} {
+body ::tycho::ControlSubpanel::requestConnect {} {
     # Register the controls so stars can access them
-    connect attenuate input.volume   10.0
-    connect gain      output.volume  10.0
-    connect balance   output.balance 5.0 50
+    connect $itk_component(attenuate) input.volume
+    connect $itk_component(gain)      output.volume
+    connect $itk_component(balance)   output.balance
 }
+
+
+    ###################################################################
+    ###################################################################
+    ####                      protected methods                    ####
+
+    ###################################################################
+    ###################################################################
+    ####                      private methods                      ####

@@ -1,11 +1,10 @@
-# -*- mode: tcl -*-
 #
 # $Id$
 #
 # The "style" master style-sheet
 #
-configure -title "Layout"
-configure -description {
+modelconfigure -label "Layout"
+modelconfigure -description {
     This style contains settings for widget dimensions.
 }
 
@@ -75,12 +74,11 @@ style default \
     }
 }
 
-style fullscreen \
-	-label "Full screen" \
+style default \
+	-label "Console" \
 	-description {
-    Layout parameters that work well using the small fonts for
-    a high-resolution screen.
+    Layout parameters for console windows.
 } {
-    parameter textHeight 56
+    parameter textWidth 60
+    parameter textHeight 6
 }
-

@@ -1,10 +1,9 @@
 # A circular list data structure.
 #
-# @Author: Edward A. Lee
+# $Id$
+# Authors: Edward A. Lee
 #
-# @Version: $Id$
-#
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -37,22 +36,26 @@
 # converted to an ordinary Tcl list starting with any specified element.
 #
 class ::tycho::CircularList {
-    inherit ::tycho::Object
 
     constructor {args} {}
 
+    #### append
     # Append an element, at the end or after the given element.
     method append {element {after {}}}
 
+    #### clear
     # Reinitialize the list.
     method clear {}
 
+    #### elements
     # Return the elements as a list, optionally starting at the given element.
     method elements {{start {}}}
 
-    # Insert an element in the list.
+    #### insert
+    # Insert an element, at the beginning or before the given element.
     method insert {element {before {}}}
 
+    #### remove
     # Remove an element from the list.
     method remove {element}
 
@@ -70,7 +73,7 @@ body ::tycho::CircularList::constructor {args} {}
 
 #####################################################################
 #### append
-# Append an element, at the end or after the given element.
+# Append an element to the list.
 # If only one argument is given, the element is appended at the end.
 # Otherwise, it is appended after the element given by the second argument.
 # If the second argument gives an invalid element, an error is reported.
@@ -84,9 +87,6 @@ body ::tycho::CircularList::append {element {after {}}} {
 	    set forward($element) $element
 	    set backward($element) $element
 	} {
-	    if [info exists forward($element)] {
-		remove $element
-	    }
 	    set forward($element) $first
 	    set forward($last) $element
 	    set backward($element) $last
@@ -100,7 +100,6 @@ body ::tycho::CircularList::append {element {after {}}} {
 	    if [info exists forward($element)] {
 		remove $element
 	    }
-	    if {$last == $after} {set last $element}
 	    set forward($element) $forward($after)
 	    set forward($after) $element
 	    set backward($element) $after
@@ -111,13 +110,11 @@ body ::tycho::CircularList::append {element {after {}}} {
 
 #####################################################################
 #### clear
-# Reinitialize the list.
+# Clear the CircularList.
 #
 body ::tycho::CircularList::clear {} {
-    # If clear is run on a newly constructed CircularList, then
-    # forward and backward might not be set
-    catch {unset forward}
-    catch {unset backward}
+    unset forward
+    unset backward
     set first {}
     set last {}
 }
@@ -157,7 +154,6 @@ body ::tycho::CircularList::elements {{start {}}} {
 # If the element already exists in the list, it is first removed.
 #
 body ::tycho::CircularList::insert {element {before {}}} {
-
     if {$before == {}} {
 	if {$last == {}} {
 	    set last $element
@@ -165,9 +161,6 @@ body ::tycho::CircularList::insert {element {before {}}} {
 	    set forward($element) $element
 	    set backward($element) $element
 	} {
-	    if [info exists forward($element)] {
-		remove $element
-	    }
 	    set forward($element) $first
 	    set forward($last) $element
 	    set backward($element) $last
@@ -181,7 +174,6 @@ body ::tycho::CircularList::insert {element {before {}}} {
 	    if [info exists forward($element)] {
 		remove $element
 	    }
-	    if {$first == $before} {set first $element}
 	    set forward($element) $before
 	    set backward($element) $backward($before)
 	    set forward($backward($before)) $element
@@ -192,7 +184,7 @@ body ::tycho::CircularList::insert {element {before {}}} {
 
 #####################################################################
 #### remove
-# Remove an element from the list.
+# Remove a specified element.
 #
 body ::tycho::CircularList::remove {element} {
     if {![info exists forward($element)]} {

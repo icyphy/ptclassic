@@ -2,7 +2,7 @@
 #
 # $Id$
 #
-# Copyright (c) 1996-%Q% The Regents of the University of California.
+# Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -39,27 +39,9 @@ ROOT =		../..
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-TCL_SRCS = \
-	HTMLMap2DAG.tcl \
-	tychoMakeIndex.tcl
-
 MISC_FILES =	
 
-INDICES = \
-	tycho.idx \
-	codeDoc.idx
-
-# Don't add $(INDICES) here, or running 'make sources' from the 
-# top tycho directory will result in generating these files twice
-EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
-
-# make clean will remove the indices.
-KRUFT =		$(INDICES)
-
-# We need not have 'make checkjunk' report that these are junk
-OPTIONAL_FILES = 	$(INDICES) doc
-
-all install: $(INDICES)
+INDICES = 	tycho.idx codeDoc.idx
 
 # Create all the indexes
 indices: $(INDICES)
@@ -70,33 +52,28 @@ FORCE:
 # We could use the GNU make $(wildcard) extension here, but that would
 # force users to have GNU make.
 tycho.idx: FORCE
-	@echo "About to create Tycho concept index"
 	@echo "You should be sure to run 'make itcldocs' before updating $@"
 	@echo "Updating $@"
 	rm -f $@
 	@if [ "$(TYCHO)" = "" ]; then \
 		echo "TYCHO is not set so we assume we are part of PTOLEMY"; \
 		echo "Running $(ITCLSH), \$$PTOLEMY=$(PTOLEMY)"; \
-		echo "set TYCHO \"$(PTOLEMY)/tycho\"; source tychoMakeIndex.tcl; tychoStandardIndex" | $(ITCLSH); \
+		echo "set TYCHO $(PTOLEMY)/tycho; source ../../kernel/tychoMakeIndex.tcl; tychoStandardIndex" | $(ITCLSH); \
 	else \
 		echo "Running $(ITCLSH)"; \
-		echo "set TYCHO \"$(TYCHO)\"; source tychoMakeIndex.tcl; tychoStandardIndex" | $(ITCLSH); \
+		echo "set TYCHO $(TYCHO); source ../../kernel/tychoMakeIndex.tcl; tychoStandardIndex" | $(ITCLSH); \
 	fi
 
 # Create a tycho code index file
 codeDoc.idx: FORCE
-	@echo "About to create Tycho code index"
 	@echo "You should be sure to run 'make itcldocs' before updating $@"
 	@echo "Updating $@"
 	rm -f $@
 	@if [ "$(TYCHO)" = "" ]; then \
 		echo "TYCHO is not set so we assume we are part of PTOLEMY"; \
 		echo "Running $(ITCLSH), \$$PTOLEMY=$(PTOLEMY)"; \
-		echo "set TYCHO \"$(PTOLEMY)/tycho\"; source tychoMakeIndex.tcl; tychoCodeDocIndex" | $(ITCLSH); \
+		echo "set TYCHO $(PTOLEMY)/tycho; source ../../kernel/tychoMakeIndex.tcl; tychoCodeDocIndex" | $(ITCLSH); \
 	else \
 		echo "Running $(ITCLSH)"; \
-		echo "set TYCHO \"$(TYCHO)\"; source tychoMakeIndex.tcl; tychoCodeDocIndex" | $(ITCLSH); \
+		echo "set TYCHO $(TYCHO); source ../../kernel/tychoMakeIndex.tcl; tychoCodeDocIndex" | $(ITCLSH); \
 	fi
-
-# We don't include common.mk since we don't use the compiler here
-include $(ROOT)/mk/no-compile.mk

@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1997-%Q% The Regents of the University of California.
+# @Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -31,18 +31,14 @@
 #######################################################################
 
 if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
+    source $TYCHO/kernel/test/testDefs.tcl
 } {}
 
 # Uncomment this to get a full report, or set in your Tcl shell window.
 # set VERBOSE 1
 
-# If necessary load up the class definitions
-if {[namespace ptolemy {info classes Block}] == {} } {
-    uplevel #0 {
-	set ::auto_path [linsert $auto_path 0 [file join $TYCHO typt kernel]] 
-    }
-}
+# Set the following to avoid endless calls to exit.
+set reallyExit 0
 
 ######################################################################
 #### setup
@@ -53,7 +49,7 @@ test Block::setup {create a test universe} {
     catch {delete object .x.x}
     catch {delete object .x.y}
     catch {delete object .x.z}
-    ::pitcl::addUniverse .x SDF
+    ::pitcl::addUniverse .x
     ::ptolemy::Block .x.w Ramp
     ::ptolemy::Block .x.x Ramp
     ::ptolemy::Block .x.y Add
@@ -64,7 +60,7 @@ test Block::setup {create a test universe} {
 ######################################################################
 #### getDescriptor method
 
-test Block::getDescriptor-1.1 {get a block descriptor} {
+test Block::getDescriptor.1 {get a block descriptor} {
     .x.w getDescriptor
 } {Generate a ramp signal, starting at "value" (default 0) and
 incrementing by step size "step" (default 1) on each firing.}
@@ -72,14 +68,15 @@ incrementing by step size "step" (default 1) on each firing.}
 ######################################################################
 #### getDomain method
 
-test Block::getDomain-1.1 {get a star domain} {
+test Block::getDomain.1 {get a star domain} {
     .x.w getDomain
 } {SDF}
 
 ######################################################################
 #### getPorts method
 
-test Block::getPorts-1.1 {Query for the ports of a Block instance} {
+test Block::getPorts.1 {Query for the ports of a Block instance} {
     .x.y getPorts
 } {output}
- 
+
+doneTests

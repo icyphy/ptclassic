@@ -6,9 +6,9 @@ exec itclsh "$0" "$@"
 # Authors: Christopher Hylands
 # Version: $Id$
 
-# Copyright (c) 1996-%Q% The Regents of the University of California.
+# Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
-# See the file $TYCHO/copyright.txt for copyright notice,
+# See the file $TYCHO/copyright for copyright notice,
 # limitation of liability, and disclaimer of warranty provisions.
 
 # Usage:
@@ -77,16 +77,10 @@ for {set n 0} {$n < $argc} {incr n} {
 }
 
 if {$argc == 0 || $argc == $switchCount} {
-    set retval [tychoStandardDAG]
+    tychoStandardDAG
 } else {
-    if {$argc < 2 } {
-	error "Usage: itcl2dag \[-t title\] dagoutput itclinput"
-    }
-    set retval [eval tychoMkClassGraph {{$title}} [lindex $argv $switchCount] \
-	[split [lrange $argv [expr $switchCount + 1] end]]]
+    eval tychoMkClassGraph {{$title}} [lindex $argv $switchCount] \
+	[split [lrange $argv [expr $switchCount + 1] end]]
+}
 
-}
-if {$retval != {}} {
-    puts stderr $retval
-}
 		

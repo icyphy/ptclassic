@@ -1,4 +1,3 @@
-# -*- mode: tcl -*-
 #
 # $Id$
 #
@@ -6,8 +5,8 @@
 #
 # FIXME: Add tk palette
 #
-configure -title "Colors"
-configure -description {
+modelconfigure -label "Colors"
+modelconfigure -description {
     This style contains color settings for widgets
     in general.
 }
@@ -30,41 +29,40 @@ style default \
 	    -description {
 	Color settings for the Tk palette. As a general rule,
 	it isn't worth messing with these...
-    } {
-	parameter activeBackground grey92 -type color \
-		-label "activeBackground"
-
-	parameter activeForeground black -type color \
-		-label "activeForeground"
-
-	parameter background grey85 -type color \
-		-label "activeForeground"
-
-	parameter disabledForeground grey64 -type color \
-		-label "disabledForeground"
-
-	parameter foreground black -type color \
-		-label "foreground"
-
-	parameter highlightBackground grey85 -type color \
-		-label "highlightBackground"
-
-	parameter highlightColor black -type color \
-		-label "highlightColor"
-
-	parameter insertBackground black -type color \
-		-label "insertBackground"
-
-	parameter selectColor maroon -type color \
-		-label "selectColor"
-
-	parameter selectBackground grey76 -type color \
-		-label "selectBackground"
-
-	parameter selectForeground black -type color \
-		-label "selectForeground"
-
-	parameter troughColor grey76 -type color \
-		-label "troughColor"
     }
+    parameter activeBackground grey92 -type color \
+	    -label "activeBackground"
+
+    parameter activeForeground black -type color \
+	    -label "activeForeground"
+
+    parameter background grey85 -type color \
+	    -label "activeForeground"
+
+    parameter disabledForeground grey64 -type color \
+	    -label "disabledForeground"
+
+    parameter foreground black -type color \
+	    -label "foreground"
+
+    parameter highlightBackground grey85 -type color \
+	    -label "highlightBackground"
+
+    parameter highlightColor black -type color \
+	    -label "highlightColor"
+
+    parameter insertBackground black -type color \
+	    -label "insertBackground"
+
+    parameter selectColor maroon -type color \
+	    -label "selectColor"
+
+    parameter selectBackground grey76 -type color \
+	    -label "selectBackground"
+
+    parameter selectForeground black -type color \
+	    -label "selectForeground"
+
+    parameter troughColor grey76 -type color \
+	    -label "troughColor"
 }

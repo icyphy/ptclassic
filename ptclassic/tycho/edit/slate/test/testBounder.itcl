@@ -5,7 +5,7 @@
 # 
 # @Version: $Id$
 #
-# @Copyright (c) 1997-1998 The Regents of the University of California.
+# @Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -31,9 +31,18 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# Make sure that the test package is loaded
-package require slate.test
+if {[string compare test [info procs test]] == 1} then { 
+    source [file join $TYCHO kernel test testDefs.tcl]
+} {}
 
+if {[string compare test [info procs _slate]] == 1} then { 
+    source [file join $TYCHO editors slate test defs.itcl]
+} {}
+
+if { ! [::info exists SHORTTIME] } {
+    set SHORTTIME 50
+}
+#set VERBOSE 1
 
 ############################################################################
 #### Define a proc that creates and a rectangle around them,
@@ -90,122 +99,32 @@ test Bounder-basic-1 {Basic interaction, item ID} {
 
     # Perform a series of movements
     _interaction $r $r 100 100 10 0 15 -button 1 ;# east
-    set result [list [.s feature $r ne]]
+    set result [list [.s aspect $r ne]]
 
     _interaction $r $r 100 100 0 10 15 -button 1 ;# south
-    lappend result [.s feature $r se]
+    lappend result [.s aspect $r se]
 
     _interaction $r $r 100 100 -10 -10 15 -button 1 ;# north-west
-    lappend result [.s feature $r nw]
+    lappend result [.s aspect $r nw]
 
     set result
 } {{180.0 40.0} {180.0 180.0} {40.0 40.0}}
 
 test Bounder-basic-2 {Basic interaction, by tag} {
-    $b bind foo -button 2
+    $b bind $f -button 2
 
     # Perform a series of movements
-    _interaction foo $f 100 100 -10 0 15 -button 2 ;# west
-    set result [list [.s feature $f sw]]
+    _interaction $f $f 100 100 -10 0 15 -button 2 ;# west
+    set result [list [.s aspect $f sw]]
 
-    _interaction foo $f 100 100 0 -10 15 -button 2 ;# north
-    lappend result [.s feature $f nw]
+    _interaction $f $f 100 100 0 -10 15 -button 2 ;# north
+    lappend result [.s aspect $f nw]
 
-    _interaction foo $f 100 100 10 10 15 -button 2 ;# south-east
-    lappend result [.s feature $f se]
+    _interaction $f $f 100 100 10 10 15 -button 2 ;# south-east
+    lappend result [.s aspect $f se]
 
     set result
 } {{40.0 180.0} {40.0 40.0} {180.0 180.0}}
-
-#######################################################################
-#### -bounds
-#
-# With -bounds set to null, use the whole size of the slate
-#
-_slate
-_boundeditems
-update
-
-test Bounder-bounds-1 {Use bounds of slate, by item ID} {
-    $b bind $r -button 1
-    $b configure -bounds ""
-
-    # Perform a series of movements
-    _interaction $r $r 100 100 10 0 50 -button 1 ;# east
-    set result [list [.s feature $r ne]]
-
-    _interaction $r $r 100 100 0 10 50 -button 1 ;# south
-    lappend result [.s feature $r se]
-
-    _interaction $r $r 100 100 -10 -10 50 -button 1 ;# north-west
-    # Hm... we have to do a little rounding here...
-    set r [.s feature $r nw]
-    lappend result [list [expr round([lindex $r 0])] [expr round([lindex $r 1])]]
-
-    set result
-} [list \
-	[list [expr double([winfo width .s])] 40.0] \
-	[list [expr double([winfo width .s])] [expr double([winfo height .s])]] \
-	[list 0 0]]
-
-test Bounder-bounds-2 {Use bounds of slate, by tag} {
-    $b bind foo -button 2
-    $b configure -bounds ""
-
-    # Perform a series of movements
-    _interaction foo $f 100 100 -10 0 50 -button 2 ;# west
-    set r [.s feature $f sw]
-    set result [list [list [expr round([lindex $r 0])] \
-	    [expr round([lindex $r 1])]]]
-
-    _interaction foo $f 100 100 0 -10 50 -button 2 ;# north
-    set r [.s feature $f nw]
-    lappend result [list [expr round([lindex $r 0])] [expr round([lindex $r 1])]]
-
-    _interaction foo $f 100 100 10 10 50 -button 2 ;# south-east
-    lappend result [.s feature $f se]
-
-    set result
-} [list \
-	[list 0 180] \
-	[list 0 0] \
-	[list [expr double([winfo width .s])] [expr double([winfo height .s])]]]
-
-#######################################################################
-#### -constrain
-#
-#
-_slate
-_boundeditems
-update
-
-test Bounder-constrain-1 {Constrain to x axis} {
-    $b bind $r -button 1
-    $b configure -constrain x
-
-    # Perform a series of movements
-    _interaction $r $r 100 100 10 10 15 -button 1 ;# south-east
-    set result [list [.s feature $r ne]]
-
-    _interaction $r $r 100 100 -10 -10 15 -button 1 ;# north-west
-    lappend result [.s feature $r nw]
-
-    set result
-} {{180.0 40.0} {40.0 40.0}}
-
-test Bounder-constrain-2 {Constrain to y axis} {
-    $b bind $f -button 2
-    $b configure -constrain y
-
-    # Perform a series of movements
-    _interaction $f $f 100 100 -10 -10 15 -button 2 ;# north-west
-    set result [list [.s feature $f ne]]
-
-    _interaction $f $f 100 100 10 10 15 -button 2 ;# south-east
-    lappend result [.s feature $f se]
-
-    set result
-} {{180.0 40.0} {180.0 180.0}}
 
 #######################################################################
 #### -click/drag/releaseprefix
@@ -235,7 +154,7 @@ test Bounder-prefix-1 {Test -click/drag/releaseprefix options} {
     list [.s coords $r] $X $Y $Z
 
 } [list {40.0 40.0 80.0 80.0} \
-	[list $r 100 100 -button 1] [list $r 200.0 200.0] [list $r %1 %2]]
+	[list $r 100 100 -button 1] [list $r 200.0 200.0] [list $r 200.0 200.0]]
     
 #######################################################################
 #### -activate/drag/deactivatecommand
@@ -270,7 +189,7 @@ test Bounder-command-1 {Test -activate/drag/deactivatecommand options} {
    list [.s coords $r] $X $Y $Z
 
 } [list {140.0 140.0 180.0 180.0} \
-	[list $r 100 100 %3 %4] [list $r 200.0 200.0] [list $r %1 %2]]
+	[list $r 100 100 %3 %4] [list $r 200.0 200.0] [list $r 300 300]]
 
 #######################################################################
 #### activate

@@ -1,10 +1,9 @@
 # A stack data structure.
 #
-# @Authors: Edward A. Lee
+# $Id$
+# Authors: Edward A. Lee
 #
-# @Version: $Id$
-#
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -32,25 +31,21 @@
 
 ##########################################################################
 #### Stack class.
-# A simple stack data structure with methods to push and pop.
-# Data stored on the stack is any arbitrary Tcl string.
+# This is a simple stack data structure with methods to push and pop.
+# Data stored on the stack is any arbitrary Tcl value.
 #
 class ::tycho::Stack {
-    inherit ::tycho::Object
 
     constructor {args} {}
 
-    # Reinitialize the stack.
+    # Reinitialize the stack
     method clear {}
 
-    # Pop a value from the stack and return it.
+    # Pop data from the stack
     method pop {}
 
-    # Push a value onto the stack.
+    # Push data onto the stack
     method push {value}
-
-    # Return the contents of the stack (used for debugging)
-    method contents {} {return $data}
 
     # The list used to implement the stack.
     protected variable data {}
@@ -63,7 +58,7 @@ body ::tycho::Stack::constructor {args} {}
 
 #####################################################################
 #### clear
-# Reinitialize the stack, eliminating all previous items.
+# Clear the stack.
 #
 body ::tycho::Stack::clear {} {
     set data {}
@@ -71,23 +66,25 @@ body ::tycho::Stack::clear {} {
 
 #####################################################################
 #### pop
-# Pop a value from the stack and return it.
-# If there is nothing on the stack, return an empty string.
+# Pop the stack.  If there is nothing on the stack, return an
+# empty string.
 #
 body ::tycho::Stack::pop {} {
     if {[llength $data] > 0} {
 	set retval [lindex $data 0]
 	set data [lreplace $data 0 0]
+puts "$this: popping $retval"
+	return $retval
     } {
-	set retval {}
+	return {}
     }
-    return $retval
 }
 
 #####################################################################
 #### push
-# Push a value onto the stack.
+# Push the stack.
 #
 body ::tycho::Stack::push {value} {
     set data [linsert $data 0 $value]
+puts "$this: pushing $value"
 }

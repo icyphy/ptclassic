@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -41,34 +41,19 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 ITCL_SRCS = \
-	Block.itcl \
-	DomainInfo.itcl \
-	Galaxy.itcl \
-	Oct.itcl \
-	Profile.itcl \
-	PtWelcomeMessage.itcl \
-	Universe.itcl
+	DomainInfo.itcl
 
-EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) \
-	README.txt \
-	kernel.tcl \
-	pkgIndex.tcl
+EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
-DIRS =		bin demo doc test
-
-# make checkjunk will not report OPTIONAL_FILES as trash
-# make realclean removes OPTIONAL_FILES
-MISC_FILES =	$(DIRS) tclIndex
-
-# make checkjunk will not report OPTIONAL_FILES as trash
-# make realclean removes OPTIONAL_FILES
-OPTIONAL_FILES =	adm img
+MISC_FILES =	tclIndex doc
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex *.html
 
 # Title for the tydoc index page
 TYDOC_DESC =	Index of classes in tycho/typt/kernel
+
+DIRS =		test #doc
 
 all install: tclIndex $(MISC_SRCS)
 

@@ -42,19 +42,11 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 # Sub directories to run make in.
-DIRS =	 bin demo doc test
+DIRS =	
 
 TCL_SRCS = 
 
-ITCL_SRCS = \
-	CacheManager.itcl \
-	HTML.itcl \
-	HTMLMessage.itcl \
-	ResourceRemote.itcl \
-	ResourceFTP.itcl \
-	ResourceHTTP.itcl \
-	ResourceMail.itcl \
-	WelcomeMessage.itcl
+ITCL_SRCS = 
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	html.tcl \
@@ -62,9 +54,7 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	makefile \
 	pkgIndex.tcl
 
-MISC_FILES =  $(DIRS) tclIndex
-
-OPTIONAL_FILES = adm
+MISC_FILES = adm bin demo doc test
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
@@ -73,11 +63,7 @@ REALCLEAN_STUFF =
 TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all: sources $(MISC_SRCS)
-
-install: all subinstall
-
-.PHONY: all install subinstall
+all install: sources $(MISC_SRCS)
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk

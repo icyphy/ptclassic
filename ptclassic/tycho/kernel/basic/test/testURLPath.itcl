@@ -30,9 +30,9 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# Make sure that the required packages are loaded
-package require tycho.util.tytest
-package require tycho.kernel.basic
+if {[string compare test [info procs test]] == 1} then { 
+    source [file join $TYCHO kernel test testDefs.tcl]
+}
 
 
 #######################################################################
@@ -51,17 +51,10 @@ package require tycho.kernel.basic
 #
 # Some additional tests for the "join" and "aslocal" options follow.
 #
-# Make sure these protocols are registered:
-catch {::tycho::register protocol "file" -class ::tycho::ResourceFile}
-catch {::tycho::register protocol "http" -class ::tycho::ResourceHTTP}
-catch {::tycho::register protocol "ftp" -class ::tycho::ResourceFTP}
-
-
 set _count 0
 foreach _name {
     foo.bar
     /users/ptolemy/foo.bar
-    c:/users/ptolemy/foo.bar
     file:/users/ptolemy/foo.bar
     http://ptolemy.eecs
     http://ptolemy.eecs/~ptdesign
@@ -87,17 +80,6 @@ foreach _name {
 	/users/ptolemy/foo
 	{}
 	{/ users ptolemy foo.bar}
-	foo.bar
-    }
-    {
-	c:/users/ptolemy
-	.bar
-	c:/users/ptolemy/foo.bar
-	absolute
-	{}
-	c:/users/ptolemy/foo
-	{}
-	{c: users ptolemy foo.bar}
 	foo.bar
     }
     {
@@ -170,8 +152,6 @@ foreach _name {
     {ptolemy foo bar}
     {/ users ptolemy foo.bar}
     {/users/ptolemy foo.bar}
-    {c: users ptolemy foo.bar}
-    {c:/users/ptolemy foo.bar}
     {file: {} users ptolemy foo.bar}
     {http: ptolemy.eecs}
     http://ptolemy.eecs
@@ -197,8 +177,6 @@ foreach _name {
     ptolemy/foo/bar
     /users/ptolemy/foo.bar
     /users/ptolemy/foo.bar
-    c:/users/ptolemy/foo.bar
-    c:/users/ptolemy/foo.bar
     file:/users/ptolemy/foo.bar
     http://ptolemy.eecs/
     http://ptolemy.eecs/

@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -36,11 +36,10 @@
 # This class is an interface between Tycho and Octtools.  
 #
 # The Ptolemy environment uses this interface.  Eventually, this file will
-# go away, but in the meantime, we use it as a placeholder for communication
+# go away, but in the meantime, we use it as a placeholder for communcation
 # with Octtools
 #
 class ::tycho::Oct {
-    inherit ::tycho::Object
 
     constructor {args} {}
     destructor {}
@@ -93,8 +92,8 @@ body ::tycho::Oct::openFacet {} {
 # does not exist we create a facet.
 #
 body ::tycho::Oct::openFacetOrContext {filename} {
-    global ptolemyfeature
-    if { $ptolemyfeature(octtools) == 1 && ! [ file exists $filename]} {
+    global ptolemypresent
+    if { $ptolemypresent == 1 && ! [ file exists $filename]} {
 	::pvOpenWindow [::ptkOpenFacet $filename schematic contents]
     } else {
 	::tycho::File::openContext $filename

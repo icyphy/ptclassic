@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1997-%Q% The Regents of the University of California.
+# @Copyright (c) 1997 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -33,25 +33,21 @@
 
 #######################################################################
 #### CompileJava
-# This class compiles a Java class and optionally runs it.
+# This class compiles and runs a Java file.
 #
-# <H2>Compilation Methods</H2>
-# If the *.java* file contains a *main()*, then we call
-# <CODE>java -cs</CODE> _ClassName_, which will check the modification times
+# There are several different possiblities to this:
+#
+# Call *java -cs* _ClassName_, which will check the modification times
 # of the *.java* and *.class* file and compile if necessary.  Then
-# the class file is run and we are done.
+# the class file is run.  This method requires that the _ClassName.java_
+# file has a *main()*.
 #
-# If the *.java* file does not contain a *main()*, then we call 
-# *javac* _ClassName_, which will compile the file.
+# Call *javac* _ClassName_, which will compile the file.  This is useful
+# if your class does not have a *main()*.
 #
-# After the compilation successfully completes, we check 
-# if there is a _ClassName_*.html* file present, then we run
-# *appletViewer* _ClassName.html_.  It would be nice if we checked to
-# see if the *.java* file extends *Applet*, but that is more work.
-#
-# <H2>Other possible compilation methods</H2>
-# Below we discuss other possible compilation methods that are 
-# <B>not</B> implemented.
+# Call *javac* _ClassName_, and then run *appletViewer* _ClassName.html_.
+# This is useful if you are writting an applet.  This method relies on
+# their being a *.html* file with the same name as the class.
 #
 # If a *makefile* is present in the same directory as the _ClassName.java_
 # file, then we should run 'make'.  There are several problems here:
@@ -60,20 +56,8 @@
 # could be multiple targets, so just running *make* might not be sufficient.
 #
 # We could generate a *ClassName.mk* file and then run
-# <CODE>make -f ClassName.mk</CODE>.  This is what the *CompileCTcl* class does.
+# *make -f ClassName.mk*.  This is what the *CompileCTcl* class does.
 #
-# <H2>CLASSPATH</H2>
-# The *CLASSPATH* environment variable controls where the Java tools
-# such as *javac*, *java*, and *appletviewer*.   *javac* and *java* take
-# a *-classpath* option, *appletviewer* does not.
-#
-# If *useEnvClassPath* style parameter is true, then the *CLASSPATH* is read
-# from the environment *$env(CLASSPATH)* and passed to *java* or *javac*
-#
-# If the *useEnvClassPath* style parameter is false, then Tycho reads the
-# *classPath* parameter and sets the *CLASSPATH* environment
-# variable before calling the java tools.  The *useEnvClassPath* and 
-# *classpath* parameters are set in the "java" stylesheet.
 #
 # <p>
 # Here is an example of how to use the CompileJava class:
@@ -91,32 +75,16 @@ class ::tycho::CompileJava {
     destructor {}
 
     ###################################################################
-    ####                   public methods                          ####
-
-    # Compile and optionally run a java class.
-    method compileAndRun {filename}
-
-    ###################################################################
-    ####                   public procs                          ####
-
-    # Get the classpath from the preferences.
-    proc classpath {}
-
-    ###################################################################
     ####                   protected methods                       ####
-
 
     # Check the source files for necessary features.
     protected method checkSourceFiles {}
 
-    ###################################################################
-    ####                   protected variables                     ####
+    # Create a makefile.   Usually subclasses modify this method.
+    protected method createMakefile {}
 
-    # Name of the Exec widget used to run appletviewer.
-    protected variable appletviewerWidget {}
-
-    # Name of the Exec widget used to run java once we've compiled.
-    protected variable javaRunWidget {}
+    # Run make and then load the result back into Tycho.
+    protected method loadFiles {}
 }
 
 #######################################################################
@@ -130,206 +98,142 @@ body ::tycho::CompileJava::constructor {args} {
 #### destructor
 #
 body ::tycho::CompileJava::destructor {} {
-    if {$monitorWidget != {} && \
-            [infoObjects ::tycho::$monitorWidget] != {}} {
-        $monitorWidget markUnmodified
-        catch {delete object $monitorWidget}
-    }
-    if {$appletviewerWidget != {} && \
-            [infoObjects ::tycho::$appletviewerWidget] != {}} {
-        $appletviewerWidget markUnmodified
-        catch {delete object $appletviewerWidget}
-    }
 }
 
-    ###################################################################
-    ###################################################################
-    ####                      public methods                       ####
-#######################################################################
-#### classpath
-# Determine what the classpath should be.
-#
-body ::tycho::CompileJava::classpath {} {
-    global env tcl_platform
-    set classPathArg ""
-    set classPath ""
-    if [::tycho::stylesheet get java useEnvClassPath] {
-        if [info exists env(CLASSPATH)] { 
-	    set classPath [::tycho::expandPathSplit $env(CLASSPATH)]
-	    set classPathArg "-classpath $classPath"
-	}
-    } else {
-	set classPath [::tycho::expandPath \
-                [::tycho::stylesheet get java classPath]]
-	if {$classPath != {} } { 
-	    set classPathArg "$classPath"
-	}
-    }
-    
-    # Check that each element of the class path exists
-    foreach dirorfile $classPath {
-        if [catch {set expandeddirorfile \
-                [uplevel #0 subst $dirorfile]} errMsg ] {
-            # This is an error because if the substitution above failed,
-            # then the substitution at the end of this file will fail too.
-            error "The classPath style parameter contains `$dirorfile' \
-		    which failed to expand properly.  The error message \
-		    was: \n$errMsg\n\n\
-                    To change the classPath parameter, select Preferences \
-                    menu choice under the Help menu, and then select the \
-		    Java style-sheet"
-        }
-        if { ![ file isdirectory $expandeddirorfile] && \
-		![file readable $expandeddirorfile] } {
-            ::tycho::warn \
-		    "The classPath style parameter contains `$dirorfile' \
-		    as an element, which expands to `$expandeddirorfile' \
-		    which does not exists  (Either it is not a directory \
-                    or it is not a readablefile).\n\
-		    To change the classPath parameter, select Preferences \
-                    menu choice under the Help menu, and then select the \
-		    Java style-sheet"
-        }
-        if {$tcl_platform(platform) == "windows"} {
-            if [regexp {[^\]\\[^\]} $expandeddirorfile] {
-                ::tycho::warn "The classPath style parameter contains \
-			`$dirorfile' as an element, which \
-                        expands to `$expandeddirorfile' which contains a \
-			backslash.  In the Sun JDK1.1.2 \
-                        under Windows, a backslash might prevent javac from \
-			properly finding a class.\n\
-			To change the classPath parameter, select \
-			Preferences menu choice under the Help menu, and then \
-			select the Java style-sheet"
-            }
-        }
-    }
-
-
-    switch $tcl_platform(platform) {
-        {unix} { set classpath [join $classPathArg ":"]}
-	# Yes, we need that many slashes.
-        {windows} { set classpath [join $classPathArg "\\\\\\\\\\;"]}
-        {macintosh} { error "Internal error: CompileJava::classPath, \
-		macintosh not supported"}
-    }
-    if {"$classpath" != ""} { 
-        return [uplevel #0 subst $classpath]
-    } else {
-        return ""
-    }
-}
-
-#######################################################################
-#### compileAndRun
-# Compile and optionally run a java file.
-#
-# If useEnvClassPath is true, then get the CLASSPATH from $env(CLASSPATH).
-# If useEnvClassPath is false, then get the CLASSPATH from the classPath
-# style parameter.
-#
-body ::tycho::CompileJava::compileAndRun {filenames} {
-    global env tcl_platform
-
-    # Initialize protected vars in the parent class such as dirname
-    ::tycho::Compile::compileAndRun $filenames
-
-    foreach filename $filenames {
-        lappend shortFilenameList [file tail $filename]
-    }
-
-    # Under NT, if you add -verbose, then execModal will think that there
-    # are errors.
- #     switch $tcl_platform(platform) {
- #         unix { set compileString \
- #                 "javac -classpath [classpath] $shortFilenameList"}
- #         windows { 
- #             # Windows has a length limit on the size of the command we
- #             # can execute.
- #             set env(CLASSPATH) [classpath]
- #             set compileString "javac $shortFilenameList"
- #         }
- #    }
-    set classpath [classpath]
-    if {"$classpath" != ""} {
-        set compileString \
-                 "[::tycho::stylesheet get java javaCompileCommand] -classpath $classpath $shortFilenameList"
-     } else {
-         set compileString \
-                 "[::tycho::stylesheet get java javaCompileCommand] $shortFilenameList"
-     }
-    if [checkSourceFiles] {
-        # We have a main(), so we don't run appletviewer
-        set runAppletViewer 0
-    } else {
-        set runAppletViewer 1
-    }
-
-    # Compile.  If we already have a monitorWidget, reuse it. 
-    if {![winfo exists $monitorWidget] && \
-            [infoObjects $monitorWidget] == {}} {
-        set retList [::tycho::execModal $compileString $dirname]
-    } else {
-        set retList [::tycho::execModal {} {} $monitorWidget]
-    }
-    set monitorWidget [lindex $retList 1]
-
-    # If necessary, run the appletviewer.
-    # If there is already an appletviewer widget, reuse it.
-    set execStatus [lindex $retList 0]
-    if {$runAppletViewer == 1 && $execStatus == "normal"} {
-        set appletFile [file rootname $firstFile]
-        if [file exists $appletFile.html] {
-            if {![winfo exists $appletviewerWidget] && \
-                    [infoObjects $appletviewerWidget] == {}} {
-                set appletviewerWidget [::tycho::view Monitor -toolbar 1]
-                set retList [::tycho::execModal \
-                        "appletviewer $appletFile.html" $dirname \
-                        $appletviewerWidget]
-            } else {
-                set retList [::tycho::execModal {} {} $appletviewerWidget]
-            }
-            set appletviewerWidget [lindex $retList 1]
-        }
-    } else {
-        if {$execStatus == "normal"} {
-            # The .java file contains a main statement, so run it
-            if {![winfo exists $javaRunWidget] && \
-                    [infoObjects $javaRunWidget] == {}} {
-                set javaRunWidget [::tycho::view Monitor -toolbar 1]
-                set retList [::tycho::execModal \
-                        "java [file root [file tail $filenames]]" $dirname \
-                        $javaRunWidget]
-            } else {
-                set retList [::tycho::execModal {} {} $javaRunWidget]
-            }
-            set javaRunWidget [lindex $retList 1]
-        }
-
-    }
-}
     ###################################################################
     ###################################################################
     ####                      protected methods                    ####
 
-
 #######################################################################
 #### checkSourceFiles
 # Check the source files for necessary features. 
-# Return 1 if this file has a main() statement.
+# When a C file is loaded into Tcl, an initialization procedure with
+# a specific name is called.  See the Tcl load command for naming details.
 # 
+# We search the first filename in the list for an apropriately named
+# initialization function.  This might be a mistake, the fix would
+# be to make this code package aware so that it could use the package
+# name.
+#
 body ::tycho::CompileJava::checkSourceFiles {} {
-    # Search for main()
-    set sawMain 0
+    set initProcName "[string toupper\
+            [string range $basename 0 0]][string tolower\
+            [string range $basename 1 end]]_Init"
+
+    # Search for tcl.h and initProcName
+    set sawInclude 0
+    set sawInitProcName 0
     # catch all of this incase the file does not yet exist
     if ![catch {set fd [open $firstFile r]}] {
         while {[gets $fd linein] >= 0} {
-            if [regexp {main(.*)} $linein] {
-                set sawMain 1
-                break
+            if [regexp {#include [<"](tcl|tk|itcl).h[">]} $linein] {
+                set sawInclude 1 
             }
+            if [regexp $initProcName $linein] {
+                set sawInitProcName 1
+                break
+            } 
         }
         close $fd
     }
-    return $sawMain
+
+    if {$sawInitProcName == 0} {
+	# The initialization procedure was not found.
+	# Ask the user if they want to append one, if they do, append it
+	# and don't load, so the user can stick in the body and re-evaluate.
+	set nm [::tycho::autoName .editCYNC]
+	::tycho::YesNoCancel $nm \
+		-text "The file $firstFile does not have a Tcl initialization \
+		procedure named \"$initProcName\".\nIf you choose to add\
+		the initialization procedure, then be sure to reedit\
+		the file and insert calls to register your commands and\
+		reevaluate the file.\nAdd\
+		the initialization procedure now?"
+	
+	set response [::tycho::Dialog::wait $nm]
+    	switch $response {
+	    -1 {return}
+	    0 {}
+	    1 {
+		# Add a initialization procedure to the end of the file
+		set fd [open $firstFile a]
+                # Check to see if we need to add #include <tcl.h>
+                if {$sawInclude == 0 } { 
+                    puts $fd "#ifndef _TCL\n#include <tcl.h>"
+                    puts $fd "#endif"
+                }
+
+		puts $fd "/* Tcl initialization procedure added for\
+			the Tcl load command\n */"
+		puts $fd "int ${initProcName}\(Tcl_Interp *interp)\n\{"
+		puts $fd "    /* A sample Tcl command registration. */"
+		puts $fd "    /* Tcl_CreateCommand(interp, \"$basename\",\
+			Tcl_${basename}Cmd,"
+		puts $fd "                         (ClientData) NULL,\
+			(Tcl_CmdDeleteProc*) NULL);"
+                puts $fd "     */"
+                puts $fd "    return TCL_OK;\n\}"
+		close $fd
+                if {$view != {} } {
+                    $view reload
+                }
+                putStatus "Successfully added initialization procedure"
+		return
+	    }
+	}
+    }
+}
+
+#######################################################################
+#### createMakefile
+# Create a makefile.   Usually subclasses modify this method.
+# The makefile that is created is named by the *makefile* protected variable.
+#
+body ::tycho::CompileJava::createMakefile {} {
+    global tycho env
+    if ![file exists [file join $dirname $makefile]] {
+	# Create a makefile by reading in from the template and 
+	# substituting %basename% for the value of $basename
+	# FIXME: templateMakefile should probably be a preference.
+	set templateMakefile \
+		[file join $tycho editors textedit templates Cmakefile.mk]
+	set fdin [open $templateMakefile r]
+	set fdout [open [file join $dirname $makefile] w]
+	while {[gets $fdin linein] >= 0} {
+	    regsub -all {%basename%} $linein $basename lineout
+	    puts $fdout $lineout
+	}
+	close $fdout
+	close $fdin
+    }
+    if [info exists env(PTARCH)] {
+	set PTARCH $env(PTARCH)
+    } else {
+	error "Sorry, the PTARCH environment variable is not set.\nIn csh,\
+		you can exit Tycho, and run\nsetenv PTARCH `$TYCHO/bin/ptarch`"
+    }
+    if {![file exists [file join $tycho obj.$PTARCH tcl.mk]] || \
+	    ![file exists [file join $tycho obj.$PTARCH java.mk]]} {
+	putStatus "About to make tcl.mk and java.mk, when complete, be\
+		sure to close the Exec window to continue."
+	::tycho::execModal "make config_tclexts" $tycho
+	putStatus ""
+    }
+}
+
+#######################################################################
+#### loadFiles
+# Run load the shared objects back into Tycho.
+#
+body ::tycho::CompileJava::loadFiles {} {
+    foreach file $filenameList {
+	set filebase [file rootname [file tail $firstFile]]
+	if [catch {uplevel #0 \
+		load [file join $dirname $filebase[info sharedlibextension]]} \
+		errMsg] {
+	    error "Failed to load\
+		    [file join $dirname $filebase[info sharedlibextension]]:\n\
+		    $errMsg"
+	}
+    }
 }

@@ -1,43 +1,46 @@
-# -*- mode: tcl -*-
 #
 # $Id$
 #
-# The "text" master style-sheet
+# The "textcolors" master style-sheet
 #
-configure -title "Text"
-configure -description {
-    This style contains settings for text widgets.
+modelconfigure -label "Text colors"
+modelconfigure -description {
+    This style contains settings text widgets.
     It contains universal coloring settings such
     as foreground and background, cursor and selection
     colors, and so on.
 }
 
 style default \
-	-label "Black on white" \
+	-label "Default" \
 	-description {
     The default text colors. This style provides
     colors for black-on-white text.
 } {
-    parameter background grey93 \
-	    -type color \
-	    -label "Text background color"
-
-    parameter foreground black \
+    parameter textForeground black \
 	    -type color \
 	    -label "Text color"
 
-    parameter selectBackground yellow \
+    parameter textBackground grey93 \
 	    -type color \
-	    -label "Selected text background"
-
-    parameter selectForeground black \
-	    -type color \
-	    -label "Selected text foreground"
+	    -label "Text background color"
 
     parameter insertBackground black \
 	    -type color \
 	    -label "Cursor color"
  
+    parameter selectColor lightyellow \
+	    -type color \
+	    -label "Selected text highlight"
+
+    parameter answerForeground blue \
+	    -type color \
+	    -label "Color of result text"
+
+    parameter promptForeground firebrick \
+	    -type color \
+	    -label "Color of prompt text"
+
     parameter hyperlinkColor lightskyblue \
 	    -type color \
 	    -label "Color of hyperlinks"
@@ -49,14 +52,6 @@ style default \
     parameter activeColor cyan4 \
 	    -type color \
 	    -label "Color of active text"
-
-    parameter parenColor lightskyblue \
-	    -type color \
-	    -label "Parenthesis match highlight"
-
-    parameter targetColor lightskyblue \
-	-type color \
-	-label "?Target color?"
 
     group search \
 	    -label "Search and replace colors" {
@@ -81,25 +76,18 @@ style default \
     }
 }
 
-style reverse \
-	-label "White on black" {
-    parameter background black
-    parameter foreground white
-    parameter insertBackground white
-    parameter selectBackground grey50
-    parameter selectForeground white
-    parameter parenColor lightskyblue4
-}
-
 style console \
 	-label "Console" \
 	-description {
     Text colors for console windows.
 } {
-    parameter background grey93
-    parameter foreground black
+    parameter textBackground grey93
+    parameter textBackground grey93
     parameter insertBackground black
-    parameter selectBackground grey80
+    parameter selectColor lightyellow
+
+    parameter answerForeground blue
+    parameter promptForeground firebrick
 }
 
 style html \
@@ -107,8 +95,8 @@ style html \
 	-description {
     Text colors for HTML viewers.
 } {
-    parameter background LightGrey
-    parameter foreground black
+    parameter textBackground LightGrey
+    parameter textBackground black
     parameter insertBackground black
-    parameter selectBackground lightyellow
+    parameter selectColor lightyellow
 }

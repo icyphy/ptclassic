@@ -1,10 +1,10 @@
-# Makefile for tycho/typt/edit directory
+# Makefile for Ptolemy Retargetting tool
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)makefile	1.2 9/9/96
 
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -34,35 +34,27 @@
 ROOT =		../..
 
 # True source directory
-VPATH =		$(ROOT)/typt/edit
+VPATH =		$(ROOT)/lib/retarg
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 ITCL_SRCS = \
-	Retarget.itcl \
-	EditPalette.itcl \
-	EditPtcl.itcl \
-	EditPtlang.itcl
+	DomainInfo.itcl \
+	RetargEdit.itcl
 
-EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) \
-	README.txt \
-	edit.tcl \
-	pkgIndex.tcl
+EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
-DIRS =		bin demo doc test
-
-MISC_FILES =	tclIndex $(DIRS)
+MISC_FILES =	tclIndex doc
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex *.html
 
-# make checkjunk will not report OPTIONAL_FILES as trash
-OPTIONAL_FILES = adm
-
 # Title for the tydoc index page
-TYDOC_DESC =	Index of classes in tycho/typt/edit
+TYDOC_DESC =	Index of classes in tycho/lib/retarg
+
+DIRS =		test #doc
 
 all install: tclIndex $(MISC_SRCS)
 

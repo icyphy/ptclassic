@@ -42,56 +42,11 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 # Sub directories to run make in.
-DIRS =	 bin demo doc test
+DIRS =	
 
 TCL_SRCS = 
 
-ITCL_SRCS = \
-	ButtonBox.itcl \
-	BuilderDialog.itcl \
-	ColorBrowser.itcl \
-	ColorManager.itcl \
-	ColorPicker.itcl \
-	Dialog.itcl \
-	Displayer.itcl \
-	Edit.itcl \
-	EditSearch.itcl \
-	EditSpell.itcl \
-	EditStack.itcl \
-	ErrorMessage.itcl \
-	Exec.itcl \
-	File.itcl \
-	FileBrowser.itcl \
-	FontManager.itcl \
-	FontDialog.itcl \
-	IndexBrowser.itcl \
-	LabeledGrid.itcl \
-	ListBrowser.itcl \
-	MenuBar.itcl \
-	MenuSupport.itcl \
-	Message.itcl \
-	Monitor.itcl \
-	PopupMenu.itcl \
-	StyleChooser.itcl \
-	StyleEditor.itcl \
-	Query.itcl \
-	RevControl.itcl \
-	RevControlSCCS.itcl \
-	RevControlRCS.itcl \
-	Shortcuts.itcl \
-	StatusBar.itcl \
-	StyleSheet.itcl \
-	Subpanel.itcl \
-	TArchetype.itcl \
-	TclShell.itcl \
-	ToolBar.itcl \
-	TopLevel.itcl \
-	TWidget.itcl \
-	UserProfile.itcl \
-	WidgetTree.itcl \
-	View.itcl \
-	YesNoCancel.itcl \
-	YesNoQuery.itcl
+ITCL_SRCS = 
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	gui.tcl \
@@ -99,10 +54,7 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	makefile \
 	pkgIndex.tcl
 
-MISC_FILES =  $(DIRS) tclIndex
-
-# make checkjunk will not report OPTIONAL_FILES as trash
-OPTIONAL_FILES = adm
+MISC_FILES = adm bin demo doc test
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
@@ -112,13 +64,6 @@ TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
 all install: sources $(MISC_SRCS)
-
-install: all subinstall
-
-.PHONY: install all subinstall
-
-test_exec_msg:
-	@echo "This message is used to test the Exec class"
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk

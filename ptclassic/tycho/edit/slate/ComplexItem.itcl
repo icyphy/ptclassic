@@ -1,15 +1,15 @@
-#########################################################################
-# @Version: $Id$
-# @Author: H. John Reekie
+##########################################################################
+# Version: $Id$
+# Author: H. John Reekie
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# Copyright (c) %Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that the
-# above copyright notice and the following two paragraphs appear in all
-# copies of this software.
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
 # 
 # IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
 # FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
@@ -23,401 +23,1207 @@
 # PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 # CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 # ENHANCEMENTS, OR MODIFICATIONS.
-# 
-# 						PT_COPYRIGHT_VERSION_2
-# 						COPYRIGHTENDKEY
+#                                                         COPYRIGHTENDKEY
 ##########################################################################
 
 
-##########################################################################
-## ComplexItem
+## Picture
 #
-# An "empty" item to which items can be added to create a complex item.
-# Clients can create a complex item directly (by calling the slate's
-# create{} method) and add items into it by manipulating hierarchy tags.
-# often, however, the behavior of a complex item will need to be tailored,
-# and this is done by subclassing ComplexItem (or one of its subclasses)
-# and adding procedures to override the default implementations
-# in this class.
+# The top-level picture class. This is an abstract class.
 #
-# ComplexItem and its subclasses are not classes in the usual sense:
-# instead of instantiating these classes, the Slate creates a new item
-# ID that uniquely identifies it; instead of calling methods on an 
-# object, the slate calls procedures in 
-# those classes with the ID of the item as the first argument;
-# instead of instance variables, these classes manipulate common arrays
-# indexed by item ID. The ComplexItem class and its subclasses have
-# mechanism to simulate inheritance and to give complex items options
-# just like regular Tk canvas items. This evilness is needed to avoid
-# creating large numbers of objects, which is just too inefficient
-# in Itcl. (I know this because I did it first...)
-#
-# Because every "method" is just a procedure, each takes as its first 
-# three arguments the item ID, the canvas on which the item is being
-# drawn, and the slate on which the item is being drawn. Arguments
-# following those three are arguments that would be passed to 
-# methods if these classes implemented objects in the normal way.
-#
-# This class contains a number of common arrays that must be used
-# in the expected ways by subclasses. The following protected
-# common arrays are used by all subclasses:
-# <ul>
-# <li><b>component</b>: Subclasses should store canvas items
-# they create in this array, indexed by the component name
-# followed by the item ID. For example, a subclass that creates
-# text label would store the id of that text item as
-# <code>component(label$id)</code>.
-#
-# <li><b>option</b>: Each option of an item is stored in this array,
-# indexed by <code>option(<i>name</i>$id)</code>, where _name_ does not
-# include the leading dash.
-#
-# <li><b>primary</b>: Each item must create exactly one simple
-# canvas item called its "primary" component, and store it in this
-# array indexed by the item ID. (It does not also need to be
-# stored in the *component* array.)
-#
-# <li><b>variable</b>: Variables created by the item that need
-# to be kept around. These are stored in this array instead of in
-# individual arrays in order to make it possible to mimic
-# multiple inheritance.
-#
-# </ul>
-#
-# The following private
-# common arrays must be redeclared by all subclasses:
-# <ul>
-# <li><b>methodtable</b>: An array of procedure names indexed by
-# the "methoid" name. This is used to simulate method calls
-# on complex items.
-# <li><b>optiondefault</b>: An array of values indexed by the
-# option name (including the leading dash), giving the default
-# values of the item's options.
-# </ul>
-#
-# <p><b>Options</b>:
-# 
-# <ul>
-# <li><b>-shape</b>. The "shape" of this item, used for manipulating
-# the shape of an item.
-# Note that although the shape of a complex item is accessible as
-# an option, and can be changed arbitrarily, you should be
-# very careful of doing so, and only change it if the documentation
-# for an item says it can be changed.
-# </ul>
-#
-# <ul>
-# <li><a href="../internals/howtoread.html">Reading <i>ComplexItem</i>
-# documentation</a>.
-# <li><a href="../internals/items.html">Complex item classes</a>.
-# </ul>
-#
-class ::tycho::ComplexItem {
-    inherit ::tycho::Uninstantiable
+class ::tycho::Picture {
 
-    # Create a new complex item
-    proc construct {id canvas slate tags x0 y0 x1 y1 args}
-    
-    # Delete a complex item (NOT USED)
-    # proc destruct {id canvas slate}
 
     ###################################################################
-    ####                         public procs                      ####
+    ## Configuration options
 
-    # Update the *-shape* option
-    proc _shape {id canvas slate shape}
 
-    # Get or set the coordinates of the item
-    proc coords {id canvas slate args}
+    ## annotations
+    #
+    # Each picture can have any number of ``annotations.'' In effect
+    # these are like named tags, and are useful for managing information
+    # more complex than simple tags.
+    #
+    # The value of the configuration variable is a list of name-value
+    # pairs. The annotation{} method provides a friendlier front-end
+    # to this configuration variable.
+    #
+    public variable annotations {}
 
-    # Create a "ghost" of the item for moving and resizing
-    proc ghost {id canvas slate}
-    
-    # Get a configuration option of an item
-    proc itemcget {id canvas slate scope opt}
 
-    # Configure an item
-    proc itemconfigure {id canvas slate scope args}
-
-    ###################################################################
-    ####                         protected variables               ####
-
-    # The components of each item. Each subclass should place 
-    # component items into this array, instead of creating
-    # their own common arrays. This makes it much easier to build
-    # complex items out of existing complex items. Note: subclasses
-    # are _not_ to create their own copy of this variable.
-    protected common component
-
-    # The options of each item. Note: subclasses are _not_ to
-    # create their own copy of this variable.
-    protected common option
-
-    # Every ComplexItem class must create exactly one primitive canvas item
-    # and place its ID into this array indexed by the complex item ID.
-    # The Slate uses this component to manipulate the coordinates of
-    # complex items. Note: subclasses are _not_ to create their own 
-    # copy of this variable.
-    protected common primary
-
-    # The instance variables of each item. Each subclass should place
-    # all local variables into this array, instead of creating
-    # their own common arrays. This makes it much easier to build
-    # complex items out of existing complex items. Note: subclasses
-    # are _not_ to create their own copy of this variable.
-    protected common variable
-
-    ###################################################################
-    ####                         private variables                 ####
-
-    # The virtual "method" table. This is a common array indexed by
-    # method name, with contents being the actual procedure to call
-    # to implement the method. Every subclass of ComplexItem must create
-    # its own copy of this array, and fill it with methods names and
-    # procedures. For example, the ComplexItem class has an
-    # entry named "coords" which contains "::tycho::ComplexItem::coords".
-    # This array implements "inheritance": if a method is not implemented
-    # in a given class, then the array contains the name of a procedure
-    # in one of its superclasses.
-    private common methodtable
-
-    # Default values of this item's options. Every class must create
-    # its own copy of this array and initialize it with the default 
-    # values of the item's options.
-    private common optiondefault
-}
-
-###################################################################
-####                       class initialization                ####
-
-namespace eval ::tycho::ComplexItem {
-    #### Set method table
-    set methodtable(_shape)        ::tycho::ComplexItem::_shape
-    set methodtable(construct)     ::tycho::ComplexItem::construct
-    set methodtable(coords)        ::tycho::ComplexItem::coords
-    set methodtable(itemcget)      ::tycho::ComplexItem::itemcget
-    set methodtable(itemconfigure) ::tycho::ComplexItem::itemconfigure
-    
-    #### Set option defaults
-    set optiondefault(-shape) rectangle
-}
-
-##########################################################################
-#### -shape option configuration
-#
-body ::tycho::ComplexItem::_shape {id canvas slate shape} {
-    set option(shape$id) $shape
-}
-
-##########################################################################
-#### construct
-#
-# Create a new complex item. This procedure is used in place of
-# an object constructor. The default implementation just creates
-# the primary component (which must be present in _all_ complex items)
-# as a rectangle at the given coordinates. From now on, this item
-# will be used to get and set the coordinates of the new item.
-# Components items can then be added to the new complex item with
-# the Slate's create{} method.
-#
-# The arguments to every construct{} procedure are the item ID,
-# the canvas, the slate, the tags to be given to each item added to the
-# complex item, two or more coordinate values, and
-# zero or more option-value pairs.
-# 
-body ::tycho::ComplexItem::construct {id canvas slate tags x0 y0 x1 y1 args} {
-    # Initialize the options
-    foreach {opt value} [concat [array get optiondefault] $args] {
-	set option([string trimleft $opt -]$id) $value
+    ## behavior
+    #
+    # This variable sets the behavior of a picture under interaction.
+    # It can be a single word or a list: in the latter case, the first
+    # element of the list is taken to be the mode of behavior, and the
+    # remaining elements options to control the behavior.
+    #
+    # The behavior interface (methods click{}, drag{}, continue{}, and
+    # release{}) forwards an interaction command to the method named
+    # as the behaviour mode; its first argument is the name of the
+    # interaction command, the co-ordinates (if any) follow; and finally
+    # the behaviour options (click{} only):
+    #
+    #     {dothis withthat} {top left}
+    #
+    # than a call
+    #
+    #     click 100 200
+    #
+    # will be translated into the call
+    #
+    #     dothis withthat click 100 200 top left
+    #
+    # The call
+    #
+    #     drag 10 20
+    #
+    # will be translated into 
+    #
+    #     dothis withthat drag 10 20
+    #
+    #
+    # The legal values of this option depend on the specific picture;
+    # however, all pictures support at least "move," which is the default.
+    # Most will support "deform," which is used to change one or more
+    # aspects of the picture under interaction; a few will support
+    # "extend," which is used when adding segments to lines and polygons,
+    # and "transform," which applies other transformations such as
+    # rotation.
+    #
+    # If this variable is set to "ignore", then the picture will
+    # not respond to interaction commands at all, but will not
+    # complain either. If set to "", then the picture will
+    # respond to interaction commands by generating an error message.
+    #
+    public variable behavior "move" {
+	set behaviorOperation [lhead $behavior]
+	set behaviorOptions   [ltail $behavior]
     }
 
-    # Create the primary component for the outline coordinates.
-    # Because this item is completely blank, it will actually respond to
-    # events inside it -- I don't know if this is good or bad, but that's
-    # the way it is.
-    set primary($id) [$canvas create rectangle $x0 $y0 $x1 $y1 \
-	    -outline "" -tags $tags]
-}
-
-##########################################################################
-#### destruct
-#
-# Delete a complex item. This procedure is used in place of
-# an object destructor. The default implementation does nothing.
-# This procedure does not need to delete component items, as
-# that is done automatically by the Slate.
-#
-# body ::tycho::ComplexItem::destruct {id canvas slate} {}
-#
-
-##########################################################################
-#### coords
-#
-# Set or read a complex item's coordinates. With no arguments, return the
-# coordinates of the item as given by the primary component. With
-# arguments, set the coordinates of the item to those coordinates.
-# In the default implementation, the coordinates of the primary
-# components are set to the given coordinates and all other components
-# are scaled accordingly. If the coordinates are a rectangular region
-# (such as for items with a rectangle or oval as the primary component)
-# then the components are moved and scaled according to the size of the
-# original and new regions in the horizontal and vertical directions.
-# if the coordinates are not rectangular, then the bounding box of the
-# primary component is used to determine the moving and scale
-# figures.
-#
-# Note that the scaling of all components is uniform -- subclasses will
-# want to override this behavior if non-uniform scaling is required. 
-# (For example, the _Frame_ class scales so that its borders remain
-# the same width.)
-#
-body ::tycho::ComplexItem::coords {id canvas slate args} {
-
-    # Get the current coordinates
-    set coords [$canvas coords $primary($id)]
-
-    # If there are no arguments, return the coords
-    if { $args == "" } {
-	return $coords
-    }
-
-    # If the primary is rectangular, use those coords. If not,
-    # base it on the bounding box.
-    if { [llength $coords] != 4 } {
-	set oldbox [eval ::tycho::Rectangle::shrink \
-		[$canvas bbox $primary($id)] 2]
-	eval $canvas coords $primary($id)($id) $args
-	set newbox [eval ::tycho::Rectangle::shrink \
-		[$canvas bbox $primary($id)] 2]
-    } else {
-	set oldbox $coords
-	set newbox $args
-    }
-
-    # Scale the item
-    ::tycho::assign x0 y0 x1 y1 $oldbox
-    ::tycho::assign a0 b0 a1 b1 $newbox
-
-    set xdelta [expr $a0-$x0]
-    set ydelta [expr $b0-$y0]
-    set xscale [expr double($a1-$a0)/($x1-$x0)]
-    set yscale [expr double($b1-$b0)/($y1-$y0)]
-
-    # Hack hack! This prevents the canvas from barfing
-    # on zero scale factor
-    if { $xscale == 0.0 } {
-	set xscale 0.01
-    }
-    if { $yscale == 0.0 } {
-	set yscale 0.01
-    }
-
-    # Move and scale each of the components
-    foreach pict [$slate children $id] {
-	$slate move  $pict $xdelta $ydelta
-	$slate scale $pict $a0 $b0 $xscale $yscale
-    }
-
-    # Move and scale the items belonging to this item
-    $canvas move  !$id $xdelta $ydelta
-    $canvas scale !$id $a0 $b0 $xscale $yscale
-
-    # Fix the primary coordinates (non-rectangular)
-    if { [llength $coords] != 4 } {
-	eval $canvas coords $primary($id) $args
-    }
-}
+    protected variable behaviorOperation move
+    protected variable behaviorOptions   {}
 
 
-##########################################################################
-#### itemcget
-#
-body ::tycho::ComplexItem::itemcget {id canvas slate scope opt} {
-    # Process -tags specially
-    if { ! [string compare $opt -tags] } {
-	# Return the tags
-	$slate gettags $id
-    } elseif { [namespace eval $scope [list ::info exists optiondefault($opt)]] } {
-	# Read the value directly from the class
-	return $option([string trimleft $opt -]$id)
-    } else {
-	error "unknown option $opt"
-    }
-}
+    ## mark
+    #
+    # A picture is "marked" if it is able to respond to user
+    # interaction. This variable is tied on intimately with the
+    # tagging mechanisms, so don't use it!
+    #
+    # FIXME: Can this option be eliminated by just using
+    # absence/presence of certain tag types?
+    #
+    public variable mark "" {}
 
-#######################################################################
-#### itemconfigure
-#
-body ::tycho::ComplexItem::itemconfigure {id canvas slate scope args} {
-    if { [llength $args] == 0 } {
-	# We've been asked for all configuration values. Use
-	# the defaultoptions array to get the names of all options,
-	# and read their values.
-	set result {}
-	foreach opt [namespace eval $scope {array names optiondefault}] {
-	    # Read its value
-	    set value $option([string trimleft $opt -]$id)
-	    # Read default value
-	    set default [namespace eval $scope [list set optiondefault($opt)]]
-	    # Add to result
-	    lappend result [list $opt {} {} $default $value]
+
+    ## shape
+    #
+    # The shape class of this picture. This determines the "shape" of
+    # a picture, and must be the name of a class in the Shape hierarchy.
+    # (The word is capitalized -- first letter uppercased --
+    # automatically.)
+    #
+    # The configuration body ::tycho::cooperates with the _shape{} method,
+    # so that shape objects are not created until actually needed.
+    #
+    # If this option is null (the default), then the
+    # object won't respond to shape commands.
+    # Whenever this option is changed, the current shape object
+    # is deleted.
+    #
+    protected variable shapeobject ""
+
+    public variable shape {} {
+	if { $shapeobject != "" } {
+	    delete object $shapeobject
+	    set shapeobject ""
 	}
-	# Add the tags
-	lappend result [list -tags {} {} {} [$slate gettags $id]]
-	return $result
+    }
+
+
+    ## tags
+    #
+    # Tags associated with this picture. These tags are maintained
+    # separately from those used internally by the slate and picture
+    # classes to create and manipulate the picture hierarchy.
+    #
+    # The utility method tags{} provides a simpler way of adding
+    # tags to a picture's tag list than manipulating the option variable.
+    #
+    public variable tags {} {
+	$this tag set $tags
+    }
+
+
+    ###################################################################
+    ## Constructor and destuctor
+
+    ## constructor
+    #
+    # Set the slate and canvas variables, and the initial value
+    # of the picture hierarchy tags.
+    #
+    # There are no optional args because this class cannot be
+    # instantiated.
+    #
+    constructor {} {
+	#
+	# Initialise the hierarchy tags
+	#
+	set _htags [list $this]
+
+	#
+	# Supply the default answers.
+	#
+	set answers [list [info context]]
+    }
+
+
+    ## destructor
+    #
+    destructor {
+	if { $shapeobject != "" } {
+	    delete object $shapeobject
+	}
+    }
+
+
+    ###################################################################
+    ## Public methods
+
+    method annotation {mode name args} {}
+    method aspect     {aspect}         {}
+    method aspects    {args}           {}
+    method cget       {option}         {}
+    method click      {x y}            {}
+    method configure  {args}           {}
+    method component  {mode args}      {abstractMethod Picture component}
+    method coords     {args}           {abstractMethod Picture coords}
+    method deform     {mode x y args}  {}
+    method drag       {x y}            {}
+    method extend     {args}           {}
+    method grapple    {args}           {}
+    method move       {mode x y args}  {}
+    method moveto     {aspect x y}     {}
+    method normal     {aspect}         {}
+    method parent     {args}           {}
+    method release    {}               {}
+    method reshape    {args}           {}
+    method scale      {xscale args}    {}
+    method tag        {mode args}      {}
+    method transform  {mode args}      {}
+    method query      {option}         {}
+    method _answer    {option}         {}
+
+
+    ###################################################################
+    ## Private methods
+    #
+    # (none)
+
+    ## _configure, _cget
+    #
+    # Built-in versions of configure{} and cget{}.
+    #
+    private method _configure \
+ 	    {?option? ?value option value...?} @itcl-builtin-configure
+
+    private method _cget {option} @itcl-builtin-cget
+
+
+    ###################################################################
+    ## Methods for internal picture and slate use only.
+
+    
+    ## canvas, slate
+    #
+    # The canvas and the slate on which pictures are drawn. These
+    # cannot be changed once set.
+    #
+    # FIXME: These are now obsolete: use the query method.
+    #
+    public variable canvas "" {
+	error "You cannot change the -canvas option"
+    }
+
+    public variable slate "" {
+	if { $canvas == "" } {
+	    set canvas [$slate _canvas]
+	} {
+	    error "You cannot change the -slate option"
+	}
+    }
+
+
+    ## active
+    #
+    # Return the ``active'' picture above this one.
+    #
+    method active {} {
+	if { $parent == "" || $mark != "" } {
+	    return $this
+	} else {
+	    return [$parent active]
+	}
+    }
+
+    ## ancestor
+    #
+    # Predicate to test if a picture is an ancestor of this one.
+    # Uses the hierarchy tags as a quick way of performing this test.
+    #
+    method ancestor {pict} {
+	return [lmember $_htags $pict]
+    }
+
+    ## component
+    #
+    # The named array of components. These are manipulated with the
+    # component{} method of each key picture sub-class.
+    #
+    # By convention, the component named ``primary''
+    # is used by the coords{} operation to provide the picture's
+    # canvas coordinates.
+    #
+    protected variable component
+
+
+    ## parent
+    #
+    # The parent of this picture in the picture hierarchy
+    #
+    protected variable parent ""
+
+
+    ## ghost, startpos
+    #
+    # The ghost is a greyed outline used when moving a picture;
+    # startpos is the starting position of a click-drag-release
+    # move sequence. ghost can be a single canvas item or a list
+    # of them.
+    #
+    # For use by the move{} method ONLY.
+    #
+    private variable ghost   ""
+    private variable startpos
+
+
+    ## prevX, prevY
+    #
+    # Mouse tracking variables, for use by click{}, drag{}, and
+    # release{} ONLY.
+    #
+    private variable prevX
+    private variable prevY
+
+
+    ## shape
+    # 
+    # Return the shape object of a picture. Makes sure it exists first.
+    # All methods that access the shape object should call this method
+    # first to ensure that the shape object actually exists.
+    #
+    protected method shape {} {
+	if { $shape == "" } {
+	    set shapeobject [::tycho::Noshape #auto -target $this]
+	} elseif { $shapeobject == "" } {
+	    set shapeobject [::tycho::[capitalize $shape] #auto -target $this]
+	}
+	return $shapeobject
+    }
+
+
+    ## answers
+    #
+    # Pre-packaged things to execute when queried about stuff.
+    #
+    protected variable answers
+
+
+    ## answer option cmd
+    #
+    # Add a pre-packaged answer to the picture. _option_ is the name
+    # by which the query will be made; _cmd_ is a command executed (in
+    # the global scope) to provide the answer.
+    #
+    # To return a constant value, write "return whatever."
+    #
+    # NOTE: DO NOT OVERRIDE
+    #
+#    protected method answer {option cmd} {
+#	set answers($option) $cmd
+#    }
+
+
+    ## _etags, _htags
+    #
+    # Internal hierarchy and event tags.
+    #
+    protected variable _etags {}
+    protected variable _htags {}
+
+    method _htag {mode args} {abstractMethod Picture _htag}
+    method _etag {mode args} {abstractMethod Picture _etag}
+
+
+    ###################################################################
+    ## EXPERIMENTAL
+
+    ## constraints
+    #
+    # An associative array mapping aspects to constraints. A constraint
+    # is stored as a triple (picture, operation, options). See the
+    # propagate{} method for more information.
+    #
+    protected variable constraints
+
+    method attach    {aspects picture operation args} {}
+    method detach    {aspects picture} {}
+    method propagate {mode x y aspect} {}
+
+    method sc {} {
+	foreach c [array names constraints] {
+	    puts "$c |-> $constraints($c)"
+	}
+    }
+
+    method sh {} {
+	return [info context]::$shapeobject
+    }
+}
+
+
+## annotation name [value]
+#
+# Read the value of an annotation, or set the value. This
+# is easier to use than cget{} and configure{}.
+#
+body ::tycho::Picture::annotation {mode name args} {
+    switch -exact $mode {
+	"get" {
+	    return [assocLookup $annotations $name]
+	}
+	"add" {
+	    assocReplace annotations $name [lindex $args 0]
+	}
+	"delete" {
+	    assocRemove annotations $name
+	}
+    }
+}
+
+
+## aspect aspect
+#
+# Return the value of a single aspect. The valid aspects depend
+# on the current setting of the picture's _shape_ option.
+#
+body ::tycho::Picture::aspect {aspect} {
+    #
+    # Call the aspect{} method of the shape delegate.
+    #
+    [shape] aspect $aspect
+}
+
+
+## aspect {aspect}+
+#
+# Return the value of one or more aspects. The valid aspects depend
+# on the current setting of the picture's _shape_ option.
+#
+body ::tycho::Picture::aspects {args} {
+    #
+    # Call the aspect{} method of the shape delegate.
+    #
+    eval [shape] aspects $args
+}
+
+
+## attach aspect picture operation {option}
+#
+# Attach a constraint to a picture. The mechanism is very simple: each
+# aspect in the list will be added to the constraints array, for later
+# use by propagate. For correct operation under move, the "body" aspect
+# should always be specified in the aspect list.
+#
+# When a picture is moved or deformed, the changed aspects (or "body"
+# for a move) are used to index into the constraint array. For each
+# picture found, _operation_ is applied to it, with the list of _options_
+# appended to the call. The form of _operation_ and _options_ is as for
+# the _behavior_ configuration variable.
+#
+body ::tycho::Picture::attach {aspects picture operation args} {
+    foreach aspect $aspects {
+	#
+	# Create a name for aspects with complex names
+	#
+	set aspect [join $aspect "-"]
+
+	#
+	# Add the constraint
+	#
+	if { [info exists constraints($aspect)] } {
+	    lappend constraints($aspect) [list $picture $operation $args]
+	} else {
+	    set constraints($aspect) [list [list $picture $operation $args]]
+	}
+    }
+}
+
+
+## cget option
+#
+# Query a configuration option. This method overrides the
+# default cget{} in order to make access to configuration
+# options of a shape transparent. See configure{} for comments.
+#
+body ::tycho::Picture::cget {option} {
+    if { [catch {_cget $option} result] } {
+	if { $shapeobject != "" } {
+	    set result [$shapeobject cget $option]
+	}
+    }
+    return $result
+}
+
+
+## click
+#
+# Start an interaction sequence on this picture. The picture's
+# behaviour is controlled by the -behaviour option.
+#
+# NOTE: DO NOT OVERRIDE
+#
+body ::tycho::Picture::click {x y} {
+    if { $behavior == "none" } {
+	error "Picture $this has no behavior"
+    }
+
+    if { $behavior != "ignore" } {
+	eval $this $behaviorOperation click $x $y $behaviorOptions
+    }
+
+    set prevX $x
+    set prevY $y
+
+}
+
+
+## configure {option value}+
+#
+# Set or query configuration options. This method overrides the
+# default configure{} in order to make access to configuration
+# options of a shape transparent.
+#
+# Note: There's one catch: configuration options of a shape show up
+# only after the shape has been accessed. However, attempting to
+# set a configuration option not valid for the picture will
+# automatically access the shape.
+#
+# FIXME: This code cannot distinguish between an error caused
+# by an incorrect option name and a bad option value, and thus
+# may give misleading error messages.
+#
+body ::tycho::Picture::configure {args} {
+    if { $args == "" } {
+ 	#
+ 	# We've been asked for the configuration values. Get the
+ 	# configuration values of this object and its shape
+ 	# object and append them together.
+ 	#
+ 	set result [_configure]
+ 	if { $shapeobject != "" } {
+ 	    set result [concat $result [$shapeobject configure]]
+ 	}
+ 	return $result
 
     } elseif { [llength $args] == 1 } {
-	set opt [lindex $args 0]
-	if { $opt == "-tags" } {
-	    return [list {} {} {} [$slate gettags $id]]
-	} elseif { [namespace eval $scope \
-		[list ::info exists optiondefault($opt)]] } {
-	    # Read its value
-	    set value $option([string trimleft $opt -]$id)
-	    # Read default value
-	    set default [namespace eval $scope [list set optiondefault($opt)]]
-	    
-	    return [list $opt {} {} $default $value]
-	    
-	} else {
-	    error "unknown option \"$opt\""
-	}
+ 	if { [catch {_configure [lindex $args 0]} result] } {
+ 	    if { $shapeobject != "" } {
+ 		set result [$shapeobject configure [lindex $args 0]]
+ 	    }
+ 	}
+ 	return $result
+
     } else {
-	foreach {opt value} $args {
-	    if { ! [string compare $opt -tags] } {
-		# Set the tags of the complex item. This is awkward and
-		# slow... First get the tags of the item
-		set tags [$slate gettags $id]
+ 	#
+ 	# To set a configuration option, we first have to figure
+ 	# out whether each option belongs to this object or not.
+ 	# There are probably several ways of doing this: I have
+ 	# done it by trying to do a cget{}.
+ 	#
+ 	foreachpair option value $args {
+ 	    if { ! [catch {_cget $option}] } {
+ 		_configure $option $value
+ 	    } elseif {$shapeobject != "" } {
+ 		$shapeobject configure $option $value
+ 	    }
+ 	}
+    }
+}
 
-		# Process given tags to find out what to add
-		foreach tag $value {
-		    # If the tag is a hierarchy tag, ignore
-		    if { [string match {[!_]*} $tag] } {
-			continue
-		    } elseif { [lsearch -exact $tags $tag] == -1 } {
-			# If the item doesn't already have the tag, add it
-			$slate addtag $tag withtag $id
-		    }
+
+## deform "direct"  x y {aspect}+
+## deform "click"   x y {aspect}+ [-ghost]
+## deform "drag"    x y
+## deform "release" x y
+#
+# Deform a picture. By default, this method delegates to the
+# picture's _shapeobject_ instance variable, as determined by the
+# _shape_ option variable. See the various Shape objects for a
+# a description of the different modes.
+#
+# The shape object is tested for null before doing anything, and one
+# is created if it doesn't exist. This avoids creating shape objects
+# that will never be used.
+#
+body ::tycho::Picture::deform {mode x y args} {
+    #
+    # Call the deform{} method of the shape delegate.
+    #
+    eval [shape] deform $mode $x $y $args
+}
+
+
+## detach aspect picture
+#
+# Remove a constraint. The constraint is specified by its aspects
+# and a picture. It is the caller's responsibility to ensure that
+# aspects and pictures when detaching correspond to those used when
+# attaching.
+#
+body ::tycho::Picture::detach {aspects picture} {
+    foreach aspect $aspects {
+	set aspect [join $aspect "-"]
+
+	if { ! [info exists constraints($aspect)] } {
+	    error "Invalid constraint ($picture, $aspect) in $this"
+	}
+
+	set result {}
+	foreach triple $constraints($aspect) {
+	    if { [lindex $triple 0] != $picture } {
+		lappend result $triple
+	    }
+	}
+	if { $result == {} } {
+	    unset constraints($aspect)
+	} else {
+	    set constraints($aspect) $result
+	}
+    }
+}
+
+
+## drag
+#
+# Continue an interaction sequence on this picture. The picture's
+# behaviour is controlled by the -behaviour option.
+#
+# NOTE: DO NOT OVERRIDE
+#
+body ::tycho::Picture::drag {x y} {
+    if { $behavior != "ignore" } {
+	eval $this $behaviorOperation drag \
+		[expr $x - $prevX] [expr $y - $prevY]
+    }
+
+    set prevX $x
+    set prevY $y
+}
+
+
+## extend args
+#
+# Extend a picture. The need for and meaning of additional
+# arguments depends on the picture's shape class. If the shape class
+# doesn't support the extend{} operation then an error will be
+# signalled.
+#
+body ::tycho::Picture::extend {args} {
+    #
+    # Call the extend{} method of the shape delegate.
+    #
+    eval [shape] extend $args
+}
+
+
+## grapple args
+#
+# Attach grapples to a picture.
+#
+body ::tycho::Picture::grapple {args} {
+    eval [shape] grapple $args
+}
+
+
+## move "direct"  x y
+## move "click"   x y [-ghost]
+## move "drag"    x y
+## move "release" x y
+#
+# Move a picture. This method has several sub-commands, selected
+# by the first argument.
+#
+# -- direct: Move the picture by the specified x and y coordinates.
+#    This is intended only for ``all-at-once'' moves; for moves that
+#    can be broken into a series of small moves -- such as dragging
+#    with the mouse -- use a sequence of click-drag-release moves.
+#
+# -- click: Signal the start of a click-drag-release action. This
+#    assumes that a release action has been called since previous
+#    drag actions. The optional -ghost flag indicates that the picture
+#    is to be moved by dragging a ``ghost'' of the picture.
+#
+# -- drag: Move the picture or its ghost by the specified amount.
+#    Drag assumes that click has already been called on the picture,
+#    and will function unpredictably if not.
+#
+# -- release: Terminate a click-drag-release sequence. If a ghost is
+#    being moved, then the picture is moved to its position and the ghost
+#    is deleted. Note: A release must be used to terminate the click-drag-
+#    release sequence, even if not ghosting the picture. The x and y
+#    arguments are ignored.
+#
+# Note: DO NOT OVERRIDE.
+#
+body ::tycho::Picture::move {mode x y args} {
+
+    #
+    # Switch on the mode keyword
+    #
+    switch -exact $mode {
+	"direct" {
+	    #
+	    # A simple relative move. Move canvas items, and then
+	    # propagate constraints.
+	    #
+	    $canvas move $this $x $y
+	    $this propagate "direct" $x $y "body"
+	}
+	"click" {
+	    getflag ghost args
+
+	    #
+	    # If the _ghost_ option is set, draw the ghost shape.
+	    # If not, clear the *ghost* flag so that later drags
+	    # don't get confused.
+	    #
+	    # If the ghost is not set, propagate constraints.
+	    #
+	    if { $ghost } {
+		set ghost [$this query ghost]
+
+		#
+		# Tag each ghost item to make moving easier later
+		#
+		foreach g $ghost {
+		    $canvas itemconfigure $g -tags "ghost"
 		}
-		
-		# Process existing tags to find out what to delete
-		foreach tag $tags {
-		    if { [lsearch -exact $value $tag] == -1 } {
-			$slate dtag $id $tag
-		    }
-		}
+
+		#
+		# Remember where I am now.
+		#
+		set startpos [lrange [$canvas coords [lindex $ghost 0]] 0 1]
+
 	    } else {
-		# Call the proc on the class to set the option
-		if { [namespace eval $scope \
-			[list ::info exists optiondefault($opt)]] } {
-                    namespace eval $scope [list eval \
-                        \[set methodtable(_[string trimleft $opt -])\] \
-                        $id $canvas $slate [list $value]]
+		set ghost ""
+		$this propagate "click" $x $y "body"
+	    }
+	}
+	"drag" {
+	    #
+	    # If there's a ghost, move it. Otherwise move the picture.
+	    #
+	    if { $ghost != "" } {
+		$canvas move "ghost" $x $y
+	    } else {
+		$canvas move $this $x $y
+		$this propagate "drag" $x $y "body"
+	    }
+	}
+	"release" {
+	    #
+	    # If there's a ghost, delete it, move the picture there, which
+	    # will in turn perform a one-shot constraint propagation.
+	    # If there isn't a ghost, finalize constraint propagation.
+	    # 
+	    if { $ghost != "" } {
+		assign x y $startpos
+		assign a b [$canvas coords [lindex $ghost 0]]
 
-		} else {
-		    error "unknown option \"$opt\""
-		}
+		$this move "direct" [expr $a - $x] [expr $b - $y]
+
+		$canvas delete "ghost"
+		set ghost ""
+
+	    } else {
+		$this propagate "release" 0 0 "body"
+	    }
+	}
+	default {
+	    error " Invlid mode \"$mode\" to $this::mode{}"
+	}
+    }
+}
+
+
+## moveto aspect x y
+#
+# Move an aspect of a picture to a given coordinate. By
+# default, this method delegates to the picture's shape object.
+#
+body ::tycho::Picture::moveto {aspect x y} {
+    #
+    # Call the move{} method of the shape delegate.
+    #
+    [shape] move $aspect $x $y
+}
+
+
+## normal aspect
+#
+# Return the normal to an aspect. The valid aspects depend
+# on the current setting of the picture's _shape_ option.
+#
+body ::tycho::Picture::normal {aspect} {
+    #
+    # Call the normal{} method of the shape delegate.
+    #
+    [shape] normal $aspect
+}
+
+
+## parent
+## parent p
+#
+# Set or clear the parent of the picture. This is not intended
+# for general use: instead, use the component{} method.
+#
+body ::tycho::Picture::parent {args} {
+    if { $args == "" } {
+	return $parent
+    }
+
+    #
+    # If the current parent is not null, then remove its tags
+    # from this picture.
+    #
+    # FIXME: Does this need -force?
+    #
+    if { $parent != "" } {
+	eval $this _etag delete [$parent _etag get]
+	eval $this _htag delete [$parent _htag get]
+    }
+
+    #
+    # Set the new parent. If it is not null, then add its tags to
+    # this picture.
+    #
+    # FIXME: Does this need -force?
+    #
+    set parent [lindex $args 0]
+    if { $parent != "" } {
+	eval $this _etag add [$parent _etag get]
+	eval $this _htag add [$parent _htag get]
+    }
+}
+
+
+## propagate mode x y aspects
+#
+# Propagate a constraint. This method is called by the various
+# moving and deforming methods. The _mode_ argument is the same mode
+# as used by interaction commands -- that is, "click," "drag," or
+# "release" -- or the "direct" mode for simple moves and deforms.
+#
+# Every constraint associated with every aspect in _aspects_ is looked
+# up in the constraints array. For each of these constraints, the associated
+# operation is called on the associated picture, with mode _mode_ and
+# coordinates _x_ and _y_.
+#
+# NOTE: Constraint propagation bypasses the behavior interface, so
+# the behavior of a picture moved or deformed under constraints is not
+# affected by its behavior configuration variable...
+#
+# FIXME: A more efficient way of caching constraints for propagation
+# for use in click-drag-release sequences is needed.
+#
+# FIXME: Constraints cannot be circular. I need to think about exactly
+# how much circularity is needed, before deciding on the best way
+# to deal with it.
+#
+body ::tycho::Picture::propagate {mode x y aspects} {
+#puts "propagate $mode $x $y $aspects"
+
+    #
+    # First get all the constraints, and remove duplicates.
+    # Note that only the picture name is considered, so the
+    # same picture cannot (usefully) have more than one operation.
+    #
+    set cons {}
+    foreach aspect $aspects {
+	set aspect [join $aspect "-"]
+
+	if { [info exists constraints($aspect)] } {
+	    set cons [concat $cons $constraints($aspect)]
+	}
+    }
+    set cons [lnubKeyed $cons]
+
+    #
+    # Apply the operation to each picture.
+    #
+    switch -exact $mode {
+	"direct" {
+	    foreach triple $cons {
+		assign picture operation options $triple
+		eval $picture $operation "direct" $x $y $options
+	    }
+	}
+	"click" {
+	    foreach triple $cons {
+		assign picture operation options $triple
+		eval $picture $operation "click" $x $y $options
+	    }
+	}
+	"drag" {
+	    foreach triple $cons {
+		assign picture operation $triple
+		eval $picture $operation "drag" $x $y
+	    }
+	}
+	"release" {
+	    foreach triple $cons {
+		assign picture operation $triple
+		eval $picture $operation "release" 0 0
 	    }
 	}
     }
+}
+
+
+## query option
+#
+# Query a picture for some information about itself. If the
+# picture does not find the answer in its own array of answers,
+# it asks its shape object.
+#
+# NOTE: DO NOT OVERRIDE
+body ::tycho::Picture::query {option} {
+    foreach c [info heritage] {
+	set result [$c::_answer $option]
+	if { $result != -1 } {
+	    return $result
+	}
+    }
+    error "Invalid option $option
+}
+
+body ::tycho::Picture::_answer {option} {
+    switch -exact $option {
+	"items"   {
+	    # The items contained by the picture. Not for general use.
+	    $canvas find withtag $this
+	}
+	"slate"   {
+	    # The slate on which this picture lives.
+	    $this slate
+	}
+	"canvas"  {
+	    # The canvas on which this picture lives. Not for general use.
+	    $this canvas
+	}
+	"bbox"    {
+	    # The bounding box of the picture.
+	    $canvas bbox $this
+	}
+	"outline" {
+	    # The exact outline of the picture. Defaults to the
+	    # bounding box less 2 in each direction. Must be a rectangle.
+	    rectShrink [$canvas bbox $this] 2
+	}
+	"region"  {
+	    # The internal region bounded by the object.
+	    # Must be a rectangle.
+	    rectShrink [$canvas bbox $this] 4
+	}
+	"canvasshape"   {
+	    # The "shape" of the picture, as a canvas type.
+	    return "rectangle"
+	}
+	"shapeobject"   {
+	    # The Shape object of the picture. Not for general use.
+	    return $shapeobject
+	}
+	"ghost"   {
+	    # Create and return a grey "ghost" for interactive
+	    # manipulation. Not for general use.
+	    eval $canvas create [$this query canvasshape] \
+		    [$this coords] \
+		    {-outline grey -fill ""}
+	}
+	default {
+	    return -1
+	}
+    }
+}
+
+
+# FIXME: Add the following back into query...
+#
+#     if { ! [string compare $option "query"] } {
+# 	return [array names answers]
+#     } elseif { [info exists answers($option)] } {
+# 	uplevel #0 $answers($option)
+#     } else {
+# 	if { [catch {[shape] query $option} result] } {
+# 	    error "Picture $this cannot answer $option"
+# 	} else {
+# 	    return $result
+# 	}
+#     }
+
+
+
+## reshape aspect x y
+## reshape aspect value
+#
+# Reshape a picture. By default, this method delegates to the
+# picture's _shapeobject_ instance variable, as determined by the
+# _shape_ option variable. The effect of this function depends on
+# the current setting of the picture's -shape option.
+#
+body ::tycho::Picture::reshape {args} {
+    #
+    # Call the reshape{} method of the shape delegate.
+    #
+    eval [shape] reshape $args
+}
+
+
+## release
+#
+# Terminate an interaction sequence on this picture. The picture's
+# behaviour is controlled by the -behaviour option.
+#
+# NOTE: DO NOT OVERRIDE
+#
+body ::tycho::Picture::release {} {
+    if { $behavior != "ignore" } {
+	eval $this $behaviorOperation release 0 0
+    }
+}
+
+
+## scale scale
+## scale xscale yscale
+## scale x y scale
+## scale x y xscale yscale
+#
+# Scale a picture. The scale operation works on the picture's
+# coordinates, not on its representation.
+#
+# If only *scale* is specified, the picture is scaled uniformly
+# in both axes. If no coordinates are specified, the picture
+# is scaled about its center.
+#
+body ::tycho::Picture::scale {xscale args} {
+    #
+    # Extract arguments
+    #
+    switch -exact [llength $args] {
+	0 {
+	    set yscale $xscale
+	    assign x y [$this aspect center]
+	}
+	1 {
+	    set yscale [lindex $args 0]
+	    assign x y [$this aspect center]
+	}
+	2 {
+	    set x $xscale
+	    assign y xscale $args
+	    set yscale $xscale
+	}
+	3 {
+	    set x $xscale
+	    assign y xscale yscale $args
+	}
+    }
+
+    #
+    # Get new coordinates
+    #
+    set result {}
+    set coords [$this coords]
+    foreachpair a b $coords {
+	set a [expr $x + $xscale * ($a - $x)]
+	set b [expr $y + $yscale * ($b - $y)]
+	lappend result $a $b
+    }
+
+    #
+    # Apply scaling
+    #
+    eval $this coords $result
+}
+
+
+## tag add {tag}+
+## tag delete {tag}+
+## tag get
+## tag set {tag}+
+#
+# Manipulate tags. This is a better interface than configure{} for
+# this purpose.
+#
+# DO NOT OVERRIDE.
+#
+body ::tycho::Picture::tag {mode args} {
+    switch -exact $mode {
+	"add" {
+	    set tags [lunion $tags $args]
+	    
+	    #
+	    # If the picture is not marked, see if there are any
+	    # bindings for these tags and if there are, mark it.
+	    #
+	    if { $mark == "" } {
+		foreach t $args {
+		    if { [$canvas bind $t] != "" } {
+			set mark 1
+			break
+		    }
+		}
+	    }
+
+	    #
+	    # If the picture is marked, add the new tags to the event
+	    # tags.
+	    #
+	    if { $mark != "" } {
+		eval $this _etag "add" $tags -force
+	    }
+
+	    #
+	    # Tell the slate about the new tags,
+	    #
+	    foreach t $args {
+		$slate registerTag $t $this
+	    }
+	}
+	"delete" {
+	    set tags [lsubtract $tags $args]
+
+	    #
+	    # If the picture is marked, then it is possible that deleting
+	    # a tag will make it unmarked. So, for the tags that remain,
+	    # test if there are any bindings. If none of them have bindings,
+	    # then the picture can be unmarked and its event tags set to
+	    # the event tags of its parent.
+	    #
+	    set unmark 1
+	    foreach t $tags {
+		if { [$itk_component(canvas) bind $t] != "" } {
+		    set unmark 0
+		    break
+		}
+	    }
+	    if { $unmark } {
+		set mark ""
+
+		if { $parent != "" } {
+		    eval $this _etag set [$parent _etag get] -force
+		} else {
+		    $this _etag set {} -force
+		}
+	    }
+
+	    #
+	    # If the picture is still marked, set its event tags to
+	    # its user tags.
+	    #
+	    if { $mark != "" } {
+		eval $this _etag "set" $tags -force
+	    }
+
+	    #
+	    # Tell the slate about the removed tags.
+	    #
+	    foreach t $args {
+		$slate deregisterTag $t $this
+	    }
+	}
+	"get" {
+	    return $tags
+	}
+	"set" {
+	    set newtags [lsubtract $args $tags]
+	    if { $tags != "" } {
+		set deadtags [lsubtract $tags $args]
+	    }
+	    set tags $args
+
+	    if { $newtags != "" } {
+		$this tag "add" $newtags
+	    }
+	    if { $deadtags != "" } {
+		$this tag "delete" $deadtags
+	    }
+	}
+	default {
+	    error "Picture::tag: Invalid mode $mode"
+	}
+    }
+}
+
+
+## transform query
+## transform mode args
+#
+# Transform a picture. The transformation available depend on the
+# picture's shape; use the query mode to get a list of available
+# transformation modes.
+#
+body ::tycho::Picture::transform {mode args} {
+    #
+    # Call the transform{} method of the shape delegate.
+    #
+    eval [shape] transform $mode $args
+}
+
+
+
+# FIXME: move these somewwhere else...
+proc lsearchKeyed {list key} {
+    set index 0
+    foreach i $list {
+	if { [lindex $i 0] == $key } {
+	    return $index
+	}
+	incr index
+    }
+    return -1
+}
+
+proc ldeleteKeyed {list key} {
+    set i [lsearchKeyed $list $key]
+
+    if { $i != -1 } {
+	return [lreplace $list $i $i]
+    }
+
+    return $list
+}
+
+proc lnubKeyed {list} {
+    set result {}
+    foreach i $list {
+	if { [lsearchKeyed $result [lindex $i 0]] == -1 } {
+	    lappend result $i
+	}
+    }
+    return $result
 }

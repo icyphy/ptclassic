@@ -1,11 +1,10 @@
-# -*- mode: tcl -*-
 #
 # $Id$
 #
 # The "system" master style-sheet
 #
-configure -title "System"
-configure -description {
+modelconfigure -label "System"
+modelconfigure -description [
 	This style contains system-wide application settings.
 }
 
@@ -37,7 +36,6 @@ style default \
 	The full name of the user.
     }
 
-    # FIXME: This doesn't belong here (or anywhere, for that matter!)
     parameter itclHTMLPage {$tycho/doc/itclhtml/TclTkMainList.html} \
 	    -label "Pathname of Itcl TclTkMainList.html file" \
 	    -description {
@@ -47,7 +45,7 @@ style default \
 
     parameter revisionControlTypes {SCCS RCS} \
 	    -label "Supported revision control types" \
-	    -description {
+	    description {
 	Types of revision control software, in order of parameter.
 	It is assumed that for each type listed, there is a class defined
 	called RevControl$type, where $type is the type, and that this

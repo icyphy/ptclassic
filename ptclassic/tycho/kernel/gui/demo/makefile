@@ -48,7 +48,7 @@ TCL_SRCS =
 
 ITCL_SRCS = 
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) widgettree labeledgrid
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS)
 
 MISC_FILES = 
 
@@ -60,8 +60,8 @@ TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
 all install: sources $(MISC_SRCS)
-	chmod a+x widgettree
-	chmod a+x labeledgrid
 
-# We have an all rule, so include tycommon.mk.
-include $(ROOT)/mk/tycommon.mk
+# We don't include common.mk since we don't use the compiler here
+include $(ROOT)/mk/no-compile.mk
+
+

@@ -3,8 +3,8 @@
 #
 # The "makefile" master style-sheet
 #
-configure -title "Makefile colors"
-configure -description {
+modelconfigure -label "Makefile colors"
+modelconfigure -description {
     Additional color settings for makefile editors.
 }
 

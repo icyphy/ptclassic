@@ -50,7 +50,7 @@ ITCL_SRCS =
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) gui
 
-MISC_FILES = README.txt
+MISC_FILES = 
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
@@ -59,14 +59,13 @@ REALCLEAN_STUFF =
 TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all:  sources $(MISC_SRCS)
+all install: sources $(MISC_SRCS) tclIndex
+
+# Make the shell script/s executable
+sources::
 	chmod a+x gui
 
-install: all tybin_install
-
-.PHONY: all install tybin_install
-
 # We don't include common.mk since we don't use the compiler here
-include $(ROOT)/mk/tycommon.mk
+include $(ROOT)/mk/no-compile.mk
 
 

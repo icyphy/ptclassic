@@ -3,7 +3,7 @@
 # Version identification:
 # $Id$
 #
-# Copyright (c) 1996-%Q% The Regents of the University of California.
+# Copyright (c) %Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,22 +30,14 @@
 # Date of creation: 7/31/96
 # Author: Christopher Hylands
 
-# This makefile should be included at the top of every Tycho makefile.
-# This makefile uses the ROOT makefile variable.
 
-# The destination directory for any libraries created.
-# Usually this is an architecture dependent library.
-LIBDIR =	$(ROOT)/lib.$(PTARCH)
+# Itcl2.1 shell: [incr Tcl] sh  (tclsh + namespaces)
+#ISH =	$(PTOLEMY)/tcltk/itcl.$(PTARCH)/bin/ish
+ISH =	ish
 
-# Provide an initial value for LIB_DEBUG so we don't get messages about
-# multiply defined rules for $(LIBDIR)/$(LIB_DEBUG) if LIB_DEBUG is empty.
-LIBR_DEBUG =	libdummy_g
+# Create tclIndex from .tcl and .itcl files
+tclIndex: $(TCL_SRCS) $(ITCL_SRCS)
+	@echo "Updating tclIndex"
+	rm -f $@
+	echo 'set auto_path [linsert $$auto_path 0 [info library] ]; auto_mkindex . $(TCL_SRCS) $(ITCL_SRCS)' | $(ISH)
 
-# Itcl shell
-#ITCLSH =	$(PTOLEMY)/tcltk/tcl.$(PTARCH)/bin/itclsh
-ITCLSH =	itclsh
-
-# Tcl script that generates html from itcl files
-# Note that $(ROOT) here is relative to the tycho directory, not
-# the Ptolemy directory.
-TYDOC=$(ROOT)/util/tydoc/bin/tydoc

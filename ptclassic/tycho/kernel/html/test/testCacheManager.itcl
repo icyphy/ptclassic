@@ -30,78 +30,21 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# Make sure that the require packages are loaded
-package require tycho.util.tytest
-package require tycho.kernel.html
-
-# The following tests need to be sequential...
-test cache-1 {Get a cache file name, and write into it.} {
-    ::tycho::cache initialize
-    set url "newformat://a.b.c/index.tyc"
-    set cachefile [::tycho::cache tmpCacheName $url]
-    set date {Monday 1-2-3}
-    set size 12345
-    set contenttype "vrml/slow"
-    set cacheid [::open $cachefile w+]
-    foreach i {This is a test} {
-        ::puts $cacheid $i
-    }
-    ::close $cacheid
-    ::tycho::cache update $url \
-            $date $size $contenttype $cachefile
+if {[string compare test [info procs test]] == 1} then { 
+    source [file join $TYCHO kernel test testDefs.tcl]
 } {}
 
-test cache-2 {Get back the cache info about the url} {
-    set url "newformat://a.b.c/index.tyc"
-    set exists [::tycho::cache exists $url]
-    set date [::tycho::cache getdate $url]
-    set contenttype [::tycho::cache getcontenttype $url]
-    set cachefile [::tycho::cache getcachefile $url]
-    set size [::tycho::cache getsize $url]
-    list $exists $date $contenttype $size
-} {1\
-        {Monday 1-2-3}\
-        vrml/slow\
-        12345}
+test Resource-1.1 {} {
 
-test cache-3 {Check the integrity of the cache file} {
-    set url "newformat://a.b.c/index.tyc"
-    set cachefile [::tycho::cache getcachefile $url]
-    set fileid [::open $cachefile r]
-    set line {}
-    while {![eof $fileid]} {
-        append line "[gets $fileid] "
-    }
-    list $line
-} {{This is a test  }}
+} {normal {}}
 
-test cache-4 {Check the same status} {
-    set url "newformat://a.b.c/index.tyc"
-    set cachefile [::tycho::cache tmpCacheName $url]
-    set date {Monday 1-2-3}
-    set size 12345
-    set contenttype "vrml/slow"
 
-    set ret1 [::tycho::cache same $url $date $size $contenttype]
-    set ret2 [::tycho::cache same $url $date 55555 $contenttype]
-    
-    list $ret1 $ret2
-} {1 0}
 
-test cache-5 {Check whether initialize/exists will keep concurrency} {
-    # Synchronize index and cache directory (keep 1:1 correspondence)
-    ::tycho::cache initialize
 
-    set url "newformat://a.b.c/index.tyc"
-    set cachefile [::tycho::cache getcachefile $url]
-    ::tycho::cache remove $url
 
-    # Resynchronize
-    ::tycho::cache initialize
-    set exists [::tycho::cache exists $url]
-    set cachefile [::tycho::cache getcachefile $url]
-    list $cachefile $exists
-} {{} 0}
+
+
+
 
 
 

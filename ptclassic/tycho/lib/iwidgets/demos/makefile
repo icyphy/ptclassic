@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -43,7 +43,7 @@ include $(CONFIG)
 ITCL_SRCS = 
 
 DEMO_SRCS = \
-	labeledgrid \
+	query \
 	widgettree
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) $(DEMO_SRCS)
@@ -58,12 +58,10 @@ TYDOC_DESC =	Index of classes in tycho/lib/iwidgets/demos
 
 DIRS =		
 
-MISC_FILES = 	arrowclose.xbm arrowopen.xbm
+all install: $(MISC_SRCS)
 
-all:  $(MISC_SRCS)
+sources:: $(DEMO_SRCS)
 	chmod a+x $(DEMO_SRCS)
 
-install: all
-
-# We have an all rule, so include tycommon.mk.
-include $(ROOT)/mk/tycommon.mk
+# We don't include common.mk since we don't use the compiler here
+include $(ROOT)/mk/no-compile.mk

@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -66,7 +66,7 @@ class ::tycho::RunWindow {
     ####                         public methods                    ####
 
     # Add a subpanel widget into this widget
-    method add {tag args}
+    method add {widget args}
 
     # Connect a callback to a control
     method callback {control callback}
@@ -79,9 +79,6 @@ class ::tycho::RunWindow {
 
     # Resume the simulation
     method resume {}
-
-    # Show a new panel
-    method show {show args}
 
     # Simulation control
     method simulation {mode args}
@@ -110,9 +107,6 @@ class ::tycho::RunWindow {
     ###################################################################
     ####                   protected methods                       ####
 
-    # Tell the class to use for the simulation.
-    protected method _simulationClass {}
-
     # Initialize the menu/status/tool bars associated with this widget.
     protected method _initializeBars {menubar statusbar toolbar}
 
@@ -140,14 +134,14 @@ class ::tycho::RunWindow {
     # The array of control names, indexed by widget name
     protected variable widgetcontrols
 
-    # The simulation interface object.
-    protected variable _simulation
-
     # The name of the simulation
     protected variable _simulationName ""
 
-    # The script file sourced to extend the panel
-    protected variable _scriptFile ""
+    ###################################################################
+    ####                     private variables                     ####
+
+    # The simulation interface object.
+    private variable _simulation
 }
 
 ######################################################################
@@ -184,7 +178,7 @@ body ::tycho::RunWindow::constructor {args} {
     } {
 	keep -background -cursor -font -padx -pady
     }
-    pack $itk_component(bbox) -side bottom -expand no -padx 2 -pady 4
+    pack $itk_component(bbox) -side right -expand no -padx 2 -pady 4
 
     # Initialize the iteration counter and add a trace to it
     global iterationcounter
@@ -219,25 +213,19 @@ body ::tycho::RunWindow::constructor {args} {
 #### add
 #
 # Add a control subpanel widget into this control panel.
-# The arguments to this command are exactly as they would be
-# for the <b>itk_component add</b> command.
-# 
-# The widget is not packed -- this must be done with the
-# show{} command.
+# The widget must be a subclass of ControlSubpanel. Optional
+# arguments are passed to the Tk *pack* command. The widget's
+# *-runWindow* option is set, and the widget's requestConnect{}
+# method is called.
 #
-body ::tycho::RunWindow::add {tag create {options {}}} {
-    # puts $create
-    # set create [uplevel subst $create]
-    # puts $create
+body ::tycho::RunWindow::add {widget args} {
+    # Pack the widget
+    eval pack $widget $args
 
-    if { $options == "" } {
-	itk_component add $tag $create
-    } else {
-	itk_component add $tag $create $options
-    }
-    uplevel "set $tag $itk_component($tag)"
-
-    return $itk_component($tag)
+    # Tell the widget about its control panel and make it
+    # connect its controls
+    $widget configure -runWindow $this
+    $widget requestConnect
 }
 
 #######################################################################
@@ -331,19 +319,6 @@ body ::tycho::RunWindow::resume {} {
 }
 
 #######################################################################
-#### show
-#
-# Pack a control panel widget into the runwindow. The first
-# argument can either be the widget tag or its full path.
-#
-body ::tycho::RunWindow::show {widget args} {
-    if [info exists itk_component($widget)] {
-	set widget $itk_component($widget)
-    }
-    eval pack $widget $args
-}
-
-#######################################################################
 #### simulation
 #
 # Access simulation control.
@@ -354,10 +329,7 @@ body ::tycho::RunWindow::simulation {mode args} {
     switch -exact $mode {
 	"create" {
 	    # Create a new simulation.
-	    set simClass [_simulationClass]
-	    set _simulation [uplevel #0 $simClass #auto $args]
-            # puts !$_simulation
-	    $_simulation startServer
+	    set _simulation [uplevel #0 ::tycho::Simulation #auto $args]
 	    return $_simulation
 	}
 	"delete" {
@@ -374,21 +346,6 @@ body ::tycho::RunWindow::simulation {mode args} {
 		displayer configure -title $_simulationName
 	    } else {
 		$_simulation cget -simulationName
-	    }
-	}
-	"script" {
-	    if { $args != "" } {
-		set f [lindex $args 0]
-		set _scriptFile "[file root $f]Init.tcl"
-		# puts "Script file is $_scriptFile"
-		if [file exists $_scriptFile] {
-		    namespace eval _temp_ "set runWindow $this"
-		    namespace eval _temp_ "set simulation $_simulation"
-		    namespace eval _temp_ "source $_scriptFile"
-		    namespace delete _temp_
-		} else {
-		    set _scriptFile ""
-		}
 	    }
 	}
 	default {
@@ -508,16 +465,6 @@ body ::tycho::RunWindow::starConnect {galaxy star control callback} {
     ###################################################################
     ###################################################################
     ####                      protected methods                    ####
-
-#####################################################################
-#### _simulationClass
-# Return the class to create for simulations. Subclasses can override
-# this method to have specific subclasses of <b>Simulation</b>
-# created.
-#
-body ::tycho::RunWindow::_simulationClass {} {
-    return ::tycho::Simulation
-}
 
 #####################################################################
 #### _initializeBars

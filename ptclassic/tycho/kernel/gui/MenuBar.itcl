@@ -33,17 +33,22 @@
 
 #######################################################################
 #### MenuBar
-# This class defines a menu bar widget. The widget is intended to
-# make it easier to manage a complete menu bar, and provides
-# simple access to menu, menu entries, and hierarchical menus.
-# It may become obsolete once Tk 4.3 is out.
+# This class defines a menu bar widget that may be inserted into any
+# Displayer or TopLevel window.  It may become obsolete once Tk 4.3
+# is out.
 # <p>
-# For examples illustrating the use of the menu-bar, see
-# the <a href="../internals/decorators.html#MenuBar class">
-# programmer's documentation</a>.
+# Here is an example:
+# <tcl><pre>
+# ::tycho::Displayer .f
+# ::tycho::MenuBar .f.mb
+# .f configure -menubar .f.mb
+# .f.mb addMenu File left {}
+# .f.mb addMenuItem Close File -command {delete object .f}
+# .f centerOnScreen
+# </pre></tcl>
 #
 class ::tycho::MenuBar {
-    inherit ::tycho::MenuSupport
+    inherit itk::Widget
 
     constructor {args} {}
     destructor {}
@@ -51,39 +56,47 @@ class ::tycho::MenuBar {
     ###################################################################
     ####                         public methods                    ####
 
-    # Add a menu to the menu bar
-    method addMenu {tag args}
+    # Add a menu to the displayer
+    method addMenu {name side before args}
 
-    # Get an option of a menu button
-    method buttoncget {tag option}
-
-    # Set options of a menu button
-    method buttonconfigure {tag args}
-
-    # Delete a menu or menu entry
-    method delete {menu}
-
-    # Disable an entry or an entire menu
-    method disable {tag}
-
-    # Enable an entry or an entire menu
-    method enable {tag}
-
-    # Return the entries in a menu
-    method entries {{tag {}}}
-
-    # Post a menu or cascade menu
-    method post {tag}
-
-    # Unpost a menu or cascade menu
-    method unpost {tag}
-
-    ###################################################################
-    ####                       private variables                   ####
+    # Add a menu item to a menu in the MenuBar
+    method addMenuItem {itemName inMenu args}
     
-    # The list of menu buttons
-    private variable menubuttons {}
+    # Add a separator to a menu
+    method addMenuSeparator {inMenu args}
 
+    # Add a radio button item to a menu in the MenuBar
+    method addRadioItem {itemName inMenu args}
+    
+    # Disable an entire menu 
+    method disableMenu {name}
+
+    # Disable a menu item in a menu
+    method disableMenuItem {itemName inMenu}
+
+    # Enable an entire menu
+    method enableMenu {name}
+
+    # Enable a menu item in a menu
+    method enableMenuItem {itemName inMenu}
+
+    # Insert a menu item to the specified menu before the specified item
+    method insertMenuItem {itemName before inMenu args}
+ 
+    # Insert a separator to the specified menu
+    method insertMenuSeparator {before inMenu args}
+
+    # Query the state of a menu item in a menu
+    method queryMenuItemState {itemName inMenu} {return $state}
+    
+    # Query the state of an entire menu
+    method queryMenuState {name} {return $state}
+
+    # Remove the specifed menu
+    method removeMenu {menu}
+
+    # Remove the item from the specified menu.
+    method removeMenuItem {itemName inMenu}
 }
 
 #######################################################################
@@ -93,246 +106,388 @@ body ::tycho::MenuBar::constructor {args} {
     eval itk_initialize $args
 }
 
-###################################################################
-###################################################################
-####                      public methods                       ####
+#######################################################################
+#### destructor
+#
+body ::tycho::MenuBar::destructor {} {
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
 
 
 #######################################################################
 #### addMenu
-# Add a menu to the menu bar.  The first argument is the tag of the
-# menu, and can be any arbitrary string. Remaining arguments control
-# the appearance and layout of the menu. Options include the following:
+# Add a menu to the menu bar.  The first argument is the name of the
+# menu.  This should be a single word, with the first character 
+# capitalized.  The second argument should have value either "left"
+# or "right".  It determines on which side of the menu bar the menu
+# will be packed.  The third argument should be either an empty string
+# or the name of a menu before which this menu button should be packed.
+# If the string is empty, then the menu is button is placed in the next
+# logical position. The remaining arguments are passed unchanged to the Tk
+# <code>menubutton</code> command.  If a menu with the given name already
+# exists, then this method just returns without doing anything.
 #
-# <ul>
-# <li>*-side* _side_: Specify the side to pack in. Must be either _left_
-# (the default) or _right_.
-# <li>*-before* _menu_: Pack before the specified menu.
-# <li>*-after* _menu_: Pack after the specified menu.
-# <li>*-label* _string_: The label of the menu button. Note that
-# this option will be translated into the *-text* option of
-# the Tk *menubutton* widget -- this is for consistency with
-# the option used for menu entries.
-# <li>*-underline* _index_: Underline the specified character of the label.
-# </ul>
-#
-# Other options are supported: the whole set of options supported
-# by the Tk menubutton widget are supported, except for the
-# and *-menu* options.
-#
-# The above options cannot be changed once the menu has been created.
-# If the specified menu already exists, then this method does
-# nothing. To specify options of the menu itself,
-# use the *menuconfigure* method. Note that the menu is created with
-# the menu's *-tearoff* option set false.
-#
-# The returned result is the menu's tag.
-#
-body ::tycho::MenuBar::addMenu {tag args} {
-
-    # Do nothing at all if the menu already exists
-    if { [::info exists entrypath($tag)] } {
-	return
-	# error "menu $tag already exists"
+body ::tycho::MenuBar::addMenu {name side before args} {
+    
+    # Avoid adding new menus with the same name.
+    if [info exists itk_component(menuButton$name)] {
+        return
     }
 
-    # Get special options
-    array set temp [concat {-side left -before {} -after {} -label {}} $args]
-    if { $temp(-label) != "" } {
-	set temp(-text) $temp(-label)
-    }
-    unset temp(-label)
-    set side   $temp(-side)
-    set before $temp(-before)
-    set after  $temp(-after)
-    unset temp(-side)
-    unset temp(-before)
-    unset temp(-after)
-    set args [array get temp]
-
-    # Create the menu button
-    set buttonpath $itk_interior.[incr _unique]
-    set _menupath($tag) $buttonpath.menu
-    set _tag($_menupath($tag)) $tag
-    itk_component add button$tag {
-	eval menubutton $buttonpath \
-		$args \
-		-menu $_menupath($tag)
+    # create the new menu button
+    itk_component add menuButton$name {
+        eval menubutton $itk_interior.menuButton$name \
+                -text $name \
+                -menu $itk_interior.menuButton$name.menu \
+                $args
     } {
-	keep -font -activebackground -cursor -activeforeground \
-		-background -foreground -highlightbackground \
- 		-highlightcolor -padx -pady
+        keep -font -activebackground -cursor -activeforeground \
+                -background -foreground -highlightbackground \
+                -highlightcolor
     }
 
-    # Create the new menu. This is done at the global scope so
-    # that adding menu entries in the superclass (MenuSupport)
-    # do not invoke unknown{}.
-    itk_component add $tag {
-	uplevel #0 menu $_menupath($tag) -tearoff 0
+    if {$before != {}} {
+        if {![info exists itk_component(menu$before)]} {
+            error "Menu $before does not exist."
+        }
+        pack $itk_component(menuButton$name) -side $side \
+                -before $itk_component(menuButton$before)
+    } {
+        pack $itk_component(menuButton$name) -side $side
+    }
+
+    # New menu contents
+    itk_component add menu$name {
+	menu $itk_component(menuButton$name).menu -tearoff 0
     } {
 	keep -font -activebackground -cursor -activeforeground \
 		-background -foreground
     }
+}
 
-    # Pack it. This should be simplified with Tk8.0
-    if { $before != "" } {
-	pack $itk_component(button$tag) -side $side \
-		-before $itk_component(button$before)
-	set menubuttons [linsert $menubuttons \
-		[lsearch -exact $menubuttons $before] $tag]
-    } elseif { $after != "" } {
-	pack $itk_component(button$tag) -side $side \
-		-after $itk_component(button$after)
-	set menubuttons [linsert $menubuttons \
-		[expr [lsearch -exact $menubuttons $after] + 1] $tag]
+#####################################################################
+#### addMenuItem
+# Add a menu item to the end of a menu. The method takes the name of
+# the menu item, the name of the menu in which the menu item is to be
+# added and other menu item options including the command option. The
+# first argument is the label to use in the menu for the item. By
+# convention, this should have the first character of each word
+# capitalized. The second argument should be the name of a menu created
+# with <code>addMenu</code>. The remaining arguments are passed
+# unchanged to the Tk <i>menu</i> <code>add command</code> directive.
+# If a menu item already exists with the given name, then it is
+# configured using the arguments after the second one.
+#
+body ::tycho::MenuBar::addMenuItem {itemName inMenu args} {
+    
+    if {![info exists itk_component(menu$inMenu)]} {
+	error "Menu $inMenu does not exist."
+    }
+
+    # check if itemName does not already exists
+    if [catch {set check [$itk_component(menu$inMenu) index $itemName]}] {
+	# create a new menu item 
+        eval $itk_component(menu$inMenu) add command \
+                [list -label $itemName] $args
     } else {
-	pack $itk_component(button$tag) -side $side
-	lappend menubuttons $tag
+	# if it does then link it to cmd
+        eval $itk_component(menu$inMenu) entryconfigure $itemName $args
     }
-    return $tag
 }
 
 #####################################################################
-#### buttoncget
-# Get a configuration option of a menu button. Flag an error if the button
-# does not exist.
+#### addMenuSeparator
+# Add a separator to the specified menu. The first argument is the name
+# of the menu. The remaining arguments are passed unchanged to the Tk
+# <i>menu</i> <code>add separator</code> command.
 #
-body ::tycho::MenuBar::buttoncget {tag option} {
-    # Check validity
-    if { ! [::info exists itk_component(button$tag)] } {
-	error "$tag is not a top-level menu"
-    }
-    # Get the option
-    if { $option == "-label" } {
-	set option "-text"
-    }
-    $itk_component(button$tag) cget $option
+body ::tycho::MenuBar::addMenuSeparator {inMenu args} {
+    eval $itk_component(menu$inMenu) add separator $args
 }
 
 #####################################################################
-#### buttonconfigure
-# Get or configure options of a menu button. Flag an error if the button
-# does not exist.
+#### addRadioItem
+# Add a radio button item to the end of a menu. The method takes the name of
+# the radio button item, the name of the menu in which the item is to be
+# added and other options including the command option. The
+# first argument is the label to use in the menu for the item. By
+# convention, this should have the first character of each word
+# capitalized. The second argument should be the name of a menu created
+# with <code>addMenu</code>. The remaining arguments are passed
+# unchanged to the Tk <i>menu</i> <code>add radio</code> directive.
+# If a item already exists with the given name, then it is
+# configured using the arguments after the second one.
 #
-body ::tycho::MenuBar::buttonconfigure {tag args} {
-    # Check validity
-    if { ! [::info exists itk_component(button$tag)] } {
-	error "$tag is not a top-level menu"
+body ::tycho::MenuBar::addRadioItem {itemName inMenu args} {
+    
+    if {![info exists itk_component(menu$inMenu)]} {
+	error "Menu $inMenu does not exist."
     }
-    # Get or set the option(s)
-    array set opts $args
-    if [::info exists opts(-label)] {
-	set opts(-text) $opts(-label)
-	unset opts(-label)
-	set args [array get opts]
-    }
-    eval $itk_component(button$tag) configure $args
-}
 
-#####################################################################
-#### delete
-# Delete a menu or a menu entry. If the specified menu or entry
-# does not exist, nothing happens.
-#
-body ::tycho::MenuBar::delete {tag} {
-    # See if it's a top-level menu
-    if { [::info exists itk_component(button$tag)] } {
-	# Delete a top-level menu
-	clear $tag
-
-	destroy $itk_component($tag)
-	destroy $itk_component(button$tag)
-	catch {unset itk_component($tag)}
-	catch {unset itk_component(button$tag)}
-	unset _menupath($tag)
-	set menubuttons [::tycho::ldelete $menubuttons $tag]
+    # check if itemName does not already exists
+    if [catch {set check [$itk_component(menu$inMenu) index $itemName]}] {
+	# create a new menu item 
+        eval $itk_component(menu$inMenu) add radio \
+                [list -label $itemName] $args
     } else {
-	# If not, perform default removal
-	chain $tag
+	# if it does then link it to cmd
+        eval $itk_component(menu$inMenu) entryconfigure [list $itemName] $args
+    }
+}
+
+#######################################################################
+#### disableMenu
+# This method provides a way for the view to disable an entire menu in
+# its MenuBar.  The name of the menu to be disabled is the only
+# argument.  If the menu does not exist, the command is ignored.
+#
+body ::tycho::MenuBar::disableMenu {name} {
+    
+    if {![info exists itk_component(menu$name)]} {
+	return
+    }
+
+    # Get the index of the last entry in the menu
+    set lastEntryIndex [$itk_component(menu$name) index last]
+   
+    # disable all menu entries
+    set i 0
+    while {$i <= $lastEntryIndex} {
+	$itk_component(menu$name) entryconfigure $i -state disabled
+	incr i
     }
 }
 
 #####################################################################
-#### disable
-# Disable a menu or a menu entry. Signal an error if the menu or entry
-# does not exist.
+#### disableMenuItem
+# Disable the menu item in the specified menu.  The menu item name 
+# and the name of the menu that contains the item are the required
+# arguments.  If the menu does not exist, or the menu item does not
+# exist, the command is ignored.
 #
-body ::tycho::MenuBar::disable {tag} {
-    if { [::info exists itk_component(button$tag)] } {
-	# Disable a menu button
-	$itk_component(button$tag) configure -state disabled
-	unpost $tag
-    } else {
-	chain $tag
+body ::tycho::MenuBar::disableMenuItem {itemName inMenu} {
+    if {![info exists itk_component(menu$inMenu)]} {
+	return
+    }
+    
+    # check if itemName exists
+    if [catch {set check [$itk_component(menu$inMenu) index $itemName]}] {
+        return
+    } {
+	$itk_component(menu$inMenu) entryconfigure $itemName -state disabled
     }
 }
 
 #####################################################################
-#### enable
-# Enable a menu or a menu entry. Signal an error if the menu or entry
-# does not exist.
+#### enableMenu
+# Enable an entire menu that has been previously disabled.  The name
+# of the menu of the menu to be enabled is the only argument.  If the
+# menu does not exist, the command is ignored.
 #
-body ::tycho::MenuBar::enable {tag} {
-    if { [::info exists itk_component(button$tag)] } {
-	# Enable a menu button
-	$itk_component(button$tag) configure -state normal
-    } else {
-	chain $tag
+body ::tycho::MenuBar::enableMenu {name} {
+
+    if {![info exists itk_component(menu$name)]} {
+	return
+    }
+
+    # Get the index of the last entry in the menu
+    set lastEntryIndex [$itk_component(menu$name) index last]
+    
+    # enable all menu entries
+    set i 0
+    while {$i <= $lastEntryIndex} {
+	$itk_component(menu$name) entryconfigure $i -state normal
+	incr i
     }
 }
 
 #####################################################################
-#### entries
-# 
-# Return the entries in a menu. If no tag is given,
-# return the tags of the menu buttons. The returned entries
-# will be in the order in which they appear on the screen.
+#### enableMenuItem
+# Enable the menu item in the specified menu. Required arguments are
+# the name of the menu item and the name of the menu that contains
+# the item.  If the menu or the menu item do not exist, the command
+# is ignored.
 #
-body ::tycho::MenuBar::entries {{tag {}}} {
-    if { $tag == "" } {
-	return $menubuttons
-    } else {
-	chain $tag
+body ::tycho::MenuBar::enableMenuItem {itemName inMenu} {
+
+    if {![info exists itk_component(menu$inMenu)]} {
+	return
+    }
+    
+    # check if itemName exists
+    if [catch {set check [$itk_component(menu$inMenu) index $itemName]}] {
+        return
+    } {
+	$itk_component(menu$inMenu) entryconfigure $itemName -state normal
     }
 }
 
 #####################################################################
-#### post
-# Post a menu or cascade-menu and make it active so that
-# menu traversal can then be used on it. This method uses the
-# tkMbPost{} procedure from the Tk library to post a top-level menu,
-# in order that menu traversal then works correctly. This is
-# unfortunate, since these procs are apparently not
-# documented... The menu will not be posted if it's
-# corresponding entry is disabled. If the menu is a top-level
-# menu, raise the containing top-level window, since having
-# menus pop up without being connected to a window looks really stupid.
-# (Note: this can still happen if using Tk's menu traversal...)
-# Return 1 is the menu posted, zero if not.
+#### insertMenuItem
+# Insert a menu item to the specified menu. The first argument is the
+# label to use in the menu for the item. By convention, this should
+# have the first character of each word capitalized. The second
+# argument is the label of an existing menu item before which the new
+# item should be inserted. The third arguments is the name of a menu
+# created with <code>addMenu</code>. The remaining arguments are passed
+# unchanged to the Tk <i>menu</i> <code>add command</code> directive.
+# If a menu item already exists with the given name, then it is
+# configured using the arguments after the second one.
 #
-body ::tycho::MenuBar::post {tag} {
-    if { [::info exists itk_component(button$tag)] } {
-	# Post a top-level menu
-	if { [$itk_component(button$tag) cget -state] == "disabled" } {
-	    return 0
+body ::tycho::MenuBar::insertMenuItem {itemName before inMenu args} {
+    
+    if {![info exists itk_component(menu$inMenu)]} {
+	error "Menu $inMenu does not exist."
+    }
+
+    # Check validity of the "before" argument.
+    if [catch {set check [$itk_component(menu$inMenu) index $before]}] {
+        global ::errorInfo
+        set saveInfo $errorInfo
+        error "Menu item $before does not exist." $saveInfo
+    }
+
+    # check if itemName does not already exists
+    if [catch {set check [$itk_component(menu$inMenu) index $itemName]}] {
+	
+	# create a new menu item 
+	eval $itk_component(menu$inMenu) insert \
+                [list $before] command \
+		[list -label $itemName] \
+		$args
+	
+    } {
+	# if it does then link it to cmd
+	eval $itk_component(menu$inMenu) entryconfigure [list $itemName] $args
+    }
+}
+
+#####################################################################
+#### insertMenuSeparator
+# Insert a separator to the specified menu. The first argument is the 
+# label of an existing menu item before which the new separator should 
+# be inserted. The second arguments is the name of a menu created with 
+# <code>addMenu</code>. The remaining arguments are passed unchanged 
+# to the Tk <i>menu</i> <code>insert separator</code> command.
+#
+body ::tycho::MenuBar::insertMenuSeparator {before inMenu args} {
+
+    if {![info exists itk_component(menu$inMenu)]} {
+	error "Menu $inMenu does not exist."
+    }
+
+    if [catch {eval $itk_component(menu$inMenu) insert \
+	    [list $before] separator $args}] {
+	error "Menu item $before does not exist"
+    }
+}
+
+######################################################################
+#### queryMenuItemState
+# This method allows a view to query the state of a menu item.
+# The required arguments are the name of the menu item and the name
+# of the menu that contains it.  The method returns the state of the
+# menu item: normal, disabled, or active.  If the item or its menu
+# does not exist, it returns an empty string.
+#
+body ::tycho::MenuBar::queryMenuItemState {itemName inMenu} {
+
+    # check if menu exists
+    if {![info exists itk_component(menu$inMenu)]} {
+	return {}
+    }
+    
+    # check if itemName exists
+    if [catch {set check [$itk_component(menu$inMenu) index $itemName]}] {
+	return {}
+    } {
+	return [$itk_component(menu$inMenu) entrycget $itemName -state]
+    }
+}
+
+#####################################################################
+#### queryMenuState
+# Query the current state of the menu. The only required argument is
+# the name of the menu.  The method returns "disabled" if all the items in
+# the menu are disabled, "enabled" if all the entries are enabled, and 
+# "mixed" if some items are enabled and some are disabled.  It returns
+# an empty string if the menu does not exist.
+#
+body ::tycho::MenuBar::queryMenuState {name} {
+
+    # check if menu exists
+    if {![info exists itk_component(menu$name)]} {
+	return {}
+    }
+
+    # Get the index of the last entry in the menu
+    set lastEntryIndex [$itk_component(menu$name) index last]
+    
+    # query all entries and count the number of disabled and enabled
+    # entries
+    set i 0
+    set enabledCount 0
+    set disabledCount 0
+    while {$i <= $lastEntryIndex} {
+	set currentState [$itk_component(menu$name) entrycget $i -state]
+	if {$currentState == "normal"} {
+	    incr enabledCount
 	}
-        raise [winfo toplevel $itk_component(hull)]
-	tkMbPost $itk_component(button$tag)
-	return 1
-    } else {
-	chain $tag
+	if {$currentState == "disabled"} {
+	    incr disabledCount
+	}
+	incr i
+    }
+
+    # if the total enabled entries equals the total number of entries then
+    # state of the menu is enabled, else if the total number of disabled
+    # entries equals the total number of entries then the state is disabled
+    # else it is neither.
+    if {$enabledCount == [expr $lastEntryIndex + 1]} {
+	return {enabled}
+    } {
+	if {$disabledCount == [expr $lastEntryIndex +1]} {
+	    return {disabled}
+	} {
+ 	    return {mixed}
+	}
     }
 }
 
-#####################################################################
-#### unpost
-# Unpost a menu or cascade-menu.
+#######################################################################
+#### removeMenu
+# Allows a view to remove a menu from its MenuBar.  It takes the
+# the name of the menu to be removed as an argument.  If the menu
+# does not exist, then the command is ignored.
 #
-body ::tycho::MenuBar::unpost {tag} {
-    if { [::info exists itk_component(button$tag)] } {
-	# Unpost a top-level menu
-	tkMenuUnpost $itk_component($tag)
-    } else {
-	chain $tag
+body ::tycho::MenuBar::removeMenu {name} {
+    if [info exists itk_component(menu$name)] {
+	destroy $itk_component(menu$name)
+	destroy $itk_component(menuButton$name)
+        unset itk_component(menu$name)
+        unset itk_component(menuButton$name)
+    }
+}
+
+#######################################################################
+#### removeMenuItem
+# Allows a view to remove a menu item from a menu. It takes the the
+# name of item (its label) and the name of the menu as arguments. If
+# the menu does not exist, then the command is ignored.
+#
+body ::tycho::MenuBar::removeMenuItem {itemName inMenu} {
+ 
+    if {![info exists itk_component(menu$inMenu)]} {
+	return
+    }
+    
+    # check if itemName exists
+    if [catch {set check [$itk_component(menu$inMenu) index $itemName]}] {
+        return
+    } {
+	$itk_component(menu$inMenu) delete $itemName
     }
 }

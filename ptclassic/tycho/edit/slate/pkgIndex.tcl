@@ -1,10 +1,10 @@
-# Package index for the Tycho tycho.edit.slate package
+# Package index for the Slate package
 #
 # @Author: John Reekie
 #
-# @Version: $Id$
+# @Version: @(#)%pkgIndex.tcl	1.1 02/10/98
 #
-# @Copyright (c) 1998 The Regents of the University of California.
+# @Copyright (c)  The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,27 +30,8 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# Package name depends on whether we are running Tycho
-if [info exists ::TYCHO] {
-    package ifneeded tycho.edit.slate 3.0 \
-	    [list source [file join $dir slate.tcl]]
-} else {
-    package ifneeded slate 3.0 \
-	    [list source [file join $dir slate.tcl]]
-}
 
-# Make sure that the demo package is known about
-if [file exists [file join $dir demo pkgIndex.tcl]] {
-    set olddir $dir
-    set dir [file join $dir demo] ;# $dir is needed by the sourced file
-    source [file join $dir pkgIndex.tcl]
-    set dir $olddir
-}
+package ifneeded Slate 1.0 \
+	[list source [file join $dir slate.tcl]]
 
-# Make sure that the test package is known about
-if [file exists [file join $dir test pkgIndex.tcl]] {
-    set olddir $dir
-    set dir [file join $dir test] ;# $dir is needed by the sourced file
-    source [file join $dir pkgIndex.tcl]
-    set dir $olddir
-}
+

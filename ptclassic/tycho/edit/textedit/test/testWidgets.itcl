@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: $Id$
+# @Version: @(#)testWidgets.itcl	1.21 08/15/97
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -36,9 +36,11 @@
 # windows left at the end.  Currently, windows are left open for 4 seconds.
 # Run from within tycho (can just source this file and execute it).
 
-# Make sure that the required packages are loaded
-package require tycho.util.tytest
-package require tycho.edit.textedit
+if {[string compare test [info procs test]] == 1} then { 
+    source [file join $TYCHO kernel test testDefs.tcl]
+} {}
+
+set tychoExitWhenNoMoreWindows 0
 
 #set VERBOSE 1
 
@@ -65,21 +67,18 @@ test EditCpp-1.1 {Test EditCpp} {
 ######################################################################
 #### Generate a DAG of classes
 # 
-if ![catch {package require tycho.edit.visedit}] {
-    test EditCpp-2.1 {Generate a DAG of classes} {
-	file delete -force class.dag    
-	set view [::tycho::openContext EditCppTest.h]
-	set win [$view displayer windowName] 
-	set dagview [$view classDAG]
-	set dagwin [$dagview displayer windowName]
-	after $duration removeobj $win
-	after $duration removeobj $dagwin
-	set retval [file exists class.dag]
-	#file delete -force class.dag    
-	list $retval
-    } {1}
-}
-
+test EditCpp-2.1 {Generate a DAG of classes} {
+    file delete -force class.dag    
+    set view [::tycho::openContext EditCppTest.h]
+    set win [$view displayer windowName] 
+    set dagview [$view classDAG]
+    set dagwin [$dagview displayer windowName]
+    after $duration removeobj $win
+    after $duration removeobj $dagwin
+    set retval [file exists class.dag]
+    #file delete -force class.dag    
+    list $retval
+} {1}
 ############################################################################
 #### EditEsterel
 test EditEsterel-1.1 {Test EditEsterel} {
@@ -123,7 +122,7 @@ test EditItcl-1.1 {Test EditItcl} {
 
 test EditItcl-1.2 {Test EditItcl gendocBuffer} {
     set savedir [pwd]
-    cd [file join $env(TEXTEDIT_LIBRARY) test]
+    cd [file join $TYCHO editors textedit test]
     file delete -force EditItcl.itcl
     file copy ../EditItcl.itcl .
     file delete -force doc
@@ -145,7 +144,7 @@ test EditItcl-1.2 {Test EditItcl gendocBuffer} {
 
 test EditItcl-1.3 {Test EditItcl gendoc} {
     set savedir [pwd]
-    cd [file join $env(TEXTEDIT_LIBRARY) test]
+    cd [file join $TYCHO editors textedit test]
     file delete -force EditItcl.itcl
     file copy ../EditItcl.itcl .
     file delete -force doc
@@ -161,6 +160,36 @@ test EditItcl-1.3 {Test EditItcl gendoc} {
     cd $savedir
     file exists [file join doc codeDoc EditItcl.html]
 } {1}
+
+############################################################################
+#### ItclClassList
+test ItclClassList {Test ItclClassList} {
+    set savedir [pwd]
+    cd [file join $TYCHO editors textedit test]
+    # Note that ItclClassList creates a classdiagram file in the
+    # current directory
+    set tmpName ItclClassList.icl
+    set view [::tycho::view ItclClassList \
+	    -file $tmpName \
+	    -toolbar 1]
+    set win [$view displayer windowName]
+    #update
+    $view includeTychoClasses
+    #update
+    set dag [$view updateClassDiagram]
+    set dagWin [$dag displayer windowName]
+    #update
+    #$view saveAsFile $tmpName
+    $view save
+    file delete -force $tmpName
+    after $longDuration removeobj $win
+    after $longDuration removeobj $dagWin
+    file delete -force $tmpName classDiagram.dag
+    cd $savedir
+    update
+} {}
+
+update idletasks
 
 ############################################################################
 #### EditJava
@@ -186,9 +215,7 @@ test EditMake-1.1 {Test EditMake} {
 #### Test generating makefile.vc files
 # 
 test EditMake-1.1 {Test generating makefile.vc files} {
-    cd [file join $env(TEXTEDIT_LIBRARY) test]
-    file delete -force vctest.mk
-    file copy makefile vctest.mk
+    cd [file join $TYCHO editors textedit test]
     set view [::tycho::openContext vctest.mk]
     set win [$view displayer windowName]
     file delete -force vctest.mk.vc
@@ -196,7 +223,6 @@ test EditMake-1.1 {Test generating makefile.vc files} {
     set vcwin [$vcview displayer windowName]
     after $duration removeobj $win
     after $duration removeobj $vcwin
-    after $duration file delete -force vctest.mk vctest.mk.vc
     update
 } {}
 
@@ -209,6 +235,57 @@ test EditProgram-1.1 {Test EditProgram} {
     after $duration removeobj $win
     update
 } {}
+
+############################################################################
+#### EditPtcl
+test EditPtcl-1.1 {Test EditPtcl} {
+    set view [::tycho::view EditPtcl]
+    set win [$view displayer windowName]
+    wm deiconify $win
+    after $duration removeobj $win
+    update
+} {}
+
+############################################################################
+#### EditPtlang
+test EditPtlang-1.1 {Test EditPtlang} {
+    set view [::tycho::view EditPtlang]
+    set win [$view displayer windowName]
+    wm deiconify $win
+    after $duration removeobj $win
+    update
+} {}
+test EditPtlang-1.2 {Test EditPtlang gendocBuffer} {
+    set savedir [pwd]
+    cd [file join $TYCHO editors textedit test]
+    file delete -force SDFMyRamp.htm
+    set view [::tycho::File::openContext SDFMyRamp.pl]
+    set win [$view displayer windowName]
+    set html [$win.v gendocBuffer]
+    after $duration removeobj $win
+    set retval ""
+    if {"$html" == ""} {
+	set retval "gendocBuffer did not return the name of the html widget"
+    } else {
+	after $duration removeobj $html
+    }
+    update
+    set retval2 [file exists SDFMyRamp.htm]
+    cd $savedir
+    list $retval $retval2
+} {{} 1}
+
+test EditPtlang-1.3 {Test EditPtlang gendoc} {
+    set savedir [pwd]
+    cd [file join $TYCHO editors textedit test]
+    file delete -force SDFMyRamp.htm
+    set html [ ::tycho::EditPtlang::gendoc SDFMyRamp.pl]
+    after $duration removeobj [$html displayer windowName]
+    update
+    set retval [file exists SDFMyRamp.htm]
+    cd $savedir
+    list $retval
+} {1}
 
 ############################################################################
 #### EditTcl

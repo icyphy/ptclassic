@@ -3,7 +3,7 @@
 # $Id$
 # Makefile Author: Christopher Hylands
 #
-# Copyright (c) 1996-%Q% The Regents of the University of California.
+# Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,22 +30,17 @@
 ##########################################################################
 
 # Root of Tycho directory
-ROOT =		../../..
+ROOT =		../../../..
 # True source directory
-VPATH =		$(ROOT)/editors/textedit/template
+VPATH =		$(ROOT)/editors/textedit/doc/template
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 EXTRA_SRCS = \
-	Cmakefile.mk \
-	CppTemplate.cc \
-	CppTemplate.h \
 	HTMLTemplate.html \
-	ItclTemplate.itcl \
-	JavaTemplate.java \
-	testTemplate.itcl
+	ItclTemplate.html
 
 MISC_FILES =
 

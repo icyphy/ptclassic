@@ -1,11 +1,10 @@
-# -*- mode: tcl -*-
 #
 # $Id$
 #
 # The "stacktrace" master style-sheet
 #
-configure -title "Stack trace colors"
-configure -description {
+modelconfigure -label "Stack trace colors"
+modelconfigure -description {
     Additional color settings for stack trace windows.
 }
 

@@ -50,14 +50,11 @@ class ::tycho::EditSTD {
     # Clear the display, discarding the current items.
     method clear {}
 
-    # Clear all previous highlight states.
-    method clearHighlightState {}
+    # Specify whether or not modifications are allowed in the displayed text.
+    method setReadOnly {bool}
 
-    # Draw the visual syntax of an arc based on preemptiveness and entry type
-    method drawArcAttribute {arc}
-
-    method editArc {arc} 
-    method editArcDone {arc w}
+    # Invoked by the "Set Initial State" command in the Edit menu.
+    method setInitialState {tag} 
 
     # Invoked by the "Edit Item" command in the Edit menu.
     # It invokes the "editState" or "editArc" methods depending on 
@@ -66,70 +63,30 @@ class ::tycho::EditSTD {
 
     method editState {node} 
     method editStateDone {node w} 
+    method editArc {arc} 
+    method editArcDone {arc w} 
 
-    # getInfo
-    method getInfo {} 
- 
-    # Open a help window.
-    method help {}
+    method lookInside {nodeOrArc w}
+    method insideValue {typeInfo nodeOrArc w}
+    method insideValueDone {typeInfo nodeOrArc w}
+    method insideAction {typeInfo nodeOrArc w}
+    method getNewAction {typeInfo nodeOrArc w}
 
-    # Highlight those states with the name.
-    method highlightState {name}
- 
-    # To set the names and types of the I/O ports & internal events
-    method ioPorts {}
-    method ioPortsDone {w}
-
-    # Look inside an item with tag $tag.
-    method lookInside {tag}
-    
-    # Look inside a state with id $node.
-    method lookInsideState {node}
-
+    # The following are methods used by the Special menu commands.
+    # To set the names of the I/O ports
+    method ioPortNames {}
+    method ioPortNamesDone {w}
     # makeIcon
     method makeIcon {}
     method makeIconOk {w}
-
-    # Pop up a file
-    method popUpFile {name}
+    # getInfo
+    method getInfo {} 
 
     # The following methods are used only when work with Ptolemy
     method ptkCompile {}
 
-    # Invoked by the "Set Initial State" command in the Edit menu.
-    method setInitialState {tag} 
-    
-    # setOptions and setPortNames
-    # OLD codes: for compatible with old format
-    method setOptions {machine evaluation oneWriter}
-    method setPortNames {in out internal}
-
-    # Set the input, output and internal ports.
-    method setPorts {input output internal}
- 
-    # Specify whether or not modifications are allowed in the displayed text.
-    method setReadOnly {bool}
-
-    # Split the action event and the action expression in action.
-    method transAction {action}
-
-    # Substitute each event name, if it is valid in input/output/internal
-    # ports, in argument "expression" by $name(s) or $name(v) depending on
-    # argument "option".
-    method transExpr {option expression}
-
-    # Split the name and the type for each input/output/internal (option) port
-    method transPort {option}
-
-    # Split event, condition, action events and action expressions
-    # from a transition
-    method transTransit {transition}
-
     ##########################################################################
     ####                     protected methods                            ####
-   
-    # Initialize the menu/status/tool bars
-    protected method _initializeBars {menubar statusbar toolbar}
 
     # Insert the specified data into the canvas.
     protected method insertData {data}
@@ -140,54 +97,75 @@ class ::tycho::EditSTD {
     ##########################################################################
     ####                     protected variables                          ####
 
-    # Previous highlighted state
-    protected variable preHighLtStateId ""
+    # The name of the Tk canvas as a variable, for convenience.
+    protected variable canvas
 
-    # Names and types of the I/O ports. This is an array with three elements:
-    # "input", "output" and "internal".
-    protected variable ports
+    # Machine type of this state transition diagram, Moore or Mealy.
+    protected variable machineType
+
+    # Names of the I/O ports.  This is an array with two elements:
+    # "in" and "out".
+    protected variable portNames
 
     # Store the value used in makeIcon last time.
-    protected common makeIconSrcDir [file join \$PTOLEMY src domains fsm demo]
-    protected common makeIconPaletteName "user.pal"
-
-    # Array stores the result of split transition and is used by
-    # method transTransit. It has four elements: "event", "condition",
-    # "actEvents", "actExprs"
-    protected variable splitTransit
-
-    ##########################################################################
-    ####                         private methods                          ####
-    
-    # Initialize the menu bar.
-    private method _initializeMenubar {menubar}
+    protected common makeIconSrcDir
+    protected common makeIconPaletteName
 }
 
 ##########################################################################
 ####  constructor & destructor
 #
 body ::tycho::EditSTD::constructor {args} {
-    interactiveEnable 0
+    component graphics undoEnable 0
 
-    # Initialize the io ports array elements.
-    set ports(input)  ""
-    set ports(output) ""
-    set ports(internal) ""
+    # Enable items in Edit menu
+    enableMenuItem "Edit Item" Edit
+
+    # Renew items in Edit menu
+    addMenuItem {Edit Item} Edit -underline 0 \
+	    -command "$this editItem selected"
+
+    # Add items into Special menu
+    insertMenuItem "I/O Port Names" "Smooth Toggle" Special -underline 0 \
+            -command "$this ioPortNames"
+    insertMenuItem "Set Initial State" "Smooth Toggle" Special -underline 0 \
+            -command "$this setInitialState selected"
+    insertMenuSeparator "Smooth Toggle" Special
+
+    insertMenuItem "Make Icon" "Get Info" Special -underline 0 \
+            -command "$this makeIcon"
+
+    # Initialize the variables.
+    set canvas [component graphics canvasName]
+
+    # Initialize the machine type as Moore.
+    set machineType Moore
+
+    # Initialize the io portNames array elements.
+    set portNames(in)  ""
+    set portNames(out) ""
+
+    #FIXME : makeIconSrcDir needs to be initialized to "~users/"
+    if {![info exists makeIconSrcDir]} {
+	set makeIconSrcDir {$PTOLEMY/src/domains/fsm/demo}
+	set makeIconPaletteName "./user.pal"
+    }
 
     # Setup menu hot key and mouse binding
-    bind $slate <Key-e> "$this editItem selected"
-    bind $slate <Double-1> "$this editItem current"
-    bind $slate <Key-i> "$this lookInside current"
+    bind $canvas <Key-e> "$this editItem selected"
+    bind $canvas <Double-1> "$this editItem current"
 
     # The following initialize options and then invoke any
     # configuration options, assuming there are options specified.
     eval itk_initialize $args 
 
-    interactiveEnable 1
-}
+    # Need to load the startup file here again, otherwise
+    # the member variables of this derived class will be lost,
+    # such as portNames(in) and portNames(out).
+    $this reload
 
-    ##########################################################################
-    ####                         public methods                           ####
+    component graphics undoEnable 1
+}
 
 #######################################################################
 #### clear
@@ -196,631 +174,24 @@ body ::tycho::EditSTD::constructor {args} {
 #
 body ::tycho::EditSTD::clear {} {
     if [getReadOnly] {bell; return}
+    foreach node [$canvas find withtag node] {
+	# destroy the corresponding edit state window if it exists.
+	set w [$this windowName].stdEditState$node
+	if [winfo exists $w] { destroy $w }
+    }
+    foreach arc [$canvas find withtag arc] {
+	# destroy the corresponding edit arc window if it exists.
+	set w [$this windowName].stdEditArc$arc
+	if [winfo exists $w] { destroy $w }
+    } 
 
-    $slate delete all
+    $canvas delete all
     foreach index [array names nodeInfo] {
 	unset nodeInfo($index)
     }
     foreach index [array names edgeInfo] {
 	unset edgeInfo($index)
     }
-}
-
-################################################################
-#### clearHighlightState
-# Clear all previous highlight states.
-#
-body ::tycho::EditSTD::clearHighlightState {} {
-    foreach id $preHighLtStateId {
-        $slate itemconfigure $id -fill white
-    }
-}
-
-################################################################
-#### drawArcAttribute
-# Draw the visual syntax of an arc based on preemptiveness and entry type
-#
-body ::tycho::EditSTD::drawArcAttribute {arc} {
-}
-
-###################################################################
-#### editArc and editArcDone
-# Edit an arc.
-#
-body ::tycho::EditSTD::editArc {arc} {
-    set w $prefix.stdEditArc$arc
-    if [winfo exists $w] {
-	wm deiconify $w
-	raise $w
-    } else {
-        set name [file tail [file rootname [filename]]]
-	set arcLabel [$slate itemcget $edgeInfo($arc,label) -text]
-	set src [$slate itemcget $edgeInfo($arc,src) -text]
-	set dest [$slate itemcget $edgeInfo($arc,dest) -text]
-	set title "Edit \"$name\" Arc \"$arcLabel\"\nSource state: $src\
-		\nDestination state: $dest"
-
-	set labelQuery [list line label\
-		{Event [Condition] / Action:} $arcLabel]
-
-	if "![info exists edgeInfo($arc,preemptive)]" {
-	    set edgeInfo($arc,preemptive) NO
-	} 
-	set preemptiveQuery [list radio preemptive {Preemptive:} {NO YES}\
-		$edgeInfo($arc,preemptive)]
-
-	if "![info exists edgeInfo($arc,entryType)]" {
-	    set edgeInfo($arc,entryType) History
-	} 
-	set entryTypeQuery [list radio entryType {Entry Type:}\
-		{History Default} $edgeInfo($arc,entryType)]
-
-	set cmd "$this editArcDone $arc $w"
-
-	::tycho::Query $w -title "STD Edit Arc" -text $title\
-		-queries [list $labelQuery $preemptiveQuery $entryTypeQuery]\
-		-okcommand [list catch $cmd]
-    }
-    
-    $w centerOnScreen
-}
-
-body ::tycho::EditSTD::editArcDone {arc w} {
-    set label [$slate itemcget $edgeInfo($arc,label) -text]
-    set newLabel [string trim [$w get label]]
-    # Any trailing "/" is also unnessary.
-    set newLabel [string trimright $newLabel "/"]
-    if {$label != $newLabel} {
-	$slate itemconfigure $edgeInfo($arc,label) -text $newLabel
-	$this markModified
-    }
-
-    set newPreemptive [string trim [$w get preemptive]]
-    if {$edgeInfo($arc,preemptive) != $newPreemptive} {
-	set edgeInfo($arc,preemptive) $newPreemptive
-	$this markModified	
-    }
-
-    set newEntryType [string trim [$w get entryType]]
-    if {$edgeInfo($arc,entryType) != $newEntryType} {
-	set edgeInfo($arc,entryType) $newEntryType
-	$this markModified	
-    }
-}
-
-###################################################################
-#### editItem
-# Invoked by the "Edit Item" command in the Edit menu.
-#
-body ::tycho::EditSTD::editItem {item} {
-    # The indices in the nodeInfo and edgeInfo arrays
-    # are item IDs.
-    set id [$slate find withtag $item]
-    if {[lsearch -exact [$slate gettags $id] node] >= 0} {
-	# id is a node.
-	$this editState $id
-    } elseif {[lsearch -exact [$slate gettags $id] arc] >= 0} {
-	# id is an arc.
-	$this editArc $id
-    }
-}
-
-#########################################################################
-#### editState and editStateDone
-# Edit a state.
-#
-body ::tycho::EditSTD::editState {node} {
-    
-    set w $prefix.stdEditState$node
-    if [winfo exists $w] {
-	wm deiconify $w
-	raise $w
-    } else {
-        set name [file tail [file rootname [filename]]]
-	set nodeLabel [$slate itemcget $node -text]
-	set title "Edit \"$name\" State \"$nodeLabel\""
-	set labelQuery [list line label {Label:} $nodeLabel]
-
-	if "![info exists nodeInfo($node,slave)]" {
-	    set nodeInfo($node,slave) ""
-	}
-	set slaveQuery [list line slave {Slave Process:} \
-	    $nodeInfo($node,slave)]
-
-	if "![info exists nodeInfo($node,slaveShared)]" {
-	    set nodeInfo($node,slaveShared) NO
-	}
-	set slaveSharedQuery [list radio slaveShared {Slave shared:} \
-	    {NO YES} $nodeInfo($node,slaveShared)]
-
-	set cmd "$this editStateDone $node $w"
-
-	::tycho::Query $w -title "STD Edit State" -text $title \
-	    -queries [list $labelQuery $slaveQuery $slaveSharedQuery]\
-	    -okcommand [list catch $cmd]
-
-        set init_state_id [$slate find withtag init_state]
-        if {[lsearch -exact $init_state_id $node] >= 0} {
-            if "![info exists nodeInfo($node,initTransit)]" {
-                set nodeInfo($node,initTransit) ""
-            }
-            $w line initTransit {Initial transition:} \
-                $nodeInfo($node,initTransit)
-        }
-
-	$w centerOnScreen
-    }
-
-
-}
-
-body ::tycho::EditSTD::editStateDone {node w} {
-    set label [$slate itemcget $node -text]
-    set newLabel [string trim [$w get label]]
-
-    if {$label != $newLabel} {
-	$slate itemconfigure $node -text $newLabel
-	$this markModified
-    }
-
-    set newSlave [string trim [$w get slave]]
-    if {$nodeInfo($node,slave) != $newSlave} {
-	set nodeInfo($node,slave) $newSlave
-	$this markModified	
-    }
-
-    set newSlaveShared [string trim [$w get slaveShared]]
-    if {$nodeInfo($node,slaveShared) != $newSlaveShared} {
-	set nodeInfo($node,slaveShared) $newSlaveShared
-	$this markModified	
-    }
-
-    set init_state_id [$slate find withtag init_state]
-    if {[lsearch -exact $init_state_id $node] >= 0} {
-        set newInitTransit [string trim [$w get initTransit]]
-        if {$nodeInfo($node,initTransit) != $newInitTransit} {
-            set nodeInfo($node,initTransit) $newInitTransit
-            $this markModified
-        }
-    }
-}
-
-##############################################################
-#### getInfo
-body ::tycho::EditSTD::getInfo {} {
-    set nodes [$slate find withtag node]
-    set arcs [$slate find withtag arc]
-    set init_state_id [$slate find withtag init_state]
-    if {$init_state_id == ""} {
-	set init_state None
-    } else {
-	set init_state [$slate itemcget $init_state_id -text]
-    }
-
-    set w $prefix.getInfo
-    catch {destroy $w}
-    ::tycho::Message $w -text "# of nodes: [llength $nodes]\
-	    \n# of arcs: [llength $arcs]\
-	    \nInitial state: $init_state "
-    $w centerOnScreen
-}
-
-#######################################################################
-#### help
-# Open a help window.
-#
-body ::tycho::EditSTD::help {} {
-    global ::TYCHO
-    ::tycho::File::openContext \
-        [file join $TYCHO edit visedit doc usersGuides \
-	    EditSTDHelp.html] html
-}
-
-################################################################
-#### highlightState
-# Highlight those states with the name.
-#
-body ::tycho::EditSTD::highlightState {name} {
-    set curHighLtStateId ""
-    set allNodeId [$slate find withtag node]
-    foreach nodeId $allNodeId {
-        # Find those node with text "name"
-	if {$name == [$slate itemcget $nodeId -text]} {
-	    lappend curHighLtStateId $nodeId
-	}
-    }
-
-    if {$curHighLtStateId != ""} {
-        $this clearHighlightState
-
-        foreach id $curHighLtStateId {
-            $slate itemconfigure $id -fill skyblue
-        }
-
-        set preHighLtStateId $curHighLtStateId
-    }
-}
-
-################################################################
-#### ioPorts
-# Edit the I/O ports of the STD.
-#
-body ::tycho::EditSTD::ioPorts {} {
-
-    set w $prefix.stdIOPorts
-    if [winfo exists $w] {
-	wm deiconify $w
-	raise $w
-    } else {
-	set name [file tail [file rootname [filename]]]
-	set titleLabel "Edit I/O Ports of $name"
-
-	set inputQuery [list line input {Input ports:} $ports(input)]
-	set outputQuery [list line output {Output ports:} $ports(output)]
-	set internalQuery [list line internalEvents {Internal events:}\
-		    $ports(internal)]
-
-	::tycho::Query $w -title "STD I/O Ports"\
-		-text $titleLabel \
-		-queries [list $inputQuery $outputQuery $internalQuery]\
-		-okcommand "$this ioPortsDone $w"
-
-	$w centerOnScreen
-    }
-}
-
-###################################################################
-#### ioPortsDone
-# Only used by ioPorts.
-#
-body ::tycho::EditSTD::ioPortsDone {w} {
-    set newInput [$w get input]
-    if {$ports(input) != $newInput} {
-	set ports(input) $newInput
-	$this markModified
-    }
-
-    set newOutput [$w get output]
-    if {$ports(output) != $newOutput} {
-	set ports(output) $newOutput
-	$this markModified
-    }
-
-    set newInternalEvents [$w get internalEvents]
-    if {$ports(internal) != $newInternalEvents} {
-	set ports(internal) $newInternalEvents
-	$this markModified
-    }	
-}
-
-###################################################################
-#### lookInside.
-# Look inside an item with tag $tag.
-#
-body ::tycho::EditSTD::lookInside {tag} {
-    set id [$slate find withtag $tag]
-    if {[lsearch -exact [$slate gettags $id] node] >= 0} {
-	# If item is a node (state).
-	$this lookInsideState $id
-    }
-}
-
-###################################################################
-#### lookInsideState.
-# Look inside a state (node) with id $node.
-#
-body ::tycho::EditSTD::lookInsideState {node} {
-	if "![info exists nodeInfo($node,slave)]" {
-	    set nodeInfo($node,slave) ""
-	}
-	set name $nodeInfo($node,slave)	
-	$this popUpFile $name
-}
-
-
-##############################################################
-#### makeIcon
-# Make a icon for this STD to be put into a VEM palette facet.
-body ::tycho::EditSTD::makeIcon {} {
-
-    set w $prefix.stdMakeIcon
-    if [winfo exists $w] {
-	wm deiconify $w
-	raise $w
-    } else {
-	set srcdirQuery [list line srcdir {Src File Directory:}\
-		$makeIconSrcDir]
-
-	set paletteQuery [list line palette {Pathname of Palette:}\
-		$makeIconPaletteName]
-
-	::tycho::Query $w -title "stdMakeIcon" -text "Make Icon"\
-		-queries [list $srcdirQuery $paletteQuery]\
-		-okcommand "$this makeIconOk $w"
-
-	$w centerOnScreen
-    }
-}
-
-##############################################################
-#### makeIconOk
-body ::tycho::EditSTD::makeIconOk {w} {
-    set name [file tail [file rootname [filename]]]
-    set makeIconSrcDir [$w get srcdir]
-    set makeIconPaletteName [$w get palette]
-    # It doesn't matter in which domain this icon is made.
-    ptkSetMkStar $name SDF $makeIconSrcDir $makeIconPaletteName
-}
-
-##############################################################
-#### popUpFile
-body ::tycho::EditSTD::popUpFile {name} {
-    if {$name == ""} {
-	error "EditSTD: No galaxy for the slave process is specified yet. "
-    }
-
-    set name [::tycho::expandPath $name]
-
-    if [file exists $name] {
-	::tycho::File::openContext $name
-    } else {
-	error "EditSTD: \
-	       Specified galaxy for the slave process does not exist. "
-    }
-}
-
-##############################################################
-#### ptkCompile
-# Compile this STD into Ptolemy using ptcl code.
-# This method can used only when invoked from Ptolemy.
-# FIXME : Should add some code to check if Ptolemy exists.
-body ::tycho::EditSTD::ptkCompile {} {
-    if "![file exists [filename]]" {
-	error "EditSTD: The specified STD file doesn't exist. "
-    }
-
-    # set the name for the FSM galaxy.
-    set name [file tail [file rootname [filename]]]
-
-    # Create a galaxy :
-    defgalaxy $name {
-	domain FSM
-
-	# Setup Target.
-	target default-FSM
-	# Set Target parameters.
-	transPort internal; # Split the name and type for each internal port
-	targetparam intlEventNames $ports(internal,names)
-	targetparam intlEventTypes $ports(internal,types)
-
-        # Setup input ports of FSM galaxy
-	transPort input; # Split the name and type for each input port
-	set indx 0
-	foreach portName $ports(input,names) {
-	    set portType [lindex $ports(input,types) $indx]
-            if {$portType == "INT"} {
-                star $portName BlackHoleInt
-                alias $portName $portName input
-            } elseif {$portType == "FLOAT"} {
-                star $portName BlackHole
-                alias $portName $portName input
-	    } else {
-		error "EditSTD: \
-		       Unsupported port type $portType for $portName! "
-            }
-	    incr indx
-        }
-
-        # Setup output ports of FSM galaxy
-	transPort output; # Split the name and type for each output port
-	set indx 0
-	foreach portName $ports(output,names) {
-	    set portType [lindex $ports(output,types) $indx]
-            if {$portType == "INT"} {
-                star $portName NullInt
-                alias $portName $portName output
-            } elseif {$portType == "FLOAT"} {
-                star $portName Null
-                alias $portName $portName output
-	    } else {
-                error "EditSTD: \
-		       Unsupported port type $portType for $portName! "
-            }
-	    incr indx
-	}
-        
-	# Creating a star for each node in the canvas. 
-	foreach node [$slate find withtag node] {
-	    set star$node [$slate itemcget $node -text]
-	    star [set star$node] State
-	}
-
-	# Set initial state.
-	set init_state_id [$slate find withtag init_state]
-	if {$init_state_id == ""} {
-	    error "EditSTD: No initial state is specified. "
-	} elseif {[llength $init_state_id] > 1} {
-	    error "EditSTD: Only one initial state is allowed. "
-	} else {
-	    # Setup one initial state :
-	    setstate [set star$init_state_id] isInitState YES
-
-	    # Parse and set initial guard and action if exist
-	    if { [info exists nodeInfo($init_state_id,initTransit)] } {
-		set initTransit $nodeInfo($init_state_id,initTransit)
-		if {$initTransit != ""} {
-		    transTransit $initTransit
-		    setstate [set star$init_state_id] \
-			initEvent     $splitTransit(event)
-		    setstate [set star$init_state_id] \
-			initCondition $splitTransit(condition)
-		    setstate [set star$init_state_id] \
-			initActEvents $splitTransit(actEvents)
-		    setstate [set star$init_state_id] \
-			initActExprs  $splitTransit(actExprs)
-		}
-	    }
-	}
-
-	# Set the parameters for each star.
-	foreach node [$slate find withtag node] {
-
-	    if { ![info exists nodeInfo($node,slave)] } {
-		setstate [set star$node] slaveNm ""
-		setstate [set star$node] where_is_defined ""
-	    } else {
-		set slaveNm [file tail $nodeInfo($node,slave)]
-		setstate [set star$node] slaveNm $slaveNm
-		set dirname [file dirname $nodeInfo($node,slave)]
-		setstate [set star$node] where_is_defined $dirname
-                
-                if "![info exists nodeInfo($node,slaveShared)]" {
-                    set nodeInfo($node,slaveShared) NO
-                }
-                setstate [set star$node] slaveShared \
-		    $nodeInfo($node,slaveShared)
-                #if {$nodeInfo($node,slaveShared) == "NO"} {
-                #    setstate [set star$node] slaveShared 0
-                #} else {
-                #    setstate [set star$node] slaveShared 1
-                #}
-	    }
-
-	    set events ""
-	    set conditions ""
-	    set actEvents ""
-	    set actExprs ""
-	    set preemptive ""
-	    set entryType ""
-	    # Go through each outgoing arc
-	    foreach arc $nodeInfo($node,outEdges) {
-                set transition [$slate itemcget $edgeInfo($arc,label) -text]
-		transTransit $transition
-		append events     \{$splitTransit(event)\}
-		append conditions \{$splitTransit(condition)\}
-		append actEvents  \{$splitTransit(actEvents)\}
-		append actExprs   \{$splitTransit(actExprs)\}
-
-		if "![info exists edgeInfo($arc,preemptive)]" {
-		    set edgeInfo($arc,preemptive) NO
-		}
-                append preemptive "$edgeInfo($arc,preemptive)\ "
-		#if {$edgeInfo($arc,preemptive) == "NO"} {
-		#    append preemptive "0\ "
-		#} elseif {$edgeInfo($arc,preemptive) == "YES"}  {
-		#    append preemptive "1\ "
-		#} else {
-		#    error "EditSTD: Unrecognized preemptive! "
-		#}
-
-		if "![info exists edgeInfo($arc,entryType)]" {
-		    set edgeInfo($arc,entryType) History
-		}
-		if {$edgeInfo($arc,entryType) == "History"} {
-		    append entryType "0\ "
-		} elseif {$edgeInfo($arc,entryType) == "Default"}  {
-		    append entryType "1\ "
-		} else {
-		    error "EditSTD: Unrecognized entryType! "
-		}
-
-	    } ;# end of going through each outgoing arc
-
-	    setstate [set star$node] events $events
-	    setstate [set star$node] conditions $conditions
-	    setstate [set star$node] actEvents $actEvents
-	    setstate [set star$node] actExprs $actExprs
-	    setstate [set star$node] preemptive $preemptive
-	    setstate [set star$node] entryType $entryType
-
-	} ;# end of setting parameters for each star
-
-	# Do the output connection of each star.
-	foreach node [$slate find withtag node] {
-	    numports [set star$node] stateOut \
-		    [llength $nodeInfo($node,outEdges)]
-	    set count 1
-	    foreach arc $nodeInfo($node,outEdges) {
-		connect [set star$node] stateOut#$count \
-			[set star$edgeInfo($arc,dest)] stateIn
-		incr count
-	    }
-	}
-
-    } ;# end of defgalaxy
-
-    # Done
-}
-
-###################################################################
-#### setInitialState
-# If the specified item is a node, mark it as the initial state
-# of the STD.
-#
-body ::tycho::EditSTD::setInitialState {tag} {
-    set item [$slate find withtag $tag]
-    if {$item == {}} return
-    
-    if {[lsearch -exact [$slate gettags $item] node] >= 0} {
-	# Item is a node.
-        if {[lsearch -exact [$slate gettags $item] init_state] < 0} {
-            # If it's not already a initial state,
-            # see if there is already an initial state, and unset it if exists
-            set init_state_id [$slate find withtag init_state]
-            if {$init_state_id != ""} {
-                $slate itemconfigure $init_state_id -width 1.0
-                $slate dtag init_state
-
-                if "[info exists nodeInfo($init_state_id,initTransit)]" {
-                    unset nodeInfo($init_state_id,initTransit)
-                }
-
-                set w $prefix.stdEditState$init_state_id
-                if [winfo exists $w] {
-                    # If there is aready a edit window for this state,
-                    # modify the window.
-                    $w remove initTransit
-                }
-            }
-
-            $slate addtag init_state withtag $item
-            $slate itemconfigure $item -width 5.0
-
-            set w $prefix.stdEditState$item
-            if [winfo exists $w] {
-                # If there is aready a edit window for this state,
-                # modify the window.
-                if "![info exists nodeInfo($item,initTransit)]" {
-                    set nodeInfo($item,initTransit) ""
-                }
-                $w line initTransit {Initial transition:} \
-                        $nodeInfo($item,initTransit)
-            }
-
-            $this markModified
-        }
-    }
-}
-
-#######################################################################
-#### setOptions and setPortNames
-# OLD codes: for compatible with old format
-#
-body ::tycho::EditSTD::setOptions {machine evaluation oneWriter} {
-}
-body ::tycho::EditSTD::setPortNames {in out internal} {
-    set ports(in)       $in
-    set ports(out)      $out
-    set ports(internal) $internal
-}
-
-#######################################################################
-#### setPorts
-#
-body ::tycho::EditSTD::setPorts {input output internal} {
-    set ports(input)    $input
-    set ports(output)   $output
-    set ports(internal) $internal
 }
 
 #####################################################################
@@ -834,279 +205,12 @@ body ::tycho::EditSTD::setReadOnly {bool} {
     ::tycho::File::setReadOnly $bool
     if [winfo exists $prefix] {
 	if {$bool} {
-	    menubar disable edititem
-            menubar disable delete
+	    disableMenuItem {Edit Item} Edit
+            disableMenuItem {Delete} Edit
 	} {
-	    menubar enable edititem
-            menubar enable delete
+	    enableMenuItem {Edit Item} Edit
+            enableMenuItem {Delete} Edit
 	}
-    }
-}
-
-#####################################################################
-#### transAction
-# Split the action event and the action expression for each action:
-# Each element in argument "action" is supposed to be in the form of
-# "event(expression)" and is delimited by either "," or space.
-# Then, the events and the expressions are parsed and stored into
-# splitTransit(actEvents) and splitTransit(actExprs) respectively.
-#
-body  ::tycho::EditSTD::transAction {action} {
-    set splitTransit(actEvents) ""
-    set splitTransit(actExprs)  ""
-
-    set length [string length $action]
-    set start 0
-    set end 0
-
-    while {1} {
-	# Set start point.
-	while {$start<$length} {
-	    set char [string index $action $start]
-	    if {$char==" " || $char==","} {
-		incr start
-	    } else {
-		break
-	    }
-	}
-
-	# Check if the string is finished
-	if {$start==$length} { break }
-
-	# Set end point.
-	set end $start
-	while {$end<$length} {
-	    set char [string index $action $end]
-	    if {$char==","} {
-		break
-	    } else {
-		incr end
-	    }
-	}
-
-	# Found one element.
-	set element [string range $action $start [expr $end-1]]
-	
-	# Split event and expression in element
-	set leftIndx [string first {(} $element]
-	set rightIndx [string last {)} $element]
-	if {$leftIndx == -1} {
-	    set event $element
-	    set expression ""
-	} elseif {$leftIndx == 0} {
-	    error "EditSTD: Need an event name before the expression! "
-	} else {
-	    set event [string range $element 0 [expr $leftIndx-1]]
-	    set expression [string range \
-		    $element [expr $leftIndx+1] [expr $rightIndx-1]]
-	}
-
-	# Check if event is valid in output or internal events.
-	if {[lsearch -exact $ports(output,names) $event]!=-1 || \
-	    [lsearch -exact $ports(internal,names) $event]!=-1} {
-	    append splitTransit(actEvents) \"$event\"
-	    append splitTransit(actExprs)  \"[transExpr actExpr $expression]\"
-	} else {
-	    error "EditSTD: $event is not an output/internal event! " 
-	}
-
-        set start $end
-    }
-}
-
-#####################################################################
-#### transExpr
-# Substitute each event name, if it is valid in input/output/internal
-# ports, in argument "expression" by $name(s) or $name(v) depending on
-# argument "option".
-#
-body  ::tycho::EditSTD::transExpr {option expression} {
-    if {$option=="event"} {
-	set validOp "{ } ! | &" ;# { } means space
-	set invalidOp "< > = + - * /"
-	set arrayIndx s
-    } elseif {$option=="condition" || $option=="actExpr"} {
-	set validOp "{ } ! | & < > = + - * / ( )"
-	set invalidOp ""
-	set arrayIndx v
-     } else {
-	error "EditSTD: Unrecognized option $option for method transExpr! "
-    }
-
-    set length [string length $expression]
-    set start 0
-    set end 0
-
-    set result ""
-    while {1} {
-	while {$start<$length} {
-	    set char [string index $expression $start]
-	    if {[lsearch -exact $invalidOp $char] != -1} {
-		error "EditSTD: $char is invalid operator for $option! "
-	    } elseif {[lsearch -exact $validOp $char] != -1} {
-		append result $char
-		incr start
-	    } else {
-		break
-	    }
-	}
-
-	set end $start
-	while {$end<$length} {
-	    set char [string index $expression $end]
-	    if {[lsearch -exact $invalidOp $char] != -1} {
-		error "EditSTD: $char is invalid operator for $option! "
-	    } elseif {[lsearch -exact $validOp $char] != -1} {
-		break
-	    } else {
-		incr end
-	    }
-	}
-
-	if {$start==$length} { break }
-
-	set item [string range $expression $start [expr $end-1]]
-	if {[lsearch -exact $ports(input,names) $item]!=-1 || \
-	    [lsearch -exact $ports(internal,names) $item]!=-1} {
-	    # item is an input or internal event.
-	    append result "\$$item\($arrayIndx\)"
-	} elseif {[regexp {[0-9*]} $item]} {
-	    # item is just a number.
-	    append result $item
-	} else {
-	    error "EditSTD: \
-		   $item is not an input/internal event nor a number! " 
-	}
-
-	set start $end
-    }
-
-    return $result
-}
-
-#####################################################################
-#### transPort
-# Split the name and the type for each input/output/internal (option) port:
-# For each element in ports($option), it is supposed to be in the form
-# of "name(type)". Then, the name and the type are parsed and stored into
-# ports($option,names) and ports($option,types) respectively.
-#
-body  ::tycho::EditSTD::transPort {option} {
-    set ports($option,names)  ""
-    set ports($option,types)  ""
-
-    foreach port $ports($option) {
-	set parenIndx [string first "(" $port]
-	if {$parenIndx == -1} {
-	    set portName $port
-	    set portType INT
-	} else {
-            set port [string trimright $port ","]
-	    set port [string trimright $port ")"]
-	    set portName [string range $port 0 [expr $parenIndx-1]]
-	    set portType [string range $port [expr $parenIndx+1] end]
-	    set portType [string toupper $portType]
-	}
-	if {$portType != "INT" && $portType != "FLOAT" } {
-	    error "EditSTD: Unsupported port type $portType for $portName! "
-	}
-	lappend ports($option,names) $portName
-	lappend ports($option,types) $portType
-    }
-}
-
-#####################################################################
-#### transTransit
-# Split event, condition, action events and action expressions from
-# a transition which should be in the form of "event[condition]/action".
-# Each element in "action" should be in the form of "event(expression)"
-# and is delimited by either "," or space. Then, the event, condition,
-# action events and action expressions are parsed and stored into
-# splitTransit(event), splitTransit(condition), splitTransit(actEvents),
-# and splitTransit(actExprs) respectively.
-#
-body  ::tycho::EditSTD::transTransit {transition} {
-    if {$transition==""} {
-	set splitTransit(event)     ""
-	set splitTransit(condition) ""
-	set splitTransit(actEvents) ""
-	set splitTransit(actExprs)  ""
-    } else {
-	# Split guard and action
-	set slashIndx [string first "/" $transition]
-	if {$slashIndx == -1} {
-	    set guard $transition
-	    set action ""
-	} elseif {$slashIndx == 0} {
-	    set guard ""
-	    set action [string range $transition 1 end]
-	} else {
-	    set rightIndx [string first {]} $transition]
-	    if {$rightIndx == -1} {
-		set guard [string range $transition 0 [expr $slashIndx-1]]
-		set action [string range $transition [expr $slashIndx+1] end]
-	    } else {
-		# If right-side bracket exists, i.e. condition
-		# exists, the slash separator must be on the
-		# right of the right-side bracket. (The slash
-		# on the left is just the divide operator.)
-		set tmpLabel [string range $transition $rightIndx end] 
-		set slashIndx [string first "/" $tmpLabel]
-		if {$slashIndx == -1} {
-		    set guard $transition
-		    set action ""
-		} else {
-		    set slashIndx [expr $rightIndx+$slashIndx]
-		    set guard [string range $transition 0 [expr $slashIndx-1]]
-		    set action \
-			[string range $transition [expr $slashIndx+1] end]
-		}
-	    }
-        } ;# end of spliting guard and action
-
-	# Split event and condition in guard
-	set leftIndx [string first {[} $guard]
-	set rightIndx [string first {]} $guard]
-	if {$leftIndx == -1} {
-	    set event $guard
-	    set condition ""
-	} elseif {$leftIndx == 0} {
-	    set event ""
-	    set condition \
-		[string range $guard 1 [expr $rightIndx-1]]
-	} else {
-	    set event [string range $guard 0 [expr $leftIndx-1]]
-	    set condition [string range \
-		$guard [expr $leftIndx+1] [expr $rightIndx-1]]
-	}
-	set splitTransit(event)     [transExpr event $event]
-	set splitTransit(condition) [transExpr condition $condition]
-
-	# Split action events and action expressions in action. 
-	# After invoke transAction, the action events and the action
-	# expressions are parsed and stored into splitTransit(actEvents)
-	# and splitTransit(actExprs) respectively.
-	transAction $action
-    }
-}
-
-    ##########################################################################
-    ####                     protected methods                            ####
-
-#####################################################################
-#### _initializeBars
-# Initialize the menu, status, and toolbars associated with this widget.
-# If any of these arguments is null, the associated bar does not
-# exist and must be ignored. This method is called from within
-# the attachDisplayer{} method.
-#
-body ::tycho::EditSTD::_initializeBars {menubar statusbar toolbar} {
-    chain $menubar $statusbar $toolbar
-
-    if {$menubar != {}} {
-        # We have to qualify the call to this supposed-ly private
-        # method because Itcl (2.2) has virtual private methods!
-        ::tycho::EditSTD::_initializeMenubar $menubar
     }
 }
 
@@ -1117,7 +221,7 @@ body ::tycho::EditSTD::_initializeBars {menubar statusbar toolbar} {
 body ::tycho::EditSTD::insertData {data} {
     if [getReadOnly] {bell; return}
     if {[catch {eval $data} msg]} {
-	error "EditSTD: $msg "
+	error $msg
     }
 }
 
@@ -1128,78 +232,104 @@ body ::tycho::EditSTD::insertData {data} {
 #
 body ::tycho::EditSTD::saveText {} {
     # Identification header comment 
-    set name [file tail [filename]]
+    set name [file tail $file]
     set text "### State transition diagram : $name\n"
+
+    # Machine type
+    append text "### Machine type: $machineType\n"
+    append text "set machineType $machineType\n"
 
     # First, save the canvas dimensions
     append text "\n### Canvas widget dimensions\n"
-    set height [winfo height $slate]
+    set height [winfo height $canvas]
     if {$height == 1} {
         # Canvas has not been mapped yet
         set height [cget -canvasheight]
     }
-    append text "\$this configure -canvasheight $height\n"
-    set width [winfo width $slate]
+    append text "\$canvas configure -height $height\n"
+    set width [winfo width $canvas]
     if {$width == 1} {
         # Canvas has not been mapped yet
         set width [cget -canvaswidth]
     }
-    append text "\$this configure -canvaswidth $width\n"
+    append text "\$canvas configure -width $width\n"
 
-    # Set member variables: input/output/internal ports
-    append text "\n### Member variables\n"
-    # I/O ports and internal events
-    append text "\$this setPorts \
-         [list $ports(input) $ports(output) $ports(internal)]\n"
+    # Set global variables
+    append text "\n### Global variables\n"
+    append text "set create_item(\$this) \{\}\n"
+
+    # I/O port names
+    append text "\n### InPort names\n"
+    append text "set portNames(in) \"$portNames(in)\"\n"
+    append text "### OutPort names\n"
+    append text "set portNames(out) \"$portNames(out)\"\n"
 
     # Step through all the nodes in the canvas.
     append text "\n### Creating the nodes\n"
-    foreach node [$slate find withtag node] {
+    foreach node [$canvas find withtag node] {
 	# Generate code to draw the node as an oval on the canvas.
 	append text "set node$node\
-		\[\$slate create LabeledOval [$slate coords $node]\
-		-outline black -fill white -tags node \
-		-text [list [$slate itemcget $node -text]]\]\n"
+		\[\$canvas create oval [$canvas coords $node]\
+		-outline black -fill white -tags node\]\n"
 	append text "set nodeInfo(\$node$node,inEdges) \{\}\n"
 	append text "set nodeInfo(\$node$node,outEdges) \{\}\n"
 
-        # Slave Process
-        if "[info exists nodeInfo($node,slave)]" {
-	    append text "# Slave Process:\n"
-	    append text "set nodeInfo(\$node$node,slave)\
-		    [list $nodeInfo($node,slave)]\n"
+	# Generate code to draw the label.
+	append text "set nodeInfo(\$node$node,label)\
+		\[\$canvas create text\
+		[$canvas coords $nodeInfo($node,label)] -fill black"
+	set label [$canvas itemcget $nodeInfo($node,label) -text]
+	if {$label != {}} {
+	    append text " -text $label"
 	}
-        if "[info exists nodeInfo($node,slaveShared)]" {
-	    append text "set nodeInfo(\$node$node,slaveShared)\
-		    [list $nodeInfo($node,slaveShared)]\n"
+	append text "\]\n"
+
+	if {$machineType == "Moore"} {
+	    # Output choice
+	    if "[info exists nodeInfo($node,output)]" {
+		append text "# Output choice: None, Action or Value.\n"
+		append text "set nodeInfo(\$node$node,output)\
+			[list $nodeInfo($node,output)]\n"
+
+		if {$nodeInfo($node,output) == "Action"} {
+		    # Output by an action
+		    if [info exists nodeInfo($node,action)] {
+			append text "set nodeInfo(\$node$node,action)\
+				[list $nodeInfo($node,action)]\n"
+		    }
+		} elseif {$nodeInfo($node,output) == "Value"} {
+		    # Output by fixed values
+		    foreach outName $portNames(out) {
+			if [info exists nodeInfo($node,value,$outName)] {
+			    append text\
+				    "set nodeInfo(\$node$node,value,$outName)\
+				    [list $nodeInfo($node,value,$outName)]\n"
+			}
+		    }
+		}
+	    }
 	}
-        
+
 	append text "\n"
     }
     
     # See if the initial state is specified.  If so, generate
     # code to set the initial state.
-    set init_state_id [$slate find withtag init_state]
+    set init_state_id [$canvas find withtag init_state]
     if {[llength $init_state_id] > 1} {
-	error "EditSTD (internel error): more than one initial state! "
+	error "Internel error: more than one initial state!!!"
     } elseif {$init_state_id != ""} {
 	append text "### Initial state\n"
-	append text "\$slate addtag init_state withtag \$node$init_state_id\n"
-	append text "\$slate itemconfigure \$node$init_state_id -width 5.0\n"
-
-        if "[info exists nodeInfo($init_state_id,initTransit)]" {
-	    append text "# Initial transition:\n"
-	    append text "set nodeInfo(\$node$init_state_id,initTransit)\
-		    [list $nodeInfo($init_state_id,initTransit)]\n"
-        }
+	append text "\$canvas addtag init_state withtag \$node$init_state_id\n"
+	append text "\$canvas itemconfigure \$node$init_state_id -width 5.0\n"
     }
 
     # Step through all the arcs in the canvas.
     append text "\n### Creating the arcs\n"
-    foreach arc [$slate find withtag arc] {
-	set smooth [$slate itemcget $arc -smooth]
-	append text "set arc \[\$slate create line\
-		[$slate coords $arc] -arrow last -tags arc -fill black\
+    foreach arc [$canvas find withtag arc] {
+	set smooth [$canvas itemcget $arc -smooth]
+	append text "set arc \[\$canvas create line\
+		[$canvas coords $arc] -arrow last -tags arc -fill black\
 		-smooth $smooth\]\n"
 	# Set up the corresponding nodeInfo and edgeInfo entries.
 	set src $edgeInfo($arc,src)
@@ -1211,8 +341,8 @@ body ::tycho::EditSTD::saveText {} {
 
 	# Set up the points of the arc.
 	foreach point $edgeInfo($arc,points) {
-	    append text "set point \[\$slate create rectangle\
-		    [$slate coords $point] -fill \{\} -outline \{\}\]\n"
+	    append text "set point \[\$canvas create rectangle\
+		    [$canvas coords $point] -fill \{\} -outline \{\}\]\n"
 	    append text "lappend edgeInfo(\$arc,points) \$point\n"
 	}
 	
@@ -1227,11 +357,11 @@ body ::tycho::EditSTD::saveText {} {
 	set mid_x [lindex $mid_xy 0]
 	set mid_y [lindex $mid_xy 1]
 	append text "set edgeInfo(\$arc,label)\
-		\[\$slate create text\
+		\[\$canvas create text\
 		[expr $mid_x + $edgeInfo($arc,label_deltax)]\
 		[expr $mid_y + $edgeInfo($arc,label_deltay)]\
 		-fill black"
-	set label [$slate itemcget $edgeInfo($arc,label) -text]
+	set label [$canvas itemcget $edgeInfo($arc,label) -text]
 	if {$label != {}} {
 	    append text " -text \{$label\}"
 	}
@@ -1242,16 +372,35 @@ body ::tycho::EditSTD::saveText {} {
 	append text "set edgeInfo(\$arc,label_deltay)\
 		$edgeInfo($arc,label_deltay)\n"
 
-	# Preemptive.
-	if [info exists edgeInfo($arc,preemptive)] {
-	    append text "set edgeInfo(\$arc,preemptive)\
-		    $edgeInfo($arc,preemptive)\n"
+	# Guard
+	if [info exists edgeInfo($arc,guard)] {
+	    append text "set edgeInfo(\$arc,guard)\
+		    [list $edgeInfo($arc,guard)]\n"
 	}
-	
-	# Entry type. 
-	if [info exists edgeInfo($arc,entryType)] {
-	    append text "set edgeInfo(\$arc,entryType)\
-		    $edgeInfo($arc,entryType)\n"
+
+	if {$machineType == "Mealy"} {
+	    # Output choice
+	    if "[info exists edgeInfo($arc,output)]" {
+		append text "# Output choice: None, Action or Value.\n"
+		append text "set edgeInfo(\$arc,output)\
+			[list $edgeInfo($arc,output)]\n"
+
+		if {$edgeInfo($arc,output) == "Action"} {
+		    # Output by an action
+		    if [info exists edgeInfo($arc,action)] {
+			append text "set edgeInfo(\$arc,action)\
+				[list $edgeInfo($arc,action)]\n"
+		    }
+		} elseif {$edgeInfo($arc,output) == "Value"} {
+		    # Output by fixed values
+		    foreach outName $portNames(out) {
+			if [info exists edgeInfo($arc,value,$outName)] {
+			    append text "set edgeInfo(\$arc,value,$outName)\
+				    [list $edgeInfo($arc,value,$outName)]\n"
+			}
+		    }
+		}
+	    }
 	}
 
 	append text "\n"
@@ -1263,41 +412,547 @@ body ::tycho::EditSTD::saveText {} {
     return $text
 }
 
-
-#########################################################################
-#########################################################################
-####                     private methods                             ####
-
-#####################################################################
-#### _initializeMenubar
-# Initialize the menu bar.  Adds entries specific to this class.
+###################################################################
+#### setInitialState
+# If the specified item is a node, mark it as the initial state
+# of the STD.
 #
-body ::tycho::EditSTD::_initializeMenubar {menubar} {
-    # Add items into File menu
-    $menubar insert command lookinside close \
-	    -label "Look Inside" \
-	    -underline 5 -accelerator "i" -command "$this lookInside selected"
-    $menubar insert separator stdsep1 close
-
-    # Enable items in Edit menu
-    $menubar enable edititem
-
-    # Change command of items in Edit menu
-    $menubar entryconfigure edititem \
-	    -command "$this editItem selected"
-
-    # Add items into Special menu
-    $menubar insert command ioports smoothtoggle \
-	    -label "I/O Ports..." \
-	    -underline 0 -command "$this ioPorts"
-
-    $menubar insert command setinitial smoothtoggle \
-	    -label "Set Initial State" \
-	    -underline 0 -command "$this setInitialState selected"
+body ::tycho::EditSTD::setInitialState {tag} {
+    set item [$canvas find withtag $tag]
+    if {$item == {}} return
     
-    $menubar insert separator stdsep2 smoothtoggle
+    if {[lsearch -exact [$canvas gettags $item] node] >= 0} {
+	# Item is a node.  See if there is already an initial state.
+	set init_state_id [$canvas find withtag init_state]
+	if {$init_state_id != ""} {
+	    $canvas itemconfigure $init_state_id -width 1.0
+	    $canvas dtag init_state
+	}
+	$canvas addtag init_state withtag $item
+	$canvas itemconfigure $item -width 5.0
+	$this markModified
+    }
+}
 
-    $menubar insert command makeicon getinfo \
-	    -label "Make Icon..." -underline 0 \
-            -command "$this makeIcon"
+###################################################################
+#### editItem
+# Invoked by the "Edit Item" command in the Edit menu.
+#
+body ::tycho::EditSTD::editItem {item} {
+    # The indices in the nodeInfo and edgeInfo arrays
+    # are item IDs.
+    set id [$canvas find withtag $item]
+    if {[lsearch -exact [$canvas gettags $id] node] >= 0} {
+	# id is a node.
+	$this editState $id
+    } elseif {[lsearch -exact [$canvas gettags $id] arc] >= 0} {
+	# id is an arc.
+	$this editArc $id
+    }
+}
+
+#########################################################################
+#### editState and editStateDone
+# Edit a state.
+#
+body ::tycho::EditSTD::editState {node} {
+    
+    set w [$this windowName].stdEditState$node
+    if [winfo exists $w] {
+	wm deiconify $w
+	raise $w
+    } else {
+
+	set nodeLabel [$canvas itemcget $nodeInfo($node,label) -text]
+	set title "Edit $machineType State \"$nodeLabel\""
+	set labelQuery [list label {Label:} $nodeLabel]
+
+	::tycho::EntryQuery $w -title "STD Edit $machineType State" \
+		-text $title -queries [list $labelQuery]\
+		-okcommand "$this editStateDone $node $w"
+
+	if {$machineType == "Moore"} {
+	    if "![info exists nodeInfo($node,output)]" {
+		set nodeInfo($node,output) "None"
+	    }
+	    $w addRadioQuery output {Output} {None Action Value} \
+		    $nodeInfo($node,output) 
+	    
+	    $w addButton lookInside -text {Look Inside}\
+		    -command "$this lookInside $node $w"
+	}
+
+	$w centerOnScreen
+    }
+
+
+}
+
+body ::tycho::EditSTD::editStateDone {node w} {
+
+    set label [$canvas itemcget $nodeInfo($node,label) -text]
+    set newLabel [$w get label]
+    if {$label != $newLabel} {
+	$canvas itemconfigure $nodeInfo($node,label) -text $newLabel
+	$this markModified
+    }
+
+    if {$machineType == "Moore"} {
+	set newOutput [$w get output]
+	if {$nodeInfo($node,output) != $newOutput} {
+	    set nodeInfo($node,output) $newOutput
+	    $this markModified	
+	}
+    }
+}
+
+###################################################################
+#### editArc and editArcDone
+# Edit an arc.
+#
+body ::tycho::EditSTD::editArc {arc} {
+    set w [$this windowName].stdEditArc$arc
+    if [winfo exists $w] {
+	wm deiconify $w
+	raise $w
+    } else {
+
+	set arcLabel [$canvas itemcget $edgeInfo($arc,label) -text]
+	set src [$canvas itemcget $nodeInfo($edgeInfo($arc,src),label) -text]
+	set dest [$canvas itemcget $nodeInfo($edgeInfo($arc,dest),label) -text]
+	set title "Edit $machineType Arc \"$arcLabel\"\nSource state: $src\
+		\nDestination state: $dest"
+
+	set labelQuery [list label {Label:} $arcLabel]
+
+	if "![info exists edgeInfo($arc,guard)]" {
+	    set edgeInfo($arc,guard) ""
+	}
+	set guardQuery [list guard {Guard:} $edgeInfo($arc,guard)]
+
+	::tycho::EntryQuery $w -title "STD Edit $machineType Arc" \
+		-text $title -queries [list $labelQuery $guardQuery]\
+		-okcommand "$this editArcDone $arc $w"
+
+	if {$machineType == "Mealy"} {
+	    if "![info exists edgeInfo($arc,output)]" {
+		set edgeInfo($arc,output) "None"
+	    }
+	    $w addRadioQuery output {Output} {None Action Value} \
+		    $edgeInfo($arc,output) 
+
+	    $w addButton lookInside -text {Look Inside}\
+		-command "$this lookInside $arc $w"
+	}
+
+	$w centerOnScreen
+    }
+}
+
+body ::tycho::EditSTD::editArcDone {arc w} {
+    set label [$canvas itemcget $edgeInfo($arc,label) -text]
+    set newLabel [$w get label]
+    if {$label != $newLabel} {
+	$canvas itemconfigure $edgeInfo($arc,label) -text $newLabel
+	$this markModified
+    }
+
+    set newGuard [$w get guard]
+    if {$edgeInfo($arc,guard) != $newGuard} {
+	set edgeInfo($arc,guard) $newGuard
+	$this markModified
+    }
+
+    if {$machineType == "Mealy"} {
+	set newOutput [$w get output]
+	if {$edgeInfo($arc,output) != $newOutput} {
+	    set edgeInfo($arc,output) $newOutput
+	    $this markModified	
+	}
+    }
+}
+
+###################################################################
+#### lookInside, insideValue, insideValueDone, insideAction and getNewAction
+# Look inside a state/arc depending on whether it's a Moore/Mealy machine.
+#
+body ::tycho::EditSTD::lookInside {nodeOrArc w} {
+    if {[lsearch -exact [$canvas gettags $nodeOrArc] node] >= 0} {
+	# nodeOrArc is a node.
+	set typeInfo nodeInfo
+    } else {
+	# nodeOrArc is an arc.
+	set typeInfo edgeInfo
+    }
+
+    if {[$w get output] == "Action"} {
+	$this insideAction $typeInfo $nodeOrArc $w
+    } elseif {[$w get output] == "Value"} {
+	$this insideValue $typeInfo $nodeOrArc $w
+    }
+}
+
+body ::tycho::EditSTD::insideValue {typeInfo nodeOrArc w} {
+    set w $w.stdInsideValue$nodeOrArc
+    if [winfo exists $w] {
+	destroy $w
+    } 
+
+    eval set labelID $[set typeInfo]($nodeOrArc,label)
+    set label [$canvas itemcget $labelID -text]
+    set title "Edit Output Values in \"$label\""
+
+    ::tycho::EntryQuery $w -title "STD Edit Output Values" -text $title\
+	    -okcommand "$this insideValueDone $typeInfo $nodeOrArc $w"
+
+    set numOutPorts [llength $portNames(out)]
+
+    foreach outName $portNames(out) {
+	if "![info exists [set typeInfo]($nodeOrArc,value,$outName)]" {
+	    set [set typeInfo]($nodeOrArc,value,$outName) 0
+	} 
+	eval $w addQuery $outName "${outName}:"\
+		$[set typeInfo]($nodeOrArc,value,$outName)
+    }
+
+    $w centerOnScreen
+}
+
+body ::tycho::EditSTD::insideValueDone {typeInfo nodeOrArc w} {
+    foreach outName $portNames(out) {
+	set newValue [$w get $outName]
+	if "$[set typeInfo]($nodeOrArc,value,$outName) != $newValue" {
+	    set [set typeInfo]($nodeOrArc,value,$outName) $newValue
+	    $this markModified
+	}
+    }
+}
+
+body ::tycho::EditSTD::insideAction {typeInfo nodeOrArc w} {
+
+    if "[info exists [set typeInfo]($nodeOrArc,action)]" {
+	eval set filename $[set typeInfo]($nodeOrArc,action)
+	set filename [::tycho::expandPath $filename]
+    } else {
+	set filename ""
+    }
+
+    if [file exists $filename] {
+	if [file isdirectory $filename] {
+	    # filename is a directory, then consider it as a Oct facet.
+	    if [catch {ptkOpenFacet $filename}] {
+		error "Can't open action file.\
+			This needs Ptolemy to exist."
+	    }
+	    
+	    pvOpenWindow [ptkOpenFacet $filename]
+	} else {
+	    # filename is a file, pass it to ::tycho::File::openContext
+	    ::tycho::File::openContext $filename
+	}
+    } else {
+	set tmpW $w.insideActionWithName
+	::tycho::DialogWindow $tmpW\
+		-title "Inside Action Galaxy"\
+		-text "Specified action galaxy does not exist,\
+		\nor no action galaxy is specified yet."
+	$tmpW addButton create -text {Create New}\
+		-command "destroy $tmpW;\
+		$this getNewAction $typeInfo $nodeOrArc $w"
+	$tmpW addButton ignore -text {Ignore} -command "destroy $tmpW"
+	$tmpW default create
+	$tmpW centerOnScreen
+	    
+	# Modal interaction
+	grab set $tmpW
+    }
+}
+
+body ::tycho::EditSTD::getNewAction {typeInfo nodeOrArc w} {
+
+    dialog.openFacet
+    # This is not a clean way to set non-modal window,
+    # but it will be fixed after using Tycho as the fileBrowser.
+    grab set .fileBrowser 
+    tkwait window .fileBrowser
+    global openDialogGlobal
+    if "$openDialogGlobal(response)" { 
+	set filename $openDialogGlobal(dialogLastOpened)
+	if {$filename != ""} {
+	    set [set typeInfo]($nodeOrArc,action) $filename
+	    $this markModified
+	}
+    }
+
+if 0 {## Following code is used after Tycho replaces VEM
+    set tmpW $w.getNewActionFile
+    set filename [::tycho::DialogWindow::newModal FileBrowser $tmpW]
+
+    if {$filename != ""} {
+	set nodeInfo($node,action) $filename
+	$this markModified
+	???pvOpenWindow [ptkOpenFacet $filename]???
+    }
+} ## Previous code is used after Tycho replaces VEM
+
+}
+
+################################################################
+#### ioPortNames
+# Edit the I/O portNames of the STD.
+#
+body ::tycho::EditSTD::ioPortNames {} {
+
+    set w [$this windowName].stdIOPortNames
+    if [winfo exists $w] {
+	wm deiconify $w
+	raise $w
+    } else {
+	set name [file tail [file rootname $file]]
+	set titleLabel "Edit I/O Port Names of $name"
+
+	set inPortQuery [list inPort {InPort  names:} $portNames(in)]
+	set outPortQuery [list outPort {OutPort names:} $portNames(out)]
+
+	::tycho::EntryQuery $w -title "STD I/O Port Names"\
+		-text $titleLabel -queries [list $inPortQuery $outPortQuery]\
+		-okcommand "$this ioPortNamesDone $w"
+
+	$w centerOnScreen
+    }
+}
+
+###################################################################
+#### ioPortNamesDone
+# Only used by ioPortNames.
+#
+body ::tycho::EditSTD::ioPortNamesDone {w} {
+    set newInPortNames [$w get inPort]
+    if {$portNames(in) != $newInPortNames} {
+	set portNames(in) $newInPortNames
+	$this markModified
+    }
+
+    set newOutPortNames [$w get outPort]
+    if {$portNames(out) != $newOutPortNames} {
+	set portNames(out) $newOutPortNames
+	$this markModified
+    }
+}
+
+##############################################################
+#### makeIcon
+# Make a icon for this STD to be put into a VEM palette facet.
+body ::tycho::EditSTD::makeIcon {} {
+
+    set w [$this windowName].stdMakeIcon
+    if [winfo exists $w] {
+	wm deiconify $w
+	raise $w
+    } else {
+	set srcdirQuery [list srcdir {Src File Directory:}\
+		$makeIconSrcDir]
+
+	set paletteQuery [list palette {Pathname of Palette:}\
+		$makeIconPaletteName]
+
+	::tycho::EntryQuery $w -title "stdMakeIcon" -text "Make Icon"\
+		-queries [list $srcdirQuery $paletteQuery]\
+		-okcommand "$this makeIconOk $w"
+
+	$w centerOnScreen
+    }
+}
+
+##############################################################
+#### makeIconOk
+body ::tycho::EditSTD::makeIconOk {w} {
+    set name [file tail [file rootname $file]]
+    set makeIconSrcDir [$w get srcdir]
+    set makeIconPaletteName [$w get palette]
+    # It doesn't matter in which domain this icon is made.
+    ptkSetMkStar $name SDF $makeIconSrcDir $makeIconPaletteName
+}
+
+##############################################################
+#### getInfo
+body ::tycho::EditSTD::getInfo {} {
+    set nodes [$canvas find withtag node]
+    set arcs [$canvas find withtag arc]
+    set w [$this windowName].getInfo
+    catch {destroy $w}
+    ::tycho::Message $w -text "Machine type: $machineType\
+	    \n# of nodes  : [llength $nodes]\
+	    \n# of arcs   : [llength $arcs]"
+    $w centerOnScreen
+}
+
+##############################################################
+#### ptkCompile
+# Compile this STD into Ptolemy using ptcl code.
+# This method can used only when invoked from Ptolemy.
+# FIXME : Should add some code to check if Ptolemy exists.
+body ::tycho::EditSTD::ptkCompile {} {
+
+    if "![file exists $file]" {
+	error "The specified STD file doesn't exist."
+    }
+
+    # set the name for the FSM galaxy.
+    set name [file tail [file rootname $file]]
+
+puts "outer domain = [domain]"
+
+    # Create a galaxy :
+    defgalaxy $name {
+	domain FSM
+
+	# Setup Target.
+	target default-FSM
+	# Set Target parameters.
+	set inPorts "";
+	foreach inName $portNames(in) {
+	    append inPorts \"$inName\"
+	}
+	targetparam inputNameMap $inPorts
+	set outPorts "";
+	foreach outName $portNames(out) {
+	    append outPorts \"$outName\"
+	}
+	targetparam outputNameMap $outPorts
+        targetparam machineType $machineType
+        
+        # Setup In/Out Ports
+        star DataInStar DataIn
+        star DataOutStar DataOut
+	numports DataInStar input [llength $portNames(in)]
+	numports DataOutStar output [llength $portNames(out)]
+        set count 1
+	foreach inName $portNames(in) {
+	    alias $inName DataInStar input#$count
+	    incr count
+	}
+        set count 1
+	foreach outName $portNames(out) {
+	    alias $outName DataOutStar output#$count
+	    incr count
+	}
+        
+	# Step through all the nodes in the canvas.
+	# Creating a star for each node : 
+	foreach node [$canvas find withtag node] {
+	    set star$node [$canvas itemcget $nodeInfo($node,label) -text]
+	    star [set star$node] $machineType
+	}
+
+	# Set initial state
+	set init_state_id [$canvas find withtag init_state]
+	if {$init_state_id == ""} {
+	    error "No initial state is specified."
+	} elseif {[llength $init_state_id] > 1} {
+	    error "Only one initial state is allowed."
+	} else {
+	    # Setup one initial state :
+	    setstate [set star$init_state_id] isInitState YES
+	}
+    
+	# Set the parameters for each star :
+	foreach node [$canvas find withtag node] {
+
+	    set conditions ""
+	    foreach arc $nodeInfo($node,outEdges) {
+		if {![info exists edgeInfo($arc,guard)]} {
+		    error "A guard is required in each arc."
+		} else {
+		    append conditions \"$edgeInfo($arc,guard)\"
+		}
+	    }
+	    setstate [set star$node] conditions $conditions
+	 
+	    if {$machineType == "Moore"} {
+		# Moore machine.
+		setstate [set star$node] outputBy $nodeInfo($node,output)
+		if {$nodeInfo($node,output) == "Value"} {
+		    # Output by fixed values
+		    set value ""
+		    foreach outName $portNames(out) {
+			if {![info exists nodeInfo($node,value,$outName)]} {
+			    append value "0\ "
+			} else {
+			    append value "$nodeInfo($node,value,$outName)\ "
+			}
+		    }
+		    setstate [set star$node] actionOrValue $value
+
+		} elseif {$nodeInfo($node,output) == "Action"} {
+		    # Output by an action
+		    if { ![info exists nodeInfo($node,action)] ||\
+			    $nodeInfo($node,action) == "" } {
+			error "Output is by Action. An action is required."
+		    } else {
+			set action [file tail $nodeInfo($node,action)]
+			setstate [set star$node] actionOrValue $action
+			set dirname [file dirname $nodeInfo($node,action)]
+			setstate [set star$node] where_is_defined $dirname
+		    }
+		}
+
+	    } else {
+		# Mealy machine.
+		set outputBy ""
+		set actionOrValue ""
+		set where_is_defined ""
+		foreach arc $nodeInfo($node,outEdges) {
+		    if "![info exists edgeInfo($arc,output)]" {
+			set edgeInfo($arc,output) "None"
+		    }
+		    append outputBy "$edgeInfo($arc,output)\ "
+
+		    if {$edgeInfo($arc,output) == "Value"} {
+			# Output by fixed values
+			set value ""
+			foreach outName $portNames(out) {
+			    if {![info exists edgeInfo($arc,value,$outName)]} {
+				append value "0\ "
+			    } else {
+				append value "$edgeInfo($arc,value,$outName)\ "
+			    }
+			}
+			append actionOrValue \"$value\"
+			append where_is_defined \"\"
+
+		    }  elseif {$edgeInfo($arc,output) == "Action"} {
+			# Output by an action
+			if { ![info exists edgeInfo($arc,action)] ||\
+			    $edgeInfo($arc,action) == "" } {
+			    error "Output is by Action. An action is required."
+		        } else {
+			    set action [file tail $edgeInfo($arc,action)]
+			    append actionOrValue \"$action\"
+			    set dirname [file dirname $edgeInfo($arc,action)]
+			    append where_is_defined \"$dirname\"
+			}
+		    }
+		}
+		setstate [set star$node] outputBy $outputBy
+		setstate [set star$node] actionOrValue $actionOrValue
+		setstate [set star$node] where_is_defined $where_is_defined
+
+	    }
+	}
+
+	# Do the output connection of each star :
+	foreach node [$canvas find withtag node] {
+	    numports [set star$node] stateOut \
+		    [llength $nodeInfo($node,outEdges)]
+	    set count 1
+	    foreach arc $nodeInfo($node,outEdges) {
+		connect [set star$node] stateOut#$count \
+			[set star$edgeInfo($arc,dest)] stateIn
+		incr count
+	    }
+	}
+    }
+
+    # Done
 }

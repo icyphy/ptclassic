@@ -46,25 +46,11 @@ DIRS =
 
 TCL_SRCS = 
 
-SIMPLE_TESTS = \
-	testCircularList.itcl \
-	testPath.itcl \
-	testResource.itcl \
-        testStack.itcl \
-	testURLPath.itcl
-
-GRAPHICAL_TESTS = \
-	testLoader.itcl
-
-ITCL_SRCS = \
-	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) \
-	alltests.itcl all.itcl
+ITCL_SRCS = 
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS)
 
 MISC_FILES = 
-
-OPTIONAL_FILES = doc
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
@@ -72,16 +58,10 @@ REALCLEAN_STUFF =
 # Title for the tydoc index page
 TYDOC_DESC =
 
-tests:: test_simple test_graphics
-
-# These tests do not require a graphics terminal
-test_simple: $(TCL_SRCS) $(ITCL_SRCS)
-	tytestsh $(SIMPLE_TESTS)
-
-# These tests require a graphics terminal
-test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
-	tytest $(GRAPHICAL_TESTS)
+# Do make sources so that we ensure that the subdirectories are checked out
+all install: sources $(MISC_SRCS)
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
+
 

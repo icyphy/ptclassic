@@ -38,8 +38,7 @@
 
 # Make sure that the required packages are loaded
 package require tycho.util.tytest
-package require tycho.typt.edit
-package require tycho.kernel.html
+package require tycho.typt.editors
 
 #set VERBOSE 1
 
@@ -55,7 +54,7 @@ test EditPtlang-1.1 {Test EditPtlang} {
 
 test EditPtlang-1.2 {Test EditPtlang gendocBuffer} {
     set savedir [pwd]
-    cd [file join $env(PTEDIT_LIBRARY) test]
+    cd [file join $env(PTEDITORS_LIBRARY) test]
     file delete -force SDFMyRamp.htm
     set view [::tycho::File::openContext SDFMyRamp.pl]
     set win [$view displayer windowName]
@@ -75,7 +74,7 @@ test EditPtlang-1.2 {Test EditPtlang gendocBuffer} {
 
 test EditPtlang-1.3 {Test EditPtlang gendoc} {
     set savedir [pwd]
-    cd [file join $env(PTEDIT_LIBRARY) test]
+    cd [file join $env(PTEDITORS_LIBRARY) test]
     file delete -force SDFMyRamp.htm
     set html [ ::tycho::EditPtlang::gendoc SDFMyRamp.pl]
     after $duration removeobj [$html displayer windowName]

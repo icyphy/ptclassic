@@ -33,7 +33,7 @@
 
 #######################################################################
 #### Shortcuts
-# This non-instantiable class manages shortcuts (key bindings) in Tycho.
+# This non-intantiable class manages shortcuts (key bindings) in Tycho.
 # Only the core set of shortcuts supported by the kernel are dealt with
 # here.  The class provides both standard and emacs-like bindings,
 # associating them with virtual events.
@@ -92,9 +92,8 @@ class ::tycho::Shortcuts {
             Copy2        {{} {}                       <Escape><Key-w> Esc-w                     {} {}} \
             Cut          {<Control-x> Ctrl+X          <Control-w> C-w                           <Control-x> Ctrl+X} \
             DownLine     {{} {}                       <Control-n> {C-n}                         <Control-n> {C-n}} \
-            DownPage     {<Next> {Page Down}          <Control-v> {C-v}                         <Next> {Page Down}} \
+            DownPage     {{} {}                       <Control-v> {C-v}                         {} {}} \
             Evaluate     {{} {}                       <Control-x><Control-r> {C-x C-r}          {} {}} \
-            EvaluateConstruct {{} {}                  <Control-x><Control-Shift-R> {C-x C-R}    {} {}} \
             Exit         {<Control-q> Ctrl+Q          <Control-x><Control-c> {C-x C-c}          <Control-q> Ctrl+Q} \
             Fill         {{} {}                       <Meta-q> M-q                              {} {}} \
             Fill2        {{} {}                       <Escape><Key-q> {Esc q}                   {} {}} \
@@ -113,7 +112,7 @@ class ::tycho::Shortcuts {
             NextPane     {<Control-Tab> Ctrl+Tab      <Control-x><o> {C-x o}                    <Control-Tab> Ctrl+Tab} \
             NextWindow   {<Control-F6> Ctrl+F6        <Control-x><O> {C-x O}                    <Control-F6> Ctrl+F6} \
             Open         {<Control-o> Ctrl+O          <Control-x><Control-f> {C-x C-f}          <Control-o> Ctrl+O} \
-            OpenLine     {<Control-j> Ctrl+J          <Control-o> C-o                           <Control-j> Ctrl+J} \
+            OpenLine     {<Control-i> Ctrl+I          <Control-o> C-o                           <Control-i> Ctrl+I} \
             OpenSource   {{} {}                       <Control-x><Key-s> {C-x s}                {} {}} \
             Paste        {<Control-v> Ctrl+V          <Control-y> C-y                           <Control-v> Ctrl+V} \
             PrevWindow   {<Control-Shift-F6> Ctrl+Shift+F6 <Control-x><O> {C-x O}               <Control-Shift-F6> Ctrl+Shift+F6} \
@@ -128,15 +127,14 @@ class ::tycho::Shortcuts {
             SelectAll    {<Control-a> Ctrl+A          <Control-slash> {C-/}                     <Control-A> Ctrl+Shift+A} \
             Spelling     {{} {}                       <Meta-dollar> {M-\$}                      {} {}} \
             Spelling2    {{} {}                       <Escape><dollar> {Esc-\$}                 {} {}} \
-            Tab          {<Control-i> Ctrl+I          <Control-q><Tab> {C-q Tab}                <Control-i> Ctrl+i} \
-            ToggleReadOnly {{} {}                     <Control-x><Control-q> {C-x C-q}          {} {}} \
+            ToggleReadOnly {{} {}                       <Control-x><Control-q> {C-x C-q}        {} {}} \
             Top          {<Control-Home> {Ctrl+Home}  <Escape><less> {Esc-<}                    <Control-Home> {Ctrl+Home}} \
             Undo         {<Control-z> Ctrl+Z          <Control-x><u> {C-x u}                    <Control-z> Ctrl+Z} \
             UnselectAll  {{} {}                       <Control-backslash> "C-\\"                {} {}} \
             UpperCase    {{} {}                       <Meta-u> M-u                              {} {}} \
             UpperCase2   {{} {}                       <Escape><u> {Esc u}                       {} {}} \
             UpLine       {{} {}                       <Control-p> {C-p}                         {} {}} \
-            UpPage       {<Prior> {Page Up}           <Meta-v> {M-v}                            <Prior> {Page Up}} \
+            UpPage       {{} {}                       <Meta-v> {M-v}                            {} {}} \
             UpPage2      {{} {}                       <Escape><v> {Esc-v}                       {} {}} \
     }
 }
