@@ -1,0 +1,46 @@
+# Makefile for Ptolemy lib dir (used primarily for 'make sources')
+
+# Version Identification:
+# $Id$
+# Copyright (c) 1990-%Q% The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+
+ROOT = ..
+VPATH = $(ROOT)/lib
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+include $(CONFIG)
+
+MISC_FILES = CompileMake.template README gantt.me \
+	interpreter.help oct2ps.pro pigiDebugRpc pigiRpcConsole \
+	pigiRpcDebug pigiRpcDebug.dbx pigiRpcDebug.xdb \
+	pigiRpcShell \
+	pigiXRes7 pigiXRes8 pigiXRes8.bw pigiXRes8.cp \
+	pigiXRes9 pigiXRes9.bw pigiXRes9.cp startPigiRpc \
+	vem.bindings.7-3 vem.bindings.8-0 vem.bindings.8-1
+
+# We don't include common.mk since we don't use the compiler here
+include $(ROOT)/mk/no-compile.mk
