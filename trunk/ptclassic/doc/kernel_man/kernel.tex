@@ -1253,6 +1253,17 @@ portholes and states belonging to the block, and calls \code{setup()}, which
 is intended to be the ``user-supplied'' initialization function.
 
 \begin{example}
+virtual void preinitialize();
+\end{example}
+
+Perform a "pre-initialization" step.  The default implementation does nothing.
+This method is redefined by HOF stars and other stars that need to rewire a
+galaxy before the main initialization phase starts.  Blocks must act safely
+if preinitialized multiple times (unless they remove themselves from the
+galaxy when preinitialized, as the HOF stars do).  Preinitialize is invoked
+by Galaxy::preinitialize, which see.
+
+\begin{example}
 virtual int run();
 \end{example}
 
@@ -1537,6 +1548,28 @@ void initialize();
 System initialize method.  Derived Galaxies should not redefine
 initialize; they should write a \code{setup()} method to do any
 class-specific startup.
+
+\begin{example}
+virtual void preinitialize();
+\end{example}
+
+Preinitialization of a Galaxy invokes preinitialization of all its member
+blocks.  Preinitialization of the member blocks is done in two passes: the
+first pass preinits atomic blocks only, the second all blocks.  This allows
+clean support of graphical recursion; for example, a HOFIfElseGr star can
+control a recursive reference to the current galaxy.  The IfElse star is
+guaranteed to get control before the subgalaxy does, so it can delete the
+subgalaxy to stop the recursion.  The second pass must preinit all blocks in
+case a non-atomic block adds a block to the current galaxy.
+Galaxy::preinitialize is called from Galaxy::initialize.  (It would be
+somewhat cleaner to have the various schedulers invoke preinitialize()
+separately from initialize(), but that would require many more pieces of the
+system to know about preinitialization.)  Because of this decision, blocks in
+subgalaxies will see a preinitialize call during the outer galaxy's
+preinitialize pass and then another one when the subgalaxy is itself
+initialized.  Thus, blocks must act safely if preinitialized multiple times.
+(HOF stars generally destroy themselves when preinitialized, so they can't
+see extra calls.)
 
 \begin{example}
 void wrapup();
@@ -1934,12 +1967,13 @@ variable; it is set by \code{addToKnownList} and copied from one
 galaxy to another by the copy constructor or by cloning.
 
 \begin{example}
-void initialize();
+void preinitialize();
 \end{example}
 
-Overrides \code{Block::initialize()}.  The main extra work is to do
-variable-parameter initializations, such as delays and bus connections
+Overrides `Galaxy::preinitialize()'.  This re-executes initialization
+steps that depend on variable parameters, such as delays and bus connections
 for which the delay value or bus width is an expression with variables.
+Galaxy::preinitialize is then invoked to preinitialize the member blocks.
 
 \begin{example}
 Block* blockWithDottedName(const char* \var{name});
@@ -3247,6 +3281,12 @@ from one Block to another.  For code
 generation domains, the Particles typically only move during scheduling
 and these objects merely provide information on the topology.
 
+Currently, class PortHole is also responsible for the type resolution
+algorithm that assigns specific types to ANYTYPE portholes.  It would
+probably be better to put that function in Geodesic, which would make
+it simpler to provide domain-specific type resolution rules.  This
+improvement must await a redesign of the PortHole/Geodesic structure.
+
 \node class GenericPort
 \section{Class GenericPort}
 
@@ -3266,6 +3306,17 @@ which specifies that this port has the same type as another port.
 When a GenericPort is destroyed, any alias or typePort pointers are
 automatically cleaned up, so that other GenericPorts are never left
 with dangling pointers.
+
+The type() and typePort() functions belong to GenericPort, not PortHole,
+because multiportholes have a declared type and can be type-equivalenced
+to other portholes.  However, type resolution is strictly a PortHole notion.
+Multiportholes need no resolved type because they do not themselves transport
+particles, and indeed the concept would be ambiguous since the member ports
+of a multiporthole might have different resolved types.  The declared type of
+a multiporthole is automatically assigned to its children, and its children
+are automatically brought into any type equivalence set the multiporthole is
+made part of.  Thereafter, type resolution considers only the member
+portholes and not the multiporthole itself.
 
 \node GenericPort query functions
 \subsection{GenericPort query functions}
@@ -3289,9 +3340,12 @@ DataType type () const;
 \end{example}
 
 Return my DataType.  This may be one of the DataType values associated
-with Particle classes, or the special type \code{ANYTYPE}, which
-indicates that the type will be resolved by the \code{setPlasma}
-function using information from connected ports and \code{typePort} pointers.
+with Particle classes, or the special type `ANYTYPE', which indicates
+that the type must be resolved during setup.  Note that type() returns
+the port's declared type, as supplied to setPort().  This is not
+necessarily the datatype that will be chosen to pass through the port at
+runtime.  That type is available from the PortHole::resolvedType()
+function.
 
 \begin{example}
 GenericPort* alias() const;
@@ -3381,8 +3435,14 @@ Set the basic PortHole parameters: the name, parent, and data type.
 void inheritTypeFrom(GenericPort& \var{p});
 \end{example}
 
-Set up a port for determining the type of \code{ANYTYPE} connections.
-typePort pointers form a circular loop.
+Link to another port for determining the type of `ANYTYPE' connections.
+The "inheritance" relationship is actually a completely symmetric constraint,
+and so this function would have been better named sameTypeAs().  Any number
+of portholes can be tied together by inheritTypeFrom() calls.  Internally
+this is represented by chaining all the members of such a type equivalence
+set into a circular loop, which can be walked via typePort() calls.  If a
+multiporthole is made part of a type equivalence set, all its current and
+future children become part of the set automatically.
 
 \begin{example}
 virtual Plasma* setPlasma(Plasma *\var{useType} = NULL) = 0;
@@ -3540,11 +3600,26 @@ zero if never called.
 DataType resolvedType () const;
 \end{example}
 
-Return the data type computed by \code{PortHole::initialize} to resolve
-type conversions.  For example, if an INT output porthole is connected
-to a FLOAT input porthole, the resolved type (the type of the Particles
-that travel between the ports) will be FLOAT.  A null pointer will be
-returned if the type has not been set, e.g. before initialization.
+Return the data type computed by `PortHole::initialize' to resolve type
+conversions.  For example, if an INT output porthole is connected to a FLOAT
+input porthole, the resolved type (the type of the Particles that travel
+between the ports) will be FLOAT.  Two connected portholes will always return
+the same resolvedType.  A null pointer will be returned if the type has not
+yet been resolved, e.g. before initialization.
+
+\begin{example}
+DataType preferredType () const;
+\end{example}
+
+Return the "preferred" type of the porthole.  This is the same as the
+declared type (GenericPort::type()) if the declared type is not ANYTYPE.
+If the declared type is ANYTYPE, the preferredType is the type of the
+connected porthole or type equivalence set from which the ANYTYPE's true type
+was determined.  (If preferredType and resolvedType are not the same, the
+need for a run-time type conversion is indicated.  Code generation domains
+may choose to splice in type conversion stars to ensure that preferredType
+and resolvedType are the same at all ports.)  A null pointer will be returned
+if the type has not yet been resolved, e.g. before initialization.
 
 \begin{example}
 int numXfer() const;
@@ -4028,6 +4103,20 @@ When initialized, it creates that number of particles in its
 ParticleStack; these particles are obtained from the Plasma of the
 originating port (so they will be of the correct type).
 
+A severe limitation of the current Geodesic class is that it is designed
+around point-to-point connections, ie, a single source port to a single
+destination port.  This is a problem for domains that wish to support
+one-to-many geodesics (single source to multiple receivers) or many-to-many
+geodesics (such as multiple in/out ports connected to a common bus).
+Geodesic ought to be redesigned as a base class that supports any number of
+connected ports, with the restriction to point-to-point being a specialized
+subclass.  This would also allow a cleaner treatment of autofork (autoforking
+geodesics could just be a subclass of Geodesic).  It would be necessary
+to remove PortHole's belief that there is a unique far-side porthole, and
+that would require rethinking the porthole type resolution algorithm;
+probably type resolution should become a Geodesic function, not a PortHole
+function.  This area will be addressed in some future version of Ptolemy.
+
 \node Geodesic public members
 \subsection{Geodesic public members}
 
@@ -4323,6 +4412,202 @@ the interior port that is to be the alias.  The \code{isItInput} and
 \code{isItOutput} functions are implemented by forwarding the request
 to the alias.
 
+The PortHole type resolution algorithm
+--------------------------------------
+
+The type resolution algorithm is concerned with assigning concrete types
+to ANYTYPE portholes and resolving conflicts between the types of connected
+portholes.  The algorithm is somewhat complex since it tries to produce
+convenient results in an area where the "right" behavior is not always easy
+to define.  Ptolemy 0.7 introduces a new resolution algorithm that is hoped
+to produce more convenient and less surprising results than the method
+previously used.
+
+The problem of connecting ports of different types is simple to resolve:
+we say that the input porthole determines what particle type to use, and
+that any necessary type conversion takes place when the output porthole
+puts data into a particle (or buffer variable, in the case of codegen
+domains).  The opposite convention would be about equally defensible, but
+this is the one that has historically been used in Ptolemy.  It has the
+advantage that star writers can presume that the declared type of an input
+porthole is the data type that will actually be received, whenever the
+declared type is not ANYTYPE.
+
+Resolving ANYTYPE portholes is much more difficult.  We need to handle
+several fundamental cases:
+
+1) Printer and similar polymorphic stars, which accept any input type.
+These simply declare their inputs to be ANYTYPE, and we need to resolve
+them to the type of the connected output.  (Introducing any forced particle
+type conversion would be very undesirable.)
+
+2) Fork and similar stars, which want to bind multiple outputs to the type
+of a given input.  Here the input porthole and output portholes are ANYTYPE,
+and are bound into a type equivalence set by inheritTypeFrom().  If possible
+we want to resolve all these portholes to the type of the output porthole
+connected to the input.
+
+3) Merge and similar stars, which have a single output type-equivalenced to
+multiple inputs.  If the inputs all receive the same type of data, we should
+resolve the output to that type.  If there is no common input type, but the
+input connected to the single output has determinable type, we can resolve
+the output porthole to that type (since the data would ultimately get
+converted to that type, anyway).  If the connected input is ANYTYPE, we must
+declare error, because we have no good way to choose a type for the Merge's
+output.
+
+We have to recursively propagate type information in order to deal with
+chains of ANYTYPE stars, such as one Fork following another.
+
+In some cases the type is really undefined.  Consider this universe
+(using ptcl syntax)
+
+\begin{example}
+star f Fork; star p Printer
+connect f output f input 1
+connect f output p input
+\end{example}
+
+There are no types anywhere in the system.  We have little choice
+but to declare an error.  Thus, the fact that we will sometimes
+fail to assign a type is not an implementation shortcoming but an
+unavoidable property of the problem.
+
+These considerations lead to the following algorithm.  We first perform
+a recursive scan to resolve ANYTYPE portholes, the results of which are
+represented by a "preferred" type assigned to each porthole.  (A porthole
+of non-ANYTYPE declared type always has that type as its preferred type;
+so preferred type assignment is only interesting for ANYTYPE portholes.)
+Then, the "resolved" type of each connected pair of input and output
+portholes is the preferred type of the input porthole.  This is the type
+that will be used for actual data transported between those portholes.
+It is useful to explicitly store the preferred type, so that codegen domains
+can detect type mismatches just by looking at individual output portholes.
+A type conversion star can be spliced in wherever an output is found that
+has preferredType != resolvedType.
+
+Assignment of preferred types proceeds in two passes.  Pass 1 is "feed
+forward" from outputs to inputs.  Pass 2 is "feed back" from inputs to
+outputs; it is the dual of Pass 1.  Pass 2 is invoked only if Pass 1 is
+unable to choose a type for a porthole.  The details are:
+
+Pass 1: Non-ANYTYPE portholes are simply assigned their declared type as
+preferred type.  If an ANYTYPE porthole is not a member of an equivalence
+group, but is an input porthole and is connected to a porthole of
+pass-1-assignable type, that porthole's type becomes its preferred type.
+When an ANYTYPE porthole is a member of an equivalence group, the group is
+scanned to see if it includes any non-ANYTYPE portholes; if so, they must all
+agree in type, and that type becomes the preferred type of all members of the
+group.  But usually, all the members of an equivalence set will be ANYTYPE.
+Then, pass 1 scans all the input portholes of the group to see whether their
+connected portholes have pass-1-assignable type.  If at least one does, and
+all of the assignable ones have the same preferred type, then that common
+type becomes the preferred type of all the members of the equivalence group.
+
+Pass 2: If an unassigned ANYTYPE porthole is not a member of an equivalence
+group, but is connected to a porthole of type assignable by either pass 1 or
+pass 2, that porthole's type becomes its preferred type.  When an ANYTYPE
+porthole is a member of an equivalence group, all the output portholes of the
+group are scanned to see whether their connected portholes have type
+assignable by either pass 1 or pass 2.  If at least one does, and all of the
+assignable ones have the same preferred type, then that common type becomes
+the preferred type of all the members of the equivalence group.
+
+Pass 1 handles Fork-like stars as well as Merge stars whose inputs all have
+the same type.  Pass 2 does something reasonable with Merge stars that have
+inputs of different types: if the merge output is going to a port of knowable
+type, we may as well just output particles of that type.  An error is
+declared if a porthole's type remains unassigned after both passes.  This
+occurs if a Merge-like star has inputs of nonidentical types and an output
+connected to an (unresolvable) ANYTYPE input.  The user must insert type
+conversion stars to coerce the Merge inputs to a common type, so that the
+system can figure out what type to use for the Merge output.
+
+Notice that each pass will resolve an equivalence set if all the
+<b>assignable</b> connected portholes agree on a type; it is not required
+that all the connected portholes be assignable.  This rule is needed to allow
+resolution of schematics that contain type-free loops.  Here is an example:
+
+\begin{example}
+	star imp Impulse; star f Fork; star d Delay; star p Printer
+	connect imp output f input#1
+	connect f output d input
+	connect d output f input#2
+	connect f output p input
+\end{example}
+
+This schematic will work if we resolve all the ports to FLOAT (the output
+type of Impulse).  But if we insist on both Fork inputs being resolved before
+we assign a type to the Fork output, we will be unable to resolve the
+schematic.  So, once Pass 1 has recursively traversed the schematic and
+concluded that it can't yet assign a type to Fork's input#2, it uses the
+FLOAT type found at input#1 to resolve the type of the Fork portholes.
+Further recursion then propagates this result around the schematic.
+
+This rather baroque-looking algorithm does have some simple properties.  In
+particular, all members of an equivalence set are guaranteed to be assigned
+the same preferred type; an error will be reported if this is not possible.
+
+In some domains it is important that members of an equivalence set
+have the same resolved type, not just the same preferred type.  (For
+example, the CGC Fork star fails if this is not so, because its various
+portholes are all just aliases for a single variable.)  The domain can
+check this by seeing whether preferred type = resolved type for all
+portholes.  If the types are not the same, it can either report an error
+or splice in a type-conversion star to make them the same.
+
+Note: it might be better to cause this to happen on a per-star-type basis,
+not a per-domain basis, since one can imagine that some CG blocks would
+need strict type equality of portholes while others would not.  This
+improvement is not currently implemented.
+
+The porthole type resolution algorithm is dependent on the notion that every
+porthole is connected to just one other porthole.  If class Geodesic is ever
+redesigned to support multiple connections directly, some work would be
+needed.  A likely tactic is to move some or all of the resolution work into
+Geodesic.  A one-to-one Geodesic could enforce the same behavior described
+above, but one-to-many or many-to-many Geodesics would need different,
+possibly domain-dependent behavior.
+
+\node changes since Ptolemy 0.6
+\section{Changes since Ptolemy0.6}
+
+Ptolemy 0.7 introduces several changes related to porthole type resolution.
+
+Older versions used a much simpler ANYTYPE resolution algorithm, which
+essentially amounted to just pass 2 ("feed back") of the present method.
+That had the serious deficiency that it couldn't decide what to do with
+fork stars feeding inputs of multiple types.  For example, a fork star
+receiving INT and outputting to INT and FLOAT portholes would lead to
+a type resolution error.  In essence, the old code insisted on being
+able to push type conversions back across a fork, and would fail if it
+couldn't assign the same type to all the fork outputs.  The new algorithm
+solves this problem by delaying type conversions until after a fork.
+Occasionally this will introduce some inefficiency.  For example, if a
+fork receives INT and feeds two FLOATs, the new method leads to a type
+conversion being done separately on each fork output, whereas the old
+method would have generated only one conversion at the fork input.
+The improved ease of use of the new method is judged well worth this loss.
+
+Formerly, the member ports of a multiporthole were always constrained to have
+the same resolved type.  This is no longer true, since it gets in the way for
+polymorphic stars.  But if a multiporthole is tied to another porthole via
+inheritTypeFrom, then each member porthole will still be constrained to match
+the type of that other porthole, at least in terms of preferred type.
+
+Formerly, the HOF stars acted during the galaxy "setup" phase, in which each
+block within the galaxy receives its setup call.  This proved inadequate
+because porthole type resolution is done during setup; by the time a HOF star
+acted, the types of the portholes connected to it would already have been
+resolved.  For example, a HOFNop star formerly constrained all the particles
+passing through it to be of the same type, because the porthole resolver
+insisted on being able to choose a unique type for the HOFNop's output
+porthole, even though that porthole is just a dummy that won't even exist at
+runtime.  In Ptolemy 0.7, a "preinitialize" phase has been added so that HOF
+stars can rewire the galaxy and remove themselves before any block setup or
+porthole type resolution occurs.  The constraints on porthole types are then
+only those resulting from the rewired schematic.
+
 \node Particles and Messages
 \chapter{Particles and Messages}
 
@@ -4396,8 +4681,13 @@ the appropriate type conversion.
 virtual Particle& operator = (const Particle& \var{arg}) = 0;
 \end{example}
 
-Copy a Particle.  As a rule, we permit this only for Particles of the
-same type, and otherwise assert an error.
+Copy a Particle.  In general, we permit this only for Particles of the
+same type, and otherwise assert an error.  But the arithmetic particle
+types invoke type conversion, via the virtual casting operators, so as to
+allow assignment from other arithmetic particle types.  Without this
+exception, useful cases such as forking an INT output to INT and FLOAT
+inputs would fail in the simulation domains (because the fork stars use
+particle assignment).
 
 \begin{example}
 virtual int operator == (const Particle&) = 0;
@@ -5578,14 +5868,39 @@ static KnownBlock entry(proto,"MyClass");
 
 This code adds a prototype entry of the class to the known list.
 
+Dynamically constructed block types, such as interpreted galaxies,
+are added to the known list with a direct call to KnownBlock::addEntry.
+These cases should always supply an appropriate definition-source
+string so that conflicting block type definitions can be detected.
+
+KnownBlock keeps track of the source of the definition of every
+known block type.  This allows compile.c to determine whether an Oct
+facet needs to be recompiled (without the source information, different
+facets that have the same base name could be mistaken for each other).
+This also allows us to generate some helpful warning messages when
+a block name is accidentally re-used.  The source location information
+is currently rather crude for everything except Oct facets, but that's
+good enough to generate a useful warning in nearly all cases.
+
+KnownBlock assigns a sequential serial number to each definition or
+redefinition of a known block type.  This can be used, for example,
+to determine whether a galaxy has been compiled more recently than
+any of its constituent blocks.
+
 \begin{example}
-static void addEntry (Block &\var{block}, const char* \var{name}, int \var{onHeap});
+static void addEntry (Block & \var{block}, const char* \var{name}, 
+	int \var{onHeap} const char* \var{definitionSource});
 \end{example}
 
-This function actually adds the block to the list.  If \var{onHeap} is true,
-the block will be destroyed when the entry is removed or replaced from
-the list.  Separate lists are maintained for each domain; the block
-is added to the list corresponding to \code{\var{block}.domain()}.
+This function actually adds the block to the list.  Separate lists are
+maintained for each domain; the block is added to the list corresponding to
+`block.domain()'.  If onHeap is true, the block will be destroyed when the
+entry is removed or replaced from the list.
+definitionSource should be NULL for any block type defined
+by C++ code (this is what is passed by the KnownBlock constructor).
+It should be a hashstring'ed path name for a block defined by an
+identifiable file (such as an Oct facet), or a special case constant
+string for other cases such as the ptcl defgalaxy command.
 
 \begin{example}
 static const Block* find (const char* \var{name}, const char* \var{dom});
@@ -5613,6 +5928,10 @@ an object of the same class, but with default initializations
 For either of these, an error message is generated (with
 \code{Error::abortRun}) and a null pointer is returned if there is no
 match.
+
+To avoid a crash in the event of a self-referential galaxy definition,
+recursive clone or makeNew attempts are detected, and are terminated by
+generating an error message and returning a null pointer.
 
 \begin{example}
 static StringList nameList (const char* \var{domain});
@@ -5654,6 +5973,28 @@ KnownBlockIter.  It takes as an argument the name of a domain.  The
 argument may be omitted, in which case the default domain is used.
 Its \code{next} function returns the type \code{const Block *}; it
 steps through the blocks on the known list for that domain.
+
+\begin{example}
+static int isDefined (const char* \var{type}, const char* \var{dom},
+			   const char* \var{definitionSource});
+\end{example}
+
+If there is a known block of the given name and domain,
+return TRUE and pass back its definition source string.
+
+\begin{example}
+static long serialNumber (const char* \var{name}, const char* \var{dom});
+\end{example}
+
+Look up a KnownBlock definition by name and domain, and return its serial
+number.  Returns 0 iff no matching definition exists.
+
+\begin{example}
+static long serialNumber (Block& \var{block});
+\end{example}
+
+Given a block, find the matching KnownBlock definition,
+and return its serial number (or 0 if no matching definition exists).
 
 \node class KnownTarget
 \section{Class KnownTarget}
