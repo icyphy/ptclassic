@@ -88,15 +88,18 @@
 #       export $PATH
 # 4. Edit the TOOLS32 and TOOLS16 variables to point to the location
 #    of the 32 bit and 16 bit Microsoft Visual C++ tools.
-# 5. Build and install Tcl 8.0 by copying 
-#    $PTOLEMY/src/tcltk/tcl8.0.5pt/win/makefile.vc to makefile and 
+# 5. Build and install Tcl 8.0 by
 #    setting the following variables
+#    $PTOLEMY/src/tcltk/tcl8.0.5pt/win/makefile.vc
 #	TOOLS32		= d:\progra~1\micros~2\vc98
 #	TOOLS32_rc	= d:\progra~1\micros~2\common\msdev98
 #	TOOLS16		= $(TOOLS32)
 #	INSTALLDIR	= d:\users\ptolemy\tcltk\tcl.nt4.vc
 #    Then do:
-#	cd $PTOLEMY/src/tcltk/tcl8.0.5pt/win; nmake -f makefile.vc
+#	cd $PTOLEMY/src/tcltk/tcl8.0.5pt/win
+#	nmake -f makefile.vc
+#     You can ignore messages about problems with toolhelp.h
+#	nmake -f makefile.vc install
 #    If you get a message about mspdb60.dll missing, then be sure
 #    that d:\progra~1\micros~2\common\msdev98\bin is in your path.
 # 6. MSVC++ does not understand the Cygwin symbolic links, so you will
