@@ -457,7 +457,7 @@ jsinstr:
 	$(JSINSTR) $(JSINTRFLAGS) $(JSRCS)
 # If the jsoriginal directory does not exist, then instrument the Java files.
 jsoriginal:
-	@if [ ! -d jsoriginal ]; then \
+	@if [ ! -d jsoriginal -a "$(JSRCS)" != "" ]; then \
 		echo "$(JSINSTR) $(JSINTRFLAGS) $(JSRCS)"; \
 		$(JSINSTR) $(JSINTRFLAGS) $(JSRCS); \
 	fi
@@ -467,6 +467,7 @@ jsrestore:
 	$(JSRESTORE) $(JSRCS)
 	-rm -f jsoriginal/README
 	-rmdir jsoriginal
+	$(MAKE) clean
 
 # Compile the instrumented Java classes and include JavaScope.zip
 jsbuild:
