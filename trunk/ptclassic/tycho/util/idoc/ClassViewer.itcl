@@ -2405,7 +2405,7 @@ body ::tycho::IDoc::initializeMenubar {menubar} {
     $menubar addMenu special -label Special -after window -underline 0
     # Add font size control
     $menubar command biggerfont special \
-            -label "Bigger Font" -underline 0\
+            -label "Larger Font" -underline 0\
             -accelerator "C-+" -command "$this upSize"
         
     $menubar command smallerfont special \
