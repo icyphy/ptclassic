@@ -186,8 +186,10 @@ body ::tycho::PreferenceDialog::destructor {} {
 	puts $fd "# User preference settings\n"
 	foreach {group preference value} \
 		[::tycho::preference model different] {
-	    puts $fd "catch \{ ::tycho::preference model assign \
-		    $group $preference $value \}"
+	    set string "catch \{::tycho::preference model assign"
+	    lappend string $group $preference $value
+	    append string "\}"
+	    puts $fd $string
 	}
 	close $fd
     }
