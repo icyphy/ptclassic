@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
- Programmer:  Raza Ahmed
+ Programmer:  Raza Ahmed and Brian L. Evans
  Date of creation: 07/09/96
 
  Target for the generation of cost of individual stars in a galaxy.
