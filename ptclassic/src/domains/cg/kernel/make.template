@@ -40,6 +40,7 @@ AsmStar.h \
 AsmTarget.h \
 BaseMultiTarget.h \
 CGConnect.h \
+CGDisplay.h \
 CGStar.h \
 CGTarget.h \
 CGWormhole.h \
