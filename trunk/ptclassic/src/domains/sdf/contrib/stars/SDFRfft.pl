@@ -91,9 +91,10 @@ limitation of liability, and disclaimer of warranty provisions.
   go {
     int invflag = Inverse;
     int fftlength = fftSize;
+    int i;
     nb_fft F( invflag, fftlength / 2 );
 
-    for (int i = 0; i < int(InputSize); i++ )
+    for (i = 0; i < int(InputSize); i++ )
       In[ int(InputSize) - i - 1 ] = input%i;
     for (i = int(InputSize); i < fftlength; i++ )
       In[ i ] = 0;
