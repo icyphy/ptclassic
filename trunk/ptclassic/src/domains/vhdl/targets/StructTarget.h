@@ -110,6 +110,9 @@ protected:
 	// Combine all sections of code;
 	/*virtual*/ void frameCode();
 
+	// Method to write out com file for VSS if needed.
+	/*virtual*/ void writeComFile();
+
 	// virtual function to add additional codeStreams.
 	/*virtual*/ void addCodeStreams();
 
@@ -171,54 +174,82 @@ private:
 	void mergeSignalList(VHDLSignalList*);
 
 	// Connect a source of the given value to the given signal.
-	void connectSource(StringList, StringList);
+	void connectSource(StringList, StringList, StringList);
 
 	// Add a source component declaration.
-	void registerSource(StringList);
+	void registerSource(StringList="INTEGER");
 
 	// Connect a multiplexor between the given input and output signals.
 	void connectMultiplexor(StringList, StringList, StringList,
 				StringList);
 
 	// Add a multiplexor component declaration.
-	void registerMultiplexor(StringList type);
+	void registerMultiplexor(StringList="INTEGER");
 
 	// Connect a register between the given input and output signals.
 	void connectRegister(StringList, StringList, StringList, StringList);
 
+	// Connect a clock generator driving the given signal.
+	void connectClockGen(StringList);
+
+	// Add a clock generator declaration.
+	void registerClockGen();
+
 	// Add a register component declaration.
-	void registerRegister(StringList);
+	void registerRegister(StringList="INTEGER");
+
+	// Flag indicating if system clock generator is needed.
+        int systemClockUsed;
+
+	// Set the condition indicating system clock generator is needed.
+	void setSystemClockUsed() { systemClockUsed = 1; }
+
+	// Return the condition indicating if system clock generator is needed.
+        int systemClock() { return systemClockUsed; }
 
 	// Flag indicating if registers are needed.
-        int regsUsed;
+        int regIntsUsed;
+        int regRealsUsed;
 
 	// Set the condition indicating registers are needed.
-	void setRegisters() { regsUsed = 1; }
+	void setRegisterInts() { regIntsUsed = 1; }
+	void setRegisterReals() { regRealsUsed = 1; }
 
 	// Return the condition indicating if registers are needed.
-        int registers() { return regsUsed; }
+        int registerInts() { return regIntsUsed; }
+        int registerReals() { return regRealsUsed; }
 
 	// Flag indicating if multiplexors are needed.
-        int muxsUsed;
+        int muxIntsUsed;
+        int muxRealsUsed;
 
 	// Set the condition indicating multiplexors are needed.
-	void setMultiplexors() { muxsUsed = 1; }
+	void setMultiplexorInts() { muxIntsUsed = 1; }
+	void setMultiplexorReals() { muxRealsUsed = 1; }
 
 	// Return the condition indicating if multiplexors are needed.
-        int multiplexors() { return muxsUsed; }
+        int multiplexorInts() { return muxIntsUsed; }
+        int multiplexorReals() { return muxRealsUsed; }
 
 	// Flag indicating if sources are needed.
-        int sorsUsed;
+        int sorIntsUsed;
+        int sorRealsUsed;
 
 	// Set the condition indicating sources are needed.
-	void setSources() { sorsUsed = 1; }
+	void setSourceInts() { sorIntsUsed = 1; }
+	void setSourceReals() { sorRealsUsed = 1; }
 
 	// Return the condition indicating if sources are needed.
-        int sources() { return sorsUsed; }
+        int sourceInts() { return sorIntsUsed; }
+        int sourceReals() { return sorRealsUsed; }
 
 	// Add in sensitivity list of input ports.
 	// Do this explicitly for sake of synthesis.
 	void addSensitivities(VHDLCluster*, int);
+
+	// Add in wait statement with list of input ports.
+	// Do this explicitly for sake of simulation.
+	void addWaitStatement(VHDLCluster*, int);
 
 	// Add in variable refs here from variableList.
 	void addVariableRefs(VHDLCluster*, int);
@@ -253,14 +284,17 @@ private:
 	// Add in configuration declaration here from mainCompDeclList.
 	void buildConfigurationDeclaration(int);
 
+	// Generate the clock generator entity and architecture.
+	StringList clockGenCode();
+
 	// Generate the register entity and architecture.
-	StringList regCode();
+	StringList regCode(StringList);
 
 	// Generate the multiplexor entity and architecture.
-	StringList muxCode();
+	StringList muxCode(StringList);
 
 	// Generate the source entity and architecture.
-	StringList sourceCode();
+	StringList sourceCode(StringList);
 
 	// Merge all firings into one cluster.
 	void allFiringsOneCluster();
