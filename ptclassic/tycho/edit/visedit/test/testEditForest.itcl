@@ -51,9 +51,9 @@ test EditForest-1.1 {Create a Forest, then display it} {
     ff roots
     ff add e {e e} b
     set descr [ff describe]
-    catch {delete object .x}
-    ::tycho::EditForestWidget .x -forest ff
-    wm deiconify .x
+    set view [::tycho::view EditForest [list -graph ff]]
+    set win [$view displayer windowName]
+    wm deiconify $win
     after $duration removeobj $win
     list $descr
 } {}
