@@ -57,7 +57,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // enough to store tokens that represent numbers, pathnames, and strings.
 // Pathnames in Unix are limited to 256 characters.
 
-#define TOKSIZE 1024
+#define TOKSIZE 256
 
 /*************************************************************************
 
