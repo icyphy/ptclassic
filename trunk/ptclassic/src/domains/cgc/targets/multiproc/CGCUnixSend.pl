@@ -97,11 +97,16 @@ Produce code for inter-process communication (send-side)
 		
 	codeblock (block) {
 	int i, pos;
-	double fData;
+	union {
+		unsigned long l;
+		float f;
+	} myData;
+	
 	for (i = 0; i < $val(numData); i++) {
 		pos = $val(numData) - 1 + i;
-		fData = $ref(input,pos);
-		if (write($starSymbol(sId), &fData, sizeof(fData)) != sizeof(fData)) {
+		myData.f = (float) $ref(input,pos);
+		myData.l = htonl(myData.l);
+		if (write($starSymbol(sId), &myData.l, sizeof(myData)) != sizeof(myData)) {
 			printf("write fails.\n");
 			exit(1);
 		}

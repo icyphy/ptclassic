@@ -103,14 +103,19 @@ Produce code for inter-process communication (receive-side)
 		
 	codeblock (block) {
 	int i, pos;
-	double fData;
+	union {
+		unsigned long l;
+		float f;
+	} myData;
+
 	for (i = 0; i < $val(numData); i++) {
 		pos = $val(numData) - 1 + i;
-		if (read($starSymbol(newSId), &fData, sizeof(fData)) != sizeof(fData)) {
+		if (read($starSymbol(newSId), &myData.l, sizeof(myData)) != sizeof(myData)) {
 			printf("write fails.\n");
 			break;
 		}
-		$ref(output,pos) = fData;
+		myData.l = ntohl(myData.l);
+		$ref(output,pos) = myData.f;
 	}
 	}
 	go {
