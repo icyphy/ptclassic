@@ -150,7 +150,7 @@ body ::tycho::Compile::compile {filenames} {
 # Compile and load in each file in the list of filenames.
 #
 body ::tycho::Compile::compileAndLoad {filenames} {
-    eval compile $filenames
+    compile $filenames
     loadFiles
 }
 #######################################################################
