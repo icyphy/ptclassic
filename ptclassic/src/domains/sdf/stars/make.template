@@ -50,6 +50,8 @@ SRCS= \
  SDFCxDiff.pl \
  SDFCxGain.pl \
  SDFCxLMS.pl \
+ SDFCxLMSPlot.pl \
+ SDFCxRaisedCos.pl \
  SDFCxTable.pl \
  SDFDB.pl \
  SDFDTFT.pl \
@@ -78,6 +80,7 @@ SRCS= \
  SDFIntToBits.pl \
  SDFIntegrator.pl \
  SDFLMS.pl \
+ SDFLMSPlot.pl \
  SDFLevDur.pl \
  SDFLimit.pl \
  SDFLog.pl \
@@ -95,6 +98,7 @@ SRCS= \
  SDFSgn.pl \
  SDFSin.pl \
  SDFSqrt.pl \
+ SDFTrainer.pl \
  SDFUnwrap.pl \
  SDFUpSample.pl \
  SDFWaveForm.pl \
