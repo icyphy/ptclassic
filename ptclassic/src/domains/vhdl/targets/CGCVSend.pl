@@ -21,6 +21,14 @@ defstar {
   setup {
     classname = "CGCVSend";
     sndrcv = "snd";
+
+    if (strcmp(input.resolvedType(), "INT") == 0) 
+      format = "%d";
+    else if (strcmp(input.resolvedType(), "FLOAT") == 0) 
+      format = "%f";
+    else
+      Error::abortRun(*this, input.resolvedType(), ": type not supported");
+
     numXfer = input.numXfer();
     CGCVSynchComm::setup();
   }
@@ -31,8 +39,14 @@ defstar {
   $starSymbol(intptr) = 0;
   $starSymbol(status) = 0;
   if($starSymbol(status) >= 0) {
-    (void) sprintf($starSymbol(buffer), \"%d\", $ref(input));
-    $starSymbol(status) = write($starSymbol(xmitsock), $starSymbol(buffer), $starSymbol(nbytes));
+");
+
+    StringList oneline = "  (void) sprintf($starSymbol(buffer), \"";
+    oneline << format;
+    oneline << "\", $ref(input));";
+    addCode(oneline);
+    
+    addCode("$starSymbol(status) = write($starSymbol(xmitsock), $starSymbol(buffer), $starSymbol(nbytes));
     if($starSymbol(status) < 0) {
       perror($starSymbol(dummy));
     }

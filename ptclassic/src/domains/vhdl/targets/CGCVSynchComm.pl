@@ -41,6 +41,11 @@ defstar {
     type {string}
     default {"sndrcv"}
   }
+  defstate {
+    name {format}
+    type {string}
+    default {"%"}
+  }
   setup {
   }
 
