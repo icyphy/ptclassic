@@ -50,7 +50,7 @@ ITCL_SRCS =
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) html
 
-MISC_FILES = 
+MISC_FILES = README.txt
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
@@ -67,5 +67,3 @@ sources::
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
-
-
