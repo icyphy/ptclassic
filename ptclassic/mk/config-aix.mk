@@ -29,7 +29,7 @@
 # $Id$
 
 #	Programmer: Xavier Warzee (Thomson CSF)
-#
+#	            Alexander Kurpiers (a.kurpiers@uet.th-darmstadt.de)
 #
 #
 # --------------------------------------------------------------------
@@ -90,7 +90,10 @@ VEM_X11_LIBSPEC = \
 $(SMTLIB) -L/usr/lib -lXaw -lXmu $(X11EXT_LIBSPEC) -lIM -lXt -lX11
 
 # system libraries (libraries from the environment)
-SYSLIBS= -lbsd -lm
+# ordering dictates which pow function for ^ in parameter expressions is used
+# and what math functions Tcl/Tk uses: math lib must come before the bsd lib
+# fix sent by Alexander Kurpiers (a.kurpiers@uet.th-darmstadt.de)
+SYSLIBS= -lm -lbsd
 
 # octtools/attache uses this
 TERMLIB_LIBSPEC = -lbsd
