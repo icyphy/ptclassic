@@ -38,6 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "ConstIters.h"
+#include "CGUtilities.h"
 #include "CGCPortHole.h"
 #include "CGCGeodesic.h"
 #include "SDFStar.h"
@@ -330,9 +331,6 @@ CGCPrecisionHolder CGCPortHole::operator % (int offset) const
 
 CGCPrecisionHolder CGCPortHole::operator % (const char* symbolic_offset) const
 {
-	// function declared in CGCStar.cc
-	extern const char* sanitize(const char*);
-
 	CGCStar* star = (CGCStar*)this->parent();
 
 	// if this is a port that uses precision variables,
@@ -357,7 +355,7 @@ CGCPrecisionHolder CGCPortHole::operator % (const char* symbolic_offset) const
 		ref << "[(";
 
 		if (staticBuf()) ref << bufPos();
-		else ref << sanitize(star->starSymbol.lookup(name()));
+		else ref << ptSanitize(star->starSymbol.lookup(name()));
 		if (strcmp(symbolic_offset,"0"))
 			ref << "-(" << symbolic_offset << ')';
 		if (!linearBuf())	// use circular addressing
