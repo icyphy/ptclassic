@@ -61,7 +61,7 @@ class ::tycho::EditDiff {
     ####                         public methods                           ####
 
     # Compare files
-    method compareFile {{nothing {}}} {}
+    method compareFile {} {}
 
     # Keep the concurrency between filename and listentry file
     method configureUpdate {} {}
@@ -83,7 +83,10 @@ class ::tycho::EditDiff {
     method insertString {index str status} {}
 
     # Jump to the next difference
-    method jumpDifference {{incrdecr 1}} {}
+    method jumpDifference {incrdecr idx} {}
+
+    # openContext a file, then jump to the line
+    method jumpToLine {filename line} {}
 
     ####################################################################
     ####           protected methods and variables                  ####
@@ -93,10 +96,6 @@ class ::tycho::EditDiff {
 
     # Instance of the Exec which calls UNIX's diff utility
     private variable execDiff {}
-
-    # Color for old and new text
-    protected variable linecolor1 {{} {}}
-    protected variable linecolor2 {{} {}}
 
     # This keeps a list of diffs, output from UNIX's diff
     public variable diffResult {}
@@ -109,13 +108,26 @@ class ::tycho::EditDiff {
     # Keep track of where in the error we are now.
     public variable differenceListCount -1
 
+    ####################################################################
+    ####                     other variables                        ####
+    # File names that are being diffed.
+
+    public variable filename1
+    public variable filename2
+
+    # Color for old and new text. FIXME: This should be in preference!
+    public variable linecolor1 {{} {}}
+
+    # Color for old and new text. FIXME: This should be in preference!
+    public variable linecolor2 {{} {}}
+
+    # Used by insertLine-- update for every n number of times
+    # to speed up loading time.
+    private variable okaytoupdate 0
+
     # Keep track where we can insert in the text. This is added for
     # concurency with seeFragment during insertion.
     public variable textLineCount 1
-
-    # File names that are being diffed.
-    public variable filename1
-    public variable filename2
 }
 
 
@@ -146,16 +158,6 @@ body ::tycho::EditDiff::constructor {args} {
             -description {Read in both files, and start parsing} \
             -command "$this compareFile"
 
-    toolbar button addfile \
-            -text "Add File" \
-            -description {Read in one more file to compare} \
-            -command {} -state disabled
-
-    toolbar button remfile \
-            -text "Remove File" \
-            -description {Remove one more file entry} \
-            -command {} -state disabled
-           
     toolbar entry filename1 "File 1 name: " {} "puts " \
             -foreground [lindex $linecolor1 0] \
             -command "$this insertSelectedFileName 1"
@@ -230,17 +232,18 @@ body ::tycho::EditDiff::constructor {args} {
 #
 # This is the entry point to comparing files. It first clears up the
 # text buffer, read in UNIX's diff, and then compare.
-body ::tycho::EditDiff::compareFile {{nothing {}}} {
+body ::tycho::EditDiff::compareFile {} {
     markUnmodified
 
     set text $itk_component(text)
+    $text config -cursor left_ptr
     $text delete 0.0 end    ;# This replaces clear
     set differenceList {}
     set differenceListCount -1
     set textLineCount 1
 
     #global filename1 filename2
-    global linecolor1 linecolor2
+    #global linecolor1 linecolor2
     
     # Make sure that all the files are legal to begin with. Otherwise, exit.
     set flag 1
@@ -284,7 +287,6 @@ body ::tycho::EditDiff::compareFile {{nothing {}}} {
     set fileLineCount2 1
     
     # Entry point to reading the actual files and outputting to text
-    clear
     while {[set diffInfo [diffReport]] != "done"} {
 
         set info [lindex $diffInfo 0]
@@ -309,33 +311,55 @@ body ::tycho::EditDiff::compareFile {{nothing {}}} {
         # If changed (character c), delete (d), or added (a)
         set differenceBlock {}
         if {$info=="c" || $info=="d" || $info=="a"} {
-            lappend differenceBlock [$text index insert]
+            #lappend differenceBlock [$text index insert]
+            lappend differenceBlock $textLineCount
         }
+        # Setup tag bindings for either file
+        set tag l1[llength $differenceList]
+        set tag l2[llength $differenceList]
+        $text tag configure l1$tag -foreground [lindex $linecolor1 0]
+        $text tag bind l1$tag <Enter> "$text config -cursor dot"
+        $text tag bind l1$tag <Leave> "$text config -cursor left_ptr"
+        $text tag bind l1$tag <Button-1> \
+                "$this jumpDifference {} [llength $differenceList]"
+        $text tag bind l1$tag <Double-Button-1> \
+                "$this jumpToLine $filename1 $fileLineCount1"
+
+        $text tag configure l2$tag -foreground [lindex $linecolor2 0]
+        $text tag bind l2$tag <Enter> "$text config -cursor circle"
+        $text tag bind l2$tag <Leave> "$text config -cursor left_ptr"
+        $text tag bind l2$tag <Button-1> \
+                "$this jumpDifference {} [llength $differenceList]"
+        $text tag bind l2$tag <Double-Button-1> \
+                "$this jumpToLine $filename2 $fileLineCount2"
+        # Setup coloring
         if {$info=="c"} {
             # Output differences
             while {$fileLineCount1 <= $n2} {
-                insertString insert [gets $fd1]\n linecolor1
+                insertString insert [gets $fd1]\n l1$tag
                 incr fileLineCount1
             }
+
             while {$fileLineCount2 <= $n4} {
-                insertString insert [gets $fd2]\n linecolor2
+                insertString insert [gets $fd2]\n l2$tag
                 incr fileLineCount2
             }
             # Continue...
         } elseif {$info=="d"} {
             # Output the added lines
             while {$fileLineCount1 <= $n2} {
-                insertString insert [gets $fd1]\n linecolor1
+                insertString insert [gets $fd1]\n l1$tag
                 incr fileLineCount1
             }
         } elseif {$info=="a"} {
             while {$fileLineCount2 <= $n4} {
-                insertString insert [gets $fd2]\n linecolor2
+                insertString insert [gets $fd2]\n l2$tag
                 incr fileLineCount2
             }
         }
         if {$info=="c" || $info=="d" || $info=="a"} {
-            lappend differenceBlock [$text index insert]
+            #lappend differenceBlock [$text index insert]
+            lappend differenceBlock $textLineCount
             lappend differenceList $differenceBlock
         }
     }
@@ -417,15 +441,19 @@ body ::tycho::EditDiff::help {} {
 }
 
 ###################################################################
-####
+#### insertString
+# modified to handle cases
+#
 body ::tycho::EditDiff::insertString {index str {status {common}}} {
-    #configure -readonly 0
     $itk_component(text) insert $textLineCount.0 $str $status
-    incr textLineCount
-    #configure -readonly 1
 
-    # This is here as an attempt to speed up responce time.
-    ::tycho::safeUpdate $this
+    incr textLineCount
+    if {[expr [incr okaytoupdate] % 50]==0} {
+        # This is here as an attempt to speed up responce time.
+        # increase number to increase overall speed.
+        # decrease number to increase responce time.
+        ::tycho::safeUpdate $this
+    }
 }
 
 ###################################################################
@@ -452,30 +480,55 @@ body ::tycho::EditDiff::insertSelectedFileName {num} {
 ###################################################################
 ####
 # Jump to the next difference
-body ::tycho::EditDiff::jumpDifference {{incrdecr 1}} {
+body ::tycho::EditDiff::jumpDifference {{incrdecr 1} {idx {}}} {
     # No difference, return
     if {[llength $differenceList]==0} {return}
     
-    incr differenceListCount $incrdecr
-    # Overflow! Warning:
-    if {$differenceListCount==[llength $differenceList]} {
-        incr differenceListCount -1
-    }
-    if {$differenceListCount==-1} {
-        incr differenceListCount 1
+
+    if {$idx=={}} {
+        # Choose to incr or decr
+        incr differenceListCount $incrdecr
+        # Overflow! Warning:
+        if {$differenceListCount==[llength $differenceList]} {
+            incr differenceListCount -1
+            tycho::warn {No more differences!}
+        }
+        if {$differenceListCount==-1} {
+            incr differenceListCount 1
+            tycho::warn {No more differences!}
+        }
+    } elseif {$idx!={}} {
+        set differenceListCount $idx
+        return
+    } else {
+        error "Passing empty params to jumpDifference"
     }
     
     # Extract begin and ending block numbers
-    set differenceBlock [lindex $differenceList $differenceListCount]
-    regexp {([0-9]+).0 ([0-9]+).0} $differenceBlock match \
-            differenceBegin differenceEnd
+    set diffBlock [lindex $differenceList $differenceListCount]
+    set differenceBegin [lindex $diffBlock 0]
     
-    # Highlight from end to beginning to be sure that we always see
-    # the beginning of a difference block.
-    for {set i $differenceBegin} {$i != $differenceEnd} {incr i} {
-        # Indexing is different for seeFragment
-        $this seeFragment "line $i"
-    }
+    # Highlight just the beginning of the difference.
+    # Previously, highlighting the entire block is too annoying.
+    $this seeFragment "line [expr $differenceBegin]"
+}
+
+#######################################################################
+#### jumpToLine
+# This will open file context, and jump to entry number.
+#
+body ::tycho::EditDiff::jumpToLine {filename line} {
+    # FIXME: directory could potentially be anywhere, specified in Makefile.
+    # Name of our editor/viewer
+    set editorName [::tycho::File::openContext $filename]
+    set editorName [string trim $editorName :]
+
+    # Jump to the line in editor
+    $editorName seeFragment "line $line"
+    # THe following is added because if a file has not been opened,
+    # then seeFragment will be called too quickly, thus no line
+    # will be selected.
+    after 1000 "$editorName seeFragment \"line $line\""
 }
 
 
