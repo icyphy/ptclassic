@@ -151,3 +151,21 @@ if { [lsearch -exact $auto_path $env(TEXTEDIT_LIBRARY)] == -1 } {
 	-category "text" \
 	-underline 0
 
+# Matlab console
+if {[uplevel #0 info commands matlab] != {}} {
+    ::tycho::register mode "matlab" \
+	    -command {::tycho::view Matlab -file {%s}} \
+	    -viewclass ::tycho::Matlab \
+	    -label {Matlab Console}  \
+	    -category "tool"
+}
+
+# Mathematica console
+if {[uplevel #0 info commands mathematica] != {}} {
+    ::tycho::register mode "mathematica" \
+	    -command {::tycho::view Mathematica -file {%s}} \
+	    -viewclass ::tycho::Mathematica \
+	    -label {Mathematica Console}  \
+	    -category "tool"
+}
+
