@@ -17,11 +17,14 @@ CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 VHDLKERNEL = $(ROOT)/src/domains/vhdl/kernel
+VHDLSTARS = $(ROOT)/src/domains/vhdl/stars
+CGCSTARS = $(ROOT)/src/domains/cgc/stars
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
 CGKERNEL = $(ROOT)/src/domains/cg/kernel
+CGCKERNEL = $(ROOT)/src/domains/cgc/kernel
 
-INCL = -I$(VHDLKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) \
-		-I$(CGKERNEL)
+INCL = -I$(VHDLKERNEL) -I$(VHDLSTARS) -I$(CGCSTARS) -I$(SDFKERNEL) \
+	-I$(KERNDIR) -I$(CGKERNEL) -I$(CGCKERNEL)
 
 SRCS = StructTarget.cc SynthTarget.cc SimTarget.cc SimMTTarget.cc SimVSSTarget.cc
 HDRS = $(SRCS:.cc=.h)
