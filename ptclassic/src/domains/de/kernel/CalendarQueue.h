@@ -1,6 +1,6 @@
 /**************************************************************************
 Version identification:
-@(#)CalendarQueue.h	1.15	11/25/92
+$Id$ $Revision$
 
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
@@ -89,12 +89,6 @@ public:
 	// Numerically smaller number represents the higher priority.
 	// (i.e., highest level is at the tail)
 	CqLevelLink* levelput(Pointer a, double v, double fv, Star* dest);
-
-	// The following takes care of the case where levelput is called
-	// directly without going thru pushHead. In that case it is called
-	// with three arguments and dest must be internallu calculated.
-	CqLevelLink* levelput(Pointer a, double v, double fv);
-
 
 	// Push back the link just gotten.
 	void pushBack(CqLevelLink*);
