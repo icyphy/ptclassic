@@ -68,7 +68,7 @@ public:
 
 	// output a comment.  Default form uses "outputLineOrientedComment"
 	// to make comments beginning with semicolons.
-	virtual void outputComment (const char*);
+	void outputComment (const char*);
 
 	// useful function for comment generation
 	void outputLineOrientedComment(const char* prefix,

@@ -41,6 +41,10 @@ public:
 	virtual void writeCode(UserOutput&);
 	int isA(const char*) const;
 
+	// output a comment.  Default form uses "outputLineOrientedComment"
+	// to make comments beginning with semicolons.
+	virtual void outputComment (const char*);
+
 	// destructor
 	~CGTarget();
 };

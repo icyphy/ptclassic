@@ -89,3 +89,10 @@ void CGTarget :: writeCode(UserOutput& o) {
 ISA_FUNC(CGTarget,Target);
 
 CGTarget :: ~CGTarget() { delSched();}
+
+void CGTarget :: outputComment (const char* msg) {
+	StringList code = "/* ";
+        code += msg;
+        code += " */\n";
+        addCode(code);
+}
