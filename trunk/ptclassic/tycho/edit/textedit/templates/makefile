@@ -30,9 +30,9 @@
 ##########################################################################
 
 # Root of Tycho directory
-ROOT =		../../../..
+ROOT =		../../..
 # True source directory
-VPATH =		$(ROOT)/editors/textedit/doc/template
+VPATH =		$(ROOT)/editors/textedit/template
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
