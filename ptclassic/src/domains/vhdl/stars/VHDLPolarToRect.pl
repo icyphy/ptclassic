@@ -70,8 +70,8 @@ $temp(sin,float) := $temp(term11,float) - $temp(term12,float) +
   $temp(term13,float) - $temp(term14,float) + $temp(term15,float) -
   $temp(term16,float);
 
-$ref(x) := $ref(magnitude) * $temp(cos,float);
-$ref(y) := $ref(magnitude) * $temp(sin,float);
+$ref(x) $assign(x) $ref(magnitude) * $temp(cos,float);
+$ref(y) $assign(y) $ref(magnitude) * $temp(sin,float);
 	}
 	go {
 	  addCode(std);
