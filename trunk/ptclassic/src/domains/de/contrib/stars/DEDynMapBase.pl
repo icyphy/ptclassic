@@ -250,8 +250,8 @@ check the current eventQueue for any pending pointer to it (CQScheduler) or for 
             // get the block from the list and remove it from the list
             // first check whether or not the list exists
             if (!list_t) {
-                Error::abortRun(*this,"No DynBlock exists, so I can't 
-                delete one");
+                Error::abortRun(*this,
+			"No DynBlock exists, so I can't delete one");
                 return;
             }
             else {
