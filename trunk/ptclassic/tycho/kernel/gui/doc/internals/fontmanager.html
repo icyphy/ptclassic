@@ -4,147 +4,147 @@
 <Title>The FontManager Class</title>
 </head>
 <body bgcolor="#faf0e6">
-<h1><a name="FontManager class">The FontManager Class</a></h1>
+<h1><a name="FontManager class">The FontManager and FontDialog Classes</a></h1>
 <p>
 <ul>
 <li><a href="#fonts, examining">Examining Fonts</a>
 <li><a href="#fonts, setting">Setting Fonts Interactively</a>
 <li><a href="#font utilities">Font Utilities</a>
 <ul COMPACT>
-	<li><a href="#font, checking">Checking a Font</a>
-	<li><a href="#font, specification">Getting a Font
-		from a Specification</a>
-	<li><a href="#font, finding valid">Finding a Valid Font</a>
-	<li><a href="#default fonts">Default Fonts</a>
+	<li><a href="#font, sizes">Font Sizes</a>
+	<li><a href="#font, families">Font Families and Types</a>
 </ul>
 </ul>
 <p>
 <h2><a name="fonts, examining">Examining Fonts</a></h2>
-The FontManager class in Tycho provides a top-level window within
-which the user can select a font, together with a set of utilities
-for controlling X window fonts.  The simplest use of the class is as follows:
+
+The FontManager class in Tycho provides a simple interface to the
+arcane font specification that is used by the X window system. The
+FontDialog class in turn uses the FontManager to provide the user with
+a window within which fonts cen be previewed and selected.
+
+ <P>
+The simplest use of these classes is as follows:
 <tcl><pre>
-::tycho::FontManager .fontmanager
-.fontmanager centerOnScreen
+::tycho::queryfont Times 12 Italic
 </pre></tcl>
-This creates an interactive window that permits the user
-to try out the available fonts.
-Rather than exposing to the user the arcane font specification
-that is used by the X window system, this window provides
-a set of pull-down menus that can be used to select fonts
-by family, size, weight, and style.  Since some of the best
-X window fonts do not conform to this partitioning, a
-separate menu is provided for selecting miscellaneous fonts
-by name.  For example, the 9x15 and 10x20 fonts are particularly
-nice screen fonts.  When the user selects a font,
-a sample is displayed.
+
+This creates an interactive window that permits the user to try out
+the available fonts by selecting the family, size, and style (roman,
+bold, italic, and so on) from pull-down menus.  Since some of the best
+X window fonts -- 9x15 and 10x20, for example, are particularly nice
+screen fonts -- the font manager provides these as a psuedo font
+"Screen."  When the user selects a font, a sample is displayed.
+
+<P> The arguments passed to this procedure represent the initial font
+to be displayed, as its family, size, and style. Any number may be
+supplied (provided they remain in the right order). If none are
+supplied, the font default to "Helvetica 12 Roman."
+
 <p>
 <h2><a name="fonts, setting">Setting Fonts Interactively</a></h2>
-The FontManager class can be used to set fonts in any Tycho text widget.
-Opening a FontManager with a specified -okcommand option is one way
-to do this.
-For example, the following code will query the user for
-a font selection, and then post the font name in a new window when
-the user clicks the OK button:
+
+The FontDialog just given returns the selected font when the user
+presses OK, or the name of the initial font if the used presses
+Cancel. This can be used to set fonts in any Tycho text
+widget.  For example, the following code will query the
+user for a font selection, and then post the font name in a new window
+when the user clicks the OK button:
+
 <tcl><pre>
-::tycho::FontManager .fm &#92
-        -okcommand "::tycho::post \[.fm getCurrentFont\]"
-.fm centerOnScreen
+set font [::tycho::queryfont Lucida 14 BoldItalic]
+::tycho::post $font
 </pre></tcl>
-The backslashes in front of the square brackets are needed to defer
-the evaluation of the <code>getCurrentFont</code> method until
-the OK button is pushed.
+
+ <P>The FontDialog class returns only a symbolic representation of the
+font. To convert this into a system-dependent font, use the
+<code>::tycho::font</code> procedure. For example:
+
+<tcl><pre>
+set font [::tycho::queryfont Screen 14]
+::tycho::post [eval ::tycho::font $font]
+</pre></tcl>
+
+The font manager goes to some lengths to find a reasonable alternative
+font if the requested one is not available on the system. For example,
+try selecting the "Screen" font in an italic style: you will get a
+courier font instead. The <code>::tycho::font</code> procedure will
+always return a valid system font, even if it cannot find a reasonable one:
+as a last resort, it will return the font "fixed".
+
+
 <p>
 <h2><a name="font utilities">Font Utilities</a></h2>
-For the convenience of applications that wish to directly control
-fonts, without user intervention, an instance of the FontManager class
-is created when Tycho starts up in tycho namespace.
-This instance, called .tychoFonts, is never mapped to the screen.
-By interacting with it through its public members, however, an
-application can check the validity of a font, find a font given
-a prioritized list, or query for the default fonts used in Tycho
-(which can vary by installation, since X window fonts are not
-standardized).
+
+<h3><a name="font, sizes">Font Sizes</a></h3>
 <p>
-<h3><a name="font, checking">Checking a Font</a></h3>
-<p>
-The <a name="fontValid method">"fontValid" method</a>
-of the FontManager returns zero or one
-if the specified font is invalid or valid (installed on the current system).
-For example, the following checks to see whether the font 9x15
-is installed on your system:
+The font manager provides procedures that give applications more
+detailed control over fonts. Firstly, <code>::tycho::font</code> can
+"shift" up or down by some number of sizes:
+
 <tcl><pre>
-if [::tycho::.tychoFonts fontValid 9x15] {
-    ::tycho::post {The 9x15 font is available}
-} {
-    ::tycho::post {The 9x15 font is not available}
-}
+::tycho::post [eval ::tycho::font $font -2]
 </pre></tcl>
-<p>
-<h3><a name="font, specification">Getting a Font from a Specification</a></h3>
-The <a name="getFont method">"getFont" method</a> takes as arguments a
-font specification, and checks to see whether the font is
-available on the current system. If it is, it return the font name.
-Otherwise, return the empty string. A font specification consists of
-four items, the family, point size, weight, and style. Common
-families are "times", "courier", and "helvetica". Reasonable point
-sizes are 12, 14, 18, and 24. The weight is typically either "medium"
-or "bold", and the style is either "r" or "i" for roman or italic.
+
+
+The posted font name is a font that is two sizes smaller than
+the font you selected in the previous dialog box. To access this
+facility directly, use <code>::tycho::FontManager::size</code>:
+
 <tcl><pre>
-set font [::tycho::.tychoFonts getFont times 18 medium i]
-if {$font != {}} {
-    ::tycho::post "The font name is: $font"
-} {
-    ::tycho::post {No font was found}
-}
+::tycho::post [::tycho::FontManager::size 11 +1]
 </pre></tcl>
-<p>
-<h3><a name="font, finding valid">Finding a Valid Font</a></h3>
-<p>
-Frequently, applications will wish to search through some set of
-preferred fonts before resorting to the only font guaranteed to exist
-on all systems, "fixed".  The method <a name="findFont method">"findFont"</a>
-stakes a list of
-specifications and tries to find a font that matches one in the list.
-Specifications earlier in the list are given priority.
-A specification is either a font name or a list with four items. The
-items are the family, point size, weight, and style.
-These items have the same meaning as that used in the
-"<a href="#getFont method">getFont</a>" method.  For example, the following
-code will try to use the 9x15 font, but if it is not installed,
-it will try to use a courier font, and if that is not installed,
-it will resort to "fixed".
+
+Since 11 is not a valid font size, this procedure rounds it
+up to the next valid size (12) and then selects the next size up
+again.
+
+<h3><a name="font, families">Font Families and Types</a></h3>
+
+The font manager understands three "types" of font:
+<I>serif</I>, <I>sans-serif</I>, and <I>constant-width</i>.
+To find out the families in a particular type, use
+<code>::tycho::FontManager::family</code>:
+
 <tcl><pre>
-::tycho::post [
-    ::tycho::.tychoFonts findFont {
-         9x15
-         {courier 14 medium r}
-    }
-]
+::tycho::post [::tycho::FontManager::family serif]
 </pre></tcl>
-The "findFont" method always returns a valid font name.
-<p>
-<h3><a name="default fonts">Default Fonts</a></h3>
-<p>
-The <a name="defaultFont method">"defaultFont" method</a> returns the name of a
-preferred font from a list of possibilities.
-The possible options are fixed, fixedBold, fixedItalic,
-variable, variableBold, and variableItalic.
-For example, to identify the font that Tycho is using as its
-default entry font, issue the following command
+
+You can supply these types as arguments to <code>::tycho::queryfont</code>
+and <code>::tycho::font</code>, and the font manager will choose
+a font of the given type. Unless your installation of
+tycho has changed the font manager settings, this window will
+display the system-dependent name for 14-pt Courier:
+
 <tcl><pre>
-::tycho::post [
-    ::tycho::.tychoFonts defaultFont entryFont
-]
+::tycho::post [::tycho::font constant-width 14]
 </pre></tcl>
-<p>
+
+
+Some applications may need more fonts than the font manager provides
+by default. To add a font family, use the
+<code>::tycho::FontManager::family</code> again:
+
+<tcl><pre>
+::tycho::FontManager::family serif Rockwell times]
+</pre></tcl>
+
+The first argument is the type of font; the second is the new family, and
+following arguments are alternate families that are tried if the
+given family cannot supply a font in the requested size and style.
+Bring up the font dialog again: you will see the new family
+in the Famiiy menu.
+
+ <p>
+<a href="../codeDoc/FontManager.html">FontManager class documentation</a><br>
+<a href="../codeDoc/FontDialog.html">FontDialog class documentation</a><br>
 <a href="../../../doc/index.html">Tycho Home Page</a><br>
 <p>
 <HR>
-Copyright &#169 %Q%, The Regents of the University of California.
+Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: %D%,
+Last updated: 96/11/20,
 comments to: <author>eal@eecs.berkeley.edu</author>
 </body>
 </html>
