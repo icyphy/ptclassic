@@ -49,7 +49,8 @@ HDRS		= and_procs.h \
 		merge_procs.h \
 		or_procs.h \
 		region_procs.h \
-		scan.h
+		scan.h \
+		sort.h
 
 LIBCSRCS	= add_region.c \
 		and.c \
