@@ -173,9 +173,12 @@ bind Entry <Control-k> {
 ::tycho::register extensions "indexbrowser" .idx
 
 ########### special viewing modes
+# FIXME: .idoc should bring up "generic" class viewer.
+# Language-specific cases are handled by the mode variable
+# in the header string.
 # ::tycho::register extensions "idoc" .idoc
-::tycho::register extensions "itclclass" .itclclass
-::tycho::register extensions "javaclass" .javaclass
+# ::tycho::register extensions "itclclass" .itclclass
+# ::tycho::register extensions "javaclass" .javaclass
 
 ########### tool modes
 ::tycho::register extensions "itclclasslist" .icl
