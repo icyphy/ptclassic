@@ -255,6 +255,55 @@ test SDFFloatToCx-2 { SDFFloatToCx: fractional steps} {
 }}
 
 ######################################################################
+#### test SDFFloatToCx
+# 
+test SDFFloatToCx-3 { SDFFloatToCx: Connect to a fork} {
+    set star FloatToCx
+    reset __empty__
+    domain SDF
+    newuniverse $star SDF
+    target loop-SDF
+
+    star Rampa Ramp
+    set tmpfile [sdfSetupPrinter]
+    set tmpfile2 [sdfSetupPrinter Printb]
+    star "$star.a" $star
+
+    star Fork.output=21 Fork
+	numports Fork.output=21 output 2
+
+    connect Rampa output "$star.a" input
+    connect Fork.output=21 input "$star.a" output
+    connect Fork.output=21 output#1 Printa input
+    connect Fork.output=21 output#2 Printb input
+
+    run 10 
+    wrapup
+
+    list [readTmpFile $tmpfile] [readTmpFile $tmpfile2]
+} {{{(0.0,0.0)	
+(1.0,0.0)	
+(2.0,0.0)	
+(3.0,0.0)	
+(4.0,0.0)	
+(5.0,0.0)	
+(6.0,0.0)	
+(7.0,0.0)	
+(8.0,0.0)	
+(9.0,0.0)	
+}} {{(0.0,0.0)	
+(1.0,0.0)	
+(2.0,0.0)	
+(3.0,0.0)	
+(4.0,0.0)	
+(5.0,0.0)	
+(6.0,0.0)	
+(7.0,0.0)	
+(8.0,0.0)	
+(9.0,0.0)	
+}}}
+
+######################################################################
 #### Test SDFFloatToFix
 # 
 test SDFFloatToFix { SDFFloatToFix} {
