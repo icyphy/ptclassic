@@ -107,7 +107,9 @@ body ::tycho::Point::_aspect {id canvas slate args} {
     } else {
 	foreach aspect $opts(-aspects) {
 	    switch -exact $aspect {
-		"origin" {
+		"origin" -
+                "center" -
+                "c" {
 		    set result $coords
 		}
 		default {
