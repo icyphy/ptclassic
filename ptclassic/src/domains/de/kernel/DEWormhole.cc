@@ -72,7 +72,7 @@ LOG_NEW; return new DEWormhole(gal.clone()->asGalaxy(), target->cloneTarget());
 // put the wormhole into the process queue.
 void DEWormhole :: sumUp() {
 	if (scheduler()->stopBeforeDeadlocked()) {
-		DEScheduler* sched = (DEScheduler*) parent()->scheduler();
+		DEScheduler* sched = (DEScheduler*) outerSched();
 		DEStar* me = this;
 		sched->eventQ.levelput(me, sched->now(), 0);
 	}
@@ -85,7 +85,7 @@ void DEWormhole :: sumUp() {
 //	the stopTime of the DEScheduler.
 
 double DEWormhole :: getStopTime() {
-	DEScheduler* sched = (DEScheduler*) parent()->scheduler();
+	DEScheduler* sched = (DEScheduler*) outerSched();
 	if (sched->syncMode) {
 		return sched->now();
 	} else {
@@ -167,10 +167,10 @@ void DEfromUniversal :: sendData ()
 	
 		// 2. copy the timeMark from ghostPort if it is an input.
 		if (DEfromUniversal :: isItInput()) {
-			s = (DEScheduler*) parent()->scheduler();
+			s = (DEScheduler*) innerSched();
 			timeMark = ghostPort->getTimeMark() * s->relTimeScale;
 		} else {
-			s = (DEScheduler*) parent()->parent()->scheduler();
+			s = (DEScheduler*) outerSched();
 			timeMark = s->now();
 		}
 
