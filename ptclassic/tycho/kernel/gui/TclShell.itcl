@@ -236,7 +236,7 @@ body ::tycho::TclShell::constructor {args} {
     bind $itk_component(text) <Button-1> {
 	set _tychoTclShellGlobalRememberedCursorPosition [%W index insert]
 	tkTextButton1 %W %x %y
-	%W tag remove sel 0.0 end
+	%q tag remove sel 0.0 end
 	# Adjust the insertion cursor so that it is not before the prompt
 	%Q adjustInsertionCursor $_tychoTclShellGlobalRememberedCursorPosition
 	break
@@ -246,7 +246,7 @@ body ::tycho::TclShell::constructor {args} {
 	set _tychoTclShellGlobalRememberedCursorPosition [%W index insert]
 	set tkPriv(selectMode) word
 	tkTextSelectTo %W %x %y
-	catch {%W mark set insert sel.first}
+	catch {%q mark set insert sel.first}
 	# Adjust the insertion cursor so that it is not before the prompt
 	%Q adjustInsertionCursor $_tychoTclShellGlobalRememberedCursorPosition
 	break
@@ -256,7 +256,7 @@ body ::tycho::TclShell::constructor {args} {
 	set _tychoTclShellGlobalRememberedCursorPosition [%W index insert]
 	set tkPriv(selectMode) line
 	tkTextSelectTo %W %x %y
-	catch {%W mark set insert sel.first}
+	catch {%q mark set insert sel.first}
 	# Adjust the insertion cursor so that it is not before the prompt
 	%Q adjustInsertionCursor $_tychoTclShellGlobalRememberedCursorPosition
 	break
