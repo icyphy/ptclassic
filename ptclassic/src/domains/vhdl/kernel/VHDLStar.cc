@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "VHDLStar.h"
 #include "VHDLTarget.h"
+#include <stdio.h>              // sscanf()
 #include <fstream.h>
 
 // The following is defined in VHDLDomain.cc -- this forces that module
