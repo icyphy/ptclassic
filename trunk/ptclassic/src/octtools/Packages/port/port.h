@@ -133,7 +133,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #ifdef _IBMR2
+
+#ifdef aix
+#define _BSD 44
+#else
 #define _BSD
+#endif /* aix */
+
 #ifndef _POSIX_SOURCE
 #define _POSIX_SOURCE		/* Argh!  IBM strikes again */
 #endif
