@@ -393,7 +393,7 @@ Class:	\fBFrame\fR
 .IP
 A frame containing the children of a tree node.  This frame is not
 created until a child is added to that node with the \fBadd\fR method.
-See the "frame" widget manual entry for details on the frame item.
+See the "frame" widget manual entry for details.
 .LP
 .nf
 Name:	\fItag\fR\fBbutton\fR
@@ -401,7 +401,7 @@ Class:	\fBButton\fR
 .fi
 .IP
 The button of a tree node. See the "button" widget manual entry for
-details on the buttonitem.
+details.
 .LP
 .nf
 Name:	\fItag\fR\fBlabel\fR
@@ -409,7 +409,7 @@ Class:	\fBLabel\fR
 .fi
 .IP
 The label of a tree node. See the "label" widget manual entry for
-details on the label item.
+details.
 .fi
 
 .SH EXAMPLE
