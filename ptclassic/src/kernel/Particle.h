@@ -3,7 +3,8 @@
 
 #include "StringList.h"
 #include "DataStruct.h"
-#include <Complex.h>
+// include all of the Complex class except the stream functions
+#include "ComplexSubset.h"
 
 /**************************************************************************
 Version identification:
