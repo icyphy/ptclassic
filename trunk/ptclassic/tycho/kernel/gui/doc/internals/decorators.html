@@ -109,13 +109,13 @@ key bindings as well as displaying the accelerator string.)
 <tcl><pre>
 $f.mb addSeparator Help
 $f.mb add Foo Help -command {::tycho::inform Foo!}
-</tcl></pre>
+</pre></tcl>
 
  <P>Individual menu entries can be disabled and enabled:
 
 <tcl><pre>
 $f.mb disable {Tycho Home Page}
-</tcl></pre>
+</pre></tcl>
 
 (Pop down the Help menu: the Tycho Home Page entry is greyed
 out and cannot be invoked.) Whole menus can be disabled
@@ -123,14 +123,14 @@ in exactly the same way:
 
 <tcl><pre>
 $f.mb disable File
-</tcl></pre>
+</pre></tcl>
 
 To re-enable disabled menus or entries, just call <code>enable</code>:
 
 <tcl><pre>
 $f.mb enable {Tycho Home Page}
 $f.mb enable File
-</tcl></pre>
+</pre></tcl>
 
 For more detailed information on menu bars, see the 
 <a href="../codeDoc/MenuBar.html">MenuBar</a> and 
