@@ -220,6 +220,11 @@ and disclaimer of warranty provisions, push the button below. "
     bind .version.bm <Button> "wm iconify ."
     bind . <Key> "wm iconify ."
     bind .version <Key> "wm iconify ."
+    bind .version.msg <Key> "wm iconify ."
+    bind .version.msg.msg1 <Key> "wm iconify ."
+    bind .version.msg.msg2 <Key> "wm iconify ."
+    bind .version.bm <Key> "wm iconify ."
+
 }
 
 ###################################################################
