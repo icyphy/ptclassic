@@ -34,8 +34,10 @@
 # Based on pp 344-346 of Harrison and McClellan's "Effective Tcl/Tk
 # Programming" book
 
-package require tycho.kernel.gui
-package require tycho.kernel.html
+if [info exists tk_version] {
+    package require tycho.kernel.gui
+    package require tycho.kernel.html
+}
 
 package provide tycho.util.tydoc 2.0
 
@@ -46,37 +48,89 @@ if { [lsearch -exact $auto_path $env(TYDOC_LIBRARY)] == -1 } {
 }
 
 
-########### special viewing modes
-# FIXME: .idoc should bring up "generic" class viewer.
-# Language-specific cases are handled by the mode variable
-# in the header string.
-# ::tycho::register extensions "idoc" .idoc
-# ::tycho::register extensions "itclclass" .itclclass
-# ::tycho::register extensions "javaclass" .javaclass
+if [info exists tk_version] {
+    ########### special viewing modes
+    # FIXME: .idoc should bring up "generic" class viewer.
+    # Language-specific cases are handled by the mode variable
+    # in the header string.
+    # ::tycho::register extensions "idoc" .idoc
+    # ::tycho::register extensions "itclclass" .itclclass
+    # ::tycho::register extensions "javaclass" .javaclass
 
-::tycho::register stylesheet "tydoc" \
-	[file join {$TYCHO} lib tydoc tydoc.style] \
-	[file join ~ .Tycho styles tydoc.style]
+    ::tycho::register stylesheet "tydoc" \
+	    [file join {$TYCHO} lib tydoc tydoc.style] \
+	    [file join ~ .Tycho styles tydoc.style]
 
-# Cliff's IDoc viewer (still under construction)
-#::tycho::register mode "idoc" \
-#	-command {::tycho::view IDoc -file {%s}} \
-#	-viewclass ::tycho::IDoc \
-#	-label {IDoc Viewer}  \
-#	-category "html" \
-#	-underline 0
+    # Cliff's IDoc viewer (still under construction)
+    #::tycho::register mode "idoc" \
+    #	-command {::tycho::view IDoc -file {%s}} \
+    #	-viewclass ::tycho::IDoc \
+    #	-label {IDoc Viewer}  \
+    #	-category "html" \
+    #	-underline 0
 
-::tycho::register mode "itclclass" \
-	-command {::tycho::view ItclViewer -file {%s}} \
-	-viewclass ::tycho::ItclViewer \
-	-label {Itcl Class Viewer}  \
-	-category "html" \
-	-underline 0
+    ::tycho::register mode "itclclass" \
+	    -command {::tycho::view ItclViewer -file {%s}} \
+	    -viewclass ::tycho::ItclViewer \
+	    -label {Itcl Class Viewer}  \
+	    -category "html" \
+	    -underline 0
 
-::tycho::register mode "javaclass" \
-	-command {::tycho::view JavaViewer -file {%s}} \
-	-viewclass ::tycho::JavaViewer \
-	-label {Java Class Viewer}  \
-	-category "html" \
-	-underline 0
+    ::tycho::register mode "javaclass" \
+	    -command {::tycho::view JavaViewer -file {%s}} \
+	    -viewclass ::tycho::JavaViewer \
+	    -label {Java Class Viewer}  \
+	    -category "html" \
+	    -underline 0
+}
 
+######################################################################
+#### tydoc
+# This proc generates HTML frome itcl files
+# Usage: tydoc [-v] [-t "title"] itcl_file [itcl_file . . .] 
+# -v: verbose html output
+# -t "title": use "title" as the title for the index page
+#
+proc tydoc {args} {
+    global errorInfo
+    set argc [llength $args]
+    set title "Index of classes"
+    set verbose 0
+    set debug 0
+    set switchCount 0
+    for {set n 0} {$n < $argc} {incr n} {
+	if { [ lindex $argc $n] == "-t" } {
+	    set title [lindex $argc [incr n]]
+	    incr switchCount 2
+	}
+	if { [ lindex $argc $n] == "-v" } {
+	    set verbose 1
+	    incr switchCount
+	} 
+	if { [ lindex $argc $n] == "-d" } {
+	    set debug 1
+	    incr switchCount
+	}
+    }
+
+    if {$argc == 0 || $argc == $switchCount} {
+	puts "tydoc called with no files, \
+		so no documentation need be generated"
+	exit
+    }
+
+
+
+    set generateIndex 1
+    set errorInfo ""
+    if [catch {set retval [::tycho::HTMLDocSys::generateHTML $verbose $debug \
+	    $generateIndex $title \
+	    [lrange $args $switchCount end]]} err ] {
+	puts "tydoc: $err\n$errorInfo"
+	
+    }
+    if {$retval != ""} {
+	puts "tydoc returned $retval\n$errorInfo"
+	exit 3
+    }
+}
