@@ -393,10 +393,11 @@ proc ::tycho::simplifyPath {pathName {envVarList {}}} {
     }
     set lastMatch $expandedPathName
     foreach envVar $envVarList {
-	# Does the variable exist, is it non-empty and does it specify a 
-	# non-relative pathname?
+	# Does the variable exist, is it non-empty, is it anything other
+        # than PWD and does it specify a non-relative pathname?
 	if {[info exists env($envVar)] == 1 && \
-		"$env($envVar)" != "" && \
+		"$env($envVar)" != "" &&  \
+                "$envVar" != "PWD" && \
 		[file pathtype $env($envVar)] != "relative" } {
 	    set expandedEnvVar [::tycho::expandPath $env($envVar)]
 	    if { [string first $expandedEnvVar $expandedPathName] != -1} {
