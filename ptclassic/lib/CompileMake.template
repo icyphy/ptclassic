@@ -44,7 +44,6 @@ TK = 1
 LIBS += -lcompileSDF
 LIBFILES += $(LIBDIR)/libcompileSDF.$(LIBSUFFIX)
 SDFFULL = 1
-ATM = 1
 HOF = 1
 include $(ROOT)/mk/stars.mk
 
