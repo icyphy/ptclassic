@@ -45,11 +45,11 @@ INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(ROOT)/src/domains/sdf/stars \
        -I$(ROOT)/src/utils/libptdsp $(WILDFORCECFLAGS)
 
 # Library name
-PTLIB=libsdfwildforcetars.$(LIBSUFFIX)
+PTLIB=libsdfwildforcestars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor, put derived stars first
 PL_SRCS= \
-
+	SDFWF4.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
@@ -61,9 +61,9 @@ OBJS= $(SRCS:.cc=.o)
 HDRS= $(SRCS:.cc=.h)
 
 STAR_MK=sdfwildforcestars
-DOMAIN=SDF_WILDFROCE
+DOMAIN=SDF_WILDFORCE
 DOMAIN_2=SDF
-EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS) rtvc.cc rtvc.h
+EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS)
 
 all:		makefile stars_all
 
