@@ -140,9 +140,15 @@ if ($?pigidebug && ! -x $PIGIRPC.debug ) then
 	if ( -x $PTOLEMY/obj.$ARCH/pigiRpc/${PIGIBASE}.debug ) then
 		setenv PIGIRPC $PTOLEMY/obj.$ARCH/pigiRpc/${PIGIBASE}.debug
 		echo "Using $PIGIRPC instead"
+	else
+		if ( -x $PIGIRPC ) then
+			echo "Using $PIGIRPC instead."
+		endif
 	endif
 else
-	setenv PIGIRPC $PIGIRPC.debug
+	if ($?pigidebug ) then
+		setenv PIGIRPC $PIGIRPC.debug
+	endif
 endif
 
 if ( ! -x $PIGIRPC ) then
