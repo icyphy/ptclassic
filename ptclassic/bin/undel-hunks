@@ -1,18 +1,30 @@
 #!/bin/sh
 #
-#	$Id$
+# Version: $Id$
 #
-# 
 # This script can be used to track down memory leaks in Ptolemy.  In
 # theory if MEMORYLOG is defined during compile time, then LOG_NEW and
-# LOG_DEL should produce memory usage log messages.  To define
-# MEMORYLOG, add -DMEMORYLOG to GPPFLAGS in
-# $PTOLEMY/mk/config-$PTARCH.
+# LOG_DEL should produce memory usage log messages.  To define MEMORYLOG,
+# add -DMEMORYLOG to GPPFLAGS in # $PTOLEMY/mk/config-$PTARCH. -cxh
 #
-# At UC Berkeley, we use purify so we have not tested this script
-# in sometime.  Note further that this script uses GNU awk, which
-# is not part of the Ptolemy distribution.
-# 
+# If MEMORYLOG is defined, it is the name of a file.  Each new and delete
+# adds a line to the file due to the LOG_NEW and LOG_DELETE macros.
+# The undel-hunks script processes this file (undel-hunks logfile) and
+# reports all lines corresponding to memory that is allocated and never
+# freed. -jtb
+#
+# Note that the LOG_NEW/LOG_DELETE and Purify definitions of a leak differ
+# (Purify is a commercial tool).  Purify says something is a leak if there
+# is no pointer or reference to it.  The older system says something is a
+# leak if was allocated by new but never freed by delete when the program
+# exits (even if it is pointed to by some data structure that is not on
+# the heap). -jtb
+#
+# At UC Berkeley, we use Purify to track down memory leaks and other memory
+# violations, so we have not tested this script in some time.  Note further
+# that this script uses GNU awk, which is not part of the Ptolemy
+# distribution. -cxh
+
 gawk '$1 == "new" {
 	if ($3 == "Top") tag = $2 ":" $4;
 	else tag = $2 ":" $3 ":" $4;
