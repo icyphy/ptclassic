@@ -1062,7 +1062,7 @@ StringList VHDLTarget :: addConfigurationDeclarations(VHDLCompDeclList* compDecl
 
 // Return variable declarations based on variableList.
 StringList VHDLTarget :: addVariableDecls(VHDLVariableList* varList,
-					  int level/*=0*/) {
+					  int level/*=0*/, int noinit/*=0*/) {
   StringList all;
   VHDLVariableListIter nextVariable(*varList);
   VHDLVariable* variable;
@@ -1072,9 +1072,12 @@ StringList VHDLTarget :: addVariableDecls(VHDLVariableList* varList,
     all << variable->name;
     all << ": ";
     all << variable->type;
-    if ((variable->initVal).length() > 0) {
-      all << " := ";
-      all << variable->initVal;
+    // Add initialization code if not turned off.
+    if (!noinit) {
+      if ((variable->initVal).length() > 0) {
+	all << " := ";
+	all << variable->initVal;
+      }
     }
     all << ";\n";
     level--;
