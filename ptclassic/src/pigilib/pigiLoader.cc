@@ -194,8 +194,8 @@ linkObject (const char* ofile) {
 const int N_PREPROCS = 3;
 const int INTERP_FILE = 3;
 
-static char *preprocSuffix[] = { "", "pl", "chdl", "pt" };
-static char *preprocProg[] = { "", "ptlang", "pepp", 0 };
+static const char *preprocSuffix[] = { "", "pl", "chdl", "pt" };
+static const char *preprocProg[] = { "", "ptlang", "pepp", 0 };
 
 // Here is the function that loads in a star!
 // name = username of the star
