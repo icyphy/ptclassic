@@ -50,7 +50,7 @@ option add *EditSearch.findMatchForegroundColor \
 # is removed when the parent is removed. To do this, just give it a
 # name that is the name of the EditText window (or its top-level
 # parent) with an additional field appended after a period. For
-# example, if the name of the Edit object is ".file0", the search
+# example, if the name of the top-level object is ".file0", the search
 # object could be ".file0.search".
 #
 class ::tycho::EditSearch {
