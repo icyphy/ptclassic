@@ -3,8 +3,12 @@ defstar {
 	domain { SDF }
 	author { GSWalter, E. A. Lee }
 	version { $Id$ }
-WARNING: CHECK COPYRIGHT - not UC
-	copyright { 1992 (c) U. C. Regents }
+        copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+        }
 	location { Ptolemy SDF Signal Processing palette }
 	desc {
 This star accepts a template and a search window.
