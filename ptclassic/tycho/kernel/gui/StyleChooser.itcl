@@ -316,6 +316,9 @@ body ::tycho::StyleChooser::close {} {
         if { $answer == 1 } {
             foreach {sheet model} $save {
                 set file [::tycho::stylesheet register $sheet]
+		if {![file isdirectory [file dirname $file]]} {
+                    file mkdir [file dirname $file]
+                }
                 set fd [open $file "w"]
                 puts $fd [$model describe]
                 ::close $fd
