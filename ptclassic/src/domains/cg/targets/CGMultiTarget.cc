@@ -58,7 +58,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "stdlib.h"
 #include "BooleanMatrix.h"
 #include "MultiScheduler.h"
-#include "ProfileTimer.h"
 
 CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
 			     const char* desc) :
@@ -71,19 +70,22 @@ CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
 	addState(relTimeScales.setState("relTimeScales",this,"1",
 		"define the relative time scales of child targets"));
 	filePrefix.setAttributes(A_SETTABLE);
-        addState(schedName.setState("schedName(DL,HU,DC,MACRO,CGDDF)",this,"DL",
-           "schedulers: DL - dynamic level \n\t HU - ignore IPC \n\t DC - clustering \n\t MACRO - parallel task\n\t CGDDF - dynamic constructs \n"));
+        addState(schedName.setState
+		 ("schedName(DL,HU,DC,HIER,MACRO,CGDDF)",this,"DL",
+		  "schedulers: \n"
+		  "\tDL - dynamic level \n"
+		  "\tHU - ignore IPC \n"
+		  "\tDC - clustering \n"
+		  "\tHIER(DL,HU,DC) - hierarchical scheduler, "
+		  "defaults to DL top-level parallel scheduler\n"
+		  "\tMACRO - parallel task\n"
+		  "\tCGDDF - dynamic constructs\n\t"));
         addState(ganttChart.setState("ganttChart",this,"YES",
                                      "if true, display Gantt chart"));
         addState(logFile.setState("logFile",this,"",
                                      "log file to write to (none if empty)"));
         addState(amortizedComm.setState("amortizedComm",this,"NO",
                                      "try to amortize communication?"));
-	addState(useMultipleSchedulers.setState("Use multiple schedulers?",
-						this,"NO",
-				   "Use hierarchical schedulers?"));
-	addState(displaySchedulerStats.setState("Display scheduler stats?",
-		 this,"NO","Print DAG nodes and scheduling time to stdout?"));
 	addedStates.initialize();
 }
 
@@ -187,7 +189,7 @@ void CGMultiTarget :: prepareChildren() {
 	    tname.initialize();
 	    tname << filePrefix << i;
 	    const char* childFilePrefix = hashstring(tname);
-	    t->setNameParent(childFilePrefix,this);
+	    t->setParent(this);
 	    if (cgChild(i)) {
 		t->stateWithName("file")->setInitValue(childFilePrefix);
 		t->stateWithName("directory")
@@ -265,33 +267,42 @@ void CGMultiTarget :: chooseScheduler() {
     delSched();
     ParScheduler* mainScheduler;
     const char* sname = schedName;
-    if (*sname == 'M' || *sname == 'm') {
+    int hierSchedulingFlag = FALSE;
+    size_t snamelen = strlen(sname);
+    if(*sname == 'H' || *sname == 'h') {
+	hierSchedulingFlag = TRUE;
+	const char* paren = strchr(sname,'(');
+	if (paren && ! ++paren == '\0') sname = paren;
+	// else, default to DL
+    }
+    if (*sname == 'M' || *sname == 'm' && ! hierSchedulingFlag ) {
     	LOG_NEW; mainScheduler = new MacroScheduler(this, logFile);
-    } else if (*sname == 'H' || *sname == 'h') {
+    } else if (snamelen > 1 && (*(sname+1) == 'U' || *(sname+1) == 'u')) {
     	LOG_NEW; mainScheduler = new HuScheduler(this, logFile);
-    } else if (*(sname+1) == 'C' || *(sname+1) == 'c') {
+    } else if (snamelen > 1 && (*(sname+1) == 'C' || *(sname+1) == 'c')) {
     	if (childType.size() > 1) {
-    		Error :: warn("Declustering technique can not be",
-    		"applied for heterogeneous targets.\n By default",
-    		"we use dynamic-level scheduling");
+    		Error :: warn("Declustering technique can not be "
+    		"applied for heterogeneous targets.\nBy default "
+    		"we use dynamic-level scheduling.");
     		LOG_NEW; mainScheduler = new DLScheduler(this, logFile, 1);
     	} else if (resources.size() > 1) {
-    		Error :: warn("Declustering technique can not be",
-    		"applied with resource restriction.\n By default",
-    		"we use dynamic-level scheduling");
+    		Error :: warn("Declustering technique can not be "
+    		"applied with resource restriction.\nBy default "
+    		"we use dynamic-level scheduling.");
     		LOG_NEW; mainScheduler = new DLScheduler(this, logFile, 1);
     	} else {
     		LOG_NEW; mainScheduler = new DeclustScheduler(this, logFile);
     	}
-    } else if (*(sname+1) == 'G' || *(sname+1) == 'g') {
+    } else if (! hierSchedulingFlag && snamelen > 1 &&
+	       (*(sname+1) == 'G' || *(sname+1) == 'g')) {
     	LOG_NEW; mainScheduler = new CGDDFScheduler(this, logFile);
     } else {
     	LOG_NEW; mainScheduler = new DLScheduler(this, logFile, 1);
     }
 
-    if(int(useMultipleSchedulers)) {
+    if (hierSchedulingFlag)
 	LOG_NEW; mainScheduler=new MultiScheduler(this,logFile,*mainScheduler);
-    }
+
     setSched(mainScheduler);
 }
 
@@ -439,37 +450,6 @@ int CGMultiTarget :: allReceiveWormData() {
 	return !Scheduler::haltRequested();
 }
 
-/*virtual*/ int CGMultiTarget::schedulerSetup() {
-    ProfileTimer schedulingTimer;
-    int status = MultiTarget::schedulerSetup();
-
-    if (int(displaySchedulerStats)) {
-	double schedulingTime =  schedulingTimer.elapsedCPUTime();
-
-	StringList message;
-
-	// Compute total stars
-	GalStarIter nextStar(*galaxy());
-	DataFlowStar* star;
-	int totalStars = 0;
-	while ((star = (DataFlowStar*) nextStar++) != NULL)
-	    totalStars++;
-	    
-	int dagNodes = ((ParScheduler*)scheduler())->dagNodes();
-
-	message << "The time to compute the schedule was "
-		<< schedulingTime 
-		<< " seconds.  There were a total of "
-		<< dagNodes << " precedence DAG nodes "
-		<< "constructed from a multirate dataflow graph of " 
-		<< totalStars << " nodes.";
-	Error::message(message);
-	cout << message << "\n";
-	cout.flush();
-    }
-    return status;
-}    
-
 // default code generation for a wormhole.  This produces an infinite
 // loop that reads from the inputs, processes the schedule, and generates
 // the outputs.
@@ -481,13 +461,13 @@ void CGMultiTarget :: generateCode() {
     int iterations = inWormHole()? -1 : (int)scheduler()->getStopTime();
     beginIteration(iterations,0);
     scheduler()->compileRun();
-	if (SimControl::haltRequested()) return;
-	for (int i = 0 ; i < nChildrenAlloc ; i++) {
-		if (child(i)->isA("CGTarget")) {
-			((CGTarget*)child(i))->generateCode();
-		}
+    if (SimControl::haltRequested()) return;
+    for (int i = 0 ; i < nChildrenAlloc ; i++) {
+	if (child(i)->isA("CGTarget")) {
+	    ((CGTarget*)child(i))->generateCode();
 	}
-        endIteration(iterations,0);
+    }
+    endIteration(iterations,0);
 }
 
 void CGMultiTarget::wrapup() {
