@@ -27,7 +27,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 # 
-# Authors: Jose Luis Pino
+# Authors: Jose Luis Pino, Christopher Hylands
 #
 # This makefile may be copied and modified to make your own version of
 # pigiRpc, with a different set of compiled-in stars or support for a
@@ -61,9 +61,9 @@ TK=1
 
 PT_DEPEND = pigiMain.o
 
-ADD_SRCS=version.$(PIGI).c palettes.$(PIGI).c
+ADD_OBJS=version.$(PIGI).o palettes.$(PIGI).o
 
-PIGI_OBJS = pigiMain.o -lptcl $(ADD_SRCS:.c=.o)
+PIGI_OBJS = pigiMain.o -lptcl $(ADD_OBJS)
 
 LIBS += -L$(OCTLIBDIR) -lpigi -lrpc -loh -lvov -lrpc -llist -ltr -lutility \
 	-lst -lerrtrap -luprintf -lport
@@ -86,4 +86,30 @@ palettes.$(PIGI).c: $(PT_DEPEND)
 		>> palettes.$(PIGI).c
 	$(CC) -c palettes.$(PIGI).c	
 
+
+# "make clean" removes .o files and other cruft
+clean:
+		rm -f *.o core *~ *.bak *#
+
+# even cleaner
+realclean:	clean
+		rm -f pigiRpc pigiRpc.debug \
+			pigiRpc.debug.purify pigiRpc.debug.quantify \
+			ptrimRpc.debug ptrimRpc.debug.purify \
+			ptrimRpc.debug.purcov \
+			ptinyRpc.debug ptinyRpc.debug.purify \
+			ptinyRpc.debug.purcov pigiRpc.cp \
+			ptinyRpc ptrimRpc pigiRpc.ptiny pigiRpc.ptrim \
+			version.* palettes.*
+
+# "make sources" will do SCCS get on anything where SCCS file is newer.
+sources:	pigiMain.cc
+
+depend:	
+		@echo no dependencies in pigiRpc directory
+
+sccsinfo:
+		sccs info
+checkjunk:
+	@checkextra -v pigiMain.cc makefile
 
