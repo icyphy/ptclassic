@@ -44,6 +44,14 @@ public:
 	// clone -- allows interpreter to make copies
 	Block* clone() const;
 
+	// identify myself as a wormhole
+	int isItWormhole() const { return TRUE;}
+
+	// use statelist for inner galaxy for stateWithName
+	State* stateWithName (const char* name) const {
+		return gal.stateWithName(name);
+	}
+
 protected:
 	// redefine getStopTime() : 
 	// return the currentTime if syncMode of the scheduler is set (default)
