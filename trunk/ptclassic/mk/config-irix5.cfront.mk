@@ -1,35 +1,6 @@
 # Configuration makefile to build on SGI Indigo running Irix5.3 with
 # SGI's `Delta-C++' compiler (This compiler is not cfront, but we call 
 # all non-g++ compilers 'cfront' for historical reasons)
-#
-# $Id$
-# Copyright (c) 1994-%Q% The Regents of the University of California.
-# Permission is hereby granted, without written agreement and without
-# license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that the
-# above copyright notice and the following two paragraphs appear in all
-# copies of this software.
-# 
-# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-# SUCH DAMAGE.
-# 
-# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-# ENHANCEMENTS, OR MODIFICATIONS.
-# 
-# 						PT_COPYRIGHT_VERSION_2
-# 						COPYRIGHTENDKEY
-#
-#	Programmer: Dan Ellis (MIT Media Lab)
-#	Contributors:  Christopher Hylands, Uwe Trautwein 
-#
-# NOTES on installing Ptolemy 0.5.2 beta under SGI IRIX 5.3 using the 
 # vendor's compilers ($PTARCH=irix5.cfront)
 # 
 # I believe this is working well.  To install, you need only grab the
@@ -123,7 +94,7 @@ ARCHFLAGS =	-DIRIX5
 # unless -nonshared is also specified, it is ignored anyway.)
 ## -xgot is the SGI hack to avoid overflows in the GOT by allowing 
 # 32 bit offsets, or something.
-GOTFLAG = 	-G 0 -xgot
+GOTFLAG = 	-xgot
 LOCALCCFLAGS =	$(GOTFLAG) -D_BSD_SIGNALS -D_BSD_TIME
 
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
@@ -135,7 +106,7 @@ CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 
 # command to generate dependencies (cfront users can try CC -M)
 ##DEPEND=g++ -MM
-DEPEND=CC -M
+DEPEND=CC -M -I$(ROOT)/src/compat/cfront
 
 # IRIX5.x does not have a ranlib
 RANLIB = 	true
@@ -155,9 +126,9 @@ CSYSLIBS = $(SYSLIBS)
 # just dump core.  So we'll have to settle for huge links and then 
 # run 'strip' on the executables by hand later.
 ##LINKFLAGS =	-L$(LIBDIR) $(GOTFLAG) -Xlinker -s
-LINKFLAGS =	-L$(LIBDIR) $(GOTFLAG)
+LINKFLAGS =	-L$(LIBDIR) $(GOTFLAG) $(SHARED_LIBRARY_R_LIST)
 ##LINKFLAGS_D =	-L$(LIBDIR) $(GOTFLAG)
-LINKFLAGS_D =	-L$(LIBDIR) $(GOTFLAG) 
+LINKFLAGS_D =	-L$(LIBDIR) $(GOTFLAG) $(SHARED_LIBRARY_R_LIST)
 
 #
 # Directories to use
