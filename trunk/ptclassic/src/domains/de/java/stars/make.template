@@ -49,7 +49,7 @@ INCL =		-I$(DEDIR) -I$(KERNDIR) -I$(PTKLIB) \
 			-I$(ROOT)/src/domains/de/java/stars
 
 # Library name
-LIB =		libdejavastars.$(LIBSUFFIX)
+PTLIB =		libdejavastars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 # DEJavaIfc.pl
