@@ -136,9 +136,9 @@ public:
 	void DisableResize() { cq_resizeEnabled = 0; }
 
 	// Constructor
-	CalendarQueue() : freeLinkHead(0), cq_eventNum(0), numFreeLinks(0), 
-			  cq_absEventCounter(0), cq_resizeEnabled(1),
-			  cq_debug(0)
+	CalendarQueue() : cq_debug(0), cq_eventNum(0),
+	  		  cq_absEventCounter(0), freeLinkHead(0),
+	                  numFreeLinks(0), cq_resizeEnabled(1)
         { LocalInit(0, 2, 1.0, HUGE_VAL ); }
 	virtual ~CalendarQueue();
 
