@@ -20,7 +20,7 @@ limitation of liability, and disclaimer of warranty provisions.
     {
 	InterpGalaxy* gal;	// Container for dynamically created stars.
 	int spliceCount;	// Number of spliced stars.
-	PNThreadList* threads;	// Container for dynamically created threads.
+	ThreadList* threads;	// Container for dynamically created threads.
     }
 
     conscalls
@@ -133,7 +133,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	{
 	    if (!threads)
 	    {
-		LOG_NEW; threads = new PNThreadList;
+		LOG_NEW; threads = new ThreadList;
 	    }
 	    LOG_NEW; DataFlowProcess* p = new DataFlowProcess(*star);
 	    threads->add(p);
