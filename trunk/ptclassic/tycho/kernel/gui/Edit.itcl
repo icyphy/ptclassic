@@ -867,6 +867,7 @@ body ::tycho::Edit::cut {} {
     if $readOnly {bell; return}
     
     if {[set sel [getSelection]] != {}} {
+        copy
 	deleteRange sel.first sel.last
     }
 }
