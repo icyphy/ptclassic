@@ -43,6 +43,7 @@ char *optProgName;
 #define MAX_LINE	1024
 
 /*ARGSUSED*/
+int
 main(argc, argv)
 int argc;
 char *argv[];
