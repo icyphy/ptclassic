@@ -53,8 +53,14 @@ This class maintains the number of tokens transferred on the ports.
 ****/
 class SynDFClusterPort : public ClusterPort {
 public:
+
 	SynDFClusterPort(GenericPort& gp) : ClusterPort(gp) {};
+
+	// Set the loop factor.
 	/* virtual */ void initializeClusterPort();
+
+	// called after Absorb/merge operations.  Takes care of aliases
+	// , loopFac, and tnob if possible.
 	/* virtual */ void update();
 };
 
@@ -67,10 +73,13 @@ Iterator class for SynDFClusterPorts; steps through each port in a Block.
 class SynDFClusterPortIter : private ClusterPortIter {
 public:
     inline SynDFClusterPortIter(Block& b): ClusterPortIter(b) {};
+
     inline SynDFClusterPort* next() {
 	return (SynDFClusterPort*)ClusterPortIter::next();
     }
+
     inline SynDFClusterPort* operator++(POSTFIX_OP) { return next(); }
+
     ClusterPortIter::reset;
     ClusterPortIter::remove;
 };
@@ -102,29 +111,61 @@ of all of the repetitions of the SynDFCLusters inside itself.
 ****/
 class SynDFCluster: public Cluster {
 private:
+
         // maintains the gcd of all the loopFacs of constituent clusters
         int loopFac;
+
 	// tnob = total number of blocks in cluster (at the lowest levels)
 	int tnob;
+
 public:
+	// Constructor
 	SynDFCluster();
 
+	// make a new SynDFCluster
 	/* virtual */ Block* makeNew() const { return new SynDFCluster; }
+
+	// make a new SynDFClusterPort
 	inline /* virtual */ ClusterPort* makeNewPort(GenericPort& p) {
 	    return new SynDFClusterPort(p);
 	}
+
+	// Convert a Star to a SynDFCluster.
 	/* virtual */ Cluster* convertStar(Star&);
+
+	// Absorb c into *this.  c is kept intact; hence, the number 
+	// of blocks in *this goes up by 1.
 	/* virtual */ int absorb(Cluster& c, int removeFlag=TRUE);
+
+	// Merge the contents of c into *this.  Hence, the number
+	// of blocks in *this goes up by the number of blocks in c.
 	/* virtual */ int merge(Cluster& c, int removeFlag=TRUE);
+
+	// return tnob; compute it and return it if not set yet.
 	inline int totalNumberOfBlocks() {
 	    if (tnob < 0) setTotalNumberOfBlocks();
 	    return tnob;
 	}
+
 	inline void settnob(int i) {tnob = i;}
+
+	// compute and set tnob.
 	void setTotalNumberOfBlocks();
+
+	// Compute the Total Number of Samples Exchanged on c1 ---> c2
 	int computeTNSE(SynDFCluster* c1, SynDFCluster* c2, SynDFClusterPort* a);
+
+	// return the loop factor.
 	int loopFactor() { return loopFac;}
+
+	// Set the loop factor.
 	void setLoopFac(int r) {loopFac = r;}
+
+	// return the number of input ports this cluster has.
+	int numInputs();
+
+	// return the number of output ports this cluster has.
+	int numOutputs();
 };
 
 /****
@@ -136,11 +177,14 @@ Iterator class for SynDFClusters; steps through each SynDFCluster in a Galaxy.
 class SynDFClusterIter : private ClusterIter {
 public:
 	inline SynDFClusterIter(Galaxy& g):ClusterIter(g) {};
+
 	inline SynDFCluster* next() { return (SynDFCluster*)(ClusterIter::next());}
 	inline SynDFCluster* operator++(POSTFIX_OP) { return next(); }
+
 	SynDFCluster* next(int flagValue, int index) {
 	    return (SynDFCluster*)(ClusterIter::next(flagValue, index));
 	}
+
 	ClusterIter::reset;
 	ClusterIter::remove;
 };
@@ -154,15 +198,19 @@ Iterator class that returns the SynDFClusterPorts that are outputs of a SynDFClu
 class SynDFClusterOutputIter : private ClusterOutputIter {
 public:
 	inline SynDFClusterOutputIter(Block& b):ClusterOutputIter(b) {};
+
 	inline SynDFClusterPort* next() {
 	    return (SynDFClusterPort*)ClusterOutputIter::next();
 	}
+
 	inline SynDFClusterPort* next(int flag_loc, int flag_val) {
 	    return (SynDFClusterPort*)ClusterOutputIter::next(flag_loc,flag_val);
 	}
+
 	inline SynDFClusterPort* operator++(POSTFIX_OP) {
 	    return SynDFClusterOutputIter::next();
 	}
+
 	ClusterOutputIter::reset;
 	ClusterOutputIter::remove;
 };
@@ -176,15 +224,19 @@ Iterator class that returns the SynDFClusterPorts that are inputs of a particula
 class SynDFClusterInputIter : private ClusterInputIter {
 public:
 	inline SynDFClusterInputIter(Block& b):ClusterInputIter(b) {};
+
 	inline SynDFClusterPort* next() {
 	    return (SynDFClusterPort*)ClusterInputIter::next();
 	}
+
 	inline SynDFClusterPort* next(int flag_loc, int flag_val) {
 	    return (SynDFClusterPort*)ClusterInputIter::next(flag_loc,flag_val);
 	}
+
 	inline SynDFClusterPort* operator++(POSTFIX_OP) {
 	    return SynDFClusterInputIter::next();
 	}
+
 	ClusterInputIter::reset;
 	ClusterInputIter::remove;
 };
