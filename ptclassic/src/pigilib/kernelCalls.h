@@ -19,5 +19,6 @@ extern "C" {
 	void clr_accum_string();
 	void accum_string (const char*);
 	void pr_accum_string();
+	void FindClear();
 }
 
