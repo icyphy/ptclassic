@@ -28,7 +28,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
  Programmer: Christopher Hylands
- Based on the MultiTarget by Soonhoi Ha
 
  This is a Makefile target class for CGCdomain.
 
@@ -74,8 +73,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
  * If the remote machine does not fulfill these constraints, then the
  * user should use default_C.
  *
- * makefile_C would not assume GNU make, so in the default situation
- * we could not include common.mk.  The reason not to assume GNU make
+ * makefile_C does not assume GNU make, so in the default situation
+ * we could not include mk/common.mk.  The reason not to assume GNU make
  * is that we are not sure what the user's path is like when they log
  * in.  However, makefile_C has a target parameter 'skeletonMakefile' that
  * allows the user to specify an arbitrary makefile that could or
