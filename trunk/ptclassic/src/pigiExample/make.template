@@ -82,18 +82,14 @@ DOMAIN  = SDF
 # Include files neede to build your star(s)
 INCL =	-I$(ROOT)/src/domains/sdf/kernel -I$(KERNDIR)
 
-# Specify where you want star documentation files to end up.  The
-# following version puts them in a subdirectory named starDoc.
-STARDOCDIR =	starDoc
-
 #############################################################################
 # You probably need not change anything below here.
 
 # If $PTOLEMY/src/pigiExample/override.mk exists, then we 
 # include its contents in this file.  This allows us to easily
 # make changes.  For example, rather than editing this file, we could
-# create an override.mk file that set the VERSION, LOCAL_OBJS, PL_SRCS,
-# and STARDOCDIR variables
+# create an override.mk file that set the VERSION, LOCAL_OBJS, and PL_SRCS
+# variables
 -include override.mk
 
 # If override.mk did not set BASENAME and PIGI, then we do that now.
