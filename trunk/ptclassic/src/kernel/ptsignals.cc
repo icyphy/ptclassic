@@ -105,7 +105,7 @@ extern "C" SIG_PT ptSignal(int sig, SIG_PT handler)
 
     // These casts are UGLY, but what else are you going to do?!
     SIG_PT old = (SIG_PT)action.sa_handler;
-#if defined(PTSOL2_5) && defined(PTSOL2_CFRONT)   
+#if defined(PTSOL2_5) && defined(PTSOL2_CFRONT) || defined(PTSOL2_5) && (__GNUC__ >= 3)  
     // See /usr/include/sys/signal.h under solaris2.5 for a complete discussion
     action.sa_handler = (void (*)(int))handler;
 #else
