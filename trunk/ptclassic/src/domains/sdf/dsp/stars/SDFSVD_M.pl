@@ -104,11 +104,7 @@ Data_M
 	type	{ FLOAT_MATRIX_ENV }
 	desc	{ Left singular vectors of X. }
     }
-    header {
-       // some macros
-       #define MAX(a,b)  (a > b ? a : b)
-       #define MIN(a,b)  (a < b ? a : b)
-    }
+    ccinclude { <minmax.h> }
     protected	{
 	int N,nrows,ncols;
         FloatMatrix *U, *W, *V;
@@ -312,7 +308,7 @@ Data_M
         }
 
         if(withU) {         // Now accumulate the left-hand transforms.
-          for (i = MIN(numRows,numCols) - 1; i >= 0; i--) {
+          for (i = min(numRows,numCols) - 1; i >= 0; i--) {
             l = i + 1;
             g = W.entry(i);
             for (j = l; j < numCols; j++)
