@@ -39,7 +39,9 @@ SRCS= \
  CGSource.pl \
  CGThrough.pl \
  CGSink.pl \
- CGVarTime.pl
+ CGVarTime.pl \
+ CGSend.pl \
+ CGReceive.pl 
 
 # The .cc files
 CCSRCS=$(SRCS:.pl=.cc)
