@@ -84,7 +84,7 @@ cd ..
 
 cd utils
 foreach x (libptdsp libexttools libgslider libptmatlab libptmathematica \
-		ptplay ptvhdlsim rman-2.4 tkman-1.7.3)
+		ptplay ptvhdlsim rman-2.5a6 tkman-1.8b5)
 	optmkdir $x
 	cd $x
 	optlink ../../../src/utils/$x makefile
