@@ -28,16 +28,6 @@ You can experiment with limitations on the size of the queue,
 but notice that even a queue with capacity 2 produces
 a far better signal than that in the distortion demo.
 The ``reorder'' distortion is still present.
-.pp
-This demo has also dispensed with the infinitesimal delays
-on the
-.c clock
-input to the sampler.
-To get determinate execution, a delay would be required
-there and at the
-.c demand
-input of the
-.c Queue.
 .SA
 distortion,
 Router,
