@@ -56,7 +56,10 @@ proc ::tycho::icanvas {pathName args} {
 # The IncrCanvas ("icanvas") is a widget based on the Tk canvas that
 # supports "complex" items, each of which can contain many "simple"
 # canvas items. All methods of the IncrCanvas can manipulate either
-# simple or complex items more-or-less transparently.
+# simple or complex items more-or-less transparently. For an
+# overview of the methods in this class, see the
+# <a href="../internals/icanvas.html">IncrCanvas methods</a>
+# document.
 #
 # This is a total re-write of the earlier design. In this new design,
 # complex items are not represented by [incr Tcl] objects, but by an
@@ -70,7 +73,7 @@ proc ::tycho::icanvas {pathName args} {
 # according to their function:
 #
 # <ul>
-# <li><i>ComplexItem</i> and subclasses.
+# <li><a href="../internals/items.html"><i>ComplexItem</i></a> and subclasses.
 # These classes implement the functionality needed by the icanvas to 
 # actually create complex items. Subclasses of ComplexItem includes things
 # like ``3D'' rectangles and
@@ -94,12 +97,13 @@ proc ::tycho::icanvas {pathName args} {
 # characters are used internally by the IncrCanvas.
 # <li>Any item with the tag "#" is an "invisible" item: it will be
 # ignored by many methods unless explicitly requested. For example,
-# *delete all* will not delete invisible items.
+# <code>delete all</code> will not delete invisible items.
 # Such items should be used for "background" items that you do not
 # want to respond to the mouse, such as grids and so on.
 # </ul>
 #
-# Note that there is a subclass of _IncrCanvas_, _Slate_, which adds
+# Note that there is a subclass of _IncrCanvas_,
+# <a href="Slate.html">_Slate_</a>, which adds
 # further functionality.
 #
 class ::tycho::IncrCanvas {
@@ -108,6 +112,8 @@ class ::tycho::IncrCanvas {
     constructor {args} {}
     destructor {}
 
+    # A debug method, which just evaluates its argument in this
+    # object's context
     method debug {args} {
 	eval $args
     }
@@ -343,8 +349,9 @@ body ::tycho::IncrCanvas::constructor {args} {
 #######################################################################
 #### addtag
 #
-# Add a tag to specified items. Uses find{} to get all relevant
-# items, and then tags them.
+# Add the tag _add_ to specified items, as given by the _mode_
+# and following arguments. The search criterion is the same
+# as for the find{} method.
 #
 body ::tycho::IncrCanvas::addtag {add mode args} {
     # Find all items using find{}, and then
@@ -491,9 +498,14 @@ body ::tycho::IncrCanvas::children {tag} {
 #######################################################################
 #### coords
 #
-# Get or set the coordinates of an item. If the argument
-# is a tag, perform this operation on the first item on the
-# icanvas returned by `find withtag'.
+# Get or set the coordinates of an item. If only the first
+# argument is given, return the coordinates of that item
+# (if it is an item ID) or the first matching item
+# returned by `find withtag' (if it is a tag). If there is no
+# matching item, return
+# null. If additional arguments are given, set the coordinates
+# of the first matching item to those coordinates; the correct
+# number of coordinates depends on the item type.
 #
 body ::tycho::IncrCanvas::coords {tag args} {
     # If the argument is a tag, use the first found item
@@ -519,8 +531,9 @@ body ::tycho::IncrCanvas::coords {tag args} {
 #######################################################################
 #### create
 #
-# Create a top-level item. If the _type_ arg starts with a lower-case
-# letter, this method creates a simple (canvas item); if not, it
+# Create a top-level item and return its ID.
+# If the _type_ arg starts with a lower-case
+# letter, this method creates a simple (canvas) item; if not, it
 # assumes that the type is the name of a subclass of ComplexItem, and
 # creates the corresponding complex item. In either case, _args_ contains
 # the coordinates of the item, followed by option-value pairs.
@@ -570,8 +583,10 @@ body ::tycho::IncrCanvas::create {type args} {
 #######################################################################
 #### create*
 #
-# Create an item. This method takes the item tags as the first argument
-# instead of in the options list.
+# Create an item and return its ID.
+# This method takes the item tags as the first argument
+# instead of in the options list, and is slightly faster
+# than create{}.
 #
 body ::tycho::IncrCanvas::create* {tags type args} {
     if { [string match {[a-z]*} $type] } {
@@ -593,7 +608,10 @@ body ::tycho::IncrCanvas::create* {tags type args} {
 #######################################################################
 #### createchild
 #
-# Create a child item. The first argument is its parent
+# Create child item and return its ID. The child item becomes
+# a "part" of the parent 
+# item, and will be moved and scaled when the parent is moved and 
+# scaled. The first argument is its parent
 # item, the second its type, and the remainder the coordinates
 # and options.
 #
@@ -613,7 +631,10 @@ body ::tycho::IncrCanvas::createchild {parent type args} {
 #######################################################################
 #### createchild*
 #
-# Create a child item. The first argument is the hierarchy
+# This is a faster version of <code>createchild</code>: instead 
+# of providing the name of the parent and the tags in the options 
+# list, provide the tags of as the first argument.
+# The first argument is the hierarchy
 # tags of the parent as passed to the construct{} procs of the
 # ComplexItem classes or as obtained by *getchildtags*; the second
 # is the additional tags of the new item.
@@ -638,9 +659,10 @@ body ::tycho::IncrCanvas::createchild* {parent ptags tags type args} {
 #######################################################################
 #### createrootchild
 #
-# Create a root child item. The first argument is its parent
-# item, the second its type, and the remainder the coordinates
-# and options.
+# Create a root child item and return its ID. The item is
+# a "logical root" that is a child of tyhe given parent.
+# The first argument is the parent, the second its type, and
+# the remainder the coordinates and options.
 #
 body ::tycho::IncrCanvas::createrootchild {parent type args} {
     set indx [lsearch -exact $args -tags]
@@ -657,7 +679,7 @@ body ::tycho::IncrCanvas::createrootchild {parent type args} {
 #######################################################################
 #### createrootchild*
 #
-# Create a root child item. The first argument is the hierarchy
+# Create a root child item and return its ID. The first argument is the hierarchy
 # tags of the parent as passed to the construct{} procs of the
 # ComplexItem classes or as obtained by *getrootchildtags*; the second
 # is the additional tags of the new item.
@@ -686,6 +708,9 @@ body ::tycho::IncrCanvas::createrootchild* {parent ptags tags type args} {
 
 #######################################################################
 #### delete
+# 
+# Delete all matching items. Each argument can be an item ID
+# or a tag -- the item or all items with that tag are deleted.
 #
 body ::tycho::IncrCanvas::delete {args} {
     foreach id $args {
@@ -948,11 +973,16 @@ body ::tycho::IncrCanvas::itemcget {tag option} {
 #######################################################################
 #### itemconfigure
 #
-# Set configuration option. If the argument
+# Set configuration options. If the argument
 # is a tag, perform this operation on the first item on the
-# icanvas returned by `find withtag'.
+# icanvas returned by `find withtag'. If only the first
+# argument is given, return a list of all configuration
+# options. If a second argument is given, return a list
+# representing that option; if more argument are given,
+# they are a list of option-value pairs, and each option will
+# be set to the given value.
 #
-# Note also that dtag{}, gettags{}, and addtag{} are faster (and safer)
+# <b>Note</b>: dtag{}, gettags{}, and addtag{} are faster (and safer)
 # ways of manipulating tags and should be used in preference to
 # itemcget{} and itemconfigure{}.
 #
@@ -984,8 +1014,8 @@ body ::tycho::IncrCanvas::itemconfigure {tag args} {
 #
 # Lower the specified complex items to the bottom of the display
 # list. If _belowThis_ is specified, then lower below that item,
-# or if _belowThis_ is a tag, then lower below the first item
-# with that tag.
+# or if _belowThis_ is a tag, then lower below the first matching
+# item with that tag.
 #
 body ::tycho::IncrCanvas::lower {tag {belowThis {}}} {
     # Figure out which item we're talking about
@@ -1106,7 +1136,8 @@ body ::tycho::IncrCanvas::raise {tag {aboveThis {}}} {
 #### root
 #
 # Find the root of an item -- that is, the item which will respond to
-# events on this item.
+# events on this item.  (The returned item could be this one.)
+# Note that the argument <i>must</i> be an item ID, not a tag.
 #
 body ::tycho::IncrCanvas::root {id} {
     if { $id == "" } {
@@ -1135,6 +1166,10 @@ body ::tycho::IncrCanvas::root {id} {
 
 #######################################################################
 #### scale
+#
+# Scale all matching items. <i>xOrigin</i> and <i>yOrigin</i> 
+# specify the point about which scaling occurs; <i>xScale</i> and 
+# <i>yScale</i> are the proportions to scale by.
 #
 body ::tycho::IncrCanvas::scale {tag xOrigin yOrigin xScale yScale} {
     # Find the matching items
@@ -1312,9 +1347,22 @@ body ::tycho::IncrCanvas::search {mode tag x0 y0 x1 y1} {
 #######################################################################
 #### select
 #
-# Manipulate the selection. Same as the standard Tk canvas method,
-# but complex items can override if the _mode_ is <b>adjust</b>,
-# <b>from</b>, or <b>to</b>.
+# Manipulate the selection. The _mode_ and following arguments can
+# be any of the following values. If _mode_ is <b>adjust</b>,
+# <b>from</b>, or <b>to</b>, then complex items can override
+# the default behaviour (which is to forward the call directly
+# to the canvas) by providing a select{} procedure in their
+# method tables:
+# <ul>
+# <li><b>adjust</b> _tagOrId_ _index_: Adjust the end
+# of the selection to be at the specified _index_.
+# <li><b>clear</b>: Clear the selection if it is in this canvas.
+# <li><b>from</b> _tagOrId_ _index_: Set the selection
+# anchor point to just before _index_.
+# <li><b>item</b>: Return the ID of the selected item.
+# <li><b>to</b> _tagOrId_ _index_: Set the end of the
+# selection to _index_.
+# </ul>
 #
 body ::tycho::IncrCanvas::select {mode {id {}} {index {}}} {
     switch -exact $mode {

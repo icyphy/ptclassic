@@ -84,7 +84,8 @@ proc ::tycho::slate {pathName args} {
 #######################################################################
 #### Slate
 #
-# The slate extends the IncrCanvas widget to support more complex
+# The slate extends the <a href="Slate.html">IncrCanvas</a>
+#  widget to support more complex
 # item manipulation, including symbolic aspects ("ne," "vertex-2"),
 # reshaping, alignment, and fast construction
 # of items. Because it inherits from IncrCanvas, it is (almost)
@@ -105,18 +106,20 @@ proc ::tycho::slate {pathName args} {
 # according to their function in the slate:
 #
 # <ul>
-# <li><i>ComplexItem</i> and subclasses.
+# <li><a href="../internals/items.html"><i>ComplexItem</i> and subclasses</a>.
 # These classes implement the functionalty needed by the slate to 
 # actually create complex items. Subclasses of ComplexItem includes things
 # like ``3D'' rectangles and
 # polygons, and ``smart'' objects like self-routing lines.
 #
-# <li><i>Shape</i> and subclasses. Shape classes add functionality
+# <li><a href="../internals/shapes.html"><i>Shape</i> and
+# subclasses</a>. Shape classes add functionality
 # to items related to their shape. Facilities such as symbolic
 # points on an item ("ne," "vertex-2"), alignment, and reshaping
 # all depend on the shape classes.
 #
-# <li><i>Interactor</i> and subclasses. Interactors are objects that
+# <li><a href="../internals/interactors.html"><i>Interactor</i>
+# and subclasses</a>. Interactors are objects that
 # manage user interaction with the slate. Interactors provide a powerful
 # mechanism for capturing and reusing standard patterns of interaction.
 # </ul>
@@ -132,8 +135,6 @@ proc ::tycho::slate {pathName args} {
 #
 # The Slate class is designed to be fully compatible with the canvas,
 # so some of the methods are less efficient than they could be.
-# We are considering writing a second class which will provide a
-# faster interface for code that doesn't need backwards compatibility.
 #
 class ::tycho::Slate {
     inherit ::tycho::IncrCanvas
@@ -167,9 +168,6 @@ class ::tycho::Slate {
 
     # Return a representation of an item
     method describe {id args}
-
-    # Remove an item or items from the selection
-    method deselect {args}
 
     # Create a "ghost" of one or more items
     method ghost {tag {tags {}}}
@@ -264,7 +262,7 @@ body ::tycho::Slate::constructor {args} {
 # Align items in the vertical or horizontal axis. The first argument
 # specifies the alignment, and can be one of "left," "center," "right," 
 # "top," "middle," or "bottom." Following arguments are items IDs or tags
-# specifying the items to align.
+# specifying the items to align. <b>Not implemented</b>.
 #
 body ::tycho::Slate::align {where args} {
     ;# FIXME
@@ -276,14 +274,14 @@ body ::tycho::Slate::align {where args} {
 # Return the value of one or more "aspects" of an item. An aspect
 # is a point on the item, such as its center or north-east corner.
 # The returned value is a list of coordinates, two (_x_ and _y_) for each
-# given aspect.
-#
-# The aspects supported depends on the shape of the item. See the
+# given aspect.  The aspects of an item depend on its type -- see the
 # <a href="../internals/shapes.html">Shape</a> classes for information
-# on the aspects of each type.
-# 
-# If there are no arguments, return the list of valid aspects for
-# this item.
+# on the aspects of each type..  If the 
+# <code>-region</code> flag is supplied, treat the item as a rectangular 
+# item regardless of its real shape.  To query legal aspects, call with no 
+# argument, and a list of legal aspects will be returned.  (Note that the 
+# legal aspects are not necessarily constant over the lifetime of an item 
+# -- for example, adding a vertex to a polygon will also add an aspect.)
 #
 body ::tycho::Slate::aspect {id args} {
     ::tycho::getflag region args
@@ -351,29 +349,17 @@ body ::tycho::Slate::describe {id args} {
 }
 
 #######################################################################
-#### deselect
-#
-# Remove an item or items from the selection.
-#
-body ::tycho::Slate::deselect {args} {
-	# Make sure the selector is initialized
-	selector
-
-    foreach t $args {
-	foreach i [find withtag $t] {
-	    $selector deselect $i
-	}
-    }
-}
-
-#######################################################################
 #### ghost
 #
-# Create a ghost of an item. This is a grey outline of the item
+# Create a ghost of an item and return the ID of the ghost item.
+# This is a grey outline of the item
 # for (optional) use when moving and resizing the item. If
-# _tag_ refers to more than one item, the returned item contains
-# a ghost for each of those items. If the optional _tags_ argument
-# is given, these tags are given to the created ghost item.
+# _tag_ refers to more than one item, the returned (complex) item
+# contains a ghost for each of those items. If the optional
+# _tags_ argument is given, these tags are given to the created
+# ghost item. If a matching complex item has a ghost{} procedure
+# in its method table, that procedure is called to create the
+# ghost item.
 #
 body ::tycho::Slate::ghost {tag {tags {}}} {
     if { ! [string match {[_0-9]*} $tag] } {
@@ -473,9 +459,6 @@ body ::tycho::Slate::highlight {tag args} {
     # Lower the box to just below the item
     $canvas lower highlight.$tag $tag
 
-    # Add it as a constraint to the item
-    # attach $tag "move" [list lambda id x y -> $this move $result \$x \$y]
-
     # Return it
     return $result
 }
@@ -497,7 +480,8 @@ body ::tycho::Slate::interactor {class args} {
 #### move
 #
 # Move one or more items the specified amount. The first argument
-# can either be a tag or an id.
+# can either be a tag or an id. This method override the
+# superclass' method to move highlight items as well.
 #
 body ::tycho::Slate::move {tag xAmount yAmount} {
     # Move the items
@@ -941,7 +925,6 @@ body ::tycho::Slate::selector {args} {
 #
 # Return the "shape" of an item. The shape of an item
 # value returned is a subset of the types.
-#
 # If an extra argument given, this method returns the proc to
 # call that implements that method on the item's shape. A
 # third argument, if present and true, causes the item to be treated
@@ -985,7 +968,7 @@ body ::tycho::Slate::shape {id {method {}} {region 0}} {
 #######################################################################
 #### unhighlight
 #
-# Delete highlights.
+# Delete highlights from all matching items.
 #
 body ::tycho::Slate::unhighlight {tag} {
     if { [string match {_*} $tag] } {
@@ -996,9 +979,6 @@ body ::tycho::Slate::unhighlight {tag} {
 	    @scope ::tycho::$itemClass($tag) \
 		    [list eval \[set methodtable(unhighlight)\] \
 		    $tag $canvas $this]
-
-	    # Remove the constraint
-	    # detach $tag "move"
 	    return
     	}
     } elseif { ! [string match {[_0-9]*} $tag] } {
@@ -1012,9 +992,6 @@ body ::tycho::Slate::unhighlight {tag} {
     # If we get to here, tag represents a single item
     # Delete the highlight item
     $canvas delete highlight.$tag
-
-    # Remove the constraint
-    # detach $tag "move"
 }
 
 
