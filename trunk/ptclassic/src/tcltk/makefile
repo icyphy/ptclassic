@@ -81,9 +81,9 @@ BINDIR=$(PTOLEMY)/bin.$(PTARCH)
 #TK_VERSION =		tk4.0p1
 
 TCL_MAJOR_VERSION = 	tcl7.5
-TCL_VERSION =		tcl7.5a2
+TCL_VERSION =		tcl7.5b2
 TK_MAJOR_VERSION = 	tk4.1
-TK_VERSION =		tk4.1a2
+TK_VERSION =		tk4.1b2
 # Between tcl7.4 and tcl7.5, the location of the unix sources moved.
 TCL_7_5_HACK=		/unix
 ENABLE_GCC =		--enable-gcc --disable-load
@@ -167,11 +167,26 @@ clean_shared:		clean_itcl_shared
 realclean_shared:	clean_itcl_shared
 
 # Rules to build non-itcl tcltk
+# Note that pigiRpc requires itcl, these rules are left in only for testing
+# To build pigiRpc w/o itcl, you will need to compile pigilib/ptkTkSetup.c
+# and ptcl/ptclAppInit.cc with -DPT_NO_ITCL.  You can avoid needing libitcl
+# if you do 'make install ITCL_LIBSPEC= ITK_LIBSPEC='
+#
+# If you are trying to install a non-itcl tcltk, you will need to do:
+#    mkdir $PTOLEMY/tcltk/{tcl,tk}.$PTARCH $PTOLEMY/tcltk/{tcl,tk}
+# or else the tcl.$PTARCH and tk.$PTARCH directories that this makefile 
+# creates for you will be only links into the itcl tree.
+
 all_tcltk: 		configure_tcltk tcl tk
 configure_tcltk:	$(TCL_OBJ)/config.status $(TK_OBJ)/config.status \
 			$(TCLTK_OBJ)/makefile
 bin_tcltk:		tcl tk
 install_tcltk:	install_tcl install_tk
+	(cd $(TCL_DEST)/lib; ln -s . shared)
+	(cd $(TK_DEST)/lib; ln -s . shared)
+	(cd $(TCL_INDEPENDENT_DEST)/lib; ln -s $(TCL_MAJOR_VERSION) tcl)
+	(cd $(TK_INDEPENDENT_DEST)/lib; ln -s $(TK_MAJOR_VERSION) tcl)
+
 clean_tcltk:		clean_tcl clean_tk
 realclean_tcltk:	clean_tcl clean_tk
 
