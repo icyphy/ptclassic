@@ -84,7 +84,7 @@ ifdef FULL
 	ACS =		1
 	SDFFULL =	1
 	SR =		1
-#	SRCGC =		1
+	SRCGC =		1
 	VHDLFULL =	1
 	VHDLB =		1
 endif
