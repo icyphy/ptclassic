@@ -31,12 +31,6 @@ class ostream;
 // This class shows the information of a scheduled node.
 class NodeSchedule : public DoubleLink {
 friend class UniProcessor;
-private:
-	int idleFlag;		// set if idle time
-	int duration;
-	int index;		// index for dynamic constructs.
-	ParNode* myNode;
-	NodeSchedule* nextFree;	// free list management.
 public:
 	// reset members
 	void resetMembers() { nextFree = 0; idleFlag = 0; index = -1; }
@@ -63,6 +57,13 @@ public:
 	// get next and previous link.
 	NodeSchedule* nextLink() { return (NodeSchedule*) next; }
 	NodeSchedule* previousLink() { return (NodeSchedule*) prev; }
+
+private:
+	int idleFlag;		// set if idle time
+	int duration;
+	int index;		// index for dynamic constructs.
+	ParNode* myNode;
+	NodeSchedule* nextFree;	// free list management.
 };
 
 ////////////////////////
@@ -74,64 +75,6 @@ public:
 class UniProcessor : public DoubleLinkList {
 
 friend class ParProcessors;
-
-private:
-	// Memory management for NodeSchedules: list of free NodeSchedules.
-	NodeSchedule* freeNodeSched;
-	int numFree;		// debugging purpose.
-
-	// galaxy of blocks assigned to this processor
-	DynamicGalaxy* subGal;
-
-	// Multiprocessor object of which I am a part of
-	ParProcessors* parent;
-
-	// my id
-	int index;
-
-	// create special stars and connect them
-	SDFStar* makeSpread(PortHole* srcP, ParNode* sN);
-	SDFStar* makeCollect(PortHole* destP, ParNode* dN);
-	void makeReceive(int pindex, PortHole* rP,int delay,ParNode*,EGGate*);
-	void makeSend(int pindex, PortHole* sP, ParNode*, EGGate*);
-
-	// Depending on OSOPReq(), make connections
-	void makeOSOPConnect(PortHole* p, SDFStar* org, SDFStar* far,
-			     SequentialList&);
-	void makeGenConnect(PortHole* p, ParNode*, SDFStar* org, SDFStar* far,
-			     SequentialList&);
-
-        // Check whether the user want to assign all invocations of a star
-        // into the same processor or not.
-        int OSOPreq() { return mtarget->getOSOPreq(); }
-
-	// Convert a processor schedule to an SDF schedule for child target.
-	void convertSchedule();
-
-protected:
-	// The time when the processor available
-	int availTime;
-
-	// The schedule of the currently executed node.
-	NodeSchedule* curSchedule;
-
-	// target pointer
-	BaseMultiTarget* mtarget;	// multi-target
-	CGTarget* targetPtr;		// my target processor
-
-	// sum of idle time
-	int sumIdle;
-
-	NodeSchedule* getFree();	// get a free NodeSchedule
-	void putFree(NodeSchedule*);	// put into the pool of free NodeSched.
-	void clearFree();		// remove all created NodeSchedules.
-	
-	// sub-universe creation
-	void makeConnection(ParNode* dN, ParNode* sN, PortHole* ref);
-	void makeBoundary(ParNode* sN, PortHole* ref);
-
-	// Simulate the schedule: obtain the buffer requirement.
-	void simRunSchedule();
 
 public:
 	// constructor
@@ -211,6 +154,67 @@ public:
 
 	// generate code
 	StringList generateCode();
+
+
+protected:
+	// The time when the processor available
+	int availTime;
+
+	// The schedule of the currently executed node.
+	NodeSchedule* curSchedule;
+
+	// target pointer
+	BaseMultiTarget* mtarget;	// multi-target
+	CGTarget* targetPtr;		// my target processor
+
+	// sum of idle time
+	int sumIdle;
+
+	NodeSchedule* getFree();	// get a free NodeSchedule
+	void putFree(NodeSchedule*);	// put into the pool of free NodeSched.
+	void clearFree();		// remove all created NodeSchedules.
+	
+	// sub-universe creation
+	void makeConnection(ParNode* dN, ParNode* sN, PortHole* ref);
+	void makeBoundary(ParNode* sN, PortHole* ref);
+
+	// Simulate the schedule: obtain the buffer requirement.
+	void simRunSchedule();
+
+private:
+	// Memory management for NodeSchedules: list of free NodeSchedules.
+	NodeSchedule* freeNodeSched;
+	int numFree;		// debugging purpose.
+
+	// galaxy of blocks assigned to this processor
+	DynamicGalaxy* subGal;
+
+	// Multiprocessor object of which I am a part of
+	ParProcessors* parent;
+
+	// my id
+	int index;
+
+	// create special stars and connect them
+	SDFStar* makeSpread(PortHole* srcP, ParNode* sN);
+	SDFStar* makeCollect(PortHole* destP, ParNode* dN);
+	void makeReceive(int pindex, PortHole* rP,
+		int delay, ParNode*, EGGate*, PortHole* orgP = 0);
+	void makeSend(int pindex, PortHole* sP, ParNode*, 
+		EGGate*, PortHole* orgP = 0);
+
+	// Depending on OSOPReq(), make connections
+	void makeOSOPConnect(PortHole* p, SDFStar* org, SDFStar* far,
+			     SequentialList&);
+	void makeGenConnect(PortHole* p, ParNode*, SDFStar* org, SDFStar* far,
+			     SequentialList&);
+
+        // Check whether the user want to assign all invocations of a star
+        // into the same processor or not.
+        int OSOPreq() { return mtarget->getOSOPreq(); }
+
+	// Convert a processor schedule to an SDF schedule for child target.
+	void convertSchedule();
 };
 
 /////////////////////////
