@@ -186,3 +186,6 @@ INCLUDE_IPUS_DOMAIN = no
 
 # Build gthreads
 INCLUDE_GTHREADS =	yes
+
+# Include the PN domain.
+INCLUDE_PN_DOMAIN =	yes
