@@ -332,8 +332,9 @@ TCLBLEND_OBJ =	$(TCLTK_OBJ)/tclBlend$(TCLBLEND_VERSION)
 TCLBLEND_DEST =	$(ITCL_DEST)
 TCLBLEND_INDEPENDENT_DEST =	$(ITCL_INDEPENDENT_DEST)
 
-# Uncomment this line to build the Tcl Bean
-#JAVA_STUDIO_CONFIG= --with-studio=/users/ptdesign/vendors/sun/Java-Studio1.0/JS/classes
+# Script that checks for Java Studio
+JAVA_STUDIO_CONFIG=`$(PTOLEMY)/src/tcltk/java_studio`
+
 all_tclblend: config_tclblend tclblend install_tclblend
 config_tclblend: $(TCLBLEND_OBJ)
 	@echo "Configuring tclblend"
@@ -362,6 +363,8 @@ clean_tclblend:
 test_tclblend:
 	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; $(MAKE) test)
 
+bean_tclblend:
+	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; $(MAKE) bean)
 # Run JavaScope, the Java Code Coverage tool.
 # See http://www.suntest.com/JavaScope
 jsall_tclblend:
