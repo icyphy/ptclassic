@@ -31,7 +31,7 @@ A
 is a block that contains stars and other galaxies.
 .IE Galaxy
 From the outside, a galaxy looks like a star, and can be treated
-exacltly like a star.
+exactly like a star.
 But looking inside a galaxy reveals the block diagram that defines it.
 A galaxy
 has input and output ports (corresponding to terminals
@@ -60,7 +60,7 @@ Domains that are currently supported in Pigi include synchronous
 dataflow (SDF), dynamic dataflow (DDF), and discrete events (DE).
 See the manual sections for these domains for an explanation
 of their operation.
-Knowledgable users can define new domains and link them into Pigi.
+Knowledgeable users can define new domains and link them into Pigi.
 .pp
 A
 .c State
@@ -98,9 +98,12 @@ Oct objects called facets.  A \fIfacet\fP is
 .IE facet
 the fundamental unit that a user edits with VEM.  As an analogy, we can
 think of a facet as a text file in a computer system and VEM as a text
-editor, such as vi.  However, instead
-of calling system routines to access the data stored in a text file
-like vi does, VEM calls Oct routines to access the data stored in a
+editor, such as
+.i vi .
+However, instead of calling system routines to access the data stored
+in a text file like
+.i vi
+does, VEM calls Oct routines to access the data stored in a
 facet.  Thus, Oct manages all data accesses to facets.
 Facets may define a universe, a galaxy, or a wormhole.
 They also define the physical appearance and formal
@@ -134,7 +137,7 @@ A block in \*(PT that contains sub-blocks,
 i.e., other stars or galaxies.  A galaxy also has at least one
 input or output port.
 .ip \fBuniverse\fP 1i
-The outer-most block in \*(PT representing a
+The outermost block in \*(PT representing a
 complete system that the user can execute.
 .ip \fBdomain\fP 1i
 A model of computation, or a set of semantic rules

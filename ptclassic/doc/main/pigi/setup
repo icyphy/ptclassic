@@ -29,8 +29,8 @@ This should be done in your .cshrc file, rather than your .login file,
 because RPC applications are started as separate processes,
 and new processes do not examine the .login file.
 .pp
-The ~ptolemy/.cshrc file defines the path variable to include the appriate bin
-directories to run ptolemy.
+The ~ptolemy/.cshrc file defines the path variable to include the appropriate
+bin directories to run ptolemy.
 .IE .cshrc
 The pertinent lines read:
 .EQ
@@ -63,7 +63,7 @@ You should replace
 with whatever printer name you are using.
 .H2 "The X Window System"
 .pp
-Pigi uses the X window system, version 11.4.
+Pigi uses the X window system, version 11 release 4 (X11R4).
 This section provides just enough information about using X
 so that if you are not familiar with it you will nonetheless
 be able to get started.
@@ -72,7 +72,7 @@ would be helpful.
 Complete guides to the X window system are
 available in many technical bookstores.
 If you are familiar with X, and your user account
-is properly configured to run version 11.4, you may skip
+is properly configured to run X11R4, you may skip
 the rest of this section, proceeding directly to the \*(PT demos.
 Pigi will automatically load the resources it needs
 for operation.
@@ -120,9 +120,9 @@ the basic window manipulations are explained below.
 Note that there are often several different ways to accomplish the
 same objective.  Feel free to experiment with key and mouse button
 combinations in various parts of the screen.
-First, you must identify the "meta" key on your keyboard.
-It may be labeled in any of various ways, including "meta", "left",
-"right", "alt",  or any of a number of other possibilities.
+First, you must identify the ``meta'' key on your keyboard.
+It may be labeled in any of various ways, including ``meta'', ``left'',
+``right'', ``alt'',  or any of a number of other possibilities.
 It is usually close to the shift and control keys.
 Most window manipulations require that you hold down the meta key
 while depressing mouse buttons.
@@ -137,7 +137,7 @@ An alternative iconifying mechanism is to click any mouse button
 on the icon symbol at the left of the window header.
 .UH "Moving windows."
 Holding the meta key and dragging with the middle mouse button will move
-a window.  "Dragging" simply means to hold the mouse button while
+a window.  ``Dragging'' simply means to hold the mouse button while
 moving the mouse.
 Alternatively, you can drag the
 left button in the middle of the window header.
@@ -150,7 +150,7 @@ any button in the rightmost corner of the window header will resize the window.
 .UH "Mnemonic."
 The window header has an iconify icon at the left, a blue bar for moving
 the window in the middle, and a resize symbol at the right.
-Correspongingly, without going to the window header, but using the meta key,
+Correspondingly, without going to the window header, but using the meta key,
 the left mouse button will iconify a window, the middle button will move it,
 and the right button will resize it.  Hence, the window header can be used
 as a mnemonic to help remember which mouse button has which function when
@@ -167,9 +167,9 @@ The highlighted text is "picked up", stored for future use.
 The middle button causes the highlighted text to be typed
 to whatever window has the mouse cursor.
 .UH "New windows."
-A useful command, defined in ~ptolemy/.cshrc, is "term".
+A useful command, defined in ~ptolemy/.cshrc, is ``term''.
 Typing this in any window, followed by a carriage return,
-opens a new terminal window with a resonable size and color.
+opens a new terminal window with a reasonable size and color.
 You may change the size and location in the usual way.
 .H3 "Resources"
 .pp
@@ -190,6 +190,6 @@ If you have not used the X window system before,
 you will probably not have a file with the name .Xresources in your home
 directory, and can simply copy the one from ~ptolemy.
 This file defines some basic resources, including some
-which fix some bugs in X11R4.
+which work around some bugs in X11R4.
 If you already have a file with this name, then you can probably
 use the one you have as is.

@@ -25,10 +25,10 @@ directory is ~joe/ptolemy.
 Pigi will next query for the name of a palette into which
 to store the icon.
 If the palette does not already exist, it will be created.
-The dialog box suggests using the palette ``./user'', simply
-because this is easy to access via the open-palette (``O'') command.
-Note that you can have many palettes named ``user''; the one opened
-by the open-palette command is the one in the directory where
+The dialog box suggests using the palette ``./user.pal'', simply
+because this is easy to access via the \fIopen-palette\fR (``O'') command.
+Note that you can have many palettes named ``user.pal''; the one opened
+by the \fIopen-palette\fR command is the one in the directory where
 you started Pigi.
 .pp
 After the icon has been created, you can use it immediately.  The icon
@@ -38,7 +38,7 @@ see the section below on editing icons.
 .pp
 An important note: whenever the definition of a star is changed so that
 the new definition has different I/O ports, the icon must be updated as
-well.  You can do thid by calling \fImake-star\fP again to replace
+well.  You can do this by calling \fImake-star\fP again to replace
 the old icon with a new one.  Furthermore, whenever you update the
 formal parameters of a star or create a new icon for a star, you must
 also re-instantiate the icon in all facets that refer to it.  This

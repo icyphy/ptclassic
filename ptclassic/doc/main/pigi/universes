@@ -202,7 +202,10 @@ Resize the palette window to make it larger and select
 Create an instance of the star called ``FloatRamp'':
 .in +0.5i
 .LE
-Create a point in the window labeled ``wave:schematic'' anywhere in the
+While in the window ``wave:schematic'', zoom out three times
+(type ``Z'').
+.LE
+Create a point in the ``wave:schematic'' window anywhere in the
 window by clicking the left button.
 .LE
 Locate the ``FloatRamp'' icon in the palette.
@@ -234,7 +237,7 @@ place a point near the original ramp, place the cursor over the
 ramp icon in the palette, and press ``c''.
 Actually, you don't have to use the icon in the palette \- you
 could also put the cursor over the already existing ramp icon
-and acheive the same effect.
+and achieve the same effect.
 .LE
 Place cursor over the new ramp icon and execute \fIselect-objects\fP
 by typing ``s''.
