@@ -19,8 +19,8 @@ $Id$
 #endif
 
 #include "Target.h"
+#include "IntState.h"
 #include "StringState.h"
-#include "StringStack.h"
 
 class CGStar;
 
@@ -29,6 +29,11 @@ class UserOutput;
 class CGTarget : public Target {
 protected:
 	StringList myCode;
+
+	StringState destDirectory;
+	IntState loopScheduler;
+
+	char *schedFileName;
 
 	// The following utilities are used by many types of code generators
 	// Return a list of spaces for indenting
@@ -44,6 +49,8 @@ protected:
 public:
 	CGTarget(const char* name, const char* starclass, const char* desc,
 		 char sep = '_');
+
+	~CGTarget();
 	void initialize();
 	// The setup method should not be invoked if the stars are not
 	// CGStars or their portHoles are not CGPortHoles.
@@ -65,36 +72,13 @@ public:
 	// output a comment.  Default form uses C-style comments.
 	virtual void outputComment (const char*);
 
-	// destructor
-	~CGTarget();
+	// generate code for a firing.  The definition here simply
+	// fires the star
+	void writeFiring(Star&,int depth);
+
+	// dummy beginIteration and endIteration
+	void beginIteration(int,int);
+	void endIteration(int,int);
 };
 
-// Class for unique symbol generation.  The symbol is guaranteed
-// to be unique with respect to all other symbols in the target.
-class Symbol {
-private:
-	// List of all symbols
-	StringList symbols;
-	CGTarget* myTarget;
-public:
-	Symbol(CGTarget* t=0);
-	void initialize() { symbols.initialize(); };
-	StringList lookup(const char*);
-	void setTarget(CGTarget* t) {myTarget = t;}
-};
-
-// Class for unique nested symbol generation.
-class NestedSymbol {
-private:
-	// List of all symbols
-	StringStack symbols;
-	CGTarget* myTarget;
-public:
-	NestedSymbol(CGTarget* t=0);
-	void initialize() { symbols.initialize(); };
-	const char* push(const char* tag="L");
-	const char* pop();
-	int depth() { return symbols.depth();};
-	void setTarget(CGTarget* t) {myTarget = t;};
-};
 #endif
