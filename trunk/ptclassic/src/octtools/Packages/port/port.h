@@ -85,17 +85,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define	__host_mips   host_mips
 #endif
 
-/* This should be outside of the below ifdef, and must be before any include.
-* I removed _BSD_SOURCE and _POSIX_SOURCE because they are redundant, since
-* defining _GNU_SOURCE turns on everything
-*/
-#ifdef linux
-#ifndef __linux
-#define __linux		linux
-#endif
-#define _GNU_SOURCE
-#endif
-
 #if defined(aix) || defined(_AIX)
 #define __aix		aix
 #define _POSIX_SOURCE
@@ -143,6 +132,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #endif /*  defined(__GNUC__) && defined(ultrix) */
+
+/* This should be outside of the below ifdef, and must be before any include.
+* I removed _BSD_SOURCE and _POSIX_SOURCE because they are redundant, since
+* defining _GNU_SOURCE turns on everything
+*/
+#ifdef linux
+#ifndef __linux
+#define __linux		linux
+#endif
+#define _GNU_SOURCE
+#endif
 
 #ifdef SABER
 #define volatile
