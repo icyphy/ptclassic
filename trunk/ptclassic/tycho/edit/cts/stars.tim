@@ -58,7 +58,8 @@ group sink -label {Sink Stars} {
         attribute XMax -default "1.0" -label "X maximum" -type number
         attribute YMin -default "-1.0" -label "Y minimum" -type number
         attribute YMax -default "1.0" -label "Y maximum" -type number        
-        port input -datatype float
+        port inputX -datatype float
+        port inputY -datatype float
     }
 }
 
@@ -91,7 +92,7 @@ group arithmetic -label {Basic Arithmetic} {
     star multiply \
             -class {Multiply} \
             -label Multiply \
-            -icon {edit/graphedit/icons.tim#arithmetic.multiply} {
+            -icon {edit/cts/icons.tim#arithmetic.multiply} {
         port input -composite 1
         port output -composite 0
     }

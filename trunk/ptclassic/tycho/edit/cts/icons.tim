@@ -272,7 +272,7 @@ group arithmetic -label {Arithmetic Icons} {
         line 20 50 80 50 -width 4
         line 50 20 50 80 -width 4
     }
-    icon mutiply -label Multiply \
+    icon multiply -label Multiply \
             -slatetype IconOval \
             -fill white \
             -text "" \
