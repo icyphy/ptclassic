@@ -14,12 +14,8 @@ a universe.
 
 *******************************************************************/
 
-#include "CGTarget.h"
+#include "BaseCTarget.h"
 #include "KnownTarget.h"
-#include "SDFCluster.h"
-#include "SDFScheduler.h"
-#include "StringState.h"
-#include "IntState.h"
 #include "UserOutput.h"
 #include "Galaxy.h"
 #include "GalIter.h"
@@ -27,69 +23,31 @@ a universe.
 #include "ConstIters.h"
 #include <ctype.h>
 
-class CompileTarget : public CGTarget {
+class CompileTarget : public BaseCTarget {
+public:
+	int run();
+	void wrapup ();
+	Block* clone() const
+		{ LOG_NEW; return &(new CompileTarget)->copyStates(*this);}
+
+	// Routines for writing code: schedulers may call these
+	StringList writeFiring(Star& s, int depth);
+
 private:
-	int id;
 	// Method to return a pointer to the MultiPortHole that spawned a
 	// given PortHole, if there is such a thing.  If not, the pointer
 	// to the PortHole is returned as pointer to a GenericPort.
 	GenericPort* findMasterPort(const PortHole* p) const;
+
 	// Returns the name of an ordinary porthole, or
 	// "name.newPort()" for a MultiPortHole.
 	StringList expandedName(const GenericPort* p) const;
+
 	StringList galDef(Galaxy* galaxy, StringList className, int level);
+
 	int writeGalDef(Galaxy& galaxy, const StringList className);
 
-	// return a name that can be used as C++ identifiers, derived
-	// from the actual name.
-	StringList sanitize(const char* s) const;
-	StringList sanitizedName(const NamedObj &b) const;
-	StringList sanitizedFullName(const NamedObj &b) const;
-
-protected:
-	StringState destDirectory;
-	IntState loopScheduler;
-	char *schedFileName;
-public:
-	CompileTarget();
-	void start();
-	int run();
-	void wrapup ();
-	Block* clone() const { LOG_NEW; return &(new CompileTarget)->copyStates(*this);}
-
-	// Routines for writing code: schedulers may call these
-	StringList beginIteration(int repetitions, int depth);
-	StringList endIteration(int repetitions, int depth);
-	StringList writeFiring(Star& s, int depth);
-
-	~CompileTarget() { delSched();}
 };
-
-// constructor
-CompileTarget::CompileTarget() : CGTarget("compile-SDF","SDFStar",
-"Generate stand-alone C++ programs and compile them.  The program\n"
-"and associated makefile is written to a directory given as a Target param.\n"
-"Can use either the default SDF scheduler or Joe's loop scheduler."),
-schedFileName(0), id(0)
-{
-	addState(destDirectory.setState("destDirectory",this,"PTOLEMY_SYSTEMS",
-			"Directory to write to"));
-	addState(loopScheduler.setState("loopScheduler",this,"NO",
-			"Specify whether to use loop scheduler."));
-}
-
-void CompileTarget::start() {
-
-    LOG_DEL; delete dirFullName;
-    dirFullName = writeDirectoryName(destDirectory);
-
-    if(int(loopScheduler)) {
-	char* schedFileName = writeFileName("schedule.log");
-	LOG_NEW; setSched(new SDFClustSched(schedFileName));
-    } else {
-	LOG_NEW; setSched(new SDFScheduler);
-    }
-}
 
 int CompileTarget::writeGalDef(Galaxy& galaxy, const StringList className) {
     // First generate the files that define the galaxies
@@ -252,32 +210,6 @@ void CompileTarget::wrapup() {
     system(cmd);
 }
 
-
-// Routines for writing code: schedulers may call these
-StringList CompileTarget::beginIteration(int repetitions, int depth) {
-	StringList out;
-	out = indent(depth);
-	out += "int i";
-	out += id;
-	out += "; ";
-	out += "for (i";
-	out += id;
-	out += "=0; i";
-	out += id;
-	out += " < ";
-	out += repetitions;
-	out += "; i";
-	out += id++;
-	out += "++) {\n";
-	return out;
-}
-
-StringList CompileTarget::endIteration(int, int depth) {
-	StringList out;
-	out = indent(depth);
-	out += "}\n";
-	return out;
-}
 
 StringList CompileTarget::writeFiring(Star& s, int depth) {
 	StringList out;
@@ -529,45 +461,6 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
     runCode += "}\n";
     return runCode;
 }
-
-// This method creates a name derived from the name of the object
-// where all characters in the name that are not alphanumeric are
-// changed to '_' so that the resulting name is a legitimate C++
-// identifier.  For all names that begin with a numeric character,
-// the character 'x' is prepended.
-StringList CompileTarget :: sanitizedName (const NamedObj& obj) const {
-        const char *s = obj.readName();
-	return sanitize(s);
-}
-
-
-StringList CompileTarget :: sanitize(const char* s) const {
-        LOG_NEW; char *snm = new char [strlen(s) + 2];
-        char *n = snm;
-	if(isdigit(*s)) *(n++) = 'x';
-        while (*s != 0) {
-            if(isalnum(*s)) *(n++) = *(s++);
-            else { *(n++) = '_'; s++; }
-        }
-        *n = 0;
-        StringList out(snm);
-        LOG_DEL; delete snm;
-        return out;
-}
-
-StringList CompileTarget :: sanitizedFullName (const NamedObj& obj) const {
-        StringList out;
-        if(obj.parent() != NULL) {
-                out = sanitizedFullName(*obj.parent());
-                out += ".";
-                out += sanitizedName(obj);
-        } else {
-                out = sanitizedName(obj);
-        }
-        return out;
-}
-
-    
 
 static CompileTarget compileTargetProto;
 static KnownTarget entry(compileTargetProto,"compile-SDF");
