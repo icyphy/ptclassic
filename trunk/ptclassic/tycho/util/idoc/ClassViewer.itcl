@@ -618,7 +618,8 @@ body ::tycho::ClassViewer::ghostHandle {horizontal pixels} {
 body ::tycho::ClassViewer::help {} {
     global env
     ::tycho::File::openContext \
-	    [file join $env(IDOC_LIBRARY) doc usersGuides ClassViewerHelp.html]
+	    [file join $env(IDOC_LIBRARY) doc usersGuides \
+	    ClassViewerHelp.html] html
 }
 
 #######################################################################
