@@ -242,6 +242,9 @@ class ::tycho::File {
     # Open a file browser, and then open an editor for the file.
     method openWinMethod {} {}
 
+    # Create an entry widget, and then open an editor for the file.
+    method openWinMethod2 {} {}
+
     # Print the contents of the file. The default behavior is an error.
     method print {}
 
@@ -469,6 +472,9 @@ body ::tycho::File::constructor {args} {
     bind $prefix <Control-x><Control-r> "$this evaluate; break"
     bind $prefix <Control-x><Control-q> "$this toggleReadOnly; break"
     bind $prefix <Control-x><v> "$this revisionControl; break"
+
+    # Experimental binding: open using status bar
+    bind $prefix <Control-x><Control-F> "$this openWinMethod2; break"
 
     # The following initialize options and then invoke any
     # configuration options, assuming there are options specified.
@@ -764,7 +770,6 @@ body ::tycho::File::openItclHTMLPage {} {
     }
 }
 
-
 #####################################################################
 #### openWinMethod
 # Open a file browser, and then open an editor for the file.
@@ -778,6 +783,31 @@ body ::tycho::File::openWinMethod {} {
 	    -text "Open File:" \
             -initial $completeFilePath
 }
+
+#####################################################################
+#### openWinMethod2
+# Place an entry widget in the status bar, if there is one, and
+# set it up so that Return opens the file in it. If there is
+# no statusbar, call OpenWinMethod{}.
+# The editor is chosen based on the file extension, if the extension
+# is recognized.  Otherwise, the <code>Edit</code> class is used to open an
+# ordinary text editor.
+#
+body ::tycho::File::openWinMethod2 {} {
+    if { [statusbar] == "" } {
+        openWinMethod
+    } else {
+        if { $completeFilePath == "NoName" } {
+            set default [pwd]
+        } else {
+            set default [::tycho::url dirname $completeFilePath] 
+        }
+        statusbar entry "Open File:" \
+                -default $default \
+                -command "::tycho::openContext %%; $this statusbar puts {}"
+    }
+}
+
 #####################################################################
 #### print
 # Print the contents of the file. The default behavior is an error.
