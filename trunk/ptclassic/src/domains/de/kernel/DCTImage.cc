@@ -5,6 +5,7 @@ static const char file_id[] = "DCTImage.cc";
 // SCCS info:		$Id$
 
 #include "DCTImage.h"
+#include <minmax.h>
 
 const char* DCTImage::dataType() const { return("DCTImage"); }
 PacketData* DCTImage::clone() const { LOG_NEW; return new DCTImage(*this); }

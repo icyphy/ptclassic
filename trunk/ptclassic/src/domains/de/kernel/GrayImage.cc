@@ -5,6 +5,7 @@ static const char file_id[] = "GrayImage.cc";
 // SCCS info:		$Id$
 
 #include "GrayImage.h"
+#include <minmax.h>
 
 const char* GrayImage::dataType() const { return "GrayImage";}
 PacketData* GrayImage::clone() const { LOG_NEW; return new GrayImage(*this);}

@@ -5,6 +5,7 @@ static const char file_id[] = "MVImage.cc";
 // SCCS info:		$Id$
 
 #include "MVImage.h"
+#include <minmax.h>
 
 void MVImage::init()
 {
