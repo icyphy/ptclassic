@@ -46,18 +46,20 @@ The difference is simply that traverse is re-initialized each time
 CompileFacet is called.  xfered never gets re-initialized.
 */
 
-/* Includes */
-
-#include "local.h"		/* include "ansi.h" and "compat.h" */
+/* Standard includes */
+#include "local.h"		/* include compat.h, sol2compat.h, ansi.h */
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
 
-/* Include sol2compat.h, oct.h, list.h, and rpc.h */
-/* Defines boolean, octObject, lsList, and RPC data structures, respectively */
-#include "compile.h"
-
+/* Octtools include */
+#include "oct.h"		/* define octObject */
+#include "list.h"		/* define lsList */
+#include "rpc.h"		/* define remote procedure calls */
 #include "oh.h"
+
+/* Pigilib includes */
+#include "compile.h"
 #include "paramStructs.h"
 #include "vemInterface.h"
 #include "util.h"
@@ -68,8 +70,6 @@ CompileFacet is called.  xfered never gets re-initialized.
 #include "ptk.h"
 #include "kernelCalls.h"
 #include "handle.h"
-
-static boolean RunAll();
 
 /* maximum number of actual terms allowed on a net */
 #define TERMS_MAX 50
@@ -204,6 +204,7 @@ octObject *facetPtr;
     while (octGenerate(&netGen, &net) == OCT_OK) {
 	prop.type = OCT_PROP;
 	prop.contents.prop.name = "delay";
+	prop.contents.prop.type = OCT_NULL;
 	if (octGetByName(&net, &prop) == OCT_NOT_FOUND) {
 	    prop.contents.prop.name = "delay2";
 	    if (octGetByName(&net, &prop) == OCT_NOT_FOUND) {
@@ -838,7 +839,7 @@ boolean
 CompileGalInst(galInstPtr,parentFacetPtr)
 octObject *galInstPtr, *parentFacetPtr;
 {
-    char* galDomain;
+    const char* galDomain;
     octObject galFacet = {OCT_UNDEFINED_OBJECT};
 
     /* get the galaxy domain */
@@ -868,7 +869,7 @@ boolean
 CompileGalStandalone(galFacetPtr)
 octObject *galFacetPtr;
 {
-    char* galDomain;
+    const char* galDomain;
     /* get the galaxy domain */
     if (!GOCDomainProp(galFacetPtr, &galDomain, curDomainName())) {
         PrintErr(ErrGet());
@@ -899,7 +900,10 @@ octObject *galFacetPtr;
 {
     char *name;
     boolean xferedBool;
-    char *oldDomain, *galDomain, *galTarget, *desc;
+    const char *galDomain;
+    const char *desc;
+    const char *oldDomain;
+    const char *galTarget;
 
     name = BaseName(galFacetPtr->contents.facet.cell);
 
@@ -999,16 +1003,14 @@ octObject *galFacetPtr;
     return (TRUE);
 }
 
-char* KcDefTarget();
-
 static boolean
 CompileUniv(facetPtr)
 octObject *facetPtr;
 {
     char *name;
     boolean xferedBool;
-    char *domain;
-    char *target;
+    const char *domain;
+    const char *target;
 
     name = BaseName(facetPtr->contents.facet.cell);
     if (!GOCDomainProp(facetPtr, &domain, DEFAULT_DOMAIN)) {
@@ -1135,45 +1137,6 @@ CompileEnd()
     /* clean up tmp file before exiting */
 }
 
-/* NEW FUNCTION */
-
-int
-RpcRunAllDemos(spot, cmdList, userOptionWord) /* ARGSUSED */
-RPCSpot *spot;
-lsList cmdList;
-long userOptionWord;
-{
-    octObject facet = {OCT_UNDEFINED_OBJECT};
-    char* name;
-    char octHandle[POCT_FACET_HANDLE_LEN];
-
-    ViInit("run-all-demos");
-    ErrClear();
-    facet.objectId = spot->facet;
-    if (octGetById(&facet) != OCT_OK) {
-	PrintErr(octErrorString());
-	ViDone();
-    }
-    if (!IsPalFacet(&facet)) {
-	PrintErr("This command must be run in a palette");
-	ViDone();
-    }
-
-    name = BaseName(facet.contents.facet.cell);
-    ptkOctObj2Handle(&facet, octHandle);
-
-    if (Tcl_VarEval(ptkInterp, "ptkRunAllDemos ", name, " ", octHandle,
-      (char *) NULL) == TCL_ERROR) {
-	PrintErr("Run-all-demos control panel cannot be brought up");
-	ViDone();
-    }
-    RunAll(&facet);
-    TCL_CATCH_ERR(Tcl_VarEval(ptkInterp, "ptkRunAllDemosDel ", name,
-      " ", octHandle, (char *) NULL));
-    FreeOctMembers(&facet);
-    ViDone();
-}
-
 /* run everything in the facet, which is assumed to be a palette */
 static boolean
 RunAll(facetPtr)
@@ -1221,3 +1184,43 @@ octObject *facetPtr;
     octFreeGenerator(&genInst);
     return TRUE;
 }
+
+/* NEW FUNCTION */
+
+int
+RpcRunAllDemos(spot, cmdList, userOptionWord) /* ARGSUSED */
+RPCSpot *spot;
+lsList cmdList;
+long userOptionWord;
+{
+    octObject facet = {OCT_UNDEFINED_OBJECT};
+    char* name;
+    char octHandle[POCT_FACET_HANDLE_LEN];
+
+    ViInit("run-all-demos");
+    ErrClear();
+    facet.objectId = spot->facet;
+    if (octGetById(&facet) != OCT_OK) {
+	PrintErr(octErrorString());
+	ViDone();
+    }
+    if (!IsPalFacet(&facet)) {
+	PrintErr("This command must be run in a palette");
+	ViDone();
+    }
+
+    name = BaseName(facet.contents.facet.cell);
+    ptkOctObj2Handle(&facet, octHandle);
+
+    if (Tcl_VarEval(ptkInterp, "ptkRunAllDemos ", name, " ", octHandle,
+      (char *) NULL) == TCL_ERROR) {
+	PrintErr("Run-all-demos control panel cannot be brought up");
+	ViDone();
+    }
+    RunAll(&facet);
+    TCL_CATCH_ERR(Tcl_VarEval(ptkInterp, "ptkRunAllDemosDel ", name,
+      " ", octHandle, (char *) NULL));
+    FreeOctMembers(&facet);
+    ViDone();
+}
+
