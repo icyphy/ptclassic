@@ -1,0 +1,47 @@
+\c Version $Id$
+\c Author:	T. M. Parks
+\c Created:	17 January 1993
+\c
+\c Generate a single index for LaTeX output
+\c and multiple smaller indices for the Info file.
+
+\node Index
+\unnumbered{Index}
+\begin{iftex}
+\printindex{cp}
+\end{iftex}
+
+\begin{ifinfo}
+\begin{menu}
+* Concept Index::		
+* Program Index::		
+* Function Index::		
+* Variable Index::		
+* Data Type Index::		
+* Keystroke Index::		
+\end{menu}
+
+\node Concept Index, Program Index, Index, Index
+\section{Concept Index}
+\printindex{cp}  
+
+\node Program Index, Function Index, Concept Index, Index
+\section{Program Index}
+\printindex{pg}
+
+\node Function Index, Variable Index, Program Index, Index
+\section{Function Index}
+\printindex{fn}
+
+\node Variable Index, Data Type Index, Function Index, Index
+\section{Variable Index}
+\printindex{vr}
+
+\node Data Type Index, Keystroke Index, Variable Index, Index
+\section{Data Type Index}
+\printindex{tp}
+
+\node Keystroke Index,  , Data Type Index, Index
+\section{Keystroke Index}
+\printindex{ky}
+\end{ifinfo}
