@@ -1,4 +1,4 @@
-#!/bin/sh
+#! /bin/sh
 #
 # Two forms, because I cant decide whether to use sh or csh.
 # I cant figure out the equivalent of sh's "$@".  The big gotcha is
@@ -7,4 +7,4 @@
 #
 #if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 PTOLEMY=${PTOLEMY-`csh -fc 'echo ~ptolemy'`}
-$PTOLEMY/tcltk/tk.$ARCH/bin/wish -f $PTOLEMY/bin/ptfixtree.tk "$@"
+$PTOLEMY/tcltk/tcl.$ARCH/bin/tclsh $PTOLEMY/bin/ptfixtree.tcl "$@"
