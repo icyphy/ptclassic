@@ -60,6 +60,7 @@ HDRS= \
 	ACSWormhole.h \
 	ACSKnownCategory.h \
 	ACSFPSimCore.h \
+	ACSFixSimCore.h \
 	# ACSGeodesic.h
 
 # Library sources

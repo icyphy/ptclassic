@@ -49,7 +49,7 @@ public:
 
 	// This is the flavor of constructor used by 
 	// ACSCore* makeNew( ACSCorona & ).
-	// ACSFPSimCore(ACSCorona & corona_) : ACSCore(corona_, ACSFPSimCategory) { }
+	ACSFPSimCore(ACSCorona & corona_) : ACSCore(ACSFPSimCategory) { }
 
 
 };

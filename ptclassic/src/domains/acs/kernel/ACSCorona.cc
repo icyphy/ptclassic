@@ -39,9 +39,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownBlock.h"
 #include "ACSTarget.h"
 
-extern "C" int
+/* extern "C" int
 KcCompileAndLink (const char* name, const char* idomain, const char* srcDir,
-  int permB, const char* linkArgs);
+  int permB, const char* linkArgs); */
 
 // The following is defined in ACSDomain.cc -- this forces that module
 // to be included if any ACS stars are linked in.
@@ -52,6 +52,16 @@ const char* ACSCorona :: domain () const { return ACSdomainName;}
 
 // isA
 ISA_FUNC(ACSCorona, ACSStar);
+
+// initialize cores name and parent members
+void ACSCorona::initCores()
+{
+  ListIter iterator(coreList);
+  ACSCore* ptr;
+  while ( (ptr = (ACSCore*)(iterator++)) != 0 ) {
+	ptr->setNameParent(name(),parent());
+  }
+}
 
 // select Core to be used
 int ACSCorona::setCore(const char *coreName)
@@ -94,21 +104,23 @@ void ACSCorona::addCores() {
 		coronaName = className();
 		domainName = domain();
 		coronaName += strlen(domainName);
-		coreName << coronaName << category;
+		coreName = coronaName;
+		coreName += category;
 		if ( (core =(ACSCore *)KnownBlock::find(coreName,domainName)) != NULL ) {
 			coreList.put(core->makeNew(*this));
-		} else {
+		} /* else {
 			if(!KcCompileAndLink(coreName, domainName, srcdir, 0, 0)) continue;
 			if ((core = (ACSCore *) KnownBlock::find(coreName,domainName)) != NULL ) {
 				coreList.put(core->makeNew(*this));
 				continue;
 			}
 			Error::warn("ACSCorona::addCores(): core compiled ok but still not known.");	
-		}
+		} */
 	}
 }
 	
 void ACSCorona::initialize() {
+	initCores();
 	ACSStar::initialize();
 	ACSTarget* t = (ACSTarget*)target();
 	if(!setCore(t->getCoreCategory())) {
