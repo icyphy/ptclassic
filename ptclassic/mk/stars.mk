@@ -359,9 +359,6 @@ ifdef IPUS
 			$(LIBDIR)/libipusstars.$(LIBSUFFIX) \
 			$(LIBDIR)/libipus.$(LIBSUFFIX) \
 			$(LIBDIR)/libicp.$(LIBSUFFIX)
-		# ipustcltk is listed twice since -lipus needs Blackboard
-		# symbols.  ipustcltk must be listed twice if we are
-		# using static libraries, like under sun4
 		LIBS += -lipustclstars -lipusstars -lipus \
 			-lipustcltk -licp
 	endif
