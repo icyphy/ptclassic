@@ -56,6 +56,10 @@ ITCL_SRCS = \
 	DialogWindow.itcl \
 	Dismiss.itcl \
 	Edit.itcl \
+	EditItcl.itcl \
+	EditItclText.itcl \
+	EditTcl.itcl \
+	EditTclText.itcl \
 	EditText.itcl \
 	EntryQuery.itcl \
 	ErrorMessage.itcl \
