@@ -202,8 +202,7 @@ body ::tycho::CompileJava::compileAndRun {filenames} {
         if [file exists $appletFile.html] {
             if {![winfo exists $appletviewerWidget] && \
                     [info object $appletviewerWidget] == {}} {
-                set appletviewerWidget [$this cget -view].appletviewer
-                ::tycho::Monitor $appletviewerWidget
+                set appletviewerWidget [::tycho::view Monitor -toolbar 1]
                 set retList [::tycho::execModal \
                         "appletviewer $appletFile.html" $dirname \
                         $appletviewerWidget]

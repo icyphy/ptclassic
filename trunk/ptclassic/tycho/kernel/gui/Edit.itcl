@@ -993,12 +993,9 @@ body ::tycho::Edit::downSize {} {
 # hit ok.
 #
 body ::tycho::Edit::execProcess {command {waitForOk 1}} {
-    set w [::tycho::autoName .exec]
-    ::tycho::Monitor $w -command $command -dir [file dirname $file]
-    $w centerOnScreen
-    if {$waitForOk != 1} {
-        $w invoke ok 
-    }
+    ::tycho::view Monitor -toolbar 1 \
+            -command $command -dir [file dirname $file] \
+            -autostart $waitForOk
 }
 
 #####################################################################

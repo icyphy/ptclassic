@@ -306,8 +306,7 @@ body ::tycho::Glimpse::updateTychoDatabase {} {
 	    [file join $TYCHO .glimpse_exclude]
 
     # Create a monitor window and make it run make glimpse.
-    set win [::tycho::autoName .glimpseExec]
-    ::tycho::Monitor $win \
+    ::tycho::view Monitor -toolbar 1 \
             -command [list glimpseindex -H "$TYCHO" "$TYCHO"] \
             -dir [file join $TYCHO] \
             -autostart 1 -autodestroy 1
