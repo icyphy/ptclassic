@@ -394,12 +394,12 @@ foreach _name {
     /users/ptolemy/foo.bar
     /users/ptolemy/foo.bar
     file:/users/ptolemy/foo.bar
-    http://ptolemy.eecs
-    http://ptolemy.eecs
-    http://ptolemy.eecs
+    http://ptolemy.eecs/
+    http://ptolemy.eecs/
+    http://ptolemy.eecs/
     http://ptolemy.eecs/~ptdesign
     http://ptolemy.eecs/~ptdesign
-    http://ptolemy.eecs/~ptdesign/
+    http://ptolemy.eecs/~ptdesign
     http://ptolemy.eecs/~ptdesign/index.html
     http://ptolemy.eecs/~ptdesign/index.html
     http://ptolemy.eecs/~ptdesign/index.html
