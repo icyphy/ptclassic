@@ -87,7 +87,7 @@ body ::tycho::CTRunWindow::start {} {
     set timestep [$itk_component(time) get main.step]
 
     # FIXME: call through parameter est method of Simulation
-    set exec [$_simulation getExecutiveDirector]
+    set exec [$_simulation getDirector]
     $exec setParam startTime $starttime
     $exec setParam stopTime $stoptime
     $exec setParam initialStepSize $timestep
