@@ -181,9 +181,11 @@ body ::tycho::Graph::add {nodename contents {parents {}}} {
     if {$nodename == {}} {
         error "Graph: Blank node name is not allowed."
     }
-    if [info exists contentslist($nodename)] {
-        error "Graph: Duplicate node name in graph: $nodename"
-    }
+    # Rather than throwing an error, we should pick these up
+    # with the verifyAll
+    #    if [info exists contentslist($nodename)] {
+    #        error "Graph: Duplicate node name in graph: $nodename"
+    #    }
     if {$parents == {}} {
         lappend rootnames $nodename
     } {
