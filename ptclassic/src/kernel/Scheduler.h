@@ -92,7 +92,7 @@ private:
 	volatile static int interrupt;
 
 	// interrupt handler routine
-	static void intCatcher();
+	static void intCatcher(int);
 
 	// tell user about interrupts
 	static void reportInterrupt();
