@@ -13,16 +13,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	desc {
 Accept a stream of black-and-white images from input GrayImages,
 save the images to files, and display the resulting files as a
-moving video sequence. This star requires that programs from the
-"Utah Raster Toolkit" be in your $path variable. Although this
+moving video sequence. This star requires that programs from
+the "Utah Raster Toolkit" be in your "path" variable. Although this
 toolkit is not included with Ptolemy it is available for free.
-See this star's long description (with the "look-inside" or
-"manual" commands in the Ptolemy menu) for info on how to get
+See this star's long description (with the "look-inside"
+or "manual" commands in the Ptolemy menu) for info on how to get
 the toolkit.
 
 The user can set the root filename of the displayed images (which
-probably will be printed in the display window titlebar) with the
-'ImageName' state. If no filename is set, a default will be chosen.
+probably will be printed in the display window titlebar) with
+the 'ImageName' state. If no filename is set, a default will
+be chosen.
 
 The 'Save' state can be set to "YES" or "NO" to choose whether
 the created image files should be saved or deleted.
@@ -30,6 +31,7 @@ Each image's frame number is appended to the root filename
 to form the image's complete filename.
 	}
 	explanation {
+.pp
 At the end of a simulation this star pops up an X window and
 loads in a sequence of video frames for display.
 Pressing the left or right mouse buttons inside the window plays
@@ -42,7 +44,7 @@ of the displayed video.
 The shift key and right mouse button loops through the video
 sequence alternately forwards and backwards.
 To end a loop playback, press any mouse button in the video window.
-To close the window type 'q' inside.
+To close the window type "q" inside.
 .pp
 This star uses programs from the
 \fIUtah Raster Toolkit\fR
@@ -51,24 +53,29 @@ The Utah Raster Toolkit is a collection of software tools from the
 University of Utah.
 These programs are available free via anonymous ftp.
 To get the software:
-.nf
+.sp
 unix> ftp cs.utah.edu
-
+.sp
 ftp name> anonymous
+.br
 ftp passwd> YOUR EMAIL ADDRESS
+.br
 ftp> binary
+.br
 ftp> cd pub
+.br
 ftp> get urt-3.0.tar.Z
+.br
 ftp> quit
-
+.sp
 unix> uncompress urt-3.0.tar.Z
+.br
 unix> tar xvf urt-3.0.tar
-.fi
 .sp
 Then, change directories to the new urt_3.0 directory and build the
 software.
 To use the software, put the name of the directory with the URT
-executable files into the definition of the $path variable
+executable files into the definition of the \fIpath\fR variable
 inside the .cshrc file in your home directory.
 .pp
 These instructions are appropriate as of December 1992 but may change
