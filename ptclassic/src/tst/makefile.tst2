@@ -35,7 +35,25 @@
 test:: $(TST_PREAMBLE) $(TESTBED_STARS) $(DEMOS_POUT) 
 
 $(TESTBED_STARS):
-	cd stars; $(MAKE)
+	cd $(dir $@); $(MAKE)
+
+# Script to run all the demos in a domain
+all.pt: $(DEMOS_PT)
+	echo "puts \"Running demos for $(DOMAIN)\" " > $@
+ifdef TESTBED_STARS
+	echo "cd `pwd`" >> $@
+	for file in $(TESTBED_STARS); do \
+		(cd `dirname $$file`; make `basename $$file`); \
+		echo "link $$file; puts stdout $$file" >> $@; \
+	done
+else
+	echo "cd `pwd`" >> $@
+	@echo 'puts "TESTBED_STARS is empty, so there is no need to load anything"' >> $@
+endif
+	for file in $(DEMOS_PT); do \
+		echo "puts \"Running demos for $(DOMAIN) $$file\" " >> $@; \
+		cat $$file >> $@; \
+	done
 
 # Some demo palettes can't be run through oct2ptcl
 echo_bad_demos::
@@ -54,15 +72,50 @@ else
 
 endif
 
-diff:
-	diff -r $(TST_DOMAIN)/results .
+diff:	random.tmp results.tmp chk.tmp
+ifdef RANDOM_RESULTS
+	-mv $(RANDOM_RESULTS) random.tmp
+endif
+	@echo "Not all domains have all types of output, so expect errors"
+	-mv *.pt *.pt.* *.pout xv* *.au results.tmp
+	-mv results.tmp/*.pt.pxgraph chk.tmp
+	diff -r $(TST_DOMAIN)/results results.tmp
 
 # Copy the results of the tests into the results dir for regression testing
-updateresults: $(TST_DOMAIN)/results
-	rm -f $(TST_DOMAIN)/results/*
-	mv *.pt *.pt.* *.pout xv* $(TST_DOMAIN)/results
+updateresults: $(TST_DOMAIN)/results $(TST_DOMAIN)/chk $(TST_DOMAIN)/random
+	rm -f $(TST_DOMAIN)/results/* 	$(TST_DOMAIN)/random/*
+ifdef RANDOM_RESULTS
+	mv $(RANDOM_RESULTS)  	$(TST_DOMAIN)/random
+endif
+	@echo "Not all domains have all types of output, so expect errors"
+	-mv *.pt *.pt.* *.pout xv* *.au $(TST_DOMAIN)/results
+	mv $(TST_DOMAIN)/results/*.pt.pxgraph $(TST_DOMAIN)/chk
 
-$(TST_DOMAIN)/results:
+$(TST_DOMAIN)/results $(TST_DOMAIN)/chk $(TST_DOMAIN)/random random.tmp \
+	results.tmp chk.tmp:
 	mkdir $@
-clean:
-	rm -f core *.pt *.pt.* *.pout *.pxgraph pxfilename xv.* *~ stars/*.o
+
+# Plot the results that are random
+plotrandom: random.tmp
+ifdef RANDOM_RESULTS
+	-mv $(RANDOM_RESULTS) random.tmp
+	for file in $(RANDOM_RESULTS); do \
+		$(PTOLEMY)/bin.$(PTARCH)/pxgraph -t "$$file" -binary \
+			$(TST_DOMAIN)/random/$$file random.tmp/$$file; \
+	done
+else
+	@echo "RANDOM_RESULTS not set, so $@ need not be done
+endif
+
+sources clean realclean::
+	@if [ -w stars ]; then \
+		( cd stars ; \
+		echo making $@ in stars ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../$(TST_DOMAIN)/stars $@ ;\
+		) \
+	     fi
+sources:: makefile
+realclean clean::
+	rm -f core *.pt *.pt.* *.pout *.pxgraph pxgraph* pxfilename xv.* \
+		*~ stars/*.o $(KRUFT)
+	rm -rf results.tmp chk.tmp

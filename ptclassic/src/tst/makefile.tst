@@ -45,18 +45,33 @@ endif
 
 SRC = $(PTOLEMY)/src
 
+TST_SBINDIR =	$(PTOLEMY)/src/tst/sbin
+
 # Clean up the .pt file.  Most of these problems have to do with
 # 'targetparam' in cgc
+# 	-e 's/\{Destination Directory\}/directory/'
+
 FIXPT4TEST= sed -e 's=\$$PTOLEMY/bin.\$$PTARCH/==' \
 	-e 's=\$$HOME/PTOLEMY_SYSTEMS=PTOLEMY_SYSTEMS=' \
 	-e 's=destDirectory=directory=' \
-	-e 's=\{Destination Directory\}=directory=' \
 	-e 's=hostMachine=host=' \
 	-e 's=loopingLevel=\{Looping Level\}=' \
 	-e 's=doCompile=compile?=' \
 	-e 's=^wrapup=wrapup; flush stdout='
 
-OCT2PTCL = /users/cxh/pt/bin.sol2.5/oct2ptcl
+# Binary that converts oct facets to ptcl
+OCT2PTCL=$(PTOLEMY)/bin.$(PTARCH)/oct2ptcl
+
+#VERBOSE=1
+ifdef VERBOSE
+	OCT2PTCLARGS = -rgcv
+	# Tee the output from ptcl to stdout so the user has feedback
+	VERBOSE_TEE = | tee
+else
+	OCT2PTCLARGS = -rgc
+	# Just take the output from ptcl and place it in a file
+	VERBOSE_TEE = > 
+endif
 
 #usage: /users/ptdesign/obj.sol2/octtools/tkoct/oct2ptcl/oct2ptcl [-=V]
 #                    [-=E on_error] [-rgtv] facet
@@ -76,14 +91,17 @@ OCT2PTCL = /users/cxh/pt/bin.sol2.5/oct2ptcl
 .PRECIOUS: %.pt
 # Convert demo palettes to ptcl files.
 %.pt: %.pal
-	-if [ -f $(TST_DOMAIN)/`basename $@ .pt`.base ]; then \
-		echo "found $@.base, using it instead of running oct2ptcl"; \
+	@if [ -f $(TST_DOMAIN)/`basename $@ .pt`.base ]; then \
+		echo "Found $@.base, using it instead of running oct2ptcl"; \
 		cp $(TST_DOMAIN)/`basename $@ .pt`.base $@; \
-		echo "running oct2ptcl to see what the diffs are"; \
-		$(OCT2PTCL) -rgv $< | $(FIXPT4TEST) >  /tmp/pttst.tmp; \
+		echo "Running oct2ptcl to see what the diffs are"; \
+		$(OCT2PTCL) $(OCT2PTCLARGS) $< | $(FIXPT4TEST) >  /tmp/pttst.tmp; \
 		diff /tmp/pttst.tmp $@; \
+		true; \
 	else \
-		$(OCT2PTCL) -rgv $< | $(FIXPT4TEST) >  $(notdir $@); \
+		echo "Running $(OCT2PTCL) $< ... > $(notdir $@)"; \
+		$(OCT2PTCL) $(OCT2PTCLARGS) $< | $(FIXPT4TEST) > $(notdir $@); \
+		$(TST_SBINDIR)/pxgraph.chk $(notdir $@); \
 	fi
 
 # Run files containing ptcl commands through ptcl, running the universes,
@@ -92,11 +110,18 @@ OCT2PTCL = /users/cxh/pt/bin.sol2.5/oct2ptcl
 #  we sort this script since the order that the pxgraphs are run is 
 #  non-deterministic	
 %.pout: %.pt
-	echo "$^" >pxfilename
-	rm -f $^.pxgraph
-	(PATH=$$PTOLEMY/src/tst:$$PATH; export PATH; \
+	@echo "Running $(PTCL) on $^"
+	@echo "$^ contains: Universes: `grep newuniverse $^ | wc -l ` Galaxies: `grep defgalaxy $^ | wc -l` Stars: `egrep '[ 	]*star' $^ | wc -l `"
+	@echo "$^" >pxfilename
+	@rm -f $^.pxgraph
+	@(PATH=$(TST_SBINDIR):$$PATH; export PATH; \
 		PT_DISPLAY="echo %s"; export PT_DISPLAY; \
-		echo "source $(TST_PREAMBLE); source $^" | $(PTCL) | tee $@)
-	sort $^.pxgraph > $^.pxgraph.tmp; mv $^.pxgraph.tmp $^.pxgraph
+		echo "source $(TST_PREAMBLE); source $^" |  $(PTCL) $(VERBOSE_TEE) $@)
+	@sleep 2 
+	@if [ -f $^.pxgraph ]; then \
+		sort $^.pxgraph > $^.pxgraph.tmp; \
+		mv $^.pxgraph.tmp $^.pxgraph; \
+	fi
+
 # End of implicit rules
 
