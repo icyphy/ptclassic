@@ -1,4 +1,4 @@
-# Makefile for Ptolemy Tycho system, kernel/doc directory.
+# Makefile for Ptolemy Tycho system, editors/visedit/doc directory.
 #
 # $Id$
 # Makefile Author: Christopher Hylands
@@ -29,21 +29,13 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# If this file's name is "make.template" and there is no makefile in
-# this directory, do
-#	cp make.template makefile
-#	make depend
-# This will add the dependencies to the makefile.
-
-# Root of Ptolemy directory
-ROOT =		../../../..
-# Path (absolute or relative) to the object directory root
-OBJDIR =	../../../..
+# Root of Tycho directory
+ROOT =		../../..
 # True source directory
-VPATH =		$(ROOT)/tycho/editors/visedit/doc
+VPATH =		$(ROOT)/editors/visedit/doc
 
-# get configuration info
-CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
+# Get configuration info
+CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 EXTRA_SRCS =
@@ -56,12 +48,5 @@ REALCLEAN_STUFF =
 # Sub directories to run make in.
 DIRS =		usersGuides
 
-# Include information on all stars and targets.
-include $(ROOT)/mk/stars.mk
-
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
-
-# Don't add anything after the next line; makedepend will zap it.
-# DO NOT DELETE THIS LINE -- make depend depends on it.
-

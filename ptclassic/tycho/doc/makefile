@@ -29,21 +29,14 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# If this file's name is "make.template" and there is no makefile in
-# this directory, do
-#	cp make.template makefile
-#	make depend
-# This will add the dependencies to the makefile.
-
 # Root of Ptolemy directory
-ROOT =		../..
-# Path (absolute or relative) to the object directory root
-OBJDIR =	../..
-# True source directory
-VPATH =		$(ROOT)/tycho/doc
+ROOT =		..
 
-# get configuration info
-CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
+# True source directory
+VPATH =		$(ROOT)doc
+
+# Get configuration info
+CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 EXTRA_SRCS =	abbreviations.html \
@@ -71,7 +64,3 @@ DIRS =			coding
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
-
-# Don't add anything after the next line; makedepend will zap it.
-# DO NOT DELETE THIS LINE -- make depend depends on it.
-

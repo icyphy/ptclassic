@@ -30,21 +30,14 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# If this file's name is "make.template" and there is no makefile in
-# this directory, do
-#	cp make.template makefile
-#	make depend
-# This will add the dependencies to the makefile.
+# Root of Tycho directory
+ROOT =		../..
 
-# Root of Ptolemy directory
-ROOT =		../../..
-# Path (absolute or relative) to the object directory root
-OBJDIR =	../../..
 # True source directory
-VPATH =		$(ROOT)/tycho/lib/html_library
+VPATH =		$(ROOT)/lib/html_library
 
-# get configuration info
-CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
+# Get configuration info
+CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 TCL_SRCS = \
@@ -52,20 +45,13 @@ TCL_SRCS = \
   
 ITCL_SRCS = 
 
-EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
+EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
 MISC_FILES =	README html license.terms sample.tcl 
 
 REALCLEAN_STUFF =
 
-# Include information on all stars and targets.
-include $(ROOT)/mk/stars.mk
-
 all install: $(MISC_SRCS)
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
-
-# Don't add anything after the next line; makedepend will zap it.
-# DO NOT DELETE THIS LINE -- make depend depends on it.
-

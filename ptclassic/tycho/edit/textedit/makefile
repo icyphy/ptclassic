@@ -30,15 +30,15 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# Root of Ptolemy directory
-ROOT =		../../..
+# Root of Tycho directory
+ROOT =		../..
 # Path (absolute or relative) to the object directory root
-OBJDIR =	../../..
+OBJDIR =	../..
 # True source directory
-VPATH =		$(ROOT)/tycho/editors/textedit
+VPATH =		$(ROOT)/editors/textedit
 
-# get configuration info
-CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
+# Get configuration info
+CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 TCL_SRCS = 
@@ -84,19 +84,7 @@ REALCLEAN_STUFF =			tclIndex
 # Title for the tydoc index page
 TYDOC_DESC =	Index of classes in tycho/kernel/textedit
 
-# Include information on all stars and targets.
-include $(ROOT)/mk/stars.mk
-
 all install: sources tclIndex $(MISC_SRCS)
-
-tclIndex: $(TCL_SRCS) $(ITCL_SRCS)
-	@echo "Updating tclIndex"
-	rm -f $@
-	echo 'set auto_path [linsert $$auto_path 0 $(ITCL_LIBDIR)]; auto_mkindex . $(TCL_SRCS) $(ITCL_SRCS)' | $(ITCL2_0_SH)
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
-
-# Don't add anything after the next line; makedepend will zap it.
-# DO NOT DELETE THIS LINE -- make depend depends on it.
-

@@ -32,26 +32,14 @@
 DIRS = textedit visedit 
 
 makefiles all install clean sources depend realclean checkjunk sccsinfo \
-itcldocs:
+itcldocs extraclean:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
-		echo making $@ in tycho/lib/$$x ; \
+		echo making $@ in tycho/editors/$$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
 		) \
 	    fi ; \
 	done
-
-.PHONY:	TAGS
-TAGS:
-	@for x in $(DIRS); do \
-	    if [ -w $$x ] ; then \
-		( cd $$x ; \
-		echo making $@ in tycho/lib/$$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ; \
-		) \
-	    fi ; \
-	done
-	-cat -s $(DOMAINS:%=%/TAGS) > $@
 
 
