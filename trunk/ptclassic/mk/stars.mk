@@ -695,7 +695,7 @@ ifdef TK
 endif
 
 CUSTOM_DIRS += $(CROOT)/src/kernel $(CROOT)/src/pigiRpc $(CROOT)/src/ptcl \
-	$(CROOT)/mk $(CROOT)/src/tysh
+	$(CROOT)/mk $(CROOT)/src/tysh $(CROOT)/src/pigiExample
 
 # Under some architectures, we need to use static libraries or we get
 # GateKeeper errors.
