@@ -1,16 +1,14 @@
 <!-- $Id$ -->
 <html>
 <head>
-<title>Tycho under Windows</title>
+<title>Tycho under Microsoft Windows</title>
 </head>
 <body bgcolor="#faf0e6">
 <HR>
-<h1>Tycho under Windows</h1>
-The Windows port of Tycho is fairly young, so there are plenty of bugs.
-
-The only testing of this port was done under NT4.0, so Windows3.1 and
-Windows95 users may have other problems.
-
+<h1>Tycho under Microsoft Windows</h1>
+The Microsoft Windows port of Tycho is fairly young, so there are
+plenty of bugs.  The only testing of this port was done under NT4.0,
+so Windows3.1 and Windows95 users may have other problems.
 <H2><A NAME="Windows external links (URLs)">External Windows Tcl
 places to go</A> </H2>
 <MENU>
@@ -22,21 +20,21 @@ places to go</A> </H2>
 <H2><A NAME="windows bugs">Tycho/Windows bugs</A></H2>
 <MENU>
 
-<LI> Tycho0.1.1 does not handle spaces in pathnames very well.  Tycho
+<LI> Tycho0.2 does not handle spaces in pathnames very well.  Tycho
 will work best if the distribution is installed in a directory that
 has a pathname that contains no spaces.
 
-<LI> It would be nice if the installation was such that a windows user could
+<LI> It would be nice if the installation was such that a Windows user could
 just mouse on a Tycho icon and then Tycho would come up.
 
-<LI> Don't use Itcl2.1 under windows, it does not support removing
+<LI> Don't use Itcl2.1 under Windows, it does not support removing
 files and making directories.  If you use Itcl2.1, then Tycho
 <CODE>exec</CODE>s <CODE>rm</CODE> or <CODE>mkdir</CODE>, which fail
-under windows.  Instead of using Itcl2.1 under windows, use the
+under Windows.  Instead of using Itcl2.1 under Windows, use the
 Itcl2.2 binaries.
 
 <LI> Because of differences in the end-of-line characters between Unix
-and Windows, it appears that tcl scripts edited with the NT
+and Windows, it appears that Tcl scripts edited with the NT
 <CODE>Notebook</CODE> program cannot be sourced with Itcl2.2.
 
 <LI> Tycho cannot access web pages over the net.  Under Unix, the workaround
@@ -60,14 +58,14 @@ binaries for Windows.
 <LI> Install Itcl by running <CODE>itcl22.exe</CODE>.
 
 <LI> Because of a bug in Itcl2.2, the path leading up to the
-<CODE>tycho.0.1.1/lib/windows/tycho-windows.itk</CODE> script cannot
+<CODE>tycho.0.2/lib/windows/tycho-windows.itk</CODE> script cannot
 have any spaces in it.  If you installed Tycho in <CODE>c:\Program
 Files</CODE>, then you must move either
-<CODE>c:\Program Files\tycho0.1.1\ </CODE> or the
-<CODE>tycho0.1.1\lib\windows\tycho-window.itk</CODE> script to a
+<CODE>c:\Program Files\tycho0.2\ </CODE> or the
+<CODE>tycho0.2\lib\windows\tycho-window.itk</CODE> script to a
 directory that has no spaces in the pathname leading up to it.  It is
-best if you move the entire tycho distribution to
-<CODE>c:\tycho0.1.1</CODE>.
+best if you move the entire Tyycho distribution to
+<CODE>c:\tycho0.2</CODE>.
 
 <LI> Tycho refers to the directory where the Tycho distribution is
 with the environment variable <CODE>$TYCHO</CODE>.  In Unix, under
@@ -84,24 +82,24 @@ window that comes up, select <CODE>Environment</CODE>.  There, you can
 add <CODE>TYCHO</CODE> as a User Variable.  Incidentally, this is
 where you set your path.
 
- <P> If your Tycho distribution is at <CODE>c:\tycho0.1.1</CODE>, then
+ <P> If your Tycho distribution is at <CODE>c:\tycho0.2</CODE>, then
 you need not set the <CODE>TYCHO</CODE> environment variable, it will
 be set for you, by the <CODE>tycho-windows</CODE> script.  If your
 distribution is elsewhere, then you must either set the
 <CODE>TYCHO</CODE> variable, or edit
-<CODE>tycho0.1.1/lib/windows/tycho-windows</CODE>.
+<CODE>tycho0.2/lib/windows/tycho-windows</CODE>.
 
-<LI> The script <CODE>tycho0.1.1/lib/windows/tycho-windows</CODE>
+<LI> The script <CODE>tycho0.2/lib/windows/tycho-windows</CODE>
 first checks the <CODE>TYCHO</CODE> variable, and if
 <CODE>TYCHO</CODE> is not set, then the script expects that the Tycho
-distribution will be at <CODE>c:\tycho0.1.1</CODE>.
+distribution will be at <CODE>c:\tycho0.2</CODE>.
 
 <LI> Itcl2.2 associates files with the <CODE>itk</CODE> extension with
 the <CODE>itkwish</CODE> binary.  Apparently, the <CODE>itk</CODE>
 files must have Unix style end-of-line characters.
 
 <P> To start Tycho, click on the
-<CODE>tycho0.1.1/lib/windows/tycho-windows.itk</CODE> script.
+<CODE>tycho0.2/lib/windows/tycho-windows.itk</CODE> script.
 
 </OL>
 
