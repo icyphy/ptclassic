@@ -144,7 +144,7 @@ double $starSymbol(timeSend);
 prusage_t $starSymbol(beginSend);
 prusage_t $starSymbol(endSend);
 #endif
-en_t $starSymbol(endname);
+en_t *$starSymbol(endname);
 ea_t $starSymbol(endpoint);
 int $starSymbol(i);
         }
