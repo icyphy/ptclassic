@@ -204,8 +204,8 @@ proc dotests {file args} {
 # This procedure removes an object if it exists.
 #
 proc removeobj {name} {
-    if {[info object $name] != ""} {
-	delete object $name
+    if {[uplevel ::itcl::find objects $name] != ""} {
+	itcl::delete objects $name
     }
 }
 
