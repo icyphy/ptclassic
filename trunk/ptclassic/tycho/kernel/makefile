@@ -65,7 +65,6 @@ ITCL_SRCS = \
 	ModelViewer.itcl \
 	MultiPanel.itcl \
 	PackageData.itcl \
-	PopupMenu.itcl \
 	PortedGraph.itcl \
 	Resource.itcl \
 	ResourceFile.itcl \
