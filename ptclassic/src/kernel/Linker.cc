@@ -207,15 +207,14 @@ int Linker::multiLink (int argc, char** argv) {
 	cmd << tname;
 	for (int i = 1; i < argc; i++) {
 		const char* objName = expandPathName(argv[i]);
+#ifdef DEBUG
+		DebugMessage("multiLink():",command);
+		DebugMessage(objName, myDefaultOpts);
+#endif //DEBUG
 		cmd << " " << objName;
 	}
 	// these options go last so libraries will be searched properly.
 	cmd << " " << myDefaultOpts;
-
-#ifdef DEBUG
-	DebugMessage("multiLink():",command);
-	DebugMessage(objName, myDefaultOpts);
-#endif //DEBUG
 
 	if (system (cmd)) {
 		Error::abortRun("Error in linking file");
@@ -305,15 +304,13 @@ static void debugInvokeConstructors(char *symbol,long addr, const
 	  strcpy(tmpname,objName);
 
 	  if (nlist(tmpname,nl))
-	  {
+          {
 	     Error::abortRun("nlist failed");
-	     return();
+	  } else {
+	     addr = nl[0].n_value;
+	     sprintf(buf, "Nlist found: %s at 0x%x", symbol, addr);
+	     Error::message(buf);
 	  }
-
-	  addr = nl[0].n_value;
-
-	  sprintf(buf, "Nlist found: %s at 0x%x", symbol, addr);
-	  Error::message(buf);
 #endif //hppa
 }
 #endif
