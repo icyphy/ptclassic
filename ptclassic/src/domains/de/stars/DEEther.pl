@@ -43,6 +43,7 @@ the particle to a receiver that matches the specified address.
 The
 <tt>EtherRec</tt>
 star, after the "duration" time has elapsed, outputs the particle.
+<p>
 In this implementation, receiver addresses are arbitrary strings,
 but each receiver for a medium must have a different address.
 The implementation could easily be extended to permit more
@@ -82,7 +83,7 @@ This would allow any number of receivers to share the same address.
 <p>
 The receiver addresses are interpreted as strings.  Thus,
 any name could be used.  But we make
-<tt>EtherSend</tt>
+<tt>EtherReceive</tt>
 reject names beginning with "-", so that
 <tt>EtherSend</tt>
 can unambiguously treat such addresses as requesting broadcast.
