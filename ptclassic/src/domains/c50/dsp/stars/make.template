@@ -36,6 +36,7 @@ PL_SRCS= \
  C50BiquadDSPlay.pl \
  C50DTMFPostTest.pl \
  C50Comb.pl \
+ C50Goertzel.pl \
  C50GoertzelBase.pl \
  C50GoertzelPower.pl \
  C50IIR.pl \
