@@ -26,6 +26,33 @@ Note that Tycho0.2 will <B>not</B> work with Itcl2.0 or Itcl2.1, you must have
 Itcl2.2.  (Itcl2.0 was shipped with Ptolemy0.6, Itcl2.2 was shipped with
 with Ptolemy0.7)
 
+<H3><A NAME="libitk error messages"></A></H3>
+If Tycho fails to start with a message like:
+<PRE>
+cxh@kahn > tycho
+ld.so.1: itkwish: fatal: libitk2.2.so: can't open file: errno=2
+Killed
+cxh@kahn
+</PRE>
+
+then the problem is that the <CODE>itkwish</CODE> binary cannot find
+its shared libraries.  If you are using prebuilt Itcl binaries, be
+sure that your path is setup so <CODE>$TYCHO/bin</CODE> is before
+directory that contains the <CODE>itkwish</CODE> binary. 
+ <P>
+For example, under C shell:
+<PRE>
+set path = ($TYCHO/bin $path)
+</PRE>
+If you are using the prebuilt Itcl binaries, the <CODE>ITCLDIR</CODE> variable
+should be set to the location of the untar'd Itcl files.
+
+ <P>
+If you are using Ptolemy, then your path should be set:
+<PRE>
+set path = ($PTOLEMY/bin $PTOLEMY/bin.$PTARCH $path)
+</PRE>
+
 <H3><A NAME="Error Message about error while autoloading tk_setPalette">
 Error Message about "error while autoloading tk_setPalette"
 </A></H3>
