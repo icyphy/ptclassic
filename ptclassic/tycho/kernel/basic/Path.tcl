@@ -6,7 +6,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1995-1997 The Regents of the University of California.
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -53,6 +53,90 @@ proc ::tycho::autoName {stem} {
         set autoNames($stem) 0
     }
     return "$stem$autoNames($stem)"
+}
+
+##############################################################################
+#### egrep
+# Simple implementation of the Unix egrep command.
+#
+# The code below returns all the lines that have a # as the first character
+# in two files.
+# <tcl><pre>
+# ::tycho::egrep {^#} &#92
+#    [file join $TYCHO makefile] &#92
+#    [file join $TYCHO kernel makefile]
+# </pre></tcl>
+#
+# egrep can also take an optional <code>-i</code> or <code>-nocase</code>
+# argument.  egrep will expand any glob style pathnames:
+# <tcl><pre>
+# ::tycho::egrep -i author *
+# </pre></tcl
+#
+proc ::tycho::egrep {regexp args} {
+    set retval {}
+    set regexparg {}
+    switch -- $regexp {
+        -i {set regexparg -nocase
+        set regexp [lindex $args 0]
+        set filelist [lrange $args 1 end]
+    }
+        -nocase {set regexparg -nocase
+        set regexp [lindex $args 0]
+        set filelist [lrange $args 1 end]
+    }
+        default {set filelist $args}
+    }
+
+    
+    # Only show the first 100 matches
+    set count 1
+    while {[llength $filelist] > 0 && [incr count] < 100} {
+        set file [lindex $filelist 0]
+        set filelist [lreplace $filelist 0 0]
+        if [file isdirectory $file] {
+            continue
+        }
+        if {![file exists $file]} {
+            # If we don't find the file, try expanding the argument
+            set globlist [glob -nocomplain $file]
+            if {![file exists [lindex $globlist 0]]} {
+                lappend retval "$file does not exist"
+                continue
+            }
+            set tfilelist $globlist
+            if {[llength [lrange $filelist 1 end]] > 0} {
+                lappend tfilelist [lrange $filelist 1 end]
+            }
+            set filelist $tfilelist
+            set file [lindex $globlist 0]
+        }
+        if [catch {set fd [open $file "r"]} errMsg] {
+            lappend retval $errMsg
+            continue
+        }
+        set linecount 0
+        while {[gets $fd linein] >= 0 } {
+            incr linecount
+            if {$regexparg == {} } {
+                if [regexp $regexp $linein] {
+                    lappend retval "$file: $linecount: $linein"
+                }
+            } else {
+                # Handle the -i or -nocase
+                if [regexp $regexparg $regexp $linein] {
+                    lappend retval "$file: $linecount: $linein"
+                }
+
+            }
+        }
+        close $fd
+    }
+    if { $count > 99 } {
+        lappend retval "*** egrep terminated, more than $count files matched"
+    }
+    return $retval
+
 }
 
 ########################################################################
@@ -254,6 +338,7 @@ proc ::tycho::directorySeparator {} {
 proc ::tycho::isRelative {pathname} {
     set char [string index $pathname 0]
     if { [file pathtype $pathname] != "absolute" && \
+            [file pathtype $pathname] != "volumerelative" && \
 	    $char != "~" && $char != "\$"} {
 	return 1
     }
@@ -288,6 +373,7 @@ proc ::tycho::pathEnvSearch {filename} {
     }
     return [::tycho::pathSearch $filename \
             [split $env(PATH) [::tycho::pathSeparator]]]
+
 }
 
 ##############################################################################
@@ -297,8 +383,9 @@ proc ::tycho::pathEnvSearch {filename} {
 # string
 #
 proc ::tycho::pathSearch {filename {path {}}} {
+    global env tcl_platform
+
     if {$path == {} } {
-	global env tcl_platform
         if ![info exists env(PATH)] {
             error "pathSearch: \$PATH is not set!"
         }
@@ -309,6 +396,17 @@ proc ::tycho::pathSearch {filename {path {}}} {
 	    return $dir
 	}
     }
+    # If we are under windows, and the filename does not end
+    # with .exe, then search for $filename.exe
+    if { $tcl_platform(platform) == "windows" && \
+            [regexp {\.exe} $filename] == 0 } {
+        foreach dir $path {
+            if [file executable [file join $dir $filename.exe]] {
+                return $dir
+            }
+	}
+    }
+
     return {}
 }
 
@@ -383,7 +481,8 @@ proc ::tycho::parseHeaderString {string var} {
 proc ::tycho::relativePath {srcFile dstFile} {
     #puts "$srcFile $dstFile"
     if { [string index $dstFile 0] != "$" && \
-	    [file pathtype $dstFile] != "absolute" } {
+	    [file pathtype $dstFile] != "absolute" && \
+        [file pathtype $dstFile] != "volumerelative" } {
 	return $dstFile
     }
     set srcList [file split [::tycho::expandPath $srcFile]]
