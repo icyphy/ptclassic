@@ -51,6 +51,12 @@
 # top-level windows.
 # <li><b>-height</b>: The height of the window in pixels.
 # <li><b>-title</b>: The title string placed into the window head.
+# <li><b>-menubar</b>: If one, the Displayer will create a separate
+# menubar for this view. If zero, this view will not have a menubar.
+# If "default", this view will share the default menubar of the displayer.
+# <li><b>-statusbar</b>: If one, the Displayer will create a separate
+# statusbar for this view. If zero, this view will not have a statusbar.
+# If "default", this view will share the default statusbar of the displayer.
 # <li><b>-toolbar</b>: If true, the Displayer will create and display
 # a toolbar.
 # <li><b>-width</b>: The width of the window in pixels.
@@ -67,7 +73,7 @@ proc ::tycho::view {view args} {
     # Figure out options for displayer
     array set temp $args
     set options {}
-    foreach opt {-geometry -height -master -title -toolbar -width} {
+    foreach opt {-geometry -height -master -title -width} {
 	if { [::info exists temp($opt)] } {
 	    lappend options $opt $temp($opt)
 	    unset temp($opt)
@@ -95,6 +101,29 @@ proc ::tycho::view {view args} {
     } else {
 	set withdrawn 0
     }
+
+    # Get the flag saying whether there's a menubar
+    if { [::info exists temp(-menubar)] } {
+	set menubar $temp(-menubar)
+	unset temp(-menubar)
+    } else {
+	set menubar default
+    }
+
+    # Get the flag saying whether there's a statusbar
+    if { [::info exists temp(-statusbar)] } {
+	set statusbar $temp(-statusbar)
+	unset temp(-statusbar)
+    } else {
+	set statusbar default
+    }
+    # Get the flag saying whether there's a toolbar
+    if { [::info exists temp(-toolbar)] } {
+	set toolbar $temp(-toolbar)
+	unset temp(-toolbar)
+    } else {
+	set toolbar 0
+    }
     
     # Figure out what to call the displayer
     set wname {}
@@ -109,9 +138,14 @@ proc ::tycho::view {view args} {
     if { $wname == "" } {
 	set wname [::tycho::autoName .displayer]
     }
-    # Create the displayer and view and show the view
+    # Create the displayer and view
     uplevel #0 $displayer $wname $options
     uplevel #0 $view $wname.v [array get temp]
+
+    # Attach the view
+    $wname attachView $wname.v \
+            -menubar $menubar -statusbar $statusbar -toolbar $toolbar
+
     $wname showView $wname.v
 
     # Deiconify the displayer and return the view name
@@ -166,14 +200,11 @@ class ::tycho::Displayer {
     constructor {args} {}
     destructor {}
 
-    # If non-zero, show a tool bar for each view.
-    itk_option define -toolbar toolbar Toolbar "0"
-
     ###################################################################
     ####                         public methods                    ####
 
     # Register a view and create its menu and status bars
-    method attachView {view}
+    method attachView {view args}
 
     # Destroy a view, removing it from the display.
     method destroyView {view}
@@ -232,6 +263,12 @@ class ::tycho::Displayer {
     # If 1, C-x C-c will be bound in future instances to exit the program.
     protected common normalexit 1
 
+    # An array mapping view window paths to the bars (status, menu, and tool)
+    # they've requested. For example _usedbars(.x.v) will hold {1 default 0}
+    # if the view .x.v has it's own statusbar, the default menubar, and no
+    # toolbar
+    protected common _usedbars 
+
     # An array mapping view window paths to a name for making components
     # This array can be used to get the names of all views.
     protected variable _viewtag
@@ -258,26 +295,6 @@ body ::tycho::Displayer::configureMaster {master} {
     }
     foreach view [array names _viewtag] {
         $itk_component(status$view) configure -closetext $closetxt
-    }
-}
-
-###################################################################
-#### -toolbar configuration
-# If the value of this option is "1", show the toolbar for each widget.
-# Otherwise, hide the toolbar.
-# FIXME: This should create and destroy toolbars when the value
-# is changed.
-configbody ::tycho::Displayer::toolbar {
-    if $itk_option(-toolbar) {
-        # The frame is packed "-before" the childsite to prevent the
-        # bar from disappearing when the window is made smaller (see
-        # Welch page 126).
-        pack $itk_component(toolFrame) -side top -fill x \
-                -before $itk_component(childsite)
-    } {
-        if [winfo ismapped $itk_component(toolFrame)] {
-            pack forget $itk_component(toolFrame)
-        }
     }
 }
 
@@ -416,70 +433,103 @@ body ::tycho::Displayer::destructor {} {
 #######################################################################
 #### attachView
 # Register a view with the Displayer and create menu, tool, and
-# status bars for it. The first argument is the window name of the
-# view. This method calls the protected methods initializeMenubar{},
-# initializeToolbar{}, and initializeStatusbar{} of the view. The
+# status bars for it if it wants them. The first argument is the 
+# window name of the view. 
+#
+# Accepts the remaining arguments as option value pairs, including
+# -statusbar 0|1|default -toolbar 0|1 -menubar 0|1|default
+# 0 means that there will be no bar for this view, 1 means
+# there will be a special bar, and default means it will share the
+# default bar. (Note there is no default toolbar. (Should there be?))
+#
+# This method calls the protected method initialize of the view. The
 # view is not displayed -- call <code>showView</code> to do this.
 #
-body ::tycho::Displayer::attachView {view} {
+body ::tycho::Displayer::attachView {view args} {
     set view [::info namespace tail $view]
 
     if [::info exists _viewtag($view)] {
 	error "View $view already exists in Displayer $this"
     }
 
+    set statusbar default
+    set menubar default
+    set toolbar 0
+    foreach "option value" $args {
+        switch -- $option {
+            "-statusbar" {set statusbar $value}
+            "-toolbar" {set toolbar $value}
+            "-menubar" {set menubar $value}
+            default {error "Bad option $option in attachView"}
+        }
+    }
+
     # Add the view to the list of views
     set tag [::tycho::autoName ""]
     set _viewtag($view) $tag
+    set _usedbars($view) [list $statusbar $menubar $toolbar]
     set _showing($view) 0
 
     # Create the menubar at the global scope.
-    itk_component add menubar$tag {
-	uplevel #0 ::tycho::MenuBar $itk_component(menuFrame).menubar$tag
-    } {
-	keep -background -cursor -font
-	rename -padx -menupadx menuPadX MenuPadX
-	rename -pady -menupady menuPadY MenuPadY
+    if {$menubar == 1} {
+        itk_component add menubar$tag {
+            uplevel #0 ::tycho::MenuBar $itk_component(menuFrame).menubar$tag
+        } {
+            keep -background -cursor -font
+            rename -padx -menupadx menuPadX MenuPadX
+            rename -pady -menupady menuPadY MenuPadY
+        }
+        set menuwidget $itk_component(menubar$tag)
+    } elseif {$menubar == "default"} {
+        set menuwidget $itk_component(menubar)
+    } else {
+        set menuwidget {}
     }
 
     # Create the status bar
-    itk_component add status$tag {
-	uplevel #0 ::tycho::StatusBar \
-		$itk_component(statusFrame).status$tag \
-		-closetext $closetxt \
-		-closecommand [list "$this nextWindow; delete object $this"]
-    } {
-	keep -background -font -activebackground -cursor \
-		-highlightthickness -activeforeground \
-		-foreground -highlightcolor -highlightbackground
-	rename -padx -buttonpadx buttonPadX ButtonPadX
-	rename -pady -buttonpady buttonPadY ButtonPadY
-    }
-
-    # Create a tool bar if -toolbar is set
-    if { $itk_option(-toolbar) } {
-	itk_component add toolbar$tag {
-	    uplevel #0 ::tycho::ToolBar \
-		    $itk_component(toolFrame).toolbar$tag \
-		    -statusbar $itk_component(status$tag)
-	} {
-	    keep -background -cursor -font
-	    rename -padx -buttonpadx buttonPadX ButtonPadX
-	    rename -pady -buttonpady buttonPadY ButtonPadY
-	}
-    }
-
-    # Return the view's menubar, status bar, and tool bar, so
-    # it can initialize them.
-    if { $itk_option(-toolbar) } {
-        return [list $itk_component(menubar$tag) \
-                $itk_component(status$tag) \
-                $itk_component(toolbar$tag)]
+    if {$statusbar == 1} {
+        itk_component add status$tag {
+            uplevel #0 ::tycho::StatusBar \
+                    $itk_component(statusFrame).status$tag \
+                    -closetext $closetxt \
+                    -closecommand [list "$this nextWindow; delete object $this"]
+        } {
+            keep -background -font -activebackground -cursor \
+                    -highlightthickness -activeforeground \
+                    -foreground -highlightcolor -highlightbackground
+            rename -padx -buttonpadx buttonPadX ButtonPadX
+            rename -pady -buttonpady buttonPadY ButtonPadY
+        }
+        set statuswidget $itk_component(status$tag)
+    } elseif {$statusbar == "default"} {
+        set statuswidget $itk_component(status)
     } else {
-        return [list $itk_component(menubar$tag) \
-                $itk_component(status$tag) \
-                {}]
+        set statuswidget {}
     }
+
+    # Create a tool bar if needed
+    if {$toolbar == 1} {
+        # FIXME: Should this be here?
+        pack $itk_component(toolFrame) -side top -fill x \
+                -before $itk_component(childsite)
+        
+        itk_component add toolbar$tag {
+            uplevel #0 ::tycho::ToolBar \
+                    $itk_component(toolFrame).toolbar$tag \
+                    -statusbar $statuswidget
+        } {
+            keep -background -cursor -font
+            rename -padx -buttonpadx buttonPadX ButtonPadX
+            rename -pady -buttonpady buttonPadY ButtonPadY
+        }
+        set toolwidget $itk_component(toolbar$tag)
+    } else {
+        set toolwidget {}
+    }
+
+    # Call initialize, a protected method of every view
+    @scope [$view info class] \
+            $view initialize $menuwidget $statuswidget $toolwidget
 }
 
 #######################################################################
@@ -504,12 +554,13 @@ body ::tycho::Displayer::destroyView {view} {
 
     # As long as the view destroyed successfully (it could have
     # been cancelled), delete its menubar, status bar, and toolbar
-    delete object $itk_component(menubar$tag)
-    delete object $itk_component(status$tag)
+    catch {delete object $itk_component(menubar$tag)}
+    catch {delete object $itk_component(status$tag)}
     catch {delete object $itk_component(toolbar$tag)}
 
     # De-register the view
     unset _viewtag($view)
+    unset _usedbars($view)
     unset _showing($view)
 
     # Give focus to some other view that is showing, if there is one.
@@ -604,9 +655,16 @@ body ::tycho::Displayer::hideView {view} {
 
     # Remove menubar, status bar, and view
     set tag $_viewtag($view)
-    pack forget $itk_component(menubar$tag)
-    pack forget $itk_component(status$tag)
-    catch {pack forget $itk_component(toolbar$tag)}
+    set bars $_usedbars($view)
+    if {[lindex $bars 0] == 1} {
+        pack forget $itk_component(menubar$tag)
+    }
+    if {[lindex $bars 1] == 1} {
+        pack forget $itk_component(status$tag)
+    }
+    if {[lindex $bars 2] == 1} {
+        catch {pack forget $itk_component(toolbar$tag)}
+    }
     pack forget $view
     
     # Indicate that view is no longer showing.
@@ -666,34 +724,77 @@ body ::tycho::Displayer::setCurrentView {view} {
     if {$view != $currentView} {
 	verifyView $view setCurrentView
 
-	# Unpack existing components
-	if { $currentView == "" } {
-	    set tag ""
-	} else {
-	    set tag $_viewtag($currentView)
-	}
-	catch {pack forget $itk_component(menubar$tag)}
-	catch {pack forget $itk_component(status$tag)}
-	catch {pack forget $itk_component(toolbar$tag)}
+	# Unpack existing components only if they are different
+        if {$currentView == ""} {
+            set oldtag ""
+            set oldbars {default default 0}
+        } else {
+            set oldtag $_viewtag($currentView)
+            set oldbars $_usedbars($currentView)
+        }        
 
-	# Pack the menu bar, status bar, and toolbar into the window
+	# While packing the menu bar, status bar, and toolbar into the window
 	set tag $_viewtag($view)
-	pack $itk_component(menubar$tag) \
-		-in $itk_component(menuFrame) \
-		-fill x \
-		-expand 0
+	set bars $_usedbars($view)
 
-	pack $itk_component(status$tag) \
-		-in $itk_component(statusFrame) \
-		-fill x \
-		-expand 0
+        # Menubars
+        if {[lindex $oldbars 0] != "default" 
+                || [lindex $bars 0] != "default"} {
+            # Both didn't use default
+            
+            if {$tag != ""} {catch {pack forget $itk_component(menubar)}}
+            catch {pack forget $itk_component(menubar$oldtag)}
+            
+            switch [lindex $bars 0] {
+                "0" {}
+                "1" {
+                    pack $itk_component(menubar$tag) \
+                            -in $itk_component(menuFrame) \
+                            -fill x \
+                            -expand 0
+                }
+                "default" {
+                    pack $itk_component(menubar) \
+                            -in $itk_component(menuFrame) \
+                            -fill x \
+                            -expand 0
+                }
+            }
+        }
 
-	if { $itk_option(-toolbar) } {
-	    pack $itk_component(toolbar$tag) \
-		    -in $itk_component(toolFrame) \
-		    -fill x \
-		    -expand 0
-	}
+        # Statusbars
+        if {[lindex $oldbars 1] != "default" \
+                || [lindex $bars 1] != "default"} {
+            # Both didn't use default
+            
+            if {$tag != ""} {catch {pack forget $itk_component(statusbar)}}
+            catch {pack forget $itk_component(status$oldtag)}
+            
+            switch [lindex $bars 1] {
+                "0" {}
+                "1" {
+                    pack $itk_component(status$tag) \
+                            -in $itk_component(statusFrame) \
+                            -fill x \
+                            -expand 0
+                }
+                "default" {
+                    pack $itk_component(status) \
+                            -in $itk_component(statusFrame) \
+                            -fill x \
+                            -expand 0
+                }
+            }
+        }
+        # Toolbars  (simpler because there is no default toolbar)
+        catch {pack forget $itk_component(toolbar$oldtag)}
+        if {[lindex $bars 2] == "1"} {
+            pack $itk_component(toolbar$tag) \
+                    -in $itk_component(toolFrame) \
+                    -fill x \
+                    -expand 0
+        }
+
 	set currentView $view
     }
 }
