@@ -31,7 +31,7 @@ CFLAGS        = -g -I$(OCTTOOLS)/include
 
 # C++ compiler variables
 GXX	      = g++
-GPPFLAGS      = -g -fminimal-debug -I$(ROOT)/src/kernel
+GPPFLAGS      = -g -I$(ROOT)/src/kernel
 GNULIB	      = /usr/gnu/lib
 GNUINCLUDE    = $(GNULIB)/g++-include
 
@@ -41,7 +41,7 @@ LINKOPTS      = -S
 LDIR          = $(ROOT)/lib.$(ARCH)
 LDFLAGS	      = $(LINKOPTS) -e start -dc -dp -Bstatic /lib/crt0.o \
 		-L$(OCTTOOLS)/lib.$(ARCH) -L$(LDIR) -u_UserMain
-LIBS	      = -lsdf -lddf -lde -lptolemy \
+LIBS	      = -lsdf -lddf -lde -lthor -lptolemy \
 		-lg++ -loh -lrpc -llist -ltr -lutility -lst -lerrtrap \
 		-luprintf -lport -lX11 -lm $(GNULIB)/gcc-gnulib -lc
 
@@ -96,16 +96,20 @@ LIBOBJS = $(LIBCSRCS:.c=.o) $(LIBCPPSRCS:.cc=.o)
 SDF=../domains/sdf/stars
 DDF=../domains/ddf/stars
 DE =../domains/de/stars
+Thor=../domains/thor/stars
+
 SDFSRC=$(ROOT)/src/domains/sdf/stars
 DDFSRC=$(ROOT)/src/domains/ddf/stars
 DESRC =$(ROOT)/src/domains/de/stars
+ThorSRC=$(ROOT)/src/domains/thor/stars
 
 # include files for star names.  These define the symbols SDFSTARS, DESTARS,
-# and DDFSTARS.
+# DDFSTARS, and ThorSTARS.
 
 include $(SDFSRC)/sdfstars.mk
 include $(DESRC)/destars.mk
 include $(DDFSRC)/ddfstars.mk
+include $(ThorSRC)/thorstars.mk
 
 all:	makefile libpigi.a pigiRpc
 
@@ -114,12 +118,12 @@ libpigi.a:	$(LIBOBJS)
 	ar cq libpigi.a $(LIBOBJS)
 	ranlib libpigi.a
 
+ALLSTARS=$(SDFSTARS) $(DESTARS) $(DDFSTARS) $(ThorSTARS)
+
 pigiRpc:	defpalettes.o libpigi.a $(LDIR)/libptolemy.a \
 		$(LDIR)/libsdf.a $(LDIR)/libddf.a $(LDIR)/libde.a \
-		$(SDFSTARS) $(DESTARS) $(DDFSTARS)
-	$(LINKER) $(LDFLAGS) defpalettes.o \
-		$(SDFSTARS) $(DESTARS) $(DDFSTARS) \
-	    libpigi.a $(LIBS) -o pigiRpc
+		$(ALLSTARS)
+	$(LINKER) $(LDFLAGS) defpalettes.o $(ALLSTARS) libpigi.a $(LIBS) -o pigiRpc
 
 DESTLIB = $(ROOT)/lib.$(ARCH)/libpigi.a
 DESTBIN = $(ROOT)/bin.$(ARCH)/pigiRpc
