@@ -217,43 +217,35 @@ The values of the input ports will be passed as arguments to this function.
 	  }
 	}
 
-	// Returns 1 for Failure and 0 for Success
 	method {
-	  name { processInputMatrices }
+	  name { PtolemyToMatlab }
 	  access { protected }
-	  type { int }
-	  arglist { "()" }
+	  type { "Matrix*" }
+	  arglist { "(Particle& particle, DataType portType, int *errflag)" }
 	  code {
-		int errorFlag = FALSE;
-
-		// allocate memory for Matlab matrices
-		MPHIter nexti(input);
-		for ( int i = 0; i < numInputs; i++ ) {
-		  // read a reference to the matrix on input port i
-		  PortHole *iportp = nexti++;
-		  DataType portType = iportp->resolvedType();
-		  Matrix *matlabMatrix = 0;
-
 		  // can't use a switch because enumerated data types
 		  // are assigned to strings and not to integers
+		  double *realp = 0;
+		  double *imagp = 0;
+		  Matrix *matlabMatrix = 0;
 		  if ( portType == INT ||
 		       portType == FLOAT ||
 		       portType == FIX ) {
 		    matlabMatrix = mxCreateFull(1, 1, MXREAL);
-		    double *realp = mxGetPr(matlabMatrix);
-		    *realp = double((*iportp)%0);
+		    realp = mxGetPr(matlabMatrix);
+		    *realp = double(particle);
 		  }
 		  else if ( portType == COMPLEX ) {
 		    matlabMatrix = mxCreateFull(1, 1, MXCOMPLEX);
-		    double *realp = mxGetPr(matlabMatrix);
-		    double *imagp = mxGetPi(matlabMatrix);
-		    Complex temp = (*iportp)%0;
+		    realp = mxGetPr(matlabMatrix);
+		    imagp = mxGetPi(matlabMatrix);
+		    Complex temp = particle;
 		    *realp = real(temp);
 		    *imagp = imag(temp);
 		  }
 		  else if ( portType == COMPLEX_MATRIX_ENV ) {
 		    Envelope Apkt;
-		    ((*iportp)%0).getMessage(Apkt);
+		    particle.getMessage(Apkt);
 		    const ComplexMatrix& Amatrix =
 			*(const ComplexMatrix *)Apkt.myData();
 
@@ -276,7 +268,7 @@ The values of the input ports will be passed as arguments to this function.
 		  }
 		  else if ( portType == FIX_MATRIX_ENV ) {
 		    Envelope Apkt;
-		    ((*iportp)%0).getMessage(Apkt);
+		    particle.getMessage(Apkt);
 		    const FixMatrix& Amatrix =
 			*(const FixMatrix *)Apkt.myData();
 
@@ -296,7 +288,7 @@ The values of the input ports will be passed as arguments to this function.
 		  }
 		  else if ( portType == FLOAT_MATRIX_ENV ) {
 		    Envelope Apkt;
-		    ((*iportp)%0).getMessage(Apkt);
+		    particle.getMessage(Apkt);
 		    const FloatMatrix& Amatrix =
 			*(const FloatMatrix *)Apkt.myData();
 
@@ -316,9 +308,9 @@ The values of the input ports will be passed as arguments to this function.
 		  }
 		  else if ( portType == INT_MATRIX_ENV ) {
 		    Envelope Apkt;
-		    ((*iportp)%0).getMessage(Apkt);
+		    particle.getMessage(Apkt);
 		    const IntMatrix& Amatrix =
-			*(const IntMatrix *)Apkt.myData();
+		        *(const IntMatrix *)Apkt.myData();
 
 		    // allocate a Matlab matrix and name it
 		    int rows = Amatrix.numRows();
@@ -335,14 +327,42 @@ The values of the input ports will be passed as arguments to this function.
 		    }
 		  }
 		  else {
+		    *errflag = TRUE;
+		    matlabMatrix = mxCreateFull(1, 1, MXREAL);
+		    double *realp = mxGetPr(matlabMatrix);
+		    *realp = 0.0;
+		  }
+
+		  return matlabMatrix;
+	  }
+	}
+
+	// Returns 1 for Failure and 0 for Success
+	method {
+	  name { processInputMatrices }
+	  access { protected }
+	  type { int }
+	  arglist { "()" }
+	  code {
+		int errorFlag = FALSE;
+
+		// allocate memory for Matlab matrices
+		MPHIter nexti(input);
+		for ( int i = 0; i < numInputs; i++ ) {
+		  // read a reference to the matrix on input port i
+		  int errflag = FALSE;
+		  PortHole *iportp = nexti++;
+		  DataType portType = iportp->resolvedType();
+		  Matrix *matlabMatrix =
+		  	PtolemyToMatlab((*iportp)%0, portType, &errflag);
+
+		  // check for error in the call to PtolemyToMatlab
+		  if ( errflag ) {
 		    errorFlag = TRUE;
 		    StringList errstr;
 		    errstr = "Unsupported data type ";
 		    errstr << portType << " on input port " << i+1 << ".";
 		    Error::warn(*this, errstr);
-		    matlabMatrix = mxCreateFull(1, 1, MXREAL);
-		    double *realp = mxGetPr(matlabMatrix);
-		    *realp = 0.0;
 		  }
 
 		  // Give the current matrix a name
@@ -361,14 +381,79 @@ The values of the input ports will be passed as arguments to this function.
 	}
 
 	// Returns 1 for Failure and 0 for Success
+	// copy a Matlab output matrix to a Ptolemy matrix
+	method {
+	  name { MatlabToPtolemy }
+	  access { protected }
+	  type { int }
+	  arglist { "(Particle &particle, DataType portType, Matrix* matlabMatrix, const char* matrixId, int *errflag)" }
+	  code {
+		  // error flags
+		  *errflag = FALSE;
+		  int incompatibleOutportPort = FALSE;
+
+		  // allocate a Ptolemy matrix
+		  int rows = mxGetM(matlabMatrix);
+		  int cols = mxGetN(matlabMatrix);
+
+		  if ( mxIsFull(matlabMatrix) ) {
+
+		    // for real matrices, imagp will be null
+		    double *realp = mxGetPr(matlabMatrix);
+		    double *imagp = mxGetPi(matlabMatrix);
+
+		    // copy Matlab matrices (in column-major order) to Ptolemy
+		    if ( portType == COMPLEX_MATRIX_ENV ) {
+		      ComplexMatrix& Amatrix = *(new ComplexMatrix(rows, cols));
+		      for ( int jcol = 0; jcol < cols; jcol++ ) {
+			for ( int jrow = 0; jrow < rows; jrow++ ) {
+			  double realValue = *realp++;
+			  double imagValue = ( imagp ) ? *imagp++ : 0.0;
+			  Amatrix[jrow][jcol] = Complex(realValue, imagValue);
+			}
+		      }
+		      // write the matrix to output port j
+		      // do not delete Amatrix: particle class handles that
+		      particle << Amatrix;
+		    }
+		    else if ( portType == FLOAT_MATRIX_ENV ) {
+		      FloatMatrix& Amatrix = *(new FloatMatrix(rows, cols));
+		      if ( mxIsComplex(matlabMatrix) ) {
+			StringList myerrstr;
+			myerrstr = "\nImaginary components ignored for the ";
+			myerrstr << "Matlab matrix " << matrixId;
+			Error::warn(myerrstr);
+		      }
+		      for ( int jcol = 0; jcol < cols; jcol++ ) {
+			for ( int jrow = 0; jrow < rows; jrow++ ) {
+			  Amatrix[jrow][jcol] = *realp++;
+			}
+		      }
+		      // write the matrix to output port j
+		      // do not delete Amatrix: particle class handles that
+		      particle << Amatrix;
+		    }
+		    // this situation should never be encountered since the
+		    // setup method should have checked for output data type
+		    else {
+		      incompatibleOutportPort = TRUE;
+		    }
+		  }
+		  else {
+		    *errflag = TRUE;
+		  }
+
+		  return incompatibleOutportPort;
+	  }
+	}
+
+	// Returns 1 for Failure and 0 for Success
 	method {
 	  name { processOutputMatrices }
 	  access { protected }
 	  type { int }
 	  arglist { "()" }
 	  code {
-		// copy each Matlab output matrix to a Ptolemy matrix
-
 		// possible error messages and flags
 		int incompatibleOutportPort = FALSE;
 		int matlabFatalError = FALSE;
@@ -406,55 +491,15 @@ The values of the input ports will be passed as arguments to this function.
 		    continue;
 		  }
 
-		  // allocate a Ptolemy matrix
-		  int rows = mxGetM(matlabMatrix);
-		  int cols = mxGetN(matlabMatrix);
+		  StringList matrixId = matlabOutputNames[j];
+		  matrixId << " on output port " << j;
+		  int errflag = FALSE;
+		  int badport = MatlabToPtolemy((*oportp)%0, portType,
+		  				matlabMatrix, matrixId,
+						&errflag);
+		  incompatibleOutportPort = incompatibleOutportPort || badport;
 
-		  if ( mxIsFull(matlabMatrix) ) {
-
-		    // for real matrices, imagp will be null
-		    double *realp = mxGetPr(matlabMatrix);
-		    double *imagp = mxGetPi(matlabMatrix);
-
-		    // copy Matlab matrices (in column-major order) to Ptolemy
-		    if ( portType == COMPLEX_MATRIX_ENV ) {
-		      ComplexMatrix& Amatrix = *(new ComplexMatrix(rows, cols));
-		      for ( int jcol = 0; jcol < cols; jcol++ ) {
-			for ( int jrow = 0; jrow < rows; jrow++ ) {
-			  double realValue = *realp++;
-			  double imagValue = ( imagp ) ? *imagp++ : 0.0;
-			  Amatrix[jrow][jcol] = Complex(realValue, imagValue);
-			}
-		      }
-		      // write the matrix to output port j
-		      // do not delete Amatrix: particle class handles that
-		      (*oportp)%0 << Amatrix;
-		    }
-		    else if ( portType == FLOAT_MATRIX_ENV ) {
-		      FloatMatrix& Amatrix = *(new FloatMatrix(rows, cols));
-		      if ( mxIsComplex(matlabMatrix) ) {
-			StringList myerrstr;
-			myerrstr = "\nImaginary components ignored for the ";
-			myerrstr << "Matlab matrix " << matlabOutputNames[j];
-			myerrstr << " on output port " << j;
-			Error::warn(*this, myerrstr);
-		      }
-		      for ( int jcol = 0; jcol < cols; jcol++ ) {
-			for ( int jrow = 0; jrow < rows; jrow++ ) {
-			  Amatrix[jrow][jcol] = *realp++;
-			}
-		      }
-		      // write the matrix to output port j
-		      // do not delete Amatrix: particle class handles that
-		      (*oportp)%0 << Amatrix;
-		    }
-		    // this situation should never be encountered since the
-		    // setup method should have checked for output data type
-		    else {
-		      incompatibleOutportPort = TRUE;
-		    }
-		  }
-		  else {
+		  if ( errflag ) {
 		    if ( ! matlabFatalError ) {
 		      matlabFatalError = TRUE;
 		      merrstr = "For the Matlab command ";
