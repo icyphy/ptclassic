@@ -65,6 +65,8 @@ PL_SRCS= \
  CG56BitsToInt.pl \
  CG56CircToLin.pl \
  CG56Commutator.pl \
+ CG56Chop.pl \
+ CG56ChopVarOffset.pl \
  CG56Const.pl \
  CG56ConstCx.pl \
  CG56ConstInt.pl \
@@ -123,6 +125,7 @@ PL_SRCS= \
  CG56QuantIdx.pl \
  CG56QuantRange.pl \
  CG56Ramp.pl \
+ CG56RampInt.pl \
  CG56ReadFile.pl \
  CG56ReadFileInt.pl \
  CG56Reciprocal.pl \
@@ -138,6 +141,7 @@ PL_SRCS= \
  CG56SgnInt.pl \
  CG56Shifter.pl \
  CG56Sin.pl \
+ CG56Sinc.pl \
  CG56Skew.pl \
  CG56Sqr.pl \
  CG56Sqrt.pl \
