@@ -6,11 +6,14 @@ Quantize the input value to one of N+1 possible output levels using
 N thresholds.  For an input less than or equal to the n-th threshold,
 but larger than all previous thresholds, the output will be the n-th
 level.  If the input is greater than all thresholds, the output is
-the N+1-th level.  If level is specified, there must be one more level
-than thresholds; the default value for level is 0, 1, 2, ... N.  This
-star takes on the order of log N steps to find the right level, whereas
-the LinQuantIdx star takes a constant amount of time.  Therefore, use
-the LinQuantIdx star when possible.
+the N+1-th level.  If the input is less than all thresholds, then the
+output is the zeroth level.
+
+If level is specified, there must be one more level than thresholds.
+The default value for level is 0, 1, 2, ... N.  This star takes on the
+order of log N steps to find the right level, whereas the linear
+quantizer star LinQuantIdx takes a constant amount of time.  Therefore,
+if you doing linear quantization, use the LinQuantIdx star.
 	}
 	version { $Id$ }
 	author { E. A. Lee and J. Buck }
@@ -19,6 +22,13 @@ Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
+	}
+	explanation {
+Assume that the \fIthresholds\fR parameter is set to $(8.1, 9.2, 10.3)$,
+and that the \fIlevels\fR parameter is not set so that the default values
+of $(0.0, 1.0, 2.0, 3.0)$ are used.  Then, an input of $-1.5$ would give
+an output of $0.0$, an input of $8.2$ would give an output of $1.0$, and
+an input of $15.5$ would give an output of $3.0$.
 	}
 	location { SDF main library }
 	input {
