@@ -40,9 +40,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "compat.h"		/* Pickup PTSOL2 etc. */
 #include <sys/stat.h>		/* Pickup chmod for hppa */
 
-// #ifdef PTALPHA
-// #define LINKING_NOT_SUPPORTED
-// #endif
+#ifdef PTNT
+#define LINKING_NOT_SUPPORTED
+#endif
 
 // Is linking supported?
 const int linkingNotSupported =
@@ -328,7 +328,7 @@ extern "C" {
 #define COFF
 #include <aouthdr.h>
 #endif
-#ifndef SOL2
+#if !defined(SOL2) && !defined(PTNT)
 #include <a.out.h>
 #endif /*SOL2*/
 #endif
