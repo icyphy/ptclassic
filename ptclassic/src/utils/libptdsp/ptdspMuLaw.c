@@ -30,41 +30,49 @@ Version: $Id$
 
 #include "ptdspMuLaw.h"
 
-const int BIAS = 0x84;
-const int CLIP = 32635;
+const int BIAS16 = 0x84;
+const int CLIP16 = 32635;		/* 2^15 - BIAS16 - 1 */
 
-/* MuLaw compression routine */
+static int exp_lut[256] = {0,0,1,1,2,2,2,2,3,3,3,3,3,3,3,3,
+			   4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
+			   5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
+			   5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
+			   6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+			   6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+			   6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+			   6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+			   7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+			   7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+			   7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+			   7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+			   7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+			   7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+			   7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+			   7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7};
 
-unsigned char Ptdsp_MuLaw( int sample ) {
-  static int exp_lut[256] = {0,0,1,1,2,2,2,2,3,3,3,3,3,3,3,3,
-			     4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
-			     5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
-			     5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
-			     6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
-			     6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
-			     6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
-			     6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
-			     7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-			     7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-			     7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-			     7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-			     7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-			     7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-			     7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-			     7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7};
-  int sign, exponent, mantissa;
+/* Compress 16-bit linear data to 8-bit mu-law data */
+unsigned char Ptdsp_Linear16ToMuLaw8(int sample) {
+  int exponent, mantissa, sign;
   unsigned char ulawbyte;
 
   /* Get the sample into sign-magnitude. */
-  /* this code assumes a twos complement representation */
+  /* this code assumes a two's complement representation */
   sign = (sample >> 8) & 0x80;
-  if ( sign != 0 ) sample = -sample;
-  if ( sample > CLIP ) sample = CLIP;
+  if ( sign ) sample = -sample;
+  if ( sample > CLIP16 ) sample = CLIP16;
 
-  /* Convert from 16 bit linear to mu-law. */
-  sample = sample + BIAS;
+  /* Convert from 16-bit linear to mu-law. */
+  /* The exponent is four bits; the mantissa is four bits */
+  sample += BIAS16;
   exponent = exp_lut[( sample >> 7 ) & 0xFF];
   mantissa = ( sample >> ( exponent + 3 ) ) & 0x0F;
   ulawbyte = ~ ( sign | ( exponent << 4 ) | mantissa );
+
   return ulawbyte;
+}
+
+/* Compress 8-bit linear data to 8-bit mu-law data */
+/* Convert the data to 16 bits and call the 16-bit converter */
+unsigned char Ptdsp_Linear8ToMuLaw8(int sample) {
+  return Ptdsp_Linear8ToMuLaw8((sample & 0xFF) << 8);
 }

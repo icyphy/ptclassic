@@ -35,7 +35,8 @@ Version: $Id$
 extern "C" {
 #endif
 
-unsigned char Ptdsp_MuLaw( int sample );
+unsigned char Ptdsp_Linear16BitToMuLaw8(int sample);
+unsigned char Ptdsp_Linear8BitToMuLaw8(int sample);
 
 #ifdef __cplusplus
 }
