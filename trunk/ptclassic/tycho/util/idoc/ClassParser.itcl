@@ -43,8 +43,8 @@
 # a list of filenames. It examines their extensions, and uses
 # <code>ClassParser::generator</code> to create an instance of the
 # correct parsing class to process that file.
-# (Currently, <a href = "ItclParser.idoc">[incr Tcl]</a> and 
-# <a href ="JavaParser.idoc">Java</a> are supported). If a subsequent file
+# (Currently, <a href = "ItclParser.itclclass">[incr Tcl]</a> and 
+# <a href ="JavaParser.itclclass">Java</a> are supported). If a subsequent file
 # is of the same type, it uses the same generator.
 #
 # This procedure is also tied to the make idocs command as well as the 
