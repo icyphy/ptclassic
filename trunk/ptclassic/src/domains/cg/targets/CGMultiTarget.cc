@@ -204,11 +204,11 @@ private:
 };
 
 int CGMultiTarget::modifyGalaxy() {
-    Star& dummyStar =
-	Domain::of(*galaxy())->newWorm(*new DummyGalaxy(*galaxy()));
+    StringList topStarType;
+    topStarType << galaxy()->domain() << "Star";
     int i;
     for (i = 0 ; i < nProcs() ; i++) {
-	if (child(i)->support(&dummyStar)) {
+	if (strcmp(child(i)->starType(),topStarType) == 0) {
 	    if (cgChild(i)) {
 		cgChild(i)->setGalaxy(*galaxy());
 		galaxy()->setTarget(cgChild(i));
@@ -218,7 +218,6 @@ int CGMultiTarget::modifyGalaxy() {
 	    }
 	}
     }
-    delete &dummyStar;
     return recursiveModifyGalaxy(*galaxy());
 }
 
