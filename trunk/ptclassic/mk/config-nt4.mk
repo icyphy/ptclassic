@@ -74,7 +74,7 @@ CC =		gcc -I$(ROOT)/src/compat/nt
 OPTIMIZER =	#-O2
 # -Wsynth is new in g++-2.6.x
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
-WARNINGS =	-Wall -Wsynth #-Wcast-qual 
+WARNINGS =	-Wall -Wsynth -Wno-non-virtual-dtor #-Wcast-qual 
 
 # PT_NO_ITCL  : Used by ptcl to avoid including Itcl
 # PT_NO_TIMER : Used in ProfileTimer.cc and SimControl.cc
