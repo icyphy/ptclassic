@@ -2,7 +2,8 @@ defstar {
 	name { Sin }
 	domain { C50 }
 	desc {
-Sine function.  Input range of (-1,1) scaled by pi.  Output is sin(pi*input).
+Sine function calculated by table lookup.  Input range of [-1,1) is scaled
+by pi.  Output is sin(pi*input).
 	}
 	version { $Id$ }
 	acknowledge { Gabriel version by Maureen O'Reilly }
@@ -16,11 +17,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { C50 nonlinear functions library }
 	explanation {
 This star computes the sine of the input, which must be in the range
-(-1.0, 1.0).
-The output equals sin($~pi~cdot~$\fIin\fR$+\fIphase\fR$),
-so the input range is effectively (-$~pi$, $pi~$).
-The output is in the range (-1.0, 1.0).
-The parameter \fIphase\fR is in degrees (e.g., cos() would use phase=90).
+[-1.0, 1.0).  The output equals sin($~pi~cdot~$\fIin\fR$+\fIphase\fR$),
+so the input range is effectively (-$~pi$, $pi~$).  The output is in
+the range (-1.0, 1.0).  The parameter \fIphase\fR is in degrees
+(e.g., cosine would use a phase of 90).
 	}
 	input {
 		name {input}
@@ -43,6 +43,9 @@ The parameter \fIphase\fR is in degrees (e.g., cos() would use phase=90).
 		desc { "Munged form of phase." }
 		attributes { A_NONSETTABLE }
 	}
+	constructor {
+		noInternalState();
+	}
 	codeblock (SinTable) {
 	.ds     02900h
 	.q15    0,-0.09802,-0.1951,-0.290285,-0.3827,-0.4714,-0.5556,-0.63439
@@ -59,8 +62,8 @@ The parameter \fIphase\fR is in degrees (e.g., cos() would use phase=90).
 	mar     *,AR0			;
 	lar     AR0,#$addr(input)	;Address input		=> AR0
 	lar     AR7,#$addr(output)	;Address output		=> AR1
-	bit     *                       ;Bit 15 = 1 in input (negativ value) ?
-	lacc    *                       ;Accu =  input (x)  
+	bit     *			;Bit 15 = 1 in input (negativ value) ?
+	lacc    *			;Accu =  input (x)  
 	and     #0fb00h			;normalize input value for table (x1)
 	samm    INDX    		;store Accu in INDX
 	bsar    10			;shift Accu 10 bits right
