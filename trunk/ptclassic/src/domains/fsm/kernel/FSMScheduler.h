@@ -37,11 +37,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "Scheduler.h"
-#include "PortHole.h"
-#include "tcl.h"
 #include "FSMStateStar.h"
-#include "FSMPortHole.h"
+#include "InfString.h"
+#include "PortHole.h"
+#include "Scheduler.h"
+#include "tcl.h"
 
 extern const char FSMdomainName[];
 
@@ -73,29 +73,16 @@ public:
     // Set the stopping time when inside a Wormhole.
     /*virtual*/ void resetStopTime(double);
 
-    // Input/Output name maps.        //--|
-    char* inputNameMap;               //  |
-    char* outputNameMap;              //  |
-    // Internal event name maps.      //  |--These will be set by Target.
-    char* internalNameMap;            //  |				  
-                                      //  |
-    // Machine type.                  //  |
-    char* machineType;                //  |
-    // Evaluation type.               //  |
-    char* evaluationType;             //  |
-    // One-writer rule checking type. //  |
-    char* oneWriterType;              //--|
-
-    // Return the input/output multiport of this FSM.
-    MultiPortHole* inPorts() { return myInPorts; }
-    MultiPortHole* outPorts() { return myOutPorts; }
-
-    // Return the name list of the internal events.
-    const StringList* getInternalEventNm() { return &internalEventNm; } 
+    // Internal event name maps.       //--|
+    InfString intlEventNames;          //  |
+    InfString intlEventTypes;          //  |
+    // Evaluation type.                //  |--These will be set by Target.
+    InfString evaluationType;          //  |
+    // One-writer rule checking type.  //  |
+    InfString oneWriterType;           //--|
 
      // Return my own Tcl interp.
     Tcl_Interp* interp() { return myInterp; }
-
 
    // Reset current state to be the initial state.
     // This needs to be invoked while hierarchical entry is initial entry.
@@ -105,23 +92,9 @@ protected:
     // Check all stars.
     int checkStars();
 
-    // Setup inputs, outputs and internal events.
-    int setupIO();
-    // Setup input/output/internal event buffers.
-    // Note that: These buffers depend on the type of the machine,
-    // so this method should be redefined in derived class.
-    virtual int setupIOBuf();
-    // Setup the name of each PortHole in the input/output MultiPortHole.
-    int setupNameMap(MultiPortHole& mph, const char* Name_Map);
-
-    // The input multiport of this FSM.
-    MultiPortHole* myInPorts;
-
-    // The output multiport of this FSM.
-    MultiPortHole* myOutPorts;
-
-    // The list of names of internal events. 
-    StringList internalEventNm; 
+    // (1) Create a Tcl interpreter 
+    // (2) Register inputs, outputs, internal events in the Tcl interp
+    int setupTclInterp();
 
     // my own Tcl interpreter
     Tcl_Interp* myInterp;
@@ -142,14 +115,14 @@ protected:
     const char* outerDomain;	 
 };
 
-class SPureSched : public FSMScheduler
+class StrictSched : public FSMScheduler
 {
 public:
     // Constructor.
-    SPureSched();
+    StrictSched();
 
     // Destructor
-    ~SPureSched();
+    ~StrictSched();
 
     // class identification
     int isA(const char*) const;
@@ -157,29 +130,16 @@ public:
     // Run (or continue) the simulation.
     /*virtual*/ int run();
 
-    // Return my myAllInBuf and myAllOutBuf pointers;
-    int* allInBuf()  { return myAllInBuf; }
-    int* allOutBuf() { return myAllOutBuf; }
-    
 protected:
-    // Setup input/output/internal event buffers.
-    /* virtual */ int setupIOBuf();
-
-    // Clear output buffers, and set to deafult values.
-    void clearOutput(int value);
-
     // Receive input data, and feed back internal events.
-    void receiveData();
+    int receiveData();
 
     // Send output data.
-    void sendData();
+    int sendData();
 
-
-    // Input buffers for the internal events and input ports of this FSM.
-    int* myAllInBuf;
-
-    // Output buffers for the internal events and output ports of this FSM.
-    int* myAllOutBuf;
+private:
+    // Used for debugging
+    void printTclVar();
 };
 
 #endif

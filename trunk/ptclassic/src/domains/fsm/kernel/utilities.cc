@@ -41,7 +41,199 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include <string.h>
 #include "Error.h"
+#include "Geodesic.h"
+#include "InfString.h"
+#include "PortHole.h"
+#include "tcl.h"
 #include "type.h"
+
+// Translate the data from PortHole to Tcl Interp depending on ghostDoamin.
+int port2interp(PortHole* port,Tcl_Interp* myInterp,const char* ghostDomain) {
+
+  if (!strcmp(ghostDomain,"SDF")) {
+    // Set value to "name(v)"
+    InfString buf = port->name();
+    buf << "(v)";
+    InfString valueStr;
+    Particle* p = port->geo()->get(); // Get Particle directly from Geodesic.
+    valueStr = p->print();
+    Tcl_SetVar(myInterp,buf,valueStr,TCL_GLOBAL_ONLY);
+
+    // Recycle the Particle by putting it into Plasma.
+    p->die();
+    // Clear those Particles that is still in Geodesic.
+    while (port->geo()->size()) {
+      p = port->geo()->get();
+      p->die();
+    }
+
+    // Set status to "name(s)" i.e set name(s) [expr $name(v) != 0]
+    buf = "set ";
+    buf << port->name();
+    buf << "(s) [expr $";
+    buf << port->name();
+    buf << "(v)";
+    buf << " != 0]";
+    Tcl_Eval(myInterp,buf);
+
+  } else if (!strcmp(ghostDomain,"DE") || !strcmp(ghostDomain,"FSM")) {
+    InfString statusStr;
+    InfString valueStr;
+    InfString buf;
+    if (!port->geo()->size()) {
+      // There is no token, i.e. the event is absent.
+      // Then set both status and value to 0.
+      statusStr = "0";
+      valueStr = "0";
+
+    } else {
+      // There exist tokens: First set status to 1.
+      statusStr = "1";
+
+      // Then grab Particle directly from Geodesic, and set value.
+      Particle* p = port->geo()->get();
+      valueStr = p->print();
+
+      // Recycle the Particle by putting it into Plasma.
+      p->die();
+      // Clear those Particles that is still in Geodesic.
+      while (port->geo()->size()) {
+	p = port->geo()->get();
+	p->die();
+      }
+    }
+
+    // Register into Tcl interp.
+    buf = port->name();
+    buf << "(s)";
+    Tcl_SetVar(myInterp,buf,statusStr,TCL_GLOBAL_ONLY);
+    buf = port->name();
+    buf << "(v)";
+    Tcl_SetVar(myInterp,buf,valueStr,TCL_GLOBAL_ONLY);
+
+  } else {
+    InfString buf = "port2interp: ";
+    buf << "Interaction with domain ";
+    buf << ghostDomain;
+    buf << " is not supported yet!";
+    Error::abortRun(buf);
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+// Translate the data from Tcl Interp to PortHole depending on ghostDoamin.
+int interp2port(Tcl_Interp* myInterp,PortHole* port,const char* ghostDomain) {
+
+  InfString buf = port->name();
+  buf << "(s)";
+  InfString statusStr = Tcl_GetVar(myInterp,buf,TCL_GLOBAL_ONLY);
+  buf = port->name();
+  buf << "(v)";
+  InfString valueStr = Tcl_GetVar(myInterp,buf,TCL_GLOBAL_ONLY);
+
+  int status;
+  if (Tcl_GetInt(myInterp,statusStr,&status) != TCL_OK) {
+    Error::abortRun("FSMScheduler: ","Tcl_GetInt for status failed: ",
+		    myInterp->result);
+    return FALSE;
+  }
+
+  if (status == 0) {
+    // If the event is absent:
+
+    if (!strcmp(ghostDomain,"SDF")) {
+      // When the ghostDomain is SDF, need to pass a token with value 0.
+      if (!strcmp(port->type(),"INT")) {
+	if (port->isItOutput()) {
+	  // FSM galaxy -> Outer domain (for FSMScheduler::sendData)
+	  (*port)%0 << (int)0;
+	  port->sendData();
+	} else {
+	  // FSM galaxy -> Inner domain of slave (for FSMStateStar::execSlave)
+	  Particle* p = new IntParticle(0);
+	  port->geo()->put(p);
+	}
+
+      } else if (!strcmp(port->type(),"FLOAT")) {
+	if (port->isItOutput()) {
+	  // FSM galaxy -> Outer domain (for FSMScheduler::sendData)
+	  (*port)%0 << (double)0;
+	  port->sendData();
+	} else {
+	  // FSM galaxy -> Inner domain of slave (for FSMStateStar::execSlave)
+	  Particle* p = new FloatParticle(0);
+	  port->geo()->put(p);
+	}
+	
+      } else {
+	Error::abortRun("interp2port: ",port->type()," is not supported yet!");
+	return FALSE;
+      }
+    }  // end of if (!strcmp(ghostDomain,"SDF"))
+    
+    // For other domains, pass NOTHING. 
+
+  } else {
+    // If the event is present, set the token value
+    if (!strcmp(port->type(),"INT")) {
+      // First cast "valueStr" to integer string.
+      buf = "int(";
+      buf << valueStr;
+      buf << ")";
+      if (Tcl_ExprString(myInterp,buf) != TCL_OK) {
+	Error::abortRun("FSMScheduler: ","Tcl_ExprString failed: ",
+			myInterp->result) ;
+	return FALSE;
+      }
+      // Then get the integer value.
+      int value;
+      if (Tcl_GetInt(myInterp,myInterp->result,&value) != TCL_OK) {
+	Error::abortRun("FSMScheduler: ",
+			"Tcl_GetInt for value failed: ",
+			myInterp->result);
+	return FALSE;
+      }
+      if (port->isItOutput()) {
+	// FSM galaxy -> Outer domain (for FSMScheduler::sendData)
+	(*port)%0 << value;
+	port->sendData();
+      }  else {
+	// FSM galaxy -> Inner domain of slave (for FSMStateStar::execSlave)
+	Particle* p = new IntParticle(value);
+	port->geo()->put(p);
+      }
+      
+    } else if (!strcmp(port->type(),"FLOAT")) {
+      double value;
+      if (Tcl_GetDouble(myInterp,valueStr,&value) != TCL_OK) {
+	Error::abortRun("FSMScheduler: ",
+			"Tcl_GetDouble for value failed: ",
+			myInterp->result);
+	return FALSE;
+      } 
+      if (port->isItOutput()) {
+	// FSM galaxy -> Outer domain (for FSMScheduler::sendData)
+	(*port)%0 << value;
+	port->sendData();
+      } else {
+	// FSM galaxy -> Inner domain of slave (for FSMStateStar::execSlave)
+	Particle* p = new FloatParticle(value);
+	port->geo()->put(p);
+      }
+      
+    } else {
+      Error::abortRun("interp2port: Data type ", port->type(),
+		      " is not supported yet!");
+      return FALSE;
+    }
+    
+  } // end of else for if (status == 0)
+    
+  return TRUE;
+}
+
 
 // Parse a string using either double-quotes or curly-braces as the delimitter.
 char** strParser(const char* string,int& numStr,const char* type) {

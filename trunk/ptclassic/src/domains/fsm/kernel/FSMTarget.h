@@ -40,6 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
+#include "StringArrayState.h"
 #include "StringState.h"
 #include "FloatState.h"
 #include "Block.h"
@@ -64,17 +65,9 @@ public:
 	/*virtual*/ const char* domain();
 
 protected:
-	// Input name maps
-        StringState inputNameMap;         
-
-	// Output name maps
-	StringState outputNameMap;   
-
-	// Internal event name maps
-	StringState internalNameMap;   
-
-        // Machine type: Pure.
-	StringState machineType;
+	// Internal event names and types. 
+	StringArrayState intlEventNames;
+	StringArrayState intlEventTypes;
 
 	// Evaluation type: Strict or NonStrict.
 	StringState evaluationType;
