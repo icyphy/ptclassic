@@ -22,9 +22,9 @@ wherever there is a Itcl file, the tests are in the <CODE>test</CODE>
 directory.
 
 <H3>Running the tests</H3>
-There are several ways to run the tests
-<OL>
+There are several ways to run the tests:
 
+<OL>
 
 <LI> The <A
 HREF="../../kernel/doc/usersGuides/BuilderDialogHelp.html">BuilderDialog</A>
@@ -199,6 +199,24 @@ test Foo-1.1 {Test out Foo} {
 
 </OL>
 
+<H3><A NAME="test styles">Test Styles</A></H3>
+There are two types of tests:
+<OL>
+<LI> Tests that handle all necessary setup in each individual test.
+
+<LI> Tests that rely on the earlier tests to do setup.
+</OL>
+
+In general, each test file should be able to be run over and over again
+in a binary without exiting the binary (it should be idempotent).  
+
+ <P>It is up to the author of the tests as to whether each individual
+test does all the set up necessary.  If each test is atomic, then it
+makes it easy to highlight the text of an individual test and run it.
+If lots of tests are sharing common setup, then using a separate
+procedure to do setup might help.  On the negative side, atomic tests
+usually are longer and have more complicated return results.
+
 <H3><A NAME="testing modal dialog widgets">Testing Modal Dialog Widgets</A></H3>
 Testing modal dialog widgets and the methods that use them is tricky because 
 we want the test suite to be able to just 'do the right thing' and 
@@ -231,6 +249,28 @@ test YesNoQuery-2.1 {Test the modal ::tycho::askuser proc} {
 } 1
 </pre></tcl>
 	
+<H3>Using <CODE>event generate</CODE></H3>
+
+The <CODE>event generate</CODE> command is very handy for testing
+widgets! These tests are doing an <CODE>&lt;Enter&gt;</CODE> and
+<CODE>&lt;Leave&gt;</CODE> of a button and checking the text placed
+into a status bar:
+
+<PRE>
+update
+test ButtonBox-3.3 {Enter button and check status bar} {
+    event generate [.bb component buttonfoo] <Enter>
+    .sb get
+} {The Foo button}
+
+update
+test ButtonBox-3.4 {Leave the button} {
+    event generate [.bb component buttonfoo] <Leave>
+    .sb get
+} {}
+</PRE>
+
+
 <H2>Writing Testable Code</H2>
 Below are some hints about writing code that can be tested.
 <MENU>
