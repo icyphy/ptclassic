@@ -41,6 +41,8 @@ but if the constructor subsequently fails, then Tycho
 becomes incoherent. It looks like the File methods
 used by openContext barf because a widget is in the file
 index but doesn't exist.
+<li>When you open a non-existent HTML file, you probably want
+the HTML editor, not the HTML viewer. But that's what you get.
 </ul>
 
 <h3><a href="$TYCHO/kernel/Displayer.itcl">Displayer</a></h3>
@@ -53,8 +55,6 @@ index but doesn't exist.
 <ul>
 <li>Fill region is much too slow.
 <li>The undo in the text widgets is only one level deep.
-<li>Meta-f, Meta-d do not skip over white space (a Tk "feature" -- need to
-    override it).
 <li>Need a "find-again" binding, and perhaps emacs-style incremental search.
 <li>Selecting text does not automatically put it into the clipboard.
 After it's deselected, then it cannot be "stuffed" elsewhere from the
