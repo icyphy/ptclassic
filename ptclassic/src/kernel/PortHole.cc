@@ -97,14 +97,11 @@ void PortHole :: allocateBuffer(int bufferSize)
 PortHole& PortHole :: setPort(char* s,
                               Block* parent,
                               dataType t = FLOAT) {
-        name = s;
-        alias = NULL;
+	GenericPort::setPort (s, parent, t);
         myGeodesic = NULL;
 	myBuffer = NULL;
 	myPlasma = plasmaList.getPlasma(t);
 	numberTokens = 1;
-        type = t;
-        blockIamIn = parent;
         farSidePort = NULL;
 	allocateBuffer(numberTokens);
         return *this;
@@ -131,15 +128,9 @@ PortHole& SDFPortHole :: setPort (
         return *this;
 }
 
-PortHole :: operator char* () {
+// Print a Generic Port
+GenericPort :: operator char* () {
         StringList out;
-        char* parentBlock;
-
-        // Get the name of the parent block, if there is one
-        if( blockIamIn != NULL)
-                parentBlock = blockIamIn->readFullName();
-        else
-                parentBlock = "null (no block)";
  
         if(isItInput())
            out = "      Input ";
@@ -147,31 +138,42 @@ PortHole :: operator char* () {
            out = "      Output ";
         
         out += "PortHole: ";
-        out += parentBlock;
-        out += ".";
-        out += readName();
+        out += readFullName();
         out += "\n";
         
         if(alias != NULL) {
-           PortHole& eventualAlias = realPort();
+           GenericPort& eventualAlias = realPort();
            out += "       Aliased to: ";
-           out += eventualAlias.blockIamIn->readFullName();
-           out += ".";
-           out += eventualAlias.readName();
+           out += eventualAlias.readFullName();
            out += "\n";
-        } else {
-        
+	}
+	return out;
+}
+
+PortHole :: operator char* () {
+	StringList out;
+	out = GenericPort:: operator char* ();
+	if (alias == NULL) {
            if (farSidePort != NULL) {
               out += "    Connected to port: ";
-              out += farSidePort->blockIamIn->readFullName();
-              out += ".";
-              out += farSidePort->readName();
+              out += farSidePort->readFullName();
               out += "\n";
               }
            else
               out += "    Not connected.\n";
         }
         return out;
+}
+
+MultiPortHole :: operator char* () {
+	StringList out;
+	out = "Multi ";
+	out += GenericPort:: operator char* ();
+	out += "This MultiPortHole contains ";
+	out += numberPorts();
+	out += " PortHoles.\n";
+// Should add stuff on the PortList
+	return out;
 }
 
 void PortHole :: initialize()
@@ -324,45 +326,14 @@ Particle& OutOtherPort :: operator ++ ()
 MultiPortHole& MultiPortHole :: setPort(char* s,
                               Block* parent,
                               dataType t = FLOAT) {
-        name = s;
-        type = t;
-        alias = NULL;
-        blockIamIn = parent;
+	GenericPort::setPort (s, parent, t);
         return *this;
 }
 
-MultiPortHole :: operator char* () {
-        StringList out;
-        char* parentBlock;
-        
-        // Get the name of the parent block, if there is one
-        if( blockIamIn != NULL)
-                parentBlock = blockIamIn->readFullName();
-        else
-                parentBlock = "null (no block)";
-        
-        if(isItInput())
-           out = "      Input ";
-        else if(isItOutput())
-           out = "      Output ";
-        
-        out += "MultiPortHole: ";
-        out += parentBlock;
-        out += ".";
-        out += readName();
-        out += "\n";
- 
-        // TO BE DONE:
-        // Probably want to peruse ports in the MultiPort here,
-        // using the char* cast of each to get its information.
-        
-        return out;
-}
-        
 PortHole& MultiPortHole :: newPort() {
         PortHole* newport = new PortHole;
         ports.put(*newport);
-        blockIamIn->addPort(newport->setPort(readName(), blockIamIn, type));
+        parent()->addPort(newport->setPort(readName(), parent(), type));
         return *newport;
 }
  
@@ -379,9 +350,9 @@ MultiPortHole& MultiSDFPort :: setPort (char* s,
 PortHole& MultiInSDFPort :: newPort () {
         InSDFPort* newport = new InSDFPort;
         ports.put(*newport);
-        blockIamIn->
+        parent()->
             addPort(newport->
-                        setPort(readName(), blockIamIn, type, numberTokens));
+                        setPort(readName(), parent(), type, numberTokens));
         return *newport;
 }
  
@@ -389,9 +360,9 @@ PortHole& MultiInSDFPort :: newPort () {
 PortHole& MultiOutSDFPort :: newPort () {
         OutSDFPort* newport = new OutSDFPort;
         ports.put(*newport);
-        blockIamIn->
+        parent()->
             addPort(newport->
-                        setPort(readName(), blockIamIn, type, numberTokens));
+                        setPort(readName(), parent(), type, numberTokens));
         return *newport;
 }
 
