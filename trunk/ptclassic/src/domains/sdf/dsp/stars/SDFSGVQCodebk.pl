@@ -142,7 +142,7 @@ represent a training vector.
   go {
     // Get the input training vectors and store them in the 2-dimension array
     Envelope inpkt;
-    int i;
+    int i,j;
     FloatMatrix zerovector(1, int(dimension));
     zerovector = 0;
     for (i=0; i<int(sizeTrnSet); i++) {
@@ -160,7 +160,7 @@ represent a training vector.
 	return;
       }
       int rowloc = i * int(dimension);
-      for (int j=0; j<int(dimension); j++) 
+      for (j = 0; j<int(dimension); j++) 
 	trnSet[rowloc + j] = vectorp->entry(j);
     }
 
@@ -170,7 +170,7 @@ represent a training vector.
     const int K1 = int(sizeTrnSet)/int(sizeShapeCodebook);
     for (i = 0; i < int(sizeShapeCodebook); i++) {
       double gain = 0.0;
-      int j, t_rowloc = i * K1 * int(dimension);
+      int t_rowloc = i * K1 * int(dimension);
       for (j = 0; j < int(dimension); j++) {
         gain += trnSet[t_rowloc + j] * trnSet[t_rowloc + j];
       }
@@ -184,7 +184,7 @@ represent a training vector.
     for (i = 0; i < int(sizeGainCodebook); i++) {
       double gain = 0.0;
       int rowloc = i * K2 * int(dimension);
-      for (int j = 0; j < int(dimension); j++) {
+      for (j = 0; j < int(dimension); j++) {
         gain += trnSet[rowloc + j] * trnSet[rowloc + j];
       }
       gainCodebook[i] = sqrt(gain);
@@ -193,7 +193,7 @@ represent a training vector.
     // Store the centroid of each partitioned cluster of training set
     for (i = 0; i < int(sizeShapeCodebook); i++) {
       int rowloc = i * int(dimension);
-      for (int j = 0; j < int(dimension); j++) {
+      for (j = 0; j < int(dimension); j++) {
         shapeCentroid[rowloc + j] = 0;
       }
     }
@@ -222,7 +222,7 @@ represent a training vector.
 			      int(sizeShapeCodebook), int(dimension),
 			      gainCodebook, int(sizeGainCodebook));
       distortion += distance;
-      for (int j = 0; j < int(dimension); j++) {
+      for (j = 0; j < int(dimension); j++) {
         shapeCentroid[indexShape*int(dimension) + j] +=
 		gainCodebook[indexGain] * trnSet[i*int(dimension) + j];
       }
@@ -267,7 +267,7 @@ represent a training vector.
         (numGainPart[indexGain])++;
 	int s_rowloc = indexShape * int(dimension);
 	int t_rowloc = i * int(dimension);
-        for (int j = 0; j < int(dimension); j++) {
+        for (j = 0; j < int(dimension); j++) {
           gainCentroid[indexGain] +=
 		shapeCodebook[s_rowloc + j] * trnSet[t_rowloc + j];
 	}
@@ -287,7 +287,7 @@ represent a training vector.
       //  Reset the contents of array shapeCentroid to 0.
       for (i = 0; i < int(sizeShapeCodebook); i++) {
 	int rowloc = i * int(dimension);
-        for (int j = 0; j < int(dimension); j++) {
+        for (j = 0; j < int(dimension); j++) {
           shapeCentroid[rowloc + j] = 0;
 	}
       }
@@ -306,7 +306,7 @@ represent a training vector.
         distortion += distance;
 	int s_rowloc = indexShape * int(dimension);
 	int t_rowloc = i * int(dimension);
-        for (int j = 0; j < int(dimension); j++) {
+        for (j = 0; j < int(dimension); j++) {
           shapeCentroid[s_rowloc + j] +=
 		gainCodebook[indexGain] * trnSet[t_rowloc + j];
 	}
