@@ -148,11 +148,6 @@ if ( $?selectTty && $?filename ) then
 	exit 2	
 endif
 
-if ( $?nowelcome && $?noconsole && ! $?filename) then
-	echo "Usage: $0 : -nowelcome -noconsole with no file is pretty boring"
-	exit 2
-endif
-
 if ( ! $?TYCHO ) then
 	if ( $?PTOLEMY ) then
 		setenv TYCHO "$PTOLEMY/tycho"
