@@ -47,7 +47,8 @@ int PNForkNode::isItPersistent() const
 }
 
 // Make a new source connection.
-PortHole* PNForkNode::setSourcePort(GenericPort &port, int delay, char* values)
+PortHole* PNForkNode::setSourcePort(GenericPort &port,
+				    int delay, const char* values)
 {
     return autoFork.setSource(port, delay, values);
 }
