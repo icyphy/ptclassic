@@ -262,7 +262,7 @@ body ::tycho::Class::constructor {args} {
 
     # Define the attributes of this model. See the class
     # comment for information.
-    defineAttributes \
+    defineModelAttributes \
             -interface "" \
             -name "" \
             -language "" \
