@@ -18,7 +18,7 @@ Add a porthole to the current galaxy, and alias it to a porthole
 belonging to a contained star or galaxy.
 }
 
-add_to_help animation {?on/off?} {
+add_to_help animation {?on|off?} {
 With no aruments, indicate whether animation is turned on or off.  An
 argument of "on" enables animation; an argument of "off" disables it.  If
 animation is enabled, then the names of stars are printed on the standard
@@ -61,9 +61,9 @@ add_to_help delstar {<star>} {
 Delete the named star from the current galaxy.
 }
 
-add_to_help descriptor {?<desc>?} {
-If an argument is given, set the descriptor of the current galaxy to the
-indicated text.  Otherwise return the descriptor.
+add_to_help descriptor {?<block-or-classname>?} {
+If an argument is given, return the descriptor of the named block or
+class.  Otherwise return the descriptor of the current galaxy.
 }
 
 add_to_help disconnect {<starname> <portname>} {
@@ -122,7 +122,7 @@ add_to_help node {<name>} {
 Create a node named <name> for use in netlist-style connections.
 }
 
-add_to_help nodeconnect {<starname> <portname> <node>} {
+add_to_help nodeconnect {<starname> <portname> <node> ?<delay>?} {
 Connect a porthole to a node.  If you connect one input and multiple
 outputs to the same node, a Fork star will automatically be created to
 connect the input to all the outputs.
@@ -186,7 +186,7 @@ Add a star, or galaxy, of the given class to the current galaxy and name
 it <name>.
 }
 
-add_to_help statevalue {<block> <state> ?current/initial?} {
+add_to_help statevalue {<block> <state> ?current|initial?} {
 Return the current or initial value of <state> within <block>.
 Default is current value.
 }
@@ -233,7 +233,7 @@ arguments may be omitted, <dom> is the current domain by default and
 an existing universe, that universe is deleted and recreated empty.
 }
 
-add_to_help deluniverse {<name>} {
+add_to_help deluniverse {?<name>?} {
 Deletes the universe named <name>.  If the argument is omitted, the
 current universe is deleted and the current universe reverts to "main".
 }
@@ -248,7 +248,7 @@ arguments, rename the universe named <oldname> to <newname>.  Any existing
 universe named <newname> is deleted.
 }
 
-add_to_help schedtime {[actual]} {
+add_to_help schedtime {?actual?} {
 Returns the current time from the schedule of the current top-level
 universe.  If the target has a state named "schedulePeriod", the value
 returned by calling "now" on the scheduler is divided by the
@@ -257,7 +257,7 @@ the division is omitted.  This is done to cause the time to match the
 number of iterations specified for the SDF, DDF, and BDF domains.
 }
 
-add_to_help listobjs {[states|ports|multiports] ?<block-or-classname>} {
+add_to_help listobjs {states|ports|multiports ?<block-or-classname>?} {
 Return a list of either the states, ports, or multiports in the named
 block or class.  If the last argument is omitted, the current galaxy is
 used.  The special name "target" may be used to list the states in the
@@ -270,7 +270,7 @@ registerAction.  The argument must be the action_handle previously returned
 by the registerAction command.
 }
 
-add_to_help registerAction {[pre or post] <tcl_command>} {
+add_to_help registerAction {pre|post <tcl_command>} {
 Register a tcl command to be executed before or after the firing of any star.
 The function takes two arguments, the first of which must be "pre" or "post".
 This argument indicates whether the action should occur before or after
