@@ -785,10 +785,9 @@ ensemble ::tycho::url {
     }
     #  Return the protocol component of the name.
     option protocol {name} {
-	if [regexp {^[a-z]+:/+} $name] {
+	if [regexp {^([a-z]+):+} $name _ protocol] {
 	    # Network name
-	    regexp {^[a-z]+:} $name protocol
-	    return $protocol
+	    return [string tolower $protocol]
 	} else {
 	    # Local name
 	    return {}
