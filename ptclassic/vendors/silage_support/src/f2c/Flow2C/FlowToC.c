@@ -40,8 +40,9 @@ st_table *Edgetable[MAXINDEXLEVEL];
 
 static st_table *GraphTable;
 
-FlowToC(l_flag)
+FlowToC(l_flag,pl_flag)
 bool l_flag;
+bool pl_flag;
 {
     printmsg(NULL, "\n\n\t\t\t*** STARTING CODE GENERATION ***\n\n");
     /* input commands first */
@@ -60,7 +61,7 @@ bool l_flag;
     EnforceBoolType(Root);
     printmsg(NULL, "GENERATING INITIALIZATION CODE...\n\n");
 /*    DumpFlowGraph(Root, FALSE);  */
-    GenCode(l_flag); 
+    GenCode(l_flag,pl_flag); 
 }
 
 BuildRootGraph()
@@ -626,19 +627,20 @@ EdgePointer edge;
 	return(edge->Name);
 }
 
-GenCode(l_flag)
+GenCode(l_flag,pl_flag)
 bool l_flag;
+bool pl_flag;
 {
-
     /* Initialize Edgetable */
     indexlevel = 0;
     Edgetable[indexlevel] = st_init_table(strcmp, st_strhash);
 
-    GenHeading();
+    if (pl_flag == true) GenPtHeading();
+    else GenHeading();
     fprintf (CFD, "/* Delay structure definition goes here...*/\n\n");
-    GenDelayStruct(Root);  /*  Process all hierarchy  */
-    GenInputFileDecls();
-    GenDisplayFileDecls(Root);  /*  Process all hierarchy  */
+    GenDelayStruct(Root,pl_flag);  /*  Process all hierarchy  */
+    if(!pl_flag) GenInputFileDecls();
+    if(!pl_flag) GenDisplayFileDecls(Root);  /*  Process all hierarchy  */
     fprintf (CFD, ";\n\n");
     if (GE(Root)->HasDelay) {
 	GenDelayStructName(Root);
@@ -646,19 +648,32 @@ bool l_flag;
     }
     GenConstInputDecls();
     GenFixedLeafDecls();
-    GenFixedLeafInits();
-    GenDelayStructInits(Root);  /*  Process all hierarchy  */
-    GenFuncOpenFile();
-    GenFuncCreateFile ();
-    GenReadInput();
-    GenMain();
-    GenWrapUp();
-    if (l_flag) {
-        printmsg(NULL, "REDUCING LOCAL VARIABLES...\n\n");
-	ReduceLocalVars(Root);
+    GenFixedLeafInits(pl_flag);
+    GenDelayStructInits(Root,pl_flag);  /*  Process all hierarchy  */
+    if(!pl_flag) GenFuncOpenFile();
+    if(!pl_flag) GenFuncCreateFile ();
+    GenReadInput(pl_flag);
+
+    if(pl_flag)
+    {
+    	GenFunctions(pl_flag);  /*  Process all hierarchy  */
+    	/*GenPtMain(); */
+	fprintf(CFD,"} // end code \n");
+	GenPtSetup();
+	GenPtGo();
+	fprintf(CFD,"} // end defstar \n");
     }
-    printmsg(NULL, "GENERATING FUNCTION DEFINITION CODE...\n\n");
-    GenFunctions();  /*  Process all hierarchy  */
+    else
+    {
+    	GenMain();
+    	GenWrapUp();
+    	if (l_flag) {
+        	printmsg(NULL, "REDUCING LOCAL VARIABLES...\n\n");
+		ReduceLocalVars(Root);
+    	}
+    	printmsg(NULL, "GENERATING FUNCTION DEFINITION CODE...\n\n");
+    	GenFunctions(pl_flag);  /*  Process all hierarchy  */
+    }
     st_free_table(Edgetable[indexlevel]);
 }
 
@@ -687,6 +702,90 @@ GenHeading ()
    fprintf (CFD, "#define _Min(a,b)  ((a) < (b) ? (a) : (b))\n");
    fprintf (CFD, "#define _Max(a,b)  ((a) > (b) ? (a) : (b))\n\n");
    fprintf (CFD, "int CycleCount;\n\n");
+}
+
+GenPtHeading ()
+{
+   long ct;
+   time (&ct);
+   fprintf (CFD, "defstar { \n");
+   fprintf (CFD, "\t name { %s } \n", Root->Name);
+   fprintf (CFD, "\t domain { Silage } \n");
+   fprintf (CFD, "\t desc {} \n");
+   fprintf (CFD, "\t author { *** } \n");
+   fprintf (CFD, "\t copyright { \n");
+   fprintf (CFD, "Copyright (c) 1990, 1991, 1992 The Regents of the University of California. \n");
+   fprintf (CFD, "All rights reserved. \n");
+   fprintf (CFD, "See the file ~ptolemy/copyright for copyright notice, \n");
+   fprintf (CFD, "limitation of liability, and disclaimer of warranty provisions. \n \t } \n");
+   GenPtInputHeaders();
+   GenPtOutputHeaders();
+   fprintf (CFD, "\t ccinclude { <stdio.h>, <math.h>, <sys/types.h>, <sys/times.h> } \n");
+   /* #ifdef HIGHLEVEL --- */
+   fprintf (CFD, "\t hinclude { \"highlevel.h\" } \n");
+   fprintf (CFD, "\t code { \n");
+   fprintf (CFD, "#define at(d, i, m)  ((i+d)%%m)\n");
+   fprintf (CFD, "#define _Min(a,b)  ((a) < (b) ? (a) : (b))\n");
+   fprintf (CFD, "#define _Max(a,b)  ((a) > (b) ? (a) : (b))\n");
+   fprintf (CFD, "\n");
+}
+
+GenPtInputHeaders()
+{
+/* need to generate the input name type etc stuff for all inputs */
+   FILE *fp;
+   char name[100];
+   char inputName[100];
+   strcpy(name,Root->Name);
+   strcat(name,".inputs");
+   fp = fopen(name,"r");
+   if(fp == NULL) 
+   {
+   fprintf(stderr,"input information file not found.\n");
+   exit(-1);
+   }
+   while (fscanf(fp,"%s",inputName) == 1)
+   {
+   fprintf (CFD, "\tinput { \n");
+   fprintf (CFD, "\t\tname { ");
+   fprintf (CFD, "%s",inputName);
+   fprintf (CFD, " }\n");
+   fprintf (CFD, "\t\ttype {");
+   fprintf (CFD, " float "); /* NEED TO GET THIS TOO LATER */
+   fprintf (CFD, "}\n");
+   fprintf (CFD, "\t} \n");
+   }
+   fclose(fp);
+}
+
+GenPtOutputHeaders()
+{
+/* need to generate the output name type etc stuff for all outputs */
+   FILE *fq;
+   char name[100];
+   char outputName[100];
+   strcat(outputName,"");
+   strcpy(name,Root->Name);
+   strcat(name,".outputs");
+   fq = fopen(name,"r");
+
+   if(fq == NULL) 
+   {
+   fprintf(stderr,"output information file not found.\n");
+   exit(-1);
+   }
+   while( (fscanf(fq,"%s",outputName) == 1 ) )
+   {
+   fprintf (CFD, "\toutput { \n");
+   fprintf (CFD, "\t\tname { ");
+   fprintf (CFD, "%s",outputName);
+   fprintf (CFD, " }\n");
+   fprintf (CFD, "\t\ttype {");
+   fprintf (CFD, " float "); /* NEED TO GET THIS TOO LATER */
+   fprintf (CFD, "}\n");
+   fprintf (CFD, "\t} \n");
+   }
+   fclose(fq);
 }
 
 GenInputFileDecls()
@@ -793,13 +892,15 @@ GenFixedLeafDecls()
     fprintf(CFD,";\n\n");	
 }
 
-GenFixedLeafInits()
+GenFixedLeafInits(pl_flag)
+bool pl_flag;
 {
     register ListPointer ptr;
     register EdgePointer edge;
     register char *value;
 
     fprintf(CFD,"/* Initialize the FixedPoint globals */\n");
+    if(pl_flag == true) fprintf(CFD,"void \t ");
     fprintf(CFD,"InitFixedLeafs ()\n{\n");
 
     for(ptr = ListOfFixedLeafs; ptr != NULL; ptr = ptr->Next) {
@@ -896,21 +997,23 @@ GenFuncCreateFile ()
     fprintf (CFD, "}\n\n");
 }
 
-GenReadInput()
+GenReadInput(pl_flag)
+bool pl_flag;
 {
     register ListPointer ptr;
 
     fprintf(CFD, "/* Routines to read in inputs */\n");
     for (ptr = ListOfInputs; ptr != NULL; ptr = ptr->Next) {
 	if (IsArray(EP(ptr))) 
-	    GenReadInputControl(EP(ptr));
+	    GenReadInputControl(EP(ptr),pl_flag);
 	else
-	    GenReadInputEdge(EP(ptr));
+	    GenReadInputEdge(EP(ptr),pl_flag);
     }
 }
 
-GenReadInputControl(edge)
+GenReadInputControl(edge,pl_flag)
 EdgePointer edge;
+bool pl_flag;
 {
     int i = 0;
     char label[STRSIZE], value[STRSIZE];
@@ -974,22 +1077,40 @@ EdgePointer edge;
     fprintf(CFD, "    return(0);\n}\n\n");
 
 /* generate the routine called above */
-    GenReadInputEdge(edge);
+    GenReadInputEdge(edge,pl_flag);
 }
 
-GenReadInputEdge(edge)
+GenReadInputEdge(edge,pl_flag)
 EdgePointer edge;
+bool pl_flag;
 {
     char *Infile;
 
+    if(pl_flag) fprintf(CFD,"void \t");
     fprintf(CFD,"Read_");
     GenEdgeName(edge);
-    fprintf(CFD," (pIn)\n");
+    if(pl_flag) fprintf(CFD,"(");
+    else fprintf(CFD," (pIn)\n");
     if (IsFixedType(edge))
-	    fprintf(CFD, "Sig_Type *pIn;\n");
+    {
+	    if(pl_flag) fprintf(CFD, "Sig_Type* pIn,");
+	    else fprintf(CFD, "Sig_Type *pIn;\n");
+    }
     else 
-    	fprintf(CFD, "int *pIn;\n");
+    {
+    	if(pl_flag) fprintf(CFD, "int* pIn, \n");
+    	else fprintf(CFD, "int *pIn;\n");
+    }
+    if(pl_flag) 
+    {
+    fprintf(CFD, "float d");
+    fprintf(CFD,")");
+    }
+
     fprintf(CFD, "{\n");
+
+    if(!pl_flag)
+    {
     fprintf(CFD, "    float d;\n");
     fprintf(CFD, "    if (fscanf (fd_");
     GenEdgeName(edge);
@@ -999,6 +1120,7 @@ EdgePointer edge;
     fprintf(CFD, "file : %s\\n\");\n", Infile);
     fprintf(CFD, "\tWrapUp();\n");
     fprintf(CFD, "    } else\n");
+    }
     if (IsFixedType(edge)) {
 	    fprintf(CFD, "\tFloat2Fix (d, pIn[0]");
 	    GenFixedType(edge);
@@ -1006,7 +1128,7 @@ EdgePointer edge;
     }
     else
 	    fprintf(CFD, "\tpIn[0] = d;\n");
-    fprintf(CFD, "    return(0);\n");
+    if(!pl_flag) fprintf(CFD, "    return(0);\n");
     fprintf(CFD, "}\n\n");
 }
 
@@ -1037,6 +1159,92 @@ GenMain()
     GenMainBody();
     fprintf(CFD, "\n    WrapUp();\n");
     fprintf(CFD, "}\n\n");
+}
+
+GenPtMain()
+{
+    extern int NrOfCycles;
+
+    fprintf(CFD, "void %s (** put i/o here )",Root->Name);
+    fprintf(CFD, " {\n");	
+    GenPtProcessCall();
+    fprintf(CFD, "}\n\n");
+}
+
+GenPtSetup()
+{
+    fprintf(CFD, "\t setup { \n");
+    fprintf(CFD, "\t\tInitFixedLeafs ();");
+	if (GE(Root)->HasDelay == true) 
+        {
+        fprintf(CFD, "\n\t\t/*  Delay Initialization goes here... */\n");
+        fprintf(CFD, "\t\tInit_%s (&SigTab);\n", Root->Name);
+        }
+    fprintf(CFD, "\t } // setup \n\n");
+}
+
+GenPtGo()
+{
+   bool comma = false;
+   FILE *fp;
+   FILE *fq;
+   char fInName[100], fOutName[100], inputName[100], outputName[100];
+   struct listOfIO {
+       	char name[100];
+   };
+   struct listOfIO inputList[10];	/* max num of inputs */ 
+   struct listOfIO outputList[10];	/* max num of outputs */ 
+   int numIn, numOut, numberIn, numberOut, k ;
+
+   fprintf(CFD, "\t go { \n");
+
+   numIn = 0;
+   numOut = 0;
+
+   strcpy(fInName,Root->Name); 
+   strcat(fInName,".inputs");
+   strcpy(fOutName,Root->Name); 
+   strcat(fOutName,".outputs");
+   fp = fopen(fInName,"r");
+   if (fp == NULL) {fprintf(stderr,"error opening input file\n"); exit(-1); }
+   fq = fopen(fOutName,"r");
+   if (fq == NULL) {fprintf(stderr,"error opening output file\n"); exit(-1); }
+
+   while( fscanf(fp,"%s",inputName) == 1)
+   {
+   fprintf(CFD, "\t\tfloat %s_%s = %s%%0; \n", Root->Name,inputName,inputName);
+   strcpy(inputList[numIn].name,inputName);
+   numIn++;
+   }
+   numberIn = numIn; 
+
+   while( fscanf(fq,"%s",outputName) == 1)
+   {
+   fprintf(CFD, "\t\tfloat %s_%s; \n", Root->Name,outputName);
+   strcpy(outputList[numOut].name,outputName);
+   numOut++;
+   }
+   numberOut = numOut; 
+
+   fprintf(CFD, "\t\tSim_%s (", Root->Name);
+	if (GE(Root)->HasDelay) {
+	fprintf(CFD, "&SigTab");
+        }
+   for( k=0; k<numberIn; k++)
+   { fprintf(CFD, ", &%s_%s",Root->Name,inputList[k].name); }
+
+   for( k=0; k<numberOut; k++)
+   { fprintf(CFD, ", &%s_%s",Root->Name,outputList[k].name); }
+
+    fprintf(CFD, ");\n");
+
+   for( k=0; k<numberOut; k++)
+   {
+   fprintf(CFD,"\t\t%s%%0 << %s_%s; \n",outputList[k].name,Root->Name,outputList[k].name);
+   }
+
+    fprintf(CFD, "\t } // go \n");
+    fclose(fp); fclose(fq);
 }
 
 GenWrapUp()
@@ -1166,9 +1374,10 @@ GraphPointer Graph;
     fprintf(CFD,"    dfd_dump = CreateFile(\"%s\");\n", DumpFile);
 }
 
-GenMainBody()
+GenMainBody(pl_flag)
+bool pl_flag;
 {
-    GenConstInputs();
+    GenConstInputs(pl_flag);
     fprintf(CFD, "\n/* Simulation for # cycles = MaxCycles */\n");
     fprintf(CFD, "    for (CycleCount = 1;");
     fprintf(CFD, " CycleCount < MaxCycles+1; CycleCount++) {\n");
@@ -1239,14 +1448,16 @@ ListPointer List;
     return(NULL);
 }
 
-GenConstInputs()
+GenConstInputs(pl_flag)
+bool pl_flag;
 {
     fprintf(CFD, "\n/* Reading Inputs that are constant*/\n");
-    GenConstInputsOfEdge(ListOfInputs);
+    GenConstInputsOfEdge(ListOfInputs,pl_flag);
 }
 
-GenConstInputsOfEdge(List)
+GenConstInputsOfEdge(List,pl_flag)
 ListPointer List;
+bool pl_flag;
 {
     register ListPointer ptr;
     register EdgePointer edge;
@@ -1265,16 +1476,72 @@ ListPointer List;
 	        else
                 fprintf(CFD,"(&");
             GenEdgeName(edge);
+	    if(pl_flag) 
+	    {
+ 		fprintf(CFD,", %s_",Root->Name);
+/* NEED & HERE? */
+                GenEdgeName(edge);
+            } 
             fprintf(CFD, ");\n");
         }
     }
+}
+
+GenPtProcessCall()
+{
+    FILE *fp;
+    FILE *fq;
+    char fInName[100], fOutName[100], inputName[100], outputName[100];
+    struct listOfIO {
+        char name[100];
+   };
+   struct listOfIO inputList[10];       /* max num of inputs */
+   struct listOfIO outputList[10];      /* max num of outputs */
+   int numIn, numOut, numberIn, numberOut, k ;
+
+
+    bool GenAddressOfParams(), comma = false;
+    
+
+   strcpy(fInName,Root->Name);
+   strcat(fInName,".inputs");
+   strcpy(fOutName,Root->Name);
+   strcat(fOutName,".outputs");
+   fp = fopen(fInName,"r");
+   if (fp == NULL) {fprintf(stderr,"error opening input file\n"); exit(-1); }
+   fq = fopen(fOutName,"r");
+   if (fq == NULL) {fprintf(stderr,"error opening output file\n"); exit(-1); }
+
+   while( fscanf(fp,"%s",inputName) == 1) {
+   strcpy(inputList[numIn].name,inputName);
+   numIn++; }
+   numberIn = numIn;
+
+   while( fscanf(fq,"%s",outputName) == 1) {
+   strcpy(outputList[numOut].name,outputName);
+   numOut++; }
+   numberOut = numOut;
+
+    fprintf(CFD, "\t/* Calling main simulation routine */\n");
+    fprintf(CFD, "\tSim_%s (", Root->Name);
+	if (GE(Root)->HasDelay) {
+	fprintf(CFD, "&SigTab");
+        comma = true;
+    }
+   for( k=0; k<numberIn; k++) 
+   fprintf(CFD, ", &recv_%s_%s\n", Root->Name,inputList[k].name);
+   for( k=0; k<numberOut; k++) 
+   fprintf(CFD, ", &send_%s_%s\n", Root->Name,outputList[k].name);
+ 
+    fprintf(CFD, ");\n");
+    fclose(fp); fclose(fq);
 }
 
 GenProcessCall()
 {
     bool GenAddressOfParams(), comma = false;
 
-    fprintf(CFD, "\n/* Calling main simulation routine */\n");
+    fprintf(CFD, "\t/* Calling main simulation routine */\n");
     fprintf(CFD, "\tSim_%s (", Root->Name);
 	if (GE(Root)->HasDelay) {
 	fprintf(CFD, "&SigTab");

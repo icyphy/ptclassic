@@ -34,6 +34,7 @@ int castFlag = TRUE;
 
 static bool a_flag = false;  /*  write out AFL format */
 static bool l_flag = false;  /*  optimize local variable usage */
+static bool pl_flag = false;  /*  for generation of .pl file for Ptolemy*/
 
 /*
  * global functions 
@@ -45,13 +46,14 @@ extern char *getenv();
  * Definitions
  */
 
-#define WRONG_ARG {printmsg(NULL,"usage : Flow2C [-aldmfv] file\n"); \
+#define WRONG_ARG {printmsg(NULL,"usage : Flow2C [-aldmfvp] file\n"); \
            printmsg(NULL," -a : Work in AFL format\n"); \
            printmsg(NULL," -l : Minimize usage of local variables\n"); \
            printmsg(NULL," -d : Dumps library paths\n"); \
            printmsg(NULL," -m : Interactively requests inputs and outputs\n");\
            printmsg(NULL," -f : Include leaf cells when dumping graph\n"); \
            printmsg(NULL," -v : Verbose mode with -A flag\n"); \
+           printmsg(NULL," -p : Generate .pl file for Ptolemy \n"); \
                    exit(1);}  
 
 main(argc, argv)
@@ -85,7 +87,8 @@ char *argv[];
    ParseOctInit();
 
    GraphName = RemoveVersion(FlowGraphName);
-   sprintf (CFile,"%s.c", GraphName);
+   if(pl_flag) sprintf (CFile,"Silage%s.pl", GraphName);
+   else sprintf (CFile,"%s.c", GraphName);
    sprintf (ComFile, "%s.com", GraphName);
    sprintf (Dump, "%s.dmp", FlowGraphName);
    DumpFile = Intern(Dump);
@@ -112,7 +115,7 @@ char *argv[];
 /*
  * Translate to C
  */
-   FlowToC(l_flag);
+   FlowToC(l_flag,pl_flag);
    GenMakefile (GraphName);
 
 /*
@@ -161,6 +164,10 @@ char **argv;
 	       break;
             case 'a' :
 	       a_flag = true;
+	       break;
+            case 'p' :
+	       pl_flag = true;
+	       fprintf(stderr,"setting pl_flag \n");
 	       break;
 	    default:
 	       WRONG_ARG;

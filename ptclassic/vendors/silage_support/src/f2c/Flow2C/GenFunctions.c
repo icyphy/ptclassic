@@ -18,45 +18,89 @@ extern int indexlevel;
 extern st_table *Edgetable[MAXINDEXLEVEL];
 extern ListPointer ListOfParams;
 
-GenFunctions()
+GenFunctions(pl_flag)
+bool pl_flag;
 {
     register GraphPointer Graph;
     bool IsLoop();
 
     for (Graph = Root; Graph != NULL; Graph = Graph->Next) {
         if (!IsLoop(Graph))
-	    GenFunc(Graph);
+	    GenFunc(Graph,pl_flag);
     }
 }
 
-GenFunc(Graph)
+GenFunc(Graph,pl_flag)
 GraphPointer Graph;
+bool pl_flag;
 {
+   FILE *fp;
+   FILE *fq;
+   char fInName[100], fOutName[100], inputName[100], outputName[100];
+   struct listOfIO {
+        char name[100];
+   };
+   struct listOfIO inputList[10];       /* max num of inputs */
+   struct listOfIO outputList[10];      /* max num of outputs */
+   int numIn, numOut, numberIn, numberOut, k ;
     bool GenFormalParams(), GenFormalConParams(), comma = false;
+
+   numIn = 0; numOut = 0;
+
+   strcpy(fInName,Graph->Name); strcat(fInName,".inputs");
+   strcpy(fOutName,Graph->Name); strcat(fOutName,".outputs");
+   fp = fopen(fInName,"r");
+   if (fp == NULL) {fprintf(stderr,"error opening input file\n"); exit(-1); }
+   fq = fopen(fOutName,"r");
+   if (fq == NULL) {fprintf(stderr,"error opening output file\n"); exit(-1); }
+
+   while( fscanf(fp,"%s",inputName) == 1)
+   { strcpy(inputList[numIn].name,inputName); numIn++; }
+   numberIn = numIn;
+
+   while( fscanf(fq,"%s",outputName) == 1)
+   { strcpy(outputList[numOut].name,outputName); numOut++; }
+   numberOut = numOut;
 
     indexlevel++;
     Edgetable[indexlevel] = st_init_table(strcmp, st_strhash);
 
+    if(pl_flag) fprintf(CFD,"void \t");
     fprintf(CFD, "Sim_%s (", Graph->Name);
 	if (GE(Graph)->HasDelay) {
 	    if (comma == true)
 	        fprintf(CFD, ", ");
 	    else
 	        comma = true;
-	    fprintf(CFD, "pST");
+	    if(!pl_flag)    fprintf(CFD, "pST");
     }
     ListOfParams = (ListPointer) NULL;
     comma = GenFormalParams(Graph->InEdges, comma);
     comma = GenFormalConParams(Graph->InControl, comma);
     comma = GenFormalParams(Graph->OutEdges, comma);
     comma = GenFormalConParams(Graph->OutControl, comma);
-    fprintf(CFD, ")\n");
+    if(!pl_flag) 	fprintf(CFD, ")\n");
 
 /* Generate declarations for the formal params, fixedtype and int  */
-	if (GE(Graph)->HasDelay) {
+    if(!pl_flag)
+    {
+	if (GE(Graph)->HasDelay) 
+	{
 	    GenDelayStructName(Graph);
 	    fprintf(CFD, " *pST;\n");
+    	}
     }
+   if(pl_flag)
+   {
+	GenDelayStructName(Graph);
+	fprintf(CFD,"* pST");
+   	for( k=0; k<numberIn; k++)
+   	{ fprintf(CFD, ", float* r_%s_%s",Graph->Name,inputList[k].name); }
+   	for( k=0; k<numberOut; k++)
+   	{ fprintf(CFD, ", float* s_%s_%s",Graph->Name,outputList[k].name); }
+    	fprintf(CFD, ")\n");
+   }
+
     ClearList(ListOfParams);
     ListOfParams = (ListPointer) NULL;
     GenDeclFormalParams(Graph->InEdges);
@@ -85,8 +129,8 @@ GraphPointer Graph;
     GenStatements(Graph);
 
 /* Generate statements to display requested signals */
-    GenDisplays(Graph->EdgeList);
-    GenDisplays(Graph->ControlList);
+    GenDisplays(Graph,Graph->EdgeList,pl_flag);
+    GenDisplays(Graph,Graph->ControlList,pl_flag);
 
 /* Generate statements to update delay signals */
     GenIncrementDelays (GE(Graph)->ListOfDelays);
@@ -453,18 +497,33 @@ GraphPointer Graph;
     fprintf(CFD, ";\n");
 }
 
-GenDisplays(List)
+GenDisplays(Graph,List,pl_flag)
+GraphPointer Graph;
 EdgePointer List;
+bool pl_flag;
 {
     register EdgePointer edge;
 
     for(edge = List; edge != NULL; edge = edge->Next) {
-	if (HasAttribute(edge->Attributes, "IsDisplay")) {
- 	    if (IsArray(edge))
-		 GenDisplayArray(edge);
-	    else
-		 GenDisplaySingle(edge);
-        }
+  	if(!pl_flag)
+	{
+		if (HasAttribute(edge->Attributes, "IsDisplay")) {
+ 	    	if (IsArray(edge))
+			 GenDisplayArray(edge);
+	    	else
+			 GenDisplaySingle(edge);
+        	}
+	}
+	if(pl_flag)
+	{
+		if (HasAttribute(edge->Attributes, "IsDisplay")) {
+			fprintf(CFD,"*s_%s_",Graph->Name);
+    			GenEdgeName(edge);
+			fprintf(CFD," = ");
+    			GenEdgeName(edge);
+			fprintf(CFD,";\n");
+		}
+	}
     }
 }
 
