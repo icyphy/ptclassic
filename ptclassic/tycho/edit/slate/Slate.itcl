@@ -1,5 +1,5 @@
 ##########################################################################
-# A canvas mega-widget for manipulating hierarchical picture objects.
+# A canvas mega-widget for manipulating complex graphical items.
 #
 # @Version: $Id$
 # @Author: H. John Reekie
@@ -82,25 +82,16 @@ proc ::tycho::slate {pathName args} {
 #######################################################################
 #### Slate
 #
-# A canvas mega-widget for manipulating hierarchical picture objects.
-# A "picture," or "pict," is a collection of canvas items, that together
-# form a more complex graphic than a single canvas item. All
-# methods of the Slate can manipulate either canvas items or
-# "pictures" more-or-less transparently.
+# The slate is widget basedon the Tk canbas that support "complex"
+# items, each of which can contain many "simple" canvas items.
+# All methods of the Slate can manipulate either simple or
+# complex items more-or-less transparently.
 #
 # This is a total re-write of the earlier design. In this new design,
-# pictures are not represented by [incr Tcl] objects, but by an
+# complex items are not represented by [incr Tcl] objects, but by an
 # associative array containing just enough information to allow
-# hierarchical picture construction and object-oriented-like
-# picture manipulation.
-#
-# The key here is a hierarchical naming scheme, as used in Tk
-# widgets. If a picture is named say .foo, then it might have
-# a component named say .foo.bar; unlike Tk widgets, .foo.bar
-# does not necessarily denote a unique item, but could denote
-# a number of canvas items. Canvas items and 'pictures' are more
-# integrated in this design: .foo.bar could itself have a
-# component named, say, .foo.bar.fred.
+# hierarchical item construction and object-oriented-like
+# item manipulation.
 #
 # In addition to the Slate class itself, there are a number of
 # other classes that work with the slate to implement its full
@@ -143,20 +134,20 @@ class ::tycho::Slate {
     ###################################################################
     ####                         public methods                    ####
 
-    # Add a tag to picts using a search spec
+    # Add a tag to items using a search spec
     method addtag {add searchSpec args}
 
-    # Get aspects of a picture
+    # Get aspects of an item
     method aspect {id args}
 
-    # Get the bounding box of one or more picts or items
+    # Get the bounding box of one or more items
     method bbox {args}
 
-    # Bind a command to an item, picture, or tag
+    # Bind a command to an item or tag
     method bind {id {sequence {}} args}
 
-    # Call a "method" on a picture
-    method call {picture method args}
+    # Call a "method" on a complex item
+    method call {id method args}
 
     # Convert a screen x coordinate into a canvas x coordinate
     method canvasx {screenx {gridspacing {}}}
@@ -164,13 +155,13 @@ class ::tycho::Slate {
     # Convert a screen y coordinate into a canvas y coordinate
     method canvasy {screeny {gridspacing {}}}
 
-    # Set or get the coordinates of an item or pict
+    # Set or get the coordinates of an item
     method coords {id args}
 
-    # Access a component of a picture
+    # Access a component of an item
     method component {id args}
 
-    # Create a new item or pict
+    # Create a new item
     method create {type args}
 
     # Delete characters
@@ -178,16 +169,16 @@ class ::tycho::Slate {
 	eval $canvas dchars $id $first $last
     }
 
-    # Delete items or picts
+    # Delete items
     method delete {args}
 
-    # Return a representation of a picture
+    # Return a representation of an item
     method describe {id args}
 
     # Delete a tag from items
     method dtag {tag {tagToDelete {}}}
 
-    # Find picts according to a search spec
+    # Find items according to a search spec
     method find {searchSpec args}
 
     # Focus on an item
@@ -198,7 +189,7 @@ class ::tycho::Slate {
     # Focus on the slate
     method focusin {}
 
-    # Get the tags of an item or pict
+    # Get the tags of an item
     method gettags {id}
 
     # Set the insertion cursor
@@ -216,43 +207,43 @@ class ::tycho::Slate {
 	$canvas insert $id $beforeThis $string
     }
 
-    # Interact with pictures
-    method interact {mode pict args}
+    # Interact with complex items
+    method interact {mode item args}
 
-    # Get a configuration option of an item or pict
+    # Get a configuration option of an item
     method itemcget {id option}
 
-    # Configure an item or pict
+    # Configure an item
     method itemconfigure {id args}
 
-    # Lower an item or pict
+    # Lower an item
     method lower {id {belowThis {}}}
 
-    # Move items or picts
+    # Move items
     method move {tag xAmount yAmount}
 
     # Move to an absolute location
     method moveto {tag x y {aspect center}}
 
-    # Manipulate pictures
+    # Manipulate complex items
     method picture {mode args}
 
     # Generate postscript
     method postscript {args}
 
-    # Raise an item or pict
+    # Raise an item
     method raise {id {aboveThis {}}}
 
     # Recreate an item from a description generated by describe{}
     method recreate {description args}
 
-    # Set or get the rectangular "region" of the picture
+    # Set or get the rectangular "region" of the item
     method region {id args}
 
-    # Scale a picture
+    # Scale an item
     method scale {id xOrigin yOrigin xScale yScale}
 
-    # Scanning on a picture
+    # Scanning on an item
     method scan {option args} {
 	eval $canvas scan $option $args
     }
@@ -262,7 +253,7 @@ class ::tycho::Slate {
 	eval $canvas select $option $id $index
     }
 
-    # Return the picture type
+    # Return the item type
     method type {id args}
 
     # Set the horizontal view for scrolling
@@ -282,35 +273,35 @@ class ::tycho::Slate {
     ###################################################################
     ####                     private methods                       ####
     
-    # Give a picture a new parent
+    # Give an item a new parent
     private method adopt {parent id}
 
-    # Test id a picture is an ancestor of another
+    # Test id an item is an ancestor of another
     private method ancestor {ancestor descendent}
 
-    # Return the children of an item or picture
+    # Return the children of an item or complex item
     private method children {id}
 
-    # Return the ancestors of an item or picture
+    # Return the ancestors of an item or complex item
     private method ancestors {id}
 
-    # Return the items only under this item or picture
+    # Return the items only under this item or complex item
     private method items {id}
 
-    # Make a picture have no parent
+    # Make an item have no parent
     private method orphan {id}
 
     # Return the "owner" of an item -- the parent if there is one,
     # else the item.
     private method owner {id}
 
-    # Return the parent of an item or picture
+    # Return the parent of an item or complex item
     private method parent {id}
 
-    # Return the root of an item or picture
+    # Return the root of an item or complex item
     private method root {id}
 
-    # Add a tag to items and pictures
+    # Add a tag to items and complex items
     private method tagadd {tag args}
 
 
@@ -322,13 +313,13 @@ class ::tycho::Slate {
     # all slates!
     private common secretcounter 0
 
-    # Every picture remembers its parent
+    # Every complex item remembers its parent
     private variable parent
 
-    # Each pict has a "type"
-    private variable picttype
+    # Each item has a "type"
+    private variable itemtype
 
-    # Each tag belongs to one or more picts
+    # Each tag belongs to one or more items
     private variable tagged
 
     # Storage for temporary variables
@@ -373,9 +364,8 @@ body ::tycho::Slate::constructor {args} {
 #######################################################################
 #### addtag
 #
-# Add a tag to specified pictures. Uses find{} to get all relevent
-# pictures and items, and then tags them; optimized for some
-# special cases.
+# Add a tag to specified items. Uses find{} to get all relevent
+# items, and then tags them; optimized for some special cases.
 #
 body ::tycho::Slate::addtag {add mode args} {
     switch -exact $mode {
@@ -390,7 +380,7 @@ body ::tycho::Slate::addtag {add mode args} {
 		$canvas addtag $add withtag $tag
 
 	    } elseif { [string match {_*} $tag] } {
-		# Hey, this is just a picture ID
+		# Hey, this is just a complex item ID
 		$canvas addtag $add withtag $tag
 
 		if { ! [::info exists tagged($add)] } {
@@ -419,28 +409,28 @@ body ::tycho::Slate::addtag {add mode args} {
 #######################################################################
 #### aspect
 #
-# Return the value of one or more "aspects" of a picture. An aspect
-# is a point on the picture, such as its center or north-east corner.
+# Return the value of one or more "aspects" of an item. An aspect
+# is a point on the complex item, such as its center or north-east corner.
 # The returned value is a list of coordinates, two (x and y) for each
 # given aspect.
 #
 # The aspects supported depends on the type (or more specifically,
-# the shape type -- see the type{} method) of the picture. Some
+# the shape type -- see the type{} method) of the complex item. Some
 # item types will support a more complex set of aspects. If the
-# picture is rectangular, is supports at least the aspects _c_ or
+# complex item is rectangular, is supports at least the aspects _c_ or
 # _center_, and the eight compass
 # points: _n_, _s_, _e_, _w_, _ne_, _nw_, _se_, and _sw_. If the
 # *-region* option is given, these aspects will be assumed regardless
-# of the picture's actual shape, and will denote the corners
-# of the picture's _region_ (see the region{} method).
+# of the complex item's actual shape, and will denote the corners
+# of the complex item's _region_ (see the region{} method).
 #
 # If there are no arguments, return the list of valid aspects for
-# this picture.
+# this complex item.
 #
 body ::tycho::Slate::aspect {id args} {
     getflag region args
 
-    # If the -region flag is given, treat the picture as a rectangle
+    # If the -region flag is given, treat the complex item as a rectangle
     if { $region } {
 	if { $args == "" } {
 	    return {c n s e w ne nw se sw}
@@ -449,13 +439,13 @@ body ::tycho::Slate::aspect {id args} {
 	}
     }
 
-    # If this is a picture id, and there's a method defined for it,
+    # If this is a complex item, and there's a method defined for it,
     # call the method
     if { [string match {_*} $id] } {
-	if { [@scope ::tycho::$picttype($id) [list \
+	if { [@scope ::tycho::$itemtype($id) [list \
 		::info exists methodtable(aspect)]] } {
-	    return [@scope ::tycho::$picttype($id) [list \
-		    eval \[set methodtable(aspect)\] $id $canvas $args]]
+	    return [@scope ::tycho::$itemtype($id) [list \
+		    eval \[set methodtable(aspect)\] $id $canvas $this $args]]
 	}
     }
 
@@ -464,7 +454,7 @@ body ::tycho::Slate::aspect {id args} {
     if { [string match {[0-9]*} $id] } {
 	set shape [$canvas type $id]
     } else {
-	set shape [@scope ::tycho::$picttype($id) [list set shape]]
+	set shape [@scope ::tycho::$itemtype($id) [list set shape]]
     }
     switch -exact $shape {
 	"oval" -
@@ -509,11 +499,10 @@ body ::tycho::Slate::aspect {id args} {
 #######################################################################
 #### bbox
 #
-# Return the bounding box of any number of items or picts, as a four-list.
-# Each argument can be an item, a pict, or a tag. If there are no pictures
-# matching the tags, return the null string -- the caller must check for
-# this condition. (This behavior matches
-# that of the canvas).
+# Return the bounding box of any number of items, as a four-list. Each
+# argument can be an item, a item, or a tag. If there are no complex
+# items matching the tags, return the null string -- the caller must
+# check for this condition. (This behavior matches that of the canvas).
 #
 body ::tycho::Slate::bbox {args} {
     eval $canvas bbox $args
@@ -522,7 +511,7 @@ body ::tycho::Slate::bbox {args} {
 #######################################################################
 #### bind
 #
-# Bind a command to an item, picture, or tag. The command accepts the 
+# Bind a command to an item, complex item, or tag. The command accepts the 
 # following argument formats:
 #
 # <ul>
@@ -533,9 +522,9 @@ body ::tycho::Slate::bbox {args} {
 # </ul>
 #
 # <b>Caveat</b>: The bind{} command dpes not work properly on
-# hierarchical pictures yet. There are
+# hierarchical complex items yet. There are
 # some interactions with canvas bindings, multiple bindings on the
-# same tag/object, and hierarchical pictures that need to be
+# same tag/object, and hierarchical complex items that need to be
 # explored and clarified.
 #
 body ::tycho::Slate::bind {tag {sequence {}} args} {
@@ -550,7 +539,7 @@ body ::tycho::Slate::bind {tag {sequence {}} args} {
 
 #######################################################################
 #### call
-# Call a "method" on a picture. This just looks up the method in
+# Call a "method" on an item. This just looks up the method in
 # the global "virtual function table" and calls it.
 #
 # In the Slate code itself, this method is called in non-critical
@@ -558,8 +547,8 @@ body ::tycho::Slate::bind {tag {sequence {}} args} {
 # code here is "in-lined."
 #
 body ::tycho::Slate::call {id method args} {
-    @scope ::tycho::$picttype($id) [list \
-	    eval \[set methodtable($method)\] $id $canvas $args]
+    @scope ::tycho::$itemtype($id) [list \
+	    eval \[set methodtable($method)\] $id $canvas $this $args]
 }
 
 #######################################################################
@@ -579,12 +568,12 @@ body ::tycho::Slate::canvasy {screeny {gridspacing {}}} {
 #######################################################################
 #### component
 #
-# Access a component of a picture. Pictures only support components
+# Access a component of an item. Pictures only support components
 # if they have been explicitly declared as such in the "components"
-# variable in the picture class.
+# variable in the complex item class.
 #
 # With one argument, return the names of the components of this
-# picture. With two arguments, return the specified component. With
+# complex item. With two arguments, return the specified component. With
 # more than two arguments, call the specified method on the
 # component and return its result.
 #
@@ -601,30 +590,30 @@ body ::tycho::Slate::component {id {component {}} {method {}} args} {
 	return $canvas
     }
 
-    # If there's a component method on the picture, just call that
-    if { [@scope ::tycho::$picttype($id) \
+    # If there's a component method on the complex item, just call that
+    if { [@scope ::tycho::$itemtype($id) \
 	    [list ::info exists methodtable(component)]] } {
-	set component [@scope ::tycho::$picttype($id) \
+	set component [@scope ::tycho::$itemtype($id) \
 		[list eval \[set methodtable(component)\] \
-		$id $canvas $component]]
+		$id $canvas $this $component]]
     } else {
 	# Check for no component arg
 	if { $component == "" } {
-	    return [@scope ::tycho::$picttype($id) [list set components]]
+	    return [@scope ::tycho::$itemtype($id) [list set components]]
 	}
 
 	# Check for a valid component
-	if { ! [@scope ::tycho::$picttype($id) \
+	if { ! [@scope ::tycho::$itemtype($id) \
 		[list ::info exists components]] \
-		|| ! [lmember [@scope ::tycho::$picttype($id) \
+		|| ! [lmember [@scope ::tycho::$itemtype($id) \
 		[list set components]] $component] } {
 	    error "unknown component $component"
 	}
 
 	# Finally, read its value
-	if { [@scope $picttype($id) \
+	if { [@scope $itemtype($id) \
 		[list ::info exists [set component]($id)]] } {
-	    set component [@scope $picttype($id) \
+	    set component [@scope $itemtype($id) \
 		    [list [set [set component]($id)]]]
 	} else {
 	    set component {}
@@ -643,7 +632,7 @@ body ::tycho::Slate::component {id {component {}} {method {}} args} {
 #######################################################################
 #### coords
 #
-# Get or set the coordinates of an item or pict. If the argument
+# Get or set the coordinates of an item. If the argument
 # is a tag, perform this operation on the first item on the
 # slate returned by `find withtag'.
 #
@@ -652,21 +641,21 @@ body ::tycho::Slate::coords {id args} {
     if { [string match {[0-9]*} $id] } {
 	eval $canvas coords $id $args
     } elseif { [string match {_*} $id] } {
-	# Call the picture's coords method
-	@scope ::tycho::$picttype($id) [list \
-		eval \[set methodtable(coords)\] $id $canvas $args]
+	# Call the complex item's coords method
+	@scope ::tycho::$itemtype($id) [list \
+		eval \[set methodtable(coords)\] $id $canvas $this $args]
     } else {
 	# It's a tag, so get the first matching item and process that
-	set picts [$this find withtag $id]
-	if { $picts == "" } {
+	set items [$this find withtag $id]
+	if { $items == "" } {
 	    return ""
 	}
-	set id [lindex $picts 0]
+	set id [lindex $items 0]
 	if { [string match {[0-9]*} $id] } {
 	    eval $canvas coords $id $args
 	} elseif { [string match {_*} $id] } {
-	    @scope ::tycho::$picttype($id) [list \
-		    eval \[set methodtable(coords)\] $id $canvas $args]
+	    @scope ::tycho::$itemtype($id) [list \
+		    eval \[set methodtable(coords)\] $id $canvas $this $args]
 	}
     }
 }
@@ -674,15 +663,15 @@ body ::tycho::Slate::coords {id args} {
 #######################################################################
 #### create
 #
-# Create a canvas item or a picture. If the _type_ arg starts
+# Create an item. If the _type_ arg starts
 # with a lower-case letter, create an item; if not, create a
-# picture. In either case, _args_ is the coordinates
-# and options used to create the picture. See the canvas documentation
+# complex item. In either case, _args_ is the coordinates
+# and options used to create the complex item. See the canvas documentation
 # for primitive canvas items; see the
-# <a> href="../../../pictures/doc/codeDoc/index.html"><b>pictures</b></a>
-# hierarchy for pictures implemented by the slate.
+# <a> href="../../../complex items/doc/codeDoc/index.html"><b>complex items</b></a>
+# hierarchy for complex items implemented by the slate.
 #
-# FIXME: Explain how to create hierarchical pictures.
+# FIXME: Explain how to create hierarchical complex items.
 #
 body ::tycho::Slate::create {type args} {
     if { [string match {[a-z]*} $type] } {
@@ -690,16 +679,16 @@ body ::tycho::Slate::create {type args} {
 	eval $canvas create $type $args
 
     } else {
-	# Create a picture. Tags determine nesting.
+	# Create a complex item. Tags determine nesting.
 
 	# Get the unique id
 	set id _$secretcounter
 	incr secretcounter
 
-	# Remember the picture-type mapping
-	set picttype($id) $type
+	# Remember the complex item-type mapping
+	set itemtype($id) $type
 
-	# Add the picture id tag to the tags. If there's a parent
+	# Add the complex item id tag to the tags. If there's a parent
 	# then remember it.
 	set indx [lsearch -exact $args -tags]
 	if { $indx != -1 } {
@@ -727,10 +716,10 @@ body ::tycho::Slate::create {type args} {
 	    set tags [list !$id $id]
 	}
 
-	# Create the picture by calling the construct{} proc. This
-	# is OK, since every picture must have a constructor, and also
+	# Create the complex item by calling the construct{} proc. This
+	# is OK, since every complex item must have a constructor, and also
 	# guarantees that auto-loading will work.
-	eval ::tycho::$type::construct $id [list $tags] $canvas $args
+	eval ::tycho::$type::construct $id $canvas $this [list $tags] $args
 
 	# Make sure the name is returned
 	return $id
@@ -747,9 +736,9 @@ body ::tycho::Slate::delete {args} {
 	    # Delete a canvas item
 	    $canvas delete $id
 	} elseif { [string match {_*} $id] } {
-	    # Delete a picture. First remember its tags.
+	    # Delete a complex item. First remember its tags.
 	    set tags [$canvas gettags \
-		    [@scope ::tycho::$picttype($id) \
+		    [@scope ::tycho::$itemtype($id) \
 		    [list set primary($id)]]]
 
 	    # Filter out hierarchy tags. Boy, this is kludgy...
@@ -762,14 +751,14 @@ body ::tycho::Slate::delete {args} {
 	    }
 	    
 	    # First call its destruct method
-	    @scope ::tycho::$picttype($id) [list \
-		    eval \[set methodtable(destruct)\] $id $canvas]
+	    @scope ::tycho::$itemtype($id) [list \
+		    eval \[set methodtable(destruct)\] $id $canvas $this]
 
 	    # Then remove all items
 	    $canvas delete $id
 
 	    # Then forget it
-	    unset picttype($id)
+	    unset itemtype($id)
 	    unset parent($id)
 	    foreach t $tags {
 		set tagged($t) [ldelete $tagged($t) $id]
@@ -790,12 +779,12 @@ body ::tycho::Slate::delete {args} {
 # about the contents of the string returned by this method.</i>
 #
 # Note: If saving the description for later recreation, you may also need
-# to save other information about the picture, such as its type
+# to save other information about the complex item, such as its type
 # or whether it has certain tags that affect how you will recreate it.
 #
 # describe{} accepts the following optional arguments:
 # <ul>
-# <li>*-hierarchical*: Return a description of all child pictures as well.
+# <li>*-hierarchical*: Return a description of all child complex items as well.
 # <li>*-constraints*: Include all constraints in the description.
 # </ul>
 #
@@ -846,7 +835,7 @@ body ::tycho::Slate::dtag {tag {delete {}}} {
 	# A canvas item.
 	eval $canvas dtag $tag $delete
     } elseif { [string match {_*} $tag] } {
-	# A picture. Make sure _delete exists.
+	# A complex item. Make sure _delete exists.
 	if { $delete != "" } {
 	    set tagged($delete) [ldelete $tagged($delete) $tag]
 	    $canvas dtag $tag $delete
@@ -866,39 +855,39 @@ body ::tycho::Slate::dtag {tag {delete {}}} {
 #######################################################################
 #### find
 #
-# Find a pict or picts, as given by _searchSpec_. The argument
+# Find a items, as given by _searchSpec_. The argument
 # formats are the same as for the Tk canvas; however, because of
 # hierarchy, the behavior for the different search modes differ
 # from each other. As a general rule, the slate does not
 # attempt to deal with hierarchy, but blindly returns a set of
-# pictures and items -- the caller must eliminate unwanted parents
-# or children explicitly (see the <i>picture</i> method).
+# complex items and items -- the caller must eliminate unwanted parents
+# or children explicitly (see the <i>complex item</i> method).
 # The following argument formats are supported:
 #
 # <ul>
-# <li><b>above</b> _id_: Return the picture or item immediately above
+# <li><b>above</b> _id_: Return the complex item immediately above
 # _id_. Currently, this will not work if _id_ is a tag.
 #
-# <li><b>all</b>: Return every _root_ picture, and every
-# item that is not a component of a picture.
+# <li><b>all</b>: Return every _root_ complex item, and every
+# item that is not a component of a complex item.
 #
-# <li><b>below</b> _id_: Return the picture or item immediately below
+# <li><b>below</b> _id_: Return the complex item immediately below
 # _id_. Currently, this will not work if _id_ is a tag.
 #
-# <li><b>closest</b> _x y ?halo? ?start?_: Return the picture or item
+# <li><b>closest</b> _x y ?halo? ?start?_: Return the complex item
 # closest to the point _(x,y)_. Currently, this mode is not
 # working correctly.
 #
-# <li><b>enclosed</b> _x0 x1 y0 y1_: Return every picture and
+# <li><b>enclosed</b> _x0 x1 y0 y1_: Return every complex item and
 # unparented item enclosed by the given region.
 #
-# <li><b>overlapping</b> _x0 x1 y0 y1_: Return every picture and
+# <li><b>overlapping</b> _x0 x1 y0 y1_: Return every complex item and
 # unparented item that overlaps the given region.
 #
-# <li><b>withtag</b> _tag_: Return every picture and every item
+# <li><b>withtag</b> _tag_: Return every complex item and every item
 # with the given tag. (In the case of items, this means items that
 # were explicitly tagged, rather than implicitly as a result of being
-# a component of a picture with that tag.)
+# a component of a complex item with that tag.)
 #
 # The _tag_ can also be
 # ``current,''  in which case either a) the current item is
@@ -910,7 +899,7 @@ body ::tycho::Slate::dtag {tag {delete {}}} {
 body ::tycho::Slate::find {mode args} {
     switch -exact $mode {
 	"above" {
-	    # Get the passed item/id as a picture if possible
+	    # Get the passed item/id as a complex item if possible
 	    set id [$this owner [lindex $args 0]]
 	    
 	    # Get the item above it and return its owner
@@ -922,27 +911,27 @@ body ::tycho::Slate::find {mode args} {
 	    }
 	}
 	"all" {
-	    # Find top-level picts
-	    set picts {}
+	    # Find top-level complex items
+	    set complexitems {}
 	    foreach p [array names parent] {
 		if { $parent($p) == "" } {
-		    lappend picts $p
+		    lappend complexitems $p
 		}
 	    }
 
-	    # Tag top-level items
+	    # Tag top-level complex items
 	    $canvas addtag temp all
-	    foreach id $picts {
+	    foreach id $complexitems {
 		$canvas dtag $id temp
 	    }
-	    set items [$canvas find withtag temp]
+	    set canvasitems [$canvas find withtag temp]
 	    $canvas dtag temp
 
-	    # Return picts and items
-	    return [concat $picts $items]
+	    # Return canvas items and complex items
+	    return [concat $canvasitems $complexitems]
 	}
 	"below" {
-	    # Get the passed item/id as a picture if possible
+	    # Get the passed item/id as a complex item if possible
 	    set id [$this owner [lindex $args 0]]
 	    
 	    # Get the item below it and return its owner
@@ -962,54 +951,55 @@ body ::tycho::Slate::find {mode args} {
 	    return [$this owner $item]
 	}
 	"enclosed" {
-	    # Find enclosed items
-	    set items [eval $canvas find enclosed $args]
+	    # Find enclosed canvas items
+	    set canvasitems [eval $canvas find enclosed $args]
 
 	    # For each, find out whether the owner is also fully
 	    # enclosed by looking at its region. If it is, include
 	    # it in the result list, and process its parent.
 	    set result {}
-	    while { $items != "" } {
-		set item [lindex $items 0]
-		set pict [$this owner $item]
-		if { [string match {[0-9]*} $pict] } {
-		    # It's a top-level item, so include it
-		    lappend result $item
-		    set items [lreplace $items 0 0]
+	    while { $canvasitems != "" } {
+		set canvasitem [lindex $canvasitems 0]
+		set complexitem [$this owner $canvasitem]
+		if { [string match {[0-9]*} $complexitem] } {
+		    # It's a top-level canvas item, so include it
+		    lappend result $canvasitem
+		    set canvasitems [lreplace $canvasitems 0 0]
 		} else {
-		    if { [rectInside [$this region $pict] $args] } {
-			set result [lsetadd $result $pict]
-			while { $parent($pict) != "" } {
-			    set pict $parent($pict)
-			    if { [rectInside [$this region $pict] $args] } {
-				set result [lsetadd $result $pict]
+		    if { [rectInside [$this region $complexitem] $args] } {
+			set result [lsetadd $result $complexitem]
+			while { $parent($complexitem) != "" } {
+			    set complexitem $parent($complexitem)
+			    if { [rectInside [$this region $complexitem] $args] } {
+				set result [lsetadd $result $complexitem]
 			    } else {
 				break
 			    }
 			}
 		    }
-		    set items [lsubtract $items [$canvas find withtag $pict]]
+		    set canvasitems [lsubtract $canvasitems \
+                            [$canvas find withtag $complexitem]]
 		}
 	    }
 	    return $result
 	}
 	"overlapping" {
-	    # Find overlapping items
-	    set items [eval $canvas find overlapping $args]
+	    # Find overlapping canvas items
+	    set canvasitems [eval $canvas find overlapping $args]
 
 	    # Find the set of owners
-	    set picts {}
-	    foreach i $items {
-		set picts [lsetadd $picts [$this owner $i]]
+	    set complexitems {}
+	    foreach i $canvasitems {
+		set complexitems [lsetadd $complexitems [$this owner $i]]
 	    }
 
 	    # For each owner, include all ancestors
-	    foreach p $picts {
+	    foreach p $complexitems {
 		if { [string match {_*} $p] } {
-		    set picts [lunion $picts [$this ancestors $p]]
+		    set complexitems [lunion $complexitems [$this ancestors $p]]
 		}
 	    }
-	    return $picts
+	    return $complexitems
 	}
 	"withtag" {
 	    set tag [lindex $args 0]
@@ -1031,25 +1021,25 @@ body ::tycho::Slate::find {mode args} {
 		}
 	    } elseif { [string match {[0-9]*} $tag] \
 		    || [string match {_*} $tag] } {
-		# Hey, this is really just a picture or item ID
+		# Hey, this is really just an item ID
 		return $tag
 
 	    } else {
 		# Get unparented items with this tag
 		$canvas addtag temp withtag $tag
 		if { [::info exists tagged($tag)] } {
-		    set picts $tagged($tag)
+		    set complexitems $tagged($tag)
 		} else {
-		    set picts {}
+		    set complexitems {}
 		}
-		foreach id $picts {
+		foreach id $complexitems {
 		    $canvas dtag $id temp
 		}
-		set items [$canvas find withtag temp]
+		set canvasitems [$canvas find withtag temp]
 		$canvas dtag temp
 
-		# Return picts and items
-		return [concat $picts $items]
+		# Return canvas items and complex items
+		return [concat $canvasitems $complexitems]
 	    }
 	}
     }
@@ -1077,7 +1067,7 @@ body ::tycho::Slate::focusin {} {
 #######################################################################
 #### gettags
 #
-# Returns the tags of an item or pict. The slate does not
+# Returns the tags of an item. The slate does not
 # attempt to hide its internal tags, so they are all returned by
 # this method in addition to any "user-specified" tags. If the argument
 # is a tag, perform this operation on the first item on the
@@ -1086,13 +1076,13 @@ body ::tycho::Slate::focusin {} {
 body ::tycho::Slate::gettags {id} {
     # If a tag, get the first matching item
     if { ! [string match {[_0-9]*} $id] } {
-	set picts [$this find withtag $id]
-	if { $picts == "" } {
+	set items [$this find withtag $id]
+	if { $items == "" } {
 	    return ""
 	}
-	set id [lindex $picts 0]
+	set id [lindex $items 0]
     }
-    # If a picture, get the primary
+    # If a complex item, get the primary
     if { [string match {_*} $id] } {
 	set id [@scope ::tycho::Picture [list set primary($id)]]
     }
@@ -1133,7 +1123,7 @@ body ::tycho::Slate::interact {mode id args} {
 	    set x [lindex $args 0]
 	    set y [lindex $args 1]
 
-	    # If there's a ghost, move it. else move the picture.
+	    # If there's a ghost, move it. else move the complex item.
 	    if { [::info exists scratch($id.ghost)] } {
 		set movethis $scratch($id.ghost)
 	    } else {
@@ -1150,7 +1140,7 @@ body ::tycho::Slate::interact {mode id args} {
 	    set scratch($id.prevY) $y
 	}
 	"release" {
-	    # If there's a ghost, move the picture to its position and then
+	    # If there's a ghost, move the complex item to its position and then
 	    # delete it
 	    if { [::info exists scratch($id.ghost)] } {
 		assign x y $scratch($id.start)
@@ -1183,28 +1173,28 @@ body ::tycho::Slate::itemcget {id option} {
 	return [$canvas itemcget $id $option]
 
     } elseif { ! [string match {_*} $id] } {
-	# It's a tag, so get the first matching picture
-	set picts [$this find withtag $id]
-	if { $picts == "" } {
+	# It's a tag, so get the first matching complex item
+	set items [$this find withtag $id]
+	if { $items == "" } {
 	    return ""
 	}
-	set id [lindex $picts 0]
+	set id [lindex $items 0]
 	if { [string match {[0-9]*} $id] } {
 	    # In the end, it's a canvas item
 	    return [$canvas itemcget $id $option]
 	}
     }
 
-    # If we get to here, id must be a picture item
+    # If we get to here, id must be a complex item item
     if { ! [string compare $option -tags] } {
-	# Return the tags of this picture using the primary
+	# Return the tags of this complex item using the primary
 	return [$canvas gettags \
-		[@scope ::tycho::$picttype($id) [list set primary($id)]]]
+		[@scope ::tycho::$itemtype($id) [list set primary($id)]]]
 
-    } elseif { [@scope ::tycho::$picttype($id) \
+    } elseif { [@scope ::tycho::$itemtype($id) \
 	    [list ::info exists optiondefault($option)]] } {
 	# Read the value directly from the class
-	return [@scope ::tycho::$picttype($id) \
+	return [@scope ::tycho::$itemtype($id) \
 		[list set [string trimleft $option -]($id)]]
     } else {
 	error "unknown option $option"
@@ -1228,31 +1218,31 @@ body ::tycho::Slate::itemconfigure {id args} {
     if { [string match {[0-9]*} $id] } {
 	return [eval $canvas itemconfigure $id $args]
     } elseif { ! [string match {_*} $id] } {
-	# It's a tag, so get the first matching picture
-	set picts [$this find withtag $id]
-	if { $picts == "" } {
+	# It's a tag, so get the first matching complex item
+	set items [$this find withtag $id]
+	if { $items == "" } {
 	    return ""
 	}
-	set id [lindex $picts 0]
+	set id [lindex $items 0]
 	if { [string match {[0-9]*} $id] } {
 	    # In the end, it's a canvas item
 	    return [eval $canvas itemconfigure $id $args]
 	}
     }
     
-    # If we get to here, the id represents a picture item
+    # If we get to here, the id represents a complex item
     if { [llength $args] == 0 } {
 	# We've been asked for all configuration values. Use
 	# the defaultoptions array to get the names of all options,
 	# and read their values.
  	set result {}
-	foreach option [@scope ::tycho::$picttype($id) \
+	foreach option [@scope ::tycho::$itemtype($id) \
 		{array names optiondefault}] {
 	    # Read its value
-	    set value [@scope ::tycho::$picttype($id) \
+	    set value [@scope ::tycho::$itemtype($id) \
 		    [list set [string trimleft $option -]($id)]]
 	    # Read default value
-	    set default [@scope ::tycho::$picttype($id) \
+	    set default [@scope ::tycho::$itemtype($id) \
 		    [list set optiondefault($option)]]
 	    # Add to result
 	    lappend result [list $option {} {} $default $value]
@@ -1260,19 +1250,19 @@ body ::tycho::Slate::itemconfigure {id args} {
 	# Add the tags
 	lappend result [list -tags {} {} {} \
 		[$canvas gettags \
-		[@scope ::tycho::$picttype($id) [list set primary($id)]]]]
+		[@scope ::tycho::$itemtype($id) [list set primary($id)]]]]
 
 	return $result
 
     } elseif { [llength $args] == 1 } {
 	set option [lindex $args 0]
-	if { [@scope ::tycho::$picttype($id) \
+	if { [@scope ::tycho::$itemtype($id) \
 		[list ::info exists optiondefault($option)]] } {
 	    # Read its value
-	    set value [@scope ::tycho::$picttype($id) \
+	    set value [@scope ::tycho::$itemtype($id) \
 		    [list set [string trimleft $option -]($id)]]
 	    # Read default value
-	    set default [@scope ::tycho::$picttype($id) \
+	    set default [@scope ::tycho::$itemtype($id) \
 		    [list set optiondefault($option)]]
 	    
 	    return [list $option {} {} $default $value]
@@ -1283,9 +1273,9 @@ body ::tycho::Slate::itemconfigure {id args} {
     } else {
 	foreach {option value} $args {
 	    if { ! [string compare $option -tags] } {
-		# Set the tags of the picture. Figure out the differences.
+		# Set the tags of the complex item. Figure out the differences.
 		set tags [$canvas gettags \
-			[@scope ::tycho::$picttype($id) \
+			[@scope ::tycho::$itemtype($id) \
 			[list set primary($id)]]]
 
 		# Filter out hierarchy tags. Boy, this is kludgy...
@@ -1311,7 +1301,7 @@ body ::tycho::Slate::itemconfigure {id args} {
 		}
 	    } else {
 		# Call the proc on the class to set the option
-		if { [@scope ::tycho::$picttype($id) \
+		if { [@scope ::tycho::$itemtype($id) \
 			[list ::info exists optiondefault($option)]] } {
 		    $this call $id [string trimleft $option -] $value
 		} else {
@@ -1325,7 +1315,7 @@ body ::tycho::Slate::itemconfigure {id args} {
 #######################################################################
 #### lower
 #
-# Lower the specified pictures or items to the bottom of the display
+# Lower the specified complex items to the bottom of the display
 # list. If _belowThis_ is specified, then lower below that item,
 # or if _belowThis_ is a tag, then lower below the first item
 # with that tag.
@@ -1334,7 +1324,7 @@ body ::tycho::Slate::itemconfigure {id args} {
 #
 body ::tycho::Slate::lower {id {belowThis {}}} {
     # We have to intercept the "current" tag since it applies
-    # only to an item, not a picture
+    # only to a canvas item, not a complex item
     if { $id == "current" } {
 	set id [$this find withtag current]
     }
@@ -1342,15 +1332,15 @@ body ::tycho::Slate::lower {id {belowThis {}}} {
     if { $belowThis == "" } {
 	$canvas lower $id
     } elseif { [string match {[_0-9]*} $belowThis] } {
-	# Got an item or pict, so use it
+	# Got an item, so use it
 	$canvas lower $id $belowThis
     } else {
 	# Got a id, so use the first matching item
-	set picts [$this find withtag $belowThis]
-	if { $picts == "" } {
+	set items [$this find withtag $belowThis]
+	if { $items == "" } {
 	    $canvas lower $id
 	} else {
-	    $canvas lower $id [lindex $picts 0]
+	    $canvas lower $id [lindex $items 0]
 	}
     }
 }
@@ -1358,7 +1348,7 @@ body ::tycho::Slate::lower {id {belowThis {}}} {
 #######################################################################
 #### move
 #
-# Move one or more picts the specified amount. The first argument
+# Move one or more items the specified amount. The first argument
 # can either be a tag or an id.
 #
 body ::tycho::Slate::move {tag xAmount yAmount} {
@@ -1368,14 +1358,14 @@ body ::tycho::Slate::move {tag xAmount yAmount} {
 #######################################################################
 #### moveto
 #
-# Move one or more pictures to an absolute location. The point
-# of the picture that is moved to the specified location is
+# Move one or more complex items to an absolute location. The point
+# of the complex item that is moved to the specified location is
 # specified by the fourth argument, the aspect. If omitted, this
 # argument defaults to center.
 #
-# If a tag is specified and the tag denotes more than one picture,
-# then the pictures are moved so that the indicated point on the
-# region covered by those pictures is at the specified location.
+# If a tag is specified and the tag denotes more than one complex item,
+# then the complex items are moved so that the indicated point on the
+# region covered by those complex items is at the specified location.
 #
 body ::tycho::Slate::moveto {tag x y {aspect center}} {
     # Get the current location of the aspect
@@ -1403,8 +1393,8 @@ body ::tycho::Slate::moveto {tag x y {aspect center}} {
 
 #######################################################################
 #### picture
-# Manipulate pictures. This is a "safe" interface to some of the
-# picture manipulation methods used within the slate.
+# Manipulate complex items. This is a "safe" interface to some of the
+# complex item manipulation methods used within the slate.
 #
 # <b>Note</b>: The functionality of the method is still evolving,
 # and much of it may end up in other methods, such as component{}.
@@ -1451,7 +1441,7 @@ body ::tycho::Slate::postscript {args} {
 #######################################################################
 #### raise
 #
-# Raise the specified pictures or items to the top of the display
+# Raise the specified complex items to the top of the display
 # list. If _aboveThis_ is specified, then raise above that item,
 # or if _aboveThis_ is a tag, then raise above the first item
 # with that tag.
@@ -1460,7 +1450,7 @@ body ::tycho::Slate::postscript {args} {
 #
 body ::tycho::Slate::raise {id {aboveThis {}}} {
     # We have to intercept the "current" tag since it applies
-    # only to an item, not a picture
+    # only to an item, not a complex item
     if { $id == "current" } {
 	set id [$this find withtag current]
     }
@@ -1468,15 +1458,15 @@ body ::tycho::Slate::raise {id {aboveThis {}}} {
     if { $aboveThis == "" } {
 	$canvas raise $id
     } elseif { [string match {[_0-9]*} $aboveThis] } {
-	# Got an item or pict, so use it
+	# Got an item, so use it
 	$canvas raise $id $aboveThis
     } else {
 	# Got a tag, so use the first matching item
-	set picts [$this find withtag $aboveThis]
-	if { $picts == "" } {
+	set items [$this find withtag $aboveThis]
+	if { $items == "" } {
 	    $canvas raise $id
 	} else {
-	    $canvas raise $id [lindex $picts 0]
+	    $canvas raise $id [lindex $items 0]
 	}
     }
 }
@@ -1484,19 +1474,19 @@ body ::tycho::Slate::raise {id {aboveThis {}}} {
 #######################################################################
 #### recreate
 #
-# Re-create a picture from a description returned by describe{}.
-# By default, the picture will be created in exactly the same
+# Re-create a complex item from a description returned by describe{}.
+# By default, the complex item will be created in exactly the same
 # position as when describe was called, and without any hierarchy.
 # A number of options can modify this behavior (these options do not
 # have to be used, but are really just short-cuts to save other calls:
 # <ul>
-# <li>*-move* _x y_: Move the new picture relative to the described
+# <li>*-move* _x y_: Move the new complex item relative to the described
 # potision.
 # <li>*-at* _x y_ ?_aspect_?: Place the given _aspect_ at (_x_,_y_).
 # The aspect default to center.
 # <li>*-coords* _x0 y0_ ...: Use these coordinates instead of the ones
 # given by the description.
-# <li>*-in* _id_: Make the picture a child of the picture _id.
+# <li>*-in* _id_: Make the complex item a child of the complex item _id.
 # </ul>
 #
 # *-move*, *-at* and *-coords* are mutually exclusive.
@@ -1560,12 +1550,12 @@ body ::tycho::Slate::region {id args} {
 		return [rectShrink [$canvas bbox $id] 2]
 	    }
 	} else {
-	    # For a picture, use the primary component if there is one.
+	    # For a complex item, use the primary component if there is one.
 	    # If not, use the bounding box.
-	    if { [@scope ::tycho::$picttype($id) \
+	    if { [@scope ::tycho::$itemtype($id) \
 		    [list ::info exists primary($id)]] } {
 		set region [$canvas coords \
-			[@scope ::tycho::$picttype($id) \
+			[@scope ::tycho::$itemtype($id) \
 			[list set primary($id)]]]
 
 		if { [llength $region] == 4 } {
@@ -1593,7 +1583,7 @@ body ::tycho::Slate::scale {id xOrigin yOrigin xScale yScale} {
 	# Get new coordinates
 	set newcoords {}
 	set coords [$canvas coords \
-		[@scope ::tycho::$picttype($id) [list set primary($id)]]]
+		[@scope ::tycho::$itemtype($id) [list set primary($id)]]]
 	foreach {a b} $coords {
 	    set a [expr $xOrigin + $xScale * ($a - $xOrigin)]
 	    set b [expr $yOrigin + $yScale * ($b - $yOrigin)]
@@ -1608,9 +1598,9 @@ body ::tycho::Slate::scale {id xOrigin yOrigin xScale yScale} {
 #######################################################################
 #### type
 #
-# Return the type of a picture. Note that types are case-sensitive.
+# Return the type of an item. Note that types are case-sensitive.
 #
-# With the *-shape* option, return the "shape" of the picture. The
+# With the *-shape* option, return the "shape" of the complex item. The
 # value returned is a subset of the types.
 #
 body ::tycho::Slate::type {id args} {
@@ -1619,9 +1609,9 @@ body ::tycho::Slate::type {id args} {
     } else {
 	getflag shape args
 	if { $shape } {
-	    return [@scope ::tycho::$picttype($id) [list set shape]]
+	    return [@scope ::tycho::$itemtype($id) [list set shape]]
 	} else {
-	    return $picttype($id)
+	    return $itemtype($id)
 	}
     }
 }
@@ -1660,7 +1650,7 @@ proc canvasslate {canvas} {
 #######################################################################
 #### adopt
 #
-# Give a picture a new parent
+# Give a complex item a new parent
 #
 body ::tycho::Slate::adopt {parent id} {
     # If we have a parent, then orphan it first
@@ -1668,7 +1658,7 @@ body ::tycho::Slate::adopt {parent id} {
 	$this orphan $id
     }
 
-    # If this is a picture, remove the owner tags
+    # If this is a complex item, remove the owner tags
     if { ! [string match {[0-9]*} $id] } {
 	$canvas dtag !$id
     }
@@ -1682,7 +1672,7 @@ body ::tycho::Slate::adopt {parent id} {
 #######################################################################
 #### ancestor
 #
-# Test if a picture is an ancestor of another
+# Test if a complex item is an ancestor of another
 #
 body ::tycho::Slate::ancestor {ancestor descendent} {
     return [lmember [$this itemcget $descendent -tags] $ancestor]
@@ -1691,26 +1681,26 @@ body ::tycho::Slate::ancestor {ancestor descendent} {
 #######################################################################
 #### ancestors
 #
-# Return the ancestors of an item or picture
+# Return the ancestors of an item or complex item
 #
 body ::tycho::Slate::ancestors {id} {
     if { [string match {[0-9]*} $id] } {
 	# A canvas item: find the owner and call again
 	return [$this ancestors [$this owner $id]]
     } else {
-	set picts [list $id]
+	set items [list $id]
 	while { $parent($id) != "" } {
-	    lappend $picts $parent($id)
+	    lappend $items $parent($id)
 	    set id $parent($id)
 	}
-	return $picts
+	return $items
     }
 }
 
 #######################################################################
 #### children
 #
-# Return the children of an item or picture
+# Return the children of an item or complex item
 #
 body ::tycho::Slate::children {id} {
     if { [string match {[0-9]*} $id] } {
@@ -1728,7 +1718,7 @@ body ::tycho::Slate::children {id} {
 #######################################################################
 #### items
 #
-# Return the items only under this item or picture
+# Return the items only under this item or complex item
 # Note that this includes the primary -- is this good or bad?
 #
 body ::tycho::Slate::items {id} {
@@ -1742,7 +1732,7 @@ body ::tycho::Slate::items {id} {
 #######################################################################
 #### orphan
 #
-# Make a picture have no parent
+# Make a complex item have no parent
 #
 body ::tycho::Slate::orphan {id} {
     # Remove parent tags
@@ -1750,7 +1740,7 @@ body ::tycho::Slate::orphan {id} {
 	$canvas dtag $tag
     }
     
-    # If this is a picture, add the owner tag
+    # If this is a complex item, add the owner tag
     if { ! [string match {[0-9]*} $id] } {
 	$canvas addtag !$id withtag $id
     }
@@ -1778,7 +1768,7 @@ body ::tycho::Slate::owner {id} {
 #######################################################################
 #### parent
 #
-# Return the parent of an item or picture
+# Return the parent of an item or complex item
 #
 body ::tycho::Slate::parent {id} {
     if { [string match {[0-9]*} $id] } {
@@ -1798,7 +1788,7 @@ body ::tycho::Slate::parent {id} {
 #######################################################################
 #### root
 #
-# Return the root of an item or picture
+# Return the root of an item or complex item
 #
 body ::tycho::Slate::root {id} {
     if { [string match {[0-9]*} $id] } {
@@ -1818,14 +1808,14 @@ body ::tycho::Slate::root {id} {
 #######################################################################
 #### tagadd
 #
-# Add a tag to items and pictures
+# Add a tag to items and complex items
 #
 body ::tycho::Slate::tagadd {tag args} {
     foreach id $args {
 	# Add the tag to canvas items
 	$canvas addtag $tag withtag $id
 
-	# If a picture, remember the tag
+	# If a complex item, remember the tag
 	if { [string match {_*} $id] } {
 	    if { ! [::info exists tagged($tag)] } {
 		set tagged($tag) [list $id]

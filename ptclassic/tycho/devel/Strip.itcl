@@ -4,7 +4,7 @@
 # @Author: John Reekie, Farhana Sheikh
 # @Version: $Id$
 # 
-# @Copyright (c) %Q% The Regents of the University of California.
+# @Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -43,9 +43,8 @@
 class ::tycho::Strip {
     inherit ::tycho::Picture
 
-    proc construct {id tags canvas x0 y0 x1 y1 args}
-    proc destruct  {id canvas}
-
+    # Create a new Strip
+    proc construct {id canvas slate tags x0 y0 x1 y1 args}
 
     ###################################################################
     ####                            options                        ####
@@ -56,37 +55,41 @@ class ::tycho::Strip {
     # The value at the high end of the strip
     common to
 
-
     ###################################################################
     ####                         public procs                    ####
 
     # Add a box to the strip
-    proc addBox {id canvas name type tags low high args} {}
+    proc addBox {id canvas slate name type tags low high args} {}
 
     # Add several boxes to the strip
-    proc addBoxes {args} {}
+    proc addBoxes {id canvas slate args} {}
 
     # Add labels to the boxes
-    proc addLabels {args} {}
+    proc addLabels {id canvas slate args} {}
 
     # Get a configuration option of a box
-    proc cgetBox {name option} {}
+    proc boxcget {id canvas slate name option} {}
 
     # Configure options of a box
-    proc configureBox {name args} {}
+    proc boxconfigure {id canvas slate name args} {}
 
     # Delete a box
-    proc deleteBox {name} {}
+    proc deleteBox {id canvas slate name} {}
 
     # Get or set the coordinates of the strip.
-    proc coords {args} {}
+    proc coords {id canvas slate args} {}
 
     # Get the name of the box at a specified pixel position on the strip
-    proc getBox {pos} {}
+    proc getBox {id canvas slate pos} {}
 
     # Change the position of a box
-    proc moveBox {name low high} {}
+    proc moveBox {id canvas slate name low high} {}
 
+    # Update the *-from* configuration option
+    proc from {id canvas slate val}
+
+    # Update the *-to* configuration option
+    proc to {id canvas slate val}
 
     ###################################################################
     ####                         protected variables               ####
@@ -109,21 +112,37 @@ class ::tycho::Strip {
     # The canvas of a picture
     common canvasmap
 
+    # The virtual "method" table
+    common methodtable
+
+    # Default values of this item's options
+    common optiondefault
+
     ###################################################################
     ####                         private procs                   ####
 
     # Recompute internal numeric parameters
     private proc recompute {id canvas} {}
+
+    ###################################################################
+    ####                       class initialization                ####
+
+    #### Set method table
+    array set methodtable [array get ::tycho::Picture::methodtable]
+
+    set methodtable(addBox)		::tycho::Axis::addBox
+    set methodtable(addBoxes)	::tycho::Axis::addBoxes
+    set methodtable(construct)	::tycho::Axis::construct
+    set methodtable(from)		::tycho::Axis::from
+    set methodtable(coords)		::tycho::Axis::coords
+    set methodtable(to)			::tycho::Axis::to
+
+    #### Set option defaults
+    array set optiondefault [array get ::tycho::Picture::optiondefault]
+
+    set optiondefault(-from)		0
+    set optiondefault(-to)			100
 }
-
-array set Strip [array get Picture]
-
-set Strip(construct) ::tycho::Strip::construct
-set Strip(coords)    ::tycho::Strip::coords
-
-set Strip(addBox)    ::tycho::Strip::addBox
-set Strip(addBoxes)  ::tycho::Strip::addBoxes
-
 
 #######################################################################
 #### addBox
@@ -131,7 +150,7 @@ set Strip(addBoxes)  ::tycho::Strip::addBoxes
 # Add a box to the strip. The option args must include the tags of
 # this strip.
 #
-body ::tycho::Strip::addBox {id canvas name type low high args} {
+body ::tycho::Strip::addBox {id canvas slate name type low high args} {
 
     # Get the coordinates of the strip
     set coords [$canvas coords $primary($id)]
@@ -160,11 +179,9 @@ body ::tycho::Strip::addBox {id canvas name type low high args} {
 		[eval $canvas create $type $left $y0 $right $y1 $args]
     } else {
 	set boxes($id.$name) \
-		[eval [canvasslate $canvas] create \
-		$type $left $y0 $right $y1 $args]
+		[eval $slate create $type $left $y0 $right $y1 $args]
     }
 }
-
 
 #######################################################################
 ## addBoxes args
@@ -176,7 +193,7 @@ body ::tycho::Strip::addBox {id canvas name type low high args} {
 # where args is a list of arguments given to the canvas, and _must_
 # include the tags of this strip.
 #
-body ::tycho::Strip::addBoxes {id canvas args} {
+body ::tycho::Strip::addBoxes {id canvas slate args} {
 
     # Get the coordinates of the strip
     set coords [$canvas coords $primary($id)]
@@ -215,19 +232,18 @@ body ::tycho::Strip::addBoxes {id canvas args} {
 		    [eval $canvas create $type $left $y0 $right $y1 $args]
 	} else {
 	    set boxes($id.$name) \
-		    [eval [canvasslate $canvas] create \
-		    $type $left $y0 $right $y1 $args]
+		    [eval $slate create $type $left $y0 $right $y1 $args]
 	}
     }
 }
 
-
+#######################################################################
 ## addLabels args
 #
 # Add labels to boxes. The arguments are an alternating
 # list of box names and labels.
 #
-body ::tycho::Strip::addLabels {args} {
+body ::tycho::Strip::addLabels {id canvas slate args} {
 
     # This code works by creating a list of canvas items. Initialize it.
     set itemlist {}
@@ -255,28 +271,28 @@ body ::tycho::Strip::addLabels {args} {
     }
 }
 
-
-## cgetBox name -option
+#######################################################################
+## boxcget name -option
 #
 # Get a configuration option of a box.
 #
-body ::tycho::Strip::cgetBox {name option} {
+body ::tycho::Strip::boxcget {id canvas slate name option} {
     eval $canvas itemcget $component($name) $option
 }
 
-
-## configureBox name args
+#######################################################################
+## boxconfigure name args
 #
 # Set configuration options of a box.
 #
-body ::tycho::Strip::configureBox {name args} {
+body ::tycho::Strip::boxconfigure {id canvas slate name args} {
     eval $canvas itemconfigure $component($name) $args
 }
 
-
+#######################################################################
 ## construct
 #
-body ::tycho::Strip::construct {id tags canvas x0 y0 x1 y1 args} {
+body ::tycho::Strip::construct {id canvas slate tags x0 y0 x1 y1 args} {
     # Initialize the options
     set defaultoptions {-from 0 -to 100}
 
@@ -303,7 +319,7 @@ body ::tycho::Strip::construct {id tags canvas x0 y0 x1 y1 args} {
     set canvasmap($id) $canvas
 }
 
-
+#######################################################################
 ## coords
 ## coords x0 y0 x1 y1
 #
@@ -314,7 +330,7 @@ body ::tycho::Strip::construct {id tags canvas x0 y0 x1 y1 args} {
 #
 # FIXME: Doesn't check label size
 #
-body ::tycho::Strip::coords {args} {
+body ::tycho::Strip::coords {id canvas slate args} {
     if { $args == "" } {
 	return [$canvas coords $primary($id)]
     } else {
@@ -323,17 +339,17 @@ body ::tycho::Strip::coords {args} {
     }
 }
 
-
+#######################################################################
 ## deleteBox name
 #
 # Remove a box.
 #
-body ::tycho::Strip::deleteBox {name} {
+body ::tycho::Strip::deleteBox {id canvas slate name} {
     component delete $name
     catch {component delete $name.label}
 }
 
-
+#######################################################################
 ## getBox xposition
 #
 # Return the label of the box at the specified canvas coordinate.
@@ -343,7 +359,7 @@ body ::tycho::Strip::deleteBox {name} {
 # is only one item returned when it queries the canvas. Later
 # on, this should probably be made more robust.
 #
-body ::tycho::Strip::getBox {xposition} {
+body ::tycho::Strip::getBox {id canvas slate xposition} {
     set y1 [lindex [$canvas coords $primary($id)] 3]
 
     # This is where we'll check the canvas
@@ -371,12 +387,12 @@ body ::tycho::Strip::getBox {xposition} {
     return ""
 }
 
-
+#######################################################################
 ## moveBox name low high
 #
 # Move a box from its current position to a new one.
 #
-body ::tycho::Strip::moveBox {name low high} {
+body ::tycho::Strip::moveBox {id canvas slate name low high} {
     # Get the coordinates of the strip
     assign x0 y0 x1 y1 [$canvas coords $primary($id)]
 
@@ -399,7 +415,7 @@ body ::tycho::Strip::moveBox {name low high} {
     $canvas coords $component($name) $left $y0 $right $y1
 }
 
-
+#######################################################################
 ## recompute
 #
 # Recompute conversion parameters.

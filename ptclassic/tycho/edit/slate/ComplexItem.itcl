@@ -31,36 +31,56 @@
 ##########################################################################
 ## Picture
 #
-# An "empty" picture class into which items and other pictures can be
-# added.
+# An "empty" item to which items can be added to create a complex item.
+# Clients can create a complex item directly (by calling the slate's
+# create{} method) and add items into it by manipulating hierarchy tags.
+# often, however, the behavior of a complex item will need to be tailored,
+# and this is done by subclassing Picture (or one of its subclasses)
+# and adding procedures to override the default implementations
+# in this class.
+#
+# Picture and all of its subclasses are not classes in the usual sense:
+# instead of instantiating these classes, the Slate calls procedures
+# of those classes with the ID of a complex item as the first argument;
+# instead of instance variables, these classes manipulate common arrays
+# indexed by item ID. This evilness is needed to avoid creating large
+# numbers of Itcl objects, which is just too inefficient.
+#
+# Because every "method" is just a procedure, each takes as its first 
+# three arguments the item ID, the canvas on which the item is being
+# drawn, and the slate on which the item is being drawn.
 #
 class ::tycho::Picture {
     inherit ::tycho::Uninstantiable
 
-    proc construct {id tags canvas x0 y0 x1 y1 args}
-    proc destruct  {id canvas}
+    # Create a new complex item
+    proc construct {id canvas slate tags x0 y0 x1 y1 args}
+    
+    # Delete a complex item
+    proc destruct {id canvas slate}
 
     ###################################################################
     ####                         public procs                      ####
 
-    proc coords    {id canvas args}
-    proc draw      {id canvas args}
-    proc ghost     {id canvas}
-    proc update    {id canvas}
+    # Get or set the coordinates of the item
+    proc coords {id canvas slate args}
 
+    # Create a "ghost" of the item for moving and resizing
+    proc ghost {id canvas slate}
+    
     ###################################################################
     ####                         protected variables               ####
 
-    # All methods are looked up through a table
+    # The virtual "method" table
     common methodtable
 
-    # All options have a default value
+    # Default values of this item's options
     common optiondefault
 
-    # All pictures must have a "primary" item to define their coordinates
+    # The "primary" component that defines the item's coordinates
     common primary
 
-    # The "shape" of pictures of this class -- rectangle by default
+    # The "shape" of items of this type -- rectangle by default
     common shape "rectangle"
 
     ###################################################################
@@ -70,17 +90,27 @@ class ::tycho::Picture {
     set methodtable(construct) ::tycho::Picture::construct
     set methodtable(destruct)  ::tycho::Picture::destruct
     set methodtable(coords)    ::tycho::Picture::coords
-    set methodtable(draw)      ::tycho::Picture::draw
     set methodtable(ghost)     ::tycho::Picture::ghost
-    set methodtable(update)    ::tycho::Picture::update
 }
 
 
 ##########################################################################
 #### construct
 #
-body ::tycho::Picture::construct {id tags canvas x0 y0 x1 y1 args} {
-
+# Create a new complex item. This procedure is used in place of
+# an object constructor. The default implementation just creates
+# the primary component (which must be present in _all_ complex items)
+# as a rectangle at the given coordinates. From now on, this item
+# will be used to get and set the coordinatse of the new item.
+# Components items can then be added to the new complex item with
+# the Slate's create{} method.
+#
+# The arguments to every construct{} procedure are the item ID,
+# the canvas, the slate, the tags to be given to each item added to the
+# complex item, two or more coordinate values, and
+# zero or more option-value pairs.
+# 
+body ::tycho::Picture::construct {id canvas slate tags x0 y0 x1 y1 args} {
     # Create the primary component for the outline coordinates.
     # Because this item is completely blank, it will actually respond to
     # events inside it -- I don't know if this is good or bad, but that's
@@ -92,17 +122,37 @@ body ::tycho::Picture::construct {id tags canvas x0 y0 x1 y1 args} {
 ##########################################################################
 #### destruct
 #
-# Does nothing.
+# Delete a complex item. This procedure is used in place of
+# an object destructor. The default implementation does nothing.
+# This procedure does not need to delete component items, as
+# that is done automatically by the Slate.
 #
-body ::tycho::Picture::destruct {id canvas} {}
-
+body ::tycho::Picture::destruct {id canvas slate} {
+    ;# Do nothing
+}
 
 ##########################################################################
 #### coords
 #
-# Set or read the picture's coordinates
+# Set or read a complex item's coordinates. With no arguments, return the
+# coordinates of the item as given by the primary component. With
+# arguments, set the coordinates of the item to those coordinates.
+# In the default implementation, the coordinates of the primary
+# components are set to the given coordinates and all other components
+# are scaled accordingly. If the coordinates are a rectangular region
+# (such as for items with a rectangle or oval as the primary component)
+# then the components are moved and scaled according to the size of the
+# original and new regions in the horizontal and vertical directions.
+# if the coordinates are not rectangular, then the bounding box of the
+# primary component is used to determine the moving and scale
+# figures.
 #
-body ::tycho::Picture::coords {id canvas args} {
+# Note that the scaling of all components is uniform -- subclasses will
+# want to override this behavior if non-uniform scaling is required. 
+# (For example, the _Frame_ class scales so that its border's remain
+# the same width.)
+#
+body ::tycho::Picture::coords {id canvas slate args} {
 
     # Get the current coordinates
     set coords [$canvas coords $primary($id)]
@@ -154,17 +204,11 @@ body ::tycho::Picture::coords {id canvas args} {
 ##########################################################################
 ## ghost
 #
-# Create and return a "ghost" of the picture.
+# Create and return a "ghost" of the item. This is used when moving 
+# and deforming the item. The default implementation creates a
+# grey item with the coordinates of the primary component.
 #
-body ::tycho::Picture::ghost {id canvas} {
+body ::tycho::Picture::ghost {id canvas slate} {
     eval $canvas create rectangle [$canvas coords $primary($id)] \
 	    -outline grey
 }
-
-##########################################################################
-## update
-#
-# The proc that gets called after changing a configuration option.
-# By default, does nothing.
-#
-body ::tycho::Picture::update {id canvas} {}
