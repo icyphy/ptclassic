@@ -11,7 +11,7 @@ Synchronize output is produced.  The closer the resulting
 plot is to a straight line with a slope of one, the more
 precise the timing of the Synchronize outputs are.
 .DE
-.LO "~ptolemy/src/domains/de/demo"
+.LO "$PTOLEMY/src/domains/de/demo"
 .SV $Id$ $Revision$
 .AL "Tom Parks"
 .LD
