@@ -70,7 +70,8 @@ PITCL = 1
 
 INCL = 		-I$(KERNDIR) -I$(ITCL_INCDIR) -I$(TCL_INCDIR) \
 		$(PTCOMPAT_INCSPEC) $(MATLAB_INCSPEC) $(MATLABIFC_INCSPEC) \
-		$(MATHEMATICA_INCSPEC) $(MATHEMATICAIFC_INCSPEC)
+		$(MATHEMATICA_INCSPEC) $(MATHEMATICAIFC_INCSPEC) \
+		-I$(VPATH)/../ptcl
 
 C_INCL =	$(PTCOMPAT_INCSPEC) -I$(TCL_INCDIR) -I$(TK_INCDIR)
 
@@ -82,8 +83,13 @@ LIB_SRCS =	MatlabTcl.cc MathematicaTcl.cc PITcl.cc ptclInit.cc \
 LIB_CSRCS = 	displayFile.c
 NON_LIB_SRCS =	ptclAppInit.cc
 TCL_SRCS =	gendoc.tcl
-SRCS =		$(LIB_SRCS) $(LIB_CSRCS) $(NON_LIB_SRCS) $(TCL_SRCS)
+# SRCS are used by make depend, so they should be C/C++ files
+SRCS =		$(LIB_SRCS) $(LIB_CSRCS) $(NON_LIB_SRCS) 
 
+EXTRA_SRCS =	$(TCL_SRCS) make.template
+
+# Files or directories that are present, but that 'make checkjunk' 
+# should not complain about
 MISC_FILES =		doc test
 
 # 'make realclean' should remove these
