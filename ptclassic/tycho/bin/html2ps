@@ -4,7 +4,7 @@ exec tclsh "$0" "$@"
 
 # Convert html files to PostScript by using netscape
 #
-# @Author: Christopher Hylands
+# @Author: Christopher Hylands (cxh@eecs.berkeley.edu)
 #
 # @Version: $Id$
 #
@@ -227,8 +227,12 @@ proc html2ps {filelist} {
         #puts "$urlfile $printfile"
 	if [catch {exec netscape -remote "openURL($urlfile)"} errMsg ] {
 		puts "\nCall to netscape failed to \nopen `$urlfile',\n\
-			 perhaps netscape is not running?:\n $errMsg"
-		exit
+			 perhaps netscape is not running?:\n $errMsg\n\
+			 About to try starting netscape by hand."
+		exec netscape &	 
+		#FIXME: we should do this with the tcl clock command
+		exec sleep 10
+
 	}
 	if [catch {exec netscape -remote "saveas($printfile,PostScript)"} \
 		errMsg] {
