@@ -49,17 +49,23 @@ static const char file_id[] = "CGPortHole.cc";
 CGPortHole :: CGPortHole() : offset(0), forkSrc(0), embeddedPort(0),
 	embeddedLoc(-1), embeddingFlag(0), switchFlag(0) {}
 
-// destructor: remove forklist references.
+// destructor: remove fork from chain of blocks
 CGPortHole :: ~CGPortHole() {
-	ListIter next(forkDests);
+	// Destroy fork destination list
+	// Set the source of the destination ports to zero to prevent
+	// access to this porthole since it is being destroyed
 	OutCGPort* p;
-	while ((p = (OutCGPort*)next++) != 0) p->zeroForkSource();
+	while ((p = (OutCGPort*)forkDests.getAndRemove()) != 0)
+		p->zeroForkSource();
 
+	// Remove this porthole from the source's destination porthole list
 	if (forkSrc) forkSrc->removeForkDest(this);
+	forkSrc = 0;
 
 	// If myGeodesic is switched, the pointer is set to zero to prevent
 	// deleting the same geodesic multiple times.  Make sure that
-	// original geodesic is destroyed when switching geodesics.
+	// original geodesic is destroyed when switching geodesics,
+	// which is the responsibility of the Geodesic class
 	if (switched()) myGeodesic = 0;
 }
 
