@@ -20,7 +20,7 @@ private:
 
 public:
 
-  fft( int _Inverse, int size ) : Inverse( _Inverse ), N( size ) {}
+  fft( int _Inverse, int size ) : N( size ), Inverse( _Inverse ) {}
 
   Complex* Compute( Complex* z1, Complex* z2 );
 
