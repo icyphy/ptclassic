@@ -46,6 +46,7 @@ PL_SRCS= \
 	SRNop.pl \
 	SRPre.pl \
 	SRPrinter.pl \
+	SRSerialIn.pl \
 	SRSub.pl \
 	SRStringToInt.pl \
 	SRWhen.pl
