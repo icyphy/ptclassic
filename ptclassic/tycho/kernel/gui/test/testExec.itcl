@@ -91,6 +91,7 @@ test Exec-1.4 {Check doEachLine and doWhenDone} {
     _initialize
     set text [::tycho::view Edit]
     update idletasks
+    after 250
     
     .exec doEachLine "$text insertData \$line"
     .exec doWhenDone "$text insertData I_AM_DONE\n"
@@ -126,7 +127,3 @@ test Exec-1.5 {Check method getStatusNow without blocking} {
 
     list $statusnow1 $statusnow2
 } {running killed}
-
-
-
-
