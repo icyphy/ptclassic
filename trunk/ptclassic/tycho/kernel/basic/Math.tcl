@@ -37,10 +37,34 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
+
 #
-# FIXME: Add round calls to functions to ensure correct behaviour
-# with integer arguments
+# Return list of n numbers in the range x to y. The -indented
+# option causes the first and list numbers to be more or less
+# the end points by half the interval between the reset of the
+# elements.
 #
+proc spread {n x y args} {
+    getflag indented args
+
+    set result {}
+    set i      0
+
+    if { $indented } {
+	set delta  [expr (double($y) - $x) / $n]
+	set x [expr $x + $delta / 2]
+    } else {
+	set delta  [expr (double($y) - $x) / ($n - 1)]
+    }
+
+    while { $i < $n } {
+	lappend result [expr $x + $i * $delta]
+	incr i +1
+    }
+
+    return $result
+}
+
 
 #
 # Given a number, round up to the nearest power of ten
@@ -121,6 +145,16 @@ proc mapRange {low high values lowdash highdash} {
     }
 
     return $result
+}
+
+
+#
+# Given two ranges and a number in the first range,
+# produce the mapping of that number to the second range.
+#
+proc mapValue {low high value lowdash highdash} {
+    set scale [expr (double($highdash) - $lowdash) / ($high - $low)]
+    return [expr $lowdash + ($value-$low) * $scale]
 }
 
 
