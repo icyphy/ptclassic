@@ -28,7 +28,9 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
- 
+# auto_mkindex \
+proc ::tycho::Animator {} {}
+
 #######################################################################
 ## Animator
 #
@@ -86,7 +88,7 @@ class ::tycho::Animator {
 	set slate $s
 	set canvas $c
 
-	eval configure $args
+	eval $this configure $args
     }
     destructor {}
     

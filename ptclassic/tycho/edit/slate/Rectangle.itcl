@@ -28,6 +28,8 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
+# auto_mkindex \
+proc ::tycho::Rectangle {} {}
 
 #######################################################################
 #### Rectangle
@@ -42,7 +44,7 @@
 # this shape always uses the region{} method instead of the
 # coords{} method.
 #
-#  <P><b>Primitive aspects</b>
+#  <P><b>Primitive features</b>
 #
 # <ul>
 # <li><B>n</B>: The center of the top edge.
@@ -51,7 +53,7 @@
 # <li><B>w</B>: The center of the left edge.
 # </ul>
 #
-# <p><b>Derived aspects</b>
+# <p><b>Derived features</b>
 #
 # <ul>
 # <li><B>ne</B>: The top-right corner.
@@ -79,13 +81,13 @@ class ::tycho::Rectangle {
     ###################################################################
     ####                         public procs                      ####
 
-    # Get one or more aspects of an item
-    proc _aspect {id canvas slate args}
+    # Get one or more features of an item
+    proc _feature {id canvas slate args}
 
     # Attach a set of grapples to an item
     proc _grapple {id canvas slate interactor args}
 
-    # Reshape one or more aspects of an item
+    # Reshape one or more features of an item
     proc _reshape {id canvas slate x y args}
 
     # Start a reshape interaction sequence
@@ -97,8 +99,8 @@ class ::tycho::Rectangle {
     # Terminate a reshape interaction sequence
     proc _reshaperelease {id canvas slate}
 
-    # Get an aspect of a rectangle
-    proc aspect {x0 y0 x1 y1 aspect}
+    # Get an feature of a rectangle
+    proc feature {x0 y0 x1 y1 feature}
 
     # Test if the first rectangle is inside the second.
     proc inside {x0 y0 x1 y1 a0 b0 a1 b1}
@@ -109,7 +111,7 @@ class ::tycho::Rectangle {
     # Test if two rectangles overlap
     proc overlap {x0 y0 x1 y1 a0 b0 a1 b1}
 
-    # Reshape one or more aspects of a rectangle
+    # Reshape one or more features of a rectangle
     proc reshape {x0 y0 x1 y1 x y args}
 
     # Stretch a rectangle
@@ -124,62 +126,67 @@ class ::tycho::Rectangle {
     ###################################################################
     ####                     private variables                     ####
 
-    # The weights mapping aspects to aspects
+    # The weights mapping features to features
     private common xweights
     private common yweights
     
-    array set xweights {
-	nw.sw 1 nw.w 1 nw.n 0.5 nw.ne 0 nw.c 0.5
-	ne.se 1 ne.e 1 ne.n 0.5 ne.nw 0 ne.c 0.5
-	sw.nw 1 sw.w 1 sw.s 0.5 sw.se 0 sw.c 0.5
-	se.ne 1 se.e 1 se.s 0.5 se.sw 0 se.c 0.5
-	n.w 0 n.nw 0 n.ne 0 n.e 0 n.c 0
-	s.w 0 s.sw 0 s.se 0 s.e 0 s.c 0
-	e.n 0.5 e.ne 1 e.se 1 e.s 0.5 e.c 0.5
-	w.n 0.5 w.ne 1 w.se 1 w.s 0.5 w.c 0.5
-    }
-    
-    array set yweights {
-	nw.sw 0 nw.w 0.5 nw.n 1 nw.ne 1 nw.c 0.5
-	ne.se 0 ne.e 0.5 ne.n 1 ne.nw 1 ne.c 0.5
-	sw.nw 0 sw.w 0.5 sw.s 1 sw.se 1 sw.c 0.5
-	se.ne 0 se.e 0.5 se.s 1 se.sw 1 se.c 0.5
-	n.w 0.5 n.nw 1 n.ne 1 n.e 0.5 n.c 0.5
-	s.w 0.5 s.sw 1 s.se 1 s.e 0.5 s.c 0.5
-	e.n 0 e.ne 0 e.se 0 e.s 0 e.c 0
-	w.n 0 w.ne 0 w.se 0 w.s 0 w.c 0
-    }
-
-    # The expressions used to get aspects
-    private common aspectExpr
-    array set aspectExpr {
-	n {list [expr ($x0+$x1) / 2] $y0}
-	s {list [expr ($x0+$x1) / 2] $y1}
-	e {list $x1 [expr ($y0+$y1) / 2]}
-	w {list $x0 [expr ($y0+$y1) / 2]}
-	nw {list $x0 $y0}
-	ne {list $x1 $y0}
-	sw {list $x0 $y1}
-	se {list $x1 $y1}
-	c {list [expr ($x0+$x1) / 2] [expr ($y0+$y1) / 2]}
-	center {list [expr ($x0+$x1) / 2] [expr ($y0+$y1) / 2]}
-    }
+    # The expressions used to get features
+    private common featureExpr
 }
 
+###################################################################
+####                  class initialization                     ####
+
+array set ::tycho::Rectangle::xweights {
+    nw.sw 1 nw.w 1 nw.n 0.5 nw.ne 0 nw.c 0.5
+    ne.se 1 ne.e 1 ne.n 0.5 ne.nw 0 ne.c 0.5
+    sw.nw 1 sw.w 1 sw.s 0.5 sw.se 0 sw.c 0.5
+    se.ne 1 se.e 1 se.s 0.5 se.sw 0 se.c 0.5
+    n.w 0 n.nw 0 n.ne 0 n.e 0 n.c 0
+    s.w 0 s.sw 0 s.se 0 s.e 0 s.c 0
+    e.n 0.5 e.ne 1 e.se 1 e.s 0.5 e.c 0.5
+    w.n 0.5 w.ne 1 w.se 1 w.s 0.5 w.c 0.5
+}
+
+array set ::tycho::Rectangle::yweights {
+    nw.sw 0 nw.w 0.5 nw.n 1 nw.ne 1 nw.c 0.5
+    ne.se 0 ne.e 0.5 ne.n 1 ne.nw 1 ne.c 0.5
+    sw.nw 0 sw.w 0.5 sw.s 1 sw.se 1 sw.c 0.5
+    se.ne 0 se.e 0.5 se.s 1 se.sw 1 se.c 0.5
+    n.w 0.5 n.nw 1 n.ne 1 n.e 0.5 n.c 0.5
+    s.w 0.5 s.sw 1 s.se 1 s.e 0.5 s.c 0.5
+    e.n 0 e.ne 0 e.se 0 e.s 0 e.c 0
+    w.n 0 w.ne 0 w.se 0 w.s 0 w.c 0
+}
+
+array set ::tycho::Rectangle::featureExpr {
+    n {list [expr ($x0+$x1) / 2] $y0}
+    s {list [expr ($x0+$x1) / 2] $y1}
+    e {list $x1 [expr ($y0+$y1) / 2]}
+    w {list $x0 [expr ($y0+$y1) / 2]}
+    nw {list $x0 $y0}
+    ne {list $x1 $y0}
+    sw {list $x0 $y1}
+    se {list $x1 $y1}
+    c {list [expr ($x0+$x1) / 2] [expr ($y0+$y1) / 2]}
+    center {list [expr ($x0+$x1) / 2] [expr ($y0+$y1) / 2]}
+}
+
+
 #######################################################################
-#### _aspect aspect
+#### _feature feature
 #
-body ::tycho::Rectangle::_aspect {id canvas slate args} {
-    array set opts {-aspects {}}
+body ::tycho::Rectangle::_feature {id canvas slate args} {
+    array set opts {-features {}}
     array set opts $args
     
-    if { $opts(-aspects) == "" } {
+    if { $opts(-features) == "" } {
 	return {n s e w ne nw se sw}
     } else {
 	set region [$slate region $id]
 	set result {}
-	foreach a $opts(-aspects) {
-	    eval lappend result [eval aspect $region $a]
+	foreach a $opts(-features) {
+	    eval lappend result [eval feature $region $a]
 	}
 	return $result
     }
@@ -256,24 +263,24 @@ body ::tycho::Rectangle::_grapple {id canvas slate interactor args} {
     $nw query set bounds "list \
 	    2 \
 	    2 \
-	    \[expr \[lindex \[$se aspect nw\] 0\] - 2\] \
-	    \[expr \[lindex \[$se aspect nw\] 1\] - 2\] "
+	    \[expr \[lindex \[$se feature nw\] 0\] - 2\] \
+	    \[expr \[lindex \[$se feature nw\] 1\] - 2\] "
 
     $ne query set bounds "list \
-	    \[expr \[lindex \[$sw aspect ne\] 0\] + 2\] \
+	    \[expr \[lindex \[$sw feature ne\] 0\] + 2\] \
 	    2 \
 	    \[expr \[winfo width $slate\] - 3\] \
-	    \[expr \[lindex \[$sw aspect ne\] 1\] - 2\] "
+	    \[expr \[lindex \[$sw feature ne\] 1\] - 2\] "
 
     $sw query set bounds "list \
 	    2 \
-	    \[expr \[lindex \[$ne aspect sw\] 1\] + 2\] \
-	    \[expr \[lindex \[$ne aspect sw\] 0\] - 2\] \
+	    \[expr \[lindex \[$ne feature sw\] 1\] + 2\] \
+	    \[expr \[lindex \[$ne feature sw\] 0\] - 2\] \
 	    \[expr \[winfo height $slate\] - 3\] "
 
     $se query set bounds "list \
-	    \[expr \[lindex \[$nw aspect se\] 0\] + 2\] \
-	    \[expr \[lindex \[$nw aspect se\] 1\] + 2\] \
+	    \[expr \[lindex \[$nw feature se\] 0\] + 2\] \
+	    \[expr \[lindex \[$nw feature se\] 1\] + 2\] \
 	    \[expr \[winfo width  $slate\] - 3\] \
 	    \[expr \[winfo height $slate\] - 3\] "
 
@@ -289,11 +296,11 @@ body ::tycho::Rectangle::_grapple {id canvas slate interactor args} {
 #### _reshape
 #
 body ::tycho::Rectangle::_reshape {id canvas slate x y args} {
-    array set opts {-aspects {}}
+    array set opts {-features {}}
     array set opts $args
 
     eval $slate region $id \
-	    [eval reshape [$slate region $id] $x $y $opts(-aspects)]
+	    [eval reshape [$slate region $id] $x $y $opts(-features)]
 }
 
 #######################################################################
@@ -309,10 +316,10 @@ body ::tycho::Rectangle::_reshapeclick {id canvas slate x y args} {
     set unique $id.[$slate uniqueid]
 
     # Extract options
-    array set opts {-ghost 0 -aspects {}}
+    array set opts {-ghost 0 -features {}}
     array set opts $args
-    if { $opts(-aspects) == "" } {
-        error "Empty aspect list"
+    if { $opts(-features) == "" } {
+        error "Empty feature list"
     }
 
     # Remember how I am now.
@@ -324,22 +331,22 @@ body ::tycho::Rectangle::_reshapeclick {id canvas slate x y args} {
     set scratch(prevX.$unique) $x
     set scratch(prevY.$unique) $y
 
-    # For each direction, see if it is present in the aspects list,
+    # For each direction, see if it is present in the features list,
     # and if it is, add it to the drag script
     set script ""
-    if { [lsearch $opts(-aspects) "*w"] >= 0 } {
+    if { [lsearch $opts(-features) "*w"] >= 0 } {
     	append script {; set scratch(w.$unique) \
     		[expr $scratch(w.$unique) + $deltaX]}
     }
-    if { [lsearch $opts(-aspects) "*e"] >= 0 } {
+    if { [lsearch $opts(-features) "*e"] >= 0 } {
     	append script {; set scratch(e.$unique) \
     		[expr $scratch(e.$unique) + $deltaX]}
     }
-    if { [lsearch $opts(-aspects) "n*"] >= 0 } {
+    if { [lsearch $opts(-features) "n*"] >= 0 } {
     	append script {; set scratch(n.$unique) \
     		[expr $scratch(n.$unique) + $deltaY]}
     }
-    if { [lsearch $opts(-aspects) "s*"] >= 0 } {
+    if { [lsearch $opts(-features) "s*"] >= 0 } {
     	append script {; set scratch(s.$unique) \
     		[expr $scratch(s.$unique) + $deltaY]}
     }
@@ -409,13 +416,13 @@ body ::tycho::Rectangle::_reshaperelease {id canvas slate} {
 }
 
 ##########################################################################
-#### aspect
+#### feature
 #
-# Return an aspect of a rectangle. Valid aspects are any
+# Return an feature of a rectangle. Valid features are any
 # of the eight compass points and "c" or "center."
 #
-body ::tycho::Rectangle::aspect {x0 y0 x1 y1 aspect} {
-    eval $aspectExpr($aspect)
+body ::tycho::Rectangle::feature {x0 y0 x1 y1 feature} {
+    eval $featureExpr($feature)
 }
 
 ##########################################################################
@@ -452,14 +459,14 @@ body ::tycho::Rectangle::overlap {x0 y0 x1 y1 a0 b0 a1 b1} {
 #######################################################################
 #### reshape
 #
-# Given a rectangle, reshape it by moving the given aspects
+# Given a rectangle, reshape it by moving the given features
 # by the specified _x_ and _y_ relative
 # values. Aspects are only affected by the appropriate _x_ or _y_
-# value -- for example, if the "e" (east) aspect is specified, it
+# value -- for example, if the "e" (east) feature is specified, it
 # is moved only by the _x_ amount.
 #
 body ::tycho::Rectangle::reshape {x0 y0 x1 y1 x y args} {
-    # For each direction, see if it is present in the aspects list,
+    # For each direction, see if it is present in the features list,
     # and if it is, add to the appropriate direction
     if { [lsearch $args "*w"] >= 0 } {
 	set x0 [expr $x0 + $x]

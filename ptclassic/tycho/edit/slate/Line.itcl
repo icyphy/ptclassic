@@ -28,6 +28,8 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
+# auto_mkindex \
+proc ::tycho::Line {} {}
 
 #######################################################################
 #### Line
@@ -35,7 +37,7 @@
 # The shape of lines. Items with
 # this shape include <I>line</I> and <I>SmartLine</I>.
 #
-#  <P><b>Primitive aspects</b>
+#  <P><b>Primitive features</b>
 #
 # <ul>
 # <li><B>vertex-</B><I>n</I>: The <I>n</I>'th vertex of the line.
@@ -61,13 +63,13 @@ class ::tycho::Line {
     ###################################################################
     ####                         public procs                      ####
 
-    # Get one or more aspects of an item
-    proc _aspect {id canvas slate args}
+    # Get one or more features of an item
+    proc _feature {id canvas slate args}
 
     # Attach a set of grapples to an item
     proc _grapple {id canvas slate interactor args}
 
-    # Reshape one or more aspects of an item
+    # Reshape one or more features of an item
     proc _reshape {id canvas slate x y args}
 
     # Start a reshape interaction sequence
@@ -79,8 +81,8 @@ class ::tycho::Line {
     # Terminate a reshape interaction sequence
     proc _reshaperelease {id canvas slate}
 
-    # Get one or more aspects of a line
-    proc aspect {coords args}
+    # Get one or more features of a line
+    proc feature {coords args}
 
     # Find the "center" point of a line
     proc center {coords}
@@ -97,7 +99,7 @@ class ::tycho::Line {
     # Find the nearest point on the line
     proc nearest {coords x y}
 
-    # Reshape one or more aspects of a line
+    # Reshape one or more features of a line
     proc reshape {coords x y args}
 
     # Reverse the direction of a line
@@ -111,14 +113,14 @@ class ::tycho::Line {
 }
 
 #######################################################################
-#### _aspect
+#### _feature
 #
-body ::tycho::Line::_aspect {id canvas slate args} {
-    array set opts {-aspects {}}
+body ::tycho::Line::_feature {id canvas slate args} {
+    array set opts {-features {}}
     array set opts $args
     set coords [$slate coords $id]
 
-    if { $opts(-aspects) == "" } {
+    if { $opts(-features) == "" } {
 	set result "start"
 	set length [expr [llength $coords] / 2 - 1]
 	for {set i 1} {$i < $length} {incr i} {
@@ -127,7 +129,7 @@ body ::tycho::Line::_aspect {id canvas slate args} {
 	lappend result "end"
 	return $result
     } else {
-	return [eval aspect [list $coords] $opts(-aspects)]
+	return [eval feature [list $coords] $opts(-features)]
     }
 }
 
@@ -135,11 +137,11 @@ body ::tycho::Line::_aspect {id canvas slate args} {
 #### _reshape
 #
 body ::tycho::Line::_reshape {id canvas slate x y args} {
-    array set opts {-aspects {}}
+    array set opts {-features {}}
     array set opts $args
 
     eval $slate coords $id \
-	    [eval reshape [list [$slate coords $id]] $x $y $opts(-aspects)]
+	    [eval reshape [list [$slate coords $id]] $x $y $opts(-features)]
 }
 
 #######################################################################
@@ -149,10 +151,10 @@ body ::tycho::Line::_reshapeclick {id canvas slate x y args} {
     set unique $id.[$slate uniqueid]
 
     # Extract options
-    array set opts {-ghost 0 -aspects {}}
+    array set opts {-ghost 0 -features {}}
     array set opts $args
-    if { $opts(-aspects) == "" } {
-        error "Empty aspect list"
+    if { $opts(-features) == "" } {
+        error "Empty feature list"
     }
 
     # Remember how I am now.
@@ -171,8 +173,8 @@ body ::tycho::Line::_reshapeclick {id canvas slate x y args} {
 
     # Figure out the vertices that will be changed
     set scratch(vertices.$unique) {}
-    foreach aspect $opts(-aspects) {
-	::tycho::assign a n [split $aspect "-"]
+    foreach feature $opts(-features) {
+	::tycho::assign a n [split $feature "-"]
 	switch -exact $a {
 	    "start" {
 		lappend scratch(vertices.$unique) 0
@@ -185,7 +187,7 @@ body ::tycho::Line::_reshapeclick {id canvas slate x y args} {
 		lappend scratch(vertices.$unique) $n
 	    }
 	    default {
-		error "Invalid aspect \"$aspect\" of line shape"
+		error "Invalid feature \"$feature\" of line shape"
 	    }
 	}
     }
@@ -263,17 +265,17 @@ body ::tycho::Line::_reshaperelease {id canvas slate} {
 }
 
 #######################################################################
-#### aspect
+#### feature
 #
-# Return aspects of a line. Valid aspects are "start,"
+# Return features of a line. Valid features are "start,"
 # "end," or <code>vertex-</code><i>n</i>, where _n_ is
 # between 0 and the number of vertices less one.
 #
-body ::tycho::Line::aspect {coords args} {
+body ::tycho::Line::feature {coords args} {
     set result {}
 
-    foreach aspect $args {
-	set a [lindex [split $aspect "-"] 0]
+    foreach feature $args {
+	set a [lindex [split $feature "-"] 0]
 	switch -exact $a {
 	    "start" {
 		lappend result [lindex $coords 0] [lindex $coords 1]
@@ -284,13 +286,13 @@ body ::tycho::Line::aspect {coords args} {
 			[lindex $coords end]
 	    }
 	    "vertex" {
-		set n [lindex [split $aspect "-"] 1]
+		set n [lindex [split $feature "-"] 1]
 		lappend result \
 			[lindex $coords [expr 2*$n]] \
 			[lindex $coords [expr 2*$n + 1]]
 	    }
 	    default {
-		error "Invalid aspect \"$aspect\" of line shape"
+		error "Invalid feature \"$feature\" of line shape"
 	    }
 	}
     }
@@ -413,8 +415,8 @@ body ::tycho::Line::nearest {coords x y} {
 #######################################################################
 #### reshape
 #
-# Reshape one or more aspects of a line by the specified amount.
-# Reshape each aspect by the specified _x_ and _y_ relative
+# Reshape one or more features of a line by the specified amount.
+# Reshape each feature by the specified _x_ and _y_ relative
 # values.
 #
 body ::tycho::Line::reshape {coords x y args} {
@@ -428,9 +430,9 @@ body ::tycho::Line::reshape {coords x y args} {
 	incr i
     }
 
-    # Process all aspects to change coordinates
-    foreach aspect $args {
-	::tycho::assign a n [split $aspect "-"]
+    # Process all features to change coordinates
+    foreach feature $args {
+	::tycho::assign a n [split $feature "-"]
 	switch -exact $a {
 	    "start" {
 		set _x(0) [expr $_x(0) + $x]
@@ -446,7 +448,7 @@ body ::tycho::Line::reshape {coords x y args} {
 		set _y($n) [expr $_y($n) + $y]
 	    }
 	    default {
-		error "Invalid aspect \"$aspect\" of line shape"
+		error "Invalid feature \"$feature\" of line shape"
 	    }
 	}
     }

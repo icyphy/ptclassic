@@ -28,11 +28,8 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-
-# Explicitly load the superclass. I don't really know why this is
-# needed, but the common arrays get upset otherwise.
-::tycho::slateLoadSuper IconItem
-::tycho::slateLoadSuper LabeledOval
+# auto_mkindex \
+proc ::tycho::IconOval {} {}
 
 ########################################################################
 ## IconOval
@@ -103,21 +100,23 @@ class ::tycho::IconOval {
 
     # All options have a default value
     private common optiondefault
+}
 
-    ###################################################################
-    ####                       class initialization                ####
 
+###################################################################
+####                       class initialization                ####
+
+catch {::tycho::LabeledOval}
+namespace eval ::tycho::IconOval {
     #### Set method table
-    array set methodtable [@scope ::tycho::LabeledOval array get methodtable]
+    array set methodtable [array get ::tycho::LabeledOval::methodtable]
     array set methodtable [array get ::tycho::IconItem::methodtable]
  
     set methodtable(_coords)     ::tycho::LabeledOval::coords
-
     set methodtable(construct)   ::tycho::IconOval::construct
 
     #### Set option defaults
-    array set optiondefault [@scope ::tycho::LabeledOval \
-            array get optiondefault]
+    array set optiondefault [array get ::tycho::LabeledOval::optiondefault]
     array set optiondefault [array get ::tycho::IconItem::optiondefault]
  
     # Make it round and white
@@ -125,6 +124,7 @@ class ::tycho::IconOval {
     set optiondefault(-vsize) 50
     set optiondefault(-fill)  white
 }
+
 
 #########################################################################
 #### construct

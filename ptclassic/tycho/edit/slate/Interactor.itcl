@@ -28,6 +28,8 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
+# auto_mkindex \
+proc ::tycho::Interactor {} {}
 
 #######################################################################
 #### Interactor
@@ -216,6 +218,15 @@ class ::tycho::Interactor {
     
     # Aliases for event names to reduce my memory load!
     private common eventName
+
+    # Event class determines how to add extra stuff
+    private common eventClass
+}
+
+###################################################################
+####                       class initialization                ####
+
+namespace eval ::tycho::Interactor {
     array set eventName {
         "button"        Button
 	"press"         Button
@@ -238,9 +249,6 @@ class ::tycho::Interactor {
 	"keyup"         KeyRelease
 	"keyrelease"    KeyRelease
     }
-
-    # Event class determines how to add extra stuff
-    private common eventClass
     array set eventClass {
         Button        button
         Double-Button button
@@ -505,7 +513,7 @@ body ::tycho::Interactor::target {args} {
 body ::tycho::Interactor::unbind {t args} {
     # Make sure that the interactor is deactivated first
     if { $target != "" } {
-        deactivate $target $args
+        $this deactivate $target $args
     }
 
     # Forget the target

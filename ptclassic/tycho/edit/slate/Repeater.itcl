@@ -28,7 +28,9 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
- 
+# auto_mkindex \
+proc ::tycho::Repeater {} {}
+
 #######################################################################
 ## Repeater
 #
@@ -89,7 +91,7 @@ class ::tycho::Repeater {
 	set slate $s
 	set canvas $c
 
-	eval configure $args
+	eval $this configure $args
     }
     destructor {}
     

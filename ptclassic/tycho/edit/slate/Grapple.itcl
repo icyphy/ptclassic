@@ -28,10 +28,8 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-
-# Explicitly load the superclass. I don't really know why this is
-# needed, but the common arrays get upset otherwise.
-::tycho::slateLoadSuper ComplexItem
+# auto_mkindex \
+proc ::tycho::Grapple {} {}
 
 ##########################################################################
 ## Grapple
@@ -42,8 +40,8 @@
 # <p><a name="Grapple class Options"></a><b>Options</b>
 #
 # <ul>
-# <li><b>-aspect</b>:
-# The aspect of the item to which this grapple is attached.
+# <li><b>-feature</b>:
+# The feature of the item to which this grapple is attached.
 #
 # <li><b>-fill</b>:
 # The fill color of the grapple.
@@ -90,8 +88,8 @@ class ::tycho::Grapple {
     ###################################################################
     ####                         public procs                      ####
 
-    # Update the *-aspect* option
-    proc _aspect {id canvas slate aspect}
+    # Update the *-feature* option
+    proc _feature {id canvas slate feature}
 
     # Update the *-fill* option
     proc _fill {id canvas slate fill}
@@ -122,14 +120,17 @@ class ::tycho::Grapple {
 
     # Default values of this item's options
     private common optiondefault
+}
 
-    ###################################################################
-    ####                       class initialization                ####
 
+###################################################################
+####                       class initialization                ####
+
+namespace eval ::tycho::Grapple {
     #### Set method table
     array set methodtable [array get ::tycho::ComplexItem::methodtable]
 
-    set methodtable(_aspect)   ::tycho::Grapple::_aspect
+    set methodtable(_feature)   ::tycho::Grapple::_feature
     set methodtable(_fill)     ::tycho::Grapple::_fill
     set methodtable(_item)     ::tycho::Grapple::_item
     set methodtable(_outline)  ::tycho::Grapple::_outline
@@ -142,7 +143,7 @@ class ::tycho::Grapple {
     #### Set option defaults
     array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
 
-    set optiondefault(-aspect)  ""
+    set optiondefault(-feature)  ""
     set optiondefault(-fill)    "cyan3"
     set optiondefault(-item)    ""
     set optiondefault(-outline) ""
@@ -152,10 +153,10 @@ class ::tycho::Grapple {
 }
 
 ##########################################################################
-## -aspect option configuration
+## -feature option configuration
 #
-body ::tycho::Grapple::_aspect {id canvas slate aspect} {
-    set option(aspect) $aspect
+body ::tycho::Grapple::_feature {id canvas slate feature} {
+    set option(feature) $feature
 }
 
 ##########################################################################
@@ -224,7 +225,7 @@ body ::tycho::Grapple::coords {id canvas slate args} {
 
     # No args: just return coordinates
     if { $args == "" } {
-        eval ::tycho::Rectangle::aspect $coords c
+        eval ::tycho::Rectangle::feature $coords c
     } else {
         eval $canvas coords $primary($id) \
                 [eval ::tycho::Rectangle::stretch $coords 4]

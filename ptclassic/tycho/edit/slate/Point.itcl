@@ -28,6 +28,8 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
+# auto_mkindex \
+proc ::tycho::Point {} {}
 
 #######################################################################
 #### Point
@@ -36,13 +38,13 @@
 # this shape include <I>text</I>, <I>bitmap</I>, <I>image</I>,
 # and <I>Axis</I>..
 #
-#  <P><b>Primitive aspects</b>
+#  <P><b>Primitive features</b>
 #
 # <ul>
 # <li><B>origin</B>: The coordinates of the item.
 # </ul>
 #
-# <p><b>Derived aspects</b>
+# <p><b>Derived features</b>
 #
 # <P>None.
 #
@@ -66,8 +68,8 @@ class ::tycho::Point {
     ###################################################################
     ####                         public procs                      ####
 
-    # Get one or more aspects of an item
-    proc _aspect {id canvas slate args}
+    # Get one or more features of an item
+    proc _feature {id canvas slate args}
 
     # Attach a set of grapples to an item
     proc _grapple {id canvas slate interactor args}
@@ -87,33 +89,33 @@ class ::tycho::Point {
 
 
 #######################################################################
-#### _aspect
+#### _feature
 #
-# Return the value of an aspect. The only valid aspect is "origin."
+# Return the value of an feature. The only valid feature is "origin."
 #
-body ::tycho::Point::_aspect {id canvas slate args} {
-    array set opts {-aspects {}}
+body ::tycho::Point::_feature {id canvas slate args} {
+    array set opts {-features {}}
     array set opts $args
 
     set coords [$slate coords $id]
     if { [llength $coords] != 2 } {
     	# Not really a point -- get center of bbox instead
-    	set coords [eval ::tycho::Rectangle::aspect [$slate bbox $id] c]
+    	set coords [eval ::tycho::Rectangle::feature [$slate bbox $id] c]
     }
     set result {}
 
-    if { $opts(-aspects) == "" } {
+    if { $opts(-features) == "" } {
     	return "origin"
     } else {
-	foreach aspect $opts(-aspects) {
-	    switch -exact $aspect {
+	foreach feature $opts(-features) {
+	    switch -exact $feature {
 		"origin" -
                 "center" -
                 "c" {
 		    set result $coords
 		}
 		default {
-		    error "Invalid aspect \"$aspect\" of Point shape"
+		    error "Invalid feature \"$feature\" of Point shape"
 		}
 	    }
 	}
