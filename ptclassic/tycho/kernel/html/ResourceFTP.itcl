@@ -118,11 +118,14 @@ class ::tycho::ResourceFTP {
     # Abort in the middle of ftphandler transaction.
     public method ftpabort {message}
 
-    # DATA port to receive. This includes LIST and RETR
-    public method ftpdataportinit {}
+    # The first method to call to open up the socket to receive data.
+    public method ftpdataportopen {}
 
+    # When server connects to our port, this method is called.
+    public method ftpdataportinit {fd location port}
 
-    public method ftpdataport {fd location port}
+    # This is used to handle incoming data.
+    public method ftpdataport {fd}
 
     ###################################################################
     ####                        protected commons                  ####
@@ -154,6 +157,7 @@ class ::tycho::ResourceFTP {
     # <tt>n1.n2.n3.n4  client_name  unique_16_bit_client_socket</tt>
     protected variable _dataport 0
     protected variable _dataaddr 127.0.0.1
+    protected variable _datafd -1
 
     # Transfer could be either file or directory (two distince FTP commands).
     protected variable ftptype {directory}
@@ -171,8 +175,8 @@ class ::tycho::ResourceFTP {
     # True if the file is open
     private variable fileIsOpen 0
 
-    # Timeout for sending/receiving protocol message. Default 2 seconds
-    private variable timeout 2000
+    # Timeout for sending/receiving protocol message. Default 5 seconds
+    private variable timeout 5000
 }
 
 
@@ -358,18 +362,11 @@ body ::tycho::ResourceFTP::ftphandler {} {
     # This returns the status number. 200-299 is okay (just like HTTP)
     # Need to use regexp instead of lindex because some servers return
     # number followed by - (ie. 200- This is just a comment).
-    if {![regexp {^([0-9]+) .*} $line _ status]} {
-        return
-    }
+    if {![regexp {^([0-9]+) .*} $line _ status]} {return}
 
     set cmd {}
     # The following is a state machine
     switch -- $state {
-        DISCONNECTED {
-            ftpabort "DISCONNECTED: Error, should not expect incoming message"
-            set progress -1
-        }
-
         USER {
             # USER 220 messier.eecs.berkeley.edu FTP server
             if [regexp -nocase {^22[0-9] .*} $line] {
@@ -417,8 +414,17 @@ body ::tycho::ResourceFTP::ftphandler {} {
         }
 
         PORT {
+            # 213 5000
+            # 500 SIZE not a good command
+            if [regexp -nocase {^2[0-9][0-9] .*} $line] {
+                set ftpsize [lindex $line 1]
+            } else {
+                set status 213
+                set ftpsize 0
+            }
+
             # Setup a ftpdataport
-            if {[ftpdataportinit]<=0} {
+            if {[ftpdataportopen]<=0} {
                 ftpabort "$status> Could not open up a client socket"
                 return
             }
@@ -430,28 +436,26 @@ body ::tycho::ResourceFTP::ftphandler {} {
                 set state TYPE
             } elseif {$ftptype=="dir"} {
                 set state CWD
-            }
+            } else {error "syntax error: ftptype is unknown: $ftptype"}
             after $timeout "eval $this ftptimeout $state"
-
-            # 213 5000
-            # 500 SIZE not a good command
-            if [regexp -nocase {^2[0-9][0-9] .*} $line] {
-                set ftpsize [lindex $line 1]
-            } else {
-                set ftpsize 0
-            }
         }
 
         TYPE {
             # 200 PORT command successful.
             if [regexp -nocase {^22[0-9] .*} $line] {
-                set cmd "RETR [::tycho::url join $ftppath $ftpfile]"
+                set cmd "TYPE I"    ;# Always binary transfer
                 set state RETR
                 after $timeout "eval $this ftptimeout $state"
             }
         }
+        RETR {
+            
+            set cmd "RETR [::tycho::url join $ftppath $ftpfile]"
+        }
+
 
         CWD {
+            # Protocol for file list
             # 200 PORT command successful.
             if [regexp -nocase {^20[0-9] .*} $line] {
                 set cmd "CWD $ftppath"
@@ -463,11 +467,39 @@ body ::tycho::ResourceFTP::ftphandler {} {
             # 250 CWD command successful.
             if [regexp -nocase {^25[0-9] .*} $line] {
                 set cmd "LIST"
+                set state TRANSFER1
                 after $timeout "eval $this ftptimeout $state"
             }
         }
-
+        TRANSFER1 {
+            # 150 Binary data connection for README (1.3.4.5,8192) (350 bytes).
+            if [regexp -nocase {^15[0-9] .*} $line] {
+                # Just wait until end of dataport transfer
+                set state TRANSFER2
+                # DO NOT SET A TIME OUT! File transfer could take a while.
+            }
+        }
+        TRANSFER2 {
+            # 226 ASCII Transfer complete.
+            if [regexp -nocase {^22[0-9] .*} $line] {
+                set cmd "QUIT"
+                set state QUIT
+                after $timeout "eval $this ftptimeout $state"
+            }
+        }
+        
+        
+        QUIT {
+            # 221 Goodbye.
+            if [regexp -nocase {^22[0-9] .*} $line] {
+                set state DISCONNECTED
+                # DO NOT SET A TIME OUT!
+                catch {::close $_socketid}
+            }
+        }
+        
     }
+
     # The following is required because Tcl will buffer all output
     if {$cmd!={}} {
         debugputs "$state> $cmd"
@@ -475,22 +507,26 @@ body ::tycho::ResourceFTP::ftphandler {} {
         ::flush $_socketid
     }
 
-    if {$status>=400 && !($state=="CWD" || $state=="TYPE")} {
-        # we have $status now, check if it's error
+    # Timeout 421
+    if {$status==421} {ftpabort "$state> $line"}
+
+    # we have $status now, check if it's error
+    if {$status>=400} {
         ftpabort "$state> ERROR: $line"
     }
 }
 
+
 #########################################################################
-#### ftpdataportinit
-# Open up a socket (client) so that server can send data into
+#### ftpdataportopen
+# Open up a socket so that server can send data into
 # the socket. The socket number is determined by 
 # (the current socket connecting to the server) + 1 + (n tries)
-#
-#
+# 
 # Return ftpdataport's file descriptor if successfully opened up a socket.
 # 0 if failed n times.
-body ::tycho::ResourceFTP::ftpdataportinit {} {
+#
+body ::tycho::ResourceFTP::ftpdataportopen {} {
     # Try to open up socket 15 times.
     set n 15
 
@@ -500,15 +536,13 @@ body ::tycho::ResourceFTP::ftpdataportinit {} {
     while {$n > 0} {
         debugputs "Going to open up port $_dataport"
         
-        socket -server \
-                "@scope ::tycho::ResourceFTP $this ftpdataport" \
-                $_dataport
+        if {![catch {socket -server \
+                "@scope ::tycho::ResourceFTP $this ftpdataportinit" \
+                $_dataport} _datafd]} {
+            debugputs "SUCCESS: ($_datafd), [fconfigure $_datafd -sockname]"
 
-        if {0} {
-            debugputs "SUCCESS: [fconfigure $dataid -sockname]"
-
-            fconfigure $dataid -blocking no -translation auto
-            return $dataid
+            fconfigure $_datafd -blocking no
+            return $_datafd
         }
         incr n -1
         # Increase the port amount more will increase the probability
@@ -519,15 +553,34 @@ body ::tycho::ResourceFTP::ftpdataportinit {} {
 }
 
 #########################################################################
+#### ftpdataportinit
+# When a connection is first made, this method is called. This method
+# three arguments passed automatically with the line "socket -server <meth>".
+# 
+# They are fd, location, and port (originator's port)
+body ::tycho::ResourceFTP::ftpdataportinit {fd location port} {
+    debugputs "OKAY ($_datafd) GOT ($fd) $location $port"
+
+    fconfigure $fd -blocking no -translation auto
+    fileevent $fd writable {}
+    fileevent $fd readable \
+            "@scope ::tycho::ResourceFTP $this ftpdataport $fd"
+    # Close off client's initial socket connection.
+    catch {::close $_datafd}
+}
+
+#########################################################################
 #### ftpdataport
+# Dataport handler, receive data and save it.
 #
-body ::tycho::ResourceFTP::ftpdataport {fd location port} {
-    if [eof $fd] {
-        catch {close $fd}
+body ::tycho::ResourceFTP::ftpdataport {fd} {
+    if [::eof $fd] {
+        debugputs "--->EOF"
+        catch {::close $fd}
         return
     }
     ::gets $fd line
-    ::puts "$fd $location $port> $line"
+    debugputs "--->$line"
 }
 
 #########################################################################
