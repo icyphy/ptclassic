@@ -21,8 +21,12 @@ SDFDIR = $(ROOT)/src/domains/sdf/kernel
 
 INCL = -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
 
+DOMAIN_2 = AnyAsm
+
 # source files for all stars, using preprocessor
 PL_SRCS= \
+ AnyAsmBlackHole.pl \
+ AnyAsmFork.pl \
  CGRateChange.pl \
  CGMultiIn.pl \
  CGMultiInOut.pl \
