@@ -32,7 +32,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  linking.
 
  The stuff for HP is not yet completed, hence linkingNotSupported is
- true.
+ true on that platform.
 
 **************************************************************************/
 
@@ -85,6 +85,8 @@ const int linkingNotSupported =
 // hp-ux does not provide this function; may need to be changed
 #ifdef hpux
 inline int getpagesize() { return 4096;}
+#else
+extern "C" int getpagesize(void);
 #endif
 
 // Prefix for constructor-calling symbols
@@ -129,6 +131,12 @@ extern "C" {
 #include <std.h>
 #ifndef mips
 #include <sys/file.h>
+#endif
+
+// gcc/libg++ 2.5 is missing a prototype for pclose, though there is one
+// for popen.  Go figure.
+#ifdef __GNUG__
+extern "C" int pclose(FILE *);
 #endif
 
 // the following code may also be needed on other platforms.
