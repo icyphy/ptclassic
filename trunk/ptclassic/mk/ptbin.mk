@@ -42,6 +42,13 @@
 
 VERSION =	0.6devel.$(BASENAME)
 
+ifndef PTINY
+ifndef PTRIM
+	# If PTINY or PTRIM are not defined, then this is a full build
+	FULL=1
+endif
+endif
+
 ifdef FULL
 	PIGI=$(BASENAME)
 	BDF=1
@@ -92,7 +99,11 @@ PIGI_OBJS += $(STARS) $(TARGETS)
 PIGI_BINARIES = 	$(PIGI) $(PIGI).debug $(PIGI).debug.purify \
 			$(PIGI).debug.quantify $(PIGI).debug.purecov
 
-REALCLEAN_STUFF= $(PIGI_BINARIES)
+REALCLEAN_STUFF= $(PIGI_BINARIES) \
+		$(PIGI).ptiny $(PIGI).ptiny.debug $(PIGI).ptiny.debug.purify \
+		$(PIGI).ptiny.debug.quantify $(PIGI).ptiny.debug.purecov \
+		$(PIGI).ptrim $(PIGI).ptrim.debug $(PIGI).ptrim.debug.purify \
+		$(PIGI).ptrim.debug.quantify $(PIGI).ptrim.debug.purecov
 
 ####################################################################
 # Variable definitions are above this point.  Rules are below this point.
@@ -169,26 +180,26 @@ $(BINDIR)/$(BASENAME): $(BASENAME)
 
 else #ALLBINARIES
 
-$(PIGI): $(PT_DEPEND) $(ADD_SRCS)
+$(PIGI): $(PT_DEPEND) $(ADD_OBJS)
 	$(PURELINK) $(LINKER) $(LINKFLAGS) $(PIGI_OBJS) $(LIBS) -o $@
 
 # Same, with debugging symbols.
-$(PIGI).debug: $(PT_DEPEND) $(ADD_SRCS)
+$(PIGI).debug: $(PT_DEPEND) $(ADD_OBJS)
 	$(PURELINK) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
 
 # Same, with debugging symbols and purify
-$(PIGI).debug.purify: $(PT_DEPEND) $(ADD_SRCS)
+$(PIGI).debug.purify: $(PT_DEPEND) $(ADD_OBJS)
 	$(PURIFY) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
 
 # Same, with quantify, for profiling.
-$(PIGI).debug.quantify: $(PT_DEPEND) $(ADD_SRCS)
+$(PIGI).debug.quantify: $(PT_DEPEND) $(ADD_OBJS)
 	$(QUANTIFY) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
 
 # Same, with purecov, for code coverage measurements.
-$(PIGI).debug.purecov: $(PT_DEPEND) $(ADD_SRCS)
+$(PIGI).debug.purecov: $(PT_DEPEND) $(ADD_OBJS)
 	$(PURECOV) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
 
-version.$(PIGI).c: $(PT_DEPEND)
+version.$(PIGI).o: $(PT_DEPEND)
 	echo char '*gVersion = "Version:' $(VERSION) \
 		'%created' `date` '";' | sed 's/%/\\n/g' > version.$(PIGI).c
 	$(CC) -c version.$(PIGI).c
