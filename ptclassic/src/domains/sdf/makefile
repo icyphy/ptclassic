@@ -11,7 +11,7 @@
 # objects can be maintained.
 
 
-DIRS = kernel stars expgraph loopScheduler image
+DIRS = kernel stars expgraph loopScheduler image targets
 
 ME = sdf
 
