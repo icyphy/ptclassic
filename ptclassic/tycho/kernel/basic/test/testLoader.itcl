@@ -52,8 +52,12 @@ test Loader-1.1 {load up the profile command} {
     set profileobj [file join $profileobjdir \
 	    tclXprofile[info sharedlibextension]]
     if ![file exists $profileobj] {
-	exec cd $profiledir; make all
+	puts "About to run make in $profiledir"
+	set savedir [pwd]
+	cd $profiledir
+	exec make all
 
+	cd $savedir
 	#	set endtime [expr [clock seconds] +20]
 	#	while {[clock seconds] < $endtime} {
 	#	    puts -nonewline .
