@@ -70,6 +70,7 @@ const int MAX_NO_GRAPHS = 64;
 #include "miscFuncs.h"
 #include <math.h>
 #include "streamCompat.h"
+#include "paths.h"
 
 // constructor initializes streams and filenames
 XGraph :: XGraph () : strm(0), tmpFileNames(0), count(0), blockIamIn(0), ng(0)
@@ -100,6 +101,10 @@ void XGraph :: initialize(Block* parent,
 			  const char* saveFile,
 			  int ignore)
 {
+	// test for existence of program.
+	if (progNotFound("xgraph", "Plots cannot be generated without it.\n"))
+		return;
+
 	StringList msg;
 
 	// just in case initialize is called twice.
