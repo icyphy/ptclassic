@@ -8,7 +8,7 @@ With the default parameters, input samples are simply accumulated,
 and the running sum is the output.  To prevent any resetting in the
 middle of a run, connect a d.c. source with value 0.0 to the "reset"
 input.  Otherwise, whenever a non-zero is received on this input,
-the accumulated sum is reset to 0.0.
+the accumulated sum is reset to the current input (i.e. no feedback).
 
 Limits are controlled by the "top" and "bottom" parameters.
 If top <= bottom, no limiting is performed (default).  Otherwise,
@@ -75,24 +75,23 @@ is the previous output.
 	}
 	go {
 	    double t;
-	    if (int(reset%0) != 0) t = 0;
-	    else {
+	    if (int(reset%0) != 0) {
+		t = double(data%0);
+	    } else {
 		t = double(data%0) + double(feedbackGain) * double(state);
-		if (spread > 0.0) {
+	    }
+	    if (spread > 0.0) {
 		    // Limiting is in effect
 
 		    // Take care of the top
-		    if (t > double(top))
-			if (int(saturate)) t = double(top);
-			else do t -= spread;
-			     while (t > double(top));
+		if (t > double(top))
+		    if (int(saturate)) t = double(top);
+		    else do t -= spread; while (t > double(top));
 
 		    // Take care of the bottom
-		    if (t < double(bottom))
-			if (int(saturate)) t = double(bottom);
-			else do t += spread;
-			     while (t < double(bottom));
-		}
+		if (t < double(bottom))
+		    if (int(saturate)) t = double(bottom);
+		    else do t += spread; while (t < double(bottom));
 	    }
 	    output%0 << t;
 	    state = t;
