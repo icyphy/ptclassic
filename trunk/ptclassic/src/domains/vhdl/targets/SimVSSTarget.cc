@@ -130,9 +130,18 @@ void SimVSSTarget :: setup() {
   simarchString << simarch.currentValue();
   const char* hashSimarchString = hashstring(simarchString);
 
-  putenv(hashSynopsysString);
-  putenv(hashArchString);
-  putenv(hashSimarchString);
+  // Under SunOS4.1.3, the man page for putenv() says:
+  //    string points to a string of the form `name=value'  putenv()
+  //    makes  the  value  of the environment variable name equal to
+  //    value by altering an existing variable  or  creating  a  new
+  //    one.   In  either  case,  the  string  pointed  to by string
+  //    becomes part of the environment, so altering the string will
+  //    change  the  environment.   The  space  used by string is no
+  //    longer used once a new string-defining  name  is  passed  to
+  //    putenv().
+  putenv((char *)hashSynopsysString);
+  putenv((char *)hashArchString);
+  putenv((char *)hashSimarchString);
 
   writeCom = 1;
 
