@@ -44,10 +44,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	    out << -i;
 	    out << ") $assign(output) $refCx(input, ";
 	    out << -i;
-	    out << , real");\n";
+	    out << ", real);\n";
 	  }
 	  addCode(out);
 	  out.initialize();
 	}
 }
-
