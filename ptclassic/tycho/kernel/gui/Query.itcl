@@ -319,6 +319,9 @@ class ::tycho::Query {
     # Get the current value of the queries (or one query).
     method get {{tag {}}}
 
+    # Insert tags to the specified tag group.
+    method groupTags { grouptag args}
+
     # Insert the specified string into the specified query.
     method insert {tag str}
 
@@ -339,6 +342,12 @@ class ::tycho::Query {
 
     # Execute the -okcommand command and close the window.
     method ok {}
+
+    # Return the value of the specified configuration option.
+    method querycget {tag option}
+
+    # Change the configuration option of the specified query.
+    method queryconfigure {tag option value}
 
     # Add a radio button query.
     method radio {tag label bttnNames default args}
@@ -375,6 +384,9 @@ class ::tycho::Query {
 
     ##################################################################
     ####             protected and private variables              ####
+
+    # Array of tag groups
+    private variable taggroups
 
     # Keep track of tags in the order in which they are created.
     private variable tags {}
@@ -694,10 +706,35 @@ body ::tycho::Query::get {{tag {}}} {
             lappend response $tag
             lappend response [eval $tagsget($tag)]
         }
-    } {
+    } elseif [info exists taggroups($tag)] {
+	foreach tag $taggroups($tag) {
+	    lappend response [get $tag]
+	}
+    } else {
         set response [eval $tagsget($tag)]
     }
     return $response
+}
+
+#####################################################################
+#### groupTags
+# Create the specified tag group if it doesn't exist, and
+# insert tags into the specified tag group. 
+# 
+body ::tycho::Query::groupTags {grouptag args} {
+    if {[info exists taggroups($grouptag)] == 0} {
+	set taggroups($grouptag) {}
+    }
+
+    # if no tag is given, return the tags in the specified group tag.
+    if {$args == ""} { return $taggroups($grouptag) }
+
+    foreach tag $args {
+	if {[lsearch $tags $tag] == -1} {
+	    error "tag $tag does not exist in $this"
+	}
+	lappend taggroups($grouptag) $tag 
+    }
 }
 
 #####################################################################
@@ -957,6 +994,48 @@ body ::tycho::Query::ok {} {
     delete object $this
 }
 
+#####################################################################
+#### querycget
+# Return the value of the specified configuration option.
+#
+body ::tycho::Query::querycget {tag option} {
+    array set gridopt [grid info $itk_component(tag_$tag)]
+    if {$option == "-column"} {
+	return [expr $gridopt($option)/2]
+    } elseif [info exists gridopt($option)] {
+    # If another option for grid,
+	return $gridopt($option)
+    } else {
+	return [$itk_component(tag_$tag) cget $option]
+    }
+}
+
+#####################################################################
+#### queryconfigure
+# Configure the option of the query.
+# 
+body ::tycho::Query::queryconfigure {tag option value} {
+    array set entryopt [grid info $itk_component(tag_$tag)]
+    array set labelopt [grid info $itk_component(label_$tag)]
+    if {$option == "-column"} {
+	if {$entryopt(-column) > $labelopt(-column)} {
+	    grid configure $itk_component(tag_$tag) -column [expr 2*$value+1]
+	    grid configure $itk_component(label_$tag) -column [expr 2*$value]
+	} {
+	    grid configure $itk_component(tag_$tag) -column [expr 2*$value]
+	    grid configure $itk_component(label_$tag) -column [expr 2*$value+1]
+	}
+    } elseif {$option == "-row"} {
+	grid configure $itk_component(tag_$tag) -row $value
+	grid configure $itk_component(label_$tag) -row $value
+    } elseif [info exists entryopt($option)] {
+    # If another option for grid,
+	grid configure $itk_component(tag_$tag) $option $value
+    } else {
+	$itk_component(tag_$tag) configure $option $value
+    }
+}
+    
 #####################################################################
 #### radio
 # Add a radio button query. The arguments are:
