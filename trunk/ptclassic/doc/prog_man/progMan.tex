@@ -1,0 +1,41 @@
+% Version $Id$
+% Author:	T. M. Parks
+% Created:	17 January 1993
+
+\documentstyle[12pt,elisp,ptinfo,Almagest]{book}
+% The volume number is used in the page headings.
+\def\Volume{2}
+
+\newindex{cp}
+\newindex{pg}
+\newindex{fn}
+\newindex{vr}
+\newindex{tp}
+\newindex{ky}
+
+% The \syncodeindex command does not work, so use \synindex instead.
+\synindex{pg}{cp}
+\synindex{fn}{cp}
+\synindex{vr}{cp}
+\synindex{tp}{cp}
+\synindex{ky}{cp}
+
+\begin{document}
+
+\alwaysrefill
+\setfilename{progMan.info}
+
+\node Top
+
+\begin{ifinfo}
+\title{The Almagest\\
+A Programmer's Guide to \Ptolemy}
+\author{}
+\maketitle
+\end{ifinfo}
+
+\include{start}
+
+\include{../../src/domains/cgc/doc/CGCProg}
+
+\end{document}
