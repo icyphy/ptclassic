@@ -107,7 +107,7 @@ which is a function of k and N
 		// double Nd = double(int(N));
 		double Nd = double(int(N) ? int(N) : 1);
 		double kd = double(int(k));
-		theta = 2.0 * M_PI * kd / Nd;
+		theta = -2.0 * M_PI * kd / Nd;
 		WnReal= double(cos(theta));
 		WnImag  = double(sin(theta));
 		input.setSDFParams(int(size), int(size)-1);
