@@ -180,7 +180,6 @@ sccsinfo:
 		    if [ -w $$x ] ; then \
 			( cd $$x ; \
 			echo making $@ in $$x ; \
-			sccs check || true ; \
 			$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
 			) \
 		    fi ; \
