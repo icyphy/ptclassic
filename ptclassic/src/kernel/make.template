@@ -1,5 +1,5 @@
 # Makefile for Ptolemy library and main module for interpreter
-# @(#)make.template	1.8	5/22/90
+# $Id$
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
