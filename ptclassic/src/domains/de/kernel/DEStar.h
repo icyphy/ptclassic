@@ -72,7 +72,7 @@ public:
 	/* virtual */ int run();
 
 	// send output events to the global event queue.
-	void sendOutput();
+	inline void sendOutput();
 
 	// class identification
 	/* virtual */ int isA(const char*) const;
