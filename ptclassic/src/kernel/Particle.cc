@@ -60,7 +60,7 @@ extern const DataType ANYTYPE = "ANYTYPE";
 
 extern const DataType INT = "INT";
 
-Particle* IntParticle :: clone () {
+Particle* IntParticle :: clone () const {
 	Particle* p = intPlasma.get();
 	((IntParticle*)p)->data = data;
 	return p;
@@ -68,7 +68,7 @@ Particle* IntParticle :: clone () {
 
 void IntParticle :: die () { intPlasma.put(this);}
 
-Particle* IntParticle :: useNew () { LOG_NEW; return new IntParticle;}
+Particle* IntParticle :: useNew () const { LOG_NEW; return new IntParticle;}
 
 Particle& IntParticle :: operator = (const Particle& p)
 {
@@ -107,9 +107,10 @@ void IntParticle :: operator << (const Complex& c) {data=int(abs(c));}
 
 extern const DataType FLOAT = "FLOAT";
 
-Particle* FloatParticle :: useNew () { LOG_NEW; return new FloatParticle;}
+Particle* FloatParticle :: useNew () const
+{ LOG_NEW; return new FloatParticle;}
 
-Particle* FloatParticle :: clone () { 
+Particle* FloatParticle :: clone () const { 
 	Particle* p = floatPlasma.get();
 	((FloatParticle*)p)->data = data;
 	return p;
@@ -163,9 +164,10 @@ ComplexParticle :: ComplexParticle(double f) {data= f;}
 ComplexParticle :: ComplexParticle(int i) {data = double(i);}
 ComplexParticle :: ComplexParticle() {data=0.0;}
 
-Particle* ComplexParticle :: useNew () { LOG_NEW; return new ComplexParticle;}
+Particle* ComplexParticle :: useNew () const
+{ LOG_NEW; return new ComplexParticle;}
 
-Particle* ComplexParticle :: clone () {
+Particle* ComplexParticle :: clone () const {
 	Particle* p = complexPlasma.get();
 	((ComplexParticle*)p)->data = data;
 	return p;

@@ -192,9 +192,9 @@ public:
 
 	// clone, useNew, die analogous to other particles.
 
-	Particle* clone();
+	Particle* clone() const;
 
-	Particle* useNew();
+	Particle* useNew() const;
 	void die();
 
 private:

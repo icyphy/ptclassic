@@ -190,13 +190,13 @@ int MessageParticle :: operator == (const Particle& p) {
 
 // clone, useNew, die analogous to other particles.
 
-Particle* MessageParticle::clone() {
+Particle* MessageParticle::clone() const {
 	Particle * p = messagePlasma.get();
 	((MessageParticle*)p)->data = data;
 	return p;
 }
 
-Particle* MessageParticle::useNew() {
+Particle* MessageParticle::useNew() const {
 	LOG_NEW; return new MessageParticle;
 }
 
