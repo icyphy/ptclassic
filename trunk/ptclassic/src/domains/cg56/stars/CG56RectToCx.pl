@@ -28,9 +28,9 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { COMPLEX }
 	}
 	codeblock (convert) {
-	move 	$ref(real),a1
-	move 	$ref(imag),a0
-	move 	a10,L:$addr(output)
+	move 	$ref(real),x1
+	move 	$ref(imag),x0
+	move 	x,L:$addr(output)
 	}
 	go {
 		addCode(convert);
