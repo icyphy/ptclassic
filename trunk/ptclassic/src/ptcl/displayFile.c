@@ -32,9 +32,24 @@ ENHANCEMENTS, OR MODIFICATIONS.
 Author: Christopher Hylands 9/3/96
 */
 
-#include "DisplayFile.c"
+#include "displayFile.h"
 #include <tcl.h>
+#include <string.h>
+#include <stdlib.h>		/* For system() */
 
+extern char* getenv();
+
+/* We could pass this around everywhere and have displayFile.h include
+ * tcl.h, but that would add a layer of complication.
+ */
+Tcl_Interp *ptkInterp;
+
+/* The following provides more convenient and consistent access to Tcl
+   with error checking.  See pigilib/err.h  */
+#define TCL_CATCH_ERR(tcl_call) \
+    if ( (tcl_call) != TCL_OK) { \
+	Tcl_Eval(ptkInterp,"ptkDisplayErrorInfo"); \
+    }
 /*
  * If the PT_DISPLAY environment variable is not set, then set
  * buf to the empty string.
@@ -42,14 +57,13 @@ Author: Christopher Hylands 9/3/96
  * the value of $PT_DISPLAY into buf.  PT_DISPLAY should 
  * be printf format string, like "xedit -name ptolemy_code %s".
  */
-static void genDispCommand(char *buf, const char *fileName, int background)
+static void genDispCommand(char *buf, const char *fileName)
 {
     char* dispCmd = getenv("PT_DISPLAY");
     if (dispCmd == 0) {
 	*buf = '\0';
     } else {
-	sprintf(buf, dispCmd, file);
-	if (background) strcat(buf, "&");
+	sprintf(buf, dispCmd, fileName);
     }
 }
 
@@ -69,31 +83,46 @@ void startTycho() {
  *  
  * Currently, this function is called from pigilib/icon.c and from
  * cg/kernel/CGUtilties.cc
- */
-int DisplayFile( const char *fileName, void (*errFuncPtr)(char *))
+ *
+ * fileName	- The name of the file to open
+ * debugFuncPtr - A function that takes a const char * that will print
+ *		  out status information about what is going on.  This
+ *		  is useful if there is a slight delay in getting things
+ *		  started
+ * errFuncPtr	- A functino that takes a const char * that will print
+ *		  an error message if something goes wrong.
+ * If debugFuncPtr or errFuncPtr are NULL, then they are not called.
+ */	
+int displayFile(const char *fileName,
+		void (*debugFuncPtr)(const char *),
+		void (*errFuncPtr)(const char *))
 {
   char buf[512];
-  genDispCommand(buf, fileName, TRUE);
+  genDispCommand(buf, fileName);
   if (*buf == '\0') {
-    PrintDebug("Invoking Tycho editor");
+    if (debugFuncPtr != (void (*)(const char *))NULL )    
+      (debugFuncPtr)("Invoking Tycho editor");
     startTycho();
     if (( Tcl_VarEval(ptkInterp,
 		      "::tycho::File::openContext ",
 		      fileName,
 		      (char *)NULL) ) != TCL_OK) {
       sprintf(buf, "Cannot invoke Tycho editor for '%s'", fileName);
-      *errFuncPtr(buf);
-      return (FALSE);
+      if (errFuncPtr != (void (*)(const char *)) NULL) 
+	(errFuncPtr)(buf);
+      return 0;
     }
-    return (TRUE);
+    return 1;
   } else {
-    PrintDebug(buf);
+    if (debugFuncPtr != (void (*)(const char *)) NULL)    
+      (debugFuncPtr)(buf);
     if (system(buf)) {
       sprintf(buf, "Cannot edit Ptolemy code file '%s'", fileName);
-      *errFuncPtr(buf);
-      return (FALSE);
+      if (errFuncPtr != (void (*)(const char *)) NULL)
+	(errFuncPtr)(buf);
+      return 0;
     }
-    return (TRUE);
+    return 1;
   }
 
 }
