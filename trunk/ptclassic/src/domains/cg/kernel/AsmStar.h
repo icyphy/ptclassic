@@ -119,10 +119,6 @@ protected:
 	// Reset the state entry list.
 	void zapStateEntries();
 
-	// Special method for limiting and printing fixedpoint values
-	// baseclass method does not limit.
-	virtual StringList printFixValue(double) const;
-
 	// add runCmds or miscCmds to the target streams.  cmd2 is
 	// supported to allow for individual command separators.
 	void addRunCmd(const char*,const char* cmd2=NULL);
