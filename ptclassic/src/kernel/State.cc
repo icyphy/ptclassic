@@ -49,10 +49,11 @@ inline unsigned int is_idchar(char c) {
 
 // Attributes
 // standard attributes.
-extern const Attribute A_CONSTANT(AB_CONST,0);
-extern const Attribute A_SETTABLE(AB_SETTABLE,0);
-extern const Attribute A_NONCONSTANT(0,AB_CONST);
-extern const Attribute A_NONSETTABLE(0,AB_SETTABLE);
+extern const Attribute A_CONSTANT = {AB_CONST,0};
+extern const Attribute A_SETTABLE = {AB_SETTABLE,0};
+extern const Attribute A_NONCONSTANT = {0,AB_CONST};
+extern const Attribute A_NONSETTABLE = {0,AB_SETTABLE};
+extern const Attribute A_DYNAMIC = {AB_DYNAMIC,0};
 
 ParseToken State :: pushback;
 
