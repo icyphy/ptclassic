@@ -277,8 +277,7 @@ void Block::initState () { states.initElements();}
 Scheduler* Block :: scheduler() const {
 	Block* p = parent();
 	if (p) return p->scheduler();
-	Error::abortRun(*this, "has neither a parent nor a scheduler");
-	return 0;
+	else return 0;
 }
 
 // destructor isn't really do-nothing because it calls destructors
