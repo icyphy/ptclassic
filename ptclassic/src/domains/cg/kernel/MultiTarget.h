@@ -59,8 +59,6 @@ public:
 	// Resolve the parameter conflicts based on priorities
 	void initState();
 
-	int getIters() { return iters; }
-
 	// create Send and Receive Star.  "from" and "to" are the processor
 	// ID numbers.  "num" is the number of tokens moved.
 	virtual DataFlowStar* createReceive(int from, int to, int num) = 0;
@@ -74,12 +72,6 @@ public:
 	// with each other, and should be called after they are created
 	// with the above methods.  The default implementation does nothing.
 	virtual void pairSendReceive(DataFlowStar* s, DataFlowStar* r);
-
-	// set current child.
-	void setCurChild(int i) { curChild = i; }
-
-	// get current child index.
-	int getCurChild() { return curChild; }
 
         // Inform how many processors are available.
         void setTargets(int);
@@ -181,9 +173,6 @@ protected:
 	IntState oneStarOneProc;	// all invocations of a star should
 					// be assigned to a single PE.
 
-	int curChild;
 	int nChildrenAlloc;
-private:
-	int iters;
 };
 #endif
