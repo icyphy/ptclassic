@@ -39,17 +39,11 @@ package require tycho.kernel.gui
 # Uncomment this to get a full report, or set in your Tcl shell window.
 # set VERBOSE 1
 
-# If a file contains non-graphical tests, then it should be named .tcl
-# If a file contains graphical tests, then it should be called .itcl
-# 
-# It would be nice if the tests would work in a vanilla itkwish binary.
-# Check for necessary classes and adjust the auto_path accordingly.
-#
-if {[namespace ptolemy {info classes File} ] == {} } {
-    uplevel #0 {
-	set ::auto_path [linsert $auto_path 0 [file join $TYCHO kernel]] 
-    }
-}
+# Unfortunately, these tests work by selecting an html
+# file, and therefore require the HTML package. This should
+# not be necessary, but Tycho barfs because the html mode
+# is unregistered, instead of defaulting to plain text (?)
+package require tycho.kernel.html
 
 ######################################################################
 #### testIndexBrowserSetup
@@ -110,18 +104,15 @@ test IndexBrowser-1.1 {Bring up a index, select an simple node} {
 ######################################################################
 #### 
 # 
-# This next test is going to need the HTML browser...
-if ![catch {package require tycho.kernel.html} ] {
-    test IndexBrowser-1.2 {Bring up a index, select an hierarchichal index} {
-	testIndexBrowserSetup
+test IndexBrowser-1.2 {Bring up a index, select an hierarchichal index} {
+    testIndexBrowserSetup
 
-	# Bring up the browser, open the home page
-	set win [::tycho::File::openContext IndexBrowser.idx]
-	$win clearSelection
-	$win goto 1
-	# It would be nice if we could some how get the return value here.
-	$win ok
-	# .. until that happens, just return this:
-	list {}
-    } {{}}
-}
+    # Bring up the browser, open the home page
+    set win [::tycho::File::openContext IndexBrowser.idx]
+    $win clearSelection
+    $win goto 1
+    # It would be nice if we could some how get the return value here.
+    $win ok
+    # .. until that happens, just return this:
+    list {}
+} {{}}
