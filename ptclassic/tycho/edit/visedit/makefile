@@ -43,11 +43,14 @@ include $(CONFIG)
 TCL_SRCS =
   
 ITCL_SRCS = \
+	DirectedAcyclicGraph.itcl \
 	EditBubbleAndArc.itcl \
 	EditDAG.itcl \
 	EditForest.itcl \
 	EditPalette.itcl \
 	EditSTD.itcl \
+	Forest.itcl \
+	Graph.itcl \
 	Graphics.itcl \
 	HTMLExport.itcl \
 	ProfileTcl.itcl 
