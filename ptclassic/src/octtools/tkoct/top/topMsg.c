@@ -86,14 +86,14 @@ void topMsg( TOPMask flags, char *msg) {
     char		*buf;
     int			n;
 
-    if ( msg == NULL || *msg == NULL ) {
+    if ( msg == NULL || *msg == (char)NULL ) {
 	buf = topBufStrcpy( "(Unknown null message)\n");
     } else {
         buf = topBufStrcpy( msg);
 	n = strlen( buf);
 	if ( n > 0 && buf[n-1] != '\n' ) {
 	    buf[n] = '\n';
-	    buf[n+1] = NULL;
+	    buf[n+1] = (char)NULL;
 	}
     }
 

@@ -188,7 +188,7 @@ _topBufStrcpy( char *buf, int buflen, char *str) {
 
     n = strlen( str);
     if ( n >= buflen - TOP_MSG_BUFPADSIZE ) {
-	buf[buflen-1] = NULL;
+	buf[buflen-1] = (char)NULL;
 	_topBufOverflow( buf);	/* aborts */
     }
     strcpy( buf, str);
@@ -213,7 +213,7 @@ _topBufStrcat( char *buf, int buflen, char *str) {
     nb = strlen(buf);
     n = strlen( str);
     if ( n+nb >= buflen - TOP_MSG_BUFPADSIZE ) {
-	buf[buflen-1] = NULL;
+	buf[buflen-1] = (char)NULL;
 	_topBufOverflow( buf);	/* aborts */
     }
     strcpy( buf+nb, str);
@@ -233,7 +233,7 @@ _topBufFmtVa( char *buf, int buflen, char *fmt, va_list args) {
     vsprintf( buf, fmt, args);
     n = strlen( buf);
     if ( n >= buflen - TOP_MSG_BUFPADSIZE ) {
-	buf[buflen-1] = NULL;
+	buf[buflen-1] = (char)NULL;
 	_topBufOverflow( buf);	/* aborts */
     }
     return buf;
