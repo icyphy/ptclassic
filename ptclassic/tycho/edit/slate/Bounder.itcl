@@ -71,8 +71,6 @@
 # <li><b>none</b>: Move anywhere within the bounds
 # <li><b>x</b>: Move only along the horizontal axis
 # <li><b>y</b>: Move only along the vertical axis
-# <li><b>positive</b>: Move only along the positive diagonal axis
-# <li><b>negative</b>: Move only along the negative diagonal axis
 # </ul>
 #
 # </dl></dl>
@@ -133,11 +131,7 @@ class ::tycho::Bounder {
     # The position to which the cursor has been moved
     private variable actualX
     private variable actualY
-    
-    # The starting position of the cursor
-    private variable startX
-    private variable startY
-}
+ }
 
 
 #######################################################################
@@ -162,9 +156,9 @@ body ::tycho::Bounder::click {x y args} {
 	set b {}
 	if { [llength $b] != 4 } {
 	    # That didn't work either: use the size of the slate
-	    set b [list 2 2 \
-		    [expr [winfo width $slate] - 2] \
-		    [expr [winfo height $slate] - 2]]
+	    set b [list 0 0 \
+		    [winfo width $slate]  \
+		    [winfo height $slate]]
 	}
     }
     # Remember the bounds
@@ -185,11 +179,6 @@ body ::tycho::Bounder::click {x y args} {
     # Remember where we are
     set actualX $x
     set actualY $y
-    
-    if { $constrain == "positive" || $constrain == "negative" } {
-	set startX $x
-    	set startY $y
-    }
 }
 
 #######################################################################
@@ -200,7 +189,7 @@ body ::tycho::Bounder::click {x y args} {
 # new point, constraining movement if specified.
 #
 body ::tycho::Bounder::drag {x y} {
-    # Keep x in bounds
+   # Keep x in bounds
     if { $constrain != "y" } {
 	if { $x < $x0 } {
 	    set actualX $x0
@@ -210,7 +199,6 @@ body ::tycho::Bounder::drag {x y} {
 	    set actualX $x
     	}
     }
-
     # Keep y in bounds
     if { $constrain != "x" } {
 	if { $y < $y0 } {
@@ -221,13 +209,5 @@ body ::tycho::Bounder::drag {x y} {
 	    set actualY $y
     	}
     }
-
-    # Move it, constraining diagonal movement if necessary
-    if { $constrain == "negative" } {
-	chain $actualX [expr $startY+($actualX-$startX)]
-    } elseif { $constrain == "positive" } {
-	chain $actualY [expr $startY-($actualY-$startX)]
-    } else {
-	chain $actualX $actualY
-    }
+    chain $actualX $actualY
 }
