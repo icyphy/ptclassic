@@ -48,7 +48,7 @@
 # TCL_SRCS	.tcl files
 # HDRS		.h files.
 # JSRCS		.java files
-# JCLASSES	.class files
+# JCLASS	.class files
 # OBJS		.o files
 # LIB		The name of the library being created.
 # EXP		???
@@ -275,7 +275,7 @@ htmlchek:
 checkjunk:
 	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) $(MISC_FILES) \
 		$(OPTIONAL_FILES) $(JSRCS) makefile SCCS \
-		$(JCLASSES) $(OBJS) $(LIB) 
+		$(JCLASS) $(OBJS) $(LIB) 
 	@if [ "x$(DIRS)" != "x" ]; then \
 		set $(DIRS); \
 		for x do \
@@ -292,7 +292,7 @@ checkjunk:
 # Rules for cleaning
 
 CRUD=*.o *.so core *~ *.bak ,* LOG* *.class \
-	config.cache config.log config.status $(KRUFT)  
+	config.cache config.log config.status $(JCLASS) $(KRUFT)  
 
 clean:
 	rm -f $(CRUD)
