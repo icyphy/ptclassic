@@ -57,6 +57,8 @@ public:
 };
 
 
+class GalStarIter;
+
 	////////////////////////////
 	// SDFScheduler
 	////////////////////////////
@@ -220,6 +222,8 @@ private:
 	// Pointer to star that may be causing deadlock
 	Block* dead;
 
+	// Function to report on deadlock
+	void reportDeadlock(GalStarIter&);
 	// Flag for errors detected while computing the schedule
 	int invalid;
 };
