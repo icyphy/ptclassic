@@ -43,6 +43,17 @@ class DEScheduler : public Scheduler {
 	// report delay-free-loop
 	int errorDelayFree(PortHole* p);
 	void errorUndefined(PortHole* p);
+
+	// If output events are generated at the "start" phase,
+	// send them to the global event queue
+	void initialFire(Galaxy&);
+
+	// check deley free loop
+	int checkDelayFreeLoop(Galaxy&);
+
+	// compute depth of all portholes
+	int computeDepth(Galaxy& g);
+
 public:
 	// my domain
 	const char* domain() const;

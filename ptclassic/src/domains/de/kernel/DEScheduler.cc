@@ -63,8 +63,7 @@ int DEScheduler :: setup (Galaxy& galaxy) {
 	// check connectivity
 	if (warnIfNotConnected (galaxy)) return FALSE;
 
-	// Notify each star of the global event queue, and fire source
-	// stars to initialize the global event queue.
+	// Notify each star of the global event queue, 
 	Star* s;
 	while ((s = next++) != 0) {
 		if (strcmp (s->domain(), DEdomainName) != 0) {
@@ -81,30 +80,12 @@ int DEScheduler :: setup (Galaxy& galaxy) {
 
 	galaxy.initialize();
 	
-	// detect the delay free loop.
-	next.reset();
-	while ((s = next++) != 0) {
-		BlockPortIter nextp(*s);
-		for (int k = s->numberPorts(); k > 0; k--) {
-			DEStar* ds = (DEStar*) s;
-			if(!checkLoop(nextp++, ds)) return FALSE;
-		}
-	}
+	// Fire source stars to initialize the global event queue.
+	initialFire(galaxy);
 
-	// set the depth of the stars...
-	next.reset();
-	while ((s = next++) != 0) {
-		BlockPortIter nextp(*s);
-		for (int k = s->numberPorts(); k > 0; k--) {
-			DEStar* ds = (DEStar*) s;
-			PortHole* p = nextp++;
-			if (p->isItInput())
-			   if(setDepth(p, ds) >= 0) {
-				Error::abortRun(*p, "has an undefined depth");
-				return FALSE;
-			   }
-		}
-	}
+	if (!checkDelayFreeLoop(galaxy)) return FALSE;
+
+	if (!computeDepth(galaxy)) return FALSE;
 
 	// set the relative time scale.
 	FloatState* st = (FloatState*) galaxy.stateWithName("timeScale");
@@ -123,6 +104,46 @@ int DEScheduler :: setup (Galaxy& galaxy) {
 	}
 
 	return !haltRequested();
+}
+
+//  If output events are generated during the "start" phase, send them
+//  to the global event queue.
+void DEScheduler :: initialFire(Galaxy& g) {
+	GalStarIter nextStar(g);
+	DEStar* s;
+	while ((s = (DEStar*) nextStar++) != 0 )
+		s->sendOutput();
+}
+
+// detect the delay free loop.
+int DEScheduler :: checkDelayFreeLoop(Galaxy& g) {
+	GalStarIter next(g);
+	DEStar* s;
+	while ((s = (DEStar*) next++) != 0) {
+		BlockPortIter nextp(*s);
+		for (int k = s->numberPorts(); k > 0; k--) {
+			if(!checkLoop(nextp++, s)) return FALSE;
+		}
+	}
+	return TRUE;
+}
+
+// set the depth of the stars...
+int DEScheduler :: computeDepth(Galaxy& g) {
+	GalStarIter next(g);
+	DEStar* s;
+	while ((s = (DEStar*) next++) != 0) {
+		BlockPortIter nextp(*s);
+		for (int k = s->numberPorts(); k > 0; k--) {
+			PortHole* p = nextp++;
+			if (p->isItInput())
+			   if(setDepth(p, s) >= 0) {
+				Error::abortRun(*p, "has an undefined depth");
+				return FALSE;
+			   }
+		}
+	}
+	return TRUE;
 }
 
 	////////////////////////////
