@@ -1,0 +1,76 @@
+/**************************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1992 The Regents of the University of California.
+                       All Rights Reserved.
+		       
+ Programmer:  J. T. Buck
+ Date of creation: 3/4/92
+
+This is the main program for the ptcl interpreter.  Most of the code
+here handles I/O and is copied from the "wish" Tcl/Tk interpreter by
+John Ousterhout.
+
+Eventually we will use streams instead and move this stuff into the PTcl
+class.
+
+**************************************************************************/
+
+#include "PTcl.h"
+#include "Error.h"
+#include <stdio.h>
+
+extern "C" int isatty(int);
+
+void prompt (int tty) {
+	if (tty) {
+		printf("ptcl: ");
+		fflush(stdout);
+	}
+}
+
+main () {
+	int tty = isatty(0);
+	// all this stuff should be moved into the PTcl class.
+	// streams would be better than stdio.
+
+	char* cmd;
+	Tcl_CmdBuf buffer = Tcl_CreateCmdBuf();
+	int result;
+	char line[200];
+	Tcl_Interp* interp = Tcl_CreateInterp();
+	PTcl ptcl(interp);
+	int gotPartial = 0;
+	prompt(tty);
+	while (fgets (line, 200, stdin) != NULL) {
+		cmd = Tcl_AssembleCmd(buffer, line);
+		if (cmd) {
+			gotPartial = 0;
+			result = Tcl_Eval(interp, cmd, 0, 0);
+			if (interp->result[0])
+				printf ("%s\n", interp->result);
+			prompt(tty);
+		}
+		else {
+			gotPartial = 1;
+		}
+	}
+	if (gotPartial) {
+		line[0] = 0;
+		cmd = Tcl_AssembleCmd(buffer, line);
+		if (cmd) {
+			result = Tcl_Eval(interp, cmd, 0, 0);
+			printf ("%s\n", interp->result);
+		}
+	}
+	Tcl_DeleteCmdBuf(buffer);
+}
+
+// the following stub is here until we support the Gantt chart
+// under the interpreter.
+
+extern "C" int displayGanttChart(const char*) {
+	Error::error("Gantt chart display not implemented for the interpreter");
+	return 0;
+}
