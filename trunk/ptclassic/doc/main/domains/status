@@ -15,7 +15,3 @@ system.  Any wormhole may contain any other wormhole
 to make a hierarchical structure (exception: it is not currently
 possible to define a wormhole whose outer domain is CG and whose
 inner domain is something else).
-Combinations of the two timed domains, DE and THOR, have rigorously tested
-our method of mixing timed domains.
-The timed nature of the SDF domain has proven 
-well behaved with the DE domain.
