@@ -67,9 +67,16 @@
 #		|	 depending on context
 #---------------------------------------------------------------------------
 
+# COMPATIBILITY
+if { $tk_version >= 4.0 } {
+  set ptkBind_Compatibility(Caret) tkEntrySeeInsert
+} else {
+  set ptkBind_Compatibility(Caret) tk_entrySeeCaret
+}
+
 #  C-F          |       Forward one character
     bind Entry <Control-f> {
-	%W icursor [expr [%W index insert]+1]; tk_entrySeeCaret %W
+	%W icursor [expr [%W index insert]+1]; $ptkBind_Compatibility(Caret) %W
     }
     bind Text <Control-f> {
 	%W mark set insert "insert + 1 char"
@@ -77,7 +84,7 @@
 
 #  C-B          |       Backward one character
     bind Entry <Control-b> {
-	%W icursor [expr [%W index insert]-1]; tk_entrySeeCaret %W
+	%W icursor [expr [%W index insert]-1]; $ptkBind_Compatibility(Caret) %W
     }
     bind Text <Control-b> {
 	%W mark set insert "insert - 1 char"
@@ -85,7 +92,7 @@
 
 #  C-A          |       Goto beginning of line
     bind Entry <Control-a> {
-	%W icursor 0; tk_entrySeeCaret %W
+	%W icursor 0; $ptkBind_Compatibility(Caret) %W
     }
     bind Text <Control-a> {
         %W mark set insert "insert linestart"
@@ -93,7 +100,7 @@
 
 #  C-E          |       Goto EOL
     bind Entry <Control-e> {
-	%W icursor end; tk_entrySeeCaret %W
+	%W icursor end; $ptkBind_Compatibility(Caret) %W
     }
     bind Text <Control-e> {
         %W mark set insert "insert lineend"
@@ -114,7 +121,7 @@
 	set ptkKillBuffer [
 	 string range [%W get] [%W index insert] [%W index end]
 	]
-	%W delete insert end; tk_entrySeeCaret %W
+	%W delete insert end; $ptkBind_Compatibility(Caret) %W
     }
     bind Text <Control-k> {
 	set ptkKillBuffer [%W get insert "insert lineend"]
@@ -123,7 +130,7 @@
 
 #  C-D          |       Delete insertion point character
     bind Entry <Control-d> {
-	%W delete insert; tk_entrySeeCaret %W
+	%W delete insert; $ptkBind_Compatibility(Caret) %W
     }
     bind Text <Control-d> {
 	%W delete insert
@@ -151,13 +158,15 @@
 
 #  C-W          |       (Backward) Kill word
     # This line copied and modified from Tk3.6 (file "tk.tcl")
-    bind Entry <Control-w> {entry_BackWordAndSave %W; tk_entrySeeCaret %W}
+    bind Entry <Control-w> {
+        entry_BackWordAndSave %W; $ptkBind_Compatibility(Caret) %W
+    }
     bind Text <Control-w> {text_BackWordAndSave %W}
     # FIXME: consecutive Control-w's should cause kill buffer to grow
       
 #  M-D          |       (Forward) Kill word
     bind Entry <Key-Escape><Key-d> {
-	entry_ForwardWordAndSave %W; tk_entrySeeCaret %W
+	entry_ForwardWordAndSave %W; $ptkBind_Compatibility(Caret) %W
     }
     bind Text <Key-Escape><Key-d> {
 	text_ForwardWordAndSave %W
@@ -193,7 +202,9 @@
     # not added for Text widgets
 
     #bind second mouse button to selection insertion
-    bind Entry <2> {%W insert insert [selection get]; tk_entrySeeCaret %W}
+    bind Entry <2> {
+        %W insert insert [selection get]; $ptkBind_Compatibility(Caret) %W
+    }
     bind Entry <B2-Motion> ""
     bind Text <2> {catch {%W insert insert [selection get]} }
     bind Text <B2-Motion> ""
@@ -218,12 +229,12 @@
 		selection clear %W
 	   } else {
 		%W insert insert %A
-		tk_entrySeeCaret %W
+		$ptkBind_Compatibility(Caret) %W
 	   }
 	   if {$exists} { set errorInfo $temp }
 	} else {
 		%W insert insert %A
-		tk_entrySeeCaret %W
+		$ptkBind_Compatibility(Caret) %W
 	}
     }
 
