@@ -1,5 +1,5 @@
-#ifndef _PTDSPNearestNeighbor_h
-#define _PTDSPNearestNeighbor_h 1
+#ifndef _ptdspNearestNeighbor_h
+#define _ptdspNearestNeighbor_h 1
 
 /*
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -35,7 +35,7 @@ Version: $Id$
 extern "C" {
 #endif
 
-extern void PTDSPNearestNeighbor(int* theindex, double* thedistance,
+extern void Ptdsp_NearestNeighbor(int* theindex, double* thedistance,
 	const double* trnVector, const double* codebook,
 	const double* halfCodewordPower, int sizeCodebook, int dimension);
 

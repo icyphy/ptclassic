@@ -1,5 +1,5 @@
-#ifndef _PTDSPcephes_h
-#define _PTDSPcephes_h
+#ifndef _ptdspcephes_h
+#define _ptdspcephes_h
 
 /*
 Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -70,8 +70,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 extern "C" {
 #endif
 
-extern double PTDSPi0( double x );
-extern double PTDSPchbevl( double x, double array[], int n );
+extern double Ptdsp_i0( double x );
+extern double Ptdsp_chbevl( double x, double array[], int n );
 
 #ifdef __cplusplus
 }

@@ -28,7 +28,7 @@ Programmer: Biling Lee and Brian Evans
 Version: $Id$
 */
 
-#include "PTDSPNearestNeighbor.h"
+#include "ptdspNearestNeighbor.h"
 
 /*
 Find the index of nearest neighbor in the codebook for the training
@@ -41,7 +41,7 @@ Ai=||Yi||^2/2 and should have already been stored in the array
 halfCodewordPower[numCodewords].
  */
 
-void PTDSPNearestNeighbor(int* theindex, double* thedistance,
+void Ptdsp_NearestNeighbor(int* theindex, double* thedistance,
 	const double* trnVector, const double* codebook,
 	const double* halfCodewordPower, int sizeCodebook,
 	int dimension) {

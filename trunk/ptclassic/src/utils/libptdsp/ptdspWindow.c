@@ -30,11 +30,11 @@ Version: $Id$
 
 #include <string.h>
 #include <math.h>
-#include "PTDSPcephes.h"
-#include "PTDSPWindow.h"
+#include "ptdspcephes.h"
+#include "ptdspWindow.h"
 
 /* Returns the window identification number from a window name as a string */
-int PTDSPWindowNumber(const char* wn) {
+int Ptdsp_WindowNumber(const char* wn) {
 	int winType = PTDSP_WINDOW_TYPE_NULL;
 	if ( strcasecmp(wn, "Rectangle")==0 ) {
 	    winType = PTDSP_WINDOW_TYPE_RECTANGLE;
@@ -54,7 +54,7 @@ int PTDSPWindowNumber(const char* wn) {
 
 /* Returns the window values */
 /* The parameters argument is accessed only for the Kaiser window */
-int PTDSPWindow(double* window, int realLen, int winType, double* parameters) {
+int Ptdsp_Window(double* window, int realLen, int winType, double* parameters) {
 	double alpha = 0.0;
 	double freq1 = 0.0;
 	double freq2 = 0.0;
@@ -98,7 +98,7 @@ int PTDSPWindow(double* window, int realLen, int winType, double* parameters) {
 	    break;
 	  case PTDSP_WINDOW_TYPE_KAISER:
 	    alpha = ((double)(realLen-1))/2.0;
-	    norm = fabs(PTDSPi0(parameters[0]));
+	    norm = fabs(Ptdsp_i0(parameters[0]));
 	    break;
 	  default:
 	    return 0;
@@ -117,7 +117,7 @@ int PTDSPWindow(double* window, int realLen, int winType, double* parameters) {
 	    for (i = 0; i < realLen; i++){
 		double squared = pow(((i - alpha)/alpha), 2);
 		double entry = parameters[0] * sqrt(1-squared);
-		window[i] = PTDSPi0(entry)/norm;
+		window[i] = Ptdsp_i0(entry)/norm;
 	    }
 	    break;
 	  default:
