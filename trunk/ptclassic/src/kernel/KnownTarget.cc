@@ -33,7 +33,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  of targets.
 
 **************************************************************************/
-#ifdef __GNUG_
+#ifdef __GNUG__
 #pragma implementation
 #endif
 
