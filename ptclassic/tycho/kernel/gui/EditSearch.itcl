@@ -172,12 +172,18 @@ body ::tycho::EditSearch::constructor {args} {
     }
     pack $itk_component(regexp) -side left
 
-    configure -queries {
-	{pattern {Search pattern:} {}}
-	{change {Change to:} {}}
-    }
-
     eval itk_initialize $args
+
+    if {$itk_option(-nochange) == 0} {
+        configure -queries {
+            {pattern {Search pattern:} {}}
+            {change {Change to:} {}}
+        }
+    } {
+        configure -queries {
+            {pattern {Search pattern:} {}}
+        }
+    }
 
     # Subscribe to the preference set
     preference subscribe search $this \
@@ -235,6 +241,8 @@ body ::tycho::EditSearch::constructor {args} {
     if {$itk_option(-nochange) == 0 && [info exists lastChangeString]} {
 	insert change $lastChangeString
     }
+
+    configure -title "Search [file tail [$itk_option(-edit) filename]]"
 }
 
 ##################################################################
