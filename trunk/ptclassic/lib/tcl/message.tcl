@@ -66,6 +66,8 @@ proc tkerror message {
     }
     # If no other messages are available, issue a generic one
     if {$flag} {ptkImportantMessage .error "Tcl reports an error"}
+    # In case a run is active, request a halt
+    halt
 }
 
 
