@@ -57,11 +57,6 @@ TK_LIBSPEC=-L$(TCL_ROOT)/tk4.0p1.$(PTARCH)/lib -ltk #-lXpm
 # Directory containing utilities for BarGraph and XYPlot
 PTKDIR = $(ROOT)/src/ptklib
 
-# Directory containing the [incr Tcl] extensions to Tcl
-# FIXME: This should be in the Ptolemy tree
-ITCL_INCDIR = $(ROOT)/tcltk/itcl/include
-ITCL_LIBSPEC = -L$(ROOT)/tcltk/itcl.$(PTARCH)/lib -litcl
-
 INCL =		-I$(KERNDIR) -I$(PTCL_INCDIR) \
 		-I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC) -I$(PTKDIR) \
 		-I$(ITCL_INCDIR)
