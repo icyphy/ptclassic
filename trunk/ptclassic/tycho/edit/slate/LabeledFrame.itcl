@@ -42,10 +42,10 @@
 # At present, the graphics do not take account of the width
 # of the 3D border.
 #
-# <p><a name="Slate LabeledFrame class Options"></a><b>Options</b>
+# <p><a name="LabeledFrame class Options"></a><b>Options</b>
 #
-# See <a href="LabeledItem.html#Slate LabeledItem class Options">LabeledItem</a>
-# and <a href="Frame.html#Slate Frame class Options">Frame</a>.
+# See <a href="LabeledItem.html#LabeledItem class Options">LabeledItem</a>
+# and <a href="Frame.html#Frame class Options">Frame</a>.
 #
 # <p><b>Bugs</b>: (none)
 #
