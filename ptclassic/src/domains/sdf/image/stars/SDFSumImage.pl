@@ -52,7 +52,7 @@ their absolute sum, scale the sum, and pass the result to the output.
 		const GrayImage* img2 = (const GrayImage*) inEnvp2.myData();
 
 // Calc the sum.
-		int width, height;
+		int width, height = 0;
 		if (((width = img1->retWidth()) != img2->retWidth()) ||
 				((height = img1->retHeight()) != img2->retHeight())) {
 			delete img1;
