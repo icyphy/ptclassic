@@ -1,5 +1,5 @@
 defstar {
-	name		{ RunLen }
+	name		{ RunLenImage }
 	domain		{ SDF }
 	version		{ $Id$ }
 	author		{ Paul Haskell }

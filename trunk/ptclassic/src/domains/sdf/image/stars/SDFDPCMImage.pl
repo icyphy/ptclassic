@@ -1,5 +1,5 @@
 defstar {
-	name		{ Dpcm }
+	name		{ DPCMImage }
 	domain		{ SDF }
 	version		{ $Id$ }
 	author		{ Paul Haskell }

@@ -1,5 +1,5 @@
 defstar {
-	name		{ DisplayRgb }
+	name		{ DisplayRGB }
 	domain		{ SDF }
 	version		{ $Id$ }
 	author		{ Sun-Inn Shih }

@@ -12,9 +12,9 @@
 # This will add the dependencies to the makefile.
 
 # Root of Ptolemy directory
-ROOT=../../../..
+ROOT = ../../../../..
 # True source directory
-VPATH = $(ROOT)/src/domains/sdf/image
+VPATH = $(ROOT)/src/domains/sdf/image/kernel
 
 # get configuration info
 CONFIG=$(ROOT)/config-$(ARCH).mk

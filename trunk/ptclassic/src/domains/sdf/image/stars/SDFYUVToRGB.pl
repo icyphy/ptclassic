@@ -1,6 +1,6 @@
  defstar {
 //////// INFO ON STAR.
-	name	{ Yuv2Rgb }
+	name	{ YUVToRGB }
 	domain	{ SDF }
 	version	{ $Id$ }
 	author	{ Sun-Inn Shih }

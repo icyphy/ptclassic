@@ -1,5 +1,5 @@
 defstar {
-	name		{ ZigZagInv }
+	name		{ ZigZagImageInv }
 	domain		{ SDF }
 	version		{ $Id$ }
 	author		{ Paul Haskell }
@@ -8,7 +8,7 @@ defstar {
 	desc {
 This star inverse zig-zag scans a DCTImage.
 }
-	seealso { ZigZag }
+	seealso { ZigZagImage }
 
 	input	{ name	{ inport }	type { message } }
 	output	{ name	{ outport }	type { message } }

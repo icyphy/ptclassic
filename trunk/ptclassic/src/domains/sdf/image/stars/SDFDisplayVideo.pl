@@ -1,5 +1,5 @@
 defstar {
-	name		{ DisplaySeq }
+	name		{ DisplayVideo }
 	domain		{ SDF }
 	version		{ $Id$ }
 	author		{ Paul Haskell }

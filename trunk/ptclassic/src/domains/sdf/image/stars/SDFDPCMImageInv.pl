@@ -1,5 +1,5 @@
 defstar {
-	name		{ DpcmInv }
+	name		{ DPCMImageInv }
 	domain		{ SDF }
 	version		{ $Id$ }
 	author		{ Paul Haskell }
@@ -17,7 +17,7 @@ directly to the "output". Otherwise, add the "past" to the
 .Id "inverse DPCM"
 .Id "decompression, image"
 	}
-	seealso { Dpcm }
+	seealso { DPCMImage }
 
 	hinclude { "GrayImage.h", "Error.h" }
 

@@ -1,6 +1,6 @@
  defstar {
 //////// INFO ON STAR.
-	name		{ ReadRgb }
+	name		{ ReadRGB }
 	domain		{ SDF }
 	version		{ $Id$ }
 	author		{ Sun-Inn Shih }
