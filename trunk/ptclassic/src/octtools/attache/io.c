@@ -47,7 +47,7 @@ void IOinit()
 	 * was invoked in another program. */
 	errRaise(optProgName, 0, "can't initialize curses");
     }
-#if defined(hpux) || defined(SYSV) || defined(linux)
+#ifdef USE_SYSV_CURSES		/* Defined in compat.h */
     nonl();
     cbreak();
     noecho();
