@@ -35,6 +35,7 @@ static char	sccsid_xfunctions[] = "$Id$";
 #include <stdio.h>
 #include <sys/types.h>
 #include <unistd.h>		/* Pick up getpid() */
+#include "compat.h"
 #include "vemInterface.h"
 
 #include "xfunctions.h"

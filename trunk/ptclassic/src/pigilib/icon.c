@@ -35,6 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <pwd.h>
+#include <unistd.h>
 #include "rpc.h"
 #include "util.h"
 #include "err.h"

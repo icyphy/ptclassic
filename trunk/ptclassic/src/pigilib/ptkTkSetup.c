@@ -35,6 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
    
 #include <stdio.h>
+#include "compat.h"
 #include "ptk.h"
 #include "ptkRegisterCmds.h"
 #include "ptkNet.h"
