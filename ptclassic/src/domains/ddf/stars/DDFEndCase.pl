@@ -46,10 +46,13 @@ the "output".
 			control.grabData();	
 		
 		MPHIter nexti(input);
-		PortHole* p;
+		PortHole* p = 0;
 		for (int i = int(control%0); i >= 0; i--)
 			p = nexti++;
-
+		if (!p) {
+			Error::abortRun (*this, "control value out of range");
+			return;
+		}
 		if (p->numTokens() >= p->numberTokens) {
 			p->grabData();
 			output%0 = (*p)%0;

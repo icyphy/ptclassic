@@ -37,10 +37,13 @@ This star routes an "input" token to one "output" depending on the
 		// read control value, and route input
 		// to output depending on it.
 		MPHIter nexti(output);
-		PortHole* p;
+		PortHole* p = 0;
 		for (int i = int(control%0); i >= 0; i--)
 			p = nexti++;
-
+		if (!p) {
+			Error::abortRun (*this, "control value out of range");
+			return;
+		}
 		(*p)%0 = input%0;
 		p->sendData();
 	}
