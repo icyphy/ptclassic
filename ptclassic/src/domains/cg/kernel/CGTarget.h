@@ -45,6 +45,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SimControl.h"
 #include "CodeStreamList.h"
 #include "StringList.h"
+#include "SDFStar.h"
 
 class CGStar;
 class SDFSchedule;
@@ -165,8 +166,13 @@ public:
     // set inheritFlag;
     void amInherited() { inheritFlag = TRUE; }
 
-    // do I support the given star type?
-    int support(Star* s); 
+    // virtual method: do I support the given star type?
+    virtual int support(Star* s); 
+
+    // virtual method to return the relative execution of a star
+    // by default, it just returns the myExecTime() of the star.
+    virtual int execTime(DataFlowStar* s, CGTarget* t = 0)
+	{ return s->myExecTime(); }
 
 protected:
     // Add a CodeStream to the target.  This allows stars to access this
