@@ -429,16 +429,16 @@ test MenuSupport-unpost-1 {Unpost top-level menu} {
     .m unpost
     list \
             [winfo ismapped .m.top] \
-            [winfo ismapped .m.top.menucascade-entry] \
-            [winfo ismapped .m.top.menucascade-entry.menucascade-entry-3]
+            [winfo ismapped .m.top.cascade-entry] \
+            [winfo ismapped .m.top.cascade-entry.cascade-entry-3]
 } {0 0 0}
 
 test MenuSupport-post-1 {Post top-level menu} {
     .m post top
     list \
             [winfo ismapped .m.top] \
-            [winfo ismapped .m.top.menucascade-entry] \
-            [winfo ismapped .m.top.menucascade-entry.menucascade-entry-3]
+            [winfo ismapped .m.top.cascade-entry] \
+            [winfo ismapped .m.top.cascade-entry.cascade-entry-3]
 } {1 0 0}
 
 test MenuSupport-post-2 {Post top-level menu} {
@@ -446,8 +446,8 @@ test MenuSupport-post-2 {Post top-level menu} {
     .m post cascade-entry-3
     list \
             [winfo ismapped .m.top] \
-            [winfo ismapped .m.top.menucascade-entry] \
-            [winfo ismapped .m.top.menucascade-entry.menucascade-entry-3]
+            [winfo ismapped .m.top.cascade-entry] \
+            [winfo ismapped .m.top.cascade-entry.cascade-entry-3]
 } {1 1 1}
 
 # Unpost has been changed to unpost all menus in the chain...
@@ -455,8 +455,8 @@ test MenuSupport-unpost-2 {Unpost bottom-level menu} {
     .m unpost cascade-entry-3
     list \
             [winfo ismapped .m.top] \
-            [winfo ismapped .m.top.menucascade-entry] \
-            [winfo ismapped .m.top.menucascade-entry.menucascade-entry-3]
+            [winfo ismapped .m.top.cascade-entry] \
+            [winfo ismapped .m.top.cascade-entry.cascade-entry-3]
 } {0 0 0}
           
 
