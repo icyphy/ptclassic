@@ -83,7 +83,6 @@ proc roundDownTwo {x} {
 #
 proc axisIncrement {low high space width padding} {
     set maxnum   [expr double($space) / ($width+$padding)]
-puts $maxnum
     set estimate [expr (double($high) - $low) / ($maxnum)]
     set estimate [axisRoundUp $estimate]
 
