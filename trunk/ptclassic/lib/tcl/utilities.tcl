@@ -51,6 +51,34 @@ proc ptkStartTycho { } {
 }
 
 #######################################################################
+# Procedure to load an FSM within Tycho.
+#
+proc ptkTychoLoadFSM { file } {
+    # Start Tycho, if it hasn't already started
+    ptkStartTycho
+
+    # Get the class name which is the rootname.
+    set classname [file tail [file rootname $file]]
+
+    set winName [::tycho::File::isFileOpen $file]
+    if {$winName != "0"} {
+	# File has been open already.
+        $winName ptkCompile
+    } else {
+      	# File is not open yet.
+	set winName .tychoLoadFSM_$classname
+        catch {destroy $winName}
+        # Open new window.
+        ::tycho::EditSTD $winName -file $file
+        $winName ptkCompile
+	destroy $winName
+    }
+
+    # Successfully loading & return the classname 
+    return $classname
+}
+
+#######################################################################
 # Procedure to expand a filename that might begin with
 # an environment variable.  For example, if the value of
 # of the environment variable PTOLEMY is /usr/tools/ptolemy, then
