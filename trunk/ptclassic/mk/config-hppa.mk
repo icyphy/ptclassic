@@ -37,10 +37,12 @@ CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 # this flag. See also config-g++.mk
 CC_STATIC = 	-Wl,-a,archive
 
+# -s strips out debugging information, otherwise we get a 30Mb pigiRpc
+# -x is also useful, it removed local symbols, see the ld man page
 # We ship statically linked binaries, but other sites might want
 # to remove the -static below
-LINKFLAGS = 	-L$(LIBDIR) -Xlinker -x -static
-LINKFLAGS_D = 	-L$(LIBDIR) -g -Xlinker -x -static
+LINKFLAGS = 	-L$(LIBDIR) -Xlinker -s -static
+LINKFLAGS_D = 	-L$(LIBDIR) -g -static
 
 #
 # Directories to use
