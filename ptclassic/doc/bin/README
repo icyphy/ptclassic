@@ -1,0 +1,14 @@
+$Id$
+
+This directory contains scripts for printing out or previewing the
+Ptolemy documentation.  There are two possible configurations:
+as shipped, the ditroff program prints the documentation, and
+the xditview program is used as the previewer.
+
+It is also possible to configure this directory to use groff, the
+Free Software Foundation replacement for troff and associated tools.
+You'll need to install groff on your own (including the X previewer),
+and make sure it is on users' paths.
+
+Running USE_GROFF sets things up to use groff.  Running USE_DITROFF
+reverts to the original installation.

@@ -1,0 +1,104 @@
+#! /bin/csh -f
+# $Id$
+
+# Command uses printer defined by environmental variable $PRINTER
+# User .cshrc file must contain "setenv PRINTER whatever"
+
+# The argument(s) are the files to be printed (unless they begin with "-").
+# An implicit header file, $PTOLEMY/doc/headers/shared, is prepended.
+# The optional argument is the directory of the domain documentation
+
+# The -index option generates an index only, printing nothing.
+# The -preview option causes the domain to previewed via xditview
+# (or nroff, if no DISPLAY is set) instead of being printed.
+# The -H option means the following option is a file in the
+# $PTOLEMY/doc/headers directory.
+# Index information is appended to the file $HOME/Almagest.index,
+# or to whatever ALAMAGEST_INDEX is set to.
+
+if ($#argv == 0) then
+	echo "Usage: printsec [-options] files"
+	exit 0
+endif
+
+# On interrupt, remove temporary files
+onintr catch
+
+if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+
+# File structure information:
+set dirheader = $PTOLEMY/doc/headers
+set printcommand = groff
+set printoptions = "-me -t -e"
+set contentscmd = $PTOLEMY/doc/bin/contents.groff
+set files = ""
+
+# Variables
+set indexonly = 0
+set preview = 0
+
+if (!($?ALMAGEST_INDEX)) then
+	setenv ALMAGEST_INDEX $HOME/Almagest.index
+endif
+
+#make sure permissions are OK
+umask 2
+
+while ($#argv)
+	switch ($argv[1])
+		case -index:
+			set indexonly = 1
+			shift
+			breaksw
+		case -preview:
+			set preview = 1
+			shift
+			breaksw
+		case -H:
+			shift
+			set files = ($files $dirheader/$argv[1])
+			shift
+			breaksw
+		case -*:
+			set printoptions = ($printoptions $argv[1])
+			shift
+			breaksw
+		default:
+			set files = ($files $argv[1])
+			shift
+			breaksw
+	endsw
+end
+
+
+gsoelim $dirheader/groff-fix $dirheader/shared $files > /tmp/pt$$
+
+if ($indexonly) then
+	# if only generating index, add -t option and throw away the output
+	($printcommand $printoptions -t /tmp/pt$$ > /dev/null) >& /tmp/index$$
+else if ($preview) then
+	# if previewing, use either X windows or nroff
+	if ($?DISPLAY) then
+		$printcommand $printoptions -TX75 /tmp/pt$$
+	else
+		($printcommand $printoptions -Tascii /tmp/pt$$ > /tmp/ptnr$$) >& /dev/null
+		more /tmp/ptnr$$
+	endif
+else
+	# otherwise just print it out
+	($printcommand $printoptions /tmp/pt$$ | lpr ) >& /tmp/index$$
+	$contentscmd /tmp/index$$
+	if (-r title) $printcommand $printoptions $dirheader/shared title
+else
+endif
+
+if (-r /tmp/index$$ ) cat /tmp/index$$ >>! $ALMAGEST_INDEX
+/bin/rm -f /tmp/pt$$ /tmp/index$$
+
+exit 0
+
+catch:
+        # prevent the "no match" error message if there are no temporary files
+        set nonomatch
+        /bin/rm -f /tmp/pt$$ /tmp/index$$
+        exit 1

@@ -1,0 +1,25 @@
+#! /bin/csh -f
+# $Id$
+
+# Print documentation for a Ptolemy star or demo
+
+# Command uses printer defined by environmental variable $PRINTER
+# User .cshrc file must contain "setenv PRINTER whatever"
+
+# The argument is the troff source file.
+# Two implicit header files, $PTOLEMY/doc/headers/shared,
+# and $PTOLEMY/doc/headers/domain, are prepended.
+
+if ($#argv != 1) then
+	echo "usage: printstar file"
+	exit 1
+endif
+
+if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+
+# File structure information:
+set dirheader = $PTOLEMY/doc/headers
+set printcommand = groff
+set printoptions = "-me -t -e"
+
+$printcommand $printoptions $dirheader/shared $dirheader/domain $1 | lpr
