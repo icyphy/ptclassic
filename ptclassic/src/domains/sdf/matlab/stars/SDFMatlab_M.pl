@@ -311,6 +311,7 @@ extern "C" {
 		// close Matlab connection and exit Ptolemy if fatal error
 		if ( fatalErrorFlag ) {
 		  engClose(matlabEnginePtr);
+		  matlabEnginePtr = 0;
 		  if ( matlabInputMatrices != 0 ) free( matlabInputMatrices );
 		  if ( matlabOutputMatrices != 0 ) free( matlabOutputMatrices );
 		  Error::abortRun(*this, (char *) errstr, verbstr);
@@ -328,6 +329,7 @@ extern "C" {
 		  Error::warn(*this, "Error when terminating connection ",
 			      "to the Matlab kernel.");
 		}
+		matlabEnginePtr = 0;
 		if ( matlabInputMatrices != 0 ) free( matlabInputMatrices );
 		if ( matlabOutputMatrices != 0 ) free( matlabOutputMatrices );
 	}
