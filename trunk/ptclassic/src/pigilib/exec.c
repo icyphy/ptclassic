@@ -69,6 +69,7 @@ long userOptionWord;
 
     ViInit("run");
     ErrClear();
+    FindClear();
     /* get current facet */
     facet.objectId = spot->facet;
     if (octGetById(&facet) != OCT_OK) {
@@ -126,4 +127,12 @@ long userOptionWord;
         ViDone();
     }
     ViDone();
+}
+
+/* mark stars involved in errors detected by kernel */
+void
+PigiErrorMark(objName)
+char *objName;
+{
+    FindAndMarkError(lastFacet, objName);
 }
