@@ -37,10 +37,14 @@ CCS_WITH_H_FILES=\
  ComplexState.cc \
  ComplexSubset.cc \
  PortHole.cc \
+ DFPortHole.cc \
+ DataFlowStar.cc \
  DataStruct.cc \
  Display.cc \
  DoubleLink.cc \
  Domain.cc \
+ DynDFPortHole.cc \
+ DynDFStar.cc \
  DynamicGalaxy.cc \
  Error.cc \
  EventHorizon.cc \
