@@ -8,7 +8,7 @@ The initial filter coefficients are given by the "taps" parameter.
 The default initial coefficients give an 8th-order, linear phase
 lowpass filter.
 To read initial coefficients from a file, replace the default
-coefficients with "< fileName", preferably specifying a complete path.
+coefficients with "&lt; fileName", preferably specifying a complete path.
 This star supports decimation, but not interpolation.
 	}
 	version {$Id$}

@@ -5,7 +5,7 @@ defstar {
 A complex finite impulse response (FIR) filter.
 Coefficients are specified by the "taps" parameter.
 Default coefficients give an 8th order, linear phase, lowpass filter.
-To read coefficients from a file, use the syntax: "< fileName",
+To read coefficients from a file, use the syntax: "&lt; fileName",
 preferably specifying a complete path.
 Real and imaginary parts should be paired with parentheses, e.g. (1.0, 0.0).
 Polyphase multirate filtering is also supported.
