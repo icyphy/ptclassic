@@ -127,17 +127,24 @@ limitation of liability, and disclaimer of warranty provisions.
                 errorReport("Invalid gain");
                 return TCL_ERROR;
             }
-	    /* set the new gain  */
-	    $ref(gain) = tkgain/5.0 - 10.0;
-	    /* procedure calls to update; defined in base class */
-	    $starSymbol(setparams)(&$starSymbol(parametric));
-	    $sharedSymbol(CGCVISParametricEq,selectFilter)
-	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
-	       $starSymbol(filtertaps), $ref(filtertype));
 
+	      /* set the new gain  */
+	      $ref(gain) = tkgain/5.0 - 10.0;
+	    if($starSymbol(tapmatrix)) {
+	      /* procedure calls to update; defined in base class */
+	      $sharedSymbol(CGCVISParametricEq,setparams)
+		(&$starSymbol(parametric),$ref(sampleFreq),
+		 $ref(passFreq), $ref(centerFreq), $ref(bandwidth), $ref(gain));
+	      $sharedSymbol(CGCVISParametricEq,selectFilter)
+		(&$starSymbol(parametric), $starSymbol(filtercoeff),
+		 $starSymbol(filtertaps), $ref(filtertype));
+	      $sharedSymbol(CGCVISBiquad,settaps)($starSymbol(filtertaps),
+		 $starSymbol(tapmatrix),&$starSymbol(betatop),
+	         &$starSymbol(betabott),$starSymbol(scaledown));
+	    }
 	    sprintf(buf, "%.2f", $ref(gain));
 	    displaySliderValue(".low", "$starSymbol(scale1)", buf);
-            return TCL_OK;
+	    return TCL_OK;
         }
     }
 
@@ -154,19 +161,27 @@ limitation of liability, and disclaimer of warranty provisions.
                 errorReport("Invalid center freq");
                 return TCL_ERROR;
             }
+
 	    /* set the new center frequency  */
 	    $ref(centerFreq) = 
 	      tkcenter*($val(highFreq) - $val(lowFreq))/100 
 	      + $val(lowFreq);
+	    if($starSymbol(tapmatrix)) {
 	    /* procedure calls to update; defined in base class */	    
-	    $starSymbol(setparams)(&$starSymbol(parametric));
+	    $sharedSymbol(CGCVISParametricEq,setparams)
+	      (&$starSymbol(parametric),$ref(sampleFreq),
+	       $ref(passFreq), $ref(centerFreq), $ref(bandwidth), $ref(gain));
 	    $sharedSymbol(CGCVISParametricEq,selectFilter)
 	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
 	       $starSymbol(filtertaps), "$val(filtertype)");
-
+	    $sharedSymbol(CGCVISBiquad,settaps)($starSymbol(filtertaps),
+	       $starSymbol(tapmatrix),&$starSymbol(betatop),
+	       &$starSymbol(betabott),$starSymbol(scaledown));
+            }
 	    sprintf(buf, "%.2f", $ref(centerFreq));
 	    displaySliderValue(".middle", "$starSymbol(scale2)", buf);
-            return TCL_OK;
+
+	    return TCL_OK;
         }
     }
     
@@ -182,15 +197,21 @@ limitation of liability, and disclaimer of warranty provisions.
                 errorReport("Invalid center freq");
                 return TCL_ERROR;
             }
+	    if($starSymbol(tapmatrix)) {
 	    /* procedure calls to update; defined in base class */	    
-	    $starSymbol(setparams)(&$starSymbol(parametric));
+	    $sharedSymbol(CGCVISParametricEq,setparams)
+	      (&$starSymbol(parametric),$ref(sampleFreq),
+	       $ref(passFreq), $ref(centerFreq), $ref(bandwidth), $ref(gain));
 	    $sharedSymbol(CGCVISParametricEq,selectFilter)
 	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
 	       $starSymbol(filtertaps), "$val(filtertype)");
-
+	    $sharedSymbol(CGCVISBiquad,settaps)($starSymbol(filtertaps),
+	       $starSymbol(tapmatrix),&$starSymbol(betatop),
+	       &$starSymbol(betabott),$starSymbol(scaledown));
+            }
 	    sprintf(buf, "%.2f", $ref(centerFreq));
 	    displaySliderValue(".middle", "$starSymbol(scale2)", buf);
-            return TCL_OK;
+	    return TCL_OK;
         }
     }
     
@@ -207,15 +228,22 @@ limitation of liability, and disclaimer of warranty provisions.
                 errorReport("Invalid bandwidth");
                 return TCL_ERROR;
             }
+
 	    /* conveying the value changes of bandwidth to audio */
 	    /* only for bandpass filters, else inactive          */
 	    $ref(bandwidth) = tkband*0.0399 + 0.01;
+	    if($starSymbol(tapmatrix)) {
 	    /* procedure calls to update; defined in base class */
-	    $starSymbol(setparams)(&$starSymbol(parametric));
+	    $sharedSymbol(CGCVISParametricEq,setparams)
+	      (&$starSymbol(parametric),$ref(sampleFreq),
+	       $ref(passFreq), $ref(centerFreq), $ref(bandwidth), $ref(gain));
 	    $sharedSymbol(CGCVISParametricEq,selectFilter)
 	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
 	       $starSymbol(filtertaps), "$val(filtertype)");
-
+	    $sharedSymbol(CGCVISBiquad,settaps)($starSymbol(filtertaps),
+	       $starSymbol(tapmatrix),&$starSymbol(betatop),
+	       &$starSymbol(betabott),$starSymbol(scaledown));
+	    }
 	    sprintf(buf, "%.4f", $ref(bandwidth));
 	    displaySliderValue(".high", "$starSymbol(scale3)", buf);
             return TCL_OK;
@@ -240,12 +268,18 @@ limitation of liability, and disclaimer of warranty provisions.
 	    $ref(passFreq) = 
 	      tkpass*($val(highFreq) - $val(lowFreq))/100 
 	      + $val(lowFreq);
+	    if($starSymbol(tapmatrix)) {
 	    /* procedure calls to update; defined in base class */	    
-	    $starSymbol(setparams)(&$starSymbol(parametric));
+	    $sharedSymbol(CGCVISParametricEq,setparams)
+	      (&$starSymbol(parametric),$ref(sampleFreq),
+	       $ref(passFreq), $ref(centerFreq), $ref(bandwidth), $ref(gain));
 	    $sharedSymbol(CGCVISParametricEq,selectFilter)
 	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
 	       $starSymbol(filtertaps), "$val(filtertype)");
-
+	    $sharedSymbol(CGCVISBiquad,settaps)($starSymbol(filtertaps),
+	       $starSymbol(tapmatrix),&$starSymbol(betatop),
+	       &$starSymbol(betabott),$starSymbol(scaledown));
+	    }
 	    sprintf(buf, "%.2f", $ref(passFreq));
 	    displaySliderValue(".middle", "$starSymbol(scale4)", buf);
             return TCL_OK;
