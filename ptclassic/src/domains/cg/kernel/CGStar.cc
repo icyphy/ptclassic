@@ -432,9 +432,15 @@ StringList CGStar::expandSize(const char* name)
     StringList size;
     StringList portName = expandPortName(name);
     State* state = stateWithName(name);
-    CGPortHole* port = (CGPortHole*)genPortWithName(portName);
+    GenericPort* port = genPortWithName(portName);
     if (state != NULL) size << state->size();
-    else if (port != NULL) size << port->bufSize();
+    else if (port != NULL) {
+	if (!port->isItMulti())	
+	    size << ((CGPortHole*)port)->bufSize();
+	else
+	    size << ((MultiPortHole*)port)->numberPorts();
+    }
+	
     else codeblockError(name, " is not defined as a state or port");
     return size;
 }
