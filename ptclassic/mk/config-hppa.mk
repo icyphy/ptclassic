@@ -11,12 +11,9 @@
 include $(ROOT)/config-g++.mk
 
 # Gnu tools on snake do not support debugging
-# there are a couple of places where g++-2.2 optimization breaks,
-# so we don't use -O for now.
-GPPFLAGS=-DUSG -msnake $(MEMLOG)
-
-# This uses the native cc (could use gcc, not certain about the optimizer)
+GPPFLAGS=-DUSG -O -msnake $(MEMLOG)
 CFLAGS=-DUSG -O
+LINKFLAGS=-L$(LIBDIR)
 
 # If the X11 include directories are in /usr/include/X11, leave
 # the following symbol blank.  Otherwise define it as "-Idir" where
