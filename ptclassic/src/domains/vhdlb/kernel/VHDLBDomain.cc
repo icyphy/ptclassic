@@ -34,9 +34,10 @@ public:
 	// new wormhole
 	Star& newWorm(Galaxy& ,Target* )  {
 		// return *new VHDLBWormhole(innerGal,innerTarget);
-		Error::abortRun("No VHDLB wormhole implemented yet");
+		// Error::abortRun("No VHDLB wormhole implemented yet");
 		// Following is a hack
-		LOG_NEW; return *(new SDFStar);
+		LOG_NEW;
+		return *(new VHDLBStar);
 	}
 */
 	// new input porthole
