@@ -55,7 +55,7 @@ Block* CG56Wormhole :: clone() const {
 	LOG_NEW; return new CG56Wormhole(gal.clone()->asGalaxy(), myTarget()->cloneTarget());
 }
 
-CGWormBase* CG56Wormhole :: myWormhole() { return selfWorm; }
+CGWormBase* CG56Wormhole :: myWormhole() { return this; }
 
 
 /**************************************************************************
