@@ -181,10 +181,12 @@ class ::tycho::Exec {
         return [uplevel #0 "set $statusVariableName"]
     }
     # Wait patiently until the forked process ends and returns status
-    # Default wait time is 30 seconds
-    method getStatusWait {{timeToWait 30000} } {
+    # Default wait time is forever!
+    method getStatusWait {{timeToWait {}} } {
         global $statusVariableName
-        after $timeToWait set $statusVariableName "timeout"
+        if {$timeToWait !={}} {
+            after $timeToWait set $statusVariableName "timeout"
+        }
         tkwait variable $statusVariableName
         if {[uplevel #0 "set $statusVariableName"]=="timeout"} {
             addHistory "Timeout after $timeToWait\n"
