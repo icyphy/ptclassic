@@ -94,7 +94,7 @@ proc ::tycho::updateTkPalette {args} {
 	troughColor
     } {
 	set color [::tycho::preference get tkpalette $pref]
-	if { $color != "" #} {
+	if { $color != "" } {
 	    lappend arglist $pref $color
 	}
     }
@@ -172,7 +172,7 @@ proc ::tycho::unsubscribeTkPalette {} {
 proc ::tycho::resetTkPalette {{style grey}} {
     ::tycho::unsubscribeTkPalette
 
-    if { $style == "bisque" #} {
+    if { $style == "bisque" } {
 	# For the record, here is what the binary values are.
 	# They're slightly different, but close enough.
 	# activeBackground    #e6ceb1 

@@ -660,7 +660,7 @@ body ::tycho::ResourceHTTP::httpget {url type} {
 
     # Surfit starts here vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     if {[catch {socket -async $hostname $port} socketid]} {
-	catch {unset $socketid}
+	catch {unset socketid}
 	error "Can't open $hostname, $port"
     }
     # Surfit ends here ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
