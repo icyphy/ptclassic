@@ -504,16 +504,6 @@ ifdef CEPHESLIB
 	LIBFILES += $(LIBDIR)/libcephes.$(LIBSUFFIX)
 endif
 
-ifdef EXTERNALTOOLSLIB
-	LIBS += -lexttools
-	LIBFILES += $(LIBDIR)/libexttools.$(LIBSUFFIX)
-	MATLABENGINE = 1
-endif
-
-ifdef MATLABENGINE
-	LIBS += $(MATLABEXT_LIB)
-endif
-
 ifdef BDFLIB
 	CUSTOM_DIRS += $(BDFDIR)/kernel
 	LIBS += -lbdf
@@ -563,6 +553,14 @@ ifdef PIGI
 	LIBS += version.o -lptcl 
 endif
 
+# External interface support - we need to expand libexttools, because it
+# depends upon the Ptolemy kernel.  Matlab always is pulled in
+
+CUSTOM_DIRS += $(CROOT)/utils/libexttools
+LIBS += -lexttools $(MATLABEXT_LIB)
+LIBFILES += $(LIBDIR)/libexttools.$(LIBSUFFIX)
+
+# Now, pull in the Ptolemy kernel support, system libraries and tcl
 LIBS += -lptolemy $(ITCL_LIBSPEC) $(TCL_LIBSPEC) \
 	$(SYSLIBS) $(LIB_FLUSH_CACHE)
 
