@@ -15,7 +15,7 @@ maximum number of inputs determined in the definition of the XGraph class.
 	seealso {xgraph Xgraph Xhistogram}
 	inmulti {
 		name { input }
-		type { anytype }
+		type { float }
 	}
 	defstate {
 		name {title}
