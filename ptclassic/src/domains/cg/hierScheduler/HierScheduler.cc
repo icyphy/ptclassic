@@ -82,6 +82,13 @@ void MultiScheduler :: setup () {
     // Now fix buffer sizes
     topCluster->fixBufferSizes(1);
 
+    // Set all looping levels for child targets > 0.  Targets might
+    // have to do different style buffering (ie. CGC)
+    int childNum = 0;
+    while (CGTarget* child = mtarget->cgChild(childNum++)) {
+      child->loopingLevel = 3;
+    }
+    
     return;
 }
 
