@@ -40,23 +40,23 @@ namespace ::tycho {
 
     ::tycho::File::registerExtensions {} \
             {::tycho::view Edit -file {%s}} \
-            {Plain text editor} "text"
+            {Plain Text Editor} "text"
 
     ::tycho::File::registerExtensions {.sched .c .y} \
             {::tycho::view EditC -file {%s}} \
-            {C editor} "text"
+            {C Editor} "text"
     ::tycho::File::registerExtensions {.C .cc .h .H} \
             {::tycho::view EditCpp -file {%s}} \
-            {C++ editor} "text"
+            {C++ Editor} "text"
     ::tycho::File::registerExtensions {.strl} \
             {::tycho::view EditEsterel -file {%s}} \
-            {Esterel editor} "text"
+            {Esterel Editor} "text"
     ::tycho::File::registerExtensions {.fst} \
             {::tycho::view EditForest -file {%s}} \
-            {Forest editor} "graphics"
+            {Forest Editor} "graphics"
     ::tycho::File::registerExtensions {} \
             {::tycho::view EditHTML -file {%s}} \
-            {HTML editor} "text"
+            {HTML Editor} "text"
     ::tycho::File::registerExtensions {.gif .ppm .pgm .xbm} \
             {::tycho::view HTML -file {%s} -image 1 -toolbar 1} \
             {}
@@ -65,38 +65,38 @@ namespace ::tycho {
             {}
     ::tycho::File::registerExtensions {.itcl .itk} \
             {::tycho::view EditItcl -file {%s}} \
-            {Itcl editor} "text"
+            {Itcl Editor} "text"
     ::tycho::File::registerExtensions {.java} \
             {::tycho::view EditJava -file {%s}} \
-            {Java editor} "text"
+            {Java Editor} "text"
     # .vc is for Microsoft Visual c++
     ::tycho::File::registerExtensions {.mk .template .vc} \
             {::tycho::view EditMake -file {%s}} \
-	    {Makefile editor} "text"
+	    {Makefile Editor} "text"
     ::tycho::File::registerFilenames {Makefile makefile GNUmakefile} \
             {::tycho::view EditMake -file {%s}} \
 	    {} 
     ::tycho::File::registerExtensions {.pt .ptcl} \
             {::tycho::view EditPtcl -file {%s}} \
-            {Ptcl editor} "text"
+            {Ptcl Editor} "text"
     ::tycho::File::registerExtensions .pl \
             {::tycho::view EditPtlang -file {%s}} \
-            {Ptlang editor} "text"
+            {Ptlang Editor} "text"
     ::tycho::File::registerExtensions .sdl \
             {::tycho::view EditSDL -file {%s}} \
-            {SDL editor} "text"
+            {SDL Editor} "text"
     ::tycho::File::registerExtensions .tcl \
             {::tycho::view EditTcl -file {%s}} \
-            {Tcl editor} "text"
-    # For now, TIM files open a Tcl editor
+            {Tcl Editor} "text"
+    # For now, TIM files open a Tcl Editor
     ::tycho::File::registerExtensions .tim \
             {::tycho::view EditTcl -file {%s}} \
-            {TIM editor} "text"
+            {TIM Editor} "text"
 
     ########### graphical editors (alphabetical)
     ::tycho::File::registerExtensions {.dag} \
             {::tycho::view EditDAG -file {%s}} \
-            {DAG editor} "graphics"
+            {DAG Editor} "graphics"
     # NOTE: Not useful on its own.
     # ::tycho::File::registerExtensions {.fsm} \
     #       {::tycho::view EditFSM -file {%s}} \
@@ -104,19 +104,19 @@ namespace ::tycho {
 
     ::tycho::File::registerExtensions {.dfg} \
             {::tycho::view EditGraph -file {%s}} \
-            {Graph editor} "graphics"
+            {Graph Editor} "graphics"
 
     if !$ptolemyfeature(octtools) {
         # Vem is not present.
         ::tycho::File::registerContents [file join schematic {contents;}] \
                 {::tycho::view EditPalette -facet {%s}} \
-                {Palette editor} "graphics"
+                {Palette Editor} "graphics"
     }
     # NOTE: Not ready for release
     # NOTE: Put back in after release 1.1.2 -- hjr
     ::tycho::File::registerExtensions {.std} \
 	    {::tycho::view EditSTD -file {%s}} \
-	    {State transition diagram editor} "graphics"
+	    {State Transition Diagram Editor} "graphics"
 
     ::tycho::File::registerExtensions {.idx} \
             {::tycho::Dialog::new IndexBrowser [::tycho::autoName .idx] \
@@ -126,7 +126,7 @@ namespace ::tycho {
         # Ptolemy and vem are present.  Use them.
         ::tycho::File::registerContents [file join schematic {contents;}] \
                 {::pvOpenWindow [::ptkOpenFacet {%s} schematic contents]} \
-                {Vem facet} "graphics"
+                {Vem Facet} "graphics"
     }
 
     ########### tools (alphabetical)
@@ -137,18 +137,18 @@ namespace ::tycho {
 
     ::tycho::File::registerExtensions {} \
             {::tycho::view BuilderDialog} \
-            {Build Tycho} "tools"
+            {Tycho Builder} "tools"
 
     if {$tcl_platform(platform) != "macintosh"} {
 	::tycho::File::registerExtensions {} \
 		{::tycho::view EditDiff -toolbar 1} \
-		{Diff} "tools"
+		{Diff Viewer} "tools"
     }
 
     if {$tcl_platform(platform) != "macintosh"} {
 	::tycho::File::registerExtensions {} \
 		{::tycho::view Monitor -toolbar 1} \
-		{Exec} "tools"
+		{Exec Window} "tools"
     }
 
     if {$tcl_platform(platform) != "macintosh"} {
@@ -166,16 +166,16 @@ namespace ::tycho {
     if {[uplevel #0 info commands matlab] != {}} {
 	::tycho::File::registerExtensions {} \
                 {::tycho::view Matlab -file {%s}} \
-                {Matlab console} "tools"
+                {Matlab Console} "tools"
     }
     if {[uplevel #0 info commands mathematica] != {}} {
 	::tycho::File::registerExtensions {} \
                 {::tycho::view Mathematica -file {%s}} \
-                {Mathematica console} "tools"
+                {Mathematica Console} "tools"
     }
     ::tycho::File::registerExtensions {} \
             {::tycho::view ProfileTcl -file {%s} -toolbar 1} \
-            {Tcl profiler} "tools"
+            {Tcl Profiler} "tools"
 
     if { $ptolemyfeature(ptolemy)} {
 	::tycho::File::registerExtensions {} \
@@ -185,7 +185,7 @@ namespace ::tycho {
 
     ::tycho::File::registerExtensions {} \
             {::tycho::view TclShell -file {%s}} \
-            {Tcl shell} "tools"
+            {Tcl Shell} "tools"
 
     # If we open a shared object, try to load it as a Tycho task
     ::tycho::File::registerExtensions [info sharedlibext] \
@@ -197,7 +197,7 @@ namespace ::tycho {
     # Cliff's IDoc viewer (still under construction)
     ::tycho::File::registerExtensions {.idoc} \
             {::tycho::view IDoc -file {%s}} \
-            {IDoc viewer} "graphics"
+            {IDoc Viewer} "text"
 
 }
 
