@@ -985,8 +985,7 @@ void describePort ()
 	if (portMulti) {
 	    sprintf(str1,".NE\n\\fI%s\\fR (multiple), (%s)",portName,portType);
             strcat(dest,str1);
-	    sprintf(str1,"<tr>\n<td><i>%s</i> (multiple)</td><td>%s</td>\n",
-                    portName,portType);
+	    sprintf(str1,"<tr>\n<td><i><b><font color=%s>%s</font></b></i> (multiple)</td><td>%s</td>\n", color, portName,portType);	
             strcat(destHTML,str1);
 	} else {
 	    sprintf(str1,".NE\n\\fI%s\\fR (%s)",portName,portType);
