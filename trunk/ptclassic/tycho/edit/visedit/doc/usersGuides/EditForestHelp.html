@@ -52,34 +52,42 @@ contents of the node can be a list, with items in the list being lists
 lists of the form <CODE>{<i>keyword value</i>}</CODE>.  The following keywords
 are currently understood:
 <dl>
-<dt><code>label</code><dd>The <i>value</i> field gives the label used to show
-the node in the display.  If this is not present, then the node name
-is used.
-<dt><code>color</code><dd>The <i>value</i> field gives the color used to show
-the node in the display.  If this is not present, then the node color is
-black.  The color name is processed to make sure it is valid, and if not,
-black is used.
-<dt><code>font</code><dd>The <i>value</i> field gives the font used to show
-the node in the display.  If this is not present, then the default
-variable-spacing font is chosen.  The <i>value</i> can take any form
-understood by the <code>getFont</code> method of the <code>FontManager</code> 
-class.
-<dt><code>link</code><dd>The <i>value</i> field gives a list with two elements,
-a filename and a point within the file, in the standard Tycho hyperlink
-format.  Double clicking on the node will activate the hyperlink.
-The filename may be absolute or relative, and may begin
-with an environment variable (such as <CODE>$TYCHO</CODE>), or a user directory
-(~<i>username</i>).  If the filename is relative, then the reference
-directory is that of the file of the top-level editor that contains this
-<code>EditForest</code>.  The point may be a string identifying
-a named anchor in an HTML file, or <CODE>{line <i>linenumber</i>}</CODE> or
-<CODE>{range <i>start end</i>}</CODE> for text files, or any other destination
-that is understood by the <code>seePoint</code> method of the
-widget that will display the hyperlink.
-<dt><code>html</code><dd>The <i>value</i> field gives HTML source code that
-will be rendered and displayed in a message window in response to a
-double click on the node.  If both this field and the <CODE>link</CODE>
-field are given, then both will be activated by a double click.
+
+<dt><code>label</code><dd>The <code><i>value</i></code> field gives
+the label used to show the node in the display.  If this is not
+present, then the node name is used.
+
+<dt><code>color</code><dd>The <code><i>value</i></code> field gives
+the color used to show the node in the display.  If this is not
+present, then the node color is black.  The color name is processed to
+make sure it is valid, and if not, black is used.
+
+<dt><code>font</code><dd>The <code><i>value</i></code> field gives the
+font used to show the node in the display.  If this is not present,
+then the default variable-spacing font is chosen.  The
+<code><i>value</i></code> can take any form understood by the
+<code>getFont</code> method of the <code>FontManager</code> class.
+
+<dt><code>link</code><dd>The <code><i>value</i></code> field gives a
+list with two elements, a filename and a point within the file, in the
+standard Tycho hyperlink format.  Double clicking on the node will
+activate the hyperlink.  The filename may be absolute or relative, and
+may begin with an environment variable (such as <CODE>$TYCHO</CODE>),
+or a user directory (<CODE>~<i>username</i></CODE>).  If the filename
+is relative, then the reference directory is that of the file of the
+top-level editor that contains this <code>EditForest</code>.  The
+point may be a string identifying a named anchor in an HTML file, or
+<CODE>{line <i>linenumber</i>}</CODE> or <CODE>{range <i>start
+end</i>}</CODE> for text files, or any other destination that is
+understood by the <code>seePoint</code> method of the widget that will
+display the hyperlink.
+
+<dt><code>html</code><dd>The <code><i>value</i></code> field gives
+HTML source code that will be rendered and displayed in a message
+window in response to a double click on the node.  If both this field
+and the <CODE>link</CODE> field are given, then both will be activated
+by a double click.
+
 </dl>
 
 <p>
