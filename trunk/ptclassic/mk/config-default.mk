@@ -80,6 +80,10 @@ OCT_DEBUG_FLAGS = -g
 # dir is the PARENT of the include directory, which must end in X11.
 X11_INCSPEC=
 
+# Architectures that build with shared libraries use this to set the 
+# library search path
+X11_LIBDIR=/usr/sww/X11/lib
+
 # The following has two parts.  The first part is optional, and
 # is only required if the X libraries are not on the default search path.
 # If this is the case, add something like "-Ldir" where dir is the directory
