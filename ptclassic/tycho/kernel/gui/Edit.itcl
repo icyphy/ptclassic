@@ -46,13 +46,13 @@
 
 #######################################################################
 #### Edit
-# This widget contains arbitrary text and allows editing of this text
-# using emacs-like key bindings plus mouse movements. It interfaces to
-# find/change and spell check dialog boxes, and supports filling of
-# text, with an optional prefix added on each line. It has an undo
-# mechanism and supports filling text. It also provides an
-# infrastructure, exploited in derived classes, for parsing text in
-# order to color it, control the font, etc.
+# This widget contains arbitrary text and allows editing of this text.
+# It interfaces to find/change and spell check dialog boxes, and
+# supports filling of text, with an optional prefix added on each line.
+# It has an undo mechanism, although it is currently only a one-level
+# undo. It also provides an infrastructure, exploited in derived
+# classes, for parsing text in order to color it, control the font,
+# etc.
 # <p>
 # This widget is designed to be placed within a Displayer window,
 # although it can also be used on its own.
@@ -66,7 +66,7 @@
 # <p>
 # Note that sometime in the future, many of the public methods in this
 # class may become private or protected.  Currently they are public
-# to permit access from key bindings.  The "code" directive in Itcl
+# to permit access from key bindings (shortcuts).  The "code" directive in Itcl
 # only makes private procedures accessible, not private methods.
 # But this may change in the future.
 #
@@ -172,6 +172,9 @@ class ::tycho::Edit {
     # Remove text from the insertion pointer to the end of the line.
     method killToEndOfLine {}
 
+    # Remove text from the insertion pointer to the end of the line.
+    method killToStartOfLine {}
+
     # Convert the selection or the current word to lower case.
     method lowerCase {}
 
@@ -268,9 +271,6 @@ class ::tycho::Edit {
     # After a fill, this variable will indicate the index where the fill began.
     protected variable fillStart
 
-    # Array for incremental search static data: (to, from, fail)
-    protected variable incSearchArray
-
     # Specify how much parsing is done (how many lines of text) before
     # the rest is deferred. This number may need to be tuned to work well
     # on a wide range of platforms.  It determines the responsivity of the
@@ -310,6 +310,9 @@ class ::tycho::Edit {
     # Return the text to save.
     protected method saveText {}
 
+    # Set the insertion cursor at the specified point.
+    protected method setInsert {index}
+
     ##########################################################################
     ####                     private variables and methods                ####
 
@@ -347,6 +350,13 @@ class ::tycho::Edit {
     private variable lastDelPosition ""
     private variable redo 0
 
+    # Variables for incremental search
+    private variable _incSearchForward 1
+    private variable _incSearchFrom 1.0
+    private variable _incSearchTo end
+    private variable _incSearchFail 0
+    private variable _incSearchText {}
+
     # The following are used to record the mouse position when necessary,
     # for example to determine whether the mouse has moved between two
     # events.
@@ -361,6 +371,7 @@ class ::tycho::Edit {
 #
 configbody ::tycho::Edit::basefont {
     set bf [::tycho::FontManager::parseFont "$itk_option(-basefont)"]
+
     set sz [lindex $bf 1]
     set sz [expr $sz + $fontOffset]
     set tf [lreplace $bf 1 1 $sz]
@@ -447,21 +458,22 @@ body ::tycho::Edit::constructor {args} {
 	rename -foreground -textforeground textForeground TextForeground
 	rename -background -textbackground textBackground TextBackground
     }
-    pack $itk_component(text) -side left -expand yes -fill both
+    set text $itk_component(text)
+    pack $text -side left -expand yes -fill both
 
     # Modify the Tk binding tags.
     # NOTE: This used to reverse the order of the text widget and
     # the top level.  This appears to be no longer necessary.
     set tl [winfo toplevel $itk_component(hull)]
-    bindtags $itk_component(text) \
-	    "$tl $itk_component(hull) $itk_component(text) Text all"
+    bindtags $text \
+	    "$tl $itk_component(hull) $text Text all"
 
     # NOTE: This used to be bound to the hull of TopLevel, which caused
     # focusin to be called a very large number of times.
-    bind $itk_component(text) <Map> "$this focusin; break"
+    bind $text <Map> "$this focusin; break"
 
     # Put the insertion cursor at the top
-    $itk_component(text) mark set insert @0,0
+    $text mark set insert @0,0
 
     # Default bindings for key presses control whether the file is
     # marked modified and what goes into the undo buffer. Some of
@@ -474,127 +486,148 @@ body ::tycho::Edit::constructor {args} {
     # that do not affect the text have redefined bindings below
     # that do the right thing.
     
-    bind $itk_component(text) <KeyPress> \
+    bind $text <KeyPress> \
 	    "if \[%Q recordCharForUndo %A\] {bell; break}"
-    bind $itk_component(text) <Control-Shift-Key> [code "%Q undoBoundary"]
-    bind $itk_component(text) <Control-Key> [code "%Q undoBoundary"]
-    bind $itk_component(text) <Meta-Key> [code "%Q undoBoundary"]
-    bind $itk_component(text) <Meta-Shift-Key> [code "%Q undoBoundary"]
+    bind $text <Control-Shift-Key> [code "%Q undoBoundary"]
+    bind $text <Control-Key> [code "%Q undoBoundary"]
+    bind $text <Meta-Key> [code "%Q undoBoundary"]
+    bind $text <Meta-Shift-Key> [code "%Q undoBoundary"]
 
     # Stop Tycho from beeping when pressing Alt on read-only files
-    bind $itk_component(text) <Alt_L> { }
-    bind $itk_component(text) <Alt_R> { }
+    bind $text <Alt_L> { }
+    bind $text <Alt_R> { }
 
     # Don't break on Alt-key combinations: the top-level window needs
     # it for menu traversal
-    bind $itk_component(text) <Alt-Key> { }
+    bind $text <Alt-Key> { }
     
     # Bindings to highlight parenthesized regions
-    bind $itk_component(text) <Key-parenright> \
+    bind $text <Key-parenright> \
 	    "if \[%Q recordCharForUndo %A\] {bell; break}; \
 	    $this closeParen paren ; break"
-    bind $itk_component(text) <Key-braceright> \
+    bind $text <Key-braceright> \
 	    "if \[%Q recordCharForUndo %A\] {bell; break}; \
 	    $this closeParen brace ; break"
-    bind $itk_component(text) <Key-bracketright> \
+    bind $text <Key-bracketright> \
 	    "if \[%Q recordCharForUndo %A\] {bell; break}; \
 	    $this closeParen bracket ; break"
     
     # Modify the following bindings to mark modified and set up undo
-    bind $itk_component(text) <Control-Key-h> "%Q del char; break"
-    bind $itk_component(text) <Meta-Control-Key-h> "%Q del word; break"
-    bind $itk_component(text) <Escape><Control-Key-h> "%Q del word; break"
-    bind $itk_component(text) <BackSpace> "%Q del char; break"
-    bind $itk_component(text) <Meta-BackSpace> "%Q del word; break"
-    bind $itk_component(text) <Escape><BackSpace> "%Q del word; break"
-    bind $itk_component(text) <Delete> "%Q del char; break"
-    bind $itk_component(text) <Meta-Delete> "%Q del word; break"
-    bind $itk_component(text) <Escape><Delete> "%Q del word; break"
-    bind $itk_component(text) <Control-d> "%Q del fchar; break"
-    bind $itk_component(text) <Meta-d> "%Q del fword; break"
-    bind $itk_component(text) <Escape><d> "%Q del fword; break"
+    bind $text <BackSpace> "%Q del char; break"
+    bind $text <Control-BackSpace> "%Q del word; break"
+    bind $text <Meta-BackSpace> "%Q del word; break"
+    bind $text <Escape><BackSpace> "%Q del word; break"
+    bind $text <Delete> "%Q del fchar; break"
+    bind $text <Control-Delete> "%Q del fword; break"
+    bind $text <Meta-Delete> "%Q del fword; break"
+    bind $text <Escape><Delete> "%Q del fword; break"
+
+    # Non-standard bindings
+    bind $text <Control-Key-h> "%Q del char; break"
+    bind $text <Meta-Control-Key-h> "%Q del word; break"
+    bind $text <Escape><Control-Key-h> "%Q del word; break"
+    bind $text <Control-d> "%Q del fchar; break"
+    bind $text <Meta-d> "%Q del fword; break"
+    bind $text <Escape><d> "%Q del fword; break"
     
-    bind $itk_component(text) <Insert> "%Q stuff; break"
+    # Cutting and pasting
+    bind $text <<Paste>> "%Q paste; break"
+    bind $text <Key-F18> "%Q paste; break"
+    bind $text <Insert> "%Q paste; break"
+    bind $text <<Cut>> "%Q cut; break"
+    bind $text <Key-F20> "%Q cut; break"
+    bind $text <<Copy>> "%Q copy; break"
+    bind $text <<Copy2>> "%Q copy; break"
+    bind $text <Key-F16> "%Q copy; break"
     
-    bind $itk_component(text) <Control-Key-y> "%Q paste; break"
-    bind $itk_component(text) <Key-F18> "%Q paste; break"
-    bind $itk_component(text) <Control-Key-w> "%Q cut; break"
-    bind $itk_component(text) <Key-F20> "%Q cut; break"
-    bind $itk_component(text) <Meta-Key-w> "%Q copy; break"
-    bind $itk_component(text) <Escape><Key-w> "%Q copy; break"
-    bind $itk_component(text) <Key-F16> "%Q copy; break"
+    bind $text <Button-2> "%Q recordMousePos %x %y"
+    bind $text <ButtonRelease-2> "%Q mouseStuff %x %y; break"
     
-    bind $itk_component(text) <Button-2> "%Q recordMousePos %x %y"
-    bind $itk_component(text) <ButtonRelease-2> "%Q mouseStuff %x %y; break"
-    
-    # A not-fully-implemented binding in the Text widget to
-    # transpose characters is bogus anyway, so remove it.
-    bind $itk_component(text) <Control-t> "break"
-    
-    # The following binds are basically the same as in the Text
+    bind $text <<SelectAll>> "%Q selectRange 1.0 end; break"
+
+    # The following bindings are basically the same as in the Text
     # widget, but here they set up the undo and save data to our
     # clipboard.
-    bind $itk_component(text) <Control-k> "%Q killToEndOfLine ; break"
-    bind $itk_component(text) <Control-i> \
-	    "if \[%Q recordCharForUndo %A\] {bell; break}"
-    bind $itk_component(text) <Control-o> "%Q openLine; break"
-    
+    bind $text <<ClearToEnd>> "%Q killToEndOfLine ; break"
+    bind $text <<ClearToStart>> "%Q killToStartOfLine ; break"
+    # Tab character alternate C-i (overridden by OpenLine)
+    # bind $text <Control-i> \
+    #      "if \[%Q recordCharForUndo %A\] {bell; break}"
+    bind $text <<OpenLine>> "%Q openLine; break"
+        
     # Search commands
-    bind $itk_component(text) <Control-s> "%Q incSearchMinibuffer"
-    bind $itk_component(text) <Control-r> "%Q incSearchMinibuffer 1"
-    bind $itk_component(text) <Control-S> "%Q search; break"
-    bind $itk_component(text) <Control-R> "%Q searchQuery 1 0; break"
-    bind $itk_component(text) <Find> "%Q searchQuery 1 0; break"
+    bind $text <Find> "%Q search; break"
+    bind $text <<Find>> "%Q search; break"
+    # NOTE: There used to be separate bindings for case sensitive
+    # and case insensitive.  Now we have only case insensitive
+    # incremental search.
+    bind $text <<Search>> "%Q incSearchMinibuffer; break"
+    bind $text <<SearchBackwards>> \
+            "%Q incSearchMinibuffer 1; break"
 
-    if {$tcl_platform(platform) != "windows"} {
-	# Spelling command
-	bind $itk_component(text) <Meta-dollar> "%Q spellCheck; break"
-	bind $itk_component(text) <Escape><dollar> "%Q spellCheck; break"
-    }
+    # Spelling command
+    bind $text <<Spelling>> "%Q spellCheck; break"
+    bind $text <<Spelling2>> "%Q spellCheck; break"
 
     # Scrolling commands
-    bind $itk_component(text) <Control-v> "%Q scroll 1; break"
-    bind $itk_component(text) <Meta-v> "%Q scroll -1; break"
-    bind $itk_component(text) <Escape><v> "%Q scroll -1; break"
-    bind $itk_component(text) <Control-l> "%Q center; break"
+    bind $text <<DownPage>> "%Q scroll 1; break"
+    bind $text <<UpPage>> "%Q scroll -1; break"
+    bind $text <<UpPage2>> "%Q scroll -1; break"
+    bind $text <<Center>> "%Q center; break"
     
     # The undo command
-    bind $itk_component(text) <Control-x><u> "%Q undo; break"
+    bind $text <<Undo>> "%Q undo; break"
 
     # The goto command
-    bind $itk_component(text) <Control-c><Control-g> \
+    bind $text <<Goto>> \
 	    "%Q gotoLine; break"
-    bind $itk_component(text) <Escape><less> \
-	"%Q seeFragment {range 1.0 1.0}; break"
-    bind $itk_component(text) <Escape><greater> \
-        "%Q seeFragment {range end-1c end-1c}; break"
+    bind $text <<Top>> \
+            "%Q seeFragment {range 1.0 1.0}; break"
+    bind $text <<Bottom>> \
+            "%Q seeFragment {range end-1c end-1c}; break"
+    bind $text <End> +[code "%Q undoBoundary"]
+    bind $text <Home> +[code "%Q undoBoundary"]
 
     # The fillSelection commands
-    bind $itk_component(text) <Meta-q> "%Q busy %Q fillSelection; break"
-    bind $itk_component(text) <Escape><q> \
+    bind $text <<Fill>> "%Q busy %Q fillSelection; break"
+    bind $text <<Fill2>> \
 	    "%Q busy %Q fillSelection; break"
-    bind $itk_component(text) <Control-x><period> \
+    bind $text <<FillPrefix>> \
 	    "%Q queryFillPrefix; break"
-    bind $itk_component(text) <Control-x><f> \
+    bind $text <<FillColumn>> \
 	    "%Q queryFillColumn; break"
     
     # Case control
-    bind $itk_component(text) <Meta-l> "%Q lowerCase; break"
-    bind $itk_component(text) <Escape><l> "%Q lowerCase; break"
-    bind $itk_component(text) <Meta-u> "%Q upperCase; break"
-    bind $itk_component(text) <Escape><u> "%Q upperCase; break"
-    bind $itk_component(text) <Meta-C> "%Q capitalize; break"
-    bind $itk_component(text) <Escape><C> "%Q capitalize; break"
+    bind $text <<LowerCase>> "%Q lowerCase; break"
+    bind $text <<LowerCase2>> "%Q lowerCase; break"
+    bind $text <<UpperCase>> "%Q upperCase; break"
+    bind $text <<UpperCase2>> "%Q upperCase; break"
+    bind $text <<Capitalize>> "%Q capitalize; break"
+    bind $text <<Capitalize2>> "%Q capitalize; break"
 
-    # Modified cursor motion keys
-    bind $itk_component(text) <Meta-f> "%Q move fword; break"
-    bind $itk_component(text) <Escape><f> "%Q move fword; break"
-    bind $itk_component(text) <Control-Right> "%Q move fword; break"
-    bind $itk_component(text) <Meta-Right> "%Q move fword; break"
-    bind $itk_component(text) <Meta-b> "%Q move bword; break"
-    bind $itk_component(text) <Escape><b> "%Q move bword; break"
-    bind $itk_component(text) <Control-Left> "%Q move bword; break"
-    bind $itk_component(text) <Meta-Left> "%Q move bword; break"
+    # Cursor motion.
+    bind $text <<LineStart>> \
+            "tkTextSetCursor %W {insert linestart}; break"
+    bind $text <<LineEnd>> \
+            "tkTextSetCursor %W {insert lineend}; break"
+
+    # Although some of these make no sense for windows, them seem
+    # pretty harmless, so we leave them in without intermediary
+    # virtual events.
+    bind $text <Meta-f> "%Q move fword; break"
+    bind $text <Escape><f> "%Q move fword; break"
+    # Override Tk binding to get more emacs-like behavior.
+    bind $text <Control-Right> "%Q move fword; break"
+    # So that Tk bindings work for extending the selection:
+    bind $text <Control-Shift-Right> { }
+    bind $text <Meta-Right> "%Q move fword; break"
+    bind $text <Meta-b> "%Q move bword; break"
+    bind $text <Escape><b> "%Q move bword; break"
+    # Override Tk binding to get more emacs-like behavior.
+    bind $text <Control-Left> "%Q move bword; break"
+    # So that Tk bindings work for extending the selection:
+    bind $text <Control-Shift-Left> { }
+    bind $text <Meta-Left> "%Q move bword; break"
 
     # Cursor motion keys do not set the modified flag
     # Note that the definitions below have a blank space.
@@ -603,71 +636,74 @@ body ::tycho::Edit::constructor {args} {
     # KeyPress above.  Note that these do not call undoBoundary,
     # so they have no effect on the ability to undo a sequence
     # of key entries. The first one is the control key itself.
-    bind $itk_component(text) <Control_L> { }
-    bind $itk_component(text) <Control_R> { }
-    bind $itk_component(text) <Shift_L> { }
-    bind $itk_component(text) <Shift_R> { }
-    bind $itk_component(text) <Meta_L> { }
-    bind $itk_component(text) <Meta_R> { }
-    bind $itk_component(text) <Caps_Lock> { }
-    bind $itk_component(text) <Escape> { }
-    bind $itk_component(text) <Multi_key> { }
-    bind $itk_component(text) <Mode_switch> { }
-    bind $itk_component(text) <F1> { }
-    bind $itk_component(text) <F2> { }
-    bind $itk_component(text) <F3> { }
-    bind $itk_component(text) <F4> { }
-    bind $itk_component(text) <F5> { }
-    bind $itk_component(text) <F6> { }
-    bind $itk_component(text) <F7> { }
-    bind $itk_component(text) <F8> { }
-    bind $itk_component(text) <F9> { }
-    bind $itk_component(text) <F10> { }
-    bind $itk_component(text) <F11> { }
-    bind $itk_component(text) <F12> { }
-    
-    bind $itk_component(text) <Control-x><0> { }
-    bind $itk_component(text) <Control-x><k> { }
-    bind $itk_component(text) <Control-x><o> { }
-    
-    bind $itk_component(text) <Control-x><Control-c> { }
-    bind $itk_component(text) <Control-x><Control-f> { }
-    bind $itk_component(text) <Control-x><Control-F> { }
-    bind $itk_component(text) <Control-x><Control-r> { }
-    bind $itk_component(text) <Control-x><Control-s> { }
-    bind $itk_component(text) <Control-x><Control-w> { }
+    bind $text <Control_L> { }
+    bind $text <Control_R> { }
+    bind $text <Shift_L> { }
+    bind $text <Shift_R> { }
+    bind $text <Meta_L> { }
+    bind $text <Meta_R> { }
+    bind $text <Caps_Lock> { }
+    bind $text <Escape> { }
+    bind $text <Multi_key> { }
+    bind $text <Mode_switch> { }
+    bind $text <F1> { }
+    bind $text <F2> { }
+    bind $text <F3> { }
+    bind $text <F4> { }
+    bind $text <F5> { }
+    bind $text <F6> { }
+    bind $text <F7> { }
+    bind $text <F8> { }
+    bind $text <F9> { }
+    bind $text <F10> { }
+    bind $text <F11> { }
+    bind $text <F12> { }
+
+# FIXME: Are the following needed with emacs bindings?
+# Probably not because the top-level window gets events first.
+#     bind $text <Control-x><0> { }
+#     bind $text <Control-x><k> { }
+#     bind $text <Control-x><o> { }
+#     
+#     bind $text <Control-x><Control-c> { }
+#     bind $text <Control-x><Control-f> { }
+#     bind $text <Control-x><Control-F> { }
+#     bind $text <Control-x><Control-r> { }
+#     bind $text <Control-x><Control-s> { }
+#     bind $text <Control-x><Control-w> { }
     
     # The following do break a sequence of key entries for
     # the purposes of the undo.  I don't know why some systems
     # require the "KP" prefix, but here it is.
-    bind $itk_component(text) <Prior> [code "%Q undoBoundary"]
-    bind $itk_component(text) <Next> [code "%Q undoBoundary"]
-    bind $itk_component(text) <End> [code "%Q undoBoundary"]
-    bind $itk_component(text) <Up> [code "%Q undoBoundary"]
-    bind $itk_component(text) <Right> [code "%Q undoBoundary"]
-    bind $itk_component(text) <Down> [code "%Q undoBoundary"]
-    bind $itk_component(text) <Left> [code "%Q undoBoundary"]
-    bind $itk_component(text) <Home> [code "%Q undoBoundary"]
-    bind $itk_component(text) <Pause> [code "%Q undoBoundary"]
+    bind $text <Prior> +[code "%Q undoBoundary"]
+    bind $text <Next> +[code "%Q undoBoundary"]
+    bind $text <Up> +[code "%Q undoBoundary"]
+    bind $text <Right> +[code "%Q undoBoundary"]
+    bind $text <Down> +[code "%Q undoBoundary"]
+    bind $text <Left> +[code "%Q undoBoundary"]
+    bind $text <Pause> +[code "%Q undoBoundary"]
     
     # font size control
-    bind $itk_component(text) <Control-equal> "$this upSize"
-    bind $itk_component(text) <Control-plus> "$this upSize"
-    bind $itk_component(text) <Control-minus> "$this downSize"
+    bind $text <Control-equal> "$this upSize"
+    bind $text <Control-plus> "$this upSize"
+    bind $text <Control-minus> "$this downSize"
+    # for compatibility with many common programs like netscape...
+    bind $text <Control-bracketright> "$this upSize"
+    bind $text <Control-bracketleft> "$this downSize"
     
     # We have gotten some reported problems about these keys
     # being undefined on some machines.  But they also seem
     # be needed for other machines.  Hence the catch.
     catch {
-	bind $itk_component(text) <KP_Insert> "%Q stuff; break"
-	bind $itk_component(text) <KP_Prior> [code "%Q undoBoundary"]
-	bind $itk_component(text) <KP_Next> [code "%Q undoBoundary"]
-	bind $itk_component(text) <KP_End> [code "%Q undoBoundary"]
-	bind $itk_component(text) <KP_Up> [code "%Q undoBoundary"]
-	bind $itk_component(text) <KP_Right> [code "%Q undoBoundary"]
-	bind $itk_component(text) <KP_Down> [code "%Q undoBoundary"]
-	bind $itk_component(text) <KP_Left> [code "%Q undoBoundary"]
-	bind $itk_component(text) <KP_Home> [code "%Q undoBoundary"]
+	bind $text <KP_Insert> "%Q stuff; break"
+	bind $text <KP_Prior> [code "%Q undoBoundary"]
+	bind $text <KP_Next> [code "%Q undoBoundary"]
+	bind $text <KP_End> [code "%Q undoBoundary"]
+	bind $text <KP_Up> [code "%Q undoBoundary"]
+	bind $text <KP_Right> [code "%Q undoBoundary"]
+	bind $text <KP_Down> [code "%Q undoBoundary"]
+	bind $text <KP_Left> [code "%Q undoBoundary"]
+	bind $text <KP_Home> [code "%Q undoBoundary"]
     }
 
     # Initialize options and tell stylesheet manager to ignore them
@@ -686,12 +722,12 @@ body ::tycho::Edit::constructor {args} {
 	    -textheight       layout textHeight
 
     # Set this to zero because it's completely bogus
-    $itk_component(text) configure -selectborderwidth 0
+    $text configure -selectborderwidth 0
 
     set maxLineLength [stylesheet get layout fillColumn]
 
     # Create the context-sensitive popup menu
-    contextmenu create $itk_component(text) 
+    contextmenu create $text 
 }
 
 
@@ -1411,91 +1447,65 @@ body ::tycho::Edit::help {} {
 
 #####################################################################
 #### incSearchMinibuffer
-# Use the minibuffer to implement an incremental search. Callback is
-# ::tycho::Edit::incSearch. Sets up bindings and data when the search
-# is began. 
+# Use the minibuffer for an incremental search. An incremental search
+# is where a pattern is matched as characters are typed into the
+# minibuffer. Typing return or escape closes the minibuffer and returns
+# the focus to the text widget. If the single (optional) argument is
+# non-zero, search forwards. Otherwise, search backwards. This is meant
+# to be a faster and sometimes more convenient alternative to the
+# search dialog, although the search dialog should be used when more
+# options are needed (like regular-expression search, full-word search,
+# etc.). Repeatedly typing the shortcut that originally invokes the
+# incremental search results in searching for the next instance of the
+# pattern in the minibuffer.
 #
-# The search itself is similar to Emacs but more akin to Borland C++. 
+# This method operates by opening an entry widget in the status bar
+# (this entry widget is the minibuffer) and setting up bindings so that
+# the method incSearch is called when characters are typed. If there is
+# no status bar, then the search dialog is opened.
 #
-# Hitting keys (letters, symbols, backspace) works exactly as an 
-# incremental search should.
-#
-# Hitting <Control-s> (or <Control-r> for a reverse search) repeatedly resets
-# the point the search begins from, so that deleting deletes characters in 
-# the search buffer, but does not undo ala Emacs. 
-#
-# Hitting the arrow keys
-# <Control-s> initiates or repeats a forward search
-# <Control-r> initiates or repeats a reverse search
-# <Control-e> switches between an exact and regexp search. 
-# <Control-c> switches between case and nocase
-# 
-# Wrapping is currently disabled.
-#
-# There is currently no mapping between settings in the incremental search
-# and the EditSearch.
-#
-body ::tycho::Edit::incSearchMinibuffer {{backward 0}} {
+body ::tycho::Edit::incSearchMinibuffer {{backward 0}} { 
     # Because of Tcl's event model need to scope for callbacks
     set incSearch "@scope ::tycho::Edit $this incSearch"
 
     if { [statusbar] == "" } {
         search
     } else {
+        # As a side effect, the following binds <Return> to end a search.
         statusbar entry "i-search:"\
-                -default "" \
+                -default $_incSearchText \
                 -command "$incSearch end" \
                 -keycommand "$incSearch %A"
 
         # set point to start search
-        set incSearchArray(from) [$itk_component(text) index insert]
+        set _incSearchFrom [$itk_component(text) index insert]
 
         # set point to end search
         if {$backward} {
-            set incSearchArray(to) 1.0
+            set _incSearchTo 1.0
+            set _incSearchForward 0
         } else {
-            set incSearchArray(to) end
-        }
-
-        # set regexp/exact if unset
-        if {![info exists incSearchArray(regexp)]} { 
-            set incSearchArray(regexp) 1
-        }
-
-        # set case if unset
-        if {![info exists incSearchArray(nocase)]} { 
-            set incSearchArray(nocase) 0
+            set _incSearchTo end
+            set _incSearchForward 1
         }
 
         # set failure status
-        set incSearchArray(fail) 0
+        set _incSearchFail 0
 
         set entryWidget [statusbar _entrywidget]
 
-        # Use cursor keys, escape (as well as return) to get out
-        bind $entryWidget <Left> "$incSearch end; break"
-        bind $entryWidget <Right> "$incSearch end; break"
-        bind $entryWidget <Up> "$incSearch end; break"
-        bind $entryWidget <Down> "$incSearch end; break"
+        # Use return and escape to get out
         bind $entryWidget <Escape> "$incSearch end; break"
 
-        # does nothing anyway, disable messages from it
-        bind $entryWidget <Delete> "break;"
-
-        # special "key" for BackSpace
+        # BackSpace keys
         bind $entryWidget <BackSpace> "$incSearch del"
+        bind $entryWidget <Control-h> "$incSearch del"
 
-        # special "key" for <Control-c> (switch from nocase to case and vv)
-        bind $entryWidget <Control-c> "$incSearch switchCase"
+        # repeated searches
+        bind $entryWidget <<Search>> "$incSearch forward"
 
-        # special "key" for <Control-e> (switch from regexp to exact and vv)
-        bind $entryWidget <Control-e> "$incSearch switchType"
-
-        # special "key" for <Control-s> (repeat or switch direction)
-        bind $entryWidget <Control-s> "$incSearch forward"
-
-        # special "key" for <Control-r> (repeat or switch direction)
-        bind $entryWidget <Control-r> "$incSearch backward"
+        # repeated backward searches
+        bind $entryWidget <<SearchBackwards>> "$incSearch backward"
     }    
 }
 
@@ -1560,7 +1570,8 @@ body ::tycho::Edit::insertString {index str} {
 #########################################################################
 #### killToEndOfLine
 # Delete characters from the insertion mark to the end of the line.
-# If the line is blank (no characters), then delete the line.
+# If the insertion cursor is at the end of the line, delete the end-of-line
+# character, joining the next line.
 #
 body ::tycho::Edit::killToEndOfLine {} {
     if $readOnly {bell; return}
@@ -1573,6 +1584,26 @@ body ::tycho::Edit::killToEndOfLine {} {
 	deleteRange insert {insert +1 char}
     } {
 	deleteRange insert {insert lineend}
+    }
+}
+
+#########################################################################
+#### killToStartOfLine
+# Delete characters from the insertion mark to the start of the line.
+# If the insertion cursor is at the beginning of the line, delete the
+# previous end-of-line character, joining with the previous line.
+#
+body ::tycho::Edit::killToStartOfLine {} {
+    if $readOnly {bell; return}
+    
+    # Do nothing if we are at the beginning of the buffer
+    if [$itk_component(text) compare insert == 1.0] {return}
+
+    if [$itk_component(text) compare insert == {insert linestart}] {
+	# The line has only the return character.  Delete it.
+	deleteRange {insert -1 char} insert
+    } {
+	deleteRange {insert linestart} insert
     }
 }
 
@@ -2183,25 +2214,23 @@ body ::tycho::Edit::getTaggedText {tag} {
 
 #####################################################################
 #### incSearch
-# Callback for incremental searching. Called whenever the user presses
-# a key. Keys which are remapped before being passed are:
-# <ul>
-# <li>_BackSpace_ -> del
-# <li>_Control-s_ -> forward
-# <li>_Control-r_ -> backward   
-# <li>_Control-c_ -> switchCase (go from nocase to case sensitive)
-# <li>_Control-e_ -> switchType (go from regexp to exact type search)
-# <li>_(arrow keys)_ -> end
-# <li>_Delete_ -> (ignored: Tk entries do not respond to delete)
-# </ul>
+# Callback for incremental searching. This is called whenever the user
+# presses a key while the focus is in the minibuffer. The single
+# argument is either a single key being added to the buffer, a string
+# with value "forward" or "backward" (to set or change the direction of
+# the search), the string "del" to delete a character, or the string
+# "end" to end a search. Searches are case-insensitive. Regular
+# expression searches are not supported.
 #
 body ::tycho::Edit::incSearch {key} {
-    set status {}
+    # To avoid responding to Control key, etc., return if no key
+    if {$key == {}} {return}
 
     # Local variables 
     set entryWidget [statusbar _entrywidget]
-    set searchText [$entryWidget get]
     set textWidget $itk_component(text)
+
+    set _incSearchText [$entryWidget get]
 
     # End the search
     if {$key == "end"} {
@@ -2211,83 +2240,50 @@ body ::tycho::Edit::incSearch {key} {
     }
 
     # Switch direction
+    set incremented 0
     if {$key == "forward"} {
         # add one character to avoid "refinding" 
-        set incSearchArray(from) [$textWidget index insert]+1c
-        if {$incSearchArray(to) != "end"} {
+        set _incSearchFrom [$textWidget index $_incSearchFrom+1c]
+        set incremented 1
+        if {!$_incSearchForward} {
             # switch direction
-            set incSearchArray(to) end
-            set incSearchArray(fail) 0
+            set _incSearchTo end
+            set _incSearchFail 0
+            set _incSearchForward 1
         } 
     } elseif {$key == "backward"} {
-        set incSearchArray(from) [$textWidget index insert]
-        if {$incSearchArray(to) != "1.0"} {
+        if {$_incSearchForward} {
             # switch direction
-            set incSearchArray(to) 1.0
-            set incSearchArray(fail) 0
+            set _incSearchTo 1.0
+            set _incSearchFail 0
+            set _incSearchForward 0
         } 
-    }
-
-    # Switch type
-    if {$key == "switchType"} {
-        if {$incSearchArray(regexp)} {
-            set incSearchArray(regexp) 0
-            set status "exact"
-        } else {
-            set incSearchArray(regexp) 1
-            set status "regexp"
-        }
-    }
-
-    # Switch case
-    if {$key == "switchCase"} {
-        if {$incSearchArray(nocase)} {
-            set incSearchArray(nocase) 0
-            set status "case"
-        } else {
-            set incSearchArray(nocase) 1
-            set status "nocase"
-        }
-    }
-
-    # Check for valid ASCII text, append to searchText or remove from it
-    # if it's a backspace (the entry widget behaves strangely because of
-    # it's timing.)
-    if [regexp {^[ -~]$} $key] {
-        # It's a single ASCII text character (32-126)
-        append searchText $key
     } elseif {$key == "del"} {
-        # It's a backspace
-        set searchText [string range $searchText 0 \
-                [expr [string length $searchText] - 2]]
-    }       
+        set _incSearchText [string range $_incSearchText 0 \
+                [expr [string length $_incSearchText] - 2]]        
+    } else {
+        if {!$_incSearchForward} {
+            # Searching backwards, and just added one character.
+            # Increment the search position so that in-place matches
+            # are identified.
+            set _incSearchFrom [$textWidget index $_incSearchFrom+1c]
+            set incremented 1
+        }
+        append _incSearchText $key
+    }
 
     # Set forward/backward flag
-    if {$incSearchArray(to) == "1.0"} {
-        set dirflag "-backward" 
-    } else {
+    if {$_incSearchForward} {
         set dirflag "-forward"
-    }
-
-    # set regexp/exact flag
-    if {$incSearchArray(regexp)} {
-        set typeflag "-regexp"
     } else {
-        set typeflag "-exact"
-    }
-
-    # set nocase flag
-    if {$incSearchArray(nocase)} {
-        set caseflag "-nocase"
-    } else {
-        set caseflag "--"
+        set dirflag "-backward" 
     }
     
     set foundLength 0
     # Search the text
     set searchIndex [$textWidget search \
-            $dirflag $typeflag -count foundLength $caseflag \
-            $searchText $incSearchArray(from) $incSearchArray(to)]
+            $dirflag -exact -count foundLength -nocase \
+            $_incSearchText $_incSearchFrom $_incSearchTo]
     
     # Test for success
     if {$searchIndex != {}} {
@@ -2295,36 +2291,34 @@ body ::tycho::Edit::incSearch {key} {
         $textWidget tag remove sel 1.0 end
     
         # Add selection
-        set incSearchArray(fail) 0
+        set _incSearchFail 0
         $textWidget tag add sel $searchIndex \
                 "$searchIndex + $foundLength chars"
 
         # Show selection
         $textWidget see $searchIndex
-        $textWidget mark set insert $searchIndex
-    } else {
-        # Fix to keep from losing place
-        if [regexp {^.*[+]1c$} $incSearchArray(from)] {
-            set incSearchArray(from) \
-                    [string trimright $incSearchArray(from) +1c]
+        setInsert $searchIndex
+        set _incSearchFrom $searchIndex
+    } else { 
+       # Fix to keep from losing place
+        if $incremented {
+            set _incSearchFrom [$textWidget index $_incSearchFrom-1c]
         }
-        if {!$incSearchArray(fail)} {
+        if {!$_incSearchFail} {
             # First time
-            set incSearchArray(fail) 1
+            set _incSearchFail 1
             bell
-        }
-        if {$status != {}} {
-            append status ", failing"
         } else {
-            append status "failing"
+            # Second time -- start over
+            set _incSearchFail 0
+            if {$_incSearchForward} {
+                set _incSearchFrom 1.0
+                incSearch forward
+            } else {
+                set _incSearchFrom end
+                incSearch backward
+            }
         }
-    }
-    
-    # Update statusbar
-    if {$status != {}} {
-        statusbar _label "i-search($status):"
-    } else {
-        statusbar _label "i-search:"
     }
 }
 
@@ -2370,6 +2364,16 @@ body ::tycho::Edit::saveText {} {
 }
 
 #####################################################################
+#### setInsert 
+# Set the insertion mark at the specified index.
+# This is done by a protected method so that it can be overridden
+# in derived classes.
+#
+body ::tycho::Edit::setInsert {index} {
+    $itk_component(text) mark set insert $index
+}
+
+#####################################################################
 #####################################################################
 ####                       private methods                       ####
 
@@ -2400,53 +2404,80 @@ body ::tycho::Edit::_initializeMenubar {menubar} {
     $menubar addMenu edit -label Edit -before window -underline 0
     
     $menubar command undoredo edit \
-	    -label "Undo/Redo" -accelerator "C-x u" \
-	    -underline 0 -command "$this undo"
+	    -label "Undo/Redo" \
+            -accelerator [::tycho::Shortcuts::getLabel Undo] \
+	    -underline 0 \
+            -command "$this undo"
     
     $menubar separator editsep1 edit
     
     $menubar command cut edit \
-	    -label "Cut" -underline 0 -accelerator "C-w" \
+	    -label "Cut" \
+            -underline 0 \
+            -accelerator [::tycho::Shortcuts::getLabel Cut] \
 	    -command "$this cut"
     
     $menubar command copy edit \
-	    -label "Copy" -underline 1 -accelerator "M-w" \
+	    -label "Copy" \
+            -underline 1 \
+            -accelerator [::tycho::Shortcuts::getLabel Copy] \
 	    -command "$this copy"
     
     $menubar command paste edit \
-	    -label "Paste" -underline 0 -accelerator "C-y" \
+	    -label "Paste" \
+            -underline 0 \
+            -accelerator [::tycho::Shortcuts::getLabel Paste] \
 	    -command "$this paste"
     
     $menubar separator editsep2 edit
     
     $menubar command selectall edit \
-	    -label "Select All" -underline 0 \
-	    -accelerator "C-/" -command "$this selectRange 1.0 end"
+            -label "Select All" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel SelectAll] \
+            -command "$this selectRange 1.0 end"
     
     $menubar command unselect edit \
-	    -label "Unselect" -underline 0 \
-	    -accelerator "C-\\" -command "$this unselectRange 1.0 end"
+	    -label "Unselect" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel UnselectAll] \
+            -command "$this unselectRange 1.0 end"
     
     $menubar separator editsep3 edit
     
     $menubar command findchange edit \
-	    -label "Find/Change..." -underline 0 \
-	    -accelerator "C-S" -command "$this search"
+	    -label "Find/Change..." \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel Find] \
+            -command "$this search"
     
     $menubar command search edit \
-	    -label "Incremental Search" -underline 0 \
-	    -accelerator "C-s" -command "$this incSearchMinibuffer"
+	    -label "Incremental Search" \
+            -underline 8 \
+	    -accelerator [::tycho::Shortcuts::getLabel Search] \
+            -command "$this incSearchMinibuffer"
+    
+    $menubar command searchbackwards edit \
+	    -label "Search Backwards" \
+            -underline 3 \
+	    -accelerator [::tycho::Shortcuts::getLabel SearchBackwards] \
+            -command "$this incSearchMinibuffer 1"
     
     $menubar command spelling edit \
-	    -label "Spelling..." -underline 2 \
-	    -accelerator "M-$" -command "$this spellCheck"
+	    -label "Spelling..." \
+            -underline 2 \
+	    -accelerator [::tycho::Shortcuts::getLabel Spelling] \
+            -command "$this spellCheck"
+
     if {$tcl_platform(platform) == "macintosh"} {
 	$menubar disable spelling
     }
 
     $menubar command gotoline edit \
-	    -label "Goto Line..." -underline 0 \
-	    -accelerator "C-c C-g" -command "$this gotoLine"
+	    -label "Goto Line..." \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel Goto] \
+            -command "$this gotoLine"
     
     # Add a Format menu
     $menubar addMenu format -label Format -underline 1
@@ -2454,42 +2485,58 @@ body ::tycho::Edit::_initializeMenubar {menubar} {
     # $menubar separator formatsep0 format
 
     $menubar command fillregion format \
-	    -label "Fill Region" -underline 2 \
-	    -accelerator "M-q" -command "$this busy $this fillSelection"
+	    -label "Fill Region" \
+            -underline 2 \
+	    -accelerator [::tycho::Shortcuts::getLabel Fill] \
+            -command "$this busy $this fillSelection"
     
     $menubar command rightfillcolumn format \
-	    -label "Right Fill Column" -underline 2 \
-	    -accelerator "C-x f" -command "$this queryFillColumn"
+	    -label "Right Fill Column" \
+            -underline 2 \
+	    -accelerator [::tycho::Shortcuts::getLabel FillColumn] \
+            -command "$this queryFillColumn"
     
     $menubar command setfillprefix format \
-	    -label "Set Fill Prefix" -underline 1 \
-	    -accelerator "C-x ." -command "$this queryFillPrefix"
+	    -label "Set Fill Prefix" \
+            -underline 1 \
+	    -accelerator [::tycho::Shortcuts::getLabel FillPrefix] \
+            -command "$this queryFillPrefix"
 
     $menubar separator formatsep1 format
 
     $menubar command capitalize format \
-	    -label "Capitalize" -underline 0 \
-	    -accelerator "M-C" -command "$this capitalize"
+	    -label "Capitalize" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel Capitalize] \
+            -command "$this capitalize"
 
     $menubar command lowercase format \
-	    -label "Lower Case" -underline 0 \
-	    -accelerator "M-l" -command "$this lowerCase"
+	    -label "Lower Case" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel LowerCase] \
+            -command "$this lowerCase"
 
     $menubar command uppercase format \
-	    -label "Upper Case" -underline 0 \
-	    -accelerator "M-u" -command "$this upperCase"
+	    -label "Upper Case" \
+            -underline 0 \
+	    -accelerator [::tycho::Shortcuts::getLabel UpperCase] \
+            -command "$this upperCase"
 
     # Add a Special menu for file templates and so on
     $menubar addMenu special -label Special -underline 0
     
     # Add font size control
     $menubar command biggerfont special \
-	    -label "Larger Font" -underline 0\
-            -accelerator "C-+" -command "$this upSize"
+	    -label "Larger Font" \
+            -underline 0 \
+            -accelerator "C-\]" \
+            -command "$this upSize"
 
     $menubar command smallerfont special \
-	    -label "Smaller Font" -underline 0\
-            -accelerator "C--" -command "$this downSize"
+	    -label "Smaller Font" \
+            -underline 0 \
+            -accelerator "C-\[" \
+            -command "$this downSize"
 }
 
 #####################################################################
