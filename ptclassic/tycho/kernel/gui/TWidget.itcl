@@ -139,6 +139,9 @@ body ::tycho::TWidget::constructor {args} {
 
     # This is not a good idea because some widgets don't want the focus:
     # ::bind $itk_component(hull) <Enter> "$this focusin"
+
+    # There are a few bindings that we want to work everywhere
+    bind $itk_component(hull) <<Open>> {::tycho::File::openWin %W; break}
 }
 
 #######################################################################
@@ -150,7 +153,7 @@ body ::tycho::TWidget::constructor {args} {
 body ::tycho::TWidget::destructor {} {
     if $disableDestruction {
         # Schedule a future attempt at destruction.
-        after 1000 "$this nextWindow; delete object $this"
+        after 1000 "$this prevWindow; delete object $this"
         ::tycho::silentError
     }
     # Delete the context menu if there is one
