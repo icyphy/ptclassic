@@ -245,7 +245,11 @@ proc ptkRunControl { name octHandle } {
 	"ptkRunControlDel $name $octHandle $defNumIter"
 
     set olduniverse [curuniverse]
-    newuniverse $name
+
+    # EAL: The following call was here for a long time, but appears
+    # to be entirely redundant, since ptkCompile creates a new universe.
+    # newuniverse $name
+
     if {[catch {ptkCompile $octHandle} msg] == 1} {
 	# An error has occurred.
 	ptkClearRunFlag $name $octHandle
@@ -260,55 +264,10 @@ proc ptkRunControl { name octHandle } {
 		"ptkGo $name $octHandle"
     bind $ctrlPanel.iter.entry <Escape> "ptkStop $name"
     bind $ctrlPanel.iter.entry <space> "ptkPause $name $octHandle"
-    bind $ctrlPanel <Return> "ptkGo $name $octHandle"
-    bind $ctrlPanel <space> "ptkPause $name $octHandle"
-    bind $ctrlPanel <Escape> "ptkStop $name"
     bind $ctrlPanel <Control-d> \
 	"ptkRunControlDel $name $octHandle $defNumIter"
-}
 
-
-#######################################################################
-# Procedure to turn on or off the event loop during a run
-#     - Alan Kamas
-#
-proc ptkSetRunInteractivity { name octHandle } {
-    global ptkDebug ptkRunEventLoop ptkRunFlag
-    set Panelwindow .run_$octHandle
-    if {$ptkRunEventLoop($name)} {
-	# TkEventLoop is active during a run
-	# If the run is in progress, turn event loop on
-	if {$ptkRunFlag($name)=={ACTIVE}||$ptkRunFlag($name)=={PAUSED}} {
-	    ptkSetEventLoop on
-	}
-	# Return pause, run, and debug to active states
-        if {[winfo exists $Panelwindow]} {
-	    $Panelwindow.panel.pause configure -state normal
-	    $Panelwindow.panel.stop configure -state normal
-	    $Panelwindow.options.debug configure -state normal
-	}
-	# Debug is now allowed
-	ptkSetOrClearDebug $name $octHandle
-    } {
-	# Turn off debug mode
-	set ptkDebug($name) 0
-	# Close down debug window
-	ptkSetOrClearDebug $name $octHandle
-	# mark the pause, stop, and debug buttons inactive
-        if {[winfo exists $Panelwindow]} {
-	    $Panelwindow.panel.pause configure -state disabled
-	    $Panelwindow.panel.stop configure -state disabled
-	    $Panelwindow.options.debug configure -state disabled
-	}
-	# If the run is in progress, turn off the event loop
-	if {$ptkRunFlag($name)=={ACTIVE} || $ptkRunFlag($name)=={PAUSED} } {
-	    # one last call to update to make sure that the pause/stop/debug
-            # buttons get turned off
-	    update idletasks
-            # now turn off the event loop
-	    ptkSetEventLoop off
-	}
-    }
+    focus $ctrlPanel.iter.entry
 }
 
 #######################################################################
@@ -322,11 +281,13 @@ proc ptkToggleScript { name octHandle } {
 	pack forget $ctrlPanel.iter
 	pack $ctrlPanel.tclScript -expand 1 -fill both \
 	    -after $ctrlPanel.options
+	focus $ctrlPanel.tclScript.tframe.text
     } {
 	# Reverting to non-scripted run
 	pack forget $ctrlPanel.tclScript
 	pack $ctrlPanel.iter -anchor w -fill x \
 	    -after $ctrlPanel.options
+	focus $ctrlPanel.iter.entry
     }
 }
 
