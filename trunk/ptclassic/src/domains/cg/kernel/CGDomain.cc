@@ -20,25 +20,19 @@ $Id$
 #include "SDFScheduler.h"
 #include "CGConnect.h"
 #include "AutoForkNode.h"
-
-// for error messages (temporary, until wormholes exist):
-#include "Error.h"
+#include "CGWormhole.h"
+#include "CGWormConnect.h"
 
 // For the hacks below to avoid doing wormholes:
-
-#include "WormConnect.h"
 
 extern const char CGdomainName[] = "CG";
 
 class CGDomain : public Domain {
 public:
 	// new wormhole
-	Star& newWorm(Galaxy&, Target*)  {
-		// return *new CGWormhole(innerGal);
-		Error::abortRun("No CG wormhole implemented yet");
-		// Following is a hack
-		LOG_NEW; return *(new SDFStar);
-	}
+        Star& newWorm(Galaxy& innerGal, Target* tg)  {
+                LOG_NEW; return *new CGWormhole(innerGal, tg);
+        }
 
 	// new input porthole
 	PortHole& newInPort() { LOG_NEW; return *new InCGPort;}
@@ -47,20 +41,14 @@ public:
 	PortHole& newOutPort() { LOG_NEW; return *new OutCGPort;}
 
 	// new fromUniversal EventHorizon
-	EventHorizon& newFrom() {
-		// return *new CGfromUniversal;
-		Error::abortRun("No CG EventHorizon implemented yet");
-		// Following is a hack
-		LOG_NEW; return *(new EventHorizon);
-	}
+        EventHorizon& newFrom() {
+                LOG_NEW; return *new CGfromUniversal;
+        }
 
 	// new toUniversal EventHorizon
-	EventHorizon& newTo() {
-		// return *new CGtoUniversal;
-		Error::abortRun("No CG EventHorizon implemented yet");
-		// Following is a hack
-		LOG_NEW; return *(new EventHorizon);
-	}
+        EventHorizon& newTo() {
+                LOG_NEW; return *new CGtoUniversal;
+        }
 
 	// new node (geodesic)
 	Geodesic& newNode() { LOG_NEW; return *new AutoForkNode;}
