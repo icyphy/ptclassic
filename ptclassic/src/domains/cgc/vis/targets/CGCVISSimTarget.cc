@@ -1,5 +1,5 @@
 #ifdef lint
-static const char file_id[] = "$Id$";
+static const char file_id[] = "CGCVISSimTarget.cc";
 #endif /*lint*/
 /******************************************************************
 Version identification:
