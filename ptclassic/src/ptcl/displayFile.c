@@ -100,7 +100,7 @@ int displayFile(const char *fileName,
 		void (*debugFuncPtr)(const char *),
 		void (*errFuncPtr)(const char *))
 {
-  char buf[512];
+  char buf[1024];
   genDispCommand(buf, fileName);
   if (*buf == '\0') {
     if (debugFuncPtr != (void (*)(const char *))NULL )    
@@ -110,12 +110,15 @@ int displayFile(const char *fileName,
 		      "::tycho::File::openContext ",
 		      fileName,
 		      (char *)NULL) ) != TCL_OK) {
-      if ( ptkInterp != NULL ) 
-	sprintf(buf, "Cannot invoke Tycho editor for '%s':\n%s", fileName,
-		Tcl_GetVar(ptkInterp,"errorInfo",TCL_GLOBAL_ONLY));
-      else 
+      if ( ptkInterp == NULL ) {
 	sprintf(buf, "Cannot invoke Tycho editor for '%s':\nptkInterp==NULL",
 		fileName);
+      } else {
+        /* Only print a maximum of 850 chars from the stack trace */
+	sprintf(buf, "Cannot invoke Tycho editor for '%.100s':\n%.850s",
+		fileName,
+		Tcl_GetVar(ptkInterp,"errorInfo",TCL_GLOBAL_ONLY));
+      }
       if (errFuncPtr != (void (*)(const char *)) NULL) 
 	(errFuncPtr)(buf);
       return 0;
