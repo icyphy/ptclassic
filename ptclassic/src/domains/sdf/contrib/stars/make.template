@@ -84,6 +84,9 @@ all:		$(SRCS) stars_all
 
 install:	stars_install
 
+# allow CC_SHAREDFLAGS to be overridden (neal@ctd.comsat.com (Neal Becker))
+include $(ROOT)/mk/contrib.mk
+
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
 
