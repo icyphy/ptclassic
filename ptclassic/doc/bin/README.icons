@@ -79,7 +79,7 @@ So I wrote a macro, ".Ps filename size", that generates a string like
 
 in the troff input.  When you run ditroff -t and psdit, you wind up with
 the same string in the postscript output.  I then wrote a small C program
-post-processor called "psi" ($PTOLEMY/src/utils/psi) that searches a
+post-processor called "psi" ($PTOLEMY/adm/src/psi) that searches a
 postscript file for PSINCLUDE lines and includes the named files as
 encapsulated postscript.  The result is a postscript file that has
 everything you want in it.
@@ -107,3 +107,8 @@ postscript output has \256 and \257 for these ligatures.
 
 3. The icon .ps files could be greatly reduced by telling oct2ps to use
 a null prolog file, and just include the prolog file once at the beginning.
+
+ACKNOWLEDGEMENTS:
+-----------------
+The postscript routines that allow the actual inclusion come from somebody
+else, but I forget who.  I got them off the net.
