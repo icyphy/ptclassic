@@ -45,9 +45,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "FloatState.h"
 #include "GalIter.h"
 #include "Target.h"
+#include "EventHorizon.h"
 
 extern const char SDFdomainName[];
-
 
 /************************************************************************
 
@@ -160,6 +160,9 @@ void SDFScheduler :: setup () {
         // Schedule the graph.
 
         computeSchedule(*galaxy());
+	if (invalid) return;
+
+	adjustSampleRates();
 	return;
 }
 
@@ -206,6 +209,24 @@ inline int wormEdge(PortHole& p) {
 	PortHole* f = p.far();
 	if (!f) return TRUE;
 	else return p.atBoundary();
+}
+
+// if the schedule is for a wormhole, we need to set the number
+// of tokens transferred by the attached event horizons.
+// This function does the job.
+
+void SDFScheduler::adjustSampleRates() {
+	BlockPortIter nextPort(*galaxy());
+	PortHole* p;
+	while ((p = nextPort++) != 0) {
+		DFPortHole* dp = (DFPortHole*) &p->newConnection();
+		int num = dp->numXfer() * dp->parentReps();
+		PortHole* dfar = dp->far();
+		if (dfar == 0) continue;
+		EventHorizon* eh = dfar->asEH();
+		if (eh == 0) continue;
+		eh->setParams(num);
+	}
 }
 
 int SDFScheduler::computeSchedule(Galaxy& g)

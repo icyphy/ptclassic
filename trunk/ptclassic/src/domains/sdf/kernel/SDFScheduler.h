@@ -177,6 +177,10 @@ protected:
         // Schedule the synchronous data flow graph.
         virtual int computeSchedule(Galaxy& g);
 
+	// fn to adjust sample rates on event horizon ports
+	// after schedule is computed.
+	virtual void adjustSampleRates();
+
 	// run one iteration of the SDF schedule
 	virtual void runOnce();
 
