@@ -402,6 +402,10 @@ body ::tycho::HTML::constructor {args} {
 
     # Add a binding for links to display the destination.
     $text tag bind link <Enter> "$this linkEnter %x %y"
+    # If we don't have a <Motion> tag for the link, then if we have several
+    # links stacked on top of each other horizontally, the status bar
+    # is not updated as we move the mouse from link to link (see tynt.html).
+    $text tag bind link <Motion> "$this linkEnter %x %y"
     $text tag bind link <Leave> "$this statusbar puts {}"
 
     # Additions:
