@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-1993 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -36,7 +36,6 @@ static const char file_id[] = "$RCSfile$";
 #include "PNTarget.h"
 #include "PNScheduler.h"
 #include "PNThread.h"
-#include "PNMonitor.h"
 
 static PNMonitor prototype;
 
@@ -73,11 +72,9 @@ void PNTarget::wrapup()
 {
     Target::wrapup();
 
-    // Uninitialize the thread library.
-    PNThread::finalize();
+    // Delete scheduler (and any threads it created).
+    delSched();
 
     // Disable all registered PtGates after threads have been deleted.
     GateKeeper::disableAll();
-
-    delSched();
 }
