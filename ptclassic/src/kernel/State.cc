@@ -129,11 +129,10 @@ reparse:
 			goto reparse;
 		}
 	}
-	else {
-		parseError ("unexpected token", token);
-		t.tok = T_ERROR;
-		return t;
-	}
+// if we get here, next token is bogus
+	parseError ("unexpected token", token);
+	t.tok = T_ERROR;
+	return t;
 }
 
 const State* State :: lookup (char* name, const Block* blockIAmIn) const {
