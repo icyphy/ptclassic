@@ -29,10 +29,6 @@ The TclX package includes a <CODE>profile</CODE> command which can be
 used to return a call stack.  TclX can be found at <A
 HREF="ftp://ftp.neosoft.com/pub/tcl/tclx-distrib"><CODE>ftp://ftp.neosoft.com/pub/tcl/tclx-distrib</CODE></A>.
 
- <P>Tycho uses <CODE>profile</CODE> to provide a <A
-HREF="../../editors/visedit/doc/usersGuides/ProfileTclHelp.html">Graphical
-Tcl Profiler</A>.
-
 <H3><A NAME="performance hints">Performance Hints</A></H3>
 
 The hints below were taken from <A
@@ -90,11 +86,6 @@ See the <A HREF="../../kernel/doc/internals/exec.html">Tycho Exec Internals Guid
 
 <LI> If your application is taking a long time to start up, try the following:
 <OL>
-<LI> Use the 
-<A
-HREF="../../editors/visedit/doc/usersGuides/ProfileTclHelp.html">Graphical
-Tcl Profiler</A> to look for bottlenecks.  Look for lots of calls to <CODE>unknown</CODE> and <CODE>tcl_unknown</CODE>.
-
 <LI> Autoloading Itcl files takes more time than just sourcing them.
 If you source the files necessary before creating your first widget,
 you might see a speedup.  You might find it interesting to put
