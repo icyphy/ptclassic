@@ -30,32 +30,32 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #ifndef INTARRAY_H
 #define INTARRAY_H
 
-class IntArray
+class ACSIntArray
 {
  private:
   int total;
   int* ints;
 
  public:
- IntArray::IntArray(void);
- IntArray::IntArray(int);
- IntArray::IntArray(int,int);
- IntArray::~IntArray(void);
-  IntArray& operator=(IntArray&);
-  void IntArray::incr(int);
-  void IntArray::copy(IntArray*);
-  void IntArray::fill(int);
-  IntArray* IntArray::sort_lh(void);
-  IntArray* IntArray::sort_hl(void);
-  void IntArray::reorder(IntArray*);
-  void IntArray::add(void);
-  void IntArray::add(int);
-  void IntArray::remove(int);
-  int IntArray::population(void);
-  int IntArray::query(int);
-  int IntArray::set(int,int);
-  void IntArray::print(const char*);
-  int IntArray::find(int);
+ ACSIntArray::ACSIntArray(void);
+ ACSIntArray::ACSIntArray(int);
+ ACSIntArray::ACSIntArray(int,int);
+ ACSIntArray::~ACSIntArray(void);
+  ACSIntArray& operator=(ACSIntArray&);
+  void ACSIntArray::incr(int);
+  void ACSIntArray::copy(ACSIntArray*);
+  void ACSIntArray::fill(int);
+  ACSIntArray* ACSIntArray::sort_lh(void);
+  ACSIntArray* ACSIntArray::sort_hl(void);
+  void ACSIntArray::reorder(ACSIntArray*);
+  void ACSIntArray::add(void);
+  void ACSIntArray::add(int);
+  void ACSIntArray::remove(int);
+  int ACSIntArray::population(void);
+  int ACSIntArray::query(int);
+  int ACSIntArray::set(int,int);
+  void ACSIntArray::print(const char*);
+  int ACSIntArray::find(int);
 };
 
 #endif
