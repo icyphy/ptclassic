@@ -136,12 +136,19 @@ after processing all inputs is sent to the "size" output.
 		inData.triggers(size);
 		demand.triggers(size);
 
+		demand.triggers(outData);
 		// Note that although demand triggers outData if the Queue
 		// has data, it does not trigger an immediate output if the
 		// Queue is empty.  Hence, if the Queue is empty, there is
-		// a delay in this path.  For this reason, we do not want
-		// to declare that demand triggers outData.  Delay-free
-		// loops involving a path through demand to outData are fine.
+		// a delay in this path.  Although this might imply we do not
+		// want to declare that demand triggers outData, actually, we
+		// do.  Consider for instance a star feeding data to both
+		// the demand input of the Queue and a downstream star that
+		// also gets data from the demand input of the star. We want
+		// the Queue to fire before the downstream star. Delay free
+		// loops involving a path through demand to outData are fine,
+		// but an infinitessimal delay should be put in the feedback
+		// path.
 	}
 	start {
 		infinite = (int(capacity) < 0);
