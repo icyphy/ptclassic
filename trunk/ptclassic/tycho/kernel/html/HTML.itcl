@@ -630,7 +630,7 @@ body ::tycho::HTML::openSource {} {
 	$sourcewin raiseWindow
 	return
     }
-    set obj [::tycho::view EditHTML [list -file $file]]
+    set obj [::tycho::view EditHTML -file $file]
     set sourcewin $obj
 }
 
