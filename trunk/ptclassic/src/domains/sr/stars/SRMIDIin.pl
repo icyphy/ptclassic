@@ -181,7 +181,7 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	    int byte = int(byteNum);
 
-	    switch ( status ) {
+	    switch ( status & 0xf0 ) {
 	    case NoteOff:
 
 	      if ( byte == 0 ) {
