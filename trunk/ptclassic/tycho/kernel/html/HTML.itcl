@@ -515,6 +515,13 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
                 return
             }
 
+            # If the destination file does not exist, issue a message.
+            if ![file readable $filename] {
+                ::tycho::warn \
+                        "File does not exist or is not readable:\n$filename"
+                return
+            }
+
             # For backtracking
             if $push {
                 $stack push [list $file [currentPoint]]
