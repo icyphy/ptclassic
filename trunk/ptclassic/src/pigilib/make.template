@@ -31,7 +31,7 @@ CFLAGS        = -g
 	$(CC) $(CFLAGS) -I$(OCTTOOLS)/include -c $<
 
 # C++ compiler variables
-GXX	      = g++
+GNU	      = g++
 GPPFLAGS      = -g
 
 HDRS	      = compile.h \
@@ -129,7 +129,7 @@ lint:	$(LIBCSRCS)
 # Rule for compiling with g++
 .SUFFIXES: .cc
 .cc.o:
-	$(GXX) $(GPPFLAGS) -I$(KERNDIR) -c  $<
+	$(GNU) $(GPPFLAGS) -I$(KERNDIR) -c  $<
 
 # print out source file names
 printsrcs:;	@echo "$(SRCS)"
