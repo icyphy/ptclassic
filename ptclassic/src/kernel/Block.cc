@@ -5,6 +5,7 @@
 #include <std.h>
 #include "Block.h"
 #include "StringList.h"
+#include "ConstIters.h"
 #include "Error.h"
 
 /**************************************************************************
@@ -31,8 +32,8 @@ Block :: printPorts (const char* type) const {
 		out += "Ports in the ";
 		out += type;
 		out += ":\n";
-		BlockPortIter next(*this);
-		PortHole* p;
+		CBlockPortIter next(*this);
+		const PortHole* p;
 		while ((p = next++) != 0)
 			if (!hidden(*p)) out += p->printVerbose();
 	}
@@ -41,8 +42,8 @@ Block :: printPorts (const char* type) const {
 		out += "MultiPortHoles in the ";
 		out += type;
 		out += "\n";
-		BlockMPHIter next(*this);
-		MultiPortHole* mp;
+		CBlockMPHIter next(*this);
+		const MultiPortHole* mp;
 		while ((mp = next++) != 0)
 			if (!hidden(*mp)) out += mp->printVerbose();
 	}
@@ -56,8 +57,8 @@ Block :: printStates (const char* type) const {
         out += "States in the ";
         out += type;
         out += ":\n";
-	State* s;
-	BlockStateIter next(*this);
+	const State* s;
+	CBlockStateIter next(*this);
 	while ((s = next++) != 0)
 		out += s->printVerbose();
         return out;
@@ -96,7 +97,7 @@ void Block :: initialize()
 // If the name refers to a MultiPortHole, a new PortHole is created.
 // The real port is always returned (no need to check for aliases).
 PortHole *
-Block::portWithName (const char* name) const {
+Block::portWithName (const char* name) {
 	GenericPort* g;
 	BlockGenPortIter gpi(*this);
 	while ((g = gpi++) != 0) {
@@ -108,7 +109,7 @@ Block::portWithName (const char* name) const {
 }
 
 // Return the matching MultiPortHole.
-MultiPortHole* Block::multiPortWithName(const char* name) const {
+MultiPortHole* Block::multiPortWithName(const char* name) {
 	MultiPortHole* m;
 	BlockMPHIter mpi(*this);
 	while ((m = mpi++) != 0) {
@@ -129,15 +130,17 @@ Block* Block::clone() const {
 
 // Return the names of the ports within the block.  Omit hidden ports.
 int
-Block::portNames (const char** names, int* io, int nMax) const {
+Block::portNames (const char** names, const char** types,
+		  int* io, int nMax) const {
 	int n = numberPorts();
 	int count = 0;
 	if (n > nMax) n = nMax;
-	BlockPortIter next(*this);
+	CBlockPortIter next(*this);
 	for (int i = n; i>0; i--) {
-		PortHole& p = *next++;
+		const PortHole& p = *next++;
 		if (hidden(p)) continue;
 		*names++ = p.readName();
+		*types++ = p.myType();
 		*io++ = p.isItOutput();
 		count++;
 	}
@@ -146,15 +149,17 @@ Block::portNames (const char** names, int* io, int nMax) const {
 
 // Return the names of the multiports within the block.  Omit hidden ports.
 int
-Block::multiPortNames (const char** names, int* io, int nMax) const {
+Block::multiPortNames (const char** names, const char** types,
+		       int* io, int nMax) const {
 	int n = numberMPHs();
 	int count = 0;
 	if (n > nMax) n = nMax;
-	BlockMPHIter next(*this);
+	CBlockMPHIter next(*this);
 	for (int i = n; i>0; i--) {
-		MultiPortHole& p = *next++;
+		const MultiPortHole& p = *next++;
 		if (hidden(p)) continue;
 		*names++ = p.readName();
+		*types++ = p.myType();
 		*io++ = p.isItOutput();
 		count++;
 	}
@@ -162,7 +167,7 @@ Block::multiPortNames (const char** names, int* io, int nMax) const {
 }
 
 State *
-Block::stateWithName(const char* name) const {
+Block::stateWithName(const char* name) {
 	State* s;
 	BlockStateIter next(*this);
 	while ((s = next++) != 0) {
