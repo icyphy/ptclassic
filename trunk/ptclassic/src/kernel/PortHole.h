@@ -126,7 +126,6 @@ public:
 	// function to initialize PortHole Plasmas
 	virtual Plasma* setPlasma(Plasma *useType = NULL) = 0;
 
-
 	// function to connect two portholes
 	virtual void connect(GenericPort& destination,int numberDelays);
 
@@ -303,26 +302,19 @@ private:
 	int indexValue;
 };
 
-// The following generic types are good enough to use in galaxies.
-// They are just like PortHole except that they indicate whether
-// they are input or output.
+// The following generic type is good enough to use in galaxies.
+// It always has an alias.
+// The "isIt" functions work by asking the alias.
 
         //////////////////////////////////////////
-        // class InPortHole
+        // class GalPort
         //////////////////////////////////////////
 
-class InPortHole : public PortHole {
+class GalPort : public PortHole {
 public:
-	int isItInput() const; // return TRUE
-};
-
-        //////////////////////////////////////////
-        // class OutPortHole
-        //////////////////////////////////////////
-
-class OutPortHole : public PortHole {
-public:
-	int isItOutput() const; // {return TRUE;}
+	GalPort(GenericPort& a) { setAlias(a);}
+	int isItInput() const;
+	int isItOutput() const;
 };
 
         //////////////////////////////////////////
@@ -418,6 +410,18 @@ protected:
 	// add a newly created port to the multiporthole
 	PortHole& installPort(PortHole& p);
 };
+
+        //////////////////////////////////////////
+        // class GalMultiPort
+        //////////////////////////////////////////
+
+class GalMultiPort : public MultiPortHole {
+public:
+	GalMultiPort(GenericPort& a) { setAlias(a);}
+	int isItInput() const;
+	int isItOutput() const;
+};
+
 
         //////////////////////////////////////////
         // class MPHList

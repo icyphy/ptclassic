@@ -158,12 +158,18 @@ PortHole :: ~PortHole() {
 	delete myBuffer;
 }
 
-// small virtual functions for PortHole, InPortHole, OutPortHole
+// small virtual functions for PortHole, GalPort, GalMultiPort
 
-int InPortHole :: isItInput() const { return TRUE;}
-int OutPortHole :: isItOutput() const { return TRUE;}
 void PortHole :: grabData () { return;}
 void PortHole :: sendData () { return;}
+
+// get answer by asking the alias.
+int GalPort :: isItInput() const { return alias()->isItInput();}
+int GalPort :: isItOutput() const { return alias()->isItOutput();}
+
+// get answer by asking the alias.
+int GalMultiPort :: isItInput() const { return alias()->isItInput();}
+int GalMultiPort :: isItOutput() const { return alias()->isItOutput();}
 
 // return number of tokens waiting on Geodesic
 int PortHole :: numTokens() const { return myGeodesic->size();}
