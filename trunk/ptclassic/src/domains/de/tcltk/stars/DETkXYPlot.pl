@@ -77,7 +77,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	        name {updateSize}
 		type{int}
 		default {10}
-		desc { The number of points drawn simulataneously. Higher numbers make the response faster.  }
+		desc { The number of points drawn simultaneously. Higher numbers make the response faster.  }
 	}
 	
 	inmulti {

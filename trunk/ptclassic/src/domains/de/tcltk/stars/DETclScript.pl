@@ -80,7 +80,7 @@ setOutputs_$starID, or one by one, using setOutput_$starID.
 The time stamp on the affected output ports will be the current time
 of the scheduler.  If writing to the outputs occurs in goTcl_$starID
 procedure, then the time stamp on the outputs will be the same as
-the invocation time of the star.  If it ocurrs asynchronously, then
+the invocation time of the star.  If it occurrs asynchronously, then
 the time stamp is somewhat arbitrary, in that the current time of the scheduler,
 whenever the procedure happens to be invoked, will be used.
 .EQ
