@@ -122,6 +122,9 @@ body ::tycho::EditDAG::constructor {args} {
     addMenuItem {Transpose} Format -underline 0 \
             -command "$this transpose"
 
+    addMenuItem {Scale} Format -underline 1 \
+            -command "$this component graphics setSpacing"
+
     eval itk_initialize $args
 }
 
