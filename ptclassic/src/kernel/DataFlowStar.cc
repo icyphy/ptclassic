@@ -100,6 +100,15 @@ void DataFlowStar::endLoop() {}
 // isA function
 ISA_FUNC(DataFlowStar,Star);
 
+// make a duplicate DataFlowStar.  This will call Star::clone 
+// and then set DataFlowStar specific data members such as
+// repetitions.
+/* virtual */ Block* DataFlowStar::clone () const {
+	DataFlowStar* star = (DataFlowStar*)Star::clone();
+	if (star) star->repetitions = repetitions;
+	return star;
+}
+
 // scheduling functions below assume SDF semantics can be used.
 
 	////////////////////////////

@@ -131,6 +131,11 @@ public:
 	virtual DFPortHole* waitPort() const; // default returns 0
 	virtual int waitTokens() const; // default: return 0
 
+	// make a duplicate DataFlowStar.  This will call Star::clone 
+	// and then set DataFlowStar specific data members such as
+	// repetitions.
+	/* virtual */ Block* clone () const;
+
 protected:
 	// initialize the port counts used by isSource, isSink, etc.
 	void initPortCounts();
