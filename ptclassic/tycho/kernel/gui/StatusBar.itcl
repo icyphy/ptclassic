@@ -359,8 +359,8 @@ body ::tycho::StatusBar::_complete {filename caseSens {down 1}} {
             set _completedata(lastEntry) "$completion"
 
             # Insert completion
-            _entryinsert $completion
             _label "Open File: ([expr $num+1]/$length)"
+            _entryinsert $completion
         } elseif {$length == 1} {
             # Open if length == 1 unless directory
             if {[file type $filename] != "directory"} {
@@ -451,9 +451,6 @@ body ::tycho::StatusBar::_complete {filename caseSens {down 1}} {
             append completion [::tycho::directorySeparator]
         }                               
 
-        # Insert completion
-        _entryinsert $completion
-        
         # If it's valid, this is the first completion
         if {[file exists $completion]} {
             if {[file type $completion] != "directory"}  {
@@ -469,8 +466,10 @@ body ::tycho::StatusBar::_complete {filename caseSens {down 1}} {
             set _completedata(listNum) -1
             _label "Open File: (0/$length)"
         }
- 
-       # Save _completedata
+        # Now insert completion, after label has changed
+        _entryinsert $completion
+
+        # Save _completedata
         set _completedata(lastEntry) "$completion"
         set _completedata(lastCase) $caseSens
         set _completedata(list) $files        
@@ -826,7 +825,8 @@ body ::tycho::StatusBar::_drawprogress {progress {color blue}} {
 #### _entryinsert
 #
 # Insert text into the entry widget and view the cursor. Does nothing
-# if not in entry mode.
+# if not in entry mode. If the label is being changed at the same
+# time, this method should be _after_ changing the label.
 #
 body ::tycho::StatusBar::_entryinsert {text} {
     if { $_mode != "entry" } {
@@ -836,7 +836,11 @@ body ::tycho::StatusBar::_entryinsert {text} {
     $itk_component(feedback) insert 0 $text
 
     # Call Tk proc to view the insertion cursor. These procs
-    # are undocumented, but this saves me writing it... 
+    # are undocumented, but this saves me writing it... This
+    # proc works fine, but we still perform an update first, in
+    # case the label has changed, causing the size of the entry widget
+    # to change
+    ::tycho::safeUpdate $this
     tkEntrySeeInsert $itk_component(feedback)
 }
 
