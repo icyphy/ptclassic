@@ -62,7 +62,7 @@ OBJS =		$(LIB_CSRCS:.c=.o)
 $(DUMPEXTSBIN): $(SRCS)
 	$(cc32) $(CON_CFLAGS) -Fo$(TMPDIR)\ $?
 	set LIB=$(TOOLS32)\lib
-	$(link32) $(linkdebug) $(conlflags) -out:$@ $(TMPDIR)\winDumpExts.obj $(guilibs)
+	$(link32) $(linkdebug) $(conlflags) -out:$@ $(TMPDIR)\winDumpExts.o $(guilibs)
 
 install: $(BINDIR)/$(DUMPEXTSBIN)
 $(BINDIR)/$(DUMPEXTSBIN): $(DUMPEXTSBIN)
@@ -71,7 +71,7 @@ $(BINDIR)/$(DUMPEXTSBIN): $(DUMPEXTSBIN)
 sources: $(SRCS)
 
 clean:
-	rm -f $(DUMPEXTBIN) *.obj
+	rm -f $(DUMPEXTBIN) *.o
 
 depend:
 	echo no dependencies here
