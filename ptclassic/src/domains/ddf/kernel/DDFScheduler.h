@@ -3,9 +3,7 @@
 
 #include "Scheduler.h"
 #include "Galaxy.h"
-#include "SDFStar.h"
 #include "DDFStar.h"
-#include "SDFConnect.h"
 #include "DataStruct.h"
 #include "IntState.h"
 

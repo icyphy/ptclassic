@@ -23,7 +23,6 @@ These are the methods for the dynamic dataflow scheduler.
 extern Error errorHandler;
 
 extern const char DDFdomainName[];
-extern const char SDFdomainName[];
 
 void fireSource(Star&, int);
 
