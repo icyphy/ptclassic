@@ -25,8 +25,8 @@ vem*title*foreground: black
 #endif
 
 ! Ptolemy resources for xterm windows
-ptolemy_code*Background:	black
-ptolemy_code*Foreground: 	yellow
+ptolemy_code*Background:	LightGray
+ptolemy_code*Foreground: 	midnightBlue
 ! the ptolemy resources below are not currently implemented
 ptolemy_sim*Background:		black
 ptolemy_sim*Foreground: 	green
