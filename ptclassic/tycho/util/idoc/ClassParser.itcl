@@ -453,11 +453,6 @@ body ::tycho::IDocSys::readFile {filename} {
     while {![eof $fd]} {
         gets $fd lineIn
      
-        if {[regexp {^[	 ]*$} $lineIn]} {
-            # Remove blank lines
-            continue
-        }
-
         if {[regexp {\\$} $lineIn]} {
             # Concatenate lines ending with a \.
         }
