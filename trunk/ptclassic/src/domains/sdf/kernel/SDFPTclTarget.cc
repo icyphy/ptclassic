@@ -128,6 +128,7 @@ int SDFPTclTarget::run() {
 			 << "\"\n";
 	}
     }
+    delete [] portNumber;
     StringList ptclFileName;
     char* path = expandPathName("~/PTOLEMY_SYSTEMS/ptcl/");
     ptclFileName << path << galaxy()->name() << ".pt";
