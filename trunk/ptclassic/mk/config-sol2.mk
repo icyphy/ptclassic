@@ -56,8 +56,9 @@ OPTIMIZER =	-O2
 WARNINGS =	-Wall -Wsynth #-Wcast-qual 
 MULTITHREAD =	-D_REENTRANT
 # Define PTSOL2_4 if you are on Solaris2_4
+# config-sol2.5.mk defines ARCHFLAGS
 # Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
-LOCALFLAGS =	-DPTSOL2_4 -pipe -fno-for-scope
+LOCALFLAGS =	-DPTSOL2_4 $(ARCHFLAGS) -pipe -fno-for-scope
 GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAGS)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
 CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAGS)
