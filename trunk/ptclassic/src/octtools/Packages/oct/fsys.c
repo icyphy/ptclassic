@@ -68,10 +68,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
  * 
  */
 
-extern int errno;
-extern int sys_nerr;
-extern char *sys_errlist[];
-
 static int canonicalize();	/* Forward declaration. */
 
 
