@@ -873,8 +873,6 @@ body ::tycho::HTML::insertDirectoryContents {dirname} {
     set dirFiles [lsort \
             [::tycho::resource dirlist [::tycho::url join $dirname *]]]
     foreach dirFile $dirFiles {
-        ::puts "goin through $dirname, $dirFile"
-
         # If the filename is over 20 chars long, truncate it and add ...
         set shortName [::tycho::url tail $dirFile]
         if [::tycho::resource isdirectory $dirFile] {
