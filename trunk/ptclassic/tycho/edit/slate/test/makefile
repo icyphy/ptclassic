@@ -43,6 +43,7 @@ include $(CONFIG)
 TCL_SRCS = 
   
 ITCL_SRCS = \
+	$(GRAPHICAL_TESTS) \
 	alltests.itcl all.itcl \
 	sample.itcl \
 	stars.itcl \
@@ -61,6 +62,10 @@ MISC_FILES = \
 	stars.itcl \
 	trace.itcl
 
+# If we get some SIMPLE_TESTS, then add $(SIMPLE_TESTS)
+# to ITCL_SRCS above.
+# SIMPLE_TESTS cannot be empty, or the script that builds alltests.itcl
+# and all.itcl will barf.
 SIMPLE_TESTS = \
 	dummy.tcl
 
