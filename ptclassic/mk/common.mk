@@ -54,7 +54,7 @@ $(STAR_MK).mk:	make.template
 # Rule for making a star list module for pulling stars out of libraries
 $(STAR_MK).c:	make.template
 		rm -f $(STAR_MK).c
-		genStarTable $(DOMAIN) $(DOMAIN_2) > $(STAR_MK).c
+		cd $(VPATH); genStarTable $(DOMAIN) $(DOMAIN_2) > $(STAR_MK).c
 
 $(STAR_MK).o:	$(STAR_MK).c
 
