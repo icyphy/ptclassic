@@ -84,7 +84,7 @@ PtMatrix* MDSDFPortHole::getOutput() {
   return (PtMatrix*)0;
 }
 
-double MDSDFPortHole::getFloatInput(int rowDelay, int colDelay) {
+double MDSDFPortHole::getFloatInput(int /*rowDelay*/, int /*colDelay*/) {
   Error::abortRun("getFloatInput() called on a porthole which is not an InMDSDFPort");
   return 0.0;
 }
