@@ -89,7 +89,7 @@ ifdef FULL
 	VHDLB =		1
 endif
 
-ifdef ACS
+ifdef ACSBIN
 	PIGI=		$(BASENAME).acs
 	VERSION_DESC =	'With Adaptive Computing Systems (ACS) Domain only'
 	ACS =		1
@@ -227,14 +227,33 @@ INSTALL += $(BINDIR)/$(BASENAME) $(BINDIR)/$(BASENAME).ptrim \
 		$(BINDIR)/$(BASENAME).ptiny $(BINDIR)/$(BASENAME).acs
 
 
+# If the user wants to build anything but a full pigiRpc or ptcl, then
+# we want to be careful not to depend on the full set of dependencies.
+# The way we do this is that we declare everything but $(BASENAME)
+# to be .PHONY so that they will always be built.  Since the rules
+# for these binaries invokes a submake process, the new submake process
+# will have the proper dependencies for the specific binary we are building.
 .PHONY: $(BASENAME).ptrim $(BASENAME).ptiny \
 	$(BASENAME).ptrim.debug $(BASENAME).ptiny.debug \
 	$(BASENAME).ptrim.debug.purify $(BASENAME).ptiny.debug.purify \
 	$(BASENAME).ptrim.debug.quantify $(BASENAME).ptiny.debug.quantify \
-	$(BASENAME).ptrim.debug.purecov $(BASENAME).ptiny.debug.purecov
+	$(BASENAME).ptrim.debug.purecov $(BASENAME).ptiny.debug.purecov \
 	$(BASENAME).acs $(BASENAME).acs.debug \
 	$(BASENAME).acs.debug.purify $(BASENAME).acs.debug.quantify \
 	$(BASENAME).acs.debug.purecov
+
+# You might find it helpful to use the PTDEPEND rule to debug dependencies:
+# make ACSBIN=1 BASENAME=pigiRpc DEFAULT_DOMAIN=ACS PTDEPEND
+# First, find out what the submake command is that build the binary:
+#   cxh@carson 153% make pigiRpc.acs
+#   make ACSBIN=1 BASENAME=pigiRpc DEFAULT_DOMAIN=ACS \
+# 	  pigiRpc.acs 
+#
+# Then use those same settings, but use the PTDEPEND target: 
+#   cxh@carson 154% make ACSBIN=1 BASENAME=pigiRpc DEFAULT_DOMAIN=ACS PTDEPEND
+#
+PTDEPEND:
+	echo $(PT_DEPEND)
 
 # The .ptrim and .ptiny files below should not depend on $(PT_DEPEND), or
 # else we must have all the libs installed to build ptrim and ptiny, even
@@ -250,7 +269,7 @@ $(BASENAME).ptiny:
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny
 
 $(BASENAME).acs:
-	$(MAKE) ACS=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
+	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
 		$(BASENAME).acs 
 
 $(BASENAME).debug: $(PT_DEPEND)
@@ -263,7 +282,7 @@ $(BASENAME).ptiny.debug:
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug
 
 $(BASENAME).acs.debug: 
-	$(MAKE) ACS=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
+	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
 		$(BASENAME).acs.debug
 
 
@@ -278,7 +297,7 @@ $(BASENAME).ptiny.debug.purify:
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purify
 
 $(BASENAME).acs.debug.purify:
-	$(MAKE) ACS=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
+	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
 		$(BASENAME).acs.debug.purify
 
 
@@ -293,7 +312,7 @@ $(BASENAME).ptiny.debug.quantify:
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.quantify
 
 $(BASENAME).acs.debug.quantify: 
-	$(MAKE) ACS=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
+	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
 		$(BASENAME).acs.debug.quantify
 
 
@@ -308,7 +327,7 @@ $(BASENAME).ptiny.debug.purecov:
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purecov
 
 $(BASENAME).acs.debug.purecov: 
-	$(MAKE) ACS=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
+	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
 		$(BASENAME).acs.debug.purecov
 
 
@@ -322,13 +341,11 @@ $(BINDIR)/$(BASENAME).ptiny: $(BASENAME).ptiny
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BINDIR)/$(BASENAME).ptiny
 
 $(BINDIR)/$(BASENAME).acs: $(BASENAME).acs 
-	$(MAKE) ACS=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
+	$(MAKE) ACSBIN=1 BASENAME=$(BASENAME) DEFAULT_DOMAIN=ACS \
 		$(BINDIR)/$(BASENAME).acs
 
 endif #ALLBINARIES
 
-PTDEPEND:
-	echo $(PT_DEPEND)
 
 install: $(INSTALL)
 
