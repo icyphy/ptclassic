@@ -5,7 +5,7 @@ defstar {
     desc {
 Display the values of the inputs in textual form.
 The print method of the input particles is used,
-so any datatype can be handled, although the space
+so any data type can be handled, although the space
 allocated on the screen may need to be adjusted.
     }
     version { $Id$ }
@@ -21,8 +21,8 @@ limitation of liability, and disclaimer of warranty provisions.
 This star uses the "print()" method of the input particles to create
 the display.
 The width of the display window is appropriate for integer, float, and
-complex particles.  Particles that require more space to display may
-create problems.
+complex particles.
+Particles that require more space to display may create problems.
     }
     hinclude { "ptk.h" }
     defstate {

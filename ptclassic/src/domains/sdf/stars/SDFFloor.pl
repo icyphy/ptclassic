@@ -1,7 +1,7 @@
 defstar {
 	name { Floor }
 	domain { SDF } 
-	desc { Output the greatest integer <= the input. }
+	desc { Output the greatest integer less than or equal to the input. }
 	version {$Id$}
 	author { J. T. Buck }
 	copyright {

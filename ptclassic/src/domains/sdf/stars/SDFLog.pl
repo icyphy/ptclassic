@@ -1,7 +1,7 @@
 defstar {
 	name { Log }
 	domain { SDF } 
-	desc { Output the natural log of the input value. }
+	desc { Output the natural logarithm of the input value. }
 	version {$Id$}
 	author { J. T. Buck }
 	copyright {
@@ -12,8 +12,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
 	explanation {
-Outputs natural log of input.
-If the input is zero or negative, the run is aborted.
+Outputs natural logarithm of the input.
+If the input is zero or negative, then the run of the universe that
+contains this star will be aborted.
 .Id "logarithm"
 	}
 	input {
