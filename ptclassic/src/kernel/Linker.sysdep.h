@@ -36,6 +36,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 **************************************************************************/
 
+// get size_t definition
+#include <sys/types.h>
+
 // Is linking supported?  Currently not complete for HP/UX.
 const int linkingNotSupported =
 #if defined(hpux) || defined(__alpha)
