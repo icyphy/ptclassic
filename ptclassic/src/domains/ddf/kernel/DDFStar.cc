@@ -57,7 +57,7 @@ void DDFStar :: prepareForScheduling() {
 }
 
 // set the waiting condition for execution
-void DDFStar :: wait(PortHole& p, int num = 1) {
+void DDFStar :: waitFor(PortHole& p, int num = 1) {
 	// check p is input, if not, error.
 	if (p.isItInput()) {
 		waitPort = &p;
