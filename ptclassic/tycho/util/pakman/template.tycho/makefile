@@ -53,9 +53,11 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	_pkgIndex.tcl \
 	copyright
 
-MISC_FILES = $(DIRS) adm
+MISC_FILES = $(DIRS)
 
-OPTIONAL_FILES = 
+# make checkjunk will not report OPTIONAL_FILES as trash
+# make realclean removes OPTIONAL_FILES
+OPTIONAL_FILES = adm
 
 REALCLEAN_STUFF =
 
