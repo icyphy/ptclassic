@@ -124,7 +124,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	char	buf[32];
 	coeffsd.initialize();
 	coeffsn.initialize();
-
+        int i;
 	double b0, scaleDenom, scaleNumer;
 
 	// Set up scaling to distribute the gain through the numerator,
@@ -142,7 +142,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	scaleDenom = 1.0 / b0;
 	scaleNumer = scaleDenom * double(gain);
 	delays.resize(numState+1);
-	for (int i = numState-1; i > 0; i--){
+	for (i = numState-1; i > 0; i--){
             if ( i < numDenom ) {
                 double temp = scaleDenom * -(double(denominator[i]));
                 if ((temp >= 1) || (temp < -1)) {
@@ -164,7 +164,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 
 	denominator.setInitValue(coeffsd);
 	
-	for (int i = 0; i < numState; i++) {
+	for (i = 0; i < numState; i++) {
             delays[i] = 0;
             if (i < numNumer) {
                 double temp = scaleNumer*double(numerator[i]);
