@@ -45,9 +45,9 @@ preview:
 		$(SOELIM) $(MAINSEC) >> $(TMPFILE) ; \
 		cd .. ; \
 	done
-	$(DOCBIN)/$(PRINTSEC) -preview -H together init $(TMPFILE)
+	$(DOCBIN)/$(PRINTSEC) $(OPTIONS) -preview -H together init $(TMPFILE)
 
 # this does preview a second time
 review:
-	$(DOCBIN)/$(PRINTSEC) -preview -H together init $(TMPFILE)
+	$(DOCBIN)/$(PRINTSEC) $(OPTIONS) -preview -H together init $(TMPFILE)
 
