@@ -29,15 +29,16 @@ The length of the filter (the number of taps) is given by <i>length</i>.
 For the ordinary raised cosine response,
 the impulse response of the filter would ideally be
 <pre>
-h(n) ~=~ left ( { sin ( pi n / T ) } over { pi n / T } right )
-left ( { cos ( alpha pi n / T ) } over { 1 ~-~ (2 alpha n / T) sup 2 } right )
+       sin(pi n/T)   cos(alpha pi n/T)
+h(n) = ----------- * -----------------
+         pi n/T      1-(2 alpha n/T)<sup>2</sup>
 </pre>
 where <i>alpha</i> is <i>excessBW</i> and <i>T</i> is the <i>symbol_interval</i>.
 However, this pulse is centered at zero, and we can only implement causal
 filters in the SDF domain in Ptolemy.  Hence, the impulse response is
 actually
 <pre>
-g(n) ~=~ h(n - M)
+g(n) = h(n - M)
 </pre>
 where <i>M </i>=<i> length/</i>2 if <i>length</i> is even, and <i>M
 </i>= (<i>length+</i>1)<i>/</i>2 if <i>length</i> is odd.
@@ -62,10 +63,9 @@ ordinary raised cosine filter.
 <p>
 The impulse response of the square-root raised cosine pulse is given by
 <pre>
-h(n) ~=~ {4 alpha} over {pi sqrt T} cdot
-{ cos ( (1 ~+~ alpha ) pi n / T ) ~+~
-{ T sin ((1 ~-~ alpha ) pi n/T) } over {4 alpha n/T}} over
-{1 ~-~ (4 alpha n/T) sup 2 } ~.
+        4 alpha(cos((1+alpha)pi n/T)+Tsin((1-alpha)pi n/T)/(4n alpha/T))
+h(n) = -----------------------------------------------------------------
+                     pi sqrt(T)(1-(4 alpha n/T)<sup>2</sup>)
 </pre>
 This impulse response convolved with itself will, in principle, be equal
 to a raised cosine pulse.  However, because of the abrupt rectangular
