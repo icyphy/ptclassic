@@ -50,7 +50,7 @@ MISC_FILES =	tclIndex audioio.html
 REALCLEAN_STUFF =	tclIndex
 
 # Title for the tydoc index page
-TYDOC_DESC =	Index of classes in tycho/typt/editors
+TYDOC_DESC =	Index of classes in tycho/typt/demo
 
 DIRS =		
 
