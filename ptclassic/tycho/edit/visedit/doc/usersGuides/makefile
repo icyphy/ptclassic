@@ -36,9 +36,9 @@
 # This will add the dependencies to the makefile.
 
 # Root of Ptolemy directory
-ROOT =		../../../..
+ROOT =		../../../../..
 # Path (absolute or relative) to the object directory root
-OBJDIR =	../../../..
+OBJDIR =	../../../../..
 # True source directory
 VPATH =		$(ROOT)/tycho/editors/visedit/doc/usersGuides
 
