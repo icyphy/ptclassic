@@ -23,18 +23,14 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
+                                                        COPYRIGHTENDKEY
 
- Programmer:  Soonhoi Ha
- Date of creation: 4/22/92
 
- Declaration for DDFTarget, the default target to be used in the DDF
- domain.  This used to be declared elsewhere.
+ Programmer:  Soonhoi Ha, R. S. Stevens
+ Date of creation (simpler version): 7/20/94
 
- If restructure is 1, auto-wormholization is performed.
- This is an experimental facility that automatically creates SDF wormholes
- for subsystems that consist entirely of SDF stars.  It is disabled by
- default.
+ Declaration for CDFTarget, the default target to be used in the CDF
+ domain. 
 
 ***********************************************************************/
 #ifndef _DDFTarget_h
@@ -64,10 +60,6 @@ protected:
 	// schedulePeriod for interface with a timed domain.
 	FloatState schedulePeriod;
 
-	// Specify whether or not to use the experimental automatic
-	// restructuring of DDF systems.  This facility identifies
-	// SDF subsystems and creates SDF wormholes for them.
-	IntState restructure;
 public:
 	DDFTarget();
 	Block* makeNew() const;

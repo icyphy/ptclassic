@@ -1,3 +1,4 @@
+static const char file_id[] = "DDFTarget.cc";
 /**********************************************************************
 Version identification:
 $Id$
@@ -23,21 +24,17 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
+                                                        COPYRIGHTENDKEY
 
- Programmer:  Soonhoi Ha
- Date of creation: 4/22/92
+
+ Programmer:  Soonhoi Ha, R. S. Stevens
+ Date of creation: 7/20/94
+
 
  Declaration for DDFTarget, the default target to be used in the DDF
- domain.  This used to be declared elsewhere.
-
- If restructure is 1, auto-wormholization is performed.
- This is an experimental facility that automatically creates SDF wormholes
- for subsystems that consist entirely of SDF stars.  It is disabled by
- default.
+ domain.
 
 ***********************************************************************/
-static const char file_id[] = "DDFTarget.cc";
 #ifdef __GNUG__
 #pragma implementation
 #endif
@@ -55,10 +52,6 @@ Target("default-DDF","DataFlowStar","default DDF target")
 	    "number of iteration cycles to be overlapped for execution."));
 	addState(schedulePeriod.setState("schedulePeriod",this,"10000.0",
 		"schedulePeriod for interface with a timed domains."));
-	addState(restructure.setState("restructure",this,"NO",
-		"perform auto-wormholization?"));
-	// Hide the restructure state because restructuring does not work.
-	restructure.clearAttributes(A_SETTABLE);
 }
 
 Block* DDFTarget::makeNew() const {
@@ -68,8 +61,7 @@ Block* DDFTarget::makeNew() const {
 void DDFTarget::setup() {
 	// set up the parameters for the DDF scheduler
 	DDFScheduler* s = (DDFScheduler*) scheduler();
-	s->setParams(numOverlapped,schedulePeriod,maxBufferSize,
-		     restructure);
+	s->setParams(numOverlapped,schedulePeriod,maxBufferSize);
 	Target :: setup();
 }
 
