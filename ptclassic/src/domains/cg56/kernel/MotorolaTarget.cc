@@ -87,62 +87,62 @@ Block* MotorolaTarget :: makeNew () const {
 
 void MotorolaTarget::beginIteration(int repetitions, int) {
     if (repetitions == -1)		// iterate infinitely
-	myCode << targetNestedSymbol.push("LOOP") << "\n";
+	*defaultStream << targetNestedSymbol.push("LOOP") << "\n";
     else				// iterate finitely
-	myCode << "\tdo\t#" << repetitions << "," 
+	*defaultStream << "\tdo\t#" << repetitions << "," 
 	       << targetNestedSymbol.push("LOOP") << "\n";
 }
 
 void MotorolaTarget::endIteration(int repetitions, int) {
 	if (repetitions == -1)		// iterate infinitely
-		myCode << "\tjmp\t"<< targetNestedSymbol.pop() << "\n";
+		*defaultStream << "\tjmp\t"<< targetNestedSymbol.pop() << "\n";
 	else 				// iterate finitely
-		myCode << "\tnop\n; prevent two endloops in a row\n"
+		*defaultStream << "\tnop\n; prevent two endloops in a row\n"
 		       << targetNestedSymbol.pop() << "\n";
 }
 
 void MotorolaTarget::codeSection() {
 	if (!inProgSection) {
-		myCode << "\torg p:\n";
+		*defaultStream << "\torg p:\n";
 		inProgSection = 1;
 	}
 }
 
 void MotorolaTarget::disableInterrupts() {
 	codeSection();
-	myCode << "	ori	#03,mr	;disable interrupts\n";
+	*defaultStream << "	ori	#03,mr	;disable interrupts\n";
 }
 
 void MotorolaTarget::enableInterrupts() {
 	codeSection();
-	myCode << "	andi	#$fc,mr	;enable interrupts\n";
+	*defaultStream << "	andi	#$fc,mr	;enable interrupts\n";
 }
 
 void MotorolaTarget::saveProgramCounter() {
 	codeSection();
-	myCode << targetNestedSymbol.push("SAVEPC") << "\tequ	*\n";
+	*defaultStream << targetNestedSymbol.push("SAVEPC") << "\tequ	*\n";
 }
 
 void MotorolaTarget::restoreProgramCounter() {
 	codeSection();
-	myCode << "\torg	p:" << targetNestedSymbol.pop() << "\n";
+	*defaultStream << "\torg	p:" << targetNestedSymbol.pop() << "\n";
 }
 
 void MotorolaTarget::orgDirective(const char* memName, unsigned addr) {
-	myCode << "\torg\t" << memName << ":" << int(addr) << "\n";
+	*defaultStream << "\torg\t" << memName << ":" << int(addr) << "\n";
 	inProgSection = 0;
 }
 
 void MotorolaTarget::writeInt(int val) {
-	myCode << "\tdc\t" << val << "\n";
+	*defaultStream << "\tdc\t" << val << "\n";
 }
 
 void MotorolaTarget::writeFix(double val) {
-	myCode << "\tdc\t" << limitFix(val) << "\n";
+	*defaultStream << "\tdc\t" << limitFix(val) << "\n";
 }
 
 void MotorolaTarget::writeFloat(double val) {
-	myCode << "\tdc\t" << val << "\n";
+	*defaultStream << "\tdc\t" << val << "\n";
 }
 
 double MotorolaTarget::limitFix(double val) { 
