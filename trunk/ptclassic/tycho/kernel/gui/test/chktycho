@@ -3,6 +3,16 @@
 # Author: Christopher Hylands
 # Script to test out tycho script
 #
+# chktycho runs two sample invocations of tycho, then does an exhaustive
+# search of the command line argument combinations.
+#
+# If the -debug option is present, then you must type 'cont' and then 
+# Control-X Control-C for chktycho to continue.
+# 
+# If the -debug option is not present, then the script brings up tycho
+# and then automatically exits tycho without user intervention.
+
+# The user's tychorc file.
 tychorc=$HOME/.Tycho/tychorc.tcl
 
 # Check the tychorc file for the 'chktycho' magic line.
@@ -40,9 +50,9 @@ set +x
 
 echo "---"
 echo "Exhaustive search of all option combinations:"
-for binary in -ptiny "" -ptrim -pigi -java
-do
 for debug in "" -debug
+do
+for binary in -ptiny "" -ptrim -pigi -java
 do
 for tclscript in "" "-e $tclscript"
 do
