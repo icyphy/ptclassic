@@ -2,10 +2,11 @@ defstar {
 	name { Printer }
 	domain { DE }
 	desc {
-Print the value of each arriving event, together with its time of arrival.
-The "fileName" parameter specifies the file to be written; the special
-names <stdout> and <cout> (specifying the standard output stream), and
-<stderr> and <cerr> specifying the standard error stream, are also supported.
+Print the value of each arriving event, together with its time of
+arrival.  The "fileName" parameter specifies the file to be written;
+the special names &lt;stdout&gt; and &lt;out&gt; (specifying the
+standard output stream), and &lt;stderr&gt; and &lt;cerr&gt;
+specifying the standard error stream, are also supported.
 	}
 	version { $Id$}
 	author { Soonhoi Ha and J. Buck}
