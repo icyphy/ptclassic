@@ -42,7 +42,10 @@ PL_SRCS= \
  CGSend.pl \
  CGReceive.pl \
  CGSpread.pl \
- CGCollect.pl 
+ CGCollect.pl \
+ CGFork.pl \
+ CGSwitch.pl \
+ CGSelect.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
