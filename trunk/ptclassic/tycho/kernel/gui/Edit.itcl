@@ -2130,7 +2130,7 @@ body ::tycho::Edit::writeSpellText {filename} {
     set fd [open $filename w+]
     set tags [spellCheckTags]
     if {$tags == {}} {
-	<s -nonewline $fd [get 1.0 {end -1 char}]
+	puts -nonewline $fd [get 1.0 {end -1 char}]
     } {
 	foreach tag $tags {
 	    set upto 1.0
