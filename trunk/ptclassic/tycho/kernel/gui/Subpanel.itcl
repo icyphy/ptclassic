@@ -68,7 +68,8 @@ option add *Subpanel.labelMargin 2 widgetDefault
 # checkbutton .w.options.b -text B
 # pack .w.options.a
 # pack .w.options.b
-# ::tycho::Subpanel .w.s -text "Options" -childwidget .w.options
+# ::tycho::Subpanel .w.s -text "Options" -childwidget .w.options \
+#      -indentwidth 15
 # ::tycho::Subpanel .w.t -text "Preferences" -childwidget .w.s
 # pack .w.t -anchor nw
 # wm deiconify .w
@@ -94,7 +95,8 @@ option add *Subpanel.labelMargin 2 widgetDefault
 #     return .x.b
 # }
 # ::tycho::Displayer .x
-# ::tycho::Subpanel .x.s -text "Button" -openbm back.xbm -closebm back.xbm
+# ::tycho::Subpanel .x.s -text "Button" \
+#      -openbm folderopen.xbm -closebm folderclose.xbm
 # .x.s configure -opencallback nb
 # .x.s configure -closecallback "destroy .x.b"
 # pack .x.s -anchor w
@@ -116,10 +118,19 @@ class ::tycho::Subpanel {
 
     # Specify the name of a widget to be packed into the subpanel
     itk_option define -childwidget childWidget ChildWidget ""
+ 
+    # Specify the bitmap to use as the closed icon. Not updated by config.
+    itk_option define -closebm closeBitmap CloseBitmap arrowclose.xbm
 
     # Specify the name of the procedure to execute when closing subpanel
     itk_option define -closecallback closeCallback CloseCallback ""
 
+    # Specify the amount to indent the widget under the open subpanel.
+    itk_option define -indentwidth indentWidth IndentWidth 25
+ 
+    # Specify the bitmap to use as the open icon. Not updated by config.
+    itk_option define -openbm openBitmap OpenBitmap arrowopen.xbm
+  
     # Specify the name of the procedure to execute when opening subpanel;
     # The procedure should return the name of a widget to pack into the panel
     itk_option define -opencallback openCallback OpenCallback ""
@@ -129,12 +140,6 @@ class ::tycho::Subpanel {
 
     # Specify the text to be inserted in the subpanel label
     itk_option define -text subpanelTitle SubpanelTitle ""
-
-    # Specify the bitmap to use as the open icon. Not updated by config.
-    itk_option define -openbm openBitmap OpenBitmap arrowopen.xbm
-    
-    # Specify the bitmap to use as the closed icon. Not updated by config.
-    itk_option define -closebm closeBitmap CloseBitmap arrowclose.xbm
 
     ###################################################################
     ####                        public methods                     ####
@@ -192,6 +197,15 @@ configbody ::tycho::Subpanel::childwidget {
 # 
 configbody ::tycho::Subpanel::closecallback {
     set closecmd $itk_option(-closecallback)
+}
+
+#######################################################################
+#### -indentwidth configuration
+# Width of spaceframe widget which indents the contents of an open subpanel.
+#
+configbody ::tycho::Subpanel::indentwidth {
+
+    $itk_component(spaceFrame) configure -width $itk_option(-indentwidth)
 }
 
 #######################################################################
@@ -270,7 +284,7 @@ body ::tycho::Subpanel::constructor {args} {
     # create space holder frame so that buttons, etc. are lined up
     # underneath the title and not the open/close button
     itk_component add spaceFrame {
-	frame $itk_component(mainFrame).spaceFrame -width 25
+	frame $itk_component(mainFrame).spaceFrame
     } {
     }
     pack propagate $itk_component(spaceFrame) off
