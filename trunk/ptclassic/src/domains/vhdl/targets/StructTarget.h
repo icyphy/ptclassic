@@ -126,6 +126,12 @@ protected:
 	// virtual function to initialize firing lists.
 	virtual void initFiringLists();
 
+	// Return the condition indicating if system clock generator is needed.
+        virtual int systemClock() { return systemClockUsed; }
+
+	// Method called by comm stars to place important code into structure.
+	/*virtual*/ void registerComm(int, int, int, const char*);
+
 private:
 	// A list of clocks to trigger in order.
 	StringList clockList;
@@ -171,9 +177,6 @@ private:
 	VHDLPortVarList ctlerVarPortList;
 
 
-	// Method called by comm stars to place important code into structure.
-	/*virtual*/ void registerComm(int, int, int, const char*);
-
 	// Merge the Star's signal list with the Target's signal list.
 	void mergeSignalList(VHDLSignalList*);
 
@@ -207,9 +210,6 @@ private:
 
 	// Set the condition indicating system clock generator is needed.
 	void setSystemClockUsed() { systemClockUsed = 1; }
-
-	// Return the condition indicating if system clock generator is needed.
-        int systemClock() { return systemClockUsed; }
 
 	// Flag indicating if registers are needed.
         int regIntsUsed;
