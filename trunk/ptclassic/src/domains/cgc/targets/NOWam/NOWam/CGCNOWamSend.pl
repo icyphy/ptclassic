@@ -70,11 +70,8 @@ typedef union ints_or_double {
 } convert;
         } 
         codeblock (timeincludes) {
-#ifdef TIME_INFO
-#include <sys/fcntl.h>
-#include <sys/resource.h>
-#include <sys/procfs.h>
-#include <unistd.h>
+#ifdef TIME_INFO1
+#include <sys/time.h>
 #endif
         }
         codeblock (replyHandler) {
@@ -130,19 +127,17 @@ en_t global;
 eb_t bundle;
         }
         codeblock (timedecls) {
-#ifdef TIME_INFO
-int fd;
-char proc[BUFSIZ];
-double timeRun;
-prusage_t beginRun;
-prusage_t endRun;
+#ifdef TIME_INFO1
+hrtime_t timeRun;
+hrtime_t beginRun;
+hrtime_t endRun;
 #endif
         }
         codeblock (stardecls) {
-#ifdef TIME_INFO
-double $starSymbol(timeSend);
-prusage_t $starSymbol(beginSend);
-prusage_t $starSymbol(endSend);
+#ifdef TIME_INFO2
+hrtime_t $starSymbol(timeSend);
+hrtime_t $starSymbol(beginSend);
+hrtime_t $starSymbol(endSend);
 #endif
 en_t *$starSymbol(endname);
 ea_t $starSymbol(endpoint);
@@ -161,8 +156,11 @@ if (AM_SetEventMask(bundle, AM_NOTEMPTY) != AM_OK) {
 
         }
         codeblock (timeinit) {
-#ifdef TIME_INFO
-timeRun = 0.0;
+#ifdef TIME_INFO2
+$starSymbol(timeSend) = 0.0;
+#endif
+#ifdef TIME_INFO1
+beginRun = gethrtime();
 #endif
         }
         codeblock (starinit) {
@@ -198,17 +196,6 @@ for ($starSymbol(i) = 0; $starSymbol(i) < $val(numNodes); $starSymbol(i)++) {
         }
 }
         }
-        codeblock (openfd) {
-#ifdef TIME_INFO
-sprintf(proc,"/proc/%d", (int)getpid());
-if ((fd = open(proc, O_RDONLY)) == -1)
-        printf("error opening proc\n");
-if (fd == -1)
-        printf("couldn't open proc\n");
-else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
-        printf("error getting time\n");
-#endif
-        }
 
 	initCode {
 		// obtain the hostAddr state from parent MultiTarget.
@@ -231,11 +218,12 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 		     "-L$PTOLEMY/lib.$PTARCH -ludpam -lnsl -lsocket -lthread");
 
                 addCode(timeincludes, "include", "timeIncludes");
+                addProcedure(replyHandler, "CGCNOWam_ReplyHandler");
+                addProcedure(errorHandler, "CGCNOWam_ErrorHandler");
                 addCode(amdecls, "mainDecls", "amDecls");
                 addCode(timedecls, "mainDecls", "timeDecls");
                 addCode(stardecls, "mainDecls");
                 addCode(timeinit, "mainInit", "timeInit");
-                addCode(openfd, "mainInit", "openFd");
                 addCode(aminit, "mainInit", "amInit");
                 addCode(starinit, "mainInit");
 	}
@@ -244,13 +232,8 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 	int i, pos, check;
 	convert myData;
 	
-#ifdef TIME_INFO
-	if (fd == -1) {
-		printf("couldn't open proc\n");
-	}
-	else if (ioctl(fd, PIOCUSAGE, &$starSymbol(beginSend)) == -1) {
-		printf("error getting time\n");
-	}
+#ifdef TIME_INFO2
+        $starSymbol(beginSend) = gethrtime();
 #endif
 
 	for (i = 0; i < $val(numData); i++) {
@@ -262,38 +245,22 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 		}
 	}
 
-#ifdef TIME_INFO
-	if (fd == -1) {
-		printf("couldn't open proc\n");
-	}
-	else if (ioctl(fd, PIOCUSAGE, &$starSymbol(endSend)) == -1) {
-		printf("error getting time\n");
-	}
-        $starSymbol(timeSend) += (double)($starSymbol(endSend).pr_rtime.tv_sec -
-                             $starSymbol(beginSend).pr_rtime.tv_sec) +
-                    ((double)($starSymbol(endSend).pr_rtime.tv_nsec -
-                             $starSymbol(beginSend).pr_rtime.tv_nsec)) /
-                             1000000000.0; 
-	printf("Cumulative time to send %lf seconds\n", $starSymbol(timeSend));
+#ifdef TIME_INFO2
+        $starSymbol(endSend) = gethrtime();
+        $starSymbol(timeSend) += $starSymbol(endSend) - $starSymbol(beginSend);
+        printf("Cumulative time to send %lld usec\n", $starSymbol(timeSend) / 1000);
 #endif
 
 	}
 	go {
-                addProcedure(replyHandler, "CGCNOWam_ReplyHandler");
-                addProcedure(errorHandler, "CGCNOWam_ErrorHandler");
 		addCode(block);
 	}
 
         codeblock (runtime) {
-#ifdef TIME_INFO
-if (fd == -1)
-       printf("couldn't open proc\n");
-else if (ioctl(fd, PIOCUSAGE, &endRun) == -1)
-       printf("error getting time\n");
-timeRun = (double)(endRun.pr_rtime.tv_sec - beginRun.pr_rtime.tv_sec) +
-           ((double)(endRun.pr_rtime.tv_nsec -
-                     beginRun.pr_rtime.tv_nsec)) / 1000000000.0;
-printf("Time to run %lf seconds\n", timeRun);
+#ifdef TIME_INFO1
+endRun = gethrtime();
+timeRun = endRun - beginRun;
+printf("Time to run %lld usec\n", timeRun / 1000);
 #endif
         }
 
