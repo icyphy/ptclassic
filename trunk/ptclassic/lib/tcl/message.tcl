@@ -40,7 +40,7 @@ set unique 0
 
 # flag whether or not to report tcl error messages.
 # This should be made a settable option.
-set ptkVerboseErrors 1
+set ptkVerboseErrors 0
 
 
 ###################################################################
