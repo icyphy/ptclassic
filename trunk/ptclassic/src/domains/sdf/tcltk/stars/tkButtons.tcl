@@ -69,7 +69,7 @@ set tkButtonsWait_$starID 0
 
 # If simultaneous events are allowed, this is called when the
 # "PUSH TO PRODUCE EVENTS" button is pressed.
-proc ptkButtonsClearButtons {win numOut starID val} {
+proc tkButtonsClearButtons_$starID {win numOut starID val} {
     for {set i 1} {$i <= $numOut} {incr i} {
 	if {[lindex [$win.b.b$i configure -relief] 4] == {sunken}} {
 	    setOutput_$starID $i $val
@@ -112,7 +112,7 @@ if {[set ${starID}(allow_simultaneous_events)]} {
     catch {destroy $s.b.sync}
     frame $s.b.sync -class Attention
     ptkMakeButton $s.b.sync b "PUSH TO PRODUCE EVENTS" \
-	    "ptkButtonsClearButtons $s [set ${starID}(numOutputs)] \
+	    "tkButtonsClearButtons_$starID $s [set ${starID}(numOutputs)] \
 	    $starID [set ${starID}(value)]"
     pack $s.b.sync -fill x
 }
@@ -149,9 +149,7 @@ if {[set ${starID}(synchronous)]} {
 	tkwait variable tkButtonsWait_$starID
     }
 
-    # The name of the universe, by convention, is the first component of
-    # the full name of the star.  The components are separated by ".".
-    set tmp_univName [lindex [split [set ${starID}(fullName)] .] 0]
+    set tmp_univName [curuniverse]
 
     # The "trace" command allows a variable to have more than one copy
     # of the same trace.  We add the trace only if it is not already
@@ -165,21 +163,20 @@ if {[set ${starID}(synchronous)]} {
     proc goTcl_$starID {starID} {}
 }
 
-proc destructorTcl_$starID {starID} {
-    global $starID ptkControlPanel ptkRunFlag
+proc destructorTcl_$starID {starID} "
+    global ptkRunFlag
 
     # Remove the buttons
-    destroy $ptkControlPanel.buttons_$starID
+    destroy $s
 
-    set univName [lindex [split [set ${starID}(fullName)] .] 0]
-    trace vdelete ptkRunFlag($univName) w tkButtonsTrace_$starID
+    trace vdelete ptkRunFlag([curuniverse]) w tkButtonsTrace_$starID
 
-    rename tkButtonsTrace_$starID {}
-    rename setOut_$starID {}
-    rename ptkButtonsClearButtons {}
+    rename tkButtonsTrace_$starID \{\}
+    rename setOut_$starID \{\}
+    rename tkButtonsClearButtons_$starID \{\}
 
     global tkButtonsWait_$starID
     unset tkButtonsWait_$starID
-}
+"
 
 unset s window_previously_existed
