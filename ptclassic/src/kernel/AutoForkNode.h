@@ -49,7 +49,8 @@ public:
 	// constructor: make the AutoFork object refer to me.
 	AutoForkNode() : af(*this) {}
 	int isItPersistent () const;
-	PortHole* setSourcePort (GenericPort &, int delay = 0);
+	PortHole* setSourcePort (GenericPort &, int numDelays = 0,
+				 const char* initDelayValues = 0);
 	PortHole* setDestPort (GenericPort &);
 
 	// class identification

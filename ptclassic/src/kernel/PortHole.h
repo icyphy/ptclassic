@@ -142,7 +142,9 @@ public:
 	virtual DataType setResolvedType(DataType useType = 0) = 0;
 
 	// function to connect two portholes
-	virtual void connect(GenericPort& destination,int numberDelays);
+	// 3/2/94 changed to support initDelayValues
+	virtual void connect(GenericPort& destination,int numberDelays,
+			     const char* initDelayValues = 0);
 
 	// return my type
 	DataType type () const { return myType;}
@@ -243,7 +245,9 @@ public:
 	void initialize();
 
 	// make a bus connection with another multiporthole
-	void busConnect (MultiPortHole&, int width, int delay = 0);
+	// 3/2/94 changed to support initDelayValues
+	void busConnect (MultiPortHole&, int width, int delay = 0,
+			 const char* initDelayValues = 0);
 
 	// virtual function to identify multi-ness
 	int isItMulti() const; // {return TRUE;}
@@ -303,8 +307,11 @@ private:
 	// peer multiporthole in a bus connection
 	MultiPortHole* peerMPH;
 
-	// delay on portholes in a bus connection
-	int busDelay;
+	// number of delays on portholes in a bus connection
+	int numDelaysBus;
+
+	// inital values of delays in a bus connection, 3/2/94 added
+	const char* initDelayValuesBus;
 };
 
         //////////////////////////////////////////
@@ -401,6 +408,10 @@ public:
 	// return the number of initial delays on my Geodesic
 	int numInitDelays() const;
 
+        // return a string representing the initial delays on my Geodesic
+        // 3/2/94 added
+        const char* initDelayValues() const;
+
 	// return pointer to my Geodesic
 	Geodesic* geo() { return myGeodesic;}
 
@@ -415,8 +426,9 @@ public:
 
 	MultiPortHole* getMyMultiPortHole() const { return myMultiPortHole; }
 
-	// adjust the delay on the connection
-	virtual void setDelay (int);
+	// adjust the delay on the connection, with initial values
+	virtual void setDelay (int numberDelays, 
+                               const char* initDelayValues = 0);
 
 	// Allocate a return a Geodesic compatible with this
 	// type of PortHole

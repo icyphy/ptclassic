@@ -45,8 +45,9 @@ int AutoForkNode::isItPersistent () const {
 }
 
 // make a new source connection
-PortHole* AutoForkNode::setSourcePort (GenericPort &sp, int delay) {
-	return af.setSource(sp, delay);
+PortHole* AutoForkNode::setSourcePort (GenericPort &sp, int numDelays,
+				       const char* initDelayValues) {
+	return af.setSource(sp, numDelays, initDelayValues);
 }
 
 // make a new destination connection, possibly autoforking

@@ -49,7 +49,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 AutoFork::AutoFork(Geodesic& g)
 : geo(g), forkStar(0), forkInput(0), forkOutput(0) {}
 
-PortHole* AutoFork::setSource (GenericPort &sp, int delay) {
+PortHole* AutoFork::setSource (GenericPort &sp, int numDelays,
+			       const char* initDelayValues) {
 	if (geo.originatingPort) {
 		Error::abortRun(geo, 
 			"multiple output ports found on the same node");
@@ -76,7 +77,7 @@ PortHole* AutoFork::setSource (GenericPort &sp, int delay) {
 // normal case, simple enough.
 	geo.originatingPort = &sp.newConnection();
 	geo.portHoleConnect();
-	geo.numInitialParticles = delay;
+	geo.setDelay(numDelays, initDelayValues);
 	return geo.originatingPort;
 }
 

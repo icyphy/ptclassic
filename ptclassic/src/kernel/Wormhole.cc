@@ -252,7 +252,8 @@ Galaxy* Wormhole :: explode() {
 	PortHole* p;
 
 	while((p = nextp++) != 0) {
-		int delay = p->numInitDelays();
+		int numDelays = p->numInitDelays();
+		const char* delayValues = p->initDelayValues();
 		PortHole* tempP = p->far();
 		EventHorizon* eveP = p->asEH();
 		PortHole* inP = eveP->ghostAsPort()->far();
@@ -269,9 +270,9 @@ Galaxy* Wormhole :: explode() {
 
 		// make new connection
 		if (tempP->isItInput())
-			inP->connect(*tempP, delay);
+			inP->connect(*tempP, numDelays, delayValues);
 		else
-			tempP->connect(*inP, delay);
+			tempP->connect(*inP, numDelays, delayValues);
 
 		// update aliase pointer if necessary.
 		// since deleting EventHorizons may corrupt aliase pointers.

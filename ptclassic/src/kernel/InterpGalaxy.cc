@@ -53,6 +53,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "IntState.h"
 #include <ctype.h>
 
+// dummy empty delay value, added 3/2/94
+const char emptyDelay = '\0';
+
 // constructor: sets the class name and domain.
 InterpGalaxy::InterpGalaxy(const char* c, const char* dom) {
 	setDescriptor("An interpreted galaxy");
@@ -153,67 +156,66 @@ static int isVarExp(const char* exp) {
 
 static void
 logConnect(StringList& list,const char* srcStar,const char* srcPipe,
-	   const char* dstStar,const char* dstPipe, const char* delay) {
+	   const char* dstStar,const char* dstPipe, 
+	   const char* initDelayValues) {
 	list += "C";
 	list += srcStar;
 	list += srcPipe;
 	list += dstStar;
 	list += dstPipe;
-	list += delay;
+	list += initDelayValues;
 }
 
 // Form a point-to-point connection.
 int
 InterpGalaxy::connect(const char* srcStar,const char* srcPipe,
 		      const char* dstStar,const char* dstPipe,
-		      const char* delay) {
-	if (delay == 0) delay = "";
+		      const char* initDelayValues) {
+	if ((initDelayValues == 0) || (*initDelayValues == 0)
+	    initDelayValues = &emptyDelay;
 // Get the source and destination ports
 	PortHole *srcP = findPortHole (srcStar, srcPipe);
 	PortHole *dstP = findPortHole (dstStar, dstPipe);
 	if (srcP == NULL || dstP == NULL) return FALSE;
 
 // add the action to the list, and to initList if variable
-	logConnect(actionList,srcStar,srcPipe,dstStar,dstPipe,delay);
-	int del = 0;
-	if (isVarExp(delay))
-		logConnect(initList,srcStar,srcPipe,dstStar,dstPipe,delay);
-	else del = evalExp(this,delay,"delay");
-	Galaxy::connect (*srcP, *dstP, del);
+	logConnect(actionList,srcStar,srcPipe,dstStar,dstPipe,initDelayValues);
+	if (*initDelayValues)
+	  logConnect(initList,srcStar,srcPipe,dstStar,dstPipe,initDelayValues);
+	Galaxy::connect (*srcP, *dstP, 0, initDelayValues);
 	return TRUE;
 }
 
 static void
 logBus(StringList& list, const char* srcStar,const char* srcPipe,
        const char* dstStar,const char* dstPipe, const char* width,
-       const char* delay) {
+       const char* initDelayValues) {
 	list += "B";
 	list += srcStar;
 	list += srcPipe;
 	list += dstStar;
 	list += dstPipe;
 	list += width;
-	list += delay;
+	list += initDelayValues;
 }
 
 // Form a bus connection
 int
 InterpGalaxy::busConnect(const char* srcStar,const char* srcPipe,
-		      const char* dstStar,const char* dstPipe,
-			 const char* width, const char* delay) {
-	if (delay == 0) delay = "";
-	MultiPortHole* s = findMPH (srcStar, srcPipe);
-	MultiPortHole* d = findMPH (dstStar, dstPipe);
-	if (s == 0 || d == 0) return FALSE;
-	logBus(actionList,srcStar,srcPipe,dstStar,dstPipe,width,delay);
-	int numberDelays = 0;
-	if (isVarExp(width) || isVarExp(delay))
-		logBus(initList,srcStar,srcPipe,dstStar,dstPipe,width,delay);
-	else numberDelays = evalExp(this,delay,"delay");
-	int w = evalExp(this,width,"busWidth");
-	if (w == 0) w = 1;
-	s->busConnect (*d, w, numberDelays);
-	return TRUE;
+			 const char* dstStar,const char* dstPipe,
+			 const char* width, const char* initDelayValues) {
+  if (initDelayValues == 0)
+    initDelayValues = &emptyDelay;
+  MultiPortHole* s = findMPH (srcStar, srcPipe);
+  MultiPortHole* d = findMPH (dstStar, dstPipe);
+  if (s == 0 || d == 0) return FALSE;
+  logBus(actionList,srcStar,srcPipe,dstStar,dstPipe,width,initDelayValues);
+  if (isVarExp(width) || *initDelayValues)
+    logBus(initList,srcStar,srcPipe,dstStar,dstPipe,width,initDelayValues);
+  int w = evalExp(this,width,"busWidth");
+  if (w == 0) w = 1;
+  s->busConnect (*d, w, 0, initDelayValues);
+  return TRUE;
 }
 
 // Add a star to the galaxy.
@@ -323,8 +325,9 @@ InterpGalaxy::delNode (const char* nodename) {
 // Connect a porthole to a node.
 int
 InterpGalaxy::nodeConnect (const char* star, const char* port,
-			   const char* node, const char* delay) {
-	if (delay == 0) delay = "";
+			   const char* node, const char* initDelayValues) {
+	if (initDelayValues == 0)
+	  initDelayValues = &emptyDelay;
 	GenericPort *ph = findGenericPort (star, port);
 	if (ph == NULL) return FALSE;
 	Geodesic *g = nodes.nodeWithName (node);
@@ -332,17 +335,11 @@ InterpGalaxy::nodeConnect (const char* star, const char* port,
 		noInstance (node, name());
 		return FALSE;
 	}
-	if (ph->isItOutput()) {
-		int del;
-		if (isVarExp(delay)) del = 0;
-		else del = evalExp(this,delay,"delay");
-		if (!g->setSourcePort (*ph, del)) return FALSE;
-	}
-	else if (delay && *delay) {
-
-		    
-		Error::abortRun ("delay not allowed when nodeConnecting an input");
-		return FALSE;
+	if (ph->isItOutput())
+		if (!g->setSourcePort (*ph, 0)) return FALSE;
+	else if (*initDelayValues) {
+	  Error::abortRun ("delay not allowed when nodeConnecting an input");
+	  return FALSE;
 	}
 	else if (!g->setDestPort (*ph)) return FALSE;
 
@@ -351,13 +348,13 @@ InterpGalaxy::nodeConnect (const char* star, const char* port,
 	actionList += star;
 	actionList += port;
 	actionList += node;
-	actionList += delay;
-	if (isVarExp(delay)) {
+	actionList += initDelayValues;
+	if (*initDelayValues) {
 		initList += "c";
 		initList += star;
 		initList += port;
 		initList += node;
-		initList += delay;
+		initList += initDelayValues;
 	}
 	return TRUE;
 }
@@ -498,7 +495,7 @@ InterpGalaxy::copy(const InterpGalaxy& g) {
 
 	while (nacts > 0) {
 		const char *a, *b, *c, *d, *action;
-		const char *ndelay, *width;
+		const char *initDelayValues, *width;
 
 		action = next++;
 		switch (action[0]) {
@@ -521,9 +518,9 @@ InterpGalaxy::copy(const InterpGalaxy& g) {
 			b = next++;
 			c = next++;
 			d = next++;
-			ndelay = next++;
+			initDelayValues = next++;
 
-			connect (a, b, c, d, ndelay);
+			connect (a, b, c, d, initDelayValues);
 			nacts -= 6;
 			break;
 
@@ -533,8 +530,8 @@ InterpGalaxy::copy(const InterpGalaxy& g) {
 			c = next++;
 			d = next++;
 			width = next++;
-			ndelay = next++;
-			busConnect (a, b, c, d, width, ndelay);
+			initDelayValues = next++;
+			busConnect (a, b, c, d, width, initDelayValues);
 			nacts -= 7;
 			break;
 
@@ -563,8 +560,8 @@ InterpGalaxy::copy(const InterpGalaxy& g) {
 			a = next++;
 			b = next++;
 			c = next++;
-			ndelay = next++;
-			nodeConnect (a, b, c, ndelay);
+			initDelayValues = next++;
+			nodeConnect (a, b, c, initDelayValues);
 			nacts -= 5;
 			break;
 
@@ -693,8 +690,8 @@ InterpGalaxy::initialize () {
 	int nacts = initList.numPieces();
 	int err = 0;
 	while (nacts > 0) {
-		const char *a, *b, *c, *d, *action;
-		int ndelay, width;
+		const char *a, *b, *c, *d, *initDelayValues, *action;
+		int width;
 		action = next++;
 		switch (action[0]) {
 		case 'B':
@@ -703,12 +700,12 @@ InterpGalaxy::initialize () {
 			c = next++;
 			d = next++;
 			width = evalExp(this,next++,"busWidth");
-			ndelay = evalExp(this,next++,"delay");
+			initDelayValues = next++;
 			{
-				MultiPortHole* s = findMPH (a, b);
-				MultiPortHole* dp = findMPH (c, d);
-				if (s == 0 || dp == 0) err++;
-				else s->busConnect(*dp, width, ndelay);
+			  MultiPortHole* s = findMPH (a, b);
+			  MultiPortHole* dp = findMPH (c, d);
+			  if (s == 0 || dp == 0) err++;
+			  else s->busConnect(*dp, width, 0, initDelayValues);
 			}
 			nacts -= 7;
 			break;
@@ -717,12 +714,12 @@ InterpGalaxy::initialize () {
 			b = next++;
 			c = next++;
 			d = next++;
-			ndelay = evalExp(this,next++,"delay");
+			initDelayValues = next++;
 			{
 				PortHole* s = findPortHole(a, b);
 				if (s == 0) err++;
 				else {
-					s->setDelay(ndelay);
+					s->setDelay(0, initDelayValues);
 				}
 			}
 			nacts -= 6;
@@ -731,11 +728,11 @@ InterpGalaxy::initialize () {
 			a = next++;
 			b = next++;
 			c = next++;
-			ndelay = evalExp(this,next++,"delay");
+			initDelayValues = next++;
 			{
 				Geodesic *g = nodes.nodeWithName(c);
 				if (g == 0) err++;
-				g->setDelay(ndelay);
+				g->setDelay(0, initDelayValues);
 			}
 			nacts -= 5;
 			break;

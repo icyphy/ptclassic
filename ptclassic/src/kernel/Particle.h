@@ -73,6 +73,13 @@ public:
 	// Zero or initialize this Particle
 	virtual Particle& initialize() = 0;
 
+        // Initialize a given ParticleStack with the values in delay,
+        // obtaining other particles from the given plasma.  Returns
+        // the number of total particles initialized, including this one.
+	// 3/2/94 added
+        virtual int initParticleStack(Block* parent, ParticleStack& pstack,
+			      Plasma* myPlasma, const char* delay = 0) = 0;
+
 	// Load the Particle with data
 	virtual void operator << (int) = 0;
 	virtual void operator << (double) = 0;
@@ -154,6 +161,12 @@ public:
 	// Wash the Particle
 	Particle& initialize();
 
+        // Initialize a given ParticleStack with the values in delay,
+        // obtaining other particles from the given plasma.  Returns
+        // the number of total particles initialized, including this one.
+	// 3/2/94 added
+        virtual int initParticleStack(Block* parent, ParticleStack& pstack,
+			      Plasma* myPlasma, const char* delay = 0) = 0;
 	// Load up with data
 	void operator << (int i);
 	void operator << (double f);
@@ -201,6 +214,13 @@ public:
         // Initialize the Particle
         Particle& initialize();
  
+        // Initialize a given ParticleStack with the values in delay,
+        // obtaining other particles from the given plasma.  Returns
+        // the number of total particles initialized, including this one.
+	// 3/2/94 added
+        virtual int initParticleStack(Block* parent, ParticleStack& pstack,
+			      Plasma* myPlasma, const char* delay = 0);
+
         // Load up with data
         void operator << (int i);
         void operator << (double f);
@@ -249,6 +269,13 @@ public:
 
         // Initialize the Particle
         Particle& initialize();
+
+        // Initialize a given ParticleStack with the values in delay,
+        // obtaining other particles from the given plasma.  Returns
+        // the number of total particles initialized, including this one.
+	// 3/2/94 added
+        virtual int initParticleStack(Block* parent, ParticleStack& pstack,
+			      Plasma* myPlasma, const char* delay = 0);
 
         // Load up with data
         void operator << (int i);
@@ -300,6 +327,13 @@ public:
 
         // Wash the Particle
         Particle& initialize();
+
+        // Initialize a given ParticleStack with the values in delay,
+        // obtaining other particles from the given plasma.  Returns
+        // the number of total particles initialized, including this one.
+	// 3/2/94 added
+        virtual int initParticleStack(Block* parent, ParticleStack& pstack,
+			      Plasma* myPlasma, const char* delay = 0);
 
         // Load up with data
         void operator << (int i);

@@ -41,6 +41,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Particle.h"
 #include "Plasma.h"
 #include "Error.h"
+#include "ComplexArrayState.h"   // 3/2/94 added for initParticleStack
+#include "FixArrayState.h"       // 3/2/94 added for initParticleStack
+#include "FloatArrayState.h"     // 3/2/94 added for initParticleStack
+#include "IntArrayState.h"       // 3/2/94 added for initParticleStack
 
 // Here are the plasmas!
 // Create instances of each particle and plasma
@@ -122,6 +126,27 @@ StringList IntParticle :: print () const { return StringList(data);}
 	// Wash the Particle
 Particle& IntParticle :: initialize() {data=0; return *this;}
 
+        // Initialize a given ParticleStack with the values in delay,
+        // obtaining other particles from the given plasma.  Returns
+        // the number of total particles initialized, including this one.
+        // 3/2/94 added 
+int IntParticle::initParticleStack(Block* parent, ParticleStack& pstack, 
+				   Plasma* myPlasma, const char* delay) {
+  IntArrayState initDelays;
+  initDelays.setState("initDelays",parent,delay);
+  initDelays.initialize();
+  int numInitialParticles = initDelays.size();
+  if(numInitialParticles > 0) {
+    data = initDelays[0];
+    for(int i = 1; i < numInitialParticles; i++) {
+      Particle* p = myPlasma->get();
+      *p << initDelays[i];
+      pstack.putTail(p);
+    }
+  }
+  return numInitialParticles;
+}
+
 	// Load up with data
 void IntParticle :: operator << (int i) {data=i;}
 void IntParticle :: operator << (double f) {data=int(f);}
@@ -177,6 +202,27 @@ StringList FloatParticle :: print () const { return StringList(data);}
  
         // Initialize the Particle
 Particle& FloatParticle :: initialize() {data=0.0; return *this;}
+
+        // Initialize a given ParticleStack with the values in delay,
+        // obtaining other particles from the given plasma.  Returns
+        // the number of total particles initialized, including this one.
+        // 3/2/94 added 
+int FloatParticle::initParticleStack(Block* parent, ParticleStack& pstack, 
+				     Plasma* myPlasma, const char* delay) {
+  FloatArrayState initDelays;
+  initDelays.setState("initDelays",parent,delay);
+  initDelays.initialize();
+  int numInitialParticles = initDelays.size();
+  if(numInitialParticles > 0) {
+    data = initDelays[0];
+    for(int i = 1; i < numInitialParticles; i++) {
+      Particle* p = myPlasma->get();
+      *p << initDelays[i];
+      pstack.putTail(p);
+    }
+  }
+  return numInitialParticles;
+}
 
         // Load up with data
 void FloatParticle :: operator << (int i) {data=i;}
@@ -243,6 +289,26 @@ StringList ComplexParticle :: print () const {
         // Initialize the Particle
 Particle& ComplexParticle :: initialize() {data=0.0; return *this;}
 
+        // Initialize a given ParticleStack with the values in delay,
+        // obtaining other particles from the given plasma.  Returns
+        // the number of total particles initialized, including this one.
+        // 3/2/94 added 
+int ComplexParticle::initParticleStack(Block* parent, ParticleStack& pstack, 
+				       Plasma* myPlasma, const char* delay) {
+  ComplexArrayState initDelays;
+  initDelays.setState("initDelays",parent,delay);
+  initDelays.initialize();
+  int numInitialParticles = initDelays.size();
+  if(numInitialParticles > 0) {
+    data = initDelays[0];
+    for(int i = 1; i < numInitialParticles; i++) {
+      Particle* p = myPlasma->get();
+      *p << initDelays[i];
+      pstack.putTail(p);
+    }
+  }
+  return numInitialParticles;
+}
         // Load up with data
 void ComplexParticle :: operator << (int i) {data=Complex(i);}
 void ComplexParticle :: operator << (double f) {data=Complex(f);}
@@ -307,6 +373,26 @@ StringList FixParticle :: print () const
         // Wash the Particle
 Particle& FixParticle :: initialize() {data.initialize(); return *this;}
 
+        // Initialize a given ParticleStack with the values in delay,
+        // obtaining other particles from the given plasma.  Returns
+        // the number of total particles initialized, including this one.
+        // 3/2/94 added 
+int FixParticle::initParticleStack(Block* parent, ParticleStack& pstack, 
+				   Plasma* myPlasma, const char* delay) {
+  FixArrayState initDelays;
+  initDelays.setState("initDelays",parent,delay);
+  initDelays.initialize();
+  int numInitialParticles = initDelays.size();
+  if(numInitialParticles > 0) {
+    data = initDelays[0];
+    for(int i = 1; i < numInitialParticles; i++) {
+      Particle* p = myPlasma->get();
+      *p << initDelays[i];
+      pstack.putTail(p);
+    }
+  }
+  return numInitialParticles;
+}
         // Load up with data
 void FixParticle :: operator << (int i) {data = double(i);}
 void FixParticle :: operator << (double f) {data = f;}

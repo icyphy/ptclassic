@@ -200,6 +200,18 @@ void MessageParticle::getMessage (Envelope& p) {
 
 Particle& MessageParticle::initialize() { data = dummy; return *this;}
 
+// Initialize a given ParticleStack with the values in the delay
+// string, obtaining other Particles from the given Plasma.  
+// Returns the number of total Particles initialized, including
+// this one.  This should be redefined by the specific message class.
+// 3/2/94 added
+int MessageParticle::initParticleStack(Block* parent, ParticleStack& pstack,
+				       Plasma* myPlasma, 
+				       const char* delay) {
+  Error::abortRun("delays with initial values not supported by general Messages");
+  return 0;
+}
+
 // load with data -- function errorAssign prints an
 // error and calls Error::abortRun().
 
