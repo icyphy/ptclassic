@@ -802,8 +802,6 @@ proc ed_Apply {facet number args} {
   if { $changeFlag } {
     set ed_Parameters($facet,$number) $newParamArray
     ed_WriteParam $ed_Parameters($facet,$number) $facet $number $args
-    # added for DMM support 11/22/95 (kalavade)
-    ptkSetDMMChangedFlag $facet
   }
 }
 
