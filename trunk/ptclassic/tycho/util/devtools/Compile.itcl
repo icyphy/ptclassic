@@ -237,7 +237,11 @@ body ::tycho::Compile::compileFiles {} {
         set autostart 0
         set autodestroy 0
 
-        set compileString "make -f $makefile"
+        if [regexp {[Mm]akefile} $makefile] {
+            set compileString "make"
+        } {
+            set compileString "make -f $makefile"
+        }
         set compileWidget \
                 [::tycho::Monitor [::tycho::autoName .makeExec] \
                 -autostart $autostart -autodestroy $autodestroy \
