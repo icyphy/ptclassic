@@ -184,7 +184,7 @@ class iwidgets::Labeledgrid {
 #
 # Provide a lowercase access method for the Labeledgrid class.
 #
-proc ::iwidgets::labeledgrid { path args } {
+proc labeledgrid { path args } {
     # Create widget
     uplevel ::iwidgets::Labeledgrid $path $args
 }
