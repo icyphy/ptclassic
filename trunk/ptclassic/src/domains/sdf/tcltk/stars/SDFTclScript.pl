@@ -17,7 +17,7 @@ inputs and update the value of the outputs.
 	}
 	explanation {
 .EQ
-nodelim
+delim off
 .EN
 The star reads a file containing Tcl commands.
 It can be used in a huge
