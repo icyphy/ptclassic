@@ -75,8 +75,11 @@ all install:
 	    fi ; \
 	done
 
-# Grab the rules that are common to most makefiles.
-include $(ROOT)/mk/corerules.mk
+depend:
+	@echo "no dependencies in this directory"
+
+# Get the rest of the rules
+include $(ROOT)/mk/tycommon.mk
 
 #----------------------------------------------------------------------
 # Rules for rebuilding the configure and Makefile files
