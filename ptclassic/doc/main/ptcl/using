@@ -983,13 +983,12 @@ Tcl language.
 .pp
 .IE "wormholes in the interpreter"
 .IE "domains in the interpreter"
-Here is an example of a simulation that contains both an SDF portion
-and a DE portion.  The FloatRamp star generates samples 0, 1, 2, ...
-The CoinFlip star generates either 0 or 1, with equal probability.
-Discard discards or passes its input based on whether its "keep" input
-is 0 or 1.  UniformDelay causes a random delay (from a uniform distribution).
-The Sampler star samples its input at a constant rate.  Xgraph plots
-the result.
+Here is an example of a simulation that contains both an SDF portion and a
+DE portion.  In this example, a Poisson process where particles have value
+0.0 is sent into an SDF wormhole, where Gaussian noise is added to the
+samples.  This demo shows how easy it is to use the SDF stars to perform
+computation on DE particles.  The overall delay of the SDF wormhole is
+zero, so the result is simply Poisson arrivals of Gaussian noise samples.
 .pp
 A
 .c Wormhole
