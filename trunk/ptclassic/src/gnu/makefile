@@ -62,7 +62,7 @@ GNU_PREFIX=$(GNU_DEST)/common
 # references to the current version, along with
 # $PTOLEMY/src/gnu/README.
 # Also, check out the COLLECTOR variables in $PTOLEMY/mk/config-*.mk
-GCC_VERSION=egcs-2.91.57
+GCC_VERSION=egcs-2.91.60
 
 # If you are trying to build GNU for Linux, you may want to uncomment
 # the next line and comment out the following line
