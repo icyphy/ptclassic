@@ -20,6 +20,19 @@ Contents:
 </ul>
 <h1><a name="bugs in the kernel">Bugs in the kernel</a></h1>
 
+<h3><a href="$TYCHO/kernel/MenuBar.itcl">MenuBar</a></h3>
+<ul>
+<li>If you add a menu with a name that already exists, and the
+existing menu is before an entry that has no -label option
+(such as a separator), then the add will fail with an error.
+The reason is that the menubar uses the menu label as the
+only way of accessing menu entries, and separators have no
+label! The design is flawed, but it's probably not worth fixing
+this until we find out what support Tk 8.0 has for menubars,
+and using that.
+
+</ul>
+
 <h3><a href="$TYCHO/kernel/Displayer.itcl">Displayer</a></h3>
 <ul>
 <li>Key-driven posting of menus does not work.  Displayer needs to
