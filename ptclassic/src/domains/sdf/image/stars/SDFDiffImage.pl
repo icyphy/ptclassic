@@ -39,7 +39,7 @@ and pass the result to the output.
 		(input2%0).getMessage(inEnvp2);
 		TYPE_CHECK(inEnvp1, "GrayImage");
 		TYPE_CHECK(inEnvp2, "GrayImage");
-		GrayImage* img1 = (GrayImage*) inEnvp1.writableCopy();
+		const GrayImage* img1 = (const GrayImage*) inEnvp1.myData();
 		const GrayImage* img2 = (const GrayImage*) inEnvp2.myData();
 
 		// Calculate the difference between the images
@@ -48,38 +48,38 @@ and pass the result to the output.
 
 		if ((width != img2->retWidth()) ||
 		    (height != img2->retHeight())) {
-			delete img1;
 			Error::abortRun(*this, "Image sizes do not match.");
 			return;
 		}
 		if (img1->fragmented() || img1->processed() ||
 		    img2->fragmented() || img2->processed()) {
-			delete img1;
 			Error::abortRun(*this,
 					"Can't handle fragmented or processed images.");
 			return;
 		}
 
-		unsigned char* ptr1 = img1->retData();
-		unsigned const char* ptr2 = img2->constData();
+		// Allocate a copy of the first image to hold result
+		GrayImage *img3 = new GrayImage(*img1);
+
+		// Compute the pixel-by-pixel difference
 		double scale = Scale;
-		unsigned int maxindex = width*height;
-		for (unsigned int travel = 0; travel < maxindex; travel++) {
+		unsigned int maxpixel = width * height;
+		unsigned const char* ptr2 = img2->constData();
+		unsigned char* ptr3 = img3->retData();
+		for (unsigned int pixel = 0; pixel < maxpixel; pixel++) {
 			// take absolute value of scaled difference
-			double diff;
-			diff = scale * ( double(*ptr1) - double(*ptr2) );
+			double diff = scale *
+					( double(*ptr3) - double(*ptr2++) );
 			if (diff < 0.0) diff = -diff;
 
 			// map the intensity values into the range [0, 255]
-			if (diff < 0.5)	*ptr1 = (unsigned char) 0;
-			else if (diff > 254.5) *ptr1 = (unsigned char) 255;
-			else *ptr1 = (unsigned char) (diff + 0.5);
-			ptr1++;
-			ptr2++;
+			if (diff < 0.5)	*ptr3++ = (unsigned char) 0;
+			else if (diff > 254.5) *ptr3++ = (unsigned char) 255;
+			else *ptr3++ = (unsigned char) (diff + 0.5);
 		}
 
 		// Send the result.
-		Envelope outEnvp(*img1);
+		Envelope outEnvp(*img3);
 		(outData%0) << outEnvp;
 	} // end go{}
 } // end defstar { DiffImage }
