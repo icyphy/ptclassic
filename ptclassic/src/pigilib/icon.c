@@ -127,7 +127,7 @@ int background;
 }
 
 /* 8/3/90
-Open a window and run xedit on a file.
+Open a window and run tycho on a file.
 Runs in the background and returns immediately.
 */
 boolean
@@ -390,7 +390,7 @@ long userOptionWord;
     vemStatus status;
     static char buf[512];
 
-    ViInit("look-inside");
+    ViInit("show-name");
     ErrClear();
 
     /* get current facet */
@@ -432,6 +432,31 @@ long userOptionWord;
 	FreeOctMembers(&inst);
     }
     FreeOctMembers(&facet);
+    ViDone();
+}
+
+/* Start Tycho, if it has not already been started. */
+int
+RpcTycho(spot, cmdList, userOptionWord)
+RPCSpot *spot;
+lsList cmdList;
+long userOptionWord;
+{
+    ViInit("Tycho");
+    ErrClear();
+
+    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,
+	"if {![info exists TYCHO]} {",
+	"   set argc 1\n",
+	"   set argv {-noconsole}\n",
+	"   source $ptolemy/tycho/kernel/Tycho.tcl",
+	"}\n",
+	"::tycho::TopLevel::exitWhenNoMoreWindows 0\n",
+	"set tychoconsole [autoName .console]\n",
+	"::tycho::Console $tychoconsole -text {Welcome to Tycho in Pigi\n} -geometry +0-20\n",
+	"wm deiconify $tychoconsole",
+	(char *)NULL) );
+
     ViDone();
 }
 
