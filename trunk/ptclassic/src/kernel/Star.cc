@@ -21,7 +21,8 @@ $Id$
 #include <ACG.h>
 
 // common random number generator for all Star classes.
-ACG gen(10,20);
+// default seed is 1.
+ACG* gen = new ACG(1);		
 
 /*******************************************************************
 
