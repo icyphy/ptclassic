@@ -50,6 +50,7 @@ EXTRA_SRCS =	\
 	displayer.html \
 	edit.html \
 	error.html \
+	exec.html \
 	file.html \
 	html.html \
 	index.html \
