@@ -4,7 +4,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1997-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -70,7 +70,7 @@ public:
 	static void addEntry( ACSCore& );
 
 	// return the entire list
-	static const StringList getCategories();
+	static StringList getCategories();
 
 	// find an entry in the list
 	static const ACSCore* find( const char* category );
