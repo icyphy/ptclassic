@@ -89,7 +89,7 @@ fm2ps: update_book
 	echo "SaveAs t troubleshooting.doc /tmp/troubleshooting.txt" >> $@
 	echo "Quit" >> $@ 
 
-VERSION=0.5.2beta
+VERSION=0.5.2
 OBTAINING_PTOLEMY=OBTAINING_PTOLEMY_$(VERSION)
 OBTAINING_PTOLEMY: $(OBTAINING_PTOLEMY) 
 $(OBTAINING_PTOLEMY): /tmp/obtainPtolemy.txt
@@ -106,6 +106,7 @@ $(OBTAINING_PTOLEMY): /tmp/obtainPtolemy.txt
 	awk '{if(length($$0)>120) printf("%s\n\n",$$0); else print $$0  }' | \
 	awk '{if($$0 ~ /^A\./) printf("\n%s\n\n",$$0); else print $$0}' | \
 	sed 's/\\x11/ /g' | \
+	/usr/sww/bin/gexpand | \
 	/usr/sww/bin/gfold -s -w 65 | \
 	awk '{if ($$0 ~ /setenv GCC_EXEC_PREFIX/) printf("%s",$$0); else print $$0 }' | \
 	awk '{if ($$0 ~ /setenv CPLUS_INCLUDE_PATH/) printf("%s",substr($$0,1,length($$0)-1)); else print $$0 }' | \
@@ -127,6 +128,7 @@ $(INSTALL): /tmp/installation.txt
 	awk '{if(length($$0)>120) printf("%s\n\n",$$0); else print $$0  }' | \
 	awk '{if($$0 ~ /^A\./) printf("\n%s\n\n",$$0); else print $$0}' | \
 	sed 's/\\x11/ /g' | \
+	/usr/sww/bin/gexpand | \
 	/usr/sww/bin/gfold -s -w 65 | \
 	awk '{if ($$0 ~ /setenv GCC_EXEC_PREFIX/) printf("%s",$$0); else print $$0 }' | \
 	awk '{if ($$0 ~ /setenv CPLUS_INCLUDE_PATH/) printf("%s",substr($$0,1,length($$0)-1)); else print $$0 }' | \
@@ -148,6 +150,7 @@ $(TROUBLE_SHOOTING): /tmp/troubleshooting.txt
 	awk '{if(length($$0)>120) printf("%s\n\n",$$0); else print $$0  }' | \
 	awk '{if($$0 ~ /^A\./) printf("\n%s\n\n",$$0); else print $$0}' | \
 	sed 's/\\x11/ /g' | \
+	/usr/sww/bin/gexpand | \
 	/usr/sww/bin/gfold -s -w 65 | \
 	awk '{if ($$0 ~ /setenv GCC_EXEC_PREFIX/) printf("%s",$$0); else print $$0 }' | \
 	awk '{if ($$0 ~ /setenv CPLUS_INCLUDE_PATH/) printf("%s",substr($$0,1,length($$0)-1)); else print $$0 }' | \
@@ -166,6 +169,7 @@ clean_ftp_txt:
 
 #FTPSITE=/vol/ptolemy/pt0/ftp/pub/ptolemy/ptolemy$(VERSION)
 FTPSITE=/vol/ptolemy/pt0/ftp/pub/ptolemy/ptolemy$(VERSION)
+
 diff_OBTAINING_PTOLEMY: $(OBTAINING_PTOLEMY) 
 	-diff $(FTPSITE)/$(OBTAINING_PTOLEMY) $(OBTAINING_PTOLEMY) 
 diff_INSTALL: $(INSTALL) 
@@ -188,56 +192,14 @@ update_ftp_txt: \
 ##########################################
 # Generate html from .doc files
 
-# This sort of barely works. Here's the procedure:
-# 1. Log on to babbage, cd /users/ptdesign/doc/users/man
-# 2. make mifs
-# 3. make users_man.html
-#	This rule will fix a small problem in obtainPtolemy.MIF, and then 
-#	generate the html text files for the users_man
-# 4. Set your display variable, the next step needs it
-# 5. make users_man_graph
-#	This will take several hours to run
-# 6. The table of contents and the title page are messed up.  You will need
-#	to copy these from wwwtocs
-#		make update_local_www
-# 7. For some reason the first several hundred html files are bogus, you will
-# 	have to remove them.
-#		make fix_www
-# 8. Copy the files over to the ftp site:
-#		make update_ftp_www
-# 9. Update the wais server.
-#	Log into messier first, or the wais entry will point to the machine you
-#	are running on, which is probably not what you want.
-#	rsh ptolemy "cd /users/ptdesign/doc/users_man; make wais_man"
-# Webmaker binaries
-# To use the wmgraph binary, place /usr/tools/webmaker/bin.sunos in your path
-WMCONFIG =	/usr/tools/webmaker/bin/wmconfig
-WEBMAKER =	/usr/tools/webmaker/bin/webmaker
-WMGRAPH =	/usr/tools/webmaker/bin/wmgraph
+DOC_NAME=	users_man
+DOC_DESCRIPTOR=	"Ptolemy $(VERSION) Users Manual"
+OTHER_MIFS=	obtainPtolemy-fixed.MIF
+include $(ROOT)/doc/mk/docwais.mk
 
-# All the .MIF files
-MIFS =		$(DOCS:.doc=.MIF) #users_man.MIF
-mifs: $(MIFS)
+# Destination for users_man html pages
+USERS_MAN_ARCHIVEDIR=$(WWWDIR)/users_man$(VERSION)
 
-# All the html files
-HTMLS =		$(MIFS:.MIF=.html)
-htmls: $(HTMLS)
-
-
-# Rule to convert .doc files to .MIF. See also /usr/tools/webmaker/bin/fm2mif
-%.MIF: %.doc
-	echo "Open $<" > /tmp/fm2mif.fmb
-	echo "SaveAs m $< $@" >> /tmp/fm2mif.fmb		
-	fmbatch -v /tmp/fm2mif.fmb
-	rm -f /tmp/fm2mif.fmb
-%.MIF: %.book
-	echo "Open $<" > /tmp/fm2mif.fmb
-	echo "SaveAs m $< $@" >> /tmp/fm2mif.fmb		
-	fmbatch -v /tmp/fm2mif.fmb
-	rm -f /tmp/fm2mif.fmb
-# Rule to convert mif files to html files
-%.html: %.MIF
-	$(WEBMAKER) -c users_man.wml -t $(basename $<) $<
 
 # You will need to edit obtainPtolemy.MIF by hand and change 2Heading
 # to 2Heading-alpha, or else webmaker will get an error
@@ -262,20 +224,83 @@ obtainPtolemy-fixed.MIF: obtainPtolemy.MIF
 #  <PgfTag `ExternalTOC'>
 # >
 
-# This rule generates all the .html files.
-# Note that you may have to edit users_man_1.html and the file that contains
-# Appendix A, section 4.3
-users_man.html: $(MIFS) obtainPtolemy-fixed.MIF
-	$(WEBMAKER) -c users_man.wml -t "Ptolemy $(VERSION) Users Manual" users_man.MIF
-
-users_man_graph:
-	@echo "For best results run on babbage (image path name problems)"
-	$(WMGRAPH) -G -n users_man	
-
 update_local_www:
 	cp wwwtocs/users_man_0.html wmwork/www
 	cp wwwtocs/users_man_1.html wmwork/www
 	cp wwwtocs/users_man_2.html wmwork/www
+
+
+.PHONY:	obtainPtolemy.html installation.html troubleshooting.html \
+	appendix_A_html update_appendix_A_html
+
+wmwork/www/obtainPtolemy-fixed_2.html: obtainPtolemy-fixed.MIF
+	$(WEBMAKER) -c $(ALMAGEST_WML) -t "Ptolemy $(VERSION) Users Manual" $^
+wmwork/www/installation_1.html: installation.MIF
+	$(WEBMAKER) -c $(ALMAGEST_WML) -t "Ptolemy $(VERSION) Users Manual" $^
+wmwork/www/troubleshooting_1.html: troubleshooting.MIF
+	$(WEBMAKER) -c $(ALMAGEST_WML) -t "Ptolemy $(VERSION) Users Manual" $^
+
+WWW_APPENDIXA =	$(WWWDIR)/appendixA
+
+appendixA_html: wmwork/www/obtainPtolemy-fixed_2.html \
+		wmwork/www/installation_1.html \
+		wmwork/www/troubleshooting_1.html
+
+
+.PHONY:	update_appendixA_html
+update_appendixA_html: 	$(WWW_APPENDIXA) \
+		$(WWW_APPENDIXA)/obtainPtolemy-fixed_1.html \
+		$(WWW_APPENDIXA)/installation_1.html \
+		$(WWW_APPENDIXA)/troubleshooting_1.html
+
+$(WWW_APPENDIXA)/obtainPtolemy-fixed_1.html: \
+					wmwork/www/obtainPtolemy-fixed_2.html
+	(cd wmwork/www; tar -cf - obtainPtolemy-fixed*) | \
+		rsh ptolemy "cd $(dir $@); tar -xpf -"
+	(cd $(dir $@); rm -f $@; \
+		ln -s appendixA.html obtainPtolemy-fixed_1.html; \
+		ln -s appendixA.html index.html);
+
+$(WWW_APPENDIXA)/installation_1.html: wmwork/www/installation_1.html
+	(cd wmwork/www; tar -cf - installation*) | rsh ptolemy "cd $(dir $@); tar -xpf -"
+	(cd $(dir $@); rm -f $@; ln -s appendixA.html installation_1.html)
+
+
+$(WWW_APPENDIXA)/troubleshooting_1.html: wmwork/www/troubleshooting_1.html
+	(cd wmwork/www; tar -cf - troubleshooting*) | rsh ptolemy "cd $(dir $@); tar -xpf -"
+	(cd $(dir $@); rm -f $@; ln -s appendixA.html troubleshooting_1.html)
+
+$(WWW_APPENDIXA): appendixA.html
+	if [ ! -d $@ ]; then mkdir $@; fi
+	cp $^ $@
+
+.PHONY:	appendixA.html
+appendixA.html: 
+	@echo "Creating new $@"
+	@echo '<!-- Generated from (cd ~ptdesign/doc/users_man; make appendixA.html) -->' > $@
+	@echo '<HTML>' >> $@
+	@echo '<HEAD>' >> $@
+	@echo '<TITLE>Ptolemy 0.5.2 Users Manual: Appendix A: Installation and Troubleshooting</TITLE>' >> $@
+	@echo '</HEAD>' >> $@
+	@echo '<BODY>' >> $@
+	@echo '<A HREF="obtainPtolemy-fixed_2.html">[Next] </A>[Contents] [Index] <A HREF="http://ptolemy.eecs.berkeley.edu/cgi-bin/users-man-wais.pl">[Search] </A><P>' >> $@
+	@echo '<A NAME=HEADING1>' >> $@
+	@echo '<H1>Appendix A: Installation and Troubleshooting  </H1>' >> $@
+	@echo '<HR>' >> $@
+	@echo '<DL>' >> $@
+	@echo '<DT><A HREF="obtainPtolemy-fixed_3.html#HEADING2"><B>A.1  </B> - Obtaining Ptolemy</A><DD>' >> $@
+	@echo '<DT><A HREF="obtainPtolemy-fixed_8.html#HEADING7"><B>A.2  </B> - Ptolemy mailing lists</A><DD>' >> $@
+	@echo '<DT><A HREF="obtainPtolemy-fixed_9.html#HEADING8"><B>A.3  </B> - Ptolemy Newsgroup</A><DD>' >> $@
+	@echo '<DT><A HREF="installation_2.html#HEADING2"><B>A.4  </B> - Installation</A><DD>' >> $@
+	@echo '<DT><A HREF="troubleshooting_2.html#HEADING2"><B>A.5  </B> - Troubleshooting </A><DD>' >> $@
+	@echo '</DL>' >> $@
+	@echo '' >> $@
+	@echo '<HR>' >> $@
+	@echo "<ADDRESS>Ptolemy 0.5.2 Users Manual `date` </ADDRESS>" >> $@
+	@echo '<A HREF="obtainPtolemy-fixed_2.html">[Next] </A>[Contents] [Index] <A HREF="http://ptolemy.eecs.berkeley.edu/cgi-bin/users-man-wais.pl">[Search] </A><P>' >> $@
+	@echo '</BODY>' >> $@
+	@echo '</HTML>' >> $@
+	@echo "Done creating new $@"
 
 # Remove users_man_3.html -> users_man_485.html
 # Note that if the docs change, then these number will change
@@ -283,36 +308,11 @@ fix_www:
 	csh -c "rm wmwork/www/users_man_[1-9]?.html wmwork/www/users_man_[123]??.html wmwork/www/users_man_4[0-7]?.html wmwork/www/users_man_48[0-5].html"
 
 update_ftp_www:
-	(cd wmwork/www; tar -cf - .) | rsh ptolemy "cd /vol/ptolemy/pt0/ftp/pub/ptolemy/www/users_man0.5.1; tar -xpf -"
-
-# Don't run this, you'll clobber the configuration file we created by hand!
-#users_man.wml: users_man.MIF
-#	$(WMCONFIG) -c $@ $<
-
+	(cd wmwork/www; tar -cf - .) | rsh ptolemy "cd $(USERS_MAN_ARCHIVEDIR); tar -xpf -"
 
 mif_links:
 	for filename in $(MIFS); \
 	do \
 		ln -s users_man.html wmwork/www/`basename $$filename .MIF`_1.html;\
 	done
-
-# Top of the WWW tree
-WWWDIR=/vol/ptolemy/pt0/ftp/pub/ptolemy/www
-
-# Destination for mailing list archives
-ARCHIVEDIR=$(WWWDIR)/users_man0.5.1
-
-# Destination of wais index
-WAIS_SOURCES=$(WWWDIR)/wais-sources
-
-wais_man:
-	-echo "Run this from messier so the host name for the database is right"
-	/usr/sww/bin/waisindex -l 1 -export \
-	 -d $(WAIS_SOURCES)/pt-0.5.1-users-man \
-	 -t URL $(WWWDIR) http://ptolemy.eecs.berkeley.edu \
-	 -r $(ARCHIVEDIR)
-
-#	 -t URL /users/cxh/public_html/wmwork/www \
-#		http://ptolemy.eecs.berkeley.edu/~cxh/wmwork/www \
-#	 -r /users/cxh/public_html/wmwork/www 
 
