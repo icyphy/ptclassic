@@ -1,8 +1,8 @@
 # common include file for directories that don't get compiled and don't
 # need dependencies generated
 # Version Identification:
-# @(#)no-compile.mk	1.42 03/27/97
-# Copyright (c) 1990-1997 The Regents of the University of California.
+# $Id$
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
