@@ -3,7 +3,7 @@ static const char file_id[] = "DataStruct.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -62,7 +62,8 @@ void SequentialList :: prepend(Pointer a)
 void SequentialList :: append(Pointer a)
 {
 	if (dimen > 0) {	// List not empty
-		LOG_NEW; lastNode = lastNode->next = new SingleLink(a,lastNode->next);
+		LOG_NEW; lastNode->next = new SingleLink(a,lastNode->next);
+		lastNode = lastNode->next;
 	}
 	else {		// List empty
 		LOG_NEW; lastNode = new SingleLink(a,0);
