@@ -30,9 +30,13 @@ limitation of liability, and disclaimer of warranty provisions.
     }
     go {
 	if ( input1.present() && input2.present() ) {
-	    output.emit() << int(input1.get()) + int(input2.get());
-	} else {
-	  Error::abortRun(*this, "One input present, the other absent");
-	}
+	  output.emit() << int(input1.get()) + int(input2.get());
+	} else if ( input1.present() && input2.absent() ) {
+	  output.emit() << int(input1.get());
+        } else if ( input1.absent() && input2.present() ) {
+          output.emit() << int(input2.get());
+        } else if ( input1.absent() && input2.absent() ) {
+	  output.makeAbsent();
+        }
     }
 }
