@@ -78,3 +78,5 @@ const char* DEStar :: domain() const {
 	return DEdomainName;
 }
 
+// isA function
+ISA_FUNC(DEStar,Star);
