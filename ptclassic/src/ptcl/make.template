@@ -40,12 +40,12 @@ CGSRC=$(ROOT)/src/domains/cg/stars
 CGDDFSRC=$(ROOT)/src/domains/cg-ddf/stars
 
 # libraries
-LIBS=-lcgddf -lddf -ldycon -lDC -lQS -lDL -lPar -lLS -lEG -lcg -lsdf \
+LIBS=-lcgddf -lddf -ldycon -lDC -lHu -lDL -lPar -lLS -lEG -lcg -lsdf \
 	-lde -lthor -lptolemy -lImage -ltcl $(SYSLIBS)
 
 LIBFILES=\
  $(LIBDIR)/libcgddf.a \
- $(LIBDIR)/libDL.a $(LIBDIR)/libQS.a \
+ $(LIBDIR)/libDL.a $(LIBDIR)/libHu.a \
  $(LIBDIR)/libcg.a $(LIBDIR)/libDC.a $(LIBDIR)/libPar.a \
  $(LIBDIR)/libLS.a $(LIBDIR)/libEG.a $(LIBDIR)/libsdf.a \
  $(LIBDIR)/libImage.a \
@@ -69,7 +69,7 @@ CGT = $(OBJDIR)/domains/cg/targets
 SDFT = $(OBJDIR)/domains/sdf/targets
 
 TARGETS = $(OBJDIR)/domains/sdf/loopScheduler/LoopTarget.o \
-	$(CGT)/CGFullConnect.o $(CGT)/CGSharedBus.o $(SDFT)/CompileTarget.o 
+	$(CGT)/CGMultiTarget.o $(CGT)/CGSharedBus.o $(SDFT)/CompileTarget.o 
 
 # Sources
 SRCS= PTcl.cc ptclMain.cc ptclError.cc
