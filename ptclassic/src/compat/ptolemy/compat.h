@@ -99,7 +99,7 @@ extern "C" {
 #endif
 
 #ifndef PTLINUX
-#if defined(USG) 
+#if defined(USG) && ! defined(PTHPPA)
 extern int sprintf();
 #else
 #ifndef PTIRIX5
