@@ -1,3 +1,4 @@
+static const char file_id[] = "KnownState.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -32,8 +33,9 @@ int KnownState::numGlobals = 0;		// and the number of global values
 KnownState::KnownState (State &state, const char* name) {
 // on the first call, create the known state list.
 // It's done this way to get around the order-of-static-constructors problem.
-        if (numStates == 0)
-                allStates = new StateList;
+        if (numStates == 0) {
+                LOG_NEW; allStates = new StateList;
+	}
         numStates++;
 // set my name and add to the list
         state.setState (name,NULL,"");
@@ -41,8 +43,9 @@ KnownState::KnownState (State &state, const char* name) {
 }
 
 KnownState::KnownState (State& state, const char* name, const char* value) {
-	if (numGlobals == 0)
-		allGlobals = new StateList;
+	if (numGlobals == 0) {
+		LOG_NEW; allGlobals = new StateList;
+	}
 	numGlobals++;
 	state.setState (name,NULL,value);
 	state.initialize();
@@ -117,3 +120,16 @@ KnownState k_false(false,"FALSE",zero);
 static IntState no;
 KnownState k_no(no,"NO",zero);
 
+// the following discards the states at the end.
+class KnownStateOwner {
+public:
+	// constructor only here because of g++ bug -- it won't call
+	// the destructor otherwise.
+	KnownStateOwner () {}
+	~KnownStateOwner () {
+		delete KnownState::allStates;
+		delete KnownState::allGlobals;
+	}
+};
+
+static KnownStateOwner kso;
