@@ -332,7 +332,7 @@ extern char* curDomainName();
         EAL, 9/23/90
 */
 char *
-setCurDomainS(spot)
+getDomainS(spot)
 RPCSpot *spot;
 {
     octObject facet;
@@ -345,18 +345,44 @@ RPCSpot *spot;
 
     if (octGetById(&facet) != OCT_OK) {
         PrintErr(octErrorString());
-        return FALSE;
+        return NULL;
     }
     if (!GOCDomainProp(&facet, &domain, oldDomain)) {
         PrintErr(ErrGet());
         return NULL;
     }
+    return domain;
+}
+
+char *
+setCurDomainS(spot)
+RPCSpot *spot;
+{
+    octObject facet;
+    char *domain, *oldDomain;
+    domain = getDomainS(spot);
+    if (!domain) return NULL;
+    oldDomain = curDomainName();
     /* Call Kernel function to set KnownBlock current domain */
     if (! KcSetKBDomain(domain)) {
 	PrintErr("Domain error in current facet.");
 	return NULL;
     }
     return oldDomain;
+}
+
+/* Get domain corresponding to the facet */
+char *
+getDomainF(facetPtr)
+octObject *facetPtr;
+{
+    char *domain,*oldDomain;
+    oldDomain = curDomainName();
+    if (!GOCDomainProp(facetPtr, &domain, oldDomain)) {
+        PrintErr(ErrGet());
+        return NULL;
+    }
+    return domain;
 }
 
 /* Given a facet, set the KnownBlocks currentDomain to correspond
@@ -372,13 +398,9 @@ setCurDomainF(facetPtr)
 octObject *facetPtr;
 {
     char *domain, *oldDomain;
-
+    domain = getDomainF(facetPtr);
+    if (!domain) return NULL;
     oldDomain = curDomainName();
-
-    if (!GOCDomainProp(facetPtr, &domain, oldDomain)) {
-        PrintErr(ErrGet());
-        return NULL;
-    }
     /* Call Kernel function to set KnownBlock current domain */
     if (! KcSetKBDomain(domain)) {
 	PrintErr("Domain error in current facet.");
@@ -387,15 +409,14 @@ octObject *facetPtr;
     return oldDomain;
 }
 
-/* Set the domain to correspond to an instance. */
-
+/* Get the domain corresponding to an instance. */
 char *
-setCurDomainInst(instPtr)
+getDomainInst(instPtr)
 octObject *instPtr;
 {
     octObject mFacet;
-    char *oldDomain = curDomainName();
-    char domain[64], srcName[512], *fullName;
+    static char domain[32];
+    char srcName[512], *fullName;
     if (IsGal(instPtr) || IsUniv(instPtr) || IsPal(instPtr))
 	    return setCurDomainF(instPtr);
     if (!MyOpenMaster(&mFacet, instPtr, "interface", "r")) {
@@ -407,6 +428,18 @@ octObject *instPtr;
 	    PrintErr(ErrGet());
 	    return NULL;
     }
+    return domain;
+}
+
+/* Set the domain to correspond to an instance. */
+
+char *
+setCurDomainInst(instPtr)
+octObject *instPtr;
+{
+    char *oldDomain = curDomainName();
+    char* domain = getDomainInst(instPtr);
+    if (!domain) return NULL;
     if (!KcSetKBDomain(domain)) {
 	PrintErr("Domain error in instance.");
 	return NULL;
