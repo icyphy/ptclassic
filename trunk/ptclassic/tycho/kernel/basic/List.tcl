@@ -124,55 +124,6 @@ proc ::tycho::linterval {x y} {
 }
 
 ##########################################################################
-#### lmap
-#
-# Apply a function-script point-wise across multiple lists. The
-# _last_ argument is the function-script; all preceding arguments
-# are lists. The function-script is applied to one element from
-# each list to produce an element of the output list. The function-
-# script is evaluated in the caller's context, so "free" variables
-# are evaluated correctly. Examples:
-# <pre><tcl>
-#     set fred 4
-#     ::tycho::lmap {1 2 3} {lambda x -> expr $x + 4}
-# </tcl></pre>
-# <pre><tcl>
-#     ::tycho::lmap {1 2 3} {4 5 6} {lambda x y -> expr $x + $y}
-# </tcl></pre>
-#
-# <b>Caveat</b>: The lists must all be the same length, or this function
-# Will fail with a cryptic error message. This should be fixed.
-#
-# FIXME: <b>When did this ever work?</b>
-#
-proc ::tycho::lmap {args} {
-    set result {}
-    set script [lindex $args end]
-
-    # Create the script to execute. For, say, two arg lists,
-    # {1 2 3} and {4 5 6}, it will look (sort of) like this:
-    #
-    # foreach _0 {1 2 3} _1 {4 5 6} {
-    #     lappend result [uplevel apply [list $script] $_0 $_1]
-    # }
-    set counts [interval 0 [expr [llength $args] - 2]]
-    set runthis {foreach}
-    foreach c $counts {
-	lappend runthis _$c [lindex $args $c]
-    }
-    set runthismore [list eval uplevel apply [list [list $script]]]
-    foreach c $counts {
-	lappend runthismore "\[set _$c\]"
-    }
-    set runthismore [concat lappend result "\[$runthismore\]"]
-    lappend runthis $runthismore
-
-    # Now run it, and return the result
-    eval $runthis
-    return $result
-}
-
-##########################################################################
 #### lmember list item
 #
 # Test whether an item is in a list. Examples:
@@ -363,7 +314,7 @@ proc ::tycho::lsubtract {l1 l2} {
 ##########################################################################
 #### ltake list n
 #
-# Take _n_ list elements. <i>This proc ::tycho::will be deleted
+# Take _n_ list elements. <i>This proc will be deleted
 # soon -- do not use.</i>
 #
 proc ::tycho::ltake {list n} {
