@@ -46,7 +46,9 @@ VPATH =		$(ROOT)/tycho/editors/textedit/doc
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-EXTRA_SRCS =
+EXTRA_SRCS = \
+	editors.html \
+	consoles.html
 
 MISC_FILES =
 
