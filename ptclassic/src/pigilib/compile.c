@@ -1186,6 +1186,7 @@ octObject *facetPtr;
 	else if (IsUnivFacet(&univFacet)) {
 	    char *name = BaseName(univFacet.contents.facet.cell);
 	    char octHandle[POCT_FACET_HANDLE_LEN];
+	    char *flagVal;
 
 	    sprintf(msg, "RunAllDemos: executing universe '%s'", name);
 	    PrintDebug(msg);
@@ -1193,15 +1194,23 @@ octObject *facetPtr;
 	    /* ptkCompileRun is very similar to ptkGo, but assuming controlled
 	       by run-all-demos panel instead of ordinary run control panel. */
 	    retval = FALSE;
-	    TCL_CATCH_ERR(Tcl_VarEval(ptkInterp, "ptkCompileRun ", name,
-				      " ", octHandle, (char *) NULL));
+	    TCL_CATCH_ERR1_BREAK(Tcl_VarEval(ptkInterp, "ptkCompileRun ", name,
+					     " ", octHandle, (char *) NULL));
 	    /* delete the universe after run finishes. */
 	    TCL_CATCH_ERR1_BREAK(Tcl_VarEval(ptkInterp, "ptkDelLite ", name,
 					     " ", octHandle, (char *) NULL));
+	    /* check abort-all-demos flag */
+	    if ((flagVal = Tcl_GetVar(ptkInterp, "ptkRunAllFlag",
+				      TCL_GLOBAL_ONLY)) != NULL &&
+		*flagVal == '0')
+	      break;
 	    retval = TRUE;
 	}
 	else if (IsPalFacet(&univFacet)) {
-	    RunAll(&univFacet);
+	    if (! RunAll(&univFacet)) {
+		retval = FALSE;
+		break;
+	    }
 	}
 	FreeOctMembers(&univFacet);
 	FreeOctMembers(&inst);
