@@ -63,6 +63,8 @@ OPTIMIZER =	-O2
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wsynth #-Wcast-qual 
 
+ARCHFLAGS =	-DIRIX5 	
+
 # Use -D_BSD_SIGNALS for src/kernel/SimControl.cc
 #  see /usr/include/sys/signals.h for more info.
 # Use -D_BSD_TIME for src/kernel/Clock.cc, see /usr/include/sys/time.h
@@ -84,9 +86,10 @@ CSYSLIBS = 	-lm -lmld
 # system libraries (libraries from the environment) for c++ files
 SYSLIBS =	-lg++ $(CSYSLIBS)
 
-# -s strips out debugging information, otherwise we get a 30Mb pigiRpc
+# -Xlinker -s strips out debugging information, otherwise we get a 30Mb
+#  pigiRpc.  -s seems to cause core dumps inside collect, so we leave it out
 # -x is also useful, it removed local symbols, see the ld man page
-LINKFLAGS =	-L$(LIBDIR) -G 0 -Xlinker -s
+LINKFLAGS =	-L$(LIBDIR) -G 0 # -Xlinker -s
 LINKFLAGS_D =	-L$(LIBDIR) -G 0
 
 #
