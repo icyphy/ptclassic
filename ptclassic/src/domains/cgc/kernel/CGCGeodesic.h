@@ -45,12 +45,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class CGCGeodesic : public CGGeodesic {
 public:
 	CGCGeodesic() : bufName(0), myWaste(2.0) {}
-	~CGCGeodesic() {LOG_DEL; delete bufName; }
+	~CGCGeodesic() {LOG_DEL; delete [] bufName; }
 
 	// class identification
 	int isA(const char*) const;
 
-	void setBufName(char* n) {bufName = n;}
+	void setBufName(char* n) {delete [] bufName; bufName = savestring(n);}
 	char* getBufName() const;
 
 	// make large the wasteFactor
