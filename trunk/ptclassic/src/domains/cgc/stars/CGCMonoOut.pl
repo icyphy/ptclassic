@@ -51,36 +51,32 @@ provisions.
     $starSymbol(bufferptr) = $starSymbol(buffer);
   }  
 
-  codeblock (convert) {
-    {
-      /* select convert procedure depending on encodingType */
-      int i;
-      if (strcasecmp($ref(encodingType), "linear16") == 0)
-	{
-	  for (i=0; i <($val(blockSize)/2); i++) {
-	    /* Convert from floating point [-1.0,1.0] to 16-bit sample */
-	    $starSymbol(buffer)[i] = ceil($ref(input, i)*32768.0);
-	  }
-	}
-      else
-	{
-	  for(i = 0; i < $val(blockSize); i++) {
-	    /* Convert from floating point [-1.0,1.0] to 16-bit sample */
-	    int sample16 = (int)($ref(input,i) * 32768.0);
-	    /* Convert 16-bit sample to PCM mu-law */
-	    $starSymbol(buffer)[$val(blockSize)-1-i] = 
-	      Ptdsp_LinearToPCMMuLaw(sample16);
-	  }
-	}
-    }
-  }
+  codeblock (convertLinear) {{
+    /* convert floating-point to 16-bit linear */
+    int i;
+    for (i=0; i <($val(blockSize)/2); i++) {
+      /* Convert from floating point [-1.0,1.0] to 16-bit sample */
+     $starSymbol(buffer)[i] = ceil($ref(input, i)*32768.0);
+    }	
+  }}
   
-  setup {
-    if (strcasecmp(encodingType, "ulaw8") == 0){
-      input.setSDFParams(int(blockSize), int(blockSize)-1);
+  codeblock (convertUlaw) {{
+    /* convert floating-point to 8-bit u-law encoding */
+    int i;
+    for(i = 0; i < $val(blockSize); i++) {
+      /* Convert from floating point [-1.0,1.0] to 16-bit sample */
+      int sample16 = (int)($ref(input,i) * 32768.0);
+      /* Convert 16-bit sample to PCM mu-law */
+      $starSymbol(buffer)[$val(blockSize)-1-i] = 
+	      Ptdsp_LinearToPCMMuLaw(sample16);
     }
-    else {
+  }}
+
+  setup {
+    if (strcasecmp(encodingType, "linear16") == 0){
       input.setSDFParams(int(blockSize/2), int(blockSize/2)-1);
+    } else {
+      input.setSDFParams(int(blockSize), int(blockSize)-1);
     }
   }
   
@@ -91,8 +87,7 @@ provisions.
     /* Declare buffer type and size depending on the encoding */
     if (strcasecmp(encodingType, "linear16") == 0){
       addDeclaration(declarations("short", int(blockSize)/2));
-    }
-    else {
+    } else {
       addDeclaration(declarations("unsigned char", int(blockSize)));
       addModuleFromLibrary("ptdspMuLaw", "src/utils/libptdsp", "ptdsp");
     }
@@ -111,7 +106,11 @@ provisions.
 
 
   go {
-    addCode(convert);
+    if (strcasecmp(encodingType, "linear16") == 0) {
+	addCode(convertLinear);
+    } else {
+	addCode(convertUlaw);
+    }
     if ((int)aheadLimit >= 0 ) addCode(sync);
     addCode(setbufptr);
     addCode(write);
