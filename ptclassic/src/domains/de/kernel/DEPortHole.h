@@ -29,7 +29,6 @@ Two DE-specific struct/classes are defined.
 #include "dataType.h"
 #include "type.h"
 #include "Connect.h"
-#include "PriorityQueue.h"
 
 class Particle;
 
@@ -104,7 +103,7 @@ public:
 	// Get particles from global queue and set the timeStamp.
 	// At A TIME INSTANCE, the first call of this method returns TRUE,
 	// afterwards return FALSE.
-	int grabData(Particle* p);
+	int getFromQueue(Particle* p);
 
 	// operator to return a zero delayed Particle,
 	// which is same as operator % (0).
@@ -237,50 +236,6 @@ public:
 	OutDEMPHIter(const MultiOutDEPort& mph) : MPHIter(mph) {}
 	OutDEPort* next() { return (OutDEPort*) MPHIter::next();}
 	OutDEPort* operator++() { return next();}
-};
-
-        //////////////////////////////////////////
-        // class Event and EventQueue
-        //////////////////////////////////////////
-
-class Event
-{
-public:	
-	PortHole* dest;		// destination PortHole
-	Particle* p;		// particle or event
-	Event*	  next;		// form a event-list
-
-	Event() : next(0) {}
-};
-
-class EventQueue : public PriorityQueue
-{
-	Event*  freeEventHead;
-	Event*  getEvent(Particle*, PortHole*);
-	void    putEvent(Event* e) {
-			e->next = freeEventHead;
-			freeEventHead = e;
-		}
-	void clearFreeEvents();
-
-protected:
-	void clearFreeList() {
-		clearFreeEvents();
-		PriorityQueue :: clearFreeList();
-	}
-public:
-	void pushHead(Particle* p, PortHole* ph, float v, float fv) {
-		Event* temp = getEvent(p, ph);
-		leveltup(temp, v, fv);
-	}
-
-	void pushTail(Particle* p, PortHole* ph, float v, float fv) {
-		Event* temp = getEvent(p, ph);
-		levelput(temp, v, fv);
-	}
-	void putFreeLink(LevelLink* p);
-
-	EventQueue() : freeEventHead(0) {}
 };
 
 #endif
