@@ -2,7 +2,8 @@ defstar {
 	name {Modulo}
 	domain {SDF}
 	desc { 
-The output is equal to the input modulo the "modulo" parameter.
+The output is equal to the remainder after dividing
+the input by the modulo the "modulo" parameter.
 	}
 	version {$Id$}
 	author { E. A. Lee }
@@ -28,6 +29,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc {The modulo parameter}
 	}
 	go {
-	   output%0 << double(input%0) % double(modulo);
+	  double dummy;
+	  output%0 << modf(double(input%0)/double(modulo), &dummy);
 	}
 }
