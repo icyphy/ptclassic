@@ -77,8 +77,7 @@ class ::tycho::EditPtlang {
 # of a domain name and a star name.  The domain name should be capitalized.
 # for example, the following code will open up the SDF Cosine .pl file 
 # <tcl><pre>
-#  ::tycho::EditPtlang .e -star {SDF Cos}
-#  .e centerOnScreen
+#  ::tycho::view EditPtlang {-star {SDF Cos}}
 # </pre></tcl>
 configbody ::tycho::EditPtlang::star {
     global PTOLEMY
