@@ -39,7 +39,7 @@
 # requires Ptolemy be installed locally, and could take a few minutes
 # to bring up an editor
 # <tcl><pre>
-#     ::tycho::view EditPalette [list -facet $PTOLEMY/init.pal]
+#     ::tycho::view EditPalette -facet $PTOLEMY/init.pal
 # </pre></tcl>
 #
 class ::tycho::EditPalette {
