@@ -179,6 +179,7 @@ body ::tycho::RevControlRCS::unedit {} {
     catch {exec co -u $basefile} output
     cd $olddir
     $object reload
+    focusin
     enableButton checkout
 
     updateHistory

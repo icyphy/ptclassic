@@ -121,7 +121,6 @@ body ::tycho::RevControlSCCS::checkIn {object} {
     set comment [getComments]
     if {$comment == ""} {
 	# cancelled
-        # ::tycho::inform "Checkin cancelled"
 	return
     }
     catch {exec echo $comment | sccs delget $basefile} output
@@ -257,6 +256,7 @@ body ::tycho::RevControlSCCS::unedit {} {
     }    
     cd $olddir
     $object reload
+    focusin
 
     enableButton checkout
     updateHistory
