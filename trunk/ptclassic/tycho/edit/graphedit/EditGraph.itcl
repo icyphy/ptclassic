@@ -791,7 +791,7 @@ body ::tycho::EditGraph::_clear {} {
 # Remove an item from the selection.
 #
 body ::tycho::EditGraph::_deselect {name} {
-    $slate select remove $_itemID($name)
+    $slate selection remove $_itemID($name)
 }
 
 ########################################################################
@@ -922,7 +922,7 @@ body ::tycho::EditGraph::_reshaperelease {name x y} {
 # Add an item to the selection.
 #
 body ::tycho::EditGraph::_select {name} {
-    $slate select add $_itemID($name)
+    $slate selection add $_itemID($name)
 }
 
 ########################################################################
@@ -931,7 +931,7 @@ body ::tycho::EditGraph::_select {name} {
 # Clear the selection.
 #
 body ::tycho::EditGraph::_selectionclear {foo} {
-    $slate select clear
+    $slate selection clear
 }
 
 
