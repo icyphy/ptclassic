@@ -194,7 +194,10 @@ protected:
 	// Return signal declarations based on signalList.
 	StringList addSignalDeclarations(VHDLSignalList*, int=0);
 
-	// Return component mappings based on compMapList.
+	// Return component declarations based on compDeclList.
+	StringList addComponentDeclarations(VHDLCompDeclList*, int=0);
+
+	// Return component mappings based on compDeclList.
 	StringList addComponentMappings(VHDLCompDeclList*, int=0);
 
 	// Return variable declarations based on variableList.
