@@ -719,13 +719,20 @@ body ::tycho::File::print {} {
 # the current data is cleared, leaving a blank slate. If the current
 # file exists but is not readable, an error occurs. The actual
 # replacement of the data occurs via the method
-# <code>insertData</code>.
+# <code>insertData</code>. Note that if the data is modified, then
+# changes will be lost -- if this is a possibility then callers
+# must be sure to call the saveQuery{} method before calling
+# reload{}.
 #
 body ::tycho::File::reload {} {
     if {$file == "NoName" || $file == ""} {
 	return 
     }
-    saveQuery
+    # This call to saveQuery has been commented out because it
+    # was causing erroneous save queries after checking
+    # in a modified file and not saving changes. Hopefully
+    # it won't break anything else. See the method comment.
+    # saveQuery
     set saveclipboard [getClipboard]
     if [file exists $file] {
         if [file readable $file] {
