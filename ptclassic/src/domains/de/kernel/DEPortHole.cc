@@ -66,7 +66,7 @@ Particle& InDEPort :: get()
 		return *(Particle *) *(myBuffer->here());
 	} else {
 		Particle** myP = myBuffer->next();
-		myPlasma->put(*myP);
+		(*myP)->die();
 		Particle* p = (Particle*) inQue->get();
 		*myP = p; 
 		if (inQue->length() == 0)
@@ -106,7 +106,7 @@ int InDEPort :: getFromQueue (Particle* p)
 			return FALSE;
 		}
 		Particle** myP = myBuffer->next();
-		myPlasma->put(*myP);
+		(*myP)->die();
 		*myP = p; 
 		moreData++;
 	} else {
@@ -122,7 +122,7 @@ void InDEPort :: cleanIt()
 	else {
 		while (inQue->length() > 0) {
 			Particle* p = (Particle*)inQue->get();
-			myPlasma->put(p);
+			p->die();
 		}
 	}
 }
