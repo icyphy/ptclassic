@@ -75,7 +75,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 
-#ifdef aix
+#if defined(aix) || defined(_AIX)
 #define __aix		aix
 #define _POSIX_SOURCE
 #define _GNU_SOURCE
@@ -134,7 +134,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #ifdef _IBMR2
 
-#ifdef aix
+#if defined(aix) || defined(_AIX)
 #define _BSD 44
 #else
 #define _BSD
