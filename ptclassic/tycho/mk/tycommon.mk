@@ -456,7 +456,7 @@ alltests.itcl: makefile
 			echo "source $$x" >> $@; \
 		done; \
 	fi
-	echo "doneTests" >> $@
+	echo "catch {doneTests}" >> $@
 	echo "exit" >> $@
 
 # alljtests.tcl is used to source all the tcl files that use Java
@@ -488,7 +488,7 @@ alljtests.tcl: makefile
 			echo "if [ file exists $$x ] {source $$x}" >> $@; \
 		done; \
 	fi
-	echo "doneTests" >> $@
+	echo "catch {doneTests}" >> $@
 	echo "exit" >> $@
 
 # all.itcl is used to source all the *.itcl files
