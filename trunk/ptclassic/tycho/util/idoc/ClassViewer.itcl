@@ -64,8 +64,18 @@ option add *Idoc.textWidth 32 widgetDefault
 # all the methods that are available to a user and to a maintainer of this  
 # particular class, which includes public and protected methods from the   
 # parent classes which are not redefined.
-
-
+#
+# Here's an example of how to use this class:
+#
+# <tcl><pre>
+# ::tycho::Displayer .u
+# ::tycho::Idoc .u.i
+# .u showView .u.i
+# .u centerOnScreen
+# .u.i configure -file ~cliffc/idoc/doc/codeDoc/Idoc.idoc
+# .u.i reload
+# </tcl></pre>
+#
 class ::tycho::Idoc {
     inherit tycho::File
 
