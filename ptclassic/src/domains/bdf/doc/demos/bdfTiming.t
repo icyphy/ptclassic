@@ -11,8 +11,6 @@ stars instead of DDF
 and
 .c EndCase
 stars.
-The static schedule has some simple if-then constructs to
-implement conditional firing.
 .EQ
 delim off
 .EN
@@ -22,11 +20,14 @@ delim $$
 .EN
 .SV $Revision$ $Date$
 .AL "J. T. Buck"
+.LD
+The static schedule has some simple if-then constructs to
+implement conditional firing.
 .Ie "timing recovery, MMSE"
 .Ie "MMSE timing recovery"
 .Ir "asynchronous signal processing"
 .SA
 Select,
-Switch
+Switch,
 timing.
 .ES
