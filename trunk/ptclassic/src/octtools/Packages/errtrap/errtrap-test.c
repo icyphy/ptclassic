@@ -28,6 +28,7 @@ static char SccsId[]="$Id$";
 #include "errtrap.h"
 
 /*ARGSUSED*/
+int
 main(argc, argv)
 int argc;
 char *argv[];
@@ -46,7 +47,8 @@ char *argv[];
 
     errPushHandler(benignHandler);
     testFunc();
-    exit(1);		/* shouldn't be reached */
+    /* shouldn't be reached */
+    return 0;
 }
 
 void testFunc()
