@@ -375,4 +375,6 @@ cd $PTOLEMY/obj.$PTARCH
 cd $PTOLEMY
 touch $PTOLEMY/obj.$PTARCH
 
-return 0
+# Call exit 0 so that if the touch fails we don't fail.
+# touch under NT sometimes fails
+exit 0
