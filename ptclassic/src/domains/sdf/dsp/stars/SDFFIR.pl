@@ -31,7 +31,7 @@ simply replace the default coefficients with the string "<filename".
 It is advisable to use an absolute path name as part of the file name,
 especially if you are using the graphical interface.
 This will allow the FIR filter to work as expected regardless of
-the directory in which the ptolemy process actually runs.
+the directory in which the Ptolemy process actually runs.
 It is best to use tilde's in the filename to reference them to user's
 home directory.  This way, future filesystem reorganizations
 will have minimal effect.
