@@ -80,8 +80,13 @@ public:
 	}
 
 	// virtual identification for Fixed-Point cores used
-	// by Target to determine if Plasma substitution is necessary.
+	// by ACSTarget to determine if Plasma substitution is necessary.
 	virtual int isFixedPoint() const { return FALSE; }
+
+	// virtual identification for Code Generation cores used
+	// by ACSTarget to determine if Code generation is called for instead
+	// of simulation.
+	virtual int isCG() const { return FALSE; }
 
 protected:
 
