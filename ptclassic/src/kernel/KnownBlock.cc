@@ -245,6 +245,20 @@ KnownBlock::find(const char* type, const char* dom) {
 	return e ? e->b : (Block*)NULL;
 }
 
+// Look up a KnownBlock definition by name and return its definition source.
+// Returns TRUE if found, FALSE if no matching definition exists.
+// note we do NOT consider blocks in subdomains.
+int
+KnownBlock::isDefined(const char* type, const char* dom,
+		      const char* &definitionSource) {
+	int domidx = domainIndex(dom);
+	if (domidx < 0) return FALSE;
+	KnownListEntry* e = findEntry (type, allBlocks[domidx]);
+	if (!e) return FALSE;
+	definitionSource = e->definitionSource;
+	return TRUE;
+}
+
 // return TRUE if indicated name refers to a dynamically linked block.
 // note we do NOT consider blocks in subdomains.
 int
