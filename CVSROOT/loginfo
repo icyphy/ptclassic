@@ -31,9 +31,19 @@ collabrador/.* mailx -s \"%s\" collabrador-cvs@gigascale.org
 diva/.* mailx -s \"%s\" diva-cvs@gigascale.org
 diva-binaries/.* mailx -s \"%s\" diva-cvs@gigascale.org
 mescal/.* mailx -s \"%s\" mescal-cvs@gigascale.org
+mica/.* mailx -s \"%s\" mica-cvs@gigascale.org
 mvsis/.* mailx -s \"%s\" mvsis-cvs@gigascale.org
 impact/.* mailx -s \"%s\" mescal-cvs@gigascale.org
 powertools/.* mailx -s \"%s\" powertools-cvs@gigascale.org
 
 #panda releated stuff (Bart Kienhuis)
 panda/.* mailx -s \"%s\" kienhuis@eecs.berkeley.edu rijpkema@liacs.nl
+
+
+
+
+
+
+
+
+
