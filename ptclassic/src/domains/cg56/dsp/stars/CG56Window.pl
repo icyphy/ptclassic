@@ -179,7 +179,7 @@ Rectangle, Bartlett, Hanning, Hamming, Blackman, or SteepBlackman.
 		window << val;
 	    }
 	}
-	value.setInitValue(window);
+	value.setInitValue(hashstring(window));
 	value.initialize();
 	CG56WaveForm::setup();
 }
