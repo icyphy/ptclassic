@@ -1,107 +1,114 @@
 .\" $Id$
 .VR 0.$Revision$ $Date$
-.TI "Appendix:  Packets in Ptolemy"
+.TI "Appendix:  Messages in Ptolemy"
 .AU
 Joseph Buck
 .AE
-.IE "packets"
+.IE "messages"
+.IE "heterogenous message interface"
+.IE "packet interface"
 .H1 "Design Criteria for the Packet Interface
 .pp
-The Ptolemy packet interface is designed to provide a mechanism that
-allows stars to transmit packets that are arbitrary objects to other
-stars.  The design was constrained by the following criteria:
-.IE "packet design criteria"
+The Ptolemy heterogeneous message interface is designed to provide a mechanism that
+allows stars to transmit message that are arbitrary objects to other
+stars.
+.(f
+This interface was formerly called the packet interfaces; the classes
+have been renamed.
+.)f
+The design was constrained by the following criteria:
+.IE "message design criteria"
 .bu
 Existing stars (stars that were written
-before the packet interface was added) that handle ANYTYPE work
-with packet particles without change.
+before the message interface was added) that handle ANYTYPE work
+with message particles without change.
 .bu
-Packet portholes should be able to send different types of packets
+Message portholes should be able to send different types of messages
 during the same simulation (just as a real network does).
 .bu
 The design should be efficient: we should not repeatedly be required
-to copy large packets.  This suggests using a reference-count mechanism
+to copy large messages.  This suggests using a reference-count mechanism
 as is used in many C++ classes (for example, string classes).
 .bu
-At the same time, it should be possible to safely modify large packets
+At the same time, it should be possible to safely modify large messages
 without excessive memory allocation and deallocation.
 .bu
-It should be easy for users to define their own packet types, and
-no change to the kernel should be required to transmit the new packet
+It should be easy for users to define their own message types, and
+no change to the kernel should be required to transmit the new message
 types.
 .lp
 To accomplish this goal, three classes were designed:
 .bu
 The
-.c  PacketData
-.IE "class PacketData"
-class is the base class from which all other packet datatypes
+.c  Message
+.IE "class Message"
+class is the base class from which all other message datatypes
 are derived.  A user who wishes to define an application-specific
-packet type creates a new class that is derived from
-.c PacketData .
+message type creates a new class that is derived from
+.c Message .
 .bu
 The
-.c Packet
-.IE "class Packet"
+.c Envelope
+.IE "class Envelope"
 class is an envelope; it "holds" an object derived from class
-.c PacketData .
-.c Packet
+.c Message .
+.c Envelope
 objects may be copied or duplicated; when this
 happens, the contents are not copied (several
-.c Packet
+.c Envelope
 objects share the same
-.c PacketData
+.c Message
 object); at any time, the
-.c PacketData
+.c Message
 object's reference count says how many
-.c Packet
+.c Envelope
 objects refer to it.  When the last reference is removed, the contents
 are deleted.
 .bu
 The
-.c PacketSample
-.IE "class PacketSample"
+.c MessageParticle
+.IE "class MessageParticle"
 class is a type of
 .c Particle
 (like
 .c IntSample ,
 .c FloatSample ,
 etc); it contains a
-.c Packet .
+.c Envelope .
 Most users will never see this class directly;
 if a
 .c PortHole
-is declared to be of type ``packet'' it will use this type of
+is declared to be of type ``message'' it will use this type of
 .c Particle .
 .pp
 Class
 .c Particle
-contains two member functions for packet support:
-.c getPacket ,
-to receive a packet, and the "<<" operator with a
-.c Packet
-as the right argument, to load a packet into a particle.  These functions
+contains two member functions for message support:
+.c getMessage ,
+to receive a message, and the "<<" operator with a
+.c Envelope
+as the right argument, to load a message into a particle.  These functions
 return errors in the base class; they are overridden in the
-.c PacketSample
+.c MessageParticle
 class with functions that "do the right thing".
-.H1 "Defining A New PacketData Class"
-.IE "user-defined packets"
+.H1 "Defining A New Message Class"
+.IE "user-defined messages"
 .pp
-The designer of a new type of packet does so by defining a new
+The designer of a new type of message does so by defining a new
 class that is derived from class
-.c PacketData .
+.c Message .
 Certain virtual functions
 defined in that class must be overriden; others may optionally be
-overriden.  Here is an example of a user-defined packet type:
-.IE "vector packet"
+overriden.  Here is an example of a user-defined message type:
+.IE "vector message"
 .(c
-// This is a simple vector packet body.  It stores
+// This is a simple vector message body.  It stores
 // an array of integer values of arbitrary length.
 // The length is specified by the constructor.
 
-#include "Packet.h"
+#include "Message.h"
 
-class IntVecData : public PacketData {
+class IntVecData : public Message {
 private:
 	int len;
 
@@ -125,7 +132,7 @@ public:
 	// of any baseclass.
 	int isA(const char* typ) const {
 		if (strcmp(typ,"IntVecData") == 0) return TRUE;
-		else return PacketData::isA(typ);
+		else return Message::isA(typ);
 	}
 
 	// constructor: makes an uninitialized array
@@ -140,7 +147,7 @@ public:
 	IntVecData(const IntVecData& src) { init(src.len,src.data);}
 
 	// clone: make a duplicate object
-	PacketData* clone() const { return new IntVecData(*this);}
+	Message* clone() const { return new IntVecData(*this);}
 
 	// destructor
 	~IntVecData() {
@@ -149,15 +156,15 @@ public:
 };
 .)c
 .pp
-This packet body can contain a vector of integers of arbitrary length.
+This message body can contain a vector of integers of arbitrary length.
 Some functions in the class are arbitrary and the user may define them
 in whatever way is most convenient; however, there are some requirements.
 .pp
 The class must redefine class
-.c PacketData 's
+.c Message 's
 .c dataType()
 function.
-This function returns a string identifying the packet type.  This string
+This function returns a string identifying the message type.  This string
 should be identical to the name of the class.  In addition, the
 .c isA()
 function must be defined.
@@ -166,7 +173,7 @@ The
 Function
 responds with TRUE (1) if given the name of the class or of any baseclass;
 it returns FALSE (0) otherwise.  This mechanism permits stars to handle
-any of a whole group of packet types, even for classes that are defined
+any of a whole group of message types, even for classes that are defined
 after the star is written.
 .pp
 Because of the regular structure of
@@ -175,7 +182,7 @@ function bodies, macros are provided to generate them.  The
 .c ISA_INLINE
 macro expands to an inline definition of the function; for example,
 .(c
-	ISA_INLINE(IntVecData,PacketData)
+	ISA_INLINE(IntVecData,Message)
 .)c
 could have been written above instead of the definition of
 .c isA
@@ -186,7 +193,7 @@ body in a .cc file, one can write
 .)c
 in the class body and put
 .(c
-ISA_FUNC(IntVecData,PacketData)
+ISA_FUNC(IntVecData,Message)
 .)c
 in the .cc file.
 .pp
@@ -195,7 +202,7 @@ copy constructor generated by the compiler, which does memberwise copying,
 will do the job.
 .pp
 The class must redefine class
-.c PacketData 's
+.c Message 's
 .c  clone()
 function.  Given that the copy constructor is defined, the form shown
 in the example, where a new object is created with the
@@ -203,10 +210,10 @@ in the example, where a new object is created with the
 operator and the copy constructor, will suffice.
 .pp
 In addition, the user may optionally define type conversion and printing
-functions if they make sense.  If a star that produces packets is connected
+functions if they make sense.  If a star that produces messages is connected
 to a star that expects integers (or floating values, or complex values),
 the appropriate type conversion function is called.  The base class,
-.c PacketData ,
+.c Message ,
 defines the virtual conversion functions
 .c asInt() ,
 .c asFloat() ,
@@ -214,7 +221,7 @@ and
 .c asComplex()
 and the printing function
 .c print()
-\- see the Packet.h file for their exact types.  The base class conversion
+\- see the Message.h file for their exact types.  The base class conversion
 functions assert a run-time error, and the default print function returns
 a
 .c StringList
@@ -228,57 +235,68 @@ is whatever is returned by
 .c dataType() .
 .pp
 By redefining these functions, you can make it legal to connect a star
-that generates packets to a star that expects integer,
+that generates messages to a star that expects integer,
 floating, or complex particles, or you can connect to a Printer or Xgraph
 star (for Xgraph to work, you must define the
 .c asFloat
 function; for Printer to work, you must define the
 .c print
 function).
-.H1 "Use of the Packet class"
-.IE "class Packet"
+.H1 "Use of the Envelope class"
+.IE "class Envelope"
 .pp
 The
-.c Packet
+.c Envelope
 class serves as an envelope to hold objects of class
-.c PacketData
-or derived classes. 
+.c Message
+or derived classes.  Once a user's Message object is placed into
+an Envelope object, the Envelope takes over responsibility for
+managing its memory: maintaining reference counts, deleting the
+Message when it is no longer needed.
 .pp
 The constructor (which takes as argument a reference to
-.c PacketData ),
+.c Message ),
 copy constructor, and assignment operator for
-.c Packet
+.c Envelope
 manipulate the reference counts of the
-.c PacketData
+.c Message
 object inside the
-.c Packet
+.c Envelope
 objects.  Assignment simply copies a pointer and increments the
 reference count.  Whenever the destructor for a
-.c Packet
+.c Envelope
 is called, the reference count of the contents is decremented; if
 it reaches zero, the contained
-.c PacketData
+.c Message
 object is deleted.  Because of this deletion, a
-.c PacketData
+.c Message
 must never be put inside a
-.c Packet
+.c Envelope
 unless it was created with the
 .c new
 operator.  Once a
-.c PacketData
+.c Message
 object is put into a
-.c Packet
+.c Envelope
 it should never be deleted; it will ``live'' as long as
 there is at least one
-.c Packet
+.c Envelope
 that contains it and will then be deleted automatically.
+.pp
+It is possible for an
+.c Envelope
+to be ``empty''.  If it is, the
+.c empty()
+member function will return true, and the data field will point
+to a special ``dummy message'' whose type is DUMMY and that has
+no data in it.
 .pp
 The
 .c dataType()
 member function of
-.c Packet
+.c Envelope
 returns the datatype of the contained
-.c PacketData
+.c Message
 object; the functions
 .c asInt() ,
 .c asFloat() ,
@@ -293,26 +311,26 @@ and
 .c typeError .
 A simple example illustrates their use:
 .(c
-	if (!packet.typeCheck("IntVecData")) {
-		Error::abortRun(*this,packet.typeError("IntVecData"));
+	if (!envelope.typeCheck("IntVecData")) {
+		Error::abortRun(*this,envelope.typeError("IntVecData"));
 		return;
 	}
 .)c
 .c typeCheck
 calls
 .c isA
-on the packet contents and returns the result, so an error will be
-reported if the packet contents are not IntVecData and are not
+on the message contents and returns the result, so an error will be
+reported if the message contents are not IntVecData and are not
 derived from IntVecData.  Since the above code segment is so common in
-stars; a macro is included in Packet.h to generate it; the macro
+stars; a macro is included in Message.h to generate it; the macro
 .(c
-	TYPE_CHECK(packet,"IntVecData");
+	TYPE_CHECK(envelope,"IntVecData");
 .)c
 expands to essentially the same code as above and is shorter to type.
 .c typeError
 generates an appropriate error message:
 .pp
-Expected packet type '\fIarg\fR', got '\fItype\fR'
+Expected message type '\fIarg\fR', got '\fItype\fR'
 .pp
 To access the data, two functions are provided:
 .c getData()
@@ -322,11 +340,11 @@ The
 .c getData
 function
 returns a pointer to the contained
-.c PacketData -derived
+.c Message -derived
 object.
 .i "The data pointed to by this pointer must not be modified" ,
 since other
-.c Packet
+.c Envelope
 objects in the program may also contain it.  If you convert its type,
 always make sure that the converted type is a pointer to const
 (see the programming example for UnPackInt below).  This will
@@ -335,44 +353,37 @@ ensure that the compiler will complain if you do anything illegal.
 The
 .c writableCopy
 function also returns a pointer to the contained object, but with a difference.
-If the object's reference count is one, the packet is zeroed (set to
-the null packet) and the contents are returned.  If the reference
+If the object's reference count is one, the envelope is emptied (set to
+the dummy message) and the contents are returned.  If the reference
 count is more than one, a
 .i clone
 of the contents is made (by calling its
 .c clone()
-function) and that is returned; again the packet is zeroed (to
+function) and that is returned; again the envelope is zeroed (to
 avoid the making of additional clones later on).
 .pp
 In some cases, a star writer will need to keep a received
-.c PacketData
+.c Message
 object around between executions.  One way to accomplish this is
 for the star to have a member of type
-.c Packet ,
-and to use this member object to hold the packet data between
-executions.
-.H1 "Use of the PacketSample class"
-.IE "class PacketSample"
+.c Envelope ,
+and to use this member object to hold the message data between
+executions.  Messages should always be kept in envelopes so that
+the user does not have to worry about managing their memory.
+.H1 "Use of the MessageParticle class"
+.IE "class MessageParticle"
 .pp
-In normal star code that uses packets, the user does not see directly
-that he or she is using class PacketSample.  However, if a
-.c PortHole
-is declared to be of type `packet',
-then the
-.c Particle
-objects used by that
-.c PortHole
-will be of type
-.c PacketSample .
-The only functions specific to class
-.c PacketSample
-that are visible to the user are virtual functions that override
-functions provided by class
-.c Particle .
+If a porthole is of type ``message'', then its particles are of
+the class
+.c MessageParticle .
+A MessageParticle is simply a particle whose data field is an
+Envelope, which means that it can hold a Message in the same
+way that Envelope objects do.
 .pp
 Many of
 .c Particle 's
-functions are redefined to cause a run-time error; for example, it
+functions are redefined by this class
+to cause a run-time error; for example, it
 is illegal to send an integer, floating, or complex number to the
 particle with the `<<' operator.  The conversion operators (conversion
 to type int, float, or Complex) return errors by default, but can
@@ -381,55 +392,55 @@ be made legal by redefining the
 .c asFloat ,
 or
 .c asComplex
-member functions for a specific packet type.
+member functions for a specific message type.
 .pp
 The principal operations on
-.c PacketSample
+.c MessageParticle
 objects are `<<' with an argument of type
-.c Packet ,
-to load a packet into the particle, and
-.c getPacket(Packet&) ,
-to transfer packet contents from the particle into a user-supplied
-packet.
-.c getPacket
-removes the packet contents from the particle.
+.c Envelope ,
+to load a message into the particle, and
+.c getMessage(Envelope&) ,
+to transfer message contents from the particle into a user-supplied
+message.
+.c getMessage
+removes the message contents from the particle.
 .(f
 The reason for this
 ``aggressive reclamation'' policy (both here and in other places)
 is to minimize the number of no-longer-needed
-packets in the system and to prevent unnecessary clones from being
+messages in the system and to prevent unnecessary clones from being
 generated by
 .c writableCopy()
 by eliminating references to
-.c PacketData
+.c Message
 objects as soon as possible.
 .)f
 For cases where the destructive behavior of
-.c getPacket
+.c getMessage
 cannot be tolerated, an alternate interface,
-.c accessPacket(Packet&) ,
-is provided.  It does not remove the packet contents from the particle.
+.c accessMessage(Envelope&) ,
+is provided.  It does not remove the message contents from the particle.
 Promiscuous use of
-.c accessPacket
-in systems where large-sized packets may be present can cause the
-amount of virtual memory occupied to grow (though all packet will
+.c accessMessage
+in systems where large-sized messages may be present can cause the
+amount of virtual memory occupied to grow (though all message will
 be deleted eventually).
-.H1 "Use of Packets in Stars"
+.H1 "Use of Messages in Stars"
 .pp
 Here are a couple of simple examples of stars that produce and
-consume packets.  For more advanced samples, look in the Ptolemy
-distribution for stars that produce or consume packets.
-.IE "packet programming example"
+consume messages.  For more advanced samples, look in the Ptolemy
+distribution for stars that produce or consume messages.
+.IE "message programming example"
 .(c
 defstar {
 	name { PackInt }
 	domain { SDF }
-	desc { Accept integer inputs and produce IntVecData packets.}
+	desc { Accept integer inputs and produce IntVecData messages.}
 	defstate {
 		name { length }
 		type { int }
 		default { 10 }
-		desc { number of values per packet }
+		desc { number of values per message }
 	}
 	input {
 		name { input }
@@ -437,39 +448,39 @@ defstar {
 	}
 	output {
 		name { output }
-		type { packet }
+		type { message }
 	}
-	ccinclude { "Packet.h", "IntVecData.h" }
+	ccinclude { "Message.h", "IntVecData.h" }
 	start {
 		input.setSDFParams(int(length),int(length-1));
 	}
 	go {
 		int l = length;
 		IntVecData * pd = new IntVecData(l);
-		// Fill in packet.  input%0 is newest, must reverse
+		// Fill in message.  input%0 is newest, must reverse
 		for (int i = 0; i < l; i++)
 			pd->data[l-i-1] = int(input%i);
-		Packet pkt(*pd);
+		Envelope pkt(*pd);
 		output%0 << pkt;
 	}
 }
 .)c
 .pp
 Since this is an SDF star, it must produce and consume a constant
-number of tokens on each step, so the packet length must be fixed
+number of tokens on each step, so the message length must be fixed
 (though it is controllable with a state).  Notice that the output
-porthole is declared to be of type packet.  Notice also the
+porthole is declared to be of type message.  Notice also the
 .c ccinclude
-statement; we must include the file Packet.h in all packet-manipulating
+statement; we must include the file Message.h in all message-manipulating
 stars, and we must also include the definition of the specific
-packet type we wish to use.
+message type we wish to use.
 .pp
 The code itself is fairly straightforward -- an
 .c IntVecData
 object is created with 
 .c new ,
 it is filled in with data, put into a
-.c Packet
+.c Envelope
 envelope, and sent.  Resist the temptation to declare the
 .c IntVecData
 object as a local variable; it won't work.
@@ -480,37 +491,37 @@ defstar {
 	name { UnPackInt }
 	domain { SDF }
 	desc {
-Accept IntVecData packets and produce integers.  The first 'length'
-values from each packet are produced.
+Accept IntVecData messages and produce integers.  The first 'length'
+values from each message are produced.
 	}
 	defstate {
 		name { length }
 		type { int }
 		default { 10 }
-		desc { number of values output per packet }
+		desc { number of values output per message }
 	}
 	input {
 		name { input }
-		type { packet }
+		type { message }
 	}
 	output {
 		name { output }
 		type { int }
 	}
-	ccinclude { "Packet.h", "IntVecData.h" }
+	ccinclude { "Message.h", "IntVecData.h" }
 	start {
 		output.setSDFParams(int(length),int(length-1));
 	}
 	go {
-		Packet pkt;
-		(input%0).getPacket(pkt);
+		Envelope pkt;
+		(input%0).getMessage(pkt);
 		if (!pkt.typeCheck("IntVecData")) {
 			Error::abortRun(*this,pkt.typeError("IntVecData"));
 			return;
 		}
 		const IntVecData * pd = (const IntVecData *)pkt.myData();
 		if (pd.length() < int(length)) {
-			Error::abortRun(*this,"Received packet is too short");
+			Error::abortRun(*this,"Received message is too short");
 			return;
 		}
 		for (i = 0; i < int(length); i++) {
@@ -520,26 +531,26 @@ values from each packet are produced.
 }
 .pp
 Because the domain is SDF, we must always produce the same number of
-outputs regardless of the size of the packets.  The simple approach
+outputs regardless of the size of the messages.  The simple approach
 taken here is to require at least a certain amount of data or else
 die.
 .pp
 The operations here are to declare an envelope, get the data from the
 particle into the envelope with
-.c getPacket ,
+.c getMessage ,
 check the type, and then access the contents.  Notice the cast operation;
 this is needed because
 .c myData
 returns a const pointer to class
-.c PacketData .
+.c Message .
 It is important that we converted the pointer to
 .c "const IntVecData *"
 and not
 .c "IntVecData *"
-because we have no right to modify the packet through this pointer.
+because we have no right to modify the message through this pointer.
 Most C++ compilers will not warn by default about ``casting away const''; we
 recommend turning on compiler warnings when compiling code that
-uses packets to avoid getting into trouble (for
+uses messages to avoid getting into trouble (for
 .i g++ ,
 say
 .c \-Wcast-qual ;
@@ -548,7 +559,7 @@ for
 compilers, say
 .c \+w ).
 .pp
-If we wished to modify the packet and then send the result as an output,
+If we wished to modify the message and then send the result as an output,
 we would call
 .c writableCopy
 instead of

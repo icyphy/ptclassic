@@ -13,6 +13,7 @@ and hence need not be discussed further:
 	descriptor { }
 	version { }
 	author { }
+	acknowledge { }
 	copyright { }
 	location { }
 	explanation { }
