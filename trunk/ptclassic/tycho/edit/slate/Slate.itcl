@@ -1484,7 +1484,7 @@ body ::tycho::Slate::raise {id {aboveThis {}}} {
 # have to be used, but are really just short-cuts to save other calls:
 # <ul>
 # <li>*-move* _x y_: Move the new complex item relative to the described
-# potision.
+# position.
 # <li>*-at* _x y_ ?_aspect_?: Place the given _aspect_ at (_x_,_y_).
 # The aspect default to center.
 # <li>*-coords* _x0 y0_ ...: Use these coordinates instead of the ones
