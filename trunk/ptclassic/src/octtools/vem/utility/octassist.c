@@ -55,9 +55,6 @@ static char SccsId[]="$Id$";
 #include "selset.h"
 #include "selection.h"
 
-/* Not done elsewhere */
-extern void qsort();
-
 /* Forward */
 static int traceBag();
 
