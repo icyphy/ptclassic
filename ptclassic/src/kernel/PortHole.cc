@@ -764,12 +764,14 @@ DataType PortHole :: assignPass1 () {
 
 // Second pass of preferred type assignment.
 DataType PortHole :: assignPass2 () {
-  // We should not get here if the type is already resolved or resolvable.
-  if (myPreferredType || type() != ANYTYPE) {
-    Error::abortRun(*this, "internal error in PortHole::assignPass2");
-    return 0;
+  // Fast path if type is already determined
+  if (myPreferredType) {
+    // if we are revisiting a node that an outer level of recursion is
+    // already busy with, return 0 to indicate "not yet resolvable".
+    if (myPreferredType == Mark)
+      return 0;
+    return myPreferredType;
   }
-
   if (typePort() == 0) {
     // Not a member of an inheritance group.
     // Get preferred type from connected porthole.
