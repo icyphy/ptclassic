@@ -465,8 +465,9 @@ body ::tycho::Query::choice {tag label entries default {command {}}} {
 		-textvariable [scope $itk_component(hull)_[set tag]sw] \
 		-relief raised -bd 2 -highlightthickness 2 -anchor c
     } {
-        keep -background -cursor -font
+        keep -background -cursor
         rename -width -entrywidth entryWidth EntryWidth
+	rename -font -buttonfont buttonFont Font
     }
     grid $itk_component(tag_$tag) -row $numentries -column 1 -sticky e
     
@@ -474,7 +475,8 @@ body ::tycho::Query::choice {tag label entries default {command {}}} {
     itk_component add menu_$tag {
 	menu $itk_component(tag_$tag).menu -tearoff 0 -takefocus 1
     } {
-	keep -background -cursor -font
+	keep -background -cursor
+	rename -font -buttonfont buttonFont Font
     }
     foreach e $entries {
 	$itk_component(menu_$tag) add command -label $e \
@@ -751,7 +753,7 @@ body ::tycho::Query::mediated {tag label default command args} {
         label $itk_component(querysite).label_$tag \
                 -text "$label"
     } {
-        keep -background -cursor -font
+        keep -background -cursor
 	rename -foreground labelcolor labelColor LabelColor
     }
     grid $itk_component(label_$tag) -column 0 -row $numentries -sticky e
@@ -764,8 +766,9 @@ body ::tycho::Query::mediated {tag label default command args} {
                 -command $cmd] \
                 $args
     } {
-	keep -background -foreground -font
+	keep -background -foreground
         rename -width -entrywidth entryWidth EntryWidth
+	rename -font -buttonfont buttonFont Font
     }
     
     grid $itk_component(tag_$tag) -column 1 -row $numentries -sticky ew
