@@ -79,7 +79,8 @@ int CGCTychoTarget :: compileCode() {
   StringList cmd, error;
   cmd << "puts " << filePrefix << "\n";
   cmd << "::tycho::compileC "
-      << expandPathName(destDirectory) << "/" << filePrefix << ".c";
+      << expandPathName(destDirectory) << "/" << filePrefix << ".c"
+      << " -autostart 1 -autodestroy 1 -modal 1";
 
   Tcl_Eval( PTcl::activeInterp, cmd.chars() );
 
