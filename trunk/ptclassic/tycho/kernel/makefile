@@ -91,8 +91,6 @@ ITCL_SRCS = \
 	MultiGraph.itcl \
 	NamedData.itcl \
 	Object.itcl \
-	Parameters.itcl \
-	Preferences.itcl \
 	PreferenceDialog.itcl \
 	PreferenceEditor.itcl \
 	PopupMenu.itcl \
