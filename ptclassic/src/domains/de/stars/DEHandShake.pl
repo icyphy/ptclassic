@@ -4,15 +4,27 @@ defstar
     domain { DE }
     descriptor
     {
-This star cooperates with a (possibly preemptive) arbitrator.
-A "request" TRUE is generated in response to new "input" particles.
-If no new "input" is available when it comes time to send the next
-"output", a "request" FALSE is generated.  When a "grant" TRUE is
-received in response to a "request", an "output" particle is sent.
-This must be acknowledged by an "ackIn" particle before the next
-"output" can be sent.  Any "ackIn" particle which is received in
-response to an "output" is sent to "ackOut".  All other "ackIn"
-particles are discarded.
+Cooperates with a (possibly preemptive) arbitrator through the
+"request" and "grant" controls.  "Input" particles are passed to
+"output", and an "ackIn" particle must be received before the next
+"output" can be sent.  This response is made available on "ackOut".
+    }
+    explanation
+    {
+A \fI request \fP TRUE is generated in response to a new \fI input.\fP
+After a \fI grant \fP TRUE response is received, the \fI input \fP will
+be passed to the \fI output.\fP  After this \fI output \fP is
+acknowledged by an \fI ackIn \fP response, the next \fI input \fP is
+passed to the \fI output \fP if it is available, and the process
+repeats.  If no new \fI input \fP is available when the \fI ackIn \fP
+is received, a \fI request \fP FALSE is generated.  When the \fI grant \fP
+FALSE response is received, the star reverts to its original idle state.
+.lp
+Note that the star will not generate any spurious outputs on either \fI
+output \fP or \fI request \fP while it is waiting for a response on
+the \fI grant \fP or \fI ackIn \fP inputs.  Also, only those \fI ackIn \fP
+particles received in response to an \fI output \fP will be sent to \fI
+ackOut.\fP
     }
     version { $Id$ }
     author { T.M. Parks }
@@ -61,14 +73,17 @@ particles are discarded.
 
     protected
     {
-	int req : 1;	// request has been issued
+	int idle : 1;	// arbitration is idle
+	int req : 1;	// request is pending
+	int rel : 1;	// release is pending
 	int open : 1;	// output is enabled
 	int wait : 1;	// waiting for acknowledge
     }
 
     start
     {
-	req = open = wait = FALSE;
+	idle = TRUE;
+	req = rel = open = wait = FALSE;
     }
 
     go
@@ -76,7 +91,26 @@ particles are discarded.
 	if (grant.dataNew)	// new control received
 	{
 	    open = int(grant.get());	// enable or disable output
-	    if (req && open && !wait && input.dataNew)	// send data
+	    if (req && open)		// request acknowledged
+	    {
+		req = FALSE;
+	    }
+	    else if (rel && !open)	// release acknowledged
+	    {
+		rel = FALSE;
+		idle = TRUE;
+	    }
+	}
+
+	if (input.dataNew)	// new data available
+	{
+	    if (idle)		// generate request
+	    {
+		idle = FALSE;
+		req = TRUE;
+		request.put(arrivalTime) << TRUE;
+	    }
+	    else if (open && !req && !rel && !wait)	// send data
 	    {
 		wait = TRUE;
 		output.put(arrivalTime) = input.get();
@@ -84,18 +118,14 @@ particles are discarded.
 	    }
 	}
 
-	if (input.dataNew && !req)	// new data received
-	{
-	    request.put(arrivalTime) << (req = TRUE);
-	}
-
 	if (ackIn.dataNew && wait)	// acknowledge received
 	{
 	    wait = FALSE;
 	    ackOut.put(arrivalTime) = ackIn.get();
-	    if (!input.dataNew)		// release
+	    if (!input.dataNew)		// generate release
 	    {
-		request.put(arrivalTime) << (req = FALSE);
+		rel = TRUE;
+		request.put(arrivalTime) << FALSE;
 	    }
 	    else if (open)		// send data
 	    {
