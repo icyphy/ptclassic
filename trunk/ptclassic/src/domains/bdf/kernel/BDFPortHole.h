@@ -134,7 +134,6 @@ class InBDFPort : public BDFPortHole
 public:
 	int isItInput () const ; // {return TRUE; }
 
-	// Get Particles from input Geodesic
 	void receiveData();
 
         // Services of PortHole that are often used: 
@@ -151,15 +150,7 @@ class OutBDFPort : public BDFPortHole
 public:
         int isItOutput () const; // {return TRUE; }
 
-	void increment();
-
-	// Move the current Particle in the input buffer -- this
-	// method is invoked by the BDFScheduler before go()
 	void receiveData();
-
-	// Put the Particles that were generated into the
-	// output Geodesic -- this method is invoked by the
-	// BDFScheduler after go()
 	void sendData();
 
         // Services of PortHole that are often used: 

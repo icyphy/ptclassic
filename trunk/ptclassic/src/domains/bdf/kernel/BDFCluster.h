@@ -126,6 +126,10 @@ protected:
 	// generate a name for a new member ClusterBag
 	const char* genBagName();
 
+	// create a new arc to pass boolean information
+	BDFClustPort* connectBoolean(BDFCluster* c,BDFClustPort* cond,
+				     BDFRelation& rel);
+
 	// return true if there is an indirect path between two
 	// member clusters
 	int indirectPath(BDFCluster* src,BDFCluster* dst,
@@ -206,9 +210,6 @@ public:
 	// convert the cluster into a do-while loop.
 	void makeWhile(BDFClustPort* condition,BDFRelation rel);
 
-	// create a new arc to pass boolean information
-	BDFClustPort* connectBoolean(BDFClustPort* cond,BDFRelation& rel);
-
 	// undo looping of a cluster, changing repetitions, token numbers
 	BDFClustPort* unloop(int& reps,BDFLoopType& lcond);
 
@@ -229,6 +230,12 @@ public:
 
 	// generate the schedule (does nothing except for bags)
 	virtual int genSched() { return TRUE;}
+
+	// execute the cluster
+	void go();
+
+	// inside-run of cluster
+	virtual void runInner() = 0;
 
 	// return true if condition is satisfied and cluster should
 	// continue executing -- this is for simulation runs.
@@ -266,8 +273,9 @@ public:
 	// return my insides
 	DataFlowStar& real() { return pStar;}
 
-	// execute the cluster
-	void go();
+	// execute the cluster's "inside" (called by BDFCluster::go)
+	// the number of times indicated by loop().
+	void runInner();
 
 	// time reqd
 	int myExecTime();
@@ -345,9 +353,9 @@ public:
 	// code generation
 	void genCode(Target&, int depth);
 
-	// run the cluster, the number of times indicated by the loop
-	// factor.
-	void go();
+	// execute the cluster's "inside" (called by BDFCluster::go)
+	// the number of times indicated by loop().
+	void runInner();
 
 	// do additional clustering on internal cluster (merge parallel
 	// loops, for example)
