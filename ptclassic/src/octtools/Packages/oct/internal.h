@@ -33,7 +33,8 @@
 #include "macros.h"
 #include "str.h"
 #include "xid.h"
-#include "master.h"
+typedef st_table master_table;
+/*#include "master.h"*/
 
 /*
  * Every internal data type having these fields, must
