@@ -36,10 +36,10 @@ most significant bit first.
     }
     setup {
         /* Need (int) cast on sizeof to eliminate gcc warning */
-	if (int(nBits) > sizeof(int)*8) {
-	    StringList message = "nBits needs to be less than";
+	if (int(nBits) > int(sizeof(int)*8)) {
+	    StringList message = "nBits needs to be less than ";
 	    message << (unsigned int)(sizeof(int)*8);
-	    Error::abortRun(*this,message);
+	    Error::abortRun(*this, message);
 	    return;
 	}
 	if (int(nBits) < 0) {
