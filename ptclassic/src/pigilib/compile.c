@@ -808,13 +808,15 @@ octObject *facetPtr;
 {
     static octId lastFacetId = OCT_NULL_ID;
 
+    ERR_IF1(!EmitInit());
+
+    /* if this is not the same facet as last time... */
     if (!octIdsEqual(lastFacetId, facetPtr->objectId)) {
 	/* Different facet, so compile everything */
 	DupSheetClear(&xfered);
 	lastFacetId = OCT_NULL_ID;  /* forget last facet */
     }
 
-    ERR_IF1(!EmitInit());
     ERR_IF1(!UniqNameInit());
     DupSheetClear(&traverse);
     if (IsGalFacet(facetPtr)) {
