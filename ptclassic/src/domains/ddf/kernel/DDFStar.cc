@@ -13,8 +13,6 @@ $Id$
 #include "DDFStar.h"
 #include "Scheduler.h"
 
-extern Error errorHandler;
-
 /*******************************************************************
 
 	class DDFStar methods
@@ -64,9 +62,9 @@ void DDFStar :: waitFor(PortHole& p, int num = 1) {
 		waitPort = &p;
 		waitNum = num;
 	} else {
-		errorHandler.error("waiting port should be input for ", 
+		Error::mark(*this);
+		Error::abortRun("waiting port should be input for ", 
 			readFullName());
-		exit(1);
 	}
 }
 			
