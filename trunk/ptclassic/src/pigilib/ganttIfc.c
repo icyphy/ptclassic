@@ -11,7 +11,6 @@ $Id$
 #include "ganttIfc.h"
 #include "oh.h"
 #include "vemInterface.h"
-#include <setjmp.h>
 
 /* MAX_DEPTH
 Maximum nesting depth for galaxies, eg. a star in a galaxy in a
@@ -271,7 +270,6 @@ Frame(stars)
 char *stars[];
 {
     int i;
-    octObject inst;
 
     for (i = 0; i < procN; i++) {
 	if (!FrameStar(&lastFacet, stars[i], &procColors[i], sets[i],
@@ -282,42 +280,3 @@ char *stars[];
     return 1;
 }
 
-/*
-The main guy
-*/
-
-static jmp_buf env;
-
-boolean
-displayGanttChart(fileName)
-char* fileName;
-{
-	extern char* xDisplay;
-	if (setjmp(env)) {
-		return (FALSE);
-	} else {
-		display_schedule(xDisplay, 1, fileName, "");
-		return (TRUE);
-	}
-}
-
-/* 8/12/89
-Save the error message for GGI and exit from display_schedule().
-*/
-void
-GanttErr(msg)
-char *msg;
-{
-    ErrAdd("Internal error in Gantt chart display\n");
-    ErrAdd(msg);
-    PrintErr(ErrGet());
-    longjmp(env, 1);
-}
-
-int
-GanttMan(name)
-char *name;
-{
-    win_msg("Gantt chart help not yet implemented\nFor more information, see the file ~ptolemy/lib/gantt.help");
-    return 0;
-}
